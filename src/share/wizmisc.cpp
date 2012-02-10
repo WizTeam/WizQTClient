@@ -445,6 +445,20 @@ COLORREF WizStringToColor(const CString& str)
     return RGB(r, g, b);
 }
 
+
+QColor WizStringToColor2(const CString& str)
+{
+    CString s = str;
+    s.Trim('#');
+    int n = WizHexToInt(s);
+    //
+    int r = (LOBYTE((n)>>16));
+    int g = (LOBYTE(((WORD)(n)) >> 8));
+    int b = LOBYTE(n);
+    //
+    return QColor(r, g, b);
+}
+
 std::string WizBSTR2UTF8(const CString& str)
 {
     QByteArray utf8 = str.toUtf8();

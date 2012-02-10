@@ -28,6 +28,14 @@ int CWizSettings::GetInt(const CString& strSection, const CString& strKey, int n
     //
     return n;
 }
+QColor CWizSettings::GetColor(const CString& strSection, const CString& strKey, QColor defColor)
+{
+    CString str = GetString(strSection, strKey, "");
+    if (str.isEmpty())
+        return defColor;
+    //
+    return WizStringToColor2(str);
+}
 
 BOOL CWizSettings::SetInt(const CString& strSection, const CString& strKey, int val)
 {

@@ -32,6 +32,8 @@ COleDateTime WizGetCurrentTime();
 BOOL WizStringToDateTime(const CString& str, COleDateTime& t, CString& strError);
 COleDateTime WizStringToDateTime(const CString& str);
 COLORREF WizStringToColor(const CString& str);
+QColor WizStringToColor2(const CString& str);
+
 std::string WizBSTR2UTF8(const CString& str);
 
 CString WizFormatString0(const CString& str);

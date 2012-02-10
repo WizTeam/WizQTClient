@@ -101,6 +101,11 @@ CWizDocumentListView::CWizDocumentListView(CWizExplorerApp& app, QWidget *parent
     setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
     setItemDelegate(new CWizDocumentListViewDelegate(this));
+    //
+    QPalette pal = palette();
+    pal.setColor(QPalette::Base, WizGetDocumentsBackroundColor());
+    setPalette(pal);
+    //
     setStyle(WizGetStyle());
     //
     connect(&m_db, SIGNAL(tagCreated(const WIZTAGDATA&)), this, SLOT(on_tag_created(const WIZTAGDATA&)));

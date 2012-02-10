@@ -23,25 +23,11 @@ public:
     {
         if (role == Qt::SizeHintRole)
         {
-            QVariant data = QTreeWidgetItem::data(column, Qt::SizeHintRole);
-            if (data.isValid())
-            {
-                QSize sz = qvariant_cast<QSize>(data);
-                sz.setHeight(getItemHeight(sz.height()));
-                return QVariant(sz);
-            }
-            else
-            {
-                int height = getItemHeight(-1);
-                if (-1 == height)
-                {
-                    return data;
-                }
-                else
-                {
-                    return QSize(-1, height);
-                }
-            }
+            int fontHeight = treeWidget()->fontMetrics().height();
+            int defHeight = fontHeight + 6;
+            int height = getItemHeight(defHeight);
+            QSize sz(-1, height);
+            return QVariant(sz);
         }
         else
         {
@@ -264,7 +250,7 @@ CWizCategoryView::CWizCategoryView(CWizExplorerApp& app, QWidget *parent)
     setAutoFillBackground(true);
     //
     QPalette pal = palette();
-    pal.setColor(QPalette::Base, QColor(0x80, 0x80, 0x80));
+    pal.setColor(QPalette::Base, WizGetCategoryBackroundColor());
     setPalette(pal);
     //
     setStyle(::WizGetStyle());

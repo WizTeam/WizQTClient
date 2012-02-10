@@ -15,6 +15,8 @@ public:
     int GetInt(const CString& strSection, const CString& strKey, int nDef = 0);
     BOOL SetInt(const CString& strSection, const CString& strKey, int val);
 
+    QColor GetColor(const CString& strSection, const CString& strKey, QColor defColor);
+
     CString GetEncryptedString(const CString& strSection, const CString& strKey, const CString& strDef = "");
     BOOL SetEncryptedString(const CString& strSection, const CString& strKey, const CString& str);
     //

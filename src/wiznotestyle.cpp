@@ -3,6 +3,7 @@
 #include "wizcategoryview.h"
 #include "share/wizdrawtexthelper.h"
 #include "share/wizqthelper.h"
+#include "share/wizsettings.h"
 
 #include <QPainter>
 #include <QPixmapCache>
@@ -52,6 +53,22 @@ private:
     QImage m_collapsedImage;
     CWizSkin9GridImage m_toolBarImage;
     CWizSkin9GridImage m_categorySelectedItemBackground;
+    CWizSkin9GridImage m_documentsSelectedItemBackground;
+    CWizSkin9GridImage m_documentsSelectedItemBackgroundHot;
+    //
+    QColor m_colorCategoryBackground;
+    QColor m_colorCategoryText;
+    QColor m_colorCategoryTextSelected;
+    //
+    QColor m_colorDocumentsBackground;
+    QColor m_colorDocumentsTitle;
+    QColor m_colorDocumentsDate;
+    QColor m_colorDocumentsSummary;
+    QColor m_colorDocumentsTitleSelected;
+    QColor m_colorDocumentsDateSelected;
+    QColor m_colorDocumentsSummarySelected;
+    QColor m_colorDocumentsLine;
+    //
 protected:
     virtual void drawCategoryViewItem(const QStyleOptionViewItemV4 *option, QPainter *painter, const CWizCategoryView *widget) const;
     virtual void drawDocumentListViewItem(const QStyleOptionViewItemV4 *option, QPainter *painter, const CWizDocumentListView *widget) const;
@@ -62,7 +79,10 @@ public:
     virtual void drawPrimitive(PrimitiveElement pe, const QStyleOption *opt, QPainter *p, const QWidget *w = 0) const;
 
 public:
-    static QStyle* noteStyle();
+    QColor categoryBackground() { return m_colorCategoryBackground; }
+    QColor documentsBackground() { return m_colorDocumentsBackground; }
+public:
+    static CWizNoteStyle* noteStyle();
 };
 
 
@@ -74,6 +94,22 @@ CWizNoteStyle::CWizNoteStyle()
     m_collapsedImage.load(WizGetSkinPath() + "button_collapsed.png");
     m_toolBarImage.SetImage(WizGetSkinPath() + "toolbar_background.png", QPoint(8, 8));
     m_categorySelectedItemBackground.SetImage(WizGetSkinPath() + "category_selected_background.png", QPoint(4, 4));
+    m_documentsSelectedItemBackground.SetImage(WizGetSkinPath() + "documents_selected_background.png", QPoint(4, 4));
+    m_documentsSelectedItemBackgroundHot.SetImage(WizGetSkinPath() + "documents_selected_background_hot.png", QPoint(4, 4));
+    //
+    CWizSettings settings(WizGetSkinPath() + "skin.ini");
+    m_colorCategoryBackground = settings.GetColor("Category", "Background", "#808080");
+    m_colorCategoryText = settings.GetColor("Category", "Text", "#000000");
+    m_colorCategoryTextSelected = settings.GetColor("Category", "TextSelected", "#ffffff");
+    //
+    m_colorDocumentsBackground = settings.GetColor("Documents", "Background", "#ffffff");
+    m_colorDocumentsTitle = settings.GetColor("Documents", "Title", "#000000");
+    m_colorDocumentsDate = settings.GetColor("Documents", "Date", "#0000ff");
+    m_colorDocumentsSummary = settings.GetColor("Documents", "Summary", "#666666");
+    m_colorDocumentsTitleSelected = settings.GetColor("Documents", "TitleSelected", "#000000");
+    m_colorDocumentsDateSelected = settings.GetColor("Documents", "DateSelected", "#0000ff");
+    m_colorDocumentsSummarySelected = settings.GetColor("Documents", "SummarySelected", "#666666");
+    m_colorDocumentsLine = settings.GetColor("Documents", "Line", "#666666");
 }
 
 
@@ -133,9 +169,10 @@ void CWizNoteStyle::drawCategoryViewItem(const QStyleOptionViewItemV4 *vopt,
             p->drawRect(textRect.adjusted(0, 0, -1, -1));
         }
         //
+        QColor colorText = vopt->state.testFlag(State_Selected) ? m_colorCategoryTextSelected : m_colorCategoryText;
         QRect rcTitle = textRect;
         CString strTitle = vopt->text;
-        ::WizDrawTextSingleLine(p, rcTitle, strTitle,  Qt::TextSingleLine | Qt::AlignVCenter, QColor(0xff, 0xff, 0xff), true);
+        ::WizDrawTextSingleLine(p, rcTitle, strTitle,  Qt::TextSingleLine | Qt::AlignVCenter, colorText, true);
     }
 
     p->restore();
@@ -168,13 +205,21 @@ void CWizNoteStyle::drawDocumentListViewItem(const QStyleOptionViewItemV4 *vopt,
 
     QRect textLine = opt->rect;
     textLine.adjust(4, 0, -4, 0);
-    p->setPen(QColor(0xd9, 0xdc, 0xdd));
+    p->setPen(m_colorDocumentsLine);
     p->drawLine(textLine.bottomLeft(), textLine.bottomRight());
 
     QRect textRect = subElementRect(SE_ItemViewItemText, vopt, view);
 
     // draw the background
-    proxy()->drawPrimitive(PE_PanelItemViewItem, opt, p, view);
+    if (vopt->state.testFlag(State_Selected))
+    {
+        m_documentsSelectedItemBackground.Draw(p, vopt->rect, 0);
+    }
+    else if (vopt->state.testFlag(State_MouseOver))
+    {
+        m_documentsSelectedItemBackgroundHot.Draw(p, vopt->rect, 0);
+    }
+    //proxy()->drawPrimitive(PE_PanelItemViewItem, opt, p, view);
     //
     const QImage& img = abstract.image;
     if (img.width() > 0
@@ -224,31 +269,36 @@ void CWizNoteStyle::drawDocumentListViewItem(const QStyleOptionViewItemV4 *vopt,
         //
         textRect.adjust(8, 8, -8, -8);
         //
+        bool selected = vopt->state.testFlag(State_Selected);
+        //
+        QColor colorTitle = selected ? m_colorDocumentsTitleSelected : m_colorDocumentsTitle;
         QRect rcTitle = textRect;
         rcTitle.setBottom(rcTitle.top() + vopt->fontMetrics.height());
         CString strTitle = document.strTitle;
-        ::WizDrawTextSingleLine(p, rcTitle, strTitle,  Qt::TextSingleLine | Qt::AlignVCenter, QColor(0, 0, 0), true);
+        ::WizDrawTextSingleLine(p, rcTitle, strTitle,  Qt::TextSingleLine | Qt::AlignVCenter, colorTitle, true);
         //
+        QColor colorDate = selected ? m_colorDocumentsDateSelected : m_colorDocumentsDate;
         QRect rcInfo = rcTitle;
         rcInfo.moveTo(rcInfo.left(), rcInfo.bottom() + 4);
         CString strInfo = document.tCreated.date().toString(Qt::DefaultLocaleShortDate) + tagsText;
-        int infoWidth = ::WizDrawTextSingleLine(p, rcInfo, strInfo,  Qt::TextSingleLine | Qt::AlignVCenter, QColor(0, 0, 0xFF), true);
+        int infoWidth = ::WizDrawTextSingleLine(p, rcInfo, strInfo,  Qt::TextSingleLine | Qt::AlignVCenter, colorDate, true);
         //
+        QColor colorSummary = selected ? m_colorDocumentsSummarySelected : m_colorDocumentsSummary;
         QRect rcAbstract1 = rcInfo;
         rcAbstract1.setLeft(rcInfo.left() + infoWidth + 16);
         rcAbstract1.setRight(rcTitle.right());
         CString strAbstract = abstract.text;
-        ::WizDrawTextSingleLine(p, rcAbstract1, strAbstract, Qt::TextSingleLine | Qt::AlignVCenter, QColor(0x66, 0x66, 0x66), false);
+        ::WizDrawTextSingleLine(p, rcAbstract1, strAbstract, Qt::TextSingleLine | Qt::AlignVCenter, colorSummary, false);
         //
         QRect rcAbstract2 = textRect;
         rcAbstract2.setTop(rcAbstract1.bottom() + 2);
         rcAbstract2.setBottom(rcAbstract2.top() + rcTitle.height());
-        ::WizDrawTextSingleLine(p, rcAbstract2, strAbstract, Qt::TextSingleLine | Qt::AlignVCenter, QColor(0x66, 0x66, 0x66), false);
+        ::WizDrawTextSingleLine(p, rcAbstract2, strAbstract, Qt::TextSingleLine | Qt::AlignVCenter, colorSummary, false);
         //
         QRect rcAbstract3 = textRect;
         rcAbstract3.setTop(rcAbstract2.bottom() + 2);
         rcAbstract3.setBottom(rcAbstract3.top() + rcTitle.height());
-        ::WizDrawTextSingleLine(p, rcAbstract3, strAbstract, Qt::TextSingleLine | Qt::AlignVCenter, QColor(0x66, 0x66, 0x66), true);
+        ::WizDrawTextSingleLine(p, rcAbstract3, strAbstract, Qt::TextSingleLine | Qt::AlignVCenter, colorSummary, true);
     }
 
     // draw the focus rect
@@ -387,7 +437,7 @@ void CWizNoteStyle::drawcenterImage(QPainter* p, const QImage& image, const QRec
 
 
 
-QStyle* CWizNoteStyle::noteStyle()
+CWizNoteStyle* CWizNoteStyle::noteStyle()
 {
     static CWizNoteStyle style;
     return &style;
@@ -396,6 +446,16 @@ QStyle* CWizNoteStyle::noteStyle()
 QStyle* WizGetStyle()
 {
     return CWizNoteStyle::noteStyle();
+}
+
+QColor WizGetCategoryBackroundColor()
+{
+    return CWizNoteStyle::noteStyle()->categoryBackground();
+}
+
+QColor WizGetDocumentsBackroundColor()
+{
+    return CWizNoteStyle::noteStyle()->documentsBackground();
 }
 
 /////////////////////////////////////////////////////////////////////////////
