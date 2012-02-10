@@ -58,6 +58,7 @@ CWizSearchBox::CWizSearchBox(QWidget* parent /*= 0*/)
     layout->setStretch(0, 1);
 }
 
+#endif
 void CWizSearchBox::on_search_editingFinished()
 {
     emit doSearch(m_keywords);
@@ -67,7 +68,7 @@ void CWizSearchBox::on_search_edited(const QString& str)
     m_keywords = str;
 }
 
-#endif
+
 
 
 QSize CWizSearchBox::sizeHint() const

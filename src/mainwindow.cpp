@@ -128,7 +128,10 @@ void MainWindow::initClient()
 {
     QWidget* client = new QWidget(this);
     setCentralWidget(client);
+
+#ifndef Q_OS_MAC
     client->setContentsMargins(4, 4, 4, 4);
+#endif
     //
     QBoxLayout* layout = new QBoxLayout(QBoxLayout::LeftToRight, client);
     client->setLayout(layout);
