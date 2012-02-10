@@ -75,7 +75,7 @@ public:
     CWizCategoryViewAllFoldersItem(const CString& str)
     {
         setText(0, str);
-        setIcon(0, WizLoadSkinIcon("folder"));
+        setIcon(0, WizLoadSkinIcon("folders"));
     }
     virtual void getDocuments(CWizDatabase& db, CWizDocumentDataArray& arrayDocument)
     {
@@ -105,7 +105,7 @@ public:
         : m_strLocation(strLocation)
     {
         setText(0, CWizDatabase::GetLocationDisplayName(strLocation));
-        //setIcon(0, WizLoadSkinIcon("folder"));
+        setIcon(0, WizLoadSkinIcon("folder"));
     }
     virtual QTreeWidgetItem *clone() const
     {
@@ -154,7 +154,7 @@ public:
         : m_tag(tag)
     {
         setText(0, tag.strName);
-        //setIcon(0, WizLoadSkinIcon("tag"));
+        setIcon(0, WizLoadSkinIcon("tag"));
     }
     virtual QTreeWidgetItem *clone() const
     {

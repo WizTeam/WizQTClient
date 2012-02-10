@@ -215,11 +215,10 @@ CString WizGetResourcesPath()
 {
 #ifdef Q_OS_LINUX
     QDir dir(WizGetAppPath());
-    dir.cdUp(); //bin
     dir.cdUp(); //../bin
     CString strPath = dir.path();
     WizPathAddBackslash(strPath);
-    strPath + "share/wiznote/";
+    strPath += "share/wiznote/";
     return strPath;
 #else
     return WizGetAppPath();
@@ -2352,9 +2351,9 @@ QIcon WizLoadSkinIcon(const CString& strIconName)
     {
         CString strFileName = arrayPath[i] + strIconName;
 
-        if (!strFileName.endsWith(".ico"))
+        if (!strFileName.endsWith(".png"))
         {
-            strFileName.append(".ico");
+            strFileName.append(".png");
         }
         //
         if (::PathFileExists(strFileName))
