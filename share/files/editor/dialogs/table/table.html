@@ -1,0 +1,231 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+        "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <title>插入表格</title>
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type"/>
+    <script type="text/javascript" src="../internal.js"></script>
+    <style type="text/css">
+        *{color: #838383}
+        body {
+            font-size: 12px;
+            width:382px;
+            height: 225px;
+            overflow: hidden;
+            margin:0px;padding:0px;
+        }
+        .wrap{
+            padding: 9px 0px 0px 15px;
+            height:100%;
+        }
+        .wrap table{padding:0;margin:0}
+        .wrap table tr{padding:0;margin:0px; list-style: none;height: 30px; line-height: 30px;}
+        .wrap input{ width:110px;height:21px;line-height:21px;background: #FFF;border:1px solid #d7d7d7;padding: 0px; margin: 0px; }
+        td.spe input{width:78px!important; width: 75px;}
+        td.spe span{width:75px;line-height:30px;display:block;float:left}
+    </style>
+</head>
+<body>
+<div class="wrap">
+    <table>
+        <tr>
+           <td width="180"> <span>行数：</span>
+            <input type="text" id="rowCount"/></td>
+            <td><span>宽度：</span>
+            <input type="text" id="tableWidth"/> px</td>
+        </tr>
+        <tr>
+            <td><span>列数：</span>
+            <input type="text" id="colCount"/></td>
+            <td><span>高度：</span>
+            <input type="text" id="tableHeight"/> px</td>
+        </tr>
+        <tr>
+            <td class="spe"><span>表格边框：</span>
+                <input type="text" id="border"/> px
+            </td>
+            <td><span>间距：</span>
+            <input type="text" id="cellspacing"/> px</td>
+        </tr>
+        <tr>
+            <td class="spe"><span style="width: 85px;">表格边框颜色：</span>
+                <input type="text" style="width: 68px!important;width: 65px;" id="border-color" onclick="show(this)" />
+            </td>
+            <td><span>边距：</span>            
+                <input type="text" id="cellpadding"/> px
+            </td>
+        </tr>
+        <tr>
+            <td><span>表格对齐：</span>
+                <select id="tablealign" >
+                    <option value="">默认</option>
+                    <option value="left">居左</option>
+                    <option value="right">居右</option>
+                    <option value="center">居中</option>
+                </select>
+            </td>
+            <td colspan="2">
+                <span>单元格对齐：</span>
+                <select id="alignment" style="">
+                    <option value="left">左对齐</option>
+                    <option value="center">居中</option>
+                    <option value="right">右对齐</option>
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td class="spe"><span style="width: 85px;">表格背景颜色：</span>
+                <input type="text" style="width: 68px!important;width: 65px;" id="background-color" onclick="show(this)" />
+            </td>
+        </tr>
+    </table>
+</div>
+<script type="text/javascript">
+    var activeEl;
+    var colorpicker = new parent.baidu.editor.ui.Popup({
+            content: new parent.baidu.editor.ui.ColorPicker({
+                noColorText: '清除颜色'
+            })
+    });
+    colorpicker.render();
+    colorpicker.content.onpickcolor = function(t, color){
+        activeEl.value = color.toUpperCase();
+        colorpicker.hide();
+    };
+    colorpicker.content.onpicknocolor = function(t, color){
+        activeEl.value = '';
+        colorpicker.hide();
+    };
+    parent.baidu.editor.dom.domUtils.on(document, 'mousedown', function (evt){
+        parent.baidu.editor.ui.Popup.postHide(evt.target || evt.srcElement);
+    });
+    var state = editor.queryCommandState("edittable"),oldtable;
+    if(state == 0){
+        var range = editor.selection.getRange(),tmptd;
+            tmptd = parent.baidu.editor.dom.domUtils.findParentByTagName(range.startContainer, 'td', true);
+            oldtable = tmptd.parentNode.parentNode.parentNode;
+        if(oldtable){
+            var rowlength = 0,
+                    celllength = 0,
+                    alignmode = parent.baidu.editor.dom.domUtils.getComputedStyle(tmptd,"text-align");
+            for(var r=0,row;row = oldtable.rows[r++];){
+                var tmpcells = 0;
+                for(var c = 0,cell;cell = row.cells[c++];){
+                    if(cell.style.display != "none"){
+                        tmpcells++;
+                    }
+                }
+                rowlength += tmpcells>0 ? 1 : 0;
+                celllength = tmpcells > celllength ? tmpcells : celllength;
+            }
+            
+            g("rowCount").value = rowlength;
+            g("rowCount").setAttribute("readonly","readonly");
+            g("rowCount").onmousedown = function(){
+                return false;
+            };
+            g("colCount").value = celllength;
+            g("colCount").setAttribute("readonly","readonly");
+            g("colCount").onmousedown = function(){
+                return false;
+            };
+            g("cellpadding").value = oldtable.getAttribute("cellpadding") || "";
+            g("cellspacing").value = oldtable.getAttribute("cellspacing") || "";
+            g("tableWidth").value = oldtable.offsetWidth || "";
+            g("tableHeight").value = oldtable.offsetHeight || "";
+            g("border-color").value = oldtable.getAttribute("bordercolor")? oldtable.getAttribute("bordercolor").toUpperCase(): "#000000";
+            g("border").value = oldtable.getAttribute("border") || 1;
+            g("background-color").value = oldtable.getAttribute("bgColor")? oldtable.getAttribute("bgColor").toUpperCase():"#FFFFFF";
+            g("alignment").value = alignmode;
+            g("tablealign").value = oldtable.getAttribute("align") || "";
+        }
+    }else{
+        var ipt = g("rowCount");
+        var isIE = !!window.ActiveXObject;
+        if ( isIE ) {
+            setTimeout( function () {
+                var r = ipt.createTextRange();
+                r.collapse( false );
+                r.select();
+            } );
+        }
+        ipt.focus();
+    }
+    function show(el){
+        activeEl = el;
+        colorpicker.showAnchor(el);
+    }
+    function g(id){
+        return document.getElementById(id);
+    }
+    dialog.onok = function(){
+        var rows = g("rowCount").value,
+            cols = g("colCount").value,
+            width = g("tableWidth").value,
+            height = g("tableHeight").value,
+            border = g("border").value,
+            cellspacing = g("cellspacing").value,
+            cellpadding = g("cellpadding").value,
+            align = g("alignment").value,
+            bordercolor = g("border-color").value || "#000000",
+            backgroundcolor = g("background-color").value || "#FFFFFF",
+            tablealign = g("tablealign").value;
+        if(!/^[1-9]+[0-9]*$/.test(rows)){
+            alert("请输入正确行数");
+            return false;
+        }
+        if(!/^[1-9]+[0-9]*$/.test(cols)){
+            alert("请输入正确列数");
+            return false;
+        }
+        if(width && !/^[1-9]+[0-9]*$/.test(width)){
+            alert("宽度输入不正确");
+            return false;
+        }
+        if(height && !/^[1-9]+[0-9]*$/.test(height)){
+            alert("高度输入不正确");
+            return false;
+        }
+        if(border && !/^[0-9]*$/.test(border)){
+            alert("表格边框输入不正确");
+            return false;
+        }
+        if(cellspacing && !/^[0-9]*$/.test(cellspacing)){
+            alert("间距输入不正确");
+            return false;
+        }
+        if(cellpadding && !/^[0-9]*$/.test(cellpadding)){
+            alert("边距输入不正确");
+            return false;
+        }
+        if(bordercolor && !/^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(bordercolor)){
+            alert("颜色值输入错误");
+            return false;
+        }
+        if(backgroundcolor && !/^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(backgroundcolor)){
+            alert("颜色值输入错误");
+            return false;
+        }
+        var table = {
+            numRows : rows,
+            numCols : cols,
+            border : border,
+            cellpadding : cellpadding,
+            cellspacing : cellspacing,
+            width : width,
+            height : height,
+            align : align,
+            bordercolor:bordercolor,
+            backgroundcolor:backgroundcolor,
+            tablealign : tablealign
+        };
+        if(oldtable){
+            editor.execCommand('edittable',table );
+        }else{
+            editor.execCommand('inserttable',table );
+        }
+    };
+    
+</script>
+</body>
+</html>

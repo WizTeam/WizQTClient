@@ -1,0 +1,113 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+    "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
+        <title>插入视频</title>
+        <script type="text/javascript" src="../internal.js"></script>
+    <style type="text/css">
+        *{color: #838383}
+        body {
+            font-size: 12px;
+            width:360px;
+            overflow: hidden;
+            margin:0px;padding:0px;
+        }
+        .content{
+            padding: 9px 0px 0px 15px;
+            height:100%;
+        }
+        .content table{padding:0px;margin:0px;width: 100%}
+        .content table tr{padding:0px;margin:0px; list-style: none;height: 30px; line-height: 30px;}
+        .content input{ width:60px;height:21px;background: #FFF;border:1px solid #d7d7d7;padding: 0px; margin: 0px; line-height:21px;}
+        .content label{ width:60px;display:block;float:left;}
+        #url{width:250px}
+    </style>
+    </head>
+    <body>
+        <div class="content">
+        <table >
+
+            <tr>
+                <td colspan="2"><label for="url">视频地址:</label> <input id="url" type="text" value=""/></td>
+            </tr>
+
+            <tr>
+                <td><label for="width">宽度:</label><input id="width" type="text" value=""/> px</td>
+                <td><label for="height">高度:</label><input id="height" type="text" value=""/> px</td>
+            </tr>
+            <tr>
+                <td colspan="2"> <span>对齐方式：</span>
+                    <select id="float">
+                        <option value="">默认</option>
+                        <option value="float: left">左浮动</option>
+                        <option value="float: right">右浮动</option>
+                        <option value="display: block">独占一行</option>
+                    </select>
+                </td>
+            </tr>
+        </table>
+        </div>
+        <script type="text/javascript">
+            function convert_url(s){
+                s=s.replace(/http:\/\/www\.tudou\.com\/programs\/view\/([\w\-]+)\/?/i,"http://www.tudou.com/v/$1");
+                s=s.replace(/http:\/\/www\.youtube\.com\/watch\?v=([\w\-]+)/i,"http://www.youtube.com/v/$1");
+                s=s.replace(/http:\/\/v\.youku\.com\/v_show\/id_([\w\-=]+)\.html/i,"http://player.youku.com/player.php/sid/$1");
+                s=s.replace(/http:\/\/www\.56\.com\/u\d+\/v_([\w\-]+)\.html/i, "http://player.56.com/v_$1.swf");
+                s=s.replace(/http:\/\/www.56.com\/w\d+\/play_album\-aid\-\d+_vid\-([^.]+)\.html/i, "http://player.56.com/v_$1.swf");
+                s=s.replace(/http:\/\/v\.ku6\.com\/.+\/([^.]+)\.html/i, "http://player.ku6.com/refer/$1/v.swf");
+                return s;
+
+            }
+            function G (id){
+                return document.getElementById(id);
+            }
+            dialog.onok = function (){
+                var width = G("width").value;
+                var height = G("height").value;
+                if(!/^[1-9]+[.]?\d*$/g.test(width)){
+                    alert("请输入正确的宽度");
+                    return false;
+                }
+                if(!/^[1-9]+[.]?\d*$/g.test(height)){
+                    alert("请输入正确的高度");
+                    return false;
+                }
+                var str = convert_url(G('url').value);
+                if(str){
+                    editor.execCommand('insertvideo', {
+                        url: str,
+                        width: width,
+                        height: height,
+                        style: G("float").value
+                    });
+                }else{
+                    alert("请输入视频地址");
+                    return false;
+                }
+
+            };
+            (function(){
+                var img = editor.selection.getRange().getClosedNode();
+                if(img && img.className == "edui-faked-video"){
+                    G("url").value = img.getAttribute("_url");
+                    G("width").value = img.width;
+                    G("height").value = img.height;
+                    var float = img.style.styleFloat ? img.style.styleFloat : img.style.cssFloat;
+                    var str = float ? ("float: "+float) : (img.style.display ? "display: "+img.style.display : "");
+                    G("float").value = str;
+                }
+            })()
+            var ipt = G('url');
+            var isIE = !!window.ActiveXObject;
+            if (isIE) {
+                setTimeout(function (){
+                    var r = ipt.createTextRange();
+                    r.collapse(false);
+                    r.select();
+                });
+            }
+            ipt.focus()
+        </script>
+    </body>
+</html>

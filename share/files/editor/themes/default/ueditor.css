@@ -1,0 +1,1090 @@
+/* common layer */
+.edui-box { border: none; padding: 0; margin: 0; overflow: hidden; }
+a.edui-box { display: block; text-decoration: none; color: black; }
+a.edui-box:hover { text-decoration: none; }
+a.edui-box:active { text-decoration: none; }
+table.edui-box { border-collapse: collapse; }
+ul.edui-box { list-style-type: none; }
+div.edui-box { position: relative; display: -moz-inline-box!important; display: inline-block!important; vertical-align: top;  }
+.edui-clearfix { zoom:1 }
+.edui-clearfix:after { content: '\20'; display: block; clear: both; }
+* html div.edui-box { display: inline!important; }
+*:first-child+html div.edui-box { display: inline!important; }
+
+
+/* control layout */
+.edui-button-body, .edui-splitbutton-body, .edui-menubutton-body, .edui-combox-body { position: relative; }
+.edui-popup { position: absolute; -webkit-user-select: none; -moz-user-select: none; }
+.edui-popup .edui-shadow { position: absolute; z-index: -1; }
+.edui-popup .edui-bordereraser { position: absolute; overflow: hidden; }
+.edui-tablepicker .edui-canvas { position: relative; }
+.edui-tablepicker .edui-canvas .edui-overlay { position: absolute; }
+.edui-dialog-modalmask, .edui-dialog-dragmask { position: absolute; left: 0; top: 0; width: 100%; height: 100%; }
+.edui-toolbar { position: relative; }
+
+/*
+ * default theme
+ */
+.edui-label {
+    cursor: default;
+}
+span.edui-clickable {
+    color: blue;
+    cursor: pointer;
+    text-decoration: underline;
+}
+span.edui-unclickable {
+    color: gray;
+    cursor:default;
+}
+/* popup */
+.edui-popup {
+    z-index: 3000;
+}
+.edui-popup .edui-shadow {
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: black;
+    box-shadow: 3px 3px 5px #818181;
+    -webkit-box-shadow: 3px 3px 5px #818181;
+    -moz-box-shadow: 3px 3px 5px #818181;
+    -ms-filter: 'progid:DXImageTransform.Microsoft.Blur(PixelRadius='3', MakeShadow='true', ShadowOpacity='0.5')';
+    filter: progid:DXImageTransform.Microsoft.Blur(PixelRadius='3', MakeShadow='true', ShadowOpacity='0.5');
+}
+.edui-popup-content {
+    border: 1px solid gray;
+    background-color: white;
+    padding: 5px;
+}
+.edui-popup .edui-bordereraser {
+    background-color: white;
+    height: 3px;
+}
+
+.edui-menu .edui-bordereraser {
+    background-color: #f1f1f1;
+    height: 3px;
+}
+.edui-anchor-topleft .edui-bordereraser {
+    left: 1px;
+    top: -2px;
+}
+.edui-anchor-topright .edui-bordereraser {
+    right: 1px;
+    top: -2px;
+}
+.edui-anchor-bottomleft .edui-bordereraser {
+    left: 0;
+    bottom: -6px;
+    height: 7px;
+    border-left: 1px solid gray;
+    border-right: 1px solid gray;
+}
+.edui-anchor-bottomright .edui-bordereraser {
+    right: 0;
+    bottom: -6px;
+    height: 7px;
+    border-left: 1px solid gray;
+    border-right: 1px solid gray;
+}
+
+/* menu */
+.edui-menu {
+    z-index: 3000;
+}
+.edui-menu .edui-popup-content {
+    background-color: white;
+    padding: 3px;
+}
+.edui-menu-body {
+    _width: 150px;
+    min-width: 150px;
+    background: url("images/menu/sparator_v.png") repeat-y 25px;
+}
+.edui-menuitem-body {
+}
+.edui-menuitem {
+    height: 20px;
+    cursor: default;
+    vertical-align: top;
+}
+.edui-menuitem .edui-icon {
+    width: 20px;
+    height: 20px;
+    background: url(images/icons.png) 0 -40px;
+    background: url(images/icons.gif) 0 -40px\9;
+}
+
+.edui-menuitem .edui-label {
+    font-size: 12px;
+    line-height: 20px;
+    height: 20px;
+    padding-left: 10px;
+    padding-right: 20px;
+}
+.edui-state-checked .edui-menuitem-body {
+    background: url("images/icons-all.gif") no-repeat 6px -205px;
+}
+.edui-state-disabled .edui-menuitem-label {
+    color: gray;
+}
+.edui-state-disabled .edui-icon {
+    opacity: 0.3;
+    -ms-filter: 'alpha(opacity=30)';
+    filter: alpha(opacity=30);
+}
+
+/*by taoqili*/
+.edui-state-disabled .edui-label {
+    color: gray;
+}
+
+.edui-hassubmenu .edui-arrow {
+    height: 20px;
+    width: 20px;
+    float: right;
+    background: url("images/icons-all.gif") no-repeat 10px -233px;
+}
+.edui-menu-body .edui-menuitem {
+    padding: 1px;
+}
+.edui-menuseparator {
+    margin: 2px 0;
+    height: 1px;
+    overflow: hidden;
+}
+.edui-menuseparator-inner {
+    border-bottom: 1px solid #e2e3e3;
+    margin-left: 29px;
+    margin-right: 1px;
+}
+.edui-menu-body .edui-state-hover {
+    padding: 0 !important;
+    background-color: #fff5d4;
+    border: 1px solid #dcac6c;
+}
+
+/* dialog */
+.edui-dialog {
+    z-index: 2000;
+    position: absolute;
+}
+.edui-dialog-wrap {
+    margin-right: 6px;
+    margin-bottom: 6px;
+    border: 1px solid #c6c6c6;
+}
+.edui-dialog-body {
+    position: relative;
+    background-color: white;
+    _zoom: 1;
+}
+.edui-dialog-shadow {
+    position: absolute;
+    z-index: -1;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: black;
+    box-shadow: 3px 3px 5px #818181;
+    -webkit-box-shadow: 3px 3px 5px #818181;
+    -moz-box-shadow: 3px 3px 5px #818181;
+    -ms-filter: 'progid:DXImageTransform.Microsoft.Blur(PixelRadius='3', MakeShadow='true', ShadowOpacity='0.5')';
+    filter: progid:DXImageTransform.Microsoft.Blur(PixelRadius='3', MakeShadow='true', ShadowOpacity='0.5');
+}
+.edui-dialog-foot {
+    background-color: white;
+}
+.edui-dialog-titlebar {
+    height: 26px;
+    border-bottom: 1px solid #c6c6c6;
+    background: url(images/dialog-title-bg.png) repeat-x bottom;
+    position: relative;
+    cursor: move;
+}
+.edui-dialog-caption {
+    font-weight: bold;
+    font-size: 12px;
+    line-height: 26px;
+    padding-left: 5px;
+}
+.edui-dialog-draghandle {
+    height: 26px;
+}
+.edui-dialog-closebutton {
+    position: absolute !important;
+    right: 5px;
+    top: 3px;
+}
+.edui-dialog-closebutton .edui-button-body {
+    height: 20px;
+    width: 20px;
+    cursor: pointer;
+    background: url("images/icons-all.gif") no-repeat 0 -59px;
+}
+.edui-dialog-closebutton .edui-state-hover .edui-button-body {
+    background: url("images/icons-all.gif") no-repeat 0 -89px;
+}
+.edui-dialog-foot {
+    height: 40px;
+}
+.edui-dialog-buttons {
+    position: absolute;
+    right: 0;
+}
+.edui-dialog-buttons .edui-button {
+    margin-right: 10px;
+}
+.edui-dialog-buttons .edui-button .edui-button-body {
+    background: url("images/icons-all.gif") no-repeat;
+    height: 24px;
+    width: 96px;
+    font-size: 12px;
+    line-height: 24px;
+    text-align: center;
+    cursor: default;
+}
+.edui-dialog-buttons .edui-button .edui-state-hover .edui-button-body {
+    background: url("images/icons-all.gif") no-repeat 0 -30px;
+}
+.edui-dialog iframe {
+    border: 0;
+    padding: 0;
+    margin: 0;
+    vertical-align: top;
+}
+.edui-dialog-modalmask {
+    opacity: 0.3;
+    filter: alpha(opacity=30);
+    background-color: #ccc;
+    position: absolute;
+    /*z-index: 1999;*/
+}
+.edui-dialog-dragmask {
+    position: absolute;
+    /*z-index: 2001;*/
+    background-color: transparent;
+    cursor: move;
+}
+.edui-dialog-content  {
+    position: relative;
+}
+
+/* color picker */
+.edui-colorpicker-topbar {
+    height: 27px;
+    width: 200px;
+    /*border-bottom: 1px gray dashed;*/
+}
+.edui-colorpicker-preview {
+    height: 20px;
+    border: 1px inset black;
+    margin-left: 1px;
+    width: 128px;
+    float: left;
+}
+.edui-colorpicker-nocolor {
+    float: right;
+    margin-right: 1px;
+    font-size: 12px;
+    line-height: 14px;
+    height: 14px;
+    border: 1px solid #333;
+    padding: 3px 5px;
+    cursor: pointer;
+}
+.edui-colorpicker-tablefirstrow {
+    height: 30px;
+}
+.edui-colorpicker-colorcell {
+    width: 14px;
+    height: 14px;
+    display: block;
+    margin: 0;
+    cursor: pointer;
+}
+.edui-colorpicker-colorcell:hover {
+    width: 14px;
+    height: 14px;
+    margin: 0;
+}
+
+/* tablepicker */
+.edui-tablepicker .edui-infoarea {
+    height: 14px;
+    line-height: 14px;
+    font-size: 12px;
+    width: 220px;
+    margin-bottom: 3px;
+    clear: both;
+}
+.edui-tablepicker .edui-infoarea .edui-label {
+    float: left;
+}
+.edui-tablepicker .edui-infoarea .edui-clickable {
+    float: right;
+}
+.edui-tablepicker .edui-pickarea {
+    background: url("images/tablepicker/unhighlighted.gif") repeat;
+    height: 220px;
+    width: 220px;
+}
+.edui-tablepicker .edui-pickarea .edui-overlay {
+    background: url("images/tablepicker/highlighted.gif") repeat;
+}
+
+/* toolbar */
+.edui-toolbar {
+    cursor: default;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    padding: 1px;
+}
+.edui-toolbar .edui-button,
+.edui-toolbar .edui-splitbutton,
+.edui-toolbar .edui-menubutton,
+.edui-toolbar .edui-combox {
+    margin: 1px ;
+}
+
+/* toolbar sparator  */
+.edui-toolbar .edui-separator {
+    width: 2px;
+    height: 20px;
+    margin: 2px 4px 2px 3px;
+    background: url(images/icons.png) -180px 0;
+    background: url(images/icons.gif) -180px 0\9;
+}
+
+/* toolbar button */
+.edui-toolbar .edui-button .edui-icon,
+.edui-toolbar .edui-menubutton .edui-icon,
+.edui-toolbar .edui-splitbutton .edui-icon {
+    height: 20px!important;
+    width: 20px!important;
+    background-image: url(images/icons.png);
+    background-image: url(images/icons.gif)\9;
+}
+
+.edui-toolbar .edui-button .edui-button-wrap {
+    padding: 1px;
+    position: relative;
+}
+.edui-toolbar .edui-button .edui-state-hover .edui-button-wrap {
+    background-color: #fff5d4;
+    padding: 0;
+    border: 1px solid #dcac6c;
+}
+.edui-toolbar .edui-button .edui-state-checked .edui-button-wrap {
+    background-color: #ffe69f;
+    padding: 0;
+    border: 1px solid #dcac6c;
+}
+.edui-toolbar .edui-button .edui-state-active .edui-button-wrap {
+    background-color: #ffffff;
+    padding: 0;
+    border: 1px solid gray;
+}
+
+/* toolbar splitbutton */
+.edui-toolbar .edui-splitbutton-body .edui-arrow,
+.edui-toolbar .edui-menubutton-body .edui-arrow{
+    background: url(images/icons.png) -741px 0;
+    _background: url(images/icons.gif) -741px 0;
+    height: 20px;
+    width: 9px;
+}
+.edui-toolbar .edui-splitbutton .edui-splitbutton-body,
+.edui-toolbar .edui-menubutton .edui-menubutton-body{
+    padding: 1px;
+}
+.edui-toolbar .edui-splitborder{
+    width: 1px;
+    height: 20px;
+}
+.edui-toolbar .edui-state-hover .edui-splitborder{
+    width: 1px;
+    border-left: 0px solid #dcac6c;
+}
+.edui-toolbar .edui-state-active .edui-splitborder{
+    width: 0;
+    border-left: 1px solid gray;
+}
+.edui-toolbar .edui-state-opened .edui-splitborder{
+    width: 1px;
+    border: 0;
+}
+.edui-toolbar .edui-splitbutton .edui-state-hover .edui-splitbutton-body,
+.edui-toolbar .edui-menubutton .edui-state-hover .edui-menubutton-body{
+    background-color: #fff5d4;
+    border: 1px solid #dcac6c;
+    padding: 0;
+}
+.edui-toolbar .edui-splitbutton .edui-state-checked .edui-splitbutton-body,
+.edui-toolbar .edui-menubutton .edui-state-checked .edui-menubutton-body{
+    background-color: #FFE69F;
+    border: 1px solid #DCAC6C;
+    padding: 0;
+}
+.edui-toolbar .edui-splitbutton .edui-state-active .edui-splitbutton-body,
+.edui-toolbar .edui-menubutton .edui-state-active .edui-menubutton-body{
+    background-color: #ffffff;
+    border: 1px solid gray;
+    padding: 0;
+}
+.edui-state-disabled .edui-arrow{
+    opacity: 0.3;
+    -ms-filter: 'alpha(opacity=30)';
+    _filter: alpha(opacity=30);
+}
+.edui-toolbar .edui-splitbutton .edui-state-opened .edui-splitbutton-body,
+.edui-toolbar .edui-menubutton .edui-state-opened .edui-menubutton-body{
+    background-color: white;
+    border: 1px solid gray;
+    padding: 0;
+}
+
+.edui-for-insertorderedlist .edui-bordereraser,
+.edui-for-insertunorderedlist .edui-bordereraser {
+    background-color: white;
+}
+/* 解决嵌套导致的图标问题 */
+.edui-for-insertorderedlist .edui-popup-body .edui-icon,
+.edui-for-insertunorderedlist .edui-popup-body .edui-icon {
+    background-position: 0 -40px;
+}
+
+/* toolbar colorbutton */
+.edui-toolbar .edui-colorbutton .edui-colorlump {
+    position: absolute;
+    overflow: hidden;
+    bottom: 1px;
+    left: 1px;
+    width: 18px;
+    height: 4px;
+}
+
+/* toolbar combox */
+.edui-toolbar .edui-combox-body .edui-button-body {
+    width: 60px;
+    font-size: 12px;
+    height: 20px;
+    line-height: 20px;
+    padding-left: 5px;
+    white-space: nowrap;
+}
+.edui-toolbar .edui-combox-body .edui-arrow {
+    background: url(images/icons.png) -741px 0;
+    _background: url(images/icons.gif) -741px 0;
+    height: 20px;
+    width: 9px;
+}
+.edui-toolbar .edui-combox .edui-combox-body {
+    border: 1px solid #CCC;
+    background-color: white;
+}
+.edui-toolbar .edui-combox-body .edui-splitborder {
+    display: none;
+}
+.edui-toolbar .edui-combox-body .edui-arrow {
+    border-left: 1px solid #CCC;
+}
+.edui-toolbar .edui-state-hover .edui-combox-body {
+    background-color: #fff5d4;
+    border: 1px solid #dcac6c;
+}
+.edui-toolbar .edui-state-hover .edui-combox-body .edui-arrow {
+    border-left: 1px solid #dcac6c;
+}
+.edui-toolbar .edui-state-checked .edui-combox-body {
+    background-color: #FFE69F;
+    border: 1px solid #DCAC6C;
+}
+.edui-toolbar .edui-state-checked .edui-combox-body .edui-arrow {
+    border-left: 1px solid #DCAC6C;
+}
+.edui-toolbar .edui-state-disabled .edui-combox-body {
+    background-color: #F0F0EE;
+    opacity: 0.3;
+    -ms-filter: 'alpha(opacity=30)';
+    filter: alpha(opacity=30);
+}
+.edui-toolbar .edui-state-opened .edui-combox-body {
+    background-color: white;
+    border: 1px solid gray;
+}
+
+.edui-list .edui-bordereraser {
+    display: none;
+}
+.edui-listitem {
+    padding: 1px;
+    white-space: nowrap;
+}
+.edui-list .edui-state-hover {
+    position: relative;
+    background-color: #fff5d4;
+    border: 1px solid #dcac6c;
+    padding: 0;
+}
+.edui-for-fontfamily .edui-listitem-label {
+    min-width: 120px;
+    _width: 120px;
+    font-size: 12px;
+    height: 22px;
+    line-height: 22px;
+    padding-left: 5px;
+}
+.edui-for-underline .edui-listitem-label{
+    min-width: 120px;
+    _width: 120px;
+    padding: 3px 5px;
+    font-size:12px;
+}
+.edui-for-fontsize .edui-listitem-label {
+    min-width: 120px;
+    _width: 120px;
+    padding: 3px 5px;
+
+}
+.edui-for-paragraph .edui-listitem-label {
+    min-width: 200px;
+    _width: 200px;
+    padding: 2px 5px;
+}
+.edui-for-rowspacing .edui-listitem-label {
+    min-width: 53px;
+    _width: 53px;
+    padding: 2px 5px;
+}
+.edui-for-lineheight .edui-listitem-label {
+    min-width: 53px;
+    _width: 53px;
+    padding: 2px 5px;
+}
+
+.edui-for-customstyle .edui-listitem-label {
+    min-width: 200px;
+    _width: 200px;
+    width:200px!important;
+    padding:2px 5px;
+}
+/* toolbar icons */
+
+.edui-for-undo .edui-icon {
+    background-position: -160px 0;
+}
+.edui-for-redo .edui-icon {
+    background-position: -100px 0;
+}
+.edui-for-bold .edui-icon {
+    background-position: 0 0;
+}
+.edui-for-italic .edui-icon {
+    background-position: -60px 0;
+}
+.edui-for-underline .edui-icon {
+    background-position: -140px 0;
+}
+.edui-for-strikethrough .edui-icon {
+    background-position: -120px 0;
+}
+.edui-for-subscript .edui-icon {
+    background-position: -600px 0;
+}
+.edui-for-superscript .edui-icon {
+    background-position: -620px 0;
+}
+.edui-for-blockquote .edui-icon {
+    background-position: -220px 0;
+}
+.edui-for-forecolor .edui-icon {
+    background-position: -720px 0;
+}
+.edui-for-backcolor .edui-icon {
+    background-position: -760px 0;
+}
+.edui-for-inserttable .edui-icon {
+    background-position: -580px -20px;
+}
+.edui-for-justifyleft .edui-icon {
+    background-position: -460px 0;
+}
+.edui-for-justifycenter .edui-icon {
+    background-position: -420px 0;
+}
+.edui-for-justifyright .edui-icon {
+    background-position: -480px 0;
+}
+.edui-for-justifyjustify .edui-icon {
+    background-position: -440px 0;
+}
+.edui-for-insertorderedlist .edui-icon {
+    background-position: -80px 0;
+}
+.edui-for-insertunorderedlist .edui-icon {
+    background-position: -20px 0;
+}
+.edui-for-horizontal .edui-icon {
+    background-position: -360px 0;
+}
+.edui-for-link .edui-icon {
+    background-position: -500px 0;
+}
+.edui-for-code .edui-icon {
+    background-position: -440px -40px;
+}
+
+.edui-for-insertimage .edui-icon {
+    background-position: -380px 0;
+}
+.edui-for-insertframe .edui-icon {
+    background-position: -240px -40px;
+}
+.edui-for-emoticon .edui-icon {
+    background-position: -60px -20px;
+}
+.edui-for-spechars .edui-icon {
+    background-position: -240px 0;
+}
+.edui-for-help .edui-icon {
+    background-position: -340px 0;
+}
+.edui-for-print .edui-icon {
+    background-position: -440px -20px;
+}
+.edui-for-preview .edui-icon {
+    background-position: -420px -20px;
+}
+.edui-for-selectall .edui-icon {
+    background-position: -400px -20px;
+}
+.edui-for-searchreplace .edui-icon {
+    background-position: -520px -20px;
+}
+.edui-for-map .edui-icon {
+    background-position: -40px -40px;
+}
+.edui-for-gmap .edui-icon {
+    background-position: -260px -40px;
+}
+.edui-for-insertvideo .edui-icon {
+    background-position: -320px -20px;
+}
+.edui-for-time .edui-icon {
+    background-position: -160px -20px;
+}
+.edui-for-date .edui-icon {
+    background-position: -140px -20px;
+}
+.edui-for-cut .edui-icon {
+    background-position: -680px 0;
+}
+.edui-for-copy .edui-icon {
+    background-position: -700px 0;
+}
+.edui-for-paste .edui-icon {
+    background-position: -560px 0;
+}
+.edui-for-formatmatch .edui-icon {
+    background-position: -40px 0;
+}
+.edui-for-pasteplain .edui-icon {
+    background-position: -360px -20px;
+}
+.edui-for-directionalityltr .edui-icon {
+    background-position: -20px -20px;
+}
+.edui-for-directionalityrtl .edui-icon {
+    background-position: -40px -20px;
+}
+.edui-for-source .edui-icon {
+    background-position: -260px -0px;
+}
+.edui-for-removeformat .edui-icon {
+    background-position: -580px 0;
+}
+.edui-for-unlink .edui-icon {
+    background-position: -640px 0;
+}
+.edui-for-insertrow .edui-icon {
+    background-position: -740px -20px;
+}
+.edui-for-insertcol .edui-icon {
+    background-position: -700px -20px;
+}
+.edui-for-mergeright .edui-icon {
+    background-position: -60px -40px;
+}
+.edui-for-mergedown .edui-icon {
+    background-position: -80px -40px;
+}
+.edui-for-splittorows .edui-icon {
+    background-position: -100px -40px;
+}
+.edui-for-splittocols .edui-icon {
+    background-position: -120px -40px;
+}
+.edui-for-insertparagraphbeforetable .edui-icon {
+    background-position: -140px -40px;
+}
+.edui-for-deleterow .edui-icon {
+    background-position: -660px -20px;
+}
+.edui-for-deletecol .edui-icon {
+    background-position: -640px -20px;
+}
+.edui-for-splittocells .edui-icon {
+    background-position: -800px -20px;
+}
+.edui-for-mergecells .edui-icon {
+    background-position: -760px -20px;
+}
+.edui-for-deletetable .edui-icon {
+    background-position: -620px -20px;
+}
+.edui-for-cleardoc .edui-icon {
+    background-position: -520px 0;
+}
+.edui-for-fullscreen .edui-icon {
+    background-position: -100px -20px;
+}
+.edui-for-anchor .edui-icon {
+    background-position:  -200px 0;
+}
+.edui-for-pagebreak .edui-icon {
+    background-position:  -460px -40px;
+}
+.edui-for-imagenone .edui-icon {
+    background-position: -480px -40px;
+}
+.edui-for-imageleft .edui-icon {
+    background-position: -500px -40px;
+}
+.edui-for-checkimage .edui-icon {
+    background-position: -560px -40px;
+}
+.edui-for-imageright .edui-icon {
+    background-position: -520px -40px;
+}
+.edui-for-imagecenter .edui-icon {
+    background-position: -540px -40px;
+}
+
+.edui-for-indent .edui-icon {
+    background-position:  -400px 0;
+}
+.edui-for-outdent .edui-icon {
+    background-position:  -540px 0;
+}
+
+.edui-for-table .edui-icon {
+    background-position: -580px -20px;
+}
+.edui-for-edittable .edui-icon {
+    background-position: -420px -40px;
+}
+
+.edui-for-delete .edui-icon {
+    background-position: -360px -40px;
+}
+.edui-for-highlightcode .edui-icon{
+    background-position: -440px -40px;
+}
+.edui-for-deletehighlightcode .edui-icon{
+    background-position: -360px -40px;
+}
+
+/*link-dialog*/
+.edui-for-link .edui-dialog-content  {
+    width:420px;
+    height:150px;
+    overflow: hidden;
+}
+/*emoticon-dialog*/
+.edui-for-emoticon .edui-dialog-content{
+    width:515px;
+    *width:506px;
+    height:360px;
+}
+/*spechars-dialog*/
+.edui-for-spechars .edui-dialog-content{
+    width:620px;
+    height:500px;
+}
+/*image-dialog*/
+.edui-for-insertimage .edui-dialog-content  {
+    width:620px;
+    height:390px;
+    overflow: hidden;
+}
+/*image-insertframe*/
+.edui-for-insertframe .edui-dialog-content  {
+    width:350px;
+    height:200px;
+    overflow: hidden;
+}
+/*wordImage-dialog*/
+.edui-for-wordimage .edui-dialog-content  {
+    width:620px;
+    height:380px;
+    overflow: hidden;
+}
+/*code-dialog*/
+.edui-for-highlightcode .edui-dialog-content  {
+    width:550px;
+    height:360px;
+    overflow: hidden;
+}
+/*map-dialog*/
+.edui-for-map .edui-dialog-content  {
+    width:550px;
+    height:400px;
+}
+/*gmap-dialog*/
+.edui-for-gmap .edui-dialog-content  {
+    width:550px;
+    height:400px;
+}
+/*video-dialog*/
+.edui-for-insertvideo .edui-dialog-content  {
+    width:380px;
+    height:150px;
+}
+
+/*anchor-dialog*/
+.edui-for-anchor .edui-dialog-content  {
+    width:320px;
+    height:60px;
+    overflow: hidden;
+}
+
+/*searchreplace-dialog*/
+.edui-for-searchreplace .edui-dialog-content  {
+    width:400px;
+    height:180px;
+}
+/*help-dialog*/
+.edui-for-help .edui-dialog-content  {
+    width:400px;
+    height:420px;
+}
+/*table-dialog*/
+.edui-for-inserttable .edui-dialog-content  {
+    width:450px;
+    height:225px;
+}
+
+/*for wordimage*/
+.edui-editor-toolbarmsg-upload{
+    font-size: 14px;
+    color: blue;
+    width: 100px;
+    height: 16px;
+    line-height:16px;
+    cursor:pointer;
+    position:absolute;
+    top:5px;
+    left:350px;
+}
+
+.edui-for-paragraph .edui-listitem-label .edui-for-p{
+    font-size: 22px;
+    font-family: Tahoma,Verdana,Arial,Helvetica;
+}
+.edui-for-paragraph .edui-listitem-label .edui-for-h1{
+    font-weight: bolder;
+    font-size: 1.9em;
+    font-family: Tahoma,Verdana,Arial,Helvetica;
+}
+.edui-for-paragraph .edui-listitem-label .edui-for-h2{
+    font-weight: bolder;
+    font-size: 1.5em;
+    font-family: Tahoma,Verdana,Arial,Helvetica;
+}
+.edui-for-paragraph .edui-listitem-label .edui-for-h3{
+    font-weight: bolder;
+    font-size: 1.17em;
+    font-family: Tahoma,Verdana,Arial,Helvetica;
+}
+.edui-for-paragraph .edui-listitem-label .edui-for-h4{
+    font-weight: bolder;
+    font-size: 1em;
+    font-family: Tahoma,Verdana,Arial,Helvetica;
+}
+.edui-for-paragraph .edui-listitem-label .edui-for-h5{
+    font-weight: bolder;
+    font-size: 0.83em;
+    font-family: Tahoma,Verdana,Arial,Helvetica;
+}
+.edui-for-paragraph .edui-listitem-label .edui-for-h6{
+    font-weight: bolder;
+    font-size: .75em;
+    font-family: Tahoma,Verdana,Arial,Helvetica;
+}
+
+/* ui.Editor */
+.edui-editor {
+    border:  1px solid #ccc;
+    background-color: white;
+    position: relative;
+    overflow: visible;
+}
+.edui-editor-toolbarbox {
+    position: relative;
+    zoom: 1;
+}
+.edui-editor-toolbarboxouter {
+    border-bottom:  1px solid #ccc;
+    background: white url(images/toolbar_bg.png) repeat-x bottom left;
+}
+.edui-editor-toolbarboxinner {
+    padding: 2px;
+}
+.edui-editor-iframeholder {
+    position: relative;
+    /*for fix ie6 toolbarmsg under iframe bug. relative -> static */
+    /*_position: static !important;*/
+}
+.edui-editor-iframeholder textarea {
+    font-family: consolas, "Courier New", "lucida console", monospace;
+    font-size: 12px;
+    line-height: 18px;
+}
+.edui-editor-bottombar {
+    /*border-top: 1px solid #ccc;*/
+    /*height: 20px;*/
+    /*width: 40%;*/
+    /*float: left;*/
+    /*overflow: hidden;*/
+}
+.edui-editor-bottomContainer{overflow:hidden;}
+.edui-editor-bottomContainer table{width:100%;height:0;overflow:hidden;border-spacing:0;border-collapse:collapse;}
+.edui-editor-bottomContainer td{white-space:nowrap;border-top: 1px solid #ccc;line-height: 20px;font-size:12px;font-family: Arial,Helvetica,Tahoma,Verdana,Sans-Serif;}
+.edui-editor-wordcount{
+    text-align: right;
+    margin-right: 5px;
+    color: #aaa;
+}
+.edui-editor-breadcrumb {
+    margin: 2px 0 0 3px;
+}
+.edui-editor-breadcrumb span {
+    cursor: pointer;
+    text-decoration: underline;
+    color: blue;
+}
+
+.edui-toolbar .edui-for-fullscreen {
+    float: right;
+}
+.edui-bubble .edui-popup-content {
+    border: 1px solid #DCAC6C;
+    background-color: #fff6d9;
+    padding: 5px;
+    font-size: 10pt;
+    font-family: "宋体";
+}
+.edui-bubble .edui-shadow {
+    box-shadow: 1px 1px 3px #818181;
+    -webkit-box-shadow: 2px 2px 3px #818181;
+    -moz-box-shadow: 2px 2px 3px #818181;
+    -ms-filter: 'progid:DXImageTransform.Microsoft.Blur(PixelRadius='2', MakeShadow='true', ShadowOpacity='0.5')';
+    filter: progid:DXImageTransform.Microsoft.Blur(PixelRadius='2', MakeShadow='true', ShadowOpacity='0.5');
+}
+.edui-editor-toolbarmsg {
+    background-color: #FFF6D9;
+    border-bottom: 1px solid #ccc;
+    position: absolute;
+    bottom:-25px;
+    left:0;
+    z-index: 1009;
+    width: 99.9%;
+}
+.edui-editor-toolbarmsg-label {
+    font-size: 12px;
+    line-height: 16px;
+    padding: 4px;
+}
+.edui-editor-toolbarmsg-close {
+    float: right;
+    width: 20px;
+    height: 16px;
+    line-height:16px;
+    cursor:pointer;
+    color:red;
+}
+
+/**for edui-emotion-menu*/
+.edui-for-emotion .edui-icon {background-position: -60px -20px;}
+.edui-for-emotion .edui-popup-content{position: relative;z-index: 555}
+.edui-for-emotion .edui-popup-content iframe{width:514px;height:367px;overflow:hidden;}
+.edui-for-emotion .edui-splitborder{display:none}
+.edui-for-emotion .edui-splitbutton-body .edui-arrow{width:0}   /*去除了表情的下拉箭头*/
+
+/* 日期选择控件 */
+.tangram-calendar {
+	height: 164px;
+	width: 178px;
+	font-size:12px;
+	text-align: center;
+	border: 5px solid #EEEEEE;
+}
+.tangram-calendar-title {
+	position: relative;
+	background-color: #EEEEEE;
+}
+.tangram-calendar-label{
+	width: 100%;/*ie必要*/
+	background-color: #EEEEEE;
+}
+.tangram-calendar-prev {
+	position: absolute;
+	text-align: center;
+	cursor: pointer;
+	left: 0px;
+	top: 0px;
+	width: 30px;
+}
+.tangram-calendar-next{
+	position: absolute;
+	text-align: center;
+	cursor: pointer;
+	right: 0px;
+	top: 0px;
+	width: 30px;
+}
+.tangram-calendar-table {
+	width: 100%;
+	height: 100%;
+}
+.tangram-calendar-week td{
+	cursor: default;
+	font-weight: bold;
+	font-size:12px;
+	background-color: #EEEEEE;
+}
+.tangram-calendar-date td{
+	cursor:pointer;
+	text-align: center;
+	border: 1px solid #FAFAFA;
+}
+td.tangram-calendar-date-current{
+	border: 1px solid #A00000;
+}
+.tangram-calendar-date-other{
+	color: #ccc;
+}
+.tangram-calendar-disabled{
+	background: #CCCCCC;
+}
+.tangram-calendar-date-disable{
+	background: gray;
+}
+td.tangram-calendar-hover{
+	border: 1px solid blue;
+}
+

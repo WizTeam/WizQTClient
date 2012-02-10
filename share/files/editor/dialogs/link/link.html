@@ -1,0 +1,130 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+        "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <title>插入链接</title>
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
+    <script type="text/javascript" src="../internal.js"></script>
+    <style type="text/css">
+        *{color: #838383}
+        body {
+            font-size: 12px;
+            width:382px;
+            height: 100px;
+            overflow: hidden;
+            margin:0px;padding:0px;
+        }
+         span.txt{width: 60px;height:30px;line-height: 30px;display: block;float:left}
+        .content{
+            padding: 9px 0px 0px 15px;
+            height:100%;
+        }
+        #link_href,
+        #title{width:286px;height:21px;background: #FFF;border:1px solid #d7d7d7;padding: 0px; margin: 0px; line-height:21px}
+
+        #link_href{width:208px}
+        .content table{padding:0px;margin:0px}
+        .content table tr{padding:0px;margin:0px; list-style: none;height: 20px; line-height: 20px;}
+
+        .red{color:red;}
+    </style>
+</head>
+<body>
+<div class="content">
+    <table>
+        <tr>
+            <td><span class="txt">链接地址：</span>
+                <select id="protocol">
+                    <option value="http://">http://</option>
+                    <option value="https://">https://</option>
+                </select>
+                <input id="link_href" type="text" /><br/>
+            <span id="msg2" class="red"></span></td>
+        </tr>
+        <tr>
+            <td><span class="txt">标题：</span><input id="title" type="text"/></td>
+        </tr>
+        <tr>
+             <td><span>是否在新窗口打开：</span><input id="target" type="checkbox"/></td>
+        </tr>
+    </table>
+
+</div>
+<script type="text/javascript">
+    var a = editor.queryCommandValue("link"),link = {};
+    if(a){
+        link = a;
+    }
+    function G(id){
+        return document.getElementById(id);
+    }
+    function jbind(obj,evt,fun){
+        if(obj.addEventListener){  // firefox,w3c
+            obj.addEventListener(evt,fun,false);
+        }else{// ie
+            obj.attachEvent("on"+evt,function(){fun.apply(obj);});
+        }
+    }
+    function initIpt(){
+        if(link.href){
+            G("title").value = link.title ? link.title : "";
+            var href = link.getAttribute('data_ue_src') || link.href;
+            /^(?:http:\/\/)/ig.test(href) ? G("protocol").value="http://" : G("protocol").value="https://";
+            G("link_href").value = href.replace(/^(?:https?:\/\/)|(?:\/)$/ig,"");
+            if(link.target == "_blank"){
+                G("target").checked = true;
+            }
+        }
+        var ipt = G("link_href");
+        ipt.focus();
+        ipt.style.cssText = 'border:1px solid #ccc;background-color:#fafafa;';
+        jbind(ipt,'focus',function(){
+            this.style.cssText = 'border:1px solid #ccc;background-color:#fff;';
+        });
+        jbind(ipt,'blur',function(){
+            this.style.cssText = 'border:1px solid #ccc;background-color:#fafafa;';
+        });
+    }
+   
+    function handleDialogOk(){
+        var href = G('link_href').value || '';
+        var obj = {},td,link;
+        obj.href = href.replace(/^\s+|\s+$/g, '');
+        if(!obj.href){
+            G("msg2").innerHTML = "请输入链接地址！";
+            return false;
+        }
+        obj.href = G("protocol").value+obj.href;
+        if(G("target").checked){
+            obj["target"] = "_blank";
+        } else {
+            obj["target"] = "_self";
+        }
+        if(G("title").value.replace(/^\s+|\s+$/g, '')){
+            obj["title"] = G("title").value.replace(/^\s+|\s+$/g, '');
+        }
+        editor.execCommand('link', obj);
+        dialog.close();
+    }
+    var keyHandle = function(evt){
+        evt = evt || window.event;
+        if (evt.keyCode == 13) {
+            handleDialogOk();
+            return false;
+        }
+    }
+    initIpt();
+    dialog.onok = handleDialogOk;
+    G('link_href').onkeydown = keyHandle;
+    var ipt = G('link_href');
+    var isIE = !!window.ActiveXObject;
+    if (isIE) {
+        setTimeout(function (){
+            var r = ipt.createTextRange();
+            r.collapse(false);
+            r.select();
+        });
+    }
+</script>
+</body>
+</html>

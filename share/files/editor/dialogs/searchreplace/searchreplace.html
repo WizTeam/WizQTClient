@@ -1,0 +1,254 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+        "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <title>查找替换</title>
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type"/>
+    <script type="text/javascript" src="../internal.js"></script>
+    <style type="text/css">
+
+
+        *{color: #838383}
+        body {
+            font-size: 12px;
+            width:380px;
+            height: 170px;
+            overflow: hidden;
+            margin:0px;padding:0px;
+        }
+        .warp{
+            padding: 39px 0px 0px 15px;
+            height:88%;position:relative;
+        }
+        * +html .warp{height:80%}
+        .head{position:absolute;height:31px;top:9px;}
+        .content{height:110px;border: 1px solid #ddd;padding:5px}
+        
+        .head span{width:62px;height:29px;line-height:29px;background:red;display:block;float: left;text-align: center;margin-right: 1px;cursor: pointer }
+        
+        
+        .head span.def{background:url("../../themes/default/images/dialog-title-bg.png") repeat-x;border:1px solid #ccc;}
+        .head span.act{background:#FFF;border:1px solid #ccc;border-bottom: 1px solid #FFF}
+
+        .content table{width:100%;}
+        .content input.int{ width:190px;height:21px;background: #FFF;border:1px solid #d7d7d7;padding: 0px; margin: 0px;line-height:21px;}
+        .content input.btn{width:60px; text-align:center;line-height:24px; text-decoration: none;height:24px;border: 0px;margin:0px;padding:0px;background:url("../../themes/default/images/dialog-title-bg.png") repeat-x;border:1px solid #ccc; }
+    </style>
+</head>
+<body>
+<div class="warp">
+    <div id="head" class="head">
+        <span name="find" class="act">查找</span> <span name="replace" class="def">替换</span>
+    </div>
+    <div class="content" id="find">
+        <table>
+            <tr>
+                <td width="80">查找：</td>
+                <td><input id="findtxt" type="text" class="int" /></td>
+            </tr>
+            <tr>
+                <td>区分大小写：</td>
+                <td>
+                    <input id="matchCase" type="checkbox" />
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2">
+                    <input id="nextFindBtn" type="button" value="下一个" class="btn" />
+                    <input id="preFindBtn" type="button" value="上一个"class="btn" />
+                </td>
+            </tr>
+        </table>
+    </div>
+    
+    <div class="content" id="replace">
+        <table>
+            <tr>
+                <td width="80">查找：</td>
+                <td><input id="findtxt1" type="text" class="int"  /></td>
+            </tr>
+            <tr>
+                <td>替换：</td>
+                <td><input id="replacetxt" type="text" class="int" /></td>
+            </tr>
+            <tr>
+                <td>区分大小写：</td>
+                <td>
+                    <input id="matchCase1" type="checkbox" />
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2">
+                    <input id="nextReplaceBtn" type="button" value="下一个" class="btn" />
+                    <input id="preReplaceBtn" type="button" value="上一个" class="btn" />
+                    <input id="repalceBtn" type="button" value="替换" class="btn" />
+                    <input id="allrepalceBtn" type="button" value="全部替换" class="btn" />
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>
+<script type="text/javascript">
+        //清空上次查选的痕迹
+        editor.firstForSR = 0;
+        editor.currentRangeForSR = null;
+
+        g("replace").style.display = "none";
+        var sel =  editor.selection,
+            range = sel.getRange(),
+            searchStr = "";
+        if(!range.collapsed){
+            searchStr = sel._bakIERange ? sel._bakIERange.text : sel.getText();
+            g('findtxt').value = searchStr;
+        }
+        function g (id){
+            return document.getElementById(id);
+        }
+
+
+        function jbind (obj,evt,fun){
+            if(obj.addEventListener){  // firefox,w3c
+                obj.addEventListener(evt,fun,false);
+            }else{// ie
+                obj.attachEvent("on"+evt,function(){fun.apply(obj);});
+            }
+        }
+        //给tab注册切换事件
+        function toggletab(){
+            var tabs = document.getElementsByTagName("span");
+            for(var i=0,j;j=tabs[i];i++){
+                jbind(j,"click",function(){
+                    var name = this.getAttribute("name");
+
+                    var spans = document.getElementsByTagName("span");
+                    var len = spans.length;
+                    for(var s=0;s<len;s++){
+                        spans[s].className = 'def';
+                    }
+                    this.className = 'act';
+                    g("find").style.display = "none";
+                    g("replace").style.display = "none";
+                    g(name).style.display = "";
+                    g('findtxt1').value = g('findtxt').value;
+                });
+            }
+            tabs[0].focus();
+            g("findtxt").focus();
+        }
+        //是否区分大小写
+        function getMatchCase (id){
+            return g(id).checked ? true : false;
+        }
+        //查找
+        g("nextFindBtn").onclick = function(txt,dir,mcase){
+            var findtxt = g("findtxt").value,obj;
+            if(!findtxt){
+                alert("请输入查找内容！");
+                return false;
+            }
+            obj = {
+                searchStr : findtxt,
+                dir : 1,
+                casesensitive : getMatchCase("matchCase")
+            };
+            if(!frCommond(obj)){
+                alert("没有找到内容");
+            }
+        }
+        g("nextReplaceBtn").onclick = function(txt,dir,mcase){
+            var findtxt = g("findtxt1").value,obj;
+            if(!findtxt){
+                alert("请输入查找内容！");
+                return false;
+            }
+            obj = {
+                searchStr : findtxt,
+                dir : 1,
+                casesensitive : getMatchCase("matchCase1")
+            };
+            frCommond(obj);
+        }
+        g("preFindBtn").onclick = function(txt,dir,mcase){
+            var findtxt = g("findtxt").value,obj;
+            if(!findtxt){
+                alert("请输入查找内容！");
+                return false;
+            }
+            obj = {
+                searchStr : findtxt,
+                dir : -1,
+                casesensitive : getMatchCase("matchCase")
+            };
+            if(!frCommond(obj)){
+                alert("没有找到内容");
+            }
+        }
+        g("preReplaceBtn").onclick = function(txt,dir,mcase){
+            var findtxt = g("findtxt1").value,obj;
+            if(!findtxt){
+                alert("请输入查找内容！");
+                return false;
+            }
+            obj = {
+                searchStr : findtxt,
+                dir : -1,
+                casesensitive : getMatchCase("matchCase1")
+            };
+            frCommond(obj);
+        }
+        //替换
+        g("repalceBtn").onclick = function(){
+            var findtxt = g("findtxt1").value.replace(/^\s|\s$/g,""),obj,
+                replacetxt = g("replacetxt").value.replace(/^\s|\s$/g,"");
+            if(!findtxt){
+                alert("请输入需要替换的内容！");
+                return false;
+            }
+            if(findtxt == replacetxt || (!getMatchCase("matchCase1") && findtxt.toLowerCase() == replacetxt.toLowerCase())){
+                alert("查找内容与替换内容一样！")
+                return false;
+            }
+            obj = {
+                searchStr : findtxt,
+                dir : 1,
+                casesensitive : getMatchCase("matchCase1"),
+                replaceStr : replacetxt
+            };
+            if(!frCommond(obj)){
+                alert("没有可替换的内容");
+            }
+        }
+        //全部替换
+        g("allrepalceBtn").onclick = function(){
+            var findtxt = g("findtxt1").value.replace(/^\s|\s$/g,""),obj,
+                replacetxt = g("replacetxt").value.replace(/^\s|\s$/g,"");
+            if(!findtxt){
+                alert("请输入需要替换的内容！");
+                return false;
+            }
+            if(findtxt == replacetxt || (!getMatchCase("matchCase1") && findtxt.toLowerCase() == replacetxt.toLowerCase())){
+                alert("查找内容与替换内容一样！")
+                return false;
+            }
+            obj = {
+                searchStr : findtxt,
+                casesensitive : getMatchCase("matchCase1"),
+                replaceStr : replacetxt,
+                all : true
+            };
+            var num = frCommond(obj);
+            if(num){
+                alert("总共替换了"+num+"个");
+            }
+            if(!num){
+                alert("没有可替换的内容");
+            }
+        }
+        //执行
+        var frCommond = function(obj){
+            return editor.execCommand("searchreplace",obj);
+        }
+        toggletab();
+</script>
+</body>
+</html>

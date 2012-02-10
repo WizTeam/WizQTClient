@@ -1,0 +1,628 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+        "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <title></title>
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type"/>
+    <style type="text/css">
+        body {
+            font-size: 12px;
+            overflow: hidden;
+            padding: 10px;
+            margin: 0;
+            color: #838383
+        }
+
+        .tabWarper {
+            width: 600px;
+            height: 370px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .head {
+            height: 35px;
+            line-height: 35px;
+            position: relative;
+            z-index: 2
+        }
+
+        .head span {
+            width: 62px;
+            height: 28px;
+            line-height: 28px;
+            display: block;
+            float: left;
+            text-align: center;
+            margin-right: 1px;
+            cursor: pointer
+        }
+
+        .head span.def {
+            background: url("../../themes/default/images/dialog-title-bg.png") repeat-x;
+            border: 1px solid #ccc;
+        }
+
+        .head span.act {
+            background: #FFF;
+            border: 1px solid #ccc;
+            border-bottom: 1px solid #FFF
+        }
+
+        .tabContainer {
+            width: 1250px;
+            height: 320px;
+            position: relative;
+            top: -6px;
+        }
+
+        .content {
+            width: 588px;
+            height: 320px;
+            float: left;
+            border: 1px solid #ddd;
+            padding: 5px;
+            margin-right: 20px;
+        }
+
+        .content table {
+            margin-top: 5px;
+            position: relative;
+        }
+
+        .content table tr {
+            height: 35px;
+            line-height: 35px;
+        }
+
+        .lable {
+            text-align: center;
+            width: 45px;
+        }
+
+        td input {
+            width: 125px;
+            height: 21px;
+            line-height: 21px;
+            background: #FFF;
+            border: 1px solid #d7d7d7;
+        }
+
+        #url {
+            width: 534px;
+            margin-bottom: 2px;
+        }
+
+        #preview {
+            width: 330px;
+            height: 252px;
+            position: absolute;
+            top: 50px;
+            left: 246px;
+            background: #eee;
+            padding: 5px;
+            overflow: auto
+        }
+
+        .start {
+            float: right;
+            width: 100px;
+            height: 28px;
+            line-height: 28px;
+            background: #ddd url("../../themes/default/images/upload.png");
+            border: 0;
+            cursor: pointer
+        }
+
+        .control {
+            z-index: 9999;
+            position: absolute;
+            width: 588px;
+            height: 36px;
+            line-height: 36px;
+            top: 315px;
+            left: 6px;
+        }
+
+        .align {
+            float: left;
+            height: 36px;
+        }
+
+        .singlelable {
+            background: url(../../themes/default/images/imgLable.png) -21px 2px no-repeat
+        }
+
+        .batchlable {
+            display: block;
+            float: left;
+            width: 50px;
+            height: 36px;
+            background: url(../../themes/default/images/imgLable.png) -21px 2px no-repeat
+        }
+
+        .lock-zoom {
+            position: absolute;
+            width: 25px;
+            height: 40px;
+            top: 60px;
+            left: 200px;
+            background: url("../../themes/default/images/lock.gif") 0 -3px;
+        }
+
+        .lock-zoom input {
+            position: relative;
+            top: 10px;
+            left: -2px;
+        }
+        .flag{color: blue}
+    </style>
+    <script type="text/javascript" src="../internal.js"></script>
+</head>
+<body>
+<div class="tabWarper">
+    <div id="head" class="head">
+        <span name="tab1" onclick="switchTab(this,0)" class="act">网络图片</span>
+        <span name="tab2" onclick="switchTab(this,1)" class="def">本地上传</span>
+    </div>
+    <div id="tabs" class="tabContainer">
+        <div id="tab1" class="content">
+            <table cellpadding="0" cellspacing="0">
+                <tr>
+                    <td class="lable"> 地 址：</td>
+                    <td><input id="url" type="text" value=""/></td>
+                </tr>
+
+                <tr>
+                    <td class="lable">宽 度：</td>
+                    <td><input type="text" id="imgWidth"/> px</td>
+                </tr>
+                <tr>
+                    <td class="lable">高 度：</td>
+                    <td><input type="text" id="imgHeight"/> px</td>
+                </tr>
+
+                <tr>
+                    <td class="lable">边 框：</td>
+                    <td><input type="text" id="imgBorder"/> px</td>
+                </tr>
+                <tr>
+                    <td class="lable">边 距：</td>
+                    <td><input type="text" id="imgMargin"/> px</td>
+                </tr>
+                <tr>
+                    <td class="lable">描 述：</td>
+                    <td><input type="text" id="imgTitle"/></td>
+                </tr>
+                <tr>
+                    <td class="lable singlelable"></td>
+                    <td id="singleFloat">
+                        <img name="none" src="../../themes/default/images/none_focus.jpg" alt="默认" title="默认"
+                             onclick="imgselect(this)"/>
+                        <img name="left" src="../../themes/default/images/left.jpg" alt="左浮动" title="左浮动"
+                             onclick="imgselect(this)"/>
+                        <img name="right" src="../../themes/default/images/right.jpg" alt="右浮动" title="右浮动"
+                             onclick="imgselect(this)"/>
+                        <img name="center" src="../../themes/default/images/topbottom.jpg" alt="居中" title="居中"
+                             onclick="imgselect(this)"/>
+                    </td>
+                </tr>
+                <!--<tr style="display:none" id="originalSize"><td>原  始：</td><td></td></tr>-->
+            </table>
+            <div id="msg" style="display: none;color: red">
+                <span style="font-size: 14px">图片转存步骤：</span>
+
+                    <li style="list-style-type: none;">1.复制本选项卡中图片地址,切换至<span class="flag">本地上传</span></li>
+                    <li style="list-style-type: none">2.点击<span class="flag">添加图片</span>,在<span class="flag">文件名</span>框中粘贴图片地址</li>
+                    <li style="list-style-type: none;">3.正常执行图片上传操作即可</li>
+            </div>
+            <div id="preview"></div>
+            <div class="lock-zoom">
+                <input id="zoom" title="锁定宽高比例" type="checkbox" checked="checked"/>
+            </div>
+
+        </div>
+        <div id="tab2" class="content"></div>
+    </div>
+    <div id="control" class="control" style="display: none">
+        <span class="batchlable"></span>
+        <span id="batchFloat" class="align">
+            <img name="none" src="../../themes/default/images/none_focus.jpg" alt="默认" title="默认"
+                 onclick="imgselect(this)"/>
+            <img name="left" src="../../themes/default/images/left.jpg" alt="左浮动" title="左浮动"
+                 onclick="imgselect(this)"/>
+            <img name="right" src="../../themes/default/images/right.jpg" alt="右浮动" title="右浮动"
+                 onclick="imgselect(this)"/>
+            <img name="center" src="../../themes/default/images/topbottom.jpg" alt="居中" title="居中"
+                 onclick="imgselect(this)"/>
+        </span>
+        <button id="start" class="start" style="display: none"></button>
+    </div>
+
+</div>
+<script type="text/javascript" src="tangram.js"></script>
+
+<!--完整的回调函数，有需要的可以完整取用-->
+<!--<script type="text/javascript" src="callbacks.js"></script>-->
+
+<script type="text/javascript">
+/*-=-=-=-=-=-=-=全局变量模块-=-=-=-=-=-=-*/
+var imageUrls = [],        //从服务器返回的上传成功图片数组
+    imageCount = 0;        //预览框中的图片数量，初始为0
+
+
+/*-=-=-=-=-=-=-=界面生成模块-=-=-=-=-=-=-*/
+
+function switchTab(obj, index) {
+    clearFocusClass();
+    obj.className = "act";
+    g("tabs").style.left = index * (-620) + "px";
+    if (obj.getAttribute("name") == "tab2") {
+        g("control").style.display = "";
+        if (imageCount != 0) {
+            dialog.buttons[0].setDisabled(true); //如果预览框中没有图片或者没有成功上传图片，切回来时重新置灰按钮
+        }
+    } else {
+        g("control").style.display = "none";
+        dialog.buttons[0].setDisabled(false); //切回来时重新点亮按钮
+    }
+}
+function clearFocusClass() {
+    var heads = g("head").children;
+    for (var i = 0,j; j = heads[i++];) {
+        j.className = "def";
+    }
+}
+//flash初始化参数
+var flashOptions ={
+    createOptions:{
+        id:'flash',
+        url:'imageUploader.swf',
+        width:'588',
+        height:'272',
+        errorMessage:'Flash插件初始化错误，请更新您的flashplayer版本！',
+        wmode:'window',
+        ver:'10.0.0',
+        // 初始化的参数就是这些，
+        vars:{
+            width:588,      //width是flash的宽
+            height:272,        //height是flash的高
+            gridWidth:115,  // gridWidth是每一个预览图片所占的宽度，应该为width的整除
+            gridHeight:120,  // gridHeight是每一个预览图片所占的高度，应该为height的整除
+            picWidth:100,    // 单张预览图片的宽度
+            picHeight:100,    // 单张预览图片的高度
+            uploadDataFieldName:'picdata',    // POST请求中图片数据的key
+            picDescFieldName:'pictitle',    // POST请求中图片描述的key
+            maxSize:2,                    // 文件的最大体积,单位M
+            compressSize:1,               // 上传前如果图片体积超过该值，会先压缩,单位M
+            maxNum:32,                        // 最大上传多少个文件
+            backgroundUrl:'',               //背景图片,留空默认
+            listBackgroundUrl:'',           //预览图背景，留空默认
+            buttonUrl:'',                   //按钮背景，留空默认
+            compressSide:editor.options.compressSide,                //等比压缩的基准，0为按照最长边，1为按照宽度，2为按照高度
+            compressLength:editor.options.maxImageSideLength,                // 能接受的最大边长，超过该值Flash会自动等比压缩
+            url:'../../server/upload/php/up.php',                                             // 上传处理页面的url地址
+            ext:'{"param1":"参数值1", "param2":"参数值2"}',            //可向服务器提交的自定义参数列表
+            fileType:'{"description":"图片", "extension":"*.gif;*.jpeg;*.png;*.jpg"}'      //上传文件格式限制
+
+        },
+        container: 'tab2'
+    },
+    selectFileCallback: 'selectFileCallback',   // 选择文件的回调
+    //exceedFileCallback: 'exceedFileCallback',   // 文件超出限制的最大体积时的回调
+    deleteFileCallback: 'deleteFileCallback',   // 删除文件的回调
+    //startUploadCallback: 'startUploadCallback',  // 开始上传某个文件时的回调
+    uploadCompleteCallback: 'uploadCompleteCallback',   // 某个文件上传完成的回调
+    uploadErrorCallback: function (data){
+        //console && console.log(data);
+    },  // 某个文件上传失败的回调
+    allCompleteCallback: 'allCompleteCallback'// 全部上传完成时的回调
+    //changeFlashHeight: 'changeFlashHeight'     // 改变Flash的高度，mode==1的时候才有用
+
+}
+var flashObj = new baidu.flash.imageUploader(flashOptions);
+
+/*-=-=-=-=-=-=-=逻辑处理模块-=-=-=-=-=-=-*/
+//-----------------核心流程------------------------------
+var img = editor.selection.getRange().getClosedNode(),oWidth,oHeight,percent;
+if (!img) img = document.createElement("img");
+if (img.src) {
+    //图片编辑时显示图片信息
+    showImageInfo();
+}
+if (document.attachEvent) {
+    g("url").onpropertychange = function() {
+        if (g("url").value) preloadImg();//trace：解决IE下初始提示bug
+    };
+} else {
+    g("url").addEventListener("input", function() {
+        preloadImg();
+    }, false);
+}
+//点击确定时的事件处理
+dialog.onok = function() {
+    var actionTab = findActionTab();
+    if (actionTab == "tab1") {
+        return insertSingle();
+    } else if (actionTab == "tab2") {
+        return insertBatch();
+    }
+};
+//----------------------------------------------------
+
+/**
+ * 返回false时不会关闭对话框
+ */
+function insertSingle() {
+    //未成功加载图片直接返回
+    if (!img || !img.src) return;
+//    if(img.hasAttribute("word_img") && img.src.indexOf("file:///") == -1){
+//        img.removeAttribute("word_img");
+//    }
+    var imgObj = { src: editor.options.relativePath ? img.getAttribute("src",2) : img.src};
+    var width = g("imgWidth").value;
+    if (!width) width = oWidth;
+    if (!isNumber(width)) {
+        alert("请输入正确的宽度值！例如：140，201");
+        g("imgWidth").value = "";
+        g("imgWidth").focus();
+        return false;
+    }
+    var height = g("imgHeight").value;
+    if (!height) height = oHeight;
+    if (!isNumber(height)) {
+        alert("请输入正确的高度值！例如：140，201");
+        g("imgHeight").value = "";
+        g("imgHeight").focus();
+        return false;
+    }
+    var border = g("imgBorder").value;
+    if (!border && border != 0 && !isNumber(border)) {
+        alert("请输入正确的边框值！例如：1，2");
+        g("imgBorder").value = "";
+        g("imgBorder").focus();
+        return false;
+    }
+    var margin = g("imgMargin").value;
+    if (!margin && margin != 0 && !isNumber(margin)) {
+        alert("请输入正确的边框值！例如：1，2");
+        g("imgMargin").value = "";
+        g("imgMargin").focus();
+        return false;
+    }
+    imgObj.width = width;
+    imgObj.height = height;
+    imgObj.border = border ||"";
+    imgObj.vspace = imgObj.hspace = margin||"";
+    g("imgTitle").value && (imgObj.title = g("imgTitle").value );
+    imgObj.floatStyle = getAlign("singleFloat");
+    imgObj.data_ue_src=imgObj.src;
+    editor.execCommand("insertImage", imgObj);
+    img = null;
+}
+
+/**
+ * 返回false时不会关闭对话框
+ */
+function insertBatch() {
+    if ( !imageUrls.length ) return;
+    var imgObjs = [],
+            align = getAlign( "batchFloat" );
+
+    for ( var i = 0, ci; ci = imageUrls[i++]; ) {
+        var tmpObj = {};
+        tmpObj.title = ci.title;
+        tmpObj.floatStyle = align;
+        //修正显示时候的地址数据,如果后台返回的是图片的绝对地址，那么此处无需修正
+        tmpObj.data_ue_src = tmpObj.src = editor.options.imagePath + ci.url;
+        imgObjs.push( tmpObj );
+    }
+    editor.execCommand( "insertImage", imgObjs );
+}
+
+function findActionTab() {
+    var heads = g( "head" ).children;
+    for ( var i = 0, j; j = heads[i++]; ) {
+        var className = j.className;
+        if ( className == "act" ) {
+            return j.getAttribute( "name" );
+        }
+    }
+    return "";
+}
+
+//预加载图片
+function preloadImg() {
+
+    var imgType = new RegExp( "/\.(png|gif|jpg|jpeg)$/ig" ),
+            urlFilter = "";
+    var url = g( "url" ).value, pimg, sourceSize,
+            preview = g( "preview" );
+    if ( !imgType.test( url ) && url.indexOf( urlFilter ) == -1 ) {
+        preview.innerHTML = "不正确的图片格式或者图片域！";
+        return;
+    }
+    preview.innerHTML = "图片加载中……";
+    //修正当修改地址时候img对象已经销毁的问题
+    if(!img){
+        img = document.createElement("img");
+        img.src = url;
+    }
+    img.onload = function() {
+        oWidth = this.width;
+        oHeight = this.height;
+        g("imgWidth").value = oWidth || "";
+        g("imgHeight").value = oHeight || "";
+        percent = (oWidth / oHeight).toFixed(2);
+        setPreview(this,330);
+
+    };
+    img.onerror = function() {
+        preview.innerHTML = "图片加载失败，请检查网络！";
+        img = null;
+    };
+    img.src = url;
+}
+
+//显示图片信息
+function showImageInfo() {
+    //获取图片float方式
+    var align = editor.queryCommandValue( 'imagefloat' );
+    replaceImg( align );
+    if ( img.getAttribute( "word_img" ) ) {
+        g( "url" ).value = img.getAttribute( "word_img" ).replace( "&amp;", "&" );
+        g( "msg" ).style.display = "";
+    } else {
+        //g("url").value = img.src.replace("&amp;", "&");
+        g( "url" ).value = img.getAttribute( 'data_ue_src' ) || (editor.options.relativePath ?
+                img.getAttribute( "src", 2 ).replace( "&amp;", "&" ) : img.src.replace( "&amp;", "&" ));
+    }
+    g( "imgWidth" ).value = img.width;
+    g( "imgHeight" ).value = img.height;
+    g( "imgMargin" ).value = img.getAttribute( "vspace" ) || 0;
+    g( "imgBorder" ).value = img.getAttribute( "border" ) || 0;
+    g( "imgTitle" ).value = img.title;
+    setPreview( img, 330 );
+    percent = (img.width / img.height).toFixed( 2 );
+}
+
+function setPreview( img, max ) {
+    var tmp = img.cloneNode( true );
+    tmp.width = img.width;
+    tmp.height = img.height;
+    scale( tmp, max );
+    g( "preview" ).innerHTML = '<img src="' + (editor.options.relativePath ? tmp.getAttribute( "src" ) : tmp.src) + '" width="' + img.width + '" height="' + img.height + '" border="' + img.style.border + '" />';
+}
+//更改float的提示图标
+function replaceImg( str ) {
+    var imgs = g( "singleFloat" ).children;
+    for ( var i = 0, j; j = imgs[i++]; ) {
+        imgs[0].src = imgs[0].src.replace( "_focus.jpg", ".jpg" )
+    }
+    for ( var i = 0, j; j = imgs[i++]; ) {
+        if ( j.getAttribute( "name" ) == str ) {
+            j.src = j.src.replace( ".jpg", "_focus.jpg" );
+            break;
+        }
+    }
+}
+
+/*-=-=-=-=-=-=-=批量上传控制模块-=-=-=-=-=-=-*/
+function upload() {
+    flashObj.upload();
+    g( "start" ).style.display = "none";
+}
+/**
+ * 选择文件后的回调函数
+ * @param selectFiles
+ */
+function selectFileCallback( selectFiles ) {
+    //if(console)console.log("开始选择文件：");
+    imageCount += selectFiles.length;
+    g( "start" ).style.display = "";
+    g( "start" ).onclick = upload;
+    dialog.buttons[0].setDisabled( true ); //初始化时置灰确定按钮
+
+}
+/**
+ * 单个文件上传完成的回调函数
+ * @param    Object/String    服务端返回啥，参数就是啥
+ */
+function uploadCompleteCallback( data ) {
+    //debugger
+    //if(console)console.log("上传成功", data);
+    var info = eval( "(" + data.info + ")" );
+    info && imageUrls.push( info );
+    imageCount--;
+}
+
+//全部上传完成的回调函数
+function allCompleteCallback() {
+    //console.log("全部上传成功");
+    dialog.buttons[0].setDisabled( false ); //上传完毕后点亮按钮
+}
+/**
+ * 删除文件后的回调函数
+ * @param    Array
+ */
+function deleteFileCallback( delFiles ) {
+    // 数组里单个元素为Object，{index:在多图上传的索引号, name:文件名, size:文件大小}
+    // 其中size单位为Byte
+    imageCount -= delFiles.length;
+    if ( imageCount == 0 ) {
+        g( "start" ).style.display = "none";
+        dialog.buttons[0].setDisabled( false ); //上传完毕后点亮按钮
+    }
+}
+
+
+/*-=-=-=-=-=-=-=公共方法模块-=-=-=-=-=-=-*/
+function g( id ) {
+    return document.getElementById( id );
+}
+function isNumber( n ) {
+    return /^[1-9]\d*$/.test( n );
+}
+/**
+ * 等比例缩放图片
+ * @param img
+ * @param max
+ */
+function scale( img, max ) {
+    var width = 0, height = 0, percent;
+    img.sWidth = img.width;
+    img.sHeight = img.height;
+    if ( img.width > max || img.height > max ) {
+        if ( img.width >= img.height ) {
+            if ( width = img.width - max ) {
+                percent = (width / img.width).toFixed( 2 );
+                img.height = img.height - img.height * percent;
+                img.width = max;
+            }
+        } else {
+            if ( height = img.height - max ) {
+                percent = (height / img.height).toFixed( 2 );
+                img.width = img.width - img.width * percent;
+                img.height = max;
+            }
+        }
+    }
+}
+function imgselect( simg ) {
+    var childs = simg.parentNode.children;
+    for ( var i = 0, child; child = childs[i++]; ) {
+        if ( /img/ig.test( child.tagName ) ) {
+            child.src = child.src.replace( "_focus.jpg", ".jpg" );
+        }
+    }
+    simg.src = simg.src.replace( ".jpg", "_focus.jpg" );
+}
+//获取id下选中图片的name
+function getAlign( id ) {
+    var imgs = g( id ).children;
+    for ( var i = 0, img; img = imgs[i++]; ) {
+        if ( img.src.indexOf( "_focus" ) != -1 ) {
+            break;
+        }
+    }
+    return i != imgs.length + 1 ? img.name : 'none';
+}
+
+var imgWidth = g( "imgWidth" ),
+        imgHeight = g( "imgHeight" ),
+        zoom = g( 'zoom' );
+
+imgWidth.onkeyup = function () {
+    if ( !isNaN( this.value ) && zoom.checked ) {
+        imgHeight.value = Math.round( this.value / percent ) || this.value;
+    }
+};
+imgHeight.onkeyup = function () {
+    if ( !isNaN( this.value ) && zoom.checked ) {
+        imgWidth.value = Math.round( this.value * percent ) || this.value;
+    }
+}
+
+</script>
+</body>
+</html>

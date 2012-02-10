@@ -1,0 +1,148 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+        "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>插入特殊符号</title>
+<style type="text/css">
+
+        *{color: #838383}
+        body {
+            font-size: 12px;
+            width:610px;
+            height: 490px;
+            overflow: hidden;
+            margin:0px;padding:0px;
+        }
+        .warp{
+            padding: 39px 0px 0px 15px;
+            height:90%;position:relative;
+        }
+#tabContainer{ position: absolute;top:10px;height:30px;}
+#tabContainer ul{list-style:none;margin:0;padding:0}
+#tabContainer li{display:block;float:left;padding:0px 5px;height:28px ;line-height:28px;cursor:pointer;margin-right:1px}
+
+#tabContainer li{background:url("../../themes/default/images/dialog-title-bg.png") repeat-x;border:1px solid #ccc;}
+#tabContainer li.selected{background:url("") #FFF;border:1px solid #ccc;border-bottom: 1px solid #FFF}
+
+
+table{border-collapse:collapse}
+td{cursor:pointer;text-align:center;height:20px;}
+
+
+#contContainer{border:1px solid #ccc;padding:15px 0px 0px 0px}
+
+</style>
+<script type="text/javascript" src="../internal.js"></script>
+<script type="text/javascript">
+/*<![CDATA[*/
+function G(id){ return (typeof(id) == "string") ? document.getElementById(id) : id ; }
+function S(id){ G(id).style.display = ''; }
+function H(id){ G(id).style.display = 'none'; }
+function A(sr){ return sr.split(","); }
+var character_common = [
+    ["特殊符号", A("、,。,·,ˉ,ˇ,¨,〃,々,—,～,‖,…,‘,’,“,”,〔,〕,〈,〉,《,》,「,」,『,』,〖,〗,【,】,±,×,÷,∶,∧,∨,∑,∏,∪,∩,∈,∷,√,⊥,∥,∠,⌒,⊙,∫,∮,≡,≌,≈,∽,∝,≠,≮,≯,≤,≥,∞,∵,∴,♂,♀,°,′,″,℃,＄,¤,￠,￡,‰,§,№,☆,★,○,●,◎,◇,◆,□,■,△,▲,※,→,←,↑,↓,〓,〡,〢,〣,〤,〥,〦,〧,〨,〩,㊣,㎎,㎏,㎜,㎝,㎞,㎡,㏄,㏎,㏑,㏒,㏕,︰,￢,￤,,℡,ˊ,ˋ,˙,–,―,‥,‵,℅,℉,↖,↗,↘,↙,∕,∟,∣,≒,≦,≧,⊿,═,║,╒,╓,╔,╕,╖,╗,╘,╙,╚,╛,╜,╝,╞,╟,╠,╡,╢,╣,╤,╥,╦,╧,╨,╩,╪,╫,╬,╭,╮,╯,╰,╱,╲,╳,▁,▂,▃,▄,▅,▆,▇,�,█,▉,▊,▋,▌,▍,▎,▏,▓,▔,▕,▼,▽,◢,◣,◤,◥,☉,⊕,〒,〝,〞")],
+    ["罗马数字", A("ⅰ,ⅱ,ⅲ,ⅳ,ⅴ,ⅵ,ⅶ,ⅷ,ⅸ,ⅹ,Ⅰ,Ⅱ,Ⅲ,Ⅳ,Ⅴ,Ⅵ,Ⅶ,Ⅷ,Ⅸ,Ⅹ,Ⅺ,Ⅻ")],
+    ["数字符号", A("⒈,⒉,⒊,⒋,⒌,⒍,⒎,⒏,⒐,⒑,⒒,⒓,⒔,⒕,⒖,⒗,⒘,⒙,⒚,⒛,⑴,⑵,⑶,⑷,⑸,⑹,⑺,⑻,⑼,⑽,⑾,⑿,⒀,⒁,⒂,⒃,⒄,⒅,⒆,⒇,①,②,③,④,⑤,⑥,⑦,⑧,⑨,⑩,㈠,㈡,㈢,㈣,㈤,㈥,㈦,㈧,㈨,㈩")],
+    ["日文符号", A("ぁ,あ,ぃ,い,ぅ,う,ぇ,え,ぉ,お,か,が,き,ぎ,く,ぐ,け,げ,こ,ご,さ,ざ,し,じ,す,ず,せ,ぜ,そ,ぞ,た,だ,ち,ぢ,っ,つ,づ,て,で,と,ど,な,に,ぬ,ね,の,は,ば,ぱ,ひ,び,ぴ,ふ,ぶ,ぷ,へ,べ,ぺ,ほ,ぼ,ぽ,ま,み,む,め,も,ゃ,や,ゅ,ゆ,ょ,よ,ら,り,る,れ,ろ,ゎ,わ,ゐ,ゑ,を,ん,ァ,ア,ィ,イ,ゥ,ウ,ェ,エ,ォ,オ,カ,ガ,キ,ギ,ク,グ,ケ,ゲ,コ,ゴ,サ,ザ,シ,ジ,ス,ズ,セ,ゼ,ソ,ゾ,タ,ダ,チ,ヂ,ッ,ツ,ヅ,テ,デ,ト,ド,ナ,ニ,ヌ,ネ,ノ,ハ,バ,パ,ヒ,ビ,ピ,フ,ブ,プ,ヘ,ベ,ペ,ホ,ボ,ポ,マ,ミ,ム,メ,モ,ャ,ヤ,ュ,ユ,ョ,ヨ,ラ,リ,ル,レ,ロ,ヮ,ワ,ヰ,ヱ,ヲ,ン,ヴ,ヵ,ヶ")],
+    ["希腊字母", A("Α,Β,Γ,Δ,Ε,Ζ,Η,Θ,Ι,Κ,Λ,Μ,Ν,Ξ,Ο,Π,Ρ,Σ,Τ,Υ,Φ,Χ,Ψ,Ω,α,β,γ,δ,ε,ζ,η,θ,ι,κ,λ,μ,ν,ξ,ο,π,ρ,σ,τ,υ,φ,χ,ψ,ω")],
+    ["俄文字母", A("А,Б,В,Г,Д,Е,Ё,Ж,З,И,Й,К,Л,М,Н,О,П,Р,С,Т,У,Ф,Х,Ц,Ч,Ш,Щ,Ъ,Ы,Ь,Э,Ю,Я,а,б,в,г,д,е,ё,ж,з,и,й,к,л,м,н,о,п,р,с,т,у,ф,х,ц,ч,ш,щ,ъ,ы,ь,э,ю,я")],
+    ["拼音字母", A("ā,á,ǎ,à,ē,é,ě,è,ī,í,ǐ,ì,ō,ó,ǒ,ò,ū,ú,ǔ,ù,ǖ,ǘ,ǚ,ǜ,ü")],
+    ["注音字符及其他", A("ㄅ,ㄆ,ㄇ,ㄈ,ㄉ,ㄊ,ㄋ,ㄌ,ㄍ,ㄎ,ㄏ,ㄐ,ㄑ,ㄒ,ㄓ,ㄔ,ㄕ,ㄖ,ㄗ,ㄘ,ㄙ,ㄚ,ㄛ,ㄜ,ㄝ,ㄞ,ㄟ,ㄠ,ㄡ,ㄢ,ㄣ,ㄤ,ㄥ,ㄦ,ㄧ,ㄨ")]
+];
+var character_title = [
+    ["特殊符号", A("、,。,·,ˉ,ˇ,¨,〃,々,—,～,‖,…,‘,’,“,”,〔,〕,〈,〉,《,》,±,×,÷,∶,∧,∨,∑,∏,∪,∩,∈,∷,√,⊥,∥,∠,⌒,≡,≌,≈,∽,∝,≠,≮,≯,≤,≥,∞,°,′,″,℃,＄,‰,㎎,㎏,㎜,㎝,㎞,㎡,㏄,㏎,㏑,㏒,㏕,℉")],
+    ["罗马数字", A("ⅰ,ⅱ,ⅲ,ⅳ,ⅴ,ⅵ,ⅶ,ⅷ,ⅸ,ⅹ,Ⅰ,Ⅱ,Ⅲ,Ⅳ,Ⅴ,Ⅵ,Ⅶ,Ⅷ,Ⅸ,Ⅹ,Ⅺ,Ⅻ")],
+    ["日文符号", A("ぁ,あ,ぃ,い,ぅ,う,ぇ,え,ぉ,お,か,が,き,ぎ,く,ぐ,け,げ,こ,ご,さ,ざ,し,じ,す,ず,せ,ぜ,そ,ぞ,た,だ,ち,ぢ,っ,つ,づ,て,で,と,ど,な,に,ぬ,ね,の,は,ば,ぱ,ひ,び,ぴ,ふ,ぶ,ぷ,へ,べ,ぺ,ほ,ぼ,ぽ,ま,み,む,め,も,ゃ,や,ゅ,ゆ,ょ,よ,ら,り,る,れ,ろ,ゎ,わ,ゐ,ゑ,を,ん,ァ,ア,ィ,イ,ゥ,ウ,ェ,エ,ォ,オ,カ,ガ,キ,ギ,ク,グ,ケ,ゲ,コ,ゴ,サ,ザ,シ,ジ,ス,ズ,セ,ゼ,ソ,ゾ,タ,ダ,チ,ヂ,ッ,ツ,ヅ,テ,デ,ト,ド,ナ,ニ,ヌ,ネ,ノ,ハ,バ,パ,ヒ,ビ,ピ,フ,ブ,プ,ヘ,ベ,ペ,ホ,ボ,ポ,マ,ミ,ム,メ,モ,ャ,ヤ,ュ,ユ,ョ,ヨ,ラ,リ,ル,レ,ロ,ヮ,ワ,ヰ,ヱ,ヲ,ン,ヴ,ヵ,ヶ")],
+    ["希腊字母", A("Α,Β,Γ,Δ,Ε,Ζ,Η,Θ,Ι,Κ,Λ,Μ,Ν,Ξ,Ο,Π,Ρ,Σ,Τ,Υ,Φ,Χ,Ψ,Ω,α,β,γ,δ,ε,ζ,η,θ,ι,κ,λ,μ,ν,ξ,ο,π,ρ,σ,τ,υ,φ,χ,ψ,ω")],
+    ["俄文字母", A("А,Б,В,Г,Д,Е,Ё,Ж,З,И,Й,К,Л,М,Н,О,П,Р,С,Т,У,Ф,Х,Ц,Ч,Ш,Щ,Ъ,Ы,Ь,Э,Ю,Я,а,б,в,г,д,е,ё,ж,з,и,й,к,л,м,н,о,п,р,с,т,у,ф,х,ц,ч,ш,щ,ъ,ы,ь,э,ю,я")],
+    ["拼音字母", A("ā,á,ǎ,à,ē,é,ě,è,ī,í,ǐ,ì,ō,ó,ǒ,ò,ū,ú,ǔ,ù,ǖ,ǘ,ǚ,ǜ,ü")],
+    ["注音字符及其他", A("ㄅ,ㄆ,ㄇ,ㄈ,ㄉ,ㄊ,ㄋ,ㄌ,ㄍ,ㄎ,ㄏ,ㄐ,ㄑ,ㄒ,ㄓ,ㄔ,ㄕ,ㄖ,ㄗ,ㄘ,ㄙ,ㄚ,ㄛ,ㄜ,ㄝ,ㄞ,ㄟ,ㄠ,ㄡ,ㄢ,ㄣ,ㄤ,ㄥ,ㄦ,ㄧ,ㄨ")]
+];
+
+//用于区分普通特殊字符与标题特殊字符
+var character = character_common,
+    tab = 0,
+    which = 0;
+var showTabContent = (function(){
+    var selectedTab = "";
+    return function(id_or_el){
+        var el = G(id_or_el);
+        if (el.id == selectedTab)
+            return false;
+        if (selectedTab != "") {
+            G(selectedTab).className = "lk";
+            H("C" + selectedTab.substr(1));
+        }
+        G(el).className = "lk selected";
+        S("C" + el.id.substr(1));
+        selectedTab = el.id;
+    }
+})();
+function genTab(id, data){
+    return ["<li class='lk' id='T", id, "' onclick='showTabContent(this)'>", data, "</li>"].join("");
+}
+function genTabContent(id, data){
+    var datalen = data.length;
+    var max_cell_per_row = 10;
+    var max_rows = Math.ceil(datalen / 10);
+    var html = ["<table id='C", id, "' style='display:none;' width='100%' cellpadding='0' cellspacing='0' border='0'>"];
+    for(var i = 0, j = 0; i < max_rows; i ++){
+        html.push("<tr>");
+        for(j = 0; j < max_cell_per_row; j ++){
+            if(i * max_cell_per_row + j >= datalen){
+                break;
+            }
+            html.push("<td id='n_" + (id + "_" + (i*max_cell_per_row + j)) + "' onclick='insertSC(this);'>" + data[i * max_cell_per_row + j] + "</td>");
+        }
+
+        if(j < max_cell_per_row){
+            for(var k = 0; k < (max_cell_per_row - j); k ++){
+                html.push("<td>&nbsp;</td>");
+            }
+        }
+        html.push("</tr>");
+    }
+    html.push("</table>");
+    return html.join("");
+}
+function insertSC(td){
+    var id = td.id.split("_");
+    var _tab = id[1];
+    var _which = id[2];
+    editor.execCommand('InsertHTML',td.innerHTML);
+    dialog.close();
+}
+
+function insertDefault(){
+    var obj = G("n_" + tab + "_" + which);
+    if(obj){
+        editor.execCommand('InsertHTML',obj.innerHTML);
+    }
+}
+var module = null;
+window.onload = function(){
+    var tabs = [], conts = [];
+    for(var i = 0; i < character.length; i ++){
+        tabs.push(genTab(i, character[i][0]));
+        conts.push(genTabContent(i, character[i][1]));
+    }
+    G("tabContainer").innerHTML = "<ul>" + tabs.join("") + "</ul>";
+    G("contContainer").innerHTML = conts.join("");
+    setTimeout(function(){
+        showTabContent("T" + tab); //显示第几个tab
+        if(G("n_" + tab + "_" + which)){
+            G("n_" + tab + "_" + which).className = "selected"; //显示那个符号被选中
+        }
+    }, 100);
+}
+/*]]>*/
+</script>
+</head>
+<body>
+    <div class="warp">
+<div id="tabContainer"></div>
+<div id="contContainer"></div>
+</div>
+</body>
+</html>

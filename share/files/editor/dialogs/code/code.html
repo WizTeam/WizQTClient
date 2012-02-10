@@ -1,0 +1,158 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+    "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+        <title>插入代码</title>
+        <script type="text/javascript" src="../internal.js"></script>
+        <style type="text/css">
+            *{color: #838383}
+            body {
+                font-size: 12px;
+                width:540px;
+                height: 340px;
+                overflow: hidden;
+                margin:0px;
+            }
+            .content{
+                padding:5px 0 0 15px;
+                height:100%;
+            }
+            input{
+                height:21px;
+                line-height:21px;
+            }
+            .content input{ width:145px;height:21px;background: #FFF;border:1px solid #d7d7d7;padding: 0px; margin: 0px; }
+            textarea{width:510px;height:280px;overflow:auto;}
+            #language{
+                margin: 5px 0 0 0;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="content">
+            <table cellpadding="0" cellspacing="0">
+                <tr>
+                    <td><span>选择语言：</span>
+                        <select id="language">
+                        <option value="as3">ActionScript3</option>
+                        <option value="bash">Bash/Shell</option>
+                        <option value="cpp">C/C++</option>
+                        <option value="css">Css</option>
+                        <option value="cf">CodeFunction</option>
+                        <option value="c#">C#</option>
+                        <option value="delphi">Delphi</option>
+                        <option value="diff">Diff</option>
+                        <option value="erlang">Erlang</option>
+                        <option value="groovy">Groovy</option>
+                        <option value="html">Html</option>
+                        <option value="java">Java</option>
+                        <option value="jfx">JavaFx</option>
+                        <option value="js">Javascript</option>
+                        <option value="pl">Perl</option>
+                        <option value="php">Php</option>
+                        <option value="plain">Plain Text</option>
+                        <option value="ps">PowerShell</option>
+                        <option value="python">Python</option>
+                        <option value="ruby">Ruby</option>
+                        <option value="scala">Scala</option>
+                        <option value="sql">Sql</option>
+                        <option value="vb">Vb</option>
+                        <option value="xml">Xml</option>
+                    </select></td>
+                </tr>
+                <tr><td>&nbsp;</td></tr>
+                <tr>
+                    <td><textarea id="code" rows="10" cols="10"></textarea></td>
+                </tr>
+            </table>
+        </div>
+        <script type="text/javascript">
+            var sels = document.getElementById("language"),
+            code = document.getElementById('code');
+            var state = editor.queryCommandState("highlightcode");
+            if(state){
+                var domUtils = parent.baidu.editor.dom.domUtils;
+                var di = domUtils.findParent(editor.selection.getRange().startContainer,function(node){
+			return node.className == "container";
+		});
+                var pN = di.parentNode;
+                while(pN){
+                    if(pN.tagName == 'DIV' && /highlighter/.test(pN.id)){
+                        break;
+                    }
+                    pN = pN.parentNode;
+                }
+                for(var str=[],c=0,ci;ci=di.childNodes[c++];){
+                    str.push(ci[parent.baidu.editor.browser.ie?'innerText':'textContent']);
+                }
+                document.getElementById("code").value = str.join("\n");
+                var reg = new RegExp(/highlighter[\s]+([a-z\d]*#?)/);
+                var syntax = pN.className.match(reg)[1];
+                document.getElementById("language").value = syntax;
+            }
+            function getSel(){
+                var i = sels.options.length,item;
+                for(i>=0;item = sels[i-1];i--){
+                    if(item.selected == true){
+                        return item.value;
+                    }
+                }
+            }
+            code.onkeydown= function(evt){
+                evt = evt || event;
+                if(evt.keyCode == 9){
+                    if (('selectionStart' in code) && code.selectionStart == code.selectionEnd) {
+                            var offset = code.selectionStart;
+                            code.value = code.value.substring (0, code.selectionStart) +
+                                "    " + code.value.substring  (code.selectionStart);
+                        code.selectionStart =  code.selectionEnd = offset + 4;
+                        setTimeout(function(){
+                            code.focus();
+                        },0)
+                    }
+                    else {
+                        var textRange = document.selection.createRange();
+                        textRange.text = "    " + textRange.text ;
+                        textRange.collapse(false);
+                        textRange.select();
+                        setTimeout(function(){
+                            code.focus()
+                        },50)
+                    }
+                    evt.returnValue = false;
+                    evt.preventDefault();
+                }
+                if((evt.ctrlKey||evt.metaKey) && evt.keyCode == 13){
+                    dialog.onok();
+                }
+            }
+            dialog.onok = function(){
+                var language = getSel();
+                var code = document.getElementById("code");
+                if(code.value.replace(/^\s*|\s*$/ig,"")){
+                    editor.execCommand("highlightcode",code.value,language);
+                    dialog.close();
+                }else{
+                    alert("请输入代码");
+                }
+            }
+            function setFocus(){
+                var isIE = !!window.ActiveXObject;
+                if (isIE) {
+                    setTimeout(function (){
+                        var r = code.createTextRange();
+                        r.collapse(false);
+                        r.select();
+                    });
+                }
+                code.focus();
+            }
+            sels.onchange = function(){
+                setFocus();
+            }
+            setFocus();
+
+        </script>
+    </body>
+</html>

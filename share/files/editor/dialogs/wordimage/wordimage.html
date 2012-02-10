@@ -1,0 +1,250 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+        "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <title></title>
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
+    <script type="text/javascript" src="../internal.js"></script>
+    <script type="text/javascript" src="../image/tangram.js"></script>
+    <style type="text/css">
+        *{padding: 0;margin: 0}
+        body {font-size: 12px;overflow: hidden;padding: 10px;margin: 0;color: #838383;}
+        ul{padding-left: 4px;margin-top: 10px;}
+        .warp{width: 600px;height: 352px;overflow: hidden;position: relative;border-bottom: 1px solid #d7d7d7}
+        .warp .urllist{width:230px;height: 340px;overflow: hidden;float: left; border: 1px solid #d7d7d7}
+        .warp .urllist li{overflow:hidden;list-style:none;background: url(../../themes/default/images/copy.png) no-repeat;height: 30px;line-height: 30px}
+        li input{height: 20px;}
+        .warp .flash{float: right;width: 360px;height: 350px;}
+        .flashupload{width: 360px;height: 315px;}
+        .control{width: 360px;height: 30px;}
+        .start {
+            width: 100px;
+            height: 28px;
+            line-height: 28px;
+            background: #ddd url("../../themes/default/images/upload.png");
+            border: 0;
+            cursor: pointer;
+            position: relative;
+            top:0;
+            right: -38px;
+        }
+        .clipboard{width: 50px;height: 25px;position: relative;top:-20px;left: 160px;}
+        #msg{color: red;line-height: 25px;}
+    </style>
+</head>
+<body>
+    <div class="warp">
+        <div class="urllist" id="urllist"></div>
+        <div class="flash">
+           <div class="flashupload" id="flashupload"></div>
+           <div id="control" class="control">
+               <span style="color: red">温馨提示：</span>请按序复制左侧图片地址转存
+               <button id="start" class="start" style="display: none"></button>
+           </div>
+        </div>
+
+    </div>
+    <script type="text/javascript">
+        var imageUrls = [],        //从服务器返回的上传成功图片数组
+            imageCount = 0,        //预览框中的图片数量，初始为0
+            browser = parent.baidu.editor.browser;
+        var tmpid={};
+        showUrlList();
+        /**
+         * flash初始化配置
+         */
+        baidu.swf.create({
+            id:"flash",
+            url:"../image/imageUploader.swf",
+            width:"360",
+            height:"305",
+            errorMessage:"Flash插件初始化错误，请更新您的flashplayer版本！",
+            wmode:"window",
+            ver:"10.0.0",
+            // 初始化的参数就是这些，
+            vars:{
+                width:360,      //width是flash的宽
+                height:305,        //height是flash的高
+                gridWidth:115,  // gridWidth是每一个预览图片所占的宽度，应该为width的整除
+                gridHeight:110,  // gridHeight是每一个预览图片所占的高度，应该为height的整除
+                picWidth:100,    // 单张预览图片的宽度
+                picHeight:100,    // 单张预览图片的高度
+                uploadDataFieldName:"picdata",    // POST请求中图片数据的key
+                picDescFieldName:"pictitle",    // POST请求中图片描述的key
+                maxSize:2,                    // 文件的最大体积,单位M
+                compressSize:1,               // 上传前如果图片体积超过该值，会先压缩,单位M
+                maxNum:32,                        // 最大上传多少个文件
+                backgroundUrl:"",               //背景图片,留空默认
+                listBackgroundUrl:"",           //预览图背景，留空默认
+                buttonUrl:"",                   //按钮背景，留空默认
+                compressSide:0,                //等比压缩的基准，0为按照最长边，1为按照宽度，2为按照高度
+                compressLength:500, //editor.options.maxImageSideLength,                // 能接受的最大边长，超过该值Flash会自动等比压缩
+                url:"../../server/upload/php/up.php",                                             // 上传处理页面的url地址
+                fileType:"{\"description\":\"图片\", \"extension\":\"*.gif;*.jpeg;*.png;*jpg\"}"      //上传文件格式限制
+
+            }
+        }, "flashupload");
+
+        var flashObj = baidu.swf.getMovie("flash");
+        var interval = setInterval(function() {
+            if (flashObj && flashObj.flashInit) {
+                clearInterval(interval);
+                //console.log("flash完成初始化");
+                // 设置回调函数名
+                var callback_func_names = [
+                    "selectFileCallback",    // 选择文件的回调
+                    "exceedFileCallback",    // 文件超出限制的最大体积时的回调
+                    "deleteFileCallback",    // 删除文件的回调
+                    "startUploadCallback",    // 开始上传某个文件时的回调
+                    "uploadCompleteCallback",    // 某个文件上传完成的回调
+                    "uploadErrorCallback",    // 某个文件上传失败的回调
+                    "allCompleteCallback",    // 全部上传完成时的回调
+                    "changeFlashHeight"        // 改变Flash的高度，mode==1的时候才有用
+                ];
+                flashObj.setJSFuncName(callback_func_names);
+            }
+        }, 500);
+
+        dialog.onok = function(){
+            if (!imageUrls.length) return;
+            var images = editor.document.getElementsByTagName("img");
+            for(var i=0,url;url = imageUrls[i++];){
+                for(var j = 0,img;img=images[j++];){
+                    if(!img.getAttribute("word_img")) continue;
+                    img.src = editor.options.imagePath + url.url;
+                    img.setAttribute("data_ue_src",editor.options.imagePath + url.url);  //同时修改"data_ue_src"属性
+                    parent.baidu.editor.dom.domUtils.removeAttributes(img,["word_img","style","width","height"]);
+                    editor.fireEvent("selectionchange");
+                    break;
+                }
+            }
+        };
+
+
+        function g(id){
+            return document.getElementById(id);
+        }
+        function upload() {
+            flashObj.call("upload");
+            g("start").style.display = "none";
+        }
+
+        function selectFileCallback(selectFiles) {
+            imageCount += selectFiles.length;
+            g("start").style.display = "";
+            g("start").onclick = upload;
+            dialog.buttons[0].setDisabled(true); //初始化时置灰确定按钮
+        }
+        function uploadCompleteCallback(data) {
+            var info = eval("(" + data.info + ")");
+            info && imageUrls.push(info);
+            imageCount--;
+        }
+        function allCompleteCallback() {
+            //console.log("全部上传成功");
+            dialog.buttons[0].setDisabled(false); //上传完毕后点亮按钮
+        }
+        function deleteFileCallback(delFiles) {
+            imageCount -= delFiles.length;
+            if (imageCount == 0) {
+                g("start").style.display = "none";
+                dialog.buttons[0].setDisabled(false); //上传完毕后点亮按钮
+            }
+        }
+
+        function showUrlList(){
+            var urlList = editor._localImages;
+            var htmls=[],
+                html = '',
+                tmp='',
+                listLen = urlList.length;
+            //todo 暂时全部单张复制，改成多张
+//            if(browser.ie && browser.version <9){
+                for(var i=0,ci;ci = urlList[i++];){
+                    htmls.push(ci);
+                }
+//            }else{
+//                for(var i=0,ci;ci = urlList[i++];){
+//                    tmp = html + '"' + ci + '" ';
+//                    if(tmp.length < 255){
+//                        if(i == listLen){
+//                            htmls.push(tmp);
+//                            break;
+//                        }
+//                        html = tmp;
+//                    } else {
+//                        htmls.push(html);
+//                        html='';
+//                        i--;
+//                    }
+//                }
+//            }
+
+            html = '<ul id="list">';
+
+            for(var j= 0,cj; cj = htmls[j++];){
+                html += "<li><input onmousedown='return false' id='url_"+j+"' type='text' value='"+ cj +"'><div class='clipboard' id='url_"+j+"_l' name='url_"+j+"'></div></li>";
+            }
+            html += '</ul>';
+            html += '<p id="msg"></p>';
+            g("urllist").innerHTML = html;
+
+            var divs = g("list").getElementsByTagName("div");
+            for(var i=0,div;div = divs[i++];){
+                if(div.getAttribute("name").indexOf("url_")!=-1){
+                    createFlashButton(div.getAttribute("id"), div.getAttribute("name"));
+                }
+            }
+
+        }
+
+        function createFlashButton(id,srcid){
+            baidu.swf.create(
+                {
+                    id:"clipflash"+id,
+                    url:"fClipboard_ueditor.swf",
+                    width:"58",
+                    height:"25",
+                    errorMessage:"",
+                    bgColor:"#CBCBCB",
+                    wmode:"transparent",
+                    ver:"10.0.0",
+                    vars:{
+                        tid:srcid
+                    }
+                },
+                id
+            );
+
+            var clipboard = baidu.swf.getMovie("clipflash"+id);
+            var clipinterval = setInterval(function(){
+                if(clipboard &&clipboard.flashInit){
+                    clearInterval(clipinterval);
+                    clipboard.setHandCursor(true);
+                    clipboard.setContentFuncName("getPasteData");
+                    //clipboard.setMEFuncName("mouseEventHandler");
+                }
+
+            },500);
+
+        }
+        function get(obj){
+            if(!obj)return;
+            tmpid.id = obj.getAttribute("name");
+        }
+
+        function getPasteData(id){
+            g("msg").innerHTML= "　复制成功！</br>　请点击右边的 \"添加照片\" 按钮并使用<br/>　Ctrl + V快捷键粘贴地址后上传！";
+            setTimeout(function(){
+                g("msg").innerHTML= "";
+            },5000);
+            return document.getElementById(id).value;
+        }
+//        function mouseEventHandler(eventtype){
+//            console.log(eventtype);
+//        }
+
+
+    </script>
+</body>
+</html>

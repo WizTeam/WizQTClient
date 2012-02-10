@@ -1,0 +1,191 @@
+﻿<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+        "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
+    <title></title>
+    <script type="text/javascript">
+        var UEDITOR_HOME_URL = "./";
+    </script>
+    <script type="text/javascript" charset="utf-8" src="editor_config.js"></script>
+
+    <script type="text/javascript" charset="utf-8" src="editor_all.js"></script>
+    
+    <link rel="stylesheet" type="text/css" href="themes/default/ueditor.css"/>
+</head>
+<body>
+
+    <textarea id="editorArea" style="width:100%" cols="10" rows="10">
+    </textarea>
+    
+    
+
+    <script type="text/javascript">
+
+        var editor = null;
+        var modified = false;
+    
+        //
+        function onEditorAfterExecCommand() {
+            modified = true;
+        }
+        function onEditorKeyDown(type, evt) {
+            modified = true;
+            var e = evt;
+            if (e.ctrlKey && !e.altKey && !e.shiftKey) {
+                if (String.fromCharCode(e.keyCode).toLocaleUpperCase() == 'S') {
+
+                    saveDocument(true);
+                    //
+                    e.returnValue = false;
+                }
+                else if (String.fromCharCode(e.keyCode).toLocaleUpperCase() == 'V') {
+                    if (autoPaste()) {
+                        e.returnValue = false;
+                        e.keyCode = 0;
+                    }
+                    else {
+                    }
+                }
+            }
+        }
+        //
+        try {
+            var editorOption = {
+            toolbars: 
+            [
+                [
+                'FontFamily', 'FontSize', '|', 'Bold', 'Italic', 'Underline', 'StrikeThrough', '|',
+                'JustifyLeft', 'JustifyCenter', 'JustifyRight', 'JustifyJustify', '|',
+                'Indent', 'Outdent', 'InsertOrderedList', 'InsertUnorderedList', '|',
+                'Link', 'ForeColor', 'BackColor', '|', 'RemoveFormat', 'Undo', 'Redo'
+                ]
+            ],
+                elementPathEnabled: false,
+                wordCount:false, //是否开启字数统计
+                maximumWords:100000000 //允许的最大字符数
+            };
+            editor = new baidu.editor.ui.Editor(editorOption);
+            editor.render('editorArea');
+            editor.ui.setFullScreen(true);
+            editor.addListener('afterexeccommand', onEditorAfterExecCommand);
+            editor.addListener('keydown', onEditorKeyDown);
+        }
+        catch (err) {
+            alert(err);
+        }
+        //
+        var objApp = WizExplorerApp;
+        var objDatabase = objApp.Database;
+        var objCommon = objApp.CreateWizObject("WizKMControls.WizCommonUI");
+        var currentGUID = "";
+        var currentFileName = "";
+
+        function isNewDocument() {
+            return currentGUID == null || currentGUID == "";
+        }
+
+        function setEditorHtml(html) {
+            editor.document.body.innerHTML = '<p>' + html + '</p>';
+            editor.undoManger.reset();
+            modified = false;
+        }
+        
+        function getEditorHtml() {
+            return editor.document.documentElement.outerHTML;
+        }
+        
+        function viewDocument(guid, filename) {
+            try {
+                currentGUID = guid;
+                currentFileName = filename;
+                //
+                var html = "";
+                if (!isNewDocument()) {
+                    html = objCommon.LoadTextFromFile(filename);
+                }
+                //
+                setEditorHtml(html);
+                //
+                return true;
+            }
+            catch (err) {
+                alert(err);
+                return false;
+            }
+        }
+        //
+        function updateDocument(objDocument, html, url, falgs) {
+            try {
+                return objDocument.UpdateDocument4(html, url, falgs);
+            }
+            catch (err) {
+                return false;
+            }
+        }
+        
+        //
+        function saveDocument(force) {
+            try {
+                if (!force && !modified)
+                    return true;
+                //
+                var objFolder = objApp.Window.CategoryCtrl.SelectedFolder;
+                if (objFolder == null) {
+                    objFolder = objDatabase.GetFolderByLocation("/My Notes/", true);
+                }
+                if (isNewDocument()) {
+                    try {
+                        var newDocument = objFolder.CreateDocument2("New Note (" + (new Date()).toLocaleDateString() + ")", "");
+                        currentGUID = newDocument.GUID;
+                        currentFileName = "";
+                    }
+                    catch (err) {
+                        alert("Can not create a new note!");
+                        return false;
+                    }
+                }
+                //
+                var objDocument = objDatabase.DocumentFromGUID(currentGUID);
+                if (objDocument == null || objDocument == "")
+                    return false;
+                //
+                var html = getEditorHtml();
+                //
+                var ret = updateDocument(objDocument, html, currentFileName, 0);
+                if (ret) {
+                    modified = false;
+                }
+                else {
+                    alert("Can not save note!");
+                }
+                return ret;
+            }
+            catch (err) {
+                alert(err);
+            }
+        }
+        //
+        function newDocument() {
+            if (!saveDocument(false))
+                return false;
+            //
+            currentGUID = "";
+            currentFileName = "";
+            //
+            setEditorHtml("");
+            return true;
+        }
+        //
+        function autoPaste() {
+            alert("paste");
+            return false;
+        }
+        
+    </script>
+
+</body>
+
+
+</html>
