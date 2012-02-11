@@ -1,6 +1,8 @@
 #ifndef QTMACTOOLBAR_H
 #define QTMACTOOLBAR_H
 
+#include <QtGlobal>
+
 #ifdef Q_OS_MAC
 #include <QtCore/QObject>
 #include <QtCore/QString>
@@ -55,6 +57,7 @@ public:
     //
     bool isGroup() const { return m_actionGroup != NULL; }
     QActionGroup* actionGroup() const { return m_actionGroup; }
+    QAction* action() const { return m_action; }
 signals:
     void activated();
 private:
@@ -64,7 +67,6 @@ private:
     QString m_toolTip;
     StandardItem m_standardItem;
 public: // (not really public)
-    QPixmap m_iconPixmap;
     QAction *m_action;
     QActionGroup* m_actionGroup;
     void emitActivated() { emit activated(); }

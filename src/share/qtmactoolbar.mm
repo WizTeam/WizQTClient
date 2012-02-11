@@ -37,13 +37,14 @@
  **
  ****************************************************************************/
 
-#include "qtmactoolbar.h"
-#include "qtmactoolbardelegate.h"
 #include <QtGui/QApplication>
 #include <QtDeclarative/QDeclarativeView>
 #include <QtCore/QtCore>
 #include <QAction>
 #include "cocoahelp_mac.h"
+#include "qtmactoolbar.h"
+#include "qtmactoolbardelegate.h"
+
 #import <AppKit/AppKit.h>
 
 NSString *toNSStandardItem(MacToolButton::StandardItem standardItem)
@@ -131,7 +132,6 @@ void MacToolButton::setAction(QAction *action)
 {
     m_action = action;
     m_text = action->text();
-    m_iconPixmap = action->icon().pixmap(16, 16);
     m_toolTip = action->toolTip();
     m_selectable = action->isCheckable();
 }

@@ -38,10 +38,10 @@
  ****************************************************************************/
 
 
+#include <QDebug>
+#include <QPixmap>
 #include "qtmactoolbardelegate.h"
 #include "cocoahelp_mac.h"
-#include <qdebug.h>
-#include <QPixmap>
 
 NSString *toNSStandardItem(MacToolButton::StandardItem standardItem);
 
@@ -236,8 +236,7 @@ NSMutableArray *itemIdentifiers(const QList<QObject *> *items, bool cullUnselect
             if (!action->icon().isNull())
             {
                 QIcon icon = action->icon();
-                QPixmap pixmap = icon.pixmap(16, 16);
-                NSImage* image = toNSImage(pixmap);
+                NSImage* image = toNSImage(icon);
                 [groupView setImage:image forSegment:i];
             }
         }
@@ -261,25 +260,13 @@ NSMutableArray *itemIdentifiers(const QList<QObject *> *items, bool cullUnselect
         [toolbarItem setPaletteLabel:[toolbarItem label]];
         [toolbarItem setToolTip: toNSString(toolButton->toolTip())];
 
-        // load icon. ### use QDeclarativePixmap to support network urls.
-        QPixmap pixmap;
-        QUrl url = toolButton->iconSource();
-        QString urlString = url.toString();
-        if (urlString.startsWith("qrc")) {
-            urlString.remove(0, 3);
-            pixmap.load(urlString);
-        } else {
-            pixmap.load(url.toLocalFile());
-        }
-
-        // Pre-scaling the icon here gives better looking results.
-        // Store the result in m_iconPixmap, toNSImage returns
         // a reference to and not a copy of the pixmap data.
-        if (toolButton->m_iconPixmap.isNull() && !pixmap.isNull())
-            toolButton->m_iconPixmap = pixmap;
-
-        if (toolButton->m_iconPixmap.isNull() == false) {
-            [toolbarItem setImage : toNSImage(toolButton->m_iconPixmap)];
+        QAction* action = toolButton->action();
+        if (action && !action->icon().isNull())
+        {
+            QIcon icon = action->icon();
+            NSImage* image = toNSImage(icon);
+            [toolbarItem setImage:image];
         }
 
         [toolbarItem setTarget : self];

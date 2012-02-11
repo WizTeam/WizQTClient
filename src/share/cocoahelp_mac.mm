@@ -1,4 +1,6 @@
-#include <QtGui/QPixmap>
+#include <QPixmap>
+#include <QIcon>
+
 #import <AppKit/AppKit.h>
 #import <objc/objc-class.h>
 
@@ -49,6 +51,28 @@ NSImage *toNSImage(const QPixmap &pixmap)
     [bitmapRep release];
     return image;
 }
+
+
+
+NSImage *toNSImage(const QIcon &icon)
+{
+    QList<QSize> sizes = icon.availableSizes();
+    if (sizes.empty())
+        return nil;
+    //
+    QSize sz = sizes.at(0);
+    for (int i = 1; i < sizes.size(); i++)
+    {
+        if (sizes.at(i).width() > sz.width())
+        {
+            sz = sizes.at(i);
+        }
+    }
+    //
+    QPixmap pixmap = icon.pixmap(sz);
+    return toNSImage(pixmap);
+}
+
 
 QChangeCocoaImplementation::QChangeCocoaImplementation(Class baseClass, SEL originalSel,
      Class proxyClass, SEL replacementSel, SEL backupSel, bool apply)

@@ -1,3 +1,8 @@
+#ifndef QTMACTOOLBARDELEGATE_H
+#define QTMACTOOLBARDELEGATE_H
+
+#include <QtGlobal>
+
 #ifdef Q_OS_MAC
 
 #import <AppKit/AppKit.h>
@@ -8,8 +13,6 @@
 #include "qtmactoolbar.h"
 
 
-#ifndef QTMACTOOLBARDELEGATE_H
-#define QTMACTOOLBARDELEGATE_H
 
 #if MAC_OS_X_VERSION_MAX_ALLOWED < MAC_OS_X_VERSION_10_6
 @protocol NSToolbarDelegate @end
@@ -46,6 +49,7 @@
 @end
 
 
-#endif // QTMACTOOLBARDELEGATE_H
 
 #endif
+
+#endif // QTMACTOOLBARDELEGATE_H
