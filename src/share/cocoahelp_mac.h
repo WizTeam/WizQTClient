@@ -1,6 +1,8 @@
 #ifndef COCOAHELP_H
 #define COCOAHELP_H
 
+#ifdef Q_OS_MAC
+
 #include <Cocoa/Cocoa.h>
 #include <QtCore>
 
@@ -37,5 +39,7 @@ class QChangeCocoaImplementation
 };
 
 #endif // __OBJC__
+
+#endif
 
 #endif // COCOAHELP_H

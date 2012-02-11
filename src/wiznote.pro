@@ -140,10 +140,12 @@ HEADERS  += mainwindow.h \
     share/wizuihelper.h \
     share/wizdownloadobjectdata.h \
     share/wizdownloadobjectdatadialog.h \
-    wizdocumenthistory.h \
-share/qtmactoolbar.h \
+    wizdocumenthistory.h
+
+mac:HEADERS += share/qtmactoolbar.h \
     share/qtmactoolbardelegate.h \
     share/cocoahelp_mac.h
+
 
 FORMS    += \
     welcomedialog.ui \
