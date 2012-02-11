@@ -1,7 +1,8 @@
-#include "cocoahelp_mac.h"
 #include <QtGui/QPixmap>
 #import <AppKit/AppKit.h>
 #import <objc/objc-class.h>
+
+#include "cocoahelp_mac.h"
 
 QNSAutoReleasePool::QNSAutoReleasePool() : _pool([[NSAutoreleasePool alloc] init])
 {

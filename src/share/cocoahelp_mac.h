@@ -1,8 +1,11 @@
 #ifndef COCOAHELP_H
 #define COCOAHELP_H
 
-#include <Cocoa/Cocoa.h>
 #include <QtCore>
+
+#ifdef Q_OS_MAC
+
+#include <Cocoa/Cocoa.h>
 
 class QNSAutoReleasePool
 {
@@ -37,5 +40,7 @@ class QChangeCocoaImplementation
 };
 
 #endif // __OBJC__
+
+#endif //Q_OS_MAC
 
 #endif // COCOAHELP_H
