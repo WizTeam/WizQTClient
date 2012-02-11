@@ -1,0 +1,5 @@
+wiznote (0.1-1) unstable; urgency=low
+
+  * Initial release (Closes: #nnnn)  <nnnn is the bug number of your ITP>
+
+ -- Albert <albert@unknown>  Sat, 11 Feb 2012 10:35:00 +0800
