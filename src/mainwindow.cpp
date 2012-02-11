@@ -14,11 +14,15 @@
 #include <QProgressBar>
 #include <QListView>
 #include <QHBoxLayout>
+#ifndef Q_OS_MAC
 #include <QToolBar>
+#endif
 #include <QMenuBar>
 #include <QAction>
 #include <QDebug>
 #include <QBoxLayout>
+
+#include "share/qtmactoolbar.h"
 
 #include "wiznotestyle.h"
 #include "wizdocumenthistory.h"
@@ -31,7 +35,9 @@ MainWindow::MainWindow(CWizDatabase& db, QWidget *parent) :
     m_db(db),
     m_sync(m_db, WIZ_API_URL, *this),
     m_menuBar(new QMenuBar(this)),
+    #ifndef Q_OS_MAC
     m_toolBar(new QToolBar("Main", this)),
+    #endif
     m_statusBar(new QStatusBar(this)),
     m_labelStatus(new QLabel(this)),
     m_progressSync(new QProgressBar(this)),
@@ -79,19 +85,35 @@ void MainWindow::initMenuBar()
 
 void MainWindow::initToolBar()
 {
+#ifdef Q_OS_MAC
+    //
+
+    QtMacToolBar* toolbar = new QtMacToolBar(this);
+    //
+    QActionGroup* groupNavigate = new QActionGroup(this);
+    groupNavigate->addAction(m_actions->actionFromName("actionGoBack"));
+    groupNavigate->addAction(m_actions->actionFromName("actionGoForward"));
+    toolbar->addActionGroup(groupNavigate);
+    //
+    toolbar->addStandardItem(MacToolButton::Space);
+
+    toolbar->addAction(m_actions->actionFromName("actionSync"));
+    //
+    toolbar->addStandardItem(MacToolButton::Space);
+    //
+    toolbar->addAction(m_actions->actionFromName("actionNewNote"));
+    toolbar->addAction(m_actions->actionFromName("actionDeleteCurrentNote"));
+    //
+    toolbar->showInWindow(this);
+    //
+#else
     addToolBar(m_toolBar);
 
     m_toolBar->setMovable(false);
-#ifdef Q_WS_MAC
-    m_toolBar->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
-#else
     m_toolBar->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
-#endif
     //
-#ifndef Q_WS_MAC
     m_toolBar->addAction(m_actions->actionFromName("actionPopupMainMenu"));
     m_toolBar->addWidget(new CWizFixedSpacer(QSize(10, 1), m_toolBar));
-#endif
     m_toolBar->addAction(m_actions->actionFromName("actionSync"));
     //
     m_toolBar->addWidget(new CWizFixedSpacer(QSize(10, 1), m_toolBar));
@@ -119,9 +141,8 @@ void MainWindow::initToolBar()
     m_toolBar->addWidget(new CWizFixedSpacer(QSize(2, 1), m_toolBar));
 #endif
     //
-    setUnifiedTitleAndToolBarOnMac(true);
-    //
     m_toolBar->setStyle(WizGetStyle());
+#endif
 }
 
 void MainWindow::initClient()
@@ -173,6 +194,19 @@ void MainWindow::closeEvent(QCloseEvent *e)
     m_sync.abort();
     //
     QMainWindow::closeEvent(e);
+}
+
+QSize MainWindow::sizeHint() const
+{
+    QDesktopWidget * desk = QApplication::desktop();
+    QRect rc = desk->rect();
+#ifdef Q_OS_MAC
+    rc.adjust(100, 100, -100, -200);
+#else
+    rc.adjust(100, 100, -100, -100);
+#endif
+    //
+    return rc.size();
 }
 
 QWidget* MainWindow::mainWindow()
@@ -252,15 +286,14 @@ void MainWindow::on_actionNewNote_triggered()
     CWizFolder* pFolder = m_category->SelectedFolder();
     if (!pFolder)
     {
-        m_category->addAndSelectFolder("/My Notes");
+        m_category->addAndSelectFolder("/My Notes/");
         pFolder = m_category->SelectedFolder();
         //
         if (!pFolder)
             return;
     }
     //
-    m_db.CreateDocument(tr("New note"), "newnote", pFolder->Location(), "", data);
-    m_db.UpdateDocumentData(data, "<body></body>", "", 0);
+    m_db.CreateDocumentAndInit("<body></body>", "", 0, tr("New note"), "newnote", pFolder->Location(), "", data);
     //
     m_documents->addAndSelectDocument(data);
 }
@@ -288,6 +321,7 @@ void MainWindow::on_actionAbout_triggered()
 
 }
 
+#ifndef Q_OS_MAC
 void MainWindow::on_actionPopupMainMenu_triggered()
 {
     QAction* pAction = m_actions->actionFromName("actionPopupMainMenu");
@@ -301,6 +335,7 @@ void MainWindow::on_actionPopupMainMenu_triggered()
     //
     pMenu->popup(pt);
 }
+#endif
 
 void MainWindow::on_actionGoBack_triggered()
 {
@@ -327,6 +362,11 @@ void MainWindow::on_category_itemSelectionChanged()
     CWizDocumentDataArray arrayDocument;
     m_category->getDocuments(arrayDocument);
     m_documents->setDocuments(arrayDocument);
+    //
+    if (arrayDocument.empty())
+    {
+        on_documents_itemSelectionChanged();
+    }
 }
 
 void MainWindow::on_documents_itemSelectionChanged()

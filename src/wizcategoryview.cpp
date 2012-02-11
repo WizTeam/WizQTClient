@@ -290,13 +290,17 @@ void CWizCategoryView::initFolders()
     CWizStdStringArray arrayAllLocation;
     m_db.GetAllLocations(arrayAllLocation);
     //
+    initFolders(pAllFoldersItem, "", arrayAllLocation);
+    //
     if (arrayAllLocation.empty())
     {
-        arrayAllLocation.push_back(_T("/My Notes/"));
-        arrayAllLocation.push_back(_T("/My Drafts/"));
+        const CString strNotes("/My Notes/");
+        const CString strDrafts("/My Drafts/");
+        m_db.AddExtraFolder(strNotes);
+        m_db.AddExtraFolder(strDrafts);
+        arrayAllLocation.push_back(strNotes);
+        arrayAllLocation.push_back(strDrafts);
     }
-    //
-    initFolders(pAllFoldersItem, "", arrayAllLocation);
     //
     //init extra folders
     CWizStdStringArray arrayExtLocation;

@@ -9,10 +9,17 @@ QT += xml
 QT += network
 QT += webkit
 
+mac:QT += declarative
+
 TARGET = wiznote
 TEMPLATE = app
 
-OBJECTIVE_SOURCES += share/wizuihelper_mac.mm
+
+
+OBJECTIVE_SOURCES += share/wizuihelper_mac.mm \
+    share/qtmactoolbar.mm \
+    share/qtmactoolbardelegate.mm \
+    share/cocoahelp_mac.mm
 
 
 SOURCES += main.cpp\
@@ -133,7 +140,10 @@ HEADERS  += mainwindow.h \
     share/wizuihelper.h \
     share/wizdownloadobjectdata.h \
     share/wizdownloadobjectdatadialog.h \
-    wizdocumenthistory.h
+    wizdocumenthistory.h \
+share/qtmactoolbar.h \
+    share/qtmactoolbardelegate.h \
+    share/cocoahelp_mac.h
 
 FORMS    += \
     welcomedialog.ui \

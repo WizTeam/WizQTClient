@@ -13,6 +13,7 @@ int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
 
+    a.setApplicationName(QObject::tr("WizNote"));
 #ifdef Q_WS_WIN32
     QFont f = WizCreateWindowsUIFont(a);
     a.setFont(f);

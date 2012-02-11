@@ -444,16 +444,22 @@ void CWizSync::uploadNextAttachment()
 
 void CWizSync::onDeletedPostList(const std::deque<WIZDELETEDGUIDDATA>& arrayData)
 {
+    Q_UNUSED(arrayData);
+    //
     uploadNextDeleteds();
 }
 
 void CWizSync::onTagPostList(const std::deque<WIZTAGDATA>& arrayData)
 {
+    Q_UNUSED(arrayData);
+    //
     uploadNextTags();
 }
 
 void CWizSync::onStylePostList(const std::deque<WIZSTYLEDATA>& arrayData)
 {
+    Q_UNUSED(arrayData);
+    //
     uploadNextStyles();
 }
 

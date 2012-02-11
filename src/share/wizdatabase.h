@@ -24,7 +24,7 @@ public:
 private:
     CString GetMetaText();
 public:
-    Q_PROPERTY(QString GUID READ GUID);
+    Q_PROPERTY(QString GUID READ GUID)
 public slots:
     bool UpdateDocument4(const QString& strHtml, const QString& strURL, int nFlags);
     void Delete();
@@ -48,7 +48,7 @@ public:
     BOOL CanMove(CWizFolder* pSrc, CWizFolder* pDest) const;
 public:
 public:
-    Q_PROPERTY(QString Location READ Location);
+    Q_PROPERTY(QString Location READ Location)
 public slots:
     QString Location() const { return m_strLocation; }
     QObject* CreateDocument2(const QString& strTitle, const QString& strURL);
@@ -128,6 +128,7 @@ public:
     using CIndex::GetDocumentsByTag;
     using CIndex::DocumentFromGUID;
     //
+    BOOL CreateDocumentAndInit(const CString& strHtml, const CString& strHtmlUrl, int nFlags, const CString& strTitle, const CString& strName, const CString& strLocation, const CString& strURL, WIZDOCUMENTDATA& data);
 public:
     CString GetUserId() const { return m_strUserId; }
     CString GetPassword() const { return m_strPassword; }

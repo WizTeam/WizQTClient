@@ -637,6 +637,8 @@ bool CWizDatabase::UpdateDocumentData(WIZDOCUMENTDATA& data, const QString& strH
     if (!bZip)
         return false;
     //
+    SetObjectDataDownloaded(data.strGUID, "document", TRUE);
+    //
     return UpdateDocumentDataMD5(data, strZipFileName);
 }
 
@@ -749,6 +751,9 @@ BOOL CWizDatabase::GetAllRootLocations(CWizStdStringArray& arrayLocation)
 }
 BOOL CWizDatabase::GetChildLocations(const CString& strLocation, CWizStdStringArray& arrayLocation)
 {
+    Q_UNUSED(strLocation);
+    Q_UNUSED(arrayLocation);
+    //
     return FALSE;
 }
 
@@ -800,6 +805,30 @@ BOOL CWizDatabase::GetChildLocations(const CWizStdStringArray& arrayAllLocation,
 BOOL CWizDatabase::IsInDeletedItems(const CString& strLocation)
 {
     return strLocation.startsWith(GetDeletedItemsLocation());
+}
+
+BOOL CWizDatabase::CreateDocumentAndInit(const CString& strHtml, const CString& strHtmlUrl, int nFlags, const CString& strTitle, const CString& strName, const CString& strLocation, const CString& strURL, WIZDOCUMENTDATA& data)
+{
+    BOOL bRet = FALSE;
+    try
+    {
+        BeginUpdate();
+        bRet = CreateDocument(strTitle, strName, strLocation, strHtmlUrl, data);
+        if (bRet)
+        {
+            bRet = UpdateDocumentData(data, strHtml, strURL, nFlags);
+            //
+            emit documentCreated(data);
+        }
+    }
+    catch (...)
+    {
+
+    }
+    //
+    EndUpdate();
+    //
+    return bRet;
 }
 
 BOOL CWizDatabase::LoadDocumentData(const CString& strDocumentGUID, QByteArray& arrayData)
@@ -1014,6 +1043,8 @@ BOOL CWizDatabase::DocumentToTempHtmlFile(const WIZDOCUMENTDATA& document, CStri
 //////////////////////////////////////////////////////////////////////
 QObject* CWizDatabase::GetFolderByLocation(const QString& strLocation, bool create)
 {
+    Q_UNUSED(create);
+    //
     return new CWizFolder(*this, strLocation);
 }
 QObject* CWizDatabase::GetDeletedItemsFolder()

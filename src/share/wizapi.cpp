@@ -366,6 +366,8 @@ void CWizApi::onDownloadDataPart(const WIZOBJECTPARTDATA& data)
 
 BOOL CWizApi::callUploadDataPart(const CString& strObjectGUID, const CString& strObjectType, const CString& strObjectMD5, int allSize, int partCount, int partIndex, int partSize, const QByteArray& arrayData)
 {
+    Q_UNUSED(allSize);
+    //
     ATLASSERT(partSize == arrayData.size());
     //
     CWizApiTokenParam param(*this);
@@ -491,7 +493,7 @@ BOOL CWizApi::uploadDocument(const WIZDOCUMENTDATAEX& data)
 
 void CWizApi::onUploadDocument(const WIZDOCUMENTDATAEX& data)
 {
-
+    Q_UNUSED(data);
 }
 
 BOOL CWizApi::callDocumentPostData(const WIZDOCUMENTDATAEX& data)
@@ -632,7 +634,7 @@ BOOL CWizApi::uploadAttachment(const WIZDOCUMENTATTACHMENTDATAEX& data)
 
 void CWizApi::onUploadAttachment(const WIZDOCUMENTATTACHMENTDATAEX& data)
 {
-
+    Q_UNUSED(data);
 }
 
 
@@ -707,7 +709,7 @@ BOOL CWizApi::callDocumentsGetInfo(const CWizStdStringArray& arrayDocumentGUID)
 
 void CWizApi::onDocumentsGetInfo(const std::deque<WIZDOCUMENTDATABASE>& arrayRet)
 {
-
+    Q_UNUSED(arrayRet);
 }
 
 BOOL CWizApi::callAttachmentsGetInfo(const CWizStdStringArray& arrayAttachmentGUID)
@@ -720,7 +722,7 @@ BOOL CWizApi::callAttachmentsGetInfo(const CWizStdStringArray& arrayAttachmentGU
 
 void CWizApi::onAttachmentsGetInfo(const std::deque<WIZDOCUMENTATTACHMENTDATAEX>& arrayRet)
 {
-
+    Q_UNUSED(arrayRet);
 }
 
 //

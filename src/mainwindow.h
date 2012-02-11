@@ -8,7 +8,9 @@
 #include "share/wizsync.h"
 
 
+#ifndef Q_OS_MAC
 class QToolBar;
+#endif
 class QStatusBar;
 class QProgressBar;
 class QLabel;
@@ -49,7 +51,9 @@ private:
     CWizSync m_sync;
     //
     QMenuBar* m_menuBar;
+#ifndef Q_OS_MAC
     QToolBar* m_toolBar;
+#endif
     QStatusBar* m_statusBar;
     QLabel* m_labelStatus;
     QProgressBar* m_progressSync;
@@ -72,6 +76,7 @@ private:
     void initStatusBar();
 public:
     virtual void closeEvent(QCloseEvent *);
+    virtual QSize sizeHint() const;
 
 public:
     CWizDatabase* Database() { return &m_db; }
@@ -138,7 +143,9 @@ public slots:
     void on_actionDeleteCurrentNote_triggered();
     void on_actionLogout_triggered();
     void on_actionAbout_triggered();
+#ifndef Q_OS_MAC
     void on_actionPopupMainMenu_triggered();
+#endif
     //
     void on_actionGoBack_triggered();
     void on_actionGoForward_triggered();
