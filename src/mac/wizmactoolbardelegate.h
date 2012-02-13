@@ -44,7 +44,7 @@ class CWizMacToolBarItem;
 - (void)addActionGroup:(QActionGroup *)actionGroup;
 - (void)addAction:(QAction *)action;
 - (void)addStandardItem:(CWizMacToolBar::StandardItem)standardItem;
-- (void)addSearch;
+- (void)addSearch:(const QString&)label tooltip:(const QString&)tooltip;
 
 - (CWizMacToolBarItem*) itemFromItemIdentifier: (NSString*)itemIdentifier;
 - (NSToolbarItem*) itemIdentifierToItem: (NSString*)itemIdentifier;

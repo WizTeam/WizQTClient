@@ -324,15 +324,19 @@ public:
 class CWizMacToolBarSearchItem : public CWizMacToolBarItem
 {
 public:
-    CWizMacToolBarSearchItem()
+    CWizMacToolBarSearchItem(const QString& label, const QString& tooltip)
         : m_id(WizGenGUID())
         , m_searchFieldOutlet(nil)
+        , m_strLabel(label)
+        , m_strTooltip(tooltip)
 
     {
     }
 private:
     NSString* m_id;
     NSSearchField* m_searchFieldOutlet;
+    QString m_strLabel;
+    QString m_strTooltip;
 public:
     virtual NSString* itemIdentifier() const
     {
@@ -344,11 +348,8 @@ public:
         //
         NSToolbarItem* toolbarItem = [[[NSToolbarItem alloc] initWithItemIdentifier: itemId] autorelease];
         //
-        QString label = tr("Search");
-        QString tooltip = tr("Search Your Document");
-        //
-        NSString* labelString = WizToNSString(label);
-        NSString* tooltipString = WizToNSString(tooltip);
+        NSString* labelString = WizToNSString(m_strLabel);
+        NSString* tooltipString = WizToNSString(m_strTooltip);
 
         // Set up the standard properties
         [toolbarItem setLabel: labelString];
@@ -519,9 +520,9 @@ NSMutableArray *itemIdentifiers(const QList<CWizMacToolBarItem *> *items, bool c
     items->append(new CWizMacToolBarStandardItem(standardItem));
 }
 
-- (void)addSearch
+- (void)addSearch:(const QString&)label tooltip:(const QString&)tooltip
 {
-    items->append(new CWizMacToolBarSearchItem());
+    items->append(new CWizMacToolBarSearchItem(label, tooltip));
 }
 
 

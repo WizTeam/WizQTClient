@@ -106,7 +106,7 @@ void MainWindow::initToolBar()
     //
     toolbar->addStandardItem(CWizMacToolBar::FlexibleSpace);
     //
-    toolbar->addSearch();
+    toolbar->addSearch(tr("Search"), tr("Search your notes"));
     //
     connect(toolbar, SIGNAL(doSearch(const QString&)), this, SLOT(on_search_doSearch(const QString&)));
     //

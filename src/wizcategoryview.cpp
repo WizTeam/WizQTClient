@@ -39,6 +39,10 @@ public:
     {
         return hintHeight;
     }
+    virtual bool operator<(const QTreeWidgetItem &other) const
+    {
+        return text(0).compare(other.text(0), Qt::CaseInsensitive) < 0;
+    }
 };
 
 class CWizCategoryViewSeparatorItem : public CWizCategoryViewItem
@@ -320,7 +324,8 @@ void CWizCategoryView::initFolders()
     }
     //
     pAllFoldersItem->setExpanded(true);
-
+    //
+    pAllFoldersItem->sortChildren(0, Qt::AscendingOrder);
 }
 
 void CWizCategoryView::initFolders(QTreeWidgetItem* pParent, const CString& strParentLocation, const CWizStdStringArray& arrayAllLocation)

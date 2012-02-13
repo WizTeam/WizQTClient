@@ -47,112 +47,6 @@
 
 #import <AppKit/AppKit.h>
 
-/*
-NSString *toNSStandardItem(MacToolButton::StandardItem standardItem)
-{
-    if (standardItem == MacToolButton::Separator)
-        return NSToolbarSeparatorItemIdentifier;
-    else if (standardItem == MacToolButton::Space)
-        return NSToolbarSpaceItemIdentifier;
-    else if (standardItem == MacToolButton::FlexibleSpace)
-        return NSToolbarFlexibleSpaceItemIdentifier;
-    else if (standardItem == MacToolButton::ShowColors)
-        return NSToolbarShowColorsItemIdentifier;
-    else if (standardItem == MacToolButton::ShowFonts)
-        return NSToolbarShowFontsItemIdentifier;
-    else if (standardItem == MacToolButton::CustomizeToolbar)
-        return NSToolbarCustomizeToolbarItemIdentifier;
-    else if (standardItem == MacToolButton::PrintItem)
-        return NSToolbarPrintItemIdentifier;
-    return @"";
-}
-
-MacToolButton::MacToolButton()
-{
-   m_standardItem = NoItem;
-   m_selectable = false;
-   m_action = NULL;
-   m_actionGroup = NULL;
-}
-
-MacToolButton::MacToolButton(QObject *parent)
-    :QObject(parent)
-{
-    m_standardItem = NoItem;
-    m_selectable = false;
-    m_action = NULL;
-    m_actionGroup = NULL;
-}
-
-MacToolButton::~MacToolButton()
-{
-
-}
-
-QString MacToolButton::text() const
-{
-    return m_text;
-}
-
-void MacToolButton::setText(const QString &text)
-{
-    m_text = text;
-}
-
-QUrl MacToolButton::iconSource() const
-{
-    return m_iconSource;
-}
-
-void MacToolButton::setIconSource(const QUrl &iconSource)
-{
-    m_iconSource = iconSource;
-}
-
-bool MacToolButton::selectable() const
-{
-    return m_selectable;
-}
-
-void MacToolButton::setSelectable(bool selectable)
-{
-    m_selectable = selectable;
-}
-
-QString MacToolButton::toolTip() const
-{
-    return m_toolTip;
-}
-
-void MacToolButton::setToolTip(const QString &toolTip)
-{
-    m_toolTip = toolTip;
-}
-
-void MacToolButton::setAction(QAction *action)
-{
-    m_action = action;
-    m_text = action->text();
-    m_toolTip = action->toolTip();
-    m_selectable = action->isCheckable();
-}
-void MacToolButton::setActionGroup(QActionGroup *actionGroup)
-{
-    m_actionGroup = actionGroup;
-    m_text = "";
-}
-
-MacToolButton::StandardItem MacToolButton::standardItem() const
-{
-    return m_standardItem;
-}
-
-void MacToolButton::setStandardItem(StandardItem standardItem)
-{
-    m_standardItem = standardItem;
-}
-
-*/
 class CWizMacToolBarPrivate
 {
 public:
@@ -253,9 +147,9 @@ void CWizMacToolBar::addStandardItem(StandardItem standardItem)
 {
     [d->delegate addStandardItem:standardItem];
 }
-void CWizMacToolBar::addSearch()
+void CWizMacToolBar::addSearch(const QString& label, const QString& tooltip)
 {
-    [d->delegate addSearch];
+    [d->delegate addSearch:label tooltip:tooltip];
 }
 
 

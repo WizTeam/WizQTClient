@@ -970,7 +970,7 @@ CString CWizDatabase::GetLocationDisplayName(const CString& strLocation)
 {
     if (IsRootLocation(strLocation))
     {
-        if (strLocation.startsWith("My "))
+        if (strLocation.startsWith("/My "))
         {
             if (strLocation == "/My Notes/")
             {
