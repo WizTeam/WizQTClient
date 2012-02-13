@@ -19,11 +19,12 @@ public:
 
 #ifdef __OBJC__
 
-NSString *WizToNSString(const QString &string);
 QString WizToQString(NSString *string);
-NSArray *WizToNSArray(const QList<QString> &stringList);
-NSImage *WizToNSImage(const QPixmap &pixmap);
-NSImage *WizToNSImage(const QIcon &icon);
+NSString* WizToNSString(const QString &string);
+NSArray* WizToNSArray(const QList<QString> &stringList);
+NSImage* WizToNSImage(const QPixmap &pixmap);
+NSImage* WizToNSImage(const QIcon &icon);
+NSString* WizGenGUID();
 
 class CWizChangeCocoaImplementation
 {

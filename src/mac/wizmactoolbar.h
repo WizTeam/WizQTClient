@@ -10,7 +10,7 @@
 #include <QtGui/QAction>
 #include <QtDeclarative/QDeclarativeListProperty>
 #include <QtDeclarative/QDeclarativeParserStatus>
-
+/*
 class MacToolButton : public QObject
 {
     Q_OBJECT
@@ -72,17 +72,15 @@ public: // (not really public)
     void emitActivated() { emit activated(); }
 };
 
-
+*/
 
 class CWizMacToolBarPrivate;
 class CWizMacToolBarItem;
 //
 class CWizMacToolBar
     : public QObject
-    , public QDeclarativeParserStatus
 {
     Q_OBJECT
-    Q_INTERFACES(QDeclarativeParserStatus)
 public:
     CWizMacToolBar(QObject *parent = 0);
     ~CWizMacToolBar();
@@ -101,11 +99,21 @@ public:
        SmallSize
     };
 
+    enum StandardItem
+    {
+        NoItem,
+        Separator,
+        Space,
+        FlexibleSpace,
+        ShowColors,
+        ShowFonts,
+        CustomizeToolbar,
+        PrintItem
+    };
+
+
     void classBegin();
     void componentComplete();
-
-    QDeclarativeListProperty<QObject> buttons();
-    QDeclarativeListProperty<QObject> allowedButtons();
 
     DisplayMode displayMode() const;
     void setDisplayMode(DisplayMode displayMode);
@@ -113,18 +121,25 @@ public:
     SizeMode sizeMode() const;
     void setSizeMode(SizeMode sizeMode);
 
-    void showInMainWindow();
     void showInWindow(QWidget *window);
 
-    // Add actions to the toolbar
+    // Add actions to the Toolbar
     void addActionGroup(QActionGroup* actionGroup);
     void addAction(QAction* action);
-    void addStandardItem(MacToolButton::StandardItem standardItem);
+    void addStandardItem(StandardItem standardItem);
+    void addSearch();
+    //
+    void onSearchEndEditing(const QString& str);
 
 private:
     void showInWindowImpl(QWidget *window);
+protected slots:
     void showInTargetWindow();
 
+Q_SIGNALS:
+    void doSearch(const QString& str);
+
+private:
     bool m_showText;
     QList<CWizMacToolBarItem *> m_items;
     CWizMacToolBarPrivate *d;

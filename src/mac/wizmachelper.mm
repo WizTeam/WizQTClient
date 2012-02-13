@@ -4,7 +4,7 @@
 #import <AppKit/AppKit.h>
 #import <objc/objc-class.h>
 
-#include "cocoahelp_mac.h"
+#include "wizmachelper.h"
 
 CWizNSAutoReleasePool::CWizNSAutoReleasePool() : _pool([[NSAutoreleasePool alloc] init])
 {
@@ -38,7 +38,7 @@ NSArray* WizToNSArray(const QList<QString> &stringList)
 {
     NSMutableArray *array = [[[NSMutableArray alloc] init] autorelease];
     foreach (const QString &string, stringList) {
-        [array addObject: toNSString(string)];
+        [array addObject: WizToNSString(string)];
     }
     return array;
 }
@@ -70,7 +70,20 @@ NSImage* WizToNSImage(const QIcon &icon)
     }
     //
     QPixmap pixmap = icon.pixmap(sz);
-    return toNSImage(pixmap);
+    return WizToNSImage(pixmap);
+}
+
+NSString* WizGenGUID()
+{
+    CFUUIDRef theUUID = CFUUIDCreate(NULL);
+    CFStringRef string = CFUUIDCreateString(NULL, theUUID);
+    CFRelease(theUUID);
+    //
+    NSString* str = [NSString stringWithString:(NSString*)string];
+    //
+    CFRelease(string);
+    //
+    return [str lowercaseString];
 }
 
 

@@ -22,7 +22,7 @@
 #include <QDebug>
 #include <QBoxLayout>
 
-#include "share/qtmactoolbar.h"
+#include "mac/wizmactoolbar.h"
 
 #include "wiznotestyle.h"
 #include "wizdocumenthistory.h"
@@ -88,21 +88,27 @@ void MainWindow::initToolBar()
 #ifdef Q_OS_MAC
     //
 
-    QtMacToolBar* toolbar = new QtMacToolBar(this);
+    CWizMacToolBar* toolbar = new CWizMacToolBar(this);
     //
     QActionGroup* groupNavigate = new QActionGroup(this);
     groupNavigate->addAction(m_actions->actionFromName("actionGoBack"));
     groupNavigate->addAction(m_actions->actionFromName("actionGoForward"));
     toolbar->addActionGroup(groupNavigate);
     //
-    toolbar->addStandardItem(MacToolButton::Space);
+    toolbar->addStandardItem(CWizMacToolBar::Space);
 
     toolbar->addAction(m_actions->actionFromName("actionSync"));
     //
-    toolbar->addStandardItem(MacToolButton::Space);
+    toolbar->addStandardItem(CWizMacToolBar::Space);
     //
     toolbar->addAction(m_actions->actionFromName("actionNewNote"));
     toolbar->addAction(m_actions->actionFromName("actionDeleteCurrentNote"));
+    //
+    toolbar->addStandardItem(CWizMacToolBar::FlexibleSpace);
+    //
+    toolbar->addSearch();
+    //
+    connect(toolbar, SIGNAL(doSearch(const QString&)), this, SLOT(on_search_doSearch(const QString&)));
     //
     toolbar->showInWindow(this);
     //
