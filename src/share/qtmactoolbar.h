@@ -1,5 +1,5 @@
-#ifndef QTMACTOOLBAR_H
-#define QTMACTOOLBAR_H
+#ifndef CWizMacToolBar_H
+#define CWizMacToolBar_H
 
 #include <QtGlobal>
 
@@ -73,18 +73,19 @@ public: // (not really public)
 };
 
 
-class QtMacToolBarPrivate;
-class QtMacToolBar : public QObject, public QDeclarativeParserStatus
+
+class CWizMacToolBarPrivate;
+class CWizMacToolBarItem;
+//
+class CWizMacToolBar
+    : public QObject
+    , public QDeclarativeParserStatus
 {
     Q_OBJECT
     Q_INTERFACES(QDeclarativeParserStatus)
-    Q_PROPERTY(QDeclarativeListProperty<QObject> buttons READ buttons)
-    Q_PROPERTY(QDeclarativeListProperty<QObject> allowedButtons READ allowedButtons)
-    Q_CLASSINFO("DefaultProperty", "buttons")
-    Q_PROPERTY(DisplayMode displayMode READ displayMode WRITE setDisplayMode)
-    Q_PROPERTY(SizeMode sizeMode READ sizeMode WRITE setSizeMode)
-    Q_ENUMS(DisplayMode)
-    Q_ENUMS(SizeMode)
+public:
+    CWizMacToolBar(QObject *parent = 0);
+    ~CWizMacToolBar();
 public:
     enum DisplayMode
     {
@@ -100,9 +101,6 @@ public:
        SmallSize
     };
 
-    QtMacToolBar(QObject *parent = 0);
-    ~QtMacToolBar();
-
     void classBegin();
     void componentComplete();
 
@@ -115,39 +113,21 @@ public:
     SizeMode sizeMode() const;
     void setSizeMode(SizeMode sizeMode);
 
-    // In addition to the QML bindings QtMacToolBar also has a
-    // QAction-based interface for use from C++.
-    //
-    // Usage example:
-    //
-    // QWidget *mainWindow = ...;
-    // QtMacToolBar * macToolBar = new QtMacToolBar(mainWindow);
-    // macToolBar->addAction("FooButton");
-    // macToolBar->showInWindow(mainWindow);
-    //
-
-    Q_INVOKABLE void showInMainWindow();
+    void showInMainWindow();
     void showInWindow(QWidget *window);
 
     // Add actions to the toolbar
-    Q_INVOKABLE void addActionGroup(QActionGroup* actionGroup);
-    Q_INVOKABLE void addAction(QAction* action);
-    Q_INVOKABLE QAction *addAction(const QString &text);
-    Q_INVOKABLE QAction *addAction(const QIcon &icon, const QString &text);
-    Q_INVOKABLE QAction *addStandardItem(MacToolButton::StandardItem standardItem);
+    void addActionGroup(QActionGroup* actionGroup);
+    void addAction(QAction* action);
+    void addStandardItem(MacToolButton::StandardItem standardItem);
 
-    // Add actions to the "Customize Toolbar" menu
-    Q_INVOKABLE QAction *addAllowedAction(const QString &text);
-    Q_INVOKABLE QAction *addAllowedAction(const QIcon &icon, const QString &text);
-    Q_INVOKABLE QAction *addAllowedStandardItem(MacToolButton::StandardItem standardItem);
 private:
     void showInWindowImpl(QWidget *window);
-    Q_INVOKABLE void showInTargetWindow();
+    void showInTargetWindow();
 
     bool m_showText;
-    QList<QObject *> m_buttons;
-    QList<QObject *> m_allowedButtons;
-    QtMacToolBarPrivate *d;
+    QList<CWizMacToolBarItem *> m_items;
+    CWizMacToolBarPrivate *d;
 };
 
 #endif

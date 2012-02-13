@@ -7,29 +7,29 @@
 
 #include <Cocoa/Cocoa.h>
 
-class QNSAutoReleasePool
+class CWizNSAutoReleasePool
 {
 private:
     void *_pool;
 public:
-    QNSAutoReleasePool();
-    ~QNSAutoReleasePool();
+    CWizNSAutoReleasePool();
+    ~CWizNSAutoReleasePool();
     inline void *handle() const { return _pool; }
 };
 
 #ifdef __OBJC__
 
-NSString *toNSString(const QString &string);
-QString toQString(NSString *string);
-NSArray *toNSArray(const QList<QString> &stringList);
-NSImage *toNSImage(const QPixmap &pixmap);
-NSImage *toNSImage(const QIcon &icon);
+NSString *WizToNSString(const QString &string);
+QString WizToQString(NSString *string);
+NSArray *WizToNSArray(const QList<QString> &stringList);
+NSImage *WizToNSImage(const QPixmap &pixmap);
+NSImage *WizToNSImage(const QIcon &icon);
 
-class QChangeCocoaImplementation
+class CWizChangeCocoaImplementation
 {
     public:
-    QChangeCocoaImplementation(Class baseClass, SEL originalSel, Class proxyClass, SEL replacementSel, SEL backupSel, bool apply = true);
-    ~QChangeCocoaImplementation();
+    CWizChangeCocoaImplementation(Class baseClass, SEL originalSel, Class proxyClass, SEL replacementSel, SEL backupSel, bool apply = true);
+    ~CWizChangeCocoaImplementation();
 
     static void change(Class baseClass, SEL originalSel, Class proxyClass, SEL replacementSel, SEL backupSel);
     static void changeBack(Class baseClass, SEL originalSel, SEL backupSel);

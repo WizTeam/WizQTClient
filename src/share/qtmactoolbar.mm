@@ -42,11 +42,12 @@
 #include <QtCore/QtCore>
 #include <QAction>
 #include "cocoahelp_mac.h"
-#include "qtmactoolbar.h"
-#include "qtmactoolbardelegate.h"
+#include "wizmactoolbar.h"
+#include "wizmactoolbardelegate.h"
 
 #import <AppKit/AppKit.h>
 
+/*
 NSString *toNSStandardItem(MacToolButton::StandardItem standardItem)
 {
     if (standardItem == MacToolButton::Separator)
@@ -151,26 +152,27 @@ void MacToolButton::setStandardItem(StandardItem standardItem)
     m_standardItem = standardItem;
 }
 
-class QtMacToolBarPrivate
+*/
+class CWizMacToolBarPrivate
 {
 public:
     NSToolbar *toolbar;
-    QtMacToolbarDelegate *delegate;
+    CWizMacToolBarDelegate *delegate;
     QWidget *m_targetWindow;
 };
 
-QtMacToolBar::QtMacToolBar(QObject *parent)
+CWizMacToolBar::CWizMacToolBar(QObject *parent)
     : QObject(parent)
 {
-    //qDebug() << "QtMacToolBar()";
+    //qDebug() << "CWizMacToolBar()";
 
     QNSAutoReleasePool pool;
     //
     Q_UNUSED(pool);
     //
-    d = new QtMacToolBarPrivate();
-    d->toolbar = [[NSToolbar alloc] initWithIdentifier:@"QtMacToolBarr"];
-    d->delegate = [[QtMacToolbarDelegate alloc] init];
+    d = new CWizMacToolBarPrivate();
+    d->toolbar = [[NSToolbar alloc] initWithIdentifier:@"CWizMacToolBarr"];
+    d->delegate = [[CWizMacToolBarDelegate alloc] init];
     [d->toolbar setAllowsUserCustomization:YES];
     //  [d->toolbar setAutosavesConfiguration:YES];
     [d->toolbar setDisplayMode:NSToolbarDisplayModeIconAndLabel];
@@ -180,19 +182,19 @@ QtMacToolBar::QtMacToolBar(QObject *parent)
     d->m_targetWindow = 0;
 }
 
-QtMacToolBar::~QtMacToolBar()
+CWizMacToolBar::~CWizMacToolBar()
 {
     QNSAutoReleasePool pool;
     [d->toolbar release];
     delete d;
 }
 
-void QtMacToolBar::classBegin()
+void CWizMacToolBar::classBegin()
 {
 
 }
 
-void QtMacToolBar::componentComplete()
+void CWizMacToolBar::componentComplete()
 {
 //    qDebug() << "item count" << QList<QObject *>(m_buttons).count();
     *(d->delegate->items) = QList<QObject *>(m_buttons);
@@ -200,38 +202,38 @@ void QtMacToolBar::componentComplete()
     showInMainWindow();
 }
 
-QDeclarativeListProperty<QObject> QtMacToolBar::buttons()
+QDeclarativeListProperty<QObject> CWizMacToolBar::buttons()
 {
     return QDeclarativeListProperty<QObject>(this, m_buttons);
 }
 
-QDeclarativeListProperty<QObject> QtMacToolBar::allowedButtons()
+QDeclarativeListProperty<QObject> CWizMacToolBar::allowedButtons()
 {
     return QDeclarativeListProperty<QObject>(this, m_allowedButtons);
 }
 
-QtMacToolBar::DisplayMode QtMacToolBar::displayMode() const
+CWizMacToolBar::DisplayMode CWizMacToolBar::displayMode() const
 {
-    return QtMacToolBar::DisplayMode([d->toolbar displayMode]);
+    return CWizMacToolBar::DisplayMode([d->toolbar displayMode]);
 }
 
-void QtMacToolBar::setDisplayMode(DisplayMode displayMode)
+void CWizMacToolBar::setDisplayMode(DisplayMode displayMode)
 {
    [d->toolbar setDisplayMode : NSToolbarDisplayMode(displayMode)];
 }
 
-QtMacToolBar::SizeMode QtMacToolBar::sizeMode() const
+CWizMacToolBar::SizeMode CWizMacToolBar::sizeMode() const
 {
-    return QtMacToolBar::SizeMode([d->toolbar sizeMode]);
+    return CWizMacToolBar::SizeMode([d->toolbar sizeMode]);
 }
 
-void QtMacToolBar::setSizeMode(SizeMode sizeMode)
+void CWizMacToolBar::setSizeMode(SizeMode sizeMode)
 {
     [d->toolbar setDisplayMode : NSToolbarSizeMode(sizeMode)];
 }
 
 // show the toolbar in the main declarative window, delay/retry until found
-void QtMacToolBar::showInMainWindow()
+void CWizMacToolBar::showInMainWindow()
 {
 
     QNSAutoReleasePool pool;
@@ -269,27 +271,27 @@ void QtMacToolBar::showInMainWindow()
 }
 
 // show the toolbar in the given window, delayed
-void QtMacToolBar::showInWindow(QWidget *window)
+void CWizMacToolBar::showInWindow(QWidget *window)
 {
     d->m_targetWindow = window;
     QTimer::singleShot(0, this, SLOT(showInTargetWindow()));
 }
 
 // internal invokable, show the toolbar in m_targetWindow
-void QtMacToolBar::showInTargetWindow()
+void CWizMacToolBar::showInTargetWindow()
 {
     showInWindowImpl(d->m_targetWindow);
 }
 
 // internal implementation: show the toolbar in window
-void QtMacToolBar::showInWindowImpl(QWidget *window)
+void CWizMacToolBar::showInWindowImpl(QWidget *window)
 {
     QNSAutoReleasePool pool;
     NSWindow *macWindow = qt_mac_window_for(window);
 //    qDebug() << "macWindow" << macWindow;
 
 
- //   qDebug() << "QtMacToolBar NSWidnow setToolbar";
+ //   qDebug() << "CWizMacToolBar NSWidnow setToolbar";
 //    [macWindow orderOut: macWindow];
     [macWindow setToolbar: d->toolbar];
     [d->toolbar setVisible: YES];
@@ -299,44 +301,44 @@ void QtMacToolBar::showInWindowImpl(QWidget *window)
 //    d->delegate
 }
 
-void QtMacToolBar::addActionGroup(QActionGroup* actionGroup)
+void CWizMacToolBar::addActionGroup(QActionGroup* actionGroup)
 {
     [d->delegate addActionGroup:actionGroup];
 }
 
-void QtMacToolBar::addAction(QAction* action)
+void CWizMacToolBar::addAction(QAction* action)
 {
     [d->delegate addAction:action];
 }
 
 
 
-QAction *QtMacToolBar::addAction(const QString &text)
+QAction *CWizMacToolBar::addAction(const QString &text)
 {
     return [d->delegate addActionWithText:&text];
 }
 
-QAction *QtMacToolBar::addAction(const QIcon &icon, const QString &text)
+QAction *CWizMacToolBar::addAction(const QIcon &icon, const QString &text)
 {
     return [d->delegate addActionWithText:&text icon:&icon];
 }
 
-QAction *QtMacToolBar::addStandardItem(MacToolButton::StandardItem standardItem)
+QAction *CWizMacToolBar::addStandardItem(MacToolButton::StandardItem standardItem)
 {
     return [d->delegate addStandardItem:standardItem];
 }
 
-QAction *QtMacToolBar::addAllowedAction(const QString &text)
+QAction *CWizMacToolBar::addAllowedAction(const QString &text)
 {
     return [d->delegate addAllowedActionWithText:&text];
 }
 
-QAction *QtMacToolBar::addAllowedAction(const QIcon &icon, const QString &text)
+QAction *CWizMacToolBar::addAllowedAction(const QIcon &icon, const QString &text)
 {
     return [d->delegate addAllowedActionWithText:&text icon:&icon];
 }
 
-QAction *QtMacToolBar::addAllowedStandardItem(MacToolButton::StandardItem standardItem)
+QAction *CWizMacToolBar::addAllowedStandardItem(MacToolButton::StandardItem standardItem)
 {
     return [d->delegate addAllowedStandardItem:standardItem];
 }

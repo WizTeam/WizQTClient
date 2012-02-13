@@ -43,41 +43,28 @@
 #include "qtmactoolbardelegate.h"
 #include "cocoahelp_mac.h"
 
-NSString *toNSStandardItem(MacToolButton::StandardItem standardItem);
-
-
-NSMutableArray *itemIdentifiers(const QList<QObject *> *items, bool cullUnselectable)
+NSMutableArray *itemIdentifiers(const QList<CWizMacToolBarItem *> *items, bool cullUnselectable)
 {
     NSMutableArray *array = [[[NSMutableArray alloc] init] autorelease];
 
-    foreach (const QObject * object, *items)
+    foreach (const CWizMacToolBarItem * object, *items)
     {
-        // Handle MacToolButtons
-        const MacToolButton *item = qobject_cast<const MacToolButton *>(object);
-        if (!item)
-            continue;
-        if (cullUnselectable && item->selectable() == false)
-            continue;
-        if (item->standardItem() == MacToolButton::NoItem) {
-            [array addObject: toNSString(QString::number(qulonglong(item)))];
-        } else {
-            [array addObject: toNSStandardItem(item->standardItem())];
-        }
+        CWizMacToolBarItem* item = object;
+        [array addObject: item->itemIdentifier()];
     }
     return array;
 }
 
 
-@implementation QtMacToolbarDelegate
+@implementation CWizMacToolbarDelegate
 
-- (id)init
+-(id)initWithToolbar:(NSToolbar*)tb
 {
-    toolbar = nil;
+    toolbar = tb;
     //
     self = [super init];
     if (self) {
-        items = new QList<QObject *>();
-        allowedItems = new QList<QObject *>();
+        items = new QList<CWizMacToolBarItem *>();
     }
     return self;
 }
@@ -85,7 +72,6 @@ NSMutableArray *itemIdentifiers(const QList<QObject *> *items, bool cullUnselect
 - (void)dealloc
 {
     delete items;
-    delete allowedItems;
     [super dealloc];
 }
 
@@ -106,12 +92,11 @@ NSMutableArray *itemIdentifiers(const QList<QObject *> *items, bool cullUnselect
 {
     Q_UNUSED(tb);
     NSMutableArray *array = itemIdentifiers(self->items, true);
-    [array addObjectsFromArray: itemIdentifiers(self->allowedItems, true)];
     return array;
 }
 
 
-
+/*
 - (NSToolbarItemGroup* )findItemGroup:(NSToolbarItem*)item itemIndex:(int*)itemIndex
 {
     if (toolbar == nil)
@@ -146,8 +131,10 @@ NSMutableArray *itemIdentifiers(const QList<QObject *> *items, bool cullUnselect
     return nil;
 }
 
+*/
 - (IBAction)itemClicked:(id)sender
 {
+    /*
     NSToolbarItem *item = reinterpret_cast<NSToolbarItem *>(sender);
     //
     QString identifier = toQString([item itemIdentifier]);
@@ -180,15 +167,16 @@ NSMutableArray *itemIdentifiers(const QList<QObject *> *items, bool cullUnselect
         }
     }
     //
+    */
 }
 
 - (NSToolbarItem *) toolbar: (NSToolbar *)tb itemForItemIdentifier: (NSString *) itemIdentifier willBeInsertedIntoToolbar:(BOOL) willBeInserted
 {
-    toolbar = tb;
-    //
-    Q_UNUSED(willBeInserted);
-    const QString identifier = toQString(itemIdentifier);
 
+    Q_UNUSED(willBeInserted);
+    //
+    return [self itemIdentifierToItem:itemIdentifier];
+    /*
     //qDebug() << "toolbar for identifier" << identifier;
     //return 0;
 
@@ -274,6 +262,7 @@ NSMutableArray *itemIdentifiers(const QList<QObject *> *items, bool cullUnselect
 
         return toolbarItem;
     }
+    */
 }
 
 - (void) viewSizeChanged : (NSNotification*)notification
@@ -284,66 +273,34 @@ NSMutableArray *itemIdentifiers(const QList<QObject *> *items, bool cullUnselect
 
 - (void)addActionGroup:(QActionGroup *)actionGroup
 {
+    /*
     MacToolButton *button = new MacToolButton(actionGroup);
     button->setActionGroup(actionGroup);
     items->append(button);
+    */
 }
 
 - (void)addAction:(QAction *)action
 {
+    /*
     MacToolButton *button = new MacToolButton(action);
     button->setAction(action);
     items->append(button);
+    */
 }
 
-- (QAction *)addActionWithText:(const QString *)text
-{
-    QIcon nullIcon;
-    return [self addActionWithText:text icon:&nullIcon];
-}
 
-- (QAction *)addActionWithText:(const QString *)text icon:(const QIcon *)icon
+- (CWizMacToolBarItem *)addStandardItem:(MacToolButton::StandardItem) standardItem
 {
-    QAction *action = new QAction(*icon, *text, 0);
-    MacToolButton *button = new MacToolButton(action);
-    button->setAction(action);
-    items->append(button);
-    return action;
-}
-
-- (QAction *)addStandardItem:(MacToolButton::StandardItem) standardItem
-{
+    /*
     QAction *action = new QAction(0);
     MacToolButton *button = new MacToolButton(action);
     button->setAction(action);
     button->setStandardItem(standardItem);
     items->append(button);
     return action;
+    */
 }
 
-- (QAction *)addAllowedActionWithText:(const QString *)text
-{
-    QIcon nullIcon;
-    return [self addAllowedActionWithText:text icon:&nullIcon];
-}
-
-- (QAction *)addAllowedActionWithText:(const QString *)text icon:(const QIcon *)icon
-{
-    QAction *action = new QAction(*icon, *text, 0);
-    MacToolButton *button = new MacToolButton(action);
-    button->setAction(action);
-    items->append(button);
-    return action;
-}
-
-- (QAction *)addAllowedStandardItem:(MacToolButton::StandardItem)standardItem
-{
-    QAction *action = new QAction(0);
-    MacToolButton *button = new MacToolButton(action);
-    button->setAction(action);
-    button->setStandardItem(standardItem);
-    items->append(button);
-    return action;
-}
 
 @end

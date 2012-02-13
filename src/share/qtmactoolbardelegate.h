@@ -13,21 +13,33 @@
 #include "qtmactoolbar.h"
 
 
+class CWizMacToolBarItem
+{
+public:
+    CWizMacToolBarItem();
+public:
+    virtual NSString* toIdentifier() = 0;
+    virtual NSToolbarItem* toItem() = 0;
+    virtual bool isGroup() = 0;
+    virtual int childCount() = 0;
+    virtual NSToolbarItem* childItem(int index) = 0;
+    virtual int indexOf(NSToolbarItem* item) = 0;
+};
+
 
 #if MAC_OS_X_VERSION_MAX_ALLOWED < MAC_OS_X_VERSION_10_6
 @protocol NSToolbarDelegate @end
 #endif
 
-@interface QtMacToolbarDelegate : NSObject <NSToolbarDelegate>
+@interface CWizMacToolbarDelegate : NSObject <NSToolbarDelegate>
 {
 @public
     NSToolbar *toolbar;
 
-    QList<QObject *> *items;
-    QList<QObject *> *allowedItems;
+    QList<CWizMacToolBarItem *> *items;
 }
 
-- (id)init;
+- (id)initWithToolbar:(NSToolbar*)tb;
 - (NSToolbarItem *) toolbar: (NSToolbar *)toolbar itemForItemIdentifier: (NSString *) itemIdent willBeInsertedIntoToolbar:(BOOL) willBeInserted;
 - (NSArray *)toolbarDefaultItemIdentifiers:(NSToolbar*)tb;
 - (NSArray *)toolbarAllowedItemIdentifiers:(NSToolbar*)toolbar;
@@ -35,17 +47,13 @@
 
 - (void)addActionGroup:(QActionGroup *)actionGroup;
 - (void)addAction:(QAction *)action;
-- (QAction *)addActionWithText:(const QString *)text;
-- (QAction *)addActionWithText:(const QString *)text icon:(const QIcon *)icon;
-- (QAction *)addStandardItem:(MacToolButton::StandardItem)standardItem;
+- (CWizMacToolBarItem *)addStandardItem:(MacToolButton::StandardItem)standardItem;
 
-- (QAction *)addAllowedActionWithText:(const QString *)text;
-- (QAction *)addAllowedActionWithText:(const QString *)text icon:(const QIcon *)icon;
-- (QAction *)addAllowedStandardItem:(MacToolButton::StandardItem)standardItem;
+- (NSToolbarItem*) itemIdentifierToItem: (NSString*)itemIdentifier;
 
 - (void) viewSizeChanged:(NSNotification*)notification;
 - (IBAction)itemClicked:(id)sender;
-- (NSToolbarItemGroup* )findItemGroup:(NSToolbarItem*)item itemIndex:(int*)itemIndex;
+//- (NSToolbarItemGroup* )findItemGroup:(NSToolbarItem*)item itemIndex:(int*)itemIndex;
 @end
 
 

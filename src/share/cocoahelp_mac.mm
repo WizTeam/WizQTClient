@@ -6,23 +6,23 @@
 
 #include "cocoahelp_mac.h"
 
-QNSAutoReleasePool::QNSAutoReleasePool() : _pool([[NSAutoreleasePool alloc] init])
+CWizNSAutoReleasePool::CWizNSAutoReleasePool() : _pool([[NSAutoreleasePool alloc] init])
 {
 }
 
-QNSAutoReleasePool::~QNSAutoReleasePool()
+CWizNSAutoReleasePool::~CWizNSAutoReleasePool()
 {
     [static_cast<NSAutoreleasePool*>(_pool) release];
 }
 
-NSString *toNSString(const QString &string)
+NSString* WizToNSString(const QString &string)
 {
     return [NSString
         stringWithCharacters: reinterpret_cast<const UniChar *>(string.unicode())
         length: string.length()];
 }
 
-QString toQString(NSString *string)
+QString WizToQString(NSString *string)
 {
     if (!string)
         return QString();
@@ -34,7 +34,7 @@ QString toQString(NSString *string)
     return qstring;
 }
 
-NSArray *toNSArray(const QList<QString> &stringList)
+NSArray* WizToNSArray(const QList<QString> &stringList)
 {
     NSMutableArray *array = [[[NSMutableArray alloc] init] autorelease];
     foreach (const QString &string, stringList) {
@@ -43,7 +43,7 @@ NSArray *toNSArray(const QList<QString> &stringList)
     return array;
 }
 
-NSImage *toNSImage(const QPixmap &pixmap)
+NSImage* WizToNSImage(const QPixmap &pixmap)
 {
     NSBitmapImageRep *bitmapRep = [[NSBitmapImageRep alloc] initWithCGImage:pixmap.toMacCGImageRef()];
     NSImage *image = [[NSImage alloc] init];
@@ -54,7 +54,7 @@ NSImage *toNSImage(const QPixmap &pixmap)
 
 
 
-NSImage *toNSImage(const QIcon &icon)
+NSImage* WizToNSImage(const QIcon &icon)
 {
     QList<QSize> sizes = icon.availableSizes();
     if (sizes.empty())
@@ -74,7 +74,7 @@ NSImage *toNSImage(const QIcon &icon)
 }
 
 
-QChangeCocoaImplementation::QChangeCocoaImplementation(Class baseClass, SEL originalSel,
+CWizChangeCocoaImplementation::CWizChangeCocoaImplementation(Class baseClass, SEL originalSel,
      Class proxyClass, SEL replacementSel, SEL backupSel, bool apply)
     : _baseClass(baseClass), _originalSel(originalSel), _backupSel(backupSel), _apply(apply)
 {
@@ -82,13 +82,13 @@ QChangeCocoaImplementation::QChangeCocoaImplementation(Class baseClass, SEL orig
         change(baseClass, originalSel, proxyClass, replacementSel, backupSel);
 }
 
-QChangeCocoaImplementation::~QChangeCocoaImplementation()
+CWizChangeCocoaImplementation::~CWizChangeCocoaImplementation()
 {
     if (_apply)
         changeBack(_baseClass, _originalSel, _backupSel);
 }
 
-void QChangeCocoaImplementation::change(Class baseClass, SEL originalSel, Class proxyClass, SEL replacementSel, SEL backupSel)
+void CWizChangeCocoaImplementation::change(Class baseClass, SEL originalSel, Class proxyClass, SEL replacementSel, SEL backupSel)
 {
 #ifndef QT_MAC_USE_COCOA
     if (QSysInfo::MacintoshVersion >= QSysInfo::MV_10_5)
@@ -119,7 +119,7 @@ void QChangeCocoaImplementation::change(Class baseClass, SEL originalSel, Class 
     }
 }
 
-void QChangeCocoaImplementation::changeBack(Class baseClass, SEL originalSel, SEL backupSel)
+void CWizChangeCocoaImplementation::changeBack(Class baseClass, SEL originalSel, SEL backupSel)
 {
 #ifndef QT_MAC_USE_COCOA
     if (QSysInfo::MacintoshVersion >= QSysInfo::MV_10_5)
