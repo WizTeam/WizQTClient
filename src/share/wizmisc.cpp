@@ -2353,7 +2353,7 @@ CString WizGetSystemCustomSkinPath()
 }
 
 
-QIcon WizLoadSkinIcon(const CString& strIconName)
+CString WizGetSkinResourceFileName(const CString& strName)
 {
     CString arrayPath[] =
     {
@@ -2363,7 +2363,7 @@ QIcon WizLoadSkinIcon(const CString& strIconName)
     //
     for (size_t i = 0; i < sizeof(arrayPath) / sizeof(CString); i++)
     {
-        CString strFileName = arrayPath[i] + strIconName;
+        CString strFileName = arrayPath[i] + strName;
 
         if (!strFileName.endsWith(".png"))
         {
@@ -2372,11 +2372,20 @@ QIcon WizLoadSkinIcon(const CString& strIconName)
         //
         if (::PathFileExists(strFileName))
         {
-            return QIcon(strFileName);
+            return strFileName;
         }
     }
     //
-    return QIcon();
+    return CString();
+}
+
+QIcon WizLoadSkinIcon(const CString& strIconName)
+{
+    CString strFileName = WizGetSkinResourceFileName(strIconName);
+    if (strFileName.isEmpty())
+        return QIcon();
+    //
+    return QIcon(strFileName);
 }
 
 void WizHtml2Text(const CString& strHtml, CString& strText)

@@ -45,6 +45,7 @@ MainWindow::MainWindow(CWizDatabase& db, QWidget *parent) :
     m_category(new CWizCategoryView(*this, this)),
     m_documents(new CWizDocumentListView(*this, this)),
     m_doc(new CWizDocumentView(*this, this)),
+    m_splitter(NULL),
     m_history(new CWizDocumentViewHistory()),
     m_bRestart(false),
     m_bUpdatingSelection(false)
@@ -118,19 +119,22 @@ void MainWindow::initToolBar()
     m_toolBar->setMovable(false);
     m_toolBar->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
     //
-    m_toolBar->addAction(m_actions->actionFromName("actionPopupMainMenu"));
-    m_toolBar->addWidget(new CWizFixedSpacer(QSize(10, 1), m_toolBar));
+    m_toolBar->addAction(m_actions->actionFromName("actionGoBack"));
+    m_toolBar->addAction(m_actions->actionFromName("actionGoForward"));
+    //
+    m_toolBar->addWidget(new CWizFixedSpacer(QSize(20, 1), m_toolBar));
+    //
     m_toolBar->addAction(m_actions->actionFromName("actionSync"));
     //
-    m_toolBar->addWidget(new CWizFixedSpacer(QSize(10, 1), m_toolBar));
+    m_toolBar->addWidget(new CWizFixedSpacer(QSize(20, 1), m_toolBar));
     //
     m_toolBar->addAction(m_actions->actionFromName("actionNewNote"));
     m_toolBar->addAction(m_actions->actionFromName("actionDeleteCurrentNote"));
     //
-    m_toolBar->addWidget(new CWizFixedSpacer(QSize(10, 1), m_toolBar));
+    m_toolBar->addWidget(new CWizFixedSpacer(QSize(20, 1), m_toolBar));
     //
-    m_toolBar->addAction(m_actions->actionFromName("actionGoBack"));
-    m_toolBar->addAction(m_actions->actionFromName("actionGoForward"));
+    m_toolBar->addAction(m_actions->actionFromName("actionPopupMainMenu"));
+    //
 #if 0
     QAction* pCaptureScreenAction = m_actions->actionFromName("actionCaptureScreen");
     m_actions->buildActionMenu(pCaptureScreenAction, this, ::WizGetAppPath() + "files/mainmenu.ini");
@@ -179,6 +183,12 @@ void MainWindow::initClient()
     pal.setColor(QPalette::Window, QColor(0x80, 0x80, 0x80));
     client->setPalette(pal);
     client->setAutoFillBackground(true);
+    //
+    m_splitter = splitter;
+    //
+#ifndef Q_OS_MAC
+    //connect(splitter, SIGNAL(splitterMoved(int,int)), this, SLOT(on_client_splitterMoved(int, int)));
+#endif
 }
 
 void MainWindow::initStatusBar()
@@ -341,6 +351,30 @@ void MainWindow::on_actionPopupMainMenu_triggered()
     //
     pMenu->popup(pt);
 }
+
+void MainWindow::on_client_splitterMoved(int pos, int index)
+{
+    if (0 == index)
+    {
+    }
+    else if (1 == index)
+    {
+        QPoint pt(pos, 0);
+        //
+        pt = m_splitter->mapToGlobal(pt);
+        //
+        adjustToolBarSpacerToPos(0, pt.x());
+    }
+    else if (2 == index)
+    {
+        QPoint pt(pos, 0);
+        //
+        pt = m_splitter->mapToGlobal(pt);
+        //
+        adjustToolBarSpacerToPos(1, pt.x());
+    }
+}
+
 #endif
 
 void MainWindow::on_actionGoBack_triggered()
@@ -430,6 +464,56 @@ void MainWindow::locateDocument(const WIZDOCUMENTDATA& data)
     //
     m_bUpdatingSelection = FALSE;
 }
+
+#ifndef Q_OS_MAC
+CWizFixedSpacer* MainWindow::findFixedSpacer(int index)
+{
+    if (!m_toolBar)
+        return NULL;
+    //
+    int i = 0;
+    //
+    QList<QAction*> actions = m_toolBar->actions();
+    foreach (QAction* action, actions)
+    {
+        QWidget* widget = m_toolBar->widgetForAction(action);
+        if (!widget)
+            continue;
+        //
+        if (CWizFixedSpacer* spacer = dynamic_cast<CWizFixedSpacer*>(widget))
+        {
+            if (index == i)
+                return spacer;
+            //
+            i++;
+        }
+    }
+    //
+    return NULL;
+}
+
+
+void MainWindow::adjustToolBarSpacerToPos(int index, int pos)
+{
+    if (!m_toolBar)
+        return;
+    //
+    CWizFixedSpacer* spacer = findFixedSpacer(index);
+    if (!spacer)
+        return;
+    //
+    QPoint pt = spacer->mapToGlobal(QPoint(0, 0));
+    //
+    if (pt.x() > pos)
+        return;
+    //
+    int width = pos - pt.x();
+    //
+    spacer->adjustWidth(width);
+}
+
+
+#endif
 
 QObject* MainWindow::CategoryCtrlObject()
 {

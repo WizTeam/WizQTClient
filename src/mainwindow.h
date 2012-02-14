@@ -21,6 +21,8 @@ class CWizDocumentListView;
 class CWizDocumentView;
 class CWizActions;
 class CWizDocumentViewHistory;
+class CWizFixedSpacer;
+class CWizSplitter;
 
 
 class MainWindow
@@ -62,6 +64,7 @@ private:
     CWizCategoryView* m_category;
     CWizDocumentListView* m_documents;
     CWizDocumentView* m_doc;
+    CWizSplitter* m_splitter;
     //
     CWizDocumentViewHistory* m_history;
     //
@@ -86,13 +89,17 @@ public:
     //
     void viewDocument(const WIZDOCUMENTDATA& data, bool addToHistory);
     void locateDocument(const WIZDOCUMENTDATA& data);
+    //
+#ifndef Q_OS_MAC
+    CWizFixedSpacer* findFixedSpacer(int index);
+    void adjustToolBarSpacerToPos(int index, int pos);
+#endif
 public:
     bool isRestart() const { return m_bRestart; }
 private:
     QObject* CategoryCtrlObject();
     QObject* DocumentsCtrlObject();
 public:
-
     //interface WizExplorerApp
     Q_PROPERTY(QObject* Database READ Database)
     Q_PROPERTY(QObject* Window READ Window)
@@ -145,6 +152,7 @@ public slots:
     void on_actionAbout_triggered();
 #ifndef Q_OS_MAC
     void on_actionPopupMainMenu_triggered();
+    void on_client_splitterMoved(int pos, int index);
 #endif
     //
     void on_actionGoBack_triggered();

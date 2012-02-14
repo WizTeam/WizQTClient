@@ -37,6 +37,8 @@ public:
         QSizePolicy sizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
         setSizePolicy(sizePolicy);
     }
+    //
+    void adjustWidth(int width) { m_sz.setWidth(width); setFixedWidth(width); }
 
     QSize sizeHint() const { return m_sz; }
 };

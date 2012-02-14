@@ -130,6 +130,7 @@ CString WizStringToBase64(const CString& strSource);
 CString WizStringFromBase64(const CString& strBase64);
 
 CString WizGetSkinPath();
+CString WizGetSkinResourceFileName(const CString& strName);
 QIcon WizLoadSkinIcon(const CString& strIconName);
 
 

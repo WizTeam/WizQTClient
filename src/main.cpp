@@ -20,9 +20,12 @@ int main(int argc, char *argv[])
     //
 #endif
     //
-#ifndef Q_WS_MAC
-    a.setWindowIcon(WizLoadSkinIcon("wiznote"));
-#endif
+    QIcon iconApp;
+    iconApp.addFile(WizGetSkinResourceFileName("wiznote16"));
+    iconApp.addFile(WizGetSkinResourceFileName("wiznote24"));
+    iconApp.addFile(WizGetSkinResourceFileName("wiznote32"));
+    iconApp.addFile(WizGetSkinResourceFileName("wiznote48"));
+    a.setWindowIcon(iconApp);
 
     QTranslator translator;
     QString localName = QLocale::system().name();

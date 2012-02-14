@@ -10,6 +10,7 @@ class CWizCategoryViewFolderItem;
 class CWizCategoryViewAllTagsItem;
 class CWizCategoryViewTagItem;
 class CWizCategoryViewSearchItem;
+class CWizCategoryViewTrashItem;
 
 class CWizCategoryView : public QTreeWidget
 {
@@ -63,6 +64,8 @@ public:
     void removeTag(const WIZTAGDATA& tag);
     //
     CWizCategoryViewSearchItem* findSearch();
+    //
+    CWizCategoryViewTrashItem* findTrash();
     //
     bool acceptDocument(const WIZDOCUMENTDATA& document);
     //

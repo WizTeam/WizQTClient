@@ -175,10 +175,11 @@ public:
 };
 
 
-class CWizCategoryViewTrashItem : public CWizCategoryViewItem
+class CWizCategoryViewTrashItem : public CWizCategoryViewFolderItem
 {
 public:
     CWizCategoryViewTrashItem(const CString& str)
+        : CWizCategoryViewFolderItem("/Deleted Items/")
     {
         setText(0, str);
         setIcon(0, WizLoadSkinIcon("trash"));
@@ -194,13 +195,6 @@ public:
     virtual void showContextMenu(CWizCategoryView* pCtrl, QPoint pos)
     {
         pCtrl->showTrashContextMenu(pos);
-    }
-    inline QSize sizeHint(int column) const
-    {
-
-        QSize sz = CWizCategoryViewItem::sizeHint(column);
-        sz.setHeight(sz.height() + 4);
-        return sz;
     }
 };
 
@@ -654,6 +648,20 @@ CWizCategoryViewSearchItem* CWizCategoryView::findSearch()
     //
     return pItem;
 }
+CWizCategoryViewTrashItem* CWizCategoryView::findTrash()
+{
+    int nCount = topLevelItemCount();
+    for (int i = 0; i < nCount; i++)
+    {
+        if (CWizCategoryViewTrashItem* pItem = dynamic_cast<CWizCategoryViewTrashItem*>(topLevelItem(i)))
+        {
+            return pItem;
+        }
+    }
+    //
+    return NULL;
+}
+
 
 void CWizCategoryView::search(const CString& str)
 {
@@ -734,6 +742,11 @@ CWizCategoryViewFolderItem* CWizCategoryView::findFolder(const CString& strLocat
     CWizCategoryViewAllFoldersItem* pAllFolders = findAllFolders();
     if (!pAllFolders)
         return NULL;
+    //
+    if (m_db.IsInDeletedItems(strLocation))
+    {
+        return findTrash();
+    }
     //
     CString strCurrentLocation = "/";
     QTreeWidgetItem* parent = pAllFolders;

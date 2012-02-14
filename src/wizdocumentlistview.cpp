@@ -64,6 +64,11 @@ public:
         const CWizDocumentListViewItem* pOther = dynamic_cast<const CWizDocumentListViewItem*>(&other);
         ATLASSERT(pOther);
         //
+        if (pOther->m_data.tCreated == m_data.tCreated)
+        {
+            return text().compare(other.text(), Qt::CaseInsensitive) < 0;
+        }
+        //
         return pOther->m_data.tCreated < m_data.tCreated;
     }
     void resetAbstract()
