@@ -4,7 +4,7 @@
 #include "wizdocumentlistview.h"
 #include "wizdocumentview.h"
 #include "wizactions.h"
-
+#include "aboutdialog.h"
 
 #include <QDir>
 #include <QMessageBox>
@@ -334,7 +334,8 @@ void MainWindow::on_actionLogout_triggered()
 
 void MainWindow::on_actionAbout_triggered()
 {
-
+    AboutDialog dlg(this);
+    dlg.exec();
 }
 
 #ifndef Q_OS_MAC

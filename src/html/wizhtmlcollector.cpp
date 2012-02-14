@@ -51,6 +51,10 @@ CWizHtmlCollector::CWizHtmlCollector()
 
 void CWizHtmlCollector::StartTag(CWizHtmlTag *pTag, DWORD dwAppData, bool &bAbort)
 {
+    Q_UNUSED(dwAppData);
+    Q_UNUSED(bAbort);
+    //
+    //
     CString strName = pTag->getTagName();
     //
     strName.MakeLower();
@@ -82,6 +86,9 @@ void CWizHtmlCollector::StartTag(CWizHtmlTag *pTag, DWORD dwAppData, bool &bAbor
 
 void CWizHtmlCollector::EndTag(CWizHtmlTag *pTag, DWORD dwAppData, bool &bAbort)
 {
+    Q_UNUSED(dwAppData);
+    Q_UNUSED(bAbort);
+    //
     if (!pTag->isOpening())
     {
         m_ret.push_back(pTag->getTag());
@@ -89,10 +96,16 @@ void CWizHtmlCollector::EndTag(CWizHtmlTag *pTag, DWORD dwAppData, bool &bAbort)
 }
 void CWizHtmlCollector::Characters(const CString &rText, DWORD dwAppData, bool &bAbort)
 {
+    Q_UNUSED(dwAppData);
+    Q_UNUSED(bAbort);
+    //
     m_ret.push_back(rText);
 }
 void CWizHtmlCollector::Comment(const CString &rComment, DWORD dwAppData, bool &bAbort)
 {
+    Q_UNUSED(dwAppData);
+    Q_UNUSED(bAbort);
+    //
     m_ret.push_back(rComment);
 }
 

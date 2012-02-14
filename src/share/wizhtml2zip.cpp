@@ -12,6 +12,8 @@
 
 BOOL WizHtml2Zip(const CString& strUrl, const CString& strHtml, const CString& strResourcePath, long flags, const CString& strMetaText, const CString& strZipFileName)
 {
+    Q_UNUSED(flags);
+    //
     CWizHtmlCollector collector;
     //
     CString strMainHtml = strHtml;

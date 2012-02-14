@@ -10,7 +10,7 @@ QT += network
 QT += webkit
 
 
-TARGET = wiznote
+TARGET = WizNote
 TEMPLATE = app
 
 
@@ -78,6 +78,7 @@ SOURCES += main.cpp\
     share/wizdownloadobjectdata.cpp \
     share/wizdownloadobjectdatadialog.cpp \
     wizdocumenthistory.cpp \
+    aboutdialog.cpp
 
 HEADERS  += mainwindow.h \
     share/wizqthelper.h \
@@ -140,6 +141,7 @@ HEADERS  += mainwindow.h \
     share/wizdownloadobjectdata.h \
     share/wizdownloadobjectdatadialog.h \
     wizdocumenthistory.h \
+    aboutdialog.h
 
 
 mac:HEADERS +=     \
@@ -152,7 +154,8 @@ FORMS    += \
     welcomedialog.ui \
     newfolderdialog.ui \
     newtagdialog.ui \
-    share/wizdownloadobjectdatadialog.ui
+    share/wizdownloadobjectdatadialog.ui \
+    aboutdialog.ui
 
 
 
@@ -166,6 +169,9 @@ RC_FILE = wiznote.rc
 
 TRANSLATIONS = wiznote_zh_CN.ts \
     wiznote_zh_TW.ts
+
+
+
 
 
 

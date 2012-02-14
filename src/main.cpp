@@ -12,8 +12,9 @@
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
+    QApplication::setApplicationName(QObject::tr("WizNote"));
 
-    a.setApplicationName(QObject::tr("WizNote"));
+
 #ifdef Q_WS_WIN32
     QFont f = WizCreateWindowsUIFont(a);
     a.setFont(f);
@@ -25,7 +26,10 @@ int main(int argc, char *argv[])
     iconApp.addFile(WizGetSkinResourceFileName("wiznote24"));
     iconApp.addFile(WizGetSkinResourceFileName("wiznote32"));
     iconApp.addFile(WizGetSkinResourceFileName("wiznote48"));
-    a.setWindowIcon(iconApp);
+    iconApp.addFile(WizGetSkinResourceFileName("wiznote64"));
+    iconApp.addFile(WizGetSkinResourceFileName("wiznote72"));
+    iconApp.addFile(WizGetSkinResourceFileName("wiznote128"));
+    QApplication::setWindowIcon(iconApp);
 
     QTranslator translator;
     QString localName = QLocale::system().name();
