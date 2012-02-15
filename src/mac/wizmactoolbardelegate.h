@@ -72,7 +72,9 @@ public:
     virtual CWizMacToolBarItem* itemFromItemIdentifier(NSString* itemIdentifier) = 0;
     virtual void trigger() = 0;
     virtual void childItemTriggerred(CWizMacToolBarItem* itemChild) = 0;
+    virtual void onActionChanged()  {}
 };
+
 
 
 #endif  //Q_OS_MAC

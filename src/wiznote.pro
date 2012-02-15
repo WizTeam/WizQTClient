@@ -80,7 +80,8 @@ SOURCES += main.cpp\
     wizdocumenthistory.cpp \
     aboutdialog.cpp \
     createaccountdialog.cpp \
-    share/wizcreateaccount.cpp
+    share/wizcreateaccount.cpp \
+    mac/wizmacactionhelper.cpp
 
 HEADERS  += mainwindow.h \
     share/wizqthelper.h \
@@ -145,7 +146,8 @@ HEADERS  += mainwindow.h \
     wizdocumenthistory.h \
     aboutdialog.h \
     createaccountdialog.h \
-    share/wizcreateaccount.h
+    share/wizcreateaccount.h \
+    mac/wizmacactionhelper.h
 
 
 mac:HEADERS +=     \
@@ -174,3 +176,5 @@ RC_FILE = wiznote.rc
 
 TRANSLATIONS = wiznote_zh_CN.ts \
     wiznote_zh_TW.ts
+
+

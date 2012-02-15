@@ -42,6 +42,13 @@
 #include <QPixmap>
 #include "wizmactoolbardelegate.h"
 #include "wizmachelper.h"
+#include "wizmacactionhelper.h"
+
+
+void CWizMacActionHelper::on_action_changed()
+{
+    m_item->onActionChanged();
+}
 
 
 class CWizMacToolBarActionItem : public CWizMacToolBarItem
@@ -50,12 +57,14 @@ public:
     CWizMacToolBarActionItem(QAction* action)
         : m_action(action)
         , m_id(WizGenGUID())
+        , m_item(nil)
     {
-
+        new CWizMacActionHelper(this, action, this);
     }
 private:
     QAction* m_action;
     NSString* m_id;
+    NSToolbarItem* m_item;
 public:
     virtual NSString* itemIdentifier() const
     {
@@ -82,6 +91,8 @@ public:
         [item setTarget : delegate];
         [item setAction : @selector(itemClicked:)];
 
+        m_item = item;
+        //
         return item;
     }
     virtual bool isGroup() const
@@ -115,6 +126,14 @@ public:
     {
         Q_UNUSED(itemChild);
     }
+    virtual void onActionChanged()
+    {
+        if (m_item)
+        {
+            [m_item setEnabled: (m_action->isEnabled() ? YES : NO)];
+        }
+    }
+
 };
 
 
