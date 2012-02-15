@@ -3,16 +3,38 @@
 
 #include <QAbstractButton>
 #include <QMessageBox>
+#include <QDesktopServices>
+#include <QWebFrame>
+#include "CreateAccountDialog.h"
 
 WelcomeDialog::WelcomeDialog(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::WelcomeDialog),
     m_verifyAccount(WIZ_API_URL)
-
 {
     ui->setupUi(this);
     //
     connect(&m_verifyAccount, SIGNAL(done(bool, const CString&)), this, SLOT(verifyAccountDone(bool, const CString&)));
+    //
+    QString localName = QLocale::system().name();
+    CString strDefaultFileName = ::WizGetResourcesPath() + "languages/welcome.htm";
+    CString strLocalFileName = ::WizGetResourcesPath() + "languages/welcome_" + localName + ".htm";
+    CString strFileName = strLocalFileName;
+    if (!PathFileExists(strFileName))
+    {
+        strFileName = strDefaultFileName;
+    }
+    //
+    QPalette pal = palette();
+    QColor color = pal.color(QPalette::Background);
+    //
+    CString strHtml;
+    ::WizLoadUnicodeTextFromFile(strFileName, strHtml);
+    strHtml.replace("ButtonFace", "#" + ::WizColorToString(color.rgb()));
+    //
+    ui->webView->setHtml(strHtml, QUrl::fromLocalFile(strFileName));
+    ui->webView->page()->setLinkDelegationPolicy(QWebPage::DelegateAllLinks);
+    connect(ui->webView, SIGNAL(linkClicked(const QUrl&)), this, SLOT(on_web_linkClicked(const QUrl&)));
     //
     setFixedSize(size());
 }
@@ -53,17 +75,17 @@ void WelcomeDialog::accept()
     m_verifyAccount.verifyAccount(userId(), password());
 }
 
-void WelcomeDialog::verifyAccountDone(bool error, const CString& errorMessage)
+void WelcomeDialog::verifyAccountDone(bool succeeded, const CString& errorMessage)
 {
     enableControls(true);
     //
-    if (error)
+    if (succeeded)
     {
-        QMessageBox::critical(this, "", errorMessage);
+        QDialog::accept();
     }
     else
     {
-        QDialog::accept();
+        QMessageBox::critical(this, "", errorMessage);
     }
 }
 
@@ -72,6 +94,39 @@ void WelcomeDialog::enableControls(bool b)
     ui->editUserId->setEnabled(b);
     ui->editPassword->setEnabled(b);
     ui->buttonBox->setEnabled(b);
+}
+void WelcomeDialog::on_web_linkClicked(const QUrl & url)
+{
+    CString strUrl = url.toString();
+    strUrl.MakeLower();
+    //
+    CString strStart("http://wiz.cn/cmd/");
+    if (strUrl.startsWith(strStart))
+    {
+        strUrl.remove(0, strStart.length());
+        if (strUrl == "view_guide")
+        {
+            QDesktopServices::openUrl(QUrl("http://www.wiz.cn/"));
+        }
+        else if (strUrl == "create_account")
+        {
+            CreateAccountDialog dlg(this);
+            if (QDialog::Accepted != dlg.exec())
+                return;
+            //
+            CString strUserId = dlg.userId();
+            CString strPassword = dlg.password();
+            //
+            ui->editUserId->setText(strUserId);
+            ui->editPassword->setText(strPassword);
+            //
+            QDialog::accept();
+        }
+    }
+    else
+    {
+        QDesktopServices::openUrl(url);
+    }
 }
 
 

@@ -78,7 +78,9 @@ SOURCES += main.cpp\
     share/wizdownloadobjectdata.cpp \
     share/wizdownloadobjectdatadialog.cpp \
     wizdocumenthistory.cpp \
-    aboutdialog.cpp
+    aboutdialog.cpp \
+    createaccountdialog.cpp \
+    share/wizcreateaccount.cpp
 
 HEADERS  += mainwindow.h \
     share/wizqthelper.h \
@@ -141,7 +143,9 @@ HEADERS  += mainwindow.h \
     share/wizdownloadobjectdata.h \
     share/wizdownloadobjectdatadialog.h \
     wizdocumenthistory.h \
-    aboutdialog.h
+    aboutdialog.h \
+    createaccountdialog.h \
+    share/wizcreateaccount.h
 
 
 mac:HEADERS +=     \
@@ -155,7 +159,8 @@ FORMS    += \
     newfolderdialog.ui \
     newtagdialog.ui \
     share/wizdownloadobjectdatadialog.ui \
-    aboutdialog.ui
+    aboutdialog.ui \
+    createaccountdialog.ui
 
 
 
@@ -169,24 +174,3 @@ RC_FILE = wiznote.rc
 
 TRANSLATIONS = wiznote_zh_CN.ts \
     wiznote_zh_TW.ts
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

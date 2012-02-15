@@ -52,6 +52,14 @@ void CWizApiBase::onXmlRpcReturn(const CString& strMethodName, CWizXmlRpcValue& 
     {
         onClientLogout();
     }
+    else if (strMethodName == SyncMethod_CreateAccount)
+    {
+        onCreateAccount();
+    }
+    else if (strMethodName == SyncMethod_GetUserInfo)
+    {
+        onGetUserInfo(ret);
+    }
     else
     {
         ATLASSERT(FALSE);
@@ -121,9 +129,23 @@ void CWizApiBase::onGetUserInfo(CWizXmlRpcValue& ret)
     Q_UNUSED(ret);
 }
 
-BOOL CWizApiBase::callCreateAccount()
+BOOL CWizApiBase::callCreateAccount(const CString& strUserId, const CString& strPassword)
 {
-    return TRUE;
+    CWizApiParamBase param;
+    param.AddString("user_id", MakeXmlRpcUserId(strUserId));
+    param.AddString("password", MakeXmlRpcPassword(strPassword));
+#if defined Q_OS_MAC
+    param.AddString("invite_code", "ae54537f");
+    param.AddString("product_name", "qtMac");
+#elif defined Q_OS_LINUX
+    param.AddString("invite_code", "ae54537f");
+    param.AddString("product_name", "qtLinux");
+#else
+    param.AddString("invite_code", "ae54537f");
+    param.AddString("product_name", "qtWindows");
+#endif
+    //
+    return callXmlRpc(SyncMethod_CreateAccount, &param);
 }
 
 void CWizApiBase::onCreateAccount()

@@ -20,7 +20,7 @@ protected:
 public:
     void startDownload();
 Q_SIGNALS:
-    void downloadOnjectDataDone(bool succeeded);
+    void done(bool succeeded);
 };
 
 BOOL WizDownloadObjectData(CWizDatabase& db, const WIZOBJECTDATA& data, QWidget* parent);

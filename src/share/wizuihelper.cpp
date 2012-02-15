@@ -26,7 +26,7 @@ QWidget* createSearchWidget(CWizSearchBox* searchBox)
     widget->setLayout(layout);
     //
     layout->setSpacing(0);
-    layout->setMargin(2);
+    layout->setMargin(1);
     layout->addWidget(iconLabel);
     layout->addWidget(editSearch);
     layout->setStretch(0, 0);

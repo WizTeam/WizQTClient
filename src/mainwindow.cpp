@@ -131,10 +131,6 @@ void MainWindow::initToolBar()
     m_toolBar->addAction(m_actions->actionFromName("actionNewNote"));
     m_toolBar->addAction(m_actions->actionFromName("actionDeleteCurrentNote"));
     //
-    m_toolBar->addWidget(new CWizFixedSpacer(QSize(20, 1), m_toolBar));
-    //
-    m_toolBar->addAction(m_actions->actionFromName("actionPopupMainMenu"));
-    //
 #if 0
     QAction* pCaptureScreenAction = m_actions->actionFromName("actionCaptureScreen");
     m_actions->buildActionMenu(pCaptureScreenAction, this, ::WizGetAppPath() + "files/mainmenu.ini");
@@ -142,6 +138,10 @@ void MainWindow::initToolBar()
 #endif
     //
     m_toolBar->addWidget(new CWizSpacer(m_toolBar));
+    //
+    m_toolBar->addAction(m_actions->actionFromName("actionPopupMainMenu"));
+    //
+    m_toolBar->addWidget(new CWizFixedSpacer(QSize(20, 1), m_toolBar));
     //
     CWizSearchBox* searchBox = new CWizSearchBox();
     connect(searchBox, SIGNAL(doSearch(const QString&)), this, SLOT(on_search_doSearch(const QString&)));

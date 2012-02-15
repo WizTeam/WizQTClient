@@ -18,7 +18,7 @@ WizDownloadObjectDataDialog::WizDownloadObjectDataDialog(CWizDatabase& db, const
     //
     m_downloader.startDownload();
     //
-    connect(&m_downloader, SIGNAL(downloadOnjectDataDone(bool)), this, SLOT(on_downloader_downloadOnjectDataDone(bool)));
+    connect(&m_downloader, SIGNAL(done(bool)), this, SLOT(on_downloader_downloadObjectDataDone(bool)));
     //
     setFixedSize(size());
 }
@@ -49,7 +49,7 @@ void WizDownloadObjectDataDialog::reject()
     QDialog::reject();
 }
 
-void WizDownloadObjectDataDialog::on_downloader_downloadOnjectDataDone(bool succeeded)
+void WizDownloadObjectDataDialog::on_downloader_downloadObjectDataDone(bool succeeded)
 {
     if (succeeded)
     {

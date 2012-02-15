@@ -3,8 +3,10 @@
 
 #include <QDialog>
 #include "share/wizverifyaccount.h"
+#include "share/wizcreateaccount.h"
 
 class QAbstractButton;
+class QUrl;
 
 namespace Ui {
     class WelcomeDialog;
@@ -32,8 +34,9 @@ public:
 public Q_SLOTS:
     virtual void accept();
 
-private slots:
-    void verifyAccountDone(bool error, const CString& errorMessage);
+public slots:
+    void verifyAccountDone(bool succeeded, const CString& errorMessage);
+    void on_web_linkClicked(const QUrl & url);
 };
 
 #endif // WELCOMEDIALOG_H

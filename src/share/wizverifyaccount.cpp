@@ -16,12 +16,12 @@ void CWizVerifyAccount::onXmlRpcError(const CString& strMethodName, WizXmlRpcErr
     Q_UNUSED(err);
     Q_UNUSED(errorCode);
     //
-    emit done(true, errorMessage);
+    emit done(false, errorMessage);
 }
 
 void CWizVerifyAccount::onClientLogin()
 {
-    emit done(false, "");
+    emit done(true, "");
 }
 
 void CWizVerifyAccount::addErrorLog(const CString& str)

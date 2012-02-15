@@ -16,7 +16,7 @@ void CWizDownloadObjectData::onXmlRpcError(const CString& strMethodName, WizXmlR
 {
     CWizApi::onXmlRpcError(strMethodName, err, errorCode, errorMessage);
     //
-    emit downloadOnjectDataDone(m_bDownloaded);
+    emit done(m_bDownloaded);
 }
 
 //step 1 login
@@ -37,7 +37,7 @@ void CWizDownloadObjectData::onDownloadObjectDataCompleted(const WIZOBJECTDATA& 
 //step 3 logout
 void CWizDownloadObjectData::onClientLogout()
 {
-    emit downloadOnjectDataDone(m_bDownloaded);
+    emit done(m_bDownloaded);
 }
 //
 void CWizDownloadObjectData::startDownload()

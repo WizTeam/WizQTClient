@@ -23,7 +23,7 @@ public:
         m_edit = new QLineEdit(this);
         layout->addWidget(m_edit);
         //
-        m_edit->setStyleSheet("QLineEdit{border-color:#ffffff;border-width:1;border-style:solid;}QLineEdit:hover{border-color:#bbbbbb;border-width:1;border-style:solid;}");
+        m_edit->setStyleSheet("QLineEdit{padding:2 2 2 2;border-color:#ffffff;border-width:1;border-style:solid;}QLineEdit:hover{border-color:#bbbbbb;border-width:1;border-style:solid;}");
         setStyleSheet("border-bottom-width:1;border-bottom-style:solid;border-bottom-color:#bbbbbb");
     }
 private:

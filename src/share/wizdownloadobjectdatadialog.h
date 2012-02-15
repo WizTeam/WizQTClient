@@ -29,7 +29,7 @@ protected:
     virtual void changeObjectDataProgress(int pos);
 public slots:
     virtual void reject();
-    void on_downloader_downloadOnjectDataDone(bool succeeded);
+    void on_downloader_downloadObjectDataDone(bool succeeded);
 public:
     static bool downloadObjectData(CWizDatabase& db, const CString& strAccountsApiURL, const WIZOBJECTDATA& data, QWidget* parent);
 };

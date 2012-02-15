@@ -21,7 +21,7 @@ public:
     virtual void addErrorLog(const CString& str);
 
 Q_SIGNALS:
-    void done(bool error, const CString& errorMessage);
+    void done(bool succeeded, const CString& errorMessage);
 };
 
 

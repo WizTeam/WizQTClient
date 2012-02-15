@@ -19,8 +19,6 @@ const char* const SyncMethod_GetStyleList = "style.getList";
 const char* const SyncMethod_GetDocumentList = "document.getList";
 const char* const SyncMethod_GetAttachmentList = "attachment.getList";
 
-
-
 const char* const SyncMethod_PostDeletedList = "deleted.postList";
 const char* const SyncMethod_PostTagList = "tag.postList";
 const char* const SyncMethod_PostStyleList = "style.postList";
@@ -145,7 +143,7 @@ protected:
     virtual BOOL callGetUserInfo();
     virtual void onGetUserInfo(CWizXmlRpcValue& ret);
     //
-    virtual BOOL callCreateAccount();
+    virtual BOOL callCreateAccount(const CString& strUserId, const CString& strPassword);
     virtual void onCreateAccount();
     //
 protected:
