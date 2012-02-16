@@ -30,6 +30,7 @@
 
 #include "share/wizuihelper.h"
 #include "share/wizsettings.h"
+#include "share/wizanimateaction.h"
 
 MainWindow::MainWindow(CWizDatabase& db, QWidget *parent) :
     QMainWindow(parent),
@@ -48,6 +49,7 @@ MainWindow::MainWindow(CWizDatabase& db, QWidget *parent) :
     m_doc(new CWizDocumentView(*this, this)),
     m_splitter(NULL),
     m_history(new CWizDocumentViewHistory()),
+    m_animateSync(new CWizAnimateAction(this)),
     m_bRestart(false),
     m_bUpdatingSelection(false)
 {
@@ -73,6 +75,9 @@ MainWindow::~MainWindow()
 void MainWindow::initActions()
 {
     m_actions->init();
+    //
+    m_animateSync->setAction(m_actions->actionFromName("actionSync"));
+    m_animateSync->setIcons("sync");
 }
 
 void MainWindow::initMenuBar()
@@ -246,6 +251,8 @@ void MainWindow::syncStarted()
     m_labelStatus->setText("");
     //
     m_statusBar->show();
+    //
+    m_animateSync->startPlay();
 }
 
 void MainWindow::syncDone(bool error)
@@ -257,6 +264,8 @@ void MainWindow::syncDone(bool error)
     //
     m_progressSync->setVisible(false);
     m_labelStatus->setVisible(false);
+    //
+    m_animateSync->stopPlay();
 }
 
 void MainWindow::addLog(const CString& strMsg)

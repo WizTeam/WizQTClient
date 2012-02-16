@@ -7,6 +7,7 @@ class QAction;
 class QMenuBar;
 class QMenu;
 class CWizSettings;
+class CWizAnimateAction;
 struct WIZACTION;
 
 class CWizActions
@@ -23,6 +24,7 @@ private:
 public:
     void init();
     QAction* actionFromName(const CString& strActionName);
+    CWizAnimateAction* animateActionFromName(const CString& strActionName);
     //
     QMenu* toMenu(QWidget* parent, CWizSettings& settings, const CString& strSection);
     void buildMenu(QMenu* pMenu, CWizSettings& settings, const CString& strSection);

@@ -23,6 +23,7 @@ class CWizActions;
 class CWizDocumentViewHistory;
 class CWizFixedSpacer;
 class CWizSplitter;
+class CWizAnimateAction;
 
 
 class MainWindow
@@ -68,6 +69,8 @@ private:
     //
     CWizDocumentViewHistory* m_history;
     //
+    CWizAnimateAction* m_animateSync;
+    //
     bool m_bRestart;
     //
     bool m_bUpdatingSelection;
@@ -80,7 +83,6 @@ private:
 public:
     virtual void closeEvent(QCloseEvent *);
     virtual QSize sizeHint() const;
-
 public:
     CWizDatabase* Database() { return &m_db; }
     MainWindow* Window() { return this; }

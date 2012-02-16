@@ -3,6 +3,7 @@
 #include <QMenuBar>
 #include "share/wizmisc.h"
 #include "share/wizsettings.h"
+#include "share/wizanimateaction.h"
 
 
 struct WIZACTION
@@ -99,6 +100,10 @@ QAction* CWizActions::actionFromName(const CString& strActionName)
     //
     WIZACTION data = {strActionName, strActionName};
     return addAction(data);
+}
+CWizAnimateAction* CWizActions::animateActionFromName(const CString& strActionName)
+{
+    return dynamic_cast<CWizAnimateAction*>(actionFromName(strActionName));
 }
 
 

@@ -135,13 +135,13 @@ BOOL CWizApiBase::callCreateAccount(const CString& strUserId, const CString& str
     param.AddString("user_id", MakeXmlRpcUserId(strUserId));
     param.AddString("password", MakeXmlRpcPassword(strPassword));
 #if defined Q_OS_MAC
-    param.AddString("invite_code", "ae54537f");
+    param.AddString("invite_code", "129ce11c");
     param.AddString("product_name", "qtMac");
 #elif defined Q_OS_LINUX
-    param.AddString("invite_code", "ae54537f");
+    param.AddString("invite_code", "7abd8f4a");
     param.AddString("product_name", "qtLinux");
 #else
-    param.AddString("invite_code", "ae54537f");
+    param.AddString("invite_code", "8480c6d7");
     param.AddString("product_name", "qtWindows");
 #endif
     //
@@ -833,7 +833,7 @@ unsigned int CWizApi::getCountPerPage() const
 }
 unsigned int CWizApi::getPartSize() const
 {
-    return 10 * 1024;
+    return 512 * 1024;
 }
 BOOL CWizApi::downloadNextPartData()
 {
@@ -995,8 +995,15 @@ BOOL WIZOBJECTPARTDATA::LoadFromXmlRpc(CWizXmlRpcStructValue& data)
 ///////////////////////////////////////////////////////////////////
 
 #define WIZ_API_VERSION     "3"
-#define WIZ_CLIENT_TYPE     "WIN"
 #define WIZ_CLIENT_VERSION  "2.0.0.0"
+
+#if defined Q_OS_MAC
+#define WIZ_CLIENT_TYPE     "QTWIN"
+#elif defined Q_OS_LINUX
+#define WIZ_CLIENT_TYPE     "QTLINUX"
+#else
+#define WIZ_CLIENT_TYPE     "QTMAC"
+#endif
 
 
 CWizApiParamBase::CWizApiParamBase()
