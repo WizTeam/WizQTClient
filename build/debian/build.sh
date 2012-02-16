@@ -15,7 +15,7 @@ cp -r $source_root/share $build_dir
 cp -r debian $build_dir/src
 
 # files need install
-echo "wiznote /usr/bin" >> ${build_dir}/src/debian/install
+echo "WizNote /usr/bin" >> ${build_dir}/src/debian/install
 echo "../share/wiznote /usr/share" >> ${build_dir}/src/debian/install
 
 cd $build_dir/src
