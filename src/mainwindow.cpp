@@ -88,7 +88,6 @@ void MainWindow::initToolBar()
 {
 #ifdef Q_OS_MAC
     //
-
     CWizMacToolBar* toolbar = new CWizMacToolBar(this);
     //
     QActionGroup* groupNavigate = new QActionGroup(this);

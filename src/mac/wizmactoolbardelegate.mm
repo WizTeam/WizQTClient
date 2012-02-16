@@ -54,14 +54,16 @@ void CWizMacActionHelper::on_action_changed()
 class CWizMacToolBarActionItem : public CWizMacToolBarItem
 {
 public:
-    CWizMacToolBarActionItem(QAction* action)
-        : m_action(action)
+    CWizMacToolBarActionItem(CWizMacToolBarDelegate* delegate, QAction* action)
+        : m_delegate(delegate)
+        , m_action(action)
         , m_id(WizGenGUID())
         , m_item(nil)
     {
         new CWizMacActionHelper(this, action, this);
     }
 private:
+    CWizMacToolBarDelegate* m_delegate;
     QAction* m_action;
     NSString* m_id;
     NSToolbarItem* m_item;
@@ -70,7 +72,7 @@ public:
     {
         return m_id;
     }
-    virtual NSToolbarItem* toItem(CWizMacToolBarDelegate* delegate)
+    virtual NSToolbarItem* toItem()
     {
         NSString* itemId = itemIdentifier();
         //
@@ -88,65 +90,52 @@ public:
             [item setImage:image];
         }
 
-        [item setTarget : delegate];
+        [item setTarget : m_delegate];
         [item setAction : @selector(itemClicked:)];
+        [item setEnabled: (m_action->isEnabled() ? YES : NO)];
 
         m_item = item;
         //
         return item;
     }
-    virtual bool isGroup() const
-    {
-        return false;
-    }
-    virtual int childCount() const
-    {
-        return 0;
-    }
-    virtual CWizMacToolBarItem* childItem(int index) const
-    {
-        Q_UNUSED(index);
-        return nil;
-    }
-    virtual int indexOf(CWizMacToolBarItem* item) const
-    {
-        Q_UNUSED(item);
-        return -1;
-    }
-    virtual CWizMacToolBarItem* itemFromItemIdentifier(NSString* itemIdentifier)
-    {
-        Q_UNUSED(itemIdentifier);
-        return NULL;
-    }
     virtual void trigger()
     {
         m_action->trigger();
-    }
-    virtual void childItemTriggerred(CWizMacToolBarItem* itemChild)
-    {
-        Q_UNUSED(itemChild);
     }
     virtual void onActionChanged()
     {
         if (m_item)
         {
             [m_item setEnabled: (m_action->isEnabled() ? YES : NO)];
+            //
+            NSString* itemId = [m_item itemIdentifier];
+            qDebug() << WizToQString(itemId);
+            CWizMacToolBarItem* item = [m_delegate findItemGroup: itemId];
+            if (item)
+            {
+                CWizMacToolBarItem* itemChild = item->childItemFromItemIdentifier(itemId);
+                if (itemChild)
+                {
+                    item->setChildItemEnabled(itemChild, m_action->isEnabled());
+                }
+            }
         }
     }
-
 };
 
 
 class CWizMacToolBarActionGroupItem : public CWizMacToolBarItem
 {
 public:
-    CWizMacToolBarActionGroupItem(QActionGroup* actionGroup)
-        : m_actionGroup(actionGroup)
+    CWizMacToolBarActionGroupItem(CWizMacToolBarDelegate* delegate, QActionGroup* actionGroup)
+        : m_delegate(delegate)
+        , m_actionGroup(actionGroup)
         , m_groupItem(nil)
         , m_id(WizGenGUID())
     {
     }
 private:
+    CWizMacToolBarDelegate* m_delegate;
     QActionGroup* m_actionGroup;
     NSToolbarItemGroup* m_groupItem;
     NSString* m_id;
@@ -156,7 +145,7 @@ public:
     {
         return m_id;
     }
-    virtual NSToolbarItem* toItem(CWizMacToolBarDelegate* delegate)
+    virtual NSToolbarItem* toItem()
     {
         m_subItems.clear();
         //
@@ -177,8 +166,8 @@ public:
         {
             QAction* action = actions.at(i);
             //
-            CWizMacToolBarActionItem* item = new CWizMacToolBarActionItem(action);
-            NSToolbarItem *toolbarItem = item->toItem(delegate);
+            CWizMacToolBarActionItem* item = new CWizMacToolBarActionItem(m_delegate, action);
+            NSToolbarItem *toolbarItem = item->toItem();
             //
             [groupItems addObject:toolbarItem];
             //
@@ -189,6 +178,9 @@ public:
                 NSImage* image = [toolbarItem image];
                 [groupView setImage:image forSegment:i];
             }
+            //
+            [groupView setEnabled: (action->isEnabled() ? YES : NO) forSegment:i];
+
             //
             m_subItems.append(item);
         }
@@ -230,7 +222,7 @@ public:
     {
         return m_subItems.indexOf(item);
     }
-    virtual CWizMacToolBarItem* itemFromItemIdentifier(NSString* itemIdentifier)
+    virtual CWizMacToolBarItem* childItemFromItemIdentifier(NSString* itemIdentifier)
     {
         foreach (CWizMacToolBarItem* item, m_subItems)
         {
@@ -239,9 +231,6 @@ public:
         }
         //
         return NULL;
-    }
-    virtual void trigger()
-    {
     }
     virtual void childItemTriggerred(CWizMacToolBarItem* itemChild)
     {
@@ -260,6 +249,24 @@ public:
             if (index < [control segmentCount])
             {
                 [control setSelected:NO forSegment:index];
+            }
+            //
+        }
+    }
+    virtual void setChildItemEnabled(CWizMacToolBarItem* itemChild, bool enabled)
+    {
+        int index = indexOf(itemChild);
+        if (index == -1)
+            return;
+        //
+        NSView* view = [m_groupItem view];
+        if ([view isKindOfClass:[NSSegmentedControl class]])
+        {
+            NSSegmentedControl* control = (NSSegmentedControl *)view;
+            //
+            if (index < [control segmentCount])
+            {
+                [control setEnabled: (enabled ? YES : NO) forSegment:index];
             }
             //
         }
@@ -299,42 +306,10 @@ public:
         //
         return @"";
     }
-    virtual NSToolbarItem* toItem(CWizMacToolBarDelegate* delegate)
+    virtual NSToolbarItem* toItem()
     {
-        Q_UNUSED(delegate);
-        //
         assert(false);
         return nil;
-    }
-    virtual bool isGroup() const
-    {
-        return false;
-    }
-    virtual int childCount() const
-    {
-        return 0;
-    }
-    virtual CWizMacToolBarItem* childItem(int index) const
-    {
-        Q_UNUSED(index);
-        return nil;
-    }
-    virtual int indexOf(CWizMacToolBarItem* item) const
-    {
-        Q_UNUSED(item);
-        return -1;
-    }
-    virtual CWizMacToolBarItem* itemFromItemIdentifier(NSString* itemIdentifier)
-    {
-        Q_UNUSED(itemIdentifier);
-        return NULL;
-    }
-    virtual void trigger()
-    {
-    }
-    virtual void childItemTriggerred(CWizMacToolBarItem* itemChild)
-    {
-        Q_UNUSED(itemChild);
     }
 };
 
@@ -343,8 +318,9 @@ public:
 class CWizMacToolBarSearchItem : public CWizMacToolBarItem
 {
 public:
-    CWizMacToolBarSearchItem(const QString& label, const QString& tooltip)
-        : m_id(WizGenGUID())
+    CWizMacToolBarSearchItem(CWizMacToolBarDelegate* delegate, const QString& label, const QString& tooltip)
+        : m_delegate(delegate)
+        , m_id(WizGenGUID())
         , m_searchFieldOutlet(nil)
         , m_strLabel(label)
         , m_strTooltip(tooltip)
@@ -352,6 +328,7 @@ public:
     {
     }
 private:
+    CWizMacToolBarDelegate* m_delegate;
     NSString* m_id;
     NSSearchField* m_searchFieldOutlet;
     QString m_strLabel;
@@ -361,7 +338,7 @@ public:
     {
         return m_id;
     }
-    virtual NSToolbarItem* toItem(CWizMacToolBarDelegate* delegate)
+    virtual NSToolbarItem* toItem()
     {
         NSString* itemId = itemIdentifier();
         //
@@ -376,7 +353,7 @@ public:
         [toolbarItem setToolTip: tooltipString];
 
         m_searchFieldOutlet = [[NSSearchField alloc] initWithFrame:NSRectFromString(@"{0, 0}, {150, 26}")];
-        [m_searchFieldOutlet setDelegate: delegate];
+        [m_searchFieldOutlet setDelegate: m_delegate];
         // Use a custom view, a text field, for the search item
         [toolbarItem setView: m_searchFieldOutlet];
         [toolbarItem setMinSize:NSMakeSize(30, NSHeight([m_searchFieldOutlet frame]))];
@@ -384,36 +361,6 @@ public:
         //
         //
         return toolbarItem;
-    }
-    virtual bool isGroup() const
-    {
-        return false;
-    }
-    virtual int childCount() const
-    {
-        return 0;
-    }
-    virtual CWizMacToolBarItem* childItem(int index) const
-    {
-        Q_UNUSED(index);
-        return nil;
-    }
-    virtual int indexOf(CWizMacToolBarItem* item) const
-    {
-        Q_UNUSED(item);
-        return -1;
-    }
-    virtual CWizMacToolBarItem* itemFromItemIdentifier(NSString* itemIdentifier)
-    {
-        Q_UNUSED(itemIdentifier);
-        return NULL;
-    }
-    virtual void trigger()
-    {
-    }
-    virtual void childItemTriggerred(CWizMacToolBarItem* itemChild)
-    {
-        Q_UNUSED(itemChild);
     }
 };
 
@@ -525,12 +472,12 @@ NSMutableArray *itemIdentifiers(const QList<CWizMacToolBarItem *> *items, bool c
 
 - (void)addActionGroup:(QActionGroup *)actionGroup
 {
-    items->append(new CWizMacToolBarActionGroupItem(actionGroup));
+    items->append(new CWizMacToolBarActionGroupItem(self, actionGroup));
 }
 
 - (void)addAction:(QAction *)action
 {
-    items->append(new CWizMacToolBarActionItem(action));
+    items->append(new CWizMacToolBarActionItem(self, action));
 }
 
 
@@ -541,7 +488,7 @@ NSMutableArray *itemIdentifiers(const QList<CWizMacToolBarItem *> *items, bool c
 
 - (void)addSearch:(const QString&)label tooltip:(const QString&)tooltip
 {
-    items->append(new CWizMacToolBarSearchItem(label, tooltip));
+    items->append(new CWizMacToolBarSearchItem(self, label, tooltip));
 }
 
 
@@ -564,7 +511,7 @@ NSMutableArray *itemIdentifiers(const QList<CWizMacToolBarItem *> *items, bool c
     if (item == NULL)
         return nil;
     //
-    return item->toItem(self);
+    return item->toItem();
 }
 
 - (CWizMacToolBarItem*) itemFromItemIdentifierWithChildren: (NSString*)itemIdentifier
@@ -578,7 +525,7 @@ NSMutableArray *itemIdentifiers(const QList<CWizMacToolBarItem *> *items, bool c
         //
         if (item->isGroup())
         {
-            CWizMacToolBarItem* subItem = item->itemFromItemIdentifier(itemIdentifier);
+            CWizMacToolBarItem* subItem = item->childItemFromItemIdentifier(itemIdentifier);
             if (subItem)
                 return subItem;
         }
@@ -594,7 +541,7 @@ NSMutableArray *itemIdentifiers(const QList<CWizMacToolBarItem *> *items, bool c
         if (!item->isGroup())
             continue;
         //
-        CWizMacToolBarItem* subItem = item->itemFromItemIdentifier(itemIdentifier);
+        CWizMacToolBarItem* subItem = item->childItemFromItemIdentifier(itemIdentifier);
         if (subItem)
             return item;
     }

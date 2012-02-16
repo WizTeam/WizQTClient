@@ -64,15 +64,17 @@ class CWizMacToolBarItem : public QObject
 {
 public:
     virtual NSString* itemIdentifier() const = 0;
-    virtual NSToolbarItem* toItem(CWizMacToolBarDelegate* delegate) = 0;
-    virtual bool isGroup() const = 0;
-    virtual int childCount() const = 0;
-    virtual CWizMacToolBarItem* childItem(int index) const = 0;
-    virtual int indexOf(CWizMacToolBarItem* item) const = 0;
-    virtual CWizMacToolBarItem* itemFromItemIdentifier(NSString* itemIdentifier) = 0;
-    virtual void trigger() = 0;
-    virtual void childItemTriggerred(CWizMacToolBarItem* itemChild) = 0;
-    virtual void onActionChanged()  {}
+    virtual NSToolbarItem* toItem() = 0;
+    virtual void trigger() { }
+    virtual void onActionChanged()  { }
+    //
+    virtual bool isGroup() const { return false; }
+    virtual int childCount() const { return 0; }
+    virtual CWizMacToolBarItem* childItem(int index) const { Q_UNUSED(index); return NULL; }
+    virtual int indexOf(CWizMacToolBarItem* item) const { Q_UNUSED(item); return -1; }
+    virtual CWizMacToolBarItem* childItemFromItemIdentifier(NSString* itemIdentifier)  { Q_UNUSED(itemIdentifier); return NULL; }
+    virtual void childItemTriggerred(CWizMacToolBarItem* itemChild) { Q_UNUSED(itemChild); }
+    virtual void setChildItemEnabled(CWizMacToolBarItem* itemChild, bool enabled) { Q_UNUSED(itemChild); Q_UNUSED(enabled); }
 };
 
 
