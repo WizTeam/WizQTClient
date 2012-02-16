@@ -172,6 +172,7 @@ mac:LIBS += -framework Cocoa -framework Carbon
 
 
 RC_FILE = wiznote.rc
+ICON=images/wiznote.icns
 
 
 TRANSLATIONS = wiznote_zh_CN.ts \

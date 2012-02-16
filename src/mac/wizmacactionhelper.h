@@ -4,6 +4,8 @@
 #include <QtGlobal>
 #include <QtCore/QObject>
 
+#ifdef Q_OS_MAC
+
 class CWizMacToolBarItem;
 class QAction;
 
@@ -17,5 +19,17 @@ private:
 public slots:
     void on_action_changed();
 };
+
+#else
+
+//
+//temp class for avoid moc tool error
+//
+class CWizMacActionHelper : public QObject
+{
+    Q_OBJECT
+};
+
+#endif
 
 #endif // WIZMACACTIONHELPER_H
