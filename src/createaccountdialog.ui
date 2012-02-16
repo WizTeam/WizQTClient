@@ -23,7 +23,7 @@
     </rect>
    </property>
    <property name="text">
-    <string>&amp;User ID: (Email)</string>
+    <string>&amp;User ID (Email):</string>
    </property>
    <property name="buddy">
     <cstring>editUserId</cstring>
