@@ -146,9 +146,7 @@ void MainWindow::initToolBar()
     connect(searchBox, SIGNAL(doSearch(const QString&)), this, SLOT(on_search_doSearch(const QString&)));
     m_toolBar->addWidget(searchBox);
     //
-#ifndef Q_WS_MAC
     m_toolBar->addWidget(new CWizFixedSpacer(QSize(2, 1), m_toolBar));
-#endif
     //
     m_toolBar->setStyle(WizGetStyle());
 #endif
@@ -202,6 +200,8 @@ void MainWindow::initStatusBar()
     m_labelStatus->setVisible(false);
     //
     m_statusBar->hide();
+    //
+    //m_statusBar->setStyle(WizGetStyle());
 }
 
 void MainWindow::closeEvent(QCloseEvent *e)
