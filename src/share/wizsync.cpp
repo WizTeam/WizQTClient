@@ -36,6 +36,7 @@ const int DOWNLOAD_OBJECT_STEP_COUNT                 = progressObjectDownloaded 
 
 CWizSync::CWizSync(CWizDatabase& db, const CString& strAccountsApiURL, CWizSyncEvents& events)
     : CWizApi(db, strAccountsApiURL, events)
+    , m_error(false)
     , m_nAllDocumentsNeedToBeDownloadedCount(0)
     , m_bDocumentInfoError(FALSE)
     , m_nDocumentMaxVersion(-1)
@@ -49,6 +50,8 @@ void CWizSync::startSync()
 {
     if (isSyncing())
         return;
+    //
+    m_error = false;
     //
     m_events.syncStarted();
     //
@@ -80,6 +83,8 @@ void CWizSync::startSync()
 void CWizSync::onXmlRpcError(const CString& strMethodName, WizXmlRpcError err, int errorCode, const CString& errorMessage)
 {
     CWizApi::onXmlRpcError(strMethodName, err, errorCode, errorMessage);
+    //
+    m_error = true;
     //
     if (strMethodName != SyncMethod_ClientLogout)
     {
@@ -298,7 +303,7 @@ void CWizSync::onClientLogout()
     changeProgress(progressDone);
 
     addLog("sync done");
-    m_events.syncDone(true);
+    m_events.syncDone(m_error);
 }
 
 ///////////////

@@ -60,13 +60,21 @@ public:
         , m_id(WizGenGUID())
         , m_item(nil)
     {
+        m_nsImages = [[NSMutableDictionary alloc] init];
+        //
         new CWizMacActionHelper(this, action, this);
     }
+    virtual ~CWizMacToolBarActionItem()
+    {
+        [m_nsImages release];
+    }
+
 private:
     CWizMacToolBarDelegate* m_delegate;
     QAction* m_action;
     NSString* m_id;
     NSToolbarItem* m_item;
+    NSMutableDictionary* m_nsImages;
 public:
     virtual NSString* itemIdentifier() const
     {
@@ -119,7 +127,36 @@ public:
                     item->setChildItemEnabled(itemChild, m_action->isEnabled());
                 }
             }
+            //
+            QIcon icon = m_action->icon();
+            qDebug() << icon.cacheKey();
+            //
+            NSImage* img = iconToNSImage(icon);
+            if (img)
+            {
+                [m_item setImage:img];
+            }
         }
+    }
+    NSImage* iconToNSImage(const QIcon& icon)
+    {
+        qint64 k = icon.cacheKey();
+        NSString* key = [NSString stringWithFormat:@"%qi", k];
+        //
+        NSObject* obj = [m_nsImages objectForKey:key];
+        if (obj)
+        {
+            if ([obj isKindOfClass: [NSImage class]])
+            {
+                return (NSImage *)obj;
+            }
+        }
+        //
+        NSImage* img = WizToNSImage(icon);
+        //
+        [m_nsImages setObject:img forKey:key];
+        //
+        return img;
     }
 };
 

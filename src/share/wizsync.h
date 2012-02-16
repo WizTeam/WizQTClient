@@ -13,6 +13,7 @@ public:
 public:
     void startSync();
 private:
+    bool m_error;
     size_t m_nAllDocumentsNeedToBeDownloadedCount;
     BOOL m_bDocumentInfoError;
     __int64 m_nDocumentMaxVersion;
