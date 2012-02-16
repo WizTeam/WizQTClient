@@ -5,7 +5,7 @@
 #include <QMessageBox>
 #include <QDesktopServices>
 #include <QWebFrame>
-#include "CreateAccountDialog.h"
+#include "createaccountdialog.h"
 
 WelcomeDialog::WelcomeDialog(QWidget *parent) :
     QDialog(parent),
