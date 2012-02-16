@@ -21,6 +21,7 @@
 #include <QAction>
 #include <QDebug>
 #include <QBoxLayout>
+#include <share/wizcommonui.h>
 
 #include "mac/wizmactoolbar.h"
 
@@ -200,8 +201,6 @@ void MainWindow::initStatusBar()
     m_labelStatus->setVisible(false);
     //
     m_statusBar->hide();
-    //
-    //m_statusBar->setStyle(WizGetStyle());
 }
 
 void MainWindow::closeEvent(QCloseEvent *e)
@@ -530,16 +529,11 @@ QObject* MainWindow::CreateWizObject(const QString& strObjectID)
     CString str(strObjectID);
     if (0 == str.CompareNoCase("WizKMControls.WizCommonUI"))
     {
-        return this;
+        static CWizCommonUI* commonUI = new CWizCommonUI(this);
+        return commonUI;
     }
     //
     return NULL;
-}
-QString MainWindow::LoadTextFromFile(const QString& strFileName)
-{
-    CString strText;
-    ::WizLoadUnicodeTextFromFile(strFileName, strText);
-    return strText;
 }
 
 

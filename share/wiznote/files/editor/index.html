@@ -179,8 +179,13 @@
         }
         //
         function autoPaste() {
-            alert("paste");
-            return false;
+            var imageFileName = objCommon.ClipboardToImage(0, "");
+            if (imageFileName == null || imageFileName == "")
+                return false;
+            //
+            var html = "<img border=\"0\" src=\"file:///" + imageFileName + "\" />";
+            editor.execCommand("inserthtml", html);
+            return true;
         }
         
     </script>

@@ -688,7 +688,7 @@ bool CWizCategoryView::acceptDocument(const WIZDOCUMENTDATA& document)
     if (items.empty())
         return false;
     //
-    CWizCategoryViewFolderItem* pItem = dynamic_cast<CWizCategoryViewFolderItem*>(items.first());
+    CWizCategoryViewItem* pItem = dynamic_cast<CWizCategoryViewItem*>(items.first());
     if (!pItem)
         return false;
     //

@@ -81,7 +81,8 @@ SOURCES += main.cpp\
     aboutdialog.cpp \
     createaccountdialog.cpp \
     share/wizcreateaccount.cpp \
-    mac/wizmacactionhelper.cpp
+    mac/wizmacactionhelper.cpp \
+    share/wizcommonui.cpp
 
 HEADERS  += mainwindow.h \
     share/wizqthelper.h \
@@ -147,7 +148,8 @@ HEADERS  += mainwindow.h \
     aboutdialog.h \
     createaccountdialog.h \
     share/wizcreateaccount.h \
-    mac/wizmacactionhelper.h
+    mac/wizmacactionhelper.h \
+    share/wizcommonui.h
 
 
 mac:HEADERS +=     \
@@ -177,5 +179,3 @@ ICON=images/wiznote.icns
 
 TRANSLATIONS = wiznote_zh_CN.ts \
     wiznote_zh_TW.ts
-
-

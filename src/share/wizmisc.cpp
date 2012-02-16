@@ -2482,3 +2482,41 @@ CString WizMakeValidFileNameNoPathReturn(const CString& strFileName)
     //
     return strNew;
 }
+
+
+
+CString WizStringArrayGetValue(const CWizStdStringArray& arrayText, const CString& valueName)
+{
+    CString strValueName = valueName + "=";
+    int nValueNameLen = strValueName.GetLength();
+    //
+    size_t nCount = arrayText.size();
+    for (size_t i = 0; i < nCount; i++)
+    {
+        CString strLine = arrayText[i];
+        if (strLine.startsWith(strValueName))
+        {
+            CString str = strLine.Right(strLine.GetLength() - nValueNameLen);
+            str.Trim();
+            return str;
+        }
+    }
+    //
+    return CString();
+}
+
+void WizCommandLineToStringArray(const CString& commandLine, CWizStdStringArray& arrayLine)
+{
+    CString strCommandLine(commandLine);
+    //
+    strCommandLine.Insert(0, ' ');
+    //
+    WizSplitTextToArray(strCommandLine, _T(" /"), FALSE, arrayLine);
+}
+CString WizGetCommandLineValue(const CString& strCommandLine, const CString& strKey)
+{
+    CWizStdStringArray arrayLine;
+    WizCommandLineToStringArray(strCommandLine, arrayLine);
+    //
+    return WizStringArrayGetValue(arrayLine, strKey);
+}

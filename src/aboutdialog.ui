@@ -29,13 +29,13 @@
     <set>QDialogButtonBox::Ok</set>
    </property>
   </widget>
-  <widget class="QLabel" name="label">
+  <widget class="QLabel" name="labelIcon">
    <property name="geometry">
     <rect>
      <x>20</x>
      <y>20</y>
-     <width>181</width>
-     <height>201</height>
+     <width>128</width>
+     <height>128</height>
     </rect>
    </property>
    <property name="text">

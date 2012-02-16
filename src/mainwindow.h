@@ -110,8 +110,6 @@ public slots:
     //interface WizExplorerApp;
     QObject* CreateWizObject(const QString& strObjectID);
     //interface WizExplorerWindow
-    //interface WizKMControls.WizCommonUI;
-    QString LoadTextFromFile(const QString& strFileName);
 
     /*
     STDMETHOD(get_Database)(IDispatch** pVal);

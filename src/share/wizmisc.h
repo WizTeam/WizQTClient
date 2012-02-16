@@ -59,6 +59,11 @@ void WizStringArrayEraseEmptyLine(CWizStdStringArray& arrayText);
 void WizStringArrayRemoveMultiElement(CWizStdStringArray& arrayText);
 void WizStringArrayRemoveMultiElementNoCase(CWizStdStringArray& arrayText);
 
+
+CString WizStringArrayGetValue(const CWizStdStringArray& arrayText, const CString& valueName);
+void WizCommandLineToStringArray(const CString& commandLine, CWizStdStringArray& arrayLine);
+CString WizGetCommandLineValue(const CString& strCommandLine, const CString& strKey);
+
 BOOL WizStringSimpleSplit(const CString& str, char ch, CString& strLeft, CString& strRight);
 
 CString WizDateToLocalString(const COleDateTime& t);
