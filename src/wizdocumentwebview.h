@@ -16,6 +16,7 @@ public:
 private:
     CWizExplorerApp& m_app;
     bool m_bInited;
+    bool m_bLocked;
     bool m_bViewDocumentWhileFinished;
     CString m_strHtmlFileName;
     WIZDOCUMENTDATA m_data;
@@ -28,6 +29,7 @@ public:
     bool newDocument();
     const WIZDOCUMENTDATA& document() { return m_data; }
 public slots:
+    void on_unlockBtnCliked();
     void on_web_populateJavaScriptWindowObject();
     void on_web_loadFinished(bool ok);
     void on_web_linkClicked(const QUrl & url);

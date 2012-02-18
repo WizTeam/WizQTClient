@@ -107,6 +107,7 @@
                 }
                 //
                 setEditorHtml(html);
+                lockDocument();
                 //
                 return true;
             }
@@ -115,6 +116,17 @@
                 return false;
             }
         }
+
+        function lockDocument() {
+            var bar = document.getElementsByClassName("edui-editor-toolbarbox")[0].style.display = "none";
+            editor.document.body.contentEditable = false;
+        }
+
+        function unlockDocument() {
+            var bar = document.getElementsByClassName("edui-editor-toolbarbox")[0].style.display = "block";
+            editor.document.body.contentEditable = true;
+        }
+
         //
         function updateDocument(objDocument, html, url, falgs) {
             try {

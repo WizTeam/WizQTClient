@@ -5,6 +5,9 @@
 #include <QWidget>
 #endif
 
+#include <QLineEdit>
+#include <QPushButton>
+
 #ifndef WIZDEF_H
 #include "wizdef.h"
 #endif
@@ -14,7 +17,29 @@ class CWizDocumentWebView;
 class CWizDatabase;
 //
 
-class CWizTitleContainer;
+class CWizTitleContainer
+    : public QWidget
+{
+    Q_OBJECT;
+
+public:
+    CWizTitleContainer(QWidget* parent);
+
+private:
+    QLineEdit* m_edit;
+
+    bool m_bLocked;
+    QPushButton* m_lockBtn;
+
+public:
+    QLineEdit* edit() const { return m_edit; }
+    QPushButton* unlock() const { return m_lockBtn; }
+    void setLock();
+    void setText(const QString& str) { m_edit->setText(str); }
+
+public slots:
+    void on_unlockBtnClicked();
+};
 
 class CWizDocumentView
     : public QWidget
