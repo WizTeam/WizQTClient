@@ -8,3 +8,4 @@ Makefile
 .obj/
 WizNote*
 tags
+cscope.*
