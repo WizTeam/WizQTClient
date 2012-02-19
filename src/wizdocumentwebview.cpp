@@ -13,6 +13,7 @@ CWizDocumentWebView::CWizDocumentWebView(CWizExplorerApp& app, QWidget* parent /
     , m_app(app)
     , m_bInited(false)
     , m_bViewDocumentWhileFinished(false)
+    , m_bLocked(true)
 {
 }
 
@@ -74,11 +75,12 @@ bool CWizDocumentWebView::viewDocument(const WIZDOCUMENTDATA& doc)
     //
     if (m_bInited)
     {
+        m_bLocked = true;
         return viewDocumentInEditor();
     }
     else
     {
-        m_bViewDocumentWhileFinished = true;
+       m_bViewDocumentWhileFinished = true;
        init();
        return true;
     }
@@ -101,6 +103,20 @@ bool CWizDocumentWebView::viewDocumentInEditor()
         strScript = strScript.arg(m_data.strGUID, m_strHtmlFileName);
     }
     return page()->mainFrame()->evaluateJavaScript(strScript).toBool();
+}
+
+void CWizDocumentWebView::on_unlockBtnCliked()
+{
+    if (m_bLocked) {
+        // show toolbar, remove content lock
+        CString strScript("unlockDocument()");
+        page()->mainFrame()->evaluateJavaScript(strScript);
+        m_bLocked = false;
+    } else {
+        CString strScript("lockDocument()");
+        page()->mainFrame()->evaluateJavaScript(strScript);
+        m_bLocked = true;
+    }
 }
 
 void CWizDocumentWebView::on_web_populateJavaScriptWindowObject()

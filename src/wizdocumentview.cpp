@@ -6,32 +6,49 @@
 #include <QWebFrame>
 
 #include <QBoxLayout>
-#include <QLineEdit>
 
 
-class CWizTitleContainer : public QWidget
-{
-public:
-    CWizTitleContainer(QWidget* parent)
+CWizTitleContainer::CWizTitleContainer(QWidget* parent)
         : QWidget(parent)
-    {
-        QBoxLayout* layout = new QBoxLayout(QBoxLayout::TopToBottom, this);
-        setLayout(layout);
-        layout->setMargin(0);
+        , m_bLocked(true)
+{
+    //QBoxLayout* layout = new QBoxLayout(QBoxLayout::TopToBottom, this);
+    QHBoxLayout* layout = new QHBoxLayout(this);
+    setLayout(layout);
+    layout->setMargin(0);
 
-        setContentsMargins(4, 4, 4, 4);
-        m_edit = new QLineEdit(this);
-        layout->addWidget(m_edit);
-        //
-        m_edit->setStyleSheet("QLineEdit{padding:2 2 2 2;border-color:#ffffff;border-width:1;border-style:solid;}QLineEdit:hover{border-color:#bbbbbb;border-width:1;border-style:solid;}");
-        setStyleSheet("border-bottom-width:1;border-bottom-style:solid;border-bottom-color:#bbbbbb");
+    setContentsMargins(4, 4, 4, 4);
+
+    m_edit = new QLineEdit(this);
+    QIcon icon(WizGetSkinResourceFileName("lock"));
+    m_lockBtn = new QPushButton(icon, "", this);
+
+    layout->addWidget(m_edit);
+    layout->addWidget(m_lockBtn);
+    //
+    m_edit->setStyleSheet("QLineEdit{padding:2 2 2 2;border-color:#ffffff;border-width:1;border-style:solid;}QLineEdit:hover{border-color:#bbbbbb;border-width:1;border-style:solid;}");
+    setStyleSheet("border-bottom-width:1;border-bottom-style:solid;border-bottom-color:#bbbbbb");
+}
+
+void CWizTitleContainer::on_unlockBtnClicked()
+{
+    if (!m_bLocked) {
+        QIcon icon(WizGetSkinResourceFileName("lock"));
+        m_lockBtn->setIcon(icon);
+        m_bLocked = true;
+    } else {
+        QIcon icon(WizGetSkinResourceFileName("unlock"));
+        m_lockBtn->setIcon(icon);
+        m_bLocked = false;
     }
-private:
-    QLineEdit* m_edit;
-public:
-    QLineEdit* edit() const { return m_edit; }
-    void setText(const QString& str) { m_edit->setText(str); }
-};
+}
+
+void CWizTitleContainer::setLock()
+{
+    QIcon icon(WizGetSkinResourceFileName("lock"));
+    m_lockBtn->setIcon(icon);
+    m_bLocked = true;
+}
 
 
 CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
@@ -49,6 +66,11 @@ CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
     layout->setMargin(0);
     //
     connect(m_title->edit(), SIGNAL(textEdited(QString)), this, SLOT(on_title_textEdited(QString)));
+
+    // when lock/unlock button clicked, reset document, reset icon
+    connect(m_title->unlock(), SIGNAL(clicked()), m_web, SLOT(on_unlockBtnCliked()));
+    connect(m_title->unlock(), SIGNAL(clicked()), m_title, SLOT(on_unlockBtnClicked()));
+
 }
 
 
@@ -98,6 +120,7 @@ bool CWizDocumentView::viewDocument(const WIZDOCUMENTDATA& data)
     //
     showClient(true);
     //
+    m_title->setLock();
     m_title->setText(data.strTitle);
     return true;
 }
