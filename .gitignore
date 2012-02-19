@@ -7,3 +7,4 @@ Makefile
 .DS_Store
 .obj/
 WizNote*
+tags
