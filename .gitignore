@@ -1,3 +1,9 @@
 *.swp
 *.pro.user*
 wiznote-build-desktop*/
+moc_*
+ui_*
+Makefile
+.DS_Store
+.obj/
+WizNote*

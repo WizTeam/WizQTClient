@@ -13,6 +13,10 @@ QT += webkit
 TARGET = WizNote
 TEMPLATE = app
 
+# Date: 18/02/2012 10:59 
+# Maintainer: Zhang PengCheng
+# Purpose: hide .o file in src directory.
+OBJECTS_DIR = .obj
 
 
 OBJECTIVE_SOURCES += share/wizuihelper_mac.mm \

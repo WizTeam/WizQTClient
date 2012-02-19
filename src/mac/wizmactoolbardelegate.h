@@ -10,7 +10,7 @@
 #include <QtCore/QHash>
 #include <QtGui/QAction>
 
-#include "wizmacToolbar.h"
+#include "wizmactoolbar.h"
 
 
 
