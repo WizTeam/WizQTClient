@@ -74,6 +74,8 @@ private:
     bool m_bRestart;
     //
     bool m_bUpdatingSelection;
+    //
+    WIZDOCUMENTDATA m_documentForEditing;
 private:
     void initActions();
     void initMenuBar();

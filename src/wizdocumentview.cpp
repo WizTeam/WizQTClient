@@ -6,57 +6,66 @@
 #include <QWebFrame>
 
 #include <QBoxLayout>
+#include <QLineEdit>
+#include <QPushButton>
 
-
-CWizTitleContainer::CWizTitleContainer(QWidget* parent)
-        : QWidget(parent)
-        , m_bLocked(true)
+class CWizTitleBar
+    : public QWidget
 {
-    //QBoxLayout* layout = new QBoxLayout(QBoxLayout::TopToBottom, this);
-    QHBoxLayout* layout = new QHBoxLayout(this);
-    setLayout(layout);
-    layout->setMargin(0);
+public:
+    CWizTitleBar(QWidget* parent)
+            : QWidget(parent)
+    {
+        QHBoxLayout* layout = new QHBoxLayout(this);
+        setLayout(layout);
+        layout->setMargin(0);
 
-    setContentsMargins(4, 4, 4, 4);
+        setContentsMargins(4, 4, 4, 4);
 
-    m_edit = new QLineEdit(this);
-    QIcon icon(WizGetSkinResourceFileName("lock"));
-    m_lockBtn = new QPushButton(icon, "", this);
-
-    layout->addWidget(m_edit);
-    layout->addWidget(m_lockBtn);
-    //
-    m_edit->setStyleSheet("QLineEdit{padding:2 2 2 2;border-color:#ffffff;border-width:1;border-style:solid;}QLineEdit:hover{border-color:#bbbbbb;border-width:1;border-style:solid;}");
-    setStyleSheet("border-bottom-width:1;border-bottom-style:solid;border-bottom-color:#bbbbbb");
-}
-
-void CWizTitleContainer::on_unlockBtnClicked()
-{
-    if (!m_bLocked) {
-        QIcon icon(WizGetSkinResourceFileName("lock"));
-        m_lockBtn->setIcon(icon);
-        m_bLocked = true;
-    } else {
-        QIcon icon(WizGetSkinResourceFileName("unlock"));
-        m_lockBtn->setIcon(icon);
-        m_bLocked = false;
+        m_titleEdit = new QLineEdit(this);
+        //
+        m_editIcon = WizLoadSkinIcon("unlock");
+        m_commitIcon = WizLoadSkinIcon("lock");
+        //
+        m_editDocumentButton = new QPushButton(m_editIcon, "", this);
+        updateEditDocumentButtonIcon(false);
+        //
+        layout->addWidget(m_titleEdit);
+        layout->addWidget(m_editDocumentButton);
+        //
+        m_titleEdit->setStyleSheet("QLineEdit{padding:2 2 2 2;border-color:#ffffff;border-width:1;border-style:solid;}QLineEdit:hover{border-color:#bbbbbb;border-width:1;border-style:solid;}");
     }
-}
+private:
+    QLineEdit* m_titleEdit;
 
-void CWizTitleContainer::setLock()
-{
-    QIcon icon(WizGetSkinResourceFileName("lock"));
-    m_lockBtn->setIcon(icon);
-    m_bLocked = true;
-}
+    QPushButton* m_editDocumentButton;
+    //
+    QIcon m_editIcon;
+    QIcon m_commitIcon;
+private:
+    void updateEditDocumentButtonIcon(bool editing)
+    {
+        m_editDocumentButton->setIcon(editing ? m_commitIcon : m_editIcon);
+        m_editDocumentButton->setText(editing ? tr("Save && Read") : tr("Edit Note"));
+    }
+public:
+    QLineEdit* titleEdit() const { return m_titleEdit; }
+    QPushButton* editDocumentButton() const { return m_editDocumentButton; }
+    //
+    void setEditingDocument(bool editing) { updateEditDocumentButtonIcon(editing); }
+    void setTitle(const QString& str) { m_titleEdit->setText(str); }
+};
+
 
 
 CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
     : QWidget(parent)
     , m_db(app.database())
-    , m_title(new CWizTitleContainer(this))
+    , m_title(new CWizTitleBar(this))
     , m_web(new CWizDocumentWebView(app, this))
     , m_client(NULL)
+    , m_editingDocument(true)
+    , m_viewMode(viewmodeKeep)
 {
     m_client = createClient();
     //
@@ -65,12 +74,10 @@ CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
     layout->addWidget(m_client);
     layout->setMargin(0);
     //
-    connect(m_title->edit(), SIGNAL(textEdited(QString)), this, SLOT(on_title_textEdited(QString)));
-
-    // when lock/unlock button clicked, reset document, reset icon
-    connect(m_title->unlock(), SIGNAL(clicked()), m_web, SLOT(on_unlockBtnCliked()));
-    connect(m_title->unlock(), SIGNAL(clicked()), m_title, SLOT(on_unlockBtnClicked()));
-
+    m_title->setEditingDocument(m_editingDocument);
+    //
+    connect(m_title->titleEdit(), SIGNAL(textEdited(QString)), this, SLOT(on_title_textEdited(QString)));
+    connect(m_title->editDocumentButton(), SIGNAL(clicked()), this, SLOT(on_editDocumentButton_clicked()));
 }
 
 
@@ -86,10 +93,15 @@ QWidget* CWizDocumentView::createClient()
     pal.setColor(QPalette::Window, QColor(0xff, 0xff, 0xff));
     client->setPalette(pal);
     //
+    QWidget* line = new QWidget(this);
+    line->setMaximumHeight(1);
+    line->setMinimumHeight(1);
+    line->setStyleSheet("border-bottom-width:1;border-bottom-style:solid;border-bottom-color:#bbbbbb");
     //
     layout->setSpacing(0);
     layout->setMargin(0);
     layout->addWidget(m_title);
+    layout->addWidget(line);
     layout->addWidget(m_web);
     //
     layout->setStretchFactor(m_title, 0);
@@ -109,9 +121,30 @@ void CWizDocumentView::showClient(bool visible)
     }
 }
 
-bool CWizDocumentView::viewDocument(const WIZDOCUMENTDATA& data)
+bool CWizDocumentView::viewDocument(const WIZDOCUMENTDATA& data, bool forceEdit)
 {
-    bool ret = m_web->viewDocument(data);
+    bool edit = false;
+    if (forceEdit)
+    {
+        edit = true;
+    }
+    else
+    {
+        switch (m_viewMode)
+        {
+        case viewmodeAlwaysEditing:
+            edit = true;
+            break;
+        case viewmodeAlwaysReading:
+            edit = false;
+            break;
+        default:
+            edit = m_editingDocument;
+            break;
+        }
+    }
+    //
+    bool ret = m_web->viewDocument(data, edit);
     if (!ret)
     {
         showClient(false);
@@ -119,14 +152,10 @@ bool CWizDocumentView::viewDocument(const WIZDOCUMENTDATA& data)
     }
     //
     showClient(true);
+    editDocument(edit);
     //
-    m_title->setLock();
-    m_title->setText(data.strTitle);
+    m_title->setTitle(data.strTitle);
     return true;
-}
-bool CWizDocumentView::newDocument()
-{
-    return m_web->newDocument();
 }
 
 const WIZDOCUMENTDATA& CWizDocumentView::document()
@@ -138,7 +167,14 @@ const WIZDOCUMENTDATA& CWizDocumentView::document()
     return m_web->document();
 }
 
-void CWizDocumentView::on_title_textEdited ( const QString & text )
+void CWizDocumentView::editDocument(bool editing)
+{
+    m_editingDocument = editing;
+    m_title->setEditingDocument(m_editingDocument);
+    m_web->setEditingDocument(m_editingDocument);
+}
+
+void CWizDocumentView::on_title_textEdited(const QString & text )
 {
     QString title = text;
     if (title.length() > 255)
@@ -152,4 +188,9 @@ void CWizDocumentView::on_title_textEdited ( const QString & text )
         data.strTitle = title;
         m_db.ModifyDocumentInfo(data);
     }
+}
+
+void CWizDocumentView::on_editDocumentButton_clicked()
+{
+    editDocument(!m_editingDocument);
 }

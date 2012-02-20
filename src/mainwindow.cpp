@@ -316,7 +316,9 @@ void MainWindow::on_actionNewNote_triggered()
             return;
     }
     //
-    m_db.CreateDocumentAndInit("<body></body>", "", 0, tr("New note"), "newnote", pFolder->Location(), "", data);
+    m_db.CreateDocumentAndInit("<body><div>&nbsp;</div></body>", "", 0, tr("New note"), "newnote", pFolder->Location(), "", data);
+    //
+    m_documentForEditing = data;
     //
     m_documents->addAndSelectDocument(data);
 }
@@ -445,7 +447,14 @@ void MainWindow::viewDocument(const WIZDOCUMENTDATA& data, bool addToHistory)
     if (data.strGUID == m_doc->document().strGUID)
         return;
     //
-    if (!m_doc->viewDocument(data))
+    bool forceEdit = false;
+    if (data.strGUID == m_documentForEditing.strGUID)
+    {
+        m_documentForEditing = WIZDOCUMENTDATA();
+        forceEdit = true;
+    }
+    //
+    if (!m_doc->viewDocument(data, forceEdit))
         return;
     //
     if (addToHistory)

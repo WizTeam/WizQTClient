@@ -16,20 +16,20 @@ public:
 private:
     CWizExplorerApp& m_app;
     bool m_bInited;
-    bool m_bLocked;
     bool m_bViewDocumentWhileFinished;
+    bool m_bEditDocumentWhileFinished;
     CString m_strHtmlFileName;
     WIZDOCUMENTDATA m_data;
 protected:
     void init();
-    bool viewDocumentInEditor();
+    bool viewDocumentInEditor(bool editing);
 public:
     bool saveDocument(bool force);
-    bool viewDocument(const WIZDOCUMENTDATA& doc);
+    bool viewDocument(const WIZDOCUMENTDATA& doc, bool editing);
     bool newDocument();
+    void setEditingDocument(bool editing);
     const WIZDOCUMENTDATA& document() { return m_data; }
 public slots:
-    void on_unlockBtnCliked();
     void on_web_populateJavaScriptWindowObject();
     void on_web_loadFinished(bool ok);
     void on_web_linkClicked(const QUrl & url);

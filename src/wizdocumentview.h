@@ -5,41 +5,19 @@
 #include <QWidget>
 #endif
 
-#include <QLineEdit>
-#include <QPushButton>
-
 #ifndef WIZDEF_H
 #include "wizdef.h"
 #endif
 
-class QLineEdit;
+#ifndef WIZNOTESETTINGS_H
+#include "wiznotesettings.h"
+#endif
+
+class CWizTitleBar;
 class CWizDocumentWebView;
 class CWizDatabase;
 //
 
-class CWizTitleContainer
-    : public QWidget
-{
-    Q_OBJECT;
-
-public:
-    CWizTitleContainer(QWidget* parent);
-
-private:
-    QLineEdit* m_edit;
-
-    bool m_bLocked;
-    QPushButton* m_lockBtn;
-
-public:
-    QLineEdit* edit() const { return m_edit; }
-    QPushButton* unlock() const { return m_lockBtn; }
-    void setLock();
-    void setText(const QString& str) { m_edit->setText(str); }
-
-public slots:
-    void on_unlockBtnClicked();
-};
 
 class CWizDocumentView
     : public QWidget
@@ -49,21 +27,28 @@ public:
     CWizDocumentView(CWizExplorerApp& app, QWidget* parent = 0);
 protected:
     CWizDatabase& m_db;
-    CWizTitleContainer* m_title;
+    CWizTitleBar* m_title;
     CWizDocumentWebView* m_web;
     QWidget* m_client;
     //
     QWidget* createClient();
+    //
+    bool m_editingDocument;
+    WizDocumentViewMode m_viewMode;
 public:
-    bool viewDocument(const WIZDOCUMENTDATA& data);
-    bool newDocument();
+    bool viewDocument(const WIZDOCUMENTDATA& data, bool forceEdit);
     //
     void showClient(bool visible);
     //
     const WIZDOCUMENTDATA& document();
     //
+    void editDocument(bool editing);
+    bool isEditingDocument() const { return m_editingDocument; }
+    //
+    void setViewMode(WizDocumentViewMode mode);
 public slots:
     void on_title_textEdited ( const QString & text );
+    void on_editDocumentButton_clicked();
 };
 
 #endif // WIZDOCUMENTVIEW_H

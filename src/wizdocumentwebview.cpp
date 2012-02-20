@@ -13,7 +13,6 @@ CWizDocumentWebView::CWizDocumentWebView(CWizExplorerApp& app, QWidget* parent /
     , m_app(app)
     , m_bInited(false)
     , m_bViewDocumentWhileFinished(false)
-    , m_bLocked(true)
 {
 }
 
@@ -46,7 +45,7 @@ bool CWizDocumentWebView::saveDocument(bool force)
     return page()->mainFrame()->evaluateJavaScript(strScript).toBool();
 }
 
-bool CWizDocumentWebView::viewDocument(const WIZDOCUMENTDATA& doc)
+bool CWizDocumentWebView::viewDocument(const WIZDOCUMENTDATA& doc, bool editing)
 {
     if (m_bInited)
     {
@@ -75,48 +74,50 @@ bool CWizDocumentWebView::viewDocument(const WIZDOCUMENTDATA& doc)
     //
     if (m_bInited)
     {
-        m_bLocked = true;
-        return viewDocumentInEditor();
+        return viewDocumentInEditor(editing);
     }
     else
     {
-       m_bViewDocumentWhileFinished = true;
-       init();
-       return true;
+        m_bViewDocumentWhileFinished = true;
+        m_bEditDocumentWhileFinished = editing;
+        //
+        init();
+        return true;
     }
 }
 bool CWizDocumentWebView::newDocument()
 {
-    return viewDocument(WIZDOCUMENTDATA());
+    return viewDocument(WIZDOCUMENTDATA(), true);
 }
 
-bool CWizDocumentWebView::viewDocumentInEditor()
+void CWizDocumentWebView::setEditingDocument(bool editing)
 {
-    CString strScript;
-    if (m_data.strGUID.IsEmpty())
+    CString strScript = CString("setEditing(%1)").arg(editing ? "true" : "false");
+    page()->mainFrame()->evaluateJavaScript(strScript).toBool();
+    //
+    if (editing)
     {
-        strScript = ("newDocument()");
+        setFocus();
     }
-    else
-    {
-        strScript = ("viewDocument('%1', '%2')");
-        strScript = strScript.arg(m_data.strGUID, m_strHtmlFileName);
-    }
-    return page()->mainFrame()->evaluateJavaScript(strScript).toBool();
 }
 
-void CWizDocumentWebView::on_unlockBtnCliked()
+bool CWizDocumentWebView::viewDocumentInEditor(bool editing)
 {
-    if (m_bLocked) {
-        // show toolbar, remove content lock
-        CString strScript("unlockDocument()");
-        page()->mainFrame()->evaluateJavaScript(strScript);
-        m_bLocked = false;
-    } else {
-        CString strScript("lockDocument()");
-        page()->mainFrame()->evaluateJavaScript(strScript);
-        m_bLocked = true;
+    ATLASSERT(!m_data.strGUID.IsEmpty());
+    //
+    CString strScript = ("viewDocument('%1', '%2', %3)");
+    strScript = strScript.arg(m_data.strGUID,
+                              m_strHtmlFileName,
+                              editing ? "true" : "false");
+    //
+    bool ret = page()->mainFrame()->evaluateJavaScript(strScript).toBool();
+    //
+    if (editing)
+    {
+        setFocus();
     }
+    //
+    return ret;
 }
 
 void CWizDocumentWebView::on_web_populateJavaScriptWindowObject()
@@ -131,7 +132,7 @@ void CWizDocumentWebView::on_web_loadFinished(bool ok)
         if (!m_bViewDocumentWhileFinished)
             return;
         //
-        viewDocumentInEditor();
+        viewDocumentInEditor(m_bEditDocumentWhileFinished);
     }
 }
 void CWizDocumentWebView::on_web_linkClicked(const QUrl & url)
