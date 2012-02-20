@@ -998,11 +998,11 @@ BOOL WIZOBJECTPARTDATA::LoadFromXmlRpc(CWizXmlRpcStructValue& data)
 #define WIZ_CLIENT_VERSION  "2.0.0.0"
 
 #if defined Q_OS_MAC
-#define WIZ_CLIENT_TYPE     "QTWIN"
+#define WIZ_CLIENT_TYPE     "QTMAC"
 #elif defined Q_OS_LINUX
 #define WIZ_CLIENT_TYPE     "QTLINUX"
 #else
-#define WIZ_CLIENT_TYPE     "QTMAC"
+#define WIZ_CLIENT_TYPE     "QTWIN"
 #endif
 
 
