@@ -88,7 +88,9 @@ SOURCES += main.cpp\
     mac/wizmacactionhelper.cpp \
     share/wizcommonui.cpp \
     share/wizanimateaction.cpp \
-    wiznotesettings.cpp
+    wiznotesettings.cpp \
+    wizattachmentlistwidget.cpp \
+    share/wizpopupwidget.cpp
 
 HEADERS  += mainwindow.h \
     share/wizqthelper.h \
@@ -157,7 +159,9 @@ HEADERS  += mainwindow.h \
     mac/wizmacactionhelper.h \
     share/wizcommonui.h \
     share/wizanimateaction.h \
-    wiznotesettings.h
+    wiznotesettings.h \
+    wizattachmentlistwidget.h \
+    share/wizpopupwidget.h
 
 
 mac:HEADERS +=     \

@@ -1,5 +1,6 @@
 #include "wizdocumentview.h"
 #include "wizdocumentwebview.h"
+#include "wizattachmentlistwidget.h"
 
 #include <QWebView>
 #include <QWebElement>
@@ -14,34 +15,46 @@ class CWizTitleBar
 {
 public:
     CWizTitleBar(QWidget* parent)
-            : QWidget(parent)
+        : QWidget(parent)
+        , m_titleEdit(NULL)
+        , m_editDocumentButton(NULL)
+        , m_attachmentButton(NULL)
     {
         QHBoxLayout* layout = new QHBoxLayout(this);
         setLayout(layout);
         layout->setMargin(0);
 
         setContentsMargins(4, 4, 4, 4);
-
+        //
+        QPalette pal = palette();
+        pal.setColor(QPalette::Window, QColor(0xff, 0xff, 0xff));
+        setPalette(pal);
+        //
         m_titleEdit = new QLineEdit(this);
         //
         m_editIcon = WizLoadSkinIcon("unlock");
         m_commitIcon = WizLoadSkinIcon("lock");
+        m_attachmentIcon = WizLoadSkinIcon("attachment");
         //
         m_editDocumentButton = new QPushButton(m_editIcon, "", this);
         updateEditDocumentButtonIcon(false);
         //
+        m_attachmentButton = new QPushButton(m_attachmentIcon, "Attachment", this);
+        //
         layout->addWidget(m_titleEdit);
         layout->addWidget(m_editDocumentButton);
+        layout->addWidget(m_attachmentButton);
         //
         m_titleEdit->setStyleSheet("QLineEdit{padding:2 2 2 2;border-color:#ffffff;border-width:1;border-style:solid;}QLineEdit:hover{border-color:#bbbbbb;border-width:1;border-style:solid;}");
     }
 private:
     QLineEdit* m_titleEdit;
-
     QPushButton* m_editDocumentButton;
+    QPushButton* m_attachmentButton;
     //
     QIcon m_editIcon;
     QIcon m_commitIcon;
+    QIcon m_attachmentIcon;
 private:
     void updateEditDocumentButtonIcon(bool editing)
     {
@@ -51,6 +64,7 @@ private:
 public:
     QLineEdit* titleEdit() const { return m_titleEdit; }
     QPushButton* editDocumentButton() const { return m_editDocumentButton; }
+    QPushButton* attachmentButton() const { return m_attachmentButton; }
     //
     void setEditingDocument(bool editing) { updateEditDocumentButtonIcon(editing); }
     void setTitle(const QString& str) { m_titleEdit->setText(str); }
@@ -64,6 +78,7 @@ CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
     , m_title(new CWizTitleBar(this))
     , m_web(new CWizDocumentWebView(app, this))
     , m_client(NULL)
+    , m_attachments(NULL)
     , m_editingDocument(true)
     , m_viewMode(viewmodeKeep)
 {
@@ -76,8 +91,9 @@ CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
     //
     m_title->setEditingDocument(m_editingDocument);
     //
-    connect(m_title->titleEdit(), SIGNAL(textEdited(QString)), this, SLOT(on_title_textEdited(QString)));
+    connect(m_title->titleEdit(), SIGNAL(textEdited(QString)), this, SLOT(on_titleEdit_textEdited(QString)));
     connect(m_title->editDocumentButton(), SIGNAL(clicked()), this, SLOT(on_editDocumentButton_clicked()));
+    connect(m_title->attachmentButton(), SIGNAL(clicked()), this, SLOT(on_attachmentButton_clicked()));
 }
 
 
@@ -174,7 +190,7 @@ void CWizDocumentView::editDocument(bool editing)
     m_web->setEditingDocument(m_editingDocument);
 }
 
-void CWizDocumentView::on_title_textEdited(const QString & text )
+void CWizDocumentView::on_titleEdit_textEdited(const QString & text )
 {
     QString title = text;
     if (title.length() > 255)
@@ -194,3 +210,19 @@ void CWizDocumentView::on_editDocumentButton_clicked()
 {
     editDocument(!m_editingDocument);
 }
+
+void CWizDocumentView::on_attachmentButton_clicked()
+{
+    if (!m_attachments)
+    {
+        m_attachments = new CWizAttachmentListWidget(m_db, topLevelWidget());
+    }
+    //
+    QPushButton* btn = m_title->attachmentButton();
+    QRect rc = btn->geometry();
+    QPoint pt = btn->mapToGlobal(QPoint(rc.width() / 2, rc.height()));
+    m_attachments->setGeometry(QRect(QPoint(0, 0), m_attachments->sizeHint()));
+    m_attachments->showAtPoint(pt);
+}
+
+

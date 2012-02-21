@@ -16,6 +16,7 @@
 class CWizTitleBar;
 class CWizDocumentWebView;
 class CWizDatabase;
+class CWizAttachmentListWidget;
 //
 
 
@@ -30,6 +31,7 @@ protected:
     CWizTitleBar* m_title;
     CWizDocumentWebView* m_web;
     QWidget* m_client;
+    CWizAttachmentListWidget* m_attachments;
     //
     QWidget* createClient();
     //
@@ -47,8 +49,9 @@ public:
     //
     void setViewMode(WizDocumentViewMode mode);
 public slots:
-    void on_title_textEdited ( const QString & text );
+    void on_titleEdit_textEdited ( const QString & text );
     void on_editDocumentButton_clicked();
+    void on_attachmentButton_clicked();
 };
 
 #endif // WIZDOCUMENTVIEW_H
