@@ -93,6 +93,7 @@ void CWizPopupWidget::resizeEvent(QResizeEvent* event)
     //
     QVector<QPoint> points;
     //
+#ifndef Q_OS_MAC
     QPoint pt1(0, 10);
     QPoint pt2(sz.width() - 54, 10);
     QPoint pt3(sz.width() - 41, 0);
@@ -108,6 +109,31 @@ void CWizPopupWidget::resizeEvent(QResizeEvent* event)
     points.push_back(pt5);
     points.push_back(pt6);
     points.push_back(pt7);
+#else
+    QPoint pt1(1, 10);
+    QPoint pt2(sz.width() - 51, 10);
+    QPoint pt3(sz.width() - 41, 0);
+    QPoint pt4(sz.width() - 31, 10);
+    QPoint pt5(sz.width() - 1, 10);
+    QPoint pt6(sz.width(), 11);
+    QPoint pt7(sz.width(), sz.height() - 1);
+    QPoint pt8(sz.width() - 1, sz.height());
+    QPoint pt9(1, sz.height());
+    QPoint pt10(0, sz.height() - 1);
+    QPoint pt11(0, 11);
+    //
+    points.push_back(pt1);
+    points.push_back(pt2);
+    points.push_back(pt3);
+    points.push_back(pt4);
+    points.push_back(pt5);
+    points.push_back(pt6);
+    points.push_back(pt7);
+    points.push_back(pt8);
+    points.push_back(pt9);
+    points.push_back(pt10);
+    points.push_back(pt11);
+#endif
     //
     QPolygon polygon(points);
     //
