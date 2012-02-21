@@ -7,14 +7,15 @@
 #include <QResizeEvent>
 #include <QPolygon>
 
+
 CWizPopupWidget::CWizPopupWidget(QWidget* parent)
-#ifdef Q_OS_WIN
+#ifndef Q_OS_MAC
     : QWidget(parent, Qt::Tool | Qt::FramelessWindowHint)
 #else
     : QWidget(parent, Qt::Popup | Qt::FramelessWindowHint)
 #endif
 {
-#ifdef Q_OS_WIN
+#ifndef Q_OS_MAC
     setFocusPolicy(Qt::StrongFocus);
     //
     connect(qApp, SIGNAL(focusChanged(QWidget*,QWidget*)), this, SLOT(on_application_focusChanged(QWidget*,QWidget*)));
@@ -43,7 +44,7 @@ QRect CWizPopupWidget::getClientRect() const
                  height() - margins.top() - margins.bottom());
 }
 
-#ifdef Q_OS_WIN
+#ifndef Q_OS_MAC
 
 void CWizPopupWidget::paintEvent(QPaintEvent *event)
 {
@@ -66,11 +67,11 @@ void CWizPopupWidget::resizeEvent(QResizeEvent *event)
     //
     QVector<QPoint> points;
     //
-    QPoint pt1(0, 12);
-    QPoint pt2(sz.width() - 50, 12);
-    QPoint pt3(sz.width() - 38, 0);
-    QPoint pt4(sz.width() - 26, 12);
-    QPoint pt5(sz.width(), 12);
+    QPoint pt1(0, 10);
+    QPoint pt2(sz.width() - 54, 10);
+    QPoint pt3(sz.width() - 41, 0);
+    QPoint pt4(sz.width() - 28, 10);
+    QPoint pt5(sz.width(), 10);
     QPoint pt6(sz.width(), sz.height());
     QPoint pt7(0, sz.height());
     //
@@ -114,7 +115,7 @@ void CWizPopupWidget::showAtPoint(const QPoint& pt)
     //
     move(QPoint(left, top));
     //
-#ifdef Q_OS_WIN
+#ifndef Q_OS_MAC
     QRect rc = geometry();
     m_backgroundPixmap = QPixmap::grabWindow(QApplication::desktop()->winId(), rc.left(), rc.top(), rc.width(), rc.height());
 #endif
@@ -124,7 +125,7 @@ void CWizPopupWidget::showAtPoint(const QPoint& pt)
     activateWindow();
 }
 
-#ifdef Q_OS_WIN
+#ifndef Q_OS_MAC
 
 void CWizPopupWidget::on_application_focusChanged(QWidget* old, QWidget* now)
 {
