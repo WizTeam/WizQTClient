@@ -5,6 +5,7 @@
 #include "share/wizqthelper.h"
 #include "share/wizsettings.h"
 #include "share/wizuihelper.h"
+#include "share/wizui.h"
 
 #include <QPainter>
 #include <QPixmapCache>

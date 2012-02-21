@@ -8,19 +8,26 @@
 #include <QPolygon>
 
 CWizPopupWidget::CWizPopupWidget(QWidget* parent)
+#ifdef Q_OS_WIN
     : QWidget(parent, Qt::Tool | Qt::FramelessWindowHint)
+#else
+    : QWidget(parent, Qt::Popup | Qt::FramelessWindowHint)
+#endif
 {
+#ifdef Q_OS_WIN
     setFocusPolicy(Qt::StrongFocus);
     //
     connect(qApp, SIGNAL(focusChanged(QWidget*,QWidget*)), this, SLOT(on_application_focusChanged(QWidget*,QWidget*)));
-    //
     m_backgroundImage.SetImage(::WizGetSkinResourceFileName("popup_bckground.png"), QPoint(80, 50));
+    setContentsMargins(24, 26, 22, 27);
+#else
+    setContentsMargins(8, 20, 8, 8);
+#endif
     //
     QPalette pal = palette();
     pal.setColor(QPalette::Window, QColor(0xff, 0xff, 0xff));
     setPalette(pal);
     //
-    setContentsMargins(24, 26, 22, 27);
 }
 
 QSize CWizPopupWidget::sizeHint() const
@@ -36,6 +43,8 @@ QRect CWizPopupWidget::getClientRect() const
                  height() - margins.top() - margins.bottom());
 }
 
+#ifdef Q_OS_WIN
+
 void CWizPopupWidget::paintEvent(QPaintEvent *event)
 {
     Q_UNUSED(event);
@@ -49,6 +58,7 @@ void CWizPopupWidget::paintEvent(QPaintEvent *event)
     //
     m_backgroundImage.Draw(&painter, rect(), 0);
 }
+#endif
 
 void CWizPopupWidget::resizeEvent(QResizeEvent *event)
 {
@@ -104,13 +114,17 @@ void CWizPopupWidget::showAtPoint(const QPoint& pt)
     //
     move(QPoint(left, top));
     //
+#ifdef Q_OS_WIN
     QRect rc = geometry();
     m_backgroundPixmap = QPixmap::grabWindow(QApplication::desktop()->winId(), rc.left(), rc.top(), rc.width(), rc.height());
+#endif
     //
     show();
     setFocus();
     activateWindow();
 }
+
+#ifdef Q_OS_WIN
 
 void CWizPopupWidget::on_application_focusChanged(QWidget* old, QWidget* now)
 {
@@ -136,5 +150,6 @@ void CWizPopupWidget::on_application_focusChanged(QWidget* old, QWidget* now)
     {
         hide();
     }
-
 }
+
+#endif

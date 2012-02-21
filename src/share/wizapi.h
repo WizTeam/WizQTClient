@@ -109,7 +109,7 @@ struct WIZOBJECTPARTDATA
 
 class CWizApiBase : public QObject
 {
-    Q_OBJECT;
+    Q_OBJECT
 public:
     CWizApiBase(const CString& strAccountsApiURL, CWizSyncEvents& events);
     virtual void abort();
@@ -155,7 +155,7 @@ protected:
 
 class CWizApi : public CWizApiBase
 {
-    Q_OBJECT;
+    Q_OBJECT
 public:
     CWizApi(CWizDatabase& db, const CString& strAccountsApiURL, CWizSyncEvents& events);
 protected:

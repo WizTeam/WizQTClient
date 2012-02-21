@@ -1,5 +1,7 @@
 #include "wizattachmentlistwidget.h"
 
+#include <QBoxLayout>
+
 CWizAttachmentListView::CWizAttachmentListView(CWizDatabase& db, QWidget* parent)
     : QListWidget(parent)
     , m_db(db)

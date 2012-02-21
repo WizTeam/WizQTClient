@@ -16,7 +16,7 @@ int main(int argc, char *argv[])
     QApplication::setApplicationName(QObject::tr("WizNote"));
 
 
-#ifdef Q_WS_WIN32
+#ifdef Q_OS_WIN
     QFont f = WizCreateWindowsUIFont(a);
     a.setFont(f);
     //
