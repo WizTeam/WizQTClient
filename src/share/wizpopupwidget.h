@@ -11,8 +11,8 @@ class CWizPopupWidget : public QWidget
 public:
     CWizPopupWidget(QWidget* parent);
 private:
-    CWizSkin9GridImage m_backgroundImage;
 #ifndef Q_OS_MAC
+    CWizSkin9GridImage m_backgroundImage;
     QPixmap m_backgroundPixmap;
 #endif
 public:
@@ -20,17 +20,17 @@ public:
     virtual QRect getClientRect() const;
 protected:
 #ifndef Q_OS_MAC
-    virtual void paintEvent(QPaintEvent *event);
+    virtual void paintEvent(QPaintEvent* event);
+    virtual void keyPressEvent(QKeyEvent* event);
+    virtual void mousePressEvent(QMouseEvent* event);
 #endif
-    virtual void resizeEvent(QResizeEvent *event);
-    virtual void keyPressEvent(QKeyEvent *);
+    virtual void resizeEvent(QResizeEvent* event);
 public:
     void showAtPoint(const QPoint& pt);
-
-public slots:
 #ifndef Q_OS_MAC
-    void on_application_focusChanged(QWidget* old, QWidget* now) ;
+    void closeWidget();
 #endif
+public slots:
 };
 
 #undef Q_OS_WIN

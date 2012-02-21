@@ -16,8 +16,6 @@ CWizPopupWidget::CWizPopupWidget(QWidget* parent)
 #endif
 {
 #ifndef Q_OS_MAC
-    setFocusPolicy(Qt::StrongFocus);
-    //
     connect(qApp, SIGNAL(focusChanged(QWidget*,QWidget*)), this, SLOT(on_application_focusChanged(QWidget*,QWidget*)));
     m_backgroundImage.SetImage(::WizGetSkinResourceFileName("popup_bckground.png"), QPoint(80, 50));
     setContentsMargins(24, 26, 22, 27);
@@ -28,12 +26,15 @@ CWizPopupWidget::CWizPopupWidget(QWidget* parent)
     QPalette pal = palette();
     pal.setColor(QPalette::Window, QColor(0xff, 0xff, 0xff));
     setPalette(pal);
-    //
 }
 
 QSize CWizPopupWidget::sizeHint() const
 {
+#ifndef Q_OS_MAC
+    return QSize(350, 450);
+#else
     return QSize(300, 400);
+#endif
 }
 
 QRect CWizPopupWidget::getClientRect() const
@@ -46,7 +47,7 @@ QRect CWizPopupWidget::getClientRect() const
 
 #ifndef Q_OS_MAC
 
-void CWizPopupWidget::paintEvent(QPaintEvent *event)
+void CWizPopupWidget::paintEvent(QPaintEvent* event)
 {
     Q_UNUSED(event);
     //
@@ -59,9 +60,34 @@ void CWizPopupWidget::paintEvent(QPaintEvent *event)
     //
     m_backgroundImage.Draw(&painter, rect(), 0);
 }
+
+void CWizPopupWidget::keyPressEvent(QKeyEvent* event)
+{
+    if (event->key() == Qt::Key_Escape)
+    {
+        event->accept();
+        closeWidget();
+    }
+    else
+    {
+        event->ignore();
+    }
+}
+
+void CWizPopupWidget::mousePressEvent(QMouseEvent* event)
+{
+    QPoint pos = event->pos();
+    //
+    if (!mask().contains(pos))
+    {
+        event->accept();
+        closeWidget();
+    }
+}
+
 #endif
 
-void CWizPopupWidget::resizeEvent(QResizeEvent *event)
+void CWizPopupWidget::resizeEvent(QResizeEvent* event)
 {
     QSize sz = event->size();
     //
@@ -90,19 +116,6 @@ void CWizPopupWidget::resizeEvent(QResizeEvent *event)
     setMask(region);
 }
 
-void CWizPopupWidget::keyPressEvent(QKeyEvent * e)
-{
-    if (e->key() == Qt::Key_Escape)
-    {
-        hide();
-        e->accept();
-    }
-    else
-    {
-        QWidget::keyPressEvent(e);
-    }
-}
-
 void CWizPopupWidget::showAtPoint(const QPoint& pt)
 {
     QSize sz = geometry().size();
@@ -116,41 +129,27 @@ void CWizPopupWidget::showAtPoint(const QPoint& pt)
     move(QPoint(left, top));
     //
 #ifndef Q_OS_MAC
+    //remember background
     QRect rc = geometry();
     m_backgroundPixmap = QPixmap::grabWindow(QApplication::desktop()->winId(), rc.left(), rc.top(), rc.width(), rc.height());
 #endif
     //
     show();
-    setFocus();
     activateWindow();
+
+#ifndef Q_OS_MAC
+    grabKeyboard();
+    grabMouse();
+#endif
 }
 
 #ifndef Q_OS_MAC
-
-void CWizPopupWidget::on_application_focusChanged(QWidget* old, QWidget* now)
+void CWizPopupWidget::closeWidget()
 {
-    if (!isVisible())
-        return;
-    if (!old && !now)
-        return;
+    hide();
     //
-    bool childWidget = false;
-    QWidget* newWidget = now;
-    while (newWidget)
-    {
-        if (newWidget == this)
-        {
-            childWidget = true;
-            break;
-        }
-        //
-        newWidget = newWidget->parentWidget();
-    }
-    //
-    if (!childWidget)
-    {
-        hide();
-    }
+    releaseKeyboard();
+    releaseMouse();
 }
 
 #endif
