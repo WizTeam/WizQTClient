@@ -1,5 +1,6 @@
 #include "wizapi.h"
 #include <QFile>
+#include "zip/wizzip.h"
 
 #define PARTSIZE 10*1024
 #define MD5PART 10*1024
@@ -632,11 +633,12 @@ BOOL CWizApi::uploadAttachment(const WIZDOCUMENTATTACHMENTDATAEX& data)
     //
     if (bData)
     {
-        if (!m_db.LoadAttachmentData(m_currentAttachment.strGUID, m_currentAttachment.arrayData))
+        if (!m_db.LoadCompressedAttachmentData(m_currentAttachment.strGUID, m_currentAttachment.arrayData))
         {
             //skip this document
             addErrorLog("Can not load attachment data: " + data.strName);
             onUploadAttachment(data);   //skip
+            m_db.ModifyObjectVersion(data.strGUID, WIZDOCUMENTATTACHMENTDATAEX::ObjectName(), -1);  //re-upload attachment at next time
             return FALSE;
         }
         //
@@ -739,7 +741,7 @@ BOOL CWizApi::callAttachmentsGetInfo(const CWizStdStringArray& arrayAttachmentGU
     CWizApiTokenParam param(*this);
     param.AddStringArray("attachment_guids", arrayAttachmentGUID);
     //
-    return callXmlRpc(SyncMethod_GetDocumentsInfo, &param);
+    return callXmlRpc(SyncMethod_GetAttachmentsInfo, &param);
 }
 
 void CWizApi::onAttachmentsGetInfo(const std::deque<WIZDOCUMENTATTACHMENTDATAEX>& arrayRet)
@@ -774,7 +776,7 @@ BOOL CWizApi::downloadObjectData(const WIZOBJECTDATA& data)
 
 void CWizApi::onDownloadObjectDataCompleted(const WIZOBJECTDATA& data)
 {
-    m_db.UpdateObjectLocalData(data);
+    m_db.UpdateSyncObjectLocalData(data);
 }
 
 

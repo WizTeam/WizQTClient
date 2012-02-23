@@ -435,7 +435,8 @@ BOOL CWizDatabase::UpdateAttachment(const WIZDOCUMENTATTACHMENTDATAEX& data, CWi
     {
         bRet = ModifyAttachmentInfoEx(data);
         //
-        if (dataTemp.strDataMD5 != data.strDataMD5)
+        bool changed = dataTemp.strDataMD5 != data.strDataMD5;
+        if (changed)
         {
             SetObjectDataDownloaded(data.strGUID, "attachment", FALSE);
         }
@@ -650,6 +651,16 @@ BOOL CWizDatabase::UpdateDocumentDataMD5(WIZDOCUMENTDATA& data, const CString& s
     //
     return bRet;
 }
+BOOL CWizDatabase::DeleteAttachment(const WIZDOCUMENTATTACHMENTDATA& data, BOOL bLog)
+{
+    BOOL bRet = CIndex::DeleteAttachment(data, bLog);
+    CString strFileName = GetAttachmentFileName(data.strGUID);
+    if (PathFileExists(strFileName))
+    {
+        ::WizDeleteFile(strFileName);
+    }
+    return bRet;
+}
 
 BOOL CWizDatabase::IsDocumentDownloaded(const CString& strGUID)
 {
@@ -673,25 +684,25 @@ BOOL CWizDatabase::GetAllObjectsNeedToBeDownloaded(std::deque<WIZOBJECTDATA>& ar
     //
     return TRUE;
 }
-BOOL CWizDatabase::UpdateObjectLocalData(const WIZOBJECTDATA& data)
+BOOL CWizDatabase::UpdateSyncObjectLocalData(const WIZOBJECTDATA& data)
 {
-    CString strFileName = GetObjectFileName(data);
-    //
-    //
-    // force to close file and stream //
-    //
+    if (data.eObjectType == wizobjectDocumentAttachment)
     {
-        QFile file(strFileName);
-        if (!file.open(QIODevice::WriteOnly | QIODevice::Truncate))
+        if (!SaveCompressedAttachmentData(data.strObjectGUID, data.arrayData))
         {
+            TOLOG1(_T("Failed to save attachment data: %1"), data.strDisplayName);
             return FALSE;
         }
-        //
-        QDataStream out(&file);   // we will serialize the data into the file
-        //
-        out << data.arrayData;
     }
-    //
+    else
+    {
+        CString strFileName = GetObjectFileName(data);
+        if (!::WizSaveDataToFile(strFileName, data.arrayData))
+        {
+            TOLOG1(_T("Failed to save document data: %1"), data.strDisplayName);
+            return FALSE;
+        }
+    }
     //
     if (data.eObjectType == wizobjectDocument)
     {
@@ -830,6 +841,22 @@ BOOL CWizDatabase::CreateDocumentAndInit(const CString& strHtml, const CString& 
     //
     return bRet;
 }
+BOOL CWizDatabase::AddAttachment(const WIZDOCUMENTDATA& document, const CString& strFileName, WIZDOCUMENTATTACHMENTDATA& dataRet)
+{
+    CString strMD5 = ::WizMd5FileString(strFileName);
+    if (!CreateAttachment(document.strGUID, WizExtractFileName(strFileName), strFileName, "", strMD5, dataRet))
+        return FALSE;
+    //
+    if (!::WizCopyFile(strFileName, GetAttachmentFileName(dataRet.strGUID), FALSE))
+    {
+        DeleteAttachment(dataRet, FALSE);
+        return FALSE;
+    }
+    //
+    UpdateDocumentAttachmentCount(document.strGUID);
+    //
+    return TRUE;
+}
 
 BOOL CWizDatabase::LoadDocumentData(const CString& strDocumentGUID, QByteArray& arrayData)
 {
@@ -862,6 +889,65 @@ BOOL CWizDatabase::LoadAttachmentData(const CString& strDocumentGUID, QByteArray
     arrayData = file.readAll();
     //
     return !arrayData.isEmpty();
+}
+
+BOOL CWizDatabase::LoadCompressedAttachmentData(const CString& strDocumentGUID, QByteArray& arrayData)
+{
+    CString strFileName = GetAttachmentFileName(strDocumentGUID);
+    if (!PathFileExists(strFileName))
+    {
+        return FALSE;
+    }
+    CString strTempZipFileName = ::WizGlobal()->GetTempPath() + WizIntToStr(GetTickCount()) + ".tmp";
+    CWizZipFile zip;
+    if (!zip.open(strTempZipFileName))
+    {
+        TOLOG1(_T("Failed to create temp zip file: %1"), strTempZipFileName);
+        return FALSE;
+    }
+    //
+    if (!zip.compressFile(strFileName, "data"))
+    {
+        TOLOG1(_T("Failed to compress file: %1"), strFileName);
+        return FALSE;
+    }
+    //
+    zip.close();
+    //
+    QFile file(strTempZipFileName);
+    if (!file.open(QFile::ReadOnly))
+        return FALSE;
+    //
+    arrayData = file.readAll();
+    //
+    return !arrayData.isEmpty();
+}
+
+BOOL CWizDatabase::SaveCompressedAttachmentData(const CString& strDocumentGUID, const QByteArray& arrayData)
+{
+    CString strTempZipFileName = ::WizGlobal()->GetTempPath() + WizIntToStr(GetTickCount()) + ".tmp";
+    if (!WizSaveDataToFile(strTempZipFileName, arrayData))
+    {
+        TOLOG1(_T("Failed to save attachment data to temp file: %1"), strTempZipFileName);
+        return FALSE;
+    }
+    CWizUnzipFile zip;
+    if (!zip.open(strTempZipFileName))
+    {
+        TOLOG1(_T("Failed to open temp zip file: %1"), strTempZipFileName);
+        return FALSE;
+    }
+    //
+    CString strFileName = GetAttachmentFileName(strDocumentGUID);
+    if (!zip.extractFile(0, strFileName))
+    {
+        TOLOG1(_T("Failed to extract attachment file: %1"), strFileName);
+        return FALSE;
+    }
+    //
+    zip.close();
+    //
+    return TRUE;
 }
 
 BOOL CWizDatabase::UpdateDocumentAbstract(const CString& strDocumentGUID)

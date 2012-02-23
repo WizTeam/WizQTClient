@@ -20,6 +20,8 @@ public:
     //
     void Draw(QPainter* p, QRect rc, int nAlpha) const;
     BOOL Valid() const;
+    //
+    QSize actualSize() const { return m_img.size(); }
 };
 
 

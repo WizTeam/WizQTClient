@@ -52,6 +52,8 @@ public slots:
     void on_titleEdit_textEdited ( const QString & text );
     void on_editDocumentButton_clicked();
     void on_attachmentButton_clicked();
+    void on_attachment_created(const WIZDOCUMENTATTACHMENTDATA& attachment);
+    void on_attachment_deleted(const WIZDOCUMENTATTACHMENTDATA& attachment);
 };
 
 #endif // WIZDOCUMENTVIEW_H

@@ -45,16 +45,16 @@ BOOL CWizSkin9GridImage::SplitRect(const QRect& rcSrc, QPoint ptTopLeft, QRect* 
     int y4 = rcSrc.top() + nHeight;
     //
     arrayRect[0] = QRect(QPoint(x1, y1), QPoint(x2, y2));
-    arrayRect[1] = QRect(QPoint(x2, y1), QPoint(x3, y2));
-    arrayRect[2] = QRect(QPoint(x3, y1), QPoint(x4, y2));
+    arrayRect[1] = QRect(QPoint(x2 + 1, y1), QPoint(x3, y2));
+    arrayRect[2] = QRect(QPoint(x3 + 1, y1), QPoint(x4, y2));
 
-    arrayRect[3] = QRect(QPoint(x1, y2), QPoint(x2, y3));
-    arrayRect[4] = QRect(QPoint(x2, y2), QPoint(x3, y3));
-    arrayRect[5] = QRect(QPoint(x3, y2), QPoint(x4, y3));
+    arrayRect[3] = QRect(QPoint(x1, y2 + 1), QPoint(x2, y3));
+    arrayRect[4] = QRect(QPoint(x2 + 1, y2 + 1), QPoint(x3, y3));
+    arrayRect[5] = QRect(QPoint(x3 + 1, y2 + 1), QPoint(x4, y3));
 
-    arrayRect[6] = QRect(QPoint(x1, y3), QPoint(x2, y4));
-    arrayRect[7] = QRect(QPoint(x2, y3), QPoint(x3, y4));
-    arrayRect[8] = QRect(QPoint(x3, y3), QPoint(x4, y4));
+    arrayRect[6] = QRect(QPoint(x1, y3 + 1), QPoint(x2, y4));
+    arrayRect[7] = QRect(QPoint(x2 + 1, y3 + 1), QPoint(x3, y4));
+    arrayRect[8] = QRect(QPoint(x3 + 1, y3 + 1), QPoint(x4, y4));
     //
     return TRUE;
 }
@@ -87,12 +87,6 @@ void CWizSkin9GridImage::Draw(QPainter* p, QRect rc, int nAlpha) const
     {
         const QRect& rcSrc = m_arrayImageGrid[i];
         const QRect& rcDest = arrayDest[i];
-        //
-        if (rcDest.width() > 255)
-        {
-            int i = 0;
-            i = 1;
-        }
         //
         if (nAlpha > 0 && nAlpha <= 255)
         {

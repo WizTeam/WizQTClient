@@ -45,6 +45,7 @@ CString WizFormatString5(const CString& strFormat, const CString& strParam1, con
 CString WizFormatString6(const CString& strFormat, const CString& strParam1, const CString& strParam2, const CString& strParam3, const CString& strParam4, const CString& strParam5, const CString& strParam6);
 CString WizFormatString7(const CString& strFormat, const CString& strParam1, const CString& strParam2, const CString& strParam3, const CString& strParam4, const CString& strParam5, const CString& strParam6, const CString& strParam7);
 CString WizFormatString8(const CString& strFormat, const CString& strParam1, const CString& strParam2, const CString& strParam3, const CString& strParam4, const CString& strParam5, const CString& strParam6, const CString& strParam7, const CString& strParam8);
+CString WizFormatInt(__int64 n);
 
 time_t WizTimeGetTimeT(const COleDateTime& t);
 
@@ -93,7 +94,9 @@ void WizEnumFiles(const CString& strPath, const CString& strExts, CWizStdStringA
 void WizEnumFolders(const CString& strPath, CWizStdStringArray& arrayFolders, UINT uFlags);
 
 
-BOOL WizCopyFile(const CString& strSrcFileName, CString& strDestFileName, BOOL bOverwrite);
+BOOL WizCopyFile(const CString& strSrcFileName, const CString& strDestFileName, BOOL bFailIfExists);
+void WizGetNextFileName(CString& strFileName);
+
 CString WizEncryptPassword(const CString& strPassword);
 CString WizDecryptPassword(const CString& strEncryptedText);
 
@@ -149,6 +152,9 @@ void WizMakeValidFileNameNoPath(CString& strFileName);
 void WizMakeValidFileNameNoPathLimitLength(CString& strFileName, int nMaxTitleLength);
 void WizMakeValidFileNameNoPathLimitFullNameLength(CString& strFileName, int nMaxFullNameLength);
 CString WizMakeValidFileNameNoPathReturn(const CString& strFileName);
+
+BOOL WizSaveDataToFile(const CString& strFileName, const QByteArray& arrayData);
+BOOL WizLoadDataFromFile(const CString& strFileName, QByteArray& arrayData);
 
 
 class CWizXMLNode

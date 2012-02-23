@@ -449,21 +449,21 @@ void CWizSync::uploadNextAttachment()
 
 void CWizSync::onDeletedPostList(const std::deque<WIZDELETEDGUIDDATA>& arrayData)
 {
-    Q_UNUSED(arrayData);
+    CWizApi::onDeletedPostList(arrayData);
     //
     uploadNextDeleteds();
 }
 
 void CWizSync::onTagPostList(const std::deque<WIZTAGDATA>& arrayData)
 {
-    Q_UNUSED(arrayData);
+    CWizApi::onTagPostList(arrayData);
     //
     uploadNextTags();
 }
 
 void CWizSync::onStylePostList(const std::deque<WIZSTYLEDATA>& arrayData)
 {
-    Q_UNUSED(arrayData);
+    CWizApi::onStylePostList(arrayData);
     //
     uploadNextStyles();
 }
@@ -499,6 +499,36 @@ void CWizSync::onDocumentsGetInfo(const std::deque<WIZDOCUMENTDATABASE>& arrayRe
         addErrorLog("Can not query document info");
     }
 }
+void CWizSync::onAttachmentsGetInfo(const std::deque<WIZDOCUMENTATTACHMENTDATAEX>& arrayRet)
+{
+    size_t count = arrayRet.size();
+    //
+    if (0 == count)
+    {
+        //new document
+        WIZDOCUMENTATTACHMENTDATA data;
+        data.strGUID = m_currentUploadAttachment.strGUID;
+        data.strDocumentGUID = m_currentUploadAttachment.strDocumentGUID;
+        data.strName = m_currentUploadDocument.strName;
+        data.tInfoModified = COleDateTime(1900, 1, 1, 0, 0, 0);
+        data.tDataModified = data.tInfoModified;
+        data.strInfoMD5 = "-1";
+        data.strDataMD5 = "-1";
+        //
+        onQueryAttachmentInfo(data);
+    }
+    else if (1 == count)
+    {
+        onQueryAttachmentInfo(arrayRet[0]);
+    }
+    else
+    {
+        ATLASSERT(FALSE);
+        onXmlRpcError(SyncMethod_GetDocumentsInfo, errorXmlRpcFault, -1, "Fault error: Invalid document info");
+        addErrorLog("Can not query document info");
+    }
+}
+
 
 void CWizSync::onDeletedGetList(const std::deque<WIZDELETEDGUIDDATA>& arrayRet)
 {

@@ -95,11 +95,12 @@ public:
     //
     bool UpdateDocumentData(WIZDOCUMENTDATA& data, const QString& strHtml, const QString& strURL, int nFlags);
     virtual BOOL UpdateDocumentDataMD5(WIZDOCUMENTDATA& data, const CString& strZipFileName);
+    BOOL DeleteAttachment(const WIZDOCUMENTATTACHMENTDATA& data, BOOL bLog);
     //
     BOOL IsDocumentDownloaded(const CString& strGUID);
     BOOL IsAttachmentDownloaded(const CString& strGUID);
     BOOL GetAllObjectsNeedToBeDownloaded(std::deque<WIZOBJECTDATA>& arrayData);
-    BOOL UpdateObjectLocalData(const WIZOBJECTDATA& data);
+    BOOL UpdateSyncObjectLocalData(const WIZOBJECTDATA& data);
     //
     CString GetDocumentFileName(const CString& strGUID);
     CString GetAttachmentFileName(const CString& strGUID);
@@ -114,6 +115,8 @@ public:
     BOOL GetModifiedDeletedGUIDs(CWizDeletedGUIDDataArray& arrayData) { return GetDeletedGUIDs(arrayData); }
     BOOL LoadDocumentData(const CString& strDocumentGUID, QByteArray& arrayData);
     BOOL LoadAttachmentData(const CString& strDocumentGUID, QByteArray& arrayData);
+    BOOL LoadCompressedAttachmentData(const CString& strDocumentGUID, QByteArray& arrayData);
+    BOOL SaveCompressedAttachmentData(const CString& strDocumentGUID, const QByteArray& arrayData);
     //
     BOOL UpdateDocumentAbstract(const CString& strDocumentGUID);
     //
@@ -129,6 +132,7 @@ public:
     using CIndex::DocumentFromGUID;
     //
     BOOL CreateDocumentAndInit(const CString& strHtml, const CString& strHtmlUrl, int nFlags, const CString& strTitle, const CString& strName, const CString& strLocation, const CString& strURL, WIZDOCUMENTDATA& data);
+    BOOL AddAttachment(const WIZDOCUMENTDATA& document, const CString& strFileName, WIZDOCUMENTATTACHMENTDATA& dataRet);
 public:
     CString GetUserId() const { return m_strUserId; }
     CString GetPassword() const { return m_strPassword; }

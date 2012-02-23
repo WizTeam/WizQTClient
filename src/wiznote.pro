@@ -90,7 +90,11 @@ SOURCES += main.cpp\
     share/wizanimateaction.cpp \
     wiznotesettings.cpp \
     wizattachmentlistwidget.cpp \
-    share/wizpopupwidget.cpp
+    share/wizpopupwidget.cpp \
+    share/wizmultilinelistwidget.cpp \
+    share/wizfileiconprovider.cpp \
+    share/wizwindowshelper.cpp \
+    share/wizimagepushbutton.cpp
 
 HEADERS  += mainwindow.h \
     share/wizqthelper.h \
@@ -161,7 +165,11 @@ HEADERS  += mainwindow.h \
     share/wizanimateaction.h \
     wiznotesettings.h \
     wizattachmentlistwidget.h \
-    share/wizpopupwidget.h
+    share/wizpopupwidget.h \
+    share/wizmultilinelistwidget.h \
+    share/wizfileiconprovider.h \
+    share/wizwindowshelper.h \
+    share/wizimagepushbutton.h
 
 
 mac:HEADERS +=     \

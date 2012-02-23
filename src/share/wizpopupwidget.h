@@ -4,6 +4,7 @@
 #include <QWidget>
 #include "wizui.h"
 
+class QTimer;
 
 class CWizPopupWidget : public QWidget
 {
@@ -14,6 +15,7 @@ private:
 #ifndef Q_OS_MAC
     CWizSkin9GridImage m_backgroundImage;
     QPixmap m_backgroundPixmap;
+    QTimer* m_timer;
 #endif
 public:
     virtual QSize sizeHint() const;
@@ -21,18 +23,14 @@ public:
 protected:
 #ifndef Q_OS_MAC
     virtual void paintEvent(QPaintEvent* event);
-    virtual void keyPressEvent(QKeyEvent* event);
-    virtual void mousePressEvent(QMouseEvent* event);
 #endif
     virtual void resizeEvent(QResizeEvent* event);
 public:
     void showAtPoint(const QPoint& pt);
 #ifndef Q_OS_MAC
-    void closeWidget();
-#endif
 public slots:
+    void on_timer_timeOut();
+#endif
 };
-
-#undef Q_OS_WIN
 
 #endif // WIZPOPUPWIDGET_H

@@ -1,6 +1,7 @@
 #include "wizdocumentview.h"
 #include "wizdocumentwebview.h"
 #include "wizattachmentlistwidget.h"
+#include "wiznotestyle.h"
 
 #include <QWebView>
 #include <QWebElement>
@@ -8,7 +9,7 @@
 
 #include <QBoxLayout>
 #include <QLineEdit>
-#include <QPushButton>
+#include "share/wizimagepushbutton.h"
 
 class CWizTitleBar
     : public QWidget
@@ -36,21 +37,24 @@ public:
         m_commitIcon = WizLoadSkinIcon("lock");
         m_attachmentIcon = WizLoadSkinIcon("attachment");
         //
-        m_editDocumentButton = new QPushButton(m_editIcon, "", this);
+        m_editDocumentButton = new CWizImagePushButton(m_editIcon, "", this);
         updateEditDocumentButtonIcon(false);
+        m_editDocumentButton->setStyle(::WizGetStyle());
         //
-        m_attachmentButton = new QPushButton(m_attachmentIcon, "Attachment", this);
+        m_attachmentButton = new CWizImagePushButton(m_attachmentIcon, "", this);
+        m_attachmentButton->setStyle(::WizGetStyle());
+        m_attachmentButton->setToolTip(tr("Attachments"));
         //
         layout->addWidget(m_titleEdit);
         layout->addWidget(m_editDocumentButton);
         layout->addWidget(m_attachmentButton);
         //
-        m_titleEdit->setStyleSheet("QLineEdit{padding:2 2 2 2;border-color:#ffffff;border-width:1;border-style:solid;}QLineEdit:hover{border-color:#bbbbbb;border-width:1;border-style:solid;}");
+        m_titleEdit->setStyleSheet("QLineEdit{padding:4 4 4 4;border-color:#ffffff;border-width:1;border-style:solid;}QLineEdit:hover{border-color:#bbbbbb;border-width:1;border-style:solid;}");
     }
 private:
     QLineEdit* m_titleEdit;
-    QPushButton* m_editDocumentButton;
-    QPushButton* m_attachmentButton;
+    CWizImagePushButton* m_editDocumentButton;
+    CWizImagePushButton* m_attachmentButton;
     //
     QIcon m_editIcon;
     QIcon m_commitIcon;
@@ -59,7 +63,7 @@ private:
     void updateEditDocumentButtonIcon(bool editing)
     {
         m_editDocumentButton->setIcon(editing ? m_commitIcon : m_editIcon);
-        m_editDocumentButton->setText(editing ? tr("Save && Read") : tr("Edit Note"));
+        m_editDocumentButton->setToolTip(editing ? tr("Save & Read") : tr("Edit Note"));
     }
 public:
     QLineEdit* titleEdit() const { return m_titleEdit; }
@@ -68,6 +72,14 @@ public:
     //
     void setEditingDocument(bool editing) { updateEditDocumentButtonIcon(editing); }
     void setTitle(const QString& str) { m_titleEdit->setText(str); }
+    //
+    void updateInformation(CWizDatabase& db, const WIZDOCUMENTDATA& data)
+    {
+        m_titleEdit->setText(data.strTitle);
+        int nAttachmentCount = db.GetDocumentAttachmentCount(data.strGUID);
+        CString strText = nAttachmentCount ? WizIntToStr(nAttachmentCount) : CString();
+        m_attachmentButton->setText(strText);
+    }
 };
 
 
@@ -94,6 +106,9 @@ CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
     connect(m_title->titleEdit(), SIGNAL(textEdited(QString)), this, SLOT(on_titleEdit_textEdited(QString)));
     connect(m_title->editDocumentButton(), SIGNAL(clicked()), this, SLOT(on_editDocumentButton_clicked()));
     connect(m_title->attachmentButton(), SIGNAL(clicked()), this, SLOT(on_attachmentButton_clicked()));
+    //
+    connect(&m_db, SIGNAL(attachmentCreated(WIZDOCUMENTATTACHMENTDATA)), this, SLOT(on_attachment_created(WIZDOCUMENTATTACHMENTDATA)));
+    connect(&m_db, SIGNAL(attachmentDeleted(WIZDOCUMENTATTACHMENTDATA)), this, SLOT(on_attachment_deleted(WIZDOCUMENTATTACHMENTDATA)));
 }
 
 
@@ -170,7 +185,7 @@ bool CWizDocumentView::viewDocument(const WIZDOCUMENTDATA& data, bool forceEdit)
     showClient(true);
     editDocument(edit);
     //
-    m_title->setTitle(data.strTitle);
+    m_title->updateInformation(m_db, data);
     return true;
 }
 
@@ -218,6 +233,8 @@ void CWizDocumentView::on_attachmentButton_clicked()
         m_attachments = new CWizAttachmentListWidget(m_db, topLevelWidget());
     }
     //
+    m_attachments->setDocument(m_web->document());
+    //
     QPushButton* btn = m_title->attachmentButton();
     QRect rc = btn->geometry();
     QPoint pt = btn->mapToGlobal(QPoint(rc.width() / 2, rc.height()));
@@ -225,4 +242,18 @@ void CWizDocumentView::on_attachmentButton_clicked()
     m_attachments->showAtPoint(pt);
 }
 
+void CWizDocumentView::on_attachment_created(const WIZDOCUMENTATTACHMENTDATA& attachment)
+{
+    if (attachment.strDocumentGUID == document().strGUID)
+    {
+        m_title->updateInformation(m_db, document());
+    }
+}
 
+void CWizDocumentView::on_attachment_deleted(const WIZDOCUMENTATTACHMENTDATA& attachment)
+{
+    if (attachment.strDocumentGUID == document().strGUID)
+    {
+        m_title->updateInformation(m_db, document());
+    }
+}

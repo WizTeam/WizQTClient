@@ -842,6 +842,7 @@ BOOL CIndex::SQLToDocumentParamDataArray(const CString& strSQL, CWizDocumentPara
 	}
 }
 
+
 BOOL CIndex::SQLToDocumentAttachmentDataArray(const CString& strSQL, CWizDocumentAttachmentDataArray& arrayAttachment)
 {
 	try
@@ -1867,6 +1868,8 @@ BOOL CIndex::DeleteAttachment(const WIZDOCUMENTATTACHMENTDATA& data, BOOL bLog)
 	{
         emit attachmentDeleted(data);
 	}
+    //
+    UpdateDocumentAttachmentCount(data.strDocumentGUID);
 	//
 	return TRUE;
 }
@@ -4181,6 +4184,32 @@ BOOL CIndex::SetMetaInt64(const CString& strMetaName, const CString& strKey, __i
 {
     return SetMeta(strMetaName, strKey, WizInt64ToStr(n));
 }
+int CIndex::GetDocumentAttachmentCount(const CString& strDocumentGUID)
+{
+    CString strSQL;
+    strSQL.Format(_T("select count(*) from WIZ_DOCUMENT_ATTACHMENT where DOCUMENT_GUID=%s"),
+                  STR2SQL(strDocumentGUID).utf16());
+    //
+    CppSQLite3Query query = m_db.execQuery(strSQL);
+    //
+    if (!query.eof())
+    {
+        int nCount = query.getIntField(0);
+        return nCount;
+    }
+    return 0;
+}
+void CIndex::UpdateDocumentAttachmentCount(const CString& strDocumentGUID)
+{
+    WIZDOCUMENTDATA data;
+    if (!DocumentFromGUID(strDocumentGUID, data))
+        return;
+    //
+    data.nAttachmentCount = GetDocumentAttachmentCount(strDocumentGUID);
+    //
+    ModifyDocumentInfo(data);
+}
+
 BOOL CIndex::GetSync(const CString& strLocation)
 {
     CString strRootLocationName = GetRootLocationName(strLocation);

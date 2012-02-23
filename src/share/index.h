@@ -136,7 +136,11 @@ public:
     BOOL SetMeta(CString strMetaName, CString strKey, const CString& lpszValue);
     __int64 GetMetaInt64(const CString& strMetaName, const CString& strKey, __int64 nDef);
     BOOL SetMetaInt64(const CString& strMetaName, const CString& strKey, __int64 n);
+    //
+    int GetDocumentAttachmentCount(const CString& strDocumentGUID);
+    void UpdateDocumentAttachmentCount(const CString& strDocumentGUID);
 	//
+
     BOOL LogDeletedGUID(const CString& strGUID, WizObjectType eType);
     BOOL LogDeletedGUIDs(const CWizStdStringArray& arrayGUID, WizObjectType eType);
 	//

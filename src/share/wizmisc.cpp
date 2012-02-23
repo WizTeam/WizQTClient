@@ -187,14 +187,74 @@ void WizEnumFolders(const CString& path, CWizStdStringArray& arrayFolders, UINT 
     }
     //
 }
-BOOL WizCopyFile(const CString& strSrcFileName, CString& strDestFileName, BOOL bOverwrite)
+BOOL WizCopyFile(const CString& strSrcFileName, const CString& strDestFileName, BOOL bFailIfExists)
 {
-    Q_UNUSED(strSrcFileName);
-    Q_UNUSED(strDestFileName);
-    Q_UNUSED(bOverwrite);
-    return FALSE;
+    QFile fileSrc(strSrcFileName);
+    if (!fileSrc.exists())
+        return FALSE;
+    //
+    QFile fileDest(strDestFileName);
+    if (fileDest.exists())
+    {
+        if (bFailIfExists)
+            return FALSE;
+        //
+        fileDest.remove();
+    }
+    //
+    return fileSrc.copy(strDestFileName);
 }
-
+void WizGetNextFileName(CString& strFileName)
+{
+    if (!PathFileExists(strFileName))
+        return;
+    //
+    CString strPath = WizExtractFilePath(strFileName);
+    CString strTitle = WizExtractFileTitle(strFileName);
+    CString strExt = WizExtractFileExt(strFileName);
+    //
+    //
+    const UINT nMaxLength = MAX_PATH - 10;
+    if (strFileName.GetLength() >= int(nMaxLength))
+    {
+        int nTitleLength = nMaxLength - (strPath.GetLength() + strExt.GetLength());
+        if (nTitleLength <= 0)
+        {
+            TOLOG1(_T("File name is too long: %1"), strFileName);
+            strTitle = WizIntToStr(GetTickCount());
+        }
+        else
+        {
+            ATLASSERT(strTitle.GetLength() >= nTitleLength);
+            if (strTitle.GetLength() >= nTitleLength)
+            {
+                strTitle = strTitle.Left(nTitleLength);
+            }
+        }
+        //
+        strFileName = strPath + strTitle + strExt;
+    }
+    //
+    if (!PathFileExists(strFileName))
+        return;
+    //
+    int nPos = strTitle.lastIndexOf('_');
+    if (nPos != -1)
+    {
+        CString strTemp = strTitle.Right(strTitle.GetLength() - nPos - 1);
+        if (strTemp == WizIntToStr(_ttoi(strTemp)))
+        {
+            strTitle.Delete(nPos, strTitle.GetLength() - nPos);
+        }
+    }
+    //
+    int nIndex = 2;
+    while (PathFileExists(strFileName))
+    {
+        strFileName.Format(_T("%s%s_%d%s"), strPath.utf16(), strTitle.utf16(), nIndex, strExt.utf16());
+        nIndex++;
+    }
+}
 CString WizEncryptPassword(const CString& strPassword)
 {
     return strPassword;
@@ -554,6 +614,27 @@ CString WizFormatString8(const CString& strFormat, const CString& strParam1, con
     str.replace("%8", strParam8);
     return str;
 }
+
+CString WizFormatInt(__int64 n)
+{
+    // According to the Si standard KB is 1000 bytes, KiB is 1024
+    // but on windows sizes are calulated by dividing by 1024 so we do what they do.
+    const quint64 kb = 1024;
+    const quint64 mb = 1024 * kb;
+    const quint64 gb = 1024 * mb;
+    const quint64 tb = 1024 * gb;
+    quint64 bytes = n;
+    if (bytes >= tb)
+        return QObject::tr("%1 TB").arg(QLocale().toString(qreal(bytes) / tb, 'f', 3));
+    if (bytes >= gb)
+        return QObject::tr("%1 GB").arg(QLocale().toString(qreal(bytes) / gb, 'f', 2));
+    if (bytes >= mb)
+        return QObject::tr("%1 MB").arg(QLocale().toString(qreal(bytes) / mb, 'f', 1));
+    if (bytes >= kb)
+        return QObject::tr("%1 KB").arg(QLocale().toString(bytes / kb));
+    return QObject::tr("%1 byte(s)").arg(QLocale().toString(bytes));
+}
+
 
 time_t WizTimeGetTimeT(const COleDateTime& t)
 {
@@ -2519,4 +2600,35 @@ CString WizGetCommandLineValue(const CString& strCommandLine, const CString& str
     WizCommandLineToStringArray(strCommandLine, arrayLine);
     //
     return WizStringArrayGetValue(arrayLine, strKey);
+}
+
+BOOL WizSaveDataToFile(const CString& strFileName, const QByteArray& arrayData)
+{
+    QFile file(strFileName);
+    if (!file.open(QIODevice::WriteOnly | QIODevice::Truncate))
+    {
+        return FALSE;
+    }
+    //
+    QDataStream out(&file);   // we will serialize the data into the file
+    //
+    out << arrayData;
+    return TRUE;
+}
+
+BOOL WizLoadDataFromFile(const CString& strFileName, QByteArray& arrayData)
+{
+    arrayData.clear();
+    if (!PathFileExists(strFileName))
+        return FALSE;
+    if (0 == ::WizGetFileSize(strFileName))
+        return TRUE;
+    //
+    QFile file(strFileName);
+    if (!file.open(QFile::ReadOnly))
+        return FALSE;
+    //
+    arrayData = file.readAll();
+    //
+    return TRUE;
 }

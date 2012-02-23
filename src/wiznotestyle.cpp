@@ -6,9 +6,12 @@
 #include "share/wizsettings.h"
 #include "share/wizuihelper.h"
 #include "share/wizui.h"
+#include "share/wizmultilinelistwidget.h"
+#include "share/wizimagepushbutton.h"
 
 #include <QPainter>
 #include <QPixmapCache>
+#include <QPushButton>
 
 #include <QDebug>
 
@@ -40,6 +43,13 @@ private:
     CWizSkin9GridImage m_categorySelectedItemBackground;
     CWizSkin9GridImage m_documentsSelectedItemBackground;
     CWizSkin9GridImage m_documentsSelectedItemBackgroundHot;
+    CWizSkin9GridImage m_multiLineListSelectedItemBackground;
+    CWizSkin9GridImage m_multiLineListSelectedItemBackgroundHot;
+    CWizSkin9GridImage m_imagePushButton;
+    CWizSkin9GridImage m_imagePushButtonHot;
+    CWizSkin9GridImage m_imagePushButtonPressed;
+    CWizSkin9GridImage m_imagePushButtonDisabled;
+    CWizSkin9GridImage m_imagePushButtonLabel;
     //
     QColor m_colorCategoryBackground;
     QColor m_colorCategoryText;
@@ -54,9 +64,17 @@ private:
     QColor m_colorDocumentsSummarySelected;
     QColor m_colorDocumentsLine;
     //
+    QColor m_colorMultiLineListFirstLine;
+    QColor m_colorMultiLineListFirstLineSelected;
+    QColor m_colorMultiLineListOtherLine;
+    QColor m_colorMultiLineListOtherLineSelected;
+    //
+    QFont m_fontImagePushButtonLabel;
 protected:
     virtual void drawCategoryViewItem(const QStyleOptionViewItemV4 *option, QPainter *painter, const CWizCategoryView *widget) const;
     virtual void drawDocumentListViewItem(const QStyleOptionViewItemV4 *option, QPainter *painter, const CWizDocumentListView *widget) const;
+    virtual void drawMultiLineListWidgetItem(const QStyleOptionViewItemV4 *option, QPainter *painter, const CWizMultiLineListWidget *widget) const;
+    virtual void drawImagePushButton(const QStyleOptionButton *option, QPainter *painter, const CWizImagePushButton *button) const;
     //
     void drawcenterImage(QPainter* p, const QImage& image, const QRect& rc) const;
 public:
@@ -81,6 +99,13 @@ CWizNoteStyle::CWizNoteStyle()
     m_categorySelectedItemBackground.SetImage(WizGetSkinPath() + "category_selected_background.png", QPoint(4, 4));
     m_documentsSelectedItemBackground.SetImage(WizGetSkinPath() + "documents_selected_background.png", QPoint(4, 4));
     m_documentsSelectedItemBackgroundHot.SetImage(WizGetSkinPath() + "documents_selected_background_hot.png", QPoint(4, 4));
+    m_multiLineListSelectedItemBackground.SetImage(WizGetSkinPath() + "multilinelist_selected_background.png", QPoint(4, 4));
+    m_multiLineListSelectedItemBackgroundHot.SetImage(WizGetSkinPath() + "multilinelist_selected_background_hot.png", QPoint(4, 4));
+    m_imagePushButton.SetImage(WizGetSkinPath() + "imagepushbutton.png", QPoint(4, 4));
+    m_imagePushButtonHot.SetImage(WizGetSkinPath() + "imagepushbutton_hot.png", QPoint(4, 4));
+    m_imagePushButtonPressed.SetImage(WizGetSkinPath() + "imagepushbutton_pressed.png", QPoint(4, 4));
+    m_imagePushButtonDisabled.SetImage(WizGetSkinPath() + "imagepushbutton_disabled.png", QPoint(4, 4));
+    m_imagePushButtonLabel.SetImage(WizGetSkinPath() + "imagepushbutton_label.png", QPoint(8, 8));
     //
     CWizSettings settings(WizGetSkinPath() + "skin.ini");
     m_colorCategoryBackground = settings.GetColor("Category", "Background", "#808080");
@@ -94,7 +119,15 @@ CWizNoteStyle::CWizNoteStyle()
     m_colorDocumentsTitleSelected = settings.GetColor("Documents", "TitleSelected", "#000000");
     m_colorDocumentsDateSelected = settings.GetColor("Documents", "DateSelected", "#0000ff");
     m_colorDocumentsSummarySelected = settings.GetColor("Documents", "SummarySelected", "#666666");
-    m_colorDocumentsLine = settings.GetColor("Documents", "Line", "#666666");
+    m_colorDocumentsLine = settings.GetColor("Documents", "Line", "#d9dcdd");
+    //
+    m_colorMultiLineListFirstLine = settings.GetColor("MultiLineList", "First", "#000000");
+    m_colorMultiLineListFirstLineSelected = settings.GetColor("MultiLineList", "FirstSelected", "#000000");
+    m_colorMultiLineListOtherLine = settings.GetColor("MultiLineList", "Other", "#666666");
+    m_colorMultiLineListOtherLineSelected = settings.GetColor("MultiLineList", "OtherSelected", "#666666");
+    //
+    m_fontImagePushButtonLabel = QFont("Arial Black", 8);
+    m_fontImagePushButtonLabel.setBold(true);
 }
 
 
@@ -305,6 +338,229 @@ void CWizNoteStyle::drawDocumentListViewItem(const QStyleOptionViewItemV4 *vopt,
     p->restore();
 }
 
+void CWizNoteStyle::drawMultiLineListWidgetItem(const QStyleOptionViewItemV4 *vopt, QPainter *p, const CWizMultiLineListWidget *view) const
+{
+    bool imageAlignLeft = view->imageAlignLeft();
+    int imageWidth = view->imageWidth();
+    int lineCount = view->lineCount();
+    int wrapTextLineText = view->wrapTextLineIndex();
+    const QPixmap img = view->itemImage(vopt->index);
+    //
+    QPalette palette = vopt->palette;
+    palette.setColor(QPalette::All, QPalette::HighlightedText, palette.color(QPalette::Active, QPalette::Text));
+    // Note that setting a saturated color here results in ugly XOR colors in the focus rect
+    palette.setColor(QPalette::All, QPalette::Highlight, palette.base().color().darker(108));
+    QStyleOptionViewItemV4 adjustedOption = *vopt;
+    adjustedOption.palette = palette;
+    // We hide the  focusrect in singleselection as it is not required
+    if ((view->selectionMode() == QAbstractItemView::SingleSelection)
+        && !(vopt->state & State_KeyboardFocusChange))
+    {
+        adjustedOption.state &= ~State_HasFocus;
+    }
+
+    QStyleOptionViewItemV4* opt = &adjustedOption;
+    //
+    p->save();
+    p->setClipRect(opt->rect);
+
+    QRect textLine = opt->rect;
+    textLine.adjust(4, 0, -4, 0);
+    p->setPen(m_colorDocumentsLine);
+    p->drawLine(textLine.bottomLeft(), textLine.bottomRight());
+
+    QRect textRect = subElementRect(SE_ItemViewItemText, vopt, view);
+
+    // draw the background
+    if (vopt->state.testFlag(State_Selected))
+    {
+        m_multiLineListSelectedItemBackground.Draw(p, vopt->rect, 0);
+    }
+#ifndef Q_OS_MAC
+    else if (vopt->state.testFlag(State_MouseOver))
+    {
+        m_multiLineListSelectedItemBackgroundHot.Draw(p, vopt->rect, 0);
+    }
+#endif
+    //proxy()->drawPrimitive(PE_PanelItemViewItem, opt, p, view);
+    //
+    if (!img.isNull()
+        && img.width() > 0
+        && img.height() > 0)
+    {
+        QRect imageRect = textRect;
+        if (imageAlignLeft)
+        {
+            imageRect.setRight(imageRect.left() + imageWidth + 16);
+            imageRect.adjust(4, 4, -4, -4);
+            textRect.setLeft(imageRect.right());
+        }
+        else
+        {
+            imageRect.setLeft(imageRect.right() - imageWidth + 16);
+            imageRect.adjust(4, 4, -4, -4);
+            textRect.setRight(imageRect.left());
+        }
+        //
+        if (img.width() > imageRect.width() || img.height() > imageRect.height())
+        {
+            double fRate = std::min<double>(double(imageRect.width()) / img.width(), double(imageRect.height()) / img.height());
+            int newWidth = int(img.width() * fRate);
+            int newHeight = int(img.height() * fRate);
+            //
+            int adjustX = (imageRect.width() - newWidth) / 2;
+            int adjustY = (imageRect.height() - newHeight) / 2;
+            imageRect.adjust(adjustX, adjustY, -adjustX, -adjustY);
+        }
+        else
+        {
+            int adjustX = (imageRect.width() - img.width()) / 2;
+            int adjustY = (imageRect.height() - img.height()) / 2;
+            imageRect.adjust(adjustX, adjustY, -adjustX, -adjustY);
+        }
+        p->drawPixmap(imageRect, img);
+        //
+    }
+    //
+    // draw the text
+    QPalette::ColorGroup cg = vopt->state & QStyle::State_Enabled
+                              ? QPalette::Normal : QPalette::Disabled;
+    if (cg == QPalette::Normal && !(vopt->state & QStyle::State_Active))
+        cg = QPalette::Inactive;
+
+    if (vopt->state & QStyle::State_Selected) {
+        p->setPen(vopt->palette.color(cg, QPalette::HighlightedText));
+    } else {
+        p->setPen(vopt->palette.color(cg, QPalette::Text));
+    }
+    if (vopt->state & QStyle::State_Editing) {
+        p->setPen(vopt->palette.color(cg, QPalette::Text));
+        p->drawRect(textRect.adjusted(0, 0, -1, -1));
+    }
+    //
+    textRect.adjust(8, 8, -8, -8);
+    //
+    bool selected = vopt->state.testFlag(State_Selected);
+    //
+    int lineHeight = vopt->fontMetrics.height() + 2;
+    //
+    for (int line = 0; line < wrapTextLineText && line < lineCount; line++)
+    {
+        QColor color = (0 == line) ? (selected ? m_colorMultiLineListFirstLineSelected : m_colorMultiLineListFirstLine)
+            : (selected ? m_colorMultiLineListOtherLineSelected : m_colorMultiLineListOtherLine);
+        //
+        CString strText = view->itemText(vopt->index, line);
+        color = view->itemTextColor(vopt->index, line, selected, color);
+        QRect rc = textRect;
+        rc.setTop(rc.top() + line * lineHeight);
+        rc.setHeight(lineHeight);
+        ::WizDrawTextSingleLine(p, rc, strText,  Qt::TextSingleLine | Qt::AlignVCenter, color, true);
+    }
+    //
+    int line = wrapTextLineText;
+    if (line < lineCount)
+    {
+        CString strText = view->itemText(vopt->index, line);
+        for (; line < lineCount; line++)
+        {
+            QColor color = selected ? m_colorMultiLineListOtherLineSelected : m_colorMultiLineListOtherLine;
+            //
+            color = view->itemTextColor(vopt->index, line, selected, color);
+            QRect rc = textRect;
+            rc.setTop(rc.top() + line * lineHeight);
+            rc.setHeight(lineHeight);
+            bool elidedText = (line == lineCount - 1);
+            ::WizDrawTextSingleLine(p, rc, strText,  Qt::TextSingleLine | Qt::AlignVCenter, color, elidedText);
+        }
+    }
+
+    // draw the focus rect
+    if (vopt->state & QStyle::State_HasFocus) {
+        QStyleOptionFocusRect o;
+        o.QStyleOption::operator=(*vopt);
+        o.rect = subElementRect(SE_ItemViewItemFocusRect, vopt, view);
+        o.state |= QStyle::State_KeyboardFocusChange;
+        o.state |= QStyle::State_Item;
+        QPalette::ColorGroup cg = (vopt->state & QStyle::State_Enabled)
+                                  ? QPalette::Normal : QPalette::Disabled;
+        o.backgroundColor = vopt->palette.color(cg, (vopt->state & QStyle::State_Selected)
+                                                ? QPalette::Highlight : QPalette::Window);
+        proxy()->drawPrimitive(QStyle::PE_FrameFocusRect, &o, p, view);
+    }
+    //
+    p->restore();
+}
+
+
+void CWizNoteStyle::drawImagePushButton(const QStyleOptionButton *option, QPainter *painter, const CWizImagePushButton *button) const
+{
+    bool disabled = false;
+    bool pressed = false;
+    bool hot = false;
+    //
+    State flags = option->state;
+    if (!(flags & State_Enabled))
+        disabled = true;
+    else if (flags & (State_Sunken | State_On))
+        pressed = true;
+    else if (flags & State_MouseOver)
+        hot = true;
+    //
+    QRect rect(option->rect);
+    QRect rectImage = rect;
+    //
+    CString label = button->text();
+    if (!label.isEmpty())
+    {
+        rectImage.setWidth(std::min<int>(16 + 16, rect.width()));
+    }
+    //
+    if (disabled)
+    {
+        m_imagePushButtonDisabled.Draw(painter, rectImage, 0);
+    }
+    else if (pressed)
+    {
+        m_imagePushButtonPressed.Draw(painter, rectImage, 0);
+    }
+    else if (hot)
+    {
+        m_imagePushButtonHot.Draw(painter, rectImage, 0);
+    }
+    else
+    {
+        m_imagePushButton.Draw(painter, rectImage, 0);
+    }
+    //
+    QIcon::Mode mode = disabled ? QIcon::Disabled : QIcon::Normal;
+    QPixmap pixmap = button->icon().pixmap(16, 16, mode);
+    if (!pixmap.isNull())
+    {
+        QPoint pt = rectImage.center();
+        pt.setX(pt.x() - pixmap.width() / 2 + 1);
+        pt.setY(pt.y() - pixmap.height() / 2 + 1);
+        //
+        painter->drawPixmap(pt, pixmap);
+    }
+    //
+    if (!label.isEmpty())
+    {
+        QRect rectLabel = rect;
+        rectLabel.setLeft(rectImage.right() - 8);
+        rectLabel.setHeight(m_imagePushButtonLabel.actualSize().height());
+        //
+        m_imagePushButtonLabel.Draw(painter, rectLabel, 0);
+        //
+        QRect rectLabelText = rectLabel;
+        rectLabelText.setRight(rectLabelText.right() - 2);    //shadow
+        rectLabelText.setBottom(rectLabelText.bottom() - 4);    //shadow
+        painter->save();
+        painter->setFont(m_fontImagePushButtonLabel);
+        ::WizDrawTextSingleLine(painter, rectLabelText, label,  Qt::TextSingleLine | Qt::AlignVCenter | Qt::AlignCenter, QColor(0xff, 0xff, 0xff), false);
+        painter->restore();
+    }
+}
+
 void CWizNoteStyle::drawControl(ControlElement element, const QStyleOption *option, QPainter *painter, const QWidget *widget) const
 {
     switch (element)
@@ -328,6 +584,10 @@ void CWizNoteStyle::drawControl(ControlElement element, const QStyleOption *opti
             {
                 drawDocumentListViewItem(vopt, painter, view);
             }
+            else if (const CWizMultiLineListWidget *view = dynamic_cast<const CWizMultiLineListWidget *>(widget))
+            {
+                drawMultiLineListWidgetItem(vopt, painter, view);
+            }
             else if (const CWizCategoryView *view = dynamic_cast<const CWizCategoryView *>(widget))
             {
                 drawCategoryViewItem(vopt, painter, view);
@@ -338,6 +598,21 @@ void CWizNoteStyle::drawControl(ControlElement element, const QStyleOption *opti
             }
             break;
         }
+    case CE_PushButton:
+        {
+            const QStyleOptionButton* vopt = qstyleoption_cast<const QStyleOptionButton *>(option);
+            ATLASSERT(vopt);
+            //
+            if (const CWizImagePushButton *button = dynamic_cast<const CWizImagePushButton *>(widget))
+            {
+                drawImagePushButton(vopt, painter, button);
+            }
+            else
+            {
+                CWizNoteBaseStyle::drawControl(element, option, painter, widget);
+            }
+        }
+        break;
     default:
         CWizNoteBaseStyle::drawControl(element, option, painter, widget);
         break;

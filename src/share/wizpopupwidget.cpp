@@ -6,19 +6,26 @@
 #include <QDesktopWidget>
 #include <QResizeEvent>
 #include <QPolygon>
+#include <QTimer>
+
+#ifdef Q_OS_WIN
+//#include "wizwindowshelper.h"
+#endif
 
 
 CWizPopupWidget::CWizPopupWidget(QWidget* parent)
 #ifndef Q_OS_MAC
     : QWidget(parent, Qt::Tool | Qt::FramelessWindowHint)
+    , m_timer(new QTimer(this))
 #else
     : QWidget(parent, Qt::Popup | Qt::FramelessWindowHint)
 #endif
 {
 #ifndef Q_OS_MAC
-    connect(qApp, SIGNAL(focusChanged(QWidget*,QWidget*)), this, SLOT(on_application_focusChanged(QWidget*,QWidget*)));
     m_backgroundImage.SetImage(::WizGetSkinResourceFileName("popup_bckground.png"), QPoint(80, 50));
-    setContentsMargins(24, 26, 22, 27);
+    setContentsMargins(24, 30, 22, 30);
+    m_timer->setInterval(100);
+    connect(m_timer, SIGNAL(timeout()), this, SLOT(on_timer_timeOut()));
 #else
     setContentsMargins(8, 20, 8, 8);
 #endif
@@ -59,30 +66,6 @@ void CWizPopupWidget::paintEvent(QPaintEvent* event)
     }
     //
     m_backgroundImage.Draw(&painter, rect(), 0);
-}
-
-void CWizPopupWidget::keyPressEvent(QKeyEvent* event)
-{
-    if (event->key() == Qt::Key_Escape)
-    {
-        event->accept();
-        closeWidget();
-    }
-    else
-    {
-        event->ignore();
-    }
-}
-
-void CWizPopupWidget::mousePressEvent(QMouseEvent* event)
-{
-    QPoint pos = event->pos();
-    //
-    if (!mask().contains(pos))
-    {
-        event->accept();
-        closeWidget();
-    }
 }
 
 #endif
@@ -160,22 +143,41 @@ void CWizPopupWidget::showAtPoint(const QPoint& pt)
     m_backgroundPixmap = QPixmap::grabWindow(QApplication::desktop()->winId(), rc.left(), rc.top(), rc.width(), rc.height());
 #endif
     //
+#ifdef Q_OS_WIN
+    /*
+    HWND hwnd = winId();
+    int exStyle = WizGetWindowExStyle(hwnd);
+    exStyle |= WS_EX_NOACTIVATE;
+    WizSetWindowExStyle(hwnd, exStyle);
+    */
+#endif
     show();
     activateWindow();
 
 #ifndef Q_OS_MAC
-    grabKeyboard();
-    grabMouse();
+    m_timer->start();
 #endif
 }
 
 #ifndef Q_OS_MAC
-void CWizPopupWidget::closeWidget()
+void CWizPopupWidget::on_timer_timeOut()
 {
-    hide();
+    QWidget* widget = QApplication::activeWindow();
+    bool hasFocus = false;
+    while (widget)
+    {
+        if (widget == this)
+        {
+            hasFocus = true;
+            break;
+        }
+        widget = widget->parentWidget();
+    }
     //
-    releaseKeyboard();
-    releaseMouse();
+    if (hasFocus)
+        return;
+    //
+    hide();
 }
 
 #endif

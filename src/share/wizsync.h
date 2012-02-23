@@ -123,6 +123,7 @@ protected:
     virtual void onStylePostList(const std::deque<WIZSTYLEDATA>& arrayData);
     //
     virtual void onDocumentsGetInfo(const std::deque<WIZDOCUMENTDATABASE>& arrayRet);
+    virtual void onAttachmentsGetInfo(const std::deque<WIZDOCUMENTATTACHMENTDATAEX>& arrayRet);
     //
     virtual void onDeletedGetList(const std::deque<WIZDELETEDGUIDDATA>& arrayRet);
     virtual void onTagGetList(const std::deque<WIZTAGDATA>& arrayRet);
