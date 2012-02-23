@@ -95,8 +95,34 @@
         function getEditorHtml() {
             return editor.document.documentElement.outerHTML;
         }
+
+        function setEditorFocus() {
+            editor.focus();
+            var range = editor.selection.getRange();
+            range.select(true);
+            editor._selectionChange();
+        }
+
+        function isEditing() {
+            return editor.document.body.contentEditable;
+        }
+
+        function setEditing(editing) {
+            if (isEditing()) {
+                saveDocument(false);
+            }
+            if (isEditing() == editing)
+                return;
+            //
+            var bar = document.getElementsByClassName("edui-editor-toolbarbox")[0].style.display = editing ? "block" : "none";
+            editor.document.body.contentEditable = editing ? true : false;
+            //
+            if (editing) {
+                setTimeout("setEditorFocus()", 100);
+            }
+        }
         
-        function viewDocument(guid, filename) {
+        function viewDocument(guid, filename, editing) {
             try {
                 currentGUID = guid;
                 currentFileName = filename;
@@ -107,7 +133,7 @@
                 }
                 //
                 setEditorHtml(html);
-                lockDocument();
+                setEditing(editing);
                 //
                 return true;
             }
@@ -115,16 +141,6 @@
                 alert(err);
                 return false;
             }
-        }
-
-        function lockDocument() {
-            var bar = document.getElementsByClassName("edui-editor-toolbarbox")[0].style.display = "none";
-            editor.document.body.contentEditable = false;
-        }
-
-        function unlockDocument() {
-            var bar = document.getElementsByClassName("edui-editor-toolbarbox")[0].style.display = "block";
-            editor.document.body.contentEditable = true;
         }
 
         //
@@ -141,6 +157,8 @@
         function saveDocument(force) {
             try {
                 if (!force && !modified)
+                    return true;
+                if (!isEditing())
                     return true;
                 //
                 var objFolder = objApp.Window.CategoryCtrl.SelectedFolder;
@@ -177,17 +195,6 @@
             catch (err) {
                 alert(err);
             }
-        }
-        //
-        function newDocument() {
-            if (!saveDocument(false))
-                return false;
-            //
-            currentGUID = "";
-            currentFileName = "";
-            //
-            setEditorHtml("");
-            return true;
         }
         //
         function autoPaste() {
