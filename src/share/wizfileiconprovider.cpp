@@ -63,7 +63,7 @@ QIcon CWizFileIconProvider::icon(const QString& strFileName) const
 #elif defined (Q_OS_MAC)
     QString strTempFileName = ::WizGlobal()->GetTempPath() + "test" + WizExtractFileExt(strFileName);
     ::WizSaveDataToFile(strTempFileName, QByteArray());
-    QIcon retIcon = QFileIconProvider::icon(QFileInfo(strTempFileName));
+    retIcon = QFileIconProvider::icon(QFileInfo(strTempFileName));
     ::WizDeleteFile(strTempFileName);
 #endif
     //
