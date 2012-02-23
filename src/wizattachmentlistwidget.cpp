@@ -45,6 +45,10 @@ CWizAttachmentListView::CWizAttachmentListView(CWizDatabase& db, QWidget* parent
     //
     setSelectionMode(QAbstractItemView::ExtendedSelection);
     //
+#ifdef Q_OS_MAC
+    setAttribute(Qt::WA_MacShowFocusRect, false);
+#endif
+    //
     connect(this, SIGNAL(itemDoubleClicked(QListWidgetItem*)), this, SLOT(on_list_itemDoubleClicked(QListWidgetItem*)));
 }
 int CWizAttachmentListView::wrapTextLineIndex() const

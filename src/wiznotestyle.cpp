@@ -126,7 +126,11 @@ CWizNoteStyle::CWizNoteStyle()
     m_colorMultiLineListOtherLine = settings.GetColor("MultiLineList", "Other", "#666666");
     m_colorMultiLineListOtherLineSelected = settings.GetColor("MultiLineList", "OtherSelected", "#666666");
     //
+#ifdef Q_OS_MAC
+    m_fontImagePushButtonLabel = QFont("Arial Black", 9);
+#else
     m_fontImagePushButtonLabel = QFont("Arial Black", 8);
+#endif
     m_fontImagePushButtonLabel.setBold(true);
 }
 

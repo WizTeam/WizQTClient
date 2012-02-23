@@ -1,6 +1,8 @@
 #include "wizfileiconprovider.h"
 #include <QPixmapCache>
 #include <QDir>
+#include <QDebug>
+#include "wizmisc.h"
 
 #if defined(Q_WS_WIN)
 #  define _WIN32_IE 0x0500
@@ -15,13 +17,20 @@
 
 #endif
 
+#ifdef Q_OS_MAC
+#include "../mac/wizmacicon.h"
+#endif
+
+
 CWizFileIconProvider::CWizFileIconProvider()
 {
 }
 
+
 QIcon CWizFileIconProvider::icon(const QString& strFileName) const
 {
-    QIcon retIcon = QFileIconProvider::icon(QFileInfo(strFileName));
+    QFileInfo fi(strFileName);
+    QIcon retIcon = QFileIconProvider::icon(fi);
     if (!retIcon.isNull())
         return retIcon;
     //
@@ -51,10 +60,17 @@ QIcon CWizFileIconProvider::icon(const QString& strFileName) const
             DestroyIcon(info.hIcon);
         }
     }
+#else defined Q_OS_MAC
+    QString strTempFileName = ::WizGlobal()->GetTempPath() + "test" + WizExtractFileExt(strFileName);
+    ::WizSaveDataToFile(strTempFileName, QByteArray());
+    retIcon = getMacIcon(QFileInfo(strTempFileName));
+    ::WizDeleteFile(strTempFileName);
 #endif
     //
     return retIcon;
 }
+
+
 QString CWizFileIconProvider::type(const QString& strFileName) const
 {
 #if defined(Q_WS_WIN)

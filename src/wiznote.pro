@@ -22,7 +22,8 @@ OBJECTS_DIR = .obj
 OBJECTIVE_SOURCES += share/wizuihelper_mac.mm \
     mac/wizmactoolbardelegate.mm \
     mac/wizmactoolbar.mm \
-    mac/wizmachelper.mm
+    mac/wizmachelper.mm \
+    mac/wizmacicon.mm
 
 
 SOURCES += main.cpp\
@@ -169,7 +170,8 @@ HEADERS  += mainwindow.h \
     share/wizmultilinelistwidget.h \
     share/wizfileiconprovider.h \
     share/wizwindowshelper.h \
-    share/wizimagepushbutton.h
+    share/wizimagepushbutton.h \
+    mac/wizmacicon.h
 
 
 mac:HEADERS +=     \
@@ -199,3 +201,7 @@ ICON=images/wiznote.icns
 
 TRANSLATIONS = wiznote_zh_CN.ts \
     wiznote_zh_TW.ts
+
+
+
+
