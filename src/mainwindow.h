@@ -114,38 +114,11 @@ public slots:
     //interface WizExplorerApp;
     QObject* CreateWizObject(const QString& strObjectID);
     //interface WizExplorerWindow
-
-    /*
-    STDMETHOD(get_Database)(IDispatch** pVal);
-    STDMETHOD(get_Window)(IDispatch** pVal);
-    STDMETHOD(get_AppPath)(BSTR* pVal);
-    STDMETHOD(get_DataStore)(BSTR* pVal);
-    STDMETHOD(get_SettingsFileName)(BSTR* pVal);
-    STDMETHOD(get_LogFileName)(BSTR* pVal);
-    STDMETHOD(LoadPluginString)(BSTR bstrPluginAppGUID, BSTR bstrStringName, BSTR* pVal);
-    STDMETHOD(LoadPluginString2)(IDispatch* pHtmlDocumentDisp, BSTR bstrStringName, BSTR* pVal);
-    STDMETHOD(TranslateString)(BSTR bstrString, BSTR* pbstrRet);
-    STDMETHOD(GetPluginAppGUID)(IDispatch* pHtmlDocumentDisp, BSTR* pVal);
-    STDMETHOD(GetPluginAppPath)(IDispatch* pHtmlDocumentDisp, BSTR* pVal);
-    STDMETHOD(PluginLocalizeHtmlDialog)(IDispatch* pHtmlDocumentDisp);
-    STDMETHOD(CreateWizObject)(BSTR bstrObjectName, IDispatch** ppVal);
-    STDMETHOD(CreateActiveXObject)(BSTR bstrObjectName, IDispatch** ppVal);
-    STDMETHOD(get_CurPluginAppGUID)(BSTR* pVal);
-    STDMETHOD(get_CurPluginGUID)(BSTR* pVal);
-    STDMETHOD(get_CurPluginAppPath)(BSTR* pVal);
-    STDMETHOD(LoadString)(BSTR bstrStringName, BSTR* pVal);
-    STDMETHOD(RunScriptCode)(BSTR bstrScriptCode, BSTR bstrScriptLanguage);
-    STDMETHOD(RunScriptFile)(BSTR bstrScriptFileName, BSTR bstrScriptLanguage);
-    STDMETHOD(LoadStringFromFile)(BSTR bstrFileName, BSTR bstrStringName, BSTR* pVal);
-    STDMETHOD(LocalizeHtmlDocument)(BSTR bstrLanguageFileName, IDispatch* pHtmlDocumentDisp);
-    STDMETHOD(GetHtmlDocumentPath)(IDispatch* pHtmlDocumentDisp, BSTR* pVal);
-    STDMETHOD(GetPluginPathByScriptFileName)(BSTR bstrScriptFileName, BSTR* pbstrPluginPath);
-    STDMETHOD(AddGlobalScript)(BSTR bstrScriptFileName);
-    STDMETHOD(ExecutePlugin)(BSTR bstrPluginGUID, BSTR bstrURLParams);
-    STDMETHOD(ExecuteCommand)(BSTR bstrCommandName, VARIANT* pvInParams1, VARIANT* pvInParams2, VARIANT* pvretResult);
-    STDMETHOD(InsertPluginMenu)(LONGLONG nMenuHandle, LONG nInsertPos, BSTR bstrMenuType, LONG nPluginBeginCommand, BSTR* pbstrCommandPluginGUID);
-    */
     //
+    //ext functions
+    void SetDocumentModified(bool modified);
+    void SetSavingDocument(bool saving);
+
     void on_actionExit_triggered();
     void on_actionSync_triggered();
     void on_actionNewNote_triggered();

@@ -50,6 +50,7 @@ private:
     CWizSkin9GridImage m_imagePushButtonPressed;
     CWizSkin9GridImage m_imagePushButtonDisabled;
     CWizSkin9GridImage m_imagePushButtonLabel;
+    CWizSkin9GridImage m_imagePushButtonLabelRed;
     //
     QColor m_colorCategoryBackground;
     QColor m_colorCategoryText;
@@ -106,6 +107,7 @@ CWizNoteStyle::CWizNoteStyle()
     m_imagePushButtonPressed.SetImage(WizGetSkinPath() + "imagepushbutton_pressed.png", QPoint(4, 4));
     m_imagePushButtonDisabled.SetImage(WizGetSkinPath() + "imagepushbutton_disabled.png", QPoint(4, 4));
     m_imagePushButtonLabel.SetImage(WizGetSkinPath() + "imagepushbutton_label.png", QPoint(8, 8));
+    m_imagePushButtonLabelRed.SetImage(WizGetSkinPath() + "imagepushbutton_label_red.png", QPoint(8, 8));
     //
     CWizSettings settings(WizGetSkinPath() + "skin.ini");
     m_colorCategoryBackground = settings.GetColor("Category", "Background", "#808080");
@@ -553,7 +555,14 @@ void CWizNoteStyle::drawImagePushButton(const QStyleOptionButton *option, QPaint
         rectLabel.setLeft(rectImage.right() - 8);
         rectLabel.setHeight(m_imagePushButtonLabel.actualSize().height());
         //
-        m_imagePushButtonLabel.Draw(painter, rectLabel, 0);
+        if (button->redFlag())
+        {
+            m_imagePushButtonLabelRed.Draw(painter, rectLabel, 0);
+        }
+        else
+        {
+            m_imagePushButtonLabel.Draw(painter, rectLabel, 0);
+        }
         //
         QRect rectLabelText = rectLabel;
         rectLabelText.setRight(rectLabelText.right() - 2);    //shadow

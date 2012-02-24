@@ -7,6 +7,7 @@
 
 class CWizDocumentListViewItem;
 class CWizCategoryView;
+class CWizTagListWidget;
 //
 class CWizDocumentListView : public QListWidget
 {
@@ -16,6 +17,8 @@ public:
 protected:
     CWizDatabase& m_db;
     CWizCategoryView& m_category;
+    QMenu* m_menu;
+    CWizTagListWidget* m_tagList;
 public:
     void setDocuments(const CWizDocumentDataArray& arrayDocument);
     void addDocuments(const CWizDocumentDataArray& arrayDocument);
@@ -29,6 +32,13 @@ public:
     void getSelectedDocuments(CWizDocumentDataArray& arrayDocument);
 
     virtual QSize sizeHint() const { return QSize(320, 1); }
+    virtual void contextMenuEvent(QContextMenuEvent * e);
+    //drag
+    virtual void startDrag(Qt::DropActions supportedActions);
+    //drop
+    virtual void dragEnterEvent(QDragEnterEvent *event);
+    virtual void dragMoveEvent(QDragMoveEvent *event);
+    virtual void dropEvent(QDropEvent * event);
 public slots:
     void on_tag_created(const WIZTAGDATA& tag);
     void on_tag_modified(const WIZTAGDATA& tagOld, const WIZTAGDATA& tagNew);
@@ -36,6 +46,8 @@ public slots:
     void on_document_modified(const WIZDOCUMENTDATA& documentOld, const WIZDOCUMENTDATA& documentNew);
     void on_document_deleted(const WIZDOCUMENTDATA& document);
     void on_document_AbstractModified(const WIZDOCUMENTDATA& document);
+    void on_action_selectTags();
+    void on_action_deleteDocument();
 public:
     int documentIndexFromGUID(const CString& strGUID);
     CWizDocumentListViewItem *documentItemAt(int index);

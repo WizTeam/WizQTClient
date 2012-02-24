@@ -10,6 +10,7 @@
 #include <QTextDocumentFragment>
 #include <QTextCodec>
 #include <algorithm>
+#include <QCursor>
 
 #ifndef MAX_PATH
 #define MAX_PATH 200
@@ -2631,4 +2632,14 @@ BOOL WizLoadDataFromFile(const CString& strFileName, QByteArray& arrayData)
     arrayData = file.readAll();
     //
     return TRUE;
+}
+
+CWaitCursor::CWaitCursor()
+{
+    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+}
+
+CWaitCursor::~CWaitCursor()
+{
+    QApplication::restoreOverrideCursor();
 }

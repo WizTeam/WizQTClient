@@ -48,6 +48,7 @@ public:
     bool isEditingDocument() const { return m_editingDocument; }
     //
     void setViewMode(WizDocumentViewMode mode);
+    void setModified(bool modified);
 public slots:
     void on_titleEdit_textEdited ( const QString & text );
     void on_editDocumentButton_clicked();

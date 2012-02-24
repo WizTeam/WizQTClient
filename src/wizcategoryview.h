@@ -48,6 +48,12 @@ public:
     virtual void mousePressEvent(QMouseEvent* event );
     virtual QModelIndex moveCursor(CursorAction cursorAction, Qt::KeyboardModifiers modifiers);
     virtual QSize sizeHint() const { return QSize(180, 1); }
+    //drag
+    virtual void startDrag(Qt::DropActions supportedActions);
+    //drop
+    virtual void dragEnterEvent(QDragEnterEvent *event);
+    virtual void dragMoveEvent(QDragMoveEvent *event);
+    virtual void dropEvent(QDropEvent * event);
 public:
     CWizCategoryViewItem* categoryItemFromIndex(const QModelIndex &index) const;
     bool isSeparatorItemByIndex(const QModelIndex &index) const;
@@ -59,6 +65,8 @@ public:
 
     CWizCategoryViewAllTagsItem* findAllTags();
     CWizCategoryViewTagItem* findTag(const WIZTAGDATA& tag, bool create, bool sort);
+    CWizCategoryViewTagItem* findTagInTree(const WIZTAGDATA& tag);
+    CWizCategoryViewTagItem* findTagInTree(const WIZTAGDATA& tag, QTreeWidgetItem* itemParent);
     CWizCategoryViewTagItem* addTag(const WIZTAGDATA& tag, bool sort);
     CWizCategoryViewTagItem* addTagWithChildren(const WIZTAGDATA& tag);
     void removeTag(const WIZTAGDATA& tag);
@@ -77,6 +85,7 @@ public:
 public slots:
     void on_tag_created(const WIZTAGDATA& tag);
     void on_tag_modified(const WIZTAGDATA& tagOld, const WIZTAGDATA& tagNew);
+    void on_tag_deleted(const WIZTAGDATA& tag);
     void on_document_created(const WIZDOCUMENTDATA& document);
     void on_document_modified(const WIZDOCUMENTDATA& documentOld, const WIZDOCUMENTDATA& documentNew);
     void on_folder_created(const CString& strLocation);

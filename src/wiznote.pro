@@ -95,7 +95,8 @@ SOURCES += main.cpp\
     share/wizmultilinelistwidget.cpp \
     share/wizfileiconprovider.cpp \
     share/wizwindowshelper.cpp \
-    share/wizimagepushbutton.cpp
+    share/wizimagepushbutton.cpp \
+    wiztaglistwidget.cpp
 
 HEADERS  += mainwindow.h \
     share/wizqthelper.h \
@@ -171,7 +172,8 @@ HEADERS  += mainwindow.h \
     share/wizfileiconprovider.h \
     share/wizwindowshelper.h \
     share/wizimagepushbutton.h \
-    mac/wizmacicon.h
+    mac/wizmacicon.h \
+    wiztaglistwidget.h
 
 
 mac:HEADERS +=     \
@@ -201,7 +203,3 @@ ICON=images/wiznote.icns
 
 TRANSLATIONS = wiznote_zh_CN.ts \
     wiznote_zh_TW.ts
-
-
-
-

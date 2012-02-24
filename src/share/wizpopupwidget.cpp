@@ -14,21 +14,10 @@
 
 
 CWizPopupWidget::CWizPopupWidget(QWidget* parent)
-#ifndef Q_OS_MAC
-    : QWidget(parent, Qt::Tool | Qt::FramelessWindowHint)
-    , m_timer(new QTimer(this))
-#else
     : QWidget(parent, Qt::Popup | Qt::FramelessWindowHint)
-#endif
+    , m_leftAlign(false)
 {
-#ifndef Q_OS_MAC
-    m_backgroundImage.SetImage(::WizGetSkinResourceFileName("popup_bckground.png"), QPoint(80, 50));
-    setContentsMargins(24, 30, 22, 30);
-    m_timer->setInterval(100);
-    connect(m_timer, SIGNAL(timeout()), this, SLOT(on_timer_timeOut()));
-#else
     setContentsMargins(8, 20, 8, 8);
-#endif
     //
     QPalette pal = palette();
     pal.setColor(QPalette::Window, QColor(0xff, 0xff, 0xff));
@@ -37,11 +26,7 @@ CWizPopupWidget::CWizPopupWidget(QWidget* parent)
 
 QSize CWizPopupWidget::sizeHint() const
 {
-#ifndef Q_OS_MAC
-    return QSize(350, 450);
-#else
     return QSize(300, 400);
-#endif
 }
 
 QRect CWizPopupWidget::getClientRect() const
@@ -56,16 +41,47 @@ QRect CWizPopupWidget::getClientRect() const
 
 void CWizPopupWidget::paintEvent(QPaintEvent* event)
 {
-    Q_UNUSED(event);
-    //
     QPainter painter(this);
+    QPen pen(QColor(0xd9, 0xdc, 0xdd));
+    //pen.setWidth(3);
+    painter.setPen(pen);
     //
-    if (!m_backgroundPixmap.isNull())
+    QVector<QPoint> points = m_points;
+    int right = 0;
+    int bottom = 0;
+    for (int i = 0; i < points.size() - 1; i++)
     {
-        painter.drawPixmap(0, 0, m_backgroundPixmap);
+        right = std::max<int>(right, points[i].x());
+        bottom = std::max<int>(bottom, points[i].y());
+    }
+    for (int i = 0; i < points.size() - 1; i++)
+    {
+        if (right == points[i].x())
+        {
+            points[i].setX(points[i].x() - 1);
+        }
+        if (bottom == points[i].y())
+        {
+            points[i].setY(points[i].y() - 1);
+        }
+    }
+    for (int i = 0; i < points.size() - 1; i++)
+    {
+        QPoint pt1 = points[i];
+        QPoint pt2 = points[i + 1];
+        //
+        if (pt1.x() < pt2.x()
+            && pt1.y() < pt2.y())
+        {
+            points[i + 1].setX(points[i + 1].x() - 1);
+            points.insert(i + 1, QPoint(pt1.x() - 1, pt1.y()));
+            i++;
+            break;
+        }
+
     }
     //
-    m_backgroundImage.Draw(&painter, rect(), 0);
+    painter.drawPolygon(points);
 }
 
 #endif
@@ -74,51 +90,62 @@ void CWizPopupWidget::resizeEvent(QResizeEvent* event)
 {
     QSize sz = event->size();
     //
-    QVector<QPoint> points;
+    m_points.clear();
     //
-#ifndef Q_OS_MAC
-    QPoint pt1(0, 10);
-    QPoint pt2(sz.width() - 54, 10);
-    QPoint pt3(sz.width() - 41, 0);
-    QPoint pt4(sz.width() - 28, 10);
-    QPoint pt5(sz.width(), 10);
-    QPoint pt6(sz.width(), sz.height());
-    QPoint pt7(0, sz.height());
+    if (m_leftAlign)
+    {
+        QPoint pt1(1, 10);
+        QPoint pt2(11, 10);
+        QPoint pt3(21, 0);
+        QPoint pt4(31, 10);
+        QPoint pt5(sz.width() - 1, 10);
+        QPoint pt6(sz.width(), 11);
+        QPoint pt7(sz.width(), sz.height() - 1);
+        QPoint pt8(sz.width() - 1, sz.height());
+        QPoint pt9(1, sz.height());
+        QPoint pt10(0, sz.height() - 1);
+        QPoint pt11(0, 11);
+        //
+        m_points.push_back(pt1);
+        m_points.push_back(pt2);
+        m_points.push_back(pt3);
+        m_points.push_back(pt4);
+        m_points.push_back(pt5);
+        m_points.push_back(pt6);
+        m_points.push_back(pt7);
+        m_points.push_back(pt8);
+        m_points.push_back(pt9);
+        m_points.push_back(pt10);
+        m_points.push_back(pt11);
+    }
+    else
+    {
+        QPoint pt1(1, 10);
+        QPoint pt2(sz.width() - 31, 10);
+        QPoint pt3(sz.width() - 21, 0);
+        QPoint pt4(sz.width() - 11, 10);
+        QPoint pt5(sz.width() - 1, 10);
+        QPoint pt6(sz.width(), 11);
+        QPoint pt7(sz.width(), sz.height() - 1);
+        QPoint pt8(sz.width() - 1, sz.height());
+        QPoint pt9(1, sz.height());
+        QPoint pt10(0, sz.height() - 1);
+        QPoint pt11(0, 11);
+        //
+        m_points.push_back(pt1);
+        m_points.push_back(pt2);
+        m_points.push_back(pt3);
+        m_points.push_back(pt4);
+        m_points.push_back(pt5);
+        m_points.push_back(pt6);
+        m_points.push_back(pt7);
+        m_points.push_back(pt8);
+        m_points.push_back(pt9);
+        m_points.push_back(pt10);
+        m_points.push_back(pt11);
+    }
     //
-    points.push_back(pt1);
-    points.push_back(pt2);
-    points.push_back(pt3);
-    points.push_back(pt4);
-    points.push_back(pt5);
-    points.push_back(pt6);
-    points.push_back(pt7);
-#else
-    QPoint pt1(1, 10);
-    QPoint pt2(sz.width() - 51, 10);
-    QPoint pt3(sz.width() - 41, 0);
-    QPoint pt4(sz.width() - 31, 10);
-    QPoint pt5(sz.width() - 1, 10);
-    QPoint pt6(sz.width(), 11);
-    QPoint pt7(sz.width(), sz.height() - 1);
-    QPoint pt8(sz.width() - 1, sz.height());
-    QPoint pt9(1, sz.height());
-    QPoint pt10(0, sz.height() - 1);
-    QPoint pt11(0, 11);
-    //
-    points.push_back(pt1);
-    points.push_back(pt2);
-    points.push_back(pt3);
-    points.push_back(pt4);
-    points.push_back(pt5);
-    points.push_back(pt6);
-    points.push_back(pt7);
-    points.push_back(pt8);
-    points.push_back(pt9);
-    points.push_back(pt10);
-    points.push_back(pt11);
-#endif
-    //
-    QPolygon polygon(points);
+    QPolygon polygon(m_points);
     //
     QRegion region(polygon);
     //
@@ -129,7 +156,7 @@ void CWizPopupWidget::showAtPoint(const QPoint& pt)
 {
     QSize sz = geometry().size();
     //
-    int xOffset = sz.width() - 34;
+    int xOffset = m_leftAlign ? 21 : sz.width() - 21;
     int yOffset = 4;
     //
     int left = pt.x() - xOffset;
@@ -137,47 +164,7 @@ void CWizPopupWidget::showAtPoint(const QPoint& pt)
     //
     move(QPoint(left, top));
     //
-#ifndef Q_OS_MAC
-    //remember background
-    QRect rc = geometry();
-    m_backgroundPixmap = QPixmap::grabWindow(QApplication::desktop()->winId(), rc.left(), rc.top(), rc.width(), rc.height());
-#endif
-    //
-#ifdef Q_OS_WIN
-    /*
-    HWND hwnd = winId();
-    int exStyle = WizGetWindowExStyle(hwnd);
-    exStyle |= WS_EX_NOACTIVATE;
-    WizSetWindowExStyle(hwnd, exStyle);
-    */
-#endif
     show();
-    activateWindow();
-
-#ifndef Q_OS_MAC
-    m_timer->start();
-#endif
+    //activateWindow();
 }
 
-#ifndef Q_OS_MAC
-void CWizPopupWidget::on_timer_timeOut()
-{
-    QWidget* widget = QApplication::activeWindow();
-    bool hasFocus = false;
-    while (widget)
-    {
-        if (widget == this)
-        {
-            hasFocus = true;
-            break;
-        }
-        widget = widget->parentWidget();
-    }
-    //
-    if (hasFocus)
-        return;
-    //
-    hide();
-}
-
-#endif

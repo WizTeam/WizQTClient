@@ -21,6 +21,7 @@
 #include <QAction>
 #include <QDebug>
 #include <QBoxLayout>
+#include <QApplication>
 #include <share/wizcommonui.h>
 
 #include "mac/wizmactoolbar.h"
@@ -552,6 +553,25 @@ QObject* MainWindow::CreateWizObject(const QString& strObjectID)
     }
     //
     return NULL;
+}
+void MainWindow::SetDocumentModified(bool modified)
+{
+    m_doc->setModified(modified);
+}
+void MainWindow::SetSavingDocument(bool saving)
+{
+    m_statusBar->setVisible(saving);
+    if (saving)
+    {
+        m_labelStatus->setVisible(true);
+        m_labelStatus->setText(tr("Saving note..."));
+        qApp->processEvents(QEventLoop::AllEvents);
+    }
+    else
+    {
+        m_labelStatus->setVisible(false);
+    }
+    //
 }
 
 

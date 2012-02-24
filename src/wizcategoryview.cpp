@@ -11,6 +11,7 @@
 #include <QPalette>
 #include <QContextMenuEvent>
 #include <QMenu>
+#include <QCursor>
 
 class CWizCategoryViewItem : public QTreeWidgetItem
 {
@@ -76,7 +77,10 @@ public:
     }
     virtual bool accept(CWizDatabase& db, const WIZDOCUMENTDATA& data)
     {
-        Q_UNUSED(db);
+        if (db.IsInDeletedItems(data.strLocation))
+        {
+            return false;
+        }
         //
         COleDateTime t = data.tCreated;
         return t.addDays(60) >= WizGetCurrentTime();
@@ -259,12 +263,16 @@ CWizCategoryView::CWizCategoryView(CWizExplorerApp& app, QWidget *parent)
     //
     connect(&m_db, SIGNAL(tagCreated(const WIZTAGDATA&)), this, SLOT(on_tag_created(const WIZTAGDATA&)));
     connect(&m_db, SIGNAL(tagModified(const WIZTAGDATA&, const WIZTAGDATA&)), this, SLOT(on_tag_modified(const WIZTAGDATA&, const WIZTAGDATA&)));
+    connect(&m_db, SIGNAL(tagDeleted(WIZTAGDATA)), this, SLOT(on_tag_deleted(const WIZTAGDATA&)));
     connect(&m_db, SIGNAL(documentCreated(const WIZDOCUMENTDATA&)), this, SLOT(on_document_created(const WIZDOCUMENTDATA&)));
     connect(&m_db, SIGNAL(documentModified(const WIZDOCUMENTDATA&, const WIZDOCUMENTDATA&)), this, SLOT(on_document_modified(const WIZDOCUMENTDATA&, const WIZDOCUMENTDATA&)));
     connect(&m_db, SIGNAL(folderCreated(const CString&)), this, SLOT(on_folder_created(const CString&)));
     connect(&m_db, SIGNAL(folderDeleted(const CString&)), this, SLOT(on_folder_deleted(const CString&)));
     //
     setIndentation(12);
+    //
+    setDragDropMode(QAbstractItemView::DragDrop);
+    setDragEnabled(true);
 }
 
 
@@ -443,7 +451,7 @@ void CWizCategoryView::showTrashContextMenu(QPoint pos)
     if (!m_menuTrash)
     {
         m_menuTrash = new QMenu(this);
-        m_menuTrash->addAction(tr("Empty"), this, SLOT(on_action_emptyTrash()));
+        m_menuTrash->addAction(tr("Empty the Trash"), this, SLOT(on_action_emptyTrash()));
     }
     //
     m_menuTrash->popup(pos);
@@ -465,6 +473,7 @@ void CWizCategoryView::mousePressEvent(QMouseEvent* event )
     //
     QTreeWidget::mousePressEvent(event);
 }
+
 QModelIndex CWizCategoryView::moveCursor(CursorAction cursorAction, Qt::KeyboardModifiers modifiers)
 {
     QModelIndex index = QTreeWidget::moveCursor(cursorAction, modifiers);
@@ -499,27 +508,84 @@ QModelIndex CWizCategoryView::moveCursor(CursorAction cursorAction, Qt::Keyboard
     return index;
 }
 
-/*
-void CWizCategoryView::keyPressEvent(QKeyEvent* event)
+void CWizCategoryView::startDrag(Qt::DropActions supportedActions)
 {
-    if (event->key() == Qt::Key_Up)
+    Q_UNUSED(supportedActions);
+    //
+    QPoint pt = mapFromGlobal(QCursor::pos());
+    //
+    if (CWizCategoryViewTagItem* item = dynamic_cast<CWizCategoryViewTagItem*>(itemAt(pt)))
     {
-        QTreeWidgetItem* pItem = currentItem();
-
-
+        QDrag* drag = new QDrag(this);
+        QMimeData* mimeData = new QMimeData();
+        mimeData->setData(WIZNOTE_MIMEFORMAT_TAGS, item->tag().strGUID.toUtf8());
+        drag->setMimeData(mimeData);
+        drag->exec(Qt::CopyAction);
     }
-    else if (event->key() == Qt::Key_Down)
-    {
-
-    }
-    else
-    {
-        QTreeWidget::keyPressEvent(event);
-    }
-
 }
-*/
 
+void CWizCategoryView::dragEnterEvent(QDragEnterEvent *event)
+{
+    if (event->mimeData()->hasFormat(WIZNOTE_MIMEFORMAT_DOCUMENTS))
+    {
+        event->accept();
+        return;
+    }
+    //
+    QTreeWidget::dragEnterEvent(event);
+}
+
+void CWizCategoryView::dragMoveEvent(QDragMoveEvent *event)
+{
+    if (event->mimeData()->hasFormat(WIZNOTE_MIMEFORMAT_DOCUMENTS))
+    {
+        event->accept();
+        return;
+    }
+    //
+    QTreeWidget::dragMoveEvent(event);
+}
+
+void CWizCategoryView::dropEvent(QDropEvent * event)
+{
+    if (event->mimeData()->hasFormat(WIZNOTE_MIMEFORMAT_DOCUMENTS))
+    {
+        QByteArray data = event->mimeData()->data(WIZNOTE_MIMEFORMAT_DOCUMENTS);
+        QString strDocumentGUIDs = QString::fromUtf8(data, data.length());
+        CWizStdStringArray arrayDocumentGUID;
+        ::WizSplitTextToArray(strDocumentGUIDs, ';', arrayDocumentGUID);
+        //
+        if (CWizCategoryViewTagItem* item = dynamic_cast<CWizCategoryViewTagItem*>(itemAt(event->pos())))
+        {
+            foreach (const CString& strDocumentGUID, arrayDocumentGUID)
+            {
+                WIZDOCUMENTDATA dataDocument;
+                if (m_db.DocumentFromGUID(strDocumentGUID, dataDocument))
+                {
+                    CWizDocument doc(m_db, dataDocument);
+                    doc.AddTag(item->tag());
+                }
+            }
+        }
+        else if (CWizCategoryViewFolderItem* item = dynamic_cast<CWizCategoryViewFolderItem*>(itemAt(event->pos())))
+        {
+            CWizFolder folder(m_db, item->location());
+            //
+            foreach (const CString& strDocumentGUID, arrayDocumentGUID)
+            {
+                WIZDOCUMENTDATA dataDocument;
+                if (m_db.DocumentFromGUID(strDocumentGUID, dataDocument))
+                {
+                    CWizDocument doc(m_db, dataDocument);
+                    doc.MoveDocument(&folder);
+                }
+            }
+        }
+
+        event->accept();
+        return;
+    }
+}
 
 CWizCategoryViewAllTagsItem* CWizCategoryView::findAllTags()
 {
@@ -595,6 +661,36 @@ CWizCategoryViewTagItem* CWizCategoryView::findTag(const WIZTAGDATA& tag, bool c
     return dynamic_cast<CWizCategoryViewTagItem *>(parent);
 }
 
+CWizCategoryViewTagItem* CWizCategoryView::findTagInTree(const WIZTAGDATA& tag)
+{
+    CWizCategoryViewAllTagsItem* pAllTags = findAllTags();
+    if (!pAllTags)
+        return NULL;
+    //
+    return findTagInTree(tag, pAllTags);
+}
+CWizCategoryViewTagItem* CWizCategoryView::findTagInTree(const WIZTAGDATA& tag, QTreeWidgetItem* itemParent)
+{
+    for (int i = 0; i < itemParent->childCount(); i++)
+    {
+        QTreeWidgetItem* it = itemParent->child(i);
+        //
+        if (CWizCategoryViewTagItem* item = dynamic_cast<CWizCategoryViewTagItem*>(it))
+        {
+            if (item->tag().strGUID == tag.strGUID)
+                return item;
+        }
+        //
+        if (CWizCategoryViewTagItem* childItem = findTagInTree(tag, it))
+        {
+            return childItem;
+        }
+    }
+    //
+    return NULL;
+}
+
+
 CWizCategoryViewTagItem* CWizCategoryView::addTag(const WIZTAGDATA& tag, bool sort)
 {
     return findTag(tag, true, sort);
@@ -619,7 +715,7 @@ CWizCategoryViewTagItem* CWizCategoryView::addTagWithChildren(const WIZTAGDATA& 
 
 void CWizCategoryView::removeTag(const WIZTAGDATA& tag)
 {
-    CWizCategoryViewTagItem* pItem = findTag(tag, false, false);
+    CWizCategoryViewTagItem* pItem = findTagInTree(tag);
     if (pItem)
     {
         QTreeWidgetItem* parent = pItem->parent();
@@ -805,7 +901,6 @@ void CWizCategoryView::on_tag_created(const WIZTAGDATA& tag)
 {
     addTagWithChildren(tag);
 }
-
 void CWizCategoryView::on_tag_modified(const WIZTAGDATA& tagOld, const WIZTAGDATA& tagNew)
 {
     if (tagOld.strParentGUID != tagNew.strParentGUID)
@@ -822,6 +917,11 @@ void CWizCategoryView::on_tag_modified(const WIZTAGDATA& tagOld, const WIZTAGDAT
         }
     }
 }
+void CWizCategoryView::on_tag_deleted(const WIZTAGDATA& tag)
+{
+    removeTag(tag);
+}
+
 
 void CWizCategoryView::on_document_created(const WIZDOCUMENTDATA& document)
 {
@@ -885,6 +985,9 @@ void CWizCategoryView::on_action_newFolder()
 
 void CWizCategoryView::on_action_deleteFolder()
 {
+    CWaitCursor wait;
+    Q_UNUSED(wait);
+    //
     if (CWizCategoryViewFolderItem* p = currentCategoryItem<CWizCategoryViewFolderItem>())
     {
         CWizFolder folder(m_db, p->location());
@@ -923,12 +1026,32 @@ void CWizCategoryView::on_action_newTag()
 
 void CWizCategoryView::on_action_deleteTag()
 {
-
+    CWaitCursor wait;
+    Q_UNUSED(wait);
+    //
+    if (CWizCategoryViewTagItem* p = currentCategoryItem<CWizCategoryViewTagItem>())
+    {
+        WIZTAGDATA tag = p->tag();
+        m_db.DeleteTagWithChildren(tag, TRUE);
+    }
 }
 
 void CWizCategoryView::on_action_emptyTrash()
 {
-
+    CWaitCursor wait;
+    Q_UNUSED(wait);
+    //
+    if (CWizCategoryViewTrashItem* trashItem = CWizCategoryView::findTrash())
+    {
+        CWizDocumentDataArray arrayDocument;
+        trashItem->getDocuments(m_db, arrayDocument);
+        //
+        foreach (const WIZDOCUMENTDATA& data, arrayDocument)
+        {
+            CWizDocument doc(m_db, data);
+            doc.Delete();
+        }
+    }
 }
 
 

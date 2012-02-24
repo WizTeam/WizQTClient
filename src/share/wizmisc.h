@@ -294,4 +294,11 @@ public:
 };
 
 
+class CWaitCursor
+{
+public:
+    CWaitCursor();
+    ~CWaitCursor();
+};
+
 #endif // WIZMISC_H

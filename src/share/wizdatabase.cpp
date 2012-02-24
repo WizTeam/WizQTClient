@@ -92,12 +92,28 @@ BOOL CWizDocument::MoveDocument(CWizFolder* pFolder)
     CString strNewLocation = pFolder->Location();
     CString strOldLocation = m_data.strLocation;
     //
-
     m_data.strLocation = strNewLocation;
     if (!m_db.ModifyDocumentInfo(m_data))
     {
         m_data.strLocation = strOldLocation;
         TOLOG1(_T("Failed to modify document location %1."), m_data.strLocation);
+        return FALSE;
+    }
+    //
+    return TRUE;
+}
+
+BOOL CWizDocument::AddTag(const WIZTAGDATA& dataTag)
+{
+    CWizStdStringArray arrayTag;
+    m_db.GetDocumentTags(m_data.strGUID, arrayTag);
+
+    if (-1 != WizFindInArray(arrayTag, dataTag.strGUID))
+        return TRUE;
+    //
+    if (!m_db.InsertDocumentTag(m_data, dataTag.strGUID))
+    {
+        TOLOG1(_T("Failed to insrt document tag: %1"), m_data.strTitle);
         return FALSE;
     }
     //
@@ -854,6 +870,19 @@ BOOL CWizDatabase::AddAttachment(const WIZDOCUMENTDATA& document, const CString&
     }
     //
     UpdateDocumentAttachmentCount(document.strGUID);
+    //
+    return TRUE;
+}
+BOOL CWizDatabase::DeleteTagWithChildren(const WIZTAGDATA& data, BOOL bLog)
+{
+    CWizTagDataArray arrayChildTag;
+    GetChildTags(data.strGUID, arrayChildTag);
+    foreach (const WIZTAGDATA& childTag, arrayChildTag)
+    {
+        DeleteTagWithChildren(childTag, bLog);
+    }
+    //
+    DeleteTag(data, bLog);
     //
     return TRUE;
 }

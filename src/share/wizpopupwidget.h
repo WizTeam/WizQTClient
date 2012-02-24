@@ -11,26 +11,20 @@ class CWizPopupWidget : public QWidget
     Q_OBJECT
 public:
     CWizPopupWidget(QWidget* parent);
-private:
-#ifndef Q_OS_MAC
-    CWizSkin9GridImage m_backgroundImage;
-    QPixmap m_backgroundPixmap;
-    QTimer* m_timer;
-#endif
 public:
     virtual QSize sizeHint() const;
     virtual QRect getClientRect() const;
+private:
+    QVector<QPoint> m_points;
+    bool m_leftAlign;
 protected:
 #ifndef Q_OS_MAC
     virtual void paintEvent(QPaintEvent* event);
 #endif
     virtual void resizeEvent(QResizeEvent* event);
 public:
+    void setLeftAlign(bool b) { m_leftAlign = b; }
     void showAtPoint(const QPoint& pt);
-#ifndef Q_OS_MAC
-public slots:
-    void on_timer_timeOut();
-#endif
 };
 
 #endif // WIZPOPUPWIDGET_H

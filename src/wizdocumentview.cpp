@@ -9,6 +9,7 @@
 
 #include <QBoxLayout>
 #include <QLineEdit>
+#include <QApplication>
 #include "share/wizimagepushbutton.h"
 
 class CWizTitleBar
@@ -20,6 +21,7 @@ public:
         , m_titleEdit(NULL)
         , m_editDocumentButton(NULL)
         , m_attachmentButton(NULL)
+        , m_editing(false)
     {
         QHBoxLayout* layout = new QHBoxLayout(this);
         setLayout(layout);
@@ -40,6 +42,7 @@ public:
         m_editDocumentButton = new CWizImagePushButton(m_editIcon, "", this);
         updateEditDocumentButtonIcon(false);
         m_editDocumentButton->setStyle(::WizGetStyle());
+        m_editDocumentButton->setRedFlag(true);
         //
         m_attachmentButton = new CWizImagePushButton(m_attachmentIcon, "", this);
         m_attachmentButton->setStyle(::WizGetStyle());
@@ -59,12 +62,25 @@ private:
     QIcon m_editIcon;
     QIcon m_commitIcon;
     QIcon m_attachmentIcon;
+    //
+    bool m_editing;
 private:
     void updateEditDocumentButtonIcon(bool editing)
     {
         m_editDocumentButton->setIcon(editing ? m_commitIcon : m_editIcon);
-        m_editDocumentButton->setToolTip(editing ? tr("Save & Read") : tr("Edit Note"));
+        m_editing = editing;
+        //
+        updateEditDocumentButtonTooltip();
     }
+    void updateEditDocumentButtonTooltip()
+    {
+        QString strSaveAndRead = tr("Save & Switch to Reading View");
+        QString strRead = tr("Switch to Reading View");
+        QString strEditNote = tr("Switch to Editing View");
+        QString strSwitchRead = m_editDocumentButton->text().isEmpty() ? strRead : strSaveAndRead;
+        m_editDocumentButton->setToolTip(m_editing ? strSwitchRead : strEditNote);
+    }
+
 public:
     QLineEdit* titleEdit() const { return m_titleEdit; }
     QPushButton* editDocumentButton() const { return m_editDocumentButton; }
@@ -79,6 +95,12 @@ public:
         int nAttachmentCount = db.GetDocumentAttachmentCount(data.strGUID);
         CString strText = nAttachmentCount ? WizIntToStr(nAttachmentCount) : CString();
         m_attachmentButton->setText(strText);
+    }
+    //
+    void setModified(bool modified)
+    {
+        m_editDocumentButton->setText(modified ? "*" : "");
+        updateEditDocumentButtonTooltip();
     }
 };
 
@@ -203,6 +225,24 @@ void CWizDocumentView::editDocument(bool editing)
     m_editingDocument = editing;
     m_title->setEditingDocument(m_editingDocument);
     m_web->setEditingDocument(m_editingDocument);
+    //
+    //
+    ////force to re-align controls////
+    QRect rc = m_web->geometry();
+    m_web->setGeometry(rc.adjusted(0, 0, 0, 100));
+    qApp->processEvents(QEventLoop::AllEvents);
+    m_web->setGeometry(rc);
+    qApp->processEvents(QEventLoop::AllEvents);
+}
+//
+void CWizDocumentView::setViewMode(WizDocumentViewMode mode)
+{
+    m_viewMode = mode;
+}
+
+void CWizDocumentView::setModified(bool modified)
+{
+    m_title->setModified(modified);
 }
 
 void CWizDocumentView::on_titleEdit_textEdited(const QString & text )

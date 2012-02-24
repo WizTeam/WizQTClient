@@ -21,6 +21,7 @@ public:
     CString GetAttachmentsPath(BOOL create);
     BOOL IsInDeletedItemsFolder();
     BOOL MoveDocument(CWizFolder* pFolder);
+    BOOL AddTag(const WIZTAGDATA& dataTag);
 private:
     CString GetMetaText();
 public:
@@ -133,6 +134,9 @@ public:
     //
     BOOL CreateDocumentAndInit(const CString& strHtml, const CString& strHtmlUrl, int nFlags, const CString& strTitle, const CString& strName, const CString& strLocation, const CString& strURL, WIZDOCUMENTDATA& data);
     BOOL AddAttachment(const WIZDOCUMENTDATA& document, const CString& strFileName, WIZDOCUMENTATTACHMENTDATA& dataRet);
+    //
+    BOOL DeleteTagWithChildren(const WIZTAGDATA& data, BOOL bLog);
+
 public:
     CString GetUserId() const { return m_strUserId; }
     CString GetPassword() const { return m_strPassword; }
@@ -147,7 +151,9 @@ public slots:
 
 
 
-
+#define WIZNOTE_MIMEFORMAT_TAGS             "wiznote/tags"
+#define WIZNOTE_MIMEFORMAT_DOCUMENTS        "wiznote/documents"
+#define WIZNOTE_MIMEFORMAT_FOLDER           "wiznote/folder"
 
 
 #endif // WIZDATABASE_H

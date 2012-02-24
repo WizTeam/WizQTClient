@@ -264,6 +264,7 @@ CWizAttachmentListWidget::CWizAttachmentListWidget(CWizDatabase& db, QWidget* pa
     CWizImagePushButton* addAttachmentButton = new CWizImagePushButton(iconAddAttachment, "", this);
     addAttachmentButton->setStyle(WizGetStyle());
     addAttachmentButton->setToolTip(tr("Add attachments"));
+    layoutHeader->addWidget(new CWizFixedSpacer(QSize(4, 2), this));
     layoutHeader->addWidget(new QLabel(tr("Attachments"), this));
     layoutHeader->addWidget(new CWizSpacer(this));
     layoutHeader->addWidget(addAttachmentButton);

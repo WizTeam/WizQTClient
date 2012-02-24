@@ -2,6 +2,7 @@
 
 CWizImagePushButton::CWizImagePushButton(const QIcon& icon, const QString &text, QWidget* parent)
     :QPushButton(icon, text, parent)
+    , m_redFlag(false)
 {
 }
 

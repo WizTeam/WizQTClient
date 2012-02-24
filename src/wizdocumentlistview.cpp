@@ -3,9 +3,12 @@
 
 #include "wiznotestyle.h"
 
+#include "wiztaglistwidget.h"
+
 #include <QStyledItemDelegate>
 #include <QApplication>
-
+#include <QMenu>
+#include <QContextMenuEvent>
 
 
 
@@ -100,6 +103,8 @@ CWizDocumentListView::CWizDocumentListView(CWizExplorerApp& app, QWidget *parent
     : QListWidget(parent)
     , m_db(app.database())
     , m_category(app.category())
+    , m_menu(NULL)
+    , m_tagList(NULL)
 {
     setFrameStyle(QFrame::NoFrame);
     setAttribute(Qt::WA_MacShowFocusRect, false);
@@ -119,6 +124,12 @@ CWizDocumentListView::CWizDocumentListView(CWizExplorerApp& app, QWidget *parent
     connect(&m_db, SIGNAL(documentModified(const WIZDOCUMENTDATA&, const WIZDOCUMENTDATA&)), this, SLOT(on_document_modified(const WIZDOCUMENTDATA&, const WIZDOCUMENTDATA&)));
     connect(&m_db, SIGNAL(documentDeleted(WIZDOCUMENTDATA)), this, SLOT(on_document_deleted(WIZDOCUMENTDATA)));
     connect(&m_db, SIGNAL(documentAbstractModified(const WIZDOCUMENTDATA&)), this, SLOT(on_document_AbstractModified(const WIZDOCUMENTDATA&)));
+    //
+    setDragDropMode(QAbstractItemView::DragDrop);
+    setDragEnabled(true);
+    setAcceptDrops(true);
+    //
+    setSelectionMode(QAbstractItemView::ExtendedSelection);
 }
 
 void CWizDocumentListView::setDocuments(const CWizDocumentDataArray& arrayDocument)
@@ -197,6 +208,98 @@ void CWizDocumentListView::getSelectedDocuments(CWizDocumentDataArray& arrayDocu
     }
 }
 
+
+void CWizDocumentListView::contextMenuEvent(QContextMenuEvent * e)
+{
+    if (!m_menu)
+    {
+        m_menu = new QMenu(this);
+        //m_menu->addAction(tr("Tags..."), this, SLOT(on_action_selectTags()));
+        //m_menu->addSeparator();
+        m_menu->addAction(tr("Delete..."), this, SLOT(on_action_deleteDocument()));
+    }
+    //
+    m_menu->popup(mapToGlobal(e->pos()));
+}
+
+
+void CWizDocumentListView::startDrag(Qt::DropActions supportedActions)
+{
+    Q_UNUSED(supportedActions);
+    //
+    //
+    CWizStdStringArray arrayGUID;
+
+    QList<QListWidgetItem*> items = selectedItems();
+    foreach (QListWidgetItem* it, items)
+    {
+        if (CWizDocumentListViewItem* item = dynamic_cast<CWizDocumentListViewItem*>(it))
+        {
+            arrayGUID.push_back((item->document().strGUID));
+        }
+    }
+    //
+    if (arrayGUID.empty())
+        return;
+    //
+    CString strGUIDs;
+    ::WizStringArrayToText(arrayGUID, strGUIDs, ";");
+    //
+    QDrag* drag = new QDrag(this);
+    QMimeData* mimeData = new QMimeData();
+    mimeData->setData(WIZNOTE_MIMEFORMAT_DOCUMENTS, strGUIDs.toUtf8());
+    drag->setMimeData(mimeData);
+    drag->exec(Qt::CopyAction);
+}
+
+void CWizDocumentListView::dragEnterEvent(QDragEnterEvent *event)
+{
+    if (event->mimeData()->hasFormat(WIZNOTE_MIMEFORMAT_TAGS))
+    {
+        event->accept();
+        return;
+    }
+    //
+    QListWidget::dragEnterEvent(event);
+}
+
+void CWizDocumentListView::dragMoveEvent(QDragMoveEvent *event)
+{
+    if (event->mimeData()->hasFormat(WIZNOTE_MIMEFORMAT_TAGS))
+    {
+        event->accept();
+        return;
+    }
+    //
+    QListWidget::dragMoveEvent(event);
+}
+
+void CWizDocumentListView::dropEvent(QDropEvent * event)
+{
+    if (event->mimeData()->hasFormat(WIZNOTE_MIMEFORMAT_TAGS))
+    {
+        if (CWizDocumentListViewItem* item = dynamic_cast<CWizDocumentListViewItem*>(itemAt(event->pos())))
+        {
+            QByteArray data = event->mimeData()->data(WIZNOTE_MIMEFORMAT_TAGS);
+            QString strTagGUIDs = QString::fromUtf8(data, data.length());
+            CWizStdStringArray arrayTagGUID;
+            ::WizSplitTextToArray(strTagGUIDs, ';', arrayTagGUID);
+            foreach (const CString& strTagGUID, arrayTagGUID)
+            {
+                WIZTAGDATA dataTag;
+                if (m_db.TagFromGUID(strTagGUID, dataTag))
+                {
+                    CWizDocument doc(m_db, item->document());
+                    doc.AddTag(dataTag);
+                }
+            }
+        }
+
+        event->accept();
+        return;
+    }
+}
+
 void CWizDocumentListView::on_tag_created(const WIZTAGDATA& tag)
 {
     Q_UNUSED(tag);
@@ -269,6 +372,40 @@ void CWizDocumentListView::on_document_AbstractModified(const WIZDOCUMENTDATA& d
     QRect rc = visualItemRect(pItem);
     repaint(rc);
 }
+void CWizDocumentListView::on_action_selectTags()
+{
+    QList<QListWidgetItem*> items = selectedItems();
+    if (items.isEmpty())
+        return;
+    //
+    if (CWizDocumentListViewItem* item = dynamic_cast<CWizDocumentListViewItem*>(items.at(0)))
+    {
+        Q_UNUSED(item);
+        //
+        if (!m_tagList)
+        {
+            m_tagList = new CWizTagListWidget(this);
+            m_tagList->setLeftAlign(true);
+        }
+        //
+        m_tagList->showAtPoint(QCursor::pos());
+    }
+}
+
+void CWizDocumentListView::on_action_deleteDocument()
+{
+    QList<QListWidgetItem*> items = selectedItems();
+
+    foreach (QListWidgetItem* it, items)
+    {
+        if (CWizDocumentListViewItem* item = dynamic_cast<CWizDocumentListViewItem*>(it))
+        {
+            CWizDocument doc(m_db, item->document());
+            doc.Delete();
+        }
+    }
+}
+
 
 int CWizDocumentListView::documentIndexFromGUID(const CString& strGUID)
 {

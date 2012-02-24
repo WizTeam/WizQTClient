@@ -13,6 +13,11 @@
     <script type="text/javascript" charset="utf-8" src="editor_all.js"></script>
     
     <link rel="stylesheet" type="text/css" href="themes/default/ueditor.css"/>
+    <style type="text/css">
+        .edui-for-mybutton .edui-icon{
+            background-position: -480px -20px;
+        }
+    </style>
 </head>
 <body>
 
@@ -25,15 +30,37 @@
 
         var editor = null;
         var modified = false;
-    
+        var objApp = WizExplorerApp;
+        var objDatabase = objApp.Database;
+        var objCommon = objApp.CreateWizObject("WizKMControls.WizCommonUI");
+        var currentGUID = "";
+        var currentFileName = "";
+        var editingDocument = true;
+
+        function setModified(flag) {
+            modified = flag;
+            if (!isEditing()) {
+                modified = false;
+                return;
+            }
+            objApp.SetDocumentModified(modified);
+        }
         //
         function onEditorAfterExecCommand() {
-            modified = true;
+            setModified(true);
         }
         function onEditorKeyDown(type, evt) {
-            modified = true;
             var e = evt;
+            if (!e.ctrlKey && !e.altKey && !e.shiftKey) {
+                setModified(true);
+            }
             if (e.ctrlKey && !e.altKey && !e.shiftKey) {
+                if (String.fromCharCode(e.keyCode).toLocaleUpperCase() == 'X') {
+
+                    setModified(true);
+                    //
+                    e.returnValue = true;
+                }
                 if (String.fromCharCode(e.keyCode).toLocaleUpperCase() == 'S') {
 
                     saveDocument(true);
@@ -52,10 +79,27 @@
         }
         //
         try {
+
+            var strSave = "Save";
+            //
+            var saveButton = new baidu.editor.ui.Button({
+                className: 'edui-for-mybutton',
+                title: strSave,
+                label: strSave,
+                showText: false,
+                onclick: function() {
+                    //
+                    saveDocument(false);
+                    //
+                }
+            });
+            //
+
             var editorOption = {
             toolbars: 
             [
-                [
+                [saveButton,
+                '|',
                 'FontFamily', 'FontSize', '|', 'Bold', 'Italic', 'Underline', 'StrikeThrough', '|',
                 'JustifyLeft', 'JustifyCenter', 'JustifyRight', 'JustifyJustify', '|',
                 'Indent', 'Outdent', 'InsertOrderedList', 'InsertUnorderedList', '|',
@@ -76,11 +120,6 @@
             alert(err);
         }
         //
-        var objApp = WizExplorerApp;
-        var objDatabase = objApp.Database;
-        var objCommon = objApp.CreateWizObject("WizKMControls.WizCommonUI");
-        var currentGUID = "";
-        var currentFileName = "";
 
         function isNewDocument() {
             return currentGUID == null || currentGUID == "";
@@ -89,7 +128,7 @@
         function setEditorHtml(html) {
             editor.document.body.innerHTML = '<p>' + html + '</p>';
             editor.undoManger.reset();
-            modified = false;
+            setModified(false);
         }
         
         function getEditorHtml() {
@@ -104,7 +143,8 @@
         }
 
         function isEditing() {
-            return editor.document.body.contentEditable;
+            //return editor.document.body.contentEditable ? true : false;
+            return editingDocument;
         }
 
         function setEditing(editing) {
@@ -116,6 +156,7 @@
             //
             var bar = document.getElementsByClassName("edui-editor-toolbarbox")[0].style.display = editing ? "block" : "none";
             editor.document.body.contentEditable = editing ? true : false;
+            editingDocument = editing;
             //
             if (editing) {
                 setTimeout("setEditorFocus()", 100);
@@ -183,9 +224,14 @@
                 //
                 var html = getEditorHtml();
                 //
+                objApp.SetSavingDocument(true);
+                //
                 var ret = updateDocument(objDocument, html, currentFileName, 0);
+                //
+                objApp.SetSavingDocument(false);
+                //
                 if (ret) {
-                    modified = false;
+                    setModified(false);
                 }
                 else {
                     alert("Can not save note!");
