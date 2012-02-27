@@ -11,6 +11,7 @@
 #include <QTextCodec>
 #include <algorithm>
 #include <QCursor>
+#include <fstream>
 
 #ifndef MAX_PATH
 #define MAX_PATH 200
@@ -20,6 +21,11 @@
 __int64 WizGetFileSize(const CString& strFileName)
 {
     QFileInfo info(strFileName);
+    if (!info.exists())
+    {
+        TOLOG1(_T("File does not exists: %1"), strFileName);
+    }
+
     return info.size();
 }
 
@@ -321,6 +327,36 @@ CString IWizGlobal::GetTempPath()
 void IWizGlobal::WriteLog(const CString& str)
 {
     qDebug() << str;
+    //
+    COleDateTime t = ::WizGetCurrentTime();
+    CString strTime = t.toString(Qt::SystemLocaleLongDate);
+    //
+    CString strFileName = ::WizGetDataStorePath() + "wiznote.log";
+    std::fstream outf(strFileName.toLocal8Bit().constData(), std::ios::app | std::ios::out);
+    outf << strTime.toUtf8().constData() << ":\t" << str.toUtf8().constData() << std::endl;
+    outf.close();
+}
+
+void IWizGlobal::WriteDebugLog(const CString& str)
+{
+    static int writeLog = -1;
+    if (writeLog == -1)
+    {
+#ifdef QT_DEBUG
+        writeLog = 1;
+#else
+        writeLog = 0;
+        QStringList args = QCoreApplication::arguments();
+        if (-1 != args.join(" ").toLower().indexOf("debug"))
+        {
+            writeLog = 1;
+        }
+#endif
+    }
+    if (writeLog != 1)
+        return;
+    //
+    WriteLog(str);
 }
 
 IWizGlobal* WizGlobal()

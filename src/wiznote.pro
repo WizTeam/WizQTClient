@@ -192,8 +192,6 @@ FORMS    += \
 
 
 
-
-
 mac:LIBS += -framework Cocoa -framework Carbon
 
 

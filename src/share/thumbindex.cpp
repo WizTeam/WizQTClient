@@ -164,7 +164,10 @@ bool CThumbIndex::UpdateIphoneAbstract(const WIZABSTRACT &abstract)
 bool CThumbIndex::UpdateAbstract(const WIZABSTRACT &abstractNew, const CString& type)
 {
     if(!m_dbThumb.IsOpened())
+    {
+        TOLOG(_T("Fault error: thumb database does not opened"));
         return false;
+    }
     //
     QByteArray data;
     if (abstractNew.image.width() > 0 && abstractNew.image.height() > 0)
@@ -183,9 +186,19 @@ bool CThumbIndex::UpdateAbstract(const WIZABSTRACT &abstractNew, const CString& 
             img = abstractNew.image;
         }
         //
+        if (img.isNull())
+        {
+            TOLOG(_T("Faile to scale image to abstract"));
+            return false;
+        }
+        //
         QBuffer buffer(&data);
         buffer.open(QIODevice::WriteOnly);
-        img.save(&buffer, "JPG");
+        if (!img.save(&buffer, "JPG"))
+        {
+            TOLOG(_T("Faile to save abstract image data to buffer"));
+            return false;
+        }
         buffer.close();
     }
     //

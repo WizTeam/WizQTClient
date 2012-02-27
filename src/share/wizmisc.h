@@ -22,6 +22,7 @@ struct IWizGlobal
 {
     CString GetTempPath();
     void WriteLog(const CString& str);
+    void WriteDebugLog(const CString& str);
 };
 
 
@@ -124,12 +125,17 @@ CString WizGetComputerName();
 
 #define TOLOG(x)                        WizGlobal()->WriteLog(x)
 #define TOLOG1(x, p1)                   WizGlobal()->WriteLog(WizFormatString1(x, p1))
-#define TOLOG2(x, p1, p2)                   WizGlobal()->WriteLog(WizFormatString2(x, p1, p2))
-#define TOLOG3(x, p1, p2, p3)                   WizGlobal()->WriteLog(WizFormatString3(x, p1, p2, p3))
-#define TOLOG4(x, p1, p2, p3, p4)                   WizGlobal()->WriteLog(WizFormatString4(x, p1, p2, p3, p4))
+#define TOLOG2(x, p1, p2)               WizGlobal()->WriteLog(WizFormatString2(x, p1, p2))
+#define TOLOG3(x, p1, p2, p3)           WizGlobal()->WriteLog(WizFormatString3(x, p1, p2, p3))
+#define TOLOG4(x, p1, p2, p3, p4)       WizGlobal()->WriteLog(WizFormatString4(x, p1, p2, p3, p4))
 
 
-#define DEBUG_TOLOG(x)
+#define DEBUG_TOLOG(x)                        WizGlobal()->WriteDebugLog(x)
+#define DEBUG_TOLOG1(x, p1)                   WizGlobal()->WriteDebugLog(WizFormatString1(x, p1))
+#define DEBUG_TOLOG2(x, p1, p2)               WizGlobal()->WriteDebugLog(WizFormatString2(x, p1, p2))
+#define DEBUG_TOLOG3(x, p1, p2, p3)           WizGlobal()->WriteDebugLog(WizFormatString3(x, p1, p2, p3))
+#define DEBUG_TOLOG4(x, p1, p2, p3, p4)       WizGlobal()->WriteDebugLog(WizFormatString4(x, p1, p2, p3, p4))
+
 
 BOOL WizBase64Encode(const QByteArray& arrayData, CString& str);
 BOOL WizBase64Decode(const CString& str, QByteArray& arrayData);

@@ -1025,6 +1025,7 @@ BOOL CWizDatabase::UpdateDocumentAbstract(const CString& strDocumentGUID)
     if (!arrayImageFileName.empty())
     {
         CString strImageFileName = arrayImageFileName[0];
+        DEBUG_TOLOG1(_T("abstract image file: %1"), strImageFileName);
         //
         __int64 m = 0;
         for (CWizStdStringArray::const_iterator it = arrayImageFileName.begin() + 1;
@@ -1043,15 +1044,24 @@ BOOL CWizDatabase::UpdateDocumentAbstract(const CString& strDocumentGUID)
         QImage img;
         if (img.load(strImageFileName))
         {
+            DEBUG_TOLOG2("Abstract image size: %1 X %2", WizIntToStr(img.width()), WizIntToStr(img.height()));
             if (img.width() > 32 && img.height() > 32)
             {
                 abstract.image = img;
             }
         }
+        else
+        {
+            TOLOG1(_T("Failed to load image file: %1"), strImageFileName);
+        }
     }
     //
     //
     BOOL ret = UpdatePadAbstract(abstract);
+    if (!ret)
+    {
+        TOLOG(_T("Failed to update note abstract!"));
+    }
     //
     ::WizDeleteFolder(strHtmlTempPath);
     //

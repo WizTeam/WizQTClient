@@ -106,7 +106,7 @@ void CWizMacToolBar::setSizeMode(SizeMode sizeMode)
 void CWizMacToolBar::showInWindow(QWidget *window)
 {
     d->m_targetWindow = window;
-    QTimer::singleShot(0, this, SLOT(showInTargetWindow()));
+    QTimer::singleShot(300, this, SLOT(showInTargetWindow()));
 }
 
 // internal invokable, show the Toolbar in m_targetWindow

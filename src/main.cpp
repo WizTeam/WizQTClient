@@ -14,8 +14,7 @@ int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
     QApplication::setApplicationName(QObject::tr("WizNote"));
-
-
+    //
 #ifdef Q_OS_WIN
     QFont f = WizCreateWindowsUIFont(a);
     a.setFont(f);
@@ -32,10 +31,15 @@ int main(int argc, char *argv[])
     iconApp.addFile(WizGetSkinResourceFileName("wiznote128"));
     QApplication::setWindowIcon(iconApp);
 
-    QTranslator translator;
     QString localName = QLocale::system().name();
-    translator.load(QString("wiznote_") + localName, WizGetResourcesPath() + "languages/");
-    a.installTranslator(&translator);
+
+    QTranslator translatorWizNote;
+    translatorWizNote.load(QString("wiznote_") + localName, WizGetResourcesPath() + "languages/");
+    a.installTranslator(&translatorWizNote);
+
+    QTranslator translatorQt;
+    translatorQt.load(QString("qt_") + localName, WizGetResourcesPath() + "languages/");
+    a.installTranslator(&translatorQt);
 
     const CString strCommon("Common");
     //
