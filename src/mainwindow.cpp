@@ -125,6 +125,10 @@ void MainWindow::initToolBar()
     //
     toolbar->addStandardItem(CWizMacToolBar::FlexibleSpace);
     //
+    toolbar->addAction(m_actions->actionFromName("actionOptions"));
+
+    toolbar->addStandardItem(CWizMacToolBar::Space);
+    //
     toolbar->addSearch(tr("Search"), tr("Search your notes"));
     //
     connect(toolbar, SIGNAL(doSearch(const QString&)), this, SLOT(on_search_doSearch(const QString&)));
@@ -413,15 +417,16 @@ void MainWindow::on_actionAbout_triggered()
 
 void MainWindow::on_actionOptions_triggered()
 {
-#ifdef Q_OS_MAC
-
-#else
     if (!m_options)
     {
         m_options = new CWizOptionsWidget(this);
         connect(m_options, SIGNAL(settingsChanged(WizOptionsType)), this, SLOT(on_options_settingsChanged(WizOptionsType)));
     }
     //
+#ifdef Q_OS_MAC
+    QPoint pt = QCursor::pos();
+    m_options->showAtPoint(pt);
+#else
     if (QWidget* button = m_toolBar->widgetForAction(m_optionsAction))
     {
         QPoint pt = button->mapToGlobal(QPoint(button->width() / 2, button->height()));

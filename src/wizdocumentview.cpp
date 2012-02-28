@@ -37,6 +37,13 @@ public:
         setPalette(pal);
         //
         m_titleEdit = new QLineEdit(this);
+#ifdef Q_OS_MAC
+        m_titleEdit->setAttribute(Qt::WA_MacShowFocusRect, false);
+        m_titleEdit->setStyleSheet("QLineEdit{margin:4 0 0 0; padding:4 4 4 4;border-color:#ffffff;border-width:1;border-style:solid;}QLineEdit:hover{border-color:#bbbbbb;border-width:1;border-style:solid;}");
+        //m_titleEdit->setAlignment(Qt::AlignVCenter);
+#else
+        m_titleEdit->setStyleSheet("QLineEdit{padding:4 4 4 4;border-color:#ffffff;border-width:1;border-style:solid;}QLineEdit:hover{border-color:#bbbbbb;border-width:1;border-style:solid;}");
+#endif
         //
         m_editIcon = WizLoadSkinIcon("unlock");
         m_commitIcon = WizLoadSkinIcon("lock");
@@ -58,8 +65,11 @@ public:
         layout->addWidget(m_editDocumentButton);
         layout->addWidget(m_tagsButton);
         layout->addWidget(m_attachmentButton);
+        layout->setAlignment(m_titleEdit, Qt::AlignVCenter);
+        layout->setAlignment(m_editDocumentButton, Qt::AlignVCenter);
+        layout->setAlignment(m_tagsButton, Qt::AlignVCenter);
+        layout->setAlignment(m_attachmentButton, Qt::AlignVCenter);
         //
-        m_titleEdit->setStyleSheet("QLineEdit{padding:4 4 4 4;border-color:#ffffff;border-width:1;border-style:solid;}QLineEdit:hover{border-color:#bbbbbb;border-width:1;border-style:solid;}");
     }
 private:
     QLineEdit* m_titleEdit;

@@ -1,11 +1,13 @@
 #include "wizmacicon.h"
 
+#if 0
 #include <QFileInfo>
 #include <QPixmapCache>
 #include <QPainter>
 #include <QStyle>
 #include <QDebug>
 #include <QDir>
+
 
 
 void qt_mac_constructQIconFromIconRef(const IconRef icon, const IconRef overlayIcon, QIcon *retIcon,
@@ -123,3 +125,4 @@ void qt_mac_constructQIconFromIconRef(const IconRef icon, const IconRef overlayI
     }
 }
 
+#endif
