@@ -25,4 +25,7 @@ Q_SIGNALS:
 
 BOOL WizDownloadObjectData(CWizDatabase& db, const WIZOBJECTDATA& data, QWidget* parent);
 
+BOOL WizPrepareDocument(CWizDatabase& db, const WIZDOCUMENTDATA& data, QWidget* parent);
+BOOL WizPrepareAttachment(CWizDatabase& db, const WIZDOCUMENTATTACHMENTDATA& data, QWidget* parent);
+
 #endif // WIZDOWNLOADOBJECTDATA_H

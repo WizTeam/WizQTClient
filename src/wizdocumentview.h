@@ -16,6 +16,7 @@
 class CWizTitleBar;
 class CWizDocumentWebView;
 class CWizDatabase;
+class CWizTagListWidget;
 class CWizAttachmentListWidget;
 //
 
@@ -31,6 +32,7 @@ protected:
     CWizTitleBar* m_title;
     CWizDocumentWebView* m_web;
     QWidget* m_client;
+    CWizTagListWidget* m_tags;
     CWizAttachmentListWidget* m_attachments;
     //
     QWidget* createClient();
@@ -49,12 +51,17 @@ public:
     //
     void setViewMode(WizDocumentViewMode mode);
     void setModified(bool modified);
+    //
+    void settingsChanged();
+    //
 public slots:
     void on_titleEdit_textEdited ( const QString & text );
     void on_editDocumentButton_clicked();
+    void on_tagsButton_clicked();
     void on_attachmentButton_clicked();
     void on_attachment_created(const WIZDOCUMENTATTACHMENTDATA& attachment);
     void on_attachment_deleted(const WIZDOCUMENTATTACHMENTDATA& attachment);
+    void on_document_modified(const WIZDOCUMENTDATA& documentOld, const WIZDOCUMENTDATA& documentNew);
 };
 
 #endif // WIZDOCUMENTVIEW_H

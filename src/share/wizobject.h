@@ -11,6 +11,7 @@ class CWizSyncEvents
 {
 public:
     virtual void syncStarted() { }
+    virtual void syncLogin() {}
     virtual void syncDone(bool error) { Q_UNUSED(error); }
     virtual void addLog(const CString& strMsg) { Q_UNUSED(strMsg); }
     virtual void addDebugLog(const CString& strMsg) { Q_UNUSED(strMsg); }
@@ -400,6 +401,16 @@ const COLORREF WIZ_TODO_TEXT_COLOR_NOTURGENTANDNOTIMPORTANT = RGB(128, 128, 128)
 
 const char* const TAG_NAME_PUBLIC				= "$public-documents$";
 const char* const TAG_NAME_SHARE_WITH_FRIENDS	= "$share-with-friends$";
+
+
+inline const CString TAG_DISPLAY_NAME_PUBLIC()
+{
+    return QObject::tr("$Public Notes");
+}
+inline const CString TAG_DISPLAY_NAME_SHARE_WITH_FRIENDS()
+{
+    return QObject::tr("$Share with friends");
+}
 
 #define LOCATION_DELETED_ITEMS      "/Deleted Items/"
 

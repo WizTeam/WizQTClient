@@ -46,6 +46,7 @@ WIZACTION* CWizActions::actionsData()
         {"actionPopupMainMenu",     QObject::tr("Menu")},
         {"actionGoBack",            QObject::tr("Back")},
         {"actionGoForward",         QObject::tr("Forward")},
+        {"actionOptions",         QObject::tr("Options")},
 
         /////////////////////
         {"",                        ""}

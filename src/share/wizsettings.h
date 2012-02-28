@@ -31,7 +31,17 @@ BOOL WizSetString(const CString& strSection, const CString& strKey, const CStrin
 int WizGetInt(const CString& strSection, const CString& strKey, int nDef = 0);
 BOOL WizSetInt(const CString& strSection, const CString& strKey, int val);
 
+BOOL WizGetBool(const CString& strSection, const CString& strKey, bool def = false);
+BOOL WizSetBool(const CString& strSection, const CString& strKey, bool val);
+
+
 CString WizGetEncryptedString(const CString& strSection, const CString& strKey, const CString& strDef = "");
 BOOL WizSetEncryptedString(const CString& strSection, const CString& strKey, const CString& str);
+
+CString WizGetShortcut(const CString& strName, const CString& strDef = "");
+
+QColor WizGetSkinColor(const CString& strSection, const CString& strName, const QColor& colorDef);
+int WizGetSkinInt(const CString& strSection, const CString& strName, int def);
+
 
 #endif // WIZSETTINGS_H

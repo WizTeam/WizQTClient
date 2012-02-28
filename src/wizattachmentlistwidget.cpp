@@ -3,9 +3,12 @@
 #include "share/wizmisc.h"
 #include "share/wizimagepushbutton.h"
 #include "share/wizuihelper.h"
+#include "share/wizdownloadobjectdata.h"
+#include "wizdef.h"
 #include <QBoxLayout>
 #include <QFileDialog>
 #include <QDesktopServices>
+
 
 class CWizAttachmentListViewItem : public QListWidgetItem
 {
@@ -22,7 +25,7 @@ public:
         CString strFileName = view->m_db.GetAttachmentFileName(m_attachment.strGUID);
         long long size = ::WizGetFileSize(strFileName);
         //
-        CString strSize = WizFormatInt(size);
+        CString strSize = 0 == size ? CString(QObject::tr("Un-downloaded")) : WizFormatInt(size);
         //
         CString strType = view->m_iconProvider.type(m_attachment.strName);
         //
@@ -34,9 +37,10 @@ public:
     }
 };
 
-CWizAttachmentListView::CWizAttachmentListView(CWizDatabase& db, QWidget* parent)
+CWizAttachmentListView::CWizAttachmentListView(CWizExplorerApp& app, QWidget* parent)
     : CWizMultiLineListWidget(2, parent)
-    , m_db(db)
+    , m_app(app)
+    , m_db(app.database())
     , m_menu(NULL)
 {
     setFrameStyle(QFrame::NoFrame);
@@ -140,6 +144,10 @@ void CWizAttachmentListView::openAttachment(CWizAttachmentListViewItem* item)
     //
     CString strTempPath = ::WizGlobal()->GetTempPath();
     //
+    const WIZDOCUMENTATTACHMENTDATA& attachment = item->attachment();
+    if (!::WizPrepareAttachment(m_db, attachment, m_app.mainWindow()))
+        return;
+    //
     CString strTempFileName = strTempPath + item->attachment().strName;
     ::WizGetNextFileName(strTempFileName);
     //
@@ -186,6 +194,9 @@ void CWizAttachmentListView::on_action_saveAttachmentAs()
             if (strFileName.isEmpty())
                 return;
             //
+            if (!::WizPrepareAttachment(m_db, item->attachment(), m_app.mainWindow()))
+                return;
+            //
             if (!::WizCopyFile(m_db.GetAttachmentFileName(item->attachment().strGUID), strFileName, FALSE))
             {
                 QMessageBox::critical(this, qApp->applicationName(), tr("Can not save attachment to %1").arg(strFileName));
@@ -202,6 +213,9 @@ void CWizAttachmentListView::on_action_saveAttachmentAs()
         {
             if (CWizAttachmentListViewItem* item = dynamic_cast<CWizAttachmentListViewItem*>(it))
             {
+                if (!::WizPrepareAttachment(m_db, item->attachment(), m_app.mainWindow()))
+                    continue;
+                //
                 CString strFileName = strDir + item->attachment().strName;
                 WizGetNextFileName(strFileName);
                 //
@@ -250,9 +264,9 @@ void CWizAttachmentListView::on_list_itemDoubleClicked(QListWidgetItem* it)
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-CWizAttachmentListWidget::CWizAttachmentListWidget(CWizDatabase& db, QWidget* parent)
+CWizAttachmentListWidget::CWizAttachmentListWidget(CWizExplorerApp& app, QWidget* parent)
     : CWizPopupWidget(parent)
-    , m_list(new CWizAttachmentListView(db, this))
+    , m_list(new CWizAttachmentListView(app, this))
 {
     QLayout* layoutMain = new QBoxLayout(QBoxLayout::TopToBottom, this);
     setLayout(layoutMain);

@@ -48,14 +48,17 @@
      <x>190</x>
      <y>10</y>
      <width>321</width>
-     <height>31</height>
+     <height>91</height>
     </rect>
    </property>
    <property name="styleSheet">
     <string notr="true">font-weight:bold;font-size:14pt</string>
    </property>
    <property name="text">
-    <string>WizNote 0.01</string>
+    <string>WizNote 1.00 (beta)</string>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
    </property>
   </widget>
   <widget class="QLabel" name="labelLink">

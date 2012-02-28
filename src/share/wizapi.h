@@ -67,6 +67,8 @@ struct WIZUSERINFO
     //
     int bEnableGroup;
     //
+    CString strNotice;
+    //
     WIZUSERINFO();
     int GetMaxFileSize();
     BOOL LoadFromXmlRpc(CWizXmlRpcValue& val);

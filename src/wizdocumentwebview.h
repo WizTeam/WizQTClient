@@ -29,6 +29,8 @@ public:
     bool newDocument();
     void setEditingDocument(bool editing);
     const WIZDOCUMENTDATA& document() { return m_data; }
+    CWizExplorerApp& app() { return m_app; }
+
 public slots:
     void on_web_populateJavaScriptWindowObject();
     void on_web_loadFinished(bool ok);

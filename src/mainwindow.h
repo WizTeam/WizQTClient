@@ -6,6 +6,7 @@
 #include "wizdef.h"
 
 #include "share/wizsync.h"
+#include "wiznotesettings.h"
 
 
 #ifndef Q_OS_MAC
@@ -15,6 +16,7 @@ class QStatusBar;
 class QProgressBar;
 class QLabel;
 class QMenuBar;
+class QTimer;
 
 class CWizCategoryView;
 class CWizDocumentListView;
@@ -24,6 +26,7 @@ class CWizDocumentViewHistory;
 class CWizFixedSpacer;
 class CWizSplitter;
 class CWizAnimateAction;
+class CWizOptionsWidget;
 
 
 class MainWindow
@@ -44,6 +47,7 @@ public:
     virtual CWizCategoryView& category() { return *m_category; }
     //
     virtual void syncStarted();
+    virtual void syncLogin();
     virtual void syncDone(bool error);
     virtual void addLog(const CString& strMsg);
     virtual void addDebugLog(const CString& strMsg);
@@ -56,6 +60,8 @@ private:
     QMenuBar* m_menuBar;
 #ifndef Q_OS_MAC
     QToolBar* m_toolBar;
+    QLabel* m_labelNotice;
+    QAction* m_optionsAction;
 #endif
     QStatusBar* m_statusBar;
     QLabel* m_labelStatus;
@@ -66,10 +72,13 @@ private:
     CWizDocumentListView* m_documents;
     CWizDocumentView* m_doc;
     CWizSplitter* m_splitter;
+    CWizOptionsWidget* m_options;
     //
     CWizDocumentViewHistory* m_history;
     //
     CWizAnimateAction* m_animateSync;
+    //
+    QTimer* m_syncTimer;
     //
     bool m_bRestart;
     //
@@ -82,6 +91,9 @@ private:
     void initToolBar();
     void initClient();
     void initStatusBar();
+    //
+    void resetNotice();
+
 public:
     virtual void closeEvent(QCloseEvent *);
     virtual QSize sizeHint() const;
@@ -125,6 +137,7 @@ public slots:
     void on_actionDeleteCurrentNote_triggered();
     void on_actionLogout_triggered();
     void on_actionAbout_triggered();
+    void on_actionOptions_triggered();
 #ifndef Q_OS_MAC
     void on_actionPopupMainMenu_triggered();
     void on_client_splitterMoved(int pos, int index);
@@ -137,6 +150,10 @@ public slots:
     void on_documents_itemSelectionChanged();
 
     void on_search_doSearch(const QString& keywords);
+    //
+    void on_options_settingsChanged(WizOptionsType type);
+    //
+    void on_syncTimer_timeout();
 
 };
 

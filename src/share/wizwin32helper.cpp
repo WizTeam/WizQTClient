@@ -38,11 +38,18 @@ QString WizGetWindowsFontName()
     return QString::fromUtf16((const unsigned short *)ncm.lfMenuFont.lfFaceName);
 }
 
-QFont WizCreateWindowsUIFont(const QApplication& a)
+QFont WizCreateWindowsUIFont(const QApplication& a, const QString& strDefaultFontName)
 {
     QFont f = a.font();
     //
-    f.setFamily(WizGetWindowsFontName());
+    if (strDefaultFontName.isEmpty())
+    {
+        f.setFamily(WizGetWindowsFontName());
+    }
+    else
+    {
+        f.setFamily(strDefaultFontName);
+    }
     //
     int fontHeight = WizGetWindowsFontHeight();
 

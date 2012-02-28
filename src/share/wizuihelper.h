@@ -26,6 +26,13 @@ public:
     QSize sizeHint() const { return QSize(1, 1); }
 };
 
+class CWizVerSpacer : public QWidget
+{
+public:
+    CWizVerSpacer(QWidget* parent = 0);
+    QSize sizeHint() const { return QSize(1, 1); }
+};
+
 class CWizFixedSpacer : public QWidget
 {
     QSize m_sz;

@@ -1,7 +1,9 @@
 #include "wizdocumentview.h"
 #include "wizdocumentwebview.h"
+#include "wiztaglistwidget.h"
 #include "wizattachmentlistwidget.h"
 #include "wiznotestyle.h"
+#include "share/wizsettings.h"
 
 #include <QWebView>
 #include <QWebElement>
@@ -20,6 +22,7 @@ public:
         : QWidget(parent)
         , m_titleEdit(NULL)
         , m_editDocumentButton(NULL)
+        , m_tagsButton(NULL)
         , m_attachmentButton(NULL)
         , m_editing(false)
     {
@@ -37,6 +40,7 @@ public:
         //
         m_editIcon = WizLoadSkinIcon("unlock");
         m_commitIcon = WizLoadSkinIcon("lock");
+        m_tagsIcon = WizLoadSkinIcon("document_tags");
         m_attachmentIcon = WizLoadSkinIcon("attachment");
         //
         m_editDocumentButton = new CWizImagePushButton(m_editIcon, "", this);
@@ -44,12 +48,15 @@ public:
         m_editDocumentButton->setStyle(::WizGetStyle());
         m_editDocumentButton->setRedFlag(true);
         //
+        m_tagsButton = new CWizImagePushButton(m_tagsIcon, "", this);
+        m_tagsButton->setStyle(::WizGetStyle());
+        //
         m_attachmentButton = new CWizImagePushButton(m_attachmentIcon, "", this);
         m_attachmentButton->setStyle(::WizGetStyle());
-        m_attachmentButton->setToolTip(tr("Attachments"));
         //
         layout->addWidget(m_titleEdit);
         layout->addWidget(m_editDocumentButton);
+        layout->addWidget(m_tagsButton);
         layout->addWidget(m_attachmentButton);
         //
         m_titleEdit->setStyleSheet("QLineEdit{padding:4 4 4 4;border-color:#ffffff;border-width:1;border-style:solid;}QLineEdit:hover{border-color:#bbbbbb;border-width:1;border-style:solid;}");
@@ -57,10 +64,12 @@ public:
 private:
     QLineEdit* m_titleEdit;
     CWizImagePushButton* m_editDocumentButton;
+    CWizImagePushButton* m_tagsButton;
     CWizImagePushButton* m_attachmentButton;
     //
     QIcon m_editIcon;
     QIcon m_commitIcon;
+    QIcon m_tagsIcon;
     QIcon m_attachmentIcon;
     //
     bool m_editing;
@@ -74,16 +83,21 @@ private:
     }
     void updateEditDocumentButtonTooltip()
     {
-        QString strSaveAndRead = tr("Save & Switch to Reading View");
-        QString strRead = tr("Switch to Reading View");
-        QString strEditNote = tr("Switch to Editing View");
+        QString shortcut = ::WizGetShortcut("EditNote", "Alt+1");
+        QString strSaveAndRead = QObject::tr("Save & Switch to Reading View");
+        QString strRead = QObject::tr("Switch to Reading View");
+        QString strEditNote = QObject::tr("Switch to Editing View");
         QString strSwitchRead = m_editDocumentButton->text().isEmpty() ? strRead : strSaveAndRead;
-        m_editDocumentButton->setToolTip(m_editing ? strSwitchRead : strEditNote);
+        QString strToolTip = m_editing ? strSwitchRead : strEditNote;
+        strToolTip += " (" + shortcut + ")";
+        m_editDocumentButton->setToolTip(strToolTip);
+        m_editDocumentButton->setShortcut(QKeySequence::fromString(shortcut));
     }
 
 public:
     QLineEdit* titleEdit() const { return m_titleEdit; }
     QPushButton* editDocumentButton() const { return m_editDocumentButton; }
+    QPushButton* tagsButton() const { return m_tagsButton; }
     QPushButton* attachmentButton() const { return m_attachmentButton; }
     //
     void setEditingDocument(bool editing) { updateEditDocumentButtonIcon(editing); }
@@ -91,10 +105,25 @@ public:
     //
     void updateInformation(CWizDatabase& db, const WIZDOCUMENTDATA& data)
     {
+        //title
         m_titleEdit->setText(data.strTitle);
+        //tags
+        CWizStdStringArray arrayTagGUID;
+        db.GetDocumentTags(data.strGUID, arrayTagGUID);
+        CString strTagText = arrayTagGUID.empty() ? CString() : WizIntToStr(arrayTagGUID.size());
+        m_tagsButton->setText(strTagText);
+        QString tagsShortcut = ::WizGetShortcut("EditNoteTags", "Alt+2");
+        QString strTagsToolTip = arrayTagGUID.empty() ? QObject::tr("Tags (%1)") : QObject::tr("Tags (%1): %2");
+        strTagsToolTip = strTagsToolTip.arg(tagsShortcut, db.GetDocumentTagDisplayNameText(data.strGUID));
+        m_tagsButton->setToolTip(strTagsToolTip);
+        m_tagsButton->setShortcut(QKeySequence::fromString(tagsShortcut));
+        //attachments
         int nAttachmentCount = db.GetDocumentAttachmentCount(data.strGUID);
-        CString strText = nAttachmentCount ? WizIntToStr(nAttachmentCount) : CString();
-        m_attachmentButton->setText(strText);
+        CString strAttachmentText = nAttachmentCount ? WizIntToStr(nAttachmentCount) : CString();
+        m_attachmentButton->setText(strAttachmentText);
+        QString attachmentShortcut = ::WizGetShortcut("EditNoteAttachments", "Alt+3");
+        m_attachmentButton->setToolTip(QObject::tr("Attachments (%1)").arg(attachmentShortcut));
+        m_attachmentButton->setShortcut(QKeySequence::fromString(attachmentShortcut));
     }
     //
     void setModified(bool modified)
@@ -112,9 +141,10 @@ CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
     , m_title(new CWizTitleBar(this))
     , m_web(new CWizDocumentWebView(app, this))
     , m_client(NULL)
+    , m_tags(NULL)
     , m_attachments(NULL)
     , m_editingDocument(true)
-    , m_viewMode(viewmodeKeep)
+    , m_viewMode(WizGetDefaultNoteView())
 {
     m_client = createClient();
     //
@@ -127,10 +157,12 @@ CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
     //
     connect(m_title->titleEdit(), SIGNAL(textEdited(QString)), this, SLOT(on_titleEdit_textEdited(QString)));
     connect(m_title->editDocumentButton(), SIGNAL(clicked()), this, SLOT(on_editDocumentButton_clicked()));
+    connect(m_title->tagsButton(), SIGNAL(clicked()), this, SLOT(on_tagsButton_clicked()));
     connect(m_title->attachmentButton(), SIGNAL(clicked()), this, SLOT(on_attachmentButton_clicked()));
     //
     connect(&m_db, SIGNAL(attachmentCreated(WIZDOCUMENTATTACHMENTDATA)), this, SLOT(on_attachment_created(WIZDOCUMENTATTACHMENTDATA)));
     connect(&m_db, SIGNAL(attachmentDeleted(WIZDOCUMENTATTACHMENTDATA)), this, SLOT(on_attachment_deleted(WIZDOCUMENTATTACHMENTDATA)));
+    connect(&m_db, SIGNAL(documentModified(const WIZDOCUMENTDATA&, const WIZDOCUMENTDATA&)), this, SLOT(on_document_modified(const WIZDOCUMENTDATA&, const WIZDOCUMENTDATA&)));
 }
 
 
@@ -238,11 +270,28 @@ void CWizDocumentView::editDocument(bool editing)
 void CWizDocumentView::setViewMode(WizDocumentViewMode mode)
 {
     m_viewMode = mode;
+    //
+    switch (m_viewMode)
+    {
+    case viewmodeAlwaysEditing:
+        editDocument(true);
+        break;
+    case viewmodeAlwaysReading:
+        editDocument(false);
+        break;
+    default:
+        break;
+    }
 }
 
 void CWizDocumentView::setModified(bool modified)
 {
     m_title->setModified(modified);
+}
+
+void CWizDocumentView::settingsChanged()
+{
+    setViewMode(WizGetDefaultNoteView());
 }
 
 void CWizDocumentView::on_titleEdit_textEdited(const QString & text )
@@ -270,7 +319,7 @@ void CWizDocumentView::on_attachmentButton_clicked()
 {
     if (!m_attachments)
     {
-        m_attachments = new CWizAttachmentListWidget(m_db, topLevelWidget());
+        m_attachments = new CWizAttachmentListWidget(m_web->app(), topLevelWidget());
     }
     //
     m_attachments->setDocument(m_web->document());
@@ -280,6 +329,22 @@ void CWizDocumentView::on_attachmentButton_clicked()
     QPoint pt = btn->mapToGlobal(QPoint(rc.width() / 2, rc.height()));
     m_attachments->setGeometry(QRect(QPoint(0, 0), m_attachments->sizeHint()));
     m_attachments->showAtPoint(pt);
+}
+
+void CWizDocumentView::on_tagsButton_clicked()
+{
+    if (!m_tags)
+    {
+        m_tags = new CWizTagListWidget(m_db, topLevelWidget());
+    }
+    //
+    m_tags->setDocument(m_web->document());
+    //
+    QPushButton* btn = m_title->tagsButton();
+    QRect rc = btn->geometry();
+    QPoint pt = btn->mapToGlobal(QPoint(rc.width() / 2, rc.height()));
+    m_tags->setGeometry(QRect(QPoint(0, 0), m_tags->sizeHint()));
+    m_tags->showAtPoint(pt);
 }
 
 void CWizDocumentView::on_attachment_created(const WIZDOCUMENTATTACHMENTDATA& attachment)
@@ -293,6 +358,16 @@ void CWizDocumentView::on_attachment_created(const WIZDOCUMENTATTACHMENTDATA& at
 void CWizDocumentView::on_attachment_deleted(const WIZDOCUMENTATTACHMENTDATA& attachment)
 {
     if (attachment.strDocumentGUID == document().strGUID)
+    {
+        m_title->updateInformation(m_db, document());
+    }
+}
+
+void CWizDocumentView::on_document_modified(const WIZDOCUMENTDATA& documentOld, const WIZDOCUMENTDATA& documentNew)
+{
+    Q_UNUSED(documentOld);
+    //
+    if (document().strGUID == documentNew.strGUID)
     {
         m_title->updateInformation(m_db, document());
     }

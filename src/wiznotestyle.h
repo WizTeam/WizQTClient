@@ -8,5 +8,6 @@ QStyle* WizGetStyle();
 class QColor;
 QColor WizGetCategoryBackroundColor();
 QColor WizGetDocumentsBackroundColor();
+QColor WizGetClientBackgroundColor();
 
 #endif // WIZNOTESTYLE_H

@@ -5,12 +5,14 @@
 CWizSettings::CWizSettings(const CString& strFileName)
     : QSettings(strFileName, QSettings::IniFormat)
 {
+    setIniCodec("utf-8");
 }
 
 
 CString CWizSettings::GetString(const CString& strSection, const CString& strKey, const CString& strDef /*= ""*/)
 {
-    return value(strSection + "/" + strKey, strDef).toString();
+    QVariant v = value(strSection + "/" + strKey, strDef);
+    return v.toString();
 }
 
 BOOL CWizSettings::SetString(const CString& strSection, const CString& strKey, const CString& str)
@@ -93,6 +95,16 @@ BOOL WizSetInt(const CString& strSection, const CString& strKey, int val)
     return settings.SetInt(strSection, strKey, val);
 }
 
+BOOL WizGetBool(const CString& strSection, const CString& strKey, bool def)
+{
+    return WizGetInt(strSection, strKey, def ? 1 : 0) != 0;
+}
+
+BOOL WizSetBool(const CString& strSection, const CString& strKey, bool val)
+{
+    return WizSetInt(strSection, strKey, val ? 1 : 0);
+}
+
 CString WizGetEncryptedString(const CString& strSection, const CString& strKey, const CString& strDef /*= ""*/)
 {
     CWizSettings settings(WizGetSettingsFileName());
@@ -103,4 +115,23 @@ BOOL WizSetEncryptedString(const CString& strSection, const CString& strKey, con
 {
     CWizSettings settings(WizGetSettingsFileName());
     return settings.SetEncryptedString(strSection, strKey, str);
+}
+CString WizGetShortcut(const CString& strName, const CString& strDef /*= ""*/)
+{
+    CWizSettings settings(WizGetSettingsFileName());
+    return settings.GetString("Shortcut", strName, strDef);
+}
+
+QColor WizGetSkinColor(const CString& strSection, const CString& strName, const QColor& colorDef)
+{
+    CWizSettings settings(WizGetSkinPath() + "skin.ini");
+    return settings.GetColor(strSection, strName, colorDef);
+}
+
+
+
+int WizGetSkinInt(const CString& strSection, const CString& strName, int def)
+{
+    CWizSettings settings(WizGetSkinPath() + "skin.ini");
+    return settings.GetInt(strSection, strName, def);
 }

@@ -14,7 +14,7 @@ AboutDialog::AboutDialog(QWidget *parent) :
     QIcon icon(WizGetSkinResourceFileName("wiznote128"));
     //
     ui->labelIcon->setPixmap(icon.pixmap(128, 128));
-    CString strVersion("0.01");
+    CString strVersion("\n1.00 (beta)");
 #if defined Q_OS_MAC
     ui->labelAbout->setText(tr("WizNote for Mac %1").arg(strVersion));
 #elif defined Q_OS_LINUX

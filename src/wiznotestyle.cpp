@@ -732,3 +732,8 @@ QColor WizGetDocumentsBackroundColor()
 {
     return CWizNoteStyle::noteStyle()->documentsBackground();
 }
+QColor WizGetClientBackgroundColor()
+{
+    return WizGetSkinColor("Client", "Background", QColor(0x80, 0x80, 0x80));
+}
+

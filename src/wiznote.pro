@@ -96,7 +96,8 @@ SOURCES += main.cpp\
     share/wizfileiconprovider.cpp \
     share/wizwindowshelper.cpp \
     share/wizimagepushbutton.cpp \
-    wiztaglistwidget.cpp
+    wiztaglistwidget.cpp \
+    wizoptionswidget.cpp
 
 HEADERS  += mainwindow.h \
     share/wizqthelper.h \
@@ -173,7 +174,8 @@ HEADERS  += mainwindow.h \
     share/wizwindowshelper.h \
     share/wizimagepushbutton.h \
     mac/wizmacicon.h \
-    wiztaglistwidget.h
+    wiztaglistwidget.h \
+    wizoptionswidget.h
 
 
 mac:HEADERS +=     \

@@ -16,7 +16,8 @@ int main(int argc, char *argv[])
     QApplication::setApplicationName(QObject::tr("WizNote"));
     //
 #ifdef Q_OS_WIN
-    QFont f = WizCreateWindowsUIFont(a);
+    QString strDefaultFontName = ::WizGetString("Common", "DefaultFont", "");
+    QFont f = WizCreateWindowsUIFont(a, strDefaultFontName);
     a.setFont(f);
     //
 #endif
@@ -66,7 +67,7 @@ int main(int argc, char *argv[])
     CWizDatabase db;
     if (!db.Open(strUserId, strPassword))
     {
-        QMessageBox::critical(NULL, "", "Can not open account");
+        QMessageBox::critical(NULL, "", QObject::tr("Can not open account"));
         return 0;
     }
     //

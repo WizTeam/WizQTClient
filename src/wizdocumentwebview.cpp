@@ -52,19 +52,10 @@ bool CWizDocumentWebView::viewDocument(const WIZDOCUMENTDATA& doc, bool editing)
         if (!saveDocument(false))
             return false;
     }
-
-    if (!m_app.database().IsDocumentDownloaded(doc.strGUID)
-        || !PathFileExists(m_app.database().GetDocumentFileName(doc.strGUID)))
-    {
-
-        WIZOBJECTDATA data;
-        data.strObjectGUID = doc.strGUID;
-        data.strDisplayName = doc.strTitle;
-        data.eObjectType = wizobjectDocument;
-        if (!WizDownloadObjectData(m_app.database(), data, m_app.mainWindow()))
-            return false;
-    }
-
+    //
+    if (!::WizPrepareDocument(m_app.database(), doc, m_app.mainWindow()))
+        return false;
+    //
     CString strHtmlFileName;
     if (!m_app.database().DocumentToTempHtmlFile(doc, strHtmlFileName))
         return false;

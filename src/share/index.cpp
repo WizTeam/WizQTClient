@@ -2164,6 +2164,37 @@ CString CIndex::GetDocumentTagNameText(const CString& strDocumentGUID)
 	return strText;
 }
 
+
+BOOL CIndex::GetDocumentTagsDisplayNameStringArray(const CString& strDocumentGUID, CWizStdStringArray& arrayTagDisplayName)
+{
+    CWizTagDataArray arrayTag;
+    if (!GetDocumentTags(strDocumentGUID, arrayTag))
+    {
+        TOLOG1(_T("Failed to get document tags: %1"), strDocumentGUID);
+        return FALSE;
+    }
+    //
+    for (CWizTagDataArray::const_iterator it = arrayTag.begin();
+        it != arrayTag.end();
+        it++)
+    {
+        arrayTagDisplayName.push_back(TagNameToDisplayName(it->strName));
+    }
+    //
+    return TRUE;
+}
+CString CIndex::GetDocumentTagDisplayNameText(const CString& strDocumentGUID)
+{
+    CString strText;
+    //
+    CWizStdStringArray arrayTagDisplayName;
+    if (!GetDocumentTagsDisplayNameStringArray(strDocumentGUID, arrayTagDisplayName))
+        return strText;
+    //
+    WizStringArrayToText(arrayTagDisplayName, strText, _T("; "));
+    //
+    return strText;
+}
 CString CIndex::GetDocumentTagGUIDsString(const CString& strDocumentGUID)
 {
 	CWizStdStringArray arrayTagGUID;
@@ -4856,13 +4887,24 @@ BOOL CIndex::GetNeedToBeDownloadedAttachments(CWizDocumentAttachmentDataArray& a
 CString CIndex::TagDisplayNameToName(const CString& strDisplayName)
 {
     CString strName(strDisplayName);
-    if (strName ==::WizFormatString0(TAG_NAME_PUBLIC))
+    if (strName ==TAG_DISPLAY_NAME_PUBLIC())
 		strName = TAG_NAME_PUBLIC;
-    else if (strName == ::WizFormatString0(TAG_NAME_SHARE_WITH_FRIENDS))
+    else if (strName == TAG_DISPLAY_NAME_SHARE_WITH_FRIENDS())
 		strName = TAG_NAME_SHARE_WITH_FRIENDS;
 	//
 	return strName;
 }
+CString CIndex::TagNameToDisplayName(const CString& strName)
+{
+    CString strDisplayName(strName);
+    if (strDisplayName == TAG_NAME_PUBLIC)
+        strDisplayName = TAG_DISPLAY_NAME_PUBLIC();
+    else if (strDisplayName == TAG_NAME_SHARE_WITH_FRIENDS)
+        strDisplayName = TAG_DISPLAY_NAME_SHARE_WITH_FRIENDS();
+    //
+    return strDisplayName;
+}
+
 
 BOOL CIndex::Repair(const CString& strDestFileName)
 {

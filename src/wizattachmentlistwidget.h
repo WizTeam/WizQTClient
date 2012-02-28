@@ -7,13 +7,16 @@
 
 #include "share/wizfileiconprovider.h"
 
+class CWizExplorerApp;
 class CWizAttachmentListViewItem;
+
 class CWizAttachmentListView : public CWizMultiLineListWidget
 {
     Q_OBJECT
 public:
-    CWizAttachmentListView(CWizDatabase& db, QWidget* parent);
+    CWizAttachmentListView(CWizExplorerApp& app, QWidget* parent);
 private:
+    CWizExplorerApp& m_app;
     CWizDatabase& m_db;
     WIZDOCUMENTDATA m_document;
     CWizFileIconProvider m_iconProvider;
@@ -48,7 +51,7 @@ class CWizAttachmentListWidget : public CWizPopupWidget
 {
     Q_OBJECT
 public:
-    CWizAttachmentListWidget(CWizDatabase& db, QWidget* parent);
+    CWizAttachmentListWidget(CWizExplorerApp& app, QWidget* parent);
 private:
     CWizAttachmentListView* m_list;
 public:

@@ -11,7 +11,6 @@
 #include <QContextMenuEvent>
 
 
-
 class CWizDocumentListViewItem : public QListWidgetItem
 {
 protected:
@@ -46,7 +45,7 @@ public:
     {
         if (m_tags.IsEmpty())
         {
-            m_tags = db.GetDocumentTagsText(m_data.strGUID);
+            m_tags = db.GetDocumentTagDisplayNameText(m_data.strGUID);
             m_tags = " " + m_tags;
         }
         //
@@ -59,6 +58,7 @@ public:
         m_abstract = WIZABSTRACT();
         m_tags.clear();
         //
+        setText("");    //force repaint
         setText(m_data.strTitle);
     }
     //
@@ -214,8 +214,8 @@ void CWizDocumentListView::contextMenuEvent(QContextMenuEvent * e)
     if (!m_menu)
     {
         m_menu = new QMenu(this);
-        //m_menu->addAction(tr("Tags..."), this, SLOT(on_action_selectTags()));
-        //m_menu->addSeparator();
+        m_menu->addAction(tr("Tags..."), this, SLOT(on_action_selectTags()));
+        m_menu->addSeparator();
         m_menu->addAction(tr("Delete..."), this, SLOT(on_action_deleteDocument()));
     }
     //
@@ -384,10 +384,11 @@ void CWizDocumentListView::on_action_selectTags()
         //
         if (!m_tagList)
         {
-            m_tagList = new CWizTagListWidget(this);
+            m_tagList = new CWizTagListWidget(m_db, this);
             m_tagList->setLeftAlign(true);
         }
         //
+        m_tagList->setDocument(item->document());
         m_tagList->showAtPoint(QCursor::pos());
     }
 }

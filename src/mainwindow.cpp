@@ -22,6 +22,7 @@
 #include <QDebug>
 #include <QBoxLayout>
 #include <QApplication>
+#include <QTimer>
 #include <share/wizcommonui.h>
 
 #include "mac/wizmactoolbar.h"
@@ -33,6 +34,8 @@
 #include "share/wizsettings.h"
 #include "share/wizanimateaction.h"
 
+#include "wizoptionswidget.h"
+
 MainWindow::MainWindow(CWizDatabase& db, QWidget *parent) :
     QMainWindow(parent),
     m_db(db),
@@ -40,6 +43,8 @@ MainWindow::MainWindow(CWizDatabase& db, QWidget *parent) :
     m_menuBar(new QMenuBar(this)),
     #ifndef Q_OS_MAC
     m_toolBar(new QToolBar("Main", this)),
+    m_labelNotice(NULL),
+    m_optionsAction(NULL),
     #endif
     m_statusBar(new QStatusBar(this)),
     m_labelStatus(new QLabel(this)),
@@ -49,8 +54,10 @@ MainWindow::MainWindow(CWizDatabase& db, QWidget *parent) :
     m_documents(new CWizDocumentListView(*this, this)),
     m_doc(new CWizDocumentView(*this, this)),
     m_splitter(NULL),
+    m_options(NULL),
     m_history(new CWizDocumentViewHistory()),
     m_animateSync(new CWizAnimateAction(this)),
+    m_syncTimer(new QTimer(this)),
     m_bRestart(false),
     m_bUpdatingSelection(false)
 {
@@ -64,6 +71,11 @@ MainWindow::MainWindow(CWizDatabase& db, QWidget *parent) :
     //
     connect(m_category, SIGNAL(itemSelectionChanged()), this, SLOT(on_category_itemSelectionChanged()));
     connect(m_documents, SIGNAL(itemSelectionChanged()), this, SLOT(on_documents_itemSelectionChanged()));
+    //
+    m_sync.setDownloadAllNotesData(::WizIsDownloadAllNotesData());
+    m_syncTimer->setInterval(3 * 60 * 1000);    //3 minutes
+    connect(m_syncTimer, SIGNAL(timeout()), this, SLOT(on_syncTimer_timeout()));
+    QTimer::singleShot(30 * 1000, this, SLOT(on_syncTimer_timeout()));  //30 seconds
     //
     m_category->init();
 }
@@ -137,6 +149,7 @@ void MainWindow::initToolBar()
     m_toolBar->addAction(m_actions->actionFromName("actionNewNote"));
     m_toolBar->addAction(m_actions->actionFromName("actionDeleteCurrentNote"));
     //
+    //
 #if 0
     QAction* pCaptureScreenAction = m_actions->actionFromName("actionCaptureScreen");
     m_actions->buildActionMenu(pCaptureScreenAction, this, ::WizGetAppPath() + "files/mainmenu.ini");
@@ -145,6 +158,22 @@ void MainWindow::initToolBar()
     //
     m_toolBar->addWidget(new CWizSpacer(m_toolBar));
     //
+    m_labelNotice = new QLabel("", m_toolBar);
+    m_labelNotice->setOpenExternalLinks(true);
+    m_toolBar->addWidget(m_labelNotice);
+    //
+    m_toolBar->addWidget(new CWizSpacer(m_toolBar));
+    //
+    if (QAction* actionOptions = m_actions->actionFromName("actionOptions"))
+    {
+        QToolButton* buttonOptions = new QToolButton(m_toolBar);
+        buttonOptions->setIcon(actionOptions->icon());
+        buttonOptions->setText("");
+        buttonOptions->setToolTip(actionOptions->text());
+        m_optionsAction = m_toolBar->addWidget(buttonOptions);
+        //
+        connect(buttonOptions, SIGNAL(clicked()), this, SLOT(on_actionOptions_triggered()));
+    }
     m_toolBar->addAction(m_actions->actionFromName("actionPopupMainMenu"));
     //
     m_toolBar->addWidget(new CWizFixedSpacer(QSize(20, 1), m_toolBar));
@@ -156,7 +185,11 @@ void MainWindow::initToolBar()
     m_toolBar->addWidget(new CWizFixedSpacer(QSize(2, 1), m_toolBar));
     //
     m_toolBar->setStyle(WizGetStyle());
+    //
+    m_toolBar->layout()->setMargin(::WizGetSkinInt("ToolBar", "Margin", m_toolBar->layout()->margin()));
 #endif
+    //
+    resetNotice();
 }
 
 void MainWindow::initClient()
@@ -184,7 +217,7 @@ void MainWindow::initClient()
     splitter->setStretchFactor(2, 1);
     //
     QPalette pal = client->palette();
-    pal.setColor(QPalette::Window, QColor(0x80, 0x80, 0x80));
+    pal.setColor(QPalette::Window, WizGetClientBackgroundColor());
     client->setPalette(pal);
     client->setAutoFillBackground(true);
     //
@@ -207,6 +240,29 @@ void MainWindow::initStatusBar()
     m_labelStatus->setVisible(false);
     //
     m_statusBar->hide();
+}
+
+void MainWindow::resetNotice()
+{
+#ifdef Q_OS_MAC
+#else
+    if (!m_labelNotice)
+        return;
+    //
+    m_labelNotice->setText("");
+    //
+    QString notice;
+    if (!::WizGetNotice(notice)
+        || notice.isEmpty())
+        return;
+    //
+    CString strTitle = ::WizGetCommandLineValue(notice, "Title");
+    CString strLink = ::WizGetCommandLineValue(notice, "Link");
+    //
+    CString strText = CString("<a href=\"%1\">%2</a>").arg(strLink, strTitle);
+    //
+    m_labelNotice->setText(strText);
+#endif
 }
 
 void MainWindow::closeEvent(QCloseEvent *e)
@@ -256,15 +312,24 @@ void MainWindow::syncStarted()
     m_animateSync->startPlay();
 }
 
+void MainWindow::syncLogin()
+{
+    ::WizSetNotice(m_sync.userInfo().strNotice);
+    //
+#ifdef QT_DEBUG
+    //::WizSetNotice("/Title=test /Link=http://www.wiz.cn/");
+#endif
+    resetNotice();
+}
+
 void MainWindow::syncDone(bool error)
 {
-    if (!error)
-    {
-        m_statusBar->hide();
-    }
+    Q_UNUSED(error);
     //
-    m_progressSync->setVisible(false);
-    m_labelStatus->setVisible(false);
+    m_statusBar->hide();
+    //
+    m_progressSync->setVisible(error);
+    m_labelStatus->setVisible(error);
     //
     m_animateSync->stopPlay();
 }
@@ -277,14 +342,12 @@ void MainWindow::addLog(const CString& strMsg)
 }
 void MainWindow::addDebugLog(const CString& strMsg)
 {
-    //qDebug() << strMsg;
-    //
-    Q_UNUSED(strMsg);
+    DEBUG_TOLOG(strMsg);
 }
 
 void MainWindow::addErrorLog(const CString& strMsg)
 {
-    qDebug() << strMsg;
+    TOLOG(strMsg);
     //
     QMessageBox::critical(this, "", strMsg);
 }
@@ -346,6 +409,25 @@ void MainWindow::on_actionAbout_triggered()
 {
     AboutDialog dlg(this);
     dlg.exec();
+}
+
+void MainWindow::on_actionOptions_triggered()
+{
+#ifdef Q_OS_MAC
+
+#else
+    if (!m_options)
+    {
+        m_options = new CWizOptionsWidget(this);
+        connect(m_options, SIGNAL(settingsChanged(WizOptionsType)), this, SLOT(on_options_settingsChanged(WizOptionsType)));
+    }
+    //
+    if (QWidget* button = m_toolBar->widgetForAction(m_optionsAction))
+    {
+        QPoint pt = button->mapToGlobal(QPoint(button->width() / 2, button->height()));
+        m_options->showAtPoint(pt);
+    }
+#endif
 }
 
 #ifndef Q_OS_MAC
@@ -441,6 +523,26 @@ void MainWindow::on_documents_itemSelectionChanged()
 void MainWindow::on_search_doSearch(const QString& keywords)
 {
     m_category->search(keywords);
+}
+
+void MainWindow::on_options_settingsChanged(WizOptionsType type)
+{
+    if (wizoptionsNoteView == type)
+    {
+        m_doc->settingsChanged();
+    }
+    else if (wizoptionsSync == type)
+    {
+        m_sync.setDownloadAllNotesData(::WizIsDownloadAllNotesData());
+    }
+}
+
+void MainWindow::on_syncTimer_timeout()
+{
+    if (!::WizIsAutoSync())
+        return;
+    //
+    on_actionSync_triggered();
 }
 
 void MainWindow::viewDocument(const WIZDOCUMENTDATA& data, bool addToHistory)

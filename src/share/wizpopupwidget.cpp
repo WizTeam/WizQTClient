@@ -152,8 +152,11 @@ void CWizPopupWidget::resizeEvent(QResizeEvent* event)
     setMask(region);
 }
 
+
 void CWizPopupWidget::showAtPoint(const QPoint& pt)
 {
+    adjustSize();
+    //
     QSize sz = geometry().size();
     //
     int xOffset = m_leftAlign ? 21 : sz.width() - 21;
@@ -165,6 +168,7 @@ void CWizPopupWidget::showAtPoint(const QPoint& pt)
     move(QPoint(left, top));
     //
     show();
+    //
     //activateWindow();
 }
 

@@ -234,7 +234,10 @@ public:
 	//
     BOOL GetDocumentTagsNameStringArray(const CString& strDocumentGUID, CWizStdStringArray& arrayTagName);
     CString GetDocumentTagNameText(const CString& strDocumentGUID);
-	//
+    //
+    BOOL GetDocumentTagsDisplayNameStringArray(const CString& strDocumentGUID, CWizStdStringArray& arrayTagDisplayName);
+    CString GetDocumentTagDisplayNameText(const CString& strDocumentGUID);
+    //
     BOOL ChangeDocumentsLocation(const CString& strOldLocation, const CString& strNewLocation);
 	//
     BOOL TitleExists(const CString& strLocation, CString strTitle);
@@ -345,6 +348,7 @@ public:
     static BOOL IsRootLocation(CString strLocation);
     static CString GetRootLocationName(CString strLocation);
     static CString TagDisplayNameToName(const CString& strDisplayName);
+    static CString TagNameToDisplayName(const CString& strName);
 	//
 	template <class TData>
     static void RemoveMultiElements(std::deque<TData>& arrayData);

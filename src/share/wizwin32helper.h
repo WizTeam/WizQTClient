@@ -1,12 +1,18 @@
 #ifndef WIZWIN32HELPER_H
 #define WIZWIN32HELPER_H
 
-#ifdef Q_WS_WIN32
+#include <QtGlobal>
+
+#ifdef Q_OS_WIN
+
+#include <QFont>
+
 int WizGetWindowsFontHeight();
 
 class QApplication;
-QFont WizCreateWindowsUIFont(const QApplication& a);
+class QString;
+QFont WizCreateWindowsUIFont(const QApplication& a, const QString& strDefaultFontName);
 
-#endif  //Q_WS_WIN32
+#endif  //Q_OS_WIN
 
 #endif // WIZWIN32HELPER_H

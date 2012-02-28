@@ -147,7 +147,7 @@ public:
     CWizCategoryViewTagItem(const WIZTAGDATA& tag)
         : m_tag(tag)
     {
-        setText(0, tag.strName);
+        setText(0, CWizDatabase::TagNameToDisplayName(tag.strName));
         setIcon(0, WizLoadSkinIcon("tag"));
     }
     virtual QTreeWidgetItem *clone() const

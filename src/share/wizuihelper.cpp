@@ -26,7 +26,7 @@ QWidget* createSearchWidget(CWizSearchBox* searchBox)
     widget->setLayout(layout);
     //
     layout->setSpacing(0);
-    layout->setMargin(1);
+    layout->setMargin(0);
     layout->addWidget(iconLabel);
     layout->addWidget(editSearch);
     layout->setStretch(0, 0);
@@ -84,11 +84,17 @@ QSize CWizSearchBox::sizeHint() const
 
 
 CWizSpacer::CWizSpacer(QWidget *parent)
-:QWidget(parent)
+    :QWidget(parent)
 {
     QSizePolicy sizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
     setSizePolicy(sizePolicy);
 }
 
 
+CWizVerSpacer::CWizVerSpacer(QWidget* parent)
+    :QWidget(parent)
+{
+    QSizePolicy sizePolicy(QSizePolicy::Fixed, QSizePolicy::Expanding);
+    setSizePolicy(sizePolicy);
+}
 

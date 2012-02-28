@@ -1,7 +1,6 @@
 #include "wizsync.h"
 #include <algorithm>
 
-
 enum WizSyncProgress
 {
     progressStart = 0,
@@ -43,6 +42,7 @@ CWizSync::CWizSync(CWizDatabase& db, const CString& strAccountsApiURL, CWizSyncE
     , m_nAllDocumentsNeedToBeUploadedCount(0)
     , m_nAllAttachmentsNeedToBeUploadedCount(0)
     , m_nAllObjectsNeedToBeDownloadedCount(0)
+    , m_bDownloadAllNotesData(true)
 {
 }
 
@@ -88,7 +88,7 @@ void CWizSync::onXmlRpcError(const CString& strMethodName, WizXmlRpcError err, i
     //
     if (strMethodName != SyncMethod_ClientLogout)
     {
-        callClientLogout();
+        stopSync();
     }
 }
 
@@ -99,6 +99,8 @@ void CWizSync::onClientLogin()
     //
     addLog("downloading deleted objects list");
     startDownloadDeleteds();
+    //
+    m_events.syncLogin();
 }
 
 void CWizSync::startDownloadDeleteds()
@@ -285,6 +287,31 @@ void CWizSync::onUploadAttachmentsCompleted()
 void CWizSync::startDownloadObjectsData()
 {
     m_db.GetAllObjectsNeedToBeDownloaded(m_arrayAllObjectsNeedToBeDownloaded);
+    //
+    if (!m_bDownloadAllNotesData)
+    {
+        COleDateTime tNow = ::WizGetCurrentTime();
+        //
+        size_t count = m_arrayAllObjectsNeedToBeDownloaded.size();
+        for (intptr_t i = count - 1; i >= 0; i--)
+        {
+            COleDateTime t = m_arrayAllObjectsNeedToBeDownloaded[i].tTime;
+            t = t.addDays(7);
+            if (t < tNow)
+            {
+                m_arrayAllObjectsNeedToBeDownloaded.erase(m_arrayAllObjectsNeedToBeDownloaded.begin() + i);
+                continue;
+            }
+            //
+            if (m_arrayAllObjectsNeedToBeDownloaded[i].eObjectType == wizobjectDocumentAttachment)
+            {
+                m_arrayAllObjectsNeedToBeDownloaded.erase(m_arrayAllObjectsNeedToBeDownloaded.begin() + i);
+                continue;
+            }
+        }
+    }
+    //
+    //
     m_nAllObjectsNeedToBeDownloadedCount = m_arrayAllObjectsNeedToBeDownloaded.size();
     //
     downloadNextObjectData();
@@ -293,13 +320,24 @@ void CWizSync::startDownloadObjectsData()
 void CWizSync::onDownloadObjectsDataCompleted()
 {
     changeProgress(progressObjectDownloaded);
-
-    addLog("logout");
-    callClientLogout();
+    //
+    stopSync();
 }
 
 void CWizSync::onClientLogout()
 {
+    CWizApi::onClientLogout();
+}
+
+void CWizSync::stopSync()
+{
+    addLog("logout");
+    //
+    if (!m_user.strToken.isEmpty())
+    {
+        callClientLogout();
+    }
+    //
     changeProgress(progressDone);
 
     addLog("sync done");

@@ -33,6 +33,8 @@ private:
     //
     size_t m_nAllObjectsNeedToBeDownloadedCount;
     CWizObjectDataArray m_arrayAllObjectsNeedToBeDownloaded;
+    //
+    bool m_bDownloadAllNotesData;
 private:
     BOOL updateDocument(const WIZDOCUMENTDATABASE& data);
     BOOL updateDocuments(const std::deque<WIZDOCUMENTDATABASE>& arrayDocument);
@@ -99,6 +101,8 @@ protected:
     virtual void uploadNextDocument();
     virtual void uploadNextAttachment();
     ////
+    //
+    virtual void stopSync();
 protected:
     //download document full info
     virtual void downloadNextDocumentFullInfo();
@@ -130,6 +134,8 @@ protected:
     virtual void onStyleGetList(const std::deque<WIZSTYLEDATA>& arrayRet);
     virtual void onDocumentGetList(const std::deque<WIZDOCUMENTDATABASE>& arrayRet);
     virtual void onAttachmentGetList(const std::deque<WIZDOCUMENTATTACHMENTDATAEX>& arrayRet);
+public:
+    void setDownloadAllNotesData(bool b) { m_bDownloadAllNotesData = b; }
 };
 
 

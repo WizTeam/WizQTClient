@@ -88,11 +88,14 @@ CString CWizApiBase::MakeXmlRpcUserId(const CString& strUserId)
 
 CString CWizApiBase::MakeXmlRpcPassword(const CString& strPassword)
 {
-    return strPassword;
+    return "md5." + ::WizMd5StringNoSpaceJava(strPassword.toUtf8());
+    //return strPassword;
 }
 
 BOOL CWizApiBase::callClientLogin(const CString& strUserId, const CString& strPassword)
 {
+    m_user = WIZUSERINFO();
+    //
     CWizApiParamBase param;
     param.AddString("user_id", MakeXmlRpcUserId(strUserId));
     param.AddString("password", MakeXmlRpcPassword(strPassword));
@@ -927,6 +930,8 @@ BOOL WIZUSERINFO::LoadFromXmlRpc(CWizXmlRpcValue& val)
     data.GetInt(_T("user_points"), nUserPoints);
     data.GetStr(_T("sns_list"), strSNSList);
     data.GetInt(_T("enable_group"), bEnableGroup);
+    //
+    data.GetStr(_T("notice"), strNotice);
     //
     if (CWizXmlRpcStructValue* pUser = data.GetStruct(_T("user")))
     {

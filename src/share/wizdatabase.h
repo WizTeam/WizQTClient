@@ -22,6 +22,7 @@ public:
     BOOL IsInDeletedItemsFolder();
     BOOL MoveDocument(CWizFolder* pFolder);
     BOOL AddTag(const WIZTAGDATA& dataTag);
+    BOOL RemoveTag(const WIZTAGDATA& dataTag);
 private:
     CString GetMetaText();
 public:

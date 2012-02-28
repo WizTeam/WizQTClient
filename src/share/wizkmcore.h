@@ -7,9 +7,22 @@
 template<class T>
 BOOL WizKMDataArrayIsEqual(const std::deque<T>& arrayData1, const std::deque<T>& arrayData2)
 {
-    Q_UNUSED(arrayData1);
-    Q_UNUSED(arrayData2);
-    return TRUE;
+    if (arrayData1.size() != arrayData2.size())
+        return FALSE;
+    //
+    std::set<CString> setGUID1;
+    foreach (const T& data, arrayData1)
+    {
+        setGUID1.insert(data.strGUID);
+    }
+    //
+    std::set<CString> setGUID2;
+    foreach (const T& data, arrayData2)
+    {
+        setGUID2.insert(data.strGUID);
+    }
+    //
+    return setGUID1 == setGUID2;
 }
 
 

@@ -119,6 +119,10 @@ BOOL CWizDocument::AddTag(const WIZTAGDATA& dataTag)
     //
     return TRUE;
 }
+BOOL CWizDocument::RemoveTag(const WIZTAGDATA& dataTag)
+{
+    return m_db.DeleteDocumentTag(m_data, dataTag.strGUID);
+}
 
 void CWizDocument::Delete()
 {

@@ -264,12 +264,16 @@ void WizGetNextFileName(CString& strFileName)
 }
 CString WizEncryptPassword(const CString& strPassword)
 {
-    return strPassword;
+    CString str;
+    ::WizBase64Encode(strPassword.toUtf8(), str);
+    return str;
 }
 
 CString WizDecryptPassword(const CString& strEncryptedText)
 {
-    return strEncryptedText;
+    QByteArray data;
+    ::WizBase64Decode(strEncryptedText, data);
+    return CString::fromUtf8(data);
 }
 
 CString WizGetAppPath()

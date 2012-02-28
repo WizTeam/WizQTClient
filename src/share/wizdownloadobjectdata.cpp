@@ -51,3 +51,38 @@ BOOL WizDownloadObjectData(CWizDatabase& db, const WIZOBJECTDATA& data, QWidget*
 {
     return WizDownloadObjectDataDialog::downloadObjectData(db, WIZ_API_URL, data, parent);
 }
+
+BOOL WizPrepareDocument(CWizDatabase& db, const WIZDOCUMENTDATA& data, QWidget* parent)
+{
+    if (!db.IsObjectDataDownloaded(data.strGUID, "document")
+        || !PathFileExists(db.GetDocumentFileName(data.strGUID))
+        )
+    {
+        WIZOBJECTDATA obj;
+        obj.strObjectGUID = data.strGUID;
+        obj.strDisplayName = data.strTitle;
+        obj.eObjectType = wizobjectDocument;
+        if (!WizDownloadObjectData(db, obj, parent))
+            return FALSE;
+    }
+    //
+    return TRUE;
+}
+
+BOOL WizPrepareAttachment(CWizDatabase& db, const WIZDOCUMENTATTACHMENTDATA& data, QWidget* parent)
+{
+    if (!db.IsObjectDataDownloaded(data.strGUID, "attachment")
+        || !PathFileExists(db.GetAttachmentFileName(data.strGUID))
+        )
+    {
+        WIZOBJECTDATA obj;
+        obj.strObjectGUID = data.strGUID;
+        obj.strDisplayName = data.strName;
+        obj.eObjectType = wizobjectDocumentAttachment;
+        if (!WizDownloadObjectData(db, obj, parent))
+            return FALSE;
+    }
+    //
+    return TRUE;
+}
+
