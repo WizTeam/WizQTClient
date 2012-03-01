@@ -55,7 +55,7 @@ public:
     void settingsChanged();
     //
 public slots:
-    void on_titleEdit_textEdited ( const QString & text );
+    void on_titleEdit_editingFinished();
     void on_editDocumentButton_clicked();
     void on_tagsButton_clicked();
     void on_attachmentButton_clicked();

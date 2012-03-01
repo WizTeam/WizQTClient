@@ -50,6 +50,10 @@
             setModified(true);
         }
         function onEditorKeyDown(type, evt) {
+            //
+            if (!isEditing())
+                return;
+            //
             var e = evt;
             if (!e.ctrlKey && !e.altKey && !e.shiftKey) {
                 setModified(true);

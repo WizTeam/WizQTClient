@@ -29,6 +29,7 @@ public:
     bool newDocument();
     void setEditingDocument(bool editing);
     const WIZDOCUMENTDATA& document() { return m_data; }
+    void reloadDocument();
     CWizExplorerApp& app() { return m_app; }
 
 public slots:

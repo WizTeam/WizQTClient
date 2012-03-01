@@ -71,6 +71,7 @@ BOOL WizStringSimpleSplit(const CString& str, char ch, CString& strLeft, CString
 CString WizDateToLocalString(const COleDateTime& t);
 
 CString WizGetAppPath();
+CString WizGetAppFileName();
 CString WizGetResourcesPath();
 CString WizGetDataStorePath();
 CString WizGetSettingsFileName();

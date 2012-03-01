@@ -29,7 +29,17 @@
     <cstring>editTagName</cstring>
    </property>
   </widget>
-  <widget class="QDialogButtonBox" name="buttonBox">
+   <widget class="QLineEdit" name="editTagName">
+     <property name="geometry">
+       <rect>
+         <x>20</x>
+         <y>40</y>
+         <width>361</width>
+         <height>20</height>
+       </rect>
+     </property>
+   </widget>
+   <widget class="QDialogButtonBox" name="buttonBox">
    <property name="geometry">
     <rect>
      <x>40</x>
@@ -43,16 +53,6 @@
    </property>
    <property name="standardButtons">
     <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
-   </property>
-  </widget>
-  <widget class="QLineEdit" name="editTagName">
-   <property name="geometry">
-    <rect>
-     <x>20</x>
-     <y>40</y>
-     <width>361</width>
-     <height>20</height>
-    </rect>
    </property>
   </widget>
  </widget>

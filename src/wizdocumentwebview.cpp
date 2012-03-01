@@ -92,6 +92,11 @@ void CWizDocumentWebView::setEditingDocument(bool editing)
     }
 }
 
+void CWizDocumentWebView::reloadDocument()
+{
+    m_app.database().DocumentFromGUID(m_data.strGUID, m_data);
+}
+
 bool CWizDocumentWebView::viewDocumentInEditor(bool editing)
 {
     ATLASSERT(!m_data.strGUID.IsEmpty());

@@ -2,6 +2,7 @@
 #include "ui_aboutdialog.h"
 
 #include "share/wizmisc.h"
+#include <QFileInfo>
 
 AboutDialog::AboutDialog(QWidget *parent) :
     QDialog(parent),
@@ -11,17 +12,36 @@ AboutDialog::AboutDialog(QWidget *parent) :
     //
     setFixedSize(size());
     //
-    QIcon icon(WizGetSkinResourceFileName("wiznote128"));
+    QPixmap pixmap(WizGetSkinResourceFileName("about_logo"));
+    ui->labelIcon->setPixmap(pixmap);
     //
-    ui->labelIcon->setPixmap(icon.pixmap(128, 128));
-    CString strVersion("\n1.00 (beta)");
 #if defined Q_OS_MAC
-    ui->labelAbout->setText(tr("WizNote for Mac %1").arg(strVersion));
+    CString strProduct(tr("WizNote for Mac"));
 #elif defined Q_OS_LINUX
-    ui->labelAbout->setText(tr("WizNote for Linux %1").arg(strVersion));
+    CString strProduct(tr("WizNote for Linux"));
 #else
-    ui->labelAbout->setText(tr("WizNote for Windows %1").arg(strVersion));
+    CString strProduct(tr("WizNote for Windows"));
 #endif
+    //
+    CString strVersionNumber("1.00");
+    //
+    QFileInfo fi(::WizGetAppFileName());
+    QDateTime t = fi.lastModified();
+    CString strBuildNumber;
+    strBuildNumber.Format("%04d%02d%02d", t.date().year(), t.date().month(), t.date().day());
+    //
+    bool beta = true;
+    CString strVersion(beta ? tr("beta (build %1)") : tr("release (build %1)"));
+    strVersion = strVersion.arg(strBuildNumber);
+    //
+    CString strInfo = WizFormatString3("<span style=\"font-weight:bold;font-size:16pt\">%1</span><br /><span>%2 %3</span>",
+                                       strProduct,
+                                       strVersionNumber,
+                                       strVersion);
+    //
+    ui->labelAbout->setTextFormat(Qt::AutoText);
+    ui->labelAbout->setText(strInfo);
+    //
     ui->labelLink->setOpenExternalLinks(true);
 }
 

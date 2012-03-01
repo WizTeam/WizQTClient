@@ -9380,6 +9380,8 @@ baidu.editor.plugins['serialize'] = function () {
                         children:[]
                     }
                 }
+                /************************
+                //<!--removed by wiznote 
                 if ( node.attributes.src && /^(?:file)/.test( node.attributes.src ) ) {
                     if ( !/(gif|bmp|png|jpg|jpeg)$/.test( node.attributes.src ) ) {
                         return {
@@ -9392,6 +9394,8 @@ baidu.editor.plugins['serialize'] = function () {
                     node.attributes.style = 'width:395px;height:173px;';
                     word_img_flag && (word_img_flag.flag = 1);
                 }
+                // removed by wiznote -->
+                *///////////////////
                 if(browser.ie && browser.version < 7 && me.options.relativePath)
                     node.attributes.orgSrc = node.attributes.src;
                 node.attributes.data_ue_src = node.attributes.data_ue_src || node.attributes.src;

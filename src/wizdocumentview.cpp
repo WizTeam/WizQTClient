@@ -37,6 +37,13 @@ public:
         setPalette(pal);
         //
         m_titleEdit = new QLineEdit(this);
+#ifdef Q_OS_MAC
+        m_titleEdit->setAttribute(Qt::WA_MacShowFocusRect, false);
+        m_titleEdit->setStyleSheet("QLineEdit{margin:4 0 0 0; padding:4 4 4 4;border-color:#ffffff;border-width:1;border-style:solid;}QLineEdit:hover{border-color:#bbbbbb;border-width:1;border-style:solid;}");
+        //m_titleEdit->setAlignment(Qt::AlignVCenter);
+#else
+        m_titleEdit->setStyleSheet("QLineEdit{padding:4 4 4 4;border-color:#ffffff;border-width:1;border-style:solid;}QLineEdit:hover{border-color:#bbbbbb;border-width:1;border-style:solid;}");
+#endif
         //
         m_editIcon = WizLoadSkinIcon("unlock");
         m_commitIcon = WizLoadSkinIcon("lock");
@@ -58,8 +65,11 @@ public:
         layout->addWidget(m_editDocumentButton);
         layout->addWidget(m_tagsButton);
         layout->addWidget(m_attachmentButton);
+        layout->setAlignment(m_titleEdit, Qt::AlignVCenter);
+        layout->setAlignment(m_editDocumentButton, Qt::AlignVCenter);
+        layout->setAlignment(m_tagsButton, Qt::AlignVCenter);
+        layout->setAlignment(m_attachmentButton, Qt::AlignVCenter);
         //
-        m_titleEdit->setStyleSheet("QLineEdit{padding:4 4 4 4;border-color:#ffffff;border-width:1;border-style:solid;}QLineEdit:hover{border-color:#bbbbbb;border-width:1;border-style:solid;}");
     }
 private:
     QLineEdit* m_titleEdit;
@@ -155,7 +165,7 @@ CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
     //
     m_title->setEditingDocument(m_editingDocument);
     //
-    connect(m_title->titleEdit(), SIGNAL(textEdited(QString)), this, SLOT(on_titleEdit_textEdited(QString)));
+    connect(m_title->titleEdit(), SIGNAL(editingFinished()), this, SLOT(on_titleEdit_editingFinished()));
     connect(m_title->editDocumentButton(), SIGNAL(clicked()), this, SLOT(on_editDocumentButton_clicked()));
     connect(m_title->tagsButton(), SIGNAL(clicked()), this, SLOT(on_tagsButton_clicked()));
     connect(m_title->attachmentButton(), SIGNAL(clicked()), this, SLOT(on_attachmentButton_clicked()));
@@ -294,9 +304,9 @@ void CWizDocumentView::settingsChanged()
     setViewMode(WizGetDefaultNoteView());
 }
 
-void CWizDocumentView::on_titleEdit_textEdited(const QString & text )
+void CWizDocumentView::on_titleEdit_editingFinished()
 {
-    QString title = text;
+    QString title = m_title->titleEdit()->text();
     if (title.length() > 255)
     {
         title = title.left(255);
@@ -369,6 +379,7 @@ void CWizDocumentView::on_document_modified(const WIZDOCUMENTDATA& documentOld, 
     //
     if (document().strGUID == documentNew.strGUID)
     {
+        m_web->reloadDocument();
         m_title->updateInformation(m_db, document());
     }
 }

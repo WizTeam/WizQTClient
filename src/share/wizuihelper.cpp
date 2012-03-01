@@ -19,8 +19,8 @@ QWidget* createSearchWidget(CWizSearchBox* searchBox)
     //
     QLineEdit* editSearch = new QLineEdit(widget);
     //
-    iconLabel->setStyleSheet("border-width:0;border-style:outset");
-    editSearch->setStyleSheet("border-width:0;border-style:outset");
+    iconLabel->setStyleSheet("QLabel{border-width:0;border-style:outset}");
+    editSearch->setStyleSheet("QLineEdit{border-width:0;border-style:outset}");
     //
     QHBoxLayout* layout = new QHBoxLayout(widget);
     widget->setLayout(layout);
@@ -36,7 +36,8 @@ QWidget* createSearchWidget(CWizSearchBox* searchBox)
     widget->setMinimumHeight(std::max<int>(16, editSearch->sizeHint().height()));
     widget->setMinimumWidth(250);
     //
-    widget->setStyleSheet("QWidget{background-color:#ffffff;border-color:#bbbbbb;border-width:1;border-style:solid}");
+    widget->setObjectName("WizSearchBoxClient");
+    widget->setStyleSheet("QWidget#WizSearchBoxClient{background-color:#ffffff;border-color:#bbbbbb;border-width:1;border-style:solid}");
     //
     CWizSearchBox::connect(editSearch, SIGNAL(editingFinished()), searchBox, SLOT(on_search_editingFinished()));
     CWizSearchBox::connect(editSearch, SIGNAL(textEdited(QString)), searchBox, SLOT(on_search_edited(QString)));
@@ -98,3 +99,43 @@ CWizVerSpacer::CWizVerSpacer(QWidget* parent)
     setSizePolicy(sizePolicy);
 }
 
+
+
+#ifndef Q_OS_MAC
+
+class CWizSplitterHandle : public QSplitterHandle
+{
+    CWizSplitter* m_splitter;
+public:
+    CWizSplitterHandle(Qt::Orientation orientation, CWizSplitter *parent);
+    void paintEvent(QPaintEvent *);
+};
+
+
+
+CWizSplitterHandle::CWizSplitterHandle(Qt::Orientation orientation, CWizSplitter *parent)
+    : QSplitterHandle(orientation, parent)
+    , m_splitter(parent)
+{
+}
+
+// Paint the horizontal handle as a gradient, paint
+// the vertical handle as a line.
+void CWizSplitterHandle::paintEvent(QPaintEvent *)
+{
+    QPainter painter(this);
+    //
+    painter.fillRect(QRect(0, 0, width(), height()), m_splitter->splitterColor());
+}
+
+QSplitterHandle *CWizSplitter::createHandle()
+{
+    return new CWizSplitterHandle(orientation(), this);
+}
+
+void CWizSplitter::setSplitterColor(const QColor& color)
+{
+    m_splitterColor = color;
+}
+
+#endif

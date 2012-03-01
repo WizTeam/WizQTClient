@@ -9,13 +9,12 @@
         <translation>关于为知笔记</translation>
     </message>
     <message>
-        <location filename="aboutdialog.ui" line="58"/>
         <source>WizNote 1.00 (beta)</source>
         <oldsource>WizNote 0.01</oldsource>
-        <translation>为知笔记 1.00 (测试版)</translation>
+        <translation type="obsolete">为知笔记 1.00 (测试版)</translation>
     </message>
     <message>
-        <location filename="aboutdialog.ui" line="74"/>
+        <location filename="aboutdialog.ui" line="71"/>
         <source>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
@@ -25,18 +24,31 @@ p, li { white-space: pre-wrap; }
     </message>
     <message>
         <location filename="aboutdialog.cpp" line="19"/>
-        <source>WizNote for Mac %1</source>
-        <translation>为知笔记 Mac版 %1</translation>
+        <source>WizNote for Mac</source>
+        <oldsource>WizNote for Mac %1</oldsource>
+        <translation>为知笔记 Mac版</translation>
     </message>
     <message>
         <location filename="aboutdialog.cpp" line="21"/>
-        <source>WizNote for Linux %1</source>
-        <translation>为知笔记 Linux版 %1</translation>
+        <source>WizNote for Linux</source>
+        <oldsource>WizNote for Linux %1</oldsource>
+        <translation>为知笔记 Linux版</translation>
     </message>
     <message>
         <location filename="aboutdialog.cpp" line="23"/>
-        <source>WizNote for Windows %1</source>
-        <translation>为知笔记 Windows版 %1</translation>
+        <source>WizNote for Windows</source>
+        <oldsource>WizNote for Windows %1</oldsource>
+        <translation>为知笔记 Windows版</translation>
+    </message>
+    <message>
+        <location filename="aboutdialog.cpp" line="34"/>
+        <source>beta (build %1)</source>
+        <translation>测试版 (build %1)</translation>
+    </message>
+    <message>
+        <location filename="aboutdialog.cpp" line="34"/>
+        <source>release (build %1)</source>
+        <translation>正式版 (build %1)</translation>
     </message>
 </context>
 <context>
@@ -334,22 +346,22 @@ p, li { white-space: pre-wrap; }
         <translation>为知笔记</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="128"/>
+        <location filename="mainwindow.cpp" line="132"/>
         <source>Search</source>
         <translation>搜索</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="128"/>
+        <location filename="mainwindow.cpp" line="132"/>
         <source>Search your notes</source>
         <translation>搜索您的笔记</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="383"/>
+        <location filename="mainwindow.cpp" line="387"/>
         <source>New note</source>
         <translation>新建笔记</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="669"/>
+        <location filename="mainwindow.cpp" line="674"/>
         <source>Saving note...</source>
         <translation>正在保存笔记...</translation>
     </message>
@@ -417,7 +429,7 @@ p, li { white-space: pre-wrap; }
         <location filename="wizactions.cpp" line="40"/>
         <source>Delete Note</source>
         <oldsource>Delete</oldsource>
-        <translation>删除</translation>
+        <translation type="unfinished">删除笔记</translation>
     </message>
     <message>
         <location filename="wizactions.cpp" line="41"/>
@@ -476,67 +488,67 @@ p, li { white-space: pre-wrap; }
         <translation>不能打开帐号</translation>
     </message>
     <message>
-        <location filename="share/wizmisc.cpp" line="669"/>
+        <location filename="share/wizmisc.cpp" line="677"/>
         <source>%1 TB</source>
         <translation>%1 TB</translation>
     </message>
     <message>
-        <location filename="share/wizmisc.cpp" line="671"/>
+        <location filename="share/wizmisc.cpp" line="679"/>
         <source>%1 GB</source>
         <translation>%1 GB</translation>
     </message>
     <message>
-        <location filename="share/wizmisc.cpp" line="673"/>
+        <location filename="share/wizmisc.cpp" line="681"/>
         <source>%1 MB</source>
         <translation>%1 MB</translation>
     </message>
     <message>
-        <location filename="share/wizmisc.cpp" line="675"/>
+        <location filename="share/wizmisc.cpp" line="683"/>
         <source>%1 KB</source>
         <translation>%1 KB</translation>
     </message>
     <message>
-        <location filename="share/wizmisc.cpp" line="676"/>
+        <location filename="share/wizmisc.cpp" line="684"/>
         <source>%1 byte(s)</source>
         <translation>%1 B</translation>
     </message>
     <message>
-        <location filename="share/wizobject.h" line="406"/>
+        <location filename="share/wizobject.h" line="408"/>
         <source>$Public Notes</source>
         <translation>$完全公开的笔记</translation>
     </message>
     <message>
-        <location filename="share/wizobject.h" line="407"/>
+        <location filename="share/wizobject.h" line="412"/>
         <source>$Share with friends</source>
         <translation>$分享给朋友的笔记</translation>
     </message>
     <message>
-        <location filename="wizdocumentview.cpp" line="87"/>
+        <location filename="wizdocumentview.cpp" line="97"/>
         <source>Save &amp; Switch to Reading View</source>
         <translation>保存并切换到阅读视图</translation>
     </message>
     <message>
-        <location filename="wizdocumentview.cpp" line="88"/>
+        <location filename="wizdocumentview.cpp" line="98"/>
         <source>Switch to Reading View</source>
         <translation>切换到阅读视图</translation>
     </message>
     <message>
-        <location filename="wizdocumentview.cpp" line="89"/>
+        <location filename="wizdocumentview.cpp" line="99"/>
         <source>Switch to Editing View</source>
         <translation>切换到编辑视图</translation>
     </message>
     <message>
-        <location filename="wizdocumentview.cpp" line="116"/>
+        <location filename="wizdocumentview.cpp" line="126"/>
         <source>Tags (%1)</source>
         <translation>标签 (%1)</translation>
     </message>
     <message>
-        <location filename="wizdocumentview.cpp" line="116"/>
+        <location filename="wizdocumentview.cpp" line="126"/>
         <source>Tags (%1): %2</source>
         <translation>标签 (%1): (%2)</translation>
     </message>
     <message>
-        <location filename="wizdocumentview.cpp" line="125"/>
+        <location filename="wizdocumentview.cpp" line="135"/>
         <source>Attachments (%1)</source>
         <translation>附件 (%1)</translation>
     </message>

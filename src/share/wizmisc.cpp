@@ -1,4 +1,5 @@
 #include "wizmisc.h"
+#include "wizsettings.h"
 #include <QDir>
 #include <QApplication>
 #include <QFile>
@@ -282,6 +283,14 @@ CString WizGetAppPath()
     ::WizPathAddBackslash(strPath);
     return strPath;
 }
+
+CString WizGetAppFileName()
+{
+    CString strPath = QApplication::applicationFilePath();
+    return strPath;
+}
+
+
 CString WizGetResourcesPath()
 {
 #ifdef Q_OS_LINUX
@@ -2457,7 +2466,11 @@ CString WizStringFromBase64(const CString& strBase64)
 
 CString WizGetSkinPath()
 {
+#ifdef Q_OS_MAC
     return ::WizGetResourcesPath() + "skins/default/";
+#else
+    return ::WizGetResourcesPath() + "skins/default/";
+#endif
 }
 
 CString WizGetSystemCustomSkinPath()

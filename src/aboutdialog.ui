@@ -46,16 +46,13 @@
    <property name="geometry">
     <rect>
      <x>190</x>
-     <y>10</y>
-     <width>321</width>
+     <y>20</y>
+     <width>261</width>
      <height>91</height>
     </rect>
    </property>
-   <property name="styleSheet">
-    <string notr="true">font-weight:bold;font-size:14pt</string>
-   </property>
    <property name="text">
-    <string>WizNote 1.00 (beta)</string>
+    <string/>
    </property>
    <property name="alignment">
     <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>

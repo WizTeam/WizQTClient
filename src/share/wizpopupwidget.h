@@ -15,7 +15,8 @@ public:
     virtual QSize sizeHint() const;
     virtual QRect getClientRect() const;
 private:
-    QVector<QPoint> m_points;
+    QVector<QPoint> m_pointsRegion;
+    QVector<QPoint> m_pointsPolygon;
     bool m_leftAlign;
 protected:
 #ifndef Q_OS_MAC
