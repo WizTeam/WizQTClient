@@ -31,6 +31,7 @@ CWizTagListWidget::CWizTagListWidget(CWizDatabase& db, QWidget* parent)
     //
     layoutMain->addItem(layoutTitle);
     layoutMain->addWidget(m_scroll);
+    layoutMain->addWidget(new CWizVerSpacer(this));
     //
     m_scroll->setMaximumHeight(400);
     //
@@ -51,9 +52,6 @@ void CWizTagListWidget::setDocument(const WIZDOCUMENTDATA& data)
     QLayout* layout = new QBoxLayout(QBoxLayout::TopToBottom, newWidget);
     newWidget->setLayout(layout);
     //
-    m_scroll->setWidget(newWidget);
-    m_scroll->setWidgetResizable(true);
-
     m_document = data;
     //
     CWizTagDataArray arrayTag;
@@ -74,9 +72,12 @@ void CWizTagListWidget::setDocument(const WIZDOCUMENTDATA& data)
         connect(checkBox, SIGNAL(tagChecked(CWizTagCheckBox*,int)), this, SLOT(on_tagCheckBox_checked(CWizTagCheckBox*,int)));
     }
     //
-    layout->addWidget(new CWizVerSpacer(newWidget));
-    //
     updateTagsText();
+    //
+    newWidget->adjustSize();
+    //
+    m_scroll->setWidget(newWidget);
+    m_scroll->setWidgetResizable(false);
 }
 
 void CWizTagListWidget::updateTagsText()
