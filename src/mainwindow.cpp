@@ -69,15 +69,6 @@ MainWindow::MainWindow(CWizDatabase& db, QWidget *parent) :
     initClient();
     initStatusBar();
     //
-    connect(m_category, SIGNAL(itemSelectionChanged()), this, SLOT(on_category_itemSelectionChanged()));
-    connect(m_documents, SIGNAL(itemSelectionChanged()), this, SLOT(on_documents_itemSelectionChanged()));
-    //
-    m_sync.setDownloadAllNotesData(::WizIsDownloadAllNotesData());
-    m_syncTimer->setInterval(3 * 60 * 1000);    //3 minutes
-    connect(m_syncTimer, SIGNAL(timeout()), this, SLOT(on_syncTimer_timeout()));
-    QTimer::singleShot(30 * 1000, this, SLOT(on_syncTimer_timeout()));  //30 seconds
-    //
-    m_category->init();
 }
 
 MainWindow::~MainWindow()
@@ -283,6 +274,19 @@ void MainWindow::resetNotice()
     //
     m_labelNotice->setText(strText);
 #endif
+}
+
+void MainWindow::init()
+{
+    connect(m_category, SIGNAL(itemSelectionChanged()), this, SLOT(on_category_itemSelectionChanged()));
+    connect(m_documents, SIGNAL(itemSelectionChanged()), this, SLOT(on_documents_itemSelectionChanged()));
+    //
+    m_sync.setDownloadAllNotesData(::WizIsDownloadAllNotesData());
+    m_syncTimer->setInterval(3 * 60 * 1000);    //3 minutes
+    connect(m_syncTimer, SIGNAL(timeout()), this, SLOT(on_syncTimer_timeout()));
+    QTimer::singleShot(30 * 1000, this, SLOT(on_syncTimer_timeout()));  //30 seconds
+    //
+    m_category->init();
 }
 
 void MainWindow::closeEvent(QCloseEvent *e)

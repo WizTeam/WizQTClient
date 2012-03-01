@@ -73,13 +73,27 @@ int main(int argc, char *argv[])
     //
     MainWindow w(db);
     w.show();
+    //
+    w.init();
 
     int ret = a.exec();
     //
+    //
+    //
+    //////////////////////////////
+    //delete temp files
+    {
+        CString strTempPath = ::WizGlobal()->GetTempPath();
+        ::WizDeleteAllFilesInFolder(strTempPath);
+    }
+    //
+    //
+    //restart
     if (w.isRestart())
     {
         QProcess::startDetached(argv[0], QStringList());
     }
+    //
 
     //
     return ret;

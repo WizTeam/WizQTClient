@@ -2119,7 +2119,29 @@ BOOL CIndex::GetDocumentTags(const CString& strDocumentGUID, CWizStdStringArray&
     CString strWhere = WizFormatString1(_T("DOCUMENT_GUID='%1'"), strDocumentGUID);
 	CString strSQL = FormatQuerySQL(TABLE_NAME_WIZ_DOCUMENT_TAG, FIELD_LIST_WIZ_DOCUMENT_TAG, strWhere); 
 	//
-	return SQLToStringArray(strSQL, 1, arrayTagGUID);
+    if (!SQLToStringArray(strSQL, 1, arrayTagGUID))
+        return FALSE;
+    //
+    size_t tagCount = arrayTagGUID.size();
+    if (tagCount == 0)
+        return TRUE;
+    //
+    WIZDOCUMENTDATA dataDocument;
+    if (!DocumentFromGUID(strDocumentGUID, dataDocument))
+        return FALSE;
+    //
+    for (intptr_t i = tagCount - 1; i >= 0; i--)
+    {
+        WIZTAGDATA temp;
+        if (!TagFromGUID(arrayTagGUID[i], temp))
+        {
+            DeleteDocumentTag(dataDocument, arrayTagGUID[i]);
+            arrayTagGUID.erase(arrayTagGUID.begin() + i);
+            continue;
+        }
+    }
+    //
+    return TRUE;
 }
 
 CString CIndex::GetDocumentTagsText(const CString& strDocumentGUID)

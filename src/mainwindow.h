@@ -95,6 +95,7 @@ private:
     void resetNotice();
 
 public:
+    virtual void init();
     virtual void closeEvent(QCloseEvent *);
     virtual QSize sizeHint() const;
 public:

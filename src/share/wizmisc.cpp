@@ -74,9 +74,25 @@ void WizEnsurePathExists(const CString& strPath)
 
 BOOL WizDeleteAllFilesInFolder(const CString& strPath)
 {
-    Q_UNUSED(strPath);
-    return FALSE;
+    CWizStdStringArray arrayFile;
+    ::WizEnumFiles(strPath, "*", arrayFile, EF_INCLUDESUBDIR);
+    foreach (const QString& fileName, arrayFile)
+    {
+        ::WizDeleteFile(fileName);
+    }
+    //
+    CWizStdStringArray arrayFolder;
+    ::WizEnumFolders(strPath, arrayFolder, EF_INCLUDESUBDIR);
+    std::sort(arrayFolder.begin(), arrayFolder.end());
+    size_t folderCount = arrayFolder.size();
+    for (intptr_t i = folderCount - 1; i >= 0; i--)
+    {
+        CString strPath = arrayFolder[i];
+        ::WizDeleteFolder(strPath);
+    }
+    return TRUE;
 }
+
 
 CString WizExtractFilePath(const CString& strFileName)
 {
@@ -161,13 +177,13 @@ void WizEnumFiles(const CString& path, const CString& strExts, CWizStdStringArra
     if (!bIncludeSubDir)
         return;
     //
-    QDir::Filters filtersDir = QDir::Dirs;
-    QStringList dirs = dir.entryList(filtersDir);
-    for (QStringList::const_iterator it = dirs.begin();
-        it != dirs.end();
+    CWizStdStringArray arrayFolder;
+    WizEnumFolders(strPath, arrayFolder, 0);
+    for (CWizStdStringArray::const_iterator it = arrayFolder.begin();
+        it != arrayFolder.end();
         it++)
     {
-        WizEnumFiles(strPath, strExts, arrayFiles, uFlags);
+        WizEnumFiles(*it, strExts, arrayFiles, uFlags);
     }
 }
 
@@ -188,19 +204,19 @@ void WizEnumFolders(const CString& path, CWizStdStringArray& arrayFolders, UINT 
         it != dirs.end();
         it++)
     {
-        arrayFolders.push_back(strPath + *it + "/");
+        CString strName = *it;
+        if (strName == "."
+            || strName == "..")
+            continue;
+        //
+        CString strSubPath = strPath + strName + "/";
+        arrayFolders.push_back(strSubPath);
+        //
+        if (!bIncludeSubDir)
+            continue;
+        //
+        WizEnumFolders(strSubPath, arrayFolders, uFlags);
     }
-    //
-    if (!bIncludeSubDir)
-        return;
-    //
-    for (QStringList::const_iterator it = dirs.begin();
-        it != dirs.end();
-        it++)
-    {
-        WizEnumFolders(strPath, arrayFolders, uFlags);
-    }
-    //
 }
 BOOL WizCopyFile(const CString& strSrcFileName, const CString& strDestFileName, BOOL bFailIfExists)
 {
@@ -2613,7 +2629,11 @@ void WizDeleteFolder(const CString& strPath)
 {
     QDir dir(strPath);
     dir.cdUp();
-    dir.rmdir(WizExtractFileName(strPath));
+    //
+    if (dir.isRoot())
+        return;
+    //
+    dir.rmdir(::WizExtractLastPathName(strPath));
 }
 void WizDeleteFile(const CString& strFileName)
 {
