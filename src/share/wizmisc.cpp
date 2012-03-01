@@ -2475,7 +2475,7 @@ CString WizStringFromBase64(const CString& strBase64)
 CString WizGetSkinName()
 {
 #ifdef Q_OS_MAC
-    return "default"
+    return "default";
 #else
     static CString strSkinName = WizGetString("skin", "Name", "default");
     if (strSkinName.isEmpty())
