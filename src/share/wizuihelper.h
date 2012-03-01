@@ -53,12 +53,15 @@ public:
 class CWizSplitter : public QSplitter
 {
 public:
-    CWizSplitter(QWidget* parent = 0) : QSplitter(parent) {}
+    CWizSplitter(QWidget* parent = 0);
     QSplitterHandle *createHandle();
 #ifndef Q_OS_MAC
 private:
+    int m_splitterWidth;
     QColor m_splitterColor;
 public:
+    void setSplitterWidth(int width);
+    int splitterWidth() const { return m_splitterWidth; }
     void setSplitterColor(const QColor& color);
     QColor splitterColor() const { return m_splitterColor; }
 #endif

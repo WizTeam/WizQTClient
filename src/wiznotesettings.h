@@ -15,7 +15,8 @@ void WizSetDefaultNoteView(WizDocumentViewMode view);
 enum WizOptionsType
 {
     wizoptionsNoteView,
-    wizoptionsSync
+    wizoptionsSync,
+    wizoptionsSkin
 };
 
 bool WizIsAutoSync();

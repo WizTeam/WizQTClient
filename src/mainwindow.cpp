@@ -178,6 +178,7 @@ void MainWindow::initToolBar()
         //
         connect(buttonOptions, SIGNAL(clicked()), this, SLOT(on_actionOptions_triggered()));
     }
+    m_toolBar->addWidget(new CWizFixedSpacer(QSize(10, 1), m_toolBar));
     m_toolBar->addAction(m_actions->actionFromName("actionPopupMainMenu"));
     //
     m_toolBar->addWidget(new CWizFixedSpacer(QSize(20, 1), m_toolBar));
@@ -208,11 +209,8 @@ void MainWindow::initClient()
     //
 
 #ifndef Q_OS_MAC
-    int clientMarginLeft = ::WizGetSkinInt("Client", "MarginLeft", 4);
-    int clientMarginTop = ::WizGetSkinInt("Client", "MarginTop", 4);
-    int clientMarginRight = ::WizGetSkinInt("Client", "MarginRight", 4);
-    int clientMarginBottom = ::WizGetSkinInt("Client", "MarginBottom", 4);
-    client->setContentsMargins(clientMarginLeft, clientMarginTop, clientMarginRight, clientMarginBottom);
+    WizInitWidgetMargins(client, "Client");
+    WizInitWidgetMargins(m_doc, "Document");
 #endif
     //
     QBoxLayout* layout = new QBoxLayout(QBoxLayout::LeftToRight, client);
@@ -223,15 +221,20 @@ void MainWindow::initClient()
     layout->addWidget(splitter);
     //
 #ifndef Q_OS_MAC
-    int splitterWidth = ::WizGetSkinInt("splitter", "Width", splitter->handleWidth());
-    splitter->setHandleWidth(splitterWidth);
+    int splitterWidth = ::WizGetSkinInt("splitter", "Width", splitter->splitterWidth());
+    splitter->setSplitterWidth(splitterWidth);
     QColor defSplitterColor = client->palette().color(QPalette::Window);
     QColor splitterColor = ::WizGetSkinColor("splitter", "Color", defSplitterColor);
     splitter->setSplitterColor(splitterColor);
 #endif
     //
+#ifndef Q_OS_MAC
+    splitter->addWidget(WizInitWidgetMarginsEx(m_category, "Category"));
+    splitter->addWidget(WizInitWidgetMarginsEx(m_documents, "Documents"));
+#else
     splitter->addWidget(m_category);
     splitter->addWidget(m_documents);
+#endif
     splitter->addWidget(m_doc);
     //
     splitter->setStretchFactor(0, 0);
@@ -434,6 +437,9 @@ void MainWindow::on_actionOptions_triggered()
     {
         m_options = new CWizOptionsWidget(this);
         connect(m_options, SIGNAL(settingsChanged(WizOptionsType)), this, SLOT(on_options_settingsChanged(WizOptionsType)));
+#ifndef Q_OS_MAC
+        connect(m_options, SIGNAL(restartForSettings()), this, SLOT(on_options_restartForSettings()));
+#endif
     }
     //
 #ifdef Q_OS_MAC
@@ -554,6 +560,14 @@ void MainWindow::on_options_settingsChanged(WizOptionsType type)
         m_sync.setDownloadAllNotesData(::WizIsDownloadAllNotesData());
     }
 }
+#ifndef Q_OS_MAC
+void MainWindow::on_options_restartForSettings()
+{
+    m_bRestart = true;
+    QTimer::singleShot(100, this, SLOT(close()));
+    //QApplication::postEvent(this, new QCloseEvent());
+}
+#endif
 
 void MainWindow::on_syncTimer_timeout()
 {

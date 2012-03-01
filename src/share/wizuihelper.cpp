@@ -100,6 +100,16 @@ CWizVerSpacer::CWizVerSpacer(QWidget* parent)
 }
 
 
+CWizSplitter::CWizSplitter(QWidget* parent /*= 0*/)
+    : QSplitter(parent)
+#ifndef Q_OS_MAC
+    , m_splitterWidth(handleWidth())
+    , m_splitterColor(palette().color(QPalette::Window))
+#endif
+{
+}
+
+
 
 #ifndef Q_OS_MAC
 
@@ -125,12 +135,23 @@ void CWizSplitterHandle::paintEvent(QPaintEvent *)
 {
     QPainter painter(this);
     //
-    painter.fillRect(QRect(0, 0, width(), height()), m_splitter->splitterColor());
+    QRect rc(0, 0, width(), height());
+    int splitterWidth = m_splitter->splitterWidth();
+    rc.setLeft((rc.width() - splitterWidth) / 2);
+    rc.setRight(rc.left() + splitterWidth - 1);
+    //
+    painter.fillRect(rc, m_splitter->splitterColor());
 }
 
 QSplitterHandle *CWizSplitter::createHandle()
 {
     return new CWizSplitterHandle(orientation(), this);
+}
+
+
+void CWizSplitter::setSplitterWidth(int width)
+{
+    m_splitterWidth = width;
 }
 
 void CWizSplitter::setSplitterColor(const QColor& color)

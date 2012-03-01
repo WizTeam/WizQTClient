@@ -90,6 +90,13 @@ CString WizExtractFilePath(const CString& strFileName)
 }
 
 
+CString WizExtractLastPathName(const CString& strFileName)
+{
+    CString strPath = ::WizPathRemoveBackslash2(strFileName);
+    return ::WizExtractFileName(strPath);
+}
+
+
 CString WizExtractFileName(const CString& strFileName)
 {
     CString str = strFileName;
@@ -2464,14 +2471,86 @@ CString WizStringFromBase64(const CString& strBase64)
     return CString::fromUtf8(arrayData);
 }
 
-CString WizGetSkinPath()
+
+CString WizGetSkinName()
 {
 #ifdef Q_OS_MAC
-    return ::WizGetResourcesPath() + "skins/default/";
+    return "default"
 #else
-    return ::WizGetResourcesPath() + "skins/default/";
+    static CString strSkinName = WizGetString("skin", "Name", "default");
+    if (strSkinName.isEmpty())
+        strSkinName = "default";
+    //
+    CString strPath = ::WizGetResourcesPath() + "skins/" + strSkinName + "/";
+    if (!PathFileExists(strPath))
+    {
+        strSkinName = "default";
+    }
+    //
+    return strSkinName;
 #endif
 }
+
+#ifndef Q_OS_MAC
+void WizSetSkinName(const CString& strName)
+{
+    WizSetString("skin", "Name", strName);
+}
+void WizSetSkinDisplayName(const CString& strDisplayName)
+{
+    std::map<CString, CString> skins;
+    typedef std::map<CString, CString>::value_type SKIN;
+    ::WizGetSkins(skins);
+    foreach (const SKIN& skin, skins)
+    {
+        if (strDisplayName == skin.second)
+        {
+            WizSetSkinName(skin.first);
+            return;
+        }
+    }
+}
+
+#endif
+
+
+CString WizGetSkinPath()
+{
+    return WizGetResourcesPath() + "skins/" + WizGetSkinName() + "/";
+}
+
+#ifndef Q_OS_MAC
+void WizGetSkins(std::map<CString, CString>& skins)
+{
+    CWizStdStringArray folders;
+    ::WizEnumFolders(::WizGetResourcesPath() + "skins/", folders, 0);
+    //
+    QString localName = QLocale::system().name();
+
+    foreach (const CString& path, folders)
+    {
+        CString strSkinFileName = path + "skin.ini";
+        if (!PathFileExists(strSkinFileName))
+            continue;
+        //
+        CString strSkinName = WizExtractLastPathName(path);
+        //
+        CWizSettings settings(strSkinFileName);
+        CString strSkinDisplayName = settings.GetString("Common", "Name_" + localName);
+        if (strSkinDisplayName.IsEmpty())
+        {
+            strSkinDisplayName = settings.GetString("Common", "Name");
+        }
+        if (strSkinDisplayName.IsEmpty())
+        {
+            strSkinDisplayName = strSkinName;
+        }
+        //
+        skins[strSkinName] = strSkinDisplayName;
+    }
+}
+
+#endif
 
 CString WizGetSystemCustomSkinPath()
 {

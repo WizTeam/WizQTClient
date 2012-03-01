@@ -152,6 +152,9 @@ public slots:
     void on_search_doSearch(const QString& keywords);
     //
     void on_options_settingsChanged(WizOptionsType type);
+#ifndef Q_OS_MAC
+    void on_options_restartForSettings();
+#endif
     //
     void on_syncTimer_timeout();
 

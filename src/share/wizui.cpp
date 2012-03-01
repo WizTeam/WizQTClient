@@ -1,8 +1,10 @@
 #include "wizui.h"
 
 #include <QPainter>
+#include <QWidget>
+#include <QBoxLayout>
 
-
+#include "wizsettings.h"
 /////////////////////////////////////////////////////////////////////////////
 
 
@@ -98,4 +100,32 @@ void CWizSkin9GridImage::Draw(QPainter* p, QRect rc, int nAlpha) const
         }
     }
 }
+
+
+
+void WizInitWidgetMargins(QWidget* widget, const QString& name)
+{
+    QMargins def = widget->contentsMargins();
+    int clientMarginLeft = ::WizGetSkinInt(name, "MarginLeft", def.left());
+    int clientMarginTop = ::WizGetSkinInt(name, "MarginTop", def.top());
+    int clientMarginRight = ::WizGetSkinInt(name, "MarginRight", def.right());
+    int clientMarginBottom = ::WizGetSkinInt(name, "MarginBottom", def.bottom());
+    widget->setContentsMargins(clientMarginLeft, clientMarginTop, clientMarginRight, clientMarginBottom);
+}
+
+
+QWidget* WizInitWidgetMarginsEx(QWidget* widget, const QString& name)
+{
+    QWidget* wrap = new QWidget(widget->parentWidget());
+    QLayout* layout = new QBoxLayout(QBoxLayout::LeftToRight, wrap);
+    wrap->setLayout(layout);
+    layout->setMargin(0);
+    //
+    WizInitWidgetMargins(wrap, name);
+    //
+    layout->addWidget(widget);
+    //
+    return wrap;
+}
+
 

@@ -222,40 +222,50 @@ p, li { white-space: pre-wrap; }
 <context>
     <name>CWizOptionsWidget</name>
     <message>
-        <location filename="wizoptionswidget.cpp" line="20"/>
+        <location filename="wizoptionswidget.cpp" line="26"/>
         <source>Default note view</source>
         <translation>預設筆記檢視</translation>
     </message>
     <message>
-        <location filename="wizoptionswidget.cpp" line="22"/>
+        <location filename="wizoptionswidget.cpp" line="28"/>
         <source>Auto (Keep view state)</source>
         <oldsource>&amp;Auto (Keep view state)</oldsource>
         <translation>自動 (保存檢視狀態)</translation>
     </message>
     <message>
-        <location filename="wizoptionswidget.cpp" line="23"/>
+        <location filename="wizoptionswidget.cpp" line="29"/>
         <source>Always open note in Reading-View</source>
         <translation>總是在閲讀檢視中打開筆記</translation>
     </message>
     <message>
-        <location filename="wizoptionswidget.cpp" line="24"/>
+        <location filename="wizoptionswidget.cpp" line="30"/>
         <source>Always open note in Editing-View</source>
         <translation>總是在編輯檢視中打開筆記</translation>
     </message>
     <message>
-        <location filename="wizoptionswidget.cpp" line="47"/>
+        <location filename="wizoptionswidget.cpp" line="53"/>
         <source>Sync</source>
         <translation>同步</translation>
     </message>
     <message>
-        <location filename="wizoptionswidget.cpp" line="49"/>
+        <location filename="wizoptionswidget.cpp" line="55"/>
         <source>Auto sync</source>
         <translation>自動同步</translation>
     </message>
     <message>
-        <location filename="wizoptionswidget.cpp" line="50"/>
+        <location filename="wizoptionswidget.cpp" line="56"/>
         <source>Download all notes data</source>
         <translation>下載所有筆記數據</translation>
+    </message>
+    <message>
+        <location filename="wizoptionswidget.cpp" line="67"/>
+        <source>Skin</source>
+        <translation>界面</translation>
+    </message>
+    <message>
+        <location filename="wizoptionswidget.cpp" line="76"/>
+        <source>Restart to apply the new skin</source>
+        <translation>重新啓動應用新的界面</translation>
     </message>
 </context>
 <context>
@@ -318,12 +328,12 @@ p, li { white-space: pre-wrap; }
         <translation>搜索您的筆記</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="387"/>
+        <location filename="mainwindow.cpp" line="403"/>
         <source>New note</source>
         <translation>新建筆記</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="674"/>
+        <location filename="mainwindow.cpp" line="701"/>
         <source>Saving note...</source>
         <translation>正在保存筆記...</translation>
     </message>
@@ -448,27 +458,27 @@ p, li { white-space: pre-wrap; }
         <translation>搜索 %1 結果</translation>
     </message>
     <message>
-        <location filename="share/wizmisc.cpp" line="677"/>
+        <location filename="share/wizmisc.cpp" line="685"/>
         <source>%1 TB</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="share/wizmisc.cpp" line="679"/>
+        <location filename="share/wizmisc.cpp" line="687"/>
         <source>%1 GB</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="share/wizmisc.cpp" line="681"/>
+        <location filename="share/wizmisc.cpp" line="689"/>
         <source>%1 MB</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="share/wizmisc.cpp" line="683"/>
+        <location filename="share/wizmisc.cpp" line="691"/>
         <source>%1 KB</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="share/wizmisc.cpp" line="684"/>
+        <location filename="share/wizmisc.cpp" line="692"/>
         <source>%1 byte(s)</source>
         <translation></translation>
     </message>

@@ -78,7 +78,7 @@ int main(int argc, char *argv[])
     //
     if (w.isRestart())
     {
-        QProcess::execute(argv[0], QStringList());
+        QProcess::startDetached(argv[0], QStringList());
     }
 
     //

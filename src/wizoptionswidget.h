@@ -4,21 +4,34 @@
 #include "share/wizpopupwidget.h"
 #include "wiznotesettings.h"
 
+#ifndef Q_OS_MAC
+class QLabel;
+#endif
 
 class CWizOptionsWidget : public CWizPopupWidget
 {
     Q_OBJECT
 public:
     CWizOptionsWidget(QWidget* parent);
-    //
+private:
+#ifndef Q_OS_MAC
+    QLabel* m_labelRestartForSkin;
+#endif
 public slots:
     void on_radioAuto_clicked(bool checked);
     void on_radioAlwaysReading_clicked(bool checked);
     void on_radioAlwaysEditing_clicked(bool checked);
     void on_checkAutoSync_clicked(bool checked);
     void on_checkDownloadAllNotesData_clicked(bool checked);
+#ifndef Q_OS_MAC
+    void on_comboSkin_currentIndexChanged(const QString& text);
+    void on_labelRestartForSkin_linkActivated(const QString& text);
+#endif
 Q_SIGNALS:
     void settingsChanged(WizOptionsType type);
+#ifndef Q_OS_MAC
+    void restartForSettings();
+#endif
 };
 
 #endif // WIZOPTIONSWIDGET_H

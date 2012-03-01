@@ -4,12 +4,18 @@
 #include <QGroupBox>
 #include <QRadioButton>
 #include <QCheckBox>
-#include "wiznotesettings.h"
+#include <QComboBox>
+#include <QLabel>
 
+#include "wiznotesettings.h"
+#include "share/wizmisc.h"
 
 
 CWizOptionsWidget::CWizOptionsWidget(QWidget* parent)
     : CWizPopupWidget(parent)
+#ifndef Q_OS_MAC
+    , m_labelRestartForSkin(NULL)
+#endif
 {
     QBoxLayout* layoutMain = new QBoxLayout(QBoxLayout::TopToBottom, this);
     //
@@ -55,10 +61,45 @@ CWizOptionsWidget::CWizOptionsWidget(QWidget* parent)
     groupBoxSyncLayout->addWidget(checkAutoSync);
     groupBoxSyncLayout->addWidget(checkDownloadAllNotesData);
     //
+#ifndef Q_OS_MAC
+    ////////////////////////////////////////
+    //sync
+    QGroupBox *groupBoxSkin = new QGroupBox(tr("Skin"), this);
+    //
+    QComboBox* comboSkin = new QComboBox(groupBoxSkin);
+    m_labelRestartForSkin = new QLabel(groupBoxSkin);
+    QVBoxLayout* groupBoxSkinLayout = new QVBoxLayout(groupBoxSkin);
+    groupBoxSkin->setLayout(groupBoxSkinLayout);
+    groupBoxSkinLayout->addWidget(comboSkin);
+    groupBoxSkinLayout->addWidget(m_labelRestartForSkin);
+    //
+    QString strApplySkinText = tr("Restart to apply the new skin");
+    CString strApplySkinLabelText = QString("<a href=\"restart\">%1</a>").arg(strApplySkinText);
+    m_labelRestartForSkin->setText(strApplySkinLabelText);
+    m_labelRestartForSkin->setVisible(false);
+    //
+    CString strCurrSkinName = ::WizGetSkinName();
+    std::map<CString, CString> skins;
+    typedef std::map<CString, CString>::value_type SKIN;
+    ::WizGetSkins(skins);
+    foreach (const SKIN& skin, skins)
+    {
+        comboSkin->addItem(skin.second);
+        if (strCurrSkinName == skin.first)
+        {
+            comboSkin->setCurrentIndex(comboSkin->count() - 1);
+        }
+    }
+    //
+#endif
+
     ////////////////////////////////////////
     //main
     layoutMain->addWidget(groupBoxNoteView);
     layoutMain->addWidget(groupBoxSync);
+#ifndef Q_OS_MAC
+    layoutMain->addWidget(groupBoxSkin);
+#endif
     layoutMain->addStretch(1);
     //
     //events
@@ -68,6 +109,11 @@ CWizOptionsWidget::CWizOptionsWidget(QWidget* parent)
     //
     connect(checkAutoSync, SIGNAL(clicked(bool)), this, SLOT(on_checkAutoSync_clicked(bool)));
     connect(checkDownloadAllNotesData, SIGNAL(clicked(bool)), this, SLOT(on_checkDownloadAllNotesData_clicked(bool)));
+    //
+#ifndef Q_OS_MAC
+    connect(comboSkin, SIGNAL(currentIndexChanged(QString)), this, SLOT(on_comboSkin_currentIndexChanged(QString)));
+    connect(m_labelRestartForSkin, SIGNAL(linkActivated(QString)), this, SLOT(on_labelRestartForSkin_linkActivated(QString)));
+#endif
 
 }
 
@@ -109,4 +155,20 @@ void CWizOptionsWidget::on_checkDownloadAllNotesData_clicked(bool checked)
     ::WizSetDownloadAllNotesData(checked);
     emit settingsChanged(wizoptionsSync);
 }
+#ifndef Q_OS_MAC
 
+void CWizOptionsWidget::on_comboSkin_currentIndexChanged(const QString& text)
+{
+    WizSetSkinDisplayName(text);
+    m_labelRestartForSkin->setVisible(true);
+    emit settingsChanged(wizoptionsSkin);
+}
+void CWizOptionsWidget::on_labelRestartForSkin_linkActivated(const QString& text)
+{
+    Q_UNUSED(text);
+    close();
+    emit restartForSettings();
+}
+
+
+#endif

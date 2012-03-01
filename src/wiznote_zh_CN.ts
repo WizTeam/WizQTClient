@@ -233,40 +233,50 @@ p, li { white-space: pre-wrap; }
 <context>
     <name>CWizOptionsWidget</name>
     <message>
-        <location filename="wizoptionswidget.cpp" line="20"/>
+        <location filename="wizoptionswidget.cpp" line="26"/>
         <source>Default note view</source>
         <translation>默认笔记视图</translation>
     </message>
     <message>
-        <location filename="wizoptionswidget.cpp" line="22"/>
+        <location filename="wizoptionswidget.cpp" line="28"/>
         <source>Auto (Keep view state)</source>
         <oldsource>&amp;Auto (Keep view state)</oldsource>
         <translation>自动(保持视图状态)</translation>
     </message>
     <message>
-        <location filename="wizoptionswidget.cpp" line="23"/>
+        <location filename="wizoptionswidget.cpp" line="29"/>
         <source>Always open note in Reading-View</source>
         <translation>总是在阅读视图打开笔记</translation>
     </message>
     <message>
-        <location filename="wizoptionswidget.cpp" line="24"/>
+        <location filename="wizoptionswidget.cpp" line="30"/>
         <source>Always open note in Editing-View</source>
         <translation>总是在编辑视图打开笔记</translation>
     </message>
     <message>
-        <location filename="wizoptionswidget.cpp" line="47"/>
+        <location filename="wizoptionswidget.cpp" line="53"/>
         <source>Sync</source>
         <translation>同步</translation>
     </message>
     <message>
-        <location filename="wizoptionswidget.cpp" line="49"/>
+        <location filename="wizoptionswidget.cpp" line="55"/>
         <source>Auto sync</source>
         <translation>自动同步</translation>
     </message>
     <message>
-        <location filename="wizoptionswidget.cpp" line="50"/>
+        <location filename="wizoptionswidget.cpp" line="56"/>
         <source>Download all notes data</source>
         <translation>下载所有笔记数据</translation>
+    </message>
+    <message>
+        <location filename="wizoptionswidget.cpp" line="67"/>
+        <source>Skin</source>
+        <translation>皮肤</translation>
+    </message>
+    <message>
+        <location filename="wizoptionswidget.cpp" line="76"/>
+        <source>Restart to apply the new skin</source>
+        <translation>重新启动应用新的皮肤</translation>
     </message>
 </context>
 <context>
@@ -356,12 +366,12 @@ p, li { white-space: pre-wrap; }
         <translation>搜索您的笔记</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="387"/>
+        <location filename="mainwindow.cpp" line="403"/>
         <source>New note</source>
         <translation>新建笔记</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="674"/>
+        <location filename="mainwindow.cpp" line="701"/>
         <source>Saving note...</source>
         <translation>正在保存笔记...</translation>
     </message>
@@ -429,7 +439,7 @@ p, li { white-space: pre-wrap; }
         <location filename="wizactions.cpp" line="40"/>
         <source>Delete Note</source>
         <oldsource>Delete</oldsource>
-        <translation type="unfinished">删除笔记</translation>
+        <translation>删除笔记</translation>
     </message>
     <message>
         <location filename="wizactions.cpp" line="41"/>
@@ -488,27 +498,27 @@ p, li { white-space: pre-wrap; }
         <translation>不能打开帐号</translation>
     </message>
     <message>
-        <location filename="share/wizmisc.cpp" line="677"/>
+        <location filename="share/wizmisc.cpp" line="685"/>
         <source>%1 TB</source>
         <translation>%1 TB</translation>
     </message>
     <message>
-        <location filename="share/wizmisc.cpp" line="679"/>
+        <location filename="share/wizmisc.cpp" line="687"/>
         <source>%1 GB</source>
         <translation>%1 GB</translation>
     </message>
     <message>
-        <location filename="share/wizmisc.cpp" line="681"/>
+        <location filename="share/wizmisc.cpp" line="689"/>
         <source>%1 MB</source>
         <translation>%1 MB</translation>
     </message>
     <message>
-        <location filename="share/wizmisc.cpp" line="683"/>
+        <location filename="share/wizmisc.cpp" line="691"/>
         <source>%1 KB</source>
         <translation>%1 KB</translation>
     </message>
     <message>
-        <location filename="share/wizmisc.cpp" line="684"/>
+        <location filename="share/wizmisc.cpp" line="692"/>
         <source>%1 byte(s)</source>
         <translation>%1 B</translation>
     </message>
