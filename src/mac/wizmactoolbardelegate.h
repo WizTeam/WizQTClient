@@ -12,8 +12,6 @@
 
 #include "wizmactoolbar.h"
 
-
-
 class CWizMacToolBarItem;
 
 
