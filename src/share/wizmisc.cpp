@@ -2493,9 +2493,16 @@ CString WizGetSkinName()
 #ifdef Q_OS_MAC
     return "default";
 #else
+
+#ifdef Q_OS_LINUX
+    static CString strSkinName = WizGetString("skin", "Name", "ubuntu");
+    if (strSkinName.isEmpty())
+        strSkinName = "ubuntu";
+#else
     static CString strSkinName = WizGetString("skin", "Name", "default");
     if (strSkinName.isEmpty())
         strSkinName = "default";
+#endif
     //
     CString strPath = ::WizGetResourcesPath() + "skins/" + strSkinName + "/";
     if (!PathFileExists(strPath))

@@ -86,7 +86,7 @@ void CWizPopupWidget::resizeEvent(QResizeEvent* event)
         m_pointsPolygon.push_back(QPoint(31, 10));
         m_pointsPolygon.push_back(QPoint(sz.width() - 2, 10));
         m_pointsPolygon.push_back(QPoint(sz.width() - 1, 11));
-        m_pointsPolygon.push_back(QPoint(sz.width(), sz.height() - 1));
+        m_pointsPolygon.push_back(QPoint(sz.width() - 1, sz.height() - 1));
         m_pointsPolygon.push_back(QPoint(0, sz.height() - 1));
         m_pointsPolygon.push_back(QPoint(0, 11));
         m_pointsPolygon.push_back(QPoint(1, 11));
@@ -121,7 +121,7 @@ void CWizPopupWidget::resizeEvent(QResizeEvent* event)
         m_pointsPolygon.push_back(QPoint(sz.width() - 2, 10));
         m_pointsPolygon.push_back(QPoint(sz.width() - 2, 11));
         m_pointsPolygon.push_back(QPoint(sz.width() - 1, 11));
-        m_pointsPolygon.push_back(QPoint(sz.width(), sz.height() - 1));
+        m_pointsPolygon.push_back(QPoint(sz.width() - 1, sz.height() - 1));
         m_pointsPolygon.push_back(QPoint(0, sz.height() - 1));
         m_pointsPolygon.push_back(QPoint(0, 11));
         m_pointsPolygon.push_back(QPoint(1, 11));
