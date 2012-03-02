@@ -208,7 +208,7 @@ public:
             //
             [groupItems addObject:toolbarItem];
             //
-            [groupView setWidth:40.0 forSegment:i];
+            [groupView setWidth:24.0 forSegment:i];
             //
             if (!action->icon().isNull())
             {
@@ -225,7 +225,7 @@ public:
         [group setSubitems:groupItems];
         //
         //
-        int groupViewWidth = actionCount * 40 + 8;
+        int groupViewWidth = actionCount * 24 + 8;
         [group setMinSize:NSMakeSize(groupViewWidth, 26)];
         [group setMaxSize:NSMakeSize(groupViewWidth, 26)];
         //
