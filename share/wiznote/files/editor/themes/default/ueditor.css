@@ -469,7 +469,7 @@ span.edui-unclickable {
 
 /* toolbar combox */
 .edui-toolbar .edui-combox-body .edui-button-body {
-    width: 60px;
+    width: 30px;
     font-size: 12px;
     height: 20px;
     line-height: 20px;
