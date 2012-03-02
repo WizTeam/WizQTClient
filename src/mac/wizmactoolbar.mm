@@ -65,7 +65,7 @@ CWizMacToolBar::CWizMacToolBar(QObject *parent)
     d = new CWizMacToolBarPrivate();
     d->toolbar = [[NSToolbar alloc] initWithIdentifier:@"CWizMacToolBarr"];
     d->delegate = [[CWizMacToolBarDelegate alloc] initWithToolbar:d->toolbar qtToolBar:this];
-    [d->toolbar setAllowsUserCustomization:YES];
+    [d->toolbar setAllowsUserCustomization:NO];
     //  [d->Toolbar setAutosavesConfiguration:YES];
     [d->toolbar setDisplayMode:NSToolbarDisplayModeIconAndLabel];
     //[d->Toolbar setSizeMode: NSToolbarSizeModeSmall];
