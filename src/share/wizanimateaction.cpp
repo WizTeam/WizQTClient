@@ -11,7 +11,7 @@ CWizAnimateAction::CWizAnimateAction(QObject* parent)
     , m_timer(new QTimer())
 {
     connect(m_timer, SIGNAL(timeout()), this, SLOT(on_timer_timeout()));
-    m_timer->setInterval(300);
+    m_timer->setInterval(100);
 }
 void CWizAnimateAction::setAction(QAction* action)
 {

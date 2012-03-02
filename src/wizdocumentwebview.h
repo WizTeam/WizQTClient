@@ -31,7 +31,7 @@ public:
     const WIZDOCUMENTDATA& document() { return m_data; }
     void reloadDocument();
     CWizExplorerApp& app() { return m_app; }
-
+    void updateSize();
 public slots:
     void on_web_populateJavaScriptWindowObject();
     void on_web_loadFinished(bool ok);

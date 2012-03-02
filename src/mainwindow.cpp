@@ -169,7 +169,6 @@ void MainWindow::initToolBar()
         //
         connect(buttonOptions, SIGNAL(clicked()), this, SLOT(on_actionOptions_triggered()));
     }
-    m_toolBar->addWidget(new CWizFixedSpacer(QSize(10, 1), m_toolBar));
     m_toolBar->addAction(m_actions->actionFromName("actionPopupMainMenu"));
     //
     m_toolBar->addWidget(new CWizFixedSpacer(QSize(20, 1), m_toolBar));

@@ -116,6 +116,18 @@ bool CWizDocumentWebView::viewDocumentInEditor(bool editing)
     return ret;
 }
 
+
+void CWizDocumentWebView::updateSize()
+{
+    ////force to re-align controls////
+    QRect rc = geometry();
+    setGeometry(rc.adjusted(0, 0, 0, 100));
+    qApp->processEvents(QEventLoop::AllEvents);
+    setGeometry(rc);
+    qApp->processEvents(QEventLoop::AllEvents);
+}
+
+
 void CWizDocumentWebView::on_web_populateJavaScriptWindowObject()
 {
     page()->mainFrame()->addToJavaScriptWindowObject("WizExplorerApp", m_app.object());
@@ -129,6 +141,8 @@ void CWizDocumentWebView::on_web_loadFinished(bool ok)
             return;
         //
         viewDocumentInEditor(m_bEditDocumentWhileFinished);
+        //
+        updateSize();
     }
 }
 void CWizDocumentWebView::on_web_linkClicked(const QUrl & url)

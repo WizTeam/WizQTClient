@@ -267,14 +267,7 @@ void CWizDocumentView::editDocument(bool editing)
     m_editingDocument = editing;
     m_title->setEditingDocument(m_editingDocument);
     m_web->setEditingDocument(m_editingDocument);
-    //
-    //
-    ////force to re-align controls////
-    QRect rc = m_web->geometry();
-    m_web->setGeometry(rc.adjusted(0, 0, 0, 100));
-    qApp->processEvents(QEventLoop::AllEvents);
-    m_web->setGeometry(rc);
-    qApp->processEvents(QEventLoop::AllEvents);
+    m_web->updateSize();
 }
 //
 void CWizDocumentView::setViewMode(WizDocumentViewMode mode)
