@@ -566,6 +566,12 @@ CString WizColorToString(COLORREF cr)
         + WizIntToHexEx(GetGValue(cr), 2, FALSE)
         + WizIntToHexEx(GetBValue(cr), 2, FALSE);
 }
+CString WizColorToString(const QColor& cr)
+{
+    return WizIntToHexEx(cr.red() , 2, FALSE)
+        + WizIntToHexEx(cr.green(), 2, FALSE)
+        + WizIntToHexEx(cr.blue(), 2, FALSE);
+}
 
 COLORREF WizStringToColor(const CString& str)
 {
@@ -752,6 +758,14 @@ CString WizTimeToSQL(const COleDateTime& t)
 
 
 CString WizColorToSQL(COLORREF cr)
+{
+    CString str;
+    str.Format("'%s'",
+               WizColorToString(cr).utf16()
+               );
+    return str;
+}
+CString WizColorToSQL(const QColor& cr)
 {
     CString str;
     str.Format("'%s'",

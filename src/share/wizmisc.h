@@ -113,7 +113,9 @@ CString WizDateTimeToString(const COleDateTime& t);
 CString WizStringToSQL(const CString& str);
 CString WizTimeToSQL(const COleDateTime& t);
 CString WizColorToString(COLORREF cr);
+CString WizColorToString(const QColor& cr);
 CString WizColorToSQL(COLORREF cr);
+CString WizColorToSQL(const QColor& cr);
 
 intptr_t WizStrStrI_Pos(const CString& str, const CString& Find, int nStart = 0);
 

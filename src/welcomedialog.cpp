@@ -30,7 +30,7 @@ WelcomeDialog::WelcomeDialog(QWidget *parent) :
     //
     CString strHtml;
     ::WizLoadUnicodeTextFromFile(strFileName, strHtml);
-    strHtml.replace("ButtonFace", "#" + ::WizColorToString(color.rgb()));
+    strHtml.replace("ButtonFace", "#" + ::WizColorToString(color));
     //
     ui->webView->setHtml(strHtml, QUrl::fromLocalFile(strFileName));
     ui->webView->page()->setLinkDelegationPolicy(QWebPage::DelegateAllLinks);
