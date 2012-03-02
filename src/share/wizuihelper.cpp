@@ -34,7 +34,7 @@ QWidget* createSearchWidget(CWizSearchBox* searchBox)
     //
     widget->setContentsMargins(1, 1, 1, 1);
     widget->setMinimumHeight(std::max<int>(16, editSearch->sizeHint().height()));
-    widget->setMinimumWidth(250);
+    widget->setMinimumWidth(200);
     //
     widget->setObjectName("WizSearchBoxClient");
     widget->setStyleSheet("QWidget#WizSearchBoxClient{background-color:#ffffff;border-color:#bbbbbb;border-width:1;border-style:solid}");
