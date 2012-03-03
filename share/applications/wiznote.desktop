@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=wiznote
+GenericName=note taking
+Comment=taking note and manage information
+Exec=WizNote
+Terminal=false
+Type=Application
+StartupNotify=true
+Icon=wiznote
+Categories=KDE;QT;Utility;
