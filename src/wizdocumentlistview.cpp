@@ -186,7 +186,7 @@ void CWizDocumentListView::addAndSelectDocument(const WIZDOCUMENTDATA& document)
     if (-1 == index)
         return;
     //
-    setCurrentItem(item(index));
+    setCurrentItem(item(index), QItemSelectionModel::ClearAndSelect);
     //
     sortItems();
 }

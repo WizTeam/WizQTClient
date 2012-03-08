@@ -32,7 +32,7 @@ BOOL WizHtml2Zip(const CString& strHtml, const CWizStdStringArray& arrayResource
         return FALSE;
     //
     CString strMetaFileName = ::WizGlobal()->GetTempPath() + WizIntToStr(GetTickCount()) + _T(".xml");
-    if (!::WizSaveUnicodeTextToUnicodeFile(strMetaFileName, strMetaText))
+    if (!::WizSaveUnicodeTextToUtf8File(strMetaFileName, strMetaText))
         return FALSE;
     //
     if (!zip.compressFile(strIndexFileName, "index.html"))

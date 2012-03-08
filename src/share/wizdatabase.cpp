@@ -137,9 +137,33 @@ void CWizDocument::Delete()
 
 }
 
+
+
+static const char* g_lpszZiwMeta = "\
+<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n\
+<META>\n\
+    <CLASS>ziw file</CLASS>\n\
+    <VERSION>1.0</VERSION>\n\
+    <DESCRIPTION>Wiz file formate</DESCRIPTION>\n\
+    <TITLE><![CDATA[%title%]]></TITLE>\n\
+    <URL><![CDATA[%url%]]></URL>\n\
+    <TAGS><![CDATA[%tags%]]></TAGS>\n\
+</META>\n\
+";
+
+inline CString WizGetZiwMetaText(const CString& strTitle, const CString& strURL, const CString& strTagsText)
+{
+    CString strText(g_lpszZiwMeta);
+    //
+    strText.Replace("%title%", strTitle);
+    strText.Replace("%url%", strURL);
+    strText.Replace("%tags%", strTagsText);
+    return strText;
+}
+
 CString CWizDocument::GetMetaText()
 {
-    return "";
+    return WizGetZiwMetaText(m_data.strTitle, m_data.strURL, m_db.GetDocumentTagsText(m_data.strGUID));
 }
 
 
@@ -662,8 +686,11 @@ bool CWizDatabase::UpdateDocumentData(WIZDOCUMENTDATA& data, const QString& strH
         strProcessedHtml.replace(urlResource.toString(), "index_files/");
     }
     //
+    CWizDocument doc(*this, data);
+    CString strMetaText = doc.GetMetaText();
+    //
     CString strZipFileName = GetDocumentFileName(data.strGUID);
-    bool bZip = ::WizHtml2Zip(strURL, strProcessedHtml, strResourcePath, nFlags, "", strZipFileName);
+    bool bZip = ::WizHtml2Zip(strURL, strProcessedHtml, strResourcePath, nFlags, strMetaText, strZipFileName);
     if (!bZip)
         return false;
     //
