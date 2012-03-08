@@ -435,13 +435,22 @@ BOOL CWizDatabase::UpdateDocument(const WIZDOCUMENTDATAEX& data, CWizSyncEvents*
     //
     WIZDOCUMENTDATA dataRet = data;
     //
+    bool resetVersion = false;
     if (!data.arrayParam.empty())
     {
         SetDocumentParams(dataRet, data.arrayParam);
+        resetVersion = true;
     }
     if (!data.arrayTagGUID.empty())
     {
         SetDocumentTags(dataRet, data.arrayTagGUID);
+        resetVersion = true;
+    }
+    //
+    if (resetVersion)
+    {
+        //reset document info
+        ModifyDocumentInfoEx(data);
     }
     //
     return bRet;

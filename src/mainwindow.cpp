@@ -561,6 +561,7 @@ void MainWindow::on_options_settingsChanged(WizOptionsType type)
     else if (wizoptionsSync == type)
     {
         m_sync.setDownloadAllNotesData(::WizIsDownloadAllNotesData());
+        m_sync.resetProxy();
     }
 }
 #ifndef Q_OS_MAC

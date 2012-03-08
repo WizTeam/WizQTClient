@@ -897,6 +897,11 @@ CWizXmlRpcServer::CWizXmlRpcServer(const CString& strUrl)
     connect(&m_http, SIGNAL(dataReadProgress(int,int)), SLOT(httpReadProgress(int,int)));
 }
 
+void CWizXmlRpcServer::setProxy(const QString& host, int port, const QString& userName, const QString& password)
+{
+    m_http.setProxy(host, port, userName, password);
+}
+
 void CWizXmlRpcServer::abort()
 {
     m_http.disconnect(this);

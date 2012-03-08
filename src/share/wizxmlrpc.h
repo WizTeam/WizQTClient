@@ -200,6 +200,7 @@ public:
 public:
     void abort();
     int currentId() const { return m_http.currentId(); }
+    void setProxy(const QString& host, int port, const QString& userName, const QString& password);
 protected:
     QHttp m_http;
     CString m_strUrl;

@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>566</width>
-    <height>322</height>
+    <height>318</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -106,6 +106,22 @@
     <url>
      <string>about:blank</string>
     </url>
+   </property>
+  </widget>
+  <widget class="QLabel" name="labelProxySettings">
+   <property name="geometry">
+    <rect>
+     <x>390</x>
+     <y>140</y>
+     <width>161</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
    </property>
   </widget>
  </widget>

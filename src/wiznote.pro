@@ -97,7 +97,8 @@ SOURCES += main.cpp\
     share/wizwindowshelper.cpp \
     share/wizimagepushbutton.cpp \
     wiztaglistwidget.cpp \
-    wizoptionswidget.cpp
+    wizoptionswidget.cpp \
+    proxydialog.cpp
 
 HEADERS  += mainwindow.h \
     share/wizqthelper.h \
@@ -175,7 +176,8 @@ HEADERS  += mainwindow.h \
     share/wizimagepushbutton.h \
     mac/wizmacicon.h \
     wiztaglistwidget.h \
-    wizoptionswidget.h
+    wizoptionswidget.h \
+    proxydialog.h
 
 
 mac:HEADERS +=     \
@@ -190,7 +192,8 @@ FORMS    += \
     newtagdialog.ui \
     share/wizdownloadobjectdatadialog.ui \
     aboutdialog.ui \
-    createaccountdialog.ui
+    createaccountdialog.ui \
+    proxydialog.ui
 
 
 

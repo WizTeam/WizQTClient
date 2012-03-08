@@ -37,6 +37,7 @@ public Q_SLOTS:
 public slots:
     void verifyAccountDone(bool succeeded, const CString& errorMessage);
     void on_web_linkClicked(const QUrl & url);
+    void on_labelProxy_linkActivated(const QString & link);
 };
 
 #endif // WELCOMEDIALOG_H

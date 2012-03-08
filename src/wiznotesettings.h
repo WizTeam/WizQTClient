@@ -1,6 +1,8 @@
 #ifndef WIZNOTESETTINGS_H
 #define WIZNOTESETTINGS_H
 
+#include <QString>
+
 enum WizDocumentViewMode
 {
     viewmodeAlwaysEditing,
@@ -25,8 +27,8 @@ void WizSetAutoSync(bool b);
 bool WizIsDownloadAllNotesData();
 void WizSetDownloadAllNotesData(bool b);
 
-class QString;
 bool WizGetNotice(QString& strNotice);
 void WizSetNotice(const QString& strNotice);
+
 
 #endif // WIZNOTESETTINGS_H

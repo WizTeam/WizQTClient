@@ -23,6 +23,7 @@ public slots:
     void on_radioAlwaysEditing_clicked(bool checked);
     void on_checkAutoSync_clicked(bool checked);
     void on_checkDownloadAllNotesData_clicked(bool checked);
+    void on_labelProxy_linkActivated(const QString & link);
 #ifndef Q_OS_MAC
     void on_comboSkin_currentIndexChanged(const QString& text);
     void on_labelRestartForSkin_linkActivated(const QString& text);

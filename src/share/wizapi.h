@@ -124,6 +124,7 @@ public:
     CString kbGUID() const { return m_user.strKbGUID; }
     const WIZUSERINFO& userInfo() const { return m_user; }
     bool isSyncing() const;
+    void resetProxy();
 protected:
     CString MakeXmlRpcUserId(const CString& strUserId);
     CString MakeXmlRpcPassword(const CString& strPassword);

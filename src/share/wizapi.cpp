@@ -1,6 +1,7 @@
 #include "wizapi.h"
 #include <QFile>
 #include "zip/wizzip.h"
+#include "wizsettings.h"
 
 #define PARTSIZE 10*1024
 #define MD5PART 10*1024
@@ -10,6 +11,8 @@ CWizApiBase::CWizApiBase(const CString& strAccountsApiURL, CWizSyncEvents& event
     : m_server(strAccountsApiURL)
     , m_events(events)
 {
+    resetProxy();
+    //
     connect(&m_server, SIGNAL(xmlRpcReturn(const CString&, CWizXmlRpcValue&)), this, SLOT(xmlRpcReturn(const CString&, CWizXmlRpcValue&)));
     connect(&m_server, SIGNAL(xmlRpcError(const CString&, WizXmlRpcError, int, const CString&)), this, SLOT(xmlRpcError(const CString&, WizXmlRpcError, int, const CString&)));
 }
@@ -79,6 +82,16 @@ void CWizApiBase::onXmlRpcError(const CString& strMethodName, WizXmlRpcError err
 bool CWizApiBase::isSyncing() const
 {
     return m_server.currentId() != 0;
+}
+
+void CWizApiBase::resetProxy()
+{
+    QString host = ::WizGetProxyHost();
+    int port = ::WizGetProxyPort();
+    QString userName = ::WizGetProxyUserName();
+    QString password = ::WizGetProxyPassword();
+    //
+    m_server.setProxy(host, port, userName, password);
 }
 
 CString CWizApiBase::MakeXmlRpcUserId(const CString& strUserId)

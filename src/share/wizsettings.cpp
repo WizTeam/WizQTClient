@@ -135,3 +135,45 @@ int WizGetSkinInt(const CString& strSection, const CString& strName, int def)
     CWizSettings settings(WizGetSkinPath() + "skin.ini");
     return settings.GetInt(strSection, strName, def);
 }
+
+
+
+QString WizGetProxyHost()
+{
+    return WizGetString("Sync", "ProxyHost");
+}
+int WizGetProxyPort()
+{
+    int port = WizGetInt("Sync", "ProxyPort", 0);
+    if (port <= 0)
+        port = 80;
+    //
+    return port;
+}
+QString WizGetProxyUserName()
+{
+    return WizGetString("Sync", "ProxyUserName");
+}
+QString WizGetProxyPassword()
+{
+    return WizGetString("Sync", "ProxyPassword");
+}
+
+void WizSetProxyHost(const QString& val)
+{
+    WizSetString("Sync", "ProxyHost", val);
+}
+
+void WizSetProxyPort(int val)
+{
+    WizSetInt("Sync", "ProxyPort", val);
+}
+
+void WizSetProxyUserName(const QString& val)
+{
+    WizSetString("Sync", "ProxyUserName", val);
+}
+void WizSetProxyPassword(const QString& val)
+{
+    WizSetString("Sync", "ProxyPassword", val);
+}

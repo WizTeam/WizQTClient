@@ -10,6 +10,8 @@
 #include "wiznotesettings.h"
 #include "share/wizmisc.h"
 
+#include "proxydialog.h"
+
 
 CWizOptionsWidget::CWizOptionsWidget(QWidget* parent)
     : CWizPopupWidget(parent)
@@ -56,10 +58,14 @@ CWizOptionsWidget::CWizOptionsWidget(QWidget* parent)
     QCheckBox* checkDownloadAllNotesData = new QCheckBox(tr("Download all notes data"), this);
     checkAutoSync->setChecked(WizIsAutoSync());
     checkDownloadAllNotesData->setChecked(WizIsDownloadAllNotesData());
+    QString proxySettings = WizFormatString1("<a href=\"proxy_settings\">%1</a>", tr("Proxy settings"));
+    QLabel* labelProxySettings =   new QLabel(proxySettings, this);
+    labelProxySettings->setAlignment(Qt::AlignRight);
     QVBoxLayout* groupBoxSyncLayout = new QVBoxLayout(groupBoxSync);
     groupBoxSync->setLayout(groupBoxSyncLayout);
     groupBoxSyncLayout->addWidget(checkAutoSync);
     groupBoxSyncLayout->addWidget(checkDownloadAllNotesData);
+    groupBoxSyncLayout->addWidget(labelProxySettings);
     //
 #ifndef Q_OS_MAC
     ////////////////////////////////////////
@@ -109,6 +115,8 @@ CWizOptionsWidget::CWizOptionsWidget(QWidget* parent)
     //
     connect(checkAutoSync, SIGNAL(clicked(bool)), this, SLOT(on_checkAutoSync_clicked(bool)));
     connect(checkDownloadAllNotesData, SIGNAL(clicked(bool)), this, SLOT(on_checkDownloadAllNotesData_clicked(bool)));
+    connect(labelProxySettings, SIGNAL(linkActivated(QString)), this, SLOT(on_labelProxy_linkActivated(QString)));
+
     //
 #ifndef Q_OS_MAC
     connect(comboSkin, SIGNAL(currentIndexChanged(QString)), this, SLOT(on_comboSkin_currentIndexChanged(QString)));
@@ -155,6 +163,20 @@ void CWizOptionsWidget::on_checkDownloadAllNotesData_clicked(bool checked)
     ::WizSetDownloadAllNotesData(checked);
     emit settingsChanged(wizoptionsSync);
 }
+
+
+void CWizOptionsWidget::on_labelProxy_linkActivated(const QString & link)
+{
+    Q_UNUSED(link);
+    //
+    ProxyDialog dlg(parentWidget());
+    if (QDialog::Accepted != dlg.exec())
+        return;
+    //
+    emit settingsChanged(wizoptionsSync);
+}
+
+
 #ifndef Q_OS_MAC
 
 void CWizOptionsWidget::on_comboSkin_currentIndexChanged(const QString& text)

@@ -44,4 +44,16 @@ QColor WizGetSkinColor(const CString& strSection, const CString& strName, const 
 int WizGetSkinInt(const CString& strSection, const CString& strName, int def);
 
 
+
+QString WizGetProxyHost();
+int WizGetProxyPort();
+QString WizGetProxyUserName();
+QString WizGetProxyPassword();
+
+void WizSetProxyHost(const QString& val);
+void WizSetProxyPort(int val);
+void WizSetProxyUserName(const QString& val);
+void WizSetProxyPassword(const QString& val);
+
+
 #endif // WIZSETTINGS_H

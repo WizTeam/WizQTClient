@@ -6,6 +6,7 @@
 #include <QDesktopServices>
 #include <QWebFrame>
 #include "createaccountdialog.h"
+#include "proxydialog.h"
 
 WelcomeDialog::WelcomeDialog(QWidget *parent) :
     QDialog(parent),
@@ -35,6 +36,9 @@ WelcomeDialog::WelcomeDialog(QWidget *parent) :
     ui->webView->setHtml(strHtml, QUrl::fromLocalFile(strFileName));
     ui->webView->page()->setLinkDelegationPolicy(QWebPage::DelegateAllLinks);
     connect(ui->webView, SIGNAL(linkClicked(const QUrl&)), this, SLOT(on_web_linkClicked(const QUrl&)));
+    //
+    ui->labelProxySettings->setText(WizFormatString1("<a href=\"proxy_settings\">%1</a>", tr("Proxy settings")));
+    connect(ui->labelProxySettings, SIGNAL(linkActivated(QString)), this, SLOT(on_labelProxy_linkActivated(QString)));
     //
     setFixedSize(size());
 }
@@ -127,6 +131,17 @@ void WelcomeDialog::on_web_linkClicked(const QUrl & url)
     {
         QDesktopServices::openUrl(url);
     }
+}
+
+void WelcomeDialog::on_labelProxy_linkActivated(const QString & link)
+{
+    Q_UNUSED(link);
+    //
+    ProxyDialog dlg;
+    if (QDialog::Accepted != dlg.exec())
+        return;
+    //
+    m_verifyAccount.resetProxy();
 }
 
 
