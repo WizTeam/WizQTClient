@@ -274,7 +274,7 @@ bool CThumbIndex::DeleteAbstractByGUID(const CString& guid)
         return false;
     }
     catch (...) {
-        TOLOG("Unknown exception while update document");
+        TOLOG("Unknown exception while update abstract");
         return false;
     }
 }
