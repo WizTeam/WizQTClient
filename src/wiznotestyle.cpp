@@ -239,12 +239,12 @@ void CWizNoteStyle::drawDocumentListViewItem(const QStyleOptionViewItemV4 *vopt,
     {
         m_documentsSelectedItemBackground.Draw(p, vopt->rect, 0);
     }
-#ifndef Q_OS_MAC
-    else if (vopt->state.testFlag(State_MouseOver))
-    {
-        m_documentsSelectedItemBackgroundHot.Draw(p, vopt->rect, 0);
-    }
-#endif
+//#ifndef Q_OS_MAC
+//    else if (vopt->state.testFlag(State_MouseOver))
+//    {
+//        m_documentsSelectedItemBackgroundHot.Draw(p, vopt->rect, 0);
+//    }
+//#endif
     //proxy()->drawPrimitive(PE_PanelItemViewItem, opt, p, view);
     //
     const QImage& img = abstract.image;
