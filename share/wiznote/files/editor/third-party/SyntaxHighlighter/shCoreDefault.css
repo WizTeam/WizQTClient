@@ -42,7 +42,7 @@
   right: auto !important;
   text-align: left !important;
   top: auto !important;
-  vertical-align: baseline !important;
+  /*vertical-align: baseline !important;*/
   width: auto !important;
   box-sizing: content-box !important;
   font-family: "Consolas", "Bitstream Vera Sans Mono", "Courier New", Courier, monospace !important;
@@ -56,7 +56,7 @@
 }
 
 .syntaxhighlighter .container div{
-    height: auto !important;
+    /*height: auto !important;*/
     height:100%\9!important;
 }
 
@@ -109,6 +109,8 @@
 .syntaxhighlighter table td.gutter .line {
   text-align: right !important;
   padding: 0 0.5em 0 1em !important;
+  /*太窄时右边的显示行数会下沉*/
+  white-space:nowrap;
 }
 .syntaxhighlighter table td.code .line {
   padding: 0 1em !important;

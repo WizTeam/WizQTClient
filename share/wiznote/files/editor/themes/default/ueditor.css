@@ -111,8 +111,8 @@ span.edui-unclickable {
     vertical-align: top;
 }
 .edui-menuitem .edui-icon {
-    width: 20px;
-    height: 20px;
+    width: 20px!important;
+    height: 20px!important;
     background: url(images/icons.png) 0 -40px;
     background: url(images/icons.gif) 0 -40px\9;
 }
@@ -272,6 +272,7 @@ span.edui-unclickable {
 .edui-dialog-content  {
     position: relative;
 }
+.dialogcontmask{cursor:move;visibility:hidden;display:block;position:absolute;width:100%;height:100%;opacity:0;filter:alpha(opacity=0);}
 
 /* color picker */
 .edui-colorpicker-topbar {
@@ -324,6 +325,9 @@ span.edui-unclickable {
 .edui-tablepicker .edui-infoarea .edui-label {
     float: left;
 }
+.edui-dialog-buttons .edui-label{
+    line-height: 24px;
+}
 .edui-tablepicker .edui-infoarea .edui-clickable {
     float: right;
 }
@@ -335,7 +339,16 @@ span.edui-unclickable {
 .edui-tablepicker .edui-pickarea .edui-overlay {
     background: url("images/tablepicker/highlighted.gif") repeat;
 }
-
+/*autotypeset*/
+.edui-autotypesetpicker .edui-autotypesetpicker-body{
+    font-size: 12px;
+    width:330px;
+    margin-bottom: 3px;
+    clear: both;
+}
+.edui-autotypesetpicker-body td{
+    font-size:12px;
+}
 /* toolbar */
 .edui-toolbar {
     cursor: default;
@@ -448,11 +461,17 @@ span.edui-unclickable {
 }
 
 .edui-for-insertorderedlist .edui-bordereraser,
+.edui-for-lineheight .edui-bordereraser,
+.edui-for-rowspacingtop .edui-bordereraser,
+.edui-for-rowspacingbottom .edui-bordereraser,
 .edui-for-insertunorderedlist .edui-bordereraser {
     background-color: white;
 }
 /* 解决嵌套导致的图标问题 */
 .edui-for-insertorderedlist .edui-popup-body .edui-icon,
+.edui-for-lineheight .edui-popup-body .edui-icon,
+.edui-for-rowspacingtop .edui-popup-body .edui-icon,
+.edui-for-rowspacingbottom .edui-popup-body .edui-icon,
 .edui-for-insertunorderedlist .edui-popup-body .edui-icon {
     background-position: 0 -40px;
 }
@@ -469,7 +488,7 @@ span.edui-unclickable {
 
 /* toolbar combox */
 .edui-toolbar .edui-combox-body .edui-button-body {
-    width: 30px;
+    width: 60px;
     font-size: 12px;
     height: 20px;
     line-height: 20px;
@@ -555,7 +574,8 @@ span.edui-unclickable {
     _width: 200px;
     padding: 2px 5px;
 }
-.edui-for-rowspacing .edui-listitem-label {
+.edui-for-rowspacingtop .edui-listitem-label,
+.edui-for-rowspacingbottom .edui-listitem-label {
     min-width: 53px;
     _width: 53px;
     padding: 2px 5px;
@@ -610,6 +630,9 @@ span.edui-unclickable {
 .edui-for-inserttable .edui-icon {
     background-position: -580px -20px;
 }
+.edui-for-autotypeset .edui-icon {
+    background-position: -640px -40px;
+}
 .edui-for-justifyleft .edui-icon {
     background-position: -460px 0;
 }
@@ -628,6 +651,16 @@ span.edui-unclickable {
 .edui-for-insertunorderedlist .edui-icon {
     background-position: -20px 0;
 }
+.edui-for-lineheight .edui-icon {
+    background-position: -725px -40px;
+}
+.edui-for-rowspacingbottom .edui-icon {
+    background-position: -745px -40px;
+}
+.edui-for-rowspacingtop .edui-icon {
+    background-position: -765px -40px;
+}
+
 .edui-for-horizontal .edui-icon {
     background-position: -360px 0;
 }
@@ -710,6 +743,12 @@ span.edui-unclickable {
 .edui-for-unlink .edui-icon {
     background-position: -640px 0;
 }
+.edui-for-touppercase .edui-icon {
+    background-position: -786px 0;
+}
+.edui-for-tolowercase .edui-icon {
+    background-position: -806px 0;
+}
 .edui-for-insertrow .edui-icon {
     background-position: -740px -20px;
 }
@@ -764,8 +803,8 @@ span.edui-unclickable {
 .edui-for-imageleft .edui-icon {
     background-position: -500px -40px;
 }
-.edui-for-checkimage .edui-icon {
-    background-position: -560px -40px;
+.edui-for-wordimage .edui-icon {
+    background-position: -660px -40px;
 }
 .edui-for-imageright .edui-icon {
     background-position: -520px -40px;
@@ -780,6 +819,9 @@ span.edui-unclickable {
 .edui-for-outdent .edui-icon {
     background-position:  -540px 0;
 }
+.edui-for-webapp .edui-icon {
+    background-position:  -601px -40px
+}
 
 .edui-for-table .edui-icon {
     background-position: -580px -20px;
@@ -787,7 +829,9 @@ span.edui-unclickable {
 .edui-for-edittable .edui-icon {
     background-position: -420px -40px;
 }
-
+.edui-for-template .edui-icon {
+    background-position: -339px -40px;
+}
 .edui-for-delete .edui-icon {
     background-position: -360px -40px;
 }
@@ -797,11 +841,39 @@ span.edui-unclickable {
 .edui-for-deletehighlightcode .edui-icon{
     background-position: -360px -40px;
 }
+.edui-for-attachment .edui-icon{
+    background-position: -620px -40px;
+}
+.edui-for-edittd .edui-icon {
+    background-position: -700px -40px;
+}
+
+.edui-for-snapscreen .edui-icon {
+    background-position: -581px -40px
+}
+.edui-for-scrawl .edui-icon {
+    background-position: -801px -41px
+}
+.edui-for-background .edui-icon {
+    background-position: -678px -40px;
+}
 
 /*link-dialog*/
 .edui-for-link .edui-dialog-content  {
     width:420px;
-    height:150px;
+    height:200px;
+    overflow: hidden;
+}
+/*background-dialog*/
+.edui-for-background .edui-dialog-content  {
+    width:440px;
+    height:280px;
+    overflow: hidden;
+}
+/*template-dialog*/
+.edui-for-template .edui-dialog-content  {
+    width:630px;
+    height:390px;
     overflow: hidden;
 }
 /*emoticon-dialog*/
@@ -810,15 +882,29 @@ span.edui-unclickable {
     *width:506px;
     height:360px;
 }
+/*scrawl-dialog*/
+.edui-for-scrawl .edui-dialog-content{
+    width:515px;
+    *width:506px;
+    height:360px;
+}
 /*spechars-dialog*/
 .edui-for-spechars .edui-dialog-content{
     width:620px;
     height:500px;
+    *height:570px;
 }
 /*image-dialog*/
 .edui-for-insertimage .edui-dialog-content  {
-    width:620px;
+    width:640px;
     height:390px;
+    overflow: hidden;
+}
+/*webapp-dialog*/
+.edui-for-webapp .edui-dialog-content  {
+    width:560px;
+    _width:565px;
+    height:450px;
     overflow: hidden;
 }
 /*image-insertframe*/
@@ -831,6 +917,12 @@ span.edui-unclickable {
 .edui-for-wordimage .edui-dialog-content  {
     width:620px;
     height:380px;
+    overflow: hidden;
+}
+/*attachment-dialog*/
+.edui-for-attachment .edui-dialog-content  {
+    width:480px;
+    height:360px;
     overflow: hidden;
 }
 /*code-dialog*/
@@ -851,8 +943,8 @@ span.edui-unclickable {
 }
 /*video-dialog*/
 .edui-for-insertvideo .edui-dialog-content  {
-    width:380px;
-    height:150px;
+    width:590px;
+    height:390px;
 }
 
 /*anchor-dialog*/
@@ -874,8 +966,19 @@ span.edui-unclickable {
 }
 /*table-dialog*/
 .edui-for-inserttable .edui-dialog-content  {
-    width:450px;
-    height:225px;
+    width:510px;
+    height:275px;
+}
+/*td-dialog*/
+.edui-for-edittd .edui-dialog-content  {
+    width:220px;
+    height:125px;
+}
+
+/*snapscreen-dialog*/
+.edui-for-snapscreen .edui-dialog-content  {
+    width:400px;
+    height:220px;
 }
 
 /*for wordimage*/
@@ -890,40 +993,42 @@ span.edui-unclickable {
     top:5px;
     left:350px;
 }
-
+.edui-for-paragraph .edui-listitem-label{
+    font-family: Tahoma,Verdana,Arial,Helvetica;
+}
 .edui-for-paragraph .edui-listitem-label .edui-for-p{
     font-size: 22px;
-    font-family: Tahoma,Verdana,Arial,Helvetica;
+    line-height: 27px;
 }
 .edui-for-paragraph .edui-listitem-label .edui-for-h1{
     font-weight: bolder;
-    font-size: 1.9em;
-    font-family: Tahoma,Verdana,Arial,Helvetica;
+    font-size: 32px;
+    line-height:36px;
 }
 .edui-for-paragraph .edui-listitem-label .edui-for-h2{
     font-weight: bolder;
-    font-size: 1.5em;
-    font-family: Tahoma,Verdana,Arial,Helvetica;
+    font-size: 27px;
+    line-height: 29px;
 }
 .edui-for-paragraph .edui-listitem-label .edui-for-h3{
     font-weight: bolder;
-    font-size: 1.17em;
-    font-family: Tahoma,Verdana,Arial,Helvetica;
+    font-size: 19px;
+    line-height: 23px;
 }
 .edui-for-paragraph .edui-listitem-label .edui-for-h4{
     font-weight: bolder;
-    font-size: 1em;
-    font-family: Tahoma,Verdana,Arial,Helvetica;
+    font-size: 16px;
+    line-height: 19px
 }
 .edui-for-paragraph .edui-listitem-label .edui-for-h5{
     font-weight: bolder;
-    font-size: 0.83em;
-    font-family: Tahoma,Verdana,Arial,Helvetica;
+    font-size: 13px;
+    line-height: 16px;
 }
 .edui-for-paragraph .edui-listitem-label .edui-for-h6{
     font-weight: bolder;
-    font-size: .75em;
-    font-family: Tahoma,Verdana,Arial,Helvetica;
+    font-size: 12px;
+    line-height: 14px;
 }
 
 /* ui.Editor */
@@ -1021,70 +1126,6 @@ span.edui-unclickable {
 /**for edui-emotion-menu*/
 .edui-for-emotion .edui-icon {background-position: -60px -20px;}
 .edui-for-emotion .edui-popup-content{position: relative;z-index: 555}
-.edui-for-emotion .edui-popup-content iframe{width:514px;height:367px;overflow:hidden;}
+.edui-for-emotion .edui-popup-content iframe{width:514px;height:380px;overflow:hidden;}
 .edui-for-emotion .edui-splitborder{display:none}
 .edui-for-emotion .edui-splitbutton-body .edui-arrow{width:0}   /*去除了表情的下拉箭头*/
-
-/* 日期选择控件 */
-.tangram-calendar {
-	height: 164px;
-	width: 178px;
-	font-size:12px;
-	text-align: center;
-	border: 5px solid #EEEEEE;
-}
-.tangram-calendar-title {
-	position: relative;
-	background-color: #EEEEEE;
-}
-.tangram-calendar-label{
-	width: 100%;/*ie必要*/
-	background-color: #EEEEEE;
-}
-.tangram-calendar-prev {
-	position: absolute;
-	text-align: center;
-	cursor: pointer;
-	left: 0px;
-	top: 0px;
-	width: 30px;
-}
-.tangram-calendar-next{
-	position: absolute;
-	text-align: center;
-	cursor: pointer;
-	right: 0px;
-	top: 0px;
-	width: 30px;
-}
-.tangram-calendar-table {
-	width: 100%;
-	height: 100%;
-}
-.tangram-calendar-week td{
-	cursor: default;
-	font-weight: bold;
-	font-size:12px;
-	background-color: #EEEEEE;
-}
-.tangram-calendar-date td{
-	cursor:pointer;
-	text-align: center;
-	border: 1px solid #FAFAFA;
-}
-td.tangram-calendar-date-current{
-	border: 1px solid #A00000;
-}
-.tangram-calendar-date-other{
-	color: #ccc;
-}
-.tangram-calendar-disabled{
-	background: #CCCCCC;
-}
-.tangram-calendar-date-disable{
-	background: gray;
-}
-td.tangram-calendar-hover{
-	border: 1px solid blue;
-}
-

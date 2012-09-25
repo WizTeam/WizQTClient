@@ -1,0 +1,30 @@
+*{margin:0;padding:0;}
+.wrap{ padding: 5px;}
+body{font-size: 12px;color: #888;overflow: hidden;}
+input,label{vertical-align:middle}
+.clear{clear: both;}
+.pl{padding-left: 23px;padding-left: 28px\9;}
+
+
+.tabheade {position: relative;width: 410px;z-index: 10;}
+.tabheade span{display: inline-block;width: 82px;height: 30px;text-align: center;cursor: pointer;line-height: 30px;border: 1px solid #CCC;background: url("../../themes/default/images/dialog-title-bg.png") repeat-x;}
+.tabheade span.focus{border-bottom: none;height: 31px;background-color: white;}
+
+.tabbody{border: 1px solid #CCC;width: 428px;height: 225px;_height: 228px;margin: 0 auto;position: relative;top: -1px;}
+.tabbody .panel{position: absolute;width: 420px;height: 225px;background: white;}
+
+#imageList {width: 420px;height: 215px;margin-top: 10px;overflow: hidden;overflow-y: auto;}
+#imageList div {float: left;width: 100px;height: 95px;margin: 5px 10px;}
+#imageList img {cursor: pointer;border: 2px solid white;}
+
+.bgarea{margin: 10px;padding: 5px;height: 84%;}
+.content div{margin: 10px 0 10px 5px;}
+.content .iptradio{margin-right: 10px;}
+.txt{width:280px;}
+
+.wrapcolor{height: 19px;}
+div.color{float: left;margin: 0;}
+#colorPicker{width: 17px;height: 17px;border: 1px solid #CCC;display: inline-block;border-radius: 3px;box-shadow: 2px 2px 5px #D3D6DA;margin: 0;float: left;}
+div.alignment,#custom{margin-left: 30px;margin-left: 35px\9;}
+#custom input{height: 15px;min-height: 15px;width:20px;}
+#repeatType{width:100px;}

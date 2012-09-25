@@ -26,10 +26,8 @@
 
 var XRegExp;
 
-if (XRegExp) {
-    // Avoid running twice, since that would break references to native globals
-    throw Error("can't load XRegExp twice in the same frame");
-}
+if (!XRegExp) {
+
 
 // Run within an anonymous function to protect variables and avoid new globals
 (function () {
@@ -296,6 +294,8 @@ if (XRegExp) {
                 r2 = RegExp(this.source, real.replace.call(getNativeFlags(this), "g", ""));
                 // Using `str.slice(match.index)` rather than `match[0]` in case lookahead allowed
                 // matching due to characters outside the match
+                //修复跟jquery冲突的问题
+                if (str) str += '';
                 real.replace.call(str.toString().slice(match.index), r2, function () {
                     for (var i = 1; i < arguments.length - 2; i++) {
                         if (arguments[i] === undefined)
@@ -1771,8 +1771,10 @@ function stripCData(original)
 	}
 	
 	var copyLength = copy.length;
-	
-	if (copy.indexOf(right) == copyLength - rightLength)
+    //trace:2472
+	//当输入的内容是2个字符时，悲剧了copy.indexOf(right) == copyLength - rightLength 为真
+    //前边加个copy.indexOf(right)!= -1先判断一下
+	if (copy.indexOf(right)!= -1 &&  copy.indexOf(right) == copyLength - rightLength)
 	{
 		copy = copy.substring(0, copyLength - rightLength);
 		changed = true;
@@ -3598,3 +3600,5 @@ typeof(exports) != 'undefined' ? exports['SyntaxHighlighter'] = SyntaxHighlighte
 	// CommonJS
 	typeof(exports) != 'undefined' ? exports.Brush = Brush : null;
 })();
+
+}

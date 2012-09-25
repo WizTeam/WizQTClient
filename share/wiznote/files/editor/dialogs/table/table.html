@@ -2,230 +2,251 @@
         "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
-    <title>插入表格</title>
-    <meta content="text/html; charset=utf-8" http-equiv="Content-Type"/>
-    <script type="text/javascript" src="../internal.js"></script>
+    <title></title>
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
     <style type="text/css">
-        *{color: #838383}
-        body {
-            font-size: 12px;
-            width:382px;
-            height: 225px;
-            overflow: hidden;
-            margin:0px;padding:0px;
-        }
-        .wrap{
-            padding: 9px 0px 0px 15px;
-            height:100%;
-        }
-        .wrap table{padding:0;margin:0}
-        .wrap table tr{padding:0;margin:0px; list-style: none;height: 30px; line-height: 30px;}
-        .wrap input{ width:110px;height:21px;line-height:21px;background: #FFF;border:1px solid #d7d7d7;padding: 0px; margin: 0px; }
-        td.spe input{width:78px!important; width: 75px;}
-        td.spe span{width:75px;line-height:30px;display:block;float:left}
+        *{margin: 0;padding: 0;font-size: 12px;}
+        .wrapper{margin-left: 2px;}
+        .base{width: 472px;height: 70px; margin-left: 10px;margin-top:10px;border: 1px solid #ddd;}
+        legend{margin-left: 5px; font-weight: bold;font-size: 12px;color: #0066cc;}
+        fieldset table{margin-left: 5px;float: left;}
+        select{width: 50px}
+        .base table{margin-left: 10px;}
+        .base table tr{height: 25px;}
+        input{ width: 50px;border:1px solid #ccc;}
+        .extend {width: 300px;height: 160px;margin:10px;;float: left;border: 1px solid #ddd;}
+        .extend table{height: 135px;}
+        #preview{width: 160px;height: 155px;float: left;border: 1px solid #ccc;margin: 16px 0;background-color: #eee}
+        span.bold{font-weight: bold}
+        #preview table {margin:3px 5px;}
+        #preview table td{width: 30px;height: 20px;}
+        #message{float: left;width: 110px;margin-left: 10px;font-size: 10px;color: red;line-height: 15px}
+        #messageContent{color: green;margin-top: 5px;}
+        .extend select{width: 90px}
+        #bgColor{width: 85px;}
     </style>
 </head>
 <body>
-<div class="wrap">
-    <table>
-        <tr>
-           <td width="180"> <span>行数：</span>
-            <input type="text" id="rowCount"/></td>
-            <td><span>宽度：</span>
-            <input type="text" id="tableWidth"/> px</td>
-        </tr>
-        <tr>
-            <td><span>列数：</span>
-            <input type="text" id="colCount"/></td>
-            <td><span>高度：</span>
-            <input type="text" id="tableHeight"/> px</td>
-        </tr>
-        <tr>
-            <td class="spe"><span>表格边框：</span>
-                <input type="text" id="border"/> px
-            </td>
-            <td><span>间距：</span>
-            <input type="text" id="cellspacing"/> px</td>
-        </tr>
-        <tr>
-            <td class="spe"><span style="width: 85px;">表格边框颜色：</span>
-                <input type="text" style="width: 68px!important;width: 65px;" id="border-color" onclick="show(this)" />
-            </td>
-            <td><span>边距：</span>            
-                <input type="text" id="cellpadding"/> px
-            </td>
-        </tr>
-        <tr>
-            <td><span>表格对齐：</span>
-                <select id="tablealign" >
-                    <option value="">默认</option>
-                    <option value="left">居左</option>
-                    <option value="right">居右</option>
-                    <option value="center">居中</option>
-                </select>
-            </td>
-            <td colspan="2">
-                <span>单元格对齐：</span>
-                <select id="alignment" style="">
-                    <option value="left">左对齐</option>
-                    <option value="center">居中</option>
-                    <option value="right">右对齐</option>
-                </select>
-            </td>
-        </tr>
-        <tr>
-            <td class="spe"><span style="width: 85px;">表格背景颜色：</span>
-                <input type="text" style="width: 68px!important;width: 65px;" id="background-color" onclick="show(this)" />
-            </td>
-        </tr>
-    </table>
-</div>
-<script type="text/javascript">
-    var activeEl;
-    var colorpicker = new parent.baidu.editor.ui.Popup({
-            content: new parent.baidu.editor.ui.ColorPicker({
-                noColorText: '清除颜色'
-            })
-    });
-    colorpicker.render();
-    colorpicker.content.onpickcolor = function(t, color){
-        activeEl.value = color.toUpperCase();
-        colorpicker.hide();
-    };
-    colorpicker.content.onpicknocolor = function(t, color){
-        activeEl.value = '';
-        colorpicker.hide();
-    };
-    parent.baidu.editor.dom.domUtils.on(document, 'mousedown', function (evt){
-        parent.baidu.editor.ui.Popup.postHide(evt.target || evt.srcElement);
-    });
-    var state = editor.queryCommandState("edittable"),oldtable;
-    if(state == 0){
-        var range = editor.selection.getRange(),tmptd;
-            tmptd = parent.baidu.editor.dom.domUtils.findParentByTagName(range.startContainer, 'td', true);
-            oldtable = tmptd.parentNode.parentNode.parentNode;
-        if(oldtable){
-            var rowlength = 0,
-                    celllength = 0,
-                    alignmode = parent.baidu.editor.dom.domUtils.getComputedStyle(tmptd,"text-align");
-            for(var r=0,row;row = oldtable.rows[r++];){
-                var tmpcells = 0;
-                for(var c = 0,cell;cell = row.cells[c++];){
-                    if(cell.style.display != "none"){
-                        tmpcells++;
+    <div class="wrapper">
+        <fieldset  class="base">
+            <legend><var id="lang_baseInfo"></var></legend>
+            <table>
+                <tr>
+                    <td width="120"><label for="numRows"><var id="lang_rows"></var>: </label><input id="numRows" type="text"  /> <var id="lang_rowUnit"></var></td>
+                    <td>
+                        <label for="width"><var id="lang_width"></var>: </label><input id="width" type="text"  />
+                        <label for="widthUnit"><var id="lang_widthUnit"></var>: </label>
+                        <select id="widthUnit">
+                            <option value="%">%</option>
+                            <option value="px">px</option>
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td><label for="numCols"><var id="lang_cols"></var>: </label><input id="numCols" type="text"  /> <var id="lang_colUnit"></var></td>
+                    <td>
+                        <label for="height"><var id="lang_height"></var>: </label><input id="height" type="text"  />
+                        <label for="heightUnit"><var id="lang_heightUnit"></var>: </label>
+                        <select id="heightUnit">
+                            <option value="%">%</option>
+                            <option value="px">px</option>
+                        </select>
+                    </td>
+                </tr>
+            </table>
+            <div id="message" style="display: none">
+                <p><var id="lang_warmPrompt"></var>：</p>
+                <p id="messageContent"><var id="lang_maxPadding"></var></p>
+            </div>
+        </fieldset>
+        <div>
+            <fieldset  class="extend">
+                <legend><var id="lang_extendInfo"></var><span style="font-weight: normal;">(<var id="lang_preview"></var>)</span></legend>
+                <table>
+                    <tr>
+                        <td width="60"><span class="bold"><var id="lang_tableBorder"></var></span>:</td>
+                        <td><label for="border"><var id="lang_borderSize"></var>: </label><input id="border" type="text"  /> px&nbsp;</td>
+                        <td><label for="borderColor"><var id="lang_borderColor"></var>: </label><input id="borderColor" type="text"  /></td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid #ddd">
+                        <td><span class="bold"><var id="lang_mar_pad"></var></span>:</td>
+                        <td><label for="cellPadding"><var id="lang_margin"></var>: </label><input id="cellPadding" type="text"  /> px&nbsp;</td>
+                        <td><label for="cellSpacing"><var id="lang_padding"></var>: </label><input id="cellSpacing" type="text"  /> px </td>
+                    </tr>
+                    <tr>
+                        <td colspan="3"><span class="bold"><var id="lang_table_background"></var></span>:
+                            <input id="bgColor" type="text"  />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="3"><span class="bold"><var id="lang_table_alignment"></var></span>:
+                            <select id="align">
+                                <option value=""></option>
+                                <option value="center"></option>
+                                <option value="left"></option>
+                                <option value="right"></option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                       <td colspan="3">
+                           <span class="bold"><var id="lang_borderFor"></var></span>:
+                           <select id="borderType">
+                               <option value="0"></option>
+                               <option value="1"></option>
+                           </select>
+                       </td>
+                    </tr>
+
+                </table>
+            </fieldset>
+
+            <div id="preview">
+                <table border="1" borderColor="#000" cellpadding="0" cellspacing="0" style="border-collapse: collapse;">
+                    <tr><td colspan="3"><var id="lang_forPreview"></var></td></tr>
+                    <tr><td></td><td></td><td></td></tr>
+                    <tr><td></td><td></td><td></td></tr>
+                </table>
+            </div>
+        </div>
+    </div>
+    <script type="text/javascript" src="../internal.js"></script>
+    <script type="text/javascript" src="table.js"></script>
+    <script type="text/javascript">
+        var inputs = document.getElementsByTagName('input'),
+            selects=document.getElementsByTagName('select');
+        //ie给出默认值
+        for(var i=0,ci;ci=inputs[i++];){
+            switch (ci.id){
+                case 'numRows':
+                case 'numCols':
+                    ci.value = 5;
+                    break;
+                case 'bgColor':
+                    ci.value = '';
+                    break;
+                case 'borderColor':
+                    ci.value = '#000000';
+                    break;
+                case 'border':
+                    ci.value = 1;
+                    break;
+                case 'cellSpacing':
+                case 'cellPadding':
+                    ci.value = '0';
+                    break;
+                default:
+            }
+        }
+        for(var i=0,ci;ci=selects[i++];){
+            ci.options[0].selected = true;
+        }
+        var state = editor.queryCommandState("edittable");
+        if(state == 0){
+            var range = editor.selection.getRange(),
+                    table = domUtils.findParentByTagName(range.startContainer,'table',true);
+            if(table){
+                var numRows = table.rows.length,cellCount=0;
+                //列取最大数
+                for(var i=0,ri;ri=table.rows[i++];){
+                    var tmpCellCount = 0;
+                    for(var j=0,cj;cj=ri.cells[j++];){
+                        if(cj.style.display != 'none'){
+                            tmpCellCount++;
+                        }
+                    }
+                    cellCount = Math.max(tmpCellCount,cellCount)
+                }
+                domUtils.setAttributes($G('numRows'),{
+                    'value':numRows,
+                    'disabled':true
+                });
+                domUtils.setAttributes($G('numCols'),{
+                    'value':cellCount,
+                    'disabled':true
+                });
+
+                $G("cellPadding").value = table.getAttribute("cellPadding") || '0';
+                $G("cellSpacing").value = table.getAttribute("cellSpacing") || '0';
+
+                var value = table.getAttribute('width');
+                value = !value ? ['',table.offsetWidth]:/%$/.test(value) ? value.match(/(\d+)(%)?/) : ['',value.replace(/px/i,'')];
+                $G("width").value = value[1];
+                $G('widthUnit').options[value[2] ? 0:1].selected = true;
+                value = table.getAttribute('height');
+                value = !value ? ['','']:/%$/.test(value) ? value.match(/(\d+)(%)?/) : ['',value.replace(/px/i,'')];
+                $G("height").value = value[1];
+                $G('heightUnit').options[value[2]?0:1].selected = true;
+                $G('borderColor').value = (table.getAttribute('borderColor')||"#000000").toUpperCase();
+                $G("border").value = table.getAttribute("border");
+                for(var i=0,ip,opts= $G("align").options;ip=opts[i++];){
+                    if(ip.value == (table.getAttribute('align' )||"").toLowerCase()){
+                        ip.selected = true;
+                        break;
                     }
                 }
-                rowlength += tmpcells>0 ? 1 : 0;
-                celllength = tmpcells > celllength ? tmpcells : celllength;
+                $G("borderType").options[table.getAttribute('borderType') == '1' ? 1: 0].selected = true;
+                $G("bgColor").value = (table.getAttribute("bgColor")||"").toUpperCase();
+                createTable();
             }
-            
-            g("rowCount").value = rowlength;
-            g("rowCount").setAttribute("readonly","readonly");
-            g("rowCount").onmousedown = function(){
-                return false;
-            };
-            g("colCount").value = celllength;
-            g("colCount").setAttribute("readonly","readonly");
-            g("colCount").onmousedown = function(){
-                return false;
-            };
-            g("cellpadding").value = oldtable.getAttribute("cellpadding") || "";
-            g("cellspacing").value = oldtable.getAttribute("cellspacing") || "";
-            g("tableWidth").value = oldtable.offsetWidth || "";
-            g("tableHeight").value = oldtable.offsetHeight || "";
-            g("border-color").value = oldtable.getAttribute("bordercolor")? oldtable.getAttribute("bordercolor").toUpperCase(): "#000000";
-            g("border").value = oldtable.getAttribute("border") || 1;
-            g("background-color").value = oldtable.getAttribute("bgColor")? oldtable.getAttribute("bgColor").toUpperCase():"#FFFFFF";
-            g("alignment").value = alignmode;
-            g("tablealign").value = oldtable.getAttribute("align") || "";
-        }
-    }else{
-        var ipt = g("rowCount");
-        var isIE = !!window.ActiveXObject;
-        if ( isIE ) {
-            setTimeout( function () {
-                var r = ipt.createTextRange();
-                r.collapse( false );
-                r.select();
-            } );
-        }
-        ipt.focus();
-    }
-    function show(el){
-        activeEl = el;
-        colorpicker.showAnchor(el);
-    }
-    function g(id){
-        return document.getElementById(id);
-    }
-    dialog.onok = function(){
-        var rows = g("rowCount").value,
-            cols = g("colCount").value,
-            width = g("tableWidth").value,
-            height = g("tableHeight").value,
-            border = g("border").value,
-            cellspacing = g("cellspacing").value,
-            cellpadding = g("cellpadding").value,
-            align = g("alignment").value,
-            bordercolor = g("border-color").value || "#000000",
-            backgroundcolor = g("background-color").value || "#FFFFFF",
-            tablealign = g("tablealign").value;
-        if(!/^[1-9]+[0-9]*$/.test(rows)){
-            alert("请输入正确行数");
-            return false;
-        }
-        if(!/^[1-9]+[0-9]*$/.test(cols)){
-            alert("请输入正确列数");
-            return false;
-        }
-        if(width && !/^[1-9]+[0-9]*$/.test(width)){
-            alert("宽度输入不正确");
-            return false;
-        }
-        if(height && !/^[1-9]+[0-9]*$/.test(height)){
-            alert("高度输入不正确");
-            return false;
-        }
-        if(border && !/^[0-9]*$/.test(border)){
-            alert("表格边框输入不正确");
-            return false;
-        }
-        if(cellspacing && !/^[0-9]*$/.test(cellspacing)){
-            alert("间距输入不正确");
-            return false;
-        }
-        if(cellpadding && !/^[0-9]*$/.test(cellpadding)){
-            alert("边距输入不正确");
-            return false;
-        }
-        if(bordercolor && !/^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(bordercolor)){
-            alert("颜色值输入错误");
-            return false;
-        }
-        if(backgroundcolor && !/^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(backgroundcolor)){
-            alert("颜色值输入错误");
-            return false;
-        }
-        var table = {
-            numRows : rows,
-            numCols : cols,
-            border : border,
-            cellpadding : cellpadding,
-            cellspacing : cellspacing,
-            width : width,
-            height : height,
-            align : align,
-            bordercolor:bordercolor,
-            backgroundcolor:backgroundcolor,
-            tablealign : tablealign
-        };
-        if(oldtable){
-            editor.execCommand('edittable',table );
         }else{
-            editor.execCommand('inserttable',table );
+            $focus($G("numRows"));
         }
-    };
-    
-</script>
+        init();
+
+        domUtils.on($G("width"),"keyup",function(){
+            var value = this.value;
+            if(value>100){
+                $G("widthUnit").value="px";
+            }
+        });
+        domUtils.on($G("height"),"keyup",function(){
+            var value = this.value;
+            if(value>100){
+                $G("heightUnit").value="px";
+            }
+        });
+
+        dialog.onok = function(){
+            for(var i=0,opt={},ci;ci=inputs[i++];){
+                switch (ci.id){
+                    case 'numRows':
+                    case 'numCols':
+                    case 'height':
+                    case 'width':
+                        if(ci.value && !/^[1-9]+[0-9]*$/.test(ci.value)){
+                            alert(lang.errorNum);
+                            $focus(ci);
+                            return false;
+                        }
+                        break;
+                    case 'cellspacing':
+                    case 'cellpadding':
+                    case 'border':
+                        if(ci.value && !/^[0-9]*$/.test(ci.value)){
+                            alert(lang.errorNum);
+                            $focus(ci);
+                            return false;
+                        }
+                        break;
+                    case 'bgColor':
+                    case 'borderColor':
+                        if(ci.value && !/^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(ci.value)){
+                            alert(lang.errorColor);
+                            $focus(ci);
+                            return false;
+                        }
+                        break;
+                    default:
+                }
+                opt[ci.id] = ci.value || (ci.id == 'border' ? 0 : '')
+            }
+
+            for(var i=0,ci;ci=selects[i++];){
+                opt[ci.id] = ci.value.toUpperCase()
+            }
+            editor.execCommand(state == -1 ? 'inserttable' : 'edittable',opt );
+        };
+    </script>
 </body>
 </html>

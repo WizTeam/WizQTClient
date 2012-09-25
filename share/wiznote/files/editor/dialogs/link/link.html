@@ -2,129 +2,125 @@
         "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
-    <title>插入链接</title>
+    <title></title>
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
-    <script type="text/javascript" src="../internal.js"></script>
     <style type="text/css">
-        *{color: #838383}
-        body {
-            font-size: 12px;
-            width:382px;
-            height: 100px;
-            overflow: hidden;
-            margin:0px;padding:0px;
-        }
-         span.txt{width: 60px;height:30px;line-height: 30px;display: block;float:left}
-        .content{
-            padding: 9px 0px 0px 15px;
-            height:100%;
-        }
-        #link_href,
-        #title{width:286px;height:21px;background: #FFF;border:1px solid #d7d7d7;padding: 0px; margin: 0px; line-height:21px}
-
-        #link_href{width:208px}
-        .content table{padding:0px;margin:0px}
-        .content table tr{padding:0px;margin:0px; list-style: none;height: 20px; line-height: 20px;}
-
-        .red{color:red;}
+        *{margin:0;padding:0;color: #838383;}
+        table{font-size: 12px;margin: 10px;line-height: 30px}
+        .txt{width:300px;height:21px;line-height:21px;border:1px solid #d7d7d7;}
     </style>
 </head>
 <body>
-<div class="content">
     <table>
         <tr>
-            <td><span class="txt">链接地址：</span>
-                <select id="protocol">
-                    <option value="http://">http://</option>
-                    <option value="https://">https://</option>
-                </select>
-                <input id="link_href" type="text" /><br/>
-            <span id="msg2" class="red"></span></td>
+            <td><label for="text"> <var id="lang_input_text"></var></label></td>
+            <td><input class="txt" id="text" type="text" disabled="true"/></td>
         </tr>
         <tr>
-            <td><span class="txt">标题：</span><input id="title" type="text"/></td>
+            <td><label for="href"> <var id="lang_input_url"></var></label></td>
+            <td><input class="txt" id="href" type="text" /></td>
         </tr>
         <tr>
-             <td><span>是否在新窗口打开：</span><input id="target" type="checkbox"/></td>
+            <td><label for="title"> <var id="lang_input_title"></var></label></td>
+            <td><input class="txt" id="title" type="text"/></td>
+        </tr>
+        <tr>
+             <td colspan="2">
+                 <label for="target"><var id="lang_input_target"></var></label>
+                 <input id="target" type="checkbox"/>
+             </td>
+        </tr>
+        <tr>
+            <td colspan="2" id="msg"></td>
         </tr>
     </table>
-
-</div>
+    <script type="text/javascript" src="../internal.js"></script>
 <script type="text/javascript">
-    var a = editor.queryCommandValue("link"),link = {};
-    if(a){
-        link = a;
-    }
-    function G(id){
-        return document.getElementById(id);
-    }
-    function jbind(obj,evt,fun){
-        if(obj.addEventListener){  // firefox,w3c
-            obj.addEventListener(evt,fun,false);
-        }else{// ie
-            obj.attachEvent("on"+evt,function(){fun.apply(obj);});
+    var range = editor.selection.getRange(),
+        link = range.collapsed ? editor.queryCommandValue( "link" ) : editor.selection.getStart(),
+        url,
+        text = $G('text'),
+        rangeLink = domUtils.findParentByTagName(range.getCommonAncestor(),'a',true),
+        orgText;
+    link = domUtils.findParentByTagName( link, "a", true );
+    if(link){
+        url = utils.html(link.getAttribute( 'data_ue_src' ) || link.getAttribute( 'href', 2 ));
+
+        if(rangeLink === link && !link.getElementsByTagName('img').length){
+            text.removeAttribute('disabled');
+            orgText = text.value = link[browser.ie ? 'innerText':'textContent'];
+        }else{
+            text.setAttribute('disabled','true');
+            text.value = lang.validLink;
         }
-    }
-    function initIpt(){
-        if(link.href){
-            G("title").value = link.title ? link.title : "";
-            var href = link.getAttribute('data_ue_src') || link.href;
-            /^(?:http:\/\/)/ig.test(href) ? G("protocol").value="http://" : G("protocol").value="https://";
-            G("link_href").value = href.replace(/^(?:https?:\/\/)|(?:\/)$/ig,"");
-            if(link.target == "_blank"){
-                G("target").checked = true;
-            }
+
+    }else{
+        if(range.collapsed){
+            text.removeAttribute('disabled');
+            text.value = '';
+        }else{
+            text.setAttribute('disabled','true');
+            text.value = lang.validLink;
         }
-        var ipt = G("link_href");
-        ipt.focus();
-        ipt.style.cssText = 'border:1px solid #ccc;background-color:#fafafa;';
-        jbind(ipt,'focus',function(){
-            this.style.cssText = 'border:1px solid #ccc;background-color:#fff;';
-        });
-        jbind(ipt,'blur',function(){
-            this.style.cssText = 'border:1px solid #ccc;background-color:#fafafa;';
-        });
+
     }
-   
+    $G("title").value = url ? link.title : "";
+    $G("href").value = url ? url: '';
+    $G("target").checked = url && link.target == "_blank" ? true :  false;
+    $focus($G("href"));
+
     function handleDialogOk(){
-        var href = G('link_href').value || '';
-        var obj = {},td,link;
-        obj.href = href.replace(/^\s+|\s+$/g, '');
-        if(!obj.href){
-            G("msg2").innerHTML = "请输入链接地址！";
-            return false;
+        var href =$G('href').value.replace(/^\s+|\s+$/g, '');
+        if(href){
+            if(!hrefStartWith(href,["http","/","ftp://"])) {
+                href  = "http://" + href;
+            }
+            var obj = {
+                'href' : href,
+                'target' : $G("target").checked ? "_blank" : '_self',
+                'title' : $G("title").value.replace(/^\s+|\s+$/g, ''),
+                'data_ue_src':href
+            };
+            //修改链接内容的情况太特殊了，所以先做到这里了
+            //todo:情况多的时候，做到command里
+            if(orgText && text.value != orgText){
+                link[browser.ie ? 'innerText' : 'textContent'] =  obj.textValue = text.value;
+                range.selectNode(link).select()
+            }
+            if(range.collapsed){
+                obj.textValue = text.value;
+            }
+            editor.execCommand('link',obj );
+            dialog.close();
         }
-        obj.href = G("protocol").value+obj.href;
-        if(G("target").checked){
-            obj["target"] = "_blank";
-        } else {
-            obj["target"] = "_self";
-        }
-        if(G("title").value.replace(/^\s+|\s+$/g, '')){
-            obj["title"] = G("title").value.replace(/^\s+|\s+$/g, '');
-        }
-        editor.execCommand('link', obj);
-        dialog.close();
     }
-    var keyHandle = function(evt){
+    dialog.onok = handleDialogOk;
+    $G('href').onkeydown = $G('title').onkeydown = function(evt){
         evt = evt || window.event;
         if (evt.keyCode == 13) {
             handleDialogOk();
             return false;
         }
+    };
+    $G('href').onblur = function(){
+        if(!hrefStartWith(this.value,["http","/","ftp://"])){
+            $G("msg").innerHTML = "<span style='color: red'>"+lang.httpPrompt+"</span>";
+        }else{
+            $G("msg").innerHTML = "";
+        }
+    };
+
+    function hrefStartWith(href,arr){
+        href = href.replace(/^\s+|\s+$/g, '');
+        for(var i=0,ai;ai=arr[i++];){
+            if(href.indexOf(ai)==0){
+                return true;
+            }
+        }
+        return false;
     }
-    initIpt();
-    dialog.onok = handleDialogOk;
-    G('link_href').onkeydown = keyHandle;
-    var ipt = G('link_href');
-    var isIE = !!window.ActiveXObject;
-    if (isIE) {
-        setTimeout(function (){
-            var r = ipt.createTextRange();
-            r.collapse(false);
-            r.select();
-        });
-    }
+
+
 </script>
 </body>
 </html>
