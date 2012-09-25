@@ -9,7 +9,6 @@
         var UEDITOR_HOME_URL = "./";
     </script>
     <script type="text/javascript" charset="utf-8" src="editor_config.js"></script>
-
     <script type="text/javascript" charset="utf-8" src="editor_all.js"></script>
     
     <link rel="stylesheet" type="text/css" href="themes/default/ueditor.css"/>
@@ -20,11 +19,7 @@
     </style>
 </head>
 <body>
-
-    <textarea id="editorArea" style="width:100%" cols="10" rows="10">
-    </textarea>
-    
-    
+    <script type="text/plain" id="editorArea"></script>
 
     <script type="text/javascript">
 
@@ -36,6 +31,49 @@
         var currentGUID = "";
         var currentFileName = "";
         var editingDocument = true;
+
+        try {
+
+            var strSave = "Save";
+            //
+            var saveButton = new baidu.editor.ui.Button({
+                className: 'edui-for-mybutton',
+                title: strSave,
+                label: strSave,
+                showText: false,
+                onclick: function() {
+                    //
+                    saveDocument(false);
+                    //
+                }
+            });
+            //
+
+
+            var editorOption = {
+            toolbars:
+            [
+                [saveButton,
+                '|',
+                'FontFamily', 'FontSize', '|', 'Bold', 'Italic', 'Underline', 'StrikeThrough', '|',
+                'JustifyLeft', 'JustifyCenter', 'JustifyRight', 'JustifyJustify', '|',
+                'Indent', 'Outdent', 'InsertOrderedList', 'InsertUnorderedList', '|',
+                'Link', 'ForeColor', 'BackColor', '|', 'RemoveFormat', 'Undo', 'Redo'
+                ]
+            ],
+                elementPathEnabled: false,
+                wordCount: false,
+                maximumWords: 100000000,
+                fullscreen: true
+            };
+            editor = new baidu.editor.ui.Editor(editorOption);
+            editor.render('editorArea');
+            //editor.ui.setFullScreen(true);
+            editor.addListener('afterexeccommand', onEditorAfterExecCommand);
+            editor.addListener('keydown', onEditorKeyDown);
+        } catch (err) {
+            alert(err);
+        }
 
         function setModified(flag) {
             modified = flag;
@@ -81,55 +119,14 @@
                 }
             }
         }
-        //
-        try {
-
-            var strSave = "Save";
-            //
-            var saveButton = new baidu.editor.ui.Button({
-                className: 'edui-for-mybutton',
-                title: strSave,
-                label: strSave,
-                showText: false,
-                onclick: function() {
-                    //
-                    saveDocument(false);
-                    //
-                }
-            });
-            //
-
-            var editorOption = {
-            toolbars: 
-            [
-                [saveButton,
-                '|',
-                'FontFamily', 'FontSize', '|', 'Bold', 'Italic', 'Underline', 'StrikeThrough', '|',
-                'JustifyLeft', 'JustifyCenter', 'JustifyRight', 'JustifyJustify', '|',
-                'Indent', 'Outdent', 'InsertOrderedList', 'InsertUnorderedList', '|',
-                'Link', 'ForeColor', 'BackColor', '|', 'RemoveFormat', 'Undo', 'Redo'
-                ]
-            ],
-                elementPathEnabled: false,
-                wordCount:false, //是否开启字数统计
-                maximumWords:100000000 //允许的最大字符数
-            };
-            editor = new baidu.editor.ui.Editor(editorOption);
-            editor.render('editorArea');
-            editor.ui.setFullScreen(true);
-            editor.addListener('afterexeccommand', onEditorAfterExecCommand);
-            editor.addListener('keydown', onEditorKeyDown);
-        }
-        catch (err) {
-            alert(err);
-        }
-        //
 
         function isNewDocument() {
             return currentGUID == null || currentGUID == "";
         }
 
         function setEditorHtml(html) {
+            // use sestContent can't display images on editor, why?
+            //editor.setContent('<p>' + html + '</p>');
             editor.document.body.innerHTML = '<p>' + html + '</p>';
             editor.undoManger.reset();
             setModified(false);
@@ -157,9 +154,10 @@
             }
             if (isEditing() == editing)
                 return;
-            //
-            var bar = document.getElementsByClassName("edui-editor-toolbarbox")[0].style.display = editing ? "block" : "none";
-            editor.document.body.contentEditable = editing ? true : false;
+
+            document.getElementsByClassName("edui-editor-toolbarbox")[0].style.display = editing ? "block" : "none";
+
+            editing ? editor.setEnabled() : editor.setDisabled();
             editingDocument = editing;
             //
             if (editing) {
@@ -171,15 +169,19 @@
             try {
                 currentGUID = guid;
                 currentFileName = filename;
-                //
+
                 var html = "";
                 if (!isNewDocument()) {
                     html = objCommon.LoadTextFromFile(filename);
                 }
-                //
-                setEditorHtml(html);
-                setEditing(editing);
-                //
+
+                // we need wait until ueditor initialized, otherwise 'undefined' error will be fired!
+                // maybe it's an issue of ueditor.
+                setTimeout(function () {
+                    setEditorHtml(html);
+                    setEditing(editing);
+		}, 50);
+
                 return true;
             }
             catch (err) {
