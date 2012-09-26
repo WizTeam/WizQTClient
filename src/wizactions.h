@@ -14,22 +14,22 @@ class CWizActions
 {
 public:
     CWizActions(QObject* parent);
+
 private:
     QObject* m_parent;
     std::map<CString, QAction*> m_actions;
-    //
     WIZACTION* actionsData();
-private:
     QAction* addAction(WIZACTION& action);
+
 public:
     void init();
-    QAction* actionFromName(const CString& strActionName);
-    CWizAnimateAction* animateActionFromName(const CString& strActionName);
-    //
-    QMenu* toMenu(QWidget* parent, CWizSettings& settings, const CString& strSection);
-    void buildMenu(QMenu* pMenu, CWizSettings& settings, const CString& strSection);
-    void buildMenuBar(QMenuBar* menuBar, const CString& strFileName);
-    void buildActionMenu(QAction* pAction, QWidget* parent, const CString& strFileName);
+    QAction* actionFromName(const QString& strActionName);
+    CWizAnimateAction* animateActionFromName(const QString& strActionName);
+
+    QMenu* toMenu(QWidget* parent, CWizSettings& settings, const QString& strSection);
+    void buildMenu(QMenu* pMenu, CWizSettings& settings, const QString& strSection);
+    void buildMenuBar(QMenuBar* menuBar, const QString& strFileName);
+    void buildActionMenu(QAction* pAction, QWidget* parent, const QString& strFileName);
 };
 
 #endif // WIZACTIONS_H

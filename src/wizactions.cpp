@@ -57,23 +57,22 @@ WIZACTION* CWizActions::actionsData()
 
 QAction* CWizActions::addAction(WIZACTION& action)
 {
-    CString strSlot = "1on_" + action.strName + "_triggered()";
-    //
-    CString strText = action.strText;
-    //
+    QString strText = action.strText;
+    QString strIconName = action.strName;
+    QString strSlot = "1on_" + action.strName + "_triggered()";
+
+
     QAction* pAction = new QAction(strText, m_parent);
     pAction->setObjectName(action.strName);
-    //
-    CString strIconName = action.strName;
+
     if (!strIconName.isEmpty())
     {
         pAction->setIcon(WizLoadSkinIcon(strIconName));
     }
-    //
+
     m_actions[action.strName] = pAction;
-    //
     QObject::connect(pAction, "2triggered()", m_parent, strSlot.toUtf8());
-    //
+
     return pAction;
 }
 
@@ -92,45 +91,44 @@ void CWizActions::init()
     }
 }
 
-QAction* CWizActions::actionFromName(const CString& strActionName)
+QAction* CWizActions::actionFromName(const QString& strActionName)
 {
     QAction* pAction = m_actions[strActionName];
-    //
     if (pAction)
         return pAction;
-    //
+
     WIZACTION data = {strActionName, strActionName};
+
     return addAction(data);
 }
-CWizAnimateAction* CWizActions::animateActionFromName(const CString& strActionName)
+
+CWizAnimateAction* CWizActions::animateActionFromName(const QString& strActionName)
 {
     return dynamic_cast<CWizAnimateAction*>(actionFromName(strActionName));
 }
 
-
-QMenu* CWizActions::toMenu(QWidget* parent, CWizSettings& settings, const CString& strSection)
+QMenu* CWizActions::toMenu(QWidget* parent, CWizSettings& settings, const QString& strSection)
 {
     QMenu* pMenu = new QMenu(parent);
-    //
-    CString strLocalText = QObject::tr(strSection.toUtf8());
+    QString strLocalText = QObject::tr(strSection.toUtf8());
+
     pMenu->setTitle(strLocalText);
-    //
     buildMenu(pMenu, settings, strSection);
-    //
+
     return pMenu;
 }
 
-void CWizActions::buildMenu(QMenu* pMenu, CWizSettings& settings, const CString& strSection)
+void CWizActions::buildMenu(QMenu* pMenu, CWizSettings& settings, const QString& strSection)
 {
     int index = 0;
     while (true)
     {
-        CString strKey = WizIntToStr(index);
-        //
-        CString strAction = settings.GetString(strSection, strKey);
+        QString strKey = WizIntToStr(index);
+        QString strAction = settings.GetString(strSection, strKey);
+
         if (strAction.isEmpty())
             break;
-        //
+
         if (strAction.startsWith("-"))
         {
             pMenu->addSeparator();
@@ -138,31 +136,30 @@ void CWizActions::buildMenu(QMenu* pMenu, CWizSettings& settings, const CString&
         else if (strAction.startsWith("+"))
         {
             strAction.remove(0, 1);
-            //
             pMenu->addMenu(toMenu(pMenu, settings, strAction));
         }
         else
         {
             pMenu->addAction(actionFromName(strAction));
         }
-        //
+
         index++;
     }
 }
 
-void CWizActions::buildMenuBar(QMenuBar* menuBar, const CString& strFileName)
+void CWizActions::buildMenuBar(QMenuBar* menuBar, const QString& strFileName)
 {
     CWizSettings settings(strFileName);
     //
     int index = 0;
     while (true)
     {
-        CString strKey = WizIntToStr(index);
-        //
-        CString strAction = settings.GetString("MainMenu", strKey);
+        QString strKey = WizIntToStr(index);
+        QString strAction = settings.GetString("MainMenu", strKey);
+
         if (strAction.isEmpty())
             break;
-        //
+
         if (strAction.startsWith("-"))
         {
             continue;
@@ -170,22 +167,22 @@ void CWizActions::buildMenuBar(QMenuBar* menuBar, const CString& strFileName)
         else if (strAction.startsWith("+"))
         {
             strAction.remove(0, 1);
-            CString strLocalText = QObject::tr(strAction.toUtf8());
+            QString strLocalText = QObject::tr(strAction.toUtf8());
             QMenu* pMenu = menuBar->addMenu(strLocalText);
-            //
+
             buildMenu(pMenu, settings, strAction);
         }
         else
         {
             menuBar->addAction(actionFromName(strAction));
         }
-        //
+
         index++;
     }
 }
 
 
-void CWizActions::buildActionMenu(QAction* pAction, QWidget* parent, const CString& strFileName)
+void CWizActions::buildActionMenu(QAction* pAction, QWidget* parent, const QString& strFileName)
 {
     CWizSettings settings(strFileName);
     //
