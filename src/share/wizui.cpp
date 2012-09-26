@@ -118,14 +118,12 @@ QWidget* WizInitWidgetMarginsEx(QWidget* widget, const QString& name)
 {
     QWidget* wrap = new QWidget(widget->parentWidget());
     QLayout* layout = new QBoxLayout(QBoxLayout::LeftToRight, wrap);
+
     wrap->setLayout(layout);
     layout->setMargin(0);
-    //
+
     WizInitWidgetMargins(wrap, name);
-    //
     layout->addWidget(widget);
-    //
+
     return wrap;
 }
-
-

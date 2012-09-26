@@ -17,7 +17,7 @@ public:
 
 private:
     QObject* m_parent;
-    std::map<CString, QAction*> m_actions;
+    std::map<QString, QAction*> m_actions;
     WIZACTION* actionsData();
     QAction* addAction(WIZACTION& action);
 
@@ -28,8 +28,8 @@ public:
 
     QMenu* toMenu(QWidget* parent, CWizSettings& settings, const QString& strSection);
     void buildMenu(QMenu* pMenu, CWizSettings& settings, const QString& strSection);
-    void buildMenuBar(QMenuBar* menuBar, const QString& strFileName);
-    void buildActionMenu(QAction* pAction, QWidget* parent, const QString& strFileName);
+//    void buildMenuBar(QMenuBar* menuBar, const QString& strFileName);
+//    void buildActionMenu(QAction* pAction, QWidget* parent, const QString& strFileName);
 };
 
 #endif // WIZACTIONS_H

@@ -61,8 +61,9 @@ QAction* CWizActions::addAction(WIZACTION& action)
     QString strIconName = action.strName;
     QString strSlot = "1on_" + action.strName + "_triggered()";
 
-
     QAction* pAction = new QAction(strText, m_parent);
+
+    // Used for building menu from ini file
     pAction->setObjectName(action.strName);
 
     if (!strIconName.isEmpty())
@@ -147,45 +148,45 @@ void CWizActions::buildMenu(QMenu* pMenu, CWizSettings& settings, const QString&
     }
 }
 
-void CWizActions::buildMenuBar(QMenuBar* menuBar, const QString& strFileName)
-{
-    CWizSettings settings(strFileName);
-    //
-    int index = 0;
-    while (true)
-    {
-        QString strKey = WizIntToStr(index);
-        QString strAction = settings.GetString("MainMenu", strKey);
-
-        if (strAction.isEmpty())
-            break;
-
-        if (strAction.startsWith("-"))
-        {
-            continue;
-        }
-        else if (strAction.startsWith("+"))
-        {
-            strAction.remove(0, 1);
-            QString strLocalText = QObject::tr(strAction.toUtf8());
-            QMenu* pMenu = menuBar->addMenu(strLocalText);
-
-            buildMenu(pMenu, settings, strAction);
-        }
-        else
-        {
-            menuBar->addAction(actionFromName(strAction));
-        }
-
-        index++;
-    }
-}
-
-
-void CWizActions::buildActionMenu(QAction* pAction, QWidget* parent, const QString& strFileName)
-{
-    CWizSettings settings(strFileName);
-    //
-    QMenu* pMenu = toMenu(parent, settings, pAction->objectName());
-    pAction->setMenu(pMenu);
-}
+//void CWizActions::buildMenuBar(QMenuBar* menuBar, const QString& strFileName)
+//{
+//    CWizSettings settings(strFileName);
+//    //
+//    int index = 0;
+//    while (true)
+//    {
+//        QString strKey = WizIntToStr(index);
+//        QString strAction = settings.GetString("MainMenu", strKey);
+//
+//        if (strAction.isEmpty())
+//            break;
+//
+//        if (strAction.startsWith("-"))
+//        {
+//            continue;
+//        }
+//        else if (strAction.startsWith("+"))
+//        {
+//            strAction.remove(0, 1);
+//            QString strLocalText = QObject::tr(strAction.toUtf8());
+//            QMenu* pMenu = menuBar->addMenu(strLocalText);
+//
+//            buildMenu(pMenu, settings, strAction);
+//        }
+//        else
+//        {
+//            menuBar->addAction(actionFromName(strAction));
+//        }
+//
+//        index++;
+//    }
+//}
+//
+//
+//void CWizActions::buildActionMenu(QAction* pAction, QWidget* parent, const QString& strFileName)
+//{
+//    CWizSettings settings(strFileName);
+//    //
+//    QMenu* pMenu = toMenu(parent, settings, pAction->objectName());
+//    pAction->setMenu(pMenu);
+//}

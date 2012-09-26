@@ -9,22 +9,21 @@
 QWidget* createSearchWidget(CWizSearchBox* searchBox)
 {
     QWidget* widget = new QWidget(searchBox);
-    QSizePolicy sizePolicy(QSizePolicy::Fixed, QSizePolicy::Expanding);
-    widget->setSizePolicy(sizePolicy);
-    //
+    //QSizePolicy sizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum);
+    //widget->setSizePolicy(sizePolicy);
+
     QIcon icon = ::WizLoadSkinIcon("search");
-    //
     QLabel* iconLabel = new QLabel(widget);
     iconLabel->setPixmap(icon.pixmap(16, 16));
-    //
+
     QLineEdit* editSearch = new QLineEdit(widget);
-    //
+
     iconLabel->setStyleSheet("QLabel{border-width:0;border-style:outset}");
     editSearch->setStyleSheet("QLineEdit{border-width:0;border-style:outset}");
-    //
+
     QHBoxLayout* layout = new QHBoxLayout(widget);
     widget->setLayout(layout);
-    //
+
     layout->setSpacing(0);
     layout->setMargin(0);
     layout->addWidget(iconLabel);
@@ -49,15 +48,15 @@ CWizSearchBox::CWizSearchBox(QWidget* parent /*= 0*/)
     : QWidget(parent)
     , m_search(createSearchWidget(this))
 {
-    QSizePolicy sizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-    setSizePolicy(sizePolicy);
-    //
+    //QSizePolicy sizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+    //setSizePolicy(sizePolicy);
+
     QBoxLayout* layout = new QBoxLayout(QBoxLayout::TopToBottom, this);
     setLayout(layout);
     layout->setMargin(0);
-    //
+
     layout->addWidget(m_search);
-    layout->setStretch(0, 1);
+    //layout->setStretch(0, 1);
 }
 
 #endif

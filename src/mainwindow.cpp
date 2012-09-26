@@ -169,21 +169,23 @@ void MainWindow::initToolBar()
         //
         connect(buttonOptions, SIGNAL(clicked()), this, SLOT(on_actionOptions_triggered()));
     }
-    m_toolBar->addAction(m_actions->actionFromName("actionPopupMainMenu"));
-    //
+
+    //CWizSearchBox* searchBox = new CWizSearchBox();
+    //connect(searchBox, SIGNAL(doSearch(const QString&)), this, SLOT(on_search_doSearch(const QString&)));
+    //m_toolBar->addWidget(searchBox);
+
     m_toolBar->addWidget(new CWizFixedSpacer(QSize(20, 1), m_toolBar));
-    //
-    CWizSearchBox* searchBox = new CWizSearchBox();
-    connect(searchBox, SIGNAL(doSearch(const QString&)), this, SLOT(on_search_doSearch(const QString&)));
-    m_toolBar->addWidget(searchBox);
-    //
+
+    m_toolBar->addAction(m_actions->actionFromName("actionPopupMainMenu"));
+
     m_toolBar->addWidget(new CWizFixedSpacer(QSize(2, 1), m_toolBar));
-    //
+
     m_toolBar->setStyle(WizGetStyle());
-    //
+
     m_toolBar->layout()->setMargin(::WizGetSkinInt("ToolBar", "Margin", m_toolBar->layout()->margin()));
-#endif
-    //
+
+#endif // #ifdef Q_OS_MAC
+
     resetNotice();
 }
 
@@ -191,25 +193,24 @@ void MainWindow::initClient()
 {
     QWidget* client = new QWidget(this);
     setCentralWidget(client);
-    //
+
     QPalette pal = client->palette();
     pal.setColor(QPalette::Window, WizGetClientBackgroundColor());
     client->setPalette(pal);
     client->setAutoFillBackground(true);
-    //
 
 #ifndef Q_OS_MAC
     WizInitWidgetMargins(client, "Client");
     WizInitWidgetMargins(m_doc, "Document");
 #endif
-    //
+
     QBoxLayout* layout = new QBoxLayout(QBoxLayout::LeftToRight, client);
     client->setLayout(layout);
     layout->setMargin(0);;
-    //
+
     CWizSplitter *splitter = new CWizSplitter(client);
     layout->addWidget(splitter);
-    //
+
 #ifndef Q_OS_MAC
     int splitterWidth = ::WizGetSkinInt("splitter", "Width", splitter->splitterWidth());
     splitter->setSplitterWidth(splitterWidth);
@@ -217,25 +218,40 @@ void MainWindow::initClient()
     QColor splitterColor = ::WizGetSkinColor("splitter", "Color", defSplitterColor);
     splitter->setSplitterColor(splitterColor);
 #endif
-    //
+
 #ifndef Q_OS_MAC
     splitter->addWidget(WizInitWidgetMarginsEx(m_category, "Category"));
-    splitter->addWidget(WizInitWidgetMarginsEx(m_documents, "Documents"));
+    //splitter->addWidget(WizInitWidgetMarginsEx(m_documents, "Documents"));
 #else
     splitter->addWidget(m_category);
-    splitter->addWidget(m_documents);
+    //splitter->addWidget(m_documents);
 #endif
+
+    CWizSearchBox* searchBox = new CWizSearchBox();
+    connect(searchBox, SIGNAL(doSearch(const QString&)), this, SLOT(on_search_doSearch(const QString&)));
+
+    QBoxLayout* layoutDocuments = new QBoxLayout(QBoxLayout::TopToBottom, client);
+
+    QWidget* documents = new QWidget(splitter);
+    documents->setLayout(layoutDocuments);
+
+    layoutDocuments->addWidget(searchBox);
+    layoutDocuments->addWidget(m_documents);
+
+    splitter->addWidget(documents);
+
     splitter->addWidget(m_doc);
-    //
+
     splitter->setStretchFactor(0, 0);
     splitter->setStretchFactor(1, 0);
     splitter->setStretchFactor(2, 1);
-    //
+
     m_splitter = splitter;
-    //
+
 #ifndef Q_OS_MAC
     //connect(splitter, SIGNAL(splitterMoved(int,int)), this, SLOT(on_client_splitterMoved(int, int)));
 #endif
+
 }
 
 void MainWindow::initStatusBar()
@@ -463,12 +479,12 @@ void MainWindow::on_actionPopupMainMenu_triggered()
     QAction* pAction = m_actions->actionFromName("actionPopupMainMenu");
     QRect rc = m_toolBar->actionGeometry(pAction);
     QPoint pt = m_toolBar->mapToGlobal(QPoint(rc.left(), rc.bottom()));
-    //
+
     CWizSettings settings(::WizGetResourcesPath() + "files/mainmenu.ini");
-    //
+
     QMenu* pMenu = new QMenu(this);
     m_actions->buildMenu(pMenu, settings, pAction->objectName());
-    //
+
     pMenu->popup(pt);
 }
 
