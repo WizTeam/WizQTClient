@@ -27,7 +27,7 @@ OBJECTIVE_SOURCES += share/wizuihelper_mac.mm \
 
 
 SOURCES += main.cpp\
-        mainwindow.cpp \
+    mainwindow.cpp \
     share/wizqthelper.cpp \
     share/wizmisc.cpp \
     share/sqlite3.c \
@@ -98,7 +98,8 @@ SOURCES += main.cpp\
     share/wizimagepushbutton.cpp \
     wiztaglistwidget.cpp \
     wizoptionswidget.cpp \
-    proxydialog.cpp
+    proxydialog.cpp \
+    wizpreferencewindow.cpp
 
 HEADERS  += mainwindow.h \
     share/wizqthelper.h \
@@ -177,7 +178,8 @@ HEADERS  += mainwindow.h \
     mac/wizmacicon.h \
     wiztaglistwidget.h \
     wizoptionswidget.h \
-    proxydialog.h
+    proxydialog.h \
+    wizpreferencewindow.h
 
 
 mac:HEADERS +=     \

@@ -6,6 +6,7 @@ WizDocumentViewMode WizGetDefaultNoteView()
 {
     return (WizDocumentViewMode)WizGetInt("Common", "NoteView", viewmodeKeep);
 }
+
 void WizSetDefaultNoteView(WizDocumentViewMode view)
 {
     WizSetInt("Common", "NoteView", view);

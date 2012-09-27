@@ -5,6 +5,7 @@
 #include "wizdocumentview.h"
 #include "wizactions.h"
 #include "aboutdialog.h"
+#include "wizpreferencewindow.h"
 
 #include <QDir>
 #include <QMessageBox>
@@ -61,14 +62,13 @@ MainWindow::MainWindow(CWizDatabase& db, QWidget *parent) :
     m_bRestart(false),
     m_bUpdatingSelection(false)
 {
-    setWindowTitle(tr("WizNote"));
-    //
     initActions();
     initMenuBar();
     initToolBar();
     initClient();
     initStatusBar();
-    //
+
+    setWindowTitle(tr("WizNote"));
 }
 
 MainWindow::~MainWindow()
@@ -471,6 +471,12 @@ void MainWindow::on_actionOptions_triggered()
         m_options->showAtPoint(pt);
     }
 #endif
+}
+
+void MainWindow::on_actionPreference_triggered()
+{
+    CWizPreferenceWindow preference(this);
+    preference.exec();
 }
 
 #ifndef Q_OS_MAC

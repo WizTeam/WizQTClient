@@ -139,6 +139,7 @@ public slots:
     void on_actionLogout_triggered();
     void on_actionAbout_triggered();
     void on_actionOptions_triggered();
+    void on_actionPreference_triggered();
 #ifndef Q_OS_MAC
     void on_actionPopupMainMenu_triggered();
     void on_client_splitterMoved(int pos, int index);
