@@ -1,59 +1,54 @@
 #ifndef WIZSETTINGS_H
 #define WIZSETTINGS_H
 
-#include "wizqthelper.h"
 #include <QSettings>
+
+#include "wizqthelper.h"
+#include "wizmisc.h"
+
 
 class CWizSettings : public QSettings
 {
 public:
-    CWizSettings(const CString& strFileName);
-public:
-    CString GetString(const CString& strSection, const CString& strKey, const CString& strDef = "");
-    BOOL SetString(const CString& strSection, const CString& strKey, const CString& str);
+    CWizSettings(const QString& strFileName);
 
-    int GetInt(const CString& strSection, const CString& strKey, int nDef = 0);
-    BOOL SetInt(const CString& strSection, const CString& strKey, int val);
-
-    QColor GetColor(const CString& strSection, const CString& strKey, QColor defColor);
-
-    CString GetEncryptedString(const CString& strSection, const CString& strKey, const CString& strDef = "");
-    BOOL SetEncryptedString(const CString& strSection, const CString& strKey, const CString& str);
-    //
     void GetSections(CWizStdStringArray& arrayAction);
-    void GetKeys(const CString& strSection, CWizStdStringArray& arrayAction);
+    void GetKeys(const QString& strSection, CWizStdStringArray& arrayAction);
+
+    QString GetString(const QString& strSection, const QString& strKey, const QString& strDef = "");
+    BOOL SetString(const QString& strSection, const QString& strKey, const QString& str);
+
+    int GetInt(const QString& strSection, const QString& strKey, int nDef = 0);
+    BOOL SetInt(const QString& strSection, const QString& strKey, int val);
+
+    BOOL GetBool(const QString& strSection, const QString& strKey, bool def);
+    BOOL SetBool(const QString& strSection, const QString& strKey, bool def);
+
+    QColor GetColor(const QString& strSection, const QString& strKey, QColor defColor);
+
+    QString GetEncryptedString(const QString& strSection, const QString& strKey, const QString& strDef = "");
+    BOOL SetEncryptedString(const QString& strSection, const QString& strKey, const QString& str);
+
+    // proxy settings
+    QString GetProxyHost();
+    void SetProxyHost(const QString& val);
+    int GetProxyPort();
+    void SetProxyPort(int val);
+    QString GetProxyUserName();
+    void SetProxyUserName(const QString& val);
+    QString GetProxyPassword();
+    void SetProxyPassword(const QString& val);
+
 };
 
 
 CString WizGetString(const CString& strSection, const CString& strKey, const CString& strDef = "");
 BOOL WizSetString(const CString& strSection, const CString& strKey, const CString& str);
 
-int WizGetInt(const CString& strSection, const CString& strKey, int nDef = 0);
-BOOL WizSetInt(const CString& strSection, const CString& strKey, int val);
-
-BOOL WizGetBool(const CString& strSection, const CString& strKey, bool def = false);
-BOOL WizSetBool(const CString& strSection, const CString& strKey, bool val);
-
-
-CString WizGetEncryptedString(const CString& strSection, const CString& strKey, const CString& strDef = "");
-BOOL WizSetEncryptedString(const CString& strSection, const CString& strKey, const CString& str);
-
 CString WizGetShortcut(const CString& strName, const CString& strDef = "");
 
 QColor WizGetSkinColor(const CString& strSection, const CString& strName, const QColor& colorDef);
 int WizGetSkinInt(const CString& strSection, const CString& strName, int def);
-
-
-
-QString WizGetProxyHost();
-int WizGetProxyPort();
-QString WizGetProxyUserName();
-QString WizGetProxyPassword();
-
-void WizSetProxyHost(const QString& val);
-void WizSetProxyPort(int val);
-void WizSetProxyUserName(const QString& val);
-void WizSetProxyPassword(const QString& val);
 
 
 #endif // WIZSETTINGS_H

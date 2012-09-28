@@ -4,42 +4,50 @@
 
 WizDocumentViewMode WizGetDefaultNoteView()
 {
-    return (WizDocumentViewMode)WizGetInt("Common", "NoteView", viewmodeKeep);
+    CWizSettings settings(WizGetSettingsFileName());
+    return (WizDocumentViewMode)(settings.GetInt("Common", "NoteView", viewmodeKeep));
 }
 
 void WizSetDefaultNoteView(WizDocumentViewMode view)
 {
-    WizSetInt("Common", "NoteView", view);
+    CWizSettings settings(WizGetSettingsFileName());
+    settings.SetInt("Common", "NoteView", view);
 }
 
 bool WizIsAutoSync()
 {
-    return WizGetBool("Common", "AutoSync", true);
+    CWizSettings settings(WizGetSettingsFileName());
+    return settings.GetBool("Common", "AutoSync", true);
 }
 
 void WizSetAutoSync(bool b)
 {
-    WizSetBool("Common", "AutoSync", b);
+    CWizSettings settings(WizGetSettingsFileName());
+    settings.SetBool("Common", "AutoSync", b);
 }
 
 
 bool WizIsDownloadAllNotesData()
 {
-    return WizGetBool("Common", "DownloadAllNotesData", false);
+    CWizSettings settings(WizGetSettingsFileName());
+    return settings.GetBool("Common", "DownloadAllNotesData", false);
 }
 
 void WizSetDownloadAllNotesData(bool b)
 {
-    WizSetBool("Common", "DownloadAllNotesData", b);
+    CWizSettings settings(WizGetSettingsFileName());
+    settings.SetBool("Common", "DownloadAllNotesData", b);
 }
 
 bool WizGetNotice(QString& strNotice)
 {
-    strNotice = WizGetString("Common", "Notice", strNotice);
+    CWizSettings settings(WizGetSettingsFileName());
+    strNotice = settings.GetString("Common", "Notice", strNotice);
     return !strNotice.isEmpty();
 }
 
 void WizSetNotice(const QString& strNotice)
 {
-    WizSetString("Common", "Notice", strNotice);
+    CWizSettings settings(WizGetSettingsFileName());
+    settings.SetString("Common", "Notice", strNotice);
 }

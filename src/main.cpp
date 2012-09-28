@@ -42,11 +42,11 @@ int main(int argc, char *argv[])
     translatorQt.load(QString("qt_") + localName, WizGetResourcesPath() + "languages/");
     a.installTranslator(&translatorQt);
 
-    const CString strCommon("Common");
-    //
-    CString strUserId = WizGetString(strCommon, "UserId", "");
-    CString strPassword = WizGetEncryptedString(strCommon, "Password", "");
-    //
+    //const CString strCommon("Common");
+    CWizSettings settings(WizGetSettingsFileName());
+    CString strUserId = settings.GetString("Common", "UserId", "");
+    CString strPassword = settings.GetEncryptedString("Common", "Password", "");
+
     if (strUserId.IsEmpty() || strPassword.IsEmpty())
     {
         WelcomeDialog dlgWelcome;
@@ -60,8 +60,8 @@ int main(int argc, char *argv[])
             || strPassword.IsEmpty())
             return 0;
         //
-        WizSetString(strCommon, "UserId", strUserId);
-        WizSetEncryptedString(strCommon, "Password", strPassword);
+        settings.SetString("Common", "UserId", strUserId);
+        settings.SetEncryptedString("Common", "Password", strPassword);
     }
     //
     CWizDatabase db;

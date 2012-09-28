@@ -439,9 +439,10 @@ void MainWindow::on_actionDeleteCurrentNote_triggered()
 
 void MainWindow::on_actionLogout_triggered()
 {
-    WizSetEncryptedString("Common", "Password", "");
+    CWizSettings settings(WizGetSettingsFileName());
+    settings.SetEncryptedString("Common", "Password", "");
     m_bRestart = true;
-    //
+
     close();
 }
 

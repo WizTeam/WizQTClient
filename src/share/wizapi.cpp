@@ -85,10 +85,12 @@ bool CWizApiBase::isSyncing() const
 
 void CWizApiBase::resetProxy()
 {
-    QString host = ::WizGetProxyHost();
-    int port = ::WizGetProxyPort();
-    QString userName = ::WizGetProxyUserName();
-    QString password = ::WizGetProxyPassword();
+    CWizSettings settings(WizGetSettingsFileName());
+
+    QString host = settings.GetProxyHost();
+    int port = settings.GetProxyPort();
+    QString userName = settings.GetProxyUserName();
+    QString password = settings.GetProxyPassword();
     //
     m_server.setProxy(host, port, userName, password);
 }

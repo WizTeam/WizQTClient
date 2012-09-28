@@ -2508,8 +2508,10 @@ CString WizGetSkinName()
     return "default";
 #else
 
+    CWizSettings settings(WizGetSettingsFileName());
+
 #ifdef Q_OS_LINUX
-    static CString strSkinName = WizGetString("skin", "Name", "ubuntu");
+    static CString strSkinName = settings.GetString("skin", "Name", "ubuntu");
     if (strSkinName.isEmpty())
         strSkinName = "ubuntu";
 #else
@@ -2533,6 +2535,7 @@ void WizSetSkinName(const CString& strName)
 {
     WizSetString("skin", "Name", strName);
 }
+
 void WizSetSkinDisplayName(const CString& strDisplayName)
 {
     std::map<CString, CString> skins;
@@ -2547,7 +2550,6 @@ void WizSetSkinDisplayName(const CString& strDisplayName)
         }
     }
 }
-
 #endif
 
 

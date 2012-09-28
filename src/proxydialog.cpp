@@ -10,11 +10,12 @@ ProxyDialog::ProxyDialog(QWidget *parent) :
     ui(new Ui::ProxyDialog)
 {
     ui->setupUi(this);
-    //
-    ui->editAddress->setText(WizGetProxyHost());
-    ui->editPort->setText(WizIntToStr(WizGetProxyPort()));
-    ui->editUserName->setText(WizGetProxyUserName());
-    ui->editPassword->setText(WizGetProxyPassword());
+
+    CWizSettings settings(WizGetSettingsFileName());
+    ui->editAddress->setText(settings.GetProxyHost());
+    ui->editPort->setText(WizIntToStr(settings.GetProxyPort()));
+    ui->editUserName->setText(settings.GetProxyUserName());
+    ui->editPassword->setText(settings.GetProxyPassword());
 }
 
 ProxyDialog::~ProxyDialog()
@@ -24,10 +25,11 @@ ProxyDialog::~ProxyDialog()
 
 void ProxyDialog::accept()
 {
-    WizSetProxyHost(ui->editAddress->text());
-    WizSetProxyPort(ui->editPort->text().toInt());
-    WizSetProxyUserName(ui->editUserName->text());
-    WizSetProxyPassword(ui->editPassword->text());
-    //
+    CWizSettings settings(WizGetSettingsFileName());
+    settings.SetProxyHost(ui->editAddress->text());
+    settings.SetProxyPort(ui->editPort->text().toInt());
+    settings.SetProxyUserName(ui->editUserName->text());
+    settings.SetProxyPassword(ui->editPassword->text());
+
     QDialog::accept();
 }
