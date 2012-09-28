@@ -5,11 +5,15 @@
 
 CWizPreferenceWindow::CWizPreferenceWindow(QWidget* parent)
     : QDialog(parent)
+    , m_generalTab(new CWizPreferenceGeneralTab(this))
+    , m_readingTab(new CWizPreferenceReadingTab(this))
+    , m_syncingTab(new CWizPreferenceSyncingTab(this))
 {
     m_tab = new QTabWidget(this);
-    m_tab->addTab(new CWizPreferenceGeneralTab(this), tr("General"));
-    m_tab->addTab(new CWizPreferenceReadingTab(this), tr("Reading"));
-    m_tab->addTab(new CWizPreferenceSyncingTab(this), tr("Syncing"));
+
+    m_tab->addTab(m_generalTab, tr("General"));
+    m_tab->addTab(m_readingTab, tr("Reading"));
+    m_tab->addTab(m_syncingTab, tr("Syncing"));
 
     m_buttons = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
     connect(m_buttons, SIGNAL(accepted()), this, SLOT(accept()));
@@ -22,6 +26,16 @@ CWizPreferenceWindow::CWizPreferenceWindow(QWidget* parent)
 
     setWindowTitle(tr("Preference"));
     setFixedSize(400, 600);
+
+    // chaining up
+    connect(m_generalTab, SIGNAL(settingsChanged(WizOptionsType)), SLOT(on_settingsChanged_emit(WizOptionsType)));
+    connect(m_readingTab, SIGNAL(settingsChanged(WizOptionsType)), SLOT(on_settingsChanged_emit(WizOptionsType)));
+    connect(m_syncingTab, SIGNAL(settingsChanged(WizOptionsType)), SLOT(on_settingsChanged_emit(WizOptionsType)));
+}
+
+void CWizPreferenceWindow::on_settingsChanged_emit(WizOptionsType type)
+{
+    emit settingsChanged(type);
 }
 
 CWizPreferenceGeneralTab::CWizPreferenceGeneralTab(QWidget* parent)
@@ -78,8 +92,8 @@ CWizPreferenceGeneralTab::CWizPreferenceGeneralTab(QWidget* parent)
 
     // callbacks
 #ifndef Q_OS_MAC
-    connect(comboSkin, SIGNAL(currentIndexChanged(QString)), this, SLOT(on_comboSkin_currentIndexChanged(QString)));
-    connect(m_labelRestartForSkin, SIGNAL(linkActivated(QString)), this, SLOT(on_labelRestartForSkin_linkActivated(QString)));
+    connect(comboSkin, SIGNAL(currentIndexChanged(QString)), SLOT(on_comboSkin_currentIndexChanged(QString)));
+    connect(m_labelRestartForSkin, SIGNAL(linkActivated(QString)), SLOT(on_labelRestartForSkin_linkActivated(QString)));
 #endif
 }
 
@@ -95,7 +109,7 @@ void CWizPreferenceGeneralTab::on_comboSkin_currentIndexChanged(const QString& t
 void CWizPreferenceGeneralTab::on_labelRestartForSkin_linkActivated(const QString& text)
 {
     Q_UNUSED(text);
-    close();
+
     emit restartForSettings();
 }
 #endif
@@ -134,7 +148,37 @@ CWizPreferenceReadingTab::CWizPreferenceReadingTab(QWidget* parent)
     layoutMain->addWidget(groupBoxNoteView);
     layoutMain->addStretch();
 
+    // callbacks
+    connect(radioAuto, SIGNAL(clicked(bool)), SLOT(on_radioAuto_clicked(bool)));
+    connect(radioAlwaysReading, SIGNAL(clicked(bool)), SLOT(on_radioAlwaysReading_clicked(bool)));
+    connect(radioAlwaysEditing, SIGNAL(clicked(bool)), SLOT(on_radioAlwaysEditing_clicked(bool)));
+}
 
+void CWizPreferenceReadingTab::on_radioAuto_clicked(bool chcked)
+{
+    if (chcked)
+    {
+        WizSetDefaultNoteView(viewmodeKeep);
+        emit settingsChanged(wizoptionsNoteView);
+    }
+}
+
+void CWizPreferenceReadingTab::on_radioAlwaysReading_clicked(bool chcked)
+{
+    if (chcked)
+    {
+        WizSetDefaultNoteView(viewmodeAlwaysReading);
+        emit settingsChanged(wizoptionsNoteView);
+    }
+}
+
+void CWizPreferenceReadingTab::on_radioAlwaysEditing_clicked(bool chcked)
+{
+    if (chcked)
+    {
+        WizSetDefaultNoteView(viewmodeAlwaysEditing);
+        emit settingsChanged(wizoptionsNoteView);
+    }
 }
 
 CWizPreferenceSyncingTab::CWizPreferenceSyncingTab(QWidget* parent)
@@ -165,9 +209,9 @@ CWizPreferenceSyncingTab::CWizPreferenceSyncingTab(QWidget* parent)
     layoutMain->addStretch();
 
     // callbacks
-    connect(checkAutoSync, SIGNAL(clicked(bool)), this, SLOT(on_checkAutoSync_clicked(bool)));
-    connect(checkDownloadAllNotesData, SIGNAL(clicked(bool)), this, SLOT(on_checkDownloadAllNotesData_clicked(bool)));
-    connect(labelProxySettings, SIGNAL(linkActivated(QString)), this, SLOT(on_labelProxy_linkActivated(QString)));
+    connect(checkAutoSync, SIGNAL(clicked(bool)), SLOT(on_checkAutoSync_clicked(bool)));
+    connect(checkDownloadAllNotesData, SIGNAL(clicked(bool)), SLOT(on_checkDownloadAllNotesData_clicked(bool)));
+    connect(labelProxySettings, SIGNAL(linkActivated(QString)), SLOT(on_labelProxy_linkActivated(QString)));
 }
 
 void CWizPreferenceSyncingTab::on_checkAutoSync_clicked(bool checked)
@@ -175,6 +219,7 @@ void CWizPreferenceSyncingTab::on_checkAutoSync_clicked(bool checked)
     ::WizSetAutoSync(checked);
     emit settingsChanged(wizoptionsSync);
 }
+
 void CWizPreferenceSyncingTab::on_checkDownloadAllNotesData_clicked(bool checked)
 {
     ::WizSetDownloadAllNotesData(checked);
@@ -184,10 +229,10 @@ void CWizPreferenceSyncingTab::on_checkDownloadAllNotesData_clicked(bool checked
 void CWizPreferenceSyncingTab::on_labelProxy_linkActivated(const QString & link)
 {
     Q_UNUSED(link);
-    //
+
     ProxyDialog dlg(parentWidget());
     if (QDialog::Accepted != dlg.exec())
         return;
-    //
+
     emit settingsChanged(wizoptionsSync);
 }

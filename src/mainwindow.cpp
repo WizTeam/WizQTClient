@@ -159,16 +159,16 @@ void MainWindow::initToolBar()
     //
     m_toolBar->addWidget(new CWizSpacer(m_toolBar));
     //
-    if (QAction* actionOptions = m_actions->actionFromName("actionOptions"))
-    {
-        QToolButton* buttonOptions = new QToolButton(m_toolBar);
-        buttonOptions->setIcon(actionOptions->icon());
-        buttonOptions->setText("");
-        buttonOptions->setToolTip(actionOptions->text());
-        m_optionsAction = m_toolBar->addWidget(buttonOptions);
-        //
-        connect(buttonOptions, SIGNAL(clicked()), this, SLOT(on_actionOptions_triggered()));
-    }
+    //if (QAction* actionOptions = m_actions->actionFromName("actionOptions"))
+    //{
+    //    QToolButton* buttonOptions = new QToolButton(m_toolBar);
+    //    buttonOptions->setIcon(actionOptions->icon());
+    //    buttonOptions->setText("");
+    //    buttonOptions->setToolTip(actionOptions->text());
+    //    m_optionsAction = m_toolBar->addWidget(buttonOptions);
+    //    //
+    //    connect(buttonOptions, SIGNAL(clicked()), this, SLOT(on_actionOptions_triggered()));
+    //}
 
     //CWizSearchBox* searchBox = new CWizSearchBox();
     //connect(searchBox, SIGNAL(doSearch(const QString&)), this, SLOT(on_search_doSearch(const QString&)));
@@ -450,33 +450,38 @@ void MainWindow::on_actionAbout_triggered()
     dlg.exec();
 }
 
-void MainWindow::on_actionOptions_triggered()
-{
-    if (!m_options)
-    {
-        m_options = new CWizOptionsWidget(this);
-        connect(m_options, SIGNAL(settingsChanged(WizOptionsType)), this, SLOT(on_options_settingsChanged(WizOptionsType)));
-#ifndef Q_OS_MAC
-        connect(m_options, SIGNAL(restartForSettings()), this, SLOT(on_options_restartForSettings()));
-#endif
-    }
-    //
-#ifdef Q_OS_MAC
-    QPoint pt = QCursor::pos();
-    m_options->showAtPoint(pt);
-#else
-    if (QWidget* button = m_toolBar->widgetForAction(m_optionsAction))
-    {
-        QPoint pt = button->mapToGlobal(QPoint(button->width() / 2, button->height()));
-        m_options->showAtPoint(pt);
-    }
-#endif
-}
+//void MainWindow::on_actionOptions_triggered()
+//{
+//    if (!m_options)
+//    {
+//        m_options = new CWizOptionsWidget(this);
+//        connect(m_options, SIGNAL(settingsChanged(WizOptionsType)), this, SLOT(on_options_settingsChanged(WizOptionsType)));
+//#ifndef Q_OS_MAC
+//        connect(m_options, SIGNAL(restartForSettings()), this, SLOT(on_options_restartForSettings()));
+//#endif
+//    }
+//    //
+//#ifdef Q_OS_MAC
+//    QPoint pt = QCursor::pos();
+//    m_options->showAtPoint(pt);
+//#else
+//    if (QWidget* button = m_toolBar->widgetForAction(m_optionsAction))
+//    {
+//        QPoint pt = button->mapToGlobal(QPoint(button->width() / 2, button->height()));
+//        m_options->showAtPoint(pt);
+//    }
+//#endif
+//}
 
 void MainWindow::on_actionPreference_triggered()
 {
-    CWizPreferenceWindow preference(this);
-    preference.exec();
+    CWizPreferenceWindow* preference = new CWizPreferenceWindow(this);
+
+    connect(preference, SIGNAL(settingsChanged(WizOptionsType)), SLOT(on_options_settingsChanged(WizOptionsType)));
+#ifndef Q_OS_MAC
+    connect(preference->generalTab(), SIGNAL(restartForSettings()), SLOT(on_options_restartForSettings()));
+#endif
+    preference->exec();
 }
 
 #ifndef Q_OS_MAC
@@ -586,6 +591,7 @@ void MainWindow::on_options_settingsChanged(WizOptionsType type)
         m_sync.resetProxy();
     }
 }
+
 #ifndef Q_OS_MAC
 void MainWindow::on_options_restartForSettings()
 {

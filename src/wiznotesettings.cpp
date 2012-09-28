@@ -43,4 +43,3 @@ void WizSetNotice(const QString& strNotice)
 {
     WizSetString("Common", "Notice", strNotice);
 }
-

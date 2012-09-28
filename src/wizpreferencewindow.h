@@ -14,16 +14,33 @@
 #include "wiznotesettings.h"
 #include "proxydialog.h"
 
+class CWizPreferenceGeneralTab;
+class CWizPreferenceReadingTab;
+class CWizPreferenceSyncingTab;
+
 class CWizPreferenceWindow: public QDialog
 {
      Q_OBJECT
 
 public:
      CWizPreferenceWindow(QWidget* parent);
+     CWizPreferenceGeneralTab* generalTab() { return m_generalTab; }
+     CWizPreferenceReadingTab* readingTab() { return m_readingTab; }
+     CWizPreferenceSyncingTab* syncingTab() { return m_syncingTab; }
 
 private:
      QTabWidget* m_tab;
      QDialogButtonBox* m_buttons;
+
+    CWizPreferenceGeneralTab* m_generalTab;
+    CWizPreferenceReadingTab* m_readingTab;
+    CWizPreferenceSyncingTab* m_syncingTab;
+
+Q_SIGNALS:
+    void settingsChanged(WizOptionsType type);
+
+private slots:
+    void on_settingsChanged_emit(WizOptionsType);
 };
 
 class CWizPreferenceGeneralTab: public QWidget
@@ -57,6 +74,14 @@ class CWizPreferenceReadingTab: public QWidget
 
 public:
     CWizPreferenceReadingTab(QWidget* parent);
+
+public slots:
+    void on_radioAuto_clicked(bool checked);
+    void on_radioAlwaysReading_clicked(bool checked);
+    void on_radioAlwaysEditing_clicked(bool checked);
+
+Q_SIGNALS:
+    void settingsChanged(WizOptionsType type);
 };
 
 class CWizPreferenceSyncingTab: public QWidget
