@@ -124,12 +124,6 @@ void CWizSettings::SetProxyPassword(const QString& val)
 
 
 
-CString WizGetString(const CString& strSection, const CString& strKey, const CString& strDef /*= ""*/)
-{
-    CWizSettings settings(WizGetSettingsFileName());
-    return settings.GetString(strSection, strKey, strDef);
-}
-
 BOOL WizSetString(const CString& strSection, const CString& strKey, const CString& str)
 {
     CWizSettings settings(WizGetSettingsFileName());

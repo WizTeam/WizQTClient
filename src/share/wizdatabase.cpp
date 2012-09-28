@@ -309,50 +309,68 @@ void CWizFolder::MoveToLocation(const CString& strDestLocation)
 //class CWizDatabase
 CWizDatabase::CWizDatabase()
 {
+
 }
 
-BOOL CWizDatabase::Open(const CString& strUserId, const CString& strPassword)
+BOOL CWizDatabase::Open(const QString& strUserId, const QString& strPassword)
 {
     m_strUserId = strUserId;
     m_strPassword = strPassword;
     BOOL bRet = CIndex::Open(GetIndexFileName()) && CThumbIndex::OpenThumb(GetThumbFileName());
-    //
-    //
+
     return bRet;
 }
 
-CString CWizDatabase::GetAccountDataPath() const
+QString CWizDatabase::GetAccountDataPath() const
 {
     ATLASSERT(!m_strUserId.isEmpty());
-    //
-    CString strPath = ::WizGetDataStorePath()+ m_strUserId + "/";
+
+    QString strPath = ::WizGetDataStorePath()+ m_strUserId + "/";
     WizEnsurePathExists(strPath);
-    //
+
     return strPath;
 }
-CString CWizDatabase::GetIndexFileName() const
+
+QString CWizDatabase::GetUserDataDataPath() const
 {
-    CString strPath = GetAccountDataPath();
+   QString strPath = GetAccountDataPath() + "user/";
+   WizEnsurePathExists(strPath);
+   return strPath;
+}
+
+QString CWizDatabase::GetGroupDataDataPath() const
+{
+   QString strPath = GetAccountDataPath() + "group/";
+   WizEnsurePathExists(strPath);
+   return strPath;
+}
+
+QString CWizDatabase::GetIndexFileName() const
+{
+    QString strPath = GetUserDataDataPath();
     return strPath + "index.db";
 }
-CString CWizDatabase::GetThumbFileName() const
+
+QString CWizDatabase::GetThumbFileName() const
 {
-    CString strPath = GetAccountDataPath();
+    QString strPath = GetUserDataDataPath();
     return strPath + "wizthumb.db";
 }
 
-CString CWizDatabase::GetDocumentsDataPath() const
+QString CWizDatabase::GetDocumentsDataPath() const
 {
-    CString strPath = GetAccountDataPath() + "Notes/";
+    CString strPath = GetUserDataDataPath() + "notes/";
     WizEnsurePathExists(strPath);
     return  strPath;
 }
-CString CWizDatabase::GetAttachmentsDataPath() const
+
+QString CWizDatabase::GetAttachmentsDataPath() const
 {
-    CString strPath = GetAccountDataPath() + "Attachments/";
+    CString strPath = GetUserDataDataPath() + "attachments/";
     WizEnsurePathExists(strPath);
     return  strPath;
 }
+
 __int64 CWizDatabase::GetObjectVersion(const CString& strObjectName)
 {
     return GetMetaInt64("SYNC_INFO", strObjectName, -1) + 1;

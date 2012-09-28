@@ -65,23 +65,31 @@ class CWizDatabase
     , public CThumbIndex
 {
     Q_OBJECT
+
 public:
     CWizDatabase();
+
+    QString GetUserId() const { return m_strUserId; }
+    QString GetPassword() const { return m_strPassword; }
+
+    QString GetAccountDataPath() const;
+    QString GetUserDataDataPath() const;
+    QString GetGroupDataDataPath() const;
+    QString GetIndexFileName() const;
+    QString GetThumbFileName() const;
+    QString GetDocumentsDataPath() const;
+    QString GetAttachmentsDataPath() const;
+
+    BOOL Open(const QString& strUserId, const QString& strPassword);
+
 private:
-    CString m_strUserId;
-    CString m_strPassword;
+    QString m_strUserId;
+    QString m_strPassword;
+
 public:
-    CString GetAccountDataPath() const;
-    CString GetIndexFileName() const;
-    CString GetThumbFileName() const;
-    CString GetDocumentsDataPath() const;
-    CString GetAttachmentsDataPath() const;
-    //
     __int64 GetObjectVersion(const CString& strObjectName);
     BOOL SetObjectVersion(const CString& strObjectName, __int64 nVersion);
-public:
-    BOOL Open(const CString& strUserId, const CString& strPassword);
-    //
+
     BOOL UpdateDeletedGUID(const WIZDELETEDGUIDDATA& data, CWizSyncEvents* pEvents);
     BOOL UpdateTag(const WIZTAGDATA& data, CWizSyncEvents* pEvents);
     BOOL UpdateStyle(const WIZSTYLEDATA& data, CWizSyncEvents* pEvents);
@@ -137,9 +145,6 @@ public:
     //
     BOOL DeleteTagWithChildren(const WIZTAGDATA& data, BOOL bLog);
 
-public:
-    CString GetUserId() const { return m_strUserId; }
-    CString GetPassword() const { return m_strPassword; }
 public:
     BOOL DocumentToTempHtmlFile(const WIZDOCUMENTDATA& document, CString& strTempHtmlFileName);
 

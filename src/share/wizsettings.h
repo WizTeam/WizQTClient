@@ -42,7 +42,6 @@ public:
 };
 
 
-CString WizGetString(const CString& strSection, const CString& strKey, const CString& strDef = "");
 BOOL WizSetString(const CString& strSection, const CString& strKey, const CString& str);
 
 CString WizGetShortcut(const CString& strName, const CString& strDef = "");

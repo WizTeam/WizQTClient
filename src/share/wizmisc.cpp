@@ -33,11 +33,13 @@ __int64 WizGetFileSize(const CString& strFileName)
 void WizPathAddBackslash(CString& strPath)
 {
     strPath.replace('\\', '/');
-    //
+
     if (strPath.endsWith('/'))
         return;
+
     strPath += '/';
 }
+
 void WizPathRemoveBackslash(CString& strPath)
 {
     while (1)
@@ -62,14 +64,10 @@ CString WizPathRemoveBackslash2(const CString& strPath)
     return str;
 }
 
-BOOL WizEnsurePathExistsEx(const CString& path)
+void WizEnsurePathExists(const CString& path)
 {
     QDir dir;
-    return dir.mkpath(path);
-}
-void WizEnsurePathExists(const CString& strPath)
-{
-    WizEnsurePathExistsEx(strPath);
+    dir.mkpath(path);
 }
 
 BOOL WizDeleteAllFilesInFolder(const CString& strPath)
@@ -313,7 +311,6 @@ CString WizGetAppFileName()
     return strPath;
 }
 
-
 CString WizGetResourcesPath()
 {
 #ifdef Q_OS_LINUX
@@ -326,36 +323,39 @@ CString WizGetResourcesPath()
 #else
     return WizGetAppPath();
 #endif
-
 }
-
 
 CString WizGetDataStorePath()
 {
     QDir dir;
     CString strPath = dir.homePath();
-    //
-    ::WizPathAddBackslash(strPath);
-    //
-    strPath = strPath + "WizNote/";
-    //
+    //::WizPathAddBackslash(strPath);
+    //strPath = strPath + "WizNote/";
+
+#ifdef Q_OS_LINUX
+    strPath += "/.wiznote/";
+#else
+    strPath += "/WizNote/";
+#endif
+
     ::WizEnsurePathExists(strPath);
+
     return strPath;
 }
 
 CString WizGetSettingsFileName()
 {
-    return WizGetDataStorePath() + _T("wiznote.ini");
+    return WizGetDataStorePath() + "wiznote.ini";
 }
 
 CString IWizGlobal::GetTempPath()
 {
     CString path = QDir::tempPath();
-    WizPathAddBackslash(path);
-    //
-    path += "WizNote/";
+    //WizPathAddBackslash(path);
+
+    path += "/WizNote/";
     ::WizEnsurePathExists(path);
-    //
+
     return path;
 }
 
