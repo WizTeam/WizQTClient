@@ -1,25 +1,26 @@
 #include "wizxmlrpc.h"
 #include <QUrl>
-//
+
 BOOL WizXmlRpcValueFromXml(CWizXMLNode& nodeValue, CWizXmlRpcValue** ppRet);
 
 
 CWizXmlRpcIntValue::CWizXmlRpcIntValue(int n /*= 0*/)
 	: m_n(n)
 {
+
 }
-//
+
 BOOL CWizXmlRpcIntValue::Write(CWizXMLNode& nodeValue)
 {
 	nodeValue.SetChildNodeText(_T("int"), WizIntToStr(m_n));
 	return TRUE;
 }
+
 BOOL CWizXmlRpcIntValue::Read(CWizXMLNode& nodeValue)
 {
 	CString strValue = nodeValue.GetFirstChildNodeText();
-	//
-	m_n = _ttoi(strValue);
-	//
+    m_n = _ttoi(strValue);
+
 	return TRUE;
 }
 CString CWizXmlRpcIntValue::ToString() const
@@ -27,7 +28,6 @@ CString CWizXmlRpcIntValue::ToString() const
 	return WizIntToStr(m_n);
 }
 
-//
 CWizXmlRpcIntValue::operator int()
 {
 	return m_n;
@@ -36,55 +36,57 @@ CWizXmlRpcIntValue::operator int()
 CWizXmlRpcBoolValue::CWizXmlRpcBoolValue(BOOL b /*= FALSE*/)
 	: m_b(b)
 {
+
 }
-//
+
 BOOL CWizXmlRpcBoolValue::Write(CWizXMLNode& nodeValue)
 {
 	nodeValue.SetChildNodeText(_T("boolean"), WizIntToStr(m_b ? 1 : 0));
 	return TRUE;
 }
+
 BOOL CWizXmlRpcBoolValue::Read(CWizXMLNode& nodeValue)
 {
 	CString strValue = nodeValue.GetFirstChildNodeText();
-	//
-	m_b = (strValue == _T("1") || 0 == strValue.CompareNoCase(_T("true")));
-	//
+    m_b = (strValue == _T("1") || 0 == strValue.CompareNoCase(_T("true")));
+
 	return TRUE;
 }
+
 CString CWizXmlRpcBoolValue::ToString() const
 {
 	return WizIntToStr(m_b ? 1 : 0);
 }
 
-//
 CWizXmlRpcBoolValue::operator BOOL ()
 {
 	return m_b;
 }
 
 
-
 CWizXmlRpcStringValue::CWizXmlRpcStringValue(const CString& strDef)
 : m_str(strDef)
 {
+
 }
-//
+
 BOOL CWizXmlRpcStringValue::Write(CWizXMLNode& nodeValue)
 {
 	nodeValue.SetChildNodeText(_T("string"), m_str);
 	return TRUE;
 }
+
 BOOL CWizXmlRpcStringValue::Read(CWizXMLNode& nodeValue)
 {
 	m_str = nodeValue.GetFirstChildNodeText();
 	return TRUE;
 }
+
 CString CWizXmlRpcStringValue::ToString() const
 {
 	return m_str;
 }
 
-//
 CWizXmlRpcStringValue::operator CString()
 {
 	return m_str;
@@ -93,14 +95,16 @@ CWizXmlRpcStringValue::operator CString()
 CWizXmlRpcTimeValue::CWizXmlRpcTimeValue(const COleDateTime& t /*= ::WizGetCurrentTime()*/)
 	: m_t(t)
 {
+
 }
-//
+
 BOOL CWizXmlRpcTimeValue::Write(CWizXMLNode& nodeValue)
 {
     CString str = WizDateTimeToIso8601String(m_t);
     nodeValue.SetChildNodeText(_T("dateTime.iso8601"), str);
 	return TRUE;
 }
+
 BOOL CWizXmlRpcTimeValue::Read(CWizXMLNode& nodeValue)
 {
 	CString str = nodeValue.GetFirstChildNodeText();
@@ -114,24 +118,24 @@ BOOL CWizXmlRpcTimeValue::Read(CWizXMLNode& nodeValue)
 	//
 	return TRUE;
 }
+
 CString CWizXmlRpcTimeValue::ToString() const
 {
 	return ::WizDateTimeToString(m_t);
 }
 
-//
 CWizXmlRpcTimeValue::operator COleDateTime()
 {
 	return m_t;
 }
 
 
-
 CWizXmlRpcBase64Value::CWizXmlRpcBase64Value(const QByteArray& arrayData)
     : m_arrayData(arrayData)
 {
+
 }
-//
+
 BOOL CWizXmlRpcBase64Value::Write(CWizXMLNode& nodeValue)
 {
     CString strText;
@@ -139,6 +143,7 @@ BOOL CWizXmlRpcBase64Value::Write(CWizXMLNode& nodeValue)
 	nodeValue.SetChildNodeText(_T("base64"), CString(strText));
 	return TRUE;
 }
+
 BOOL CWizXmlRpcBase64Value::Read(CWizXMLNode& nodeValue)
 {
 	CString str = nodeValue.GetFirstChildNodeText();
@@ -147,13 +152,14 @@ BOOL CWizXmlRpcBase64Value::Read(CWizXMLNode& nodeValue)
 	//
     return WizBase64Decode(str, m_arrayData);
 }
+
 CString CWizXmlRpcBase64Value::ToString() const
 {
     CString strText;
     WizBase64Encode(m_arrayData, strText);
 	return CString(strText);
 }
-//
+
 BOOL CWizXmlRpcBase64Value::GetStream(QByteArray& arrayData)
 {
     arrayData = m_arrayData;
@@ -163,17 +169,19 @@ BOOL CWizXmlRpcBase64Value::GetStream(QByteArray& arrayData)
 
 CWizXmlRpcArrayValue::CWizXmlRpcArrayValue()
 {
+
 }
-//
+
 CWizXmlRpcArrayValue::CWizXmlRpcArrayValue(const CWizStdStringArray& arrayData)
 {
 	SetStringArray(arrayData);
 }
-//
+
 CWizXmlRpcArrayValue::~CWizXmlRpcArrayValue ()
 {
 	Clear();
 }
+
 BOOL CWizXmlRpcArrayValue::Write(CWizXMLNode& nodeValue)
 {
 	CWizXMLNode nodeData;
@@ -193,6 +201,7 @@ BOOL CWizXmlRpcArrayValue::Write(CWizXMLNode& nodeValue)
 	//
 	return TRUE;
 }
+
 BOOL CWizXmlRpcArrayValue::Read(CWizXMLNode& nodeValue)
 {
 	CWizXMLNode nodeData;
@@ -231,12 +240,11 @@ CString CWizXmlRpcArrayValue::ToString() const
 	return CString(_T("[array]"));
 }
 
-//
 void CWizXmlRpcArrayValue::Add(CWizXmlRpcValue* pValue)
 {
 	m_array.push_back(pValue);
 }
-//
+
 void CWizXmlRpcArrayValue::Clear()
 {
     for (std::deque<CWizXmlRpcValue*>::const_iterator it = m_array.begin();
@@ -244,10 +252,11 @@ void CWizXmlRpcArrayValue::Clear()
 		it++)
 	{
 		delete *it;
-	}
-	//
+    }
+
 	m_array.clear();
 }
+
 BOOL CWizXmlRpcArrayValue::ToStringArray(CWizStdStringArray& arrayRet)
 {
     for (std::deque<CWizXmlRpcValue*>::const_iterator it = m_array.begin();
@@ -266,6 +275,7 @@ BOOL CWizXmlRpcArrayValue::ToStringArray(CWizStdStringArray& arrayRet)
 	//
 	return TRUE;
 }
+
 BOOL CWizXmlRpcArrayValue::SetStringArray(const CWizStdStringArray& arrayData)
 {
 	for (CWizStdStringArray::const_iterator it = arrayData.begin();
@@ -273,8 +283,8 @@ BOOL CWizXmlRpcArrayValue::SetStringArray(const CWizStdStringArray& arrayData)
 		it++)
 	{
 		Add(new CWizXmlRpcStringValue(*it));
-	}
-	//
+    }
+
 	return TRUE;
 }
 
@@ -286,6 +296,7 @@ void CWizXmlRpcStructValue::AddValue(const CString& strName, CWizXmlRpcValue* pV
 	//
     m_map[CString(strName)] = pValue;
 }
+
 CWizXmlRpcValue* CWizXmlRpcStructValue::GetValue(const CString& strName) const
 {
     std::map<CString, CWizXmlRpcValue*>::const_iterator  it = m_map.find(strName);
@@ -299,7 +310,7 @@ CWizXmlRpcStructValue::~CWizXmlRpcStructValue()
 {
 	Clear();
 }
-//
+
 BOOL CWizXmlRpcStructValue::Write(CWizXMLNode& nodeValue)
 {
 	CWizXMLNode nodeStruct;
@@ -325,6 +336,7 @@ BOOL CWizXmlRpcStructValue::Write(CWizXMLNode& nodeValue)
 	//
 	return TRUE;
 }
+
 BOOL CWizXmlRpcStructValue::Read(CWizXMLNode& nodeValue)
 {
 	CWizXMLNode nodeStruct;
@@ -371,44 +383,52 @@ BOOL CWizXmlRpcStructValue::Read(CWizXMLNode& nodeValue)
 	//
 	return TRUE;
 }
+
 CString CWizXmlRpcStructValue::ToString() const
 {
 	return CString(_T("[struct]"));
 }
 
-//
 void CWizXmlRpcStructValue::AddInt(const CString& strName, int n)
 {
     AddValue(strName, new CWizXmlRpcIntValue(n));
 }
+
 void CWizXmlRpcStructValue::AddString(const CString& strName, const CString& str)
 {
     AddValue(strName, new CWizXmlRpcStringValue(str));
 }
+
 void CWizXmlRpcStructValue::AddBool(const CString& strName, BOOL b)
 {
     AddValue(strName, new CWizXmlRpcBoolValue(b));
 }
+
 void CWizXmlRpcStructValue::AddTime(const CString& strName, const COleDateTime& t)
 {
     AddValue(strName, new CWizXmlRpcTimeValue(t));
 }
+
 void CWizXmlRpcStructValue::AddBase64(const CString& strName, const QByteArray& arrayData)
 {
     AddValue(strName, new CWizXmlRpcBase64Value(arrayData));
 }
+
 void CWizXmlRpcStructValue::AddStringArray(const CString& strName, const CWizStdStringArray& arrayData)
 {
     AddValue(strName, new CWizXmlRpcArrayValue(arrayData));
 }
+
 void CWizXmlRpcStructValue::AddInt64(const CString& strName, __int64 n)
 {
     AddValue(strName, new CWizXmlRpcStringValue(WizInt64ToStr(n)));
 }
+
 void CWizXmlRpcStructValue::AddColor(const CString& strName, COLORREF cr)
 {
     AddValue(strName, new CWizXmlRpcStringValue(WizColorToString(cr)));
 }
+
 BOOL CWizXmlRpcStructValue::AddFile(const CString& strName, const CString& strFileName)
 {
     Q_UNUSED(strName);
@@ -417,16 +437,16 @@ BOOL CWizXmlRpcStructValue::AddFile(const CString& strName, const CString& strFi
 	return TRUE;
 }
 
-
 void CWizXmlRpcStructValue::AddStruct(const CString& strName, CWizXmlRpcStructValue* pStruct)
 {
     AddValue(strName, pStruct);
 }
+
 void CWizXmlRpcStructValue::AddArray(const CString& strName, CWizXmlRpcValue* pArray)
 {
     AddValue(strName, pArray);
 }
-//
+
 void CWizXmlRpcStructValue::Clear()
 {
 	for (std::map<CString, CWizXmlRpcValue*>::const_iterator it = m_map.begin();
@@ -438,7 +458,7 @@ void CWizXmlRpcStructValue::Clear()
 	//
 	m_map.clear();
 }
-//
+
 void CWizXmlRpcStructValue::RemoveValue(const CString& strName)
 {
     std::map<CString, CWizXmlRpcValue*>::iterator  it = m_map.find(strName);
@@ -449,12 +469,12 @@ void CWizXmlRpcStructValue::RemoveValue(const CString& strName)
 	//
 	m_map.erase(it);
 }
-//
+
 void CWizXmlRpcStructValue::DeleteValue(CWizXmlRpcValue* pValue)
 {
 	delete pValue;
 }
-//
+
 BOOL CWizXmlRpcStructValue::GetBool(const CString& strName, BOOL& b) const
 {
     CWizXmlRpcBoolValue* p = GetValue<CWizXmlRpcBoolValue>(strName);
@@ -466,6 +486,7 @@ BOOL CWizXmlRpcStructValue::GetBool(const CString& strName, BOOL& b) const
 	return TRUE;
 	
 }
+
 BOOL CWizXmlRpcStructValue::GetInt(const CString& strName, int& n) const
 {
     if (CWizXmlRpcIntValue* p = GetValue<CWizXmlRpcIntValue>(strName))
@@ -477,10 +498,11 @@ BOOL CWizXmlRpcStructValue::GetInt(const CString& strName, int& n) const
 	{
 		n = _ttoi(CString(*p));
 		return TRUE;
-	}
-	//
+    }
+
 	return FALSE;
 }
+
 BOOL CWizXmlRpcStructValue::GetString(const CString& strName, CString& str) const
 {
     if (CWizXmlRpcIntValue* p = GetValue<CWizXmlRpcIntValue>(strName))
@@ -492,18 +514,19 @@ BOOL CWizXmlRpcStructValue::GetString(const CString& strName, CString& str) cons
 	{
 		str = *p;
 		return TRUE;
-	}
-	//
+    }
+
 	return FALSE;
 }
+
 BOOL CWizXmlRpcStructValue::GetTime(const CString& strName, COleDateTime& t) const
 {
     if (CWizXmlRpcTimeValue* p = GetValue<CWizXmlRpcTimeValue>(strName))
 	{
 		t = *p;
 		return TRUE;
-	}
-	//
+    }
+
 	return FALSE;
 }
 
@@ -513,6 +536,7 @@ BOOL CWizXmlRpcStructValue::GetStream(const CString& strName, QByteArray& arrayD
     {
         return p->GetStream(arrayData);
     }
+
     return FALSE;
 }
 
@@ -520,10 +544,12 @@ CWizXmlRpcStructValue* CWizXmlRpcStructValue::GetStruct(const CString& strName) 
 {
     return GetValue<CWizXmlRpcStructValue>(strName);
 }
+
 CWizXmlRpcArrayValue* CWizXmlRpcStructValue::GetArray(const CString& strName) const
 {
     return GetValue<CWizXmlRpcArrayValue>(strName);
 }
+
 BOOL CWizXmlRpcStructValue::GetInt64(const CString& strName, __int64& n) const
 {
 	CString str;
@@ -533,6 +559,7 @@ BOOL CWizXmlRpcStructValue::GetInt64(const CString& strName, __int64& n) const
 	n = _ttoi64(str);
 	return TRUE;
 }
+
 BOOL CWizXmlRpcStructValue::GetInt(const CString& strName, long& n) const
 {
 	int i = 0;
@@ -542,6 +569,7 @@ BOOL CWizXmlRpcStructValue::GetInt(const CString& strName, long& n) const
 	n = i;
 	return TRUE;
 }
+
 BOOL CWizXmlRpcStructValue::GetColor(const CString& strName, COLORREF& cr) const
 {
 	CString str;
@@ -554,6 +582,7 @@ BOOL CWizXmlRpcStructValue::GetColor(const CString& strName, COLORREF& cr) const
 	//
 	return TRUE;
 }
+
 BOOL CWizXmlRpcStructValue::GetStringArray(const CString& strName, CWizStdStringArray& arrayData) const
 {
     CWizXmlRpcArrayValue* pArray = GetArray(strName);
@@ -566,8 +595,6 @@ BOOL CWizXmlRpcStructValue::GetStringArray(const CString& strName, CWizStdString
 	return pArray->ToStringArray(arrayData);
 }
 
-
-
 BOOL CWizXmlRpcStructValue::ToStringMap(std::map<CString, CString>& ret) const
 {
 	for (std::map<CString, CWizXmlRpcValue*>::const_iterator it = m_map.begin();
@@ -579,7 +606,6 @@ BOOL CWizXmlRpcStructValue::ToStringMap(std::map<CString, CString>& ret) const
 	//
 	return TRUE;
 }
-
 
 
 
@@ -601,13 +627,14 @@ public:
 
 CWizXmlRpcFaultValue::~CWizXmlRpcFaultValue()
 {
+
 }
-//
+
 BOOL CWizXmlRpcFaultValue::Read(CWizXMLNode& nodeValue)
 {
 	return m_val.Read(nodeValue);
 }
-//
+
 int CWizXmlRpcFaultValue::GetFaultCode() const
 {
 	int nCode = 0;
@@ -620,7 +647,6 @@ CString CWizXmlRpcFaultValue::GetFaultString() const
 	m_val.GetString(_T("faultString"), str);
 	return str;
 }
-
 
 
 BOOL WizXmlRpcParamsToXml(CWizXMLDocument& doc, const CString& strMethodName, CWizXmlRpcValue* pParam1, CWizXmlRpcValue* pParam2, CWizXmlRpcValue* pParam3, CWizXmlRpcValue* pParam4,
@@ -733,8 +759,6 @@ BOOL WizXmlRpcValueFromXml(CWizXMLNode& nodeValue, CWizXmlRpcValue** ppRet)
 }
 
 
-
-
 BOOL WizXmlRpcResultFromXml(CWizXMLDocument& doc, CWizXmlRpcValue** ppRet)
 {
 	CWizXMLNode nodeMethodResponse;
@@ -789,35 +813,6 @@ BOOL WizXmlRpcResultFromXml(CWizXMLDocument& doc, CWizXmlRpcValue** ppRet)
 		return FALSE;
 	}
 }
-
-
-
-
-class CWizXmlRpcFormData : public CWizHttpFormDataBase
-{
-public:
-    CWizXmlRpcFormData(const CString& strMethodName, CWizXmlRpcValue* pParam1, CWizXmlRpcValue* pParam2, CWizXmlRpcValue* pParam3, CWizXmlRpcValue* pParam4,
-		CWizXmlRpcValue* pParam5, CWizXmlRpcValue* pParam6, CWizXmlRpcValue* pParam7, CWizXmlRpcValue* pParam8);
-public:
-    virtual int SendRequest(QHttp& http, const CString& strUrl);
-protected:
-	BOOL m_bInited;
-	//
-	CString m_strMethodName;
-	CWizXmlRpcValue* m_pParam1;
-	CWizXmlRpcValue* m_pParam2;
-	CWizXmlRpcValue* m_pParam3;
-	CWizXmlRpcValue* m_pParam4;
-	CWizXmlRpcValue* m_pParam5;
-	CWizXmlRpcValue* m_pParam6;
-	CWizXmlRpcValue* m_pParam7;
-	CWizXmlRpcValue* m_pParam8;
-	//
-	CWizXMLDocument m_doc;
-private:
-	BOOL Init();
-public:
-};
 
 
 CWizXmlRpcFormData::CWizXmlRpcFormData(const CString& strMethodName, CWizXmlRpcValue* pParam1, CWizXmlRpcValue* pParam2, CWizXmlRpcValue* pParam3, CWizXmlRpcValue* pParam4,
@@ -888,9 +883,8 @@ CWizXmlRpcServer::CWizXmlRpcServer(const CString& strUrl)
     , m_nCurrentXmlRpcRequestID(-1)
 {
     QUrl url(strUrl);
-    //
     m_http.setHost(url.host(), url.port(80));
-    //
+
     connect(&m_http, SIGNAL(done(bool)), this, SLOT(httpDone(bool)));
     connect(&m_http, SIGNAL(requestFinished(int, bool)), this, SLOT(httpRequestFinished(int, bool)));
     connect(&m_http, SIGNAL(requestStarted(int)), this, SLOT(httpRequestStarted(int)));
@@ -905,7 +899,6 @@ void CWizXmlRpcServer::setProxy(const QString& host, int port, const QString& us
 void CWizXmlRpcServer::abort()
 {
     m_http.disconnect(this);
-    //
     m_http.abort();
 }
 
@@ -914,7 +907,7 @@ BOOL CWizXmlRpcServer::xmlRpcCall(const CString& strMethodName,
                    CWizXmlRpcValue* pParam5, CWizXmlRpcValue* pParam6, CWizXmlRpcValue* pParam7, CWizXmlRpcValue* pParam8)
 {
     m_strMethodName = strMethodName;
-    //
+
     CWizXmlRpcFormData data(strMethodName, pParam1, pParam2, pParam3, pParam4, pParam5, pParam6, pParam7, pParam8);
     m_nCurrentXmlRpcRequestID = data.SendRequest(m_http, m_strUrl);
     return m_nCurrentXmlRpcRequestID != -1;
@@ -925,6 +918,7 @@ void CWizXmlRpcServer::processError(WizXmlRpcError error, int errorCode, const C
 {
     emit xmlRpcError(m_strMethodName, error, errorCode, errorString);
 }
+
 void CWizXmlRpcServer::processReturn(CWizXmlRpcValue& ret)
 {
     emit xmlRpcReturn(m_strMethodName, ret);
@@ -946,14 +940,13 @@ void CWizXmlRpcServer::httpRequestFinished (int id, bool error)
         processError(errorNetwork, 0, m_http.errorString());
         return;
     }
-    //
+
     if (id != m_nCurrentXmlRpcRequestID)
         return;
-    //
+
     if (m_strMethodName.IsEmpty())
         return;
-    //
-    //
+
     QHttpResponseHeader header = m_http.lastResponse();
     CString contentType = header.contentType();
 
@@ -962,18 +955,18 @@ void CWizXmlRpcServer::httpRequestFinished (int id, bool error)
         processError(errorContentType, 0, "Invalid content type of response");
         return;
     }
-    //
+
     QByteArray data = m_http.readAll();
 
     CString strXml = CString::fromUtf8(data.constData());
-    //
+
     CWizXMLDocument doc;
     if (!doc.LoadXML(strXml))
     {
         processError(errorXmlFormat, 0, "Invalid xml");
         return;
     }
-    //
+
     CWizXmlRpcValue* pRet = NULL;
 
     if (!WizXmlRpcResultFromXml(doc, &pRet))
@@ -981,16 +974,16 @@ void CWizXmlRpcServer::httpRequestFinished (int id, bool error)
         processError(errorXmlRpcFormat, 0, "Can not parse xmlrpc");
         return;
     }
-    //
+
     ATLASSERT(pRet);
-    //
+
     if (CWizXmlRpcFaultValue* pFault = dynamic_cast<CWizXmlRpcFaultValue*>(pRet))
     {
         processError(errorXmlRpcFault, pFault->GetFaultCode(), pFault->GetFaultString());
         delete pRet;
         return;
     }
-    //
+
     processReturn(*pRet);
 }
 
@@ -998,6 +991,7 @@ void CWizXmlRpcServer::httpRequestStarted(int id)
 {
     m_nCurrentRequestID = id;
 }
+
 void CWizXmlRpcServer::httpReadProgress(int done, int total)
 {
     emit xmlRpcReadProgress(done, total);

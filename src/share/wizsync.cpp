@@ -80,6 +80,7 @@ void CWizSync::startSync()
     addLog("login");
     callClientLogin(m_db.GetUserId(), m_db.GetPassword());
 }
+
 void CWizSync::onXmlRpcError(const CString& strMethodName, WizXmlRpcError err, int errorCode, const CString& errorMessage)
 {
     CWizApi::onXmlRpcError(strMethodName, err, errorCode, errorMessage);

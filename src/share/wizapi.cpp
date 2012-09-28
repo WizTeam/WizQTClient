@@ -12,7 +12,7 @@ CWizApiBase::CWizApiBase(const CString& strAccountsApiURL, CWizSyncEvents& event
     , m_events(events)
 {
     resetProxy();
-    //
+
     connect(&m_server, SIGNAL(xmlRpcReturn(const CString&, CWizXmlRpcValue&)), this, SLOT(xmlRpcReturn(const CString&, CWizXmlRpcValue&)));
     connect(&m_server, SIGNAL(xmlRpcError(const CString&, WizXmlRpcError, int, const CString&)), this, SLOT(xmlRpcError(const CString&, WizXmlRpcError, int, const CString&)));
 }
@@ -69,7 +69,6 @@ void CWizApiBase::onXmlRpcReturn(const CString& strMethodName, CWizXmlRpcValue& 
         ATLASSERT(FALSE);
     }
 }
-
 
 void CWizApiBase::onXmlRpcError(const CString& strMethodName, WizXmlRpcError err, int errorCode, const CString& errorMessage)
 {

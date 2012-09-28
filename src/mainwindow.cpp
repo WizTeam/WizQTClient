@@ -405,6 +405,7 @@ void MainWindow::on_actionSync_triggered()
 {
     m_sync.startSync();
 }
+
 void MainWindow::on_actionNewNote_triggered()
 {
     WIZDOCUMENTDATA data;

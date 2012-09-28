@@ -9,15 +9,42 @@
 #include <QHttp>
 #endif
 
+class CWizXmlRpcValue;
+
 
 class CWizHttpFormDataBase
 {
 public:
     virtual ~CWizHttpFormDataBase() {}
-public:
+
     virtual int SendRequest(QHttp& http, const CString& strUrl) = 0;
 };
 
+
+class CWizXmlRpcFormData : public CWizHttpFormDataBase
+{
+public:
+    CWizXmlRpcFormData(const CString& strMethodName, CWizXmlRpcValue* pParam1, CWizXmlRpcValue* pParam2, CWizXmlRpcValue* pParam3, CWizXmlRpcValue* pParam4,
+        CWizXmlRpcValue* pParam5, CWizXmlRpcValue* pParam6, CWizXmlRpcValue* pParam7, CWizXmlRpcValue* pParam8);
+
+    virtual int SendRequest(QHttp& http, const CString& strUrl);
+
+protected:
+    CWizXMLDocument m_doc;
+    BOOL m_bInited;
+    CString m_strMethodName;
+    CWizXmlRpcValue* m_pParam1;
+    CWizXmlRpcValue* m_pParam2;
+    CWizXmlRpcValue* m_pParam3;
+    CWizXmlRpcValue* m_pParam4;
+    CWizXmlRpcValue* m_pParam5;
+    CWizXmlRpcValue* m_pParam6;
+    CWizXmlRpcValue* m_pParam7;
+    CWizXmlRpcValue* m_pParam8;
+
+private:
+    BOOL Init();
+};
 
 struct CWizXmlRpcValue
 {
@@ -195,39 +222,40 @@ enum WizXmlRpcError { errorNetwork, errorContentType, errorXmlFormat, errorXmlRp
 class CWizXmlRpcServer : public QObject
 {
     Q_OBJECT
+
 public:
     CWizXmlRpcServer(const CString& strUrl);
-public:
+
     void abort();
     int currentId() const { return m_http.currentId(); }
     void setProxy(const QString& host, int port, const QString& userName, const QString& password);
+
+    BOOL xmlRpcCall(const CString& strMethodName,
+                    CWizXmlRpcValue* pParam1, CWizXmlRpcValue* pParam2 = NULL, CWizXmlRpcValue* pParam3 = NULL, CWizXmlRpcValue* pParam4 = NULL,
+                    CWizXmlRpcValue* pParam5 = NULL, CWizXmlRpcValue* pParam6 = NULL, CWizXmlRpcValue* pParam7 = NULL, CWizXmlRpcValue* pParam8 = NULL);
+
 protected:
     QHttp m_http;
     CString m_strUrl;
     CString m_strMethodName;
-    //
+
     int m_nCurrentRequestID;
     int m_nCurrentXmlRpcRequestID;
-    //
+
     virtual void processError(WizXmlRpcError error, int errorCode, const CString& errorString);
     virtual void processReturn(CWizXmlRpcValue& ret);
+
 public slots:
     void httpDone(bool error);
     void httpRequestFinished (int id, bool error);
     void httpRequestStarted(int id);
     void httpReadProgress(int done, int total);
-public:
-    //
-    BOOL xmlRpcCall(const CString& strMethodName,
-                       CWizXmlRpcValue* pParam1, CWizXmlRpcValue* pParam2 = NULL, CWizXmlRpcValue* pParam3 = NULL, CWizXmlRpcValue* pParam4 = NULL,
-                       CWizXmlRpcValue* pParam5 = NULL, CWizXmlRpcValue* pParam6 = NULL, CWizXmlRpcValue* pParam7 = NULL, CWizXmlRpcValue* pParam8 = NULL);
-    //
+
 Q_SIGNALS:
     void xmlRpcError(const CString& strMethodName, WizXmlRpcError error, int errorCode, const CString& errorString);
     void xmlRpcReturn(const CString& strMethodName, CWizXmlRpcValue& ret);
     void xmlRpcReadProgress(int done, int total);
 };
-
 
 
 template <class TData>
@@ -240,7 +268,7 @@ inline BOOL CWizXmlRpcValue::ToData(TData& data)
     //
     return FALSE;
 }
-//
+
 template <class TData>
 inline BOOL CWizXmlRpcValue::ToArray(std::deque<TData>& arrayData)
 {
@@ -291,7 +319,7 @@ inline BOOL CWizXmlRpcStructValue::GetArray(const CString& strName, std::deque<T
     //
     return pArray->ToArray<TData>(arrayData);
 }
-//
+
 template <class TData>
 inline BOOL CWizXmlRpcStructValue::AddArray(const CString& strName, const std::deque<TData>& arrayData)
 {
@@ -310,7 +338,6 @@ inline BOOL CWizXmlRpcStructValue::AddArray(const CString& strName, const std::d
     //
     return TRUE;
 }
-//
 
 
 #endif //WIZXMLRPC_H

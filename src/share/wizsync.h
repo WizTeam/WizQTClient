@@ -10,8 +10,10 @@ class CWizSync : public CWizApi
 {
 public:
     CWizSync(CWizDatabase& db, const CString& strAccountsApiURL, CWizSyncEvents& events);
-public:
+
     void startSync();
+    void setDownloadAllNotesData(bool b) { m_bDownloadAllNotesData = b; }
+
 private:
     bool m_error;
     size_t m_nAllDocumentsNeedToBeDownloadedCount;
@@ -134,8 +136,7 @@ protected:
     virtual void onStyleGetList(const std::deque<WIZSTYLEDATA>& arrayRet);
     virtual void onDocumentGetList(const std::deque<WIZDOCUMENTDATABASE>& arrayRet);
     virtual void onAttachmentGetList(const std::deque<WIZDOCUMENTATTACHMENTDATAEX>& arrayRet);
-public:
-    void setDownloadAllNotesData(bool b) { m_bDownloadAllNotesData = b; }
+
 };
 
 

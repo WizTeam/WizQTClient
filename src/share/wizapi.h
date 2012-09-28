@@ -161,9 +161,9 @@ class CWizApi : public CWizApiBase
     Q_OBJECT
 public:
     CWizApi(CWizDatabase& db, const CString& strAccountsApiURL, CWizSyncEvents& events);
+
 protected:
     CWizDatabase& m_db;
-protected:
     WIZOBJECTPARTDATA m_currentObjectPartData;
     WIZOBJECTDATA m_currentObjectData;
     std::deque<WIZDELETEDGUIDDATA> m_arrayCurrentPostDeletedGUID;
@@ -177,6 +177,7 @@ private:
     int m_nCurrentObjectAllSize;
     CString m_strCurrentObjectMD5;
     bool m_bDownloadingObject;
+
 protected:
     virtual void onXmlRpcReturn(const CString& strMethodName, CWizXmlRpcValue& ret);
     //
@@ -261,7 +262,6 @@ class CWizApiTokenParam : public CWizApiParamBase
 public:
     CWizApiTokenParam(CWizApiBase& api);
 };
-//
 
 template <class TData>
 inline BOOL CWizApi::callPostList(const CString& strMethodName, const CString& strArrayName, const std::deque<TData>& arrayData)
@@ -275,6 +275,6 @@ inline BOOL CWizApi::callPostList(const CString& strMethodName, const CString& s
     //
     return callXmlRpc(strMethodName, &param);
 }
-//
-//
+
+
 #endif //WIZAPI_H
