@@ -143,86 +143,90 @@ void CIndex::Close()
 {
 	m_db.close();
 }
-//
-const CString g_strAccountSection = _T("Account");
+
+const CString g_strAccountSection = "Account";
 
 BOOL CIndex::GetUserName(CString& strUserName)
 {
-    strUserName = GetMetaDef(g_strAccountSection, _T("UserName"));
+    strUserName = GetMetaDef(g_strAccountSection, "UserName");
 	return TRUE;
 }
+
 BOOL CIndex::SetUserName(const CString& strUserName)
 {
 	CString strOld;
 	GetUserName(strOld);
 	if (!strOld.IsEmpty())
 	{
-		TOLOG(_T("Can not set user name: user name exists!"));
+        TOLOG("Can not set user name: user name exists!");
 		return FALSE;
-	}
-	//
+    }
+
     if (!SetMeta(g_strAccountSection, _T("UserName"), strUserName))
 	{
-		TOLOG(_T("Failed to set user name while SetUserName"));
+        TOLOG("Failed to set user name while SetUserName");
 		return FALSE;
-	}
-	//
+    }
+
 	return TRUE;
 }
 
 CString CIndex::GetEncryptedPassword()
 {
-    return GetMetaDef(g_strAccountSection, _T("Password"));
+    return GetMetaDef(g_strAccountSection, "Password");
 }
+
 BOOL CIndex::GetPassword(CString& strPassword)
 {
 	BOOL bExists = FALSE;
-    if (!GetMeta(g_strAccountSection, _T("Password"), strPassword, "", &bExists))
+    if (!GetMeta(g_strAccountSection, "Password", strPassword, "", &bExists))
 	{
 		TOLOG(_T("Failed to get password while GetPassword"));
 		return FALSE;
-	}
-	//
+    }
+
 	if (strPassword.IsEmpty())
-		return TRUE;
-	//
-	strPassword = WizDecryptPassword(strPassword);
-	//
+        return TRUE;
+
+    strPassword = WizDecryptPassword(strPassword);
+
 	return TRUE;
 }
+
 BOOL CIndex::SetPassword(const CString& strOldPassword, const CString& strPassword)
 {
 	CString strOld;
 	if (!GetPassword(strOld))
 	{
-		TOLOG(_T("Failed to get old password while changing password"));
+        TOLOG("Failed to get old password while changing password");
 		return FALSE;
 	}
     if (strOld != strOldPassword)
 	{
-		TOLOG(_T("Invalid password while changing password"));
+        TOLOG("Invalid password while changing password");
 		return FALSE;
-	}
-	//
-    if (!SetMeta(g_strAccountSection, _T("Password"), WizEncryptPassword(strPassword)))
+    }
+
+    if (!SetMeta(g_strAccountSection, "Password", WizEncryptPassword(strPassword)))
 	{
-		TOLOG(_T("Failed to set new password while changing password"));
+        TOLOG("Failed to set new password while changing password");
 		return FALSE;
-	}
-	//
+    }
+
 	return TRUE;
 }
-//
+
 UINT CIndex::GetPasswordFalgs()
 {
-    CString strFlags = GetMetaDef(g_strAccountSection, _T("PasswordFlags"), "");
+    CString strFlags = GetMetaDef(g_strAccountSection, "PasswordFlags", "");
     return (UINT)atoi(strFlags.toUtf8());
 }
+
 BOOL CIndex::SetPasswordFalgs(UINT nFlags)
 {
-    return SetMeta(g_strAccountSection, _T("PasswordFlags"), WizIntToStr(int(nFlags)));
+    return SetMeta(g_strAccountSection, "PasswordFlags", WizIntToStr(int(nFlags)));
 }
-//
+
 CppSQLite3Query CIndex::Query(const CString& strSQL)
 {
     return m_db.execQuery(strSQL);

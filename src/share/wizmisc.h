@@ -93,8 +93,8 @@ CString WizExtractFileExt(const CString& strFileName);
 #define EF_INCLUDESUBDIR			0x02
 
 void WizEnumFiles(const CString& strPath, const CString& strExts, CWizStdStringArray& arrayFiles, UINT uFlags);
-void WizEnumFolders(const CString& strPath, CWizStdStringArray& arrayFolders, UINT uFlags);
-
+void WizEnumFolders(const QString& strPath, CWizStdStringArray& arrayFolders, UINT uFlags);
+QString WizFolderNameByPath(const QString& strPath);
 
 BOOL WizCopyFile(const CString& strSrcFileName, const CString& strDestFileName, BOOL bFailIfExists);
 void WizGetNextFileName(CString& strFileName);

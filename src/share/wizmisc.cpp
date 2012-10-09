@@ -1,4 +1,3 @@
-#include "wizmisc.h"
 #include "wizsettings.h"
 #include <QDir>
 #include <QApplication>
@@ -185,37 +184,44 @@ void WizEnumFiles(const CString& path, const CString& strExts, CWizStdStringArra
     }
 }
 
-void WizEnumFolders(const CString& path, CWizStdStringArray& arrayFolders, UINT uFlags)
+void WizEnumFolders(const QString& path, CWizStdStringArray& arrayFolders, UINT uFlags)
 {
-    //BOOL bIncludeHiddenFile = uFlags & EF_INCLUDEHIDDEN;
     BOOL bIncludeSubDir = uFlags & EF_INCLUDESUBDIR;
-    //
+
     CString strPath(path);
     WizPathAddBackslash(strPath);
-    //
+
     QDir dir(strPath);
-    //
+
     QDir::Filters filtersDir = QDir::Dirs;
     QStringList dirs = dir.entryList(filtersDir);
-    //
+
     for (QStringList::const_iterator it = dirs.begin();
         it != dirs.end();
         it++)
     {
-        CString strName = *it;
-        if (strName == "."
-            || strName == "..")
+        QString strName = *it;
+        if (strName == "." || strName == "..")
             continue;
-        //
-        CString strSubPath = strPath + strName + "/";
+
+        QString strSubPath = strPath + strName + "/";
         arrayFolders.push_back(strSubPath);
-        //
-        if (!bIncludeSubDir)
-            continue;
-        //
-        WizEnumFolders(strSubPath, arrayFolders, uFlags);
+
+        if (bIncludeSubDir)
+            WizEnumFolders(strSubPath, arrayFolders, uFlags);
     }
 }
+
+QString WizFolderNameByPath(const QString& strPath)
+{
+    Q_ASSERT(!strPath.isEmpty());
+
+    QStringList list = strPath.split("/");
+
+    // the last item is null string, we return string before that.
+    return list.at(list.size() - 2);
+}
+
 BOOL WizCopyFile(const CString& strSrcFileName, const CString& strDestFileName, BOOL bFailIfExists)
 {
     QFile fileSrc(strSrcFileName);
@@ -2563,7 +2569,7 @@ void WizGetSkins(std::map<CString, CString>& skins)
 {
     CWizStdStringArray folders;
     ::WizEnumFolders(::WizGetResourcesPath() + "skins/", folders, 0);
-    //
+
     QString localName = QLocale::system().name();
 
     foreach (const CString& path, folders)
@@ -2571,9 +2577,9 @@ void WizGetSkins(std::map<CString, CString>& skins)
         CString strSkinFileName = path + "skin.ini";
         if (!PathFileExists(strSkinFileName))
             continue;
-        //
+
         CString strSkinName = WizExtractLastPathName(path);
-        //
+
         CWizSettings settings(strSkinFileName);
         CString strSkinDisplayName = settings.GetString("Common", "Name_" + localName);
         if (strSkinDisplayName.IsEmpty())
@@ -2584,11 +2590,10 @@ void WizGetSkins(std::map<CString, CString>& skins)
         {
             strSkinDisplayName = strSkinName;
         }
-        //
+
         skins[strSkinName] = strSkinDisplayName;
     }
 }
-
 #endif
 
 CString WizGetSystemCustomSkinPath()

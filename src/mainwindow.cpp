@@ -439,10 +439,10 @@ void MainWindow::on_actionDeleteCurrentNote_triggered()
 
 void MainWindow::on_actionLogout_triggered()
 {
-    CWizSettings settings(WizGetSettingsFileName());
-    settings.SetEncryptedString("Common", "Password", "");
-    m_bRestart = true;
+    CWizSettings settings(::WizGetDataStorePath() + "wiznote.ini");
+    settings.SetBool("Users", "AutoLogin", false);
 
+    m_bRestart = true;
     close();
 }
 

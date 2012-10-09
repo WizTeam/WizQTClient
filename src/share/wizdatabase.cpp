@@ -404,7 +404,7 @@ BOOL CWizDatabase::UpdateDeletedGUID(const WIZDELETEDGUIDDATA& data, CWizSyncEve
 BOOL CWizDatabase::UpdateTag(const WIZTAGDATA& data, CWizSyncEvents* pEvents)
 {
     BOOL bRet = FALSE;
-    //
+
     WIZTAGDATA dataTemp;
     if (TagFromGUID(data.strGUID, dataTemp))
     {

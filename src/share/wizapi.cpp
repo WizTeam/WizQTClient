@@ -109,11 +109,11 @@ CString CWizApiBase::MakeXmlRpcPassword(const CString& strPassword)
 BOOL CWizApiBase::callClientLogin(const CString& strUserId, const CString& strPassword)
 {
     m_user = WIZUSERINFO();
-    //
+
     CWizApiParamBase param;
     param.AddString("user_id", MakeXmlRpcUserId(strUserId));
     param.AddString("password", MakeXmlRpcPassword(strPassword));
-    //
+
     return callXmlRpc(SyncMethod_ClientLogin, &param);
 }
 

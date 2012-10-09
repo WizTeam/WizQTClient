@@ -3,6 +3,7 @@
 CWizVerifyAccount::CWizVerifyAccount(const CString& strAccountsApiURL)
     : CWizApiBase(strAccountsApiURL, m_events)
 {
+
 }
 
 void CWizVerifyAccount::verifyAccount(const CString& strUserId, const CString& strPassword)
@@ -15,7 +16,7 @@ void CWizVerifyAccount::onXmlRpcError(const CString& strMethodName, WizXmlRpcErr
     Q_UNUSED(strMethodName);
     Q_UNUSED(err);
     Q_UNUSED(errorCode);
-    //
+
     emit done(false, errorMessage);
 }
 

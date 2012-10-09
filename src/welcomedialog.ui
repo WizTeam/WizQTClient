@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>566</width>
-    <height>318</height>
+    <width>593</width>
+    <height>350</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -19,39 +19,23 @@
   <widget class="QLabel" name="label">
    <property name="geometry">
     <rect>
-     <x>370</x>
+     <x>360</x>
      <y>20</y>
-     <width>131</width>
-     <height>16</height>
+     <width>180</width>
+     <height>15</height>
     </rect>
    </property>
    <property name="text">
-    <string>&amp;User ID (Email):</string>
-   </property>
-   <property name="buddy">
-    <cstring>editUserId</cstring>
-   </property>
-  </widget>
-  <widget class="QLineEdit" name="editUserId">
-   <property name="geometry">
-    <rect>
-     <x>370</x>
-     <y>40</y>
-     <width>181</width>
-     <height>20</height>
-    </rect>
-   </property>
-   <property name="locale">
-    <locale language="English" country="UnitedStates"/>
+    <string>User ID (Email):</string>
    </property>
   </widget>
   <widget class="QLineEdit" name="editPassword">
    <property name="geometry">
     <rect>
      <x>370</x>
-     <y>100</y>
-     <width>181</width>
-     <height>20</height>
+     <y>90</y>
+     <width>200</width>
+     <height>25</height>
     </rect>
    </property>
    <property name="locale">
@@ -64,10 +48,10 @@
   <widget class="QLabel" name="label_2">
    <property name="geometry">
     <rect>
-     <x>370</x>
-     <y>80</y>
-     <width>121</width>
-     <height>16</height>
+     <x>360</x>
+     <y>70</y>
+     <width>150</width>
+     <height>15</height>
     </rect>
    </property>
    <property name="text">
@@ -77,29 +61,13 @@
     <cstring>editPassword</cstring>
    </property>
   </widget>
-  <widget class="QDialogButtonBox" name="buttonBox">
-   <property name="geometry">
-    <rect>
-     <x>360</x>
-     <y>270</y>
-     <width>191</width>
-     <height>32</height>
-    </rect>
-   </property>
-   <property name="orientation">
-    <enum>Qt::Horizontal</enum>
-   </property>
-   <property name="standardButtons">
-    <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
-   </property>
-  </widget>
   <widget class="QWebView" name="webView">
    <property name="geometry">
     <rect>
      <x>10</x>
      <y>10</y>
      <width>341</width>
-     <height>291</height>
+     <height>331</height>
     </rect>
    </property>
    <property name="url">
@@ -108,20 +76,98 @@
     </url>
    </property>
   </widget>
-  <widget class="QLabel" name="labelProxySettings">
+  <widget class="QCheckBox" name="checkRememberMe">
    <property name="geometry">
     <rect>
-     <x>390</x>
-     <y>140</y>
-     <width>161</width>
-     <height>16</height>
+     <x>440</x>
+     <y>130</y>
+     <width>141</width>
+     <height>22</height>
     </rect>
    </property>
    <property name="text">
-    <string/>
+    <string>Remember me</string>
    </property>
-   <property name="alignment">
-    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+   <property name="tristate">
+    <bool>false</bool>
+   </property>
+  </widget>
+  <widget class="QCheckBox" name="checkAutoLogin">
+   <property name="geometry">
+    <rect>
+     <x>440</x>
+     <y>160</y>
+     <width>97</width>
+     <height>22</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Auto login</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="labelProxySettings">
+   <property name="geometry">
+    <rect>
+     <x>460</x>
+     <y>310</y>
+     <width>121</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Settings</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="labelRegisterNew">
+   <property name="geometry">
+    <rect>
+     <x>460</x>
+     <y>290</y>
+     <width>91</width>
+     <height>17</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>New to Wiz?</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="labelForgotPassword">
+   <property name="geometry">
+    <rect>
+     <x>460</x>
+     <y>270</y>
+     <width>121</width>
+     <height>17</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Forgot Password?</string>
+   </property>
+  </widget>
+  <widget class="QComboBox" name="comboUsers">
+   <property name="geometry">
+    <rect>
+     <x>370</x>
+     <y>40</y>
+     <width>200</width>
+     <height>25</height>
+    </rect>
+   </property>
+   <property name="editable">
+    <bool>true</bool>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="buttonLogin">
+   <property name="geometry">
+    <rect>
+     <x>490</x>
+     <y>200</y>
+     <width>97</width>
+     <height>27</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Login</string>
    </property>
   </widget>
  </widget>
@@ -133,43 +179,13 @@
   </customwidget>
  </customwidgets>
  <tabstops>
-  <tabstop>editUserId</tabstop>
+  <tabstop>comboUsers</tabstop>
   <tabstop>editPassword</tabstop>
-  <tabstop>buttonBox</tabstop>
+  <tabstop>checkRememberMe</tabstop>
+  <tabstop>checkAutoLogin</tabstop>
+  <tabstop>buttonLogin</tabstop>
+  <tabstop>webView</tabstop>
  </tabstops>
  <resources/>
- <connections>
-  <connection>
-   <sender>buttonBox</sender>
-   <signal>accepted()</signal>
-   <receiver>WelcomeDialog</receiver>
-   <slot>accept()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>248</x>
-     <y>254</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>157</x>
-     <y>274</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>buttonBox</sender>
-   <signal>rejected()</signal>
-   <receiver>WelcomeDialog</receiver>
-   <slot>reject()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>316</x>
-     <y>260</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>286</x>
-     <y>274</y>
-    </hint>
-   </hints>
-  </connection>
- </connections>
+ <connections/>
 </ui>

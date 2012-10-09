@@ -31,37 +31,48 @@ int main(int argc, char *argv[])
     iconApp.addFile(WizGetSkinResourceFileName("wiznote128"));
     QApplication::setWindowIcon(iconApp);
 
-    QString localName = QLocale::system().name();
+    CWizSettings settings(::WizGetDataStorePath() + "wiznote.ini");
+
+    // setup locale
+    QString strLocale = settings.GetString("Users", "Locale", "");
+    if (strLocale.isEmpty())
+        //strLocale = QLocale::system().name();
+        strLocale = "zh_CN";
 
     QTranslator translatorWizNote;
-    translatorWizNote.load(QString("wiznote_") + localName, WizGetResourcesPath() + "languages/");
+    translatorWizNote.load(QString("wiznote_") + strLocale, WizGetResourcesPath() + "languages/");
     a.installTranslator(&translatorWizNote);
 
     QTranslator translatorQt;
-    translatorQt.load(QString("qt_") + localName, WizGetResourcesPath() + "languages/");
+    translatorQt.load(QString("qt_") + strLocale, WizGetResourcesPath() + "languages/");
     a.installTranslator(&translatorQt);
 
-    CWizSettings settings(WizGetSettingsFileName());
-    CString strUserId = settings.GetString("Common", "UserId", "");
-    CString strPassword = settings.GetEncryptedString("Common", "Password", "");
+    // figure out auto login or manually login
+    QString strDefaultUser = settings.GetString("Users", "DefaultUser", "");
+    bool bAutoLogin = settings.GetBool("Users", "AutoLogin", false);
 
-    if (strUserId.IsEmpty() || strPassword.IsEmpty())
-    {
-        WelcomeDialog dlgWelcome;
-        dlgWelcome.setUserId(strUserId);
+    bool bFallback = true;
+    QString strUserId, strPassword;
+    if (bAutoLogin) {
+        CWizDatabase db;
+        if (db.Open(strDefaultUser, ""))
+        {
+            strUserId = strDefaultUser;
+            strPassword = db.GetEncryptedPassword();
+            bFallback = false;
+        }
+    }
+
+    if (bFallback) {
+        WelcomeDialog dlgWelcome(strDefaultUser);
         if (QDialog::Accepted != dlgWelcome.exec())
             return 0;
 
         strUserId = dlgWelcome.userId();
         strPassword = dlgWelcome.password();
-        if (strUserId.IsEmpty()
-            || strPassword.IsEmpty())
-            return 0;
-
-        settings.SetString("Common", "UserId", strUserId);
-        settings.SetEncryptedString("Common", "Password", strPassword);
     }
 
+    // ready
     CWizDatabase db;
     if (!db.Open(strUserId, strPassword))
     {

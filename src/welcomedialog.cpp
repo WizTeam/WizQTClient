@@ -8,38 +8,46 @@
 #include "createaccountdialog.h"
 #include "proxydialog.h"
 
-WelcomeDialog::WelcomeDialog(QWidget *parent) :
-    QDialog(parent),
-    ui(new Ui::WelcomeDialog),
-    m_verifyAccount(WIZ_API_URL)
+WelcomeDialog::WelcomeDialog(const QString &strDefaultUserId, QWidget *parent)
+    : QDialog(parent)
+    , ui(new Ui::WelcomeDialog)
+    , m_strDefaultUserId(strDefaultUserId)
+    , m_verifyAccount(WIZ_API_URL)
 {
     ui->setupUi(this);
-    //
-    connect(&m_verifyAccount, SIGNAL(done(bool, const CString&)), this, SLOT(verifyAccountDone(bool, const CString&)));
-    //
-    QString localName = QLocale::system().name();
-    CString strDefaultFileName = ::WizGetResourcesPath() + "languages/welcome.htm";
-    CString strLocalFileName = ::WizGetResourcesPath() + "languages/welcome_" + localName + ".htm";
-    CString strFileName = strLocalFileName;
-    if (!PathFileExists(strFileName))
+
+    ui->labelProxySettings->setText(WizFormatString1("<a href=\"proxy_settings\">%1</a>", tr("Proxy settings")));
+
+    // load webview content
+    QString localeName = QLocale::system().name();
+    QString strLocalFileName = ::WizGetResourcesPath() + "languages/welcome_" + localeName + ".htm";
+    QString strFileName = ::WizGetResourcesPath() + "languages/welcome.htm";
+    if (PathFileExists(strLocalFileName))
     {
-        strFileName = strDefaultFileName;
+        strFileName = strLocalFileName;
     }
-    //
+
     QPalette pal = palette();
     QColor color = pal.color(QPalette::Background);
-    //
+
     CString strHtml;
     ::WizLoadUnicodeTextFromFile(strFileName, strHtml);
     strHtml.replace("ButtonFace", "#" + ::WizColorToString(color));
-    //
+
     ui->webView->setHtml(strHtml, QUrl::fromLocalFile(strFileName));
     ui->webView->page()->setLinkDelegationPolicy(QWebPage::DelegateAllLinks);
     connect(ui->webView, SIGNAL(linkClicked(const QUrl&)), this, SLOT(on_web_linkClicked(const QUrl&)));
-    //
-    ui->labelProxySettings->setText(WizFormatString1("<a href=\"proxy_settings\">%1</a>", tr("Proxy settings")));
+
+    // callbacks
     connect(ui->labelProxySettings, SIGNAL(linkActivated(QString)), this, SLOT(on_labelProxy_linkActivated(QString)));
-    //
+    connect(ui->comboUsers, SIGNAL(currentIndexChanged(QString)), SLOT(on_comboUsers_indexChanged(QString)));
+    connect(ui->checkAutoLogin, SIGNAL(stateChanged(int)), SLOT(on_autoLogin_stateChanged(int)));
+    connect(ui->buttonLogin, SIGNAL(clicked()), SLOT(accept()));
+
+    connect(&m_verifyAccount, SIGNAL(done(bool, const CString&)), SLOT(verifyAccountDone(bool, const CString&)));
+
+    setUsers();
+
     setFixedSize(size());
 }
 
@@ -47,18 +55,39 @@ WelcomeDialog::~WelcomeDialog()
 {
     delete ui;
 }
-void WelcomeDialog::setUserId(const QString& strUserId)
+
+void WelcomeDialog::setUsers()
 {
-    ui->editUserId->setText(strUserId);
+    getUserPasswordPairs();
+    ui->comboUsers->addItems(m_users.keys());
+
+    // set default user as default login entry.
+    for (int i = 0; i < ui->comboUsers->count(); i++) {
+        if (!m_strDefaultUserId.compare(ui->comboUsers->itemText(i))) {
+            ui->comboUsers->setCurrentIndex(i);
+            break;
+        }
+    }
+}
+
+void WelcomeDialog::setPassword(const QString &strPassword)
+{
+    // only set encrypted password here, avoid attack risk!
+    ui->editPassword->setText(strPassword);
 }
 
 QString WelcomeDialog::userId() const
 {
-    return ui->editUserId->text();
+    return ui->comboUsers->currentText();
 }
+
 QString WelcomeDialog::password() const
 {
-    return ui->editPassword->text();
+    QString strPassword = ui->editPassword->text();
+    if (!m_users.value(userId(), "").compare(strPassword))
+        return ::WizDecryptPassword(strPassword);
+    else
+        return strPassword;
 }
 
 void WelcomeDialog::accept()
@@ -73,18 +102,19 @@ void WelcomeDialog::accept()
         QMessageBox::critical(this, "", tr("Please enter user password"));
         return;
     }
-    //
+
     enableControls(false);
-    //
+
     m_verifyAccount.verifyAccount(userId(), password());
 }
 
 void WelcomeDialog::verifyAccountDone(bool succeeded, const CString& errorMessage)
 {
     enableControls(true);
-    //
+
     if (succeeded)
     {
+        updateConfig();
         QDialog::accept();
     }
     else
@@ -93,12 +123,65 @@ void WelcomeDialog::verifyAccountDone(bool succeeded, const CString& errorMessag
     }
 }
 
+void WelcomeDialog::updateConfig()
+{
+    CWizSettings settings(::WizGetDataStorePath() + "wiznote.ini");
+
+    // set current login user as default user.
+    settings.SetString("Users", "DefaultUser", userId());
+
+    if(ui->checkAutoLogin->checkState() == Qt::Checked) {
+        settings.SetBool("Users", "AutoLogin", true);
+    } else {
+        settings.SetBool("Users", "AutoLogin", false);
+    }
+
+    // no password reset needed
+    if (!m_users.value(userId(), "").compare(password()) &&
+            ui->checkRememberMe->checkState() == Qt::Checked)
+        return;
+
+    // otherwise, reset password
+    CWizDatabase db;
+    QString strOldPassword = m_users.value(userId(), "");
+    if (db.Open(userId(), "")) {
+        if(ui->checkRememberMe->checkState() == Qt::Checked) {
+            db.SetPassword(::WizDecryptPassword(strOldPassword), password());
+        } else {
+            db.SetPassword(::WizDecryptPassword(strOldPassword), "");
+        }
+    }
+}
+
+void WelcomeDialog::getUserPasswordPairs()
+{
+    CWizStdStringArray usersFolder;
+    ::WizEnumFolders(::WizGetDataStorePath(), usersFolder, 0);
+
+    for(CWizStdStringArray::const_iterator iter = usersFolder.begin();
+        iter != usersFolder.end();
+        iter++)
+    {
+        QString strPath = *iter;
+        CWizDatabase db;
+        QString strUserId = ::WizFolderNameByPath(strPath);
+        if(db.Open(strUserId, ""))
+        {
+            QString strPassword = db.GetEncryptedPassword();
+            m_users.insert(strUserId, strPassword);
+        }
+    }
+}
+
 void WelcomeDialog::enableControls(bool b)
 {
-    ui->editUserId->setEnabled(b);
+    ui->comboUsers->setEnabled(b);
     ui->editPassword->setEnabled(b);
-    ui->buttonBox->setEnabled(b);
+    ui->checkRememberMe->setEnabled(b);
+    ui->checkAutoLogin->setEnabled(b);
+    ui->buttonLogin->setEnabled(b);
 }
+
 void WelcomeDialog::on_web_linkClicked(const QUrl & url)
 {
     CString strUrl = url.toString();
@@ -121,7 +204,7 @@ void WelcomeDialog::on_web_linkClicked(const QUrl & url)
             CString strUserId = dlg.userId();
             CString strPassword = dlg.password();
             //
-            ui->editUserId->setText(strUserId);
+            //ui->editUserId->setText(strUserId);
             ui->editPassword->setText(strPassword);
             //
             QDialog::accept();
@@ -136,12 +219,28 @@ void WelcomeDialog::on_web_linkClicked(const QUrl & url)
 void WelcomeDialog::on_labelProxy_linkActivated(const QString & link)
 {
     Q_UNUSED(link);
-    //
+
     ProxyDialog dlg;
     if (QDialog::Accepted != dlg.exec())
         return;
-    //
+
     m_verifyAccount.resetProxy();
 }
 
+void WelcomeDialog::on_comboUsers_indexChanged(const QString &userId)
+{
+    QString strPassword = m_users.value(userId, "");
 
+    setPassword(strPassword);
+
+    if (strPassword.isEmpty())
+        ui->checkRememberMe->setCheckState(Qt::Unchecked);
+    else
+        ui->checkRememberMe->setCheckState(Qt::Checked);
+}
+
+void WelcomeDialog::on_autoLogin_stateChanged(int state)
+{
+    if (state == Qt::Checked)
+        ui->checkRememberMe->setCheckState(Qt::Checked);
+}
