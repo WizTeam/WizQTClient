@@ -15,8 +15,10 @@ int main(int argc, char *argv[])
     QApplication a(argc, argv);
     QApplication::setApplicationName(QObject::tr("WizNote"));
 
+    CWizSettings settings(::WizGetDataStorePath() + "wiznote.ini");
+
 #ifdef Q_OS_WIN
-    QString strDefaultFontName = ::WizGetString("Common", "DefaultFont", "");
+    QString strDefaultFontName = settings.GetString("Common", "DefaultFont", "");
     QFont f = WizCreateWindowsUIFont(a, strDefaultFontName);
     a.setFont(f);
 #endif
@@ -31,7 +33,6 @@ int main(int argc, char *argv[])
     iconApp.addFile(WizGetSkinResourceFileName("wiznote128"));
     QApplication::setWindowIcon(iconApp);
 
-    CWizSettings settings(::WizGetDataStorePath() + "wiznote.ini");
 
     // setup locale
     QString strLocale = settings.GetString("Users", "Locale", "");

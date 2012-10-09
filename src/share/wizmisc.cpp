@@ -2521,7 +2521,7 @@ CString WizGetSkinName()
     if (strSkinName.isEmpty())
         strSkinName = "ubuntu";
 #else
-    static CString strSkinName = WizGetString("skin", "Name", "default");
+    static CString strSkinName = settings.GetString("skin", "Name", "default");
     if (strSkinName.isEmpty())
         strSkinName = "default";
 #endif

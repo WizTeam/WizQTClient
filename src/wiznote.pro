@@ -11,11 +11,12 @@ QT += webkit
 
 
 TARGET = WizNote
+
+# useful under windows compilation
+win32:DESTDIR = ../share/wiznote/
+
 TEMPLATE = app
 
-# Date: 18/02/2012 10:59 
-# Maintainer: Zhang PengCheng
-# Purpose: hide .o file in src directory.
 OBJECTS_DIR = .obj
 
 
@@ -101,7 +102,7 @@ SOURCES += main.cpp\
     proxydialog.cpp \
     wizpreferencewindow.cpp
 
-HEADERS  += mainwindow.h \
+HEADERS += mainwindow.h \
     share/wizqthelper.h \
     share/wizmisc.h \
     share/sqlite3ext.h \
@@ -182,13 +183,13 @@ HEADERS  += mainwindow.h \
     wizpreferencewindow.h
 
 
-mac:HEADERS +=     \
+mac:HEADERS += \
     mac/wizmactoolbardelegate.h \
     mac/wizmactoolbar.h \
     mac/wizmachelper.h
 
 
-FORMS    += \
+FORMS += \
     welcomedialog.ui \
     newfolderdialog.ui \
     newtagdialog.ui \
@@ -196,7 +197,6 @@ FORMS    += \
     aboutdialog.ui \
     createaccountdialog.ui \
     proxydialog.ui
-
 
 
 mac:LIBS += -framework Cocoa -framework Carbon
