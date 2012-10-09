@@ -136,14 +136,10 @@ void WelcomeDialog::updateConfig()
         settings.SetBool("Users", "AutoLogin", false);
     }
 
-    // no password reset needed
-    if (!m_users.value(userId(), "").compare(password()) &&
-            ui->checkRememberMe->checkState() == Qt::Checked)
-        return;
-
-    // otherwise, reset password
-    CWizDatabase db;
+    // reset password
     QString strOldPassword = m_users.value(userId(), "");
+
+    CWizDatabase db;
     if (db.Open(userId(), "")) {
         if(ui->checkRememberMe->checkState() == Qt::Checked) {
             db.SetPassword(::WizDecryptPassword(strOldPassword), password());
