@@ -620,7 +620,7 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="wizactions.cpp" line="50"/>
         <source>Preference</source>
-        <translation type="unfinished"></translation>
+        <translation>设置</translation>
     </message>
     <message>
         <location filename="wizcategoryview.cpp" line="234"/>
@@ -727,12 +727,11 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="welcomedialog.ui" line="29"/>
         <source>User ID (Email):</source>
-        <oldsource>&amp;User ID (Email):</oldsource>
         <translation>账号(Email地址):</translation>
     </message>
     <message>
         <location filename="welcomedialog.ui" line="58"/>
-        <source>&amp;Password:</source>
+        <source>Password:</source>
         <translation>密码:</translation>
     </message>
     <message>
@@ -764,14 +763,6 @@ p, li { white-space: pre-wrap; }
         <location filename="welcomedialog.ui" line="170"/>
         <source>Login</source>
         <translation>登录</translation>
-    </message>
-    <message>
-        <source>User ID:</source>
-        <translation type="obsolete">用户ID:</translation>
-    </message>
-    <message>
-        <source>Password:</source>
-        <translation type="obsolete">密码:</translation>
     </message>
     <message>
         <location filename="welcomedialog.ui" line="75"/>
