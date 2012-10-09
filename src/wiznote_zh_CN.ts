@@ -289,27 +289,27 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="wizpreferencewindow.cpp" line="44"/>
         <source>Languages</source>
-        <translation type="unfinished"></translation>
+        <translation>语言</translation>
     </message>
     <message>
         <location filename="wizpreferencewindow.cpp" line="46"/>
         <source>Chinese</source>
-        <translation type="unfinished"></translation>
+        <translation>简体中文</translation>
     </message>
     <message>
         <location filename="wizpreferencewindow.cpp" line="47"/>
         <source>English</source>
-        <translation type="unfinished"></translation>
+        <translation>English(US)</translation>
     </message>
     <message>
         <location filename="wizpreferencewindow.cpp" line="55"/>
         <source>Skin</source>
-        <translation type="unfinished">皮肤</translation>
+        <translation>皮肤</translation>
     </message>
     <message>
         <location filename="wizpreferencewindow.cpp" line="65"/>
         <source>Restart to apply the new skin</source>
-        <translation type="unfinished">重新启动应用新的皮肤</translation>
+        <translation>重新启动应用新的皮肤</translation>
     </message>
 </context>
 <context>
@@ -317,22 +317,22 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="wizpreferencewindow.cpp" line="120"/>
         <source>Default note view</source>
-        <translation type="unfinished">默认笔记视图</translation>
+        <translation>默认笔记视图</translation>
     </message>
     <message>
         <location filename="wizpreferencewindow.cpp" line="122"/>
         <source>Auto (Keep view state)</source>
-        <translation type="unfinished">自动(保持视图状态)</translation>
+        <translation>自动(保持视图状态)</translation>
     </message>
     <message>
         <location filename="wizpreferencewindow.cpp" line="123"/>
         <source>Always open note in Reading-View</source>
-        <translation type="unfinished">总是在阅读视图打开笔记</translation>
+        <translation>总是在阅读视图打开笔记</translation>
     </message>
     <message>
         <location filename="wizpreferencewindow.cpp" line="124"/>
         <source>Always open note in Editing-View</source>
-        <translation type="unfinished">总是在编辑视图打开笔记</translation>
+        <translation>总是在编辑视图打开笔记</translation>
     </message>
 </context>
 <context>
@@ -340,22 +340,22 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="wizpreferencewindow.cpp" line="187"/>
         <source>Sync</source>
-        <translation type="unfinished">同步</translation>
+        <translation>同步</translation>
     </message>
     <message>
         <location filename="wizpreferencewindow.cpp" line="189"/>
         <source>Auto sync</source>
-        <translation type="unfinished">自动同步</translation>
+        <translation>自动同步</translation>
     </message>
     <message>
         <location filename="wizpreferencewindow.cpp" line="190"/>
         <source>Download all notes data</source>
-        <translation type="unfinished">下载所有笔记数据</translation>
+        <translation>下载所有笔记数据</translation>
     </message>
     <message>
         <location filename="wizpreferencewindow.cpp" line="195"/>
         <source>Proxy settings</source>
-        <translation type="unfinished">代理设置</translation>
+        <translation>代理设置</translation>
     </message>
 </context>
 <context>
@@ -363,22 +363,22 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="wizpreferencewindow.cpp" line="14"/>
         <source>General</source>
-        <translation type="unfinished"></translation>
+        <translation>常规</translation>
     </message>
     <message>
         <location filename="wizpreferencewindow.cpp" line="15"/>
         <source>Reading</source>
-        <translation type="unfinished"></translation>
+        <translation>阅读</translation>
     </message>
     <message>
         <location filename="wizpreferencewindow.cpp" line="16"/>
         <source>Syncing</source>
-        <translation type="unfinished"></translation>
+        <translation>同步</translation>
     </message>
     <message>
         <location filename="wizpreferencewindow.cpp" line="27"/>
         <source>Preference</source>
-        <translation type="unfinished"></translation>
+        <translation>设置</translation>
     </message>
 </context>
 <context>
