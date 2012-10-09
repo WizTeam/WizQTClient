@@ -55,7 +55,7 @@
     </rect>
    </property>
    <property name="text">
-    <string>&amp;Password:</string>
+    <string>Password:</string>
    </property>
    <property name="buddy">
     <cstring>editPassword</cstring>

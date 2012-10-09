@@ -177,42 +177,42 @@ p, li { white-space: pre-wrap; }
 <context>
     <name>CWizDatabase</name>
     <message>
-        <location filename="share/wizdatabase.cpp" line="1115"/>
+        <location filename="share/wizdatabase.cpp" line="1160"/>
         <source>My Notes</source>
         <translation>我的笔记</translation>
     </message>
     <message>
-        <location filename="share/wizdatabase.cpp" line="1119"/>
+        <location filename="share/wizdatabase.cpp" line="1164"/>
         <source>My Journals</source>
         <translation>我的日记</translation>
     </message>
     <message>
-        <location filename="share/wizdatabase.cpp" line="1123"/>
+        <location filename="share/wizdatabase.cpp" line="1168"/>
         <source>My Events</source>
         <translation>我的事件</translation>
     </message>
     <message>
-        <location filename="share/wizdatabase.cpp" line="1127"/>
+        <location filename="share/wizdatabase.cpp" line="1172"/>
         <source>My Sticky Notes</source>
         <translation>我的桌面便笺</translation>
     </message>
     <message>
-        <location filename="share/wizdatabase.cpp" line="1131"/>
+        <location filename="share/wizdatabase.cpp" line="1176"/>
         <source>My Emails</source>
         <translation>我的电子邮件</translation>
     </message>
     <message>
-        <location filename="share/wizdatabase.cpp" line="1135"/>
+        <location filename="share/wizdatabase.cpp" line="1180"/>
         <source>My Drafts</source>
         <translation>我的草稿</translation>
     </message>
     <message>
-        <location filename="share/wizdatabase.cpp" line="1141"/>
+        <location filename="share/wizdatabase.cpp" line="1186"/>
         <source>Inbox</source>
         <translation>收集箱</translation>
     </message>
     <message>
-        <location filename="share/wizdatabase.cpp" line="1145"/>
+        <location filename="share/wizdatabase.cpp" line="1190"/>
         <source>Completed</source>
         <translation>已完成</translation>
     </message>
@@ -282,6 +282,103 @@ p, li { white-space: pre-wrap; }
         <location filename="wizoptionswidget.cpp" line="82"/>
         <source>Restart to apply the new skin</source>
         <translation>重新启动应用新的皮肤</translation>
+    </message>
+</context>
+<context>
+    <name>CWizPreferenceGeneralTab</name>
+    <message>
+        <location filename="wizpreferencewindow.cpp" line="44"/>
+        <source>Languages</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="wizpreferencewindow.cpp" line="46"/>
+        <source>Chinese</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="wizpreferencewindow.cpp" line="47"/>
+        <source>English</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="wizpreferencewindow.cpp" line="55"/>
+        <source>Skin</source>
+        <translation type="unfinished">皮肤</translation>
+    </message>
+    <message>
+        <location filename="wizpreferencewindow.cpp" line="65"/>
+        <source>Restart to apply the new skin</source>
+        <translation type="unfinished">重新启动应用新的皮肤</translation>
+    </message>
+</context>
+<context>
+    <name>CWizPreferenceReadingTab</name>
+    <message>
+        <location filename="wizpreferencewindow.cpp" line="120"/>
+        <source>Default note view</source>
+        <translation type="unfinished">默认笔记视图</translation>
+    </message>
+    <message>
+        <location filename="wizpreferencewindow.cpp" line="122"/>
+        <source>Auto (Keep view state)</source>
+        <translation type="unfinished">自动(保持视图状态)</translation>
+    </message>
+    <message>
+        <location filename="wizpreferencewindow.cpp" line="123"/>
+        <source>Always open note in Reading-View</source>
+        <translation type="unfinished">总是在阅读视图打开笔记</translation>
+    </message>
+    <message>
+        <location filename="wizpreferencewindow.cpp" line="124"/>
+        <source>Always open note in Editing-View</source>
+        <translation type="unfinished">总是在编辑视图打开笔记</translation>
+    </message>
+</context>
+<context>
+    <name>CWizPreferenceSyncingTab</name>
+    <message>
+        <location filename="wizpreferencewindow.cpp" line="187"/>
+        <source>Sync</source>
+        <translation type="unfinished">同步</translation>
+    </message>
+    <message>
+        <location filename="wizpreferencewindow.cpp" line="189"/>
+        <source>Auto sync</source>
+        <translation type="unfinished">自动同步</translation>
+    </message>
+    <message>
+        <location filename="wizpreferencewindow.cpp" line="190"/>
+        <source>Download all notes data</source>
+        <translation type="unfinished">下载所有笔记数据</translation>
+    </message>
+    <message>
+        <location filename="wizpreferencewindow.cpp" line="195"/>
+        <source>Proxy settings</source>
+        <translation type="unfinished">代理设置</translation>
+    </message>
+</context>
+<context>
+    <name>CWizPreferenceWindow</name>
+    <message>
+        <location filename="wizpreferencewindow.cpp" line="14"/>
+        <source>General</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="wizpreferencewindow.cpp" line="15"/>
+        <source>Reading</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="wizpreferencewindow.cpp" line="16"/>
+        <source>Syncing</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="wizpreferencewindow.cpp" line="27"/>
+        <source>Preference</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -356,7 +453,7 @@ p, li { white-space: pre-wrap; }
 <context>
     <name>MainWindow</name>
     <message>
-        <location filename="mainwindow.cpp" line="64"/>
+        <location filename="mainwindow.cpp" line="71"/>
         <source>WizNote</source>
         <translation>为知笔记</translation>
     </message>
@@ -371,12 +468,12 @@ p, li { white-space: pre-wrap; }
         <translation>搜索您的笔记</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="406"/>
+        <location filename="mainwindow.cpp" line="423"/>
         <source>New note</source>
         <translation>新建笔记</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="705"/>
+        <location filename="mainwindow.cpp" line="735"/>
         <source>Saving note...</source>
         <translation>正在保存笔记...</translation>
     </message>
@@ -521,6 +618,11 @@ p, li { white-space: pre-wrap; }
         <translation>选项</translation>
     </message>
     <message>
+        <location filename="wizactions.cpp" line="50"/>
+        <source>Preference</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="wizcategoryview.cpp" line="234"/>
         <source>Search for %1</source>
         <translation>搜索 %1</translation>
@@ -531,32 +633,32 @@ p, li { white-space: pre-wrap; }
         <translation>为知笔记</translation>
     </message>
     <message>
-        <location filename="main.cpp" line="70"/>
+        <location filename="main.cpp" line="80"/>
         <source>Can not open account</source>
         <translation>不能打开帐号</translation>
     </message>
     <message>
-        <location filename="share/wizmisc.cpp" line="707"/>
+        <location filename="share/wizmisc.cpp" line="713"/>
         <source>%1 TB</source>
         <translation>%1 TB</translation>
     </message>
     <message>
-        <location filename="share/wizmisc.cpp" line="709"/>
+        <location filename="share/wizmisc.cpp" line="715"/>
         <source>%1 GB</source>
         <translation>%1 GB</translation>
     </message>
     <message>
-        <location filename="share/wizmisc.cpp" line="711"/>
+        <location filename="share/wizmisc.cpp" line="717"/>
         <source>%1 MB</source>
         <translation>%1 MB</translation>
     </message>
     <message>
-        <location filename="share/wizmisc.cpp" line="713"/>
+        <location filename="share/wizmisc.cpp" line="719"/>
         <source>%1 KB</source>
         <translation>%1 KB</translation>
     </message>
     <message>
-        <location filename="share/wizmisc.cpp" line="714"/>
+        <location filename="share/wizmisc.cpp" line="720"/>
         <source>%1 byte(s)</source>
         <translation>%1 B</translation>
     </message>
@@ -624,14 +726,44 @@ p, li { white-space: pre-wrap; }
     </message>
     <message>
         <location filename="welcomedialog.ui" line="29"/>
-        <source>&amp;User ID (Email):</source>
-        <oldsource>&amp;User ID:</oldsource>
-        <translation>用户ID(&amp;U)(Email地址):</translation>
+        <source>User ID (Email):</source>
+        <oldsource>&amp;User ID (Email):</oldsource>
+        <translation>账号(Email地址):</translation>
     </message>
     <message>
-        <location filename="welcomedialog.ui" line="74"/>
+        <location filename="welcomedialog.ui" line="58"/>
         <source>&amp;Password:</source>
-        <translation>密码(&amp;P):</translation>
+        <translation>密码:</translation>
+    </message>
+    <message>
+        <location filename="welcomedialog.ui" line="89"/>
+        <source>Remember me</source>
+        <translation>记住密码</translation>
+    </message>
+    <message>
+        <location filename="welcomedialog.ui" line="105"/>
+        <source>Auto login</source>
+        <translation>自动登录</translation>
+    </message>
+    <message>
+        <location filename="welcomedialog.ui" line="118"/>
+        <source>Settings</source>
+        <translation>设置</translation>
+    </message>
+    <message>
+        <location filename="welcomedialog.ui" line="131"/>
+        <source>New to Wiz?</source>
+        <translation>注册新账号</translation>
+    </message>
+    <message>
+        <location filename="welcomedialog.ui" line="144"/>
+        <source>Forgot Password?</source>
+        <translation>找回密码</translation>
+    </message>
+    <message>
+        <location filename="welcomedialog.ui" line="170"/>
+        <source>Login</source>
+        <translation>登录</translation>
     </message>
     <message>
         <source>User ID:</source>
@@ -642,22 +774,22 @@ p, li { white-space: pre-wrap; }
         <translation type="obsolete">密码:</translation>
     </message>
     <message>
-        <location filename="welcomedialog.ui" line="107"/>
+        <location filename="welcomedialog.ui" line="75"/>
         <source>about:blank</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="welcomedialog.cpp" line="40"/>
+        <location filename="welcomedialog.cpp" line="19"/>
         <source>Proxy settings</source>
         <translation>代理设置</translation>
     </message>
     <message>
-        <location filename="welcomedialog.cpp" line="68"/>
+        <location filename="welcomedialog.cpp" line="97"/>
         <source>Please enter user id</source>
         <translation>请输入用户ID</translation>
     </message>
     <message>
-        <location filename="welcomedialog.cpp" line="73"/>
+        <location filename="welcomedialog.cpp" line="102"/>
         <source>Please enter user password</source>
         <translation>请输入用户密码</translation>
     </message>
