@@ -4,7 +4,7 @@
 <context>
     <name>AboutDialog</name>
     <message>
-        <location filename="aboutdialog.ui" line="14"/>
+        <location filename="ui/aboutdialog.ui" line="14"/>
         <source>About WizNote</source>
         <translation>关于为知笔记</translation>
     </message>
@@ -14,7 +14,7 @@
         <translation type="obsolete">为知笔记 1.00 (测试版)</translation>
     </message>
     <message>
-        <location filename="aboutdialog.ui" line="71"/>
+        <location filename="ui/aboutdialog.ui" line="71"/>
         <source>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
@@ -287,98 +287,155 @@ p, li { white-space: pre-wrap; }
 <context>
     <name>CWizPreferenceGeneralTab</name>
     <message>
-        <location filename="wizpreferencewindow.cpp" line="44"/>
         <source>Languages</source>
-        <translation>语言</translation>
+        <translation type="obsolete">语言</translation>
     </message>
     <message>
-        <location filename="wizpreferencewindow.cpp" line="46"/>
         <source>Chinese</source>
-        <translation>简体中文</translation>
+        <translation type="obsolete">简体中文</translation>
     </message>
     <message>
-        <location filename="wizpreferencewindow.cpp" line="47"/>
         <source>English</source>
-        <translation>English(US)</translation>
+        <translation type="obsolete">English(US)</translation>
     </message>
     <message>
-        <location filename="wizpreferencewindow.cpp" line="55"/>
         <source>Skin</source>
-        <translation>皮肤</translation>
+        <translation type="obsolete">皮肤</translation>
     </message>
     <message>
-        <location filename="wizpreferencewindow.cpp" line="65"/>
         <source>Restart to apply the new skin</source>
-        <translation>重新启动应用新的皮肤</translation>
+        <translation type="obsolete">重新启动应用新的皮肤</translation>
     </message>
 </context>
 <context>
     <name>CWizPreferenceReadingTab</name>
     <message>
-        <location filename="wizpreferencewindow.cpp" line="120"/>
         <source>Default note view</source>
-        <translation>默认笔记视图</translation>
+        <translation type="obsolete">默认笔记视图</translation>
     </message>
     <message>
-        <location filename="wizpreferencewindow.cpp" line="122"/>
         <source>Auto (Keep view state)</source>
-        <translation>自动(保持视图状态)</translation>
+        <translation type="obsolete">自动(保持视图状态)</translation>
     </message>
     <message>
-        <location filename="wizpreferencewindow.cpp" line="123"/>
         <source>Always open note in Reading-View</source>
-        <translation>总是在阅读视图打开笔记</translation>
+        <translation type="obsolete">总是在阅读视图打开笔记</translation>
     </message>
     <message>
-        <location filename="wizpreferencewindow.cpp" line="124"/>
         <source>Always open note in Editing-View</source>
-        <translation>总是在编辑视图打开笔记</translation>
+        <translation type="obsolete">总是在编辑视图打开笔记</translation>
     </message>
 </context>
 <context>
     <name>CWizPreferenceSyncingTab</name>
     <message>
-        <location filename="wizpreferencewindow.cpp" line="187"/>
         <source>Sync</source>
-        <translation>同步</translation>
+        <translation type="obsolete">同步</translation>
     </message>
     <message>
-        <location filename="wizpreferencewindow.cpp" line="189"/>
         <source>Auto sync</source>
-        <translation>自动同步</translation>
+        <translation type="obsolete">自动同步</translation>
     </message>
     <message>
-        <location filename="wizpreferencewindow.cpp" line="190"/>
         <source>Download all notes data</source>
-        <translation>下载所有笔记数据</translation>
+        <translation type="obsolete">下载所有笔记数据</translation>
     </message>
     <message>
-        <location filename="wizpreferencewindow.cpp" line="195"/>
         <source>Proxy settings</source>
-        <translation>代理设置</translation>
+        <translation type="obsolete">代理设置</translation>
     </message>
 </context>
 <context>
     <name>CWizPreferenceWindow</name>
     <message>
-        <location filename="wizpreferencewindow.cpp" line="14"/>
+        <location filename="ui/preferencedialog.ui" line="14"/>
+        <source>Dialog</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="ui/preferencedialog.ui" line="46"/>
         <source>General</source>
         <translation>常规</translation>
     </message>
     <message>
-        <location filename="wizpreferencewindow.cpp" line="15"/>
+        <location filename="ui/preferencedialog.ui" line="58"/>
+        <source>Language</source>
+        <translation>语言</translation>
+    </message>
+    <message>
+        <location filename="ui/preferencedialog.ui" line="81"/>
+        <source>Skin</source>
+        <translation>皮肤</translation>
+    </message>
+    <message>
+        <location filename="ui/preferencedialog.ui" line="97"/>
         <source>Reading</source>
         <translation>阅读</translation>
     </message>
     <message>
-        <location filename="wizpreferencewindow.cpp" line="16"/>
+        <location filename="ui/preferencedialog.ui" line="109"/>
+        <source>Default note view</source>
+        <translation>默认笔记视图</translation>
+    </message>
+    <message>
+        <location filename="ui/preferencedialog.ui" line="121"/>
+        <source>Auto (Keep view state)</source>
+        <translation>自动(保持视图状态)</translation>
+    </message>
+    <message>
+        <location filename="ui/preferencedialog.ui" line="134"/>
+        <source>Always open note in Reading-View</source>
+        <translation>总是在阅读视图打开笔记</translation>
+    </message>
+    <message>
+        <location filename="ui/preferencedialog.ui" line="147"/>
+        <source>Always open note in Editing-View</source>
+        <translation>总是在编辑视图打开笔记</translation>
+    </message>
+    <message>
+        <location filename="ui/preferencedialog.ui" line="154"/>
         <source>Syncing</source>
         <translation>同步</translation>
     </message>
     <message>
-        <location filename="wizpreferencewindow.cpp" line="27"/>
+        <location filename="ui/preferencedialog.ui" line="166"/>
+        <source>Sync Method</source>
+        <translation>同步方式</translation>
+    </message>
+    <message>
+        <location filename="ui/preferencedialog.ui" line="178"/>
+        <source>Auto syncing</source>
+        <translation>自动同步</translation>
+    </message>
+    <message>
+        <location filename="ui/preferencedialog.ui" line="191"/>
+        <source>Download all notes data</source>
+        <translation>下载所有笔记数据</translation>
+    </message>
+    <message>
+        <location filename="ui/preferencedialog.ui" line="204"/>
+        <source>Proxy Settings</source>
+        <translation>代理设置</translation>
+    </message>
+    <message>
+        <location filename="wizpreferencewindow.cpp" line="12"/>
         <source>Preference</source>
         <translation>设置</translation>
+    </message>
+    <message>
+        <location filename="wizpreferencewindow.cpp" line="19"/>
+        <source>Chinese</source>
+        <translation>简体中文</translation>
+    </message>
+    <message>
+        <location filename="wizpreferencewindow.cpp" line="20"/>
+        <source>English</source>
+        <translation>English(US)</translation>
+    </message>
+    <message>
+        <location filename="wizpreferencewindow.cpp" line="76"/>
+        <source>Proxy settings</source>
+        <translation>代理设置</translation>
     </message>
 </context>
 <context>
@@ -419,23 +476,23 @@ p, li { white-space: pre-wrap; }
 <context>
     <name>CreateAccountDialog</name>
     <message>
-        <location filename="createaccountdialog.ui" line="14"/>
+        <location filename="ui/createaccountdialog.ui" line="14"/>
         <source>Create Account</source>
         <translation>创建帐号</translation>
     </message>
     <message>
-        <location filename="createaccountdialog.ui" line="26"/>
+        <location filename="ui/createaccountdialog.ui" line="26"/>
         <source>&amp;User ID (Email):</source>
         <oldsource>&amp;User ID: (Email)</oldsource>
         <translation>用户ID(email地址)(&amp;U):</translation>
     </message>
     <message>
-        <location filename="createaccountdialog.ui" line="52"/>
+        <location filename="ui/createaccountdialog.ui" line="52"/>
         <source>&amp;Password</source>
         <translation>密码(&amp;P)</translation>
     </message>
     <message>
-        <location filename="createaccountdialog.ui" line="94"/>
+        <location filename="ui/createaccountdialog.ui" line="94"/>
         <source>&amp;Confirm Password:</source>
         <translation>确认密码(&amp;C):</translation>
     </message>
@@ -481,12 +538,12 @@ p, li { white-space: pre-wrap; }
 <context>
     <name>NewFolderDialog</name>
     <message>
-        <location filename="newfolderdialog.ui" line="20"/>
+        <location filename="ui/newfolderdialog.ui" line="20"/>
         <source>New Folder</source>
         <translation>新建文件夹</translation>
     </message>
     <message>
-        <location filename="newfolderdialog.ui" line="42"/>
+        <location filename="ui/newfolderdialog.ui" line="42"/>
         <source>&amp;Folder name:</source>
         <translation>文件夹名称(&amp;F):</translation>
     </message>
@@ -494,12 +551,12 @@ p, li { white-space: pre-wrap; }
 <context>
     <name>NewTagDialog</name>
     <message>
-        <location filename="newtagdialog.ui" line="14"/>
+        <location filename="ui/newtagdialog.ui" line="14"/>
         <source>New Tag</source>
         <translation>新建标签</translation>
     </message>
     <message>
-        <location filename="newtagdialog.ui" line="26"/>
+        <location filename="ui/newtagdialog.ui" line="26"/>
         <source>&amp;Tag name:</source>
         <translation>标签名称(&amp;T):</translation>
     </message>
@@ -507,32 +564,32 @@ p, li { white-space: pre-wrap; }
 <context>
     <name>ProxyDialog</name>
     <message>
-        <location filename="proxydialog.ui" line="14"/>
+        <location filename="ui/proxydialog.ui" line="14"/>
         <source>Proxy settings</source>
         <translation>代理设置</translation>
     </message>
     <message>
-        <location filename="proxydialog.ui" line="26"/>
+        <location filename="ui/proxydialog.ui" line="26"/>
         <source>Address:</source>
         <translation>地址:</translation>
     </message>
     <message>
-        <location filename="proxydialog.ui" line="62"/>
+        <location filename="ui/proxydialog.ui" line="62"/>
         <source>Port:</source>
         <translation>端口:</translation>
     </message>
     <message>
-        <location filename="proxydialog.ui" line="78"/>
+        <location filename="ui/proxydialog.ui" line="78"/>
         <source>Authentication (If required)</source>
         <translation>身份验证 (如果需要)</translation>
     </message>
     <message>
-        <location filename="proxydialog.ui" line="90"/>
+        <location filename="ui/proxydialog.ui" line="90"/>
         <source>User Name:</source>
         <translation>用户名:</translation>
     </message>
     <message>
-        <location filename="proxydialog.ui" line="116"/>
+        <location filename="ui/proxydialog.ui" line="116"/>
         <source>Password:</source>
         <translation>密码:</translation>
     </message>
@@ -719,53 +776,61 @@ p, li { white-space: pre-wrap; }
 <context>
     <name>WelcomeDialog</name>
     <message>
-        <location filename="welcomedialog.ui" line="14"/>
+        <location filename="ui/welcomedialog.ui" line="14"/>
         <source>Welcome to WizNote</source>
         <oldsource>Welcome to Wiz</oldsource>
         <translation>欢迎使用为知笔记</translation>
     </message>
     <message>
-        <location filename="welcomedialog.ui" line="29"/>
+        <location filename="ui/welcomedialog.ui" line="29"/>
         <source>User ID (Email):</source>
         <translation>账号(Email地址):</translation>
     </message>
     <message>
-        <location filename="welcomedialog.ui" line="58"/>
+        <location filename="ui/welcomedialog.ui" line="58"/>
         <source>Password:</source>
         <translation>密码:</translation>
     </message>
     <message>
-        <location filename="welcomedialog.ui" line="89"/>
+        <location filename="ui/welcomedialog.ui" line="92"/>
         <source>Remember me</source>
         <translation>记住密码</translation>
     </message>
     <message>
-        <location filename="welcomedialog.ui" line="105"/>
+        <location filename="ui/welcomedialog.ui" line="108"/>
         <source>Auto login</source>
         <translation>自动登录</translation>
     </message>
     <message>
-        <location filename="welcomedialog.ui" line="118"/>
+        <location filename="ui/welcomedialog.ui" line="121"/>
         <source>Settings</source>
         <translation>设置</translation>
     </message>
     <message>
-        <location filename="welcomedialog.ui" line="131"/>
-        <source>New to Wiz?</source>
+        <location filename="ui/welcomedialog.ui" line="137"/>
+        <source>New to Wiz</source>
         <translation>注册新账号</translation>
     </message>
     <message>
-        <location filename="welcomedialog.ui" line="144"/>
-        <source>Forgot Password?</source>
+        <location filename="ui/welcomedialog.ui" line="156"/>
+        <source>Forgot Password</source>
         <translation>找回密码</translation>
     </message>
     <message>
-        <location filename="welcomedialog.ui" line="170"/>
+        <source>New to Wiz?</source>
+        <translation type="obsolete">注册新账号</translation>
+    </message>
+    <message>
+        <source>Forgot Password?</source>
+        <translation type="obsolete">找回密码</translation>
+    </message>
+    <message>
+        <location filename="ui/welcomedialog.ui" line="185"/>
         <source>Login</source>
         <translation>登录</translation>
     </message>
     <message>
-        <location filename="welcomedialog.ui" line="75"/>
+        <location filename="ui/welcomedialog.ui" line="75"/>
         <source>about:blank</source>
         <translation></translation>
     </message>
@@ -788,12 +853,12 @@ p, li { white-space: pre-wrap; }
 <context>
     <name>WizDownloadObjectDataDialog</name>
     <message>
-        <location filename="share/wizdownloadobjectdatadialog.ui" line="20"/>
+        <location filename="ui/wizdownloadobjectdatadialog.ui" line="20"/>
         <source>Downloading Object</source>
         <translation>正在下在数据</translation>
     </message>
     <message>
-        <location filename="share/wizdownloadobjectdatadialog.ui" line="48"/>
+        <location filename="ui/wizdownloadobjectdatadialog.ui" line="48"/>
         <source>Downloading %1</source>
         <translation>正在下载 %1</translation>
     </message>

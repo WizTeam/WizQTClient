@@ -481,7 +481,7 @@ void MainWindow::on_actionPreference_triggered()
 
     connect(preference, SIGNAL(settingsChanged(WizOptionsType)), SLOT(on_options_settingsChanged(WizOptionsType)));
 #ifndef Q_OS_MAC
-    connect(preference->generalTab(), SIGNAL(restartForSettings()), SLOT(on_options_restartForSettings()));
+    connect(preference, SIGNAL(restartForSettings()), SLOT(on_options_restartForSettings()));
 #endif
     preference->exec();
 }

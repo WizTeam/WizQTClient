@@ -196,7 +196,8 @@ FORMS += \
     ui/wizdownloadobjectdatadialog.ui \
     ui/aboutdialog.ui \
     ui/createaccountdialog.ui \
-    ui/proxydialog.ui
+    ui/proxydialog.ui \
+    ui/preferencedialog.ui
 
 
 mac:LIBS += -framework Cocoa -framework Carbon

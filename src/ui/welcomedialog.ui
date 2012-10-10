@@ -79,11 +79,14 @@
   <widget class="QCheckBox" name="checkRememberMe">
    <property name="geometry">
     <rect>
-     <x>440</x>
+     <x>370</x>
      <y>130</y>
      <width>141</width>
      <height>22</height>
     </rect>
+   </property>
+   <property name="layoutDirection">
+    <enum>Qt::LeftToRight</enum>
    </property>
    <property name="text">
     <string>Remember me</string>
@@ -95,8 +98,8 @@
   <widget class="QCheckBox" name="checkAutoLogin">
    <property name="geometry">
     <rect>
-     <x>440</x>
-     <y>160</y>
+     <x>370</x>
+     <y>150</y>
      <width>97</width>
      <height>22</height>
     </rect>
@@ -117,18 +120,24 @@
    <property name="text">
     <string>Settings</string>
    </property>
+   <property name="alignment">
+    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+   </property>
   </widget>
   <widget class="QLabel" name="labelRegisterNew">
    <property name="geometry">
     <rect>
-     <x>460</x>
+     <x>490</x>
      <y>290</y>
      <width>91</width>
      <height>17</height>
     </rect>
    </property>
    <property name="text">
-    <string>New to Wiz?</string>
+    <string>New to Wiz</string>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
    </property>
   </widget>
   <widget class="QLabel" name="labelForgotPassword">
@@ -140,8 +149,14 @@
      <height>17</height>
     </rect>
    </property>
+   <property name="layoutDirection">
+    <enum>Qt::LeftToRight</enum>
+   </property>
    <property name="text">
-    <string>Forgot Password?</string>
+    <string>Forgot Password</string>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
    </property>
   </widget>
   <widget class="QComboBox" name="comboUsers">
@@ -161,7 +176,7 @@
    <property name="geometry">
     <rect>
      <x>490</x>
-     <y>200</y>
+     <y>180</y>
      <width>97</width>
      <height>27</height>
     </rect>
