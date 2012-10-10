@@ -10,16 +10,19 @@ CWizPreferenceWindow::CWizPreferenceWindow(QWidget* parent)
     ui->setupUi(this);
 
     setWindowTitle(tr("Preference"));
-    //setFixedSize(400, 600);
 
-    connect(ui->buttonBox, SIGNAL(accepted()), this, SLOT(accept()));
-    connect(ui->buttonBox, SIGNAL(rejected()), this, SLOT(reject()));
+    connect(ui->buttonOK, SIGNAL(clicked()), this, SLOT(accept()));
 
     // general tab
     ui->comboLang->addItem(tr("Chinese"));
     ui->comboLang->addItem(tr("English"));
 
-#ifndef Q_WS_MAC
+
+    // just hide skin setup on mac for convience.
+#ifdef Q_WS_MAC
+    ui->groupBoxSkin->hide();
+#endif // Q_WS_MAC
+
     //m_labelRestartForSkin = new QLabel(groupBoxSkin);
 //
     //QVBoxLayout* groupBoxSkinLayout = new QVBoxLayout(groupBoxSkin);
@@ -44,12 +47,9 @@ CWizPreferenceWindow::CWizPreferenceWindow(QWidget* parent)
             ui->comboSkin->setCurrentIndex(ui->comboSkin->count() - 1);
         }
     }
-#endif
 
-#ifndef Q_OS_MAC
     connect(ui->comboSkin, SIGNAL(currentIndexChanged(QString)), SLOT(on_comboSkin_currentIndexChanged(QString)));
     //connect(m_labelRestartForSkin, SIGNAL(linkActivated(QString)), SLOT(on_labelRestartForSkin_linkActivated(QString)));
-#endif
 
     // reading tab
     switch (::WizGetDefaultNoteView())
@@ -86,6 +86,7 @@ void CWizPreferenceWindow::on_comboSkin_currentIndexChanged(const QString& text)
 {
     ::WizSetSkinDisplayName(text);
     //m_labelRestartForSkin->setVisible(true);
+    m_bRestart = true;
     emit settingsChanged(wizoptionsSkin);
 }
 
@@ -145,4 +146,13 @@ void CWizPreferenceWindow::on_labelProxy_linkActivated(const QString & link)
         return;
 
     emit settingsChanged(wizoptionsSync);
+}
+
+void CWizPreferenceWindow::accept()
+{
+    if (m_bRestart) {
+        emit restartForSettings();
+    }
+
+    QDialog::accept();
 }

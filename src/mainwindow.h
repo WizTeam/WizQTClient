@@ -38,6 +38,7 @@ class MainWindow
 
 public:
     explicit MainWindow(CWizDatabase& db, QWidget *parent = 0);
+    void center(int width, int height);
     ~MainWindow();
 
 public:
@@ -81,6 +82,7 @@ private:
     QTimer* m_syncTimer;
     //
     bool m_bRestart;
+    bool m_bLogoutRestart;
     //
     bool m_bUpdatingSelection;
     //
@@ -113,6 +115,7 @@ public:
 #endif
 public:
     bool isRestart() const { return m_bRestart; }
+    bool isLogout() const { return m_bLogoutRestart; }
 private:
     QObject* CategoryCtrlObject();
     QObject* DocumentsCtrlObject();

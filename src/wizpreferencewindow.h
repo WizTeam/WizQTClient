@@ -21,6 +21,7 @@ public:
 
 private:
     Ui::CWizPreferenceWindow *ui;
+    bool m_bRestart;
 
 #ifndef Q_OS_MAC
     QLabel* m_labelRestartForSkin;
@@ -28,17 +29,13 @@ private:
 
 Q_SIGNALS:
     void settingsChanged(WizOptionsType type);
-
-#ifndef Q_OS_MAC
     void restartForSettings();
-#endif
 
 private slots:
+    virtual void accept();
 
-#ifndef Q_OS_MAC
     void on_comboSkin_currentIndexChanged(const QString& text);
     //void on_labelRestartForSkin_linkActivated(const QString& text);
-#endif
 
     void on_radioAuto_clicked(bool checked);
     void on_radioAlwaysReading_clicked(bool checked);

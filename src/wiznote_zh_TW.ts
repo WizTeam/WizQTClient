@@ -360,12 +360,12 @@ p, li { white-space: pre-wrap; }
         <translation type="unfinished">自動 (保存檢視狀態)</translation>
     </message>
     <message>
-        <location filename="ui/preferencedialog.ui" line="134"/>
+        <location filename="ui/preferencedialog.ui" line="147"/>
         <source>Always open note in Reading-View</source>
         <translation type="unfinished">總是在閲讀檢視中打開筆記</translation>
     </message>
     <message>
-        <location filename="ui/preferencedialog.ui" line="147"/>
+        <location filename="ui/preferencedialog.ui" line="134"/>
         <source>Always open note in Editing-View</source>
         <translation type="unfinished">總是在編輯檢視中打開筆記</translation>
     </message>
@@ -465,22 +465,22 @@ p, li { white-space: pre-wrap; }
         <translation>爲知筆記</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="123"/>
+        <location filename="mainwindow.cpp" line="131"/>
         <source>Search</source>
         <translation>搜索</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="123"/>
+        <location filename="mainwindow.cpp" line="131"/>
         <source>Search your notes</source>
         <translation>搜索您的筆記</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="423"/>
+        <location filename="mainwindow.cpp" line="431"/>
         <source>New note</source>
         <translation>新建筆記</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="735"/>
+        <location filename="mainwindow.cpp" line="743"/>
         <source>Saving note...</source>
         <translation>正在保存筆記...</translation>
     </message>

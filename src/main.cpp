@@ -33,7 +33,6 @@ int main(int argc, char *argv[])
     iconApp.addFile(WizGetSkinResourceFileName("wiznote128"));
     QApplication::setWindowIcon(iconApp);
 
-
     // setup locale
     QString strLocale = settings.GetString("Users", "Locale", "");
     if (strLocale.isEmpty())
@@ -59,7 +58,7 @@ int main(int argc, char *argv[])
         if (db.Open(strDefaultUser, ""))
         {
             strUserId = strDefaultUser;
-            strPassword = db.GetEncryptedPassword();
+            strPassword = db.GetPassword2();
             bFallback = false;
         }
     }
@@ -73,6 +72,27 @@ int main(int argc, char *argv[])
         strPassword = dlgWelcome.password();
     }
 
+    // reset password for restart event
+    QStringList args = QApplication::arguments();
+    if (args.count() >= 4) {
+        if (!args.at(1).compare("autologin")) {
+            bool bOldAutoLogin = args.at(2).toInt();
+            settings.SetBool("Users", "AutoLogin", bOldAutoLogin);
+        }
+
+        if (!args.at(3).compare("cleanpassword") &&
+                args.at(4).toInt()) {
+            CWizDatabase db;
+            QString strUser = settings.GetString("Users", "DefaultUser", "");
+            CString strPassword;
+
+            if (db.Open(strUser, "")) {
+                db.GetPassword(strPassword);
+                db.SetPassword(strPassword, "");
+            }
+        }
+    }
+
     // ready
     CWizDatabase db;
     if (!db.Open(strUserId, strPassword))
@@ -82,6 +102,7 @@ int main(int argc, char *argv[])
     }
 
     MainWindow w(db);
+    w.showMaximized();
     w.show();
     w.init();
 
@@ -96,6 +117,26 @@ int main(int argc, char *argv[])
     // restart
     if (w.isRestart())
     {
+        // reset auto login
+        bAutoLogin = settings.GetBool("Users", "AutoLogin", false);
+        settings.SetBool("Users", "AutoLogin", true);
+
+        // reset password
+        bool bCleanPassword = false;
+        QString strStoredPassword = db.GetEncryptedPassword();
+        if (strStoredPassword.isEmpty()) {
+            db.SetPassword("", strPassword);
+            bCleanPassword = true;
+        }
+
+        QStringList argsRestart;
+        argsRestart.append(QString("autologin"));
+        argsRestart.append(QString(bAutoLogin ? "1" : "0"));
+        argsRestart.append(QString("cleanpassword"));
+        argsRestart.append(QString(bCleanPassword ? "1" : "0"));
+        QProcess::startDetached(argv[0], argsRestart);
+    } else if (w.isLogout()) {
+        db.SetPassword(strPassword, "");
         QProcess::startDetached(argv[0], QStringList());
     }
 

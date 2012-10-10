@@ -60,6 +60,7 @@ MainWindow::MainWindow(CWizDatabase& db, QWidget *parent) :
     m_animateSync(new CWizAnimateAction(this)),
     m_syncTimer(new QTimer(this)),
     m_bRestart(false),
+    m_bLogoutRestart(false),
     m_bUpdatingSelection(false)
 {
     initActions();
@@ -74,6 +75,14 @@ MainWindow::MainWindow(CWizDatabase& db, QWidget *parent) :
 MainWindow::~MainWindow()
 {
     delete m_history;
+}
+
+void MainWindow::center(int width, int height)
+{
+    QRect screenGeometry = QApplication::desktop()->screenGeometry();
+    int x = (screenGeometry.width() - width) / 2;
+    int y = (screenGeometry.height() - height) / 2;
+    setGeometry(x, y, width, height);
 }
 
 void MainWindow::initActions()
@@ -442,7 +451,7 @@ void MainWindow::on_actionLogout_triggered()
     CWizSettings settings(::WizGetDataStorePath() + "wiznote.ini");
     settings.SetBool("Users", "AutoLogin", false);
 
-    m_bRestart = true;
+    m_bLogoutRestart = true;
     close();
 }
 

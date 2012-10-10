@@ -42,7 +42,7 @@ void CWizDownloadObjectData::onClientLogout()
 //
 void CWizDownloadObjectData::startDownload()
 {
-    callClientLogin(m_db.GetUserId(), m_db.GetPassword());
+    callClientLogin(m_db.GetUserId(), m_db.GetPassword2());
 }
 
 

@@ -78,7 +78,7 @@ void CWizSync::startSync()
     changeProgress(progressStart);
     //
     addLog("login");
-    callClientLogin(m_db.GetUserId(), m_db.GetPassword());
+    callClientLogin(m_db.GetUserId(), m_db.GetPassword2());
 }
 
 void CWizSync::onXmlRpcError(const CString& strMethodName, WizXmlRpcError err, int errorCode, const CString& errorMessage)

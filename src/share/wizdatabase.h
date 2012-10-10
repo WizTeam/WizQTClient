@@ -70,7 +70,7 @@ public:
     CWizDatabase();
 
     QString GetUserId() const { return m_strUserId; }
-    QString GetPassword() const { return m_strPassword; }
+    QString GetPassword2() const { return m_strPassword; }
 
     QString GetAccountDataPath() const;
     QString GetUserDataDataPath() const;

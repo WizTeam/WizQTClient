@@ -32,11 +32,17 @@
   <widget class="QLineEdit" name="editPassword">
    <property name="geometry">
     <rect>
-     <x>370</x>
+     <x>359</x>
      <y>90</y>
-     <width>200</width>
+     <width>221</width>
      <height>25</height>
     </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">QLineEdit {
+	border: 1px solid gray;
+	border-radius: 3px;
+}</string>
    </property>
    <property name="locale">
     <locale language="English" country="UnitedStates"/>
@@ -88,6 +94,12 @@
    <property name="layoutDirection">
     <enum>Qt::LeftToRight</enum>
    </property>
+   <property name="styleSheet">
+    <string notr="true">QCheckBox::indicator {
+     width: 13px;
+     height: 13px;
+ }</string>
+   </property>
    <property name="text">
     <string>Remember me</string>
    </property>
@@ -103,6 +115,12 @@
      <width>97</width>
      <height>22</height>
     </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">QCheckBox::indicator {
+     width: 13px;
+     height: 13px;
+ }</string>
    </property>
    <property name="text">
     <string>Auto login</string>
@@ -162,11 +180,19 @@
   <widget class="QComboBox" name="comboUsers">
    <property name="geometry">
     <rect>
-     <x>370</x>
+     <x>360</x>
      <y>40</y>
-     <width>200</width>
+     <width>221</width>
      <height>25</height>
     </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">QComboBox {
+     border: 1px solid gray;
+     border-radius: 3px;
+     padding: 1px 18px 1px 3px;
+     min-width: 6em;
+ }</string>
    </property>
    <property name="editable">
     <bool>true</bool>

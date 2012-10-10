@@ -70,7 +70,7 @@ public:
 	//
 	BOOL GetUserName(CString& strUserName);
     BOOL SetUserName(const CString& strUserName);
-	BOOL GetPassword(CString& strPassword);
+    BOOL GetPassword(CString& strPassword);
 	CString GetEncryptedPassword();
     BOOL SetPassword(const CString& strOldPassword, const CString& strPassword);
 	//
