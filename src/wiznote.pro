@@ -190,13 +190,13 @@ mac:HEADERS += \
 
 
 FORMS += \
-    welcomedialog.ui \
-    newfolderdialog.ui \
-    newtagdialog.ui \
-    share/wizdownloadobjectdatadialog.ui \
-    aboutdialog.ui \
-    createaccountdialog.ui \
-    proxydialog.ui
+    ui/welcomedialog.ui \
+    ui/newfolderdialog.ui \
+    ui/newtagdialog.ui \
+    ui/wizdownloadobjectdatadialog.ui \
+    ui/aboutdialog.ui \
+    ui/createaccountdialog.ui \
+    ui/proxydialog.ui
 
 
 mac:LIBS += -framework Cocoa -framework Carbon
