@@ -6,6 +6,7 @@
 CWizPreferenceWindow::CWizPreferenceWindow(QWidget* parent)
     : QDialog(parent)
     , ui(new Ui::CWizPreferenceWindow)
+    , m_bRestart(false)
 {
     ui->setupUi(this);
 
@@ -22,18 +23,6 @@ CWizPreferenceWindow::CWizPreferenceWindow(QWidget* parent)
 #ifdef Q_WS_MAC
     ui->groupBoxSkin->hide();
 #endif // Q_WS_MAC
-
-    //m_labelRestartForSkin = new QLabel(groupBoxSkin);
-//
-    //QVBoxLayout* groupBoxSkinLayout = new QVBoxLayout(groupBoxSkin);
-    //groupBoxSkinLayout->addWidget(comboSkin);
-    //groupBoxSkinLayout->addWidget(m_labelRestartForSkin);
-    //groupBoxSkin->setLayout(groupBoxSkinLayout);
-
-    //QString strApplySkinText = tr("Restart to apply the new skin");
-    //QString strApplySkinLabelText = QString("<a href=\"restart\">%1</a>").arg(strApplySkinText);
-    //m_labelRestartForSkin->setText(strApplySkinLabelText);
-    //m_labelRestartForSkin->setVisible(false);
 
     CString strCurrSkinName = ::WizGetSkinName();
     std::map<CString, CString> skins;
@@ -81,7 +70,6 @@ CWizPreferenceWindow::CWizPreferenceWindow(QWidget* parent)
     connect(ui->labelProxySettings, SIGNAL(linkActivated(QString)), SLOT(on_labelProxy_linkActivated(QString)));
 }
 
-#ifndef Q_OS_MAC
 void CWizPreferenceWindow::on_comboSkin_currentIndexChanged(const QString& text)
 {
     ::WizSetSkinDisplayName(text);
@@ -89,14 +77,6 @@ void CWizPreferenceWindow::on_comboSkin_currentIndexChanged(const QString& text)
     m_bRestart = true;
     emit settingsChanged(wizoptionsSkin);
 }
-
-//void CWizPreferenceGeneralTab::on_labelRestartForSkin_linkActivated(const QString& text)
-//{
-//    Q_UNUSED(text);
-//
-//    emit restartForSettings();
-//}
-#endif
 
 void CWizPreferenceWindow::on_radioAuto_clicked(bool chcked)
 {

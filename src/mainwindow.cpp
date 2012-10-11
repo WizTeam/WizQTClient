@@ -40,6 +40,7 @@
 MainWindow::MainWindow(CWizDatabase& db, QWidget *parent) :
     QMainWindow(parent),
     m_db(db),
+    m_settings(new CWizUserSettings(db)),
     m_sync(m_db, WIZ_API_URL, *this),
     m_menuBar(new QMenuBar(this)),
     #ifndef Q_OS_MAC
@@ -489,9 +490,7 @@ void MainWindow::on_actionPreference_triggered()
     CWizPreferenceWindow* preference = new CWizPreferenceWindow(this);
 
     connect(preference, SIGNAL(settingsChanged(WizOptionsType)), SLOT(on_options_settingsChanged(WizOptionsType)));
-#ifndef Q_OS_MAC
     connect(preference, SIGNAL(restartForSettings()), SLOT(on_options_restartForSettings()));
-#endif
     preference->exec();
 }
 

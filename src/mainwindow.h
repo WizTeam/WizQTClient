@@ -2,9 +2,9 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-
 #include "wizdef.h"
 
+#include "share/wizsettings.h"
 #include "share/wizsync.h"
 #include "wiznotesettings.h"
 
@@ -38,6 +38,8 @@ class MainWindow
 
 public:
     explicit MainWindow(CWizDatabase& db, QWidget *parent = 0);
+
+    CWizUserSettings* settings() const { return m_settings; }
     void center(int width, int height);
     ~MainWindow();
 
@@ -56,6 +58,7 @@ public:
     virtual void changeProgress(int pos);
 private:
     CWizDatabase& m_db;
+    CWizUserSettings* m_settings;
     CWizSync m_sync;
     //
     QMenuBar* m_menuBar;

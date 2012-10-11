@@ -129,17 +129,18 @@ public:
     BOOL GetDocumentsByLocation(const CString& strLocation, CWizDocumentDataArray& arrayDocument);
     BOOL GetDocumentsByLocationIncludeSubFolders(const CString& strLocation, CWizDocumentDataArray& arrayDocument);
     BOOL GetDocumentsBySQLWhere(const CString& strSQLWhere, CWizDocumentDataArray& arrayDocument);
-	BOOL GetDocumentsByGUIDs(const CWizStdStringArray& arrayGUID, CWizDocumentDataArray& arrayDocument);
+    BOOL GetDocumentsByGUIDs(const CWizStdStringArray& arrayGUID, CWizDocumentDataArray& arrayDocument);
+
+    // meta table
     BOOL GetMetasByName(const CString& lpszMetaName, CWizMetaDataArray& arrayMeta);
     BOOL GetMeta(CString strMetaName, CString strKey, CString& strValue, const CString& strDefault = "", BOOL* pbMetaExists = NULL);
     CString GetMetaDef(const CString& lpszMetaName, const CString& lpszKey, const CString& strDef = "");
     BOOL SetMeta(CString strMetaName, CString strKey, const CString& lpszValue);
     __int64 GetMetaInt64(const CString& strMetaName, const CString& strKey, __int64 nDef);
     BOOL SetMetaInt64(const CString& strMetaName, const CString& strKey, __int64 n);
-    //
+
     int GetDocumentAttachmentCount(const CString& strDocumentGUID);
     void UpdateDocumentAttachmentCount(const CString& strDocumentGUID);
-	//
 
     BOOL LogDeletedGUID(const CString& strGUID, WizObjectType eType);
     BOOL LogDeletedGUIDs(const CWizStdStringArray& arrayGUID, WizObjectType eType);

@@ -6,6 +6,8 @@
 #include "wizqthelper.h"
 #include "wizmisc.h"
 
+#include "wiznotesettings.h"
+#include "wizdatabase.h"
 
 class CWizSettings : public QSettings
 {
@@ -49,5 +51,49 @@ CString WizGetShortcut(const CString& strName, const CString& strDef = "");
 QColor WizGetSkinColor(const CString& strSection, const CString& strName, const QColor& colorDef);
 int WizGetSkinInt(const CString& strSection, const CString& strName, int def);
 
+
+
+
+const QString USER_SETTINGS_SECTION = "QT_WIZNOTE";
+
+class CWizUserSettings
+{
+public:
+
+    // m_db should always 0 if init as this way.
+    CWizUserSettings(const QString& strUserId);
+
+    // m_strUserId should always 0 if init as this way.
+    CWizUserSettings(CWizDatabase& db);
+
+private:
+    QString m_strUserId;
+    CWizDatabase* m_db;
+
+    QString get(const QString& key) const;
+    void set(const QString& key, const QString& value);
+
+public:
+    QString user() const { return m_strUserId; }
+    void setUser(const QString& strUser);
+
+    QString password() const;
+    void setPassword(const QString& strPassword = "");
+
+    QString locale() const { return get("Locale"); }
+    void setLocale(const QString& strLocale) { set("Locale", strLocale); }
+
+    QString skin() const { return get("Skin"); }
+    void setSkin(const QString& strSkin) { set("Skin", strSkin); }
+
+    WizDocumentViewMode noteViewMode() const { return WizDocumentViewMode(get("NoteViewMode").toInt()); }
+    void setNoteViewMode(WizDocumentViewMode strMode) { return set("NoteViewMode", QString(strMode)); }
+
+    bool autoSync() const { return get("AutoSync").toInt() ? true : false; }
+    void setAutoSync(bool b) { set("AutoSync", b ? "1" : "0"); }
+
+    bool downloadAllNotesData() const { return get("DownloadAllNoteData").toInt() ? true : false; }
+    void setDownloadAllNotesData(bool b) { set("DownloadAllNotesData", b ? "1" : "0"); }
+};
 
 #endif // WIZSETTINGS_H

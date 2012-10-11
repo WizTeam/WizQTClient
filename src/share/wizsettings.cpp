@@ -147,3 +147,83 @@ int WizGetSkinInt(const CString& strSection, const CString& strName, int def)
     CWizSettings settings(WizGetSkinPath() + "skin.ini");
     return settings.GetInt(strSection, strName, def);
 }
+
+
+
+CWizUserSettings::CWizUserSettings(const QString& strUserId)
+    : m_strUserId(strUserId)
+    , m_db(NULL)
+{
+}
+
+CWizUserSettings::CWizUserSettings(CWizDatabase& db)
+    : m_strUserId("")
+    , m_db(&db)
+{
+}
+
+void CWizUserSettings::setUser(const QString& strUser)
+{
+    if (!m_db)
+        m_strUserId = strUser;
+}
+
+QString CWizUserSettings::get(const QString& strKey) const
+{
+    if (!m_strUserId.isEmpty()) {
+        CWizDatabase db;
+        if (db.Open(m_strUserId, "")) {
+            return db.GetMetaDef(USER_SETTINGS_SECTION, strKey);
+        }
+    }
+
+    if (m_db) {
+        return m_db->GetMetaDef(USER_SETTINGS_SECTION, strKey);
+    }
+
+    return NULL;
+}
+
+void CWizUserSettings::set(const QString& strKey, const QString& strValue)
+{
+    if (!m_strUserId.isEmpty()) {
+        CWizDatabase db;
+        if (db.Open(m_strUserId, "")) {
+            db.SetMeta(USER_SETTINGS_SECTION, strKey, strValue);
+        }
+    }
+
+    if (m_db) {
+        m_db->SetMeta(USER_SETTINGS_SECTION, strKey, strValue);
+    }
+}
+
+QString CWizUserSettings::password() const
+{
+    if (!m_strUserId.isEmpty()) {
+        CWizDatabase db;
+        if (db.Open(m_strUserId, "")) {
+            return db.GetMetaDef("Account", "Password");
+        }
+    }
+
+    if (m_db) {
+        return m_db->GetMetaDef("Account", "Password");
+    }
+
+    return NULL;
+}
+
+void CWizUserSettings::setPassword(const QString& strPassword /* = NULL */)
+{
+    if (!m_strUserId.isEmpty()) {
+        CWizDatabase db;
+        if (db.Open(m_strUserId, "")) {
+            db.SetMeta("Account", "Password", strPassword);
+        }
+    }
+
+    if (m_db) {
+        m_db->SetMeta("Account", "Password", strPassword);
+    }
+}
