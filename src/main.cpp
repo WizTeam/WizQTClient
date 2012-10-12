@@ -30,13 +30,6 @@ int main(int argc, char *argv[])
     iconApp.addFile(WizGetResourcesPath() + "wiznote48.png");
     iconApp.addFile(WizGetResourcesPath() + "wiznote64.png");
     iconApp.addFile(WizGetResourcesPath() + "wiznote128.png");
-    //iconApp.addFile(WizGetSkinResourceFileName("wiznote16"));
-    //iconApp.addFile(WizGetSkinResourceFileName("wiznote24"));
-    //iconApp.addFile(WizGetSkinResourceFileName("wiznote32"));
-    //iconApp.addFile(WizGetSkinResourceFileName("wiznote48"));
-    //iconApp.addFile(WizGetSkinResourceFileName("wiznote64"));
-    //iconApp.addFile(WizGetSkinResourceFileName("wiznote72"));
-    //iconApp.addFile(WizGetSkinResourceFileName("wiznote128"));
     QApplication::setWindowIcon(iconApp);
 
     QString strDefaultUser = settings.GetString("Users", "DefaultUser", "");
@@ -45,12 +38,6 @@ int main(int argc, char *argv[])
 
     // setup locale
     QString strLocale = userSettings.locale();
-    if (strLocale.isEmpty())
-        strLocale = settings.GetString("Common", "Locale", "");
-    if (strLocale.isEmpty()) {
-        strLocale = QLocale::system().name();
-        settings.SetString("Common", "Locale", strLocale);
-    }
 
     QTranslator translatorWizNote;
     translatorWizNote.load(QString("wiznote_") + strLocale, WizGetResourcesPath() + "languages/");

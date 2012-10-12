@@ -6,7 +6,6 @@
 
 #include "share/wizsettings.h"
 #include "share/wizsync.h"
-#include "wiznotesettings.h"
 
 
 #ifndef Q_OS_MAC
@@ -99,7 +98,7 @@ private:
     void initClient();
     void initStatusBar();
     //
-    void resetNotice();
+    //void resetNotice();
 
 public:
     virtual void init();

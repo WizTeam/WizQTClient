@@ -35,7 +35,6 @@ CWizPreferenceWindow::CWizPreferenceWindow(CWizExplorerApp& app, QWidget* parent
     }
 
     connect(ui->comboSkin, SIGNAL(currentIndexChanged(QString)), SLOT(on_comboSkin_currentIndexChanged(QString)));
-    //connect(m_labelRestartForSkin, SIGNAL(linkActivated(QString)), SLOT(on_labelRestartForSkin_linkActivated(QString)));
 
     // reading tab
     switch (userSettings().noteViewMode())
@@ -69,8 +68,8 @@ CWizPreferenceWindow::CWizPreferenceWindow(CWizExplorerApp& app, QWidget* parent
 
 void CWizPreferenceWindow::on_comboSkin_currentIndexChanged(const QString& text)
 {
-    ::WizSetSkinDisplayName(text);
-    //m_labelRestartForSkin->setVisible(true);
+    userSettings().setSkin(text);
+
     m_bRestart = true;
     emit settingsChanged(wizoptionsSkin);
 }

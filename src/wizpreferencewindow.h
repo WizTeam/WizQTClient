@@ -7,7 +7,6 @@
 
 #include "wizdef.h"
 #include "share/wizmisc.h"
-#include "wiznotesettings.h"
 #include "proxydialog.h"
 
 namespace Ui {

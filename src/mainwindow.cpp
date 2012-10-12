@@ -197,7 +197,7 @@ void MainWindow::initToolBar()
 
 #endif // #ifdef Q_OS_MAC
 
-    resetNotice();
+    //resetNotice();
 }
 
 void MainWindow::initClient()
@@ -281,35 +281,35 @@ void MainWindow::initStatusBar()
     m_statusBar->hide();
 }
 
-void MainWindow::resetNotice()
-{
-#ifdef Q_OS_MAC
-#else
-    if (!m_labelNotice)
-        return;
-    //
-    m_labelNotice->setText("");
-    //
-    QString notice;
-    if (!::WizGetNotice(notice)
-        || notice.isEmpty())
-        return;
-    //
-    CString strTitle = ::WizGetCommandLineValue(notice, "Title");
-    CString strLink = ::WizGetCommandLineValue(notice, "Link");
-    //
-    CString strText = CString("<a href=\"%1\">%2</a>").arg(strLink, strTitle);
-    //
-    m_labelNotice->setText(strText);
-#endif
-}
+//void MainWindow::resetNotice()
+//{
+//#ifdef Q_OS_MAC
+//#else
+//    if (!m_labelNotice)
+//        return;
+//    //
+//    m_labelNotice->setText("");
+//    //
+//    QString notice;
+//    if (!::WizGetNotice(notice)
+//        || notice.isEmpty())
+//        return;
+//    //
+//    CString strTitle = ::WizGetCommandLineValue(notice, "Title");
+//    CString strLink = ::WizGetCommandLineValue(notice, "Link");
+//    //
+//    CString strText = CString("<a href=\"%1\">%2</a>").arg(strLink, strTitle);
+//    //
+//    m_labelNotice->setText(strText);
+//#endif
+//}
 
 void MainWindow::init()
 {
     connect(m_category, SIGNAL(itemSelectionChanged()), this, SLOT(on_category_itemSelectionChanged()));
     connect(m_documents, SIGNAL(itemSelectionChanged()), this, SLOT(on_documents_itemSelectionChanged()));
     //
-    m_sync.setDownloadAllNotesData(::WizIsDownloadAllNotesData());
+    m_sync.setDownloadAllNotesData(m_settings->downloadAllNotesData());
     m_syncTimer->setInterval(3 * 60 * 1000);    //3 minutes
     connect(m_syncTimer, SIGNAL(timeout()), this, SLOT(on_syncTimer_timeout()));
     QTimer::singleShot(30 * 1000, this, SLOT(on_syncTimer_timeout()));  //30 seconds
@@ -366,12 +366,13 @@ void MainWindow::syncStarted()
 
 void MainWindow::syncLogin()
 {
-    ::WizSetNotice(m_sync.userInfo().strNotice);
+    m_sync.userInfo().strNotice;
+    //::WizSetNotice(m_sync.userInfo().strNotice);
     //
 #ifdef QT_DEBUG
     //::WizSetNotice("/Title=test /Link=http://www.wiz.cn/");
 #endif
-    resetNotice();
+    //resetNotice();
 }
 
 void MainWindow::syncDone(bool error)
@@ -600,7 +601,7 @@ void MainWindow::on_options_settingsChanged(WizOptionsType type)
     }
     else if (wizoptionsSync == type)
     {
-        m_sync.setDownloadAllNotesData(::WizIsDownloadAllNotesData());
+        m_sync.setDownloadAllNotesData(m_settings->downloadAllNotesData());
         m_sync.resetProxy();
     }
 }
@@ -613,9 +614,9 @@ void MainWindow::on_options_restartForSettings()
 
 void MainWindow::on_syncTimer_timeout()
 {
-    if (!::WizIsAutoSync())
+    if (!m_settings->autoSync())
         return;
-    //
+
     on_actionSync_triggered();
 }
 

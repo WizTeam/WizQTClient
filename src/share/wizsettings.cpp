@@ -1,5 +1,6 @@
 #include "wizsettings.h"
 
+#include <QLocale>
 
 CWizSettings::CWizSettings(const QString& strFileName)
     : QSettings(strFileName, QSettings::IniFormat)
@@ -262,6 +263,35 @@ void CWizUserSettings::setSkin(const QString& strSkinName)
     set("Skin", strSkinName);
 }
 
+QString CWizUserSettings::locale() const
+{
+    QString strLocale = get("Locale");
+
+    if (!strLocale.isEmpty()) {
+            return strLocale;
+    }
+
+    CWizSettings settings(::WizGetDataStorePath() + "wiznote.ini");
+    strLocale = settings.GetString("Common", "Locale");
+
+    if (!strLocale.isEmpty()) {
+            return strLocale;
+    }
+
+    return QLocale::system().name();
+}
+
+WizDocumentViewMode CWizUserSettings::noteViewMode() const
+{
+    QString mode = get("NoteViewMode");
+
+    if (!mode.isEmpty()) {
+        return WizDocumentViewMode(mode.toInt());
+    }
+
+    return viewmodeAlwaysEditing;
+}
+
 bool CWizUserSettings::autoSync() const
 {
     QString strAutoSync = get("AutoSync");
@@ -272,4 +302,16 @@ bool CWizUserSettings::autoSync() const
 
     // auto sync as default
     return true;
+}
+
+bool CWizUserSettings::downloadAllNotesData() const
+{
+    QString strDownload = get("DownloadAllNoteData");
+
+    if (!strDownload.isEmpty()) {
+        return strDownload.toInt() ? true : false;
+    }
+
+    // do not download all notes data as default
+    return false;
 }
