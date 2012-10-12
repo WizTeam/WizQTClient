@@ -14,6 +14,10 @@ class CWizDocumentListView : public QListWidget
     Q_OBJECT
 public:
     CWizDocumentListView(CWizExplorerApp& app, QWidget *parent = 0);
+
+private:
+    CWizExplorerApp& m_app;
+
 protected:
     CWizDatabase& m_db;
     CWizCategoryView& m_category;

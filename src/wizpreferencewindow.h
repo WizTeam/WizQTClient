@@ -5,6 +5,8 @@
 
 #include <QDialog>
 
+#include "wizdef.h"
+#include "share/wizmisc.h"
 #include "wiznotesettings.h"
 #include "proxydialog.h"
 
@@ -14,18 +16,16 @@ namespace Ui {
 
 class CWizPreferenceWindow: public QDialog
 {
-     Q_OBJECT
+    Q_OBJECT
 
 public:
-     CWizPreferenceWindow(QWidget* parent);
+    CWizPreferenceWindow(CWizExplorerApp& app, QWidget* parent);
+    CWizUserSettings& userSettings() const { return m_app.userSettings(); }
 
 private:
     Ui::CWizPreferenceWindow *ui;
+    CWizExplorerApp& m_app;
     bool m_bRestart;
-
-#ifndef Q_OS_MAC
-    QLabel* m_labelRestartForSkin;
-#endif
 
 Q_SIGNALS:
     void settingsChanged(WizOptionsType type);
@@ -43,7 +43,7 @@ private slots:
 
     void on_checkAutoSync_clicked(bool checked);
     void on_checkDownloadAllNotesData_clicked(bool checked);
-    void on_labelProxy_linkActivated(const QString & link);
+    void on_labelProxy_linkActivated();
 };
 
 

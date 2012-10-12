@@ -4,15 +4,16 @@
 #include "share/wizmisc.h"
 #include <QFileInfo>
 
-AboutDialog::AboutDialog(QWidget *parent) :
-    QDialog(parent),
-    ui(new Ui::AboutDialog)
+AboutDialog::AboutDialog(CWizExplorerApp& app, QWidget *parent)
+    : QDialog(parent)
+    , ui(new Ui::AboutDialog)
+    , m_app(app)
 {
     ui->setupUi(this);
     //
     setFixedSize(size());
     //
-    QPixmap pixmap(WizGetSkinResourceFileName("about_logo"));
+    QPixmap pixmap(::WizGetSkinResourceFileName(m_app.userSettings().skin(), "about_logo"));
     ui->labelIcon->setPixmap(pixmap);
     //
 #if defined Q_OS_MAC

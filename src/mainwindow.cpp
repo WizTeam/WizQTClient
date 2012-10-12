@@ -31,11 +31,11 @@
 #include "wiznotestyle.h"
 #include "wizdocumenthistory.h"
 
+#include "share/wizui.h"
+#include "share/wizmisc.h"
 #include "share/wizuihelper.h"
 #include "share/wizsettings.h"
 #include "share/wizanimateaction.h"
-
-#include "wizoptionswidget.h"
 
 MainWindow::MainWindow(CWizDatabase& db, QWidget *parent) :
     QMainWindow(parent),
@@ -51,14 +51,14 @@ MainWindow::MainWindow(CWizDatabase& db, QWidget *parent) :
     m_statusBar(new QStatusBar(this)),
     m_labelStatus(new QLabel(this)),
     m_progressSync(new QProgressBar(this)),
-    m_actions(new CWizActions(this)),
+    m_actions(new CWizActions(*this, this)),
     m_category(new CWizCategoryView(*this, this)),
     m_documents(new CWizDocumentListView(*this, this)),
     m_doc(new CWizDocumentView(*this, this)),
     m_splitter(NULL),
     m_options(NULL),
     m_history(new CWizDocumentViewHistory()),
-    m_animateSync(new CWizAnimateAction(this)),
+    m_animateSync(new CWizAnimateAction(*this, this)),
     m_syncTimer(new QTimer(this)),
     m_bRestart(false),
     m_bLogoutRestart(false),
@@ -190,9 +190,10 @@ void MainWindow::initToolBar()
 
     m_toolBar->addWidget(new CWizFixedSpacer(QSize(2, 1), m_toolBar));
 
-    m_toolBar->setStyle(WizGetStyle());
+    m_toolBar->setStyle(WizGetStyle(m_settings->skin()));
 
-    m_toolBar->layout()->setMargin(::WizGetSkinInt("ToolBar", "Margin", m_toolBar->layout()->margin()));
+    CWizSettings settings(::WizGetSkinResourcePath(m_settings->skin()) + "skin.ini");
+    m_toolBar->layout()->setMargin(settings.GetInt("ToolBar", "Margin", m_toolBar->layout()->margin()));
 
 #endif // #ifdef Q_OS_MAC
 
@@ -205,13 +206,13 @@ void MainWindow::initClient()
     setCentralWidget(client);
 
     QPalette pal = client->palette();
-    pal.setColor(QPalette::Window, WizGetClientBackgroundColor());
+    pal.setColor(QPalette::Window, WizGetClientBackgroundColor(m_settings->skin()));
     client->setPalette(pal);
     client->setAutoFillBackground(true);
 
 #ifndef Q_OS_MAC
-    WizInitWidgetMargins(client, "Client");
-    WizInitWidgetMargins(m_doc, "Document");
+    WizInitWidgetMargins(m_settings->skin(), client, "Client");
+    WizInitWidgetMargins(m_settings->skin(), m_doc, "Document");
 #endif
 
     QBoxLayout* layout = new QBoxLayout(QBoxLayout::LeftToRight, client);
@@ -222,22 +223,24 @@ void MainWindow::initClient()
     layout->addWidget(splitter);
 
 #ifndef Q_OS_MAC
-    int splitterWidth = ::WizGetSkinInt("splitter", "Width", splitter->splitterWidth());
+    CWizSettings settings(::WizGetSkinResourcePath(m_settings->skin()) + "skin.ini");
+
+    int splitterWidth = settings.GetInt("splitter", "Width", splitter->splitterWidth());
     splitter->setSplitterWidth(splitterWidth);
     QColor defSplitterColor = client->palette().color(QPalette::Window);
-    QColor splitterColor = ::WizGetSkinColor("splitter", "Color", defSplitterColor);
+    QColor splitterColor = settings.GetColor("splitter", "Color", defSplitterColor);
     splitter->setSplitterColor(splitterColor);
 #endif
 
 #ifndef Q_OS_MAC
-    splitter->addWidget(WizInitWidgetMarginsEx(m_category, "Category"));
+    splitter->addWidget(WizInitWidgetMarginsEx(m_settings->skin(), m_category, "Category"));
     //splitter->addWidget(WizInitWidgetMarginsEx(m_documents, "Documents"));
 #else
     splitter->addWidget(m_category);
     //splitter->addWidget(m_documents);
 #endif
 
-    CWizSearchBox* searchBox = new CWizSearchBox();
+    CWizSearchBox* searchBox = new CWizSearchBox(*this);
     connect(searchBox, SIGNAL(doSearch(const QString&)), this, SLOT(on_search_doSearch(const QString&)));
 
     QBoxLayout* layoutDocuments = new QBoxLayout(QBoxLayout::TopToBottom, client);
@@ -458,7 +461,7 @@ void MainWindow::on_actionLogout_triggered()
 
 void MainWindow::on_actionAbout_triggered()
 {
-    AboutDialog dlg(this);
+    AboutDialog dlg(*this, this);
     dlg.exec();
 }
 
@@ -487,7 +490,7 @@ void MainWindow::on_actionAbout_triggered()
 
 void MainWindow::on_actionPreference_triggered()
 {
-    CWizPreferenceWindow* preference = new CWizPreferenceWindow(this);
+    CWizPreferenceWindow* preference = new CWizPreferenceWindow(*this, this);
 
     connect(preference, SIGNAL(settingsChanged(WizOptionsType)), SLOT(on_options_settingsChanged(WizOptionsType)));
     connect(preference, SIGNAL(restartForSettings()), SLOT(on_options_restartForSettings()));
@@ -602,14 +605,11 @@ void MainWindow::on_options_settingsChanged(WizOptionsType type)
     }
 }
 
-#ifndef Q_OS_MAC
 void MainWindow::on_options_restartForSettings()
 {
     m_bRestart = true;
     QTimer::singleShot(100, this, SLOT(close()));
-    //QApplication::postEvent(this, new QCloseEvent());
 }
-#endif
 
 void MainWindow::on_syncTimer_timeout()
 {

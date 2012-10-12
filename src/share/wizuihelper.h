@@ -3,13 +3,17 @@
 
 #include <QtGui>
 
+#include "wizdef.h"
+
 class CWizSearchBox : public QWidget
 {
     Q_OBJECT
 public:
-    CWizSearchBox(QWidget* parent = 0);
+    CWizSearchBox(CWizExplorerApp& app, QWidget* parent = 0);
     virtual QSize sizeHint() const;
+
 private:
+    CWizExplorerApp& m_app;
     QString m_keywords;
     QWidget* m_search;
 public slots:

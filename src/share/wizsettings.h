@@ -48,8 +48,8 @@ BOOL WizSetString(const CString& strSection, const CString& strKey, const CStrin
 
 CString WizGetShortcut(const CString& strName, const CString& strDef = "");
 
-QColor WizGetSkinColor(const CString& strSection, const CString& strName, const QColor& colorDef);
-int WizGetSkinInt(const CString& strSection, const CString& strName, int def);
+//QColor WizGetSkinColor(const CString& strSection, const CString& strName, const QColor& colorDef);
+//int WizGetSkinInt(const CString& strSection, const CString& strName, int def);
 
 
 
@@ -68,6 +68,7 @@ public:
 
 private:
     QString m_strUserId;
+    QString m_strSkinName;
     CWizDatabase* m_db;
 
     QString get(const QString& key) const;
@@ -83,13 +84,13 @@ public:
     QString locale() const { return get("Locale"); }
     void setLocale(const QString& strLocale) { set("Locale", strLocale); }
 
-    QString skin() const { return get("Skin"); }
-    void setSkin(const QString& strSkin) { set("Skin", strSkin); }
+    QString skin();
+    void setSkin(const QString& strSkinName);
 
     WizDocumentViewMode noteViewMode() const { return WizDocumentViewMode(get("NoteViewMode").toInt()); }
-    void setNoteViewMode(WizDocumentViewMode strMode) { return set("NoteViewMode", QString(strMode)); }
+    void setNoteViewMode(WizDocumentViewMode strMode) { set("NoteViewMode", QString::number(strMode)); }
 
-    bool autoSync() const { return get("AutoSync").toInt() ? true : false; }
+    bool autoSync() const; //{ return get("AutoSync").toInt() ? true : false; }
     void setAutoSync(bool b) { set("AutoSync", b ? "1" : "0"); }
 
     bool downloadAllNotesData() const { return get("DownloadAllNoteData").toInt() ? true : false; }

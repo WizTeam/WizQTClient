@@ -52,10 +52,14 @@ class CWizAttachmentListWidget : public CWizPopupWidget
     Q_OBJECT
 public:
     CWizAttachmentListWidget(CWizExplorerApp& app, QWidget* parent);
+
 private:
+    CWizExplorerApp& m_app;
     CWizAttachmentListView* m_list;
+
 public:
     void setDocument(const WIZDOCUMENTDATA& document);
+
 public slots:
     void on_addAttachment_clicked();
 };

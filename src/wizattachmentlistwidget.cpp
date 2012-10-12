@@ -45,7 +45,7 @@ CWizAttachmentListView::CWizAttachmentListView(CWizExplorerApp& app, QWidget* pa
 {
     setFrameStyle(QFrame::NoFrame);
     //
-    setStyle(WizGetStyle());
+    setStyle(WizGetStyle(m_app.userSettings().skin()));
     //
     setSelectionMode(QAbstractItemView::ExtendedSelection);
     //
@@ -266,6 +266,7 @@ void CWizAttachmentListView::on_list_itemDoubleClicked(QListWidgetItem* it)
 
 CWizAttachmentListWidget::CWizAttachmentListWidget(CWizExplorerApp& app, QWidget* parent)
     : CWizPopupWidget(parent)
+    , m_app(app)
     , m_list(new CWizAttachmentListView(app, this))
 {
     QLayout* layoutMain = new QBoxLayout(QBoxLayout::TopToBottom, this);
@@ -274,9 +275,9 @@ CWizAttachmentListWidget::CWizAttachmentListWidget(CWizExplorerApp& app, QWidget
     //
     QLayout* layoutHeader = new QHBoxLayout(this);
     layoutHeader->setMargin(0);
-    QIcon iconAddAttachment = ::WizLoadSkinIcon("add_attachment_button");
+    QIcon iconAddAttachment = ::WizLoadSkinIcon(m_app.userSettings().skin(), "add_attachment_button");
     CWizImagePushButton* addAttachmentButton = new CWizImagePushButton(iconAddAttachment, "", this);
-    addAttachmentButton->setStyle(WizGetStyle());
+    addAttachmentButton->setStyle(WizGetStyle(m_app.userSettings().skin()));
     addAttachmentButton->setToolTip(tr("Add attachments"));
     layoutHeader->addWidget(new CWizFixedSpacer(QSize(4, 2), this));
     layoutHeader->addWidget(new QLabel(tr("Attachments"), this));

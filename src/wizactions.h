@@ -1,6 +1,7 @@
 #ifndef WIZACTIONS_H
 #define WIZACTIONS_H
 
+#include "wizdef.h"
 #include "share/wizqthelper.h"
 
 class QAction;
@@ -13,9 +14,10 @@ struct WIZACTION;
 class CWizActions
 {
 public:
-    CWizActions(QObject* parent);
+    CWizActions(CWizExplorerApp& app, QObject* parent);
 
 private:
+    CWizExplorerApp& m_app;
     QObject* m_parent;
     std::map<QString, QAction*> m_actions;
     WIZACTION* actionsData();

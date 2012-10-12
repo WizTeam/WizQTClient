@@ -14,8 +14,9 @@ struct WIZACTION
 
 
 
-CWizActions::CWizActions(QObject* parent)
+CWizActions::CWizActions(CWizExplorerApp& app, QObject* parent)
     : m_parent(parent)
+    , m_app(app)
 {
 }
 
@@ -69,7 +70,7 @@ QAction* CWizActions::addAction(WIZACTION& action)
 
     if (!strIconName.isEmpty())
     {
-        pAction->setIcon(WizLoadSkinIcon(strIconName));
+        pAction->setIcon(::WizLoadSkinIcon(m_app.userSettings().skin(), strIconName));
     }
 
     m_actions[action.strName] = pAction;

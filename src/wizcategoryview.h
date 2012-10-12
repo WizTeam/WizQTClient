@@ -28,6 +28,7 @@ protected:
     //
     void addSeparator();
 private:
+    CWizExplorerApp& m_app;
     QMenu* m_menuAllFolders;
     QMenu* m_menuAllTags;
     QMenu* m_menuFolder;

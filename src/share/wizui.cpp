@@ -101,18 +101,20 @@ void CWizSkin9GridImage::Draw(QPainter* p, QRect rc, int nAlpha) const
 
 
 
-void WizInitWidgetMargins(QWidget* widget, const QString& name)
+void WizInitWidgetMargins(const QString& strSkinName, QWidget* widget, const QString& name)
 {
     QMargins def = widget->contentsMargins();
-    int clientMarginLeft = ::WizGetSkinInt(name, "MarginLeft", def.left());
-    int clientMarginTop = ::WizGetSkinInt(name, "MarginTop", def.top());
-    int clientMarginRight = ::WizGetSkinInt(name, "MarginRight", def.right());
-    int clientMarginBottom = ::WizGetSkinInt(name, "MarginBottom", def.bottom());
+
+    CWizSettings settings(::WizGetSkinResourcePath(strSkinName) + "skin.ini");
+    int clientMarginLeft = settings.GetInt(name, "MarginLeft", def.left());
+    int clientMarginTop = settings.GetInt(name, "MarginTop", def.top());
+    int clientMarginRight = settings.GetInt(name, "MarginRight", def.right());
+    int clientMarginBottom = settings.GetInt(name, "MarginBottom", def.bottom());
     widget->setContentsMargins(clientMarginLeft, clientMarginTop, clientMarginRight, clientMarginBottom);
 }
 
 
-QWidget* WizInitWidgetMarginsEx(QWidget* widget, const QString& name)
+QWidget* WizInitWidgetMarginsEx(const QString& strSkinName, QWidget* widget, const QString& name)
 {
     QWidget* wrap = new QWidget(widget->parentWidget());
     QLayout* layout = new QBoxLayout(QBoxLayout::LeftToRight, wrap);
@@ -120,7 +122,7 @@ QWidget* WizInitWidgetMarginsEx(QWidget* widget, const QString& name)
     wrap->setLayout(layout);
     layout->setMargin(0);
 
-    WizInitWidgetMargins(wrap, name);
+    WizInitWidgetMargins(strSkinName, wrap, name);
     layout->addWidget(widget);
 
     return wrap;

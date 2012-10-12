@@ -1,11 +1,9 @@
 #include "wizpreferencewindow.h"
 
-#include "wiznotesettings.h"
-#include "share/wizmisc.h"
-
-CWizPreferenceWindow::CWizPreferenceWindow(QWidget* parent)
+CWizPreferenceWindow::CWizPreferenceWindow(CWizExplorerApp& app, QWidget* parent)
     : QDialog(parent)
     , ui(new Ui::CWizPreferenceWindow)
+    , m_app(app)
     , m_bRestart(false)
 {
     ui->setupUi(this);
@@ -18,13 +16,12 @@ CWizPreferenceWindow::CWizPreferenceWindow(QWidget* parent)
     ui->comboLang->addItem(tr("Chinese"));
     ui->comboLang->addItem(tr("English"));
 
-
     // just hide skin setup on mac for convience.
 #ifdef Q_WS_MAC
     ui->groupBoxSkin->hide();
 #endif // Q_WS_MAC
 
-    CString strCurrSkinName = ::WizGetSkinName();
+    CString strCurrSkinName = userSettings().skin();
     std::map<CString, CString> skins;
     typedef std::map<CString, CString>::value_type SKIN;
     ::WizGetSkins(skins);
@@ -41,7 +38,7 @@ CWizPreferenceWindow::CWizPreferenceWindow(QWidget* parent)
     //connect(m_labelRestartForSkin, SIGNAL(linkActivated(QString)), SLOT(on_labelRestartForSkin_linkActivated(QString)));
 
     // reading tab
-    switch (::WizGetDefaultNoteView())
+    switch (userSettings().noteViewMode())
     {
     case viewmodeAlwaysEditing:
         ui->radioAlwaysEditing->setChecked(true);
@@ -59,15 +56,15 @@ CWizPreferenceWindow::CWizPreferenceWindow(QWidget* parent)
     connect(ui->radioAlwaysEditing, SIGNAL(clicked(bool)), SLOT(on_radioAlwaysEditing_clicked(bool)));
 
     // syncing tab
-    ui->checkAutoSync->setChecked(::WizIsAutoSync());
-    ui->checkDownloadAllNotesData->setChecked(::WizIsDownloadAllNotesData());
+    ui->checkAutoSync->setChecked(userSettings().autoSync());
+    ui->checkDownloadAllNotesData->setChecked(userSettings().downloadAllNotesData());
 
     QString proxySettings = WizFormatString1("<a href=\"proxy_settings\">%1</a>", tr("Proxy settings"));
     ui->labelProxySettings->setText(proxySettings);
 
     connect(ui->checkAutoSync, SIGNAL(clicked(bool)), SLOT(on_checkAutoSync_clicked(bool)));
     connect(ui->checkDownloadAllNotesData, SIGNAL(clicked(bool)), SLOT(on_checkDownloadAllNotesData_clicked(bool)));
-    connect(ui->labelProxySettings, SIGNAL(linkActivated(QString)), SLOT(on_labelProxy_linkActivated(QString)));
+    connect(ui->labelProxySettings, SIGNAL(linkActivated()), SLOT(on_labelProxy_linkActivated()));
 }
 
 void CWizPreferenceWindow::on_comboSkin_currentIndexChanged(const QString& text)
@@ -80,47 +77,45 @@ void CWizPreferenceWindow::on_comboSkin_currentIndexChanged(const QString& text)
 
 void CWizPreferenceWindow::on_radioAuto_clicked(bool chcked)
 {
-    if (chcked)
-    {
-        ::WizSetDefaultNoteView(viewmodeKeep);
-        emit settingsChanged(wizoptionsNoteView);
-    }
+    if (!chcked)
+        return;
+
+    userSettings().setNoteViewMode(viewmodeKeep);
+    emit settingsChanged(wizoptionsNoteView);
 }
 
 void CWizPreferenceWindow::on_radioAlwaysReading_clicked(bool chcked)
 {
-    if (chcked)
-    {
-        ::WizSetDefaultNoteView(viewmodeAlwaysReading);
-        emit settingsChanged(wizoptionsNoteView);
-    }
+    if (!chcked)
+        return;
+
+    userSettings().setNoteViewMode(viewmodeAlwaysReading);
+    emit settingsChanged(wizoptionsNoteView);
 }
 
 void CWizPreferenceWindow::on_radioAlwaysEditing_clicked(bool chcked)
 {
-    if (chcked)
-    {
-        ::WizSetDefaultNoteView(viewmodeAlwaysEditing);
-        emit settingsChanged(wizoptionsNoteView);
-    }
+    if (!chcked)
+        return;
+
+    userSettings().setNoteViewMode(viewmodeAlwaysEditing);
+    emit settingsChanged(wizoptionsNoteView);
 }
 
 void CWizPreferenceWindow::on_checkAutoSync_clicked(bool checked)
 {
-    ::WizSetAutoSync(checked);
+    userSettings().setAutoSync(checked);
     emit settingsChanged(wizoptionsSync);
 }
 
 void CWizPreferenceWindow::on_checkDownloadAllNotesData_clicked(bool checked)
 {
-    ::WizSetDownloadAllNotesData(checked);
+    userSettings().setDownloadAllNotesData(checked);
     emit settingsChanged(wizoptionsSync);
 }
 
-void CWizPreferenceWindow::on_labelProxy_linkActivated(const QString & link)
+void CWizPreferenceWindow::on_labelProxy_linkActivated()
 {
-    Q_UNUSED(link);
-
     ProxyDialog dlg(parentWidget());
     if (QDialog::Accepted != dlg.exec())
         return;

@@ -1,13 +1,16 @@
 #ifndef WIZNOTESTYLE_H
 #define WIZNOTESTYLE_H
 
+#include <QString>
+#include <QStyle>
 
-class QStyle;
-QStyle* WizGetStyle();
+//class QStyle;
+
+QStyle* WizGetStyle(const QString& skinName);
 
 class QColor;
-QColor WizGetCategoryBackroundColor();
-QColor WizGetDocumentsBackroundColor();
-QColor WizGetClientBackgroundColor();
+QColor WizGetCategoryBackroundColor(const QString& skinName);
+QColor WizGetDocumentsBackroundColor(const QString& skinName);
+QColor WizGetClientBackgroundColor(const QString& skinName);
 
 #endif // WIZNOTESTYLE_H

@@ -6,13 +6,13 @@
 #include <QLabel>
 
 
-QWidget* createSearchWidget(CWizSearchBox* searchBox)
+QWidget* createSearchWidget(CWizExplorerApp& app, CWizSearchBox* searchBox)
 {
     QWidget* widget = new QWidget(searchBox);
     //QSizePolicy sizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum);
     //widget->setSizePolicy(sizePolicy);
 
-    QIcon icon = ::WizLoadSkinIcon("search");
+    QIcon icon = ::WizLoadSkinIcon(app.userSettings().skin(), "search");
     QLabel* iconLabel = new QLabel(widget);
     iconLabel->setPixmap(icon.pixmap(16, 16));
 
@@ -44,9 +44,10 @@ QWidget* createSearchWidget(CWizSearchBox* searchBox)
     return widget;
 }
 
-CWizSearchBox::CWizSearchBox(QWidget* parent /*= 0*/)
+CWizSearchBox::CWizSearchBox(CWizExplorerApp& app, QWidget* parent /*= 0*/)
     : QWidget(parent)
-    , m_search(createSearchWidget(this))
+    , m_app(app)
+    , m_search(createSearchWidget(app, this))
 {
     //QSizePolicy sizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     //setSizePolicy(sizePolicy);

@@ -98,7 +98,6 @@ SOURCES += main.cpp\
     share/wizwindowshelper.cpp \
     share/wizimagepushbutton.cpp \
     wiztaglistwidget.cpp \
-    wizoptionswidget.cpp \
     proxydialog.cpp \
     wizpreferencewindow.cpp
 
@@ -178,7 +177,6 @@ HEADERS += mainwindow.h \
     share/wizimagepushbutton.h \
     mac/wizmacicon.h \
     wiztaglistwidget.h \
-    wizoptionswidget.h \
     proxydialog.h \
     wizpreferencewindow.h
 

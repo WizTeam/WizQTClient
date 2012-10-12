@@ -26,7 +26,7 @@ public:
 
 
 
-void WizInitWidgetMargins(QWidget* widget, const QString& name);
-QWidget* WizInitWidgetMarginsEx(QWidget* widget, const QString& name);
+void WizInitWidgetMargins(const QString& skinName, QWidget* widget, const QString& name);
+QWidget* WizInitWidgetMarginsEx(const QString& skinName, QWidget* widget, const QString& name);
 
 #endif // WIZUI_H

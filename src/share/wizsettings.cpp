@@ -136,17 +136,17 @@ CString WizGetShortcut(const CString& strName, const CString& strDef /*= ""*/)
     return settings.GetString("Shortcut", strName, strDef);
 }
 
-QColor WizGetSkinColor(const CString& strSection, const CString& strName, const QColor& colorDef)
-{
-    CWizSettings settings(WizGetSkinPath() + "skin.ini");
-    return settings.GetColor(strSection, strName, colorDef);
-}
+//QColor WizGetSkinColor(const CString& strSection, const CString& strName, const QColor& colorDef)
+//{
+//    CWizSettings settings(WizGetSkinPath() + "skin.ini");
+//    return settings.GetColor(strSection, strName, colorDef);
+//}
 
-int WizGetSkinInt(const CString& strSection, const CString& strName, int def)
-{
-    CWizSettings settings(WizGetSkinPath() + "skin.ini");
-    return settings.GetInt(strSection, strName, def);
-}
+//int WizGetSkinInt(const CString& strSection, const CString& strName, int def)
+//{
+//    CWizSettings settings(WizGetSkinPath() + "skin.ini");
+//    return settings.GetInt(strSection, strName, def);
+//}
 
 
 
@@ -226,4 +226,50 @@ void CWizUserSettings::setPassword(const QString& strPassword /* = NULL */)
     if (m_db) {
         m_db->SetMeta("Account", "Password", strPassword);
     }
+}
+
+QString CWizUserSettings::skin()
+{
+    if (!m_strSkinName.isEmpty())
+        return m_strSkinName;
+
+    QString strSkinName = get("Skin");
+
+    if (!strSkinName.isEmpty()) {
+        if (PathFileExists(::WizGetSkinResourcePath(strSkinName))) {
+            return strSkinName;
+        }
+    }
+
+    CWizSettings settings(::WizGetDataStorePath() + "wiznote.ini");
+    strSkinName = settings.GetString("Common", "Skin");
+
+    if (!strSkinName.isEmpty()) {
+        if (PathFileExists(::WizGetSkinResourcePath(strSkinName))) {
+            return strSkinName;
+        }
+    }
+
+    // default skin depends on user's OS
+    return ::WizGetDefaultSkinName();
+}
+
+void CWizUserSettings::setSkin(const QString& strSkinName)
+{
+    Q_ASSERT(!strSkinName.isEmpty());
+
+    m_strSkinName = strSkinName;
+    set("Skin", strSkinName);
+}
+
+bool CWizUserSettings::autoSync() const
+{
+    QString strAutoSync = get("AutoSync");
+
+    if (!strAutoSync.isEmpty()) {
+        return strAutoSync.toInt() ? true : false;
+    }
+
+    // auto sync as default
+    return true;
 }

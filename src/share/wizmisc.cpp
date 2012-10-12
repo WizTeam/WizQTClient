@@ -2507,12 +2507,18 @@ CString WizStringFromBase64(const CString& strBase64)
     return CString::fromUtf8(arrayData);
 }
 
+QString WizGetDefaultSkinName()
+{
+#ifdef Q_OS_LINUX
+    return "ubuntu";
+#else
+    return "default";
+#endif
+}
 
 CString WizGetSkinName()
 {
-#ifdef Q_OS_MAC
-    return "default";
-#else
+    QString defaultSkin = WizGetDefaultSkinName();
 
     CWizSettings settings(WizGetSettingsFileName());
 
@@ -2525,18 +2531,16 @@ CString WizGetSkinName()
     if (strSkinName.isEmpty())
         strSkinName = "default";
 #endif
-    //
-    CString strPath = ::WizGetResourcesPath() + "skins/" + strSkinName + "/";
+
+    QString strPath = ::WizGetResourcesPath() + "skins/" + strSkinName + "/";
     if (!PathFileExists(strPath))
     {
         strSkinName = "default";
     }
-    //
+
     return strSkinName;
-#endif
 }
 
-#ifndef Q_OS_MAC
 void WizSetSkinName(const CString& strName)
 {
     WizSetString("skin", "Name", strName);
@@ -2556,15 +2560,18 @@ void WizSetSkinDisplayName(const CString& strDisplayName)
         }
     }
 }
-#endif
-
 
 CString WizGetSkinPath()
 {
     return WizGetResourcesPath() + "skins/" + WizGetSkinName() + "/";
 }
 
-#ifndef Q_OS_MAC
+QString WizGetSkinResourcePath(const QString& strSkinName)
+{
+    Q_ASSERT(!strSkinName.isEmpty());
+    return WizGetResourcesPath() + "skins/" + strSkinName + "/";
+}
+
 void WizGetSkins(std::map<CString, CString>& skins)
 {
     CWizStdStringArray folders;
@@ -2594,11 +2601,10 @@ void WizGetSkins(std::map<CString, CString>& skins)
         skins[strSkinName] = strSkinDisplayName;
     }
 }
-#endif
 
-CString WizGetSystemCustomSkinPath()
+QString WizGetSystemCustomSkinPath(const QString& strSkinName)
 {
-    return WizGetSkinPath() +
+    return WizGetSkinResourcePath(strSkinName) +
         #if defined(Q_OS_WIN32)
             "windows/";
         #elif defined(Q_OS_LINUX)
@@ -2611,38 +2617,38 @@ CString WizGetSystemCustomSkinPath()
 }
 
 
-CString WizGetSkinResourceFileName(const CString& strName)
+QString WizGetSkinResourceFileName(const QString& strSkinName, const QString& strName)
 {
-    CString arrayPath[] =
+    QString arrayPath[] =
     {
-        WizGetSystemCustomSkinPath(),
-        WizGetSkinPath()
+        WizGetSystemCustomSkinPath(strSkinName),
+        WizGetSkinResourcePath(strSkinName)
     };
-    //
-    for (size_t i = 0; i < sizeof(arrayPath) / sizeof(CString); i++)
+
+    for (size_t i = 0; i < sizeof(arrayPath) / sizeof(QString); i++)
     {
-        CString strFileName = arrayPath[i] + strName;
+        QString strFileName = arrayPath[i] + strName;
 
         if (!strFileName.endsWith(".png"))
         {
             strFileName.append(".png");
         }
-        //
+
         if (::PathFileExists(strFileName))
         {
             return strFileName;
         }
     }
-    //
-    return CString();
+
+    return QString();
 }
 
-QIcon WizLoadSkinIcon(const CString& strIconName)
+QIcon WizLoadSkinIcon(const QString& strSkinName, const QString& strIconName)
 {
-    CString strFileName = WizGetSkinResourceFileName(strIconName);
+    QString strFileName = WizGetSkinResourceFileName(strSkinName, strIconName);
     if (strFileName.isEmpty())
         return QIcon();
-    //
+
     return QIcon(strFileName);
 }
 

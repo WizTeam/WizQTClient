@@ -1,17 +1,19 @@
 #include "wizcategoryview.h"
 
+#include <QHeaderView>
+#include <QPalette>
+#include <QContextMenuEvent>
+#include <QMenu>
+#include <QCursor>
+
+#include "wizdef.h"
+
 #include "share/wizdrawtexthelper.h"
 #include "wiznotestyle.h"
 
 #include "newfolderdialog.h"
 #include "newtagdialog.h"
 
-
-#include <QHeaderView>
-#include <QPalette>
-#include <QContextMenuEvent>
-#include <QMenu>
-#include <QCursor>
 
 class CWizCategoryViewItem : public QTreeWidgetItem
 {
@@ -63,10 +65,10 @@ public:
 class CWizCategoryViewAllFoldersItem : public CWizCategoryViewItem
 {
 public:
-    CWizCategoryViewAllFoldersItem(const CString& str)
+    CWizCategoryViewAllFoldersItem(CWizExplorerApp& app, const CString& str)
     {
         setText(0, str);
-        setIcon(0, WizLoadSkinIcon("folders"));
+        setIcon(0, ::WizLoadSkinIcon(app.userSettings().skin(), "folders"));
     }
     virtual void getDocuments(CWizDatabase& db, CWizDocumentDataArray& arrayDocument)
     {
@@ -95,15 +97,16 @@ class CWizCategoryViewFolderItem : public CWizCategoryViewItem
 {
     CString m_strLocation;
 public:
-    CWizCategoryViewFolderItem(const CString& strLocation)
-        : m_strLocation(strLocation)
+    CWizCategoryViewFolderItem(CWizExplorerApp& app, const CString& strLocation)
+        : m_app(app)
+        , m_strLocation(strLocation)
     {
         setText(0, CWizDatabase::GetLocationDisplayName(strLocation));
-        setIcon(0, WizLoadSkinIcon("folder"));
+        setIcon(0, ::WizLoadSkinIcon(m_app.userSettings().skin(), "folder"));
     }
     virtual QTreeWidgetItem *clone() const
     {
-        return new CWizCategoryViewFolderItem(m_strLocation);
+        return new CWizCategoryViewFolderItem(m_app, m_strLocation);
     }
     virtual void getDocuments(CWizDatabase& db, CWizDocumentDataArray& arrayDocument)
     {
@@ -122,6 +125,9 @@ public:
 
     CString location() const { return m_strLocation; }
     CString name() const { return CWizDatabase::GetLocationName(m_strLocation); }
+
+private:
+    CWizExplorerApp& m_app;
 };
 
 
@@ -129,10 +135,10 @@ public:
 class CWizCategoryViewAllTagsItem : public CWizCategoryViewItem
 {
 public:
-    CWizCategoryViewAllTagsItem(const CString& str)
+    CWizCategoryViewAllTagsItem(CWizExplorerApp& app, const CString& str)
     {
         setText(0, str);
-        setIcon(0, WizLoadSkinIcon("tags"));
+        setIcon(0, ::WizLoadSkinIcon(app.userSettings().skin(), "tags"));
     }
     virtual void showContextMenu(CWizCategoryView* pCtrl, QPoint pos)
     {
@@ -144,15 +150,16 @@ class CWizCategoryViewTagItem : public CWizCategoryViewItem
 {
     WIZTAGDATA m_tag;
 public:
-    CWizCategoryViewTagItem(const WIZTAGDATA& tag)
-        : m_tag(tag)
+    CWizCategoryViewTagItem(CWizExplorerApp& app, const WIZTAGDATA& tag)
+        : m_app(app)
+        , m_tag(tag)
     {
         setText(0, CWizDatabase::TagNameToDisplayName(tag.strName));
-        setIcon(0, WizLoadSkinIcon("tag"));
+        setIcon(0, ::WizLoadSkinIcon(app.userSettings().skin(), "tag"));
     }
     virtual QTreeWidgetItem *clone() const
     {
-        return new CWizCategoryViewTagItem(m_tag);
+        return new CWizCategoryViewTagItem(m_app, m_tag);
     }
     virtual void getDocuments(CWizDatabase& db, CWizDocumentDataArray& arrayDocument)
     {
@@ -176,17 +183,21 @@ public:
     {
         return m_tag;
     }
+
+private:
+    CWizExplorerApp& m_app;
 };
 
 
 class CWizCategoryViewTrashItem : public CWizCategoryViewFolderItem
 {
 public:
-    CWizCategoryViewTrashItem(const CString& str)
-        : CWizCategoryViewFolderItem("/Deleted Items/")
+    CWizCategoryViewTrashItem(CWizExplorerApp& app, const CString& str)
+        : m_app(app)
+        , CWizCategoryViewFolderItem(app, "/Deleted Items/")
     {
         setText(0, str);
-        setIcon(0, WizLoadSkinIcon("trash"));
+        setIcon(0, ::WizLoadSkinIcon(m_app.userSettings().skin(), "trash"));
     }
     virtual void getDocuments(CWizDatabase& db, CWizDocumentDataArray& arrayDocument)
     {
@@ -200,6 +211,9 @@ public:
     {
         pCtrl->showTrashContextMenu(pos);
     }
+
+private:
+    CWizExplorerApp& m_app;
 };
 
 
@@ -208,10 +222,10 @@ class CWizCategoryViewSearchItem : public CWizCategoryViewItem
 {
     CString m_strKeywords;
 public:
-    CWizCategoryViewSearchItem(const CString& keywords)
+    CWizCategoryViewSearchItem(CWizExplorerApp& app, const CString& keywords)
     {
         setKeywords(keywords);
-        setIcon(0, WizLoadSkinIcon("search"));
+        setIcon(0, WizLoadSkinIcon(app.userSettings().skin(), "search"));
     }
     virtual void getDocuments(CWizDatabase& db, CWizDocumentDataArray& arrayDocument)
     {
@@ -240,6 +254,7 @@ public:
 
 CWizCategoryView::CWizCategoryView(CWizExplorerApp& app, QWidget *parent)
     : QTreeWidget(parent)
+    , m_app(app)
     , m_db(app.database())
     , m_menuAllFolders(NULL)
     , m_menuAllTags(NULL)
@@ -252,10 +267,10 @@ CWizCategoryView::CWizCategoryView(CWizExplorerApp& app, QWidget *parent)
     setAutoFillBackground(true);
     //
     QPalette pal = palette();
-    pal.setColor(QPalette::Base, WizGetCategoryBackroundColor());
+    pal.setColor(QPalette::Base, WizGetCategoryBackroundColor(m_app.userSettings().skin()));
     setPalette(pal);
     //
-    setStyle(::WizGetStyle());
+    setStyle(::WizGetStyle(m_app.userSettings().skin()));
     //
     header()->hide();
     setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
@@ -290,7 +305,7 @@ void CWizCategoryView::init()
 
 void CWizCategoryView::initFolders()
 {
-    CWizCategoryViewAllFoldersItem* pAllFoldersItem = new CWizCategoryViewAllFoldersItem(tr("Note Folders"));
+    CWizCategoryViewAllFoldersItem* pAllFoldersItem = new CWizCategoryViewAllFoldersItem(m_app, tr("Note Folders"));
     addTopLevelItem(pAllFoldersItem);
     //
     CWizStdStringArray arrayAllLocation;
@@ -344,7 +359,7 @@ void CWizCategoryView::initFolders(QTreeWidgetItem* pParent, const CString& strP
         if (m_db.IsInDeletedItems(strLocation))
             continue;
         //
-        CWizCategoryViewFolderItem* pFolderItem = new CWizCategoryViewFolderItem(strLocation);
+        CWizCategoryViewFolderItem* pFolderItem = new CWizCategoryViewFolderItem(m_app, strLocation);
         pParent->addChild(pFolderItem);
         //
         initFolders(pFolderItem, strLocation, arrayAllLocation);
@@ -353,7 +368,7 @@ void CWizCategoryView::initFolders(QTreeWidgetItem* pParent, const CString& strP
 
 void CWizCategoryView::initTags()
 {
-    CWizCategoryViewAllTagsItem* pAllTagsItem = new CWizCategoryViewAllTagsItem(tr("Tags"));
+    CWizCategoryViewAllTagsItem* pAllTagsItem = new CWizCategoryViewAllTagsItem(m_app, tr("Tags"));
     addTopLevelItem(pAllTagsItem);
     //
     initTags(pAllTagsItem, "");
@@ -368,7 +383,7 @@ void CWizCategoryView::initTags(QTreeWidgetItem* pParent, const CString& strPare
     it != arrayTag.end();
     it++)
     {
-        CWizCategoryViewTagItem* pTagItem = new CWizCategoryViewTagItem(*it);
+        CWizCategoryViewTagItem* pTagItem = new CWizCategoryViewTagItem(m_app, *it);
         pParent->addChild(pTagItem);
         //
         initTags(pTagItem, it->strGUID);
@@ -377,7 +392,7 @@ void CWizCategoryView::initTags(QTreeWidgetItem* pParent, const CString& strPare
 
 void CWizCategoryView::initTrash()
 {
-    addTopLevelItem(new CWizCategoryViewTrashItem(tr("Trash")));
+    addTopLevelItem(new CWizCategoryViewTrashItem(m_app, tr("Trash")));
 }
 
 void CWizCategoryView::addSeparator()
@@ -646,7 +661,7 @@ CWizCategoryViewTagItem* CWizCategoryView::findTag(const WIZTAGDATA& tag, bool c
         if (!create)
             return NULL;
         //
-        CWizCategoryViewTagItem* pTagItem = new CWizCategoryViewTagItem(tagParent);
+        CWizCategoryViewTagItem* pTagItem = new CWizCategoryViewTagItem(m_app, tagParent);
         parent->addChild(pTagItem);
         parent->setExpanded(true);
         parent = pTagItem;
@@ -739,7 +754,7 @@ CWizCategoryViewSearchItem* CWizCategoryView::findSearch()
     //
     addSeparator();
     //
-    CWizCategoryViewSearchItem* pItem = new CWizCategoryViewSearchItem("");
+    CWizCategoryViewSearchItem* pItem = new CWizCategoryViewSearchItem(m_app, "");
     addTopLevelItem(pItem);
     //
     return pItem;
@@ -878,7 +893,7 @@ CWizCategoryViewFolderItem* CWizCategoryView::findFolder(const CString& strLocat
         if (!create)
             return NULL;
         //
-        CWizCategoryViewFolderItem* pFolderItem = new CWizCategoryViewFolderItem(strCurrentLocation);
+        CWizCategoryViewFolderItem* pFolderItem = new CWizCategoryViewFolderItem(m_app, strCurrentLocation);
         parent->addChild(pFolderItem);
         parent->setExpanded(true);
         if (sort)

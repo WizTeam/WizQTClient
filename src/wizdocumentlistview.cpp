@@ -101,6 +101,7 @@ public:
 
 CWizDocumentListView::CWizDocumentListView(CWizExplorerApp& app, QWidget *parent /*= 0*/)
     : QListWidget(parent)
+    , m_app(app)
     , m_db(app.database())
     , m_category(app.category())
     , m_menu(NULL)
@@ -113,10 +114,10 @@ CWizDocumentListView::CWizDocumentListView(CWizExplorerApp& app, QWidget *parent
     setItemDelegate(new CWizDocumentListViewDelegate(this));
     //
     QPalette pal = palette();
-    pal.setColor(QPalette::Base, WizGetDocumentsBackroundColor());
+    pal.setColor(QPalette::Base, WizGetDocumentsBackroundColor(m_app.userSettings().skin()));
     setPalette(pal);
     //
-    setStyle(WizGetStyle());
+    setStyle(::WizGetStyle(m_app.userSettings().skin()));
     //
     connect(&m_db, SIGNAL(tagCreated(const WIZTAGDATA&)), this, SLOT(on_tag_created(const WIZTAGDATA&)));
     connect(&m_db, SIGNAL(tagModified(const WIZTAGDATA&, const WIZTAGDATA&)), this, SLOT(on_tag_modified(const WIZTAGDATA&, const WIZTAGDATA&)));

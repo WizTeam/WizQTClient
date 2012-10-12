@@ -1,32 +1,27 @@
 #ifndef WIZDOCUMENTVIEW_H
 #define WIZDOCUMENTVIEW_H
 
-#ifndef QWIDGET_H
 #include <QWidget>
-#endif
 
-#ifndef WIZDEF_H
 #include "wizdef.h"
-#endif
-
-#ifndef WIZNOTESETTINGS_H
-#include "wiznotesettings.h"
-#endif
 
 class CWizTitleBar;
 class CWizDocumentWebView;
 class CWizDatabase;
 class CWizTagListWidget;
 class CWizAttachmentListWidget;
-//
-
 
 class CWizDocumentView
     : public QWidget
 {
-    Q_OBJECT;
+    Q_OBJECT
+
 public:
     CWizDocumentView(CWizExplorerApp& app, QWidget* parent = 0);
+
+private:
+    CWizUserSettings& m_userSettings;
+
 protected:
     CWizDatabase& m_db;
     CWizTitleBar* m_title;

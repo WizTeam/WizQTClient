@@ -18,8 +18,9 @@ class CWizTitleBar
     : public QWidget
 {
 public:
-    CWizTitleBar(QWidget* parent)
+    CWizTitleBar(CWizExplorerApp& app, QWidget* parent)
         : QWidget(parent)
+        , m_app(app)
         , m_titleEdit(NULL)
         , m_editDocumentButton(NULL)
         , m_tagsButton(NULL)
@@ -45,21 +46,21 @@ public:
         m_titleEdit->setStyleSheet("QLineEdit{padding:4 4 4 4;border-color:#ffffff;border-width:1;border-style:solid;}QLineEdit:hover{border-color:#bbbbbb;border-width:1;border-style:solid;}");
 #endif
         //
-        m_editIcon = WizLoadSkinIcon("unlock");
-        m_commitIcon = WizLoadSkinIcon("lock");
-        m_tagsIcon = WizLoadSkinIcon("document_tags");
-        m_attachmentIcon = WizLoadSkinIcon("attachment");
+        m_editIcon = ::WizLoadSkinIcon(m_app.userSettings().skin(), "unlock");
+        m_commitIcon = ::WizLoadSkinIcon(m_app.userSettings().skin(), "lock");
+        m_tagsIcon = ::WizLoadSkinIcon(m_app.userSettings().skin(), "document_tags");
+        m_attachmentIcon = ::WizLoadSkinIcon(m_app.userSettings().skin(), "attachment");
         //
         m_editDocumentButton = new CWizImagePushButton(m_editIcon, "", this);
         updateEditDocumentButtonIcon(false);
-        m_editDocumentButton->setStyle(::WizGetStyle());
+        m_editDocumentButton->setStyle(::WizGetStyle(m_app.userSettings().skin()));
         m_editDocumentButton->setRedFlag(true);
         //
         m_tagsButton = new CWizImagePushButton(m_tagsIcon, "", this);
-        m_tagsButton->setStyle(::WizGetStyle());
+        m_tagsButton->setStyle(::WizGetStyle(m_app.userSettings().skin()));
         //
         m_attachmentButton = new CWizImagePushButton(m_attachmentIcon, "", this);
-        m_attachmentButton->setStyle(::WizGetStyle());
+        m_attachmentButton->setStyle(::WizGetStyle(m_app.userSettings().skin()));
         //
         layout->addWidget(m_titleEdit);
         layout->addWidget(m_editDocumentButton);
@@ -71,7 +72,9 @@ public:
         layout->setAlignment(m_attachmentButton, Qt::AlignVCenter);
         //
     }
+
 private:
+    CWizExplorerApp& m_app;
     QLineEdit* m_titleEdit;
     CWizImagePushButton* m_editDocumentButton;
     CWizImagePushButton* m_tagsButton;
@@ -147,14 +150,15 @@ public:
 
 CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
     : QWidget(parent)
+    , m_userSettings(app.userSettings())
     , m_db(app.database())
-    , m_title(new CWizTitleBar(this))
+    , m_title(new CWizTitleBar(app, this))
     , m_web(new CWizDocumentWebView(app, this))
     , m_client(NULL)
     , m_tags(NULL)
     , m_attachments(NULL)
     , m_editingDocument(true)
-    , m_viewMode(WizGetDefaultNoteView())
+    , m_viewMode(app.userSettings().noteViewMode())
 {
     m_client = createClient();
     //
@@ -269,11 +273,11 @@ void CWizDocumentView::editDocument(bool editing)
     m_web->setEditingDocument(m_editingDocument);
     m_web->updateSize();
 }
-//
+
 void CWizDocumentView::setViewMode(WizDocumentViewMode mode)
 {
     m_viewMode = mode;
-    //
+
     switch (m_viewMode)
     {
     case viewmodeAlwaysEditing:
@@ -294,7 +298,7 @@ void CWizDocumentView::setModified(bool modified)
 
 void CWizDocumentView::settingsChanged()
 {
-    setViewMode(WizGetDefaultNoteView());
+    setViewMode(m_userSettings.noteViewMode());
 }
 
 void CWizDocumentView::on_titleEdit_editingFinished()

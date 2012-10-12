@@ -22,14 +22,21 @@ int main(int argc, char *argv[])
     a.setFont(f);
 #endif
 
+    // set icon
     QIcon iconApp;
-    iconApp.addFile(WizGetSkinResourceFileName("wiznote16"));
-    iconApp.addFile(WizGetSkinResourceFileName("wiznote24"));
-    iconApp.addFile(WizGetSkinResourceFileName("wiznote32"));
-    iconApp.addFile(WizGetSkinResourceFileName("wiznote48"));
-    iconApp.addFile(WizGetSkinResourceFileName("wiznote64"));
-    iconApp.addFile(WizGetSkinResourceFileName("wiznote72"));
-    iconApp.addFile(WizGetSkinResourceFileName("wiznote128"));
+    iconApp.addFile(WizGetResourcesPath() + "wiznote16.png");
+    iconApp.addFile(WizGetResourcesPath() + "wiznote24.png");
+    iconApp.addFile(WizGetResourcesPath() + "wiznote32.png");
+    iconApp.addFile(WizGetResourcesPath() + "wiznote48.png");
+    iconApp.addFile(WizGetResourcesPath() + "wiznote64.png");
+    iconApp.addFile(WizGetResourcesPath() + "wiznote128.png");
+    //iconApp.addFile(WizGetSkinResourceFileName("wiznote16"));
+    //iconApp.addFile(WizGetSkinResourceFileName("wiznote24"));
+    //iconApp.addFile(WizGetSkinResourceFileName("wiznote32"));
+    //iconApp.addFile(WizGetSkinResourceFileName("wiznote48"));
+    //iconApp.addFile(WizGetSkinResourceFileName("wiznote64"));
+    //iconApp.addFile(WizGetSkinResourceFileName("wiznote72"));
+    //iconApp.addFile(WizGetSkinResourceFileName("wiznote128"));
     QApplication::setWindowIcon(iconApp);
 
     QString strDefaultUser = settings.GetString("Users", "DefaultUser", "");

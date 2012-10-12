@@ -1,11 +1,13 @@
 #include "wizanimateaction.h"
+
 #include "wizmisc.h"
 
 #include <QTimer>
 #include <QAction>
 
-CWizAnimateAction::CWizAnimateAction(QObject* parent)
+CWizAnimateAction::CWizAnimateAction(CWizExplorerApp& app, QObject* parent)
     : QObject(parent)
+    , m_app(app)
     , m_action(NULL)
     , m_nIconIndex(-1)
     , m_timer(new QTimer())
@@ -24,7 +26,7 @@ void CWizAnimateAction::setIcons(const CString& strIconBaseName)
     int index = 1;
     while (1)
     {
-        CString strFileName = ::WizGetSkinResourceFileName(strIconBaseName + WizIntToStr(index));
+        CString strFileName = ::WizGetSkinResourceFileName(m_app.userSettings().skin(), strIconBaseName + WizIntToStr(index));
         if (strFileName.isEmpty())
             return;
         QIcon icon(strFileName);

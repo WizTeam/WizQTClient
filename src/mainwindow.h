@@ -48,7 +48,9 @@ public:
     virtual QObject* object();
     virtual CWizDatabase& database();
     virtual CWizCategoryView& category() { return *m_category; }
-    //
+
+    virtual CWizUserSettings& userSettings() { return *m_settings; }
+
     virtual void syncStarted();
     virtual void syncLogin();
     virtual void syncDone(bool error);

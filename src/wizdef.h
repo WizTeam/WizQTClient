@@ -1,9 +1,8 @@
 #ifndef WIZDEF_H
 #define WIZDEF_H
 
-#ifndef WIZDATABASE_H
 #include "share/wizdatabase.h"
-#endif
+#include "share/wizsettings.h"
 
 class CWizDatabase;
 class CWizCategoryView;
@@ -15,6 +14,8 @@ public:
     virtual QObject* object() = 0;
     virtual CWizDatabase& database() = 0;
     virtual CWizCategoryView& category() = 0;
+
+    virtual CWizUserSettings& userSettings() = 0;
 };
 
 #endif // WIZDEF_H

@@ -35,7 +35,7 @@ class QStyleOptionViewItemV4;
 class CWizNoteStyle : public CWizNoteBaseStyle
 {
 public:
-    CWizNoteStyle();
+    CWizNoteStyle(const QString& skinName);
 private:
     QImage m_expandedImage;
     QImage m_collapsedImage;
@@ -86,30 +86,31 @@ public:
     QColor categoryBackground() { return m_colorCategoryBackground; }
     QColor documentsBackground() { return m_colorDocumentsBackground; }
 public:
-    static CWizNoteStyle* noteStyle();
+    static CWizNoteStyle* noteStyle(const QString& skinName);
 };
 
 
 const int IMAGE_WIDTH = 80;
 
-CWizNoteStyle::CWizNoteStyle()
+CWizNoteStyle::CWizNoteStyle(const QString& strSkinName)
 {
-    m_expandedImage.load(WizGetSkinPath() + "button_expanded.png");
-    m_collapsedImage.load(WizGetSkinPath() + "button_collapsed.png");
-    m_toolBarImage.SetImage(WizGetSkinPath() + "toolbar_background.png", QPoint(8, 8));
-    m_categorySelectedItemBackground.SetImage(WizGetSkinPath() + "category_selected_background.png", QPoint(4, 4));
-    m_documentsSelectedItemBackground.SetImage(WizGetSkinPath() + "documents_selected_background.png", QPoint(4, 4));
-    m_documentsSelectedItemBackgroundHot.SetImage(WizGetSkinPath() + "documents_selected_background_hot.png", QPoint(4, 4));
-    m_multiLineListSelectedItemBackground.SetImage(WizGetSkinPath() + "multilinelist_selected_background.png", QPoint(4, 4));
-    m_multiLineListSelectedItemBackgroundHot.SetImage(WizGetSkinPath() + "multilinelist_selected_background_hot.png", QPoint(4, 4));
-    m_imagePushButton.SetImage(WizGetSkinPath() + "imagepushbutton.png", QPoint(4, 4));
-    m_imagePushButtonHot.SetImage(WizGetSkinPath() + "imagepushbutton_hot.png", QPoint(4, 4));
-    m_imagePushButtonPressed.SetImage(WizGetSkinPath() + "imagepushbutton_pressed.png", QPoint(4, 4));
-    m_imagePushButtonDisabled.SetImage(WizGetSkinPath() + "imagepushbutton_disabled.png", QPoint(4, 4));
-    m_imagePushButtonLabel.SetImage(WizGetSkinPath() + "imagepushbutton_label.png", QPoint(8, 8));
-    m_imagePushButtonLabelRed.SetImage(WizGetSkinPath() + "imagepushbutton_label_red.png", QPoint(8, 8));
+    QString strSkinPath = ::WizGetSkinResourcePath(strSkinName);
+    m_expandedImage.load(strSkinPath + "button_expanded.png");
+    m_collapsedImage.load(strSkinPath + "button_collapsed.png");
+    m_toolBarImage.SetImage(strSkinPath + "toolbar_background.png", QPoint(8, 8));
+    m_categorySelectedItemBackground.SetImage(strSkinPath + "category_selected_background.png", QPoint(4, 4));
+    m_documentsSelectedItemBackground.SetImage(strSkinPath + "documents_selected_background.png", QPoint(4, 4));
+    m_documentsSelectedItemBackgroundHot.SetImage(strSkinPath + "documents_selected_background_hot.png", QPoint(4, 4));
+    m_multiLineListSelectedItemBackground.SetImage(strSkinPath + "multilinelist_selected_background.png", QPoint(4, 4));
+    m_multiLineListSelectedItemBackgroundHot.SetImage(strSkinPath + "multilinelist_selected_background_hot.png", QPoint(4, 4));
+    m_imagePushButton.SetImage(strSkinPath + "imagepushbutton.png", QPoint(4, 4));
+    m_imagePushButtonHot.SetImage(strSkinPath + "imagepushbutton_hot.png", QPoint(4, 4));
+    m_imagePushButtonPressed.SetImage(strSkinPath + "imagepushbutton_pressed.png", QPoint(4, 4));
+    m_imagePushButtonDisabled.SetImage(strSkinPath + "imagepushbutton_disabled.png", QPoint(4, 4));
+    m_imagePushButtonLabel.SetImage(strSkinPath + "imagepushbutton_label.png", QPoint(8, 8));
+    m_imagePushButtonLabelRed.SetImage(strSkinPath + "imagepushbutton_label_red.png", QPoint(8, 8));
     //
-    CWizSettings settings(WizGetSkinPath() + "skin.ini");
+    CWizSettings settings(strSkinPath + "skin.ini");
     m_colorCategoryBackground = settings.GetColor("Category", "Background", "#808080");
     m_colorCategoryText = settings.GetColor("Category", "Text", "#000000");
     m_colorCategoryTextSelected = settings.GetColor("Category", "TextSelected", "#ffffff");
@@ -712,28 +713,30 @@ void CWizNoteStyle::drawcenterImage(QPainter* p, const QImage& image, const QRec
 
 
 
-CWizNoteStyle* CWizNoteStyle::noteStyle()
+CWizNoteStyle* CWizNoteStyle::noteStyle(const QString& skinName)
 {
-    static CWizNoteStyle style;
+    static CWizNoteStyle style(skinName);
     return &style;
 }
 
-QStyle* WizGetStyle()
+QStyle* WizGetStyle(const QString& skinName)
 {
-    return CWizNoteStyle::noteStyle();
+    return CWizNoteStyle::noteStyle(skinName);
 }
 
-QColor WizGetCategoryBackroundColor()
+QColor WizGetCategoryBackroundColor(const QString& skinName)
 {
-    return CWizNoteStyle::noteStyle()->categoryBackground();
+    return CWizNoteStyle::noteStyle(skinName)->categoryBackground();
 }
 
-QColor WizGetDocumentsBackroundColor()
+QColor WizGetDocumentsBackroundColor(const QString& skinName)
 {
-    return CWizNoteStyle::noteStyle()->documentsBackground();
+    return CWizNoteStyle::noteStyle(skinName)->documentsBackground();
 }
-QColor WizGetClientBackgroundColor()
+
+QColor WizGetClientBackgroundColor(const QString& strSkinName)
 {
-    return WizGetSkinColor("Client", "Background", QColor(0x80, 0x80, 0x80));
+    CWizSettings settings(::WizGetSkinResourcePath(strSkinName) + "skin.ini");
+    return settings.GetColor("Client", "Background", QColor(0x80, 0x80, 0x80));
 }
 

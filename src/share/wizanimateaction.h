@@ -6,6 +6,8 @@
 #include <QIcon>
 #include <QList>
 
+#include "wizdef.h"
+
 class QTimer;
 class QAction;
 
@@ -13,9 +15,10 @@ class CWizAnimateAction : public QObject
 {
     Q_OBJECT
 public:
-    CWizAnimateAction(QObject* parent);
+    CWizAnimateAction(CWizExplorerApp& app, QObject* parent);
     void setAction(QAction* action);
 private:
+    CWizExplorerApp& m_app;
     QAction* m_action;
     int m_nIconIndex;
     QIcon m_iconDefault;
