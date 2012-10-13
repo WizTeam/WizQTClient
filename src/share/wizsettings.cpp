@@ -158,15 +158,17 @@ CWizUserSettings::CWizUserSettings(const QString& strUserId)
 }
 
 CWizUserSettings::CWizUserSettings(CWizDatabase& db)
-    : m_strUserId("")
-    , m_db(&db)
+    : m_db(&db)
 {
 }
 
 void CWizUserSettings::setUser(const QString& strUser)
 {
-    if (!m_db)
+    if (!m_db) {
         m_strUserId = strUser;
+        m_strSkinName.clear();
+        m_strLocale.clear();
+    }
 }
 
 QString CWizUserSettings::get(const QString& strKey) const
@@ -227,6 +229,21 @@ void CWizUserSettings::setPassword(const QString& strPassword /* = NULL */)
     if (m_db) {
         m_db->SetMeta("Account", "Password", strPassword);
     }
+}
+
+bool CWizUserSettings::autoLogin() const
+{
+    QString strAutoLogin = get("AutoLogin");
+    if (!strAutoLogin.isEmpty()) {
+        return strAutoLogin.toInt() ? true : false;
+    }
+
+    return false;
+}
+
+void CWizUserSettings::setAutoLogin(bool bAutoLogin)
+{
+    set("AutoLogin", bAutoLogin ? "1" : "0");
 }
 
 QString CWizUserSettings::skin()
@@ -328,7 +345,7 @@ bool CWizUserSettings::autoSync() const
 
 bool CWizUserSettings::downloadAllNotesData() const
 {
-    QString strDownload = get("DownloadAllNoteData");
+    QString strDownload = get("DownloadAllNotesData");
 
     if (!strDownload.isEmpty()) {
         return strDownload.toInt() ? true : false;

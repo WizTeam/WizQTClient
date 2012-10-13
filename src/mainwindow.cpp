@@ -453,8 +453,8 @@ void MainWindow::on_actionDeleteCurrentNote_triggered()
 
 void MainWindow::on_actionLogout_triggered()
 {
-    CWizSettings settings(::WizGetDataStorePath() + "wiznote.ini");
-    settings.SetBool("Users", "AutoLogin", false);
+    m_settings->setAutoLogin(false);
+    m_settings->setPassword();
 
     m_bLogoutRestart = true;
     close();

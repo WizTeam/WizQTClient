@@ -8,7 +8,7 @@
 #include "createaccountdialog.h"
 #include "proxydialog.h"
 
-WelcomeDialog::WelcomeDialog(const QString &strDefaultUserId, QWidget *parent)
+WelcomeDialog::WelcomeDialog(const QString &strDefaultUserId, const QString& strLocale, QWidget *parent)
     : QDialog(parent)
     , ui(new Ui::WelcomeDialog)
     , m_strDefaultUserId(strDefaultUserId)
@@ -19,8 +19,7 @@ WelcomeDialog::WelcomeDialog(const QString &strDefaultUserId, QWidget *parent)
     ui->labelProxySettings->setText(WizFormatString1("<a href=\"proxy_settings\">%1</a>", tr("Proxy settings")));
 
     // load webview content
-    QString localeName = QLocale::system().name();
-    QString strLocalFileName = ::WizGetResourcesPath() + "languages/welcome_" + localeName + ".htm";
+    QString strLocalFileName = ::WizGetResourcesPath() + "languages/welcome_" + strLocale + ".htm";
     QString strFileName = ::WizGetResourcesPath() + "languages/welcome.htm";
     if (PathFileExists(strLocalFileName))
     {
@@ -84,7 +83,7 @@ QString WelcomeDialog::userId() const
 QString WelcomeDialog::password() const
 {
     QString strPassword = ui->editPassword->text();
-    if (!m_users.value(userId(), "").compare(strPassword))
+    if (!m_users.value(userId()).compare(strPassword))
         return ::WizDecryptPassword(strPassword);
     else
         return strPassword;
@@ -110,42 +109,35 @@ void WelcomeDialog::accept()
 
 void WelcomeDialog::verifyAccountDone(bool succeeded, const CString& errorMessage)
 {
-    enableControls(true);
-
-    if (succeeded)
-    {
-        updateConfig();
+    if (succeeded) {
+        updateUserSettings();
         QDialog::accept();
-    }
-    else
-    {
+    } else {
         QMessageBox::critical(this, "", errorMessage);
     }
+
+    enableControls(true);
 }
 
-void WelcomeDialog::updateConfig()
+void WelcomeDialog::updateUserSettings()
 {
     CWizSettings settings(::WizGetDataStorePath() + "wiznote.ini");
 
     // set current login user as default user.
     settings.SetString("Users", "DefaultUser", userId());
 
+    CWizUserSettings userSettings(userId());
+
     if(ui->checkAutoLogin->checkState() == Qt::Checked) {
-        settings.SetBool("Users", "AutoLogin", true);
+        userSettings.setAutoLogin(true);
     } else {
-        settings.SetBool("Users", "AutoLogin", false);
+        userSettings.setAutoLogin(false);
     }
 
-    // reset password
-    QString strOldPassword = m_users.value(userId(), "");
-
-    CWizDatabase db;
-    if (db.Open(userId(), "")) {
-        if(ui->checkRememberMe->checkState() == Qt::Checked) {
-            db.SetPassword(::WizDecryptPassword(strOldPassword), password());
-        } else {
-            db.SetPassword(::WizDecryptPassword(strOldPassword), "");
-        }
+    if(ui->checkRememberMe->checkState() == Qt::Checked) {
+        userSettings.setPassword(::WizEncryptPassword(password()));
+    } else {
+        userSettings.setPassword();
     }
 }
 
@@ -159,13 +151,10 @@ void WelcomeDialog::getUserPasswordPairs()
         iter++)
     {
         QString strPath = *iter;
-        CWizDatabase db;
         QString strUserId = ::WizFolderNameByPath(strPath);
-        if(db.Open(strUserId, ""))
-        {
-            QString strPassword = db.GetEncryptedPassword();
-            m_users.insert(strUserId, strPassword);
-        }
+
+        CWizUserSettings userSettings(strUserId);
+        m_users.insert(strUserId, userSettings.password());
     }
 }
 
@@ -225,7 +214,7 @@ void WelcomeDialog::on_labelProxy_linkActivated(const QString & link)
 
 void WelcomeDialog::on_comboUsers_indexChanged(const QString &userId)
 {
-    QString strPassword = m_users.value(userId, "");
+    QString strPassword = m_users.value(userId);
 
     setPassword(strPassword);
 

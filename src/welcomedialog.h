@@ -19,10 +19,10 @@ class WelcomeDialog : public QDialog
     Q_OBJECT
 
 public:
-    explicit WelcomeDialog(const QString &strDefaultUserId, QWidget *parent = 0);
+    explicit WelcomeDialog(const QString& strDefaultUserId, const QString& strLocale, QWidget* parent = 0);
 
     void setUsers();
-    void setPassword(const QString &strPassword);
+    void setPassword(const QString& strPassword);
 
     QString userId() const;
     QString password() const;
@@ -30,23 +30,23 @@ public:
     ~WelcomeDialog();
 
 private:
-    Ui::WelcomeDialog *ui;
+    Ui::WelcomeDialog* ui;
     QString m_strDefaultUserId;
     QHash<QString, QString> m_users;
     CWizVerifyAccount m_verifyAccount;
 
     void getUserPasswordPairs();
-    void updateConfig();
+    void updateUserSettings();
     void enableControls(bool bEnable);
 
 public Q_SLOTS:
     virtual void accept();
 
-    void verifyAccountDone(bool succeeded, const CString &errorMessage);
+    void verifyAccountDone(bool succeeded, const CString& errorMessage);
     void on_web_linkClicked(const QUrl &url);
-    void on_labelProxy_linkActivated(const QString &link);
+    void on_labelProxy_linkActivated(const QString& link);
 
-    void on_comboUsers_indexChanged(const QString &userId);
+    void on_comboUsers_indexChanged(const QString& userId);
     void on_autoLogin_stateChanged(int state);
 };
 

@@ -537,7 +537,7 @@ p, li { white-space: pre-wrap; }
         <translation>爲知筆記</translation>
     </message>
     <message>
-        <location filename="main.cpp" line="88"/>
+        <location filename="main.cpp" line="89"/>
         <source>Can not open account</source>
         <translation>不能打開賬戶</translation>
     </message>
@@ -628,42 +628,42 @@ p, li { white-space: pre-wrap; }
         <translation>搜索 %1 結果</translation>
     </message>
     <message>
-        <location filename="share/wizmisc.cpp" line="373"/>
+        <location filename="share/wizmisc.cpp" line="374"/>
         <source>Simplified Chinese</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="share/wizmisc.cpp" line="375"/>
+        <location filename="share/wizmisc.cpp" line="376"/>
         <source>Traditional Chinese</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="share/wizmisc.cpp" line="377"/>
+        <location filename="share/wizmisc.cpp" line="378"/>
         <source>English(US)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="share/wizmisc.cpp" line="740"/>
+        <location filename="share/wizmisc.cpp" line="741"/>
         <source>%1 TB</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="share/wizmisc.cpp" line="742"/>
+        <location filename="share/wizmisc.cpp" line="743"/>
         <source>%1 GB</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="share/wizmisc.cpp" line="744"/>
+        <location filename="share/wizmisc.cpp" line="745"/>
         <source>%1 MB</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="share/wizmisc.cpp" line="746"/>
+        <location filename="share/wizmisc.cpp" line="747"/>
         <source>%1 KB</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="share/wizmisc.cpp" line="747"/>
+        <location filename="share/wizmisc.cpp" line="748"/>
         <source>%1 byte(s)</source>
         <translation></translation>
     </message>

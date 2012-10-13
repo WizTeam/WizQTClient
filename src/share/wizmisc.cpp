@@ -290,18 +290,19 @@ void WizGetNextFileName(CString& strFileName)
         nIndex++;
     }
 }
-CString WizEncryptPassword(const CString& strPassword)
+
+QString WizEncryptPassword(const QString& strPassword)
 {
-    CString str;
+    QString str;
     ::WizBase64Encode(strPassword.toUtf8(), str);
     return str;
 }
 
-CString WizDecryptPassword(const CString& strEncryptedText)
+QString WizDecryptPassword(const QString& strEncryptedText)
 {
     QByteArray data;
     ::WizBase64Decode(strEncryptedText, data);
-    return CString::fromUtf8(data);
+    return QString::fromUtf8(data);
 }
 
 CString WizGetAppPath()
@@ -357,6 +358,11 @@ CString WizGetSettingsFileName()
 QString WizGetLocaleFileName(const QString& strLocale)
 {
     return WizGetResourcesPath() + "languages/wiznote_" + strLocale + ".qm";
+}
+
+QString WizGetQtLocaleFileName(const QString& strLocale)
+{
+    return WizGetResourcesPath() + "languages/qt_" + strLocale + ".qm";
 }
 
 void WizGetTranslatedLocales(QStringList& locales)
@@ -2504,21 +2510,21 @@ BOOL CWizBufferAlloc::SetNewSize(int nNewSize)
 
 
 
-BOOL WizBase64Encode(const QByteArray& arrayData, CString& str)
+BOOL WizBase64Encode(const QByteArray& arrayData, QString& str)
 {
     const QByteArray base64 = arrayData.toBase64();
-    //
     str = base64.constData();
-    //
+
     return TRUE;
 }
 
-BOOL WizBase64Decode(const CString& str, QByteArray& arrayData)
+BOOL WizBase64Decode(const QString& str, QByteArray& arrayData)
 {
     arrayData = QByteArray::fromBase64(str.toUtf8());
-    //
+
     return TRUE;
 }
+
 CString WizStringToBase64(const CString& strSource)
 {
     QByteArray arrayData = strSource.toUtf8();

@@ -92,6 +92,9 @@ public:
     QString password() const;
     void setPassword(const QString& strPassword = "");
 
+    bool autoLogin() const;
+    void setAutoLogin(bool bAutoLogin);
+
     QString locale();
     void setLocale(const QString& strLocale);
 

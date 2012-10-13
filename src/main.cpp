@@ -32,35 +32,38 @@ int main(int argc, char *argv[])
     iconApp.addFile(WizGetResourcesPath() + "wiznote128.png");
     QApplication::setWindowIcon(iconApp);
 
-    QString strDefaultUser = settings.GetString("Users", "DefaultUser", "");
+    QString strUserId = settings.GetString("Users", "DefaultUser", "");
+    QString strPassword;
 
-    CWizUserSettings userSettings(strDefaultUser);
+    CWizUserSettings userSettings(strUserId);
 
-    // setup locale
+    // setup locale for welcome dialog
     QString strLocale = userSettings.locale();
 
     QTranslator translatorWizNote;
-    translatorWizNote.load("wiznote_" + strLocale, WizGetResourcesPath() + "languages/");
+    QString strLocaleFile = WizGetLocaleFileName(strLocale);
+    translatorWizNote.load(strLocaleFile);
     a.installTranslator(&translatorWizNote);
 
     QTranslator translatorQt;
-    translatorQt.load("qt_" + strLocale, WizGetResourcesPath() + "languages/");
+    strLocaleFile = WizGetQtLocaleFileName(strLocale);
+    translatorQt.load(strLocaleFile);
     a.installTranslator(&translatorQt);
 
     // figure out auto login or manually login
-    bool bAutoLogin = settings.GetBool("Users", "AutoLogin", false);
-
     bool bFallback = true;
-    QString strUserId, strPassword;
-    if (bAutoLogin) {
-        strUserId = strDefaultUser;
-        strPassword = ::WizDecryptPassword(userSettings.password());
+
+    bool bAutoLogin = userSettings.autoLogin();
+    strPassword = ::WizDecryptPassword(userSettings.password());
+
+    if (bAutoLogin && !strPassword.isEmpty()) {
         bFallback = false;
     }
 
     // manually login
     if (bFallback) {
-        WelcomeDialog dlgWelcome(strDefaultUser);
+
+        WelcomeDialog dlgWelcome(strUserId, strLocale);
         if (QDialog::Accepted != dlgWelcome.exec())
             return 0;
 
@@ -68,18 +71,33 @@ int main(int argc, char *argv[])
         strPassword = dlgWelcome.password();
     }
 
-    // reset password for restart event
+    // reset password for restart event, will not touch welcome dialog
     QStringList args = QApplication::arguments();
     if (args.count() >= 3) {
-        if (!args.at(1).compare("--autologin=0")) {
-            settings.SetBool("Users", "AutoLogin", false);
-        }
-
-        if (!args.at(2).compare("--cleanpassword=1")) {
-            userSettings.setUser(strDefaultUser);
-            userSettings.setPassword();
+        for (int i = 0; i < args.count(); i++) {
+            if (!args.at(i).compare("--autologin=0")) {
+                userSettings.setAutoLogin(false);
+            } else if(!args.at(i).compare("--autologin=1")) {
+                userSettings.setAutoLogin(true);
+            } else if(!args.at(i).compare("--cleanpassword=1")) {
+                userSettings.setPassword();
+            }
         }
     }
+
+    // reset locale for current user.
+    userSettings.setUser(strUserId);
+    strLocale = userSettings.locale();
+
+    a.removeTranslator(&translatorWizNote);
+    strLocaleFile = WizGetLocaleFileName(strLocale);
+    translatorWizNote.load(strLocaleFile);
+    a.installTranslator(&translatorWizNote);
+
+    a.removeTranslator(&translatorQt);
+    strLocaleFile = WizGetQtLocaleFileName(strLocale);
+    translatorQt.load(strLocaleFile);
+    a.installTranslator(&translatorQt);
 
     // ready
     CWizDatabase db;
@@ -103,16 +121,16 @@ int main(int argc, char *argv[])
     // restart
     if (w.isRestart())
     {
+        userSettings.setUser(strUserId);
+
         // reset auto login
-        bAutoLogin = settings.GetBool("Users", "AutoLogin", false);
-        settings.SetBool("Users", "AutoLogin", true);
+        bAutoLogin = userSettings.autoLogin();
+        userSettings.setAutoLogin(true);
 
         // reset password
         // if user did not choose remember password, stored password already cleaned from database
         // we need store it back.
         bool bCleanPassword = false;
-        userSettings.setUser(strUserId);
-
         if (userSettings.password().isEmpty()) {
             userSettings.setPassword(::WizEncryptPassword(strPassword));
             bCleanPassword = true;
@@ -129,13 +147,11 @@ int main(int argc, char *argv[])
         if (bCleanPassword) {
             argsRestart.append(QString("--cleanpassword=1"));
         } else {
-            argsRestart.append(QString("--cleanpassword=1"));
+            argsRestart.append(QString("--cleanpassword=0"));
         }
 
         QProcess::startDetached(argv[0], argsRestart);
     } else if (w.isLogout()) {
-        userSettings.setUser(strUserId);
-        userSettings.setPassword();
         QProcess::startDetached(argv[0], QStringList());
     }
 

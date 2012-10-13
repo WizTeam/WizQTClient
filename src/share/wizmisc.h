@@ -76,6 +76,7 @@ CString WizGetResourcesPath();
 CString WizGetDataStorePath();
 CString WizGetSettingsFileName();
 QString WizGetLocaleFileName(const QString& strLocale);
+QString WizGetQtLocaleFileName(const QString& strLocale);
 void WizGetTranslatedLocales(QStringList& locales);
 QString WizGetTranslatedLocaleDisplayName(int index);
 
@@ -102,8 +103,8 @@ QString WizFolderNameByPath(const QString& strPath);
 BOOL WizCopyFile(const CString& strSrcFileName, const CString& strDestFileName, BOOL bFailIfExists);
 void WizGetNextFileName(CString& strFileName);
 
-CString WizEncryptPassword(const CString& strPassword);
-CString WizDecryptPassword(const CString& strEncryptedText);
+QString WizEncryptPassword(const QString& strPassword);
+QString WizDecryptPassword(const QString& strEncryptedText);
 
 
 BOOL WizLoadUnicodeTextFromFile(const CString& strFileName, CString& steText);
@@ -143,8 +144,8 @@ CString WizGetComputerName();
 #define DEBUG_TOLOG4(x, p1, p2, p3, p4)       WizGlobal()->WriteDebugLog(WizFormatString4(x, p1, p2, p3, p4))
 
 
-BOOL WizBase64Encode(const QByteArray& arrayData, CString& str);
-BOOL WizBase64Decode(const CString& str, QByteArray& arrayData);
+BOOL WizBase64Encode(const QByteArray& arrayData, QString& str);
+BOOL WizBase64Decode(const QString& str, QByteArray& arrayData);
 
 CString WizStringToBase64(const CString& strSource);
 CString WizStringFromBase64(const CString& strBase64);
