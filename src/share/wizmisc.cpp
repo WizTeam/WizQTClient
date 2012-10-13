@@ -354,6 +354,33 @@ CString WizGetSettingsFileName()
     return WizGetDataStorePath() + "wiznote.ini";
 }
 
+QString WizGetLocaleFileName(const QString& strLocale)
+{
+    return WizGetResourcesPath() + "languages/wiznote_" + strLocale + ".qm";
+}
+
+void WizGetTranslatedLocales(QStringList& locales)
+{
+    locales.append("zh_CN");
+    locales.append("zh_TW");
+    locales.append("en_US");
+}
+
+QString WizGetTranslatedLocaleDisplayName(int index)
+{
+    switch (index) {
+        case 0:
+            return QObject::tr("Simplified Chinese");
+        case 1:
+            return QObject::tr("Traditional Chinese");
+        case 2:
+            return QObject::tr("English(US)");
+        default:
+            Q_ASSERT(index < 3);
+            return QString();
+    }
+}
+
 CString IWizGlobal::GetTempPath()
 {
     CString path = QDir::tempPath();

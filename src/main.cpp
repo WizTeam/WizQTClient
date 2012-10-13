@@ -40,11 +40,11 @@ int main(int argc, char *argv[])
     QString strLocale = userSettings.locale();
 
     QTranslator translatorWizNote;
-    translatorWizNote.load(QString("wiznote_") + strLocale, WizGetResourcesPath() + "languages/");
+    translatorWizNote.load("wiznote_" + strLocale, WizGetResourcesPath() + "languages/");
     a.installTranslator(&translatorWizNote);
 
     QTranslator translatorQt;
-    translatorQt.load(QString("qt_") + strLocale, WizGetResourcesPath() + "languages/");
+    translatorQt.load("qt_" + strLocale, WizGetResourcesPath() + "languages/");
     a.installTranslator(&translatorQt);
 
     // figure out auto login or manually login

@@ -75,6 +75,9 @@ CString WizGetAppFileName();
 CString WizGetResourcesPath();
 CString WizGetDataStorePath();
 CString WizGetSettingsFileName();
+QString WizGetLocaleFileName(const QString& strLocale);
+void WizGetTranslatedLocales(QStringList& locales);
+QString WizGetTranslatedLocaleDisplayName(int index);
 
 __int64 WizGetFileSize(const CString& strFileName);
 void WizPathAddBackslash(CString& strPath);
@@ -145,6 +148,8 @@ BOOL WizBase64Decode(const CString& str, QByteArray& arrayData);
 
 CString WizStringToBase64(const CString& strSource);
 CString WizStringFromBase64(const CString& strBase64);
+
+
 
 // skin related
 QString WizGetDefaultSkinName();

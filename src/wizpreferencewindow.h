@@ -26,8 +26,11 @@ private:
     CWizExplorerApp& m_app;
     bool m_bRestart;
 
+    QStringList m_locales;
+    int m_iSelectedLocale;
+
     QStringList m_skins;
-    QString m_selectedSkin;
+    QString m_strSelectedSkin;
 
 Q_SIGNALS:
     void settingsChanged(WizOptionsType type);
@@ -36,8 +39,8 @@ Q_SIGNALS:
 private slots:
     virtual void accept();
 
+    void on_comboLang_currentIndexChanged(int index);
     void on_comboSkin_currentIndexChanged(int index);
-    //void on_labelRestartForSkin_linkActivated(const QString& text);
 
     void on_radioAuto_clicked(bool checked);
     void on_radioAlwaysReading_clicked(bool checked);

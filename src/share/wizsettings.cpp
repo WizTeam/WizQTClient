@@ -238,6 +238,7 @@ QString CWizUserSettings::skin()
 
     if (!strSkinName.isEmpty()) {
         if (PathFileExists(::WizGetSkinResourcePath(strSkinName))) {
+            m_strSkinName = strSkinName;
             return strSkinName;
         }
     }
@@ -247,6 +248,7 @@ QString CWizUserSettings::skin()
 
     if (!strSkinName.isEmpty()) {
         if (PathFileExists(::WizGetSkinResourcePath(strSkinName))) {
+            m_strSkinName = strSkinName;
             return strSkinName;
         }
     }
@@ -263,22 +265,42 @@ void CWizUserSettings::setSkin(const QString& strSkinName)
     set("Skin", strSkinName);
 }
 
-QString CWizUserSettings::locale() const
+QString CWizUserSettings::locale()
 {
+    if (!m_strLocale.isEmpty()) {
+        return m_strLocale;
+    }
+
     QString strLocale = get("Locale");
 
     if (!strLocale.isEmpty()) {
-            return strLocale;
+        m_strLocale = strLocale;
+        return strLocale;
     }
 
     CWizSettings settings(::WizGetDataStorePath() + "wiznote.ini");
     strLocale = settings.GetString("Common", "Locale");
 
     if (!strLocale.isEmpty()) {
-            return strLocale;
+        m_strLocale = strLocale;
+        return strLocale;
     }
 
-    return QLocale::system().name();
+    strLocale = QLocale::system().name();
+    if (::PathFileExists(::WizGetLocaleFileName(strLocale))) {
+        m_strLocale = strLocale;
+        return strLocale;
+    }
+
+    return "en_US";
+}
+
+void CWizUserSettings::setLocale(const QString& strLocale)
+{
+    Q_ASSERT(!strLocale.isEmpty());
+
+    m_strLocale = strLocale;
+    set("Locale", strLocale);
 }
 
 WizDocumentViewMode CWizUserSettings::noteViewMode() const

@@ -13,8 +13,16 @@ CWizPreferenceWindow::CWizPreferenceWindow(CWizExplorerApp& app, QWidget* parent
     connect(ui->buttonOK, SIGNAL(clicked()), this, SLOT(accept()));
 
     // general tab
-    ui->comboLang->addItem(tr("Chinese"));
-    ui->comboLang->addItem(tr("English"));
+    ::WizGetTranslatedLocales(m_locales);
+    for (int i = 0; i < m_locales.count(); i++) {
+        ui->comboLang->addItem(::WizGetTranslatedLocaleDisplayName(i));
+    }
+
+    for (int i = 0; i < ui->comboLang->count(); i++) {
+        if (!m_locales[i].compare(userSettings().locale())) {
+            ui->comboLang->setCurrentIndex(i);
+        }
+    }
 
     // just hide skin setup on mac for convience.
 #ifdef Q_WS_MAC
@@ -33,20 +41,21 @@ CWizPreferenceWindow::CWizPreferenceWindow(CWizExplorerApp& app, QWidget* parent
         }
     }
 
+    connect(ui->comboLang, SIGNAL(currentIndexChanged(int)), SLOT(on_comboLang_currentIndexChanged(int)));
     connect(ui->comboSkin, SIGNAL(currentIndexChanged(int)), SLOT(on_comboSkin_currentIndexChanged(int)));
 
     // reading tab
     switch (userSettings().noteViewMode())
     {
-    case viewmodeAlwaysEditing:
-        ui->radioAlwaysEditing->setChecked(true);
-        break;
-    case viewmodeAlwaysReading:
-        ui->radioAlwaysReading->setChecked(true);
-        break;
-    default:
-        ui->radioAuto->setChecked(true);
-        break;
+        case viewmodeAlwaysEditing:
+            ui->radioAlwaysEditing->setChecked(true);
+            break;
+        case viewmodeAlwaysReading:
+            ui->radioAlwaysReading->setChecked(true);
+            break;
+        default:
+            ui->radioAuto->setChecked(true);
+            break;
     }
 
     connect(ui->radioAuto, SIGNAL(clicked(bool)), SLOT(on_radioAuto_clicked(bool)));
@@ -65,9 +74,14 @@ CWizPreferenceWindow::CWizPreferenceWindow(CWizExplorerApp& app, QWidget* parent
     connect(ui->labelProxySettings, SIGNAL(linkActivated(QString)), SLOT(on_labelProxy_linkActivated(QString)));
 }
 
+void CWizPreferenceWindow::on_comboLang_currentIndexChanged(int index)
+{
+    m_iSelectedLocale = index;
+}
+
 void CWizPreferenceWindow::on_comboSkin_currentIndexChanged(int index)
 {
-    m_selectedSkin = m_skins[index];
+    m_strSelectedSkin = m_skins[index];
 }
 
 void CWizPreferenceWindow::on_radioAuto_clicked(bool chcked)
@@ -121,8 +135,14 @@ void CWizPreferenceWindow::on_labelProxy_linkActivated(const QString& link)
 
 void CWizPreferenceWindow::accept()
 {
-    if (m_selectedSkin.compare(userSettings().skin())) {
-        userSettings().setSkin(m_selectedSkin);
+    if (m_strSelectedSkin.compare(userSettings().skin())) {
+        userSettings().setSkin(m_strSelectedSkin);
+        m_bRestart = true;
+    }
+
+    QString strLocaleName = m_locales[m_iSelectedLocale];
+    if (strLocaleName.compare(userSettings().locale())) {
+        userSettings().setLocale(strLocaleName);
         m_bRestart = true;
     }
 

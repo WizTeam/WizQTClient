@@ -79,6 +79,7 @@ public:
 private:
     QString m_strUserId;
     QString m_strSkinName;
+    QString m_strLocale;
     CWizDatabase* m_db;
 
     QString get(const QString& key) const;
@@ -91,8 +92,8 @@ public:
     QString password() const;
     void setPassword(const QString& strPassword = "");
 
-    QString locale() const;
-    void setLocale(const QString& strLocale) { set("Locale", strLocale); }
+    QString locale();
+    void setLocale(const QString& strLocale);
 
     QString skin();
     void setSkin(const QString& strSkinName);
