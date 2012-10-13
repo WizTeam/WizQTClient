@@ -142,8 +142,8 @@ void MainWindow::initToolBar()
     m_toolBar->setMovable(false);
     m_toolBar->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
     //
-    m_toolBar->addAction(m_actions->actionFromName("actionGoBack"));
-    m_toolBar->addAction(m_actions->actionFromName("actionGoForward"));
+    //m_toolBar->addAction(m_actions->actionFromName("actionGoBack"));
+    //m_toolBar->addAction(m_actions->actionFromName("actionGoForward"));
     //
     m_toolBar->addWidget(new CWizFixedSpacer(QSize(20, 1), m_toolBar));
     //
