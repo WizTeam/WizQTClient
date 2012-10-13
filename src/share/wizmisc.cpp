@@ -2516,90 +2516,42 @@ QString WizGetDefaultSkinName()
 #endif
 }
 
-CString WizGetSkinName()
-{
-    QString defaultSkin = WizGetDefaultSkinName();
-
-    CWizSettings settings(WizGetSettingsFileName());
-
-#ifdef Q_OS_LINUX
-    static CString strSkinName = settings.GetString("skin", "Name", "ubuntu");
-    if (strSkinName.isEmpty())
-        strSkinName = "ubuntu";
-#else
-    static CString strSkinName = settings.GetString("skin", "Name", "default");
-    if (strSkinName.isEmpty())
-        strSkinName = "default";
-#endif
-
-    QString strPath = ::WizGetResourcesPath() + "skins/" + strSkinName + "/";
-    if (!PathFileExists(strPath))
-    {
-        strSkinName = "default";
-    }
-
-    return strSkinName;
-}
-
-void WizSetSkinName(const CString& strName)
-{
-    WizSetString("skin", "Name", strName);
-}
-
-void WizSetSkinDisplayName(const CString& strDisplayName)
-{
-    std::map<CString, CString> skins;
-    typedef std::map<CString, CString>::value_type SKIN;
-    ::WizGetSkins(skins);
-    foreach (const SKIN& skin, skins)
-    {
-        if (strDisplayName == skin.second)
-        {
-            WizSetSkinName(skin.first);
-            return;
-        }
-    }
-}
-
-CString WizGetSkinPath()
-{
-    return WizGetResourcesPath() + "skins/" + WizGetSkinName() + "/";
-}
-
 QString WizGetSkinResourcePath(const QString& strSkinName)
 {
     Q_ASSERT(!strSkinName.isEmpty());
     return WizGetResourcesPath() + "skins/" + strSkinName + "/";
 }
 
-void WizGetSkins(std::map<CString, CString>& skins)
+void WizGetSkins(QStringList& skins)
 {
     CWizStdStringArray folders;
     ::WizEnumFolders(::WizGetResourcesPath() + "skins/", folders, 0);
 
-    QString localName = QLocale::system().name();
-
     foreach (const CString& path, folders)
     {
-        CString strSkinFileName = path + "skin.ini";
+        QString strSkinFileName = path + "skin.ini";
         if (!PathFileExists(strSkinFileName))
             continue;
 
-        CString strSkinName = WizExtractLastPathName(path);
-
-        CWizSettings settings(strSkinFileName);
-        CString strSkinDisplayName = settings.GetString("Common", "Name_" + localName);
-        if (strSkinDisplayName.IsEmpty())
-        {
-            strSkinDisplayName = settings.GetString("Common", "Name");
-        }
-        if (strSkinDisplayName.IsEmpty())
-        {
-            strSkinDisplayName = strSkinName;
-        }
-
-        skins[strSkinName] = strSkinDisplayName;
+        skins.append(WizExtractLastPathName(path));
     }
+}
+
+QString WizGetSkinDisplayName(const QString& strSkinName, const QString& strLocale)
+{
+    CWizSettings settings(::WizGetSkinResourcePath(strSkinName) + "skin.ini");
+
+    QString strSkinDisplayName = settings.GetString("Common", "Name_" + strLocale);
+    if (!strSkinDisplayName.isEmpty()) {
+        return strSkinDisplayName;
+    }
+
+    strSkinDisplayName = settings.GetString("Common", "Name");
+    if (!strSkinDisplayName.isEmpty()) {
+        return strSkinDisplayName;
+    }
+
+    return strSkinName;
 }
 
 QString WizGetSystemCustomSkinPath(const QString& strSkinName)
@@ -2615,7 +2567,6 @@ QString WizGetSystemCustomSkinPath(const QString& strSkinName)
             "";
         #endif
 }
-
 
 QString WizGetSkinResourceFileName(const QString& strSkinName, const QString& strName)
 {
@@ -2651,6 +2602,7 @@ QIcon WizLoadSkinIcon(const QString& strSkinName, const QString& strIconName)
 
     return QIcon(strFileName);
 }
+
 
 void WizHtml2Text(const CString& strHtml, CString& strText)
 {

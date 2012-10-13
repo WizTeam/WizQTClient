@@ -26,6 +26,9 @@ private:
     CWizExplorerApp& m_app;
     bool m_bRestart;
 
+    QStringList m_skins;
+    QString m_selectedSkin;
+
 Q_SIGNALS:
     void settingsChanged(WizOptionsType type);
     void restartForSettings();
@@ -33,7 +36,7 @@ Q_SIGNALS:
 private slots:
     virtual void accept();
 
-    void on_comboSkin_currentIndexChanged(const QString& text);
+    void on_comboSkin_currentIndexChanged(int index);
     //void on_labelRestartForSkin_linkActivated(const QString& text);
 
     void on_radioAuto_clicked(bool checked);
@@ -42,7 +45,7 @@ private slots:
 
     void on_checkAutoSync_clicked(bool checked);
     void on_checkDownloadAllNotesData_clicked(bool checked);
-    void on_labelProxy_linkActivated();
+    void on_labelProxy_linkActivated(const QString& link);
 };
 
 

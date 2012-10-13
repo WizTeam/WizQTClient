@@ -21,20 +21,19 @@ CWizPreferenceWindow::CWizPreferenceWindow(CWizExplorerApp& app, QWidget* parent
     ui->groupBoxSkin->hide();
 #endif // Q_WS_MAC
 
-    CString strCurrSkinName = userSettings().skin();
-    std::map<CString, CString> skins;
-    typedef std::map<CString, CString>::value_type SKIN;
-    ::WizGetSkins(skins);
-    foreach (const SKIN& skin, skins)
-    {
-        ui->comboSkin->addItem(skin.second);
-        if (strCurrSkinName == skin.first)
-        {
-            ui->comboSkin->setCurrentIndex(ui->comboSkin->count() - 1);
+    ::WizGetSkins(m_skins);
+    for (int i = 0; i < m_skins.count(); i++) {
+        ui->comboSkin->addItem(::WizGetSkinDisplayName(m_skins[i], userSettings().locale()));
+    }
+
+    QString strCurSkinName = userSettings().skin();
+    for (int i = 0; i < ui->comboSkin->count(); i++) {
+        if (!strCurSkinName.compare(m_skins[i])) {
+            ui->comboSkin->setCurrentIndex(i);
         }
     }
 
-    connect(ui->comboSkin, SIGNAL(currentIndexChanged(QString)), SLOT(on_comboSkin_currentIndexChanged(QString)));
+    connect(ui->comboSkin, SIGNAL(currentIndexChanged(int)), SLOT(on_comboSkin_currentIndexChanged(int)));
 
     // reading tab
     switch (userSettings().noteViewMode())
@@ -63,15 +62,12 @@ CWizPreferenceWindow::CWizPreferenceWindow(CWizExplorerApp& app, QWidget* parent
 
     connect(ui->checkAutoSync, SIGNAL(clicked(bool)), SLOT(on_checkAutoSync_clicked(bool)));
     connect(ui->checkDownloadAllNotesData, SIGNAL(clicked(bool)), SLOT(on_checkDownloadAllNotesData_clicked(bool)));
-    connect(ui->labelProxySettings, SIGNAL(linkActivated()), SLOT(on_labelProxy_linkActivated()));
+    connect(ui->labelProxySettings, SIGNAL(linkActivated(QString)), SLOT(on_labelProxy_linkActivated(QString)));
 }
 
-void CWizPreferenceWindow::on_comboSkin_currentIndexChanged(const QString& text)
+void CWizPreferenceWindow::on_comboSkin_currentIndexChanged(int index)
 {
-    userSettings().setSkin(text);
-
-    m_bRestart = true;
-    emit settingsChanged(wizoptionsSkin);
+    m_selectedSkin = m_skins[index];
 }
 
 void CWizPreferenceWindow::on_radioAuto_clicked(bool chcked)
@@ -113,17 +109,23 @@ void CWizPreferenceWindow::on_checkDownloadAllNotesData_clicked(bool checked)
     emit settingsChanged(wizoptionsSync);
 }
 
-void CWizPreferenceWindow::on_labelProxy_linkActivated()
+void CWizPreferenceWindow::on_labelProxy_linkActivated(const QString& link)
 {
-    ProxyDialog dlg(parentWidget());
-    if (QDialog::Accepted != dlg.exec())
-        return;
+    Q_UNUSED(link);
 
-    emit settingsChanged(wizoptionsSync);
+    ProxyDialog dlg(this);
+    if (QDialog::Accepted != dlg.exec()) {
+        emit settingsChanged(wizoptionsSync);
+    }
 }
 
 void CWizPreferenceWindow::accept()
 {
+    if (m_selectedSkin.compare(userSettings().skin())) {
+        userSettings().setSkin(m_selectedSkin);
+        m_bRestart = true;
+    }
+
     if (m_bRestart) {
         emit restartForSettings();
     }

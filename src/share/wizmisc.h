@@ -146,18 +146,13 @@ BOOL WizBase64Decode(const CString& str, QByteArray& arrayData);
 CString WizStringToBase64(const CString& strSource);
 CString WizStringFromBase64(const CString& strBase64);
 
+// skin related
 QString WizGetDefaultSkinName();
-CString WizGetSkinName();
-CString WizGetSkinPath();
+void WizGetSkins(QStringList& skins);
 QString WizGetSkinResourcePath(const QString& strSkinName);
+QString WizGetSkinDisplayName(const QString& strSkinName, const QString& strLocale);
 QString WizGetSkinResourceFileName(const QString& strSkinName, const QString& strName);
 QIcon WizLoadSkinIcon(const QString& strSkinName, const QString& strIconName);
-
-#ifndef Q_OS_MAC
-void WizSetSkinName(const CString& strName);
-void WizSetSkinDisplayName(const CString& strDisplayName);
-void WizGetSkins(std::map<CString, CString>& skins);
-#endif
 
 
 void WizHtml2Text(const CString& strHtml, CString& strText);
