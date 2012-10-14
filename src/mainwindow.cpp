@@ -41,6 +41,7 @@ MainWindow::MainWindow(CWizDatabase& db, QWidget *parent) :
     QMainWindow(parent),
     m_db(db),
     m_settings(new CWizUserSettings(db)),
+    m_console(new CWizConsoleDialog(*this, this)),
     m_sync(m_db, WIZ_API_URL, *this),
     m_menuBar(new QMenuBar(this)),
     #ifndef Q_OS_MAC
@@ -449,6 +450,12 @@ void MainWindow::on_actionDeleteCurrentNote_triggered()
     //
     CWizDocument doc(m_db, document);
     doc.Delete();
+}
+
+void MainWindow::on_actionConsole_triggered()
+{
+    //m_console.setModle(false);
+    m_console->show();
 }
 
 void MainWindow::on_actionLogout_triggered()

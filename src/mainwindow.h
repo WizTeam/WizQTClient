@@ -7,6 +7,7 @@
 #include "share/wizsettings.h"
 #include "share/wizsync.h"
 
+#include "wizconsoledialog.h"
 
 #ifndef Q_OS_MAC
 class QToolBar;
@@ -57,6 +58,7 @@ public:
     virtual void addDebugLog(const CString& strMsg);
     virtual void addErrorLog(const CString& strMsg);
     virtual void changeProgress(int pos);
+
 private:
     CWizDatabase& m_db;
     CWizUserSettings* m_settings;
@@ -91,6 +93,9 @@ private:
     bool m_bUpdatingSelection;
     //
     WIZDOCUMENTDATA m_documentForEditing;
+
+    CWizConsoleDialog* m_console;
+
 private:
     void initActions();
     void initMenuBar();
@@ -140,6 +145,7 @@ public slots:
     void SetSavingDocument(bool saving);
 
     void on_actionExit_triggered();
+    void on_actionConsole_triggered();
     void on_actionSync_triggered();
     void on_actionNewNote_triggered();
     void on_actionDeleteCurrentNote_triggered();

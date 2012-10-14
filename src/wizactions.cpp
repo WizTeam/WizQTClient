@@ -49,6 +49,7 @@ WIZACTION* CWizActions::actionsData()
         {"actionGoForward",         QObject::tr("Forward")},
         {"actionOptions",         QObject::tr("Options")},
         {"actionPreference",         QObject::tr("Preference")},
+        {"actionConsole",         QObject::tr("Console")},
 
         /////////////////////
         {"",                        ""}

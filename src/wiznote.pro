@@ -98,7 +98,8 @@ SOURCES += main.cpp\
     share/wizimagepushbutton.cpp \
     wiztaglistwidget.cpp \
     proxydialog.cpp \
-    wizpreferencewindow.cpp
+    wizpreferencewindow.cpp \
+    wizconsoledialog.cpp
 
 HEADERS += mainwindow.h \
     share/wizqthelper.h \
@@ -176,7 +177,8 @@ HEADERS += mainwindow.h \
     mac/wizmacicon.h \
     wiztaglistwidget.h \
     proxydialog.h \
-    wizpreferencewindow.h
+    wizpreferencewindow.h \
+    wizconsoledialog.h
 
 
 mac:HEADERS += \
@@ -193,7 +195,8 @@ FORMS += \
     ui/aboutdialog.ui \
     ui/createaccountdialog.ui \
     ui/proxydialog.ui \
-    ui/preferencedialog.ui
+    ui/preferencedialog.ui \
+    ui/wizconsoledialog.ui
 
 
 mac:LIBS += -framework Cocoa -framework Carbon

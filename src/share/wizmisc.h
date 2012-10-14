@@ -80,12 +80,15 @@ QString WizGetQtLocaleFileName(const QString& strLocale);
 void WizGetTranslatedLocales(QStringList& locales);
 QString WizGetTranslatedLocaleDisplayName(int index);
 
+QString WizGetLogFileName();
+
 __int64 WizGetFileSize(const CString& strFileName);
 void WizPathAddBackslash(CString& strPath);
 void WizPathRemoveBackslash(CString& strPath);
 CString WizPathAddBackslash2(const CString& strPath);
 CString WizPathRemoveBackslash2(const CString& strPath);
 void WizEnsurePathExists(const CString& strPath);
+void WizEnsureFileExists(const QString& strFileName);
 
 CString WizExtractFilePath(const CString& strFileName);
 CString WizExtractFileName(const CString& strFileName);

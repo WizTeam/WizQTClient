@@ -69,6 +69,15 @@ void WizEnsurePathExists(const CString& path)
     dir.mkpath(path);
 }
 
+void WizEnsureFileExists(const QString& strFileName)
+{
+    QFile file(strFileName);
+    if (!file.exists()) {
+        file.open(QIODevice::ReadWrite);
+        file.close();
+    }
+}
+
 BOOL WizDeleteAllFilesInFolder(const CString& strPath)
 {
     CWizStdStringArray arrayFile;
@@ -398,15 +407,20 @@ CString IWizGlobal::GetTempPath()
     return path;
 }
 
+QString WizGetLogFileName()
+{
+    QString strLogFileName = WizGetDataStorePath() + "wiznote.log";
+    WizEnsureFileExists(strLogFileName);
+    return strLogFileName;
+}
 
 void IWizGlobal::WriteLog(const CString& str)
 {
     qDebug() << str;
-    //
+
     COleDateTime t = ::WizGetCurrentTime();
-    CString strTime = t.toString(Qt::SystemLocaleLongDate);
-    //
     CString strFileName = ::WizGetDataStorePath() + "wiznote.log";
+
     std::fstream outf(strFileName.toLocal8Bit().constData(), std::ios::app | std::ios::out);
     outf << strTime.toUtf8().constData() << ":\t" << str.toUtf8().constData() << std::endl;
     outf.close();
