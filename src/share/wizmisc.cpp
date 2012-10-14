@@ -396,6 +396,33 @@ QString WizGetTranslatedLocaleDisplayName(int index)
     }
 }
 
+QString WizGetLogFileName()
+{
+    QString strLogFileName = WizGetDataStorePath() + "wiznote.log";
+    WizEnsureFileExists(strLogFileName);
+    return strLogFileName;
+}
+
+
+
+IWizGlobal* WizGlobal()
+{
+    return IWizGlobal::instance();
+}
+
+IWizGlobal* IWizGlobal::m_pInstance = NULL;
+
+IWizGlobal* IWizGlobal::instance()
+{
+    if (!m_pInstance)
+          m_pInstance = new IWizGlobal();
+       return m_pInstance;
+}
+
+IWizGlobal::IWizGlobal()
+{
+}
+
 CString IWizGlobal::GetTempPath()
 {
     CString path = QDir::tempPath();
@@ -407,23 +434,24 @@ CString IWizGlobal::GetTempPath()
     return path;
 }
 
-QString WizGetLogFileName()
-{
-    QString strLogFileName = WizGetDataStorePath() + "wiznote.log";
-    WizEnsureFileExists(strLogFileName);
-    return strLogFileName;
-}
-
 void IWizGlobal::WriteLog(const CString& str)
 {
-    qDebug() << str;
+    QDateTime strTime = QDateTime::currentDateTime();
+    QString msg(strTime.toString() + ": " + str + "\n");
 
-    COleDateTime t = ::WizGetCurrentTime();
-    CString strFileName = ::WizGetDataStorePath() + "wiznote.log";
+    qDebug() << msg;
 
-    std::fstream outf(strFileName.toLocal8Bit().constData(), std::ios::app | std::ios::out);
-    outf << strTime.toUtf8().constData() << ":\t" << str.toUtf8().constData() << std::endl;
-    outf.close();
+    // write to buffer who is interested in logs just need to connect readyRead signal
+    m_bufferLog.open(QIODevice::Append);
+    m_bufferLog.write(msg.toUtf8());
+    m_bufferLog.close();
+
+    // write to global log file
+    QString strLogFileName = WizGetLogFileName();
+    QFile f(strLogFileName);
+    f.open(QIODevice::Append | QIODevice::Text);
+    f.write(msg.toUtf8());
+    f.close();
 }
 
 void IWizGlobal::WriteDebugLog(const CString& str)
@@ -446,12 +474,6 @@ void IWizGlobal::WriteDebugLog(const CString& str)
         return;
     //
     WriteLog(str);
-}
-
-IWizGlobal* WizGlobal()
-{
-    static IWizGlobal global;
-    return &global;
 }
 
 

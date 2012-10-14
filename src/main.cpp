@@ -9,6 +9,7 @@
 #include "share/wizsettings.h"
 #include "share/wizwin32helper.h"
 
+
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);

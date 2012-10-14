@@ -5,6 +5,8 @@
 #include <QTextCodec>
 #include <QScrollBar>
 
+#include <QMessageBox>
+
 CWizConsoleDialog::CWizConsoleDialog(CWizExplorerApp& app, QWidget* parent)
     : QDialog(parent)
     , m_ui(new Ui::CWizConsoleDialog)
@@ -13,11 +15,11 @@ CWizConsoleDialog::CWizConsoleDialog(CWizExplorerApp& app, QWidget* parent)
     m_ui->setupUi(this);
     setWindowTitle(tr("Console"));
 
-    load();
-
     connect(m_ui->editConsole, SIGNAL(textChanged()), SLOT(on_editConsole_textChanged()));
+    connect(::WizGlobal()->bufferLog(), SIGNAL(readyRead()), SLOT(on_bufferLogReady()));
 
-    m_ui->editConsole->setText(m_data);
+    m_ui->buttonSync->setDown(true);
+    load();
 }
 
 void CWizConsoleDialog::load()
@@ -28,12 +30,39 @@ void CWizConsoleDialog::load()
 
     QByteArray data = file.readAll();
     QTextCodec* codec = QTextCodec::codecForName("UTF-8");
-    m_data = codec->toUnicode(data);
+    QString strLogData = codec->toUnicode(data);
     file.close();
+
+    m_data = strLogData;
+
+    m_ui->editConsole->setText(m_data);
 }
 
 void CWizConsoleDialog::on_editConsole_textChanged()
 {
     QScrollBar *sb = m_ui->editConsole->verticalScrollBar();
     sb->setValue(sb->maximum());
+}
+
+void CWizConsoleDialog::on_bufferLogReady()
+{
+    QBuffer* buffer = WizGlobal()->bufferLog();
+    buffer->open(QIODevice::ReadWrite);
+    QByteArray data = buffer->readAll();
+    buffer->close();
+
+    buffer->setData("");
+
+    QTextCodec* codec = QTextCodec::codecForName("UTF-8");
+    QString strLog = codec->toUnicode(data);
+
+    m_data += strLog;
+
+    appendLogs(strLog);
+}
+
+void CWizConsoleDialog::appendLogs(const QString& strLog)
+{
+    m_ui->editConsole->moveCursor(QTextCursor::End);
+    m_ui->editConsole->insertPlainText(strLog);
 }

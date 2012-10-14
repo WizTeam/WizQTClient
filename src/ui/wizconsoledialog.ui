@@ -34,10 +34,10 @@
   <widget class="QTextEdit" name="editConsole">
    <property name="geometry">
     <rect>
-     <x>10</x>
-     <y>40</y>
-     <width>481</width>
-     <height>351</height>
+     <x>0</x>
+     <y>30</y>
+     <width>501</width>
+     <height>371</height>
     </rect>
    </property>
    <property name="readOnly">
@@ -47,17 +47,55 @@
   <widget class="QWidget" name="horizontalLayoutWidget">
    <property name="geometry">
     <rect>
-     <x>170</x>
+     <x>0</x>
      <y>0</y>
-     <width>321</width>
-     <height>41</height>
+     <width>501</width>
+     <height>31</height>
     </rect>
    </property>
    <layout class="QHBoxLayout" name="horizontalLayout">
+    <property name="spacing">
+     <number>0</number>
+    </property>
+    <item>
+     <widget class="QPushButton" name="buttonSync">
+      <property name="text">
+       <string>Sync Log</string>
+      </property>
+      <property name="flat">
+       <bool>false</bool>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <spacer name="horizontalSpacer">
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+      <property name="sizeType">
+       <enum>QSizePolicy::Fixed</enum>
+      </property>
+      <property name="sizeHint" stdset="0">
+       <size>
+        <width>80</width>
+        <height>20</height>
+       </size>
+      </property>
+     </spacer>
+    </item>
     <item>
      <widget class="QPushButton" name="buttonAll">
+      <property name="styleSheet">
+       <string notr="true">QPushButton {
+	border: 1px solid #bfbfbf;
+	border-radius: 2px;
+}</string>
+      </property>
       <property name="text">
        <string>All Log</string>
+      </property>
+      <property name="flat">
+       <bool>false</bool>
       </property>
      </widget>
     </item>
@@ -66,12 +104,18 @@
       <property name="text">
        <string>Error Log</string>
       </property>
+      <property name="flat">
+       <bool>false</bool>
+      </property>
      </widget>
     </item>
     <item>
      <widget class="QPushButton" name="buttonWarn">
       <property name="text">
        <string>Warning Log</string>
+      </property>
+      <property name="flat">
+       <bool>false</bool>
       </property>
      </widget>
     </item>
@@ -80,22 +124,12 @@
       <property name="text">
        <string>Clear Log</string>
       </property>
+      <property name="flat">
+       <bool>false</bool>
+      </property>
      </widget>
     </item>
    </layout>
-  </widget>
-  <widget class="QPushButton" name="buttonSync">
-   <property name="geometry">
-    <rect>
-     <x>10</x>
-     <y>10</y>
-     <width>75</width>
-     <height>23</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Sync Log</string>
-   </property>
   </widget>
  </widget>
  <resources/>

@@ -1,6 +1,9 @@
 #ifndef WIZMISC_H
 #define WIZMISC_H
 
+#include <QBuffer>
+#include <QByteArray>
+
 #ifndef WIZQTHELPER_H
 #include "wizqthelper.h"
 #endif
@@ -18,13 +21,25 @@
 #endif
 
 
-struct IWizGlobal
+class IWizGlobal : public QObject
 {
+    Q_OBJECT
+
+public:
+    static IWizGlobal* instance();
+
+    QBuffer* bufferLog() { return &m_bufferLog; }
     CString GetTempPath();
     void WriteLog(const CString& str);
     void WriteDebugLog(const CString& str);
-};
 
+private:
+    IWizGlobal();
+    static IWizGlobal* m_pInstance;
+
+    QBuffer m_bufferLog;
+
+};
 
 IWizGlobal* WizGlobal();
 

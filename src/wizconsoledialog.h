@@ -12,9 +12,10 @@ namespace Ui {
 
 class CWizConsoleDialog: public QDialog
 {
+    Q_OBJECT
+
 public:
     CWizConsoleDialog(CWizExplorerApp& app, QWidget* parent = 0);
-    const QString* data() { return &m_data; }
 
 private:
     Ui::CWizConsoleDialog* m_ui;
@@ -24,8 +25,11 @@ private:
 
     void load();
 
-private Q_SLOTS:
+    void appendLogs(const QString& strLog);
+
+public slots:
     void on_editConsole_textChanged();
+    void on_bufferLogReady();
 };
 
 #endif // WIZCONSOLEDIALOG_H
