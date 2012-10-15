@@ -5,6 +5,7 @@
 #include <QProcess>
 
 #include "mainwindow.h"
+#include "wizupdaterdialog.h"
 #include "welcomedialog.h"
 #include "share/wizsettings.h"
 #include "share/wizwin32helper.h"
@@ -14,7 +15,6 @@ int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
     QApplication::setApplicationName(QObject::tr("WizNote"));
-
     IWizGlobal::instance()->setVersion("1.1.00");
 
     CWizSettings settings(::WizGetDataStorePath() + "wiznote.ini");
@@ -53,6 +53,11 @@ int main(int argc, char *argv[])
     strLocaleFile = WizGetQtLocaleFileName(strLocale);
     translatorQt.load(strLocaleFile);
     a.installTranslator(&translatorQt);
+
+    // update check.
+    CWizUpdaterDialog updater;
+    updater.show();
+    a.exec();
 
     // figure out auto login or manually login
     bool bFallback = true;

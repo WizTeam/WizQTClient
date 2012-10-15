@@ -23,32 +23,30 @@ p, li { white-space: pre-wrap; }
         <translation></translation>
     </message>
     <message>
-        <location filename="aboutdialog.cpp" line="20"/>
+        <location filename="aboutdialog.cpp" line="19"/>
         <source>WizNote for Mac</source>
         <oldsource>WizNote for Mac %1</oldsource>
         <translation>爲知筆記 Mac版</translation>
     </message>
     <message>
-        <location filename="aboutdialog.cpp" line="22"/>
+        <location filename="aboutdialog.cpp" line="21"/>
         <source>WizNote for Linux</source>
         <oldsource>WizNote for Linux %1</oldsource>
         <translation>爲知筆記 Linux版</translation>
     </message>
     <message>
-        <location filename="aboutdialog.cpp" line="24"/>
+        <location filename="aboutdialog.cpp" line="23"/>
         <source>WizNote for Windows</source>
         <oldsource>WizNote for Windows %1</oldsource>
         <translation>爲知筆記Windows版</translation>
     </message>
     <message>
-        <location filename="aboutdialog.cpp" line="35"/>
         <source>beta (build %1)</source>
-        <translation>測試版 (build %1)</translation>
+        <translation type="obsolete">測試版 (build %1)</translation>
     </message>
     <message>
-        <location filename="aboutdialog.cpp" line="35"/>
         <source>release (build %1)</source>
-        <translation>正式版 (build %1)</translation>
+        <translation type="obsolete">正式版 (build %1)</translation>
     </message>
 </context>
 <context>
@@ -437,6 +435,25 @@ p, li { white-space: pre-wrap; }
     </message>
 </context>
 <context>
+    <name>CWizUpdaterDialog</name>
+    <message>
+        <location filename="ui/wizupdaterdialog.ui" line="14"/>
+        <source>updaterDialog</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="ui/wizupdaterdialog.ui" line="45"/>
+        <source>logo</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="ui/wizupdaterdialog.ui" line="61"/>
+        <source>Update ongoing: 
+ (Please do not close the window to avoid damage your data)</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>CreateAccountDialog</name>
     <message>
         <location filename="ui/createaccountdialog.ui" line="14"/>
@@ -560,12 +577,12 @@ p, li { white-space: pre-wrap; }
 <context>
     <name>QObject</name>
     <message>
-        <location filename="main.cpp" line="16"/>
+        <location filename="main.cpp" line="17"/>
         <source>WizNote</source>
         <translation>爲知筆記</translation>
     </message>
     <message>
-        <location filename="main.cpp" line="108"/>
+        <location filename="main.cpp" line="114"/>
         <source>Can not open account</source>
         <translation>不能打開賬戶</translation>
     </message>
@@ -661,42 +678,42 @@ p, li { white-space: pre-wrap; }
         <translation>搜索 %1 結果</translation>
     </message>
     <message>
-        <location filename="share/wizmisc.cpp" line="388"/>
+        <location filename="share/wizmisc.cpp" line="386"/>
         <source>Simplified Chinese</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="share/wizmisc.cpp" line="390"/>
+        <location filename="share/wizmisc.cpp" line="388"/>
         <source>Traditional Chinese</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="share/wizmisc.cpp" line="392"/>
+        <location filename="share/wizmisc.cpp" line="390"/>
         <source>English(US)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="share/wizmisc.cpp" line="782"/>
+        <location filename="share/wizmisc.cpp" line="789"/>
         <source>%1 TB</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="share/wizmisc.cpp" line="784"/>
+        <location filename="share/wizmisc.cpp" line="791"/>
         <source>%1 GB</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="share/wizmisc.cpp" line="786"/>
+        <location filename="share/wizmisc.cpp" line="793"/>
         <source>%1 MB</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="share/wizmisc.cpp" line="788"/>
+        <location filename="share/wizmisc.cpp" line="795"/>
         <source>%1 KB</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="share/wizmisc.cpp" line="789"/>
+        <location filename="share/wizmisc.cpp" line="796"/>
         <source>%1 byte(s)</source>
         <translation></translation>
     </message>

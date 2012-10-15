@@ -99,7 +99,8 @@ SOURCES += main.cpp\
     wiztaglistwidget.cpp \
     proxydialog.cpp \
     wizpreferencewindow.cpp \
-    wizconsoledialog.cpp
+    wizconsoledialog.cpp \
+    wizupdaterdialog.cpp
 
 HEADERS += mainwindow.h \
     share/wizqthelper.h \
@@ -178,7 +179,8 @@ HEADERS += mainwindow.h \
     wiztaglistwidget.h \
     proxydialog.h \
     wizpreferencewindow.h \
-    wizconsoledialog.h
+    wizconsoledialog.h \
+    wizupdaterdialog.h
 
 
 mac:HEADERS += \
@@ -196,15 +198,14 @@ FORMS += \
     ui/createaccountdialog.ui \
     ui/proxydialog.ui \
     ui/preferencedialog.ui \
-    ui/wizconsoledialog.ui
+    ui/wizconsoledialog.ui \
+    ui/wizupdaterdialog.ui
 
 
 mac:LIBS += -framework Cocoa -framework Carbon
 
-
-RC_FILE = wiznote.rc
-ICON=images/wiznote.icns
-
-
 TRANSLATIONS = wiznote_zh_CN.ts \
     wiznote_zh_TW.ts
+
+RESOURCES += \
+    wiznote.qrc

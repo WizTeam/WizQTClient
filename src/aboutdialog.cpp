@@ -23,15 +23,10 @@ AboutDialog::AboutDialog(CWizExplorerApp& app, QWidget *parent)
     QString strProduct(tr("WizNote for Windows"));
 #endif
 
-    //QString strVersionNumber("1.00");
-
     QFileInfo fi(::WizGetAppFileName());
     QDateTime t = fi.lastModified();
     QString strBuildNumber("build %1.%2.%3");
     strBuildNumber = strBuildNumber.arg(t.date().year()).arg(t.date().month()).arg(t.date().day());
-
-    //QString strVersion(tr("beta (build %1)"));
-    //strVersion = strVersion.arg(strBuildNumber);
 
     QString strInfo("<span style=\"font-weight:bold;font-size:16pt\">%1</span><br /><span>%2 %3</span>");
     strInfo = strInfo.arg(strProduct, IWizGlobal::instance()->version(), strBuildNumber);
