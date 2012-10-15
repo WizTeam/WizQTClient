@@ -15,6 +15,8 @@ int main(int argc, char *argv[])
     QApplication a(argc, argv);
     QApplication::setApplicationName(QObject::tr("WizNote"));
 
+    IWizGlobal::instance()->setVersion("1.1.00");
+
     CWizSettings settings(::WizGetDataStorePath() + "wiznote.ini");
 
 #ifdef Q_OS_WIN

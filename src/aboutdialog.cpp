@@ -10,39 +10,34 @@ AboutDialog::AboutDialog(CWizExplorerApp& app, QWidget *parent)
     , m_app(app)
 {
     ui->setupUi(this);
-    //
     setFixedSize(size());
-    //
+
     QPixmap pixmap(::WizGetSkinResourceFileName(m_app.userSettings().skin(), "about_logo"));
     ui->labelIcon->setPixmap(pixmap);
-    //
+
 #if defined Q_OS_MAC
-    CString strProduct(tr("WizNote for Mac"));
+    QString strProduct(tr("WizNote for Mac"));
 #elif defined Q_OS_LINUX
-    CString strProduct(tr("WizNote for Linux"));
+    QString strProduct(tr("WizNote for Linux"));
 #else
-    CString strProduct(tr("WizNote for Windows"));
+    QString strProduct(tr("WizNote for Windows"));
 #endif
-    //
-    CString strVersionNumber("1.00");
-    //
+
+    //QString strVersionNumber("1.00");
+
     QFileInfo fi(::WizGetAppFileName());
     QDateTime t = fi.lastModified();
-    CString strBuildNumber;
-    strBuildNumber.Format("%04d%02d%02d", t.date().year(), t.date().month(), t.date().day());
-    //
-    bool beta = true;
-    CString strVersion(beta ? tr("beta (build %1)") : tr("release (build %1)"));
-    strVersion = strVersion.arg(strBuildNumber);
-    //
-    CString strInfo = WizFormatString3("<span style=\"font-weight:bold;font-size:16pt\">%1</span><br /><span>%2 %3</span>",
-                                       strProduct,
-                                       strVersionNumber,
-                                       strVersion);
-    //
+    QString strBuildNumber("build %1.%2.%3");
+    strBuildNumber = strBuildNumber.arg(t.date().year()).arg(t.date().month()).arg(t.date().day());
+
+    //QString strVersion(tr("beta (build %1)"));
+    //strVersion = strVersion.arg(strBuildNumber);
+
+    QString strInfo("<span style=\"font-weight:bold;font-size:16pt\">%1</span><br /><span>%2 %3</span>");
+    strInfo = strInfo.arg(strProduct, IWizGlobal::instance()->version(), strBuildNumber);
+
     ui->labelAbout->setTextFormat(Qt::AutoText);
     ui->labelAbout->setText(strInfo);
-    //
     ui->labelLink->setOpenExternalLinks(true);
 }
 

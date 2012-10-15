@@ -28,6 +28,9 @@ class IWizGlobal : public QObject
 public:
     static IWizGlobal* instance();
 
+    QString version() const { return m_strVersion; }
+    void setVersion(const QString& strVersion) { m_strVersion = strVersion; }
+
     QBuffer* bufferLog() { return &m_bufferLog; }
     CString GetTempPath();
     void WriteLog(const CString& str);
@@ -37,8 +40,8 @@ private:
     IWizGlobal();
     static IWizGlobal* m_pInstance;
 
+    QString m_strVersion;
     QBuffer m_bufferLog;
-
 };
 
 IWizGlobal* WizGlobal();
