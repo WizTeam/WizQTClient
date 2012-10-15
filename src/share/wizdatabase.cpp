@@ -333,7 +333,7 @@ QString CWizDatabase::GetAccountDataPath() const
 
 QString CWizDatabase::GetUserDataDataPath() const
 {
-   QString strPath = GetAccountDataPath() + "user/";
+   QString strPath = GetAccountDataPath() + "data/";
    WizEnsurePathExists(strPath);
    return strPath;
 }
@@ -796,12 +796,12 @@ BOOL CWizDatabase::UpdateSyncObjectLocalData(const WIZOBJECTDATA& data)
 
 CString CWizDatabase::GetDocumentFileName(const CString& strGUID)
 {
-    return GetDocumentsDataPath() + strGUID + _T(".ziw");
+    return GetDocumentsDataPath() + "{" + strGUID + "}";
 }
 
 CString CWizDatabase::GetAttachmentFileName(const CString& strGUID)
 {
-    return GetAttachmentsDataPath() + strGUID + _T(".dat");
+    return GetAttachmentsDataPath() + "{" + strGUID + "}";
 }
 
 CString CWizDatabase::GetObjectFileName(const WIZOBJECTDATA& data)

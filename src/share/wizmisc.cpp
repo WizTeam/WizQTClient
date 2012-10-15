@@ -29,7 +29,7 @@ __int64 WizGetFileSize(const CString& strFileName)
     return info.size();
 }
 
-void WizPathAddBackslash(CString& strPath)
+void WizPathAddBackslash(QString& strPath)
 {
     strPath.replace('\\', '/');
 
@@ -314,20 +314,20 @@ QString WizDecryptPassword(const QString& strEncryptedText)
     return QString::fromUtf8(data);
 }
 
-CString WizGetAppPath()
+QString WizGetAppPath()
 {
-    CString strPath = QApplication::applicationDirPath();
+    QString strPath = QApplication::applicationDirPath();
     ::WizPathAddBackslash(strPath);
     return strPath;
 }
 
-CString WizGetAppFileName()
+QString WizGetAppFileName()
 {
-    CString strPath = QApplication::applicationFilePath();
+    QString strPath = QApplication::applicationFilePath();
     return strPath;
 }
 
-CString WizGetResourcesPath()
+QString WizGetResourcesPath()
 {
 #ifdef Q_OS_LINUX
     QDir dir(WizGetAppPath());
@@ -341,12 +341,10 @@ CString WizGetResourcesPath()
 #endif
 }
 
-CString WizGetDataStorePath()
+QString WizGetDataStorePath()
 {
     QDir dir;
-    CString strPath = dir.homePath();
-    //::WizPathAddBackslash(strPath);
-    //strPath = strPath + "WizNote/";
+    QString strPath = dir.homePath();
 
 #ifdef Q_OS_LINUX
     strPath += "/.wiznote/";

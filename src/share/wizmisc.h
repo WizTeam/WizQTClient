@@ -85,20 +85,20 @@ BOOL WizStringSimpleSplit(const CString& str, char ch, CString& strLeft, CString
 
 CString WizDateToLocalString(const COleDateTime& t);
 
-CString WizGetAppPath();
-CString WizGetAppFileName();
-CString WizGetResourcesPath();
-CString WizGetDataStorePath();
+QString WizGetAppPath();
+QString WizGetAppFileName();
+QString WizGetResourcesPath();
+QString WizGetDataStorePath();
 CString WizGetSettingsFileName();
+QString WizGetLogFileName();
 QString WizGetLocaleFileName(const QString& strLocale);
 QString WizGetQtLocaleFileName(const QString& strLocale);
 void WizGetTranslatedLocales(QStringList& locales);
 QString WizGetTranslatedLocaleDisplayName(int index);
 
-QString WizGetLogFileName();
 
 __int64 WizGetFileSize(const CString& strFileName);
-void WizPathAddBackslash(CString& strPath);
+void WizPathAddBackslash(QString& strPath);
 void WizPathRemoveBackslash(CString& strPath);
 CString WizPathAddBackslash2(const CString& strPath);
 CString WizPathRemoveBackslash2(const CString& strPath);
