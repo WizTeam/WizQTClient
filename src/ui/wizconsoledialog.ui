@@ -29,7 +29,7 @@
    </size>
   </property>
   <property name="windowTitle">
-   <string>Dialog</string>
+   <string>WizConsoelDialog</string>
   </property>
   <widget class="QTextEdit" name="editConsole">
    <property name="geometry">
@@ -85,11 +85,11 @@
     </item>
     <item>
      <widget class="QPushButton" name="buttonAll">
+      <property name="enabled">
+       <bool>true</bool>
+      </property>
       <property name="styleSheet">
-       <string notr="true">QPushButton {
-	border: 1px solid #bfbfbf;
-	border-radius: 2px;
-}</string>
+       <string notr="true"/>
       </property>
       <property name="text">
        <string>All Log</string>
@@ -101,6 +101,9 @@
     </item>
     <item>
      <widget class="QPushButton" name="buttonError">
+      <property name="enabled">
+       <bool>true</bool>
+      </property>
       <property name="text">
        <string>Error Log</string>
       </property>

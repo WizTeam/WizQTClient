@@ -8,8 +8,6 @@ CWizPreferenceWindow::CWizPreferenceWindow(CWizExplorerApp& app, QWidget* parent
 {
     ui->setupUi(this);
 
-    setWindowTitle(tr("Preference"));
-
     connect(ui->buttonOK, SIGNAL(clicked()), this, SLOT(accept()));
 
     // general tab

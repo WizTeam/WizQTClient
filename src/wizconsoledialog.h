@@ -2,6 +2,7 @@
 #define WIZCONSOLEDIALOG_H
 
 #include <QDialog>
+#include <QScrollBar>
 #include <QFile>
 
 #include "wizdef.h"
@@ -17,18 +18,22 @@ class CWizConsoleDialog: public QDialog
 public:
     CWizConsoleDialog(CWizExplorerApp& app, QWidget* parent = 0);
 
+    // who invoke exec() or show() method who response for ajust scrollbar position.
+    QScrollBar* vScroll;
+
 private:
-    Ui::CWizConsoleDialog* m_ui;
     CWizExplorerApp& m_app;
+
+    Ui::CWizConsoleDialog* m_ui;
 
     QString m_data;
 
     void load();
-
     void appendLogs(const QString& strLog);
 
 public slots:
     void on_editConsole_textChanged();
+    void on_buttonClear_clicked();
     void on_bufferLogReady();
 };
 

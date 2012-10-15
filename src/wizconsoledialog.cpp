@@ -3,7 +3,6 @@
 #include "ui_wizconsoledialog.h"
 
 #include <QTextCodec>
-#include <QScrollBar>
 
 #include <QMessageBox>
 
@@ -13,12 +12,18 @@ CWizConsoleDialog::CWizConsoleDialog(CWizExplorerApp& app, QWidget* parent)
     , m_app(app)
 {
     m_ui->setupUi(this);
-    setWindowTitle(tr("Console"));
+    vScroll = m_ui->editConsole->verticalScrollBar();
 
     connect(m_ui->editConsole, SIGNAL(textChanged()), SLOT(on_editConsole_textChanged()));
+    connect(m_ui->buttonClear, SIGNAL(clicked()), SLOT(on_buttonClear_clicked()));
     connect(::WizGlobal()->bufferLog(), SIGNAL(readyRead()), SLOT(on_bufferLogReady()));
 
     m_ui->buttonSync->setDown(true);
+
+    m_ui->buttonAll->setEnabled(false);
+    m_ui->buttonWarn->setEnabled(false);
+    m_ui->buttonError->setEnabled(false);
+
     load();
 }
 
@@ -27,11 +32,11 @@ void CWizConsoleDialog::load()
     QString strLogFileName = ::WizGetLogFileName();
     QFile file(strLogFileName);
     file.open(QIODevice::ReadOnly | QIODevice::Text);
-
     QByteArray data = file.readAll();
+    file.close();
+
     QTextCodec* codec = QTextCodec::codecForName("UTF-8");
     QString strLogData = codec->toUnicode(data);
-    file.close();
 
     m_data = strLogData;
 
@@ -40,8 +45,17 @@ void CWizConsoleDialog::load()
 
 void CWizConsoleDialog::on_editConsole_textChanged()
 {
-    QScrollBar *sb = m_ui->editConsole->verticalScrollBar();
-    sb->setValue(sb->maximum());
+    vScroll->setValue(vScroll->maximum());
+}
+
+void CWizConsoleDialog::on_buttonClear_clicked()
+{
+    QString strLogFileName = ::WizGetLogFileName();
+    QFile file(strLogFileName);
+    file.open(QIODevice::Truncate | QIODevice::WriteOnly);
+    file.close();
+
+    m_ui->editConsole->clear();
 }
 
 void CWizConsoleDialog::on_bufferLogReady()

@@ -454,8 +454,8 @@ void MainWindow::on_actionDeleteCurrentNote_triggered()
 
 void MainWindow::on_actionConsole_triggered()
 {
-    //m_console.setModle(false);
     m_console->show();
+    m_console->vScroll->setValue(m_console->vScroll->maximum());
 }
 
 void MainWindow::on_actionLogout_triggered()

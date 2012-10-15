@@ -398,9 +398,21 @@ QString WizGetTranslatedLocaleDisplayName(int index)
 
 QString WizGetLogFileName()
 {
-    QString strLogFileName = WizGetDataStorePath() + "wiznote.log";
-    WizEnsureFileExists(strLogFileName);
-    return strLogFileName;
+    //QString strLogFileName = WizGetDataStorePath() + "wiznote.log";
+    //WizEnsureFileExists(strLogFileName);
+    //return strLogFileName;
+    return WizGetDataStorePath() + "wiznote.log";
+}
+
+QString WizGetLogTime()
+{
+    QDateTime strTime = QDateTime::currentDateTime();
+    QString strCurrentTime = QString("%1.%2 %3").arg(\
+                strTime.date().month()).arg(\
+                strTime.date().day()).arg(\
+                strTime.time().toString());
+
+    return strCurrentTime;
 }
 
 
@@ -436,10 +448,7 @@ CString IWizGlobal::GetTempPath()
 
 void IWizGlobal::WriteLog(const CString& str)
 {
-    QDateTime strTime = QDateTime::currentDateTime();
-    QString msg(strTime.toString() + ": " + str + "\n");
-
-    qDebug() << msg;
+    QString msg(WizGetLogTime() + ": " + str + "\n");
 
     // write to buffer who is interested in logs just need to connect readyRead signal
     m_bufferLog.open(QIODevice::Append);

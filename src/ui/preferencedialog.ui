@@ -29,7 +29,7 @@
    </size>
   </property>
   <property name="windowTitle">
-   <string>Dialog</string>
+   <string>WizPreferenceDialog</string>
   </property>
   <widget class="QTabWidget" name="tabWidget">
    <property name="geometry">
@@ -37,7 +37,7 @@
      <x>0</x>
      <y>0</y>
      <width>401</width>
-     <height>371</height>
+     <height>381</height>
     </rect>
    </property>
    <property name="currentIndex">
@@ -215,7 +215,7 @@
   <widget class="QPushButton" name="buttonOK">
    <property name="geometry">
     <rect>
-     <x>300</x>
+     <x>320</x>
      <y>380</y>
      <width>75</width>
      <height>23</height>
