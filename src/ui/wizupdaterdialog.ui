@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
-    <height>125</height>
+    <width>482</width>
+    <height>193</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -19,9 +19,9 @@
   <widget class="QProgressBar" name="progressUpdate">
    <property name="geometry">
     <rect>
-     <x>20</x>
-     <y>80</y>
-     <width>361</width>
+     <x>30</x>
+     <y>130</y>
+     <width>421</width>
      <height>23</height>
     </rect>
    </property>
@@ -40,8 +40,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>91</width>
-     <height>71</height>
+     <width>111</width>
+     <height>91</height>
     </rect>
    </property>
    <property name="text">
@@ -51,18 +51,46 @@
     <set>Qt::AlignCenter</set>
    </property>
   </widget>
-  <widget class="QLabel" name="labelText">
+  <widget class="QLabel" name="labelOngoing">
    <property name="geometry">
     <rect>
-     <x>90</x>
-     <y>30</y>
-     <width>311</width>
+     <x>120</x>
+     <y>60</y>
+     <width>261</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Update ongoing:</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="labelNotice">
+   <property name="geometry">
+    <rect>
+     <x>30</x>
+     <y>90</y>
+     <width>421</width>
      <height>31</height>
     </rect>
    </property>
    <property name="text">
-    <string>Update ongoing: 
- (Please do not close the window to avoid damage your data)</string>
+    <string>(Please do not close the window to avoid damage your data)</string>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignCenter</set>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label">
+   <property name="geometry">
+    <rect>
+     <x>30</x>
+     <y>160</y>
+     <width>421</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string notr="true">command executed</string>
    </property>
   </widget>
  </widget>

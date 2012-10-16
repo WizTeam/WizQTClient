@@ -442,14 +442,13 @@ p, li { white-space: pre-wrap; }
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="ui/wizupdaterdialog.ui" line="45"/>
-        <source>logo</source>
+        <location filename="ui/wizupdaterdialog.ui" line="64"/>
+        <source>Update ongoing:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="ui/wizupdaterdialog.ui" line="61"/>
-        <source>Update ongoing: 
- (Please do not close the window to avoid damage your data)</source>
+        <location filename="ui/wizupdaterdialog.ui" line="77"/>
+        <source>(Please do not close the window to avoid damage your data)</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -582,7 +581,7 @@ p, li { white-space: pre-wrap; }
         <translation>爲知筆記</translation>
     </message>
     <message>
-        <location filename="main.cpp" line="114"/>
+        <location filename="main.cpp" line="115"/>
         <source>Can not open account</source>
         <translation>不能打開賬戶</translation>
     </message>

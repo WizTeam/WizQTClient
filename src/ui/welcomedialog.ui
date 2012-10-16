@@ -95,10 +95,7 @@
     <enum>Qt::LeftToRight</enum>
    </property>
    <property name="styleSheet">
-    <string notr="true">QCheckBox::indicator {
-     width: 13px;
-     height: 13px;
- }</string>
+    <string notr="true"/>
    </property>
    <property name="text">
     <string>Remember me</string>
@@ -117,10 +114,7 @@
     </rect>
    </property>
    <property name="styleSheet">
-    <string notr="true">QCheckBox::indicator {
-     width: 13px;
-     height: 13px;
- }</string>
+    <string notr="true"/>
    </property>
    <property name="text">
     <string>Auto login</string>
@@ -190,8 +184,6 @@
     <string notr="true">QComboBox {
      border: 1px solid gray;
      border-radius: 3px;
-     padding: 1px 18px 1px 3px;
-     min-width: 6em;
  }</string>
    </property>
    <property name="editable">

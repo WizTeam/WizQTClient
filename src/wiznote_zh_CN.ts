@@ -501,18 +501,22 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="ui/wizupdaterdialog.ui" line="14"/>
         <source>updaterDialog</source>
-        <translation type="unfinished"></translation>
+        <translation>升级管理</translation>
     </message>
     <message>
-        <location filename="ui/wizupdaterdialog.ui" line="45"/>
-        <source>logo</source>
-        <translation type="unfinished"></translation>
+        <location filename="ui/wizupdaterdialog.ui" line="64"/>
+        <source>Update ongoing:</source>
+        <translation>正在升级：</translation>
     </message>
     <message>
-        <location filename="ui/wizupdaterdialog.ui" line="61"/>
+        <location filename="ui/wizupdaterdialog.ui" line="77"/>
+        <source>(Please do not close the window to avoid damage your data)</source>
+        <translation>(请勿尝试关闭程序，以免破坏用户数据)</translation>
+    </message>
+    <message>
         <source>Update ongoing: 
  (Please do not close the window to avoid damage your data)</source>
-        <translation>正在升级：
+        <translation type="obsolete">正在升级：
 (请勿尝试关闭程序，以免破坏用户数据)</translation>
     </message>
 </context>
@@ -738,7 +742,7 @@ p, li { white-space: pre-wrap; }
         <translation>为知笔记</translation>
     </message>
     <message>
-        <location filename="main.cpp" line="114"/>
+        <location filename="main.cpp" line="115"/>
         <source>Can not open account</source>
         <translation>不能打开帐号</translation>
     </message>
