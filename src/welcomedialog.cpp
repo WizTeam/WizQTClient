@@ -39,7 +39,8 @@ WelcomeDialog::WelcomeDialog(const QString &strDefaultUserId, const QString& str
 
     // callbacks
     connect(ui->labelProxySettings, SIGNAL(linkActivated(QString)), this, SLOT(on_labelProxy_linkActivated(QString)));
-    connect(ui->comboUsers, SIGNAL(currentIndexChanged(QString)), SLOT(on_comboUsers_indexChanged(QString)));
+    connect(ui->comboUsers, SIGNAL(activated(QString)), SLOT(on_comboUsers_activated(QString)));
+    connect(ui->comboUsers, SIGNAL(editTextChanged(QString)), SLOT(on_comboUsers_editTextChanged(QString)));
     connect(ui->checkAutoLogin, SIGNAL(stateChanged(int)), SLOT(on_autoLogin_stateChanged(int)));
     connect(ui->buttonLogin, SIGNAL(clicked()), SLOT(accept()));
 
@@ -64,6 +65,7 @@ void WelcomeDialog::setUsers()
     for (int i = 0; i < ui->comboUsers->count(); i++) {
         if (!m_strDefaultUserId.compare(ui->comboUsers->itemText(i))) {
             ui->comboUsers->setCurrentIndex(i);
+            setUser(m_strDefaultUserId);
             break;
         }
     }
@@ -212,7 +214,12 @@ void WelcomeDialog::on_labelProxy_linkActivated(const QString & link)
     m_verifyAccount.resetProxy();
 }
 
-void WelcomeDialog::on_comboUsers_indexChanged(const QString &userId)
+void WelcomeDialog::on_comboUsers_activated(const QString &userId)
+{
+    setUser(userId);
+}
+
+void WelcomeDialog::setUser(const QString &userId)
 {
     QString strPassword = m_users.value(userId);
 
@@ -222,6 +229,14 @@ void WelcomeDialog::on_comboUsers_indexChanged(const QString &userId)
         ui->checkRememberMe->setCheckState(Qt::Unchecked);
     else
         ui->checkRememberMe->setCheckState(Qt::Checked);
+}
+
+void WelcomeDialog::on_comboUsers_editTextChanged(const QString& strText)
+{
+    Q_UNUSED(strText);
+
+    ui->editPassword->clear();
+    ui->checkRememberMe->setCheckState(Qt::Unchecked);
 }
 
 void WelcomeDialog::on_autoLogin_stateChanged(int state)

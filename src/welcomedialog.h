@@ -38,6 +38,7 @@ private:
     void getUserPasswordPairs();
     void updateUserSettings();
     void enableControls(bool bEnable);
+    void setUser(const QString &userId);
 
 public Q_SLOTS:
     virtual void accept();
@@ -46,7 +47,8 @@ public Q_SLOTS:
     void on_web_linkClicked(const QUrl &url);
     void on_labelProxy_linkActivated(const QString& link);
 
-    void on_comboUsers_indexChanged(const QString& userId);
+    void on_comboUsers_activated(const QString& userId);
+    void on_comboUsers_editTextChanged(const QString& strText);
     void on_autoLogin_stateChanged(int state);
 };
 
