@@ -54,10 +54,18 @@ int main(int argc, char *argv[])
     translatorQt.load(strLocaleFile);
     a.installTranslator(&translatorQt);
 
-    // update check.
+    // check update if needed
     CWizUpdaterDialog updater;
-    updater.show();
-    a.exec();
+    if (updater.checkNeedUpdate()) {
+        if(updater.isPrepared()) {
+            updater.show();
+            updater.doUpdate();
+            a.exec();
+        } else {
+            updater.prepare();
+            QProcess::startDetached(updater.execPath(), QStringList());
+        }
+    }
 
     // figure out auto login or manually login
     bool bFallback = true;

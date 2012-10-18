@@ -7,9 +7,6 @@
 bool PathFileExists(const CString& strPath)
 {
     return QFile::exists(strPath);
-    //
-    //QDir dir(strPath);
-    //return dir.exists();
 }
 
 bool DeleteFile(const CString& strFileName)

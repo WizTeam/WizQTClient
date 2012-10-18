@@ -159,19 +159,18 @@ CString WizExtractFileExt(const CString& strFileName)
     return strName.right(strName.GetLength() - index);  //include .
 }
 
-void WizEnumFiles(const CString& path, const CString& strExts, CWizStdStringArray& arrayFiles, UINT uFlags)
+void WizEnumFiles(const QString& path, const QString& strExts, CWizStdStringArray& arrayFiles, UINT uFlags)
 {
-    //BOOL bIncludeHiddenFile = uFlags & EF_INCLUDEHIDDEN;
     BOOL bIncludeSubDir = uFlags & EF_INCLUDESUBDIR;
-    //
-    CString strPath(path);
+
+    QString strPath(path);
     WizPathAddBackslash(strPath);
-    //
+
     QDir dir(strPath);
-    //
+
     QStringList nameFilters = strExts.split(";");
     QDir::Filters filters = QDir::Files;
-    //
+
     QStringList files = dir.entryList(nameFilters, filters);
     for (QStringList::const_iterator it = files.begin();
         it != files.end();
@@ -179,10 +178,10 @@ void WizEnumFiles(const CString& path, const CString& strExts, CWizStdStringArra
     {
         arrayFiles.push_back(strPath + *it);
     }
-    //
+
     if (!bIncludeSubDir)
         return;
-    //
+
     CWizStdStringArray arrayFolder;
     WizEnumFolders(strPath, arrayFolder, 0);
     for (CWizStdStringArray::const_iterator it = arrayFolder.begin();
@@ -197,7 +196,7 @@ void WizEnumFolders(const QString& path, CWizStdStringArray& arrayFolders, UINT 
 {
     BOOL bIncludeSubDir = uFlags & EF_INCLUDESUBDIR;
 
-    CString strPath(path);
+    QString strPath(path);
     WizPathAddBackslash(strPath);
 
     QDir dir(strPath);
@@ -343,8 +342,7 @@ QString WizGetResourcesPath()
 
 QString WizGetDataStorePath()
 {
-    QDir dir;
-    QString strPath = dir.homePath();
+    QString strPath = QDir::homePath();
 
 #ifdef Q_OS_LINUX
     strPath += "/.wiznote/";

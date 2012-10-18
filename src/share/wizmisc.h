@@ -117,7 +117,7 @@ CString WizExtractFileExt(const CString& strFileName);
 #define EF_INCLUDEHIDDEN			0x01
 #define EF_INCLUDESUBDIR			0x02
 
-void WizEnumFiles(const CString& strPath, const CString& strExts, CWizStdStringArray& arrayFiles, UINT uFlags);
+void WizEnumFiles(const QString& strPath, const QString& strExts, CWizStdStringArray& arrayFiles, UINT uFlags);
 void WizEnumFolders(const QString& strPath, CWizStdStringArray& arrayFolders, UINT uFlags);
 QString WizFolderNameByPath(const QString& strPath);
 
