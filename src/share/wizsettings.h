@@ -43,12 +43,7 @@ public:
 };
 
 
-BOOL WizSetString(const CString& strSection, const CString& strKey, const CString& str);
-
 CString WizGetShortcut(const CString& strName, const CString& strDef = "");
-
-//QColor WizGetSkinColor(const CString& strSection, const CString& strName, const QColor& colorDef);
-//int WizGetSkinInt(const CString& strSection, const CString& strName, int def);
 
 enum WizDocumentViewMode
 {

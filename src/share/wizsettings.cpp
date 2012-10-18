@@ -124,31 +124,11 @@ void CWizSettings::SetProxyPassword(const QString& val)
 }
 
 
-
-BOOL WizSetString(const CString& strSection, const CString& strKey, const CString& str)
-{
-    CWizSettings settings(WizGetSettingsFileName());
-    return settings.SetString(strSection, strKey, str);
-}
-
 CString WizGetShortcut(const CString& strName, const CString& strDef /*= ""*/)
 {
     CWizSettings settings(WizGetSettingsFileName());
     return settings.GetString("Shortcut", strName, strDef);
 }
-
-//QColor WizGetSkinColor(const CString& strSection, const CString& strName, const QColor& colorDef)
-//{
-//    CWizSettings settings(WizGetSkinPath() + "skin.ini");
-//    return settings.GetColor(strSection, strName, colorDef);
-//}
-
-//int WizGetSkinInt(const CString& strSection, const CString& strName, int def)
-//{
-//    CWizSettings settings(WizGetSkinPath() + "skin.ini");
-//    return settings.GetInt(strSection, strName, def);
-//}
-
 
 
 CWizUserSettings::CWizUserSettings(const QString& strUserId)
