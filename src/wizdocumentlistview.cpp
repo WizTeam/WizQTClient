@@ -9,6 +9,7 @@
 #include <QApplication>
 #include <QMenu>
 #include <QContextMenuEvent>
+#include <QScrollBar>
 
 
 class CWizDocumentListViewItem : public QListWidgetItem
@@ -17,6 +18,7 @@ protected:
     WIZDOCUMENTDATA m_data;
     WIZABSTRACT m_abstract;
     CString m_tags;
+
 public:
     CWizDocumentListViewItem(const WIZDOCUMENTDATA& data, QListWidget *view = 0, int type = Type)
         : QListWidgetItem(view, type)
@@ -24,10 +26,12 @@ public:
     {
         setText(m_data.strTitle);
     }
+
     const WIZDOCUMENTDATA& document() const
     {
         return m_data;
     }
+
     WIZABSTRACT& abstract(CWizDatabase& db)
     {
         if (m_abstract.text.isEmpty())
@@ -38,9 +42,10 @@ public:
             m_abstract.text.replace('\n', ' ');
             m_abstract.text.replace("\r", "");
         }
-        //
+
         return m_abstract;
     }
+
     CString tags(CWizDatabase& db)
     {
         if (m_tags.IsEmpty())
@@ -48,32 +53,33 @@ public:
             m_tags = db.GetDocumentTagDisplayNameText(m_data.strGUID);
             m_tags = " " + m_tags;
         }
-        //
+
         return m_tags;
     }
-    //
+
     void reload(CWizDatabase& db)
     {
         db.DocumentFromGUID(m_data.strGUID, m_data);
         m_abstract = WIZABSTRACT();
         m_tags.clear();
-        //
+
         setText("");    //force repaint
         setText(m_data.strTitle);
     }
-    //
+
     virtual bool operator<(const QListWidgetItem &other) const
     {
         const CWizDocumentListViewItem* pOther = dynamic_cast<const CWizDocumentListViewItem*>(&other);
         ATLASSERT(pOther);
-        //
+
         if (pOther->m_data.tCreated == m_data.tCreated)
         {
             return text().compare(other.text(), Qt::CaseInsensitive) < 0;
         }
-        //
+
         return pOther->m_data.tCreated < m_data.tCreated;
     }
+
     void resetAbstract()
     {
         m_abstract = WIZABSTRACT();
@@ -92,7 +98,6 @@ public:
                            const QModelIndex &index) const
     {
         QSize sz = QStyledItemDelegate::sizeHint(option, index);
-        //
         sz.setHeight(sz.height() + (option.fontMetrics.height() + 2) * 3 + 2 + 16);
         return sz;
     }
@@ -106,37 +111,43 @@ CWizDocumentListView::CWizDocumentListView(CWizExplorerApp& app, QWidget *parent
     , m_category(app.category())
     , m_menu(NULL)
     , m_tagList(NULL)
+    , m_vscrollTimer(new QTimer(this))
 {
     setFrameStyle(QFrame::NoFrame);
     setAttribute(Qt::WA_MacShowFocusRect, false);
+
     setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
+
+    m_vscrollOldPos = 0;
+    connect(verticalScrollBar(), SIGNAL(valueChanged(int)), SLOT(on_vscroll_valueChanged(int)));
+    connect(m_vscrollTimer, SIGNAL(timeout()), SLOT(on_vscroll_update()));
 
     setItemDelegate(new CWizDocumentListViewDelegate(this));
-    //
+
     QPalette pal = palette();
     pal.setColor(QPalette::Base, WizGetDocumentsBackroundColor(m_app.userSettings().skin()));
     setPalette(pal);
-    //
+
     setStyle(::WizGetStyle(m_app.userSettings().skin()));
-    //
+
     connect(&m_db, SIGNAL(tagCreated(const WIZTAGDATA&)), this, SLOT(on_tag_created(const WIZTAGDATA&)));
     connect(&m_db, SIGNAL(tagModified(const WIZTAGDATA&, const WIZTAGDATA&)), this, SLOT(on_tag_modified(const WIZTAGDATA&, const WIZTAGDATA&)));
     connect(&m_db, SIGNAL(documentCreated(const WIZDOCUMENTDATA&)), this, SLOT(on_document_created(const WIZDOCUMENTDATA&)));
     connect(&m_db, SIGNAL(documentModified(const WIZDOCUMENTDATA&, const WIZDOCUMENTDATA&)), this, SLOT(on_document_modified(const WIZDOCUMENTDATA&, const WIZDOCUMENTDATA&)));
     connect(&m_db, SIGNAL(documentDeleted(WIZDOCUMENTDATA)), this, SLOT(on_document_deleted(WIZDOCUMENTDATA)));
     connect(&m_db, SIGNAL(documentAbstractModified(const WIZDOCUMENTDATA&)), this, SLOT(on_document_AbstractModified(const WIZDOCUMENTDATA&)));
-    //
+
     setDragDropMode(QAbstractItemView::DragDrop);
     setDragEnabled(true);
     setAcceptDrops(true);
-    //
+
     setSelectionMode(QAbstractItemView::ExtendedSelection);
 }
 
 void CWizDocumentListView::setDocuments(const CWizDocumentDataArray& arrayDocument)
 {
     clear();
-    //
     addDocuments(arrayDocument);
 }
 
@@ -149,9 +160,9 @@ void CWizDocumentListView::addDocuments(const CWizDocumentDataArray& arrayDocume
     {
         addDocument(*it, false);
     }
-    //
+
     sortItems();
-    //
+
     if (selectedItems().empty())
     {
         setCurrentRow(0);
@@ -161,24 +172,25 @@ void CWizDocumentListView::addDocuments(const CWizDocumentDataArray& arrayDocume
 int CWizDocumentListView::addDocument(const WIZDOCUMENTDATA& data, bool sort)
 {
     CWizDocumentListViewItem* pItem = new CWizDocumentListViewItem(data, this);
-    //
+
     addItem(pItem);
-    //
     if (sort)
     {
         sortItems();
     }
-    //
+
     return count();
 }
+
 bool CWizDocumentListView::acceptDocument(const WIZDOCUMENTDATA& document)
 {
     return m_category.acceptDocument(document);
 }
+
 void CWizDocumentListView::addAndSelectDocument(const WIZDOCUMENTDATA& document)
 {
     ATLASSERT(acceptDocument(document));
-    //
+
     int index = documentIndexFromGUID(document.strGUID);
     if (-1 == index)
     {
@@ -186,9 +198,8 @@ void CWizDocumentListView::addAndSelectDocument(const WIZDOCUMENTDATA& document)
     }
     if (-1 == index)
         return;
-    //
+
     setCurrentItem(item(index), QItemSelectionModel::ClearAndSelect);
-    //
     sortItems();
 }
 
@@ -200,7 +211,7 @@ void CWizDocumentListView::getSelectedDocuments(CWizDocumentDataArray& arrayDocu
     it++)
     {
         QListWidgetItem* pItem = *it;
-        //
+
         CWizDocumentListViewItem* pDocumentItem = dynamic_cast<CWizDocumentListViewItem*>(pItem);
         if (pDocumentItem)
         {
@@ -219,7 +230,7 @@ void CWizDocumentListView::contextMenuEvent(QContextMenuEvent * e)
         m_menu->addSeparator();
         m_menu->addAction(tr("Delete..."), this, SLOT(on_action_deleteDocument()));
     }
-    //
+
     m_menu->popup(mapToGlobal(e->pos()));
 }
 
@@ -227,8 +238,7 @@ void CWizDocumentListView::contextMenuEvent(QContextMenuEvent * e)
 void CWizDocumentListView::startDrag(Qt::DropActions supportedActions)
 {
     Q_UNUSED(supportedActions);
-    //
-    //
+
     CWizStdStringArray arrayGUID;
 
     QList<QListWidgetItem*> items = selectedItems();
@@ -239,13 +249,13 @@ void CWizDocumentListView::startDrag(Qt::DropActions supportedActions)
             arrayGUID.push_back((item->document().strGUID));
         }
     }
-    //
+
     if (arrayGUID.empty())
         return;
-    //
+
     CString strGUIDs;
     ::WizStringArrayToText(arrayGUID, strGUIDs, ";");
-    //
+
     QDrag* drag = new QDrag(this);
     QMimeData* mimeData = new QMimeData();
     mimeData->setData(WIZNOTE_MIMEFORMAT_DOCUMENTS, strGUIDs.toUtf8());
@@ -260,7 +270,7 @@ void CWizDocumentListView::dragEnterEvent(QDragEnterEvent *event)
         event->accept();
         return;
     }
-    //
+
     QListWidget::dragEnterEvent(event);
 }
 
@@ -271,7 +281,7 @@ void CWizDocumentListView::dragMoveEvent(QDragMoveEvent *event)
         event->accept();
         return;
     }
-    //
+
     QListWidget::dragMoveEvent(event);
 }
 
@@ -327,7 +337,7 @@ void CWizDocumentListView::on_document_created(const WIZDOCUMENTDATA& document)
 void CWizDocumentListView::on_document_modified(const WIZDOCUMENTDATA& documentOld, const WIZDOCUMENTDATA& documentNew)
 {
     Q_UNUSED(documentOld);
-    //
+
     if (m_category.acceptDocument(documentNew))
     {
         int index = documentIndexFromGUID(documentNew.strGUID);
@@ -353,6 +363,7 @@ void CWizDocumentListView::on_document_modified(const WIZDOCUMENTDATA& documentO
         }
     }
 }
+
 void CWizDocumentListView::on_document_deleted(const WIZDOCUMENTDATA& document)
 {
     int index = documentIndexFromGUID(document.strGUID);
@@ -361,34 +372,36 @@ void CWizDocumentListView::on_document_deleted(const WIZDOCUMENTDATA& document)
         takeItem(index);
     }
 }
+
 void CWizDocumentListView::on_document_AbstractModified(const WIZDOCUMENTDATA& document)
 {
     int index = documentIndexFromGUID(document.strGUID);
     if (-1 == index)
         return;
-    //
+
     CWizDocumentListViewItem* pItem = documentItemAt(index);
     pItem->resetAbstract();
-    //
+
     QRect rc = visualItemRect(pItem);
     repaint(rc);
 }
+
 void CWizDocumentListView::on_action_selectTags()
 {
     QList<QListWidgetItem*> items = selectedItems();
     if (items.isEmpty())
         return;
-    //
+
     if (CWizDocumentListViewItem* item = dynamic_cast<CWizDocumentListViewItem*>(items.at(0)))
     {
         Q_UNUSED(item);
-        //
+
         if (!m_tagList)
         {
             m_tagList = new CWizTagListWidget(m_db, this);
             m_tagList->setLeftAlign(true);
         }
-        //
+
         m_tagList->setDocument(item->document());
         m_tagList->showAtPoint(QCursor::pos());
     }
@@ -421,7 +434,7 @@ int CWizDocumentListView::documentIndexFromGUID(const CString& strGUID)
             }
         }
     }
-    //
+
     return -1;
 }
 
@@ -439,11 +452,43 @@ WIZDOCUMENTDATA CWizDocumentListView::documentFromIndex(const QModelIndex &index
 {
     return documentItemFromIndex(index)->document();
 }
+
 WIZABSTRACT CWizDocumentListView::documentAbstractFromIndex(const QModelIndex &index) const
 {
     return documentItemFromIndex(index)->abstract(m_db);
 }
+
 CString CWizDocumentListView::documentTagsFromIndex(const QModelIndex &index) const
 {
     return documentItemFromIndex(index)->tags(m_db);
+}
+
+void CWizDocumentListView::updateGeometries()
+{
+    QListWidget::updateGeometries();
+
+    // singleStep will initialized to item height(94 pixel), reset it
+    verticalScrollBar()->setSingleStep(1);
+}
+
+void CWizDocumentListView::wheelEvent(QWheelEvent* event)
+{
+    m_vscrollCurrent = 0;
+    m_vscrollDelta = event->delta();
+    m_vscrollTimer->start(1);
+}
+
+void CWizDocumentListView::on_vscroll_update()
+{
+    if (qAbs(m_vscrollDelta) > m_vscrollCurrent) {
+        verticalScrollBar()->setValue(m_vscrollOldPos - m_vscrollDelta/15);
+        m_vscrollCurrent += qAbs(m_vscrollDelta/15);
+    } else {
+        m_vscrollTimer->stop();
+    }
+}
+
+void CWizDocumentListView::on_vscroll_valueChanged(int value)
+{
+    m_vscrollOldPos = value;
 }
