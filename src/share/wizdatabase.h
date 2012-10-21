@@ -11,21 +11,24 @@ class CWizDocument;
 class CWizDocument : public QObject
 {
     Q_OBJECT
-protected:
-    CWizDatabase& m_db;
-    WIZDOCUMENTDATA m_data;
+
 public:
     CWizDocument(CWizDatabase& db, const WIZDOCUMENTDATA& data);
+
+private:
+    CWizDatabase& m_db;
+    WIZDOCUMENTDATA m_data;
+
 public:
     QString GUID() const { return m_data.strGUID; }
-    CString GetAttachmentsPath(BOOL create);
-    BOOL IsInDeletedItemsFolder();
-    BOOL MoveDocument(CWizFolder* pFolder);
-    BOOL AddTag(const WIZTAGDATA& dataTag);
-    BOOL RemoveTag(const WIZTAGDATA& dataTag);
-    CString GetMetaText();
-public:
-    Q_PROPERTY(QString GUID READ GUID)
+    bool isProtected() const { return m_data.nProtected; }
+    QString GetAttachmentsPath(bool create);
+    bool IsInDeletedItemsFolder();
+    bool MoveDocument(CWizFolder* pFolder);
+    bool AddTag(const WIZTAGDATA& dataTag);
+    bool RemoveTag(const WIZTAGDATA& dataTag);
+    QString GetMetaText();
+
 public slots:
     bool UpdateDocument4(const QString& strHtml, const QString& strURL, int nFlags);
     void Delete();

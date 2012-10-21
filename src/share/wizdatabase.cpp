@@ -35,20 +35,20 @@ CWizDocument::CWizDocument(CWizDatabase& db, const WIZDOCUMENTDATA& data)
     , m_data(data)
 {
 }
+
 bool CWizDocument::UpdateDocument4(const QString& strHtml, const QString& strURL, int nFlags)
 {
     return m_db.UpdateDocumentData(m_data, strHtml, strURL, nFlags);
 }
 
-BOOL CWizDocument::IsInDeletedItemsFolder()
+bool CWizDocument::IsInDeletedItemsFolder()
 {
-    CString strDeletedItemsFolderLocation = m_db.GetDeletedItemsLocation();
-    //
+    QString strDeletedItemsFolderLocation = m_db.GetDeletedItemsLocation();
+
     return m_data.strLocation.startsWith(strDeletedItemsFolderLocation);
 }
 
-
-void CWizDocument::PermanentlyDelete(void)
+void CWizDocument::PermanentlyDelete()
 {
     CWizDocumentAttachmentDataArray arrayAttachment;
     m_db.GetDocumentAttachments(m_data.strGUID, arrayAttachment);
@@ -58,16 +58,16 @@ void CWizDocument::PermanentlyDelete(void)
     {
         CString strFileName = m_db.GetAttachmentFileName(it->strGUID);
         ::WizDeleteFile(strFileName);
-        //
+
         m_db.DeleteAttachment(*it, true);
     }
-    //
+
     if (!m_db.DeleteDocument(m_data, TRUE))
     {
         TOLOG1(_T("Failed to delete document: %1"), m_data.strTitle);
         return;
     }
-    //
+
     CString strZipFileName = m_db.GetDocumentFileName(m_data.strGUID);
     if (PathFileExists(strZipFileName))
     {
@@ -80,11 +80,11 @@ void CWizDocument::MoveTo(QObject* p)
     CWizFolder* folder = dynamic_cast<CWizFolder*>(p);
     if (!folder)
         return;
-    //
+
     MoveDocument(folder);
 }
 
-BOOL CWizDocument::MoveDocument(CWizFolder* pFolder)
+bool CWizDocument::MoveDocument(CWizFolder* pFolder)
 {
     if (!pFolder)
         return FALSE;
@@ -103,7 +103,7 @@ BOOL CWizDocument::MoveDocument(CWizFolder* pFolder)
     return TRUE;
 }
 
-BOOL CWizDocument::AddTag(const WIZTAGDATA& dataTag)
+bool CWizDocument::AddTag(const WIZTAGDATA& dataTag)
 {
     CWizStdStringArray arrayTag;
     m_db.GetDocumentTags(m_data.strGUID, arrayTag);
@@ -119,7 +119,8 @@ BOOL CWizDocument::AddTag(const WIZTAGDATA& dataTag)
     //
     return TRUE;
 }
-BOOL CWizDocument::RemoveTag(const WIZTAGDATA& dataTag)
+
+bool CWizDocument::RemoveTag(const WIZTAGDATA& dataTag)
 {
     return m_db.DeleteDocumentTag(m_data, dataTag.strGUID);
 }
@@ -161,7 +162,7 @@ inline CString WizGetZiwMetaText(const CString& strTitle, const CString& strURL,
     return strText;
 }
 
-CString CWizDocument::GetMetaText()
+QString CWizDocument::GetMetaText()
 {
     return WizGetZiwMetaText(m_data.strTitle, m_data.strURL, m_db.GetDocumentTagsText(m_data.strGUID));
 }

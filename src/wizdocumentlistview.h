@@ -58,6 +58,7 @@ public:
     virtual void dropEvent(QDropEvent * event);
 
     // used for smoothly scroll
+    void vscrollBeginUpdate(int delta);
     virtual void updateGeometries();
     virtual void wheelEvent(QWheelEvent* event);
 
@@ -73,6 +74,7 @@ public Q_SLOTS:
 
     // used for smoothly scroll
     void on_vscroll_valueChanged(int value);
+    void on_vscroll_actionTriggered(int action);
     void on_vscroll_update();
 };
 

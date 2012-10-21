@@ -121,6 +121,7 @@ CWizDocumentListView::CWizDocumentListView(CWizExplorerApp& app, QWidget *parent
 
     m_vscrollOldPos = 0;
     connect(verticalScrollBar(), SIGNAL(valueChanged(int)), SLOT(on_vscroll_valueChanged(int)));
+    connect(verticalScrollBar(), SIGNAL(actionTriggered(int)), SLOT(on_vscroll_actionTriggered(int)));
     connect(m_vscrollTimer, SIGNAL(timeout()), SLOT(on_vscroll_update()));
 
     setItemDelegate(new CWizDocumentListViewDelegate(this));
@@ -471,11 +472,18 @@ void CWizDocumentListView::updateGeometries()
     verticalScrollBar()->setSingleStep(1);
 }
 
-void CWizDocumentListView::wheelEvent(QWheelEvent* event)
+void CWizDocumentListView::vscrollBeginUpdate(int delta)
 {
     m_vscrollCurrent = 0;
-    m_vscrollDelta = event->delta();
-    m_vscrollTimer->start(1);
+    m_vscrollDelta = delta;
+
+    if (!m_vscrollTimer->isActive())
+        m_vscrollTimer->start(5);
+}
+
+void CWizDocumentListView::wheelEvent(QWheelEvent* event)
+{
+    vscrollBeginUpdate(event->delta());
 }
 
 void CWizDocumentListView::on_vscroll_update()
@@ -491,4 +499,18 @@ void CWizDocumentListView::on_vscroll_update()
 void CWizDocumentListView::on_vscroll_valueChanged(int value)
 {
     m_vscrollOldPos = value;
+}
+
+void CWizDocumentListView::on_vscroll_actionTriggered(int action)
+{
+    switch (action) {
+        case QAbstractSlider::SliderSingleStepAdd:
+            vscrollBeginUpdate(-120);
+            break;
+        case QAbstractSlider::SliderSingleStepSub:
+            vscrollBeginUpdate(120);
+            break;
+        default:
+            return;
+    }
 }
