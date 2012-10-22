@@ -47,8 +47,6 @@
                     //
                 }
             });
-            //
-
 
             var editorOption = {
             toolbars:
@@ -68,7 +66,6 @@
             };
             editor = new baidu.editor.ui.Editor(editorOption);
             editor.render('editorArea');
-            //editor.ui.setFullScreen(true);
             editor.addListener('afterexeccommand', onEditorAfterExecCommand);
             editor.addListener('keydown', onEditorKeyDown);
         } catch (err) {
@@ -83,10 +80,11 @@
             }
             objApp.SetDocumentModified(modified);
         }
-        //
+
         function onEditorAfterExecCommand() {
             setModified(true);
         }
+
         function onEditorKeyDown(type, evt) {
             //
             if (!isEditing())
@@ -125,15 +123,17 @@
         }
 
         function setEditorHtml(html) {
-            // use sestContent can't display images on editor, why?
-            //editor.setContent('<p>' + html + '</p>');
-            editor.document.body.innerHTML = '<p>' + html + '</p>';
+            // use setContent can't display images on editor, why?
+            editor.setContent(html);
+            //editor.document.body.innerHTML = '<p>' + html + '</p>';
             editor.undoManger.reset();
             setModified(false);
+			editor.window.scrollTo(0,0);
         }
         
         function getEditorHtml() {
-            return editor.document.documentElement.outerHTML;
+            return editor.getContent();
+            //return editor.document.documentElement.outerHTML;
         }
 
         function setEditorFocus() {
@@ -190,7 +190,6 @@
             }
         }
 
-        //
         function updateDocument(objDocument, html, url, falgs) {
             try {
                 return objDocument.UpdateDocument4(html, url, falgs);
@@ -200,7 +199,6 @@
             }
         }
         
-        //
         function saveDocument(force) {
             try {
                 if (!force && !modified)
@@ -248,7 +246,7 @@
                 alert(err);
             }
         }
-        //
+
         function autoPaste() {
             var imageFileName = objCommon.ClipboardToImage(0, "");
             if (imageFileName == null || imageFileName == "")
