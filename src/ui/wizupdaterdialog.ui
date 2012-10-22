@@ -40,8 +40,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>111</width>
-     <height>91</height>
+     <width>131</width>
+     <height>121</height>
     </rect>
    </property>
    <property name="text">
@@ -54,9 +54,9 @@
   <widget class="QLabel" name="labelOngoing">
    <property name="geometry">
     <rect>
-     <x>120</x>
-     <y>60</y>
-     <width>261</width>
+     <x>140</x>
+     <y>70</y>
+     <width>241</width>
      <height>21</height>
     </rect>
    </property>
@@ -68,9 +68,9 @@
    <property name="geometry">
     <rect>
      <x>30</x>
-     <y>90</y>
+     <y>100</y>
      <width>421</width>
-     <height>31</height>
+     <height>21</height>
     </rect>
    </property>
    <property name="text">

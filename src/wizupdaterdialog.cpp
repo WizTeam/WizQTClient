@@ -14,7 +14,7 @@ CWizUpdaterDialog::CWizUpdaterDialog(QWidget *parent) :
     setFixedSize(size());
     setWindowFlags(Qt::CustomizeWindowHint);
 
-    QPixmap pixmap(::WizGetResourcesPath() + "skins/wiznote64.png");
+    QPixmap pixmap(::WizGetResourcesPath() + "skins/wizupdater.png");
     ui->labelIcon->setPixmap(pixmap);
 }
 
