@@ -3,6 +3,7 @@
 #include "wizcategoryview.h"
 #include "wizdocumentlistview.h"
 #include "wizdocumentview.h"
+#include "wizdocumentwebview.h"
 #include "wizactions.h"
 #include "aboutdialog.h"
 #include "wizpreferencewindow.h"
@@ -309,12 +310,12 @@ void MainWindow::init()
 {
     connect(m_category, SIGNAL(itemSelectionChanged()), this, SLOT(on_category_itemSelectionChanged()));
     connect(m_documents, SIGNAL(itemSelectionChanged()), this, SLOT(on_documents_itemSelectionChanged()));
-    //
+
     m_sync.setDownloadAllNotesData(m_settings->downloadAllNotesData());
     m_syncTimer->setInterval(3 * 60 * 1000);    //3 minutes
     connect(m_syncTimer, SIGNAL(timeout()), this, SLOT(on_syncTimer_timeout()));
     QTimer::singleShot(30 * 1000, this, SLOT(on_syncTimer_timeout()));  //30 seconds
-    //
+
     m_category->init();
 }
 
@@ -424,21 +425,20 @@ void MainWindow::on_actionSync_triggered()
 void MainWindow::on_actionNewNote_triggered()
 {
     WIZDOCUMENTDATA data;
-    //
+
     CWizFolder* pFolder = m_category->SelectedFolder();
     if (!pFolder)
     {
         m_category->addAndSelectFolder("/My Notes/");
         pFolder = m_category->SelectedFolder();
-        //
+
         if (!pFolder)
             return;
     }
-    //
+
     m_db.CreateDocumentAndInit("<body><div>&nbsp;</div></body>", "", 0, tr("New note"), "newnote", pFolder->Location(), "", data);
-    //
+
     m_documentForEditing = data;
-    //
     m_documents->addAndSelectDocument(data);
 }
 
@@ -472,29 +472,6 @@ void MainWindow::on_actionAbout_triggered()
     AboutDialog dlg(*this, this);
     dlg.exec();
 }
-
-//void MainWindow::on_actionOptions_triggered()
-//{
-//    if (!m_options)
-//    {
-//        m_options = new CWizOptionsWidget(this);
-//        connect(m_options, SIGNAL(settingsChanged(WizOptionsType)), this, SLOT(on_options_settingsChanged(WizOptionsType)));
-//#ifndef Q_OS_MAC
-//        connect(m_options, SIGNAL(restartForSettings()), this, SLOT(on_options_restartForSettings()));
-//#endif
-//    }
-//    //
-//#ifdef Q_OS_MAC
-//    QPoint pt = QCursor::pos();
-//    m_options->showAtPoint(pt);
-//#else
-//    if (QWidget* button = m_toolBar->widgetForAction(m_optionsAction))
-//    {
-//        QPoint pt = button->mapToGlobal(QPoint(button->width() / 2, button->height()));
-//        m_options->showAtPoint(pt);
-//    }
-//#endif
-//}
 
 void MainWindow::on_actionPreference_triggered()
 {
@@ -549,7 +526,7 @@ void MainWindow::on_actionGoBack_triggered()
 {
     if (!m_history->canBack())
         return;
-    //
+
     WIZDOCUMENTDATA data = m_history->back();
     viewDocument(data, false);
     locateDocument(data);
@@ -559,7 +536,7 @@ void MainWindow::on_actionGoForward_triggered()
 {
     if (!m_history->canForward())
         return;
-    //
+
     WIZDOCUMENTDATA data = m_history->forward();
     viewDocument(data, false);
     locateDocument(data);
@@ -570,9 +547,8 @@ void MainWindow::on_category_itemSelectionChanged()
     CWizDocumentDataArray arrayDocument;
     m_category->getDocuments(arrayDocument);
     m_documents->setDocuments(arrayDocument);
-    //
-    if (arrayDocument.empty())
-    {
+
+    if (arrayDocument.empty()) {
         on_documents_itemSelectionChanged();
     }
 }
@@ -581,20 +557,18 @@ void MainWindow::on_documents_itemSelectionChanged()
 {
     CWizDocumentDataArray arrayDocument;
     m_documents->getSelectedDocuments(arrayDocument);
-    if (arrayDocument.size() == 1)
-    {
+
+    if (arrayDocument.size() == 1) {
         m_doc->showClient(true);
-        //
-        if (!m_bUpdatingSelection)
-        {
+
+        if (!m_bUpdatingSelection) {
             viewDocument(arrayDocument[0], true);
         }
-    }
-    else
-    {
+    } else {
         m_doc->showClient(false);
     }
 }
+
 void MainWindow::on_search_doSearch(const QString& keywords)
 {
     m_category->search(keywords);
@@ -629,24 +603,31 @@ void MainWindow::on_syncTimer_timeout()
 
 void MainWindow::viewDocument(const WIZDOCUMENTDATA& data, bool addToHistory)
 {
-    if (data.strGUID == m_doc->document().strGUID)
+    CWizDocument* doc = new CWizDocument(m_db, data);
+
+    if (doc->GUID() == m_doc->document().strGUID)
         return;
-    //
+
     bool forceEdit = false;
-    if (data.strGUID == m_documentForEditing.strGUID)
-    {
+    if (doc->GUID() == m_documentForEditing.strGUID) {
         m_documentForEditing = WIZDOCUMENTDATA();
         forceEdit = true;
     }
-    //
+
+    // stub here
+    if (doc->isProtected()) {
+        QString strFileName = WizGetResourcesPath() + "transitions/commingsoon.html";
+        m_doc->loadSpecialPage(strFileName);
+        return;
+    }
+
     if (!m_doc->viewDocument(data, forceEdit))
         return;
-    //
-    if (addToHistory)
-    {
+
+    if (addToHistory) {
         m_history->addHistory(data);
     }
-    //
+
     m_actions->actionFromName("actionGoBack")->setEnabled(m_history->canBack());
     m_actions->actionFromName("actionGoForward")->setEnabled(m_history->canForward());
 }
@@ -663,7 +644,7 @@ void MainWindow::locateDocument(const WIZDOCUMENTDATA& data)
     {
 
     }
-    //
+
     m_bUpdatingSelection = FALSE;
 }
 

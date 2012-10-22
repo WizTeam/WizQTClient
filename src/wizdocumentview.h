@@ -2,6 +2,7 @@
 #define WIZDOCUMENTVIEW_H
 
 #include <QWidget>
+#include <QWebView>
 
 #include "wizdef.h"
 
@@ -11,16 +12,20 @@ class CWizDatabase;
 class CWizTagListWidget;
 class CWizAttachmentListWidget;
 
-class CWizDocumentView
-    : public QWidget
+class CWizDocumentView : public QWidget
 {
     Q_OBJECT
 
 public:
     CWizDocumentView(CWizExplorerApp& app, QWidget* parent = 0);
 
+    void loadSpecialPage(const QString& strFileName);
+
 private:
     CWizUserSettings& m_userSettings;
+
+    QWebView* m_specialPage;
+
 
 protected:
     CWizDatabase& m_db;
@@ -29,27 +34,23 @@ protected:
     QWidget* m_client;
     CWizTagListWidget* m_tags;
     CWizAttachmentListWidget* m_attachments;
-    //
+
     QWidget* createClient();
-    //
+
     bool m_editingDocument;
     WizDocumentViewMode m_viewMode;
+
 public:
     bool viewDocument(const WIZDOCUMENTDATA& data, bool forceEdit);
-    //
     void showClient(bool visible);
-    //
     const WIZDOCUMENTDATA& document();
-    //
     void editDocument(bool editing);
     bool isEditingDocument() const { return m_editingDocument; }
-    //
     void setViewMode(WizDocumentViewMode mode);
     void setModified(bool modified);
-    //
     void settingsChanged();
-    //
-public slots:
+
+public Q_SLOTS:
     void on_titleEdit_editingFinished();
     void on_editDocumentButton_clicked();
     void on_tagsButton_clicked();
@@ -57,6 +58,7 @@ public slots:
     void on_attachment_created(const WIZDOCUMENTATTACHMENTDATA& attachment);
     void on_attachment_deleted(const WIZDOCUMENTATTACHMENTDATA& attachment);
     void on_document_modified(const WIZDOCUMENTDATA& documentOld, const WIZDOCUMENTDATA& documentNew);
+
 };
 
 #endif // WIZDOCUMENTVIEW_H

@@ -299,7 +299,7 @@ void CWizCategoryView::init()
     initTags();
     addSeparator();
     initTrash();
-    //
+
     setCurrentItem(findAllFolders());
 }
 

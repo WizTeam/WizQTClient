@@ -128,7 +128,7 @@ QString WizEncryptPassword(const QString& strPassword);
 QString WizDecryptPassword(const QString& strEncryptedText);
 
 
-BOOL WizLoadUnicodeTextFromFile(const CString& strFileName, CString& steText);
+bool WizLoadUnicodeTextFromFile(const QString& strFileName, QString& steText);
 BOOL WizSaveUnicodeTextToUnicodeFile(const CString& strFileName, const CString& strText);
 BOOL WizSaveUnicodeTextToUtf8File(const CString& strFileName, const CString& strText);
 

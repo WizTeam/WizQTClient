@@ -149,7 +149,7 @@ public:
     BOOL DeleteTagWithChildren(const WIZTAGDATA& data, BOOL bLog);
 
 public:
-    BOOL DocumentToTempHtmlFile(const WIZDOCUMENTDATA& document, CString& strTempHtmlFileName);
+    BOOL DocumentToTempHtmlFile(const WIZDOCUMENTDATA& document, QString& strTempHtmlFileName);
 
 public slots:
     QObject* DocumentFromGUID(const QString& strGUID);

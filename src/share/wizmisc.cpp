@@ -970,7 +970,7 @@ CString WizAnsiToUnicode(const CString& strCharset, const char* lpszText)
     return codec->toUnicode(lpszText);
 }
 
-BOOL WizHtmlAnsiToUnicode(const char* lpszText, CString& strText)
+bool WizHtmlAnsiToUnicode(const char* lpszText, QString& strText)
 {
     CString strCharset = WizHTMLGetCharsetFromHTMLText(lpszText);
     if (strCharset.IsEmpty())
@@ -984,7 +984,7 @@ BOOL WizHtmlAnsiToUnicode(const char* lpszText, CString& strText)
     return TRUE;
 }
 
-BOOL WizXmlAnsiToUnicode(const char* lpszText, CString& strText)
+bool WizXmlAnsiToUnicode(const char* lpszText, QString& strText)
 {
     CString strCharset = WizXMLGetCharsetFromXMLText(lpszText);
     if (strCharset.IsEmpty())
@@ -1054,7 +1054,7 @@ void WizProcessText(char* pBuffer, size_t nBufferLen, BOOL bNoRemoveCr)
 #define			WIZ_LTFF_NO_REMOVE_CR			0x08
 #define			WIZ_LTFF_FORCE_XML				0x10
 
-BOOL WizLoadUnicodeTextFromBuffer2(char* pBuffer, size_t nLen, CString& strText, UINT nFlags, const CString& strFileName)
+bool WizLoadUnicodeTextFromBuffer2(char* pBuffer, size_t nLen, QString& strText, UINT nFlags, const QString& strFileName)
 {
     ATLASSERT(pBuffer);
     //
@@ -1161,24 +1161,23 @@ BOOL WizLoadUnicodeTextFromBuffer(const char* pBuffer, size_t nLen, CString& str
 }
 
 
-BOOL WizLoadUnicodeTextFromFile(const CString& strFileName, CString& strText)
+bool WizLoadUnicodeTextFromFile(const QString& strFileName, QString& strText)
 {
     QFile file(strFileName);
-    //
+
     __int64 size = file.size();
-    //
-     if (!file.open(QIODevice::ReadOnly))
-         return false;
-     //
-     char* pBuffer = new char[size + 4];
-     memset(pBuffer, 0, size + 4);
-     file.read(pBuffer, size);
-     file.close();
-     //
-     BOOL bRet = ::WizLoadUnicodeTextFromBuffer2(pBuffer, size, strText, 0, strFileName);
-     //
-     delete [] pBuffer;
-     //
+
+    if (!file.open(QIODevice::ReadOnly))
+        return false;
+
+    char* pBuffer = new char[size + 4];
+    memset(pBuffer, 0, size + 4);
+    file.read(pBuffer, size);
+    file.close();
+
+    bool bRet = ::WizLoadUnicodeTextFromBuffer2(pBuffer, size, strText, 0, strFileName);
+
+    delete [] pBuffer;
     return bRet;
 }
 
@@ -1195,6 +1194,7 @@ BOOL WizSaveUnicodeTextToUnicodeFile(const CString& strFileName, const CString& 
     //
     return TRUE;
 }
+
 BOOL WizSaveUnicodeTextToUtf8File(const CString& strFileName, const CString& strText)
 {
     QFile file(strFileName);
@@ -1208,7 +1208,6 @@ BOOL WizSaveUnicodeTextToUtf8File(const CString& strFileName, const CString& str
     //
     return TRUE;
 }
-
 
 BOOL WizSplitTextToArray(const CString& strText, QChar ch, CWizStdStringArray& arrayResult)
 {

@@ -26,7 +26,7 @@ enum WizObjectType
     wizobjectTag = 1,
     wizobjectStyle,
     wizobjectDocumentAttachment,
-    wizobjectDocument,
+    wizobjectDocument
 };
 
 struct WIZDOCUMENTDATA;
@@ -39,13 +39,13 @@ struct WIZOBJECTDATA
     CString strDisplayName;
     CString strObjectGUID;
     WizObjectType eObjectType;
-    //
+
     QByteArray arrayData;
-    //
+
     WIZOBJECTDATA();
     WIZOBJECTDATA(const WIZDOCUMENTDATA& data);
     WIZOBJECTDATA(const WIZDOCUMENTATTACHMENTDATA& data);
-    //
+
     static WizObjectType IntToObjectType(int n);
     static WizObjectType TypeStringToObjectType(const CString& strType);
     static CString ObjectTypeToTypeString(WizObjectType eType);
@@ -115,13 +115,13 @@ struct WIZDOCUMENTDATABASE
     COleDateTime tParamModified;
     CString strParamMD5;
     __int64 nVersion;
-    //
+
     WIZDOCUMENTDATABASE();
     virtual BOOL LoadFromXmlRpc(CWizXmlRpcStructValue& data);
-    //
+
     static CString VersionName() { return CString(_T("document_version")); }
     static CString ObjectName() { return CString(_T("document")); }
-    //
+
     int nObjectPart;
 };
 
@@ -146,12 +146,12 @@ struct WIZDOCUMENTDATA : public WIZDOCUMENTDATABASE
     long nReadCount;
     long nAttachmentCount;
     long nIndexed;
-    //
+
     int nFlags;
     int nRate;
     CString strSystemTags;
     int nShareFlags;
-    //
+
     WIZDOCUMENTDATA();
     BOOL EqualForSync(const WIZDOCUMENTDATA& data) const;
 };
@@ -161,7 +161,7 @@ struct WIZDOCUMENTPARAMDATA
     CString strDocumentGUID;
     CString strName;
     CString strValue;
-    //
+
     virtual BOOL LoadFromXmlRpc(CWizXmlRpcStructValue& data);
     virtual BOOL SaveToXmlRpc(CWizXmlRpcStructValue& data) const;
 };
@@ -225,15 +225,15 @@ struct WIZDOCUMENTDATAEX : public WIZDOCUMENTDATA
 {
     WIZDOCUMENTDATAEX();
     WIZDOCUMENTDATAEX(const WIZDOCUMENTDATA& data);
-    //
+
     CWizStdStringArray arrayTagGUID;
     std::deque<WIZDOCUMENTPARAMDATA> arrayParam;
     QByteArray arrayData;
-    //
+
     BOOL bSkipped;
-    //
+
     WIZDOCUMENTDATAEX& operator = (const WIZDOCUMENTDATAEX& right);
-    //
+
     BOOL ParamArrayToStringArray(CWizStdStringArray& params) const;
     virtual BOOL LoadFromXmlRpc(CWizXmlRpcStructValue& data);
 };

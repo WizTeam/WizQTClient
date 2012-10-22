@@ -1,0 +1,27 @@
+html, body, form, fieldset, h1, h2, h3, h4, h5, h6, p, pre, blockquote, ul, ol, dl, address {
+	margin: 0;
+	padding: 0;
+}
+
+html {
+	background: #3e373c;
+	padding: 0px 0px 0px 10px;
+}
+
+#wizstar {
+	background: url(../graphics/wizstar.png) no-repeat left bottom;
+	height: 100px;
+	margin: 0px 0px 0px 10%;
+}
+
+#content {
+	background: url(../graphics/404.png) no-repeat left bottom;
+	height: 600px;
+}
+
+h2 {
+	font: bold 2.8em Helvetica, Arial, Geneva, sans-serif;
+	font-size: 18px;
+	color: #acb6ab;
+	padding: 20px 0px 0px 10%;
+}

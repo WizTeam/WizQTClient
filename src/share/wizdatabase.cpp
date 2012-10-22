@@ -1198,7 +1198,7 @@ BOOL CWizDatabase::GetDocumentsByTag(const WIZTAGDATA& tag, CWizDocumentDataArra
     return CIndex::GetDocumentsByTag("", tag, arrayDocument);
 }
 
-BOOL CWizDatabase::DocumentToTempHtmlFile(const WIZDOCUMENTDATA& document, CString& strTempHtmlFileName)
+BOOL CWizDatabase::DocumentToTempHtmlFile(const WIZDOCUMENTDATA& document, QString& strTempHtmlFileName)
 {
     CString strZipFileName = GetDocumentFileName(document.strGUID);
     if (!PathFileExists(strZipFileName))

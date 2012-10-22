@@ -5,7 +5,6 @@
 #include "wiznotestyle.h"
 #include "share/wizsettings.h"
 
-#include <QWebView>
 #include <QWebElement>
 #include <QWebFrame>
 
@@ -160,20 +159,25 @@ CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
     , m_editingDocument(true)
     , m_viewMode(app.userSettings().noteViewMode())
 {
+    m_specialPage = new QWebView(this);
+
     m_client = createClient();
-    //
-    QBoxLayout* layout = new QBoxLayout(QBoxLayout::TopToBottom, this);
+
+    QBoxLayout* layout = new QVBoxLayout(this);
     setLayout(layout);
     layout->addWidget(m_client);
+    layout->addWidget(m_specialPage);
     layout->setMargin(0);
-    //
+
+    m_specialPage->hide();
+
     m_title->setEditingDocument(m_editingDocument);
-    //
+
     connect(m_title->titleEdit(), SIGNAL(editingFinished()), this, SLOT(on_titleEdit_editingFinished()));
     connect(m_title->editDocumentButton(), SIGNAL(clicked()), this, SLOT(on_editDocumentButton_clicked()));
     connect(m_title->tagsButton(), SIGNAL(clicked()), this, SLOT(on_tagsButton_clicked()));
     connect(m_title->attachmentButton(), SIGNAL(clicked()), this, SLOT(on_attachmentButton_clicked()));
-    //
+
     connect(&m_db, SIGNAL(attachmentCreated(WIZDOCUMENTATTACHMENTDATA)), this, SLOT(on_attachment_created(WIZDOCUMENTATTACHMENTDATA)));
     connect(&m_db, SIGNAL(attachmentDeleted(WIZDOCUMENTATTACHMENTDATA)), this, SLOT(on_attachment_deleted(WIZDOCUMENTATTACHMENTDATA)));
     connect(&m_db, SIGNAL(documentModified(const WIZDOCUMENTDATA&, const WIZDOCUMENTDATA&)), this, SLOT(on_document_modified(const WIZDOCUMENTDATA&, const WIZDOCUMENTDATA&)));
@@ -185,75 +189,82 @@ QWidget* CWizDocumentView::createClient()
     QWidget* client = new QWidget(this);
     QBoxLayout* layout = new QBoxLayout(QBoxLayout::TopToBottom, client);
     client->setLayout(layout);
-    //
+
     client->setAutoFillBackground(true);
-    //
+
     QPalette pal = palette();
     pal.setColor(QPalette::Window, QColor(0xff, 0xff, 0xff));
     client->setPalette(pal);
-    //
+
     QWidget* line = new QWidget(this);
     line->setMaximumHeight(1);
     line->setMinimumHeight(1);
     line->setStyleSheet("border-bottom-width:1;border-bottom-style:solid;border-bottom-color:#bbbbbb");
-    //
+
     layout->setSpacing(0);
     layout->setMargin(0);
     layout->addWidget(m_title);
     layout->addWidget(line);
     layout->addWidget(m_web);
-    //
+
     layout->setStretchFactor(m_title, 0);
     layout->setStretchFactor(m_web, 1);
-    //
+
     return client;
 }
+
 void CWizDocumentView::showClient(bool visible)
 {
-    if (visible)
-    {
+    if (visible) {
         m_client->show();
-    }
-    else
-    {
+        m_specialPage->hide();
+    } else {
         m_client->hide();
     }
+}
+
+void CWizDocumentView::loadSpecialPage(const QString& strFileName)
+{
+    showClient(false);
+
+    QString strHtml;
+    ::WizLoadUnicodeTextFromFile(strFileName, strHtml);
+    QUrl url = QUrl::fromLocalFile(strFileName);
+    m_specialPage->setHtml(strHtml, url);
+
+    m_specialPage->show();
 }
 
 bool CWizDocumentView::viewDocument(const WIZDOCUMENTDATA& data, bool forceEdit)
 {
     bool edit = false;
-    if (forceEdit)
-    {
+
+    if (forceEdit) {
         edit = true;
-    }
-    else
-    {
-        switch (m_viewMode)
-        {
-        case viewmodeAlwaysEditing:
-            edit = true;
-            break;
-        case viewmodeAlwaysReading:
-            edit = false;
-            break;
-        default:
-            edit = m_editingDocument;
-            break;
+    } else {
+        switch (m_viewMode) {
+            case viewmodeAlwaysEditing:
+                edit = true;
+                break;
+            case viewmodeAlwaysReading:
+                edit = false;
+                break;
+            default:
+                edit = m_editingDocument;
+                break;
         }
     }
-    //
+
     bool ret = m_web->viewDocument(data, edit);
-    if (!ret)
-    {
+    if (!ret) {
         showClient(false);
         return false;
     }
-    //
+
     showClient(true);
     editDocument(edit);
-    //
     m_title->updateInformation(m_db, data);
+
     return true;
 }
 
