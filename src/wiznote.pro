@@ -10,7 +10,10 @@ QT += network
 QT += webkit
 
 
-TARGET = WizNote
+TARGET = wiznote
+
+# NOTE: QMAKE_FLAGS_RPATH and QMAKE_RPATHDIR not working for $$ORIGIN
+unix:QMAKE_LFLAGS = -Wl,-rpath,\'\$$ORIGIN/../lib\'
 
 # useful under windows compilation
 win32:DESTDIR = ../share/wiznote/

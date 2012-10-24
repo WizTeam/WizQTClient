@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Package>
+    <DisplayName>Wiznote Core</DisplayName>
+    <Description>The core component of wiznote.</Description>
+    <Version>1.1.0</Version>
+    <ReleaseDate>2012-11-01</ReleaseDate>
+    <Name>wiznote</Name>
+    <ForcedInstallation>true</ForcedInstallation>
+</Package>

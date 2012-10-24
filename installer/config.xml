@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Installer>
+    <Name>Wiznote</Name>
+    <Version>1.1.0</Version>
+    <Title>Wiznote</Title>
+    <Logo>logo.png</Logo>
+    <Watermark></Watermark>
+    <Background></Background>
+    <Publisher>www.wiz.cn</Publisher>
+    <RunProgram></RunProgram>
+    <StartMenuDir>wiznote</StartMenuDir>
+    <TargetDir>@homeDir@/WizNote</TargetDir>
+</Installer>
