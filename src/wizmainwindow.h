@@ -1,5 +1,5 @@
-#ifndef MAINWINDOW_H
-#define MAINWINDOW_H
+#ifndef WIZMAINWINDOW_H
+#define WIZMAINWINDOW_H
 
 #include <QMainWindow>
 #include "wizdef.h"
@@ -175,4 +175,4 @@ public slots:
 
 };
 
-#endif // MAINWINDOW_H
+#endif // WIZMAINWINDOW_H

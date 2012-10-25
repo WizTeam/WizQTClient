@@ -1,13 +1,13 @@
-#ifndef WIZPREFERENCEWINDOW_H
-#define WIZPREFERENCEWINDOW_H
+#ifndef WIZPREFERENCEDIALOG_H
+#define WIZPREFERENCEDIALOG_H
 
-#include "ui_preferencedialog.h"
+#include "ui_wizpreferencedialog.h"
 
 #include <QDialog>
 
 #include "wizdef.h"
 #include "share/wizmisc.h"
-#include "proxydialog.h"
+#include "wizproxydialog.h"
 
 namespace Ui {
     class CWizPreferenceWindow;

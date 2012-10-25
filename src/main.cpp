@@ -4,9 +4,9 @@
 #include <QTranslator>
 #include <QProcess>
 
-#include "mainwindow.h"
+#include "wizmainwindow.h"
 #include "wizupdaterdialog.h"
-#include "welcomedialog.h"
+#include "wizwelcomedialog.h"
 #include "share/wizsettings.h"
 #include "share/wizwin32helper.h"
 

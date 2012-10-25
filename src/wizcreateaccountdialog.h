@@ -1,5 +1,5 @@
-#ifndef CREATEACCOUNTDIALOG_H
-#define CREATEACCOUNTDIALOG_H
+#ifndef WIZCREATEACCOUNTDIALOG_H
+#define WIZCREATEACCOUNTDIALOG_H
 
 #include <QDialog>
 #include "share/wizcreateaccount.h"
@@ -32,4 +32,4 @@ private slots:
     void createAccountDone(bool succeeded, const CString& errorMessage);
 };
 
-#endif // CREATEACCOUNTDIALOG_H
+#endif // WIZCREATEACCOUNTDIALOG_H

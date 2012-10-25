@@ -1,12 +1,12 @@
-#include "welcomedialog.h"
-#include "ui_welcomedialog.h"
+#include "wizwelcomedialog.h"
+#include "ui_wizwelcomedialog.h"
 
 #include <QAbstractButton>
 #include <QMessageBox>
 #include <QDesktopServices>
 #include <QWebFrame>
-#include "createaccountdialog.h"
-#include "proxydialog.h"
+#include "wizcreateaccountdialog.h"
+#include "wizproxydialog.h"
 
 WelcomeDialog::WelcomeDialog(const QString &strDefaultUserId, const QString& strLocale, QWidget *parent)
     : QDialog(parent)

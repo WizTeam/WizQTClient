@@ -1,8 +1,8 @@
 #ifndef WIZDATABASE_H
 #define WIZDATABASE_H
 
-#include "index.h"
-#include "thumbindex.h"
+#include "wizindex.h"
+#include "wizthumbindex.h"
 
 class CWizDatabase;
 class CWizFolder;

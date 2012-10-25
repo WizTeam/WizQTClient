@@ -1,12 +1,12 @@
-#include "mainwindow.h"
+#include "wizmainwindow.h"
 
 #include "wizcategoryview.h"
 #include "wizdocumentlistview.h"
 #include "wizdocumentview.h"
 #include "wizdocumentwebview.h"
 #include "wizactions.h"
-#include "aboutdialog.h"
-#include "wizpreferencewindow.h"
+#include "wizaboutdialog.h"
+#include "wizpreferencedialog.h"
 
 #include <QDir>
 #include <QMessageBox>

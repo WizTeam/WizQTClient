@@ -1,5 +1,5 @@
-#ifndef PROXYDIALOG_H
-#define PROXYDIALOG_H
+#ifndef WIZPROXYDIALOG_H
+#define WIZPROXYDIALOG_H
 
 #include <QDialog>
 
@@ -21,4 +21,4 @@ private:
     Ui::ProxyDialog *ui;
 };
 
-#endif // PROXYDIALOG_H
+#endif // WIZPROXYDIALOG_H

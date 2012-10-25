@@ -31,11 +31,9 @@ OBJECTIVE_SOURCES += share/wizuihelper_mac.mm \
 
 
 SOURCES += main.cpp\
-    mainwindow.cpp \
     share/wizqthelper.cpp \
     share/wizmisc.cpp \
     share/sqlite3.c \
-    share/index.cpp \
     share/cppsqlite3.cpp \
     share/wizobject.cpp \
     share/wizkmcore.cpp \
@@ -43,7 +41,6 @@ SOURCES += main.cpp\
     share/wizapi.cpp \
     share/wizsync.cpp \
     share/wizdatabase.cpp \
-    welcomedialog.cpp \
     share/wizverifyaccount.cpp \
     share/wizsettings.cpp \
     wizdocumentlistview.cpp \
@@ -77,7 +74,6 @@ SOURCES += main.cpp\
     zip/wizzip.cpp \
     wizactions.cpp \
     share/wizwin32helper.cpp \
-    share/thumbindex.cpp \
     share/wizdrawtexthelper.cpp \
     wiznotestyle.cpp \
     wizcategoryview.cpp \
@@ -87,8 +83,6 @@ SOURCES += main.cpp\
     share/wizdownloadobjectdata.cpp \
     share/wizdownloadobjectdatadialog.cpp \
     wizdocumenthistory.cpp \
-    aboutdialog.cpp \
-    createaccountdialog.cpp \
     share/wizcreateaccount.cpp \
     mac/wizmacactionhelper.cpp \
     share/wizcommonui.cpp \
@@ -100,17 +94,22 @@ SOURCES += main.cpp\
     share/wizwindowshelper.cpp \
     share/wizimagepushbutton.cpp \
     wiztaglistwidget.cpp \
-    proxydialog.cpp \
-    wizpreferencewindow.cpp \
     wizconsoledialog.cpp \
-    wizupdaterdialog.cpp
+    wizupdaterdialog.cpp \
+    wizpreferencedialog.cpp \
+    wizaboutdialog.cpp \
+    wizwelcomedialog.cpp \
+    wizproxydialog.cpp \
+    wizcreateaccountdialog.cpp \
+    wizmainwindow.cpp \
+    share/wizindex.cpp \
+    share/wizthumbindex.cpp
 
-HEADERS += mainwindow.h \
+HEADERS += \
     share/wizqthelper.h \
     share/wizmisc.h \
     share/sqlite3ext.h \
     share/sqlite3.h \
-    share/index.h \
     share/cppsqlite3.h \
     share/wizobject.h \
     share/wizkmcore.h \
@@ -118,7 +117,6 @@ HEADERS += mainwindow.h \
     share/wizxmlrpc.h \
     share/wizsync.h \
     share/wizdatabase.h \
-    welcomedialog.h \
     share/wizverifyaccount.h \
     share/wizsettings.h \
     wizdocumentlistview.h \
@@ -156,7 +154,6 @@ HEADERS += mainwindow.h \
     zip/wizzip.h \
     wizactions.h \
     share/wizwin32helper.h \
-    share/thumbindex.h \
     share/wizdrawtexthelper.h \
     wiznotestyle.h \
     wizcategoryview.h \
@@ -166,8 +163,6 @@ HEADERS += mainwindow.h \
     share/wizdownloadobjectdata.h \
     share/wizdownloadobjectdatadialog.h \
     wizdocumenthistory.h \
-    aboutdialog.h \
-    createaccountdialog.h \
     share/wizcreateaccount.h \
     mac/wizmacactionhelper.h \
     share/wizcommonui.h \
@@ -180,10 +175,16 @@ HEADERS += mainwindow.h \
     share/wizimagepushbutton.h \
     mac/wizmacicon.h \
     wiztaglistwidget.h \
-    proxydialog.h \
-    wizpreferencewindow.h \
     wizconsoledialog.h \
-    wizupdaterdialog.h
+    wizupdaterdialog.h \
+    wizpreferencedialog.h \
+    wizaboutdialog.h \
+    wizwelcomedialog.h \
+    wizproxydialog.h \
+    wizcreateaccountdialog.h \
+    wizmainwindow.h \
+    share/wizindex.h \
+    share/wizthumbindex.h
 
 
 mac:HEADERS += \
@@ -193,16 +194,16 @@ mac:HEADERS += \
 
 
 FORMS += \
-    ui/welcomedialog.ui \
     ui/newfolderdialog.ui \
     ui/newtagdialog.ui \
     ui/wizdownloadobjectdatadialog.ui \
-    ui/aboutdialog.ui \
-    ui/createaccountdialog.ui \
-    ui/proxydialog.ui \
-    ui/preferencedialog.ui \
     ui/wizconsoledialog.ui \
-    ui/wizupdaterdialog.ui
+    ui/wizupdaterdialog.ui \
+    ui/wizpreferencedialog.ui \
+    ui/wizaboutdialog.ui \
+    ui/wizwelcomedialog.ui \
+    ui/wizproxydialog.ui \
+    ui/wizcreateaccountdialog.ui
 
 
 mac:LIBS += -framework Cocoa -framework Carbon

@@ -1,5 +1,5 @@
-#include "proxydialog.h"
-#include "ui_proxydialog.h"
+#include "wizproxydialog.h"
+#include "ui_wizproxydialog.h"
 
 #include "share/wizsettings.h"
 

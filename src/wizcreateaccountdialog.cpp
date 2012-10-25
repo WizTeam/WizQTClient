@@ -1,5 +1,5 @@
-#include "createaccountdialog.h"
-#include "ui_createaccountdialog.h"
+#include "wizcreateaccountdialog.h"
+#include "ui_wizcreateaccountdialog.h"
 
 #include <QMessageBox>
 

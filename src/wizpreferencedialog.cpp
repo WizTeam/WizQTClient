@@ -1,4 +1,4 @@
-#include "wizpreferencewindow.h"
+#include "wizpreferencedialog.h"
 
 CWizPreferenceWindow::CWizPreferenceWindow(CWizExplorerApp& app, QWidget* parent)
     : QDialog(parent)

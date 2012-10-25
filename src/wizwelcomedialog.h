@@ -1,5 +1,5 @@
-#ifndef WELCOMEDIALOG_H
-#define WELCOMEDIALOG_H
+#ifndef WIZWELCOMEDIALOG_H
+#define WIZWELCOMEDIALOG_H
 
 #include <QHash>
 #include <QDialog>
@@ -52,4 +52,4 @@ public Q_SLOTS:
     void on_autoLogin_stateChanged(int state);
 };
 
-#endif // WELCOMEDIALOG_H
+#endif // WIZWELCOMEDIALOG_H

@@ -1,5 +1,5 @@
-#include "aboutdialog.h"
-#include "ui_aboutdialog.h"
+#include "wizaboutdialog.h"
+#include "ui_wizaboutdialog.h"
 
 #include "share/wizmisc.h"
 #include <QFileInfo>

@@ -1,4 +1,4 @@
-#include "index.h"
+#include "wizindex.h"
 
 #include "wizkmcore.h"
 

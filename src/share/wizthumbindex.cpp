@@ -1,6 +1,6 @@
-#include "thumbindex.h"
+#include "wizthumbindex.h"
 #include "wizmisc.h"
-#include "index.h"
+#include "wizindex.h"
 #include <QBuffer>
 
 static const char* PAD_TYPE = "PAD";
