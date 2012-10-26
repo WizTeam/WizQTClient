@@ -7,6 +7,7 @@
 #include "share/wizsettings.h"
 #include "share/wizsync.h"
 
+#include "wizupdater.h"
 #include "wizconsoledialog.h"
 
 #ifndef Q_OS_MAC
@@ -50,6 +51,7 @@ public:
     virtual CWizCategoryView& category() { return *m_category; }
 
     virtual CWizUserSettings& userSettings() { return *m_settings; }
+    virtual CWizUpdater* updater() { return m_updater; }
 
     virtual void syncStarted();
     virtual void syncLogin();
@@ -94,6 +96,7 @@ private:
     //
     WIZDOCUMENTDATA m_documentForEditing;
 
+    CWizUpdater* m_updater;
     CWizConsoleDialog* m_console;
 
 private:

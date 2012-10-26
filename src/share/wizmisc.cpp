@@ -355,6 +355,13 @@ QString WizGetDataStorePath()
     return strPath;
 }
 
+QString WizGetUpgradePath()
+{
+    QString strPath = WizGetDataStorePath() + "/update/";
+    WizEnsurePathExists(strPath);
+    return strPath;
+}
+
 CString WizGetSettingsFileName()
 {
     return WizGetDataStorePath() + "wiznote.ini";

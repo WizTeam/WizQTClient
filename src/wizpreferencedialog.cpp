@@ -41,6 +41,7 @@ CWizPreferenceWindow::CWizPreferenceWindow(CWizExplorerApp& app, QWidget* parent
 
     connect(ui->comboLang, SIGNAL(currentIndexChanged(int)), SLOT(on_comboLang_currentIndexChanged(int)));
     connect(ui->comboSkin, SIGNAL(currentIndexChanged(int)), SLOT(on_comboSkin_currentIndexChanged(int)));
+    connect(ui->buttonCheckUpgrade, SIGNAL(clicked()), SLOT(on_buttonCheckUpgrade_clicked()));
 
     // reading tab
     switch (userSettings().noteViewMode())
@@ -149,4 +150,9 @@ void CWizPreferenceWindow::accept()
     }
 
     QDialog::accept();
+}
+
+void CWizPreferenceWindow::on_buttonCheckUpgrade_clicked()
+{
+    m_app.updater()->checkAndDownloadUpgrade();
 }

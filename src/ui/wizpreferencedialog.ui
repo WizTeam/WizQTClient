@@ -93,6 +93,19 @@
       </property>
      </widget>
     </widget>
+    <widget class="QPushButton" name="buttonCheckUpgrade">
+     <property name="geometry">
+      <rect>
+       <x>140</x>
+       <y>240</y>
+       <width>97</width>
+       <height>27</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>check now</string>
+     </property>
+    </widget>
    </widget>
    <widget class="QWidget" name="tabReading">
     <attribute name="title">

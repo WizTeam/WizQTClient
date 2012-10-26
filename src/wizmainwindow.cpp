@@ -62,6 +62,7 @@ MainWindow::MainWindow(CWizDatabase& db, QWidget *parent) :
     m_history(new CWizDocumentViewHistory()),
     m_animateSync(new CWizAnimateAction(*this, this)),
     m_syncTimer(new QTimer(this)),
+    m_updater(new CWizUpdater(this)),
     m_bRestart(false),
     m_bLogoutRestart(false),
     m_bUpdatingSelection(false)

@@ -103,7 +103,8 @@ SOURCES += main.cpp\
     wizcreateaccountdialog.cpp \
     wizmainwindow.cpp \
     share/wizindex.cpp \
-    share/wizthumbindex.cpp
+    share/wizthumbindex.cpp \
+    wizupdater.cpp
 
 HEADERS += \
     share/wizqthelper.h \
@@ -184,7 +185,8 @@ HEADERS += \
     wizcreateaccountdialog.h \
     wizmainwindow.h \
     share/wizindex.h \
-    share/wizthumbindex.h
+    share/wizthumbindex.h \
+    wizupdater.h
 
 
 mac:HEADERS += \

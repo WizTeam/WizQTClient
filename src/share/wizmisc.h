@@ -92,6 +92,7 @@ QString WizGetAppPath();
 QString WizGetAppFileName();
 QString WizGetResourcesPath();
 QString WizGetDataStorePath();
+QString WizGetUpgradePath();
 CString WizGetSettingsFileName();
 QString WizGetLogFileName();
 QString WizGetLocaleFileName(const QString& strLocale);
