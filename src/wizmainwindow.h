@@ -1,7 +1,9 @@
 #ifndef WIZMAINWINDOW_H
 #define WIZMAINWINDOW_H
 
-#include <QMainWindow>
+#include <QtCore>
+#include <QtGui>
+
 #include "wizdef.h"
 
 #include "share/wizsettings.h"
@@ -40,14 +42,13 @@ class MainWindow
 public:
     explicit MainWindow(CWizDatabase& db, QWidget *parent = 0);
 
-    CWizUserSettings* settings() const { return m_settings; }
     void center(int width, int height);
     ~MainWindow();
 
 public:
-    virtual QWidget* mainWindow();
-    virtual QObject* object();
-    virtual CWizDatabase& database();
+    virtual QWidget* mainWindow() { return this; }
+    virtual QObject* object() { return this; }
+    virtual CWizDatabase& database() { return m_db; }
     virtual CWizCategoryView& category() { return *m_category; }
 
     virtual CWizUserSettings& userSettings() { return *m_settings; }
@@ -65,39 +66,37 @@ private:
     CWizDatabase& m_db;
     CWizUserSettings* m_settings;
     CWizSync m_sync;
-    //
+
+    CWizUpdater* m_updater;
+    CWizConsoleDialog* m_console;
+
     QMenuBar* m_menuBar;
-#ifndef Q_OS_MAC
-    QToolBar* m_toolBar;
-    QLabel* m_labelNotice;
-    QAction* m_optionsAction;
-#endif
     QStatusBar* m_statusBar;
     QLabel* m_labelStatus;
     QProgressBar* m_progressSync;
-    //
+
     CWizActions* m_actions;
     CWizCategoryView* m_category;
     CWizDocumentListView* m_documents;
     CWizDocumentView* m_doc;
     CWizSplitter* m_splitter;
     CWizOptionsWidget* m_options;
-    //
+
     CWizDocumentViewHistory* m_history;
-    //
     CWizAnimateAction* m_animateSync;
-    //
     QTimer* m_syncTimer;
-    //
+
     bool m_bRestart;
     bool m_bLogoutRestart;
-    //
     bool m_bUpdatingSelection;
-    //
+
     WIZDOCUMENTDATA m_documentForEditing;
 
-    CWizUpdater* m_updater;
-    CWizConsoleDialog* m_console;
+#ifndef Q_OS_MAC
+    QToolBar* m_toolBar;
+    QLabel* m_labelNotice;
+    QAction* m_optionsAction;
+#endif
 
 private:
     void initActions();
@@ -105,44 +104,33 @@ private:
     void initToolBar();
     void initClient();
     void initStatusBar();
-    //
-    //void resetNotice();
 
 public:
     virtual void init();
     virtual void closeEvent(QCloseEvent *);
     virtual QSize sizeHint() const;
+
 public:
-    CWizDatabase* Database() { return &m_db; }
-    MainWindow* Window() { return this; }
-    CWizCategoryView* CategoryCtrl() { return m_category; }
-    CWizDocumentListView* DocumentsCtrl() { return m_documents; }
-    //
     void viewDocument(const WIZDOCUMENTDATA& data, bool addToHistory);
     void locateDocument(const WIZDOCUMENTDATA& data);
-    //
+
+    bool isRestart() const { return m_bRestart; }
+    bool isLogout() const { return m_bLogoutRestart; }
+
 #ifndef Q_OS_MAC
     CWizFixedSpacer* findFixedSpacer(int index);
     void adjustToolBarSpacerToPos(int index, int pos);
 #endif
-public:
-    bool isRestart() const { return m_bRestart; }
-    bool isLogout() const { return m_bLogoutRestart; }
+
 private:
     QObject* CategoryCtrlObject();
     QObject* DocumentsCtrlObject();
-public:
-    //interface WizExplorerApp
-    Q_PROPERTY(QObject* Database READ Database)
-    Q_PROPERTY(QObject* Window READ Window)
-    //interface WizExplorerWindow
-    Q_PROPERTY(QObject* CategoryCtrl READ CategoryCtrlObject)
-    Q_PROPERTY(QObject* DocumentsCtrl READ DocumentsCtrlObject)
+
 public slots:
     //interface WizExplorerApp;
     QObject* CreateWizObject(const QString& strObjectID);
     //interface WizExplorerWindow
-    //
+
     //ext functions
     void SetDocumentModified(bool modified);
     void SetSavingDocument(bool saving);
@@ -154,13 +142,8 @@ public slots:
     void on_actionDeleteCurrentNote_triggered();
     void on_actionLogout_triggered();
     void on_actionAbout_triggered();
-    //void on_actionOptions_triggered();
     void on_actionPreference_triggered();
-#ifndef Q_OS_MAC
-    void on_actionPopupMainMenu_triggered();
-    void on_client_splitterMoved(int pos, int index);
-#endif
-    //
+
     void on_actionGoBack_triggered();
     void on_actionGoForward_triggered();
 
@@ -168,13 +151,15 @@ public slots:
     void on_documents_itemSelectionChanged();
 
     void on_search_doSearch(const QString& keywords);
-    //
     void on_options_settingsChanged(WizOptionsType type);
+
+    void on_syncTimer_timeout();
+
 #ifndef Q_OS_MAC
+    void on_actionPopupMainMenu_triggered();
+    void on_client_splitterMoved(int pos, int index);
     void on_options_restartForSettings();
 #endif
-    //
-    void on_syncTimer_timeout();
 
 };
 

@@ -313,7 +313,7 @@ CWizDatabase::CWizDatabase()
 
 }
 
-BOOL CWizDatabase::Open(const QString& strUserId, const QString& strPassword)
+bool CWizDatabase::Open(const QString& strUserId, const QString& strPassword)
 {
     m_strUserId = strUserId;
     m_strPassword = strPassword;
@@ -377,12 +377,12 @@ __int64 CWizDatabase::GetObjectVersion(const CString& strObjectName)
     return GetMetaInt64("SYNC_INFO", strObjectName, -1) + 1;
 }
 
-BOOL CWizDatabase::SetObjectVersion(const CString& strObjectName, __int64 nVersion)
+bool CWizDatabase::SetObjectVersion(const CString& strObjectName, __int64 nVersion)
 {
     return SetMetaInt64("SYNC_INFO", strObjectName, nVersion);
 }
 
-BOOL CWizDatabase::UpdateDeletedGUID(const WIZDELETEDGUIDDATA& data, CWizSyncEvents* pEvents)
+bool CWizDatabase::UpdateDeletedGUID(const WIZDELETEDGUIDDATA& data, CWizSyncEvents* pEvents)
 {
     BOOL bRet = FALSE;
     //
@@ -402,7 +402,7 @@ BOOL CWizDatabase::UpdateDeletedGUID(const WIZDELETEDGUIDDATA& data, CWizSyncEve
     return bRet;
 }
 
-BOOL CWizDatabase::UpdateTag(const WIZTAGDATA& data, CWizSyncEvents* pEvents)
+bool CWizDatabase::UpdateTag(const WIZTAGDATA& data, CWizSyncEvents* pEvents)
 {
     BOOL bRet = FALSE;
 

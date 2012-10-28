@@ -8,24 +8,24 @@
 #include "wizaboutdialog.h"
 #include "wizpreferencedialog.h"
 
-#include <QDir>
-#include <QMessageBox>
-#include <QSplitter>
-#include <QLabel>
-#include <QStatusBar>
-#include <QProgressBar>
-#include <QListView>
-#include <QHBoxLayout>
-#ifndef Q_OS_MAC
-#include <QToolBar>
-#endif
-#include <QMenuBar>
-#include <QAction>
-#include <QDebug>
-#include <QBoxLayout>
-#include <QApplication>
-#include <QTimer>
-#include <share/wizcommonui.h>
+//#include <QDir>
+//#include <QMessageBox>
+//#include <QSplitter>
+//#include <QLabel>
+//#include <QStatusBar>
+//#include <QProgressBar>
+//#include <QListView>
+//#include <QHBoxLayout>
+//#ifndef Q_OS_MAC
+//#include <QToolBar>
+//#endif
+//#include <QMenuBar>
+//#include <QAction>
+//#include <QDebug>
+//#include <QBoxLayout>
+//#include <QApplication>
+//#include <QTimer>
+#include "share/wizcommonui.h"
 
 #include "mac/wizmactoolbar.h"
 
@@ -92,7 +92,6 @@ void MainWindow::center(int width, int height)
 void MainWindow::initActions()
 {
     m_actions->init();
-    //
     m_animateSync->setAction(m_actions->actionFromName("actionSync"));
     m_animateSync->setIcons("sync");
 }
@@ -338,21 +337,6 @@ QSize MainWindow::sizeHint() const
 #endif
     //
     return rc.size();
-}
-
-QWidget* MainWindow::mainWindow()
-{
-    return this;
-}
-
-QObject* MainWindow::object()
-{
-    return this;
-}
-
-CWizDatabase& MainWindow::database()
-{
-    return m_db;
 }
 
 void MainWindow::syncStarted()

@@ -24,10 +24,9 @@ void CWizApiBase::abort()
 }
 
 
-BOOL CWizApiBase::callXmlRpc(const CString& strMethodName, CWizXmlRpcValue* pVal)
+bool CWizApiBase::callXmlRpc(const CString& strMethodName, CWizXmlRpcValue* pVal)
 {
     addDebugLog("call xmlrpc:[" + strMethodName + "]");
-    //
     return m_server.xmlRpcCall(strMethodName, pVal);
 }
 
@@ -133,13 +132,13 @@ BOOL CWizApiBase::callClientLogout()
 
 void CWizApiBase::onClientLogout()
 {
-    m_user.strToken.Empty();
-    m_user.strKbGUID.Empty();
+    m_user.strToken.clear();
+    m_user.strKbGUID.clear();
 }
-//
+
 BOOL CWizApiBase::callGetUserInfo()
 {
-    return TRUE;
+    return true;
 }
 
 void CWizApiBase::onGetUserInfo(CWizXmlRpcValue& ret)
@@ -488,8 +487,8 @@ BOOL CWizApi::callDocumentGetData(const WIZDOCUMENTDATABASE& data)
     //
     CWizApiTokenParam param(*this);
     param.AddString(_T("document_guid"), data.strGUID);
-    param.AddBool(_T("document_info"), (nPart & WIZKM_XMKRPC_DOCUMENT_PART_INFO) ? TRUE : FALSE);
-    param.AddBool(_T("document_param"), (nPart & WIZKM_XMKRPC_DOCUMENT_PART_PARAM) ? TRUE : FALSE);
+    param.AddBool(_T("document_info"), (nPart & WIZKM_XMKRPC_DOCUMENT_PART_INFO) ? true : false);
+    param.AddBool(_T("document_param"), (nPart & WIZKM_XMKRPC_DOCUMENT_PART_PARAM) ? true : false);
     //
     return callXmlRpc(SyncMethod_GetDocumentData, &param);
 }
@@ -505,7 +504,7 @@ BOOL CWizApi::uploadDocument(const WIZDOCUMENTDATAEX& data)
     //
     int nParts = m_currentDocument.nObjectPart;
     ATLASSERT(0 != nParts);
-    BOOL bData = (nParts & WIZKM_XMKRPC_DOCUMENT_PART_DATA) ? TRUE : FALSE;
+    BOOL bData = (nParts & WIZKM_XMKRPC_DOCUMENT_PART_DATA) ? true : false;
     //
     if (bData)
     {
@@ -542,9 +541,9 @@ BOOL CWizApi::callDocumentPostData(const WIZDOCUMENTDATAEX& data)
     //
     int nParts = m_currentDocument.nObjectPart;
     ATLASSERT(0 != nParts);
-    BOOL bInfo = (nParts & WIZKM_XMKRPC_DOCUMENT_PART_INFO) ? TRUE : FALSE;
-    BOOL bData = (nParts & WIZKM_XMKRPC_DOCUMENT_PART_DATA) ? TRUE : FALSE;
-    BOOL bParam = (nParts & WIZKM_XMKRPC_DOCUMENT_PART_PARAM) ? TRUE : FALSE;
+    BOOL bInfo = (nParts & WIZKM_XMKRPC_DOCUMENT_PART_INFO) ? true : false;
+    BOOL bData = (nParts & WIZKM_XMKRPC_DOCUMENT_PART_DATA) ? true : false;
+    BOOL bParam = (nParts & WIZKM_XMKRPC_DOCUMENT_PART_PARAM) ? true : false;
     //
     addLog("update note info:" + data.strTitle);
     //
@@ -554,9 +553,9 @@ BOOL CWizApi::callDocumentPostData(const WIZDOCUMENTDATAEX& data)
     param.AddStruct(_T("document"), pDocumentStruct);
     //
     pDocumentStruct->AddString(_T("document_guid"), data.strGUID);
-    pDocumentStruct->AddBool(_T("document_info"), bInfo ? TRUE : FALSE);
-    pDocumentStruct->AddBool(_T("document_data"), bData ? TRUE : FALSE);
-    pDocumentStruct->AddBool(_T("document_param"), bParam ? TRUE : FALSE);
+    pDocumentStruct->AddBool(_T("document_info"), bInfo ? true : false);
+    pDocumentStruct->AddBool(_T("document_data"), bData ? true : false);
+    pDocumentStruct->AddBool(_T("document_param"), bParam ? true : false);
     //
     BOOL bParamInfoAdded = FALSE;
     BOOL bDataInfoAdded = FALSE;
@@ -592,8 +591,8 @@ BOOL CWizApi::callDocumentPostData(const WIZDOCUMENTDATAEX& data)
         pDocumentStruct->AddString(_T("system_tags"), infodata.strSystemTags);
         pDocumentStruct->AddInt(_T("document_share"), infodata.nShareFlags);
         //
-        bParamInfoAdded = TRUE;
-        bDataInfoAdded = TRUE;
+        bParamInfoAdded = true;
+        bDataInfoAdded = true;
         //
         m_db.GetDocumentTags(infodata.strGUID, infodata.arrayTagGUID);
         //
@@ -607,7 +606,7 @@ BOOL CWizApi::callDocumentPostData(const WIZDOCUMENTDATAEX& data)
         {
             pDocumentStruct->AddTime(_T("dt_param_modified"), infodata.tParamModified);
             pDocumentStruct->AddString(_T("param_md5"), infodata.strParamMD5);
-            bParamInfoAdded = TRUE;
+            bParamInfoAdded = true;
         }
         //
         pDocumentStruct->AddArray(_T("document_params"), infodata.arrayParam);
@@ -626,7 +625,7 @@ BOOL CWizApi::callDocumentPostData(const WIZDOCUMENTDATAEX& data)
         {
             pDocumentStruct->AddTime(_T("dt_data_modified"), infodata.tDataModified);
             pDocumentStruct->AddString(_T("data_md5"), infodata.strDataMD5);
-            bDataInfoAdded = TRUE;
+            bDataInfoAdded = true;
         }
         //
         pDocumentStruct->AddString(_T("document_zip_md5"), WizMd5StringNoSpaceJava(infodata.arrayData));
@@ -646,7 +645,7 @@ BOOL CWizApi::uploadAttachment(const WIZDOCUMENTATTACHMENTDATAEX& data)
     //
     int nParts = data.nObjectPart;
     ATLASSERT(0 != nParts);
-    BOOL bData = (nParts & WIZKM_XMKRPC_ATTACHMENT_PART_DATA) ? TRUE : FALSE;
+    BOOL bData = (nParts & WIZKM_XMKRPC_ATTACHMENT_PART_DATA) ? true : false;
     //
     if (bData)
     {
@@ -693,14 +692,14 @@ BOOL CWizApi::callAttachmentPostData(const WIZDOCUMENTATTACHMENTDATAEX& data)
     CWizXmlRpcStructValue* pAttachmentStruct = new CWizXmlRpcStructValue();
     param.AddStruct(_T("attachment"), pAttachmentStruct);
     //
-    BOOL bInfo = (nParts & WIZKM_XMKRPC_ATTACHMENT_PART_INFO) ? TRUE : FALSE;
-    BOOL bData = (nParts & WIZKM_XMKRPC_ATTACHMENT_PART_DATA) ? TRUE : FALSE;
+    BOOL bInfo = (nParts & WIZKM_XMKRPC_ATTACHMENT_PART_INFO) ? true : false;
+    BOOL bData = (nParts & WIZKM_XMKRPC_ATTACHMENT_PART_DATA) ? true : false;
     //
     pAttachmentStruct->AddString(_T("attachment_guid"), data.strGUID);
-    pAttachmentStruct->AddBool(_T("attachment_info"), bInfo ? TRUE : FALSE);
-    pAttachmentStruct->AddBool(_T("attachment_data"), bData ? TRUE : FALSE);
+    pAttachmentStruct->AddBool(_T("attachment_info"), bInfo ? true : false);
+    pAttachmentStruct->AddBool(_T("attachment_data"), bData ? true : false);
     //
-    BOOL bDataInfoAdded = FALSE;
+    BOOL bDataInfoAdded = false;
     //
     const WIZDOCUMENTATTACHMENTDATAEX& infodata = data;
     //
@@ -715,7 +714,7 @@ BOOL CWizApi::callAttachmentPostData(const WIZDOCUMENTATTACHMENTDATAEX& data)
         pAttachmentStruct->AddTime(_T("dt_data_modified"), infodata.tDataModified);
         pAttachmentStruct->AddString(_T("data_md5"), infodata.strDataMD5);
         //
-        bDataInfoAdded = TRUE;
+        bDataInfoAdded = true;
     }
     if (bData)
     {
@@ -723,7 +722,7 @@ BOOL CWizApi::callAttachmentPostData(const WIZDOCUMENTATTACHMENTDATAEX& data)
         {
             pAttachmentStruct->AddTime(_T("dt_data_modified"), infodata.tDataModified);
             pAttachmentStruct->AddString(_T("data_md5"), infodata.strDataMD5);
-            bDataInfoAdded = TRUE;
+            bDataInfoAdded = true;
         }
         pAttachmentStruct->AddString(_T("attachment_zip_md5"), WizMd5StringNoSpaceJava(infodata.arrayData));
     }
@@ -865,7 +864,7 @@ BOOL CWizApi::uploadNextPartData()
     if (m_currentObjectData.arrayData.isEmpty())
     {
         onUploadObjectDataCompleted(m_currentObjectData);
-        return TRUE;
+        return true;
     }
     //
     int allSize = m_nCurrentObjectAllSize;
@@ -907,46 +906,45 @@ WIZUSERINFO::WIZUSERINFO()
     : nUserLevel(0)
     , nUserPoints(0)
     , nMaxFileSize(10 * 1024 * 1024)
-    , bEnableGroup(FALSE)
+    , bEnableGroup(false)
 {
 
 }
+
 int WIZUSERINFO::GetMaxFileSize()
 {
     return std::max<int>(20 * 1024 * 1024, nMaxFileSize);;
 }
-//
-BOOL WIZUSERINFO::LoadFromXmlRpc(CWizXmlRpcValue& val)
+
+bool WIZUSERINFO::LoadFromXmlRpc(CWizXmlRpcValue& val)
 {
     CWizXmlRpcStructValue* pStruct = dynamic_cast<CWizXmlRpcStructValue*>(&val);
     if (!pStruct)
     {
         TOLOG(_T("Failed to cast CWizXmlRpcValue to CWizXmlRpcStructValue"));
-        return FALSE;
+        return false;
     }
-    //
+
     CWizXmlRpcStructValue& data = *pStruct;
-    //
-    data.GetStr(_T("token"), strToken);
-    data.GetTime(_T("expried_time"), tTokenExpried);
-    data.GetStr(_T("kapi_url"), strDatabaseServer);
-    data.GetStr(_T("download_url"), strDownloadDataServer);
-    data.GetStr(_T("upload_url"), strUploadDataServer);
-    data.GetStr(_T("capi_url"), strChatServer);
-    data.GetStr(_T("kb_guid"), strKbGUID);
-    data.GetInt(_T("upload_size_limit"), nMaxFileSize);
-    data.GetStr(_T("user_type"), strUserType);
-    data.GetStr(_T("show_ad"), strShowAD);
-    data.GetStr(_T("system_tags"), strSystemTags);
-    data.GetStr(_T("push_tag"), strPushTag);
-    data.GetStr(_T("user_level_name"), strUserLevelName);
-    data.GetInt(_T("user_level"), nUserLevel);
-    data.GetInt(_T("user_points"), nUserPoints);
-    data.GetStr(_T("sns_list"), strSNSList);
-    data.GetInt(_T("enable_group"), bEnableGroup);
-    //
+    data.GetStr("token", strToken);
+    data.GetTime("expried_time", tTokenExpried);
+    data.GetStr("kapi_url", strDatabaseServer);
+    data.GetStr("download_url", strDownloadDataServer);
+    data.GetStr("upload_url", strUploadDataServer);
+    data.GetStr("capi_url", strChatServer);
+    data.GetStr("kb_guid", strKbGUID);
+    data.GetInt("upload_size_limit", nMaxFileSize);
+    data.GetStr("user_type", strUserType);
+    data.GetStr("show_ad", strShowAD);
+    data.GetStr("system_tags", strSystemTags);
+    data.GetStr("push_tag", strPushTag);
+    data.GetStr("user_level_name", strUserLevelName);
+    data.GetInt("user_level", nUserLevel);
+    data.GetInt("user_points", nUserPoints);
+    data.GetStr("sns_list", strSNSList);
+    data.GetInt("enable_group", bEnableGroup);
     data.GetStr(_T("notice"), strNotice);
-    //
+
     if (CWizXmlRpcStructValue* pUser = data.GetStruct(_T("user")))
     {
         pUser->GetStr(_T("displayname"), strDisplayName);
@@ -954,10 +952,10 @@ BOOL WIZUSERINFO::LoadFromXmlRpc(CWizXmlRpcValue& val)
         pUser->GetStr(_T("language"), strLanguage);
         //pUser->GetStr(_T("backupserver"), strBackupDatabaseServer);
     }
-    //
-    return !strToken.IsEmpty()
-        && !strKbGUID.IsEmpty()
-        && !strDatabaseServer.IsEmpty();
+
+    return !strToken.isEmpty()
+        && !strKbGUID.isEmpty()
+        && !strDatabaseServer.isEmpty();
 }
 
 

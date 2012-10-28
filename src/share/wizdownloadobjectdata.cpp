@@ -4,7 +4,10 @@
 #include "wizdownloadobjectdatadialog.h"
 
 
-CWizDownloadObjectData::CWizDownloadObjectData(CWizDatabase& db, const CString& strAccountsApiURL, CWizSyncEvents& events, const WIZOBJECTDATA& data)
+CWizDownloadObjectData::CWizDownloadObjectData(CWizDatabase& db, \
+                                               const CString& strAccountsApiURL, \
+                                               CWizSyncEvents& events, \
+                                               const WIZOBJECTDATA& data)
     : CWizApi(db, strAccountsApiURL, events)
     , m_data(data)
     , m_bDownloaded(FALSE)
@@ -15,7 +18,7 @@ CWizDownloadObjectData::CWizDownloadObjectData(CWizDatabase& db, const CString& 
 void CWizDownloadObjectData::onXmlRpcError(const CString& strMethodName, WizXmlRpcError err, int errorCode, const CString& errorMessage)
 {
     CWizApi::onXmlRpcError(strMethodName, err, errorCode, errorMessage);
-    //
+
     emit done(m_bDownloaded);
 }
 
@@ -24,7 +27,7 @@ void CWizDownloadObjectData::onClientLogin()
 {
     downloadObjectData(m_data);
 }
-//
+
 //step 2 download object data
 void CWizDownloadObjectData::onDownloadObjectDataCompleted(const WIZOBJECTDATA& data)
 {
@@ -39,7 +42,7 @@ void CWizDownloadObjectData::onClientLogout()
 {
     emit done(m_bDownloaded);
 }
-//
+
 void CWizDownloadObjectData::startDownload()
 {
     callClientLogin(m_db.GetUserId(), m_db.GetPassword2());
@@ -47,12 +50,12 @@ void CWizDownloadObjectData::startDownload()
 
 
 
-BOOL WizDownloadObjectData(CWizDatabase& db, const WIZOBJECTDATA& data, QWidget* parent)
+bool WizDownloadObjectData(CWizDatabase& db, const WIZOBJECTDATA& data, QWidget* parent)
 {
     return WizDownloadObjectDataDialog::downloadObjectData(db, WIZ_API_URL, data, parent);
 }
 
-BOOL WizPrepareDocument(CWizDatabase& db, const WIZDOCUMENTDATA& data, QWidget* parent)
+bool WizPrepareDocument(CWizDatabase& db, const WIZDOCUMENTDATA& data, QWidget* parent)
 {
     if (!db.IsObjectDataDownloaded(data.strGUID, "document")
         || !PathFileExists(db.GetDocumentFileName(data.strGUID))
@@ -63,13 +66,13 @@ BOOL WizPrepareDocument(CWizDatabase& db, const WIZDOCUMENTDATA& data, QWidget* 
         obj.strDisplayName = data.strTitle;
         obj.eObjectType = wizobjectDocument;
         if (!WizDownloadObjectData(db, obj, parent))
-            return FALSE;
+            return false;
     }
-    //
-    return TRUE;
+
+    return true;
 }
 
-BOOL WizPrepareAttachment(CWizDatabase& db, const WIZDOCUMENTATTACHMENTDATA& data, QWidget* parent)
+bool WizPrepareAttachment(CWizDatabase& db, const WIZDOCUMENTATTACHMENTDATA& data, QWidget* parent)
 {
     if (!db.IsObjectDataDownloaded(data.strGUID, "attachment")
         || !PathFileExists(db.GetAttachmentFileName(data.strGUID))
@@ -80,9 +83,9 @@ BOOL WizPrepareAttachment(CWizDatabase& db, const WIZDOCUMENTATTACHMENTDATA& dat
         obj.strDisplayName = data.strName;
         obj.eObjectType = wizobjectDocumentAttachment;
         if (!WizDownloadObjectData(db, obj, parent))
-            return FALSE;
+            return false;
     }
-    //
-    return TRUE;
+
+    return true;
 }
 

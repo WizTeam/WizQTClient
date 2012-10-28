@@ -10,19 +10,20 @@ CWizXmlRpcIntValue::CWizXmlRpcIntValue(int n /*= 0*/)
 
 }
 
-BOOL CWizXmlRpcIntValue::Write(CWizXMLNode& nodeValue)
+bool CWizXmlRpcIntValue::Write(CWizXMLNode& nodeValue)
 {
 	nodeValue.SetChildNodeText(_T("int"), WizIntToStr(m_n));
-	return TRUE;
+    return true;
 }
 
-BOOL CWizXmlRpcIntValue::Read(CWizXMLNode& nodeValue)
+bool CWizXmlRpcIntValue::Read(CWizXMLNode& nodeValue)
 {
 	CString strValue = nodeValue.GetFirstChildNodeText();
     m_n = _ttoi(strValue);
 
-	return TRUE;
+    return true;
 }
+
 CString CWizXmlRpcIntValue::ToString() const
 {
 	return WizIntToStr(m_n);
@@ -503,7 +504,7 @@ BOOL CWizXmlRpcStructValue::GetInt(const CString& strName, int& n) const
 	return FALSE;
 }
 
-BOOL CWizXmlRpcStructValue::GetString(const CString& strName, CString& str) const
+bool CWizXmlRpcStructValue::GetString(const QString& strName, QString& str) const
 {
     if (CWizXmlRpcIntValue* p = GetValue<CWizXmlRpcIntValue>(strName))
 	{
@@ -902,9 +903,11 @@ void CWizXmlRpcServer::abort()
     m_http.abort();
 }
 
-BOOL CWizXmlRpcServer::xmlRpcCall(const CString& strMethodName,
-                   CWizXmlRpcValue* pParam1, CWizXmlRpcValue* pParam2, CWizXmlRpcValue* pParam3, CWizXmlRpcValue* pParam4,
-                   CWizXmlRpcValue* pParam5, CWizXmlRpcValue* pParam6, CWizXmlRpcValue* pParam7, CWizXmlRpcValue* pParam8)
+bool CWizXmlRpcServer::xmlRpcCall(const CString& strMethodName, \
+                                  CWizXmlRpcValue* pParam1, CWizXmlRpcValue* pParam2, \
+                                  CWizXmlRpcValue* pParam3, CWizXmlRpcValue* pParam4, \
+                                  CWizXmlRpcValue* pParam5, CWizXmlRpcValue* pParam6, \
+                                  CWizXmlRpcValue* pParam7, CWizXmlRpcValue* pParam8)
 {
     m_strMethodName = strMethodName;
 

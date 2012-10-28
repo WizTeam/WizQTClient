@@ -11,7 +11,7 @@ BOOL CWizHtmlFileMap::Lookup(const CString& strUrl, CString& strFileName)
         return FALSE;
     //
     strFileName = it->second.strFileName;
-    return TRUE;
+    return true;
 }
 
 void CWizHtmlFileMap::Add(const CString& strUrl, const CString& strFileName, WIZHTMLFILEDATA::HtmlFileType eType, BOOL bProcessed)
@@ -172,7 +172,7 @@ BOOL CWizHtmlCollector::Collect(const CString& strUrl, CString& strHtml, BOOL ma
     //
     ::WizStringArrayToText(m_ret, strHtml, "");
     //
-    return TRUE;
+    return true;
 }
 
 BOOL CWizHtmlCollector::Html2Zip(const CString& strUrl, const CString& strHtml, const CString& strExtResourcePath, const CString& strMetaText, const CString& strZipFileName)
