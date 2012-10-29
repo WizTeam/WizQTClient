@@ -41,6 +41,8 @@ QRect CWizPopupWidget::getClientRect() const
 
 void CWizPopupWidget::paintEvent(QPaintEvent* event)
 {
+    Q_UNUSED(event);
+
     QPainter painter(this);
     QPen pen(QColor(0xd9, 0xdc, 0xdd));
     //pen.setWidth(3);

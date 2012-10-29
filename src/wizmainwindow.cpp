@@ -67,6 +67,9 @@ MainWindow::MainWindow(CWizDatabase& db, QWidget *parent) :
     m_bLogoutRestart(false),
     m_bUpdatingSelection(false)
 {
+    // start update check thread
+    m_updater->start();
+
     initActions();
     initMenuBar();
     initToolBar();

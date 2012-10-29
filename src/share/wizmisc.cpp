@@ -496,6 +496,10 @@ CString WizIntToStr(int n)
     return str;
 }
 
+QString WizGetTimeStamp()
+{
+    return QString::number(QDateTime::currentDateTime().toTime_t());
+}
 
 COleDateTime WizGetCurrentTime()
 {

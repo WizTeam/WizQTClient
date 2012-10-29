@@ -1,6 +1,8 @@
 #ifndef WIZMISC_H
 #define WIZMISC_H
 
+#include <stdint.h>
+
 #include <QBuffer>
 #include <QByteArray>
 
@@ -46,7 +48,7 @@ private:
 
 IWizGlobal* WizGlobal();
 
-
+QString WizGetTimeStamp();
 COleDateTime WizGetCurrentTime();
 BOOL WizStringToDateTime(const CString& str, COleDateTime& t, CString& strError);
 COleDateTime WizStringToDateTime(const CString& str);
