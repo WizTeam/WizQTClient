@@ -1,7 +1,6 @@
 #ifndef WIZMAINWINDOW_H
 #define WIZMAINWINDOW_H
 
-#include <QtCore>
 #include <QtGui>
 
 #include "wizdef.h"
@@ -11,15 +10,6 @@
 
 #include "wizupdater.h"
 #include "wizconsoledialog.h"
-
-#ifndef Q_OS_MAC
-class QToolBar;
-#endif
-class QStatusBar;
-class QProgressBar;
-class QLabel;
-class QMenuBar;
-class QTimer;
 
 class CWizCategoryView;
 class CWizDocumentListView;
@@ -41,9 +31,13 @@ class MainWindow
 
 public:
     explicit MainWindow(CWizDatabase& db, QWidget *parent = 0);
-
-    void center(int width, int height);
+    virtual void init();
+    virtual void closeEvent(QCloseEvent *);
+    void center();
     ~MainWindow();
+
+    bool isRestart() const { return m_bRestart; }
+    bool isLogout() const { return m_bLogoutRestart; }
 
 public:
     virtual QWidget* mainWindow() { return this; }
@@ -106,16 +100,8 @@ private:
     void initStatusBar();
 
 public:
-    virtual void init();
-    virtual void closeEvent(QCloseEvent *);
-    virtual QSize sizeHint() const;
-
-public:
     void viewDocument(const WIZDOCUMENTDATA& data, bool addToHistory);
     void locateDocument(const WIZDOCUMENTDATA& data);
-
-    bool isRestart() const { return m_bRestart; }
-    bool isLogout() const { return m_bLogoutRestart; }
 
 #ifndef Q_OS_MAC
     CWizFixedSpacer* findFixedSpacer(int index);

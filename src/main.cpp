@@ -122,7 +122,6 @@ int main(int argc, char *argv[])
     }
 
     MainWindow w(db);
-    w.showMaximized();
     w.show();
     w.init();
 

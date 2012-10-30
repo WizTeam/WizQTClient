@@ -8,23 +8,6 @@
 #include "wizaboutdialog.h"
 #include "wizpreferencedialog.h"
 
-//#include <QDir>
-//#include <QMessageBox>
-//#include <QSplitter>
-//#include <QLabel>
-//#include <QStatusBar>
-//#include <QProgressBar>
-//#include <QListView>
-//#include <QHBoxLayout>
-//#ifndef Q_OS_MAC
-//#include <QToolBar>
-//#endif
-//#include <QMenuBar>
-//#include <QAction>
-//#include <QDebug>
-//#include <QBoxLayout>
-//#include <QApplication>
-//#include <QTimer>
 #include "share/wizcommonui.h"
 
 #include "mac/wizmactoolbar.h"
@@ -38,34 +21,34 @@
 #include "share/wizsettings.h"
 #include "share/wizanimateaction.h"
 
-MainWindow::MainWindow(CWizDatabase& db, QWidget *parent) :
-    QMainWindow(parent),
-    m_db(db),
-    m_settings(new CWizUserSettings(db)),
-    m_console(new CWizConsoleDialog(*this, this)),
-    m_sync(m_db, WIZ_API_URL, *this),
-    m_menuBar(new QMenuBar(this)),
+MainWindow::MainWindow(CWizDatabase& db, QWidget *parent)
+    : QMainWindow(parent)
+    , m_db(db)
+    , m_settings(new CWizUserSettings(db))
+    , m_console(new CWizConsoleDialog(*this, this))
+    , m_sync(m_db, WIZ_API_URL, *this)
+    , m_menuBar(new QMenuBar(this))
     #ifndef Q_OS_MAC
-    m_toolBar(new QToolBar("Main", this)),
-    m_labelNotice(NULL),
-    m_optionsAction(NULL),
+    , m_toolBar(new QToolBar("Main", this))
+    , m_labelNotice(NULL)
+    , m_optionsAction(NULL)
     #endif
-    m_statusBar(new QStatusBar(this)),
-    m_labelStatus(new QLabel(this)),
-    m_progressSync(new QProgressBar(this)),
-    m_actions(new CWizActions(*this, this)),
-    m_category(new CWizCategoryView(*this, this)),
-    m_documents(new CWizDocumentListView(*this, this)),
-    m_doc(new CWizDocumentView(*this, this)),
-    m_splitter(NULL),
-    m_options(NULL),
-    m_history(new CWizDocumentViewHistory()),
-    m_animateSync(new CWizAnimateAction(*this, this)),
-    m_syncTimer(new QTimer(this)),
-    m_updater(new CWizUpdater(this)),
-    m_bRestart(false),
-    m_bLogoutRestart(false),
-    m_bUpdatingSelection(false)
+    , m_statusBar(new QStatusBar(this))
+    , m_labelStatus(new QLabel(this))
+    , m_progressSync(new QProgressBar(this))
+    , m_actions(new CWizActions(*this, this))
+    , m_category(new CWizCategoryView(*this, this))
+    , m_documents(new CWizDocumentListView(*this, this))
+    , m_doc(new CWizDocumentView(*this, this))
+    , m_splitter(NULL)
+    , m_options(NULL)
+    , m_history(new CWizDocumentViewHistory())
+    , m_animateSync(new CWizAnimateAction(*this, this))
+    , m_syncTimer(new QTimer(this))
+    , m_updater(new CWizUpdater(this))
+    , m_bRestart(false)
+    , m_bLogoutRestart(false)
+    , m_bUpdatingSelection(false)
 {
     // start update check thread
     m_updater->start();
@@ -77,19 +60,23 @@ MainWindow::MainWindow(CWizDatabase& db, QWidget *parent) :
     initStatusBar();
 
     setWindowTitle(tr("WizNote"));
+    center();
 }
 
 MainWindow::~MainWindow()
 {
+    m_updater->quit();
     delete m_history;
 }
 
-void MainWindow::center(int width, int height)
+void MainWindow::center()
 {
-    QRect screenGeometry = QApplication::desktop()->screenGeometry();
-    int x = (screenGeometry.width() - width) / 2;
-    int y = (screenGeometry.height() - height) / 2;
-    setGeometry(x, y, width, height);
+    setGeometry(QStyle::alignedRect(
+                    Qt::LeftToRight,
+                    Qt::AlignCenter,
+                    sizeHint(),
+                    qApp->desktop()->availableGeometry()
+    ));
 }
 
 void MainWindow::initActions()
@@ -143,56 +130,34 @@ void MainWindow::initToolBar()
     //
 #else
     addToolBar(m_toolBar);
-
     m_toolBar->setMovable(false);
     m_toolBar->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
-    //
-    //m_toolBar->addAction(m_actions->actionFromName("actionGoBack"));
-    //m_toolBar->addAction(m_actions->actionFromName("actionGoForward"));
-    //
+
     m_toolBar->addWidget(new CWizFixedSpacer(QSize(20, 1), m_toolBar));
-    //
     m_toolBar->addAction(m_actions->actionFromName("actionSync"));
-    //
     m_toolBar->addWidget(new CWizFixedSpacer(QSize(20, 1), m_toolBar));
-    //
     m_toolBar->addAction(m_actions->actionFromName("actionNewNote"));
     m_toolBar->addAction(m_actions->actionFromName("actionDeleteCurrentNote"));
-    //
-    //
+
 #if 0
     QAction* pCaptureScreenAction = m_actions->actionFromName("actionCaptureScreen");
     m_actions->buildActionMenu(pCaptureScreenAction, this, ::WizGetAppPath() + "files/mainmenu.ini");
     m_toolBar->addAction(pCaptureScreenAction);
 #endif
-    //
+
     m_toolBar->addWidget(new CWizSpacer(m_toolBar));
-    //
-    m_labelNotice = new QLabel("", m_toolBar);
-    m_labelNotice->setOpenExternalLinks(true);
-    m_toolBar->addWidget(m_labelNotice);
-    //
-    m_toolBar->addWidget(new CWizSpacer(m_toolBar));
-    //
-    //if (QAction* actionOptions = m_actions->actionFromName("actionOptions"))
-    //{
-    //    QToolButton* buttonOptions = new QToolButton(m_toolBar);
-    //    buttonOptions->setIcon(actionOptions->icon());
-    //    buttonOptions->setText("");
-    //    buttonOptions->setToolTip(actionOptions->text());
-    //    m_optionsAction = m_toolBar->addWidget(buttonOptions);
-    //    //
-    //    connect(buttonOptions, SIGNAL(clicked()), this, SLOT(on_actionOptions_triggered()));
-    //}
+
+    //m_labelNotice = new QLabel("", m_toolBar);
+    //m_labelNotice->setOpenExternalLinks(true);
+    //m_toolBar->addWidget(m_labelNotice);
+    //m_toolBar->addWidget(new CWizSpacer(m_toolBar));
 
     //CWizSearchBox* searchBox = new CWizSearchBox();
     //connect(searchBox, SIGNAL(doSearch(const QString&)), this, SLOT(on_search_doSearch(const QString&)));
     //m_toolBar->addWidget(searchBox);
 
     m_toolBar->addWidget(new CWizFixedSpacer(QSize(20, 1), m_toolBar));
-
     m_toolBar->addAction(m_actions->actionFromName("actionPopupMainMenu"));
-
     m_toolBar->addWidget(new CWizFixedSpacer(QSize(2, 1), m_toolBar));
 
     m_toolBar->setStyle(WizGetStyle(m_settings->skin()));
@@ -200,7 +165,7 @@ void MainWindow::initToolBar()
     CWizSettings settings(::WizGetSkinResourcePath(m_settings->skin()) + "skin.ini");
     m_toolBar->layout()->setMargin(settings.GetInt("ToolBar", "Margin", m_toolBar->layout()->margin()));
 
-#endif // #ifdef Q_OS_MAC
+#endif // Q_OS_MAC
 
     //resetNotice();
 }
@@ -208,21 +173,22 @@ void MainWindow::initToolBar()
 void MainWindow::initClient()
 {
     QWidget* client = new QWidget(this);
-    setCentralWidget(client);
+    this->setCentralWidget(client);
 
+    client->setSizePolicy(QSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum));
     QPalette pal = client->palette();
     pal.setColor(QPalette::Window, WizGetClientBackgroundColor(m_settings->skin()));
     client->setPalette(pal);
     client->setAutoFillBackground(true);
 
+    QHBoxLayout* layout = new QHBoxLayout(client);
+    layout->setMargin(0);
+    client->setLayout(layout);
+
 #ifndef Q_OS_MAC
     WizInitWidgetMargins(m_settings->skin(), client, "Client");
     WizInitWidgetMargins(m_settings->skin(), m_doc, "Document");
 #endif
-
-    QBoxLayout* layout = new QBoxLayout(QBoxLayout::LeftToRight, client);
-    client->setLayout(layout);
-    layout->setMargin(0);;
 
     CWizSplitter *splitter = new CWizSplitter(client);
     layout->addWidget(splitter);
@@ -275,14 +241,14 @@ void MainWindow::initClient()
 void MainWindow::initStatusBar()
 {
     setStatusBar(m_statusBar);
-    //
+
     m_progressSync->setRange(0, 100);
     m_statusBar->addWidget(m_progressSync, 20);
     m_statusBar->addWidget(m_labelStatus, 80);
-    //
+
     m_progressSync->setVisible(false);
     m_labelStatus->setVisible(false);
-    //
+
     m_statusBar->hide();
 }
 
@@ -325,21 +291,8 @@ void MainWindow::init()
 void MainWindow::closeEvent(QCloseEvent *e)
 {
     m_sync.abort();
-    //
-    QMainWindow::closeEvent(e);
-}
 
-QSize MainWindow::sizeHint() const
-{
-    QDesktopWidget * desk = QApplication::desktop();
-    QRect rc = desk->rect();
-#ifdef Q_OS_MAC
-    rc.adjust(100, 100, -100, -200);
-#else
-    rc.adjust(100, 100, -100, -100);
-#endif
-    //
-    return rc.size();
+    QMainWindow::closeEvent(e);
 }
 
 void MainWindow::syncStarted()
@@ -348,9 +301,8 @@ void MainWindow::syncStarted()
     m_progressSync->setVisible(true);
     m_labelStatus->setVisible(true);
     m_labelStatus->setText("");
-    //
+
     m_statusBar->show();
-    //
     m_animateSync->startPlay();
 }
 
@@ -368,19 +320,19 @@ void MainWindow::syncLogin()
 void MainWindow::syncDone(bool error)
 {
     Q_UNUSED(error);
-    //
+
     m_statusBar->hide();
-    //
+
     m_progressSync->setVisible(error);
     m_labelStatus->setVisible(error);
-    //
+
     m_animateSync->stopPlay();
 }
 
 void MainWindow::addLog(const CString& strMsg)
 {
     qDebug() << strMsg;
-    //
+
     m_labelStatus->setText(strMsg);
 }
 void MainWindow::addDebugLog(const CString& strMsg)
@@ -391,14 +343,14 @@ void MainWindow::addDebugLog(const CString& strMsg)
 void MainWindow::addErrorLog(const CString& strMsg)
 {
     TOLOG(strMsg);
-    //
+
     QMessageBox::critical(this, "", strMsg);
 }
+
 void MainWindow::changeProgress(int pos)
 {
     m_progressSync->setValue(pos);
 }
-
 
 void MainWindow::on_actionExit_triggered()
 {
@@ -435,7 +387,7 @@ void MainWindow::on_actionDeleteCurrentNote_triggered()
     WIZDOCUMENTDATA document = m_doc->document();
     if (document.strGUID.IsEmpty())
         return;
-    //
+
     CWizDocument doc(m_db, document);
     doc.Delete();
 }
@@ -501,9 +453,9 @@ void MainWindow::on_client_splitterMoved(int pos, int index)
     else if (2 == index)
     {
         QPoint pt(pos, 0);
-        //
+
         pt = m_splitter->mapToGlobal(pt);
-        //
+
         adjustToolBarSpacerToPos(1, pt.x());
     }
 }
@@ -704,13 +656,15 @@ QObject* MainWindow::CreateWizObject(const QString& strObjectID)
         static CWizCommonUI* commonUI = new CWizCommonUI(this);
         return commonUI;
     }
-    //
+
     return NULL;
 }
+
 void MainWindow::SetDocumentModified(bool modified)
 {
     m_doc->setModified(modified);
 }
+
 void MainWindow::SetSavingDocument(bool saving)
 {
     m_statusBar->setVisible(saving);
@@ -724,7 +678,4 @@ void MainWindow::SetSavingDocument(bool saving)
     {
         m_labelStatus->setVisible(false);
     }
-    //
 }
-
-

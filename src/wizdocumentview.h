@@ -18,6 +18,7 @@ class CWizDocumentView : public QWidget
 
 public:
     CWizDocumentView(CWizExplorerApp& app, QWidget* parent = 0);
+    virtual QSize sizeHint() const { return QSize(800,700); }
 
     void loadSpecialPage(const QString& strFileName);
 

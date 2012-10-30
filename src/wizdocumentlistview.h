@@ -16,6 +16,7 @@ class CWizDocumentListView : public QListWidget
 
 public:
     CWizDocumentListView(CWizExplorerApp& app, QWidget *parent = 0);
+    virtual QSize sizeHint() const { return QSize(320, 1); }
 
 private:
     CWizExplorerApp& m_app;
@@ -48,7 +49,6 @@ public:
     WIZABSTRACT documentAbstractFromIndex(const QModelIndex &index) const;
     CString documentTagsFromIndex(const QModelIndex &index) const;
 
-    virtual QSize sizeHint() const { return QSize(320, 1); }
     virtual void contextMenuEvent(QContextMenuEvent * e);
     //drag
     virtual void startDrag(Qt::DropActions supportedActions);

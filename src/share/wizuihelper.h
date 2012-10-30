@@ -59,6 +59,7 @@ class CWizSplitter : public QSplitter
 public:
     CWizSplitter(QWidget* parent = 0);
     QSplitterHandle *createHandle();
+
 #ifndef Q_OS_MAC
 private:
     int m_splitterWidth;
@@ -69,11 +70,8 @@ public:
     void setSplitterColor(const QColor& color);
     QColor splitterColor() const { return m_splitterColor; }
 #endif
+
 };
-
-
-
-
 
 
 #endif // WIZMACHELPER_H
