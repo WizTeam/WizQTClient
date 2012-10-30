@@ -8,8 +8,8 @@
 
 CWizConsoleDialog::CWizConsoleDialog(CWizExplorerApp& app, QWidget* parent)
     : QDialog(parent)
-    , m_ui(new Ui::CWizConsoleDialog)
     , m_app(app)
+    , m_ui(new Ui::CWizConsoleDialog)
 {
     m_ui->setupUi(this);
     vScroll = m_ui->editConsole->verticalScrollBar();

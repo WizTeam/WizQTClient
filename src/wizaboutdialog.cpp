@@ -6,8 +6,8 @@
 
 AboutDialog::AboutDialog(CWizExplorerApp& app, QWidget *parent)
     : QDialog(parent)
-    , ui(new Ui::AboutDialog)
     , m_app(app)
+    , ui(new Ui::AboutDialog)
 {
     ui->setupUi(this);
     setFixedSize(size());

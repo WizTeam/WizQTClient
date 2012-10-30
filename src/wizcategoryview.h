@@ -22,6 +22,7 @@ public:
     void init();
 
 protected:
+    CWizExplorerApp& m_app;
     CWizDatabase& m_db;
 
     void initFolders();
@@ -33,7 +34,6 @@ protected:
     void addSeparator();
 
 private:
-    CWizExplorerApp& m_app;
     QMenu* m_menuAllFolders;
     QMenu* m_menuAllTags;
     QMenu* m_menuFolder;

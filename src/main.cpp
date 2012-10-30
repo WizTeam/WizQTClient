@@ -1,8 +1,5 @@
-#include <QApplication>
-#include <QDebug>
-#include <QMessageBox>
-#include <QTranslator>
-#include <QProcess>
+#include <QtCore>
+#include <QtGui>
 
 #include "wizmainwindow.h"
 #include "wizupdaterprogressdialog.h"

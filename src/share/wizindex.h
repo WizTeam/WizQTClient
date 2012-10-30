@@ -29,7 +29,6 @@ struct WIZSEARCHDATA
 };
 
 
-
 struct WIZDOCUMENTLOCATIONDATA
 {
 	CString strLocation;

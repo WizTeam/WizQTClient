@@ -136,7 +136,7 @@ void CWizDocumentWebView::on_web_loadFinished(bool ok)
     }
 }
 
-void CWizDocumentWebView::on_web_linkClicked(const QUrl & url)
+void CWizDocumentWebView::on_web_linkClicked(const QUrl& url)
 {
     Qt::KeyboardModifiers mod = QApplication::keyboardModifiers ();
     if (mod.testFlag(Qt::ControlModifier))

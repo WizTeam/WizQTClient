@@ -17,8 +17,9 @@ public:
     CWizActions(CWizExplorerApp& app, QObject* parent);
 
 private:
-    CWizExplorerApp& m_app;
     QObject* m_parent;
+    CWizExplorerApp& m_app;
+
     std::map<QString, QAction*> m_actions;
     WIZACTION* actionsData();
     QAction* addAction(WIZACTION& action);

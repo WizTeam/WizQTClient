@@ -38,7 +38,7 @@ WelcomeDialog::WelcomeDialog(const QString &strDefaultUserId, const QString& str
     connect(ui->webView, SIGNAL(linkClicked(const QUrl&)), this, SLOT(on_web_linkClicked(const QUrl&)));
 
     // callbacks
-    connect(ui->labelProxySettings, SIGNAL(linkActivated(QString)), this, SLOT(on_labelProxy_linkActivated(QString)));
+    connect(ui->labelProxySettings, SIGNAL(linkActivated(const QString&)), SLOT(on_labelProxy_linkActivated(const QString&)));
     connect(ui->comboUsers, SIGNAL(activated(QString)), SLOT(on_comboUsers_activated(QString)));
     connect(ui->comboUsers, SIGNAL(editTextChanged(QString)), SLOT(on_comboUsers_editTextChanged(QString)));
     connect(ui->checkAutoLogin, SIGNAL(stateChanged(int)), SLOT(on_autoLogin_stateChanged(int)));
@@ -155,6 +155,10 @@ void WelcomeDialog::getUserPasswordPairs()
         QString strPath = *iter;
         QString strUserId = ::WizFolderNameByPath(strPath);
 
+        if (strUserId.indexOf("@") == -1) {
+            continue;
+        }
+
         CWizUserSettings userSettings(strUserId);
         m_users.insert(strUserId, userSettings.password());
     }
@@ -169,7 +173,7 @@ void WelcomeDialog::enableControls(bool b)
     ui->buttonLogin->setEnabled(b);
 }
 
-void WelcomeDialog::on_web_linkClicked(const QUrl & url)
+void WelcomeDialog::on_web_linkClicked(const QUrl& url)
 {
     CString strUrl = url.toString();
     strUrl.MakeLower();

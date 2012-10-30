@@ -95,7 +95,10 @@ public:
 
 class CWizCategoryViewFolderItem : public CWizCategoryViewItem
 {
+private:
+    CWizExplorerApp& m_app;
     CString m_strLocation;
+
 public:
     CWizCategoryViewFolderItem(CWizExplorerApp& app, const CString& strLocation)
         : m_app(app)
@@ -122,12 +125,8 @@ public:
         pCtrl->showFolderContextMenu(pos);
     }
 
-
     CString location() const { return m_strLocation; }
     CString name() const { return CWizDatabase::GetLocationName(m_strLocation); }
-
-private:
-    CWizExplorerApp& m_app;
 };
 
 
@@ -148,7 +147,10 @@ public:
 
 class CWizCategoryViewTagItem : public CWizCategoryViewItem
 {
+private:
+    CWizExplorerApp& m_app;
     WIZTAGDATA m_tag;
+
 public:
     CWizCategoryViewTagItem(CWizExplorerApp& app, const WIZTAGDATA& tag)
         : m_app(app)
@@ -183,18 +185,18 @@ public:
     {
         return m_tag;
     }
-
-private:
-    CWizExplorerApp& m_app;
 };
 
 
 class CWizCategoryViewTrashItem : public CWizCategoryViewFolderItem
 {
+private:
+    CWizExplorerApp& m_app;
+
 public:
     CWizCategoryViewTrashItem(CWizExplorerApp& app, const CString& str)
-        : m_app(app)
-        , CWizCategoryViewFolderItem(app, "/Deleted Items/")
+        : CWizCategoryViewFolderItem(app, "/Deleted Items/")
+        , m_app(app)
     {
         setText(0, str);
         setIcon(0, ::WizLoadSkinIcon(m_app.userSettings().skin(), "trash"));
@@ -211,9 +213,6 @@ public:
     {
         pCtrl->showTrashContextMenu(pos);
     }
-
-private:
-    CWizExplorerApp& m_app;
 };
 
 

@@ -23,7 +23,6 @@ public:
 
 private:
     CWizExplorerApp& m_app;
-
     Ui::CWizConsoleDialog* m_ui;
 
     QString m_data;

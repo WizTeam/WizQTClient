@@ -59,10 +59,16 @@ public:
 private:
     CWizDatabase& m_db;
     CWizUserSettings* m_settings;
-    CWizSync m_sync;
-
     CWizUpdater* m_updater;
     CWizConsoleDialog* m_console;
+    CWizSync m_sync;
+    QTimer* m_syncTimer;
+
+#ifndef Q_OS_MAC
+    QToolBar* m_toolBar;
+    QLabel* m_labelNotice;
+    QAction* m_optionsAction;
+#endif
 
     QMenuBar* m_menuBar;
     QStatusBar* m_statusBar;
@@ -78,19 +84,12 @@ private:
 
     CWizDocumentViewHistory* m_history;
     CWizAnimateAction* m_animateSync;
-    QTimer* m_syncTimer;
 
     bool m_bRestart;
     bool m_bLogoutRestart;
     bool m_bUpdatingSelection;
 
     WIZDOCUMENTDATA m_documentForEditing;
-
-#ifndef Q_OS_MAC
-    QToolBar* m_toolBar;
-    QLabel* m_labelNotice;
-    QAction* m_optionsAction;
-#endif
 
 private:
     void initActions();

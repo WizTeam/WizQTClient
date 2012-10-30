@@ -119,16 +119,20 @@ public:
     {
         //title
         m_titleEdit->setText(data.strTitle);
+
         //tags
         CWizStdStringArray arrayTagGUID;
         db.GetDocumentTags(data.strGUID, arrayTagGUID);
-        CString strTagText = arrayTagGUID.empty() ? CString() : WizIntToStr(arrayTagGUID.size());
+
+        QString strTagText = arrayTagGUID.empty() ? QString() : QString::number(arrayTagGUID.size());
         m_tagsButton->setText(strTagText);
+
         QString tagsShortcut = ::WizGetShortcut("EditNoteTags", "Alt+2");
-        QString strTagsToolTip = arrayTagGUID.empty() ? QObject::tr("Tags (%1)") : QObject::tr("Tags (%1): %2");
-        strTagsToolTip = strTagsToolTip.arg(tagsShortcut, db.GetDocumentTagDisplayNameText(data.strGUID));
+        QString strTagsToolTip = QObject::tr("Tags (%1)").arg(tagsShortcut);
+        //strTagsToolTip = strTagsToolTip.arg(tagsShortcut).arg(db.GetDocumentTagDisplayNameText(data.strGUID));
         m_tagsButton->setToolTip(strTagsToolTip);
         m_tagsButton->setShortcut(QKeySequence::fromString(tagsShortcut));
+
         //attachments
         int nAttachmentCount = db.GetDocumentAttachmentCount(data.strGUID);
         CString strAttachmentText = nAttachmentCount ? WizIntToStr(nAttachmentCount) : CString();

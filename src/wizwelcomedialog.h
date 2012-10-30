@@ -44,7 +44,7 @@ public Q_SLOTS:
     virtual void accept();
 
     void verifyAccountDone(bool succeeded, const CString& errorMessage);
-    void on_web_linkClicked(const QUrl &url);
+    void on_web_linkClicked(const QUrl& url);
     void on_labelProxy_linkActivated(const QString& link);
 
     void on_comboUsers_activated(const QString& userId);

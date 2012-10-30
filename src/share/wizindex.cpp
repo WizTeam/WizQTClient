@@ -4082,16 +4082,14 @@ BOOL CIndex::GetRecentDocumentsModified(const CString& strDocumentType, int nCou
 BOOL CIndex::GetRecentDocumentsByCreatedTime(const COleDateTime& t, CWizDocumentDataArray& arrayDocument)
 {
     CString strTime = TIME2SQL(t);
-    //
+
     CString strSQL;
     strSQL.Format(_T("select %s from %s where DOCUMENT_LOCATION not like '/Deleted Items/%%' and DT_CREATED>=%s order by DT_CREATED desc"),
         FIELD_LIST_WIZ_DOCUMENT.utf16(),
         TABLE_NAME_WIZ_DOCUMENT.utf16(),
         strTime.utf16()
         );
-    //
-    qDebug() << strSQL;
-    //
+
     return SQLToDocumentDataArray(strSQL, arrayDocument);
 }
 
