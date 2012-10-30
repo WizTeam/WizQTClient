@@ -4175,12 +4175,13 @@ CString CIndex::GetRootLocationName(CString strLocation)
 	else
 		return strLocation.Left(nIndex);
 }
-BOOL CIndex::IsRootLocation(CString strLocation)
+
+bool CIndex::IsRootLocation(CString strLocation)
 {
 	strLocation.Trim('/');
-	//
 	return -1 == strLocation.Find('/');
 }
+
 BOOL CIndex::GetLocationsNeedToBeSync(CWizStdStringArray& arrayLocation)
 {
 	if (!GetLocations(arrayLocation))
@@ -4643,9 +4644,9 @@ BOOL CIndex::IsLocationEmpty(const CString& strLocation)
 	return !HasRecord(strSQL);
 }
 
-BOOL CIndex::GetAllLocations(CWizStdStringArray& arrayLocation)
+bool CIndex::GetAllLocations(CWizStdStringArray& arrayLocation)
 {
-	CString strSQL = _T("select distinct DOCUMENT_LOCATION from WIZ_DOCUMENT");
+    QString strSQL = "select distinct DOCUMENT_LOCATION from WIZ_DOCUMENT";
 	return SQLToStringArray(strSQL, 0, arrayLocation);
 }
 

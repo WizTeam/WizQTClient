@@ -306,61 +306,56 @@ void CWizCategoryView::initFolders()
 {
     CWizCategoryViewAllFoldersItem* pAllFoldersItem = new CWizCategoryViewAllFoldersItem(m_app, tr("Note Folders"));
     addTopLevelItem(pAllFoldersItem);
-    //
+
     CWizStdStringArray arrayAllLocation;
     m_db.GetAllLocations(arrayAllLocation);
-    //
-    initFolders(pAllFoldersItem, "", arrayAllLocation);
-    //
-    if (arrayAllLocation.empty())
-    {
-        const CString strNotes("/My Notes/");
-        const CString strDrafts("/My Drafts/");
+
+    initFolders(pAllFoldersItem, QString(), arrayAllLocation);
+
+    if (arrayAllLocation.empty()) {
+        const QString strNotes("/My Notes/");
         m_db.AddExtraFolder(strNotes);
-        m_db.AddExtraFolder(strDrafts);
         arrayAllLocation.push_back(strNotes);
-        arrayAllLocation.push_back(strDrafts);
     }
-    //
+
     //init extra folders
     CWizStdStringArray arrayExtLocation;
     m_db.GetExtraFolder(arrayExtLocation);
-    for (CWizStdStringArray::const_iterator it = arrayExtLocation.begin();
-    it != arrayExtLocation.end();
-    it++)
-    {
-        CString strLocation = *it;
-        if (strLocation.IsEmpty())
+
+    CWizStdStringArray::const_iterator it;
+    for (it = arrayExtLocation.begin(); it != arrayExtLocation.end(); it++) {
+        QString strLocation = *it;
+
+        if (strLocation.isEmpty())
             continue;
-        //
+
         if (m_db.IsInDeletedItems(strLocation))
             continue;
-        //
+
         addFolder(strLocation, true);
     }
-    //
+
     pAllFoldersItem->setExpanded(true);
-    //
     pAllFoldersItem->sortChildren(0, Qt::AscendingOrder);
 }
 
-void CWizCategoryView::initFolders(QTreeWidgetItem* pParent, const CString& strParentLocation, const CWizStdStringArray& arrayAllLocation)
+void CWizCategoryView::initFolders(QTreeWidgetItem* pParent, \
+                                   const QString& strParentLocation, \
+                                   const CWizStdStringArray& arrayAllLocation)
 {
     CWizStdStringArray arrayLocation;
     CWizDatabase::GetChildLocations(arrayAllLocation, strParentLocation, arrayLocation);
-    //
-    for (CWizStdStringArray::const_iterator it = arrayLocation.begin();
-    it != arrayLocation.end();
-    it++)
-    {
+
+    CWizStdStringArray::const_iterator it;
+    for (it = arrayLocation.begin(); it != arrayLocation.end(); it++) {
         CString strLocation = *it;
-        //
+
         if (m_db.IsInDeletedItems(strLocation))
             continue;
-        //
+
         CWizCategoryViewFolderItem* pFolderItem = new CWizCategoryViewFolderItem(m_app, strLocation);
         pParent->addChild(pFolderItem);
-        //
+
         initFolders(pFolderItem, strLocation, arrayAllLocation);
     }
 }

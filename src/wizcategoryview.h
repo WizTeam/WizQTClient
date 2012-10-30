@@ -26,7 +26,9 @@ protected:
     CWizDatabase& m_db;
 
     void initFolders();
-    void initFolders(QTreeWidgetItem* pParent, const CString& strParentLocation, const CWizStdStringArray& arrayAllLocation);
+    void initFolders(QTreeWidgetItem* pParent, const QString& strParentLocation, \
+                     const CWizStdStringArray& arrayAllLocation);
+
     void initTags();
     void initTags(QTreeWidgetItem* pParent, const CString& strParentTagGUID);
     void initTrash();

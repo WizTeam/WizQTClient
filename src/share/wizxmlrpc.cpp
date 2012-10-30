@@ -816,8 +816,11 @@ BOOL WizXmlRpcResultFromXml(CWizXMLDocument& doc, CWizXmlRpcValue** ppRet)
 }
 
 
-CWizXmlRpcFormData::CWizXmlRpcFormData(const CString& strMethodName, CWizXmlRpcValue* pParam1, CWizXmlRpcValue* pParam2, CWizXmlRpcValue* pParam3, CWizXmlRpcValue* pParam4,
-									   CWizXmlRpcValue* pParam5, CWizXmlRpcValue* pParam6, CWizXmlRpcValue* pParam7, CWizXmlRpcValue* pParam8)
+CWizXmlRpcFormData::CWizXmlRpcFormData(const CString& strMethodName, \
+                                       CWizXmlRpcValue* pParam1, CWizXmlRpcValue* pParam2, \
+                                       CWizXmlRpcValue* pParam3, CWizXmlRpcValue* pParam4, \
+                                       CWizXmlRpcValue* pParam5, CWizXmlRpcValue* pParam6, \
+                                       CWizXmlRpcValue* pParam7, CWizXmlRpcValue* pParam8)
     : m_strMethodName(strMethodName)
 	, m_pParam1(pParam1)
 	, m_pParam2(pParam2)
@@ -834,45 +837,47 @@ CWizXmlRpcFormData::CWizXmlRpcFormData(const CString& strMethodName, CWizXmlRpcV
 
 BOOL CWizXmlRpcFormData::Init()
 {
-	m_doc.Clear();
-	//
-	return ::WizXmlRpcParamsToXml(m_doc, m_strMethodName, m_pParam1, m_pParam2, m_pParam3, m_pParam4, m_pParam5, m_pParam6, m_pParam7, m_pParam8);
+    m_doc.Clear();
+
+    return ::WizXmlRpcParamsToXml(m_doc, m_strMethodName, \
+                                  m_pParam1, m_pParam2, \
+                                  m_pParam3, m_pParam4, \
+                                  m_pParam5, m_pParam6, \
+                                  m_pParam7, m_pParam8);
 }
 
 int CWizXmlRpcFormData::SendRequest(QHttp& http, const CString& strUrl)
 {
 	if (!m_bInited)
         return -1;
-	//
+
 	CString strText;
 	if (!m_doc.ToXML(strText, TRUE))
 	{
-		TOLOG(_T("Failed to get xml text!"));
+        TOLOG("Failed to get xml text!");
         return -1;
-	}
-	//
+    }
+
 	if (strText.GetLength() < 10)
 	{
-		TOLOG1(_T("Invalidate xml: %1"), strText);
+        TOLOG1("Invalidate xml: %1", strText);
         return -1;
-	}
-	//
+    }
+
 	if (strText[0] == '<' && strText[1] == '?')
 	{
 	}
 	else
 	{
 		strText.Insert(0, _T("<?xml version=\"1.0\"?>\n"));
-	}
-    //
-    //
+    }
+
     QUrl url(strUrl);
-    //
     QHttpRequestHeader header;
     header.setRequest("POST", url.path());
     header.setValue("Host", url.host());
     header.setContentType("text/xml");
-    //
+
     QByteArray data = strText.toUtf8();
     return http.request(header, data);
 }
@@ -911,8 +916,14 @@ bool CWizXmlRpcServer::xmlRpcCall(const CString& strMethodName, \
 {
     m_strMethodName = strMethodName;
 
-    CWizXmlRpcFormData data(strMethodName, pParam1, pParam2, pParam3, pParam4, pParam5, pParam6, pParam7, pParam8);
+    CWizXmlRpcFormData data(strMethodName, \
+                            pParam1, pParam2, \
+                            pParam3, pParam4, \
+                            pParam5, pParam6, \
+                            pParam7, pParam8);
+
     m_nCurrentXmlRpcRequestID = data.SendRequest(m_http, m_strUrl);
+
     return m_nCurrentXmlRpcRequestID != -1;
 }
 

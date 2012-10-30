@@ -818,75 +818,75 @@ CString CWizDatabase::GetObjectFileName(const WIZOBJECTDATA& data)
     }
 }
 
-BOOL CWizDatabase::GetAllRootLocations(CWizStdStringArray& arrayLocation)
+//BOOL CWizDatabase::GetAllRootLocations(CWizStdStringArray& arrayLocation)
+//{
+//    CWizStdStringArray arrayAll;
+//    GetAllLocations(arrayAll);
+//    //
+//    std::set<CString> setRoot;
+//    for (CWizStdStringArray::const_iterator it = arrayAll.begin();
+//    it != arrayAll.end();
+//    it++)
+//    {
+//        setRoot.insert(GetRootLocation(*it));
+//    }
+//    //
+//    arrayLocation.assign(setRoot.begin(), setRoot.end());
+//    //
+//    return TRUE;
+//}
+
+//bool CWizDatabase::GetChildLocations(const QString& strLocation, CWizStdStringArray& arrayLocation)
+//{
+//    Q_UNUSED(strLocation);
+//    Q_UNUSED(arrayLocation);
+//
+//    return false;
+//}
+
+bool CWizDatabase::GetAllRootLocations(const CWizStdStringArray& arrayAllLocation, \
+                                       CWizStdStringArray& arrayLocation)
 {
-    CWizStdStringArray arrayAll;
-    GetAllLocations(arrayAll);
-    //
-    std::set<CString> setRoot;
-    for (CWizStdStringArray::const_iterator it = arrayAll.begin();
-    it != arrayAll.end();
-    it++)
-    {
+    std::set<QString> setRoot;
+
+    CWizStdStringArray::const_iterator it;
+    for (it = arrayAllLocation.begin(); it != arrayAllLocation.end(); it++) {
         setRoot.insert(GetRootLocation(*it));
     }
-    //
+
     arrayLocation.assign(setRoot.begin(), setRoot.end());
-    //
-    return TRUE;
-}
-BOOL CWizDatabase::GetChildLocations(const CString& strLocation, CWizStdStringArray& arrayLocation)
-{
-    Q_UNUSED(strLocation);
-    Q_UNUSED(arrayLocation);
-    //
-    return FALSE;
+
+    return true;
 }
 
-
-
-BOOL CWizDatabase::GetAllRootLocations(const CWizStdStringArray& arrayAllLocation, CWizStdStringArray& arrayLocation)
+bool CWizDatabase::GetChildLocations(const CWizStdStringArray& arrayAllLocation, \
+                                     const QString& strLocation, \
+                                     CWizStdStringArray& arrayLocation)
 {
-    std::set<CString> setRoot;
-    for (CWizStdStringArray::const_iterator it = arrayAllLocation.begin();
-        it != arrayAllLocation.end();
-        it++)
-    {
-        setRoot.insert(GetRootLocation(*it));
-    }
-    //
-    arrayLocation.assign(setRoot.begin(), setRoot.end());
-    //
-    return TRUE;
-}
-BOOL CWizDatabase::GetChildLocations(const CWizStdStringArray& arrayAllLocation, const CString& strLocation, CWizStdStringArray& arrayLocation)
-{
-    if (strLocation.IsEmpty())
+    if (strLocation.isEmpty())
         return GetAllRootLocations(arrayAllLocation, arrayLocation);
-    //
-    std::set<CString> setLocation;
-    for (CWizStdStringArray::const_iterator it = arrayAllLocation.begin();
-        it != arrayAllLocation.end();
-        it++)
-    {
-        const CString& str = *it;
-        if (str.length() > strLocation.length()
-            && str.startsWith(strLocation))
+
+    std::set<QString> setLocation;
+
+    CWizStdStringArray::const_iterator it;
+    for (it = arrayAllLocation.begin(); it != arrayAllLocation.end(); it++) {
+        const QString& str = *it;
+
+        if (str.length() > strLocation.length() && str.startsWith(strLocation))
         {
             int index = str.indexOf('/', strLocation.length() + 1);
             if (index > 0)
             {
-                CString strChild = str.left(index + 1);
+                QString strChild = str.left(index + 1);
                 setLocation.insert(strChild);
             }
         }
     }
-    //
-    arrayLocation.assign(setLocation.begin(), setLocation.end());
-    //
-    return TRUE;
-}
 
+    arrayLocation.assign(setLocation.begin(), setLocation.end());
+
+    return true;
+}
 
 BOOL CWizDatabase::IsInDeletedItems(const CString& strLocation)
 {
@@ -1150,46 +1150,33 @@ CString CWizDatabase::GetLocationName(const CString& strLocation)
     //
     return str;
 }
+
 CString CWizDatabase::GetLocationDisplayName(const CString& strLocation)
 {
-    if (IsRootLocation(strLocation))
-    {
-        if (strLocation.startsWith("/My "))
-        {
-            if (strLocation == "/My Notes/")
-            {
+    if (IsRootLocation(strLocation)) {
+        if (strLocation.startsWith("/My ")) {
+            if (strLocation == "/My Notes/") {
                 return tr("My Notes");
-            }
-            else if (strLocation == "/My Journals/")
-            {
+            } else if (strLocation == "/My Journals/") {
                 return tr("My Journals");
-            }
-            else if (strLocation == "/My Events/")
-            {
+            } else if (strLocation == "/My Events/") {
                 return tr("My Events");
-            }
-            else if (strLocation == "/My Sticky Notes/")
-            {
+            } else if (strLocation == "/My Sticky Notes/") {
                 return tr("My Sticky Notes");
-            }
-            else if (strLocation == "/My Emails/")
-            {
+            } else if (strLocation == "/My Emails/") {
                 return tr("My Emails");
-            }
-            else if (strLocation == "/My Drafts/")
-            {
+            } else if (strLocation == "/My Drafts/") {
                 return tr("My Drafts");
+            } else if (strLocation == "/My Tasks/") {
+                return tr("My Tasks");
             }
         }
-    }
-    else if (strLocation == "/My Tasks/Inbox/")
-    {
+    } else if (strLocation == "/My Tasks/Inbox/") {
         return tr("Inbox");
-    }
-    else if (strLocation == "/My Tasks/Completed/")
-    {
+    } else if (strLocation == "/My Tasks/Completed/") {
         return tr("Completed");
     }
+
     return GetLocationName(strLocation);
 }
 

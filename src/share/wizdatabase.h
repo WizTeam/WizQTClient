@@ -118,8 +118,8 @@ public:
 
     CString GetObjectFileName(const WIZOBJECTDATA& data);
 
-    bool GetAllRootLocations(CWizStdStringArray& arrayLocation);
-    bool GetChildLocations(const CString& strLocation, CWizStdStringArray& arrayLocation);
+    //bool GetAllRootLocations(CWizStdStringArray& arrayLocation);
+    //bool GetChildLocations(const QString& strLocation, CWizStdStringArray& arrayLocation);
 
     bool GetDocumentsByTag(const WIZTAGDATA& tag, CWizDocumentDataArray& arrayDocument);
 
@@ -135,7 +135,9 @@ public:
     static CString GetLocationName(const CString& strLocation);
     static CString GetLocationDisplayName(const CString& strLocation);
     static bool GetAllRootLocations(const CWizStdStringArray& arrayAllLocation, CWizStdStringArray& arrayLocation);
-    static bool GetChildLocations(const CWizStdStringArray& arrayAllLocation, const CString& strLocation, CWizStdStringArray& arrayLocation);
+    static bool GetChildLocations(const CWizStdStringArray& arrayAllLocation, \
+                                  const QString& strLocation, \
+                                  CWizStdStringArray& arrayLocation);
 
     bool IsInDeletedItems(const CString& strLocation);
 
