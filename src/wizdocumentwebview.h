@@ -38,7 +38,7 @@ public:
 public Q_SLOTS:
     void on_web_populateJavaScriptWindowObject();
     void on_web_loadFinished(bool ok);
-    void on_web_linkClicked(const QUrl & url);
+    void on_web_linkClicked(const QUrl& url);
 };
 
 

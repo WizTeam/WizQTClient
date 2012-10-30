@@ -212,7 +212,7 @@ void MainWindow::initClient()
 #endif
 
     CWizSearchBox* searchBox = new CWizSearchBox(*this);
-    connect(searchBox, SIGNAL(doSearch(const QString&)), this, SLOT(on_search_doSearch(const QString&)));
+    connect(searchBox, SIGNAL(doSearch(const QString&)), SLOT(on_search_doSearch(const QString&)));
 
     QBoxLayout* layoutDocuments = new QBoxLayout(QBoxLayout::TopToBottom, client);
 

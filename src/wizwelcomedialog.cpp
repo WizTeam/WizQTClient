@@ -35,13 +35,13 @@ WelcomeDialog::WelcomeDialog(const QString &strDefaultUserId, const QString& str
 
     ui->webView->setHtml(strHtml, QUrl::fromLocalFile(strFileName));
     ui->webView->page()->setLinkDelegationPolicy(QWebPage::DelegateAllLinks);
-    connect(ui->webView, SIGNAL(linkClicked(const QUrl&)), this, SLOT(on_web_linkClicked(const QUrl&)));
+    connect(ui->webView, SIGNAL(linkClicked(const QUrl&)), this, SLOT(on_webView_linkClicked(const QUrl&)));
 
     // callbacks
-    connect(ui->labelProxySettings, SIGNAL(linkActivated(const QString&)), SLOT(on_labelProxy_linkActivated(const QString&)));
+    connect(ui->labelProxySettings, SIGNAL(linkActivated(const QString&)), SLOT(on_labelProxySettings_linkActivated(const QString&)));
     connect(ui->comboUsers, SIGNAL(activated(QString)), SLOT(on_comboUsers_activated(QString)));
     connect(ui->comboUsers, SIGNAL(editTextChanged(QString)), SLOT(on_comboUsers_editTextChanged(QString)));
-    connect(ui->checkAutoLogin, SIGNAL(stateChanged(int)), SLOT(on_autoLogin_stateChanged(int)));
+    connect(ui->checkAutoLogin, SIGNAL(stateChanged(int)), SLOT(on_checkAutoLogin_stateChanged(int)));
     connect(ui->buttonLogin, SIGNAL(clicked()), SLOT(accept()));
 
     connect(&m_verifyAccount, SIGNAL(done(bool, const CString&)), SLOT(verifyAccountDone(bool, const CString&)));
@@ -173,7 +173,7 @@ void WelcomeDialog::enableControls(bool b)
     ui->buttonLogin->setEnabled(b);
 }
 
-void WelcomeDialog::on_web_linkClicked(const QUrl& url)
+void WelcomeDialog::on_webView_linkClicked(const QUrl& url)
 {
     CString strUrl = url.toString();
     strUrl.MakeLower();
@@ -207,7 +207,7 @@ void WelcomeDialog::on_web_linkClicked(const QUrl& url)
     }
 }
 
-void WelcomeDialog::on_labelProxy_linkActivated(const QString & link)
+void WelcomeDialog::on_labelProxySettings_linkActivated(const QString & link)
 {
     Q_UNUSED(link);
 
@@ -243,7 +243,7 @@ void WelcomeDialog::on_comboUsers_editTextChanged(const QString& strText)
     ui->checkRememberMe->setCheckState(Qt::Unchecked);
 }
 
-void WelcomeDialog::on_autoLogin_stateChanged(int state)
+void WelcomeDialog::on_checkAutoLogin_stateChanged(int state)
 {
     if (state == Qt::Checked)
         ui->checkRememberMe->setCheckState(Qt::Checked);

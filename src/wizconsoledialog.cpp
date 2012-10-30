@@ -16,7 +16,7 @@ CWizConsoleDialog::CWizConsoleDialog(CWizExplorerApp& app, QWidget* parent)
 
     connect(m_ui->editConsole, SIGNAL(textChanged()), SLOT(on_editConsole_textChanged()));
     connect(m_ui->buttonClear, SIGNAL(clicked()), SLOT(on_buttonClear_clicked()));
-    connect(::WizGlobal()->bufferLog(), SIGNAL(readyRead()), SLOT(on_bufferLogReady()));
+    connect(::WizGlobal()->bufferLog(), SIGNAL(readyRead()), SLOT(bufferLog_readyRead()));
 
     m_ui->buttonSync->setDown(true);
 
@@ -58,7 +58,7 @@ void CWizConsoleDialog::on_buttonClear_clicked()
     m_ui->editConsole->clear();
 }
 
-void CWizConsoleDialog::on_bufferLogReady()
+void CWizConsoleDialog::bufferLog_readyRead()
 {
     QBuffer* buffer = WizGlobal()->bufferLog();
     buffer->open(QIODevice::ReadWrite);

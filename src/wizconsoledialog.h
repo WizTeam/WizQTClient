@@ -33,7 +33,7 @@ private:
 public slots:
     void on_editConsole_textChanged();
     void on_buttonClear_clicked();
-    void on_bufferLogReady();
+    void bufferLog_readyRead();
 };
 
 #endif // WIZCONSOLEDIALOG_H

@@ -44,12 +44,12 @@ public Q_SLOTS:
     virtual void accept();
 
     void verifyAccountDone(bool succeeded, const CString& errorMessage);
-    void on_web_linkClicked(const QUrl& url);
-    void on_labelProxy_linkActivated(const QString& link);
+    void on_webView_linkClicked(const QUrl& url);
+    void on_labelProxySettings_linkActivated(const QString& link);
 
     void on_comboUsers_activated(const QString& userId);
     void on_comboUsers_editTextChanged(const QString& strText);
-    void on_autoLogin_stateChanged(int state);
+    void on_checkAutoLogin_stateChanged(int state);
 };
 
 #endif // WIZWELCOMEDIALOG_H
