@@ -17,7 +17,7 @@ CWizUpdater::CWizUpdater(QObject* parent)
 
 void CWizUpdater::checkAndDownloadUpgrade()
 {
-    emit checkUpdate();
+    Q_EMIT checkUpdate();
 }
 
 void CWizUpdater::run()
@@ -63,7 +63,7 @@ void CWizUpdater::on_requestUpgrade_finished()
 
     if (reply->error()) {
         TOLOG1("Network error, error number: %1", QString::number(reply->error()));
-        emit upgradeError(NetworkError);
+        Q_EMIT upgradeError(NetworkError);
         m_bIsStarted = false;
         return;
     }
@@ -83,7 +83,7 @@ void CWizUpdater::on_requestRedirect_finished()
     QNetworkReply* reply = qobject_cast<QNetworkReply *>(sender());
 
     if (reply->error()) {
-        emit upgradeError(NetworkError);
+        Q_EMIT upgradeError(NetworkError);
         m_bIsStarted = false;
         return;
     }
@@ -102,7 +102,7 @@ void CWizUpdater::on_downloadTarball_finished()
     QNetworkReply* reply = qobject_cast<QNetworkReply *>(sender());
 
     if (reply->error()) {
-        emit upgradeError(NetworkError);
+        Q_EMIT upgradeError(NetworkError);
         m_bIsStarted = false;
         return;
     }
@@ -127,10 +127,19 @@ void CWizUpdater::processTarball()
     QString strZip = ::WizGetUpgradePath() + "update.zip";
     if (!CWizUnzipFile::extractZip(strZip, ::WizGetUpgradePath())) {
         TOLOG("tarball data is not correct!");
-        emit upgradeError(UnzipError);
+        Q_EMIT upgradeError(UnzipError);
         m_bIsStarted = false;
         return;
     }
+
+    readMetadata();
+
+    generateDownloadQueue();
+}
+
+void CWizUpdater::readMetadata()
+{
+    m_files.clear();
 
     // read metadata to memory
     CWizSettings* config = new CWizSettings(::WizGetUpgradePath() + "config.txt");
@@ -143,7 +152,7 @@ void CWizUpdater::processTarball()
         QStringList strFileMeta = strFileEntry.split("*");
 
         if (strFileMeta.count() != 2) {
-            emit upgradeError(ParseError);
+            Q_EMIT upgradeError(ParseError);
             m_bIsStarted = false;
             return;
         }
@@ -155,8 +164,6 @@ void CWizUpdater::processTarball()
         i++;
         strFileEntry = config->GetString("Files", QString::number(i));
     }
-
-    generateDownloadQueue();
 }
 
 void CWizUpdater::generateDownloadQueue()
@@ -206,6 +213,12 @@ void CWizUpdater::generateDownloadQueue()
     }
 
     m_nNeedProcess = m_downloadQueue.count();
+
+    if (!m_nNeedProcess) {
+        m_bIsStarted = false;
+        return;
+    }
+
     processDownload();
 }
 
@@ -214,6 +227,8 @@ void CWizUpdater::processDownload()
     if (m_nProcessTimes >= m_nNeedProcess) {
         if (!m_downloadQueue.isEmpty()) {
             TOLOG("Current download still meet error, scheduled 3 hours later");
+        } else {
+            Q_EMIT upgradePreparedDone();
         }
 
         m_bIsStarted = false;
@@ -269,8 +284,6 @@ void CWizUpdater::on_downloadFile_finished()
     fileReply.close();
 
     reply->deleteLater();
-
-    TOLOG1("Downloaded file: %1", strDownloadFileName);
 
     // unzip
     WizEnsurePathExists(strDownloadFilePath);

@@ -13,10 +13,11 @@ QT += webkit
 TARGET = wiznote
 
 # NOTE: QMAKE_FLAGS_RPATH and QMAKE_RPATHDIR not working for $$ORIGIN
-unix:QMAKE_LFLAGS = -Wl,-rpath,\'\$$ORIGIN/../lib\'
+unix:QMAKE_LFLAGS = -Wl,-rpath,\'\$$ORIGIN/lib\'
 
 # useful under windows compilation
 win32:DESTDIR = ../share/wiznote/
+unix:DESTDIR = ../../wiznote-build-desktop/
 
 TEMPLATE = app
 
@@ -95,7 +96,6 @@ SOURCES += main.cpp\
     share/wizimagepushbutton.cpp \
     wiztaglistwidget.cpp \
     wizconsoledialog.cpp \
-    wizupdaterdialog.cpp \
     wizpreferencedialog.cpp \
     wizaboutdialog.cpp \
     wizwelcomedialog.cpp \
@@ -104,7 +104,8 @@ SOURCES += main.cpp\
     wizmainwindow.cpp \
     share/wizindex.cpp \
     share/wizthumbindex.cpp \
-    wizupdater.cpp
+    wizupdater.cpp \
+    wizupdaterprogressdialog.cpp
 
 HEADERS += \
     share/wizqthelper.h \
@@ -177,7 +178,6 @@ HEADERS += \
     mac/wizmacicon.h \
     wiztaglistwidget.h \
     wizconsoledialog.h \
-    wizupdaterdialog.h \
     wizpreferencedialog.h \
     wizaboutdialog.h \
     wizwelcomedialog.h \
@@ -186,7 +186,8 @@ HEADERS += \
     wizmainwindow.h \
     share/wizindex.h \
     share/wizthumbindex.h \
-    wizupdater.h
+    wizupdater.h \
+    wizupdaterprogressdialog.h
 
 
 mac:HEADERS += \
@@ -200,12 +201,12 @@ FORMS += \
     ui/newtagdialog.ui \
     ui/wizdownloadobjectdatadialog.ui \
     ui/wizconsoledialog.ui \
-    ui/wizupdaterdialog.ui \
     ui/wizpreferencedialog.ui \
     ui/wizaboutdialog.ui \
     ui/wizwelcomedialog.ui \
     ui/wizproxydialog.ui \
-    ui/wizcreateaccountdialog.ui
+    ui/wizcreateaccountdialog.ui \
+    ui/wizupdaterprogressdialog.ui
 
 
 mac:LIBS += -framework Cocoa -framework Carbon

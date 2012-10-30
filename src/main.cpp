@@ -5,7 +5,7 @@
 #include <QProcess>
 
 #include "wizmainwindow.h"
-#include "wizupdaterdialog.h"
+#include "wizupdaterprogressdialog.h"
 #include "wizwelcomedialog.h"
 #include "share/wizsettings.h"
 #include "share/wizwin32helper.h"
@@ -57,14 +57,11 @@ int main(int argc, char *argv[])
     // check update if needed
     CWizUpdaterDialog updater;
     if (updater.checkNeedUpdate()) {
-        if(updater.isPrepared()) {
-            updater.show();
-            updater.doUpdate();
-            a.exec();
-        } else {
-            updater.prepare();
-            QProcess::startDetached(updater.execPath(), QStringList());
-        }
+        updater.show();
+        updater.doUpdate();
+        int ret = a.exec();
+        QProcess::startDetached(argv[0], QStringList());
+        return ret;
     }
 
     // figure out auto login or manually login

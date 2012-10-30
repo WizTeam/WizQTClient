@@ -21,6 +21,9 @@ public:
 
     void checkAndDownloadUpgrade();
 
+    // stand alone call
+    void readMetadata();
+
 protected:
     virtual void run();
 

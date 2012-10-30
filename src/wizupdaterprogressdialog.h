@@ -1,10 +1,7 @@
-#ifndef WIZUPDATERDIALOG_H
-#define WIZUPDATERDIALOG_H
+#ifndef WIZUPDATERPROGRESSDIALOG_H
+#define WIZUPDATERPROGRESSDIALOG_H
 
-#include <QDialog>
-#include <QMouseEvent>
-#include <QPoint>
-
+#include <QtGui>
 
 namespace Ui {
 class CWizUpdaterDialog;
@@ -16,6 +13,7 @@ class CWizUpdaterDialog : public QDialog
     
 public:
     explicit CWizUpdaterDialog(QWidget *parent = 0);
+    void center();
     ~CWizUpdaterDialog();
 
     bool checkNeedUpdate();
@@ -23,15 +21,11 @@ public:
     void prepare();
     void doUpdate();
 
-    QString execPath() { return m_strExecPath; }
-
 private:
     Ui::CWizUpdaterDialog *ui;
 
     bool m_bMovable;
     QPoint m_lastPos;
-
-    QString m_strExecPath;
 
     bool m_isOldDatabase;
     bool m_bUpdateDatabase;
@@ -45,12 +39,17 @@ private:
     virtual void mouseMoveEvent(QMouseEvent* event);
     virtual void mouseReleaseEvent(QMouseEvent* event);
 
-    bool detectIsOldDatabaseStruct();
+    void setGuiNotify(const QString& text);
+
     bool needUpdateDatabase();
-    bool needUpdateApp();
+    bool detectIsOldDatabaseStruct();
+    void doOldDatabaseUpgradeSetSteps();
     void doOldDatabaseUpgrade();
     void doDatabaseUpgrade();
+
+    bool needUpdateApp();
+    void doUpdateAppSetSteps();
     void doUpdateApp();
 };
 
-#endif // WIZUPDATERDIALOG_H
+#endif // WIZUPDATERPROGRESSDIALOG_H

@@ -1,16 +1,19 @@
-#include "wizupdaterdialog.h"
-#include "ui_wizupdaterdialog.h"
-
-#include <QTimer>
-#include <QDir>
+#include "wizupdaterprogressdialog.h"
+#include "ui_wizupdaterprogressdialog.h"
 
 #include "share/wizmisc.h"
+#include "share/wizsettings.h"
 
-CWizUpdaterDialog::CWizUpdaterDialog(QWidget *parent) :
-    QDialog(parent),
-    ui(new Ui::CWizUpdaterDialog)
+CWizUpdaterDialog::CWizUpdaterDialog(QWidget *parent)
+    : QDialog(parent)
+    , ui(new Ui::CWizUpdaterDialog)
+    , m_isOldDatabase(false)
+    , m_bUpdateDatabase(false)
+    , m_bUpdateApp(false)
 {
     ui->setupUi(this);
+
+    center();
     setFixedSize(size());
     setWindowFlags(Qt::CustomizeWindowHint);
 
@@ -40,19 +43,25 @@ void CWizUpdaterDialog::mouseReleaseEvent(QMouseEvent* event)
     }
 }
 
+void CWizUpdaterDialog::center()
+{
+    setGeometry(QStyle::alignedRect(
+                    Qt::LeftToRight,
+                    Qt::AlignCenter,
+                    size(),
+                    qApp->desktop()->availableGeometry()
+    ));
+}
+
+void CWizUpdaterDialog::setGuiNotify(const QString& text)
+{
+    ui->label->setText(text);
+    ui->progressUpdate->setValue(ui->progressUpdate->value() + 1);
+}
+
 CWizUpdaterDialog::~CWizUpdaterDialog()
 {
     delete ui;
-}
-
-bool CWizUpdaterDialog::isPrepared()
-{
-    return true;
-}
-
-void CWizUpdaterDialog::prepare()
-{
-    m_strExecPath = WizGetDataStorePath() + "update/" + WizGetAppFileName();
 }
 
 bool CWizUpdaterDialog::checkNeedUpdate()
@@ -84,8 +93,13 @@ bool CWizUpdaterDialog::needUpdateDatabase()
 
 bool CWizUpdaterDialog::needUpdateApp()
 {
-    m_bUpdateApp = false;
-    return false;
+    // check stub here, created by CWizUpdaterNotifyDialog
+    QFile fileUpdate(::WizGetUpgradePath() + "WIZNOTE_READY_FOR_UPGRADE");
+    if (fileUpdate.exists()) {
+        m_bUpdateApp = true;
+    }
+
+    return m_bUpdateApp;
 }
 
 void CWizUpdaterDialog::doUpdate()
@@ -103,6 +117,69 @@ void CWizUpdaterDialog::doUpdate()
     }
 
     QTimer::singleShot(3000, this, SLOT(close()));
+}
+
+void CWizUpdaterDialog::doUpdateAppSetSteps()
+{
+    int steps = 0;
+
+    QString strUpdate = ::WizGetUpgradePath();
+    QDir rootDir(strUpdate);
+
+    steps = rootDir.entryList().count();
+
+    ui->progressUpdate->setMaximum(steps);
+}
+
+void CWizUpdaterDialog::doUpdateApp()
+{
+    // read metadata
+    QList<QStringList> files;
+
+    setGuiNotify("Prepare upgrade");
+
+    CWizSettings* config = new CWizSettings(::WizGetUpgradePath() + "config.txt");
+
+    int i = 0;
+    QString strFileEntry = config->GetString("Files", QString::number(i));
+    while (!strFileEntry.isEmpty()) {
+        QStringList strFileMeta = strFileEntry.split("*");
+
+        QStringList strFile;
+        strFile << strFileMeta.at(0) << strFileMeta.at(1);
+        files.append(strFile);
+
+        i++;
+        strFileEntry = config->GetString("Files", QString::number(i));
+    }
+
+    QList<QStringList>::const_iterator it;
+    for(it = files.constBegin(); it!= files.constEnd(); it++) {
+        QString strLocal = ::WizGetAppPath() + (*it).at(0);
+        QString strLocalPath = ::WizExtractFilePath(strLocal);
+        QString strUpdate = ::WizGetUpgradePath() + (*it).at(0);
+
+        QFile fileLocal(strUpdate);
+        if (fileLocal.exists()) {
+            // compare MD5
+            QString md5Remote = (*it).at(1);
+            QString md5Download = ::WizMd5FileString(strUpdate);
+
+            if (md5Remote == md5Download) {
+                ::WizEnsurePathExists(strLocalPath);
+                QFile fileUpdate(strUpdate);
+                fileUpdate.copy(strLocal);
+                setGuiNotify(QString("Copying %1").arg(strLocal));
+            }
+        }
+    }
+
+    // remove stub
+    QFile fileStub(::WizGetUpgradePath() + "WIZNOTE_READY_FOR_UPGRADE");
+    fileStub.remove();
+
+    setGuiNotify("Upgrade done");
+    ui->progressUpdate->setValue(ui->progressUpdate->maximum());
 }
 
 bool CWizUpdaterDialog::detectIsOldDatabaseStruct()
@@ -124,13 +201,27 @@ bool CWizUpdaterDialog::detectIsOldDatabaseStruct()
     return false;
 }
 
+void CWizUpdaterDialog::doOldDatabaseUpgradeSetSteps()
+{
+    int steps = 0;
+
+    QString oldDataStorePath = QDir::homePath() + "/WizNote/";
+    QDir rootDir(oldDataStorePath);
+
+    steps = rootDir.entryList().count();
+
+    ui->progressUpdate->setMaximum(steps + 10);
+}
+
 void CWizUpdaterDialog::doOldDatabaseUpgrade()
 {
     QString oldDataStorePath = QDir::homePath() + "/WizNote/";
     QDir rootDir(oldDataStorePath);
 
     rootDir.remove("wiznote.ini");
+    setGuiNotify("Remove wiznote.ini");
     rootDir.remove("wiznote.log");
+    setGuiNotify("Remove wiznote.log");
 
     // enum each user
     CWizStdStringArray folders;
@@ -149,6 +240,7 @@ void CWizUpdaterDialog::doOldDatabaseUpgrade()
             // 36 chars for GUID and 4 chars for extention
             QString strNewName = strOldNotes + "{" + note.right(40).left(36) + "}";
             dirNote.rename(note, strNewName);
+            setGuiNotify(QString("Rename %1").arg(note));
         }
 
         // rename attachments data
@@ -158,9 +250,11 @@ void CWizUpdaterDialog::doOldDatabaseUpgrade()
             QDir dirAttach(strOldAttaches);
             QString strNewName = strOldAttaches + "{" + attach.right(40).left(36) + "}";
             dirAttach.rename(attach, strNewName);
+            setGuiNotify(QString("Rename %1").arg(attach));
         }
 
         // move user data to new dir
+        setGuiNotify("reconstruct directories");
         userDir.rename(strOldNotes, folder + "notes/");
         userDir.rename(strOldAttaches, folder + "attachments/");
 
@@ -169,15 +263,13 @@ void CWizUpdaterDialog::doOldDatabaseUpgrade()
         userDir.rename(folder + "attachments", folder + "data/attachments");
         userDir.rename(folder + "index.db", folder + "data/index.db");
         userDir.rename(folder + "wizthumb.db", folder + "data/wizthumb.db");
+
+        ui->progressUpdate->setValue(ui->progressUpdate->maximum());
+        setGuiNotify("Update Done!");
     }
 }
 
 void CWizUpdaterDialog::doDatabaseUpgrade()
 {
-
-}
-
-void CWizUpdaterDialog::doUpdateApp()
-{
-
+    // stub here
 }
