@@ -115,46 +115,51 @@ class CWizApiBase : public QObject
 
 public:
     CWizApiBase(const CString& strAccountsApiURL, CWizSyncEvents& events);
+
+    CString token() const { return m_user.strToken; }
+    CString kbGUID() const { return m_user.strKbGUID; }
+    const WIZUSERINFO& userInfo() const { return m_user; }
+
+    virtual bool callXmlRpc(const CString& strMethodName, CWizXmlRpcValue* pVal);
+    bool isSyncing() const;
+    void resetProxy();
     virtual void abort();
+
 protected:
     WIZUSERINFO m_user;
     CWizXmlRpcServer m_server;
     CWizSyncEvents& m_events;
-public:
-    CString token() const { return m_user.strToken; }
-    CString kbGUID() const { return m_user.strKbGUID; }
-    const WIZUSERINFO& userInfo() const { return m_user; }
-    bool isSyncing() const;
-    void resetProxy();
+
 protected:
     CString MakeXmlRpcUserId(const CString& strUserId);
     CString MakeXmlRpcPassword(const CString& strPassword);
-public:
-    virtual BOOL callXmlRpc(const CString& strMethodName, CWizXmlRpcValue* pVal);
-public slots:
-    void xmlRpcReturn(const CString& strMethodName, CWizXmlRpcValue& ret);
-    void xmlRpcError(const CString& strMethodName, WizXmlRpcError err, int errorCode, const CString& errorMessage);
+
 protected:
     virtual void onXmlRpcReturn(const CString& strMethodName, CWizXmlRpcValue& ret);
     virtual void onXmlRpcError(const CString& strMethodName, WizXmlRpcError err, int errorCode, const CString& errorMessage);
-protected:
-    virtual BOOL callClientLogin(const CString& strUserId, const CString& strPassword);
+
+    virtual bool callClientLogin(const CString& strUserId, const CString& strPassword);
     virtual void onClientLogin();
-    //
-    virtual BOOL callClientLogout();
+
+    virtual bool callClientLogout();
     virtual void onClientLogout();
-    //
-    virtual BOOL callGetUserInfo();
+
+    virtual bool callGetUserInfo();
     virtual void onGetUserInfo(CWizXmlRpcValue& ret);
-    //
-    virtual BOOL callCreateAccount(const CString& strUserId, const CString& strPassword);
+
+    virtual bool callCreateAccount(const CString& strUserId, const CString& strPassword);
     virtual void onCreateAccount();
-    //
+
 protected:
     virtual void changeProgress(int pos);
     virtual void addLog(const CString& str);
     virtual void addDebugLog(const CString& str);
     virtual void addErrorLog(const CString& str);
+
+public Q_SLOTS:
+    void xmlRpcReturn(const CString& strMethodName, CWizXmlRpcValue& ret);
+    void xmlRpcError(const CString& strMethodName, WizXmlRpcError err, \
+                     int errorCode, const CString& errorMessage);
 };
 
 class CWizApi : public CWizApiBase

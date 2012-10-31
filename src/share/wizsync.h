@@ -11,8 +11,8 @@ class CWizSync : public CWizApi
 public:
     CWizSync(CWizDatabase& db, const CString& strAccountsApiURL, CWizSyncEvents& events);
 
-    void startSync();
     void setDownloadAllNotesData(bool b) { m_bDownloadAllNotesData = b; }
+    void startSync();
 
 private:
     bool m_error;

@@ -105,7 +105,8 @@ SOURCES += main.cpp\
     share/wizindex.cpp \
     share/wizthumbindex.cpp \
     wizupdater.cpp \
-    wizupdaterprogressdialog.cpp
+    wizupdaterprogressdialog.cpp \
+    share/wizxml.cpp
 
 HEADERS += \
     share/wizqthelper.h \
@@ -187,7 +188,8 @@ HEADERS += \
     share/wizindex.h \
     share/wizthumbindex.h \
     wizupdater.h \
-    wizupdaterprogressdialog.h
+    wizupdaterprogressdialog.h \
+    share/wizxml.h
 
 
 mac:HEADERS += \

@@ -211,17 +211,17 @@ void MainWindow::initClient()
     //splitter->addWidget(m_documents);
 #endif
 
+
     CWizSearchBox* searchBox = new CWizSearchBox(*this);
     connect(searchBox, SIGNAL(doSearch(const QString&)), SLOT(on_search_doSearch(const QString&)));
 
-    QBoxLayout* layoutDocuments = new QBoxLayout(QBoxLayout::TopToBottom, client);
+    QVBoxLayout* layoutDocuments = new QVBoxLayout(client);
+    layoutDocuments->setContentsMargins(0, 0, 0, 0);
 
     QWidget* documents = new QWidget(splitter);
     documents->setLayout(layoutDocuments);
-
     layoutDocuments->addWidget(searchBox);
     layoutDocuments->addWidget(m_documents);
-
     splitter->addWidget(documents);
 
     splitter->addWidget(m_doc);
@@ -335,6 +335,7 @@ void MainWindow::addLog(const CString& strMsg)
 
     m_labelStatus->setText(strMsg);
 }
+
 void MainWindow::addDebugLog(const CString& strMsg)
 {
     DEBUG_TOLOG(strMsg);

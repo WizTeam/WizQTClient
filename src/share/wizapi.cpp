@@ -13,8 +13,10 @@ CWizApiBase::CWizApiBase(const CString& strAccountsApiURL, CWizSyncEvents& event
 {
     resetProxy();
 
-    connect(&m_server, SIGNAL(xmlRpcReturn(const CString&, CWizXmlRpcValue&)), this, SLOT(xmlRpcReturn(const CString&, CWizXmlRpcValue&)));
-    connect(&m_server, SIGNAL(xmlRpcError(const CString&, WizXmlRpcError, int, const CString&)), this, SLOT(xmlRpcError(const CString&, WizXmlRpcError, int, const CString&)));
+    connect(&m_server, SIGNAL(xmlRpcReturn(const CString&, CWizXmlRpcValue&)), \
+            SLOT(xmlRpcReturn(const CString&, CWizXmlRpcValue&)));
+    connect(&m_server, SIGNAL(xmlRpcError(const CString&, WizXmlRpcError, int, const CString&)), \
+            SLOT(xmlRpcError(const CString&, WizXmlRpcError, int, const CString&)));
 }
 
 void CWizApiBase::abort()
@@ -22,7 +24,6 @@ void CWizApiBase::abort()
     m_server.disconnect(this);
     m_server.abort();
 }
-
 
 bool CWizApiBase::callXmlRpc(const CString& strMethodName, CWizXmlRpcValue* pVal)
 {
@@ -33,14 +34,12 @@ bool CWizApiBase::callXmlRpc(const CString& strMethodName, CWizXmlRpcValue* pVal
 void CWizApiBase::xmlRpcReturn(const CString& strMethodName, CWizXmlRpcValue& ret)
 {
     addDebugLog("xmlrpc done:[" + strMethodName + "]");
-    //
     onXmlRpcReturn(strMethodName, ret);
 }
 
 void CWizApiBase::xmlRpcError(const CString& strMethodName, WizXmlRpcError err, int errorCode, const CString& errorMessage)
 {
     addErrorLog("Error: [" + strMethodName + "]: " + errorMessage);
-    //
     onXmlRpcError(strMethodName, err, errorCode, errorMessage);
 }
 
@@ -65,7 +64,7 @@ void CWizApiBase::onXmlRpcReturn(const CString& strMethodName, CWizXmlRpcValue& 
     }
     else
     {
-        ATLASSERT(FALSE);
+        Q_ASSERT(false);
     }
 }
 
@@ -90,7 +89,7 @@ void CWizApiBase::resetProxy()
     int port = settings.GetProxyPort();
     QString userName = settings.GetProxyUserName();
     QString password = settings.GetProxyPassword();
-    //
+
     m_server.setProxy(host, port, userName, password);
 }
 

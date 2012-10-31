@@ -2,6 +2,7 @@
 #define WIZXMLRPC_H
 
 #include "wizmisc.h"
+#include "wizxml.h"
 
 #ifndef QHTTP_H
 #include <QHttp>
