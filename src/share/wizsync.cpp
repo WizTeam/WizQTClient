@@ -33,8 +33,8 @@ const int DOWNLOAD_OBJECT_STEP_BEGIN                 = progressAttachmentUploade
 const int DOWNLOAD_OBJECT_STEP_COUNT                 = progressObjectDownloaded - progressAttachmentUploaded;
 
 
-CWizSync::CWizSync(CWizDatabase& db, const CString& strAccountsApiURL, CWizSyncEvents& events)
-    : CWizApi(db, strAccountsApiURL, events)
+CWizSync::CWizSync(CWizDatabase& db, const CString& strAccountsApiURL)
+    : CWizApi(db, strAccountsApiURL)
     , m_error(false)
     , m_nAllDocumentsNeedToBeDownloadedCount(0)
     , m_bDocumentInfoError(FALSE)
@@ -52,7 +52,6 @@ void CWizSync::startSync()
         return;
 
     m_error = false;
-    m_events.syncStarted();
 
     m_nAllDocumentsNeedToBeDownloadedCount = 0;
     m_bDocumentInfoError = false;
@@ -74,9 +73,9 @@ void CWizSync::startSync()
     m_nAllObjectsNeedToBeDownloadedCount = 0;
     m_arrayAllObjectsNeedToBeDownloaded.clear();
 
-    changeProgress(progressStart);
-
-    addLog("login");
+    Q_EMIT syncStarted();
+    Q_EMIT progressChanged(progressStart);
+    Q_EMIT processLog(tr("begin syning"));
 
     callClientLogin(m_db.GetUserId(), m_db.GetPassword2());
 }
@@ -95,11 +94,11 @@ void CWizSync::onXmlRpcError(const CString& strMethodName, WizXmlRpcError err, i
 
 void CWizSync::onClientLogin()
 {
-    addLog("downloading deleted objects list");
+    Q_EMIT syncLogined();
+    Q_EMIT processLog(tr("downloading deleted objects list"));
+    Q_EMIT progressChanged(progressOnLogin);
 
-    changeProgress(progressOnLogin);
     startDownloadDeleteds();
-    m_events.syncLogin();
 }
 
 void CWizSync::startDownloadDeleteds()
@@ -109,9 +108,9 @@ void CWizSync::startDownloadDeleteds()
 
 void CWizSync::onDownloadDeletedsCompleted()
 {
-    addLog("uploading deleted objects list");
+    Q_EMIT processLog(tr("uploading deleted objects list"));
+    Q_EMIT progressChanged(progressDeletedsDownloaded);
 
-    changeProgress(progressDeletedsDownloaded);
     startUploadDeleteds();
 }
 
@@ -123,9 +122,9 @@ void CWizSync::startUploadDeleteds()
 
 void CWizSync::onUploadDeletedsCompleted()
 {
-    addLog("downloading tags");
+    Q_EMIT processLog(tr("downloading tags"));
+    Q_EMIT progressChanged(progressDeletedsUploaded);
 
-    changeProgress(progressDeletedsUploaded);
     startDownloadTags();
 }
 
@@ -136,9 +135,9 @@ void CWizSync::startDownloadTags()
 
 void CWizSync::onDownloadTagsCompleted()
 {
-    addLog("uploading tags");
+    Q_EMIT processLog(tr("uploading tags"));
+    Q_EMIT progressChanged(progressTagsDownloaded);
 
-    changeProgress(progressTagsDownloaded);
     startUploadTags();
 }
 
@@ -150,9 +149,9 @@ void CWizSync::startUploadTags()
 
 void CWizSync::onUploadTagsCompleted()
 {
-    addLog("downloading styles");
+    Q_EMIT processLog(tr("downloading styles"));
+    Q_EMIT progressChanged(progressTagsUploaded);
 
-    changeProgress(progressTagsUploaded);
     startDownloadStyles();
 }
 
@@ -163,9 +162,9 @@ void CWizSync::startDownloadStyles()
 
 void CWizSync::onDownloadStylesCompleted()
 {
-    addLog("uploading styles");
+    Q_EMIT processLog(tr("uploading styles"));
+    Q_EMIT progressChanged(progressStyleDownloaded);
 
-    changeProgress(progressStyleDownloaded);
     startUploadStyles();
 }
 
@@ -177,9 +176,9 @@ void CWizSync::startUploadStyles()
 
 void CWizSync::onUploadStylesCompleted()
 {
-    addLog("downloading notes list");
+    Q_EMIT processLog(tr("downloading notes list"));
+    Q_EMIT progressChanged(progressStyleUploaded);
 
-    changeProgress(progressStyleUploaded);
     startDownloadDocumentsSimpleInfo();
 }
 
@@ -190,24 +189,22 @@ void CWizSync::startDownloadDocumentsSimpleInfo()
 
 void CWizSync::onDownloadDocumentsSimpleInfoCompleted()
 {
-    m_events.changeProgress(progressDocumentSimpleInfoDownloaded);
-    //
+    Q_EMIT progressChanged(progressDocumentSimpleInfoDownloaded);
+
     //save max version of document
     //if no error occured while downloading document full information
     //then update this version
-    //
-    m_bDocumentInfoError = FALSE;
+    m_bDocumentInfoError = false;
     m_nDocumentMaxVersion = -1;
     if (!m_arrayAllDocumentsNeedToBeDownloaded.empty())
     {
         m_nDocumentMaxVersion = ::WizObjectsGetMaxVersion<WIZDOCUMENTDATABASE>(m_arrayAllDocumentsNeedToBeDownloaded);
     }
-    //
+
     //filter documents for getting document full information (not data)
-    //
     filterDocuments();
-    //
-    addLog("downloading notes information");
+
+    Q_EMIT processLog(tr("downloading notes information"));
     startDownloadDocumentsFullInfo();
 }
 
@@ -219,20 +216,18 @@ void CWizSync::startDownloadDocumentsFullInfo()
 
 void CWizSync::onDownloadDocumentsFullInfoCompleted()
 {
-    changeProgress(progressDocumemtFullInfoDownloaded);
-    //
+    Q_EMIT progressChanged(progressDocumemtFullInfoDownloaded);
+
     //if no error occured while downloading document full information
     //update document version
-    if (!m_bDocumentInfoError
-        && -1 != m_nDocumentMaxVersion)
+    if (!m_bDocumentInfoError && -1 != m_nDocumentMaxVersion)
     {
         m_db.SetObjectVersion(WIZDOCUMENTDATA::ObjectName(), m_nDocumentMaxVersion);
     }
-    //
-    addLog("downloading attachments information");
+
+    Q_EMIT processLog(tr("downloading attachments information"));
     startDownloadAttachmentsInfo();
 }
-
 
 void CWizSync::startDownloadAttachmentsInfo()
 {
@@ -241,11 +236,12 @@ void CWizSync::startDownloadAttachmentsInfo()
 
 void CWizSync::onDownloadAttachmentsInfoCompleted()
 {
-    changeProgress(progressAttachmentInfoDownloaded);
-    //
-    addLog("uploading documents");
+    Q_EMIT processLog(tr("uploading documents"));
+    Q_EMIT progressChanged(progressAttachmentInfoDownloaded);
+
     startUploadDocuments();
 }
+
 void CWizSync::startUploadDocuments()
 {
     m_db.GetModifiedDocuments(m_arrayAllDocumentsNeedToBeUploaded);
@@ -255,12 +251,11 @@ void CWizSync::startUploadDocuments()
 
 void CWizSync::onUploadDocumentsCompleted()
 {
-    changeProgress(progressDocumentUploaded);
-    //
-    addLog("uploading attachments");
+    Q_EMIT processLog(tr("uploading attachments"));
+    Q_EMIT progressChanged(progressDocumentUploaded);
+
     startUploadAttachments();
 }
-
 
 void CWizSync::startUploadAttachments()
 {
@@ -269,23 +264,22 @@ void CWizSync::startUploadAttachments()
     uploadNextAttachment();
 }
 
-
 void CWizSync::onUploadAttachmentsCompleted()
 {
-    changeProgress(progressAttachmentUploaded);
-    //
-    addLog("downloading objects data");
+    Q_EMIT processLog(tr("downloading objects data"));
+    Q_EMIT progressChanged(progressAttachmentUploaded);
+
     startDownloadObjectsData();
 }
 
 void CWizSync::startDownloadObjectsData()
 {
     m_db.GetAllObjectsNeedToBeDownloaded(m_arrayAllObjectsNeedToBeDownloaded);
-    //
+
     if (!m_bDownloadAllNotesData)
     {
         COleDateTime tNow = ::WizGetCurrentTime();
-        //
+
         size_t count = m_arrayAllObjectsNeedToBeDownloaded.size();
         for (intptr_t i = count - 1; i >= 0; i--)
         {
@@ -296,7 +290,7 @@ void CWizSync::startDownloadObjectsData()
                 m_arrayAllObjectsNeedToBeDownloaded.erase(m_arrayAllObjectsNeedToBeDownloaded.begin() + i);
                 continue;
             }
-            //
+
             if (m_arrayAllObjectsNeedToBeDownloaded[i].eObjectType == wizobjectDocumentAttachment)
             {
                 m_arrayAllObjectsNeedToBeDownloaded.erase(m_arrayAllObjectsNeedToBeDownloaded.begin() + i);
@@ -304,16 +298,16 @@ void CWizSync::startDownloadObjectsData()
             }
         }
     }
-    //
-    //
+
     m_nAllObjectsNeedToBeDownloadedCount = m_arrayAllObjectsNeedToBeDownloaded.size();
-    //
+
     downloadNextObjectData();
 }
 
 void CWizSync::onDownloadObjectsDataCompleted()
 {
-    changeProgress(progressObjectDownloaded);
+    Q_EMIT progressChanged(progressObjectDownloaded);
+
     stopSync();
 }
 
@@ -324,20 +318,16 @@ void CWizSync::onClientLogout()
 
 void CWizSync::stopSync()
 {
-    addLog("logout");
-
     if (!m_user.strToken.isEmpty())
     {
         callClientLogout();
     }
 
-    changeProgress(progressDone);
 
-    addLog("sync done");
-    m_events.syncDone(m_error);
+    Q_EMIT processLog(tr("sync done"));
+    Q_EMIT progressChanged(progressDone);
+    Q_EMIT syncDone(m_error);
 }
-
-////////////////////////////////////////////////////////////////////////////////////////////////
 
 void CWizSync::downloadNextDeleteds(__int64 nVersion)
 {
@@ -373,7 +363,7 @@ void CWizSync::uploadNextDeleteds()
     else
     {
         int countPerPage = getCountPerPage();
-        //
+
         CWizDeletedGUIDDataArray arrayCurr;
         if (m_arrayAllDeletedsNeedToBeUploaded.size() > (size_t)countPerPage)
         {
@@ -385,7 +375,7 @@ void CWizSync::uploadNextDeleteds()
             arrayCurr.assign(m_arrayAllDeletedsNeedToBeUploaded.begin(), m_arrayAllDeletedsNeedToBeUploaded.end());
             m_arrayAllDeletedsNeedToBeUploaded.clear();
         }
-        //
+
         callDeletedPostList(arrayCurr);
     }
 }
@@ -399,7 +389,7 @@ void CWizSync::uploadNextTags()
     else
     {
         int countPerPage = getCountPerPage();
-        //
+
         CWizTagDataArray arrayCurr;
         if (m_arrayAllTagsNeedToBeUploaded.size() > (size_t)countPerPage)
         {
@@ -411,7 +401,7 @@ void CWizSync::uploadNextTags()
             arrayCurr.assign(m_arrayAllTagsNeedToBeUploaded.begin(), m_arrayAllTagsNeedToBeUploaded.end());
             m_arrayAllTagsNeedToBeUploaded.clear();
         }
-        //
+
         callTagPostList(arrayCurr);
     }
 }
@@ -425,7 +415,7 @@ void CWizSync::uploadNextStyles()
     else
     {
         int countPerPage = getCountPerPage();
-        //
+
         CWizStyleDataArray arrayCurr;
         if (m_arrayAllStylesNeedToBeUploaded.size() > (size_t)countPerPage)
         {
@@ -437,7 +427,7 @@ void CWizSync::uploadNextStyles()
             arrayCurr.assign(m_arrayAllStylesNeedToBeUploaded.begin(), m_arrayAllStylesNeedToBeUploaded.end());
             m_arrayAllStylesNeedToBeUploaded.clear();
         }
-        //
+
         callStylePostList(arrayCurr);
     }
 }
@@ -450,12 +440,12 @@ void CWizSync::uploadNextDocument()
     }
     else
     {
-        ATLASSERT(m_nAllDocumentsNeedToBeUploadedCount > 0);
+        Q_ASSERT(m_nAllDocumentsNeedToBeUploadedCount > 0);
         changeProgressEx(m_arrayAllDocumentsNeedToBeUploaded.size(), m_nAllDocumentsNeedToBeUploadedCount, UPLOAD_DOCUMENT_STEP_BEGIN, UPLOAD_DOCUMENT_STEP_COUNT);
-        //
+
         m_currentUploadDocument = m_arrayAllDocumentsNeedToBeUploaded[0];
         m_arrayAllDocumentsNeedToBeUploaded.erase(m_arrayAllDocumentsNeedToBeUploaded.begin());
-        //
+
         queryDocumentInfo(m_currentUploadDocument.strGUID, m_currentUploadDocument.strTitle);
     }
 }
@@ -470,7 +460,7 @@ void CWizSync::uploadNextAttachment()
     {
         ATLASSERT(m_nAllAttachmentsNeedToBeUploadedCount > 0);
         changeProgressEx(m_arrayAllAttachmentsNeedToBeUploaded.size(), m_nAllAttachmentsNeedToBeUploadedCount, UPLOAD_ATTACHMENT_STEP_BEGIN, UPLOAD_ATTACHMENT_STEP_COUNT);
-        //
+
         m_currentUploadAttachment = m_arrayAllAttachmentsNeedToBeUploaded[0];
         m_arrayAllAttachmentsNeedToBeUploaded.erase(m_arrayAllAttachmentsNeedToBeUploaded.begin());
 
@@ -481,28 +471,28 @@ void CWizSync::uploadNextAttachment()
 void CWizSync::onDeletedPostList(const std::deque<WIZDELETEDGUIDDATA>& arrayData)
 {
     CWizApi::onDeletedPostList(arrayData);
-    //
+
     uploadNextDeleteds();
 }
 
 void CWizSync::onTagPostList(const std::deque<WIZTAGDATA>& arrayData)
 {
     CWizApi::onTagPostList(arrayData);
-    //
+
     uploadNextTags();
 }
 
 void CWizSync::onStylePostList(const std::deque<WIZSTYLEDATA>& arrayData)
 {
     CWizApi::onStylePostList(arrayData);
-    //
+
     uploadNextStyles();
 }
 
 void CWizSync::onDocumentsGetInfo(const std::deque<WIZDOCUMENTDATABASE>& arrayRet)
 {
     size_t count = arrayRet.size();
-    //
+
     if (0 == count)
     {
         //new document
@@ -516,7 +506,7 @@ void CWizSync::onDocumentsGetInfo(const std::deque<WIZDOCUMENTDATABASE>& arrayRe
         data.strInfoMD5 = "-1";
         data.strDataMD5 = "-1";
         data.strParamMD5 = "-1";
-        //
+
         onQueryDocumentInfo(data);
     }
     else if (1 == count)
@@ -525,16 +515,16 @@ void CWizSync::onDocumentsGetInfo(const std::deque<WIZDOCUMENTDATABASE>& arrayRe
     }
     else
     {
-        ATLASSERT(FALSE);
+        Q_ASSERT(false);
         onXmlRpcError(SyncMethod_GetDocumentsInfo, errorXmlRpcFault, -1, "Fault error: Invalid document info");
-        addErrorLog("Can not query document info");
+        Q_EMIT processErrorLog("Can not query document info");
     }
 }
 
 void CWizSync::onAttachmentsGetInfo(const std::deque<WIZDOCUMENTATTACHMENTDATAEX>& arrayRet)
 {
     size_t count = arrayRet.size();
-    //
+
     if (0 == count)
     {
         //new document
@@ -546,7 +536,7 @@ void CWizSync::onAttachmentsGetInfo(const std::deque<WIZDOCUMENTATTACHMENTDATAEX
         data.tDataModified = data.tInfoModified;
         data.strInfoMD5 = "-1";
         data.strDataMD5 = "-1";
-        //
+
         onQueryAttachmentInfo(data);
     }
     else if (1 == count)
@@ -557,14 +547,14 @@ void CWizSync::onAttachmentsGetInfo(const std::deque<WIZDOCUMENTATTACHMENTDATAEX
     {
         ATLASSERT(FALSE);
         onXmlRpcError(SyncMethod_GetDocumentsInfo, errorXmlRpcFault, -1, "Fault error: Invalid document info");
-        addErrorLog("Can not query document info");
+        Q_EMIT processErrorLog("Can not query document info");
     }
 }
 
 void CWizSync::onDeletedGetList(const std::deque<WIZDELETEDGUIDDATA>& arrayRet)
 {
     CWizApi::onDeletedGetList(arrayRet);
-    //
+
     if (arrayRet.size() < getCountPerPage())
     {
         onDownloadDeletedsCompleted();
@@ -578,7 +568,7 @@ void CWizSync::onDeletedGetList(const std::deque<WIZDELETEDGUIDDATA>& arrayRet)
 void CWizSync::onTagGetList(const std::deque<WIZTAGDATA>& arrayRet)
 {
     CWizApi::onTagGetList(arrayRet);
-    //
+
     if (arrayRet.size() < getCountPerPage())
     {
         onDownloadTagsCompleted();
@@ -592,7 +582,7 @@ void CWizSync::onTagGetList(const std::deque<WIZTAGDATA>& arrayRet)
 void CWizSync::onStyleGetList(const std::deque<WIZSTYLEDATA>& arrayRet)
 {
     CWizApi::onStyleGetList(arrayRet);
-    //
+
     if (arrayRet.size() < getCountPerPage())
     {
         onDownloadStylesCompleted();
@@ -606,9 +596,9 @@ void CWizSync::onStyleGetList(const std::deque<WIZSTYLEDATA>& arrayRet)
 void CWizSync::onDocumentGetList(const std::deque<WIZDOCUMENTDATABASE>& arrayRet)
 {
     CWizApi::onDocumentGetList(arrayRet);
-    //
+
     m_arrayAllDocumentsNeedToBeDownloaded.insert(m_arrayAllDocumentsNeedToBeDownloaded.end(), arrayRet.begin(), arrayRet.end());
-    //
+
     if (arrayRet.size() < getCountPerPage())
     {
         onDownloadDocumentsSimpleInfoCompleted();
@@ -622,7 +612,7 @@ void CWizSync::onDocumentGetList(const std::deque<WIZDOCUMENTDATABASE>& arrayRet
 void CWizSync::onAttachmentGetList(const std::deque<WIZDOCUMENTATTACHMENTDATAEX>& arrayRet)
 {
     CWizApi::onAttachmentGetList(arrayRet);
-    //
+
     if (arrayRet.size() < getCountPerPage())
     {
         onDownloadAttachmentsInfoCompleted();
@@ -642,10 +632,10 @@ void CWizSync::downloadNextDocumentFullInfo()
     else
     {
         changeProgressEx(m_arrayAllDocumentsNeedToBeDownloaded.size(), m_nAllDocumentsNeedToBeDownloadedCount, DOWNLOAD_DOCUMENT_FULL_INFO_STEP_BEGIN, DOWNLOAD_DOCUMENT_FULL_INFO_STEP_COUNT);
-        //
+
         WIZDOCUMENTDATABASE data = m_arrayAllDocumentsNeedToBeDownloaded[0];
         m_arrayAllDocumentsNeedToBeDownloaded.erase(m_arrayAllDocumentsNeedToBeDownloaded.begin());
-        //
+
         callDocumentGetData(data);
     }
 }
@@ -653,11 +643,11 @@ void CWizSync::downloadNextDocumentFullInfo()
 void CWizSync::onDocumentGetData(const WIZDOCUMENTDATAEX& data)
 {
     //CWizApi::onDocumentGetData(data);
-    if (!m_db.UpdateDocument(data, &m_events))
+    if (!m_db.UpdateDocument(data))
     {
         m_bDocumentInfoError = TRUE;
     }
-    //
+
     downloadNextDocumentFullInfo();
 }
 
@@ -670,11 +660,14 @@ void CWizSync::downloadNextObjectData()
     else
     {
         ATLASSERT(m_nAllObjectsNeedToBeDownloadedCount > 0);
-        changeProgressEx(m_arrayAllObjectsNeedToBeDownloaded.size(), m_nAllObjectsNeedToBeDownloadedCount, DOWNLOAD_OBJECT_STEP_BEGIN, DOWNLOAD_OBJECT_STEP_COUNT);
-        //
+        changeProgressEx(m_arrayAllObjectsNeedToBeDownloaded.size(), \
+                         m_nAllObjectsNeedToBeDownloadedCount, \
+                         DOWNLOAD_OBJECT_STEP_BEGIN, \
+                         DOWNLOAD_OBJECT_STEP_COUNT);
+
         WIZOBJECTDATA data = *m_arrayAllObjectsNeedToBeDownloaded.begin();
         m_arrayAllObjectsNeedToBeDownloaded.erase(m_arrayAllObjectsNeedToBeDownloaded.begin());
-        //
+
         downloadObjectData(data);
     }
 }
@@ -682,7 +675,7 @@ void CWizSync::downloadNextObjectData()
 void CWizSync::onDownloadObjectDataCompleted(const WIZOBJECTDATA& data)
 {
     CWizApi::onDownloadObjectDataCompleted(data);
-    //
+
     downloadNextObjectData();
 }
 
@@ -691,7 +684,8 @@ void CWizSync::onDownloadObjectDataCompleted(const WIZOBJECTDATA& data)
 //2: upload data
 void CWizSync::queryDocumentInfo(const CString& strGUID, const CString& strTitle)
 {
-    addLog("query note info: " + strTitle);
+    Q_EMIT processLog(tr("query note info: ") + strTitle);
+
     CWizStdStringArray arrayGUID;
     arrayGUID.push_back(strGUID);
     callDocumentsGetInfo(arrayGUID);
@@ -699,29 +693,30 @@ void CWizSync::queryDocumentInfo(const CString& strGUID, const CString& strTitle
 
 void CWizSync::onQueryDocumentInfo(const WIZDOCUMENTDATABASE& data)
 {
-    ATLASSERT(data.strGUID == m_currentUploadDocument.strGUID);
+    Q_ASSERT(data.strGUID == m_currentUploadDocument.strGUID);
+
     if (data.strGUID != m_currentUploadDocument.strGUID)
     {
         onXmlRpcError(SyncMethod_GetDocumentsInfo, errorXmlRpcFault, -1, "Fault error: can not query document info");
         return;
     }
-    //
+
     UINT nParts = 0;
     if (data.strInfoMD5 != m_currentUploadDocument.strInfoMD5)
     {
         nParts |= WIZKM_XMLRPC_OBJECT_PART_INFO;
     }
-    //
+
     if (data.strDataMD5 != m_currentUploadDocument.strDataMD5)
     {
         nParts |= WIZKM_XMLRPC_OBJECT_PART_DATA;
     }
-    //
+
     if (data.strParamMD5 != m_currentUploadDocument.strParamMD5)
     {
         nParts |= WIZKM_XMLRPC_OBJECT_PART_PARAM;
     }
-    //
+
     if (0 == nParts)
     {
         onUploadDocument(m_currentUploadDocument);
@@ -745,7 +740,8 @@ void CWizSync::onUploadDocument(const WIZDOCUMENTDATAEX& data)
 
 void CWizSync::queryAttachmentInfo(const CString& strGUID, const CString& strName)
 {
-    addLog("query attachment info: " + strName);
+    Q_EMIT processLog(tr("query attachment info: ") + strName);
+
     CWizStdStringArray arrayGUID;
     arrayGUID.push_back(strGUID);
     callAttachmentsGetInfo(arrayGUID);
@@ -753,24 +749,25 @@ void CWizSync::queryAttachmentInfo(const CString& strGUID, const CString& strNam
 
 void CWizSync::onQueryAttachmentInfo(const WIZDOCUMENTATTACHMENTDATA& data)
 {
-    ATLASSERT(data.strGUID == m_currentUploadAttachment.strGUID);
+    Q_ASSERT(data.strGUID == m_currentUploadAttachment.strGUID);
+
     if (data.strGUID != m_currentUploadAttachment.strGUID)
     {
         onXmlRpcError(SyncMethod_GetAttachmentsInfo, errorXmlRpcFault, -1, "Fault error: can not query attachment info");
         return;
     }
-    //
+
     UINT nParts = 0;
     if (data.strInfoMD5 != m_currentUploadAttachment.strInfoMD5)
     {
         nParts |= WIZKM_XMLRPC_OBJECT_PART_INFO;
     }
-    //
+
     if (data.strDataMD5 != m_currentUploadAttachment.strDataMD5)
     {
         nParts |= WIZKM_XMLRPC_OBJECT_PART_DATA;
     }
-    //
+
     if (0 == nParts)
     {
         onUploadAttachment(m_currentUploadAttachment);
@@ -788,16 +785,13 @@ void CWizSync::onUploadAttachment(const WIZDOCUMENTATTACHMENTDATAEX& data)
     uploadNextAttachment();
 }
 
-//////////////////////////////////////////////////////
 BOOL CWizSync::downloadDocument(const WIZDOCUMENTDATABASE& data)
 {
     int nPart = data.nObjectPart;
-    ATLASSERT(nPart != 0);
-    //
+    Q_ASSERT(nPart != 0);
+
     return callDocumentGetData(data);
 }
-
-
 
 BOOL CWizSync::updateDocument(const WIZDOCUMENTDATABASE& data)
 {
@@ -854,7 +848,7 @@ void CWizSync::filterDocuments()
 int CWizSync::calObjectPart(const WIZDOCUMENTDATABASE& data)
 {
     int nPart = 0;
-    //
+
     WIZDOCUMENTDATA dataExists;
     if (m_db.DocumentFromGUID(data.strGUID, dataExists))
     {
@@ -875,7 +869,7 @@ int CWizSync::calObjectPart(const WIZDOCUMENTDATABASE& data)
     {
         nPart = WIZKM_XMLRPC_OBJECT_PART_INFO | WIZKM_XMLRPC_OBJECT_PART_DATA | WIZKM_XMLRPC_OBJECT_PART_PARAM;
     }
-    //
+
     return nPart;
 }
 
@@ -883,10 +877,10 @@ void CWizSync::changeProgressEx(size_t currentCount, size_t total, int stepStart
 {
     if (total <= 0)
         return;
-    //
+
     int processed = total - currentCount;
-    //
+
     int n = int(double(processed) / total * stepCount);
-    //
-    changeProgress(stepStart + n);
+
+    Q_EMIT progressChanged(stepStart + n);
 }

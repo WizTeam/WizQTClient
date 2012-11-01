@@ -26,11 +26,16 @@ void CWizDocumentWebView::init()
     ::WizLoadUnicodeTextFromFile(strFileName, strHtml);
     QUrl url = QUrl::fromLocalFile(strFileName);
 
-    connect(page()->mainFrame(), SIGNAL(javaScriptWindowObjectCleared()), this, SLOT(on_web_populateJavaScriptWindowObject()));
-    connect(page()->mainFrame(), SIGNAL(loadFinished(bool)), this, SLOT(on_web_loadFinished(bool)));
-
     page()->setLinkDelegationPolicy(QWebPage::DelegateAllLinks);
-    connect(this, SIGNAL(linkClicked(const QUrl&)), this, SLOT(on_web_linkClicked(const QUrl&)));
+
+    connect(page()->mainFrame(), SIGNAL(javaScriptWindowObjectCleared()), \
+            SLOT(on_web_populateJavaScriptWindowObject()));
+
+    connect(page()->mainFrame(), SIGNAL(loadFinished(bool)), \
+            SLOT(on_web_loadFinished(bool)));
+
+    connect(this, SIGNAL(linkClicked(const QUrl&)), \
+            SLOT(on_web_linkClicked(const QUrl&)));
 
     setHtml(strHtml, url);
 

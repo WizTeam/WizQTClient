@@ -6,41 +6,12 @@
 
 CWizDownloadObjectData::CWizDownloadObjectData(CWizDatabase& db, \
                                                const CString& strAccountsApiURL, \
-                                               CWizSyncEvents& events, \
                                                const WIZOBJECTDATA& data)
-    : CWizApi(db, strAccountsApiURL, events)
+    : CWizApi(db, strAccountsApiURL)
     , m_data(data)
-    , m_bDownloaded(FALSE)
+    , m_bDownloaded(false)
 {
 
-}
-
-void CWizDownloadObjectData::onXmlRpcError(const CString& strMethodName, WizXmlRpcError err, int errorCode, const CString& errorMessage)
-{
-    CWizApi::onXmlRpcError(strMethodName, err, errorCode, errorMessage);
-
-    emit done(m_bDownloaded);
-}
-
-//step 1 login
-void CWizDownloadObjectData::onClientLogin()
-{
-    downloadObjectData(m_data);
-}
-
-//step 2 download object data
-void CWizDownloadObjectData::onDownloadObjectDataCompleted(const WIZOBJECTDATA& data)
-{
-    CWizApi::onDownloadObjectDataCompleted(data);
-    m_data.arrayData = data.arrayData;
-    m_bDownloaded = TRUE;
-    callClientLogout();
-}
-
-//step 3 logout
-void CWizDownloadObjectData::onClientLogout()
-{
-    emit done(m_bDownloaded);
 }
 
 void CWizDownloadObjectData::startDownload()
@@ -48,6 +19,29 @@ void CWizDownloadObjectData::startDownload()
     callClientLogin(m_db.GetUserId(), m_db.GetPassword2());
 }
 
+void CWizDownloadObjectData::onXmlRpcError(const CString& strMethodName, WizXmlRpcError err, int errorCode, const CString& errorMessage)
+{
+    CWizApi::onXmlRpcError(strMethodName, err, errorCode, errorMessage);
+    Q_EMIT downloadDone(m_bDownloaded);
+}
+
+void CWizDownloadObjectData::onClientLogin()
+{
+    downloadObjectData(m_data);
+}
+
+void CWizDownloadObjectData::onDownloadObjectDataCompleted(const WIZOBJECTDATA& data)
+{
+    CWizApi::onDownloadObjectDataCompleted(data);
+    m_data.arrayData = data.arrayData;
+    m_bDownloaded = true;
+    callClientLogout();
+}
+
+void CWizDownloadObjectData::onClientLogout()
+{
+    Q_EMIT downloadDone(m_bDownloaded);
+}
 
 
 bool WizDownloadObjectData(CWizDatabase& db, const WIZOBJECTDATA& data, QWidget* parent)

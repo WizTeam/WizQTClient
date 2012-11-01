@@ -38,8 +38,8 @@ QWidget* createSearchWidget(CWizExplorerApp& app, CWizSearchBox* searchBox)
     widget->setObjectName("WizSearchBoxClient");
     widget->setStyleSheet("QWidget#WizSearchBoxClient{background-color:#ffffff;border-color:#bbbbbb;border-width:1;border-style:solid}");
     //
-    CWizSearchBox::connect(editSearch, SIGNAL(editingFinished()), searchBox, SLOT(on_search_editingFinished()));
-    CWizSearchBox::connect(editSearch, SIGNAL(textEdited(QString)), searchBox, SLOT(on_search_edited(QString)));
+    searchBox->connect(editSearch, SIGNAL(editingFinished()), SLOT(on_search_editingFinished()));
+    searchBox->connect(editSearch, SIGNAL(textEdited(const QString&)), SLOT(on_search_edited(const QString&)));
     //
     return widget;
 }

@@ -8,7 +8,7 @@ CWizPreferenceWindow::CWizPreferenceWindow(CWizExplorerApp& app, QWidget* parent
 {
     ui->setupUi(this);
 
-    connect(ui->buttonOK, SIGNAL(clicked()), this, SLOT(accept()));
+    connect(ui->buttonOK, SIGNAL(clicked()), SLOT(accept()));
 
     // general tab
     ::WizGetTranslatedLocales(m_locales);
@@ -70,7 +70,7 @@ CWizPreferenceWindow::CWizPreferenceWindow(CWizExplorerApp& app, QWidget* parent
 
     connect(ui->checkAutoSync, SIGNAL(clicked(bool)), SLOT(on_checkAutoSync_clicked(bool)));
     connect(ui->checkDownloadAllNotesData, SIGNAL(clicked(bool)), SLOT(on_checkDownloadAllNotesData_clicked(bool)));
-    connect(ui->labelProxySettings, SIGNAL(linkActivated(const QString&)), SLOT(on_labelProxy_linkActivated(const QString&)));
+    connect(ui->labelProxySettings, SIGNAL(linkActivated(const QString&)), SLOT(labelProxy_linkActivated(const QString&)));
 }
 
 void CWizPreferenceWindow::on_comboLang_currentIndexChanged(int index)
@@ -122,7 +122,7 @@ void CWizPreferenceWindow::on_checkDownloadAllNotesData_clicked(bool checked)
     emit settingsChanged(wizoptionsSync);
 }
 
-void CWizPreferenceWindow::on_labelProxy_linkActivated(const QString& link)
+void CWizPreferenceWindow::labelProxy_linkActivated(const QString& link)
 {
     Q_UNUSED(link);
 

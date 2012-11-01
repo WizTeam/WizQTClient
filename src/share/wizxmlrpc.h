@@ -229,7 +229,7 @@ public:
     CWizXmlRpcServer(const CString& strUrl);
 
     void abort();
-    int currentId() const { return m_http.currentId(); }
+    int state() const { return m_http.state(); }
     void setProxy(const QString& host, int port, const QString& userName, const QString& password);
 
     bool xmlRpcCall(const CString& strMethodName, \

@@ -53,8 +53,9 @@ CWizAttachmentListView::CWizAttachmentListView(CWizExplorerApp& app, QWidget* pa
     setAttribute(Qt::WA_MacShowFocusRect, false);
 #endif
     //
-    connect(this, SIGNAL(itemDoubleClicked(QListWidgetItem*)), this, SLOT(on_list_itemDoubleClicked(QListWidgetItem*)));
+    connect(this, SIGNAL(itemDoubleClicked(QListWidgetItem*)), SLOT(on_list_itemDoubleClicked(QListWidgetItem*)));
 }
+
 int CWizAttachmentListView::wrapTextLineIndex() const
 {
     return 1;
@@ -283,7 +284,7 @@ CWizAttachmentListWidget::CWizAttachmentListWidget(CWizExplorerApp& app, QWidget
     layoutHeader->addWidget(new QLabel(tr("Attachments"), this));
     layoutHeader->addWidget(new CWizSpacer(this));
     layoutHeader->addWidget(addAttachmentButton);
-    connect(addAttachmentButton, SIGNAL(clicked()), this, SLOT(on_addAttachment_clicked()));
+    connect(addAttachmentButton, SIGNAL(clicked()), SLOT(on_addAttachment_clicked()));
     //
     QWidget* line = new QWidget(this);
     line->setMaximumHeight(1);

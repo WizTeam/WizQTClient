@@ -6,7 +6,7 @@
 #include "wizdef.h"
 
 #include "share/wizsettings.h"
-#include "share/wizsync.h"
+#include "share/wizsyncthread.h"
 
 #include "wizupdater.h"
 #include "wizconsoledialog.h"
@@ -25,7 +25,6 @@ class CWizOptionsWidget;
 class MainWindow
     : public QMainWindow
     , public CWizExplorerApp
-    , public CWizSyncEvents
 {
     Q_OBJECT
 
@@ -48,20 +47,14 @@ public:
     virtual CWizUserSettings& userSettings() { return *m_settings; }
     virtual CWizUpdater* updater() { return m_updater; }
 
-    virtual void syncStarted();
-    virtual void syncLogin();
-    virtual void syncDone(bool error);
-    virtual void addLog(const CString& strMsg);
-    virtual void addDebugLog(const CString& strMsg);
-    virtual void addErrorLog(const CString& strMsg);
-    virtual void changeProgress(int pos);
+
 
 private:
     CWizDatabase& m_db;
     CWizUserSettings* m_settings;
     CWizUpdater* m_updater;
     CWizConsoleDialog* m_console;
-    CWizSync m_sync;
+    CWizSyncThread* m_sync;
     QTimer* m_syncTimer;
 
 #ifndef Q_OS_MAC
@@ -111,7 +104,7 @@ private:
     QObject* CategoryCtrlObject();
     QObject* DocumentsCtrlObject();
 
-public slots:
+public Q_SLOTS:
     //interface WizExplorerApp;
     QObject* CreateWizObject(const QString& strObjectID);
     //interface WizExplorerWindow
@@ -139,6 +132,14 @@ public slots:
     void on_options_settingsChanged(WizOptionsType type);
 
     void on_syncTimer_timeout();
+
+    void on_syncStarted();
+    void on_syncLogined();
+    void on_syncDone(bool error);
+    void on_syncProcessLog(const QString& strMsg);
+    void on_syncProcessDebugLog(const QString& strMsg);
+    void on_syncProcessErrorLog(const QString& strMsg);
+    void on_syncProgressChanged(int pos);
 
 #ifndef Q_OS_MAC
     void on_actionPopupMainMenu_triggered();

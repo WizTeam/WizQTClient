@@ -62,7 +62,7 @@ void CWizDocument::PermanentlyDelete()
         m_db.DeleteAttachment(*it, true);
     }
 
-    if (!m_db.DeleteDocument(m_data, TRUE))
+    if (!m_db.DeleteDocument(m_data, true))
     {
         TOLOG1(_T("Failed to delete document: %1"), m_data.strTitle);
         return;
@@ -87,7 +87,7 @@ void CWizDocument::MoveTo(QObject* p)
 bool CWizDocument::MoveDocument(CWizFolder* pFolder)
 {
     if (!pFolder)
-        return FALSE;
+        return false;
     //
     CString strNewLocation = pFolder->Location();
     CString strOldLocation = m_data.strLocation;
@@ -97,10 +97,10 @@ bool CWizDocument::MoveDocument(CWizFolder* pFolder)
     {
         m_data.strLocation = strOldLocation;
         TOLOG1(_T("Failed to modify document location %1."), m_data.strLocation);
-        return FALSE;
+        return false;
     }
     //
-    return TRUE;
+    return true;
 }
 
 bool CWizDocument::AddTag(const WIZTAGDATA& dataTag)
@@ -109,15 +109,15 @@ bool CWizDocument::AddTag(const WIZTAGDATA& dataTag)
     m_db.GetDocumentTags(m_data.strGUID, arrayTag);
 
     if (-1 != WizFindInArray(arrayTag, dataTag.strGUID))
-        return TRUE;
+        return true;
     //
     if (!m_db.InsertDocumentTag(m_data, dataTag.strGUID))
     {
         TOLOG1(_T("Failed to insrt document tag: %1"), m_data.strTitle);
-        return FALSE;
+        return false;
     }
     //
-    return TRUE;
+    return true;
 }
 
 bool CWizDocument::RemoveTag(const WIZTAGDATA& dataTag)
@@ -176,12 +176,12 @@ CWizFolder::CWizFolder(CWizDatabase& db, const CString& strLocation)
 {
 
 }
-BOOL CWizFolder::IsDeletedItems() const
+bool CWizFolder::IsDeletedItems() const
 {
     return m_db.GetDeletedItemsLocation() == Location();
 }
 
-BOOL CWizFolder::IsInDeletedItems() const
+bool CWizFolder::IsInDeletedItems() const
 {
     return !IsDeletedItems() && Location().startsWith(m_db.GetDeletedItemsLocation());
 }
@@ -196,6 +196,7 @@ QObject* CWizFolder::CreateDocument2(const QString& strTitle, const QString& str
     //pDoc->ref();
     return pDoc;
 }
+
 void CWizFolder::Delete()
 {
     if (IsDeletedItems())
@@ -238,17 +239,17 @@ void CWizFolder::MoveTo(QObject* dest)
     return MoveToLocation(pFolder->Location());
 }
 
-BOOL CWizFolder::CanMove(const CString& strSrcLocation, const CString& strDestLocation) const
+bool CWizFolder::CanMove(const CString& strSrcLocation, const CString& strDestLocation) const
 {
     if (m_db.GetDeletedItemsLocation() == strSrcLocation)
-        return FALSE;
+        return false;
     //
     if (strDestLocation.startsWith(strSrcLocation))
-        return FALSE;
+        return false;
     //
-    return TRUE;
+    return true;
 }
-BOOL CWizFolder::CanMove(CWizFolder* pSrc, CWizFolder* pDest) const
+bool CWizFolder::CanMove(CWizFolder* pSrc, CWizFolder* pDest) const
 {
     return CanMove(pSrc->Location(), pDest->Location());
 }
@@ -306,8 +307,6 @@ void CWizFolder::MoveToLocation(const CString& strDestLocation)
 }
 
 
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//class CWizDatabase
 CWizDatabase::CWizDatabase()
 {
 
@@ -317,7 +316,7 @@ bool CWizDatabase::Open(const QString& strUserId, const QString& strPassword)
 {
     m_strUserId = strUserId;
     m_strPassword = strPassword;
-    BOOL bRet = CIndex::Open(GetIndexFileName()) && CThumbIndex::OpenThumb(GetThumbFileName());
+    bool bRet = CIndex::Open(GetIndexFileName()) && CThumbIndex::OpenThumb(GetThumbFileName());
 
     return bRet;
 }
@@ -382,72 +381,65 @@ bool CWizDatabase::SetObjectVersion(const CString& strObjectName, __int64 nVersi
     return SetMetaInt64("SYNC_INFO", strObjectName, nVersion);
 }
 
-bool CWizDatabase::UpdateDeletedGUID(const WIZDELETEDGUIDDATA& data, CWizSyncEvents* pEvents)
+bool CWizDatabase::UpdateDeletedGUID(const WIZDELETEDGUIDDATA& data)
 {
-    BOOL bRet = FALSE;
-    //
+    bool bRet = false;
+
     CString strType = WIZOBJECTDATA::ObjectTypeToTypeString(data.eType);
-    BOOL bExists = FALSE;
+    bool bExists = false;
     ObjectExists(data.strGUID, strType, bExists);
     if (!bExists)
-        return TRUE;
-    //
-    bRet = DeleteObject(data.strGUID, strType, FALSE);
-    //
-    if (!bRet && pEvents)
-    {
-        pEvents->addErrorLog("Failed to delete object: " + data.strGUID + " type: " + strType);
+        return true;
+
+    bRet = DeleteObject(data.strGUID, strType, false);
+
+    if (!bRet) {
+        Q_EMIT updateError("Failed to delete object: " + data.strGUID + " type: " + strType);
     }
-    //
+
     return bRet;
 }
 
-bool CWizDatabase::UpdateTag(const WIZTAGDATA& data, CWizSyncEvents* pEvents)
+bool CWizDatabase::UpdateTag(const WIZTAGDATA& data)
 {
-    BOOL bRet = FALSE;
+    bool bRet = false;
 
     WIZTAGDATA dataTemp;
-    if (TagFromGUID(data.strGUID, dataTemp))
-    {
+    if (TagFromGUID(data.strGUID, dataTemp)) {
         bRet = ModifyTagEx(data);
-    }
-    else
-    {
+    } else {
         bRet = CreateTagEx(data);
     }
-    //
-    if (!bRet && pEvents)
-    {
-        pEvents->addErrorLog("Failed to update tag: " + data.strName);
+
+    if (!bRet) {
+        Q_EMIT updateError("Failed to update tag: " + data.strName);
     }
-    //
+
     return bRet;
 }
-BOOL CWizDatabase::UpdateStyle(const WIZSTYLEDATA& data, CWizSyncEvents* pEvents)
+
+bool CWizDatabase::UpdateStyle(const WIZSTYLEDATA& data)
 {
-    BOOL bRet = FALSE;
-    //
+    bool bRet = false;
+
     WIZSTYLEDATA dataTemp;
-    if (StyleFromGUID(data.strGUID, dataTemp))
-    {
+    if (StyleFromGUID(data.strGUID, dataTemp)) {
         bRet = ModifyStyleEx(data);
-    }
-    else
-    {
+    } else {
         bRet = CreateStyleEx(data);
     }
-    //
-    if (!bRet && pEvents)
-    {
-        pEvents->addErrorLog("Failed to update style: " + data.strName);
+
+    if (!bRet) {
+        Q_EMIT updateError("Failed to update style: " + data.strName);
     }
-    //
+
     return bRet;
 }
-BOOL CWizDatabase::UpdateDocument(const WIZDOCUMENTDATAEX& data, CWizSyncEvents* pEvents)
+
+bool CWizDatabase::UpdateDocument(const WIZDOCUMENTDATAEX& data)
 {
-    BOOL bRet = FALSE;
-    //
+    bool bRet = false;
+
     WIZDOCUMENTDATAEX dataTemp;
     if (DocumentFromGUID(data.strGUID, dataTemp))
     {
@@ -456,28 +448,27 @@ BOOL CWizDatabase::UpdateDocument(const WIZDOCUMENTDATAEX& data, CWizSyncEvents*
             bRet = ModifyDocumentInfoEx(data);
             if (dataTemp.strDataMD5 != data.strDataMD5)
             {
-                SetObjectDataDownloaded(data.strGUID, "document", FALSE);
+                SetObjectDataDownloaded(data.strGUID, "document", false);
             }
         }
         else
         {
-            bRet = TRUE;
+            bRet = true;
         }
     }
     else
     {
-        ATLASSERT(data.nObjectPart & WIZKM_XMLRPC_OBJECT_PART_INFO);
-        //
+        Q_ASSERT(data.nObjectPart & WIZKM_XMLRPC_OBJECT_PART_INFO);
+
         bRet = CreateDocumentEx(data);
     }
-    //
-    if (!bRet && pEvents)
-    {
-        pEvents->addErrorLog("Failed to update document: " + data.strTitle);
+
+    if (!bRet) {
+        Q_EMIT updateError("Failed to update document: " + data.strTitle);
     }
-    //
+
     WIZDOCUMENTDATA dataRet = data;
-    //
+
     bool resetVersion = false;
     if (!data.arrayParam.empty())
     {
@@ -489,209 +480,195 @@ BOOL CWizDatabase::UpdateDocument(const WIZDOCUMENTDATAEX& data, CWizSyncEvents*
         SetDocumentTags(dataRet, data.arrayTagGUID);
         resetVersion = true;
     }
-    //
+
     if (resetVersion)
     {
         //reset document info
         ModifyDocumentInfoEx(data);
     }
-    //
+
     return bRet;
 }
-BOOL CWizDatabase::UpdateAttachment(const WIZDOCUMENTATTACHMENTDATAEX& data, CWizSyncEvents* pEvents)
+
+bool CWizDatabase::UpdateAttachment(const WIZDOCUMENTATTACHMENTDATAEX& data)
 {
-    BOOL bRet = FALSE;
-    //
+    bool bRet = false;
+
     WIZDOCUMENTATTACHMENTDATAEX dataTemp;
     if (AttachmentFromGUID(data.strGUID, dataTemp))
     {
         bRet = ModifyAttachmentInfoEx(data);
-        //
+
         bool changed = dataTemp.strDataMD5 != data.strDataMD5;
         if (changed)
         {
-            SetObjectDataDownloaded(data.strGUID, "attachment", FALSE);
+            SetObjectDataDownloaded(data.strGUID, "attachment", false);
         }
     }
     else
     {
         bRet = CreateAttachmentEx(data);
     }
-    //
-    if (!bRet && pEvents)
-    {
-        pEvents->addErrorLog("Failed to update attachment: " + data.strName);
+
+    if (!bRet) {
+        Q_EMIT updateError("Failed to update attachment: " + data.strName);
     }
-    //
+
     return bRet;
 }
-//
 
-BOOL CWizDatabase::UpdateDeletedGUIDs(const std::deque<WIZDELETEDGUIDDATA>& arrayDeletedGUID, CWizSyncEvents* pEvents)
+bool CWizDatabase::UpdateDeletedGUIDs(const std::deque<WIZDELETEDGUIDDATA>& arrayDeletedGUID)
 {
     if (arrayDeletedGUID.empty())
-        return TRUE;
-    //
+        return true;
+
     __int64 nVersion = -1;
-    //
-    BOOL bHasError = FALSE;
-    for (std::deque<WIZDELETEDGUIDDATA>::const_iterator it = arrayDeletedGUID.begin();
-        it != arrayDeletedGUID.end();
-        it++)
+
+    bool bHasError = false;
+
+    std::deque<WIZDELETEDGUIDDATA>::const_iterator it;
+    for (it = arrayDeletedGUID.begin(); it != arrayDeletedGUID.end(); it++)
     {
         const WIZDELETEDGUIDDATA& data = *it;
-        //
-        if (!UpdateDeletedGUID(data, pEvents))
+
+        if (!UpdateDeletedGUID(data))
         {
             bHasError = true;
         }
-        //
+
         nVersion = std::max<__int64>(nVersion, data.nVersion);
     }
-    //
+
     if (!bHasError)
     {
         SetObjectVersion(WIZDELETEDGUIDDATA::ObjectName(), nVersion);
     }
-    //
+
     return !bHasError;
 }
 
-BOOL CWizDatabase::UpdateTags(const std::deque<WIZTAGDATA>& arrayTag, CWizSyncEvents* pEvents)
+bool CWizDatabase::UpdateTags(const std::deque<WIZTAGDATA>& arrayTag)
 {
     if (arrayTag.empty())
-        return FALSE;
-    //
+        return false;
+
     __int64 nVersion = -1;
-    //
-    BOOL bHasError = FALSE;
-    for (std::deque<WIZTAGDATA>::const_iterator it = arrayTag.begin();
-        it != arrayTag.end();
-        it++)
+
+    bool bHasError = false;
+    std::deque<WIZTAGDATA>::const_iterator it;
+    for (it = arrayTag.begin(); it != arrayTag.end(); it++)
     {
         const WIZTAGDATA& data = *it;
-        //
-        if (pEvents)
-        {
-            pEvents->addLog("tag: " + data.strName);
-        }
-        //
-        if (!UpdateTag(data, pEvents))
+
+        Q_EMIT processLog("tag: " + data.strName);
+
+        if (!UpdateTag(data))
         {
             bHasError = true;
         }
-        //
+
         nVersion = std::max<__int64>(nVersion, data.nVersion);
     }
     if (!bHasError)
     {
         SetObjectVersion(WIZTAGDATA::ObjectName(), nVersion);
     }
-    //
+
     return !bHasError;
 }
 
 
-BOOL CWizDatabase::UpdateStyles(const std::deque<WIZSTYLEDATA>& arrayStyle, CWizSyncEvents* pEvents)
+bool CWizDatabase::UpdateStyles(const std::deque<WIZSTYLEDATA>& arrayStyle)
 {
     if (arrayStyle.empty())
-        return TRUE;
-    //
+        return true;
+
     __int64 nVersion = -1;
-    //
-    BOOL bHasError = FALSE;
-    for (std::deque<WIZSTYLEDATA>::const_iterator it = arrayStyle.begin();
-        it != arrayStyle.end();
-        it++)
+
+    bool bHasError = false;
+    std::deque<WIZSTYLEDATA>::const_iterator it;
+    for (it = arrayStyle.begin(); it != arrayStyle.end(); it++)
     {
         const WIZSTYLEDATA& data = *it;
-        //
-        if (pEvents)
-        {
-            pEvents->addLog("style: " + data.strName);
-        }
-        //
-        if (!UpdateStyle(data, pEvents))
+
+        Q_EMIT processLog("style: " + data.strName);
+
+        if (!UpdateStyle(data))
         {
             bHasError = true;
         }
-        //
+
         nVersion = std::max<__int64>(nVersion, data.nVersion);
     }
+
     if (!bHasError)
     {
         SetObjectVersion(WIZSTYLEDATA::ObjectName(), nVersion);
     }
-    //
+
     return !bHasError;
 }
 
-BOOL CWizDatabase::UpdateDocuments(const std::deque<WIZDOCUMENTDATAEX>& arrayDocument, CWizSyncEvents* pEvents)
+bool CWizDatabase::UpdateDocuments(const std::deque<WIZDOCUMENTDATAEX>& arrayDocument)
 {
     if (arrayDocument.empty())
-        return TRUE;
-    //
+        return true;
+
     __int64 nVersion = -1;
-    //
-    BOOL bHasError = FALSE;
-    for (std::deque<WIZDOCUMENTDATAEX>::const_iterator it = arrayDocument.begin();
-        it != arrayDocument.end();
-        it++)
+
+    bool bHasError = false;
+    std::deque<WIZDOCUMENTDATAEX>::const_iterator it;
+    for (it = arrayDocument.begin(); it != arrayDocument.end(); it++)
     {
         const WIZDOCUMENTDATAEX& data = *it;
-        //
-        if (pEvents)
+
+        Q_EMIT processLog("note: " + data.strTitle);
+
+        if (!UpdateDocument(data))
         {
-            pEvents->addLog("note: " + data.strTitle);
+            bHasError = true;
         }
-        //
-        if (!UpdateDocument(data, pEvents))
-        {
-            bHasError = TRUE;
-        }
-        //
+
         nVersion = std::max<__int64>(nVersion, data.nVersion);
     }
+
     if (!bHasError)
     {
         SetObjectVersion(WIZDOCUMENTDATAEX::ObjectName(), nVersion);
     }
-    //
+
     return !bHasError;
 }
 
-
-BOOL CWizDatabase::UpdateAttachments(const std::deque<WIZDOCUMENTATTACHMENTDATAEX>& arrayAttachment, CWizSyncEvents* pEvents)
+bool CWizDatabase::UpdateAttachments(const std::deque<WIZDOCUMENTATTACHMENTDATAEX>& arrayAttachment)
 {
     if (arrayAttachment.empty())
-        return TRUE;
-    //
+        return true;
+
     __int64 nVersion = -1;
-    //
-    BOOL bHasError = FALSE;
-    for (std::deque<WIZDOCUMENTATTACHMENTDATAEX>::const_iterator it = arrayAttachment.begin();
-        it != arrayAttachment.end();
-        it++)
+
+    bool bHasError = false;
+
+    std::deque<WIZDOCUMENTATTACHMENTDATAEX>::const_iterator it;
+    for (it = arrayAttachment.begin(); it != arrayAttachment.end(); it++)
     {
         const WIZDOCUMENTATTACHMENTDATAEX& data = *it;
-        //
-        if (pEvents)
-        {
-            pEvents->addLog("attachment: " + data.strName);
-        }
-        //
-        if (!UpdateAttachment(data, pEvents))
+
+        Q_EMIT processLog("attachment: " + data.strName);
+
+        if (!UpdateAttachment(data))
         {
             bHasError = true;
         }
-        //
+
         nVersion = std::max<__int64>(nVersion, data.nVersion);
     }
+
     if (!bHasError)
     {
         SetObjectVersion(WIZDOCUMENTATTACHMENTDATAEX::ObjectName(), nVersion);
     }
-    //
+
     return !bHasError;
 }
 
@@ -704,31 +681,31 @@ bool CWizDatabase::UpdateDocumentData(WIZDOCUMENTDATA& data, const QString& strH
         QUrl urlResource = QUrl::fromLocalFile(strResourcePath);
         strProcessedHtml.replace(urlResource.toString(), "index_files/");
     }
-    //
+
     CWizDocument doc(*this, data);
     CString strMetaText = doc.GetMetaText();
-    //
+
     CString strZipFileName = GetDocumentFileName(data.strGUID);
     bool bZip = ::WizHtml2Zip(strURL, strProcessedHtml, strResourcePath, nFlags, strMetaText, strZipFileName);
     if (!bZip)
         return false;
-    //
-    SetObjectDataDownloaded(data.strGUID, "document", TRUE);
-    //
+
+    SetObjectDataDownloaded(data.strGUID, "document", true);
+
     return UpdateDocumentDataMD5(data, strZipFileName);
 }
 
-BOOL CWizDatabase::UpdateDocumentDataMD5(WIZDOCUMENTDATA& data, const CString& strZipFileName)
+bool CWizDatabase::UpdateDocumentDataMD5(WIZDOCUMENTDATA& data, const CString& strZipFileName)
 {
-    BOOL bRet = CIndex::UpdateDocumentDataMD5(data, strZipFileName);
-    //
+    bool bRet = CIndex::UpdateDocumentDataMD5(data, strZipFileName);
+
     UpdateDocumentAbstract(data.strGUID);
-    //
+
     return bRet;
 }
-BOOL CWizDatabase::DeleteAttachment(const WIZDOCUMENTATTACHMENTDATA& data, BOOL bLog)
+bool CWizDatabase::DeleteAttachment(const WIZDOCUMENTATTACHMENTDATA& data, bool bLog)
 {
-    BOOL bRet = CIndex::DeleteAttachment(data, bLog);
+    bool bRet = CIndex::DeleteAttachment(data, bLog);
     CString strFileName = GetAttachmentFileName(data.strGUID);
     if (PathFileExists(strFileName))
     {
@@ -737,36 +714,36 @@ BOOL CWizDatabase::DeleteAttachment(const WIZDOCUMENTATTACHMENTDATA& data, BOOL 
     return bRet;
 }
 
-BOOL CWizDatabase::IsDocumentDownloaded(const CString& strGUID)
+bool CWizDatabase::IsDocumentDownloaded(const CString& strGUID)
 {
     return IsObjectDataDownloaded(strGUID, "document");
 }
 
-BOOL CWizDatabase::IsAttachmentDownloaded(const CString& strGUID)
+bool CWizDatabase::IsAttachmentDownloaded(const CString& strGUID)
 {
     return IsObjectDataDownloaded(strGUID, "attachment");
 }
 
-BOOL CWizDatabase::GetAllObjectsNeedToBeDownloaded(std::deque<WIZOBJECTDATA>& arrayData)
+bool CWizDatabase::GetAllObjectsNeedToBeDownloaded(std::deque<WIZOBJECTDATA>& arrayData)
 {
     CWizDocumentDataArray arrayDocument;
     CWizDocumentAttachmentDataArray arrayAttachment;
     GetNeedToBeDownloadedDocuments(arrayDocument);
     GetNeedToBeDownloadedAttachments(arrayAttachment);
-    //
+
     arrayData.assign(arrayAttachment.begin(), arrayAttachment.end());
     arrayData.insert(arrayData.begin(), arrayDocument.begin(), arrayDocument.end());
-    //
-    return TRUE;
+
+    return true;
 }
-BOOL CWizDatabase::UpdateSyncObjectLocalData(const WIZOBJECTDATA& data)
+bool CWizDatabase::UpdateSyncObjectLocalData(const WIZOBJECTDATA& data)
 {
     if (data.eObjectType == wizobjectDocumentAttachment)
     {
         if (!SaveCompressedAttachmentData(data.strObjectGUID, data.arrayData))
         {
-            TOLOG1(_T("Failed to save attachment data: %1"), data.strDisplayName);
-            return FALSE;
+            Q_EMIT updateError("Failed to save attachment data: " + data.strDisplayName);
+            return false;
         }
     }
     else
@@ -774,25 +751,25 @@ BOOL CWizDatabase::UpdateSyncObjectLocalData(const WIZOBJECTDATA& data)
         CString strFileName = GetObjectFileName(data);
         if (!::WizSaveDataToFile(strFileName, data.arrayData))
         {
-            TOLOG1(_T("Failed to save document data: %1"), data.strDisplayName);
-            return FALSE;
+            Q_EMIT updateError("Failed to save document data: " + data.strDisplayName);
+            return false;
         }
     }
-    //
+
     if (data.eObjectType == wizobjectDocument)
     {
         WIZDOCUMENTDATA document;
         if (DocumentFromGUID(data.strObjectGUID, document))
         {
-            emit documentDataModified(document);
+            Q_EMIT documentDataModified(document);
         }
-        //
+
         UpdateDocumentAbstract(data.strObjectGUID);
     }
-    //
-    SetObjectDataDownloaded(data.strObjectGUID, WIZOBJECTDATA::ObjectTypeToTypeString(data.eObjectType), TRUE);
-    //
-    return TRUE;
+
+    SetObjectDataDownloaded(data.strObjectGUID, WIZOBJECTDATA::ObjectTypeToTypeString(data.eObjectType), true);
+
+    return true;
 }
 
 CString CWizDatabase::GetDocumentFileName(const CString& strGUID)
@@ -813,36 +790,10 @@ CString CWizDatabase::GetObjectFileName(const WIZOBJECTDATA& data)
         return GetAttachmentFileName(data.strObjectGUID);
     else
     {
-        ATLASSERT(FALSE);
+        ATLASSERT(false);
         return CString();
     }
 }
-
-//BOOL CWizDatabase::GetAllRootLocations(CWizStdStringArray& arrayLocation)
-//{
-//    CWizStdStringArray arrayAll;
-//    GetAllLocations(arrayAll);
-//    //
-//    std::set<CString> setRoot;
-//    for (CWizStdStringArray::const_iterator it = arrayAll.begin();
-//    it != arrayAll.end();
-//    it++)
-//    {
-//        setRoot.insert(GetRootLocation(*it));
-//    }
-//    //
-//    arrayLocation.assign(setRoot.begin(), setRoot.end());
-//    //
-//    return TRUE;
-//}
-
-//bool CWizDatabase::GetChildLocations(const QString& strLocation, CWizStdStringArray& arrayLocation)
-//{
-//    Q_UNUSED(strLocation);
-//    Q_UNUSED(arrayLocation);
-//
-//    return false;
-//}
 
 bool CWizDatabase::GetAllRootLocations(const CWizStdStringArray& arrayAllLocation, \
                                        CWizStdStringArray& arrayLocation)
@@ -888,14 +839,21 @@ bool CWizDatabase::GetChildLocations(const CWizStdStringArray& arrayAllLocation,
     return true;
 }
 
-BOOL CWizDatabase::IsInDeletedItems(const CString& strLocation)
+bool CWizDatabase::IsInDeletedItems(const CString& strLocation)
 {
     return strLocation.startsWith(GetDeletedItemsLocation());
 }
 
-BOOL CWizDatabase::CreateDocumentAndInit(const CString& strHtml, const CString& strHtmlUrl, int nFlags, const CString& strTitle, const CString& strName, const CString& strLocation, const CString& strURL, WIZDOCUMENTDATA& data)
+bool CWizDatabase::CreateDocumentAndInit(const CString& strHtml, \
+                                         const CString& strHtmlUrl, \
+                                         int nFlags, \
+                                         const CString& strTitle, \
+                                         const CString& strName, \
+                                         const CString& strLocation, \
+                                         const CString& strURL, \
+                                         WIZDOCUMENTDATA& data)
 {
-    BOOL bRet = FALSE;
+    bool bRet = false;
     try
     {
         BeginUpdate();
@@ -903,36 +861,38 @@ BOOL CWizDatabase::CreateDocumentAndInit(const CString& strHtml, const CString& 
         if (bRet)
         {
             bRet = UpdateDocumentData(data, strHtml, strURL, nFlags);
-            //
-            emit documentCreated(data);
+
+            Q_EMIT documentCreated(data);
         }
     }
     catch (...)
     {
 
     }
-    //
+
     EndUpdate();
-    //
+
     return bRet;
 }
-BOOL CWizDatabase::AddAttachment(const WIZDOCUMENTDATA& document, const CString& strFileName, WIZDOCUMENTATTACHMENTDATA& dataRet)
+
+bool CWizDatabase::AddAttachment(const WIZDOCUMENTDATA& document, const CString& strFileName, WIZDOCUMENTATTACHMENTDATA& dataRet)
 {
     CString strMD5 = ::WizMd5FileString(strFileName);
     if (!CreateAttachment(document.strGUID, WizExtractFileName(strFileName), strFileName, "", strMD5, dataRet))
-        return FALSE;
-    //
-    if (!::WizCopyFile(strFileName, GetAttachmentFileName(dataRet.strGUID), FALSE))
+        return false;
+
+    if (!::WizCopyFile(strFileName, GetAttachmentFileName(dataRet.strGUID), false))
     {
-        DeleteAttachment(dataRet, FALSE);
-        return FALSE;
+        DeleteAttachment(dataRet, false);
+        return false;
     }
-    //
+
     UpdateDocumentAttachmentCount(document.strGUID);
-    //
-    return TRUE;
+
+    return true;
 }
-BOOL CWizDatabase::DeleteTagWithChildren(const WIZTAGDATA& data, BOOL bLog)
+
+bool CWizDatabase::DeleteTagWithChildren(const WIZTAGDATA& data, bool bLog)
 {
     CWizTagDataArray arrayChildTag;
     GetChildTags(data.strGUID, arrayChildTag);
@@ -940,120 +900,121 @@ BOOL CWizDatabase::DeleteTagWithChildren(const WIZTAGDATA& data, BOOL bLog)
     {
         DeleteTagWithChildren(childTag, bLog);
     }
-    //
+
     DeleteTag(data, bLog);
-    //
-    return TRUE;
+
+    return true;
 }
 
-BOOL CWizDatabase::LoadDocumentData(const CString& strDocumentGUID, QByteArray& arrayData)
+bool CWizDatabase::LoadDocumentData(const CString& strDocumentGUID, QByteArray& arrayData)
 {
     CString strFileName = GetDocumentFileName(strDocumentGUID);
     if (!PathFileExists(strFileName))
     {
-        return FALSE;
+        return false;
     }
-    //
+
     QFile file(strFileName);
     if (!file.open(QFile::ReadOnly))
-        return FALSE;
-    //
+        return false;
+
     arrayData = file.readAll();
-    //
-    return !arrayData.isEmpty();
-}
-BOOL CWizDatabase::LoadAttachmentData(const CString& strDocumentGUID, QByteArray& arrayData)
-{
-    CString strFileName = GetAttachmentFileName(strDocumentGUID);
-    if (!PathFileExists(strFileName))
-    {
-        return FALSE;
-    }
-    //
-    QFile file(strFileName);
-    if (!file.open(QFile::ReadOnly))
-        return FALSE;
-    //
-    arrayData = file.readAll();
-    //
+
     return !arrayData.isEmpty();
 }
 
-BOOL CWizDatabase::LoadCompressedAttachmentData(const CString& strDocumentGUID, QByteArray& arrayData)
+bool CWizDatabase::LoadAttachmentData(const CString& strDocumentGUID, QByteArray& arrayData)
 {
     CString strFileName = GetAttachmentFileName(strDocumentGUID);
     if (!PathFileExists(strFileName))
     {
-        return FALSE;
+        return false;
+    }
+
+    QFile file(strFileName);
+    if (!file.open(QFile::ReadOnly))
+        return false;
+
+    arrayData = file.readAll();
+
+    return !arrayData.isEmpty();
+}
+
+bool CWizDatabase::LoadCompressedAttachmentData(const CString& strDocumentGUID, QByteArray& arrayData)
+{
+    CString strFileName = GetAttachmentFileName(strDocumentGUID);
+    if (!PathFileExists(strFileName))
+    {
+        return false;
     }
     CString strTempZipFileName = ::WizGlobal()->GetTempPath() + WizIntToStr(GetTickCount()) + ".tmp";
     CWizZipFile zip;
     if (!zip.open(strTempZipFileName))
     {
-        TOLOG1(_T("Failed to create temp zip file: %1"), strTempZipFileName);
-        return FALSE;
+        Q_EMIT updateError("Failed to create temp zip file: " + strTempZipFileName);
+        return false;
     }
-    //
+
     if (!zip.compressFile(strFileName, "data"))
     {
-        TOLOG1(_T("Failed to compress file: %1"), strFileName);
-        return FALSE;
+        Q_EMIT updateError("Failed to compress file: " + strFileName);
+        return false;
     }
-    //
+
     zip.close();
-    //
+
     QFile file(strTempZipFileName);
     if (!file.open(QFile::ReadOnly))
-        return FALSE;
-    //
+        return false;
+
     arrayData = file.readAll();
-    //
+
     return !arrayData.isEmpty();
 }
 
-BOOL CWizDatabase::SaveCompressedAttachmentData(const CString& strDocumentGUID, const QByteArray& arrayData)
+bool CWizDatabase::SaveCompressedAttachmentData(const CString& strDocumentGUID, const QByteArray& arrayData)
 {
     CString strTempZipFileName = ::WizGlobal()->GetTempPath() + WizIntToStr(GetTickCount()) + ".tmp";
     if (!WizSaveDataToFile(strTempZipFileName, arrayData))
     {
-        TOLOG1(_T("Failed to save attachment data to temp file: %1"), strTempZipFileName);
-        return FALSE;
+        Q_EMIT updateError("Failed to save attachment data to temp file: " + strTempZipFileName);
+        return false;
     }
     CWizUnzipFile zip;
     if (!zip.open(strTempZipFileName))
     {
-        TOLOG1(_T("Failed to open temp zip file: %1"), strTempZipFileName);
-        return FALSE;
+        Q_EMIT updateError("Failed to open temp zip file: " + strTempZipFileName);
+        return false;
     }
-    //
+
     CString strFileName = GetAttachmentFileName(strDocumentGUID);
     if (!zip.extractFile(0, strFileName))
     {
-        TOLOG1(_T("Failed to extract attachment file: %1"), strFileName);
-        return FALSE;
+        Q_EMIT updateError("Failed to extract attachment file: " + strFileName);
+        return false;
     }
-    //
+
     zip.close();
-    //
-    return TRUE;
+
+    return true;
 }
 
-BOOL CWizDatabase::UpdateDocumentAbstract(const CString& strDocumentGUID)
+bool CWizDatabase::UpdateDocumentAbstract(const CString& strDocumentGUID)
 {
     CString strFileName = GetDocumentFileName(strDocumentGUID);
     if (!PathFileExists(strFileName))
-        return FALSE;
-    //
+        return false;
+
     WIZDOCUMENTDATA data;
     if (!DocumentFromGUID(strDocumentGUID, data))
-        return FALSE;
-    //
+        return false;
+
     CString strHtmlFileName;
     if (!DocumentToTempHtmlFile(data, strHtmlFileName))
-        return FALSE;
-    //
+        return false;
+
     CString strHtmlTempPath = WizExtractFilePath(strHtmlFileName);
-    //
+
     CString strHtml;
     CString strAbstractFileName = strHtmlTempPath + "wiz_full.html";
     if (PathFileExists(strAbstractFileName))
@@ -1064,11 +1025,11 @@ BOOL CWizDatabase::UpdateDocumentAbstract(const CString& strDocumentGUID)
     {
         ::WizLoadUnicodeTextFromFile(strHtmlFileName, strHtml);
     }
-    //
+
     WIZABSTRACT abstract;
     abstract.guid = strDocumentGUID;
     ::WizHtml2Text(strHtml, abstract.text);
-    //
+
     abstract.text.replace("\r", "");
     abstract.text.replace("\t", " ");
     abstract.text.replace(QRegExp("[\\n]+"), " ");
@@ -1077,7 +1038,7 @@ BOOL CWizDatabase::UpdateDocumentAbstract(const CString& strDocumentGUID)
     {
         abstract.text = abstract.text.left(2000);
     }
-    //
+
     CString strResourcePath = WizExtractFilePath(strHtmlFileName) + "index_files/";
     CWizStdStringArray arrayImageFileName;
     ::WizEnumFiles(strResourcePath, "*.jpg;*.png;*.bmp;*.gif", arrayImageFileName, 0);
@@ -1085,7 +1046,7 @@ BOOL CWizDatabase::UpdateDocumentAbstract(const CString& strDocumentGUID)
     {
         CString strImageFileName = arrayImageFileName[0];
         DEBUG_TOLOG1(_T("abstract image file: %1"), strImageFileName);
-        //
+
         __int64 m = 0;
         for (CWizStdStringArray::const_iterator it = arrayImageFileName.begin() + 1;
         it != arrayImageFileName.end();
@@ -1099,7 +1060,7 @@ BOOL CWizDatabase::UpdateDocumentAbstract(const CString& strDocumentGUID)
                 m = size;
             }
         }
-        //
+
         QImage img;
         if (img.load(strImageFileName))
         {
@@ -1111,21 +1072,21 @@ BOOL CWizDatabase::UpdateDocumentAbstract(const CString& strDocumentGUID)
         }
         else
         {
-            TOLOG1(_T("Failed to load image file: %1"), strImageFileName);
+            Q_EMIT updateError("Failed to load image file: " + strImageFileName);
         }
     }
-    //
-    //
-    BOOL ret = UpdatePadAbstract(abstract);
+
+
+    bool ret = UpdatePadAbstract(abstract);
     if (!ret)
     {
-        TOLOG(_T("Failed to update note abstract!"));
+        Q_EMIT updateError("Failed to update note abstract!");
     }
-    //
+
     ::WizDeleteFolder(strHtmlTempPath);
-    //
-    emit documentAbstractModified(data);
-    //
+
+    Q_EMIT documentAbstractModified(data);
+
     return ret;
 }
 
@@ -1134,7 +1095,7 @@ CString CWizDatabase::GetRootLocation(const CString& strLocation)
     int index = strLocation.indexOf('/', 1);
     if (index == -1)
         return CString();
-    //
+
     return strLocation.left(index + 1);
 }
 
@@ -1143,11 +1104,11 @@ CString CWizDatabase::GetLocationName(const CString& strLocation)
     int index = strLocation.lastIndexOf('/', strLocation.length() - 2);
     if (index == -1)
         return CString();
-    //
+
     CString str = strLocation.right(strLocation.length() - index - 1);
-    //
+
     str.Trim('/');
-    //
+
     return str;
 }
 
@@ -1180,58 +1141,55 @@ CString CWizDatabase::GetLocationDisplayName(const CString& strLocation)
     return GetLocationName(strLocation);
 }
 
-BOOL CWizDatabase::GetDocumentsByTag(const WIZTAGDATA& tag, CWizDocumentDataArray& arrayDocument)
+bool CWizDatabase::GetDocumentsByTag(const WIZTAGDATA& tag, CWizDocumentDataArray& arrayDocument)
 {
     return CIndex::GetDocumentsByTag("", tag, arrayDocument);
 }
 
-BOOL CWizDatabase::DocumentToTempHtmlFile(const WIZDOCUMENTDATA& document, QString& strTempHtmlFileName)
+bool CWizDatabase::DocumentToTempHtmlFile(const WIZDOCUMENTDATA& document, QString& strTempHtmlFileName)
 {
     CString strZipFileName = GetDocumentFileName(document.strGUID);
     if (!PathFileExists(strZipFileName))
     {
-        return FALSE;
+        return false;
     }
-    //
+
     CString strTempPath = ::WizGlobal()->GetTempPath() + document.strGUID + "/";
     ::WizEnsurePathExists(strTempPath);
-    //
+
     CWizUnzipFile::extractZip(strZipFileName, strTempPath);
-    //
+
     strTempHtmlFileName = strTempPath + "index.html";
-    //
+
     CString strText;
     ::WizLoadUnicodeTextFromFile(strTempHtmlFileName, strText);
-    //
+
     QUrl url = QUrl::fromLocalFile(strTempPath + "index_files/");
     strText.replace("index_files/", url.toString());
-    //
+
     WizSaveUnicodeTextToUtf8File(strTempHtmlFileName, strText);
-    //
+
     return PathFileExists(strTempHtmlFileName);
 }
 
-//////////////////////////////////////////////////////////////////////
 QObject* CWizDatabase::GetFolderByLocation(const QString& strLocation, bool create)
 {
     Q_UNUSED(create);
-    //
+
     return new CWizFolder(*this, strLocation);
 }
+
 QObject* CWizDatabase::GetDeletedItemsFolder()
 {
     return new CWizFolder(*this, GetDeletedItemsLocation());
 }
-
 
 QObject* CWizDatabase::DocumentFromGUID(const QString& strGUID)
 {
     WIZDOCUMENTDATA data;
     if (!DocumentFromGUID(strGUID, data))
         return NULL;
-    //
+
     CWizDocument* pDoc = new CWizDocument(*this, data);
     return pDoc;
 }
-
-

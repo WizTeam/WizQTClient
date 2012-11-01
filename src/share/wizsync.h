@@ -8,11 +8,16 @@
 
 class CWizSync : public CWizApi
 {
-public:
-    CWizSync(CWizDatabase& db, const CString& strAccountsApiURL, CWizSyncEvents& events);
+    Q_OBJECT
 
-    void setDownloadAllNotesData(bool b) { m_bDownloadAllNotesData = b; }
+public:
+    CWizSync(CWizDatabase& db, const CString& strAccountsApiURL);
+
     void startSync();
+    void setDownloadAllNotesData(bool b) { m_bDownloadAllNotesData = b; }
+    void resetProxy() { CWizApi::resetProxy(); }
+
+    virtual void abort() { CWizApi::abort(); }
 
 private:
     bool m_error;
@@ -139,6 +144,11 @@ protected:
     virtual void onStyleGetList(const std::deque<WIZSTYLEDATA>& arrayRet);
     virtual void onDocumentGetList(const std::deque<WIZDOCUMENTDATABASE>& arrayRet);
     virtual void onAttachmentGetList(const std::deque<WIZDOCUMENTATTACHMENTDATAEX>& arrayRet);
+
+Q_SIGNALS:
+    void syncStarted();
+    void syncLogined();
+    void syncDone(bool error);
 };
 
 

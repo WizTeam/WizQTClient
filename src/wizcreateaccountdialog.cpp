@@ -9,8 +9,9 @@ CreateAccountDialog::CreateAccountDialog(QWidget *parent) :
     m_createAccount(WIZ_API_URL)
 {
     ui->setupUi(this);
-    //
-    connect(&m_createAccount, SIGNAL(done(bool, const CString&)), this, SLOT(createAccountDone(bool, const CString&)));
+
+    connect(&m_createAccount, SIGNAL(done(bool, const CString&)), \
+            SLOT(createAccountDone(bool, const CString&)));
 }
 
 CreateAccountDialog::~CreateAccountDialog()

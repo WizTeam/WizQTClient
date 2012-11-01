@@ -1,17 +1,20 @@
 #include "wizverifyaccount.h"
 
 CWizVerifyAccount::CWizVerifyAccount(const CString& strAccountsApiURL)
-    : CWizApiBase(strAccountsApiURL, m_events)
+    : CWizApiBase(strAccountsApiURL)
 {
-
 }
 
-void CWizVerifyAccount::verifyAccount(const CString& strUserId, const CString& strPassword)
+void CWizVerifyAccount::verifyAccount(const CString& strUserId, \
+                                      const CString& strPassword)
 {
     callClientLogin(strUserId, strPassword);
 }
 
-void CWizVerifyAccount::onXmlRpcError(const CString& strMethodName, WizXmlRpcError err, int errorCode, const CString& errorMessage)
+void CWizVerifyAccount::onXmlRpcError(const CString& strMethodName, \
+                                      WizXmlRpcError err, \
+                                      int errorCode, \
+                                      const CString& errorMessage)
 {
     Q_UNUSED(strMethodName);
     Q_UNUSED(err);

@@ -14,7 +14,6 @@ public:
 
 private:
     CString m_strErrorMessage;
-    CWizSyncEvents m_events;
 
 public:
     virtual void onXmlRpcError(const CString& strMethodName, WizXmlRpcError err, int errorCode, const CString& errorMessage);

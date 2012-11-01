@@ -35,16 +35,26 @@ WelcomeDialog::WelcomeDialog(const QString &strDefaultUserId, const QString& str
 
     ui->webView->setHtml(strHtml, QUrl::fromLocalFile(strFileName));
     ui->webView->page()->setLinkDelegationPolicy(QWebPage::DelegateAllLinks);
-    connect(ui->webView, SIGNAL(linkClicked(const QUrl&)), this, SLOT(on_webView_linkClicked(const QUrl&)));
 
-    // callbacks
-    connect(ui->labelProxySettings, SIGNAL(linkActivated(const QString&)), SLOT(on_labelProxySettings_linkActivated(const QString&)));
-    connect(ui->comboUsers, SIGNAL(activated(QString)), SLOT(on_comboUsers_activated(QString)));
-    connect(ui->comboUsers, SIGNAL(editTextChanged(QString)), SLOT(on_comboUsers_editTextChanged(QString)));
-    connect(ui->checkAutoLogin, SIGNAL(stateChanged(int)), SLOT(on_checkAutoLogin_stateChanged(int)));
+    connect(ui->webView, SIGNAL(linkClicked(const QUrl&)), \
+            SLOT(on_webView_linkClicked(const QUrl&)));
+
+    connect(ui->labelProxySettings, SIGNAL(linkActivated(const QString&)), \
+            SLOT(on_labelProxySettings_linkActivated(const QString&)));
+
+    connect(ui->comboUsers, SIGNAL(activated(const QString&)), \
+            SLOT(on_comboUsers_activated(const QString&)));
+
+    connect(ui->comboUsers, SIGNAL(editTextChanged(const QString&)), \
+            SLOT(on_comboUsers_editTextChanged(const QString&)));
+
+    connect(ui->checkAutoLogin, SIGNAL(stateChanged(int)), \
+            SLOT(on_checkAutoLogin_stateChanged(int)));
+
     connect(ui->buttonLogin, SIGNAL(clicked()), SLOT(accept()));
 
-    connect(&m_verifyAccount, SIGNAL(done(bool, const CString&)), SLOT(verifyAccountDone(bool, const CString&)));
+    connect(&m_verifyAccount, SIGNAL(done(bool, const CString&)), \
+            SLOT(verifyAccountDone(bool, const CString&)));
 
     setUsers();
 

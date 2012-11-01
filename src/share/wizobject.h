@@ -1,24 +1,10 @@
 #ifndef WIZOBJECT_H
 #define WIZOBJECT_H
 
-#ifndef WIZMISC_H
+#include <QMetaType>
 #include "wizmisc.h"
-#endif
 
 class CWizXmlRpcStructValue;
-
-class CWizSyncEvents
-{
-public:
-    virtual void syncStarted() { }
-    virtual void syncLogin() {}
-    virtual void syncDone(bool error) { Q_UNUSED(error); }
-    virtual void addLog(const CString& strMsg) { Q_UNUSED(strMsg); }
-    virtual void addDebugLog(const CString& strMsg) { Q_UNUSED(strMsg); }
-    virtual void addErrorLog(const CString& strMsg) { Q_UNUSED(strMsg); }
-    virtual void changeProgress(int pos) { Q_UNUSED(pos); }
-    virtual void changeObjectDataProgress(int pos) { Q_UNUSED(pos); }
-};
 
 enum WizObjectType
 {
@@ -29,54 +15,47 @@ enum WizObjectType
     wizobjectDocument
 };
 
-struct WIZDOCUMENTDATA;
-struct WIZDOCUMENTATTACHMENTDATA;
 
-
-struct WIZOBJECTDATA
+struct WIZDOCUMENTPARAMDATA
 {
-    COleDateTime tTime;
-    CString strDisplayName;
-    CString strObjectGUID;
-    WizObjectType eObjectType;
+    CString strDocumentGUID;
+    CString strName;
+    CString strValue;
 
-    QByteArray arrayData;
-
-    WIZOBJECTDATA();
-    WIZOBJECTDATA(const WIZDOCUMENTDATA& data);
-    WIZOBJECTDATA(const WIZDOCUMENTATTACHMENTDATA& data);
-
-    static WizObjectType IntToObjectType(int n);
-    static WizObjectType TypeStringToObjectType(const CString& strType);
-    static CString ObjectTypeToTypeString(WizObjectType eType);
+    virtual BOOL LoadFromXmlRpc(CWizXmlRpcStructValue& data);
+    virtual BOOL SaveToXmlRpc(CWizXmlRpcStructValue& data) const;
 };
 
 
 struct WIZTAGDATA
 {
+    WIZTAGDATA();
+    virtual ~WIZTAGDATA();
+
     CString strGUID;
     CString strParentGUID;
     CString strName;
     CString strDescription;
     COleDateTime tModified;
     __int64 nVersion;
-    //
-    WIZTAGDATA();
-    //
-    friend bool operator< ( const WIZTAGDATA& data1, const WIZTAGDATA& data2 ) throw();
-    //
+
+    friend bool operator< (const WIZTAGDATA& data1, const WIZTAGDATA& data2) throw();
+
     BOOL EqualForSync(const WIZTAGDATA& data) const;
     virtual BOOL LoadFromXmlRpc(CWizXmlRpcStructValue& data);
     virtual BOOL SaveToXmlRpc(CWizXmlRpcStructValue& data) const;
-    //
+
     static CString VersionName() { return CString(_T("tag_version")); }
     static CString ObjectName() { return CString(_T("tag")); }
 };
 
 bool operator< ( const WIZTAGDATA& data1, const WIZTAGDATA& data2 ) throw();
+//Q_DECLARE_METATYPE(WIZTAGDATA)
 
 struct WIZSTYLEDATA
 {
+    WIZSTYLEDATA();
+
     CString strGUID;
     CString strName;
     CString strDescription;
@@ -86,15 +65,13 @@ struct WIZSTYLEDATA
     int nFlagIndex;
     COleDateTime tModified;
     __int64 nVersion;
-    //
-    WIZSTYLEDATA();
 
     friend bool operator< (const WIZSTYLEDATA& data1, const WIZSTYLEDATA& data2 ) throw();
-    //
-    BOOL EqualForSync(const WIZSTYLEDATA& data) const;
-    virtual BOOL LoadFromXmlRpc(CWizXmlRpcStructValue& data);
-    virtual BOOL SaveToXmlRpc(CWizXmlRpcStructValue& data) const;
-    //
+
+    bool EqualForSync(const WIZSTYLEDATA& data) const;
+    virtual bool LoadFromXmlRpc(CWizXmlRpcStructValue& data);
+    virtual bool SaveToXmlRpc(CWizXmlRpcStructValue& data) const;
+
     static CString VersionName() { return CString(_T("style_version")); }
     static CString ObjectName() { return CString(_T("style")); }
 };
@@ -102,9 +79,14 @@ struct WIZSTYLEDATA
 bool operator< (const WIZSTYLEDATA& data1, const WIZSTYLEDATA& data2 ) throw();
 
 
-
 struct WIZDOCUMENTDATABASE
 {
+    WIZDOCUMENTDATABASE();
+
+    virtual BOOL LoadFromXmlRpc(CWizXmlRpcStructValue& data);
+    static CString VersionName() { return CString("document_version"); }
+    static CString ObjectName() { return CString("document"); }
+
     CString strGUID;
     CString strTitle;
     CString strLocation;
@@ -116,18 +98,17 @@ struct WIZDOCUMENTDATABASE
     CString strParamMD5;
     __int64 nVersion;
 
-    WIZDOCUMENTDATABASE();
-    virtual BOOL LoadFromXmlRpc(CWizXmlRpcStructValue& data);
-
-    static CString VersionName() { return CString(_T("document_version")); }
-    static CString ObjectName() { return CString(_T("document")); }
-
     int nObjectPart;
 };
 
 
 struct WIZDOCUMENTDATA : public WIZDOCUMENTDATABASE
 {
+    WIZDOCUMENTDATA();
+    virtual ~WIZDOCUMENTDATA();
+
+    bool EqualForSync(const WIZDOCUMENTDATA& data) const;
+
     CString strName;
     CString strSEO;
     CString strURL;
@@ -151,41 +132,40 @@ struct WIZDOCUMENTDATA : public WIZDOCUMENTDATABASE
     int nRate;
     CString strSystemTags;
     int nShareFlags;
-
-    WIZDOCUMENTDATA();
-    BOOL EqualForSync(const WIZDOCUMENTDATA& data) const;
 };
 
-struct WIZDOCUMENTPARAMDATA
+//Q_DECLARE_METATYPE(WIZDOCUMENTDATA)
+
+
+struct WIZDOCUMENTDATAEX : public WIZDOCUMENTDATA
 {
-    CString strDocumentGUID;
-    CString strName;
-    CString strValue;
+    WIZDOCUMENTDATAEX();
+    WIZDOCUMENTDATAEX(const WIZDOCUMENTDATA& data);
 
-    virtual BOOL LoadFromXmlRpc(CWizXmlRpcStructValue& data);
-    virtual BOOL SaveToXmlRpc(CWizXmlRpcStructValue& data) const;
+    WIZDOCUMENTDATAEX& operator= (const WIZDOCUMENTDATAEX& right);
+    bool ParamArrayToStringArray(CWizStdStringArray& params) const;
+    virtual bool LoadFromXmlRpc(CWizXmlRpcStructValue& data);
+
+    CWizStdStringArray arrayTagGUID;
+    std::deque<WIZDOCUMENTPARAMDATA> arrayParam;
+    QByteArray arrayData;
+
+    bool bSkipped;
 };
 
-
-struct WIZDELETEDGUIDDATA
-{
-    CString strGUID;
-    WizObjectType eType;
-    COleDateTime tDeleted;
-    __int64 nVersion;
-    //
-    WIZDELETEDGUIDDATA();
-    //
-    BOOL EqualForSync(const WIZDELETEDGUIDDATA& data) const;
-    virtual BOOL LoadFromXmlRpc(CWizXmlRpcStructValue& data);
-    virtual BOOL SaveToXmlRpc(CWizXmlRpcStructValue& data) const;
-    //
-    static CString VersionName() { return CString(_T("deleted_guid_version")); }
-    static CString ObjectName() { return CString(_T("deleted_guid")); }
-};
 
 struct WIZDOCUMENTATTACHMENTDATA
 {
+    WIZDOCUMENTATTACHMENTDATA();
+    virtual ~WIZDOCUMENTATTACHMENTDATA();
+
+    friend bool operator< (const WIZDOCUMENTATTACHMENTDATA& data1,const WIZDOCUMENTATTACHMENTDATA& data2 ) throw();
+    BOOL EqualForSync(const WIZDOCUMENTATTACHMENTDATA& data) const;
+    virtual BOOL LoadFromXmlRpc(CWizXmlRpcStructValue& data);
+
+    static CString VersionName() { return CString(_T("attachment_version")); }
+    static CString ObjectName() { return CString(_T("attachment")); }
+
     CString strGUID;
     CString strDocumentGUID;
     CString strName;
@@ -196,21 +176,60 @@ struct WIZDOCUMENTATTACHMENTDATA
     COleDateTime tDataModified;
     CString strDataMD5;
     __int64 nVersion;
-    //
-    WIZDOCUMENTATTACHMENTDATA();
-    //
-    friend bool operator< (const WIZDOCUMENTATTACHMENTDATA& data1,const WIZDOCUMENTATTACHMENTDATA& data2 ) throw();
-
-    BOOL EqualForSync(const WIZDOCUMENTATTACHMENTDATA& data) const;
-    virtual BOOL LoadFromXmlRpc(CWizXmlRpcStructValue& data);
-    //
-    static CString VersionName() { return CString(_T("attachment_version")); }
-    static CString ObjectName() { return CString(_T("attachment")); }
 };
 
-//
 bool operator< (const WIZDOCUMENTATTACHMENTDATA& data1,const WIZDOCUMENTATTACHMENTDATA& data2 ) throw();
+//Q_DECLARE_METATYPE(WIZDOCUMENTATTACHMENTDATA)
 
+
+struct WIZDOCUMENTATTACHMENTDATAEX : public WIZDOCUMENTATTACHMENTDATA
+{
+    WIZDOCUMENTATTACHMENTDATAEX();
+    WIZDOCUMENTATTACHMENTDATAEX(const WIZDOCUMENTATTACHMENTDATA& data);
+
+    WIZDOCUMENTATTACHMENTDATAEX& operator= (const WIZDOCUMENTATTACHMENTDATAEX& right);
+
+    QByteArray arrayData;
+    BOOL bSkipped;
+    int nObjectPart;
+};
+
+
+struct WIZOBJECTDATA
+{
+    WIZOBJECTDATA();
+    WIZOBJECTDATA(const WIZDOCUMENTDATA& data);
+    WIZOBJECTDATA(const WIZDOCUMENTATTACHMENTDATA& data);
+
+    static WizObjectType IntToObjectType(int n);
+    static WizObjectType TypeStringToObjectType(const CString& strType);
+    static CString ObjectTypeToTypeString(WizObjectType eType);
+
+    COleDateTime tTime;
+    CString strDisplayName;
+    CString strObjectGUID;
+    WizObjectType eObjectType;
+
+    QByteArray arrayData;
+};
+
+
+struct WIZDELETEDGUIDDATA
+{
+    WIZDELETEDGUIDDATA();
+
+    CString strGUID;
+    WizObjectType eType;
+    COleDateTime tDeleted;
+    __int64 nVersion;
+
+    BOOL EqualForSync(const WIZDELETEDGUIDDATA& data) const;
+    virtual BOOL LoadFromXmlRpc(CWizXmlRpcStructValue& data);
+    virtual BOOL SaveToXmlRpc(CWizXmlRpcStructValue& data) const;
+
+    static CString VersionName() { return CString(_T("deleted_guid_version")); }
+    static CString ObjectName() { return CString(_T("deleted_guid")); }
+};
 
 struct WIZMETADATA
 {
@@ -219,39 +238,6 @@ struct WIZMETADATA
     CString strValue;
     COleDateTime tModified;
 };
-
-
-struct WIZDOCUMENTDATAEX : public WIZDOCUMENTDATA
-{
-    WIZDOCUMENTDATAEX();
-    WIZDOCUMENTDATAEX(const WIZDOCUMENTDATA& data);
-
-    CWizStdStringArray arrayTagGUID;
-    std::deque<WIZDOCUMENTPARAMDATA> arrayParam;
-    QByteArray arrayData;
-
-    BOOL bSkipped;
-
-    WIZDOCUMENTDATAEX& operator = (const WIZDOCUMENTDATAEX& right);
-
-    BOOL ParamArrayToStringArray(CWizStdStringArray& params) const;
-    virtual BOOL LoadFromXmlRpc(CWizXmlRpcStructValue& data);
-};
-
-struct WIZDOCUMENTATTACHMENTDATAEX : public WIZDOCUMENTATTACHMENTDATA
-{
-    WIZDOCUMENTATTACHMENTDATAEX();
-    WIZDOCUMENTATTACHMENTDATAEX(const WIZDOCUMENTATTACHMENTDATA& data);
-    //
-    WIZDOCUMENTATTACHMENTDATAEX& operator = (const WIZDOCUMENTATTACHMENTDATAEX& right);
-    //
-    QByteArray arrayData;
-    //
-    BOOL bSkipped;
-    //
-    int nObjectPart;
-};
-
 
 
 

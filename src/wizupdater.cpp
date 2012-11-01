@@ -9,7 +9,6 @@ const QString WIZ_UPGRADE_URL = "http://api.wiz.cn/";
 
 CWizUpdater::CWizUpdater(QObject* parent)
     : QThread(parent)
-    , m_net(new QNetworkAccessManager(this))
     , m_bIsStarted(false)
     , m_nProcessTimes(0)
 {
@@ -22,6 +21,9 @@ void CWizUpdater::checkAndDownloadUpgrade()
 
 void CWizUpdater::run()
 {
+    // m_net owned by updater thread
+    m_net = new QNetworkAccessManager(this);
+
     QTimer timer(this);
     timer.start(WIZ_CHECK_UPDATE_TIMEOUT);
     connect(&timer, SIGNAL(timeout()), SLOT(on_request_checkUpdate()));

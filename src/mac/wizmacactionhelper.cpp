@@ -7,7 +7,7 @@ CWizMacActionHelper::CWizMacActionHelper(CWizMacToolBarItem* item, QAction* acti
     : QObject(parent)
     , m_item(item)
 {
-    connect(action, SIGNAL(changed()), this, SLOT(on_action_changed()));
+    connect(action, SIGNAL(changed()), SLOT(on_action_changed()));
 }
 
 #endif

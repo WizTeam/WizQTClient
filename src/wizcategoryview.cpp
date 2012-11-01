@@ -264,27 +264,43 @@ CWizCategoryView::CWizCategoryView(CWizExplorerApp& app, QWidget *parent)
     setFrameStyle(QFrame::NoFrame);
     setAttribute(Qt::WA_MacShowFocusRect, false);
     setAutoFillBackground(true);
-    //
+
     QPalette pal = palette();
     pal.setColor(QPalette::Base, WizGetCategoryBackroundColor(m_app.userSettings().skin()));
     setPalette(pal);
-    //
+
     setStyle(::WizGetStyle(m_app.userSettings().skin()));
-    //
+
     header()->hide();
     setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     setTextElideMode(Qt::ElideMiddle);
-    //
-    connect(&m_db, SIGNAL(tagCreated(const WIZTAGDATA&)), this, SLOT(on_tag_created(const WIZTAGDATA&)));
-    connect(&m_db, SIGNAL(tagModified(const WIZTAGDATA&, const WIZTAGDATA&)), this, SLOT(on_tag_modified(const WIZTAGDATA&, const WIZTAGDATA&)));
-    connect(&m_db, SIGNAL(tagDeleted(WIZTAGDATA)), this, SLOT(on_tag_deleted(const WIZTAGDATA&)));
-    connect(&m_db, SIGNAL(documentCreated(const WIZDOCUMENTDATA&)), this, SLOT(on_document_created(const WIZDOCUMENTDATA&)));
-    connect(&m_db, SIGNAL(documentModified(const WIZDOCUMENTDATA&, const WIZDOCUMENTDATA&)), this, SLOT(on_document_modified(const WIZDOCUMENTDATA&, const WIZDOCUMENTDATA&)));
-    connect(&m_db, SIGNAL(folderCreated(const CString&)), this, SLOT(on_folder_created(const CString&)));
-    connect(&m_db, SIGNAL(folderDeleted(const CString&)), this, SLOT(on_folder_deleted(const CString&)));
-    //
+
+    qRegisterMetaType<WIZTAGDATA>("WIZTAGDATA");
+    qRegisterMetaType<WIZDOCUMENTDATA>("WIZDOCUMENTDATA");
+
+    connect(&m_db, SIGNAL(tagCreated(const WIZTAGDATA&)), \
+            SLOT(on_tag_created(const WIZTAGDATA&)));
+
+    connect(&m_db, SIGNAL(tagModified(const WIZTAGDATA&, const WIZTAGDATA&)), \
+            SLOT(on_tag_modified(const WIZTAGDATA&, const WIZTAGDATA&)));
+
+    connect(&m_db, SIGNAL(tagDeleted(const WIZTAGDATA&)), \
+            SLOT(on_tag_deleted(const WIZTAGDATA&)));
+
+    connect(&m_db, SIGNAL(documentCreated(const WIZDOCUMENTDATA&)), \
+            SLOT(on_document_created(const WIZDOCUMENTDATA&)));
+
+    connect(&m_db, SIGNAL(documentModified(const WIZDOCUMENTDATA&, const WIZDOCUMENTDATA&)), \
+            SLOT(on_document_modified(const WIZDOCUMENTDATA&, const WIZDOCUMENTDATA&)));
+
+    connect(&m_db, SIGNAL(folderCreated(const CString&)), \
+            SLOT(on_folder_created(const CString&)));
+
+    connect(&m_db, SIGNAL(folderDeleted(const CString&)), \
+            SLOT(on_folder_deleted(const CString&)));
+
     setIndentation(12);
-    //
+
     setDragDropMode(QAbstractItemView::DragDrop);
     setDragEnabled(true);
 }
@@ -786,17 +802,16 @@ void CWizCategoryView::search(const CString& str)
     }
 }
 
-
 bool CWizCategoryView::acceptDocument(const WIZDOCUMENTDATA& document)
 {
     QList<QTreeWidgetItem*> items = selectedItems();
     if (items.empty())
         return false;
-    //
+
     CWizCategoryViewItem* pItem = dynamic_cast<CWizCategoryViewItem*>(items.first());
     if (!pItem)
         return false;
-    //
+
     return pItem->accept(m_db, document);
 }
 
@@ -910,6 +925,7 @@ void CWizCategoryView::on_tag_created(const WIZTAGDATA& tag)
 {
     addTagWithChildren(tag);
 }
+
 void CWizCategoryView::on_tag_modified(const WIZTAGDATA& tagOld, const WIZTAGDATA& tagNew)
 {
     if (tagOld.strParentGUID != tagNew.strParentGUID)
@@ -926,6 +942,7 @@ void CWizCategoryView::on_tag_modified(const WIZTAGDATA& tagOld, const WIZTAGDAT
         }
     }
 }
+
 void CWizCategoryView::on_tag_deleted(const WIZTAGDATA& tag)
 {
     removeTag(tag);
@@ -936,7 +953,7 @@ void CWizCategoryView::on_document_created(const WIZDOCUMENTDATA& document)
 {
     if (m_db.IsInDeletedItems(document.strLocation))
         return;
-    //
+
     addFolder(document.strLocation, true);
 }
 
@@ -949,6 +966,7 @@ void CWizCategoryView::on_document_modified(const WIZDOCUMENTDATA& documentOld, 
     //
     addFolder(documentNew.strLocation, true);
 }
+
 void CWizCategoryView::on_folder_created(const CString& strLocation)
 {
     addFolder(strLocation, true);
@@ -970,15 +988,15 @@ void CWizCategoryView::on_action_newFolder()
     NewFolderDialog dlg;
     if (QDialog::Accepted != dlg.exec())
         return;
-    //
+
     CString strFolderName = dlg.folderName();
     if (strFolderName.IsEmpty())
         return;
-    //
+
     WizMakeValidFileNameNoPath(strFolderName);
-    //
+
     CString strLocation;
-    //
+
     if (CWizCategoryViewAllFoldersItem* p = currentCategoryItem<CWizCategoryViewAllFoldersItem>())
     {
         Q_UNUSED(p);
@@ -988,6 +1006,7 @@ void CWizCategoryView::on_action_newFolder()
     {
         strLocation = p->location() + strFolderName + "/";
     }
+
     addAndSelectFolder(strLocation);
     m_db.AddExtraFolder(strLocation);
 }

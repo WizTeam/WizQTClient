@@ -15,29 +15,29 @@ CWizTagListWidget::CWizTagListWidget(CWizDatabase& db, QWidget* parent)
     , m_scroll(NULL)
     , m_db(db)
 {
-    QLayout* layoutMain = new QBoxLayout(QBoxLayout::TopToBottom, this);
+    QBoxLayout* layoutMain = new QBoxLayout(QBoxLayout::TopToBottom, this);
     setLayout(layoutMain);
     layoutMain->setMargin(0);
-    //
+
     QLayout* layoutTitle = new QHBoxLayout(this);
     m_tagsEdit = new QLineEdit(this);
     layoutTitle->addWidget(new QLabel(tr("Tags:"), this));
     layoutTitle->addWidget(m_tagsEdit);
     layoutTitle->setSpacing(8);
     layoutTitle->setMargin(4);
-    //
+
     m_scroll = new QScrollArea(this);
     m_scroll->setFrameStyle(QFrame::NoFrame);
-    //
-    layoutMain->addItem(layoutTitle);
+
+    layoutMain->addLayout(layoutTitle);
     layoutMain->addWidget(m_scroll);
     layoutMain->addWidget(new CWizVerSpacer(this));
-    //
+
     m_scroll->setMaximumHeight(400);
-    //
-    connect(m_tagsEdit, SIGNAL(editingFinished()), this, SLOT(on_tagsEdit_editingFinished()));
+
+    connect(m_tagsEdit, SIGNAL(editingFinished()), SLOT(on_tagsEdit_editingFinished()));
 }
-//
+
 void CWizTagListWidget::setDocument(const WIZDOCUMENTDATA& data)
 {
     if (QWidget* oldWidget = m_scroll->takeWidget())
@@ -68,8 +68,9 @@ void CWizTagListWidget::setDocument(const WIZDOCUMENTDATA& data)
         {
             checkBox->setChecked(true);
         }
-        //
-        connect(checkBox, SIGNAL(tagChecked(CWizTagCheckBox*,int)), this, SLOT(on_tagCheckBox_checked(CWizTagCheckBox*,int)));
+
+        connect(checkBox, SIGNAL(tagChecked(CWizTagCheckBox*, int)), \
+                SLOT(on_tagCheckBox_checked(CWizTagCheckBox*, int)));
     }
     //
     updateTagsText();
@@ -128,7 +129,7 @@ CWizTagCheckBox::CWizTagCheckBox(const WIZTAGDATA& tag, QWidget* parent)
     , m_tag(tag)
 {
 
-    connect(this, SIGNAL(stateChanged(int)), this, SLOT(on_checkbox_checked(int)));
+    connect(this, SIGNAL(stateChanged(int)), SLOT(on_checkbox_checked(int)));
 }
 
 void CWizTagCheckBox::on_checkbox_checked(int state)

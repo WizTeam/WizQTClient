@@ -7,10 +7,13 @@
 #define MD5PART 10*1024
 #define CONSTDEFAULTCOUNT 200
 
-CWizApiBase::CWizApiBase(const CString& strAccountsApiURL, CWizSyncEvents& events)
+CWizApiBase::CWizApiBase(const CString& strAccountsApiURL)
     : m_server(strAccountsApiURL)
-    , m_events(events)
 {
+    //qRegisterMetaType<WIZTAGDATA>("WIZTAGDATA");
+    //qRegisterMetaType<WIZDOCUMENTDATA>("WIZDOCUMENTDATA");
+    //qRegisterMetaType<WIZDOCUMENTATTACHMENTDATA>("WIZDOCUMENTATTACHMENTDATA");
+
     resetProxy();
 
     connect(&m_server, SIGNAL(xmlRpcReturn(const CString&, CWizXmlRpcValue&)), \
@@ -27,19 +30,17 @@ void CWizApiBase::abort()
 
 bool CWizApiBase::callXmlRpc(const CString& strMethodName, CWizXmlRpcValue* pVal)
 {
-    addDebugLog("call xmlrpc:[" + strMethodName + "]");
     return m_server.xmlRpcCall(strMethodName, pVal);
 }
 
 void CWizApiBase::xmlRpcReturn(const CString& strMethodName, CWizXmlRpcValue& ret)
 {
-    addDebugLog("xmlrpc done:[" + strMethodName + "]");
     onXmlRpcReturn(strMethodName, ret);
 }
 
 void CWizApiBase::xmlRpcError(const CString& strMethodName, WizXmlRpcError err, int errorCode, const CString& errorMessage)
 {
-    addErrorLog("Error: [" + strMethodName + "]: " + errorMessage);
+    Q_EMIT processErrorLog("Error: [" + strMethodName + "]: " + errorMessage);
     onXmlRpcError(strMethodName, err, errorCode, errorMessage);
 }
 
@@ -78,7 +79,7 @@ void CWizApiBase::onXmlRpcError(const CString& strMethodName, WizXmlRpcError err
 
 bool CWizApiBase::isSyncing() const
 {
-    return m_server.currentId() != 0;
+    return m_server.state();
 }
 
 void CWizApiBase::resetProxy()
@@ -101,10 +102,9 @@ CString CWizApiBase::MakeXmlRpcUserId(const CString& strUserId)
 CString CWizApiBase::MakeXmlRpcPassword(const CString& strPassword)
 {
     return "md5." + ::WizMd5StringNoSpaceJava(strPassword.toUtf8());
-    //return strPassword;
 }
 
-BOOL CWizApiBase::callClientLogin(const CString& strUserId, const CString& strPassword)
+bool CWizApiBase::callClientLogin(const CString& strUserId, const CString& strPassword)
 {
     m_user = WIZUSERINFO();
 
@@ -118,14 +118,14 @@ BOOL CWizApiBase::callClientLogin(const CString& strUserId, const CString& strPa
 void CWizApiBase::onClientLogin()
 {
 }
-//
-BOOL CWizApiBase::callClientLogout()
+
+bool CWizApiBase::callClientLogout()
 {
     if (m_user.strToken.isEmpty())
-        return FALSE;
-    //
+        return false;
+
     CWizApiTokenParam param(*this);
-    //
+
     return callXmlRpc(SyncMethod_ClientLogout, &param);
 }
 
@@ -135,7 +135,7 @@ void CWizApiBase::onClientLogout()
     m_user.strKbGUID.clear();
 }
 
-BOOL CWizApiBase::callGetUserInfo()
+bool CWizApiBase::callGetUserInfo()
 {
     return true;
 }
@@ -145,11 +145,12 @@ void CWizApiBase::onGetUserInfo(CWizXmlRpcValue& ret)
     Q_UNUSED(ret);
 }
 
-BOOL CWizApiBase::callCreateAccount(const CString& strUserId, const CString& strPassword)
+bool CWizApiBase::callCreateAccount(const CString& strUserId, const CString& strPassword)
 {
     CWizApiParamBase param;
     param.AddString("user_id", MakeXmlRpcUserId(strUserId));
     param.AddString("password", MakeXmlRpcPassword(strPassword));
+
 #if defined Q_OS_MAC
     param.AddString("invite_code", "129ce11c");
     param.AddString("product_name", "qtMac");
@@ -160,7 +161,7 @@ BOOL CWizApiBase::callCreateAccount(const CString& strUserId, const CString& str
     param.AddString("invite_code", "8480c6d7");
     param.AddString("product_name", "qtWindows");
 #endif
-    //
+
     return callXmlRpc(SyncMethod_CreateAccount, &param);
 }
 
@@ -169,31 +170,8 @@ void CWizApiBase::onCreateAccount()
 
 }
 
-void CWizApiBase::changeProgress(int pos)
-{
-    m_events.changeProgress(pos);
-}
-
-void CWizApiBase::addLog(const CString& str)
-{
-    m_events.addLog(str);
-}
-
-void CWizApiBase::addDebugLog(const CString& str)
-{
-    m_events.addDebugLog(str);
-}
-
-void CWizApiBase::addErrorLog(const CString& str)
-{
-    m_events.addErrorLog(str);
-}
-
-
-///////////////////////////////////////////////////////////////
-
-CWizApi::CWizApi(CWizDatabase& db, const CString& strAccountsApiURL, CWizSyncEvents& events)
-    : CWizApiBase(strAccountsApiURL, events)
+CWizApi::CWizApi(CWizDatabase& db, const CString& strAccountsApiURL)
+    : CWizApiBase(strAccountsApiURL)
     , m_db(db)
     , m_nCurrentObjectAllSize(0)
     , m_bDownloadingObject(false)
@@ -287,53 +265,51 @@ void CWizApi::onXmlRpcReturn(const CString& strMethodName, CWizXmlRpcValue& ret)
 }
 
 
-BOOL CWizApi::callGetList(const CString& strMethodName, __int64 nVersion)
+bool CWizApi::callGetList(const CString& strMethodName, __int64 nVersion)
 {
     CWizApiTokenParam param(*this);
     param.AddInt(_T("count"), getCountPerPage());
     param.AddString(_T("version"), WizInt64ToStr(nVersion));
-    //
+
     return callXmlRpc(strMethodName, &param);
 }
 
-
-BOOL CWizApi::callDeletedGetList(__int64 nVersion)
+bool CWizApi::callDeletedGetList(__int64 nVersion)
 {
-    m_events.addLog(WizFormatString1("Syncing deleted items: [%1]", WizInt64ToStr(nVersion)));
+    Q_EMIT processLog(tr("Syncing deleted items, version: ") + QString::number(nVersion));
     return callGetList(SyncMethod_GetDeletedList, nVersion);
 }
 
 void CWizApi::onDeletedGetList(const std::deque<WIZDELETEDGUIDDATA>& arrayRet)
 {
-    m_db.UpdateDeletedGUIDs(arrayRet, &m_events);
+    m_db.UpdateDeletedGUIDs(arrayRet);
 }
 
-BOOL CWizApi::callTagGetList(__int64 nVersion)
+bool CWizApi::callTagGetList(__int64 nVersion)
 {
-    m_events.addLog(WizFormatString1("Syncing tags: [%1]", WizInt64ToStr(nVersion)));
+    Q_EMIT processLog(tr("Syncing tags, version: ") + QString::number(nVersion));
     return callGetList(SyncMethod_GetTagList, nVersion);
 }
 
-
 void CWizApi::onTagGetList(const std::deque<WIZTAGDATA>& arrayRet)
 {
-    m_db.UpdateTags(arrayRet, &m_events);
+    m_db.UpdateTags(arrayRet);
 }
 
-BOOL CWizApi::callStyleGetList(__int64 nVersion)
+bool CWizApi::callStyleGetList(__int64 nVersion)
 {
-    m_events.addLog(WizFormatString1("Syncing styles: [%1]", WizInt64ToStr(nVersion)));
+    Q_EMIT processLog(tr("Syncing styles, version: ") + QString::number(nVersion));
     return callGetList(SyncMethod_GetStyleList, nVersion);
 }
 
 void CWizApi::onStyleGetList(const std::deque<WIZSTYLEDATA>& arrayRet)
 {
-    m_db.UpdateStyles(arrayRet, &m_events);
+    m_db.UpdateStyles(arrayRet);
 }
 
-BOOL CWizApi::callDocumentGetList(__int64 nVersion)
+bool CWizApi::callDocumentGetList(__int64 nVersion)
 {
-    m_events.addLog(WizFormatString1("Syncing note list: [%1]", WizInt64ToStr(nVersion)));
+    Q_EMIT processLog(tr("Syncing note list, version: ") + QString::number(nVersion));
     return callGetList(SyncMethod_GetDocumentList, nVersion);
 }
 
@@ -342,36 +318,36 @@ void CWizApi::onDocumentGetList(const std::deque<WIZDOCUMENTDATABASE>& arrayRet)
     Q_UNUSED(arrayRet);
 }
 
-BOOL CWizApi::callAttachmentGetList(__int64 nVersion)
+bool CWizApi::callAttachmentGetList(__int64 nVersion)
 {
-    m_events.addLog(WizFormatString1("Syncing attachment list: [%1]", WizInt64ToStr(nVersion)));
+    Q_EMIT processLog(tr("Syncing attachment list: version: ") + QString::number(nVersion));
     return callGetList(SyncMethod_GetAttachmentList, nVersion);
 }
 
 void CWizApi::onAttachmentGetList(const std::deque<WIZDOCUMENTATTACHMENTDATAEX>& arrayRet)
 {
-    m_db.UpdateAttachments(arrayRet, &m_events);
+    m_db.UpdateAttachments(arrayRet);
 }
 
-BOOL CWizApi::callDownloadDataPart(const CString& strObjectGUID, const CString& strObjectType, int pos)
+bool CWizApi::callDownloadDataPart(const CString& strObjectGUID, const CString& strObjectType, int pos)
 {
     m_bDownloadingObject = true;
 
     unsigned int size = getPartSize();
-    //
+
     m_currentObjectPartData.strObjectGUID = strObjectGUID;
     m_currentObjectPartData.strObjectType = strObjectType;
     m_currentObjectPartData.nStartPos = pos;
     m_currentObjectPartData.nQuerySize = size;
-    //
+
     CWizApiTokenParam param(*this);
-    //
+
     param.AddString(_T("obj_guid"), strObjectGUID);
     param.AddString(_T("obj_type"), strObjectType);
-    //
+
     param.AddInt64(_T("start_pos"), pos);
     param.AddInt64(_T("part_size"), size);
-    //
+
     return callXmlRpc(SyncMethod_DownloadObjectPart, &param);
 }
 
@@ -380,18 +356,17 @@ void CWizApi::onDownloadDataPart(const WIZOBJECTPARTDATA& data)
     m_bDownloadingObject = false;
 
     m_currentObjectData.arrayData.append(data.arrayData);
-    //
+
     double fPercent = 0;
     if (data.nObjectSize > 0)
         fPercent = 100.0 * m_currentObjectData.arrayData.size() / double(data.nObjectSize);
-    //
+
     m_nCurrentObjectAllSize = data.nObjectSize;
-    //
-    //
-    m_events.addLog(WizFormatString2("Downloading %1 [%2]", m_currentObjectData.strDisplayName, WizIntToStr(int(fPercent)) + "%"));
-    //
-    m_events.changeObjectDataProgress(int(fPercent));
-    //
+
+    //QString info = m_currentObjectData.strDisplayName;
+    Q_EMIT processLog(tr("Downloaded : ") + QString::number(fPercent) + "%");
+    Q_EMIT progressChanged(int(fPercent));
+
     if (data.bEOF)
     {
         onDownloadObjectDataCompleted(m_currentObjectData);
@@ -402,12 +377,12 @@ void CWizApi::onDownloadDataPart(const WIZOBJECTPARTDATA& data)
     }
 }
 
-BOOL CWizApi::callUploadDataPart(const CString& strObjectGUID, const CString& strObjectType, const CString& strObjectMD5, int allSize, int partCount, int partIndex, int partSize, const QByteArray& arrayData)
+bool CWizApi::callUploadDataPart(const CString& strObjectGUID, const CString& strObjectType, const CString& strObjectMD5, int allSize, int partCount, int partIndex, int partSize, const QByteArray& arrayData)
 {
     Q_UNUSED(allSize);
-    //
-    ATLASSERT(partSize == arrayData.size());
-    //
+
+    Q_ASSERT(partSize == arrayData.size());
+
     CWizApiTokenParam param(*this);
     param.AddString(_T("obj_guid"), strObjectGUID);
     param.AddString(_T("obj_type"), strObjectType);
@@ -417,7 +392,7 @@ BOOL CWizApi::callUploadDataPart(const CString& strObjectGUID, const CString& st
     param.AddInt64(_T("part_size"), partSize);
     param.AddString(_T("part_md5"), ::WizMd5StringNoSpaceJava(arrayData));
     param.AddBase64(_T("data"), arrayData);
-    //
+
     return callXmlRpc(SyncMethod_UploadObjectPart, &param);
 }
 
@@ -433,27 +408,29 @@ void CWizApi::onUploadDataPart()
     }
 }
 
-BOOL CWizApi::uploadObjectData(const WIZOBJECTDATA& data)
+bool CWizApi::uploadObjectData(const WIZOBJECTDATA& data)
 {
     if (data.eObjectType == wizobjectDocument)
     {
-        addLog("uploading note: " + data.strDisplayName);
+        QString info = data.strDisplayName;
+        Q_EMIT processLog(tr("uploading note: ") + info);
     }
     else if (data.eObjectType == wizobjectDocumentAttachment)
     {
-        addLog("uploading attachment: " + data.strDisplayName);
+        QString info = data.strDisplayName;
+        Q_EMIT processLog(tr("uploading attachment: ") + info);
     }
     else
     {
-        ATLASSERT(FALSE);
+        Q_ASSERT(false);
     }
-    //
-    ATLASSERT(!data.arrayData.isEmpty());
-    //
+
+    Q_ASSERT(!data.arrayData.isEmpty());
+
     m_currentObjectData = data;
     m_nCurrentObjectAllSize = data.arrayData.size();
     m_strCurrentObjectMD5 = ::WizMd5StringNoSpaceJava(m_currentObjectData.arrayData);
-    //
+
     return uploadNextPartData();
 }
 
@@ -461,66 +438,68 @@ void CWizApi::onUploadObjectDataCompleted(const WIZOBJECTDATA& data)
 {
     if (data.eObjectType == wizobjectDocument)
     {
-        ATLASSERT(data.strObjectGUID == m_currentDocument.strGUID);
-        ATLASSERT(m_currentDocument.nObjectPart & WIZKM_XMLRPC_OBJECT_PART_DATA);
+        Q_ASSERT(data.strObjectGUID == m_currentDocument.strGUID);
+        Q_ASSERT(m_currentDocument.nObjectPart & WIZKM_XMLRPC_OBJECT_PART_DATA);
         callDocumentPostData(m_currentDocument);
     }
     else if (data.eObjectType == wizobjectDocumentAttachment)
     {
-        ATLASSERT(data.strObjectGUID == m_currentAttachment.strGUID);
-        ATLASSERT(m_currentAttachment.nObjectPart & WIZKM_XMLRPC_OBJECT_PART_DATA);
+        Q_ASSERT(data.strObjectGUID == m_currentAttachment.strGUID);
+        Q_ASSERT(m_currentAttachment.nObjectPart & WIZKM_XMLRPC_OBJECT_PART_DATA);
         callAttachmentPostData(m_currentAttachment);
     }
     else
     {
-        ATLASSERT(FALSE);
+        Q_ASSERT(false);
     }
 }
 
-BOOL CWizApi::callDocumentGetData(const WIZDOCUMENTDATABASE& data)
+bool CWizApi::callDocumentGetData(const WIZDOCUMENTDATABASE& data)
 {
-    addLog("getting note info: " + data.strTitle);
-    //
+    QString info = data.strTitle;
+    Q_EMIT processLog(tr("downloading note info: ") + info);
+
     int nPart = data.nObjectPart;
-    ATLASSERT(nPart != 0);
-    //
+    Q_ASSERT(nPart != 0);
+
     CWizApiTokenParam param(*this);
-    param.AddString(_T("document_guid"), data.strGUID);
-    param.AddBool(_T("document_info"), (nPart & WIZKM_XMKRPC_DOCUMENT_PART_INFO) ? true : false);
-    param.AddBool(_T("document_param"), (nPart & WIZKM_XMKRPC_DOCUMENT_PART_PARAM) ? true : false);
-    //
+    param.AddString("document_guid", data.strGUID);
+    param.AddBool("document_info", (nPart & WIZKM_XMKRPC_DOCUMENT_PART_INFO) ? true : false);
+    param.AddBool("document_param", (nPart & WIZKM_XMKRPC_DOCUMENT_PART_PARAM) ? true : false);
+
     return callXmlRpc(SyncMethod_GetDocumentData, &param);
 }
 
 void CWizApi::onDocumentGetData(const WIZDOCUMENTDATAEX& data)
 {
-    m_db.UpdateDocument(data, &m_events);
+    m_db.UpdateDocument(data);
 }
 
-BOOL CWizApi::uploadDocument(const WIZDOCUMENTDATAEX& data)
+bool CWizApi::uploadDocument(const WIZDOCUMENTDATAEX& data)
 {
     m_currentDocument = data;
-    //
+
     int nParts = m_currentDocument.nObjectPart;
-    ATLASSERT(0 != nParts);
-    BOOL bData = (nParts & WIZKM_XMKRPC_DOCUMENT_PART_DATA) ? true : false;
-    //
+    Q_ASSERT(0 != nParts);
+    bool bData = (nParts & WIZKM_XMKRPC_DOCUMENT_PART_DATA) ? true : false;
+
     if (bData)
     {
         if (!m_db.LoadDocumentData(m_currentDocument.strGUID, m_currentDocument.arrayData))
         {
             //skip this document
-            addErrorLog("Can not load document data: " + data.strTitle);
+            QString info = data.strTitle;
+            Q_EMIT processErrorLog(tr("could not load document data: ") + info);
             onUploadDocument(data);   //skip
-            return FALSE;
+            return false;
         }
-        //
+
         WIZOBJECTDATA obj;
         obj.strObjectGUID = m_currentDocument.strGUID;
         obj.strDisplayName = m_currentDocument.strTitle;
         obj.eObjectType = wizobjectDocument;
         obj.arrayData = m_currentDocument.arrayData;
-        //
+
         return uploadObjectData(obj);
     }
     else
@@ -534,33 +513,34 @@ void CWizApi::onUploadDocument(const WIZDOCUMENTDATAEX& data)
     Q_UNUSED(data);
 }
 
-BOOL CWizApi::callDocumentPostData(const WIZDOCUMENTDATAEX& data)
+bool CWizApi::callDocumentPostData(const WIZDOCUMENTDATAEX& data)
 {
     m_currentDocument = data;
-    //
+
     int nParts = m_currentDocument.nObjectPart;
-    ATLASSERT(0 != nParts);
-    BOOL bInfo = (nParts & WIZKM_XMKRPC_DOCUMENT_PART_INFO) ? true : false;
-    BOOL bData = (nParts & WIZKM_XMKRPC_DOCUMENT_PART_DATA) ? true : false;
-    BOOL bParam = (nParts & WIZKM_XMKRPC_DOCUMENT_PART_PARAM) ? true : false;
-    //
-    addLog("update note info:" + data.strTitle);
-    //
+    Q_ASSERT(0 != nParts);
+    bool bInfo = (nParts & WIZKM_XMKRPC_DOCUMENT_PART_INFO) ? true : false;
+    bool bData = (nParts & WIZKM_XMKRPC_DOCUMENT_PART_DATA) ? true : false;
+    bool bParam = (nParts & WIZKM_XMKRPC_DOCUMENT_PART_PARAM) ? true : false;
+
+    QString info = data.strTitle;
+    Q_EMIT processLog(tr("update note info:") + info);
+
     CWizApiTokenParam param(*this);
-    //
+
     CWizXmlRpcStructValue* pDocumentStruct = new CWizXmlRpcStructValue();
     param.AddStruct(_T("document"), pDocumentStruct);
-    //
+
     pDocumentStruct->AddString(_T("document_guid"), data.strGUID);
     pDocumentStruct->AddBool(_T("document_info"), bInfo ? true : false);
     pDocumentStruct->AddBool(_T("document_data"), bData ? true : false);
     pDocumentStruct->AddBool(_T("document_param"), bParam ? true : false);
-    //
-    BOOL bParamInfoAdded = FALSE;
-    BOOL bDataInfoAdded = FALSE;
-    //
+
+    bool bParamInfoAdded = false;
+    bool bDataInfoAdded = false;
+
     WIZDOCUMENTDATAEX& infodata = m_currentDocument;
-    //
+
     if (bInfo)
     {
         pDocumentStruct->AddString(_T("document_title"), infodata.strTitle);
@@ -589,25 +569,25 @@ BOOL CWizApi::callDocumentPostData(const WIZDOCUMENTDATAEX& data)
         pDocumentStruct->AddString(_T("param_md5"), infodata.strParamMD5);
         pDocumentStruct->AddString(_T("system_tags"), infodata.strSystemTags);
         pDocumentStruct->AddInt(_T("document_share"), infodata.nShareFlags);
-        //
+
         bParamInfoAdded = true;
         bDataInfoAdded = true;
-        //
+
         m_db.GetDocumentTags(infodata.strGUID, infodata.arrayTagGUID);
-        //
+
         pDocumentStruct->AddStringArray(_T("document_tags"), data.arrayTagGUID);
     }
     if (bParam)
     {
         m_db.GetDocumentParams(infodata.strGUID, infodata.arrayParam);
-        //
+
         if (!bParamInfoAdded)
         {
             pDocumentStruct->AddTime(_T("dt_param_modified"), infodata.tParamModified);
             pDocumentStruct->AddString(_T("param_md5"), infodata.strParamMD5);
             bParamInfoAdded = true;
         }
-        //
+
         pDocumentStruct->AddArray(_T("document_params"), infodata.arrayParam);
     }
     if (bData)
@@ -615,54 +595,57 @@ BOOL CWizApi::callDocumentPostData(const WIZDOCUMENTDATAEX& data)
         if (!m_db.LoadDocumentData(m_currentDocument.strGUID, m_currentDocument.arrayData))
         {
             //skip this document
-            addErrorLog("Can not load document data: " + data.strTitle);
+            QString info2 = data.strTitle;
+            Q_EMIT processErrorLog(tr("Can not load document data: ") + info2);
             onUploadObjectDataCompleted(data);
-            return FALSE;
+            return false;
         }
-        //
+
         if (!bDataInfoAdded)
         {
             pDocumentStruct->AddTime(_T("dt_data_modified"), infodata.tDataModified);
             pDocumentStruct->AddString(_T("data_md5"), infodata.strDataMD5);
             bDataInfoAdded = true;
         }
-        //
+
         pDocumentStruct->AddString(_T("document_zip_md5"), WizMd5StringNoSpaceJava(infodata.arrayData));
     }
+
     return callXmlRpc(SyncMethod_PostDocumentData, &param);
 }
 
 void CWizApi::onDocumentPostData(const WIZDOCUMENTDATAEX& data)
 {
-    ATLASSERT(data.strGUID == m_currentDocument.strGUID);
+    Q_ASSERT(data.strGUID == m_currentDocument.strGUID);
     onUploadDocument(m_currentDocument);
 }
 
-BOOL CWizApi::uploadAttachment(const WIZDOCUMENTATTACHMENTDATAEX& data)
+bool CWizApi::uploadAttachment(const WIZDOCUMENTATTACHMENTDATAEX& data)
 {
     m_currentAttachment = data;
-    //
+
     int nParts = data.nObjectPart;
-    ATLASSERT(0 != nParts);
-    BOOL bData = (nParts & WIZKM_XMKRPC_ATTACHMENT_PART_DATA) ? true : false;
-    //
+    Q_ASSERT(0 != nParts);
+    bool bData = (nParts & WIZKM_XMKRPC_ATTACHMENT_PART_DATA) ? true : false;
+
     if (bData)
     {
         if (!m_db.LoadCompressedAttachmentData(m_currentAttachment.strGUID, m_currentAttachment.arrayData))
         {
             //skip this document
-            addErrorLog("Can not load attachment data: " + data.strName);
+            QString info = data.strName;
+            Q_EMIT processErrorLog(tr("Could not load attachment data: ") + info);
             onUploadAttachment(data);   //skip
             m_db.ModifyObjectVersion(data.strGUID, WIZDOCUMENTATTACHMENTDATAEX::ObjectName(), -1);  //re-upload attachment at next time
-            return FALSE;
+            return false;
         }
-        //
+
         WIZOBJECTDATA obj;
         obj.strObjectGUID = m_currentAttachment.strGUID;
         obj.strDisplayName = m_currentAttachment.strName;
         obj.eObjectType = wizobjectDocumentAttachment;
         obj.arrayData = m_currentAttachment.arrayData;
-        //
+
         return uploadObjectData(obj);
     }
     else
@@ -676,32 +659,32 @@ void CWizApi::onUploadAttachment(const WIZDOCUMENTATTACHMENTDATAEX& data)
     Q_UNUSED(data);
 }
 
-
-BOOL CWizApi::callAttachmentPostData(const WIZDOCUMENTATTACHMENTDATAEX& data)
+bool CWizApi::callAttachmentPostData(const WIZDOCUMENTATTACHMENTDATAEX& data)
 {
     m_currentAttachment = data;
-    //
+
     int nParts = data.nObjectPart;
-    ATLASSERT(0 != nParts);
-    //
-    addLog("update attachment info:" + data.strName);
-    //
+    Q_ASSERT(0 != nParts);
+
+    QString info = data.strName;
+    Q_EMIT processLog(tr("update attachment info: ") + info);
+
     CWizApiTokenParam param(*this);
-    //
+
     CWizXmlRpcStructValue* pAttachmentStruct = new CWizXmlRpcStructValue();
     param.AddStruct(_T("attachment"), pAttachmentStruct);
-    //
-    BOOL bInfo = (nParts & WIZKM_XMKRPC_ATTACHMENT_PART_INFO) ? true : false;
-    BOOL bData = (nParts & WIZKM_XMKRPC_ATTACHMENT_PART_DATA) ? true : false;
-    //
+
+    bool bInfo = (nParts & WIZKM_XMKRPC_ATTACHMENT_PART_INFO) ? true : false;
+    bool bData = (nParts & WIZKM_XMKRPC_ATTACHMENT_PART_DATA) ? true : false;
+
     pAttachmentStruct->AddString(_T("attachment_guid"), data.strGUID);
     pAttachmentStruct->AddBool(_T("attachment_info"), bInfo ? true : false);
     pAttachmentStruct->AddBool(_T("attachment_data"), bData ? true : false);
-    //
-    BOOL bDataInfoAdded = false;
-    //
+
+    bool bDataInfoAdded = false;
+
     const WIZDOCUMENTATTACHMENTDATAEX& infodata = data;
-    //
+
     if (bInfo)
     {
         pAttachmentStruct->AddString(_T("attachment_document_guid"), infodata.strDocumentGUID);
@@ -712,7 +695,7 @@ BOOL CWizApi::callAttachmentPostData(const WIZDOCUMENTATTACHMENTDATAEX& data)
         pAttachmentStruct->AddString(_T("info_md5"), infodata.strInfoMD5);
         pAttachmentStruct->AddTime(_T("dt_data_modified"), infodata.tDataModified);
         pAttachmentStruct->AddString(_T("data_md5"), infodata.strDataMD5);
-        //
+
         bDataInfoAdded = true;
     }
     if (bData)
@@ -725,24 +708,21 @@ BOOL CWizApi::callAttachmentPostData(const WIZDOCUMENTATTACHMENTDATAEX& data)
         }
         pAttachmentStruct->AddString(_T("attachment_zip_md5"), WizMd5StringNoSpaceJava(infodata.arrayData));
     }
-    //
+
     return callXmlRpc(SyncMethod_PostAttachmentData, &param);
 }
 
 void CWizApi::onAttachmentPostData(const WIZDOCUMENTATTACHMENTDATAEX& data)
 {
-    ATLASSERT(data.strGUID == m_currentAttachment.strGUID);
-    //
+    Q_ASSERT(data.strGUID == m_currentAttachment.strGUID);
     onUploadAttachment(m_currentAttachment);
 }
 
-//
-
-BOOL CWizApi::callDocumentsGetInfo(const CWizStdStringArray& arrayDocumentGUID)
+bool CWizApi::callDocumentsGetInfo(const CWizStdStringArray& arrayDocumentGUID)
 {
     CWizApiTokenParam param(*this);
     param.AddStringArray("document_guids", arrayDocumentGUID);
-    //
+
     return callXmlRpc(SyncMethod_GetDocumentsInfo, &param);
 }
 
@@ -751,11 +731,11 @@ void CWizApi::onDocumentsGetInfo(const std::deque<WIZDOCUMENTDATABASE>& arrayRet
     Q_UNUSED(arrayRet);
 }
 
-BOOL CWizApi::callAttachmentsGetInfo(const CWizStdStringArray& arrayAttachmentGUID)
+bool CWizApi::callAttachmentsGetInfo(const CWizStdStringArray& arrayAttachmentGUID)
 {
     CWizApiTokenParam param(*this);
     param.AddStringArray("attachment_guids", arrayAttachmentGUID);
-    //
+
     return callXmlRpc(SyncMethod_GetAttachmentsInfo, &param);
 }
 
@@ -764,28 +744,28 @@ void CWizApi::onAttachmentsGetInfo(const std::deque<WIZDOCUMENTATTACHMENTDATAEX>
     Q_UNUSED(arrayRet);
 }
 
-//
-
-BOOL CWizApi::downloadObjectData(const WIZOBJECTDATA& data)
+bool CWizApi::downloadObjectData(const WIZOBJECTDATA& data)
 {
     if (data.eObjectType == wizobjectDocument)
     {
-        addLog("downloading note: " + data.strDisplayName);
+        QString info = data.strDisplayName;
+        Q_EMIT processLog(tr("downloading note: ") + info);
     }
     else if (data.eObjectType == wizobjectDocumentAttachment)
     {
-        addLog("downloading attachment: " + data.strDisplayName);
+        QString info = data.strDisplayName;
+        Q_EMIT processLog(tr("downloading attachment: ") + info);
     }
     else
     {
-        ATLASSERT(FALSE);
+        Q_ASSERT(false);
     }
-    //
-    m_events.changeObjectDataProgress(0);
-    //
+
+    Q_EMIT progressChanged(0);
+
     m_currentObjectData = data;
     m_currentObjectData.arrayData.clear();;
-    //
+
     return downloadNextPartData();
 }
 
@@ -794,8 +774,7 @@ void CWizApi::onDownloadObjectDataCompleted(const WIZOBJECTDATA& data)
     m_db.UpdateSyncObjectLocalData(data);
 }
 
-
-BOOL CWizApi::callDeletedPostList(const std::deque<WIZDELETEDGUIDDATA>& arrayData)
+bool CWizApi::callDeletedPostList(const std::deque<WIZDELETEDGUIDDATA>& arrayData)
 {
     m_arrayCurrentPostDeletedGUID.assign(arrayData.begin(), arrayData.end());
     return callPostList(SyncMethod_PostDeletedList, "deleteds", arrayData);
@@ -803,15 +782,13 @@ BOOL CWizApi::callDeletedPostList(const std::deque<WIZDELETEDGUIDDATA>& arrayDat
 
 void CWizApi::onDeletedPostList(const std::deque<WIZDELETEDGUIDDATA>& arrayData)
 {
-    for (std::deque<WIZDELETEDGUIDDATA>::const_iterator it = arrayData.begin();
-    it != arrayData.end();
-    it++)
-    {
+    std::deque<WIZDELETEDGUIDDATA>::const_iterator it;
+    for (it = arrayData.begin(); it != arrayData.end(); it++) {
         m_db.DeleteDeletedGUID(it->strGUID);
     }
 }
 
-BOOL CWizApi::callTagPostList(const std::deque<WIZTAGDATA>& arrayData)
+bool CWizApi::callTagPostList(const std::deque<WIZTAGDATA>& arrayData)
 {
     m_arrayCurrentPostTag.assign(arrayData.begin(), arrayData.end());
     return callPostList(SyncMethod_PostTagList, "tags", arrayData);
@@ -819,16 +796,13 @@ BOOL CWizApi::callTagPostList(const std::deque<WIZTAGDATA>& arrayData)
 
 void CWizApi::onTagPostList(const std::deque<WIZTAGDATA>& arrayData)
 {
-    for (std::deque<WIZTAGDATA>::const_iterator it = arrayData.begin();
-    it != arrayData.end();
-    it++)
-    {
+    std::deque<WIZTAGDATA>::const_iterator it;
+    for (it = arrayData.begin(); it != arrayData.end(); it++) {
         m_db.ModifyObjectVersion(it->strGUID, WIZTAGDATA::ObjectName(), 0);
     }
 }
 
-//
-BOOL CWizApi::callStylePostList(const std::deque<WIZSTYLEDATA>& arrayData)
+bool CWizApi::callStylePostList(const std::deque<WIZSTYLEDATA>& arrayData)
 {
     m_arrayCurrentPostStyle.assign(arrayData.begin(), arrayData.end());
     return callPostList(SyncMethod_PostTagList, "styles", arrayData);
@@ -836,51 +810,52 @@ BOOL CWizApi::callStylePostList(const std::deque<WIZSTYLEDATA>& arrayData)
 
 void CWizApi::onStylePostList(const std::deque<WIZSTYLEDATA>& arrayData)
 {
-    for (std::deque<WIZSTYLEDATA>::const_iterator it = arrayData.begin();
-    it != arrayData.end();
-    it++)
-    {
+    std::deque<WIZSTYLEDATA>::const_iterator it;
+    for (it = arrayData.begin(); it != arrayData.end(); it++) {
         m_db.ModifyObjectVersion(it->strGUID, WIZSTYLEDATA::ObjectName(), 0);
     }
 }
-//
+
 unsigned int CWizApi::getCountPerPage() const
 {
     return 10;
 }
+
 unsigned int CWizApi::getPartSize() const
 {
     return 512 * 1024;
 }
-BOOL CWizApi::downloadNextPartData()
+
+bool CWizApi::downloadNextPartData()
 {
     return callDownloadDataPart(m_currentObjectData.strObjectGUID,
                                 WIZOBJECTDATA::ObjectTypeToTypeString(m_currentObjectData.eObjectType),
                                 m_currentObjectData.arrayData.size());
 }
-BOOL CWizApi::uploadNextPartData()
+
+bool CWizApi::uploadNextPartData()
 {
     if (m_currentObjectData.arrayData.isEmpty())
     {
         onUploadObjectDataCompleted(m_currentObjectData);
         return true;
     }
-    //
+
     int allSize = m_nCurrentObjectAllSize;
     int partSize = getPartSize();
-    //
+
     int partCount = allSize / partSize;
     if (allSize % partSize != 0)
     {
         partCount++;
     }
-    //
+
     int lastSize = m_currentObjectData.arrayData.size();
-    //
+
     int partIndex = (allSize - lastSize) / partSize;
-    //
+
     QByteArray arrayData;
-    //
+
     if (lastSize <= partSize)
     {
         arrayData = m_currentObjectData.arrayData;
@@ -891,16 +866,15 @@ BOOL CWizApi::uploadNextPartData()
         arrayData = QByteArray(m_currentObjectData.arrayData.constData(), partSize);
         m_currentObjectData.arrayData.remove(0, partSize);
     }
-    //
+
     return callUploadDataPart(m_currentObjectData.strObjectGUID,
                               WIZOBJECTDATA::ObjectTypeToTypeString(m_currentObjectData.eObjectType),
                               m_strCurrentObjectMD5,
                               allSize, partCount, partIndex, arrayData.size(), arrayData);
 }
 
-//
-//////////////////////////////////////////////////////////////////////////////
 
+//////////////////////////////////////////////////////////////////////////////
 WIZUSERINFO::WIZUSERINFO()
     : nUserLevel(0)
     , nUserPoints(0)
@@ -966,9 +940,8 @@ WIZKBINFO::WIZKBINFO()
     nTrafficLimit = 0;
     nTrafficUsage = 0;
 }
-//
 
-BOOL WIZKBINFO::LoadFromXmlRpc(CWizXmlRpcStructValue& data)
+bool WIZKBINFO::LoadFromXmlRpc(CWizXmlRpcStructValue& data)
 {
     data.GetInt64(_T("storage_limit"), nStorageLimit);
     data.GetInt64(_T("storage_usage"), nStorageUsage);
@@ -980,7 +953,7 @@ BOOL WIZKBINFO::LoadFromXmlRpc(CWizXmlRpcStructValue& data)
     data.GetStr(_T("traffic_limit_string"), strTrafficLimit);
     data.GetStr(_T("traffic_usage_string"), strTrafficUsage);
     //
-    return TRUE;
+    return true;
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -989,12 +962,12 @@ WIZOBJECTPARTDATA::WIZOBJECTPARTDATA()
     : nStartPos(0)
     , nQuerySize(0)
     , nObjectSize(0)
-    , bEOF(FALSE)
+    , bEOF(false)
     , nPartSize(0)
 {
 }
 
-BOOL WIZOBJECTPARTDATA::LoadFromXmlRpc(CWizXmlRpcStructValue& data)
+bool WIZOBJECTPARTDATA::LoadFromXmlRpc(CWizXmlRpcStructValue& data)
 {
     data.GetInt64(_T("obj_size"), nObjectSize);
     data.GetInt(_T("eof"), bEOF);
@@ -1003,10 +976,10 @@ BOOL WIZOBJECTPARTDATA::LoadFromXmlRpc(CWizXmlRpcStructValue& data)
     if (!data.GetStream("data", arrayData))
     {
         TOLOG(_T("Fault error, data is null!"));
-        return FALSE;
+        return false;
     }
     //
-    return TRUE;
+    return true;
 }
 
 

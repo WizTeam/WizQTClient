@@ -181,10 +181,23 @@ public:
 	BOOL CreateDocumentEx(const WIZDOCUMENTDATA& data);
 	BOOL CreateAttachmentEx(const WIZDOCUMENTATTACHMENTDATA& data);
 
-    BOOL CreateTag(const CString& strParentTagGUID, const CString& strName, const CString& strDescription, WIZTAGDATA& data);
-    BOOL CreateStyle(const CString& strName, const CString& strDescription, COLORREF crTextColor, COLORREF crBackColor, BOOL bTextBold, int nFlagIndex, WIZSTYLEDATA& data);
-    BOOL CreateDocument(const CString& strTitle, const CString& strName, const CString& strLocation, const CString& strURL, const CString& strAuthor, const CString& strKeywords, const CString& strType, const CString& strOwner, const CString& strFileType, const CString& strStyleGUID, int nIconIndex, int nSync, int nProtected, WIZDOCUMENTDATA& data);
-    BOOL CreateDocument(const CString& strTitle, const CString& strName, const CString& strLocation, const CString& strURL, WIZDOCUMENTDATA& data);
+    BOOL CreateTag(const CString& strParentTagGUID, const CString& strName, \
+                   const CString& strDescription, WIZTAGDATA& data);
+
+    BOOL CreateStyle(const CString& strName, const CString& strDescription, \
+                     COLORREF crTextColor, COLORREF crBackColor, \
+                     BOOL bTextBold, int nFlagIndex, WIZSTYLEDATA& data);
+
+    BOOL CreateDocument(const CString& strTitle, const CString& strName, \
+                        const CString& strLocation, const CString& strURL, \
+                        const CString& strAuthor, const CString& strKeywords, \
+                        const CString& strType, const CString& strOwner, \
+                        const CString& strFileType, const CString& strStyleGUID, \
+                        int nIconIndex, int nSync, int nProtected, WIZDOCUMENTDATA& data);
+
+    BOOL CreateDocument(const CString& strTitle, const CString& strName, \
+                        const CString& strLocation, const CString& strURL, WIZDOCUMENTDATA& data);
+
     BOOL CreateAttachment(const CString& strDocumentGUID, const CString& strName, const CString& strURL, const CString& strDescription, const CString& strDataMD5, WIZDOCUMENTATTACHMENTDATA& data);
 
 	CString CalDocumentInfoMD5(const WIZDOCUMENTDATA& data);

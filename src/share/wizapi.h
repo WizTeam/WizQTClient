@@ -114,7 +114,7 @@ class CWizApiBase : public QObject
     Q_OBJECT
 
 public:
-    CWizApiBase(const CString& strAccountsApiURL, CWizSyncEvents& events);
+    CWizApiBase(const CString& strAccountsApiURL);
 
     CString token() const { return m_user.strToken; }
     CString kbGUID() const { return m_user.strKbGUID; }
@@ -128,7 +128,6 @@ public:
 protected:
     WIZUSERINFO m_user;
     CWizXmlRpcServer m_server;
-    CWizSyncEvents& m_events;
 
 protected:
     CString MakeXmlRpcUserId(const CString& strUserId);
@@ -150,11 +149,11 @@ protected:
     virtual bool callCreateAccount(const CString& strUserId, const CString& strPassword);
     virtual void onCreateAccount();
 
-protected:
-    virtual void changeProgress(int pos);
-    virtual void addLog(const CString& str);
-    virtual void addDebugLog(const CString& str);
-    virtual void addErrorLog(const CString& str);
+Q_SIGNALS:
+    void progressChanged(int pos);
+    void processLog(const QString& str);
+    void processDebugLog(const QString& str);
+    void processErrorLog(const QString& str);
 
 public Q_SLOTS:
     void xmlRpcReturn(const CString& strMethodName, CWizXmlRpcValue& ret);
@@ -167,7 +166,7 @@ class CWizApi : public CWizApiBase
     Q_OBJECT
 
 public:
-    CWizApi(CWizDatabase& db, const CString& strAccountsApiURL, CWizSyncEvents& events);
+    CWizApi(CWizDatabase& db, const CString& strAccountsApiURL);
 
 protected:
     CWizDatabase& m_db;

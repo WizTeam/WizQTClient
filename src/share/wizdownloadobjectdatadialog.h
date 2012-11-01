@@ -10,7 +10,6 @@ namespace Ui {
 
 class WizDownloadObjectDataDialog
     : public QDialog
-    , public CWizSyncEvents
 {
     Q_OBJECT
 
@@ -24,12 +23,12 @@ private:
     CWizDownloadObjectData m_downloader;
     QStringList m_slError;
     bool m_bUserCanceled;
-protected:
-    virtual void addErrorLog(const CString& strMsg);
-    virtual void changeObjectDataProgress(int pos);
-public slots:
+
+public Q_SLOTS:
     virtual void reject();
-    void on_downloader_downloadObjectDataDone(bool succeeded);
+    void downloader_downloadObjectDataDone(bool succeeded);
+    void downloader_progress(int pos);
+
 public:
     static bool downloadObjectData(CWizDatabase& db, const CString& strAccountsApiURL, const WIZOBJECTDATA& data, QWidget* parent);
 };

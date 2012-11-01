@@ -92,17 +92,17 @@ public:
     __int64 GetObjectVersion(const CString& strObjectName);
     bool SetObjectVersion(const CString& strObjectName, __int64 nVersion);
 
-    bool UpdateDeletedGUID(const WIZDELETEDGUIDDATA& data, CWizSyncEvents* pEvents);
-    bool UpdateTag(const WIZTAGDATA& data, CWizSyncEvents* pEvents);
-    bool UpdateStyle(const WIZSTYLEDATA& data, CWizSyncEvents* pEvents);
-    bool UpdateDocument(const WIZDOCUMENTDATAEX& data, CWizSyncEvents* pEvents);
-    bool UpdateAttachment(const WIZDOCUMENTATTACHMENTDATAEX& data, CWizSyncEvents* pEvents);
+    bool UpdateDeletedGUID(const WIZDELETEDGUIDDATA& data);
+    bool UpdateTag(const WIZTAGDATA& data);
+    bool UpdateStyle(const WIZSTYLEDATA& data);
+    bool UpdateDocument(const WIZDOCUMENTDATAEX& data);
+    bool UpdateAttachment(const WIZDOCUMENTATTACHMENTDATAEX& data);
 
-    bool UpdateDeletedGUIDs(const std::deque<WIZDELETEDGUIDDATA>& arrayDeletedGUID, CWizSyncEvents* pEvents);
-    bool UpdateTags(const std::deque<WIZTAGDATA>& arrayTag, CWizSyncEvents* pEvents);
-    bool UpdateStyles(const std::deque<WIZSTYLEDATA>& arrayStyle, CWizSyncEvents* pEvents);
-    bool UpdateDocuments(const std::deque<WIZDOCUMENTDATAEX>& arrayDocument, CWizSyncEvents* pEvents);
-    bool UpdateAttachments(const std::deque<WIZDOCUMENTATTACHMENTDATAEX>& arrayAttachment, CWizSyncEvents* pEvents);
+    bool UpdateDeletedGUIDs(const std::deque<WIZDELETEDGUIDDATA>& arrayDeletedGUID);
+    bool UpdateTags(const std::deque<WIZTAGDATA>& arrayTag);
+    bool UpdateStyles(const std::deque<WIZSTYLEDATA>& arrayStyle);
+    bool UpdateDocuments(const std::deque<WIZDOCUMENTDATAEX>& arrayDocument);
+    bool UpdateAttachments(const std::deque<WIZDOCUMENTATTACHMENTDATAEX>& arrayAttachment);
 
     bool UpdateDocumentData(WIZDOCUMENTDATA& data, const QString& strHtml, const QString& strURL, int nFlags);
     virtual bool UpdateDocumentDataMD5(WIZDOCUMENTDATA& data, const CString& strZipFileName);
@@ -118,9 +118,6 @@ public:
 
     CString GetObjectFileName(const WIZOBJECTDATA& data);
 
-    //bool GetAllRootLocations(CWizStdStringArray& arrayLocation);
-    //bool GetChildLocations(const QString& strLocation, CWizStdStringArray& arrayLocation);
-
     bool GetDocumentsByTag(const WIZTAGDATA& tag, CWizDocumentDataArray& arrayDocument);
 
     bool GetModifiedDeletedGUIDs(CWizDeletedGUIDDataArray& arrayData) { return GetDeletedGUIDs(arrayData); }
@@ -134,7 +131,8 @@ public:
     static CString GetRootLocation(const CString& strLocation);
     static CString GetLocationName(const CString& strLocation);
     static CString GetLocationDisplayName(const CString& strLocation);
-    static bool GetAllRootLocations(const CWizStdStringArray& arrayAllLocation, CWizStdStringArray& arrayLocation);
+    static bool GetAllRootLocations(const CWizStdStringArray& arrayAllLocation, \
+                                    CWizStdStringArray& arrayLocation);
     static bool GetChildLocations(const CWizStdStringArray& arrayAllLocation, \
                                   const QString& strLocation, \
                                   CWizStdStringArray& arrayLocation);
@@ -144,14 +142,29 @@ public:
     using CIndex::GetDocumentsByTag;
     using CIndex::DocumentFromGUID;
 
-    bool CreateDocumentAndInit(const CString& strHtml, const CString& strHtmlUrl, int nFlags, const CString& strTitle, const CString& strName, const CString& strLocation, const CString& strURL, WIZDOCUMENTDATA& data);
-    bool AddAttachment(const WIZDOCUMENTDATA& document, const CString& strFileName, WIZDOCUMENTATTACHMENTDATA& dataRet);
+    bool CreateDocumentAndInit(const CString& strHtml, \
+                               const CString& strHtmlUrl, \
+                               int nFlags, \
+                               const CString& strTitle, \
+                               const CString& strName, \
+                               const CString& strLocation, \
+                               const CString& strURL, \
+                               WIZDOCUMENTDATA& data);
+
+    bool AddAttachment(const WIZDOCUMENTDATA& document, \
+                       const CString& strFileName, \
+                       WIZDOCUMENTATTACHMENTDATA& dataRet);
 
     bool DeleteTagWithChildren(const WIZTAGDATA& data, bool bLog);
 
-    bool DocumentToTempHtmlFile(const WIZDOCUMENTDATA& document, QString& strTempHtmlFileName);
+    bool DocumentToTempHtmlFile(const WIZDOCUMENTDATA& document, \
+                                QString& strTempHtmlFileName);
 
-public slots:
+Q_SIGNALS:
+    void updateError(const QString& msg);
+    void processLog(const QString& msg);
+
+public Q_SLOTS:
     QObject* DocumentFromGUID(const QString& strGUID);
     QObject* GetFolderByLocation(const QString& strLocation, bool create);
     QObject* GetDeletedItemsFolder();

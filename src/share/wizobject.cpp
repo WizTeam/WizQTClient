@@ -1,4 +1,5 @@
 #include "wizobject.h"
+
 #include "wizxmlrpc.h"
 
 WIZOBJECTDATA::WIZOBJECTDATA()
@@ -6,6 +7,7 @@ WIZOBJECTDATA::WIZOBJECTDATA()
 {
 
 }
+
 WIZOBJECTDATA::WIZOBJECTDATA(const WIZDOCUMENTDATA& data)
     : eObjectType(wizobjectDocument)
 {
@@ -33,6 +35,7 @@ WizObjectType WIZOBJECTDATA::IntToObjectType(int n)
     //
     return WizObjectType(n);
 }
+
 WizObjectType WIZOBJECTDATA::TypeStringToObjectType(const CString& strType)
 {
     if (strType.IsEmpty())
@@ -57,6 +60,7 @@ WizObjectType WIZOBJECTDATA::TypeStringToObjectType(const CString& strType)
     ATLASSERT(FALSE);
     return wizobjectError;
 }
+
 CString WIZOBJECTDATA::ObjectTypeToTypeString(WizObjectType eType)
 {
     switch (eType)
@@ -88,7 +92,7 @@ BOOL WIZTAGDATA::EqualForSync(const WIZTAGDATA& data) const
         && strDescription == data.strDescription
         && strParentGUID == data.strParentGUID;
 }
-//
+
 BOOL WIZTAGDATA::LoadFromXmlRpc(CWizXmlRpcStructValue& data)
 {
     return data.GetStr(_T("tag_guid"), strGUID)
@@ -98,6 +102,7 @@ BOOL WIZTAGDATA::LoadFromXmlRpc(CWizXmlRpcStructValue& data)
         && data.GetTime(_T("dt_info_modified"), tModified)
         && data.GetInt64(_T("version"), nVersion);
 }
+
 BOOL WIZTAGDATA::SaveToXmlRpc(CWizXmlRpcStructValue& data) const
 {
     data.AddString(_T("tag_guid"), strGUID);
@@ -106,13 +111,17 @@ BOOL WIZTAGDATA::SaveToXmlRpc(CWizXmlRpcStructValue& data) const
     data.AddString(_T("tag_description"), strDescription);
     data.AddTime(_T("dt_info_modified"), tModified);
     data.AddInt64(_T("version"), nVersion);;
-    //
+
     return TRUE;
 }
 
 bool operator< (const WIZTAGDATA& data1, const WIZTAGDATA& data2 ) throw()
 {
     return( data1.strName.CompareNoCase( data2.strName) < 0 );
+}
+
+WIZTAGDATA::~WIZTAGDATA()
+{
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -123,6 +132,7 @@ WIZSTYLEDATA::WIZSTYLEDATA()
     nFlagIndex = 0;
     nVersion = -1;
 }
+
 BOOL WIZSTYLEDATA::EqualForSync(const WIZSTYLEDATA& data) const
 {
     ATLASSERT(strGUID == data.strGUID);
@@ -137,7 +147,7 @@ BOOL WIZSTYLEDATA::EqualForSync(const WIZSTYLEDATA& data) const
 BOOL WIZSTYLEDATA::LoadFromXmlRpc(CWizXmlRpcStructValue& data)
 {
     data.GetStr(_T("style_description"), strDescription);
-    //
+
     return data.GetStr(_T("style_guid"), strGUID)
         && data.GetStr(_T("style_name"), strName)
         && data.GetColor(_T("style_textcolor"), crTextColor)
@@ -151,7 +161,7 @@ BOOL WIZSTYLEDATA::LoadFromXmlRpc(CWizXmlRpcStructValue& data)
 BOOL WIZSTYLEDATA::SaveToXmlRpc(CWizXmlRpcStructValue& data) const
 {
     data.AddString(_T("style_description"), strDescription);;
-    //
+
     data.AddString(_T("style_guid"), strGUID);
     data.AddString(_T("style_name"), strName);
     data.AddColor(_T("style_textcolor"), crTextColor);
@@ -160,7 +170,7 @@ BOOL WIZSTYLEDATA::SaveToXmlRpc(CWizXmlRpcStructValue& data) const
     data.AddInt(_T("style_flagindex"), nFlagIndex);
     data.AddTime(_T("dt_info_modified"), tModified);
     data.AddInt64(_T("version"), nVersion);;
-    //
+
     return TRUE;
 }
 
@@ -179,9 +189,9 @@ WIZDOCUMENTDATABASE::WIZDOCUMENTDATABASE()
 BOOL WIZDOCUMENTDATABASE::LoadFromXmlRpc(CWizXmlRpcStructValue& data)
 {
     data.GetStr(_T("document_guid"), strGUID);
-    data.GetStr(_T("document_title"), strTitle);	//
-    data.GetStr(_T("document_category"), strLocation);	//
-    //
+    data.GetStr(_T("document_title"), strTitle);
+    data.GetStr(_T("document_category"), strLocation);
+
     data.GetTime(_T("dt_info_modified"), tInfoModified);
     data.GetStr(_T("info_md5"), strInfoMD5);
     data.GetTime(_T("dt_data_modified"), tDataModified);
@@ -189,7 +199,7 @@ BOOL WIZDOCUMENTDATABASE::LoadFromXmlRpc(CWizXmlRpcStructValue& data)
     data.GetTime(_T("dt_param_modified"), tParamModified);
     data.GetStr(_T("param_md5"), strParamMD5);
     data.GetInt64(_T("version"), nVersion);
-    //
+
     return !strGUID.IsEmpty();
 }
 
@@ -206,12 +216,17 @@ WIZDOCUMENTDATA::WIZDOCUMENTDATA()
     , nShareFlags(0)
 {
 }
+
 BOOL WIZDOCUMENTDATA::EqualForSync(const WIZDOCUMENTDATA& data) const
 {
     ATLASSERT(strGUID == data.strGUID);
     return strInfoMD5 == data.strInfoMD5
             && strDataMD5 == data.strDataMD5
             && strParamMD5 == data.strParamMD5;
+}
+
+WIZDOCUMENTDATA::~WIZDOCUMENTDATA()
+{
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -221,6 +236,7 @@ BOOL WIZDOCUMENTPARAMDATA::LoadFromXmlRpc(CWizXmlRpcStructValue& data)
     return data.GetStr(_T("param_name"), strName)
         && data.GetStr(_T("param_value"), strValue);
 }
+
 BOOL WIZDOCUMENTPARAMDATA::SaveToXmlRpc(CWizXmlRpcStructValue& data) const
 {
     data.AddString(_T("param_name"), strName);
@@ -235,13 +251,13 @@ WIZDELETEDGUIDDATA::WIZDELETEDGUIDDATA()
     eType = wizobjectError;
     nVersion = 0;
 }
-//
+
 BOOL WIZDELETEDGUIDDATA::EqualForSync(const WIZDELETEDGUIDDATA& data) const
 {
     ATLASSERT(strGUID == data.strGUID);
     return TRUE;
 }
-//
+
 BOOL WIZDELETEDGUIDDATA::LoadFromXmlRpc(CWizXmlRpcStructValue& data)
 {
     CString strType;
@@ -272,7 +288,7 @@ WIZDOCUMENTATTACHMENTDATA::WIZDOCUMENTATTACHMENTDATA()
     : nVersion(-1)
 {
 }
-//
+
 BOOL WIZDOCUMENTATTACHMENTDATA::EqualForSync(const WIZDOCUMENTATTACHMENTDATA& data) const
 {
     ATLASSERT(strGUID == data.strGUID);
@@ -292,7 +308,7 @@ BOOL WIZDOCUMENTATTACHMENTDATA::LoadFromXmlRpc(CWizXmlRpcStructValue& data)
     data.GetTime(_T("dt_data_modified"), tDataModified);
     data.GetStr(_T("data_md5"), strDataMD5);
     data.GetInt64(_T("version"), nVersion);
-    //
+
     return !strGUID.IsEmpty() && !strDocumentGUID.IsEmpty();
 }
 
@@ -301,31 +317,36 @@ bool operator< (const WIZDOCUMENTATTACHMENTDATA& data1,const WIZDOCUMENTATTACHME
     return( data1.strName.CompareNoCase( data2.strName) < 0 );
 }
 
+WIZDOCUMENTATTACHMENTDATA::~WIZDOCUMENTATTACHMENTDATA()
+{
+}
+
 
 
 ////////////////////////////////////////////////////////////////////
 WIZDOCUMENTDATAEX::WIZDOCUMENTDATAEX()
 {
-    bSkipped = FALSE;
+    bSkipped = false;
 }
+
 WIZDOCUMENTDATAEX::WIZDOCUMENTDATAEX(const WIZDOCUMENTDATA& data)
     : WIZDOCUMENTDATA(data)
 {
-    bSkipped = FALSE;
+    bSkipped = false;
 }
-WIZDOCUMENTDATAEX& WIZDOCUMENTDATAEX::operator = (const WIZDOCUMENTDATAEX& right)
+
+WIZDOCUMENTDATAEX& WIZDOCUMENTDATAEX::operator= (const WIZDOCUMENTDATAEX& right)
 {
     WIZDOCUMENTDATA::operator = (right);
-    //
+
     arrayTagGUID.assign(right.arrayTagGUID.begin(), right.arrayTagGUID.end());
     arrayParam.assign(right.arrayParam.begin(), right.arrayParam.end());
     arrayData = right.arrayData;
-    //
+
     bSkipped = right.bSkipped;
-    //
+
     return *this;
 }
-//
 
 BOOL WIZDOCUMENTDATAEX::ParamArrayToStringArray(CWizStdStringArray& params) const
 {
@@ -335,7 +356,7 @@ BOOL WIZDOCUMENTDATAEX::ParamArrayToStringArray(CWizStdStringArray& params) cons
     {
         params.push_back(it->strName + _T("=") + it->strValue);
     }
-    //
+
     return TRUE;
 }
 
@@ -383,28 +404,28 @@ BOOL WIZDOCUMENTDATAEX::LoadFromXmlRpc(CWizXmlRpcStructValue& data)
         data.GetStr(_T("data_md5"), strDataMD5);
         data.GetTime(_T("dt_param_modified"), tParamModified);
         data.GetStr(_T("param_md5"), strParamMD5);
-        //
+
         data.GetStringArray(_T("document_tags"), arrayTagGUID);
-        //
+
         data.GetStr(_T("system_tags"), strSystemTags);
     }
-    //
+
     if (bData)
     {
         ATLASSERT(FALSE);
     }
-    //
+
     if (bParam)
     {
         std::deque<WIZDOCUMENTPARAMDATA> params;
-        if (!data.GetArray(_T("document_params"), params))
+        if (!data.GetArray("document_params", params))
         {
             TOLOG(_T("Failed to get document param!"));
             return FALSE;
         }
         arrayParam.assign(params.begin(), params.end());
     }
-    //
+
     return !strGUID.IsEmpty();
 }
 
@@ -413,25 +434,24 @@ BOOL WIZDOCUMENTDATAEX::LoadFromXmlRpc(CWizXmlRpcStructValue& data)
 WIZDOCUMENTATTACHMENTDATAEX::WIZDOCUMENTATTACHMENTDATAEX()
     : nObjectPart(0)
 {
-    bSkipped = FALSE;
+    bSkipped = false;
 }
+
 WIZDOCUMENTATTACHMENTDATAEX::WIZDOCUMENTATTACHMENTDATAEX(const WIZDOCUMENTATTACHMENTDATA& data)
     : WIZDOCUMENTATTACHMENTDATA(data)
     , nObjectPart(0)
 {
-    bSkipped = FALSE;
+    bSkipped = false;
 }
-WIZDOCUMENTATTACHMENTDATAEX& WIZDOCUMENTATTACHMENTDATAEX::operator = (const WIZDOCUMENTATTACHMENTDATAEX& right)
-                                                                     {
+
+WIZDOCUMENTATTACHMENTDATAEX& WIZDOCUMENTATTACHMENTDATAEX::operator= (const WIZDOCUMENTATTACHMENTDATAEX& right)
+{
     WIZDOCUMENTATTACHMENTDATA::operator = (right);
-    //
+
     arrayData = right.arrayData;
-    //
     bSkipped = right.bSkipped;
-    //
     nObjectPart = right.nObjectPart;
 
-    //
     return *this;
 }
 
@@ -447,6 +467,7 @@ WIZTODODATA::WIZTODODATA()
     //
     InitTime();
 }
+
 WIZTODODATA::WIZTODODATA(const CString& str, WIZTODOSTATE state, WIZTODOPRIOR prior)
     : strText(str)
     , eState(state)
@@ -471,32 +492,35 @@ void WIZTODODATA::InitTime()
     nOrder = nOrder * 1000;
     nOrder = nOrder + index;
 }
-//
+
 void WIZTODODATA::AddLink(const CString& strDocumentGUID)
 {
     arrayLinkedDocumentGUID.push_back(strDocumentGUID);
 }
-//
+
 CString WIZTODODATA::GetLinkedDocumentGUIDString() const
 {
     CString strText;
     WizStringArrayToText(arrayLinkedDocumentGUID, strText, _T(";"));
     return strText;
 }
-//
+
 void WIZTODODATA::SetLinkedDocumentGUIDString(const CString& str)
 {
     WizSplitTextToArray(str, ';', arrayLinkedDocumentGUID);
 }
+
 WIZTODODATAEX::WIZTODODATAEX()
 {
 
 }
+
 WIZTODODATAEX::WIZTODODATAEX(const WIZTODODATA& data)
     : WIZTODODATA(data)
 {
 
 }
+
 intptr_t WIZTODODATAEX::AddChild(const WIZTODODATAEX& data)
 {
     arrayChild.push_back(data);
@@ -518,6 +542,7 @@ BOOL WIZTODODATAEX::WizTodoDataArrayFindLinkedDocument(const CWizTodoDataExArray
     //
     return FALSE;
 }
+
 intptr_t WIZTODODATAEX::WizTodoDataArrayFindText(const CWizTodoDataExArray& arrayData, const CString& strText)
 {
     for (CWizTodoDataExArray::const_iterator it = arrayData.begin();
@@ -530,6 +555,7 @@ intptr_t WIZTODODATAEX::WizTodoDataArrayFindText(const CWizTodoDataExArray& arra
     //
     return -1;
 }
+
 BOOL WIZTODODATAEX::WizTodoDataItemCopyAndCombine(WIZTODODATAEX& itemDest, const WIZTODODATAEX& itemOther)
 {
     BOOL bCombined = FALSE;
@@ -568,6 +594,7 @@ BOOL WIZTODODATAEX::WizTodoDataItemCopyAndCombine(WIZTODODATAEX& itemDest, const
     //
     return bCombined;
 }
+
 BOOL WIZTODODATAEX::WizTodoDataArrayCombine(WIZTODODATAEX::CWizTodoDataExArray& arrayDest, const WIZTODODATAEX::CWizTodoDataExArray& arrayOther)
 {
     BOOL bCombined = FALSE;
@@ -597,7 +624,7 @@ BOOL WIZTODODATAEX::WizTodoDataArrayCombine(WIZTODODATAEX::CWizTodoDataExArray& 
     //
     return bCombined;
 }
-//
+
 BOOL WIZTODODATAEX::WizTodoDataArrayRemoveMultiItem(WIZTODODATAEX::CWizTodoDataExArray& arrayData)
 {
     BOOL bCombined = FALSE;
@@ -649,7 +676,7 @@ BOOL WIZTODODATAEX::WizTodoDataArrayRemoveMultiItem(WIZTODODATAEX::CWizTodoDataE
     //
     return TRUE;
 }
-//
+
 void WIZTODODATAEX::AddCompletedDate(const CString& strTextExt)
 {
     CString strTime = WizFormatString1(_T("[%1]"), WizDateToLocalString(tCompleted));

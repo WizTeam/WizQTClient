@@ -132,12 +132,26 @@ CWizDocumentListView::CWizDocumentListView(CWizExplorerApp& app, QWidget *parent
 
     setStyle(::WizGetStyle(m_app.userSettings().skin()));
 
-    connect(&m_db, SIGNAL(tagCreated(const WIZTAGDATA&)), this, SLOT(on_tag_created(const WIZTAGDATA&)));
-    connect(&m_db, SIGNAL(tagModified(const WIZTAGDATA&, const WIZTAGDATA&)), this, SLOT(on_tag_modified(const WIZTAGDATA&, const WIZTAGDATA&)));
-    connect(&m_db, SIGNAL(documentCreated(const WIZDOCUMENTDATA&)), this, SLOT(on_document_created(const WIZDOCUMENTDATA&)));
-    connect(&m_db, SIGNAL(documentModified(const WIZDOCUMENTDATA&, const WIZDOCUMENTDATA&)), this, SLOT(on_document_modified(const WIZDOCUMENTDATA&, const WIZDOCUMENTDATA&)));
-    connect(&m_db, SIGNAL(documentDeleted(WIZDOCUMENTDATA)), this, SLOT(on_document_deleted(WIZDOCUMENTDATA)));
-    connect(&m_db, SIGNAL(documentAbstractModified(const WIZDOCUMENTDATA&)), this, SLOT(on_document_AbstractModified(const WIZDOCUMENTDATA&)));
+    qRegisterMetaType<WIZTAGDATA>("WIZTAGDATA");
+    qRegisterMetaType<WIZDOCUMENTDATA>("WIZDOCUMENTDATA");
+
+    connect(&m_db, SIGNAL(tagCreated(const WIZTAGDATA&)), \
+            SLOT(on_tag_created(const WIZTAGDATA&)));
+
+    connect(&m_db, SIGNAL(tagModified(const WIZTAGDATA&, const WIZTAGDATA&)), \
+            SLOT(on_tag_modified(const WIZTAGDATA&, const WIZTAGDATA&)));
+
+    connect(&m_db, SIGNAL(documentCreated(const WIZDOCUMENTDATA&)), \
+            SLOT(on_document_created(const WIZDOCUMENTDATA&)));
+
+    connect(&m_db, SIGNAL(documentModified(const WIZDOCUMENTDATA&, const WIZDOCUMENTDATA&)), \
+            SLOT(on_document_modified(const WIZDOCUMENTDATA&, const WIZDOCUMENTDATA&)));
+
+    connect(&m_db, SIGNAL(documentDeleted(const WIZDOCUMENTDATA&)), \
+            SLOT(on_document_deleted(const WIZDOCUMENTDATA&)));
+
+    connect(&m_db, SIGNAL(documentAbstractModified(const WIZDOCUMENTDATA&)), \
+            SLOT(on_document_AbstractModified(const WIZDOCUMENTDATA&)));
 
     setDragDropMode(QAbstractItemView::DragDrop);
     setDragEnabled(true);

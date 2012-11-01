@@ -12,7 +12,7 @@ CWizAnimateAction::CWizAnimateAction(CWizExplorerApp& app, QObject* parent)
     , m_nIconIndex(-1)
     , m_timer(new QTimer())
 {
-    connect(m_timer, SIGNAL(timeout()), this, SLOT(on_timer_timeout()));
+    connect(m_timer, SIGNAL(timeout()), SLOT(on_timer_timeout()));
     m_timer->setInterval(100);
 }
 

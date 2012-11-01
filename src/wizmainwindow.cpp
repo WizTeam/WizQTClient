@@ -27,7 +27,7 @@ MainWindow::MainWindow(CWizDatabase& db, QWidget *parent)
     , m_settings(new CWizUserSettings(db))
     , m_updater(new CWizUpdater())
     , m_console(new CWizConsoleDialog(*this, this))
-    , m_sync(m_db, WIZ_API_URL, *this)
+    , m_sync(new CWizSyncThread(m_db, WIZ_API_URL))
     , m_syncTimer(new QTimer(this))
     #ifndef Q_OS_MAC
     , m_toolBar(new QToolBar("Main", this))
@@ -124,7 +124,7 @@ void MainWindow::initToolBar()
     //
     toolbar->addSearch(tr("Search"), tr("Search your notes"));
     //
-    connect(toolbar, SIGNAL(doSearch(const QString&)), this, SLOT(on_search_doSearch(const QString&)));
+    connect(toolbar, SIGNAL(doSearch(const QString&)), SLOT(on_search_doSearch(const QString&)));
     //
     toolbar->showInWindow(this);
     //
@@ -277,12 +277,21 @@ void MainWindow::initStatusBar()
 
 void MainWindow::init()
 {
+
+    connect(m_sync, SIGNAL(syncStarted()), SLOT(on_syncStarted()));
+    connect(m_sync, SIGNAL(syncLogined()), SLOT(on_syncLogined()));
+    connect(m_sync, SIGNAL(processLog(const QString&)), SLOT(on_syncProcessLog(const QString&)));
+    //connect(m_sync, SIGNAL(processDebugLog(const QString&)), SLOT(on_syncProcessDebugLog(const QString&)));
+    connect(m_sync, SIGNAL(processErrorLog(const QString&)), SLOT(on_syncProcessErrorLog(const QString&)));
+    connect(m_sync, SIGNAL(syncDone(bool)), SLOT(on_syncDone(bool)));
+    connect(m_sync, SIGNAL(progressChanged(int)), SLOT(on_syncProgressChanged(int)));
+
     connect(m_category, SIGNAL(itemSelectionChanged()), this, SLOT(on_category_itemSelectionChanged()));
     connect(m_documents, SIGNAL(itemSelectionChanged()), this, SLOT(on_documents_itemSelectionChanged()));
 
-    m_sync.setDownloadAllNotesData(m_settings->downloadAllNotesData());
+    m_sync->setDownloadAllNotesData(m_settings->downloadAllNotesData());
     m_syncTimer->setInterval(3 * 60 * 1000);    //3 minutes
-    connect(m_syncTimer, SIGNAL(timeout()), this, SLOT(on_syncTimer_timeout()));
+    connect(m_syncTimer, SIGNAL(timeout()), SLOT(on_syncTimer_timeout()));
     QTimer::singleShot(30 * 1000, this, SLOT(on_syncTimer_timeout()));  //30 seconds
 
     m_category->init();
@@ -290,12 +299,12 @@ void MainWindow::init()
 
 void MainWindow::closeEvent(QCloseEvent *e)
 {
-    m_sync.abort();
+    m_sync->abort();
 
     QMainWindow::closeEvent(e);
 }
 
-void MainWindow::syncStarted()
+void MainWindow::on_syncStarted()
 {
     m_progressSync->setValue(0);
     m_progressSync->setVisible(true);
@@ -306,9 +315,9 @@ void MainWindow::syncStarted()
     m_animateSync->startPlay();
 }
 
-void MainWindow::syncLogin()
+void MainWindow::on_syncLogined()
 {
-    m_sync.userInfo().strNotice;
+    //m_sync.userInfo().strNotice;
     //::WizSetNotice(m_sync.userInfo().strNotice);
     //
 #ifdef QT_DEBUG
@@ -317,7 +326,7 @@ void MainWindow::syncLogin()
     //resetNotice();
 }
 
-void MainWindow::syncDone(bool error)
+void MainWindow::on_syncDone(bool error)
 {
     Q_UNUSED(error);
 
@@ -329,26 +338,27 @@ void MainWindow::syncDone(bool error)
     m_animateSync->stopPlay();
 }
 
-void MainWindow::addLog(const CString& strMsg)
+void MainWindow::on_syncProcessLog(const QString& msg)
 {
-    qDebug() << strMsg;
+    TOLOG(msg);
 
+    QString strMsg = msg.left(50) + "..";
     m_labelStatus->setText(strMsg);
 }
 
-void MainWindow::addDebugLog(const CString& strMsg)
+void MainWindow::on_syncProcessDebugLog(const QString& strMsg)
 {
     DEBUG_TOLOG(strMsg);
 }
 
-void MainWindow::addErrorLog(const CString& strMsg)
+void MainWindow::on_syncProcessErrorLog(const QString& strMsg)
 {
     TOLOG(strMsg);
 
     QMessageBox::critical(this, "", strMsg);
 }
 
-void MainWindow::changeProgress(int pos)
+void MainWindow::on_syncProgressChanged(int pos)
 {
     m_progressSync->setValue(pos);
 }
@@ -360,7 +370,7 @@ void MainWindow::on_actionExit_triggered()
 
 void MainWindow::on_actionSync_triggered()
 {
-    m_sync.startSync();
+    m_sync->startSync();
 }
 
 void MainWindow::on_actionNewNote_triggered()
@@ -523,8 +533,8 @@ void MainWindow::on_options_settingsChanged(WizOptionsType type)
     }
     else if (wizoptionsSync == type)
     {
-        m_sync.setDownloadAllNotesData(m_settings->downloadAllNotesData());
-        m_sync.resetProxy();
+        m_sync->setDownloadAllNotesData(m_settings->downloadAllNotesData());
+        m_sync->resetProxy();
     }
 }
 

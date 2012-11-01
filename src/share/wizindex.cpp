@@ -1158,17 +1158,15 @@ BOOL CIndex::CreateDocumentEx(const WIZDOCUMENTDATA& data)
 		ATLASSERT(FALSE);
 		return FALSE;
 	}
-	//
+
 	CString strInfoMD5 = CalDocumentInfoMD5(data);
 	if (strInfoMD5 != data.strInfoMD5)
 	{
-#ifndef WINCE
-		//TOLOG2(_T("Warning: Document info md5 does not match: %1, %2"), strInfoMD5, data.strInfoMD5);
-#endif
-	}
-	//
+        //TOLOG2(_T("Warning: Document info md5 does not match: %1, %2"), strInfoMD5, data.strInfoMD5);
+    }
+
 	CString strFormat = FormatInsertSQLFormat(TABLE_NAME_WIZ_DOCUMENT, FIELD_LIST_WIZ_DOCUMENT, PARAM_LIST_WIZ_DOCUMENT);
-	//
+
     CString strSQL;
     strSQL.Format(strFormat,
         STR2SQL(data.strGUID).utf16(),
@@ -1183,18 +1181,18 @@ BOOL CIndex::CreateDocumentEx(const WIZDOCUMENTDATA& data)
         STR2SQL(data.strOwner).utf16(),
         STR2SQL(data.strFileType).utf16(),
         STR2SQL(data.strStyleGUID).utf16(),
-		//
+
         TIME2SQL(data.tCreated).utf16(),
         TIME2SQL(data.tModified).utf16(),
         TIME2SQL(data.tAccessed).utf16(),
-		//
+
 		data.nIconIndex,
 		data.nSync,
 		data.nProtected,
 		data.nReadCount,
 		data.nAttachmentCount,
 		data.nIndexed,
-		//
+
         TIME2SQL(data.tInfoModified).utf16(),
         STR2SQL(data.strInfoMD5).utf16(),
         TIME2SQL(data.tDataModified).utf16(),
@@ -1203,26 +1201,31 @@ BOOL CIndex::CreateDocumentEx(const WIZDOCUMENTDATA& data)
         STR2SQL(data.strParamMD5).utf16(),
         WizInt64ToStr(data.nVersion).utf16()
 	);
-	//
+
 	if (!ExecSQL(strSQL))
-		return FALSE;
-	//
+        return false;
+
 	if (!m_bUpdating)
 	{
         emit documentCreated(data);
 	}
-	//
-	return TRUE;
+
+    return true;
 }
 
-BOOL CIndex::CreateDocument(const CString& strTitle, const CString& strName, const CString& strLocation, const CString& strURL, const CString& strAuthor, const CString& strKeywords, const CString& strType, const CString& strOwner, const CString& strFileType, const CString& strStyleGUID, int nIconIndex, int nSync, int nProtected, WIZDOCUMENTDATA& data)
+BOOL CIndex::CreateDocument(const CString& strTitle, const CString& strName, \
+                            const CString& strLocation, const CString& strURL, \
+                            const CString& strAuthor, const CString& strKeywords, \
+                            const CString& strType, const CString& strOwner, \
+                            const CString& strFileType, const CString& strStyleGUID, \
+                            int nIconIndex, int nSync, int nProtected, WIZDOCUMENTDATA& data)
 {
     if (strTitle.IsEmpty())
 	{
 		TOLOG(_T("NULL Pointer or Document title is empty: CreateDocument:Title!"));
 		return FALSE;
 	}
-	//
+
 	data.strGUID = WizGenGUIDLowerCaseLetterOnly();
     data.strTitle = strTitle;
     data.strName = strName;
@@ -1236,35 +1239,39 @@ BOOL CIndex::CreateDocument(const CString& strTitle, const CString& strName, con
     data.strFileType = strFileType;
     data.strStyleGUID = strStyleGUID;
 	data.strOwner = WizGetComputerName();
-	//
+
 	data.tCreated = WizGetCurrentTime();
 	data.tModified = data.tCreated;
 	data.tAccessed = data.tCreated;
-	//
+
 	data.nIconIndex = nIconIndex;
 	data.nSync = nSync;
 	data.nProtected = nProtected;
 	data.nReadCount = 0;
 	data.nAttachmentCount = 0;
 	data.nIndexed = 0;
-	//
+
 	GetNextTitle(data.strLocation, data.strTitle);
-	//
+
 	data.tInfoModified = data.tCreated;
 	data.strInfoMD5 = CalDocumentInfoMD5(data);
 	data.tDataModified = data.tCreated;
 	data.strDataMD5 = _T("");
 	data.tParamModified = data.tCreated;
 	data.strParamMD5 = _T("");
-	//
+
 	return CreateDocumentEx(data);
 
 }
-BOOL CIndex::CreateDocument(const CString& strTitle, const CString& strName, const CString& strLocation, const CString& strURL, WIZDOCUMENTDATA& data)
+BOOL CIndex::CreateDocument(const CString& strTitle, const CString& strName, \
+                            const CString& strLocation, const CString& strURL, \
+                            WIZDOCUMENTDATA& data)
 {
-        //CreateDocument(strTitle, strName, strLocation, strURL, strAuthor, strKeywords, strType, strOwner, strFileType, strStyleGUID, nIconIndex, nSync, nProtected, WIZDOCUMENTDATA& data)
-    return CreateDocument(strTitle, strName, strLocation, strURL, "", "", "", "", "", "", 0, 0, 0, data);
+    return CreateDocument(strTitle, strName, \
+                          strLocation, strURL, \
+                          "", "", "", "", "", "", 0, 0, 0, data);
 }
+
 BOOL CIndex::CreateAttachmentEx(const WIZDOCUMENTATTACHMENTDATA& data)
 {
 	CString strInfoMD5 = CalDocumentAttachmentInfoMD5(data);
@@ -1774,6 +1781,7 @@ BOOL CIndex::DeleteTag(const WIZTAGDATA& data, BOOL bLog)
 	//
 	return TRUE;
 }
+
 BOOL CIndex::DeleteStyle(const WIZSTYLEDATA& data, BOOL bLog)
 {
 	DeleteStyleDocuments(data);
@@ -4949,7 +4957,6 @@ void CIndex::SetExtraFolder(const CWizStdStringArray& arrayLocation)
     SetMeta("FOLDERS", "EXTRA", strText);
 }
 
-//
 void CIndex::GetDeletedFolder(CWizStdStringArray& arrayLocation)
 {
     CString str = GetMetaDef("FOLDERS", "DELETED");
@@ -4963,20 +4970,18 @@ void CIndex::SetDeletedFolder(const CWizStdStringArray& arrayLocation)
     SetMeta("FOLDERS", "DELETED", strText);
 }
 
-//
-
 void CIndex::AddExtraFolder(const CString& strLocation)
 {
     //remove deleted list;
     RemoveFromExtraFolder(strLocation);
-    //
+
     emit folderCreated(strLocation);
-    //
+
     CWizStdStringArray arrayLocation;
     GetExtraFolder(arrayLocation);
     if (-1 != ::WizFindInArray(arrayLocation, strLocation))
         return;
-    //
+
     arrayLocation.push_back(strLocation);
     SetExtraFolder(arrayLocation);
 }

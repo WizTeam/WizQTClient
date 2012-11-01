@@ -891,10 +891,10 @@ CWizXmlRpcServer::CWizXmlRpcServer(const CString& strUrl)
     QUrl url(strUrl);
     m_http.setHost(url.host(), url.port(80));
 
-    connect(&m_http, SIGNAL(done(bool)), this, SLOT(httpDone(bool)));
-    connect(&m_http, SIGNAL(requestFinished(int, bool)), this, SLOT(httpRequestFinished(int, bool)));
-    connect(&m_http, SIGNAL(requestStarted(int)), this, SLOT(httpRequestStarted(int)));
-    connect(&m_http, SIGNAL(dataReadProgress(int,int)), SLOT(httpReadProgress(int,int)));
+    connect(&m_http, SIGNAL(done(bool)), SLOT(httpDone(bool)));
+    connect(&m_http, SIGNAL(requestFinished(int, bool)), SLOT(httpRequestFinished(int, bool)));
+    connect(&m_http, SIGNAL(requestStarted(int)), SLOT(httpRequestStarted(int)));
+    connect(&m_http, SIGNAL(dataReadProgress(int, int)), SLOT(httpReadProgress(int, int)));
 }
 
 void CWizXmlRpcServer::setProxy(const QString& host, int port, const QString& userName, const QString& password)

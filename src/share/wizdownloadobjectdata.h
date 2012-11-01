@@ -11,14 +11,13 @@ class CWizDownloadObjectData : public CWizApi
 public:
     CWizDownloadObjectData(CWizDatabase& db, \
                            const CString& strAccountsApiURL, \
-                           CWizSyncEvents& events, \
                            const WIZOBJECTDATA& data);
 
     void startDownload();
 
 private:
     WIZOBJECTDATA m_data;
-    BOOL m_bDownloaded;
+    bool m_bDownloaded;
 
 protected:
     virtual void onXmlRpcError(const CString& strMethodName, \
@@ -29,7 +28,7 @@ protected:
     virtual void onClientLogout();
 
 Q_SIGNALS:
-    void done(bool succeeded);
+    void downloadDone(bool succeeded);
 };
 
 bool WizDownloadObjectData(CWizDatabase& db, const WIZOBJECTDATA& data, QWidget* parent);

@@ -177,14 +177,29 @@ CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
 
     m_title->setEditingDocument(m_editingDocument);
 
-    connect(m_title->titleEdit(), SIGNAL(editingFinished()), this, SLOT(on_titleEdit_editingFinished()));
-    connect(m_title->editDocumentButton(), SIGNAL(clicked()), this, SLOT(on_editDocumentButton_clicked()));
-    connect(m_title->tagsButton(), SIGNAL(clicked()), this, SLOT(on_tagsButton_clicked()));
-    connect(m_title->attachmentButton(), SIGNAL(clicked()), this, SLOT(on_attachmentButton_clicked()));
+    connect(m_title->titleEdit(), SIGNAL(editingFinished()), \
+            SLOT(on_titleEdit_editingFinished()));
 
-    connect(&m_db, SIGNAL(attachmentCreated(WIZDOCUMENTATTACHMENTDATA)), this, SLOT(on_attachment_created(WIZDOCUMENTATTACHMENTDATA)));
-    connect(&m_db, SIGNAL(attachmentDeleted(WIZDOCUMENTATTACHMENTDATA)), this, SLOT(on_attachment_deleted(WIZDOCUMENTATTACHMENTDATA)));
-    connect(&m_db, SIGNAL(documentModified(const WIZDOCUMENTDATA&, const WIZDOCUMENTDATA&)), this, SLOT(on_document_modified(const WIZDOCUMENTDATA&, const WIZDOCUMENTDATA&)));
+    connect(m_title->editDocumentButton(), SIGNAL(clicked()), \
+            SLOT(on_editDocumentButton_clicked()));
+
+    connect(m_title->tagsButton(), SIGNAL(clicked()), \
+            SLOT(on_tagsButton_clicked()));
+
+    connect(m_title->attachmentButton(), SIGNAL(clicked()), \
+            SLOT(on_attachmentButton_clicked()));
+
+    qRegisterMetaType<WIZDOCUMENTDATA>("WIZDOCUMENTDATA");
+    qRegisterMetaType<WIZDOCUMENTATTACHMENTDATA>("WIZDOCUMENTATTACHMENTDATA");
+
+    connect(&m_db, SIGNAL(documentModified(const WIZDOCUMENTDATA&, const WIZDOCUMENTDATA&)), \
+            SLOT(on_document_modified(const WIZDOCUMENTDATA&, const WIZDOCUMENTDATA&)));
+
+    connect(&m_db, SIGNAL(attachmentCreated(const WIZDOCUMENTATTACHMENTDATA&)), \
+            SLOT(on_attachment_created(const WIZDOCUMENTATTACHMENTDATA&)));
+
+    connect(&m_db, SIGNAL(attachmentDeleted(const WIZDOCUMENTATTACHMENTDATA&)), \
+            SLOT(on_attachment_deleted(const WIZDOCUMENTATTACHMENTDATA&)));
 }
 
 
