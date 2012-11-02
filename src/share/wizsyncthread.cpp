@@ -4,6 +4,7 @@ CWizSyncThread::CWizSyncThread(CWizDatabase& db, const CString& strAccountsApiUR
     : QThread(parent)
     , m_db(db)
     , m_strAccountsApiURL(strAccountsApiURL)
+    , m_sync(0)
     , m_bDownloadAllNotesData(false)
     , m_bNeedResetProxy(false)
     , m_bIsStarted(false)
@@ -15,13 +16,13 @@ void CWizSyncThread::startSync()
     if (m_bIsStarted)
         return;
 
+    m_bIsStarted = true;
+
     start();
 }
 
 void CWizSyncThread::run()
 {
-    m_bIsStarted = true;
-
     m_sync = new CWizSync(m_db, m_strAccountsApiURL);
 
     // chain up
@@ -48,10 +49,13 @@ void CWizSyncThread::on_syncDone(bool error)
 {
     Q_UNUSED(error);
 
-    if (m_sync)
-        delete m_sync;
-
+    m_sync->deleteLater();
     m_bIsStarted = false;
 
     exit();
+}
+
+CWizSyncThread::~CWizSyncThread()
+{
+    m_sync->deleteLater();
 }

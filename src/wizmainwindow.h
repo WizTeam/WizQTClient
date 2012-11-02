@@ -20,6 +20,7 @@ class CWizFixedSpacer;
 class CWizSplitter;
 class CWizAnimateAction;
 class CWizOptionsWidget;
+class CWizStatusBar;
 
 
 class MainWindow
@@ -31,12 +32,15 @@ class MainWindow
 public:
     explicit MainWindow(CWizDatabase& db, QWidget *parent = 0);
     virtual void init();
-    virtual void closeEvent(QCloseEvent *);
+
     void center();
     ~MainWindow();
 
     bool isRestart() const { return m_bRestart; }
     bool isLogout() const { return m_bLogoutRestart; }
+
+protected:
+    virtual void closeEvent(QCloseEvent* event);
 
 public:
     virtual QWidget* mainWindow() { return this; }
@@ -46,8 +50,6 @@ public:
 
     virtual CWizUserSettings& userSettings() { return *m_settings; }
     virtual CWizUpdater* updater() { return m_updater; }
-
-
 
 private:
     CWizDatabase& m_db;
@@ -64,9 +66,10 @@ private:
 #endif
 
     QMenuBar* m_menuBar;
-    QStatusBar* m_statusBar;
-    QLabel* m_labelStatus;
-    QProgressBar* m_progressSync;
+    //QStatusBar* m_statusBar;
+    CWizStatusBar* m_statusBar;
+    //QLabel* m_labelStatus;
+    //QProgressBar* m_progressSync;
 
     CWizActions* m_actions;
     CWizCategoryView* m_category;
@@ -139,7 +142,7 @@ public Q_SLOTS:
     void on_syncProcessLog(const QString& strMsg);
     void on_syncProcessDebugLog(const QString& strMsg);
     void on_syncProcessErrorLog(const QString& strMsg);
-    void on_syncProgressChanged(int pos);
+    //void on_syncProgressChanged(int pos);
 
 #ifndef Q_OS_MAC
     void on_actionPopupMainMenu_triggered();

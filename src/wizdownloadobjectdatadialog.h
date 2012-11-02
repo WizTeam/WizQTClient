@@ -2,7 +2,8 @@
 #define WIZDOWNLOADOBJECTDATADIALOG_H
 
 #include <QDialog>
-#include "wizdownloadobjectdata.h"
+
+#include "share/wizdownloadobjectdata.h"
 
 namespace Ui {
     class WizDownloadObjectDataDialog;
@@ -26,8 +27,9 @@ private:
 
 public Q_SLOTS:
     virtual void reject();
-    void downloader_downloadObjectDataDone(bool succeeded);
+    void downloader_done(bool succeeded);
     void downloader_progress(int pos);
+    void downloader_processLog(const QString& msg);
 
 public:
     static bool downloadObjectData(CWizDatabase& db, const CString& strAccountsApiURL, const WIZOBJECTDATA& data, QWidget* parent);

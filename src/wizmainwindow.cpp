@@ -7,6 +7,7 @@
 #include "wizactions.h"
 #include "wizaboutdialog.h"
 #include "wizpreferencedialog.h"
+#include "wizstatusbar.h"
 
 #include "share/wizcommonui.h"
 
@@ -35,9 +36,10 @@ MainWindow::MainWindow(CWizDatabase& db, QWidget *parent)
     , m_optionsAction(NULL)
     #endif
     , m_menuBar(new QMenuBar(this))
-    , m_statusBar(new QStatusBar(this))
-    , m_labelStatus(new QLabel(this))
-    , m_progressSync(new QProgressBar(this))
+    //, m_statusBar(new QStatusBar(this))
+    , m_statusBar(new CWizStatusBar(*this, this))
+    //, m_labelStatus(new QLabel(this))
+    //, m_progressSync(new QProgressBar(this))
     , m_actions(new CWizActions(*this, this))
     , m_category(new CWizCategoryView(*this, this))
     , m_documents(new CWizDocumentListView(*this, this))
@@ -240,16 +242,17 @@ void MainWindow::initClient()
 
 void MainWindow::initStatusBar()
 {
-    setStatusBar(m_statusBar);
+    //setStatusBar(m_statusBar);
 
-    m_progressSync->setRange(0, 100);
-    m_statusBar->addWidget(m_progressSync, 20);
-    m_statusBar->addWidget(m_labelStatus, 80);
+    //m_progressSync->setRange(0, 100);
+    //m_statusBar->addWidget(m_progressSync, 20);
+    //m_progressSync->setVisible(false);
 
-    m_progressSync->setVisible(false);
-    m_labelStatus->setVisible(false);
+    //m_statusBar->addWidget(m_labelStatus, 80);
 
-    m_statusBar->hide();
+    //m_labelStatus->setVisible(false);
+
+    //m_statusBar->hide();
 }
 
 //void MainWindow::resetNotice()
@@ -284,7 +287,7 @@ void MainWindow::init()
     //connect(m_sync, SIGNAL(processDebugLog(const QString&)), SLOT(on_syncProcessDebugLog(const QString&)));
     connect(m_sync, SIGNAL(processErrorLog(const QString&)), SLOT(on_syncProcessErrorLog(const QString&)));
     connect(m_sync, SIGNAL(syncDone(bool)), SLOT(on_syncDone(bool)));
-    connect(m_sync, SIGNAL(progressChanged(int)), SLOT(on_syncProgressChanged(int)));
+    //connect(m_sync, SIGNAL(progressChanged(int)), SLOT(on_syncProgressChanged(int)));
 
     connect(m_category, SIGNAL(itemSelectionChanged()), this, SLOT(on_category_itemSelectionChanged()));
     connect(m_documents, SIGNAL(itemSelectionChanged()), this, SLOT(on_documents_itemSelectionChanged()));
@@ -292,25 +295,18 @@ void MainWindow::init()
     m_sync->setDownloadAllNotesData(m_settings->downloadAllNotesData());
     m_syncTimer->setInterval(3 * 60 * 1000);    //3 minutes
     connect(m_syncTimer, SIGNAL(timeout()), SLOT(on_syncTimer_timeout()));
-    QTimer::singleShot(30 * 1000, this, SLOT(on_syncTimer_timeout()));  //30 seconds
+    QTimer::singleShot(10 * 1000, this, SLOT(on_syncTimer_timeout()));  //30 seconds
 
     m_category->init();
 }
 
-void MainWindow::closeEvent(QCloseEvent *e)
+void MainWindow::closeEvent(QCloseEvent* event)
 {
-    m_sync->abort();
-
-    QMainWindow::closeEvent(e);
+    QMainWindow::closeEvent(event);
 }
 
 void MainWindow::on_syncStarted()
 {
-    m_progressSync->setValue(0);
-    m_progressSync->setVisible(true);
-    m_labelStatus->setVisible(true);
-    m_labelStatus->setText("");
-
     m_statusBar->show();
     m_animateSync->startPlay();
 }
@@ -331,10 +327,6 @@ void MainWindow::on_syncDone(bool error)
     Q_UNUSED(error);
 
     m_statusBar->hide();
-
-    m_progressSync->setVisible(error);
-    m_labelStatus->setVisible(error);
-
     m_animateSync->stopPlay();
 }
 
@@ -343,7 +335,7 @@ void MainWindow::on_syncProcessLog(const QString& msg)
     TOLOG(msg);
 
     QString strMsg = msg.left(50) + "..";
-    m_labelStatus->setText(strMsg);
+    m_statusBar->setText(strMsg);
 }
 
 void MainWindow::on_syncProcessDebugLog(const QString& strMsg)
@@ -355,13 +347,13 @@ void MainWindow::on_syncProcessErrorLog(const QString& strMsg)
 {
     TOLOG(strMsg);
 
-    QMessageBox::critical(this, "", strMsg);
+    //QMessageBox::critical(this, "", strMsg);
 }
 
-void MainWindow::on_syncProgressChanged(int pos)
-{
-    m_progressSync->setValue(pos);
-}
+//void MainWindow::on_syncProgressChanged(int pos)
+//{
+//    m_progressSync->setValue(pos);
+//}
 
 void MainWindow::on_actionExit_triggered()
 {
@@ -681,12 +673,12 @@ void MainWindow::SetSavingDocument(bool saving)
     m_statusBar->setVisible(saving);
     if (saving)
     {
-        m_labelStatus->setVisible(true);
-        m_labelStatus->setText(tr("Saving note..."));
+        m_statusBar->setVisible(true);
+        m_statusBar->setText(tr("Saving note..."));
         qApp->processEvents(QEventLoop::AllEvents);
     }
     else
     {
-        m_labelStatus->setVisible(false);
+        m_statusBar->setVisible(false);
     }
 }

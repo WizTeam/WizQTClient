@@ -1,7 +1,7 @@
 #include "wizdownloadobjectdata.h"
 #include "wizdatabase.h"
 #include "wizapi.h"
-#include "wizdownloadobjectdatadialog.h"
+#include "../wizdownloadobjectdatadialog.h"
 
 
 CWizDownloadObjectData::CWizDownloadObjectData(CWizDatabase& db, \

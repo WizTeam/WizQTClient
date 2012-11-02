@@ -1,5 +1,4 @@
 #include "wizpopupwidget.h"
-#include "wizmisc.h"
 
 #include <QPainter>
 #include <QApplication>
@@ -7,6 +6,8 @@
 #include <QResizeEvent>
 #include <QPolygon>
 #include <QTimer>
+
+#include "wizmisc.h"
 
 #ifdef Q_OS_WIN
 //#include "wizwindowshelper.h"
@@ -18,7 +19,7 @@ CWizPopupWidget::CWizPopupWidget(QWidget* parent)
     , m_leftAlign(false)
 {
     setContentsMargins(8, 20, 8, 8);
-    //
+
     QPalette pal = palette();
     pal.setColor(QPalette::Window, QColor(0xff, 0xff, 0xff));
     setPalette(pal);
@@ -56,9 +57,9 @@ void CWizPopupWidget::paintEvent(QPaintEvent* event)
 void CWizPopupWidget::resizeEvent(QResizeEvent* event)
 {
     QSize sz = event->size();
-    //
+
     m_pointsRegion.clear();
-    //
+
     if (m_leftAlign)
     {
         m_pointsRegion.push_back(QPoint(1, 10));
@@ -70,7 +71,7 @@ void CWizPopupWidget::resizeEvent(QResizeEvent* event)
         m_pointsRegion.push_back(QPoint(sz.width(), sz.height()));
         m_pointsRegion.push_back(QPoint(0, sz.height()));
         m_pointsRegion.push_back(QPoint(0, 11));
-        //
+
         m_pointsPolygon.push_back(QPoint(1, 10));
         m_pointsPolygon.push_back(QPoint(11, 10));
         for (int i = 0; i < 9; i++)
@@ -104,7 +105,7 @@ void CWizPopupWidget::resizeEvent(QResizeEvent* event)
         m_pointsRegion.push_back(QPoint(sz.width(), sz.height()));
         m_pointsRegion.push_back(QPoint(0, sz.height()));
         m_pointsRegion.push_back(QPoint(0, 11));
-        //
+
         m_pointsPolygon.push_back(QPoint(1, 10));
         m_pointsPolygon.push_back(QPoint(sz.width() - 31, 10));
         for (int i = 0; i < 9; i++)
@@ -129,11 +130,11 @@ void CWizPopupWidget::resizeEvent(QResizeEvent* event)
         m_pointsPolygon.push_back(QPoint(1, 11));
 
     }
-    //
+
     QPolygon polygon(m_pointsRegion);
-    //
+
     QRegion region(polygon);
-    //
+
     setMask(region);
 }
 
@@ -141,17 +142,17 @@ void CWizPopupWidget::resizeEvent(QResizeEvent* event)
 void CWizPopupWidget::showAtPoint(const QPoint& pt)
 {
     adjustSize();
-    //
+
     QSize sz = geometry().size();
-    //
+
     int xOffset = m_leftAlign ? 21 : sz.width() - 21;
     int yOffset = 4;
-    //
+
     int left = pt.x() - xOffset;
     int top = pt.y() - yOffset;
-    //
+
     move(QPoint(left, top));
-    //
+
     show();
 }
 

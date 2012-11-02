@@ -82,7 +82,7 @@ SOURCES += main.cpp\
     newtagdialog.cpp \
     share/wizuihelper.cpp \
     share/wizdownloadobjectdata.cpp \
-    share/wizdownloadobjectdatadialog.cpp \
+    wizdownloadobjectdatadialog.cpp \
     wizdocumenthistory.cpp \
     share/wizcreateaccount.cpp \
     mac/wizmacactionhelper.cpp \
@@ -107,7 +107,8 @@ SOURCES += main.cpp\
     wizupdater.cpp \
     wizupdaterprogressdialog.cpp \
     share/wizxml.cpp \
-    share/wizsyncthread.cpp
+    share/wizsyncthread.cpp \
+    wizstatusbar.cpp
 
 HEADERS += \
     share/wizqthelper.h \
@@ -165,7 +166,7 @@ HEADERS += \
     newtagdialog.h \
     share/wizuihelper.h \
     share/wizdownloadobjectdata.h \
-    share/wizdownloadobjectdatadialog.h \
+    wizdownloadobjectdatadialog.h \
     wizdocumenthistory.h \
     share/wizcreateaccount.h \
     mac/wizmacactionhelper.h \
@@ -191,7 +192,8 @@ HEADERS += \
     wizupdater.h \
     wizupdaterprogressdialog.h \
     share/wizxml.h \
-    share/wizsyncthread.h
+    share/wizsyncthread.h \
+    wizstatusbar.h
 
 
 mac:HEADERS += \

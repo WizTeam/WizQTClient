@@ -80,6 +80,12 @@ void CWizSync::startSync()
     callClientLogin(m_db.GetUserId(), m_db.GetPassword2());
 }
 
+void CWizSync::abort()
+{
+    Q_EMIT processLog(tr("disconnct from server"));
+    CWizApi::abort();
+}
+
 void CWizSync::onXmlRpcError(const CString& strMethodName, WizXmlRpcError err, int errorCode, const CString& errorMessage)
 {
     CWizApi::onXmlRpcError(strMethodName, err, errorCode, errorMessage);
@@ -322,7 +328,6 @@ void CWizSync::stopSync()
     {
         callClientLogout();
     }
-
 
     Q_EMIT processLog(tr("sync done"));
     Q_EMIT progressChanged(progressDone);

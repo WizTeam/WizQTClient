@@ -17,7 +17,7 @@ public:
     void setDownloadAllNotesData(bool b) { m_bDownloadAllNotesData = b; }
     void resetProxy() { CWizApi::resetProxy(); }
 
-    virtual void abort() { CWizApi::abort(); }
+    virtual void abort();
 
 private:
     bool m_error;

@@ -11,20 +11,20 @@ class CWizSyncThread : public QThread
 
 public:
     explicit CWizSyncThread(CWizDatabase& db, const CString& strAccountsApiURL, QObject *parent = 0);
+    virtual ~CWizSyncThread();
 
     void startSync();
     void setDownloadAllNotesData(bool b) { m_bDownloadAllNotesData = b; }
     void resetProxy() { m_bNeedResetProxy = true; }
-    void abort() { if (m_bIsStarted) m_sync->abort(); }
 
 protected:
     virtual void run();
 
 private:
-    CWizSync* m_sync;
-
     CWizDatabase& m_db;
     QString m_strAccountsApiURL;
+
+    CWizSync* m_sync;
 
     bool m_bDownloadAllNotesData;
     bool m_bNeedResetProxy;

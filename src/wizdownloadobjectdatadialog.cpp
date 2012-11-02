@@ -21,8 +21,9 @@ WizDownloadObjectDataDialog::WizDownloadObjectDataDialog(CWizDatabase& db, \
 
     m_downloader.startDownload();
 
-    connect(&m_downloader, SIGNAL(downloadDone(bool)), SLOT(downloader_downloadObjectDataDone(bool)));
+    connect(&m_downloader, SIGNAL(processLog(const QString&)), SLOT(downloader_processLog(const QString&)));
     connect(&m_downloader, SIGNAL(progressChanged(int)), SLOT(downloader_progress(int)));
+    connect(&m_downloader, SIGNAL(downloadDone(bool)), SLOT(downloader_done(bool)));
 
     setFixedSize(size());
 }
@@ -31,6 +32,11 @@ WizDownloadObjectDataDialog::~WizDownloadObjectDataDialog()
 {
     m_downloader.abort();
     delete ui;
+}
+
+void WizDownloadObjectDataDialog::downloader_processLog(const QString& msg)
+{
+    TOLOG(msg);
 }
 
 void WizDownloadObjectDataDialog::downloader_progress(int pos)
@@ -46,7 +52,7 @@ void WizDownloadObjectDataDialog::reject()
     QDialog::reject();
 }
 
-void WizDownloadObjectDataDialog::downloader_downloadObjectDataDone(bool succeeded)
+void WizDownloadObjectDataDialog::downloader_done(bool succeeded)
 {
     if (succeeded)
     {
