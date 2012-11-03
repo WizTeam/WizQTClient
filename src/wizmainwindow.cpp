@@ -26,20 +26,16 @@ MainWindow::MainWindow(CWizDatabase& db, QWidget *parent)
     : QMainWindow(parent)
     , m_db(db)
     , m_settings(new CWizUserSettings(db))
-    , m_updater(new CWizUpdater())
+    , m_upgrade(new CWizUpgradeThread())
+    , m_sync(new CWizSyncThread(*this))
     , m_console(new CWizConsoleDialog(*this, this))
-    , m_sync(new CWizSyncThread(m_db, WIZ_API_URL))
-    , m_syncTimer(new QTimer(this))
     #ifndef Q_OS_MAC
     , m_toolBar(new QToolBar("Main", this))
     , m_labelNotice(NULL)
     , m_optionsAction(NULL)
     #endif
     , m_menuBar(new QMenuBar(this))
-    //, m_statusBar(new QStatusBar(this))
     , m_statusBar(new CWizStatusBar(*this, this))
-    //, m_labelStatus(new QLabel(this))
-    //, m_progressSync(new QProgressBar(this))
     , m_actions(new CWizActions(*this, this))
     , m_category(new CWizCategoryView(*this, this))
     , m_documents(new CWizDocumentListView(*this, this))
@@ -53,13 +49,12 @@ MainWindow::MainWindow(CWizDatabase& db, QWidget *parent)
     , m_bUpdatingSelection(false)
 {
     // start update check thread
-    m_updater->start();
+    m_upgrade->checkUpgrade();
 
     initActions();
     initMenuBar();
     initToolBar();
     initClient();
-    initStatusBar();
 
     setWindowTitle(tr("WizNote"));
     center();
@@ -67,7 +62,6 @@ MainWindow::MainWindow(CWizDatabase& db, QWidget *parent)
 
 MainWindow::~MainWindow()
 {
-    m_updater->quit();
     delete m_history;
 }
 
@@ -240,21 +234,6 @@ void MainWindow::initClient()
 
 }
 
-void MainWindow::initStatusBar()
-{
-    //setStatusBar(m_statusBar);
-
-    //m_progressSync->setRange(0, 100);
-    //m_statusBar->addWidget(m_progressSync, 20);
-    //m_progressSync->setVisible(false);
-
-    //m_statusBar->addWidget(m_labelStatus, 80);
-
-    //m_labelStatus->setVisible(false);
-
-    //m_statusBar->hide();
-}
-
 //void MainWindow::resetNotice()
 //{
 //#ifdef Q_OS_MAC
@@ -280,22 +259,15 @@ void MainWindow::initStatusBar()
 
 void MainWindow::init()
 {
-
     connect(m_sync, SIGNAL(syncStarted()), SLOT(on_syncStarted()));
     connect(m_sync, SIGNAL(syncLogined()), SLOT(on_syncLogined()));
     connect(m_sync, SIGNAL(processLog(const QString&)), SLOT(on_syncProcessLog(const QString&)));
     //connect(m_sync, SIGNAL(processDebugLog(const QString&)), SLOT(on_syncProcessDebugLog(const QString&)));
     connect(m_sync, SIGNAL(processErrorLog(const QString&)), SLOT(on_syncProcessErrorLog(const QString&)));
     connect(m_sync, SIGNAL(syncDone(bool)), SLOT(on_syncDone(bool)));
-    //connect(m_sync, SIGNAL(progressChanged(int)), SLOT(on_syncProgressChanged(int)));
 
     connect(m_category, SIGNAL(itemSelectionChanged()), this, SLOT(on_category_itemSelectionChanged()));
     connect(m_documents, SIGNAL(itemSelectionChanged()), this, SLOT(on_documents_itemSelectionChanged()));
-
-    m_sync->setDownloadAllNotesData(m_settings->downloadAllNotesData());
-    m_syncTimer->setInterval(3 * 60 * 1000);    //3 minutes
-    connect(m_syncTimer, SIGNAL(timeout()), SLOT(on_syncTimer_timeout()));
-    QTimer::singleShot(10 * 1000, this, SLOT(on_syncTimer_timeout()));  //30 seconds
 
     m_category->init();
 }
@@ -346,14 +318,7 @@ void MainWindow::on_syncProcessDebugLog(const QString& strMsg)
 void MainWindow::on_syncProcessErrorLog(const QString& strMsg)
 {
     TOLOG(strMsg);
-
-    //QMessageBox::critical(this, "", strMsg);
 }
-
-//void MainWindow::on_syncProgressChanged(int pos)
-//{
-//    m_progressSync->setValue(pos);
-//}
 
 void MainWindow::on_actionExit_triggered()
 {
@@ -362,7 +327,7 @@ void MainWindow::on_actionExit_triggered()
 
 void MainWindow::on_actionSync_triggered()
 {
-    m_sync->startSync();
+    m_sync->on_syncStarted();
 }
 
 void MainWindow::on_actionNewNote_triggered()
@@ -525,7 +490,7 @@ void MainWindow::on_options_settingsChanged(WizOptionsType type)
     }
     else if (wizoptionsSync == type)
     {
-        m_sync->setDownloadAllNotesData(m_settings->downloadAllNotesData());
+        //m_sync->setDownloadAllNotesData(m_settings->downloadAllNotesData());
         m_sync->resetProxy();
     }
 }
@@ -534,14 +499,6 @@ void MainWindow::on_options_restartForSettings()
 {
     m_bRestart = true;
     QTimer::singleShot(100, this, SLOT(close()));
-}
-
-void MainWindow::on_syncTimer_timeout()
-{
-    if (!m_settings->autoSync())
-        return;
-
-    on_actionSync_triggered();
 }
 
 void MainWindow::viewDocument(const WIZDOCUMENTDATA& data, bool addToHistory)

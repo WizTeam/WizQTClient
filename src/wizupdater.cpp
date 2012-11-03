@@ -4,133 +4,175 @@
 #include "share/wizsettings.h"
 #include "zip/wizzip.h"
 
-#define WIZ_CHECK_UPDATE_TIMEOUT 1000*60*60*3
 const QString WIZ_UPGRADE_URL = "http://api.wiz.cn/";
 
-CWizUpdater::CWizUpdater(QObject* parent)
+CWizUpgradeThread::CWizUpgradeThread(QObject* parent /* = 0 */)
     : QThread(parent)
     , m_bIsStarted(false)
-    , m_nProcessTimes(0)
 {
+    m_timer.setInterval(3 * 60 * 60 * 1000); // 3 hours
+    connect(&m_timer, SIGNAL(timeout()), SLOT(checkUpgrade()));
+
+    connect(this, SIGNAL(finished()), SLOT(checkFinished()));
+
+    m_timer.start();
 }
 
-void CWizUpdater::checkAndDownloadUpgrade()
+void CWizUpgradeThread::checkUpgrade()
 {
-    Q_EMIT checkUpdate();
+    if (m_bIsStarted)
+        return;
+
+    m_timer.stop();
+    m_bIsStarted = true;
+
+    start();
 }
 
-void CWizUpdater::run()
+void CWizUpgradeThread::run()
 {
-    // m_net owned by updater thread
-    m_net = new QNetworkAccessManager(this);
+    m_currentThread = QThread::currentThread();
 
-    QTimer timer(this);
-    timer.start(WIZ_CHECK_UPDATE_TIMEOUT);
-    connect(&timer, SIGNAL(timeout()), SLOT(on_request_checkUpdate()));
-    connect(this, SIGNAL(checkUpdate()), SLOT(on_request_checkUpdate()));
+    TOLOG(tr("Check update online"));
+
+    m_upgradePtr = new CWizUpgrade(this);
+
+    qRegisterMetaType<UpdateError>("UpdateError");
+
+    connect(m_upgradePtr, SIGNAL(prepareDone(bool)), SLOT(on_prepareDone(bool)));
+    connect(m_upgradePtr, SIGNAL(upgradeError(UpdateError)), SLOT(on_upgradeError(UpdateError)));
+
+    m_upgradePtr->requestUpgrade();
 
     exec();
 }
 
-void CWizUpdater::on_request_checkUpdate()
+void CWizUpgradeThread::on_prepareDone(bool bNeedUpgrade)
 {
-    if (!m_bIsStarted) {
-        TOLOG("Check update online");
-        m_bIsStarted = true;
-        m_nProcessTimes = 0;
+    Q_UNUSED(bNeedUpgrade);
 
-        requestUpgrade();
+    TOLOG1("Request done, need upgrade: %1", QString::number(bNeedUpgrade));
+    m_currentThread->exit();
+}
+
+void CWizUpgradeThread::on_upgradeError(UpdateError error)
+{
+    Q_UNUSED(error);
+
+    TOLOG1("Check upgrade meet error, error code: %1", QString::number(error));
+    m_currentThread->exit();
+}
+
+void CWizUpgradeThread::checkFinished()
+{
+    m_upgradePtr->deleteLater();
+    m_bIsStarted = false;
+
+    m_timer.start();
+}
+
+
+
+CWizUpgrade::CWizUpgrade(QObject* parent /* = 0 */)
+    : QObject(parent)
+    , m_nProcessTimes(0)
+{
+}
+
+QString CWizUpgrade::getUpgradeUrl()
+{
+    QString strProduct = "wiz";
+    QString strCommand = "updatev2";
+
+#ifdef _M_X64
+    QString strPlatform = "x64";
+#else
+    QString strPlatform = "x86";
+#endif
+
+    QString strUrl = WIZ_UPGRADE_URL \
+            + "?p=%1&l=%2&v=%3&c=%4&random=%5&cn=%6&plat=%7";
+    strUrl = strUrl.arg(strProduct)\
+            .arg(QLocale::system().name())\
+            .arg(::WizGlobal()->version())\
+            .arg(strCommand)\
+            .arg((int)::GetTickCount())\
+            .arg(::WizGetComputerName())\
+            .arg(strPlatform);
+
+    //TOLOG("URL:" + strUrl);
+
+    return strUrl;
+}
+
+QUrl CWizUpgrade::redirectUrl(QUrl const &possible_redirect_url, \
+                              QUrl const &old_redirect_url) const
+{
+    QUrl redirect_url;
+
+    if(!possible_redirect_url.isEmpty() \
+            && possible_redirect_url != old_redirect_url)
+    {
+            redirect_url = possible_redirect_url;
     }
+
+    return redirect_url;
 }
 
-QUrl CWizUpdater::getUpgradeUrl()
-{
-    QString strUrl = WIZ_UPGRADE_URL + "?p=%1&c=%2&plat=%3";
-    strUrl = strUrl.arg("wiz").arg("updatev2").arg("x86");
-
-    return QUrl(strUrl);
-}
-
-void CWizUpdater::requestUpgrade()
+void CWizUpgrade::requestUpgrade()
 {
     // send request to download upgrade tarball
-    QNetworkRequest request(getUpgradeUrl());
-    QNetworkReply* reply = m_net->get(request);
+    requestUpgrade_impl(getUpgradeUrl());
+}
+
+void CWizUpgrade::requestUpgrade_impl(QString const& url)
+{
+    QNetworkReply* reply = m_net.get(QNetworkRequest(url));
     connect(reply, SIGNAL(finished()), SLOT(on_requestUpgrade_finished()));
+    connect(reply, SIGNAL(error(QNetworkReply::NetworkError)), \
+            SLOT(on_request_error(QNetworkReply::NetworkError)));
 }
 
-void CWizUpdater::on_requestUpgrade_finished()
-{
-    QNetworkReply* reply = qobject_cast<QNetworkReply *>(sender());
-
-    if (reply->error()) {
-        TOLOG1("Network error, error number: %1", QString::number(reply->error()));
-        Q_EMIT upgradeError(NetworkError);
-        m_bIsStarted = false;
-        return;
-    }
-
-
-    // redirect to download server.
-    QUrl newUrl = reply->attribute(QNetworkRequest::RedirectionTargetAttribute).toUrl();
-    reply->deleteLater();
-
-    QNetworkRequest request(newUrl);
-    QNetworkReply* reply2 = m_net->get(request);
-    connect(reply2, SIGNAL(finished()), SLOT(on_requestRedirect_finished()));
-}
-
-void CWizUpdater::on_requestRedirect_finished()
+void CWizUpgrade::on_requestUpgrade_finished()
 {
     QNetworkReply* reply = qobject_cast<QNetworkReply *>(sender());
 
     if (reply->error()) {
         Q_EMIT upgradeError(NetworkError);
-        m_bIsStarted = false;
+        reply->deleteLater();
         return;
     }
 
-    // redirect to real file
-    QUrl newUrl = reply->attribute(QNetworkRequest::RedirectionTargetAttribute).toUrl();
-    reply->deleteLater();
+    QUrl possibleRedirectedUrl = reply->attribute(QNetworkRequest::RedirectionTargetAttribute).toUrl();
+    m_redirectedUrl = redirectUrl(possibleRedirectedUrl, m_redirectedUrl);
 
-    QNetworkRequest request(newUrl);
-    QNetworkReply* reply2 = m_net->get(request);
-    connect(reply2, SIGNAL(finished()), SLOT(on_downloadTarball_finished()));
-}
+    if (!m_redirectedUrl.isEmpty()) {
+        // redirect to download server.
+        //TOLOG1("redirected: %1", m_redirectedUrl.toString());
+        requestUpgrade_impl(m_redirectedUrl.toString());
+    } else {
+        // download upgrade tarball
+        QFile fileReply(::WizGetUpgradePath() + "update.zip");
+        fileReply.remove();
 
-void CWizUpdater::on_downloadTarball_finished()
-{
-    QNetworkReply* reply = qobject_cast<QNetworkReply *>(sender());
+        fileReply.open(QIODevice::Truncate | QIODevice::WriteOnly);
+        fileReply.write(reply->readAll());
+        fileReply.close();
 
-    if (reply->error()) {
-        Q_EMIT upgradeError(NetworkError);
-        m_bIsStarted = false;
-        return;
+        TOLOG(tr("Download update tarball finished"));
+        processTarball();
     }
 
-    // download upgrade tarball
-    QFile fileReply(::WizGetUpgradePath() + "update.zip");
-    fileReply.remove();
-
-    fileReply.open(QIODevice::Append);
-    fileReply.write(reply->readAll());
-    fileReply.close();
-
     reply->deleteLater();
-
-    TOLOG("Download update tarball finished");
-
-    processTarball();
 }
 
-void CWizUpdater::processTarball()
+void CWizUpgrade::processTarball()
 {
+    // unzip
     QString strZip = ::WizGetUpgradePath() + "update.zip";
     if (!CWizUnzipFile::extractZip(strZip, ::WizGetUpgradePath())) {
-        TOLOG("tarball data is not correct!");
+        TOLOG("tarball data is not correct! please contect wiz support team");
         Q_EMIT upgradeError(UnzipError);
-        m_bIsStarted = false;
         return;
     }
 
@@ -139,10 +181,8 @@ void CWizUpdater::processTarball()
     generateDownloadQueue();
 }
 
-void CWizUpdater::readMetadata()
+void CWizUpgrade::readMetadata()
 {
-    m_files.clear();
-
     // read metadata to memory
     CWizSettings* config = new CWizSettings(::WizGetUpgradePath() + "config.txt");
     m_strDownloadFileUrl = config->GetString("Common", "DownloadFileURL");
@@ -154,8 +194,8 @@ void CWizUpdater::readMetadata()
         QStringList strFileMeta = strFileEntry.split("*");
 
         if (strFileMeta.count() != 2) {
+            TOLOG("config file format is wrong, please contect wiz support team");
             Q_EMIT upgradeError(ParseError);
-            m_bIsStarted = false;
             return;
         }
 
@@ -168,10 +208,8 @@ void CWizUpdater::readMetadata()
     }
 }
 
-void CWizUpdater::generateDownloadQueue()
+void CWizUpgrade::generateDownloadQueue()
 {
-    m_downloadQueue.clear();
-
     QList<QStringList>::const_iterator i;
     for (i = m_files.constBegin(); i != m_files.constEnd(); i++) {
         QString strDownloadFullPath = ::WizGetUpgradePath() + (*i).at(0);
@@ -217,23 +255,24 @@ void CWizUpdater::generateDownloadQueue()
     m_nNeedProcess = m_downloadQueue.count();
 
     if (!m_nNeedProcess) {
-        m_bIsStarted = false;
+        Q_EMIT prepareDone(false);
         return;
     }
 
     processDownload();
 }
 
-void CWizUpdater::processDownload()
+void CWizUpgrade::processDownload()
 {
     if (m_nProcessTimes >= m_nNeedProcess) {
         if (!m_downloadQueue.isEmpty()) {
             TOLOG("Current download still meet error, scheduled 3 hours later");
+            Q_EMIT prepareDone(false);
         } else {
-            Q_EMIT upgradePreparedDone();
+            Q_EMIT prepareDone(true);
         }
 
-        m_bIsStarted = false;
+        // exist thread from here.
         return;
     }
 
@@ -242,35 +281,20 @@ void CWizUpdater::processDownload()
     QString strCurrent = m_downloadQueue.at(0).at(0);
     QUrl fileUrl = m_strDownloadFileUrl.arg(strCurrent).arg(WizGetTimeStamp());
     QNetworkRequest request(fileUrl);
-    QNetworkReply* reply = m_net->get(request);
+    QNetworkReply* reply = m_net.get(request);
     connect(reply, SIGNAL(finished()), SLOT(on_downloadFile_finished()));
     connect(reply, SIGNAL(error(QNetworkReply::NetworkError)), \
-            SLOT(on_downloadFile_error(QNetworkReply::NetworkError)));
+            SLOT(on_request_error(QNetworkReply::NetworkError)));
 }
 
-void CWizUpdater::on_downloadFile_error(QNetworkReply::NetworkError error)
-{
-    QNetworkReply* reply = qobject_cast<QNetworkReply *>(sender());
-
-    QString strFile = ::WizExtractFileName(m_downloadQueue.at(0).at(0));
-    TOLOG3("Download %1 error [code %2]: %3", strFile, QString::number(error), reply->errorString());
-
-    reply->deleteLater();
-
-    // move current file to the end of queue, waiting for next chance.
-    if (!m_downloadQueue.isEmpty()) {
-        m_downloadQueue.swap(0, m_downloadQueue.count() - 1);
-    }
-
-    processDownload();
-}
-
-void CWizUpdater::on_downloadFile_finished()
+void CWizUpgrade::on_downloadFile_finished()
 {
     QNetworkReply* reply = qobject_cast<QNetworkReply *>(sender());
 
     // while meet error, we should try again.
     if (reply->error()) {
+        moveToEnd();
+        processDownload();
         return;
     }
 
@@ -281,7 +305,7 @@ void CWizUpdater::on_downloadFile_finished()
     // save download
     QString strWorkingPath = ::WizGetUpgradePath();
     QFile fileReply(strWorkingPath + strDownloadFileName + ".zip");
-    fileReply.open(QIODevice::Append);
+    fileReply.open(QIODevice::Truncate | QIODevice::WriteOnly);
     fileReply.write(reply->readAll());
     fileReply.close();
 
@@ -293,7 +317,9 @@ void CWizUpdater::on_downloadFile_finished()
     if (!CWizUnzipFile::extractZip(strWorkingPath + strDownloadFileName + ".zip", \
                                    strDownloadFilePath)) {
         fileZip.remove();
-        TOLOG1("process failed: %1", strDownloadFileName);
+        TOLOG1("upzip failed: %1", strDownloadFileName);
+        moveToEnd();
+        processDownload();
         return;
     }
     fileZip.remove();
@@ -302,6 +328,8 @@ void CWizUpdater::on_downloadFile_finished()
     QFile file(strDownloadFilePath + "data");
     if (!file.exists()) {
         TOLOG1("process failed: %1", strDownloadFileName);
+        moveToEnd();
+        processDownload();
         return;
     }
     file.rename(strDownloadFilePath + strDownloadFileName);
@@ -315,4 +343,29 @@ void CWizUpdater::on_downloadFile_finished()
     }
 
     processDownload();
+}
+
+void CWizUpgrade::on_request_error(QNetworkReply::NetworkError error)
+{
+    QNetworkReply* reply = qobject_cast<QNetworkReply *>(sender());
+
+    // error meet when request tarball
+    if (m_downloadQueue.isEmpty()) {
+        TOLOG2("Request upgrade error [code %1]: %2", QString::number(error), reply->errorString());
+        reply->deleteLater();
+        return;
+    }
+
+    reply->deleteLater();
+
+    // else, occured when download files
+    QString strFile = ::WizExtractFileName(m_downloadQueue.at(0).at(0));
+    TOLOG3("Download %1 error [code %2]: %3", strFile, QString::number(error), reply->errorString());
+}
+
+void CWizUpgrade::moveToEnd()
+{
+    if (!m_downloadQueue.isEmpty()) {
+        m_downloadQueue.swap(0, m_downloadQueue.count() - 1);
+    }
 }

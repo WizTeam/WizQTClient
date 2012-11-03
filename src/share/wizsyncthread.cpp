@@ -1,21 +1,29 @@
 #include "wizsyncthread.h"
 
-CWizSyncThread::CWizSyncThread(CWizDatabase& db, const CString& strAccountsApiURL, QObject *parent /* = 0 */)
+CWizSyncThread::CWizSyncThread(CWizExplorerApp& app, QObject *parent /* = 0 */)
     : QThread(parent)
-    , m_db(db)
-    , m_strAccountsApiURL(strAccountsApiURL)
-    , m_sync(0)
-    , m_bDownloadAllNotesData(false)
+    , m_app(app)
+    , m_db(app.database())
     , m_bNeedResetProxy(false)
     , m_bIsStarted(false)
 {
+    connect(this, SIGNAL(finished()), SLOT(on_syncFinished()));
+
+    m_timer.setInterval(15 * 60 * 1000);    //15 minutes
+    connect(&m_timer, SIGNAL(timeout()), SLOT(on_syncStarted()));
+
+    if (m_app.userSettings().autoSync()) {
+        m_timer.start();
+        QTimer::singleShot(10 * 1000, this, SLOT(on_syncStarted()));  //10 seconds
+    }
 }
 
-void CWizSyncThread::startSync()
+void CWizSyncThread::on_syncStarted()
 {
     if (m_bIsStarted)
         return;
 
+    m_timer.stop();
     m_bIsStarted = true;
 
     start();
@@ -23,7 +31,9 @@ void CWizSyncThread::startSync()
 
 void CWizSyncThread::run()
 {
-    m_sync = new CWizSync(m_db, m_strAccountsApiURL);
+    m_currentThread = QThread::currentThread();
+
+    m_sync = new CWizSync(m_db, WIZ_API_URL);
 
     // chain up
     connect(m_sync, SIGNAL(syncStarted()), SIGNAL(syncStarted()));
@@ -34,9 +44,10 @@ void CWizSyncThread::run()
     connect(m_sync, SIGNAL(processErrorLog(const QString&)), SIGNAL(processErrorLog(const QString&)));
     connect(m_sync, SIGNAL(syncDone(bool)), SIGNAL(syncDone(bool)));
 
-    connect(m_sync, SIGNAL(syncDone(bool)), SLOT(on_syncDone(bool)));
+    connect(m_sync, SIGNAL(syncDone(bool)), SIGNAL(on_syncDone(bool)));
 
-    m_sync->setDownloadAllNotesData(m_bDownloadAllNotesData);
+    m_sync->setDownloadAllNotesData(m_app.userSettings().downloadAllNotesData());
+
     if (m_bNeedResetProxy)
         m_sync->resetProxy();
 
@@ -47,15 +58,15 @@ void CWizSyncThread::run()
 
 void CWizSyncThread::on_syncDone(bool error)
 {
-    Q_UNUSED(error);
+    m_currentThread->exit(error);
+}
 
+void CWizSyncThread::on_syncFinished()
+{
     m_sync->deleteLater();
     m_bIsStarted = false;
 
-    exit();
-}
-
-CWizSyncThread::~CWizSyncThread()
-{
-    m_sync->deleteLater();
+    if (m_app.userSettings().autoSync()) {
+        m_timer.start();
+    }
 }

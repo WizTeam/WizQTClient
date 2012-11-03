@@ -17,7 +17,7 @@ public:
     virtual CWizCategoryView& category() = 0;
 
     virtual CWizUserSettings& userSettings() = 0;
-    virtual CWizUpdater* updater() = 0;
+    //virtual CWizUpdater* updater() = 0;
 };
 
 #endif // WIZDEF_H

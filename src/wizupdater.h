@@ -4,64 +4,86 @@
 #include <QtNetwork>
 #include <QtCore>
 
-class CWizSettings;
-
 enum UpdateError {
     NetworkError,
     UnzipError,
     ParseError
 };
 
-class CWizUpdater : public QThread
+class CWizUpgrade;
+
+class CWizUpgradeThread : public QThread
 {
     Q_OBJECT
 
 public:
-    CWizUpdater(QObject* parent = 0);
-
-    void checkAndDownloadUpgrade();
-
-    // stand alone call
-    void readMetadata();
+    CWizUpgradeThread(QObject* parent = 0);
 
 protected:
     virtual void run();
 
 private:
-    QUrl getUpgradeUrl();
+    QPointer<CWizUpgrade> m_upgradePtr;
+    bool m_bIsStarted;
+    QTimer m_timer;
+
+    QPointer<QThread> m_currentThread;
+
+public Q_SLOTS:
+    void checkUpgrade();
+    void checkFinished();
+
+private Q_SLOTS:
+    void on_prepareDone(bool bNeedUpgrade);
+    void on_upgradeError(UpdateError error);
+};
+
+
+class CWizUpgrade : public QObject
+{
+    Q_OBJECT
+
+public:
+    CWizUpgrade(QObject* parent = 0);
+
     void requestUpgrade();
+    QString whatsNewUrl() const { return m_strWhatsNewUrl; }
+
+private:
+    QString getUpgradeUrl();
+    void requestUpgrade_impl(QString const& url);
+    QUrl redirectUrl(QUrl const &possible_redirect_url, \
+                     QUrl const &old_redirect_url) const;
 
     void processTarball();
+    void readMetadata();
     void generateDownloadQueue();
     void processDownload();
 
+    void moveToEnd();
+
 private:
-    QNetworkAccessManager* m_net;
-    QString m_strDownloadFileUrl;
-    QString m_strWhatsNewUrl;
+    QNetworkAccessManager m_net;
+    QUrl m_redirectedUrl;
+
     QList<QStringList> m_files;
 
-    bool m_bIsStarted;
+    QString m_strWhatsNewUrl;
 
+    // download queue info
+    QString m_strDownloadFileUrl;
     QList<QStringList> m_downloadQueue;
     int m_nNeedProcess;
     int m_nProcessTimes;
 
 Q_SIGNALS:
-    void checkUpdate();
     void upgradeError(UpdateError error);
-    void upgradeAvaliable();
-    void upgradePreparedDone();
+    void prepareDone(bool bNeedUpdate);
 
 public Q_SLOTS:
-    void on_request_checkUpdate();
-
     void on_requestUpgrade_finished();
-    void on_requestRedirect_finished();
-    void on_downloadTarball_finished();
-
     void on_downloadFile_finished();
-    void on_downloadFile_error(QNetworkReply::NetworkError error);
+    void on_request_error(QNetworkReply::NetworkError error);
 };
 
 #endif // CWIZUPDATER_H

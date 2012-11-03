@@ -49,15 +49,14 @@ public:
     virtual CWizCategoryView& category() { return *m_category; }
 
     virtual CWizUserSettings& userSettings() { return *m_settings; }
-    virtual CWizUpdater* updater() { return m_updater; }
+    //virtual CWizUpdater* updater() { return m_updater; }
 
 private:
     CWizDatabase& m_db;
     CWizUserSettings* m_settings;
-    CWizUpdater* m_updater;
+    QPointer<CWizUpgradeThread> m_upgrade;
+    QPointer<CWizSyncThread> m_sync;
     CWizConsoleDialog* m_console;
-    CWizSyncThread* m_sync;
-    QTimer* m_syncTimer;
 
 #ifndef Q_OS_MAC
     QToolBar* m_toolBar;
@@ -66,10 +65,7 @@ private:
 #endif
 
     QMenuBar* m_menuBar;
-    //QStatusBar* m_statusBar;
     CWizStatusBar* m_statusBar;
-    //QLabel* m_labelStatus;
-    //QProgressBar* m_progressSync;
 
     CWizActions* m_actions;
     CWizCategoryView* m_category;
@@ -134,15 +130,12 @@ public Q_SLOTS:
     void on_search_doSearch(const QString& keywords);
     void on_options_settingsChanged(WizOptionsType type);
 
-    void on_syncTimer_timeout();
-
     void on_syncStarted();
     void on_syncLogined();
     void on_syncDone(bool error);
     void on_syncProcessLog(const QString& strMsg);
     void on_syncProcessDebugLog(const QString& strMsg);
     void on_syncProcessErrorLog(const QString& strMsg);
-    //void on_syncProgressChanged(int pos);
 
 #ifndef Q_OS_MAC
     void on_actionPopupMainMenu_triggered();

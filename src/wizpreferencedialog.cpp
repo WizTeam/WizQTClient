@@ -154,5 +154,5 @@ void CWizPreferenceWindow::accept()
 
 void CWizPreferenceWindow::on_buttonCheckUpgrade_clicked()
 {
-    m_app.updater()->checkAndDownloadUpgrade();
+    //m_app.updater()->checkAndDownloadUpgrade();
 }

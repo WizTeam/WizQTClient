@@ -152,7 +152,7 @@ CString WizInt64ToStr(__int64 n);
 CString WizGenGUIDLowerCaseLetterOnly();
 
 
-CString WizGetComputerName();
+QString WizGetComputerName();
 
 #define TOLOG(x)                        WizGlobal()->WriteLog(x)
 #define TOLOG1(x, p1)                   WizGlobal()->WriteLog(WizFormatString1(x, p1))

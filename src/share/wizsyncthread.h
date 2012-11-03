@@ -3,6 +3,7 @@
 
 #include <QtCore>
 
+#include "wizdef.h"
 #include "wizsync.h"
 
 class CWizSyncThread : public QThread
@@ -10,26 +11,24 @@ class CWizSyncThread : public QThread
     Q_OBJECT
 
 public:
-    explicit CWizSyncThread(CWizDatabase& db, const CString& strAccountsApiURL, QObject *parent = 0);
-    virtual ~CWizSyncThread();
+    explicit CWizSyncThread(CWizExplorerApp& app, QObject *parent = 0);
 
-    void startSync();
-    void setDownloadAllNotesData(bool b) { m_bDownloadAllNotesData = b; }
     void resetProxy() { m_bNeedResetProxy = true; }
 
 protected:
     virtual void run();
 
 private:
+    CWizExplorerApp& m_app;
     CWizDatabase& m_db;
-    QString m_strAccountsApiURL;
 
-    CWizSync* m_sync;
-
-    bool m_bDownloadAllNotesData;
+    QPointer<CWizSync> m_sync;
     bool m_bNeedResetProxy;
 
     bool m_bIsStarted;
+    QTimer m_timer;
+
+    QPointer<QThread> m_currentThread;
 
 Q_SIGNALS:
     void syncStarted();
@@ -41,8 +40,11 @@ Q_SIGNALS:
     void syncDone(bool error);
 
 public Q_SLOTS:
+    void on_syncStarted();
+    void on_syncFinished();
+
+private Q_SLOTS:
     void on_syncDone(bool error);
-    
 };
 
 #endif // WIZSYNCTHREAD_H

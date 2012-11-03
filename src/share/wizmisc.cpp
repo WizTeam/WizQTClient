@@ -1,17 +1,14 @@
 #include "wizsettings.h"
-#include <QDir>
+
 #include <QApplication>
-#include <QFile>
-#include <QFileInfo>
-#include <QTextStream>
-#include <QUuid>
-#include <QDebug>
 #include <stdlib.h>
 #include <QTextDocumentFragment>
-#include <QTextCodec>
 #include <algorithm>
 #include <QCursor>
 #include <fstream>
+
+#include <QtCore>
+#include <QtNetwork>
 
 #ifndef MAX_PATH
 #define MAX_PATH 200
@@ -1409,9 +1406,9 @@ CString WizGenGUIDLowerCaseLetterOnly()
 }
 
 
-CString WizGetComputerName()
+QString WizGetComputerName()
 {
-    return "xxx";
+    return QHostInfo::localHostName();
 }
 
 
