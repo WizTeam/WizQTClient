@@ -270,11 +270,11 @@ CWizAttachmentListWidget::CWizAttachmentListWidget(CWizExplorerApp& app, QWidget
     , m_app(app)
     , m_list(new CWizAttachmentListView(app, this))
 {
-    QLayout* layoutMain = new QBoxLayout(QBoxLayout::TopToBottom, this);
+    QVBoxLayout* layoutMain = new QVBoxLayout(this);
     setLayout(layoutMain);
     layoutMain->setMargin(0);
-    //
-    QLayout* layoutHeader = new QHBoxLayout(this);
+
+    QHBoxLayout* layoutHeader = new QHBoxLayout(this);
     layoutHeader->setMargin(0);
     QIcon iconAddAttachment = ::WizLoadSkinIcon(m_app.userSettings().skin(), "add_attachment_button");
     CWizImagePushButton* addAttachmentButton = new CWizImagePushButton(iconAddAttachment, "", this);
@@ -285,13 +285,13 @@ CWizAttachmentListWidget::CWizAttachmentListWidget(CWizExplorerApp& app, QWidget
     layoutHeader->addWidget(new CWizSpacer(this));
     layoutHeader->addWidget(addAttachmentButton);
     connect(addAttachmentButton, SIGNAL(clicked()), SLOT(on_addAttachment_clicked()));
-    //
+
     QWidget* line = new QWidget(this);
     line->setMaximumHeight(1);
     line->setMinimumHeight(1);
     line->setStyleSheet("border-bottom-width:1;border-bottom-style:solid;border-bottom-color:#d9dcdd");
-    //
-    layoutMain->addItem(layoutHeader);
+
+    layoutMain->addLayout(layoutHeader);
     layoutMain->addWidget(line);
     layoutMain->addWidget(m_list);
 }

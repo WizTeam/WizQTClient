@@ -47,9 +47,15 @@ MainWindow::MainWindow(CWizDatabase& db, QWidget *parent)
     , m_bRestart(false)
     , m_bLogoutRestart(false)
     , m_bUpdatingSelection(false)
+    , m_msgQuit(new QMessageBox(this))
 {
     // start update check thread
     //m_upgrade->checkUpgrade();
+
+    m_msgQuit->setStandardButtons(0);
+    m_msgQuit->setText(tr("please wait, I'll stop working right now..."));
+    m_timerReadyQuit.setInterval(100);
+    connect(&m_timerReadyQuit, SIGNAL(timeout()), SLOT(on_readyQuit_timeout()));
 
     initActions();
     initMenuBar();
@@ -274,20 +280,29 @@ void MainWindow::init()
 
 void MainWindow::closeEvent(QCloseEvent* event)
 {
-    // FIXME: use single wiznote instence instead of hide!
-    hide();
-
-    if (m_upgrade->thread()) {
-        m_upgrade->abort();
-        m_upgrade->wait();
+    if (!m_sync->thread() && !m_upgrade->thread()) {
+        event->accept();
+        return;
     }
 
-    if (m_sync->thread()) {
-        m_sync->abort();
-        m_sync->wait();
+    if (m_timerReadyQuit.timerId() == -1) {
+        if (m_upgrade->thread())
+            m_upgrade->abort();
+
+        if (m_sync->thread())
+            m_sync->abort();
     }
 
-    QMainWindow::closeEvent(event);
+    if (m_upgrade->thread() || m_sync->thread()) {
+        m_timerReadyQuit.start();
+        event->ignore();
+    }
+}
+
+void MainWindow::on_readyQuit_timeout()
+{
+    m_msgQuit->open();
+    close();
 }
 
 void MainWindow::on_syncStarted()

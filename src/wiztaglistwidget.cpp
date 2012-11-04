@@ -15,11 +15,11 @@ CWizTagListWidget::CWizTagListWidget(CWizDatabase& db, QWidget* parent)
     , m_scroll(NULL)
     , m_db(db)
 {
-    QBoxLayout* layoutMain = new QBoxLayout(QBoxLayout::TopToBottom, this);
+    QVBoxLayout* layoutMain = new QVBoxLayout(this);
     setLayout(layoutMain);
     layoutMain->setMargin(0);
 
-    QLayout* layoutTitle = new QHBoxLayout(this);
+    QHBoxLayout* layoutTitle = new QHBoxLayout(this);
     m_tagsEdit = new QLineEdit(this);
     layoutTitle->addWidget(new QLabel(tr("Tags:"), this));
     layoutTitle->addWidget(m_tagsEdit);

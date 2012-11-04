@@ -83,6 +83,9 @@ private:
 
     WIZDOCUMENTDATA m_documentForEditing;
 
+    QTimer m_timerReadyQuit;
+    QMessageBox* m_msgQuit;
+
 private:
     void initActions();
     void initMenuBar();
@@ -143,6 +146,7 @@ public Q_SLOTS:
     void on_options_restartForSettings();
 #endif
 
+    void on_readyQuit_timeout();
 };
 
 #endif // WIZMAINWINDOW_H

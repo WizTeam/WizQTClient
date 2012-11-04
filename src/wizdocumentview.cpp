@@ -354,13 +354,12 @@ void CWizDocumentView::on_editDocumentButton_clicked()
 
 void CWizDocumentView::on_attachmentButton_clicked()
 {
-    if (!m_attachments)
-    {
+    if (!m_attachments) {
         m_attachments = new CWizAttachmentListWidget(m_web->app(), topLevelWidget());
     }
-    //
+
     m_attachments->setDocument(m_web->document());
-    //
+
     QPushButton* btn = m_title->attachmentButton();
     QRect rc = btn->geometry();
     QPoint pt = btn->mapToGlobal(QPoint(rc.width() / 2, rc.height()));
@@ -370,13 +369,12 @@ void CWizDocumentView::on_attachmentButton_clicked()
 
 void CWizDocumentView::on_tagsButton_clicked()
 {
-    if (!m_tags)
-    {
+    if (!m_tags) {
         m_tags = new CWizTagListWidget(m_db, topLevelWidget());
     }
-    //
+
     m_tags->setDocument(m_web->document());
-    //
+
     QPushButton* btn = m_title->tagsButton();
     QRect rc = btn->geometry();
     QPoint pt = btn->mapToGlobal(QPoint(rc.width() / 2, rc.height()));
