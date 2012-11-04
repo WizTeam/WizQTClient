@@ -280,6 +280,8 @@ void MainWindow::init()
 
 void MainWindow::closeEvent(QCloseEvent* event)
 {
+    m_doc->view()->saveDocument(false);
+
     if (!m_sync->thread() && !m_upgrade->thread()) {
         event->accept();
         return;

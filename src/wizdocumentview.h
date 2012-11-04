@@ -20,6 +20,8 @@ public:
     CWizDocumentView(CWizExplorerApp& app, QWidget* parent = 0);
     virtual QSize sizeHint() const { return QSize(800,700); }
 
+    CWizDocumentWebView* view() const { return m_web; }
+
     void loadSpecialPage(const QString& strFileName);
 
 private:
