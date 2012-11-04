@@ -9,6 +9,7 @@ const QString WIZ_UPGRADE_URL = "http://api.wiz.cn/";
 CWizUpgradeThread::CWizUpgradeThread(QObject* parent /* = 0 */)
     : QThread(parent)
     , m_bIsStarted(false)
+    , m_currentThread(0)
 {
     m_timer.setInterval(3 * 60 * 60 * 1000); // 3 hours
     connect(&m_timer, SIGNAL(timeout()), SLOT(checkUpgrade()));
@@ -16,6 +17,12 @@ CWizUpgradeThread::CWizUpgradeThread(QObject* parent /* = 0 */)
     connect(this, SIGNAL(finished()), SLOT(checkFinished()));
 
     m_timer.start();
+}
+
+void CWizUpgradeThread::abort()
+{
+    if (m_currentThread)
+        m_upgradePtr->abort();
 }
 
 void CWizUpgradeThread::checkUpgrade()
@@ -66,9 +73,11 @@ void CWizUpgradeThread::on_upgradeError(UpdateError error)
 void CWizUpgradeThread::checkFinished()
 {
     m_upgradePtr->deleteLater();
-    m_bIsStarted = false;
+    m_currentThread = 0;
 
     m_timer.start();
+
+    m_bIsStarted = false;
 }
 
 
@@ -79,9 +88,17 @@ CWizUpgrade::CWizUpgrade(QObject* parent /* = 0 */)
 {
 }
 
+void CWizUpgrade::abort()
+{
+    TOLOG(tr("cancle upgrade check"));
+
+    m_net.disconnect();
+    Q_EMIT prepareDone(false);
+}
+
 QString CWizUpgrade::getUpgradeUrl()
 {
-    QString strProduct = "wiz";
+    QString strProduct = "wiznote_qt";
     QString strCommand = "updatev2";
 
 #ifdef _M_X64
@@ -96,11 +113,11 @@ QString CWizUpgrade::getUpgradeUrl()
             .arg(QLocale::system().name())\
             .arg(::WizGlobal()->version())\
             .arg(strCommand)\
-            .arg((int)::GetTickCount())\
+            .arg(QString::number(::GetTickCount()))\
             .arg(::WizGetComputerName())\
             .arg(strPlatform);
 
-    //TOLOG("URL:" + strUrl);
+    TOLOG("URL:" + strUrl);
 
     return strUrl;
 }
@@ -148,7 +165,7 @@ void CWizUpgrade::on_requestUpgrade_finished()
 
     if (!m_redirectedUrl.isEmpty()) {
         // redirect to download server.
-        //TOLOG1("redirected: %1", m_redirectedUrl.toString());
+        TOLOG1("redirected: %1", m_redirectedUrl.toString());
         requestUpgrade_impl(m_redirectedUrl.toString());
     } else {
         // download upgrade tarball

@@ -82,8 +82,10 @@ void CWizSync::startSync()
 
 void CWizSync::abort()
 {
-    Q_EMIT processLog(tr("disconnct from server"));
     CWizApi::abort();
+
+    Q_EMIT processLog(tr("abort syncing, disconnct from server"));
+    Q_EMIT syncDone(m_error);
 }
 
 void CWizSync::onXmlRpcError(const CString& strMethodName, WizXmlRpcError err, int errorCode, const CString& errorMessage)

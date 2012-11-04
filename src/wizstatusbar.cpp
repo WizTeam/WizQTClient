@@ -4,7 +4,8 @@ CWizStatusBar::CWizStatusBar(CWizExplorerApp& app, QWidget *parent)
     : QLabel(parent)
     , m_app(app)
 {
-    setWindowFlags(Qt::WindowStaysOnTopHint|Qt::CustomizeWindowHint|Qt::Tool);
+    setParent(m_app.mainWindow());
+    setWindowFlags(Qt::CustomizeWindowHint|Qt::Tool);
 }
 
 void CWizStatusBar::paintEvent(QPaintEvent* event)

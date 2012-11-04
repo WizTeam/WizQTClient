@@ -13,6 +13,9 @@ class CWizSyncThread : public QThread
 public:
     explicit CWizSyncThread(CWizExplorerApp& app, QObject *parent = 0);
 
+    QThread* thread() const { return m_currentThread; }
+
+    void abort() const { if (m_currentThread) m_sync->abort(); }
     void resetProxy() { m_bNeedResetProxy = true; }
 
 protected:

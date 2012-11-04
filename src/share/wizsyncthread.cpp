@@ -6,6 +6,7 @@ CWizSyncThread::CWizSyncThread(CWizExplorerApp& app, QObject *parent /* = 0 */)
     , m_db(app.database())
     , m_bNeedResetProxy(false)
     , m_bIsStarted(false)
+    , m_currentThread(0)
 {
     connect(this, SIGNAL(finished()), SLOT(on_syncFinished()));
 
@@ -14,7 +15,7 @@ CWizSyncThread::CWizSyncThread(CWizExplorerApp& app, QObject *parent /* = 0 */)
 
     if (m_app.userSettings().autoSync()) {
         m_timer.start();
-        QTimer::singleShot(10 * 1000, this, SLOT(on_syncStarted()));  //10 seconds
+        QTimer::singleShot(30 * 1000, this, SLOT(on_syncStarted()));  //10 seconds
     }
 }
 
@@ -44,7 +45,7 @@ void CWizSyncThread::run()
     connect(m_sync, SIGNAL(processErrorLog(const QString&)), SIGNAL(processErrorLog(const QString&)));
     connect(m_sync, SIGNAL(syncDone(bool)), SIGNAL(syncDone(bool)));
 
-    connect(m_sync, SIGNAL(syncDone(bool)), SIGNAL(on_syncDone(bool)));
+    connect(m_sync, SIGNAL(syncDone(bool)), SLOT(on_syncDone(bool)));
 
     m_sync->setDownloadAllNotesData(m_app.userSettings().downloadAllNotesData());
 
@@ -64,9 +65,11 @@ void CWizSyncThread::on_syncDone(bool error)
 void CWizSyncThread::on_syncFinished()
 {
     m_sync->deleteLater();
-    m_bIsStarted = false;
+    m_currentThread = 0;
 
     if (m_app.userSettings().autoSync()) {
         m_timer.start();
     }
+
+    m_bIsStarted = false;
 }

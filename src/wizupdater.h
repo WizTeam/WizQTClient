@@ -4,23 +4,17 @@
 #include <QtNetwork>
 #include <QtCore>
 
+class CWizUpgrade;
+
 enum UpdateError {
     NetworkError,
     UnzipError,
     ParseError
 };
 
-class CWizUpgrade;
-
 class CWizUpgradeThread : public QThread
 {
     Q_OBJECT
-
-public:
-    CWizUpgradeThread(QObject* parent = 0);
-
-protected:
-    virtual void run();
 
 private:
     QPointer<CWizUpgrade> m_upgradePtr;
@@ -28,6 +22,16 @@ private:
     QTimer m_timer;
 
     QPointer<QThread> m_currentThread;
+
+public:
+    CWizUpgradeThread(QObject* parent = 0);
+
+    void abort();
+    QThread* thread() const { return m_currentThread; }
+
+
+protected:
+    virtual void run();
 
 public Q_SLOTS:
     void checkUpgrade();
@@ -47,6 +51,8 @@ public:
     CWizUpgrade(QObject* parent = 0);
 
     void requestUpgrade();
+    void abort();
+
     QString whatsNewUrl() const { return m_strWhatsNewUrl; }
 
 private:

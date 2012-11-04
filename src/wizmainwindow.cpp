@@ -26,8 +26,8 @@ MainWindow::MainWindow(CWizDatabase& db, QWidget *parent)
     : QMainWindow(parent)
     , m_db(db)
     , m_settings(new CWizUserSettings(db))
-    , m_upgrade(new CWizUpgradeThread())
-    , m_sync(new CWizSyncThread(*this))
+    , m_upgrade(new CWizUpgradeThread(this))
+    , m_sync(new CWizSyncThread(*this, this))
     , m_console(new CWizConsoleDialog(*this, this))
     #ifndef Q_OS_MAC
     , m_toolBar(new QToolBar("Main", this))
@@ -49,7 +49,7 @@ MainWindow::MainWindow(CWizDatabase& db, QWidget *parent)
     , m_bUpdatingSelection(false)
 {
     // start update check thread
-    m_upgrade->checkUpgrade();
+    //m_upgrade->checkUpgrade();
 
     initActions();
     initMenuBar();
@@ -274,6 +274,19 @@ void MainWindow::init()
 
 void MainWindow::closeEvent(QCloseEvent* event)
 {
+    // FIXME: use single wiznote instence instead of hide!
+    hide();
+
+    if (m_upgrade->thread()) {
+        m_upgrade->abort();
+        m_upgrade->wait();
+    }
+
+    if (m_sync->thread()) {
+        m_sync->abort();
+        m_sync->wait();
+    }
+
     QMainWindow::closeEvent(event);
 }
 
