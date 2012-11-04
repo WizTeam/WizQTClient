@@ -47,9 +47,24 @@ public:
     virtual QObject* object() { return this; }
     virtual CWizDatabase& database() { return m_db; }
     virtual CWizCategoryView& category() { return *m_category; }
-
     virtual CWizUserSettings& userSettings() { return *m_settings; }
-    //virtual CWizUpdater* updater() { return m_updater; }
+
+    //WizExplorerApp API:
+    QObject* Window() { return this; }
+    Q_PROPERTY(QObject* Window READ Window)
+
+    QObject* CategoryCtrl();
+    Q_PROPERTY(QObject* CategoryCtrl READ CategoryCtrl)
+
+    QObject* DocumentsCtrl();
+    Q_PROPERTY(QObject* DocumentsCtrl READ DocumentsCtrl)
+
+    QObject* Database() { return &m_db; }
+    Q_PROPERTY(QObject* Database READ Database)
+
+    Q_INVOKABLE QObject* CreateWizObject(const QString& strObjectID);
+    Q_INVOKABLE void SetDocumentModified(bool modified);
+    Q_INVOKABLE void SetSavingDocument(bool saving);
 
 private:
     CWizDatabase& m_db;
@@ -107,14 +122,6 @@ private:
     QObject* DocumentsCtrlObject();
 
 public Q_SLOTS:
-    //interface WizExplorerApp;
-    QObject* CreateWizObject(const QString& strObjectID);
-    //interface WizExplorerWindow
-
-    //ext functions
-    void SetDocumentModified(bool modified);
-    void SetSavingDocument(bool saving);
-
     void on_actionExit_triggered();
     void on_actionConsole_triggered();
     void on_actionSync_triggered();

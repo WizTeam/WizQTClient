@@ -90,7 +90,8 @@ public:
     void search(const CString& str);
     //
     template <class T> T* currentCategoryItem() const;
-public slots:
+
+public Q_SLOTS:
     void on_tag_created(const WIZTAGDATA& tag);
     void on_tag_modified(const WIZTAGDATA& tagOld, const WIZTAGDATA& tagNew);
     void on_tag_deleted(const WIZTAGDATA& tag);
@@ -103,10 +104,10 @@ public slots:
     void on_action_newTag();
     void on_action_deleteTag();
     void on_action_emptyTrash();
+
 public:
     CWizFolder* SelectedFolder();
     void setSelectedFolder(QObject* pFolder);
-public:
     Q_PROPERTY(QObject* SelectedFolder READ SelectedFolder WRITE setSelectedFolder)
 };
 

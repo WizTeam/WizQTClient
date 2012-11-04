@@ -31,11 +31,11 @@ public:
         layout->setMargin(0);
 
         setContentsMargins(4, 4, 4, 4);
-        //
+
         QPalette pal = palette();
         pal.setColor(QPalette::Window, QColor(0xff, 0xff, 0xff));
         setPalette(pal);
-        //
+
         m_titleEdit = new QLineEdit(this);
 #ifdef Q_OS_MAC
         m_titleEdit->setAttribute(Qt::WA_MacShowFocusRect, false);
@@ -44,23 +44,23 @@ public:
 #else
         m_titleEdit->setStyleSheet("QLineEdit{padding:4 4 4 4;border-color:#ffffff;border-width:1;border-style:solid;}QLineEdit:hover{border-color:#bbbbbb;border-width:1;border-style:solid;}");
 #endif
-        //
+
         m_editIcon = ::WizLoadSkinIcon(m_app.userSettings().skin(), "unlock");
         m_commitIcon = ::WizLoadSkinIcon(m_app.userSettings().skin(), "lock");
         m_tagsIcon = ::WizLoadSkinIcon(m_app.userSettings().skin(), "document_tags");
         m_attachmentIcon = ::WizLoadSkinIcon(m_app.userSettings().skin(), "attachment");
-        //
+
         m_editDocumentButton = new CWizImagePushButton(m_editIcon, "", this);
         updateEditDocumentButtonIcon(false);
         m_editDocumentButton->setStyle(::WizGetStyle(m_app.userSettings().skin()));
         m_editDocumentButton->setRedFlag(true);
-        //
+
         m_tagsButton = new CWizImagePushButton(m_tagsIcon, "", this);
         m_tagsButton->setStyle(::WizGetStyle(m_app.userSettings().skin()));
-        //
+
         m_attachmentButton = new CWizImagePushButton(m_attachmentIcon, "", this);
         m_attachmentButton->setStyle(::WizGetStyle(m_app.userSettings().skin()));
-        //
+
         layout->addWidget(m_titleEdit);
         layout->addWidget(m_editDocumentButton);
         layout->addWidget(m_tagsButton);
@@ -69,7 +69,6 @@ public:
         layout->setAlignment(m_editDocumentButton, Qt::AlignVCenter);
         layout->setAlignment(m_tagsButton, Qt::AlignVCenter);
         layout->setAlignment(m_attachmentButton, Qt::AlignVCenter);
-        //
     }
 
 private:
@@ -78,19 +77,19 @@ private:
     CWizImagePushButton* m_editDocumentButton;
     CWizImagePushButton* m_tagsButton;
     CWizImagePushButton* m_attachmentButton;
-    //
+
     QIcon m_editIcon;
     QIcon m_commitIcon;
     QIcon m_tagsIcon;
     QIcon m_attachmentIcon;
-    //
+
     bool m_editing;
 private:
     void updateEditDocumentButtonIcon(bool editing)
     {
         m_editDocumentButton->setIcon(editing ? m_commitIcon : m_editIcon);
         m_editing = editing;
-        //
+
         updateEditDocumentButtonTooltip();
     }
     void updateEditDocumentButtonTooltip()
@@ -111,10 +110,10 @@ public:
     QPushButton* editDocumentButton() const { return m_editDocumentButton; }
     QPushButton* tagsButton() const { return m_tagsButton; }
     QPushButton* attachmentButton() const { return m_attachmentButton; }
-    //
+
     void setEditingDocument(bool editing) { updateEditDocumentButtonIcon(editing); }
     void setTitle(const QString& str) { m_titleEdit->setText(str); }
-    //
+
     void updateInformation(CWizDatabase& db, const WIZDOCUMENTDATA& data)
     {
         //title
@@ -129,7 +128,6 @@ public:
 
         QString tagsShortcut = ::WizGetShortcut("EditNoteTags", "Alt+2");
         QString strTagsToolTip = QObject::tr("Tags (%1)").arg(tagsShortcut);
-        //strTagsToolTip = strTagsToolTip.arg(tagsShortcut).arg(db.GetDocumentTagDisplayNameText(data.strGUID));
         m_tagsButton->setToolTip(strTagsToolTip);
         m_tagsButton->setShortcut(QKeySequence::fromString(tagsShortcut));
 
@@ -141,7 +139,7 @@ public:
         m_attachmentButton->setToolTip(QObject::tr("Attachments (%1)").arg(attachmentShortcut));
         m_attachmentButton->setShortcut(QKeySequence::fromString(attachmentShortcut));
     }
-    //
+
     void setModified(bool modified)
     {
         m_editDocumentButton->setText(modified ? "*" : "");
@@ -292,7 +290,7 @@ const WIZDOCUMENTDATA& CWizDocumentView::document()
     static WIZDOCUMENTDATA empty;
     if (!isVisible())
         return empty;
-    //
+
     return m_web->document();
 }
 

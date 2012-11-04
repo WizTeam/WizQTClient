@@ -99,7 +99,7 @@ void CWizDocumentWebView::reloadDocument()
 
 bool CWizDocumentWebView::viewDocumentInEditor(bool editing)
 {
-    ATLASSERT(!m_data.strGUID.IsEmpty());
+    Q_ASSERT(!m_data.strGUID.IsEmpty());
 
     QString strScript = ("viewDocument('%1', '%2', %3)");
     strScript = strScript.arg(m_data.strGUID,

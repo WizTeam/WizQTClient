@@ -626,12 +626,12 @@ void MainWindow::adjustToolBarSpacerToPos(int index, int pos)
 
 #endif
 
-QObject* MainWindow::CategoryCtrlObject()
+QObject* MainWindow::CategoryCtrl()
 {
     return m_category;
 }
 
-QObject* MainWindow::DocumentsCtrlObject()
+QObject* MainWindow::DocumentsCtrl()
 {
     return m_documents;
 }

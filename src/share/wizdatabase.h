@@ -28,11 +28,13 @@ private:
     CWizDatabase& m_db;
     WIZDOCUMENTDATA m_data;
 
-public slots:
-    bool UpdateDocument4(const QString& strHtml, const QString& strURL, int nFlags);
+public Q_SLOTS:
     void Delete();
     void PermanentlyDelete(void);
     void MoveTo(QObject* pFolder);
+
+    // API:
+    bool UpdateDocument4(const QString& strHtml, const QString& strURL, int nFlags);
 };
 
 
@@ -160,14 +162,14 @@ public:
     bool DocumentToTempHtmlFile(const WIZDOCUMENTDATA& document, \
                                 QString& strTempHtmlFileName);
 
+public:
+    Q_INVOKABLE QObject* GetDeletedItemsFolder();
+    Q_INVOKABLE QObject* GetFolderByLocation(const QString& strLocation, bool create);
+    Q_INVOKABLE QObject* DocumentFromGUID(const QString& strGUID);
+
 Q_SIGNALS:
     void updateError(const QString& msg);
     void processLog(const QString& msg);
-
-public Q_SLOTS:
-    QObject* DocumentFromGUID(const QString& strGUID);
-    QObject* GetFolderByLocation(const QString& strLocation, bool create);
-    QObject* GetDeletedItemsFolder();
 };
 
 
