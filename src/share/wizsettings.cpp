@@ -35,7 +35,7 @@ BOOL CWizSettings::SetInt(const QString& strSection, const QString& strKey, int 
     return SetString(strSection, strKey, WizIntToStr(val));
 }
 
-BOOL CWizSettings::GetBool(const QString& strSection, const QString& strKey, bool def)
+BOOL CWizSettings::GetBool(const QString& strSection, const QString& strKey, bool def /* = false */)
 {
     return GetInt(strSection, strKey, def ? 1 : 0) != 0;
 }
@@ -121,6 +121,16 @@ QString CWizSettings::GetProxyPassword()
 void CWizSettings::SetProxyPassword(const QString& val)
 {
     SetString("Sync", "ProxyPassword", val);
+}
+
+bool CWizSettings::GetProxyStatus()
+{
+    return GetBool("Sync", "ProxyStatus", false);
+}
+
+void CWizSettings::SetProxyStatus(bool val)
+{
+    SetBool("Sync", "ProxyStatus", val);
 }
 
 

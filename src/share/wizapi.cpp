@@ -86,12 +86,18 @@ void CWizApiBase::resetProxy()
 {
     CWizSettings settings(WizGetSettingsFileName());
 
-    QString host = settings.GetProxyHost();
-    int port = settings.GetProxyPort();
-    QString userName = settings.GetProxyUserName();
-    QString password = settings.GetProxyPassword();
+    bool bStatus = settings.GetProxyStatus();
 
-    m_server.setProxy(host, port, userName, password);
+    if (bStatus) {
+        QString host = settings.GetProxyHost();
+        int port = settings.GetProxyPort();
+        QString userName = settings.GetProxyUserName();
+        QString password = settings.GetProxyPassword();
+
+        m_server.setProxy(host, port, userName, password);
+    } else {
+        m_server.setProxy(0, 0, 0, 0);
+    }
 }
 
 CString CWizApiBase::MakeXmlRpcUserId(const CString& strUserId)

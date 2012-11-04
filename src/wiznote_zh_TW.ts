@@ -52,82 +52,82 @@ p, li { white-space: pre-wrap; }
 <context>
     <name>CWizApi</name>
     <message>
-        <location filename="share/wizapi.cpp" line="279"/>
+        <location filename="share/wizapi.cpp" line="285"/>
         <source>Syncing deleted items, version: </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="share/wizapi.cpp" line="290"/>
+        <location filename="share/wizapi.cpp" line="296"/>
         <source>Syncing tags, version: </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="share/wizapi.cpp" line="301"/>
+        <location filename="share/wizapi.cpp" line="307"/>
         <source>Syncing styles, version: </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="share/wizapi.cpp" line="312"/>
+        <location filename="share/wizapi.cpp" line="318"/>
         <source>Syncing note list, version: </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="share/wizapi.cpp" line="323"/>
+        <location filename="share/wizapi.cpp" line="329"/>
         <source>Syncing attachment list: version: </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="share/wizapi.cpp" line="367"/>
+        <location filename="share/wizapi.cpp" line="373"/>
         <source>Downloaded : </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="share/wizapi.cpp" line="416"/>
+        <location filename="share/wizapi.cpp" line="422"/>
         <source>uploading note: </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="share/wizapi.cpp" line="421"/>
+        <location filename="share/wizapi.cpp" line="427"/>
         <source>uploading attachment: </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="share/wizapi.cpp" line="460"/>
+        <location filename="share/wizapi.cpp" line="466"/>
         <source>downloading note info: </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="share/wizapi.cpp" line="492"/>
+        <location filename="share/wizapi.cpp" line="498"/>
         <source>could not load document data: </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="share/wizapi.cpp" line="527"/>
+        <location filename="share/wizapi.cpp" line="533"/>
         <source>update note info:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="share/wizapi.cpp" line="599"/>
+        <location filename="share/wizapi.cpp" line="605"/>
         <source>Can not load document data: </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="share/wizapi.cpp" line="637"/>
+        <location filename="share/wizapi.cpp" line="643"/>
         <source>Could not load attachment data: </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="share/wizapi.cpp" line="670"/>
+        <location filename="share/wizapi.cpp" line="676"/>
         <source>update attachment info: </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="share/wizapi.cpp" line="752"/>
+        <location filename="share/wizapi.cpp" line="758"/>
         <source>downloading note: </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="share/wizapi.cpp" line="757"/>
+        <location filename="share/wizapi.cpp" line="763"/>
         <source>downloading attachment: </source>
         <translation type="unfinished"></translation>
     </message>
@@ -135,49 +135,49 @@ p, li { white-space: pre-wrap; }
 <context>
     <name>CWizAttachmentListView</name>
     <message>
-        <location filename="wizattachmentlistwidget.cpp" line="129"/>
+        <location filename="wizattachmentlistwidget.cpp" line="130"/>
         <source>Add attachments</source>
         <translation>添加附件</translation>
     </message>
     <message>
-        <location filename="wizattachmentlistwidget.cpp" line="130"/>
+        <location filename="wizattachmentlistwidget.cpp" line="131"/>
         <source>/home</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="wizattachmentlistwidget.cpp" line="131"/>
+        <location filename="wizattachmentlistwidget.cpp" line="132"/>
         <source>All files(*.*)</source>
         <translation>所有文檔(*.*)</translation>
     </message>
     <message>
-        <location filename="wizattachmentlistwidget.cpp" line="156"/>
-        <location filename="wizattachmentlistwidget.cpp" line="202"/>
-        <location filename="wizattachmentlistwidget.cpp" line="224"/>
+        <location filename="wizattachmentlistwidget.cpp" line="157"/>
+        <location filename="wizattachmentlistwidget.cpp" line="203"/>
+        <location filename="wizattachmentlistwidget.cpp" line="225"/>
         <source>Can not save attachment to %1</source>
         <translation>不能保存附件到 %1</translation>
     </message>
     <message>
-        <location filename="wizattachmentlistwidget.cpp" line="168"/>
+        <location filename="wizattachmentlistwidget.cpp" line="169"/>
         <source>Add...</source>
         <translation>添加...</translation>
     </message>
     <message>
-        <location filename="wizattachmentlistwidget.cpp" line="170"/>
+        <location filename="wizattachmentlistwidget.cpp" line="171"/>
         <source>Save as...</source>
         <translation>另存為...</translation>
     </message>
     <message>
-        <location filename="wizattachmentlistwidget.cpp" line="171"/>
+        <location filename="wizattachmentlistwidget.cpp" line="172"/>
         <source>Open...</source>
         <translation>打開...</translation>
     </message>
     <message>
-        <location filename="wizattachmentlistwidget.cpp" line="173"/>
+        <location filename="wizattachmentlistwidget.cpp" line="174"/>
         <source>Delete</source>
         <translation>刪除</translation>
     </message>
     <message>
-        <location filename="wizattachmentlistwidget.cpp" line="209"/>
+        <location filename="wizattachmentlistwidget.cpp" line="210"/>
         <source>Save attachments to</source>
         <translation>保存附件到</translation>
     </message>
@@ -185,12 +185,12 @@ p, li { white-space: pre-wrap; }
 <context>
     <name>CWizAttachmentListWidget</name>
     <message>
-        <location filename="wizattachmentlistwidget.cpp" line="281"/>
+        <location filename="wizattachmentlistwidget.cpp" line="282"/>
         <source>Add attachments</source>
         <translation>添加附件</translation>
     </message>
     <message>
-        <location filename="wizattachmentlistwidget.cpp" line="283"/>
+        <location filename="wizattachmentlistwidget.cpp" line="284"/>
         <source>Attachments</source>
         <translation>附件</translation>
     </message>
@@ -198,44 +198,44 @@ p, li { white-space: pre-wrap; }
 <context>
     <name>CWizCategoryView</name>
     <message>
-        <location filename="wizcategoryview.cpp" line="307"/>
+        <location filename="wizcategoryview.cpp" line="323"/>
         <source>Note Folders</source>
         <translation>新建檔案夾</translation>
     </message>
     <message>
-        <location filename="wizcategoryview.cpp" line="365"/>
+        <location filename="wizcategoryview.cpp" line="381"/>
         <source>Tags</source>
         <translation>標簽</translation>
     </message>
     <message>
-        <location filename="wizcategoryview.cpp" line="389"/>
+        <location filename="wizcategoryview.cpp" line="405"/>
         <source>Trash</source>
         <translation>回收桶</translation>
     </message>
     <message>
-        <location filename="wizcategoryview.cpp" line="417"/>
-        <location filename="wizcategoryview.cpp" line="428"/>
+        <location filename="wizcategoryview.cpp" line="433"/>
+        <location filename="wizcategoryview.cpp" line="444"/>
         <source>New Folder</source>
         <translation>新建檔案夾</translation>
     </message>
     <message>
-        <location filename="wizcategoryview.cpp" line="429"/>
+        <location filename="wizcategoryview.cpp" line="445"/>
         <source>Delete Folder</source>
         <translation>刪除檔案夾</translation>
     </message>
     <message>
-        <location filename="wizcategoryview.cpp" line="440"/>
-        <location filename="wizcategoryview.cpp" line="451"/>
+        <location filename="wizcategoryview.cpp" line="456"/>
+        <location filename="wizcategoryview.cpp" line="467"/>
         <source>New Tag</source>
         <translation>新建標簽</translation>
     </message>
     <message>
-        <location filename="wizcategoryview.cpp" line="452"/>
+        <location filename="wizcategoryview.cpp" line="468"/>
         <source>Delete Tag</source>
         <translation>刪除標簽</translation>
     </message>
     <message>
-        <location filename="wizcategoryview.cpp" line="463"/>
+        <location filename="wizcategoryview.cpp" line="479"/>
         <source>Empty the Trash</source>
         <translation></translation>
     </message>
@@ -280,47 +280,47 @@ p, li { white-space: pre-wrap; }
 <context>
     <name>CWizDatabase</name>
     <message>
-        <location filename="share/wizdatabase.cpp" line="1111"/>
+        <location filename="share/wizdatabase.cpp" line="1120"/>
         <source>My Notes</source>
         <translation>我的筆記</translation>
     </message>
     <message>
-        <location filename="share/wizdatabase.cpp" line="1113"/>
+        <location filename="share/wizdatabase.cpp" line="1122"/>
         <source>My Journals</source>
         <translation>我的日記</translation>
     </message>
     <message>
-        <location filename="share/wizdatabase.cpp" line="1115"/>
+        <location filename="share/wizdatabase.cpp" line="1124"/>
         <source>My Events</source>
         <translation>我的事件</translation>
     </message>
     <message>
-        <location filename="share/wizdatabase.cpp" line="1117"/>
+        <location filename="share/wizdatabase.cpp" line="1126"/>
         <source>My Sticky Notes</source>
         <translation>我的桌面便箋</translation>
     </message>
     <message>
-        <location filename="share/wizdatabase.cpp" line="1119"/>
+        <location filename="share/wizdatabase.cpp" line="1128"/>
         <source>My Emails</source>
         <translation>我的郵件</translation>
     </message>
     <message>
-        <location filename="share/wizdatabase.cpp" line="1121"/>
+        <location filename="share/wizdatabase.cpp" line="1130"/>
         <source>My Drafts</source>
         <translation>我的草稿</translation>
     </message>
     <message>
-        <location filename="share/wizdatabase.cpp" line="1123"/>
+        <location filename="share/wizdatabase.cpp" line="1132"/>
         <source>My Tasks</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="share/wizdatabase.cpp" line="1127"/>
+        <location filename="share/wizdatabase.cpp" line="1136"/>
         <source>Inbox</source>
         <translation>收集箱</translation>
     </message>
     <message>
-        <location filename="share/wizdatabase.cpp" line="1129"/>
+        <location filename="share/wizdatabase.cpp" line="1138"/>
         <source>Completed</source>
         <translation>已完成</translation>
     </message>
@@ -328,12 +328,12 @@ p, li { white-space: pre-wrap; }
 <context>
     <name>CWizDocumentListView</name>
     <message>
-        <location filename="wizdocumentlistview.cpp" line="230"/>
+        <location filename="wizdocumentlistview.cpp" line="244"/>
         <source>Tags...</source>
         <translation>標簽...</translation>
     </message>
     <message>
-        <location filename="wizdocumentlistview.cpp" line="232"/>
+        <location filename="wizdocumentlistview.cpp" line="246"/>
         <source>Delete...</source>
         <translation>刪除...</translation>
     </message>
@@ -527,77 +527,82 @@ p, li { white-space: pre-wrap; }
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="share/wizsync.cpp" line="98"/>
+        <location filename="share/wizsync.cpp" line="87"/>
+        <source>abort syncing, disconnct from server</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="share/wizsync.cpp" line="106"/>
         <source>downloading deleted objects list</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="share/wizsync.cpp" line="111"/>
+        <location filename="share/wizsync.cpp" line="119"/>
         <source>uploading deleted objects list</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="share/wizsync.cpp" line="125"/>
+        <location filename="share/wizsync.cpp" line="133"/>
         <source>downloading tags</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="share/wizsync.cpp" line="138"/>
+        <location filename="share/wizsync.cpp" line="146"/>
         <source>uploading tags</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="share/wizsync.cpp" line="152"/>
+        <location filename="share/wizsync.cpp" line="160"/>
         <source>downloading styles</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="share/wizsync.cpp" line="165"/>
+        <location filename="share/wizsync.cpp" line="173"/>
         <source>uploading styles</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="share/wizsync.cpp" line="179"/>
+        <location filename="share/wizsync.cpp" line="187"/>
         <source>downloading notes list</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="share/wizsync.cpp" line="207"/>
+        <location filename="share/wizsync.cpp" line="215"/>
         <source>downloading notes information</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="share/wizsync.cpp" line="228"/>
+        <location filename="share/wizsync.cpp" line="236"/>
         <source>downloading attachments information</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="share/wizsync.cpp" line="239"/>
+        <location filename="share/wizsync.cpp" line="247"/>
         <source>uploading documents</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="share/wizsync.cpp" line="254"/>
+        <location filename="share/wizsync.cpp" line="262"/>
         <source>uploading attachments</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="share/wizsync.cpp" line="269"/>
+        <location filename="share/wizsync.cpp" line="277"/>
         <source>downloading objects data</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="share/wizsync.cpp" line="327"/>
+        <location filename="share/wizsync.cpp" line="334"/>
         <source>sync done</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="share/wizsync.cpp" line="687"/>
+        <location filename="share/wizsync.cpp" line="694"/>
         <source>query note info: </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="share/wizsync.cpp" line="743"/>
+        <location filename="share/wizsync.cpp" line="750"/>
         <source>query attachment info: </source>
         <translation type="unfinished"></translation>
     </message>
@@ -629,6 +634,27 @@ p, li { white-space: pre-wrap; }
     </message>
 </context>
 <context>
+    <name>CWizUpgrade</name>
+    <message>
+        <location filename="wizupdater.cpp" line="93"/>
+        <source>cancle upgrade check</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="wizupdater.cpp" line="179"/>
+        <source>Download update tarball finished</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>CWizUpgradeThread</name>
+    <message>
+        <location filename="wizupdater.cpp" line="43"/>
+        <source>Check update online</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>CreateAccountDialog</name>
     <message>
         <location filename="ui/wizcreateaccountdialog.ui" line="14"/>
@@ -652,12 +678,12 @@ p, li { white-space: pre-wrap; }
         <translation>確認密碼(&amp;C):</translation>
     </message>
     <message>
-        <location filename="wizcreateaccountdialog.cpp" line="39"/>
+        <location filename="wizcreateaccountdialog.cpp" line="40"/>
         <source>Please enter user id</source>
         <translation>請輸入用戶ID</translation>
     </message>
     <message>
-        <location filename="wizcreateaccountdialog.cpp" line="44"/>
+        <location filename="wizcreateaccountdialog.cpp" line="45"/>
         <source>Please enter user password</source>
         <translation>請輸入用戶密碼</translation>
     </message>
@@ -665,27 +691,32 @@ p, li { white-space: pre-wrap; }
 <context>
     <name>MainWindow</name>
     <message>
-        <location filename="wizmainwindow.cpp" line="62"/>
+        <location filename="wizmainwindow.cpp" line="56"/>
+        <source>please wait, I&apos;ll stop working right now...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="wizmainwindow.cpp" line="65"/>
         <source>WizNote</source>
         <translation>爲知筆記</translation>
     </message>
     <message>
-        <location filename="wizmainwindow.cpp" line="125"/>
+        <location filename="wizmainwindow.cpp" line="127"/>
         <source>Search</source>
         <translation>搜索</translation>
     </message>
     <message>
-        <location filename="wizmainwindow.cpp" line="125"/>
+        <location filename="wizmainwindow.cpp" line="127"/>
         <source>Search your notes</source>
         <translation>搜索您的筆記</translation>
     </message>
     <message>
-        <location filename="wizmainwindow.cpp" line="390"/>
+        <location filename="wizmainwindow.cpp" line="377"/>
         <source>New note</source>
         <translation>新建筆記</translation>
     </message>
     <message>
-        <location filename="wizmainwindow.cpp" line="685"/>
+        <location filename="wizmainwindow.cpp" line="664"/>
         <source>Saving note...</source>
         <translation>正在保存筆記...</translation>
     </message>
@@ -747,6 +778,11 @@ p, li { white-space: pre-wrap; }
         <location filename="ui/wizproxydialog.ui" line="116"/>
         <source>Password:</source>
         <translation>密碼:</translation>
+    </message>
+    <message>
+        <location filename="ui/wizproxydialog.ui" line="159"/>
+        <source>Disable Proxy</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -849,72 +885,72 @@ p, li { white-space: pre-wrap; }
         <translation>搜索 %1 結果</translation>
     </message>
     <message>
-        <location filename="share/wizmisc.cpp" line="391"/>
+        <location filename="share/wizmisc.cpp" line="388"/>
         <source>Simplified Chinese</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="share/wizmisc.cpp" line="393"/>
+        <location filename="share/wizmisc.cpp" line="390"/>
         <source>Traditional Chinese</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="share/wizmisc.cpp" line="395"/>
+        <location filename="share/wizmisc.cpp" line="392"/>
         <source>English(US)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="share/wizmisc.cpp" line="798"/>
+        <location filename="share/wizmisc.cpp" line="795"/>
         <source>%1 TB</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="share/wizmisc.cpp" line="800"/>
+        <location filename="share/wizmisc.cpp" line="797"/>
         <source>%1 GB</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="share/wizmisc.cpp" line="802"/>
+        <location filename="share/wizmisc.cpp" line="799"/>
         <source>%1 MB</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="share/wizmisc.cpp" line="804"/>
+        <location filename="share/wizmisc.cpp" line="801"/>
         <source>%1 KB</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="share/wizmisc.cpp" line="805"/>
+        <location filename="share/wizmisc.cpp" line="802"/>
         <source>%1 byte(s)</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="share/wizobject.h" line="408"/>
+        <location filename="share/wizobject.h" line="394"/>
         <source>$Public Notes</source>
         <translation>$完全公開的筆記</translation>
     </message>
     <message>
-        <location filename="share/wizobject.h" line="412"/>
+        <location filename="share/wizobject.h" line="398"/>
         <source>$Share with friends</source>
         <translation>$分享給朋友的筆記</translation>
     </message>
     <message>
-        <location filename="wizdocumentview.cpp" line="99"/>
+        <location filename="wizdocumentview.cpp" line="98"/>
         <source>Save &amp; Switch to Reading View</source>
         <translation>保存並切換到閲讀檢視</translation>
     </message>
     <message>
-        <location filename="wizdocumentview.cpp" line="100"/>
+        <location filename="wizdocumentview.cpp" line="99"/>
         <source>Switch to Reading View</source>
         <translation>切換到閲讀檢視</translation>
     </message>
     <message>
-        <location filename="wizdocumentview.cpp" line="101"/>
+        <location filename="wizdocumentview.cpp" line="100"/>
         <source>Switch to Editing View</source>
         <translation>切換到編輯檢視</translation>
     </message>
     <message>
-        <location filename="wizdocumentview.cpp" line="131"/>
+        <location filename="wizdocumentview.cpp" line="130"/>
         <source>Tags (%1)</source>
         <translation>標簽 (%1)</translation>
     </message>
@@ -923,7 +959,7 @@ p, li { white-space: pre-wrap; }
         <translation type="obsolete">標簽 (%1): %2</translation>
     </message>
     <message>
-        <location filename="wizdocumentview.cpp" line="141"/>
+        <location filename="wizdocumentview.cpp" line="139"/>
         <source>Attachments (%1)</source>
         <translation>附件 (%1)</translation>
     </message>
@@ -1001,12 +1037,12 @@ p, li { white-space: pre-wrap; }
         <translation>代理設置</translation>
     </message>
     <message>
-        <location filename="wizwelcomedialog.cpp" line="98"/>
+        <location filename="wizwelcomedialog.cpp" line="109"/>
         <source>Please enter user id</source>
         <translation>請輸入用戶ID</translation>
     </message>
     <message>
-        <location filename="wizwelcomedialog.cpp" line="103"/>
+        <location filename="wizwelcomedialog.cpp" line="114"/>
         <source>Please enter user password</source>
         <translation>請輸入用戶密碼</translation>
     </message>
@@ -1024,7 +1060,7 @@ p, li { white-space: pre-wrap; }
         <translation>正在下載 %1</translation>
     </message>
     <message>
-        <location filename="share/wizdownloadobjectdatadialog.cpp" line="67"/>
+        <location filename="wizdownloadobjectdatadialog.cpp" line="73"/>
         <source>Failed to download data!
 
 %1</source>

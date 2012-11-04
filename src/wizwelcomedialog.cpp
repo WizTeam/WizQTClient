@@ -40,7 +40,8 @@ WelcomeDialog::WelcomeDialog(const QString &strDefaultUserId, const QString& str
             SLOT(on_webView_linkClicked(const QUrl&)));
 
     connect(ui->labelProxySettings, SIGNAL(linkActivated(const QString&)), \
-            SLOT(on_labelProxySettings_linkActivated(const QString&)));
+            SLOT(on_labelProxySettings_linkActivated(const QString&)), \
+            Qt::UniqueConnection);
 
     connect(ui->comboUsers, SIGNAL(activated(const QString&)), \
             SLOT(on_comboUsers_activated(const QString&)));
@@ -115,6 +116,8 @@ void WelcomeDialog::accept()
     }
 
     enableControls(false);
+
+    m_verifyAccount.resetProxy();
 
     m_verifyAccount.verifyAccount(userId(), password());
 }
@@ -221,7 +224,7 @@ void WelcomeDialog::on_labelProxySettings_linkActivated(const QString & link)
 {
     Q_UNUSED(link);
 
-    ProxyDialog dlg;
+    ProxyDialog dlg(this);
     if (QDialog::Accepted != dlg.exec())
         return;
 

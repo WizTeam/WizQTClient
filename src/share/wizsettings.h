@@ -22,7 +22,7 @@ public:
     int GetInt(const QString& strSection, const QString& strKey, int nDef = 0);
     BOOL SetInt(const QString& strSection, const QString& strKey, int val);
 
-    BOOL GetBool(const QString& strSection, const QString& strKey, bool def);
+    BOOL GetBool(const QString& strSection, const QString& strKey, bool def = false);
     BOOL SetBool(const QString& strSection, const QString& strKey, bool def);
 
     QColor GetColor(const QString& strSection, const QString& strKey, QColor defColor);
@@ -39,6 +39,8 @@ public:
     void SetProxyUserName(const QString& val);
     QString GetProxyPassword();
     void SetProxyPassword(const QString& val);
+    bool GetProxyStatus();
+    void SetProxyStatus(bool val);
 
 };
 
