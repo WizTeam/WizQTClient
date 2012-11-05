@@ -36,6 +36,7 @@ try {
     ],
     elementPathEnabled: false,
     wordCount: false,
+    imagePopup: false,
     maximumWords: 100000000,
     fullscreen: true
     };

@@ -399,7 +399,7 @@ void CWizDocumentView::on_attachment_deleted(const WIZDOCUMENTATTACHMENTDATA& at
 void CWizDocumentView::on_document_modified(const WIZDOCUMENTDATA& documentOld, const WIZDOCUMENTDATA& documentNew)
 {
     Q_UNUSED(documentOld);
-    //
+
     if (document().strGUID == documentNew.strGUID)
     {
         m_web->reloadDocument();
