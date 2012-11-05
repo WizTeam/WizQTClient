@@ -60,6 +60,8 @@ MainWindow::MainWindow(CWizDatabase& db, QWidget *parent)
     m_timerReadyQuit.setInterval(100);
     connect(&m_timerReadyQuit, SIGNAL(timeout()), SLOT(on_readyQuit_timeout()));
 
+    setStatusBar(m_statusBar);
+
     initActions();
     initMenuBar();
     initToolBar();
@@ -304,6 +306,13 @@ void MainWindow::init()
     connect(m_documents, SIGNAL(itemSelectionChanged()), this, SLOT(on_documents_itemSelectionChanged()));
 
     m_category->init();
+}
+
+void MainWindow::showEvent(QShowEvent* event)
+{
+    Q_UNUSED(event);
+
+    m_statusBar->hide();
 }
 
 void MainWindow::closeEvent(QCloseEvent* event)
