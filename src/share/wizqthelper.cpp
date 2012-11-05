@@ -32,14 +32,15 @@ COleDateTime &COleDateTime::operator=(const COleDateTime &other)
 
 int GetTickCount()
 {
-    static QElapsedTimer t;
-    static bool first = true;
-    if (first)
-    {
-        t.start();
-        first = false;
-    }
-    return t.elapsed();
+    return qrand();
+    //static QElapsedTimer t;
+    //static bool first = true;
+    //if (first)
+    //{
+    //    t.start();
+    //    first = false;
+    //}
+    //return t.elapsed();
 }
 
 

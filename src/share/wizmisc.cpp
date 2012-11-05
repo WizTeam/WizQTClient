@@ -1725,16 +1725,18 @@ void WizHtml2Text(const CString& strHtml, CString& strText)
     QChar ch(0xfffc);
     strText.replace(ch, QChar(' '));
 }
+
 void WizDeleteFolder(const CString& strPath)
 {
     QDir dir(strPath);
     dir.cdUp();
-    //
+
     if (dir.isRoot())
         return;
-    //
+
     dir.rmdir(::WizExtractLastPathName(strPath));
 }
+
 void WizDeleteFile(const CString& strFileName)
 {
     QDir dir(::WizExtractFilePath(strFileName));

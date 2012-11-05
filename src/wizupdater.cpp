@@ -81,6 +81,11 @@ void CWizUpgradeThread::on_prepareDone(bool bNeedUpgrade)
     // save url before thread exit
     if (bNeedUpgrade) {
         m_changelogUrl = m_upgradePtr->whatsNewUrl();
+    } else {
+        QFile fileConfig(::WizGetUpgradePath() + "config.txt");
+        fileConfig.remove();
+        QFile fileZip(::WizGetUpgradePath() + "update.zip");
+        fileZip.remove();
     }
 
     m_currentThread->exit();
@@ -114,7 +119,7 @@ void CWizUpgrade::abort()
 
 QString CWizUpgrade::getUpgradeUrl()
 {
-    QString strProduct = "wiz";
+    QString strProduct = "wiznote_qt";
     QString strCommand = "updatev2";
 
 #ifdef _M_X64
@@ -133,7 +138,7 @@ QString CWizUpgrade::getUpgradeUrl()
             .arg(::WizGetComputerName())\
             .arg(strPlatform);
 
-    TOLOG("URL:" + strUrl);
+    //TOLOG("URL:" + strUrl);
 
     return strUrl;
 }

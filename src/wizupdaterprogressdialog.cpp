@@ -159,20 +159,23 @@ void CWizUpdaterDialog::doUpdateApp()
         QString strLocal = ::WizGetAppPath() + (*it).at(0);
         QString strLocalPath = ::WizExtractFilePath(strLocal);
         QString strUpdate = ::WizGetUpgradePath() + (*it).at(0);
+        QString strUpdatePath = ::WizExtractFilePath(strUpdate);
 
-        QFile fileLocal(strUpdate);
-        if (fileLocal.exists()) {
+        QFile fileUpdate(strUpdate);
+        if (fileUpdate.exists()) {
             // compare MD5
             QString md5Remote = (*it).at(1);
             QString md5Download = ::WizMd5FileString(strUpdate);
 
             if (md5Remote == md5Download) {
                 ::WizEnsurePathExists(strLocalPath);
-                fileLocal.copy(strLocal);
-                fileLocal.remove();
+                fileUpdate.copy(strLocal);
+                fileUpdate.remove();
                 setGuiNotify(QString("Copying %1").arg(strLocal));
             }
         }
+
+        ::WizDeleteFolder(strUpdatePath);
     }
 
     // remove config file
