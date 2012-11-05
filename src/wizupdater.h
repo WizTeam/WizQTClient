@@ -16,26 +16,27 @@ class CWizUpgradeThread : public QThread
 {
     Q_OBJECT
 
+public:
+    CWizUpgradeThread(QObject* parent = 0);
+
+    void abort();
+    const QString& whatsNewUrl() const { return m_changelogUrl; }
+    QThread* thread() const { return m_currentThread; }
+
 private:
     QPointer<CWizUpgrade> m_upgradePtr;
     bool m_bIsStarted;
     QTimer m_timer;
 
     QPointer<QThread> m_currentThread;
-
-public:
-    CWizUpgradeThread(QObject* parent = 0);
-
-    void abort();
-    QThread* thread() const { return m_currentThread; }
-
+    QString m_changelogUrl;
 
 protected:
     virtual void run();
 
 public Q_SLOTS:
-    void checkUpgrade();
-    void checkFinished();
+    void checkUpgradeBegin();
+    void checkUpgradeFinished();
 
 private Q_SLOTS:
     void on_prepareDone(bool bNeedUpgrade);
@@ -70,17 +71,19 @@ private:
 
 private:
     QNetworkAccessManager m_net;
-    QUrl m_redirectedUrl;
-
-    QList<QStringList> m_files;
-
-    QString m_strWhatsNewUrl;
 
     // download queue info
     QString m_strDownloadFileUrl;
     QList<QStringList> m_downloadQueue;
     int m_nNeedProcess;
     int m_nProcessTimes;
+
+    // internal usage
+    QUrl m_redirectedUrl;
+    QList<QStringList> m_files;
+    bool m_bNewVersion;
+
+    QString m_strWhatsNewUrl;
 
 Q_SIGNALS:
     void upgradeError(UpdateError error);

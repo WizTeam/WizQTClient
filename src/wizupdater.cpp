@@ -12,9 +12,15 @@ CWizUpgradeThread::CWizUpgradeThread(QObject* parent /* = 0 */)
     , m_currentThread(0)
 {
     m_timer.setInterval(3 * 60 * 60 * 1000); // 3 hours
-    connect(&m_timer, SIGNAL(timeout()), SLOT(checkUpgrade()));
+    connect(&m_timer, SIGNAL(timeout()), SLOT(checkUpgradeBegin()));
 
-    connect(this, SIGNAL(finished()), SLOT(checkFinished()));
+    // clean up event when thread finished
+    connect(this, SIGNAL(finished()), SLOT(checkUpgradeFinished()));
+
+    // remove stub file
+    QFile file(::WizGetUpgradePath() + "WIZNOTE_SKIP_THIS_SESSION");
+    if (file.exists())
+        file.remove();
 
     m_timer.start();
 }
@@ -25,7 +31,7 @@ void CWizUpgradeThread::abort()
         m_upgradePtr->abort();
 }
 
-void CWizUpgradeThread::checkUpgrade()
+void CWizUpgradeThread::checkUpgradeBegin()
 {
     if (m_bIsStarted)
         return;
@@ -36,13 +42,27 @@ void CWizUpgradeThread::checkUpgrade()
     start();
 }
 
+void CWizUpgradeThread::checkUpgradeFinished()
+{
+    m_upgradePtr->deleteLater();
+    m_currentThread = 0;
+
+    // if user choose not check upgrade for this session
+    QFile file(::WizGetUpgradePath() + "WIZNOTE_SKIP_THIS_SESSION");
+    if (!file.exists()) {
+        m_timer.start();
+    }
+
+    m_bIsStarted = false;
+}
+
 void CWizUpgradeThread::run()
 {
     m_currentThread = QThread::currentThread();
 
     TOLOG(tr("Check update online"));
 
-    m_upgradePtr = new CWizUpgrade(this);
+    m_upgradePtr = new CWizUpgrade();
 
     qRegisterMetaType<UpdateError>("UpdateError");
 
@@ -56,9 +76,13 @@ void CWizUpgradeThread::run()
 
 void CWizUpgradeThread::on_prepareDone(bool bNeedUpgrade)
 {
-    Q_UNUSED(bNeedUpgrade);
+    TOLOG1(tr("Check upgrade done, need upgrade: %1"), QString::number(bNeedUpgrade));
 
-    TOLOG1("Request done, need upgrade: %1", QString::number(bNeedUpgrade));
+    // save url before thread exit
+    if (bNeedUpgrade) {
+        m_changelogUrl = m_upgradePtr->whatsNewUrl();
+    }
+
     m_currentThread->exit();
 }
 
@@ -66,25 +90,17 @@ void CWizUpgradeThread::on_upgradeError(UpdateError error)
 {
     Q_UNUSED(error);
 
-    TOLOG1("Check upgrade meet error, error code: %1", QString::number(error));
+    TOLOG1(tr("Check upgrade meet error, error code: %1"), QString::number(error));
     m_currentThread->exit();
 }
 
-void CWizUpgradeThread::checkFinished()
-{
-    m_upgradePtr->deleteLater();
-    m_currentThread = 0;
-
-    m_timer.start();
-
-    m_bIsStarted = false;
-}
 
 
 
 CWizUpgrade::CWizUpgrade(QObject* parent /* = 0 */)
     : QObject(parent)
     , m_nProcessTimes(0)
+    , m_bNewVersion(false)
 {
 }
 
@@ -98,7 +114,7 @@ void CWizUpgrade::abort()
 
 QString CWizUpgrade::getUpgradeUrl()
 {
-    QString strProduct = "wiznote_qt";
+    QString strProduct = "wiz";
     QString strCommand = "updatev2";
 
 #ifdef _M_X64
@@ -165,7 +181,7 @@ void CWizUpgrade::on_requestUpgrade_finished()
 
     if (!m_redirectedUrl.isEmpty()) {
         // redirect to download server.
-        TOLOG1("redirected: %1", m_redirectedUrl.toString());
+        //TOLOG1("redirected: %1", m_redirectedUrl.toString());
         requestUpgrade_impl(m_redirectedUrl.toString());
     } else {
         // download upgrade tarball
@@ -216,9 +232,12 @@ void CWizUpgrade::readMetadata()
             return;
         }
 
-        QStringList strFile;
-        strFile << strFileMeta.at(0) << strFileMeta.at(1);
-        m_files.append(strFile);
+        // debug: remove C# file
+        if (strFileMeta.at(1) != "d0098473d075f0fa1973210a5ac6fe50") {
+            QStringList strFile;
+            strFile << strFileMeta.at(0) << strFileMeta.at(1);
+            m_files.append(strFile);
+        }
 
         i++;
         strFileEntry = config->GetString("Files", QString::number(i));
@@ -241,6 +260,7 @@ void CWizUpgrade::generateDownloadQueue()
 
         // compare remote and local
         if (!fileLocal.exists()) {
+            m_bNewVersion = true;
             if (!fileUpdate.exists()) {
                 m_downloadQueue.append(*i);
                 continue;
@@ -250,6 +270,7 @@ void CWizUpgrade::generateDownloadQueue()
             if (md5Remote == md5Local) {
                 continue;
             } else {
+                m_bNewVersion = true;
                 m_downloadQueue.append(*i);
                 continue;
             }
@@ -271,10 +292,10 @@ void CWizUpgrade::generateDownloadQueue()
 
     m_nNeedProcess = m_downloadQueue.count();
 
-    if (!m_nNeedProcess) {
-        Q_EMIT prepareDone(false);
-        return;
-    }
+    //if (!m_nNeedProcess) {
+    //    Q_EMIT prepareDone(false);
+    //    return;
+    //}
 
     processDownload();
 }
@@ -283,10 +304,14 @@ void CWizUpgrade::processDownload()
 {
     if (m_nProcessTimes >= m_nNeedProcess) {
         if (!m_downloadQueue.isEmpty()) {
-            TOLOG("Current download still meet error, scheduled 3 hours later");
+            TOLOG(tr("Current download still meet error, scheduled 3 hours later"));
             Q_EMIT prepareDone(false);
         } else {
-            Q_EMIT prepareDone(true);
+            if (m_bNewVersion) {
+                Q_EMIT prepareDone(true);
+            } else {
+                Q_EMIT prepareDone(false);
+            }
         }
 
         // exist thread from here.

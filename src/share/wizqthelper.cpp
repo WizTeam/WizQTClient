@@ -1,8 +1,7 @@
 #include "wizqthelper.h"
-#include <QDir>
-#include <QPalette>
 
-
+#include <QtCore>
+#include <QtGui>
 
 bool PathFileExists(const CString& strPath)
 {
@@ -33,7 +32,7 @@ COleDateTime &COleDateTime::operator=(const COleDateTime &other)
 
 int GetTickCount()
 {
-    static QTime t;
+    static QElapsedTimer t;
     static bool first = true;
     if (first)
     {

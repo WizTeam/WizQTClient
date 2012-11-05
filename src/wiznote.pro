@@ -107,7 +107,8 @@ SOURCES += main.cpp\
     wizupdaterprogressdialog.cpp \
     share/wizxml.cpp \
     share/wizsyncthread.cpp \
-    wizstatusbar.cpp
+    wizstatusbar.cpp \
+    wizupgradenotifydialog.cpp
 
 HEADERS += \
     share/wizqthelper.h \
@@ -192,7 +193,8 @@ HEADERS += \
     wizupdaterprogressdialog.h \
     share/wizxml.h \
     share/wizsyncthread.h \
-    wizstatusbar.h
+    wizstatusbar.h \
+    wizupgradenotifydialog.h
 
 
 mac:HEADERS += \
@@ -211,7 +213,8 @@ FORMS += \
     ui/wizwelcomedialog.ui \
     ui/wizproxydialog.ui \
     ui/wizcreateaccountdialog.ui \
-    ui/wizupdaterprogressdialog.ui
+    ui/wizupdaterprogressdialog.ui \
+    ui/wizupgradenotifydialog.ui
 
 
 mac:LIBS += -framework Cocoa -framework Carbon

@@ -36,7 +36,10 @@ public:
     void center();
     ~MainWindow();
 
+    void setRestart(bool b) { m_bRestart = b; }
     bool isRestart() const { return m_bRestart; }
+    Q_PROPERTY(bool restart READ isRestart WRITE setRestart)
+
     bool isLogout() const { return m_bLogoutRestart; }
 
 protected:
@@ -154,6 +157,8 @@ public Q_SLOTS:
 #endif
 
     void on_readyQuit_timeout();
+
+    void on_upgradeThread_finished();
 };
 
 #endif // WIZMAINWINDOW_H

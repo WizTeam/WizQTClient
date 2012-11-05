@@ -8,6 +8,7 @@
 #include "wizaboutdialog.h"
 #include "wizpreferencedialog.h"
 #include "wizstatusbar.h"
+#include "wizupgradenotifydialog.h"
 
 #include "share/wizcommonui.h"
 
@@ -50,8 +51,10 @@ MainWindow::MainWindow(CWizDatabase& db, QWidget *parent)
     , m_msgQuit(new QMessageBox(this))
 {
     // start update check thread
-    //m_upgrade->checkUpgrade();
+    QTimer::singleShot(3 * 1000, m_upgrade, SLOT(checkUpgradeBegin()));
+    connect(m_upgrade, SIGNAL(finished()), SLOT(on_upgradeThread_finished()));
 
+    // used for handle user quit event
     m_msgQuit->setStandardButtons(0);
     m_msgQuit->setText(tr("please wait, I'll stop working right now..."));
     m_timerReadyQuit.setInterval(100);
@@ -64,6 +67,31 @@ MainWindow::MainWindow(CWizDatabase& db, QWidget *parent)
 
     setWindowTitle(tr("WizNote"));
     center();
+}
+
+void MainWindow::on_upgradeThread_finished()
+{
+    QString strUrl = m_upgrade->whatsNewUrl();
+    if (strUrl.isEmpty()) {
+        return;
+    }
+
+    CWizUpgradeNotifyDialog notifyDialog(strUrl, this);
+
+    if (QDialog::Accepted == notifyDialog.exec()) {
+        QFile file(::WizGetUpgradePath() + "WIZNOTE_READY_FOR_UPGRADE");
+        file.open(QIODevice::WriteOnly | QIODevice::Truncate);
+        file.close();
+
+        // restart immediately
+        setRestart(true);
+        close();
+    } else {
+        // skip for this session
+        QFile file(::WizGetUpgradePath() + "WIZNOTE_SKIP_THIS_SESSION");
+        file.open(QIODevice::WriteOnly | QIODevice::Truncate);
+        file.close();
+    }
 }
 
 MainWindow::~MainWindow()
@@ -527,7 +555,7 @@ void MainWindow::on_options_settingsChanged(WizOptionsType type)
 
 void MainWindow::on_options_restartForSettings()
 {
-    m_bRestart = true;
+    setRestart(true);
     QTimer::singleShot(100, this, SLOT(close()));
 }
 

@@ -138,7 +138,8 @@ void CWizUpdaterDialog::doUpdateApp()
 
     setGuiNotify("Prepare upgrade");
 
-    CWizSettings* config = new CWizSettings(::WizGetUpgradePath() + "config.txt");
+    QString strConfig = ::WizGetUpgradePath() + "config.txt";
+    CWizSettings* config = new CWizSettings(strConfig);
 
     int i = 0;
     QString strFileEntry = config->GetString("Files", QString::number(i));
@@ -167,12 +168,18 @@ void CWizUpdaterDialog::doUpdateApp()
 
             if (md5Remote == md5Download) {
                 ::WizEnsurePathExists(strLocalPath);
-                QFile fileUpdate(strUpdate);
-                fileUpdate.copy(strLocal);
+                fileLocal.copy(strLocal);
+                fileLocal.remove();
                 setGuiNotify(QString("Copying %1").arg(strLocal));
             }
         }
     }
+
+    // remove config file
+    QFile fileConfig(strConfig);
+    fileConfig.remove();
+    QFile fileZip(::WizGetUpgradePath() + "update.zip");
+    fileZip.remove();
 
     // remove stub
     QFile fileStub(::WizGetUpgradePath() + "WIZNOTE_READY_FOR_UPGRADE");
