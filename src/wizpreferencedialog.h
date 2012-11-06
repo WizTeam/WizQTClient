@@ -49,8 +49,6 @@ private slots:
     void on_checkAutoSync_clicked(bool checked);
     void on_checkDownloadAllNotesData_clicked(bool checked);
     void labelProxy_linkActivated(const QString& link);
-
-    void on_buttonCheckUpgrade_clicked();
 };
 
 

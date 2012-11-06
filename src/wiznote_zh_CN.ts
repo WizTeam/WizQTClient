@@ -472,37 +472,37 @@ p, li { white-space: pre-wrap; }
         <translation>皮肤</translation>
     </message>
     <message>
-        <location filename="ui/wizpreferencedialog.ui" line="106"/>
-        <source>check now</source>
-        <translation type="unfinished"></translation>
+        <location filename="ui/wizpreferencedialog.ui" line="109"/>
+        <source>Notify preview version when avaliable</source>
+        <translation>有新版发布时提醒我</translation>
     </message>
     <message>
-        <location filename="ui/wizpreferencedialog.ui" line="112"/>
+        <location filename="ui/wizpreferencedialog.ui" line="118"/>
         <source>Reading</source>
         <translation>阅读</translation>
     </message>
     <message>
-        <location filename="ui/wizpreferencedialog.ui" line="124"/>
+        <location filename="ui/wizpreferencedialog.ui" line="130"/>
         <source>Default note view</source>
         <translation>默认笔记视图</translation>
     </message>
     <message>
-        <location filename="ui/wizpreferencedialog.ui" line="136"/>
+        <location filename="ui/wizpreferencedialog.ui" line="142"/>
         <source>Auto (Keep view state)</source>
         <translation>自动(保持视图状态)</translation>
     </message>
     <message>
-        <location filename="ui/wizpreferencedialog.ui" line="162"/>
+        <location filename="ui/wizpreferencedialog.ui" line="168"/>
         <source>Always open note in Reading-View</source>
         <translation>总是在阅读视图打开笔记</translation>
     </message>
     <message>
-        <location filename="ui/wizpreferencedialog.ui" line="238"/>
+        <location filename="ui/wizpreferencedialog.ui" line="244"/>
         <source>OK</source>
         <translation>应用</translation>
     </message>
     <message>
-        <location filename="ui/wizpreferencedialog.ui" line="149"/>
+        <location filename="ui/wizpreferencedialog.ui" line="155"/>
         <source>Always open note in Editing-View</source>
         <translation>总是在编辑视图打开笔记</translation>
     </message>
@@ -512,27 +512,27 @@ p, li { white-space: pre-wrap; }
         <translation>设置</translation>
     </message>
     <message>
-        <location filename="ui/wizpreferencedialog.ui" line="169"/>
+        <location filename="ui/wizpreferencedialog.ui" line="175"/>
         <source>Syncing</source>
         <translation>同步</translation>
     </message>
     <message>
-        <location filename="ui/wizpreferencedialog.ui" line="181"/>
+        <location filename="ui/wizpreferencedialog.ui" line="187"/>
         <source>Sync Method</source>
         <translation>同步方式</translation>
     </message>
     <message>
-        <location filename="ui/wizpreferencedialog.ui" line="193"/>
+        <location filename="ui/wizpreferencedialog.ui" line="199"/>
         <source>Auto syncing</source>
         <translation>自动同步</translation>
     </message>
     <message>
-        <location filename="ui/wizpreferencedialog.ui" line="206"/>
+        <location filename="ui/wizpreferencedialog.ui" line="212"/>
         <source>Download all notes data</source>
         <translation>下载所有笔记数据</translation>
     </message>
     <message>
-        <location filename="ui/wizpreferencedialog.ui" line="219"/>
+        <location filename="ui/wizpreferencedialog.ui" line="225"/>
         <source>Proxy Settings</source>
         <translation>代理设置</translation>
     </message>
@@ -549,7 +549,7 @@ p, li { white-space: pre-wrap; }
         <translation type="obsolete">English(US)</translation>
     </message>
     <message>
-        <location filename="wizpreferencedialog.cpp" line="68"/>
+        <location filename="wizpreferencedialog.cpp" line="67"/>
         <source>Proxy settings</source>
         <translation>代理设置</translation>
     </message>
@@ -704,22 +704,60 @@ p, li { white-space: pre-wrap; }
 <context>
     <name>CWizUpgrade</name>
     <message>
-        <location filename="wizupdater.cpp" line="93"/>
+        <location filename="wizupdater.cpp" line="114"/>
         <source>cancle upgrade check</source>
         <translation>取消升级</translation>
     </message>
     <message>
-        <location filename="wizupdater.cpp" line="179"/>
+        <location filename="wizupdater.cpp" line="200"/>
         <source>Download update tarball finished</source>
         <translation>升级校验包下载完成</translation>
+    </message>
+    <message>
+        <location filename="wizupdater.cpp" line="312"/>
+        <source>Current download still meet error, scheduled 3 hours later</source>
+        <translation>更新检查遇到问题，3小时后重试</translation>
+    </message>
+</context>
+<context>
+    <name>CWizUpgradeNotifyDialog</name>
+    <message>
+        <location filename="ui/wizupgradenotifydialog.ui" line="14"/>
+        <source>Dialog</source>
+        <translation>发现新版本</translation>
+    </message>
+    <message>
+        <location filename="ui/wizupgradenotifydialog.ui" line="27"/>
+        <source>about:blank</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="ui/wizupgradenotifydialog.ui" line="41"/>
+        <source>Upgrade now</source>
+        <translation>立即升级</translation>
+    </message>
+    <message>
+        <location filename="ui/wizupgradenotifydialog.ui" line="54"/>
+        <source>Next time</source>
+        <translation>以后再说</translation>
     </message>
 </context>
 <context>
     <name>CWizUpgradeThread</name>
     <message>
-        <location filename="wizupdater.cpp" line="43"/>
+        <location filename="wizupdater.cpp" line="63"/>
         <source>Check update online</source>
         <translation>检查在线更新</translation>
+    </message>
+    <message>
+        <location filename="wizupdater.cpp" line="79"/>
+        <source>Check upgrade done, need upgrade: %1</source>
+        <translation>检查更新完毕，Code: %1</translation>
+    </message>
+    <message>
+        <location filename="wizupdater.cpp" line="98"/>
+        <source>Check upgrade meet error, error code: %1</source>
+        <translation>检查更新遇到问题，code: %1</translation>
     </message>
 </context>
 <context>
@@ -759,32 +797,32 @@ p, li { white-space: pre-wrap; }
 <context>
     <name>MainWindow</name>
     <message>
-        <location filename="wizmainwindow.cpp" line="56"/>
+        <location filename="wizmainwindow.cpp" line="59"/>
         <source>please wait, I&apos;ll stop working right now...</source>
         <translation>稍等片刻，保存一下进度...</translation>
     </message>
     <message>
-        <location filename="wizmainwindow.cpp" line="65"/>
+        <location filename="wizmainwindow.cpp" line="70"/>
         <source>WizNote</source>
         <translation>为知笔记</translation>
     </message>
     <message>
-        <location filename="wizmainwindow.cpp" line="127"/>
+        <location filename="wizmainwindow.cpp" line="157"/>
         <source>Search</source>
         <translation>搜索</translation>
     </message>
     <message>
-        <location filename="wizmainwindow.cpp" line="127"/>
+        <location filename="wizmainwindow.cpp" line="157"/>
         <source>Search your notes</source>
         <translation>搜索您的笔记</translation>
     </message>
     <message>
-        <location filename="wizmainwindow.cpp" line="377"/>
+        <location filename="wizmainwindow.cpp" line="414"/>
         <source>New note</source>
         <translation>新建笔记</translation>
     </message>
     <message>
-        <location filename="wizmainwindow.cpp" line="664"/>
+        <location filename="wizmainwindow.cpp" line="701"/>
         <source>Saving note...</source>
         <translation>正在保存笔记...</translation>
     </message>

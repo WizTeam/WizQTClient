@@ -4,24 +4,19 @@ html, body, form, fieldset, h1, h2, h3, h4, h5, h6, p, pre, blockquote, ul, ol, 
 }
 
 html {
-	background: #3e373c;
-	padding: 0px 0px 0px 10px;
+    solid #96c2f1;
+    background:#eff7ff;
 }
 
 #wizstar {
-	background: url(../graphics/wizstar.png) no-repeat left bottom;
-	height: 100px;
-	margin: 0px 0px 0px 10%;
-}
-
-#content {
-	background: url(../graphics/404.png) no-repeat left bottom;
-	height: 600px;
+    display: block;
+    margin-top: 100px;
+	margin-left: auto;
+    margin-right: auto;
 }
 
 h2 {
-	font: bold 2.8em Helvetica, Arial, Geneva, sans-serif;
+    font: bold 2.8em Helvetica, Arial, Geneva, sans-serif;
 	font-size: 18px;
-	color: #acb6ab;
-	padding: 20px 0px 0px 10%;
+    text-align: center;
 }

@@ -93,17 +93,23 @@
       </property>
      </widget>
     </widget>
-    <widget class="QPushButton" name="buttonCheckUpgrade">
+    <widget class="QCheckBox" name="checkBox">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
      <property name="geometry">
       <rect>
-       <x>140</x>
-       <y>240</y>
-       <width>97</width>
-       <height>27</height>
+       <x>10</x>
+       <y>220</y>
+       <width>341</width>
+       <height>22</height>
       </rect>
      </property>
      <property name="text">
-      <string>check now</string>
+      <string>Notify preview version when avaliable</string>
+     </property>
+     <property name="checked">
+      <bool>true</bool>
      </property>
     </widget>
    </widget>
