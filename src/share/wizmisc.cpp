@@ -42,7 +42,7 @@ void WizPathRemoveBackslash(CString& strPath)
     {
         if (!strPath.endsWith('/'))
             return;
-        //
+
         strPath.remove(strPath.length() - 1, 1);
     }
 }

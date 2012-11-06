@@ -14,7 +14,7 @@ int main(int argc, char *argv[])
     QApplication::setApplicationName(QObject::tr("WizNote"));
     IWizGlobal::instance()->setVersion("1.1.00");
 
-    CWizSettings settings(::WizGetDataStorePath() + "wiznote.ini");
+    CWizSettings settings(QDir::homePath() + "/.wiznote/wiznote.ini");
 
 #ifdef Q_OS_WIN
     QString strDefaultFontName = settings.GetString("Common", "DefaultFont", "");

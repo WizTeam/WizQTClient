@@ -94,7 +94,7 @@ bool CWizUpdaterDialog::needUpdateDatabase()
 bool CWizUpdaterDialog::needUpdateApp()
 {
     // check stub here, created by CWizUpdaterNotifyDialog
-    QFile fileUpdate(::WizGetUpgradePath() + "WIZNOTE_READY_FOR_UPGRADE");
+    QFile fileUpdate(QDir::homePath() + "/.wiznote/update/WIZNOTE_READY_FOR_UPGRADE");
     if (fileUpdate.exists()) {
         m_bUpdateApp = true;
     }
@@ -225,8 +225,20 @@ void CWizUpdaterDialog::doOldDatabaseUpgradeSetSteps()
 
 void CWizUpdaterDialog::doOldDatabaseUpgrade()
 {
+    QDir homeDir(QDir::homePath());
     QString oldDataStorePath = QDir::homePath() + "/WizNote/";
-    QDir rootDir(oldDataStorePath);
+    QString newDataStorePath = QDir::homePath() + "/.wiznote/";
+
+    bool ret = homeDir.rmdir(newDataStorePath);
+
+    if (ret) {
+        homeDir.rename(oldDataStorePath, newDataStorePath);
+    } else {
+        QMessageBox::critical(this, tr("Error"), tr("the .wiznote directory should be empty, please contect R&D team!"));
+        return;
+    }
+
+    QDir rootDir(newDataStorePath);
 
     rootDir.remove("wiznote.ini");
     setGuiNotify("Remove wiznote.ini");
@@ -235,7 +247,7 @@ void CWizUpdaterDialog::doOldDatabaseUpgrade()
 
     // enum each user
     CWizStdStringArray folders;
-    WizEnumFolders(oldDataStorePath, folders, 0);
+    WizEnumFolders(newDataStorePath, folders, 0);
     foreach (const QString& folder, folders) {
         QDir userDir(folder);
 
@@ -273,9 +285,6 @@ void CWizUpdaterDialog::doOldDatabaseUpgrade()
         userDir.rename(folder + "attachments", folder + "data/attachments");
         userDir.rename(folder + "index.db", folder + "data/index.db");
         userDir.rename(folder + "wizthumb.db", folder + "data/wizthumb.db");
-
-        QDir homeDir(QDir::homePath());
-        homeDir.rename(oldDataStorePath, ::WizGetDataStorePath());
 
         ui->progressUpdate->setValue(ui->progressUpdate->maximum());
         setGuiNotify("Update Done!");
