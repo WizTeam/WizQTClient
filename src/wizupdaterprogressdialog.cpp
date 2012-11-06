@@ -274,6 +274,9 @@ void CWizUpdaterDialog::doOldDatabaseUpgrade()
         userDir.rename(folder + "index.db", folder + "data/index.db");
         userDir.rename(folder + "wizthumb.db", folder + "data/wizthumb.db");
 
+        QDir homeDir(QDir::homePath());
+        homeDir.rename(oldDataStorePath, ::WizGetDataStorePath());
+
         ui->progressUpdate->setValue(ui->progressUpdate->maximum());
         setGuiNotify("Update Done!");
     }

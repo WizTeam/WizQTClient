@@ -340,15 +340,9 @@ QString WizGetResourcesPath()
 QString WizGetDataStorePath()
 {
     QString strPath = QDir::homePath();
-
-#ifdef Q_OS_LINUX
     strPath += "/.wiznote/";
-#else
-    strPath += "/WizNote/";
-#endif
 
     ::WizEnsurePathExists(strPath);
-
     return strPath;
 }
 
