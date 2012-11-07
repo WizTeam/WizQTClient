@@ -73,9 +73,9 @@ public:
 private:
     CWizDatabase& m_db;
     CWizUserSettings* m_settings;
-    QPointer<CWizUpgradeThread> m_upgrade;
     QPointer<CWizSyncThread> m_sync;
     CWizConsoleDialog* m_console;
+    QPointer<CWizUpgradeThread> m_upgrade;
 
 #ifndef Q_OS_MAC
     QToolBar* m_toolBar;
@@ -151,10 +151,11 @@ public Q_SLOTS:
     void on_syncProcessDebugLog(const QString& strMsg);
     void on_syncProcessErrorLog(const QString& strMsg);
 
+    void on_options_restartForSettings();
+
 #ifndef Q_OS_MAC
     void on_actionPopupMainMenu_triggered();
     void on_client_splitterMoved(int pos, int index);
-    void on_options_restartForSettings();
 #endif
 
     void on_readyQuit_timeout();

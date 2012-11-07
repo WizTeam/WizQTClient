@@ -14,10 +14,10 @@ void CWizCreateAccount::createAccount(const CString& strUserId, \
     callCreateAccount(strUserId, strPassword);
 }
 
-void CWizCreateAccount::onXmlRpcError(const CString& strMethodName, \
+void CWizCreateAccount::onXmlRpcError(const QString& strMethodName, \
                                       WizXmlRpcError err, \
                                       int errorCode, \
-                                      const CString& errorMessage)
+                                      const QString& errorMessage)
 {
     Q_UNUSED(strMethodName);
     Q_UNUSED(err);

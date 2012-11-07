@@ -31,7 +31,7 @@ public:
 
     QMenu* toMenu(QWidget* parent, CWizSettings& settings, const QString& strSection);
     void buildMenu(QMenu* pMenu, CWizSettings& settings, const QString& strSection);
-//    void buildMenuBar(QMenuBar* menuBar, const QString& strFileName);
+    void buildMenuBar(QMenuBar* menuBar, const QString& strFileName);
 //    void buildActionMenu(QAction* pAction, QWidget* parent, const QString& strFileName);
 };
 

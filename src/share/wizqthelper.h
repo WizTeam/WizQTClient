@@ -12,7 +12,8 @@
 #include <QDateTime>
 #include <QSharedPointer>
 
-typedef bool BOOL;
+#define BOOL bool
+//typedef bool BOOL;
 #define TRUE    true
 #define FALSE  false
 #define COLORREF    int

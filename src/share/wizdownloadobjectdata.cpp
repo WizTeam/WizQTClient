@@ -19,7 +19,7 @@ void CWizDownloadObjectData::startDownload()
     callClientLogin(m_db.GetUserId(), m_db.GetPassword2());
 }
 
-void CWizDownloadObjectData::onXmlRpcError(const CString& strMethodName, WizXmlRpcError err, int errorCode, const CString& errorMessage)
+void CWizDownloadObjectData::onXmlRpcError(const QString& strMethodName, WizXmlRpcError err, int errorCode, const QString& errorMessage)
 {
     CWizApi::onXmlRpcError(strMethodName, err, errorCode, errorMessage);
     Q_EMIT downloadDone(m_bDownloaded);

@@ -11,10 +11,10 @@ void CWizVerifyAccount::verifyAccount(const CString& strUserId, \
     callClientLogin(strUserId, strPassword);
 }
 
-void CWizVerifyAccount::onXmlRpcError(const CString& strMethodName, \
+void CWizVerifyAccount::onXmlRpcError(const QString& strMethodName, \
                                       WizXmlRpcError err, \
                                       int errorCode, \
-                                      const CString& errorMessage)
+                                      const QString& errorMessage)
 {
     Q_UNUSED(strMethodName);
     Q_UNUSED(err);

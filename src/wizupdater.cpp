@@ -22,7 +22,10 @@ CWizUpgradeThread::CWizUpgradeThread(QObject* parent /* = 0 */)
     if (file.exists())
         file.remove();
 
+#ifndef Q_OS_MAC
+    // FIXME: disable upgrade check, only start timer on non-mac system
     m_timer.start();
+#endif // Q_OS_MAC
 }
 
 void CWizUpgradeThread::abort()

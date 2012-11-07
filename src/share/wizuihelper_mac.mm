@@ -22,12 +22,13 @@ class CWizMacSearchWidget : public QMacCocoaViewContainer
 {
 public:
     CWizMacSearchWidget(CWizSearchBox* searchBox);
-    QSize sizeHint() const;
+    //QSize sizeHint() const;
+
 private:
     CWizSearchBox* m_searchBox;
+
 public:
     void onEndEditing(const char* utf8);
-private:
 };
 
 
@@ -79,7 +80,7 @@ CWizMacSearchWidget::CWizMacSearchWidget(CWizSearchBox* searchBox)
     // Create the NSSearchField, set it on the QCocoaViewContainer.
     NSSearchField *search = [[NSSearchField alloc] init];
     setCocoaView(search);
-    //
+
     WizMacSearchWidgetEventsObject* events = [[WizMacSearchWidgetEventsObject alloc] init];
     [events setSearchWidget:this];
     [search setDelegate:events];
@@ -98,10 +99,11 @@ CWizMacSearchWidget::CWizMacSearchWidget(CWizSearchBox* searchBox)
 }
 //![0]
 
-QSize CWizMacSearchWidget::sizeHint() const
-{
-    return QSize(250, 40);
-}
+//QSize CWizMacSearchWidget::sizeHint() const
+//{
+//    return QSize(250, 40);
+//}
+
 void CWizMacSearchWidget::onEndEditing(const char* utf8)
 {
     QString str = QString::fromUtf8(utf8);
@@ -112,12 +114,13 @@ void CWizMacSearchWidget::onEndEditing(const char* utf8)
 
 /////////////////////////////////////////////////////////////////////
 
-CWizSearchBox::CWizSearchBox(QWidget *parent)
+CWizSearchBox::CWizSearchBox(CWizExplorerApp& app, QWidget *parent)
     : QWidget(parent)
+    , m_app(app)
 {
     m_search = new CWizMacSearchWidget(this);
     m_search->move(2,2);
-    setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed));
+    //setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed));
 }
 
 /////////////////////////////////////////////////////////////////////

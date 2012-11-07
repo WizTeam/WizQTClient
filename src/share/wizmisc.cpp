@@ -325,16 +325,16 @@ QString WizGetAppFileName()
 
 QString WizGetResourcesPath()
 {
-//#ifdef Q_OS_LINUX
-//    QDir dir(WizGetAppPath());
-//    dir.cdUp(); //../bin
-//    CString strPath = dir.path();
-//    WizPathAddBackslash(strPath);
-//    strPath += "share/wiznote/";
-//    return strPath;
-//#else
+#ifdef Q_OS_MAC
+    QDir dir (WizGetAppPath());
+    dir.cdUp();
+    dir.cd("Resources");
+    QString strPath = dir.path();
+    WizPathAddBackslash(strPath);
+    return strPath;
+#else
     return WizGetAppPath();
-//#endif
+#endif
 }
 
 QString WizGetDataStorePath()

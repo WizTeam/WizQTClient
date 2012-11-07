@@ -232,7 +232,7 @@ public:
     int state() const { return m_http.state(); }
     void setProxy(const QString& host, int port, const QString& userName, const QString& password);
 
-    bool xmlRpcCall(const CString& strMethodName, \
+    bool xmlRpcCall(const QString& strMethodName, \
                     CWizXmlRpcValue* pParam1, CWizXmlRpcValue* pParam2 = NULL, \
                     CWizXmlRpcValue* pParam3 = NULL, CWizXmlRpcValue* pParam4 = NULL, \
                     CWizXmlRpcValue* pParam5 = NULL, CWizXmlRpcValue* pParam6 = NULL, \
@@ -241,12 +241,12 @@ public:
 protected:
     QHttp m_http;
     CString m_strUrl;
-    CString m_strMethodName;
+    QString m_strMethodName;
 
     int m_nCurrentRequestID;
     int m_nCurrentXmlRpcRequestID;
 
-    virtual void processError(WizXmlRpcError error, int errorCode, const CString& errorString);
+    virtual void processError(WizXmlRpcError error, int errorCode, const QString& errorString);
     virtual void processReturn(CWizXmlRpcValue& ret);
 
 public slots:
@@ -256,8 +256,8 @@ public slots:
     void httpReadProgress(int done, int total);
 
 Q_SIGNALS:
-    void xmlRpcError(const CString& strMethodName, WizXmlRpcError error, int errorCode, const CString& errorString);
-    void xmlRpcReturn(const CString& strMethodName, CWizXmlRpcValue& ret);
+    void xmlRpcError(const QString& strMethodName, WizXmlRpcError error, int errorCode, const QString& errorString);
+    void xmlRpcReturn(const QString& strMethodName, CWizXmlRpcValue& ret);
     void xmlRpcReadProgress(int done, int total);
 };
 

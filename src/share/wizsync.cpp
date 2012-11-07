@@ -88,7 +88,7 @@ void CWizSync::abort()
     Q_EMIT syncDone(m_error);
 }
 
-void CWizSync::onXmlRpcError(const CString& strMethodName, WizXmlRpcError err, int errorCode, const CString& errorMessage)
+void CWizSync::onXmlRpcError(const QString& strMethodName, WizXmlRpcError err, int errorCode, const QString& errorMessage)
 {
     CWizApi::onXmlRpcError(strMethodName, err, errorCode, errorMessage);
 
@@ -322,6 +322,10 @@ void CWizSync::onDownloadObjectsDataCompleted()
 void CWizSync::onClientLogout()
 {
     CWizApi::onClientLogout();
+
+    Q_EMIT processLog(tr("sync done"));
+    Q_EMIT progressChanged(progressDone);
+    Q_EMIT syncDone(m_error);
 }
 
 void CWizSync::stopSync()
@@ -330,10 +334,6 @@ void CWizSync::stopSync()
     {
         callClientLogout();
     }
-
-    Q_EMIT processLog(tr("sync done"));
-    Q_EMIT progressChanged(progressDone);
-    Q_EMIT syncDone(m_error);
 }
 
 void CWizSync::downloadNextDeleteds(__int64 nVersion)

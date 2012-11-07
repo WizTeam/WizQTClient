@@ -20,9 +20,9 @@ private:
     bool m_bDownloaded;
 
 protected:
-    virtual void onXmlRpcError(const CString& strMethodName, \
+    virtual void onXmlRpcError(const QString& strMethodName, \
                                WizXmlRpcError err, int errorCode, \
-                               const CString& errorMessage);
+                               const QString& errorMessage);
     virtual void onClientLogin();
     virtual void onDownloadObjectDataCompleted(const WIZOBJECTDATA& data);
     virtual void onClientLogout();

@@ -22,9 +22,10 @@ CWizPreferenceWindow::CWizPreferenceWindow(CWizExplorerApp& app, QWidget* parent
         }
     }
 
-    // just hide skin setup on mac for convience.
+    // just hide skin setup and upgrade notfiy on mac for convience.
 #ifdef Q_WS_MAC
     ui->groupBoxSkin->hide();
+    ui->checkBox->hide();
 #endif // Q_WS_MAC
 
     ::WizGetSkins(m_skins);

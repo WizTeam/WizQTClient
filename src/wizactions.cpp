@@ -23,16 +23,15 @@ CWizActions::CWizActions(CWizExplorerApp& app, QObject* parent)
 WIZACTION* CWizActions::actionsData()
 {
     //for menu translations
-    //
     static QString arrayMenuText [] =
     {
         QObject::tr("&File"),
         QObject::tr("&Tools"),
         QObject::tr("&Help"),
     };
-    //
+
     Q_UNUSED(arrayMenuText);
-    //
+
     static WIZACTION arrayActions[] =
     {
         {"actionExit",              QObject::tr("Exit")},
@@ -51,10 +50,9 @@ WIZACTION* CWizActions::actionsData()
         {"actionPreference",         QObject::tr("Preference")},
         {"actionConsole",         QObject::tr("Console")},
 
-        /////////////////////
         {"",                        ""}
     };
-    //
+
     return arrayActions;
 }
 
@@ -89,7 +87,7 @@ void CWizActions::init()
         WIZACTION& action = arrayData[index];
         if (action.strName.isEmpty())
             break;
-        //
+
         addAction(action);
         index++;
     }
@@ -151,41 +149,41 @@ void CWizActions::buildMenu(QMenu* pMenu, CWizSettings& settings, const QString&
     }
 }
 
-//void CWizActions::buildMenuBar(QMenuBar* menuBar, const QString& strFileName)
-//{
-//    CWizSettings settings(strFileName);
-//    //
-//    int index = 0;
-//    while (true)
-//    {
-//        QString strKey = WizIntToStr(index);
-//        QString strAction = settings.GetString("MainMenu", strKey);
-//
-//        if (strAction.isEmpty())
-//            break;
-//
-//        if (strAction.startsWith("-"))
-//        {
-//            continue;
-//        }
-//        else if (strAction.startsWith("+"))
-//        {
-//            strAction.remove(0, 1);
-//            QString strLocalText = QObject::tr(strAction.toUtf8());
-//            QMenu* pMenu = menuBar->addMenu(strLocalText);
-//
-//            buildMenu(pMenu, settings, strAction);
-//        }
-//        else
-//        {
-//            menuBar->addAction(actionFromName(strAction));
-//        }
-//
-//        index++;
-//    }
-//}
-//
-//
+void CWizActions::buildMenuBar(QMenuBar* menuBar, const QString& strFileName)
+{
+    CWizSettings settings(strFileName);
+
+    int index = 0;
+    while (true)
+    {
+        QString strKey = WizIntToStr(index);
+        QString strAction = settings.GetString("MainMenu", strKey);
+
+        if (strAction.isEmpty())
+            break;
+
+        if (strAction.startsWith("-"))
+        {
+            continue;
+        }
+        else if (strAction.startsWith("+"))
+        {
+            strAction.remove(0, 1);
+            QString strLocalText = QObject::tr(strAction.toUtf8());
+            QMenu* pMenu = menuBar->addMenu(strLocalText);
+
+            buildMenu(pMenu, settings, strAction);
+        }
+        else
+        {
+            menuBar->addAction(actionFromName(strAction));
+        }
+
+        index++;
+    }
+}
+
+
 //void CWizActions::buildActionMenu(QAction* pAction, QWidget* parent, const QString& strFileName)
 //{
 //    CWizSettings settings(strFileName);

@@ -16,7 +16,7 @@ TARGET = wiznote
 #unix:QMAKE_LFLAGS = -Wl,-rpath,\'\$$ORIGIN/lib\'
 
 # useful under windows compilation
-DESTDIR = ../share/wiznote/
+!mac:DESTDIR = ../share/wiznote/
 
 TEMPLATE = app
 

@@ -16,10 +16,10 @@ CWizApiBase::CWizApiBase(const CString& strAccountsApiURL)
 
     resetProxy();
 
-    connect(&m_server, SIGNAL(xmlRpcReturn(const CString&, CWizXmlRpcValue&)), \
-            SLOT(xmlRpcReturn(const CString&, CWizXmlRpcValue&)));
-    connect(&m_server, SIGNAL(xmlRpcError(const CString&, WizXmlRpcError, int, const CString&)), \
-            SLOT(xmlRpcError(const CString&, WizXmlRpcError, int, const CString&)));
+    connect(&m_server, SIGNAL(xmlRpcReturn(const QString&, CWizXmlRpcValue&)), \
+            SLOT(xmlRpcReturn(const QString&, CWizXmlRpcValue&)));
+    connect(&m_server, SIGNAL(xmlRpcError(const QString&, WizXmlRpcError, int, const QString&)), \
+            SLOT(xmlRpcError(const QString&, WizXmlRpcError, int, const QString&)));
 }
 
 void CWizApiBase::abort()
@@ -28,23 +28,24 @@ void CWizApiBase::abort()
     m_server.abort();
 }
 
-bool CWizApiBase::callXmlRpc(const CString& strMethodName, CWizXmlRpcValue* pVal)
+bool CWizApiBase::callXmlRpc(const QString& strMethodName, CWizXmlRpcValue* pVal)
 {
     return m_server.xmlRpcCall(strMethodName, pVal);
 }
 
-void CWizApiBase::xmlRpcReturn(const CString& strMethodName, CWizXmlRpcValue& ret)
+void CWizApiBase::xmlRpcReturn(const QString& strMethodName, CWizXmlRpcValue& ret)
 {
     onXmlRpcReturn(strMethodName, ret);
 }
 
-void CWizApiBase::xmlRpcError(const CString& strMethodName, WizXmlRpcError err, int errorCode, const CString& errorMessage)
+void CWizApiBase::xmlRpcError(const QString& strMethodName, WizXmlRpcError err, int errorCode, const QString& errorMessage)
 {
-    Q_EMIT processErrorLog("Error: [" + strMethodName + "]: " + errorMessage);
+    QString errorMsg(QString("Error: [%1]: %2").arg(strMethodName).arg(errorMessage));
+    Q_EMIT processErrorLog(errorMsg);
     onXmlRpcError(strMethodName, err, errorCode, errorMessage);
 }
 
-void CWizApiBase::onXmlRpcReturn(const CString& strMethodName, CWizXmlRpcValue& ret)
+void CWizApiBase::onXmlRpcReturn(const QString& strMethodName, CWizXmlRpcValue& ret)
 {
     if (strMethodName == SyncMethod_ClientLogin)
     {
@@ -69,7 +70,7 @@ void CWizApiBase::onXmlRpcReturn(const CString& strMethodName, CWizXmlRpcValue& 
     }
 }
 
-void CWizApiBase::onXmlRpcError(const CString& strMethodName, WizXmlRpcError err, int errorCode, const CString& errorMessage)
+void CWizApiBase::onXmlRpcError(const QString& strMethodName, WizXmlRpcError err, int errorCode, const QString& errorMessage)
 {
     Q_UNUSED(strMethodName);
     Q_UNUSED(err);
@@ -184,7 +185,7 @@ CWizApi::CWizApi(CWizDatabase& db, const CString& strAccountsApiURL)
 {
 }
 
-void CWizApi::onXmlRpcReturn(const CString& strMethodName, CWizXmlRpcValue& ret)
+void CWizApi::onXmlRpcReturn(const QString& strMethodName, CWizXmlRpcValue& ret)
 {
     if (strMethodName == SyncMethod_GetDeletedList)
     {
@@ -271,7 +272,7 @@ void CWizApi::onXmlRpcReturn(const CString& strMethodName, CWizXmlRpcValue& ret)
 }
 
 
-bool CWizApi::callGetList(const CString& strMethodName, __int64 nVersion)
+bool CWizApi::callGetList(const QString& strMethodName, __int64 nVersion)
 {
     CWizApiTokenParam param(*this);
     param.AddInt(_T("count"), getCountPerPage());

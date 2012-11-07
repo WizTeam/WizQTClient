@@ -27,9 +27,9 @@ MainWindow::MainWindow(CWizDatabase& db, QWidget *parent)
     : QMainWindow(parent)
     , m_db(db)
     , m_settings(new CWizUserSettings(db))
-    , m_upgrade(new CWizUpgradeThread(this))
     , m_sync(new CWizSyncThread(*this, this))
     , m_console(new CWizConsoleDialog(*this, this))
+    , m_upgrade(new CWizUpgradeThread(this))
     #ifndef Q_OS_MAC
     , m_toolBar(new QToolBar("Main", this))
     , m_labelNotice(NULL)
@@ -50,9 +50,12 @@ MainWindow::MainWindow(CWizDatabase& db, QWidget *parent)
     , m_bUpdatingSelection(false)
     , m_msgQuit(new QMessageBox(this))
 {
+
+#ifndef Q_OS_MAC
     // start update check thread
     QTimer::singleShot(3 * 1000, m_upgrade, SLOT(checkUpgradeBegin()));
     connect(m_upgrade, SIGNAL(finished()), SLOT(on_upgradeThread_finished()));
+#endif // Q_OS_MAC
 
     // used for handle user quit event
     m_msgQuit->setStandardButtons(0);
@@ -120,9 +123,9 @@ void MainWindow::initActions()
 
 void MainWindow::initMenuBar()
 {
-#if defined(Q_WS_MAC)
+#ifdef Q_WS_MAC
     setMenuBar(m_menuBar);
-    m_actions->buildMenuBar(m_menuBar, ::WizGetAppPath() + "files/mainmenu.ini");
+    m_actions->buildMenuBar(m_menuBar, ::WizGetResourcesPath() + "files/mainmenu.ini");
 #else
     m_menuBar->hide();
 #endif
@@ -131,35 +134,27 @@ void MainWindow::initMenuBar()
 void MainWindow::initToolBar()
 {
 #ifdef Q_OS_MAC
-    //
     CWizMacToolBar* toolbar = new CWizMacToolBar(this);
-    //
-    QActionGroup* groupNavigate = new QActionGroup(this);
-    groupNavigate->addAction(m_actions->actionFromName("actionGoBack"));
-    groupNavigate->addAction(m_actions->actionFromName("actionGoForward"));
-    toolbar->addActionGroup(groupNavigate);
-    //
-    toolbar->addStandardItem(CWizMacToolBar::Space);
+
+    //QActionGroup* groupNavigate = new QActionGroup(this);
+    //groupNavigate->addAction(m_actions->actionFromName("actionGoBack"));
+    //groupNavigate->addAction(m_actions->actionFromName("actionGoForward"));
+    //toolbar->addActionGroup(groupNavigate);
+    //toolbar->addStandardItem(CWizMacToolBar::Space);
 
     toolbar->addAction(m_actions->actionFromName("actionSync"));
-    //
     toolbar->addStandardItem(CWizMacToolBar::Space);
-    //
+
     toolbar->addAction(m_actions->actionFromName("actionNewNote"));
     toolbar->addAction(m_actions->actionFromName("actionDeleteCurrentNote"));
-    //
     toolbar->addStandardItem(CWizMacToolBar::FlexibleSpace);
-    //
-    toolbar->addAction(m_actions->actionFromName("actionOptions"));
 
-    toolbar->addStandardItem(CWizMacToolBar::Space);
-    //
-    toolbar->addSearch(tr("Search"), tr("Search your notes"));
-    //
-    connect(toolbar, SIGNAL(doSearch(const QString&)), SLOT(on_search_doSearch(const QString&)));
-    //
+    //toolbar->addAction(m_actions->actionFromName("actionOptions"));
+    //toolbar->addStandardItem(CWizMacToolBar::Space);
+    //toolbar->addSearch(tr("Search"), tr("Search your notes"));
+    //connect(toolbar, SIGNAL(doSearch(const QString&)), SLOT(on_search_doSearch(const QString&)));
+
     toolbar->showInWindow(this);
-    //
 #else
     addToolBar(m_toolBar);
     m_toolBar->setMovable(false);
@@ -244,7 +239,7 @@ void MainWindow::initClient()
 #endif
 
 
-    CWizSearchBox* searchBox = new CWizSearchBox(*this);
+    CWizSearchBox* searchBox = new CWizSearchBox(*this, this);
     connect(searchBox, SIGNAL(doSearch(const QString&)), SLOT(on_search_doSearch(const QString&)));
 
     QVBoxLayout* layoutDocuments = new QVBoxLayout(client);

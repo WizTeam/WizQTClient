@@ -3,24 +3,12 @@
 
 #include <stdint.h>
 
+#include <QIcon>
 #include <QBuffer>
 #include <QByteArray>
 
-#ifndef WIZQTHELPER_H
 #include "wizqthelper.h"
-#endif
-
-//#ifndef QDOM_H
-//#include <QDomDocument>
-//#endif
-
-#ifndef QICON_H
-#include <QIcon>
-#endif
-
-#ifndef WIZMD5_H
 #include "wizmd5.h"
-#endif
 
 
 class IWizGlobal : public QObject

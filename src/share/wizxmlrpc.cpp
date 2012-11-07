@@ -908,7 +908,7 @@ void CWizXmlRpcServer::abort()
     m_http.abort();
 }
 
-bool CWizXmlRpcServer::xmlRpcCall(const CString& strMethodName, \
+bool CWizXmlRpcServer::xmlRpcCall(const QString& strMethodName, \
                                   CWizXmlRpcValue* pParam1, CWizXmlRpcValue* pParam2, \
                                   CWizXmlRpcValue* pParam3, CWizXmlRpcValue* pParam4, \
                                   CWizXmlRpcValue* pParam5, CWizXmlRpcValue* pParam6, \
@@ -928,8 +928,9 @@ bool CWizXmlRpcServer::xmlRpcCall(const CString& strMethodName, \
 }
 
 
-void CWizXmlRpcServer::processError(WizXmlRpcError error, int errorCode, const CString& errorString)
+void CWizXmlRpcServer::processError(WizXmlRpcError error, int errorCode, const QString& errorString)
 {
+    Q_ASSERT(!m_strMethodName.isEmpty());
     emit xmlRpcError(m_strMethodName, error, errorCode, errorString);
 }
 
@@ -958,7 +959,7 @@ void CWizXmlRpcServer::httpRequestFinished (int id, bool error)
     if (id != m_nCurrentXmlRpcRequestID)
         return;
 
-    if (m_strMethodName.IsEmpty())
+    if (m_strMethodName.isEmpty())
         return;
 
     QHttpResponseHeader header = m_http.lastResponse();

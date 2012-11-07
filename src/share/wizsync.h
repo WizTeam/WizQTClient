@@ -53,8 +53,8 @@ private:
     void changeProgressEx(size_t currentCount, size_t total, int stepStart, int stepCount);
 
 protected:
-    virtual void onXmlRpcError(const CString& strMethodName, \
-                               WizXmlRpcError err, int errorCode, const CString& errorMessage);
+    virtual void onXmlRpcError(const QString& strMethodName, \
+                               WizXmlRpcError err, int errorCode, const QString& errorMessage);
 
     //step 1 login
     virtual void onClientLogin();

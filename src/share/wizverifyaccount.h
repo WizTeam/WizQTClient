@@ -16,7 +16,11 @@ private:
     CString m_strErrorMessage;
 
 public:
-    virtual void onXmlRpcError(const CString& strMethodName, WizXmlRpcError err, int errorCode, const CString& errorMessage);
+    virtual void onXmlRpcError(const QString& strMethodName, \
+                               WizXmlRpcError err, \
+                               int errorCode, \
+                               const QString& errorMessage);
+
     virtual void onClientLogin();
 
     virtual void addErrorLog(const CString& str);

@@ -120,7 +120,7 @@ public:
     CString kbGUID() const { return m_user.strKbGUID; }
     const WIZUSERINFO& userInfo() const { return m_user; }
 
-    virtual bool callXmlRpc(const CString& strMethodName, CWizXmlRpcValue* pVal);
+    virtual bool callXmlRpc(const QString& strMethodName, CWizXmlRpcValue* pVal);
     bool isSyncing() const;
     void resetProxy();
     virtual void abort();
@@ -134,8 +134,8 @@ protected:
     CString MakeXmlRpcPassword(const CString& strPassword);
 
 protected:
-    virtual void onXmlRpcReturn(const CString& strMethodName, CWizXmlRpcValue& ret);
-    virtual void onXmlRpcError(const CString& strMethodName, WizXmlRpcError err, int errorCode, const CString& errorMessage);
+    virtual void onXmlRpcReturn(const QString& strMethodName, CWizXmlRpcValue& ret);
+    virtual void onXmlRpcError(const QString& strMethodName, WizXmlRpcError err, int errorCode, const QString& errorMessage);
 
     virtual bool callClientLogin(const CString& strUserId, const CString& strPassword);
     virtual void onClientLogin();
@@ -156,9 +156,9 @@ Q_SIGNALS:
     void processErrorLog(const QString& str);
 
 public Q_SLOTS:
-    void xmlRpcReturn(const CString& strMethodName, CWizXmlRpcValue& ret);
-    void xmlRpcError(const CString& strMethodName, WizXmlRpcError err, \
-                     int errorCode, const CString& errorMessage);
+    void xmlRpcReturn(const QString& strMethodName, CWizXmlRpcValue& ret);
+    void xmlRpcError(const QString& strMethodName, WizXmlRpcError err, \
+                     int errorCode, const QString& errorMessage);
 };
 
 class CWizApi : public CWizApiBase
@@ -185,7 +185,7 @@ private:
     bool m_bDownloadingObject;
 
 protected:
-    virtual void onXmlRpcReturn(const CString& strMethodName, CWizXmlRpcValue& ret);
+    virtual void onXmlRpcReturn(const QString& strMethodName, CWizXmlRpcValue& ret);
 
     virtual bool callDeletedGetList(__int64 nVersion);
     virtual void onDeletedGetList(const std::deque<WIZDELETEDGUIDDATA>& arrayRet);
@@ -251,10 +251,10 @@ protected:
     virtual bool uploadNextPartData();
 
 protected:
-    bool callGetList(const CString& strMethodName, __int64 nVersion);
+    bool callGetList(const QString& strMethodName, __int64 nVersion);
 
     template <class TData>
-    bool callPostList(const CString& strMethodName, const CString& strArrayName, const std::deque<TData>& arrayData);
+    bool callPostList(const QString& strMethodName, const CString& strArrayName, const std::deque<TData>& arrayData);
 };
 
 
@@ -271,15 +271,15 @@ public:
 };
 
 template <class TData>
-inline BOOL CWizApi::callPostList(const CString& strMethodName, const CString& strArrayName, const std::deque<TData>& arrayData)
+inline BOOL CWizApi::callPostList(const QString& strMethodName, const CString& strArrayName, const std::deque<TData>& arrayData)
 {
     if (arrayData.empty())
         return TRUE;
-    //
+
     CWizApiTokenParam param(*this);
-    //
+
     param.AddArray<TData>(strArrayName, arrayData);
-    //
+
     return callXmlRpc(strMethodName, &param);
 }
 
