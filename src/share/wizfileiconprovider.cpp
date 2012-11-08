@@ -1,7 +1,6 @@
 #include "wizfileiconprovider.h"
 #include <QPixmapCache>
 #include <QDir>
-#include <QDebug>
 
 
 #if defined(Q_OS_WIN)

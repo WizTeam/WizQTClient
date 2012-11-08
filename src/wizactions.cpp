@@ -34,6 +34,9 @@ WIZACTION* CWizActions::actionsData()
 
     static WIZACTION arrayActions[] =
     {
+#ifndef Q_OS_MAC
+        {"actionPopupMainMenu",     QObject::tr("Menu")},
+#endif // Q_OS_MAC
         {"actionExit",              QObject::tr("Exit")},
         {"actionLogout",            QObject::tr("Logout")},
         {"actionAbout",             QObject::tr("About WizNote...")},
@@ -43,7 +46,6 @@ WIZACTION* CWizActions::actionsData()
         //{"actionCaptureScreen",     QObject::tr("Capture Screen")},
         //{"actionCaptureScreenShow", QObject::tr("Capture Screen")},
         //{"actionCaptureScreenHide", QObject::tr("Capture Screen (Hide WizNote)")},
-        {"actionPopupMainMenu",     QObject::tr("Menu")},
         {"actionGoBack",            QObject::tr("Back")},
         {"actionGoForward",         QObject::tr("Forward")},
         //{"actionOptions",         QObject::tr("Options")},

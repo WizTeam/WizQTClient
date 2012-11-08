@@ -111,7 +111,6 @@ CWizDocumentListView::CWizDocumentListView(CWizExplorerApp& app, QWidget *parent
     , m_category(app.category())
     , m_menu(NULL)
     , m_tagList(NULL)
-    , m_vscrollTimer(new QTimer(this))
 {
     setFrameStyle(QFrame::NoFrame);
     setAttribute(Qt::WA_MacShowFocusRect, false);
@@ -119,10 +118,13 @@ CWizDocumentListView::CWizDocumentListView(CWizExplorerApp& app, QWidget *parent
     setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
 
+#ifndef Q_OS_MAC
+    // smoothly scroll
     m_vscrollOldPos = 0;
     connect(verticalScrollBar(), SIGNAL(valueChanged(int)), SLOT(on_vscroll_valueChanged(int)));
     connect(verticalScrollBar(), SIGNAL(actionTriggered(int)), SLOT(on_vscroll_actionTriggered(int)));
     connect(m_vscrollTimer, SIGNAL(timeout()), SLOT(on_vscroll_update()));
+#endif //Q_OS_MAC
 
     setItemDelegate(new CWizDocumentListViewDelegate(this));
 
@@ -204,7 +206,7 @@ bool CWizDocumentListView::acceptDocument(const WIZDOCUMENTDATA& document)
 
 void CWizDocumentListView::addAndSelectDocument(const WIZDOCUMENTDATA& document)
 {
-    ATLASSERT(acceptDocument(document));
+    Q_ASSERT(acceptDocument(document));
 
     int index = documentIndexFromGUID(document.strGUID);
     if (-1 == index)
@@ -478,6 +480,8 @@ CString CWizDocumentListView::documentTagsFromIndex(const QModelIndex &index) co
     return documentItemFromIndex(index)->tags(m_db);
 }
 
+
+#ifndef Q_OS_MAC
 void CWizDocumentListView::updateGeometries()
 {
     QListWidget::updateGeometries();
@@ -528,3 +532,4 @@ void CWizDocumentListView::on_vscroll_actionTriggered(int action)
             return;
     }
 }
+#endif // Q_OS_MAC

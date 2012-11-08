@@ -25,6 +25,8 @@ protected:
     void init();
     bool viewDocumentInEditor(bool editing);
 
+    virtual void inputMethodEvent(QInputMethodEvent* event);
+
 public:
     bool saveDocument(bool force);
     bool viewDocument(const WIZDOCUMENTDATA& doc, bool editing);

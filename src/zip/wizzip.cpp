@@ -1,12 +1,13 @@
 #include "wizzip.h"
-#include <QDebug>
-#include "quazip.h"
-#include "quazipfile.h"
-#include "quazipfileinfo.h"
+
 #include <QString>
 #include <QDir>
 #include <QFileInfo>
 #include <QFile>
+
+#include "quazip.h"
+#include "quazipfile.h"
+#include "quazipfileinfo.h"
 
 
 class JlCompress {
@@ -15,7 +16,6 @@ public:
     static QuaZip* openReadonlyZip(QString fileName);
     static bool closeZip(QuaZip* pzip);
 
-    //
     static bool compressFile(QuaZip* zip, QString fileName, QString fileDest);
     static bool compressSubDir(QuaZip* parentZip, QString dir, QString parentDir, bool recursive = true);
     static bool extractFile(QuaZip* zip, QString fileName, QString fileDest);

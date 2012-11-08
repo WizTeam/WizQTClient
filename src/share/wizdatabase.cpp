@@ -191,9 +191,9 @@ QObject* CWizFolder::CreateDocument2(const QString& strTitle, const QString& str
     WIZDOCUMENTDATA data;
     if (!m_db.CreateDocument(strTitle, "", m_strLocation, strURL, data))
         return NULL;
-    //
+
     CWizDocument* pDoc = new CWizDocument(m_db, data);
-    //pDoc->ref();
+
     return pDoc;
 }
 

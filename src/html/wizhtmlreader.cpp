@@ -1,6 +1,5 @@
 #include "wizhtmlreader.h"
 #include "share/wizmisc.h"
-#include <QDebug>
 
 const COLORREF CWizHtmlElemAttr::_clrInvalid = (COLORREF)0xFFFFFFFF;
 const unsigned short CWizHtmlElemAttr::_percentMax = USHRT_MAX;

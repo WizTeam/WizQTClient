@@ -4,8 +4,6 @@
 
 #include <algorithm>
 
-#include <QDebug>
-
 
 #define TABLE_NAME_WIZ_TAG						CString("WIZ_TAG")
 #define FIELD_LIST_WIZ_TAG						CString("TAG_GUID, TAG_GROUP_GUID, TAG_NAME, TAG_DESCRIPTION, DT_MODIFIED, WIZ_VERSION")

@@ -26,11 +26,13 @@ private:
     QMenu* m_menu;
     CWizTagListWidget* m_tagList;
 
+#ifndef Q_OS_MAC
     // used for smoothly scroll
-    QTimer *m_vscrollTimer;
+    QTimer m_vscrollTimer;
     int m_vscrollOldPos;
     int m_vscrollDelta;
     int m_vscrollCurrent;
+#endif // Q_OS_MAC
 
 public:
     void setDocuments(const CWizDocumentDataArray& arrayDocument);
@@ -57,10 +59,12 @@ public:
     virtual void dragMoveEvent(QDragMoveEvent *event);
     virtual void dropEvent(QDropEvent * event);
 
+#ifndef Q_OS_MAC
     // used for smoothly scroll
     void vscrollBeginUpdate(int delta);
     virtual void updateGeometries();
     virtual void wheelEvent(QWheelEvent* event);
+#endif // Q_OS_MAC
 
 public Q_SLOTS:
     void on_tag_created(const WIZTAGDATA& tag);
@@ -72,10 +76,12 @@ public Q_SLOTS:
     void on_action_selectTags();
     void on_action_deleteDocument();
 
+#ifndef Q_OS_MAC
     // used for smoothly scroll
     void on_vscroll_valueChanged(int value);
     void on_vscroll_actionTriggered(int action);
     void on_vscroll_update();
+#endif // Q_OS_MAC
 };
 
 

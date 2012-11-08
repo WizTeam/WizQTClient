@@ -607,7 +607,7 @@ void MainWindow::locateDocument(const WIZDOCUMENTDATA& data)
 
     }
 
-    m_bUpdatingSelection = FALSE;
+    m_bUpdatingSelection = false;
 }
 
 #ifndef Q_OS_MAC

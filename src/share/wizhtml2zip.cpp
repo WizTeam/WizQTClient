@@ -4,8 +4,6 @@
 
 #include "wizmisc.h"
 
-#include <QDebug>
-
 #include "../zip/wizzip.h"
 
 

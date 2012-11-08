@@ -1,6 +1,7 @@
 
 var
     editor = null,
+    m_inited = false;
     m_modified = false,
     objApp = WizExplorerApp,
     objDatabase = objApp.Database,
@@ -43,13 +44,14 @@ try {
 
     editor = new baidu.editor.ui.Editor(editorOption);
     editor.render('editorArea');
-    editor.addListener('afterexeccommand', onEditorAfterExecCommand);
+    editor.addListener('contentChange', onEditorContentChanged);
     editor.addListener('keydown', onEditorKeyDown);
 } catch (err) {
     alert(err);
 }
 
-function onEditorAfterExecCommand() {
+function onEditorContentChanged()
+{
     setModified(true);
 }
 
@@ -61,17 +63,14 @@ function onEditorKeyDown(type, evt) {
     if (!e.ctrlKey && !e.altKey && !e.shiftKey) {
         setModified(true);
     }
+
     if (e.ctrlKey && !e.altKey && !e.shiftKey) {
         if (String.fromCharCode(e.keyCode).toLocaleUpperCase() == 'X') {
-
             setModified(true);
-            //
             e.returnValue = true;
         }
         if (String.fromCharCode(e.keyCode).toLocaleUpperCase() == 'S') {
-
             saveDocument(true);
-            //
             e.returnValue = false;
         }
         else if (String.fromCharCode(e.keyCode).toLocaleUpperCase() == 'V') {
@@ -90,14 +89,15 @@ function autoPaste()
     var imageFileName = objCommon.ClipboardToImage(0, "");
     if (imageFileName == null || imageFileName == "")
         return false;
-    //
+    
     var html = "<img border=\"0\" src=\"file:///" + imageFileName + "\" />";
     editor.execCommand("inserthtml", html);
     return true;
 }
 
 
-function setModified(flag) {
+function setModified(flag)
+{
     m_modified = flag;
     if (!isEditing()) {
         m_modified = false;
@@ -106,23 +106,17 @@ function setModified(flag) {
     objApp.SetDocumentModified(m_modified);
 }
 
-
-function isNewDocument() {
-    return m_currentGUID == null || m_currentGUID == "";
-}
-
 function setEditorHtml(html) {
-    // use setContent can't display images on editor, why?
-    //editor.setContent(html);
-    editor.document.body.innerHTML = '<p>' + html + '</p>';
+    //editor.document.body.innerHTML = '<p>' + html + '</p>';
+    editor.setContent(html);
     editor.undoManger.reset();
     setModified(false);
     editor.window.scrollTo(0,0);
 }
 
 function getEditorHtml() {
-    //return editor.getContent();
-    return editor.document.documentElement.outerHTML;
+    //return editor.document.documentElement.outerHTML;
+    return editor.getContent();
 }
 
 function setEditorFocus() {
@@ -151,7 +145,9 @@ function setEditing(mode) {
     m_editingMode = mode;
 
     if (mode) {
-        setTimeout("setEditorFocus()", 100);
+        setTimeout(function() {
+            setEditorFocus();
+        }, 100);
     }
 }
 
@@ -160,21 +156,24 @@ function viewDocument(guid, filename, mode)
     try {
         m_currentGUID = guid;
 
-        var html = "";
-        if (!isNewDocument()) {
-            html = objCommon.LoadTextFromFile(filename);
-        }
+        var html = objCommon.LoadTextFromFile(filename);
 
-        // we need wait until ueditor initialized, otherwise 'undefined' error will be fired!
-        // maybe it's an issue of ueditor.
-        setTimeout( function () {
+        if (m_inited) {
             setEditorHtml(html);
             setEditing(mode);
-        }, 50);
+        } else {
+            editor.ready(function() {
+                setEditorHtml(html);
+                setEditing(mode);
+                m_inited = true;
+            });
+        }
+
+        setTimeout(function(){
+        }, 60);
 
         return true;
-    }
-    catch (err) {
+    } catch (err) {
         alert(err);
         return false;
     }
@@ -184,8 +183,7 @@ function updateDocument(objDocument, html, url, flags)
 {
     try {
         return objDocument.UpdateDocument4(html, url, flags);
-    }
-    catch (err) {
+    } catch (err) {
         return false;
     }
 }
@@ -202,20 +200,12 @@ function saveDocument(force)
         if (objFolder == null) {
             objFolder = objDatabase.GetFolderByLocation("/My Notes/", true);
         }
-        if (isNewDocument()) {
-            try {
-                var newDocument = objFolder.CreateDocument2("New Note (" + (new Date()).toLocaleDateString() + ")", "");
-                m_currentGUID = newDocument.GUID;
-            }
-            catch (err) {
-                alert("Can not create a new note!");
-                return false;
-            }
-        }
-        
+
         var objDocument = objDatabase.DocumentFromGUID(m_currentGUID);
-        if (objDocument == null || objDocument == "")
+        if (objDocument == null || objDocument == "") {
+            alert("wow, why the guid is null?");
             return false;
+        }
         
         var html = getEditorHtml();
         
@@ -225,8 +215,7 @@ function saveDocument(force)
         setModified(false);
 
         return ret;
-    }
-    catch (err) {
+    } catch (err) {
         alert(err);
     }
 }

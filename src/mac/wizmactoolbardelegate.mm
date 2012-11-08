@@ -117,7 +117,7 @@ public:
             [m_item setEnabled: (m_action->isEnabled() ? YES : NO)];
             //
             NSString* itemId = [m_item itemIdentifier];
-            qDebug() << WizToQString(itemId);
+            //qDebug() << WizToQString(itemId);
             CWizMacToolBarItem* item = [m_delegate findItemGroup: itemId];
             if (item)
             {
@@ -129,7 +129,7 @@ public:
             }
             //
             QIcon icon = m_action->icon();
-            qDebug() << icon.cacheKey();
+            //qDebug() << icon.cacheKey();
             //
             NSImage* img = iconToNSImage(icon);
             if (img)

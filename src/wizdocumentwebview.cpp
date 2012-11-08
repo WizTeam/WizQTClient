@@ -1,12 +1,11 @@
 #include "wizdocumentwebview.h"
 
+#include <QtGui>
+#include <QtWebkit>
+
 #include "share/wizmisc.h"
 #include "share/wizdownloadobjectdata.h"
 
-#include <QWebElement>
-#include <QWebFrame>
-#include <QApplication>
-#include <QDesktopServices>
 
 CWizDocumentWebView::CWizDocumentWebView(CWizExplorerApp& app, QWidget* parent /*= 0*/)
     : QWebView(parent)
@@ -14,6 +13,7 @@ CWizDocumentWebView::CWizDocumentWebView(CWizExplorerApp& app, QWidget* parent /
     , m_bInited(false)
     , m_bViewDocumentWhileFinished(false)
 {
+    setAttribute(Qt::WA_InputMethodEnabled);
 }
 
 void CWizDocumentWebView::init()
@@ -42,9 +42,20 @@ void CWizDocumentWebView::init()
     m_bInited = true;
 }
 
+// This is bug of QtWebView: can't receive input method commit event
+void CWizDocumentWebView::inputMethodEvent(QInputMethodEvent* event)
+{
+    QWebView::inputMethodEvent(event);
+
+    if (!event->commitString().isEmpty()) {
+        QString strScript("setModified(true);");
+        page()->mainFrame()->evaluateJavaScript(strScript);
+    }
+}
+
 bool CWizDocumentWebView::saveDocument(bool force)
 {
-    QString strScript("saveDocument(%1)");
+    QString strScript("saveDocument(%1);");
     strScript = strScript.arg(force ? "true" : "false");
     return page()->mainFrame()->evaluateJavaScript(strScript).toBool();
 }
@@ -89,6 +100,7 @@ void CWizDocumentWebView::setEditingDocument(bool editing)
 
     if (editing) {
         setFocus();
+        grabKeyboard();
     }
 }
 

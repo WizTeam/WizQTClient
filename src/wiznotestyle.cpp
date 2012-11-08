@@ -13,8 +13,6 @@
 #include <QPixmapCache>
 #include <QPushButton>
 
-#include <QDebug>
-
 
 #if defined(Q_OS_WIN32)
 #include <QWindowsVistaStyle>
