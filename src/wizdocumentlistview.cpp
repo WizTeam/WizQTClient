@@ -123,7 +123,7 @@ CWizDocumentListView::CWizDocumentListView(CWizExplorerApp& app, QWidget *parent
     m_vscrollOldPos = 0;
     connect(verticalScrollBar(), SIGNAL(valueChanged(int)), SLOT(on_vscroll_valueChanged(int)));
     connect(verticalScrollBar(), SIGNAL(actionTriggered(int)), SLOT(on_vscroll_actionTriggered(int)));
-    connect(m_vscrollTimer, SIGNAL(timeout()), SLOT(on_vscroll_update()));
+    connect(&m_vscrollTimer, SIGNAL(timeout()), SLOT(on_vscroll_update()));
 #endif //Q_OS_MAC
 
     setItemDelegate(new CWizDocumentListViewDelegate(this));
@@ -495,8 +495,8 @@ void CWizDocumentListView::vscrollBeginUpdate(int delta)
     m_vscrollCurrent = 0;
     m_vscrollDelta = delta;
 
-    if (!m_vscrollTimer->isActive())
-        m_vscrollTimer->start(5);
+    if (!m_vscrollTimer.isActive())
+        m_vscrollTimer.start(5);
 }
 
 void CWizDocumentListView::wheelEvent(QWheelEvent* event)
@@ -510,7 +510,7 @@ void CWizDocumentListView::on_vscroll_update()
         verticalScrollBar()->setValue(m_vscrollOldPos - m_vscrollDelta/15);
         m_vscrollCurrent += qAbs(m_vscrollDelta/15);
     } else {
-        m_vscrollTimer->stop();
+        m_vscrollTimer.stop();
     }
 }
 

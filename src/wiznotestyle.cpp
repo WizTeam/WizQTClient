@@ -9,26 +9,19 @@
 #include "share/wizmultilinelistwidget.h"
 #include "share/wizimagepushbutton.h"
 
-#include <QPainter>
-#include <QPixmapCache>
-#include <QPushButton>
-
-
-#if defined(Q_OS_WIN32)
-#include <QWindowsVistaStyle>
-typedef QWindowsVistaStyle CWizNoteBaseStyle;
-#elif defined(Q_OS_LINUX) || defined(Q_OS_LINUX)
-#include <QGtkStyle>
-typedef QGtkStyle CWizNoteBaseStyle;
-#elif defined(Q_OS_MAC)
-#include <QMacStyle>
-typedef QMacStyle CWizNoteBaseStyle;
-#endif
+#include <QtGui>
 
 class CWizCategoryView;
 class CWizDocumentListView;
 class QStyleOptionViewItemV4;
 
+#ifdef defined(Q_OS_WIN32)
+typedef QWindowsVistaStyle CWizNoteBaseStyle;
+#elif defined(Q_OS_LINUX)
+typedef QCleanlooksStyle CWizNoteBaseStyle;
+#elif defined(Q_OS_MAC)
+typedef QMacStyle CWizNoteBaseStyle;
+#endif
 
 class CWizNoteStyle : public CWizNoteBaseStyle
 {

@@ -1,7 +1,7 @@
 #include "wizdocumentwebview.h"
 
 #include <QtGui>
-#include <QtWebkit>
+#include <QtWebKit>
 
 #include "share/wizmisc.h"
 #include "share/wizdownloadobjectdata.h"

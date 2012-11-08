@@ -12,7 +12,7 @@ int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
     QApplication::setApplicationName(QObject::tr("WizNote"));
-    IWizGlobal::instance()->setVersion("1.1.00");
+    IWizGlobal::instance()->setVersion("1.1.2");
 
     CWizSettings settings(QDir::homePath() + "/.wiznote/wiznote.ini");
 
