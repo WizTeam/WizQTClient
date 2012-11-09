@@ -14,13 +14,13 @@
 
 class CWizMacToolBarPrivate;
 class CWizMacToolBarItem;
-//
+
 class CWizMacToolBar
-    : public QObject
+    : public QWidget
 {
     Q_OBJECT
 public:
-    CWizMacToolBar(QObject *parent = 0);
+    CWizMacToolBar(QWidget *parent = 0);
     ~CWizMacToolBar();
 public:
     enum DisplayMode
@@ -66,7 +66,7 @@ public:
     void addAction(QAction* action);
     void addStandardItem(StandardItem standardItem);
     void addSearch(const QString& label, const QString& tooltip);
-    //
+
     void onSearchEndEditing(const QString& str);
 
 private:

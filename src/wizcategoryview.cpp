@@ -788,10 +788,10 @@ void CWizCategoryView::search(const CString& str)
 {
     if (str.isEmpty())
         return;
-    //
+
     CWizCategoryViewSearchItem* pItem = findSearch();
     pItem->setKeywords(str);
-    //
+
     if (currentItem() == pItem)
     {
         emit itemSelectionChanged();
