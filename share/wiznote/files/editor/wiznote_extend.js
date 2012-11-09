@@ -7,6 +7,7 @@ var
     objDatabase = objApp.Database,
     objCommon = objApp.CreateWizObject("WizKMControls.WizCommonUI"),
     m_currentGUID = "",
+    m_currentFileName = "",
     m_editingMode = true;
 
 
@@ -158,6 +159,7 @@ function viewDocument(guid, filename, mode)
 {
     try {
         m_currentGUID = guid;
+        m_currentFileName = filename;
 
         var html = objCommon.LoadTextFromFile(filename);
 
@@ -213,7 +215,7 @@ function saveDocument(force)
         var html = getEditorHtml();
         
         objApp.SetSavingDocument(true);
-        var ret = updateDocument(objDocument, html, editor.document.URL, 0);
+        var ret = updateDocument(objDocument, html, m_currentFileName, 0);
         objApp.SetSavingDocument(false);
         setModified(false);
 
