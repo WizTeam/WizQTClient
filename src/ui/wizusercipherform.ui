@@ -18,7 +18,7 @@
     <rect>
      <x>11</x>
      <y>20</y>
-     <width>71</width>
+     <width>81</width>
      <height>21</height>
     </rect>
    </property>
@@ -32,9 +32,9 @@
   <widget class="QLineEdit" name="editUserCipher">
    <property name="geometry">
     <rect>
-     <x>90</x>
+     <x>100</x>
      <y>20</y>
-     <width>221</width>
+     <width>231</width>
      <height>22</height>
     </rect>
    </property>
@@ -57,7 +57,7 @@
     <rect>
      <x>11</x>
      <y>60</y>
-     <width>71</width>
+     <width>81</width>
      <height>16</height>
     </rect>
    </property>
@@ -71,9 +71,9 @@
   <widget class="QLabel" name="labelHint">
    <property name="geometry">
     <rect>
-     <x>91</x>
+     <x>100</x>
      <y>60</y>
-     <width>221</width>
+     <width>231</width>
      <height>16</height>
     </rect>
    </property>

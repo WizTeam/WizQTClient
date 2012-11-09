@@ -14,10 +14,14 @@ int main(int argc, char *argv[])
     QApplication::setApplicationName(QObject::tr("WizNote"));
     IWizGlobal::instance()->setVersion("1.2.0");
 
-#ifdef Q_OS_MAC
+#if defined Q_OS_MAC
     QDir dir(QApplication::applicationDirPath());
     dir.cdUp();
     dir.cd("PlugIns");
+    QApplication::setLibraryPaths(QStringList(dir.absolutePath()));
+#elif defined Q_OS_LINUX
+    QDir dir(QApplication::applicationDirPath());
+    dir.cd("plugins");
     QApplication::setLibraryPaths(QStringList(dir.absolutePath()));
 #endif
 

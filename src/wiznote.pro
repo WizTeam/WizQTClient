@@ -16,11 +16,11 @@ TARGET = wiznote
 macx:LIBS += -framework Cocoa -framework Carbon
 
 # NOTE: QMAKE_FLAGS_RPATH and QMAKE_RPATHDIR not working for $$ORIGIN
-unix:!macx:QMAKE_LFLAGS = -Wl, -rpath, \'\$$ORIGIN/lib\'
+unix:!macx:QMAKE_LFLAGS = -Wl,-O1 -Wl,-rpath,\'\$$ORIGIN/lib\'
 #macx:QMAKE_LFLAGS = -Wl, -rpath, \'\$$ORIGIN/../Resources/lib\'
 
 # useful under windows and linux compilation
-!macx:DESTDIR = ../share/wiznote/
+#!macx:DESTDIR = ../share/wiznote/
 
 macx:HEADERS += \
     #mac/wizmactoolbardelegate.h \
