@@ -100,7 +100,6 @@ void CWizDocumentWebView::setEditingDocument(bool editing)
 
     if (editing) {
         setFocus();
-        grabKeyboard();
     }
 }
 
@@ -122,7 +121,6 @@ bool CWizDocumentWebView::viewDocumentInEditor(bool editing)
 
     if (editing) {
         setFocus();
-        grabKeyboard();
     }
 
     return ret;
