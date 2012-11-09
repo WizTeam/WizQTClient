@@ -9,19 +9,23 @@ QT += xml
 QT += network
 QT += webkit
 
-
+OBJECTS_DIR = .obj
+TEMPLATE = app
 TARGET = wiznote
 
+macx:LIBS += -framework Cocoa -framework Carbon
+
 # NOTE: QMAKE_FLAGS_RPATH and QMAKE_RPATHDIR not working for $$ORIGIN
-unix:QMAKE_LFLAGS = -Wl,-rpath,\'\$$ORIGIN/lib\'
+unix:!macx:QMAKE_LFLAGS = -Wl, -rpath, \'\$$ORIGIN/lib\'
+#macx:QMAKE_LFLAGS = -Wl, -rpath, \'\$$ORIGIN/../Resources/lib\'
 
-# useful under windows compilation
-!mac:DESTDIR = ../share/wiznote/
+# useful under windows and linux compilation
+!macx:DESTDIR = ../share/wiznote/
 
-TEMPLATE = app
-
-OBJECTS_DIR = .obj
-
+macx:HEADERS += \
+    mac/wizmactoolbardelegate.h \
+    mac/wizmactoolbar.h \
+    mac/wizmachelper.h
 
 OBJECTIVE_SOURCES += share/wizuihelper_mac.mm \
     mac/wizmactoolbardelegate.mm \
@@ -29,6 +33,11 @@ OBJECTIVE_SOURCES += share/wizuihelper_mac.mm \
     mac/wizmachelper.mm \
     mac/wizmacicon.mm
 
+TRANSLATIONS = wiznote_zh_CN.ts \
+    wiznote_zh_TW.ts
+
+RESOURCES += \
+    wiznote.qrc
 
 SOURCES += main.cpp\
     share/wizqthelper.cpp \
@@ -197,12 +206,6 @@ HEADERS += \
     wizupgradenotifydialog.h
 
 
-mac:HEADERS += \
-    mac/wizmactoolbardelegate.h \
-    mac/wizmactoolbar.h \
-    mac/wizmachelper.h
-
-
 FORMS += \
     ui/newfolderdialog.ui \
     ui/newtagdialog.ui \
@@ -215,12 +218,3 @@ FORMS += \
     ui/wizcreateaccountdialog.ui \
     ui/wizupdaterprogressdialog.ui \
     ui/wizupgradenotifydialog.ui
-
-
-mac:LIBS += -framework Cocoa -framework Carbon
-
-TRANSLATIONS = wiznote_zh_CN.ts \
-    wiznote_zh_TW.ts
-
-RESOURCES += \
-    wiznote.qrc

@@ -107,16 +107,19 @@ function setModified(flag)
 }
 
 function setEditorHtml(html) {
-    //editor.document.body.innerHTML = '<p>' + html + '</p>';
-    editor.setContent(html);
+    // This Api have bug when showing pictures, don't use it!
+    //editor.setContent(html);
+
+    editor.document.body.innerHTML = '<p>' + html + '</p>';
     editor.undoManger.reset();
     setModified(false);
     editor.window.scrollTo(0,0);
 }
 
 function getEditorHtml() {
-    //return editor.document.documentElement.outerHTML;
-    return editor.getContent();
+    //return editor.getContent();
+
+    return editor.document.documentElement.outerHTML;
 }
 
 function setEditorFocus() {

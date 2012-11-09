@@ -15,11 +15,13 @@ class CWizCategoryView;
 class CWizDocumentListView;
 class QStyleOptionViewItemV4;
 
-#ifdef defined(Q_OS_WIN32)
+#if defined(Q_OS_WIN32)
 typedef QWindowsVistaStyle CWizNoteBaseStyle;
 #elif defined(Q_OS_LINUX)
-typedef QCleanlooksStyle CWizNoteBaseStyle;
+#include <QGtkStyle>
+typedef QGtkStyle CWizNoteBaseStyle;
 #elif defined(Q_OS_MAC)
+#include <QMacStyle>
 typedef QMacStyle CWizNoteBaseStyle;
 #endif
 

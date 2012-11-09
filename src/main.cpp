@@ -14,6 +14,14 @@ int main(int argc, char *argv[])
     QApplication::setApplicationName(QObject::tr("WizNote"));
     IWizGlobal::instance()->setVersion("1.1.2");
 
+#ifdef Q_OS_MAC
+    QDir dir(QApplication::applicationDirPath());
+    dir.cdUp();
+    dir.cd("Resources");
+    dir.cd("plugins");
+    QApplication::setLibraryPaths(QStringList(dir.absolutePath()));
+#endif
+
     CWizSettings settings(QDir::homePath() + "/.wiznote/wiznote.ini");
 
 #ifdef Q_OS_WIN
