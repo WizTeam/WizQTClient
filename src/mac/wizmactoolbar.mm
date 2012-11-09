@@ -55,13 +55,13 @@ public:
     QWidget *m_targetWindow;
 };
 
-CWizMacToolBar::CWizMacToolBar(QObject *parent)
-    : QObject(parent)
+CWizMacToolBar::CWizMacToolBar(QWidget *parent)
+    : QWidget(parent)
 {
     //qDebug() << "CWizMacToolBar()";
 
     CWizNSAutoReleasePool pool;
-    //
+
     d = new CWizMacToolBarPrivate();
     d->toolbar = [[NSToolbar alloc] initWithIdentifier:@"CWizMacToolBarr"];
     d->delegate = [[CWizMacToolBarDelegate alloc] initWithToolbar:d->toolbar qtToolBar:this];
@@ -77,7 +77,7 @@ CWizMacToolBar::CWizMacToolBar(QObject *parent)
 CWizMacToolBar::~CWizMacToolBar()
 {
     CWizNSAutoReleasePool pool;
-    //
+
     [d->toolbar release];
     delete d;
 }
@@ -147,6 +147,7 @@ void CWizMacToolBar::addStandardItem(StandardItem standardItem)
 {
     [d->delegate addStandardItem:standardItem];
 }
+
 void CWizMacToolBar::addSearch(const QString& label, const QString& tooltip)
 {
     [d->delegate addSearch:label tooltip:tooltip];

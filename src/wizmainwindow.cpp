@@ -11,17 +11,15 @@
 #include "wizupgradenotifydialog.h"
 
 #include "share/wizcommonui.h"
-
-#include "mac/wizmactoolbar.h"
-
-#include "wiznotestyle.h"
-#include "wizdocumenthistory.h"
-
 #include "share/wizui.h"
 #include "share/wizmisc.h"
 #include "share/wizuihelper.h"
 #include "share/wizsettings.h"
 #include "share/wizanimateaction.h"
+
+#include "wiznotestyle.h"
+#include "wizdocumenthistory.h"
+
 
 MainWindow::MainWindow(CWizDatabase& db, QWidget *parent)
     : QMainWindow(parent)
@@ -134,7 +132,7 @@ void MainWindow::initMenuBar()
 void MainWindow::initToolBar()
 {
 #ifdef Q_OS_MAC
-    CWizMacToolBar* toolbar = new CWizMacToolBar(this);
+    CWizMacToolBar* m_toolBar = new CWizMacToolBar(this);
 
     //QActionGroup* groupNavigate = new QActionGroup(this);
     //groupNavigate->addAction(m_actions->actionFromName("actionGoBack"));
@@ -142,19 +140,19 @@ void MainWindow::initToolBar()
     //toolbar->addActionGroup(groupNavigate);
     //toolbar->addStandardItem(CWizMacToolBar::Space);
 
-    toolbar->addAction(m_actions->actionFromName("actionSync"));
-    toolbar->addStandardItem(CWizMacToolBar::Space);
+    m_toolBar->addAction(m_actions->actionFromName("actionSync"));
+    m_toolBar->addStandardItem(CWizMacToolBar::Space);
 
-    toolbar->addAction(m_actions->actionFromName("actionNewNote"));
-    toolbar->addAction(m_actions->actionFromName("actionDeleteCurrentNote"));
-    toolbar->addStandardItem(CWizMacToolBar::FlexibleSpace);
+    m_toolBar->addAction(m_actions->actionFromName("actionNewNote"));
+    m_toolBar->addAction(m_actions->actionFromName("actionDeleteCurrentNote"));
+    m_toolBar->addStandardItem(CWizMacToolBar::FlexibleSpace);
 
     //toolbar->addAction(m_actions->actionFromName("actionOptions"));
     //toolbar->addStandardItem(CWizMacToolBar::Space);
-    //toolbar->addSearch(tr("Search"), tr("Search your notes"));
-    //connect(toolbar, SIGNAL(doSearch(const QString&)), SLOT(on_search_doSearch(const QString&)));
+    m_toolBar->addSearch(tr("Search"), tr("Search your notes"));
+    connect(m_toolBar, SIGNAL(doSearch(const QString&)), SLOT(on_search_doSearch(const QString&)));
 
-    toolbar->showInWindow(this);
+    m_toolBar->showInWindow(this);
 #else
     addToolBar(m_toolBar);
     m_toolBar->setMovable(false);
@@ -233,26 +231,28 @@ void MainWindow::initClient()
 #ifndef Q_OS_MAC
     splitter->addWidget(WizInitWidgetMarginsEx(m_settings->skin(), m_category, "Category"));
     //splitter->addWidget(WizInitWidgetMarginsEx(m_documents, "Documents"));
+
+    CWizSearchBox* searchBox = new CWizSearchBox(*this, this);
+    connect(searchBox, SIGNAL(doSearch(const QString&)), SLOT(on_search_doSearch(const QString&)));
 #else
     splitter->addWidget(m_category);
     //splitter->addWidget(m_documents);
 #endif
-
-
-    CWizSearchBox* searchBox = new CWizSearchBox(*this, this);
-    connect(searchBox, SIGNAL(doSearch(const QString&)), SLOT(on_search_doSearch(const QString&)));
 
     QVBoxLayout* layoutDocuments = new QVBoxLayout(client);
     layoutDocuments->setContentsMargins(0, 0, 0, 0);
 
     QWidget* documents = new QWidget(splitter);
     documents->setLayout(layoutDocuments);
+
+#ifndef Q_OS_MAC
     layoutDocuments->addWidget(searchBox);
+#endif Q_OS_MAC
+
     layoutDocuments->addWidget(m_documents);
+
     splitter->addWidget(documents);
-
     splitter->addWidget(m_doc);
-
     splitter->setStretchFactor(0, 0);
     splitter->setStretchFactor(1, 0);
     splitter->setStretchFactor(2, 1);
@@ -262,7 +262,6 @@ void MainWindow::initClient()
 #ifndef Q_OS_MAC
     //connect(splitter, SIGNAL(splitterMoved(int,int)), this, SLOT(on_client_splitterMoved(int, int)));
 #endif
-
 }
 
 //void MainWindow::resetNotice()

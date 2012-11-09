@@ -65,7 +65,7 @@ public:
     virtual NSToolbarItem* toItem() = 0;
     virtual void trigger() { }
     virtual void onActionChanged()  { }
-    //
+
     virtual bool isGroup() const { return false; }
     virtual int childCount() const { return 0; }
     virtual CWizMacToolBarItem* childItem(int index) const { Q_UNUSED(index); return NULL; }

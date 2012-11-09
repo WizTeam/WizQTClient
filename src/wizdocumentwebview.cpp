@@ -95,7 +95,7 @@ bool CWizDocumentWebView::newDocument()
 
 void CWizDocumentWebView::setEditingDocument(bool editing)
 {
-    CString strScript = CString("setEditing(%1)").arg(editing ? "true" : "false");
+    CString strScript = CString("setEditing(%1);").arg(editing ? "true" : "false");
     page()->mainFrame()->evaluateJavaScript(strScript).toBool();
 
     if (editing) {
@@ -113,7 +113,7 @@ bool CWizDocumentWebView::viewDocumentInEditor(bool editing)
 {
     Q_ASSERT(!m_data.strGUID.IsEmpty());
 
-    QString strScript = ("viewDocument('%1', '%2', %3)");
+    QString strScript = ("viewDocument('%1', '%2', %3);");
     strScript = strScript.arg(m_data.strGUID,
                               m_strHtmlFileName,
                               editing ? "true" : "false");
@@ -122,6 +122,7 @@ bool CWizDocumentWebView::viewDocumentInEditor(bool editing)
 
     if (editing) {
         setFocus();
+        grabKeyboard();
     }
 
     return ret;
