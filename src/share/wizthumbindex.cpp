@@ -211,7 +211,14 @@ bool CThumbIndex::UpdateAbstract(const WIZABSTRACT &abstractNew, const CString& 
                                 +(" AND ABSTRACT_TYPE = ")
                                 +STR2SQL(type);
 
-        CString sql = CString("update ") + TABLE_NAME_ABSTRACT + " set ABSTRACT_TEXT" + "='" + abstractNew.text + "' where " + whereFiled;
+        // sqlite use '' instead of '
+        CString absText = CString(abstractNew.text);
+        absText = absText.replace("'","");
+
+        CString sql = CString("update ") + \
+                TABLE_NAME_ABSTRACT + \
+                " set ABSTRACT_TEXT" + "='" + \
+                absText + "' where " + whereFiled;
         try
         {
             m_dbThumb.execDML(sql);
