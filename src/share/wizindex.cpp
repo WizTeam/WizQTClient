@@ -2339,7 +2339,12 @@ BOOL CIndex::GetDocumentParams(const CString& strDocumentGUID, CWizDocumentParam
 	//
 	return SQLToDocumentParamDataArray(strSQL, arrayParam);
 }
-BOOL CIndex::GetDocumentParam(const CString& strDocumentGUID, CString strParamName, CString& strParamValue, const CString& strDefault /*= NULL*/, BOOL* pbParamExists /*= NULL*/)
+
+BOOL CIndex::GetDocumentParam(const CString& strDocumentGUID, \
+                              CString strParamName, \
+                              CString& strParamValue, \
+                              const CString& strDefault /*= NULL*/, \
+                              BOOL* pbParamExists /*= NULL*/)
 {
 	if (pbParamExists)
 	{

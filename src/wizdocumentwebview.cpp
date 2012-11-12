@@ -45,12 +45,19 @@ void CWizDocumentWebView::init()
 // This is bug of QtWebView: can't receive input method commit event
 void CWizDocumentWebView::inputMethodEvent(QInputMethodEvent* event)
 {
-    QWebView::inputMethodEvent(event);
-
     if (!event->commitString().isEmpty()) {
         QString strScript("setModified(true);");
         page()->mainFrame()->evaluateJavaScript(strScript);
     }
+
+    update();
+    QWebView::inputMethodEvent(event);
+}
+
+void CWizDocumentWebView::keyPressEvent(QKeyEvent* event)
+{
+    update();
+    QWebView::keyPressEvent(event);
 }
 
 bool CWizDocumentWebView::saveDocument(bool force)
@@ -126,15 +133,15 @@ bool CWizDocumentWebView::viewDocumentInEditor(bool editing)
     return ret;
 }
 
-void CWizDocumentWebView::updateSize()
-{
-    ////force to re-align controls////
-    QRect rc = geometry();
-    setGeometry(rc.adjusted(0, 0, 0, 100));
-    qApp->processEvents(QEventLoop::AllEvents);
-    setGeometry(rc);
-    qApp->processEvents(QEventLoop::AllEvents);
-}
+//void CWizDocumentWebView::updateSize()
+//{
+//    ////force to re-align controls////
+//    QRect rc = geometry();
+//    setGeometry(rc.adjusted(0, 0, 0, 100));
+//    qApp->processEvents(QEventLoop::AllEvents);
+//    setGeometry(rc);
+//    qApp->processEvents(QEventLoop::AllEvents);
+//}
 
 void CWizDocumentWebView::on_web_populateJavaScriptWindowObject()
 {
@@ -148,7 +155,7 @@ void CWizDocumentWebView::on_web_loadFinished(bool ok)
             return;
 
         viewDocumentInEditor(m_bEditDocumentWhileFinished);
-        updateSize();
+        //updateSize();
     }
 }
 

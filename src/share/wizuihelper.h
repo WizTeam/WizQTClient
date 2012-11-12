@@ -8,6 +8,7 @@
 class CWizSearchBox : public QWidget
 {
     Q_OBJECT
+
 public:
     CWizSearchBox(CWizExplorerApp& app, QWidget* parent = 0);
     virtual QSize sizeHint() const;
@@ -16,9 +17,11 @@ private:
     CWizExplorerApp& m_app;
     QString m_keywords;
     QWidget* m_search;
-public slots:
+
+public Q_SLOTS:
     void on_search_editingFinished();
     void on_search_edited(const QString& str);
+
 Q_SIGNALS:
     void doSearch(const QString& keywords);
 };
@@ -48,7 +51,7 @@ public:
         QSizePolicy sizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
         setSizePolicy(sizePolicy);
     }
-    //
+
     void adjustWidth(int width) { m_sz.setWidth(width); setFixedWidth(width); }
 
     QSize sizeHint() const { return m_sz; }

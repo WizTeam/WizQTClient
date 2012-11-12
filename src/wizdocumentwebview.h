@@ -26,6 +26,7 @@ protected:
     bool viewDocumentInEditor(bool editing);
 
     virtual void inputMethodEvent(QInputMethodEvent* event);
+    virtual void keyPressEvent(QKeyEvent* event);
 
 public:
     bool saveDocument(bool force);
@@ -35,7 +36,7 @@ public:
     const WIZDOCUMENTDATA& document() { return m_data; }
     void reloadDocument();
     CWizExplorerApp& app() { return m_app; }
-    void updateSize();
+    //void updateSize();
 
 public Q_SLOTS:
     void on_web_populateJavaScriptWindowObject();

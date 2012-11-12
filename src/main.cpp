@@ -17,8 +17,7 @@ int main(int argc, char *argv[])
 #ifdef Q_OS_MAC
     QDir dir(QApplication::applicationDirPath());
     dir.cdUp();
-    dir.cd("Resources");
-    dir.cd("plugins");
+    dir.cd("PlugIns");
     QApplication::setLibraryPaths(QStringList(dir.absolutePath()));
 #endif
 

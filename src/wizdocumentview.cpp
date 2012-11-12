@@ -299,7 +299,7 @@ void CWizDocumentView::editDocument(bool editing)
     m_editingDocument = editing;
     m_title->setEditingDocument(m_editingDocument);
     m_web->setEditingDocument(m_editingDocument);
-    m_web->updateSize();
+    //m_web->updateSize();
 }
 
 void CWizDocumentView::setViewMode(WizDocumentViewMode mode)
