@@ -11,9 +11,27 @@ CWizDocumentWebView::CWizDocumentWebView(CWizExplorerApp& app, QWidget* parent /
     : QWebView(parent)
     , m_app(app)
     , m_bInited(false)
-    , m_bViewDocumentWhileFinished(false)
 {
     setAttribute(Qt::WA_InputMethodEnabled);
+}
+
+// This is bug of QWebView: can't receive input method commit event
+void CWizDocumentWebView::inputMethodEvent(QInputMethodEvent* event)
+{
+    if (!event->commitString().isEmpty()) {
+        QString strScript("setModified(true);");
+        page()->mainFrame()->evaluateJavaScript(strScript);
+    }
+
+    update();
+    QWebView::inputMethodEvent(event);
+}
+
+// This also maybe a bug inside QWebView, QWebView did not update on Mac
+void CWizDocumentWebView::keyPressEvent(QKeyEvent* event)
+{
+    update();
+    QWebView::keyPressEvent(event);
 }
 
 void CWizDocumentWebView::init()
@@ -29,35 +47,17 @@ void CWizDocumentWebView::init()
     page()->setLinkDelegationPolicy(QWebPage::DelegateAllLinks);
 
     connect(page()->mainFrame(), SIGNAL(javaScriptWindowObjectCleared()), \
-            SLOT(on_web_populateJavaScriptWindowObject()));
+            SLOT(on_editor_populateJavaScriptWindowObject()));
 
     connect(page()->mainFrame(), SIGNAL(loadFinished(bool)), \
-            SLOT(on_web_loadFinished(bool)));
+            SLOT(on_editor_loadFinished(bool)));
 
     connect(this, SIGNAL(linkClicked(const QUrl&)), \
-            SLOT(on_web_linkClicked(const QUrl&)));
+            SLOT(on_editor_linkClicked(const QUrl&)));
 
     setHtml(strHtml, url);
 
     m_bInited = true;
-}
-
-// This is bug of QtWebView: can't receive input method commit event
-void CWizDocumentWebView::inputMethodEvent(QInputMethodEvent* event)
-{
-    if (!event->commitString().isEmpty()) {
-        QString strScript("setModified(true);");
-        page()->mainFrame()->evaluateJavaScript(strScript);
-    }
-
-    update();
-    QWebView::inputMethodEvent(event);
-}
-
-void CWizDocumentWebView::keyPressEvent(QKeyEvent* event)
-{
-    update();
-    QWebView::keyPressEvent(event);
 }
 
 bool CWizDocumentWebView::saveDocument(bool force)
@@ -69,6 +69,17 @@ bool CWizDocumentWebView::saveDocument(bool force)
 
 bool CWizDocumentWebView::viewDocument(const WIZDOCUMENTDATA& doc, bool editing)
 {
+    if (doc.nProtected) {
+        QString strFileName = WizGetResourcesPath() + "transitions/commingsoon.html";
+        QString strHtml;
+        ::WizLoadUnicodeTextFromFile(strFileName, strHtml);
+        QUrl url = QUrl::fromLocalFile(strFileName);
+        setHtml(strHtml, url);
+
+        m_bInited = false;
+        return true;
+    }
+
     if (m_bInited) {
         if (!saveDocument(false))
             return false;
@@ -87,17 +98,10 @@ bool CWizDocumentWebView::viewDocument(const WIZDOCUMENTDATA& doc, bool editing)
     if (m_bInited) {
         return viewDocumentInEditor(editing);
     } else {
-        m_bViewDocumentWhileFinished = true;
         m_bEditDocumentWhileFinished = editing;
-
         init();
         return true;
     }
-}
-
-bool CWizDocumentWebView::newDocument()
-{
-    return viewDocument(WIZDOCUMENTDATA(), true);
 }
 
 void CWizDocumentWebView::setEditingDocument(bool editing)
@@ -133,37 +137,22 @@ bool CWizDocumentWebView::viewDocumentInEditor(bool editing)
     return ret;
 }
 
-//void CWizDocumentWebView::updateSize()
-//{
-//    ////force to re-align controls////
-//    QRect rc = geometry();
-//    setGeometry(rc.adjusted(0, 0, 0, 100));
-//    qApp->processEvents(QEventLoop::AllEvents);
-//    setGeometry(rc);
-//    qApp->processEvents(QEventLoop::AllEvents);
-//}
-
-void CWizDocumentWebView::on_web_populateJavaScriptWindowObject()
+void CWizDocumentWebView::on_editor_populateJavaScriptWindowObject()
 {
     page()->mainFrame()->addToJavaScriptWindowObject("WizExplorerApp", m_app.object());
 }
 
-void CWizDocumentWebView::on_web_loadFinished(bool ok)
+void CWizDocumentWebView::on_editor_loadFinished(bool ok)
 {
-    if (ok) {
-        if (!m_bViewDocumentWhileFinished)
-            return;
-
-        viewDocumentInEditor(m_bEditDocumentWhileFinished);
-        //updateSize();
+    if (!ok) {
+        TOLOG("Wow, loading editor failed!");
+        return;
     }
+
+    viewDocumentInEditor(m_bEditDocumentWhileFinished);
 }
 
-void CWizDocumentWebView::on_web_linkClicked(const QUrl& url)
+void CWizDocumentWebView::on_editor_linkClicked(const QUrl& url)
 {
-    Qt::KeyboardModifiers mod = QApplication::keyboardModifiers ();
-    if (mod.testFlag(Qt::ControlModifier))
-    {
-        QDesktopServices::openUrl(url);
-    }
+    QDesktopServices::openUrl(url);
 }

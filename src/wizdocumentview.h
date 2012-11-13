@@ -22,13 +22,9 @@ public:
 
     CWizDocumentWebView* view() const { return m_web; }
 
-    void loadSpecialPage(const QString& strFileName);
-
 private:
+    CWizExplorerApp& m_app;
     CWizUserSettings& m_userSettings;
-
-    QWebView* m_specialPage;
-
 
 protected:
     CWizDatabase& m_db;

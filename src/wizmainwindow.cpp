@@ -334,7 +334,7 @@ void MainWindow::closeEvent(QCloseEvent* event)
 
 void MainWindow::on_readyQuit_timeout()
 {
-    m_msgQuit->open();
+
     close();
 }
 
@@ -573,13 +573,6 @@ void MainWindow::viewDocument(const WIZDOCUMENTDATA& data, bool addToHistory)
     if (doc->GUID() == m_documentForEditing.strGUID) {
         m_documentForEditing = WIZDOCUMENTDATA();
         forceEdit = true;
-    }
-
-    // stub here
-    if (doc->isProtected()) {
-        QString strFileName = WizGetResourcesPath() + "transitions/commingsoon.html";
-        m_doc->loadSpecialPage(strFileName);
-        return;
     }
 
     if (!m_doc->viewDocument(data, forceEdit))

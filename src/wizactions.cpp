@@ -36,10 +36,15 @@ WIZACTION* CWizActions::actionsData()
     {
 #ifndef Q_OS_MAC
         {"actionPopupMainMenu",     QObject::tr("Menu")},
-#endif // Q_OS_MAC
-        {"actionExit",              QObject::tr("Exit")},
-        {"actionLogout",            QObject::tr("Logout")},
+        {"actionPreference",         QObject::tr("Preference")},
         {"actionAbout",             QObject::tr("About WizNote...")},
+#else
+        // we don't have to translate these items on mac, qt will do it for us.
+        {"actionPreference",         "Preference"},
+        {"actionAbout",             "About WizNote..."},
+#endif // Q_OS_MAC
+        {"actionLogout",            QObject::tr("Logout")},
+        {"actionExit",              QObject::tr("Exit")},
         {"actionDeleteCurrentNote", QObject::tr("Delete Note")},
         {"actionSync",              QObject::tr("Sync")},
         {"actionNewNote",           QObject::tr("New Note")},
@@ -48,8 +53,6 @@ WIZACTION* CWizActions::actionsData()
         //{"actionCaptureScreenHide", QObject::tr("Capture Screen (Hide WizNote)")},
         {"actionGoBack",            QObject::tr("Back")},
         {"actionGoForward",         QObject::tr("Forward")},
-        //{"actionOptions",         QObject::tr("Options")},
-        {"actionPreference",         QObject::tr("Preference")},
         {"actionConsole",         QObject::tr("Console")},
 
         {"",                        ""}

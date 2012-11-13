@@ -151,6 +151,7 @@ public:
 
 CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
     : QWidget(parent)
+    , m_app(app)
     , m_userSettings(app.userSettings())
     , m_db(app.database())
     , m_title(new CWizTitleBar(app, this))
@@ -161,17 +162,12 @@ CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
     , m_editingDocument(true)
     , m_viewMode(app.userSettings().noteViewMode())
 {
-    m_specialPage = new QWebView(this);
-
     m_client = createClient();
 
-    QBoxLayout* layout = new QVBoxLayout(this);
+    QVBoxLayout* layout = new QVBoxLayout(this);
     setLayout(layout);
     layout->addWidget(m_client);
-    layout->addWidget(m_specialPage);
     layout->setMargin(0);
-
-    m_specialPage->hide();
 
     m_title->setEditingDocument(m_editingDocument);
 
@@ -204,7 +200,7 @@ CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
 QWidget* CWizDocumentView::createClient()
 {
     QWidget* client = new QWidget(this);
-    QBoxLayout* layout = new QBoxLayout(QBoxLayout::TopToBottom, client);
+    QVBoxLayout* layout = new QVBoxLayout(client);
     client->setLayout(layout);
 
     client->setAutoFillBackground(true);
@@ -234,22 +230,9 @@ void CWizDocumentView::showClient(bool visible)
 {
     if (visible) {
         m_client->show();
-        m_specialPage->hide();
     } else {
         m_client->hide();
     }
-}
-
-void CWizDocumentView::loadSpecialPage(const QString& strFileName)
-{
-    showClient(false);
-
-    QString strHtml;
-    ::WizLoadUnicodeTextFromFile(strFileName, strHtml);
-    QUrl url = QUrl::fromLocalFile(strFileName);
-    m_specialPage->setHtml(strHtml, url);
-
-    m_specialPage->show();
 }
 
 bool CWizDocumentView::viewDocument(const WIZDOCUMENTDATA& data, bool forceEdit)
@@ -299,7 +282,6 @@ void CWizDocumentView::editDocument(bool editing)
     m_editingDocument = editing;
     m_title->setEditingDocument(m_editingDocument);
     m_web->setEditingDocument(m_editingDocument);
-    //m_web->updateSize();
 }
 
 void CWizDocumentView::setViewMode(WizDocumentViewMode mode)
@@ -336,7 +318,7 @@ void CWizDocumentView::on_titleEdit_editingFinished()
     {
         title = title.left(255);
     }
-    //
+
     WIZDOCUMENTDATA data;
     if (m_db.DocumentFromGUID(m_web->document().strGUID, data))
     {
@@ -353,7 +335,7 @@ void CWizDocumentView::on_editDocumentButton_clicked()
 void CWizDocumentView::on_attachmentButton_clicked()
 {
     if (!m_attachments) {
-        m_attachments = new CWizAttachmentListWidget(m_web->app(), topLevelWidget());
+        m_attachments = new CWizAttachmentListWidget(m_app, topLevelWidget());
     }
 
     m_attachments->setDocument(m_web->document());

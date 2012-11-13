@@ -223,9 +223,9 @@ void CWizDocumentListView::addAndSelectDocument(const WIZDOCUMENTDATA& document)
 void CWizDocumentListView::getSelectedDocuments(CWizDocumentDataArray& arrayDocument)
 {
     QList<QListWidgetItem*> items = selectedItems();
-    for (QList<QListWidgetItem*>::const_iterator it = items.begin();
-    it != items.end();
-    it++)
+
+    QList<QListWidgetItem*>::const_iterator it;
+    for (it = items.begin(); it != items.end(); it++)
     {
         QListWidgetItem* pItem = *it;
 

@@ -174,8 +174,10 @@ function viewDocument(guid, filename, mode)
             });
         }
 
-        setTimeout(function(){
-        }, 60);
+        // FIXME: stub here
+        setInterval(function(){
+            saveDocument(false);
+        }, 5*60*1000);
 
         return true;
     } catch (err) {

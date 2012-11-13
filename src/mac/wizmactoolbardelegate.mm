@@ -588,8 +588,3 @@ NSMutableArray *itemIdentifiers(const QList<CWizMacToolBarItem *> *items, bool c
 
 
 @end
-
-
-
-
-
