@@ -29,6 +29,7 @@ class CWizNoteStyle : public CWizNoteBaseStyle
 {
 public:
     CWizNoteStyle(const QString& skinName);
+
 private:
     QImage m_expandedImage;
     QImage m_collapsedImage;
@@ -44,11 +45,11 @@ private:
     CWizSkin9GridImage m_imagePushButtonDisabled;
     CWizSkin9GridImage m_imagePushButtonLabel;
     CWizSkin9GridImage m_imagePushButtonLabelRed;
-    //
+
     QColor m_colorCategoryBackground;
     QColor m_colorCategoryText;
     QColor m_colorCategoryTextSelected;
-    //
+
     QColor m_colorDocumentsBackground;
     QColor m_colorDocumentsTitle;
     QColor m_colorDocumentsDate;
@@ -57,20 +58,21 @@ private:
     QColor m_colorDocumentsDateSelected;
     QColor m_colorDocumentsSummarySelected;
     QColor m_colorDocumentsLine;
-    //
+
     QColor m_colorMultiLineListFirstLine;
     QColor m_colorMultiLineListFirstLineSelected;
     QColor m_colorMultiLineListOtherLine;
     QColor m_colorMultiLineListOtherLineSelected;
-    //
+
     QFont m_fontImagePushButtonLabel;
 protected:
     virtual void drawCategoryViewItem(const QStyleOptionViewItemV4 *option, QPainter *painter, const CWizCategoryView *widget) const;
     virtual void drawDocumentListViewItem(const QStyleOptionViewItemV4 *option, QPainter *painter, const CWizDocumentListView *widget) const;
     virtual void drawMultiLineListWidgetItem(const QStyleOptionViewItemV4 *option, QPainter *painter, const CWizMultiLineListWidget *widget) const;
     virtual void drawImagePushButton(const QStyleOptionButton *option, QPainter *painter, const CWizImagePushButton *button) const;
-    //
+
     void drawcenterImage(QPainter* p, const QImage& image, const QRect& rc) const;
+
 public:
     virtual void drawControl(ControlElement element, const QStyleOption *option, QPainter *painter, const QWidget *widget) const;
     virtual void drawPrimitive(PrimitiveElement pe, const QStyleOption *opt, QPainter *p, const QWidget *w = 0) const;
@@ -78,6 +80,7 @@ public:
 public:
     QColor categoryBackground() { return m_colorCategoryBackground; }
     QColor documentsBackground() { return m_colorDocumentsBackground; }
+
 public:
     static CWizNoteStyle* noteStyle(const QString& skinName);
 };
@@ -586,7 +589,8 @@ void CWizNoteStyle::drawControl(ControlElement element, const QStyleOption *opti
     case CE_ItemViewItem:
         {
             const QStyleOptionViewItemV4 *vopt = qstyleoption_cast<const QStyleOptionViewItemV4 *>(option);
-            ATLASSERT(vopt);
+            Q_ASSERT(vopt);
+
             if (const CWizDocumentListView *view = dynamic_cast<const CWizDocumentListView *>(widget))
             {
                 drawDocumentListViewItem(vopt, painter, view);
@@ -597,6 +601,19 @@ void CWizNoteStyle::drawControl(ControlElement element, const QStyleOption *opti
             }
             else if (const CWizCategoryView *view = dynamic_cast<const CWizCategoryView *>(widget))
             {
+                if (view->isDragHovered() && view->validateDropDestination(view->dragHoveredPos())) {
+                    QRect rect = view->visualItemRect(view->itemAt(view->dragHoveredPos()));
+                    QPen pen;
+                    pen.setStyle(Qt::SolidLine);
+                    pen.setCapStyle(Qt::RoundCap);
+                    pen.setColor(Qt::blue);
+                    pen.setWidth(2);
+                    painter->setPen(pen);
+                    //painter->drawRect(2, rect.y(), view->size().width() - 4, rect.height());
+                    rect.setWidth(rect.width() - 2);
+                    painter->drawRect(rect);
+                }
+
                 drawCategoryViewItem(vopt, painter, view);
             }
             else

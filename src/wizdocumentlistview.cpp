@@ -70,7 +70,7 @@ public:
     virtual bool operator<(const QListWidgetItem &other) const
     {
         const CWizDocumentListViewItem* pOther = dynamic_cast<const CWizDocumentListViewItem*>(&other);
-        ATLASSERT(pOther);
+        Q_ASSERT(pOther);
 
         if (pOther->m_data.tCreated == m_data.tCreated)
         {
@@ -89,7 +89,7 @@ public:
 class CWizDocumentListViewDelegate : public QStyledItemDelegate
 {
 public:
-    CWizDocumentListViewDelegate(QWidget*parent)
+    CWizDocumentListViewDelegate(QWidget* parent)
         : QStyledItemDelegate(parent)
     {
     }
@@ -157,7 +157,7 @@ CWizDocumentListView::CWizDocumentListView(CWizExplorerApp& app, QWidget *parent
 
     setDragDropMode(QAbstractItemView::DragDrop);
     setDragEnabled(true);
-    setAcceptDrops(true);
+    viewport()->setAcceptDrops(true);
 
     setSelectionMode(QAbstractItemView::ExtendedSelection);
 }
@@ -274,9 +274,17 @@ void CWizDocumentListView::startDrag(Qt::DropActions supportedActions)
     ::WizStringArrayToText(arrayGUID, strGUIDs, ";");
 
     QDrag* drag = new QDrag(this);
+
     QMimeData* mimeData = new QMimeData();
     mimeData->setData(WIZNOTE_MIMEFORMAT_DOCUMENTS, strGUIDs.toUtf8());
     drag->setMimeData(mimeData);
+
+    // FIXME: need deal with more then 1 drag event!
+    if (items.size() == 1) {
+        QRect rect = visualItemRect(items[0]);
+        drag->setPixmap(QPixmap::grabWindow(winId(), rect.x(), rect.y(), rect.width(), rect.height()));
+    }
+
     drag->exec(Qt::CopyAction);
 }
 

@@ -15,6 +15,7 @@ class CWizCategoryViewTrashItem;
 class CWizCategoryView : public QTreeWidget
 {
     Q_OBJECT
+
 public:
     CWizCategoryView(CWizExplorerApp& app, QWidget *parent = 0);
     virtual QSize sizeHint() const { return QSize(160, 1); }
@@ -42,6 +43,9 @@ private:
     QMenu* m_menuTag;
     QMenu* m_menuTrash;
 
+    bool m_bDragHovered;
+    QPoint m_dragHoveredPos;
+
 public:
     void showAllFoldersContextMenu(QPoint pos);
     void showFolderContextMenu(QPoint pos);
@@ -51,16 +55,24 @@ public:
 
 public:
     void getDocuments(CWizDocumentDataArray& arrayDocument);
-    //
+
     virtual void contextMenuEvent(QContextMenuEvent *);
     virtual void mousePressEvent(QMouseEvent* event );
     virtual QModelIndex moveCursor(CursorAction cursorAction, Qt::KeyboardModifiers modifiers);
+
     //drag
     virtual void startDrag(Qt::DropActions supportedActions);
     //drop
-    virtual void dragEnterEvent(QDragEnterEvent *event);
-    virtual void dragMoveEvent(QDragMoveEvent *event);
-    virtual void dropEvent(QDropEvent * event);
+    virtual void dragEnterEvent(QDragEnterEvent* event);
+    virtual void dragMoveEvent(QDragMoveEvent* event);
+    virtual void dragLeaveEvent(QDragLeaveEvent* event);
+    virtual void dropEvent(QDropEvent* event);
+
+    virtual void paintEvent(QPaintEvent* event);
+    bool isDragHovered() const { return m_bDragHovered; }
+    QPoint dragHoveredPos() const { return m_dragHoveredPos; }
+
+    bool validateDropDestination(const QPoint& p) const;
 
 public:
     CWizCategoryViewItem* categoryItemFromIndex(const QModelIndex &index) const;

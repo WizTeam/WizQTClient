@@ -5,6 +5,7 @@
 #include <QContextMenuEvent>
 #include <QMenu>
 #include <QCursor>
+#include <QPainter>
 
 #include "wizdef.h"
 
@@ -260,6 +261,7 @@ CWizCategoryView::CWizCategoryView(CWizExplorerApp& app, QWidget *parent)
     , m_menuFolder(NULL)
     , m_menuTag(NULL)
     , m_menuTrash(NULL)
+    , m_bDragHovered(false)
 {
     setFrameStyle(QFrame::NoFrame);
     setAttribute(Qt::WA_MacShowFocusRect, false);
@@ -536,9 +538,9 @@ QModelIndex CWizCategoryView::moveCursor(CursorAction cursorAction, Qt::Keyboard
 void CWizCategoryView::startDrag(Qt::DropActions supportedActions)
 {
     Q_UNUSED(supportedActions);
-    //
+
     QPoint pt = mapFromGlobal(QCursor::pos());
-    //
+
     if (CWizCategoryViewTagItem* item = dynamic_cast<CWizCategoryViewTagItem*>(itemAt(pt)))
     {
         QDrag* drag = new QDrag(this);
@@ -551,35 +553,52 @@ void CWizCategoryView::startDrag(Qt::DropActions supportedActions)
 
 void CWizCategoryView::dragEnterEvent(QDragEnterEvent *event)
 {
+    m_bDragHovered = true;
+    repaint();
+
     if (event->mimeData()->hasFormat(WIZNOTE_MIMEFORMAT_DOCUMENTS))
     {
         event->accept();
         return;
     }
-    //
+
     QTreeWidget::dragEnterEvent(event);
 }
 
 void CWizCategoryView::dragMoveEvent(QDragMoveEvent *event)
 {
+    m_dragHoveredPos = event->pos();
+    repaint();
+
     if (event->mimeData()->hasFormat(WIZNOTE_MIMEFORMAT_DOCUMENTS))
     {
         event->accept();
         return;
     }
-    //
+
     QTreeWidget::dragMoveEvent(event);
+}
+
+void CWizCategoryView::dragLeaveEvent(QDragLeaveEvent* event)
+{
+    m_bDragHovered = false;
+    m_dragHoveredPos = QPoint();
+    repaint();
+
+    QTreeWidget::dragLeaveEvent(event);
 }
 
 void CWizCategoryView::dropEvent(QDropEvent * event)
 {
+    m_bDragHovered = false;
+
     if (event->mimeData()->hasFormat(WIZNOTE_MIMEFORMAT_DOCUMENTS))
     {
         QByteArray data = event->mimeData()->data(WIZNOTE_MIMEFORMAT_DOCUMENTS);
         QString strDocumentGUIDs = QString::fromUtf8(data, data.length());
         CWizStdStringArray arrayDocumentGUID;
         ::WizSplitTextToArray(strDocumentGUIDs, ';', arrayDocumentGUID);
-        //
+
         if (CWizCategoryViewTagItem* item = dynamic_cast<CWizCategoryViewTagItem*>(itemAt(event->pos())))
         {
             foreach (const CString& strDocumentGUID, arrayDocumentGUID)
@@ -595,7 +614,7 @@ void CWizCategoryView::dropEvent(QDropEvent * event)
         else if (CWizCategoryViewFolderItem* item = dynamic_cast<CWizCategoryViewFolderItem*>(itemAt(event->pos())))
         {
             CWizFolder folder(m_db, item->location());
-            //
+
             foreach (const CString& strDocumentGUID, arrayDocumentGUID)
             {
                 WIZDOCUMENTDATA dataDocument;
@@ -611,6 +630,49 @@ void CWizCategoryView::dropEvent(QDropEvent * event)
         return;
     }
 }
+
+bool CWizCategoryView::validateDropDestination(const QPoint& p) const
+{
+    bool valid = false;
+    CWizCategoryViewFolderItem* itemFolder = dynamic_cast<CWizCategoryViewFolderItem*>(itemAt(p));
+    if (itemFolder) {
+        valid = true;
+    }
+
+    CWizCategoryViewTagItem* itemTag = dynamic_cast<CWizCategoryViewTagItem*>(itemAt(p));
+    if (itemTag) {
+        valid = true;
+    }
+
+    return valid;
+}
+
+void CWizCategoryView::paintEvent(QPaintEvent* event)
+{
+    QTreeWidget::paintEvent(event);
+
+    //QPainter painter(this);
+
+    //if (m_bDragHovered) {
+    //    QRect rect = visualItemRect(itemAt(m_dragHoveredPos));
+    //    QPen pen;
+    //    pen.setStyle(Qt::SolidLine);
+    //    pen.setCapStyle(Qt::RoundCap);
+    //    pen.setColor(Qt::blue);
+    //    pen.setWidth(2);
+    //    painter.setPen(pen);
+    //    painter.drawRect(10, 20, 80, 60);
+    //}
+
+    //QStyleOptionViewItemV4 option;
+    //option.initFrom(this);
+//
+    //style()->drawControl(QStyle::CE_ItemViewItem, &option, &painter, this);
+//
+    //style()->drawPrimitive(QStyle::PE_IndicatorBranch, &option, &painter, this);
+
+}
+
 
 CWizCategoryViewAllTagsItem* CWizCategoryView::findAllTags()
 {
@@ -828,11 +890,13 @@ CWizCategoryViewItem* CWizCategoryView::categoryItemFromIndex(const QModelIndex 
 {
     return dynamic_cast<CWizCategoryViewItem*>(itemFromIndex(index));
 }
+
 bool CWizCategoryView::isSeparatorItemByIndex(const QModelIndex &index) const
 {
     const CWizCategoryViewItem* pItem = categoryItemFromIndex(index);
     return NULL != dynamic_cast<const CWizCategoryViewSeparatorItem*>(pItem);
 }
+
 bool CWizCategoryView::isSeparatorItemByPosition(const QPoint& pt) const
 {
     const QTreeWidgetItem* pItem = itemAt(pt);
