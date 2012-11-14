@@ -609,7 +609,6 @@ void CWizNoteStyle::drawControl(ControlElement element, const QStyleOption *opti
                     pen.setColor(Qt::blue);
                     pen.setWidth(2);
                     painter->setPen(pen);
-                    //painter->drawRect(2, rect.y(), view->size().width() - 4, rect.height());
                     rect.setWidth(rect.width() - 2);
                     painter->drawRect(rect);
                 }

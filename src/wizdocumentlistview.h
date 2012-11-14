@@ -18,6 +18,13 @@ public:
     CWizDocumentListView(CWizExplorerApp& app, QWidget *parent = 0);
     virtual QSize sizeHint() const { return QSize(320, 1); }
 
+    virtual void contextMenuEvent(QContextMenuEvent* event);
+
+    virtual void startDrag(Qt::DropActions supportedActions);
+    virtual void dragEnterEvent(QDragEnterEvent *event);
+    virtual void dragMoveEvent(QDragMoveEvent *event);
+    virtual void dropEvent(QDropEvent * event);
+
 private:
     CWizExplorerApp& m_app;
 
@@ -50,14 +57,6 @@ public:
     WIZDOCUMENTDATA documentFromIndex(const QModelIndex &index) const;
     WIZABSTRACT documentAbstractFromIndex(const QModelIndex &index) const;
     CString documentTagsFromIndex(const QModelIndex &index) const;
-
-    virtual void contextMenuEvent(QContextMenuEvent * e);
-    //drag
-    virtual void startDrag(Qt::DropActions supportedActions);
-    //drop
-    virtual void dragEnterEvent(QDragEnterEvent *event);
-    virtual void dragMoveEvent(QDragMoveEvent *event);
-    virtual void dropEvent(QDropEvent * event);
 
 #ifndef Q_OS_MAC
     // used for smoothly scroll

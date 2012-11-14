@@ -285,29 +285,28 @@ void CWizDocumentListView::startDrag(Qt::DropActions supportedActions)
         drag->setPixmap(QPixmap::grabWindow(winId(), rect.x(), rect.y(), rect.width(), rect.height()));
     }
 
-    drag->exec(Qt::CopyAction);
+    setState(QAbstractItemView::DraggingState);
+    drag->exec();
 }
 
 void CWizDocumentListView::dragEnterEvent(QDragEnterEvent *event)
 {
     if (event->mimeData()->hasFormat(WIZNOTE_MIMEFORMAT_TAGS))
     {
-        event->accept();
-        return;
+        event->acceptProposedAction();
     }
 
-    QListWidget::dragEnterEvent(event);
+    //QListWidget::dragEnterEvent(event);
 }
 
 void CWizDocumentListView::dragMoveEvent(QDragMoveEvent *event)
 {
     if (event->mimeData()->hasFormat(WIZNOTE_MIMEFORMAT_TAGS))
     {
-        event->accept();
-        return;
+        event->acceptProposedAction();
     }
 
-    QListWidget::dragMoveEvent(event);
+    //QListWidget::dragMoveEvent(event);
 }
 
 void CWizDocumentListView::dropEvent(QDropEvent * event)
@@ -331,9 +330,17 @@ void CWizDocumentListView::dropEvent(QDropEvent * event)
             }
         }
 
-        event->accept();
+        event->acceptProposedAction();
+    }
+}
+
+void CWizDocumentListView::mouseMoveEvent(QMouseEvent* event)
+{
+    if (state() == QAbstractItemView::DragSelectingState) {
         return;
     }
+
+    QListWidget::mouseMoveEvent(event);
 }
 
 void CWizDocumentListView::on_tag_created(const WIZTAGDATA& tag)

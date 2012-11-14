@@ -558,11 +558,11 @@ void CWizCategoryView::dragEnterEvent(QDragEnterEvent *event)
 
     if (event->mimeData()->hasFormat(WIZNOTE_MIMEFORMAT_DOCUMENTS))
     {
-        event->accept();
-        return;
+        event->acceptProposedAction();
+        //return;
     }
 
-    QTreeWidget::dragEnterEvent(event);
+    //QTreeWidget::dragEnterEvent(event);
 }
 
 void CWizCategoryView::dragMoveEvent(QDragMoveEvent *event)
@@ -572,25 +572,29 @@ void CWizCategoryView::dragMoveEvent(QDragMoveEvent *event)
 
     if (event->mimeData()->hasFormat(WIZNOTE_MIMEFORMAT_DOCUMENTS))
     {
-        event->accept();
-        return;
+        event->acceptProposedAction();
+        //return;
     }
 
-    QTreeWidget::dragMoveEvent(event);
+    //QTreeWidget::dragMoveEvent(event);
 }
 
 void CWizCategoryView::dragLeaveEvent(QDragLeaveEvent* event)
 {
+    Q_UNUSED(event);
+
     m_bDragHovered = false;
     m_dragHoveredPos = QPoint();
     repaint();
 
-    QTreeWidget::dragLeaveEvent(event);
+    //QTreeWidget::dragLeaveEvent(event);
 }
 
 void CWizCategoryView::dropEvent(QDropEvent * event)
 {
     m_bDragHovered = false;
+    m_dragHoveredPos = QPoint();
+    repaint();
 
     if (event->mimeData()->hasFormat(WIZNOTE_MIMEFORMAT_DOCUMENTS))
     {
@@ -626,13 +630,15 @@ void CWizCategoryView::dropEvent(QDropEvent * event)
             }
         }
 
-        event->accept();
-        return;
+        event->acceptProposedAction();
     }
 }
 
 bool CWizCategoryView::validateDropDestination(const QPoint& p) const
 {
+    if (p.isNull())
+        return false;
+
     bool valid = false;
     CWizCategoryViewFolderItem* itemFolder = dynamic_cast<CWizCategoryViewFolderItem*>(itemAt(p));
     if (itemFolder) {
