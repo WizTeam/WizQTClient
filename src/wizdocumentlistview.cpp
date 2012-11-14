@@ -334,15 +334,6 @@ void CWizDocumentListView::dropEvent(QDropEvent * event)
     }
 }
 
-void CWizDocumentListView::mouseMoveEvent(QMouseEvent* event)
-{
-    if (state() == QAbstractItemView::DragSelectingState) {
-        return;
-    }
-
-    QListWidget::mouseMoveEvent(event);
-}
-
 void CWizDocumentListView::on_tag_created(const WIZTAGDATA& tag)
 {
     Q_UNUSED(tag);

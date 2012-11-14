@@ -167,7 +167,7 @@ CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
     QVBoxLayout* layout = new QVBoxLayout(this);
     setLayout(layout);
     layout->addWidget(m_client);
-    layout->setMargin(0);
+    layout->setContentsMargins(0, 0, 0, 0);
 
     m_title->setEditingDocument(m_editingDocument);
 
@@ -215,7 +215,7 @@ QWidget* CWizDocumentView::createClient()
     line->setStyleSheet("border-bottom-width:1;border-bottom-style:solid;border-bottom-color:#bbbbbb");
 
     layout->setSpacing(0);
-    layout->setMargin(0);
+    layout->setContentsMargins(0, 0, 0, 0);
     layout->addWidget(m_title);
     layout->addWidget(line);
     layout->addWidget(m_web);

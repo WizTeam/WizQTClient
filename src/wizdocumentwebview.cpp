@@ -12,6 +12,7 @@ CWizDocumentWebView::CWizDocumentWebView(CWizExplorerApp& app, QWidget* parent /
     , m_app(app)
     , m_bInited(false)
 {
+    setAcceptDrops(false);
     setAttribute(Qt::WA_InputMethodEnabled);
 }
 
@@ -150,9 +151,20 @@ void CWizDocumentWebView::on_editor_loadFinished(bool ok)
     }
 
     viewDocumentInEditor(m_bEditDocumentWhileFinished);
+    updateSize();
 }
 
 void CWizDocumentWebView::on_editor_linkClicked(const QUrl& url)
 {
     QDesktopServices::openUrl(url);
+}
+
+void CWizDocumentWebView::updateSize()
+{
+    ////force to re-align controls////
+    QRect rc = geometry();
+    setGeometry(rc.adjusted(0, 0, 0, 100));
+    qApp->processEvents(QEventLoop::AllEvents);
+    setGeometry(rc);
+    qApp->processEvents(QEventLoop::AllEvents);
 }

@@ -34,6 +34,8 @@ public:
     const WIZDOCUMENTDATA& document() { return m_data; }
     void reloadDocument();
 
+    void updateSize();
+
 public Q_SLOTS:
     void on_editor_populateJavaScriptWindowObject();
     void on_editor_loadFinished(bool ok);

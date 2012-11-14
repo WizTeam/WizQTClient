@@ -207,7 +207,7 @@ void MainWindow::initClient()
     client->setAutoFillBackground(true);
 
     QHBoxLayout* layout = new QHBoxLayout(client);
-    layout->setMargin(0);
+    layout->setContentsMargins(0, 0, 0, 0);
     client->setLayout(layout);
 
 #ifndef Q_OS_MAC
