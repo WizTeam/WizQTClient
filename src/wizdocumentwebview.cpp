@@ -113,6 +113,8 @@ void CWizDocumentWebView::setEditingDocument(bool editing)
     if (editing) {
         setFocus();
     }
+
+    updateSize();
 }
 
 void CWizDocumentWebView::reloadDocument()
@@ -135,6 +137,8 @@ bool CWizDocumentWebView::viewDocumentInEditor(bool editing)
         setFocus();
     }
 
+    updateSize();
+
     return ret;
 }
 
@@ -151,7 +155,6 @@ void CWizDocumentWebView::on_editor_loadFinished(bool ok)
     }
 
     viewDocumentInEditor(m_bEditDocumentWhileFinished);
-    updateSize();
 }
 
 void CWizDocumentWebView::on_editor_linkClicked(const QUrl& url)
@@ -161,10 +164,7 @@ void CWizDocumentWebView::on_editor_linkClicked(const QUrl& url)
 
 void CWizDocumentWebView::updateSize()
 {
-    ////force to re-align controls////
+    // show & hide ueditor toolbar cause UI issue, force update.
     QRect rc = geometry();
     setGeometry(rc.adjusted(0, 0, 0, 100));
-    qApp->processEvents(QEventLoop::AllEvents);
-    setGeometry(rc);
-    qApp->processEvents(QEventLoop::AllEvents);
 }

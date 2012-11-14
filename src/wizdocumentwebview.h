@@ -22,6 +22,8 @@ private:
 
 protected:
     void init();
+    void updateSize();
+
     bool viewDocumentInEditor(bool editing);
 
     virtual void inputMethodEvent(QInputMethodEvent* event);
@@ -34,7 +36,6 @@ public:
     const WIZDOCUMENTDATA& document() { return m_data; }
     void reloadDocument();
 
-    void updateSize();
 
 public Q_SLOTS:
     void on_editor_populateJavaScriptWindowObject();
