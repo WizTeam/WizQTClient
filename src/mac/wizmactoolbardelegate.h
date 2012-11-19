@@ -35,9 +35,11 @@ class CWizMacToolBarItem;
 - (NSArray *)toolbarDefaultItemIdentifiers:(NSToolbar*)tb;
 - (NSArray *)toolbarAllowedItemIdentifiers:(NSToolbar*)Toolbar;
 - (NSArray *)toolbarSelectableItemIdentifiers:(NSToolbar *)Toolbar;
-//
+
 - (BOOL) control:(NSControl *)control textShouldEndEditing:(NSText *)fieldEditor;
-//
+//- (BOOL) textShouldEndEditing:(NSText *) textObject;
+- (void) searchUsingToolbarSearchField:(id) sender;
+//- (void)mouseDown:(NSEvent *) event;
 
 - (void)addActionGroup:(QActionGroup *)actionGroup;
 - (void)addAction:(QAction *)action;

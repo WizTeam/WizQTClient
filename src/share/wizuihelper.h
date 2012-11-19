@@ -61,9 +61,10 @@ class CWizSplitter : public QSplitter
 {
 public:
     CWizSplitter(QWidget* parent = 0);
-    QSplitterHandle *createHandle();
 
 #ifndef Q_OS_MAC
+    QSplitterHandle *createHandle();
+
 private:
     int m_splitterWidth;
     QColor m_splitterColor;

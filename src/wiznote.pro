@@ -23,15 +23,18 @@ unix:!macx:QMAKE_LFLAGS = -Wl, -rpath, \'\$$ORIGIN/lib\'
 !macx:DESTDIR = ../share/wiznote/
 
 macx:HEADERS += \
-    mac/wizmactoolbardelegate.h \
-    mac/wizmactoolbar.h \
-    mac/wizmachelper.h
+    #mac/wizmactoolbardelegate.h \
+    #mac/wizmactoolbar.h \
+    #mac/wizmactoolbar2.h \
+    #mac/wizmachelper.h
 
-OBJECTIVE_SOURCES += share/wizuihelper_mac.mm \
-    mac/wizmactoolbardelegate.mm \
-    mac/wizmactoolbar.mm \
-    mac/wizmachelper.mm \
-    mac/wizmacicon.mm
+OBJECTIVE_SOURCES += \
+    #share/wizuihelper_mac.mm \
+    #mac/wizmactoolbardelegate.mm \
+    #mac/wizmactoolbar.mm \
+    #mac/wizmactoolbar2.mm \
+    #mac/wizmachelper.mm \
+    #mac/wizmacicon.mm
 
 TRANSLATIONS = wiznote_zh_CN.ts \
     wiznote_zh_TW.ts
@@ -93,7 +96,7 @@ SOURCES += main.cpp\
     wizdownloadobjectdatadialog.cpp \
     wizdocumenthistory.cpp \
     share/wizcreateaccount.cpp \
-    mac/wizmacactionhelper.cpp \
+    #mac/wizmacactionhelper.cpp \
     share/wizcommonui.cpp \
     share/wizanimateaction.cpp \
     wizattachmentlistwidget.cpp \
@@ -178,7 +181,7 @@ HEADERS += \
     wizdownloadobjectdatadialog.h \
     wizdocumenthistory.h \
     share/wizcreateaccount.h \
-    mac/wizmacactionhelper.h \
+    #mac/wizmacactionhelper.h \
     share/wizcommonui.h \
     share/wizanimateaction.h \
     wizattachmentlistwidget.h \
@@ -187,7 +190,7 @@ HEADERS += \
     share/wizfileiconprovider.h \
     share/wizwindowshelper.h \
     share/wizimagepushbutton.h \
-    mac/wizmacicon.h \
+    #mac/wizmacicon.h \
     wiztaglistwidget.h \
     wizconsoledialog.h \
     wizpreferencedialog.h \
@@ -203,7 +206,7 @@ HEADERS += \
     share/wizxml.h \
     share/wizsyncthread.h \
     wizstatusbar.h \
-    wizupgradenotifydialog.h
+    wizupgradenotifydialog.h \
 
 
 FORMS += \
@@ -218,3 +221,6 @@ FORMS += \
     ui/wizcreateaccountdialog.ui \
     ui/wizupdaterprogressdialog.ui \
     ui/wizupgradenotifydialog.ui
+
+OTHER_FILES += \
+

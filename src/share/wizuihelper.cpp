@@ -1,6 +1,6 @@
 #include "wizuihelper.h"
 
-#ifndef Q_OS_MAC
+//#ifndef Q_OS_MAC
 
 #include "share/wizmisc.h"
 #include <QLabel>
@@ -25,7 +25,7 @@ QWidget* createSearchWidget(CWizExplorerApp& app, CWizSearchBox* searchBox)
     widget->setLayout(layout);
 
     layout->setSpacing(0);
-    layout->setMargin(0);
+    layout->setContentsMargins(0, 0, 0, 0);
     layout->addWidget(iconLabel);
     layout->addWidget(editSearch);
     layout->setStretch(0, 0);
@@ -54,13 +54,13 @@ CWizSearchBox::CWizSearchBox(CWizExplorerApp& app, QWidget* parent /*= 0*/)
 
     QBoxLayout* layout = new QBoxLayout(QBoxLayout::TopToBottom, this);
     setLayout(layout);
-    layout->setMargin(0);
+    layout->setContentsMargins(0, 0, 0, 0);
 
     layout->addWidget(m_search);
     //layout->setStretch(0, 1);
 }
 
-#endif
+//#endif
 void CWizSearchBox::on_search_editingFinished()
 {
     emit doSearch(m_keywords);

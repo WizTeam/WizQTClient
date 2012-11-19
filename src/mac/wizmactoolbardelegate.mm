@@ -391,14 +391,20 @@ public:
 
         m_searchFieldOutlet = [[NSSearchField alloc] initWithFrame:NSRectFromString(@"{0, 0}, {150, 26}")];
         [m_searchFieldOutlet setDelegate: m_delegate];
+        [m_searchFieldOutlet setTarget: m_delegate];
+        [m_searchFieldOutlet setAction: @selector(searchUsingToolbarSearchField:)];
+
         // Use a custom view, a text field, for the search item
         [toolbarItem setView: m_searchFieldOutlet];
         [toolbarItem setMinSize:NSMakeSize(30, NSHeight([m_searchFieldOutlet frame]))];
         [toolbarItem setMaxSize:NSMakeSize(250,NSHeight([m_searchFieldOutlet frame]))];
-        //
-        //
+
+
+
         return toolbarItem;
     }
+
+
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -467,19 +473,70 @@ NSMutableArray *itemIdentifiers(const QList<CWizMacToolBarItem *> *items, bool c
     return [self itemIdentifierToItem:itemIdentifier];
 }
 
-- (BOOL) control:(NSControl *)control textShouldEndEditing:(NSText *)fieldEditor
+- (BOOL) resignFirstResponder
 {
-    Q_UNUSED(control);
+    return YES;
+}
+
+- (BOOL) becomeFirstResponder
+{
+    return NO;
+}
+
+- (void)controlTextDidEndEditing:(NSNotification *)aNotification
+{
+    NSWindow* window1 = [[NSApp windows] objectAtIndex:0];
+    NSWindow* window2 = [[NSApp windows] objectAtIndex:1];
+    NSWindow* window3 = [NSApp mainWindow];
+    //NSWindow* window4 = [self window];
+
+    //[[self window] makeFirstResponder:[self window]];
+    //[[NSApp mainWindow] makeFirstResponder:[NSApp mainWindow]];
+    return;
+}
+
+- (BOOL) control:(NSControl *)control textShouldEndEditing:(NSText *)fieldEditor
+//- (BOOL) textShouldEndEditing:(NSText *) textObject;
+{
+    //Q_UNUSED(control);
     //
     if (!m_toolbar)
         return YES;
-    //
-    QString str = WizToQString([fieldEditor string]);
-    //
-    m_qtToolBar->onSearchEndEditing(str);
-    //
+
+    //[[NSApp mainWindow] makeFirstResponder:nil];
+    //NSWindow* window1 = [[NSApp windows] objectAtIndex:1];
+    //[window1 makeFirstResponder:window1];
+
+
+    //NSWindow* window1 = [[NSApp windows] objectAtIndex:0];
+    //NSWindow* window2 = [[NSApp windows] objectAtIndex:1];
+    //NSWindow* window3 = [NSApp mainWindow];
+    //BOOL b1 = [window1 canBecomeKeyWindow];
+    //BOOL b2 = [window2 canBecomeKeyWindow];
+
+    //QString str = WizToQString([fieldEditor string]);
+
+    //m_qtToolBar->onSearchEndEditing(str);
+    //[[NSApp mainWindow] makeKeyWindow];
+
+    //m_qtToolBar->clearFocus();
+
     return YES;
 }
+
+- (void) searchUsingToolbarSearchField:(id) sender
+{
+    NSToolbarItem *item = reinterpret_cast<NSToolbarItem *>(sender);
+    NSString* searchString = [(NSTextField *)item stringValue];
+    QString str = WizToQString(searchString);
+    m_qtToolBar->onSearchEndEditing(str);
+}
+
+//- (void)mouseDown:(NSEvent *) event
+//{
+//    [[event window] makeFirstResponder: self];
+//    [super mouseDown: event];
+//}
 
 
 - (IBAction)itemClicked:(id)sender

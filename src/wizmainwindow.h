@@ -5,7 +5,7 @@
 
 #include "wizdef.h"
 
-#include "mac/wizmactoolbar.h"
+#include "share/wizuihelper.h"
 
 #include "share/wizsettings.h"
 #include "share/wizsyncthread.h"
@@ -79,13 +79,17 @@ private:
     CWizConsoleDialog* m_console;
     QPointer<CWizUpgradeThread> m_upgrade;
 
-#ifndef Q_OS_MAC
+//#ifndef Q_OS_MAC
     QToolBar* m_toolBar;
+
+#ifndef Q_OS_MAC
     QLabel* m_labelNotice;
     QAction* m_optionsAction;
-#else
-    CWizMacToolBar* m_toolBar;
 #endif
+
+//#else
+//    CWizMacToolBar* m_toolBar;
+//#endif
 
     QMenuBar* m_menuBar;
     CWizStatusBar* m_statusBar;

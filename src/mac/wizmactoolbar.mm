@@ -71,6 +71,7 @@ CWizMacToolBar::CWizMacToolBar(QWidget *parent)
     //[d->Toolbar setSizeMode: NSToolbarSizeModeSmall];
     [d->toolbar setDelegate: d->delegate];
 
+    setFocusPolicy(Qt::StrongFocus);
     d->m_targetWindow = 0;
 }
 

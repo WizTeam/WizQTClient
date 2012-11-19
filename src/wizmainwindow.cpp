@@ -32,6 +32,8 @@ MainWindow::MainWindow(CWizDatabase& db, QWidget *parent)
     , m_toolBar(new QToolBar("Main", this))
     , m_labelNotice(NULL)
     , m_optionsAction(NULL)
+    #else
+    , m_toolBar(new QToolBar("Main", this))
     #endif
     , m_menuBar(new QMenuBar(this))
     , m_statusBar(new CWizStatusBar(*this, this))
@@ -69,6 +71,7 @@ MainWindow::MainWindow(CWizDatabase& db, QWidget *parent)
     initClient();
 
     setWindowTitle(tr("WizNote"));
+    setUnifiedTitleAndToolBarOnMac(true);
     center();
 }
 
@@ -131,7 +134,20 @@ void MainWindow::initMenuBar()
 
 void MainWindow::initToolBar()
 {
-#ifdef Q_OS_MAC
+//#ifdef Q_OS_MAC
+//    addToolBar(m_toolBar);
+//
+//    m_toolBar->addWidget(new CWizFixedSpacer(QSize(20, 1), this));
+//    m_toolBar->addAction(m_actions->actionFromName("actionSync"));
+//
+//    m_toolBar->addWidget(new CWizFixedSpacer(QSize(20, 1), this));
+//    m_toolBar->addAction(m_actions->actionFromName("actionNewNote"));
+//    m_toolBar->addAction(m_actions->actionFromName("actionDeleteCurrentNote"));
+//    m_toolBar->addWidget(new CWizSpacer(this));
+
+
+
+#if 0
     CWizMacToolBar* m_toolBar = new CWizMacToolBar(this);
 
     //QActionGroup* groupNavigate = new QActionGroup(this);
@@ -153,7 +169,9 @@ void MainWindow::initToolBar()
     connect(m_toolBar, SIGNAL(doSearch(const QString&)), SLOT(on_search_doSearch(const QString&)));
 
     m_toolBar->showInWindow(this);
-#else
+#endif
+
+//#else
     addToolBar(m_toolBar);
     m_toolBar->setMovable(false);
     m_toolBar->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
@@ -181,16 +199,18 @@ void MainWindow::initToolBar()
     //connect(searchBox, SIGNAL(doSearch(const QString&)), this, SLOT(on_search_doSearch(const QString&)));
     //m_toolBar->addWidget(searchBox);
 
+#ifndef Q_OS_MAC
     m_toolBar->addWidget(new CWizFixedSpacer(QSize(20, 1), m_toolBar));
     m_toolBar->addAction(m_actions->actionFromName("actionPopupMainMenu"));
     m_toolBar->addWidget(new CWizFixedSpacer(QSize(2, 1), m_toolBar));
+#endif
 
     m_toolBar->setStyle(WizGetStyle(m_settings->skin()));
 
     CWizSettings settings(::WizGetSkinResourcePath(m_settings->skin()) + "skin.ini");
     m_toolBar->layout()->setMargin(settings.GetInt("ToolBar", "Margin", m_toolBar->layout()->margin()));
 
-#endif // Q_OS_MAC
+//#endif // Q_OS_MAC
 
     //resetNotice();
 }
@@ -231,23 +251,23 @@ void MainWindow::initClient()
 #ifndef Q_OS_MAC
     splitter->addWidget(WizInitWidgetMarginsEx(m_settings->skin(), m_category, "Category"));
     //splitter->addWidget(WizInitWidgetMarginsEx(m_documents, "Documents"));
-
-    CWizSearchBox* searchBox = new CWizSearchBox(*this, this);
-    connect(searchBox, SIGNAL(doSearch(const QString&)), SLOT(on_search_doSearch(const QString&)));
 #else
     splitter->addWidget(m_category);
     //splitter->addWidget(m_documents);
 #endif
 
     QVBoxLayout* layoutDocuments = new QVBoxLayout(client);
-    layoutDocuments->setContentsMargins(0, 0, 0, 0);
+    layoutDocuments->setContentsMargins(1, 1, 1, 1);
+    layoutDocuments->setSpacing(3);
 
     QWidget* documents = new QWidget(splitter);
     documents->setLayout(layoutDocuments);
 
-#ifndef Q_OS_MAC
+//#ifndef Q_OS_MAC
+    CWizSearchBox* searchBox = new CWizSearchBox(*this, this);
+    connect(searchBox, SIGNAL(doSearch(const QString&)), SLOT(on_search_doSearch(const QString&)));
     layoutDocuments->addWidget(searchBox);
-#endif Q_OS_MAC
+//#endif Q_OS_MAC
 
     layoutDocuments->addWidget(m_documents);
 
