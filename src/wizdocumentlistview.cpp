@@ -251,6 +251,26 @@ void CWizDocumentListView::contextMenuEvent(QContextMenuEvent * e)
     m_menu->popup(mapToGlobal(e->pos()));
 }
 
+void CWizDocumentListView::mousePressEvent(QMouseEvent* event)
+{
+    if (event->button() == Qt::LeftButton) {
+        m_dragStartPosition.setX(event->pos().x());
+        m_dragStartPosition.setY(event->pos().y());
+    }
+
+    QListWidget::mousePressEvent(event);
+}
+
+void CWizDocumentListView::mouseMoveEvent(QMouseEvent* event)
+{
+    if ((event->buttons() & Qt::LeftButton) && \
+            (event->pos() - m_dragStartPosition).manhattanLength() > QApplication::startDragDistance()) {
+        setState(QAbstractItemView::DraggingState);
+    }
+
+    QListWidget::mouseMoveEvent(event);
+}
+
 
 void CWizDocumentListView::startDrag(Qt::DropActions supportedActions)
 {
@@ -285,7 +305,6 @@ void CWizDocumentListView::startDrag(Qt::DropActions supportedActions)
         drag->setPixmap(QPixmap::grabWindow(winId(), rect.x(), rect.y(), rect.width(), rect.height()));
     }
 
-    setState(QAbstractItemView::DraggingState);
     drag->exec();
 }
 

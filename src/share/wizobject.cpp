@@ -9,19 +9,19 @@ WIZOBJECTDATA::WIZOBJECTDATA()
 }
 
 WIZOBJECTDATA::WIZOBJECTDATA(const WIZDOCUMENTDATA& data)
-    : eObjectType(wizobjectDocument)
 {
     strDisplayName = data.strTitle;
     strObjectGUID = data.strGUID;
     tTime = data.tDataModified;
+    eObjectType = wizobjectDocument;
 }
 
 WIZOBJECTDATA::WIZOBJECTDATA(const WIZDOCUMENTATTACHMENTDATA& data)
-    : eObjectType(wizobjectDocumentAttachment)
 {
     strDisplayName = data.strName;
     strObjectGUID = data.strGUID;
     tTime = data.tDataModified;
+    eObjectType = wizobjectDocumentAttachment;
 }
 
 

@@ -432,7 +432,6 @@ IWizGlobal::IWizGlobal()
 CString IWizGlobal::GetTempPath()
 {
     CString path = QDir::tempPath();
-    //WizPathAddBackslash(path);
 
     path += "/WizNote/";
     ::WizEnsurePathExists(path);
@@ -1593,11 +1592,10 @@ BOOL WizBase64Encode(const QByteArray& arrayData, QString& str)
     return TRUE;
 }
 
-BOOL WizBase64Decode(const QString& str, QByteArray& arrayData)
+bool WizBase64Decode(const QString& str, QByteArray& arrayData)
 {
     arrayData = QByteArray::fromBase64(str.toUtf8());
-
-    return TRUE;
+    return true;
 }
 
 CString WizStringToBase64(const CString& strSource)
@@ -1849,35 +1847,45 @@ CString WizGetCommandLineValue(const CString& strCommandLine, const CString& str
     return WizStringArrayGetValue(arrayLine, strKey);
 }
 
-BOOL WizSaveDataToFile(const CString& strFileName, const QByteArray& arrayData)
+bool WizSaveDataToFile(const QString& strFileName, const QByteArray& arrayData)
 {
     QFile file(strFileName);
-    if (!file.open(QIODevice::WriteOnly | QIODevice::Truncate))
-    {
-        return FALSE;
+    if (!file.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
+        TOLOG("Can't open file when save data to file");
+        return false;
     }
-    //
-    QDataStream out(&file);   // we will serialize the data into the file
-    //
-    out << arrayData;
-    return TRUE;
+
+    QDataStream out(&file);
+    int retLen = out.writeRawData(arrayData.constData(), arrayData.length());
+    if (retLen == -1) {
+        TOLOG("Error occured when save data to file");
+        return false;
+    } else if (retLen != arrayData.length()) {
+        TOLOG("not all data saved when save data to file");
+        return false;
+    }
+
+    return true;
 }
 
-BOOL WizLoadDataFromFile(const CString& strFileName, QByteArray& arrayData)
+bool WizLoadDataFromFile(const QString& strFileName, QByteArray& arrayData)
 {
-    arrayData.clear();
-    if (!PathFileExists(strFileName))
-        return FALSE;
-    if (0 == ::WizGetFileSize(strFileName))
-        return TRUE;
-    //
     QFile file(strFileName);
-    if (!file.open(QFile::ReadOnly))
-        return FALSE;
-    //
-    arrayData = file.readAll();
-    //
-    return TRUE;
+    if (!file.exists()) {
+        TOLOG("File not exists when load data from file");
+        return false;
+    }
+
+    if (!file.open(QFile::ReadOnly)) {
+        TOLOG("Can't open file when load data from file");
+        return false;
+    }
+
+    arrayData.clear();
+    arrayData.append(file.readAll());
+    file.close();
+
+    return true;
 }
 
 CWaitCursor::CWaitCursor()

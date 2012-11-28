@@ -143,6 +143,7 @@ void CIndex::Close()
 }
 
 const CString g_strAccountSection = "Account";
+const CString g_strCertSection = "Cert";
 
 BOOL CIndex::GetUserName(CString& strUserName)
 {
@@ -169,49 +170,49 @@ BOOL CIndex::SetUserName(const CString& strUserName)
 	return TRUE;
 }
 
-CString CIndex::GetEncryptedPassword()
+QString CIndex::GetEncryptedPassword()
 {
     return GetMetaDef(g_strAccountSection, "Password");
 }
 
-BOOL CIndex::GetPassword(CString& strPassword)
+bool CIndex::GetPassword(CString& strPassword)
 {
-	BOOL bExists = FALSE;
+    bool bExists = false;
     if (!GetMeta(g_strAccountSection, "Password", strPassword, "", &bExists))
 	{
-		TOLOG(_T("Failed to get password while GetPassword"));
-		return FALSE;
+        TOLOG("Failed to get password while GetPassword");
+        return false;
     }
 
 	if (strPassword.IsEmpty())
-        return TRUE;
+        return true;
 
     strPassword = WizDecryptPassword(strPassword);
 
-	return TRUE;
+    return true;
 }
 
-BOOL CIndex::SetPassword(const CString& strOldPassword, const CString& strPassword)
+bool CIndex::SetPassword(const QString& strOldPassword, const QString& strPassword)
 {
-	CString strOld;
+    CString strOld;
 	if (!GetPassword(strOld))
 	{
         TOLOG("Failed to get old password while changing password");
-		return FALSE;
+        return false;
 	}
     if (strOld != strOldPassword)
-	{
+    {
         TOLOG("Invalid password while changing password");
-		return FALSE;
+        return false;
     }
 
     if (!SetMeta(g_strAccountSection, "Password", WizEncryptPassword(strPassword)))
 	{
         TOLOG("Failed to set new password while changing password");
-		return FALSE;
+        return false;
     }
 
-	return TRUE;
+    return true;
 }
 
 UINT CIndex::GetPasswordFalgs()
@@ -223,6 +224,27 @@ UINT CIndex::GetPasswordFalgs()
 BOOL CIndex::SetPasswordFalgs(UINT nFlags)
 {
     return SetMeta(g_strAccountSection, "PasswordFlags", WizIntToStr(int(nFlags)));
+}
+
+bool CIndex::GetUserCert(QString& strN, QString& stre, QString& strd, QString& strHint)
+{
+    strN = GetMetaDef(g_strCertSection, "N");
+    stre = GetMetaDef(g_strCertSection, "E");
+    strd = GetMetaDef(g_strCertSection, "D");
+    strHint = GetMetaDef(g_strCertSection, "Hint");
+
+    if (strN.isEmpty() || stre.isEmpty() || strd.isEmpty())
+        return false;
+
+    return true;
+}
+
+bool CIndex::SetUserCert(const QString& strN, const QString& stre, const QString& strd, const QString& strHint)
+{
+    return SetMeta(g_strCertSection, "N", strN) \
+            && SetMeta(g_strCertSection, "E", stre) \
+            && SetMeta(g_strCertSection, "D", strd) \
+            && SetMeta(g_strCertSection, "Hint", strHint);
 }
 
 CppSQLite3Query CIndex::Query(const CString& strSQL)

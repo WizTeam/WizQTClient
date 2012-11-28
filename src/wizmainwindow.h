@@ -4,14 +4,17 @@
 #include <QtGui>
 
 #include "wizdef.h"
-
 #include "share/wizuihelper.h"
-
 #include "share/wizsettings.h"
 #include "share/wizsyncthread.h"
-
 #include "wizupdater.h"
 #include "wizconsoledialog.h"
+#include "wizdocumentview.h"
+#include "wizcertmanager.h"
+#include "wizusercipherform.h"
+#include "wizdownloadobjectdatadialog.h"
+#include "wizcategoryview.h"
+#include "wizdocumentlistview.h"
 
 class CWizCategoryView;
 class CWizDocumentListView;
@@ -48,51 +51,23 @@ protected:
     virtual void showEvent(QShowEvent* event);
     virtual void closeEvent(QCloseEvent* event);
 
-public:
-    virtual QWidget* mainWindow() { return this; }
-    virtual QObject* object() { return this; }
-    virtual CWizDatabase& database() { return m_db; }
-    virtual CWizCategoryView& category() { return *m_category; }
-    virtual CWizUserSettings& userSettings() { return *m_settings; }
-
-    //WizExplorerApp API:
-    QObject* Window() { return this; }
-    Q_PROPERTY(QObject* Window READ Window)
-
-    QObject* CategoryCtrl();
-    Q_PROPERTY(QObject* CategoryCtrl READ CategoryCtrl)
-
-    QObject* DocumentsCtrl();
-    Q_PROPERTY(QObject* DocumentsCtrl READ DocumentsCtrl)
-
-    QObject* Database() { return &m_db; }
-    Q_PROPERTY(QObject* Database READ Database)
-
-    Q_INVOKABLE QObject* CreateWizObject(const QString& strObjectID);
-    Q_INVOKABLE void SetDocumentModified(bool modified);
-    Q_INVOKABLE void SetSavingDocument(bool saving);
-
 private:
     CWizDatabase& m_db;
     CWizUserSettings* m_settings;
     QPointer<CWizSyncThread> m_sync;
     CWizConsoleDialog* m_console;
     QPointer<CWizUpgradeThread> m_upgrade;
-
-//#ifndef Q_OS_MAC
+    QPointer<CWizCertManager> m_certManager;
+    QPointer<CWizUserCipherForm> m_cipherForm;
+    QPointer<CWizDownloadObjectDataDialog> m_objectDownloadDialog;
     QToolBar* m_toolBar;
+    QMenuBar* m_menuBar;
+    CWizStatusBar* m_statusBar;
 
 #ifndef Q_OS_MAC
     QLabel* m_labelNotice;
     QAction* m_optionsAction;
 #endif
-
-//#else
-//    CWizMacToolBar* m_toolBar;
-//#endif
-
-    QMenuBar* m_menuBar;
-    CWizStatusBar* m_statusBar;
 
     CWizActions* m_actions;
     CWizCategoryView* m_category;
@@ -121,6 +96,13 @@ private:
     void initStatusBar();
 
 public:
+    // CWizDocument passthrough methods
+    QWidget* client() const { return m_doc->client(); }
+    void showClient(bool visible) const { return m_doc->showClient(visible); }
+
+    CWizUserCipherForm* cipherForm() const { return m_cipherForm; }
+    CWizDownloadObjectDataDialog* objectDownloadDialog() const { return m_objectDownloadDialog; }
+
     void viewDocument(const WIZDOCUMENTDATA& data, bool addToHistory);
     void locateDocument(const WIZDOCUMENTDATA& data);
 
@@ -128,10 +110,6 @@ public:
     CWizFixedSpacer* findFixedSpacer(int index);
     void adjustToolBarSpacerToPos(int index, int pos);
 #endif
-
-private:
-    QObject* CategoryCtrlObject();
-    QObject* DocumentsCtrlObject();
 
 public Q_SLOTS:
     void on_actionExit_triggered();
@@ -169,6 +147,32 @@ public Q_SLOTS:
     void on_readyQuit_timeout();
 
     void on_upgradeThread_finished();
+
+public:
+    // WizExplorerApp pointer
+    virtual QWidget* mainWindow() { return this; }
+    virtual QObject* object() { return this; }
+    virtual CWizDatabase& database() { return m_db; }
+    virtual CWizCategoryView& category() { return *m_category; }
+    virtual CWizUserSettings& userSettings() { return *m_settings; }
+
+    //WizExplorerApp API:
+    QObject* Window() { return this; }
+    Q_PROPERTY(QObject* Window READ Window)
+
+    QObject* CategoryCtrl() { return m_category; }
+    Q_PROPERTY(QObject* CategoryCtrl READ CategoryCtrl)
+
+    QObject* DocumentsCtrl() { return m_documents; }
+    Q_PROPERTY(QObject* DocumentsCtrl READ DocumentsCtrl)
+
+    QObject* Database() { return &m_db; }
+    Q_PROPERTY(QObject* Database READ Database)
+
+    Q_INVOKABLE QObject* CreateWizObject(const QString& strObjectID);
+    Q_INVOKABLE void SetDocumentModified(bool modified);
+    Q_INVOKABLE void SetSavingDocument(bool saving);
+
 };
 
 #endif // WIZMAINWINDOW_H

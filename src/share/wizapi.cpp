@@ -1,5 +1,6 @@
 #include "wizapi.h"
 #include <QFile>
+#include <QDebug>
 #include "zip/wizzip.h"
 #include "wizsettings.h"
 
@@ -7,13 +8,9 @@
 #define MD5PART 10*1024
 #define CONSTDEFAULTCOUNT 200
 
-CWizApiBase::CWizApiBase(const CString& strAccountsApiURL)
+CWizApiBase::CWizApiBase(const CString& strAccountsApiURL /* = WIZ_API_URL*/)
     : m_server(strAccountsApiURL)
 {
-    //qRegisterMetaType<WIZTAGDATA>("WIZTAGDATA");
-    //qRegisterMetaType<WIZDOCUMENTDATA>("WIZDOCUMENTDATA");
-    //qRegisterMetaType<WIZDOCUMENTATTACHMENTDATA>("WIZDOCUMENTATTACHMENTDATA");
-
     resetProxy();
 
     connect(&m_server, SIGNAL(xmlRpcReturn(const QString&, CWizXmlRpcValue&)), \
@@ -63,6 +60,10 @@ void CWizApiBase::onXmlRpcReturn(const QString& strMethodName, CWizXmlRpcValue& 
     else if (strMethodName == SyncMethod_GetUserInfo)
     {
         onGetUserInfo(ret);
+    }
+    else if (strMethodName == SyncMethod_GetUserCert)
+    {
+        onGetUserCert(ret);
     }
     else
     {
@@ -128,11 +129,9 @@ void CWizApiBase::onClientLogin()
 
 bool CWizApiBase::callClientLogout()
 {
-    if (m_user.strToken.isEmpty())
-        return false;
+    Q_ASSERT(!m_user.strToken.isEmpty());
 
     CWizApiTokenParam param(*this);
-
     return callXmlRpc(SyncMethod_ClientLogout, &param);
 }
 
@@ -148,6 +147,20 @@ bool CWizApiBase::callGetUserInfo()
 }
 
 void CWizApiBase::onGetUserInfo(CWizXmlRpcValue& ret)
+{
+    Q_UNUSED(ret);
+}
+
+bool CWizApiBase::callGetUserCert(const QString& strUserId, const QString& strPassword)
+{
+    CWizApiParamBase param;
+    param.AddString("user_id", MakeXmlRpcUserId(strUserId));
+    param.AddString("password", MakeXmlRpcPassword(strPassword));
+
+    return callXmlRpc(SyncMethod_GetUserCert, &param);
+}
+
+void CWizApiBase::onGetUserCert(CWizXmlRpcValue& ret)
 {
     Q_UNUSED(ret);
 }
@@ -177,7 +190,7 @@ void CWizApiBase::onCreateAccount()
 
 }
 
-CWizApi::CWizApi(CWizDatabase& db, const CString& strAccountsApiURL)
+CWizApi::CWizApi(CWizDatabase& db, const CString& strAccountsApiURL /* = WIZ_API_URL */)
     : CWizApiBase(strAccountsApiURL)
     , m_db(db)
     , m_nCurrentObjectAllSize(0)
@@ -361,6 +374,8 @@ bool CWizApi::callDownloadDataPart(const CString& strObjectGUID, const CString& 
 void CWizApi::onDownloadDataPart(const WIZOBJECTPARTDATA& data)
 {
     m_bDownloadingObject = false;
+
+    // TODO: verify MD5 of data
 
     m_currentObjectData.arrayData.append(data.arrayData);
 
@@ -835,9 +850,10 @@ unsigned int CWizApi::getPartSize() const
 
 bool CWizApi::downloadNextPartData()
 {
+    int size = m_currentObjectData.arrayData.size();
     return callDownloadDataPart(m_currentObjectData.strObjectGUID,
                                 WIZOBJECTDATA::ObjectTypeToTypeString(m_currentObjectData.eObjectType),
-                                m_currentObjectData.arrayData.size());
+                                size);
 }
 
 bool CWizApi::uploadNextPartData()
@@ -901,7 +917,7 @@ bool WIZUSERINFO::LoadFromXmlRpc(CWizXmlRpcValue& val)
     CWizXmlRpcStructValue* pStruct = dynamic_cast<CWizXmlRpcStructValue*>(&val);
     if (!pStruct)
     {
-        TOLOG(_T("Failed to cast CWizXmlRpcValue to CWizXmlRpcStructValue"));
+        TOLOG("Failed to cast CWizXmlRpcValue to CWizXmlRpcStructValue");
         return false;
     }
 
@@ -923,7 +939,7 @@ bool WIZUSERINFO::LoadFromXmlRpc(CWizXmlRpcValue& val)
     data.GetInt("user_points", nUserPoints);
     data.GetStr("sns_list", strSNSList);
     data.GetInt("enable_group", bEnableGroup);
-    data.GetStr(_T("notice"), strNotice);
+    data.GetStr("notice", strNotice);
 
     if (CWizXmlRpcStructValue* pUser = data.GetStruct(_T("user")))
     {
@@ -938,6 +954,31 @@ bool WIZUSERINFO::LoadFromXmlRpc(CWizXmlRpcValue& val)
         && !strDatabaseServer.isEmpty();
 }
 
+WIZUSERCERT::WIZUSERCERT()
+{
+}
+
+bool WIZUSERCERT::LoadFromXmlRpc(CWizXmlRpcValue& val)
+{
+    CWizXmlRpcStructValue* pStruct = dynamic_cast<CWizXmlRpcStructValue*>(&val);
+    if (!pStruct)
+    {
+        TOLOG("Failed to cast CWizXmlRpcValue to CWizXmlRpcStructValue while onGetUserCert");
+        return false;
+    }
+
+    CWizXmlRpcStructValue& data = *pStruct;
+    data.GetStr("n", strN);
+    data.GetStr("e", stre);
+    data.GetStr("d", strd);
+    data.GetStr("hint", strHint);
+
+    qDebug() << strN;
+    qDebug() << stre;
+    qDebug() << strd;
+
+    return true;
+}
 
 
 WIZKBINFO::WIZKBINFO()
@@ -985,7 +1026,7 @@ bool WIZOBJECTPARTDATA::LoadFromXmlRpc(CWizXmlRpcStructValue& data)
         TOLOG(_T("Fault error, data is null!"));
         return false;
     }
-    //
+
     return true;
 }
 

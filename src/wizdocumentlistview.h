@@ -19,6 +19,8 @@ public:
     virtual QSize sizeHint() const { return QSize(320, 1); }
 
     virtual void contextMenuEvent(QContextMenuEvent* event);
+    virtual void mousePressEvent(QMouseEvent* event);
+    virtual void mouseMoveEvent(QMouseEvent* event);
 
     virtual void startDrag(Qt::DropActions supportedActions);
     virtual void dragEnterEvent(QDragEnterEvent *event);
@@ -32,6 +34,8 @@ private:
     CWizCategoryView& m_category;
     QMenu* m_menu;
     CWizTagListWidget* m_tagList;
+
+    QPoint m_dragStartPosition;
 
 #ifndef Q_OS_MAC
     // used for smoothly scroll

@@ -308,8 +308,8 @@ void CWizFolder::MoveToLocation(const CString& strDestLocation)
 
 
 CWizDatabase::CWizDatabase()
+    : m_ziwReader(new CWizZiwReader())
 {
-
 }
 
 bool CWizDatabase::Open(const QString& strUserId, const QString& strPassword)
@@ -676,8 +676,7 @@ bool CWizDatabase::UpdateDocumentData(WIZDOCUMENTDATA& data, const QString& strH
 {
     CString strProcessedHtml(strHtml);
     CString strResourcePath = GetResoucePathFromFile(strURL);
-    if (!strResourcePath.IsEmpty())
-    {
+    if (!strResourcePath.IsEmpty()) {
         QUrl urlResource = QUrl::fromLocalFile(strResourcePath);
         strProcessedHtml.replace(urlResource.toString(), "index_files/");
     }
@@ -686,9 +685,22 @@ bool CWizDatabase::UpdateDocumentData(WIZDOCUMENTDATA& data, const QString& strH
     CString strMetaText = doc.GetMetaText();
 
     CString strZipFileName = GetDocumentFileName(data.strGUID);
-    bool bZip = ::WizHtml2Zip(strURL, strProcessedHtml, strResourcePath, nFlags, strMetaText, strZipFileName);
-    if (!bZip)
-        return false;
+    if (!data.nProtected) {
+        bool bZip = ::WizHtml2Zip(strURL, strProcessedHtml, strResourcePath, nFlags, strMetaText, strZipFileName);
+        if (!bZip) {
+            return false;
+        }
+    } else {
+        CString strTempFile = ::WizGlobal()->GetTempPath() + data.strGUID + "-decrypted";
+        bool bZip = ::WizHtml2Zip(strURL, strProcessedHtml, strResourcePath, nFlags, strMetaText, strTempFile);
+        if (!bZip) {
+            return false;
+        }
+
+        if (!m_ziwReader->encryptDataToTempFile(strTempFile, strZipFileName)) {
+            return false;
+        }
+    }
 
     SetObjectDataDownloaded(data.strGUID, "document", true);
 
@@ -887,6 +899,7 @@ bool CWizDatabase::AddAttachment(const WIZDOCUMENTDATA& document, const CString&
         return false;
     }
 
+    SetAttachmentDataDownloaded(dataRet.strGUID, true);
     UpdateDocumentAttachmentCount(document.strGUID);
 
     return true;
@@ -1002,12 +1015,18 @@ bool CWizDatabase::SaveCompressedAttachmentData(const CString& strDocumentGUID, 
 bool CWizDatabase::UpdateDocumentAbstract(const CString& strDocumentGUID)
 {
     CString strFileName = GetDocumentFileName(strDocumentGUID);
-    if (!PathFileExists(strFileName))
+    if (!PathFileExists(strFileName)) {
         return false;
+    }
 
     WIZDOCUMENTDATA data;
-    if (!DocumentFromGUID(strDocumentGUID, data))
+    if (!DocumentFromGUID(strDocumentGUID, data)) {
         return false;
+    }
+
+    if (data.nProtected) {
+        return false;
+    }
 
     CString strHtmlFileName;
     if (!DocumentToTempHtmlFile(data, strHtmlFileName))
@@ -1146,16 +1165,46 @@ bool CWizDatabase::GetDocumentsByTag(const WIZTAGDATA& tag, CWizDocumentDataArra
     return CIndex::GetDocumentsByTag("", tag, arrayDocument);
 }
 
+bool CWizDatabase::loadUserCert()
+{
+    QString strN, stre, strEncryptedd, strHint;
+    if (!GetUserCert(strN, stre, strEncryptedd, strHint)) {
+        TOLOG("can't get user cert from db");
+        return false;
+    }
+
+    m_ziwReader->setRSAKeys(strN.toUtf8(), stre.toUtf8(), strEncryptedd.toUtf8(), strHint.toUtf8());
+    return true;
+}
+
 bool CWizDatabase::DocumentToTempHtmlFile(const WIZDOCUMENTDATA& document, QString& strTempHtmlFileName)
 {
     CString strZipFileName = GetDocumentFileName(document.strGUID);
-    if (!PathFileExists(strZipFileName))
-    {
+    if (!PathFileExists(strZipFileName)) {
         return false;
     }
 
     CString strTempPath = ::WizGlobal()->GetTempPath() + document.strGUID + "/";
     ::WizEnsurePathExists(strTempPath);
+
+    if (document.nProtected) {
+        if (userCipher().isEmpty()) {
+            return false;
+        }
+
+        if (!m_ziwReader->setFile(strZipFileName)) {
+            return false;
+        }
+
+        strZipFileName = ::WizGlobal()->GetTempPath() + document.strGUID + "-decrypted";
+        QFile::remove(strZipFileName);
+
+        if (!m_ziwReader->decryptDataToTempFile(strZipFileName)) {
+            // force clear usercipher
+            m_ziwReader->setUserCipher(QString());
+            return false;
+        }
+    }
 
     CWizUnzipFile::extractZip(strZipFileName, strTempPath);
 

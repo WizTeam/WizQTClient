@@ -2,18 +2,35 @@
 
 #include <QtGui>
 #include <QtWebKit>
+#include <QMessageBox>
 
 #include "share/wizmisc.h"
-#include "share/wizdownloadobjectdata.h"
-
+#include "wizmainwindow.h"
 
 CWizDocumentWebView::CWizDocumentWebView(CWizExplorerApp& app, QWidget* parent /*= 0*/)
     : QWebView(parent)
     , m_app(app)
-    , m_bInited(false)
+    , m_db(app.database())
+    , m_bEditorInited(false)
 {
     setAcceptDrops(false);
+
+    settings()->setAttribute(QWebSettings::JavascriptCanAccessClipboard, true);
+    settings()->setAttribute(QWebSettings::PluginsEnabled, true);
+
     setAttribute(Qt::WA_InputMethodEnabled);
+    connect(this, SIGNAL(selectionChanged()), SLOT(onSelectionChanged()));
+
+    // FIXME: stub here
+    m_timerAutoSave.setInterval(5*60*1000);
+    connect(&m_timerAutoSave, SIGNAL(timeout()), SLOT(onTimerAutoSaveTimout()));
+
+    MainWindow* mainWindow = qobject_cast<MainWindow *>(m_app.mainWindow());
+    m_cipherDialog = mainWindow->cipherForm();
+    connect(m_cipherDialog, SIGNAL(accepted()), SLOT(onCipherDialogClosed()));
+
+    m_downloadDialog = mainWindow->objectDownloadDialog();
+    connect(m_downloadDialog, SIGNAL(finished(int)), SLOT(onDownloadDialogClosed(int)));
 }
 
 // This is bug of QWebView: can't receive input method commit event
@@ -35,9 +52,19 @@ void CWizDocumentWebView::keyPressEvent(QKeyEvent* event)
     QWebView::keyPressEvent(event);
 }
 
-void CWizDocumentWebView::init()
+void CWizDocumentWebView::onSelectionChanged()
 {
-    if (m_bInited)
+    update();
+}
+
+void CWizDocumentWebView::onTimerAutoSaveTimout()
+{
+    saveDocument(false);
+}
+
+void CWizDocumentWebView::initEditorAndLoadDocument()
+{
+    if (m_bEditorInited)
         return;
 
     QString strFileName = WizGetResourcesPath() + "files/editor/index.html";
@@ -57,12 +84,12 @@ void CWizDocumentWebView::init()
             SLOT(on_editor_linkClicked(const QUrl&)));
 
     setHtml(strHtml, url);
-
-    m_bInited = true;
 }
 
 bool CWizDocumentWebView::saveDocument(bool force)
 {
+    Q_ASSERT(m_bEditorInited);
+
     QString strScript("saveDocument(%1);");
     strScript = strScript.arg(force ? "true" : "false");
     return page()->mainFrame()->evaluateJavaScript(strScript).toBool();
@@ -70,43 +97,84 @@ bool CWizDocumentWebView::saveDocument(bool force)
 
 bool CWizDocumentWebView::viewDocument(const WIZDOCUMENTDATA& doc, bool editing)
 {
-    if (doc.nProtected) {
-        QString strFileName = WizGetResourcesPath() + "transitions/commingsoon.html";
-        QString strHtml;
-        ::WizLoadUnicodeTextFromFile(strFileName, strHtml);
-        QUrl url = QUrl::fromLocalFile(strFileName);
-        setHtml(strHtml, url);
+    m_cipherDialog->hide();
 
-        m_bInited = false;
-        return true;
-    }
-
-    if (m_bInited) {
+    if (m_bEditorInited) {
         if (!saveDocument(false))
             return false;
     }
 
-    if (!::WizPrepareDocument(m_app.database(), doc, m_app.mainWindow()))
-        return false;
-
-    QString strHtmlFileName;
-    if (!m_app.database().DocumentToTempHtmlFile(doc, strHtmlFileName))
-        return false;
-
     m_data = doc;
+    m_bEditingMode = editing;
+
+    QString strDocumentFileName = m_db.GetDocumentFileName(doc.strGUID);
+    if (!m_db.IsObjectDataDownloaded(doc.strGUID, "document") || \
+            !PathFileExists(strDocumentFileName)) {
+        MainWindow* window = qobject_cast<MainWindow *>(m_app.mainWindow());
+        window->showClient(false);
+
+        m_downloadDialog->downloadData(doc);
+
+        return false;
+    }
+
+    if (doc.nProtected) {
+        if(!m_db.loadUserCert()) {
+            return false;
+        }
+
+        if (m_db.userCipher().isEmpty()) {
+            MainWindow* window = qobject_cast<MainWindow *>(m_app.mainWindow());
+            window->showClient(false);
+
+            m_cipherDialog->setHint(m_db.userCipherHint());
+            m_cipherDialog->sheetShow();
+
+            return false;
+        }
+    }
+
+    return viewDocumentImpl();
+}
+
+bool CWizDocumentWebView::viewDocumentImpl()
+{
+    QString strHtmlFileName;
+    if (!m_db.DocumentToTempHtmlFile(m_data, strHtmlFileName)) {
+        return false;
+    }
+
     m_strHtmlFileName = strHtmlFileName;
 
-    if (m_bInited) {
-        return viewDocumentInEditor(editing);
+    if (m_bEditorInited) {
+        return viewDocumentInEditor(m_bEditingMode);
     } else {
-        m_bEditDocumentWhileFinished = editing;
-        init();
+        initEditorAndLoadDocument();
         return true;
     }
 }
 
+void CWizDocumentWebView::onCipherDialogClosed()
+{
+    m_db.setUserCipher(m_cipherDialog->userCipher());
+    m_db.setSaveUserCipher(m_cipherDialog->isSaveForSession());
+
+    viewDocumentImpl();
+}
+
+void CWizDocumentWebView::onDownloadDialogClosed(int result)
+{
+    if (result == QDialog::Rejected) {
+        return;
+    }
+
+    viewDocument(m_data, m_bEditingMode);
+}
+
 void CWizDocumentWebView::setEditingDocument(bool editing)
 {
+    Q_ASSERT(m_bEditorInited);
+
     CString strScript = CString("setEditing(%1);").arg(editing ? "true" : "false");
     page()->mainFrame()->evaluateJavaScript(strScript).toBool();
 
@@ -119,12 +187,16 @@ void CWizDocumentWebView::setEditingDocument(bool editing)
 
 void CWizDocumentWebView::reloadDocument()
 {
-    m_app.database().DocumentFromGUID(m_data.strGUID, m_data);
+    Q_ASSERT(!m_data.strGUID.isEmpty());
+
+    m_db.DocumentFromGUID(m_data.strGUID, m_data);
 }
 
 bool CWizDocumentWebView::viewDocumentInEditor(bool editing)
 {
-    Q_ASSERT(!m_data.strGUID.IsEmpty());
+    Q_ASSERT(m_bEditorInited);
+    Q_ASSERT(!m_data.strGUID.isEmpty());
+    Q_ASSERT(!m_strHtmlFileName.isEmpty());
 
     QString strScript = ("viewDocument('%1', '%2', %3);");
     strScript = strScript.arg(m_data.strGUID,
@@ -133,11 +205,18 @@ bool CWizDocumentWebView::viewDocumentInEditor(bool editing)
 
     bool ret = page()->mainFrame()->evaluateJavaScript(strScript).toBool();
 
+    if (ret) {
+        MainWindow* window = qobject_cast<MainWindow *>(m_app.mainWindow());
+        window->showClient(true);
+    }
+
     if (editing) {
         setFocus();
     }
 
     updateSize();
+
+    m_timerAutoSave.start();
 
     return ret;
 }
@@ -154,7 +233,8 @@ void CWizDocumentWebView::on_editor_loadFinished(bool ok)
         return;
     }
 
-    viewDocumentInEditor(m_bEditDocumentWhileFinished);
+    m_bEditorInited = true;
+    viewDocumentInEditor(m_bEditingMode);
 }
 
 void CWizDocumentWebView::on_editor_linkClicked(const QUrl& url)
@@ -166,5 +246,5 @@ void CWizDocumentWebView::updateSize()
 {
     // show & hide ueditor toolbar cause UI issue, force update.
     QRect rc = geometry();
-    setGeometry(rc.adjusted(0, 0, 0, 100));
+    setGeometry(rc.adjusted(0, 0, 0, 10));
 }

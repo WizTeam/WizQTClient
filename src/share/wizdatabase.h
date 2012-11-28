@@ -1,8 +1,11 @@
 #ifndef WIZDATABASE_H
 #define WIZDATABASE_H
 
+#include <QPointer>
+
 #include "wizindex.h"
 #include "wizthumbindex.h"
+#include "wizziwreader.h"
 
 class CWizDatabase;
 class CWizFolder;
@@ -33,8 +36,8 @@ public Q_SLOTS:
     void PermanentlyDelete(void);
     void MoveTo(QObject* pFolder);
 
-    // API:
-    bool UpdateDocument4(const QString& strHtml, const QString& strURL, int nFlags);
+public:
+    Q_INVOKABLE bool UpdateDocument4(const QString& strHtml, const QString& strURL, int nFlags);
 };
 
 
@@ -74,12 +77,20 @@ class CWizDatabase
 private:
     QString m_strUserId;
     QString m_strPassword;
+    QPointer<CWizZiwReader> m_ziwReader;
 
 public:
     CWizDatabase();
 
-    QString GetUserId() const { return m_strUserId; }
-    QString GetPassword2() const { return m_strPassword; }
+    QString getUserId() const { return m_strUserId; }
+    QString getPassword() const { return m_strPassword; }
+
+    // CWizZiwReader passthrough methods
+    bool loadUserCert();
+    const QString& userCipher() const { return m_ziwReader->userCipher(); }
+    void setUserCipher(const QString& cipher) { m_ziwReader->setUserCipher(cipher); }
+    QString userCipherHint() { return m_ziwReader->userCipherHint(); }
+    void setSaveUserCipher(bool b) { m_ziwReader->setSaveUserCipher(b); }
 
     QString GetAccountDataPath() const;
     QString GetUserDataDataPath() const;

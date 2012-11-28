@@ -62,19 +62,22 @@ protected:
     bool m_bUpdating;
 
 public:
-    virtual BOOL Open(const CString& strFileName);
+    virtual bool Open(const CString& strFileName);
 	void Close();
 
     bool IsOpened();
 
-	BOOL GetUserName(CString& strUserName);
-    BOOL SetUserName(const CString& strUserName);
-    BOOL GetPassword(CString& strPassword);
-	CString GetEncryptedPassword();
-    BOOL SetPassword(const CString& strOldPassword, const CString& strPassword);
+    bool GetUserName(CString& strUserName);
+    bool SetUserName(const CString& strUserName);
+    bool GetPassword(CString& strPassword);
+    bool SetPassword(const QString& strOldPassword, const QString& strPassword);
+    QString GetEncryptedPassword();
 
 	UINT GetPasswordFalgs();
-	BOOL SetPasswordFalgs(UINT nFlags);
+    BOOL SetPasswordFalgs(UINT nFlags);
+
+    bool GetUserCert(QString& strN, QString& stre, QString& strd, QString& strHint);
+    bool SetUserCert(const QString& strN, const QString& stre, const QString& strd, const QString& strHint);
 
     CppSQLite3Query Query(const CString& strSQL);
     int Exec(const CString& strSQL);

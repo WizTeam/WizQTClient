@@ -1,8 +1,5 @@
 #include "wizmainwindow.h"
 
-#include "wizcategoryview.h"
-#include "wizdocumentlistview.h"
-#include "wizdocumentview.h"
 #include "wizdocumentwebview.h"
 #include "wizactions.h"
 #include "wizaboutdialog.h"
@@ -28,6 +25,9 @@ MainWindow::MainWindow(CWizDatabase& db, QWidget *parent)
     , m_sync(new CWizSyncThread(*this, this))
     , m_console(new CWizConsoleDialog(*this, this))
     , m_upgrade(new CWizUpgradeThread(this))
+    , m_certManager(new CWizCertManager(*this))
+    , m_cipherForm(new CWizUserCipherForm(*this, this))
+    , m_objectDownloadDialog(new CWizDownloadObjectDataDialog(db, this))
     #ifndef Q_OS_MAC
     , m_toolBar(new QToolBar("Main", this))
     , m_labelNotice(NULL)
@@ -56,6 +56,8 @@ MainWindow::MainWindow(CWizDatabase& db, QWidget *parent)
     QTimer::singleShot(3 * 1000, m_upgrade, SLOT(checkUpgradeBegin()));
     connect(m_upgrade, SIGNAL(finished()), SLOT(on_upgradeThread_finished()));
 #endif // Q_OS_MAC
+
+    m_certManager->loadUserCert();
 
     // used for handle user quit event
     m_msgQuit->setStandardButtons(0);
@@ -218,7 +220,7 @@ void MainWindow::initToolBar()
 void MainWindow::initClient()
 {
     QWidget* client = new QWidget(this);
-    this->setCentralWidget(client);
+    setCentralWidget(client);
 
     client->setSizePolicy(QSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum));
     QPalette pal = client->palette();
@@ -327,6 +329,7 @@ void MainWindow::showEvent(QShowEvent* event)
     Q_UNUSED(event);
 
     m_statusBar->hide();
+    m_cipherForm->hide();
 }
 
 void MainWindow::closeEvent(QCloseEvent* event)
@@ -354,7 +357,6 @@ void MainWindow::closeEvent(QCloseEvent* event)
 
 void MainWindow::on_readyQuit_timeout()
 {
-
     close();
 }
 
@@ -672,15 +674,20 @@ void MainWindow::adjustToolBarSpacerToPos(int index, int pos)
 
 #endif
 
-QObject* MainWindow::CategoryCtrl()
-{
-    return m_category;
-}
+//QObject* MainWindow::CategoryCtrl()
+//{
+//    return m_category;
+//}
+//
+//QObject* MainWindow::DocumentsCtrl()
+//{
+//    return m_documents;
+//}
 
-QObject* MainWindow::DocumentsCtrl()
-{
-    return m_documents;
-}
+
+//================================================================================
+// WizExplorerApp APIs
+//================================================================================
 
 QObject* MainWindow::CreateWizObject(const QString& strObjectID)
 {

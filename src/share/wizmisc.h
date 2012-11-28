@@ -184,8 +184,8 @@ void WizMakeValidFileNameNoPathLimitLength(CString& strFileName, int nMaxTitleLe
 void WizMakeValidFileNameNoPathLimitFullNameLength(CString& strFileName, int nMaxFullNameLength);
 CString WizMakeValidFileNameNoPathReturn(const CString& strFileName);
 
-BOOL WizSaveDataToFile(const CString& strFileName, const QByteArray& arrayData);
-BOOL WizLoadDataFromFile(const CString& strFileName, QByteArray& arrayData);
+bool WizSaveDataToFile(const QString& strFileName, const QByteArray& arrayData);
+bool WizLoadDataFromFile(const QString& strFileName, QByteArray& arrayData);
 
 
 class CWizBufferAlloc

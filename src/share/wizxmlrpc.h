@@ -32,7 +32,7 @@ public:
 
 protected:
     CWizXMLDocument m_doc;
-    bool m_bInited;
+
     CString m_strMethodName;
     CWizXmlRpcValue* m_pParam1;
     CWizXmlRpcValue* m_pParam2;
@@ -44,6 +44,7 @@ protected:
     CWizXmlRpcValue* m_pParam8;
 
 private:
+    bool m_bInited;
     bool Init();
 };
 

@@ -1,78 +1,68 @@
 #include "wizdownloadobjectdatadialog.h"
 #include "ui_wizdownloadobjectdatadialog.h"
 
-#include <QMessageBox>
+#include "QMessageBox"
 
-WizDownloadObjectDataDialog::WizDownloadObjectDataDialog(CWizDatabase& db, \
-                                                         const CString& strAccountsApiURL, \
-                                                         const WIZOBJECTDATA& data, \
-                                                         QWidget *parent)
+CWizDownloadObjectDataDialog::CWizDownloadObjectDataDialog(CWizDatabase& db, QWidget *parent)
     : QDialog(parent)
-    , ui(new Ui::WizDownloadObjectDataDialog)
-    , m_data(data)
-    , m_downloader(db, strAccountsApiURL, data)
-    , m_bUserCanceled(false)
+    , ui(new Ui::CWizDownloadObjectDataDialog)
+    , m_downloader(db)
 {
     ui->setupUi(this);
+    setFixedSize(size());
 
-    ui->labelDownloading->setText(ui->labelDownloading->text().arg(m_data.strDisplayName));
     ui->progressBar->setRange(0, 100);
-    ui->progressBar->setValue(0);
 
-    m_downloader.startDownload();
-
-    connect(&m_downloader, SIGNAL(processLog(const QString&)), SLOT(downloader_processLog(const QString&)));
     connect(&m_downloader, SIGNAL(progressChanged(int)), SLOT(downloader_progress(int)));
     connect(&m_downloader, SIGNAL(downloadDone(bool)), SLOT(downloader_done(bool)));
+    connect(ui->buttonCancle, SIGNAL(clicked()), SLOT(onButtonCancle_clicked()));
 
-    setFixedSize(size());
 }
 
-WizDownloadObjectDataDialog::~WizDownloadObjectDataDialog()
+CWizDownloadObjectDataDialog::~CWizDownloadObjectDataDialog()
 {
     m_downloader.abort();
     delete ui;
 }
 
-void WizDownloadObjectDataDialog::downloader_processLog(const QString& msg)
+void CWizDownloadObjectDataDialog::downloadData(const WIZOBJECTDATA& data)
 {
-    TOLOG(msg);
+    m_bUserCancled = false;
+
+    if (data.strDisplayName.length() > 30) {
+        ui->labelDownloading->setText(data.strDisplayName.left(30) + "...");
+    } else {
+        ui->labelDownloading->setText(data.strDisplayName);
+    }
+
+    ui->progressBar->setValue(0);
+    m_downloader.setData(data);
+    m_downloader.startDownload();
+    open();
 }
 
-void WizDownloadObjectDataDialog::downloader_progress(int pos)
+void CWizDownloadObjectDataDialog::onButtonCancle_clicked()
+{
+    m_bUserCancled = true;
+    m_downloader.abort();
+
+    reject();
+}
+
+void CWizDownloadObjectDataDialog::downloader_progress(int pos)
 {
     ui->progressBar->setValue(pos);
 }
 
-void WizDownloadObjectDataDialog::reject()
+void CWizDownloadObjectDataDialog::downloader_done(bool succeeded)
 {
-    m_bUserCanceled = true;
-    m_downloader.abort();
-
-    QDialog::reject();
-}
-
-void WizDownloadObjectDataDialog::downloader_done(bool succeeded)
-{
-    if (succeeded)
-    {
+    if (succeeded) {
         accept();
-    }
-    else
-    {
-        QDialog::reject();
-    }
-}
+    } else {
+        QMessageBox msg;
+        msg.setText(tr("wow, download failed! please check your network connection"));
+        msg.exec();
 
-bool WizDownloadObjectDataDialog::downloadObjectData(CWizDatabase& db, const CString& strAccountsApiURL, const WIZOBJECTDATA& data, QWidget* parent)
-{
-    WizDownloadObjectDataDialog dlg(db, strAccountsApiURL, data, parent);
-    bool ret = QDialog::Accepted == dlg.exec();
-    if (!ret && !dlg.m_bUserCanceled)
-    {
-        QString strMsg = QString(tr("Failed to download data!\n\n%1")).arg(dlg.m_slError.join("\n"));
-        QMessageBox::critical(parent, parent->windowTitle(), strMsg);
+        reject();
     }
-
-    return ret;
 }

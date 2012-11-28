@@ -21,6 +21,7 @@ public:
     virtual QSize sizeHint() const { return QSize(800,700); }
 
     CWizDocumentWebView* view() const { return m_web; }
+    QWidget* client() const { return m_client; }
 
 private:
     CWizExplorerApp& m_app;

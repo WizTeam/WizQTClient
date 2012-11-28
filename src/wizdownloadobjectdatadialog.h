@@ -6,35 +6,34 @@
 #include "share/wizdownloadobjectdata.h"
 
 namespace Ui {
-    class WizDownloadObjectDataDialog;
+    class CWizDownloadObjectDataDialog;
 }
 
-class WizDownloadObjectDataDialog
+class CWizDownloadObjectDataDialog
     : public QDialog
 {
     Q_OBJECT
 
 public:
-    explicit WizDownloadObjectDataDialog(CWizDatabase& db, const CString& strAccountsApiURL, const WIZOBJECTDATA& data, QWidget *parent = 0);
-    ~WizDownloadObjectDataDialog();
+    explicit CWizDownloadObjectDataDialog(CWizDatabase& db, QWidget *parent = 0);
+    ~CWizDownloadObjectDataDialog();
+
+    // call this method instead of open()/show()/exec()
+    void downloadData(const WIZOBJECTDATA& data);
+
+    bool isUserCancled() const { return m_bUserCancled; }
 
 private:
-    Ui::WizDownloadObjectDataDialog *ui;
-    WIZOBJECTDATA m_data;
+    Ui::CWizDownloadObjectDataDialog *ui;
     CWizDownloadObjectData m_downloader;
-    QStringList m_slError;
-    bool m_bUserCanceled;
+    bool m_bUserCancled;
 
 public Q_SLOTS:
-    virtual void reject();
     void downloader_done(bool succeeded);
     void downloader_progress(int pos);
-    void downloader_processLog(const QString& msg);
+    void onButtonCancle_clicked();
 
-public:
-    static bool downloadObjectData(CWizDatabase& db, const CString& strAccountsApiURL, const WIZOBJECTDATA& data, QWidget* parent);
 };
-
 
 
 #endif // WIZDOWNLOADOBJECTDATADIALOG_H

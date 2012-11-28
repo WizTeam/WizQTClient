@@ -12,13 +12,13 @@ CWizXmlRpcIntValue::CWizXmlRpcIntValue(int n /*= 0*/)
 
 bool CWizXmlRpcIntValue::Write(CWizXMLNode& nodeValue)
 {
-	nodeValue.SetChildNodeText(_T("int"), WizIntToStr(m_n));
+    nodeValue.SetChildNodeText("int", WizIntToStr(m_n));
     return true;
 }
 
 bool CWizXmlRpcIntValue::Read(CWizXMLNode& nodeValue)
 {
-	CString strValue = nodeValue.GetFirstChildNodeText();
+    CString strValue = nodeValue.GetFirstChildNodeText();
     m_n = _ttoi(strValue);
 
     return true;
@@ -338,7 +338,7 @@ BOOL CWizXmlRpcStructValue::Write(CWizXMLNode& nodeValue)
 	return TRUE;
 }
 
-BOOL CWizXmlRpcStructValue::Read(CWizXMLNode& nodeValue)
+bool CWizXmlRpcStructValue::Read(CWizXMLNode& nodeValue)
 {
 	CWizXMLNode nodeStruct;
 	if (!nodeValue.FindChildNode(_T("struct"), nodeStruct))
@@ -760,58 +760,58 @@ BOOL WizXmlRpcValueFromXml(CWizXMLNode& nodeValue, CWizXmlRpcValue** ppRet)
 }
 
 
-BOOL WizXmlRpcResultFromXml(CWizXMLDocument& doc, CWizXmlRpcValue** ppRet)
+bool WizXmlRpcResultFromXml(CWizXMLDocument& doc, CWizXmlRpcValue** ppRet)
 {
 	CWizXMLNode nodeMethodResponse;
-	doc.FindChildNode(_T("methodResponse"), nodeMethodResponse);
+    doc.FindChildNode("methodResponse", nodeMethodResponse);
 	if (!nodeMethodResponse.Valid())
 	{
-		TOLOG(_T("Failed to get methodResponse node!"));
-		return FALSE;
+        TOLOG("Failed to get methodResponse node!");
+        return false;
 	}
-	//
+
 	CWizXMLNode nodeTest;
 	if (!nodeMethodResponse.GetFirstChildNode(nodeTest))
 	{
-		TOLOG(_T("Failed to get methodResponse child node!"));
-		return FALSE;
+        TOLOG("Failed to get methodResponse child node!");
+        return false;
 	}
-	//
+
 	CString strTestName = nodeTest.GetName();
-	//
-	if (0 == strTestName.CompareNoCase(_T("params")))
+
+    if (0 == strTestName.CompareNoCase("params"))
 	{
 		CWizXMLNode nodeParamValue;
-		nodeTest.FindNodeByPath(_T("param/value"), nodeParamValue);
+        nodeTest.FindNodeByPath("param/value", nodeParamValue);
 		if (!nodeParamValue.Valid())
 		{
-			TOLOG(_T("Failed to get param value node of params!"));
-			return FALSE;
+            TOLOG("Failed to get param value node of params!");
+            return false;
 		}
-		//
+
 		return WizXmlRpcValueFromXml(nodeParamValue, ppRet);
 	}
-	else if (0 == strTestName.CompareNoCase(_T("fault")))
+    else if (0 == strTestName.CompareNoCase("fault"))
 	{
 		CWizXMLNode nodeFaultValue;
 		nodeTest.FindChildNode(_T("value"), nodeFaultValue);
 		if (!nodeFaultValue.Valid())
 		{
-			TOLOG(_T("Failed to get fault value node!"));
-			return FALSE;
+            TOLOG("Failed to get fault value node!");
+            return false;
 		}
-		//
+
 		CWizXmlRpcFaultValue* pFault = new CWizXmlRpcFaultValue();
 		pFault->Read(nodeFaultValue);
-		//
+
 		*ppRet = pFault;
-		//
-		return TRUE;
+
+        return true;
 	}
 	else
 	{
-		TOLOG1(_T("Unknown response node name: %1"), strTestName);
-		return FALSE;
+        TOLOG1("Unknown response node name: %1", strTestName);
+        return false;
 	}
 }
 
@@ -835,7 +835,7 @@ CWizXmlRpcFormData::CWizXmlRpcFormData(const CString& strMethodName, \
 }
 
 
-BOOL CWizXmlRpcFormData::Init()
+bool CWizXmlRpcFormData::Init()
 {
     m_doc.Clear();
 
@@ -852,7 +852,7 @@ int CWizXmlRpcFormData::SendRequest(QHttp& http, const CString& strUrl)
         return -1;
 
 	CString strText;
-	if (!m_doc.ToXML(strText, TRUE))
+    if (!m_doc.ToXML(strText, true))
 	{
         TOLOG("Failed to get xml text!");
         return -1;
@@ -869,7 +869,7 @@ int CWizXmlRpcFormData::SendRequest(QHttp& http, const CString& strUrl)
 	}
 	else
 	{
-		strText.Insert(0, _T("<?xml version=\"1.0\"?>\n"));
+        strText.Insert(0, "<?xml version=\"1.0\"?>\n");
     }
 
     QUrl url(strUrl);
@@ -941,9 +941,8 @@ void CWizXmlRpcServer::processReturn(CWizXmlRpcValue& ret)
 
 void CWizXmlRpcServer::httpDone(bool error)
 {
-    if (error)
-    {
-        processError(errorNetwork, 0, m_http.errorString());
+    if (error) {
+        //processError(errorNetwork, 0, m_http.errorString());
         return;
     }
 }
@@ -990,7 +989,7 @@ void CWizXmlRpcServer::httpRequestFinished (int id, bool error)
         return;
     }
 
-    ATLASSERT(pRet);
+    Q_ASSERT(pRet);
 
     if (CWizXmlRpcFaultValue* pFault = dynamic_cast<CWizXmlRpcFaultValue*>(pRet))
     {

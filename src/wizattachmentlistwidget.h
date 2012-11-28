@@ -7,6 +7,8 @@
 
 #include "share/wizfileiconprovider.h"
 
+#include "wizdownloadobjectdatadialog.h"
+
 class CWizExplorerApp;
 class CWizAttachmentListViewItem;
 
@@ -15,29 +17,34 @@ class CWizAttachmentListView : public CWizMultiLineListWidget
     Q_OBJECT
 public:
     CWizAttachmentListView(CWizExplorerApp& app, QWidget* parent);
+
 private:
     CWizExplorerApp& m_app;
     CWizDatabase& m_db;
     WIZDOCUMENTDATA m_document;
     CWizFileIconProvider m_iconProvider;
     QMenu* m_menu;
-private:
+    CWizDownloadObjectDataDialog* m_downloadDialog;
+
     void resetAttachments();
+
 public:
     void setDocument(const WIZDOCUMENTDATA& document);
     const CWizAttachmentListViewItem* attachmentItemFromIndex(const QModelIndex& index) const;
     void addAttachments();
     void openAttachment(CWizAttachmentListViewItem* item);
+
 protected:
     virtual int wrapTextLineIndex() const;
     virtual bool imageAlignLeft() const;
     virtual int imageWidth() const;
     virtual QString itemText(const QModelIndex& index, int line) const;
     virtual QPixmap itemImage(const QModelIndex& index) const;
-    //
+
     virtual void contextMenuEvent(QContextMenuEvent * e);
-    //
+
     friend class CWizAttachmentListViewItem;
+
 public slots:
     void on_action_addAttachment();
     void on_action_saveAttachmentAs();

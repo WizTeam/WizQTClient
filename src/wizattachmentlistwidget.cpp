@@ -9,6 +9,8 @@
 #include <QFileDialog>
 #include <QDesktopServices>
 
+#include "wizmainwindow.h"
+
 
 class CWizAttachmentListViewItem : public QListWidgetItem
 {
@@ -44,15 +46,13 @@ CWizAttachmentListView::CWizAttachmentListView(CWizExplorerApp& app, QWidget* pa
     , m_menu(NULL)
 {
     setFrameStyle(QFrame::NoFrame);
-    //
     setStyle(WizGetStyle(m_app.userSettings().skin()));
-    //
     setSelectionMode(QAbstractItemView::ExtendedSelection);
-    //
-#ifdef Q_OS_MAC
     setAttribute(Qt::WA_MacShowFocusRect, false);
-#endif
-    //
+
+    MainWindow* mainWindow = qobject_cast<MainWindow *>(m_app.mainWindow());
+    m_downloadDialog = mainWindow->objectDownloadDialog();
+
     connect(this, SIGNAL(itemDoubleClicked(QListWidgetItem*)), SLOT(on_list_itemDoubleClicked(QListWidgetItem*)));
 }
 
@@ -146,9 +146,17 @@ void CWizAttachmentListView::openAttachment(CWizAttachmentListViewItem* item)
     CString strTempPath = ::WizGlobal()->GetTempPath();
     //
     const WIZDOCUMENTATTACHMENTDATA& attachment = item->attachment();
-    if (!::WizPrepareAttachment(m_db, attachment, m_app.mainWindow()))
+
+    bool bIsLocal = m_db.IsObjectDataDownloaded(attachment.strGUID, "attachment");
+    bool bExists = PathFileExists(m_db.GetAttachmentFileName(attachment.strGUID));
+    if (!bIsLocal || !bExists) {
+        m_downloadDialog->downloadData(attachment);
         return;
-    //
+    }
+
+    //if (!::WizPrepareAttachment(m_db, attachment, m_app.mainWindow()))
+    //    return;
+
     CString strTempFileName = strTempPath + item->attachment().strName;
     ::WizGetNextFileName(strTempFileName);
     //
@@ -194,10 +202,17 @@ void CWizAttachmentListView::on_action_saveAttachmentAs()
             QString strFileName = QFileDialog::getSaveFileName(this, QString(), item->attachment().strName);
             if (strFileName.isEmpty())
                 return;
-            //
-            if (!::WizPrepareAttachment(m_db, item->attachment(), m_app.mainWindow()))
+
+            bool bIsLocal = m_db.IsObjectDataDownloaded(item->attachment().strGUID, "attachment");
+            bool bExists = PathFileExists(m_db.GetAttachmentFileName(item->attachment().strGUID));
+            if (!bIsLocal || !bExists) {
+                m_downloadDialog->downloadData(item->attachment());
                 return;
-            //
+            }
+
+            //if (!::WizPrepareAttachment(m_db, item->attachment(), m_app.mainWindow()))
+            //    return;
+
             if (!::WizCopyFile(m_db.GetAttachmentFileName(item->attachment().strGUID), strFileName, FALSE))
             {
                 QMessageBox::critical(this, qApp->applicationName(), tr("Can not save attachment to %1").arg(strFileName));
@@ -209,14 +224,22 @@ void CWizAttachmentListView::on_action_saveAttachmentAs()
     {
         CString strDir = QFileDialog::getExistingDirectory(this, tr("Save attachments to"));
         ::WizPathAddBackslash(strDir);
-        //
+
         foreach (QListWidgetItem* it, items)
         {
             if (CWizAttachmentListViewItem* item = dynamic_cast<CWizAttachmentListViewItem*>(it))
             {
-                if (!::WizPrepareAttachment(m_db, item->attachment(), m_app.mainWindow()))
+
+                bool bIsLocal = m_db.IsObjectDataDownloaded(item->attachment().strGUID, "attachment");
+                bool bExists = PathFileExists(m_db.GetAttachmentFileName(item->attachment().strGUID));
+                if (!bIsLocal || !bExists) {
+                    m_downloadDialog->downloadData(item->attachment());
                     continue;
-                //
+                }
+
+                //if (!::WizPrepareAttachment(m_db, item->attachment(), m_app.mainWindow()))
+                //    continue;
+
                 CString strFileName = strDir + item->attachment().strName;
                 WizGetNextFileName(strFileName);
                 //

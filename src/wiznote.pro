@@ -120,7 +120,11 @@ SOURCES += main.cpp\
     share/wizxml.cpp \
     share/wizsyncthread.cpp \
     wizstatusbar.cpp \
-    wizupgradenotifydialog.cpp
+    wizupgradenotifydialog.cpp \
+    wizcertmanager.cpp \
+    share/wizenc.cpp \
+    share/wizziwreader.cpp \
+    wizusercipherform.cpp
 
 HEADERS += \
     share/wizqthelper.h \
@@ -207,6 +211,10 @@ HEADERS += \
     share/wizsyncthread.h \
     wizstatusbar.h \
     wizupgradenotifydialog.h \
+    wizcertmanager.h \
+    share/wizenc.h \
+    share/wizziwreader.h \
+    wizusercipherform.h
 
 
 FORMS += \
@@ -220,7 +228,16 @@ FORMS += \
     ui/wizproxydialog.ui \
     ui/wizcreateaccountdialog.ui \
     ui/wizupdaterprogressdialog.ui \
-    ui/wizupgradenotifydialog.ui
+    ui/wizupgradenotifydialog.ui \
+    ui/wizusercipherform.ui
 
 OTHER_FILES += \
 
+
+unix:!symbian|win32: LIBS += -L$$PWD/../../libcryptopp/ -lcryptopp
+
+INCLUDEPATH += $$PWD/../../libcryptopp
+DEPENDPATH += $$PWD/../../libcryptopp
+
+win32: PRE_TARGETDEPS += $$PWD/../../libcryptopp/cryptopp.lib
+else:unix:!symbian: PRE_TARGETDEPS += $$PWD/../../libcryptopp/libcryptopp.a

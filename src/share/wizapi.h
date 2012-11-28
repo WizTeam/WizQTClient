@@ -11,7 +11,9 @@
 const char* const SyncMethod_ClientLogin = "accounts.clientLogin";
 const char* const SyncMethod_ClientLogout = "accounts.clientLogout";
 const char* const SyncMethod_CreateAccount = "accounts.createAccount";
+
 const char* const SyncMethod_GetUserInfo = "wiz.getInfo";
+const char* const SyncMethod_GetUserCert = "accounts.getCert";
 
 const char* const SyncMethod_GetDeletedList = "deleted.getList";
 const char* const SyncMethod_GetTagList = "tag.getList";
@@ -73,6 +75,17 @@ struct WIZUSERINFO
     QString strNotice;
 };
 
+struct WIZUSERCERT
+{
+    WIZUSERCERT();
+    bool LoadFromXmlRpc(CWizXmlRpcValue& val);
+
+    QString strN;
+    QString stre;
+    QString strd;
+    QString strHint;
+};
+
 
 struct WIZKBINFO
 {
@@ -114,7 +127,7 @@ class CWizApiBase : public QObject
     Q_OBJECT
 
 public:
-    CWizApiBase(const CString& strAccountsApiURL);
+    CWizApiBase(const CString& strAccountsApiURL = WIZ_API_URL);
 
     CString token() const { return m_user.strToken; }
     CString kbGUID() const { return m_user.strKbGUID; }
@@ -146,6 +159,9 @@ protected:
     virtual bool callGetUserInfo();
     virtual void onGetUserInfo(CWizXmlRpcValue& ret);
 
+    virtual bool callGetUserCert(const QString& strUserId, const QString& strPassword);
+    virtual void onGetUserCert(CWizXmlRpcValue& ret);
+
     virtual bool callCreateAccount(const CString& strUserId, const CString& strPassword);
     virtual void onCreateAccount();
 
@@ -157,8 +173,8 @@ Q_SIGNALS:
 
 public Q_SLOTS:
     void xmlRpcReturn(const QString& strMethodName, CWizXmlRpcValue& ret);
-    void xmlRpcError(const QString& strMethodName, WizXmlRpcError err, \
-                     int errorCode, const QString& errorMessage);
+    virtual void xmlRpcError(const QString& strMethodName, WizXmlRpcError err, \
+                             int errorCode, const QString& errorMessage);
 };
 
 class CWizApi : public CWizApiBase
@@ -166,7 +182,7 @@ class CWizApi : public CWizApiBase
     Q_OBJECT
 
 public:
-    CWizApi(CWizDatabase& db, const CString& strAccountsApiURL);
+    CWizApi(CWizDatabase& db, const CString& strAccountsApiURL = WIZ_API_URL);
 
 protected:
     CWizDatabase& m_db;

@@ -255,14 +255,16 @@ bool CWizDocumentView::viewDocument(const WIZDOCUMENTDATA& data, bool forceEdit)
         }
     }
 
-    bool ret = m_web->viewDocument(data, edit);
-    if (!ret) {
-        showClient(false);
-        return false;
-    }
+    m_web->viewDocument(data, edit);
+    //if (!ret) {
+        //showClient(false);
+    //    return false;
+    //}
 
-    showClient(true);
-    editDocument(edit);
+    //showClient(true);
+    //editDocument(edit);
+    m_editingDocument = edit;
+    m_title->setEditingDocument(m_editingDocument);
     m_title->updateInformation(m_db, data);
 
     return true;

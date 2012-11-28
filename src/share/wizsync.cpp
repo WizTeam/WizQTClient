@@ -77,7 +77,7 @@ void CWizSync::startSync()
     Q_EMIT progressChanged(progressStart);
     Q_EMIT processLog(tr("begin syning"));
 
-    callClientLogin(m_db.GetUserId(), m_db.GetPassword2());
+    callClientLogin(m_db.getUserId(), m_db.getPassword());
 }
 
 void CWizSync::abort()
@@ -330,10 +330,15 @@ void CWizSync::onClientLogout()
 
 void CWizSync::stopSync()
 {
-    if (!m_user.strToken.isEmpty())
-    {
-        callClientLogout();
+    // network error occured
+    if (m_user.strToken.isEmpty()) {
+        Q_EMIT processLog(tr("network error occured when syncing, please verify your network connection"));
+        Q_EMIT progressChanged(progressDone);
+        Q_EMIT syncDone(m_error);
+        return;
     }
+
+    callClientLogout();
 }
 
 void CWizSync::downloadNextDeleteds(__int64 nVersion)

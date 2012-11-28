@@ -616,6 +616,21 @@ CString WizMd5StringNoSpaceJava(const QByteArray& arr)
     return str;
 }
 
+CString WizMd5FileStringNoSpaceJava(const CString& strFileName)
+{
+    QFile file(strFileName);
+
+    if (!file.open(QIODevice::ReadOnly)) {
+        return CString();
+    }
+
+    CString ret = WizMd5StringNoSpaceJava(file.readAll());
+
+    file.close();
+
+    return ret;
+}
+
 BOOL WizMd5File(const CString& strFileName, BYTE* pResult)
 {
     __int64 len = ::WizGetFileSize(strFileName);
