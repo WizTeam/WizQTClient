@@ -25,8 +25,13 @@ AboutDialog::AboutDialog(CWizExplorerApp& app, QWidget *parent)
 
     QFileInfo fi(::WizGetAppFileName());
     QDateTime t = fi.lastModified();
-    QString strBuildNumber("build %1.%2.%3");
-    strBuildNumber = strBuildNumber.arg(t.date().year()).arg(t.date().month()).arg(t.date().day());
+    QString strBuildNumber("build %1.%2.%3 %4:%5");
+    strBuildNumber = strBuildNumber.\
+            arg(t.date().year()).\
+            arg(t.date().month()).\
+            arg(t.date().day()).\
+            arg(t.time().hour()).\
+            arg(t.time().minute());
 
     QString strInfo("<span style=\"font-weight:bold;font-size:16pt\">%1</span><br /><span>%2 %3</span>");
     strInfo = strInfo.arg(strProduct, IWizGlobal::instance()->version(), strBuildNumber);

@@ -12,7 +12,7 @@ int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
     QApplication::setApplicationName(QObject::tr("WizNote"));
-    IWizGlobal::instance()->setVersion("1.1.2");
+    IWizGlobal::instance()->setVersion("1.2.0");
 
 #ifdef Q_OS_MAC
     QDir dir(QApplication::applicationDirPath());

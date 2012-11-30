@@ -973,10 +973,6 @@ bool WIZUSERCERT::LoadFromXmlRpc(CWizXmlRpcValue& val)
     data.GetStr("d", strd);
     data.GetStr("hint", strHint);
 
-    qDebug() << strN;
-    qDebug() << stre;
-    qDebug() << strd;
-
     return true;
 }
 
