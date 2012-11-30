@@ -33,6 +33,7 @@ private:
     CWizDatabase& m_db;
     CWizCategoryView& m_category;
     QMenu* m_menu;
+    QAction* m_actionEncryptDocument;
     CWizTagListWidget* m_tagList;
 
     QPoint m_dragStartPosition;
@@ -78,6 +79,7 @@ public Q_SLOTS:
     void on_document_AbstractModified(const WIZDOCUMENTDATA& document);
     void on_action_selectTags();
     void on_action_deleteDocument();
+    void on_action_encryptDocument();
 
 #ifndef Q_OS_MAC
     // used for smoothly scroll

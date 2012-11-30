@@ -19,7 +19,10 @@ public:
     CWizDocument(CWizDatabase& db, const WIZDOCUMENTDATA& data);
 
     QString GUID() const { return m_data.strGUID; }
+
     bool isProtected() const { return m_data.nProtected; }
+    bool encryptDocument() { return false; }
+
     QString GetAttachmentsPath(bool create);
     bool IsInDeletedItemsFolder();
     bool MoveDocument(CWizFolder* pFolder);

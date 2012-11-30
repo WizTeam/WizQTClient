@@ -28,13 +28,11 @@ try {
     var editorOption = {
     toolbars:
     [
-        [saveButton,
-        '|',
+        [saveButton, '|',
         'FontFamily', 'FontSize', '|', 'Bold', 'Italic', 'Underline', 'StrikeThrough', '|',
         'JustifyLeft', 'JustifyCenter', 'JustifyRight', 'JustifyJustify', '|',
         'Indent', 'Outdent', 'InsertOrderedList', 'InsertUnorderedList', '|',
-        'Link', 'ForeColor', 'BackColor', '|', 'RemoveFormat', 'Undo', 'Redo'
-        ]
+        'Link', 'ForeColor', 'BackColor', '|', 'horizontal', 'inserttable', 'formatmatch', 'RemoveFormat']
     ],
     elementPathEnabled: false,
     wordCount: false,

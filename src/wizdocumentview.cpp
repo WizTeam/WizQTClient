@@ -2,6 +2,7 @@
 #include "wizdocumentwebview.h"
 #include "wiztaglistwidget.h"
 #include "wizattachmentlistwidget.h"
+#include "wiznoteinfoform.h"
 #include "wiznotestyle.h"
 #include "share/wizsettings.h"
 
@@ -49,6 +50,7 @@ public:
         m_commitIcon = ::WizLoadSkinIcon(m_app.userSettings().skin(), "lock");
         m_tagsIcon = ::WizLoadSkinIcon(m_app.userSettings().skin(), "document_tags");
         m_attachmentIcon = ::WizLoadSkinIcon(m_app.userSettings().skin(), "attachment");
+        m_infoIcon = ::WizLoadSkinIcon(m_app.userSettings().skin(), "noteinfo");
 
         m_editDocumentButton = new CWizImagePushButton(m_editIcon, "", this);
         updateEditDocumentButtonIcon(false);
@@ -61,14 +63,14 @@ public:
         m_attachmentButton = new CWizImagePushButton(m_attachmentIcon, "", this);
         m_attachmentButton->setStyle(::WizGetStyle(m_app.userSettings().skin()));
 
+        m_infoButton = new CWizImagePushButton(m_infoIcon, "", this);
+        m_infoButton->setStyle(::WizGetStyle(m_app.userSettings().skin()));
+
         layout->addWidget(m_titleEdit);
         layout->addWidget(m_editDocumentButton);
         layout->addWidget(m_tagsButton);
         layout->addWidget(m_attachmentButton);
-        layout->setAlignment(m_titleEdit, Qt::AlignVCenter);
-        layout->setAlignment(m_editDocumentButton, Qt::AlignVCenter);
-        layout->setAlignment(m_tagsButton, Qt::AlignVCenter);
-        layout->setAlignment(m_attachmentButton, Qt::AlignVCenter);
+        layout->addWidget(m_infoButton);
     }
 
 private:
@@ -77,11 +79,13 @@ private:
     CWizImagePushButton* m_editDocumentButton;
     CWizImagePushButton* m_tagsButton;
     CWizImagePushButton* m_attachmentButton;
+    CWizImagePushButton* m_infoButton;
 
     QIcon m_editIcon;
     QIcon m_commitIcon;
     QIcon m_tagsIcon;
     QIcon m_attachmentIcon;
+    QIcon m_infoIcon;
 
     bool m_editing;
 private:
@@ -110,6 +114,7 @@ public:
     QPushButton* editDocumentButton() const { return m_editDocumentButton; }
     QPushButton* tagsButton() const { return m_tagsButton; }
     QPushButton* attachmentButton() const { return m_attachmentButton; }
+    QPushButton* infoButton() const { return m_infoButton; }
 
     void setEditingDocument(bool editing) { updateEditDocumentButtonIcon(editing); }
     void setTitle(const QString& str) { m_titleEdit->setText(str); }
@@ -182,6 +187,9 @@ CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
 
     connect(m_title->attachmentButton(), SIGNAL(clicked()), \
             SLOT(on_attachmentButton_clicked()));
+
+    connect(m_title->infoButton(), SIGNAL(clicked()), \
+            SLOT(on_infoButton_clicked()));
 
     qRegisterMetaType<WIZDOCUMENTDATA>("WIZDOCUMENTDATA");
     qRegisterMetaType<WIZDOCUMENTATTACHMENTDATA>("WIZDOCUMENTATTACHMENTDATA");
@@ -345,7 +353,6 @@ void CWizDocumentView::on_attachmentButton_clicked()
     QPushButton* btn = m_title->attachmentButton();
     QRect rc = btn->geometry();
     QPoint pt = btn->mapToGlobal(QPoint(rc.width() / 2, rc.height()));
-    m_attachments->setGeometry(QRect(QPoint(0, 0), m_attachments->sizeHint()));
     m_attachments->showAtPoint(pt);
 }
 
@@ -360,8 +367,21 @@ void CWizDocumentView::on_tagsButton_clicked()
     QPushButton* btn = m_title->tagsButton();
     QRect rc = btn->geometry();
     QPoint pt = btn->mapToGlobal(QPoint(rc.width() / 2, rc.height()));
-    m_tags->setGeometry(QRect(QPoint(0, 0), m_tags->sizeHint()));
     m_tags->showAtPoint(pt);
+}
+
+void CWizDocumentView::on_infoButton_clicked()
+{
+    if (!m_info) {
+        m_info = new CWizNoteInfoForm(m_db, topLevelWidget());
+    }
+
+    m_info->setDocument(m_web->document());
+
+    QPushButton* btn = m_title->infoButton();
+    QRect rc = btn->geometry();
+    QPoint pt = btn->mapToGlobal(QPoint(rc.width() / 2, rc.height()));
+    m_info->showAtPoint(pt);
 }
 
 void CWizDocumentView::on_attachment_created(const WIZDOCUMENTATTACHMENTDATA& attachment)

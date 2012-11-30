@@ -124,7 +124,8 @@ SOURCES += main.cpp\
     wizcertmanager.cpp \
     share/wizenc.cpp \
     share/wizziwreader.cpp \
-    wizusercipherform.cpp
+    wizusercipherform.cpp \
+    wiznoteinfoform.cpp
 
 HEADERS += \
     share/wizqthelper.h \
@@ -214,7 +215,8 @@ HEADERS += \
     wizcertmanager.h \
     share/wizenc.h \
     share/wizziwreader.h \
-    wizusercipherform.h
+    wizusercipherform.h \
+    wiznoteinfoform.h
 
 
 FORMS += \
@@ -229,7 +231,8 @@ FORMS += \
     ui/wizcreateaccountdialog.ui \
     ui/wizupdaterprogressdialog.ui \
     ui/wizupgradenotifydialog.ui \
-    ui/wizusercipherform.ui
+    ui/wizusercipherform.ui \
+    ui/wiznoteinfoform.ui
 
 OTHER_FILES += \
 

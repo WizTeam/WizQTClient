@@ -1066,13 +1066,13 @@ bool CWizDatabase::UpdateDocumentAbstract(const CString& strDocumentGUID)
         CString strImageFileName = arrayImageFileName[0];
         DEBUG_TOLOG1(_T("abstract image file: %1"), strImageFileName);
 
-        __int64 m = 0;
+        qint64 m = 0;
         for (CWizStdStringArray::const_iterator it = arrayImageFileName.begin() + 1;
         it != arrayImageFileName.end();
         it++)
         {
             CString strFileName = *it;
-            __int64 size = ::WizGetFileSize(strFileName);
+            qint64 size = ::WizGetFileSize(strFileName);
             if (size > m)
             {
                 strImageFileName = strFileName;

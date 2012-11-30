@@ -23,6 +23,7 @@ MainWindow::MainWindow(CWizDatabase& db, QWidget *parent)
     , m_db(db)
     , m_settings(new CWizUserSettings(db))
     , m_sync(new CWizSyncThread(*this, this))
+    , m_syncTimer(new QTimer(this))
     , m_console(new CWizConsoleDialog(*this, this))
     , m_upgrade(new CWizUpgradeThread(this))
     , m_certManager(new CWizCertManager(*this))
@@ -57,7 +58,11 @@ MainWindow::MainWindow(CWizDatabase& db, QWidget *parent)
     connect(m_upgrade, SIGNAL(finished()), SLOT(on_upgradeThread_finished()));
 #endif // Q_OS_MAC
 
-    m_certManager->loadUserCert();
+    m_syncTimer->setInterval(15 * 60 * 1000);    //15 minutes
+    connect(m_syncTimer, SIGNAL(timeout()), SLOT(on_actionSync_triggered()));
+    if (m_settings->autoSync()) {
+        QTimer::singleShot(10 * 1000, this, SLOT(on_actionSync_triggered()));  //10 seconds
+    }
 
     // used for handle user quit event
     m_msgQuit->setStandardButtons(0);
@@ -364,6 +369,7 @@ void MainWindow::on_syncStarted()
 {
     m_statusBar->show();
     m_animateSync->startPlay();
+    m_syncTimer->stop();
 }
 
 void MainWindow::on_syncLogined()
@@ -383,6 +389,10 @@ void MainWindow::on_syncDone(bool error)
 
     m_statusBar->hide();
     m_animateSync->stopPlay();
+
+    if (m_settings->autoSync()) {
+        m_syncTimer->start();
+    }
 }
 
 void MainWindow::on_syncProcessLog(const QString& msg)
@@ -410,7 +420,8 @@ void MainWindow::on_actionExit_triggered()
 
 void MainWindow::on_actionSync_triggered()
 {
-    m_sync->on_syncStarted();
+    m_certManager->downloadUserCert();
+    m_sync->startSyncing();
 }
 
 void MainWindow::on_actionNewNote_triggered()

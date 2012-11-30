@@ -15,15 +15,17 @@ class CWizTagListWidget : public CWizPopupWidget
     Q_OBJECT
 public:
     CWizTagListWidget(CWizDatabase& db, QWidget* parent);
+
+    void setDocument(const WIZDOCUMENTDATA& data);
+
 private:
     QLineEdit* m_tagsEdit;
     QScrollArea* m_scroll;
     CWizDatabase& m_db;
     WIZDOCUMENTDATA m_document;
-private:
+
     void updateTagsText();
-public:
-    void setDocument(const WIZDOCUMENTDATA& data);
+
 public slots:
     void on_tagCheckBox_checked(CWizTagCheckBox* sender, int state);
     void on_tagsEdit_editingFinished();

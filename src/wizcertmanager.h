@@ -12,6 +12,7 @@ public:
     CWizCertManager(CWizExplorerApp& app, const QString& strAccountsApiURL = WIZ_API_URL);
 
     void loadUserCert();
+    bool downloadUserCert();
 
 private:
     CWizExplorerApp& m_app;
@@ -21,7 +22,6 @@ private:
     bool m_bCertInited;
 
 protected:
-    bool downloadUserCert();
 
     virtual void onGetUserCert(CWizXmlRpcValue& ret);
 

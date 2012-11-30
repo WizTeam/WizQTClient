@@ -15,14 +15,27 @@
 #endif
 
 
-__int64 WizGetFileSize(const CString& strFileName)
+QString WizGetFileSizeHumanReadalbe(const QString& strFileName)
 {
     QFileInfo info(strFileName);
-    if (!info.exists())
-    {
-        TOLOG1(_T("File does not exists: %1"), strFileName);
-    }
 
+    int sz = info.size();
+
+    if (sz < 1024) {
+        return QString::number(sz) + "B";
+    } else if (sz >= 1024 && sz < 1024*1024) {
+        return QString::number(sz/1024) + "KB";
+    } else if (sz >= 1024*1024 && sz < 1024*1024*1024) {
+        return QString::number(sz/(1024*1024)) + "MB";
+    } else {
+        Q_ASSERT(0);
+        return QString();
+    }
+}
+
+qint64 WizGetFileSize(const CString& strFileName)
+{
+    QFileInfo info(strFileName);
     return info.size();
 }
 

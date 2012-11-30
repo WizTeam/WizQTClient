@@ -13,6 +13,7 @@ class CWizSyncThread : public QThread
 public:
     explicit CWizSyncThread(CWizExplorerApp& app, QObject *parent = 0);
 
+    void startSyncing();
     QThread* thread() const { return m_currentThread; }
 
     void abort() const { if (m_currentThread) m_sync->abort(); }
@@ -29,7 +30,6 @@ private:
     bool m_bNeedResetProxy;
 
     bool m_bIsStarted;
-    QTimer m_timer;
 
     QPointer<QThread> m_currentThread;
 
@@ -43,7 +43,6 @@ Q_SIGNALS:
     void syncDone(bool error);
 
 public Q_SLOTS:
-    void on_syncStarted();
     void on_syncFinished();
 
 private Q_SLOTS:

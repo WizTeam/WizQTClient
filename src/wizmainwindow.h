@@ -55,6 +55,7 @@ private:
     CWizDatabase& m_db;
     CWizUserSettings* m_settings;
     QPointer<CWizSyncThread> m_sync;
+    QPointer<QTimer> m_syncTimer;
     CWizConsoleDialog* m_console;
     QPointer<CWizUpgradeThread> m_upgrade;
     QPointer<CWizCertManager> m_certManager;

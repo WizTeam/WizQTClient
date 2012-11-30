@@ -15,23 +15,25 @@ CWizTagListWidget::CWizTagListWidget(CWizDatabase& db, QWidget* parent)
     , m_scroll(NULL)
     , m_db(db)
 {
-    QVBoxLayout* layoutMain = new QVBoxLayout(this);
-    setLayout(layoutMain);
-    layoutMain->setMargin(0);
+    QWidget* root = new QWidget(this);
+    root->setGeometry(0, 0, sizeHint().width(), sizeHint().height());
+    root->setContentsMargins(8, 20, 8, 8);
+    QVBoxLayout* layoutMain = new QVBoxLayout(root);
+    layoutMain->setContentsMargins(0, 0, 0, 0);
+    root->setLayout(layoutMain);
 
-    QHBoxLayout* layoutTitle = new QHBoxLayout(this);
-    m_tagsEdit = new QLineEdit(this);
-    layoutTitle->addWidget(new QLabel(tr("Tags:"), this));
+    QHBoxLayout* layoutTitle = new QHBoxLayout(root);
+    m_tagsEdit = new QLineEdit(root);
+    layoutTitle->addWidget(new QLabel(tr("Tags:"), root));
     layoutTitle->addWidget(m_tagsEdit);
     layoutTitle->setSpacing(8);
     layoutTitle->setMargin(4);
-
-    m_scroll = new QScrollArea(this);
-    m_scroll->setFrameStyle(QFrame::NoFrame);
-
     layoutMain->addLayout(layoutTitle);
+
+    m_scroll = new QScrollArea(root);
+    m_scroll->setFrameStyle(QFrame::NoFrame);
     layoutMain->addWidget(m_scroll);
-    layoutMain->addWidget(new CWizVerSpacer(this));
+    layoutMain->addWidget(new CWizVerSpacer(root));
 
     m_scroll->setMaximumHeight(400);
 

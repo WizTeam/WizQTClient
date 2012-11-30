@@ -25,7 +25,7 @@ public:
     QString detailText(const CWizAttachmentListView* view) const
     {
         CString strFileName = view->m_db.GetAttachmentFileName(m_attachment.strGUID);
-        long long size = ::WizGetFileSize(strFileName);
+        qint64 size = ::WizGetFileSize(strFileName);
         //
         CString strSize = 0 == size ? CString(QObject::tr("Un-downloaded")) : WizFormatInt(size);
         //
@@ -293,23 +293,27 @@ CWizAttachmentListWidget::CWizAttachmentListWidget(CWizExplorerApp& app, QWidget
     , m_app(app)
     , m_list(new CWizAttachmentListView(app, this))
 {
-    QVBoxLayout* layoutMain = new QVBoxLayout(this);
-    setLayout(layoutMain);
-    layoutMain->setMargin(0);
+    QWidget* root = new QWidget(this);
+    root->setGeometry(0, 0, sizeHint().width(), sizeHint().height());
+    root->setContentsMargins(8, 20, 8, 8);
 
-    QHBoxLayout* layoutHeader = new QHBoxLayout(this);
+    QVBoxLayout* layoutMain = new QVBoxLayout(root);
+    root->setLayout(layoutMain);
+    layoutMain->setContentsMargins(0, 0, 0, 0);
+
+    QHBoxLayout* layoutHeader = new QHBoxLayout(root);
     layoutHeader->setMargin(0);
     QIcon iconAddAttachment = ::WizLoadSkinIcon(m_app.userSettings().skin(), "add_attachment_button");
-    CWizImagePushButton* addAttachmentButton = new CWizImagePushButton(iconAddAttachment, "", this);
+    CWizImagePushButton* addAttachmentButton = new CWizImagePushButton(iconAddAttachment, "", root);
     addAttachmentButton->setStyle(WizGetStyle(m_app.userSettings().skin()));
     addAttachmentButton->setToolTip(tr("Add attachments"));
-    layoutHeader->addWidget(new CWizFixedSpacer(QSize(4, 2), this));
-    layoutHeader->addWidget(new QLabel(tr("Attachments"), this));
-    layoutHeader->addWidget(new CWizSpacer(this));
+    layoutHeader->addWidget(new CWizFixedSpacer(QSize(4, 2), root));
+    layoutHeader->addWidget(new QLabel(tr("Attachments"), root));
+    layoutHeader->addWidget(new CWizSpacer(root));
     layoutHeader->addWidget(addAttachmentButton);
     connect(addAttachmentButton, SIGNAL(clicked()), SLOT(on_addAttachment_clicked()));
 
-    QWidget* line = new QWidget(this);
+    QWidget* line = new QWidget(root);
     line->setMaximumHeight(1);
     line->setMinimumHeight(1);
     line->setStyleSheet("border-bottom-width:1;border-bottom-style:solid;border-bottom-color:#d9dcdd");

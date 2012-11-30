@@ -11,6 +11,7 @@ class CWizDocumentWebView;
 class CWizDatabase;
 class CWizTagListWidget;
 class CWizAttachmentListWidget;
+class CWizNoteInfoForm;
 
 class CWizDocumentView : public QWidget
 {
@@ -32,8 +33,9 @@ protected:
     CWizTitleBar* m_title;
     CWizDocumentWebView* m_web;
     QWidget* m_client;
-    CWizTagListWidget* m_tags;
-    CWizAttachmentListWidget* m_attachments;
+    QPointer<CWizTagListWidget> m_tags;
+    QPointer<CWizAttachmentListWidget> m_attachments;
+    QPointer<CWizNoteInfoForm> m_info;
 
     QWidget* createClient();
 
@@ -55,6 +57,7 @@ public Q_SLOTS:
     void on_editDocumentButton_clicked();
     void on_tagsButton_clicked();
     void on_attachmentButton_clicked();
+    void on_infoButton_clicked();
     void on_attachment_created(const WIZDOCUMENTATTACHMENTDATA& attachment);
     void on_attachment_deleted(const WIZDOCUMENTATTACHMENTDATA& attachment);
     void on_document_modified(const WIZDOCUMENTDATA& documentOld, const WIZDOCUMENTDATA& documentNew);

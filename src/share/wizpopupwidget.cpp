@@ -20,9 +20,9 @@ CWizPopupWidget::CWizPopupWidget(QWidget* parent)
 {
     setContentsMargins(8, 20, 8, 8);
 
-    QPalette pal = palette();
-    pal.setColor(QPalette::Window, QColor(0xff, 0xff, 0xff));
-    setPalette(pal);
+    //QPalette pal = palette();
+    //pal.setColor(QPalette::Window, QColor(0xff, 0xff, 0xff));
+    //setPalette(pal);
 }
 
 QSize CWizPopupWidget::sizeHint() const
@@ -141,18 +141,39 @@ void CWizPopupWidget::resizeEvent(QResizeEvent* event)
 
 void CWizPopupWidget::showAtPoint(const QPoint& pt)
 {
-    adjustSize();
-
-    QSize sz = geometry().size();
-
-    int xOffset = m_leftAlign ? 21 : sz.width() - 21;
+    int xOffset = m_leftAlign ? 21 : sizeHint().width() - 21;
     int yOffset = 4;
 
     int left = pt.x() - xOffset;
     int top = pt.y() - yOffset;
 
-    move(QPoint(left, top));
+    m_pos.setX(left);
+    m_pos.setY(top);
+
+    QPropertyAnimation* animation = new QPropertyAnimation(this, "geometry");
+    animation->setDuration(100);
+    animation->setStartValue(QRect(QPoint(m_pos.x() + sizeHint().width(), m_pos.y()), QSize(0, 0)));
+    animation->setEndValue(QRect(QPoint(m_pos.x() - 100, m_pos.y()), QSize(sizeHint().width() + 100, sizeHint().height() + 100)));
+    animation->start();
+
+    connect(animation, SIGNAL(stateChanged(QAbstractAnimation::State, QAbstractAnimation::State)), \
+            SLOT(onAnimationStateChanged(QAbstractAnimation::State, QAbstractAnimation::State)));
 
     show();
 }
 
+void CWizPopupWidget::onAnimationStateChanged(QAbstractAnimation::State newState, QAbstractAnimation::State oldState)
+{
+    Q_UNUSED(oldState);
+
+    if (newState == QAbstractAnimation::Stopped && size() != sizeHint()) {
+        hide();
+        QTimer::singleShot(10, this, SLOT(onAnimationTimeout()));
+    }
+}
+
+void CWizPopupWidget::onAnimationTimeout()
+{
+    setGeometry(QRect(m_pos, sizeHint()));
+    show();
+}

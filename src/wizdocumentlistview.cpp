@@ -246,6 +246,10 @@ void CWizDocumentListView::contextMenuEvent(QContextMenuEvent * e)
         m_menu->addAction(tr("Tags..."), this, SLOT(on_action_selectTags()));
         m_menu->addSeparator();
         m_menu->addAction(tr("Delete..."), this, SLOT(on_action_deleteDocument()));
+
+        m_actionEncryptDocument = new QAction(tr("Encrypt Document"), m_menu);
+        connect(m_actionEncryptDocument, SIGNAL(triggered()), SLOT(on_action_encryptDocument()));
+        //m_menu->addAction(m_actionEncryptDocument);
     }
 
     m_menu->popup(mapToGlobal(e->pos()));
@@ -459,6 +463,18 @@ void CWizDocumentListView::on_action_deleteDocument()
         {
             CWizDocument doc(m_db, item->document());
             doc.Delete();
+        }
+    }
+}
+
+void CWizDocumentListView::on_action_encryptDocument()
+{
+    QList<QListWidgetItem*> items = selectedItems();
+
+    foreach (QListWidgetItem* it, items) {
+        if (CWizDocumentListViewItem* item = dynamic_cast<CWizDocumentListViewItem*>(it)) {
+            CWizDocument doc(m_db, item->document());
+            doc.encryptDocument();
         }
     }
 }

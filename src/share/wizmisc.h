@@ -91,7 +91,9 @@ void WizGetTranslatedLocales(QStringList& locales);
 QString WizGetTranslatedLocaleDisplayName(int index);
 
 
-__int64 WizGetFileSize(const CString& strFileName);
+qint64 WizGetFileSize(const CString& strFileName);
+QString WizGetFileSizeHumanReadalbe(const QString& strFileName);
+
 void WizPathAddBackslash(QString& strPath);
 void WizPathRemoveBackslash(CString& strPath);
 CString WizPathAddBackslash2(const CString& strPath);

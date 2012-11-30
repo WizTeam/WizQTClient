@@ -633,7 +633,7 @@ CString WizMd5FileStringNoSpaceJava(const CString& strFileName)
 
 BOOL WizMd5File(const CString& strFileName, BYTE* pResult)
 {
-    __int64 len = ::WizGetFileSize(strFileName);
+    qint64 len = ::WizGetFileSize(strFileName);
     if (len <= 0)
         return FALSE;
     //

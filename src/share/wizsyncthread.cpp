@@ -9,22 +9,13 @@ CWizSyncThread::CWizSyncThread(CWizExplorerApp& app, QObject *parent /* = 0 */)
     , m_currentThread(0)
 {
     connect(this, SIGNAL(finished()), SLOT(on_syncFinished()));
-
-    m_timer.setInterval(15 * 60 * 1000);    //15 minutes
-    connect(&m_timer, SIGNAL(timeout()), SLOT(on_syncStarted()));
-
-    if (m_app.userSettings().autoSync()) {
-        m_timer.start();
-        QTimer::singleShot(30 * 1000, this, SLOT(on_syncStarted()));  //10 seconds
-    }
 }
 
-void CWizSyncThread::on_syncStarted()
+void CWizSyncThread::startSyncing()
 {
     if (m_bIsStarted)
         return;
 
-    m_timer.stop();
     m_bIsStarted = true;
 
     start();
@@ -66,10 +57,6 @@ void CWizSyncThread::on_syncFinished()
 {
     m_sync->deleteLater();
     m_currentThread = 0;
-
-    if (m_app.userSettings().autoSync()) {
-        m_timer.start();
-    }
 
     m_bIsStarted = false;
 }
