@@ -94,6 +94,7 @@ void CWizHtmlCollector::EndTag(CWizHtmlTag *pTag, DWORD dwAppData, bool &bAbort)
         m_ret.push_back(pTag->getTag());
     }
 }
+
 void CWizHtmlCollector::Characters(const CString &rText, DWORD dwAppData, bool &bAbort)
 {
     Q_UNUSED(dwAppData);
@@ -101,6 +102,7 @@ void CWizHtmlCollector::Characters(const CString &rText, DWORD dwAppData, bool &
     //
     m_ret.push_back(rText);
 }
+
 void CWizHtmlCollector::Comment(const CString &rComment, DWORD dwAppData, bool &bAbort)
 {
     Q_UNUSED(dwAppData);
@@ -152,7 +154,9 @@ CString CWizHtmlCollector::ToResourceFileName(const CString& strFileName)
     }
 }
 
-BOOL CWizHtmlCollector::Collect(const CString& strUrl, CString& strHtml, BOOL mainPage /*= false*/)
+bool CWizHtmlCollector::Collect(const CString& strUrl, \
+                                CString& strHtml, \
+                                BOOL mainPage /*= false*/)
 {
     m_ret.clear();
     m_bMainPage = mainPage;
@@ -164,52 +168,53 @@ BOOL CWizHtmlCollector::Collect(const CString& strUrl, CString& strHtml, BOOL ma
     {
         m_url = QUrl(strUrl);
     }
-    //
+
     CWizHtmlReader reader;
     reader.setEventHandler(this);
-    //
+
     reader.Read(strHtml);
-    //
+
     ::WizStringArrayToText(m_ret, strHtml, "");
-    //
+
     return true;
 }
 
-BOOL CWizHtmlCollector::Html2Zip(const CString& strUrl, const CString& strHtml, const CString& strExtResourcePath, const CString& strMetaText, const CString& strZipFileName)
+bool CWizHtmlCollector::Html2Zip(const CString& strUrl, \
+                                 const CString& strHtml, \
+                                 const CString& strExtResourcePath, \
+                                 const CString& strMetaText, \
+                                 const CString& strZipFileName)
 {
     CString strMainHtml(strHtml);
     if (!Collect(strUrl, strMainHtml, true))
-        return FALSE;
-    //
+        return false;
+
     std::deque<WIZHTMLFILEDATA> arrayResource;
     m_files.GetAll(arrayResource);
-    //
+
     std::set<CString> files;
-    for (std::deque<WIZHTMLFILEDATA>::const_iterator it = arrayResource.begin();
-        it != arrayResource.end();
-        it++)
-    {
+    std::deque<WIZHTMLFILEDATA>::const_iterator it;
+    for (it = arrayResource.begin(); it != arrayResource.end(); it++) {
         files.insert(it->strFileName);
     }
-    //
+
     CWizStdStringArray arrayExtResource;
     if (!strExtResourcePath.IsEmpty())
     {
-        ::WizEnumFiles(strExtResourcePath, _T("*.*"), arrayExtResource, 0);
+        ::WizEnumFiles(strExtResourcePath, "*.*", arrayExtResource, 0);
         for (CWizStdStringArray::const_iterator it = arrayExtResource.begin();
             it != arrayExtResource.end();
             it++)
         {
-            //
             files.insert(*it);
         }
     }
-    //
+
     CString strRet;
     ::WizStringArrayToText(m_ret, strRet, "");
-    //
+
     CWizStdStringArray arrayAllResource;
     arrayAllResource.assign(files.begin(), files.end());
-    //
+
     return WizHtml2Zip(strRet, arrayAllResource, strMetaText, strZipFileName);
 }

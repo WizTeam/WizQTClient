@@ -52,6 +52,15 @@ void CWizDocumentWebView::keyPressEvent(QKeyEvent* event)
     QWebView::keyPressEvent(event);
 }
 
+// This is bug of UEditor, UEditor will insert a placeholder in the cursor position when focus out
+// We just don't tell it focus out event.
+void CWizDocumentWebView::focusOutEvent(QFocusEvent *event)
+{
+    Q_UNUSED(event);
+
+    return;
+}
+
 void CWizDocumentWebView::onSelectionChanged()
 {
     update();

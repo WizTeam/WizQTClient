@@ -10,6 +10,8 @@
 #include "wizqthelper.h"
 #include "wizmd5.h"
 
+#define WIZNOTE_OBSOLETE
+
 
 class IWizGlobal : public QObject
 {
@@ -38,7 +40,7 @@ IWizGlobal* WizGlobal();
 
 QString WizGetTimeStamp();
 COleDateTime WizGetCurrentTime();
-BOOL WizStringToDateTime(const CString& str, COleDateTime& t, CString& strError);
+bool WizStringToDateTime(const QString& str, COleDateTime& t, QString& strError);
 COleDateTime WizStringToDateTime(const CString& str);
 COLORREF WizStringToColor(const CString& str);
 QColor WizStringToColor2(const CString& str);
@@ -122,8 +124,8 @@ QString WizDecryptPassword(const QString& strEncryptedText);
 
 
 bool WizLoadUnicodeTextFromFile(const QString& strFileName, QString& steText);
-BOOL WizSaveUnicodeTextToUnicodeFile(const CString& strFileName, const CString& strText);
-BOOL WizSaveUnicodeTextToUtf8File(const CString& strFileName, const CString& strText);
+bool WizSaveUnicodeTextToUnicodeFile(const CString& strFileName, const CString& strText);
+bool WizSaveUnicodeTextToUtf8File(const CString& strFileName, const CString& strText);
 
 CString WizDateTimeToIso8601String(const COleDateTime& t);
 BOOL WizIso8601StringToDateTime(CString str, COleDateTime& t, CString& strError);

@@ -176,8 +176,8 @@ CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
 
     m_title->setEditingDocument(m_editingDocument);
 
-    connect(m_title->titleEdit(), SIGNAL(editingFinished()), \
-            SLOT(on_titleEdit_editingFinished()));
+    connect(m_title->titleEdit(), SIGNAL(textChanged(const QString&)), \
+            SLOT(on_titleEdit_textChanged(const QString&)));
 
     connect(m_title->editDocumentButton(), SIGNAL(clicked()), \
             SLOT(on_editDocumentButton_clicked()));
@@ -321,17 +321,19 @@ void CWizDocumentView::settingsChanged()
     setViewMode(m_userSettings.noteViewMode());
 }
 
-void CWizDocumentView::on_titleEdit_editingFinished()
+void CWizDocumentView::on_titleEdit_textChanged(const QString& strTitle)
 {
-    QString title = m_title->titleEdit()->text();
-    if (title.length() > 255)
-    {
+    if (m_web->document().strTitle == strTitle) {
+       return;
+    }
+
+    QString title = strTitle;
+    if (title.length() > 255) {
         title = title.left(255);
     }
 
     WIZDOCUMENTDATA data;
-    if (m_db.DocumentFromGUID(m_web->document().strGUID, data))
-    {
+    if (m_db.DocumentFromGUID(m_web->document().strGUID, data)) {
         data.strTitle = title;
         m_db.ModifyDocumentInfo(data);
     }

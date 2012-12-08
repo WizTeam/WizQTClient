@@ -10,116 +10,32 @@
 
 const char* const SyncMethod_ClientLogin = "accounts.clientLogin";
 const char* const SyncMethod_ClientLogout = "accounts.clientLogout";
-const char* const SyncMethod_CreateAccount = "accounts.createAccount";
-
-const char* const SyncMethod_GetUserInfo = "wiz.getInfo";
 const char* const SyncMethod_GetUserCert = "accounts.getCert";
+const char* const SyncMethod_CreateAccount = "accounts.createAccount";
+const char* const SyncMethod_GetUserInfo = "wiz.getInfo";
 
 const char* const SyncMethod_GetDeletedList = "deleted.getList";
-const char* const SyncMethod_GetTagList = "tag.getList";
-const char* const SyncMethod_GetStyleList = "style.getList";
-const char* const SyncMethod_GetDocumentList = "document.getList";
-const char* const SyncMethod_GetAttachmentList = "attachment.getList";
-
 const char* const SyncMethod_PostDeletedList = "deleted.postList";
+
+const char* const SyncMethod_GetTagList = "tag.getList";
 const char* const SyncMethod_PostTagList = "tag.postList";
+
+const char* const SyncMethod_GetStyleList = "style.getList";
 const char* const SyncMethod_PostStyleList = "style.postList";
-const char* const SyncMethod_PostDocumentList = "document.postList";
-const char* const SyncMethod_PostAttachmentList = "attachment.postList";
 
-const char* const SyncMethod_DownloadObjectPart = "data.download";
-const char* const SyncMethod_UploadObjectPart = "data.upload";
-
+const char* const SyncMethod_GetDocumentList = "document.getList";
 const char* const SyncMethod_GetDocumentData = "document.getData";
-const char* const SyncMethod_PostDocumentData = "document.postData";
-
-const char* const SyncMethod_PostAttachmentData = "attachment.postData";
-
 const char* const SyncMethod_GetDocumentsInfo = "document.downloadList";
+
+const char* const SyncMethod_GetAttachmentList = "attachment.getList";
 const char* const SyncMethod_GetAttachmentsInfo = "attachment.downloadList";
 
+const char* const SyncMethod_DownloadObjectPart = "data.download";
 
-struct WIZUSERINFO
-{
-    WIZUSERINFO();
-    bool LoadFromXmlRpc(CWizXmlRpcValue& val);
-    int GetMaxFileSize();
+const char* const SyncMethod_PostDocumentData = "document.postData";
+const char* const SyncMethod_PostAttachmentData = "attachment.postData";
 
-    QString strDisplayName;
-    QString strUserType;
-    QString strShowAD;
-    QString strNickName;
-    QString strLanguage;
-    QString strDatabaseServer;
-    QString strUploadDataServer;
-    QString strDownloadDataServer;
-    QString strChatServer;
-    QString strBackupDatabaseServer;
-    QString strToken;
-    COleDateTime tTokenExpried;
-    QString strKbGUID;
-
-    QString strUserLevelName;
-    int nUserLevel;
-    int nUserPoints;
-
-    QString strSNSList;
-
-    QString strSystemTags;
-    QString strPushTag;
-
-    int nMaxFileSize;
-
-    int bEnableGroup;
-
-    QString strNotice;
-};
-
-struct WIZUSERCERT
-{
-    WIZUSERCERT();
-    bool LoadFromXmlRpc(CWizXmlRpcValue& val);
-
-    QString strN;
-    QString stre;
-    QString strd;
-    QString strHint;
-};
-
-
-struct WIZKBINFO
-{
-    WIZKBINFO();
-    bool LoadFromXmlRpc(CWizXmlRpcStructValue& data);
-
-    __int64 nStorageLimit;
-    __int64 nStorageUsage;
-    QString strStorageLimit;
-    QString strStorageUsage;
-
-    __int64 nTrafficLimit;
-    __int64 nTrafficUsage;
-    QString strTrafficLimit;
-    QString strTrafficUsage;
-};
-
-
-struct WIZOBJECTPARTDATA
-{
-    WIZOBJECTPARTDATA();
-    bool LoadFromXmlRpc(CWizXmlRpcStructValue& data);
-
-    CString strObjectGUID;
-    CString strObjectType;
-    __int64 nStartPos;
-    __int64 nQuerySize;
-
-    __int64 nObjectSize;
-    int bEOF;
-    __int64 nPartSize;
-    CString strPartMD5;
-    QByteArray arrayData;
-};
+const char* const SyncMethod_UploadObjectPart = "data.upload";
 
 
 class CWizApiBase : public QObject
@@ -127,20 +43,19 @@ class CWizApiBase : public QObject
     Q_OBJECT
 
 public:
-    CWizApiBase(const CString& strAccountsApiURL = WIZ_API_URL);
+    CWizApiBase(const QString& strAccountsApiURL = WIZ_API_URL);
 
     CString token() const { return m_user.strToken; }
     CString kbGUID() const { return m_user.strKbGUID; }
     const WIZUSERINFO& userInfo() const { return m_user; }
 
     virtual bool callXmlRpc(const QString& strMethodName, CWizXmlRpcValue* pVal);
-    bool isSyncing() const;
     void resetProxy();
     virtual void abort();
 
 protected:
     WIZUSERINFO m_user;
-    CWizXmlRpcServer m_server;
+    QPointer<CWizXmlRpcServer> m_server;
 
 protected:
     CString MakeXmlRpcUserId(const CString& strUserId);
@@ -160,7 +75,7 @@ protected:
     virtual void onGetUserInfo(CWizXmlRpcValue& ret);
 
     virtual bool callGetUserCert(const QString& strUserId, const QString& strPassword);
-    virtual void onGetUserCert(CWizXmlRpcValue& ret);
+    virtual void onGetUserCert(const WIZUSERCERT& data);
 
     virtual bool callCreateAccount(const CString& strUserId, const CString& strPassword);
     virtual void onCreateAccount();
@@ -173,8 +88,8 @@ Q_SIGNALS:
 
 public Q_SLOTS:
     void xmlRpcReturn(const QString& strMethodName, CWizXmlRpcValue& ret);
-    virtual void xmlRpcError(const QString& strMethodName, WizXmlRpcError err, \
-                             int errorCode, const QString& errorMessage);
+    void xmlRpcError(const QString& strMethodName, WizXmlRpcError err, \
+                     int errorCode, const QString& errorMessage);
 };
 
 class CWizApi : public CWizApiBase
@@ -206,65 +121,76 @@ protected:
     virtual bool callDeletedGetList(__int64 nVersion);
     virtual void onDeletedGetList(const std::deque<WIZDELETEDGUIDDATA>& arrayRet);
 
+    virtual bool callDeletedPostList(const std::deque<WIZDELETEDGUIDDATA>& arrayData);
+    virtual void onDeletedPostList(const std::deque<WIZDELETEDGUIDDATA>& arrayData);
+
     virtual bool callTagGetList(__int64 nVersion);
     virtual void onTagGetList(const std::deque<WIZTAGDATA>& arrayRet);
+
+    virtual bool callTagPostList(const std::deque<WIZTAGDATA>& arrayData);
+    virtual void onTagPostList(const std::deque<WIZTAGDATA>& arrayData);
 
     virtual bool callStyleGetList(__int64 nVersion);
     virtual void onStyleGetList(const std::deque<WIZSTYLEDATA>& arrayRet);
 
+    virtual bool callStylePostList(const std::deque<WIZSTYLEDATA>& arrayData);
+    virtual void onStylePostList(const std::deque<WIZSTYLEDATA>& arrayData);
+
     virtual bool callDocumentGetList(__int64 nVersion);
     virtual void onDocumentGetList(const std::deque<WIZDOCUMENTDATABASE>& arrayRet);
-
-    virtual bool callAttachmentGetList(__int64 nVersion);
-    virtual void onAttachmentGetList(const std::deque<WIZDOCUMENTATTACHMENTDATAEX>& arrayRet);
-
-    virtual bool callDownloadDataPart(const CString& strObjectGUID, const CString& strObjectType, int pos);
-    virtual void onDownloadDataPart(const WIZOBJECTPARTDATA& data);
-
-    virtual bool callUploadDataPart(const CString& strObjectGUID, const CString& strObjectType, const CString& strObjectMD5, int allSize, int partCount, int partIndex, int partSize, const QByteArray& arrayData);
-    virtual void onUploadDataPart();
-
-    virtual bool uploadObjectData(const WIZOBJECTDATA& data);
-    virtual void onUploadObjectDataCompleted(const WIZOBJECTDATA& data);
 
     virtual bool callDocumentGetData(const WIZDOCUMENTDATABASE& data);
     virtual void onDocumentGetData(const WIZDOCUMENTDATAEX& data);
 
+    virtual bool callDocumentsGetInfo(const CWizStdStringArray& arrayDocumentGUID);
+    virtual void onDocumentsGetInfo(const std::deque<WIZDOCUMENTDATABASE>& arrayRet);
+
+    virtual bool callAttachmentGetList(__int64 nVersion);
+    virtual void onAttachmentGetList(const std::deque<WIZDOCUMENTATTACHMENTDATAEX>& arrayRet);
+
+    virtual bool callAttachmentsGetInfo(const CWizStdStringArray& arrayAttachmentGUID);
+    virtual void onAttachmentsGetInfo(const std::deque<WIZDOCUMENTATTACHMENTDATAEX>& arrayRet);
+
+    // download several slices of data (callDownloadDataPart)
+    virtual bool downloadObjectData(const WIZOBJECTDATA& data);
+    virtual bool downloadNextPartData();
+    virtual void onDownloadObjectDataCompleted(const WIZOBJECTDATA& data);
+
+    virtual bool callDownloadDataPart(const CString& strObjectGUID, \
+                                      const CString& strObjectType, \
+                                      int pos);
+    virtual void onDownloadDataPart(const WIZOBJECTPARTDATA& data);
+
+    // upload both document info (callDocumentPostData) and document data (callUploadDataPart)
     virtual bool uploadDocument(const WIZDOCUMENTDATAEX& data);
     virtual void onUploadDocument(const WIZDOCUMENTDATAEX& data);
 
     virtual bool callDocumentPostData(const WIZDOCUMENTDATAEX& data);
     virtual void onDocumentPostData(const WIZDOCUMENTDATAEX& data);
 
+    // upload both attachment info (callAttachmentPostData) and document data (callUploadDataPart)
     virtual bool uploadAttachment(const WIZDOCUMENTATTACHMENTDATAEX& data);
     virtual void onUploadAttachment(const WIZDOCUMENTATTACHMENTDATAEX& data);
 
     virtual bool callAttachmentPostData(const WIZDOCUMENTATTACHMENTDATAEX& data);
     virtual void onAttachmentPostData(const WIZDOCUMENTATTACHMENTDATAEX& data);
 
-    virtual bool downloadObjectData(const WIZOBJECTDATA& data);
-    virtual void onDownloadObjectDataCompleted(const WIZOBJECTDATA& data);
+    // upload several slices of data (callUploadDataPart)
+    virtual bool uploadObjectData(const WIZOBJECTDATA& data);
+    virtual bool uploadNextPartData();
+    virtual void onUploadObjectDataCompleted(const WIZOBJECTDATA& data);
 
-    virtual bool callDeletedPostList(const std::deque<WIZDELETEDGUIDDATA>& arrayData);
-    virtual void onDeletedPostList(const std::deque<WIZDELETEDGUIDDATA>& arrayData);
-
-    virtual bool callTagPostList(const std::deque<WIZTAGDATA>& arrayData);
-    virtual void onTagPostList(const std::deque<WIZTAGDATA>& arrayData);
-
-    virtual bool callStylePostList(const std::deque<WIZSTYLEDATA>& arrayData);
-    virtual void onStylePostList(const std::deque<WIZSTYLEDATA>& arrayData);
-
-    virtual bool callDocumentsGetInfo(const CWizStdStringArray& arrayDocumentGUID);
-    virtual void onDocumentsGetInfo(const std::deque<WIZDOCUMENTDATABASE>& arrayRet);
-
-    virtual bool callAttachmentsGetInfo(const CWizStdStringArray& arrayAttachmentGUID);
-    virtual void onAttachmentsGetInfo(const std::deque<WIZDOCUMENTATTACHMENTDATAEX>& arrayRet);
+    virtual bool callUploadDataPart(const CString& strObjectGUID, \
+                                    const CString& strObjectType, \
+                                    const CString& strObjectMD5, \
+                                    int allSize, int partCount, \
+                                    int partIndex, int partSize, \
+                                    const QByteArray& arrayData);
+    virtual void onUploadDataPart();
 
     virtual unsigned int getCountPerPage() const;
     virtual unsigned int getPartSize() const;
 
-    virtual bool downloadNextPartData();
-    virtual bool uploadNextPartData();
 
 protected:
     bool callGetList(const QString& strMethodName, __int64 nVersion);

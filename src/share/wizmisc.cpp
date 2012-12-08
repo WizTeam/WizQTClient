@@ -510,7 +510,7 @@ COleDateTime WizGetCurrentTime()
     return t;
 }
 
-BOOL WizStringToDateTime(const CString& str, COleDateTime& t, CString& strError)
+BOOL WizStringToDateTime(const QString& str, COleDateTime& t, QString& strError)
 {
     std::string utf8 = ::WizBSTR2UTF8(str);
     const char* lpsz = utf8.c_str();
@@ -1195,32 +1195,30 @@ bool WizLoadUnicodeTextFromFile(const QString& strFileName, QString& strText)
     return bRet;
 }
 
-BOOL WizSaveUnicodeTextToUnicodeFile(const CString& strFileName, const CString& strText)
+bool WizSaveUnicodeTextToUnicodeFile(const CString& strFileName, const CString& strText)
 {
     QFile file(strFileName);
     if (!file.open(QIODevice::WriteOnly))
         return false;
-    //
+
     file.write("\xff\xfe");
     file.write((const char*)strText.utf16(), strText.length() * 2);
-    //
     file.close();
-    //
-    return TRUE;
+
+    return true;
 }
 
-BOOL WizSaveUnicodeTextToUtf8File(const CString& strFileName, const CString& strText)
+bool WizSaveUnicodeTextToUtf8File(const CString& strFileName, const CString& strText)
 {
     QFile file(strFileName);
     if (!file.open(QIODevice::WriteOnly))
         return false;
-    //
+
     file.write("\xef\xbb\xbf");
     file.write(strText.toUtf8());
-    //
     file.close();
-    //
-    return TRUE;
+
+    return true;
 }
 
 BOOL WizSplitTextToArray(const CString& strText, QChar ch, CWizStdStringArray& arrayResult)
@@ -1656,6 +1654,9 @@ void WizGetSkins(QStringList& skins)
     }
 }
 
+#ifdef WIZNOTE_OBSOLETE
+
+// FIXME: remove from wizmisc!
 QString WizGetSkinDisplayName(const QString& strSkinName, const QString& strLocale)
 {
     CWizSettings settings(::WizGetSkinResourcePath(strSkinName) + "skin.ini");
@@ -1672,6 +1673,8 @@ QString WizGetSkinDisplayName(const QString& strSkinName, const QString& strLoca
 
     return strSkinName;
 }
+
+#endif // WIZNOTE_OBSOLETE
 
 QString WizGetSystemCustomSkinPath(const QString& strSkinName)
 {

@@ -1,7 +1,63 @@
 #include "wizxmlrpc.h"
 #include <QUrl>
 
+//#define WIZNOTE_DEBUG_XMLRPC
+
 BOOL WizXmlRpcValueFromXml(CWizXMLNode& nodeValue, CWizXmlRpcValue** ppRet);
+
+BOOL WizXmlRpcParamsToXml(CWizXMLDocument& doc, const CString& strMethodName, \
+                          CWizXmlRpcValue* pParam1, CWizXmlRpcValue* pParam2, \
+                          CWizXmlRpcValue* pParam3, CWizXmlRpcValue* pParam4, \
+                          CWizXmlRpcValue* pParam5, CWizXmlRpcValue* pParam6, \
+                          CWizXmlRpcValue* pParam7, CWizXmlRpcValue* pParam8);
+
+
+CWizXmlRpcRequest::CWizXmlRpcRequest(const QString& strMethodName)
+{
+    CWizXMLNode nodeMethodCall;
+    m_doc.AppendChild("methodCall", nodeMethodCall);
+    nodeMethodCall.SetChildNodeText("methodName", strMethodName);
+
+    CWizXMLNode nodeParams;
+    nodeMethodCall.AppendChild("params", nodeParams);
+}
+
+void CWizXmlRpcRequest::addParam(CWizXmlRpcValue* pParam)
+{
+    Q_ASSERT(pParam);
+
+    CWizXMLNode nodeParams;
+    m_doc.FindNodeByPath("methodCall/params", nodeParams);
+
+    CWizXMLNode nodeParamValue;
+    nodeParams.AppendNodeByPath("param/value", nodeParamValue);
+
+    pParam->Write(nodeParamValue);
+}
+
+QByteArray CWizXmlRpcRequest::toData()
+{
+    QString strText;
+    if (!m_doc.ToXML(strText, true)) {
+        TOLOG("Failed to get xml text!");
+        return QByteArray();
+    }
+
+    if (strText.length() < 10) {
+        TOLOG1("Invalidate xml: %1", strText);
+        return QByteArray();
+    }
+
+    if (strText[0] == '<' && strText[1] == '?')
+    {
+    }
+    else
+    {
+        strText.insert(0, "<?xml version=\"1.0\"?>\n");
+    }
+
+    return strText.toUtf8();
+}
 
 
 CWizXmlRpcIntValue::CWizXmlRpcIntValue(int n /*= 0*/)
@@ -687,7 +743,7 @@ BOOL WizXmlRpcValueFromXml(CWizXMLNode& nodeValue, CWizXmlRpcValue** ppRet)
 	//
 	CWizXMLNode nodeTypeTest;
 	nodeValue.GetFirstChildNode(nodeTypeTest);
-	if (!nodeTypeTest.Valid())
+    if (nodeTypeTest.isNull())
 	{
 		CString strText = nodeValue.GetText();
 		//
@@ -764,7 +820,7 @@ bool WizXmlRpcResultFromXml(CWizXMLDocument& doc, CWizXmlRpcValue** ppRet)
 {
 	CWizXMLNode nodeMethodResponse;
     doc.FindChildNode("methodResponse", nodeMethodResponse);
-	if (!nodeMethodResponse.Valid())
+    if (nodeMethodResponse.isNull())
 	{
         TOLOG("Failed to get methodResponse node!");
         return false;
@@ -783,7 +839,7 @@ bool WizXmlRpcResultFromXml(CWizXMLDocument& doc, CWizXmlRpcValue** ppRet)
 	{
 		CWizXMLNode nodeParamValue;
         nodeTest.FindNodeByPath("param/value", nodeParamValue);
-		if (!nodeParamValue.Valid())
+        if (nodeParamValue.isNull())
 		{
             TOLOG("Failed to get param value node of params!");
             return false;
@@ -795,7 +851,7 @@ bool WizXmlRpcResultFromXml(CWizXMLDocument& doc, CWizXmlRpcValue** ppRet)
 	{
 		CWizXMLNode nodeFaultValue;
 		nodeTest.FindChildNode(_T("value"), nodeFaultValue);
-		if (!nodeFaultValue.Valid())
+        if (nodeFaultValue.isNull())
 		{
             TOLOG("Failed to get fault value node!");
             return false;
@@ -816,117 +872,55 @@ bool WizXmlRpcResultFromXml(CWizXMLDocument& doc, CWizXmlRpcValue** ppRet)
 }
 
 
-CWizXmlRpcFormData::CWizXmlRpcFormData(const CString& strMethodName, \
-                                       CWizXmlRpcValue* pParam1, CWizXmlRpcValue* pParam2, \
-                                       CWizXmlRpcValue* pParam3, CWizXmlRpcValue* pParam4, \
-                                       CWizXmlRpcValue* pParam5, CWizXmlRpcValue* pParam6, \
-                                       CWizXmlRpcValue* pParam7, CWizXmlRpcValue* pParam8)
-    : m_strMethodName(strMethodName)
-	, m_pParam1(pParam1)
-	, m_pParam2(pParam2)
-	, m_pParam3(pParam3)
-	, m_pParam4(pParam4)
-	, m_pParam5(pParam5)
-	, m_pParam6(pParam6)
-	, m_pParam7(pParam7)
-	, m_pParam8(pParam8)
+
+CWizXmlRpcServer::CWizXmlRpcServer(const QString& strUrl)
 {
-	m_bInited = Init();
-}
-
-
-bool CWizXmlRpcFormData::Init()
-{
-    m_doc.Clear();
-
-    return ::WizXmlRpcParamsToXml(m_doc, m_strMethodName, \
-                                  m_pParam1, m_pParam2, \
-                                  m_pParam3, m_pParam4, \
-                                  m_pParam5, m_pParam6, \
-                                  m_pParam7, m_pParam8);
-}
-
-int CWizXmlRpcFormData::SendRequest(QHttp& http, const CString& strUrl)
-{
-	if (!m_bInited)
-        return -1;
-
-	CString strText;
-    if (!m_doc.ToXML(strText, true))
-	{
-        TOLOG("Failed to get xml text!");
-        return -1;
-    }
-
-	if (strText.GetLength() < 10)
-	{
-        TOLOG1("Invalidate xml: %1", strText);
-        return -1;
-    }
-
-	if (strText[0] == '<' && strText[1] == '?')
-	{
-	}
-	else
-	{
-        strText.Insert(0, "<?xml version=\"1.0\"?>\n");
-    }
-
-    QUrl url(strUrl);
-    QHttpRequestHeader header;
-    header.setRequest("POST", url.path());
-    header.setValue("Host", url.host());
-    header.setContentType("text/xml");
-
-    QByteArray data = strText.toUtf8();
-    return http.request(header, data);
-}
-
-
-CWizXmlRpcServer::CWizXmlRpcServer(const CString& strUrl)
-    : m_strUrl(strUrl)
-    , m_nCurrentRequestID(-1)
-    , m_nCurrentXmlRpcRequestID(-1)
-{
-    QUrl url(strUrl);
-    m_http.setHost(url.host(), url.port(80));
-
-    connect(&m_http, SIGNAL(done(bool)), SLOT(httpDone(bool)));
-    connect(&m_http, SIGNAL(requestFinished(int, bool)), SLOT(httpRequestFinished(int, bool)));
-    connect(&m_http, SIGNAL(requestStarted(int)), SLOT(httpRequestStarted(int)));
-    connect(&m_http, SIGNAL(dataReadProgress(int, int)), SLOT(httpReadProgress(int, int)));
+    m_strUrl = strUrl;
+    m_network = new QNetworkAccessManager(this);
 }
 
 void CWizXmlRpcServer::setProxy(const QString& host, int port, const QString& userName, const QString& password)
 {
-    m_http.setProxy(host, port, userName, password);
+    QNetworkProxy proxy = m_network->proxy();
+
+    if (host.isEmpty()) {
+        proxy.setType(QNetworkProxy::DefaultProxy);
+    } else {
+        proxy.setHostName(host);
+        proxy.setPort(port);
+        proxy.setUser(userName);
+        proxy.setPassword(password);
+        proxy.setType(QNetworkProxy::HttpProxy);
+    }
+
+    m_network->setProxy(proxy);
 }
 
 void CWizXmlRpcServer::abort()
 {
-    m_http.disconnect(this);
-    m_http.abort();
+    m_network->disconnect();
 }
 
-bool CWizXmlRpcServer::xmlRpcCall(const QString& strMethodName, \
-                                  CWizXmlRpcValue* pParam1, CWizXmlRpcValue* pParam2, \
-                                  CWizXmlRpcValue* pParam3, CWizXmlRpcValue* pParam4, \
-                                  CWizXmlRpcValue* pParam5, CWizXmlRpcValue* pParam6, \
-                                  CWizXmlRpcValue* pParam7, CWizXmlRpcValue* pParam8)
+bool CWizXmlRpcServer::xmlRpcCall(const QString& strMethodName, CWizXmlRpcValue* pParam)
 {
     m_strMethodName = strMethodName;
 
-    CWizXmlRpcFormData data(strMethodName, \
-                            pParam1, pParam2, \
-                            pParam3, pParam4, \
-                            pParam5, pParam6, \
-                            pParam7, pParam8);
+    CWizXmlRpcRequest data(strMethodName);
+    data.addParam(pParam);
 
-    m_nCurrentXmlRpcRequestID = data.SendRequest(m_http, m_strUrl);
+    m_requestData = data.toData();
 
-    return m_nCurrentXmlRpcRequestID != -1;
+    QNetworkRequest request;
+    request.setUrl(QUrl(m_strUrl));
+    request.setHeader(QNetworkRequest::ContentTypeHeader, QVariant("text/xml"));
+
+    QNetworkReply* reply = m_network->post(request, m_requestData);
+    connect(reply, SIGNAL(finished()), SLOT(on_replyFinished()));
+    connect(reply, SIGNAL(error(QNetworkReply::NetworkError)), SLOT(on_replyError(QNetworkReply::NetworkError)));
+    connect(reply, SIGNAL(downloadProgress(qint64, qint64)), SLOT(on_replyDownloadProgress(qint64, qint64)));
+
+    return true;
 }
-
 
 void CWizXmlRpcServer::processError(WizXmlRpcError error, int errorCode, const QString& errorString)
 {
@@ -936,64 +930,57 @@ void CWizXmlRpcServer::processError(WizXmlRpcError error, int errorCode, const Q
 
 void CWizXmlRpcServer::processReturn(CWizXmlRpcValue& ret)
 {
+    Q_ASSERT(!m_strMethodName.isEmpty());
     emit xmlRpcReturn(m_strMethodName, ret);
 }
 
-void CWizXmlRpcServer::httpDone(bool error)
+void CWizXmlRpcServer::on_replyFinished()
 {
-    if (error) {
-        //processError(errorNetwork, 0, m_http.errorString());
-        return;
-    }
-}
+    QNetworkReply* reply = qobject_cast<QNetworkReply *>(sender());
 
-void CWizXmlRpcServer::httpRequestFinished (int id, bool error)
-{
-    if (error)
-    {
-        processError(errorNetwork, 0, m_http.errorString());
+    if (reply->error()) {
+        reply->deleteLater();
         return;
     }
 
-    if (id != m_nCurrentXmlRpcRequestID)
-        return;
-
-    if (m_strMethodName.isEmpty())
-        return;
-
-    QHttpResponseHeader header = m_http.lastResponse();
-    CString contentType = header.contentType();
-
-    if (0 != contentType.CompareNoCase("text/xml"))
-    {
+    QString strContentType = reply->header(QNetworkRequest::ContentTypeHeader).toString();
+    if (strContentType != "text/xml;charset=UTF-8") {
         processError(errorContentType, 0, "Invalid content type of response");
+        reply->deleteLater();
         return;
     }
 
-    QByteArray data = m_http.readAll();
+    m_replyData = reply->readAll();
 
-    CString strXml = CString::fromUtf8(data.constData());
+#ifdef WIZNOTE_DEBUG_XMLRPC
+    QString requestFile = QDir::tempPath() + "/WizNote/" + m_strMethodName;
+    QString replyFile = QDir::tempPath() + "/WizNote/on_" + m_strMethodName;
+    WizSaveUnicodeTextToUtf8File(requestFile, QString(m_requestData));
+    WizSaveUnicodeTextToUtf8File(replyFile, QString(m_replyData));
+#endif
+
+    QString strXml = QString::fromUtf8(m_replyData.constData());
 
     CWizXMLDocument doc;
-    if (!doc.LoadXML(strXml))
-    {
+    if (!doc.LoadXML(strXml)) {
         processError(errorXmlFormat, 0, "Invalid xml");
+        reply->deleteLater();
         return;
     }
 
     CWizXmlRpcValue* pRet = NULL;
 
-    if (!WizXmlRpcResultFromXml(doc, &pRet))
-    {
+    if (!WizXmlRpcResultFromXml(doc, &pRet)) {
         processError(errorXmlRpcFormat, 0, "Can not parse xmlrpc");
+        reply->deleteLater();
         return;
     }
 
     Q_ASSERT(pRet);
 
-    if (CWizXmlRpcFaultValue* pFault = dynamic_cast<CWizXmlRpcFaultValue*>(pRet))
-    {
+    if (CWizXmlRpcFaultValue* pFault = dynamic_cast<CWizXmlRpcFaultValue *>(pRet)) {
         processError(errorXmlRpcFault, pFault->GetFaultCode(), pFault->GetFaultString());
+        reply->deleteLater();
         delete pRet;
         return;
     }
@@ -1001,12 +988,12 @@ void CWizXmlRpcServer::httpRequestFinished (int id, bool error)
     processReturn(*pRet);
 }
 
-void CWizXmlRpcServer::httpRequestStarted(int id)
+void CWizXmlRpcServer::on_replyError(QNetworkReply::NetworkError error)
 {
-    m_nCurrentRequestID = id;
+    processError(errorNetwork, error, QString());
 }
 
-void CWizXmlRpcServer::httpReadProgress(int done, int total)
+void CWizXmlRpcServer::on_replyDownloadProgress(qint64 bytesReceived, qint64 bytesTotal)
 {
-    emit xmlRpcReadProgress(done, total);
+    emit xmlRpcReadProgress(bytesReceived, bytesTotal);
 }

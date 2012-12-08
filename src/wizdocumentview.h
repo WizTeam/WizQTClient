@@ -53,7 +53,7 @@ public:
     void settingsChanged();
 
 public Q_SLOTS:
-    void on_titleEdit_editingFinished();
+    void on_titleEdit_textChanged(const QString& strTitle);
     void on_editDocumentButton_clicked();
     void on_tagsButton_clicked();
     void on_attachmentButton_clicked();

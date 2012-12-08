@@ -26,18 +26,19 @@ bool WizHtml2Zip(const CString& strHtml, const CWizStdStringArray& arrayResource
 {
     CWizZipFile zip;
     if (!zip.open(strZipFileName))
-        return FALSE;
+        return false;
 
-    CString strIndexFileName = WizGlobal()->GetTempPath() + WizIntToStr(GetTickCount()) + _T(".html");
-    if (!::WizSaveUnicodeTextToUnicodeFile(strIndexFileName, strHtml))
-        return FALSE;
+    CString strIndexFileName = WizGlobal()->GetTempPath() + WizIntToStr(GetTickCount()) + ".html";
+    //if (!::WizSaveUnicodeTextToUnicodeFile(strIndexFileName, strHtml))
+    if (!::WizSaveUnicodeTextToUtf8File(strIndexFileName, strHtml))
+        return false;
 
-    CString strMetaFileName = ::WizGlobal()->GetTempPath() + WizIntToStr(GetTickCount()) + _T(".xml");
+    CString strMetaFileName = ::WizGlobal()->GetTempPath() + WizIntToStr(GetTickCount()) + ".xml";
     if (!::WizSaveUnicodeTextToUtf8File(strMetaFileName, strMetaText))
-        return FALSE;
+        return false;
 
     if (!zip.compressFile(strIndexFileName, "index.html"))
-        return FALSE;
+        return false;
 
     int failed = 0;
 

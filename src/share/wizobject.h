@@ -6,6 +6,92 @@
 
 class CWizXmlRpcStructValue;
 
+
+struct WIZUSERINFO
+{
+    WIZUSERINFO();
+    bool LoadFromXmlRpc(CWizXmlRpcStructValue& val);
+    int GetMaxFileSize();
+
+    QString strDisplayName;
+    QString strUserType;
+    QString strShowAD;
+    QString strNickName;
+    QString strLanguage;
+    QString strDatabaseServer;
+    QString strUploadDataServer;
+    QString strDownloadDataServer;
+    QString strChatServer;
+    QString strBackupDatabaseServer;
+    QString strToken;
+    COleDateTime tTokenExpried;
+    QString strKbGUID;
+
+    QString strUserLevelName;
+    int nUserLevel;
+    int nUserPoints;
+
+    QString strSNSList;
+
+    QString strSystemTags;
+    QString strPushTag;
+
+    int nMaxFileSize;
+
+    int bEnableGroup;
+
+    QString strNotice;
+};
+
+
+struct WIZUSERCERT
+{
+    WIZUSERCERT();
+    bool LoadFromXmlRpc(CWizXmlRpcStructValue& val);
+
+    QString strN;
+    QString stre;
+    QString strd;
+    QString strHint;
+};
+
+
+struct WIZKBINFO
+{
+    WIZKBINFO();
+    bool LoadFromXmlRpc(CWizXmlRpcStructValue& data);
+
+    __int64 nStorageLimit;
+    __int64 nStorageUsage;
+    QString strStorageLimit;
+    QString strStorageUsage;
+
+    __int64 nTrafficLimit;
+    __int64 nTrafficUsage;
+    QString strTrafficLimit;
+    QString strTrafficUsage;
+};
+
+
+struct WIZOBJECTPARTDATA
+{
+    WIZOBJECTPARTDATA();
+    bool LoadFromXmlRpc(CWizXmlRpcStructValue& data);
+
+    CString strObjectGUID;
+    CString strObjectType;
+    __int64 nStartPos;
+    __int64 nQuerySize;
+
+    __int64 nObjectSize;
+    int bEOF;
+    __int64 nPartSize;
+    CString strPartMD5;
+    QByteArray arrayData;
+};
+
+
+
 enum WizObjectType
 {
     wizobjectError = -1,
@@ -198,6 +284,7 @@ struct WIZDOCUMENTATTACHMENTDATAEX : public WIZDOCUMENTATTACHMENTDATA
 struct WIZOBJECTDATA
 {
     WIZOBJECTDATA();
+    WIZOBJECTDATA(const WIZOBJECTDATA& data);
     WIZOBJECTDATA(const WIZDOCUMENTDATA& data);
     WIZOBJECTDATA(const WIZDOCUMENTATTACHMENTDATA& data);
 

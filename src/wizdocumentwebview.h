@@ -47,6 +47,7 @@ protected:
 
     virtual void inputMethodEvent(QInputMethodEvent* event);
     virtual void keyPressEvent(QKeyEvent* event);
+    virtual void focusOutEvent(QFocusEvent *event);
 
 public Q_SLOTS:
     void on_editor_populateJavaScriptWindowObject();

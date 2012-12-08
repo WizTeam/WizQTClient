@@ -1576,6 +1576,7 @@ BOOL CIndex::ModifyStyle(WIZSTYLEDATA& data)
 	data.nVersion = -1;
 	return ModifyStyleEx(data);
 }
+
 BOOL CIndex::ModifyDocumentInfoEx(const WIZDOCUMENTDATA& data)
 {
     WIZDOCUMENTDATA dataOld;
@@ -1635,26 +1636,26 @@ BOOL CIndex::ModifyDocumentInfoEx(const WIZDOCUMENTDATA& data)
 	return TRUE;
 }
 
-BOOL CIndex::ModifyDocumentInfo(WIZDOCUMENTDATA& data)
+bool CIndex::ModifyDocumentInfo(WIZDOCUMENTDATA& data)
 {
-	if (data.strGUID.IsEmpty())
-	{
-		TOLOG(_T("Failed to modify document: guid is empty!"));
-		return FALSE;
+    if (data.strGUID.IsEmpty()) {
+        TOLOG("Failed to modify document: guid is empty!");
+        return false;
+    }
+
+    if (data.strTitle.IsEmpty()) {
+        TOLOG("Failed to modify document: title is empty!");
+        return false;
 	}
-	if (data.strTitle.IsEmpty())
-	{
-		TOLOG(_T("Failed to modify document: title is empty!"));
-		return FALSE;
-	}
-	//
+
 	data.tInfoModified = WizGetCurrentTime();
 	data.strInfoMD5 = CalDocumentInfoMD5(data);
 	data.tModified = WizGetCurrentTime();
-	//
+
 	data.nVersion = -1;
 	return ModifyDocumentInfoEx(data);
 }
+
 BOOL CIndex::ModifyDocumentDateModified(WIZDOCUMENTDATA& data)
 {
 	if (data.strGUID.IsEmpty())
@@ -2924,7 +2925,7 @@ BOOL CIndex::UpdateDocumentParamMD5(WIZDOCUMENTDATA& data)
 	//
 	if (!ExecSQL(strSQL))
 	{
-		TOLOG1(_T("Faoled to update document params: %1"), data.strTitle);
+        TOLOG1(_T("Failed to update document params: %1"), data.strTitle);
 		return FALSE;
 	}
 	//

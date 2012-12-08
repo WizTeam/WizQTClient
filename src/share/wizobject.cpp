@@ -2,10 +2,153 @@
 
 #include "wizxmlrpc.h"
 
+
+//////////////////////////////////////////////////////////////////////////////
+WIZUSERINFO::WIZUSERINFO()
+    : nUserLevel(0)
+    , nUserPoints(0)
+    , nMaxFileSize(10 * 1024 * 1024)
+    , bEnableGroup(false)
+{
+
+}
+
+int WIZUSERINFO::GetMaxFileSize()
+{
+    return std::max<int>(20 * 1024 * 1024, nMaxFileSize);
+}
+
+bool WIZUSERINFO::LoadFromXmlRpc(CWizXmlRpcStructValue& val)
+{
+    //CWizXmlRpcStructValue* pStruct = dynamic_cast<CWizXmlRpcStructValue*>(&val);
+    //if (!pStruct)
+    //{
+    //    TOLOG("Failed to cast CWizXmlRpcValue to CWizXmlRpcStructValue");
+    //    return false;
+    //}
+
+    CWizXmlRpcStructValue& data = val;
+    data.GetStr("token", strToken);
+    data.GetTime("expried_time", tTokenExpried);
+    data.GetStr("kapi_url", strDatabaseServer);
+    data.GetStr("download_url", strDownloadDataServer);
+    data.GetStr("upload_url", strUploadDataServer);
+    data.GetStr("capi_url", strChatServer);
+    data.GetStr("kb_guid", strKbGUID);
+    data.GetInt("upload_size_limit", nMaxFileSize);
+    data.GetStr("user_type", strUserType);
+    data.GetStr("show_ad", strShowAD);
+    data.GetStr("system_tags", strSystemTags);
+    data.GetStr("push_tag", strPushTag);
+    data.GetStr("user_level_name", strUserLevelName);
+    data.GetInt("user_level", nUserLevel);
+    data.GetInt("user_points", nUserPoints);
+    data.GetStr("sns_list", strSNSList);
+    data.GetInt("enable_group", bEnableGroup);
+    data.GetStr("notice", strNotice);
+
+    if (CWizXmlRpcStructValue* pUser = data.GetStruct("user"))
+    {
+        pUser->GetStr(_T("displayname"), strDisplayName);
+        //pUser->GetStr(_T("nickname"), strNickName);
+        pUser->GetStr(_T("language"), strLanguage);
+        //pUser->GetStr(_T("backupserver"), strBackupDatabaseServer);
+    }
+
+    return !strToken.isEmpty()
+        && !strKbGUID.isEmpty()
+        && !strDatabaseServer.isEmpty();
+}
+
+WIZUSERCERT::WIZUSERCERT()
+{
+}
+
+bool WIZUSERCERT::LoadFromXmlRpc(CWizXmlRpcStructValue& val)
+{
+    //CWizXmlRpcStructValue* pStruct = dynamic_cast<CWizXmlRpcStructValue*>(&val);
+    //if (!pStruct)
+    //{
+    //    TOLOG("Failed to cast CWizXmlRpcValue to CWizXmlRpcStructValue while onGetUserCert");
+    //    return false;
+    //}
+
+    CWizXmlRpcStructValue& data = val;
+    data.GetStr("n", strN);
+    data.GetStr("e", stre);
+    data.GetStr("d", strd);
+    data.GetStr("hint", strHint);
+
+    return true;
+}
+
+
+WIZKBINFO::WIZKBINFO()
+{
+    nStorageLimit = 0;
+    nStorageUsage = 0;
+    nTrafficLimit = 0;
+    nTrafficUsage = 0;
+}
+
+bool WIZKBINFO::LoadFromXmlRpc(CWizXmlRpcStructValue& data)
+{
+    data.GetInt64(_T("storage_limit"), nStorageLimit);
+    data.GetInt64(_T("storage_usage"), nStorageUsage);
+    data.GetStr(_T("storage_limit_string"), strStorageLimit);
+    data.GetStr(_T("storage_usage_string"), strStorageUsage);
+    //
+    data.GetInt64(_T("traffic_limit"), nTrafficLimit);
+    data.GetInt64(_T("traffic_usage"), nTrafficUsage);
+    data.GetStr(_T("traffic_limit_string"), strTrafficLimit);
+    data.GetStr(_T("traffic_usage_string"), strTrafficUsage);
+    //
+    return true;
+}
+
+///////////////////////////////////////////////////////////////////
+
+WIZOBJECTPARTDATA::WIZOBJECTPARTDATA()
+    : nStartPos(0)
+    , nQuerySize(0)
+    , nObjectSize(0)
+    , bEOF(false)
+    , nPartSize(0)
+{
+}
+
+bool WIZOBJECTPARTDATA::LoadFromXmlRpc(CWizXmlRpcStructValue& data)
+{
+    data.GetInt64(_T("obj_size"), nObjectSize);
+    data.GetInt(_T("eof"), bEOF);
+    data.GetInt64(_T("part_size"), nPartSize);
+    data.GetString(_T("part_md5"), strPartMD5);
+    if (!data.GetStream("data", arrayData))
+    {
+        TOLOG(_T("Fault error, data is null!"));
+        return false;
+    }
+
+    return true;
+}
+
+
+///////////////////////////////////////////////////////////////////
+
+
 WIZOBJECTDATA::WIZOBJECTDATA()
     : eObjectType(wizobjectError)
 {
 
+}
+
+WIZOBJECTDATA::WIZOBJECTDATA(const WIZOBJECTDATA& data)
+{
+    strDisplayName = data.strDisplayName;
+    strObjectGUID = data.strObjectGUID;
+    tTime = data.tTime;
+    eObjectType = data.eObjectType;
+    arrayData = data.arrayData;
 }
 
 WIZOBJECTDATA::WIZOBJECTDATA(const WIZDOCUMENTDATA& data)
@@ -32,7 +175,7 @@ WizObjectType WIZOBJECTDATA::IntToObjectType(int n)
         ATLASSERT(FALSE);
         return wizobjectError;
     }
-    //
+
     return WizObjectType(n);
 }
 

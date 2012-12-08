@@ -28,7 +28,7 @@ try {
     var editorOption = {
     toolbars:
     [
-        [saveButton, '|',
+        [saveButton, '|', 'source',
         'FontFamily', 'FontSize', '|', 'Bold', 'Italic', 'Underline', 'StrikeThrough', '|',
         'JustifyLeft', 'JustifyCenter', 'JustifyRight', 'JustifyJustify', '|',
         'Indent', 'Outdent', 'InsertOrderedList', 'InsertUnorderedList', '|',
@@ -106,16 +106,28 @@ function setModified(flag)
 }
 
 function setEditorHtml(html) {
+    editor.reset();
+
     // This Api have bug when showing pictures, don't use it!
     //editor.setContent(html);
+    editor.document.body.innerHTML = html;
 
-    editor.document.body.innerHTML = '<p>' + html + '</p>';
-    editor.undoManger.reset();
     setModified(false);
-    editor.window.scrollTo(0,0);
+
+    window.UE.utils.domReady(function() {
+        setEditorFocus();
+    });
+
+    //editor.document.body.innerHTML = '<p>' + html + '</p>';
+    //editor.undoManger.reset();
+    //editor.window.scrollTo(0,0);
+
+    //alert(html);
+    //alert(editor.document.documentElement.outerHTML);
 }
 
 function getEditorHtml() {
+    // This Api have bug when showing pictures, don't use it!
     //return editor.getContent();
 
     return editor.document.documentElement.outerHTML;
@@ -123,9 +135,10 @@ function getEditorHtml() {
 
 function setEditorFocus() {
     editor.focus();
-    var range = editor.selection.getRange();
-    range.select(true);
-    editor._selectionChange();
+    //var range = editor.selection.getRange();
+    //range.collapse();
+    //range.select();
+    //editor._selectionChange();
 }
 
 function isEditing() {
@@ -145,12 +158,6 @@ function setEditing(mode) {
     mode ? editor.setEnabled() : editor.setDisabled();
 
     m_editingMode = mode;
-
-    if (mode) {
-        setTimeout(function() {
-            setEditorFocus();
-        }, 100);
-    }
 }
 
 function viewDocument(guid, filename, mode)
@@ -171,6 +178,7 @@ function viewDocument(guid, filename, mode)
                 m_inited = true;
             });
         }
+
 
         return true;
     } catch (err) {

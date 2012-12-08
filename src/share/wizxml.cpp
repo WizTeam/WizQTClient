@@ -1,67 +1,41 @@
 #include "wizxml.h"
 
 
-CWizXMLNode::CWizXMLNode()
-{
-}
-
-CWizXMLNode::CWizXMLNode(const QDomNode& node)
-{
-    InitData(node);
-}
-
 CWizXMLNode::CWizXMLNode(const CWizXMLNode& nodeSrc)
 {
-    if (nodeSrc.Valid())
-    {
-        InitData(nodeSrc.m_node);
+    if (!nodeSrc.isNull()) {
+        m_node = nodeSrc.m_node;
+    } else {
+        m_node.clear();
     }
-    else
-    {
-        Clear();
-    }
-}
-
-CWizXMLNode::~CWizXMLNode()
-{
 }
 
 CWizXMLNode& CWizXMLNode::operator = (const CWizXMLNode& right)
 {
-    if (!right.m_node.isNull())
-    {
-        InitData(right.m_node);
-    }
-    else
-    {
-        Clear();
+    if (!right.m_node.isNull()) {
+        m_node = right.m_node;
+    } else {
+        m_node.clear();
     }
 
     return *this;
 }
 
-void CWizXMLNode::InitData(const QDomNode& node)
-{
-    m_node = node;
-}
-
-bool CWizXMLNode::GetName(CString& strName)
+bool CWizXMLNode::GetName(QString& strName)
 {
     strName = m_node.nodeName();
     return true;
 }
 
-CString CWizXMLNode::GetName()
+QString CWizXMLNode::GetName()
 {
-    CString strName;
-    GetName(strName);
-    return strName;
+    return m_node.nodeName();
 }
 
-CString CWizXMLNode::GetType()
+QString CWizXMLNode::GetType()
 {
     if (m_node.isNull())
-        return CString();
+        return QString();
 
     switch (m_node.nodeType())
     {
@@ -94,12 +68,13 @@ CString CWizXMLNode::GetType()
     case QDomNode::CharacterDataNode        :
         return "CharacterDataNode";
     }
-    return CString();
+
+    return QString();
 }
 
-CString CWizXMLNode::GetText(const CString& strDefault /* = "" */)
+QString CWizXMLNode::GetText(const QString& strDefault /* = "" */)
 {
-    CString str;
+    QString str;
     if (!GetText(str))
     {
         str = strDefault;
@@ -108,7 +83,7 @@ CString CWizXMLNode::GetText(const CString& strDefault /* = "" */)
     return str;
 }
 
-bool CWizXMLNode::GetText(CString& strText)
+bool CWizXMLNode::GetText(QString& strText)
 {
     QDomNodeList nodes =  m_node.childNodes();
     if (nodes.isEmpty())
@@ -125,7 +100,7 @@ bool CWizXMLNode::GetText(CString& strText)
     return true;
 }
 
-bool CWizXMLNode::SetText(const CString& strText)
+bool CWizXMLNode::SetText(const QString& strText)
 {
     Q_ASSERT(!m_node.isNull());
 
@@ -135,7 +110,7 @@ bool CWizXMLNode::SetText(const CString& strText)
     return true;
 }
 
-bool CWizXMLNode::GetAttributeText(const CString& strName, CString& strVal)
+bool CWizXMLNode::GetAttributeText(const QString& strName, QString& strVal)
 {
     QDomNamedNodeMap nodes = m_node.attributes();
     QDomNode node = nodes.namedItem(strName);
@@ -146,9 +121,9 @@ bool CWizXMLNode::GetAttributeText(const CString& strName, CString& strVal)
     return true;
 }
 
-bool CWizXMLNode::GetAttributeInt(const CString& strName, int& nVal)
+bool CWizXMLNode::GetAttributeInt(const QString& strName, int& nVal)
 {
-    CString strRet;
+    QString strRet;
     if (!GetAttributeText(strName, strRet))
         return false;
 
@@ -156,9 +131,9 @@ bool CWizXMLNode::GetAttributeInt(const CString& strName, int& nVal)
     return true;
 }
 
-bool CWizXMLNode::GetAttributeInt64(const CString& strName, __int64& nVal)
+bool CWizXMLNode::GetAttributeInt64(const QString& strName, __int64& nVal)
 {
-    CString strRet;
+    QString strRet;
     if (!GetAttributeText(strName, strRet))
         return false;
 
@@ -166,16 +141,16 @@ bool CWizXMLNode::GetAttributeInt64(const CString& strName, __int64& nVal)
     return true;
 }
 
-__int64 CWizXMLNode::GetAttributeInt64Def(const CString& strName, __int64 nDefault)
+__int64 CWizXMLNode::GetAttributeInt64Def(const QString& strName, __int64 nDefault)
 {
-    CString strRet;
+    QString strRet;
     if (!GetAttributeText(strName, strRet))
         return nDefault;
 
     return _ttoi64(strRet);
 }
 
-bool CWizXMLNode::GetAttributeUINT(const CString& strName, UINT& nVal)
+bool CWizXMLNode::GetAttributeUINT(const QString& strName, UINT& nVal)
 {
     int n;
     if (!GetAttributeInt(strName, n))
@@ -185,7 +160,7 @@ bool CWizXMLNode::GetAttributeUINT(const CString& strName, UINT& nVal)
     return true;
 }
 
-bool CWizXMLNode::GetAttributeTimeT(const CString& strName, time_t& nVal)
+bool CWizXMLNode::GetAttributeTimeT(const QString& strName, time_t& nVal)
 {
     __int64 n64;
     if (!GetAttributeInt64(strName, n64))
@@ -195,13 +170,13 @@ bool CWizXMLNode::GetAttributeTimeT(const CString& strName, time_t& nVal)
     return true;
 }
 
-bool CWizXMLNode::GetAttributeTimeString(const CString& strName, COleDateTime& t)
+bool CWizXMLNode::GetAttributeTimeString(const QString& strName, COleDateTime& t)
 {
-    CString str;
+    QString str;
     if (!GetAttributeText(strName, str))
         return false;
 
-    CString strError;
+    QString strError;
     if (!WizStringToDateTime(str, t, strError))
     {
         TOLOG(strError);
@@ -211,7 +186,7 @@ bool CWizXMLNode::GetAttributeTimeString(const CString& strName, COleDateTime& t
     return true;
 }
 
-bool CWizXMLNode::GetAttributeDWORD(const CString& strName, DWORD& dwVal)
+bool CWizXMLNode::GetAttributeDWORD(const QString& strName, DWORD& dwVal)
 {
     int nVal = 0;
     if (!GetAttributeInt(strName, nVal))
@@ -221,20 +196,20 @@ bool CWizXMLNode::GetAttributeDWORD(const CString& strName, DWORD& dwVal)
     return true;
 }
 
-bool CWizXMLNode::GetAttributeBool(const CString& strName, bool& bVal)
+bool CWizXMLNode::GetAttributeBool(const QString& strName, bool& bVal)
 {
-    CString strRet;
+    QString strRet;
     if (!GetAttributeText(strName, strRet))
         return false;
 
-    strRet.Trim();
-    bVal = strRet.Compare(_T("1")) == 0;
+    strRet = strRet.trimmed();
+    bVal = strRet.compare("1") == 0;
     return true;
 }
 
-CString CWizXMLNode::GetAttributeTextDef(const CString& strName, const CString& strDefault)
+QString CWizXMLNode::GetAttributeTextDef(const QString& strName, const QString& strDefault)
 {
-    CString strVal;
+    QString strVal;
     if (!GetAttributeText(strName, strVal))
     {
         strVal = strDefault;
@@ -242,7 +217,7 @@ CString CWizXMLNode::GetAttributeTextDef(const CString& strName, const CString& 
     return strVal;
 }
 
-int CWizXMLNode::GetAttributeIntDef(const CString& strName, int nDefault)
+int CWizXMLNode::GetAttributeIntDef(const QString& strName, int nDefault)
 {
     int nVal = 0;
     if (!GetAttributeInt(strName, nVal))
@@ -252,7 +227,7 @@ int CWizXMLNode::GetAttributeIntDef(const CString& strName, int nDefault)
     return nVal;
 }
 
-bool CWizXMLNode::GetAttributeBoolDef(const CString& strName, bool bDefault)
+bool CWizXMLNode::GetAttributeBoolDef(const QString& strName, bool bDefault)
 {
     bool bVal = false;
     if (!GetAttributeBool(strName, bVal))
@@ -262,7 +237,7 @@ bool CWizXMLNode::GetAttributeBoolDef(const CString& strName, bool bDefault)
     return bVal;
 }
 
-bool CWizXMLNode::SetAttributeText(const CString& strName, const CString& strText)
+bool CWizXMLNode::SetAttributeText(const QString& strName, const QString& strText)
 {
     Q_ASSERT(!m_node.isNull());
 
@@ -275,34 +250,34 @@ bool CWizXMLNode::SetAttributeText(const CString& strName, const CString& strTex
     return true;
 }
 
-bool CWizXMLNode::SetAttributeInt(const CString& strName, int nVal)
+bool CWizXMLNode::SetAttributeInt(const QString& strName, int nVal)
 {
     return SetAttributeText(strName, WizIntToStr(nVal));
 }
 
-bool CWizXMLNode::SetAttributeInt64(const CString& strName, __int64 nVal)
+bool CWizXMLNode::SetAttributeInt64(const QString& strName, __int64 nVal)
 {
     return SetAttributeText(strName, WizInt64ToStr(nVal));
 }
 
-bool CWizXMLNode::SetAttributeTime(const CString& strName, const COleDateTime& t)
+bool CWizXMLNode::SetAttributeTime(const QString& strName, const COleDateTime& t)
 {
     return SetAttributeText(strName, WizDateTimeToString(t));
 }
 
-bool CWizXMLNode::SetAttributeBool(const CString& strName, bool bVal)
+bool CWizXMLNode::SetAttributeBool(const QString& strName, bool bVal)
 {
     return SetAttributeText(strName, bVal ? _T("1") : _T("0"));
 }
 
-bool CWizXMLNode::FindChildNode(const CString& strNodeName, CWizXMLNode& nodeChild)
+bool CWizXMLNode::FindChildNode(const QString& strNodeName, CWizXMLNode& nodeChild)
 {
     QDomNodeList nodes = m_node.childNodes();
     QDomNode node;
     if (!FindChildNode(nodes, strNodeName, node))
         return false;
 
-    nodeChild.InitData(node);
+    nodeChild = node;
     return true;
 }
 
@@ -313,7 +288,7 @@ bool CWizXMLNode::GetAllChildNodes(CWizStdStringArray& arrayNodeName)
     for (int i = 0; i < nCount; i++)
     {
         QDomNode node = nodes.item(i);
-        CString strName = node.nodeName();
+        QString strName = node.nodeName();
 
         arrayNodeName.push_back(strName);
     }
@@ -342,7 +317,7 @@ bool CWizXMLNode::GetFirstChildNode(CWizXMLNode& nodeChild)
 
     CWizXMLNode node = nodes.item(0);
 
-    CString str = node.GetType();
+    QString str = node.GetType();
     if (str != _T("element"))
         return false;
 
@@ -350,7 +325,7 @@ bool CWizXMLNode::GetFirstChildNode(CWizXMLNode& nodeChild)
     return true;
 }
 
-CString CWizXMLNode::GetFirstChildNodeText(const CString& strDef /* = NULL */)
+QString CWizXMLNode::GetFirstChildNodeText(const QString& strDef /* = NULL */)
 {
     CWizXMLNode nodeChild;
     if (!GetFirstChildNode(nodeChild))
@@ -359,7 +334,7 @@ CString CWizXMLNode::GetFirstChildNodeText(const CString& strDef /* = NULL */)
     return nodeChild.GetText(strDef);
 }
 
-bool CWizXMLNode::DeleteChild(const CString& strChildName)
+bool CWizXMLNode::DeleteChild(const QString& strChildName)
 {
     CWizXMLNode node;
     if (!FindChildNode(strChildName, node))
@@ -375,9 +350,9 @@ bool CWizXMLNode::DeleteChild(CWizXMLNode& nodeChild)
     return true;
 }
 
-bool CWizXMLNode::DeleteAllChild(const CString& strExceptNodeName1, \
-                                 const CString& strExceptNodeName2, \
-                                 const CString& strExceptNodeName3)
+bool CWizXMLNode::DeleteAllChild(const QString& strExceptNodeName1, \
+                                 const QString& strExceptNodeName2, \
+                                 const QString& strExceptNodeName3)
 {
     QDomNodeList nodes = m_node.childNodes();
     int nCount = nodes.count();
@@ -385,22 +360,22 @@ bool CWizXMLNode::DeleteAllChild(const CString& strExceptNodeName1, \
     {
         QDomNode node = nodes.item(i);
 
-        if (!strExceptNodeName1.IsEmpty()
-            || !strExceptNodeName2.IsEmpty()
-            || !strExceptNodeName3.IsEmpty()
+        if (!strExceptNodeName1.isEmpty()
+            || !strExceptNodeName2.isEmpty()
+            || !strExceptNodeName3.isEmpty()
             )
         {
-            CString strName = node.nodeName();
+            QString strName = node.nodeName();
 
-            if (!strExceptNodeName1.IsEmpty()
+            if (!strExceptNodeName1.isEmpty()
                 && strName == strExceptNodeName1)
                 continue;
 
-            if (!strExceptNodeName2.IsEmpty()
+            if (!strExceptNodeName2.isEmpty()
                 && strName == strExceptNodeName2)
                 continue;
 
-            if (!strExceptNodeName3.IsEmpty()
+            if (!strExceptNodeName3.isEmpty()
                 && strName == strExceptNodeName3)
                 continue;
         }
@@ -431,7 +406,7 @@ int CWizXMLNode::GetChildNodesCount()
     return nChildCount;
 }
 
-bool CWizXMLNode::AppendChild(const CString& strNodeName, CWizXMLNode& nodeChild)
+bool CWizXMLNode::AppendChild(const QString& strNodeName, CWizXMLNode& nodeChild)
 {
     QDomNode node = m_node.ownerDocument().createElement(strNodeName);
 
@@ -439,7 +414,7 @@ bool CWizXMLNode::AppendChild(const CString& strNodeName, CWizXMLNode& nodeChild
     return true;
 }
 
-bool CWizXMLNode::AppendChild(const CString& strNodeName, const CString& strChildNodeText)
+bool CWizXMLNode::AppendChild(const QString& strNodeName, const QString& strChildNodeText)
 {
     CWizXMLNode nodeChild;
     if (!AppendChild(strNodeName, nodeChild))
@@ -448,7 +423,7 @@ bool CWizXMLNode::AppendChild(const CString& strNodeName, const CString& strChil
     return nodeChild.SetText(strChildNodeText);
 }
 
-bool CWizXMLNode::SetChildNodeText(const CString& strNodeName, const CString& strText)
+bool CWizXMLNode::SetChildNodeText(const QString& strNodeName, const QString& strText)
 {
     CWizXMLNode nodeChild;
     if (!GetChildNode(strNodeName, nodeChild))
@@ -457,7 +432,7 @@ bool CWizXMLNode::SetChildNodeText(const CString& strNodeName, const CString& st
     return nodeChild.SetText(strText);
 }
 
-bool CWizXMLNode::GetChildNodeText(const CString& strNodeName, CString& strText)
+bool CWizXMLNode::GetChildNodeText(const QString& strNodeName, QString& strText)
 {
     CWizXMLNode nodeChild;
     if (!GetChildNode(strNodeName, nodeChild))
@@ -466,31 +441,31 @@ bool CWizXMLNode::GetChildNodeText(const CString& strNodeName, CString& strText)
     return nodeChild.GetText(strText);
 }
 
-CString CWizXMLNode::GetChildNodeTextDef(const CString& strNodeName, const CString& strDef)
+QString CWizXMLNode::GetChildNodeTextDef(const QString& strNodeName, const QString& strDef)
 {
-    CString str;
+    QString str;
     if (GetChildNodeText(strNodeName, str))
         return str;
 
     return strDef;
 }
 
-bool CWizXMLNode::GetChildNode(const CString& strNodeName, CWizXMLNode& nodeChild)
+bool CWizXMLNode::GetChildNode(const QString& strNodeName, CWizXMLNode& nodeChild)
 {
     if (FindChildNode(strNodeName, nodeChild))
         return true;
     return AppendChild(strNodeName, nodeChild);
 }
 
-bool CWizXMLNode::FindChildNode(const QDomNodeList& nodes, const CString& strName, QDomNode& nodeRet)
+bool CWizXMLNode::FindChildNode(const QDomNodeList& nodes, const QString& strName, QDomNode& nodeRet)
 {
     long nCount = nodes.count();
     for (int i = 0; i < nCount; i++)
     {
         QDomNode node = nodes.item(i);
-        CString strNodeName = node.nodeName();
+        QString strNodeName = node.nodeName();
 
-        if (strNodeName.CompareNoCase(strName) == 0)
+        if (strNodeName.compare(strName, Qt::CaseInsensitive) == 0)
         {
             nodeRet = node;
             return true;
@@ -499,7 +474,7 @@ bool CWizXMLNode::FindChildNode(const QDomNodeList& nodes, const CString& strNam
     return false;
 }
 
-bool CWizXMLNode::FindNodeByPath(const CString& strPath, CWizXMLNode& nodeRet)
+bool CWizXMLNode::FindNodeByPath(const QString& strPath, CWizXMLNode& nodeRet)
 {
     CWizStdStringArray arrayText;
     if (!WizSplitTextToArray(strPath, '/', arrayText))
@@ -514,11 +489,11 @@ bool CWizXMLNode::FindNodeByPath(const CString& strPath, CWizXMLNode& nodeRet)
 
     for (size_t i = 0; i < arrayText.size(); i++)
     {
-        CString strNodeName = arrayText[i];
+        QString strNodeName = arrayText[i];
 
-        strNodeName.Trim();
+        strNodeName = strNodeName.trimmed();
 
-        if (strNodeName.IsEmpty())
+        if (strNodeName.isEmpty())
             return false;
 
         CWizXMLNode nodeChild;
@@ -528,14 +503,14 @@ bool CWizXMLNode::FindNodeByPath(const CString& strPath, CWizXMLNode& nodeRet)
         node = nodeChild;
     }
 
-    Q_ASSERT(node.Valid());
+    Q_ASSERT(!node.isNull());
 
     nodeRet = node;
 
     return true;
 }
 
-bool CWizXMLNode::AppendNodeByPath(const CString& strPath, CWizXMLNode& nodeRet)
+bool CWizXMLNode::AppendNodeByPath(const QString& strPath, CWizXMLNode& nodeRet)
 {
     CWizStdStringArray arrayText;
     if (!WizSplitTextToArray(strPath, '/', arrayText))
@@ -550,31 +525,31 @@ bool CWizXMLNode::AppendNodeByPath(const CString& strPath, CWizXMLNode& nodeRet)
 
     for (size_t i = 0; i < arrayText.size(); i++)
     {
-        CString strNodeName = arrayText[i];
+        QString strNodeName = arrayText[i];
 
-        strNodeName.Trim();
+        strNodeName = strNodeName.trimmed();
 
-        if (strNodeName.IsEmpty())
+        if (strNodeName.isEmpty())
             return false;
 
         CWizXMLNode nodeChild;
         if (!node.AppendChild(strNodeName, nodeChild))
         {
-            TOLOG1(_T("Failed to append child node: %1"), strNodeName);
+            TOLOG1("Failed to append child node: %1", strNodeName);
             return false;
         }
 
         node = nodeChild;
     }
 
-    Q_ASSERT(node.Valid());
+    Q_ASSERT(!node.isNull());
 
     nodeRet = node;
 
     return true;
 }
 
-bool CWizXMLNode::AppendNodeSetTextByPath(const CString& strPath, const CString& strText)
+bool CWizXMLNode::AppendNodeSetTextByPath(const QString& strPath, const QString& strText)
 {
     CWizXMLNode nodeRet;
     if (!AppendNodeByPath(strPath, nodeRet))
@@ -593,7 +568,7 @@ bool CWizXMLNode::AppendNodeSetTextByPath(const CString& strPath, const CString&
     return true;
 }
 
-bool CWizXMLNode::FindNodeTextByPath(const CString& strPath, CString& strRet)
+bool CWizXMLNode::FindNodeTextByPath(const QString& strPath, QString& strRet)
 {
     CWizXMLNode node;
     if (!FindNodeByPath(strPath, node))
@@ -602,7 +577,10 @@ bool CWizXMLNode::FindNodeTextByPath(const CString& strPath, CString& strRet)
     return node.GetText(strRet);
 }
 
-bool CWizXMLNode::GetElementNodeByValue(const CString& strElementName, const CString& strValueName, const CString& strValue, CWizXMLNode& nodeRet)
+bool CWizXMLNode::GetElementNodeByValue(const QString& strElementName, \
+                                        const QString& strValueName, \
+                                        const QString& strValue, \
+                                        CWizXMLNode& nodeRet)
 {
     std::deque<CWizXMLNode> arrayNodes;
     if (!GetAllChildNodes(arrayNodes))
@@ -620,7 +598,7 @@ bool CWizXMLNode::GetElementNodeByValue(const CString& strElementName, const CSt
         if (!node.FindNodeByPath(strValueName, nodeValue))
             continue;
 
-        if (0 == nodeValue.GetText().CompareNoCase(strValue))
+        if (0 == nodeValue.GetText().compare(strValue, Qt::CaseInsensitive))
         {
             nodeRet = node;
             return true;
@@ -630,7 +608,11 @@ bool CWizXMLNode::GetElementNodeByValue(const CString& strElementName, const CSt
     return false;
 }
 
-bool CWizXMLNode::GetElementOtherNodeByValue(const CString& strElementName, const CString& strValueName, const CString& strValue, const CString& strOtherNodePath, CWizXMLNode& nodeRet)
+bool CWizXMLNode::GetElementOtherNodeByValue(const QString& strElementName, \
+                                             const QString& strValueName, \
+                                             const QString& strValue, \
+                                             const QString& strOtherNodePath, \
+                                             CWizXMLNode& nodeRet)
 {
     CWizXMLNode nodeElement;
     if (!GetElementNodeByValue(strElementName, strValueName, strValue, nodeElement))
@@ -639,7 +621,11 @@ bool CWizXMLNode::GetElementOtherNodeByValue(const CString& strElementName, cons
     return nodeElement.FindNodeByPath(strOtherNodePath, nodeRet);
 }
 
-bool CWizXMLNode::GetElementOtherNodeByValueReturnString(const CString& strElementName, const CString& strValueName, const CString& strValue, const CString& strOtherNodePath, CString& strRet)
+bool CWizXMLNode::GetElementOtherNodeByValueReturnString(const QString& strElementName, \
+                                                         const QString& strValueName, \
+                                                         const QString& strValue, \
+                                                         const QString& strOtherNodePath, \
+                                                         QString& strRet)
 {
     CWizXMLNode nodeRet;
     if (!GetElementOtherNodeByValue(strElementName, strValueName, strValue, strOtherNodePath, nodeRet))
@@ -650,13 +636,17 @@ bool CWizXMLNode::GetElementOtherNodeByValueReturnString(const CString& strEleme
     return true;
 }
 
-bool CWizXMLNode::GetElementOtherNodeByValueReturnInt(const CString& strElementName, const CString& strValueName, const CString& strValue, const CString& strOtherNodePath, int& nRet)
+bool CWizXMLNode::GetElementOtherNodeByValueReturnInt(const QString& strElementName, \
+                                                      const QString& strValueName, \
+                                                      const QString& strValue, \
+                                                      const QString& strOtherNodePath, \
+                                                      int& nRet)
 {
-    CString strRet;
+    QString strRet;
     if (!GetElementOtherNodeByValueReturnString(strElementName, strValueName, strValue, strOtherNodePath, strRet))
         return false;
 
-    strRet.Trim();
+    strRet = strRet.trimmed();
 
     int nTemp = _ttoi(strRet);
     if (WizIntToStr(nTemp) == strRet)
@@ -668,14 +658,18 @@ bool CWizXMLNode::GetElementOtherNodeByValueReturnInt(const CString& strElementN
     return false;
 }
 
-bool CWizXMLNode::GetElementOtherNodeByValueReturnBool(const CString& strElementName, const CString& strValueName, const CString& strValue, const CString& strOtherNodePath, bool& bRet)
+bool CWizXMLNode::GetElementOtherNodeByValueReturnBool(const QString& strElementName, \
+                                                       const QString& strValueName, \
+                                                       const QString& strValue, \
+                                                       const QString& strOtherNodePath, \
+                                                       bool& bRet)
 {
-    CString strRet;
+    QString strRet;
     if (!GetElementOtherNodeByValueReturnString(strElementName, strValueName, strValue, strOtherNodePath, strRet))
         return false;
 
-    strRet.Trim();
-    strRet.MakeLower();
+    strRet = strRet.trimmed();
+    strRet = strRet.toLower();
 
     if (strRet == _T("0")
         || strRet == _T("false"))
@@ -700,21 +694,8 @@ bool CWizXMLNode::GetElementOtherNodeByValueReturnBool(const CString& strElement
 }
 
 
-CWizXMLDocument::CWizXMLDocument()
-{
-    Create();
-}
 
-CWizXMLDocument::~CWizXMLDocument()
-{
-}
-
-bool CWizXMLDocument::Create()
-{
-    return true;
-}
-
-bool CWizXMLDocument::LoadXML(const CString& strXML)
+bool CWizXMLDocument::LoadXML(const QString& strXML)
 {
     QString errorMsg;
     int errorLine = 0;
@@ -725,14 +706,14 @@ bool CWizXMLDocument::LoadXML(const CString& strXML)
     return false;
 }
 
-bool CWizXMLDocument::LoadFromFile(const CString& strFileName, bool bPromptError /*= true*/)
+bool CWizXMLDocument::LoadFromFile(const QString& strFileName, bool bPromptError /*= true*/)
 {
     Q_UNUSED(bPromptError);
 
     if (!PathFileExists(strFileName))
         return false;
 
-    CString strXml;
+    QString strXml;
     if (!::WizLoadUnicodeTextFromFile(strFileName, strXml))
         return false;
 
@@ -742,10 +723,9 @@ bool CWizXMLDocument::LoadFromFile(const CString& strFileName, bool bPromptError
 void CWizXMLDocument::Clear()
 {
     m_doc.clear();
-    Create();
 }
 
-bool CWizXMLDocument::FindChildNode(const CString& strName, CWizXMLNode& nodeChild)
+bool CWizXMLDocument::FindChildNode(const QString& strName, CWizXMLNode& nodeChild)
 {
     if (m_doc.isNull())
         return false;
@@ -756,7 +736,7 @@ bool CWizXMLDocument::FindChildNode(const CString& strName, CWizXMLNode& nodeChi
     if (!CWizXMLNode::FindChildNode(nodes, strName, node))
         return false;
 
-    nodeChild.InitData(node);
+    nodeChild = node;
 
     return true;
 }
@@ -766,7 +746,7 @@ bool CWizXMLDocument::IsFail()
     return false;
 }
 
-bool CWizXMLDocument::AppendChild(const CString& strNodeName, CWizXMLNode& nodeChild)
+bool CWizXMLDocument::AppendChild(const QString& strNodeName, CWizXMLNode& nodeChild)
 {
     if (m_doc.isNull())
     {
@@ -779,7 +759,7 @@ bool CWizXMLDocument::AppendChild(const CString& strNodeName, CWizXMLNode& nodeC
     return true;
 }
 
-bool CWizXMLDocument::GetChildNode(const CString& strName, CWizXMLNode& nodeChild)
+bool CWizXMLDocument::GetChildNode(const QString& strName, CWizXMLNode& nodeChild)
 {
     if (m_doc.isNull())
     {
@@ -791,7 +771,7 @@ bool CWizXMLDocument::GetChildNode(const CString& strName, CWizXMLNode& nodeChil
     return AppendChild(strName, nodeChild);
 }
 
-bool CWizXMLDocument::ToXML(CString& strText, bool bFormatText)
+bool CWizXMLDocument::ToXML(QString& strText, bool bFormatText)
 {
     if (m_doc.isNull())
         return false;
@@ -806,12 +786,12 @@ bool CWizXMLDocument::ToXML(CString& strText, bool bFormatText)
     return true;
 }
 
-bool CWizXMLDocument::ToUnicodeFile(const CString& strFileName)
+bool CWizXMLDocument::ToUnicodeFile(const QString& strFileName)
 {
     if (m_doc.isNull())
         return false;
 
-    CString strText;
+    QString strText;
     if (!ToXML(strText, true))
         return false;
 
@@ -828,7 +808,7 @@ bool CWizXMLDocument::GetAllChildNodes(CWizStdStringArray& arrayNodeName)
     for (int i = 0; i < nCount; i++)
     {
         QDomNode node = nodes.item(i);
-        CString strName = node.nodeName();
+        QString strName = node.nodeName();
 
         arrayNodeName.push_back(strName);
     }
@@ -852,7 +832,7 @@ bool CWizXMLDocument::GetAllChildNodes(std::deque<CWizXMLNode>& arrayNodes)
     return true;
 }
 
-bool CWizXMLDocument::FindNodeByPath(const CString& strPath, CWizXMLNode& nodeRet)
+bool CWizXMLDocument::FindNodeByPath(const QString& strPath, CWizXMLNode& nodeRet)
 {
     CWizStdStringArray arrayText;
     if (!WizSplitTextToArray(strPath, '/', arrayText))
@@ -871,11 +851,11 @@ bool CWizXMLDocument::FindNodeByPath(const CString& strPath, CWizXMLNode& nodeRe
 
     for (size_t i = 1; i < arrayText.size(); i++)
     {
-        CString strNodeName = arrayText[i];
+        QString strNodeName = arrayText[i];
 
-        strNodeName.Trim();
+        strNodeName = strNodeName.trimmed();
 
-        if (strNodeName.IsEmpty())
+        if (strNodeName.isEmpty())
             return false;
 
         CWizXMLNode nodeChild;
@@ -885,14 +865,14 @@ bool CWizXMLDocument::FindNodeByPath(const CString& strPath, CWizXMLNode& nodeRe
         node = nodeChild;
     }
 
-    Q_ASSERT(node.Valid());
+    Q_ASSERT(!node.isNull());
 
     nodeRet = node;
 
     return true;
 }
 
-bool CWizXMLDocument::GetNodeTextByPath(const CString& strPath, CString& strRet)
+bool CWizXMLDocument::GetNodeTextByPath(const QString& strPath, QString& strRet)
 {
     CWizXMLNode node;
     if (!FindNodeByPath(strPath, node))
@@ -901,7 +881,7 @@ bool CWizXMLDocument::GetNodeTextByPath(const CString& strPath, CString& strRet)
     return node.GetText(strRet);
 }
 
-bool CWizXMLDocument::SettingsGetSectionNode(const CString& strRootName, const CString& strNodeName, CWizXMLNode& node)
+bool CWizXMLDocument::SettingsGetSectionNode(const QString& strRootName, const QString& strNodeName, CWizXMLNode& node)
 {
     CWizXMLNode nodeRoot;
     if (!GetChildNode(strRootName, nodeRoot))
@@ -919,7 +899,7 @@ bool CWizXMLDocument::SettingsGetSectionNode(const CString& strRootName, const C
     return true;
 }
 
-bool CWizXMLDocument::SettingsFindSectionNode(const CString& strRootName, const CString& strNodeName, CWizXMLNode& node)
+bool CWizXMLDocument::SettingsFindSectionNode(const QString& strRootName, const QString& strNodeName, CWizXMLNode& node)
 {
     CWizXMLNode nodeRoot;
     if (!FindChildNode(strRootName, nodeRoot))
@@ -937,7 +917,10 @@ bool CWizXMLDocument::SettingsFindSectionNode(const CString& strRootName, const 
     return true;
 }
 
-bool CWizXMLDocument::SettingsGetChildNode(const CString& strRootName, const CString& strNodeName, const CString& strSubNodeName, CWizXMLNode& node)
+bool CWizXMLDocument::SettingsGetChildNode(const QString& strRootName, \
+                                           const QString& strNodeName, \
+                                           const QString& strSubNodeName, \
+                                           CWizXMLNode& node)
 {
     CWizXMLNode nodeRoot;
     if (!GetChildNode(strRootName, nodeRoot))
@@ -962,7 +945,11 @@ bool CWizXMLDocument::SettingsGetChildNode(const CString& strRootName, const CSt
     return true;
 }
 
-bool CWizXMLDocument::SettingsGetStringValue(const CString& strRootName, const CString& strNodeName, const CString& strSubNodeName, const CString& strDefault, CString& strValue)
+bool CWizXMLDocument::SettingsGetStringValue(const QString& strRootName, \
+                                             const QString& strNodeName, \
+                                             const QString& strSubNodeName, \
+                                             const QString& strDefault, \
+                                             QString& strValue)
 {
     CWizXMLNode node;
     if (!SettingsGetChildNode(strRootName, strNodeName, strSubNodeName, node))
@@ -976,7 +963,10 @@ bool CWizXMLDocument::SettingsGetStringValue(const CString& strRootName, const C
     return true;
 }
 
-bool CWizXMLDocument::SettingsSetStringValue(const CString& strRootName, const CString& strNodeName, const CString& strSubNodeName, const CString& strValue)
+bool CWizXMLDocument::SettingsSetStringValue(const QString& strRootName, \
+                                             const QString& strNodeName, \
+                                             const QString& strSubNodeName, \
+                                             const QString& strValue)
 {
     CWizXMLNode node;
     if (!SettingsGetChildNode(strRootName, strNodeName, strSubNodeName, node))

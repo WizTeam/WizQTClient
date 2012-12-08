@@ -1484,7 +1484,7 @@ void CWizHtmlTag::removeAttribute(const CString& strAttributeName)
 
 CWizHtmlReader::CWizHtmlReader()
 {
-    m_bResolveEntities = true;	// entities are resolved, by default
+    m_bResolveEntities = false;	    // entities are resolved, by default
     m_dwAppData = 0L;	// reasonable default!
     m_dwBufPos = 0L;	// start from the very beginning
     m_dwBufLen = 0L;	// buffer length is unknown yet

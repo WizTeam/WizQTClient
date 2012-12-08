@@ -19,7 +19,7 @@ private:
     bool m_bInited;
 
 protected:
-    virtual void xmlRpcError(const QString& strMethodName, \
+    virtual void onXmlRpcError(const QString& strMethodName, \
                              WizXmlRpcError err, int errorCode, \
                              const QString& errorMessage);
     virtual void onClientLogin();

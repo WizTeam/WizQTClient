@@ -23,7 +23,7 @@ private:
 
 protected:
 
-    virtual void onGetUserCert(CWizXmlRpcValue& ret);
+    virtual void onGetUserCert(const WIZUSERCERT& ret);
 
     virtual void onXmlRpcError(const QString& strMethodName, \
                                WizXmlRpcError err, \

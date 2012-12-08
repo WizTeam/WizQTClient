@@ -26,9 +26,9 @@ void CWizDownloadObjectData::startDownload()
     callClientLogin(m_db.getUserId(), m_db.getPassword());
 }
 
-void CWizDownloadObjectData::xmlRpcError(const QString& strMethodName, WizXmlRpcError err, int errorCode, const QString& errorMessage)
+void CWizDownloadObjectData::onXmlRpcError(const QString& strMethodName, WizXmlRpcError err, int errorCode, const QString& errorMessage)
 {
-    CWizApi::xmlRpcError(strMethodName, err, errorCode, errorMessage);
+    CWizApi::onXmlRpcError(strMethodName, err, errorCode, errorMessage);
     Q_EMIT downloadDone(false);
 }
 

@@ -8,26 +8,27 @@
 #define MD5PART 10*1024
 #define CONSTDEFAULTCOUNT 200
 
-CWizApiBase::CWizApiBase(const CString& strAccountsApiURL /* = WIZ_API_URL*/)
-    : m_server(strAccountsApiURL)
+CWizApiBase::CWizApiBase(const QString& strAccountsApiURL /* = WIZ_API_URL*/)
 {
-    resetProxy();
+    m_server = new CWizXmlRpcServer(strAccountsApiURL);
 
-    connect(&m_server, SIGNAL(xmlRpcReturn(const QString&, CWizXmlRpcValue&)), \
+    connect(m_server, SIGNAL(xmlRpcReturn(const QString&, CWizXmlRpcValue&)), \
             SLOT(xmlRpcReturn(const QString&, CWizXmlRpcValue&)));
-    connect(&m_server, SIGNAL(xmlRpcError(const QString&, WizXmlRpcError, int, const QString&)), \
+
+    connect(m_server, SIGNAL(xmlRpcError(const QString&, WizXmlRpcError, int, const QString&)), \
             SLOT(xmlRpcError(const QString&, WizXmlRpcError, int, const QString&)));
+
+    resetProxy();
 }
 
 void CWizApiBase::abort()
 {
-    m_server.disconnect(this);
-    m_server.abort();
+    m_server->abort();
 }
 
 bool CWizApiBase::callXmlRpc(const QString& strMethodName, CWizXmlRpcValue* pVal)
 {
-    return m_server.xmlRpcCall(strMethodName, pVal);
+    return m_server->xmlRpcCall(strMethodName, pVal);
 }
 
 void CWizApiBase::xmlRpcReturn(const QString& strMethodName, CWizXmlRpcValue& ret)
@@ -37,8 +38,6 @@ void CWizApiBase::xmlRpcReturn(const QString& strMethodName, CWizXmlRpcValue& re
 
 void CWizApiBase::xmlRpcError(const QString& strMethodName, WizXmlRpcError err, int errorCode, const QString& errorMessage)
 {
-    QString errorMsg(QString("Error: [%1]: %2").arg(strMethodName).arg(errorMessage));
-    Q_EMIT processErrorLog(errorMsg);
     onXmlRpcError(strMethodName, err, errorCode, errorMessage);
 }
 
@@ -63,7 +62,9 @@ void CWizApiBase::onXmlRpcReturn(const QString& strMethodName, CWizXmlRpcValue& 
     }
     else if (strMethodName == SyncMethod_GetUserCert)
     {
-        onGetUserCert(ret);
+        WIZUSERCERT data;
+        ret.ToData(data);
+        onGetUserCert(data);
     }
     else
     {
@@ -73,15 +74,11 @@ void CWizApiBase::onXmlRpcReturn(const QString& strMethodName, CWizXmlRpcValue& 
 
 void CWizApiBase::onXmlRpcError(const QString& strMethodName, WizXmlRpcError err, int errorCode, const QString& errorMessage)
 {
-    Q_UNUSED(strMethodName);
     Q_UNUSED(err);
     Q_UNUSED(errorCode);
-    Q_UNUSED(errorMessage);
-}
 
-bool CWizApiBase::isSyncing() const
-{
-    return m_server.state();
+    QString errorMsg(QString("Error: [%1]: %2").arg(strMethodName).arg(errorMessage));
+    Q_EMIT processErrorLog(errorMsg);
 }
 
 void CWizApiBase::resetProxy()
@@ -96,9 +93,9 @@ void CWizApiBase::resetProxy()
         QString userName = settings.GetProxyUserName();
         QString password = settings.GetProxyPassword();
 
-        m_server.setProxy(host, port, userName, password);
+        m_server->setProxy(host, port, userName, password);
     } else {
-        m_server.setProxy(0, 0, 0, 0);
+        m_server->setProxy(0, 0, 0, 0);
     }
 }
 
@@ -160,9 +157,9 @@ bool CWizApiBase::callGetUserCert(const QString& strUserId, const QString& strPa
     return callXmlRpc(SyncMethod_GetUserCert, &param);
 }
 
-void CWizApiBase::onGetUserCert(CWizXmlRpcValue& ret)
+void CWizApiBase::onGetUserCert(const WIZUSERCERT& data)
 {
-    Q_UNUSED(ret);
+    Q_UNUSED(data);
 }
 
 bool CWizApiBase::callCreateAccount(const CString& strUserId, const CString& strPassword)
@@ -458,20 +455,21 @@ bool CWizApi::uploadObjectData(const WIZOBJECTDATA& data)
 
 void CWizApi::onUploadObjectDataCompleted(const WIZOBJECTDATA& data)
 {
-    if (data.eObjectType == wizobjectDocument)
-    {
+    if (data.eObjectType == wizobjectDocument) {
         Q_ASSERT(data.strObjectGUID == m_currentDocument.strGUID);
         Q_ASSERT(m_currentDocument.nObjectPart & WIZKM_XMLRPC_OBJECT_PART_DATA);
+
+        m_db.SetObjectDataDownloaded(m_currentDocument.strGUID, "document", true);
         callDocumentPostData(m_currentDocument);
-    }
-    else if (data.eObjectType == wizobjectDocumentAttachment)
-    {
+
+    } else if (data.eObjectType == wizobjectDocumentAttachment) {
         Q_ASSERT(data.strObjectGUID == m_currentAttachment.strGUID);
         Q_ASSERT(m_currentAttachment.nObjectPart & WIZKM_XMLRPC_OBJECT_PART_DATA);
+
+        m_db.SetObjectDataDownloaded(m_currentDocument.strGUID, "attachment", true);
         callAttachmentPostData(m_currentAttachment);
-    }
-    else
-    {
+
+    } else {
         Q_ASSERT(false);
     }
 }
@@ -505,10 +503,8 @@ bool CWizApi::uploadDocument(const WIZDOCUMENTDATAEX& data)
     Q_ASSERT(0 != nParts);
     bool bData = (nParts & WIZKM_XMKRPC_DOCUMENT_PART_DATA) ? true : false;
 
-    if (bData)
-    {
-        if (!m_db.LoadDocumentData(m_currentDocument.strGUID, m_currentDocument.arrayData))
-        {
+    if (bData) {
+        if (!m_db.LoadDocumentData(m_currentDocument.strGUID, m_currentDocument.arrayData)) {
             //skip this document
             QString info = data.strTitle;
             Q_EMIT processErrorLog(tr("could not load document data: ") + info);
@@ -523,9 +519,7 @@ bool CWizApi::uploadDocument(const WIZDOCUMENTDATAEX& data)
         obj.arrayData = m_currentDocument.arrayData;
 
         return uploadObjectData(obj);
-    }
-    else
-    {
+    } else {
         return callDocumentPostData(m_currentDocument);
     }
 }
@@ -546,7 +540,7 @@ bool CWizApi::callDocumentPostData(const WIZDOCUMENTDATAEX& data)
     bool bParam = (nParts & WIZKM_XMKRPC_DOCUMENT_PART_PARAM) ? true : false;
 
     QString info = data.strTitle;
-    Q_EMIT processLog(tr("update note info:") + info);
+    Q_EMIT processLog(tr("upload document info:") + info);
 
     CWizApiTokenParam param(*this);
 
@@ -689,7 +683,7 @@ bool CWizApi::callAttachmentPostData(const WIZDOCUMENTATTACHMENTDATAEX& data)
     Q_ASSERT(0 != nParts);
 
     QString info = data.strName;
-    Q_EMIT processLog(tr("update attachment info: ") + info);
+    Q_EMIT processLog(tr("upload attachment info: ") + info);
 
     CWizApiTokenParam param(*this);
 
@@ -827,7 +821,7 @@ void CWizApi::onTagPostList(const std::deque<WIZTAGDATA>& arrayData)
 bool CWizApi::callStylePostList(const std::deque<WIZSTYLEDATA>& arrayData)
 {
     m_arrayCurrentPostStyle.assign(arrayData.begin(), arrayData.end());
-    return callPostList(SyncMethod_PostTagList, "styles", arrayData);
+    return callPostList(SyncMethod_PostStyleList, "styles", arrayData);
 }
 
 void CWizApi::onStylePostList(const std::deque<WIZSTYLEDATA>& arrayData)
@@ -897,137 +891,7 @@ bool CWizApi::uploadNextPartData()
 }
 
 
-//////////////////////////////////////////////////////////////////////////////
-WIZUSERINFO::WIZUSERINFO()
-    : nUserLevel(0)
-    , nUserPoints(0)
-    , nMaxFileSize(10 * 1024 * 1024)
-    , bEnableGroup(false)
-{
 
-}
-
-int WIZUSERINFO::GetMaxFileSize()
-{
-    return std::max<int>(20 * 1024 * 1024, nMaxFileSize);;
-}
-
-bool WIZUSERINFO::LoadFromXmlRpc(CWizXmlRpcValue& val)
-{
-    CWizXmlRpcStructValue* pStruct = dynamic_cast<CWizXmlRpcStructValue*>(&val);
-    if (!pStruct)
-    {
-        TOLOG("Failed to cast CWizXmlRpcValue to CWizXmlRpcStructValue");
-        return false;
-    }
-
-    CWizXmlRpcStructValue& data = *pStruct;
-    data.GetStr("token", strToken);
-    data.GetTime("expried_time", tTokenExpried);
-    data.GetStr("kapi_url", strDatabaseServer);
-    data.GetStr("download_url", strDownloadDataServer);
-    data.GetStr("upload_url", strUploadDataServer);
-    data.GetStr("capi_url", strChatServer);
-    data.GetStr("kb_guid", strKbGUID);
-    data.GetInt("upload_size_limit", nMaxFileSize);
-    data.GetStr("user_type", strUserType);
-    data.GetStr("show_ad", strShowAD);
-    data.GetStr("system_tags", strSystemTags);
-    data.GetStr("push_tag", strPushTag);
-    data.GetStr("user_level_name", strUserLevelName);
-    data.GetInt("user_level", nUserLevel);
-    data.GetInt("user_points", nUserPoints);
-    data.GetStr("sns_list", strSNSList);
-    data.GetInt("enable_group", bEnableGroup);
-    data.GetStr("notice", strNotice);
-
-    if (CWizXmlRpcStructValue* pUser = data.GetStruct(_T("user")))
-    {
-        pUser->GetStr(_T("displayname"), strDisplayName);
-        //pUser->GetStr(_T("nickname"), strNickName);
-        pUser->GetStr(_T("language"), strLanguage);
-        //pUser->GetStr(_T("backupserver"), strBackupDatabaseServer);
-    }
-
-    return !strToken.isEmpty()
-        && !strKbGUID.isEmpty()
-        && !strDatabaseServer.isEmpty();
-}
-
-WIZUSERCERT::WIZUSERCERT()
-{
-}
-
-bool WIZUSERCERT::LoadFromXmlRpc(CWizXmlRpcValue& val)
-{
-    CWizXmlRpcStructValue* pStruct = dynamic_cast<CWizXmlRpcStructValue*>(&val);
-    if (!pStruct)
-    {
-        TOLOG("Failed to cast CWizXmlRpcValue to CWizXmlRpcStructValue while onGetUserCert");
-        return false;
-    }
-
-    CWizXmlRpcStructValue& data = *pStruct;
-    data.GetStr("n", strN);
-    data.GetStr("e", stre);
-    data.GetStr("d", strd);
-    data.GetStr("hint", strHint);
-
-    return true;
-}
-
-
-WIZKBINFO::WIZKBINFO()
-{
-    nStorageLimit = 0;
-    nStorageUsage = 0;
-    nTrafficLimit = 0;
-    nTrafficUsage = 0;
-}
-
-bool WIZKBINFO::LoadFromXmlRpc(CWizXmlRpcStructValue& data)
-{
-    data.GetInt64(_T("storage_limit"), nStorageLimit);
-    data.GetInt64(_T("storage_usage"), nStorageUsage);
-    data.GetStr(_T("storage_limit_string"), strStorageLimit);
-    data.GetStr(_T("storage_usage_string"), strStorageUsage);
-    //
-    data.GetInt64(_T("traffic_limit"), nTrafficLimit);
-    data.GetInt64(_T("traffic_usage"), nTrafficUsage);
-    data.GetStr(_T("traffic_limit_string"), strTrafficLimit);
-    data.GetStr(_T("traffic_usage_string"), strTrafficUsage);
-    //
-    return true;
-}
-
-///////////////////////////////////////////////////////////////////
-
-WIZOBJECTPARTDATA::WIZOBJECTPARTDATA()
-    : nStartPos(0)
-    , nQuerySize(0)
-    , nObjectSize(0)
-    , bEOF(false)
-    , nPartSize(0)
-{
-}
-
-bool WIZOBJECTPARTDATA::LoadFromXmlRpc(CWizXmlRpcStructValue& data)
-{
-    data.GetInt64(_T("obj_size"), nObjectSize);
-    data.GetInt(_T("eof"), bEOF);
-    data.GetInt64(_T("part_size"), nPartSize);
-    data.GetString(_T("part_md5"), strPartMD5);
-    if (!data.GetStream("data", arrayData))
-    {
-        TOLOG(_T("Fault error, data is null!"));
-        return false;
-    }
-
-    return true;
-}
-
-
-///////////////////////////////////////////////////////////////////
 
 #define WIZ_API_VERSION     "3"
 #define WIZ_CLIENT_VERSION  "2.0.0.0"

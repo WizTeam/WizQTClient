@@ -23,18 +23,18 @@ void CWizCertManager::onXmlRpcError(const QString& strMethodName, \
     Q_EMIT done(false, errorMessage);
 }
 
-void CWizCertManager::onGetUserCert(CWizXmlRpcValue& ret)
+void CWizCertManager::onGetUserCert(const WIZUSERCERT& data)
 {
-    if (!m_cert.LoadFromXmlRpc(ret)) {
-        Q_EMIT done(false, QString());
-        return;
-    }
+    //if (!m_cert.LoadFromXmlRpc(ret)) {
+    //    Q_EMIT done(false, QString());
+    //    return;
+    //}
 
     // save to database
-    if(!m_db.SetUserCert(m_cert.strN, \
-                         m_cert.stre, \
-                         m_cert.strd, \
-                         m_cert.strHint)) {
+    if(!m_db.SetUserCert(data.strN, \
+                         data.stre, \
+                         data.strd, \
+                         data.strHint)) {
 
         TOLOG("update user cert failed");
         return;

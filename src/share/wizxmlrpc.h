@@ -1,52 +1,26 @@
 #ifndef WIZXMLRPC_H
 #define WIZXMLRPC_H
 
+#include <QtNetwork>
+
 #include "wizmisc.h"
 #include "wizxml.h"
 
-#ifndef QHTTP_H
-#include <QHttp>
-#endif
 
 class CWizXmlRpcValue;
 
-class CWizHttpFormDataBase
+
+class CWizXmlRpcRequest
 {
 public:
-    virtual ~CWizHttpFormDataBase() {}
-
-    virtual int SendRequest(QHttp& http, const CString& strUrl) = 0;
-};
-
-
-class CWizXmlRpcFormData : public CWizHttpFormDataBase
-{
-public:
-    CWizXmlRpcFormData(const CString& strMethodName, \
-                       CWizXmlRpcValue* pParam1, CWizXmlRpcValue* pParam2, \
-                       CWizXmlRpcValue* pParam3, CWizXmlRpcValue* pParam4, \
-                       CWizXmlRpcValue* pParam5, CWizXmlRpcValue* pParam6, \
-                       CWizXmlRpcValue* pParam7, CWizXmlRpcValue* pParam8);
-
-    virtual int SendRequest(QHttp& http, const CString& strUrl);
+    CWizXmlRpcRequest(const QString& strMethodName);
+    void addParam(CWizXmlRpcValue* pParam);
+    QByteArray toData();
 
 protected:
     CWizXMLDocument m_doc;
-
-    CString m_strMethodName;
-    CWizXmlRpcValue* m_pParam1;
-    CWizXmlRpcValue* m_pParam2;
-    CWizXmlRpcValue* m_pParam3;
-    CWizXmlRpcValue* m_pParam4;
-    CWizXmlRpcValue* m_pParam5;
-    CWizXmlRpcValue* m_pParam6;
-    CWizXmlRpcValue* m_pParam7;
-    CWizXmlRpcValue* m_pParam8;
-
-private:
-    bool m_bInited;
-    bool Init();
 };
+
 
 struct CWizXmlRpcValue
 {
@@ -220,46 +194,52 @@ public:
     bool GetStringArray(const CString& strName, CWizStdStringArray& arrayData) const;
 };
 
-enum WizXmlRpcError { errorNetwork, errorContentType, errorXmlFormat, errorXmlRpcFormat, errorXmlRpcFault};
+enum WizXmlRpcError
+{
+    errorNetwork,
+    errorContentType,
+    errorXmlFormat,
+    errorXmlRpcFormat,
+    errorXmlRpcFault
+};
+
 
 class CWizXmlRpcServer : public QObject
 {
     Q_OBJECT
 
 public:
-    CWizXmlRpcServer(const CString& strUrl);
+    explicit CWizXmlRpcServer(const QString& strUrl);
+
+    bool xmlRpcCall(const QString& strMethodName, CWizXmlRpcValue* pParam);
 
     void abort();
-    int state() const { return m_http.state(); }
     void setProxy(const QString& host, int port, const QString& userName, const QString& password);
 
-    bool xmlRpcCall(const QString& strMethodName, \
-                    CWizXmlRpcValue* pParam1, CWizXmlRpcValue* pParam2 = NULL, \
-                    CWizXmlRpcValue* pParam3 = NULL, CWizXmlRpcValue* pParam4 = NULL, \
-                    CWizXmlRpcValue* pParam5 = NULL, CWizXmlRpcValue* pParam6 = NULL, \
-                    CWizXmlRpcValue* pParam7 = NULL, CWizXmlRpcValue* pParam8 = NULL);
+    QByteArray requestData() { return m_requestData; }
+    QByteArray replyData() { return m_replyData; }
 
 protected:
-    QHttp m_http;
-    CString m_strUrl;
+    QPointer<QNetworkAccessManager> m_network;
+    QString m_strUrl;
     QString m_strMethodName;
-
-    int m_nCurrentRequestID;
-    int m_nCurrentXmlRpcRequestID;
 
     virtual void processError(WizXmlRpcError error, int errorCode, const QString& errorString);
     virtual void processReturn(CWizXmlRpcValue& ret);
 
-public slots:
-    void httpDone(bool error);
-    void httpRequestFinished (int id, bool error);
-    void httpRequestStarted(int id);
-    void httpReadProgress(int done, int total);
+private:
+    QByteArray m_requestData;
+    QByteArray m_replyData;
+
+public Q_SLOTS:
+    void on_replyFinished();
+    void on_replyError(QNetworkReply::NetworkError);
+    void on_replyDownloadProgress(qint64, qint64);
 
 Q_SIGNALS:
     void xmlRpcError(const QString& strMethodName, WizXmlRpcError error, int errorCode, const QString& errorString);
     void xmlRpcReturn(const QString& strMethodName, CWizXmlRpcValue& ret);
-    void xmlRpcReadProgress(int done, int total);
+    void xmlRpcReadProgress(qint64 bytesReceived, qint64 bytesTotal);
 };
 
 
