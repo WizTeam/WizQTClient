@@ -124,8 +124,8 @@ QString WizDecryptPassword(const QString& strEncryptedText);
 
 
 bool WizLoadUnicodeTextFromFile(const QString& strFileName, QString& steText);
-bool WizSaveUnicodeTextToUnicodeFile(const CString& strFileName, const CString& strText);
-bool WizSaveUnicodeTextToUtf8File(const CString& strFileName, const CString& strText);
+bool WizSaveUnicodeTextToUtf16File(const QString& strFileName, const QString& strText);
+bool WizSaveUnicodeTextToUtf8File(const QString& strFileName, const QString& strText);
 
 CString WizDateTimeToIso8601String(const COleDateTime& t);
 BOOL WizIso8601StringToDateTime(CString str, COleDateTime& t, CString& strError);
@@ -177,7 +177,7 @@ QString WizGetSkinResourceFileName(const QString& strSkinName, const QString& st
 QIcon WizLoadSkinIcon(const QString& strSkinName, const QString& strIconName);
 
 
-void WizHtml2Text(const CString& strHtml, CString& strText);
+void WizHtml2Text(const QString& strHtml, QString& strText);
 void WizDeleteFolder(const CString& strPath);
 void WizDeleteFile(const CString& strFileName);
 BOOL WizDeleteAllFilesInFolder(const CString& strPath);

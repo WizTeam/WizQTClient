@@ -1,6 +1,5 @@
 #include "wizapi.h"
 #include <QFile>
-#include <QDebug>
 #include "zip/wizzip.h"
 #include "wizsettings.h"
 

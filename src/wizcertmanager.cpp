@@ -1,7 +1,5 @@
 #include "wizcertmanager.h"
 
-#include <QDebug>
-
 CWizCertManager::CWizCertManager(CWizExplorerApp& app, const QString& strAccountsApiURL /* = WIZ_API_URL*/)
     : CWizApiBase(strAccountsApiURL)
     , m_app(app)

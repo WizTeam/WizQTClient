@@ -143,7 +143,6 @@ protected:
     virtual void processObjectData(const WIZOBJECTDATA& data);
 
 private:
-    bool updateDocument(const WIZDOCUMENTDATABASE& data);
     bool downloadDocument(const WIZDOCUMENTDATABASE& data);
 
     void filterDocuments();

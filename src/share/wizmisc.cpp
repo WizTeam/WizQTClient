@@ -2,7 +2,7 @@
 
 #include <QApplication>
 #include <stdlib.h>
-#include <QTextDocumentFragment>
+#include <QTextDocument>
 #include <algorithm>
 #include <QCursor>
 #include <fstream>
@@ -1100,30 +1100,26 @@ bool WizLoadUnicodeTextFromBuffer2(char* pBuffer, size_t nLen, QString& strText,
         {
             WizProcessText<char>(pBuffer, nLen, bNoRemoveCr);
         }
-        //
+
         //convert to unicode
         if (bUTF16)
         {
             const char* p = pBuffer;
-            if (bUTF16AutoDetected)
-            {
+            if (bUTF16AutoDetected) {
                 p += 2;
             }
-            //
-            strText = QString::fromUtf16((unsigned short *)p);
-            //
-            bRet = TRUE;
+            strText = QString::fromUtf16((ushort *)p);
+            bRet = true;
         }
         else if (bUTF8)
         {
             const char* p = pBuffer;
-            if (bUTF8AutoDetected)
-            {
+            if (bUTF8AutoDetected) {
                 p += 3;
             }
-            strText = CString::fromUtf8(p);
-            //
-            bRet = TRUE;
+
+            strText = QString::fromUtf8(p);
+            bRet = true;
         }
         else
         {
@@ -1178,24 +1174,17 @@ BOOL WizLoadUnicodeTextFromBuffer(const char* pBuffer, size_t nLen, CString& str
 bool WizLoadUnicodeTextFromFile(const QString& strFileName, QString& strText)
 {
     QFile file(strFileName);
-
-    __int64 size = file.size();
-
-    if (!file.open(QIODevice::ReadOnly))
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
         return false;
 
-    char* pBuffer = new char[size + 4];
-    memset(pBuffer, 0, size + 4);
-    file.read(pBuffer, size);
+    QTextStream stream(&file);
+    strText = stream.readAll();
     file.close();
 
-    bool bRet = ::WizLoadUnicodeTextFromBuffer2(pBuffer, size, strText, 0, strFileName);
-
-    delete [] pBuffer;
-    return bRet;
+    return true;
 }
 
-bool WizSaveUnicodeTextToUnicodeFile(const CString& strFileName, const CString& strText)
+bool WizSaveUnicodeTextToUtf16File(const CString& strFileName, const CString& strText)
 {
     QFile file(strFileName);
     if (!file.open(QIODevice::WriteOnly))
@@ -1208,14 +1197,17 @@ bool WizSaveUnicodeTextToUnicodeFile(const CString& strFileName, const CString& 
     return true;
 }
 
-bool WizSaveUnicodeTextToUtf8File(const CString& strFileName, const CString& strText)
+bool WizSaveUnicodeTextToUtf8File(const QString& strFileName, const QString& strText)
 {
     QFile file(strFileName);
-    if (!file.open(QIODevice::WriteOnly))
+    if (!file.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate))
         return false;
 
-    file.write("\xef\xbb\xbf");
-    file.write(strText.toUtf8());
+    QTextStream stream(&file);
+    stream.setCodec("UTF-8");
+    stream.setGenerateByteOrderMark(true);
+    stream << strText;
+    stream.flush();
     file.close();
 
     return true;
@@ -1726,12 +1718,14 @@ QIcon WizLoadSkinIcon(const QString& strSkinName, const QString& strIconName)
 }
 
 
-void WizHtml2Text(const CString& strHtml, CString& strText)
+void WizHtml2Text(const QString& strHtml, QString& strText)
 {
-    QTextDocumentFragment doc = QTextDocumentFragment::fromHtml(strHtml);
-    strText = doc.toPlainText();
+    QTextDocument* doc = new QTextDocument();
+    doc->setHtml(strHtml);
+    strText = doc->toPlainText();
     QChar ch(0xfffc);
     strText.replace(ch, QChar(' '));
+    return;
 }
 
 void WizDeleteFolder(const CString& strPath)

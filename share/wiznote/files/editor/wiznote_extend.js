@@ -1,4 +1,3 @@
-
 var
     editor = null,
     m_inited = false;
@@ -9,6 +8,7 @@ var
     m_currentGUID = "",
     m_currentFileName = "",
     m_editingMode = true;
+    m_bIsSourceMode = false;
 
 
 // setup ueditor
@@ -28,12 +28,26 @@ try {
     var editorOption = {
     toolbars:
     [
-        [saveButton, '|', 'source',
+        [saveButton, '|',// 'Source',
         'FontFamily', 'FontSize', '|', 'Bold', 'Italic', 'Underline', 'StrikeThrough', '|',
         'JustifyLeft', 'JustifyCenter', 'JustifyRight', 'JustifyJustify', '|',
         'Indent', 'Outdent', 'InsertOrderedList', 'InsertUnorderedList', '|',
         'Link', 'ForeColor', 'BackColor', '|', 'horizontal', 'inserttable', 'formatmatch', 'RemoveFormat']
     ],
+    'fontfamily':[
+        { label:'',name:'songti',val:'宋体,SimSun'},
+        { label:'',name:'kaiti',val:'楷体,楷体_GB2312, SimKai'},
+        { label:'',name:'heiti',val:'黑体, SimHei'},
+        { label:'',name:'lishu',val:'隶书, SimLi'},
+        { label:'',name:'andaleMono',val:'andale mono'},
+        { label:'',name:'arial',val:'arial, helvetica,sans-serif'},
+        { label:'',name:'arialBlack',val:'arial black,avant garde'},
+        { label:'',name:'comicSansMs',val:'comic sans ms'},
+        { label:'',name:'impact',val:'impact,chicago'},
+        { label:'',name:'timesNewRoman',val:'times new roman'}
+    ],
+    'fontsize':[9, 10, 11, 12, 13, 14, 16, 18, 24, 36, 48],
+    initialStyle:'body{font-size:14px}',
     elementPathEnabled: false,
     wordCount: false,
     imagePopup: false,
@@ -43,7 +57,16 @@ try {
 
     editor = new baidu.editor.ui.Editor(editorOption);
     editor.render('editorArea');
-    editor.addListener('contentChange', onEditorContentChanged);
+
+    editor.addListener('contentChange', function() {
+        setModified(true);
+    });
+
+    editor.addListener("sourceModeChanged",function(type,mode){
+        m_bIsSourceMode = mode;
+        alert("change");
+    });
+
     editor.addListener('keydown', onEditorKeyDown);
 } catch (err) {
     alert(err);
@@ -51,7 +74,6 @@ try {
 
 function onEditorContentChanged()
 {
-    setModified(true);
 }
 
 function onEditorKeyDown(type, evt) {
@@ -59,9 +81,9 @@ function onEditorKeyDown(type, evt) {
         return;
 
     var e = evt;
-    if (!e.ctrlKey && !e.altKey && !e.shiftKey) {
-        setModified(true);
-    }
+    //if (!e.ctrlKey && !e.altKey && !e.shiftKey) {
+    //    setModified(true);
+    //}
 
     if (e.ctrlKey && !e.altKey && !e.shiftKey) {
         if (String.fromCharCode(e.keyCode).toLocaleUpperCase() == 'X') {
@@ -129,8 +151,9 @@ function setEditorHtml(html) {
 function getEditorHtml() {
     // This Api have bug when showing pictures, don't use it!
     //return editor.getContent();
+    return editor.getContent();
 
-    return editor.document.documentElement.outerHTML;
+    //return editor.document.documentElement.outerHTML;
 }
 
 function setEditorFocus() {

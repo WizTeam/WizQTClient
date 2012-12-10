@@ -1,6 +1,7 @@
 #include "wizdatabase.h"
 #include <QDir>
 #include <QUrl>
+#include <QDebug>
 
 #include <algorithm>
 
@@ -1036,12 +1037,9 @@ bool CWizDatabase::UpdateDocumentAbstract(const CString& strDocumentGUID)
 
     CString strHtml;
     CString strAbstractFileName = strHtmlTempPath + "wiz_full.html";
-    if (PathFileExists(strAbstractFileName))
-    {
+    if (PathFileExists(strAbstractFileName)) {
         ::WizLoadUnicodeTextFromFile(strAbstractFileName, strHtml);
-    }
-    else
-    {
+    } else {
         ::WizLoadUnicodeTextFromFile(strHtmlFileName, strHtml);
     }
 
@@ -1210,7 +1208,7 @@ bool CWizDatabase::DocumentToTempHtmlFile(const WIZDOCUMENTDATA& document, QStri
 
     strTempHtmlFileName = strTempPath + "index.html";
 
-    CString strText;
+    QString strText;
     ::WizLoadUnicodeTextFromFile(strTempHtmlFileName, strText);
 
     QUrl url = QUrl::fromLocalFile(strTempPath + "index_files/");

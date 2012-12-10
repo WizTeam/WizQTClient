@@ -795,7 +795,7 @@ bool CWizXMLDocument::ToUnicodeFile(const QString& strFileName)
     if (!ToXML(strText, true))
         return false;
 
-    return WizSaveUnicodeTextToUnicodeFile(strFileName, strText);
+    return WizSaveUnicodeTextToUtf8File(strFileName, strText);
 }
 
 bool CWizXMLDocument::GetAllChildNodes(CWizStdStringArray& arrayNodeName)

@@ -758,14 +758,6 @@ void CWizSync::onUploadAttachment(const WIZDOCUMENTATTACHMENTDATAEX& data)
     uploadNextAttachment();
 }
 
-bool CWizSync::downloadDocument(const WIZDOCUMENTDATABASE& data)
-{
-    int nPart = data.nObjectPart;
-    Q_ASSERT(nPart != 0);
-
-    return callDocumentGetData(data);
-}
-
 bool compareDocumentByTime(const WIZDOCUMENTDATABASE& data1, const WIZDOCUMENTDATABASE& data2)
 {
     return data1.tDataModified > data2.tDataModified;
