@@ -10,6 +10,8 @@
 #include <QMenu>
 #include <QContextMenuEvent>
 #include <QScrollBar>
+#include <QDrag>
+#include <QMimeData>
 
 
 class CWizDocumentListViewItem : public QListWidgetItem

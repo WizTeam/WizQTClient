@@ -3,6 +3,10 @@
 
 #include <QtGui>
 
+#ifdef BUILD_WITH_QT5
+#include <QtWidgets>
+#endif
+
 namespace Ui {
 class CWizUpgradeNotifyDialog;
 }

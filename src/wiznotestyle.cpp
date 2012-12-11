@@ -11,19 +11,35 @@
 
 #include <QtGui>
 
+#ifdef BUILD_WITH_QT5
+#include <QtWidgets>
+#endif
+
 class CWizCategoryView;
 class CWizDocumentListView;
-class QStyleOptionViewItemV4;
+//class QStyleOptionViewItemV4;
 
-#if defined(Q_OS_WIN32)
-typedef QWindowsVistaStyle CWizNoteBaseStyle;
-#elif defined(Q_OS_LINUX)
-#include <QGtkStyle>
-typedef QGtkStyle CWizNoteBaseStyle;
-#elif defined(Q_OS_MAC)
-#include <QMacStyle>
-typedef QMacStyle CWizNoteBaseStyle;
-#endif
+//#if defined(Q_OS_WIN32)
+//typedef QWindowsVistaStyle CWizNoteBaseStyle;
+//
+//#elif defined(Q_OS_LINUX)
+//
+//#if defined(QT_NO_STYLE_GTK)
+//#include <QCleanlooksStyle>
+//typedef QCleanlooksStyle CWizLinuxStyle;
+//#else
+//#include <QGtkStyle>
+//typedef QGtkStyle CWizLinuxStyle;
+//#endif
+//
+//typedef CWizLinuxStyle CWizNoteBaseStyle;
+//
+//#elif defined(Q_OS_MAC)
+//#include <QMacStyle>
+//typedef QMacStyle CWizNoteBaseStyle;
+//#endif
+
+typedef QProxyStyle CWizNoteBaseStyle;
 
 class CWizNoteStyle : public CWizNoteBaseStyle
 {

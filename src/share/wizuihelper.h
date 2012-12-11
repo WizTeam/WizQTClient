@@ -2,6 +2,7 @@
 #define WIZMACHELPER_H
 
 #include <QtGui>
+#include <QSplitter>
 
 #include "wizdef.h"
 

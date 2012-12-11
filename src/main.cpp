@@ -1,6 +1,10 @@
 #include <QtCore>
 #include <QtGui>
 
+#ifdef BUILD_WITH_QT5
+#include <QtWidgets>
+#endif
+
 #include "wizmainwindow.h"
 #include "wizupdaterprogressdialog.h"
 #include "wizwelcomedialog.h"

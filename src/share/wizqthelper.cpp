@@ -185,7 +185,7 @@ int wiz_isalpha(int c)
 
 int wiz_isalpha(QChar c)
 {
-    return isalpha(c.toAscii());
+    return isalpha(c.unicode());
     return (c >= 'a' && c <= 'z')
             || (c >= 'A' && c <= 'Z');
     //return c.isLetter();
@@ -205,9 +205,9 @@ int wiz_isxdigit(int c)
 
 int wiz_isxdigit(QChar c)
 {
-    return isxdigit(c.toAscii());
+    return isxdigit(c.unicode());
     //
-    return wiz_isxdigit(c.toAscii());
+    return wiz_isxdigit(c.unicode());
 }
 
 size_t wiz_strlen(const unsigned short* str)

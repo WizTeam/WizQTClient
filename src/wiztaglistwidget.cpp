@@ -3,6 +3,10 @@
 
 #include "share/wizkmcore.h"
 
+#ifdef BUILD_WITH_QT5
+#include <QtWidgets>
+#endif
+
 #include <QBoxLayout>
 #include <QScrollArea>
 #include <QCheckBox>

@@ -1,5 +1,9 @@
 #include "wizcategoryview.h"
 
+#ifdef BUILD_WITH_QT5
+#include <QtWidgets>
+#endif
+
 #include <QHeaderView>
 #include <QPalette>
 #include <QContextMenuEvent>

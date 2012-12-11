@@ -2,6 +2,11 @@
 
 #include <QtGui>
 #include <QtWebKit>
+
+#ifdef BUILD_WITH_QT5
+#include <QtWebKitWidgets>
+#endif
+
 #include <QMessageBox>
 
 #include "share/wizmisc.h"

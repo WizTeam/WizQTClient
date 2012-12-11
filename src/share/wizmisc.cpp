@@ -639,11 +639,11 @@ int WizHexToInt(const CString& str)
         QChar ch = strText[i];
         if (ch >= '0' && ch <= '9')
         {
-            nValue = (nValue * 16) + ch.toAscii() - '0';
+            nValue = (nValue * 16) + ch.unicode() - '0';
         }
         else if (ch >= 'a' &&ch <= 'f')
         {
-            nValue = (nValue * 16) + ch.toAscii() - 'a' + 10;
+            nValue = (nValue * 16) + ch.unicode() - 'a' + 10;
         }
         else
         {

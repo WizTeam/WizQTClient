@@ -2,6 +2,10 @@
 
 //#ifndef Q_OS_MAC
 
+#ifdef BUILD_WITH_QT5
+#include <QtWidgets>
+#endif
+
 #include "share/wizmisc.h"
 #include <QLabel>
 
