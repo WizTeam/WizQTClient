@@ -122,7 +122,9 @@ public:
     void updateInformation(CWizDatabase& db, const WIZDOCUMENTDATA& data)
     {
         //title
-        m_titleEdit->setText(data.strTitle);
+        if (m_titleEdit->text() != data.strTitle) {
+            m_titleEdit->setText(data.strTitle);
+        }
 
         //tags
         CWizStdStringArray arrayTagGUID;

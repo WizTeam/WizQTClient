@@ -133,19 +133,14 @@ function setEditorHtml(html) {
     // This Api have bug when showing pictures, don't use it!
     //editor.setContent(html);
     editor.document.body.innerHTML = html;
-
     setModified(false);
 
     window.UE.utils.domReady(function() {
         setEditorFocus();
+        editor.window.scrollTo(0, 0);
     });
 
     //editor.document.body.innerHTML = '<p>' + html + '</p>';
-    //editor.undoManger.reset();
-    //editor.window.scrollTo(0,0);
-
-    //alert(html);
-    //alert(editor.document.documentElement.outerHTML);
 }
 
 function getEditorHtml() {
