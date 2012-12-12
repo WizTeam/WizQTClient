@@ -4,10 +4,7 @@
 #
 #-------------------------------------------------
 
-QT += core gui widgets
-QT += xml
-QT += network
-QT += webkit webkitwidgets
+QT += core gui xml network webkit
 
 OBJECTS_DIR = .obj
 TEMPLATE = app
