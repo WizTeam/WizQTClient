@@ -195,14 +195,13 @@ set(wiznote_FORMS
 )
 
 set(wiznote_TRANSLATIONS
-    wiznote_zh_CN.ts
-    wiznote_zh_TW.ts
+    ${CMAKE_SOURCE_DIR}/i18n/wiznote_zh_CN.ts
+    ${CMAKE_SOURCE_DIR}/i18n/wiznote_zh_TW.ts
 )
 
-# collect all resources files
-#file(GLOB_RECURSE wiznote_RESOURCES RELATIVE ${CMAKE_SOURCE_DIR}/share/wiznote ${CMAKE_SOURCE_DIR}/share/wiznote/*)
+file(GLOB_RECURSE wiznote_RESOURCES ${CMAKE_SOURCE_DIR}/share/wiznote/*)
 
-QT4_ADD_TRANSLATION(wiznote_QM ${wiznote_TRANSLATIONS})
+qt4_create_translation(wiznote_QM ${wiznote_TRANSLATIONS})
 
 # include uic generated ui_*.h headers
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
@@ -211,7 +210,6 @@ qt4_wrap_ui(wiznote_FORM_HEADERS ${wiznote_FORMS})
 # cmake will autogen zconf.h at BINARY_DIR
 #include_directories(${testcmake_SOURCE_DIR}/zlib ${testcmake_BINARY_DIR}/zlib)
 #link_directories(${testcmake_BINARY_DIR}/zlib)
-
 
 include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}
@@ -222,15 +220,15 @@ link_directories(${wiznote_BINARY_DIR}/lib/)
 if(UNIX)
     if(APPLE)
         add_executable(${PROJECT_NAME} MACOSX_BUNDLE ${wiznote_SOURCES} ${wiznote_FORM_HEADERS} ${wiznote_QM})
+        set_source_files_properties(${wiznote_QM} PROPERTIES MACOSX_PACKAGE_LOCATION Resources/languages)
 
-        # plist info
+        # setup plist info
         set_target_properties(${PROJECT_NAME} PROPERTIES MACOSX_BUNDLE_ICON_FILE wiznote.icns)
 
         # copy resources to bundle
+        set(wiznote_BUNDLE ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.app/Contents)
         add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-            COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.app/Contents/Resources/)
-        add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-            COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/share/wiznote/ ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.app/Contents/Resources/)
+            COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/share/wiznote/ ${wiznote_BUNDLE}/Resources/)
 
         # resovle library dependency
         add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
