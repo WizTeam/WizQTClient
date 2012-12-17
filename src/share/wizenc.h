@@ -1,11 +1,11 @@
 #ifndef WIZENC_H
 #define WIZENC_H
 
-#include "../libcryptopp/aes.h"
-#include "../libcryptopp/rsa.h"
-#include "../libcryptopp/randpool.h"
-#include "../libcryptopp/modes.h"
-#include "../libcryptopp/osrng.h"
+#include "cryptopp/aes.h"
+#include "cryptopp/rsa.h"
+#include "cryptopp/randpool.h"
+#include "cryptopp/modes.h"
+#include "cryptopp/osrng.h"
 
 #include <QDataStream>
 

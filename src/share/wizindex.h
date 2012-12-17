@@ -117,7 +117,7 @@ public:
     BOOL GetDocumentParams(const CString& strDocumentGUID, CWizDocumentParamDataArray& arrayParam);
     BOOL GetDocumentParam(const CString& strDocumentGUID, \
                           CString strParamName, CString& strParamValue, \
-                          const CString& strDefault = NULL, BOOL* pbParamExists = NULL);
+                          const CString& strDefault = QString(), BOOL* pbParamExists = NULL);
     BOOL SetDocumentParam(const CString& strDocumentGUID, \
                           CString strParamName, CString strParamValue, BOOL bUpdateParamMD5);
     BOOL SetDocumentParam(WIZDOCUMENTDATA& data, \

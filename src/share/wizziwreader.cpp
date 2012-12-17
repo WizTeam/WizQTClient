@@ -4,7 +4,6 @@
 #include <QFile>
 
 #include "wizmisc.h"
-#include "base64.h"
 #include "wizenc.h"
 
 

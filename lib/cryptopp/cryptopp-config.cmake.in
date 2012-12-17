@@ -1,0 +1,22 @@
+get_filename_component (_DIR "${CMAKE_CURRENT_LIST_FILE}" PATH)
+
+if (EXISTS ${_DIR}/cryptopp-config-build.cmake)
+  # In build tree
+  include (${_DIR}/cryptopp-config-build.cmake)
+else (EXISTS ${_DIR}/cryptopp-config-build.cmake)
+  set (CRYPTOPP_INCLUDE_DIRS ${_DIR}/include)
+endif (EXISTS ${_DIR}/cryptopp-config-build.cmake)
+
+if (NOT TARGET cryptlib AND NOT TARGET cryptopp)
+  include (${_DIR}/cryptopp-targets.cmake)
+endif (NOT TARGET cryptlib AND NOT TARGET cryptopp)
+
+set (CRYPTOPP_DEFINITIONS)
+
+if (TARGET cryptopp)
+  list (APPEND CRYPTOPP_LIBRARIES cryptopp)
+endif (TARGET cryptopp)
+
+if (TARGET cryptlib)
+  list (APPEND CRYPTOPP_LIBRARIES cryptlib)
+endif (TARGET cryptlib)
