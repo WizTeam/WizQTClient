@@ -1,0 +1,12 @@
+@CHECK_STDCALL_FUNCTION_PREMAIN@
+
+#ifdef __CLASSIC_C__
+int main(){
+  int ac;
+  char*av[];
+#else
+int main(int ac, char*av[]){
+#endif
+  @CHECK_STDCALL_FUNCTION_DECLARATION@;
+  return 0;
+}

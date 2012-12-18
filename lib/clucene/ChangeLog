@@ -1,0 +1,17 @@
+Removed jstreams namespace. Sorry, I couldn't think of a way to nicely deprecate jstreams.
+
+version 0.9.23:
+Changes:
+* Static object fields have been changed to method accessors (SortField::FIELDDOC now chould be accessed as SortField::FIELDDOC(), for example). Classes changed: FieldCache, ScoreDocComparator,
+  This was necessary for creating static libraries work on certain platforms.
+* Folders were reorganised, this seems like a good time to do it  
+* Some deprecated functions were removed.
+* moved platform configuration type code and utility code into 'shared' project. This enables tests to be built with a shared library on windows
+* Moved moved of the platform specific logic into cmake in order to reduce #ifdefs in code (i love cmake!)
+* added contributions code into the trunk. this will hopefully mean more exposure to the contributions. need to make clear about the licensing still, though.
+* Deletor::Array was renamed to Deletor::vArray.
+* re-worked the install location for system-dependent files (clucene-config.h). this was a confusing issue, and i think it's better to stick to the standards rather than push the more compatible (in my opinion) way of doing things. this one has been getting so many complaints from downstream. however, LUCENE_SYS_INCLUDES is available to install the clucene-config.h type files into the library directory (or any other place).
+
+Here is a summary of changes that you'll need to look at for this release:
+* Action deprecated features. Some features that were deprecated for a long time have now been finally removed.
+* fix things that may affect you, such as the LUCENE_SYS_INCLUDES change, and the reorganisation of code (install locations are still the same though). Also autotools removals may affect your work, depending on how you use clucene.

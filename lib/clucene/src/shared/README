@@ -1,0 +1,5 @@
+This package creates a library that is used in all the CLucene projects. It provides 
+cross-platform macros and functions that used to be inside CLucene. Since we need 
+to be able to link against the shared clucene-core library, we need these functions 
+to be seperate. They provide things like cl_* string macros, file handling functions,
+replacement functions, etc.

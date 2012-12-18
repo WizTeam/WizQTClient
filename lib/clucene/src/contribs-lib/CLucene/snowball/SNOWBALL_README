@@ -1,0 +1,82 @@
+libstemmer_c
+============
+
+This document pertains to the C version of the libstemmer distribution,
+available for download from:
+
+http://snowball.tartarus.org/dist/libstemmer_c.tgz
+
+
+Compiling the library
+=====================
+
+A simple makefile is provided for Unix style systems.  On such systems, it
+should be possible simply to run "make", and the file "libstemmer.o"
+and the example program "stemwords" will be generated.
+
+If this doesn't work on your system, you need to write your own build
+system (or call the compiler directly).  The files to compile are
+all contained in the "libstemmer", "runtime" and "src_c" directories,
+and the public header file is contained in the "include" directory.
+
+
+Using the library
+=================
+
+The library provides a simple C API.  Essentially, a new stemmer can
+be obtained by using "sb_stemmer_new".  "sb_stemmer_stem" is then
+used to stem a word, "sb_stemmer_length" returns the stemmed
+length of the last word processed, and "sb_stemmer_delete" is
+used to delete a stemmer.
+
+Creating a stemmer is a relatively expensive operation - the expected
+usage pattern is that a new stemmer is created when needed, used
+to stem many words, and deleted after some time.
+
+Stemmers are re-entrant, but not threadsafe.  In other words, if
+you wish to access the same stemmer object from multiple threads,
+you must ensure that all access is protected by a mutex or similar
+device.
+
+libstemmer does not currently incorporate any mechanism for caching the results
+of stemming operations.  Such caching can greatly increase the performance of a
+stemmer under certain situations, so suitable patches will be considered for
+inclusion.
+
+The standard libstemmer sources contain an algorithm for each of the supported
+languages.  The algorithm may be selected using the english name of the
+language, or using the 2 or 3 letter ISO 639 language codes.  In addition,
+the traditional "Porter" stemming algorithm for english is included for
+backwards compatibility purposes, but we recommend use of the "English"
+stemmer in preference for new projects.
+
+(Some minor algorithms which are included only as curiosities in the snowball
+website, such as the Lovins stemmer and the Kraaij Pohlmann stemmer, are not
+included in the standard libstemmer sources.  These are not really supported by
+the snowball project, but it would be possible to compile a modified libstemmer
+library containing these if desired.)
+
+
+The stemwords example
+=====================
+
+The stemwords example program allows you to run any of the stemmers
+compiled into the libstemmer library on a sample vocabulary.  For
+details on how to use it, run it with the "-h" command line option.
+
+
+Using the library in a larger system
+====================================
+
+If you are incorporating the library into the build system of a larger
+program, I recommend copying the unpacked tarball without modification into
+a subdirectory of the sources of your program.  Future versions of the
+library are intended to keep the same structure, so this will keep the
+work required to move to a new version of the library to a minimum.
+
+As an additional convenience, the list of source and header files used
+in the library is detailed in mkinc.mak - a file which is in a suitable
+format for inclusion by a Makefile.  By including this file in your build
+system, you can link the snowball system into your program with a few
+extra rules.
+

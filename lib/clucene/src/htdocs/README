@@ -1,0 +1,9 @@
+How to upload:
+
+#create your shell space:
+ssh ustramooner,clucene@shell.sf.net create
+
+#upload (make sure you upload with group write permissions otherwise other people can't overwrite)
+rsync --chmod=ug=rwX -Pav htdocs/ ustramooner,clucene@shell.sf.net:/home/groups/c/cl/clucene/htdocs/
+
+

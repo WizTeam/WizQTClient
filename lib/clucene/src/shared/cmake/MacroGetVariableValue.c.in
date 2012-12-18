@@ -1,0 +1,20 @@
+
+#include <stdio.h>
+
+#ifdef HAVE_WINDOWS_H
+ #include <windows.h>
+#endif
+#ifdef HAVE_LIMITS_H
+ #include <limits.h>
+#endif
+#ifdef HAVE_STAT_H
+ #include <stat.h>
+#endif
+#ifdef HAVE_SYS_STAT_H
+ #include <sys/stat.h>
+#endif
+
+int main(){
+	printf("%${}", ${});
+	return 0;
+}

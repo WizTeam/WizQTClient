@@ -1,0 +1,113 @@
+Coding Style
+------------
+
+CLucene follows a hybrid coding style. Because of the nature of the code being
+a java port, there are naturally some java like syntax.
+
+* Never use CL_NS_USE(x) in a header file (use CL_NS(x):: for each class), it defeats the purpose of namespaces.
+* Use CL_NS_USE(x) in .cpp files if there are more than a few usages of that namespace.
+
+
+Headers:
+* _headername.h headers are private, and will not be distributed. Don't include these files from public headers.
+* The shared library is not distributed, except for: SharedHeader.h and clucene-config.h
+* Keep _ifdef's in public headers to an absolute minimum.
+* Public headers should contain only classes that are exported (class CLUCENE_EXPORT classname).
+* All classes should have a destructor, 
+  the destructor should be virtual if there is any chance of the class being overridden
+
+Documentation:
+Although CLucene documentation is not complete, it would be nice to see documentation created for new files.
+We used doxygen to create documentation. 2 basic formats of documentation are:
+
+/** documentation must have ** to be included */
+void function();
+void function2(); //< can also document functions retrospectively by adding <
+
+
+/** 
+* You can also document memory with the special @memory alias.
+* @memory you must delete data returned from this function using _CLDELETE 
+*/
+Object createObject();
+
+
+Cross platform specifics:
+* Use macros provided in shared project. This applies to data types and functions
+* static const int32_t x=1; Should be coded as: Use LUCENE_STATIC_CONSTANT (int32_t, x=1). Else it is not portable.
+* Static objects should not be initialised in the class header. ( class x{ static object a; }; ). This will not work
+  everywhere. Instead use a getter.
+  
+  class x{ 
+    static object* a; 
+  public:
+    static Object* getA(); 
+    static void CLUCENE_LOCAL _shutdown();
+  }; 
+  
+  Then in the implementation code
+  
+  Object* x::a = NULL;
+  Object* x::getA(){
+    if ( a == NULL )
+        x::a = _CLNEW Object;
+    return a;
+  }
+  void x::_shutdown(){
+    _CLDELETE(a);
+  }
+  
+  In CLucene/StdHeader.cpp, add x::_shutdown() to the list _lucene_shutdown function.
+  
+* This is bad:
+
+    class x{
+        LUCENE_STATIC_CONSTANT(int32_t, x=1)
+        void func( int32_t value=x);
+    };
+  
+  This will fail on some platforms. It is better to do:
+  int32_t value=-1 (-1 should be some logical value, not necessarily -1).
+  then in the implementation, check if -1 and default to the x static constant.
+* Try and use the functions in util/Array.h instead of Void Map/List functions. Void Map/List will be deprecated for public access
+* Most compilers don't complain about this (in normal mode), but we require pedantic mode behaviour. Some important things for this are:
+  1. Initialise variables in correct order as in the class
+     class x{
+        int a;
+        int b;
+        x():
+            b(12),
+            a(11)   //THIS IS WRONG! a is initialised after b.
+        {
+        }
+     };
+
+Good development tips
+---------------------
+When developing, use the available clucene debugging tools:
+* _CND_DEBUG - condition debugging, an 'assert' type system (or configure with --enable-cnddebug)
+
+Good performance tips:
+----------------------
+CLucene has a lot of new changes to help improve performance.
+Some of them are still being tuned...
+
+MSVC profiling tutorial:
+http://webserver.tc.cornell.edu/services/edu/topics/Performance/Profiling/more.asp
+
+For GCC see gprof
+you can enable gprof by configuring with ENABLE_GPROF
+
+Developing
+----------
+When developing, please keep in mind cross-platform issues and also
+character set issues (unicode/ascii).
+
+Hint:
+To do a quick test to see if the code compiles
+run this command from the root directory of clucene.
+It will compile all the CLucene code monolithically.
+
+    % test-pedantic
+    
+This will do a quick compile then run all the clucene tests.

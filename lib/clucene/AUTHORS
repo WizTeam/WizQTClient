@@ -1,0 +1,23 @@
+As with most development projects, contributions come from many people and in 
+many forms. The CLucene project would like to thank it's many contributors. 
+Omissions are merely accidental, please e-mail ustramooner@users.sourceforge.net 
+if you have been left out or a contribution is not mentioned.
+
+CLucene was originally ported to C++ by Ben van Klinken (ustramooner@users.sourceforge.net)
+from Doug Cutting's popular java search engine, Lucene (see http://lucene.apache.org).
+
+Here is a list of contributors. Please send me an email at ustramooner@users.sourceforge.net
+if I have left you out.
+
+Doug Cutting  	         cutting@users.sourceforge.net
+John Wheeler 	         j_wheeler@users.sourceforge.net
+Robert G. Ristroph 	   rgristroph@users.sourceforge.net
+David Rushby 	         woodsplitter@users.sourceforge.net
+Jimmy Pritts            jpritts@sdf.lonestar.org
+Peter Edwards           peter@dragonstaff.co.uk
+Jorge Sabater Redondo   jsabater@elderecho.com
+Daniel Glassey          danglassey@ntlworld.com
+Peter Gladkikh          batyi@mail.ru
+Pedja                   amigo@max3d.com
+Peter Hodges            hodges.peter@gmail.com
+Itamar Syn-Hershko		synhershko@users.sourceforge.net
