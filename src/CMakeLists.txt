@@ -84,6 +84,7 @@ set(wiznote_SOURCES
     wizcertmanager.cpp
     wizusercipherform.cpp
     wiznoteinfoform.cpp
+    share/wizClucene.cpp
 )
 
 set(wiznote_HEADERS
@@ -174,6 +175,7 @@ set(wiznote_HEADERS
     wiznoteinfoform.h
     newfolderdialog.h
     newtagdialog.h
+    share/wizClucene.h
 )
 
 set(wiznote_FORMS
@@ -257,7 +259,16 @@ elseif(WIN32)
 endif()
 set_target_properties(${PROJECT_NAME} PROPERTIES AUTOMOC true)
 
-include_directories(${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_SOURCE_DIR}/lib)
+include_directories(
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    ${CMAKE_CURRENT_BINARY_DIR}
+    ${CMAKE_SOURCE_DIR}/lib
+
+    # clucene specific
+    ${clucene_SOURCE_DIR}/src/shared
+    ${clucene_BINARY_DIR}/src/shared
+    ${clucene_SOURCE_DIR}/src/core
+)
 link_directories(${CMAKE_BINANRY_DIR}/bin)
 target_link_libraries(${PROJECT_NAME} ${QT_LIBRARIES} cryptlib clucene-core-static clucene-shared-static)
 set_target_properties(${PROJECT_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
