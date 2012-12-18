@@ -324,24 +324,26 @@ GET_SHARED_FILES(clucene_shared_Files ".")
 #find our headers
 file(GLOB_RECURSE HEADERS ${clucene-shared_SOURCE_DIR}/*.h)
 
-add_library(clucene-shared SHARED
-	${clucene_shared_Files} ${HEADERS}
-)
+if (CLUCENE_BUILD_SHARED_LIBRARIES)
+    add_library(clucene-shared SHARED
+        ${clucene_shared_Files} ${HEADERS}
+    )
 
-#set properties on the libraries
-SET_TARGET_PROPERTIES(clucene-shared PROPERTIES
-    VERSION ${CLUCENE_VERSION}
-    SOVERSION ${CLUCENE_SOVERSION}
-    COMPILE_DEFINITIONS_DEBUG _DEBUG
-)
-TARGET_LINK_LIBRARIES(clucene-shared ${CMAKE_THREAD_LIBS_INIT})
-IF ( EXTRA_LIBS )
-  TARGET_LINK_LIBRARIES(clucene-shared ${EXTRA_LIBS})
-ENDIF ( EXTRA_LIBS )
+    #set properties on the libraries
+    SET_TARGET_PROPERTIES(clucene-shared PROPERTIES
+        VERSION ${CLUCENE_VERSION}
+        SOVERSION ${CLUCENE_SOVERSION}
+        COMPILE_DEFINITIONS_DEBUG _DEBUG
+    )
+    TARGET_LINK_LIBRARIES(clucene-shared ${CMAKE_THREAD_LIBS_INIT})
+    IF ( EXTRA_LIBS )
+      TARGET_LINK_LIBRARIES(clucene-shared ${EXTRA_LIBS})
+    ENDIF ( EXTRA_LIBS )
 
-install(TARGETS clucene-shared 
-        DESTINATION ${LIB_DESTINATION} 
-        COMPONENT development )
+    install(TARGETS clucene-shared
+            DESTINATION ${LIB_DESTINATION}
+            COMPONENT development )
+endif()
 
 IF ( BUILD_STATIC_LIBRARIES )
 	add_library(clucene-shared-static STATIC

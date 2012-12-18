@@ -1,6 +1,4 @@
-# use FindQt4.cmake module
-find_package(Qt4 REQUIRED QtCore QtGui QtXml QtNetwork QtWebKit)
-include(${QT_USE_FILE})
+project(wiznote)
 
 set(wiznote_SOURCES
     zip/zip.c
@@ -194,29 +192,34 @@ set(wiznote_FORMS
     ui/wiznoteinfoform.ui
 )
 
+if (NOT ${CMAKE_BUILD_TYPE})
+    set(CMAKE_BUILD_TYPE Debug)
+endif ()
+message ("Wiznote will compile as ${CMAKE_BUILD_TYPE}")
+
 set(wiznote_TRANSLATIONS
     ${CMAKE_SOURCE_DIR}/i18n/wiznote_zh_CN.ts
     ${CMAKE_SOURCE_DIR}/i18n/wiznote_zh_TW.ts
 )
 
+# resources
 file(GLOB_RECURSE wiznote_RESOURCES ${CMAKE_SOURCE_DIR}/share/wiznote/*)
 
+# use FindQt4.cmake module
+find_package(Qt4 REQUIRED QtCore QtGui QtXml QtNetwork QtWebKit)
+include(${QT_USE_FILE})
+
+# dynamically create qt files
 qt4_create_translation(wiznote_QM ${wiznote_TRANSLATIONS})
 
-# include uic generated ui_*.h headers
-include_directories(${CMAKE_CURRENT_BINARY_DIR})
+# uic
 qt4_wrap_ui(wiznote_FORM_HEADERS ${wiznote_FORMS})
 
 # cmake will autogen zconf.h at BINARY_DIR
 #include_directories(${testcmake_SOURCE_DIR}/zlib ${testcmake_BINARY_DIR}/zlib)
 #link_directories(${testcmake_BINARY_DIR}/zlib)
 
-include_directories(
-    ${CMAKE_CURRENT_SOURCE_DIR}
-    ${CMAKE_CURRENT_SOURCE_DIR}/../lib/)
-
-link_directories(${wiznote_BINARY_DIR}/lib/)
-
+# build
 if(UNIX)
     if(APPLE)
         add_executable(${PROJECT_NAME} MACOSX_BUNDLE ${wiznote_SOURCES} ${wiznote_FORM_HEADERS} ${wiznote_QM})
@@ -236,23 +239,13 @@ if(UNIX)
 
     elseif(NOT APPLE)
         add_executable(${PROJECT_NAME} ${wiznote_SOURCES} ${wiznote_FORM_HEADERS} ${wiznote_QM})
-    endif()
-endif()
 
-target_link_libraries(${PROJECT_NAME} ${QT_LIBRARIES} cryptlib)
-set_target_properties(${PROJECT_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
-
-if(UNIX)
-    if(NOT APPLE)
         add_custom_command(TARGET ${PROJECT_NAME}
             POST_BUILD COMMAND cp -R ${CMAKE_HOME_DIRECTORY}/share/wiznote/* ${CMAKE_BINARY_DIR})
     endif()
 endif()
 
-# moc related
-set_target_properties(${PROJECT_NAME} PROPERTIES AUTOMOC true)
-
-# platform specific argument should be passed in
+# moc, platform specific argument should be passed to moc
 if(UNIX)
     if(APPLE)
         set_target_properties(${PROJECT_NAME} PROPERTIES AUTOMOC_MOC_OPTIONS "-DQ_OS_MAC")
@@ -262,4 +255,9 @@ if(UNIX)
 elseif(WIN32)
     set_target_properties(${PROJECT_NAME} PROPERTIES AUTOMOC_MOC_OPTIONS "-DQ_OS_WIN32")
 endif()
+set_target_properties(${PROJECT_NAME} PROPERTIES AUTOMOC true)
 
+include_directories(${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_SOURCE_DIR}/lib)
+link_directories(${CMAKE_BINANRY_DIR}/bin)
+target_link_libraries(${PROJECT_NAME} ${QT_LIBRARIES} cryptlib clucene-core-static clucene-shared-static)
+set_target_properties(${PROJECT_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})

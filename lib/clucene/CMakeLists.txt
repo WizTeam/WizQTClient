@@ -30,7 +30,7 @@ endif(WIN32)
 
 
 # include specific modules
-set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
+set(CMAKE_MODULE_PATH "${clucene_SOURCE_DIR}/cmake")
 
 #define options...
 
@@ -42,7 +42,7 @@ IF(NOT CMAKE_BUILD_TYPE)
       "Choose the type of build, options are: None Debug Release RelWithDebInfo MinSizeRel."
       FORCE)
 ELSE(NOT CMAKE_BUILD_TYPE)
-    MESSAGE( "Compiling as ${CMAKE_BUILD_TYPE}" )
+    MESSAGE( "Clucene whill compiling as ${CMAKE_BUILD_TYPE}" )
 ENDIF(NOT CMAKE_BUILD_TYPE)
 
 OPTION(ENABLE_DEBUG
@@ -80,9 +80,12 @@ OPTION(LUCENE_USE_INTERNAL_CHAR_FUNCTIONS
 OPTION(ENABLE_PACKAGING
   "create build scripts for creating clucene packages"
   OFF)
+option(CLUCENE_BUILD_SHARED_LIBRARIES
+  "create targets for building shared libraries"
+  OFF)
 OPTION(BUILD_STATIC_LIBRARIES
   "create targets for building static libraries"
-  OFF)
+  ON)
 OPTION(BUILD_CONTRIBS
   "create targets for building the clucene-contribs"
   OFF)
