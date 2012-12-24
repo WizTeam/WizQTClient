@@ -1,4 +1,4 @@
 *.swp
 .DS_Store
 tags
-CMakeLists.txt.user
+CMakeLists.txt.user*
