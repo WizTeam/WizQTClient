@@ -38,6 +38,12 @@ const char* const SyncMethod_PostAttachmentData = "attachment.postData";
 const char* const SyncMethod_UploadObjectPart = "data.upload";
 
 
+/*
+CWizApiBase is an abstract class,  which do nothing useful but just construct
+invoke flow of xmlprc not related to syncing(eg: login, create account, logout).
+subclass of CWizApiBase should reimplement "onXXX" like callback functions to
+do some useful things.
+*/
 class CWizApiBase : public QObject
 {
     Q_OBJECT
@@ -65,8 +71,8 @@ protected:
     virtual void onXmlRpcReturn(const QString& strMethodName, CWizXmlRpcValue& ret);
     virtual void onXmlRpcError(const QString& strMethodName, WizXmlRpcError err, int errorCode, const QString& errorMessage);
 
-    virtual bool callClientLogin(const CString& strUserId, const CString& strPassword);
-    virtual void onClientLogin();
+    virtual bool callClientLogin(const QString& strUserId, const QString& strPassword);
+    virtual void onClientLogin(const WIZUSERINFO& userInfo);
 
     virtual bool callClientLogout();
     virtual void onClientLogout();
@@ -92,6 +98,11 @@ public Q_SLOTS:
                      int errorCode, const QString& errorMessage);
 };
 
+/*
+It's all about syncing, operate with database and do real things, subclass of
+CWizApi(eg: CWizSync) should not operate database directly, instead call
+CWizApi base implementations
+*/
 class CWizApi : public CWizApiBase
 {
     Q_OBJECT
@@ -117,6 +128,8 @@ private:
 
 protected:
     virtual void onXmlRpcReturn(const QString& strMethodName, CWizXmlRpcValue& ret);
+
+    virtual void onClientLogin(const WIZUSERINFO& userInfo);
 
     virtual bool callDeletedGetList(__int64 nVersion);
     virtual void onDeletedGetList(const std::deque<WIZDELETEDGUIDDATA>& arrayRet);

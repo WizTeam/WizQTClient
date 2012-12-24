@@ -233,7 +233,9 @@ public:
     }
     virtual void getDocuments(CWizDatabase& db, CWizDocumentDataArray& arrayDocument)
     {
-        db.Search(m_strKeywords, "", true, arrayDocument);
+        Q_UNUSED(db);
+        Q_UNUSED(arrayDocument);
+        //db.Search(m_strKeywords, "", true, arrayDocument);
     }
     virtual bool accept(CWizDatabase& db, const WIZDOCUMENTDATA& data)
     {
@@ -841,6 +843,7 @@ CWizCategoryViewSearchItem* CWizCategoryView::findSearch()
     //
     return pItem;
 }
+
 CWizCategoryViewTrashItem* CWizCategoryView::findTrash()
 {
     int nCount = topLevelItemCount();
@@ -856,22 +859,27 @@ CWizCategoryViewTrashItem* CWizCategoryView::findTrash()
 }
 
 
-void CWizCategoryView::search(const CString& str)
+void CWizCategoryView::search(const QString& str)
 {
-    if (str.isEmpty())
-        return;
+    Q_UNUSED(str);
 
-    CWizCategoryViewSearchItem* pItem = findSearch();
-    pItem->setKeywords(str);
+    m_selectedItem = currentItem();
+    clearSelection();
 
-    if (currentItem() == pItem)
-    {
-        emit itemSelectionChanged();
-    }
-    else
-    {
-        setCurrentItem(pItem, 0);
-    }
+    //CWizCategoryViewSearchItem* pItem = findSearch();
+    //pItem->setKeywords(str);
+//
+    //if (currentItem() == pItem) {
+    //    emit itemSelectionChanged();
+    //} else {
+    //    setCurrentItem(pItem, 0);
+    //}
+}
+
+void CWizCategoryView::restoreSelection()
+{
+    setCurrentItem(m_selectedItem);
+    emit itemSelectionChanged();
 }
 
 bool CWizCategoryView::acceptDocument(const WIZDOCUMENTDATA& document)

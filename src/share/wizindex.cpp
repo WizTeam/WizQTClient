@@ -102,33 +102,26 @@ CIndex::~CIndex(void)
 {
 	Close();
 }
-BOOL CIndex::Open(const CString& strFileName)
-{
-	try
-	{
-        m_strFileName = strFileName;
-        m_strDatabasePath = WizExtractFilePath(strFileName);
-        m_strFTSPath = m_strDatabasePath + _T(".wizfulltextindex");
-        WizPathAddBackslash(m_strFTSPath);
 
+bool CIndex::Open(const CString& strFileName)
+{
+    m_strFileName = strFileName;
+    m_strDatabasePath = WizExtractFilePath(strFileName);
+
+    try {
         m_db.open(strFileName);
-		//
-//#ifdef _DEBUG
-        //m_db.execDML("PRAGMA synchronous=OFF");
-//#endif
-	}
-	catch (const CppSQLite3Exception& e)
-	{
+
+    } catch (const CppSQLite3Exception& e) {
 		return LogSQLException(e, _T("open database"));
-	}
-	//
+    }
+
 	for (int i = 0; i < TABLE_COUNT; i++)
 	{
 		if (!CheckTable(g_arrayTableName[i]))
-			return FALSE;
-	}
-	//
-    return TRUE;
+            return false;
+    }
+
+    return true;
 }
 
 
@@ -245,6 +238,46 @@ bool CIndex::SetUserCert(const QString& strN, const QString& stre, const QString
             && SetMeta(g_strCertSection, "E", stre) \
             && SetMeta(g_strCertSection, "D", strd) \
             && SetMeta(g_strCertSection, "Hint", strHint);
+}
+
+bool CIndex::setUserInfo(const WIZUSERINFO& userInfo)
+{
+    int errors = 0;
+
+    if (!SetMeta(g_strAccountSection, "DisplayName", userInfo.strDisplayName))
+        errors++;
+
+    if (!SetMeta(g_strAccountSection, "UserType", userInfo.strUserType))
+        errors++;
+
+    if (!SetMeta(g_strAccountSection, "UserLevelName", userInfo.strUserLevelName))
+        errors++;
+
+    if (!SetMeta(g_strAccountSection, "UserLevel", QString::number(userInfo.nUserLevel)))
+        errors++;
+
+    if (!SetMeta(g_strAccountSection, "UserPoints", QString::number(userInfo.nUserPoints)))
+        errors++;
+
+    if (!SetMeta(g_strAccountSection, "KbGUID", userInfo.strKbGUID))
+        errors++;
+
+    if (errors > 0)
+        return false;
+
+    return true;
+}
+
+bool CIndex::getUserInfo(WIZUSERINFO& userInfo)
+{
+    userInfo.strKbGUID = GetMetaDef(g_strAccountSection, "KbGUID");
+    userInfo.strDisplayName = GetMetaDef(g_strAccountSection, "DisplayName");
+    userInfo.strUserType = GetMetaDef(g_strAccountSection, "UserType");
+    userInfo.strUserLevelName = GetMetaDef(g_strAccountSection, "UserLevelName");
+    userInfo.nUserLevel = GetMetaDef(g_strAccountSection, "UserLevel").toInt();
+    userInfo.nUserPoints = GetMetaDef(g_strAccountSection, "UserPoints").toInt();
+
+    return true;
 }
 
 CppSQLite3Query CIndex::Query(const CString& strSQL)
@@ -1871,7 +1904,7 @@ BOOL CIndex::DeleteDocument(const WIZDOCUMENTDATA& data, BOOL bLog)
         emit documentDeleted(data);
 	}
 	//
-	DeleteDocumentIndex(data.strGUID);
+    //DeleteDocumentIndex(data.strGUID);
 	//
 	return TRUE;
 }
@@ -2420,7 +2453,8 @@ CString CIndex::GetMetaDef(const CString& strMetaName, const CString& strKey, co
 	return str;
 }
 
-BOOL CIndex::GetMeta(CString strMetaName, CString strKey, CString& strValue, const CString& strDefault /*= NULL*/, BOOL* pbMetaExists /*= NULL*/)
+bool CIndex::GetMeta(CString strMetaName, CString strKey, CString& strValue, \
+                     const CString& strDefault /*= NULL*/, BOOL* pbMetaExists /*= NULL*/)
 {
     if (strMetaName.IsEmpty())
 	{
@@ -2709,13 +2743,13 @@ BOOL CIndex::GetDocumentsByParamName(const CString& strLocation, BOOL bIncludeSu
 	//
     if (strLocation && *strLocation)
 	{
-        CString strLocation(strLocation);
+        CString strLocation2(strLocation);
 		if (bIncludeSubFolders)
 		{
-			strLocation.AppendChar('%');
+            strLocation2.AppendChar('%');
 		}
 		//
-		strWhere += WizFormatString1(_T(" and DOCUMENT_LOCATION like %1"), STR2SQL(strLocation));
+        strWhere += WizFormatString1(_T(" and DOCUMENT_LOCATION like %1"), STR2SQL(strLocation2));
 	}
 	//
 	CString strSQL = FormatQuerySQL(TABLE_NAME_WIZ_DOCUMENT, FIELD_LIST_WIZ_DOCUMENT, strWhere); 
@@ -2735,13 +2769,13 @@ BOOL CIndex::GetDocumentsByParam(const CString& strLocation, BOOL bIncludeSubFol
 	//
     if (!strLocation.IsEmpty())
 	{
-        CString strLocation(strLocation);
+        CString strLocation2(strLocation);
 		if (bIncludeSubFolders)
 		{
-			strLocation.AppendChar('%');
+            strLocation2.AppendChar('%');
 		}
 		//
-		strWhere += WizFormatString1(_T(" and DOCUMENT_LOCATION like %1"), STR2SQL(strLocation));
+        strWhere += WizFormatString1(_T(" and DOCUMENT_LOCATION like %1"), STR2SQL(strLocation2));
 	}
 	//
 	if (!bIncludeDeletedItems)
@@ -2837,10 +2871,10 @@ BOOL CIndex::GetDocumentsByTags(BOOL bAnd, const CString& strLocation, const CWi
 	//
     if (strLocation && *strLocation)
 	{
-        CString strLocation(strLocation);
-		strLocation.AppendChar('%');
+        CString strLocation2(strLocation);
+        strLocation2.AppendChar('%');
 		//
-		strWhere = WizFormatString2(_T(" (%1) and DOCUMENT_LOCATION like %2"), strWhere, STR2SQL(strLocation));
+        strWhere = WizFormatString2(_T(" (%1) and DOCUMENT_LOCATION like %2"), strWhere, STR2SQL(strLocation2));
 	}
 	//
 	CString strSQL = FormatQuerySQL(TABLE_NAME_WIZ_DOCUMENT, FIELD_LIST_WIZ_DOCUMENT, strWhere); 
@@ -4413,94 +4447,72 @@ BOOL CIndex::SetDocumentVersion(const CString& strDocumentGUID, __int64 nVersion
 
 #ifndef WINCE
 
-BOOL CIndex::SetDocumentIndexingEnabled(BOOL b)
+bool CIndex::setDocumentFTSEnabled(bool b)
 {
-	return SetMeta(_T("FTS"), _T("Enabled"), b ? _T("1") : _T("0"));
-}
-BOOL CIndex::IsDocumentIndexingEnabled()
-{
-	CString str = GetMetaDef(_T("FTS"), _T("Enabled"));
-	if (str == _T("1")
-		|| str.IsEmpty())
-		return TRUE;
-	//
-	return FALSE;
+    return SetMeta(_T("FTS"), _T("Enabled"), b ? _T("1") : _T("0"));
 }
 
-BOOL CIndex::StartDocumentIndexing(BOOL bPrompt)
+bool CIndex::isDocumentFTSEnabled()
 {
-	if (!IsDocumentIndexingEnabled())
-		return FALSE;
-	//
-	WizKMStartAllDocumentsIndexing(m_strDatabasePath, bPrompt);
-	//
-	return TRUE;
+    QString str = GetMetaDef(_T("FTS"), _T("Enabled"));
+    if (str == _T("1") || str.isEmpty())
+        return true;
+
+    return false;
 }
 
-BOOL CIndex::SetAllDocumentsIndexed(BOOL b)
+//BOOL CIndex::StartDocumentIndexing(BOOL bPrompt)
+//{
+//	if (!IsDocumentIndexingEnabled())
+//		return FALSE;
+//	//
+//	WizKMStartAllDocumentsIndexing(m_strDatabasePath, bPrompt);
+//	//
+//	return TRUE;
+//}
+
+bool CIndex::setAllDocumentsSearchIndexed(bool b)
 {
 	CString strSQL = WizFormatString1(_T("update WIZ_DOCUMENT set DOCUMENT_INDEXED=%1"),
-		b ? _T("1") : _T("0"));
-	//
+        b ? _T("1") : _T("0"));
+
 	if (!ExecSQL(strSQL))
-		return FALSE;
-	//
-	StartDocumentIndexing(TRUE);
-	//
-	return TRUE;
+        return false;
+
+    return true;
 }
 
-
-BOOL CIndex::SetDocumentIndexed(const CString& strDocumentGUID, BOOL b)
+bool CIndex::setDocumentSearchIndexed(const QString& strDocumentGUID, bool b)
 {
 	CString strSQL = WizFormatString2(_T("update WIZ_DOCUMENT set DOCUMENT_INDEXED=%1 where DOCUMENT_GUID=%2"),
 		b ? _T("1") : _T("0"),
         STR2SQL(strDocumentGUID));
-	//
+
 	if (!ExecSQL(strSQL))
-		return FALSE;
-	//
-	//
-	if (!b)
-	{
+        return false;
+
 #ifdef _DEBUG
-		WIZDOCUMENTDATA dataTemp;
+    if (!b) {
+        WIZDOCUMENTDATA dataTemp;
         DocumentFromGUID(strDocumentGUID, dataTemp);
 		ATLASSERT(dataTemp.nIndexed == 0);
 		//TOLOG(_T("Succeeded to set document indexed: 0"));
 		//TOLOG(_T("Start indexing document!"));
+    }
 #endif
-		StartDocumentIndexing(FALSE);
-	}
-	//
-	return TRUE;
+
+    return true;
 }
 
-
-CString CIndex::GetDocumentIndexPath()
+bool CIndex::getAllDocumentsNeedToBeSearchIndexed(CWizDocumentDataArray& arrayDocument)
 {
-	if (m_strFTSPath.IsEmpty())
-		return m_strFTSPath;
-	//
-	WizEnsurePathExists(m_strFTSPath);
-	return m_strFTSPath;
-}
+    CString strWhere = _T("DOCUMENT_INDEXED=0");
 
-
-BOOL CIndex::GetAllDocumentNeedToBeIndexed(CWizDocumentDataArray& arrayDocument)
-{
-#ifdef _DEBUG
-	TOLOG(_T("GetAllDocumentNeedToBeIndexed"));
-#endif
-	CString strWhere = _T("DOCUMENT_INDEXED=0");
-	//
-	if (!GetDocumentsBySQLWhere(strWhere, arrayDocument))
-	{
+    if (!GetDocumentsBySQLWhere(strWhere, arrayDocument)) {
 		TOLOG(_T("Failed to get documents by DOCUMENT_INDEXED=0"));
-		return FALSE;
-	}
-	//
-	//
+        return false;
+    }
+
 #ifdef _DEBUG
 	TOLOG1(_T("GetAllDocumentNeedToBeIndexed: %1"), WizIntToStr((int)arrayDocument.size()));
 	for (CWizDocumentDataArray::const_iterator it = arrayDocument.begin();
@@ -4510,8 +4522,8 @@ BOOL CIndex::GetAllDocumentNeedToBeIndexed(CWizDocumentDataArray& arrayDocument)
 		TOLOG1(_T("document have not been indexed: %1"), it->strTitle);
 	}
 #endif
-	//
-	return TRUE;
+
+    return true;
 }
 
 /*
@@ -4566,67 +4578,69 @@ BOOL CIndex::UpdateDocumentIndex(IWizDatabase* pDatabase)
 }
 */
 
-BOOL CIndex::DeleteDocumentIndex(const CString& strDocumentGUID)
-{
-	CString strIndexPath = GetDocumentIndexPath();
-	//
-    HRESULT hr = FTSDeleteDocument(strIndexPath, strDocumentGUID);
-	if (FAILED(hr))
-	{
-        TOLOG1(_T("Failed to delete document index: %1"), strDocumentGUID);
-		return FALSE;
-	}
-	return TRUE;
-}
-BOOL CIndex::DeleteDocumentIndexData()
-{
-	CString strIndexPath = GetDocumentIndexPath();
-	//
-    return WizDeleteAllFilesInFolder(strIndexPath);
-}
-BOOL CIndex::SearchDocumentByFullTextSearch(const CString& strKeywords, int nMaxResult, CWizDocumentDataArray& arrayDocument)
-{
-	class CSearchDocumentEvents : public IWizToolsSearchDocumentsEvents
-	{
-	public:
-		CSearchDocumentEvents(CWizStdStringArray& arrayGUID)
-			: m_arrayGUID(arrayGUID)
-		{
-		}
-		//
-		CWizStdStringArray& m_arrayGUID;
-		//
-                virtual bool OnDocuments(const CString& strDocumentID, const CString& strURL)
-		{
-                    Q_UNUSED(strURL);
+//BOOL CIndex::DeleteDocumentIndex(const CString& strDocumentGUID)
+//{
+//	CString strIndexPath = GetDocumentIndexPath();
+//	//
+//    HRESULT hr = FTSDeleteDocument(strIndexPath, strDocumentGUID);
+//	if (FAILED(hr))
+//	{
+//        TOLOG1(_T("Failed to delete document index: %1"), strDocumentGUID);
+//		return FALSE;
+//	}
+//	return TRUE;
+//}
 
-                    m_arrayGUID.push_back(strDocumentID);
-                    return S_OK;
-		}
-	};
-	//
-	CWizStdStringArray arrayGUID;
-	//
-	CSearchDocumentEvents events(arrayGUID);
-	//
-	CString strIndexPath = GetDocumentIndexPath();
-    HRESULT hr = FTSSearchDocument(strIndexPath, strKeywords, &events);
-	if (FAILED(hr))
-	{
-        TOLOG1(_T("Failed to search document: %1"), strKeywords);
-		return FALSE;
-	}
-	//
-	if (arrayGUID.empty())
-		return TRUE;
-	//
-	if (arrayGUID.size() > size_t(nMaxResult))
-	{
-		arrayGUID.resize(nMaxResult);
-	}
-	//
-	return GetDocumentsByGUIDs(arrayGUID, arrayDocument);
-}
+//BOOL CIndex::DeleteDocumentIndexData()
+//{
+//	CString strIndexPath = GetDocumentIndexPath();
+//	//
+//    return WizDeleteAllFilesInFolder(strIndexPath);
+//}
+
+//BOOL CIndex::SearchDocumentByFullTextSearch(const CString& strKeywords, int nMaxResult, CWizDocumentDataArray& arrayDocument)
+//{
+//	class CSearchDocumentEvents : public IWizToolsSearchDocumentsEvents
+//	{
+//	public:
+//		CWizStdStringArray& m_arrayGUID;
+//
+//		CSearchDocumentEvents(CWizStdStringArray& arrayGUID)
+//			: m_arrayGUID(arrayGUID)
+//		{
+//		}
+//
+//        virtual bool OnDocuments(const CString& strDocumentID, const CString& strURL)
+//		{
+//            Q_UNUSED(strURL);
+//
+//            m_arrayGUID.push_back(strDocumentID);
+//            return S_OK;
+//		}
+//	};
+//
+//	CWizStdStringArray arrayGUID;
+//	//
+//	CSearchDocumentEvents events(arrayGUID);
+//	//
+//	CString strIndexPath = GetDocumentIndexPath();
+//    HRESULT hr = FTSSearchDocument(strIndexPath, strKeywords, &events);
+//	if (FAILED(hr))
+//	{
+//        TOLOG1(_T("Failed to search document: %1"), strKeywords);
+//		return FALSE;
+//	}
+//	//
+//	if (arrayGUID.empty())
+//		return TRUE;
+//	//
+//	if (arrayGUID.size() > size_t(nMaxResult))
+//	{
+//		arrayGUID.resize(nMaxResult);
+//	}
+//	//
+//	return GetDocumentsByGUIDs(arrayGUID, arrayDocument);
+//}
 
 #endif
 

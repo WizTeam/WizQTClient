@@ -85,6 +85,8 @@ set(wiznote_SOURCES
     wizusercipherform.cpp
     wiznoteinfoform.cpp
     share/wizClucene.cpp
+    share/wizSearchIndexer.cpp
+    wizSearchBox.cpp
 )
 
 set(wiznote_HEADERS
@@ -176,6 +178,8 @@ set(wiznote_HEADERS
     newfolderdialog.h
     newtagdialog.h
     share/wizClucene.h
+    share/wizSearchIndexer.h
+    wizSearchBox.h
 )
 
 set(wiznote_FORMS
@@ -194,11 +198,6 @@ set(wiznote_FORMS
     ui/wiznoteinfoform.ui
 )
 
-if (NOT ${CMAKE_BUILD_TYPE})
-    set(CMAKE_BUILD_TYPE Debug)
-endif ()
-message ("Wiznote will compile as ${CMAKE_BUILD_TYPE}")
-
 set(wiznote_TRANSLATIONS
     ${CMAKE_SOURCE_DIR}/i18n/wiznote_zh_CN.ts
     ${CMAKE_SOURCE_DIR}/i18n/wiznote_zh_TW.ts
@@ -206,6 +205,8 @@ set(wiznote_TRANSLATIONS
 
 # resources
 file(GLOB_RECURSE wiznote_RESOURCES ${CMAKE_SOURCE_DIR}/share/wiznote/*)
+
+message ("Wiznote will compile as ${CMAKE_BUILD_TYPE}")
 
 # use FindQt4.cmake module
 find_package(Qt4 REQUIRED QtCore QtGui QtXml QtNetwork QtWebKit)
@@ -225,6 +226,12 @@ qt4_wrap_ui(wiznote_FORM_HEADERS ${wiznote_FORMS})
 if(UNIX)
     if(APPLE)
         add_executable(${PROJECT_NAME} MACOSX_BUNDLE ${wiznote_SOURCES} ${wiznote_FORM_HEADERS} ${wiznote_QM})
+
+        # suppress cmake warnning when link library is not a target, refer to cmp0016 for detailed info.
+        cmake_policy(SET CMP0016 OLD)
+        find_library(_CARBON_LIBRARY Carbon)
+        target_link_libraries(${PROJECT_NAME} ${_CARBON_LIBRARY})
+
         set_source_files_properties(${wiznote_QM} PROPERTIES MACOSX_PACKAGE_LOCATION Resources/languages)
 
         # setup plist info
@@ -236,8 +243,10 @@ if(UNIX)
             COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/share/wiznote/ ${wiznote_BUNDLE}/Resources/)
 
         # resovle library dependency
-        add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-            COMMAND macdeployqt ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.app)
+        if (${CMAKE_BUILD_TYPE} EQUAL Release)
+            add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+                COMMAND macdeployqt ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.app)
+        endif ()
 
     elseif(NOT APPLE)
         add_executable(${PROJECT_NAME} ${wiznote_SOURCES} ${wiznote_FORM_HEADERS} ${wiznote_QM})

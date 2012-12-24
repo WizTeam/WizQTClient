@@ -31,6 +31,9 @@ class CWizAnimateAction;
 class CWizOptionsWidget;
 class CWizStatusBar;
 
+class CWizSearchBox;
+class CWizSearchIndexerThread;
+
 
 class MainWindow
     : public QMainWindow
@@ -44,6 +47,7 @@ public:
 
     void center();
     ~MainWindow();
+    bool requestThreadsQuit();
 
     void setRestart(bool b) { m_bRestart = b; }
     bool isRestart() const { return m_bRestart; }
@@ -84,14 +88,19 @@ private:
     CWizDocumentViewHistory* m_history;
     CWizAnimateAction* m_animateSync;
 
+    QPointer<CWizSearchIndexerThread> m_searchIndexer;
+    QPointer<CWizSearchBox> m_searchBox;
+
     bool m_bRestart;
     bool m_bLogoutRestart;
     bool m_bUpdatingSelection;
 
     WIZDOCUMENTDATA m_documentForEditing;
 
-    QTimer m_timerReadyQuit;
-    QMessageBox* m_msgQuit;
+    QTimer m_timerQuit;
+    bool m_bReadyQuit;
+    // indicate close event is fired internal or external
+    bool m_bRequestQuit;
 
 private:
     void initActions();
@@ -125,6 +134,10 @@ public Q_SLOTS:
     void on_actionLogout_triggered();
     void on_actionAbout_triggered();
     void on_actionPreference_triggered();
+    void on_actionRebuildFTS_triggered();
+    void on_actionSearch_triggered();
+    void on_actionResetSearch_triggered();
+    void on_searchDocumentFind(const CWizDocumentDataArray& arrayDocument);
 
     void on_actionGoBack_triggered();
     void on_actionGoForward_triggered();
@@ -149,7 +162,7 @@ public Q_SLOTS:
     void on_client_splitterMoved(int pos, int index);
 #endif
 
-    void on_readyQuit_timeout();
+    void on_quitTimeout();
 
     void on_upgradeThread_finished();
 

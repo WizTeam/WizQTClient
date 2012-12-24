@@ -91,10 +91,11 @@ void CWizSync::onXmlRpcError(const QString& strMethodName, WizXmlRpcError err, i
     }
 }
 
-void CWizSync::onClientLogin()
+void CWizSync::onClientLogin(const WIZUSERINFO& userInfo)
 {
-    Q_EMIT syncLogined();
+    CWizApi::onClientLogin(userInfo);
 
+    Q_EMIT syncLogined();
     startDownloadDeleteds();
 }
 

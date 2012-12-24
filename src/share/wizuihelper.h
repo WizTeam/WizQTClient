@@ -6,26 +6,6 @@
 
 #include "wizdef.h"
 
-class CWizSearchBox : public QWidget
-{
-    Q_OBJECT
-
-public:
-    CWizSearchBox(CWizExplorerApp& app, QWidget* parent = 0);
-    virtual QSize sizeHint() const;
-
-private:
-    CWizExplorerApp& m_app;
-    QString m_keywords;
-    QWidget* m_search;
-
-public Q_SLOTS:
-    void on_search_editingFinished();
-    void on_search_edited(const QString& str);
-
-Q_SIGNALS:
-    void doSearch(const QString& keywords);
-};
 
 class CWizSpacer : public QWidget
 {

@@ -10,6 +10,7 @@ struct WIZACTION
 {
     QString strName;
     QString strText;
+    QString strShortcut;
 };
 
 
@@ -22,39 +23,29 @@ CWizActions::CWizActions(CWizExplorerApp& app, QObject* parent)
 
 WIZACTION* CWizActions::actionsData()
 {
-    //for menu translations
-    static QString arrayMenuText [] =
-    {
-        QObject::tr("&File"),
-        QObject::tr("&Tools"),
-        QObject::tr("&Help"),
-    };
-
-    Q_UNUSED(arrayMenuText);
-
     static WIZACTION arrayActions[] =
     {
 #ifndef Q_OS_MAC
-        {"actionPopupMainMenu",     QObject::tr("Menu")},
-        {"actionPreference",         QObject::tr("Preference")},
-        {"actionAbout",             QObject::tr("About WizNote...")},
+        {"actionPopupMainMenu", QObject::tr("Menu"), ""},
+        {"actionPreference", QObject::tr("Preference", "")},
+        {"actionAbout", QObject::tr("About WizNote..."), ""},
+        {"actionExit", QObject::tr("Exit"), ""},
 #else
         // we don't have to translate these items on mac, qt will do it for us.
-        {"actionPreference",         "Preference"},
-        {"actionAbout",             "About WizNote..."},
+        {"actionPreference", "Preference", ""},
+        {"actionAbout", "About WizNote...", ""},
+        {"actionExit", "Exit", ""},
 #endif // Q_OS_MAC
-        {"actionLogout",            QObject::tr("Logout")},
-        {"actionExit",              QObject::tr("Exit")},
-        {"actionDeleteCurrentNote", QObject::tr("Delete Note")},
-        {"actionSync",              QObject::tr("Sync")},
-        {"actionNewNote",           QObject::tr("New Note")},
-        //{"actionCaptureScreen",     QObject::tr("Capture Screen")},
-        //{"actionCaptureScreenShow", QObject::tr("Capture Screen")},
-        //{"actionCaptureScreenHide", QObject::tr("Capture Screen (Hide WizNote)")},
-        {"actionGoBack",            QObject::tr("Back")},
-        {"actionGoForward",         QObject::tr("Forward")},
-        {"actionConsole",         QObject::tr("Console")},
-
+        {"actionLogout", QObject::tr("Logout"), ""},
+        {"actionDeleteCurrentNote", QObject::tr("Delete Note"), ""},
+        {"actionSync", QObject::tr("Sync"), ""},
+        {"actionNewNote", QObject::tr("New Note"), ""},
+        {"actionGoBack", QObject::tr("Back"), ""},
+        {"actionGoForward", QObject::tr("Forward"), ""},
+        {"actionConsole", QObject::tr("Console"), ""},
+        {"actionRebuildFTS", QObject::tr("Rebuild full text search index"), ""},
+        {"actionSearch", QObject::tr("Search document"), QObject::tr("Alt+Ctrl+F")},
+        {"actionResetSearch", QObject::tr("Reset search"), QObject::tr("Ctrl+R")},
         {"",                        ""}
     };
 
@@ -65,17 +56,21 @@ QAction* CWizActions::addAction(WIZACTION& action)
 {
     QString strText = action.strText;
     QString strIconName = action.strName;
+    QString strShortcut = action.strShortcut;
     QString strSlot = "1on_" + action.strName + "_triggered()";
 
     QAction* pAction = new QAction(strText, m_parent);
 
-    // Used for building menu from ini file
-    pAction->setObjectName(action.strName);
-
-    if (!strIconName.isEmpty())
-    {
+    if (!strIconName.isEmpty()) {
         pAction->setIcon(::WizLoadSkinIcon(m_app.userSettings().skin(), strIconName));
     }
+
+    if (!strShortcut.isEmpty()) {
+        pAction->setShortcut(QKeySequence(strShortcut));
+    }
+
+    // Used for building menu from ini file
+    pAction->setObjectName(action.strName);
 
     m_actions[action.strName] = pAction;
     QObject::connect(pAction, "2triggered()", m_parent, strSlot.toUtf8());
@@ -103,10 +98,12 @@ QAction* CWizActions::actionFromName(const QString& strActionName)
     QAction* pAction = m_actions[strActionName];
     if (pAction)
         return pAction;
+    else
+        return NULL;
 
-    WIZACTION data = {strActionName, strActionName};
-
-    return addAction(data);
+    //WIZACTION data = {strActionName, strActionName};
+//
+    //return addAction(data);
 }
 
 CWizAnimateAction* CWizActions::animateActionFromName(const QString& strActionName)

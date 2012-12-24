@@ -10,7 +10,7 @@ class CWizVerifyAccount : public CWizApiBase
 public:
     CWizVerifyAccount(const CString& strAccountsApiURL);
 
-    void verifyAccount(const CString& strUserId, const CString& strPassword);
+    void verifyAccount(const QString& strUserId, const QString& strPassword);
 
 private:
     CString m_strErrorMessage;
@@ -21,7 +21,7 @@ public:
                                int errorCode, \
                                const QString& errorMessage);
 
-    virtual void onClientLogin();
+    virtual void onClientLogin(const WIZUSERINFO& userInfo);
 
     virtual void addErrorLog(const CString& str);
 

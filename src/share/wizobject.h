@@ -175,7 +175,7 @@ struct WIZDOCUMENTDATABASE
 
     CString strGUID;
     CString strTitle;
-    CString strLocation;
+    CString strLocation; // notebook
     COleDateTime tInfoModified;
     CString strInfoMD5;
     COleDateTime tDataModified;

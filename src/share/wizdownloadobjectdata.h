@@ -22,7 +22,7 @@ protected:
     virtual void onXmlRpcError(const QString& strMethodName, \
                              WizXmlRpcError err, int errorCode, \
                              const QString& errorMessage);
-    virtual void onClientLogin();
+    virtual void onClientLogin(const WIZUSERINFO& userInfo);
     virtual void onDownloadObjectDataCompleted(const WIZOBJECTDATA& data);
     virtual void onClientLogout();
 

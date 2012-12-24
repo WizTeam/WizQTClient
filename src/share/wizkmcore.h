@@ -44,7 +44,7 @@ struct IWizToolsSearchDocumentsEvents
 };
 
 
-void WizKMStartAllDocumentsIndexing(const CString& str, bool bPtompt);
+//void WizKMStartAllDocumentsIndexing(const CString& str, bool bPtompt);
 
 HRESULT FTSDeleteDocument(const CString& strIndexPath, const CString& strDocumentGUID);
 HRESULT FTSSearchDocument(const CString& strIndexPath, const CString& strKeywords, IWizToolsSearchDocumentsEvents* pEvents);

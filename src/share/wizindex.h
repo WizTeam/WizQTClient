@@ -43,6 +43,9 @@ struct WIZDOCUMENTLOCATIONDATA
 
 typedef std::deque<WIZDOCUMENTLOCATIONDATA> CDocumentLocationArray;
 
+/*
+Base class for database operation of sqlite layer
+*/
 class CIndex : public QObject
 {
     Q_OBJECT
@@ -57,7 +60,6 @@ protected:
 
 	CString m_strFileName;
 	CString m_strDatabasePath;
-	CString m_strFTSPath;
 
     bool m_bUpdating;
 
@@ -76,8 +78,10 @@ public:
 	UINT GetPasswordFalgs();
     BOOL SetPasswordFalgs(UINT nFlags);
 
-    bool GetUserCert(QString& strN, QString& stre, QString& strd, QString& strHint);
     bool SetUserCert(const QString& strN, const QString& stre, const QString& strd, const QString& strHint);
+    bool GetUserCert(QString& strN, QString& stre, QString& strd, QString& strHint);
+    bool setUserInfo(const WIZUSERINFO& userInfo);
+    bool getUserInfo(WIZUSERINFO& userInfo);
 
     CppSQLite3Query Query(const CString& strSQL);
     int Exec(const CString& strSQL);
@@ -360,16 +364,17 @@ public:
     BOOL GetNeedToBeDownloadedDocuments(CWizDocumentDataArray& arrayData);
     BOOL GetNeedToBeDownloadedAttachments(CWizDocumentAttachmentDataArray& arrayData);
 
-    BOOL SetDocumentIndexed(const CString& strDocumentGUID, BOOL b);
-	BOOL SetAllDocumentsIndexed(BOOL b);
-	CString GetDocumentIndexPath();
-	BOOL GetAllDocumentNeedToBeIndexed(CWizDocumentDataArray& arrayDocument);
-    BOOL DeleteDocumentIndex(const CString& strDocumentGUID);
-	BOOL DeleteDocumentIndexData();
-    BOOL SearchDocumentByFullTextSearch(const CString& strKeywords, int nMaxResult, CWizDocumentDataArray& arrayDocument);
-	BOOL StartDocumentIndexing(BOOL bPrompt);
-	BOOL SetDocumentIndexingEnabled(BOOL b);
-	BOOL IsDocumentIndexingEnabled();
+    // Full text search related
+    bool setDocumentFTSEnabled(bool b);
+    bool isDocumentFTSEnabled();
+    bool setAllDocumentsSearchIndexed(bool b);
+    bool getAllDocumentsNeedToBeSearchIndexed(CWizDocumentDataArray& arrayDocument);
+    bool setDocumentSearchIndexed(const QString& strDocumentGUID, bool b);
+    //BOOL DeleteDocumentIndex(const CString& strDocumentGUID);
+    //BOOL DeleteDocumentIndexData();
+    //BOOL SearchDocumentByFullTextSearch(const CString& strKeywords, int nMaxResult, CWizDocumentDataArray& arrayDocument);
+    //BOOL StartDocumentIndexing(BOOL bPrompt);
+
 
     static BOOL IsRootLocation(CString strLocation);
     static CString GetRootLocationName(CString strLocation);

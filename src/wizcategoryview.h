@@ -46,6 +46,8 @@ private:
     bool m_bDragHovered;
     QPoint m_dragHoveredPos;
 
+    QTreeWidgetItem* m_selectedItem;
+
 public:
     void showAllFoldersContextMenu(QPoint pos);
     void showFolderContextMenu(QPoint pos);
@@ -90,17 +92,16 @@ public:
     CWizCategoryViewTagItem* addTag(const WIZTAGDATA& tag, bool sort);
     CWizCategoryViewTagItem* addTagWithChildren(const WIZTAGDATA& tag);
     void removeTag(const WIZTAGDATA& tag);
-    //
+
     CWizCategoryViewSearchItem* findSearch();
-    //
     CWizCategoryViewTrashItem* findTrash();
-    //
+
     bool acceptDocument(const WIZDOCUMENTDATA& document);
-    //
     void addAndSelectFolder(const CString& strLocation);
-    //
-    void search(const CString& str);
-    //
+
+    void search(const QString& str);
+    void restoreSelection();
+
     template <class T> T* currentCategoryItem() const;
 
 public Q_SLOTS:

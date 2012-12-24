@@ -1,5 +1,9 @@
 #include "wizmainwindow.h"
 
+#ifdef Q_OS_MAC
+#include <Carbon/Carbon.h>
+#endif
+
 #include "wizdocumentwebview.h"
 #include "wizactions.h"
 #include "wizaboutdialog.h"
@@ -13,6 +17,10 @@
 #include "share/wizuihelper.h"
 #include "share/wizsettings.h"
 #include "share/wizanimateaction.h"
+
+#include "share/wizSearchIndexer.h"
+
+#include "wizSearchBox.h"
 
 #include "wiznotestyle.h"
 #include "wizdocumenthistory.h"
@@ -49,26 +57,34 @@ MainWindow::MainWindow(CWizDatabase& db, QWidget *parent)
     , m_bRestart(false)
     , m_bLogoutRestart(false)
     , m_bUpdatingSelection(false)
-    , m_msgQuit(new QMessageBox(this))
 {
+    // FTS engine thread
+    m_searchIndexer = new CWizSearchIndexerThread(m_db, this);
+    m_searchIndexer->start();
 
+    connect(m_searchIndexer, SIGNAL(documentFind(const CWizDocumentDataArray&)), \
+            SLOT(on_searchDocumentFind(const CWizDocumentDataArray&)));
+
+    if (!m_db.isDocumentFTSEnabled()) {
+       QTimer::singleShot(5 * 1000, m_searchIndexer->worker(), SLOT(rebuildFTSIndex()));
+    }
+
+    // upgrade check thread
 #ifndef Q_OS_MAC
     // start update check thread
     QTimer::singleShot(3 * 1000, m_upgrade, SLOT(checkUpgradeBegin()));
     connect(m_upgrade, SIGNAL(finished()), SLOT(on_upgradeThread_finished()));
 #endif // Q_OS_MAC
 
+    // auto sync thread
     m_syncTimer->setInterval(15 * 60 * 1000);    //15 minutes
     connect(m_syncTimer, SIGNAL(timeout()), SLOT(on_actionSync_triggered()));
     if (m_settings->autoSync()) {
-        QTimer::singleShot(10 * 1000, this, SLOT(on_actionSync_triggered()));  //10 seconds
+        QTimer::singleShot(3 * 1000, this, SLOT(on_actionSync_triggered()));
     }
 
-    // used for handle user quit event
-    m_msgQuit->setStandardButtons(0);
-    m_msgQuit->setText(tr("please wait, I'll stop working right now..."));
-    m_timerReadyQuit.setInterval(100);
-    connect(&m_timerReadyQuit, SIGNAL(timeout()), SLOT(on_readyQuit_timeout()));
+    m_timerQuit.setInterval(100);
+    connect(&m_timerQuit, SIGNAL(timeout()), SLOT(on_quitTimeout()));
 
     setStatusBar(m_statusBar);
 
@@ -78,8 +94,90 @@ MainWindow::MainWindow(CWizDatabase& db, QWidget *parent)
     initClient();
 
     setWindowTitle(tr("WizNote"));
-    setUnifiedTitleAndToolBarOnMac(true);
     center();
+}
+
+void MainWindow::showEvent(QShowEvent* event)
+{
+    Q_UNUSED(event);
+
+    m_statusBar->hide();
+    m_cipherForm->hide();
+}
+
+bool MainWindow::requestThreadsQuit()
+{
+    bool bOk = true;
+    if (m_sync->isRunning()) {
+        m_sync->abort();
+        bOk = false;
+    }
+
+    if (m_upgrade->isRunning()) {
+        m_upgrade->abort();
+        bOk = false;
+    }
+
+    if (m_searchIndexer->isRunning()) {
+        m_searchIndexer->quit();
+        bOk = false;
+    }
+
+    return bOk;
+}
+
+void MainWindow::on_quitTimeout()
+{
+    if (requestThreadsQuit()) {
+        // FIXME
+        m_doc->view()->saveDocument(false);
+        m_bReadyQuit = true;
+    }
+
+    // back to closeEvent
+    close();
+}
+
+void MainWindow::closeEvent(QCloseEvent* event)
+{
+    // internal close event
+    if (m_bRequestQuit) {
+        if (m_bReadyQuit) {
+            event->accept();
+            return;
+        } else {
+            event->ignore();
+            hide();
+            m_timerQuit.start();
+            return;
+        }
+    }
+
+    // system close event
+    if (isActiveWindow()) {
+        // This is bug of Qt!
+        // use hide() directly lead window can't be shown when click dock icon
+        // call native API instead
+#ifdef Q_OS_MAC
+        ProcessSerialNumber pn;
+        GetFrontProcess(&pn);
+        ShowHideProcess(&pn,false);
+#else
+        showMinimized();
+#endif
+    } else {
+        m_bRequestQuit = true;
+        m_timerQuit.start();
+    }
+
+    event->ignore();
+}
+
+void MainWindow::on_actionExit_triggered()
+{
+    m_bRequestQuit = true;
+    m_timerQuit.start();
+    close();
 }
 
 void MainWindow::on_upgradeThread_finished()
@@ -141,6 +239,37 @@ void MainWindow::initMenuBar()
 
 void MainWindow::initToolBar()
 {
+    addToolBar(m_toolBar);
+    m_toolBar->setMovable(false);
+    m_toolBar->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
+
+    m_toolBar->addWidget(new CWizFixedSpacer(QSize(20, 1), m_toolBar));
+    m_toolBar->addAction(m_actions->actionFromName("actionSync"));
+    m_toolBar->addWidget(new CWizFixedSpacer(QSize(20, 1), m_toolBar));
+    m_toolBar->addAction(m_actions->actionFromName("actionNewNote"));
+    m_toolBar->addAction(m_actions->actionFromName("actionDeleteCurrentNote"));
+
+    m_toolBar->addWidget(new CWizSpacer(m_toolBar));
+
+    m_searchBox = new CWizSearchBox(*this, this);
+    connect(m_searchBox, SIGNAL(doSearch(const QString&)), SLOT(on_search_doSearch(const QString&)));
+    m_toolBar->addWidget(m_searchBox);
+    m_toolBar->addWidget(new CWizFixedSpacer(QSize(20, 1), m_toolBar));
+
+#ifndef Q_OS_MAC
+    m_toolBar->addAction(m_actions->actionFromName("actionPopupMainMenu"));
+    m_toolBar->addWidget(new CWizFixedSpacer(QSize(2, 1), m_toolBar));
+#endif
+
+    m_toolBar->setStyle(WizGetStyle(m_settings->skin()));
+    CWizSettings settings(::WizGetSkinResourcePath(m_settings->skin()) + "skin.ini");
+    m_toolBar->layout()->setMargin(settings.GetInt("ToolBar", "Margin", m_toolBar->layout()->margin()));
+
+
+#ifdef Q_OS_MAC
+    setUnifiedTitleAndToolBarOnMac(true);
+#endif
+
 //#ifdef Q_OS_MAC
 //    addToolBar(m_toolBar);
 //
@@ -152,74 +281,36 @@ void MainWindow::initToolBar()
 //    m_toolBar->addAction(m_actions->actionFromName("actionDeleteCurrentNote"));
 //    m_toolBar->addWidget(new CWizSpacer(this));
 
+//    CWizMacToolBar* m_toolBar = new CWizMacToolBar(this);
+//
+//    //QActionGroup* groupNavigate = new QActionGroup(this);
+//    //groupNavigate->addAction(m_actions->actionFromName("actionGoBack"));
+//    //groupNavigate->addAction(m_actions->actionFromName("actionGoForward"));
+//    //toolbar->addActionGroup(groupNavigate);
+//    //toolbar->addStandardItem(CWizMacToolBar::Space);
+//
+//    m_toolBar->addAction(m_actions->actionFromName("actionSync"));
+//    m_toolBar->addStandardItem(CWizMacToolBar::Space);
+//
+//    m_toolBar->addAction(m_actions->actionFromName("actionNewNote"));
+//    m_toolBar->addAction(m_actions->actionFromName("actionDeleteCurrentNote"));
+//    m_toolBar->addStandardItem(CWizMacToolBar::FlexibleSpace);
+//
+//    //toolbar->addAction(m_actions->actionFromName("actionOptions"));
+//    //toolbar->addStandardItem(CWizMacToolBar::Space);
+//    m_toolBar->addSearch(tr("Search"), tr("Search your notes"));
+//    connect(m_toolBar, SIGNAL(doSearch(const QString&)), SLOT(on_search_doSearch(const QString&)));
+//
+//    m_toolBar->showInWindow(this);
 
+//    QAction* pCaptureScreenAction = m_actions->actionFromName("actionCaptureScreen");
+//    m_actions->buildActionMenu(pCaptureScreenAction, this, ::WizGetAppPath() + "files/mainmenu.ini");
+//    m_toolBar->addAction(pCaptureScreenAction);
 
-#if 0
-    CWizMacToolBar* m_toolBar = new CWizMacToolBar(this);
-
-    //QActionGroup* groupNavigate = new QActionGroup(this);
-    //groupNavigate->addAction(m_actions->actionFromName("actionGoBack"));
-    //groupNavigate->addAction(m_actions->actionFromName("actionGoForward"));
-    //toolbar->addActionGroup(groupNavigate);
-    //toolbar->addStandardItem(CWizMacToolBar::Space);
-
-    m_toolBar->addAction(m_actions->actionFromName("actionSync"));
-    m_toolBar->addStandardItem(CWizMacToolBar::Space);
-
-    m_toolBar->addAction(m_actions->actionFromName("actionNewNote"));
-    m_toolBar->addAction(m_actions->actionFromName("actionDeleteCurrentNote"));
-    m_toolBar->addStandardItem(CWizMacToolBar::FlexibleSpace);
-
-    //toolbar->addAction(m_actions->actionFromName("actionOptions"));
-    //toolbar->addStandardItem(CWizMacToolBar::Space);
-    m_toolBar->addSearch(tr("Search"), tr("Search your notes"));
-    connect(m_toolBar, SIGNAL(doSearch(const QString&)), SLOT(on_search_doSearch(const QString&)));
-
-    m_toolBar->showInWindow(this);
-#endif
-
-//#else
-    addToolBar(m_toolBar);
-    m_toolBar->setMovable(false);
-    m_toolBar->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
-
-    m_toolBar->addWidget(new CWizFixedSpacer(QSize(20, 1), m_toolBar));
-    m_toolBar->addAction(m_actions->actionFromName("actionSync"));
-    m_toolBar->addWidget(new CWizFixedSpacer(QSize(20, 1), m_toolBar));
-    m_toolBar->addAction(m_actions->actionFromName("actionNewNote"));
-    m_toolBar->addAction(m_actions->actionFromName("actionDeleteCurrentNote"));
-
-#if 0
-    QAction* pCaptureScreenAction = m_actions->actionFromName("actionCaptureScreen");
-    m_actions->buildActionMenu(pCaptureScreenAction, this, ::WizGetAppPath() + "files/mainmenu.ini");
-    m_toolBar->addAction(pCaptureScreenAction);
-#endif
-
-    m_toolBar->addWidget(new CWizSpacer(m_toolBar));
-
-    //m_labelNotice = new QLabel("", m_toolBar);
-    //m_labelNotice->setOpenExternalLinks(true);
-    //m_toolBar->addWidget(m_labelNotice);
-    //m_toolBar->addWidget(new CWizSpacer(m_toolBar));
-
-    //CWizSearchBox* searchBox = new CWizSearchBox();
-    //connect(searchBox, SIGNAL(doSearch(const QString&)), this, SLOT(on_search_doSearch(const QString&)));
-    //m_toolBar->addWidget(searchBox);
-
-#ifndef Q_OS_MAC
-    m_toolBar->addWidget(new CWizFixedSpacer(QSize(20, 1), m_toolBar));
-    m_toolBar->addAction(m_actions->actionFromName("actionPopupMainMenu"));
-    m_toolBar->addWidget(new CWizFixedSpacer(QSize(2, 1), m_toolBar));
-#endif
-
-    m_toolBar->setStyle(WizGetStyle(m_settings->skin()));
-
-    CWizSettings settings(::WizGetSkinResourcePath(m_settings->skin()) + "skin.ini");
-    m_toolBar->layout()->setMargin(settings.GetInt("ToolBar", "Margin", m_toolBar->layout()->margin()));
-
-//#endif // Q_OS_MAC
-
-    //resetNotice();
+//    m_labelNotice = new QLabel("", m_toolBar);
+//    m_labelNotice->setOpenExternalLinks(true);
+//    m_toolBar->addWidget(m_labelNotice);
+//    m_toolBar->addWidget(new CWizSpacer(m_toolBar));
 }
 
 void MainWindow::initClient()
@@ -269,12 +360,6 @@ void MainWindow::initClient()
 
     QWidget* documents = new QWidget(splitter);
     documents->setLayout(layoutDocuments);
-
-//#ifndef Q_OS_MAC
-    CWizSearchBox* searchBox = new CWizSearchBox(*this, this);
-    connect(searchBox, SIGNAL(doSearch(const QString&)), SLOT(on_search_doSearch(const QString&)));
-    layoutDocuments->addWidget(searchBox);
-//#endif Q_OS_MAC
 
     layoutDocuments->addWidget(m_documents);
 
@@ -329,41 +414,7 @@ void MainWindow::init()
     m_category->init();
 }
 
-void MainWindow::showEvent(QShowEvent* event)
-{
-    Q_UNUSED(event);
 
-    m_statusBar->hide();
-    m_cipherForm->hide();
-}
-
-void MainWindow::closeEvent(QCloseEvent* event)
-{
-    m_doc->view()->saveDocument(false);
-
-    if (!m_sync->thread() && !m_upgrade->thread()) {
-        event->accept();
-        return;
-    }
-
-    if (m_timerReadyQuit.timerId() == -1) {
-        if (m_upgrade->thread())
-            m_upgrade->abort();
-
-        if (m_sync->thread())
-            m_sync->abort();
-    }
-
-    if (m_upgrade->thread() || m_sync->thread()) {
-        m_timerReadyQuit.start();
-        event->ignore();
-    }
-}
-
-void MainWindow::on_readyQuit_timeout()
-{
-    close();
-}
 
 void MainWindow::on_syncStarted()
 {
@@ -413,10 +464,7 @@ void MainWindow::on_syncProcessErrorLog(const QString& strMsg)
     TOLOG(strMsg);
 }
 
-void MainWindow::on_actionExit_triggered()
-{
-    close();
-}
+
 
 void MainWindow::on_actionSync_triggered()
 {
@@ -482,6 +530,48 @@ void MainWindow::on_actionPreference_triggered()
     connect(preference, SIGNAL(settingsChanged(WizOptionsType)), SLOT(on_options_settingsChanged(WizOptionsType)));
     connect(preference, SIGNAL(restartForSettings()), SLOT(on_options_restartForSettings()));
     preference->exec();
+}
+
+void MainWindow::on_actionRebuildFTS_triggered()
+{
+    if (!QMetaObject::invokeMethod(m_searchIndexer->worker(), "rebuildFTSIndex")) {
+        TOLOG("thread call to rebuild FTS failed");
+    }
+}
+
+void MainWindow::on_actionSearch_triggered()
+{
+    m_searchBox->focus();
+}
+
+void MainWindow::on_actionResetSearch_triggered()
+{
+    m_searchBox->clear();
+    m_searchBox->focus();
+    m_category->restoreSelection();
+}
+
+void MainWindow::on_searchDocumentFind(const CWizDocumentDataArray& arrayDocument)
+{
+    m_documents->addDocuments(arrayDocument);
+    on_documents_itemSelectionChanged();
+}
+
+void MainWindow::on_search_doSearch(const QString& keywords)
+{
+    if (keywords.isEmpty()) {
+        m_category->restoreSelection();
+        return;
+    }
+
+    m_category->search(keywords);
+    m_documents->clear();
+
+    if (!QMetaObject::invokeMethod(m_searchIndexer->worker(), "search", \
+                                   Q_ARG(QString, keywords), \
+                                   Q_ARG(int, 100))) {
+        TOLOG("FTS search failed");
+    }
 }
 
 #ifndef Q_OS_MAC
@@ -571,10 +661,7 @@ void MainWindow::on_documents_itemSelectionChanged()
     }
 }
 
-void MainWindow::on_search_doSearch(const QString& keywords)
-{
-    m_category->search(keywords);
-}
+
 
 void MainWindow::on_options_settingsChanged(WizOptionsType type)
 {

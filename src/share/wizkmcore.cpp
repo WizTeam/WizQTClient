@@ -2,11 +2,11 @@
 
 
 
-void WizKMStartAllDocumentsIndexing(const CString& str, bool bPtompt)
-{
-    Q_UNUSED(str);
-    Q_UNUSED(bPtompt);
-}
+//void WizKMStartAllDocumentsIndexing(const CString& str, bool bPtompt)
+//{
+//    Q_UNUSED(str);
+//    Q_UNUSED(bPtompt);
+//}
 
 HRESULT FTSDeleteDocument(const CString& strIndexPath, const CString& strDocumentGUID)
 {

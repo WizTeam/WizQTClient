@@ -166,7 +166,11 @@
 //By adjusting this value, you can greatly improve the performance of searching
 //and especially indexing. Default is 255, but smaller numbers will decrease
 //the amount of memory used as well as increasing the speed.
-#define  LUCENE_MAX_WORD_LEN 255
+#define LUCENE_MAX_WORD_LEN 255
+
+// refer to standardTokenizer for detailed info.
+#define LUCENE_MAX_CJK_WORD_LEN 1
+
 //Maximum length of a token word. 
 //Should be the same or more than LUCENE_MAX_WORD_LEN
 //if not defined, then no token limit, but may be slower

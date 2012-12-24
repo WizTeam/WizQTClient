@@ -54,7 +54,7 @@ protected:
                                WizXmlRpcError err, int errorCode, const QString& errorMessage);
 
     // step 1: login
-    virtual void onClientLogin();
+    virtual void onClientLogin(const WIZUSERINFO& userInfo);
 
     // step 2: download deleted guids
     virtual void startDownloadDeleteds();

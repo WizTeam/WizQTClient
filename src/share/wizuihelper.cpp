@@ -1,91 +1,11 @@
 #include "wizuihelper.h"
 
-//#ifndef Q_OS_MAC
-
 #ifdef BUILD_WITH_QT5
 #include <QtWidgets>
 #endif
 
 #include "share/wizmisc.h"
 #include <QLabel>
-
-
-QWidget* createSearchWidget(CWizExplorerApp& app, CWizSearchBox* searchBox)
-{
-    QWidget* widget = new QWidget(searchBox);
-    //QSizePolicy sizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum);
-    //widget->setSizePolicy(sizePolicy);
-
-    QIcon icon = ::WizLoadSkinIcon(app.userSettings().skin(), "search");
-    QLabel* iconLabel = new QLabel(widget);
-    iconLabel->setPixmap(icon.pixmap(16, 16));
-
-    QLineEdit* editSearch = new QLineEdit(widget);
-
-    iconLabel->setStyleSheet("QLabel{border-width:0;border-style:outset}");
-    editSearch->setStyleSheet("QLineEdit{border-width:0;border-style:outset}");
-
-    QHBoxLayout* layout = new QHBoxLayout(widget);
-    widget->setLayout(layout);
-
-    layout->setSpacing(0);
-    layout->setContentsMargins(0, 0, 0, 0);
-    layout->addWidget(iconLabel);
-    layout->addWidget(editSearch);
-    layout->setStretch(0, 0);
-    layout->setStretch(1, 1);
-    //
-    widget->setContentsMargins(1, 1, 1, 1);
-    widget->setMinimumHeight(std::max<int>(16, editSearch->sizeHint().height()));
-    widget->setMinimumWidth(200);
-    //
-    widget->setObjectName("WizSearchBoxClient");
-    widget->setStyleSheet("QWidget#WizSearchBoxClient{background-color:#ffffff;border-color:#bbbbbb;border-width:1;border-style:solid}");
-    //
-    searchBox->connect(editSearch, SIGNAL(editingFinished()), SLOT(on_search_editingFinished()));
-    searchBox->connect(editSearch, SIGNAL(textEdited(const QString&)), SLOT(on_search_edited(const QString&)));
-    //
-    return widget;
-}
-
-CWizSearchBox::CWizSearchBox(CWizExplorerApp& app, QWidget* parent /*= 0*/)
-    : QWidget(parent)
-    , m_app(app)
-    , m_search(createSearchWidget(app, this))
-{
-    //QSizePolicy sizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-    //setSizePolicy(sizePolicy);
-
-    QBoxLayout* layout = new QBoxLayout(QBoxLayout::TopToBottom, this);
-    setLayout(layout);
-    layout->setContentsMargins(0, 0, 0, 0);
-
-    layout->addWidget(m_search);
-    //layout->setStretch(0, 1);
-}
-
-//#endif
-void CWizSearchBox::on_search_editingFinished()
-{
-    emit doSearch(m_keywords);
-}
-void CWizSearchBox::on_search_edited(const QString& str)
-{
-    m_keywords = str;
-}
-
-
-
-
-QSize CWizSearchBox::sizeHint() const
-{
-#ifdef Q_OS_MAC
-    return m_search->sizeHint() + QSize(6, 2);
-#else
-    return m_search->sizeHint() + QSize(8, 4);
-#endif
-}
-
 
 
 CWizSpacer::CWizSpacer(QWidget *parent)

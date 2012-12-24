@@ -192,9 +192,9 @@ void CWizDocumentWebView::setEditingDocument(bool editing)
     CString strScript = CString("setEditing(%1);").arg(editing ? "true" : "false");
     page()->mainFrame()->evaluateJavaScript(strScript).toBool();
 
-    if (editing) {
-        setFocus();
-    }
+    //if (editing) {
+    //    setFocus();
+    //}
 
     updateSize();
 }
@@ -224,9 +224,9 @@ bool CWizDocumentWebView::viewDocumentInEditor(bool editing)
         window->showClient(true);
     }
 
-    if (editing) {
-        setFocus();
-    }
+    //if (editing) {
+    //    setFocus();
+    //}
 
     updateSize();
 

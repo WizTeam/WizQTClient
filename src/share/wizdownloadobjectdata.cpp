@@ -32,8 +32,10 @@ void CWizDownloadObjectData::onXmlRpcError(const QString& strMethodName, WizXmlR
     Q_EMIT downloadDone(false);
 }
 
-void CWizDownloadObjectData::onClientLogin()
+void CWizDownloadObjectData::onClientLogin(const WIZUSERINFO& userInfo)
 {
+    Q_UNUSED(userInfo);
+
     downloadObjectData(m_data);
 }
 

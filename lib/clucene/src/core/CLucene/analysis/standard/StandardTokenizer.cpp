@@ -54,9 +54,22 @@ CL_NS_DEF2(analysis,standard)
   #define DOT             (ch == '.')
   #define DECIMAL         DOT
 
+  #define _CONSUME_AS_LONG_AS(conditionFails) \
+    while (true) { \
+        ch = readChar(); \
+        if (ch==-1 || (!(conditionFails) || str.len >= LUCENE_MAX_WORD_LEN || _CJK)) \
+            { break; } \
+        str.appendChar(ch);\
+    }
 
-  //freebsd seems to have a problem with defines over multiple lines, so this has to be one long line
-  #define _CONSUME_AS_LONG_AS(conditionFails) while (true) { ch = readChar(); if (ch==-1 || (!(conditionFails) || str.len >= LUCENE_MAX_WORD_LEN)) { break; } str.appendChar(ch);}
+  // patch by Alber.Zhou
+  #define _CONSUME_CJK_AS_LONG_AS(conditionFails) \
+    while (true) { \
+        ch = readChar(); \
+        if (ch==-1 || (!(conditionFails) || str.len >= LUCENE_MAX_CJK_WORD_LEN)) \
+            { break; } \
+        str.appendChar(ch);\
+    }
 
   #define CONSUME_ALPHAS _CONSUME_AS_LONG_AS(ALPHA)
 
@@ -70,7 +83,7 @@ CL_NS_DEF2(analysis,standard)
   /*
   ** Consume CJK characters
   */
-  #define CONSUME_CJK                   _CONSUME_AS_LONG_AS(_CJK)
+  #define CONSUME_CJK                   _CONSUME_CJK_AS_LONG_AS(_CJK)
 
 
   /* It is considered that "nothing of value" has been read if:
@@ -286,9 +299,9 @@ CL_NS_DEF2(analysis,standard)
   }
   
   Token* StandardTokenizer::ReadCJK(const TCHAR prev, Token* t) {
-    t->growBuffer(LUCENE_MAX_WORD_LEN+1);//make sure token can hold the next word
+    t->growBuffer(LUCENE_MAX_CJK_WORD_LEN+1);//make sure token can hold the next word
     StringBuffer str(t->termBuffer(),t->bufferLength(),true); //use stringbuffer to read data onto the termText
-	  if ( str.len < LUCENE_MAX_WORD_LEN ){
+      if ( str.len < LUCENE_MAX_CJK_WORD_LEN ){
 		  str.appendChar(prev);
 		  int ch = prev;
 

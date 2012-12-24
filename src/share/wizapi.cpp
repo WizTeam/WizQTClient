@@ -45,7 +45,7 @@ void CWizApiBase::onXmlRpcReturn(const QString& strMethodName, CWizXmlRpcValue& 
     if (strMethodName == SyncMethod_ClientLogin)
     {
         ret.ToData<WIZUSERINFO>(m_user);
-        onClientLogin();
+        onClientLogin(m_user);
     }
     else if (strMethodName == SyncMethod_ClientLogout)
     {
@@ -108,7 +108,7 @@ CString CWizApiBase::MakeXmlRpcPassword(const CString& strPassword)
     return "md5." + ::WizMd5StringNoSpaceJava(strPassword.toUtf8());
 }
 
-bool CWizApiBase::callClientLogin(const CString& strUserId, const CString& strPassword)
+bool CWizApiBase::callClientLogin(const QString& strUserId, const QString& strPassword)
 {
     m_user = WIZUSERINFO();
 
@@ -119,8 +119,9 @@ bool CWizApiBase::callClientLogin(const CString& strUserId, const CString& strPa
     return callXmlRpc(SyncMethod_ClientLogin, &param);
 }
 
-void CWizApiBase::onClientLogin()
+void CWizApiBase::onClientLogin(const WIZUSERINFO& userInfo)
 {
+    Q_UNUSED(userInfo);
 }
 
 bool CWizApiBase::callClientLogout()
@@ -185,6 +186,7 @@ void CWizApiBase::onCreateAccount()
 {
 
 }
+
 
 CWizApi::CWizApi(CWizDatabase& db, const CString& strAccountsApiURL /* = WIZ_API_URL */)
     : CWizApiBase(strAccountsApiURL)
@@ -280,6 +282,10 @@ void CWizApi::onXmlRpcReturn(const QString& strMethodName, CWizXmlRpcValue& ret)
     }
 }
 
+void CWizApi::onClientLogin(const WIZUSERINFO& userInfo)
+{
+    m_db.setUserInfo(userInfo);
+}
 
 bool CWizApi::callGetList(const QString& strMethodName, __int64 nVersion)
 {
@@ -382,7 +388,7 @@ void CWizApi::onDownloadDataPart(const WIZOBJECTPARTDATA& data)
     m_nCurrentObjectAllSize = data.nObjectSize;
 
     //QString info = m_currentObjectData.strDisplayName;
-    Q_EMIT processLog(tr("Downloaded : ") + QString::number(fPercent) + "%");
+    Q_EMIT processLog(tr("Downloaded : ") + QString::number((int)fPercent) + "%");
     Q_EMIT progressChanged(int(fPercent));
 
     if (data.bEOF)

@@ -5,8 +5,8 @@ CWizVerifyAccount::CWizVerifyAccount(const CString& strAccountsApiURL)
 {
 }
 
-void CWizVerifyAccount::verifyAccount(const CString& strUserId, \
-                                      const CString& strPassword)
+void CWizVerifyAccount::verifyAccount(const QString& strUserId, \
+                                      const QString& strPassword)
 {
     callClientLogin(strUserId, strPassword);
 }
@@ -23,8 +23,10 @@ void CWizVerifyAccount::onXmlRpcError(const QString& strMethodName, \
     emit done(false, errorMessage);
 }
 
-void CWizVerifyAccount::onClientLogin()
+void CWizVerifyAccount::onClientLogin(const WIZUSERINFO& userInfo)
 {
+    Q_UNUSED(userInfo);
+
     emit done(true, "");
 }
 
