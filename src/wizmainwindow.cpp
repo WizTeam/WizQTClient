@@ -94,7 +94,7 @@ MainWindow::MainWindow(CWizDatabase& db, QWidget *parent)
     initClient();
 
     setWindowTitle(tr("WizNote"));
-    center();
+    restoreStatus();
 }
 
 void MainWindow::showEvent(QShowEvent* event)
@@ -130,6 +130,7 @@ void MainWindow::on_quitTimeout()
 {
     if (requestThreadsQuit()) {
         // FIXME
+        saveStatus();
         m_doc->view()->saveDocument(false);
         m_bReadyQuit = true;
     }
@@ -210,14 +211,32 @@ MainWindow::~MainWindow()
     delete m_history;
 }
 
-void MainWindow::center()
+void MainWindow::saveStatus()
 {
-    setGeometry(QStyle::alignedRect(
-                    Qt::LeftToRight,
-                    Qt::AlignCenter,
-                    sizeHint(),
-                    qApp->desktop()->availableGeometry()
-    ));
+    CWizSettings settings(WizGetSettingsFileName());
+    settings.SetInt("window", "x", geometry().x());
+    settings.SetInt("window", "y", geometry().y());
+    settings.SetInt("window", "width", geometry().width());
+    settings.SetInt("window", "height", geometry().height());
+}
+
+void MainWindow::restoreStatus()
+{
+    CWizSettings settings(WizGetSettingsFileName());
+
+    int x = settings.GetInt("window", "x");
+    int y = settings.GetInt("window", "y");
+    int width = settings.GetInt("window", "width");
+    int height = settings.GetInt("window", "height");
+
+    if (!x || !y || !width || !height) {
+        setGeometry(QStyle::alignedRect(Qt::LeftToRight, Qt::AlignCenter, \
+                                        sizeHint(), qApp->desktop()->availableGeometry()
+                                        ));
+        return;
+    }
+
+    setGeometry(x, y, width, height);
 }
 
 void MainWindow::initActions()

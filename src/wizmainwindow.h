@@ -45,7 +45,8 @@ public:
     explicit MainWindow(CWizDatabase& db, QWidget *parent = 0);
     virtual void init();
 
-    void center();
+    void saveStatus();
+    void restoreStatus();
     ~MainWindow();
     bool requestThreadsQuit();
 

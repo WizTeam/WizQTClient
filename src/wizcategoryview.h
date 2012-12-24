@@ -18,7 +18,7 @@ class CWizCategoryView : public QTreeWidget
 
 public:
     CWizCategoryView(CWizExplorerApp& app, QWidget *parent = 0);
-    virtual QSize sizeHint() const { return QSize(160, 1); }
+    virtual QSize sizeHint() const { return QSize(150, 1); }
 
     void init();
 

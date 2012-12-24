@@ -206,7 +206,13 @@ set(wiznote_TRANSLATIONS
 # resources
 file(GLOB_RECURSE wiznote_RESOURCES ${CMAKE_SOURCE_DIR}/share/wiznote/*)
 
-message ("Wiznote will compile as ${CMAKE_BUILD_TYPE}")
+if(NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE Release CACHE STRING
+      "Choose the type of build, options are: None Debug Release RelWithDebInfo MinSizeRel."
+      FORCE)
+endif()
+
+message( "Wiznote whill compiling as ${CMAKE_BUILD_TYPE}" )
 
 # use FindQt4.cmake module
 find_package(Qt4 REQUIRED QtCore QtGui QtXml QtNetwork QtWebKit)
@@ -243,10 +249,10 @@ if(UNIX)
             COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/share/wiznote/ ${wiznote_BUNDLE}/Resources/)
 
         # resovle library dependency
-        if (${CMAKE_BUILD_TYPE} EQUAL Release)
+        if(CMAKE_BUILD_TYPE STREQUAL "Release")
             add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
                 COMMAND macdeployqt ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.app)
-        endif ()
+        endif()
 
     elseif(NOT APPLE)
         add_executable(${PROJECT_NAME} ${wiznote_SOURCES} ${wiznote_FORM_HEADERS} ${wiznote_QM})
@@ -273,7 +279,6 @@ include_directories(
     ${CMAKE_CURRENT_BINARY_DIR}
     ${CMAKE_SOURCE_DIR}/lib
 
-    # clucene specific
     ${clucene_SOURCE_DIR}/src/shared
     ${clucene_BINARY_DIR}/src/shared
     ${clucene_SOURCE_DIR}/src/core
