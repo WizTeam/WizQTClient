@@ -251,9 +251,9 @@ void MainWindow::initMenuBar()
 
 void MainWindow::initToolBar()
 {
-    addToolBar(m_toolBar);
     m_toolBar->setMovable(false);
     m_toolBar->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
+    m_toolBar->setContentsMargins(0, 0, 0, 0);
 
     m_toolBar->addWidget(new CWizFixedSpacer(QSize(20, 1), m_toolBar));
     m_toolBar->addAction(m_actions->actionFromName("actionSync"));
@@ -265,6 +265,7 @@ void MainWindow::initToolBar()
 
     m_searchBox = new CWizSearchBox(*this, this);
     connect(m_searchBox, SIGNAL(doSearch(const QString&)), SLOT(on_search_doSearch(const QString&)));
+
     m_toolBar->addWidget(m_searchBox);
     m_toolBar->addWidget(new CWizFixedSpacer(QSize(20, 1), m_toolBar));
 
@@ -273,14 +274,19 @@ void MainWindow::initToolBar()
     m_toolBar->addWidget(new CWizFixedSpacer(QSize(2, 1), m_toolBar));
 #endif
 
-    m_toolBar->setStyle(WizGetStyle(m_settings->skin()));
-    CWizSettings settings(::WizGetSkinResourcePath(m_settings->skin()) + "skin.ini");
-    m_toolBar->layout()->setMargin(settings.GetInt("ToolBar", "Margin", m_toolBar->layout()->margin()));
+    //m_toolBar->setStyle(WizGetStyle(m_settings->skin()));
+    //CWizSettings settings(::WizGetSkinResourcePath(m_settings->skin()) + "skin.ini");
+    //m_toolBar->layout()->setMargin(settings.GetInt("ToolBar", "Margin", m_toolBar->layout()->margin()));
 
 
 #ifdef Q_OS_MAC
+    m_toolBar->setIconSize(QSize(24, 24));
     setUnifiedTitleAndToolBarOnMac(true);
+#else
+    m_toolBar->setIconSize(QSize(32, 32));
 #endif
+
+    addToolBar(m_toolBar);
 
 //#ifdef Q_OS_MAC
 //    addToolBar(m_toolBar);

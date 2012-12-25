@@ -219,7 +219,7 @@ find_package(Qt4 REQUIRED QtCore QtGui QtXml QtNetwork QtWebKit)
 include(${QT_USE_FILE})
 
 # dynamically create ts files
-qt4_create_translation(wiznote_QM ${wiznote_TRANSLATIONS} ${CMAKE_CURRENT_SOURCE_DIR})
+qt4_add_translation(wiznote_QM ${wiznote_TRANSLATIONS})
 
 # uic
 qt4_wrap_ui(wiznote_FORM_HEADERS ${wiznote_FORMS})
@@ -232,38 +232,48 @@ qt4_wrap_ui(wiznote_FORM_HEADERS ${wiznote_FORMS})
 if(UNIX)
     if(APPLE)
         add_executable(${PROJECT_NAME} MACOSX_BUNDLE ${wiznote_SOURCES} ${wiznote_FORM_HEADERS} ${wiznote_QM})
+        set_target_properties(${PROJECT_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bundle)
 
         # suppress cmake warnning when link library is not a target, refer to cmp0016 for detailed info.
         cmake_policy(SET CMP0016 OLD)
         find_library(_CARBON_LIBRARY Carbon)
         target_link_libraries(${PROJECT_NAME} ${_CARBON_LIBRARY})
 
-        set_source_files_properties(${wiznote_QM} PROPERTIES MACOSX_PACKAGE_LOCATION Resources/languages)
-
         # setup plist info
         set_target_properties(${PROJECT_NAME} PROPERTIES MACOSX_BUNDLE_ICON_FILE wiznote.icns)
 
         # copy resources to bundle
-        set(wiznote_BUNDLE ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.app/Contents)
+        set(wiznote_BUNDLE ${CMAKE_BINARY_DIR}/bundle/${PROJECT_NAME}.app)
+        set(wiznote_BUNDLE_CONTENTS ${CMAKE_BINARY_DIR}/bundle/${PROJECT_NAME}.app/Contents)
         add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-            COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/share/wiznote/ ${wiznote_BUNDLE}/Resources/)
+            COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/share/wiznote/ ${wiznote_BUNDLE_CONTENTS}/Resources/)
 
         # copy qt internal qm files, otherwise qt can't translate some internal resources
         # https://bugreports.qt-project.org/browse/QTBUG-18662
         file(GLOB _QT_INTERNAL_TRANSLATIONS ${QT_TRANSLATIONS_DIR}/qt_*.qm)
         foreach(_file ${_QT_INTERNAL_TRANSLATIONS})
             add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-                COMMAND ${CMAKE_COMMAND} -E copy ${_file} ${wiznote_BUNDLE}/Resources/languages/)
+                COMMAND ${CMAKE_COMMAND} -E copy ${_file} ${wiznote_BUNDLE_CONTENTS}/Resources/languages/)
         endforeach()
 
-        # resovle library dependency
-        if(CMAKE_BUILD_TYPE STREQUAL "Release")
+        # we should copy qm manually to avoid dependency issue
+        #set_source_files_properties(${wiznote_QM} PROPERTIES MACOSX_PACKAGE_LOCATION Resources/languages)
+        foreach(_file ${wiznote_QM})
             add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-                COMMAND macdeployqt ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.app)
+                COMMAND ${CMAKE_COMMAND} -E copy ${_file} ${wiznote_BUNDLE_CONTENTS}/Resources/languages/)
+        endforeach()
+
+        if(CMAKE_BUILD_TYPE STREQUAL "Release")
+            # resovle library dependency if build type is release
+            add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+                COMMAND macdeployqt ${wiznote_BUNDLE}
+                COMMAND ln -s /Applications ${CMAKE_BINARY_DIR}/bundle/Applications
+                COMMAND hdiutil create -srcfolder ${CMAKE_BINARY_DIR}/bundle -volname ${PROJECT_NAME} ${CMAKE_BINARY_DIR}/wiznote.dmg)
         endif()
 
     elseif(NOT APPLE)
         add_executable(${PROJECT_NAME} ${wiznote_SOURCES} ${wiznote_FORM_HEADERS} ${wiznote_QM})
+        set_target_properties(${PROJECT_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
         add_custom_command(TARGET ${PROJECT_NAME}
             POST_BUILD COMMAND cp -R ${CMAKE_HOME_DIRECTORY}/share/wiznote/* ${CMAKE_BINARY_DIR})
@@ -291,6 +301,6 @@ include_directories(
     ${clucene_BINARY_DIR}/src/shared
     ${clucene_SOURCE_DIR}/src/core
 )
+
 link_directories(${CMAKE_BINANRY_DIR}/bin)
 target_link_libraries(${PROJECT_NAME} ${QT_LIBRARIES} cryptlib clucene-core-static clucene-shared-static)
-set_target_properties(${PROJECT_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})

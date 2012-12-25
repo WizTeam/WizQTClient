@@ -16,7 +16,7 @@ int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
     QApplication::setApplicationName(QObject::tr("WizNote"));
-    IWizGlobal::instance()->setVersion("1.2.5");
+    IWizGlobal::instance()->setVersion("1.3.0");
 
 #if defined Q_OS_MAC
     QDir dir(QApplication::applicationDirPath());
