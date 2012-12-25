@@ -28,7 +28,7 @@ try {
     var editorOption = {
     toolbars:
     [
-        [saveButton, '|',// 'Source',
+        [saveButton, '|', //'Source',
         'FontFamily', 'FontSize', '|', 'Bold', 'Italic', 'Underline', 'StrikeThrough', '|',
         'JustifyLeft', 'JustifyCenter', 'JustifyRight', 'JustifyJustify', '|',
         'Indent', 'Outdent', 'InsertOrderedList', 'InsertUnorderedList', '|',
@@ -64,7 +64,6 @@ try {
 
     editor.addListener("sourceModeChanged",function(type,mode){
         m_bIsSourceMode = mode;
-        alert("change");
     });
 
     editor.addListener('keydown', onEditorKeyDown);
@@ -111,8 +110,8 @@ function autoPaste()
     if (imageFileName == null || imageFileName == "")
         return false;
     
-    var html = "<img border=\"0\" src=\"file:///" + imageFileName + "\" />";
-    editor.execCommand("inserthtml", html);
+    var html = '<img border="0" src="file:///' + imageFileName + '" />';
+    editor.execCommand('insertHtml', html, true);
     return true;
 }
 

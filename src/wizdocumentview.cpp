@@ -46,8 +46,8 @@ public:
         m_titleEdit->setStyleSheet("QLineEdit{padding:4 4 4 4;border-color:#ffffff;border-width:1;border-style:solid;}QLineEdit:hover{border-color:#bbbbbb;border-width:1;border-style:solid;}");
 #endif
 
-        m_editIcon = ::WizLoadSkinIcon(m_app.userSettings().skin(), "unlock");
-        m_commitIcon = ::WizLoadSkinIcon(m_app.userSettings().skin(), "lock");
+        m_editIcon = ::WizLoadSkinIcon(m_app.userSettings().skin(), "lock");
+        m_commitIcon = ::WizLoadSkinIcon(m_app.userSettings().skin(), "unlock");
         m_tagsIcon = ::WizLoadSkinIcon(m_app.userSettings().skin(), "document_tags");
         m_attachmentIcon = ::WizLoadSkinIcon(m_app.userSettings().skin(), "attachment");
         m_infoIcon = ::WizLoadSkinIcon(m_app.userSettings().skin(), "noteinfo");
