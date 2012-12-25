@@ -23,19 +23,24 @@ CWizActions::CWizActions(CWizExplorerApp& app, QObject* parent)
 
 WIZACTION* CWizActions::actionsData()
 {
+    // useless, just for translation
+    static WIZACTION arrayRoot[] =
+    {
+        {"actionFile", QObject::tr("&File", "")},
+        {"actionTools", QObject::tr("&Tools", "")},
+        {"actionHelp", QObject::tr("&Help", "")},
+    };
+    Q_UNUSED(arrayRoot);
+
     static WIZACTION arrayActions[] =
     {
 #ifndef Q_OS_MAC
         {"actionPopupMainMenu", QObject::tr("Menu"), ""},
+#endif
+
         {"actionPreference", QObject::tr("Preference", "")},
         {"actionAbout", QObject::tr("About WizNote..."), ""},
         {"actionExit", QObject::tr("Exit"), ""},
-#else
-        // we don't have to translate these items on mac, qt will do it for us.
-        {"actionPreference", "Preference", ""},
-        {"actionAbout", "About WizNote...", ""},
-        {"actionExit", "Exit", ""},
-#endif // Q_OS_MAC
         {"actionLogout", QObject::tr("Logout"), ""},
         {"actionDeleteCurrentNote", QObject::tr("Delete Note"), ""},
         {"actionSync", QObject::tr("Sync"), ""},
@@ -69,6 +74,13 @@ QAction* CWizActions::addAction(WIZACTION& action)
         pAction->setShortcut(QKeySequence(strShortcut));
     }
 
+    if (action.strName == "actionAbout")
+        pAction->setMenuRole(QAction::AboutRole);
+    else if (action.strName == "actionPreference")
+        pAction->setMenuRole(QAction::PreferencesRole);
+    else if (action.strName == "actionExit")
+        pAction->setMenuRole(QAction::QuitRole);
+
     // Used for building menu from ini file
     pAction->setObjectName(action.strName);
 
@@ -96,14 +108,13 @@ void CWizActions::init()
 QAction* CWizActions::actionFromName(const QString& strActionName)
 {
     QAction* pAction = m_actions[strActionName];
-    if (pAction)
+    if (pAction) {
         return pAction;
-    else
-        return NULL;
+    }
 
-    //WIZACTION data = {strActionName, strActionName};
-//
-    //return addAction(data);
+    WIZACTION data = {strActionName, strActionName};
+
+    return addAction(data);
 }
 
 CWizAnimateAction* CWizActions::animateActionFromName(const QString& strActionName)

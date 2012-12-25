@@ -212,14 +212,14 @@ if(NOT CMAKE_BUILD_TYPE)
       FORCE)
 endif()
 
-message( "Wiznote whill compiling as ${CMAKE_BUILD_TYPE}" )
+message("Wiznote whill compiling as ${CMAKE_BUILD_TYPE}")
 
 # use FindQt4.cmake module
 find_package(Qt4 REQUIRED QtCore QtGui QtXml QtNetwork QtWebKit)
 include(${QT_USE_FILE})
 
-# dynamically create qt files
-qt4_create_translation(wiznote_QM ${wiznote_TRANSLATIONS})
+# dynamically create ts files
+qt4_create_translation(wiznote_QM ${wiznote_TRANSLATIONS} ${CMAKE_CURRENT_SOURCE_DIR})
 
 # uic
 qt4_wrap_ui(wiznote_FORM_HEADERS ${wiznote_FORMS})
@@ -247,6 +247,14 @@ if(UNIX)
         set(wiznote_BUNDLE ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.app/Contents)
         add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
             COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/share/wiznote/ ${wiznote_BUNDLE}/Resources/)
+
+        # copy qt internal qm files, otherwise qt can't translate some internal resources
+        # https://bugreports.qt-project.org/browse/QTBUG-18662
+        file(GLOB _QT_INTERNAL_TRANSLATIONS ${QT_TRANSLATIONS_DIR}/qt_*.qm)
+        foreach(_file ${_QT_INTERNAL_TRANSLATIONS})
+            add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+                COMMAND ${CMAKE_COMMAND} -E copy ${_file} ${wiznote_BUNDLE}/Resources/languages/)
+        endforeach()
 
         # resovle library dependency
         if(CMAKE_BUILD_TYPE STREQUAL "Release")
