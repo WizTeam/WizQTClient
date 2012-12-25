@@ -37,7 +37,7 @@ WelcomeDialog::WelcomeDialog(const QString &strDefaultUserId, const QString& str
     ui->webView->page()->setLinkDelegationPolicy(QWebPage::DelegateAllLinks);
 
     connect(ui->webView, SIGNAL(linkClicked(const QUrl&)), \
-            SLOT(on_webView_linkClicked(const QUrl&)));
+            SLOT(on_webView_linkClicked(const QUrl&)), Qt::UniqueConnection);
 
     connect(ui->labelProxySettings, SIGNAL(linkActivated(const QString&)), \
             SLOT(on_labelProxySettings_linkActivated(const QString&)), \
@@ -190,7 +190,7 @@ void WelcomeDialog::on_webView_linkClicked(const QUrl& url)
 {
     CString strUrl = url.toString();
     strUrl.MakeLower();
-    //
+
     CString strStart("http://wiz.cn/cmd/");
     if (strUrl.startsWith(strStart))
     {
@@ -204,14 +204,13 @@ void WelcomeDialog::on_webView_linkClicked(const QUrl& url)
             CreateAccountDialog dlg(this);
             if (QDialog::Accepted != dlg.exec())
                 return;
-            //
-            CString strUserId = dlg.userId();
-            CString strPassword = dlg.password();
-            //
-            //ui->editUserId->setText(strUserId);
+
+            QString strUserId = dlg.userId();
+            QString strPassword = dlg.password();
+
+            ui->comboUsers->insertItem(0, strUserId);
+            ui->comboUsers->setCurrentIndex(0);
             ui->editPassword->setText(strPassword);
-            //
-            QDialog::accept();
         }
     }
     else

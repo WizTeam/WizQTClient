@@ -102,7 +102,8 @@ void CWizDocumentWebView::initEditorAndLoadDocument()
 
 bool CWizDocumentWebView::saveDocument(bool force)
 {
-    Q_ASSERT(m_bEditorInited);
+    if (!m_bEditorInited)
+        return false;
 
     QString strScript("saveDocument(%1);");
     strScript = strScript.arg(force ? "true" : "false");

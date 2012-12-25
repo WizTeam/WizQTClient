@@ -57,6 +57,8 @@ MainWindow::MainWindow(CWizDatabase& db, QWidget *parent)
     , m_bRestart(false)
     , m_bLogoutRestart(false)
     , m_bUpdatingSelection(false)
+    , m_bReadyQuit(false)
+    , m_bRequestQuit(false)
 {
     // FTS engine thread
     m_searchIndexer = new CWizSearchIndexerThread(m_db, this);
@@ -82,9 +84,6 @@ MainWindow::MainWindow(CWizDatabase& db, QWidget *parent)
     if (m_settings->autoSync()) {
         QTimer::singleShot(3 * 1000, this, SLOT(on_actionSync_triggered()));
     }
-
-    m_timerQuit.setInterval(100);
-    connect(&m_timerQuit, SIGNAL(timeout()), SLOT(on_quitTimeout()));
 
     setStatusBar(m_statusBar);
 
@@ -129,14 +128,15 @@ bool MainWindow::requestThreadsQuit()
 void MainWindow::on_quitTimeout()
 {
     if (requestThreadsQuit()) {
-        // FIXME
         saveStatus();
+
+        // FIXME : if document not valid will lead crash
         m_doc->view()->saveDocument(false);
         m_bReadyQuit = true;
-    }
 
-    // back to closeEvent
-    close();
+        // back to closeEvent
+        close();
+    }
 }
 
 void MainWindow::closeEvent(QCloseEvent* event)
@@ -167,8 +167,7 @@ void MainWindow::closeEvent(QCloseEvent* event)
         showMinimized();
 #endif
     } else {
-        m_bRequestQuit = true;
-        m_timerQuit.start();
+        on_actionExit_triggered();
     }
 
     event->ignore();
@@ -177,8 +176,10 @@ void MainWindow::closeEvent(QCloseEvent* event)
 void MainWindow::on_actionExit_triggered()
 {
     m_bRequestQuit = true;
+
+    m_timerQuit.setInterval(100);
+    connect(&m_timerQuit, SIGNAL(timeout()), SLOT(on_quitTimeout()));
     m_timerQuit.start();
-    close();
 }
 
 void MainWindow::on_upgradeThread_finished()
@@ -196,8 +197,8 @@ void MainWindow::on_upgradeThread_finished()
         file.close();
 
         // restart immediately
-        setRestart(true);
-        close();
+        m_bRestart = true;
+        on_actionExit_triggered();
     } else {
         // skip for this session
         QFile file(::WizGetUpgradePath() + "WIZNOTE_SKIP_THIS_SESSION");
@@ -214,29 +215,21 @@ MainWindow::~MainWindow()
 void MainWindow::saveStatus()
 {
     CWizSettings settings(WizGetSettingsFileName());
-    settings.SetInt("window", "x", geometry().x());
-    settings.SetInt("window", "y", geometry().y());
-    settings.SetInt("window", "width", geometry().width());
-    settings.SetInt("window", "height", geometry().height());
+    settings.setValue("window/geometry", saveGeometry());
 }
 
 void MainWindow::restoreStatus()
 {
     CWizSettings settings(WizGetSettingsFileName());
+    QByteArray geometry = settings.value("window/geometry").toByteArray();
 
-    int x = settings.GetInt("window", "x");
-    int y = settings.GetInt("window", "y");
-    int width = settings.GetInt("window", "width");
-    int height = settings.GetInt("window", "height");
-
-    if (!x || !y || !width || !height) {
+    if (geometry.isEmpty()) {
         setGeometry(QStyle::alignedRect(Qt::LeftToRight, Qt::AlignCenter, \
                                         sizeHint(), qApp->desktop()->availableGeometry()
                                         ));
-        return;
+    } else {
+        restoreGeometry(geometry);
     }
-
-    setGeometry(x, y, width, height);
 }
 
 void MainWindow::initActions()
@@ -529,11 +522,11 @@ void MainWindow::on_actionConsole_triggered()
 
 void MainWindow::on_actionLogout_triggered()
 {
+    // save state
     m_settings->setAutoLogin(false);
     m_settings->setPassword();
-
     m_bLogoutRestart = true;
-    close();
+    on_actionExit_triggered();
 }
 
 void MainWindow::on_actionAbout_triggered()
@@ -697,8 +690,8 @@ void MainWindow::on_options_settingsChanged(WizOptionsType type)
 
 void MainWindow::on_options_restartForSettings()
 {
-    setRestart(true);
-    QTimer::singleShot(100, this, SLOT(close()));
+    m_bRestart = true;
+    on_actionExit_triggered();
 }
 
 void MainWindow::viewDocument(const WIZDOCUMENTDATA& data, bool addToHistory)
