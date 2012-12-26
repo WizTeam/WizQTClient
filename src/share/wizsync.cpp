@@ -191,8 +191,6 @@ void CWizSync::onDownloadDocumentsSimpleInfoCompleted()
 {
     Q_EMIT progressChanged(progressDocumentSimpleInfoDownloaded);
 
-    TOLOG1(tr("Total %1 documents need to be update"), QString::number(m_arrayAllDocumentsNeedToBeDownloaded.size()));
-
     //save max version of document
     //if no error occured while downloading document full information
     //then update this version
@@ -203,15 +201,17 @@ void CWizSync::onDownloadDocumentsSimpleInfoCompleted()
     //filter documents for getting document full information (not data)
     filterDocuments();
 
+    TOLOG1(tr("Total %1 notes need to be update"), QString::number(m_arrayAllDocumentsNeedToBeDownloaded.size()));
+
     startUploadDocuments();
 }
 
 void CWizSync::startUploadDocuments()
 {
-    Q_EMIT processLog(tr("uploading documents"));
+    m_db.GetModifiedDocuments(m_arrayAllDocumentsNeedToBeUploaded);
+    TOLOG1(tr("uploading notes, total %1 need upload"), QString::number(m_arrayAllDocumentsNeedToBeUploaded.size()));
     Q_EMIT progressChanged(progressAttachmentInfoDownloaded);
 
-    m_db.GetModifiedDocuments(m_arrayAllDocumentsNeedToBeUploaded);
     uploadNextDocument();
 }
 
@@ -766,9 +766,7 @@ bool compareDocumentByTime(const WIZDOCUMENTDATABASE& data1, const WIZDOCUMENTDA
 
 void CWizSync::filterDocuments()
 {
-    //
     //compare document md5 (info, param, data)
-    //
     size_t nCount = m_arrayAllDocumentsNeedToBeDownloaded.size();
     for (intptr_t i = nCount - 1; i >= 0; i--)
     {

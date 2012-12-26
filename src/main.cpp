@@ -26,7 +26,7 @@ int main(int argc, char *argv[])
 #elif defined Q_OS_LINUX
     QDir dir(QApplication::applicationDirPath());
     dir.cd("plugins");
-    QApplication::addLibraryPaths(dir.absolutePath());
+    QApplication::addLibraryPath(dir.absolutePath());
 #endif
 
     CWizSettings settings(QDir::homePath() + "/.wiznote/wiznote.ini");

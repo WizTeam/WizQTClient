@@ -83,8 +83,7 @@ if (CMAKE_CXX_COMPILER MATCHES ic[c|l])
   add_definitions (-wd177)
 endif (CMAKE_CXX_COMPILER MATCHES ic[c|l])
 
-add_definitions (-DCRYPTOPP_DISABLE_ASM)
-remove_definitions (-DUNICODE -D_UNICODE)
+#remove_definitions (-DUNICODE -D_UNICODE)
 
 if (MINGW AND NOT CMAKE_RC_COMPILER_INIT)
   set (CMAKE_RC_COMPILER_INIT windres)
@@ -136,6 +135,7 @@ if (TARGET cryptopp)
 endif (TARGET cryptopp)
 
 if (APPLE)
+    add_definitions (-DCRYPTOPP_DISABLE_ASM)
     set_target_properties (${_CRYPTOPP_INSTALL_TARGETS} PROPERTIES COMPILE_FLAGS
     "-Wno-tautological-compare -Wno-unused-value -Wno-switch")
 endif (APPLE)

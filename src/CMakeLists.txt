@@ -220,6 +220,9 @@ include(${QT_USE_FILE})
 
 # dynamically create ts files
 qt4_add_translation(wiznote_QM ${wiznote_TRANSLATIONS})
+# we should copy qt internal qm files, otherwise qt can't translate some internal resources
+# https://bugreports.qt-project.org/browse/QTBUG-18662
+file(GLOB _QT_INTERNAL_TRANSLATIONS ${QT_TRANSLATIONS_DIR}/qt_*.qm)
 
 # uic
 qt4_wrap_ui(wiznote_FORM_HEADERS ${wiznote_FORMS})
@@ -248,9 +251,6 @@ if(UNIX)
         add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
             COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/share/wiznote/ ${wiznote_BUNDLE_CONTENTS}/Resources/)
 
-        # copy qt internal qm files, otherwise qt can't translate some internal resources
-        # https://bugreports.qt-project.org/browse/QTBUG-18662
-        file(GLOB _QT_INTERNAL_TRANSLATIONS ${QT_TRANSLATIONS_DIR}/qt_*.qm)
         foreach(_file ${_QT_INTERNAL_TRANSLATIONS})
             add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
                 COMMAND ${CMAKE_COMMAND} -E copy ${_file} ${wiznote_BUNDLE_CONTENTS}/Resources/languages/)
@@ -273,10 +273,38 @@ if(UNIX)
 
     elseif(NOT APPLE)
         add_executable(${PROJECT_NAME} ${wiznote_SOURCES} ${wiznote_FORM_HEADERS} ${wiznote_QM})
-        set_target_properties(${PROJECT_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+        set_target_properties(${PROJECT_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build)
 
-        add_custom_command(TARGET ${PROJECT_NAME}
-            POST_BUILD COMMAND cp -R ${CMAKE_HOME_DIRECTORY}/share/wiznote/* ${CMAKE_BINARY_DIR})
+        # always build rpath
+        set_target_properties(${PROJECT_NAME} PROPERTIES BUILD_WITH_INSTALL_RPATH TRUE)
+        set_target_properties(${PROJECT_NAME} PROPERTIES INSTALL_RPATH "\$ORIGIN/lib")
+
+        add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/share/wiznote/ ${CMAKE_BINARY_DIR}/build)
+
+        foreach(_file ${wiznote_QM})
+            add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+                COMMAND ${CMAKE_COMMAND} -E copy ${_file} ${CMAKE_BINARY_DIR}/build/languages/)
+        endforeach()
+
+        foreach(_file ${_QT_INTERNAL_TRANSLATIONS})
+            add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+                COMMAND ${CMAKE_COMMAND} -E copy ${_file} ${CMAKE_BINARY_DIR}/build/languages/)
+        endforeach()
+
+        if(CMAKE_BUILD_TYPE STREQUAL "Release")
+            add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+                COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/build/lib/
+                COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/build/plugins/
+                COMMAND ${CMAKE_COMMAND} -E copy ${QT_LIBRARY_DIR}/libQtCore.so.4 ${CMAKE_BINARY_DIR}/build/lib/
+                COMMAND ${CMAKE_COMMAND} -E copy ${QT_LIBRARY_DIR}/libQtGui.so.4 ${CMAKE_BINARY_DIR}/build/lib/
+                COMMAND ${CMAKE_COMMAND} -E copy ${QT_LIBRARY_DIR}/libQtNetwork.so.4 ${CMAKE_BINARY_DIR}/build/lib/
+                COMMAND ${CMAKE_COMMAND} -E copy ${QT_LIBRARY_DIR}/libQtWebKit.so.4 ${CMAKE_BINARY_DIR}/build/lib/
+                COMMAND ${CMAKE_COMMAND} -E copy ${QT_LIBRARY_DIR}/libQtXml.so.4 ${CMAKE_BINARY_DIR}/build/lib/
+                COMMAND ${CMAKE_COMMAND} -E copy_directory ${QT_PLUGINS_DIR} ${CMAKE_BINARY_DIR}/build/plugins/
+            )
+        endif()
+
     endif()
 endif()
 
@@ -292,15 +320,22 @@ elseif(WIN32)
 endif()
 set_target_properties(${PROJECT_NAME} PROPERTIES AUTOMOC true)
 
+#${clucene_SOURCE_DIR}/src/shared
+#${clucene_BINARY_DIR}/src/shared
+#${clucene_SOURCE_DIR}/src/core
 include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_CURRENT_BINARY_DIR}
     ${CMAKE_SOURCE_DIR}/lib
-
-    ${clucene_SOURCE_DIR}/src/shared
-    ${clucene_BINARY_DIR}/src/shared
-    ${clucene_SOURCE_DIR}/src/core
+    ${CMAKE_SOURCE_DIR}/lib/clucene/src/core
+    ${CMAKE_SOURCE_DIR}/lib/clucene/src/shared
+    ${CMAKE_BINARY_DIR}/lib/clucene/src/shared
 )
 
-link_directories(${CMAKE_BINANRY_DIR}/bin)
-target_link_libraries(${PROJECT_NAME} ${QT_LIBRARIES} cryptlib clucene-core-static clucene-shared-static)
+link_directories(${CMAKE_BINARY_DIR}/bin)
+target_link_libraries(${PROJECT_NAME}
+    cryptlib
+    clucene-core-static
+    clucene-shared-static
+    ${QT_LIBRARIES}
+)

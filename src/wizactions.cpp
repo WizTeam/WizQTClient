@@ -34,9 +34,9 @@ WIZACTION* CWizActions::actionsData()
 
     static WIZACTION arrayActions[] =
     {
-#ifndef Q_OS_MAC
-        {"actionPopupMainMenu", QObject::tr("Menu"), ""},
-#endif
+//#ifndef Q_OS_MAC
+//        {"actionPopupMainMenu", QObject::tr("Menu"), ""},
+//#endif
 
         {"actionPreference", QObject::tr("Preference", "")},
         {"actionAbout", QObject::tr("About WizNote..."), ""},

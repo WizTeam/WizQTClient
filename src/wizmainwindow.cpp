@@ -241,12 +241,12 @@ void MainWindow::initActions()
 
 void MainWindow::initMenuBar()
 {
-#ifdef Q_WS_MAC
+//#ifdef Q_WS_MAC
     setMenuBar(m_menuBar);
     m_actions->buildMenuBar(m_menuBar, ::WizGetResourcesPath() + "files/mainmenu.ini");
-#else
-    m_menuBar->hide();
-#endif
+//#else
+//    m_menuBar->hide();
+//#endif
 }
 
 void MainWindow::initToolBar()
@@ -267,12 +267,14 @@ void MainWindow::initToolBar()
     connect(m_searchBox, SIGNAL(doSearch(const QString&)), SLOT(on_search_doSearch(const QString&)));
 
     m_toolBar->addWidget(m_searchBox);
+    m_toolBar->layout()->setAlignment(m_searchBox, Qt::AlignBottom);
+
     m_toolBar->addWidget(new CWizFixedSpacer(QSize(20, 1), m_toolBar));
 
-#ifndef Q_OS_MAC
-    m_toolBar->addAction(m_actions->actionFromName("actionPopupMainMenu"));
-    m_toolBar->addWidget(new CWizFixedSpacer(QSize(2, 1), m_toolBar));
-#endif
+//#ifndef Q_OS_MAC
+//    m_toolBar->addAction(m_actions->actionFromName("actionPopupMainMenu"));
+//    m_toolBar->addWidget(new CWizFixedSpacer(QSize(2, 1), m_toolBar));
+//#endif
 
     //m_toolBar->setStyle(WizGetStyle(m_settings->skin()));
     //CWizSettings settings(::WizGetSkinResourcePath(m_settings->skin()) + "skin.ini");

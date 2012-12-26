@@ -32,7 +32,7 @@ CWizSearchWidget::CWizSearchWidget(CWizExplorerApp& app, QWidget* parent /*= 0*/
     iconLabel->setStyleSheet("QLabel{border-width:0;border-style:outset}");
 
     m_editSearch = new QLineEdit(this);
-    m_editSearch->setStyleSheet("QLineEdit { border: 1px solid gray; border-radius: 10px; }");
+    m_editSearch->setStyleSheet("QLineEdit{border:1px solid gray; border-radius:10px;}");
     // avoid focus rect on OSX, this should be a bug of qt style sheet
     m_editSearch->setAttribute(Qt::WA_MacShowFocusRect, 0);
 

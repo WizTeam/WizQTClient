@@ -522,7 +522,7 @@ public:
 	{
 		if ( language == NULL )
             //wcsncpy(lang, NULL, 100);
-            memset(lang, NULL, 100);
+            memset(lang, 0, 100);
 		else
             wcsncpy(lang, language, 100);
 		this->stem = stem;

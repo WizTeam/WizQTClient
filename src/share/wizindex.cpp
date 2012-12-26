@@ -1993,16 +1993,19 @@ BOOL CIndex::UpdateDocumentInfoMD5(WIZDOCUMENTDATA& data)
 	data.nVersion = -1;
 	return ModifyDocumentInfoEx(data);
 }
+
 BOOL CIndex::UpdateDocumentDataMD5(WIZDOCUMENTDATA& data, const CString& strZipFileName)
 {
 	data.tModified = WizGetCurrentTime();
-	data.tDataModified = WizGetCurrentTime();
+    data.tDataModified = WizGetCurrentTime();
+    // modify note data lead modify time change, recount info md5 needed
+    data.strInfoMD5 = CalDocumentInfoMD5(data);
     data.strDataMD5 = ::WizMd5FileString(strZipFileName);
 	data.nVersion = -1;
     BOOL bRet = ModifyDocumentInfoEx(data);
-    //
+
     emit documentDataModified(data);
-    //
+
     return bRet;
 }
 
