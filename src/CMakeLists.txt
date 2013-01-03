@@ -237,6 +237,12 @@ if(UNIX)
         add_executable(${PROJECT_NAME} MACOSX_BUNDLE ${wiznote_SOURCES} ${wiznote_FORM_HEADERS} ${wiznote_QM})
         set_target_properties(${PROJECT_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bundle)
 
+        # this should be issue of cmake, refer: http://public.kitware.com/Bug/bug_revision_view_page.php?rev_id=958
+        set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS "-F /Library/Frameworks")
+
+        # qmake will do this automatically
+        set_target_properties(${PROJECT_NAME} PROPERTIES COMPILE_FLAGS "-mmacosx-version-min=10.6")
+
         # suppress cmake warnning when link library is not a target, refer to cmp0016 for detailed info.
         cmake_policy(SET CMP0016 OLD)
         find_library(_CARBON_LIBRARY Carbon)
@@ -332,7 +338,10 @@ include_directories(
     ${CMAKE_BINARY_DIR}/lib/clucene/src/shared
 )
 
-link_directories(${CMAKE_BINARY_DIR}/bin)
+link_directories(
+    ${CMAKE_BINARY_DIR}/bin
+)
+
 target_link_libraries(${PROJECT_NAME}
     cryptlib
     clucene-core-static

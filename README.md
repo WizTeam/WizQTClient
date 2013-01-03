@@ -25,9 +25,9 @@ windows暂不支持
 
 到这里下载Qt和QtCreator：
 
-http://qt-project.org/downloads
+<http://qt-project.org/downloads>
 
-> 当前Qt5还有bug，如果使用Qt5编译会无法运行，已经提交了bug，linux用户需要下载基于v4.8.4的源代码自行编译 *
+> 当前Qt5还有bug，如果使用Qt5编译会无法运行，已经提交了bug，linux用户需要下载基于v4.8.4的源代码自行编译
 
 在ubuntu上，安装g++:
 
@@ -46,6 +46,7 @@ http://qt-project.org/downloads
 Qt会被安装到/usr/local/Trolltech这个文件夹中
 
 如果你打算直接使用系统内建的Qt库，直接安装即可：
+
 \# sudo apt-get install libqt4-dev
 
 ### 3. 编译wiznote
@@ -55,7 +56,21 @@ Qt会被安装到/usr/local/Trolltech这个文件夹中
 
 编译之前，打开QtCreator设置好qt的路径以及版本，然后使用QtCreator打开CMakeLists.txt文件，这是QtCreator的工程文件
 
-设置好编译路径，并运行cmake之后，即可开始编译过程
+设置好shadow build的编译路径，并运行cmake之后，即可开始编译过程
+
+Mac OSX下为了向下兼容，需要添加环境变量:
+
+\# export MACOSX_DEPLOYMENT_TARGET=10.6
+
+你可以把这个变量写入~/.profile里边，以便编译时生效
+
+参考文档：
+<http://www.cmake.org/pipermail/cmake/2009-November/033131.html>
+<http://developer.apple.com/library/mac/#technotes/tn2064/_index.html>
+
+默认编译方式为Release,可设置为Debug默认：
+
+\# CMAKE_BUILD_TYPE=Debug cmake ../wiznote *
 
 Linux下，编译结果位于${CMAKE_BINARY_DIR}/build/目录下
 
