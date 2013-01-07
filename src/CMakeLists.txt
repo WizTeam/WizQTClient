@@ -64,6 +64,7 @@ set(wiznote_SOURCES
     wizactions.cpp
     wiznotestyle.cpp
     wizcategoryview.cpp
+    wizCategoryViewItem.cpp
     newfolderdialog.cpp
     newtagdialog.cpp
     wizdownloadobjectdatadialog.cpp
@@ -157,6 +158,7 @@ set(wiznote_HEADERS
     wizactions.h
     wiznotestyle.h
     wizcategoryview.h
+    wizCategoryViewItem.h
     wizdownloadobjectdatadialog.h
     wizdocumenthistory.h
     wizattachmentlistwidget.h

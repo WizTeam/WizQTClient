@@ -298,11 +298,14 @@ CWizAttachmentListWidget::CWizAttachmentListWidget(CWizExplorerApp& app, QWidget
     root->setContentsMargins(8, 20, 8, 8);
 
     QVBoxLayout* layoutMain = new QVBoxLayout(root);
-    root->setLayout(layoutMain);
     layoutMain->setContentsMargins(0, 0, 0, 0);
+    root->setLayout(layoutMain);
 
-    QHBoxLayout* layoutHeader = new QHBoxLayout(root);
-    layoutHeader->setMargin(0);
+    QWidget* header = new QWidget(root);
+    QHBoxLayout* layoutHeader = new QHBoxLayout(header);
+    layoutHeader->setContentsMargins(0, 0, 0, 0);
+    header->setLayout(layoutHeader);
+
     QIcon iconAddAttachment = ::WizLoadSkinIcon(m_app.userSettings().skin(), "add_attachment_button");
     CWizImagePushButton* addAttachmentButton = new CWizImagePushButton(iconAddAttachment, "", root);
     addAttachmentButton->setStyle(WizGetStyle(m_app.userSettings().skin()));
@@ -318,7 +321,7 @@ CWizAttachmentListWidget::CWizAttachmentListWidget(CWizExplorerApp& app, QWidget
     line->setMinimumHeight(1);
     line->setStyleSheet("border-bottom-width:1;border-bottom-style:solid;border-bottom-color:#d9dcdd");
 
-    layoutMain->addLayout(layoutHeader);
+    layoutMain->addWidget(header);
     layoutMain->addWidget(line);
     layoutMain->addWidget(m_list);
 }

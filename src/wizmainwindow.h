@@ -81,6 +81,8 @@ private:
 
     CWizActions* m_actions;
     CWizCategoryView* m_category;
+    CWizCategoryTagsView* m_categoryTags;
+    QWidget* m_categoryLayer;
     CWizDocumentListView* m_documents;
     CWizDocumentView* m_doc;
     CWizSplitter* m_splitter;
@@ -142,6 +144,15 @@ public Q_SLOTS:
 
     void on_actionGoBack_triggered();
     void on_actionGoForward_triggered();
+
+    void on_actionCategorySwitchPrivate_triggered();
+    void on_actionCategorySwitchTags_triggered();
+    void on_actionCategorySwitchGroups_triggered();
+    void on_actionCategorySwitchPrivate_triggered2(bool toggled);
+    void on_actionCategorySwitchTags_triggered2(bool toggled);
+    void on_actionCategorySwitchGroups_triggered2(bool toggled);
+    void categorySwitchTo(CWizCategoryBaseView* sourceCategory, CWizCategoryBaseView* destCategory);
+    void onAnimationCategorySwitchStateChanged(QAbstractAnimation::State newState, QAbstractAnimation::State oldState);
 
     void on_category_itemSelectionChanged();
     void on_documents_itemSelectionChanged();

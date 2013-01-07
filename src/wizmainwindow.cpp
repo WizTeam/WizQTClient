@@ -48,6 +48,8 @@ MainWindow::MainWindow(CWizDatabase& db, QWidget *parent)
     , m_statusBar(new CWizStatusBar(*this, this))
     , m_actions(new CWizActions(*this, this))
     , m_category(new CWizCategoryView(*this, this))
+    , m_categoryTags(new CWizCategoryTagsView(*this, this))
+    , m_categoryLayer(new QWidget(this))
     , m_documents(new CWizDocumentListView(*this, this))
     , m_doc(new CWizDocumentView(*this, this))
     , m_splitter(NULL)
@@ -256,6 +258,55 @@ void MainWindow::initToolBar()
     m_toolBar->setContentsMargins(0, 0, 0, 0);
 
     m_toolBar->addWidget(new CWizFixedSpacer(QSize(20, 1), m_toolBar));
+
+    QWidget* categorySwitchBtns = new QWidget(m_toolBar);
+    QHBoxLayout* layoutCategorySwitch = new QHBoxLayout(categorySwitchBtns);
+    categorySwitchBtns->setLayout(layoutCategorySwitch);
+    layoutCategorySwitch->setContentsMargins(0, 0, 0, 0);
+    layoutCategorySwitch->setSpacing(0);
+
+    QToolButton* btnNotes = new QToolButton(categorySwitchBtns);
+    QIcon iconNotes(::WizGetResourcesPath() + "skins/notePrivate.jpeg");
+    btnNotes->setIcon(iconNotes);
+    btnNotes->setIconSize(QSize(18, 12));
+    btnNotes->setText(tr("Notes"));
+    btnNotes->setCheckable(true);
+    connect(btnNotes, SIGNAL(toggled(bool)), SLOT(on_actionCategorySwitchPrivate_triggered2(bool)));
+
+    QToolButton* btnTags = new QToolButton(categorySwitchBtns);
+    QIcon iconTags(::WizGetResourcesPath() + "skins/noteTags.jpeg");
+    btnTags->setIcon(iconTags);
+    btnTags->setIconSize(QSize(18, 12));
+    btnTags->setText(tr("Tags"));
+    btnTags->setCheckable(true);
+    connect(btnTags, SIGNAL(toggled(bool)), SLOT(on_actionCategorySwitchTags_triggered2(bool)));
+
+    QToolButton* btnGroups = new QToolButton(categorySwitchBtns);
+    QIcon iconGroups(::WizGetResourcesPath() + "skins/noteGroups.jpeg");
+    btnGroups->setIcon(iconGroups);
+    btnGroups->setIconSize(QSize(18, 12));
+    btnGroups->setText("Groups");
+    btnGroups->setCheckable(true);
+    connect(btnGroups, SIGNAL(toggled(bool)), SLOT(on_actionCategorySwitchGroups_triggered2(bool)));
+
+    QButtonGroup* btnGroup = new QButtonGroup(categorySwitchBtns);
+    btnGroup->setExclusive(true);
+    btnGroup->addButton(btnNotes, 0);
+    btnGroup->addButton(btnTags, 1);
+    btnGroup->addButton(btnGroups, 2);
+    btnNotes->setChecked(true);
+
+    layoutCategorySwitch->addWidget(btnNotes);
+    layoutCategorySwitch->addWidget(btnTags);
+    layoutCategorySwitch->addWidget(btnGroups);
+
+    //m_toolBar->addWidget(btnNotes);
+    //m_toolBar->addWidget(btnTags);
+    //m_toolBar->addWidget(btnGroups);
+
+    m_toolBar->addWidget(categorySwitchBtns);
+
+    m_toolBar->addWidget(new CWizFixedSpacer(QSize(20, 1), m_toolBar));
     m_toolBar->addAction(m_actions->actionFromName("actionSync"));
     m_toolBar->addWidget(new CWizFixedSpacer(QSize(20, 1), m_toolBar));
     m_toolBar->addAction(m_actions->actionFromName("actionNewNote"));
@@ -368,22 +419,20 @@ void MainWindow::initClient()
 
 #ifndef Q_OS_MAC
     splitter->addWidget(WizInitWidgetMarginsEx(m_settings->skin(), m_category, "Category"));
-    //splitter->addWidget(WizInitWidgetMarginsEx(m_documents, "Documents"));
 #else
-    splitter->addWidget(m_category);
-    //splitter->addWidget(m_documents);
+    //QWidget* categories = new QWidget(this);
+    QHBoxLayout* layoutCategories = new QHBoxLayout(m_categoryLayer);
+    layoutCategories->setContentsMargins(0, 0, 0, 0);
+    layoutCategories->setSpacing(0);
+    m_categoryLayer->setLayout(layoutCategories);
+
+    layoutCategories->addWidget(m_category);
+    //layoutCategories->addWidget(m_categoryTags);
+    splitter->addWidget(m_categoryLayer);
+    //m_categoryTags->hide();
 #endif
 
-    QVBoxLayout* layoutDocuments = new QVBoxLayout(client);
-    layoutDocuments->setContentsMargins(1, 1, 1, 1);
-    layoutDocuments->setSpacing(3);
-
-    QWidget* documents = new QWidget(splitter);
-    documents->setLayout(layoutDocuments);
-
-    layoutDocuments->addWidget(m_documents);
-
-    splitter->addWidget(documents);
+    splitter->addWidget(m_documents);
     splitter->addWidget(m_doc);
     splitter->setStretchFactor(0, 0);
     splitter->setStretchFactor(1, 0);
@@ -424,14 +473,15 @@ void MainWindow::init()
     connect(m_sync, SIGNAL(syncStarted()), SLOT(on_syncStarted()));
     connect(m_sync, SIGNAL(syncLogined()), SLOT(on_syncLogined()));
     connect(m_sync, SIGNAL(processLog(const QString&)), SLOT(on_syncProcessLog(const QString&)));
-    //connect(m_sync, SIGNAL(processDebugLog(const QString&)), SLOT(on_syncProcessDebugLog(const QString&)));
     connect(m_sync, SIGNAL(processErrorLog(const QString&)), SLOT(on_syncProcessErrorLog(const QString&)));
     connect(m_sync, SIGNAL(syncDone(bool)), SLOT(on_syncDone(bool)));
 
     connect(m_category, SIGNAL(itemSelectionChanged()), this, SLOT(on_category_itemSelectionChanged()));
+    connect(m_categoryTags, SIGNAL(itemSelectionChanged()), this, SLOT(on_category_itemSelectionChanged()));
     connect(m_documents, SIGNAL(itemSelectionChanged()), this, SLOT(on_documents_itemSelectionChanged()));
 
     m_category->init();
+    m_categoryTags->init();
 }
 
 
@@ -510,6 +560,8 @@ void MainWindow::on_actionNewNote_triggered()
 
     m_documentForEditing = data;
     m_documents->addAndSelectDocument(data);
+
+    delete pFolder;
 }
 
 void MainWindow::on_actionDeleteCurrentNote_triggered()
@@ -654,10 +706,107 @@ void MainWindow::on_actionGoForward_triggered()
     locateDocument(data);
 }
 
+void MainWindow::on_actionCategorySwitchPrivate_triggered2(bool toggled)
+{
+    if (!toggled)
+        return;
+    on_actionCategorySwitchPrivate_triggered();
+}
+
+void MainWindow::on_actionCategorySwitchTags_triggered2(bool toggled)
+{
+   if (!toggled)
+        return;
+   on_actionCategorySwitchTags_triggered();
+}
+
+void MainWindow::on_actionCategorySwitchGroups_triggered2(bool toggled)
+{
+    if (!toggled)
+        return;
+    on_actionCategorySwitchGroups_triggered();
+}
+
+void MainWindow::on_actionCategorySwitchPrivate_triggered()
+{
+    CWizCategoryBaseView* categoryCurrent = NULL;
+    if (m_categoryTags->isVisible()) {
+        categoryCurrent = m_categoryTags;
+    }
+
+    if (!categoryCurrent) {
+       return;
+    }
+
+    categorySwitchTo(categoryCurrent, m_category);
+}
+
+void MainWindow::on_actionCategorySwitchTags_triggered()
+{
+    CWizCategoryBaseView* categoryCurrent = NULL;
+    if (m_category->isVisible()) {
+        categoryCurrent = m_category;
+    }
+
+    if (!categoryCurrent) {
+       return;
+    }
+
+    categorySwitchTo(categoryCurrent, m_categoryTags);
+}
+
+void MainWindow::on_actionCategorySwitchGroups_triggered()
+{
+    qDebug() << "triggered groups";
+}
+
+void MainWindow::categorySwitchTo(CWizCategoryBaseView* sourceCategory, CWizCategoryBaseView* destCategory)
+{
+    if (!sourceCategory->isVisible()) {
+        return;
+    }
+
+    QRect rectOld(sourceCategory->geometry());
+
+    // break layout and do animation
+    QHBoxLayout* layout = qobject_cast<QHBoxLayout *>(m_categoryLayer->layout());
+    layout->removeWidget(sourceCategory);
+    layout->addWidget(destCategory);
+    destCategory->show();
+    sourceCategory->raise();
+
+    QPropertyAnimation* animateCurrent = new QPropertyAnimation();
+    animateCurrent->setTargetObject(sourceCategory);
+    animateCurrent->setPropertyName("geometry");
+    animateCurrent->setDuration(250);
+    animateCurrent->setEndValue(QRect(rectOld.width(), rectOld.y(), 0, rectOld.height()));
+
+    connect(animateCurrent, SIGNAL(stateChanged(QAbstractAnimation::State, QAbstractAnimation::State)), \
+            SLOT(onAnimationCategorySwitchStateChanged(QAbstractAnimation::State, QAbstractAnimation::State)));
+
+    animateCurrent->start();
+}
+
+void MainWindow::onAnimationCategorySwitchStateChanged(QAbstractAnimation::State newState, QAbstractAnimation::State oldState)
+{
+    if (newState == QAbstractAnimation::Stopped && oldState == QAbstractAnimation::Running) {
+        QPropertyAnimation* animate = qobject_cast<QPropertyAnimation *>(sender());
+        CWizCategoryBaseView* category = qobject_cast<CWizCategoryBaseView *>(animate->targetObject());
+        category->hide();
+
+        m_categoryLayer->update();
+    }
+}
+
 void MainWindow::on_category_itemSelectionChanged()
 {
     CWizDocumentDataArray arrayDocument;
-    m_category->getDocuments(arrayDocument);
+
+    CWizCategoryBaseView* category = qobject_cast<CWizCategoryBaseView *>(sender());
+    if (!category)
+        return;
+
+    category->getDocuments(arrayDocument);
     m_documents->setDocuments(arrayDocument);
 
     if (arrayDocument.empty()) {

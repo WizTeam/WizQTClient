@@ -34,10 +34,6 @@ WIZACTION* CWizActions::actionsData()
 
     static WIZACTION arrayActions[] =
     {
-//#ifndef Q_OS_MAC
-//        {"actionPopupMainMenu", QObject::tr("Menu"), ""},
-//#endif
-
         {"actionPreference", QObject::tr("Preference", "")},
         {"actionAbout", QObject::tr("About WizNote..."), ""},
         {"actionExit", QObject::tr("Exit"), ""},
@@ -51,6 +47,9 @@ WIZACTION* CWizActions::actionsData()
         {"actionRebuildFTS", QObject::tr("Rebuild full text search index"), ""},
         {"actionSearch", QObject::tr("Search document"), QObject::tr("Alt+Ctrl+F")},
         {"actionResetSearch", QObject::tr("Reset search"), QObject::tr("Ctrl+R")},
+        {"actionCategorySwitchPrivate", QObject::tr("Switch to Private Notes"), ""},
+        {"actionCategorySwitchTags", QObject::tr("Switch to Tags"), ""},
+        {"actionCategorySwitchGroups", QObject::tr("Switch to Groups"), ""},
         {"",                        ""}
     };
 
