@@ -49,7 +49,7 @@ struct IWizToolsSearchDocumentsEvents
 HRESULT FTSDeleteDocument(const CString& strIndexPath, const CString& strDocumentGUID);
 HRESULT FTSSearchDocument(const CString& strIndexPath, const CString& strKeywords, IWizToolsSearchDocumentsEvents* pEvents);
 
-void WizKMRegularTagsText(CString& strTagsText);
+//void WizKMRegularTagsText(CString& strTagsText);
 
 
 

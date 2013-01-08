@@ -24,9 +24,9 @@ HRESULT FTSSearchDocument(const CString& strIndexPath, const CString& strKeyword
     return E_FAIL;
 }
 
-void WizKMRegularTagsText(CString& strTagsText)
-{
-    Q_UNUSED(strTagsText);
-}
+//void WizKMRegularTagsText(CString& strTagsText)
+//{
+//    Q_UNUSED(strTagsText);
+//}
 
 

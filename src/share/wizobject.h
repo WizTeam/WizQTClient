@@ -480,6 +480,7 @@ inline const CString TAG_DISPLAY_NAME_PUBLIC()
 {
     return QObject::tr("$Public Notes");
 }
+
 inline const CString TAG_DISPLAY_NAME_SHARE_WITH_FRIENDS()
 {
     return QObject::tr("$Share with friends");
