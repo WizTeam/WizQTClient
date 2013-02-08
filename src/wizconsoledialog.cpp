@@ -1,16 +1,18 @@
 #include "wizconsoledialog.h"
-
 #include "ui_wizconsoledialog.h"
 
 #include <QTextCodec>
-
 #include <QMessageBox>
+
+#include "share/wizmisc.h"
 
 CWizConsoleDialog::CWizConsoleDialog(CWizExplorerApp& app, QWidget* parent)
     : QDialog(parent)
     , m_app(app)
     , m_ui(new Ui::CWizConsoleDialog)
 {
+    setWindowFlags(Qt::Tool);
+
     m_ui->setupUi(this);
     vScroll = m_ui->editConsole->verticalScrollBar();
 

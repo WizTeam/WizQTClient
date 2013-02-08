@@ -16,6 +16,7 @@ QString CWizCommonUI::LoadTextFromFile(const QString& strFileName)
     ::WizLoadUnicodeTextFromFile(strFileName, strText);
     return strText;
 }
+
 QString CWizCommonUI::ClipboardToImage(int hwnd, const QString& strOptions)
 {
     Q_UNUSED(hwnd);

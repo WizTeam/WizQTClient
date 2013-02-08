@@ -4,7 +4,7 @@
 #include <QtCore>
 
 #include "wizdef.h"
-#include "wizsync.h"
+#include "wizSync.h"
 
 class CWizSyncThread : public QThread
 {
@@ -14,9 +14,8 @@ public:
     explicit CWizSyncThread(CWizExplorerApp& app, QObject *parent = 0);
 
     void startSyncing();
-    QThread* thread() const { return m_currentThread; }
 
-    void abort() const { if (m_currentThread) m_sync->abort(); }
+    void abort() const { m_sync->abort(); }
     void resetProxy() { m_bNeedResetProxy = true; }
 
 protected:
@@ -24,14 +23,12 @@ protected:
 
 private:
     CWizExplorerApp& m_app;
-    CWizDatabase& m_db;
+    CWizDatabaseManager& m_dbMgr;
 
     QPointer<CWizSync> m_sync;
     bool m_bNeedResetProxy;
 
     bool m_bIsStarted;
-
-    QPointer<QThread> m_currentThread;
 
 Q_SIGNALS:
     void syncStarted();

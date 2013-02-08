@@ -165,7 +165,7 @@ QString CWizUserSettings::get(const QString& strKey) const
 {
     if (!m_strUserId.isEmpty()) {
         CWizDatabase db;
-        if (db.Open(m_strUserId, "")) {
+        if (db.openPrivate(m_strUserId, "")) {
             return db.GetMetaDef(USER_SETTINGS_SECTION, strKey);
         }
     }
@@ -181,7 +181,7 @@ void CWizUserSettings::set(const QString& strKey, const QString& strValue)
 {
     if (!m_strUserId.isEmpty()) {
         CWizDatabase db;
-        if (db.Open(m_strUserId, "")) {
+        if (db.openPrivate(m_strUserId, "")) {
             db.SetMeta(USER_SETTINGS_SECTION, strKey, strValue);
         }
     }
@@ -195,7 +195,7 @@ QString CWizUserSettings::password() const
 {
     if (!m_strUserId.isEmpty()) {
         CWizDatabase db;
-        if (db.Open(m_strUserId, "")) {
+        if (db.openPrivate(m_strUserId, "")) {
             return db.GetMetaDef("Account", "Password");
         }
     }
@@ -211,7 +211,7 @@ void CWizUserSettings::setPassword(const QString& strPassword /* = NULL */)
 {
     if (!m_strUserId.isEmpty()) {
         CWizDatabase db;
-        if (db.Open(m_strUserId, "")) {
+        if (db.openPrivate(m_strUserId, "")) {
             db.SetMeta("Account", "Password", strPassword);
         }
     }

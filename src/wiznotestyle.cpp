@@ -15,7 +15,7 @@
 #include <QtWidgets>
 #endif
 
-class CWizCategoryView;
+class CWizCategoryBaseView;
 class CWizDocumentListView;
 //class QStyleOptionViewItemV4;
 
@@ -82,7 +82,7 @@ private:
 
     QFont m_fontImagePushButtonLabel;
 protected:
-    virtual void drawCategoryViewItem(const QStyleOptionViewItemV4 *option, QPainter *painter, const CWizCategoryView *widget) const;
+    virtual void drawCategoryViewItem(const QStyleOptionViewItemV4 *option, QPainter *painter, const CWizCategoryBaseView *widget) const;
     virtual void drawDocumentListViewItem(const QStyleOptionViewItemV4 *option, QPainter *painter, const CWizDocumentListView *widget) const;
     virtual void drawMultiLineListWidgetItem(const QStyleOptionViewItemV4 *option, QPainter *painter, const CWizMultiLineListWidget *widget) const;
     virtual void drawImagePushButton(const QStyleOptionButton *option, QPainter *painter, const CWizImagePushButton *button) const;
@@ -107,8 +107,12 @@ const int IMAGE_WIDTH = 80;
 CWizNoteStyle::CWizNoteStyle(const QString& strSkinName)
 {
     QString strSkinPath = ::WizGetSkinResourcePath(strSkinName);
+
     m_expandedImage.load(strSkinPath + "button_expanded.png");
+    //m_expandedImage = m_expandedImage.scaled(24, 24, Qt::KeepAspectRatio);
     m_collapsedImage.load(strSkinPath + "button_collapsed.png");
+    //m_collapsedImage = m_collapsedImage.scaled(24, 24, Qt::KeepAspectRatio);
+
     m_toolBarImage.SetImage(strSkinPath + "toolbar_background.png", QPoint(8, 8));
     m_categorySelectedItemBackground.SetImage(strSkinPath + "category_selected_background.png", QPoint(4, 4));
     m_documentsSelectedItemBackground.SetImage(strSkinPath + "documents_selected_background.png", QPoint(4, 4));
@@ -151,7 +155,7 @@ CWizNoteStyle::CWizNoteStyle(const QString& strSkinName)
 
 
 void CWizNoteStyle::drawCategoryViewItem(const QStyleOptionViewItemV4 *vopt,
-                                         QPainter *painter, const CWizCategoryView *view) const
+                                         QPainter *painter, const CWizCategoryBaseView *view) const
 {
     if (view->isSeparatorItemByIndex(vopt->index))
         return;
@@ -170,7 +174,7 @@ void CWizNoteStyle::drawCategoryViewItem(const QStyleOptionViewItemV4 *vopt,
     }
 
     QStyleOptionViewItemV4* opt = &adjustedOption;
-    //
+
     QPainter* p = painter;
     p->save();
     p->setClipRect(opt->rect);
@@ -178,15 +182,20 @@ void CWizNoteStyle::drawCategoryViewItem(const QStyleOptionViewItemV4 *vopt,
     QRect textRect = subElementRect(SE_ItemViewItemText, vopt, view);
     QRect iconRect = subElementRect(SE_ItemViewItemDecoration, vopt, view);
 
-    // draw the background
-    //proxy()->drawPrimitive(PE_PanelItemViewItem, opt, p, widget);
-    //
+    // draw icon little bigger than qt default rect
+    iconRect.adjust(0, -4, 4, 4);
+
+    // draw text little far from icon
+    textRect.adjust(10, 0, 0, 0);
+
     if (!vopt->icon.isNull())
     {
         // draw the icon
         QIcon::Mode mode = QIcon::Normal;
         QIcon::State state = QIcon::On;
+        //p->setCompositionMode(QPainter::CompositionMode_DestinationIn);
         vopt->icon.paint(p, iconRect, vopt->decorationAlignment, mode, state);
+        //p->setCompositionMode(QPainter::CompositionMode_SourceOver);
     }
 
     // draw the text
@@ -615,7 +624,7 @@ void CWizNoteStyle::drawControl(ControlElement element, const QStyleOption *opti
             {
                 drawMultiLineListWidgetItem(vopt, painter, view);
             }
-            else if (const CWizCategoryView *view = dynamic_cast<const CWizCategoryView *>(widget))
+            else if (const CWizCategoryBaseView *view = dynamic_cast<const CWizCategoryBaseView *>(widget))
             {
                 if (view->isDragHovered() && view->validateDropDestination(view->dragHoveredPos())) {
                     QRect rect = view->visualItemRect(view->itemAt(view->dragHoveredPos()));
@@ -667,7 +676,7 @@ void CWizNoteStyle::drawPrimitive(PrimitiveElement pe, const QStyleOption *opt, 
     {
     case PE_IndicatorBranch:
         {
-            if (const CWizCategoryView *view = dynamic_cast<const CWizCategoryView *>(w))
+            if (const CWizCategoryBaseView *view = dynamic_cast<const CWizCategoryBaseView *>(w))
             {
                 Q_UNUSED(view);
                 if (opt->state & State_Children)
@@ -682,7 +691,7 @@ void CWizNoteStyle::drawPrimitive(PrimitiveElement pe, const QStyleOption *opt, 
         break;
     case PE_PanelItemViewRow:
         {
-            if (const CWizCategoryView *view = dynamic_cast<const CWizCategoryView *>(w))
+            if (const CWizCategoryBaseView *view = dynamic_cast<const CWizCategoryBaseView *>(w))
             {
                 const QStyleOptionViewItemV4 *vopt = qstyleoption_cast<const QStyleOptionViewItemV4 *>(opt);
                 ATLASSERT(vopt);
@@ -729,10 +738,10 @@ void CWizNoteStyle::drawcenterImage(QPainter* p, const QImage& image, const QRec
 {
     int width = image.width();
     int height = image.height();
-    //
+
     int x = rc.left() + (rc.width() - width) / 2;
     int y = rc.top() + (rc.height() - height) / 2;
-    //
+
     p->drawImage(x, y, image);
 }
 

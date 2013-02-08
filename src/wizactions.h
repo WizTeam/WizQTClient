@@ -11,6 +11,9 @@ class CWizSettings;
 class CWizAnimateAction;
 struct WIZACTION;
 
+#define WIZACTION_GLOBAL_SYNC           "actionSync"
+#define WIZACTION_GLOBAL_NEW_DOCUMENT   "actionNewNote"
+
 class CWizActions
 {
 public:

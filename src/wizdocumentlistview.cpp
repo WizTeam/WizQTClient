@@ -1,17 +1,17 @@
 #include "wizdocumentlistview.h"
+
+//#include <QStyledItemDelegate>
+//#include <QApplication>
+//#include <QMenu>
+//#include <QContextMenuEvent>
+//#include <QScrollBar>
+//#include <QDrag>
+//#include <QMimeData>
+
 #include "wizcategoryview.h"
-
 #include "wiznotestyle.h"
-
 #include "wiztaglistwidget.h"
-
-#include <QStyledItemDelegate>
-#include <QApplication>
-#include <QMenu>
-#include <QContextMenuEvent>
-#include <QScrollBar>
-#include <QDrag>
-#include <QMimeData>
+#include "share/wizsettings.h"
 
 
 class CWizDocumentListViewItem : public QListWidgetItem
@@ -34,15 +34,10 @@ public:
         return m_data;
     }
 
-    WIZABSTRACT& abstract(CWizDatabase& db)
+    WIZABSTRACT& abstract(CWizThumbIndexCache& thumbCache)
     {
-        if (m_abstract.text.isEmpty())
-        {
-            db.PadAbstractFromGUID(m_data.strGUID, m_abstract);
-            if (m_abstract.text.IsEmpty())
-                m_abstract.text = " ";
-            m_abstract.text.replace('\n', ' ');
-            m_abstract.text.replace("\r", "");
+        if (m_abstract.strKbGUID.isEmpty()) {
+            thumbCache.load(m_data.strKbGUID, m_data.strGUID);
         }
 
         return m_abstract;
@@ -82,9 +77,12 @@ public:
         return pOther->m_data.tCreated < m_data.tCreated;
     }
 
-    void resetAbstract()
+    void resetAbstract(const WIZABSTRACT& abs)
     {
-        m_abstract = WIZABSTRACT();
+        m_abstract.strKbGUID = abs.strKbGUID;
+        m_abstract.guid= abs.guid;
+        m_abstract.text = abs.text;
+        m_abstract.image = abs.image;
     }
 };
 
@@ -105,13 +103,13 @@ public:
     }
 };
 
+#define WIZACTION_LIST_DELETE   QObject::tr("Delete")
+#define WIZACTION_LIST_TAGS     QObject::tr("Tags...")
 
 CWizDocumentListView::CWizDocumentListView(CWizExplorerApp& app, QWidget *parent /*= 0*/)
     : QListWidget(parent)
     , m_app(app)
-    , m_db(app.database())
-    , m_category(app.category())
-    , m_menu(NULL)
+    , m_dbMgr(app.databaseManager())
     , m_tagList(NULL)
 {
     setFrameStyle(QFrame::NoFrame);
@@ -139,29 +137,45 @@ CWizDocumentListView::CWizDocumentListView(CWizExplorerApp& app, QWidget *parent
     qRegisterMetaType<WIZTAGDATA>("WIZTAGDATA");
     qRegisterMetaType<WIZDOCUMENTDATA>("WIZDOCUMENTDATA");
 
-    connect(&m_db, SIGNAL(tagCreated(const WIZTAGDATA&)), \
+    connect(&m_dbMgr, SIGNAL(tagCreated(const WIZTAGDATA&)), \
             SLOT(on_tag_created(const WIZTAGDATA&)));
 
-    connect(&m_db, SIGNAL(tagModified(const WIZTAGDATA&, const WIZTAGDATA&)), \
+    connect(&m_dbMgr, SIGNAL(tagModified(const WIZTAGDATA&, const WIZTAGDATA&)), \
             SLOT(on_tag_modified(const WIZTAGDATA&, const WIZTAGDATA&)));
 
-    connect(&m_db, SIGNAL(documentCreated(const WIZDOCUMENTDATA&)), \
+    connect(&m_dbMgr, SIGNAL(documentCreated(const WIZDOCUMENTDATA&)), \
             SLOT(on_document_created(const WIZDOCUMENTDATA&)));
 
-    connect(&m_db, SIGNAL(documentModified(const WIZDOCUMENTDATA&, const WIZDOCUMENTDATA&)), \
+    connect(&m_dbMgr, SIGNAL(documentModified(const WIZDOCUMENTDATA&, const WIZDOCUMENTDATA&)), \
             SLOT(on_document_modified(const WIZDOCUMENTDATA&, const WIZDOCUMENTDATA&)));
 
-    connect(&m_db, SIGNAL(documentDeleted(const WIZDOCUMENTDATA&)), \
+    connect(&m_dbMgr, SIGNAL(documentDeleted(const WIZDOCUMENTDATA&)), \
             SLOT(on_document_deleted(const WIZDOCUMENTDATA&)));
 
-    connect(&m_db, SIGNAL(documentAbstractModified(const WIZDOCUMENTDATA&)), \
-            SLOT(on_document_AbstractModified(const WIZDOCUMENTDATA&)));
+
+    m_thumbCache = new CWizThumbIndexCache(app);
+    qRegisterMetaType<WIZABSTRACT>("WIZABSTRACT");
+    connect(m_thumbCache, SIGNAL(loaded(const WIZABSTRACT&)),
+            SLOT(on_document_abstractLoaded(const WIZABSTRACT&)));
+
+    QThread *thread = new QThread();
+    m_thumbCache->moveToThread(thread);
+    thread->start();
 
     setDragDropMode(QAbstractItemView::DragDrop);
     setDragEnabled(true);
     viewport()->setAcceptDrops(true);
 
     setSelectionMode(QAbstractItemView::ExtendedSelection);
+
+    // setup popup menu
+    m_menu = new QMenu(this);
+    m_menu->addAction(WIZACTION_LIST_TAGS, this, SLOT(on_action_selectTags()));
+    m_menu->addSeparator();
+    m_menu->addAction(WIZACTION_LIST_DELETE, this, SLOT(on_action_deleteDocument()));
+    //m_actionEncryptDocument = new QAction(tr("Encrypt Document"), m_menu);
+    //connect(m_actionEncryptDocument, SIGNAL(triggered()), SLOT(on_action_encryptDocument()));
+    //m_menu->addAction(m_actionEncryptDocument);
 }
 
 void CWizDocumentListView::setDocuments(const CWizDocumentDataArray& arrayDocument)
@@ -170,22 +184,18 @@ void CWizDocumentListView::setDocuments(const CWizDocumentDataArray& arrayDocume
     addDocuments(arrayDocument);
 }
 
-
 void CWizDocumentListView::addDocuments(const CWizDocumentDataArray& arrayDocument)
 {
-    for (CWizDocumentDataArray::const_iterator it = arrayDocument.begin();
-    it != arrayDocument.end();
-    it++)
-    {
+    CWizDocumentDataArray::const_iterator it;
+    for (it = arrayDocument.begin(); it != arrayDocument.end(); it++) {
         addDocument(*it, false);
     }
 
     sortItems();
 
-    if (selectedItems().empty())
-    {
-        setCurrentRow(0);
-    }
+    //if (selectedItems().empty()) {
+    //    setCurrentRow(0);
+    //}
 }
 
 int CWizDocumentListView::addDocument(const WIZDOCUMENTDATA& data, bool sort)
@@ -193,8 +203,7 @@ int CWizDocumentListView::addDocument(const WIZDOCUMENTDATA& data, bool sort)
     CWizDocumentListViewItem* pItem = new CWizDocumentListViewItem(data, this);
 
     addItem(pItem);
-    if (sort)
-    {
+    if (sort) {
         sortItems();
     }
 
@@ -203,7 +212,7 @@ int CWizDocumentListView::addDocument(const WIZDOCUMENTDATA& data, bool sort)
 
 bool CWizDocumentListView::acceptDocument(const WIZDOCUMENTDATA& document)
 {
-    return m_category.acceptDocument(document);
+    return m_app.category().acceptDocument(document);
 }
 
 void CWizDocumentListView::addAndSelectDocument(const WIZDOCUMENTDATA& document)
@@ -211,10 +220,10 @@ void CWizDocumentListView::addAndSelectDocument(const WIZDOCUMENTDATA& document)
     Q_ASSERT(acceptDocument(document));
 
     int index = documentIndexFromGUID(document.strGUID);
-    if (-1 == index)
-    {
+    if (-1 == index) {
         index = addDocument(document, false);
     }
+
     if (-1 == index)
         return;
 
@@ -242,19 +251,72 @@ void CWizDocumentListView::getSelectedDocuments(CWizDocumentDataArray& arrayDocu
 
 void CWizDocumentListView::contextMenuEvent(QContextMenuEvent * e)
 {
-    if (!m_menu)
-    {
-        m_menu = new QMenu(this);
-        m_menu->addAction(tr("Tags..."), this, SLOT(on_action_selectTags()));
-        m_menu->addSeparator();
-        m_menu->addAction(tr("Delete..."), this, SLOT(on_action_deleteDocument()));
+    // reset permission
+    resetPermission();
+    m_menu->popup(mapToGlobal(e->pos()));
+}
 
-        m_actionEncryptDocument = new QAction(tr("Encrypt Document"), m_menu);
-        connect(m_actionEncryptDocument, SIGNAL(triggered()), SLOT(on_action_encryptDocument()));
-        //m_menu->addAction(m_actionEncryptDocument);
+void CWizDocumentListView::resetPermission()
+{
+    // disable tags if group documents inside
+    if (isSelectedGroupDocument()) {
+        findAction(WIZACTION_LIST_TAGS)->setEnabled(false);
+    } else {
+        findAction(WIZACTION_LIST_TAGS)->setEnabled(true);
     }
 
-    m_menu->popup(mapToGlobal(e->pos()));
+    // disable delete if permission is not enough
+    if (!isSelectedAllCanDelete()) {
+        findAction(WIZACTION_LIST_DELETE)->setEnabled(false);
+    } else {
+        findAction(WIZACTION_LIST_DELETE)->setEnabled(true);
+    }
+}
+
+QAction* CWizDocumentListView::findAction(const QString& strName)
+{
+    QList<QAction *> actionList;
+    actionList.append(m_menu->actions());
+
+    QList<QAction *>::const_iterator it;
+    for (it = actionList.begin(); it != actionList.end(); it++) {
+        QAction* action = *it;
+        if (action->text() == strName) {
+            return action;
+        }
+    }
+
+    Q_ASSERT(0);
+    return NULL;
+}
+
+bool CWizDocumentListView::isSelectedGroupDocument()
+{
+    QList<QListWidgetItem*> items = selectedItems();
+    foreach (QListWidgetItem* it, items) {
+        if (CWizDocumentListViewItem* item = dynamic_cast<CWizDocumentListViewItem*>(it)) {
+            if (item->document().strKbGUID != m_dbMgr.db().kbGUID()) {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+bool CWizDocumentListView::isSelectedAllCanDelete()
+{
+    QList<QListWidgetItem*> items = selectedItems();
+    foreach (QListWidgetItem* it, items) {
+        if (CWizDocumentListViewItem* item = dynamic_cast<CWizDocumentListViewItem*>(it)) {
+            if (m_dbMgr.db(item->document().strKbGUID).permission()
+                    > WIZ_USERGROUP_EDITOR) {
+                return false;
+            }
+        }
+    }
+
+    return true;
 }
 
 void CWizDocumentListView::mousePressEvent(QMouseEvent* event)
@@ -285,10 +347,12 @@ void CWizDocumentListView::startDrag(Qt::DropActions supportedActions)
     CWizStdStringArray arrayGUID;
 
     QList<QListWidgetItem*> items = selectedItems();
-    foreach (QListWidgetItem* it, items)
-    {
-        if (CWizDocumentListViewItem* item = dynamic_cast<CWizDocumentListViewItem*>(it))
-        {
+    foreach (QListWidgetItem* it, items) {
+        if (CWizDocumentListViewItem* item = dynamic_cast<CWizDocumentListViewItem*>(it)) {
+            // not support drag group document currently
+            if (item->document().strKbGUID != m_dbMgr.db().kbGUID())
+                return;
+
             arrayGUID.push_back((item->document().strGUID));
         }
     }
@@ -316,8 +380,7 @@ void CWizDocumentListView::startDrag(Qt::DropActions supportedActions)
 
 void CWizDocumentListView::dragEnterEvent(QDragEnterEvent *event)
 {
-    if (event->mimeData()->hasFormat(WIZNOTE_MIMEFORMAT_TAGS))
-    {
+    if (event->mimeData()->hasFormat(WIZNOTE_MIMEFORMAT_TAGS)) {
         event->acceptProposedAction();
     }
 
@@ -326,8 +389,7 @@ void CWizDocumentListView::dragEnterEvent(QDragEnterEvent *event)
 
 void CWizDocumentListView::dragMoveEvent(QDragMoveEvent *event)
 {
-    if (event->mimeData()->hasFormat(WIZNOTE_MIMEFORMAT_TAGS))
-    {
+    if (event->mimeData()->hasFormat(WIZNOTE_MIMEFORMAT_TAGS)) {
         event->acceptProposedAction();
     }
 
@@ -347,9 +409,9 @@ void CWizDocumentListView::dropEvent(QDropEvent * event)
             foreach (const CString& strTagGUID, arrayTagGUID)
             {
                 WIZTAGDATA dataTag;
-                if (m_db.TagFromGUID(strTagGUID, dataTag))
+                if (m_dbMgr.db().TagFromGUID(strTagGUID, dataTag))
                 {
-                    CWizDocument doc(m_db, item->document());
+                    CWizDocument doc(m_dbMgr.db(), item->document());
                     doc.AddTag(dataTag);
                 }
             }
@@ -386,7 +448,7 @@ void CWizDocumentListView::on_document_modified(const WIZDOCUMENTDATA& documentO
 {
     Q_UNUSED(documentOld);
 
-    if (m_category.acceptDocument(documentNew))
+    if (acceptDocument(documentNew))
     {
         int index = documentIndexFromGUID(documentNew.strGUID);
         if (-1 == index)
@@ -397,7 +459,7 @@ void CWizDocumentListView::on_document_modified(const WIZDOCUMENTDATA& documentO
         {
             if (CWizDocumentListViewItem* pItem = documentItemAt(index))
             {
-                pItem->reload(m_db);
+                pItem->reload(m_dbMgr.db());
             }
         }
 
@@ -421,14 +483,18 @@ void CWizDocumentListView::on_document_deleted(const WIZDOCUMENTDATA& document)
     }
 }
 
-void CWizDocumentListView::on_document_AbstractModified(const WIZDOCUMENTDATA& document)
+void CWizDocumentListView::on_document_abstractLoaded(const WIZABSTRACT& abs)
 {
-    int index = documentIndexFromGUID(document.strGUID);
+    int index = documentIndexFromGUID(abs.guid);
     if (-1 == index)
         return;
 
+    // kbGUID also should equal
     CWizDocumentListViewItem* pItem = documentItemAt(index);
-    pItem->resetAbstract();
+    if (pItem->document().strKbGUID != abs.strKbGUID)
+        return;
+
+    pItem->resetAbstract(abs);
 
     QRect rc = visualItemRect(pItem);
     repaint(rc);
@@ -446,7 +512,7 @@ void CWizDocumentListView::on_action_selectTags()
 
         if (!m_tagList)
         {
-            m_tagList = new CWizTagListWidget(m_db, this);
+            m_tagList = new CWizTagListWidget(m_dbMgr, this);
             m_tagList->setLeftAlign(true);
         }
 
@@ -459,11 +525,9 @@ void CWizDocumentListView::on_action_deleteDocument()
 {
     QList<QListWidgetItem*> items = selectedItems();
 
-    foreach (QListWidgetItem* it, items)
-    {
-        if (CWizDocumentListViewItem* item = dynamic_cast<CWizDocumentListViewItem*>(it))
-        {
-            CWizDocument doc(m_db, item->document());
+    foreach (QListWidgetItem* it, items) {
+        if (CWizDocumentListViewItem* item = dynamic_cast<CWizDocumentListViewItem*>(it)) {
+            CWizDocument doc(m_dbMgr.db(item->document().strKbGUID), item->document());
             doc.Delete();
         }
     }
@@ -475,7 +539,7 @@ void CWizDocumentListView::on_action_encryptDocument()
 
     foreach (QListWidgetItem* it, items) {
         if (CWizDocumentListViewItem* item = dynamic_cast<CWizDocumentListViewItem*>(it)) {
-            CWizDocument doc(m_db, item->document());
+            CWizDocument doc(m_dbMgr.db(), item->document());
             doc.encryptDocument();
         }
     }
@@ -515,12 +579,12 @@ WIZDOCUMENTDATA CWizDocumentListView::documentFromIndex(const QModelIndex &index
 
 WIZABSTRACT CWizDocumentListView::documentAbstractFromIndex(const QModelIndex &index) const
 {
-    return documentItemFromIndex(index)->abstract(m_db);
+    return documentItemFromIndex(index)->abstract(*m_thumbCache);
 }
 
 CString CWizDocumentListView::documentTagsFromIndex(const QModelIndex &index) const
 {
-    return documentItemFromIndex(index)->tags(m_db);
+    return documentItemFromIndex(index)->tags(m_dbMgr.db());
 }
 
 

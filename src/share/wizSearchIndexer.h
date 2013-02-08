@@ -3,9 +3,10 @@
 
 #include <QThread>
 #include <QTimer>
+#include <QMetaType>
 
 #include "wizClucene.h"
-#include "wizdatabase.h"
+#include "wizDatabaseManager.h"
 
 
 class CWizSearchIndexer
@@ -15,11 +16,13 @@ class CWizSearchIndexer
     Q_OBJECT
 
 public:
-    explicit CWizSearchIndexer(CWizDatabase& db, QObject *parent = 0);
+    explicit CWizSearchIndexer(CWizDatabaseManager& dbMgr, QObject *parent = 0);
 
 // only call these methods use QMetaObject::invokeMethod
 public Q_SLOTS:
+    bool isFTSEnabled();
     bool buildFTSIndex();
+    bool buildFTSIndexByDatabase(CWizDatabase& db);
     bool rebuildFTSIndex();
     bool updateDocument(const WIZDOCUMENTDATAEX& doc);
     bool updateDocuments(const CWizDocumentDataArray& arrayDocuments);
@@ -32,9 +35,9 @@ protected:
     virtual bool onSearchEnd();
 
 private:
-    CWizDatabase& m_db;
+    CWizDatabaseManager& m_dbMgr;
     QString m_strIndexPath;
-    QString m_strKbGUID;
+    //QString m_strKbGUID;
 
     // collect search result and emit documentFind signal for every m_nMaxResult times
     // this variable is used for tuning proformance of clucene search engine
@@ -44,9 +47,8 @@ private:
     bool m_bSearchEnd;
 
     // store search result for signal emiting
-    CWizStdStringArray m_arrayGUIDs;
+    CWizDocumentDataArray m_arrayDocument;
 
-    bool _initKbGUID();
     bool _updateDocumentImpl(void *pHandle, const WIZDOCUMENTDATAEX& doc);
 
 private Q_SLOTS:
@@ -73,16 +75,21 @@ class CWizSearchIndexerThread : public QThread
     Q_OBJECT
 
 public:
-    CWizSearchIndexerThread(CWizDatabase& db, QObject *parent = 0)
+    CWizSearchIndexerThread(CWizDatabaseManager& dbMgr, QObject *parent = 0)
         : QThread(parent)
-        , m_db(db)
+        , m_dbMgr(dbMgr)
+        , m_indexer(NULL)
     {
+    }
+
+    ~CWizSearchIndexerThread()
+    {
+        delete m_indexer;
     }
 
     virtual void run()
     {
-        CWizSearchIndexer indexer(m_db);
-        m_indexer = &indexer;
+        m_indexer = new CWizSearchIndexer(m_dbMgr);
 
         qRegisterMetaType<CWizDocumentDataArray>("CWizDocumentDataArray");
 
@@ -93,11 +100,15 @@ public:
         exec();
     }
 
-    QPointer<CWizSearchIndexer> worker() const { return m_indexer; }
+    CWizSearchIndexer* worker() const
+    {
+        Q_ASSERT(m_indexer);
+        return m_indexer;
+    }
 
 private:
     QPointer<CWizSearchIndexer> m_indexer;
-    CWizDatabase& m_db;
+    CWizDatabaseManager& m_dbMgr;
 
 Q_SIGNALS:
     void documentFind(const CWizDocumentDataArray& arrayDocument);

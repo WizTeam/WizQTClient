@@ -1,11 +1,18 @@
 #include "wizCategoryViewItem.h"
 
 #include "wizcategoryview.h"
+#include "share/wizsettings.h"
+#include "wiznotestyle.h"
 
-CWizCategoryViewItemBase::CWizCategoryViewItemBase(CWizExplorerApp& app, const QString& strName)
+/* ------------------------------ CWizCategoryViewItemBase ------------------------------ */
+
+CWizCategoryViewItemBase::CWizCategoryViewItemBase(CWizExplorerApp& app,
+                                                   const QString& strName,
+                                                   const QString& strKbGUID)
     : QTreeWidgetItem()
     , m_app(app)
     , m_strName(strName)
+    , m_strKbGUID(strKbGUID)
 {
 }
 
@@ -33,6 +40,8 @@ bool CWizCategoryViewItemBase::operator < (const QTreeWidgetItem &other) const
 }
 
 
+/* ------------------------------ CWizCategoryViewSeparatorItem ------------------------------ */
+
 CWizCategoryViewSeparatorItem::CWizCategoryViewSeparatorItem(CWizExplorerApp& app)
     : CWizCategoryViewItemBase(app)
 {
@@ -46,11 +55,17 @@ int CWizCategoryViewSeparatorItem::getItemHeight(int hintHeight) const
 }
 
 
-CWizCategoryViewAllFoldersItem::CWizCategoryViewAllFoldersItem(CWizExplorerApp& app, const QString& str)
-    : CWizCategoryViewItemBase(app, str)
+/* ------------------------------ CWizCategoryViewAllFoldersItem ------------------------------ */
+
+CWizCategoryViewAllFoldersItem::CWizCategoryViewAllFoldersItem(CWizExplorerApp& app,
+                                                               const QString& strName,
+                                                               const QString& strKbGUID)
+    : CWizCategoryViewItemBase(app, strName, strKbGUID)
 {
-    setText(0, str);
-    setIcon(0, ::WizLoadSkinIcon(app.userSettings().skin(), "folders"));
+    QColor color = ::WizGetCategoryBackroundColor(app.userSettings().skin());
+
+    setText(0, strName);
+    setIcon(0, ::WizLoadSkinIcon(app.userSettings().skin(), color, "folder"));
 }
 
 void CWizCategoryViewAllFoldersItem::getDocuments(CWizDatabase& db, CWizDocumentDataArray& arrayDocument)
@@ -68,7 +83,11 @@ bool CWizCategoryViewAllFoldersItem::accept(CWizDatabase& db, const WIZDOCUMENTD
     }
 
     COleDateTime t = data.tCreated;
-    return t.addDays(60) >= WizGetCurrentTime();
+    if (t.addDays(60) >= WizGetCurrentTime() && data.strKbGUID == kbGUID()) {
+        return true;
+    }
+
+    return false;
 }
 
 void CWizCategoryViewAllFoldersItem::showContextMenu(CWizCategoryBaseView* pCtrl, QPoint pos)
@@ -79,16 +98,22 @@ void CWizCategoryViewAllFoldersItem::showContextMenu(CWizCategoryBaseView* pCtrl
 }
 
 
-CWizCategoryViewFolderItem::CWizCategoryViewFolderItem(CWizExplorerApp& app, const QString& strLocation)
-    : CWizCategoryViewItemBase(app, strLocation)
+/* ------------------------------ CWizCategoryViewFolderItem ------------------------------ */
+
+CWizCategoryViewFolderItem::CWizCategoryViewFolderItem(CWizExplorerApp& app,
+                                                       const QString& strLocation,
+                                                       const QString& strKbGUID)
+    : CWizCategoryViewItemBase(app, strLocation, strKbGUID)
 {
+    QColor color = ::WizGetCategoryBackroundColor(app.userSettings().skin());
+
     setText(0, CWizDatabase::GetLocationDisplayName(strLocation));
-    setIcon(0, ::WizLoadSkinIcon(m_app.userSettings().skin(), "folder"));
+    setIcon(0, ::WizLoadSkinIcon(m_app.userSettings().skin(), color, "folder"));
 }
 
 QTreeWidgetItem* CWizCategoryViewFolderItem::clone() const
 {
-    return new CWizCategoryViewFolderItem(m_app, m_strName);
+    return new CWizCategoryViewFolderItem(m_app, m_strName, m_strKbGUID);
 }
 
 void CWizCategoryViewFolderItem::getDocuments(CWizDatabase& db, CWizDocumentDataArray& arrayDocument)
@@ -99,7 +124,12 @@ void CWizCategoryViewFolderItem::getDocuments(CWizDatabase& db, CWizDocumentData
 bool CWizCategoryViewFolderItem::accept(CWizDatabase& db, const WIZDOCUMENTDATA& data)
 {
     Q_UNUSED(db);
-    return m_strName == data.strLocation;
+
+    if (m_strName == data.strLocation && data.strKbGUID == kbGUID()) {
+        return true;
+    }
+
+    return false;
 }
 
 void CWizCategoryViewFolderItem::showContextMenu(CWizCategoryBaseView* pCtrl, QPoint pos)
@@ -110,11 +140,17 @@ void CWizCategoryViewFolderItem::showContextMenu(CWizCategoryBaseView* pCtrl, QP
 }
 
 
-CWizCategoryViewAllTagsItem::CWizCategoryViewAllTagsItem(CWizExplorerApp& app, const QString& str)
-    : CWizCategoryViewItemBase(app, str)
+/* ------------------------------ CWizCategoryViewAllTagsItem ------------------------------ */
+
+CWizCategoryViewAllTagsItem::CWizCategoryViewAllTagsItem(CWizExplorerApp& app,
+                                                         const QString& strName,
+                                                         const QString& strKbGUID)
+    : CWizCategoryViewItemBase(app, strName, strKbGUID)
 {
-    setText(0, str);
-    setIcon(0, ::WizLoadSkinIcon(app.userSettings().skin(), "tags"));
+    QColor color = ::WizGetCategoryBackroundColor(app.userSettings().skin());
+
+    setText(0, strName);
+    setIcon(0, ::WizLoadSkinIcon(app.userSettings().skin(), color, "tags"));
 }
 
 void CWizCategoryViewAllTagsItem::showContextMenu(CWizCategoryBaseView* pCtrl, QPoint pos)
@@ -124,18 +160,40 @@ void CWizCategoryViewAllTagsItem::showContextMenu(CWizCategoryBaseView* pCtrl, Q
     }
 }
 
+void CWizCategoryViewAllTagsItem::getDocuments(CWizDatabase& db, CWizDocumentDataArray& arrayDocument)
+{
+    // no deleted
+    db.getDocumentsNoTag(arrayDocument, false);
+}
 
-CWizCategoryViewTagItem::CWizCategoryViewTagItem(CWizExplorerApp& app, const WIZTAGDATA& tag)
-    : CWizCategoryViewItemBase(app)
+bool CWizCategoryViewAllTagsItem::accept(CWizDatabase& db, const WIZDOCUMENTDATA& data)
+{
+    CString strTagGUIDs = db.GetDocumentTagGUIDsString(data.strGUID);
+    if (strTagGUIDs.isEmpty() && data.strKbGUID == kbGUID()) {
+        return true;
+    }
+
+    return false;
+}
+
+
+/* ------------------------------ CWizCategoryViewTagItem ------------------------------ */
+
+CWizCategoryViewTagItem::CWizCategoryViewTagItem(CWizExplorerApp& app,
+                                                 const WIZTAGDATA& tag,
+                                                 const QString& strKbGUID)
+    : CWizCategoryViewItemBase(app, tag.strName, strKbGUID)
     , m_tag(tag)
 {
+    QColor color = ::WizGetCategoryBackroundColor(app.userSettings().skin());
+
     setText(0, CWizDatabase::TagNameToDisplayName(tag.strName));
-    setIcon(0, ::WizLoadSkinIcon(app.userSettings().skin(), "tag"));
+    setIcon(0, ::WizLoadSkinIcon(app.userSettings().skin(), color, "tag"));
 }
 
 QTreeWidgetItem* CWizCategoryViewTagItem::clone() const
 {
-    return new CWizCategoryViewTagItem(m_app, m_tag);
+    return new CWizCategoryViewTagItem(m_app, m_tag, m_strKbGUID);
 }
 
 void CWizCategoryViewTagItem::getDocuments(CWizDatabase& db, CWizDocumentDataArray& arrayDocument)
@@ -146,7 +204,12 @@ void CWizCategoryViewTagItem::getDocuments(CWizDatabase& db, CWizDocumentDataArr
 bool CWizCategoryViewTagItem::accept(CWizDatabase& db, const WIZDOCUMENTDATA& data)
 {
     CString strTagGUIDs = db.GetDocumentTagGUIDsString(data.strGUID);
-    return -1 != strTagGUIDs.Find(m_tag.strGUID);
+
+    if (strTagGUIDs.Find(m_tag.strGUID) != -1 && data.strKbGUID == kbGUID()) {
+        return true;
+    }
+
+    return false;
 }
 
 void CWizCategoryViewTagItem::showContextMenu(CWizCategoryBaseView* pCtrl, QPoint pos)
@@ -162,23 +225,122 @@ void CWizCategoryViewTagItem::reload(CWizDatabase& db)
     setText(0, m_tag.strName);
 }
 
-const WIZTAGDATA& CWizCategoryViewTagItem::tag() const
+
+/* ------------------------------ CWizCategoryViewGroupRootItem ------------------------------ */
+
+CWizCategoryViewGroupRootItem::CWizCategoryViewGroupRootItem(CWizExplorerApp& app,
+                                                             const QString& strName,
+                                                             const QString& strKbGUID)
+    : CWizCategoryViewItemBase(app, strName, strKbGUID)
 {
-    return m_tag;
+    QColor color = ::WizGetCategoryBackroundColor(app.userSettings().skin());
+
+    setText(0, strName);
+    setIcon(0, ::WizLoadSkinIcon(app.userSettings().skin(), color, "groups"));
+}
+
+void CWizCategoryViewGroupRootItem::showContextMenu(CWizCategoryBaseView* pCtrl, QPoint pos)
+{
+    if (CWizCategoryGroupsView* view = dynamic_cast<CWizCategoryGroupsView *>(pCtrl)) {
+        if (!m_strKbGUID.isEmpty()) {
+            view->showGroupRootContextMenu(m_strKbGUID, pos);
+        }
+    }
+}
+
+void CWizCategoryViewGroupRootItem::getDocuments(CWizDatabase& db,
+                                                 CWizDocumentDataArray& arrayDocument)
+{
+    db.getDocumentsNoTag(arrayDocument, false);
+}
+
+bool CWizCategoryViewGroupRootItem::accept(CWizDatabase& db,
+                                           const WIZDOCUMENTDATA& data)
+{
+    if (db.IsInDeletedItems(data.strLocation)) {
+        return false;
+    }
+
+    QString strTagGUIDs = db.GetDocumentTagGUIDsString(data.strGUID);
+    if (strTagGUIDs.isEmpty() && data.strKbGUID == kbGUID()) {
+        return true;
+    }
+
+    return false;
+}
+
+void CWizCategoryViewGroupRootItem::reload(CWizDatabase& db)
+{
+    setText(0, db.name());
 }
 
 
-CWizCategoryViewTrashItem::CWizCategoryViewTrashItem(CWizExplorerApp& app, const QString& str)
-    : CWizCategoryViewFolderItem(app, "/Deleted Items/")
+/* ------------------------------ CWizCategoryViewGroupItem ------------------------------ */
+
+CWizCategoryViewGroupItem::CWizCategoryViewGroupItem(CWizExplorerApp& app,
+                                                     const WIZTAGDATA& tag,
+                                                     const QString& strKbGUID)
+    : CWizCategoryViewItemBase(app, tag.strName, strKbGUID)
+    , m_tag(tag)
 {
-    setText(0, str);
-    setIcon(0, ::WizLoadSkinIcon(app.userSettings().skin(), "trash"));
+    QColor color = ::WizGetCategoryBackroundColor(app.userSettings().skin());
+
+    setText(0, CWizDatabase::TagNameToDisplayName(tag.strName));
+    setIcon(0, ::WizLoadSkinIcon(app.userSettings().skin(), color, "tag"));
+}
+
+void CWizCategoryViewGroupItem::showContextMenu(CWizCategoryBaseView* pCtrl, QPoint pos)
+{
+    if (CWizCategoryGroupsView* view = dynamic_cast<CWizCategoryGroupsView *>(pCtrl)) {
+        view->showGroupContextMenu(m_strKbGUID, pos);
+    }
+}
+
+void CWizCategoryViewGroupItem::getDocuments(CWizDatabase& db,
+                                           CWizDocumentDataArray& arrayDocument)
+{
+    db.GetDocumentsByTag(m_tag, arrayDocument);
+}
+
+bool CWizCategoryViewGroupItem::accept(CWizDatabase& db,
+                                       const WIZDOCUMENTDATA& data)
+{
+    if (db.IsInDeletedItems(data.strLocation)) {
+        return false;
+    }
+
+    QString strTagGUIDs = db.GetDocumentTagGUIDsString(data.strGUID);
+    if (strTagGUIDs.indexOf(m_tag.strGUID) != -1 && data.strKbGUID == kbGUID()) {
+        return true;
+    }
+
+    return false;
+}
+
+void CWizCategoryViewGroupItem::reload(CWizDatabase& db)
+{
+    db.TagFromGUID(m_tag.strGUID, m_tag);
+    setText(0, m_tag.strName);
+}
+
+
+/* ------------------------------ CWizCategoryViewTrashItem ------------------------------ */
+
+CWizCategoryViewTrashItem::CWizCategoryViewTrashItem(CWizExplorerApp& app,
+                                                     const QString& strName,
+                                                     const QString& strKbGUID)
+    : CWizCategoryViewFolderItem(app, "/Deleted Items/", strKbGUID)
+{
+    QColor color = ::WizGetCategoryBackroundColor(app.userSettings().skin());
+
+    setText(0, strName);
+    setIcon(0, ::WizLoadSkinIcon(app.userSettings().skin(), color, "trash"));
 }
 
 void CWizCategoryViewTrashItem::showContextMenu(CWizCategoryBaseView* pCtrl, QPoint pos)
 {
-    if (CWizCategoryView* view = dynamic_cast<CWizCategoryView *>(pCtrl)) {
-        view->showTrashContextMenu(pos);
+    if (CWizCategoryBaseView* view = dynamic_cast<CWizCategoryBaseView *>(pCtrl)) {
+        view->showTrashContextMenu(pos, m_strKbGUID);
     }
 }
 
@@ -193,11 +355,13 @@ bool CWizCategoryViewTrashItem::accept(CWizDatabase& db, const WIZDOCUMENTDATA& 
 }
 
 
+/* ------------------------------ CWizCategoryViewSearchItem ------------------------------ */
+
 CWizCategoryViewSearchItem::CWizCategoryViewSearchItem(CWizExplorerApp& app, const QString& keywords)
     : CWizCategoryViewItemBase(app, keywords)
 {
     setKeywords(keywords);
-    setIcon(0, WizLoadSkinIcon(app.userSettings().skin(), "search"));
+    setIcon(0, WizLoadSkinIcon(app.userSettings().skin(), QColor(0xff, 0xff, 0xff), "search"));
 }
 
 bool CWizCategoryViewSearchItem::accept(CWizDatabase& db, const WIZDOCUMENTDATA& data)

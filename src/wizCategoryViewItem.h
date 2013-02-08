@@ -4,25 +4,28 @@
 #include <QTreeWidget>
 
 #include "wizdef.h"
+#include "share/wizDatabase.h"
 
 class CWizCategoryBaseView;
-
 
 class CWizCategoryViewItemBase : public QTreeWidgetItem
 {
 public:
-    CWizCategoryViewItemBase(CWizExplorerApp& app, const QString& strName = QString());
+    CWizCategoryViewItemBase(CWizExplorerApp& app, const QString& strName = "", const QString& strKbGUID = "");
     virtual void showContextMenu(CWizCategoryBaseView* pCtrl, QPoint pos) = 0;
-    virtual void getDocuments(CWizDatabase& db, CWizDocumentDataArray& arrayDocument) = 0;
+    virtual void getDocuments(CWizDatabase& dbMgr, CWizDocumentDataArray& arrayDocument) = 0;
     virtual bool accept(CWizDatabase& db, const WIZDOCUMENTDATA& data) { Q_UNUSED(db); Q_UNUSED(data); return false; }
 
     virtual QVariant data(int column, int role) const;
     virtual int getItemHeight(int hintHeight) const;
     virtual bool operator<(const QTreeWidgetItem &other) const;
 
+    const QString& kbGUID() const { return m_strKbGUID; }
+
 protected:
     CWizExplorerApp& m_app;
     QString m_strName;
+    QString m_strKbGUID;
 };
 
 class CWizCategoryViewSeparatorItem : public CWizCategoryViewItemBase
@@ -37,7 +40,7 @@ public:
 class CWizCategoryViewAllFoldersItem : public CWizCategoryViewItemBase
 {
 public:
-    CWizCategoryViewAllFoldersItem(CWizExplorerApp& app, const QString& str);
+    CWizCategoryViewAllFoldersItem(CWizExplorerApp& app, const QString& strName, const QString& strKbGUID);
     virtual void showContextMenu(CWizCategoryBaseView* pCtrl, QPoint pos);
     virtual void getDocuments(CWizDatabase& db, CWizDocumentDataArray& arrayDocument);
     virtual bool accept(CWizDatabase& db, const WIZDOCUMENTDATA& data);
@@ -46,7 +49,7 @@ public:
 class CWizCategoryViewFolderItem : public CWizCategoryViewItemBase
 {
 public:
-    CWizCategoryViewFolderItem(CWizExplorerApp& app, const QString& strLocation);
+    CWizCategoryViewFolderItem(CWizExplorerApp& app, const QString& strLocation, const QString& strKbGUID);
     virtual void showContextMenu(CWizCategoryBaseView* pCtrl, QPoint pos);
     virtual void getDocuments(CWizDatabase& db, CWizDocumentDataArray& arrayDocument);
     virtual bool accept(CWizDatabase& db, const WIZDOCUMENTDATA& data);
@@ -60,15 +63,16 @@ public:
 class CWizCategoryViewAllTagsItem : public CWizCategoryViewItemBase
 {
 public:
-    CWizCategoryViewAllTagsItem(CWizExplorerApp& app, const QString& str);
+    CWizCategoryViewAllTagsItem(CWizExplorerApp& app, const QString& strName, const QString& strKbGUID);
     virtual void showContextMenu(CWizCategoryBaseView* pCtrl, QPoint pos);
-    virtual void getDocuments(CWizDatabase& db, CWizDocumentDataArray& arrayDocument) { Q_UNUSED(db); Q_UNUSED(arrayDocument); }
+    virtual void getDocuments(CWizDatabase& db, CWizDocumentDataArray& arrayDocument);
+    virtual bool accept(CWizDatabase& db, const WIZDOCUMENTDATA& data);
 };
 
 class CWizCategoryViewTagItem : public CWizCategoryViewItemBase
 {
 public:
-    CWizCategoryViewTagItem(CWizExplorerApp& app, const WIZTAGDATA& tag);
+    CWizCategoryViewTagItem(CWizExplorerApp& app, const WIZTAGDATA& tag, const QString& strKbGUID);
     virtual void showContextMenu(CWizCategoryBaseView* pCtrl, QPoint pos);
     virtual void getDocuments(CWizDatabase& db, CWizDocumentDataArray& arrayDocument);
     virtual bool accept(CWizDatabase& db, const WIZDOCUMENTDATA& data);
@@ -76,7 +80,32 @@ public:
     virtual QTreeWidgetItem *clone() const;
 
     void reload(CWizDatabase& db);
-    const WIZTAGDATA& tag() const;
+    const WIZTAGDATA& tag() const { return m_tag; }
+
+private:
+    WIZTAGDATA m_tag;
+};
+
+class CWizCategoryViewGroupRootItem : public CWizCategoryViewItemBase
+{
+public:
+    CWizCategoryViewGroupRootItem(CWizExplorerApp& app, const QString& strName, const QString& strKbGUID);
+    virtual void showContextMenu(CWizCategoryBaseView* pCtrl, QPoint pos);
+    virtual void getDocuments(CWizDatabase& db, CWizDocumentDataArray& arrayDocument);
+    virtual bool accept(CWizDatabase& db, const WIZDOCUMENTDATA& data);
+    void reload(CWizDatabase& db);
+};
+
+class CWizCategoryViewGroupItem : public CWizCategoryViewItemBase
+{
+public:
+    CWizCategoryViewGroupItem(CWizExplorerApp& app, const WIZTAGDATA& tag, const QString& strKbGUID);
+    virtual void showContextMenu(CWizCategoryBaseView* pCtrl, QPoint pos);
+    virtual void getDocuments(CWizDatabase& db, CWizDocumentDataArray& arrayDocument);
+    virtual bool accept(CWizDatabase& db, const WIZDOCUMENTDATA& data);
+    void reload(CWizDatabase& db);
+
+    const WIZTAGDATA& tag() const { return m_tag; }
 
 private:
     WIZTAGDATA m_tag;
@@ -85,7 +114,7 @@ private:
 class CWizCategoryViewTrashItem : public CWizCategoryViewFolderItem
 {
 public:
-    CWizCategoryViewTrashItem(CWizExplorerApp& app, const QString& str);
+    CWizCategoryViewTrashItem(CWizExplorerApp& app, const QString& strName, const QString& strKbGUID);
     virtual void showContextMenu(CWizCategoryBaseView* pCtrl, QPoint pos);
     virtual void getDocuments(CWizDatabase& db, CWizDocumentDataArray& arrayDocument);
     virtual bool accept(CWizDatabase& db, const WIZDOCUMENTDATA& data);

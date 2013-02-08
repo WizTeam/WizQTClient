@@ -4,7 +4,8 @@
 #include <QCheckBox>
 
 #include "share/wizpopupwidget.h"
-#include "share/wizdatabase.h"
+#include "share/wizDatabaseManager.h"
+
 class QScrollArea;
 
 class QLineEdit;
@@ -14,14 +15,14 @@ class CWizTagListWidget : public CWizPopupWidget
 {
     Q_OBJECT
 public:
-    CWizTagListWidget(CWizDatabase& db, QWidget* parent);
+    CWizTagListWidget(CWizDatabaseManager& db, QWidget* parent);
 
     void setDocument(const WIZDOCUMENTDATA& data);
 
 private:
     QLineEdit* m_tagsEdit;
     QScrollArea* m_scroll;
-    CWizDatabase& m_db;
+    CWizDatabaseManager& m_dbMgr;
     WIZDOCUMENTDATA m_document;
 
     void updateTagsText();

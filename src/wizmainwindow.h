@@ -20,7 +20,6 @@
 #include "wizcategoryview.h"
 #include "wizdocumentlistview.h"
 
-class CWizCategoryView;
 class CWizDocumentListView;
 class CWizDocumentView;
 class CWizActions;
@@ -42,7 +41,7 @@ class MainWindow
     Q_OBJECT
 
 public:
-    explicit MainWindow(CWizDatabase& db, QWidget *parent = 0);
+    explicit MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent = 0);
     virtual void init();
 
     void saveStatus();
@@ -61,7 +60,7 @@ protected:
     virtual void closeEvent(QCloseEvent* event);
 
 private:
-    CWizDatabase& m_db;
+    CWizDatabaseManager& m_dbMgr;
     CWizUserSettings* m_settings;
     QPointer<CWizSyncThread> m_sync;
     QPointer<QTimer> m_syncTimer;
@@ -69,6 +68,7 @@ private:
     QPointer<CWizUpgradeThread> m_upgrade;
     QPointer<CWizCertManager> m_certManager;
     QPointer<CWizUserCipherForm> m_cipherForm;
+    QPointer<CWizGroupAttributeForm> m_groupAttribute;
     QPointer<CWizDownloadObjectDataDialog> m_objectDownloadDialog;
     QToolBar* m_toolBar;
     QMenuBar* m_menuBar;
@@ -80,8 +80,10 @@ private:
 #endif
 
     CWizActions* m_actions;
-    CWizCategoryView* m_category;
-    CWizCategoryTagsView* m_categoryTags;
+    QPointer<CWizCategoryBaseView> m_category;
+    QPointer<CWizCategoryView> m_categoryPrivate;
+    QPointer<CWizCategoryTagsView> m_categoryTags;
+    QPointer<CWizCategoryGroupsView> m_categoryGroups;
     QWidget* m_categoryLayer;
     CWizDocumentListView* m_documents;
     CWizDocumentView* m_doc;
@@ -115,11 +117,14 @@ private:
 public:
     // CWizDocument passthrough methods
     QWidget* client() const { return m_doc->client(); }
+    CWizDocumentWebView* web() const { return m_doc->web(); }
     void showClient(bool visible) const { return m_doc->showClient(visible); }
 
     CWizUserCipherForm* cipherForm() const { return m_cipherForm; }
+    CWizGroupAttributeForm* groupAttributeForm() { return m_groupAttribute; }
     CWizDownloadObjectDataDialog* objectDownloadDialog() const { return m_objectDownloadDialog; }
 
+    void resetPermission(const QString& strKbGUID, const QString& strDocumentOwner);
     void viewDocument(const WIZDOCUMENTDATA& data, bool addToHistory);
     void locateDocument(const WIZDOCUMENTDATA& data);
 
@@ -133,13 +138,15 @@ public Q_SLOTS:
     void on_actionConsole_triggered();
     void on_actionSync_triggered();
     void on_actionNewNote_triggered();
-    void on_actionDeleteCurrentNote_triggered();
+    //void on_actionDeleteCurrentNote_triggered();
     void on_actionLogout_triggered();
     void on_actionAbout_triggered();
     void on_actionPreference_triggered();
     void on_actionRebuildFTS_triggered();
     void on_actionSearch_triggered();
     void on_actionResetSearch_triggered();
+
+    void on_searchIndexerStarted();
     void on_searchDocumentFind(const CWizDocumentDataArray& arrayDocument);
 
     void on_actionGoBack_triggered();
@@ -182,8 +189,8 @@ public:
     // WizExplorerApp pointer
     virtual QWidget* mainWindow() { return this; }
     virtual QObject* object() { return this; }
-    virtual CWizDatabase& database() { return m_db; }
-    virtual CWizCategoryView& category() { return *m_category; }
+    virtual CWizDatabaseManager& databaseManager() { return m_dbMgr; }
+    virtual CWizCategoryBaseView& category() { return *m_category; }
     virtual CWizUserSettings& userSettings() { return *m_settings; }
 
     //WizExplorerApp API:
@@ -196,8 +203,8 @@ public:
     QObject* DocumentsCtrl() { return m_documents; }
     Q_PROPERTY(QObject* DocumentsCtrl READ DocumentsCtrl)
 
-    QObject* Database() { return &m_db; }
-    Q_PROPERTY(QObject* Database READ Database)
+    QObject* DatabaseManager() { return &m_dbMgr; }
+    Q_PROPERTY(QObject* DatabaseManager READ DatabaseManager)
 
     Q_INVOKABLE QObject* CreateWizObject(const QString& strObjectID);
     Q_INVOKABLE void SetDocumentModified(bool modified);

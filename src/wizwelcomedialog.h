@@ -43,7 +43,7 @@ private:
 public Q_SLOTS:
     virtual void accept();
 
-    void verifyAccountDone(bool succeeded, const CString& errorMessage);
+    void verifyAccountDone(bool succeeded, int errorCode, const QString& errorMessage);
     void on_webView_linkClicked(const QUrl& url);
     void on_labelProxySettings_linkActivated(const QString& link);
 

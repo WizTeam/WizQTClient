@@ -15,7 +15,7 @@
 CWizDocumentWebView::CWizDocumentWebView(CWizExplorerApp& app, QWidget* parent /*= 0*/)
     : QWebView(parent)
     , m_app(app)
-    , m_db(app.database())
+    , m_dbMgr(app.databaseManager())
     , m_bEditorInited(false)
 {
     setAcceptDrops(false);
@@ -26,24 +26,60 @@ CWizDocumentWebView::CWizDocumentWebView(CWizExplorerApp& app, QWidget* parent /
     setAttribute(Qt::WA_InputMethodEnabled);
     connect(this, SIGNAL(selectionChanged()), SLOT(onSelectionChanged()));
 
-    // FIXME: stub here
-    m_timerAutoSave.setInterval(5*60*1000);
-    connect(&m_timerAutoSave, SIGNAL(timeout()), SLOT(onTimerAutoSaveTimout()));
-
     MainWindow* mainWindow = qobject_cast<MainWindow *>(m_app.mainWindow());
+
     m_cipherDialog = mainWindow->cipherForm();
     connect(m_cipherDialog, SIGNAL(accepted()), SLOT(onCipherDialogClosed()));
 
     m_downloadDialog = mainWindow->objectDownloadDialog();
     connect(m_downloadDialog, SIGNAL(finished(int)), SLOT(onDownloadDialogClosed(int)));
+
+    m_renderer = new CWizDocumentWebViewRenderer(m_app);
+    connect(m_renderer, SIGNAL(documentReady(const QString&)), SLOT(on_documentReady(const QString&)));
+    connect(m_renderer, SIGNAL(documentSaved(bool)), SLOT(on_documentSaved(bool)));
+
+    QThread* thread = new QThread();
+    m_renderer->moveToThread(thread);
+    thread->start();
+
+    m_timerAutoSave.setInterval(10*1000); // 5 minutes
+    connect(&m_timerAutoSave, SIGNAL(timeout()), SLOT(onTimerAutoSaveTimout()));
 }
+
+void CWizDocumentWebView::onTimerAutoSaveTimout()
+{
+    saveDocument(false);
+}
+
+void CWizDocumentWebView::on_documentReady(const QString& strFileName)
+{
+    m_strHtmlFileName = strFileName;
+
+    if (m_bEditorInited) {
+        viewDocumentInEditor(m_bEditingMode);
+    } else {
+        initEditorAndLoadDocument();
+    }
+}
+
+void CWizDocumentWebView::on_documentSaved(bool ok)
+{
+    if (!ok) {
+        TOLOG("Save document failed");
+    }
+
+    MainWindow* mainWindow = qobject_cast<MainWindow *>(m_app.mainWindow());
+    mainWindow->SetSavingDocument(false);
+}
+
 
 // This is bug of QWebView: can't receive input method commit event
 void CWizDocumentWebView::inputMethodEvent(QInputMethodEvent* event)
 {
     if (!event->commitString().isEmpty()) {
-        QString strScript("setModified(true);");
-        page()->mainFrame()->evaluateJavaScript(strScript);
+        // indirect set modified flag
+        MainWindow* mainWindow = qobject_cast<MainWindow *>(m_app.mainWindow());
+        mainWindow->SetDocumentModified(true);
     }
 
     update();
@@ -71,9 +107,87 @@ void CWizDocumentWebView::onSelectionChanged()
     update();
 }
 
-void CWizDocumentWebView::onTimerAutoSaveTimout()
+void CWizDocumentWebView::viewDocument(const WIZDOCUMENTDATA& doc, bool editing)
 {
-    saveDocument(false);
+    // clear gui
+    MainWindow* window = qobject_cast<MainWindow *>(m_app.mainWindow());
+    window->showClient(false);
+
+    // save document
+    if (m_bEditorInited) {
+        saveDocument(false);
+    }
+
+    // set data
+    m_renderer->setData(doc);
+    m_bEditingMode = editing;
+
+    // download document if not exist
+    CWizDatabase& db = m_dbMgr.db(doc.strKbGUID);
+    QString strDocumentFileName = db.GetDocumentFileName(doc.strGUID);
+    if (!db.IsObjectDataDownloaded(doc.strGUID, "document") || \
+            !PathFileExists(strDocumentFileName)) {
+        MainWindow* window = qobject_cast<MainWindow *>(m_app.mainWindow());
+        window->showClient(false);
+
+        m_downloadDialog->downloadData(doc);
+
+        return;
+    }
+
+    // ask user cipher if needed
+    if (doc.nProtected) {
+        if(!db.loadUserCert()) {
+            return;
+        }
+
+        if (db.userCipher().isEmpty()) {
+            MainWindow* window = qobject_cast<MainWindow *>(m_app.mainWindow());
+            window->showClient(false);
+
+            m_cipherDialog->setHint(db.userCipherHint());
+            m_cipherDialog->sheetShow();
+
+            return;
+        }
+    }
+
+    // ask extract and load
+    m_renderer->load();
+}
+
+void CWizDocumentWebView::onCipherDialogClosed()
+{
+    CWizDatabase& db = m_dbMgr.db(document().strKbGUID);
+
+    db.setUserCipher(m_cipherDialog->userCipher());
+    db.setSaveUserCipher(m_cipherDialog->isSaveForSession());
+
+    m_renderer->load();
+}
+
+void CWizDocumentWebView::onDownloadDialogClosed(int result)
+{
+    if (result == QDialog::Rejected) {
+        return;
+    }
+
+    m_renderer->load();
+}
+
+void CWizDocumentWebView::reloadDocument()
+{
+    //Q_ASSERT(!m_data.strGUID.isEmpty());
+//
+    //CWizDatabase& db = m_dbMgr.db(m_data.strKbGUID);
+    //db.DocumentFromGUID(m_data.strGUID, m_data);
+}
+
+void CWizDocumentWebView::updateSize()
+{
+    // show & hide ueditor toolbar cause UI issue, force update.
+    QRect rc = geometry();
+    setGeometry(rc.adjusted(0, 0, 0, 10));
 }
 
 void CWizDocumentWebView::initEditorAndLoadDocument()
@@ -94,146 +208,10 @@ void CWizDocumentWebView::initEditorAndLoadDocument()
     connect(page()->mainFrame(), SIGNAL(loadFinished(bool)), \
             SLOT(on_editor_loadFinished(bool)));
 
-    connect(this, SIGNAL(linkClicked(const QUrl&)), \
+    connect(page(), SIGNAL(linkClicked(const QUrl&)), \
             SLOT(on_editor_linkClicked(const QUrl&)));
 
-    setHtml(strHtml, url);
-}
-
-bool CWizDocumentWebView::saveDocument(bool force)
-{
-    if (!m_bEditorInited)
-        return false;
-
-    QString strScript("saveDocument(%1);");
-    strScript = strScript.arg(force ? "true" : "false");
-    return page()->mainFrame()->evaluateJavaScript(strScript).toBool();
-}
-
-bool CWizDocumentWebView::viewDocument(const WIZDOCUMENTDATA& doc, bool editing)
-{
-    m_cipherDialog->hide();
-
-    if (m_bEditorInited) {
-        if (!saveDocument(false))
-            return false;
-    }
-
-    m_data = doc;
-    m_bEditingMode = editing;
-
-    QString strDocumentFileName = m_db.GetDocumentFileName(doc.strGUID);
-    if (!m_db.IsObjectDataDownloaded(doc.strGUID, "document") || \
-            !PathFileExists(strDocumentFileName)) {
-        MainWindow* window = qobject_cast<MainWindow *>(m_app.mainWindow());
-        window->showClient(false);
-
-        m_downloadDialog->downloadData(doc);
-
-        return false;
-    }
-
-    if (doc.nProtected) {
-        if(!m_db.loadUserCert()) {
-            return false;
-        }
-
-        if (m_db.userCipher().isEmpty()) {
-            MainWindow* window = qobject_cast<MainWindow *>(m_app.mainWindow());
-            window->showClient(false);
-
-            m_cipherDialog->setHint(m_db.userCipherHint());
-            m_cipherDialog->sheetShow();
-
-            return false;
-        }
-    }
-
-    return viewDocumentImpl();
-}
-
-bool CWizDocumentWebView::viewDocumentImpl()
-{
-    QString strHtmlFileName;
-    if (!m_db.DocumentToTempHtmlFile(m_data, strHtmlFileName)) {
-        return false;
-    }
-
-    m_strHtmlFileName = strHtmlFileName;
-
-    if (m_bEditorInited) {
-        return viewDocumentInEditor(m_bEditingMode);
-    } else {
-        initEditorAndLoadDocument();
-        return true;
-    }
-}
-
-void CWizDocumentWebView::onCipherDialogClosed()
-{
-    m_db.setUserCipher(m_cipherDialog->userCipher());
-    m_db.setSaveUserCipher(m_cipherDialog->isSaveForSession());
-
-    viewDocumentImpl();
-}
-
-void CWizDocumentWebView::onDownloadDialogClosed(int result)
-{
-    if (result == QDialog::Rejected) {
-        return;
-    }
-
-    viewDocument(m_data, m_bEditingMode);
-}
-
-void CWizDocumentWebView::setEditingDocument(bool editing)
-{
-    Q_ASSERT(m_bEditorInited);
-
-    CString strScript = CString("setEditing(%1);").arg(editing ? "true" : "false");
-    page()->mainFrame()->evaluateJavaScript(strScript).toBool();
-
-    //if (editing) {
-    //    setFocus();
-    //}
-
-    updateSize();
-}
-
-void CWizDocumentWebView::reloadDocument()
-{
-    Q_ASSERT(!m_data.strGUID.isEmpty());
-
-    m_db.DocumentFromGUID(m_data.strGUID, m_data);
-}
-
-bool CWizDocumentWebView::viewDocumentInEditor(bool editing)
-{
-    Q_ASSERT(m_bEditorInited);
-    Q_ASSERT(!m_data.strGUID.isEmpty());
-    Q_ASSERT(!m_strHtmlFileName.isEmpty());
-
-    QString strScript = ("viewDocument('%1', '%2', %3);");
-    strScript = strScript.arg(m_data.strGUID,
-                              m_strHtmlFileName,
-                              editing ? "true" : "false");
-
-    bool ret = page()->mainFrame()->evaluateJavaScript(strScript).toBool();
-
-    if (ret) {
-        MainWindow* window = qobject_cast<MainWindow *>(m_app.mainWindow());
-        window->showClient(true);
-    }
-
-    //if (editing) {
-    //    setFocus();
-    //}
-
-    updateSize();
-
-    m_timerAutoSave.start();
-
-    return ret;
+    page()->mainFrame()->setHtml(strHtml, url);
 }
 
 void CWizDocumentWebView::on_editor_populateJavaScriptWindowObject()
@@ -257,9 +235,119 @@ void CWizDocumentWebView::on_editor_linkClicked(const QUrl& url)
     QDesktopServices::openUrl(url);
 }
 
-void CWizDocumentWebView::updateSize()
+void CWizDocumentWebView::viewDocumentInEditor(bool editing)
 {
-    // show & hide ueditor toolbar cause UI issue, force update.
-    QRect rc = geometry();
-    setGeometry(rc.adjusted(0, 0, 0, 10));
+    Q_ASSERT(m_bEditorInited);
+    //Q_ASSERT(!m_data.strGUID.isEmpty());
+    Q_ASSERT(!m_strHtmlFileName.isEmpty());
+
+    QString strScript = ("viewDocument('%1', '%2', %3);");
+    strScript = strScript.arg(document().strGUID, m_strHtmlFileName,
+                              editing ? "true" : "false");
+
+    bool ret = page()->mainFrame()->evaluateJavaScript(strScript).toBool();
+
+    if (ret) {
+        MainWindow* window = qobject_cast<MainWindow *>(m_app.mainWindow());
+        window->showClient(true);
+    }
+
+
+    m_timerAutoSave.start();
+
+    updateSize();
+}
+
+void CWizDocumentWebView::setEditingDocument(bool editing)
+{
+    Q_ASSERT(m_bEditorInited);
+
+    bool bEditing = page()->mainFrame()->evaluateJavaScript("isEdting();").toBool();
+    if (bEditing) {
+        saveDocument(false);
+    }
+
+    QString strScript = QString("setEditing(%1);").arg(editing ? "true" : "false");
+    page()->mainFrame()->evaluateJavaScript(strScript);
+
+    updateSize();
+}
+
+void CWizDocumentWebView::saveDocument(bool force)
+{
+    Q_ASSERT(m_bEditorInited);
+
+    if (!force && !m_bModified)
+        return;
+
+    // Must reset modified flag to avoid switching whiling saving issue!
+    MainWindow* mainWindow = qobject_cast<MainWindow *>(m_app.mainWindow());
+    mainWindow->SetDocumentModified(false);
+    mainWindow->SetSavingDocument(true);
+
+    QString strHtml = page()->mainFrame()->evaluateJavaScript("getEditorHtml();").toString();
+    m_renderer->save(document(), strHtml, m_strHtmlFileName, 0);
+}
+
+
+
+
+CWizDocumentWebViewRenderer::CWizDocumentWebViewRenderer(CWizExplorerApp& app)
+    : m_app(app)
+    , m_dbMgr(app.databaseManager())
+{
+
+}
+
+void CWizDocumentWebViewRenderer::setData(const WIZDOCUMENTDATA& doc)
+{
+    m_data = doc;
+}
+
+void CWizDocumentWebViewRenderer::load()
+{
+    if (!QMetaObject::invokeMethod(this, "viewDocumentImpl")) {
+        TOLOG("Invoke viewDocumentImpl failed");
+    }
+}
+
+void CWizDocumentWebViewRenderer::viewDocumentImpl()
+{
+    CWizDatabase& db = m_dbMgr.db(m_data.strKbGUID);
+
+    QString strHtmlFileName;
+    if (!db.DocumentToTempHtmlFile(m_data, strHtmlFileName)) {
+        return;
+    }
+
+    Q_EMIT documentReady(strHtmlFileName);
+}
+
+void CWizDocumentWebViewRenderer::save(const WIZDOCUMENTDATA& data,
+                                       const QString& strHtml,
+                                       const QString& strHtmlFile,
+                                       int nFlags)
+{
+    if (!QMetaObject::invokeMethod(this, "saveDocument",
+                                   Q_ARG(QString, data.strKbGUID),
+                                   Q_ARG(QString, data.strGUID),
+                                   Q_ARG(QString, strHtml),
+                                   Q_ARG(QString, strHtmlFile),
+                                   Q_ARG(int, nFlags))) {
+        TOLOG("Invoke saveDocument failed");
+    }
+}
+
+void CWizDocumentWebViewRenderer::saveDocument(QString strKbGUID, QString strGUID,
+                                               QString strHtml, QString strHtmlFile, int nFlags)
+{
+    WIZDOCUMENTDATA data;
+    if (!m_dbMgr.db(strKbGUID).DocumentFromGUID(strGUID, data)) {
+        Q_EMIT documentSaved(false);
+        return;
+    }
+
+    bool ret = m_dbMgr.db(data.strKbGUID).UpdateDocumentData(data, strHtml, strHtmlFile, nFlags);
+
+    Q_EMIT documentSaved(ret);
 }

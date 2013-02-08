@@ -6,7 +6,7 @@
 #include "wizqthelper.h"
 #include "wizmisc.h"
 
-#include "wizdatabase.h"
+#include "wizDatabase.h"
 
 class CWizSettings : public QSettings
 {

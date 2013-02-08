@@ -1,10 +1,8 @@
 #include "wizdownloadobjectdata.h"
 
-#include "wizapi.h"
-
-
-CWizDownloadObjectData::CWizDownloadObjectData(CWizDatabase& db)
-    : CWizApi(db)
+CWizDownloadObjectData::CWizDownloadObjectData(CWizDatabaseManager& dbMgr)
+    : CWizApi(dbMgr.db())
+    , m_dbMgr(dbMgr)
     , m_bInited(false)
 {
     connect(this, SIGNAL(processLog(const QString&)), SLOT(processLog(const QString&)));
@@ -14,28 +12,72 @@ CWizDownloadObjectData::CWizDownloadObjectData(CWizDatabase& db)
 void CWizDownloadObjectData::setData(const WIZOBJECTDATA& data)
 {
     Q_ASSERT(!data.strObjectGUID.isEmpty());
+    Q_ASSERT(!data.strKbGUID.isEmpty());
 
     m_data = data;
+    setDatabase(m_dbMgr.db(data.strKbGUID));
     m_bInited = true;
 }
 
 void CWizDownloadObjectData::startDownload()
 {
     Q_ASSERT(m_bInited);
+    QString strUserId = m_dbMgr.db().getUserId();
+    QString strPasswd = m_dbMgr.db().getPassword();
 
-    callClientLogin(m_db.getUserId(), m_db.getPassword());
+    setKbUrl(WIZ_API_URL);
+    callClientLogin(strUserId, strPasswd);
 }
 
-void CWizDownloadObjectData::onXmlRpcError(const QString& strMethodName, WizXmlRpcError err, int errorCode, const QString& errorMessage)
+void CWizDownloadObjectData::onXmlRpcError(const QString& strMethodName,
+                                           WizXmlRpcError err,
+                                           int errorCode,
+                                           const QString& errorMessage)
 {
     CWizApi::onXmlRpcError(strMethodName, err, errorCode, errorMessage);
     Q_EMIT downloadDone(false);
+
+    m_bInited = false;
 }
 
 void CWizDownloadObjectData::onClientLogin(const WIZUSERINFO& userInfo)
 {
     Q_UNUSED(userInfo);
 
+    // user private document
+    if (m_data.strKbGUID == userInfo.strKbGUID) {
+        setKbUrl(userInfo.strDatabaseServer);
+        startDownloadObjectData();
+        return;
+    }
+
+    // group document
+    QString strKbUrl = m_dbMgr.db(m_data.strKbGUID).server();
+    if (strKbUrl.isEmpty()) {
+        callGetGroupList();
+    } else {
+        setKbUrl(strKbUrl);
+        startDownloadObjectData();
+    }
+}
+
+void CWizDownloadObjectData::onGetGroupList(const CWizGroupDataArray& arrayGroup)
+{
+    CWizGroupDataArray::const_iterator it;
+    for (it = arrayGroup.begin(); it != arrayGroup.end(); it++) {
+        const WIZGROUPDATA& group = *it;
+
+        if (group.strGroupGUID == m_data.strKbGUID) {
+            setKbUrl(group.strDatabaseServer);
+            startDownloadObjectData();
+            return;
+        }
+    }
+}
+
+void CWizDownloadObjectData::startDownloadObjectData()
+{
+    setKbGUID(m_data.strKbGUID);
     downloadObjectData(m_data);
 }
 
@@ -43,11 +85,10 @@ void CWizDownloadObjectData::onDownloadObjectDataCompleted(const WIZOBJECTDATA& 
 {
     CWizApi::onDownloadObjectDataCompleted(data);
     m_data.arrayData = data.arrayData;
-    callClientLogout();
-}
+    //callClientLogout();
 
-void CWizDownloadObjectData::onClientLogout()
-{
+    m_bInited = false;
+
     Q_EMIT downloadDone(true);
 }
 

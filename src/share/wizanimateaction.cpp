@@ -1,6 +1,7 @@
 #include "wizanimateaction.h"
 
 #include "wizmisc.h"
+#include "wizsettings.h"
 
 #include <QTimer>
 #include <QAction>

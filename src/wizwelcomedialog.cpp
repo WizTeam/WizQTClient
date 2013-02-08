@@ -12,7 +12,6 @@ WelcomeDialog::WelcomeDialog(const QString &strDefaultUserId, const QString& str
     : QDialog(parent)
     , ui(new Ui::WelcomeDialog)
     , m_strDefaultUserId(strDefaultUserId)
-    , m_verifyAccount(WIZ_API_URL)
 {
     ui->setupUi(this);
 
@@ -54,8 +53,8 @@ WelcomeDialog::WelcomeDialog(const QString &strDefaultUserId, const QString& str
 
     connect(ui->buttonLogin, SIGNAL(clicked()), SLOT(accept()));
 
-    connect(&m_verifyAccount, SIGNAL(done(bool, const CString&)), \
-            SLOT(verifyAccountDone(bool, const CString&)));
+    connect(&m_verifyAccount, SIGNAL(done(bool, int, const QString&)), \
+            SLOT(verifyAccountDone(bool, int, const QString&)));
 
     setUsers();
 
@@ -122,13 +121,20 @@ void WelcomeDialog::accept()
     m_verifyAccount.verifyAccount(userId(), password());
 }
 
-void WelcomeDialog::verifyAccountDone(bool succeeded, const CString& errorMessage)
+void WelcomeDialog::verifyAccountDone(bool succeeded, int errorCode, const QString& errorMessage)
 {
     if (succeeded) {
         updateUserSettings();
         QDialog::accept();
     } else {
-        QMessageBox::critical(this, "", errorMessage);
+        QString msg;
+        if (errorCode == 3) {
+            msg = tr("Network Error, please check your network connection!\n\nErrorCode: ") + QString::number(errorCode);
+        } else {
+            msg = errorMessage + tr("\n\nErrorCode: ") + QString::number(errorCode);
+        }
+
+        QMessageBox::critical(this, tr("Verify account failed"), msg);
     }
 
     enableControls(true);

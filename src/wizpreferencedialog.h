@@ -1,11 +1,10 @@
 #ifndef WIZPREFERENCEDIALOG_H
 #define WIZPREFERENCEDIALOG_H
 
-#include "ui_wizpreferencedialog.h"
-
 #include <QDialog>
 
 #include "wizdef.h"
+#include "share/wizsettings.h"
 #include "share/wizmisc.h"
 #include "wizproxydialog.h"
 

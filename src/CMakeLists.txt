@@ -28,13 +28,16 @@ set(wiznote_SOURCES
     share/cppsqlite3.cpp
     share/wizobject.cpp
     share/wizkmcore.cpp
+    share/wizxml.cpp
     share/wizxmlrpc.cpp
+    share/wizXmlRpcServer.cpp
     share/wizapi.cpp
-    share/wizsync.cpp
-    share/wizdatabase.cpp
+    share/wizKbSync.cpp
+    share/wizSync.cpp
+    share/wizDatabase.cpp
+    share/wizDatabaseManager.cpp
     share/wizverifyaccount.cpp
     share/wizsettings.cpp
-    share/wizxml.cpp
     share/wizsyncthread.cpp
     share/wizui.cpp
     share/wizmd5.cpp
@@ -53,6 +56,7 @@ set(wiznote_SOURCES
     share/wizimagepushbutton.cpp
     share/wizindex.cpp
     share/wizthumbindex.cpp
+    share/wizThumbIndexCache.cpp
     share/wizenc.cpp
     share/wizziwreader.cpp
     html/wizhtmlreader.cpp
@@ -65,7 +69,7 @@ set(wiznote_SOURCES
     wiznotestyle.cpp
     wizcategoryview.cpp
     wizCategoryViewItem.cpp
-    newfolderdialog.cpp
+    wizNewDialog.cpp
     newtagdialog.cpp
     wizdownloadobjectdatadialog.cpp
     wizdocumenthistory.cpp
@@ -84,6 +88,7 @@ set(wiznote_SOURCES
     wizupgradenotifydialog.cpp
     wizcertmanager.cpp
     wizusercipherform.cpp
+    wizGroupAttributeForm.cpp
     wiznoteinfoform.cpp
     share/wizClucene.cpp
     share/wizSearchIndexer.cpp
@@ -123,9 +128,13 @@ set(wiznote_HEADERS
     share/wizobject.h
     share/wizkmcore.h
     share/wizapi.h
+    share/wizxml.h
     share/wizxmlrpc.h
-    share/wizsync.h
-    share/wizdatabase.h
+    share/wizXmlRpcServer.h
+    share/wizKbSync.h
+    share/wizSync.h
+    share/wizDatabase.h
+    share/wizDatabaseManager.h
     share/wizverifyaccount.h
     share/wizsettings.h
     share/wizui.h
@@ -145,7 +154,7 @@ set(wiznote_HEADERS
     share/wizimagepushbutton.h
     share/wizindex.h
     share/wizthumbindex.h
-    share/wizxml.h
+    share/wizThumbIndexCache.h
     share/wizsyncthread.h
     share/wizenc.h
     share/wizziwreader.h
@@ -176,8 +185,9 @@ set(wiznote_HEADERS
     wizupgradenotifydialog.h
     wizcertmanager.h
     wizusercipherform.h
+    wizGroupAttributeForm.h
     wiznoteinfoform.h
-    newfolderdialog.h
+    wizNewDialog.h
     newtagdialog.h
     share/wizClucene.h
     share/wizSearchIndexer.h
@@ -185,7 +195,7 @@ set(wiznote_HEADERS
 )
 
 set(wiznote_FORMS
-    ui/newfolderdialog.ui 
+    ui/wizNewDialog.ui
     ui/newtagdialog.ui
     ui/wizdownloadobjectdatadialog.ui
     ui/wizconsoledialog.ui
@@ -251,7 +261,7 @@ if(UNIX)
         target_link_libraries(${PROJECT_NAME} ${_CARBON_LIBRARY})
 
         # setup plist info
-        set_target_properties(${PROJECT_NAME} PROPERTIES MACOSX_BUNDLE_ICON_FILE wiznote.icns)
+        set_target_properties(${PROJECT_NAME} PROPERTIES MACOSX_BUNDLE_INFO_PLIST "${wiznote_SOURCE_DIR}/../Info.plist")
 
         # copy resources to bundle
         set(wiznote_BUNDLE ${CMAKE_BINARY_DIR}/bundle/${PROJECT_NAME}.app)

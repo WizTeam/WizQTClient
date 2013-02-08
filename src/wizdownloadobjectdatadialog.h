@@ -2,7 +2,9 @@
 #define WIZDOWNLOADOBJECTDATADIALOG_H
 
 #include <QDialog>
+#include <QPointer>
 
+#include "share/wizDatabaseManager.h"
 #include "share/wizdownloadobjectdata.h"
 
 namespace Ui {
@@ -15,7 +17,7 @@ class CWizDownloadObjectDataDialog
     Q_OBJECT
 
 public:
-    explicit CWizDownloadObjectDataDialog(CWizDatabase& db, QWidget *parent = 0);
+    explicit CWizDownloadObjectDataDialog(CWizDatabaseManager& db, QWidget *parent = 0);
     ~CWizDownloadObjectDataDialog();
 
     // call this method instead of open()/show()/exec()
@@ -25,7 +27,7 @@ public:
 
 private:
     Ui::CWizDownloadObjectDataDialog *ui;
-    CWizDownloadObjectData m_downloader;
+    QPointer<CWizDownloadObjectData> m_downloader;
     bool m_bUserCancled;
 
 public Q_SLOTS:

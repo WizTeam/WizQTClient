@@ -8,25 +8,17 @@ class CWizVerifyAccount : public CWizApiBase
     Q_OBJECT
 
 public:
-    CWizVerifyAccount(const CString& strAccountsApiURL);
-
     void verifyAccount(const QString& strUserId, const QString& strPassword);
 
-private:
-    CString m_strErrorMessage;
-
-public:
-    virtual void onXmlRpcError(const QString& strMethodName, \
-                               WizXmlRpcError err, \
-                               int errorCode, \
+protected:
+    virtual void onClientLogin(const WIZUSERINFO& userInfo);
+    virtual void onXmlRpcError(const QString& strMethodName,
+                               WizXmlRpcError err,
+                               int errorCode,
                                const QString& errorMessage);
 
-    virtual void onClientLogin(const WIZUSERINFO& userInfo);
-
-    virtual void addErrorLog(const CString& str);
-
 Q_SIGNALS:
-    void done(bool succeeded, const CString& errorMessage);
+    void done(bool succeeded, int errorCode, const QString& errorMessage);
 };
 
 

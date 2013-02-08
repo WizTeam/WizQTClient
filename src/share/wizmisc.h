@@ -7,7 +7,7 @@
 #include <QBuffer>
 #include <QByteArray>
 
-#include "wizqthelper.h"
+#include "wizobject.h"
 #include "wizmd5.h"
 
 #define WIZNOTE_OBSOLETE
@@ -20,8 +20,11 @@ class IWizGlobal : public QObject
 public:
     static IWizGlobal* instance();
 
-    QString version() const { return m_strVersion; }
-    void setVersion(const QString& strVersion) { m_strVersion = strVersion; }
+    const WIZUSERINFO& userInfo() const { return m_user; }
+    void setUserInfo(const WIZUSERINFO& info) { m_user = info; }
+
+    QString token() const { return m_user.strToken; }
+    void clearToken() { m_user.strToken.clear(); }
 
     QBuffer* bufferLog() { return &m_bufferLog; }
     CString GetTempPath();
@@ -32,11 +35,13 @@ private:
     IWizGlobal();
     static IWizGlobal* m_pInstance;
 
-    QString m_strVersion;
+    WIZUSERINFO m_user;
     QBuffer m_bufferLog;
 };
 
 IWizGlobal* WizGlobal();
+
+QString WizApiGetUrl(const QString& strProduct, const QString& strVersion, const QString& strCommand, const QString& strExtInfo);
 
 QString WizGetTimeStamp();
 COleDateTime WizGetCurrentTime();
@@ -48,6 +53,7 @@ QColor WizStringToColor2(const CString& str);
 std::string WizBSTR2UTF8(const CString& str);
 
 CString WizFormatString0(const CString& str);
+CString WizFormatString1(const CString& strFormat, int n);
 CString WizFormatString1(const CString& strFormat, const CString& strParam1);
 CString WizFormatString2(const CString& strFormat, const CString& strParam1, const CString& strParam2);
 CString WizFormatString3(const CString& strFormat, const CString& strParam1, const CString& strParam2, const CString& strParam3);
@@ -126,6 +132,7 @@ QString WizDecryptPassword(const QString& strEncryptedText);
 bool WizLoadUnicodeTextFromFile(const QString& strFileName, QString& steText);
 bool WizSaveUnicodeTextToUtf16File(const QString& strFileName, const QString& strText);
 bool WizSaveUnicodeTextToUtf8File(const QString& strFileName, const QString& strText);
+bool WizSaveUnicodeTextToUtf8File(const QString& strFileName, const QByteArray& strText);
 
 CString WizDateTimeToIso8601String(const COleDateTime& t);
 BOOL WizIso8601StringToDateTime(CString str, COleDateTime& t, CString& strError);
@@ -174,7 +181,7 @@ void WizGetSkins(QStringList& skins);
 QString WizGetSkinResourcePath(const QString& strSkinName);
 QString WizGetSkinDisplayName(const QString& strSkinName, const QString& strLocale);
 QString WizGetSkinResourceFileName(const QString& strSkinName, const QString& strName);
-QIcon WizLoadSkinIcon(const QString& strSkinName, const QString& strIconName);
+QIcon WizLoadSkinIcon(const QString& strSkinName, QColor forceground, const QString& strIconName);
 
 
 void WizHtml2Text(const QString& strHtml, QString& strText);

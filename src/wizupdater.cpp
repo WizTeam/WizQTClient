@@ -1,5 +1,6 @@
 #include "wizupdater.h"
 
+#include "wizdef.h"
 #include "share/wizmisc.h"
 #include "share/wizsettings.h"
 #include "zip/wizzip.h"
@@ -135,7 +136,7 @@ QString CWizUpgrade::getUpgradeUrl()
             + "?p=%1&l=%2&v=%3&c=%4&random=%5&cn=%6&plat=%7";
     strUrl = strUrl.arg(strProduct)\
             .arg(QLocale::system().name())\
-            .arg(::WizGlobal()->version())\
+            .arg(WIZ_CLIENT_VERSION)\
             .arg(strCommand)\
             .arg(QString::number(::GetTickCount()))\
             .arg(::WizGetComputerName())\

@@ -1,13 +1,15 @@
 #ifndef WIZDOCUMENTLISTVIEW_H
 #define WIZDOCUMENTLISTVIEW_H
 
-#include <QListWidget>
-#include <QTimer>
+#include <QtGui>
+//#include <QListWidget>
+//#include <QTimer>
 
 #include "wizdef.h"
+#include "share/wizobject.h"
+#include "share/wizThumbIndexCache.h"
 
 class CWizDocumentListViewItem;
-class CWizCategoryView;
 class CWizTagListWidget;
 
 class CWizDocumentListView : public QListWidget
@@ -29,10 +31,10 @@ public:
 
 private:
     CWizExplorerApp& m_app;
+    CWizDatabaseManager& m_dbMgr;
+    QPointer<CWizThumbIndexCache> m_thumbCache;
 
-    CWizDatabase& m_db;
-    CWizCategoryView& m_category;
-    QMenu* m_menu;
+    QPointer<QMenu> m_menu;
     QAction* m_actionEncryptDocument;
     CWizTagListWidget* m_tagList;
 
@@ -45,6 +47,11 @@ private:
     int m_vscrollDelta;
     int m_vscrollCurrent;
 #endif // Q_OS_MAC
+
+    void resetPermission();
+    QAction* findAction(const QString& strName);
+    bool isSelectedAllCanDelete();
+    bool isSelectedGroupDocument();
 
 public:
     void setDocuments(const CWizDocumentDataArray& arrayDocument);
@@ -76,10 +83,12 @@ public Q_SLOTS:
     void on_document_created(const WIZDOCUMENTDATA& document);
     void on_document_modified(const WIZDOCUMENTDATA& documentOld, const WIZDOCUMENTDATA& documentNew);
     void on_document_deleted(const WIZDOCUMENTDATA& document);
-    void on_document_AbstractModified(const WIZDOCUMENTDATA& document);
+    //void on_document_AbstractModified(const WIZDOCUMENTDATA& document);
     void on_action_selectTags();
     void on_action_deleteDocument();
     void on_action_encryptDocument();
+
+    void on_document_abstractLoaded(const WIZABSTRACT& abs);
 
 #ifndef Q_OS_MAC
     // used for smoothly scroll

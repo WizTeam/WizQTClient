@@ -37,7 +37,7 @@ public:
     void setRSAKeys(const QByteArray& strN, \
                     const QByteArray& stre, \
                     const QByteArray& str_encrypted_d, \
-                    const QByteArray& strHint);
+                    const QString& strHint);
 
     // ziw file initialization
     bool setFile(const QString& strFileName);

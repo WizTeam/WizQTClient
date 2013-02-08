@@ -1,19 +1,33 @@
 #ifndef WIZDEF_H
 #define WIZDEF_H
 
-#include "share/wizdatabase.h"
-#include "share/wizsettings.h"
+#include <QtGlobal>
 
-class CWizDatabase;
-class CWizCategoryView;
+#define WIZNOTE_DEBUG 1
+
+#define WIZ_CLIENT_VERSION  "1.4.0"
+
+#if defined Q_OS_MAC
+#define WIZ_CLIENT_TYPE     "QTMAC"
+#elif defined Q_OS_LINUX
+#define WIZ_CLIENT_TYPE     "QTLINUX"
+#elif defined Q_OS_WIN
+#define WIZ_CLIENT_TYPE     "QTWIN"
+#endif
+
+class QWidget;
+class QObject;
+class CWizDatabaseManager;
+class CWizCategoryBaseView;
+class CWizUserSettings;
 
 class CWizExplorerApp
 {
 public:
     virtual QWidget* mainWindow() = 0;
     virtual QObject* object() = 0;
-    virtual CWizDatabase& database() = 0;
-    virtual CWizCategoryView& category() = 0;
+    virtual CWizDatabaseManager& databaseManager() = 0;
+    virtual CWizCategoryBaseView& category() = 0;
     virtual CWizUserSettings& userSettings() = 0;
 };
 

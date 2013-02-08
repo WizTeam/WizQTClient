@@ -2,6 +2,7 @@
 #include "ui_wizaboutdialog.h"
 
 #include "share/wizmisc.h"
+#include "share/wizsettings.h"
 #include <QFileInfo>
 
 AboutDialog::AboutDialog(CWizExplorerApp& app, QWidget *parent)
@@ -34,7 +35,7 @@ AboutDialog::AboutDialog(CWizExplorerApp& app, QWidget *parent)
             arg(t.time().minute());
 
     QString strInfo("<span style=\"font-weight:bold;font-size:16pt\">%1</span><br /><span>%2 %3</span>");
-    strInfo = strInfo.arg(strProduct, IWizGlobal::instance()->version(), strBuildNumber);
+    strInfo = strInfo.arg(strProduct, WIZ_CLIENT_VERSION, strBuildNumber);
 
     ui->labelAbout->setTextFormat(Qt::AutoText);
     ui->labelAbout->setText(strInfo);

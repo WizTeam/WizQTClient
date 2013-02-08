@@ -10,18 +10,23 @@
 #include <QMenu>
 #include <QCursor>
 #include <QPainter>
+#include <QUrl>
+
+#include "wizmainwindow.h"
 
 #include "share/wizdrawtexthelper.h"
 #include "wiznotestyle.h"
 
-#include "newfolderdialog.h"
 #include "newtagdialog.h"
+#include "share/wizsettings.h"
+#include "share/wizDatabaseManager.h"
 
+/* ------------------------------ CWizCategoryBaseView ------------------------------ */
 
 CWizCategoryBaseView::CWizCategoryBaseView(CWizExplorerApp& app, QWidget* parent)
     : QTreeWidget(parent)
     , m_app(app)
-    , m_db(app.database())
+    , m_dbMgr(app.databaseManager())
     , m_bDragHovered(false)
 {
     header()->hide();
@@ -44,6 +49,20 @@ void CWizCategoryBaseView::addSeparator()
     addTopLevelItem(new CWizCategoryViewSeparatorItem(m_app));
 }
 
+QString CWizCategoryBaseView::selectedItemKbGUID()
+{
+    QList<QTreeWidgetItem*> items = selectedItems();
+    if (!items.isEmpty()) {
+        CWizCategoryViewItemBase* pItem = dynamic_cast<CWizCategoryViewItemBase*>(items.first());
+        if (!pItem)
+            return NULL;
+
+        return pItem->kbGUID();
+    }
+
+    return NULL;
+}
+
 void CWizCategoryBaseView::getDocuments(CWizDocumentDataArray& arrayDocument)
 {
     QList<QTreeWidgetItem*> items = selectedItems();
@@ -54,7 +73,11 @@ void CWizCategoryBaseView::getDocuments(CWizDocumentDataArray& arrayDocument)
     if (!pItem)
         return;
 
-    pItem->getDocuments(m_db, arrayDocument);
+    if (pItem->kbGUID().isEmpty()) {
+        return;
+    }
+
+    pItem->getDocuments(m_dbMgr.db(pItem->kbGUID()), arrayDocument);
 }
 
 bool CWizCategoryBaseView::acceptDocument(const WIZDOCUMENTDATA& document)
@@ -67,7 +90,21 @@ bool CWizCategoryBaseView::acceptDocument(const WIZDOCUMENTDATA& document)
     if (!pItem)
         return false;
 
-    return pItem->accept(m_db, document);
+    return pItem->accept(m_dbMgr.db(document.strKbGUID), document);
+}
+
+void CWizCategoryBaseView::saveSelection(const QString& str)
+{
+    Q_UNUSED(str);
+
+    m_selectedItem = currentItem();
+    clearSelection();
+}
+
+void CWizCategoryBaseView::restoreSelection()
+{
+    setCurrentItem(m_selectedItem);
+    Q_EMIT itemSelectionChanged();
 }
 
 template <class T> inline  T* CWizCategoryBaseView::currentCategoryItem() const
@@ -224,23 +261,23 @@ void CWizCategoryBaseView::dropEvent(QDropEvent * event)
             foreach (const CString& strDocumentGUID, arrayDocumentGUID)
             {
                 WIZDOCUMENTDATA dataDocument;
-                if (m_db.DocumentFromGUID(strDocumentGUID, dataDocument))
+                if (m_dbMgr.db().DocumentFromGUID(strDocumentGUID, dataDocument))
                 {
-                    CWizDocument doc(m_db, dataDocument);
+                    CWizDocument doc(m_dbMgr.db(), dataDocument);
                     doc.AddTag(item->tag());
                 }
             }
         }
         else if (CWizCategoryViewFolderItem* item = dynamic_cast<CWizCategoryViewFolderItem*>(itemAt(event->pos())))
         {
-            CWizFolder folder(m_db, item->location());
+            CWizFolder folder(m_dbMgr.db(), item->location());
 
             foreach (const CString& strDocumentGUID, arrayDocumentGUID)
             {
                 WIZDOCUMENTDATA dataDocument;
-                if (m_db.DocumentFromGUID(strDocumentGUID, dataDocument))
+                if (m_dbMgr.db().DocumentFromGUID(strDocumentGUID, dataDocument))
                 {
-                    CWizDocument doc(m_db, dataDocument);
+                    CWizDocument doc(m_dbMgr.db(), dataDocument);
                     doc.MoveDocument(&folder);
                 }
             }
@@ -250,30 +287,78 @@ void CWizCategoryBaseView::dropEvent(QDropEvent * event)
     }
 }
 
+void CWizCategoryBaseView::showTrashContextMenu(QPoint pos, const QString& strKbGUID)
+{
+    if (!m_menuTrash) {
+        m_menuTrash = new QMenu(this);
+        m_menuTrash->addAction(tr("Empty the Trash"), this, SLOT(on_action_emptyTrash()));
+    }
 
+    m_strTrashKbGUID = strKbGUID;
+    m_menuTrash->popup(pos);
+}
+
+void CWizCategoryBaseView::on_action_emptyTrash()
+{
+    CWaitCursor wait;
+    Q_UNUSED(wait);
+
+    CWizCategoryViewTrashItem* pTrashItem = findTrash(m_strTrashKbGUID);
+    if (!pTrashItem) {
+        return;
+    }
+
+    CWizDocumentDataArray arrayDocument;
+    pTrashItem->getDocuments(m_dbMgr.db(m_strTrashKbGUID), arrayDocument);
+
+    foreach (const WIZDOCUMENTDATA& data, arrayDocument)
+    {
+        CWizDocument doc(m_dbMgr.db(m_strTrashKbGUID), data);
+        doc.Delete();
+    }
+}
+
+
+
+/* ------------------------------ CWizCategoryPrivateView ------------------------------ */
+
+#define WIZACTION_PRIVATE_NEW_DOCUMENT    QObject::tr("Create new document")
+#define WIZACTION_PRIVATE_NEW_FOLDER      QObject::tr("Create new folder")
+#define WIZACTION_PRIVATE_DELETE_FOLDER   QObject::tr("Delete current folder")
 
 CWizCategoryView::CWizCategoryView(CWizExplorerApp& app, QWidget* parent)
     : CWizCategoryBaseView(app, parent)
     , m_menuAllFolders(NULL)
     , m_menuFolder(NULL)
-    , m_menuTrash(NULL)
 {
     qRegisterMetaType<WIZDOCUMENTDATA>("WIZDOCUMENTDATA");
 
-    connect(&m_db, SIGNAL(documentCreated(const WIZDOCUMENTDATA&)), \
+    connect(&m_dbMgr.db(), SIGNAL(documentCreated(const WIZDOCUMENTDATA&)), \
             SLOT(on_document_created(const WIZDOCUMENTDATA&)));
 
-    connect(&m_db, SIGNAL(documentModified(const WIZDOCUMENTDATA&, const WIZDOCUMENTDATA&)), \
+    connect(&m_dbMgr.db(), SIGNAL(documentModified(const WIZDOCUMENTDATA&, const WIZDOCUMENTDATA&)), \
             SLOT(on_document_modified(const WIZDOCUMENTDATA&, const WIZDOCUMENTDATA&)));
 
-    connect(&m_db, SIGNAL(folderCreated(const CString&)), \
+    connect(&m_dbMgr.db(), SIGNAL(folderCreated(const CString&)), \
             SLOT(on_folder_created(const CString&)));
 
-    connect(&m_db, SIGNAL(folderDeleted(const CString&)), \
+    connect(&m_dbMgr.db(), SIGNAL(folderDeleted(const CString&)), \
             SLOT(on_folder_deleted(const CString&)));
 
     setDragDropMode(QAbstractItemView::DragDrop);
     setDragEnabled(true);
+
+    // setup context menu
+    m_menuAllFolders = new QMenu(this);
+    m_menuAllFolders->addAction(WIZACTION_PRIVATE_NEW_FOLDER, this, SLOT(on_action_newFolder()));
+
+    m_menuFolder = new QMenu(this);
+    m_menuFolder->addAction(WIZACTION_PRIVATE_NEW_DOCUMENT, this, SLOT(on_action_newDocument()));
+    m_menuFolder->addAction(WIZACTION_PRIVATE_NEW_FOLDER, this, SLOT(on_action_newFolder()));
+    m_menuFolder->addSeparator();
+    m_menuFolder->addAction(WIZACTION_PRIVATE_DELETE_FOLDER, this, SLOT(on_action_deleteFolder()));
+
+
 }
 
 void CWizCategoryView::init()
@@ -287,23 +372,23 @@ void CWizCategoryView::init()
 
 void CWizCategoryView::initFolders()
 {
-    CWizCategoryViewAllFoldersItem* pAllFoldersItem = new CWizCategoryViewAllFoldersItem(m_app, tr("Note Folders"));
+    CWizCategoryViewAllFoldersItem* pAllFoldersItem = new CWizCategoryViewAllFoldersItem(m_app, tr("Note Folders"), m_dbMgr.db().kbGUID());
     addTopLevelItem(pAllFoldersItem);
 
     CWizStdStringArray arrayAllLocation;
-    m_db.GetAllLocations(arrayAllLocation);
+    m_dbMgr.db().GetAllLocations(arrayAllLocation);
 
     initFolders(pAllFoldersItem, QString(), arrayAllLocation);
 
     if (arrayAllLocation.empty()) {
         const QString strNotes("/My Notes/");
-        m_db.AddExtraFolder(strNotes);
+        m_dbMgr.db().AddExtraFolder(strNotes);
         arrayAllLocation.push_back(strNotes);
     }
 
     //init extra folders
     CWizStdStringArray arrayExtLocation;
-    m_db.GetExtraFolder(arrayExtLocation);
+    m_dbMgr.db().GetExtraFolder(arrayExtLocation);
 
     CWizStdStringArray::const_iterator it;
     for (it = arrayExtLocation.begin(); it != arrayExtLocation.end(); it++) {
@@ -312,7 +397,7 @@ void CWizCategoryView::initFolders()
         if (strLocation.isEmpty())
             continue;
 
-        if (m_db.IsInDeletedItems(strLocation))
+        if (m_dbMgr.db().IsInDeletedItems(strLocation))
             continue;
 
         addFolder(strLocation, true);
@@ -333,10 +418,10 @@ void CWizCategoryView::initFolders(QTreeWidgetItem* pParent, \
     for (it = arrayLocation.begin(); it != arrayLocation.end(); it++) {
         CString strLocation = *it;
 
-        if (m_db.IsInDeletedItems(strLocation))
+        if (m_dbMgr.db().IsInDeletedItems(strLocation))
             continue;
 
-        CWizCategoryViewFolderItem* pFolderItem = new CWizCategoryViewFolderItem(m_app, strLocation);
+        CWizCategoryViewFolderItem* pFolderItem = new CWizCategoryViewFolderItem(m_app, strLocation, m_dbMgr.db().kbGUID());
         pParent->addChild(pFolderItem);
 
         initFolders(pFolderItem, strLocation, arrayAllLocation);
@@ -345,94 +430,50 @@ void CWizCategoryView::initFolders(QTreeWidgetItem* pParent, \
 
 void CWizCategoryView::initTrash()
 {
-    addTopLevelItem(new CWizCategoryViewTrashItem(m_app, tr("Trash")));
+    addTopLevelItem(new CWizCategoryViewTrashItem(m_app, tr("Trash"), m_dbMgr.db().kbGUID()));
 }
 
 void CWizCategoryView::showAllFoldersContextMenu(QPoint pos)
 {
-    if (!m_menuAllFolders) {
-        m_menuAllFolders = new QMenu(this);
-        m_menuAllFolders->addAction(tr("New Folder"), this, SLOT(on_action_newFolder()));
-    }
-
     m_menuAllFolders->popup(pos);
 }
 
 void CWizCategoryView::showFolderContextMenu(QPoint pos)
 {
-    if (!m_menuFolder) {
-        m_menuFolder = new QMenu(this);
-        m_menuFolder->addAction(tr("New Folder"), this, SLOT(on_action_newFolder()));
-        m_menuFolder->addAction(tr("Delete Folder"), this, SLOT(on_action_deleteFolder()));
-    }
-
     m_menuFolder->popup(pos);
 }
 
-void CWizCategoryView::showTrashContextMenu(QPoint pos)
-{
-    if (!m_menuTrash) {
-        m_menuTrash = new QMenu(this);
-        m_menuTrash->addAction(tr("Empty the Trash"), this, SLOT(on_action_emptyTrash()));
-    }
-
-    m_menuTrash->popup(pos);
-}
-
-CWizCategoryViewSearchItem* CWizCategoryView::findSearch()
-{
-    int nCount = topLevelItemCount();
-    for (int i = 0; i < nCount; i++)
-    {
-        if (CWizCategoryViewSearchItem* pItem = dynamic_cast<CWizCategoryViewSearchItem*>(topLevelItem(i)))
-        {
-            return pItem;
-        }
-    }
-    //
-    addSeparator();
-    //
-    CWizCategoryViewSearchItem* pItem = new CWizCategoryViewSearchItem(m_app, "");
-    addTopLevelItem(pItem);
-    //
-    return pItem;
-}
-
-CWizCategoryViewTrashItem* CWizCategoryView::findTrash()
-{
-    int nCount = topLevelItemCount();
-    for (int i = 0; i < nCount; i++)
-    {
-        if (CWizCategoryViewTrashItem* pItem = dynamic_cast<CWizCategoryViewTrashItem*>(topLevelItem(i)))
-        {
-            return pItem;
-        }
-    }
-    //
-    return NULL;
-}
-
-void CWizCategoryView::search(const QString& str)
-{
-    Q_UNUSED(str);
-
-    m_selectedItem = currentItem();
-    clearSelection();
-
-    //CWizCategoryViewSearchItem* pItem = findSearch();
-    //pItem->setKeywords(str);
+//CWizCategoryViewSearchItem* CWizCategoryView::findSearch()
+//{
+//    int nCount = topLevelItemCount();
+//    for (int i = 0; i < nCount; i++)
+//    {
+//        if (CWizCategoryViewSearchItem* pItem = dynamic_cast<CWizCategoryViewSearchItem*>(topLevelItem(i)))
+//        {
+//            return pItem;
+//        }
+//    }
 //
-    //if (currentItem() == pItem) {
-    //    emit itemSelectionChanged();
-    //} else {
-    //    setCurrentItem(pItem, 0);
-    //}
-}
+//    addSeparator();
+//
+//    CWizCategoryViewSearchItem* pItem = new CWizCategoryViewSearchItem(m_app, "");
+//    addTopLevelItem(pItem);
+//
+//    return pItem;
+//}
 
-void CWizCategoryView::restoreSelection()
+CWizCategoryViewTrashItem* CWizCategoryView::findTrash(const QString& strKbGUID)
 {
-    setCurrentItem(m_selectedItem);
-    emit itemSelectionChanged();
+    Q_UNUSED(strKbGUID);
+
+    int nCount = topLevelItemCount();
+    for (int i = 0; i < nCount; i++) {
+        if (CWizCategoryViewTrashItem* pItem = dynamic_cast<CWizCategoryViewTrashItem*>(topLevelItem(i))) {
+            return pItem;
+        }
+    }
+
+    return NULL;
 }
 
 void CWizCategoryView::addAndSelectFolder(const CString& strLocation)
@@ -463,22 +504,20 @@ CWizCategoryViewFolderItem* CWizCategoryView::findFolder(const CString& strLocat
     CWizCategoryViewAllFoldersItem* pAllFolders = findAllFolders();
     if (!pAllFolders)
         return NULL;
-    //
-    if (m_db.IsInDeletedItems(strLocation))
-    {
-        return findTrash();
+
+    if (m_dbMgr.db().IsInDeletedItems(strLocation)) {
+        return findTrash(m_dbMgr.db().kbGUID());
     }
-    //
+
     CString strCurrentLocation = "/";
     QTreeWidgetItem* parent = pAllFolders;
     //
     CString strTempLocation = strLocation;
     strTempLocation.Trim('/');
     QStringList sl = strTempLocation.split("/");
-    for (QStringList::const_iterator it = sl.begin();
-    it != sl.end();
-    it++)
-    {
+
+    QStringList::const_iterator it;
+    for (it = sl.begin(); it != sl.end(); it++) {
         CString strLocationName = *it;
         ATLASSERT(!strLocationName.IsEmpty());
         strCurrentLocation = strCurrentLocation + strLocationName + "/";
@@ -503,7 +542,7 @@ CWizCategoryViewFolderItem* CWizCategoryView::findFolder(const CString& strLocat
         if (!create)
             return NULL;
         //
-        CWizCategoryViewFolderItem* pFolderItem = new CWizCategoryViewFolderItem(m_app, strCurrentLocation);
+        CWizCategoryViewFolderItem* pFolderItem = new CWizCategoryViewFolderItem(m_app, strCurrentLocation, m_dbMgr.db().kbGUID());
         parent->addChild(pFolderItem);
         parent->setExpanded(true);
         if (sort)
@@ -524,7 +563,7 @@ CWizCategoryViewFolderItem* CWizCategoryView::addFolder(const CString& strLocati
 
 void CWizCategoryView::on_document_created(const WIZDOCUMENTDATA& document)
 {
-    if (m_db.IsInDeletedItems(document.strLocation))
+    if (m_dbMgr.db().IsInDeletedItems(document.strLocation))
         return;
 
     addFolder(document.strLocation, true);
@@ -533,10 +572,10 @@ void CWizCategoryView::on_document_created(const WIZDOCUMENTDATA& document)
 void CWizCategoryView::on_document_modified(const WIZDOCUMENTDATA& documentOld, const WIZDOCUMENTDATA& documentNew)
 {
     Q_UNUSED(documentOld);
-    //
-    if (m_db.IsInDeletedItems(documentNew.strLocation))
+
+    if (m_dbMgr.db().IsInDeletedItems(documentNew.strLocation))
         return;
-    //
+
     addFolder(documentNew.strLocation, true);
 }
 
@@ -556,61 +595,79 @@ void CWizCategoryView::on_folder_deleted(const CString& strLocation)
     }
 }
 
+void CWizCategoryView::on_action_newDocument()
+{
+    Q_EMIT newDocument();
+}
+
 void CWizCategoryView::on_action_newFolder()
 {
-    NewFolderDialog dlg;
-    if (QDialog::Accepted != dlg.exec())
-        return;
+    if (!m_MsgNewFolder) {
+        m_MsgNewFolder = new CWizNewDialog(tr("Please input folder name: "), this);
+        connect(m_MsgNewFolder, SIGNAL(finished(int)), SLOT(on_action_newFolder_confirmed(int)));
+    }
 
-    CString strFolderName = dlg.folderName();
-    if (strFolderName.IsEmpty())
+    m_MsgNewFolder->clear();
+    m_MsgNewFolder->open();
+}
+
+void CWizCategoryView::on_action_newFolder_confirmed(int result)
+{
+    if (result != QDialog::Accepted) {
+        return;
+    }
+
+    CString strFolderName = m_MsgNewFolder->input();
+    if (strFolderName.isEmpty())
         return;
 
     WizMakeValidFileNameNoPath(strFolderName);
 
-    CString strLocation;
+    QString strLocation;
 
-    if (CWizCategoryViewAllFoldersItem* p = currentCategoryItem<CWizCategoryViewAllFoldersItem>())
-    {
+    if (CWizCategoryViewAllFoldersItem* p = currentCategoryItem<CWizCategoryViewAllFoldersItem>()) {
         Q_UNUSED(p);
         strLocation = "/" + strFolderName + "/";
-    }
-    else if (CWizCategoryViewFolderItem* p = currentCategoryItem<CWizCategoryViewFolderItem>())
-    {
+    } else if (CWizCategoryViewFolderItem* p = currentCategoryItem<CWizCategoryViewFolderItem>()) {
         strLocation = p->location() + strFolderName + "/";
     }
 
     addAndSelectFolder(strLocation);
-    m_db.AddExtraFolder(strLocation);
+    m_dbMgr.db().AddExtraFolder(strLocation);
 }
 
 void CWizCategoryView::on_action_deleteFolder()
 {
     CWaitCursor wait;
     Q_UNUSED(wait);
-    //
-    if (CWizCategoryViewFolderItem* p = currentCategoryItem<CWizCategoryViewFolderItem>())
-    {
-        CWizFolder folder(m_db, p->location());
-        folder.Delete();
+
+    CWizCategoryViewFolderItem* p = currentCategoryItem<CWizCategoryViewFolderItem>();
+    if (!p)
+        return;
+
+    // setup warning messagebox
+    if (!m_MsgWarning) {
+        m_MsgWarning = new QMessageBox(this);
+        m_MsgWarning->setWindowTitle(tr("Delete Folder"));
+        m_MsgWarning->addButton(QMessageBox::Ok);
+        m_MsgWarning->addButton(QMessageBox::Cancel);
+        m_MsgWarning->setWindowModality(Qt::ApplicationModal);
     }
+
+    QString strWarning = tr("Do you really want to delete all documents inside folder: ") + p->location();
+    m_MsgWarning->setText(strWarning);
+    m_MsgWarning->open(this, SLOT(on_action_deleteFolder_confirmed()));
 }
 
-void CWizCategoryView::on_action_emptyTrash()
+void CWizCategoryView::on_action_deleteFolder_confirmed()
 {
-    CWaitCursor wait;
-    Q_UNUSED(wait);
-    //
-    if (CWizCategoryViewTrashItem* trashItem = CWizCategoryView::findTrash())
-    {
-        CWizDocumentDataArray arrayDocument;
-        trashItem->getDocuments(m_db, arrayDocument);
-        //
-        foreach (const WIZDOCUMENTDATA& data, arrayDocument)
-        {
-            CWizDocument doc(m_db, data);
-            doc.Delete();
-        }
+    CWizCategoryViewFolderItem* p = currentCategoryItem<CWizCategoryViewFolderItem>();
+    if (!p)
+        return;
+
+    if (m_MsgWarning->result() == QMessageBox::Ok) {
+        CWizFolder folder(m_dbMgr.db(), p->location());
+        folder.Delete();
     }
 }
 
@@ -624,25 +681,29 @@ CWizFolder* CWizCategoryView::SelectedFolder()
     if (!pItem)
         return NULL;
 
-    return new CWizFolder(m_db, pItem->location());
+    return new CWizFolder(m_dbMgr.db(), pItem->location());
 }
 
 
+
+/* ------------------------------ CWizCategoryTagsView ------------------------------ */
 
 CWizCategoryTagsView::CWizCategoryTagsView(CWizExplorerApp& app, QWidget *parent)
     : CWizCategoryBaseView(app, parent)
     , m_menuAllTags(NULL)
     , m_menuTag(NULL)
 {
+    //setDragDropMode(QAbstractItemView::DragDrop);
+
     qRegisterMetaType<WIZTAGDATA>("WIZTAGDATA");
 
-    connect(&m_db, SIGNAL(tagCreated(const WIZTAGDATA&)), \
+    connect(&m_dbMgr, SIGNAL(tagCreated(const WIZTAGDATA&)), \
             SLOT(on_tag_created(const WIZTAGDATA&)));
 
-    connect(&m_db, SIGNAL(tagModified(const WIZTAGDATA&, const WIZTAGDATA&)), \
+    connect(&m_dbMgr, SIGNAL(tagModified(const WIZTAGDATA&, const WIZTAGDATA&)), \
             SLOT(on_tag_modified(const WIZTAGDATA&, const WIZTAGDATA&)));
 
-    connect(&m_db, SIGNAL(tagDeleted(const WIZTAGDATA&)), \
+    connect(&m_dbMgr, SIGNAL(tagDeleted(const WIZTAGDATA&)), \
             SLOT(on_tag_deleted(const WIZTAGDATA&)));
 }
 
@@ -674,19 +735,21 @@ void CWizCategoryTagsView::init()
 
 void CWizCategoryTagsView::initTags()
 {
-    CWizCategoryViewAllTagsItem* pAllTagsItem = new CWizCategoryViewAllTagsItem(m_app, tr("Tags"));
+    CWizCategoryViewAllTagsItem* pAllTagsItem = new CWizCategoryViewAllTagsItem(m_app, tr("Tags"), m_dbMgr.db().kbGUID());
     addTopLevelItem(pAllTagsItem);
+    pAllTagsItem->setExpanded(true);
+
     initTags(pAllTagsItem, "");
 }
 
 void CWizCategoryTagsView::initTags(QTreeWidgetItem* pParent, const QString& strParentTagGUID)
 {
     CWizTagDataArray arrayTag;
-    m_db.GetChildTags(strParentTagGUID, arrayTag);
+    m_dbMgr.db().GetChildTags(strParentTagGUID, arrayTag);
 
     CWizTagDataArray::const_iterator it;
     for (it = arrayTag.begin(); it != arrayTag.end(); it++) {
-        CWizCategoryViewTagItem* pTagItem = new CWizCategoryViewTagItem(m_app, *it);
+        CWizCategoryViewTagItem* pTagItem = new CWizCategoryViewTagItem(m_app, *it, m_dbMgr.db().kbGUID());
         pParent->addChild(pTagItem);
 
         initTags(pTagItem, it->strGUID);
@@ -710,7 +773,7 @@ CWizCategoryViewAllTagsItem* CWizCategoryTagsView::findAllTags()
 CWizCategoryViewTagItem* CWizCategoryTagsView::findTag(const WIZTAGDATA& tag, bool create, bool sort)
 {
     CWizStdStringArray arrayGUID;
-    if (!m_db.GetAllParentsTagGUID(tag.strGUID, arrayGUID))
+    if (!m_dbMgr.db().GetAllParentsTagGUID(tag.strGUID, arrayGUID))
         return NULL;
 
     arrayGUID.insert(arrayGUID.begin(), tag.strGUID);   //insert self
@@ -727,7 +790,7 @@ CWizCategoryViewTagItem* CWizCategoryTagsView::findTag(const WIZTAGDATA& tag, bo
         CString strParentTagGUID = arrayGUID[i];
 
         WIZTAGDATA tagParent;
-        if (!m_db.TagFromGUID(strParentTagGUID, tagParent))
+        if (!m_dbMgr.db().TagFromGUID(strParentTagGUID, tagParent))
             return NULL;
 
         bool found = false;
@@ -750,7 +813,7 @@ CWizCategoryViewTagItem* CWizCategoryTagsView::findTag(const WIZTAGDATA& tag, bo
         if (!create)
             return NULL;
 
-        CWizCategoryViewTagItem* pTagItem = new CWizCategoryViewTagItem(m_app, tagParent);
+        CWizCategoryViewTagItem* pTagItem = new CWizCategoryViewTagItem(m_app, tagParent, m_dbMgr.db().kbGUID());
         parent->addChild(pTagItem);
         parent->setExpanded(true);
         parent = pTagItem;
@@ -802,7 +865,7 @@ CWizCategoryViewTagItem* CWizCategoryTagsView::addTagWithChildren(const WIZTAGDA
         return NULL;
 
     CWizTagDataArray arrayTag;
-    m_db.GetChildTags(tag.strGUID, arrayTag);
+    m_dbMgr.db().GetChildTags(tag.strGUID, arrayTag);
 
     CWizTagDataArray::const_iterator it;
     for (it = arrayTag.begin(); it != arrayTag.end(); it++) {
@@ -815,11 +878,9 @@ CWizCategoryViewTagItem* CWizCategoryTagsView::addTagWithChildren(const WIZTAGDA
 void CWizCategoryTagsView::removeTag(const WIZTAGDATA& tag)
 {
     CWizCategoryViewTagItem* pItem = findTagInTree(tag);
-    if (pItem)
-    {
+    if (pItem) {
         QTreeWidgetItem* parent = pItem->parent();
-        if (parent)
-        {
+        if (parent) {
             parent->removeChild(pItem);
         }
     }
@@ -832,17 +893,13 @@ void CWizCategoryTagsView::on_tag_created(const WIZTAGDATA& tag)
 
 void CWizCategoryTagsView::on_tag_modified(const WIZTAGDATA& tagOld, const WIZTAGDATA& tagNew)
 {
-    if (tagOld.strParentGUID != tagNew.strParentGUID)
-    {
+    if (tagOld.strParentGUID != tagNew.strParentGUID) {
         removeTag(tagOld);
         addTagWithChildren(tagNew);
-    }
-    else
-    {
+    } else {
         CWizCategoryViewTagItem* pTagItem = addTagWithChildren(tagNew);
-        if (pTagItem)
-        {
-            pTagItem->reload(m_db);
+        if (pTagItem) {
+            pTagItem->reload(m_dbMgr.db());
         }
     }
 }
@@ -854,11 +911,22 @@ void CWizCategoryTagsView::on_tag_deleted(const WIZTAGDATA& tag)
 
 void CWizCategoryTagsView::on_action_newTag()
 {
-    NewTagDialog dlg;
-    if (QDialog::Accepted != dlg.exec())
-        return;
+    if (!m_MsgNewTag) {
+        m_MsgNewTag = new CWizNewDialog(tr("Please input tag name: "), this);
+        connect(m_MsgNewTag, SIGNAL(finished(int)), SLOT(on_action_newTag_confirmed(int)));
+    }
 
-    CString strTagNames = dlg.tagName();
+    m_MsgNewTag->clear();
+    m_MsgNewTag->open();
+}
+
+void CWizCategoryTagsView::on_action_newTag_confirmed(int result)
+{
+    if (result != QDialog::Accepted) {
+        return;
+    }
+
+    CString strTagNames = m_MsgNewTag->input();
     if (strTagNames.IsEmpty())
         return;
 
@@ -874,7 +942,7 @@ void CWizCategoryTagsView::on_action_newTag()
         CString strTagName = *it;
 
         WIZTAGDATA tagNew;
-        m_db.CreateTag(parentTag.strGUID, strTagName, "", tagNew);
+        m_dbMgr.db().CreateTag(parentTag.strGUID, strTagName, "", tagNew);
     }
 }
 
@@ -885,6 +953,447 @@ void CWizCategoryTagsView::on_action_deleteTag()
 
     if (CWizCategoryViewTagItem* p = currentCategoryItem<CWizCategoryViewTagItem>()) {
         WIZTAGDATA tag = p->tag();
-        m_db.DeleteTagWithChildren(tag, TRUE);
+        m_dbMgr.db().DeleteTagWithChildren(tag, TRUE);
+    }
+}
+
+
+/* ------------------------------ CWizCategoryGroupsView ------------------------------ */
+
+#define WIZACTION_GROUP_MARK_READ       QObject::tr("Mark all documents read")
+#define WIZACTION_GROUP_NEW_DOCUMENT    QObject::tr("Create new document")
+#define WIZACTION_GROUP_NEW_FOLDER      QObject::tr("Create new folder")
+#define WIZACTION_GROUP_OPEN_ATTRIBUTE  QObject::tr("Open group attribute")
+#define WIZACTION_GROUP_RENAME_FOLDER   QObject::tr("Change current folder name")
+#define WIZACTION_GROUP_DELETE_FOLDER   QObject::tr("Delete current folder")
+
+CWizCategoryGroupsView::CWizCategoryGroupsView(CWizExplorerApp& app, QWidget* parent)
+    : CWizCategoryBaseView(app, parent)
+{
+    qRegisterMetaType<WIZTAGDATA>("WIZTAGDATA");
+
+    connect(&m_dbMgr, SIGNAL(databaseOpened(const QString&)), \
+            SLOT(on_group_opened(const QString&)));
+
+    connect(&m_dbMgr, SIGNAL(databaseClosed(const QString&)), \
+            SLOT(on_group_closed(const QString&)));
+
+    connect(&m_dbMgr, SIGNAL(databaseRename(const QString&)), \
+            SLOT(on_group_rename(const QString&)));
+
+    connect(&m_dbMgr, SIGNAL(databasePermissionChanged(const QString&)), \
+            SLOT(on_group_permissionChanged(const QString&)));
+
+    connect(&m_dbMgr, SIGNAL(tagCreated(const WIZTAGDATA&)), \
+            SLOT(on_tag_created(const WIZTAGDATA&)));
+
+    connect(&m_dbMgr, SIGNAL(tagModified(const WIZTAGDATA&, const WIZTAGDATA&)), \
+            SLOT(on_tag_modified(const WIZTAGDATA&, const WIZTAGDATA&)));
+
+    connect(&m_dbMgr, SIGNAL(tagDeleted(const WIZTAGDATA&)), \
+            SLOT(on_tag_deleted(const WIZTAGDATA&)));
+
+    m_menuGroupRoot = new QMenu(this);
+    //QAction* actionMarkRead = m_menuGroupRoot->addAction(WIZACTION_GROUP_MARK_READ, this, SLOT(on_action_markRead()));
+    m_menuGroupRoot->addSeparator();
+    QAction* actionNewDoc = m_menuGroupRoot->addAction(WIZACTION_GROUP_NEW_DOCUMENT, this, SLOT(on_action_newDocument()));
+    QAction* actionNewFolder = m_menuGroupRoot->addAction(WIZACTION_GROUP_NEW_FOLDER, this, SLOT(on_action_newTag()));
+    m_menuGroupRoot->addSeparator();
+    m_menuGroupRoot->addAction(WIZACTION_GROUP_OPEN_ATTRIBUTE, this, SLOT(on_action_openGroupAttribute()));
+
+    m_menuGroup = new QMenu(this);
+    //m_menuGroup->addAction(actionMarkRead);
+    m_menuGroup->addSeparator();
+    m_menuGroup->addAction(actionNewDoc);
+    m_menuGroup->addAction(actionNewFolder);
+    m_menuGroup->addSeparator();
+    //m_menuGroup->addAction(WIZACTION_GROUP_RENAME_FOLDER, this, SLOT(on_action_modifyTag()));
+    m_menuGroup->addAction(WIZACTION_GROUP_DELETE_FOLDER, this, SLOT(on_action_deleteTag()));
+}
+
+void CWizCategoryGroupsView::showGroupRootContextMenu(const QString& strKbGUID, QPoint pos)
+{
+    m_strKbGUID = strKbGUID;
+    on_group_permissionChanged(strKbGUID);
+    m_menuGroupRoot->popup(pos);
+}
+
+void CWizCategoryGroupsView::showGroupContextMenu(const QString& strKbGUID, QPoint pos)
+{
+    m_strKbGUID = strKbGUID;
+    on_group_permissionChanged(strKbGUID);
+    m_menuGroup->popup(pos);
+}
+
+void CWizCategoryGroupsView::init()
+{
+    CWizCategoryViewGroupRootItem* pAllGroupsItem = new CWizCategoryViewGroupRootItem(m_app, tr("Groups"), "");
+    addTopLevelItem(pAllGroupsItem);
+    pAllGroupsItem->setExpanded(true);
+
+    int nTotal = m_dbMgr.count();
+    for (int i = 0; i < nTotal; i++) {
+        initGroup(m_dbMgr.at(i));
+    }
+}
+
+void CWizCategoryGroupsView::initGroup(CWizDatabase& db)
+{
+    QTreeWidgetItem* pAllGroupsItem = topLevelItem(0);
+
+    CWizCategoryViewGroupRootItem* pGroupItem = new CWizCategoryViewGroupRootItem(m_app, db.name(), db.kbGUID());
+
+    pAllGroupsItem->addChild(pGroupItem);
+    initGroup(db, pGroupItem, "");
+
+    pAllGroupsItem->sortChildren(0, Qt::AscendingOrder);
+
+    CWizCategoryViewTrashItem* pTrashItem = new CWizCategoryViewTrashItem(m_app, tr("Trash"), db.kbGUID());
+    pGroupItem->addChild(pTrashItem);
+
+    // only show trash if permission is enough
+    if (db.permission() > WIZ_USERGROUP_SUPER) {
+        pTrashItem->setHidden(true);
+    }
+}
+
+void CWizCategoryGroupsView::initGroup(CWizDatabase& db, QTreeWidgetItem* pParent, const QString& strParentTagGUID)
+{
+    CWizTagDataArray arrayTag;
+    db.GetChildTags(strParentTagGUID, arrayTag);
+
+    CWizTagDataArray::const_iterator it;
+    for (it = arrayTag.begin(); it != arrayTag.end(); it++) {
+        CWizCategoryViewGroupItem* pTagItem = new CWizCategoryViewGroupItem(m_app, *it, db.kbGUID());
+        pParent->addChild(pTagItem);
+
+        initGroup(db, pTagItem, it->strGUID);
+    }
+}
+
+CWizCategoryViewGroupRootItem* CWizCategoryGroupsView::findGroup(const QString& strKbGUID)
+{
+    QTreeWidgetItem* pTop = topLevelItem(0);
+    int nCount = pTop->childCount();
+    for (int i = 0; i < nCount; i++) {
+        CWizCategoryViewGroupRootItem* pItem = dynamic_cast<CWizCategoryViewGroupRootItem *>(pTop->child(i));
+        if (pItem && (pItem->kbGUID() == strKbGUID)) {
+            return pItem;
+        }
+    }
+
+    return NULL;
+}
+
+CWizCategoryViewTrashItem* CWizCategoryGroupsView::findTrash(const QString& strKbGUID)
+{
+    CWizCategoryViewGroupRootItem* pGroupItem = findGroup(strKbGUID);
+    if (!pGroupItem) {
+        return NULL;
+    }
+
+    int nCount = pGroupItem->childCount();
+    for (int i = 0; i < nCount; i++) {
+        CWizCategoryViewTrashItem * pTrashItem = dynamic_cast<CWizCategoryViewTrashItem *>(pGroupItem->child(i));
+        if (pTrashItem) {
+            return pTrashItem;
+        }
+    }
+
+    Q_ASSERT(0);
+    return NULL;
+}
+
+QAction* CWizCategoryGroupsView::findAction(const QString& strName)
+{
+    QList<QAction *> actionList;
+    actionList.append(m_menuGroupRoot->actions());
+    actionList.append(m_menuGroup->actions());
+
+    QList<QAction *>::const_iterator it;
+    for (it = actionList.begin(); it != actionList.end(); it++) {
+        QAction* action = *it;
+        if (action->text() == strName) {
+            return action;
+        }
+    }
+
+    Q_ASSERT(0);
+    return NULL;
+}
+
+CWizCategoryViewGroupItem* CWizCategoryGroupsView::findTagInTree(const WIZTAGDATA& tag)
+{
+    CWizCategoryViewGroupRootItem* pItem = findGroup(tag.strKbGUID);
+    if (!pItem)
+        return NULL;
+
+    return findTagInTree(tag, pItem);
+}
+
+CWizCategoryViewGroupItem* CWizCategoryGroupsView::findTagInTree(const WIZTAGDATA& tag, QTreeWidgetItem* itemParent)
+{
+    for (int i = 0; i < itemParent->childCount(); i++) {
+        QTreeWidgetItem* it = itemParent->child(i);
+
+        if (CWizCategoryViewGroupItem* item = dynamic_cast<CWizCategoryViewGroupItem*>(it)) {
+            if (item && item->tag().strGUID == tag.strGUID
+                    && item->tag().strKbGUID == tag.strKbGUID)
+                return item;
+        }
+
+        if (CWizCategoryViewGroupItem* childItem = findTagInTree(tag, it)) {
+            return childItem;
+        }
+    }
+
+    return NULL;
+}
+
+void CWizCategoryGroupsView::removeTag(const WIZTAGDATA& tag)
+{
+    CWizCategoryViewGroupItem* pItem = findTagInTree(tag);
+    if (pItem) {
+        QTreeWidgetItem* parent = pItem->parent();
+        if (parent) {
+            parent->removeChild(pItem);
+        }
+    }
+}
+
+CWizCategoryViewGroupItem* CWizCategoryGroupsView::addTagWithChildren(const WIZTAGDATA& tag)
+{
+    CWizCategoryViewGroupItem* pItem = findTag(tag, true, true);
+    if (!pItem)
+        return NULL;
+
+    CWizTagDataArray arrayTag;
+    m_dbMgr.db(tag.strKbGUID).GetChildTags(tag.strGUID, arrayTag);
+
+    CWizTagDataArray::const_iterator it;
+    for (it = arrayTag.begin(); it != arrayTag.end(); it++) {
+        addTagWithChildren(*it);
+    }
+
+    return pItem;
+}
+
+CWizCategoryViewGroupItem* CWizCategoryGroupsView::findTag(const WIZTAGDATA& tag, bool create, bool sort)
+{
+    CWizStdStringArray arrayGUID;
+    if (!m_dbMgr.db(tag.strKbGUID).GetAllParentsTagGUID(tag.strGUID, arrayGUID))
+        return NULL;
+
+    arrayGUID.insert(arrayGUID.begin(), tag.strGUID);   //insert self
+
+    CWizCategoryViewGroupRootItem* pItem = findGroup(tag.strKbGUID);
+    if (!pItem)
+        return NULL;
+
+    QTreeWidgetItem* parent = pItem;
+
+    size_t nCount = arrayGUID.size();
+    for (intptr_t i = nCount - 1; i >= 0; i--) {
+        CString strParentTagGUID = arrayGUID[i];
+
+        WIZTAGDATA tagParent;
+        if (!m_dbMgr.db(tag.strKbGUID).TagFromGUID(strParentTagGUID, tagParent))
+            return NULL;
+
+        bool found = false;
+        int nCount = parent->childCount();
+        for (int i = 0; i < nCount; i++) {
+            CWizCategoryViewGroupItem* pTag = dynamic_cast<CWizCategoryViewGroupItem*>(parent->child(i));
+            if (pTag && pTag->tag().strGUID == tagParent.strGUID
+                    && pTag->tag().strKbGUID == tagParent.strKbGUID)
+            {
+                found = true;
+                parent = pTag;
+                continue;
+            }
+        }
+
+        if (found)
+            continue;
+
+        if (!create)
+            return NULL;
+
+        CWizCategoryViewGroupItem* pTagItem = new CWizCategoryViewGroupItem(m_app, tagParent, tag.strKbGUID);
+        parent->addChild(pTagItem);
+        parent->setExpanded(true);
+        parent = pTagItem;
+
+        if (sort) {
+            parent->sortChildren(0, Qt::AscendingOrder);
+        }
+    }
+
+    return dynamic_cast<CWizCategoryViewGroupItem *>(parent);
+}
+
+void CWizCategoryGroupsView::on_group_opened(const QString& strKbGUID)
+{
+    initGroup(m_dbMgr.db(strKbGUID));
+}
+
+void CWizCategoryGroupsView::on_group_closed(const QString& strKbGUID)
+{
+    CWizCategoryViewGroupRootItem* pItem = findGroup(strKbGUID);
+    if (pItem) {
+        QTreeWidgetItem* parent = pItem->parent();
+        if (parent) {
+            parent->removeChild(pItem);
+        }
+    }
+}
+
+void CWizCategoryGroupsView::on_group_rename(const QString& strKbGUID)
+{
+    CWizCategoryViewGroupRootItem* pItem = findGroup(strKbGUID);
+    if (pItem) {
+        pItem->reload(m_dbMgr.db(strKbGUID));
+    }
+}
+
+void CWizCategoryGroupsView::on_group_permissionChanged(const QString& strKbGUID)
+{
+    int nPerm = m_dbMgr.db(strKbGUID).permission();
+
+    // only Admin and Super user see trash folder and operate with tag (folder)
+    if (nPerm > WIZ_USERGROUP_SUPER) {
+        findTrash(strKbGUID)->setHidden(true);
+        findAction(WIZACTION_GROUP_NEW_FOLDER)->setEnabled(false);
+        //findAction(WIZACTION_GROUP_RENAME_FOLDER)->setEnabled(false);
+        findAction(WIZACTION_GROUP_DELETE_FOLDER)->setEnabled(false);
+    } else {
+        findTrash(strKbGUID)->setHidden(false);
+        findAction(WIZACTION_GROUP_NEW_FOLDER)->setEnabled(true);
+        //findAction(WIZACTION_GROUP_RENAME_FOLDER)->setEnabled(true);
+        findAction(WIZACTION_GROUP_DELETE_FOLDER)->setEnabled(true);
+    }
+
+    // permission greater than author can create new document
+    if (nPerm >= WIZ_USERGROUP_READER) {
+        findAction(WIZACTION_GROUP_NEW_DOCUMENT)->setEnabled(false);
+    } else {
+        findAction(WIZACTION_GROUP_NEW_DOCUMENT)->setEnabled(true);
+    }
+}
+
+void CWizCategoryGroupsView::on_tag_created(const WIZTAGDATA& tag)
+{
+    // ignore signal from private database
+    if (tag.strKbGUID == m_dbMgr.db().kbGUID())
+        return;
+
+    addTagWithChildren(tag);
+}
+
+void CWizCategoryGroupsView::on_tag_modified(const WIZTAGDATA& tagOld, const WIZTAGDATA& tagNew)
+{
+    // ignore signal from private database
+    if (tagNew.strKbGUID == m_dbMgr.db().kbGUID())
+        return;
+
+    if (tagOld.strParentGUID != tagNew.strParentGUID) {
+        removeTag(tagOld);
+        addTagWithChildren(tagNew);
+    } else {
+        CWizCategoryViewGroupItem* pTagItem = addTagWithChildren(tagNew);
+        if (pTagItem) {
+            pTagItem->reload(m_dbMgr.db(tagNew.strKbGUID));
+        }
+    }
+}
+
+void CWizCategoryGroupsView::on_tag_deleted(const WIZTAGDATA& tag)
+{
+    // ignore signal from private database
+    if (tag.strKbGUID == m_dbMgr.db().kbGUID())
+        return;
+
+    removeTag(tag);
+}
+
+void CWizCategoryGroupsView::on_action_markRead()
+{
+
+}
+
+void CWizCategoryGroupsView::on_action_newDocument()
+{
+
+}
+
+void CWizCategoryGroupsView::on_action_openGroupAttribute()
+{
+    Q_ASSERT(!m_strKbGUID.isEmpty());
+
+    MainWindow* mainWindow = qobject_cast<MainWindow *>(m_app.mainWindow());
+    mainWindow->groupAttributeForm()->sheetShow(m_strKbGUID);
+}
+
+void CWizCategoryGroupsView::on_action_newTag()
+{
+    if (!m_MsgNewFolder) {
+        m_MsgNewFolder = new CWizNewDialog(tr("Please input folder name: "), this);
+        connect(m_MsgNewFolder, SIGNAL(finished(int)), SLOT(on_action_newTag_confirmed(int)));
+    }
+
+    m_MsgNewFolder->clear();
+    m_MsgNewFolder->open();
+}
+
+void CWizCategoryGroupsView::on_action_newTag_confirmed(int result)
+{
+    if (result != QDialog::Accepted) {
+        return;
+    }
+
+    QString strTagNames = m_MsgNewFolder->input();
+    if (strTagNames.isEmpty())
+        return;
+
+    WIZTAGDATA parentTag;
+    QString strKbGUID;
+
+    if (CWizCategoryViewGroupRootItem* pRoot = currentCategoryItem<CWizCategoryViewGroupRootItem>()) {
+        strKbGUID = pRoot->kbGUID();
+    }
+
+    if (CWizCategoryViewGroupItem* p = currentCategoryItem<CWizCategoryViewGroupItem>()) {
+        strKbGUID = p->kbGUID();
+        parentTag = p->tag();
+    }
+
+    if (strKbGUID.isEmpty()) {
+        Q_ASSERT(0);
+        return;
+    }
+
+    QStringList sl = strTagNames.split(';');
+    QStringList::const_iterator it;
+    for (it = sl.begin(); it != sl.end(); it++) {
+        CString strTagName = *it;
+
+        WIZTAGDATA tagNew;
+        m_dbMgr.db(strKbGUID).CreateTag(parentTag.strGUID, strTagName, "", tagNew);
+    }
+}
+
+void CWizCategoryGroupsView::on_action_modifyTag()
+{
+
+}
+
+void CWizCategoryGroupsView::on_action_deleteTag()
+{
+    CWaitCursor wait;
+    Q_UNUSED(wait);
+
+    if (CWizCategoryViewGroupItem* p = currentCategoryItem<CWizCategoryViewGroupItem>()) {
+        WIZTAGDATA tag = p->tag();
+        m_dbMgr.db(p->kbGUID()).DeleteTagWithChildren(tag, true);
     }
 }

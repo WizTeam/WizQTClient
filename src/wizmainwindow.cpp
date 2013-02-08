@@ -17,7 +17,6 @@
 #include "share/wizuihelper.h"
 #include "share/wizsettings.h"
 #include "share/wizanimateaction.h"
-
 #include "share/wizSearchIndexer.h"
 
 #include "wizSearchBox.h"
@@ -26,29 +25,28 @@
 #include "wizdocumenthistory.h"
 
 
-MainWindow::MainWindow(CWizDatabase& db, QWidget *parent)
+MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     : QMainWindow(parent)
-    , m_db(db)
-    , m_settings(new CWizUserSettings(db))
+    , m_dbMgr(dbMgr)
+    , m_settings(new CWizUserSettings(dbMgr.db()))
     , m_sync(new CWizSyncThread(*this, this))
-    , m_syncTimer(new QTimer(this))
     , m_console(new CWizConsoleDialog(*this, this))
     , m_upgrade(new CWizUpgradeThread(this))
     , m_certManager(new CWizCertManager(*this))
     , m_cipherForm(new CWizUserCipherForm(*this, this))
-    , m_objectDownloadDialog(new CWizDownloadObjectDataDialog(db, this))
+    , m_groupAttribute(new CWizGroupAttributeForm(*this, this))
+    , m_objectDownloadDialog(new CWizDownloadObjectDataDialog(dbMgr, this))
     #ifndef Q_OS_MAC
-    , m_toolBar(new QToolBar("Main", this))
     , m_labelNotice(NULL)
     , m_optionsAction(NULL)
-    #else
-    , m_toolBar(new QToolBar("Main", this))
     #endif
+    , m_toolBar(new QToolBar("Main", this))
     , m_menuBar(new QMenuBar(this))
     , m_statusBar(new CWizStatusBar(*this, this))
     , m_actions(new CWizActions(*this, this))
-    , m_category(new CWizCategoryView(*this, this))
+    , m_categoryPrivate(new CWizCategoryView(*this, this))
     , m_categoryTags(new CWizCategoryTagsView(*this, this))
+    , m_categoryGroups(new CWizCategoryGroupsView(*this, this))
     , m_categoryLayer(new QWidget(this))
     , m_documents(new CWizDocumentListView(*this, this))
     , m_doc(new CWizDocumentView(*this, this))
@@ -63,15 +61,11 @@ MainWindow::MainWindow(CWizDatabase& db, QWidget *parent)
     , m_bRequestQuit(false)
 {
     // FTS engine thread
-    m_searchIndexer = new CWizSearchIndexerThread(m_db, this);
+    m_searchIndexer = new CWizSearchIndexerThread(m_dbMgr, this);
     m_searchIndexer->start();
-
+    connect(m_searchIndexer, SIGNAL(started()), SLOT(on_searchIndexerStarted()));
     connect(m_searchIndexer, SIGNAL(documentFind(const CWizDocumentDataArray&)), \
             SLOT(on_searchDocumentFind(const CWizDocumentDataArray&)));
-
-    if (!m_db.isDocumentFTSEnabled()) {
-       QTimer::singleShot(5 * 1000, m_searchIndexer->worker(), SLOT(rebuildFTSIndex()));
-    }
 
     // upgrade check thread
 #ifndef Q_OS_MAC
@@ -80,12 +74,21 @@ MainWindow::MainWindow(CWizDatabase& db, QWidget *parent)
     connect(m_upgrade, SIGNAL(finished()), SLOT(on_upgradeThread_finished()));
 #endif // Q_OS_MAC
 
-    // auto sync thread
+    // syncing thread
+    m_syncTimer = new QTimer(this);
     m_syncTimer->setInterval(15 * 60 * 1000);    //15 minutes
     connect(m_syncTimer, SIGNAL(timeout()), SLOT(on_actionSync_triggered()));
     if (m_settings->autoSync()) {
         QTimer::singleShot(3 * 1000, this, SLOT(on_actionSync_triggered()));
     }
+
+    m_category = m_categoryPrivate;
+
+    connect(m_sync, SIGNAL(syncStarted()), SLOT(on_syncStarted()));
+    connect(m_sync, SIGNAL(syncLogined()), SLOT(on_syncLogined()));
+    connect(m_sync, SIGNAL(processLog(const QString&)), SLOT(on_syncProcessLog(const QString&)));
+    connect(m_sync, SIGNAL(processErrorLog(const QString&)), SLOT(on_syncProcessErrorLog(const QString&)));
+    connect(m_sync, SIGNAL(syncDone(bool)), SLOT(on_syncDone(bool)));
 
     setStatusBar(m_statusBar);
 
@@ -104,6 +107,7 @@ void MainWindow::showEvent(QShowEvent* event)
 
     m_statusBar->hide();
     m_cipherForm->hide();
+    m_groupAttribute->hide();
 }
 
 bool MainWindow::requestThreadsQuit()
@@ -133,7 +137,7 @@ void MainWindow::on_quitTimeout()
         saveStatus();
 
         // FIXME : if document not valid will lead crash
-        m_doc->view()->saveDocument(false);
+        //m_doc->view()->saveDocument(false);
         m_bReadyQuit = true;
 
         // back to closeEvent
@@ -237,18 +241,14 @@ void MainWindow::restoreStatus()
 void MainWindow::initActions()
 {
     m_actions->init();
-    m_animateSync->setAction(m_actions->actionFromName("actionSync"));
+    m_animateSync->setAction(m_actions->actionFromName(WIZACTION_GLOBAL_SYNC));
     m_animateSync->setIcons("sync");
 }
 
 void MainWindow::initMenuBar()
 {
-//#ifdef Q_WS_MAC
     setMenuBar(m_menuBar);
     m_actions->buildMenuBar(m_menuBar, ::WizGetResourcesPath() + "files/mainmenu.ini");
-//#else
-//    m_menuBar->hide();
-//#endif
 }
 
 void MainWindow::initToolBar()
@@ -266,7 +266,8 @@ void MainWindow::initToolBar()
     layoutCategorySwitch->setSpacing(0);
 
     QToolButton* btnNotes = new QToolButton(categorySwitchBtns);
-    QIcon iconNotes(::WizGetResourcesPath() + "skins/notePrivate.jpeg");
+    //QIcon iconNotes(::WizGetResourcesPath() + "skins/folder.png");
+    QIcon iconNotes = ::WizLoadSkinIcon(m_settings->skin(), palette().window().color(), "folder");
     btnNotes->setIcon(iconNotes);
     btnNotes->setIconSize(QSize(18, 12));
     btnNotes->setText(tr("Notes"));
@@ -274,7 +275,8 @@ void MainWindow::initToolBar()
     connect(btnNotes, SIGNAL(toggled(bool)), SLOT(on_actionCategorySwitchPrivate_triggered2(bool)));
 
     QToolButton* btnTags = new QToolButton(categorySwitchBtns);
-    QIcon iconTags(::WizGetResourcesPath() + "skins/noteTags.jpeg");
+    //QIcon iconTags(::WizGetResourcesPath() + "skins/tag.png");
+    QIcon iconTags = ::WizLoadSkinIcon(m_settings->skin(), palette().window().color(), "tag");
     btnTags->setIcon(iconTags);
     btnTags->setIconSize(QSize(18, 12));
     btnTags->setText(tr("Tags"));
@@ -282,7 +284,8 @@ void MainWindow::initToolBar()
     connect(btnTags, SIGNAL(toggled(bool)), SLOT(on_actionCategorySwitchTags_triggered2(bool)));
 
     QToolButton* btnGroups = new QToolButton(categorySwitchBtns);
-    QIcon iconGroups(::WizGetResourcesPath() + "skins/noteGroups.jpeg");
+    //QIcon iconGroups(::WizGetResourcesPath() + "skins/noteGroups.jpeg");
+    QIcon iconGroups = ::WizLoadSkinIcon(m_settings->skin(), palette().window().color(), "groups");
     btnGroups->setIcon(iconGroups);
     btnGroups->setIconSize(QSize(18, 12));
     btnGroups->setText("Groups");
@@ -300,17 +303,13 @@ void MainWindow::initToolBar()
     layoutCategorySwitch->addWidget(btnTags);
     layoutCategorySwitch->addWidget(btnGroups);
 
-    //m_toolBar->addWidget(btnNotes);
-    //m_toolBar->addWidget(btnTags);
-    //m_toolBar->addWidget(btnGroups);
-
     m_toolBar->addWidget(categorySwitchBtns);
 
     m_toolBar->addWidget(new CWizFixedSpacer(QSize(20, 1), m_toolBar));
-    m_toolBar->addAction(m_actions->actionFromName("actionSync"));
+    m_toolBar->addAction(m_actions->actionFromName(WIZACTION_GLOBAL_SYNC));
     m_toolBar->addWidget(new CWizFixedSpacer(QSize(20, 1), m_toolBar));
-    m_toolBar->addAction(m_actions->actionFromName("actionNewNote"));
-    m_toolBar->addAction(m_actions->actionFromName("actionDeleteCurrentNote"));
+    m_toolBar->addAction(m_actions->actionFromName(WIZACTION_GLOBAL_NEW_DOCUMENT));
+    //m_toolBar->addAction(m_actions->actionFromName("actionDeleteCurrentNote"));
 
     m_toolBar->addWidget(new CWizSpacer(m_toolBar));
 
@@ -420,16 +419,19 @@ void MainWindow::initClient()
 #ifndef Q_OS_MAC
     splitter->addWidget(WizInitWidgetMarginsEx(m_settings->skin(), m_category, "Category"));
 #else
-    //QWidget* categories = new QWidget(this);
     QHBoxLayout* layoutCategories = new QHBoxLayout(m_categoryLayer);
     layoutCategories->setContentsMargins(0, 0, 0, 0);
     layoutCategories->setSpacing(0);
     m_categoryLayer->setLayout(layoutCategories);
 
-    layoutCategories->addWidget(m_category);
-    //layoutCategories->addWidget(m_categoryTags);
+    layoutCategories->addWidget(m_categoryPrivate);
+    layoutCategories->addWidget(m_categoryTags);
+    layoutCategories->addWidget(m_categoryGroups);
+
+    m_categoryTags->hide();
+    m_categoryGroups->hide();
+
     splitter->addWidget(m_categoryLayer);
-    //m_categoryTags->hide();
 #endif
 
     splitter->addWidget(m_documents);
@@ -470,21 +472,20 @@ void MainWindow::initClient()
 
 void MainWindow::init()
 {
-    connect(m_sync, SIGNAL(syncStarted()), SLOT(on_syncStarted()));
-    connect(m_sync, SIGNAL(syncLogined()), SLOT(on_syncLogined()));
-    connect(m_sync, SIGNAL(processLog(const QString&)), SLOT(on_syncProcessLog(const QString&)));
-    connect(m_sync, SIGNAL(processErrorLog(const QString&)), SLOT(on_syncProcessErrorLog(const QString&)));
-    connect(m_sync, SIGNAL(syncDone(bool)), SLOT(on_syncDone(bool)));
+    connect(m_categoryPrivate, SIGNAL(itemSelectionChanged()), SLOT(on_category_itemSelectionChanged()));
+    connect(m_categoryPrivate, SIGNAL(newDocument()), SLOT(on_actionNewNote_triggered()));
 
-    connect(m_category, SIGNAL(itemSelectionChanged()), this, SLOT(on_category_itemSelectionChanged()));
-    connect(m_categoryTags, SIGNAL(itemSelectionChanged()), this, SLOT(on_category_itemSelectionChanged()));
-    connect(m_documents, SIGNAL(itemSelectionChanged()), this, SLOT(on_documents_itemSelectionChanged()));
+    connect(m_categoryTags, SIGNAL(itemSelectionChanged()), SLOT(on_category_itemSelectionChanged()));
+    connect(m_categoryGroups, SIGNAL(itemSelectionChanged()), SLOT(on_category_itemSelectionChanged()));
 
-    m_category->init();
+    connect(m_documents, SIGNAL(itemSelectionChanged()), SLOT(on_documents_itemSelectionChanged()));
+
+    m_categoryPrivate->init();
     m_categoryTags->init();
+    m_categoryGroups->init();
+
+    m_doc->showClient(false);
 }
-
-
 
 void MainWindow::on_syncStarted()
 {
@@ -534,8 +535,6 @@ void MainWindow::on_syncProcessErrorLog(const QString& strMsg)
     TOLOG(strMsg);
 }
 
-
-
 void MainWindow::on_actionSync_triggered()
 {
     m_certManager->downloadUserCert();
@@ -546,33 +545,97 @@ void MainWindow::on_actionNewNote_triggered()
 {
     WIZDOCUMENTDATA data;
 
-    CWizFolder* pFolder = m_category->SelectedFolder();
-    if (!pFolder)
-    {
-        m_category->addAndSelectFolder("/My Notes/");
-        pFolder = m_category->SelectedFolder();
+    // private category is seletected
+    if (m_category == m_categoryPrivate) {
+        CWizFolder* pFolder = m_categoryPrivate->SelectedFolder();
+        if (!pFolder) {
+            m_categoryPrivate->addAndSelectFolder("/My Notes/");
+            pFolder = m_categoryPrivate->SelectedFolder();
 
-        if (!pFolder)
+            if (!pFolder)
+                return;
+        }
+
+        //m_dbMgr.db().CreateDocumentAndInit("<body><div>&nbsp;</div></body>", "", 0, tr("New note"), "newnote", pFolder->Location(), "", data);
+        bool ret = m_dbMgr.db().CreateDocumentAndInit("", "", 0, tr("New note"), "newnote", pFolder->Location(), "", data);
+        if (!ret) {
+            TOLOG("Create new document failed!");
+            delete pFolder;
             return;
-    }
+        }
 
-    m_db.CreateDocumentAndInit("<body><div>&nbsp;</div></body>", "", 0, tr("New note"), "newnote", pFolder->Location(), "", data);
+        delete pFolder;
+
+    // if tag category is selected, create document at default location and also assign this tag to new document
+    } else if (m_category == m_categoryTags) {
+        bool ret = m_dbMgr.db().CreateDocumentAndInit("", "", 0, tr("New note"), "newnote", "/My Notes/", "", data);
+        if (!ret) {
+            TOLOG("Create new document failed!");
+            return;
+        }
+
+        if (CWizCategoryViewTagItem* p = dynamic_cast<CWizCategoryViewTagItem*>(m_categoryTags->currentItem())) {
+            CWizDocument doc(m_dbMgr.db(), data);
+            doc.AddTag(p->tag());
+        } else {
+            m_categoryTags->setCurrentItem(m_categoryTags->findAllTags());
+        }
+
+    // if group category is selected
+    } else if (m_category == m_categoryGroups) {
+        QString strKbGUID;
+        WIZTAGDATA tag;
+        // if group root selected
+        if (CWizCategoryViewGroupRootItem* pRoot = dynamic_cast<CWizCategoryViewGroupRootItem*>(m_categoryGroups->currentItem())) {
+            strKbGUID = pRoot->kbGUID();
+        } else if (CWizCategoryViewGroupItem* p = dynamic_cast<CWizCategoryViewGroupItem*>(m_categoryGroups->currentItem())) {
+            strKbGUID = p->kbGUID();
+            tag = p->tag();
+        } else {
+            Q_ASSERT(0);
+            return;
+        }
+
+        // FIXME: root of all groups will be selected, fix this issue
+        if (strKbGUID.isEmpty()) {
+            return;
+        }
+
+        CWizDatabase& db = m_dbMgr.db(strKbGUID);
+        bool ret = db.CreateDocumentAndInit("", "", 0, tr("New note"), "newnote", "/My Notes/", "", data);
+        if (!ret) {
+            TOLOG("Create new document for group failed!");
+            return;
+        }
+
+        // also assign tag(folder)
+        if (!tag.strGUID.isEmpty()) {
+            CWizDocument doc(db, data);
+            doc.AddTag(tag);
+        }
+
+    } else {
+        Q_ASSERT(0);
+    }
 
     m_documentForEditing = data;
     m_documents->addAndSelectDocument(data);
 
-    delete pFolder;
 }
 
-void MainWindow::on_actionDeleteCurrentNote_triggered()
-{
-    WIZDOCUMENTDATA document = m_doc->document();
-    if (document.strGUID.IsEmpty())
-        return;
-
-    CWizDocument doc(m_db, document);
-    doc.Delete();
-}
+//void MainWindow::on_actionDeleteCurrentNote_triggered()
+//{
+//    WIZDOCUMENTDATA document = m_doc->document();
+//    if (document.strGUID.IsEmpty())
+//        return;
+//
+//    if (!m_dbMgr.isPrivate(document.strKbGUID)) {
+//        return;
+//    }
+//
+//    CWizDocument doc(m_dbMgr.db(), document);
+//    doc.Delete();
+//}
 
 void MainWindow::on_actionConsole_triggered()
 {
@@ -623,6 +686,14 @@ void MainWindow::on_actionResetSearch_triggered()
     m_category->restoreSelection();
 }
 
+void MainWindow::on_searchIndexerStarted()
+{
+    // build FTS index if user use it first time
+    if (!m_searchIndexer->worker()->isFTSEnabled()) {
+       QTimer::singleShot(5 * 1000, m_searchIndexer->worker(), SLOT(buildFTSIndex()));
+    }
+}
+
 void MainWindow::on_searchDocumentFind(const CWizDocumentDataArray& arrayDocument)
 {
     m_documents->addDocuments(arrayDocument);
@@ -632,11 +703,11 @@ void MainWindow::on_searchDocumentFind(const CWizDocumentDataArray& arrayDocumen
 void MainWindow::on_search_doSearch(const QString& keywords)
 {
     if (keywords.isEmpty()) {
-        m_category->restoreSelection();
+        on_actionResetSearch_triggered();
         return;
     }
 
-    m_category->search(keywords);
+    m_category->saveSelection(keywords);
     m_documents->clear();
 
     if (!QMetaObject::invokeMethod(m_searchIndexer->worker(), "search", \
@@ -729,35 +800,29 @@ void MainWindow::on_actionCategorySwitchGroups_triggered2(bool toggled)
 
 void MainWindow::on_actionCategorySwitchPrivate_triggered()
 {
-    CWizCategoryBaseView* categoryCurrent = NULL;
-    if (m_categoryTags->isVisible()) {
-        categoryCurrent = m_categoryTags;
+    if (m_category == m_categoryPrivate) {
+        return;
     }
 
-    if (!categoryCurrent) {
-       return;
-    }
-
-    categorySwitchTo(categoryCurrent, m_category);
+    categorySwitchTo(m_category, m_categoryPrivate);
 }
 
 void MainWindow::on_actionCategorySwitchTags_triggered()
 {
-    CWizCategoryBaseView* categoryCurrent = NULL;
-    if (m_category->isVisible()) {
-        categoryCurrent = m_category;
+    if (m_category == m_categoryTags) {
+        return;
     }
 
-    if (!categoryCurrent) {
-       return;
-    }
-
-    categorySwitchTo(categoryCurrent, m_categoryTags);
+    categorySwitchTo(m_category, m_categoryTags);
 }
 
 void MainWindow::on_actionCategorySwitchGroups_triggered()
 {
-    qDebug() << "triggered groups";
+    if (m_category == m_categoryGroups) {
+        return;
+    }
+
+    categorySwitchTo(m_category, m_categoryGroups);
 }
 
 void MainWindow::categorySwitchTo(CWizCategoryBaseView* sourceCategory, CWizCategoryBaseView* destCategory)
@@ -766,25 +831,26 @@ void MainWindow::categorySwitchTo(CWizCategoryBaseView* sourceCategory, CWizCate
         return;
     }
 
-    QRect rectOld(sourceCategory->geometry());
+    QRect rectOld(m_categoryLayer->geometry());
 
     // break layout and do animation
     QHBoxLayout* layout = qobject_cast<QHBoxLayout *>(m_categoryLayer->layout());
     layout->removeWidget(sourceCategory);
-    layout->addWidget(destCategory);
     destCategory->show();
-    sourceCategory->raise();
+    destCategory->lower();
 
     QPropertyAnimation* animateCurrent = new QPropertyAnimation();
     animateCurrent->setTargetObject(sourceCategory);
     animateCurrent->setPropertyName("geometry");
-    animateCurrent->setDuration(250);
+    animateCurrent->setDuration(200);
     animateCurrent->setEndValue(QRect(rectOld.width(), rectOld.y(), 0, rectOld.height()));
 
     connect(animateCurrent, SIGNAL(stateChanged(QAbstractAnimation::State, QAbstractAnimation::State)), \
             SLOT(onAnimationCategorySwitchStateChanged(QAbstractAnimation::State, QAbstractAnimation::State)));
 
     animateCurrent->start();
+
+    m_category = destCategory;
 }
 
 void MainWindow::onAnimationCategorySwitchStateChanged(QAbstractAnimation::State newState, QAbstractAnimation::State oldState)
@@ -793,6 +859,9 @@ void MainWindow::onAnimationCategorySwitchStateChanged(QAbstractAnimation::State
         QPropertyAnimation* animate = qobject_cast<QPropertyAnimation *>(sender());
         CWizCategoryBaseView* category = qobject_cast<CWizCategoryBaseView *>(animate->targetObject());
         category->hide();
+
+        QHBoxLayout* layout = qobject_cast<QHBoxLayout *>(m_categoryLayer->layout());
+        layout->addWidget(category);
 
         m_categoryLayer->update();
     }
@@ -806,6 +875,11 @@ void MainWindow::on_category_itemSelectionChanged()
     if (!category)
         return;
 
+    QString kbGUID = category->selectedItemKbGUID();
+    if (!kbGUID.isEmpty()) {
+        resetPermission(kbGUID, "");
+    }
+
     category->getDocuments(arrayDocument);
     m_documents->setDocuments(arrayDocument);
 
@@ -816,18 +890,23 @@ void MainWindow::on_category_itemSelectionChanged()
 
 void MainWindow::on_documents_itemSelectionChanged()
 {
+    // hide
+    m_cipherForm->hide();
+    m_groupAttribute->sheetHide();
+
     CWizDocumentDataArray arrayDocument;
     m_documents->getSelectedDocuments(arrayDocument);
 
     if (arrayDocument.size() == 1) {
-        m_doc->showClient(true);
+        //m_doc->showClient(true);
 
         if (!m_bUpdatingSelection) {
             viewDocument(arrayDocument[0], true);
         }
-    } else {
-        m_doc->showClient(false);
     }
+    //else {
+    //    m_doc->showClient(false);
+    //}
 }
 
 
@@ -851,9 +930,63 @@ void MainWindow::on_options_restartForSettings()
     on_actionExit_triggered();
 }
 
+void MainWindow::resetPermission(const QString& strKbGUID, const QString& strOwner)
+{
+    Q_ASSERT(!strKbGUID.isEmpty());
+
+    int nPerm = m_dbMgr.db(strKbGUID).permission();
+    bool isGroup = m_dbMgr.db().kbGUID() != strKbGUID;
+
+    // Admin, Super, do anything
+    if (nPerm == WIZ_USERGROUP_ADMIN || nPerm == WIZ_USERGROUP_SUPER) {
+        // enable editing
+        m_doc->setReadOnly(false, isGroup);
+
+        // enable create tag
+
+        // enable new document
+        m_actions->actionFromName(WIZACTION_GLOBAL_NEW_DOCUMENT)->setEnabled(true);
+
+        // enable delete document
+        //m_actions->actionFromName("actionDeleteCurrentNote")->setEnabled(true);
+
+    // Editor, only disable create tag
+    } else if (nPerm == WIZ_USERGROUP_EDITOR) {
+        m_doc->setReadOnly(false, isGroup);
+        m_actions->actionFromName(WIZACTION_GLOBAL_NEW_DOCUMENT)->setEnabled(true);
+        //m_actions->actionFromName("actionDeleteCurrentNote")->setEnabled(true);
+
+    // Author
+    } else if (nPerm == WIZ_USERGROUP_AUTHOR) {
+        m_actions->actionFromName(WIZACTION_GLOBAL_NEW_DOCUMENT)->setEnabled(true);
+
+        // author is owner
+        QString strUserId = m_dbMgr.db().getUserId();
+        if (strOwner == strUserId) {
+            m_doc->setReadOnly(false, isGroup);
+            //m_actions->actionFromName("actionDeleteCurrentNote")->setEnabled(true);
+
+        // not owner
+        } else {
+            m_doc->setReadOnly(true, isGroup);
+            //m_actions->actionFromName("actionDeleteCurrentNote")->setEnabled(false);
+        }
+
+    // reader
+    } else if (nPerm == WIZ_USERGROUP_READER) {
+        m_doc->setReadOnly(true, isGroup);
+        m_actions->actionFromName(WIZACTION_GLOBAL_NEW_DOCUMENT)->setEnabled(false);
+        //m_actions->actionFromName("actionDeleteCurrentNote")->setEnabled(false);
+    } else {
+        Q_ASSERT(0);
+    }
+}
+
 void MainWindow::viewDocument(const WIZDOCUMENTDATA& data, bool addToHistory)
 {
-    CWizDocument* doc = new CWizDocument(m_db, data);
+    Q_ASSERT(!data.strKbGUID.isEmpty());
+
+    CWizDocument* doc = new CWizDocument(m_dbMgr.db(data.strKbGUID), data);
 
     if (doc->GUID() == m_doc->document().strGUID)
         return;
@@ -864,6 +997,8 @@ void MainWindow::viewDocument(const WIZDOCUMENTDATA& data, bool addToHistory)
         forceEdit = true;
     }
 
+    resetPermission(data.strKbGUID, data.strOwner);
+
     if (!m_doc->viewDocument(data, forceEdit))
         return;
 
@@ -871,8 +1006,8 @@ void MainWindow::viewDocument(const WIZDOCUMENTDATA& data, bool addToHistory)
         m_history->addHistory(data);
     }
 
-    m_actions->actionFromName("actionGoBack")->setEnabled(m_history->canBack());
-    m_actions->actionFromName("actionGoForward")->setEnabled(m_history->canForward());
+    //m_actions->actionFromName("actionGoBack")->setEnabled(m_history->canBack());
+    //m_actions->actionFromName("actionGoForward")->setEnabled(m_history->canForward());
 }
 
 void MainWindow::locateDocument(const WIZDOCUMENTDATA& data)
@@ -880,7 +1015,7 @@ void MainWindow::locateDocument(const WIZDOCUMENTDATA& data)
     try
     {
         m_bUpdatingSelection = true;
-        m_category->addAndSelectFolder(data.strLocation);
+        m_categoryPrivate->addAndSelectFolder(data.strLocation);
         m_documents->addAndSelectDocument(data);
     }
     catch (...)

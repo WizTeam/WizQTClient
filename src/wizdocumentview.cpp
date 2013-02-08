@@ -4,7 +4,6 @@
 #include "wizattachmentlistwidget.h"
 #include "wiznoteinfoform.h"
 #include "wiznotestyle.h"
-#include "share/wizsettings.h"
 
 #include <QWebElement>
 #include <QWebFrame>
@@ -46,11 +45,11 @@ public:
         m_titleEdit->setStyleSheet("QLineEdit{padding:4 4 4 4;border-color:#ffffff;border-width:1;border-style:solid;}QLineEdit:hover{border-color:#bbbbbb;border-width:1;border-style:solid;}");
 #endif
 
-        m_editIcon = ::WizLoadSkinIcon(m_app.userSettings().skin(), "lock");
-        m_commitIcon = ::WizLoadSkinIcon(m_app.userSettings().skin(), "unlock");
-        m_tagsIcon = ::WizLoadSkinIcon(m_app.userSettings().skin(), "document_tags");
-        m_attachmentIcon = ::WizLoadSkinIcon(m_app.userSettings().skin(), "attachment");
-        m_infoIcon = ::WizLoadSkinIcon(m_app.userSettings().skin(), "noteinfo");
+        m_editIcon = ::WizLoadSkinIcon(m_app.userSettings().skin(), pal.window().color(), "lock");
+        m_commitIcon = ::WizLoadSkinIcon(m_app.userSettings().skin(), pal.window().color(), "unlock");
+        m_tagsIcon = ::WizLoadSkinIcon(m_app.userSettings().skin(), pal.window().color(), "tag");
+        m_attachmentIcon = ::WizLoadSkinIcon(m_app.userSettings().skin(), pal.window().color(), "attachment");
+        m_infoIcon = ::WizLoadSkinIcon(m_app.userSettings().skin(), pal.window().color(), "noteinfo");
 
         m_editDocumentButton = new CWizImagePushButton(m_editIcon, "", this);
         updateEditDocumentButtonIcon(false);
@@ -117,10 +116,20 @@ public:
     QPushButton* infoButton() const { return m_infoButton; }
 
     void setEditingDocument(bool editing) { updateEditDocumentButtonIcon(editing); }
-    void setTitle(const QString& str) { m_titleEdit->setText(str); }
 
-    void updateInformation(CWizDatabase& db, const WIZDOCUMENTDATA& data)
+    void setTitle(const QString& str)
     {
+        m_titleEdit->setText(str);
+    }
+
+    void updateInformation(CWizDatabase& db, const WIZDOCUMENTDATA& doc)
+    {
+        // retrieve document info and reset
+        WIZDOCUMENTDATA data;
+        if (!db.DocumentFromGUID(doc.strGUID, data)) {
+            return;
+        }
+
         //title
         if (m_titleEdit->text() != data.strTitle) {
             m_titleEdit->setText(data.strTitle);
@@ -160,7 +169,7 @@ CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
     : QWidget(parent)
     , m_app(app)
     , m_userSettings(app.userSettings())
-    , m_db(app.database())
+    , m_dbMgr(app.databaseManager())
     , m_title(new CWizTitleBar(app, this))
     , m_web(new CWizDocumentWebView(app, this))
     , m_client(NULL)
@@ -177,6 +186,9 @@ CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
     layout->setContentsMargins(0, 0, 0, 0);
 
     m_title->setEditingDocument(m_editingDocument);
+
+    m_timerDelay.setSingleShot(true);
+    connect(&m_timerDelay, SIGNAL(timeout()), SLOT(on_titleEdit_textEdit_writeDelay()));
 
     connect(m_title->titleEdit(), SIGNAL(textChanged(const QString&)), \
             SLOT(on_titleEdit_textChanged(const QString&)));
@@ -196,13 +208,13 @@ CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
     qRegisterMetaType<WIZDOCUMENTDATA>("WIZDOCUMENTDATA");
     qRegisterMetaType<WIZDOCUMENTATTACHMENTDATA>("WIZDOCUMENTATTACHMENTDATA");
 
-    connect(&m_db, SIGNAL(documentModified(const WIZDOCUMENTDATA&, const WIZDOCUMENTDATA&)), \
+    connect(&m_dbMgr, SIGNAL(documentModified(const WIZDOCUMENTDATA&, const WIZDOCUMENTDATA&)), \
             SLOT(on_document_modified(const WIZDOCUMENTDATA&, const WIZDOCUMENTDATA&)));
 
-    connect(&m_db, SIGNAL(attachmentCreated(const WIZDOCUMENTATTACHMENTDATA&)), \
+    connect(&m_dbMgr, SIGNAL(attachmentCreated(const WIZDOCUMENTATTACHMENTDATA&)), \
             SLOT(on_attachment_created(const WIZDOCUMENTATTACHMENTDATA&)));
 
-    connect(&m_db, SIGNAL(attachmentDeleted(const WIZDOCUMENTATTACHMENTDATA&)), \
+    connect(&m_dbMgr, SIGNAL(attachmentDeleted(const WIZDOCUMENTATTACHMENTDATA&)), \
             SLOT(on_attachment_deleted(const WIZDOCUMENTATTACHMENTDATA&)));
 }
 
@@ -245,6 +257,19 @@ void CWizDocumentView::showClient(bool visible)
     }
 }
 
+void CWizDocumentView::setReadOnly(bool b, bool isGroup)
+{
+    m_title->titleEdit()->setReadOnly(b);
+    m_title->editDocumentButton()->setEnabled(!b);
+
+    // tag is not avaliable for group
+    if (isGroup) {
+        m_title->tagsButton()->setEnabled(false);
+    } else {
+        m_title->tagsButton()->setEnabled(true);
+    }
+}
+
 bool CWizDocumentView::viewDocument(const WIZDOCUMENTDATA& data, bool forceEdit)
 {
     bool edit = false;
@@ -265,17 +290,19 @@ bool CWizDocumentView::viewDocument(const WIZDOCUMENTDATA& data, bool forceEdit)
         }
     }
 
-    m_web->viewDocument(data, edit);
-    //if (!ret) {
-        //showClient(false);
-    //    return false;
-    //}
+    // check user permission
+    int perm = m_dbMgr.db(data.strKbGUID).permission();
+    QString strUserId = m_dbMgr.db().getUserId();
+    // only reading is permit
+    if (perm > WIZ_USERGROUP_AUTHOR ||
+            (perm == WIZ_USERGROUP_AUTHOR && data.strOwner != strUserId)) {
+        edit = false;
+    }
 
-    //showClient(true);
-    //editDocument(edit);
+    m_web->viewDocument(data, edit);
     m_editingDocument = edit;
     m_title->setEditingDocument(m_editingDocument);
-    m_title->updateInformation(m_db, data);
+    m_title->updateInformation(m_dbMgr.db(data.strKbGUID), data);
 
     return true;
 }
@@ -316,6 +343,7 @@ void CWizDocumentView::setViewMode(WizDocumentViewMode mode)
 void CWizDocumentView::setModified(bool modified)
 {
     m_title->setModified(modified);
+    m_web->setModified(modified);
 }
 
 void CWizDocumentView::settingsChanged()
@@ -325,20 +353,42 @@ void CWizDocumentView::settingsChanged()
 
 void CWizDocumentView::on_titleEdit_textChanged(const QString& strTitle)
 {
+    // apply modify immediately to avoid user switch document
+    if (!m_dataDelay.strGUID.isEmpty() && m_dataDelay.strGUID != m_web->document().strGUID) {
+        // FIXME: other thread will try to read and set document info during delay time
+        // delay 1/10 second for them finished writing.
+        m_timerDelay.start(100);
+    }
+
+    // programmatic change, switch document
     if (m_web->document().strTitle == strTitle) {
+        return;
+    }
+
+    if (strTitle.isEmpty()) {
        return;
     }
 
-    QString title = strTitle;
-    if (title.length() > 255) {
-        title = title.left(255);
-    }
+    // Only 255 max chars accept by title
+    m_dataDelay = m_web->document();
+    m_dataDelay.strTitle = strTitle.left(255);
+    m_timerDelay.start(3000);
+}
+
+void CWizDocumentView::on_titleEdit_textEdit_writeDelay()
+{
+    Q_ASSERT(!m_dataDelay.strGUID.isEmpty());
 
     WIZDOCUMENTDATA data;
-    if (m_db.DocumentFromGUID(m_web->document().strGUID, data)) {
-        data.strTitle = title;
-        m_db.ModifyDocumentInfo(data);
+    CWizDatabase& db = m_dbMgr.db(m_dataDelay.strKbGUID);
+    if (db.DocumentFromGUID(m_dataDelay.strGUID, data)) {
+        data.strTitle = m_dataDelay.strTitle;
+        db.ModifyDocumentInfo(data);
     }
+
+    m_dataDelay = WIZDOCUMENTDATA();
+
+    m_timerDelay.stop();
 }
 
 void CWizDocumentView::on_editDocumentButton_clicked()
@@ -363,7 +413,7 @@ void CWizDocumentView::on_attachmentButton_clicked()
 void CWizDocumentView::on_tagsButton_clicked()
 {
     if (!m_tags) {
-        m_tags = new CWizTagListWidget(m_db, topLevelWidget());
+        m_tags = new CWizTagListWidget(m_dbMgr, topLevelWidget());
     }
 
     m_tags->setDocument(m_web->document());
@@ -377,7 +427,7 @@ void CWizDocumentView::on_tagsButton_clicked()
 void CWizDocumentView::on_infoButton_clicked()
 {
     if (!m_info) {
-        m_info = new CWizNoteInfoForm(m_db, topLevelWidget());
+        m_info = new CWizNoteInfoForm(m_dbMgr, topLevelWidget());
     }
 
     m_info->setDocument(m_web->document());
@@ -390,17 +440,17 @@ void CWizDocumentView::on_infoButton_clicked()
 
 void CWizDocumentView::on_attachment_created(const WIZDOCUMENTATTACHMENTDATA& attachment)
 {
-    if (attachment.strDocumentGUID == document().strGUID)
-    {
-        m_title->updateInformation(m_db, document());
+    if (attachment.strDocumentGUID == document().strGUID) {
+        QString strKbGUID = document().strKbGUID;
+        m_title->updateInformation(m_dbMgr.db(strKbGUID), document());
     }
 }
 
 void CWizDocumentView::on_attachment_deleted(const WIZDOCUMENTATTACHMENTDATA& attachment)
 {
-    if (attachment.strDocumentGUID == document().strGUID)
-    {
-        m_title->updateInformation(m_db, document());
+    if (attachment.strDocumentGUID == document().strGUID) {
+        QString strKbGUID = document().strKbGUID;
+        m_title->updateInformation(m_dbMgr.db(strKbGUID), document());
     }
 }
 
@@ -408,9 +458,10 @@ void CWizDocumentView::on_document_modified(const WIZDOCUMENTDATA& documentOld, 
 {
     Q_UNUSED(documentOld);
 
-    if (document().strGUID == documentNew.strGUID)
-    {
+    if (document().strGUID == documentNew.strGUID) {
         m_web->reloadDocument();
-        m_title->updateInformation(m_db, document());
+
+        QString strKbGUID = document().strKbGUID;
+        m_title->updateInformation(m_dbMgr.db(strKbGUID), document());
     }
 }

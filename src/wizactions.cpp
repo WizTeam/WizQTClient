@@ -5,14 +5,12 @@
 #include "share/wizsettings.h"
 #include "share/wizanimateaction.h"
 
-
 struct WIZACTION
 {
     QString strName;
     QString strText;
     QString strShortcut;
 };
-
 
 
 CWizActions::CWizActions(CWizExplorerApp& app, QObject* parent)
@@ -38,9 +36,9 @@ WIZACTION* CWizActions::actionsData()
         {"actionAbout", QObject::tr("About WizNote..."), ""},
         {"actionExit", QObject::tr("Exit"), ""},
         {"actionLogout", QObject::tr("Logout"), ""},
-        {"actionDeleteCurrentNote", QObject::tr("Delete Note"), ""},
-        {"actionSync", QObject::tr("Sync"), ""},
-        {"actionNewNote", QObject::tr("New Note"), ""},
+        //{"actionDeleteCurrentNote", QObject::tr("Delete Note"), ""},
+        {WIZACTION_GLOBAL_SYNC, QObject::tr("Sync"), ""},
+        {WIZACTION_GLOBAL_NEW_DOCUMENT, QObject::tr("New Note"), ""},
         {"actionGoBack", QObject::tr("Back"), ""},
         {"actionGoForward", QObject::tr("Forward"), ""},
         {"actionConsole", QObject::tr("Console"), ""},
@@ -66,7 +64,7 @@ QAction* CWizActions::addAction(WIZACTION& action)
     QAction* pAction = new QAction(strText, m_parent);
 
     if (!strIconName.isEmpty()) {
-        pAction->setIcon(::WizLoadSkinIcon(m_app.userSettings().skin(), strIconName));
+        pAction->setIcon(::WizLoadSkinIcon(m_app.userSettings().skin(), QColor(0xff, 0xff, 0xff), strIconName));
     }
 
     if (!strShortcut.isEmpty()) {

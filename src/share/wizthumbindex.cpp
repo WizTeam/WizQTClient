@@ -25,8 +25,9 @@ CThumbIndex::CThumbIndex()
 
 CThumbIndex::~CThumbIndex()
 {
-    
+    CloseThumb();
 }
+
 bool CThumbIndex::OpenThumb(const CString& strFileName)
 {
     if (m_dbThumb.IsOpened())
@@ -54,7 +55,7 @@ void CThumbIndex::CloseThumb()
 {
     if (!m_dbThumb.IsOpened())
 		return;
-	//
+
 	try {
         m_dbThumb.close();
 	}
@@ -97,12 +98,13 @@ bool CThumbIndex::InitThumbDB()
 {
     if (!m_dbThumb.IsOpened())
 		return false;
-	//
+
     if (!checkThumbTable(TABLE_NAME_ABSTRACT, ABSTRACT_TABLE_SQL))
         return false;
-	//
+
 	return true;
 }
+
 bool CThumbIndex::PadAbstractFromGUID(const CString& guid, WIZABSTRACT &abstract)
 {
     return AbstractFromGUID(guid, abstract, PAD_TYPE);

@@ -1,12 +1,13 @@
 #include "wizsyncthread.h"
 
+#include "wizsettings.h"
+
 CWizSyncThread::CWizSyncThread(CWizExplorerApp& app, QObject *parent /* = 0 */)
     : QThread(parent)
     , m_app(app)
-    , m_db(app.database())
+    , m_dbMgr(app.databaseManager())
     , m_bNeedResetProxy(false)
     , m_bIsStarted(false)
-    , m_currentThread(0)
 {
     connect(this, SIGNAL(finished()), SLOT(on_syncFinished()));
 }
@@ -23,9 +24,7 @@ void CWizSyncThread::startSyncing()
 
 void CWizSyncThread::run()
 {
-    m_currentThread = QThread::currentThread();
-
-    m_sync = new CWizSync(m_db, WIZ_API_URL);
+    m_sync = new CWizSync(m_dbMgr, WIZ_API_URL);
 
     // chain up
     connect(m_sync, SIGNAL(syncStarted()), SIGNAL(syncStarted()));
@@ -50,13 +49,12 @@ void CWizSyncThread::run()
 
 void CWizSyncThread::on_syncDone(bool error)
 {
-    m_currentThread->exit(error);
+    this->exit(error);
 }
 
 void CWizSyncThread::on_syncFinished()
 {
     m_sync->deleteLater();
-    m_currentThread = 0;
 
     m_bIsStarted = false;
 }

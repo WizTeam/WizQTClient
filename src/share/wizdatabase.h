@@ -71,22 +71,30 @@ public slots:
 };
 
 
+
+
 class CWizDatabase
-    : public CIndex
+    : public CWizIndex
     , public CThumbIndex
 {
     Q_OBJECT
 
+public:
+
+    enum OpenMode {
+        notOpened = 0,
+        OpenPrivate,
+        OpenGroup
+    };
+
 private:
+    int m_nOpenMode;
     QString m_strUserId;
     QString m_strPassword;
     QPointer<CWizZiwReader> m_ziwReader;
 
 public:
     CWizDatabase();
-
-    QString getUserId() const { return m_strUserId; }
-    QString getPassword() const { return m_strPassword; }
 
     // CWizZiwReader passthrough methods
     bool loadUserCert();
@@ -95,15 +103,49 @@ public:
     QString userCipherHint() { return m_ziwReader->userCipherHint(); }
     void setSaveUserCipher(bool b) { m_ziwReader->setSaveUserCipher(b); }
 
-    QString GetAccountDataPath() const;
-    QString GetUserDataDataPath() const;
-    QString GetGroupDataDataPath() const;
-    QString GetIndexFileName() const;
-    QString GetThumbFileName() const;
-    QString GetDocumentsDataPath() const;
-    QString GetAttachmentsDataPath() const;
+    bool setDatabaseInfo(const QString& strKbGUID, const QString& strDatabaseServer,
+                         const QString& strName, int nPermission);
+    bool loadDatabaseInfo();
+    bool openPrivate(const QString& strUserId, const QString& strPassword = QString());
+    bool openGroup(const QString& strUserId, const QString& strGroupGUID);
 
-    bool Open(const QString& strUserId, const QString& strPassword);
+    int openMode() const { return m_nOpenMode; }
+
+    // path resolve
+    QString GetAccountPath() const;
+    QString GetUserDataPath() const;
+    QString GetUserIndexFileName() const;
+    QString GetUserThumbFileName() const;
+    QString GetUserDocumentsDataPath() const;
+    QString GetUserAttachmentsDataPath() const;
+    QString GetGroupDataPath() const;
+    QString GetGroupIndexFileName() const;
+    QString GetGroupThumbFileName() const;
+    QString GetGroupDocumentsDataPath() const;
+    QString GetGroupAttachmentsDataPath() const;
+    QString GetDocumentFileName(const CString& strGUID) const;
+    QString GetAttachmentFileName(const CString& strGUID) const;
+
+    bool GetUserName(QString& strUserName);
+    bool SetUserName(const QString& strUserName);
+
+    QString getUserId() const { return m_strUserId; }
+    QString getPassword() const { return m_strPassword; }
+
+    QString GetEncryptedPassword();
+    bool GetPassword(CString& strPassword);
+    bool SetPassword(const QString& strOldPassword, const QString& strPassword);
+    UINT GetPasswordFalgs();
+    bool SetPasswordFalgs(UINT nFlags);
+
+    bool SetUserCert(const QString& strN, const QString& stre, const QString& strd, const QString& strHint);
+    bool GetUserCert(QString& strN, QString& stre, QString& strd, QString& strHint);
+
+    bool setUserInfo(const WIZUSERINFO& userInfo);
+    bool getUserInfo(WIZUSERINFO& userInfo);
+
+    bool getUserGroupInfo(CWizGroupDataArray& arrayGroup);
+    bool setUserGroupInfo(const CWizGroupDataArray& arrayGroup);
 
     __int64 GetObjectVersion(const CString& strObjectName);
     bool SetObjectVersion(const CString& strObjectName, __int64 nVersion);
@@ -121,16 +163,17 @@ public:
     bool UpdateAttachments(const std::deque<WIZDOCUMENTATTACHMENTDATAEX>& arrayAttachment);
 
     bool UpdateDocumentData(WIZDOCUMENTDATA& data, const QString& strHtml, const QString& strURL, int nFlags);
+    bool UpdateDocumentAbstract(const CString& strDocumentGUID);
+
     virtual bool UpdateDocumentDataMD5(WIZDOCUMENTDATA& data, const CString& strZipFileName);
+
+    bool DeleteTagWithChildren(const WIZTAGDATA& data, bool bLog);
     bool DeleteAttachment(const WIZDOCUMENTATTACHMENTDATA& data, bool bLog);
 
     bool IsDocumentDownloaded(const CString& strGUID);
     bool IsAttachmentDownloaded(const CString& strGUID);
     bool GetAllObjectsNeedToBeDownloaded(std::deque<WIZOBJECTDATA>& arrayData);
     bool UpdateSyncObjectLocalData(const WIZOBJECTDATA& data);
-
-    CString GetDocumentFileName(const CString& strGUID);
-    CString GetAttachmentFileName(const CString& strGUID);
 
     CString GetObjectFileName(const WIZOBJECTDATA& data);
 
@@ -142,8 +185,6 @@ public:
     bool LoadCompressedAttachmentData(const CString& strDocumentGUID, QByteArray& arrayData);
     bool SaveCompressedAttachmentData(const CString& strDocumentGUID, const QByteArray& arrayData);
 
-    bool UpdateDocumentAbstract(const CString& strDocumentGUID);
-
     static CString GetRootLocation(const CString& strLocation);
     static CString GetLocationName(const CString& strLocation);
     static CString GetLocationDisplayName(const CString& strLocation);
@@ -154,9 +195,6 @@ public:
                                   CWizStdStringArray& arrayLocation);
 
     bool IsInDeletedItems(const CString& strLocation);
-
-    using CIndex::GetDocumentsByTag;
-    using CIndex::DocumentFromGUID;
 
     bool CreateDocumentAndInit(const CString& strHtml, \
                                const CString& strHtmlUrl, \
@@ -171,7 +209,6 @@ public:
                        const CString& strFileName, \
                        WIZDOCUMENTATTACHMENTDATA& dataRet);
 
-    bool DeleteTagWithChildren(const WIZTAGDATA& data, bool bLog);
 
     bool DocumentToTempHtmlFile(const WIZDOCUMENTDATA& document, \
                                 QString& strTempHtmlFileName);
@@ -179,9 +216,13 @@ public:
 public:
     Q_INVOKABLE QObject* GetDeletedItemsFolder();
     Q_INVOKABLE QObject* GetFolderByLocation(const QString& strLocation, bool create);
+
+    using CWizIndexBase::DocumentFromGUID;
     Q_INVOKABLE QObject* DocumentFromGUID(const QString& strGUID);
 
 Q_SIGNALS:
+    void databaseRename(const QString& strKbGUID);
+    void databasePermissionChanged(const QString& strKbGUID);
     void updateError(const QString& msg);
     void processLog(const QString& msg);
 };

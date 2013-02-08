@@ -3,9 +3,9 @@
 
 #include <QFile>
 
-CWizNoteInfoForm::CWizNoteInfoForm(CWizDatabase& db, QWidget *parent)
+CWizNoteInfoForm::CWizNoteInfoForm(CWizDatabaseManager& db, QWidget *parent)
     : CWizPopupWidget(parent)
-    , m_db(db)
+    , m_dbMgr(db)
     , ui(new Ui::CWizNoteInfoForm)
 {
     ui->setupUi(this);
@@ -32,23 +32,40 @@ QSize CWizNoteInfoForm::sizeHint() const
 
 void CWizNoteInfoForm::setDocument(const WIZDOCUMENTDATA& data)
 {
-    QString doc = m_db.GetDocumentFileName(data.strGUID);
+    CWizDatabase& db = m_dbMgr.db(data.strKbGUID);
+    QString doc = db.GetDocumentFileName(data.strGUID);
     QString sz = ::WizGetFileSizeHumanReadalbe(doc);
 
-    CWizTagDataArray arrayTag;
-    m_db.GetDocumentTags(data.strGUID, arrayTag);
-
-    QString tags;
-    CWizTagDataArray::const_iterator it;
-    for (it = arrayTag.begin(); it != arrayTag.end(); it++) {
-        tags += it->strName;
-        tags += "; ";
-    }
-    tags = tags.remove(tags.size() - 2, 2);
-
     ui->editTitle->setText(data.strTitle);
-    ui->labelNotebook->setText(data.strLocation);
-    ui->labelTags->setText(tags);
+
+    // private document
+    if (data.strKbGUID == m_dbMgr.db().kbGUID()) {
+        ui->labelNotebook->setText(data.strLocation);
+
+        QString tags = db.GetDocumentTagsText(data.strGUID);
+        ui->labelTags->setText(tags);
+
+    // group document
+    } else {
+        CWizTagDataArray arrayTag;
+        if (!db.GetDocumentTags(data.strGUID, arrayTag)) {
+            ui->labelNotebook->clear();
+        } else {
+            if (arrayTag.size() > 1) {
+                TOLOG1("Group document should only have one tag: %1", data.strTitle);
+            }
+
+            QString tagText;
+            if (arrayTag.size()) {
+                tagText = db.getTagTreeText(arrayTag[0].strGUID);
+            }
+
+            ui->labelNotebook->setText("/" + db.name() + tagText + "/");
+        }
+
+        ui->labelTags->clear();
+    }
+
     ui->editCreateTime->setText(data.tCreated.toString());
     ui->editUpdateTime->setText(data.tModified.toString());
     ui->editURL->setText(data.strURL);

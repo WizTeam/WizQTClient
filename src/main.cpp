@@ -16,7 +16,7 @@ int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
     QApplication::setApplicationName(QObject::tr("WizNote"));
-    IWizGlobal::instance()->setVersion("1.3.0");
+    //IWizGlobal::instance()->setVersion("1.3.0");
 
 #if defined Q_OS_MAC
     QDir dir(QApplication::applicationDirPath());
@@ -126,14 +126,20 @@ int main(int argc, char *argv[])
     a.installTranslator(&translatorQt);
 
     // ready
-    CWizDatabase db;
-    if (!db.Open(strUserId, strPassword))
-    {
-        QMessageBox::critical(NULL, "", QObject::tr("Can not open account"));
+    //CWizDatabase db;
+    //if (!db.openPrivate(strUserId, strPassword))
+    //{
+    //    QMessageBox::critical(NULL, "", QObject::tr("Can not open account"));
+    //    return 0;
+    //}
+    CWizDatabaseManager dbMgr(strUserId);
+    dbMgr.setPasswd(strPassword);
+    if (!dbMgr.openAll()) {
+        QMessageBox::critical(NULL, "", QObject::tr("Can not open database"));
         return 0;
     }
 
-    MainWindow w(db);
+    MainWindow w(dbMgr);
     w.show();
     w.init();
 

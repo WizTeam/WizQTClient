@@ -13,11 +13,11 @@
 #include <QLineEdit>
 
 
-CWizTagListWidget::CWizTagListWidget(CWizDatabase& db, QWidget* parent)
+CWizTagListWidget::CWizTagListWidget(CWizDatabaseManager& db, QWidget* parent)
     : CWizPopupWidget(parent)
     , m_tagsEdit(NULL)
     , m_scroll(NULL)
-    , m_db(db)
+    , m_dbMgr(db)
 {
     QWidget* root = new QWidget(this);
     root->setGeometry(0, 0, sizeHint().width(), sizeHint().height());
@@ -46,6 +46,7 @@ CWizTagListWidget::CWizTagListWidget(CWizDatabase& db, QWidget* parent)
 
 void CWizTagListWidget::setDocument(const WIZDOCUMENTDATA& data)
 {
+    CWizDatabase& db = m_dbMgr.db(data.strKbGUID);
     if (QWidget* oldWidget = m_scroll->takeWidget())
     {
         //oldWidget->children();
@@ -62,9 +63,9 @@ void CWizTagListWidget::setDocument(const WIZDOCUMENTDATA& data)
     //
     CWizTagDataArray arrayTag;
     //
-    m_db.GetAllTags(arrayTag);
+    db.GetAllTags(arrayTag);
     //
-    CString strGUIDs = m_db.GetDocumentTagGUIDsString(m_document.strGUID);
+    CString strGUIDs = db.GetDocumentTagGUIDsString(m_document.strGUID);
     //
     foreach (const WIZTAGDATA& tag, arrayTag)
     {
@@ -89,13 +90,15 @@ void CWizTagListWidget::setDocument(const WIZDOCUMENTDATA& data)
 
 void CWizTagListWidget::updateTagsText()
 {
-    CString strTagsText = m_db.GetDocumentTagDisplayNameText(m_document.strGUID);
+    CWizDatabase& db = m_dbMgr.db(m_document.strKbGUID);
+    CString strTagsText = db.GetDocumentTagDisplayNameText(m_document.strGUID);
     m_tagsEdit->setText(strTagsText);
 }
 
 void CWizTagListWidget::on_tagCheckBox_checked(CWizTagCheckBox* sender, int state)
 {
-    CWizDocument doc(m_db, m_document);
+    CWizDatabase& db = m_dbMgr.db(m_document.strKbGUID);
+    CWizDocument doc(db, m_document);
     const WIZTAGDATA& tag = sender->tag();
     if (state == Qt::Checked)
     {
@@ -110,20 +113,21 @@ void CWizTagListWidget::on_tagCheckBox_checked(CWizTagCheckBox* sender, int stat
 }
 void CWizTagListWidget::on_tagsEdit_editingFinished()
 {
+    CWizDatabase& db = m_dbMgr.db(m_document.strKbGUID);
     CString tagsText = m_tagsEdit->text();
     //
     CWizTagDataArray arrayTagNew;
-    m_db.TagsTextToTagArray(tagsText, arrayTagNew);
+    db.TagsTextToTagArray(tagsText, arrayTagNew);
     //
     CWizTagDataArray arrayTagOld;
-    m_db.GetDocumentTags(m_document.strGUID, arrayTagOld);
+    db.GetDocumentTags(m_document.strGUID, arrayTagOld);
     //
     if (::WizKMDataArrayIsEqual(arrayTagOld, arrayTagNew))
     {
         return;
     }
     //
-    m_db.SetDocumentTags(m_document, arrayTagNew);
+    db.SetDocumentTags(m_document, arrayTagNew);
     //
     setDocument(m_document);    //refresh tags
 }

@@ -2,8 +2,6 @@
 
 #include "wizxmlrpc.h"
 
-
-//////////////////////////////////////////////////////////////////////////////
 WIZUSERINFO::WIZUSERINFO()
     : nUserLevel(0)
     , nUserPoints(0)
@@ -18,14 +16,9 @@ int WIZUSERINFO::GetMaxFileSize()
     return std::max<int>(20 * 1024 * 1024, nMaxFileSize);
 }
 
-bool WIZUSERINFO::LoadFromXmlRpc(CWizXmlRpcStructValue& val)
+bool WIZUSERINFO::LoadFromXmlRpc(CWizXmlRpcStructValue& val, const QString& kbGUID)
 {
-    //CWizXmlRpcStructValue* pStruct = dynamic_cast<CWizXmlRpcStructValue*>(&val);
-    //if (!pStruct)
-    //{
-    //    TOLOG("Failed to cast CWizXmlRpcValue to CWizXmlRpcStructValue");
-    //    return false;
-    //}
+    Q_UNUSED(kbGUID);
 
     CWizXmlRpcStructValue& data = val;
     data.GetStr("token", strToken);
@@ -64,14 +57,9 @@ WIZUSERCERT::WIZUSERCERT()
 {
 }
 
-bool WIZUSERCERT::LoadFromXmlRpc(CWizXmlRpcStructValue& val)
+bool WIZUSERCERT::LoadFromXmlRpc(CWizXmlRpcStructValue& val, const QString& kbGUID)
 {
-    //CWizXmlRpcStructValue* pStruct = dynamic_cast<CWizXmlRpcStructValue*>(&val);
-    //if (!pStruct)
-    //{
-    //    TOLOG("Failed to cast CWizXmlRpcValue to CWizXmlRpcStructValue while onGetUserCert");
-    //    return false;
-    //}
+    Q_UNUSED(kbGUID);
 
     CWizXmlRpcStructValue& data = val;
     data.GetStr("n", strN);
@@ -91,18 +79,19 @@ WIZKBINFO::WIZKBINFO()
     nTrafficUsage = 0;
 }
 
-bool WIZKBINFO::LoadFromXmlRpc(CWizXmlRpcStructValue& data)
+bool WIZKBINFO::LoadFromXmlRpc(CWizXmlRpcStructValue& data, const QString& kbGUID)
 {
+    Q_UNUSED(kbGUID);
+
     data.GetInt64(_T("storage_limit"), nStorageLimit);
     data.GetInt64(_T("storage_usage"), nStorageUsage);
     data.GetStr(_T("storage_limit_string"), strStorageLimit);
     data.GetStr(_T("storage_usage_string"), strStorageUsage);
-    //
     data.GetInt64(_T("traffic_limit"), nTrafficLimit);
     data.GetInt64(_T("traffic_usage"), nTrafficUsage);
     data.GetStr(_T("traffic_limit_string"), strTrafficLimit);
     data.GetStr(_T("traffic_usage_string"), strTrafficUsage);
-    //
+
     return true;
 }
 
@@ -117,8 +106,9 @@ WIZOBJECTPARTDATA::WIZOBJECTPARTDATA()
 {
 }
 
-bool WIZOBJECTPARTDATA::LoadFromXmlRpc(CWizXmlRpcStructValue& data)
+bool WIZOBJECTPARTDATA::LoadFromXmlRpc(CWizXmlRpcStructValue& data, const QString& kbGUID)
 {
+    strKbGUID = kbGUID;
     data.GetInt64(_T("obj_size"), nObjectSize);
     data.GetInt(_T("eof"), bEOF);
     data.GetInt64(_T("part_size"), nPartSize);
@@ -146,6 +136,7 @@ WIZOBJECTDATA::WIZOBJECTDATA(const WIZOBJECTDATA& data)
 {
     strDisplayName = data.strDisplayName;
     strObjectGUID = data.strObjectGUID;
+    strKbGUID = data.strKbGUID;
     tTime = data.tTime;
     eObjectType = data.eObjectType;
     arrayData = data.arrayData;
@@ -155,6 +146,7 @@ WIZOBJECTDATA::WIZOBJECTDATA(const WIZDOCUMENTDATA& data)
 {
     strDisplayName = data.strTitle;
     strObjectGUID = data.strGUID;
+    strKbGUID = data.strKbGUID;
     tTime = data.tDataModified;
     eObjectType = wizobjectDocument;
 }
@@ -163,6 +155,7 @@ WIZOBJECTDATA::WIZOBJECTDATA(const WIZDOCUMENTATTACHMENTDATA& data)
 {
     strDisplayName = data.strName;
     strObjectGUID = data.strGUID;
+    strKbGUID = data.strKbGUID;
     tTime = data.tDataModified;
     eObjectType = wizobjectDocumentAttachment;
 }
@@ -228,6 +221,17 @@ WIZTAGDATA::WIZTAGDATA()
 {
 }
 
+WIZTAGDATA::WIZTAGDATA(const WIZTAGDATA& data)
+{
+    strKbGUID = data.strKbGUID;
+    strGUID = data.strGUID;
+    strParentGUID = data.strParentGUID;
+    strName = data.strName;
+    strDescription = data.strDescription;
+    tModified = data.tModified;
+    nVersion = data.nVersion;
+}
+
 BOOL WIZTAGDATA::EqualForSync(const WIZTAGDATA& data) const
 {
     ATLASSERT(strGUID == data.strGUID);
@@ -236,8 +240,9 @@ BOOL WIZTAGDATA::EqualForSync(const WIZTAGDATA& data) const
         && strParentGUID == data.strParentGUID;
 }
 
-BOOL WIZTAGDATA::LoadFromXmlRpc(CWizXmlRpcStructValue& data)
+BOOL WIZTAGDATA::LoadFromXmlRpc(CWizXmlRpcStructValue& data, const QString& kbGUID)
 {
+    strKbGUID = kbGUID;
     return data.GetStr(_T("tag_guid"), strGUID)
         && data.GetStr(_T("tag_group_guid"), strParentGUID)
         && data.GetStr(_T("tag_name"), strName)
@@ -287,8 +292,9 @@ BOOL WIZSTYLEDATA::EqualForSync(const WIZSTYLEDATA& data) const
             && nFlagIndex == data.nFlagIndex;
 }
 
-BOOL WIZSTYLEDATA::LoadFromXmlRpc(CWizXmlRpcStructValue& data)
+BOOL WIZSTYLEDATA::LoadFromXmlRpc(CWizXmlRpcStructValue& data, const QString& kbGUID)
 {
+    strKbGUID = kbGUID;
     data.GetStr(_T("style_description"), strDescription);
 
     return data.GetStr(_T("style_guid"), strGUID)
@@ -329,8 +335,9 @@ WIZDOCUMENTDATABASE::WIZDOCUMENTDATABASE()
 {
 }
 
-BOOL WIZDOCUMENTDATABASE::LoadFromXmlRpc(CWizXmlRpcStructValue& data)
+BOOL WIZDOCUMENTDATABASE::LoadFromXmlRpc(CWizXmlRpcStructValue& data, const QString& kbGUID)
 {
+    strKbGUID = kbGUID;
     data.GetStr(_T("document_guid"), strGUID);
     data.GetStr(_T("document_title"), strTitle);
     data.GetStr(_T("document_category"), strLocation);
@@ -374,8 +381,9 @@ WIZDOCUMENTDATA::~WIZDOCUMENTDATA()
 
 ////////////////////////////////////////////////////////////////////
 
-BOOL WIZDOCUMENTPARAMDATA::LoadFromXmlRpc(CWizXmlRpcStructValue& data)
+BOOL WIZDOCUMENTPARAMDATA::LoadFromXmlRpc(CWizXmlRpcStructValue& data, const QString& kbGUID)
 {
+    strKbGUID = kbGUID;
     return data.GetStr(_T("param_name"), strName)
         && data.GetStr(_T("param_value"), strValue);
 }
@@ -401,17 +409,19 @@ BOOL WIZDELETEDGUIDDATA::EqualForSync(const WIZDELETEDGUIDDATA& data) const
     return TRUE;
 }
 
-BOOL WIZDELETEDGUIDDATA::LoadFromXmlRpc(CWizXmlRpcStructValue& data)
+BOOL WIZDELETEDGUIDDATA::LoadFromXmlRpc(CWizXmlRpcStructValue& data, const QString& kbGUID)
 {
+    strKbGUID = kbGUID;
+
     CString strType;
-    //
+
     BOOL bRet = data.GetStr(_T("deleted_guid"), strGUID)
         && data.GetStr(_T("guid_type"), strType)
         && data.GetTime(_T("dt_deleted"), tDeleted)
         && data.GetInt64(_T("version"), nVersion);
-    //
+
     eType = WIZOBJECTDATA::TypeStringToObjectType(strType);
-    //
+
     return bRet;
 }
 
@@ -439,8 +449,9 @@ BOOL WIZDOCUMENTATTACHMENTDATA::EqualForSync(const WIZDOCUMENTATTACHMENTDATA& da
             && strDataMD5 == data.strDataMD5;
 }
 
-BOOL WIZDOCUMENTATTACHMENTDATA::LoadFromXmlRpc(CWizXmlRpcStructValue& data)
+BOOL WIZDOCUMENTATTACHMENTDATA::LoadFromXmlRpc(CWizXmlRpcStructValue& data, const QString& kbGUID)
 {
+    strKbGUID = kbGUID;
     data.GetStr(_T("attachment_guid"), strGUID);
     data.GetStr(_T("attachment_document_guid"), strDocumentGUID);
     data.GetStr(_T("attachment_name"), strName);
@@ -503,8 +514,10 @@ BOOL WIZDOCUMENTDATAEX::ParamArrayToStringArray(CWizStdStringArray& params) cons
     return TRUE;
 }
 
-BOOL WIZDOCUMENTDATAEX::LoadFromXmlRpc(CWizXmlRpcStructValue& data)
+BOOL WIZDOCUMENTDATAEX::LoadFromXmlRpc(CWizXmlRpcStructValue& data, const QString& kbGUID)
 {
+    strKbGUID = kbGUID;
+
     BOOL bInfo = FALSE;
     BOOL bData = FALSE;
     BOOL bParam = FALSE;
@@ -561,7 +574,7 @@ BOOL WIZDOCUMENTDATAEX::LoadFromXmlRpc(CWizXmlRpcStructValue& data)
     if (bParam)
     {
         std::deque<WIZDOCUMENTPARAMDATA> params;
-        if (!data.GetArray("document_params", params))
+        if (!data.GetArray("document_params", params, kbGUID))
         {
             TOLOG(_T("Failed to get document param!"));
             return FALSE;
@@ -572,8 +585,6 @@ BOOL WIZDOCUMENTDATAEX::LoadFromXmlRpc(CWizXmlRpcStructValue& data)
     return !strGUID.IsEmpty();
 }
 
-
-////////////////////////////////////////////////////////////////////
 WIZDOCUMENTATTACHMENTDATAEX::WIZDOCUMENTATTACHMENTDATAEX()
     : nObjectPart(0)
 {
@@ -599,7 +610,66 @@ WIZDOCUMENTATTACHMENTDATAEX& WIZDOCUMENTATTACHMENTDATAEX::operator= (const WIZDO
 }
 
 
-////////////////////////////////////////////////////////////////////
+WIZGROUPDATA::WIZGROUPDATA()
+    : nUserGroup(WIZ_USERGROUP_MAX)
+{
+}
+
+WIZGROUPDATA::WIZGROUPDATA(const WIZGROUPDATA& data)
+    : strGroupName(data.strGroupName)
+    , strGroupNote(data.strGroupNote)
+    , strGroupGUID(data.strGroupGUID)
+    , nUserGroup(data.nUserGroup)
+    , strDatabaseServer(data.strDatabaseServer)
+    , tCreated(data.tCreated)
+    , tModified(data.tModified)
+    , strUserName(data.strUserName)
+    , strRoleNote(data.strRoleNote)
+    , tRoleCreated(data.tRoleCreated)
+    , strOwner(data.strOwner)
+    , strType(data.strType)
+    , strGroupSEO(data.strGroupSEO)
+    , strGroupTags(data.strGroupTags)
+    , strId(data.strId)
+{
+}
+
+bool WIZGROUPDATA::LoadFromXmlRpc(CWizXmlRpcStructValue& data, const QString& kbGUID)
+{
+    Q_UNUSED(kbGUID);
+
+    data.GetStr(_T("kb_name"), strGroupName);
+    data.GetStr(_T("kb_note"), strGroupNote);
+    data.GetStr(_T("kb_guid"), strGroupGUID);
+    data.GetInt(_T("user_group"), nUserGroup);
+    data.GetStr(_T("kapi_url"), strDatabaseServer);
+    data.GetStr(_T("server_url"), strServerUrl);
+    data.GetTime(_T("dt_created"), tCreated);
+    data.GetTime(_T("dt_modified"), tModified);
+    data.GetStr(_T("user_name"), strUserName);
+
+    // obsolete, not used currently
+    data.GetStr(_T("role_note"), strRoleNote);
+    data.GetTime(_T("dt_role_created"), tRoleCreated);
+    data.GetStr(_T("owner_name"), strOwner);
+    data.GetStr(_T("kb_type"), strType);
+    data.GetStr(_T("kb_seo"), strGroupSEO);
+    data.GetStr(_T("tag_names"), strGroupTags);
+    data.GetStr(_T("kb_id"), strId);
+
+    return !strGroupName.isEmpty()
+            && !strGroupGUID.isEmpty()
+            && !strDatabaseServer.isEmpty();
+}
+
+//WIZABSTRACT::WIZABSTRACT(const WIZABSTRACT& data)
+//{
+//    guid = data.guid;
+//    text = data.text;
+//    image = data.image;
+//}
+
+/*------------------------------ end ------------------------------*/
 
 WIZTODODATA::WIZTODODATA()
 {

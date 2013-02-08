@@ -6,6 +6,9 @@
 #include <algorithm>
 #include <QCursor>
 #include <fstream>
+#include <QBitmap>
+#include <QPixmap>
+#include <QPainter>
 
 #include <QtCore>
 #include <QtNetwork>
@@ -14,6 +17,36 @@
 #define MAX_PATH 200
 #endif
 
+#define WIZ_API_URL "http://api.wiz.cn/"
+
+QString WizApiGetUrl(const QString& strProduct, const QString& strVersion,
+                     const QString& strCommand, const QString& strExtInfo)
+{
+#ifdef _M_X64
+    QString strPlatform = "x64";
+#else
+    QString strPlatform = "x86";
+#endif
+
+    QTime time = QTime::currentTime();
+    qsrand((uint)time.msec());
+
+    // front
+    QString strUrlF = QString(WIZ_API_URL) + "?p=%1&l=%2&v=%3&c=%4&a=";
+    strUrlF = strUrlF.arg(strProduct)\
+            .arg(2052)\
+            .arg(strVersion)\
+            .arg(strCommand);
+
+            //.arg(QLocale::system())\
+
+    QString strUrlE = "&random=%1&cn=%2&plat=%3";
+    strUrlE = strUrlE.arg(qrand())\
+            .arg(::WizGetComputerName())\
+            .arg(strPlatform);
+
+    return strUrlF + strExtInfo + strUrlE;
+}
 
 QString WizGetFileSizeHumanReadalbe(const QString& strFileName)
 {
@@ -704,6 +737,13 @@ CString WizFormatString0(const CString& str)
     return str;
 }
 
+CString WizFormatString1(const CString& strFormat, int n)
+{
+    CString str(strFormat);
+    str.replace("%1", QString::number(n));
+    return str;
+}
+
 CString WizFormatString1(const CString& strFormat, const CString& strParam1)
 {
     CString str(strFormat);
@@ -1213,6 +1253,22 @@ bool WizSaveUnicodeTextToUtf8File(const QString& strFileName, const QString& str
     return true;
 }
 
+bool WizSaveUnicodeTextToUtf8File(const QString& strFileName, const QByteArray& strText)
+{
+    QFile file(strFileName);
+    if (!file.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate))
+        return false;
+
+    QTextStream stream(&file);
+    stream.setCodec("UTF-8");
+    stream.setGenerateByteOrderMark(true);
+    stream << strText;
+    stream.flush();
+    file.close();
+
+    return true;
+}
+
 BOOL WizSplitTextToArray(const CString& strText, QChar ch, CWizStdStringArray& arrayResult)
 {
     QStringList strings = strText.split(ch);
@@ -1284,11 +1340,11 @@ void WizStringArrayToText(const CWizStdStringArray& arrayText, CString& strText,
 int WizFindInArray(const CWizStdStringArray& arrayText, const CString& strFind)
 {
     int nCount = (int)arrayText.size();
-    for (int i = 0; i < nCount; i++)
-    {
+    for (int i = 0; i < nCount; i++) {
         if (0 == arrayText[i].Compare(strFind))
             return i;
     }
+
     return -1;
 }
 
@@ -1708,13 +1764,57 @@ QString WizGetSkinResourceFileName(const QString& strSkinName, const QString& st
     return QString();
 }
 
-QIcon WizLoadSkinIcon(const QString& strSkinName, const QString& strIconName)
+QIcon WizLoadSkinIcon(const QString& strSkinName, QColor forceground, const QString& strIconName)
 {
     QString strFileName = WizGetSkinResourceFileName(strSkinName, strIconName);
     if (strFileName.isEmpty())
         return QIcon();
 
-    return QIcon(strFileName);
+    QImage image(strFileName);
+    //QImage iGray(image.width(), image.height(), QImage::Format_RGB32);
+    //QPixmap mask = QPixmap::fromImage(image.createAlphaMask());
+
+    //QPixmap fileMap(strFileName);
+    //fileMap.setMask(mask);
+    //for (int i = 0; i < image.width(); i++) {
+    //    for (int j = 0; j < image.height(); j++) {
+    //        QRgb pixel = image.pixel(i, j);
+    //        int gray = qGray(pixel);
+    //        if (gray == 0) {
+    //            iGray.setPixel(i, j, qRgb(gray, gray, gray));
+    //        } else {
+    //            iGray.setPixel(i, j, pixel);
+    //        }
+    //    }
+    //}
+
+    //QPixmap rawMap(fileMap.size());
+    //rawMap.setMask(fileMap.createHeuristicMask());
+
+    //QPainter painter(&fileMap);
+    //painter.setClipRegion(QRegion(mask));
+    //painter.setRenderHint(QPainter::Antialiasing, true);
+    //painter.setCompositionMode(QPainter::CompositionMode_SourceOver);
+    //QBrush brushBack(forceground.lighter(150));
+    //painter.fillRect(0, 0, fileMap.width(), fileMap.height(), brushBack);
+    //painter.drawPixmap(0, 0, fileMap);
+
+
+    //QImage rawImage(strFileName);
+    ////rawImage = rawImage.createAlphaMask();
+    //rawImage = rawImage.alphaChannel();
+    //int count =  rawImage.colorCount();
+    //for (int i = 0; i < rawImage.colorCount(); i++) {
+    //    //int alpha = qGray(rawImage.color(i));
+    //    QColor color = forceground.lighter(200);
+    //    rawImage.setColor(i, color.rgba());
+    //}
+
+    QIcon icon;
+    //icon.addPixmap(fileMap);
+    icon.addPixmap(QPixmap::fromImage(image));
+
+    return icon;
 }
 
 

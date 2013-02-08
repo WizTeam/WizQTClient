@@ -1,9 +1,11 @@
 #include "wizcertmanager.h"
 
+#include "share/wizDatabaseManager.h"
+
 CWizCertManager::CWizCertManager(CWizExplorerApp& app, const QString& strAccountsApiURL /* = WIZ_API_URL*/)
     : CWizApiBase(strAccountsApiURL)
     , m_app(app)
-    , m_db(app.database())
+    , m_db(app.databaseManager().db())
     , m_bCertInited(false)
 {
 }
@@ -23,11 +25,6 @@ void CWizCertManager::onXmlRpcError(const QString& strMethodName, \
 
 void CWizCertManager::onGetUserCert(const WIZUSERCERT& data)
 {
-    //if (!m_cert.LoadFromXmlRpc(ret)) {
-    //    Q_EMIT done(false, QString());
-    //    return;
-    //}
-
     // save to database
     if(!m_db.SetUserCert(data.strN, \
                          data.stre, \
@@ -61,5 +58,5 @@ void CWizCertManager::loadUserCert()
 
 bool CWizCertManager::downloadUserCert()
 {
-    return callGetUserCert(m_app.database().getUserId(), m_app.database().getPassword());
+    return callGetUserCert(m_db.getUserId(), m_db.getPassword());
 }

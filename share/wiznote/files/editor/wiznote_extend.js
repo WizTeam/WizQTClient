@@ -1,7 +1,7 @@
 var
     editor = null,
     m_inited = false;
-    m_modified = false,
+    //m_modified = false,
     objApp = WizExplorerApp,
     objDatabase = objApp.Database,
     objCommon = objApp.CreateWizObject("WizKMControls.WizCommonUI"),
@@ -15,20 +15,20 @@ var
 try {
     var strSave = "Save";
     
-    var saveButton = new baidu.editor.ui.Button({
-        className: 'edui-for-mybutton',
-        title: strSave,
-        label: strSave,
-        showText: false,
-        onclick: function() {
-            saveDocument(false);
-        }
-    });
+    //var saveButton = new baidu.editor.ui.Button({
+    //    className: 'edui-for-mybutton',
+    //    title: strSave,
+    //    label: strSave,
+    //    showText: false,
+    //    onclick: function() {
+    //        saveDocument(false);
+    //    }
+    //});
 
     var editorOption = {
     toolbars:
     [
-        [saveButton, '|', //'Source',
+        [//saveButton, '|', //'Source',
         'FontFamily', 'FontSize', '|', 'Bold', 'Italic', 'Underline', 'StrikeThrough', '|',
         'JustifyLeft', 'JustifyCenter', 'JustifyRight', 'JustifyJustify', '|',
         'Indent', 'Outdent', 'InsertOrderedList', 'InsertUnorderedList', '|',
@@ -89,10 +89,10 @@ function onEditorKeyDown(type, evt) {
             setModified(true);
             e.returnValue = true;
         }
-        if (String.fromCharCode(e.keyCode).toLocaleUpperCase() == 'S') {
-            saveDocument(true);
-            e.returnValue = false;
-        }
+        //if (String.fromCharCode(e.keyCode).toLocaleUpperCase() == 'S') {
+        //    saveDocument(true);
+        //    e.returnValue = false;
+        //}
         else if (String.fromCharCode(e.keyCode).toLocaleUpperCase() == 'V') {
             if (autoPaste()) {
                 e.returnValue = false;
@@ -118,12 +118,18 @@ function autoPaste()
 
 function setModified(flag)
 {
-    m_modified = flag;
+    //m_modified = flag;
+    //if (!isEditing()) {
+    //    m_modified = false;
+    //    return;
+    //}
+
     if (!isEditing()) {
-        m_modified = false;
+        objApp.SetDocumentModified(false);
         return;
     }
-    objApp.SetDocumentModified(m_modified);
+
+    objApp.SetDocumentModified(flag);
 }
 
 function setEditorHtml(html) {
@@ -163,9 +169,9 @@ function isEditing() {
 }
 
 function setEditing(mode) {
-    if (isEditing()) {
-        saveDocument(false);
-    }
+    //if (isEditing()) {
+    //    saveDocument(false);
+    //}
 
     if (m_editingMode == mode) {
         return;
@@ -204,44 +210,44 @@ function viewDocument(guid, filename, mode)
     }
 }
 
-function updateDocument(objDocument, html, url, flags)
-{
-    try {
-        return objDocument.UpdateDocument4(html, url, flags);
-    } catch (err) {
-        return false;
-    }
-}
-
-function saveDocument(force)
-{
-    try {
-        if (!force && !m_modified)
-            return true;
-        if (!isEditing())
-            return true;
-        
-        var objFolder = objApp.Window.CategoryCtrl.SelectedFolder;
-        if (objFolder == null) {
-            objFolder = objDatabase.GetFolderByLocation("/My Notes/", true);
-        }
-
-        var objDocument = objDatabase.DocumentFromGUID(m_currentGUID);
-        if (objDocument == null || objDocument == "") {
-            alert("wow, why the guid is null?");
-            return false;
-        }
-        
-        var html = getEditorHtml();
-        
-        objApp.SetSavingDocument(true);
-        var ret = updateDocument(objDocument, html, m_currentFileName, 0);
-        objApp.SetSavingDocument(false);
-        setModified(false);
-
-        return ret;
-    } catch (err) {
-        alert(err);
-    }
-}
+//function updateDocument(objDocument, html, url, flags)
+//{
+//    try {
+//        return objDocument.UpdateDocument4(html, url, flags);
+//    } catch (err) {
+//        return false;
+//    }
+//}
+//
+//function saveDocument(force)
+//{
+//    try {
+//        if (!force && !m_modified)
+//            return true;
+//        if (!isEditing())
+//            return true;
+//        
+//        var objFolder = objApp.Window.CategoryCtrl.SelectedFolder;
+//        if (objFolder == null) {
+//            objFolder = objDatabase.GetFolderByLocation("/My Notes/", true);
+//        }
+//
+//        var objDocument = objDatabase.DocumentFromGUID(m_currentGUID);
+//        if (objDocument == null || objDocument == "") {
+//            alert("wow, why the guid is null?");
+//            return false;
+//        }
+//        
+//        var html = getEditorHtml();
+//        
+//        objApp.SetSavingDocument(true);
+//        var ret = updateDocument(objDocument, html, m_currentFileName, 0);
+//        objApp.SetSavingDocument(false);
+//        setModified(false);
+//
+//        return ret;
+//    } catch (err) {
+//        alert(err);
+//    }
+//}
 

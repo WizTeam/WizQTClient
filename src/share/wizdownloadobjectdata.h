@@ -2,29 +2,34 @@
 #define WIZDOWNLOADOBJECTDATA_H
 
 #include "wizapi.h"
-#include "wizdatabase.h"
+#include "wizDatabaseManager.h"
 
 class CWizDownloadObjectData : public CWizApi
 {
     Q_OBJECT
 
 public:
-    CWizDownloadObjectData(CWizDatabase& db);
+    CWizDownloadObjectData(CWizDatabaseManager& dbMgr);
 
     void setData(const WIZOBJECTDATA& data);
     void startDownload();
 
 private:
+    CWizDatabaseManager& m_dbMgr;
     WIZOBJECTDATA m_data;
     bool m_bInited;
 
 protected:
-    virtual void onXmlRpcError(const QString& strMethodName, \
-                             WizXmlRpcError err, int errorCode, \
-                             const QString& errorMessage);
+    virtual void onXmlRpcError(const QString& strMethodName,
+                               WizXmlRpcError err,
+                               int errorCode,
+                               const QString& errorMessage);
+
     virtual void onClientLogin(const WIZUSERINFO& userInfo);
+    virtual void onGetGroupList(const CWizGroupDataArray& arrayGroup);
     virtual void onDownloadObjectDataCompleted(const WIZOBJECTDATA& data);
-    virtual void onClientLogout();
+
+    void startDownloadObjectData();
 
 Q_SIGNALS:
     void downloadDone(bool succeeded);

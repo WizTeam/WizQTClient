@@ -2,8 +2,10 @@
 #define WIZATTACHMENTLISTWIDGET_H
 
 #include "share/wizpopupwidget.h"
-#include "share/wizdatabase.h"
+#include "share/wizDatabaseManager.h"
 #include "share/wizmultilinelistwidget.h"
+
+#include "share/wizimagepushbutton.h"
 
 #include "share/wizfileiconprovider.h"
 
@@ -17,18 +19,21 @@ class CWizAttachmentListView : public CWizMultiLineListWidget
     Q_OBJECT
 public:
     CWizAttachmentListView(CWizExplorerApp& app, QWidget* parent);
+    const WIZDOCUMENTDATA& document() const { return m_document; }
 
 private:
     CWizExplorerApp& m_app;
-    CWizDatabase& m_db;
+    CWizDatabaseManager& m_dbMgr;
     WIZDOCUMENTDATA m_document;
     CWizFileIconProvider m_iconProvider;
-    QMenu* m_menu;
+    QPointer<QMenu> m_menu;
     CWizDownloadObjectDataDialog* m_downloadDialog;
 
     void resetAttachments();
+    void resetPermission();
 
 public:
+    QAction* findAction(const QString& strName);
     void setDocument(const WIZDOCUMENTDATA& document);
     const CWizAttachmentListViewItem* attachmentItemFromIndex(const QModelIndex& index) const;
     void addAttachments();
@@ -62,12 +67,16 @@ public:
 
 private:
     CWizExplorerApp& m_app;
-    CWizAttachmentListView* m_list;
+    QPointer<CWizAttachmentListView> m_list;
+    QPointer<CWizImagePushButton> m_btnAddAttachment;
 
 public:
     void setDocument(const WIZDOCUMENTDATA& document);
 
-public slots:
+private:
+    void resetPermission();
+
+public Q_SLOTS:
     void on_addAttachment_clicked();
 };
 

@@ -2,6 +2,8 @@
 
 #include <QtGui>
 
+#include "share/wizsettings.h"
+
 CWizSearchBox::CWizSearchBox(CWizExplorerApp& app, QWidget *parent)
     : QWidget(parent)
 {
@@ -26,7 +28,7 @@ CWizSearchWidget::CWizSearchWidget(CWizExplorerApp& app, QWidget* parent /*= 0*/
     setSizePolicy(sizePolicy);
     setContentsMargins(1, 1, 1, 1);
 
-    QIcon icon = ::WizLoadSkinIcon(app.userSettings().skin(), "search");
+    QIcon icon = ::WizLoadSkinIcon(app.userSettings().skin(), palette().window().color(), "search");
     QLabel* iconLabel = new QLabel(this);
     iconLabel->setPixmap(icon.pixmap(16, 16));
     iconLabel->setStyleSheet("QLabel{border-width:0;border-style:outset}");

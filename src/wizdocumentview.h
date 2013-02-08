@@ -3,8 +3,12 @@
 
 #include <QWidget>
 #include <QWebView>
+#include <QPointer>
+#include <QTimer>
 
 #include "wizdef.h"
+#include "share/wizobject.h"
+#include "share/wizsettings.h"
 
 class CWizTitleBar;
 class CWizDocumentWebView;
@@ -21,7 +25,7 @@ public:
     CWizDocumentView(CWizExplorerApp& app, QWidget* parent = 0);
     virtual QSize sizeHint() const { return QSize(400, 300); }
 
-    CWizDocumentWebView* view() const { return m_web; }
+    CWizDocumentWebView* web() const { return m_web; }
     QWidget* client() const { return m_client; }
 
 private:
@@ -29,8 +33,8 @@ private:
     CWizUserSettings& m_userSettings;
 
 protected:
-    CWizDatabase& m_db;
-    CWizTitleBar* m_title;
+    CWizDatabaseManager& m_dbMgr;
+    QPointer<CWizTitleBar> m_title;
     CWizDocumentWebView* m_web;
     QWidget* m_client;
     QPointer<CWizTagListWidget> m_tags;
@@ -42,8 +46,12 @@ protected:
     bool m_editingDocument;
     WizDocumentViewMode m_viewMode;
 
+    QTimer m_timerDelay;
+    WIZDOCUMENTDATA m_dataDelay;
+
 public:
     bool viewDocument(const WIZDOCUMENTDATA& data, bool forceEdit);
+    void setReadOnly(bool b, bool isGroup);
     void showClient(bool visible);
     const WIZDOCUMENTDATA& document();
     void editDocument(bool editing);
@@ -54,6 +62,7 @@ public:
 
 public Q_SLOTS:
     void on_titleEdit_textChanged(const QString& strTitle);
+    void on_titleEdit_textEdit_writeDelay();
     void on_editDocumentButton_clicked();
     void on_tagsButton_clicked();
     void on_attachmentButton_clicked();

@@ -103,7 +103,7 @@ ZiwEncryptType CWizZiwReader::encryptType()
 void CWizZiwReader::setRSAKeys(const QByteArray& strN, \
                                const QByteArray& stre, \
                                const QByteArray& str_encrypted_d, \
-                               const QByteArray& strHint)
+                               const QString& strHint)
 {
     m_N = strN;
     m_e = stre;

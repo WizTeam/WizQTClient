@@ -3,25 +3,24 @@
 
 #include "QMessageBox"
 
-CWizDownloadObjectDataDialog::CWizDownloadObjectDataDialog(CWizDatabase& db, QWidget *parent)
+CWizDownloadObjectDataDialog::CWizDownloadObjectDataDialog(CWizDatabaseManager& dbMgr, QWidget *parent)
     : QDialog(parent)
     , ui(new Ui::CWizDownloadObjectDataDialog)
-    , m_downloader(db)
+    , m_downloader(new CWizDownloadObjectData(dbMgr))
 {
     ui->setupUi(this);
     setFixedSize(size());
 
     ui->progressBar->setRange(0, 100);
 
-    connect(&m_downloader, SIGNAL(progressChanged(int)), SLOT(downloader_progress(int)));
-    connect(&m_downloader, SIGNAL(downloadDone(bool)), SLOT(downloader_done(bool)));
+    connect(m_downloader, SIGNAL(progressChanged(int)), SLOT(downloader_progress(int)));
+    connect(m_downloader, SIGNAL(downloadDone(bool)), SLOT(downloader_done(bool)));
     connect(ui->buttonCancle, SIGNAL(clicked()), SLOT(onButtonCancle_clicked()));
-
 }
 
 CWizDownloadObjectDataDialog::~CWizDownloadObjectDataDialog()
 {
-    m_downloader.abort();
+    m_downloader->abort();
     delete ui;
 }
 
@@ -36,15 +35,16 @@ void CWizDownloadObjectDataDialog::downloadData(const WIZOBJECTDATA& data)
     }
 
     ui->progressBar->setValue(0);
-    m_downloader.setData(data);
-    m_downloader.startDownload();
+
+    m_downloader->setData(data);
+    m_downloader->startDownload();
     open();
 }
 
 void CWizDownloadObjectDataDialog::onButtonCancle_clicked()
 {
     m_bUserCancled = true;
-    m_downloader.abort();
+    m_downloader->abort();
 
     reject();
 }
@@ -57,6 +57,7 @@ void CWizDownloadObjectDataDialog::downloader_progress(int pos)
 void CWizDownloadObjectDataDialog::downloader_done(bool succeeded)
 {
     if (succeeded) {
+        ui->progressBar->setValue(100);
         accept();
     } else {
         QMessageBox msg;

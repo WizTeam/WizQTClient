@@ -1,4 +1,5 @@
-#include "wizdatabase.h"
+#include "wizDatabase.h"
+
 #include <QDir>
 #include <QUrl>
 #include <QDebug>
@@ -53,18 +54,16 @@ void CWizDocument::PermanentlyDelete()
 {
     CWizDocumentAttachmentDataArray arrayAttachment;
     m_db.GetDocumentAttachments(m_data.strGUID, arrayAttachment);
-    for (CWizDocumentAttachmentDataArray::const_iterator it = arrayAttachment.begin();
-    it != arrayAttachment.end();
-    it++)
-    {
+
+    CWizDocumentAttachmentDataArray::const_iterator it;
+    for (it = arrayAttachment.begin(); it != arrayAttachment.end(); it++) {
         CString strFileName = m_db.GetAttachmentFileName(it->strGUID);
         ::WizDeleteFile(strFileName);
 
         m_db.DeleteAttachment(*it, true);
     }
 
-    if (!m_db.DeleteDocument(m_data, true))
-    {
+    if (!m_db.DeleteDocument(m_data, true)) {
         TOLOG1(_T("Failed to delete document: %1"), m_data.strTitle);
         return;
     }
@@ -89,10 +88,13 @@ bool CWizDocument::MoveDocument(CWizFolder* pFolder)
 {
     if (!pFolder)
         return false;
-    //
-    CString strNewLocation = pFolder->Location();
-    CString strOldLocation = m_data.strLocation;
-    //
+
+    QString strNewLocation = pFolder->Location();
+    QString strOldLocation = m_data.strLocation;
+
+    if (strNewLocation == strOldLocation)
+        return true;
+
     m_data.strLocation = strNewLocation;
     if (!m_db.ModifyDocumentInfo(m_data))
     {
@@ -100,7 +102,7 @@ bool CWizDocument::MoveDocument(CWizFolder* pFolder)
         TOLOG1(_T("Failed to modify document location %1."), m_data.strLocation);
         return false;
     }
-    //
+
     return true;
 }
 
@@ -111,13 +113,12 @@ bool CWizDocument::AddTag(const WIZTAGDATA& dataTag)
 
     if (-1 != WizFindInArray(arrayTag, dataTag.strGUID))
         return true;
-    //
-    if (!m_db.InsertDocumentTag(m_data, dataTag.strGUID))
-    {
-        TOLOG1(_T("Failed to insrt document tag: %1"), m_data.strTitle);
+
+    if (!m_db.InsertDocumentTag(m_data, dataTag.strGUID)) {
+        TOLOG1(_T("Failed to insert document tag: %1"), m_data.strTitle);
         return false;
     }
-    //
+
     return true;
 }
 
@@ -128,12 +129,9 @@ bool CWizDocument::RemoveTag(const WIZTAGDATA& dataTag)
 
 void CWizDocument::Delete()
 {
-    if (IsInDeletedItemsFolder())
-    {
+    if (IsInDeletedItemsFolder()) {
         return PermanentlyDelete();
-    }
-    else
-    {
+    } else {
         return MoveTo(m_db.GetDeletedItemsFolder());
     }
 
@@ -202,7 +200,7 @@ void CWizFolder::Delete()
 {
     if (IsDeletedItems())
         return;
-    //
+
     if (IsInDeletedItems())
     {
         //if (IDYES != WizMessageBox1(IDS_DELETE_FOLDER, GetName(), MB_YESNO | MB_ICONQUESTION))
@@ -308,23 +306,113 @@ void CWizFolder::MoveToLocation(const CString& strDestLocation)
 }
 
 
+/* ------------------------------CWizDatabase------------------------------ */
+
+const QString g_strAccountSection = "Account";
+const QString g_strCertSection = "Cert";
+const QString g_strGroupSection = "Groups";
+const QString g_strDatabaseInfoSection = "Database";
+
+
 CWizDatabase::CWizDatabase()
     : m_ziwReader(new CWizZiwReader())
+    , m_nOpenMode(0)
 {
 }
 
-bool CWizDatabase::Open(const QString& strUserId, const QString& strPassword)
+bool CWizDatabase::setDatabaseInfo(const QString& strKbGUID, const QString& strDatabaseServer,
+                                   const QString& strName, int nPermission)
 {
+    Q_ASSERT(!strKbGUID.isEmpty() && !strName.isEmpty());
+
+    m_strKbGUID = strKbGUID;
+    m_strDatabaseServer = strDatabaseServer;
+
+    if (m_strName != strName) {
+        m_strName = strName;
+        Q_EMIT databaseRename(strKbGUID);
+    }
+
+    if (m_nPermission != nPermission) {
+        m_nPermission = nPermission;
+        Q_EMIT databasePermissionChanged(strKbGUID);
+    }
+
+    int nErrors = 0;
+
+    if (!SetMeta(g_strDatabaseInfoSection, "Name", strName))
+        nErrors++;
+
+    if (!SetMeta(g_strDatabaseInfoSection, "KbGUID", strKbGUID))
+        nErrors++;
+
+    if (!SetMeta(g_strDatabaseInfoSection, "Permission", QString::number(nPermission)))
+        nErrors++;
+
+    if (!SetMeta(g_strDatabaseInfoSection, "Version", WIZ_DATABASE_VERSION))
+        nErrors++;
+
+    if (nErrors > 0)
+        return false;
+
+    return true;
+}
+
+bool CWizDatabase::loadDatabaseInfo()
+{
+    if (m_strKbGUID.isEmpty()) {
+        m_strKbGUID = GetMetaDef(g_strDatabaseInfoSection, "KbGUID");
+    }
+
+    m_strName = GetMetaDef(g_strDatabaseInfoSection, "Name");
+    m_nPermission = GetMetaDef(g_strDatabaseInfoSection, "Permission").toInt();
+
+    if (m_strKbGUID.isEmpty() || m_strName.isEmpty()) {
+        return false;
+    }
+
+    return true;
+}
+
+bool CWizDatabase::openPrivate(const QString& strUserId, const QString& strPassword /* = QString() */)
+{
+    Q_ASSERT(m_nOpenMode == notOpened);
+
     m_strUserId = strUserId;
     m_strPassword = strPassword;
-    bool bRet = CIndex::Open(GetIndexFileName()) && CThumbIndex::OpenThumb(GetThumbFileName());
 
-    return bRet;
+    bool ret = CWizIndex::Open(GetUserIndexFileName())
+            && CThumbIndex::OpenThumb(GetUserThumbFileName());
+
+    if (ret)
+        m_nOpenMode = OpenPrivate;
+
+    loadDatabaseInfo();
+
+    return ret;
 }
 
-QString CWizDatabase::GetAccountDataPath() const
+bool CWizDatabase::openGroup(const QString& strUserId, const QString& strGroupGUID)
 {
-    ATLASSERT(!m_strUserId.isEmpty());
+    Q_ASSERT(m_nOpenMode == notOpened);
+
+    m_strUserId = strUserId;
+    m_strKbGUID = strGroupGUID;
+
+    bool ret = CWizIndex::Open(GetGroupIndexFileName())
+            && CThumbIndex::OpenThumb(GetGroupThumbFileName());
+
+    if (ret)
+        m_nOpenMode = OpenGroup;
+
+    loadDatabaseInfo();
+
+    return ret;
+}
+
+QString CWizDatabase::GetAccountPath() const
+{
+    Q_ASSERT(!m_strUserId.isEmpty());
 
     QString strPath = ::WizGetDataStorePath()+ m_strUserId + "/";
     WizEnsurePathExists(strPath);
@@ -332,45 +420,289 @@ QString CWizDatabase::GetAccountDataPath() const
     return strPath;
 }
 
-QString CWizDatabase::GetUserDataDataPath() const
+QString CWizDatabase::GetUserDataPath() const
 {
-   QString strPath = GetAccountDataPath() + "data/";
+   QString strPath = GetAccountPath() + "data/";
    WizEnsurePathExists(strPath);
    return strPath;
 }
 
-QString CWizDatabase::GetGroupDataDataPath() const
+QString CWizDatabase::GetUserIndexFileName() const
 {
-   QString strPath = GetAccountDataPath() + "group/";
-   WizEnsurePathExists(strPath);
-   return strPath;
-}
-
-QString CWizDatabase::GetIndexFileName() const
-{
-    QString strPath = GetUserDataDataPath();
+    QString strPath = GetUserDataPath();
     return strPath + "index.db";
 }
 
-QString CWizDatabase::GetThumbFileName() const
+QString CWizDatabase::GetUserThumbFileName() const
 {
-    QString strPath = GetUserDataDataPath();
+    QString strPath = GetUserDataPath();
     return strPath + "wizthumb.db";
 }
 
-QString CWizDatabase::GetDocumentsDataPath() const
+QString CWizDatabase::GetUserDocumentsDataPath() const
 {
-    CString strPath = GetUserDataDataPath() + "notes/";
+    QString strPath = GetUserDataPath() + "notes/";
     WizEnsurePathExists(strPath);
     return  strPath;
 }
 
-QString CWizDatabase::GetAttachmentsDataPath() const
+QString CWizDatabase::GetUserAttachmentsDataPath() const
 {
-    CString strPath = GetUserDataDataPath() + "attachments/";
+    QString strPath = GetUserDataPath() + "attachments/";
     WizEnsurePathExists(strPath);
     return  strPath;
 }
+
+QString CWizDatabase::GetGroupDataPath() const
+{
+    QString strPath = GetAccountPath() + "group/" + m_strKbGUID + "/";
+    WizEnsurePathExists(strPath);
+    return strPath;
+}
+
+QString CWizDatabase::GetGroupIndexFileName() const
+{
+    QString strPath = GetGroupDataPath();
+    return strPath + "index.db";
+}
+
+QString CWizDatabase::GetGroupThumbFileName() const
+{
+    QString strPath = GetGroupDataPath();
+    return strPath + "wizthumb.db";
+}
+
+QString CWizDatabase::GetGroupDocumentsDataPath() const
+{
+    CString strPath = GetGroupDataPath() + "notes/";
+    WizEnsurePathExists(strPath);
+    return  strPath;
+}
+
+QString CWizDatabase::GetGroupAttachmentsDataPath() const
+{
+    QString strPath = GetGroupDataPath() + "attachments/";
+    WizEnsurePathExists(strPath);
+    return  strPath;
+}
+
+QString CWizDatabase::GetDocumentFileName(const CString& strGUID) const
+{
+    if (m_nOpenMode == OpenPrivate)
+        return GetUserDocumentsDataPath() + "{" + strGUID + "}";
+    else if (m_nOpenMode == OpenGroup)
+        return GetGroupDocumentsDataPath() + "{" + strGUID + "}";
+    else
+        Q_ASSERT(0);
+
+    return QString();
+}
+
+QString CWizDatabase::GetAttachmentFileName(const CString& strGUID) const
+{
+    if (m_nOpenMode == OpenPrivate)
+        return GetUserAttachmentsDataPath() + "{" + strGUID + "}";
+    else if (m_nOpenMode == OpenGroup)
+        return GetGroupAttachmentsDataPath() + "{" + strGUID + "}";
+    else
+        Q_ASSERT(0);
+
+    return QString();
+}
+
+bool CWizDatabase::GetUserName(QString& strUserName)
+{
+    strUserName = GetMetaDef(g_strAccountSection, "UserName");
+    return true;
+}
+
+bool CWizDatabase::SetUserName(const QString& strUserName)
+{
+    CString strOld;
+    GetUserName(strOld);
+    if (!strOld.IsEmpty()) {
+        TOLOG("Can not set user name: user name exists!");
+        return false;
+    }
+
+    if (!SetMeta(g_strAccountSection, _T("UserName"), strUserName)) {
+        TOLOG("Failed to set user name while SetUserName");
+        return false;
+    }
+
+    return true;
+}
+
+QString CWizDatabase::GetEncryptedPassword()
+{
+    return GetMetaDef(g_strAccountSection, "Password");
+}
+
+bool CWizDatabase::GetPassword(CString& strPassword)
+{
+    bool bExists = false;
+    if (!GetMeta(g_strAccountSection, "Password", strPassword, "", &bExists)) {
+        TOLOG("Failed to get password while GetPassword");
+        return false;
+    }
+
+    if (strPassword.IsEmpty())
+        return true;
+
+    strPassword = WizDecryptPassword(strPassword);
+
+    return true;
+}
+
+bool CWizDatabase::SetPassword(const QString& strOldPassword, const QString& strPassword)
+{
+    CString strOld;
+    if (!GetPassword(strOld)) {
+        TOLOG("Failed to get old password while changing password");
+        return false;
+    }
+
+    if (strOld != strOldPassword) {
+        TOLOG("Invalid password while changing password");
+        return false;
+    }
+
+    if (!SetMeta(g_strAccountSection, "Password", WizEncryptPassword(strPassword))) {
+        TOLOG("Failed to set new password while changing password");
+        return false;
+    }
+
+    return true;
+}
+
+UINT CWizDatabase::GetPasswordFalgs()
+{
+    CString strFlags = GetMetaDef(g_strAccountSection, "PasswordFlags", "");
+    return (UINT)atoi(strFlags.toUtf8());
+}
+
+bool CWizDatabase::SetPasswordFalgs(UINT nFlags)
+{
+    return SetMeta(g_strAccountSection, "PasswordFlags", WizIntToStr(int(nFlags)));
+}
+
+bool CWizDatabase::GetUserCert(QString& strN, QString& stre, QString& strd, QString& strHint)
+{
+    strN = GetMetaDef(g_strCertSection, "N");
+    stre = GetMetaDef(g_strCertSection, "E");
+    strd = GetMetaDef(g_strCertSection, "D");
+    strHint = GetMetaDef(g_strCertSection, "Hint");
+
+    if (strN.isEmpty() || stre.isEmpty() || strd.isEmpty())
+        return false;
+
+    return true;
+}
+
+bool CWizDatabase::SetUserCert(const QString& strN, const QString& stre, const QString& strd, const QString& strHint)
+{
+    return SetMeta(g_strCertSection, "N", strN) \
+            && SetMeta(g_strCertSection, "E", stre) \
+            && SetMeta(g_strCertSection, "D", strd) \
+            && SetMeta(g_strCertSection, "Hint", strHint);
+}
+
+bool CWizDatabase::setUserInfo(const WIZUSERINFO& userInfo)
+{
+    int errors = 0;
+
+    if (!SetMeta(g_strAccountSection, "DisplayName", userInfo.strDisplayName))
+        errors++;
+
+    if (!SetMeta(g_strAccountSection, "UserType", userInfo.strUserType))
+        errors++;
+
+    if (!SetMeta(g_strAccountSection, "UserLevelName", userInfo.strUserLevelName))
+        errors++;
+
+    if (!SetMeta(g_strAccountSection, "UserLevel", QString::number(userInfo.nUserLevel)))
+        errors++;
+
+    if (!SetMeta(g_strAccountSection, "UserPoints", QString::number(userInfo.nUserPoints)))
+        errors++;
+
+    if (errors > 0)
+        return false;
+
+    return true;
+}
+
+bool CWizDatabase::getUserInfo(WIZUSERINFO& userInfo)
+{
+    userInfo.strDisplayName = GetMetaDef(g_strAccountSection, "DisplayName");
+    userInfo.strUserType = GetMetaDef(g_strAccountSection, "UserType");
+    userInfo.strUserLevelName = GetMetaDef(g_strAccountSection, "UserLevelName");
+    userInfo.nUserLevel = GetMetaDef(g_strAccountSection, "UserLevel").toInt();
+    userInfo.nUserPoints = GetMetaDef(g_strAccountSection, "UserPoints").toInt();
+
+    return true;
+}
+
+bool CWizDatabase::setUserGroupInfo(const CWizGroupDataArray& arrayGroup)
+{
+    if (!deleteMetasByName(g_strGroupSection))
+        return false;
+
+    int nTotal = arrayGroup.size();
+    if (!nTotal) {
+        return false;
+    }
+
+    if (!SetMeta(g_strGroupSection, "Count", QString::number(nTotal))) {
+        return false;
+    }
+
+    int nErrors = 0;
+    for (int i = 0; i < nTotal; i++) {
+        WIZGROUPDATA group(arrayGroup[i]);
+        if (!SetMeta(g_strGroupSection, QString::number(i), group.strGroupGUID)) {
+            nErrors++;
+        }
+
+        if (!SetMeta(g_strGroupSection, group.strGroupGUID, group.strGroupName)) {
+            nErrors++;
+        }
+    }
+
+    if (nErrors > 0) {
+        return false;
+    }
+
+    return true;
+}
+
+bool CWizDatabase::getUserGroupInfo(CWizGroupDataArray& arrayGroup)
+{
+    CString strTotal;
+    bool bExist;
+
+    if (!GetMeta(g_strGroupSection, "Count", strTotal, "", &bExist)) {
+        return false;
+    }
+
+    if (!bExist) {
+        return false;
+    }
+
+    int nTotal = strTotal.toInt();
+    for (int i = 0; i < nTotal; i++) {
+        QString strGroupGUID = GetMetaDef(g_strGroupSection, QString::number(i));
+        QString strGroupName = GetMetaDef(g_strGroupSection, strGroupGUID);
+
+        WIZGROUPDATA group;
+        group.strGroupGUID = strGroupGUID;
+        group.strGroupName = strGroupName;
+        arrayGroup.push_back(group);
+    }
+
+    return true;
+}
+
 
 __int64 CWizDatabase::GetObjectVersion(const CString& strObjectName)
 {
@@ -559,16 +891,16 @@ bool CWizDatabase::UpdateTags(const std::deque<WIZTAGDATA>& arrayTag)
     std::deque<WIZTAGDATA>::const_iterator it;
     for (it = arrayTag.begin(); it != arrayTag.end(); it++)
     {
-        const WIZTAGDATA& data = *it;
+        const WIZTAGDATA& tag = *it;
 
-        Q_EMIT processLog("tag: " + data.strName);
+        Q_EMIT processLog("tag: " + tag.strName);
 
-        if (!UpdateTag(data))
+        if (!UpdateTag(tag))
         {
             bHasError = true;
         }
 
-        nVersion = std::max<__int64>(nVersion, data.nVersion);
+        nVersion = std::max<__int64>(nVersion, tag.nVersion);
     }
     if (!bHasError)
     {
@@ -710,7 +1042,7 @@ bool CWizDatabase::UpdateDocumentData(WIZDOCUMENTDATA& data, const QString& strH
 
 bool CWizDatabase::UpdateDocumentDataMD5(WIZDOCUMENTDATA& data, const CString& strZipFileName)
 {
-    bool bRet = CIndex::UpdateDocumentDataMD5(data, strZipFileName);
+    bool bRet = CWizIndex::UpdateDocumentDataMD5(data, strZipFileName);
 
     UpdateDocumentAbstract(data.strGUID);
 
@@ -718,7 +1050,7 @@ bool CWizDatabase::UpdateDocumentDataMD5(WIZDOCUMENTDATA& data, const CString& s
 }
 bool CWizDatabase::DeleteAttachment(const WIZDOCUMENTATTACHMENTDATA& data, bool bLog)
 {
-    bool bRet = CIndex::DeleteAttachment(data, bLog);
+    bool bRet = CWizIndex::DeleteAttachment(data, bLog);
     CString strFileName = GetAttachmentFileName(data.strGUID);
     if (PathFileExists(strFileName))
     {
@@ -785,15 +1117,6 @@ bool CWizDatabase::UpdateSyncObjectLocalData(const WIZOBJECTDATA& data)
     return true;
 }
 
-CString CWizDatabase::GetDocumentFileName(const CString& strGUID)
-{
-    return GetDocumentsDataPath() + "{" + strGUID + "}";
-}
-
-CString CWizDatabase::GetAttachmentFileName(const CString& strGUID)
-{
-    return GetAttachmentsDataPath() + "{" + strGUID + "}";
-}
 
 CString CWizDatabase::GetObjectFileName(const WIZOBJECTDATA& data)
 {
@@ -870,6 +1193,8 @@ bool CWizDatabase::CreateDocumentAndInit(const CString& strHtml, \
     try
     {
         BeginUpdate();
+
+        data.strKbGUID = kbGUID();
         bRet = CreateDocument(strTitle, strName, strLocation, strHtmlUrl, data);
         if (bRet)
         {
@@ -1160,7 +1485,7 @@ CString CWizDatabase::GetLocationDisplayName(const CString& strLocation)
 
 bool CWizDatabase::GetDocumentsByTag(const WIZTAGDATA& tag, CWizDocumentDataArray& arrayDocument)
 {
-    return CIndex::GetDocumentsByTag("", tag, arrayDocument);
+    return CWizIndex::GetDocumentsByTag("", tag, arrayDocument, false);
 }
 
 bool CWizDatabase::loadUserCert()
@@ -1171,7 +1496,7 @@ bool CWizDatabase::loadUserCert()
         return false;
     }
 
-    m_ziwReader->setRSAKeys(strN.toUtf8(), stre.toUtf8(), strEncryptedd.toUtf8(), strHint.toUtf8());
+    m_ziwReader->setRSAKeys(strN.toUtf8(), stre.toUtf8(), strEncryptedd.toUtf8(), strHint);
     return true;
 }
 

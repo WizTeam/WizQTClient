@@ -802,7 +802,7 @@ bool WizFTSSearchDocument(const wchar_t* lpszIndexPath, const wchar_t* lpszKeywo
                         std::string strDocumentGUID = ::WizW2A(docid);
                         if (setGUIDs.find(strDocumentGUID) == setGUIDs.end()) {
                             setGUIDs.insert(strDocumentGUID);
-                            pEvents->onSearchProcess(kbid ? kbid : _T(""), docid, title ? title : _T(""));
+                            pEvents->onSearchProcess(kbid, docid, title ? title : _T(""));
                         }
                     }
                 }
