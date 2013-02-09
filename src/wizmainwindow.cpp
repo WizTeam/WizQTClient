@@ -416,9 +416,9 @@ void MainWindow::initClient()
     splitter->setSplitterColor(splitterColor);
 #endif
 
-#ifndef Q_OS_MAC
-    splitter->addWidget(WizInitWidgetMarginsEx(m_settings->skin(), m_category, "Category"));
-#else
+//#ifndef Q_OS_MAC
+//    splitter->addWidget(WizInitWidgetMarginsEx(m_settings->skin(), m_category, "Category"));
+//#else
     QHBoxLayout* layoutCategories = new QHBoxLayout(m_categoryLayer);
     layoutCategories->setContentsMargins(0, 0, 0, 0);
     layoutCategories->setSpacing(0);
@@ -432,7 +432,7 @@ void MainWindow::initClient()
     m_categoryGroups->hide();
 
     splitter->addWidget(m_categoryLayer);
-#endif
+//#endif
 
     splitter->addWidget(m_documents);
     splitter->addWidget(m_doc);

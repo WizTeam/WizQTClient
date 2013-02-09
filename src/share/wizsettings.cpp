@@ -238,6 +238,9 @@ void CWizUserSettings::setAutoLogin(bool bAutoLogin)
 
 QString CWizUserSettings::skin()
 {
+    // just return because no skin selection from v1.4
+    return "default";
+
     if (!m_strSkinName.isEmpty())
         return m_strSkinName;
 
