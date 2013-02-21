@@ -291,24 +291,36 @@ if(UNIX)
 
     elseif(NOT APPLE)
         add_executable(${PROJECT_NAME} ${wiznote_SOURCES} ${wiznote_FORM_HEADERS} ${wiznote_QM})
-        set_target_properties(${PROJECT_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build)
+        #set_target_properties(${PROJECT_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build)
 
         # always build rpath
         set_target_properties(${PROJECT_NAME} PROPERTIES BUILD_WITH_INSTALL_RPATH TRUE)
         set_target_properties(${PROJECT_NAME} PROPERTIES INSTALL_RPATH "\$ORIGIN/lib")
 
-        add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-            COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/share/wiznote/ ${CMAKE_BINARY_DIR}/build)
+        install(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION bin)
+        install(DIRECTORY ${CMAKE_SOURCE_DIR}/share/ DESTINATION share PATTERN ".DS_Store" EXCLUDE)
+        install(FILES ${wiznote_QM} ${_QT_INTERNAL_TRANSLATIONS} DESTINATION share/wiznote/languages)
 
-        foreach(_file ${wiznote_QM})
-            add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-                COMMAND ${CMAKE_COMMAND} -E copy ${_file} ${CMAKE_BINARY_DIR}/build/languages/)
-        endforeach()
+        # install icons and desktop entry (debian)
+        install(FILES ${CMAKE_SOURCE_DIR}/share/wiznote/skins/wiznote16.png DESTINATION share/icons/hicolor/16x16/apps RENAME wiznote.png)
+        install(FILES ${CMAKE_SOURCE_DIR}/share/wiznote/skins/wiznote24.png DESTINATION share/icons/hicolor/24x24/apps RENAME wiznote.png)
+        install(FILES ${CMAKE_SOURCE_DIR}/share/wiznote/skins/wiznote32.png DESTINATION share/icons/hicolor/32x32/apps RENAME wiznote.png)
+        install(FILES ${CMAKE_SOURCE_DIR}/share/wiznote/skins/wiznote64.png DESTINATION share/icons/hicolor/64x64/apps RENAME wiznote.png)
+        install(FILES ${CMAKE_SOURCE_DIR}/share/wiznote/skins/wiznote128.png DESTINATION share/icons/hicolor/128x128/apps RENAME wiznote.png)
+        install(FILES ${CMAKE_SOURCE_DIR}/share/wiznote/skins/wiznote256.png DESTINATION share/icons/hicolor/256x256/apps RENAME wiznote.png)
 
-        foreach(_file ${_QT_INTERNAL_TRANSLATIONS})
-            add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-                COMMAND ${CMAKE_COMMAND} -E copy ${_file} ${CMAKE_BINARY_DIR}/build/languages/)
-        endforeach()
+        #add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+        #    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/share/wiznote/ ${CMAKE_BINARY_DIR}/build)
+
+        #foreach(_file ${wiznote_QM})
+        #    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+        #        COMMAND ${CMAKE_COMMAND} -E copy ${_file} ${CMAKE_BINARY_DIR}/build/languages/)
+        #endforeach()
+
+        #foreach(_file ${_QT_INTERNAL_TRANSLATIONS})
+        #    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+        #        COMMAND ${CMAKE_COMMAND} -E copy ${_file} ${CMAKE_BINARY_DIR}/build/languages/)
+        #endforeach()
 
         if(CMAKE_BUILD_TYPE STREQUAL "Release")
             add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD

@@ -1,0 +1,2 @@
+?package(wiznote):needs="X11|text|vc|wm" section="Applications/Network"\
+  title="wiznote" command="/usr/bin/wiznote"

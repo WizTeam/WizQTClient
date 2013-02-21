@@ -211,12 +211,12 @@ if (_CRYPTOPP_INSTALL_TARGETS)
   set_target_properties (${_CRYPTOPP_INSTALL_TARGETS} PROPERTIES PUBLIC_HEADER
     "${PROJECT_H}")
 
-  install (TARGETS ${_CRYPTOPP_INSTALL_TARGETS}
-    EXPORT cryptopp-targets
-    RUNTIME DESTINATION bin
-    LIBRARY DESTINATION lib
-    ARCHIVE DESTINATION lib
-    PUBLIC_HEADER DESTINATION include/cryptopp)
+  #install (TARGETS ${_CRYPTOPP_INSTALL_TARGETS}
+  #  EXPORT cryptopp-targets
+  #  RUNTIME DESTINATION bin
+  #  LIBRARY DESTINATION lib
+  #  ARCHIVE DESTINATION lib
+  #  PUBLIC_HEADER DESTINATION include/cryptopp)
 endif (_CRYPTOPP_INSTALL_TARGETS)
 
 if (TARGET crypttest)
@@ -280,8 +280,8 @@ export (TARGETS ${_CRYPTOPP_INSTALL_TARGETS} FILE
   ${CMAKE_CURRENT_BINARY_DIR}/cryptopp-targets.cmake)
 export (PACKAGE CryptoPP)
 
-install (EXPORT cryptopp-targets DESTINATION . COMPONENT Development)
-install (FILES
-    ${CMAKE_CURRENT_BINARY_DIR}/cryptopp-config.cmake
-    ${CMAKE_CURRENT_BINARY_DIR}/cryptopp-config-version.cmake
-    DESTINATION . COMPONENT Development)
+#install (EXPORT cryptopp-targets DESTINATION . COMPONENT Development)
+#install (FILES
+#    ${CMAKE_CURRENT_BINARY_DIR}/cryptopp-config.cmake
+#    ${CMAKE_CURRENT_BINARY_DIR}/cryptopp-config-version.cmake
+#    DESTINATION . COMPONENT Development)

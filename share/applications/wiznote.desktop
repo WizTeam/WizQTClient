@@ -1,8 +1,8 @@
 [Desktop Entry]
 Name=wiznote
-GenericName=note taking
+GenericName=cloud note-taking application
 Comment=taking note and manage information
-Exec=WizNote
+Exec=wiznote
 Terminal=false
 Type=Application
 StartupNotify=true

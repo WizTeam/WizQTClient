@@ -340,9 +340,9 @@ if (CLUCENE_BUILD_SHARED_LIBRARIES)
       TARGET_LINK_LIBRARIES(clucene-shared ${EXTRA_LIBS})
     ENDIF ( EXTRA_LIBS )
 
-    install(TARGETS clucene-shared
-            DESTINATION ${LIB_DESTINATION}
-            COMPONENT development )
+    #install(TARGETS clucene-shared
+    #        DESTINATION ${LIB_DESTINATION}
+    #        COMPONENT development )
 endif()
 
 IF ( BUILD_STATIC_LIBRARIES )
@@ -356,7 +356,7 @@ IF ( BUILD_STATIC_LIBRARIES )
 	    COMPILE_DEFINITIONS_DEBUG _DEBUG
 	)
   TARGET_LINK_LIBRARIES(clucene-shared-static ${CMAKE_THREAD_LIBS_INIT})
-	install(TARGETS clucene-shared-static 
-	        DESTINATION ${LIB_DESTINATION} 
-	        COMPONENT runtime )
+        #install(TARGETS clucene-shared-static
+        #        DESTINATION ${LIB_DESTINATION}
+        #        COMPONENT runtime )
 ENDIF ( BUILD_STATIC_LIBRARIES )

@@ -37,12 +37,10 @@ public:
     bool extractFile(const CString& strNameInZip, const CString& strFileName);
     bool extractAll(const CString& strDestPath);
     bool close();
-    //
+
 public:
     static bool extractZip(const CString& strZipFileName, const CString& strDestPath);
 };
-
-
 
 
 #endif //WIZZIP_H
