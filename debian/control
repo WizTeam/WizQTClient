@@ -8,7 +8,6 @@ Homepage: http://www.wiz.cn
 Package: wiznote
 Architecture: any
 Depends: libc6 (>= 2.3.6-6~), libc6 (>= 2.11), libgcc1 (>= 1:4.1.1), libqt4-network (>= 4:4.5.3), libqt4-xml (>= 4:4.5.3), libqtcore4 (>= 4:4.7.0~beta1), libqtgui4 (>= 4:4.8.0), libqtwebkit4 (>= 2.2~2011week36), libstdc++6 (>= 4.6)
-
 Description: Cross platform cloud note-taking application
  wiznote is a cross platform note-taking application.
  .

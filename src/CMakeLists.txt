@@ -322,18 +322,18 @@ if(UNIX)
         #        COMMAND ${CMAKE_COMMAND} -E copy ${_file} ${CMAKE_BINARY_DIR}/build/languages/)
         #endforeach()
 
-        if(CMAKE_BUILD_TYPE STREQUAL "Release")
-            add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-                COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/build/lib/
-                COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/build/plugins/
-                COMMAND ${CMAKE_COMMAND} -E copy ${QT_LIBRARY_DIR}/libQtCore.so.4 ${CMAKE_BINARY_DIR}/build/lib/
-                COMMAND ${CMAKE_COMMAND} -E copy ${QT_LIBRARY_DIR}/libQtGui.so.4 ${CMAKE_BINARY_DIR}/build/lib/
-                COMMAND ${CMAKE_COMMAND} -E copy ${QT_LIBRARY_DIR}/libQtNetwork.so.4 ${CMAKE_BINARY_DIR}/build/lib/
-                COMMAND ${CMAKE_COMMAND} -E copy ${QT_LIBRARY_DIR}/libQtWebKit.so.4 ${CMAKE_BINARY_DIR}/build/lib/
-                COMMAND ${CMAKE_COMMAND} -E copy ${QT_LIBRARY_DIR}/libQtXml.so.4 ${CMAKE_BINARY_DIR}/build/lib/
-                COMMAND ${CMAKE_COMMAND} -E copy_directory ${QT_PLUGINS_DIR} ${CMAKE_BINARY_DIR}/build/plugins/
-            )
-        endif()
+        #if(CMAKE_BUILD_TYPE STREQUAL "Release")
+        #    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+        #        COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/build/lib/
+        #        COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/build/plugins/
+        #        COMMAND ${CMAKE_COMMAND} -E copy ${QT_LIBRARY_DIR}/libQtCore.so.4 ${CMAKE_BINARY_DIR}/build/lib/
+        #        COMMAND ${CMAKE_COMMAND} -E copy ${QT_LIBRARY_DIR}/libQtGui.so.4 ${CMAKE_BINARY_DIR}/build/lib/
+        #        COMMAND ${CMAKE_COMMAND} -E copy ${QT_LIBRARY_DIR}/libQtNetwork.so.4 ${CMAKE_BINARY_DIR}/build/lib/
+        #        COMMAND ${CMAKE_COMMAND} -E copy ${QT_LIBRARY_DIR}/libQtWebKit.so.4 ${CMAKE_BINARY_DIR}/build/lib/
+        #        COMMAND ${CMAKE_COMMAND} -E copy ${QT_LIBRARY_DIR}/libQtXml.so.4 ${CMAKE_BINARY_DIR}/build/lib/
+        #        COMMAND ${CMAKE_COMMAND} -E copy_directory ${QT_PLUGINS_DIR} ${CMAKE_BINARY_DIR}/build/plugins/
+        #    )
+        #endif()
 
     endif()
 endif()
