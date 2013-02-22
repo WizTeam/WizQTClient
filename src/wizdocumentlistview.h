@@ -2,8 +2,6 @@
 #define WIZDOCUMENTLISTVIEW_H
 
 #include <QtGui>
-//#include <QListWidget>
-//#include <QTimer>
 
 #include "wizdef.h"
 #include "share/wizobject.h"

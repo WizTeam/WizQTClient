@@ -309,18 +309,15 @@ if(UNIX)
         install(FILES ${CMAKE_SOURCE_DIR}/share/wiznote/skins/wiznote128.png DESTINATION share/icons/hicolor/128x128/apps RENAME wiznote.png)
         install(FILES ${CMAKE_SOURCE_DIR}/share/wiznote/skins/wiznote256.png DESTINATION share/icons/hicolor/256x256/apps RENAME wiznote.png)
 
-        #add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-        #    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/share/wiznote/ ${CMAKE_BINARY_DIR}/build)
-
-        #foreach(_file ${wiznote_QM})
-        #    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-        #        COMMAND ${CMAKE_COMMAND} -E copy ${_file} ${CMAKE_BINARY_DIR}/build/languages/)
-        #endforeach()
-
-        #foreach(_file ${_QT_INTERNAL_TRANSLATIONS})
-        #    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-        #        COMMAND ${CMAKE_COMMAND} -E copy ${_file} ${CMAKE_BINARY_DIR}/build/languages/)
-        #endforeach()
+        # debug purpose
+        if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+            add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+                COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/share/ ${CMAKE_BINARY_DIR}/share)
+	    foreach(_file ${wiznote_QM})
+                add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+                    COMMAND ${CMAKE_COMMAND} -E copy ${_file} ${CMAKE_BINARY_DIR}/share/wiznote/languages/)
+            endforeach()
+        endif()
 
         #if(CMAKE_BUILD_TYPE STREQUAL "Release")
         #    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD

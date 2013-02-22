@@ -495,9 +495,7 @@ void CWizDocumentListView::on_document_abstractLoaded(const WIZABSTRACT& abs)
         return;
 
     pItem->resetAbstract(abs);
-
-    QRect rc = visualItemRect(pItem);
-    repaint(rc);
+    update(indexFromItem(pItem));
 }
 
 void CWizDocumentListView::on_action_selectTags()
