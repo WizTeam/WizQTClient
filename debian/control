@@ -2,7 +2,7 @@ Source: wiznote
 Section: universe/x11
 Priority: optional
 Maintainer: Albert.Zhou <albert.zhou@wiz.cn>
-Build-Depends: cmake, build-essential, libqt4-dev (>= 4.7)
+Build-Depends: debhelper (>= 7), cmake (>= 2.8), build-essential, libqt4-dev (>= 4.7)
 Homepage: http://www.wiz.cn
 
 Package: wiznote

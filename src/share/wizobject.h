@@ -502,10 +502,10 @@ struct WIZTODODATAEX : public WIZTODODATA
     WIZTODODATAEX(const WIZTODODATA& data);
     //
 public:
-    intptr_t AddChild(const WIZTODODATAEX& data);
+    int AddChild(const WIZTODODATAEX& data);
     //
     static BOOL WizTodoDataArrayFindLinkedDocument(const CWizTodoDataExArray& arrayData, const CString& strDocumentGUID);
-    static intptr_t WizTodoDataArrayFindText(const CWizTodoDataExArray& arrayData, const CString& strText);
+    static int WizTodoDataArrayFindText(const CWizTodoDataExArray& arrayData, const CString& strText);
     static BOOL WizTodoDataItemCopyAndCombine(WIZTODODATAEX& itemDest, const WIZTODODATAEX& itemOther);
     static BOOL WizTodoDataArrayCombine(WIZTODODATAEX::CWizTodoDataExArray& arrayDest, const WIZTODODATAEX::CWizTodoDataExArray& arrayOther);
     static BOOL WizTodoDataArrayRemoveMultiItem(WIZTODODATAEX::CWizTodoDataExArray& arrayData);

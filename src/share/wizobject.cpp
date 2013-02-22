@@ -734,7 +734,7 @@ WIZTODODATAEX::WIZTODODATAEX(const WIZTODODATA& data)
 
 }
 
-intptr_t WIZTODODATAEX::AddChild(const WIZTODODATAEX& data)
+int WIZTODODATAEX::AddChild(const WIZTODODATAEX& data)
 {
     arrayChild.push_back(data);
     return arrayChild.size() - 1;
@@ -756,7 +756,7 @@ BOOL WIZTODODATAEX::WizTodoDataArrayFindLinkedDocument(const CWizTodoDataExArray
     return FALSE;
 }
 
-intptr_t WIZTODODATAEX::WizTodoDataArrayFindText(const CWizTodoDataExArray& arrayData, const CString& strText)
+int WIZTODODATAEX::WizTodoDataArrayFindText(const CWizTodoDataExArray& arrayData, const CString& strText)
 {
     for (CWizTodoDataExArray::const_iterator it = arrayData.begin();
     it != arrayData.end();
