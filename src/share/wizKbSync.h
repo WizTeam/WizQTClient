@@ -59,8 +59,11 @@ protected:
     virtual void onXmlRpcError(const QString& strMethodName, \
                                WizXmlRpcError err, int errorCode, const QString& errorMessage);
 
-    // step 1: login
-    //virtual void onClientLogin(const WIZUSERINFO& userInfo);
+    // step 1: upload deleted guilds
+    virtual void startUploadDeleteds();
+    virtual void uploadNextDeleteds();
+    virtual void onDeletedPostList(const std::deque<WIZDELETEDGUIDDATA>& arrayData);
+    virtual void onUploadDeletedsCompleted();
 
     // step 2: download deleted guids
     virtual void startDownloadDeleteds();
@@ -68,11 +71,11 @@ protected:
     virtual void onDeletedGetList(const std::deque<WIZDELETEDGUIDDATA>& arrayRet);
     virtual void onDownloadDeletedsCompleted();
 
-    // step 3: upload deleted guilds
-    virtual void startUploadDeleteds();
-    virtual void uploadNextDeleteds();
-    virtual void onDeletedPostList(const std::deque<WIZDELETEDGUIDDATA>& arrayData);
-    virtual void onUploadDeletedsCompleted();
+    // step 3: upload tags
+    virtual void startUploadTags();
+    virtual void uploadNextTags();
+    virtual void onTagPostList(const std::deque<WIZTAGDATA>& arrayData);
+    virtual void onUploadTagsCompleted();
 
     // step 4: download tags
     virtual void startDownloadTags();
@@ -80,11 +83,11 @@ protected:
     virtual void onTagGetList(const std::deque<WIZTAGDATA>& arrayRet);
     virtual void onDownloadTagsCompleted();
 
-    // step 5: upload tags
-    virtual void startUploadTags();
-    virtual void uploadNextTags();
-    virtual void onTagPostList(const std::deque<WIZTAGDATA>& arrayData);
-    virtual void onUploadTagsCompleted();
+    // step 5: upload styles
+    virtual void startUploadStyles();
+    virtual void uploadNextStyles();
+    virtual void onStylePostList(const std::deque<WIZSTYLEDATA>& arrayData);
+    virtual void onUploadStylesCompleted();
 
     // step 6: download styles
     virtual void startDownloadStyles();
@@ -92,19 +95,7 @@ protected:
     virtual void onStyleGetList(const std::deque<WIZSTYLEDATA>& arrayRet);
     virtual void onDownloadStylesCompleted();
 
-    // step 7: upload styles
-    virtual void startUploadStyles();
-    virtual void uploadNextStyles();
-    virtual void onStylePostList(const std::deque<WIZSTYLEDATA>& arrayData);
-    virtual void onUploadStylesCompleted();
-
-    // step 8: download documents info
-    virtual void startDownloadDocumentsSimpleInfo();
-    virtual void downloadNextDocumentsSimpleInfo(__int64 nVersion);
-    virtual void onDocumentGetList(const std::deque<WIZDOCUMENTDATABASE>& arrayRet);
-    virtual void onDownloadDocumentsSimpleInfoCompleted();
-
-    // step 9: upload documents and do confilict backup
+    // step 7: upload documents and do confilict backup
     virtual void startUploadDocuments();
     virtual void uploadNextDocument();
     virtual void queryDocumentInfo(const CString& strGUID, const CString& strTitle);
@@ -113,13 +104,7 @@ protected:
     virtual void onUploadDocument(const WIZDOCUMENTDATAEX& data);
     virtual void onUploadDocumentsCompleted();
 
-    // step 10: download attachments info
-    virtual void startDownloadAttachmentsInfo();
-    virtual void downloadNextAttachmentsInfo(__int64 nVersion);
-    virtual void onAttachmentGetList(const std::deque<WIZDOCUMENTATTACHMENTDATAEX>& arrayRet);
-    virtual void onDownloadAttachmentsInfoCompleted();
-
-    // step 11: upload attachments and do confilict backup
+    // step 8: upload attachments and do confilict backup
     virtual void startUploadAttachments();
     virtual void uploadNextAttachment();
     virtual void queryAttachmentInfo(const CString& strGUID, const CString& strName);
@@ -128,25 +113,36 @@ protected:
     virtual void onUploadAttachment(const WIZDOCUMENTATTACHMENTDATAEX& data);
     virtual void onUploadAttachmentsCompleted();
 
-    // step 12: download documents full info
+    // step 9: download documents info list
+    virtual void startDownloadDocumentsSimpleInfo();
+    virtual void downloadNextDocumentsSimpleInfo(__int64 nVersion);
+    virtual void onDocumentGetList(const std::deque<WIZDOCUMENTDATABASE>& arrayRet);
+    virtual void onDownloadDocumentsSimpleInfoCompleted();
+
+    // step 10: download documents full info
     virtual void startDownloadDocumentsFullInfo();
     virtual void downloadNextDocumentFullInfo();
     virtual void onDocumentGetData(const WIZDOCUMENTDATAEX& data);
     virtual void onDownloadDocumentsFullInfoCompleted();
 
-    // step 13: download objects data
+    // step 11: download attachments info
+    virtual void startDownloadAttachmentsInfo();
+    virtual void downloadNextAttachmentsInfo(__int64 nVersion);
+    virtual void onAttachmentGetList(const std::deque<WIZDOCUMENTATTACHMENTDATAEX>& arrayRet);
+    virtual void onDownloadAttachmentsInfoCompleted();
+
+    // step 12: download objects data
     virtual void startDownloadObjectsData();
     virtual void downloadNextObjectData();
     virtual void onDownloadObjectDataCompleted(const WIZOBJECTDATA& data);
     virtual void onDownloadObjectsDataCompleted();
 
-    // step 14: logout
+    // step 14: clean up
     virtual void stopSync();
-    //virtual void onClientLogout();
 
     // conflict backup
-    virtual void processDocumentData(const WIZDOCUMENTDATAEX& data);
-    virtual void processObjectData(const WIZOBJECTDATA& data);
+    virtual void processConflictDocumentData(const WIZDOCUMENTDATAEX& data);
+    virtual void processConflictObjectData(const WIZOBJECTDATA& data);
 
 private:
     bool downloadDocument(const WIZDOCUMENTDATABASE& data);

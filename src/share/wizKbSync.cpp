@@ -67,7 +67,7 @@ void CWizKbSync::startSync(const QString& strKbGUID)
     if (!strKbGUID.isEmpty())
         setKbGUID(strKbGUID);
 
-    startDownloadDeleteds();
+    startUploadDeleteds();
 }
 
 void CWizKbSync::abort()
@@ -112,7 +112,7 @@ void CWizKbSync::onDownloadDeletedsCompleted()
         Q_EMIT processLog(WizFormatString1(tr("Total %1 deleted objects be synchronized"), nTotal));
     }
 
-    startUploadDeleteds();
+    startUploadTags();
 }
 
 void CWizKbSync::startUploadDeleteds()
@@ -130,7 +130,7 @@ void CWizKbSync::startUploadDeleteds()
 
 void CWizKbSync::onUploadDeletedsCompleted()
 {
-    startDownloadTags();
+    startDownloadDeleteds();
 }
 
 void CWizKbSync::startDownloadTags()
@@ -148,7 +148,7 @@ void CWizKbSync::onDownloadTagsCompleted()
         Q_EMIT processLog(WizFormatString1(tr("Total %1 tags be synchronized"), nTotal));
     }
 
-    startUploadTags();
+    startUploadStyles();
 }
 
 void CWizKbSync::startUploadTags()
@@ -166,7 +166,7 @@ void CWizKbSync::startUploadTags()
 
 void CWizKbSync::onUploadTagsCompleted()
 {
-    startDownloadStyles();
+    startDownloadTags();
 }
 
 void CWizKbSync::startDownloadStyles()
@@ -184,7 +184,7 @@ void CWizKbSync::onDownloadStylesCompleted()
         Q_EMIT processLog(WizFormatString1(tr("Total %1 styles be sychronized"), nTotal));
     }
 
-    startUploadStyles();
+    startUploadDocuments();
 }
 
 void CWizKbSync::startUploadStyles()
@@ -202,7 +202,7 @@ void CWizKbSync::startUploadStyles()
 
 void CWizKbSync::onUploadStylesCompleted()
 {
-    startDownloadDocumentsSimpleInfo();
+    startDownloadStyles();
 }
 
 void CWizKbSync::startDownloadDocumentsSimpleInfo()
@@ -232,7 +232,8 @@ void CWizKbSync::onDownloadDocumentsSimpleInfoCompleted()
         Q_EMIT processLog(WizFormatString1(tr("Total %1 documents need to be synchronized"), nTotal));
     }
 
-    startUploadDocuments();
+    //startUploadDocuments();
+    startDownloadDocumentsFullInfo();
 }
 
 void CWizKbSync::startUploadDocuments()
@@ -250,7 +251,7 @@ void CWizKbSync::startUploadDocuments()
 
 void CWizKbSync::onUploadDocumentsCompleted()
 {
-    startDownloadAttachmentsInfo();
+    startUploadAttachments();
 }
 
 void CWizKbSync::startDownloadAttachmentsInfo()
@@ -267,7 +268,7 @@ void CWizKbSync::onDownloadAttachmentsInfoCompleted()
         Q_EMIT processLog(WizFormatString1(tr("Total %1 attachments be synchronized"), nTotal));
     }
 
-    startUploadAttachments();
+    startDownloadObjectsData();
 }
 
 void CWizKbSync::startUploadAttachments()
@@ -285,7 +286,7 @@ void CWizKbSync::startUploadAttachments()
 
 void CWizKbSync::onUploadAttachmentsCompleted()
 {
-    startDownloadDocumentsFullInfo();
+    startDownloadDocumentsSimpleInfo();
 }
 
 void CWizKbSync::startDownloadDocumentsFullInfo()
@@ -310,7 +311,7 @@ void CWizKbSync::onDownloadDocumentsFullInfoCompleted()
         m_db->SetObjectVersion(WIZDOCUMENTDATA::ObjectName(), m_nDocumentMaxVersion);
     }
 
-    startDownloadObjectsData();
+    startDownloadAttachmentsInfo();
 }
 
 void CWizKbSync::startDownloadObjectsData()
@@ -524,6 +525,22 @@ void CWizKbSync::onDocumentsGetInfo(const std::deque<WIZDOCUMENTDATABASE>& array
 
     // server already have this document
     } else if (count == 1) {
+        // if document version bigger than local max version number means conflict found
+        __int64 nLocalVersion = m_db->GetObjectVersion(WIZDOCUMENTDATA::ObjectName());
+
+        if (arrayRet[0].nVersion >= nLocalVersion) {
+            WIZDOCUMENTDATA localData;
+            m_db->DocumentFromGUID(arrayRet[0].strGUID, localData);
+            localData.nObjectPart = calDocumentParts(arrayRet[0], localData);
+            // do conflict back only if document data is modified
+            if (localData.nObjectPart & WIZKM_XMLRPC_OBJECT_PART_DATA) {
+                Q_EMIT processLog(tr("Conflict found: ") + localData.strTitle);
+                m_conflictedDocument = localData;
+                callDocumentGetData(localData);
+                return;
+            }
+        }
+
         onQueryDocumentInfo(arrayRet[0]);
 
     // absolutely count should not more than 1
@@ -650,7 +667,7 @@ void CWizKbSync::onDocumentGetData(const WIZDOCUMENTDATAEX& data)
 
         downloadNextDocumentFullInfo();
     } else {
-        processDocumentData(data);
+        processConflictDocumentData(data);
     }
 }
 
@@ -674,28 +691,12 @@ void CWizKbSync::onDownloadObjectDataCompleted(const WIZOBJECTDATA& data)
         m_db->UpdateSyncObjectLocalData(data);
         downloadNextObjectData();
     } else {
-        processObjectData(data);
+        processConflictObjectData(data);
     }
 }
 
 void CWizKbSync::queryDocumentInfo(const CString& strGUID, const CString& strTitle)
 {
-    // if current modified document already inside need download list, means confilict found!
-    // no need to query document info anymore.
-    std::deque<WIZDOCUMENTDATABASE>::const_iterator it;
-    for (it = m_arrayAllDocumentsNeedToBeDownloaded.begin(); \
-         it != m_arrayAllDocumentsNeedToBeDownloaded.end();
-         it++) {
-        WIZDOCUMENTDATABASE data = *it;
-
-        if (data.strGUID == strGUID) {
-            Q_EMIT processLog(tr("Conflict found: ") + strTitle);
-            m_conflictedDocument = data;
-            callDocumentGetData(data);
-            return;
-        }
-    }
-
     Q_EMIT processLog(tr("query note info: ") + strTitle);
 
     CWizStdStringArray arrayGUID;
@@ -703,16 +704,16 @@ void CWizKbSync::queryDocumentInfo(const CString& strGUID, const CString& strTit
     callDocumentsGetInfo(arrayGUID);
 }
 
-void CWizKbSync::processDocumentData(const WIZDOCUMENTDATAEX& data)
+void CWizKbSync::processConflictDocumentData(const WIZDOCUMENTDATAEX& data)
 {
-    // to avoid unable to download document object data issue.
+    // to avoid unable to download document object data, just save it
     m_conflictDownloadedInfo = data;
 
     WIZOBJECTDATA objectData(data);
     downloadObjectData(objectData);
 }
 
-void CWizKbSync::processObjectData(const WIZOBJECTDATA& data)
+void CWizKbSync::processConflictObjectData(const WIZOBJECTDATA& data)
 {
     WIZOBJECTDATA conflictObjectData(data);
     conflictObjectData.strObjectGUID = WizGenGUIDLowerCaseLetterOnly();
@@ -732,20 +733,8 @@ void CWizKbSync::processObjectData(const WIZOBJECTDATA& data)
         Q_EMIT processLog("unable to create conflict backup while create document");
     }
 
-    std::deque<WIZDOCUMENTDATABASE>::iterator it;
-    for (it = m_arrayAllDocumentsNeedToBeDownloaded.begin(); \
-         it != m_arrayAllDocumentsNeedToBeDownloaded.end();
-         it++) {
-        WIZDOCUMENTDATABASE data = *it;
-
-        if (data.strGUID == m_conflictedDocument.strGUID) {
-            m_arrayAllDocumentsNeedToBeDownloaded.erase(it);
-            break;
-        }
-    }
-
     // chain back
-    onQueryDocumentInfo(m_conflictedDocument);
+    onQueryDocumentInfo(m_conflictDownloadedInfo);
 }
 
 void CWizKbSync::onQueryDocumentInfo(const WIZDOCUMENTDATABASE& data)
