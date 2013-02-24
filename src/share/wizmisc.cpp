@@ -1824,7 +1824,7 @@ QIcon WizLoadSkinIcon(const QString& strSkinName, QColor forceground, const QStr
     return icon;
 }
 
-
+// FIXME: obosolete, use CWizHtmlToPlainText class instead!
 void WizHtml2Text(const QString& strHtml, QString& strText)
 {
     QTextDocument* doc = new QTextDocument();

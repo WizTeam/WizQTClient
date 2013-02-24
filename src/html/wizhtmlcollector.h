@@ -54,4 +54,17 @@ protected:
     virtual CString ToResourceFileName(const CString& strFileName);
 };
 
+class CWizHtmlToPlainText : public IWizHtmlReaderEvents
+{
+public:
+    CWizHtmlToPlainText();
+    bool toText(const QString& strHtml, QString& strPlainText);
+
+protected:
+    virtual void Characters(const CString &rText, DWORD dwAppData, bool &bAbort);
+
+private:
+    QString m_strText;
+};
+
 #endif // WIZHTMLCOLLECTOR_H

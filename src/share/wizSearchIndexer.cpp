@@ -1,5 +1,7 @@
 #include "wizSearchIndexer.h"
 
+#include "html/wizhtmlcollector.h"
+
 #include <QFile>
 
 CWizSearchIndexer::CWizSearchIndexer(CWizDatabaseManager& dbMgr, QObject *parent)
@@ -33,6 +35,13 @@ bool CWizSearchIndexer::buildFTSIndex()
     TOLOG(tr("Build FTS index begin"));
 
     int nErrors = 0;
+
+    // build private first
+    if (!buildFTSIndexByDatabase(m_dbMgr.db())) {
+        nErrors++;
+    }
+
+    // build group db
     int total = m_dbMgr.count();
     for (int i = 0; i < total; i++) {
         if (!buildFTSIndexByDatabase(m_dbMgr.at(i))) {
@@ -55,6 +64,8 @@ bool CWizSearchIndexer::buildFTSIndexByDatabase(CWizDatabase& db)
 
     if (!db.getAllDocumentsNeedToBeSearchIndexed(arrayDocuments))
         return false;
+
+    //TOLOG2("COUNT: Total %1 documents in %2 need build", QString::number(arrayDocuments.size()), db.name());
 
     if (arrayDocuments.empty()) {
         return true;
@@ -90,15 +101,27 @@ bool CWizSearchIndexer::rebuildFTSIndex()
         return false;
     }
 
+    // reset private db FTS index status
+    if (!m_dbMgr.db().setDocumentFTSEnabled(false)) {
+        TOLOG1("FATAL: Can't reset db index flag: %1", m_dbMgr.db().name());
+        return false;
+    }
+
+    if (!m_dbMgr.db().setAllDocumentsSearchIndexed(false)) {
+        TOLOG1("FATAL: Can't reset document index flag: %1", m_dbMgr.db().name());
+        return false;
+    }
+
+    // reset group db FTS index status
     int total = m_dbMgr.count();
     for (int i = 0; i < total; i++) {
         if (!m_dbMgr.at(i).setDocumentFTSEnabled(false)) {
-            TOLOG1("FATAL: Can't reset db index flag: %1", m_dbMgr.at(i).kbGUID());
+            TOLOG1("FATAL: Can't reset db index flag: %1", m_dbMgr.at(i).name());
             return false;
         }
 
         if (!m_dbMgr.at(i).setAllDocumentsSearchIndexed(false)) {
-            TOLOG1("FATAL: Can't reset document index flag: %1", m_dbMgr.at(i).kbGUID());
+            TOLOG1("FATAL: Can't reset document index flag: %1", m_dbMgr.at(i).name());
             return false;
         }
     }
@@ -179,11 +202,8 @@ bool CWizSearchIndexer::_updateDocumentImpl(void *pHandle, const WIZDOCUMENTDATA
     }
 
     QString strPlainText;
-    ::WizHtml2Text(strHtmlData, strPlainText);
-    if (strPlainText.isEmpty()) {
-        TOLOG("Html to text is failed: " + doc.strTitle);
-        return false;
-    }
+    CWizHtmlToPlainText htmlConverter;
+    htmlConverter.toText(strHtmlData, strPlainText);
 
     // NOTE: convert text to lower case
     bool ret = WizFTSUpdateDocument(pHandle, \

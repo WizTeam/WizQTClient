@@ -218,3 +218,30 @@ bool CWizHtmlCollector::Html2Zip(const CString& strUrl, \
 
     return WizHtml2Zip(strRet, arrayAllResource, strMetaText, strZipFileName);
 }
+
+
+
+CWizHtmlToPlainText::CWizHtmlToPlainText()
+{
+}
+
+bool CWizHtmlToPlainText::toText(const QString& strHtml, QString& strPlainText)
+{
+    m_strText.clear();
+
+    CWizHtmlReader reader;
+    reader.setEventHandler(this);
+    reader.setBoolOption(CWizHtmlReader::resolveEntities, true);
+
+    reader.Read(strHtml);
+
+    strPlainText = m_strText.simplified();
+}
+
+void CWizHtmlToPlainText::Characters(const CString &rText, DWORD dwAppData, bool &bAbort)
+{
+    Q_UNUSED(dwAppData);
+    Q_UNUSED(bAbort);
+
+    m_strText.push_back(rText + " ");
+}
