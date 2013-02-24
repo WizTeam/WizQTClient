@@ -185,11 +185,12 @@ bool CWizSearchIndexer::_updateDocumentImpl(void *pHandle, const WIZDOCUMENTDATA
         return false;
     }
 
+    // NOTE: convert text to lower case
     bool ret = WizFTSUpdateDocument(pHandle, \
                                     doc.strKbGUID.toStdWString().c_str(), \
                                     doc.strGUID.toStdWString().c_str(), \
                                     doc.strTitle.toStdWString().c_str(), \
-                                    strPlainText.toStdWString().c_str());
+                                    strPlainText.toLower().toStdWString().c_str());
 
     if (ret) {
         db.setDocumentSearchIndexed(doc.strGUID, true);
@@ -233,8 +234,9 @@ bool CWizSearchIndexer::search(const QString& strKeywords, int nMaxResult)
     m_bSearchEnd = false;
     m_timerSearch.start();
 
+    // NOTE: make sure convert keyword to lower case
     return WizFTSSearchDocument(m_strIndexPath.toStdWString().c_str(), \
-                                strKeywords.toStdWString().c_str(), \
+                                strKeywords.toLower().toStdWString().c_str(), \
                                 this);
 }
 

@@ -1,15 +1,11 @@
-
 #ifndef __WIZHTMLREADER_H__
 #define __WIZHTMLREADER_H__
-
 
 #ifndef WIZQTHELPER_H
 #include "../share/wizqthelper.h"
 #endif //WIZQTHELPER_H
 
-
 #define WIZ_SAFE_DELETE_POINTER(_P)  (void)(_P != NULL ? delete _P, _P = NULL : 0)
-
 
 class CWizHtmlReader;
 class CWizHtmlAttributes;
@@ -172,11 +168,11 @@ public:
 		notifyTagStart		= 0x00000002L,	// raise StartTag?
 		notifyTagEnd		= 0x00000004L,	// raise EndTag?
 		notifyCharacters	= 0x00000008L,	// raise Characters?
-		notifyComment		= 0x00000010L,	// raise Comment?
+        notifyComment		= 0x00000010L	// raise Comment?
 	};
 
 	enum ReaderOptionsEnum {
-		resolveEntities,	// determines whether entity references should be resolved
+        resolveEntities	    // determines whether entity references should be resolved
 	};
 
 // Construction/Destruction
