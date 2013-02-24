@@ -275,7 +275,8 @@ void CWizDocumentWebView::setEditingDocument(bool editing)
 
 void CWizDocumentWebView::saveDocument(bool force)
 {
-    Q_ASSERT(m_bEditorInited);
+    if (!m_bEditorInited)
+        return;
 
     if (!force && !m_bModified)
         return;

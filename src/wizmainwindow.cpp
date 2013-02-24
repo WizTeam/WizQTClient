@@ -137,7 +137,7 @@ void MainWindow::on_quitTimeout()
         saveStatus();
 
         // FIXME : if document not valid will lead crash
-        //m_doc->view()->saveDocument(false);
+        m_doc->web()->saveDocument(false);
         m_bReadyQuit = true;
 
         // back to closeEvent
