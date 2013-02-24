@@ -170,7 +170,8 @@ void MainWindow::closeEvent(QCloseEvent* event)
         GetFrontProcess(&pn);
         ShowHideProcess(&pn,false);
 #else
-        showMinimized();
+        // just quit on linux
+        on_actionExit_triggered();
 #endif
     } else {
         on_actionExit_triggered();
