@@ -624,6 +624,106 @@ void MainWindow::on_actionNewNote_triggered()
 
 }
 
+void MainWindow::on_actionEditingUndo_triggered()
+{
+    m_doc->web()->editorCommandExecuteUndo();
+}
+
+void MainWindow::on_actionEditingRedo_triggered()
+{
+    m_doc->web()->editorCommandExecuteRedo();
+}
+
+void MainWindow::on_actionFormatJustifyLeft_triggered()
+{
+    m_doc->web()->editorCommandExecuteJustifyLeft();
+}
+
+void MainWindow::on_actionFormatJustifyRight_triggered()
+{
+    m_doc->web()->editorCommandExecuteJustifyRight();
+}
+
+void MainWindow::on_actionFormatJustifyCenter_triggered()
+{
+    m_doc->web()->editorCommandExecuteJustifyCenter();
+}
+
+void MainWindow::on_actionFormatJustifyJustify_triggered()
+{
+    m_doc->web()->editorCommandExecuteJustifyJustify();
+}
+
+void MainWindow::on_actionFormatInsertOrderedList_triggered()
+{
+    m_doc->web()->editorCommandExecuteInsertOrderedList();
+}
+
+void MainWindow::on_actionFormatInsertUnorderedList_triggered()
+{
+    m_doc->web()->editorCommandExecuteInsertUnorderedList();
+}
+
+void MainWindow::on_actionFormatInsertTable_triggered()
+{
+    m_doc->web()->editorCommandExecuteInsertTable();
+}
+
+void MainWindow::on_actionFormatInsertLink_triggered()
+{
+    m_doc->web()->editorCommandExecuteInsertLink();
+}
+
+void MainWindow::on_actionFormatBold_triggered()
+{
+    m_doc->web()->editorCommandExecuteBold();
+}
+
+void MainWindow::on_actionFormatItalic_triggered()
+{
+    m_doc->web()->editorCommandExecuteItalic();
+}
+
+void MainWindow::on_actionFormatUnderLine_triggered()
+{
+    m_doc->web()->editorCommandExecuteUnderLine();
+}
+
+void MainWindow::on_actionFormatStrikeThrough_triggered()
+{
+    m_doc->web()->editorCommandExecuteStrikeThrough();
+}
+
+void MainWindow::on_actionFormatInsertHorizontal_triggered()
+{
+    m_doc->web()->editorCommandExecuteInsertHorizontal();
+}
+
+void MainWindow::on_actionFormatInsertDate_triggered()
+{
+    m_doc->web()->editorCommandExecuteInsertDate();
+}
+
+void MainWindow::on_actionFormatInsertTime_triggered()
+{
+    m_doc->web()->editorCommandExecuteInsertTime();
+}
+
+void MainWindow::on_actionFormatIndent_triggered()
+{
+    m_doc->web()->editorCommandExecuteIndent();
+}
+
+void MainWindow::on_actionFormatOutdent_triggered()
+{
+    m_doc->web()->editorCommandExecuteOutdent();
+}
+
+void MainWindow::on_actionFormatRemoveFormat_triggered()
+{
+    m_doc->web()->editorCommandExecuteRemoveFormat();
+}
+
 //void MainWindow::on_actionDeleteCurrentNote_triggered()
 //{
 //    WIZDOCUMENTDATA document = m_doc->document();

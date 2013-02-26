@@ -164,6 +164,7 @@ void CWizAttachmentListView::addAttachments()
     foreach (QString fileName, files)
     {
         WIZDOCUMENTATTACHMENTDATA data;
+        data.strKbGUID = m_document.strKbGUID; // needed by under layer
         m_dbMgr.db(m_document.strKbGUID).AddAttachment(m_document, fileName, data);
         addItem(new CWizAttachmentListViewItem(data));
     }

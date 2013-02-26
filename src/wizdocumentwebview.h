@@ -9,6 +9,7 @@
 #include "wizdef.h"
 #include "wizdownloadobjectdatadialog.h"
 #include "wizusercipherform.h"
+#include "wizEditorInsertLinkForm.h"
 
 class CWizDocumentWebView;
 
@@ -52,10 +53,36 @@ class CWizDocumentWebView : public QWebView
 public:
     CWizDocumentWebView(CWizExplorerApp& app, QWidget* parent = 0);
 
+    // view and save
     void viewDocument(const WIZDOCUMENTDATA& doc, bool editing);
     void setEditingDocument(bool editing);
     void setModified(bool bModified) { m_bModified = bModified; }
     void saveDocument(bool force);
+
+    // editor API
+    bool editorCommandExecuteUndo();
+    bool editorCommandExecuteRedo();
+    bool editorCommandExecuteJustifyLeft();
+    bool editorCommandExecuteJustifyRight();
+    bool editorCommandExecuteJustifyCenter();
+    bool editorCommandExecuteJustifyJustify();
+    bool editorCommandExecuteIndent();
+    bool editorCommandExecuteOutdent();
+    bool editorCommandExecuteInsertOrderedList();
+    bool editorCommandExecuteInsertUnorderedList();
+    bool editorCommandExecuteInsertTable();
+    bool editorCommandExecuteInsertLink();
+    bool editorCommandExecuteBold();
+    bool editorCommandExecuteItalic();
+    bool editorCommandExecuteUnderLine();
+    bool editorCommandExecuteStrikeThrough();
+    bool editorCommandExecuteInsertHorizontal();
+    bool editorCommandExecuteInsertDate();
+    bool editorCommandExecuteInsertTime();
+    bool editorCommandExecuteRemoveFormat();
+    bool editorCommandExecuteFormatMatch();
+
+
 
     void updateSize();
 
@@ -75,6 +102,7 @@ private:
     QPointer<CWizDocumentWebViewRenderer> m_renderer;
     QPointer<CWizDownloadObjectDataDialog> m_downloadDialog;
     QPointer<CWizUserCipherForm> m_cipherDialog;
+    QPointer<CWizEditorInsertLinkForm> m_editorInsertLinkForm;
 
     virtual void inputMethodEvent(QInputMethodEvent* event);
     virtual void keyPressEvent(QKeyEvent* event);
@@ -96,6 +124,8 @@ public Q_SLOTS:
 
     void on_documentReady(const QString& strFileName);
     void on_documentSaved(bool ok);
+
+    void on_editorCommandExecuteInsertLink_accepted();
 };
 
 

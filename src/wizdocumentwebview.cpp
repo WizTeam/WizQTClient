@@ -290,6 +290,135 @@ void CWizDocumentWebView::saveDocument(bool force)
     m_renderer->save(document(), strHtml, m_strHtmlFileName, 0);
 }
 
+bool CWizDocumentWebView::editorCommandExecuteUndo()
+{
+    return page()->mainFrame()->evaluateJavaScript("editor.execCommand('undo');").toBool();
+}
+
+bool CWizDocumentWebView::editorCommandExecuteRedo()
+{
+    return page()->mainFrame()->evaluateJavaScript("editor.execCommand('redo');").toBool();
+}
+
+bool CWizDocumentWebView::editorCommandExecuteJustifyLeft()
+{
+    return page()->mainFrame()->evaluateJavaScript("editor.execCommand('justify', 'left');").toBool();
+}
+
+bool CWizDocumentWebView::editorCommandExecuteJustifyRight()
+{
+    return page()->mainFrame()->evaluateJavaScript("editor.execCommand('justify', 'right');").toBool();
+}
+
+bool CWizDocumentWebView::editorCommandExecuteJustifyCenter()
+{
+    return page()->mainFrame()->evaluateJavaScript("editor.execCommand('justify', 'center');").toBool();
+}
+
+bool CWizDocumentWebView::editorCommandExecuteJustifyJustify()
+{
+    return page()->mainFrame()->evaluateJavaScript("editor.execCommand('justify', 'justify');").toBool();
+}
+
+bool CWizDocumentWebView::editorCommandExecuteIndent()
+{
+    return page()->mainFrame()->evaluateJavaScript("editor.execCommand('indent');").toBool();
+}
+
+bool CWizDocumentWebView::editorCommandExecuteOutdent()
+{
+    return page()->mainFrame()->evaluateJavaScript("editor.execCommand('outdent');").toBool();
+}
+
+bool CWizDocumentWebView::editorCommandExecuteInsertOrderedList()
+{
+    return page()->mainFrame()->evaluateJavaScript("editor.execCommand('insertOrderedList');").toBool();
+}
+
+bool CWizDocumentWebView::editorCommandExecuteInsertUnorderedList()
+{
+    return page()->mainFrame()->evaluateJavaScript("editor.execCommand('insertUnorderedList');").toBool();
+}
+
+bool CWizDocumentWebView::editorCommandExecuteInsertTable()
+{
+
+}
+
+bool CWizDocumentWebView::editorCommandExecuteInsertLink()
+{
+    if (!m_editorInsertLinkForm) {
+        m_editorInsertLinkForm = new CWizEditorInsertLinkForm(this);
+        connect(m_editorInsertLinkForm, SIGNAL(accepted()), SLOT(on_editorCommandExecuteInsertLink_accepted()));
+    }
+
+    m_editorInsertLinkForm->clear();
+    m_editorInsertLinkForm->open();
+
+    return true;
+}
+
+void CWizDocumentWebView::on_editorCommandExecuteInsertLink_accepted()
+{
+    // append http if not exist
+    QString strUrl = m_editorInsertLinkForm->getUrl();
+    if (strUrl.lastIndexOf("http://", 0, Qt::CaseInsensitive) == -1)
+        strUrl = "http://" + strUrl;
+
+    QString strScript = QString("editor.execCommand('link', {href: '%1', textValue: '%2'});")
+            .arg(strUrl)
+            .arg(m_editorInsertLinkForm->getContent());
+
+    page()->mainFrame()->evaluateJavaScript(strScript).toBool();
+}
+
+bool CWizDocumentWebView::editorCommandExecuteBold()
+{
+    return page()->mainFrame()->evaluateJavaScript("editor.execCommand('bold');").toBool();
+}
+
+bool CWizDocumentWebView::editorCommandExecuteItalic()
+{
+    return page()->mainFrame()->evaluateJavaScript("editor.execCommand('italic');").toBool();
+}
+
+bool CWizDocumentWebView::editorCommandExecuteUnderLine()
+{
+    return page()->mainFrame()->evaluateJavaScript("editor.execCommand('underline');").toBool();
+}
+
+bool CWizDocumentWebView::editorCommandExecuteStrikeThrough()
+{
+    return page()->mainFrame()->evaluateJavaScript("editor.execCommand('strikethrough');").toBool();
+}
+
+bool CWizDocumentWebView::editorCommandExecuteInsertHorizontal()
+{
+    return page()->mainFrame()->evaluateJavaScript("editor.execCommand('horizontal');").toBool();
+}
+
+bool CWizDocumentWebView::editorCommandExecuteInsertDate()
+{
+    return page()->mainFrame()->evaluateJavaScript("editor.execCommand('date');").toBool();
+}
+
+bool CWizDocumentWebView::editorCommandExecuteInsertTime()
+{
+    return page()->mainFrame()->evaluateJavaScript("editor.execCommand('time');").toBool();
+}
+
+bool CWizDocumentWebView::editorCommandExecuteRemoveFormat()
+{
+    return page()->mainFrame()->evaluateJavaScript("editor.execCommand('removeFormat');").toBool();
+}
+
+bool CWizDocumentWebView::editorCommandExecuteFormatMatch()
+{
+    return page()->mainFrame()->evaluateJavaScript("editor.execCommand('formatMatch');").toBool();
+}
+
+
+
 
 
 

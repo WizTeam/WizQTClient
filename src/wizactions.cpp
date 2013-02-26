@@ -24,15 +24,26 @@ WIZACTION* CWizActions::actionsData()
     // useless, just for translation
     static WIZACTION arrayRoot[] =
     {
-        {"actionFile", QObject::tr("&File", "")},
-        {"actionTools", QObject::tr("&Tools", "")},
-        {"actionHelp", QObject::tr("&Help", "")},
+        // root
+        {"actionFile", QObject::tr("&File")},
+        {"actionEdit", QObject::tr("&Edit")},
+        {"actionFormat", QObject::tr("For&mat")},
+        {"actionTools", QObject::tr("&Tools")},
+        {"actionHelp", QObject::tr("&Help")},
+
+        // sub
+        {"actionText", QObject::tr("Text")},
+        {"actionList", QObject::tr("List")},
+        {"actionTable", QObject::tr("Table")},
+        {"actionLink", QObject::tr("Link")},
+        {"actionStyle", QObject::tr("Style")}
     };
+
     Q_UNUSED(arrayRoot);
 
     static WIZACTION arrayActions[] =
     {
-        {"actionPreference", QObject::tr("Preference", "")},
+        {"actionPreference", QObject::tr("Preference"), ""},
         {"actionAbout", QObject::tr("About WizNote..."), ""},
         {"actionExit", QObject::tr("Exit"), ""},
         {"actionLogout", QObject::tr("Logout"), ""},
@@ -43,11 +54,36 @@ WIZACTION* CWizActions::actionsData()
         {"actionGoForward", QObject::tr("Forward"), ""},
         {"actionConsole", QObject::tr("Console"), ""},
         {"actionRebuildFTS", QObject::tr("Rebuild full text search index"), ""},
-        {"actionSearch", QObject::tr("Search document"), QObject::tr("Alt+Ctrl+F")},
-        {"actionResetSearch", QObject::tr("Reset search"), QObject::tr("Ctrl+R")},
+        {"actionSearch", QObject::tr("Search document"), "Alt+Ctrl+F"},
+        {"actionResetSearch", QObject::tr("Reset search"), "Ctrl+R"},
         {"actionCategorySwitchPrivate", QObject::tr("Switch to Private Notes"), ""},
         {"actionCategorySwitchTags", QObject::tr("Switch to Tags"), ""},
         {"actionCategorySwitchGroups", QObject::tr("Switch to Groups"), ""},
+
+        // editing
+        {"actionEditingUndo", QObject::tr("Undo"), "Ctrl+Z"},
+        {"actionEditingRedo", QObject::tr("Redo"), "Shift+Ctrl+Z"},
+
+        // format
+        {"actionFormatJustifyLeft", QObject::tr("Justify left"), "Ctrl+["},
+        {"actionFormatJustifyRight", QObject::tr("Justify right"), "Ctrl+]"},
+        {"actionFormatJustifyCenter", QObject::tr("Justify center"), "Ctrl+="},
+        {"actionFormatJustifyJustify", QObject::tr("Justify both side"), ""},
+        {"actionFormatIndent", QObject::tr("Indent"), ""},
+        {"actionFormatOutdent", QObject::tr("Outdent"), ""},
+        {"actionFormatInsertUnorderedList", QObject::tr("Convert to unoredered list"), "Ctrl+Alt+U"},
+        {"actionFormatInsertOrderedList", QObject::tr("Convert to ordered list"), "Ctrl+Alt+O"},
+        {"actionFormatInsertTable", QObject::tr("Insert table"), ""},
+        {"actionFormatInsertLink", QObject::tr("Insert link"), "Ctrl+K"},
+        {"actionFormatBold", QObject::tr("Bold"), "Ctrl+B"},
+        {"actionFormatItalic", QObject::tr("Italic"), "Ctrl+I"},
+        {"actionFormatUnderLine", QObject::tr("Underline"), "Ctrl+U"},
+        {"actionFormatStrikeThrough", QObject::tr("Strike through"), "Ctrl+Alt+K"},
+        {"actionFormatInsertHorizontal", QObject::tr("Insert horizontal"), "Shift+Ctrl+H"},
+        {"actionFormatInsertDate", QObject::tr("Insert date"), "Shift+Ctrl+D"},
+        {"actionFormatInsertTime", QObject::tr("Insert time"), "Shift+Ctrl+Alt+D"},
+        {"actionFormatRemoveFormat", QObject::tr("Remove format"), ""},
+
         {"",                        ""}
     };
 
@@ -68,7 +104,7 @@ QAction* CWizActions::addAction(WIZACTION& action)
     }
 
     if (!strShortcut.isEmpty()) {
-        pAction->setShortcut(QKeySequence(strShortcut));
+        pAction->setShortcut(QKeySequence::fromString(strShortcut));
     }
 
     if (action.strName == "actionAbout")

@@ -146,6 +146,30 @@ public Q_SLOTS:
     void on_actionSearch_triggered();
     void on_actionResetSearch_triggered();
 
+    // menu editing
+    void on_actionEditingUndo_triggered();
+    void on_actionEditingRedo_triggered();
+
+    // menu format
+    void on_actionFormatJustifyLeft_triggered();
+    void on_actionFormatJustifyRight_triggered();
+    void on_actionFormatJustifyCenter_triggered();
+    void on_actionFormatJustifyJustify_triggered();
+    void on_actionFormatIndent_triggered();
+    void on_actionFormatOutdent_triggered();
+    void on_actionFormatInsertOrderedList_triggered();
+    void on_actionFormatInsertUnorderedList_triggered();
+    void on_actionFormatInsertTable_triggered();
+    void on_actionFormatInsertLink_triggered();
+    void on_actionFormatBold_triggered();
+    void on_actionFormatItalic_triggered();
+    void on_actionFormatUnderLine_triggered();
+    void on_actionFormatStrikeThrough_triggered();
+    void on_actionFormatInsertHorizontal_triggered();
+    void on_actionFormatInsertDate_triggered();
+    void on_actionFormatInsertTime_triggered();
+    void on_actionFormatRemoveFormat_triggered();
+
     void on_searchIndexerStarted();
     void on_searchDocumentFind(const CWizDocumentDataArray& arrayDocument);
 

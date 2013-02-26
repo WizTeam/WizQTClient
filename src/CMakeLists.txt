@@ -93,6 +93,7 @@ set(wiznote_SOURCES
     share/wizClucene.cpp
     share/wizSearchIndexer.cpp
     wizSearchBox.cpp
+    wizEditorInsertLinkForm.cpp
 )
 
 set(wiznote_HEADERS
@@ -192,6 +193,7 @@ set(wiznote_HEADERS
     share/wizClucene.h
     share/wizSearchIndexer.h
     wizSearchBox.h
+    wizEditorInsertLinkForm.h
 )
 
 set(wiznote_FORMS
@@ -208,6 +210,7 @@ set(wiznote_FORMS
     ui/wizupgradenotifydialog.ui
     ui/wizusercipherform.ui
     ui/wiznoteinfoform.ui
+    ui/wizEditorInsertLinkForm.ui
 )
 
 set(wiznote_TRANSLATIONS

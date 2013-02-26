@@ -29,10 +29,10 @@ try {
     toolbars:
     [
         [//saveButton, '|', //'Source',
-        'FontFamily', 'FontSize', '|', 'Bold', 'Italic', 'Underline', 'StrikeThrough', '|',
-        'JustifyLeft', 'JustifyCenter', 'JustifyRight', 'JustifyJustify', '|',
-        'Indent', 'Outdent', 'InsertOrderedList', 'InsertUnorderedList', '|',
-        'Link', 'ForeColor', 'BackColor', '|', 'horizontal', 'inserttable', 'formatmatch', 'RemoveFormat']
+        'FontFamily', 'FontSize', '|', 'BackColor', 'ForeColor', 'Bold', 'Italic', 'Underline', '|',
+        'JustifyLeft', 'JustifyCenter', 'JustifyRight', '|',
+        'InsertOrderedList', 'InsertUnorderedList', '|',
+        'horizontal', 'inserttable', 'formatmatch']
     ],
     'fontfamily':[
         { label:'',name:'songti',val:'宋体,SimSun'},
@@ -169,14 +169,11 @@ function isEditing() {
 }
 
 function setEditing(mode) {
-    //if (isEditing()) {
-    //    saveDocument(false);
-    //}
-
     if (m_editingMode == mode) {
         return;
     }
 
+    // hide toolbar
     document.getElementsByClassName("edui-editor-toolbarbox")[0].style.display = mode ? "block" : "none";
     mode ? editor.setEnabled() : editor.setDisabled();
 
@@ -209,45 +206,4 @@ function viewDocument(guid, filename, mode)
         return false;
     }
 }
-
-//function updateDocument(objDocument, html, url, flags)
-//{
-//    try {
-//        return objDocument.UpdateDocument4(html, url, flags);
-//    } catch (err) {
-//        return false;
-//    }
-//}
-//
-//function saveDocument(force)
-//{
-//    try {
-//        if (!force && !m_modified)
-//            return true;
-//        if (!isEditing())
-//            return true;
-//        
-//        var objFolder = objApp.Window.CategoryCtrl.SelectedFolder;
-//        if (objFolder == null) {
-//            objFolder = objDatabase.GetFolderByLocation("/My Notes/", true);
-//        }
-//
-//        var objDocument = objDatabase.DocumentFromGUID(m_currentGUID);
-//        if (objDocument == null || objDocument == "") {
-//            alert("wow, why the guid is null?");
-//            return false;
-//        }
-//        
-//        var html = getEditorHtml();
-//        
-//        objApp.SetSavingDocument(true);
-//        var ret = updateDocument(objDocument, html, m_currentFileName, 0);
-//        objApp.SetSavingDocument(false);
-//        setModified(false);
-//
-//        return ret;
-//    } catch (err) {
-//        alert(err);
-//    }
-//}
 
