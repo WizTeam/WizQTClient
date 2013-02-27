@@ -23,7 +23,7 @@ class CWizDocumentView : public QWidget
 
 public:
     CWizDocumentView(CWizExplorerApp& app, QWidget* parent = 0);
-    virtual QSize sizeHint() const { return QSize(400, 300); }
+    virtual QSize sizeHint() const { return QSize(200, 1); }
 
     CWizDocumentWebView* web() const { return m_web; }
     QWidget* client() const { return m_client; }

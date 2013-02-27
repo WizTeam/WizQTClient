@@ -16,7 +16,7 @@ class CWizCategoryBaseView : public QTreeWidget
 
 public:
     CWizCategoryBaseView(CWizExplorerApp& app, QWidget *parent = 0);
-    virtual QSize sizeHint() const { return QSize(150, 1); }
+    //virtual QSize sizeHint() const { return QSize(150, 1); }
     virtual void init() = 0;
 
     virtual CWizCategoryViewTrashItem* findTrash(const QString& strKbGUID) { Q_UNUSED(strKbGUID); return NULL; }

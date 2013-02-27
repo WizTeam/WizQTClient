@@ -223,6 +223,7 @@ void MainWindow::saveStatus()
 {
     CWizSettings settings(WizGetSettingsFileName());
     settings.setValue("window/geometry", saveGeometry());
+    settings.setValue("window/splitter", m_splitter->saveState());
 }
 
 void MainWindow::restoreStatus()
@@ -230,6 +231,7 @@ void MainWindow::restoreStatus()
     CWizSettings settings(WizGetSettingsFileName());
     QByteArray geometry = settings.value("window/geometry").toByteArray();
 
+    // main window
     if (geometry.isEmpty()) {
         setGeometry(QStyle::alignedRect(Qt::LeftToRight, Qt::AlignCenter, \
                                         sizeHint(), qApp->desktop()->availableGeometry()
@@ -237,6 +239,8 @@ void MainWindow::restoreStatus()
     } else {
         restoreGeometry(geometry);
     }
+
+    m_splitter->restoreState(settings.value("window/splitter").toByteArray());
 }
 
 void MainWindow::initActions()
@@ -404,17 +408,17 @@ void MainWindow::initClient()
     WizInitWidgetMargins(m_settings->skin(), m_doc, "Document");
 #endif
 
-    CWizSplitter *splitter = new CWizSplitter(client);
-    layout->addWidget(splitter);
+    m_splitter = new CWizSplitter(client);
+    layout->addWidget(m_splitter);
 
 #ifndef Q_OS_MAC
     CWizSettings settings(::WizGetSkinResourcePath(m_settings->skin()) + "skin.ini");
 
-    int splitterWidth = settings.GetInt("splitter", "Width", splitter->splitterWidth());
-    splitter->setSplitterWidth(splitterWidth);
+    int splitterWidth = settings.GetInt("splitter", "Width", m_splitter->splitterWidth());
+    m_splitter->setSplitterWidth(splitterWidth);
     QColor defSplitterColor = client->palette().color(QPalette::Window);
     QColor splitterColor = settings.GetColor("splitter", "Color", defSplitterColor);
-    splitter->setSplitterColor(splitterColor);
+    m_splitter->setSplitterColor(splitterColor);
 #endif
 
 //#ifndef Q_OS_MAC
@@ -432,16 +436,14 @@ void MainWindow::initClient()
     m_categoryTags->hide();
     m_categoryGroups->hide();
 
-    splitter->addWidget(m_categoryLayer);
+    m_splitter->addWidget(m_categoryLayer);
 //#endif
 
-    splitter->addWidget(m_documents);
-    splitter->addWidget(m_doc);
-    splitter->setStretchFactor(0, 0);
-    splitter->setStretchFactor(1, 0);
-    splitter->setStretchFactor(2, 1);
-
-    m_splitter = splitter;
+    m_splitter->addWidget(m_documents);
+    m_splitter->addWidget(m_doc);
+    m_splitter->setStretchFactor(0, 0);
+    m_splitter->setStretchFactor(1, 0);
+    m_splitter->setStretchFactor(2, 1);
 
 #ifndef Q_OS_MAC
     //connect(splitter, SIGNAL(splitterMoved(int,int)), this, SLOT(on_client_splitterMoved(int, int)));

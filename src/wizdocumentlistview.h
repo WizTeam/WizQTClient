@@ -16,7 +16,7 @@ class CWizDocumentListView : public QListWidget
 
 public:
     CWizDocumentListView(CWizExplorerApp& app, QWidget *parent = 0);
-    virtual QSize sizeHint() const { return QSize(300, 1); }
+    //virtual QSize sizeHint() const { return QSize(300, 1); }
 
     virtual void contextMenuEvent(QContextMenuEvent* event);
     virtual void mousePressEvent(QMouseEvent* event);
