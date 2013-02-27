@@ -1,5 +1,6 @@
 #include "wizSearchIndexer.h"
 
+#include "wizdef.h"
 #include "html/wizhtmlcollector.h"
 
 #include <QFile>
@@ -60,6 +61,19 @@ bool CWizSearchIndexer::buildFTSIndex()
 
 bool CWizSearchIndexer::buildFTSIndexByDatabase(CWizDatabase& db)
 {
+    int strVersion = db.getDocumentFTSVersion().toInt();
+    if (strVersion == QString(WIZNOTE_FTS_VERSION).toInt()) {
+        return true;
+    }
+
+    // should rebuild all documents
+    if (strVersion < QString(WIZNOTE_FTS_VERSION).toInt() || strVersion > QString(WIZNOTE_FTS_VERSION).toInt()) {
+        if (!db.setAllDocumentsSearchIndexed(false)) {
+            TOLOG1("FATAL: Can't reset document index flag: %1", db.name());
+            return false;
+        }
+    }
+
     CWizDocumentDataArray arrayDocuments;
 
     if (!db.getAllDocumentsNeedToBeSearchIndexed(arrayDocuments))
@@ -74,25 +88,27 @@ bool CWizSearchIndexer::buildFTSIndexByDatabase(CWizDatabase& db)
     bool ret = updateDocuments(arrayDocuments);
 
     if (ret) {
-        db.setDocumentFTSEnabled(true);
+        db.setDocumentFTSVersion(WIZNOTE_FTS_VERSION);
+        //db.setDocumentFTSEnabled(true);
         return true;
     } else {
-        db.setDocumentFTSEnabled(false);
+        db.setDocumentFTSVersion("0");
+        //db.setDocumentFTSEnabled(false);
         return false;
     }
 }
 
-bool CWizSearchIndexer::isFTSEnabled()
-{
-    int total = m_dbMgr.count();
-    for (int i = 0; i < total; i++) {
-        if (!m_dbMgr.at(i).isDocumentFTSEnabled()) {
-            return false;
-        }
-    }
-
-    return true;
-}
+//bool CWizSearchIndexer::isFTSEnabled()
+//{
+//    int total = m_dbMgr.count();
+//    for (int i = 0; i < total; i++) {
+//        if (!m_dbMgr.at(i).isDocumentFTSEnabled()) {
+//            return false;
+//        }
+//    }
+//
+//    return true;
+//}
 
 bool CWizSearchIndexer::rebuildFTSIndex()
 {
@@ -102,7 +118,7 @@ bool CWizSearchIndexer::rebuildFTSIndex()
     }
 
     // reset private db FTS index status
-    if (!m_dbMgr.db().setDocumentFTSEnabled(false)) {
+    if (!m_dbMgr.db().setDocumentFTSVersion("0")) {
         TOLOG1("FATAL: Can't reset db index flag: %1", m_dbMgr.db().name());
         return false;
     }
@@ -115,7 +131,7 @@ bool CWizSearchIndexer::rebuildFTSIndex()
     // reset group db FTS index status
     int total = m_dbMgr.count();
     for (int i = 0; i < total; i++) {
-        if (!m_dbMgr.at(i).setDocumentFTSEnabled(false)) {
+        if (!m_dbMgr.at(i).setDocumentFTSVersion("0")) {
             TOLOG1("FATAL: Can't reset db index flag: %1", m_dbMgr.at(i).name());
             return false;
         }

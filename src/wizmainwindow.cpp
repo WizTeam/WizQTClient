@@ -820,9 +820,9 @@ void MainWindow::on_actionResetSearch_triggered()
 void MainWindow::on_searchIndexerStarted()
 {
     // build FTS index if user use it first time
-    if (!m_searchIndexer->worker()->isFTSEnabled()) {
-       QTimer::singleShot(5 * 1000, m_searchIndexer->worker(), SLOT(buildFTSIndex()));
-    }
+    //if (!m_searchIndexer->worker()->isFTSEnabled()) {
+    QTimer::singleShot(5 * 1000, m_searchIndexer->worker(), SLOT(buildFTSIndex()));
+    //}
 }
 
 void MainWindow::on_searchDocumentFind(const CWizDocumentDataArray& arrayDocument)

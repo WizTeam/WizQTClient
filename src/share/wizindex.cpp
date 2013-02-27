@@ -4284,6 +4284,16 @@ bool CWizIndex::SetDocumentVersion(const CString& strDocumentGUID, __int64 nVers
     return true;
 }
 
+bool CWizIndex::setDocumentFTSVersion(const QString& strVersion)
+{
+    return SetMeta("FTS", "Version", strVersion);
+}
+
+QString CWizIndex::getDocumentFTSVersion()
+{
+    return GetMetaDef("FTS", "Version");
+}
+
 bool CWizIndex::setDocumentFTSEnabled(bool b)
 {
     return SetMeta(_T("FTS"), _T("Enabled"), b ? _T("1") : _T("0"));

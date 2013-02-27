@@ -543,6 +543,8 @@ public:
     bool IsObjectDataDownloaded(const CString& strGUID, const CString& strType);
 
     /* Search related operations */
+    bool setDocumentFTSVersion(const QString& strVersion);
+    QString getDocumentFTSVersion();
     bool setDocumentFTSEnabled(bool b);
     bool isDocumentFTSEnabled();
     bool setAllDocumentsSearchIndexed(bool b);

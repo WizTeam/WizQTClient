@@ -92,12 +92,12 @@ void CWizUpgrade::on_checkUpgrade_finished()
         QFileInfo fi(::WizGetAppFileName());
         QDate dateLocal = fi.created().date();
 
-        if (dateUpgrade > dateLocal) {
+        if (dateUpgrade != dateLocal) {
             TOLOG("INFO: Upgrade is avaliable, version time:" + dateUpgrade.toString());
             Q_EMIT checkFinished(true);
         } else {
             TOLOG("INFO: Local version is up to date");
-            Q_EMIT checkFinished(true);
+            Q_EMIT checkFinished(false);
         }
     } else {
         TOLOG("ERROR: Check upgrade failed");

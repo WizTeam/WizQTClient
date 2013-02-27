@@ -20,7 +20,7 @@ public:
 
 // only call these methods use QMetaObject::invokeMethod
 public Q_SLOTS:
-    bool isFTSEnabled();
+    //bool isFTSEnabled();
     bool buildFTSIndex();
     bool buildFTSIndexByDatabase(CWizDatabase& db);
     bool rebuildFTSIndex();
