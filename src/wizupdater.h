@@ -4,6 +4,8 @@
 #include <QtNetwork>
 #include <QtCore>
 
+#ifdef WIZ_OBOSOLETE
+
 class CWizUpgrade;
 
 enum UpdateError {
@@ -94,5 +96,7 @@ public Q_SLOTS:
     void on_downloadFile_finished();
     void on_request_error(QNetworkReply::NetworkError error);
 };
+
+#endif // WIZ_OBSOLETE
 
 #endif // CWIZUPDATER_H

@@ -11,7 +11,8 @@
 #include "share/wizuihelper.h"
 #include "share/wizsettings.h"
 #include "share/wizsyncthread.h"
-#include "wizupdater.h"
+#include "wizUpgrade.h"
+//#include "wizupdater.h"
 #include "wizconsoledialog.h"
 #include "wizdocumentview.h"
 #include "wizcertmanager.h"
@@ -65,7 +66,8 @@ private:
     QPointer<CWizSyncThread> m_sync;
     QPointer<QTimer> m_syncTimer;
     CWizConsoleDialog* m_console;
-    QPointer<CWizUpgradeThread> m_upgrade;
+    QPointer<CWizUpgrade> m_upgrade;
+    //QPointer<CWizUpgradeThread> m_upgrade;
     QPointer<CWizCertManager> m_certManager;
     QPointer<CWizUserCipherForm> m_cipherForm;
     QPointer<CWizGroupAttributeForm> m_groupAttribute;
@@ -207,7 +209,11 @@ public Q_SLOTS:
 
     void on_quitTimeout();
 
+    void on_checkUpgrade_finished(bool bUpgradeAvaliable);
+
+#ifdef WIZ_OBOSOLETE
     void on_upgradeThread_finished();
+#endif
 
 public:
     // WizExplorerApp pointer

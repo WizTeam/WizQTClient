@@ -31,7 +31,8 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     , m_settings(new CWizUserSettings(dbMgr.db()))
     , m_sync(new CWizSyncThread(*this, this))
     , m_console(new CWizConsoleDialog(*this, this))
-    , m_upgrade(new CWizUpgradeThread(this))
+    , m_upgrade(new CWizUpgrade())
+    //, m_upgrade(new CWizUpgradeThread(this))
     , m_certManager(new CWizCertManager(*this))
     , m_cipherForm(new CWizUserCipherForm(*this, this))
     , m_groupAttribute(new CWizGroupAttributeForm(*this, this))
@@ -67,11 +68,17 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     connect(m_searchIndexer, SIGNAL(documentFind(const CWizDocumentDataArray&)), \
             SLOT(on_searchDocumentFind(const CWizDocumentDataArray&)));
 
+    // upgrade check
+    QThread *thread = new QThread();
+    m_upgrade->moveToThread(thread);
+    connect(m_upgrade, SIGNAL(checkFinished(bool)), SLOT(on_checkUpgrade_finished(bool)));
+    thread->start();
+
     // upgrade check thread
 #ifndef Q_OS_MAC
     // start update check thread
-    QTimer::singleShot(3 * 1000, m_upgrade, SLOT(checkUpgradeBegin()));
-    connect(m_upgrade, SIGNAL(finished()), SLOT(on_upgradeThread_finished()));
+    //QTimer::singleShot(3 * 1000, m_upgrade, SLOT(checkUpgradeBegin()));
+    //connect(m_upgrade, SIGNAL(finished()), SLOT(on_upgradeThread_finished()));
 #endif // Q_OS_MAC
 
     // syncing thread
@@ -118,10 +125,10 @@ bool MainWindow::requestThreadsQuit()
         bOk = false;
     }
 
-    if (m_upgrade->isRunning()) {
-        m_upgrade->abort();
-        bOk = false;
-    }
+    //if (m_upgrade->isRunning()) {
+    //    m_upgrade->abort();
+    //    bOk = false;
+    //}
 
     if (m_searchIndexer->isRunning()) {
         m_searchIndexer->quit();
@@ -189,6 +196,26 @@ void MainWindow::on_actionExit_triggered()
     m_timerQuit.start();
 }
 
+void MainWindow::on_checkUpgrade_finished(bool bUpgradeAvaliable)
+{
+    if (!bUpgradeAvaliable)
+        return;
+
+    QString strUrl = m_upgrade->getWhatsNewUrl();
+    CWizUpgradeNotifyDialog notifyDialog(strUrl, this);
+    if (QDialog::Accepted == notifyDialog.exec()) {
+#if defined(Q_OS_MAC)
+        QUrl url("http://www.wiz.cn/wiznote-mac.html");
+#elif defined(Q_OS_LINUX)
+        QUrl url("http://www.wiz.cn/wiznote-linux.html");
+#else
+        Q_ASSERT(0);
+#endif
+        QDesktopServices::openUrl(url);
+    }
+}
+
+#ifdef WIZ_OBOSOLETE
 void MainWindow::on_upgradeThread_finished()
 {
     QString strUrl = m_upgrade->whatsNewUrl();
@@ -213,6 +240,7 @@ void MainWindow::on_upgradeThread_finished()
         file.close();
     }
 }
+#endif
 
 MainWindow::~MainWindow()
 {

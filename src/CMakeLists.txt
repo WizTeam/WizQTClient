@@ -94,6 +94,7 @@ set(wiznote_SOURCES
     share/wizSearchIndexer.cpp
     wizSearchBox.cpp
     wizEditorInsertLinkForm.cpp
+    wizUpgrade.cpp
 )
 
 set(wiznote_HEADERS
@@ -194,6 +195,7 @@ set(wiznote_HEADERS
     share/wizSearchIndexer.h
     wizSearchBox.h
     wizEditorInsertLinkForm.h
+    wizUpgrade.h
 )
 
 set(wiznote_FORMS

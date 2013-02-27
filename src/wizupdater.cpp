@@ -1,5 +1,7 @@
 #include "wizupdater.h"
 
+#ifdef WIZ_OBOSOLETE
+
 #include "wizdef.h"
 #include "share/wizmisc.h"
 #include "share/wizsettings.h"
@@ -420,3 +422,5 @@ void CWizUpgrade::moveToEnd()
         m_downloadQueue.swap(0, m_downloadQueue.count() - 1);
     }
 }
+
+#endif // WIZ_OBOSOLETE
