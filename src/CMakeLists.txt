@@ -198,6 +198,55 @@ set(wiznote_HEADERS
     wizUpgrade.h
 )
 
+set(wiznote_WRAP_HEADERS
+    newtagdialog.h
+    wizaboutdialog.h
+    zip/quazipfile.h
+    share/wizanimateaction.h
+    share/wizapi.h
+    wizattachmentlistwidget.h
+    wizcategoryview.h
+    wizcertmanager.h
+    share/wizcommonui.h
+    wizconsoledialog.h
+    share/wizcreateaccount.h
+    wizcreateaccountdialog.h
+    share/wizDatabase.h
+    share/wizDatabaseManager.h
+    wizdocumentlistview.h
+    wizdocumentview.h
+    wizdocumentwebview.h
+    share/wizdownloadobjectdata.h
+    wizdownloadobjectdatadialog.h
+    wizEditorInsertLinkForm.h
+    wizGroupAttributeForm.h
+    share/wizindex.h
+    share/wizKbSync.h
+    wizmainwindow.h
+    share/wizmisc.h
+    wizNewDialog.h
+    wiznoteinfoform.h
+    share/wizpopupwidget.h
+    wizpreferencedialog.h
+    wizproxydialog.h
+    wizSearchBox.h
+    share/wizSearchIndexer.h
+    wizstatusbar.h
+    share/wizSync.h
+    share/wizsyncthread.h
+    wiztaglistwidget.h
+    share/wizThumbIndexCache.h
+    wizupdater.h
+    wizupdaterprogressdialog.h
+    wizUpgrade.h
+    wizupgradenotifydialog.h
+    wizusercipherform.h
+    share/wizverifyaccount.h
+    wizwelcomedialog.h
+    share/wizXmlRpcServer.h
+    share/wizziwreader.h
+)
+
 set(wiznote_FORMS
     ui/wizNewDialog.ui
     ui/newtagdialog.ui
@@ -235,6 +284,8 @@ message("Wiznote whill compiling as ${CMAKE_BUILD_TYPE}")
 find_package(Qt4 REQUIRED QtCore QtGui QtXml QtNetwork QtWebKit)
 include(${QT_USE_FILE})
 
+message("Compile with Qt: ${QT_VERSION_MAJOR}.${QT_VERSION_MINOR}.${QT_VERSION_PATCH}. Location: ${QT_BINARY_DIR}")
+
 # dynamically create ts files
 qt4_add_translation(wiznote_QM ${wiznote_TRANSLATIONS})
 # we should copy qt internal qm files, otherwise qt can't translate some internal resources
@@ -243,6 +294,13 @@ file(GLOB _QT_INTERNAL_TRANSLATIONS ${QT_TRANSLATIONS_DIR}/qt_*.qm)
 
 # uic
 qt4_wrap_ui(wiznote_FORM_HEADERS ${wiznote_FORMS})
+
+# moc, automoc feature is not exist if cmake version <= 2.8.4
+if(UNIX)
+    if(NOT APPLE)
+        qt4_wrap_cpp(wiznote_MOC_HEADERS ${wiznote_WRAP_HEADERS})
+    endif()
+endif()
 
 # cmake will autogen zconf.h at BINARY_DIR
 #include_directories(${testcmake_SOURCE_DIR}/zlib ${testcmake_BINARY_DIR}/zlib)
@@ -295,12 +353,12 @@ if(UNIX)
         endif()
 
     elseif(NOT APPLE)
-        add_executable(${PROJECT_NAME} ${wiznote_SOURCES} ${wiznote_FORM_HEADERS} ${wiznote_QM})
+        add_executable(${PROJECT_NAME} ${wiznote_SOURCES} ${wiznote_MOC_HEADERS} ${wiznote_FORM_HEADERS} ${wiznote_QM})
         #set_target_properties(${PROJECT_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build)
 
         # always build rpath
         set_target_properties(${PROJECT_NAME} PROPERTIES BUILD_WITH_INSTALL_RPATH TRUE)
-        set_target_properties(${PROJECT_NAME} PROPERTIES INSTALL_RPATH "\$ORIGIN/lib")
+        set_target_properties(${PROJECT_NAME} PROPERTIES INSTALL_RPATH "\$ORIGIN/../lib")
 
         install(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION bin)
         install(DIRECTORY ${CMAKE_SOURCE_DIR}/share/ DESTINATION share PATTERN ".DS_Store" EXCLUDE)
@@ -314,28 +372,27 @@ if(UNIX)
         install(FILES ${CMAKE_SOURCE_DIR}/share/wiznote/skins/wiznote128.png DESTINATION share/icons/hicolor/128x128/apps RENAME wiznote.png)
         install(FILES ${CMAKE_SOURCE_DIR}/share/wiznote/skins/wiznote256.png DESTINATION share/icons/hicolor/256x256/apps RENAME wiznote.png)
 
-        # debug purpose
-        if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-            add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-                COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/share/ ${CMAKE_BINARY_DIR}/share)
-	    foreach(_file ${wiznote_QM})
-                add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-                    COMMAND ${CMAKE_COMMAND} -E copy ${_file} ${CMAKE_BINARY_DIR}/share/wiznote/languages/)
-            endforeach()
-        endif()
+        add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/share/ ${CMAKE_BINARY_DIR}/share)
 
-        #if(CMAKE_BUILD_TYPE STREQUAL "Release")
-        #    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-        #        COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/build/lib/
-        #        COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/build/plugins/
-        #        COMMAND ${CMAKE_COMMAND} -E copy ${QT_LIBRARY_DIR}/libQtCore.so.4 ${CMAKE_BINARY_DIR}/build/lib/
-        #        COMMAND ${CMAKE_COMMAND} -E copy ${QT_LIBRARY_DIR}/libQtGui.so.4 ${CMAKE_BINARY_DIR}/build/lib/
-        #        COMMAND ${CMAKE_COMMAND} -E copy ${QT_LIBRARY_DIR}/libQtNetwork.so.4 ${CMAKE_BINARY_DIR}/build/lib/
-        #        COMMAND ${CMAKE_COMMAND} -E copy ${QT_LIBRARY_DIR}/libQtWebKit.so.4 ${CMAKE_BINARY_DIR}/build/lib/
-        #        COMMAND ${CMAKE_COMMAND} -E copy ${QT_LIBRARY_DIR}/libQtXml.so.4 ${CMAKE_BINARY_DIR}/build/lib/
-        #        COMMAND ${CMAKE_COMMAND} -E copy_directory ${QT_PLUGINS_DIR} ${CMAKE_BINARY_DIR}/build/plugins/
-        #    )
-        #endif()
+        foreach(_file ${wiznote_QM})
+            add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+                COMMAND ${CMAKE_COMMAND} -E copy ${_file} ${CMAKE_BINARY_DIR}/share/wiznote/languages/)
+        endforeach()
+
+        if(CMAKE_BUILD_TYPE STREQUAL "Release")
+            add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+                COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/lib/
+                COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/plugins/
+                COMMAND ${CMAKE_COMMAND} -E copy ${QT_LIBRARY_DIR}/libQtCore.so.4 ${CMAKE_BINARY_DIR}/lib/
+                COMMAND ${CMAKE_COMMAND} -E copy ${QT_LIBRARY_DIR}/libQtGui.so.4 ${CMAKE_BINARY_DIR}/lib/
+                COMMAND ${CMAKE_COMMAND} -E copy ${QT_LIBRARY_DIR}/libQtNetwork.so.4 ${CMAKE_BINARY_DIR}/lib/
+                COMMAND ${CMAKE_COMMAND} -E copy ${QT_LIBRARY_DIR}/libQtWebKit.so.4 ${CMAKE_BINARY_DIR}/lib/
+                COMMAND ${CMAKE_COMMAND} -E copy ${QT_LIBRARY_DIR}/libQtXml.so.4 ${CMAKE_BINARY_DIR}/lib/
+                COMMAND ${CMAKE_COMMAND} -E copy ${QT_LIBRARY_DIR}/libQtXmlPatterns.so.4 ${CMAKE_BINARY_DIR}/lib/
+                COMMAND ${CMAKE_COMMAND} -E copy_directory ${QT_PLUGINS_DIR} ${CMAKE_BINARY_DIR}/plugins/
+            )
+        endif()
 
     endif()
 endif()

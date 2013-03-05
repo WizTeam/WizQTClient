@@ -25,6 +25,7 @@ int main(int argc, char *argv[])
     QApplication::addLibraryPath(dir.absolutePath());
 #elif defined Q_OS_LINUX
     QDir dir(QApplication::applicationDirPath());
+    dir.cdUp();
     dir.cd("plugins");
     QApplication::addLibraryPath(dir.absolutePath());
 #endif
