@@ -397,17 +397,18 @@ if(UNIX)
     endif()
 endif()
 
+# bug fix: not use automoc for cmake 2.8.4 backward compatibility.
 # moc, platform specific argument should be passed to moc
-if(UNIX)
-    if(APPLE)
-        set_target_properties(${PROJECT_NAME} PROPERTIES AUTOMOC_MOC_OPTIONS "-DQ_OS_MAC")
-    elseif(NOT APPLE)
-        set_target_properties(${PROJECT_NAME} PROPERTIES AUTOMOC_MOC_OPTIONS "-DQ_OS_LINUX")
-    endif()
-elseif(WIN32)
-    set_target_properties(${PROJECT_NAME} PROPERTIES AUTOMOC_MOC_OPTIONS "-DQ_OS_WIN32")
-endif()
-set_target_properties(${PROJECT_NAME} PROPERTIES AUTOMOC true)
+#if(UNIX)
+#    if(APPLE)
+#        set_target_properties(${PROJECT_NAME} PROPERTIES AUTOMOC_MOC_OPTIONS "-DQ_OS_MAC")
+#    elseif(NOT APPLE)
+#        set_target_properties(${PROJECT_NAME} PROPERTIES AUTOMOC_MOC_OPTIONS "-DQ_OS_LINUX")
+#    endif()
+#elseif(WIN32)
+#    set_target_properties(${PROJECT_NAME} PROPERTIES AUTOMOC_MOC_OPTIONS "-DQ_OS_WIN32")
+#endif()
+#set_target_properties(${PROJECT_NAME} PROPERTIES AUTOMOC true)
 
 #${clucene_SOURCE_DIR}/src/shared
 #${clucene_BINARY_DIR}/src/shared
