@@ -90,6 +90,7 @@ private:
     QPointer<QMenu> m_menuAllFolders;
     QPointer<QMenu> m_menuFolder;
     QPointer<CWizNewDialog> m_MsgNewFolder;
+    QPointer<CWizNewDialog> m_MsgRenameFolder;
     QPointer<QMessageBox> m_MsgWarning;
 
 public:
@@ -108,6 +109,8 @@ public Q_SLOTS:
     void on_action_newDocument();
     void on_action_newFolder();
     void on_action_newFolder_confirmed(int result);
+    void on_action_renameFolder();
+    void on_action_renameFolder_confirmed(int result);
     void on_action_deleteFolder();
     void on_action_deleteFolder_confirmed();
 

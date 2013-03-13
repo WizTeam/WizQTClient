@@ -324,6 +324,7 @@ void CWizCategoryBaseView::on_action_emptyTrash()
 
 #define WIZACTION_PRIVATE_NEW_DOCUMENT    QObject::tr("Create new document")
 #define WIZACTION_PRIVATE_NEW_FOLDER      QObject::tr("Create new folder")
+#define WIZACTION_PRIVATE_RENAME_FOLDER   QObject::tr("Rename current folder")
 #define WIZACTION_PRIVATE_DELETE_FOLDER   QObject::tr("Delete current folder")
 
 CWizCategoryView::CWizCategoryView(CWizExplorerApp& app, QWidget* parent)
@@ -356,6 +357,7 @@ CWizCategoryView::CWizCategoryView(CWizExplorerApp& app, QWidget* parent)
     m_menuFolder->addAction(WIZACTION_PRIVATE_NEW_DOCUMENT, this, SLOT(on_action_newDocument()));
     m_menuFolder->addAction(WIZACTION_PRIVATE_NEW_FOLDER, this, SLOT(on_action_newFolder()));
     m_menuFolder->addSeparator();
+    m_menuFolder->addAction(WIZACTION_PRIVATE_RENAME_FOLDER, this, SLOT(on_action_renameFolder()));
     m_menuFolder->addAction(WIZACTION_PRIVATE_DELETE_FOLDER, this, SLOT(on_action_deleteFolder()));
 
 
@@ -634,6 +636,51 @@ void CWizCategoryView::on_action_newFolder_confirmed(int result)
 
     addAndSelectFolder(strLocation);
     m_dbMgr.db().AddExtraFolder(strLocation);
+}
+
+void CWizCategoryView::on_action_renameFolder()
+{
+    // not allowed change predefined location name
+    //if (CWizCategoryViewFolderItem* p = currentCategoryItem<CWizCategoryViewFolderItem>()) {
+    //    if (::WizIsPredefinedLocation(p->location())) {
+    //        return;
+    //    }
+    //}
+
+    if (!m_MsgRenameFolder) {
+        m_MsgRenameFolder = new CWizNewDialog(tr("Please input new folder name: "), this);
+        connect(m_MsgRenameFolder, SIGNAL(finished(int)), SLOT(on_action_renameFolder_confirmed(int)));
+    }
+
+    m_MsgRenameFolder->clear();
+    m_MsgRenameFolder->open();
+}
+
+void CWizCategoryView::on_action_renameFolder_confirmed(int result)
+{
+    if (result != QDialog::Accepted) {
+        return;
+    }
+
+    CString strFolderName = m_MsgRenameFolder->input();
+    if (strFolderName.isEmpty()) {
+        return;
+    }
+
+    WizMakeValidFileNameNoPath(strFolderName);
+
+    QString strLocation;
+    if (CWizCategoryViewFolderItem* p = currentCategoryItem<CWizCategoryViewFolderItem>()) {
+        QString strOldLocation = p->location();
+        int n = strOldLocation.lastIndexOf("/", -2);
+        strLocation = strOldLocation.left(n + 1) + strFolderName + "/";
+
+        // move all documents to new folder
+        CWizFolder folder(m_dbMgr.db(), strOldLocation);
+        folder.MoveToLocation(strLocation);
+        addAndSelectFolder(strLocation);
+        on_folder_deleted(strOldLocation);
+    }
 }
 
 void CWizCategoryView::on_action_deleteFolder()

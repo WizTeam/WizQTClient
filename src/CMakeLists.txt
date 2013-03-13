@@ -297,9 +297,13 @@ qt4_wrap_ui(wiznote_FORM_HEADERS ${wiznote_FORMS})
 
 # moc, automoc feature is not exist if cmake version <= 2.8.4
 if(UNIX)
-    if(NOT APPLE)
-        qt4_wrap_cpp(wiznote_MOC_HEADERS ${wiznote_WRAP_HEADERS})
+    if(APPLE)
+        qt4_wrap_cpp(wiznote_MOC_HEADERS ${wiznote_WRAP_HEADERS} OPTIONS "-DQ_OS_MAC")
+    elseif(NOT APPLE)
+        qt4_wrap_cpp(wiznote_MOC_HEADERS ${wiznote_WRAP_HEADERS} OPTIONS "-DQ_OS_LINUX")
     endif()
+elseif(WIN32)
+    qt4_wrap_cpp(wiznote_MOC_HEADERS ${wiznote_WRAP_HEADERS} OPTIONS "-DQ_OS_WIN32")
 endif()
 
 # cmake will autogen zconf.h at BINARY_DIR
@@ -309,7 +313,7 @@ endif()
 # build
 if(UNIX)
     if(APPLE)
-        add_executable(${PROJECT_NAME} MACOSX_BUNDLE ${wiznote_SOURCES} ${wiznote_FORM_HEADERS} ${wiznote_QM})
+        add_executable(${PROJECT_NAME} MACOSX_BUNDLE ${wiznote_SOURCES} ${wiznote_MOC_HEADERS} ${wiznote_FORM_HEADERS} ${wiznote_QM})
         set_target_properties(${PROJECT_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bundle)
 
         # this should be issue of cmake, refer: http://public.kitware.com/Bug/bug_revision_view_page.php?rev_id=958

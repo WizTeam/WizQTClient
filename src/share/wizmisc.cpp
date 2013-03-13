@@ -443,6 +443,31 @@ QString WizGetTranslatedLocaleDisplayName(int index)
     }
 }
 
+bool WizIsPredefinedLocation(const QString& strLocation)
+{
+    if (strLocation == "/My Notes/") {
+        return true;
+    } else if (strLocation == "/My Journals/") {
+        return true;
+    } else if (strLocation == "/My Events/") {
+        return true;
+    } else if (strLocation == "/My Sticky Notes/") {
+        return true;
+    } else if (strLocation == "/My Emails/") {
+        return true;
+    } else if (strLocation == "/My Drafts/") {
+        return true;
+    } else if (strLocation == "/My Tasks/") {
+        return true;
+    } else if (strLocation == "/My Tasks/Inbox/") {
+        return true;
+    } else if (strLocation == "/My Tasks/Completed/") {
+        return true;
+    }
+
+    return false;
+}
+
 QString WizGetLogFileName()
 {
     //QString strLogFileName = WizGetDataStorePath() + "wiznote.log";

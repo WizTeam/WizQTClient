@@ -242,12 +242,13 @@ bool CWizFolder::CanMove(const CString& strSrcLocation, const CString& strDestLo
 {
     if (m_db.GetDeletedItemsLocation() == strSrcLocation)
         return false;
-    //
+
     if (strDestLocation.startsWith(strSrcLocation))
         return false;
-    //
+
     return true;
 }
+
 bool CWizFolder::CanMove(CWizFolder* pSrc, CWizFolder* pDest) const
 {
     return CanMove(pSrc->Location(), pDest->Location());
@@ -255,53 +256,51 @@ bool CWizFolder::CanMove(CWizFolder* pSrc, CWizFolder* pDest) const
 
 void CWizFolder::MoveToLocation(const CString& strDestLocation)
 {
+    Q_ASSERT(strDestLocation.right(1) == "/");
+    Q_ASSERT(strDestLocation.left(1) == "/");
+
     if (!CanMove(Location(), strDestLocation))
         return;
-    //
+
     CString strOldLocation = Location();
-    CString strNewLocation;
-    //
-    CString strLocationName = CWizDatabase::GetLocationName(strOldLocation);
-    //
-    if (strDestLocation.IsEmpty())
-    {
-        strNewLocation = "/" + strLocationName + "/";
-    }
-    else
-    {
-        strNewLocation = strDestLocation + strLocationName + "/";
-    }
-    //
+    //CString strNewLocation;
+//
+    //CString strLocationName = CWizDatabase::GetLocationName(strOldLocation);
+//
+    //if (strDestLocation.IsEmpty()) {
+    //    strNewLocation = "/" + strLocationName + "/";
+    //} else {
+    //    strNewLocation = strDestLocation + strLocationName + "/";
+    //}
+
     CWizDocumentDataArray arrayDocument;
     if (!m_db.GetDocumentsByLocationIncludeSubFolders(strOldLocation, arrayDocument))
     {
         TOLOG1(_T("Failed to get documents by location (include sub folders): %1"), strOldLocation);
         return;
     }
-    //
-    for (CWizDocumentDataArray::const_iterator it = arrayDocument.begin();
-        it != arrayDocument.end();
-        it++)
+
+    CWizDocumentDataArray::const_iterator it;
+    for (it = arrayDocument.begin(); it != arrayDocument.end(); it++)
     {
         WIZDOCUMENTDATA data = *it;
-        //
-        ATLASSERT(data.strLocation.startsWith(strOldLocation));
-        if (!data.strLocation.startsWith(strOldLocation))
-        {
+
+        Q_ASSERT(data.strLocation.startsWith(strOldLocation));
+        if (!data.strLocation.startsWith(strOldLocation)) {
             TOLOG(_T("Error location of document!"));
             continue;
         }
-        //
+
         data.strLocation.Delete(0, strOldLocation.GetLength());
-        data.strLocation.Insert(0, strNewLocation);
-        //
+        data.strLocation.Insert(0, strDestLocation);
+
         if (!m_db.ModifyDocumentInfo(data))
         {
             TOLOG(_T("Failed to move document to new folder!"));
             continue;
         }
     }
-    //
+
     m_db.LogDeletedFolder(strOldLocation);
 }
 
