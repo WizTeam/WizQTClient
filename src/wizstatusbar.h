@@ -9,22 +9,19 @@
 
 #include "wizdef.h"
 
-class CWizStatusBar : public QStatusBar
+class CWizStatusBar : public QLabel
 {
     Q_OBJECT
 
 public:
     explicit CWizStatusBar(CWizExplorerApp& app, QWidget *parent = 0);
 
-    void setText(const QString& text);
-
-//protected:
-//    virtual void paintEvent(QPaintEvent* event);
+    void autoShow(const QString& strMsg);
 
 private:
     CWizExplorerApp& m_app;
-
     QLabel m_label;
+    QTimer m_timer;
 };
 
 #endif // WIZSTATUSBAR_H

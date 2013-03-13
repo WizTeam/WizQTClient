@@ -97,7 +97,7 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     connect(m_sync, SIGNAL(processErrorLog(const QString&)), SLOT(on_syncProcessErrorLog(const QString&)));
     connect(m_sync, SIGNAL(syncDone(bool)), SLOT(on_syncDone(bool)));
 
-    setStatusBar(m_statusBar);
+    //setStatusBar(m_statusBar);
 
     initActions();
     initMenuBar();
@@ -553,7 +553,7 @@ void MainWindow::on_syncProcessLog(const QString& msg)
     TOLOG(msg);
 
     QString strMsg = msg.left(50) + "..";
-    m_statusBar->setText(strMsg);
+    m_statusBar->autoShow(strMsg);
 }
 
 void MainWindow::on_syncProcessDebugLog(const QString& strMsg)
@@ -1245,7 +1245,7 @@ void MainWindow::SetSavingDocument(bool saving)
     if (saving)
     {
         m_statusBar->setVisible(true);
-        m_statusBar->setText(tr("Saving note..."));
+        m_statusBar->autoShow(tr("Saving note..."));
         qApp->processEvents(QEventLoop::AllEvents);
     }
     else
