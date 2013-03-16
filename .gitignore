@@ -1,4 +1,7 @@
 *.swp
 .DS_Store
+/build
 tags
 CMakeLists.txt.user*
+
+!/build/windows
