@@ -21,7 +21,7 @@ usage() {
 scm_only=false
 srctree=.
 if test "$1" = "--clean"; then
-	rm -r $src
+	rm -f $src
 	exit
 fi
 if test "$1" = "--save-scmversion"; then
