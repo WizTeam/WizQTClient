@@ -121,3 +121,4 @@ src/ui_wizwelcomedialog.h
 src/wiznote_zh_CN.qm
 src/wiznote_zh_TW.qm
 src/zip/moc_quazipfile.cxx
+src/wizdef_local.h

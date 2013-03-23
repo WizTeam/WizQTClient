@@ -357,6 +357,10 @@ if(UNIX)
         endif()
 
     elseif(NOT APPLE)
+        add_custom_target(local_version_header ALL DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/wizdef_local.h)
+        add_custom_command(OUTPUT wizdef_local.h
+            COMMAND ${CMAKE_SOURCE_DIR}/scripts/setlocalversion --save-scmversion)
+
         add_executable(${PROJECT_NAME} ${wiznote_SOURCES} ${wiznote_MOC_HEADERS} ${wiznote_FORM_HEADERS} ${wiznote_QM})
         #set_target_properties(${PROJECT_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build)
 
