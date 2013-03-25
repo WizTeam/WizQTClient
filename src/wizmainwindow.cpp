@@ -104,8 +104,46 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     initToolBar();
     initClient();
 
+    // system tray
+    this->systemTray=new QSystemTrayIcon();
+    this->systemTray->setIcon(QIcon(WizGetResourcesPath() + "skins/wiznote32.png"));
+    this->systemTray->show();
+    QMenu *menu = new QMenu;
+    QAction *close, *logcat;
+    logcat = menu->addAction(QIcon(WizGetResourcesPath()+"skins/logout.png"), tr("Logout"), this, SLOT(on_actionLogout_triggered()));
+    logcat->setData(QString("logcat"));
+    close = menu->addAction(QIcon(WizGetResourcesPath()+"skins/exit.png"), tr("Exit"), this, SLOT(close()));
+    close->setData(QString("exit"));
+    this->systemTray->setContextMenu(menu);
+    connect(this->systemTray, SIGNAL(activated(QSystemTrayIcon::ActivationReason)), this, SLOT(systemTrayActivated(QSystemTrayIcon::ActivationReason)));
+
     setWindowTitle(tr("WizNote"));
     restoreStatus();
+}
+
+void MainWindow::systemTrayActivated(QSystemTrayIcon::ActivationReason activationReason)
+{
+    switch(activationReason)
+    {
+    case QSystemTrayIcon::Unknown:
+        break;
+    case QSystemTrayIcon::Context: //right click
+        break;
+    case QSystemTrayIcon::DoubleClick:
+        break;
+    case QSystemTrayIcon::Trigger: //left click
+        if (this->isVisible())
+            this->hide();
+        else
+        {
+            this->show();
+            this->setWindowState(this->windowState() & (~Qt::WindowMinimized | Qt::WindowActive));
+            this->activateWindow();
+        }
+        break;
+    case QSystemTrayIcon::MiddleClick:
+        break;
+    }
 }
 
 void MainWindow::showEvent(QShowEvent* event)

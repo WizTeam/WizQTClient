@@ -75,6 +75,7 @@ private:
     QToolBar* m_toolBar;
     QMenuBar* m_menuBar;
     CWizStatusBar* m_statusBar;
+    QSystemTrayIcon *systemTray;
 
 #ifndef Q_OS_MAC
     QLabel* m_labelNotice;
@@ -147,6 +148,7 @@ public Q_SLOTS:
     void on_actionRebuildFTS_triggered();
     void on_actionSearch_triggered();
     void on_actionResetSearch_triggered();
+    void systemTrayActivated(QSystemTrayIcon::ActivationReason);
 
     // menu editing
     void on_actionEditingUndo_triggered();
