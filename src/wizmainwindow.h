@@ -57,6 +57,7 @@ public:
     bool isLogout() const { return m_bLogoutRestart; }
 
 protected:
+    virtual void changeEvent(QEvent *event);
     virtual void showEvent(QShowEvent* event);
     virtual void closeEvent(QCloseEvent* event);
 
