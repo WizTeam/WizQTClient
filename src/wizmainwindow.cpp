@@ -104,8 +104,47 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     initToolBar();
     initClient();
 
+    // system tray
+    this->systemTray=new QSystemTrayIcon();
+    this->systemTray->setIcon(QIcon(WizGetResourcesPath() + "skins/wiznote32.png"));
+    this->systemTray->show();
+    QMenu *menu = new QMenu;
+    QAction *close, *logcat;
+    logcat = menu->addAction(QIcon(WizGetResourcesPath()+"skins/logout.png"), tr("Logout"), this, SLOT(on_actionLogout_triggered()));
+    logcat->setData(QString("logcat"));
+    close = menu->addAction(QIcon(WizGetResourcesPath()+"skins/exit.png"), tr("Exit"), this, SLOT(on_actionExit_triggered()));
+    close->setData(QString("exit"));
+    this->systemTray->setContextMenu(menu);
+    connect(this->systemTray, SIGNAL(activated(QSystemTrayIcon::ActivationReason)), this, SLOT(systemTrayActivated(QSystemTrayIcon::ActivationReason)));
+
     setWindowTitle(tr("WizNote"));
     restoreStatus();
+}
+
+void MainWindow::systemTrayActivated(QSystemTrayIcon::ActivationReason activationReason)
+{
+    switch(activationReason)
+    {
+    case QSystemTrayIcon::Unknown:
+        break;
+    case QSystemTrayIcon::Context: //right click
+        break;
+    case QSystemTrayIcon::DoubleClick:
+        break;
+    case QSystemTrayIcon::Trigger: //left click
+        if (this->isVisible())
+            this->hide();
+        else
+        {
+            this->show();
+            this->setWindowState(this->windowState() & (~Qt::WindowMinimized | Qt::WindowActive));
+            this->setFocus();
+            this->activateWindow();
+        }
+        break;
+    case QSystemTrayIcon::MiddleClick:
+        break;
+    }
 }
 
 void MainWindow::showEvent(QShowEvent* event)
@@ -152,39 +191,53 @@ void MainWindow::on_quitTimeout()
     }
 }
 
+void MainWindow::changeEvent(QEvent *event)
+{
+    if(event->type() == QEvent::WindowStateChange && this->isMinimized())
+    {
+        hide();
+    }
+}
+
 void MainWindow::closeEvent(QCloseEvent* event)
 {
     // internal close event
-    if (m_bRequestQuit) {
-        if (m_bReadyQuit) {
-            event->accept();
-            return;
-        } else {
-            event->ignore();
-            hide();
-            m_timerQuit.start();
-            return;
-        }
+    if (this->isVisible())
+    {
+        hide();
+        event->ignore();
     }
 
-    // system close event
-    if (isActiveWindow()) {
-        // This is bug of Qt!
-        // use hide() directly lead window can't be shown when click dock icon
-        // call native API instead
-#ifdef Q_OS_MAC
-        ProcessSerialNumber pn;
-        GetFrontProcess(&pn);
-        ShowHideProcess(&pn,false);
-#else
-        // just quit on linux
-        on_actionExit_triggered();
-#endif
-    } else {
-        on_actionExit_triggered();
-    }
+//    if (m_bRequestQuit) {
+//        if (m_bReadyQuit) {
+//            event->accept();
+//            return;
+//        } else {
+//            event->ignore();
+//            hide();
+//            m_timerQuit.start();
+//            return;
+//        }
+//    }
 
-    event->ignore();
+//    // system close event
+//    if (isActiveWindow()) {
+//        // This is bug of Qt!
+//        // use hide() directly lead window can't be shown when click dock icon
+//        // call native API instead
+//#ifdef Q_OS_MAC
+//        ProcessSerialNumber pn;
+//        GetFrontProcess(&pn);
+//        ShowHideProcess(&pn,false);
+//#else
+//        // just quit on linux
+//        on_actionExit_triggered();
+//#endif
+//    } else {
+//        on_actionExit_triggered();
+//    }
+
+//    event->ignore();
 }
 
 void MainWindow::on_actionExit_triggered()

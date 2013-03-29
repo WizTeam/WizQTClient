@@ -33,8 +33,8 @@ OBJECTIVE_SOURCES += \
     #mac/wizmachelper.mm \
     #mac/wizmacicon.mm
 
-TRANSLATIONS = wiznote_zh_CN.ts \
-    wiznote_zh_TW.ts
+TRANSLATIONS = ../i18n/wiznote_zh_CN.ts \
+    ../i18n/wiznote_zh_TW.ts
 
 RESOURCES += \
     wiznote.qrc

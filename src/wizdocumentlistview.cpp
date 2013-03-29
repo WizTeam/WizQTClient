@@ -26,7 +26,8 @@ public:
         : QListWidgetItem(view, type)
         , m_data(data)
     {
-        setText(m_data.strTitle);
+    	setTextAlignment(Qt::AlignJustify);
+        setText(m_data.strGUID);
     }
 
     const WIZDOCUMENTDATA& document() const

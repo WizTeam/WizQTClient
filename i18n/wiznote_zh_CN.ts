@@ -249,29 +249,29 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../src/wizcategorymodel.cpp" line="393"/>
         <source>Name</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../src/wizcategorymodel.cpp" line="394"/>
         <source>Size</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../src/wizcategorymodel.cpp" line="397"/>
         <source>Kind</source>
         <comment>Match OS X Finder</comment>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../src/wizcategorymodel.cpp" line="399"/>
         <source>Type</source>
         <comment>All other platforms</comment>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../src/wizcategorymodel.cpp" line="405"/>
         <source>Date Modified</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
 </context>
 <context>
@@ -680,7 +680,7 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../src/ui/wiznoteinfoform.ui" line="14"/>
         <source>Form</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../src/ui/wiznoteinfoform.ui" line="55"/>
@@ -1180,7 +1180,7 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../src/ui/wizupgradenotifydialog.ui" line="27"/>
         <source>about:blank</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../src/ui/wizupgradenotifydialog.ui" line="41"/>
@@ -1216,7 +1216,7 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../src/ui/wizusercipherform.ui" line="14"/>
         <source>Form</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../src/ui/wizusercipherform.ui" line="26"/>
@@ -1285,7 +1285,7 @@ p, li { white-space: pre-wrap; }
         <translation type="obsolete">稍等片刻，保存一下进度...</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="107"/>
+        <location filename="../src/wizmainwindow.cpp" line="120"/>
         <source>WizNote</source>
         <translation>为知笔记</translation>
     </message>
@@ -1298,24 +1298,34 @@ p, li { white-space: pre-wrap; }
         <translation type="obsolete">搜索您的笔记</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="306"/>
+        <location filename="../src/wizmainwindow.cpp" line="113"/>
+        <source>Logout</source>
+        <translation>更改用户</translation>
+    </message>
+    <message>
+        <location filename="../src/wizmainwindow.cpp" line="115"/>
+        <source>Exit</source>
+        <translation>退出</translation>
+    </message>
+    <message>
+        <location filename="../src/wizmainwindow.cpp" line="360"/>
         <source>Notes</source>
         <translation>个人笔记</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="315"/>
+        <location filename="../src/wizmainwindow.cpp" line="369"/>
         <source>Tags</source>
         <translation>标签</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="591"/>
-        <location filename="../src/wizmainwindow.cpp" line="602"/>
-        <location filename="../src/wizmainwindow.cpp" line="636"/>
+        <location filename="../src/wizmainwindow.cpp" line="645"/>
+        <location filename="../src/wizmainwindow.cpp" line="656"/>
+        <location filename="../src/wizmainwindow.cpp" line="690"/>
         <source>New note</source>
         <translation>新建笔记</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="1248"/>
+        <location filename="../src/wizmainwindow.cpp" line="1302"/>
         <source>Saving note...</source>
         <translation>正在保存笔记...</translation>
     </message>
