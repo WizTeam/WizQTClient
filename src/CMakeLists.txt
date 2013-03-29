@@ -431,6 +431,7 @@ link_directories(
 )
 
 target_link_libraries(${PROJECT_NAME}
+    dl
     cryptlib
     clucene-core-static
     clucene-shared-static
