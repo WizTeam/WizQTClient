@@ -1,7 +1,10 @@
 #include "wizmainwindow.h"
 
+#include <QtGui>
+
 #ifdef Q_OS_MAC
 #include <Carbon/Carbon.h>
+#include "mac/wizmachelper.h"
 #endif
 
 #include "wizdocumentwebview.h"
@@ -19,10 +22,15 @@
 #include "share/wizanimateaction.h"
 #include "share/wizSearchIndexer.h"
 
-#include "wizSearchBox.h"
+#include "wizSearchWidget.h"
 
 #include "wiznotestyle.h"
 #include "wizdocumenthistory.h"
+
+#include "wizButton.h"
+#include "widgets/qsegmentcontrol.h"
+
+#include "wizEditorToolBar.h"
 
 
 MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
@@ -55,6 +63,7 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     , m_options(NULL)
     , m_history(new CWizDocumentViewHistory())
     , m_animateSync(new CWizAnimateAction(*this, this))
+    //, m_animateSync(new CWizSyncAnimation(this))
     , m_bRestart(false)
     , m_bLogoutRestart(false)
     , m_bUpdatingSelection(false)
@@ -83,10 +92,16 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
 
     // syncing thread
     m_syncTimer = new QTimer(this);
-    m_syncTimer->setInterval(15 * 60 * 1000);    //15 minutes
     connect(m_syncTimer, SIGNAL(timeout()), SLOT(on_actionSync_triggered()));
-    if (m_settings->autoSync()) {
+    if (m_settings->syncInterval() != -1) {
         QTimer::singleShot(3 * 1000, this, SLOT(on_actionSync_triggered()));
+    }
+
+    int nInterval = m_settings->syncInterval();
+    if (nInterval == 0) {
+        m_syncTimer->setInterval(15 * 60 * 1000);   // default 15 minutes
+    } else {
+        m_syncTimer->setInterval(nInterval * 60 * 1000);
     }
 
     m_category = m_categoryPrivate;
@@ -106,6 +121,17 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
 
     setWindowTitle(tr("WizNote"));
     restoreStatus();
+
+#ifdef Q_WS_MAC
+    setupFullScreenMode(this);
+#endif
+}
+
+void MainWindow::resizeEvent(QResizeEvent *event)
+{
+    Q_UNUSED(event);
+
+    m_statusBar->autoShow();
 }
 
 void MainWindow::showEvent(QShowEvent* event)
@@ -122,15 +148,12 @@ bool MainWindow::requestThreadsQuit()
     bool bOk = true;
     if (m_sync->isRunning()) {
         m_sync->abort();
+        m_sync->quit();
         bOk = false;
     }
 
-    //if (m_upgrade->isRunning()) {
-    //    m_upgrade->abort();
-    //    bOk = false;
-    //}
-
     if (m_searchIndexer->isRunning()) {
+        m_searchIndexer->worker()->abort();
         m_searchIndexer->quit();
         bOk = false;
     }
@@ -145,8 +168,8 @@ void MainWindow::on_quitTimeout()
 
         // FIXME : if document not valid will lead crash
         m_doc->web()->saveDocument(false);
-        m_bReadyQuit = true;
 
+        m_bReadyQuit = true;
         // back to closeEvent
         close();
     }
@@ -286,66 +309,29 @@ void MainWindow::initMenuBar()
 
 void MainWindow::initToolBar()
 {
+
+#ifdef Q_OS_MAC
+    m_toolBar->setIconSize(QSize(24, 24));
+    setUnifiedTitleAndToolBarOnMac(true);
+#else
+    m_toolBar->setIconSize(QSize(32, 32));
+#endif
+
     m_toolBar->setMovable(false);
-    m_toolBar->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
-    m_toolBar->setContentsMargins(0, 0, 0, 0);
+    m_toolBar->setToolButtonStyle(Qt::ToolButtonIconOnly);
+
+    m_toolBar->addWidget(new CWizFixedSpacer(QSize(40, 1), m_toolBar));
+
+    CWizButton* buttonSync = new CWizButton(*this, m_toolBar);
+    buttonSync->setAction(m_actions->actionFromName(WIZACTION_GLOBAL_SYNC));
+    m_toolBar->addWidget(buttonSync);
 
     m_toolBar->addWidget(new CWizFixedSpacer(QSize(20, 1), m_toolBar));
-
-    QWidget* categorySwitchBtns = new QWidget(m_toolBar);
-    QHBoxLayout* layoutCategorySwitch = new QHBoxLayout(categorySwitchBtns);
-    categorySwitchBtns->setLayout(layoutCategorySwitch);
-    layoutCategorySwitch->setContentsMargins(0, 0, 0, 0);
-    layoutCategorySwitch->setSpacing(0);
-
-    QToolButton* btnNotes = new QToolButton(categorySwitchBtns);
-    //QIcon iconNotes(::WizGetResourcesPath() + "skins/folder.png");
-    QIcon iconNotes = ::WizLoadSkinIcon(m_settings->skin(), palette().window().color(), "folder");
-    btnNotes->setIcon(iconNotes);
-    btnNotes->setIconSize(QSize(18, 12));
-    btnNotes->setText(tr("Notes"));
-    btnNotes->setCheckable(true);
-    connect(btnNotes, SIGNAL(toggled(bool)), SLOT(on_actionCategorySwitchPrivate_triggered2(bool)));
-
-    QToolButton* btnTags = new QToolButton(categorySwitchBtns);
-    //QIcon iconTags(::WizGetResourcesPath() + "skins/tag.png");
-    QIcon iconTags = ::WizLoadSkinIcon(m_settings->skin(), palette().window().color(), "tag");
-    btnTags->setIcon(iconTags);
-    btnTags->setIconSize(QSize(18, 12));
-    btnTags->setText(tr("Tags"));
-    btnTags->setCheckable(true);
-    connect(btnTags, SIGNAL(toggled(bool)), SLOT(on_actionCategorySwitchTags_triggered2(bool)));
-
-    QToolButton* btnGroups = new QToolButton(categorySwitchBtns);
-    //QIcon iconGroups(::WizGetResourcesPath() + "skins/noteGroups.jpeg");
-    QIcon iconGroups = ::WizLoadSkinIcon(m_settings->skin(), palette().window().color(), "groups");
-    btnGroups->setIcon(iconGroups);
-    btnGroups->setIconSize(QSize(18, 12));
-    btnGroups->setText("Groups");
-    btnGroups->setCheckable(true);
-    connect(btnGroups, SIGNAL(toggled(bool)), SLOT(on_actionCategorySwitchGroups_triggered2(bool)));
-
-    QButtonGroup* btnGroup = new QButtonGroup(categorySwitchBtns);
-    btnGroup->setExclusive(true);
-    btnGroup->addButton(btnNotes, 0);
-    btnGroup->addButton(btnTags, 1);
-    btnGroup->addButton(btnGroups, 2);
-    btnNotes->setChecked(true);
-
-    layoutCategorySwitch->addWidget(btnNotes);
-    layoutCategorySwitch->addWidget(btnTags);
-    layoutCategorySwitch->addWidget(btnGroups);
-
-    m_toolBar->addWidget(categorySwitchBtns);
-
-    m_toolBar->addWidget(new CWizFixedSpacer(QSize(20, 1), m_toolBar));
-    m_toolBar->addAction(m_actions->actionFromName(WIZACTION_GLOBAL_SYNC));
-    m_toolBar->addWidget(new CWizFixedSpacer(QSize(20, 1), m_toolBar));
-    m_toolBar->addAction(m_actions->actionFromName(WIZACTION_GLOBAL_NEW_DOCUMENT));
-    //m_toolBar->addAction(m_actions->actionFromName("actionDeleteCurrentNote"));
+    CWizButton* buttonNew = new CWizButton(*this, m_toolBar);
+    buttonNew->setAction(m_actions->actionFromName(WIZACTION_GLOBAL_NEW_DOCUMENT));
+    m_toolBar->addWidget(buttonNew);
 
     m_toolBar->addWidget(new CWizSpacer(m_toolBar));
-
     m_searchBox = new CWizSearchBox(*this, this);
     connect(m_searchBox, SIGNAL(doSearch(const QString&)), SLOT(on_search_doSearch(const QString&)));
 
@@ -353,6 +339,8 @@ void MainWindow::initToolBar()
     m_toolBar->layout()->setAlignment(m_searchBox, Qt::AlignBottom);
 
     m_toolBar->addWidget(new CWizFixedSpacer(QSize(20, 1), m_toolBar));
+
+    addToolBar(m_toolBar);
 
 //#ifndef Q_OS_MAC
 //    m_toolBar->addAction(m_actions->actionFromName("actionPopupMainMenu"));
@@ -363,15 +351,6 @@ void MainWindow::initToolBar()
     //CWizSettings settings(::WizGetSkinResourcePath(m_settings->skin()) + "skin.ini");
     //m_toolBar->layout()->setMargin(settings.GetInt("ToolBar", "Margin", m_toolBar->layout()->margin()));
 
-
-#ifdef Q_OS_MAC
-    m_toolBar->setIconSize(QSize(24, 24));
-    setUnifiedTitleAndToolBarOnMac(true);
-#else
-    m_toolBar->setIconSize(QSize(32, 32));
-#endif
-
-    addToolBar(m_toolBar);
 
 //#ifdef Q_OS_MAC
 //    addToolBar(m_toolBar);
@@ -416,16 +395,48 @@ void MainWindow::initToolBar()
 //    m_toolBar->addWidget(new CWizSpacer(m_toolBar));
 }
 
+QWidget* MainWindow::setupCategorySwitchButtons()
+{
+    QWidget* categorySwitchBtns = new QWidget(this);
+
+    QtSegmentControl* segmentControl = new QtSegmentControl();
+    segmentControl->setSelectionBehavior(QtSegmentControl::SelectOne);
+    segmentControl->setCount(3);
+    segmentControl->setIconSize(QSize(18, 18));
+    segmentControl->setSegmentIcon(0, ::WizLoadSkinIcon3("folder", QIcon::Normal));
+    segmentControl->setSegmentIcon(1, ::WizLoadSkinIcon3("tag", QIcon::Normal));
+    segmentControl->setSegmentIcon(2, ::WizLoadSkinIcon3("groups", QIcon::Normal));
+    segmentControl->setSegmentSelected(0, true);
+    connect(segmentControl, SIGNAL(segmentSelected(int)), this, SLOT(on_actionCategorySwitch_triggered(int)));
+
+    QHBoxLayout* layoutCategorySwitch = new QHBoxLayout();
+    categorySwitchBtns->setLayout(layoutCategorySwitch);
+    layoutCategorySwitch->setContentsMargins(5, 0, 5, 0);
+    layoutCategorySwitch->addStretch();
+    layoutCategorySwitch->addWidget(segmentControl);
+    layoutCategorySwitch->addStretch();
+
+    return categorySwitchBtns;
+}
+
 void MainWindow::initClient()
 {
     QWidget* client = new QWidget(this);
     setCentralWidget(client);
 
-    client->setSizePolicy(QSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum));
+    client->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
+
     QPalette pal = client->palette();
-    pal.setColor(QPalette::Window, WizGetClientBackgroundColor(m_settings->skin()));
+    QPixmap pixmapBg;
+    pixmapBg.load(::WizGetResourcesPath() + "skins/leftview_bg.png");
+    QBrush brushBg(pixmapBg);
+    pal.setBrush(QPalette::Window, brushBg);
     client->setPalette(pal);
     client->setAutoFillBackground(true);
+
+    //QPalette pal = client->palette();
+    //pal.setColor(QPalette::Window, WizGetClientBackgroundColor(m_settings->skin()));
+    //client->setPalette(pal);
 
     QHBoxLayout* layout = new QHBoxLayout(client);
     layout->setContentsMargins(0, 0, 0, 0);
@@ -437,36 +448,38 @@ void MainWindow::initClient()
 #endif
 
     m_splitter = new CWizSplitter(client);
+    m_splitter->setChildrenCollapsible(false);
     layout->addWidget(m_splitter);
 
-#ifndef Q_OS_MAC
-    CWizSettings settings(::WizGetSkinResourcePath(m_settings->skin()) + "skin.ini");
+    //CWizSettings settings(::WizGetSkinResourcePath(m_settings->skin()) + "skin.ini");
+    //int splitterWidth = settings.GetInt("splitter", "Width", m_splitter->splitterWidth());
+    //m_splitter->setSplitterWidth(splitterWidth);
+    //QColor defSplitterColor = client->palette().color(QPalette::Window);
+    //QColor splitterColor = settings.GetColor("splitter", "Color", defSplitterColor);
+    //m_splitter->setSplitterColor(splitterColor);
+    //splitter->addWidget(WizInitWidgetMarginsEx(m_settings->skin(), m_category, "Category"));
 
-    int splitterWidth = settings.GetInt("splitter", "Width", m_splitter->splitterWidth());
-    m_splitter->setSplitterWidth(splitterWidth);
-    QColor defSplitterColor = client->palette().color(QPalette::Window);
-    QColor splitterColor = settings.GetColor("splitter", "Color", defSplitterColor);
-    m_splitter->setSplitterColor(splitterColor);
-#endif
+    QWidget* categoryPanel = new QWidget(m_splitter);
+    categoryPanel->setMinimumWidth(30);
+    QVBoxLayout* layoutCategoryPanel = new QVBoxLayout(categoryPanel);
+    categoryPanel->setLayout(layoutCategoryPanel);
+    layoutCategoryPanel->setContentsMargins(0, 0, 0, 0);
+    layoutCategoryPanel->setSpacing(0);
+    layoutCategoryPanel->addWidget(setupCategorySwitchButtons());
+    layoutCategoryPanel->addWidget(m_categoryLayer);
 
-//#ifndef Q_OS_MAC
-//    splitter->addWidget(WizInitWidgetMarginsEx(m_settings->skin(), m_category, "Category"));
-//#else
     QHBoxLayout* layoutCategories = new QHBoxLayout(m_categoryLayer);
+    m_categoryLayer->setLayout(layoutCategories);
     layoutCategories->setContentsMargins(0, 0, 0, 0);
     layoutCategories->setSpacing(0);
-    m_categoryLayer->setLayout(layoutCategories);
 
     layoutCategories->addWidget(m_categoryPrivate);
     layoutCategories->addWidget(m_categoryTags);
     layoutCategories->addWidget(m_categoryGroups);
-
     m_categoryTags->hide();
     m_categoryGroups->hide();
 
-    m_splitter->addWidget(m_categoryLayer);
-//#endif
-
+    m_splitter->addWidget(categoryPanel);
     m_splitter->addWidget(m_documents);
     m_splitter->addWidget(m_doc);
     m_splitter->setStretchFactor(0, 0);
@@ -504,23 +517,21 @@ void MainWindow::initClient()
 void MainWindow::init()
 {
     connect(m_categoryPrivate, SIGNAL(itemSelectionChanged()), SLOT(on_category_itemSelectionChanged()));
-    connect(m_categoryPrivate, SIGNAL(newDocument()), SLOT(on_actionNewNote_triggered()));
-
     connect(m_categoryTags, SIGNAL(itemSelectionChanged()), SLOT(on_category_itemSelectionChanged()));
     connect(m_categoryGroups, SIGNAL(itemSelectionChanged()), SLOT(on_category_itemSelectionChanged()));
 
+    connect(m_categoryPrivate, SIGNAL(newDocument()), SLOT(on_actionNewNote_triggered()));
     connect(m_documents, SIGNAL(itemSelectionChanged()), SLOT(on_documents_itemSelectionChanged()));
 
-    m_categoryPrivate->init();
-    m_categoryTags->init();
-    m_categoryGroups->init();
+    m_categoryPrivate->baseInit();
+    m_categoryTags->baseInit();
+    m_categoryGroups->baseInit();
 
     m_doc->showClient(false);
 }
 
 void MainWindow::on_syncStarted()
 {
-    m_statusBar->show();
     m_animateSync->startPlay();
     m_syncTimer->stop();
 }
@@ -543,7 +554,7 @@ void MainWindow::on_syncDone(bool error)
     m_statusBar->hide();
     m_animateSync->stopPlay();
 
-    if (m_settings->autoSync()) {
+    if (m_settings->syncInterval() != -1) {
         m_syncTimer->start();
     }
 }
@@ -568,6 +579,9 @@ void MainWindow::on_syncProcessErrorLog(const QString& strMsg)
 
 void MainWindow::on_actionSync_triggered()
 {
+    //qDebug() << "Sync Interval: " << m_syncTimer->interval()/1000/60;
+    //qDebug() << "Sync Method: " << m_settings->syncMethod();
+
     m_certManager->downloadUserCert();
     m_sync->startSyncing();
 }
@@ -664,6 +678,26 @@ void MainWindow::on_actionEditingRedo_triggered()
     m_doc->web()->editorCommandExecuteRedo();
 }
 
+void MainWindow::on_actionViewToggleCategory_triggered()
+{
+    QWidget* category = m_splitter->widget(0);
+    if (category->isVisible()) {
+        category->hide();
+    } else {
+        category->show();
+    }
+
+    m_actions->toggleActionText(WIZACTION_GLOBAL_TOGGLE_CATEGORY);
+}
+
+void MainWindow::on_actionViewToggleFullscreen_triggered()
+{
+#ifdef Q_WS_MAC
+    toggleFullScreenMode(this);
+    m_actions->toggleActionText(WIZACTION_GLOBAL_TOGGLE_FULLSCREEN);
+#endif
+}
+
 void MainWindow::on_actionFormatJustifyLeft_triggered()
 {
     m_doc->web()->editorCommandExecuteJustifyLeft();
@@ -696,12 +730,17 @@ void MainWindow::on_actionFormatInsertUnorderedList_triggered()
 
 void MainWindow::on_actionFormatInsertTable_triggered()
 {
-    m_doc->web()->editorCommandExecuteInsertTable();
+    m_doc->web()->editorCommandExecuteTableInsert();
 }
 
 void MainWindow::on_actionFormatInsertLink_triggered()
 {
-    m_doc->web()->editorCommandExecuteInsertLink();
+    m_doc->web()->editorCommandExecuteLinkInsert();
+}
+
+void MainWindow::on_actionFormatForeColor_triggered()
+{
+    m_doc->web()->editorCommandExecuteForeColor();
 }
 
 void MainWindow::on_actionFormatBold_triggered()
@@ -771,7 +810,7 @@ void MainWindow::on_actionFormatRemoveFormat_triggered()
 void MainWindow::on_actionConsole_triggered()
 {
     m_console->show();
-    m_console->vScroll->setValue(m_console->vScroll->maximum());
+    //m_console->vScroll->setValue(m_console->vScroll->maximum());
 }
 
 void MainWindow::on_actionLogout_triggered()
@@ -791,11 +830,11 @@ void MainWindow::on_actionAbout_triggered()
 
 void MainWindow::on_actionPreference_triggered()
 {
-    CWizPreferenceWindow* preference = new CWizPreferenceWindow(*this, this);
+    CWizPreferenceWindow preference(*this, this);
 
-    connect(preference, SIGNAL(settingsChanged(WizOptionsType)), SLOT(on_options_settingsChanged(WizOptionsType)));
-    connect(preference, SIGNAL(restartForSettings()), SLOT(on_options_restartForSettings()));
-    preference->exec();
+    connect(&preference, SIGNAL(settingsChanged(WizOptionsType)), SLOT(on_options_settingsChanged(WizOptionsType)));
+    connect(&preference, SIGNAL(restartForSettings()), SLOT(on_options_restartForSettings()));
+    preference.exec();
 }
 
 void MainWindow::on_actionRebuildFTS_triggered()
@@ -908,25 +947,38 @@ void MainWindow::on_actionGoForward_triggered()
     locateDocument(data);
 }
 
-void MainWindow::on_actionCategorySwitchPrivate_triggered2(bool toggled)
-{
-    if (!toggled)
-        return;
-    on_actionCategorySwitchPrivate_triggered();
-}
+//void MainWindow::on_actionCategorySwitchPrivate_triggered2(bool toggled)
+//{
+//    if (!toggled)
+//        return;
+//    on_actionCategorySwitchPrivate_triggered();
+//}
+//
+//void MainWindow::on_actionCategorySwitchTags_triggered2(bool toggled)
+//{
+//   if (!toggled)
+//        return;
+//   on_actionCategorySwitchTags_triggered();
+//}
+//
+//void MainWindow::on_actionCategorySwitchGroups_triggered2(bool toggled)
+//{
+//    if (!toggled)
+//        return;
+//    on_actionCategorySwitchGroups_triggered();
+//}
 
-void MainWindow::on_actionCategorySwitchTags_triggered2(bool toggled)
+void MainWindow::on_actionCategorySwitch_triggered(int index)
 {
-   if (!toggled)
-        return;
-   on_actionCategorySwitchTags_triggered();
-}
-
-void MainWindow::on_actionCategorySwitchGroups_triggered2(bool toggled)
-{
-    if (!toggled)
-        return;
-    on_actionCategorySwitchGroups_triggered();
+    if (index == 0) {
+        on_actionCategorySwitchPrivate_triggered();
+    } else if (index == 1) {
+        on_actionCategorySwitchTags_triggered();
+    } else if (index == 2) {
+        on_actionCategorySwitchGroups_triggered();
+    } else {
+        Q_ASSERT(0);
+    }
 }
 
 void MainWindow::on_actionCategorySwitchPrivate_triggered()
@@ -971,10 +1023,11 @@ void MainWindow::categorySwitchTo(CWizCategoryBaseView* sourceCategory, CWizCate
     destCategory->lower();
 
     QPropertyAnimation* animateCurrent = new QPropertyAnimation();
+    animateCurrent->setEasingCurve(QEasingCurve::InOutExpo);
     animateCurrent->setTargetObject(sourceCategory);
     animateCurrent->setPropertyName("geometry");
     animateCurrent->setDuration(200);
-    animateCurrent->setEndValue(QRect(rectOld.width(), rectOld.y(), 0, rectOld.height()));
+    animateCurrent->setEndValue(QRect(rectOld.width(), 0, 0, rectOld.height()));
 
     connect(animateCurrent, SIGNAL(stateChanged(QAbstractAnimation::State, QAbstractAnimation::State)), \
             SLOT(onAnimationCategorySwitchStateChanged(QAbstractAnimation::State, QAbstractAnimation::State)));
@@ -1044,13 +1097,17 @@ void MainWindow::on_documents_itemSelectionChanged()
 
 void MainWindow::on_options_settingsChanged(WizOptionsType type)
 {
-    if (wizoptionsNoteView == type)
-    {
+    if (wizoptionsNoteView == type) {
         m_doc->settingsChanged();
-    }
-    else if (wizoptionsSync == type)
-    {
-        //m_sync->setDownloadAllNotesData(m_settings->downloadAllNotesData());
+    } else if (wizoptionsSync == type) {
+
+        int nInterval = m_settings->syncInterval();
+        if (nInterval == -1) {
+            m_syncTimer->stop();
+        } else {
+            m_syncTimer->setInterval(nInterval * 60 * 1000);
+        }
+
         m_sync->resetProxy();
     }
 }
@@ -1239,17 +1296,49 @@ void MainWindow::SetDocumentModified(bool modified)
     m_doc->setModified(modified);
 }
 
+void MainWindow::ResetEditorToolBar()
+{
+    m_doc->editorToolBar()->resetToolbar();
+}
+
+void MainWindow::ResetContextMenuAndPop(const QPoint& pos)
+{
+    m_doc->editorToolBar()->resetContextMenuAndPop(pos);
+}
+
 void MainWindow::SetSavingDocument(bool saving)
 {
-    m_statusBar->setVisible(saving);
-    if (saving)
-    {
-        m_statusBar->setVisible(true);
+    //m_statusBar->setVisible(saving);
+    if (saving) {
+        //m_statusBar->setVisible(true);
         m_statusBar->autoShow(tr("Saving note..."));
-        qApp->processEvents(QEventLoop::AllEvents);
-    }
-    else
-    {
+        //qApp->processEvents(QEventLoop::AllEvents);
+    } else {
         m_statusBar->setVisible(false);
+    }
+}
+
+void MainWindow::ProcessClipboardBeforePaste(const QVariantMap& data)
+{
+    Q_UNUSED(data);
+    // QVariantMap =  {html: text, textContent: text};
+    //qDebug() << data.value("html").toString();
+    //qDebug() << data.value("textContent").toString();
+
+    QClipboard* clipboard = QApplication::clipboard();
+    QImage image = clipboard->image();
+    if (!image.isNull()) {
+        qDebug() << "clipboard with image";
+        // save clipboard image to $TMPDIR
+        QString strTempPath = WizGlobal()->GetTempPath();
+        CString strFileName = strTempPath + WizIntToStr(GetTickCount()) + ".png";
+        if (!image.save(strFileName)) {
+            TOLOG("ERROR: Can't save clipboard image to file");
+            return;
+        }
+
+        QString strHtml = QString("<img border=\"0\" src=\"file://%1\" />").arg(strFileName);
+        web()->editorCommandExecuteInsertHtml(strHtml, true);
+        return;
     }
 }

@@ -4,23 +4,14 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <title></title>
-    <script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=false"></script>
+    <script type="text/javascript" src="../internal.js"></script>
     <style type="text/css">
-        *{color: #838383}
-        body {
-            font-size: 12px;
-            width:540px;
-            height: 350px;
-            overflow: hidden;
-            margin:0;padding:0;
-
-        }
-        .content{padding: 9px 0 0 15px;height:100%;}
-        .content table tr{height: 30px; line-height: 30px;}
-         #address{width:220px;height:21px;background: #FFF;border:1px solid #d7d7d7; line-height: 21px;}
-         a.doSearch{display:block;text-align:center;line-height:24px; text-decoration: none;height:24px;width:95px;border: 0;background:url(../../themes/default/images/icons-all.gif)  no-repeat;}
-         a.doSearch:hover{background-position: 0 -30px;}
+        .content{width:530px; height: 350px;margin: 10px auto;}
+        .content table{width: 100%}
+        .content table td{vertical-align: middle;}
+        #address{width:220px;height:21px;background: #FFF;border:1px solid #d7d7d7; line-height: 21px;}
     </style>
+    <script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=false"></script>
 </head>
 <body>
 <div class="content">
@@ -28,14 +19,13 @@
         <tr>
             <td><label for="address"><var id="lang_input_address"></var></label></td>
             <td><input id="address" type="text" /></td>
-            <td><a id="doSearch" href="javascript:void(0)" class="doSearch"><var id="lang_input_search"></var></a></td>
+            <td><a id="doSearch" href="javascript:void(0)" class="button"><var id="lang_input_search"></var></a></td>
         </tr>
     </table>
-    <div id="container" style="width: 520px; height: 340px; border: 1px solid gray;"></div>
+    <div id="container" style="width: 100%; height: 340px;margin: 5px auto; border: 1px solid gray;"></div>
 </div>
-<script type="text/javascript" src="../internal.js"></script>
 <script type="text/javascript">
-    utils.domReady(function(){
+    domUtils.on(window,"load",function(){
         var map = new google.maps.Map(document.getElementById('container'), {
                 zoom: 3,
                 streetViewControl: false,
@@ -88,7 +78,9 @@
                 marker.setPosition(new google.maps.LatLng(Number(centers[0]),Number(centers[1])));
                 imgcss = img.style.cssText;
             }else{
-                doSearch();
+                setTimeout(function(){
+                    doSearch();
+                },30)
             }
     });
 

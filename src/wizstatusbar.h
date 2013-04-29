@@ -7,7 +7,7 @@
 #include <QtWidgets>
 #endif
 
-#include "wizdef.h"
+class CWizExplorerApp;
 
 class CWizStatusBar : public QLabel
 {
@@ -16,7 +16,7 @@ class CWizStatusBar : public QLabel
 public:
     explicit CWizStatusBar(CWizExplorerApp& app, QWidget *parent = 0);
 
-    void autoShow(const QString& strMsg);
+    void autoShow(const QString& strMsg = QString());
 
 private:
     CWizExplorerApp& m_app;

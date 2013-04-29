@@ -1,9 +1,14 @@
 #include "wizimagepushbutton.h"
 
+#include <QBitmap>
+
 CWizImagePushButton::CWizImagePushButton(const QIcon& icon, const QString &text, QWidget* parent)
     :QPushButton(icon, text, parent)
     , m_redFlag(false)
 {
+    //QPixmap mask = icon.pixmap(32, 26);
+    //setIcon(QIcon(mask));
+    //setMask(mask.mask());
 }
 
 QSize CWizImagePushButton::sizeHint() const

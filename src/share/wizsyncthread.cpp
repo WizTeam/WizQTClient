@@ -29,7 +29,7 @@ void CWizSyncThread::run()
     // chain up
     connect(m_sync, SIGNAL(syncStarted()), SIGNAL(syncStarted()));
     connect(m_sync, SIGNAL(syncLogined()), SIGNAL(syncLogined()));
-    connect(m_sync, SIGNAL(progressChanged(int)), SIGNAL(progressChanged(int)));
+    //connect(m_sync, SIGNAL(progressChanged(int)), SIGNAL(progressChanged(int)));
     connect(m_sync, SIGNAL(processLog(const QString&)), SIGNAL(processLog(const QString&)));
     connect(m_sync, SIGNAL(processDebugLog(const QString&)), SIGNAL(processDebugLog(const QString&)));
     connect(m_sync, SIGNAL(processErrorLog(const QString&)), SIGNAL(processErrorLog(const QString&)));
@@ -37,7 +37,14 @@ void CWizSyncThread::run()
 
     connect(m_sync, SIGNAL(syncDone(bool)), SLOT(on_syncDone(bool)));
 
-    m_sync->setDownloadAllNotesData(m_app.userSettings().downloadAllNotesData());
+    int nDays = m_app.userSettings().syncMethod();
+    if (nDays == 0) {
+        m_sync->setDaysDownload(7);  // default
+    } else {
+        m_sync->setDaysDownload(nDays);  // default
+    }
+
+    //m_sync->setDownloadAllNotesData(m_app.userSettings().downloadAllNotesData());
 
     if (m_bNeedResetProxy)
         m_sync->resetProxy();

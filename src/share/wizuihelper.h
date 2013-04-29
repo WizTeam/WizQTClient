@@ -42,20 +42,30 @@ class CWizSplitter : public QSplitter
 {
 public:
     CWizSplitter(QWidget* parent = 0);
+    virtual QSplitterHandle *createHandle();
+};
 
-#ifndef Q_OS_MAC
-    QSplitterHandle *createHandle();
+class CWizScrollBar : public QScrollBar
+{
+    Q_OBJECT
+
+public:
+    CWizScrollBar(QWidget* parent = 0);
+    void syncWith(QScrollBar* source);
+
+    virtual QSize sizeHint() const;
+    virtual void mouseMoveEvent(QMouseEvent* event);
+    virtual void paintEvent(QPaintEvent* event);
+
+public Q_SLOTS:
+    void on_sourceValueChanged(int value);
+    void on_sourceRangeChanged(int min, int max);
+    void on_valueChanged(int value);
+    void on_scrollTimeout();
 
 private:
-    int m_splitterWidth;
-    QColor m_splitterColor;
-public:
-    void setSplitterWidth(int width);
-    int splitterWidth() const { return m_splitterWidth; }
-    void setSplitterColor(const QColor& color);
-    QColor splitterColor() const { return m_splitterColor; }
-#endif
-
+    QPointer<QScrollBar> m_scrollSyncSource;
+    QTimer m_timerScrollTimeout;
 };
 
 

@@ -14,14 +14,16 @@ public:
     // if strToken is empty, login is required
     void startSync(const QString& strKbGUID = QString());
 
-    void setDownloadAllNotesData(bool b) { m_bDownloadAllNotesData = b; }
+    void setDaysDownload(int n) { m_nDaysDownload = n; }
+    //void setDownloadAllNotesData(bool b) { m_bDownloadAllNotesData = b; }
 
     virtual void abort();
 
 private:
     bool m_bSyncStarted;
     bool m_error;
-    bool m_bDownloadAllNotesData;
+    int m_nDaysDownload;
+    //bool m_bDownloadAllNotesData;
 
     // This is trick used for conflict backup.
     // cause onDocumentGetData and onDownloadObjectDataCompleted are rewrite by the class for chain call

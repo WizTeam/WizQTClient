@@ -3,27 +3,16 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <title></title>
-<script type="text/javascript" src="http://api.map.baidu.com/api?v=1.1&services=true"></script>
-
+    <script type="text/javascript" src="../internal.js"></script>
+    <script type="text/javascript" src="http://api.map.baidu.com/api?v=1.1&services=true"></script>
     <style type="text/css">
-        *{color: #838383}
-        body {
-            font-size: 12px;
-            width:540px;
-            height: 350px;
-            overflow: hidden;
-            margin:0px;padding:0px;
-        }
-        .content{padding: 9px 0px 0px 15px;height:100%;}
-        .content table{padding:0px;margin:0px;width: 100%}
-        .content table tr{padding:0px;margin:0px; list-style: none;height: 30px; line-height: 30px;}
-        #city,#address{height:21px;background: #FFF;border:1px solid #d7d7d7;padding: 0px; margin: 0px; line-height: 21px;}
+        .content{width:530px; height: 350px;margin: 10px auto;}
+        .content table{width: 100%}
+        .content table td{vertical-align: middle;}
+        #city,#address{height:21px;background: #FFF;border:1px solid #d7d7d7; line-height: 21px;}
         #city{width:90px}
         #address{width:220px}
-         a.doSearch{display:block;text-align:center;line-height:24px; text-decoration: none;height:24px;width:95px;border: 0px;margin:0px;padding:0px;background:url(../../themes/default/images/icons-all.gif)  no-repeat;}
-         a.doSearch:hover{background-position: 0 -30px;}
     </style>
-
 </head>
 <body>
 <div class="content">
@@ -33,13 +22,12 @@
             <td><input id="city" type="text" /></td>
             <td><var id="lang_address"></var>:</td>
             <td><input id="address" type="text" value="" /></td>
-            <td><a href="javascript:doSearch()" class="doSearch"><var id="lang_search"></var></a></td>
+            <td><a href="javascript:doSearch()" class="button"><var id="lang_search"></var></a></td>
         </tr>
     </table>
-    <div style="width:520px;height:340px;border:1px solid gray" id="container"></div>
+    <div style="width:100%;height:340px;margin:5px auto;border:1px solid gray" id="container"></div>
 
 </div>
-<script type="text/javascript" src="../internal.js"></script>
 <script type="text/javascript">
     var map = new BMap.Map("container"),marker,point,imgcss;
     map.enableScrollWheelZoom();

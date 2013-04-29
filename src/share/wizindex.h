@@ -542,6 +542,10 @@ public:
     bool SetObjectDataDownloaded(const CString& strGUID, const CString& strType, bool bDownloaded);
     bool IsObjectDataDownloaded(const CString& strGUID, const CString& strType);
 
+    /* thumb index related */
+    bool setThumbIndexVersion(const QString& strVersion);
+    QString getThumIndexVersion();
+
     /* Search related operations */
     bool setDocumentFTSVersion(const QString& strVersion);
     QString getDocumentFTSVersion();

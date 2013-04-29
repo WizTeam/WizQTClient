@@ -101,11 +101,21 @@ public:
     WizDocumentViewMode noteViewMode() const;
     void setNoteViewMode(WizDocumentViewMode strMode) { set("NoteViewMode", QString::number(strMode)); }
 
-    bool autoSync() const;
-    void setAutoSync(bool b) { set("AutoSync", b ? "1" : "0"); }
+//    bool autoSync() const;
+//    void setAutoSync(bool b) { set("AutoSync", b ? "1" : "0"); }
 
-    bool downloadAllNotesData() const;
-    void setDownloadAllNotesData(bool b) { set("DownloadAllNotesData", b ? "1" : "0"); }
+//    bool downloadAllNotesData() const;
+//    void setDownloadAllNotesData(bool b) { set("DownloadAllNotesData", b ? "1" : "0"); }
+
+    // default: 5, 15, 30, 60, -1(manual)
+    int syncInterval() const;
+    void setSyncInterval(int minutes);
+
+    // default: 1, 7, 30, 99999(all), -1(no)
+    int syncMethod() const;
+    void setSyncMethod(int days);
+
+
 };
 
 #endif // WIZSETTINGS_H

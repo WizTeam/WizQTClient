@@ -45,6 +45,9 @@ public Q_SLOTS:
 
     void verifyAccountDone(bool succeeded, int errorCode, const QString& errorMessage);
     void on_webView_linkClicked(const QUrl& url);
+
+    void on_labelForgotPassword_linkActivated(const QString&);
+    void on_labelRegisterNew_linkActivated(const QString&);
     void on_labelProxySettings_linkActivated(const QString& link);
 
     void on_comboUsers_activated(const QString& userId);

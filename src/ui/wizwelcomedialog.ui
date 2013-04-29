@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>593</width>
-    <height>350</height>
+    <width>639</width>
+    <height>301</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -19,8 +19,8 @@
   <widget class="QLabel" name="label">
    <property name="geometry">
     <rect>
-     <x>360</x>
-     <y>20</y>
+     <x>410</x>
+     <y>10</y>
      <width>180</width>
      <height>15</height>
     </rect>
@@ -32,7 +32,7 @@
   <widget class="QLineEdit" name="editPassword">
    <property name="geometry">
     <rect>
-     <x>359</x>
+     <x>410</x>
      <y>90</y>
      <width>221</width>
      <height>25</height>
@@ -54,7 +54,7 @@
   <widget class="QLabel" name="label_2">
    <property name="geometry">
     <rect>
-     <x>360</x>
+     <x>410</x>
      <y>70</y>
      <width>150</width>
      <height>15</height>
@@ -70,10 +70,10 @@
   <widget class="QWebView" name="webView">
    <property name="geometry">
     <rect>
-     <x>10</x>
-     <y>10</y>
-     <width>341</width>
-     <height>331</height>
+     <x>0</x>
+     <y>0</y>
+     <width>391</width>
+     <height>300</height>
     </rect>
    </property>
    <property name="url">
@@ -85,7 +85,7 @@
   <widget class="QCheckBox" name="checkRememberMe">
    <property name="geometry">
     <rect>
-     <x>370</x>
+     <x>410</x>
      <y>130</y>
      <width>141</width>
      <height>22</height>
@@ -107,8 +107,8 @@
   <widget class="QCheckBox" name="checkAutoLogin">
    <property name="geometry">
     <rect>
-     <x>370</x>
-     <y>150</y>
+     <x>410</x>
+     <y>160</y>
      <width>97</width>
      <height>22</height>
     </rect>
@@ -123,30 +123,33 @@
   <widget class="QLabel" name="labelProxySettings">
    <property name="geometry">
     <rect>
-     <x>460</x>
-     <y>310</y>
+     <x>500</x>
+     <y>260</y>
      <width>121</width>
      <height>20</height>
     </rect>
    </property>
    <property name="text">
-    <string>Settings</string>
+    <string>&lt;a href=&quot;javascript:void(0)&quot;&gt;Proxy settings&lt;/a&gt;</string>
    </property>
    <property name="alignment">
     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+   </property>
+   <property name="openExternalLinks">
+    <bool>false</bool>
    </property>
   </widget>
   <widget class="QLabel" name="labelRegisterNew">
    <property name="geometry">
     <rect>
-     <x>490</x>
-     <y>290</y>
-     <width>91</width>
-     <height>17</height>
+     <x>470</x>
+     <y>240</y>
+     <width>151</width>
+     <height>20</height>
     </rect>
    </property>
    <property name="text">
-    <string>New to Wiz</string>
+    <string>&lt;a href=&quot;javascript:void(0)&quot;&gt;New to WizNote&lt;/a&gt;</string>
    </property>
    <property name="alignment">
     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -155,17 +158,17 @@
   <widget class="QLabel" name="labelForgotPassword">
    <property name="geometry">
     <rect>
-     <x>460</x>
-     <y>270</y>
-     <width>121</width>
-     <height>17</height>
+     <x>450</x>
+     <y>219</y>
+     <width>171</width>
+     <height>20</height>
     </rect>
    </property>
    <property name="layoutDirection">
     <enum>Qt::LeftToRight</enum>
    </property>
    <property name="text">
-    <string>Forgot Password</string>
+    <string>&lt;a href=&quot;javascript:void(0)&quot;&gt;Forgot password&lt;/a&gt;</string>
    </property>
    <property name="alignment">
     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -174,8 +177,8 @@
   <widget class="QComboBox" name="comboUsers">
    <property name="geometry">
     <rect>
-     <x>360</x>
-     <y>40</y>
+     <x>410</x>
+     <y>30</y>
      <width>221</width>
      <height>25</height>
     </rect>
@@ -193,7 +196,7 @@
   <widget class="QPushButton" name="buttonLogin">
    <property name="geometry">
     <rect>
-     <x>490</x>
+     <x>530</x>
      <y>180</y>
      <width>97</width>
      <height>27</height>

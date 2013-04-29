@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>400</width>
-    <height>411</height>
+    <height>220</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -19,13 +19,13 @@
   <property name="minimumSize">
    <size>
     <width>400</width>
-    <height>411</height>
+    <height>220</height>
    </size>
   </property>
   <property name="maximumSize">
    <size>
     <width>400</width>
-    <height>411</height>
+    <height>220</height>
    </size>
   </property>
   <property name="windowTitle">
@@ -37,11 +37,23 @@
      <x>0</x>
      <y>0</y>
      <width>401</width>
-     <height>381</height>
+     <height>191</height>
     </rect>
    </property>
    <property name="currentIndex">
-    <number>0</number>
+    <number>1</number>
+   </property>
+   <property name="usesScrollButtons">
+    <bool>false</bool>
+   </property>
+   <property name="documentMode">
+    <bool>false</bool>
+   </property>
+   <property name="tabsClosable">
+    <bool>false</bool>
+   </property>
+   <property name="movable">
+    <bool>false</bool>
    </property>
    <widget class="QWidget" name="tabGeneral">
     <attribute name="title">
@@ -70,29 +82,6 @@
       </property>
      </widget>
     </widget>
-    <widget class="QGroupBox" name="groupBoxSkin">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>120</y>
-       <width>371</width>
-       <height>91</height>
-      </rect>
-     </property>
-     <property name="title">
-      <string>Skin</string>
-     </property>
-     <widget class="QComboBox" name="comboSkin">
-      <property name="geometry">
-       <rect>
-        <x>50</x>
-        <y>40</y>
-        <width>251</width>
-        <height>22</height>
-       </rect>
-      </property>
-     </widget>
-    </widget>
     <widget class="QCheckBox" name="checkBox">
      <property name="enabled">
       <bool>false</bool>
@@ -100,7 +89,7 @@
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>220</y>
+       <y>110</y>
        <width>341</width>
        <height>22</height>
       </rect>
@@ -111,6 +100,139 @@
      <property name="checked">
       <bool>true</bool>
      </property>
+    </widget>
+   </widget>
+   <widget class="QWidget" name="tabSyncing">
+    <attribute name="title">
+     <string>Syncing</string>
+    </attribute>
+    <widget class="QGroupBox" name="groupBoxSync">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>10</y>
+       <width>371</width>
+       <height>141</height>
+      </rect>
+     </property>
+     <property name="title">
+      <string>Sync Method</string>
+     </property>
+     <widget class="QLabel" name="labelProxySettings">
+      <property name="geometry">
+       <rect>
+        <x>190</x>
+        <y>110</y>
+        <width>171</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Proxy Settings</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+      </property>
+     </widget>
+     <widget class="QComboBox" name="comboSyncInterval">
+      <property name="geometry">
+       <rect>
+        <x>150</x>
+        <y>30</y>
+        <width>211</width>
+        <height>26</height>
+       </rect>
+      </property>
+      <property name="modelColumn">
+       <number>0</number>
+      </property>
+      <item>
+       <property name="text">
+        <string>5 minutes</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>15 minutes</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>30 minutes</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>1 hour</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Manual</string>
+       </property>
+      </item>
+     </widget>
+     <widget class="QLabel" name="labelSyncInterval">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>30</y>
+        <width>131</width>
+        <height>26</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Sync time interval:</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="labelSyncMethod">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>70</y>
+        <width>131</width>
+        <height>26</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Sync method:</string>
+      </property>
+     </widget>
+     <widget class="QComboBox" name="comboSyncMethod">
+      <property name="geometry">
+       <rect>
+        <x>150</x>
+        <y>70</y>
+        <width>211</width>
+        <height>26</height>
+       </rect>
+      </property>
+      <item>
+       <property name="text">
+        <string>Without note data(very fast)</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Last 1 day</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>last 1 week</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Last 1 month</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>All data(very slow)</string>
+       </property>
+      </item>
+     </widget>
     </widget>
    </widget>
    <widget class="QWidget" name="tabReading">
@@ -170,72 +292,12 @@
      </widget>
     </widget>
    </widget>
-   <widget class="QWidget" name="tabSyncing">
-    <attribute name="title">
-     <string>Syncing</string>
-    </attribute>
-    <widget class="QGroupBox" name="groupBoxSync">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>10</y>
-       <width>371</width>
-       <height>131</height>
-      </rect>
-     </property>
-     <property name="title">
-      <string>Sync Method</string>
-     </property>
-     <widget class="QCheckBox" name="checkAutoSync">
-      <property name="geometry">
-       <rect>
-        <x>20</x>
-        <y>30</y>
-        <width>301</width>
-        <height>17</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Auto syncing</string>
-      </property>
-     </widget>
-     <widget class="QCheckBox" name="checkDownloadAllNotesData">
-      <property name="geometry">
-       <rect>
-        <x>20</x>
-        <y>60</y>
-        <width>311</width>
-        <height>17</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Download all notes data</string>
-      </property>
-     </widget>
-     <widget class="QLabel" name="labelProxySettings">
-      <property name="geometry">
-       <rect>
-        <x>260</x>
-        <y>100</y>
-        <width>101</width>
-        <height>20</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Proxy Settings</string>
-      </property>
-      <property name="alignment">
-       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-      </property>
-     </widget>
-    </widget>
-   </widget>
   </widget>
   <widget class="QPushButton" name="buttonOK">
    <property name="geometry">
     <rect>
      <x>320</x>
-     <y>380</y>
+     <y>190</y>
      <width>75</width>
      <height>23</height>
     </rect>

@@ -115,21 +115,32 @@ CWizDocumentListView::CWizDocumentListView(CWizExplorerApp& app, QWidget *parent
     setFrameStyle(QFrame::NoFrame);
     setAttribute(Qt::WA_MacShowFocusRect, false);
 
-    setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    // use custom scrollbar
     setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
+    setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    m_vScroll = new CWizScrollBar(this);
+    m_vScroll->syncWith(verticalScrollBar());
 
-#ifndef Q_OS_MAC
+    //QScrollAreaKineticScroller *newScroller = new QScrollAreaKineticScroller();
+    //newScroller->setWidget(this);
+    //m_kinecticScroll = new QsKineticScroller(this);
+    //m_kinecticScroll->enableKineticScrollFor(this);
+
+//#ifndef Q_OS_MAC
     // smoothly scroll
+    m_vscrollCurrent = 0;
     m_vscrollOldPos = 0;
     connect(verticalScrollBar(), SIGNAL(valueChanged(int)), SLOT(on_vscroll_valueChanged(int)));
     connect(verticalScrollBar(), SIGNAL(actionTriggered(int)), SLOT(on_vscroll_actionTriggered(int)));
     connect(&m_vscrollTimer, SIGNAL(timeout()), SLOT(on_vscroll_update()));
-#endif //Q_OS_MAC
+//#endif //Q_OS_MAC
 
     setItemDelegate(new CWizDocumentListViewDelegate(this));
 
+    // setup background
     QPalette pal = palette();
-    pal.setColor(QPalette::Base, WizGetDocumentsBackroundColor(m_app.userSettings().skin()));
+    pal.setColor(QPalette::Base, QColor(247,247,247));
     setPalette(pal);
 
     setStyle(::WizGetStyle(m_app.userSettings().skin()));
@@ -176,6 +187,15 @@ CWizDocumentListView::CWizDocumentListView(CWizExplorerApp& app, QWidget *parent
     //m_actionEncryptDocument = new QAction(tr("Encrypt Document"), m_menu);
     //connect(m_actionEncryptDocument, SIGNAL(triggered()), SLOT(on_action_encryptDocument()));
     //m_menu->addAction(m_actionEncryptDocument);
+}
+
+void CWizDocumentListView::resizeEvent(QResizeEvent* event)
+{
+    // reset scrollbar position
+    m_vScroll->resize(m_vScroll->sizeHint().width(), event->size().height());
+    m_vScroll->move(event->size().width() - m_vScroll->sizeHint().width(), 0);
+
+    QListWidget::resizeEvent(event);
 }
 
 void CWizDocumentListView::setDocuments(const CWizDocumentDataArray& arrayDocument)
@@ -586,37 +606,107 @@ CString CWizDocumentListView::documentTagsFromIndex(const QModelIndex &index) co
 }
 
 
-#ifndef Q_OS_MAC
-void CWizDocumentListView::updateGeometries()
-{
-    QListWidget::updateGeometries();
+//#ifndef Q_OS_MAC
+//void CWizDocumentListView::updateGeometries()
+//{
+//    QListWidget::updateGeometries();
+//
+//    // singleStep will initialized to item height(94 pixel), reset it
+//    verticalScrollBar()->setSingleStep(1);
+//}
 
-    // singleStep will initialized to item height(94 pixel), reset it
-    verticalScrollBar()->setSingleStep(1);
+void CWizDocumentListView::wheelEvent(QWheelEvent* event)
+{
+    //if (event->orientation() == Qt::Vertical) {
+        //vscrollBeginUpdate(event->delta());
+        //return;
+    //}
+
+//#ifdef Q_OS_MAC
+//    QWheelEvent* wEvent = new QWheelEvent(event->pos(),
+//                                          event->globalPos(),
+//                                          event->delta()/2,
+//                                          event->buttons(),
+//                                          event->modifiers(),
+//                                          event->orientation());
+//#endif
+
+    QListWidget::wheelEvent(event);
+
 }
 
 void CWizDocumentListView::vscrollBeginUpdate(int delta)
 {
-    m_vscrollCurrent = 0;
-    m_vscrollDelta = delta;
+    //if (m_vscrollDelta > 0) {
+    //    if (delta > 0 && delta < m_vscrollDelta) {
+    //        return;
+    //    }
+    //}
+//
+    //if (m_vscrollDelta < 0) {
+    //    if (delta > m_vscrollDelta && delta < 0) {
+    //        return;
+    //    }
+    //}
 
-    if (!m_vscrollTimer.isActive())
-        m_vscrollTimer.start(5);
+    //m_vscrollDelta = delta;
+    //qDebug() << "start:" << m_vscrollDelta;
+
+    if (!m_scrollAnimation)  {
+        m_scrollAnimation = new QPropertyAnimation();
+        m_scrollAnimation->setDuration(300);
+        m_scrollAnimation->setTargetObject(verticalScrollBar());
+        m_scrollAnimation->setEasingCurve(QEasingCurve::Linear);
+        connect(m_scrollAnimation, SIGNAL(valueChanged(const QVariant&)), SLOT(on_vscrollAnimation_valueChanged(const QVariant&)));
+        connect(m_scrollAnimation, SIGNAL(finished()), SLOT(on_vscrollAnimation_finished()));
+    }
+
+    if (delta > 0) {
+        m_scrollAnimation->setStartValue(0);
+        m_scrollAnimation->setEndValue(delta);
+    } else {
+        m_scrollAnimation->setStartValue(delta);
+        m_scrollAnimation->setEndValue(0);
+    }
+
+    m_scrollAnimation->start();
 }
 
-void CWizDocumentListView::wheelEvent(QWheelEvent* event)
+void CWizDocumentListView::on_vscrollAnimation_valueChanged(const QVariant& value)
 {
-    vscrollBeginUpdate(event->delta());
+    QPropertyAnimation* animation = qobject_cast<QPropertyAnimation *>(sender());
+    QScrollBar* scrollBar = qobject_cast<QScrollBar *>(animation->targetObject());
+
+    int delta = value.toInt();
+
+    //if (qAbs(delta) > m_vscrollCurrent) {
+    //    qDebug() << "change:" << delta;
+        scrollBar->setValue(scrollBar->value() - delta/8);
+    //    m_vscrollCurrent += qAbs(delta);
+    //} else {
+    //    animation->stop();
+    //}
+}
+
+void CWizDocumentListView::on_vscrollAnimation_finished()
+{
+    QPropertyAnimation* animation = qobject_cast<QPropertyAnimation *>(sender());
+    qDebug() << "end:" << animation->startValue() << ":" << animation->endValue();
+
+    //reset
+    //m_vscrollDelta = 0;
+    //m_vscrollCurrent = 0;
 }
 
 void CWizDocumentListView::on_vscroll_update()
 {
-    if (qAbs(m_vscrollDelta) > m_vscrollCurrent) {
-        verticalScrollBar()->setValue(m_vscrollOldPos - m_vscrollDelta/15);
-        m_vscrollCurrent += qAbs(m_vscrollDelta/15);
-    } else {
-        m_vscrollTimer.stop();
-    }
+    // scroll animation stop condition
+    //if (qAbs(m_vscrollDelta) > m_vscrollCurrent) {
+    //    verticalScrollBar()->setValue(m_vscrollOldPos - m_vscrollDelta/2);
+    //    m_vscrollCurrent += qAbs(m_vscrollDelta/2);
+    //} else {
+    //    m_vscrollTimer.stop();
+    //}
 }
 
 void CWizDocumentListView::on_vscroll_valueChanged(int value)
@@ -637,4 +727,4 @@ void CWizDocumentListView::on_vscroll_actionTriggered(int action)
             return;
     }
 }
-#endif // Q_OS_MAC
+//#endif // Q_OS_MAC

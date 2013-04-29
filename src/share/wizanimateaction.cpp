@@ -62,6 +62,9 @@ void CWizAnimateAction::startPlay()
     if (!m_action)
         return;
 
+    // for other class to determine animation status
+    m_action->setProperty("animationStatus", 1);
+
     m_nIconIndex = -1;
 
     nextIcon();
@@ -73,6 +76,8 @@ void CWizAnimateAction::stopPlay()
 {
     if (!m_action)
         return;
+
+    m_action->setProperty("animationStatus", 0);
 
     m_action->setIcon(m_iconDefault);
     m_timer->stop();

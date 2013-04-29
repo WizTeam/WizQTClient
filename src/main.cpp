@@ -15,7 +15,10 @@
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
+    a.setAttribute(Qt::AA_NativeWindows);
+
     QApplication::setApplicationName(QObject::tr("WizNote"));
+
     //IWizGlobal::instance()->setVersion("1.3.0");
 
 #if defined Q_OS_MAC

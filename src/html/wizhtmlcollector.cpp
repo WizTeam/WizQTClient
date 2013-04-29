@@ -236,6 +236,8 @@ bool CWizHtmlToPlainText::toText(const QString& strHtml, QString& strPlainText)
     reader.Read(strHtml);
 
     strPlainText = m_strText.simplified();
+
+    return true;
 }
 
 void CWizHtmlToPlainText::Characters(const CString &rText, DWORD dwAppData, bool &bAbort)
@@ -243,5 +245,7 @@ void CWizHtmlToPlainText::Characters(const CString &rText, DWORD dwAppData, bool
     Q_UNUSED(dwAppData);
     Q_UNUSED(bAbort);
 
-    m_strText.push_back(rText + " ");
+    CString strText = rText;
+    strText.replace('\000', ' ');
+    m_strText.push_back(strText + " ");
 }

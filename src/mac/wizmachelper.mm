@@ -1,10 +1,31 @@
+#include "wizmachelper.h"
+
 #include <QPixmap>
 #include <QIcon>
+#include <QMainWindow>
 
 #import <AppKit/AppKit.h>
 #import <objc/objc-class.h>
 
-#include "wizmachelper.h"
+void setupFullScreenMode(QMainWindow* mainWindow)
+{
+    NSView *nsview = (NSView *) mainWindow->winId();
+    NSWindow *nswindow = [nsview window];
+    [nswindow setCollectionBehavior:NSWindowCollectionBehaviorFullScreenPrimary];
+}
+
+void toggleFullScreenMode(QMainWindow* mainWindow)
+{
+    NSView *nsview = (NSView *) mainWindow->winId();
+    NSWindow *nswindow = [nsview window];
+    [nswindow toggleFullScreen:nil];
+}
+
+QString WizMacGetOSVersion()
+{
+    NSString *versionString = [[NSProcessInfo processInfo] operatingSystemVersionString];
+    return WizToQString(versionString);
+}
 
 CWizNSAutoReleasePool::CWizNSAutoReleasePool() : _pool([[NSAutoreleasePool alloc] init])
 {

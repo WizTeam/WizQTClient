@@ -6,6 +6,9 @@
 #include "wizdef.h"
 #include "share/wizobject.h"
 #include "share/wizThumbIndexCache.h"
+#include "share/wizuihelper.h"
+
+//#include "widgets/qscrollareakineticscroller.h"
 
 class CWizDocumentListViewItem;
 class CWizTagListWidget;
@@ -18,6 +21,7 @@ public:
     CWizDocumentListView(CWizExplorerApp& app, QWidget *parent = 0);
     //virtual QSize sizeHint() const { return QSize(300, 1); }
 
+    virtual void resizeEvent(QResizeEvent* event);
     virtual void contextMenuEvent(QContextMenuEvent* event);
     virtual void mousePressEvent(QMouseEvent* event);
     virtual void mouseMoveEvent(QMouseEvent* event);
@@ -31,6 +35,7 @@ private:
     CWizExplorerApp& m_app;
     CWizDatabaseManager& m_dbMgr;
     QPointer<CWizThumbIndexCache> m_thumbCache;
+    CWizScrollBar* m_vScroll;
 
     QPointer<QMenu> m_menu;
     QAction* m_actionEncryptDocument;
@@ -38,13 +43,15 @@ private:
 
     QPoint m_dragStartPosition;
 
-#ifndef Q_OS_MAC
+//#ifndef Q_OS_MAC
     // used for smoothly scroll
     QTimer m_vscrollTimer;
     int m_vscrollOldPos;
     int m_vscrollDelta;
     int m_vscrollCurrent;
-#endif // Q_OS_MAC
+//#endif // Q_OS_MAC
+
+    QPointer<QPropertyAnimation> m_scrollAnimation;
 
     void resetPermission();
     QAction* findAction(const QString& strName);
@@ -68,12 +75,12 @@ public:
     WIZABSTRACT documentAbstractFromIndex(const QModelIndex &index) const;
     CString documentTagsFromIndex(const QModelIndex &index) const;
 
-#ifndef Q_OS_MAC
+//#ifndef Q_OS_MAC
     // used for smoothly scroll
     void vscrollBeginUpdate(int delta);
-    virtual void updateGeometries();
+    //virtual void updateGeometries();
     virtual void wheelEvent(QWheelEvent* event);
-#endif // Q_OS_MAC
+//#endif // Q_OS_MAC
 
 public Q_SLOTS:
     void on_tag_created(const WIZTAGDATA& tag);
@@ -88,12 +95,14 @@ public Q_SLOTS:
 
     void on_document_abstractLoaded(const WIZABSTRACT& abs);
 
-#ifndef Q_OS_MAC
+//#ifndef Q_OS_MAC
     // used for smoothly scroll
     void on_vscroll_valueChanged(int value);
     void on_vscroll_actionTriggered(int action);
     void on_vscroll_update();
-#endif // Q_OS_MAC
+    void on_vscrollAnimation_valueChanged(const QVariant& value);
+    void on_vscrollAnimation_finished();
+//#endif // Q_OS_MAC
 };
 
 

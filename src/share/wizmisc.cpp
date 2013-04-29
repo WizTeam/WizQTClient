@@ -888,24 +888,19 @@ time_t WizTimeGetTimeT(const COleDateTime& t)
 
 CString WizStringToSQL(const CString& str)
 {
-    if (str.GetLength() == 0)
-    {
-        return CString(_T("NULL"));
+    if (str.isEmpty()) {
+        return "NULL";
     }
-    else
-    {
-        if (str.Find(_T('\'')) == -1)
-        {
-            return CString(_T("'")) + str + CString(_T("'"));
-        }
-        else
-        {
-            CString strRet = str;
-            strRet.replace("'", "''");
-            //
-            return CString(_T("'")) + strRet + CString(_T("'"));
-        }
+
+    CString strSql = str;
+    if (str.indexOf('\'') == -1) {
+        strSql = "'" + strSql + "'";
+    } else {
+        strSql.replace("'", "''");
+        strSql = "'" + strSql + "'";
     }
+
+    return strSql;
 }
 
 CString WizDateTimeToString(const COleDateTime& t)
@@ -1778,76 +1773,179 @@ QString WizGetSkinResourceFileName(const QString& strSkinName, const QString& st
         WizGetSkinResourcePath(strSkinName)
     };
 
+    QStringList suffixList;
+    suffixList << ".png" << ".tiff";
+
     for (size_t i = 0; i < sizeof(arrayPath) / sizeof(QString); i++)
     {
-        QString strFileName = arrayPath[i] + strName;
-
-        if (!strFileName.endsWith(".png"))
-        {
-            strFileName.append(".png");
-        }
-
-        if (::PathFileExists(strFileName))
-        {
-            return strFileName;
+        QStringList::const_iterator it;
+        for (it = suffixList.begin(); it != suffixList.end(); it++) {
+            QString strFileName = arrayPath[i] + strName + *it;
+            //qDebug() << strFileName;
+            if (::PathFileExists(strFileName)) {
+                return strFileName;
+            }
         }
     }
 
     return QString();
 }
 
+QIcon WizLoadSkinIcon(const QString& strSkinName, const QString& strIconName,
+                      QIcon::Mode mode /* = QIcon::Normal */, QIcon::State state /* = QIcon::Off */)
+{
+    Q_UNUSED(mode);
+    Q_UNUSED(state);
+
+    QString strIconNormal = WizGetSkinResourceFileName(strSkinName, strIconName);
+    QString strIconActive = WizGetSkinResourceFileName(strSkinName, strIconName + "_on");
+
+    if (!QFile::exists(strIconNormal)) {
+        //TOLOG1("Can't load icon: ", strIconName);
+        return QIcon();
+    }
+
+    QIcon icon;
+    icon.addFile(strIconNormal, QSize(), QIcon::Normal, QIcon::Off);
+
+    if (QFile::exists(strIconActive)) {
+        icon.addFile(strIconActive, QSize(), QIcon::Normal, QIcon::On);
+    }
+
+    return icon;
+}
+
 QIcon WizLoadSkinIcon(const QString& strSkinName, QColor forceground, const QString& strIconName)
 {
+    Q_UNUSED(forceground);
+
     QString strFileName = WizGetSkinResourceFileName(strSkinName, strIconName);
     if (strFileName.isEmpty())
         return QIcon();
 
-    QImage image(strFileName);
-    //QImage iGray(image.width(), image.height(), QImage::Format_RGB32);
-    //QPixmap mask = QPixmap::fromImage(image.createAlphaMask());
-
-    //QPixmap fileMap(strFileName);
-    //fileMap.setMask(mask);
-    //for (int i = 0; i < image.width(); i++) {
-    //    for (int j = 0; j < image.height(); j++) {
-    //        QRgb pixel = image.pixel(i, j);
-    //        int gray = qGray(pixel);
-    //        if (gray == 0) {
-    //            iGray.setPixel(i, j, qRgb(gray, gray, gray));
-    //        } else {
-    //            iGray.setPixel(i, j, pixel);
-    //        }
-    //    }
-    //}
-
-    //QPixmap rawMap(fileMap.size());
-    //rawMap.setMask(fileMap.createHeuristicMask());
-
-    //QPainter painter(&fileMap);
-    //painter.setClipRegion(QRegion(mask));
-    //painter.setRenderHint(QPainter::Antialiasing, true);
-    //painter.setCompositionMode(QPainter::CompositionMode_SourceOver);
-    //QBrush brushBack(forceground.lighter(150));
-    //painter.fillRect(0, 0, fileMap.width(), fileMap.height(), brushBack);
-    //painter.drawPixmap(0, 0, fileMap);
-
-
-    //QImage rawImage(strFileName);
-    ////rawImage = rawImage.createAlphaMask();
-    //rawImage = rawImage.alphaChannel();
-    //int count =  rawImage.colorCount();
-    //for (int i = 0; i < rawImage.colorCount(); i++) {
-    //    //int alpha = qGray(rawImage.color(i));
-    //    QColor color = forceground.lighter(200);
-    //    rawImage.setColor(i, color.rgba());
-    //}
+    QPixmap pixmap(strFileName);
 
     QIcon icon;
-    //icon.addPixmap(fileMap);
-    icon.addPixmap(QPixmap::fromImage(image));
+    icon.addPixmap(pixmap);
 
     return icon;
 }
+
+QIcon WizLoadSkinIcon2(const QString& strSkinName, const QColor& blendColor, const QString& strIconName)
+{
+    QString strFileName = WizGetSkinResourceFileName(strSkinName, strIconName);
+    if (!QFile::exists(strFileName)) {
+        return QIcon();
+    }
+
+    QImage imgOrig(strFileName);
+
+    float factor_R = 0.6;
+    float factor_G = 0.7;
+    float factor_B = 1;
+    QRgb blendColorBase = qRgb(blendColor.red() * factor_R, blendColor.green() * factor_G, blendColor.blue() * factor_B);
+
+    for (int i = 0; i < imgOrig.height(); i++) {
+        for (int j = 0; j < imgOrig.width(); j++) {
+            QRgb colorOld = imgOrig.pixel(i, j);
+            int alpha  = qAlpha(colorOld);
+
+            // alpha channel blending
+            int red = qRed(blendColorBase) * (255 - alpha) / 255;
+            int green = qGreen(blendColorBase) * (255 - alpha) / 255;
+            int blue = qBlue(blendColorBase) * (255 - alpha) / 255;
+
+            // optimize, shallow color deepth
+            if (alpha <= 192) {
+                imgOrig.setPixel(i, j, qRgba(red, green, blue, alpha));
+            } else if (alpha > 192) {
+                imgOrig.setPixel(i, j, qRgba(red, green, blue, alpha - 128));
+            }
+        }
+    }
+
+
+    // Test
+    QIcon icon;
+    QPixmap pixmap;
+    pixmap.convertFromImage(imgOrig);
+    icon.addPixmap(pixmap);
+    return icon;
+}
+
+bool WizImageBlending(QImage& img, const QColor& blendColor, QIcon::Mode mode /* = QIcon::Normal */)
+{
+    // FIXME: hard-coded
+    float factor_R = 0.6;
+    float factor_G = 0.7;
+    float factor_B = 1;
+
+    QRgb blendColorBase = qRgb(blendColor.red() * factor_R, blendColor.green() * factor_G, blendColor.blue() * factor_B);
+
+    for (int i = 0; i < img.height(); i++) {
+        for (int j = 0; j < img.width(); j++) {
+            QRgb colorOld = img.pixel(i, j);
+            int alpha  = qAlpha(colorOld);
+
+            // alpha channel blending
+            int red = qRed(blendColorBase) * (255 - alpha) / 255;
+            int green = qGreen(blendColorBase) * (255 - alpha) / 255;
+            int blue = qBlue(blendColorBase) * (255 - alpha) / 255;
+
+            // optimize, shallow color deepth
+            if (mode == QIcon::Selected) {
+                img.setPixel(i, j, qRgba(255, 255, 255, alpha));
+            } else {
+                if (alpha <= 192) {
+                    img.setPixel(i, j, qRgba(red, green, blue, alpha));
+                } else if (alpha > 192) {
+                    img.setPixel(i, j, qRgba(red, green, blue, alpha - 128));
+                }
+            }
+        }
+    }
+
+    return true;
+}
+
+void WizLoadSkinIcon3(QIcon& icon, const QString& strSkinName, const QString& strIconName,
+                      QIcon::Mode mode, QIcon::State state, const QColor& blendColor)
+{
+    QString strFileName = WizGetSkinResourceFileName(strSkinName, strIconName);
+    if (!QFile::exists(strFileName)) {
+        TOLOG("WizLoadSkinIcon: missing icon file");
+        return;
+    }
+
+    QImage img(strFileName);
+    if (!WizImageBlending(img, blendColor, mode)) {
+        TOLOG("WizLoadSkinIcon: icon file is not spec respect for alpha blending");
+        return;
+    }
+
+    icon.addPixmap(QPixmap::fromImage(img), mode, state);
+}
+
+QIcon WizLoadSkinIcon3(const QString& strIconName, QIcon::Mode mode)
+{
+    QString strFileName = WizGetSkinResourceFileName("default", strIconName);
+    if (!QFile::exists(strFileName)) {
+        TOLOG("WizLoadSkinIcon3: missing icon file: " + strFileName);
+        return QIcon();
+    }
+
+    QImage img(strFileName);
+    if (!WizImageBlending(img, QColor(205, 210, 215), mode)) {
+        TOLOG("WizLoadSkinIcon3: icon file is not spec respect for alpha blending");
+        return QIcon();
+    }
+
+    QIcon icon;
+    icon.addPixmap(QPixmap::fromImage(img), mode, QIcon::On);
+
+    return icon;
+}
+
 
 // FIXME: obosolete, use CWizHtmlToPlainText class instead!
 void WizHtml2Text(const QString& strHtml, QString& strText)

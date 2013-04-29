@@ -32,6 +32,8 @@ QSize CWizNoteInfoForm::sizeHint() const
 
 void CWizNoteInfoForm::setDocument(const WIZDOCUMENTDATA& data)
 {
+    Q_ASSERT(!data.strKbGUID.isEmpty());
+
     CWizDatabase& db = m_dbMgr.db(data.strKbGUID);
     QString doc = db.GetDocumentFileName(data.strGUID);
     QString sz = ::WizGetFileSizeHumanReadalbe(doc);
@@ -44,6 +46,8 @@ void CWizNoteInfoForm::setDocument(const WIZDOCUMENTDATA& data)
 
         QString tags = db.GetDocumentTagsText(data.strGUID);
         ui->labelTags->setText(tags);
+
+        ui->editAuthor->setText(data.strAuthor);
 
     // group document
     } else {
@@ -64,13 +68,14 @@ void CWizNoteInfoForm::setDocument(const WIZDOCUMENTDATA& data)
         }
 
         ui->labelTags->clear();
+        ui->editAuthor->setText(data.strOwner);
     }
 
+    // common fields
     ui->editCreateTime->setText(data.tCreated.toString());
     ui->editUpdateTime->setText(data.tModified.toString());
     ui->editURL->setText(data.strURL);
     ui->labelOpenURL->setText(WizFormatString2("<a href=\"%1\">%2</a>", data.strURL, tr("Open")));
     ui->labelSize->setText(sz);
-    ui->editAuthor->setText(data.strAuthor);
     ui->checkEncrypted->setChecked(data.nProtected ? true : false);
 }

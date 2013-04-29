@@ -4,212 +4,71 @@
 <head>
     <title></title>
     <meta content="text/html; charset=utf-8" http-equiv="Content-Type"/>
+    <script type="text/javascript" src="../internal.js"></script>
     <style type="text/css">
-        *{color: #838383}
-        body {
-            font-size: 12px;
-            width:380px;
-            height: 170px;
-            overflow: hidden;
-            margin:0;padding:0;
-        }
-        .warp{ padding: 39px 0 0 15px;height:88%;position:relative;}
-        * +html .warp{height:80%}
-        .head{position:absolute;height:31px;top:9px;}
-        .content{height:110px;border: 1px solid #ddd;padding:5px}
-        .head span{width:62px;height:29px;line-height:29px;background:red;display:block;float: left;text-align: center;margin-right: 1px;cursor: pointer }
-        .head span.def{background:url("../../themes/default/images/dialog-title-bg.png") repeat-x;border:1px solid #ccc;}
-        .head span.act{background:#FFF;border:1px solid #ccc;border-bottom: 1px solid #FFF}
-        .content table{width:100%;}
-        .content input.int{ width:190px;height:21px;background: #FFF;border:1px solid #d7d7d7;padding: 0; margin: 0;line-height:21px;}
-        .content input.btn{padding: 0 5px; text-align:center;line-height:24px; text-decoration: none;height:24px;border: 0;margin:0;background:url("../../themes/default/images/dialog-title-bg.png") repeat-x;border:1px solid #ccc; }
+        .warpper{ position:relative;width: 380px;margin: 10px auto;}
+        .tabbody{height: 115px;}
+        .tabbody table{width:100%;border-collapse: separate;border-spacing: 3px;}
+        .tabbody .panel{width:373px;height:100%;padding-left: 5px;position: absolute;background-color: #fff;}
+        .tabbody input.int{ width:190px;height:21px;border:1px solid #d7d7d7;line-height:21px;}
+        .tabbody input.btn{padding: 0 5px; text-align:center;line-height:24px; text-decoration: none;height:24px;background:url("../../themes/default/images/dialog-title-bg.png") repeat-x;border:1px solid #ccc; }
     </style>
 </head>
 <body>
-<div class="warp">
-    <div id="head" class="head">
-        <span name="find" class="act"><var id="lang_tab_search"></var></span> <span name="replace" class="def"><var id="lang_tab_replace"></var></span>
+<div class="warpper" id="searchtab">
+    <div id="head" class="tabhead">
+        <span  tabsrc="find" class="focus"><var id="lang_tab_search"></var></span>
+        <span  tabsrc="replace" ><var id="lang_tab_replace"></var></span>
     </div>
-    <div class="content" id="find">
-        <table>
-            <tr>
-                <td width="80"><var id="lang_search1"></var>: </td>
-                <td><input id="findtxt" type="text" class="int" /></td>
-            </tr>
-            <tr>
-                <td><var id="lang_case_sensitive1"></var></td>
-                <td>
-                    <input id="matchCase" type="checkbox" />
-                </td>
-            </tr>
-            <tr>
-                <td colspan="2">
-                    <input id="nextFindBtn" type="button" class="btn" />
-                    <input id="preFindBtn" type="button" class="btn" />
-                </td>
-            </tr>
-        </table>
-    </div>
-    
-    <div class="content" id="replace">
-        <table>
-            <tr>
-                <td width="80"><var id="lang_search2"></var>: </td>
-                <td><input id="findtxt1" type="text" class="int"  /></td>
-            </tr>
-            <tr>
-                <td><var id="lang_replace"></var>: </td>
-                <td><input id="replacetxt" type="text" class="int" /></td>
-            </tr>
-            <tr>
-                <td><var id="lang_case_sensitive2"></var></td>
-                <td>
-                    <input id="matchCase1" type="checkbox" />
-                </td>
-            </tr>
-            <tr>
-                <td colspan="2">
-                    <input id="nextReplaceBtn" type="button" class="btn" />
-                    <input id="preReplaceBtn" type="button" class="btn" />
-                    <input id="repalceBtn" type="button" class="btn" />
-                    <input id="repalceAllBtn" type="button" class="btn" />
-                </td>
-            </tr>
-        </table>
+    <div class="tabbody">
+        <div class="panel" id="find">
+            <table>
+                <tr>
+                    <td width="80"><var id="lang_search1"></var>: </td>
+                    <td><input id="findtxt" type="text" class="int" /></td>
+                </tr>
+                <tr>
+                    <td><var id="lang_case_sensitive1"></var></td>
+                    <td>
+                        <input id="matchCase" type="checkbox" />
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <input id="nextFindBtn" type="button" class="btn" />
+                        <input id="preFindBtn" type="button" class="btn" />
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <div class="panel" id="replace">
+            <table>
+                <tr>
+                    <td width="80"><var id="lang_search2"></var>: </td>
+                    <td><input id="findtxt1" type="text" class="int"  /></td>
+                </tr>
+                <tr>
+                    <td><var id="lang_replace"></var>: </td>
+                    <td><input id="replacetxt" type="text" class="int" /></td>
+                </tr>
+                <tr>
+                    <td><var id="lang_case_sensitive2"></var></td>
+                    <td>
+                        <input id="matchCase1" type="checkbox" />
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <input id="nextReplaceBtn" type="button" class="btn" />
+                        <input id="preReplaceBtn" type="button" class="btn" />
+                        <input id="repalceBtn" type="button" class="btn" />
+                        <input id="repalceAllBtn" type="button" class="btn" />
+                    </td>
+                </tr>
+            </table>
+        </div>
     </div>
 </div>
-<script type="text/javascript" src="../internal.js"></script>
-<script type="text/javascript">
-        //清空上次查选的痕迹
-        editor.firstForSR = 0;
-        editor.currentRangeForSR = null;
-        $G("replace").style.display = "none";
-        //给tab注册切换事件
-        function toggletab(){
-            var tabs = document.getElementsByTagName("span");
-            for(var i=0,j;j=tabs[i];i++){
-                domUtils.on(j,"click",function(){
-                    var name = this.getAttribute("name");
-                    var spans = document.getElementsByTagName("span");
-                    var len = spans.length;
-                    for(var s=0;s<len;s++){
-                        spans[s].className = 'def';
-                    }
-                    this.className = 'act';
-                    $G("find").style.display = "none";
-                    $G("replace").style.display = "none";
-                    $G(name).style.display = "";
-                    $G('findtxt1').value = $G('findtxt').value;
-                    if(name =="replace"){
-                        $focus($G("findtxt1"));
-                    }else{
-                        $focus($G("findtxt"));
-                    }
-                });
-            }
-
-        }
-        //是否区分大小写
-        function getMatchCase (id){
-            return $G(id).checked ? true : false;
-        }
-        //查找
-        $G("nextFindBtn").onclick = function(txt,dir,mcase){
-            var findtxt = $G("findtxt").value,obj;
-            if(!findtxt){
-                return false;
-            }
-            obj = {
-                searchStr : findtxt,
-                dir : 1,
-                casesensitive : getMatchCase("matchCase")
-            };
-            if(!frCommond(obj)){
-                alert(lang.getEnd);
-            }
-        };
-        $G("nextReplaceBtn").onclick = function(txt,dir,mcase){
-            var findtxt = $G("findtxt1").value,obj;
-            if(!findtxt){
-                return false;
-            }
-            obj = {
-                searchStr : findtxt,
-                dir : 1,
-                casesensitive : getMatchCase("matchCase1")
-            };
-            frCommond(obj);
-        }
-        $G("preFindBtn").onclick = function(txt,dir,mcase){
-            var findtxt = $G("findtxt").value,obj;
-            if(!findtxt){
-                return false;
-            }
-            obj = {
-                searchStr : findtxt,
-                dir : -1,
-                casesensitive : getMatchCase("matchCase")
-            };
-            if(!frCommond(obj)){
-                alert(lang.getStart);
-            }
-        }
-        $G("preReplaceBtn").onclick = function(txt,dir,mcase){
-            var findtxt = $G("findtxt1").value,obj;
-            if(!findtxt){
-                return false;
-            }
-            obj = {
-                searchStr : findtxt,
-                dir : -1,
-                casesensitive : getMatchCase("matchCase1")
-            };
-            frCommond(obj);
-        }
-        //替换
-        $G("repalceBtn").onclick = function(){
-            var findtxt = $G("findtxt1").value.replace(/^\s|\s$/g,""),obj,
-                replacetxt = $G("replacetxt").value.replace(/^\s|\s$/g,"");
-            if(!findtxt){
-                return false;
-            }
-            if(findtxt == replacetxt || (!getMatchCase("matchCase1") && findtxt.toLowerCase() == replacetxt.toLowerCase())){
-                return false;
-            }
-            obj = {
-                searchStr : findtxt,
-                dir : 1,
-                casesensitive : getMatchCase("matchCase1"),
-                replaceStr : replacetxt
-            };
-            frCommond(obj);
-        }
-        //全部替换
-        $G("repalceAllBtn").onclick = function(){
-            var findtxt = $G("findtxt1").value.replace(/^\s|\s$/g,""),obj,
-                replacetxt = $G("replacetxt").value.replace(/^\s|\s$/g,"");
-            if(!findtxt){
-                return false;
-            }
-            if(findtxt == replacetxt || (!getMatchCase("matchCase1") && findtxt.toLowerCase() == replacetxt.toLowerCase())){
-                return false;
-            }
-            obj = {
-                searchStr : findtxt,
-                casesensitive : getMatchCase("matchCase1"),
-                replaceStr : replacetxt,
-                all : true
-            };
-            var num = frCommond(obj);
-            if(num){
-                alert(lang.countMsg.replace("{#count}",num));
-            }
-        }
-        //执行
-        var frCommond = function(obj){
-            return editor.execCommand("searchreplace",obj);
-        }
-        toggletab();
-</script>
+<script type="text/javascript" src="searchreplace.js"></script>
 </body>
 </html>

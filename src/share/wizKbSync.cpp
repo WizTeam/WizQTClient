@@ -318,32 +318,34 @@ void CWizKbSync::startDownloadObjectsData()
 {
     m_db->GetAllObjectsNeedToBeDownloaded(m_arrayAllObjectsNeedToBeDownloaded);
 
-    if (!m_bDownloadAllNotesData)
-    {
-        COleDateTime tNow = ::WizGetCurrentTime();
+    int nTotal = m_arrayAllObjectsNeedToBeDownloaded.size();
 
+    if (m_nDaysDownload == -1) {
+        m_arrayAllObjectsNeedToBeDownloaded.clear();
+    } else {
+        COleDateTime tNow = ::WizGetCurrentTime();
         size_t count = m_arrayAllObjectsNeedToBeDownloaded.size();
         for (intptr_t i = count - 1; i >= 0; i--)
         {
             COleDateTime t = m_arrayAllObjectsNeedToBeDownloaded[i].tTime;
-            t = t.addDays(7);
-            if (t < tNow)
-            {
+            t = t.addDays(m_nDaysDownload);
+            if (t < tNow) {
                 m_arrayAllObjectsNeedToBeDownloaded.erase(m_arrayAllObjectsNeedToBeDownloaded.begin() + i);
                 continue;
             }
 
-            if (m_arrayAllObjectsNeedToBeDownloaded[i].eObjectType == wizobjectDocumentAttachment)
-            {
+            if (m_arrayAllObjectsNeedToBeDownloaded[i].eObjectType == wizobjectDocumentAttachment) {
                 m_arrayAllObjectsNeedToBeDownloaded.erase(m_arrayAllObjectsNeedToBeDownloaded.begin() + i);
                 continue;
             }
         }
     }
 
-    int nTotal = m_arrayAllObjectsNeedToBeDownloaded.size();
+    int nTotalDownload = m_arrayAllObjectsNeedToBeDownloaded.size();
     if (nTotal) {
-        Q_EMIT processLog(WizFormatString1(tr("downloading objects data, total %1 objects need download"), nTotal));
+        Q_EMIT processLog(WizFormatString2(tr("downloading objects data, total %1 objects need download, actually download: %2"),
+                                           QString::number(nTotal),
+                                           QString::number(nTotalDownload)));
     }
 
     Q_EMIT progressChanged(progressAttachmentUploaded);
@@ -652,6 +654,7 @@ void CWizKbSync::downloadNextDocumentFullInfo()
         WIZDOCUMENTDATABASE data = m_arrayAllDocumentsNeedToBeDownloaded[0];
         m_arrayAllDocumentsNeedToBeDownloaded.erase(m_arrayAllDocumentsNeedToBeDownloaded.begin());
 
+        Q_EMIT processLog(tr("download document info: ") + data.strTitle);
         callDocumentGetData(data);
     }
 }
@@ -662,6 +665,7 @@ void CWizKbSync::onDocumentGetData(const WIZDOCUMENTDATAEX& data)
 
     if (m_bChained) {
         if (!m_db->UpdateDocument(data)) {
+            TOLOG1("Update Document info failed: %1", data.strTitle);
             m_bDocumentInfoError = true;
         }
 

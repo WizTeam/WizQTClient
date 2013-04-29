@@ -24,22 +24,14 @@ private:
     bool m_leftAlign;
     QPoint m_pos;
 
+    QRegion maskRegion();
+
 protected:
-#ifndef Q_OS_MAC
     virtual void paintEvent(QPaintEvent* event);
-#endif
-    virtual void resizeEvent(QResizeEvent* event);
 
 public:
     void setLeftAlign(bool b) { m_leftAlign = b; }
     void showAtPoint(const QPoint& pt);
-
-
-public Q_SLOTS:
-    void onAnimationStateChanged(QAbstractAnimation::State newState, \
-                                 QAbstractAnimation::State oldState);
-
-    void onAnimationTimeout();
 };
 
 #endif // WIZPOPUPWIDGET_H

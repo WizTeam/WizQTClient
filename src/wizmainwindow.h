@@ -28,6 +28,7 @@ class CWizDocumentViewHistory;
 class CWizFixedSpacer;
 class CWizSplitter;
 class CWizAnimateAction;
+//class CWizSyncAnimation;
 class CWizOptionsWidget;
 class CWizStatusBar;
 
@@ -57,6 +58,7 @@ public:
     bool isLogout() const { return m_bLogoutRestart; }
 
 protected:
+    virtual void resizeEvent(QResizeEvent *event);
     virtual void showEvent(QShowEvent* event);
     virtual void closeEvent(QCloseEvent* event);
 
@@ -67,7 +69,6 @@ private:
     QPointer<QTimer> m_syncTimer;
     CWizConsoleDialog* m_console;
     QPointer<CWizUpgrade> m_upgrade;
-    //QPointer<CWizUpgradeThread> m_upgrade;
     QPointer<CWizCertManager> m_certManager;
     QPointer<CWizUserCipherForm> m_cipherForm;
     QPointer<CWizGroupAttributeForm> m_groupAttribute;
@@ -93,7 +94,8 @@ private:
     CWizOptionsWidget* m_options;
 
     CWizDocumentViewHistory* m_history;
-    CWizAnimateAction* m_animateSync;
+    QPointer<CWizAnimateAction> m_animateSync;
+    //QPointer<CWizSyncAnimation> m_animateSync;
 
     QPointer<CWizSearchIndexerThread> m_searchIndexer;
     QPointer<CWizSearchBox> m_searchBox;
@@ -116,12 +118,15 @@ private:
     void initClient();
     void initStatusBar();
 
+    QWidget* setupCategorySwitchButtons();
+
 public:
     // CWizDocument passthrough methods
     QWidget* client() const { return m_doc->client(); }
     CWizDocumentWebView* web() const { return m_doc->web(); }
     void showClient(bool visible) const { return m_doc->showClient(visible); }
 
+    CWizActions* actions() const { return m_actions; }
     CWizUserCipherForm* cipherForm() const { return m_cipherForm; }
     CWizGroupAttributeForm* groupAttributeForm() { return m_groupAttribute; }
     CWizDownloadObjectDataDialog* objectDownloadDialog() const { return m_objectDownloadDialog; }
@@ -152,6 +157,10 @@ public Q_SLOTS:
     void on_actionEditingUndo_triggered();
     void on_actionEditingRedo_triggered();
 
+    // menu view
+    void on_actionViewToggleCategory_triggered();
+    void on_actionViewToggleFullscreen_triggered();
+
     // menu format
     void on_actionFormatJustifyLeft_triggered();
     void on_actionFormatJustifyRight_triggered();
@@ -163,6 +172,7 @@ public Q_SLOTS:
     void on_actionFormatInsertUnorderedList_triggered();
     void on_actionFormatInsertTable_triggered();
     void on_actionFormatInsertLink_triggered();
+    void on_actionFormatForeColor_triggered();
     void on_actionFormatBold_triggered();
     void on_actionFormatItalic_triggered();
     void on_actionFormatUnderLine_triggered();
@@ -178,12 +188,13 @@ public Q_SLOTS:
     void on_actionGoBack_triggered();
     void on_actionGoForward_triggered();
 
+    void on_actionCategorySwitch_triggered(int index);
     void on_actionCategorySwitchPrivate_triggered();
     void on_actionCategorySwitchTags_triggered();
     void on_actionCategorySwitchGroups_triggered();
-    void on_actionCategorySwitchPrivate_triggered2(bool toggled);
-    void on_actionCategorySwitchTags_triggered2(bool toggled);
-    void on_actionCategorySwitchGroups_triggered2(bool toggled);
+    //void on_actionCategorySwitchPrivate_triggered2(bool toggled);
+    //void on_actionCategorySwitchTags_triggered2(bool toggled);
+    //void on_actionCategorySwitchGroups_triggered2(bool toggled);
     void categorySwitchTo(CWizCategoryBaseView* sourceCategory, CWizCategoryBaseView* destCategory);
     void onAnimationCategorySwitchStateChanged(QAbstractAnimation::State newState, QAbstractAnimation::State oldState);
 
@@ -238,7 +249,10 @@ public:
 
     Q_INVOKABLE QObject* CreateWizObject(const QString& strObjectID);
     Q_INVOKABLE void SetDocumentModified(bool modified);
+    Q_INVOKABLE void ResetEditorToolBar();
+    Q_INVOKABLE void ResetContextMenuAndPop(const QPoint& pos);
     Q_INVOKABLE void SetSavingDocument(bool saving);
+    Q_INVOKABLE void ProcessClipboardBeforePaste(const QVariantMap& data);
 
 };
 

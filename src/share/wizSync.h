@@ -16,16 +16,18 @@ public:
     ~CWizSync();
 
     void startSync();
+    void abort();
 
-    void abort() const { m_kbSync->abort(); }
     void resetProxy() const { m_kbSync->resetProxy(); }
-    void setDownloadAllNotesData(bool b) const { m_kbSync->setDownloadAllNotesData(b); }
+    void setDaysDownload(int n) { m_kbSync->setDaysDownload(n); }
+    //void setDownloadAllNotesData(bool b) const { m_kbSync->setDownloadAllNotesData(b); }
 
 private:
     CWizDatabaseManager& m_dbMgr;
     QPointer<CWizKbSync> m_kbSync;
     CWizGroupDataArray m_arrayGroup;
     bool m_bStarted;
+    bool m_bAborted;
 
 public Q_SLOTS:
     void on_clientLoginDone();

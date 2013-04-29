@@ -24,8 +24,8 @@
     /**
      * 此处配置写法适用于UEditor小组成员开发使用，外部部署用户请按照上述说明方式配置即可，建议保留下面两行，以兼容可在具体每个页面配置window.UEDITOR_HOME_URL的功能。
      */
-    var tmp = window.location.pathname;
-        URL = window.UEDITOR_HOME_URL||tmp.substr(0,tmp.lastIndexOf("\/")+1).replace("_examples/","").replace("website/","");//这里你可以配置成ueditor目录在您网站的相对路径或者绝对路径（指以http开头的绝对路径）
+    var tmp = location.protocol.indexOf("file")==-1 ? location.pathname : location.href;
+    URL = window.UEDITOR_HOME_URL||tmp.substr(0,tmp.lastIndexOf("\/")+1).replace("_examples/","").replace("website/","");//这里你可以配置成ueditor目录在您网站的相对路径或者绝对路径（指以http开头的绝对路径）
 
     /**
      * 配置项主体。注意，此处所有涉及到路径的配置别遗漏URL变量。
@@ -34,11 +34,6 @@
 
         //为编辑器实例添加一个路径，这个不能被注释
         UEDITOR_HOME_URL : URL
-
-        //语言配置项,默认是zh-cn。有需要的话也可以使用如下这样的方式来自动多语言切换，当然，前提条件是lang文件夹下存在对应的语言文件：
-        //lang值也可以通过自动获取 (navigator.language||navigator.browserLanguage ||navigator.userLanguage).toLowerCase()
-        //,lang:"zh-cn"
-        //,langPath:URL +"lang/"
 
         //图片上传配置区
         ,imageUrl:URL+"php/imageUp.php"             //图片上传提交地址
@@ -49,7 +44,7 @@
 
         //涂鸦图片配置区
         ,scrawlUrl:URL+"php/scrawlUp.php"           //涂鸦上传地址
-        ,scrawlPath:URL+"php/"                           //图片修正地址，同imagePath
+        ,scrawlPath:URL+"php/"                            //图片修正地址，同imagePath
 
         //附件上传配置区
         ,fileUrl:URL+"php/fileUp.php"               //附件上传提交地址
@@ -73,7 +68,7 @@
         ,snapscreenServerUrl: URL +"php/imageUp.php" //屏幕截图的server端保存程序，UEditor的范例代码为“URL +"server/upload/php/snapImgUp.php"”
         ,snapscreenPath: URL + "php/"
         //,snapscreenServerPort: 80                                    //屏幕截图的server端端口
-        //,snapscreenImgAlign: 'center'                                //截图的图片默认的排版方式
+        //,snapscreenImgAlign: ''                                //截图的图片默认的排版方式
 
         //word转存配置区
         ,wordImageUrl:URL + "php/imageUp.php"             //word转存提交地址
@@ -86,13 +81,13 @@
         //工具栏上的所有的功能按钮和下拉框，可以在new编辑器的实例时选择自己需要的从新定义
         ,toolbars:[
             ['fullscreen', 'source', '|', 'undo', 'redo', '|',
-                'bold', 'italic', 'underline', 'strikethrough', 'superscript', 'subscript', 'removeformat', 'formatmatch','autotypeset', '|',
-                'blockquote', '|', 'pasteplain', '|', 'forecolor', 'backcolor', 'insertorderedlist', 'insertunorderedlist','selectall', 'cleardoc', '|', 'customstyle',
-                'paragraph', '|','rowspacingtop', 'rowspacingbottom','lineheight', '|','fontfamily', 'fontsize', '|',
-                'directionalityltr', 'directionalityrtl', '|', '', 'indent', '|',
+                'bold', 'italic', 'underline', 'strikethrough', 'superscript', 'subscript', 'removeformat', 'formatmatch','autotypeset','blockquote', 'pasteplain', '|', 'forecolor', 'backcolor', 'insertorderedlist', 'insertunorderedlist','selectall', 'cleardoc', '|',
+                'rowspacingtop', 'rowspacingbottom','lineheight','|',
+                'customstyle', 'paragraph', 'fontfamily', 'fontsize', '|',
+                'directionalityltr', 'directionalityrtl', 'indent', '|',
                 'justifyleft', 'justifycenter', 'justifyright', 'justifyjustify', '|','touppercase','tolowercase','|',
-                'link', 'unlink', 'anchor', '|', 'imagenone', 'imageleft', 'imageright',
-                'imagecenter', '|', 'insertimage', 'emotion','scrawl', 'insertvideo', 'attachment', 'map', 'gmap', 'insertframe','highlightcode','webapp','pagebreak','template','background', '|',
+                'link', 'unlink', 'anchor', '|', 'imagenone', 'imageleft', 'imageright','imagecenter', '|',
+                'insertimage', 'emotion','scrawl', 'insertvideo','music','attachment', 'map', 'gmap', 'insertframe','highlightcode','webapp','pagebreak','template','background', '|',
                 'horizontal', 'date', 'time', 'spechars','snapscreen', 'wordimage', '|',
                 'inserttable', 'deletetable', 'insertparagraphbeforetable', 'insertrow', 'deleterow', 'insertcol', 'deletecol', 'mergecells', 'mergeright', 'mergedown', 'splittocells', 'splittorows', 'splittocols', '|',
                 'print', 'preview', 'searchreplace','help']
@@ -102,9 +97,18 @@
             'anchor':'', 'undo':''
         }
         //webAppKey
-        //百度应用的APIkey，每个站长必须首先去百度官网注册一个key后方能正常使用app功能  盛怒安乐死卡解决
+        //百度应用的APIkey，每个站长必须首先去百度官网注册一个key后方能正常使用app功能
         ,webAppKey:""
 
+        //语言配置项,默认是zh-cn。有需要的话也可以使用如下这样的方式来自动多语言切换，当然，前提条件是lang文件夹下存在对应的语言文件：
+        //lang值也可以通过自动获取 (navigator.language||navigator.browserLanguage ||navigator.userLanguage).toLowerCase()
+        //,lang:"zh-cn"
+        //,langPath:URL +"lang/"
+
+        //主题配置项,默认是default。有需要的话也可以使用如下这样的方式来自动多主题切换，当然，前提条件是themes文件夹下存在对应的主题文件：
+        //现有如下皮肤:default
+        //,theme:'default'
+        //,themePath:URL +"themes/"
 
         //若实例化编辑器的页面手动修改的domain，此处需要设置为true
         //,customDomain:false
@@ -117,15 +121,16 @@
 
         //,initialContent:'欢迎使用ueditor!'    //初始化编辑器的内容,也可以通过textarea/script给值，看官网例子
 
+        //,initialFrameWidth:1000  //初始化编辑器宽度,默认1000
+        //,initialFrameHeight:320  //初始化编辑器高度,默认320
+
         //,autoClearinitialContent:true //是否自动清除编辑器初始内容，注意：如果focus属性设置为true,这个也为真，那么编辑器一上来就会触发导致初始化的内容看不到了
 
-        //,iframeCssUrl: URL + '/themes/default/iframe.css' //给编辑器内部引入一个css文件
+        //,iframeCssUrl: URL + '/themes/iframe.css' //给编辑器内部引入一个css文件
 
         //,textarea:'editorValue' // 提交表单时，服务器获取编辑器提交内容的所用的参数，多实例时可以给容器name属性，会将name给定的值最为每个实例的键值，不用每次实例化的时候都设置这个值
 
         //,focus:false //初始化时，是否让编辑器获得焦点true或false
-
-        //,minFrameHeight:320  // 最小高度,默认320
 
         //,autoClearEmptyNode : true //getContent时，是否删除空的inlineElement节点（包括嵌套的情况）
 
@@ -141,7 +146,7 @@
 
         //,emotionLocalization:false //是否开启表情本地化，默认关闭。若要开启请确保emotion文件夹下包含官网提供的images表情文件夹
 
-        //,pasteplain:true  //是否纯文本粘贴。false为不使用纯文本粘贴，true为使用纯文本粘贴
+        //,pasteplain:false  //是否纯文本粘贴。false为不使用纯文本粘贴，true为使用纯文本粘贴
 
         //,allHtmlEnabled:false //提交到后台的数据是否包含整个html字符串
         //iframeUrlMap
@@ -153,21 +158,35 @@
         //insertorderedlist
         //有序列表的下拉配置,值留空时支持多语言自动识别，若配置值，则以此值为准
 //        ,'insertorderedlist':{
+//              //自定的样式
+//                'num':'1,2,3...',
+//                'num1':'1),2),3)...',
+//                'num2':'(1),(2),(3)...',
+//                'cn':'一,二,三....',
+//                'cn1':'一),二),三)....',
+//                'cn2':'(一),(二),(三)....',
+//             //系统自带
 //             'decimal' : '' ,         //'1,2,3...'
 //             'lower-alpha' : '' ,    // 'a,b,c...'
 //             'lower-roman' : '' ,    //'i,ii,iii...'
-//             'upper-alpha' : '' ,    //'A,B,C'
+//             'upper-alpha' : '' , lang   //'A,B,C'
 //             'upper-roman' : ''      //'I,II,III...'
 //        }
 
         //insertunorderedlist
         //无序列表的下拉配置，值留空时支持多语言自动识别，若配置值，则以此值为准
         //,insertunorderedlist : {
+        //              //自定的样式
+//        'dash' :'— 破折号',
+//        'dot':' 。 小圆圈'
+//             //系统自带
         //    'circle' : '',  // '○ 小圆圈'
         //    'disc' : '',    // '● 小圆点'
         //    'square' : ''   //'■ 小方块'
         //}
-
+//        ,listDefaultPaddingLeft : '30'//默认的左边缩进的基数倍
+//        ,listiconpath : 'http://bs.baidu.com/listicon/'//自定义标号的路径
+//        ,maxListLevel : 3 //限制可以tab的级数-1不限制
         //fontfamily
         //字体设置 label留空支持多语言自动切换，若配置，则以配置值为准
 //        ,'fontfamily':[
@@ -216,7 +235,7 @@
         //,'customstyle':[
         //      {tag:'h1', name:'tc', label:'', style:'border-bottom:#ccc 2px solid;padding:0 4px 0 0;text-align:center;margin:0 0 20px 0;'},
         //      {tag:'h1', name:'tl',label:'', style:'border-bottom:#ccc 2px solid;padding:0 4px 0 0;margin:0 0 10px 0;'},
-        //      {tag:'span',name:'im', label:'', style:'font-style:italic;font-weight:bold;color:#000'},
+        //      {tag:'span',name:'im', label:'', style:'font-style:italic;font-weight:bold'},
         //      {tag:'span',name:'hi', label:'', style:'font-style:italic;font-weight:bold;color:rgb(51, 153, 204)'}
         //  ]
 
@@ -234,7 +253,7 @@
 //           ]
 
         //wordCount
-        //,wordCount:false          //是否开启字数统计
+        //,wordCount:true          //是否开启字数统计
         //,maximumWords:10000       //允许的最大字符数
         //字数统计提示，{#count}代表当前字数，{#leave}代表还可以输入多少字符数,留空支持多语言自动切换，否则按此配置显示
         //,wordCountMsg:''   //当前已输入 {#count} 个字符，您还可以输入{#leave} 个字符
@@ -253,7 +272,7 @@
 
         //elementPathEnabled
         //是否启用元素路径，默认是显示
-        //,elementPathEnabled : false
+        //,elementPathEnabled : true
 
         //removeFormat
         //清除格式时可以删除的标签和属性
@@ -262,15 +281,21 @@
         //removeFormatAttributes属性
         //,removeFormatAttributes:'class,style,lang,width,height,align,hspace,valign'
 
-         //undo
-         //可以最多回退的次数,默认20
-         //,maxUndoCount:20
-         //当输入的字符数超过该值时，保存一次现场
-//         ,maxInputCount:1
+        //undo
+        //可以最多回退的次数,默认20
+        //,maxUndoCount:20
+        //当输入的字符数超过该值时，保存一次现场
+        //,maxInputCount:1
 
         //autoHeightEnabled
         // 是否自动长高,默认true
-       // ,autoHeightEnabled:false
+        //,autoHeightEnabled:true
+
+        //scaleEnabled
+        //是否可以拉伸长高,默认true(当开启时，自动长高失效)
+        //,scaleEnabled:false
+        //,minFrameWidth:800    //编辑器拖动时最小宽度,默认800
+        //,minFrameHeight:220  //编辑器拖动时最小高度,默认220
 
         //autoFloatEnabled
         //是否保持toolbar的位置不动,默认true
@@ -288,12 +313,13 @@
 
         //sourceEditor
         //源码的查看方式,codemirror 是代码高亮，textarea是文本框,默认是codemirror
+        //注意默认codemirror只能在ie8+和非ie中使用
         //,sourceEditor:"codemirror"
         //如果sourceEditor是codemirror，还用配置一下两个参数
-        //codeMirrorJsUrl js加载的路径，默认是 URL + "third-party/codemirror2.15/codemirror.js"
-        //,codeMirrorJsUrl:URL + "third-party/codemirror2.15/codemirror.js"
-        //codeMirrorCssUrl css加载的路径，默认是 URL + "third-party/codemirror2.15/codemirror.css"
-        //,codeMirrorCssUrl:URL + "third-party/codemirror2.15/codemirror.css"
+        //codeMirrorJsUrl js加载的路径，默认是 URL + "third-party/codemirror/codemirror.js"
+        //,codeMirrorJsUrl:URL + "third-party/codemirror/codemirror.js"
+        //codeMirrorCssUrl css加载的路径，默认是 URL + "third-party/codemirror/codemirror.css"
+        //,codeMirrorCssUrl:URL + "third-party/codemirror/codemirror.css"
         //编辑器初始化完成后是否进入源码模式，默认为否。
         //,sourceEditorFirst:false
 

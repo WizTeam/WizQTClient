@@ -15,18 +15,15 @@ WelcomeDialog::WelcomeDialog(const QString &strDefaultUserId, const QString& str
 {
     ui->setupUi(this);
 
-    ui->labelProxySettings->setText(WizFormatString1("<a href=\"proxy_settings\">%1</a>", tr("Proxy settings")));
-
     // load webview content
     QString strLocalFileName = ::WizGetResourcesPath() + "languages/welcome_" + strLocale + ".htm";
     QString strFileName = ::WizGetResourcesPath() + "languages/welcome.htm";
-    if (PathFileExists(strLocalFileName))
-    {
+    if (PathFileExists(strLocalFileName)) {
         strFileName = strLocalFileName;
     }
 
     QPalette pal = palette();
-    QColor color = pal.color(QPalette::Background);
+    QColor color = pal.color(QPalette::Window);
 
     CString strHtml;
     ::WizLoadUnicodeTextFromFile(strFileName, strHtml);
@@ -37,6 +34,14 @@ WelcomeDialog::WelcomeDialog(const QString &strDefaultUserId, const QString& str
 
     connect(ui->webView, SIGNAL(linkClicked(const QUrl&)), \
             SLOT(on_webView_linkClicked(const QUrl&)), Qt::UniqueConnection);
+
+    connect(ui->labelRegisterNew, SIGNAL(linkActivated(const QString&)),
+            SLOT(on_labelRegisterNew_linkActivated(const QString&)),
+            Qt::UniqueConnection);
+
+    connect(ui->labelForgotPassword, SIGNAL(linkActivated(const QString&)),
+            SLOT(on_labelForgotPassword_linkActivated(const QString&)),
+            Qt::UniqueConnection);
 
     connect(ui->labelProxySettings, SIGNAL(linkActivated(const QString&)), \
             SLOT(on_labelProxySettings_linkActivated(const QString&)), \
@@ -203,7 +208,7 @@ void WelcomeDialog::on_webView_linkClicked(const QUrl& url)
         strUrl.remove(0, strStart.length());
         if (strUrl == "view_guide")
         {
-            QDesktopServices::openUrl(QUrl("http://www.wiz.cn/"));
+            QDesktopServices::openUrl(QUrl("http://www.wiz.cn/wiznote-maclinux.html"));
         }
         else if (strUrl == "create_account")
         {
@@ -223,6 +228,29 @@ void WelcomeDialog::on_webView_linkClicked(const QUrl& url)
     {
         QDesktopServices::openUrl(url);
     }
+}
+
+void WelcomeDialog::on_labelForgotPassword_linkActivated(const QString& strUrl)
+{
+    Q_UNUSED(strUrl);
+
+    // FIXME: use different locale page
+    QUrl url("http://as.wiz.cn/wizas/htmlpages/reset_password_zh_CN.html");
+    QDesktopServices::openUrl(url);
+}
+
+void WelcomeDialog::on_labelRegisterNew_linkActivated(const QString& strUrl)
+{
+    CreateAccountDialog dlg(this);
+    if (QDialog::Accepted != dlg.exec())
+        return;
+
+    QString strUserId = dlg.userId();
+    QString strPassword = dlg.password();
+
+    ui->comboUsers->insertItem(0, strUserId);
+    ui->comboUsers->setCurrentIndex(0);
+    ui->editPassword->setText(strPassword);
 }
 
 void WelcomeDialog::on_labelProxySettings_linkActivated(const QString & link)

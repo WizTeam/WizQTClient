@@ -1,7 +1,6 @@
 var
     editor = null,
     m_inited = false;
-    //m_modified = false,
     objApp = WizExplorerApp,
     objDatabase = objApp.Database,
     objCommon = objApp.CreateWizObject("WizKMControls.WizCommonUI"),
@@ -14,16 +13,6 @@ var
 // setup ueditor
 try {
     var strSave = "Save";
-    
-    //var saveButton = new baidu.editor.ui.Button({
-    //    className: 'edui-for-mybutton',
-    //    title: strSave,
-    //    label: strSave,
-    //    showText: false,
-    //    onclick: function() {
-    //        saveDocument(false);
-    //    }
-    //});
 
     var editorOption = {
     toolbars:
@@ -47,125 +36,60 @@ try {
         { label:'',name:'timesNewRoman',val:'times new roman'}
     ],
     'fontsize':[9, 10, 11, 12, 13, 14, 16, 18, 24, 36, 48],
-    initialStyle:'body{font-size:14px}',
+    initialStyle:'body{font-size:13px}',
+    contextMenu: [],
     elementPathEnabled: false,
     wordCount: false,
     imagePopup: false,
     maximumWords: 100000000,
-    fullscreen: true
     };
 
     editor = new baidu.editor.ui.Editor(editorOption);
     editor.render('editorArea');
 
-    editor.addListener('contentChange', function() {
-        setModified(true);
+    editor.addListener('selectionChange', function() {
+        objApp.ResetEditorToolBar();
+    });
+
+    editor.addListener('beforePaste', function(type, data) {
+        objApp.ProcessClipboardBeforePaste(data);
     });
 
     editor.addListener("sourceModeChanged",function(type,mode){
         m_bIsSourceMode = mode;
     });
 
-    editor.addListener('keydown', onEditorKeyDown);
 } catch (err) {
     alert(err);
 }
 
-function onEditorContentChanged()
+function setModified()
 {
+    objApp.SetDocumentModified(true);
 }
 
-function onEditorKeyDown(type, evt) {
-    if (!isEditing())
-        return;
-
-    var e = evt;
-    //if (!e.ctrlKey && !e.altKey && !e.shiftKey) {
-    //    setModified(true);
-    //}
-
-    if (e.ctrlKey && !e.altKey && !e.shiftKey) {
-        if (String.fromCharCode(e.keyCode).toLocaleUpperCase() == 'X') {
-            setModified(true);
-            e.returnValue = true;
-        }
-        //if (String.fromCharCode(e.keyCode).toLocaleUpperCase() == 'S') {
-        //    saveDocument(true);
-        //    e.returnValue = false;
-        //}
-        else if (String.fromCharCode(e.keyCode).toLocaleUpperCase() == 'V') {
-            if (autoPaste()) {
-                e.returnValue = false;
-                e.keyCode = 0;
-            }
-            else {
-            }
-        }
-    }
-}
-
-function autoPaste()
+function setEditorHtml(html)
 {
-    var imageFileName = objCommon.ClipboardToImage(0, "");
-    if (imageFileName == null || imageFileName == "")
-        return false;
-    
-    var html = '<img border="0" src="file:///' + imageFileName + '" />';
-    editor.execCommand('insertHtml', html, true);
-    return true;
-}
+    editor.removeListener('contentChange', setModified);
 
-
-function setModified(flag)
-{
-    //m_modified = flag;
-    //if (!isEditing()) {
-    //    m_modified = false;
-    //    return;
-    //}
-
-    if (!isEditing()) {
-        objApp.SetDocumentModified(false);
-        return;
-    }
-
-    objApp.SetDocumentModified(flag);
-}
-
-function setEditorHtml(html) {
     editor.reset();
 
     // This Api have bug when showing pictures, don't use it!
     //editor.setContent(html);
     editor.document.body.innerHTML = html;
-    setModified(false);
 
     window.UE.utils.domReady(function() {
-        setEditorFocus();
         editor.window.scrollTo(0, 0);
     });
 
-    //editor.document.body.innerHTML = '<p>' + html + '</p>';
+    editor.ui.setFullScreen(true);
+
+    editor.addListener('contentChange', setModified);
 }
 
 function getEditorHtml() {
-    // This Api have bug when showing pictures, don't use it!
-    //return editor.getContent();
     return editor.getContent();
-
     //return editor.document.documentElement.outerHTML;
-}
-
-function setEditorFocus() {
-    editor.focus();
-    //var range = editor.selection.getRange();
-    //range.collapse();
-    //range.select();
-    //editor._selectionChange();
-}
-
-function isEditing() {
-    return m_editingMode;
 }
 
 function setEditing(mode) {
@@ -173,10 +97,7 @@ function setEditing(mode) {
         return;
     }
 
-    // hide toolbar
-    document.getElementsByClassName("edui-editor-toolbarbox")[0].style.display = mode ? "block" : "none";
     mode ? editor.setEnabled() : editor.setDisabled();
-
     m_editingMode = mode;
 }
 
@@ -198,8 +119,7 @@ function viewDocument(guid, filename, mode)
                 m_inited = true;
             });
         }
-
-
+        
         return true;
     } catch (err) {
         alert(err);
@@ -207,3 +127,21 @@ function viewDocument(guid, filename, mode)
     }
 }
 
+// helper functions
+function WizGetLinkUrl() {
+    try {
+        var range = editor.selection.getRange(),
+            link = range.collapsed ? editor.queryCommandValue( "link" ) : editor.selection.getStart(),
+            url;
+
+        link = UE.dom.domUtils.findParentByTagName( link, "a", true );
+        if(link){
+            url = UE.utils.html(link.getAttribute( 'data_ue_src' ) || link.getAttribute( 'href', 2 ));
+        }
+    } catch (error) {
+        alert(error);
+        return "ERROR";
+    }
+
+    return url ? url: '';
+}

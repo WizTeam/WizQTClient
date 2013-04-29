@@ -32,15 +32,10 @@ COleDateTime &COleDateTime::operator=(const COleDateTime &other)
 
 int GetTickCount()
 {
+    QTime time = QTime::currentTime();
+    qsrand((uint)time.msec());
+
     return qrand();
-    //static QElapsedTimer t;
-    //static bool first = true;
-    //if (first)
-    //{
-    //    t.start();
-    //    first = false;
-    //}
-    //return t.elapsed();
 }
 
 

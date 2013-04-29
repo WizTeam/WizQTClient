@@ -4,53 +4,22 @@
 <head>
     <title>帮助</title>
     <meta content="text/html; charset=utf-8" http-equiv="Content-Type"/>
-    <style type="text/css">
-        .head .tab-current{
-            background-color:#7DEBFF;
-        }
-        .hide{
-            display:none;
-        }
-        *{color: #838383}
-        body {
-
-            font-size: 12px;
-            width:380px;
-            height: 400px;
-            overflow: hidden;
-            margin:0px;padding:0px;
-        }
-        .warp{
-            padding: 39px 0px 0px 15px;
-            height:90%;position:relative;
-        }
-        h1{font-size:26px;}
-        p{font-size:12px;}
-        .head{position:absolute;height:31px;top:10px;}
-        .content{height:360px;border: 1px solid #ddd;clear:both;padding:5px;overflow: auto;}
-
-        .head span{width:92px;height:29px;line-height:29px;background:red;display:block;float: left;text-align: center;margin-right: 1px;cursor: pointer; }
-        .head span.def{background:url("../../themes/default/images/dialog-title-bg.png") repeat-x;border:1px solid #ccc;}
-        .head span.act{background:#FFF;border:1px solid #ccc;border-bottom: 1px solid #FFF}
-        .content table{width:90%;line-height: 20px}
-        .content table thead{font-weight: bold;line-height: 25px;}
-    </style>
+    <script type="text/javascript" src="../internal.js"></script>
+    <link rel="stylesheet" type="text/css" href="help.css">
 </head>
 <body>
-<div class="warp">
-    <div id="head" class="head">
-        <span class="act" onclick="toggle(0)"><var id="lang_input_about"></var></span>
-        <span class="def" onclick="toggle(1)"><var id="lang_input_shortcuts"></var></span>
+<div class="wrapper" id="helptab">
+    <div id="tabHeads" class="tabhead">
+        <span class="focus" tabsrc="about"><var id="lang_input_about"></var></span>
+        <span tabsrc="shortcuts"><var id="lang_input_shortcuts"></var></span>
     </div>
-    <div class="content">
-        <div id="cont0">
-
-<h1>UEditor</h1>
-<p><var id="lang_input_version"></var></p>
-<p><var id="lang_input_introduction"></var></p>
-
+    <div id="tabBodys" class="tabbody">
+        <div id="about" class="panel">
+            <h1>UEditor</h1>
+            <p><var id="lang_input_version"></var></p>
+            <p><var id="lang_input_introduction"></var></p>
         </div>
-        <div id="cont1" class="hide">
+        <div id="shortcuts" class="panel">
             <table>
                 <thead>
                 <tr>
@@ -96,63 +65,18 @@
                     <td><var id="lang_Txt_selectAll"></var></td>
                 </tr>
                 <tr>
-                    <td>ctrl+shift+c</td>
-                    <td><var id="lang_Txt_removeFormat"></var></td>
-                </tr>
-                <tr>
-                    <td>ctrl+shift+l</td>
-                    <td><var id="lang_Txt_leftJustification"></var></td>
-                </tr>
-                <tr>
-                    <td>ctrl+shift+r</td>
-                    <td><var id="lang_Txt_rightJustification"></var></td>
-                </tr>
-                <tr>
                     <td>shift+enter</td>
                     <td><var id="lang_Txt_visualEnter"></var></td>
+                </tr>
+                <tr>
+                    <td>alt+z</td>
+                    <td><var id="lang_Txt_fullscreen"></var></td>
                 </tr>
                 </tbody>
             </table>
         </div>
     </div>
 </div>
-<script type="text/javascript" src="../internal.js"></script>
-<script type="text/javascript">
-    function getChildrenByClassName (parentClass,childtag){
-        var divs = document.getElementsByTagName("div"),
-            headChilds,
-            arr = [];
-        for(var i=0;i<divs.length;i++){
-            if(divs[i].className == parentClass){
-                headChilds = divs[i].childNodes;
-            }
-        }
-        for(var j=0;j<headChilds.length;j++){
-            if(new RegExp(childtag,"i").test(headChilds[j].tagName)){
-                arr.push(headChilds[j]);
-            }
-        }
-        return arr;
-    }
-     function hideAll (){
-        var tabs = getChildrenByClassName("head","span"),
-            contents = getChildrenByClassName("content","div"),i=0;
-        for(;i<tabs.length;i++){
-            tabs[i].className = "";
-            contents[i].className = "hide";
-        }
-     }
-    function toggle (i){
-        hideAll();
-        var tabs = getChildrenByClassName("head","span"),
-            contents = getChildrenByClassName("content","div");
-          for(var s=0;s<tabs.length;s++){
-             tabs[s].className = "def";
-          }
-
-        tabs[i].className = "act";
-        contents[i].className = "";
-    }
-</script>
+<script type="text/javascript" src="help.js"></script>
 </body>
 </html>

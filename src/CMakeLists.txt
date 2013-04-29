@@ -1,6 +1,20 @@
 project(wiznote)
 
+set(wiznote_SOURCES_MAC
+    widgets/qkineticscroller_mac.mm
+    mac/wizSearchWidget.mm
+    mac/wizmachelper.mm
+)
+
+set(wiznote_HEADERS_MAC
+    mac/wizmachelper.h
+)
+
 set(wiznote_SOURCES
+    widgets/qkineticscroller.cpp
+    widgets/qscrollareakineticscroller.cpp
+    widgets/qwebviewkineticscroller.cpp
+    widgets/qsegmentcontrol.cpp
     zip/zip.c
     zip/unzip.c
     zip/quazipnewinfo.cpp
@@ -92,9 +106,12 @@ set(wiznote_SOURCES
     wiznoteinfoform.cpp
     share/wizClucene.cpp
     share/wizSearchIndexer.cpp
-    wizSearchBox.cpp
+    wizSearchWidget.cpp
     wizEditorInsertLinkForm.cpp
     wizUpgrade.cpp
+    wizButton.cpp
+    wizEditorToolBar.cpp
+    wizEditorInsertTableForm.cpp
 )
 
 set(wiznote_HEADERS
@@ -193,12 +210,18 @@ set(wiznote_HEADERS
     newtagdialog.h
     share/wizClucene.h
     share/wizSearchIndexer.h
-    wizSearchBox.h
+    wizSearchWidget.h
     wizEditorInsertLinkForm.h
     wizUpgrade.h
+    wizEditorToolBar.h
 )
 
 set(wiznote_WRAP_HEADERS
+    widgets/qkineticscroller_p.h
+    widgets/qkineticscroller.h
+    widgets/qscrollareakineticscroller.h
+    widgets/qwebviewkineticscroller.h
+    widgets/qsegmentcontrol.h
     newtagdialog.h
     wizaboutdialog.h
     zip/quazipfile.h
@@ -229,7 +252,7 @@ set(wiznote_WRAP_HEADERS
     share/wizpopupwidget.h
     wizpreferencedialog.h
     wizproxydialog.h
-    wizSearchBox.h
+    wizSearchWidget.h
     share/wizSearchIndexer.h
     wizstatusbar.h
     share/wizSync.h
@@ -245,6 +268,10 @@ set(wiznote_WRAP_HEADERS
     wizwelcomedialog.h
     share/wizXmlRpcServer.h
     share/wizziwreader.h
+    share/wizuihelper.h
+    wizButton.h
+    wizEditorToolBar.h
+    wizEditorInsertTableForm.h
 )
 
 set(wiznote_FORMS
@@ -262,6 +289,7 @@ set(wiznote_FORMS
     ui/wizusercipherform.ui
     ui/wiznoteinfoform.ui
     ui/wizEditorInsertLinkForm.ui
+    ui/wizEditorInsertTableForm.ui
 )
 
 set(wiznote_TRANSLATIONS
@@ -313,7 +341,8 @@ endif()
 # build
 if(UNIX)
     if(APPLE)
-        add_executable(${PROJECT_NAME} MACOSX_BUNDLE ${wiznote_SOURCES} ${wiznote_MOC_HEADERS} ${wiznote_FORM_HEADERS} ${wiznote_QM})
+
+        add_executable(${PROJECT_NAME} MACOSX_BUNDLE ${wiznote_SOURCES} ${wiznote_SOURCES_MAC} ${wiznote_MOC_HEADERS} ${wiznote_FORM_HEADERS} ${wiznote_QM})
         set_target_properties(${PROJECT_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bundle)
 
         # this should be issue of cmake, refer: http://public.kitware.com/Bug/bug_revision_view_page.php?rev_id=958
@@ -325,7 +354,8 @@ if(UNIX)
         # suppress cmake warnning when link library is not a target, refer to cmp0016 for detailed info.
         cmake_policy(SET CMP0016 OLD)
         find_library(_CARBON_LIBRARY Carbon)
-        target_link_libraries(${PROJECT_NAME} ${_CARBON_LIBRARY})
+        find_library(_COCOA_LIBRARY Cocoa)
+        target_link_libraries(${PROJECT_NAME} ${_CARBON_LIBRARY} ${_COCOA_LIBRARY})
 
         # setup plist info
         set_target_properties(${PROJECT_NAME} PROPERTIES MACOSX_BUNDLE_INFO_PLIST "${wiznote_SOURCE_DIR}/../Info.plist")

@@ -5,11 +5,15 @@
 #include <QTimer>
 #include <QPointer>
 #include <QMutex>
+#include <QColorDialog>
 
 #include "wizdef.h"
 #include "wizdownloadobjectdatadialog.h"
 #include "wizusercipherform.h"
-#include "wizEditorInsertLinkForm.h"
+
+
+class CWizEditorInsertLinkForm;
+class CWizEditorInsertTableForm;
 
 class CWizDocumentWebView;
 
@@ -59,32 +63,37 @@ public:
     void setModified(bool bModified) { m_bModified = bModified; }
     void saveDocument(bool force);
 
-    // editor API
+    /* editor API */
+    void editorSetFullScreen();
+
+    // -1: command invalid
+    // 0: available
+    // 1: executed before
+    int editorCommandQueryCommandState(const QString& strCommand);
+    QString editorCommandQueryCommandValue(const QString& strCommand);
+    bool editorCommandExecuteCommand(const QString& strCommand,
+                                     const QString& arg1 = QString(),
+                                     const QString& arg2 = QString(),
+                                     const QString& arg3 = QString());
+
+    // UEditor still miss link discover api
+    bool editorCommandQueryLink();
+
+    bool editorCommandExecuteFontFamily(const QString& strFamily);
+    bool editorCommandExecuteFontSize(const QString& strSize);
+
     bool editorCommandExecuteUndo();
     bool editorCommandExecuteRedo();
-    bool editorCommandExecuteJustifyLeft();
-    bool editorCommandExecuteJustifyRight();
-    bool editorCommandExecuteJustifyCenter();
-    bool editorCommandExecuteJustifyJustify();
+
     bool editorCommandExecuteIndent();
     bool editorCommandExecuteOutdent();
-    bool editorCommandExecuteInsertOrderedList();
-    bool editorCommandExecuteInsertUnorderedList();
-    bool editorCommandExecuteInsertTable();
-    bool editorCommandExecuteInsertLink();
-    bool editorCommandExecuteBold();
-    bool editorCommandExecuteItalic();
-    bool editorCommandExecuteUnderLine();
-    bool editorCommandExecuteStrikeThrough();
+
     bool editorCommandExecuteInsertHorizontal();
+    bool editorCommandExecuteInsertHtml(const QString& strHtml, bool bNotSerialize);
     bool editorCommandExecuteInsertDate();
     bool editorCommandExecuteInsertTime();
     bool editorCommandExecuteRemoveFormat();
     bool editorCommandExecuteFormatMatch();
-
-
-
-    void updateSize();
 
     const WIZDOCUMENTDATA& document() { return m_renderer->data(); }
     void reloadDocument();
@@ -103,15 +112,17 @@ private:
     QPointer<CWizDownloadObjectDataDialog> m_downloadDialog;
     QPointer<CWizUserCipherForm> m_cipherDialog;
     QPointer<CWizEditorInsertLinkForm> m_editorInsertLinkForm;
+    QPointer<CWizEditorInsertTableForm> m_editorInsertTableForm;
+    QPointer<QColorDialog> m_colorDialog;
 
-    virtual void inputMethodEvent(QInputMethodEvent* event);
-    virtual void keyPressEvent(QKeyEvent* event);
-    virtual void focusOutEvent(QFocusEvent *event);
+    //virtual void keyPressEvent(QKeyEvent* event);
+    //virtual void focusOutEvent(QFocusEvent *event);
 
     void viewDocumentInEditor(bool editing);
     void initEditorAndLoadDocument();
 
 public Q_SLOTS:
+    void on_pageContentsChanged();
     void onSelectionChanged();
     void onCipherDialogClosed();
     void onDownloadDialogClosed(int result);
@@ -119,13 +130,61 @@ public Q_SLOTS:
     void on_editor_populateJavaScriptWindowObject();
     void on_editor_loadFinished(bool ok);
     void on_editor_linkClicked(const QUrl& url);
+    void on_editor_customContextMenuRequested(const QPoint& pos);
 
     void onTimerAutoSaveTimout();
 
     void on_documentReady(const QString& strFileName);
     void on_documentSaved(bool ok);
 
-    void on_editorCommandExecuteInsertLink_accepted();
+    void on_editorCommandExecuteLinkInsert_accepted();
+    void on_editorCommandExecuteTableInsert_accepted();
+    void on_editorCommandExecuteForeColor_accepted(const QColor& color);
+
+    void editorCommandExecuteCut();
+    void editorCommandExecuteCopy();
+    void editorCommandExecutePaste();
+
+    /* editor API */
+    bool editorCommandExecuteForeColor();
+    bool editorCommandExecuteBold();
+    bool editorCommandExecuteItalic();
+    bool editorCommandExecuteUnderLine();
+    bool editorCommandExecuteStrikeThrough();
+
+    bool editorCommandExecuteLinkInsert();
+    bool editorCommandExecuteLinkRemove();
+
+    bool editorCommandExecuteJustifyLeft();
+    bool editorCommandExecuteJustifyRight();
+    bool editorCommandExecuteJustifyCenter();
+    bool editorCommandExecuteJustifyJustify();
+
+    bool editorCommandExecuteInsertOrderedList();
+    bool editorCommandExecuteInsertUnorderedList();
+
+    // table
+    bool editorCommandExecuteTableInsert();
+    //bool editorCommandExecuteTableInsert();
+    bool editorCommandExecuteTableDelete();
+    bool editorCommandExecuteTableDeleteRow();
+    bool editorCommandExecuteTableDeleteCol();
+    bool editorCommandExecuteTableInsertRow();
+    bool editorCommandExecuteTableInsertRowNext();
+    bool editorCommandExecuteTableInsertCol();
+    bool editorCommandExecuteTableInsertColNext();
+    bool editorCommandExecuteTableInsertCaption();
+    bool editorCommandExecuteTableDeleteCaption();
+    bool editorCommandExecuteTableInsertTitle();
+    bool editorCommandExecuteTableDeleteTitle();
+    bool editorCommandExecuteTableMergeCells();
+    bool editorCommandExecuteTalbeMergeRight();
+    bool editorCommandExecuteTableMergeDown();
+    bool editorCommandExecuteTableSplitCells();
+    bool editorCommandExecuteTableSplitRows();
+    bool editorCommandExecuteTableSplitCols();
+    bool editorCommandExecuteTableAverageRows();
+    bool editorCommandExecuteTableAverageCols();
 };
 
 

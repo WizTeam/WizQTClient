@@ -8,12 +8,12 @@ int WizDrawTextSingleLine(QPainter* p, const QRect& rc, CString& str, int flags,
 {
     if (rc.width() <= 0)
         return 0;
-    //
+
     if (str.isEmpty())
         return 0;
-    //
+
     p->setPen(color);
-    //
+
     if (elidedText)
     {
         CString strRet = p->fontMetrics().elidedText(str, Qt::ElideRight, rc.width());

@@ -6,9 +6,10 @@
 
 #include <algorithm>
 
+#include "wizdef.h"
 #include "wizhtml2zip.h"
-
 #include "zip/wizzip.h"
+#include "html/wizhtmlcollector.h"
 
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -380,12 +381,18 @@ bool CWizDatabase::openPrivate(const QString& strUserId, const QString& strPassw
     m_strUserId = strUserId;
     m_strPassword = strPassword;
 
-    bool ret = CWizIndex::Open(GetUserIndexFileName())
-            && CThumbIndex::OpenThumb(GetUserThumbFileName());
+    bool ret;
 
-    if (ret)
-        m_nOpenMode = OpenPrivate;
+    ret = CWizIndex::Open(GetUserIndexFileName());
+    if (!ret)
+        return false;
 
+    ret = CThumbIndex::OpenThumb(GetUserThumbFileName(), getThumIndexVersion());
+    if (!ret)
+        return false;
+
+    setThumbIndexVersion(WIZNOTE_THUMB_VERSION);
+    m_nOpenMode = OpenPrivate;
     loadDatabaseInfo();
 
     return ret;
@@ -398,12 +405,18 @@ bool CWizDatabase::openGroup(const QString& strUserId, const QString& strGroupGU
     m_strUserId = strUserId;
     m_strKbGUID = strGroupGUID;
 
-    bool ret = CWizIndex::Open(GetGroupIndexFileName())
-            && CThumbIndex::OpenThumb(GetGroupThumbFileName());
+    bool ret;
 
-    if (ret)
-        m_nOpenMode = OpenGroup;
+    ret = CWizIndex::Open(GetGroupIndexFileName());
+    if (!ret)
+        return false;
 
+    ret = CThumbIndex::OpenThumb(GetGroupThumbFileName(), getThumIndexVersion());
+    if (!ret)
+        return false;
+
+    setThumbIndexVersion(WIZNOTE_THUMB_VERSION);
+    m_nOpenMode = OpenGroup;
     loadDatabaseInfo();
 
     return ret;
@@ -1369,16 +1382,10 @@ bool CWizDatabase::UpdateDocumentAbstract(const CString& strDocumentGUID)
 
     WIZABSTRACT abstract;
     abstract.guid = strDocumentGUID;
-    ::WizHtml2Text(strHtml, abstract.text);
 
-    abstract.text.replace("\r", "");
-    abstract.text.replace("\t", " ");
-    abstract.text.replace(QRegExp("[\\n]+"), " ");
-    abstract.text.replace(QRegExp("[\\s]+"), " ");
-    if (abstract.text.length() > 2000)
-    {
-        abstract.text = abstract.text.left(2000);
-    }
+    CWizHtmlToPlainText htmlConverter;
+    htmlConverter.toText(strHtml, abstract.text);
+    abstract.text = abstract.text.left(2000);
 
     CString strResourcePath = WizExtractFilePath(strHtmlFileName) + "index_files/";
     CWizStdStringArray arrayImageFileName;
@@ -1389,10 +1396,8 @@ bool CWizDatabase::UpdateDocumentAbstract(const CString& strDocumentGUID)
         //DEBUG_TOLOG1(_T("abstract image file: %1"), strImageFileName);
 
         qint64 m = 0;
-        for (CWizStdStringArray::const_iterator it = arrayImageFileName.begin() + 1;
-        it != arrayImageFileName.end();
-        it++)
-        {
+        CWizStdStringArray::const_iterator it;
+        for (it = arrayImageFileName.begin() + 1; it != arrayImageFileName.end(); it++) {
             CString strFileName = *it;
             qint64 size = ::WizGetFileSize(strFileName);
             if (size > m)
@@ -1419,8 +1424,7 @@ bool CWizDatabase::UpdateDocumentAbstract(const CString& strDocumentGUID)
 
 
     bool ret = UpdatePadAbstract(abstract);
-    if (!ret)
-    {
+    if (!ret) {
         Q_EMIT updateError("Failed to update note abstract!");
     }
 

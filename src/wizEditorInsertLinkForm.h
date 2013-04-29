@@ -15,8 +15,12 @@ public:
     explicit CWizEditorInsertLinkForm(QWidget *parent = 0);
     ~CWizEditorInsertLinkForm();
 
-    QString getContent();
+//    QString getContent();
+//    void setContent(const QString& strText);
+
     QString getUrl();
+    void setUrl(const QString& strText);
+
     void clear();
 
 private:

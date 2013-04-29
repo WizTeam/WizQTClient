@@ -5,92 +5,103 @@
  * Time: 下午2:52
  * To change this template use File | Settings | File Templates.
  */
-var imageUploader = {};
+var imageUploader = {},
+    flashObj = null,
+    postConfig=[];
 (function () {
     var g = $G,
-            ajax = parent.baidu.editor.ajax,
-            maskIframe = g( "maskIframe" ), //tab遮罩层,用来解决flash和其他dom元素的z-index层级不一致问题
-            flashObj;               //flash上传对象
+        ajax = parent.baidu.editor.ajax,
+        maskIframe = g("maskIframe"); //tab遮罩层,用来解决flash和其他dom元素的z-index层级不一致问题
+       // flashObj;                   //flash上传对象
 
-    var flagImg = null,flashContainer;
-    imageUploader.init = function ( opt, callbacks ) {
-        switchTab( "imageTab" );
-        createAlignButton( ["remoteFloat", "localFloat"] );
-        createFlash( opt, callbacks );
+    var flagImg = null, flashContainer;
+    imageUploader.init = function (opt, callbacks) {
+        switchTab("imageTab");
+        createAlignButton(["remoteFloat", "localFloat"]);
+        createFlash(opt, callbacks);
         var srcImg = editor.selection.getRange().getClosedNode();
-        if ( srcImg ) {
-            showImageInfo( srcImg );
-            showPreviewImage( srcImg, true );
-            var tabElements = g( "imageTab" ).children,
-                            tabHeads = tabElements[0].children,
-                            tabBodys = tabElements[1].children;
-            for(var i=0,ci;ci = tabHeads[i++];){
-                if(ci.getAttribute("tabSrc")=="remote"){
-                    clickHandler(tabHeads,tabBodys,ci);
+        if (srcImg) {
+            showImageInfo(srcImg);
+            showPreviewImage(srcImg, true);
+            var tabElements = g("imageTab").children,
+                tabHeads = tabElements[0].children,
+                tabBodys = tabElements[1].children;
+            for (var i = 0, ci; ci = tabHeads[i++];) {
+                if (ci.getAttribute("tabSrc") == "remote") {
+                    clickHandler(tabHeads, tabBodys, ci);
                 }
             }
 
         }
         addUrlChangeListener();
-        addUploadListener();
         addOKListener();
         addScrollListener();
         addSearchListener();
-        $focus( g( "url" ) );
+        $focus(g("url"));
+    };
+    imageUploader.setPostParams = function(obj,index){
+        if(index===undefined){
+            utils.each(postConfig,function(config){
+                config.data = obj;
+            })
+        }else{
+            postConfig[index].data = obj;
+        }
     };
 
-    function insertImage(imgObjs){
-        editor.fireEvent('beforeInsertImage',imgObjs);
-        editor.execCommand( "insertImage", imgObjs );
+    function insertImage(imgObjs) {
+        editor.fireEvent('beforeInsertImage', imgObjs);
+        editor.execCommand("insertImage", imgObjs);
     }
+
     function searchImage() {
-        var imgSearchInput = $G( "imgSearchTxt" );
-        if ( !imgSearchInput.getAttribute( "hasClick" ) || !imgSearchInput.value ) {
-            selectTxt( imgSearchInput );
+        var imgSearchInput = $G("imgSearchTxt");
+        if (!imgSearchInput.getAttribute("hasClick") || !imgSearchInput.value) {
+            selectTxt(imgSearchInput);
             return;
         }
-        g( "searchList" ).innerHTML = "<p class='msg'>" + lang.imageLoading + "</p>";
+        g("searchList").innerHTML = "<p class='msg'>" + lang.imageLoading + "</p>";
         var key = imgSearchInput.value,
-                type = $G( "imgType" ).value,
-                url = "http://image.baidu.com/i?ct=201326592&cl=2&lm=-1&st=-1&tn=baiduimagejson&istype=2&rn=32&fm=index&pv=&word=" + encodeToGb2312( key ) + type + "&" + +new Date;
-        var reqCallBack = function ( data ) {
+            type = $G("imgType").value,
+            url = "http://image.baidu.com/i?ct=201326592&cl=2&lm=-1&st=-1&tn=baiduimagejson&istype=2&rn=32&fm=index&pv=&word=" + encodeToGb2312(key) + type + "&" + +new Date;
+        var reqCallBack = function (data) {
             try {
                 var imgObjs = data.data;
-            } catch ( e ) {
+            } catch (e) {
                 return;
             }
             var frg = document.createDocumentFragment();
-            if ( imgObjs.length < 2 ) {
-                g( "searchList" ).innerHTML = "<p class='msg'>"+lang.tryAgain+"</p>";
+            if (imgObjs.length < 2) {
+                g("searchList").innerHTML = "<p class='msg'>" + lang.tryAgain + "</p>";
                 return;
             }
-            for ( var i = 0, len = imgObjs.length; i < len - 1; i++ ) {
-                var img = document.createElement( "img" ), obj = imgObjs[i], div = document.createElement( "div" );
+            for (var i = 0, len = imgObjs.length; i < len - 1; i++) {
+                var img = document.createElement("img"), obj = imgObjs[i], div = document.createElement("div");
                 img.src = obj.objURL; //obj.thumbURL 为缩略图，只能针对百度内部使用
-                img.setAttribute( "sourceUrl", obj.objURL );
-                var title = obj.fromPageTitleEnc.replace( /^\.\.\./i, "" );
-                img.setAttribute( "title", lang.toggleSelect + obj.width + "X" + obj.height );
+                img.setAttribute("sourceUrl", obj.objURL);
+                var title = obj.fromPageTitleEnc.replace(/^\.\.\./i, "");
+                img.setAttribute("title", lang.toggleSelect + obj.width + "X" + obj.height);
                 img.onclick = function () {
-                    changeSelected( this );
+                    changeSelected(this);
                 };
-                scale( img, 100, obj.width, obj.height );
-                div.appendChild( img );
-                var p = document.createElement( "p" );
+                scale(img, 100, obj.width, obj.height);
+                div.appendChild(img);
+                var p = document.createElement("p");
                 p.innerHTML = "<a target='_blank' href='" + obj.fromURL + "'>" + title + "</a>";
-                div.appendChild( p );
+                div.appendChild(p);
                 //setTimeout(function(){
-                frg.appendChild( div );
+                frg.appendChild(div);
                 //},0);
 
             }
-            g( "searchList" ).innerHTML = "";
-            g( "searchList" ).appendChild( frg );
+            g("searchList").innerHTML = "";
+            g("searchList").appendChild(frg);
         };
-        baidu.sio.callByServer( url, reqCallBack, {charset:"GB18030"} );
+        baidu.sio.callByServer(url, reqCallBack, {charset:"GB18030"});
     }
 
-    function selectTxt( node ) {
-        if ( node.select ) {
+    function selectTxt(node) {
+        if (node.select) {
             node.select();
         } else {
             var r = node.createTextRange && node.createTextRange();
@@ -99,36 +110,36 @@ var imageUploader = {};
     }
 
     function addSearchListener() {
-        g( "imgSearchTxt" ).onclick = function () {
-            selectTxt( this );
-            this.setAttribute( "hasClick", true );
-            if ( this.value == lang.searchInitInfo ) {
+        g("imgSearchTxt").onclick = function () {
+            selectTxt(this);
+            this.setAttribute("hasClick", true);
+            if (this.value == lang.searchInitInfo) {
                 this.value = "";
             }
         };
-        g( "imgSearchTxt" ).onkeyup = function () {
-            this.setAttribute( "hasClick", true );
+        g("imgSearchTxt").onkeyup = function () {
+            this.setAttribute("hasClick", true);
             //只触发一次
             this.onkeyup = null;
         };
 
-        g( "imgSearchBtn" ).onclick = function () {
+        g("imgSearchBtn").onclick = function () {
             searchImage();
         };
-        g( "imgSearchReset" ).onclick = function () {
-            var txt = g( "imgSearchTxt" );
+        g("imgSearchReset").onclick = function () {
+            var txt = g("imgSearchTxt");
             txt.value = "";
             txt.focus();
-            g( "searchList" ).innerHTML = "";
+            g("searchList").innerHTML = "";
         };
-        g( "imgType" ).onchange = function () {
+        g("imgType").onchange = function () {
             searchImage();
         };
-        domUtils.on( g( "imgSearchTxt" ), "keyup", function ( evt ) {
-            if ( evt.keyCode == 13 ) {
+        domUtils.on(g("imgSearchTxt"), "keyup", function (evt) {
+            if (evt.keyCode == 13) {
                 searchImage();
             }
-        } )
+        })
 
     }
 
@@ -137,15 +148,15 @@ var imageUploader = {};
      */
     function addScrollListener() {
 
-        g( "imageList" ).onscroll = function () {
-            var imgs = this.getElementsByTagName( "img" ),
-                    top = Math.ceil( this.scrollTop / 100 ) - 1;
+        g("imageList").onscroll = function () {
+            var imgs = this.getElementsByTagName("img"),
+                top = Math.ceil(this.scrollTop / 100) - 1;
             top = top < 0 ? 0 : top;
-            for ( var i = top * 5; i < (top + 5) * 5; i++ ) {
+            for (var i = top * 5; i < (top + 5) * 5; i++) {
                 var img = imgs[i];
-                if ( img && !img.getAttribute( "src" ) ) {
-                    img.src = img.getAttribute( "lazy_src" );
-                    img.removeAttribute( "lazy_src" );
+                if (img && !img.getAttribute("src")) {
+                    img.src = img.getAttribute("lazy_src");
+                    img.removeAttribute("lazy_src");
                 }
             }
         }
@@ -156,8 +167,8 @@ var imageUploader = {};
      */
     function addOKListener() {
         dialog.onok = function () {
-            var currentTab = findFocus( "tabHeads", "tabSrc" );
-            switch ( currentTab ) {
+            var currentTab = findFocus("tabHeads", "tabSrc");
+            switch (currentTab) {
                 case "remote":
                     return insertSingle();
                     break;
@@ -165,19 +176,19 @@ var imageUploader = {};
                     return insertBatch();
                     break;
                 case "imgManager":
-                    return insertSearch( "imageList" );
+                    return insertSearch("imageList");
                     break;
                 case "imgSearch":
-                    return insertSearch( "searchList", true );
+                    return insertSearch("searchList", true);
                     break;
             }
         };
-        dialog.oncancel = function(){
+        dialog.oncancel = function () {
             hideFlash();
         }
     }
 
-    function hideFlash(){
+    function hideFlash() {
         flashObj = null;
         flashContainer.innerHTML = "";
     }
@@ -187,18 +198,18 @@ var imageUploader = {};
      * @param id
      * @param catchRemote  是否需要替换远程图片
      */
-    function insertSearch( id, catchRemote ) {
-        var imgs = $G( id ).getElementsByTagName( "img" ), imgObjs = [];
-        for ( var i = 0, ci; ci = imgs[i++]; ) {
-            if ( ci.getAttribute( "selected" ) ) {
-                var url = ci.getAttribute( "src", 2 ).replace( /(\s*$)/g, "" ), img = {};
+    function insertSearch(id, catchRemote) {
+        var imgs = $G(id).getElementsByTagName("img"), imgObjs = [];
+        for (var i = 0, ci; ci = imgs[i++];) {
+            if (ci.getAttribute("selected")) {
+                var url = ci.getAttribute("src", 2).replace(/(\s*$)/g, ""), img = {};
                 img.src = url;
                 img.data_ue_src = url;
-                imgObjs.push( img );
+                imgObjs.push(img);
             }
         }
         insertImage(imgObjs);
-        catchRemote && editor.fireEvent( "catchRemoteImage" );
+        catchRemote && editor.fireEvent("catchRemoteImage");
         hideFlash();
     }
 
@@ -206,17 +217,17 @@ var imageUploader = {};
      * 插入单张图片
      */
     function insertSingle() {
-        var url = g( "url" ),
-                width = g( "width" ),
-                height = g( "height" ),
-                border = g( "border" ),
-                vhSpace = g( "vhSpace" ),
-                title = g( "title" ),
-                align = findFocus( "remoteFloat", "name" ),
-                imgObj = {};
-        if ( !url.value ) return;
-        if ( !flagImg ) return;   //粘贴地址后如果没有生成对应的预览图，可以认为本次粘贴地址失败
-        if ( !checkNum( [width, height, border, vhSpace] ) ) return false;
+        var url = g("url"),
+            width = g("width"),
+            height = g("height"),
+            border = g("border"),
+            vhSpace = g("vhSpace"),
+            title = g("title"),
+            align = findFocus("remoteFloat", "name"),
+            imgObj = {};
+        if (!url.value) return;
+        if (!flagImg) return;   //粘贴地址后如果没有生成对应的预览图，可以认为本次粘贴地址失败
+        if (!checkNum([width, height, border, vhSpace])) return false;
         imgObj.src = url.value;
         imgObj.data_ue_src = url.value;
         imgObj.width = width.value;
@@ -227,7 +238,7 @@ var imageUploader = {};
         imgObj.title = title.value;
         imgObj.style = "width:" + width.value + "px;height:" + height.value + "px;";
         insertImage(imgObj);
-        editor.fireEvent( "catchRemoteImage" );
+        editor.fireEvent("catchRemoteImage");
         hideFlash();
     }
 
@@ -235,9 +246,9 @@ var imageUploader = {};
      * 检测传入的所有input框中输入的长宽是否是正数
      * @param nodes input框集合，
      */
-    function checkNum( nodes ) {
-        for ( var i = 0, ci; ci = nodes[i++]; ) {
-            if ( !isNumber( ci.value ) || ci.value < 0 ) {
+    function checkNum(nodes) {
+        for (var i = 0, ci; ci = nodes[i++];) {
+            if (!isNumber(ci.value) || ci.value < 0) {
                 alert(lang.numError);
                 ci.value = "";
                 ci.focus();
@@ -251,25 +262,25 @@ var imageUploader = {};
      * 数字判断
      * @param value
      */
-    function isNumber( value ) {
-        return /(0|^[1-9]\d*$)/.test( value );
+    function isNumber(value) {
+        return /(0|^[1-9]\d*$)/.test(value);
     }
 
     /**
      * 插入多张图片
      */
     function insertBatch() {
-        if ( imageUrls.length < 1 ) return;
+        if (imageUrls.length < 1) return;
         var imgObjs = [],
-                align = findFocus( "localFloat", "name" );
+            align = findFocus("localFloat", "name");
 
-        for ( var i = 0, ci; ci = imageUrls[i++]; ) {
+        for (var i = 0, ci; ci = imageUrls[i++];) {
             var tmpObj = {};
             tmpObj.title = ci.title;
             tmpObj.floatStyle = align;
             //修正显示时候的地址数据,如果后台返回的是图片的绝对地址，那么此处无需修正
             tmpObj.data_ue_src = tmpObj.src = editor.options.imagePath + ci.url;
-            imgObjs.push( tmpObj );
+            imgObjs.push(tmpObj);
         }
         insertImage(imgObjs);
         hideFlash();
@@ -280,12 +291,12 @@ var imageUploader = {};
      * @param id
      * @param returnProperty
      */
-    function findFocus( id, returnProperty ) {
-        var tabs = g( id ).children,
-                property;
-        for ( var i = 0, ci; ci = tabs[i++]; ) {
-            if ( ci.className == "focus" ) {
-                property = ci.getAttribute( returnProperty );
+    function findFocus(id, returnProperty) {
+        var tabs = g(id).children,
+            property;
+        for (var i = 0, ci; ci = tabs[i++];) {
+            if (ci.className == "focus") {
+                property = ci.getAttribute(returnProperty);
                 break;
             }
         }
@@ -293,36 +304,26 @@ var imageUploader = {};
     }
 
     /**
-     * 绑定开始上传事件
-     */
-    function addUploadListener() {
-        g( "upload" ).onclick = function () {
-            flashObj.upload();
-            this.style.display = "none";
-        };
-    }
-
-    /**
      * 绑定地址框改变事件
      */
     function addUrlChangeListener() {
-        var value = g( "url" ).value;
-        if ( browser.ie ) {
-            g( "url" ).onpropertychange = function () {
+        var value = g("url").value;
+        if (browser.ie) {
+            g("url").onpropertychange = function () {
                 var v = this.value;
-                if ( v != value ) {
-                    createPreviewImage( v );
+                if (v != value) {
+                    createPreviewImage(v);
                     value = v;
                 }
             };
         } else {
-            g( "url" ).addEventListener( "input", function () {
+            g("url").addEventListener("input", function () {
                 var v = this.value;
-                if ( v != value ) {
-                    createPreviewImage( v );
+                if (v != value) {
+                    createPreviewImage(v);
                     value = v;
                 }
-            }, false );
+            }, false);
         }
     }
 
@@ -330,18 +331,18 @@ var imageUploader = {};
      * 绑定图片等比缩放事件
      * @param percent  缩放比例
      */
-    function addSizeChangeListener( percent ) {
-        var width = g( "width" ),
-                height = g( "height" ),
-                lock = g( 'lock' );
+    function addSizeChangeListener(percent) {
+        var width = g("width"),
+            height = g("height"),
+            lock = g('lock');
         width.onkeyup = function () {
-            if ( !isNaN( this.value ) && lock.checked ) {
-                height.value = Math.round( this.value / percent ) || this.value;
+            if (!isNaN(this.value) && lock.checked) {
+                height.value = Math.round(this.value / percent) || this.value;
             }
         };
         height.onkeyup = function () {
-            if ( !isNaN( this.value ) && lock.checked ) {
-                width.value = Math.round( this.value * percent ) || this.value;
+            if (!isNaN(this.value) && lock.checked) {
+                width.value = Math.round(this.value * percent) || this.value;
             }
         }
     }
@@ -349,37 +350,37 @@ var imageUploader = {};
     /**
      * 依据url中的地址创建一个预览图片并将对应的信息填入信息框和预览框
      */
-    function createPreviewImage( url ) {
-        if ( !url ) {
+    function createPreviewImage(url) {
+        if (!url) {
             flagImg = null;
-            g( "preview" ).innerHTML = "";
-            g( "width" ).value = "";
-            g( "height" ).value = "";
-            g( "border" ).value = "";
-            g( "vhSpace" ).value = "";
-            g( "title" ).value = "";
-            $focus( g( "url" ) );
+            g("preview").innerHTML = "";
+            g("width").value = "";
+            g("height").value = "";
+            g("border").value = "";
+            g("vhSpace").value = "";
+            g("title").value = "";
+            $focus(g("url"));
             return;
         }
-        var img = document.createElement( "img" ),
-                preview = g( "preview" );
+        var img = document.createElement("img"),
+            preview = g("preview");
 
         var imgTypeReg = /\.(png|gif|jpg|jpeg)$/gi, //格式过滤
-                urlFilter = "";                                     //地址过滤
-        if ( !imgTypeReg.test( url ) || url.indexOf( urlFilter ) == -1 ) {
-            preview.innerHTML = "<span style='color: red'>"+lang.imageUrlError+"</span>";
+            urlFilter = "";                                     //地址过滤
+        if (!imgTypeReg.test(url) || url.indexOf(urlFilter) == -1) {
+            preview.innerHTML = "<span style='color: red'>" + lang.imageUrlError + "</span>";
             flagImg = null;
             return;
         }
         preview.innerHTML = lang.imageLoading;
         img.onload = function () {
             flagImg = this;
-            showImageInfo( this );
-            showPreviewImage( this );
+            showImageInfo(this);
+            showPreviewImage(this,true);
             this.onload = null;
         };
         img.onerror = function () {
-            preview.innerHTML = "<span style='color: red'>"+lang.imageLoadError+"</span>";
+            preview.innerHTML = "<span style='color: red'>" + lang.imageLoadError + "</span>";
             flagImg = null;
             this.onerror = null;
         };
@@ -390,21 +391,21 @@ var imageUploader = {};
      * 显示图片对象的信息
      * @param img
      */
-    function showImageInfo( img ) {
-        if ( !img.getAttribute( "src" ) || !img.src ) return;
-        var wordImgFlag = img.getAttribute( "word_img" );
-        g( "url" ).value = wordImgFlag ? wordImgFlag.replace( "&amp;", "&" ) : (img.getAttribute( 'data_ue_src' ) || img.getAttribute( "src", 2 ).replace( "&amp;", "&" ));
-        g( "width" ).value = img.width || 0;
-        g( "height" ).value = img.height || 0;
-        g( "border" ).value = img.getAttribute( "border" ) || 0;
-        g( "vhSpace" ).value = img.getAttribute( "vspace" ) || 0;
-        g( "title" ).value = img.title || "";
-        var align = editor.queryCommandValue( "imageFloat" ) || "none";
-        updateAlignButton( align );
+    function showImageInfo(img) {
+        if (!img.getAttribute("src") || !img.src) return;
+        var wordImgFlag = img.getAttribute("word_img");
+        g("url").value = wordImgFlag ? wordImgFlag.replace("&amp;", "&") : (img.getAttribute('data_ue_src') || img.getAttribute("src", 2).replace("&amp;", "&"));
+        g("width").value = img.width || 0;
+        g("height").value = img.height || 0;
+        g("border").value = img.getAttribute("border") || 0;
+        g("vhSpace").value = img.getAttribute("vspace") || 0;
+        g("title").value = img.title || "";
+        var align = editor.queryCommandValue("imageFloat") || "none";
+        updateAlignButton(align);
 
         //保存原始比例，用于等比缩放
-        var percent = (img.width / img.height).toFixed( 2 );
-        addSizeChangeListener( percent );
+        var percent = (img.width / img.height).toFixed(2);
+        addSizeChangeListener(percent);
     }
 
     /**
@@ -412,25 +413,21 @@ var imageUploader = {};
      * @param img
      * @param needClone  是否需要克隆后显示
      */
-    function showPreviewImage( img, needClone ) {
+    function showPreviewImage(img, needClone) {
         var tmpWidth = img.width, tmpHeight = img.height;
-        if ( needClone ) {
-            //针对编辑图片时
-            img = img.cloneNode( true );
-            img.width = tmpWidth;
-            img.height = tmpHeight;
-            flagImg = img;
+        var maxWidth = 262,maxHeight = 262,
+            target = scaling(tmpWidth,tmpHeight,maxWidth,maxHeight);
+        target.border = img.border||0;
+        target.src = img.src;
+        flagImg = true;
+        if ((target.width + 2 * target.border) > maxWidth) {
+            target.width = maxWidth - 2 * target.border;
         }
-        var maxWidth = 262;
-        scale( img, maxWidth, maxWidth, maxWidth );
-        if ( (img.width + 2 * img.border) > maxWidth ) {
-            img.width = maxWidth - 2 * img.border;
+        if ((target.height + 2 * target.border) > maxWidth) {
+            target.height = maxWidth - 2 * target.border;
         }
-        if ( (img.height + 2 * img.border) > maxWidth ) {
-            img.height = maxWidth - 2 * img.border;
-        }
-        var preview = g( "preview" );
-        preview.innerHTML = '<img src="' + img.src + '" width="' + img.width + '" height="' + img.height + '" border="' + img.border + 'px solid #000" />';
+        var preview = g("preview");
+        preview.innerHTML = '<img src="' + target.src + '" width="' + target.width + '" height="' + target.height + '" border="' + target.border + 'px solid #000" />';
     }
 
     /**
@@ -438,18 +435,18 @@ var imageUploader = {};
      * @param img
      * @param max
      */
-    function scale( img, max, oWidth, oHeight ) {
+    function scale(img, max, oWidth, oHeight) {
         var width = 0, height = 0, percent, ow = img.width || oWidth, oh = img.height || oHeight;
-        if ( ow > max || oh > max ) {
-            if ( ow >= oh ) {
-                if ( width = ow - max ) {
-                    percent = (width / ow).toFixed( 2 );
+        if (ow > max || oh > max) {
+            if (ow >= oh) {
+                if (width = ow - max) {
+                    percent = (width / ow).toFixed(2);
                     img.height = oh - oh * percent;
                     img.width = max;
                 }
             } else {
-                if ( height = oh - max ) {
-                    percent = (height / oh).toFixed( 2 );
+                if (height = oh - max) {
+                    percent = (height / oh).toFixed(2);
                     img.width = ow - ow * percent;
                     img.height = max;
                 }
@@ -457,20 +454,34 @@ var imageUploader = {};
         }
     }
 
+    function scaling(width,height,maxWidth,maxHeight){
+        if(width<maxWidth && height<maxHeight) return {width:width,height:height};
+        var srcRatio = (width/height).toFixed(2),
+            tarRatio = (maxWidth/maxHeight).toFixed(2),
+            w,h;
+        if(srcRatio<tarRatio){
+            h = maxHeight;
+            w = h*srcRatio;
+        }else{
+            w = maxWidth;
+            h = w/srcRatio;
+        }
+        return {width:w.toFixed(0),height:h.toFixed(0)}
+    }
     /**
      * 创建flash实例
      * @param opt
      * @param callbacks
      */
-    function createFlash( opt, callbacks ) {
-        var i18n = utils.extend({},lang.flashI18n);
+    function createFlash(opt, callbacks) {
+        var i18n = utils.extend({}, lang.flashI18n);
         //处理图片资源地址的编码，补全等问题
-        for(var i in i18n){
-            if(!(i in {"lang":1,"uploadingTF":1,"imageTF":1,"textEncoding":1}) && i18n[i]){
+        for (var i in i18n) {
+            if (!(i in {"lang":1, "uploadingTF":1, "imageTF":1, "textEncoding":1}) && i18n[i]) {
                 i18n[i] = encodeURIComponent(editor.options.langPath + editor.options.lang + "/images/" + i18n[i]);
             }
         }
-        opt = utils.extend(opt,i18n,false);
+        opt = utils.extend(opt, i18n, false);
         var option = {
             createOptions:{
                 id:'flash',
@@ -485,23 +496,23 @@ var imageUploader = {};
             }
         };
         flashContainer = $G(opt.container);
-        option = utils.extend( option, callbacks, false );
-        flashObj = new baidu.flash.imageUploader( option );
+        option = utils.extend(option, callbacks, false);
+        flashObj = new baidu.flash.imageUploader(option);
     }
 
     /**
      * 依据传入的align值更新按钮信息
      * @param align
      */
-    function updateAlignButton( align ) {
-        var aligns = g( "remoteFloat" ).children;
-        for ( var i = 0, ci; ci = aligns[i++]; ) {
-            if ( ci.getAttribute( "name" ) == align ) {
-                if ( ci.className != "focus" ) {
+    function updateAlignButton(align) {
+        var aligns = g("remoteFloat").children;
+        for (var i = 0, ci; ci = aligns[i++];) {
+            if (ci.getAttribute("name") == align) {
+                if (ci.className != "focus") {
                     ci.className = "focus";
                 }
             } else {
-                if ( ci.className == "focus" ) {
+                if (ci.className == "focus") {
                     ci.className = "";
                 }
             }
@@ -512,25 +523,26 @@ var imageUploader = {};
      * 创建图片浮动选择按钮
      * @param ids
      */
-    function createAlignButton( ids ) {
-        for ( var i = 0, ci; ci = ids[i++]; ) {
-            var floatContainer = g( ci ),
-                    nameMaps = {"none":lang.floatDefault, "left":lang.floatLeft, "right":lang.floatRight, "center":lang.floatCenter};
-            for ( var j in nameMaps ) {
-                var div = document.createElement( "div" );
-                div.setAttribute( "name", j );
-                if ( j == "none" ) div.className = "focus";
-                div.style.cssText = "background:url(../../themes/default/images/" + j + "_focus.jpg);";
-                div.setAttribute( "title", nameMaps[j] );
-                floatContainer.appendChild( div );
+    function createAlignButton(ids) {
+        for (var i = 0, ci; ci = ids[i++];) {
+            var floatContainer = g(ci),
+                nameMaps = {"none":lang.floatDefault, "left":lang.floatLeft, "right":lang.floatRight, "center":lang.floatCenter};
+            for (var j in nameMaps) {
+                var div = document.createElement("div");
+                div.setAttribute("name", j);
+                if (j == "none") div.className = "focus";
+
+                div.style.cssText = "background:url(images/" + j + "_focus.jpg);";
+                div.setAttribute("title", nameMaps[j]);
+                floatContainer.appendChild(div);
             }
-            switchSelect( ci );
+            switchSelect(ci);
         }
     }
 
-    function toggleFlash(show){
-        if(flashContainer && browser.webkit){
-            flashContainer.style.left = show ? "0":"-10000px";
+    function toggleFlash(show) {
+        if (flashContainer && browser.webkit) {
+            flashContainer.style.left = show ? "0" : "-10000px";
         }
     }
 
@@ -540,85 +552,86 @@ var imageUploader = {};
      * @param tabBodys
      * @param obj
      */
-    function clickHandler( tabHeads,tabBodys,obj ) {
+    function clickHandler(tabHeads, tabBodys, obj) {
         //head样式更改
-        for ( var k = 0, len = tabHeads.length; k < len; k++ ) {
+        for (var k = 0, len = tabHeads.length; k < len; k++) {
             tabHeads[k].className = "";
         }
         obj.className = "focus";
         //body显隐
-        var tabSrc = obj.getAttribute( "tabSrc" );
-        for ( var j = 0, length = tabBodys.length; j < length; j++ ) {
+        var tabSrc = obj.getAttribute("tabSrc");
+        for (var j = 0, length = tabBodys.length; j < length; j++) {
             var body = tabBodys[j],
-                    id = body.getAttribute( "id" );
-            body.onclick = function(){
+                id = body.getAttribute("id");
+            body.onclick = function () {
                 this.style.zoom = 1;
             };
-            if ( id != tabSrc ) {
+            if (id != tabSrc) {
                 body.style.zIndex = 1;
             } else {
                 body.style.zIndex = 200;
                 //当切换到本地图片上传时，隐藏遮罩用的iframe
-                if ( id == "local" ) {
+                if (id == "local") {
                     toggleFlash(true);
                     maskIframe.style.display = "none";
                     //处理确定按钮的状态
-                    if ( selectedImageCount ) {
-                        dialog.buttons[0].setDisabled( true );
+                    if (selectedImageCount) {
+                        dialog.buttons[0].setDisabled(true);
                     }
                 } else {
                     toggleFlash(false);
                     maskIframe.style.display = "";
-                    dialog.buttons[0].setDisabled( false );
+                    dialog.buttons[0].setDisabled(false);
                 }
-                var list = g( "imageList" );
+                var list = g("imageList");
                 list.style.display = "none";
                 //切换到图片管理时，ajax请求后台图片列表
-                if ( id == "imgManager" ) {
+                if (id == "imgManager") {
                     list.style.display = "";
                     //已经初始化过时不再重复提交请求
-                    if ( !list.children.length ) {
-                        ajax.request( editor.options.imageManagerUrl, {
+                    if (!list.children.length) {
+                        ajax.request(editor.options.imageManagerUrl, {
                             timeout:100000,
                             action:"get",
-                            onsuccess:function ( xhr ) {
+                            onsuccess:function (xhr) {
                                 //去除空格
                                 var tmp = utils.trim(xhr.responseText),
-                                        imageUrls = !tmp ? [] : tmp.split( "ue_separate_ue" ),
-                                        length = imageUrls.length;
-                                g( "imageList" ).innerHTML = !length ? "&nbsp;&nbsp;"+lang.noUploadImage : "";
-                                for ( var k = 0, ci; ci = imageUrls[k++]; ) {
-                                    var img = document.createElement( "img" );
+                                    imageUrls = !tmp ? [] : tmp.split("ue_separate_ue"),
+                                    length = imageUrls.length;
+                                g("imageList").innerHTML = !length ? "&nbsp;&nbsp;" + lang.noUploadImage : "";
+                                for (var k = 0, ci; ci = imageUrls[k++];) {
+                                    var img = document.createElement("img");
 
-                                    var div = document.createElement( "div" );
-                                    div.appendChild( img );
+                                    var div = document.createElement("div");
+                                    div.appendChild(img);
                                     div.style.display = "none";
-                                    g( "imageList" ).appendChild( div );
+                                    g("imageList").appendChild(div);
                                     img.onclick = function () {
-                                        changeSelected( this );
+                                        changeSelected(this);
                                     };
                                     img.onload = function () {
                                         this.parentNode.style.display = "";
                                         var w = this.width, h = this.height;
-                                        scale( this, 100, 120, 80 );
+                                        scale(this, 100, 120, 80);
                                         this.title = lang.toggleSelect + w + "X" + h;
+                                        this.onload = null;
                                     };
-                                    img.setAttribute( k < 35 ? "src" : "lazy_src", editor.options.imageManagerPath + ci.replace(/\s+|\s+/ig,"") );
-                                    img.setAttribute( "data_ue_src", editor.options.imageManagerPath + ci.replace(/\s+|\s+/ig,"") );
+                                    img.setAttribute(k < 35 ? "src" : "lazy_src", editor.options.imageManagerPath + ci.replace(/\s+|\s+/ig, ""));
+                                    img.setAttribute("data_ue_src", editor.options.imageManagerPath + ci.replace(/\s+|\s+/ig, ""));
 
                                 }
                             },
                             onerror:function () {
-                                g( "imageList" ).innerHTML = lang.imageLoadError;
+                                g("imageList").innerHTML = lang.imageLoadError;
                             }
-                        } );
+                        });
                     }
                 }
-                if ( id == "imgSearch" ) {
-                    selectTxt( g( "imgSearchTxt" ) );
+                if (id == "imgSearch") {
+                    selectTxt(g("imgSearchTxt"));
                 }
-                if ( id == "remote" ) {
-                    $focus( g( "url" ) );
+                if (id == "remote") {
+                    $focus(g("url"));
                 }
             }
         }
@@ -629,16 +642,16 @@ var imageUploader = {};
      * TAB切换
      * @param tabParentId  tab的父节点ID或者对象本身
      */
-    function switchTab( tabParentId ) {
-        var tabElements = g( tabParentId ).children,
-                tabHeads = tabElements[0].children,
-                tabBodys = tabElements[1].children;
+    function switchTab(tabParentId) {
+        var tabElements = g(tabParentId).children,
+            tabHeads = tabElements[0].children,
+            tabBodys = tabElements[1].children;
 
-        for ( var i = 0, length = tabHeads.length; i < length; i++ ) {
+        for (var i = 0, length = tabHeads.length; i < length; i++) {
             var head = tabHeads[i];
-            if ( head.className === "focus" )clickHandler(tabHeads,tabBodys, head );
+            if (head.className === "focus")clickHandler(tabHeads, tabBodys, head);
             head.onclick = function () {
-                clickHandler(tabHeads,tabBodys,this);
+                clickHandler(tabHeads, tabBodys, this);
             }
         }
     }
@@ -647,12 +660,12 @@ var imageUploader = {};
      * 改变o的选中状态
      * @param o
      */
-    function changeSelected( o ) {
-        if ( o.getAttribute( "selected" ) ) {
-            o.removeAttribute( "selected" );
+    function changeSelected(o) {
+        if (o.getAttribute("selected")) {
+            o.removeAttribute("selected");
             o.style.cssText = "filter:alpha(Opacity=100);-moz-opacity:1;opacity: 1;border: 2px solid #fff";
         } else {
-            o.setAttribute( "selected", "true" );
+            o.setAttribute("selected", "true");
             o.style.cssText = "filter:alpha(Opacity=50);-moz-opacity:0.5;opacity: 0.5;border:2px solid blue;";
         }
     }
@@ -661,14 +674,14 @@ var imageUploader = {};
      * 选择切换，传入一个container的ID
      * @param selectParentId
      */
-    function switchSelect( selectParentId ) {
-        var select = g(selectParentId ),
-                children = select.children;
-        domUtils.on(select,"click",function(evt){
+    function switchSelect(selectParentId) {
+        var select = g(selectParentId),
+            children = select.children;
+        domUtils.on(select, "click", function (evt) {
             var tar = evt.srcElement || evt.target;
-            for ( var j = 0, cj; cj = children[j++]; ) {
+            for (var j = 0, cj; cj = children[j++];) {
                 cj.className = "";
-                cj.removeAttribute && cj.removeAttribute( "class" );
+                cj.removeAttribute && cj.removeAttribute("class");
             }
             tar.className = "focus";
 
@@ -679,17 +692,17 @@ var imageUploader = {};
      * gb2312编码
      * @param str
      */
-    function encodeToGb2312( str ) {
+    function encodeToGb2312(str) {
         var strOut = "";
-        for ( var i = 0; i < str.length; i++ ) {
-            var c = str.charAt( i ),
-                    code = str.charCodeAt( i );
-            if ( c == " " ) strOut += "+";
-            else if ( code >= 19968 && code <= 40869 ) {
+        for (var i = 0; i < str.length; i++) {
+            var c = str.charAt(i),
+                code = str.charCodeAt(i);
+            if (c == " ") strOut += "+";
+            else if (code >= 19968 && code <= 40869) {
                 var index = code - 19968;
-                strOut += "%" + z.substr( index * 4, 2 ) + "%" + z.substr( index * 4 + 2, 2 );
+                strOut += "%" + z.substr(index * 4, 2) + "%" + z.substr(index * 4 + 2, 2);
             } else {
-                strOut += "%" + str.charCodeAt( i ).toString( 16 );
+                strOut += "%" + str.charCodeAt(i).toString(16);
             }
         }
         return strOut;

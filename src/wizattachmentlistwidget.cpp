@@ -187,13 +187,13 @@ void CWizAttachmentListView::openAttachment(CWizAttachmentListViewItem* item)
 
     CString strTempFileName = strTempPath + item->attachment().strName;
     ::WizGetNextFileName(strTempFileName);
-    //
+
     if (!::WizCopyFile(db.GetAttachmentFileName(item->attachment().strGUID), strTempFileName, FALSE))
     {
         QMessageBox::critical(this, qApp->applicationName(), tr("Can not save attachment to %1").arg(strTempFileName));
         return;
     }
-    //
+
     QDesktopServices::openUrl(QUrl::fromLocalFile(strTempFileName));
 }
 
@@ -336,12 +336,12 @@ CWizAttachmentListWidget::CWizAttachmentListWidget(CWizExplorerApp& app, QWidget
     root->setGeometry(0, 0, sizeHint().width(), sizeHint().height());
     root->setContentsMargins(8, 20, 8, 8);
 
-    QVBoxLayout* layoutMain = new QVBoxLayout(root);
+    QVBoxLayout* layoutMain = new QVBoxLayout();
     layoutMain->setContentsMargins(0, 0, 0, 0);
     root->setLayout(layoutMain);
 
     QWidget* header = new QWidget(root);
-    QHBoxLayout* layoutHeader = new QHBoxLayout(header);
+    QHBoxLayout* layoutHeader = new QHBoxLayout();
     layoutHeader->setContentsMargins(0, 0, 0, 0);
     header->setLayout(layoutHeader);
 

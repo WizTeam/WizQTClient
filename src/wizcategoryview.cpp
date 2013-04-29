@@ -20,6 +20,7 @@
 #include "newtagdialog.h"
 #include "share/wizsettings.h"
 #include "share/wizDatabaseManager.h"
+#include "widgets/qscrollareakineticscroller.h"
 
 /* ------------------------------ CWizCategoryBaseView ------------------------------ */
 
@@ -28,25 +29,63 @@ CWizCategoryBaseView::CWizCategoryBaseView(CWizExplorerApp& app, QWidget* parent
     , m_app(app)
     , m_dbMgr(app.databaseManager())
     , m_bDragHovered(false)
+    , m_selectedItem(NULL)
 {
     header()->hide();
     setFrameStyle(QFrame::NoFrame);
+    viewport()->setAttribute(Qt::WA_AcceptTouchEvents, true);
     setAttribute(Qt::WA_MacShowFocusRect, false);
     setAutoFillBackground(true);
-    setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     setTextElideMode(Qt::ElideMiddle);
     setIndentation(12);
 
+    //m_kineticScroller = new QScrollAreaKineticScroller();
+    //m_kineticScroller->setWidget(this);
+
+    // use custom scrollbar
+    setAnimated(true);
+    setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
+    setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    m_vScroll = new CWizScrollBar(this);
+    m_vScroll->syncWith(verticalScrollBar());
+
+    // setup background
+    QPixmap pixmapBg;
+    pixmapBg.load(::WizGetResourcesPath() + "skins/leftview_bg.png");
+    QBrush brushBg(pixmapBg);
     QPalette pal = palette();
-    pal.setColor(QPalette::Base, WizGetCategoryBackroundColor(m_app.userSettings().skin()));
+    pal.setBrush(QPalette::Base, brushBg);
     setPalette(pal);
 
     setStyle(::WizGetStyle(m_app.userSettings().skin()));
 }
 
+void CWizCategoryBaseView::baseInit()
+{
+    init();
+}
+
+void CWizCategoryBaseView::resizeEvent(QResizeEvent* event)
+{
+    // reset scrollbar
+    m_vScroll->resize(m_vScroll->sizeHint().width(), event->size().height());
+    m_vScroll->move(event->size().width() - m_vScroll->sizeHint().width(), 0);
+
+    QTreeWidget::resizeEvent(event);
+}
+
 void CWizCategoryBaseView::addSeparator()
 {
     addTopLevelItem(new CWizCategoryViewSeparatorItem(m_app));
+}
+
+CWizCategoryViewSpacerItem* CWizCategoryBaseView::addSpacer()
+{
+    CWizCategoryViewSpacerItem* spacer = new CWizCategoryViewSpacerItem(m_app);
+    addTopLevelItem(spacer);
+    spacer->setHidden(true);
+    return spacer;
 }
 
 QString CWizCategoryBaseView::selectedItemKbGUID()
@@ -73,9 +112,9 @@ void CWizCategoryBaseView::getDocuments(CWizDocumentDataArray& arrayDocument)
     if (!pItem)
         return;
 
-    if (pItem->kbGUID().isEmpty()) {
-        return;
-    }
+//    if (pItem->kbGUID().isEmpty()) {
+//        return;
+//    }
 
     pItem->getDocuments(m_dbMgr.db(pItem->kbGUID()), arrayDocument);
 }
@@ -103,8 +142,10 @@ void CWizCategoryBaseView::saveSelection(const QString& str)
 
 void CWizCategoryBaseView::restoreSelection()
 {
-    setCurrentItem(m_selectedItem);
-    Q_EMIT itemSelectionChanged();
+    if (m_selectedItem) {
+        setCurrentItem(m_selectedItem);
+        Q_EMIT itemSelectionChanged();
+    }
 }
 
 template <class T> inline  T* CWizCategoryBaseView::currentCategoryItem() const
@@ -120,7 +161,12 @@ CWizCategoryViewItemBase* CWizCategoryBaseView::categoryItemFromIndex(const QMod
 bool CWizCategoryBaseView::isSeparatorItemByIndex(const QModelIndex &index) const
 {
     CWizCategoryViewItemBase* pItem = categoryItemFromIndex(index);
-    return NULL != dynamic_cast<const CWizCategoryViewSeparatorItem*>(pItem);
+    if (NULL != dynamic_cast<const CWizCategoryViewSeparatorItem*>(pItem)) {
+        return true;
+    } else if (NULL != dynamic_cast<const CWizCategoryViewSpacerItem*>(pItem)) {
+        return true;
+    }
+    return false;
 }
 
 bool CWizCategoryBaseView::isSeparatorItemByPosition(const QPoint& pt) const
@@ -380,6 +426,8 @@ void CWizCategoryView::initFolders()
     CWizStdStringArray arrayAllLocation;
     m_dbMgr.db().GetAllLocations(arrayAllLocation);
 
+    doLocationSanityCheck(arrayAllLocation);
+
     initFolders(pAllFoldersItem, QString(), arrayAllLocation);
 
     if (arrayAllLocation.empty()) {
@@ -429,6 +477,40 @@ void CWizCategoryView::initFolders(QTreeWidgetItem* pParent, \
         initFolders(pFolderItem, strLocation, arrayAllLocation);
     }
 }
+
+void CWizCategoryView::doLocationSanityCheck(CWizStdStringArray& arrayLocation)
+{
+    for (int i = 0; i < arrayLocation.size(); i++) {
+        QString strLocation = arrayLocation.at(i);
+
+        if (strLocation.left(1) != "/" && strLocation.right(1) != "/") {
+            qDebug() << "[doLocationSanityCheck]: find folder name have not respect location naming spec: " << strLocation;
+
+            CWizDocumentDataArray arrayDocument;
+            CWizDocumentDataArray::iterator itDoc;
+            m_dbMgr.db().GetDocumentsByLocation(strLocation, arrayDocument);
+
+            if (!strLocation.isEmpty()) {
+                strLocation = "/" + strLocation + "/";
+            } else {
+                strLocation = "/My Notes/";
+            }
+
+            qDebug() << "[doLocationSanityCheck]: try to amend name to : " << strLocation << ", Total: " << arrayDocument.size();
+            for (itDoc = arrayDocument.begin(); itDoc != arrayDocument.end(); itDoc++) {
+                WIZDOCUMENTDATAEX& doc = *itDoc;
+
+                qDebug() << "[doLocationSanityCheck]: title: [" + doc.strTitle + "] Location: [" + doc.strLocation + "]";
+                doc.strLocation = strLocation;
+                doc.nObjectPart = WIZKM_XMLRPC_OBJECT_PART_INFO;
+                m_dbMgr.db().UpdateDocument(doc);
+            }
+
+            arrayLocation.erase(arrayLocation.begin() + i);
+        }
+    }
+}
+
 
 void CWizCategoryView::initTrash()
 {
@@ -989,6 +1071,13 @@ void CWizCategoryTagsView::on_action_newTag_confirmed(int result)
         CString strTagName = *it;
 
         WIZTAGDATA tagNew;
+
+        // only create tag for unique name
+        if (m_dbMgr.db().TagByName(strTagName, tagNew)) {
+            TOLOG1("Tag name already exist: %1", strTagName);
+            continue;
+        }
+
         m_dbMgr.db().CreateTag(parentTag.strGUID, strTagName, "", tagNew);
     }
 }
@@ -1074,7 +1163,7 @@ void CWizCategoryGroupsView::showGroupContextMenu(const QString& strKbGUID, QPoi
 
 void CWizCategoryGroupsView::init()
 {
-    CWizCategoryViewGroupRootItem* pAllGroupsItem = new CWizCategoryViewGroupRootItem(m_app, tr("Groups"), "");
+    CWizCategoryViewAllGroupsRootItem* pAllGroupsItem = new CWizCategoryViewAllGroupsRootItem(m_app, tr("Groups"), "");
     addTopLevelItem(pAllGroupsItem);
     pAllGroupsItem->setExpanded(true);
 

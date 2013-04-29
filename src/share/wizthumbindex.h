@@ -23,7 +23,7 @@ private:
     bool AbstractIsExist(const CString& guid,const CString& type);
 
 public:
-    bool OpenThumb(const CString& strFileName);
+    bool OpenThumb(const CString& strFileName, const QString& strVersion);
     void CloseThumb();
     bool IsThumbOpened();
     bool UpdatePadAbstract(const WIZABSTRACT &lpszAbstract);

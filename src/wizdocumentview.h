@@ -16,6 +16,7 @@ class CWizDatabase;
 class CWizTagListWidget;
 class CWizAttachmentListWidget;
 class CWizNoteInfoForm;
+class CWizEditorToolBar;
 
 class CWizDocumentView : public QWidget
 {
@@ -25,8 +26,9 @@ public:
     CWizDocumentView(CWizExplorerApp& app, QWidget* parent = 0);
     virtual QSize sizeHint() const { return QSize(200, 1); }
 
-    CWizDocumentWebView* web() const { return m_web; }
     QWidget* client() const { return m_client; }
+    CWizEditorToolBar* editorToolBar() const;
+    CWizDocumentWebView* web() const { return m_web; }
 
 private:
     CWizExplorerApp& m_app;
@@ -35,6 +37,7 @@ private:
 protected:
     CWizDatabaseManager& m_dbMgr;
     QPointer<CWizTitleBar> m_title;
+    QPointer<CWizEditorToolBar> m_editorToolBar;
     CWizDocumentWebView* m_web;
     QWidget* m_client;
     QPointer<CWizTagListWidget> m_tags;

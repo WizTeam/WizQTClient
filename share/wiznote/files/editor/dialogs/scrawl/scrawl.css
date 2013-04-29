@@ -2,7 +2,7 @@
 */
 body{margin: 0;}
 table{width:100%;}
-td{padding:2px 4px;vertical-align: middle;}
+table td{padding:2px 4px;vertical-align: middle;}
 a{text-decoration: none;}
 em{font-style: normal;}
 .border_style1{border: 1px solid #ccc;border-radius: 5px;box-shadow:2px 2px 5px #d3d6da;}
@@ -13,7 +13,7 @@ em{font-style: normal;}
 .hot{float:left;height:335px;}
 .drawBoard{position: relative; cursor: crosshair;}
 .brushBorad{position: absolute;left:0;top:0;z-index: 998;}
-.picBoard{display:table-cell;border: none;text-align: center;vertical-align: middle;cursor: default;}
+.picBoard{border: none;text-align: center;line-height: 300px;cursor: default;}
 .operateBar{margin-top:10px;font-size:12px;text-align: center;}
 .operateBar span{margin-left: 10px;}
 

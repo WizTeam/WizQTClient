@@ -324,26 +324,48 @@ WizDocumentViewMode CWizUserSettings::noteViewMode() const
     return viewmodeAlwaysEditing;
 }
 
-bool CWizUserSettings::autoSync() const
+//bool CWizUserSettings::autoSync() const
+//{
+//    QString strAutoSync = get("AutoSync");
+
+//    if (!strAutoSync.isEmpty()) {
+//        return strAutoSync.toInt() ? true : false;
+//    }
+
+//    // auto sync as default
+//    return true;
+//}
+
+
+
+//bool CWizUserSettings::downloadAllNotesData() const
+//{
+//    QString strDownload = get("DownloadAllNotesData");
+
+//    if (!strDownload.isEmpty()) {
+//        return strDownload.toInt() ? true : false;
+//    }
+
+//    // do not download all notes data as default
+//    return false;
+//}
+
+int CWizUserSettings::syncInterval() const
 {
-    QString strAutoSync = get("AutoSync");
-
-    if (!strAutoSync.isEmpty()) {
-        return strAutoSync.toInt() ? true : false;
-    }
-
-    // auto sync as default
-    return true;
+    return get("SyncInterval").toInt();
 }
 
-bool CWizUserSettings::downloadAllNotesData() const
+void CWizUserSettings::setSyncInterval(int minutes)
 {
-    QString strDownload = get("DownloadAllNotesData");
+    set("SyncInterval", QString::number(minutes));
+}
 
-    if (!strDownload.isEmpty()) {
-        return strDownload.toInt() ? true : false;
-    }
+int CWizUserSettings::syncMethod() const
+{
+    return get("SyncMethod").toInt();
+}
 
-    // do not download all notes data as default
-    return false;
+void CWizUserSettings::setSyncMethod(int days)
+{
+    set("SyncMethod", QString::number(days));
 }

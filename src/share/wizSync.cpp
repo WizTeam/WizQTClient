@@ -5,6 +5,7 @@
 CWizSync::CWizSync(CWizDatabaseManager& dbMgr, const QString& strKbUrl /* = WIZ_API_URL */)
     : m_dbMgr(dbMgr)
     , m_bStarted(false)
+    , m_bAborted(false)
 {
     qRegisterMetaType<CWizGroupDataArray>("CWizGroupDataArray");
 
@@ -29,14 +30,24 @@ CWizSync::~CWizSync()
 
 void CWizSync::startSync()
 {
-    TOLOG(tr("Begin syning"));
-    Q_EMIT syncStarted();
+    if (m_bStarted)
+        return;
 
     m_bStarted = true;
+    m_bAborted = false;
+
+    Q_EMIT processLog(tr("Begin syning"));
+    Q_EMIT syncStarted();
 
     QString strUserId = m_kbSync->database()->getUserId();
     QString strPasswd = m_kbSync->database()->getPassword();
     m_kbSync->callClientLogin(strUserId, strPasswd);
+}
+
+void CWizSync::abort()
+{
+    m_bAborted = true;
+    m_kbSync->abort();
 }
 
 void CWizSync::on_clientLoginDone()
@@ -88,22 +99,25 @@ void CWizSync::on_getGroupListDone(const CWizGroupDataArray& arrayGroup)
     }
 
     // sync user private notes
-    TOLOG(tr("Begin syncing user private data"));
+    Q_EMIT processLog(tr("Begin syncing user private data"));
     m_kbSync->startSync(WizGlobal()->userInfo().strKbGUID);
 }
 
 void CWizSync::on_kbSyncDone(bool bError)
 {
-    if (bError) {
+    if (m_bAborted) {
         m_bStarted = false;
-        TOLOG(tr("Error occured while syncing, Try to syncing next time"));
         Q_EMIT syncDone(true);
         return;
     }
 
+    if (bError) {
+        Q_EMIT processLog(tr("Error occured while syncing, Try to syncing next time"));
+    }
+
     if (!m_arrayGroup.size()) {
         m_bStarted = false;
-        TOLOG(tr("Syncing finished"));
+        Q_EMIT processLog(tr("Syncing finished"));
         Q_EMIT syncDone(false);
         return;
     }
@@ -122,6 +136,6 @@ void CWizSync::on_kbSyncDone(bool bError)
     m_kbSync->setDatabase(m_dbMgr.db(group.strGroupGUID));
 
     // reset db info and start sync group data
-    TOLOG1(tr("Begin syncing group data: %1"), group.strGroupName);
+    Q_EMIT processLog(tr("Begin syncing group data: %1").arg(group.strGroupName));
     m_kbSync->startSync(group.strGroupGUID);
 }

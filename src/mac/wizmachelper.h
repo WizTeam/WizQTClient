@@ -1,11 +1,13 @@
 #ifndef COCOAHELP_H
 #define COCOAHELP_H
 
-#include <QtGlobal>
+#include <QtGui>
 
-#ifdef Q_OS_MAC
+#ifdef Q_WS_MAC
 
-#include <Cocoa/Cocoa.h>
+void setupFullScreenMode(QMainWindow* mainWindow);
+void toggleFullScreenMode(QMainWindow* mainWindow);
+QString WizMacGetOSVersion();
 
 class CWizNSAutoReleasePool
 {
@@ -43,6 +45,6 @@ class CWizChangeCocoaImplementation
 
 #endif // __OBJC__
 
-#endif //Q_OS_MAC
+#endif // Q_WS_MAC
 
 #endif // COCOAHELP_H

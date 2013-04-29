@@ -10,7 +10,7 @@
 #define WIZ_API_VERSION     "3"
 #define WIZ_API_URL "http://service.wiz.cn/wizkm/xmlrpc"
 #define WIZAPI_TRUNK_SIZE   512*1024
-#define WIZAPI_PAGE_MAX     10
+#define WIZAPI_PAGE_MAX     80
 
 const char* const SyncMethod_ClientLogin = "accounts.clientLogin";
 const char* const SyncMethod_ClientKeepAlive = "accounts.keepAlive";

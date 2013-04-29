@@ -1,9 +1,12 @@
 #include "wizaboutdialog.h"
 #include "ui_wizaboutdialog.h"
 
+#include <QApplication>
+#include <QFileInfo>
+
 #include "share/wizmisc.h"
 #include "share/wizsettings.h"
-#include <QFileInfo>
+
 
 AboutDialog::AboutDialog(CWizExplorerApp& app, QWidget *parent)
     : QDialog(parent)
@@ -13,8 +16,8 @@ AboutDialog::AboutDialog(CWizExplorerApp& app, QWidget *parent)
     ui->setupUi(this);
     setFixedSize(size());
 
-    QPixmap pixmap(::WizGetSkinResourceFileName(m_app.userSettings().skin(), "about_logo"));
-    ui->labelIcon->setPixmap(pixmap);
+    QIcon iconApp = qApp->windowIcon();
+    ui->labelIcon->setPixmap(iconApp.pixmap(QSize(128, 128)));
 
 #if defined Q_OS_MAC
     QString strProduct(tr("WizNote for Mac"));

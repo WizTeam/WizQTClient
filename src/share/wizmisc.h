@@ -182,8 +182,14 @@ void WizGetSkins(QStringList& skins);
 QString WizGetSkinResourcePath(const QString& strSkinName);
 QString WizGetSkinDisplayName(const QString& strSkinName, const QString& strLocale);
 QString WizGetSkinResourceFileName(const QString& strSkinName, const QString& strName);
+QIcon WizLoadSkinIcon(const QString& strSkinName, const QString& strIconName, QIcon::Mode mode = QIcon::Normal, QIcon::State state = QIcon::Off);
 QIcon WizLoadSkinIcon(const QString& strSkinName, QColor forceground, const QString& strIconName);
+QIcon WizLoadSkinIcon2(const QString& strSkinName, const QColor& blendColor, const QString& strIconName);
 
+bool WizImageBlending(QImage& img, const QColor& blendColor, QIcon::Mode mode = QIcon::Normal);
+void WizLoadSkinIcon3(QIcon& icon, const QString& strSkinName, const QString& strIconName,
+                      QIcon::Mode mode, QIcon::State state, const QColor& blendColor);
+QIcon WizLoadSkinIcon3(const QString& strIconName, QIcon::Mode mode);
 
 void WizHtml2Text(const QString& strHtml, QString& strText);
 void WizDeleteFolder(const CString& strPath);
@@ -198,7 +204,6 @@ CString WizMakeValidFileNameNoPathReturn(const CString& strFileName);
 
 bool WizSaveDataToFile(const QString& strFileName, const QByteArray& arrayData);
 bool WizLoadDataFromFile(const QString& strFileName, QByteArray& arrayData);
-
 
 class CWizBufferAlloc
 {

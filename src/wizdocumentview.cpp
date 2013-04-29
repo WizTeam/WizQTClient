@@ -1,17 +1,18 @@
 #include "wizdocumentview.h"
+
+#include <QWebElement>
+#include <QWebFrame>
+#include <QBoxLayout>
+#include <QLineEdit>
+#include <QApplication>
+
+#include "share/wizimagepushbutton.h"
 #include "wizdocumentwebview.h"
 #include "wiztaglistwidget.h"
 #include "wizattachmentlistwidget.h"
 #include "wiznoteinfoform.h"
 #include "wiznotestyle.h"
-
-#include <QWebElement>
-#include <QWebFrame>
-
-#include <QBoxLayout>
-#include <QLineEdit>
-#include <QApplication>
-#include "share/wizimagepushbutton.h"
+#include "wizEditorToolBar.h"
 
 class CWizTitleBar
     : public QWidget
@@ -20,7 +21,6 @@ public:
     CWizTitleBar(CWizExplorerApp& app, QWidget* parent)
         : QWidget(parent)
         , m_app(app)
-        , m_titleEdit(NULL)
         , m_editDocumentButton(NULL)
         , m_tagsButton(NULL)
         , m_attachmentButton(NULL)
@@ -31,25 +31,41 @@ public:
         layout->setMargin(0);
 
         setContentsMargins(4, 4, 4, 4);
+        //setAutoFillBackground(true);
 
-        QPalette pal = palette();
-        pal.setColor(QPalette::Window, QColor(0xff, 0xff, 0xff));
-        setPalette(pal);
+        //QPalette pal = palette();
+        //QPixmap pixmapBg;
+        //pixmapBg.load(::WizGetResourcesPath() + "skins/main_bg.png");
+        //QBrush brushBg(pixmapBg);
+        //pal.setBrush(QPalette::Window, brushBg);
+        //setPalette(pal);
 
         m_titleEdit = new QLineEdit(this);
-#ifdef Q_OS_MAC
-        m_titleEdit->setAttribute(Qt::WA_MacShowFocusRect, false);
-        m_titleEdit->setStyleSheet("QLineEdit{margin:4 0 0 0; padding:4 4 4 4;border-color:#ffffff;border-width:1;border-style:solid;}QLineEdit:hover{border-color:#bbbbbb;border-width:1;border-style:solid;}");
-        //m_titleEdit->setAlignment(Qt::AlignVCenter);
-#else
-        m_titleEdit->setStyleSheet("QLineEdit{padding:4 4 4 4;border-color:#ffffff;border-width:1;border-style:solid;}QLineEdit:hover{border-color:#bbbbbb;border-width:1;border-style:solid;}");
-#endif
+//#ifdef Q_OS_MAC
 
-        m_editIcon = ::WizLoadSkinIcon(m_app.userSettings().skin(), pal.window().color(), "lock");
-        m_commitIcon = ::WizLoadSkinIcon(m_app.userSettings().skin(), pal.window().color(), "unlock");
-        m_tagsIcon = ::WizLoadSkinIcon(m_app.userSettings().skin(), pal.window().color(), "tag");
-        m_attachmentIcon = ::WizLoadSkinIcon(m_app.userSettings().skin(), pal.window().color(), "attachment");
-        m_infoIcon = ::WizLoadSkinIcon(m_app.userSettings().skin(), pal.window().color(), "noteinfo");
+        m_titleEdit->setStyleSheet(
+            "QLineEdit {\
+                margin:4 0 0 0;\
+                padding:4 4 4 4;\
+                border-style:none;\
+                background-image: url(" + ::WizGetResourcesPath() + "skins/leftview_bg.png); \
+            } \
+            QLineEdit:hover { \
+                border-color:#bbbbbb; \
+                border-width:1; \
+                border-style:solid; \
+            }");
+
+        m_titleEdit->setAttribute(Qt::WA_MacShowFocusRect, false);
+//#else
+//        m_titleEdit->setStyleSheet("QLineEdit{padding:4 4 4 4;border-color:#ffffff;border-width:1;border-style:solid;}QLineEdit:hover{border-color:#bbbbbb;border-width:1;border-style:solid;}");
+//#endif
+
+        m_editIcon = ::WizLoadSkinIcon(m_app.userSettings().skin(), "lock");
+        m_commitIcon = ::WizLoadSkinIcon(m_app.userSettings().skin(), "unlock");
+        m_tagsIcon = ::WizLoadSkinIcon(m_app.userSettings().skin(), "tag");
+        m_attachmentIcon = ::WizLoadSkinIcon(m_app.userSettings().skin(), "attachment");
+        m_infoIcon = ::WizLoadSkinIcon(m_app.userSettings().skin(), "noteinfo");
 
         m_editDocumentButton = new CWizImagePushButton(m_editIcon, "", this);
         updateEditDocumentButtonIcon(false);
@@ -74,7 +90,7 @@ public:
 
 private:
     CWizExplorerApp& m_app;
-    QLineEdit* m_titleEdit;
+    QPointer<QLineEdit> m_titleEdit;
     CWizImagePushButton* m_editDocumentButton;
     CWizImagePushButton* m_tagsButton;
     CWizImagePushButton* m_attachmentButton;
@@ -135,12 +151,13 @@ public:
             m_titleEdit->setText(data.strTitle);
         }
 
-        //tags
-        CWizStdStringArray arrayTagGUID;
-        db.GetDocumentTags(data.strGUID, arrayTagGUID);
-
-        QString strTagText = arrayTagGUID.empty() ? QString() : QString::number(arrayTagGUID.size());
-        m_tagsButton->setText(strTagText);
+        // update tags count only if it's enabled
+        if (m_tagsButton->isEnabled()) {
+            CWizStdStringArray arrayTagGUID;
+            db.GetDocumentTags(data.strGUID, arrayTagGUID);
+            QString strTagText = arrayTagGUID.empty() ? QString() : QString::number(arrayTagGUID.size());
+            m_tagsButton->setText(strTagText);
+        }
 
         QString tagsShortcut = ::WizGetShortcut("EditNoteTags", "Alt+2");
         QString strTagsToolTip = QObject::tr("Tags (%1)").arg(tagsShortcut);
@@ -172,6 +189,7 @@ CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
     , m_dbMgr(app.databaseManager())
     , m_title(new CWizTitleBar(app, this))
     , m_web(new CWizDocumentWebView(app, this))
+    , m_editorToolBar(new CWizEditorToolBar(app, this))
     , m_client(NULL)
     , m_tags(NULL)
     , m_attachments(NULL)
@@ -225,11 +243,17 @@ QWidget* CWizDocumentView::createClient()
     QVBoxLayout* layout = new QVBoxLayout(client);
     client->setLayout(layout);
 
-    client->setAutoFillBackground(true);
+    //client->setAutoFillBackground(true);
 
-    QPalette pal = palette();
-    pal.setColor(QPalette::Window, QColor(0xff, 0xff, 0xff));
-    client->setPalette(pal);
+    //QPalette pal = palette();
+    //QPixmap pixmapBg;
+    //pixmapBg.load(::WizGetResourcesPath() + "skins/main_bg.png");
+    //QBrush brushBg(pixmapBg);
+    //pal.setBrush(QPalette::Base, brushBg);
+    //client->setPalette(pal);
+    //QPalette pal = palette();
+    //pal.setColor(QPalette::Window, QColor(0xff, 0xff, 0xff));
+    //client->setPalette(pal);
 
     QWidget* line = new QWidget(this);
     line->setMaximumHeight(1);
@@ -240,12 +264,19 @@ QWidget* CWizDocumentView::createClient()
     layout->setContentsMargins(0, 0, 0, 0);
     layout->addWidget(m_title);
     layout->addWidget(line);
+    layout->addWidget(m_editorToolBar);
+    //layout->addWidget(line);
     layout->addWidget(m_web);
 
     layout->setStretchFactor(m_title, 0);
     layout->setStretchFactor(m_web, 1);
 
     return client;
+}
+
+CWizEditorToolBar* CWizDocumentView::editorToolBar() const
+{
+    return m_editorToolBar;
 }
 
 void CWizDocumentView::showClient(bool visible)
@@ -264,6 +295,7 @@ void CWizDocumentView::setReadOnly(bool b, bool isGroup)
 
     // tag is not avaliable for group
     if (isGroup) {
+        m_title->tagsButton()->setText(QString());
         m_title->tagsButton()->setEnabled(false);
     } else {
         m_title->tagsButton()->setEnabled(true);
@@ -372,7 +404,7 @@ void CWizDocumentView::on_titleEdit_textChanged(const QString& strTitle)
     // Only 255 max chars accept by title
     m_dataDelay = m_web->document();
     m_dataDelay.strTitle = strTitle.left(255);
-    m_timerDelay.start(3000);
+    m_timerDelay.start(1000);
 }
 
 void CWizDocumentView::on_titleEdit_textEdit_writeDelay()

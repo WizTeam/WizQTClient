@@ -24,47 +24,50 @@ CWizVerSpacer::CWizVerSpacer(QWidget* parent)
 }
 
 
-CWizSplitter::CWizSplitter(QWidget* parent /*= 0*/)
-    : QSplitter(parent)
-#ifndef Q_OS_MAC
-    , m_splitterWidth(handleWidth())
-    , m_splitterColor(palette().color(QPalette::Window))
-#endif
-{
-}
-
-
-
-#ifndef Q_OS_MAC
-
+/* ------------------------------ CWizSplitter ------------------------------ */
 class CWizSplitterHandle : public QSplitterHandle
 {
-    CWizSplitter* m_splitter;
 public:
-    CWizSplitterHandle(Qt::Orientation orientation, CWizSplitter *parent);
-    void paintEvent(QPaintEvent *);
+    CWizSplitterHandle(Qt::Orientation orientation, CWizSplitter *parent)
+        : QSplitterHandle(orientation, parent)
+        , m_splitter(parent)
+    {
+    }
+
+    virtual void paintEvent(QPaintEvent *e)
+    {
+        QPainter painter(this);
+
+        QRect rc = e->rect();
+        rc.setWidth(1);
+
+        // FIXME: generate shadow from background color
+        QColor bgColor1 = QColor(205, 205, 205);
+        QColor bgColor2 = QColor(195, 195, 195);
+        QColor bgColor3 = QColor(150, 150, 150);
+
+        painter.fillRect(rc, bgColor1);
+
+        rc.setX(rc.x() + 1);
+        painter.fillRect(rc, bgColor2);
+
+        rc.setX(rc.x() + 1);
+        painter.fillRect(rc, bgColor3);
+    }
+
+    virtual QSize sizeHint() const
+    {
+        return QSize(3, 1);
+    }
+
+private:
+    CWizSplitter* m_splitter;
 };
 
 
-
-CWizSplitterHandle::CWizSplitterHandle(Qt::Orientation orientation, CWizSplitter *parent)
-    : QSplitterHandle(orientation, parent)
-    , m_splitter(parent)
+CWizSplitter::CWizSplitter(QWidget* parent /*= 0*/)
+    : QSplitter(parent)
 {
-}
-
-// Paint the horizontal handle as a gradient, paint
-// the vertical handle as a line.
-void CWizSplitterHandle::paintEvent(QPaintEvent *)
-{
-    QPainter painter(this);
-    //
-    QRect rc(0, 0, width(), height());
-    int splitterWidth = m_splitter->splitterWidth();
-    rc.setLeft((rc.width() - splitterWidth) / 2);
-    rc.setRight(rc.left() + splitterWidth - 1);
-    //
-    painter.fillRect(rc, m_splitter->splitterColor());
 }
 
 QSplitterHandle *CWizSplitter::createHandle()
@@ -72,15 +75,97 @@ QSplitterHandle *CWizSplitter::createHandle()
     return new CWizSplitterHandle(orientation(), this);
 }
 
-
-void CWizSplitter::setSplitterWidth(int width)
+/* ------------------------------ CWizScrollBar ------------------------------ */
+CWizScrollBar::CWizScrollBar(QWidget* parent /* = 0 */)
+    : QScrollBar(parent)
 {
-    m_splitterWidth = width;
+    setStyleSheet(
+        "QScrollBar:vertical {\
+            background: transparent;\
+            width: 10px;\
+        }\
+        QScrollBar::handle:vertical {\
+            background: rgba(85, 85, 85, 200);\
+            margin: 0px 2px 0px 0px;\
+            border-radius: 4px;\
+            min-height: 25px;\
+        }\
+        QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {\
+            background: transparent;\
+        }\
+        QScrollBar::up-arrow:vertical, QScrollBar::down-arrow:vertical {\
+            background: transparent;\
+        }\
+        QScrollBar::add-line:vertical QScrollBar::sub-line:vertical {\
+            background: transparent;\
+            height: 0px;\
+            width: 0px;\
+        }"\
+    );
+
+    setMouseTracking(true);
+
+    connect(&m_timerScrollTimeout, SIGNAL(timeout()), this, SLOT(on_scrollTimeout()));
+    connect(this, SIGNAL(valueChanged(int)), SLOT(on_valueChanged(int)));
+
+    hide();
 }
 
-void CWizSplitter::setSplitterColor(const QColor& color)
+QSize CWizScrollBar::sizeHint() const
 {
-    m_splitterColor = color;
+    return QSize(10, 1);
 }
 
-#endif
+void CWizScrollBar::mouseMoveEvent(QMouseEvent* event)
+{
+    m_timerScrollTimeout.start(3000);
+
+    QScrollBar::mouseMoveEvent(event);
+}
+
+void CWizScrollBar::paintEvent(QPaintEvent* event)
+{
+    QScrollBar::paintEvent(event);
+}
+
+void CWizScrollBar::syncWith(QScrollBar* source)
+{
+    setMinimum(source->minimum());
+    setMaximum(source->maximum());
+    setSliderPosition(source->sliderPosition());
+    setPageStep(source->pageStep());
+    setSingleStep(source->singleStep());
+
+    connect(source, SIGNAL(valueChanged(int)), SLOT(on_sourceValueChanged(int)));
+    connect(source, SIGNAL(rangeChanged(int, int)), SLOT(on_sourceRangeChanged(int, int)));
+
+    m_scrollSyncSource = source;
+}
+
+void CWizScrollBar::on_sourceValueChanged(int value)
+{
+    setSliderPosition(value);
+}
+
+void CWizScrollBar::on_sourceRangeChanged(int min, int max)
+{
+    setMinimum(min);
+    setMaximum(max);
+    setPageStep(m_scrollSyncSource->pageStep());
+    setSingleStep(m_scrollSyncSource->singleStep());
+}
+
+void CWizScrollBar::on_valueChanged(int value)
+{
+    if (m_scrollSyncSource) {
+        m_scrollSyncSource->setSliderPosition(value);
+    }
+
+    show();
+    m_timerScrollTimeout.start(1000);
+}
+
+void CWizScrollBar::on_scrollTimeout()
+{
+    hide();
+}

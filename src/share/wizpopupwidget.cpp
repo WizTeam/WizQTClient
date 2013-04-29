@@ -1,11 +1,6 @@
 #include "wizpopupwidget.h"
 
-#include <QPainter>
-#include <QApplication>
-#include <QDesktopWidget>
-#include <QResizeEvent>
-#include <QPolygon>
-#include <QTimer>
+#include <QtGui>
 
 #include "wizmisc.h"
 
@@ -20,9 +15,9 @@ CWizPopupWidget::CWizPopupWidget(QWidget* parent)
 {
     setContentsMargins(8, 20, 8, 8);
 
-    //QPalette pal = palette();
-    //pal.setColor(QPalette::Window, QColor(0xff, 0xff, 0xff));
-    //setPalette(pal);
+    QPalette pal = palette();
+    pal.setColor(QPalette::Window, "#DCDCDC"); // (215, 215, 215)
+    setPalette(pal);
 }
 
 QSize CWizPopupWidget::sizeHint() const
@@ -38,25 +33,46 @@ QRect CWizPopupWidget::getClientRect() const
                  height() - margins.top() - margins.bottom());
 }
 
-#ifndef Q_OS_MAC
-
 void CWizPopupWidget::paintEvent(QPaintEvent* event)
 {
     Q_UNUSED(event);
 
-    QPainter painter(this);
-    QPen pen(QColor(0xd9, 0xdc, 0xdd));
-    //pen.setWidth(3);
-    painter.setPen(pen);
-    //painter.setRenderHint(QPainter::Antialiasing);
-    painter.drawPolygon(m_pointsPolygon);
+    setMask(maskRegion());
 }
 
-#endif
-
-void CWizPopupWidget::resizeEvent(QResizeEvent* event)
+void CWizPopupWidget::showAtPoint(const QPoint& pt)
 {
-    QSize sz = event->size();
+    int xOffset = m_leftAlign ? 21 : sizeHint().width() - 21;
+    int yOffset = 4;
+
+    int left = pt.x() - xOffset;
+    int top = pt.y() - yOffset;
+
+    m_pos.setX(left);
+    m_pos.setY(top);
+
+    QPropertyAnimation* anim1 = new QPropertyAnimation(this, "geometry");
+    anim1->setDuration(200);
+    anim1->setKeyValueAt(0, QRect(QPoint(m_pos.x() + sizeHint().width(), m_pos.y()), QSize(0, 0)));
+    anim1->setKeyValueAt(0.5, QRect(QPoint(m_pos.x() - 50, m_pos.y()), QSize(sizeHint().width() + 100, sizeHint().height() + 100)));
+    anim1->setKeyValueAt(1, QRect(QPoint(m_pos.x(), m_pos.y()), QSize(sizeHint().width(), sizeHint().height())));
+
+    QPropertyAnimation* anim2 = new QPropertyAnimation(this, "windowOpacity");
+    anim2->setStartValue(0.1);
+    anim2->setEndValue(1.0);
+
+    QParallelAnimationGroup *group = new QParallelAnimationGroup;
+    group->addAnimation(anim1);
+    group->addAnimation(anim2);
+
+    group->start();
+
+    show();
+}
+
+QRegion CWizPopupWidget::maskRegion()
+{
+    QSize sz = size();
 
     m_pointsRegion.clear();
 
@@ -133,47 +149,5 @@ void CWizPopupWidget::resizeEvent(QResizeEvent* event)
 
     QPolygon polygon(m_pointsRegion);
 
-    QRegion region(polygon);
-
-    setMask(region);
-}
-
-
-void CWizPopupWidget::showAtPoint(const QPoint& pt)
-{
-    int xOffset = m_leftAlign ? 21 : sizeHint().width() - 21;
-    int yOffset = 4;
-
-    int left = pt.x() - xOffset;
-    int top = pt.y() - yOffset;
-
-    m_pos.setX(left);
-    m_pos.setY(top);
-
-    QPropertyAnimation* animation = new QPropertyAnimation(this, "geometry");
-    animation->setDuration(100);
-    animation->setStartValue(QRect(QPoint(m_pos.x() + sizeHint().width(), m_pos.y()), QSize(0, 0)));
-    animation->setEndValue(QRect(QPoint(m_pos.x() - 100, m_pos.y()), QSize(sizeHint().width() + 100, sizeHint().height() + 100)));
-    animation->start();
-
-    connect(animation, SIGNAL(stateChanged(QAbstractAnimation::State, QAbstractAnimation::State)), \
-            SLOT(onAnimationStateChanged(QAbstractAnimation::State, QAbstractAnimation::State)));
-
-    show();
-}
-
-void CWizPopupWidget::onAnimationStateChanged(QAbstractAnimation::State newState, QAbstractAnimation::State oldState)
-{
-    Q_UNUSED(oldState);
-
-    if (newState == QAbstractAnimation::Stopped && size() != sizeHint()) {
-        hide();
-        QTimer::singleShot(10, this, SLOT(onAnimationTimeout()));
-    }
-}
-
-void CWizPopupWidget::onAnimationTimeout()
-{
-    setGeometry(QRect(m_pos, sizeHint()));
-    show();
+    return QRegion(polygon);
 }

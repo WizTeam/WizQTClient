@@ -28,6 +28,15 @@ protected:
     QString m_strKbGUID;
 };
 
+class CWizCategoryViewSpacerItem: public CWizCategoryViewItemBase
+{
+public:
+    CWizCategoryViewSpacerItem(CWizExplorerApp& app);
+    virtual void showContextMenu(CWizCategoryBaseView* pCtrl, QPoint pos) { Q_UNUSED(pCtrl); Q_UNUSED(pos); }
+    virtual void getDocuments(CWizDatabase& db, CWizDocumentDataArray& arrayDocument) { Q_UNUSED(db); Q_UNUSED(arrayDocument); }
+    virtual int getItemHeight(int hintHeight) const;
+};
+
 class CWizCategoryViewSeparatorItem : public CWizCategoryViewItemBase
 {
 public:
@@ -84,6 +93,15 @@ public:
 
 private:
     WIZTAGDATA m_tag;
+};
+
+class CWizCategoryViewAllGroupsRootItem : public CWizCategoryViewItemBase
+{
+public:
+    CWizCategoryViewAllGroupsRootItem(CWizExplorerApp& app, const QString& strName, const QString& strKbGUID);
+    virtual void showContextMenu(CWizCategoryBaseView* pCtrl, QPoint pos);
+    virtual void getDocuments(CWizDatabase& db, CWizDocumentDataArray& arrayDocument);
+
 };
 
 class CWizCategoryViewGroupRootItem : public CWizCategoryViewItemBase

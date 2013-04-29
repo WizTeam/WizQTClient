@@ -1414,24 +1414,19 @@ bool CWizIndex::CreateTag(const CString& strParentTagGUID,
                           const CString& strDescription,
                           WIZTAGDATA& data)
 {
-    if (!strName) {
-		TOLOG(_T("NULL Pointer: CreateTag:Name!"));
+    if (strName.isEmpty()) {
+        TOLOG("Tag name is empty");
         return false;
-	}
+    }
 
-    if (!*strName) {
-		TOLOG(_T("Tag name is empty"));
-        return false;
-	}
-
-    if (TagByName(strName, data)) {
-		TOLOG1(_T("Tag already exists: %1!"), data.strName);
+    if (TagByName(strName, data) && data.strParentGUID == strParentTagGUID) {
+        TOLOG1("[WARNING]Tag already exists: %1", data.strName);
         return false;
 	}
 
     data.strKbGUID = kbGUID();
 	data.strGUID = WizGenGUIDLowerCaseLetterOnly();
-    data.strParentGUID = CString(strParentTagGUID);
+    data.strParentGUID = strParentTagGUID;
     data.strName = strName;
     data.strDescription = strDescription;
 	data.tModified = WizGetCurrentTime();
@@ -4282,6 +4277,16 @@ bool CWizIndex::SetDocumentVersion(const CString& strDocumentGUID, __int64 nVers
         return false;
 
     return true;
+}
+
+bool CWizIndex::setThumbIndexVersion(const QString& strVersion)
+{
+    return SetMeta("ThumbIndex", "Version", strVersion);
+}
+
+QString CWizIndex::getThumIndexVersion()
+{
+    return GetMetaDef("ThumbIndex", "Version");
 }
 
 bool CWizIndex::setDocumentFTSVersion(const QString& strVersion)

@@ -1,7 +1,11 @@
 #include "wizthumbindex.h"
+
+#include <QBuffer>
+#include <QDebug>
+
+#include "wizdef.h"
 #include "wizmisc.h"
 #include "wizindex.h"
-#include <QBuffer>
 
 static const char* PAD_TYPE = "PAD";
 static const char* PHONE_TYPE = "PHONE";
@@ -28,17 +32,24 @@ CThumbIndex::~CThumbIndex()
     CloseThumb();
 }
 
-bool CThumbIndex::OpenThumb(const CString& strFileName)
+bool CThumbIndex::OpenThumb(const CString& strFileName, const QString& strVersion)
 {
     if (m_dbThumb.IsOpened())
 		return true;
-	//
+
 	try {
         m_dbThumb.open(strFileName);
-		//
+
+        // need rebuild thumb index
+        if (strVersion.isEmpty() || strVersion != WIZNOTE_THUMB_VERSION) {
+            if (m_dbThumb.tableExists("WIZ_ABSTRACT")) {
+                m_dbThumb.execDML("drop table WIZ_ABSTRACT");
+            }
+        }
+
         if (!InitThumbDB())
 			return false;
-		//
+
 		return true;
 	}
 	catch (const CppSQLite3Exception& e)
@@ -51,6 +62,7 @@ bool CThumbIndex::OpenThumb(const CString& strFileName)
 		return false;
 	}
 }
+
 void CThumbIndex::CloseThumb()
 {
     if (!m_dbThumb.IsOpened())
@@ -77,7 +89,7 @@ bool  CThumbIndex::checkThumbTable(const CString& strTableName, const CString& s
 {
     if (m_dbThumb.tableExists(strTableName))
 		return true;
-	//
+
 	try {
 
         m_dbThumb.execDML(strTableSQL);
@@ -165,29 +177,33 @@ bool CThumbIndex::UpdateIphoneAbstract(const WIZABSTRACT &abstract)
 
 bool CThumbIndex::UpdateAbstract(const WIZABSTRACT &abstractNew, const CString& type)
 {
-    if(!m_dbThumb.IsOpened())
-    {
+    if(!m_dbThumb.IsOpened()) {
         TOLOG(_T("Fault error: thumb database does not opened"));
         return false;
     }
-    //
+
     QByteArray data;
     if (abstractNew.image.width() > 0 && abstractNew.image.height() > 0)
     {
         int width = abstractNew.image.width();
         int height = abstractNew.image.height();
-        //
+
+        // process thumbnail
         QImage img;
-        if (width > 120
-            || height > 120)
-        {
+        if (width >= 120 && height >= 120) {
+            if (width > height) {
+                img = abstractNew.image.scaledToHeight(120, Qt::SmoothTransformation);
+                img = img.copy((img.width() - 120)/2, 0, 120, 120);
+            } else {
+                img = abstractNew.image.scaledToWidth(120, Qt::SmoothTransformation);
+                img = img.copy(0, (img.height() - 120)/2, 120, 120);
+            }
+        } else if (width > 120 || height > 120) {
             img = abstractNew.image.scaled(120, 120, Qt::KeepAspectRatio, Qt::SmoothTransformation);
-        }
-        else
-        {
+        } else {
             img = abstractNew.image;
         }
-        //
+
         if (img.isNull())
         {
             TOLOG(_T("Faile to scale image to abstract"));
@@ -203,34 +219,30 @@ bool CThumbIndex::UpdateAbstract(const WIZABSTRACT &abstractNew, const CString& 
         }
         buffer.close();
     }
-    //
-    //
+
+
     WIZABSTRACT abstractOld;
     if (AbstractFromGUID(abstractNew.guid ,abstractOld, type))
     {
-        CString whereFiled = CString("ABSTRACT_GUID=")
-                                + STR2SQL(abstractNew.guid)
-                                +(" AND ABSTRACT_TYPE = ")
-                                +STR2SQL(type);
+        CString whereField = CString("ABSTRACT_GUID=%1 and ABSTRACT_TYPE=%2")
+                .arg(STR2SQL(abstractNew.guid))
+                .arg(STR2SQL(type));
 
-        // sqlite use '' instead of '
-        CString absText = CString(abstractNew.text);
-        absText = absText.replace("'","");
+        CString strSql = CString("update %1 set ABSTRACT_TEXT=%2 where %3")
+                .arg(TABLE_NAME_ABSTRACT)
+                .arg(STR2SQL(abstractNew.text))
+                .arg(whereField);
 
-        CString sql = CString("update ") + \
-                TABLE_NAME_ABSTRACT + \
-                " set ABSTRACT_TEXT" + "='" + \
-                absText + "' where " + whereFiled;
         try
         {
-            m_dbThumb.execDML(sql);
-            m_dbThumb.updateBlob(TABLE_NAME_ABSTRACT, "ABSTRACT_IMAGE", (const unsigned char*)data.constData() , data.length(), whereFiled);
+            m_dbThumb.execDML(strSql);
+            m_dbThumb.updateBlob(TABLE_NAME_ABSTRACT, "ABSTRACT_IMAGE", (const unsigned char*)data.constData() , data.length(), whereField);
             return true;
         }
         catch (const CppSQLite3Exception& e)
         {
             TOLOG(e.errorMessage());
-            TOLOG(sql);
+            TOLOG(strSql);
             return false;
         }
         catch (...)
@@ -241,20 +253,22 @@ bool CThumbIndex::UpdateAbstract(const WIZABSTRACT &abstractNew, const CString& 
     }
     else
     {
-        CString sql = CString("insert into ") + TABLE_NAME_ABSTRACT + ("(") + FIELD_LIST_ABSTRACT + (")")
-            + " values("
-        + STR2SQL(abstractNew.guid) + (",")
-        + STR2SQL(type) + (",")
-        + STR2SQL(abstractNew.text) + (",?)");
+        CString strSql = CString("insert into %1 (%2) values(%3, %4, %5, ?)")
+                .arg(TABLE_NAME_ABSTRACT)
+                .arg(FIELD_LIST_ABSTRACT)
+                .arg(STR2SQL(abstractNew.guid))
+                .arg(STR2SQL(type))
+                .arg(STR2SQL(abstractNew.text));
+
         try
         {
-            m_dbThumb.insertBlob(sql, (const unsigned char*)data.constData() , data.length());
+            m_dbThumb.insertBlob(strSql, (const unsigned char*)data.constData() , data.length());
             return true;
         }
         catch (const CppSQLite3Exception& e)
         {
             TOLOG(e.errorMessage());
-            TOLOG(sql);
+            TOLOG(strSql);
             return false;
         }
         catch (...)
@@ -264,9 +278,7 @@ bool CThumbIndex::UpdateAbstract(const WIZABSTRACT &abstractNew, const CString& 
         }
     }
     
-	//
 	return true;
-    
 }
 
 bool CThumbIndex::DeleteAbstractByGUID(const CString& guid)

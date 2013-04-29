@@ -17,23 +17,30 @@ class CWizConsoleDialog: public QDialog
 
 public:
     CWizConsoleDialog(CWizExplorerApp& app, QWidget* parent = 0);
+    ~CWizConsoleDialog();
 
-    // who invoke exec() or show() method who response for ajust scrollbar position.
-    QScrollBar* vScroll;
+protected:
+    virtual void showEvent(QShowEvent *event);
 
 private:
     CWizExplorerApp& m_app;
     Ui::CWizConsoleDialog* m_ui;
 
+    QTextCodec* m_codec;
     QString m_data;
+    int m_nEntries;
 
     void load();
-    void appendLogs(const QString& strLog);
+    void readByLine(QIODevice* dev);
+    void resetCount();
 
-public slots:
+public Q_SLOTS:
     void on_editConsole_textChanged();
+    void on_editConsole_copyAvailable(bool yes);
     void on_buttonClear_clicked();
     void bufferLog_readyRead();
+    void on_btnSaveAs_clicked();
+    void on_btnCopyToClipboard_clicked();
 };
 
 #endif // WIZCONSOLEDIALOG_H

@@ -1,6 +1,8 @@
 #include "wizEditorInsertLinkForm.h"
 #include "ui_wizEditorInsertLinkForm.h"
 
+#include <QUrl>
+
 CWizEditorInsertLinkForm::CWizEditorInsertLinkForm(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::CWizEditorInsertLinkForm)
@@ -15,18 +17,29 @@ CWizEditorInsertLinkForm::~CWizEditorInsertLinkForm()
     delete ui;
 }
 
-QString CWizEditorInsertLinkForm::getContent()
-{
-    return ui->editContent->text();
-}
+//QString CWizEditorInsertLinkForm::getContent()
+//{
+//    return ui->editContent->text();
+//}
+
+//void CWizEditorInsertLinkForm::setContent(const QString& strText)
+//{
+//    ui->editContent->setText(strText);
+//}
 
 QString CWizEditorInsertLinkForm::getUrl()
 {
-    return ui->editUrl->text();
+    QUrl url(ui->editUrl->text());
+    return url.toEncoded();
 }
 
-void CWizEditorInsertLinkForm::clear()
+void CWizEditorInsertLinkForm::setUrl(const QString& strText)
 {
-    ui->editContent->clear();
-    ui->editUrl->clear();
+    ui->editUrl->setText(strText);
 }
+
+//void CWizEditorInsertLinkForm::clear()
+//{
+//    ui->editContent->clear();
+//    ui->editUrl->clear();
+//}

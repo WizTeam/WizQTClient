@@ -11,9 +11,12 @@ CWizStatusBar::CWizStatusBar(CWizExplorerApp& app, QWidget *parent)
     setAttribute(Qt::WA_MacShowFocusRect, true);
 }
 
-void CWizStatusBar::autoShow(const QString& strText)
+void CWizStatusBar::autoShow(const QString& strText /* = QString() */)
 {
-    setText(strText);
+    if (!strText.isEmpty()) {
+        setText(strText);
+    }
+
     adjustSize();
 
     MainWindow* mainWindow = qobject_cast<MainWindow *>(m_app.mainWindow());

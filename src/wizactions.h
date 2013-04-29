@@ -11,8 +11,21 @@ class CWizSettings;
 class CWizAnimateAction;
 struct WIZACTION;
 
-#define WIZACTION_GLOBAL_SYNC           "actionSync"
-#define WIZACTION_GLOBAL_NEW_DOCUMENT   "actionNewNote"
+#define WIZACTION_GLOBAL_SYNC               "actionSync"
+#define WIZACTION_GLOBAL_NEW_DOCUMENT       "actionNewNote"
+#define WIZACTION_GLOBAL_TOGGLE_CATEGORY    "actionViewToggleCategory"
+#define WIZACTION_GLOBAL_TOGGLE_FULLSCREEN  "actionViewToggleFullscreen"
+
+#define WIZACTION_FORMAT_BOLD               "actionFormatBold"
+#define WIZACTION_FORMAT_ITALIC             "actionFormatItalic"
+#define WIZACTION_FORMAT_UNDERLINE          "actionFormatUnderLine"
+#define WIZACTION_FORMAT_UNORDEREDLIST      "actionFormatInsertUnorderedList"
+#define WIZACTION_FORMAT_ORDEREDLIST        "actionFormatInsertOrderedList"
+#define WIZACTION_FORMAT_JUSTIFYLEFT        "actionFormatJustifyLeft"
+#define WIZACTION_FORMAT_JUSTIFYRIGHT       "actionFormatJustifyRight"
+#define WIZACTION_FORMAT_JUSTIFYCENTER      "actionFormatJustifyCenter"
+#define WIZACTION_FORMAT_JUSTIFYJUSTIFY     "actionFormatJustifyJustify"
+
 
 class CWizActions
 {
@@ -30,6 +43,7 @@ private:
 public:
     void init();
     QAction* actionFromName(const QString& strActionName);
+    void toggleActionText(const QString& strActionName);
     CWizAnimateAction* animateActionFromName(const QString& strActionName);
 
     QMenu* toMenu(QWidget* parent, CWizSettings& settings, const QString& strSection);

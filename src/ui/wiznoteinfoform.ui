@@ -13,10 +13,11 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
+  <property name="autoFillBackground">
+   <bool>false</bool>
+  </property>
   <property name="styleSheet">
-   <string notr="true">QLineEdit {
-border-radius: 5px;
-}</string>
+   <string notr="true">background-color: rgb(240, 240, 240);</string>
   </property>
   <widget class="QWidget" name="widget" native="true">
    <property name="geometry">
@@ -28,7 +29,7 @@ border-radius: 5px;
     </rect>
    </property>
    <property name="styleSheet">
-    <string notr="true">background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop:0 rgba(153, 153, 153, 255), stop:1 rgba(255, 255, 255, 255));</string>
+    <string notr="true">background-color: rgb(208, 208, 208);</string>
    </property>
    <widget class="QWidget" name="verticalLayoutWidget">
     <property name="geometry">
@@ -131,8 +132,6 @@ border-radius: 5px;
      </item>
     </layout>
    </widget>
-   <zorder>widget_2</zorder>
-   <zorder>verticalLayoutWidget</zorder>
   </widget>
   <widget class="QCheckBox" name="checkEncrypted">
    <property name="geometry">

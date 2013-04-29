@@ -8,7 +8,9 @@
 #include "wizCategoryViewItem.h"
 #include "wizGroupAttributeForm.h"
 #include "wizNewDialog.h"
+#include "share/wizuihelper.h"
 
+class QScrollAreaKineticScroller;
 
 class CWizCategoryBaseView : public QTreeWidget
 {
@@ -16,8 +18,7 @@ class CWizCategoryBaseView : public QTreeWidget
 
 public:
     CWizCategoryBaseView(CWizExplorerApp& app, QWidget *parent = 0);
-    //virtual QSize sizeHint() const { return QSize(150, 1); }
-    virtual void init() = 0;
+    void baseInit();
 
     virtual CWizCategoryViewTrashItem* findTrash(const QString& strKbGUID) { Q_UNUSED(strKbGUID); return NULL; }
     void showTrashContextMenu(QPoint pos, const QString& strKbGUID);
@@ -26,6 +27,7 @@ public:
     void getDocuments(CWizDocumentDataArray& arrayDocument);
     bool acceptDocument(const WIZDOCUMENTDATA& document);
     void addSeparator();
+    CWizCategoryViewSpacerItem* addSpacer();
 
     void saveSelection(const QString& str);
     void restoreSelection();
@@ -35,7 +37,8 @@ public:
     bool isSeparatorItemByIndex(const QModelIndex &index) const;
     bool isSeparatorItemByPosition(const QPoint& pt) const;
 
-    virtual void contextMenuEvent(QContextMenuEvent * e);
+    virtual void resizeEvent(QResizeEvent* event);
+    virtual void contextMenuEvent(QContextMenuEvent* e);
     virtual void mousePressEvent(QMouseEvent* event);
 
     bool isDragHovered() const { return m_bDragHovered; }
@@ -53,8 +56,9 @@ public:
 protected:
     CWizExplorerApp& m_app;
     CWizDatabaseManager& m_dbMgr;
-
     QTreeWidgetItem* m_selectedItem;
+
+    virtual void init() = 0;
 
 private:
     bool m_bDragHovered;
@@ -63,7 +67,15 @@ private:
     QPointer<QMenu> m_menuTrash;
     QString m_strTrashKbGUID;
 
+    //QTimer* m_timerScroll;
+    //QPropertyAnimation* m_scrollAnimation;
+    //CWizCategoryViewSpacerItem* m_spacerHeader;
+    //CWizCategoryViewSpacerItem* m_spacerFooter;
+    CWizScrollBar* m_vScroll;
+    QPointer<QScrollAreaKineticScroller> m_kineticScroller;
+
 public Q_SLOTS:
+    //void on_scroll_timeout();
     void on_action_emptyTrash();
 };
 
@@ -98,8 +110,10 @@ public:
     CWizCategoryViewFolderItem* findFolder(const CString& strLocation, bool create, bool sort);
     CWizCategoryViewFolderItem* addFolder(const CString& strLocation, bool sort);
 
-
     void addAndSelectFolder(const CString& strLocation);
+
+private:
+    void doLocationSanityCheck(CWizStdStringArray& arrayLocation);
 
 public Q_SLOTS:
     void on_document_created(const WIZDOCUMENTDATA& document);

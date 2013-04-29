@@ -4,10 +4,14 @@
 #include "html/wizhtmlcollector.h"
 
 #include <QFile>
+#include <QDebug>
+
+#define WIZ_SEARCH_INDEXER_PAGE_MAX 100
 
 CWizSearchIndexer::CWizSearchIndexer(CWizDatabaseManager& dbMgr, QObject *parent)
-    : m_dbMgr(dbMgr)
-    , QObject(parent)
+    : QObject(parent)
+    , m_dbMgr(dbMgr)
+    , m_bAbort(false)
 {
     m_timerSearch.setInterval(300);
     connect(&m_timerSearch, SIGNAL(timeout()), SLOT(on_searchTimeout()));
@@ -31,10 +35,14 @@ CWizSearchIndexer::CWizSearchIndexer(CWizDatabaseManager& dbMgr, QObject *parent
             SLOT(on_attachment_deleted(const WIZDOCUMENTATTACHMENTDATA&)));
 }
 
+void CWizSearchIndexer::abort()
+{
+    m_bAbort = true;
+}
+
 bool CWizSearchIndexer::buildFTSIndex()
 {
-    TOLOG(tr("Build FTS index begin"));
-
+    m_bAbort = false;
     int nErrors = 0;
 
     // build private first
@@ -55,7 +63,8 @@ bool CWizSearchIndexer::buildFTSIndex()
         return false;
     }
 
-    TOLOG(tr("Build FTS index end successfully"));
+    m_bAbort = false;
+
     return true;
 }
 
@@ -66,36 +75,48 @@ bool CWizSearchIndexer::buildFTSIndexByDatabase(CWizDatabase& db)
         return true;
     }
 
+    TOLOG(tr("Build FTS index begin for: ") + db.name());
+
     // should rebuild all documents
-    if (strVersion < QString(WIZNOTE_FTS_VERSION).toInt() || strVersion > QString(WIZNOTE_FTS_VERSION).toInt()) {
-        if (!db.setAllDocumentsSearchIndexed(false)) {
-            TOLOG1("FATAL: Can't reset document index flag: %1", db.name());
-            return false;
-        }
+    if (!db.setDocumentFTSVersion("0") || !db.setAllDocumentsSearchIndexed(false)) {
+        TOLOG1("FATAL: Can't reset document index flag: %1", db.name());
+        return false;
     }
 
     CWizDocumentDataArray arrayDocuments;
-
     if (!db.getAllDocumentsNeedToBeSearchIndexed(arrayDocuments))
         return false;
 
     //TOLOG2("COUNT: Total %1 documents in %2 need build", QString::number(arrayDocuments.size()), db.name());
 
     if (arrayDocuments.empty()) {
+        TOLOG(tr("No documents need to build"));
+
+        db.setDocumentFTSVersion(WIZNOTE_FTS_VERSION);
         return true;
     }
 
-    bool ret = updateDocuments(arrayDocuments);
+    int nErrors;
+    for (int i = 0; i < arrayDocuments.size(); i++) {
+        if (m_bAbort) {
+            return false;
+        }
 
-    if (ret) {
-        db.setDocumentFTSVersion(WIZNOTE_FTS_VERSION);
-        //db.setDocumentFTSEnabled(true);
-        return true;
-    } else {
-        db.setDocumentFTSVersion("0");
-        //db.setDocumentFTSEnabled(false);
+        const WIZDOCUMENTDATAEX& doc = arrayDocuments.at(i);
+        if (!updateDocument(doc)) {
+            nErrors++;
+        }
+    }
+
+    if (nErrors >= 3) {
+        TOLOG(tr("total %1 documents failed to build").arg(nErrors));
+        TOLOG(tr("[WARNING]: Build FTS index end with error: ") + db.name());
         return false;
     }
+
+    db.setDocumentFTSVersion(WIZNOTE_FTS_VERSION);
+    TOLOG(tr("Build FTS index end succeed for: ") + db.name());
+    return true;
 }
 
 //bool CWizSearchIndexer::isFTSEnabled()
@@ -149,25 +170,39 @@ bool CWizSearchIndexer::updateDocument(const WIZDOCUMENTDATAEX& doc)
 {
     Q_ASSERT(!doc.strGUID.isEmpty());
 
-    CWizDocumentDataArray arrayDocuments;
-    arrayDocuments.push_back(doc);
-    return updateDocuments(arrayDocuments);
+    void* pHandle = NULL;
+
+    if (!WizFTSBeginUpdateDocument(m_strIndexPath.toStdWString().c_str(), &pHandle)) {
+        TOLOG("begin update failed while update FTS index");
+        return false;
+    }
+
+    bool ret = _updateDocumentImpl(pHandle, doc);
+
+    if (!WizFTSEndUpdateDocument(pHandle)) {
+        TOLOG("end update failed while update FTS index");
+        return false;
+    }
+
+    return ret;
 }
 
 bool CWizSearchIndexer::updateDocuments(const CWizDocumentDataArray& arrayDocuments)
 {
     Q_ASSERT(!arrayDocuments.empty());
 
+    int nErrors = 0;
     void* pHandle = NULL;
+
     bool ret = WizFTSBeginUpdateDocument(m_strIndexPath.toStdWString().c_str(), &pHandle);
     if (!ret) {
         TOLOG("begin update failed while update FTS index");
         return false;
     }
 
-    int nErrors = 0;
-    for (int i = 0; i < arrayDocuments.size(); i++) {
-        WIZDOCUMENTDATAEX doc = arrayDocuments.at(i);
+    for (int i = 0;  i < arrayDocuments.size(); i++) {
+        const WIZDOCUMENTDATAEX& doc = arrayDocuments.at(i);
+        qDebug() << doc.strTitle;
         if (!_updateDocumentImpl(pHandle, doc))
             nErrors++;
     }
@@ -179,6 +214,7 @@ bool CWizSearchIndexer::updateDocuments(const CWizDocumentDataArray& arrayDocume
     }
 
     if (nErrors >= 5) {
+        TOLOG(tr("total %1 documents failed to build").arg(nErrors));
         return false;
     }
 

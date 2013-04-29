@@ -1,32 +1,72 @@
 #include "wizconsoledialog.h"
 #include "ui_wizconsoledialog.h"
 
-#include <QTextCodec>
-#include <QMessageBox>
+#include <QtGui>
 
 #include "share/wizmisc.h"
+#include "share/wizDatabaseManager.h"
+
+#ifdef Q_WS_MAC
+#include "mac/wizmachelper.h"
+#endif
+
+#define MAXIMUM_LOG_ENTRIES 10000
+
 
 CWizConsoleDialog::CWizConsoleDialog(CWizExplorerApp& app, QWidget* parent)
     : QDialog(parent)
     , m_app(app)
     , m_ui(new Ui::CWizConsoleDialog)
+    , m_nEntries(0)
 {
+    m_ui->setupUi(this);
     setWindowFlags(Qt::Tool);
 
-    m_ui->setupUi(this);
-    vScroll = m_ui->editConsole->verticalScrollBar();
-
+    connect(m_ui->btnSaveAs, SIGNAL(clicked()), SLOT(on_btnSaveAs_clicked()));
+    connect(m_ui->btnCopyToClipboard, SIGNAL(clicked()), SLOT(on_btnCopyToClipboard_clicked()));
     connect(m_ui->editConsole, SIGNAL(textChanged()), SLOT(on_editConsole_textChanged()));
+    connect(m_ui->editConsole, SIGNAL(copyAvailable(bool)), SLOT(on_editConsole_copyAvailable(bool)));
     connect(m_ui->buttonClear, SIGNAL(clicked()), SLOT(on_buttonClear_clicked()));
     connect(::WizGlobal()->bufferLog(), SIGNAL(readyRead()), SLOT(bufferLog_readyRead()));
 
-    m_ui->buttonSync->setDown(true);
-
-    m_ui->buttonAll->setEnabled(false);
-    m_ui->buttonWarn->setEnabled(false);
-    m_ui->buttonError->setEnabled(false);
-
+    m_ui->btnCopyToClipboard->setEnabled(false);
+    m_codec = QTextCodec::codecForName("UTF-8");
     load();
+}
+
+CWizConsoleDialog::~CWizConsoleDialog()
+{
+    if (m_nEntries < MAXIMUM_LOG_ENTRIES) {
+        return;
+    }
+
+    QString strLogFileName = ::WizGetLogFileName();
+    QFile file(strLogFileName);
+    file.open(QIODevice::Truncate | QIODevice::WriteOnly);
+
+    int i = 0;
+    QBuffer buffer;
+    buffer.setData(m_data.toUtf8());
+    buffer.open(QIODevice::ReadOnly);
+    while(i < m_nEntries) {
+        QByteArray bufLine = buffer.readLine();
+        if (i >= m_nEntries - MAXIMUM_LOG_ENTRIES) { // skip old entries
+            file.write(bufLine);
+        }
+
+        i++;
+    }
+
+    buffer.close();
+    file.close();
+}
+
+void CWizConsoleDialog::showEvent(QShowEvent *event)
+{
+    Q_UNUSED(event);
+
+    QScrollBar* vScroll = m_ui->editConsole->verticalScrollBar();
+    vScroll->setValue(vScroll->maximum());
 }
 
 void CWizConsoleDialog::load()
@@ -34,20 +74,18 @@ void CWizConsoleDialog::load()
     QString strLogFileName = ::WizGetLogFileName();
     QFile file(strLogFileName);
     file.open(QIODevice::ReadOnly | QIODevice::Text);
-    QByteArray data = file.readAll();
+    readByLine(&file);
     file.close();
 
-    QTextCodec* codec = QTextCodec::codecForName("UTF-8");
-    QString strLogData = codec->toUnicode(data);
-
-    m_data = strLogData;
-
-    m_ui->editConsole->setText(m_data);
+    resetCount();
 }
 
 void CWizConsoleDialog::on_editConsole_textChanged()
 {
+    QScrollBar* vScroll = m_ui->editConsole->verticalScrollBar();
     vScroll->setValue(vScroll->maximum());
+
+    resetCount();
 }
 
 void CWizConsoleDialog::on_buttonClear_clicked()
@@ -58,27 +96,99 @@ void CWizConsoleDialog::on_buttonClear_clicked()
     file.close();
 
     m_ui->editConsole->clear();
+    m_data.clear();
+    m_nEntries = 0;
+    resetCount();
 }
 
 void CWizConsoleDialog::bufferLog_readyRead()
 {
     QBuffer* buffer = WizGlobal()->bufferLog();
     buffer->open(QIODevice::ReadWrite);
-    QByteArray data = buffer->readAll();
+    // read all, to avoid write on read issue.
+    QByteArray bytesLog = buffer->readAll();
     buffer->close();
-
     buffer->setData("");
 
-    QTextCodec* codec = QTextCodec::codecForName("UTF-8");
-    QString strLog = codec->toUnicode(data);
-
-    m_data += strLog;
-
-    appendLogs(strLog);
+    QBuffer bufLog(&bytesLog);
+    bufLog.open(QIODevice::ReadOnly);
+    readByLine(&bufLog);
+    bufLog.close();
 }
 
-void CWizConsoleDialog::appendLogs(const QString& strLog)
+void CWizConsoleDialog::readByLine(QIODevice* dev)
 {
-    m_ui->editConsole->moveCursor(QTextCursor::End);
-    m_ui->editConsole->insertPlainText(strLog);
+    while (1) {
+        QByteArray data = dev->readLine();
+        if (data.isEmpty()) {
+            break;
+        }
+
+        m_data += QString::fromUtf8(data);
+        QString strText = m_codec->toUnicode(data);
+
+        m_ui->editConsole->moveCursor(QTextCursor::End);
+        m_ui->editConsole->insertPlainText(strText);
+
+        m_nEntries++;
+    }
+}
+
+void CWizConsoleDialog::resetCount()
+{
+    QString strCount = m_ui->labelCount->text();
+    strCount = strCount.replace(QRegExp("%1|\\d+"), QString::number(m_nEntries));
+    m_ui->labelCount->setText(strCount);
+}
+
+void CWizConsoleDialog::on_btnSaveAs_clicked()
+{
+    QFileDialog fileDialog;
+    fileDialog.setAcceptMode(QFileDialog::AcceptSave);
+
+    QString strToday = QDate::currentDate().toString(Qt::ISODate);
+    QString strFileName = QString("WizNote_%1_%2.txt").arg(GetTickCount()).arg(strToday);
+    fileDialog.selectFile(strFileName);
+
+    if (fileDialog.exec() == QDialog::Accepted) {
+        QStringList files = fileDialog.selectedFiles();
+        QString selected;
+        if (files.isEmpty()) {
+            return;
+        }
+
+        selected = files[0];
+        QFile file(selected);
+        file.open(QIODevice::Truncate | QIODevice::WriteOnly);
+        file.write(m_data.toUtf8());
+        file.close();
+    }
+}
+
+void CWizConsoleDialog::on_editConsole_copyAvailable(bool yes)
+{
+    m_ui->btnCopyToClipboard->setEnabled(yes);
+}
+
+void CWizConsoleDialog::on_btnCopyToClipboard_clicked()
+{
+    m_ui->editConsole->copy();
+
+    QClipboard* clipboard = QApplication::clipboard();
+    QString strText = clipboard->text();
+
+    QString strOutput;
+    strOutput += QString("Version: WizNote %1 %2\n").arg(WIZ_CLIENT_TYPE).arg(WIZ_CLIENT_VERSION);
+#ifdef Q_WS_MAC
+    strOutput += QString("OS: %1\n").arg(WizMacGetOSVersion());
+#elif defined(Q_WS_X11)
+    // FIXME: add distribution, release number, etc..
+#endif
+    strOutput += QString("Username: %1\n").arg(m_app.databaseManager().db().getUserId());
+    strOutput += QString("Time: %1 %2\n").arg(QDate::currentDate().toString(Qt::ISODate)).arg(QTime::currentTime().toString(Qt::ISODate));
+    strOutput += "\n";
+    strOutput += strText;
+
+    clipboard->setText(strOutput);
+
 }

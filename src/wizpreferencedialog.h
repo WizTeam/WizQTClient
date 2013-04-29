@@ -39,14 +39,17 @@ private slots:
     virtual void accept();
 
     void on_comboLang_currentIndexChanged(int index);
-    void on_comboSkin_currentIndexChanged(int index);
+    //void on_comboSkin_currentIndexChanged(int index);
 
     void on_radioAuto_clicked(bool checked);
     void on_radioAlwaysReading_clicked(bool checked);
     void on_radioAlwaysEditing_clicked(bool checked);
 
-    void on_checkAutoSync_clicked(bool checked);
-    void on_checkDownloadAllNotesData_clicked(bool checked);
+    void on_comboSyncInterval_activated(int index);
+    void on_comboSyncMethod_activated(int index);
+
+    //void on_checkAutoSync_clicked(bool checked);
+    //void on_checkDownloadAllNotesData_clicked(bool checked);
     void labelProxy_linkActivated(const QString& link);
 };
 

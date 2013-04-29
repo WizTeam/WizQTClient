@@ -29,6 +29,7 @@ public Q_SLOTS:
     bool deleteDocument(const WIZDOCUMENTDATAEX& doc);
     bool deleteDocuments(const CWizDocumentDataArray& arrayDocuments);
     bool search(const QString& strKeywords, int nMaxSize);
+    void abort();
 
 protected:
     virtual bool onSearchProcess(const wchar_t* lpszKbGUID, const wchar_t* lpszDocumentID, const wchar_t* lpszURL);
@@ -37,6 +38,7 @@ protected:
 private:
     CWizDatabaseManager& m_dbMgr;
     QString m_strIndexPath;
+    bool m_bAbort;
     //QString m_strKbGUID;
 
     // collect search result and emit documentFind signal for every m_nMaxResult times

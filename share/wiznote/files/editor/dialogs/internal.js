@@ -30,8 +30,16 @@
             }
         }, 0 )
     };
-    lang = UE.I18N[editor.options.lang][dialog.className.split( "-" )[2]];
-    utils.domReady( function () {
+    utils.loadFile(document,{
+        href:editor.options.themePath + editor.options.theme + "/dialogbase.css?cache="+Math.random(),
+        tag:"link",
+        type:"text/css",
+        rel:"stylesheet"
+    });
+    lang = editor.getLang(dialog.className.split( "-" )[2]);
+
+    domUtils.on(window,'load',function () {
+
         var langImgPath = editor.options.langPath + editor.options.lang + "/images/";
         //针对静态资源
         for ( var i in lang.static ) {

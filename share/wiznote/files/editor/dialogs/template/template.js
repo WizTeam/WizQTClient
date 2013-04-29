@@ -48,6 +48,6 @@
     };
     initPre();
     window.pre = pre;
-    preitem.children[1].click();
+    pre(2)
 
 })();

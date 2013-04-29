@@ -38,9 +38,16 @@ void CWizThumbIndexCache::get(const QString& strKbGUID,
     }
 
     WIZABSTRACT abs;
+    CWizDatabase& db = m_dbMgr.db(strKbGUID);
 
-    if (!m_dbMgr.db(strKbGUID).PadAbstractFromGUID(strDocumentGUID, abs)) {
-        return;
+    if (!db.PadAbstractFromGUID(strDocumentGUID, abs)) {
+        if (!db.UpdateDocumentAbstract(strDocumentGUID)) {
+            return;
+        } else {
+            if (!db.PadAbstractFromGUID(strDocumentGUID, abs)) {
+                return;
+            }
+        }
     }
 
     abs.strKbGUID = strKbGUID;
