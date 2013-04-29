@@ -84,6 +84,13 @@ void CWizKbSync::onXmlRpcError(const QString& strMethodName, WizXmlRpcError erro
 
     m_error = true;
 
+    if (strMethodName == SyncMethod_ClientLogin
+            || strMethodName == SyncMethod_ClientKeepAlive) {
+        stopSync();
+        return;
+    }
+
+
     if (errorType == errorNetwork && strMethodName != SyncMethod_ClientLogout) {
         stopSync();
     }
@@ -664,9 +671,11 @@ void CWizKbSync::onDocumentGetData(const WIZDOCUMENTDATAEX& data)
     //CWizApi::onDocumentGetData(data);
 
     if (m_bChained) {
-        if (!m_db->UpdateDocument(data)) {
-            TOLOG1("Update Document info failed: %1", data.strTitle);
-            m_bDocumentInfoError = true;
+        if (!data.strGUID.isEmpty()) {
+            if (!m_db->UpdateDocument(data)) {
+                TOLOG1("Update Document info failed: %1", data.strTitle);
+                m_bDocumentInfoError = true;
+            }
         }
 
         downloadNextDocumentFullInfo();
@@ -692,7 +701,10 @@ void CWizKbSync::onDownloadObjectDataCompleted(const WIZOBJECTDATA& data)
     //CWizApi::onDownloadObjectDataCompleted(data);
 
     if (m_bChained) {
-        m_db->UpdateSyncObjectLocalData(data);
+        if (!data.strObjectGUID.isEmpty()) {
+            m_db->UpdateSyncObjectLocalData(data);
+        }
+
         downloadNextObjectData();
     } else {
         processConflictObjectData(data);
@@ -754,7 +766,9 @@ void CWizKbSync::onQueryDocumentInfo(const WIZDOCUMENTDATABASE& data)
 
 void CWizKbSync::onUploadDocument(const WIZDOCUMENTDATAEX& data)
 {
-    m_db->ModifyObjectVersion(data.strGUID, WIZDOCUMENTDATAEX::ObjectName(), 0);
+    if (!data.strGUID.IsEmpty()) {
+        m_db->ModifyObjectVersion(data.strGUID, WIZDOCUMENTDATAEX::ObjectName(), 0);
+    }
     uploadNextDocument();
 }
 
@@ -780,7 +794,10 @@ void CWizKbSync::onQueryAttachmentInfo(const WIZDOCUMENTATTACHMENTDATA& data)
 
 void CWizKbSync::onUploadAttachment(const WIZDOCUMENTATTACHMENTDATAEX& data)
 {
-    m_db->ModifyObjectVersion(data.strGUID, WIZDOCUMENTATTACHMENTDATAEX::ObjectName(), 0);
+    if (!data.strGUID.IsEmpty()) {
+        m_db->ModifyObjectVersion(data.strGUID, WIZDOCUMENTATTACHMENTDATAEX::ObjectName(), 0);
+    }
+
     uploadNextAttachment();
 }
 

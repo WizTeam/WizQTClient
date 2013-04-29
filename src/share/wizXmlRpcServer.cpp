@@ -110,11 +110,11 @@ void CWizXmlRpcServer::on_replyFinished()
 
     if (CWizXmlRpcFaultValue* pFault = dynamic_cast<CWizXmlRpcFaultValue *>(pRet)) {
         processError(errorXmlRpcFault, pFault->GetFaultCode(), pFault->GetFaultString());
-        reply->deleteLater();
-        delete pRet;
-        return;
+        //delete pRet;
+        //return;
     }
 
+    reply->deleteLater();
     processReturn(*pRet);
 }
 

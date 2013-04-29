@@ -41,9 +41,12 @@ void CWizApiBase::onXmlRpcReturn(const QString& strMethodName, CWizXmlRpcValue& 
 {
     if (strMethodName == SyncMethod_ClientLogin)
     {
-        // pass empty kbguid here is ok
         WIZUSERINFO userInfo;
-        ret.ToData<WIZUSERINFO>(userInfo, kbGUID());
+
+        // pass empty kbguid here is ok
+        if (!ret.ToData<WIZUSERINFO>(userInfo, kbGUID())) {
+            return;
+        }
 
         // save user info
         WizGlobal()->setUserInfo(userInfo);
@@ -57,7 +60,7 @@ void CWizApiBase::onXmlRpcReturn(const QString& strMethodName, CWizXmlRpcValue& 
     }
     else if (strMethodName == SyncMethod_ClientKeepAlive)
     {
-        // save kbguid
+        // set kbguid
         setKbGUID(WizGlobal()->userInfo().strKbGUID);
 
         onClientLogin(WizGlobal()->userInfo());
@@ -102,7 +105,13 @@ void CWizApiBase::onXmlRpcReturn(const QString& strMethodName, CWizXmlRpcValue& 
     }
     else if (strMethodName == SyncMethod_PostDeletedList)
     {
-        onDeletedPostList(m_arrayCurrentPostDeletedGUID);
+        CWizXmlRpcFaultValue* pFault = dynamic_cast<CWizXmlRpcFaultValue *>(&ret);
+        if (pFault) {
+            CWizDeletedGUIDDataArray arrayDeleted;
+            onDeletedPostList(arrayDeleted);
+        } else {
+            onDeletedPostList(m_arrayCurrentPostDeletedGUID);
+        }
     }
     // tags
     else if (strMethodName == SyncMethod_GetTagList)
@@ -113,7 +122,13 @@ void CWizApiBase::onXmlRpcReturn(const QString& strMethodName, CWizXmlRpcValue& 
     }
     else if (strMethodName == SyncMethod_PostTagList)
     {
-        onTagPostList(m_arrayCurrentPostTag);
+        CWizXmlRpcFaultValue* pFault = dynamic_cast<CWizXmlRpcFaultValue *>(&ret);
+        if (pFault) {
+            CWizTagDataArray arrayTag;
+            onTagPostList(arrayTag);
+        } else {
+            onTagPostList(m_arrayCurrentPostTag);
+        }
     }
     // styles
     else if (strMethodName == SyncMethod_GetStyleList)
@@ -124,7 +139,13 @@ void CWizApiBase::onXmlRpcReturn(const QString& strMethodName, CWizXmlRpcValue& 
     }
     else if (strMethodName == SyncMethod_PostStyleList)
     {
-        onStylePostList(m_arrayCurrentPostStyle);
+        CWizXmlRpcFaultValue* pFault = dynamic_cast<CWizXmlRpcFaultValue *>(&ret);
+        if (pFault) {
+            CWizStyleDataArray arrayStyle;
+            onStylePostList(arrayStyle);
+        } else {
+            onStylePostList(m_arrayCurrentPostStyle);
+        }
     }
     // documents
     else if (strMethodName == SyncMethod_GetDocumentList)
@@ -147,7 +168,13 @@ void CWizApiBase::onXmlRpcReturn(const QString& strMethodName, CWizXmlRpcValue& 
     }
     else if (strMethodName == SyncMethod_PostDocumentData)
     {
-        onDocumentPostData(m_currentDocument);
+        CWizXmlRpcFaultValue* pFault = dynamic_cast<CWizXmlRpcFaultValue *>(&ret);
+        if (pFault) {
+            WIZDOCUMENTDATAEX doc;
+            onDocumentPostData(doc);
+        } else {
+            onDocumentPostData(m_currentDocument);
+        }
     }
     // attachments
     else if (strMethodName == SyncMethod_GetAttachmentList)
@@ -164,7 +191,13 @@ void CWizApiBase::onXmlRpcReturn(const QString& strMethodName, CWizXmlRpcValue& 
     }
     else if (strMethodName == SyncMethod_PostAttachmentData)
     {
-        onAttachmentPostData(m_currentAttachment);
+        CWizXmlRpcFaultValue* pFault = dynamic_cast<CWizXmlRpcFaultValue *>(&ret);
+        if (pFault) {
+            WIZDOCUMENTATTACHMENTDATAEX data;
+            onAttachmentPostData(data);
+        } else {
+            onAttachmentPostData(m_currentAttachment);
+        }
     }
     // trunk data
     else if (strMethodName == SyncMethod_DownloadObjectPart)
@@ -179,7 +212,7 @@ void CWizApiBase::onXmlRpcReturn(const QString& strMethodName, CWizXmlRpcValue& 
     }
     else
     {
-        Q_ASSERT(false);
+        Q_ASSERT(0);
     }
 }
 
@@ -860,7 +893,7 @@ bool CWizApi::uploadDocument(const WIZDOCUMENTDATAEX& data)
 
 void CWizApi::onDocumentPostData(const WIZDOCUMENTDATAEX& data)
 {
-    Q_ASSERT(data.strGUID == m_currentDocument.strGUID);
+    //Q_ASSERT(data.strGUID == m_currentDocument.strGUID);
     onUploadDocument(m_currentDocument);
 }
 
