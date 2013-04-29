@@ -1105,6 +1105,7 @@ void MainWindow::on_options_settingsChanged(WizOptionsType type)
         if (nInterval == -1) {
             m_syncTimer->stop();
         } else {
+            nInterval = nInterval < 5 ? 5 : nInterval;
             m_syncTimer->setInterval(nInterval * 60 * 1000);
         }
 

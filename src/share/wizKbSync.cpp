@@ -78,13 +78,13 @@ void CWizKbSync::abort()
     Q_EMIT kbSyncDone(m_error);
 }
 
-void CWizKbSync::onXmlRpcError(const QString& strMethodName, WizXmlRpcError err, int errorCode, const QString& errorMessage)
+void CWizKbSync::onXmlRpcError(const QString& strMethodName, WizXmlRpcError errorType, int errorCode, const QString& errorMessage)
 {
-    CWizApi::onXmlRpcError(strMethodName, err, errorCode, errorMessage);
+    CWizApi::onXmlRpcError(strMethodName, errorType, errorCode, errorMessage);
 
     m_error = true;
 
-    if (strMethodName != SyncMethod_ClientLogout) {
+    if (errorType == errorNetwork && strMethodName != SyncMethod_ClientLogout) {
         stopSync();
     }
 }
