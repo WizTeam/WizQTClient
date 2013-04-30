@@ -131,7 +131,7 @@ void MainWindow::resizeEvent(QResizeEvent *event)
 {
     Q_UNUSED(event);
 
-    m_statusBar->autoShow();
+    m_statusBar->adjustPosition();
 }
 
 void MainWindow::showEvent(QShowEvent* event)
@@ -563,8 +563,14 @@ void MainWindow::on_syncProcessLog(const QString& msg)
 {
     TOLOG(msg);
 
-    QString strMsg = msg.left(50) + "..";
-    m_statusBar->autoShow(strMsg);
+    QString strMsg;
+    if (msg.length() > 50) {
+        strMsg = msg.left(50) + "..";
+    } else {
+        strMsg = msg;
+    }
+
+    m_statusBar->showText(strMsg);
 }
 
 void MainWindow::on_syncProcessDebugLog(const QString& strMsg)
@@ -1312,10 +1318,10 @@ void MainWindow::SetSavingDocument(bool saving)
     //m_statusBar->setVisible(saving);
     if (saving) {
         //m_statusBar->setVisible(true);
-        m_statusBar->autoShow(tr("Saving note..."));
+        m_statusBar->showText(tr("Saving note..."));
         //qApp->processEvents(QEventLoop::AllEvents);
     } else {
-        m_statusBar->setVisible(false);
+        m_statusBar->hide();
     }
 }
 

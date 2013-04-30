@@ -1,11 +1,10 @@
 #ifndef WIZSTATUSBAR_H
 #define WIZSTATUSBAR_H
 
-#include <QtGui>
-
-#ifdef BUILD_WITH_QT5
-#include <QtWidgets>
-#endif
+#include <QLabel>
+#include <QTimer>
+#include <QPointer>
+#include <QPropertyAnimation>
 
 class CWizExplorerApp;
 
@@ -16,12 +15,24 @@ class CWizStatusBar : public QLabel
 public:
     explicit CWizStatusBar(CWizExplorerApp& app, QWidget *parent = 0);
 
-    void autoShow(const QString& strMsg = QString());
+    void adjustPosition();
+    void showText(const QString& strText = QString());
+
+protected:
+    virtual void enterEvent(QEvent* event);
 
 private:
     CWizExplorerApp& m_app;
+    QPointer<QPropertyAnimation> m_animation;
+    QTimer m_animationTimer;
     QLabel m_label;
-    QTimer m_timer;
+    bool m_bIsVisible;
+
+    bool isCursorInside();
+
+private Q_SLOTS:
+    void on_animation_finished();
+    void on_animationTimer_timeout();
 };
 
 #endif // WIZSTATUSBAR_H

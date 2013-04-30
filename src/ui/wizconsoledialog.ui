@@ -35,9 +35,9 @@
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>30</y>
+     <y>20</y>
      <width>481</width>
-     <height>341</height>
+     <height>351</height>
     </rect>
    </property>
    <property name="styleSheet">
@@ -72,7 +72,7 @@
      <x>190</x>
      <y>370</y>
      <width>131</width>
-     <height>31</height>
+     <height>20</height>
     </rect>
    </property>
    <property name="text">
@@ -88,7 +88,7 @@
      <x>340</x>
      <y>370</y>
      <width>151</width>
-     <height>31</height>
+     <height>21</height>
     </rect>
    </property>
    <property name="text">
@@ -104,7 +104,7 @@
      <x>380</x>
      <y>0</y>
      <width>111</width>
-     <height>31</height>
+     <height>21</height>
     </rect>
    </property>
    <property name="text">
@@ -117,12 +117,6 @@
     <bool>false</bool>
    </property>
   </widget>
-  <zorder>editConsole</zorder>
-  <zorder>labelCount</zorder>
-  <zorder>btnSaveAs</zorder>
-  <zorder>btnCopyToClipboard</zorder>
-  <zorder>horizontalSpacer</zorder>
-  <zorder>buttonClear</zorder>
  </widget>
  <resources/>
  <connections/>
