@@ -1138,7 +1138,7 @@ CString CWizDatabase::GetObjectFileName(const WIZOBJECTDATA& data)
         return GetAttachmentFileName(data.strObjectGUID);
     else
     {
-        ATLASSERT(false);
+        Q_ASSERT(false);
         return CString();
     }
 }

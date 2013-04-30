@@ -202,9 +202,15 @@ void CWizApiBase::onXmlRpcReturn(const QString& strMethodName, CWizXmlRpcValue& 
     // trunk data
     else if (strMethodName == SyncMethod_DownloadObjectPart)
     {
-        WIZOBJECTPARTDATA data = m_currentObjectPartData;
-        ret.ToData(data, kbGUID());
-        onDownloadDataPart(data);
+        WIZOBJECTPARTDATA data;
+        CWizXmlRpcFaultValue* pFault = dynamic_cast<CWizXmlRpcFaultValue *>(&ret);
+        if (pFault) {
+            onDownloadDataPart(data);
+        } else {
+            data = m_currentObjectPartData;
+            ret.ToData(data, kbGUID());
+            onDownloadDataPart(data);
+        }
     }
     else if (strMethodName == SyncMethod_UploadObjectPart)
     {
@@ -641,6 +647,12 @@ bool CWizApiBase::callDownloadDataPart(const CString& strObjectGUID, const CStri
 
 void CWizApiBase::onDownloadDataPart(const WIZOBJECTPARTDATA& data)
 {
+    if (data.strObjectGUID.isEmpty()) {
+        WIZOBJECTDATA objectData;
+        onDownloadObjectDataCompleted(objectData);
+        return;
+    }
+
     m_bDownloadingObject = false;
     m_nCurrentObjectAllSize = data.nObjectSize;
     m_currentObjectData.arrayData.append(data.arrayData);
