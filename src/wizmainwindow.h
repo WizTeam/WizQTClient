@@ -35,6 +35,8 @@ class CWizStatusBar;
 class CWizSearchBox;
 class CWizSearchIndexerThread;
 
+class QtSegmentControl;
+
 
 class MainWindow
     : public QMainWindow
@@ -87,6 +89,7 @@ private:
     QPointer<CWizCategoryView> m_categoryPrivate;
     QPointer<CWizCategoryTagsView> m_categoryTags;
     QPointer<CWizCategoryGroupsView> m_categoryGroups;
+    QPointer<QtSegmentControl> m_categorySwitchSegmentBtn;
     QWidget* m_categoryLayer;
     CWizDocumentListView* m_documents;
     CWizDocumentView* m_doc;

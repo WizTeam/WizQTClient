@@ -397,26 +397,26 @@ void MainWindow::initToolBar()
 
 QWidget* MainWindow::setupCategorySwitchButtons()
 {
-    QWidget* categorySwitchBtns = new QWidget(this);
+    QWidget* categorySwitchWidget = new QWidget(this);
 
-    QtSegmentControl* segmentControl = new QtSegmentControl();
-    segmentControl->setSelectionBehavior(QtSegmentControl::SelectOne);
-    segmentControl->setCount(3);
-    segmentControl->setIconSize(QSize(18, 18));
-    segmentControl->setSegmentIcon(0, ::WizLoadSkinIcon3("folder", QIcon::Normal));
-    segmentControl->setSegmentIcon(1, ::WizLoadSkinIcon3("tag", QIcon::Normal));
-    segmentControl->setSegmentIcon(2, ::WizLoadSkinIcon3("groups", QIcon::Normal));
-    segmentControl->setSegmentSelected(0, true);
-    connect(segmentControl, SIGNAL(segmentSelected(int)), this, SLOT(on_actionCategorySwitch_triggered(int)));
+    m_categorySwitchSegmentBtn = new QtSegmentControl(categorySwitchWidget);
+    m_categorySwitchSegmentBtn->setSelectionBehavior(QtSegmentControl::SelectOne);
+    m_categorySwitchSegmentBtn->setCount(3);
+    m_categorySwitchSegmentBtn->setIconSize(QSize(18, 18));
+    m_categorySwitchSegmentBtn->setSegmentIcon(0, ::WizLoadSkinIcon3("folder", QIcon::Normal));
+    m_categorySwitchSegmentBtn->setSegmentIcon(1, ::WizLoadSkinIcon3("tag", QIcon::Normal));
+    m_categorySwitchSegmentBtn->setSegmentIcon(2, ::WizLoadSkinIcon3("groups", QIcon::Normal));
+    m_categorySwitchSegmentBtn->setSegmentSelected(0, true);
+    connect(m_categorySwitchSegmentBtn, SIGNAL(segmentSelected(int)), this, SLOT(on_actionCategorySwitch_triggered(int)));
 
     QHBoxLayout* layoutCategorySwitch = new QHBoxLayout();
-    categorySwitchBtns->setLayout(layoutCategorySwitch);
+    categorySwitchWidget->setLayout(layoutCategorySwitch);
     layoutCategorySwitch->setContentsMargins(5, 0, 5, 0);
     layoutCategorySwitch->addStretch();
-    layoutCategorySwitch->addWidget(segmentControl);
+    layoutCategorySwitch->addWidget(m_categorySwitchSegmentBtn);
     layoutCategorySwitch->addStretch();
 
-    return categorySwitchBtns;
+    return categorySwitchWidget;
 }
 
 void MainWindow::initClient()
@@ -976,12 +976,19 @@ void MainWindow::on_actionGoForward_triggered()
 
 void MainWindow::on_actionCategorySwitch_triggered(int index)
 {
+    QAction* action;
     if (index == 0) {
-        on_actionCategorySwitchPrivate_triggered();
+        action = m_actions->actionFromName(WIZACTION_SWITCH_CATEGORY_PRIVATE);
+        if (action->isEnabled())
+            action->trigger();
     } else if (index == 1) {
-        on_actionCategorySwitchTags_triggered();
+        action = m_actions->actionFromName(WIZACTION_SWITCH_CATEGORY_TAGS);
+        if (action->isEnabled())
+            action->trigger();
     } else if (index == 2) {
-        on_actionCategorySwitchGroups_triggered();
+        action = m_actions->actionFromName(WIZACTION_SWITCH_CATEGORY_GROUPS);
+        if (action->isEnabled())
+            action->trigger();
     } else {
         Q_ASSERT(0);
     }
@@ -1020,27 +1027,28 @@ void MainWindow::categorySwitchTo(CWizCategoryBaseView* sourceCategory, CWizCate
         return;
     }
 
+    m_categorySwitchSegmentBtn->setEnabled(false);
+    m_actions->actionFromName(WIZACTION_SWITCH_CATEGORY_PRIVATE)->setEnabled(false);
+    m_actions->actionFromName(WIZACTION_SWITCH_CATEGORY_TAGS)->setEnabled(false);
+    m_actions->actionFromName(WIZACTION_SWITCH_CATEGORY_GROUPS)->setEnabled(false);
+
     QRect rectOld(m_categoryLayer->geometry());
 
     // break layout and do animation
     QHBoxLayout* layout = qobject_cast<QHBoxLayout *>(m_categoryLayer->layout());
     layout->removeWidget(sourceCategory);
-    destCategory->show();
     destCategory->lower();
+    destCategory->show();
+    m_category = destCategory;
 
-    QPropertyAnimation* animateCurrent = new QPropertyAnimation();
-    animateCurrent->setEasingCurve(QEasingCurve::InOutExpo);
-    animateCurrent->setTargetObject(sourceCategory);
-    animateCurrent->setPropertyName("geometry");
-    animateCurrent->setDuration(200);
-    animateCurrent->setEndValue(QRect(rectOld.width(), 0, 0, rectOld.height()));
-
-    connect(animateCurrent, SIGNAL(stateChanged(QAbstractAnimation::State, QAbstractAnimation::State)), \
+    QPropertyAnimation* anim1 = new QPropertyAnimation(sourceCategory, "geometry");
+    anim1->setEasingCurve(QEasingCurve::InOutExpo);
+    anim1->setDuration(200);
+    anim1->setEndValue(QRect(rectOld.width(), 0, 0, rectOld.height()));
+    connect(anim1, SIGNAL(stateChanged(QAbstractAnimation::State, QAbstractAnimation::State)), \
             SLOT(onAnimationCategorySwitchStateChanged(QAbstractAnimation::State, QAbstractAnimation::State)));
 
-    animateCurrent->start();
-
-    m_category = destCategory;
+    anim1->start();
 }
 
 void MainWindow::onAnimationCategorySwitchStateChanged(QAbstractAnimation::State newState, QAbstractAnimation::State oldState)
@@ -1054,6 +1062,11 @@ void MainWindow::onAnimationCategorySwitchStateChanged(QAbstractAnimation::State
         layout->addWidget(category);
 
         m_categoryLayer->update();
+
+        m_categorySwitchSegmentBtn->setEnabled(true);
+        m_actions->actionFromName(WIZACTION_SWITCH_CATEGORY_PRIVATE)->setEnabled(true);
+        m_actions->actionFromName(WIZACTION_SWITCH_CATEGORY_TAGS)->setEnabled(true);
+        m_actions->actionFromName(WIZACTION_SWITCH_CATEGORY_GROUPS)->setEnabled(true);
     }
 }
 
