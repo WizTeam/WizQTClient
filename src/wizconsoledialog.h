@@ -5,7 +5,8 @@
 #include <QScrollBar>
 #include <QFile>
 
-#include "wizdef.h"
+
+class CWizExplorerApp;
 
 namespace Ui {
     class CWizConsoleDialog;
@@ -25,6 +26,7 @@ protected:
 private:
     CWizExplorerApp& m_app;
     Ui::CWizConsoleDialog* m_ui;
+    bool m_bAutoScroll;
 
     QTextCodec* m_codec;
     QString m_data;
@@ -36,11 +38,13 @@ private:
 
 public Q_SLOTS:
     void on_editConsole_textChanged();
+    void onEditConsole_sliderMoved(int value);
     void on_editConsole_copyAvailable(bool yes);
     void on_buttonClear_clicked();
     void bufferLog_readyRead();
     void on_btnSaveAs_clicked();
     void on_btnCopyToClipboard_clicked();
+
 };
 
 #endif // WIZCONSOLEDIALOG_H

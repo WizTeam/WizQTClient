@@ -71,99 +71,104 @@ bool CWizSearchIndexer::buildFTSIndex()
 bool CWizSearchIndexer::buildFTSIndexByDatabase(CWizDatabase& db)
 {
     int strVersion = db.getDocumentFTSVersion().toInt();
-    if (strVersion == QString(WIZNOTE_FTS_VERSION).toInt()) {
-        return true;
+    if (strVersion != QString(WIZNOTE_FTS_VERSION).toInt()) {
+        clearFlags(db);
     }
 
-    TOLOG(tr("Build FTS index begin for: ") + db.name());
-
-    // should rebuild all documents
-    if (!db.setDocumentFTSVersion("0") || !db.setAllDocumentsSearchIndexed(false)) {
-        TOLOG1("FATAL: Can't reset document index flag: %1", db.name());
-        return false;
-    }
+    db.setDocumentFTSVersion(WIZNOTE_FTS_VERSION);
 
     CWizDocumentDataArray arrayDocuments;
     if (!db.getAllDocumentsNeedToBeSearchIndexed(arrayDocuments))
         return false;
 
-    //TOLOG2("COUNT: Total %1 documents in %2 need build", QString::number(arrayDocuments.size()), db.name());
+    filterDocuments(db, arrayDocuments);
 
-    if (arrayDocuments.empty()) {
-        TOLOG(tr("No documents need to build"));
-
-        db.setDocumentFTSVersion(WIZNOTE_FTS_VERSION);
+    if (arrayDocuments.empty())
         return true;
-    }
 
-    int nErrors;
+    TOLOG(tr("Build FTS index begin: ") + db.name());
+    TOLOG(tr("Total %1 documents needs to build search index").arg(arrayDocuments.size()));
+
+    int nErrors = 0;
     for (int i = 0; i < arrayDocuments.size(); i++) {
         if (m_bAbort) {
             return false;
         }
 
         const WIZDOCUMENTDATAEX& doc = arrayDocuments.at(i);
+
+        TOLOG(tr("Update search index [%1]: %2").arg(i).arg(doc.strTitle));
         if (!updateDocument(doc)) {
+            TOLOG(tr("[WARNING] failed to update: %1").arg(doc.strTitle));
             nErrors++;
         }
     }
 
     if (nErrors >= 3) {
-        TOLOG(tr("total %1 documents failed to build").arg(nErrors));
-        TOLOG(tr("[WARNING]: Build FTS index end with error: ") + db.name());
+        TOLOG(tr("[WARNING] total %1 documents failed to build").arg(nErrors));
+        //TOLOG(tr("[WARNING]: Build FTS index end with error: ") + db.name());
         return false;
     }
 
-    db.setDocumentFTSVersion(WIZNOTE_FTS_VERSION);
-    TOLOG(tr("Build FTS index end succeed for: ") + db.name());
+    TOLOG(tr("Build FTS index end succeed: ") + db.name());
     return true;
 }
 
-//bool CWizSearchIndexer::isFTSEnabled()
-//{
-//    int total = m_dbMgr.count();
-//    for (int i = 0; i < total; i++) {
-//        if (!m_dbMgr.at(i).isDocumentFTSEnabled()) {
-//            return false;
-//        }
-//    }
-//
-//    return true;
-//}
+void CWizSearchIndexer::filterDocuments(CWizDatabase& db, CWizDocumentDataArray& arrayDocuments)
+{
+    int nCount = arrayDocuments.size();
+    for (intptr_t i = nCount - 1; i >= 0; i--) {
+        bool bFilter = false;
+        WIZDOCUMENTDATAEX& doc = arrayDocuments.at(i);
+        QString strFileName = db.GetDocumentFileName(doc.strGUID);
 
-bool CWizSearchIndexer::rebuildFTSIndex()
+        if (!QFile::exists(strFileName))
+            bFilter = true;
+
+        if (doc.nProtected)
+            bFilter = true;
+
+        if (bFilter) {
+            arrayDocuments.erase(arrayDocuments.begin() + i);
+        }
+    }
+}
+
+void CWizSearchIndexer::clearFlags(CWizDatabase& db)
+{
+    if (!db.setDocumentFTSVersion("0")) {
+        TOLOG1("FATAL: Can't reset db index flag: %1", db.name());
+    }
+
+    if (!db.setAllDocumentsSearchIndexed(false)) {
+        TOLOG1("FATAL: Can't reset document index flag: %1", db.name());
+    }
+}
+
+bool CWizSearchIndexer::clear()
 {
     if (!::WizDeleteAllFilesInFolder(m_strIndexPath)) {
         TOLOG("Can't delete old index files while rebuild FTS index");
         return false;
     }
 
-    // reset private db FTS index status
-    if (!m_dbMgr.db().setDocumentFTSVersion("0")) {
-        TOLOG1("FATAL: Can't reset db index flag: %1", m_dbMgr.db().name());
-        return false;
-    }
+    clearFlags(m_dbMgr.db());
 
-    if (!m_dbMgr.db().setAllDocumentsSearchIndexed(false)) {
-        TOLOG1("FATAL: Can't reset document index flag: %1", m_dbMgr.db().name());
-        return false;
-    }
-
-    // reset group db FTS index status
     int total = m_dbMgr.count();
     for (int i = 0; i < total; i++) {
-        if (!m_dbMgr.at(i).setDocumentFTSVersion("0")) {
-            TOLOG1("FATAL: Can't reset db index flag: %1", m_dbMgr.at(i).name());
-            return false;
-        }
-
-        if (!m_dbMgr.at(i).setAllDocumentsSearchIndexed(false)) {
-            TOLOG1("FATAL: Can't reset document index flag: %1", m_dbMgr.at(i).name());
-            return false;
-        }
+        clearFlags(m_dbMgr.at(i));
     }
 
-    return buildFTSIndex();
+    return true;
+}
+
+bool CWizSearchIndexer::rebuildFTSIndex()
+{
+    if (clear()) {
+        return buildFTSIndex();
+    }
+
+    return false;
 }
 
 bool CWizSearchIndexer::updateDocument(const WIZDOCUMENTDATAEX& doc)
@@ -231,11 +236,13 @@ bool CWizSearchIndexer::_updateDocumentImpl(void *pHandle, const WIZDOCUMENTDATA
 
     // document data have not downloaded yet
     if (!QFile::exists(strFileName)) {
+        Q_ASSERT(0);
         return true;
     }
 
     // FIXME : deal with encrypted document
     if (doc.nProtected) {
+       Q_ASSERT(0);
        return true;
     }
 
@@ -243,6 +250,7 @@ bool CWizSearchIndexer::_updateDocumentImpl(void *pHandle, const WIZDOCUMENTDATA
     QString strDataFile;
     if (!db.DocumentToTempHtmlFile(doc, strDataFile)) {
         TOLOG("Can't decompress document while update FTS index: " + doc.strTitle);
+        Q_ASSERT(0);
         return false;
     }
 
@@ -261,7 +269,7 @@ bool CWizSearchIndexer::_updateDocumentImpl(void *pHandle, const WIZDOCUMENTDATA
     bool ret = WizFTSUpdateDocument(pHandle, \
                                     doc.strKbGUID.toStdWString().c_str(), \
                                     doc.strGUID.toStdWString().c_str(), \
-                                    doc.strTitle.toStdWString().c_str(), \
+                                    doc.strTitle.toLower().toStdWString().c_str(), \
                                     strPlainText.toLower().toStdWString().c_str());
 
     if (ret) {

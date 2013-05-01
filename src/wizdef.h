@@ -6,7 +6,7 @@
 #define WIZNOTE_DEBUG 1
 
 #define WIZ_CLIENT_VERSION  "1.5.1"
-#define WIZNOTE_FTS_VERSION "1"
+#define WIZNOTE_FTS_VERSION "2"
 #define WIZNOTE_THUMB_VERSION "1"
 
 #if defined Q_OS_MAC

@@ -53,6 +53,11 @@ private:
 
     bool _updateDocumentImpl(void *pHandle, const WIZDOCUMENTDATAEX& doc);
 
+    bool clear();
+    void clearFlags(CWizDatabase& db);
+
+    void filterDocuments(CWizDatabase& db, CWizDocumentDataArray& arrayDocuments);
+
 private Q_SLOTS:
     void on_searchTimeout();
     void on_document_created(const WIZDOCUMENTDATA& doc);

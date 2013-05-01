@@ -3,6 +3,7 @@
 
 #include <QtGui>
 
+#include "wizdef.h"
 #include "share/wizmisc.h"
 #include "share/wizDatabaseManager.h"
 
@@ -18,19 +19,24 @@ CWizConsoleDialog::CWizConsoleDialog(CWizExplorerApp& app, QWidget* parent)
     , m_app(app)
     , m_ui(new Ui::CWizConsoleDialog)
     , m_nEntries(0)
+    , m_bAutoScroll(true)
 {
     m_ui->setupUi(this);
     setWindowFlags(Qt::Tool);
 
-    connect(m_ui->btnSaveAs, SIGNAL(clicked()), SLOT(on_btnSaveAs_clicked()));
-    connect(m_ui->btnCopyToClipboard, SIGNAL(clicked()), SLOT(on_btnCopyToClipboard_clicked()));
-    connect(m_ui->editConsole, SIGNAL(textChanged()), SLOT(on_editConsole_textChanged()));
-    connect(m_ui->editConsole, SIGNAL(copyAvailable(bool)), SLOT(on_editConsole_copyAvailable(bool)));
-    connect(m_ui->buttonClear, SIGNAL(clicked()), SLOT(on_buttonClear_clicked()));
-    connect(::WizGlobal()->bufferLog(), SIGNAL(readyRead()), SLOT(bufferLog_readyRead()));
-
+    m_ui->editConsole->setReadOnly(true);
     m_ui->btnCopyToClipboard->setEnabled(false);
     m_codec = QTextCodec::codecForName("UTF-8");
+
+    connect(::WizGlobal()->bufferLog(), SIGNAL(readyRead()), SLOT(bufferLog_readyRead()));
+    connect(m_ui->btnSaveAs, SIGNAL(clicked()), SLOT(on_btnSaveAs_clicked()));
+    connect(m_ui->editConsole, SIGNAL(copyAvailable(bool)), SLOT(on_editConsole_copyAvailable(bool)));
+    connect(m_ui->btnCopyToClipboard, SIGNAL(clicked()), SLOT(on_btnCopyToClipboard_clicked()));
+    connect(m_ui->buttonClear, SIGNAL(clicked()), SLOT(on_buttonClear_clicked()));
+
+    connect(m_ui->editConsole, SIGNAL(textChanged()), SLOT(on_editConsole_textChanged()));
+    connect(m_ui->editConsole->verticalScrollBar(), SIGNAL(valueChanged(int)), SLOT(onEditConsole_sliderMoved(int)));
+
     load();
 }
 
@@ -80,12 +86,22 @@ void CWizConsoleDialog::load()
     resetCount();
 }
 
+void CWizConsoleDialog::onEditConsole_sliderMoved(int value)
+{
+    QScrollBar* scroll = qobject_cast<QScrollBar *>(sender());
+    if (value == scroll->maximum()) {
+        m_bAutoScroll = true;
+    } else {
+        m_bAutoScroll = false;
+    }
+}
+
 void CWizConsoleDialog::on_editConsole_textChanged()
 {
-    QScrollBar* vScroll = m_ui->editConsole->verticalScrollBar();
-    vScroll->setValue(vScroll->maximum());
-
-    resetCount();
+    if (m_bAutoScroll) {
+        QScrollBar* vScroll = m_ui->editConsole->verticalScrollBar();
+        vScroll->setValue(vScroll->maximum());
+    }
 }
 
 void CWizConsoleDialog::on_buttonClear_clicked()
@@ -114,6 +130,8 @@ void CWizConsoleDialog::bufferLog_readyRead()
     bufLog.open(QIODevice::ReadOnly);
     readByLine(&bufLog);
     bufLog.close();
+
+    resetCount();
 }
 
 void CWizConsoleDialog::readByLine(QIODevice* dev)
@@ -127,8 +145,10 @@ void CWizConsoleDialog::readByLine(QIODevice* dev)
         m_data += QString::fromUtf8(data);
         QString strText = m_codec->toUnicode(data);
 
-        m_ui->editConsole->moveCursor(QTextCursor::End);
-        m_ui->editConsole->insertPlainText(strText);
+        // use copyed cursor instead
+        QTextCursor cursor = m_ui->editConsole->textCursor();
+        cursor.movePosition(QTextCursor::End);
+        cursor.insertText(strText);
 
         m_nEntries++;
     }

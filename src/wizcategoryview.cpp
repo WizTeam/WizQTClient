@@ -480,7 +480,8 @@ void CWizCategoryView::initFolders(QTreeWidgetItem* pParent, \
 
 void CWizCategoryView::doLocationSanityCheck(CWizStdStringArray& arrayLocation)
 {
-    for (int i = 0; i < arrayLocation.size(); i++) {
+    int nCount = arrayLocation.size();
+    for (intptr_t i = nCount - 1; i >= 0; i--) {
         QString strLocation = arrayLocation.at(i);
 
         if (strLocation.left(1) != "/" && strLocation.right(1) != "/") {
