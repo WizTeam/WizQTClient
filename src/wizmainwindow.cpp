@@ -1316,6 +1316,11 @@ void MainWindow::SetDocumentModified(bool modified)
     m_doc->setModified(modified);
 }
 
+void MainWindow::ResetInitialStyle()
+{
+    m_doc->web()->initEditorStyle();
+}
+
 void MainWindow::ResetEditorToolBar()
 {
     m_doc->editorToolBar()->resetToolbar();

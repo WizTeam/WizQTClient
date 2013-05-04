@@ -1,8 +1,9 @@
 #include "wizcommonui.h"
-#include "wizmisc.h"
 
 #include <QClipboard>
 #include <QApplication>
+
+#include "wizmisc.h"
 
 
 CWizCommonUI::CWizCommonUI(QObject* parent)
@@ -12,7 +13,7 @@ CWizCommonUI::CWizCommonUI(QObject* parent)
 
 QString CWizCommonUI::LoadTextFromFile(const QString& strFileName)
 {
-    CString strText;
+    QString strText;
     ::WizLoadUnicodeTextFromFile(strFileName, strText);
     return strText;
 }

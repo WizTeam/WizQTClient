@@ -1,6 +1,10 @@
 #include "wizpreferencedialog.h"
 #include "ui_wizpreferencedialog.h"
 
+#include <QFontDialog>
+#include <QFontDatabase>
+#include <QDebug>
+
 CWizPreferenceWindow::CWizPreferenceWindow(CWizExplorerApp& app, QWidget* parent)
     : QDialog(parent)
     , ui(new Ui::CWizPreferenceWindow)
@@ -113,10 +117,13 @@ CWizPreferenceWindow::CWizPreferenceWindow(CWizExplorerApp& app, QWidget* parent
     ui->labelProxySettings->setText(proxySettings);
     connect(ui->labelProxySettings, SIGNAL(linkActivated(const QString&)), SLOT(labelProxy_linkActivated(const QString&)));
 
-    //ui->checkAutoSync->setChecked(userSettings().autoSync());
-    //ui->checkDownloadAllNotesData->setChecked(userSettings().downloadAllNotesData());
-    //connect(ui->checkAutoSync, SIGNAL(clicked(bool)), SLOT(on_checkAutoSync_clicked(bool)));
-    //connect(ui->checkDownloadAllNotesData, SIGNAL(clicked(bool)), SLOT(on_checkDownloadAllNotesData_clicked(bool)));
+    // format tab
+    QString strFont = QString("%1  %2").
+            arg(m_app.userSettings().defaultFontFamily())
+            .arg(m_app.userSettings().defaultFontSize());
+    ui->editFont->setText(strFont);
+
+    connect(ui->buttonFontSelect, SIGNAL(clicked()), SLOT(onButtonFontSelect_clicked()));
 }
 
 void CWizPreferenceWindow::on_comboLang_currentIndexChanged(int index)
@@ -155,18 +162,6 @@ void CWizPreferenceWindow::on_radioAlwaysEditing_clicked(bool chcked)
     userSettings().setNoteViewMode(viewmodeAlwaysEditing);
     emit settingsChanged(wizoptionsNoteView);
 }
-
-//void CWizPreferenceWindow::on_checkAutoSync_clicked(bool checked)
-//{
-//    userSettings().setAutoSync(checked);
-//    emit settingsChanged(wizoptionsSync);
-//}
-
-//void CWizPreferenceWindow::on_checkDownloadAllNotesData_clicked(bool checked)
-//{
-//    userSettings().setDownloadAllNotesData(checked);
-//    emit settingsChanged(wizoptionsSync);
-//}
 
 void CWizPreferenceWindow::on_comboSyncInterval_activated(int index)
 {
@@ -226,6 +221,34 @@ void CWizPreferenceWindow::labelProxy_linkActivated(const QString& link)
     if (QDialog::Accepted != dlg.exec()) {
         emit settingsChanged(wizoptionsSync);
     }
+}
+
+void CWizPreferenceWindow::onButtonFontSelect_clicked()
+{
+    if (!m_fontDialog) {
+        m_fontDialog = new QFontDialog(this);
+
+        // FIXME: Qt bugs here https://bugreports.qt-project.org/browse/QTBUG-27415
+        // upgrade Qt library to 5.0 should fix this issue
+        m_fontDialog->setOptions(QFontDialog::DontUseNativeDialog);
+    }
+
+    QString strFont = m_app.userSettings().defaultFontFamily();
+    int nSize = m_app.userSettings().defaultFontSize();
+    QFont font(strFont, nSize);
+    m_fontDialog->setCurrentFont(font);
+
+    m_fontDialog->open(this, SLOT(onButtonFontSelect_confirmed()));
+}
+
+void CWizPreferenceWindow::onButtonFontSelect_confirmed()
+{
+    QFont font = m_fontDialog->currentFont();
+    QString str = font.family() + " " + QString::number(font.pointSize());
+    ui->editFont->setText(str);
+
+    m_app.userSettings().setDefaultFontFamily(font.family());
+    m_app.userSettings().setDefaultFontSize(font.pointSize());
 }
 
 void CWizPreferenceWindow::accept()

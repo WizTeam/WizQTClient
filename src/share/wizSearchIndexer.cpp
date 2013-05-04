@@ -236,13 +236,11 @@ bool CWizSearchIndexer::_updateDocumentImpl(void *pHandle, const WIZDOCUMENTDATA
 
     // document data have not downloaded yet
     if (!QFile::exists(strFileName)) {
-        Q_ASSERT(0);
         return true;
     }
 
     // FIXME : deal with encrypted document
     if (doc.nProtected) {
-       Q_ASSERT(0);
        return true;
     }
 

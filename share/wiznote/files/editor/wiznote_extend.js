@@ -45,6 +45,7 @@ try {
     };
 
     editor = new baidu.editor.ui.Editor(editorOption);
+    objApp.ResetInitialStyle();
     editor.render('editorArea');
 
     editor.addListener('selectionChange', function() {
@@ -74,7 +75,6 @@ function setEditorHtml(html)
 
     editor.reset();
 
-    // This Api have bug when showing pictures, don't use it!
     //editor.setContent(html);
     editor.document.body.innerHTML = html;
 

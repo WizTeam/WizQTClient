@@ -101,11 +101,11 @@ public:
     WizDocumentViewMode noteViewMode() const;
     void setNoteViewMode(WizDocumentViewMode strMode) { set("NoteViewMode", QString::number(strMode)); }
 
-//    bool autoSync() const;
-//    void setAutoSync(bool b) { set("AutoSync", b ? "1" : "0"); }
+    QString defaultFontFamily();
+    void setDefaultFontFamily(const QString& strFont);
 
-//    bool downloadAllNotesData() const;
-//    void setDownloadAllNotesData(bool b) { set("DownloadAllNotesData", b ? "1" : "0"); }
+    int defaultFontSize();
+    void setDefaultFontSize(int nSize);
 
     // default: 5, 15, 30, 60, -1(manual)
     int syncInterval() const;

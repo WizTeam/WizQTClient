@@ -313,6 +313,34 @@ void CWizUserSettings::setLocale(const QString& strLocale)
     set("Locale", strLocale);
 }
 
+QString CWizUserSettings::defaultFontFamily()
+{
+    QString strFont = get("DefaultFontFamily");
+    if (!strFont.isEmpty())
+        return strFont;
+
+    return "sans-serif";
+}
+
+void CWizUserSettings::setDefaultFontFamily(const QString& strFont)
+{
+    set("DefaultFontFamily", strFont);
+}
+
+int CWizUserSettings::defaultFontSize()
+{
+    int nSize = get("DefaultFontSize").toInt();
+    if (nSize)
+        return nSize;
+
+    return 13; // default 13px
+}
+
+void CWizUserSettings::setDefaultFontSize(int nSize)
+{
+    set("DefaultFontSize", QString::number(nSize));
+}
+
 WizDocumentViewMode CWizUserSettings::noteViewMode() const
 {
     QString mode = get("NoteViewMode");
@@ -324,35 +352,13 @@ WizDocumentViewMode CWizUserSettings::noteViewMode() const
     return viewmodeAlwaysEditing;
 }
 
-//bool CWizUserSettings::autoSync() const
-//{
-//    QString strAutoSync = get("AutoSync");
-
-//    if (!strAutoSync.isEmpty()) {
-//        return strAutoSync.toInt() ? true : false;
-//    }
-
-//    // auto sync as default
-//    return true;
-//}
-
-
-
-//bool CWizUserSettings::downloadAllNotesData() const
-//{
-//    QString strDownload = get("DownloadAllNotesData");
-
-//    if (!strDownload.isEmpty()) {
-//        return strDownload.toInt() ? true : false;
-//    }
-
-//    // do not download all notes data as default
-//    return false;
-//}
-
 int CWizUserSettings::syncInterval() const
 {
-    return get("SyncInterval").toInt();
+    int nInterval = get("SyncInterval").toInt();
+    if (!nInterval)
+        return 15; // default 15 minutes
+
+    return nInterval;
 }
 
 void CWizUserSettings::setSyncInterval(int minutes)
@@ -362,7 +368,11 @@ void CWizUserSettings::setSyncInterval(int minutes)
 
 int CWizUserSettings::syncMethod() const
 {
-    return get("SyncMethod").toInt();
+    int nDays = get("SyncMethod").toInt();
+    if (!nDays)
+        return 7; // default 7 days
+
+    return nDays;
 }
 
 void CWizUserSettings::setSyncMethod(int days)

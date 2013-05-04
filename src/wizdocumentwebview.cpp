@@ -17,7 +17,6 @@ CWizDocumentWebView::CWizDocumentWebView(CWizExplorerApp& app, QWidget* parent /
     : QWebView(parent)
     , m_app(app)
     , m_dbMgr(app.databaseManager())
-    , m_bEditorInited(false)
 {
     setAcceptDrops(false);
 
@@ -25,10 +24,6 @@ CWizDocumentWebView::CWizDocumentWebView(CWizExplorerApp& app, QWidget* parent /
     connect(this, SIGNAL(customContextMenuRequested(const QPoint&)),
             SLOT(on_editor_customContextMenuRequested(const QPoint&)));
 
-    //settings()->setAttribute(QWebSettings::JavascriptCanAccessClipboard, true);
-    //settings()->setAttribute(QWebSettings::PluginsEnabled, true);
-
-    //setAttribute(Qt::WA_InputMethodEnabled);
     connect(this, SIGNAL(selectionChanged()), SLOT(onSelectionChanged()));
 
     MainWindow* mainWindow = qobject_cast<MainWindow *>(m_app.mainWindow());
@@ -60,11 +55,14 @@ void CWizDocumentWebView::on_documentReady(const QString& strFileName)
 {
     m_strHtmlFileName = strFileName;
 
-    if (m_bEditorInited) {
-        viewDocumentInEditor(m_bEditingMode);
-    } else {
-        initEditorAndLoadDocument();
-    }
+    m_bEditorInited = false;
+    initEditorAndLoadDocument();
+
+//    if (m_bEditorInited) {
+//        viewDocumentInEditor(m_bEditingMode);
+//    } else {
+//        initEditorAndLoadDocument();
+//    }
 }
 
 void CWizDocumentWebView::on_documentSaved(bool ok)
@@ -200,6 +198,16 @@ void CWizDocumentWebView::reloadDocument()
     //db.DocumentFromGUID(m_data.strGUID, m_data);
 }
 
+void CWizDocumentWebView::initEditorStyle()
+{
+    QString strFont = m_app.userSettings().defaultFontFamily();
+    int nSize = m_app.userSettings().defaultFontSize();
+
+    QString strExec = QString("editor.options.initialStyle = 'body{font-family:%1; font-size:%2px;}';")
+            .arg(strFont).arg(nSize);
+    page()->mainFrame()->evaluateJavaScript(strExec).toString();
+}
+
 void CWizDocumentWebView::initEditorAndLoadDocument()
 {
     if (m_bEditorInited)
@@ -232,6 +240,7 @@ void CWizDocumentWebView::on_editor_populateJavaScriptWindowObject()
 void CWizDocumentWebView::on_editor_loadFinished(bool ok)
 {
     if (!ok) {
+        m_bEditorInited = false;
         TOLOG("Wow, loading editor failed!");
         return;
     }
@@ -262,21 +271,21 @@ void CWizDocumentWebView::viewDocumentInEditor(bool editing)
 
     disconnect(page(), SIGNAL(contentsChanged()), this, SLOT(on_pageContentsChanged()));
 
-    QString strScript = ("viewDocument('%1', '%2', %3);");
-    strScript = strScript.arg(document().strGUID, m_strHtmlFileName,
-                              editing ? "true" : "false");
-
+    QString strScript = QString("viewDocument('%1', '%2', %3);")
+            .arg(document().strGUID)
+            .arg(m_strHtmlFileName)
+            .arg(editing ? "true" : "false");
     bool ret = page()->mainFrame()->evaluateJavaScript(strScript).toBool();
-
-    MainWindow* window = qobject_cast<MainWindow *>(m_app.mainWindow());
-    if (ret) {
-        window->showClient(true);
-    } else {
-        window->showClient(false);
-    }
 
     connect(page(), SIGNAL(contentsChanged()), SLOT(on_pageContentsChanged()));
 
+    MainWindow* window = qobject_cast<MainWindow *>(m_app.mainWindow());
+    if (!ret) {
+        window->showClient(false);
+        return;
+    }
+
+    window->showClient(true);
     m_timerAutoSave.start();
 
     update();

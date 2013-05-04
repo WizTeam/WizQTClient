@@ -121,6 +121,9 @@ private:
     void viewDocumentInEditor(bool editing);
     void initEditorAndLoadDocument();
 
+public:
+    void initEditorStyle();
+
 public Q_SLOTS:
     void on_pageContentsChanged();
     void onSelectionChanged();
@@ -146,6 +149,8 @@ public Q_SLOTS:
     void editorCommandExecutePaste();
 
     /* editor API */
+
+    // font
     bool editorCommandExecuteForeColor();
     bool editorCommandExecuteBold();
     bool editorCommandExecuteItalic();
@@ -155,6 +160,7 @@ public Q_SLOTS:
     bool editorCommandExecuteLinkInsert();
     bool editorCommandExecuteLinkRemove();
 
+    // format
     bool editorCommandExecuteJustifyLeft();
     bool editorCommandExecuteJustifyRight();
     bool editorCommandExecuteJustifyCenter();
@@ -165,7 +171,6 @@ public Q_SLOTS:
 
     // table
     bool editorCommandExecuteTableInsert();
-    //bool editorCommandExecuteTableInsert();
     bool editorCommandExecuteTableDelete();
     bool editorCommandExecuteTableDeleteRow();
     bool editorCommandExecuteTableDeleteCol();
