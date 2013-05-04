@@ -11,7 +11,7 @@
 
 class CWizSearchIndexer
         : public QObject
-        , public IWizSearchDocumentsEvents
+        , public IWizCluceneSearch
 {
     Q_OBJECT
 
@@ -51,6 +51,7 @@ private:
     // store search result for signal emiting
     CWizDocumentDataArray m_arrayDocument;
 
+    bool _updateDocumentTitleOnlyImpl(void *pHandle, const WIZDOCUMENTDATAEX& doc);
     bool _updateDocumentImpl(void *pHandle, const WIZDOCUMENTDATAEX& doc);
 
     bool clear();

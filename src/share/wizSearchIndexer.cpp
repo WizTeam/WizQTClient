@@ -120,10 +120,6 @@ void CWizSearchIndexer::filterDocuments(CWizDatabase& db, CWizDocumentDataArray&
     for (intptr_t i = nCount - 1; i >= 0; i--) {
         bool bFilter = false;
         WIZDOCUMENTDATAEX& doc = arrayDocuments.at(i);
-        QString strFileName = db.GetDocumentFileName(doc.strGUID);
-
-        if (!QFile::exists(strFileName))
-            bFilter = true;
 
         if (doc.nProtected)
             bFilter = true;
@@ -175,16 +171,30 @@ bool CWizSearchIndexer::updateDocument(const WIZDOCUMENTDATAEX& doc)
 {
     Q_ASSERT(!doc.strGUID.isEmpty());
 
+    // FIXME : deal with encrypted document
+    if (doc.nProtected) {
+       return true;
+    }
+
     void* pHandle = NULL;
 
-    if (!WizFTSBeginUpdateDocument(m_strIndexPath.toStdWString().c_str(), &pHandle)) {
+    if (!beginUpdateDocument(m_strIndexPath.toStdWString().c_str(), &pHandle)) {
         TOLOG("begin update failed while update FTS index");
         return false;
     }
 
-    bool ret = _updateDocumentImpl(pHandle, doc);
+    bool ret;
 
-    if (!WizFTSEndUpdateDocument(pHandle)) {
+    CWizDatabase& db = m_dbMgr.db(doc.strKbGUID);
+    QString strFileName = db.GetDocumentFileName(doc.strGUID);
+    if (!QFile::exists(strFileName)) {
+        // document data have not downloaded yet
+        ret = _updateDocumentTitleOnlyImpl(pHandle, doc);
+    } else {
+        ret = _updateDocumentImpl(pHandle, doc);
+    }
+
+    if (!endUpdateDocument(pHandle)) {
         TOLOG("end update failed while update FTS index");
         return false;
     }
@@ -199,7 +209,7 @@ bool CWizSearchIndexer::updateDocuments(const CWizDocumentDataArray& arrayDocume
     int nErrors = 0;
     void* pHandle = NULL;
 
-    bool ret = WizFTSBeginUpdateDocument(m_strIndexPath.toStdWString().c_str(), &pHandle);
+    bool ret = beginUpdateDocument(m_strIndexPath.toStdWString().c_str(), &pHandle);
     if (!ret) {
         TOLOG("begin update failed while update FTS index");
         return false;
@@ -212,7 +222,7 @@ bool CWizSearchIndexer::updateDocuments(const CWizDocumentDataArray& arrayDocume
             nErrors++;
     }
 
-    ret = WizFTSEndUpdateDocument(pHandle);
+    ret = endUpdateDocument(pHandle);
     if (!ret) {
         TOLOG("end update failed while update FTS index");
         return false;
@@ -226,23 +236,28 @@ bool CWizSearchIndexer::updateDocuments(const CWizDocumentDataArray& arrayDocume
     return true;
 }
 
+bool CWizSearchIndexer::_updateDocumentTitleOnlyImpl(void *pHandle, const WIZDOCUMENTDATAEX& doc)
+{
+    CWizDatabase& db = m_dbMgr.db(doc.strKbGUID);
+    db.setDocumentSearchIndexed(doc.strGUID, false);
+
+    bool ret = IWizCluceneSearch::updateDocument(pHandle,
+                                                 doc.strKbGUID.toStdWString().c_str(),
+                                                 doc.strGUID.toStdWString().c_str(),
+                                                 doc.strTitle.toLower().toStdWString().c_str(),
+                                                 QString().toStdWString().c_str());
+
+    if (ret) {
+        db.setDocumentSearchIndexed(doc.strGUID, true);
+    }
+
+    return ret;
+}
+
 bool CWizSearchIndexer::_updateDocumentImpl(void *pHandle, const WIZDOCUMENTDATAEX& doc)
 {
     CWizDatabase& db = m_dbMgr.db(doc.strKbGUID);
-
     db.setDocumentSearchIndexed(doc.strGUID, false);
-
-    QString strFileName = db.GetDocumentFileName(doc.strGUID);
-
-    // document data have not downloaded yet
-    if (!QFile::exists(strFileName)) {
-        return true;
-    }
-
-    // FIXME : deal with encrypted document
-    if (doc.nProtected) {
-       return true;
-    }
 
     // decompress
     QString strDataFile;
@@ -264,11 +279,11 @@ bool CWizSearchIndexer::_updateDocumentImpl(void *pHandle, const WIZDOCUMENTDATA
     htmlConverter.toText(strHtmlData, strPlainText);
 
     // NOTE: convert text to lower case
-    bool ret = WizFTSUpdateDocument(pHandle, \
-                                    doc.strKbGUID.toStdWString().c_str(), \
-                                    doc.strGUID.toStdWString().c_str(), \
-                                    doc.strTitle.toLower().toStdWString().c_str(), \
-                                    strPlainText.toLower().toStdWString().c_str());
+    bool ret = IWizCluceneSearch::updateDocument(pHandle,
+                                                 doc.strKbGUID.toStdWString().c_str(),
+                                                 doc.strGUID.toStdWString().c_str(),
+                                                 doc.strTitle.toLower().toStdWString().c_str(),
+                                                 strPlainText.toLower().toStdWString().c_str());
 
     if (ret) {
         db.setDocumentSearchIndexed(doc.strGUID, true);
@@ -293,7 +308,8 @@ bool CWizSearchIndexer::deleteDocuments(const CWizDocumentDataArray& arrayDocume
     bool ret = true;
     for (int i = 0; i < arrayDocuments.size(); i++) {
         WIZDOCUMENTDATAEX doc = arrayDocuments.at(i);
-        int ret = WizFTSDeleteDocument(m_strIndexPath.toStdWString().c_str(), doc.strGUID.toStdWString().c_str());
+        int ret = IWizCluceneSearch::deleteDocument(m_strIndexPath.toStdWString().c_str(),
+                                                    doc.strGUID.toStdWString().c_str());
         if (!ret) {
             TOLOG("delete FTS index failed: " + doc.strTitle);
             ret = false;
@@ -313,9 +329,8 @@ bool CWizSearchIndexer::search(const QString& strKeywords, int nMaxResult)
     m_timerSearch.start();
 
     // NOTE: make sure convert keyword to lower case
-    return WizFTSSearchDocument(m_strIndexPath.toStdWString().c_str(), \
-                                strKeywords.toLower().toStdWString().c_str(), \
-                                this);
+    return searchDocument(m_strIndexPath.toStdWString().c_str(),
+                          strKeywords.toLower().toStdWString().c_str());
 }
 
 bool CWizSearchIndexer::onSearchProcess(const wchar_t* lpszKbGUID, const wchar_t* lpszDocumentID, const wchar_t* lpszURL)

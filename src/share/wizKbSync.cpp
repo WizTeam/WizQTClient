@@ -703,6 +703,7 @@ void CWizKbSync::onDownloadObjectDataCompleted(const WIZOBJECTDATA& data)
     if (m_bChained) {
         if (!data.strObjectGUID.isEmpty()) {
             m_db->UpdateSyncObjectLocalData(data);
+            m_db->setDocumentSearchIndexed(data.strObjectGUID, false);
         }
 
         downloadNextObjectData();

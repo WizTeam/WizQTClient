@@ -632,7 +632,7 @@ struct WIZFTSDATA
 	}
 };
 
-bool WizFTSBeginUpdateDocument(const wchar_t* lpszIndexPath, void** ppHandle)
+bool IWizCluceneSearch::beginUpdateDocument(const wchar_t* lpszIndexPath, void** ppHandle)
 {
     std::wstring strIndexPath(lpszIndexPath);
     WizPathRemoveBackslash(strIndexPath);
@@ -674,7 +674,7 @@ bool WizFTSBeginUpdateDocument(const wchar_t* lpszIndexPath, void** ppHandle)
 	}
 }
 
-bool WizFTSEndUpdateDocument(void* pHandle)
+bool IWizCluceneSearch::endUpdateDocument(void* pHandle)
 {
 	WIZFTSDATA* pData = (WIZFTSDATA*)pHandle;
     if (!pData) {
@@ -698,11 +698,11 @@ bool WizFTSEndUpdateDocument(void* pHandle)
 	}
 }
 
-bool WizFTSUpdateDocument(void* pHandle, \
-                          const wchar_t* lpszKbGUID, \
-                          const wchar_t* lpszDocumentID, \
-                          const wchar_t* lpszTitle, \
-                          const wchar_t* lpszText)
+bool IWizCluceneSearch::updateDocument(void* pHandle,
+                                       const wchar_t* lpszKbGUID,
+                                       const wchar_t* lpszDocumentID,
+                                       const wchar_t* lpszTitle,
+                                       const wchar_t* lpszText)
 {
     assert(pHandle && lpszKbGUID && lpszDocumentID && lpszTitle && lpszText);
 
@@ -747,10 +747,9 @@ bool WizFTSUpdateDocument(void* pHandle, \
     return true;
 }
 
-bool WizFTSSearchDocument(const wchar_t* lpszIndexPath, const wchar_t* lpszKeywords, IWizSearchDocumentsEvents* pEvents)
+bool IWizCluceneSearch::searchDocument(const wchar_t* lpszIndexPath,
+                                       const wchar_t* lpszKeywords)
 {
-    assert(pEvents);
-
     std::wstring strIndexPath(lpszIndexPath);
     WizPathRemoveBackslash(strIndexPath);
     std::string strIndexPathA = WizW2A(strIndexPath);
@@ -802,7 +801,7 @@ bool WizFTSSearchDocument(const wchar_t* lpszIndexPath, const wchar_t* lpszKeywo
                         std::string strDocumentGUID = ::WizW2A(docid);
                         if (setGUIDs.find(strDocumentGUID) == setGUIDs.end()) {
                             setGUIDs.insert(strDocumentGUID);
-                            pEvents->onSearchProcess(kbid, docid, title ? title : _T(""));
+                            onSearchProcess(kbid, docid, title ? title : _T(""));
                         }
                     }
                 }
@@ -812,7 +811,7 @@ bool WizFTSSearchDocument(const wchar_t* lpszIndexPath, const wchar_t* lpszKeywo
         }
 
         searcher.close();
-        pEvents->onSearchEnd();
+        onSearchEnd();
         return true;
 
     } catch (CLuceneError& e) {
@@ -824,7 +823,8 @@ bool WizFTSSearchDocument(const wchar_t* lpszIndexPath, const wchar_t* lpszKeywo
 	}
 }
 
-bool WizFTSDeleteDocument(const wchar_t* lpszIndexPath, const wchar_t* lpszDocumentID)
+bool IWizCluceneSearch::deleteDocument(const wchar_t* lpszIndexPath,
+                                       const wchar_t* lpszDocumentID)
 {
     std::wstring strIndexPath(lpszIndexPath);
     WizPathRemoveBackslash(strIndexPath);
