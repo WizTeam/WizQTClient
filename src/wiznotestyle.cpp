@@ -163,18 +163,17 @@ CWizNoteStyle::CWizNoteStyle(const QString& strSkinName)
 void CWizNoteStyle::drawCategoryViewItem(const QStyleOptionViewItemV4 *vopt,
                                          QPainter *painter, const CWizCategoryBaseView *view) const
 {
-    if (view->isSeparatorItemByIndex(vopt->index))
+    CWizCategoryViewItemBase* pItem = view->categoryItemFromIndex(vopt->index);
+    if (NULL != dynamic_cast<const CWizCategoryViewSeparatorItem*>(pItem)) {
         return;
+    } else if (NULL != dynamic_cast<const CWizCategoryViewSpacerItem*>(pItem)) {
+        return;
+    }
+
+//    if (view->isSeparatorItemByIndex(vopt->index))
+//        return;
 
     QPalette palette = vopt->palette;
-    //QPixmap activePixmap;
-    //activePixmap.load(::WizGetResourcesPath() + "skins/left_row_view_bg.tiff");
-    //QBrush activeBrush(activePixmap);
-    //palette.setBrush(QPalette::All, QPalette::Highlight, activeBrush);
-    //palette.setColor(QPalette::All, QPalette::HighlightedText, palette.color(QPalette::Active, QPalette::Text));
-    // Note that setting a saturated color here results in ugly XOR colors in the focus rect
-    //palette.setColor(QPalette::All, QPalette::Highlight, palette.base().color().darker(108));
-
     QStyleOptionViewItemV4 adjustedOption = *vopt;
     adjustedOption.palette = palette;
     // We hide the focus rect in single selection as it is not required
@@ -189,49 +188,77 @@ void CWizNoteStyle::drawCategoryViewItem(const QStyleOptionViewItemV4 *vopt,
     p->save();
     p->setClipRect(opt->rect);
 
-    QRect textRect = subElementRect(SE_ItemViewItemText, vopt, view);
-    QRect iconRect = subElementRect(SE_ItemViewItemDecoration, vopt, view);
-
-    // draw icon little bigger than qt default rect
-    iconRect.adjust(0, -4, 4, 4);
-
-    // draw text little far from icon
-    textRect.adjust(10, 0, 0, 0);
-
     // draw the icon
     if (!vopt->icon.isNull())
     {
+        QRect iconRect = subElementRect(SE_ItemViewItemDecoration, vopt, view);
+
+        // draw icon little bigger than qt default rect
+        iconRect.adjust(0, -4, 4, 4);
+
         if (vopt->state.testFlag(State_Selected)) {
-            vopt->icon.paint(p, iconRect, vopt->decorationAlignment, QIcon::Selected, QIcon::On);
+            vopt->icon.paint(p, iconRect, vopt->decorationAlignment, QIcon::Selected, QIcon::Off);
         } else {
-            vopt->icon.paint(p, iconRect, vopt->decorationAlignment, QIcon::Normal, QIcon::On);
+            vopt->icon.paint(p, iconRect, vopt->decorationAlignment, QIcon::Normal, QIcon::Off);
         }
-        //QIcon::Mode mode = QIcon::Normal;
-        //QIcon::State state = QIcon::On;
-        //vopt->icon.paint(p, iconRect, vopt->decorationAlignment, mode, state);
     }
 
-    // draw the text
-    if (!vopt->text.isEmpty()) {
-        QPalette::ColorGroup cg = vopt->state & QStyle::State_Enabled
-                                  ? QPalette::Normal : QPalette::Disabled;
-        if (cg == QPalette::Normal && !(vopt->state & QStyle::State_Active))
-            cg = QPalette::Inactive;
+    // text should not empty
+    if (vopt->text.isEmpty()) {
+        Q_ASSERT(0);
+        return;
+    }
 
-        if (vopt->state & QStyle::State_Selected) {
-            p->setPen(vopt->palette.color(cg, QPalette::HighlightedText));
-        } else {
-            p->setPen(vopt->palette.color(cg, QPalette::Text));
-        }
-        if (vopt->state & QStyle::State_Editing) {
-            p->setPen(vopt->palette.color(cg, QPalette::Text));
-            p->drawRect(textRect.adjusted(0, 0, -1, -1));
-        }
-        //
-        QColor colorText = vopt->state.testFlag(State_Selected) ? m_colorCategoryTextSelected : m_colorCategoryText;
-        QRect rcTitle = textRect;
-        CString strTitle = vopt->text;
-        ::WizDrawTextSingleLine(p, rcTitle, strTitle,  Qt::TextSingleLine | Qt::AlignVCenter, colorText, true);
+    QRect textRect = subElementRect(SE_ItemViewItemText, vopt, view);
+
+    // draw text little far from icon than qt default
+    textRect.adjust(10, 0, 0, 0);
+
+    // draw the text
+    QPalette::ColorGroup cg = vopt->state & QStyle::State_Enabled
+            ? QPalette::Normal : QPalette::Disabled;
+    if (cg == QPalette::Normal && !(vopt->state & QStyle::State_Active))
+        cg = QPalette::Inactive;
+
+    if (vopt->state & QStyle::State_Selected) {
+        p->setPen(vopt->palette.color(cg, QPalette::HighlightedText));
+    } else {
+        p->setPen(vopt->palette.color(cg, QPalette::Text));
+    }
+
+    if (vopt->state & QStyle::State_Editing) {
+        p->setPen(vopt->palette.color(cg, QPalette::Text));
+        p->drawRect(textRect.adjusted(0, 0, -1, -1));
+    }
+
+    // compute document count string length and leave enough space for drawing
+    //CWizCategoryViewItemBase* pItem = view->categoryItemFromIndex(vopt->index);
+    QString strCount = pItem->countString;
+    int nCountWidthMax;
+    int nMargin = 3;
+    QFont fontCount = p->font();
+    fontCount.setPointSize(10);
+
+    if (!strCount.isEmpty()) {
+        QFont fontOld = p->font();
+        p->setFont(fontCount);
+        nCountWidthMax = p->fontMetrics().width(strCount) + nMargin;
+        textRect.adjust(0, 0, -nCountWidthMax, 0);
+        p->setFont(fontOld);
+    }
+
+    QColor colorText = vopt->state.testFlag(State_Selected) ? m_colorCategoryTextSelected : m_colorCategoryText;
+    CString strText = vopt->text;
+    int nWidth = ::WizDrawTextSingleLine(p, textRect, strText,
+                                         Qt::TextSingleLine | Qt::AlignVCenter, colorText, true);
+
+    // only draw document count if count string is not empty
+    if (!strCount.isEmpty()) {
+        p->setFont(fontCount);
+        textRect.adjust(nWidth + nMargin, 0, nCountWidthMax, 0);
+        QColor colorCount = vopt->state.testFlag(State_Selected) ? QColor(230, 230, 230) : QColor(150, 150, 150);
+        CString strCount2(strCount);
+        ::WizDrawTextSingleLine(p, textRect, strCount2,  Qt::TextSingleLine | Qt::AlignVCenter, colorCount, false);
     }
 
     p->restore();
@@ -349,7 +376,7 @@ void CWizNoteStyle::drawDocumentListViewItem(const QStyleOptionViewItemV4 *vopt,
 
         p->save();
         QFont fontTitle;
-        fontTitle.setPixelSize(13);
+        fontTitle.setPointSize(13);
         p->setFont(fontTitle);
         QRect rcTitle = textRect;
         rcTitle.setBottom(rcTitle.top() + p->fontMetrics().height());

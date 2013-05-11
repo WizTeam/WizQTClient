@@ -275,7 +275,7 @@ void CWizFolder::MoveToLocation(const CString& strDestLocation)
     //}
 
     CWizDocumentDataArray arrayDocument;
-    if (!m_db.GetDocumentsByLocationIncludeSubFolders(strOldLocation, arrayDocument))
+    if (!m_db.GetDocumentsByLocation(strOldLocation, arrayDocument, true))
     {
         TOLOG1(_T("Failed to get documents by location (include sub folders): %1"), strOldLocation);
         return;

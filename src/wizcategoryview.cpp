@@ -59,6 +59,48 @@ CWizCategoryBaseView::CWizCategoryBaseView(CWizExplorerApp& app, QWidget* parent
     setPalette(pal);
 
     setStyle(::WizGetStyle(m_app.userSettings().skin()));
+
+    qRegisterMetaType<WIZDOCUMENTDATA>("WIZDOCUMENTDATA");
+    qRegisterMetaType<WIZTAGDATA>("WIZTAGDATA");
+
+    connect(&m_dbMgr, SIGNAL(documentCreated(const WIZDOCUMENTDATA&)),
+            SLOT(on_document_created(const WIZDOCUMENTDATA&)));
+
+    connect(&m_dbMgr, SIGNAL(documentModified(const WIZDOCUMENTDATA&, const WIZDOCUMENTDATA&)),
+            SLOT(on_document_modified(const WIZDOCUMENTDATA&, const WIZDOCUMENTDATA&)));
+
+    connect(&m_dbMgr, SIGNAL(documentDeleted(const WIZDOCUMENTDATA&)),
+            SLOT(on_document_deleted(const WIZDOCUMENTDATA&)));
+
+    connect(&m_dbMgr, SIGNAL(documentTagModified(const WIZDOCUMENTDATA&)),
+            SLOT(on_document_tag_modified(const WIZDOCUMENTDATA&)));
+
+    connect(&m_dbMgr, SIGNAL(folderCreated(const CString&)),
+            SLOT(on_folder_created(const CString&)));
+
+    connect(&m_dbMgr, SIGNAL(folderDeleted(const CString&)),
+            SLOT(on_folder_deleted(const CString&)));
+
+    connect(&m_dbMgr, SIGNAL(tagCreated(const WIZTAGDATA&)),
+            SLOT(on_tag_created(const WIZTAGDATA&)));
+
+    connect(&m_dbMgr, SIGNAL(tagModified(const WIZTAGDATA&, const WIZTAGDATA&)),
+            SLOT(on_tag_modified(const WIZTAGDATA&, const WIZTAGDATA&)));
+
+    connect(&m_dbMgr, SIGNAL(tagDeleted(const WIZTAGDATA&)),
+            SLOT(on_tag_deleted(const WIZTAGDATA&)));
+
+    connect(&m_dbMgr, SIGNAL(databaseOpened(const QString&)),
+            SLOT(on_group_opened(const QString&)));
+
+    connect(&m_dbMgr, SIGNAL(databaseClosed(const QString&)),
+            SLOT(on_group_closed(const QString&)));
+
+    connect(&m_dbMgr, SIGNAL(databaseRename(const QString&)),
+            SLOT(on_group_rename(const QString&)));
+
+    connect(&m_dbMgr, SIGNAL(databasePermissionChanged(const QString&)),
+            SLOT(on_group_permissionChanged(const QString&)));
 }
 
 void CWizCategoryBaseView::baseInit()
@@ -364,6 +406,75 @@ void CWizCategoryBaseView::on_action_emptyTrash()
     }
 }
 
+void CWizCategoryBaseView::on_document_created(const WIZDOCUMENTDATA& document)
+{
+    onDocument_created(document);
+    updateDocumentCount(document.strKbGUID);
+}
+
+void CWizCategoryBaseView::on_document_modified(const WIZDOCUMENTDATA& documentOld,
+                                                const WIZDOCUMENTDATA& documentNew)
+{
+    onDocument_modified(documentOld, documentNew);
+    updateDocumentCount(documentNew.strKbGUID);
+}
+
+void CWizCategoryBaseView::on_document_deleted(const WIZDOCUMENTDATA& document)
+{
+    onDocument_deleted(document);
+    updateDocumentCount(document.strKbGUID);
+}
+
+void CWizCategoryBaseView::on_document_tag_modified(const WIZDOCUMENTDATA& document)
+{
+    updateDocumentCount(document.strKbGUID);
+}
+
+void CWizCategoryBaseView::on_folder_created(const CString& strLocation)
+{
+    onFolder_created(strLocation);
+}
+
+void CWizCategoryBaseView::on_folder_deleted(const CString& strLocation)
+{
+    onFolder_deleted(strLocation);
+}
+
+void CWizCategoryBaseView::on_tag_created(const WIZTAGDATA& tag)
+{
+    onTag_created(tag);
+}
+
+void CWizCategoryBaseView::on_tag_modified(const WIZTAGDATA& tagOld, const WIZTAGDATA& tagNew)
+{
+    onTag_modified(tagOld, tagNew);
+}
+
+void CWizCategoryBaseView::on_tag_deleted(const WIZTAGDATA& tag)
+{
+    onTag_deleted(tag);
+
+}
+
+void CWizCategoryBaseView::on_group_opened(const QString& strKbGUID)
+{
+    onGroup_opened(strKbGUID);
+}
+
+void CWizCategoryBaseView::on_group_closed(const QString& strKbGUID)
+{
+    onGroup_closed(strKbGUID);
+}
+
+void CWizCategoryBaseView::on_group_rename(const QString& strKbGUID)
+{
+    onGroup_rename(strKbGUID);
+}
+
+void CWizCategoryBaseView::on_group_permissionChanged(const QString& strKbGUID)
+{
+    onGroup_permissionChanged(strKbGUID);
+}
 
 
 /* ------------------------------ CWizCategoryPrivateView ------------------------------ */
@@ -375,23 +486,7 @@ void CWizCategoryBaseView::on_action_emptyTrash()
 
 CWizCategoryView::CWizCategoryView(CWizExplorerApp& app, QWidget* parent)
     : CWizCategoryBaseView(app, parent)
-    , m_menuAllFolders(NULL)
-    , m_menuFolder(NULL)
 {
-    qRegisterMetaType<WIZDOCUMENTDATA>("WIZDOCUMENTDATA");
-
-    connect(&m_dbMgr.db(), SIGNAL(documentCreated(const WIZDOCUMENTDATA&)), \
-            SLOT(on_document_created(const WIZDOCUMENTDATA&)));
-
-    connect(&m_dbMgr.db(), SIGNAL(documentModified(const WIZDOCUMENTDATA&, const WIZDOCUMENTDATA&)), \
-            SLOT(on_document_modified(const WIZDOCUMENTDATA&, const WIZDOCUMENTDATA&)));
-
-    connect(&m_dbMgr.db(), SIGNAL(folderCreated(const CString&)), \
-            SLOT(on_folder_created(const CString&)));
-
-    connect(&m_dbMgr.db(), SIGNAL(folderDeleted(const CString&)), \
-            SLOT(on_folder_deleted(const CString&)));
-
     setDragDropMode(QAbstractItemView::DragDrop);
     setDragEnabled(true);
 
@@ -405,8 +500,6 @@ CWizCategoryView::CWizCategoryView(CWizExplorerApp& app, QWidget* parent)
     m_menuFolder->addSeparator();
     m_menuFolder->addAction(WIZACTION_PRIVATE_RENAME_FOLDER, this, SLOT(on_action_renameFolder()));
     m_menuFolder->addAction(WIZACTION_PRIVATE_DELETE_FOLDER, this, SLOT(on_action_deleteFolder()));
-
-
 }
 
 void CWizCategoryView::init()
@@ -414,8 +507,79 @@ void CWizCategoryView::init()
     initFolders();
     addSeparator();
     initTrash();
+    initDocumentCount();
 
     setCurrentItem(findAllFolders());
+}
+
+void CWizCategoryView::initDocumentCount()
+{
+    std::map<CString, int> mapDocumentCount;
+    if (!m_dbMgr.db().GetAllLocationsDocumentCount(mapDocumentCount)) {
+        TOLOG("[ERROR]: Failed to get all locations count map");
+        return;
+    }
+
+    // folder items
+    if (CWizCategoryViewItemBase* item = dynamic_cast<CWizCategoryViewItemBase*>(topLevelItem(0))) {
+        int nTotal = initDocumentCount(item, mapDocumentCount);
+        item->setDocumentsCount(nTotal, false);
+    }
+
+    // trash item
+    if (CWizCategoryViewTrashItem* itemTrash = dynamic_cast<CWizCategoryViewTrashItem*>(topLevelItem(2))) {
+        itemTrash->setDocumentsCount(-1, true);
+        itemTrash->setDocumentsCount(0, false);
+
+        std::map<CString, int>::const_iterator it;
+        for (it = mapDocumentCount.begin(); it != mapDocumentCount.end(); it++) {
+            if (m_dbMgr.db().IsInDeletedItems(it->first)) {
+                int nCurrent = itemTrash->getDocumentsCount(false);
+                itemTrash->setDocumentsCount(nCurrent + it->second, false);
+            }
+        }
+    }
+
+    update();
+}
+
+int CWizCategoryView::initDocumentCount(CWizCategoryViewItemBase* item,
+                                        const std::map<CString, int>& mapDocumentCount)
+{
+    // reset
+    item->setDocumentsCount(-1, true);
+
+    int nCurrent = 0;
+    std::map<CString, int>::const_iterator itCurrent = mapDocumentCount.find(item->name());
+    if (itCurrent != mapDocumentCount.end()) {
+        nCurrent = itCurrent->second;
+    }
+
+    item->setDocumentsCount(nCurrent, false);
+
+    int nCountAll = nCurrent;
+    int nChild = item->childCount();
+    for (int i = 0; i < nChild; i++) {
+        if (CWizCategoryViewItemBase* itemChild = dynamic_cast<CWizCategoryViewItemBase*>(item->child(i))) {
+            int nCountChild = initDocumentCount(itemChild, mapDocumentCount);
+            if (itemChild->childCount() && nCountChild) {
+                itemChild->setDocumentsCount(nCountChild, true);
+            }
+
+            nCountAll += nCountChild;
+        }
+    }
+
+    return nCountAll;
+}
+
+void CWizCategoryView::updateDocumentCount(const QString& strKbGUID)
+{
+    if (strKbGUID != m_dbMgr.db().kbGUID()) {
+        return;
+    }
+
+    initDocumentCount();
 }
 
 void CWizCategoryView::initFolders()
@@ -646,17 +810,25 @@ CWizCategoryViewFolderItem* CWizCategoryView::addFolder(const CString& strLocati
     return findFolder(strLocation, true, sort);
 }
 
-void CWizCategoryView::on_document_created(const WIZDOCUMENTDATA& document)
+void CWizCategoryView::onDocument_created(const WIZDOCUMENTDATA& document)
 {
+    // ignore signal from group database
+    if (document.strKbGUID != m_dbMgr.db().kbGUID())
+        return;
+
     if (m_dbMgr.db().IsInDeletedItems(document.strLocation))
         return;
 
     addFolder(document.strLocation, true);
 }
 
-void CWizCategoryView::on_document_modified(const WIZDOCUMENTDATA& documentOld, const WIZDOCUMENTDATA& documentNew)
+void CWizCategoryView::onDocument_modified(const WIZDOCUMENTDATA& documentOld, const WIZDOCUMENTDATA& documentNew)
 {
     Q_UNUSED(documentOld);
+
+    // ignore signal from group database
+    if (documentNew.strKbGUID != m_dbMgr.db().kbGUID())
+        return;
 
     if (m_dbMgr.db().IsInDeletedItems(documentNew.strLocation))
         return;
@@ -664,12 +836,12 @@ void CWizCategoryView::on_document_modified(const WIZDOCUMENTDATA& documentOld, 
     addFolder(documentNew.strLocation, true);
 }
 
-void CWizCategoryView::on_folder_created(const CString& strLocation)
+void CWizCategoryView::onFolder_created(const CString& strLocation)
 {
     addFolder(strLocation, true);
 }
 
-void CWizCategoryView::on_folder_deleted(const CString& strLocation)
+void CWizCategoryView::onFolder_deleted(const CString& strLocation)
 {
     if (CWizCategoryViewFolderItem* pFolder = findFolder(strLocation, false, false))
     {
@@ -824,17 +996,6 @@ CWizCategoryTagsView::CWizCategoryTagsView(CWizExplorerApp& app, QWidget *parent
     , m_menuTag(NULL)
 {
     //setDragDropMode(QAbstractItemView::DragDrop);
-
-    qRegisterMetaType<WIZTAGDATA>("WIZTAGDATA");
-
-    connect(&m_dbMgr, SIGNAL(tagCreated(const WIZTAGDATA&)), \
-            SLOT(on_tag_created(const WIZTAGDATA&)));
-
-    connect(&m_dbMgr, SIGNAL(tagModified(const WIZTAGDATA&, const WIZTAGDATA&)), \
-            SLOT(on_tag_modified(const WIZTAGDATA&, const WIZTAGDATA&)));
-
-    connect(&m_dbMgr, SIGNAL(tagDeleted(const WIZTAGDATA&)), \
-            SLOT(on_tag_deleted(const WIZTAGDATA&)));
 }
 
 void CWizCategoryTagsView::showAllTagsContextMenu(QPoint pos)
@@ -861,6 +1022,7 @@ void CWizCategoryTagsView::showTagContextMenu(QPoint pos)
 void CWizCategoryTagsView::init()
 {
     initTags();
+    initDocumentCount();
 }
 
 void CWizCategoryTagsView::initTags()
@@ -884,6 +1046,71 @@ void CWizCategoryTagsView::initTags(QTreeWidgetItem* pParent, const QString& str
 
         initTags(pTagItem, it->strGUID);
     }
+}
+
+void CWizCategoryTagsView::initDocumentCount()
+{
+    std::map<CString, int> mapDocumentCount;
+    if (!m_dbMgr.db().GetAllTagsDocumentCount(mapDocumentCount)) {
+        TOLOG("[ERROR]: Failed to get all tags count map");
+        return;
+    }
+
+    // tags items
+    if (CWizCategoryViewAllTagsItem* item = dynamic_cast<CWizCategoryViewAllTagsItem*>(topLevelItem(0))) {
+        int nChild = item->childCount();
+        for (int i = 0; i < nChild; i++) {
+            if (CWizCategoryViewTagItem* itemChild = dynamic_cast<CWizCategoryViewTagItem*>(item->child(i))) {
+                int nCountChild = initDocumentCount(itemChild, mapDocumentCount);
+                if (itemChild->childCount() && nCountChild) {
+                    itemChild->setDocumentsCount(nCountChild, true);
+                } else {
+                    itemChild->setDocumentsCount(-1, true);
+                }
+            }
+        }
+    }
+
+    update();
+}
+
+int CWizCategoryTagsView::initDocumentCount(CWizCategoryViewTagItem* item,
+                                            const std::map<CString, int>& mapDocumentCount)
+{
+    // reset
+    item->setDocumentsCount(-1, true);
+
+    int nCurrent = 0;
+    std::map<CString, int>::const_iterator itCurrent = mapDocumentCount.find(item->tag().strGUID);
+    if (itCurrent != mapDocumentCount.end()) {
+        nCurrent = itCurrent->second;
+    }
+
+    item->setDocumentsCount(nCurrent, false);
+
+    int nCountAll = nCurrent;
+    int nChild = item->childCount();
+    for (int i = 0; i < nChild; i++) {
+        if (CWizCategoryViewTagItem* itemChild = dynamic_cast<CWizCategoryViewTagItem*>(item->child(i))) {
+            int nCountChild = initDocumentCount(itemChild, mapDocumentCount);
+            if (itemChild->childCount() && nCountChild) {
+                itemChild->setDocumentsCount(nCountChild, true);
+            }
+
+            nCountAll += nCountChild;
+        }
+    }
+
+    return nCountAll;
+}
+
+void CWizCategoryTagsView::updateDocumentCount(const QString& strKbGUID)
+{
+    if (strKbGUID != m_dbMgr.db().kbGUID()) {
+        return;
+    }
+
+    initDocumentCount();
 }
 
 CWizCategoryViewAllTagsItem* CWizCategoryTagsView::findAllTags()
@@ -1016,13 +1243,21 @@ void CWizCategoryTagsView::removeTag(const WIZTAGDATA& tag)
     }
 }
 
-void CWizCategoryTagsView::on_tag_created(const WIZTAGDATA& tag)
+void CWizCategoryTagsView::onTag_created(const WIZTAGDATA& tag)
 {
+    // ignore signal from group datebase
+    if (tag.strKbGUID != m_dbMgr.db().kbGUID())
+        return;
+
     addTagWithChildren(tag);
 }
 
-void CWizCategoryTagsView::on_tag_modified(const WIZTAGDATA& tagOld, const WIZTAGDATA& tagNew)
+void CWizCategoryTagsView::onTag_modified(const WIZTAGDATA& tagOld, const WIZTAGDATA& tagNew)
 {
+    // ignore signal from group database
+    if (tagNew.strKbGUID != m_dbMgr.db().kbGUID())
+        return;
+
     if (tagOld.strParentGUID != tagNew.strParentGUID) {
         removeTag(tagOld);
         addTagWithChildren(tagNew);
@@ -1034,8 +1269,12 @@ void CWizCategoryTagsView::on_tag_modified(const WIZTAGDATA& tagOld, const WIZTA
     }
 }
 
-void CWizCategoryTagsView::on_tag_deleted(const WIZTAGDATA& tag)
+void CWizCategoryTagsView::onTag_deleted(const WIZTAGDATA& tag)
 {
+    // ignore signal from group database
+    if (tag.strKbGUID != m_dbMgr.db().kbGUID())
+        return;
+
     removeTag(tag);
 }
 
@@ -1107,29 +1346,6 @@ void CWizCategoryTagsView::on_action_deleteTag()
 CWizCategoryGroupsView::CWizCategoryGroupsView(CWizExplorerApp& app, QWidget* parent)
     : CWizCategoryBaseView(app, parent)
 {
-    qRegisterMetaType<WIZTAGDATA>("WIZTAGDATA");
-
-    connect(&m_dbMgr, SIGNAL(databaseOpened(const QString&)), \
-            SLOT(on_group_opened(const QString&)));
-
-    connect(&m_dbMgr, SIGNAL(databaseClosed(const QString&)), \
-            SLOT(on_group_closed(const QString&)));
-
-    connect(&m_dbMgr, SIGNAL(databaseRename(const QString&)), \
-            SLOT(on_group_rename(const QString&)));
-
-    connect(&m_dbMgr, SIGNAL(databasePermissionChanged(const QString&)), \
-            SLOT(on_group_permissionChanged(const QString&)));
-
-    connect(&m_dbMgr, SIGNAL(tagCreated(const WIZTAGDATA&)), \
-            SLOT(on_tag_created(const WIZTAGDATA&)));
-
-    connect(&m_dbMgr, SIGNAL(tagModified(const WIZTAGDATA&, const WIZTAGDATA&)), \
-            SLOT(on_tag_modified(const WIZTAGDATA&, const WIZTAGDATA&)));
-
-    connect(&m_dbMgr, SIGNAL(tagDeleted(const WIZTAGDATA&)), \
-            SLOT(on_tag_deleted(const WIZTAGDATA&)));
-
     m_menuGroupRoot = new QMenu(this);
     //QAction* actionMarkRead = m_menuGroupRoot->addAction(WIZACTION_GROUP_MARK_READ, this, SLOT(on_action_markRead()));
     m_menuGroupRoot->addSeparator();
@@ -1172,6 +1388,8 @@ void CWizCategoryGroupsView::init()
     for (int i = 0; i < nTotal; i++) {
         initGroup(m_dbMgr.at(i));
     }
+
+    initDocumentCount();
 }
 
 void CWizCategoryGroupsView::initGroup(CWizDatabase& db)
@@ -1206,6 +1424,98 @@ void CWizCategoryGroupsView::initGroup(CWizDatabase& db, QTreeWidgetItem* pParen
 
         initGroup(db, pTagItem, it->strGUID);
     }
+}
+
+void CWizCategoryGroupsView::initDocumentCount()
+{
+    for (int i = 0; i < topLevelItem(0)->childCount(); i++) {
+        CWizCategoryViewGroupRootItem* pGroupRoot = dynamic_cast<CWizCategoryViewGroupRootItem*>(topLevelItem(0)->child(i));
+        if (!pGroupRoot)
+            continue;
+
+        initDocumentCount(pGroupRoot, m_dbMgr.db(pGroupRoot->kbGUID()));
+    }
+}
+
+void CWizCategoryGroupsView::initDocumentCount(CWizCategoryViewGroupRootItem* pGroupRoot,
+                                               CWizDatabase& db)
+{
+    std::map<CString, int> mapDocumentCount;
+    if (!db.GetAllTagsDocumentCount(mapDocumentCount)) {
+        TOLOG("[ERROR]: Failed to get document count map: " + db.name());
+        return;
+    }
+
+    int nGroupCount = 0;
+    for (int j = 0; j < pGroupRoot->childCount(); j++) {
+        int nCurrentGroupCount = 0;
+        CWizCategoryViewGroupItem* pGroupItem = dynamic_cast<CWizCategoryViewGroupItem*>(pGroupRoot->child(j));
+        if (pGroupItem) {
+            nCurrentGroupCount = initDocumentCount(pGroupItem, mapDocumentCount);
+            if (pGroupItem->childCount() && nCurrentGroupCount) {
+                pGroupItem->setDocumentsCount(nCurrentGroupCount, true);
+            }
+        }
+
+        CWizCategoryViewTrashItem* pTrashItem = dynamic_cast<CWizCategoryViewTrashItem*>(pGroupRoot->child(j));
+        if (pTrashItem) {
+            int nSize = 0;
+            db.GetDocumentsSizeByLocation("/Deleted Items/", nSize, true);
+            pTrashItem->setDocumentsCount(nSize, false);
+        }
+
+        nGroupCount += nCurrentGroupCount;
+    }
+
+    int nCount = 0;
+    db.getDocumentsSizeNoTag(nCount);
+    pGroupRoot->setDocumentsCount(nCount, false);
+    pGroupRoot->setDocumentsCount(nGroupCount + nCount, true);
+
+    update();
+}
+
+int CWizCategoryGroupsView::initDocumentCount(CWizCategoryViewGroupItem* item,
+                                              const std::map<CString, int>& mapDocumentCount)
+{
+    // reset
+    item->setDocumentsCount(-1, true);
+
+    int nCurrent = 0;
+    std::map<CString, int>::const_iterator itCurrent = mapDocumentCount.find(item->tag().strGUID);
+    if (itCurrent != mapDocumentCount.end()) {
+        nCurrent = itCurrent->second;
+    }
+
+    item->setDocumentsCount(nCurrent, false);
+
+    int nCountAll = nCurrent;
+    int nChild = item->childCount();
+    for (int i = 0; i < nChild; i++) {
+        if (CWizCategoryViewGroupItem* itemChild = dynamic_cast<CWizCategoryViewGroupItem*>(item->child(i))) {
+            int nCountChild = initDocumentCount(itemChild, mapDocumentCount);
+            if (itemChild->childCount() && nCountChild) {
+                itemChild->setDocumentsCount(nCountChild, true);
+            }
+
+            nCountAll += nCountChild;
+        }
+    }
+
+    return nCountAll;
+}
+
+void CWizCategoryGroupsView::updateDocumentCount(const QString& strKbGUID)
+{
+    if (strKbGUID == m_dbMgr.db().kbGUID()) {
+        return;
+    }
+
+    CWizCategoryViewGroupRootItem* pGroupItem = findGroup(strKbGUID);
+    if (!pGroupItem)
+        return;
+
+    initDocumentCount(pGroupItem, m_dbMgr.db(strKbGUID));
 }
 
 CWizCategoryViewGroupRootItem* CWizCategoryGroupsView::findGroup(const QString& strKbGUID)
@@ -1369,12 +1679,12 @@ CWizCategoryViewGroupItem* CWizCategoryGroupsView::findTag(const WIZTAGDATA& tag
     return dynamic_cast<CWizCategoryViewGroupItem *>(parent);
 }
 
-void CWizCategoryGroupsView::on_group_opened(const QString& strKbGUID)
+void CWizCategoryGroupsView::onGroup_opened(const QString& strKbGUID)
 {
     initGroup(m_dbMgr.db(strKbGUID));
 }
 
-void CWizCategoryGroupsView::on_group_closed(const QString& strKbGUID)
+void CWizCategoryGroupsView::onGroup_closed(const QString& strKbGUID)
 {
     CWizCategoryViewGroupRootItem* pItem = findGroup(strKbGUID);
     if (pItem) {
@@ -1385,7 +1695,7 @@ void CWizCategoryGroupsView::on_group_closed(const QString& strKbGUID)
     }
 }
 
-void CWizCategoryGroupsView::on_group_rename(const QString& strKbGUID)
+void CWizCategoryGroupsView::onGroup_rename(const QString& strKbGUID)
 {
     CWizCategoryViewGroupRootItem* pItem = findGroup(strKbGUID);
     if (pItem) {
@@ -1393,7 +1703,7 @@ void CWizCategoryGroupsView::on_group_rename(const QString& strKbGUID)
     }
 }
 
-void CWizCategoryGroupsView::on_group_permissionChanged(const QString& strKbGUID)
+void CWizCategoryGroupsView::onGroup_permissionChanged(const QString& strKbGUID)
 {
     int nPerm = m_dbMgr.db(strKbGUID).permission();
 
@@ -1418,7 +1728,7 @@ void CWizCategoryGroupsView::on_group_permissionChanged(const QString& strKbGUID
     }
 }
 
-void CWizCategoryGroupsView::on_tag_created(const WIZTAGDATA& tag)
+void CWizCategoryGroupsView::onTag_created(const WIZTAGDATA& tag)
 {
     // ignore signal from private database
     if (tag.strKbGUID == m_dbMgr.db().kbGUID())
@@ -1427,7 +1737,7 @@ void CWizCategoryGroupsView::on_tag_created(const WIZTAGDATA& tag)
     addTagWithChildren(tag);
 }
 
-void CWizCategoryGroupsView::on_tag_modified(const WIZTAGDATA& tagOld, const WIZTAGDATA& tagNew)
+void CWizCategoryGroupsView::onTag_modified(const WIZTAGDATA& tagOld, const WIZTAGDATA& tagNew)
 {
     // ignore signal from private database
     if (tagNew.strKbGUID == m_dbMgr.db().kbGUID())
@@ -1444,7 +1754,7 @@ void CWizCategoryGroupsView::on_tag_modified(const WIZTAGDATA& tagOld, const WIZ
     }
 }
 
-void CWizCategoryGroupsView::on_tag_deleted(const WIZTAGDATA& tag)
+void CWizCategoryGroupsView::onTag_deleted(const WIZTAGDATA& tag)
 {
     // ignore signal from private database
     if (tag.strKbGUID == m_dbMgr.db().kbGUID())

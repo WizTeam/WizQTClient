@@ -231,7 +231,7 @@ private:
 #define STR2COLOR(x)	WizStringToColor(x)
 
 #define STR2SQL_LIKE_BOTH(x)		WizStringToSQL(WizFormatString1(_T("%%1%"), x))
-#define STR2SQL_LIKE_RIGHT(x)		WizStringToSQL(WizFormatString1(_T("%1%"), x))
+#define STR2SQL_LIKE_RIGHT(x)		WizStringToSQL(WizFormatString1(_T("%1%_"), x))
 
 #endif
 

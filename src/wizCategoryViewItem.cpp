@@ -3,6 +3,7 @@
 #include "wizcategoryview.h"
 #include "share/wizsettings.h"
 #include "wiznotestyle.h"
+#include "share/wizDatabaseManager.h"
 
 /* ------------------------------ CWizCategoryViewItemBase ------------------------------ */
 
@@ -13,6 +14,8 @@ CWizCategoryViewItemBase::CWizCategoryViewItemBase(CWizExplorerApp& app,
     , m_app(app)
     , m_strName(strName)
     , m_strKbGUID(strKbGUID)
+    , m_nDocuments(-1)
+    , m_nDocumentsIncludeSub(-1)
 {
 }
 
@@ -37,6 +40,30 @@ int CWizCategoryViewItemBase::getItemHeight(int hintHeight) const
 bool CWizCategoryViewItemBase::operator < (const QTreeWidgetItem &other) const
 {
     return text(0).compare(other.text(0), Qt::CaseInsensitive) < 0;
+}
+
+int CWizCategoryViewItemBase::getDocumentsCount(bool bIncludeSub)
+{
+    if (bIncludeSub) {
+        return m_nDocumentsIncludeSub;
+    } else {
+        return m_nDocuments;
+    }
+}
+
+void CWizCategoryViewItemBase::setDocumentsCount(int nCount, bool bIncludeSub)
+{
+    if (bIncludeSub) {
+        m_nDocumentsIncludeSub = nCount;
+    } else {
+        m_nDocuments = nCount;
+    }
+
+    if (m_nDocumentsIncludeSub == -1) {
+        countString = QString("(%1)").arg(m_nDocuments);
+    } else {
+        countString = QString("(%1/%2)").arg(m_nDocuments).arg(m_nDocumentsIncludeSub);
+    }
 }
 
 /* ------------------------------ CWizCategoryViewSpacerItem ------------------------------ */
@@ -82,6 +109,16 @@ CWizCategoryViewAllFoldersItem::CWizCategoryViewAllFoldersItem(CWizExplorerApp& 
     setIcon(0, icon);
 
     setText(0, strName);
+
+    //updateDocumentsCount();
+}
+
+void CWizCategoryViewAllFoldersItem::updateDocumentsCount()
+{
+    int nCount = 0;
+    CWizDatabase& db = m_app.databaseManager().db(m_strKbGUID);
+    db.GetAllDocumentsSize(nCount);
+    setDocumentsCount(nCount, false);
 }
 
 void CWizCategoryViewAllFoldersItem::getDocuments(CWizDatabase& db, CWizDocumentDataArray& arrayDocument)
@@ -126,8 +163,24 @@ CWizCategoryViewFolderItem::CWizCategoryViewFolderItem(CWizExplorerApp& app,
     ::WizLoadSkinIcon3(icon, app.userSettings().skin(), "folder", QIcon::Normal, QIcon::On, color);
     ::WizLoadSkinIcon3(icon, app.userSettings().skin(), "folder", QIcon::Selected, QIcon::On, color);
     setIcon(0, icon);
-
     setText(0, CWizDatabase::GetLocationDisplayName(strLocation));
+
+    //updateDocumentsCount();
+}
+
+void CWizCategoryViewFolderItem::updateDocumentsCount()
+{
+    int nCount = 0, nCount2 = 0;
+    CWizDatabase& db = m_app.databaseManager().db(m_strKbGUID);
+    db.GetDocumentsSizeByLocation(m_strName, nCount, false);
+    setDocumentsCount(nCount, false);
+
+    CWizStdStringArray arrayLocation;
+    db.GetAllChildLocations(m_strName, arrayLocation);
+    if (arrayLocation.size()) {
+        db.GetDocumentsSizeByLocation(m_strName, nCount2, true);
+        setDocumentsCount(nCount2, true);
+    }
 }
 
 QTreeWidgetItem* CWizCategoryViewFolderItem::clone() const
@@ -158,6 +211,11 @@ void CWizCategoryViewFolderItem::showContextMenu(CWizCategoryBaseView* pCtrl, QP
     }
 }
 
+QString CWizCategoryViewFolderItem::name() const
+{
+    return CWizDatabase::GetLocationName(m_strName);
+}
+
 
 /* ------------------------------ CWizCategoryViewAllTagsItem ------------------------------ */
 
@@ -171,8 +229,17 @@ CWizCategoryViewAllTagsItem::CWizCategoryViewAllTagsItem(CWizExplorerApp& app,
     ::WizLoadSkinIcon3(icon, app.userSettings().skin(), "tag", QIcon::Normal, QIcon::On, color);
     ::WizLoadSkinIcon3(icon, app.userSettings().skin(), "tag", QIcon::Selected, QIcon::On, color);
     setIcon(0, icon);
-
     setText(0, strName);
+
+    //updateDocumentsCount();
+}
+
+void CWizCategoryViewAllTagsItem::updateDocumentsCount()
+{
+    int nCount;
+    CWizDatabase& db = m_app.databaseManager().db(m_strKbGUID);
+    db.getDocumentsSizeNoTag(nCount);
+    setDocumentsCount(nCount, false);
 }
 
 void CWizCategoryViewAllTagsItem::showContextMenu(CWizCategoryBaseView* pCtrl, QPoint pos)
@@ -185,7 +252,7 @@ void CWizCategoryViewAllTagsItem::showContextMenu(CWizCategoryBaseView* pCtrl, Q
 void CWizCategoryViewAllTagsItem::getDocuments(CWizDatabase& db, CWizDocumentDataArray& arrayDocument)
 {
     // no deleted
-    db.getDocumentsNoTag(arrayDocument, false);
+    db.getDocumentsNoTag(arrayDocument);
 }
 
 bool CWizCategoryViewAllTagsItem::accept(CWizDatabase& db, const WIZDOCUMENTDATA& data)
@@ -212,8 +279,24 @@ CWizCategoryViewTagItem::CWizCategoryViewTagItem(CWizExplorerApp& app,
     ::WizLoadSkinIcon3(icon, app.userSettings().skin(), "tag", QIcon::Normal, QIcon::On, color);
     ::WizLoadSkinIcon3(icon, app.userSettings().skin(), "tag", QIcon::Selected, QIcon::On, color);
     setIcon(0, icon);
-
     setText(0, CWizDatabase::TagNameToDisplayName(tag.strName));
+
+    //updateDocumentsCount();
+}
+
+void CWizCategoryViewTagItem::updateDocumentsCount()
+{
+    int nCount = 0, nCount2 = 0;
+    CWizDatabase& db = m_app.databaseManager().db(m_strKbGUID);
+    db.GetDocumentsSizeByTag(m_tag, nCount);
+    setDocumentsCount(nCount, false);
+
+    int nSizeTags = 0;
+    db.GetAllChildTagsSize(m_tag.strGUID, nSizeTags);
+    if (nSizeTags) {
+        db.GetAllDocumentsSizeByTag(m_tag, nCount2);
+        setDocumentsCount(nCount2, true);
+    }
 }
 
 QTreeWidgetItem* CWizCategoryViewTagItem::clone() const
@@ -291,8 +374,19 @@ CWizCategoryViewGroupRootItem::CWizCategoryViewGroupRootItem(CWizExplorerApp& ap
     ::WizLoadSkinIcon3(icon, app.userSettings().skin(), "groups", QIcon::Normal, QIcon::On, color);
     ::WizLoadSkinIcon3(icon, app.userSettings().skin(), "groups", QIcon::Selected, QIcon::On, color);
     setIcon(0, icon);
-
     setText(0, strName);
+
+    //updateDocumentsCount();
+}
+
+void CWizCategoryViewGroupRootItem::updateDocumentsCount()
+{
+    int nCount = 0, nCount2 = 0;
+    CWizDatabase& db = m_app.databaseManager().db(m_strKbGUID);
+    db.getDocumentsSizeNoTag(nCount);
+    setDocumentsCount(nCount, false);
+    db.GetAllDocumentsSize(nCount2);
+    setDocumentsCount(nCount2, true);
 }
 
 void CWizCategoryViewGroupRootItem::showContextMenu(CWizCategoryBaseView* pCtrl, QPoint pos)
@@ -306,7 +400,7 @@ void CWizCategoryViewGroupRootItem::showContextMenu(CWizCategoryBaseView* pCtrl,
 
 void CWizCategoryViewGroupRootItem::getDocuments(CWizDatabase& db, CWizDocumentDataArray& arrayDocument)
 {
-    db.getDocumentsNoTag(arrayDocument, false);
+    db.getDocumentsNoTag(arrayDocument);
 }
 
 bool CWizCategoryViewGroupRootItem::accept(CWizDatabase& db, const WIZDOCUMENTDATA& data)
@@ -342,8 +436,24 @@ CWizCategoryViewGroupItem::CWizCategoryViewGroupItem(CWizExplorerApp& app,
     ::WizLoadSkinIcon3(icon, app.userSettings().skin(), "groups", QIcon::Normal, QIcon::On, color);
     ::WizLoadSkinIcon3(icon, app.userSettings().skin(), "groups", QIcon::Selected, QIcon::On, color);
     setIcon(0, icon);
-
     setText(0, CWizDatabase::TagNameToDisplayName(tag.strName));
+
+    //updateDocumentsCount();
+}
+
+void CWizCategoryViewGroupItem::updateDocumentsCount()
+{
+    int nCount = 0, nCount2 = 0;
+    CWizDatabase& db = m_app.databaseManager().db(m_strKbGUID);
+    db.GetDocumentsSizeByTag(m_tag, nCount);
+    setDocumentsCount(nCount, false);
+
+    int nSizeTags = 0;
+    db.GetAllChildTagsSize(m_tag.strGUID, nSizeTags);
+    if (nSizeTags) {
+        db.GetAllDocumentsSizeByTag(m_tag, nCount2);
+        setDocumentsCount(nCount2, true);
+    }
 }
 
 void CWizCategoryViewGroupItem::showContextMenu(CWizCategoryBaseView* pCtrl, QPoint pos)
@@ -404,7 +514,7 @@ void CWizCategoryViewTrashItem::showContextMenu(CWizCategoryBaseView* pCtrl, QPo
 
 void CWizCategoryViewTrashItem::getDocuments(CWizDatabase& db, CWizDocumentDataArray& arrayDocument)
 {
-    db.GetDocumentsByLocationIncludeSubFolders(db.GetDeletedItemsLocation(), arrayDocument);
+    db.GetDocumentsByLocation(db.GetDeletedItemsLocation(), arrayDocument, true);
 }
 
 bool CWizCategoryViewTrashItem::accept(CWizDatabase& db, const WIZDOCUMENTDATA& data)
@@ -415,28 +525,28 @@ bool CWizCategoryViewTrashItem::accept(CWizDatabase& db, const WIZDOCUMENTDATA& 
 
 /* ------------------------------ CWizCategoryViewSearchItem ------------------------------ */
 
-CWizCategoryViewSearchItem::CWizCategoryViewSearchItem(CWizExplorerApp& app, const QString& keywords)
-    : CWizCategoryViewItemBase(app, keywords)
-{
-    setKeywords(keywords);
-    setIcon(0, WizLoadSkinIcon(app.userSettings().skin(), QColor(0xff, 0xff, 0xff), "search"));
-}
+//CWizCategoryViewSearchItem::CWizCategoryViewSearchItem(CWizExplorerApp& app, const QString& keywords)
+//    : CWizCategoryViewItemBase(app, keywords)
+//{
+//    setKeywords(keywords);
+//    setIcon(0, WizLoadSkinIcon(app.userSettings().skin(), QColor(0xff, 0xff, 0xff), "search"));
+//}
 
-bool CWizCategoryViewSearchItem::accept(CWizDatabase& db, const WIZDOCUMENTDATA& data)
-{
-    Q_UNUSED(db);
+//bool CWizCategoryViewSearchItem::accept(CWizDatabase& db, const WIZDOCUMENTDATA& data)
+//{
+//    Q_UNUSED(db);
 
-    if (m_strName.isEmpty())
-        return false;
+//    if (m_strName.isEmpty())
+//        return false;
 
-    return -1 != ::WizStrStrI_Pos(data.strTitle, m_strName);
-}
+//    return -1 != ::WizStrStrI_Pos(data.strTitle, m_strName);
+//}
 
-void CWizCategoryViewSearchItem::setKeywords(const QString& keywords)
-{
-    m_strName = keywords;
+//void CWizCategoryViewSearchItem::setKeywords(const QString& keywords)
+//{
+//    m_strName = keywords;
 
-    QString strText = QObject::tr("Search for %1").arg(m_strName);
+//    QString strText = QObject::tr("Search for %1").arg(m_strName);
 
-    setText(0, strText);
-}
+//    setText(0, strText);
+//}

@@ -64,6 +64,7 @@ Q_SIGNALS:
     void documentDeleted(const WIZDOCUMENTDATA& document);
     void documentDataModified(const WIZDOCUMENTDATA& document);
     void documentAbstractModified(const WIZDOCUMENTDATA& document);
+    void documentTagModified(const WIZDOCUMENTDATA& document);
     void attachmentCreated(const WIZDOCUMENTATTACHMENTDATA& attachment);
     void attachmentModified(const WIZDOCUMENTATTACHMENTDATA& attachmentOld, const WIZDOCUMENTATTACHMENTDATA& attachmentNew);
     void attachmentDeleted(const WIZDOCUMENTATTACHMENTDATA& attachment);

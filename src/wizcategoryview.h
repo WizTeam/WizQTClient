@@ -54,6 +54,25 @@ public:
     virtual QModelIndex moveCursor(CursorAction cursorAction, Qt::KeyboardModifiers modifiers);
 
 protected:
+    // subclass delegate
+    virtual void onDocument_created(const WIZDOCUMENTDATA& document) { Q_UNUSED(document); }
+    virtual void onDocument_modified(const WIZDOCUMENTDATA& documentOld,
+                                     const WIZDOCUMENTDATA& documentNew)
+    { Q_UNUSED(documentOld); Q_UNUSED(documentNew); }
+    virtual void onDocument_deleted(const WIZDOCUMENTDATA& document) { Q_UNUSED(document); }
+    virtual void onFolder_created(const CString& strLocation) { Q_UNUSED(strLocation); }
+    virtual void onFolder_deleted(const CString& strLocation) { Q_UNUSED(strLocation); }
+    virtual void onTag_created(const WIZTAGDATA& tag) { Q_UNUSED(tag); }
+    virtual void onTag_modified(const WIZTAGDATA& tagOld, const WIZTAGDATA& tagNew) { Q_UNUSED(tagOld); Q_UNUSED(tagNew); }
+    virtual void onTag_deleted(const WIZTAGDATA& tag) { Q_UNUSED(tag); }
+    virtual void onGroup_opened(const QString& strKbGUID) { Q_UNUSED(strKbGUID); }
+    virtual void onGroup_closed(const QString& strKbGUID) { Q_UNUSED(strKbGUID); }
+    virtual void onGroup_rename(const QString& strKbGUID) { Q_UNUSED(strKbGUID); }
+    virtual void onGroup_permissionChanged(const QString& strKbGUID) { Q_UNUSED(strKbGUID); }
+
+    virtual void updateDocumentCount(const QString& strKbGUID) = 0;
+
+protected:
     CWizExplorerApp& m_app;
     CWizDatabaseManager& m_dbMgr;
     QTreeWidgetItem* m_selectedItem;
@@ -67,16 +86,26 @@ private:
     QPointer<QMenu> m_menuTrash;
     QString m_strTrashKbGUID;
 
-    //QTimer* m_timerScroll;
-    //QPropertyAnimation* m_scrollAnimation;
-    //CWizCategoryViewSpacerItem* m_spacerHeader;
-    //CWizCategoryViewSpacerItem* m_spacerFooter;
     CWizScrollBar* m_vScroll;
     QPointer<QScrollAreaKineticScroller> m_kineticScroller;
 
 public Q_SLOTS:
-    //void on_scroll_timeout();
     void on_action_emptyTrash();
+
+    void on_document_created(const WIZDOCUMENTDATA& document);
+    void on_document_modified(const WIZDOCUMENTDATA& documentOld,
+                              const WIZDOCUMENTDATA& documentNew);
+    void on_document_deleted(const WIZDOCUMENTDATA& document);
+    void on_document_tag_modified(const WIZDOCUMENTDATA& document);
+    void on_folder_created(const CString& strLocation);
+    void on_folder_deleted(const CString& strLocation);
+    void on_tag_created(const WIZTAGDATA& tag);
+    void on_tag_modified(const WIZTAGDATA& tagOld, const WIZTAGDATA& tagNew);
+    void on_tag_deleted(const WIZTAGDATA& tag);
+    void on_group_opened(const QString& strKbGUID);
+    void on_group_closed(const QString& strKbGUID);
+    void on_group_rename(const QString& strKbGUID);
+    void on_group_permissionChanged(const QString& strKbGUID);
 };
 
 
@@ -98,6 +127,12 @@ private:
                      const CWizStdStringArray& arrayAllLocation);
     void initTrash();
 
+    void initDocumentCount();
+    int initDocumentCount(CWizCategoryViewItemBase* item,
+                          const std::map<CString, int>& mapDocumentCount);
+
+    virtual void updateDocumentCount(const QString& strKbGUID);
+
 private:
     QPointer<QMenu> m_menuAllFolders;
     QPointer<QMenu> m_menuFolder;
@@ -115,11 +150,14 @@ public:
 private:
     void doLocationSanityCheck(CWizStdStringArray& arrayLocation);
 
+protected:
+    virtual void onDocument_created(const WIZDOCUMENTDATA& document);
+    virtual void onDocument_modified(const WIZDOCUMENTDATA& documentOld,
+                                     const WIZDOCUMENTDATA& documentNew);
+    virtual void onFolder_created(const CString& strLocation);
+    virtual void onFolder_deleted(const CString& strLocation);
+
 public Q_SLOTS:
-    void on_document_created(const WIZDOCUMENTDATA& document);
-    void on_document_modified(const WIZDOCUMENTDATA& documentOld, const WIZDOCUMENTDATA& documentNew);
-    void on_folder_created(const CString& strLocation);
-    void on_folder_deleted(const CString& strLocation);
     void on_action_newDocument();
     void on_action_newFolder();
     void on_action_newFolder_confirmed(int result);
@@ -164,10 +202,18 @@ private:
     void initTags();
     void initTags(QTreeWidgetItem* pParent, const QString& strParentTagGUID);
 
+    void initDocumentCount();
+    int initDocumentCount(CWizCategoryViewTagItem* item,
+                          const std::map<CString, int>& mapDocumentCount);
+
+    virtual void updateDocumentCount(const QString& strKbGUID);
+
+protected:
+    virtual void onTag_created(const WIZTAGDATA& tag);
+    virtual void onTag_modified(const WIZTAGDATA& tagOld, const WIZTAGDATA& tagNew);
+    virtual void onTag_deleted(const WIZTAGDATA& tag);
+
 public Q_SLOTS:
-    void on_tag_created(const WIZTAGDATA& tag);
-    void on_tag_modified(const WIZTAGDATA& tagOld, const WIZTAGDATA& tagNew);
-    void on_tag_deleted(const WIZTAGDATA& tag);
     void on_action_newTag();
     void on_action_newTag_confirmed(int result);
     void on_action_deleteTag();
@@ -199,18 +245,28 @@ private:
     QPointer<QMenu> m_menuGroupRoot;
     QPointer<QMenu> m_menuGroup;
     QPointer<CWizNewDialog> m_MsgNewFolder;
+
     void initGroup(CWizDatabase& db);
     void initGroup(CWizDatabase& db, QTreeWidgetItem* pParent, const QString& strParentTagGUID);
 
-public Q_SLOTS:
-    void on_group_opened(const QString& strKbGUID);
-    void on_group_closed(const QString& strKbGUID);
-    void on_group_rename(const QString& strKbGUID);
-    void on_group_permissionChanged(const QString& strKbGUID);
-    void on_tag_created(const WIZTAGDATA& tag);
-    void on_tag_modified(const WIZTAGDATA& tagOld, const WIZTAGDATA& tagNew);
-    void on_tag_deleted(const WIZTAGDATA& tag);
+    void initDocumentCount();
+    void initDocumentCount(CWizCategoryViewGroupRootItem* item,
+                           CWizDatabase& db);
+    int initDocumentCount(CWizCategoryViewGroupItem* item,
+                          const std::map<CString, int>& mapDocumentCount);
 
+    virtual void updateDocumentCount(const QString& strKbGUID);
+
+protected:
+    virtual void onTag_created(const WIZTAGDATA& tag);
+    virtual void onTag_modified(const WIZTAGDATA& tagOld, const WIZTAGDATA& tagNew);
+    virtual void onTag_deleted(const WIZTAGDATA& tag);
+    virtual void onGroup_opened(const QString& strKbGUID);
+    virtual void onGroup_closed(const QString& strKbGUID);
+    virtual void onGroup_rename(const QString& strKbGUID);
+    virtual void onGroup_permissionChanged(const QString& strKbGUID);
+
+public Q_SLOTS:
     void on_action_markRead();
     void on_action_newDocument();
     void on_action_newTag();

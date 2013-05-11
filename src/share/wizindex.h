@@ -8,6 +8,7 @@
 #include <set>
 
 #define WIZ_DATABASE_VERSION "1.0"
+#define WIZ_NO_OBSOLETE
 
 class CWizIndexBase : public QObject
 {
@@ -36,11 +37,15 @@ public:
 
     /* Raw query*/
 
-    // tags
+    /* Tags */
     bool GetAllTags(CWizTagDataArray& arrayTag);
     bool GetRootTags(CWizTagDataArray& arrayTag);
-    bool GetChildTags(const CString& strParentTagGUID, CWizTagDataArray& arrayTag);
+    bool GetChildTags(const CString& strParentTagGUID, CWizTagDataArray& arrayTag); // 1 level
     bool GetAllChildTags(const CString& strParentTagGUID, CWizTagDataArray& arrayTag);
+
+    // used to test whether tag have child or not
+    bool GetChildTagsSize(const CString& strParentTagGUID, int& size); // 1 level
+    bool GetAllChildTagsSize(const CString& strParentTagGUID, int& size);
 
     bool TagFromGUID(const CString& strTagGUID, WIZTAGDATA& data);
 
@@ -55,6 +60,8 @@ public:
     bool GetAllDocuments(CWizDocumentDataArray& arrayDocument);
     bool GetDocumentsBySQLWhere(const CString& strSQLWhere, CWizDocumentDataArray& arrayDocument);
     bool DocumentFromGUID(const CString& strDocumentGUID, WIZDOCUMENTDATA& data);
+
+    bool GetAllDocumentsSize(int& count, bool bIncludeTrash = false);
 
     // attachments
     bool GetAttachments(CWizDocumentAttachmentDataArray& arrayAttachment);
@@ -111,6 +118,8 @@ protected:
                                            int nCount);
 
     /* Basic operations */
+    bool SQLToSize(const CString& strSQL, int& size);
+
     bool SQLToTagDataArray(const CString& strSQL,
                            CWizTagDataArray& arrayTag);
 
@@ -192,6 +201,7 @@ Q_SIGNALS:
     void documentDeleted(const WIZDOCUMENTDATA& document);
     void documentDataModified(const WIZDOCUMENTDATA& document);
     void documentAbstractModified(const WIZDOCUMENTDATA& document);
+    void documentTagModified(const WIZDOCUMENTDATA& document);
 
     void attachmentCreated(const WIZDOCUMENTATTACHMENTDATA& attachment);
     void attachmentModified(const WIZDOCUMENTATTACHMENTDATA& attachmentOld,
@@ -223,7 +233,6 @@ public:
                    const CString& strDescription, WIZTAGDATA& data);
     bool ModifyTag(WIZTAGDATA& data);
     bool DeleteTag(const WIZTAGDATA& data, bool bLog);
-    QString getTagTreeText(const QString& strDocumentGUID);
 
     bool InsertDocumentTag(WIZDOCUMENTDATA& data, const CString& strTagGUID);
     bool SetDocumentTags(WIZDOCUMENTDATA& data, const CWizTagDataArray& arrayTag);
@@ -235,12 +244,12 @@ public:
     bool DeleteDocumentsTagsByLocation(const CString& strLocation);
     bool DeleteTagDocuments(const WIZTAGDATA& data);
 
-    // Query by name
+    // Query tags by name
     bool TagByName(const CString& strName, WIZTAGDATA& data, const CString& strExceptGUID = "");
     bool TagByNameEx(const CString& strName, WIZTAGDATA& data);
     bool TagArrayByName(const CString& strName, CWizTagDataArray& arrayTag);
 
-    // Query by document guid
+    // Query tags by document guid
     bool GetDocumentTagsNameStringArray(const CString& strDocumentGUID, CWizStdStringArray& arrayTagName);
     bool GetDocumentTags(const CString& strDocumentGUID, CWizTagDataArray& arrayTag);
     bool GetDocumentTags(const CString& strDocumentGUID, CWizStdStringArray& arrayTagGUID);
@@ -254,19 +263,24 @@ public:
     bool GetAllParentsTagGUID(CString strTagGUID, CWizStdStringArray& arrayGUID);
     bool GetAllParentsTagGUID(CString strTagGUID, std::set<CString>& setGUID);
 
-    // Query by time
+    // Query tags by time
     bool GetTagsByTime(const COleDateTime& t, CWizTagDataArray& arrayData);
 
-    // Extend Query
-    bool GetAllTagsDocumentCount(std::map<CString, int>& mapTagDocumentCount);
+    // Tags extend Query
+
     bool GetModifiedTags(CWizTagDataArray& arrayData);
 
-    // obsolete note share method
+    // tag helper method
+
+    // Indicate group document location path
+    QString getTagTreeText(const QString& strDocumentGUID);
+
+    // convert user input text to tag data structure
+    bool TagsTextToTagArray(CString strText, CWizTagDataArray& arrayTag);
+
+    // deprecated note share tags, still avaiable, but will be removed from future release
     static CString TagDisplayNameToName(const CString& strDisplayName);
     static CString TagNameToDisplayName(const CString& strName);
-
-    // helper method
-    bool TagsTextToTagArray(CString strText, CWizTagDataArray& arrayTag);
 
     /* Style related operations */
     bool CreateStyle(const CString& strName, const CString& strDescription,
@@ -277,11 +291,11 @@ public:
 
     bool DeleteStyleDocuments(const WIZSTYLEDATA& data);
 
-    // Query
+    // Query style by name
     bool StyleByName(const CString& strName, WIZSTYLEDATA& data,
                      const CString& strExceptGUID = "");
 
-
+    // Query style by time
     bool GetStylesByTime(const COleDateTime& t, CWizStyleDataArray& arrayData);
 
     bool GetModifiedStyles(CWizStyleDataArray& arrayData);
@@ -348,7 +362,7 @@ public:
 
     bool IsLocationEmpty(const CString& strLocation);
     bool GetAllLocations(CWizStdStringArray& arrayLocation);
-    bool GetChildLocations(const CString& strLocation, CWizStdStringArray& arrayLocation);
+    bool GetAllChildLocations(const CString& strLocation, CWizStdStringArray& arrayLocation);
 
     // Extend
     bool GetSync(const CString& strLocation);
@@ -378,7 +392,8 @@ public:
 
     bool DeleteDocument(const WIZDOCUMENTDATA& data, bool bLog);
 
-    bool getDocumentsNoTag(CWizDocumentDataArray& arrayDocument, bool includeTrash);
+    bool getDocumentsNoTag(CWizDocumentDataArray& arrayDocument, bool includeTrash = false);
+    bool getDocumentsSizeNoTag(int& size, bool includeTrash = false);
 
     bool GetDocumentsByParamName(const CString& strLocation, bool bIncludeSubFolders, \
                                  CString strParamName, CWizDocumentDataArray& arrayDocument);
@@ -413,6 +428,9 @@ public:
                            CWizDocumentDataArray& arrayDocument,
                            bool includeTrash);
 
+    bool GetDocumentsSizeByTag(const WIZTAGDATA& data, int& size);
+    bool GetAllDocumentsSizeByTag(const WIZTAGDATA& data, int& size);
+
     bool GetDocumentsByTags(bool bAnd, const CString& strLocation,
                             const CWizTagDataArray& arrayTag,
                             CWizDocumentDataArray& arrayDocument);
@@ -421,13 +439,19 @@ public:
     bool GetDocumentsByGUIDs(const CWizStdStringArray& arrayGUID, CWizDocumentDataArray& arrayDocument);
 
     // Query by location(folder)
-    bool GetDocumentsByLocation(const CString& strLocation, CWizDocumentDataArray& arrayDocument);
-    bool GetDocumentsByLocationIncludeSubFolders(const CString& strLocation, CWizDocumentDataArray& arrayDocument);
+    bool GetDocumentsSizeByLocation(const CString& strLocation,
+                                    int& size,
+                                    bool bIncludeSubFolders = false);
+
+    bool GetDocumentsByLocation(const CString& strLocation,
+                                CWizDocumentDataArray& arrayDocument,
+                                bool bIncludeSubFolders = false);
+
+    //bool GetDocumentsByLocationIncludeSubFolders(const CString& strLocation, CWizDocumentDataArray& arrayDocument);
 
     bool GetDocumentsGUIDByLocation(const CString& strLocation, CWizStdStringArray& arrayGUID);
 
-    bool GetAllLocationsDocumentCount(std::map<CString, int>& mapLocationDocumentCount);
-    bool GetLocationDocumentCount(CString strLocation, bool bIncludeSubFolders, int& nDocumentCount);
+
     bool DocumentFromLocationAndName(const CString& strLocation, const CString& strName, WIZDOCUMENTDATA& data);
 
     // Query by time
@@ -506,7 +530,6 @@ public:
     bool LogDeletedGUID(const CString& strGUID, WizObjectType eType);
     bool LogDeletedGUIDs(const CWizStdStringArray& arrayGUID, WizObjectType eType);
 
-
 	static CString GetLocationArraySQLWhere(const CWizStdStringArray& arrayLocation);
 
     bool ObjectExists(const CString& strGUID, const CString& strType, bool& bExists);
@@ -515,14 +538,6 @@ public:
     bool ModifyObjectVersion(const CString& strGUID, const CString& strType, __int64 nVersion);
     bool ModifyObjectModifiedTime(const CString& strGUID, const CString& strType, const COleDateTime& t);
     bool GetObjectModifiedTime(const CString& strGUID, const CString& strType, COleDateTime& t);
-
-    // obsolete methods
-    bool IsModified();
-    bool IsDocumentModified();
-    bool FilterDocumentsInDeletedItems(CWizDocumentDataArray& arrayDocument);
-    bool GetCalendarEvents(const COleDateTime& tStart, const COleDateTime& tEnd, CWizDocumentDataArray& arrayDocument);
-    bool GetAllRecurrenceCalendarEvents(CWizDocumentDataArray& arrayDocument);
-    template <class TData> static void RemoveMultiElements(std::deque<TData>& arrayData);
 
     bool ObjectInReserved(const CString& strGUID, const CString& strType);
 
@@ -567,16 +582,30 @@ public:
                 bool bIncludeSubFolders,
                 CWizDocumentDataArray& arrayDocument);
 
+    /* Helper Methods */
+    bool GetAllTagsDocumentCount(std::map<CString, int>& mapTagDocumentCount);
+    bool GetAllLocationsDocumentCount(std::map<CString, int>& mapLocationDocumentCount);
+
+#ifndef WIZ_NO_OBSOLETE
     bool SearchDocumentByTitle(const CString& strTitle,
                                const CString& strLocation,
                                bool bIncludeSubFolders,
                                size_t nMaxCount,
                                CWizDocumentDataArray& arrayDocument);
 
+    bool IsModified();
+    bool IsDocumentModified();
+    bool FilterDocumentsInDeletedItems(CWizDocumentDataArray& arrayDocument);
+    bool GetCalendarEvents(const COleDateTime& tStart, const COleDateTime& tEnd, CWizDocumentDataArray& arrayDocument);
+    bool GetAllRecurrenceCalendarEvents(CWizDocumentDataArray& arrayDocument);
+    template <class TData> static void RemoveMultiElements(std::deque<TData>& arrayData);
+
+    bool GetLocationDocumentCount(CString strLocation, bool bIncludeSubFolders, int& nDocumentCount);
+#endif
 
 };
 
-
+#ifndef WIZ_NO_OBSOLETE
 template <class TData>
 inline void RemoveMultiElements(std::deque<TData>& arrayData)
 {
@@ -597,6 +626,6 @@ inline void RemoveMultiElements(std::deque<TData>& arrayData)
         }
     }
 }
-
+#endif
 
 #endif // WIZINDEX_H
