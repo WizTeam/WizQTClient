@@ -58,7 +58,8 @@ enum WizOptionsType
 {
     wizoptionsNoteView,
     wizoptionsSync,
-    wizoptionsSkin
+    wizoptionsSkin,
+    wizoptionsFont
 };
 
 const QString USER_SETTINGS_SECTION = "QT_WIZNOTE";

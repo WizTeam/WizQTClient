@@ -142,7 +142,7 @@ void CWizPreferenceWindow::on_radioAuto_clicked(bool chcked)
         return;
 
     userSettings().setNoteViewMode(viewmodeKeep);
-    emit settingsChanged(wizoptionsNoteView);
+    Q_EMIT settingsChanged(wizoptionsNoteView);
 }
 
 void CWizPreferenceWindow::on_radioAlwaysReading_clicked(bool chcked)
@@ -151,7 +151,7 @@ void CWizPreferenceWindow::on_radioAlwaysReading_clicked(bool chcked)
         return;
 
     userSettings().setNoteViewMode(viewmodeAlwaysReading);
-    emit settingsChanged(wizoptionsNoteView);
+    Q_EMIT settingsChanged(wizoptionsNoteView);
 }
 
 void CWizPreferenceWindow::on_radioAlwaysEditing_clicked(bool chcked)
@@ -160,7 +160,7 @@ void CWizPreferenceWindow::on_radioAlwaysEditing_clicked(bool chcked)
         return;
 
     userSettings().setNoteViewMode(viewmodeAlwaysEditing);
-    emit settingsChanged(wizoptionsNoteView);
+    Q_EMIT settingsChanged(wizoptionsNoteView);
 }
 
 void CWizPreferenceWindow::on_comboSyncInterval_activated(int index)
@@ -185,7 +185,7 @@ void CWizPreferenceWindow::on_comboSyncInterval_activated(int index)
             Q_ASSERT(0);
     }
 
-    emit settingsChanged(wizoptionsSync);
+    Q_EMIT settingsChanged(wizoptionsSync);
 }
 
 void CWizPreferenceWindow::on_comboSyncMethod_activated(int index)
@@ -210,7 +210,7 @@ void CWizPreferenceWindow::on_comboSyncMethod_activated(int index)
             Q_ASSERT(0);
     }
 
-    emit settingsChanged(wizoptionsSync);
+    Q_EMIT settingsChanged(wizoptionsSync);
 }
 
 void CWizPreferenceWindow::labelProxy_linkActivated(const QString& link)
@@ -219,7 +219,7 @@ void CWizPreferenceWindow::labelProxy_linkActivated(const QString& link)
 
     ProxyDialog dlg(this);
     if (QDialog::Accepted != dlg.exec()) {
-        emit settingsChanged(wizoptionsSync);
+        Q_EMIT settingsChanged(wizoptionsSync);
     }
 }
 
@@ -249,6 +249,8 @@ void CWizPreferenceWindow::onButtonFontSelect_confirmed()
 
     m_app.userSettings().setDefaultFontFamily(font.family());
     m_app.userSettings().setDefaultFontSize(font.pointSize());
+
+    Q_EMIT settingsChanged(wizoptionsFont);
 }
 
 void CWizPreferenceWindow::accept()

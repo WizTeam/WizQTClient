@@ -1112,8 +1112,6 @@ void MainWindow::on_documents_itemSelectionChanged()
     //}
 }
 
-
-
 void MainWindow::on_options_settingsChanged(WizOptionsType type)
 {
     if (wizoptionsNoteView == type) {
@@ -1129,6 +1127,8 @@ void MainWindow::on_options_settingsChanged(WizOptionsType type)
         }
 
         m_sync->resetProxy();
+    } else if (wizoptionsFont == type) {
+        m_doc->web()->editorResetFont();
     }
 }
 

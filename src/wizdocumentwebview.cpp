@@ -17,6 +17,7 @@ CWizDocumentWebView::CWizDocumentWebView(CWizExplorerApp& app, QWidget* parent /
     : QWebView(parent)
     , m_app(app)
     , m_dbMgr(app.databaseManager())
+    , m_bEditorInited(false)
 {
     setAcceptDrops(false);
 
@@ -55,14 +56,11 @@ void CWizDocumentWebView::on_documentReady(const QString& strFileName)
 {
     m_strHtmlFileName = strFileName;
 
-    m_bEditorInited = false;
-    initEditorAndLoadDocument();
-
-//    if (m_bEditorInited) {
-//        viewDocumentInEditor(m_bEditingMode);
-//    } else {
-//        initEditorAndLoadDocument();
-//    }
+    if (m_bEditorInited) {
+        viewDocumentInEditor(m_bEditingMode);
+    } else {
+        initEditorAndLoadDocument();
+    }
 }
 
 void CWizDocumentWebView::on_documentSaved(bool ok)
@@ -205,7 +203,17 @@ void CWizDocumentWebView::initEditorStyle()
 
     QString strExec = QString("editor.options.initialStyle = 'body{font-family:%1; font-size:%2px;}';")
             .arg(strFont).arg(nSize);
-    page()->mainFrame()->evaluateJavaScript(strExec).toString();
+    page()->mainFrame()->evaluateJavaScript(strExec);
+}
+
+void CWizDocumentWebView::editorResetFont()
+{
+    QString strFont = m_app.userSettings().defaultFontFamily();
+    int nSize = m_app.userSettings().defaultFontSize();
+
+    QString strExec = QString("editor.document.body.style.fontFamily='%1';editor.document.body.style.fontSize='%2px';")
+            .arg(strFont).arg(nSize);
+    page()->mainFrame()->evaluateJavaScript(strExec);
 }
 
 void CWizDocumentWebView::initEditorAndLoadDocument()

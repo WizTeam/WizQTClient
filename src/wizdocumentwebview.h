@@ -65,6 +65,7 @@ public:
 
     /* editor API */
     void editorSetFullScreen();
+    void editorResetFont();
 
     // -1: command invalid
     // 0: available
