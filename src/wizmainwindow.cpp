@@ -114,7 +114,9 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     initClient();
 
     setWindowTitle(tr("WizNote"));
+
     restoreStatus();
+    client()->hide();
 
 #ifdef Q_WS_MAC
     setupFullScreenMode(this);

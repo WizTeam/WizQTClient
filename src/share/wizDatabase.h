@@ -194,7 +194,7 @@ public:
                                   const QString& strLocation, \
                                   CWizStdStringArray& arrayLocation);
 
-    bool IsInDeletedItems(const CString& strLocation);
+    static bool IsInDeletedItems(const CString& strLocation);
 
     bool CreateDocumentAndInit(const CString& strHtml, \
                                const CString& strHtmlUrl, \

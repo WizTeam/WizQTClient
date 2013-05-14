@@ -20,6 +20,7 @@ class CWizEditorToolBar;
 
 class CWizTitleBar;
 class CWizInfoToolBar;
+class CWizNotifyToolbar;
 
 class CWizDocumentView : public QWidget
 {
@@ -41,6 +42,7 @@ protected:
     CWizDatabaseManager& m_dbMgr;
     QPointer<CWizTitleBar> m_title;
     QPointer<CWizInfoToolBar> m_infoToolBar;
+    QPointer<CWizNotifyToolbar> m_notifyToolBar;
     QPointer<CWizEditorToolBar> m_editorToolBar;
     CWizDocumentWebView* m_web;
     QPointer<QWidget> m_client;

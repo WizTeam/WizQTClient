@@ -189,18 +189,18 @@ public:
 
     void setDocument(const WIZDOCUMENTDATA& data)
     {
-        QString strCreateTime = tr("Create time: %1").arg(data.tCreated.toString("yyyy-MM-dd"));
+        QString strCreateTime = QObject::tr("Create time: ") + data.tCreated.toString("yyyy-MM-dd");
         m_labelCreatedTime->setText(strCreateTime);
 
-        QString strModifiedTime = tr("Update time: %1").arg(data.tModified.toString("yyyy-MM-dd"));
+        QString strModifiedTime = QObject::tr("Update time: ") + data.tModified.toString("yyyy-MM-dd");
         m_labelModifiedTime->setText(strModifiedTime);
 
-        QString strAuthor = tr("Author: %1").arg(data.strOwner);
+        QString strAuthor = QObject::tr("Author: ") + data.strOwner;
         strAuthor = fontMetrics().elidedText(strAuthor, Qt::ElideRight, 150);
         m_labelAuthor->setText(strAuthor);
 
         QString strFile = m_app.databaseManager().db(data.strKbGUID).GetDocumentFileName(data.strGUID);
-        QString strSize = tr("Size: %1").arg(::WizGetFileSizeHumanReadalbe(strFile));
+        QString strSize = QObject::tr("Size: ") + ::WizGetFileSizeHumanReadalbe(strFile);
         m_labelSize->setText(strSize);
     }
 
@@ -212,6 +212,38 @@ private:
     QPointer<QLabel> m_labelSize;
 };
 
+class CWizNotifyToolbar : public QWidget
+{
+public:
+    CWizNotifyToolbar(CWizExplorerApp& app, QWidget* parent = 0)
+        : QWidget(parent)
+        , m_app(app)
+    {
+        setStyleSheet("* {font-size:12px; color: #FFFFFF;}\
+                      *:active {background-image: url(" + ::WizGetResourcesPath() + "skins/notify_bg.png);}\
+                      *:!active {background-image: url(" + ::WizGetResourcesPath() + "skins/notify_bg_inactive.png);}");
+
+        QHBoxLayout* layout = new QHBoxLayout();
+        layout->setContentsMargins(8, 5, 8, 5);
+        layout->setSpacing(15);
+        setLayout(layout);
+
+        m_labelNotify = new QLabel(this);
+        m_labelNotify->setAttribute(Qt::WA_NoSystemBackground, true);
+        layout->addWidget(m_labelNotify);
+        layout->addStretch();
+    }
+
+    void setNotifyText(const QString& strMsg)
+    {
+        m_labelNotify->setText(strMsg);
+    }
+
+private:
+    CWizExplorerApp& m_app;
+    QPointer<QLabel> m_labelNotify;
+};
+
 
 
 CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
@@ -221,6 +253,7 @@ CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
     , m_dbMgr(app.databaseManager())
     , m_title(new CWizTitleBar(app, this))
     , m_infoToolBar(new CWizInfoToolBar(app))
+    , m_notifyToolBar(new CWizNotifyToolbar(app))
     , m_web(new CWizDocumentWebView(app, this))
     , m_editorToolBar(new CWizEditorToolBar(app))
     , m_editingDocument(true)
@@ -241,6 +274,7 @@ CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
     layout->addWidget(line);
     layout->addWidget(m_editorToolBar);
     layout->addWidget(m_infoToolBar);
+    layout->addWidget(m_notifyToolBar);
     layout->addWidget(m_web);
 
     layout->setStretchFactor(m_title, 0);
@@ -335,15 +369,27 @@ bool CWizDocumentView::viewDocument(const WIZDOCUMENTDATA& data, bool forceEdit)
         }
     }
 
+    // reset notify toolbar
+    m_notifyToolBar->hide();
+
+    if (CWizDatabase::IsInDeletedItems(data.strLocation)) {
+        m_notifyToolBar->setNotifyText(tr("This document is deleted, You can edit after move to other folders."));
+        m_notifyToolBar->show();
+        edit = false;
+    }
+
     // check user permission
     int perm = m_dbMgr.db(data.strKbGUID).permission();
     QString strUserId = m_dbMgr.db().getUserId();
     // only reading is permit
     if (perm > WIZ_USERGROUP_AUTHOR ||
             (perm == WIZ_USERGROUP_AUTHOR && data.strOwner != strUserId)) {
+        m_notifyToolBar->setNotifyText(tr("Your permission is not enough to edit this document."));
+        m_notifyToolBar->show();
         edit = false;
     }
 
+    // load document
     m_web->viewDocument(data, edit);
 
     m_editingDocument = edit;

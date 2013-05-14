@@ -1189,7 +1189,7 @@ bool CWizDatabase::GetChildLocations(const CWizStdStringArray& arrayAllLocation,
 
 bool CWizDatabase::IsInDeletedItems(const CString& strLocation)
 {
-    return strLocation.startsWith(GetDeletedItemsLocation());
+    return strLocation.startsWith(LOCATION_DELETED_ITEMS);
 }
 
 bool CWizDatabase::CreateDocumentAndInit(const CString& strHtml, \
