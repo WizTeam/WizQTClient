@@ -41,7 +41,7 @@ bool CThumbIndex::OpenThumb(const CString& strFileName, const QString& strVersio
         m_dbThumb.open(strFileName);
 
         // need rebuild thumb index
-        if (strVersion.isEmpty() || strVersion != WIZNOTE_THUMB_VERSION) {
+        if (strVersion.isEmpty() || strVersion.toInt() < QString(WIZNOTE_THUMB_VERSION).toInt()) {
             if (m_dbThumb.tableExists("WIZ_ABSTRACT")) {
                 m_dbThumb.execDML("drop table WIZ_ABSTRACT");
             }

@@ -93,8 +93,8 @@ private:
     QWidget* m_categoryLayer;
     CWizDocumentListView* m_documents;
     CWizDocumentView* m_doc;
-    CWizSplitter* m_splitter;
-    CWizOptionsWidget* m_options;
+    QPointer<CWizSplitter> m_splitter;
+    QPointer<CWizOptionsWidget> m_options;
 
     CWizDocumentViewHistory* m_history;
     QPointer<CWizAnimateAction> m_animateSync;

@@ -71,7 +71,7 @@ bool CWizSearchIndexer::buildFTSIndex()
 bool CWizSearchIndexer::buildFTSIndexByDatabase(CWizDatabase& db)
 {
     int strVersion = db.getDocumentFTSVersion().toInt();
-    if (strVersion != QString(WIZNOTE_FTS_VERSION).toInt()) {
+    if (strVersion < QString(WIZNOTE_FTS_VERSION).toInt()) {
         clearFlags(db);
     }
 

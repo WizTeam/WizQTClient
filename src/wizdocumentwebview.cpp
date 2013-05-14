@@ -19,6 +19,10 @@ CWizDocumentWebView::CWizDocumentWebView(CWizExplorerApp& app, QWidget* parent /
     , m_dbMgr(app.databaseManager())
     , m_bEditorInited(false)
 {
+    // only accept focus by mouse click
+    setFocusPolicy(Qt::ClickFocus);
+    setAttribute(Qt::WA_AcceptTouchEvents, false);
+
     setAcceptDrops(false);
 
     setContextMenuPolicy(Qt::CustomContextMenu);
@@ -45,6 +49,15 @@ CWizDocumentWebView::CWizDocumentWebView(CWizExplorerApp& app, QWidget* parent /
 
     m_timerAutoSave.setInterval(10*1000); // 5 minutes
     connect(&m_timerAutoSave, SIGNAL(timeout()), SLOT(onTimerAutoSaveTimout()));
+}
+
+void CWizDocumentWebView::focusInEvent(QFocusEvent *event)
+{
+    if (m_bEditingMode) {
+        Q_EMIT focusIn();
+    }
+
+    QWebView::focusInEvent(event);
 }
 
 void CWizDocumentWebView::onTimerAutoSaveTimout()

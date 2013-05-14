@@ -40,7 +40,6 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     , m_sync(new CWizSyncThread(*this, this))
     , m_console(new CWizConsoleDialog(*this, this))
     , m_upgrade(new CWizUpgrade())
-    //, m_upgrade(new CWizUpgradeThread(this))
     , m_certManager(new CWizCertManager(*this))
     , m_cipherForm(new CWizUserCipherForm(*this, this))
     , m_groupAttribute(new CWizGroupAttributeForm(*this, this))
@@ -59,11 +58,8 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     , m_categoryLayer(new QWidget(this))
     , m_documents(new CWizDocumentListView(*this, this))
     , m_doc(new CWizDocumentView(*this, this))
-    , m_splitter(NULL)
-    , m_options(NULL)
     , m_history(new CWizDocumentViewHistory())
     , m_animateSync(new CWizAnimateAction(*this, this))
-    //, m_animateSync(new CWizSyncAnimation(this))
     , m_bRestart(false)
     , m_bLogoutRestart(false)
     , m_bUpdatingSelection(false)
@@ -111,8 +107,6 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     connect(m_sync, SIGNAL(processLog(const QString&)), SLOT(on_syncProcessLog(const QString&)));
     connect(m_sync, SIGNAL(processErrorLog(const QString&)), SLOT(on_syncProcessErrorLog(const QString&)));
     connect(m_sync, SIGNAL(syncDone(bool)), SLOT(on_syncDone(bool)));
-
-    //setStatusBar(m_statusBar);
 
     initActions();
     initMenuBar();
@@ -585,9 +579,6 @@ void MainWindow::on_syncProcessErrorLog(const QString& strMsg)
 
 void MainWindow::on_actionSync_triggered()
 {
-    //qDebug() << "Sync Interval: " << m_syncTimer->interval()/1000/60;
-    //qDebug() << "Sync Method: " << m_settings->syncMethod();
-
     m_certManager->downloadUserCert();
     m_sync->startSyncing();
 }
@@ -816,7 +807,6 @@ void MainWindow::on_actionFormatRemoveFormat_triggered()
 void MainWindow::on_actionConsole_triggered()
 {
     m_console->show();
-    //m_console->vScroll->setValue(m_console->vScroll->maximum());
 }
 
 void MainWindow::on_actionLogout_triggered()
@@ -864,10 +854,7 @@ void MainWindow::on_actionResetSearch_triggered()
 
 void MainWindow::on_searchIndexerStarted()
 {
-    // build FTS index if user use it first time
-    //if (!m_searchIndexer->worker()->isFTSEnabled()) {
     QTimer::singleShot(5 * 1000, m_searchIndexer->worker(), SLOT(buildFTSIndex()));
-    //}
 }
 
 void MainWindow::on_searchDocumentFind(const CWizDocumentDataArray& arrayDocument)
@@ -952,27 +939,6 @@ void MainWindow::on_actionGoForward_triggered()
     viewDocument(data, false);
     locateDocument(data);
 }
-
-//void MainWindow::on_actionCategorySwitchPrivate_triggered2(bool toggled)
-//{
-//    if (!toggled)
-//        return;
-//    on_actionCategorySwitchPrivate_triggered();
-//}
-//
-//void MainWindow::on_actionCategorySwitchTags_triggered2(bool toggled)
-//{
-//   if (!toggled)
-//        return;
-//   on_actionCategorySwitchTags_triggered();
-//}
-//
-//void MainWindow::on_actionCategorySwitchGroups_triggered2(bool toggled)
-//{
-//    if (!toggled)
-//        return;
-//    on_actionCategorySwitchGroups_triggered();
-//}
 
 void MainWindow::on_actionCategorySwitch_triggered(int index)
 {

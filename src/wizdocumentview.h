@@ -10,13 +10,16 @@
 #include "share/wizobject.h"
 #include "share/wizsettings.h"
 
-class CWizTitleBar;
+
 class CWizDocumentWebView;
 class CWizDatabase;
 class CWizTagListWidget;
 class CWizAttachmentListWidget;
 class CWizNoteInfoForm;
 class CWizEditorToolBar;
+
+class CWizTitleBar;
+class CWizInfoToolBar;
 
 class CWizDocumentView : public QWidget
 {
@@ -37,14 +40,13 @@ private:
 protected:
     CWizDatabaseManager& m_dbMgr;
     QPointer<CWizTitleBar> m_title;
+    QPointer<CWizInfoToolBar> m_infoToolBar;
     QPointer<CWizEditorToolBar> m_editorToolBar;
     CWizDocumentWebView* m_web;
-    QWidget* m_client;
+    QPointer<QWidget> m_client;
     QPointer<CWizTagListWidget> m_tags;
     QPointer<CWizAttachmentListWidget> m_attachments;
     QPointer<CWizNoteInfoForm> m_info;
-
-    QWidget* createClient();
 
     bool m_editingDocument;
     WizDocumentViewMode m_viewMode;
@@ -74,6 +76,7 @@ public Q_SLOTS:
     void on_attachment_deleted(const WIZDOCUMENTATTACHMENTDATA& attachment);
     void on_document_modified(const WIZDOCUMENTDATA& documentOld, const WIZDOCUMENTDATA& documentNew);
 
+    void on_webview_focusIn();
 };
 
 #endif // WIZDOCUMENTVIEW_H

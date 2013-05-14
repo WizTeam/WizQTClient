@@ -63,7 +63,13 @@ public:
     void setModified(bool bModified) { m_bModified = bModified; }
     void saveDocument(bool force);
 
-    /* editor API */
+    const WIZDOCUMENTDATA& document() { return m_renderer->data(); }
+    void reloadDocument();
+
+    // initialize editor style before render, only invoke once.
+    void initEditorStyle();
+
+    /* editor related */
     void editorSetFullScreen();
     void editorResetFont();
 
@@ -82,22 +88,10 @@ public:
 
     bool editorCommandExecuteFontFamily(const QString& strFamily);
     bool editorCommandExecuteFontSize(const QString& strSize);
-
-    bool editorCommandExecuteUndo();
-    bool editorCommandExecuteRedo();
-
-    bool editorCommandExecuteIndent();
-    bool editorCommandExecuteOutdent();
-
-    bool editorCommandExecuteInsertHorizontal();
     bool editorCommandExecuteInsertHtml(const QString& strHtml, bool bNotSerialize);
-    bool editorCommandExecuteInsertDate();
-    bool editorCommandExecuteInsertTime();
-    bool editorCommandExecuteRemoveFormat();
-    bool editorCommandExecuteFormatMatch();
 
-    const WIZDOCUMENTDATA& document() { return m_renderer->data(); }
-    void reloadDocument();
+protected:
+    virtual void focusInEvent(QFocusEvent *event);
 
 private:
     CWizExplorerApp& m_app;
@@ -106,7 +100,6 @@ private:
     QString m_strHtmlFileName;
     bool m_bEditorInited;
     bool m_bEditingMode;
-
     bool m_bModified;
 
     QPointer<CWizDocumentWebViewRenderer> m_renderer;
@@ -116,14 +109,11 @@ private:
     QPointer<CWizEditorInsertTableForm> m_editorInsertTableForm;
     QPointer<QColorDialog> m_colorDialog;
 
-    //virtual void keyPressEvent(QKeyEvent* event);
-    //virtual void focusOutEvent(QFocusEvent *event);
-
     void viewDocumentInEditor(bool editing);
     void initEditorAndLoadDocument();
 
-public:
-    void initEditorStyle();
+Q_SIGNALS:
+    void focusIn();
 
 public Q_SLOTS:
     void on_pageContentsChanged();
@@ -162,6 +152,9 @@ public Q_SLOTS:
     bool editorCommandExecuteLinkRemove();
 
     // format
+    bool editorCommandExecuteIndent();
+    bool editorCommandExecuteOutdent();
+
     bool editorCommandExecuteJustifyLeft();
     bool editorCommandExecuteJustifyRight();
     bool editorCommandExecuteJustifyCenter();
@@ -191,6 +184,15 @@ public Q_SLOTS:
     bool editorCommandExecuteTableSplitCols();
     bool editorCommandExecuteTableAverageRows();
     bool editorCommandExecuteTableAverageCols();
+
+    // fast operation
+    bool editorCommandExecuteUndo();
+    bool editorCommandExecuteRedo();
+    bool editorCommandExecuteInsertDate();
+    bool editorCommandExecuteInsertTime();
+    bool editorCommandExecuteRemoveFormat();
+    bool editorCommandExecuteFormatMatch();
+    bool editorCommandExecuteInsertHorizontal();
 };
 
 

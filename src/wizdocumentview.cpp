@@ -1,10 +1,8 @@
 #include "wizdocumentview.h"
 
+#include <QtGui>
 #include <QWebElement>
 #include <QWebFrame>
-#include <QBoxLayout>
-#include <QLineEdit>
-#include <QApplication>
 
 #include "share/wizimagepushbutton.h"
 #include "wizdocumentwebview.h"
@@ -14,35 +12,22 @@
 #include "wiznotestyle.h"
 #include "wizEditorToolBar.h"
 
-class CWizTitleBar
-    : public QWidget
+class CWizTitleBar : public QWidget
 {
 public:
     CWizTitleBar(CWizExplorerApp& app, QWidget* parent)
         : QWidget(parent)
         , m_app(app)
-        , m_editDocumentButton(NULL)
-        , m_tagsButton(NULL)
-        , m_attachmentButton(NULL)
         , m_editing(false)
     {
-        QHBoxLayout* layout = new QHBoxLayout(this);
-        setLayout(layout);
-        layout->setMargin(0);
-
         setContentsMargins(4, 4, 4, 4);
-        //setAutoFillBackground(true);
 
-        //QPalette pal = palette();
-        //QPixmap pixmapBg;
-        //pixmapBg.load(::WizGetResourcesPath() + "skins/main_bg.png");
-        //QBrush brushBg(pixmapBg);
-        //pal.setBrush(QPalette::Window, brushBg);
-        //setPalette(pal);
+        QHBoxLayout* layout = new QHBoxLayout(this);
+        layout->setContentsMargins(0, 0, 0, 0);
+        setLayout(layout);
 
         m_titleEdit = new QLineEdit(this);
-//#ifdef Q_OS_MAC
-
+        m_titleEdit->setAttribute(Qt::WA_MacShowFocusRect, false);
         m_titleEdit->setStyleSheet(
             "QLineEdit {\
                 margin:4 0 0 0;\
@@ -55,11 +40,6 @@ public:
                 border-width:1; \
                 border-style:solid; \
             }");
-
-        m_titleEdit->setAttribute(Qt::WA_MacShowFocusRect, false);
-//#else
-//        m_titleEdit->setStyleSheet("QLineEdit{padding:4 4 4 4;border-color:#ffffff;border-width:1;border-style:solid;}QLineEdit:hover{border-color:#bbbbbb;border-width:1;border-style:solid;}");
-//#endif
 
         m_editIcon = ::WizLoadSkinIcon(m_app.userSettings().skin(), "lock");
         m_commitIcon = ::WizLoadSkinIcon(m_app.userSettings().skin(), "unlock");
@@ -91,10 +71,10 @@ public:
 private:
     CWizExplorerApp& m_app;
     QPointer<QLineEdit> m_titleEdit;
-    CWizImagePushButton* m_editDocumentButton;
-    CWizImagePushButton* m_tagsButton;
-    CWizImagePushButton* m_attachmentButton;
-    CWizImagePushButton* m_infoButton;
+    QPointer<CWizImagePushButton> m_editDocumentButton;
+    QPointer<CWizImagePushButton> m_tagsButton;
+    QPointer<CWizImagePushButton> m_attachmentButton;
+    QPointer<CWizImagePushButton> m_infoButton;
 
     QIcon m_editIcon;
     QIcon m_commitIcon;
@@ -180,6 +160,58 @@ public:
     }
 };
 
+class CWizInfoToolBar : public QWidget
+{
+public:
+    CWizInfoToolBar(CWizExplorerApp& app, QWidget* parent = 0)
+        : QWidget(parent)
+        , m_app(app)
+    {
+        setStyleSheet("font-size: 11px; color: #646464;");
+
+        // the height of Editor Toolbar is 32, hard-coded here.
+        QHBoxLayout* layout = new QHBoxLayout();
+        layout->setContentsMargins(8, 10, 8, 9);
+        layout->setSpacing(15);
+        setLayout(layout);
+
+        m_labelCreatedTime = new QLabel(this);
+        m_labelModifiedTime = new QLabel(this);
+        m_labelAuthor = new QLabel(this);
+        m_labelSize = new QLabel(this);
+
+        layout->addWidget(m_labelCreatedTime);
+        layout->addWidget(m_labelModifiedTime);
+        layout->addWidget(m_labelAuthor);
+        layout->addWidget(m_labelSize);
+        layout->addStretch();
+    }
+
+    void setDocument(const WIZDOCUMENTDATA& data)
+    {
+        QString strCreateTime = tr("Create time: %1").arg(data.tCreated.toString("yyyy-MM-dd"));
+        m_labelCreatedTime->setText(strCreateTime);
+
+        QString strModifiedTime = tr("Update time: %1").arg(data.tModified.toString("yyyy-MM-dd"));
+        m_labelModifiedTime->setText(strModifiedTime);
+
+        QString strAuthor = tr("Author: %1").arg(data.strOwner);
+        strAuthor = fontMetrics().elidedText(strAuthor, Qt::ElideRight, 150);
+        m_labelAuthor->setText(strAuthor);
+
+        QString strFile = m_app.databaseManager().db(data.strKbGUID).GetDocumentFileName(data.strGUID);
+        QString strSize = tr("Size: %1").arg(::WizGetFileSizeHumanReadalbe(strFile));
+        m_labelSize->setText(strSize);
+    }
+
+private:
+    CWizExplorerApp& m_app;
+    QPointer<QLabel> m_labelCreatedTime;
+    QPointer<QLabel> m_labelModifiedTime;
+    QPointer<QLabel> m_labelAuthor;
+    QPointer<QLabel> m_labelSize;
+};
+
 
 
 CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
@@ -188,20 +220,36 @@ CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
     , m_userSettings(app.userSettings())
     , m_dbMgr(app.databaseManager())
     , m_title(new CWizTitleBar(app, this))
+    , m_infoToolBar(new CWizInfoToolBar(app))
     , m_web(new CWizDocumentWebView(app, this))
-    , m_editorToolBar(new CWizEditorToolBar(app, this))
-    , m_client(NULL)
-    , m_tags(NULL)
-    , m_attachments(NULL)
+    , m_editorToolBar(new CWizEditorToolBar(app))
     , m_editingDocument(true)
     , m_viewMode(app.userSettings().noteViewMode())
 {
-    m_client = createClient();
-
-    QVBoxLayout* layout = new QVBoxLayout(this);
-    setLayout(layout);
-    layout->addWidget(m_client);
+    m_client = new QWidget(this);
+    QVBoxLayout* layout = new QVBoxLayout();
     layout->setContentsMargins(0, 0, 0, 0);
+    layout->setSpacing(0);
+    m_client->setLayout(layout);
+
+    QWidget* line = new QWidget(this);
+    line->setMaximumHeight(1);
+    line->setMinimumHeight(1);
+    line->setStyleSheet("border-bottom-width:1;border-bottom-style:solid;border-bottom-color:#bbbbbb");
+
+    layout->addWidget(m_title);
+    layout->addWidget(line);
+    layout->addWidget(m_editorToolBar);
+    layout->addWidget(m_infoToolBar);
+    layout->addWidget(m_web);
+
+    layout->setStretchFactor(m_title, 0);
+    layout->setStretchFactor(m_web, 1);
+
+    QVBoxLayout* layoutMain = new QVBoxLayout();
+    layoutMain->setContentsMargins(0, 0, 0, 0);
+    setLayout(layoutMain);
+    layoutMain->addWidget(m_client);
 
     m_title->setEditingDocument(m_editingDocument);
 
@@ -234,44 +282,9 @@ CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
 
     connect(&m_dbMgr, SIGNAL(attachmentDeleted(const WIZDOCUMENTATTACHMENTDATA&)), \
             SLOT(on_attachment_deleted(const WIZDOCUMENTATTACHMENTDATA&)));
-}
 
-
-QWidget* CWizDocumentView::createClient()
-{
-    QWidget* client = new QWidget(this);
-    QVBoxLayout* layout = new QVBoxLayout(client);
-    client->setLayout(layout);
-
-    //client->setAutoFillBackground(true);
-
-    //QPalette pal = palette();
-    //QPixmap pixmapBg;
-    //pixmapBg.load(::WizGetResourcesPath() + "skins/main_bg.png");
-    //QBrush brushBg(pixmapBg);
-    //pal.setBrush(QPalette::Base, brushBg);
-    //client->setPalette(pal);
-    //QPalette pal = palette();
-    //pal.setColor(QPalette::Window, QColor(0xff, 0xff, 0xff));
-    //client->setPalette(pal);
-
-    QWidget* line = new QWidget(this);
-    line->setMaximumHeight(1);
-    line->setMinimumHeight(1);
-    line->setStyleSheet("border-bottom-width:1;border-bottom-style:solid;border-bottom-color:#bbbbbb");
-
-    layout->setSpacing(0);
-    layout->setContentsMargins(0, 0, 0, 0);
-    layout->addWidget(m_title);
-    layout->addWidget(line);
-    layout->addWidget(m_editorToolBar);
-    //layout->addWidget(line);
-    layout->addWidget(m_web);
-
-    layout->setStretchFactor(m_title, 0);
-    layout->setStretchFactor(m_web, 1);
-
-    return client;
+    // webview focus
+    connect(m_web, SIGNAL(focusIn()), SLOT(on_webview_focusIn()));
 }
 
 CWizEditorToolBar* CWizDocumentView::editorToolBar() const
@@ -332,9 +345,14 @@ bool CWizDocumentView::viewDocument(const WIZDOCUMENTDATA& data, bool forceEdit)
     }
 
     m_web->viewDocument(data, edit);
+
     m_editingDocument = edit;
     m_title->setEditingDocument(m_editingDocument);
     m_title->updateInformation(m_dbMgr.db(data.strKbGUID), data);
+    m_infoToolBar->setDocument(data);
+
+    m_infoToolBar->show();
+    m_editorToolBar->hide();
 
     return true;
 }
@@ -496,4 +514,10 @@ void CWizDocumentView::on_document_modified(const WIZDOCUMENTDATA& documentOld, 
         QString strKbGUID = document().strKbGUID;
         m_title->updateInformation(m_dbMgr.db(strKbGUID), document());
     }
+}
+
+void CWizDocumentView::on_webview_focusIn()
+{
+    m_infoToolBar->hide();
+    m_editorToolBar->show();
 }
