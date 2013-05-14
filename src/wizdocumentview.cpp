@@ -369,12 +369,14 @@ bool CWizDocumentView::viewDocument(const WIZDOCUMENTDATA& data, bool forceEdit)
         }
     }
 
-    // reset notify toolbar
+    // reset
     m_notifyToolBar->hide();
+    m_title->editDocumentButton()->show();
 
     if (CWizDatabase::IsInDeletedItems(data.strLocation)) {
         m_notifyToolBar->setNotifyText(tr("This document is deleted, You can edit after move to other folders."));
         m_notifyToolBar->show();
+        m_title->editDocumentButton()->hide();
         edit = false;
     }
 
@@ -385,6 +387,7 @@ bool CWizDocumentView::viewDocument(const WIZDOCUMENTDATA& data, bool forceEdit)
     if (perm > WIZ_USERGROUP_AUTHOR ||
             (perm == WIZ_USERGROUP_AUTHOR && data.strOwner != strUserId)) {
         m_notifyToolBar->setNotifyText(tr("Your permission is not enough to edit this document."));
+        m_title->editDocumentButton()->hide();
         m_notifyToolBar->show();
         edit = false;
     }

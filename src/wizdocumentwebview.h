@@ -92,6 +92,9 @@ public:
 
 protected:
     virtual void focusInEvent(QFocusEvent *event);
+    virtual void focusOutEvent(QFocusEvent *event);
+    virtual void mousePressEvent(QMouseEvent *event);
+    virtual void contextMenuEvent(QContextMenuEvent *event);
 
 private:
     CWizExplorerApp& m_app;
@@ -101,6 +104,7 @@ private:
     bool m_bEditorInited;
     bool m_bEditingMode;
     bool m_bModified;
+    bool m_bContextMenuPop;
 
     QPointer<CWizDocumentWebViewRenderer> m_renderer;
     QPointer<CWizDownloadObjectDataDialog> m_downloadDialog;
@@ -117,14 +121,13 @@ Q_SIGNALS:
 
 public Q_SLOTS:
     void on_pageContentsChanged();
-    void onSelectionChanged();
     void onCipherDialogClosed();
     void onDownloadDialogClosed(int result);
 
     void on_editor_populateJavaScriptWindowObject();
     void on_editor_loadFinished(bool ok);
     void on_editor_linkClicked(const QUrl& url);
-    void on_editor_customContextMenuRequested(const QPoint& pos);
+    //void on_editor_customContextMenuRequested(const QPoint& pos);
 
     void onTimerAutoSaveTimout();
 

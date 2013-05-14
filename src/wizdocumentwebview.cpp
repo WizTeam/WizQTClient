@@ -18,18 +18,14 @@ CWizDocumentWebView::CWizDocumentWebView(CWizExplorerApp& app, QWidget* parent /
     , m_app(app)
     , m_dbMgr(app.databaseManager())
     , m_bEditorInited(false)
+    , m_bContextMenuPop(false)
 {
     // only accept focus by mouse click
     setFocusPolicy(Qt::ClickFocus);
     setAttribute(Qt::WA_AcceptTouchEvents, false);
 
+    // FIXME: should accept drop picture, attachment, link etc.
     setAcceptDrops(false);
-
-    setContextMenuPolicy(Qt::CustomContextMenu);
-    connect(this, SIGNAL(customContextMenuRequested(const QPoint&)),
-            SLOT(on_editor_customContextMenuRequested(const QPoint&)));
-
-    connect(this, SIGNAL(selectionChanged()), SLOT(onSelectionChanged()));
 
     MainWindow* mainWindow = qobject_cast<MainWindow *>(m_app.mainWindow());
 
@@ -60,6 +56,38 @@ void CWizDocumentWebView::focusInEvent(QFocusEvent *event)
     QWebView::focusInEvent(event);
 }
 
+void CWizDocumentWebView::focusOutEvent(QFocusEvent *event)
+{
+    // because qt will clear focus when context menu popup, we need keep focus there.
+    if (m_bContextMenuPop) {
+        return;
+    }
+
+    QWebView::focusOutEvent(event);
+}
+
+void CWizDocumentWebView::mousePressEvent(QMouseEvent *event)
+{
+    // set the flag to indicate context menu event
+    if (event->button() == Qt::RightButton) {
+        m_bContextMenuPop = true;
+    }
+
+    QWebView::mousePressEvent(event);
+}
+
+void CWizDocumentWebView::contextMenuEvent(QContextMenuEvent *event)
+{
+    if (!m_bEditorInited)
+        return;
+
+    MainWindow* window = qobject_cast<MainWindow *>(m_app.mainWindow());
+    window->ResetContextMenuAndPop(mapToGlobal(event->pos()));
+
+    // restore flag
+    m_bContextMenuPop = false;
+}
+
 void CWizDocumentWebView::onTimerAutoSaveTimout()
 {
     saveDocument(false);
@@ -84,49 +112,6 @@ void CWizDocumentWebView::on_documentSaved(bool ok)
 
     MainWindow* mainWindow = qobject_cast<MainWindow *>(m_app.mainWindow());
     mainWindow->SetSavingDocument(false);
-}
-
-//void CWizDocumentWebView::keyPressEvent(QKeyEvent* event)
-//{
-//    if (event->modifiers().testFlag(Qt::ControlModifier)) {
-//        // UE bug: contentChange event not emited when cut
-//        if(event->key() == Qt::Key_X) {
-//            MainWindow* mainWindow = qobject_cast<MainWindow *>(m_app.mainWindow());
-//            mainWindow->SetDocumentModified(true);
-//        } else if (event->key() == Qt::Key_V) {
-//            QClipboard *clipboard = QApplication::clipboard();
-//            const QMimeData *mimeData = clipboard->mimeData();
-
-//            if (mimeData->hasImage()) {
-//                QImage image = qvariant_cast<QImage>(mimeData->imageData());
-//                QString strFileName = WizGlobal()->GetTempPath() + WizIntToStr(GetTickCount()) + ".png";
-//                if (!image.save(strFileName)) {
-//                    TOLOG("ERROR: Can't save image from clipboard");
-//                    return;
-//                }
-
-//                QString strHtml = "<img border=\"0\", src=\"file:///" + strFileName + "\" />";
-//                editorCommandExecuteInsertHtml(strHtml, true);
-
-//            } else if (mimeData->hasHtml()) {
-//                editorCommandExecuteInsertHtml(mimeData->html(), false);
-//            } else if (mimeData->hasText()) {
-//                editorCommandExecuteInsertHtml(mimeData->text(), false);
-//            } else {
-//                TOLOG("WARNING: Can't paste from clipboard");
-//            }
-
-//            return;
-//        }
-//    }
-
-//    QWebView::keyPressEvent(event);
-//}
-
-// QWebView on mac have render issue
-void CWizDocumentWebView::onSelectionChanged()
-{
-    update();
 }
 
 // UEditor can't receive all event like input method commit string change, enter key event etc.
@@ -275,15 +260,6 @@ void CWizDocumentWebView::on_editor_linkClicked(const QUrl& url)
     QDesktopServices::openUrl(url);
 }
 
-void CWizDocumentWebView::on_editor_customContextMenuRequested(const QPoint& pos)
-{
-    if (!m_bEditorInited)
-        return;
-
-    MainWindow* window = qobject_cast<MainWindow *>(m_app.mainWindow());
-    window->ResetContextMenuAndPop(mapToGlobal(pos));
-}
-
 void CWizDocumentWebView::viewDocumentInEditor(bool editing)
 {
     Q_ASSERT(m_bEditorInited);
@@ -308,8 +284,6 @@ void CWizDocumentWebView::viewDocumentInEditor(bool editing)
 
     window->showClient(true);
     m_timerAutoSave.start();
-
-    update();
 }
 
 void CWizDocumentWebView::setEditingDocument(bool editing)
