@@ -465,4 +465,5 @@ target_link_libraries(${PROJECT_NAME}
     clucene-core-static
     clucene-shared-static
     ${QT_LIBRARIES}
+    ${CMAKE_DL_LIBS}
 )

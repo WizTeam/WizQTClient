@@ -27,7 +27,7 @@ public:
         layout->setContentsMargins(0, 0, 0, 0);
         setLayout(layout);
 
-        m_titleEdit = new QLineEdit(this);
+        //m_titleEdit = new QLineEdit(this);
 
         m_editIcon = ::WizLoadSkinIcon(m_app.userSettings().skin(), "lock");
         m_commitIcon = ::WizLoadSkinIcon(m_app.userSettings().skin(), "unlock");
@@ -50,18 +50,18 @@ public:
         m_infoButton->setStyle(::WizGetStyle(m_app.userSettings().skin()));
 
         layout->addStretch();
-        layout->addWidget(m_titleEdit);
+        //layout->addWidget(m_titleEdit);
         layout->addWidget(m_editDocumentButton);
         layout->addWidget(m_tagsButton);
         layout->addWidget(m_attachmentButton);
         layout->addWidget(m_infoButton);
 
-        m_titleEdit->hide();
+        //m_titleEdit->hide();
     }
 
 private:
     CWizExplorerApp& m_app;
-    QPointer<QLineEdit> m_titleEdit;
+    //QPointer<QLineEdit> m_titleEdit;
     QPointer<CWizImagePushButton> m_editDocumentButton;
     QPointer<CWizImagePushButton> m_tagsButton;
     QPointer<CWizImagePushButton> m_attachmentButton;
@@ -96,7 +96,7 @@ private:
     }
 
 public:
-    QLineEdit* titleEdit() const { return m_titleEdit; }
+    //QLineEdit* titleEdit() const { return m_titleEdit; }
     QPushButton* editDocumentButton() const { return m_editDocumentButton; }
     QPushButton* tagsButton() const { return m_tagsButton; }
     QPushButton* attachmentButton() const { return m_attachmentButton; }
@@ -278,11 +278,11 @@ CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
 
     m_title->setEditingDocument(m_editingDocument);
 
-    m_timerDelay.setSingleShot(true);
-    connect(&m_timerDelay, SIGNAL(timeout()), SLOT(on_titleEdit_textEdit_writeDelay()));
+//    m_timerDelay.setSingleShot(true);
+//    connect(&m_timerDelay, SIGNAL(timeout()), SLOT(on_titleEdit_textEdit_writeDelay()));
 
-    connect(m_title->titleEdit(), SIGNAL(textChanged(const QString&)), \
-            SLOT(on_titleEdit_textChanged(const QString&)));
+//    connect(m_title->titleEdit(), SIGNAL(textChanged(const QString&)), \
+//            SLOT(on_titleEdit_textChanged(const QString&)));
 
     connect(m_title->editDocumentButton(), SIGNAL(clicked()), \
             SLOT(on_editDocumentButton_clicked()));
@@ -382,7 +382,7 @@ void CWizDocumentView::showClient(bool visible)
 
 void CWizDocumentView::setReadOnly(bool b, bool isGroup)
 {
-    m_title->titleEdit()->setReadOnly(b);
+    //m_title->titleEdit()->setReadOnly(b);
 
     m_editTitle->setReadOnly(b);
     m_title->editDocumentButton()->setEnabled(!b);
@@ -514,45 +514,45 @@ void CWizDocumentView::on_titleEdit_editingFinished()
     }
 }
 
-void CWizDocumentView::on_titleEdit_textChanged(const QString& strTitle)
-{
-    // apply modify immediately to avoid user switch document
-    if (!m_dataDelay.strGUID.isEmpty() && m_dataDelay.strGUID != m_web->document().strGUID) {
-        // FIXME: other thread will try to read and set document info during delay time
-        // delay 1/10 second for them finished writing.
-        m_timerDelay.start(100);
-    }
+//void CWizDocumentView::on_titleEdit_textChanged(const QString& strTitle)
+//{
+//    // apply modify immediately to avoid user switch document
+//    if (!m_dataDelay.strGUID.isEmpty() && m_dataDelay.strGUID != m_web->document().strGUID) {
+//        // FIXME: other thread will try to read and set document info during delay time
+//        // delay 1/10 second for them finished writing.
+//        m_timerDelay.start(100);
+//    }
 
-    // programmatic change, switch document
-    if (m_web->document().strTitle == strTitle) {
-        return;
-    }
+//    // programmatic change, switch document
+//    if (m_web->document().strTitle == strTitle) {
+//        return;
+//    }
 
-    if (strTitle.isEmpty()) {
-       return;
-    }
+//    if (strTitle.isEmpty()) {
+//       return;
+//    }
 
-    // Only 255 max chars accept by title
-    m_dataDelay = m_web->document();
-    m_dataDelay.strTitle = strTitle.left(255);
-    m_timerDelay.start(300);
-}
+//    // Only 255 max chars accept by title
+//    m_dataDelay = m_web->document();
+//    m_dataDelay.strTitle = strTitle.left(255);
+//    m_timerDelay.start(300);
+//}
 
-void CWizDocumentView::on_titleEdit_textEdit_writeDelay()
-{
-    Q_ASSERT(!m_dataDelay.strGUID.isEmpty());
+//void CWizDocumentView::on_titleEdit_textEdit_writeDelay()
+//{
+//    Q_ASSERT(!m_dataDelay.strGUID.isEmpty());
 
-    WIZDOCUMENTDATA data;
-    CWizDatabase& db = m_dbMgr.db(m_dataDelay.strKbGUID);
-    if (db.DocumentFromGUID(m_dataDelay.strGUID, data)) {
-        data.strTitle = m_dataDelay.strTitle;
-        db.ModifyDocumentInfo(data);
-    }
+//    WIZDOCUMENTDATA data;
+//    CWizDatabase& db = m_dbMgr.db(m_dataDelay.strKbGUID);
+//    if (db.DocumentFromGUID(m_dataDelay.strGUID, data)) {
+//        data.strTitle = m_dataDelay.strTitle;
+//        db.ModifyDocumentInfo(data);
+//    }
 
-    m_dataDelay = WIZDOCUMENTDATA();
+//    m_dataDelay = WIZDOCUMENTDATA();
 
-    m_timerDelay.stop();
-}
+//    m_timerDelay.stop();
+//}
 
 void CWizDocumentView::on_editDocumentButton_clicked()
 {

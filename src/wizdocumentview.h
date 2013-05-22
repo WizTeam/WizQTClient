@@ -55,8 +55,8 @@ protected:
     bool m_editingDocument;
     WizDocumentViewMode m_viewMode;
 
-    QTimer m_timerDelay;
-    WIZDOCUMENTDATA m_dataDelay;
+    //QTimer m_timerDelay;
+    //WIZDOCUMENTDATA m_dataDelay;
 
     QTimer m_timerSizeAdjust;
     int m_nSizeAdjustedTime;
@@ -86,8 +86,8 @@ public:
     void adjustDocumentSize(const QSize& sz, bool bOnlyHeight);
 
 public Q_SLOTS:
-    void on_titleEdit_textChanged(const QString& strTitle);
-    void on_titleEdit_textEdit_writeDelay();
+//    void on_titleEdit_textChanged(const QString& strTitle);
+//    void on_titleEdit_textEdit_writeDelay();
     void on_titleEdit_editingFinished();
     void on_editDocumentButton_clicked();
     void on_tagsButton_clicked();
