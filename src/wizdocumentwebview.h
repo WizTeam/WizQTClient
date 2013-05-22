@@ -70,6 +70,7 @@ public:
     void initEditorStyle();
 
     /* editor related */
+    QSize editorGetScrollSize();
     void editorSetFullScreen();
     void editorResetFont();
 
@@ -91,10 +92,10 @@ public:
     bool editorCommandExecuteInsertHtml(const QString& strHtml, bool bNotSerialize);
 
 protected:
-    virtual void focusInEvent(QFocusEvent *event);
-    virtual void focusOutEvent(QFocusEvent *event);
-    virtual void mousePressEvent(QMouseEvent *event);
-    virtual void contextMenuEvent(QContextMenuEvent *event);
+    virtual void focusInEvent(QFocusEvent* event);
+    virtual void focusOutEvent(QFocusEvent* event);
+    virtual void contextMenuEvent(QContextMenuEvent* event);
+    virtual void wheelEvent(QWheelEvent* event);
 
 private:
     CWizExplorerApp& m_app;
@@ -102,9 +103,9 @@ private:
     QTimer m_timerAutoSave;
     QString m_strHtmlFileName;
     bool m_bEditorInited;
+    bool m_bDocumentOnLoading;
     bool m_bEditingMode;
     bool m_bModified;
-    bool m_bContextMenuPop;
 
     QPointer<CWizDocumentWebViewRenderer> m_renderer;
     QPointer<CWizDownloadObjectDataDialog> m_downloadDialog;
@@ -118,16 +119,20 @@ private:
 
 Q_SIGNALS:
     void focusIn();
+    void focusOut();
+    void sizeChanged();
 
 public Q_SLOTS:
     void on_pageContentsChanged();
+    void on_pageFrameCreated(QWebFrame* frame);
+    void on_editorFrame_contentsSizeChanged(QSize sz);
+
     void onCipherDialogClosed();
     void onDownloadDialogClosed(int result);
 
     void on_editor_populateJavaScriptWindowObject();
     void on_editor_loadFinished(bool ok);
     void on_editor_linkClicked(const QUrl& url);
-    //void on_editor_customContextMenuRequested(const QPoint& pos);
 
     void onTimerAutoSaveTimout();
 

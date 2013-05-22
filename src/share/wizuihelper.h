@@ -55,7 +55,6 @@ public:
 
     virtual QSize sizeHint() const;
     virtual void mouseMoveEvent(QMouseEvent* event);
-    virtual void paintEvent(QPaintEvent* event);
 
 public Q_SLOTS:
     void on_sourceValueChanged(int value);

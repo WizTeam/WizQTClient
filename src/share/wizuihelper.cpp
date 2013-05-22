@@ -80,24 +80,28 @@ CWizScrollBar::CWizScrollBar(QWidget* parent /* = 0 */)
     : QScrollBar(parent)
 {
     setStyleSheet(
-        "QScrollBar:vertical {\
+        "QScrollBar {\
             background: transparent;\
             width: 10px;\
         }\
-        QScrollBar::handle:vertical {\
+        QScrollBar::handle {\
             background: rgba(85, 85, 85, 200);\
-            margin: 0px 2px 0px 0px;\
             border-radius: 4px;\
-            min-height: 25px;\
+            min-height: 30px;\
         }\
-        QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {\
+        QScrollBar::handle:vertical {\
+            margin: 0px 2px 0px 0px;\
+        }\
+        QScrollBar::handle:horizontal {\
+            margin: 0px 0px 2px 0px;\
+        }\
+        QScrollBar::add-page, QScrollBar::sub-page {\
             background: transparent;\
         }\
-        QScrollBar::up-arrow:vertical, QScrollBar::down-arrow:vertical {\
+        QScrollBar::up-arrow, QScrollBar::down-arrow, QScrollBar::left-arrow, QScrollBar::right-arrow {\
             background: transparent;\
         }\
-        QScrollBar::add-line:vertical QScrollBar::sub-line:vertical {\
-            background: transparent;\
+        QScrollBar::add-line, QScrollBar::sub-line {\
             height: 0px;\
             width: 0px;\
         }"\
@@ -121,11 +125,6 @@ void CWizScrollBar::mouseMoveEvent(QMouseEvent* event)
     m_timerScrollTimeout.start(3000);
 
     QScrollBar::mouseMoveEvent(event);
-}
-
-void CWizScrollBar::paintEvent(QPaintEvent* event)
-{
-    QScrollBar::paintEvent(event);
 }
 
 void CWizScrollBar::syncWith(QScrollBar* source)

@@ -18,8 +18,11 @@ CWizDocumentWebView::CWizDocumentWebView(CWizExplorerApp& app, QWidget* parent /
     , m_app(app)
     , m_dbMgr(app.databaseManager())
     , m_bEditorInited(false)
-    , m_bContextMenuPop(false)
+    , m_bDocumentOnLoading(false)
 {
+    // minimum page size hint
+    setMinimumSize(400, 250);
+
     // only accept focus by mouse click
     setFocusPolicy(Qt::ClickFocus);
     setAttribute(Qt::WA_AcceptTouchEvents, false);
@@ -27,6 +30,7 @@ CWizDocumentWebView::CWizDocumentWebView(CWizExplorerApp& app, QWidget* parent /
     // FIXME: should accept drop picture, attachment, link etc.
     setAcceptDrops(false);
 
+    // dialogs
     MainWindow* mainWindow = qobject_cast<MainWindow *>(m_app.mainWindow());
 
     m_cipherDialog = mainWindow->cipherForm();
@@ -35,6 +39,7 @@ CWizDocumentWebView::CWizDocumentWebView(CWizExplorerApp& app, QWidget* parent /
     m_downloadDialog = mainWindow->objectDownloadDialog();
     connect(m_downloadDialog, SIGNAL(finished(int)), SLOT(onDownloadDialogClosed(int)));
 
+    // document loader thread
     m_renderer = new CWizDocumentWebViewRenderer(m_app);
     connect(m_renderer, SIGNAL(documentReady(const QString&)), SLOT(on_documentReady(const QString&)));
     connect(m_renderer, SIGNAL(documentSaved(bool)), SLOT(on_documentSaved(bool)));
@@ -43,6 +48,7 @@ CWizDocumentWebView::CWizDocumentWebView(CWizExplorerApp& app, QWidget* parent /
     m_renderer->moveToThread(thread);
     thread->start();
 
+    // auto save
     m_timerAutoSave.setInterval(10*1000); // 5 minutes
     connect(&m_timerAutoSave, SIGNAL(timeout()), SLOT(onTimerAutoSaveTimout()));
 }
@@ -59,21 +65,12 @@ void CWizDocumentWebView::focusInEvent(QFocusEvent *event)
 void CWizDocumentWebView::focusOutEvent(QFocusEvent *event)
 {
     // because qt will clear focus when context menu popup, we need keep focus there.
-    if (m_bContextMenuPop) {
+    if (event->reason() == Qt::PopupFocusReason) {
         return;
     }
 
+    Q_EMIT focusOut();
     QWebView::focusOutEvent(event);
-}
-
-void CWizDocumentWebView::mousePressEvent(QMouseEvent *event)
-{
-    // set the flag to indicate context menu event
-    if (event->button() == Qt::RightButton) {
-        m_bContextMenuPop = true;
-    }
-
-    QWebView::mousePressEvent(event);
 }
 
 void CWizDocumentWebView::contextMenuEvent(QContextMenuEvent *event)
@@ -83,9 +80,12 @@ void CWizDocumentWebView::contextMenuEvent(QContextMenuEvent *event)
 
     MainWindow* window = qobject_cast<MainWindow *>(m_app.mainWindow());
     window->ResetContextMenuAndPop(mapToGlobal(event->pos()));
+}
 
-    // restore flag
-    m_bContextMenuPop = false;
+void CWizDocumentWebView::wheelEvent(QWheelEvent* event)
+{
+    // propagate wheel event to parent scrollarea
+    event->ignore();
 }
 
 void CWizDocumentWebView::onTimerAutoSaveTimout()
@@ -115,10 +115,16 @@ void CWizDocumentWebView::on_documentSaved(bool ok)
 }
 
 // UEditor can't receive all event like input method commit string change, enter key event etc.
+// so we should listening contents change events from webkit
 void CWizDocumentWebView::on_pageContentsChanged()
 {
-    MainWindow* mainWindow = qobject_cast<MainWindow *>(m_app.mainWindow());
-    mainWindow->SetDocumentModified(true);
+    if (!m_bEditorInited)
+        return;
+
+    if (!m_bDocumentOnLoading) {
+        MainWindow* mainWindow = qobject_cast<MainWindow *>(m_app.mainWindow());
+        mainWindow->SetDocumentModified(true);
+    }
 }
 
 void CWizDocumentWebView::viewDocument(const WIZDOCUMENTDATA& doc, bool editing)
@@ -199,7 +205,7 @@ void CWizDocumentWebView::initEditorStyle()
     QString strFont = m_app.userSettings().defaultFontFamily();
     int nSize = m_app.userSettings().defaultFontSize();
 
-    QString strExec = QString("editor.options.initialStyle = 'body{font-family:%1; font-size:%2px;}';")
+    QString strExec = QString("editor.options.initialStyle = 'body{font-family:%1; font-size:%2px;} img{max-width:100%;}';")
             .arg(strFont).arg(nSize);
     page()->mainFrame()->evaluateJavaScript(strExec);
 }
@@ -226,16 +232,41 @@ void CWizDocumentWebView::initEditorAndLoadDocument()
 
     page()->setLinkDelegationPolicy(QWebPage::DelegateAllLinks);
 
-    connect(page()->mainFrame(), SIGNAL(javaScriptWindowObjectCleared()), \
+    connect(page()->mainFrame(), SIGNAL(javaScriptWindowObjectCleared()),
             SLOT(on_editor_populateJavaScriptWindowObject()));
 
-    connect(page()->mainFrame(), SIGNAL(loadFinished(bool)), \
+    connect(page()->mainFrame(), SIGNAL(loadFinished(bool)),
             SLOT(on_editor_loadFinished(bool)));
 
-    connect(page(), SIGNAL(linkClicked(const QUrl&)), \
+    connect(page(), SIGNAL(linkClicked(const QUrl&)),
             SLOT(on_editor_linkClicked(const QUrl&)));
 
+    connect(page(), SIGNAL(contentsChanged()),
+            SLOT(on_pageContentsChanged()));
+
+    connect(page(), SIGNAL(frameCreated(QWebFrame*)),
+            SLOT(on_pageFrameCreated(QWebFrame*)));
+
     page()->mainFrame()->setHtml(strHtml, url);
+}
+
+void CWizDocumentWebView::on_pageFrameCreated(QWebFrame* frame)
+{
+    // two frame will be created, the editor content frame is only what we interested in.
+    if (!frame->frameName().startsWith("baidu_editor"))
+        return;
+
+    // hide frame editor frame scrollbar, use parent scrollarea's instead.
+    frame->setScrollBarPolicy(Qt::Horizontal, Qt::ScrollBarAlwaysOff);
+    frame->setScrollBarPolicy(Qt::Vertical, Qt::ScrollBarAlwaysOff);
+
+    connect(frame, SIGNAL(contentsSizeChanged(QSize)), SLOT(on_editorFrame_contentsSizeChanged(QSize)));
+}
+
+void CWizDocumentWebView::on_editorFrame_contentsSizeChanged(QSize sz)
+{
+    // try adjust width and height both
+    Q_EMIT sizeChanged();
 }
 
 void CWizDocumentWebView::on_editor_populateJavaScriptWindowObject()
@@ -263,10 +294,9 @@ void CWizDocumentWebView::on_editor_linkClicked(const QUrl& url)
 void CWizDocumentWebView::viewDocumentInEditor(bool editing)
 {
     Q_ASSERT(m_bEditorInited);
-    //Q_ASSERT(!m_data.strGUID.isEmpty());
     Q_ASSERT(!m_strHtmlFileName.isEmpty());
 
-    disconnect(page(), SIGNAL(contentsChanged()), this, SLOT(on_pageContentsChanged()));
+    m_bDocumentOnLoading = true;
 
     QString strScript = QString("viewDocument('%1', '%2', %3);")
             .arg(document().strGUID)
@@ -274,7 +304,7 @@ void CWizDocumentWebView::viewDocumentInEditor(bool editing)
             .arg(editing ? "true" : "false");
     bool ret = page()->mainFrame()->evaluateJavaScript(strScript).toBool();
 
-    connect(page(), SIGNAL(contentsChanged()), SLOT(on_pageContentsChanged()));
+    m_bDocumentOnLoading = false;
 
     MainWindow* window = qobject_cast<MainWindow *>(m_app.mainWindow());
     if (!ret) {
@@ -337,6 +367,17 @@ void CWizDocumentWebView::editorCommandExecuteCopy()
 void CWizDocumentWebView::editorCommandExecutePaste()
 {
     triggerPageAction(QWebPage::Paste);
+}
+
+QSize CWizDocumentWebView::editorGetScrollSize()
+{
+    QString strExec = "editor.document.documentElement.scrollHeight;";
+    int height = page()->mainFrame()->evaluateJavaScript(strExec).toInt();
+
+    strExec = "editor.document.documentElement.scrollWidth;";
+    int width = page()->mainFrame()->evaluateJavaScript(strExec).toInt();
+
+    return QSize(width, height);
 }
 
 void CWizDocumentWebView::editorSetFullScreen()

@@ -12,6 +12,7 @@
 #include "wiznotestyle.h"
 #include "wizEditorToolBar.h"
 
+
 class CWizTitleBar : public QWidget
 {
 public:
@@ -27,19 +28,6 @@ public:
         setLayout(layout);
 
         m_titleEdit = new QLineEdit(this);
-        m_titleEdit->setAttribute(Qt::WA_MacShowFocusRect, false);
-        m_titleEdit->setStyleSheet(
-            "QLineEdit {\
-                margin:4 0 0 0;\
-                padding:4 4 4 4;\
-                border-style:none;\
-                background-image: url(" + ::WizGetResourcesPath() + "skins/leftview_bg.png); \
-            } \
-            QLineEdit:hover { \
-                border-color:#bbbbbb; \
-                border-width:1; \
-                border-style:solid; \
-            }");
 
         m_editIcon = ::WizLoadSkinIcon(m_app.userSettings().skin(), "lock");
         m_commitIcon = ::WizLoadSkinIcon(m_app.userSettings().skin(), "unlock");
@@ -61,11 +49,14 @@ public:
         m_infoButton = new CWizImagePushButton(m_infoIcon, "", this);
         m_infoButton->setStyle(::WizGetStyle(m_app.userSettings().skin()));
 
+        layout->addStretch();
         layout->addWidget(m_titleEdit);
         layout->addWidget(m_editDocumentButton);
         layout->addWidget(m_tagsButton);
         layout->addWidget(m_attachmentButton);
         layout->addWidget(m_infoButton);
+
+        m_titleEdit->hide();
     }
 
 private:
@@ -113,10 +104,10 @@ public:
 
     void setEditingDocument(bool editing) { updateEditDocumentButtonIcon(editing); }
 
-    void setTitle(const QString& str)
-    {
-        m_titleEdit->setText(str);
-    }
+//    void setTitle(const QString& str)
+//    {
+//        m_titleEdit->setText(str);
+//    }
 
     void updateInformation(CWizDatabase& db, const WIZDOCUMENTDATA& doc)
     {
@@ -127,9 +118,9 @@ public:
         }
 
         //title
-        if (m_titleEdit->text() != data.strTitle) {
-            m_titleEdit->setText(data.strTitle);
-        }
+//        if (m_titleEdit->text() != data.strTitle) {
+//            m_titleEdit->setText(data.strTitle);
+//        }
 
         // update tags count only if it's enabled
         if (m_tagsButton->isEnabled()) {
@@ -275,7 +266,7 @@ CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
     layout->addWidget(m_editorToolBar);
     layout->addWidget(m_infoToolBar);
     layout->addWidget(m_notifyToolBar);
-    layout->addWidget(m_web);
+    layout->addWidget(createWebScroll());
 
     layout->setStretchFactor(m_title, 0);
     layout->setStretchFactor(m_web, 1);
@@ -317,8 +308,62 @@ CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
     connect(&m_dbMgr, SIGNAL(attachmentDeleted(const WIZDOCUMENTATTACHMENTDATA&)), \
             SLOT(on_attachment_deleted(const WIZDOCUMENTATTACHMENTDATA&)));
 
-    // webview focus
+    // webview related
     connect(m_web, SIGNAL(focusIn()), SLOT(on_webview_focusIn()));
+    connect(m_web, SIGNAL(focusOut()), SLOT(on_webview_focusOut()));
+    connect(m_web, SIGNAL(sizeChanged()), SLOT(on_webview_sizeChanged()));
+    connect(&m_timerSizeAdjust, SIGNAL(timeout()), SLOT(on_webview_adjustSizeTimeout()));
+}
+
+QWidget* CWizDocumentView::createWebScroll()
+{
+    // outer most border frame
+    QWidget* docFrame = new QWidget();
+    docFrame->setStyleSheet("border-radius: 10px; background-color: #FFFFFF");
+    QVBoxLayout* layoutFrame = new QVBoxLayout();
+    layoutFrame->setContentsMargins(15, 10, 15, 10);
+    layoutFrame->setSpacing(0);
+    docFrame->setLayout(layoutFrame);
+
+    m_editTitle = new QLineEdit(this);
+    m_editTitle->setAttribute(Qt::WA_MacShowFocusRect, false);
+    m_editTitle->setFixedHeight(40);
+    m_editTitle->setFrame(false);
+
+    connect(m_editTitle, SIGNAL(editingFinished ()), \
+            SLOT(on_titleEdit_editingFinished()));
+
+    QWidget* line = new QWidget(this);
+    line->setFixedHeight(1);
+    line->setStyleSheet("border-bottom-width:1;border-bottom-style:solid;border-bottom-color:#D3D3D3");
+
+    layoutFrame->addWidget(m_editTitle);
+    layoutFrame->addWidget(line);
+    layoutFrame->addWidget(m_web);
+
+    QWidget* docView = new QWidget(this);
+    QVBoxLayout* layoutDoc = new QVBoxLayout();
+    layoutDoc->setSizeConstraint(QLayout::SetMinimumSize);
+    layoutDoc->setContentsMargins(15, 15, 15, 15);
+    docView->setLayout(layoutDoc);
+    layoutDoc->addWidget(docFrame);
+
+    m_webScroll = new QScrollArea(this);
+    m_webScroll->setFocusPolicy(Qt::NoFocus);
+    m_webScroll->setWidget(docView);
+
+    // use wiz mac style scrollbar instead of default
+    m_webScroll->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    m_webScroll->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+
+    m_vScroll = new CWizScrollBar(m_webScroll);
+    m_vScroll->syncWith(m_webScroll->verticalScrollBar());
+
+    m_hScroll = new CWizScrollBar(m_webScroll);
+    m_hScroll->setOrientation(Qt::Horizontal);
+    m_hScroll->syncWith(m_webScroll->horizontalScrollBar());
+
+    return m_webScroll;
 }
 
 CWizEditorToolBar* CWizDocumentView::editorToolBar() const
@@ -338,6 +383,8 @@ void CWizDocumentView::showClient(bool visible)
 void CWizDocumentView::setReadOnly(bool b, bool isGroup)
 {
     m_title->titleEdit()->setReadOnly(b);
+
+    m_editTitle->setReadOnly(b);
     m_title->editDocumentButton()->setEnabled(!b);
 
     // tag is not avaliable for group
@@ -370,6 +417,13 @@ bool CWizDocumentView::viewDocument(const WIZDOCUMENTDATA& data, bool forceEdit)
     }
 
     // reset
+    m_timerSizeAdjust.stop();
+    m_nSizeAdjustedTime = 0;
+    m_webScroll->setWidgetResizable(true);
+    m_webScroll->verticalScrollBar()->setValue(0);
+
+    m_editTitle->setText(data.strTitle);
+
     m_notifyToolBar->hide();
     m_title->editDocumentButton()->show();
 
@@ -450,6 +504,16 @@ void CWizDocumentView::settingsChanged()
     setViewMode(m_userSettings.noteViewMode());
 }
 
+void CWizDocumentView::on_titleEdit_editingFinished()
+{
+    WIZDOCUMENTDATA data;
+    CWizDatabase& db = m_dbMgr.db(m_web->document().strKbGUID);
+    if (db.DocumentFromGUID(m_web->document().strGUID, data)) {
+        data.strTitle = m_editTitle->text().left(255);
+        db.ModifyDocumentInfo(data);
+    }
+}
+
 void CWizDocumentView::on_titleEdit_textChanged(const QString& strTitle)
 {
     // apply modify immediately to avoid user switch document
@@ -471,7 +535,7 @@ void CWizDocumentView::on_titleEdit_textChanged(const QString& strTitle)
     // Only 255 max chars accept by title
     m_dataDelay = m_web->document();
     m_dataDelay.strTitle = strTitle.left(255);
-    m_timerDelay.start(1000);
+    m_timerDelay.start(300);
 }
 
 void CWizDocumentView::on_titleEdit_textEdit_writeDelay()
@@ -569,4 +633,93 @@ void CWizDocumentView::on_webview_focusIn()
 {
     m_infoToolBar->hide();
     m_editorToolBar->show();
+}
+
+void CWizDocumentView::on_webview_focusOut()
+{
+    m_editorToolBar->hide();
+    m_infoToolBar->show();
+}
+
+void CWizDocumentView::on_webview_sizeChanged()
+{
+    adjustSize();
+}
+
+void CWizDocumentView::adjustSize(bool reset)
+{
+    if (reset) {
+        m_webScroll->setWidgetResizable(true);
+    }
+
+    m_vScroll->hide();
+    m_hScroll->hide();
+
+    m_timerSizeAdjust.start(300);
+}
+
+void CWizDocumentView::on_webview_adjustSizeTimeout()
+{
+    if (m_nSizeAdjustedTime >= 3) {
+        m_nSizeAdjustedTime = 0;
+        m_timerSizeAdjust.stop();
+        return;
+    }
+
+    QSize sz = m_web->editorGetScrollSize();
+    if (sz == m_web->size()) {
+        m_nSizeAdjustedTime = 0;
+        m_timerSizeAdjust.stop();
+        return;
+    }
+
+    if (!m_nSizeAdjustedTime) {
+        m_timerSizeAdjust.setInterval(10);
+        m_webScroll->setWidgetResizable(false);
+        adjustPosition(sz, true);
+        qDebug() << "adjust 0: " << sz;
+    } else {
+        adjustPosition(sz, false);
+        qDebug() << "adjust" << m_nSizeAdjustedTime << ": " << sz;
+    }
+
+    m_nSizeAdjustedTime++;
+}
+
+void CWizDocumentView::adjustPosition(const QSize& sz, bool bOnlyHeight)
+{
+    // if user is editing and insert new line, resize scrollarea and scroll to bottom
+    bool bNeedScroll = false;
+    QScrollBar* vScroll = m_webScroll->verticalScrollBar();
+    if (vScroll->maximum() == vScroll->value() && m_web->hasFocus()) {
+        bNeedScroll = true;
+    }
+
+    // compute and adjust size, this will trigger frame's contentsSizeChanged event.
+    adjustDocumentSize(sz, bOnlyHeight);
+
+    // do scroll if needed
+    if (bNeedScroll) {
+        vScroll->setValue(vScroll->maximum());
+    }
+}
+
+void CWizDocumentView::adjustDocumentSize(const QSize& sz, bool bOnlyHeight)
+{
+    int width, height;
+
+    if (bOnlyHeight) {
+        width = m_webScroll->viewport()->width();
+    } else {
+        width = m_webScroll->widget()->width() - m_web->width() + sz.width();
+    }
+    height = m_webScroll->widget()->height() - m_web->height() + sz.height();
+
+    m_webScroll->widget()->resize(width, height);
+
+    // reset scrollbar
+    m_vScroll->resize(m_vScroll->sizeHint().width(), m_webScroll->size().height());
+    m_vScroll->move(m_webScroll->size().width() - m_vScroll->sizeHint().width(), 0);
+    m_hScroll->resize(m_webScroll->size().width(), m_hScroll->sizeHint().width());
+    m_hScroll->move(0, m_webScroll->size().height() - m_hScroll->sizeHint().width());
 }

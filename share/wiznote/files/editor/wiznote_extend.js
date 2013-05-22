@@ -37,6 +37,8 @@ try {
     ],
     'fontsize':[9, 10, 11, 12, 13, 14, 16, 18, 24, 36, 48],
     initialStyle:'body{font-size:13px}',
+    initialFrameWidth:400,
+    initialFrameHeight:250,
     contextMenu: [],
     elementPathEnabled: false,
     wordCount: false,

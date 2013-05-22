@@ -9,6 +9,7 @@
 #include "wizdef.h"
 #include "share/wizobject.h"
 #include "share/wizsettings.h"
+#include "share/wizuihelper.h"
 
 
 class CWizDocumentWebView;
@@ -17,6 +18,9 @@ class CWizTagListWidget;
 class CWizAttachmentListWidget;
 class CWizNoteInfoForm;
 class CWizEditorToolBar;
+
+class QScrollArea;
+class QLineEdit;
 
 class CWizTitleBar;
 class CWizInfoToolBar;
@@ -34,12 +38,10 @@ public:
     CWizEditorToolBar* editorToolBar() const;
     CWizDocumentWebView* web() const { return m_web; }
 
-private:
-    CWizExplorerApp& m_app;
-    CWizUserSettings& m_userSettings;
-
 protected:
+    CWizExplorerApp& m_app;
     CWizDatabaseManager& m_dbMgr;
+    CWizUserSettings& m_userSettings;
     QPointer<CWizTitleBar> m_title;
     QPointer<CWizInfoToolBar> m_infoToolBar;
     QPointer<CWizNotifyToolbar> m_notifyToolBar;
@@ -56,6 +58,16 @@ protected:
     QTimer m_timerDelay;
     WIZDOCUMENTDATA m_dataDelay;
 
+    QTimer m_timerSizeAdjust;
+    int m_nSizeAdjustedTime;
+
+private:
+    QPointer<QScrollArea> m_webScroll;
+    CWizScrollBar* m_vScroll;
+    CWizScrollBar* m_hScroll;
+    QPointer<QLineEdit> m_editTitle;
+    QWidget* createWebScroll();
+
 public:
     bool viewDocument(const WIZDOCUMENTDATA& data, bool forceEdit);
     void setReadOnly(bool b, bool isGroup);
@@ -67,9 +79,16 @@ public:
     void setModified(bool modified);
     void settingsChanged();
 
+public:
+    // adjust scrollarea's widget (webview) size
+    void adjustSize(bool reset = false);
+    void adjustPosition(const QSize& sz, bool bOnlyHeight);
+    void adjustDocumentSize(const QSize& sz, bool bOnlyHeight);
+
 public Q_SLOTS:
     void on_titleEdit_textChanged(const QString& strTitle);
     void on_titleEdit_textEdit_writeDelay();
+    void on_titleEdit_editingFinished();
     void on_editDocumentButton_clicked();
     void on_tagsButton_clicked();
     void on_attachmentButton_clicked();
@@ -79,6 +98,9 @@ public Q_SLOTS:
     void on_document_modified(const WIZDOCUMENTDATA& documentOld, const WIZDOCUMENTDATA& documentNew);
 
     void on_webview_focusIn();
+    void on_webview_focusOut();
+    void on_webview_sizeChanged();
+    void on_webview_adjustSizeTimeout();
 };
 
 #endif // WIZDOCUMENTVIEW_H
