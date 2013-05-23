@@ -127,7 +127,7 @@ void MainWindow::resizeEvent(QResizeEvent *event)
 {
     Q_UNUSED(event);
 
-    m_doc->adjustSize(true);
+    //m_doc->adjustSize(true);
     m_statusBar->adjustPosition();
 }
 

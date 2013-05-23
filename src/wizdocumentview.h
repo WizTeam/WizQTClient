@@ -61,6 +61,8 @@ protected:
     QTimer m_timerSizeAdjust;
     int m_nSizeAdjustedTime;
 
+    virtual void resizeEvent(QResizeEvent* event);
+
 private:
     QPointer<QScrollArea> m_webScroll;
     CWizScrollBar* m_vScroll;

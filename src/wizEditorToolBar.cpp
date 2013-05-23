@@ -33,6 +33,10 @@ void drawCombo(QComboBox* cm, QStyleOptionComboBox& opt)
     }
 
     // draw text
+    QFont f = painter.font();
+    f.setPixelSize(11);
+    painter.setFont(f);
+
     QRect editRect = cm->style()->subControlRect(QStyle::CC_ComboBox, &opt, QStyle::SC_ComboBoxEditField);
     if (!opt.currentText.isEmpty()) {
         painter.drawItemText(editRect.adjusted(1, 0, -1, 0),

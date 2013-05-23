@@ -162,7 +162,7 @@ public:
 
         // the height of Editor Toolbar is 32, hard-coded here.
         QHBoxLayout* layout = new QHBoxLayout();
-        layout->setContentsMargins(8, 10, 8, 9);
+        layout->setContentsMargins(8, 6, 8, 6);
         layout->setSpacing(15);
         setLayout(layout);
 
@@ -315,6 +315,13 @@ CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
     connect(&m_timerSizeAdjust, SIGNAL(timeout()), SLOT(on_webview_adjustSizeTimeout()));
 }
 
+void CWizDocumentView::resizeEvent(QResizeEvent* event)
+{
+    adjustSize(true);
+
+    QWidget::resizeEvent(event);
+}
+
 QWidget* CWizDocumentView::createWebScroll()
 {
     // outer most border frame
@@ -422,15 +429,17 @@ bool CWizDocumentView::viewDocument(const WIZDOCUMENTDATA& data, bool forceEdit)
     m_webScroll->setWidgetResizable(true);
     m_webScroll->verticalScrollBar()->setValue(0);
 
-    m_editTitle->setText(data.strTitle);
-
-    m_notifyToolBar->hide();
     m_title->editDocumentButton()->show();
+    m_editTitle->setReadOnly(false);
+    m_notifyToolBar->hide();
 
     if (CWizDatabase::IsInDeletedItems(data.strLocation)) {
         m_notifyToolBar->setNotifyText(tr("This document is deleted, You can edit after move to other folders."));
         m_notifyToolBar->show();
+
         m_title->editDocumentButton()->hide();
+        m_editTitle->setReadOnly(true);
+
         edit = false;
     }
 
@@ -441,12 +450,16 @@ bool CWizDocumentView::viewDocument(const WIZDOCUMENTDATA& data, bool forceEdit)
     if (perm > WIZ_USERGROUP_AUTHOR ||
             (perm == WIZ_USERGROUP_AUTHOR && data.strOwner != strUserId)) {
         m_notifyToolBar->setNotifyText(tr("Your permission is not enough to edit this document."));
-        m_title->editDocumentButton()->hide();
         m_notifyToolBar->show();
+
+        m_title->editDocumentButton()->hide();
+        m_editTitle->setReadOnly(true);
+
         edit = false;
     }
 
     // load document
+    m_editTitle->setText(data.strTitle);
     m_web->viewDocument(data, edit);
 
     m_editingDocument = edit;

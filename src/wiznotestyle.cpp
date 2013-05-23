@@ -247,6 +247,10 @@ void CWizNoteStyle::drawCategoryViewItem(const QStyleOptionViewItemV4 *vopt,
         p->setFont(fontOld);
     }
 
+    QFont f = p->font();
+    f.setPixelSize(13);
+    p->setFont(f);
+
     QColor colorText = vopt->state.testFlag(State_Selected) ? m_colorCategoryTextSelected : m_colorCategoryText;
     CString strText = vopt->text;
     int nWidth = ::WizDrawTextSingleLine(p, textRect, strText,
@@ -347,7 +351,7 @@ void CWizNoteStyle::drawDocumentListViewItem(const QStyleOptionViewItemV4 *vopt,
         //
         textRect.setRight(imageRect.left());
     }
-    //
+
     // draw the text
     if (!vopt->text.isEmpty()) {
         QPalette::ColorGroup cg = vopt->state & QStyle::State_Enabled
@@ -375,8 +379,10 @@ void CWizNoteStyle::drawDocumentListViewItem(const QStyleOptionViewItemV4 *vopt,
         //QColor colorTitle = selected ? m_colorDocumentsTitleSelected : m_colorDocumentsTitle;
 
         p->save();
-        QFont fontTitle;
-        fontTitle.setPointSize(13);
+
+        // title use 13px font size
+        QFont fontTitle = p->font();
+        fontTitle.setPixelSize(13);
         p->setFont(fontTitle);
         QRect rcTitle = textRect;
         rcTitle.setBottom(rcTitle.top() + p->fontMetrics().height());
@@ -384,6 +390,11 @@ void CWizNoteStyle::drawDocumentListViewItem(const QStyleOptionViewItemV4 *vopt,
         QColor colorTitle = selected ? selectedLightColor : m_colorDocumentsTitle;
         ::WizDrawTextSingleLine(p, rcTitle, strTitle,  Qt::TextSingleLine | Qt::AlignVCenter, colorTitle, true);
         p->restore();
+
+        // other text use 12px font size
+        QFont fontAbs = p->font();
+        fontAbs.setPixelSize(12);
+        p->setFont(fontAbs);
 
         //QColor colorDate = selected ? m_colorDocumentsDateSelected : m_colorDocumentsDate;
         QColor colorDate = selected ? selectedLightColor : m_colorDocumentsDate;
@@ -424,7 +435,7 @@ void CWizNoteStyle::drawDocumentListViewItem(const QStyleOptionViewItemV4 *vopt,
                                                 ? QPalette::Highlight : QPalette::Window);
         drawPrimitive(QStyle::PE_FrameFocusRect, &o, p, view);
     }
-    //
+
     p->restore();
 }
 
