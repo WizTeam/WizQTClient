@@ -28,10 +28,10 @@ private:
     // This is trick used for conflict backup.
     // cause onDocumentGetData and onDownloadObjectDataCompleted are rewrite by the class for chain call
     // But these two methods also needed when downloading conflict documents
-    bool m_bChained;
+    //bool m_bChained;
 
-    WIZDOCUMENTDATABASE m_conflictedDocument;
-    WIZDOCUMENTDATAEX m_conflictDownloadedInfo;
+    //WIZDOCUMENTDATABASE m_conflictedDocument;
+    //WIZDOCUMENTDATAEX m_conflictDownloadedInfo;
 
     CWizDeletedGUIDDataArray m_arrayAllDeletedsDownloaded;
     CWizDeletedGUIDDataArray m_arrayAllDeletedsNeedToBeUploaded;
@@ -97,7 +97,7 @@ protected:
     virtual void onStyleGetList(const std::deque<WIZSTYLEDATA>& arrayRet);
     virtual void onDownloadStylesCompleted();
 
-    // step 7: upload documents and do confilict backup
+    // step 7: upload documents and just cover server data
     virtual void startUploadDocuments();
     virtual void uploadNextDocument();
     virtual void queryDocumentInfo(const CString& strGUID, const CString& strTitle);
@@ -106,7 +106,7 @@ protected:
     virtual void onUploadDocument(const WIZDOCUMENTDATAEX& data);
     virtual void onUploadDocumentsCompleted();
 
-    // step 8: upload attachments and do confilict backup
+    // step 8: upload attachments and just cover server data
     virtual void startUploadAttachments();
     virtual void uploadNextAttachment();
     virtual void queryAttachmentInfo(const CString& strGUID, const CString& strName);
@@ -143,8 +143,8 @@ protected:
     virtual void stopSync();
 
     // conflict backup
-    virtual void processConflictDocumentData(const WIZDOCUMENTDATAEX& data);
-    virtual void processConflictObjectData(const WIZOBJECTDATA& data);
+    //virtual void processConflictDocumentData(const WIZDOCUMENTDATAEX& data);
+    //virtual void processConflictObjectData(const WIZOBJECTDATA& data);
 
 private:
     bool downloadDocument(const WIZDOCUMENTDATABASE& data);

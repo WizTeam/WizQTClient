@@ -1,6 +1,8 @@
 #include "wizhtmlreader.h"
 #include "share/wizmisc.h"
 
+#include <QDebug>
+
 const COLORREF CWizHtmlElemAttr::_clrInvalid = (COLORREF)0xFFFFFFFF;
 const unsigned short CWizHtmlElemAttr::_percentMax = USHRT_MAX;
 
@@ -629,7 +631,9 @@ UINT CWizHtmlElemAttr::parseFromStr(const unsigned short* lpszString)
              (*lpszEnd != _T('-')) && (*lpszEnd != _T(':')) &&
              (*lpszEnd != _T('_')) && (*lpszEnd != _T('.')) )
         {
-            ATLASSERT(lpszEnd != lpszBegin);
+            //ATLASSERT(lpszEnd != lpszBegin);
+            if (lpszEnd == lpszBegin)
+                return (0U);
 
             // only white-space characters, a null-character, an
             // equal-sign, a greater-than symbol, or a forward-slash
@@ -1678,16 +1682,16 @@ UINT CWizHtmlReader::parseDocument(void)
 {
     ATLASSERT(m_lpszBuffer != NULL);
 
-	bool	bAbort = false;			// continue parsing or abort?
-	bool	bIsClosingTag = false;	// tag parsed is a closing tag?
-	bool	bIsOpeningTag = false;	// tag parsed is an opening tag?
+    bool bAbort = false;			// continue parsing or abort?
+    bool bIsClosingTag = false;	// tag parsed is a closing tag?
+    bool bIsOpeningTag = false;	// tag parsed is an opening tag?
 	CString	strCharacters;			// character data 
 	CString	strComment;				// comment data
 	DWORD	dwCharDataStart = 0L;	// starting position of character data
 	DWORD	dwCharDataLen = 0L;		// length of character data
-    long	lTemp = 0L;				// temporary storage
-    unsigned short	ch = 0;					// character at current buffer position
-    CWizHtmlTag	oTag;			// tag information
+    long lTemp = 0L;				// temporary storage
+    unsigned short ch = 0;					// character at current buffer position
+    CWizHtmlTag oTag;			// tag information
 
 	if ( (!m_lpszBuffer) || (!m_dwBufLen) )
 		return (0U);
@@ -1851,7 +1855,7 @@ UINT CWizHtmlReader::parseDocument(void)
 UINT CWizHtmlReader::Read(const CString& strString)
 {
     const unsigned short* lpszString = strString;
-    //
+
     m_dwBufLen = ::wiz_strlen(lpszString);
 	if (m_dwBufLen)
 	{
@@ -1861,5 +1865,3 @@ UINT CWizHtmlReader::Read(const CString& strString)
 
 	return (0U);
 }
-
-

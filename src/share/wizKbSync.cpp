@@ -37,7 +37,7 @@ void CWizKbSync::startSync(const QString& strKbGUID)
     m_bSyncStarted = true;
     m_error = false;
 
-    m_bChained = false;
+    //m_bChained = false;
 
     m_arrayAllDeletedsDownloaded.clear();
     m_arrayAllDeletedsNeedToBeUploaded.clear();
@@ -303,7 +303,7 @@ void CWizKbSync::startDownloadDocumentsFullInfo()
     }
 
     // Note: Chained download needed from here.
-    m_bChained = true;
+    //m_bChained = true;
 
     downloadNextDocumentFullInfo();
 }
@@ -535,20 +535,20 @@ void CWizKbSync::onDocumentsGetInfo(const std::deque<WIZDOCUMENTDATABASE>& array
     // server already have this document
     } else if (count == 1) {
         // if document version bigger than local max version number means conflict found
-        __int64 nLocalVersion = m_db->GetObjectVersion(WIZDOCUMENTDATA::ObjectName());
-
-        if (arrayRet[0].nVersion >= nLocalVersion) {
-            WIZDOCUMENTDATA localData;
-            m_db->DocumentFromGUID(arrayRet[0].strGUID, localData);
-            localData.nObjectPart = calDocumentParts(arrayRet[0], localData);
-            // do conflict back only if document data is modified
-            if (localData.nObjectPart & WIZKM_XMLRPC_OBJECT_PART_DATA) {
-                Q_EMIT processLog(tr("Conflict found: ") + localData.strTitle);
-                m_conflictedDocument = localData;
-                callDocumentGetData(localData);
-                return;
-            }
-        }
+        //__int64 nLocalVersion = m_db->GetObjectVersion(WIZDOCUMENTDATA::ObjectName());
+//
+        //if (arrayRet[0].nVersion >= nLocalVersion) {
+        //    WIZDOCUMENTDATA localData;
+        //    m_db->DocumentFromGUID(arrayRet[0].strGUID, localData);
+        //    localData.nObjectPart = calDocumentParts(arrayRet[0], localData);
+        //    // do conflict back only if document data is modified
+        //    if (localData.nObjectPart & WIZKM_XMLRPC_OBJECT_PART_DATA) {
+        //        Q_EMIT processLog(tr("Conflict found: ") + localData.strTitle);
+        //        m_conflictedDocument = localData;
+        //        callDocumentGetData(localData);
+        //        return;
+        //    }
+        //}
 
         onQueryDocumentInfo(arrayRet[0]);
 
@@ -670,18 +670,18 @@ void CWizKbSync::onDocumentGetData(const WIZDOCUMENTDATAEX& data)
 {
     //CWizApi::onDocumentGetData(data);
 
-    if (m_bChained) {
-        if (!data.strGUID.isEmpty()) {
-            if (!m_db->UpdateDocument(data)) {
-                TOLOG1("Update Document info failed: %1", data.strTitle);
-                m_bDocumentInfoError = true;
-            }
+    //if (m_bChained) {
+    if (!data.strGUID.isEmpty()) {
+        if (!m_db->UpdateDocument(data)) {
+            TOLOG1("Update Document info failed: %1", data.strTitle);
+            m_bDocumentInfoError = true;
         }
-
-        downloadNextDocumentFullInfo();
-    } else {
-        processConflictDocumentData(data);
     }
+
+    downloadNextDocumentFullInfo();
+    //} else {
+    //    processConflictDocumentData(data);
+    //}
 }
 
 void CWizKbSync::downloadNextObjectData()
@@ -700,16 +700,16 @@ void CWizKbSync::onDownloadObjectDataCompleted(const WIZOBJECTDATA& data)
 {
     //CWizApi::onDownloadObjectDataCompleted(data);
 
-    if (m_bChained) {
-        if (!data.strObjectGUID.isEmpty()) {
-            m_db->UpdateSyncObjectLocalData(data);
-            m_db->setDocumentSearchIndexed(data.strObjectGUID, false);
-        }
-
-        downloadNextObjectData();
-    } else {
-        processConflictObjectData(data);
+    //if (m_bChained) {
+    if (!data.strObjectGUID.isEmpty()) {
+        m_db->UpdateSyncObjectLocalData(data);
+        m_db->setDocumentSearchIndexed(data.strObjectGUID, false);
     }
+
+    downloadNextObjectData();
+    //} else {
+    //    processConflictObjectData(data);
+    //}
 }
 
 void CWizKbSync::queryDocumentInfo(const CString& strGUID, const CString& strTitle)
@@ -721,38 +721,38 @@ void CWizKbSync::queryDocumentInfo(const CString& strGUID, const CString& strTit
     callDocumentsGetInfo(arrayGUID);
 }
 
-void CWizKbSync::processConflictDocumentData(const WIZDOCUMENTDATAEX& data)
-{
-    // to avoid unable to download document object data, just save it
-    m_conflictDownloadedInfo = data;
+//void CWizKbSync::processConflictDocumentData(const WIZDOCUMENTDATAEX& data)
+//{
+//    // to avoid unable to download document object data, just save it
+//    m_conflictDownloadedInfo = data;
+//
+//    WIZOBJECTDATA objectData(data);
+//    downloadObjectData(objectData);
+//}
 
-    WIZOBJECTDATA objectData(data);
-    downloadObjectData(objectData);
-}
-
-void CWizKbSync::processConflictObjectData(const WIZOBJECTDATA& data)
-{
-    WIZOBJECTDATA conflictObjectData(data);
-    conflictObjectData.strObjectGUID = WizGenGUIDLowerCaseLetterOnly();
-    conflictObjectData.strDisplayName += tr("(conflict backup)");
-
-    // set dirty flag, upload needed
-    m_conflictDownloadedInfo.nVersion = -1;
-    m_conflictDownloadedInfo.strKbGUID = kbGUID();
-    m_conflictDownloadedInfo.strGUID = conflictObjectData.strObjectGUID;
-    m_conflictDownloadedInfo.strTitle += tr("(conflict backup)");
-    m_conflictDownloadedInfo.strInfoMD5 = m_db->CalDocumentInfoMD5(m_conflictDownloadedInfo);
-
-    if (m_db->CreateDocumentEx(m_conflictDownloadedInfo)) {
-        m_db->UpdateSyncObjectLocalData(conflictObjectData);
-        Q_EMIT processLog(WizFormatString1(tr("Conflict backup created: %1"), m_conflictDownloadedInfo.strTitle));
-    } else {
-        Q_EMIT processLog("unable to create conflict backup while create document");
-    }
-
-    // chain back
-    onQueryDocumentInfo(m_conflictDownloadedInfo);
-}
+//void CWizKbSync::processConflictObjectData(const WIZOBJECTDATA& data)
+//{
+//    WIZOBJECTDATA conflictObjectData(data);
+//    conflictObjectData.strObjectGUID = WizGenGUIDLowerCaseLetterOnly();
+//    conflictObjectData.strDisplayName += tr("(conflict backup)");
+//
+//    // set dirty flag, upload needed
+//    m_conflictDownloadedInfo.nVersion = -1;
+//    m_conflictDownloadedInfo.strKbGUID = kbGUID();
+//    m_conflictDownloadedInfo.strGUID = conflictObjectData.strObjectGUID;
+//    m_conflictDownloadedInfo.strTitle += tr("(conflict backup)");
+//    m_conflictDownloadedInfo.strInfoMD5 = m_db->CalDocumentInfoMD5(m_conflictDownloadedInfo);
+//
+//    if (m_db->CreateDocumentEx(m_conflictDownloadedInfo)) {
+//        m_db->UpdateSyncObjectLocalData(conflictObjectData);
+//        Q_EMIT processLog(WizFormatString1(tr("Conflict backup created: %1"), m_conflictDownloadedInfo.strTitle));
+//    } else {
+//        Q_EMIT processLog("unable to create conflict backup while create document");
+//    }
+//
+//    // chain back
+//    onQueryDocumentInfo(m_conflictDownloadedInfo);
+//}
 
 void CWizKbSync::onQueryDocumentInfo(const WIZDOCUMENTDATABASE& data)
 {

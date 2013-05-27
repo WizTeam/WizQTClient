@@ -690,10 +690,10 @@ void CWizDocumentView::on_webview_adjustSizeTimeout()
         m_timerSizeAdjust.setInterval(10);
         m_webScroll->setWidgetResizable(false);
         adjustPosition(sz, true);
-        qDebug() << "adjust 0: " << sz;
+        //qDebug() << "adjust 0: " << sz;
     } else {
         adjustPosition(sz, false);
-        qDebug() << "adjust" << m_nSizeAdjustedTime << ": " << sz;
+        //qDebug() << "adjust" << m_nSizeAdjustedTime << ": " << sz;
     }
 
     m_nSizeAdjustedTime++;
