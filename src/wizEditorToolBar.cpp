@@ -285,7 +285,11 @@ CWizEditorToolBar::CWizEditorToolBar(CWizExplorerApp& app, QWidget *parent)
     layout->addWidget(m_btnTable);
     layout->addWidget(m_btnHorizontal);
     layout->addStretch();
+}
 
+QSize CWizEditorToolBar::sizeHint() const
+{
+    return QSize(1, 32);
 }
 
 void CWizEditorToolBar::on_actionFormatFontFamily_activated(const QString& strFamily)

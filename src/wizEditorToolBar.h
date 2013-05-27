@@ -27,6 +27,9 @@ public:
     void resetToolbar();
     void resetContextMenuAndPop(const QPoint& pos);
 
+protected:
+    QSize sizeHint() const;
+
 private:
     CWizExplorerApp& m_app;
     std::map<QString, QAction*> m_actions;

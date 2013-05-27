@@ -160,9 +160,8 @@ public:
     {
         setStyleSheet("font-size: 11px; color: #646464;");
 
-        // the height of Editor Toolbar is 32, hard-coded here.
         QHBoxLayout* layout = new QHBoxLayout();
-        layout->setContentsMargins(8, 6, 8, 6);
+        layout->setContentsMargins(8, 0, 8, 0);
         layout->setSpacing(15);
         setLayout(layout);
 
@@ -193,6 +192,11 @@ public:
         QString strFile = m_app.databaseManager().db(data.strKbGUID).GetDocumentFileName(data.strGUID);
         QString strSize = QObject::tr("Size: ") + ::WizGetFileSizeHumanReadalbe(strFile);
         m_labelSize->setText(strSize);
+    }
+
+    virtual QSize sizeHint() const
+    {
+        return QSize(1, 32);
     }
 
 private:
@@ -535,6 +539,7 @@ void CWizDocumentView::on_titleEdit_editingFinished()
     if (db.DocumentFromGUID(m_web->document().strGUID, data)) {
         QString strNewTitle = m_editTitle->text().left(255);
         if (strNewTitle != data.strTitle) {
+            data.strTitle = strNewTitle;
             db.ModifyDocumentInfo(data);
         }
     }
