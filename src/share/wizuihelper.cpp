@@ -141,6 +141,15 @@ void CWizScrollBar::syncWith(QScrollBar* source)
     m_scrollSyncSource = source;
 }
 
+void CWizScrollBar::show()
+{
+    if (maximum() == minimum())
+        return;
+
+    QScrollBar::show();
+    m_timerScrollTimeout.start(1000);
+}
+
 void CWizScrollBar::on_sourceValueChanged(int value)
 {
     setSliderPosition(value);
@@ -161,7 +170,6 @@ void CWizScrollBar::on_valueChanged(int value)
     }
 
     show();
-    m_timerScrollTimeout.start(1000);
 }
 
 void CWizScrollBar::on_scrollTimeout()

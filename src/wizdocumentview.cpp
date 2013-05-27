@@ -322,6 +322,17 @@ void CWizDocumentView::resizeEvent(QResizeEvent* event)
     QWidget::resizeEvent(event);
 }
 
+void CWizDocumentView::wheelEvent(QWheelEvent* event)
+{
+    // avoid can't horizonal scroll on linux, show both of scrollbar
+#ifdef Q_WS_X11
+    m_vScroll->show();
+    m_hScroll->show();
+#endif
+
+    QWidget::wheelEvent(event);
+}
+
 QWidget* CWizDocumentView::createWebScroll()
 {
     // outer most border frame

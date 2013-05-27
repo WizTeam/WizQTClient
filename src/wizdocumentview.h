@@ -62,6 +62,7 @@ protected:
     int m_nSizeAdjustedTime;
 
     virtual void resizeEvent(QResizeEvent* event);
+    virtual void wheelEvent(QWheelEvent* event);
 
 private:
     QPointer<QScrollArea> m_webScroll;

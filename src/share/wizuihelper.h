@@ -52,6 +52,7 @@ class CWizScrollBar : public QScrollBar
 public:
     CWizScrollBar(QWidget* parent = 0);
     void syncWith(QScrollBar* source);
+    void show();
 
     virtual QSize sizeHint() const;
     virtual void mouseMoveEvent(QMouseEvent* event);
