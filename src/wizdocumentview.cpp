@@ -533,8 +533,10 @@ void CWizDocumentView::on_titleEdit_editingFinished()
     WIZDOCUMENTDATA data;
     CWizDatabase& db = m_dbMgr.db(m_web->document().strKbGUID);
     if (db.DocumentFromGUID(m_web->document().strGUID, data)) {
-        data.strTitle = m_editTitle->text().left(255);
-        db.ModifyDocumentInfo(data);
+        QString strNewTitle = m_editTitle->text().left(255);
+        if (strNewTitle != data.strTitle) {
+            db.ModifyDocumentInfo(data);
+        }
     }
 }
 

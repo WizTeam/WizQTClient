@@ -118,13 +118,11 @@ void CWizDocumentWebView::on_documentSaved(bool ok)
 // so we should listening contents change events from webkit
 void CWizDocumentWebView::on_pageContentsChanged()
 {
-    if (!m_bEditorInited)
+    if (!m_bEditorInited || m_bDocumentOnLoading)
         return;
 
-    if (!m_bDocumentOnLoading) {
-        MainWindow* mainWindow = qobject_cast<MainWindow *>(m_app.mainWindow());
-        mainWindow->SetDocumentModified(true);
-    }
+    MainWindow* mainWindow = qobject_cast<MainWindow *>(m_app.mainWindow());
+    mainWindow->SetDocumentModified(true);
 }
 
 void CWizDocumentWebView::viewDocument(const WIZDOCUMENTDATA& doc, bool editing)
