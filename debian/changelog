@@ -1,3 +1,21 @@
+wiznote (1.5.14-0ppa1~raring1) raring; urgency=low
+
+  * 1.5.14: bug fix
+
+ -- Albert.Zhou (wiz) <albert748@gmail.com>  Tue, 28 May 2013 17:50:18 +0800
+
+wiznote (1.5.13-0ppa1~raring1) raring; urgency=low
+
+  * 1.5.13 release
+
+ -- Albert.Zhou (wiz) <albert748@gmail.com>  Tue, 28 May 2013 14:09:51 +0800
+
+wiznote (1.5.1-0ppa1~raring2) raring; urgency=low
+
+  * 1.5.1 release
+
+ -- Albert.Zhou (wiz) <albert748@gmail.com>  Tue, 30 Apr 2013 18:30:46 +0800
+
 wiznote (1.4.11-0ppa1~quantal1) quantal; urgency=low
 
   * 1.4.11 release

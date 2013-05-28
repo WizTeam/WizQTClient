@@ -19,6 +19,7 @@ CWizDocumentWebView::CWizDocumentWebView(CWizExplorerApp& app, QWidget* parent /
     , m_dbMgr(app.databaseManager())
     , m_bEditorInited(false)
     , m_bDocumentOnLoading(false)
+    , m_bModified(false)
 {
     // minimum page size hint
     setMinimumSize(400, 250);
