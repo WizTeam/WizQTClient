@@ -468,27 +468,20 @@ void CWizDocumentListView::on_document_modified(const WIZDOCUMENTDATA& documentO
 {
     Q_UNUSED(documentOld);
 
+    // FIXME: if user search on-going, acceptDocument will remove this document from the list.
     if (acceptDocument(documentNew))
     {
         int index = documentIndexFromGUID(documentNew.strGUID);
-        if (-1 == index)
-        {
+        if (-1 == index) {
             addDocument(documentNew, true);
-        }
-        else
-        {
-            if (CWizDocumentListViewItem* pItem = documentItemAt(index))
-            {
-                pItem->reload(m_dbMgr.db());
+        } else {
+            if (CWizDocumentListViewItem* pItem = documentItemAt(index)) {
+                pItem->reload(m_dbMgr.db(documentNew.strKbGUID));
             }
         }
-
-    }
-    else
-    {
+    } else {
         int index = documentIndexFromGUID(documentNew.strGUID);
-        if (-1 != index)
-        {
+        if (-1 != index) {
             takeItem(index);
         }
     }

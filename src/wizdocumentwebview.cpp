@@ -312,6 +312,9 @@ void CWizDocumentWebView::viewDocumentInEditor(bool editing)
 
     window->showClient(true);
     m_timerAutoSave.start();
+
+    // to avoid scrollarea's size not adjusted to contents, eg: document content is duplicate
+    Q_EMIT sizeChanged();
 }
 
 void CWizDocumentWebView::setEditingDocument(bool editing)
