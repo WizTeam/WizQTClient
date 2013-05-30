@@ -783,6 +783,8 @@ bool CWizDatabase::UpdateStyle(const WIZSTYLEDATA& data)
 
 bool CWizDatabase::UpdateDocument(const WIZDOCUMENTDATAEX& data)
 {
+    Q_ASSERT(data.nVersion != -1);
+
     bool bRet = false;
 
     WIZDOCUMENTDATAEX dataTemp;
@@ -829,7 +831,7 @@ bool CWizDatabase::UpdateDocument(const WIZDOCUMENTDATAEX& data)
     if (resetVersion)
     {
         //reset document info
-        ModifyDocumentInfoEx(data);
+        bRet = ModifyDocumentInfoEx(data);
     }
 
     return bRet;

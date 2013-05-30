@@ -82,6 +82,7 @@ class CWizToolButton : public QPushButton
 public:
     CWizToolButton(QWidget* parent = 0) : QPushButton(parent)
     {
+        setFocusPolicy(Qt::NoFocus);
         setCheckable(true);
         setIconSize(QSize(24, 24));
         setMaximumSize(24, 24);
@@ -103,6 +104,7 @@ class CWizToolButtonColor : public QPushButton
 public:
     CWizToolButtonColor(QWidget* parent = 0) : QPushButton(parent)
     {
+        setFocusPolicy(Qt::NoFocus);
         setCheckable(true);
         setIconSize(QSize(24, 24));
         setMaximumSize(24, 24);
@@ -137,6 +139,7 @@ class CWizToolComboBox : public QComboBox
 public:
     CWizToolComboBox(QWidget* parent = 0) : QComboBox(parent)
     {
+        setFocusPolicy(Qt::NoFocus);
         //setSizeAdjustPolicy(QComboBox::QComboBox::AdjustToMinimumContentsLength);
     }
 
@@ -171,6 +174,7 @@ class CWizToolComboBoxFont : public QFontComboBox
 public:
     CWizToolComboBoxFont(QWidget* parent = 0) : QFontComboBox(parent)
     {
+        setFocusPolicy(Qt::NoFocus);
         setSizeAdjustPolicy(QComboBox::QComboBox::AdjustToMinimumContentsLength);
         setEditable(false);
     }

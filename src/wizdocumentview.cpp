@@ -104,11 +104,6 @@ public:
 
     void setEditingDocument(bool editing) { updateEditDocumentButtonIcon(editing); }
 
-//    void setTitle(const QString& str)
-//    {
-//        m_titleEdit->setText(str);
-//    }
-
     void updateInformation(CWizDatabase& db, const WIZDOCUMENTDATA& doc)
     {
         // retrieve document info and reset
@@ -158,6 +153,7 @@ public:
         : QWidget(parent)
         , m_app(app)
     {
+        setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
         setStyleSheet("font-size: 11px; color: #646464;");
 
         QHBoxLayout* layout = new QHBoxLayout();
@@ -238,7 +234,6 @@ private:
     CWizExplorerApp& m_app;
     QPointer<QLabel> m_labelNotify;
 };
-
 
 
 CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
@@ -407,6 +402,9 @@ void CWizDocumentView::setReadOnly(bool b, bool isGroup)
     //m_title->titleEdit()->setReadOnly(b);
 
     m_editTitle->setReadOnly(b);
+    // Qt-bug: Must always set this flag after setReadOnly
+    m_editTitle->setAttribute(Qt::WA_MacShowFocusRect, false);
+
     m_title->editDocumentButton()->setEnabled(!b);
 
     // tag is not avaliable for group
@@ -416,6 +414,25 @@ void CWizDocumentView::setReadOnly(bool b, bool isGroup)
     } else {
         m_title->tagsButton()->setEnabled(true);
     }
+}
+
+void CWizDocumentView::showNotify(WizDocumentUserNotify type)
+{
+    switch (type) {
+        case DocumentLocked:
+            m_notifyToolBar->setNotifyText(tr("The document is locked and read only, press unlock button if you need edit."));
+            break;
+        case DocumentIsDeleted:
+            m_notifyToolBar->setNotifyText(tr("This document is deleted, You can edit after move to other folders."));
+            break;
+        case DocumentPermissionLack:
+            m_notifyToolBar->setNotifyText(tr("Your permission is not enough to edit this document."));
+            break;
+        defaut:
+            Q_ASSERT(0);
+    }
+
+    m_notifyToolBar->show();
 }
 
 bool CWizDocumentView::viewDocument(const WIZDOCUMENTDATA& data, bool forceEdit)
@@ -445,15 +462,22 @@ bool CWizDocumentView::viewDocument(const WIZDOCUMENTDATA& data, bool forceEdit)
     m_webScroll->verticalScrollBar()->setValue(0);
 
     m_title->editDocumentButton()->show();
+
     m_editTitle->setReadOnly(false);
+    // Qt-bug: Must always set this flag after setReadOnly
+    m_editTitle->setAttribute(Qt::WA_MacShowFocusRect, false);
+
     m_notifyToolBar->hide();
 
-    if (CWizDatabase::IsInDeletedItems(data.strLocation)) {
-        m_notifyToolBar->setNotifyText(tr("This document is deleted, You can edit after move to other folders."));
-        m_notifyToolBar->show();
+    if (!edit) {
+        showNotify(DocumentLocked);
+        m_editTitle->setReadOnly(true);
+    }
 
+    if (CWizDatabase::IsInDeletedItems(data.strLocation)) {
         m_title->editDocumentButton()->hide();
         m_editTitle->setReadOnly(true);
+        showNotify(DocumentIsDeleted);
 
         edit = false;
     }
@@ -464,11 +488,9 @@ bool CWizDocumentView::viewDocument(const WIZDOCUMENTDATA& data, bool forceEdit)
     // only reading is permit
     if (perm > WIZ_USERGROUP_AUTHOR ||
             (perm == WIZ_USERGROUP_AUTHOR && data.strOwner != strUserId)) {
-        m_notifyToolBar->setNotifyText(tr("Your permission is not enough to edit this document."));
-        m_notifyToolBar->show();
-
         m_title->editDocumentButton()->hide();
         m_editTitle->setReadOnly(true);
+        showNotify(DocumentPermissionLack);
 
         edit = false;
     }
@@ -499,6 +521,16 @@ const WIZDOCUMENTDATA& CWizDocumentView::document()
 
 void CWizDocumentView::editDocument(bool editing)
 {
+    if (!editing) {
+        showNotify(DocumentLocked);
+        m_editTitle->setReadOnly(true);
+    } else {
+        m_notifyToolBar->hide();
+        m_editTitle->setReadOnly(false);
+        // Qt-bug: Must always set this flag after setReadOnly
+        m_editTitle->setAttribute(Qt::WA_MacShowFocusRect, false);
+    }
+
     m_editingDocument = editing;
     m_title->setEditingDocument(m_editingDocument);
     m_web->setEditingDocument(m_editingDocument);

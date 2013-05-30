@@ -668,20 +668,15 @@ void CWizKbSync::downloadNextDocumentFullInfo()
 
 void CWizKbSync::onDocumentGetData(const WIZDOCUMENTDATAEX& data)
 {
+    Q_ASSERT(!data.strGUID.isEmpty());
     //CWizApi::onDocumentGetData(data);
 
-    //if (m_bChained) {
-    if (!data.strGUID.isEmpty()) {
-        if (!m_db->UpdateDocument(data)) {
-            TOLOG1("Update Document info failed: %1", data.strTitle);
-            m_bDocumentInfoError = true;
-        }
+    if (!m_db->UpdateDocument(data)) {
+        TOLOG1("Update Document info failed: %1", data.strTitle);
+        m_bDocumentInfoError = true;
     }
 
     downloadNextDocumentFullInfo();
-    //} else {
-    //    processConflictDocumentData(data);
-    //}
 }
 
 void CWizKbSync::downloadNextObjectData()

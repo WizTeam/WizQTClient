@@ -26,6 +26,13 @@ class CWizTitleBar;
 class CWizInfoToolBar;
 class CWizNotifyToolbar;
 
+enum WizDocumentUserNotify
+{
+    DocumentLocked,
+    DocumentIsDeleted,
+    DocumentPermissionLack
+};
+
 class CWizDocumentView : public QWidget
 {
     Q_OBJECT
@@ -70,6 +77,7 @@ private:
     CWizScrollBar* m_hScroll;
     QPointer<QLineEdit> m_editTitle;
     QWidget* createWebScroll();
+    void showNotify(WizDocumentUserNotify type);
 
 public:
     bool viewDocument(const WIZDOCUMENTDATA& data, bool forceEdit);

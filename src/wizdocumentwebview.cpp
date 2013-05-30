@@ -322,6 +322,17 @@ void CWizDocumentWebView::setEditingDocument(bool editing)
 {
     Q_ASSERT(m_bEditorInited);
 
+    // show editor toolbar properly
+    if (!editing && hasFocus()) {
+        Q_EMIT focusOut();
+    }
+
+    if (editing && hasFocus()) {
+        Q_EMIT focusIn();
+    }
+
+    m_bEditingMode = editing;
+
     bool bEditing = page()->mainFrame()->evaluateJavaScript("isEdting();").toBool();
     if (bEditing) {
         saveDocument(false);

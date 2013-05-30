@@ -1,5 +1,7 @@
 #include "wizindex.h"
 
+#include <QDebug>
+
 #include <algorithm>
 #include "wizkmcore.h"
 
@@ -825,21 +827,22 @@ bool CWizIndexBase::DeleteStyleEx(const WIZSTYLEDATA& data)
     return true;
 }
 
-bool CWizIndexBase::CreateDocumentEx(const WIZDOCUMENTDATA& data)
+bool CWizIndexBase::CreateDocumentEx(const WIZDOCUMENTDATA& dataNew)
 {
-    Q_ASSERT(data.strKbGUID == m_strKbGUID);
+    Q_ASSERT(dataNew.strKbGUID == m_strKbGUID);
 
-    // group note have have location of null!
-    //if (data.strLocation.IsEmpty()) {
-    //    TOLOG1(_T("Document Location is empty: %1"), data.strTitle);
-    //    Q_ASSERT(false);
-    //    return false;
-    //}
+    WIZDOCUMENTDATA data = dataNew;
 
-    //CString strInfoMD5 = CalDocumentInfoMD5(data);
-    //if (strInfoMD5 != data.strInfoMD5) {
-    //    TOLOG2(_T("Warning: Document info md5 does not match: %1, %2"), strInfoMD5, data.strInfoMD5);
-    //}
+    // try to fill the fields not allowed empty
+    if (data.strTitle.isEmpty()) {
+        TOLOG1("Document Title is empty: %1, Try to rename to the \"New note\"", data.strGUID);
+        data.strTitle = "New note";
+    }
+
+    if (data.strLocation.IsEmpty()) {
+        TOLOG1("Document Location is empty: %1, Try to relocation to the /My Notes/", data.strTitle);
+        data.strLocation = "/My Notes/";
+    }
 
     CString strFormat = FormatInsertSQLFormat(TABLE_NAME_WIZ_DOCUMENT, FIELD_LIST_WIZ_DOCUMENT, PARAM_LIST_WIZ_DOCUMENT);
 
@@ -888,12 +891,35 @@ bool CWizIndexBase::CreateDocumentEx(const WIZDOCUMENTDATA& data)
     return true;
 }
 
-bool CWizIndexBase::ModifyDocumentInfoEx(const WIZDOCUMENTDATA& data)
+bool CWizIndexBase::ModifyDocumentInfoEx(const WIZDOCUMENTDATA& dataCur)
 {
-    Q_ASSERT(data.strKbGUID == m_strKbGUID);
+    Q_ASSERT(dataCur.strKbGUID == m_strKbGUID);
 
     WIZDOCUMENTDATA dataOld;
-    DocumentFromGUID(data.strGUID, dataOld);
+    DocumentFromGUID(dataCur.strGUID, dataOld);
+
+    WIZDOCUMENTDATA data = dataCur;
+
+    // try to fill the fields not allowed empty
+    if (data.strTitle.isEmpty()) {
+        if (!dataOld.strTitle.isEmpty()) {
+            data.strTitle = dataOld.strTitle;
+        } else {
+            data.strTitle = "New note";
+        }
+
+        TOLOG2("Document Title is empty: %1, Try to rename to the %2", data.strGUID, data.strTitle);
+    }
+
+    if (data.strLocation.isEmpty()) {
+        if (!dataOld.strLocation.isEmpty()) {
+            data.strLocation = dataOld.strLocation;
+        } else {
+            data.strLocation = "/My Notes/";
+        }
+
+        TOLOG2("Document Location is empty: %1, Try to relocation to the %2", data.strTitle, data.strLocation);
+    }
 
     CString strFormat = FormatUpdateSQLFormat(TABLE_NAME_WIZ_DOCUMENT, FIELD_LIST_WIZ_DOCUMENT_MODIFY, TABLE_KEY_WIZ_DOCUMENT);
 
@@ -932,6 +958,9 @@ bool CWizIndexBase::ModifyDocumentInfoEx(const WIZDOCUMENTDATA& data)
 
         STR2SQL(data.strGUID).utf16()
     );
+
+//    qDebug() << "ModifyDocumentInfoEx, Title: " << data.strTitle << "location: " << data.strLocation;
+//    qDebug() << strSQL;
 
     if (!ExecSQL(strSQL))
         return false;
