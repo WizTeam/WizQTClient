@@ -881,6 +881,8 @@ bool CWizIndexBase::CreateDocumentEx(const WIZDOCUMENTDATA& dataNew)
         WizInt64ToStr(data.nVersion).utf16()
     );
 
+    qDebug() << "CreateDocumentEx, Title: " << data.strTitle << "location: " << data.strLocation << "version: " << data.nVersion;
+
     if (!ExecSQL(strSQL))
         return false;
 
@@ -959,8 +961,7 @@ bool CWizIndexBase::ModifyDocumentInfoEx(const WIZDOCUMENTDATA& dataCur)
         STR2SQL(data.strGUID).utf16()
     );
 
-//    qDebug() << "ModifyDocumentInfoEx, Title: " << data.strTitle << "location: " << data.strLocation;
-//    qDebug() << strSQL;
+    qDebug() << "ModifyDocumentInfoEx, Title: " << data.strTitle << "location: " << data.strLocation << "version: " << data.nVersion;
 
     if (!ExecSQL(strSQL))
         return false;
