@@ -1,3 +1,9 @@
+wiznote (1.5.16-0ppa1~oneiric1) oneiric; urgency=low
+
+  * 1.5.16: bug fix
+
+ -- Albert.Zhou (wiz) <albert748@gmail.com>  Thu, 30 May 2013 22:04:45 +0800
+
 wiznote (1.5.14-0ppa1~raring1) raring; urgency=low
 
   * 1.5.14: bug fix
