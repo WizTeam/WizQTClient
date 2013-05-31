@@ -97,9 +97,9 @@ public:
     void adjustDocumentSize(const QSize& sz, bool bOnlyHeight);
 
 public Q_SLOTS:
-//    void on_titleEdit_textChanged(const QString& strTitle);
-//    void on_titleEdit_textEdit_writeDelay();
     void on_titleEdit_editingFinished();
+    void on_titleEdit_returnPressed();
+
     void on_editDocumentButton_clicked();
     void on_tagsButton_clicked();
     void on_attachmentButton_clicked();

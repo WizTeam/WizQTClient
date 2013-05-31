@@ -347,8 +347,10 @@ QWidget* CWizDocumentView::createWebScroll()
     m_editTitle->setFixedHeight(40);
     m_editTitle->setFrame(false);
 
-    connect(m_editTitle, SIGNAL(editingFinished ()), \
+    connect(m_editTitle, SIGNAL(editingFinished()),
             SLOT(on_titleEdit_editingFinished()));
+    connect(m_editTitle, SIGNAL(returnPressed()),
+            SLOT(on_titleEdit_returnPressed()));
 
     QWidget* line = new QWidget(this);
     line->setFixedHeight(1);
@@ -555,6 +557,8 @@ void CWizDocumentView::setViewMode(WizDocumentViewMode mode)
 
 void CWizDocumentView::setModified(bool modified)
 {
+    qDebug() << "setModified, document: " << document().strTitle;
+
     m_title->setModified(modified);
     m_web->setModified(modified);
 }
@@ -575,6 +579,12 @@ void CWizDocumentView::on_titleEdit_editingFinished()
             db.ModifyDocumentInfo(data);
         }
     }
+}
+
+void CWizDocumentView::on_titleEdit_returnPressed()
+{
+    m_web->setFocus(Qt::MouseFocusReason);
+    m_web->editorFocus();
 }
 
 //void CWizDocumentView::on_titleEdit_textChanged(const QString& strTitle)

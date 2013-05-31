@@ -73,6 +73,7 @@ public:
     QSize editorGetScrollSize();
     void editorSetFullScreen();
     void editorResetFont();
+    void editorFocus();
 
     // -1: command invalid
     // 0: available
