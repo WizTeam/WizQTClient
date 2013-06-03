@@ -524,7 +524,7 @@ BOOL WIZDOCUMENTDATAEX::LoadFromXmlRpc(CWizXmlRpcStructValue& data, const QStrin
     data.GetBool(_T("document_info"), bInfo);
     data.GetBool(_T("document_data"), bData);
     data.GetBool(_T("document_param"), bParam);
-    ATLASSERT(data.GetInt64(_T("version"), nVersion));
+    data.GetInt64(_T("version"), nVersion);
     ATLASSERT(!bData);
     //
     nObjectPart = 0;
