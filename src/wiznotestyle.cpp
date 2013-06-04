@@ -15,29 +15,9 @@
 #include <QtWidgets>
 #endif
 
+
 class CWizCategoryBaseView;
 class CWizDocumentListView;
-//class QStyleOptionViewItemV4;
-
-//#if defined(Q_OS_WIN32)
-//typedef QWindowsVistaStyle CWizNoteBaseStyle;
-//
-//#elif defined(Q_OS_LINUX)
-//
-//#if defined(QT_NO_STYLE_GTK)
-//#include <QCleanlooksStyle>
-//typedef QCleanlooksStyle CWizLinuxStyle;
-//#else
-//#include <QGtkStyle>
-//typedef QGtkStyle CWizLinuxStyle;
-//#endif
-//
-//typedef CWizLinuxStyle CWizNoteBaseStyle;
-//
-//#elif defined(Q_OS_MAC)
-//#include <QMacStyle>
-//typedef QMacStyle CWizNoteBaseStyle;
-//#endif
 
 typedef QProxyStyle CWizNoteBaseStyle;
 
@@ -304,7 +284,9 @@ void CWizNoteStyle::drawDocumentListViewItem(const QStyleOptionViewItemV4 *vopt,
     p->setPen(m_colorDocumentsLine);
     p->drawLine(textLine.bottomLeft(), textLine.bottomRight());
 
-    QRect textRect = subElementRect(SE_ItemViewItemText, vopt, view);
+    // Not use subElementRect here, because Qt have issue on KDE to get the right rect
+    //QRect textRect = subElementRect(SE_ItemViewItemText, vopt, view);
+    QRect textRect = opt->rect.adjusted(-3, -3, 0, 0);
 
     // draw background behaviour
     if (vopt->state.testFlag(QStyle::State_Selected)) {
@@ -399,6 +381,7 @@ void CWizNoteStyle::drawDocumentListViewItem(const QStyleOptionViewItemV4 *vopt,
         //QColor colorDate = selected ? m_colorDocumentsDateSelected : m_colorDocumentsDate;
         QColor colorDate = selected ? selectedLightColor : m_colorDocumentsDate;
         QRect rcInfo = rcTitle;
+        rcInfo.setBottom(rcInfo.top() + p->fontMetrics().height());
         rcInfo.moveTo(rcInfo.left(), rcInfo.bottom() + 4);
         CString strInfo = document.tCreated.date().toString(Qt::DefaultLocaleShortDate) + tagsText;
         int infoWidth = ::WizDrawTextSingleLine(p, rcInfo, strInfo,  Qt::TextSingleLine | Qt::AlignVCenter, colorDate, true);
@@ -413,12 +396,12 @@ void CWizNoteStyle::drawDocumentListViewItem(const QStyleOptionViewItemV4 *vopt,
 
         QRect rcAbstract2 = textRect;
         rcAbstract2.setTop(rcAbstract1.bottom() + 2);
-        rcAbstract2.setBottom(rcAbstract2.top() + rcTitle.height());
+        rcAbstract2.setBottom(rcAbstract2.top() + rcInfo.height());
         ::WizDrawTextSingleLine(p, rcAbstract2, strAbstract, Qt::TextSingleLine | Qt::AlignVCenter, colorSummary, false);
 
         QRect rcAbstract3 = textRect;
         rcAbstract3.setTop(rcAbstract2.bottom() + 2);
-        rcAbstract3.setBottom(rcAbstract3.top() + rcTitle.height());
+        rcAbstract3.setBottom(rcAbstract3.top() + rcInfo.height());
         ::WizDrawTextSingleLine(p, rcAbstract3, strAbstract, Qt::TextSingleLine | Qt::AlignVCenter, colorSummary, true);
     }
 
@@ -426,7 +409,11 @@ void CWizNoteStyle::drawDocumentListViewItem(const QStyleOptionViewItemV4 *vopt,
     if (vopt->state & QStyle::State_HasFocus) {
         QStyleOptionFocusRect o;
         o.QStyleOption::operator=(*vopt);
-        o.rect = subElementRect(SE_ItemViewItemFocusRect, vopt, view);
+
+        // The same reason as above
+        //o.rect = subElementRect(SE_ItemViewItemFocusRect, vopt, view);
+        o.rect = vopt->rect;
+
         o.state |= QStyle::State_KeyboardFocusChange;
         o.state |= QStyle::State_Item;
         QPalette::ColorGroup cg = (vopt->state & QStyle::State_Enabled)
