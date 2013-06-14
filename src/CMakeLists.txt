@@ -392,6 +392,22 @@ if(UNIX)
         endif()
 
     elseif(NOT APPLE)
+
+        # generating wizdef_local.h
+        # Add a target with no output so it will always be built.
+        add_custom_target(local_version_header ALL DEPENDS wizdef_local_always.h)
+        add_custom_command(OUTPUT wizdef_local_always.h
+            COMMAND ${CMAKE_SOURCE_DIR}/scripts/setlocalversion --save-scmversion)
+
+        # removing wizdef_local.h
+        # It is not possible to add dependencies to target 'clean' to rm wizdef_local.h while doing 'make clean'
+        # see more details in: http://www.cmake.org/pipermail/cmake/2006-October/011477.html
+        add_custom_target(real_clean
+            COMMAND cd .. && ${CMAKE_MAKE_PROGRAM} clean
+            COMMAND ${CMAKE_SOURCE_DIR}/scripts/setlocalversion --clean
+            WORKING_DIRECTORY ${CMAKE_CURRENT_DIR}
+            )
+
         add_executable(${PROJECT_NAME} ${wiznote_SOURCES} ${wiznote_MOC_HEADERS} ${wiznote_FORM_HEADERS} ${wiznote_QM})
         #set_target_properties(${PROJECT_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build)
 
