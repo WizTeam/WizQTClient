@@ -48,29 +48,35 @@ class CWizFolder : public QObject
 {
     Q_OBJECT
 
+    Q_PROPERTY(QString Location READ Location)
+
 public:
-    CWizFolder(CWizDatabase& db, const CString& strLocation);
+    CWizFolder(CWizDatabase& db, const QString& strLocation);
 
     bool IsDeletedItems() const;
     bool IsInDeletedItems() const;
-    void MoveToLocation(const CString& strDestLocation);
-    bool CanMove(const CString& strSrcLocation, const CString& strDestLocation) const;
+    void MoveToLocation(const QString& strDestLocation);
+
+    bool CanMove(const QString& strSrcLocation,
+                 const QString& strDestLocation) const;
+
     bool CanMove(CWizFolder* pSrc, CWizFolder* pDest) const;
 
-    Q_PROPERTY(QString Location READ Location)
+    Q_INVOKABLE void Delete();
+    Q_INVOKABLE void MoveTo(QObject* dest);
+    Q_INVOKABLE QString Location() const { return m_strLocation; }
+    //QObject* CreateDocument2(const QString& strTitle, const QString& strURL);
 
 protected:
     CWizDatabase& m_db;
     CString m_strLocation;
 
-public slots:
-    QString Location() const { return m_strLocation; }
-    QObject* CreateDocument2(const QString& strTitle, const QString& strURL);
-    void Delete();
-    void MoveTo(QObject* dest);
+Q_SIGNALS:
+    void moveDocument(int nTotal, int nProcessed,
+                      const QString& strOldLocation,
+                      const QString& strNewLocation,
+                      const WIZDOCUMENTDATA& data);
 };
-
-
 
 
 class CWizDatabase

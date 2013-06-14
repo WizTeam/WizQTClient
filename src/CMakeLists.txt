@@ -83,8 +83,7 @@ set(wiznote_SOURCES
     wiznotestyle.cpp
     wizcategoryview.cpp
     wizCategoryViewItem.cpp
-    wizNewDialog.cpp
-    newtagdialog.cpp
+    wizLineInputDialog.cpp
     wizdownloadobjectdatadialog.cpp
     wizdocumenthistory.cpp
     wizattachmentlistwidget.cpp
@@ -112,6 +111,9 @@ set(wiznote_SOURCES
     wizButton.cpp
     wizEditorToolBar.cpp
     wizEditorInsertTableForm.cpp
+    wizFolderSelector.cpp
+    share/wizIOHostThread.cpp
+    wizProgressDialog.cpp
 )
 
 set(wiznote_HEADERS
@@ -206,8 +208,7 @@ set(wiznote_HEADERS
     wizusercipherform.h
     wizGroupAttributeForm.h
     wiznoteinfoform.h
-    wizNewDialog.h
-    newtagdialog.h
+    wizLineInputDialog.h
     share/wizClucene.h
     share/wizSearchIndexer.h
     wizSearchWidget.h
@@ -222,7 +223,6 @@ set(wiznote_WRAP_HEADERS
     widgets/qscrollareakineticscroller.h
     widgets/qwebviewkineticscroller.h
     widgets/qsegmentcontrol.h
-    newtagdialog.h
     wizaboutdialog.h
     zip/quazipfile.h
     share/wizanimateaction.h
@@ -247,7 +247,7 @@ set(wiznote_WRAP_HEADERS
     share/wizKbSync.h
     wizmainwindow.h
     share/wizmisc.h
-    wizNewDialog.h
+    wizLineInputDialog.h
     wiznoteinfoform.h
     share/wizpopupwidget.h
     wizpreferencedialog.h
@@ -272,11 +272,13 @@ set(wiznote_WRAP_HEADERS
     wizButton.h
     wizEditorToolBar.h
     wizEditorInsertTableForm.h
+    wizFolderSelector.h
+    share/wizIOHostThread.h
+    wizProgressDialog.h
 )
 
 set(wiznote_FORMS
-    ui/wizNewDialog.ui
-    ui/newtagdialog.ui
+    ui/wizLineInputDialog.ui
     ui/wizdownloadobjectdatadialog.ui
     ui/wizconsoledialog.ui
     ui/wizpreferencedialog.ui
@@ -290,6 +292,8 @@ set(wiznote_FORMS
     ui/wiznoteinfoform.ui
     ui/wizEditorInsertLinkForm.ui
     ui/wizEditorInsertTableForm.ui
+    ui/wizFolderSelector.ui
+    ui/wizProgressDialog.ui
 )
 
 set(wiznote_TRANSLATIONS
@@ -337,6 +341,7 @@ endif()
 # cmake will autogen zconf.h at BINARY_DIR
 #include_directories(${testcmake_SOURCE_DIR}/zlib ${testcmake_BINARY_DIR}/zlib)
 #link_directories(${testcmake_BINARY_DIR}/zlib)
+
 
 # build
 if(UNIX)
@@ -430,6 +435,8 @@ if(UNIX)
 
     endif()
 endif()
+
+set(CMAKE_CXX_FLAGS "-std=c++0x")
 
 # bug fix: not use automoc for cmake 2.8.4 backward compatibility.
 # moc, platform specific argument should be passed to moc

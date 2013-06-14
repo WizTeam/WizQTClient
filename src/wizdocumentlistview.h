@@ -12,6 +12,7 @@
 
 class CWizDocumentListViewItem;
 class CWizTagListWidget;
+class CWizFolderSelector;
 
 class CWizDocumentListView : public QListWidget
 {
@@ -37,6 +38,8 @@ private:
     QPointer<CWizThumbIndexCache> m_thumbCache;
     CWizScrollBar* m_vScroll;
 
+    CWizFolderSelector* m_folderSelector;
+
     QPointer<QMenu> m_menu;
     QAction* m_actionEncryptDocument;
     CWizTagListWidget* m_tagList;
@@ -56,7 +59,8 @@ private:
     void resetPermission();
     QAction* findAction(const QString& strName);
     bool isSelectedAllCanDelete();
-    bool isSelectedGroupDocument();
+    bool isSelectedWithGroupDocument();
+    bool isSelectedWithDeleted();
 
 public:
     void setDocuments(const CWizDocumentDataArray& arrayDocument);
@@ -83,15 +87,22 @@ public:
 //#endif // Q_OS_MAC
 
 public Q_SLOTS:
+    void on_itemSelectionChanged();
+
     void on_tag_created(const WIZTAGDATA& tag);
     void on_tag_modified(const WIZTAGDATA& tagOld, const WIZTAGDATA& tagNew);
     void on_document_created(const WIZDOCUMENTDATA& document);
     void on_document_modified(const WIZDOCUMENTDATA& documentOld, const WIZDOCUMENTDATA& documentNew);
     void on_document_deleted(const WIZDOCUMENTDATA& document);
     //void on_document_AbstractModified(const WIZDOCUMENTDATA& document);
+
+    // context menu actions
     void on_action_selectTags();
     void on_action_deleteDocument();
     void on_action_encryptDocument();
+    void on_action_moveDocument();
+    void on_action_copyDocument();
+    void on_action_copyDocument_confirmed();
 
     void on_document_abstractLoaded(const WIZABSTRACT& abs);
 

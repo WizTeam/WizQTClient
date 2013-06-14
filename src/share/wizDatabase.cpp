@@ -168,82 +168,80 @@ QString CWizDocument::GetMetaText()
 }
 
 
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//class CWizFolder
-CWizFolder::CWizFolder(CWizDatabase& db, const CString& strLocation)
+/*
+* Class CWizFolder
+*/
+
+CWizFolder::CWizFolder(CWizDatabase& db, const QString& strLocation)
     : m_db(db)
     , m_strLocation(strLocation)
 {
 
 }
+
 bool CWizFolder::IsDeletedItems() const
 {
-    return m_db.GetDeletedItemsLocation() == Location();
+    return Location() == LOCATION_DELETED_ITEMS;
 }
 
 bool CWizFolder::IsInDeletedItems() const
 {
-    return !IsDeletedItems() && Location().startsWith(m_db.GetDeletedItemsLocation());
+    return !IsDeletedItems() && Location().startsWith(LOCATION_DELETED_ITEMS);
 }
 
-QObject* CWizFolder::CreateDocument2(const QString& strTitle, const QString& strURL)
-{
-    WIZDOCUMENTDATA data;
-    if (!m_db.CreateDocument(strTitle, "", m_strLocation, strURL, data))
-        return NULL;
-
-    CWizDocument* pDoc = new CWizDocument(m_db, data);
-
-    return pDoc;
-}
+//QObject* CWizFolder::CreateDocument2(const QString& strTitle, const QString& strURL)
+//{
+//    WIZDOCUMENTDATA data;
+//    if (!m_db.CreateDocument(strTitle, "", m_strLocation, strURL, data))
+//        return NULL;
+//
+//    CWizDocument* pDoc = new CWizDocument(m_db, data);
+//
+//    return pDoc;
+//}
 
 void CWizFolder::Delete()
 {
     if (IsDeletedItems())
         return;
 
-    if (IsInDeletedItems())
-    {
-        //if (IDYES != WizMessageBox1(IDS_DELETE_FOLDER, GetName(), MB_YESNO | MB_ICONQUESTION))
-        //    return S_FALSE;
-        //
-        if (!m_db.DeleteDocumentsByLocation(Location()))
-        {
-            TOLOG1(_T("Failed to delete documents by location; %1"), Location());
+    if (IsInDeletedItems()) {
+        if (!m_db.DeleteDocumentsByLocation(Location())) {
+            TOLOG1("Failed to delete documents by location; %1", Location());
             return;
         }
-        //
+
         m_db.LogDeletedFolder(Location());
-    }
-    else
-    {
-        CWizFolder deletedItems(m_db, m_db.GetDeletedItemsLocation());
+    } else {
+        CWizFolder deletedItems(m_db, LOCATION_DELETED_ITEMS);
         MoveTo(&deletedItems);
     }
 }
+
 void CWizFolder::MoveTo(QObject* dest)
 {
     CWizFolder* pFolder = dynamic_cast<CWizFolder*>(dest);
     if (!pFolder)
         return;
-    //
+
     if (IsDeletedItems())
         return;
-    //
-    if (!CanMove(this, pFolder))
-    {
-        TOLOG2(_T("Can move %1 to %2"), Location(), pFolder->Location());
+
+    if (!CanMove(this, pFolder)) {
+        TOLOG2("Can move %1 to %2", Location(), pFolder->Location());
         return;
     }
-    //
+
     return MoveToLocation(pFolder->Location());
 }
 
-bool CWizFolder::CanMove(const CString& strSrcLocation, const CString& strDestLocation) const
+bool CWizFolder::CanMove(const QString& strSrcLocation,
+                         const QString& strDestLocation) const
 {
-    if (m_db.GetDeletedItemsLocation() == strSrcLocation)
+    if (LOCATION_DELETED_ITEMS == strSrcLocation)
         return false;
 
+    // sub folder relationship or the same folder
     if (strDestLocation.startsWith(strSrcLocation))
         return false;
 
@@ -255,7 +253,7 @@ bool CWizFolder::CanMove(CWizFolder* pSrc, CWizFolder* pDest) const
     return CanMove(pSrc->Location(), pDest->Location());
 }
 
-void CWizFolder::MoveToLocation(const CString& strDestLocation)
+void CWizFolder::MoveToLocation(const QString& strDestLocation)
 {
     Q_ASSERT(strDestLocation.right(1) == "/");
     Q_ASSERT(strDestLocation.left(1) == "/");
@@ -263,43 +261,33 @@ void CWizFolder::MoveToLocation(const CString& strDestLocation)
     if (!CanMove(Location(), strDestLocation))
         return;
 
-    CString strOldLocation = Location();
-    //CString strNewLocation;
-//
-    //CString strLocationName = CWizDatabase::GetLocationName(strOldLocation);
-//
-    //if (strDestLocation.IsEmpty()) {
-    //    strNewLocation = "/" + strLocationName + "/";
-    //} else {
-    //    strNewLocation = strDestLocation + strLocationName + "/";
-    //}
+    QString strOldLocation = Location();
 
     CWizDocumentDataArray arrayDocument;
-    if (!m_db.GetDocumentsByLocation(strOldLocation, arrayDocument, true))
-    {
-        TOLOG1(_T("Failed to get documents by location (include sub folders): %1"), strOldLocation);
+    if (!m_db.GetDocumentsByLocation(strOldLocation, arrayDocument, true)) {
+        TOLOG1("Failed to get documents by location (include sub folders): %1", strOldLocation);
         return;
     }
 
+    int i = 0;
     CWizDocumentDataArray::const_iterator it;
-    for (it = arrayDocument.begin(); it != arrayDocument.end(); it++)
-    {
+    for (it = arrayDocument.begin(); it != arrayDocument.end(); it++) {
         WIZDOCUMENTDATA data = *it;
 
-        Q_ASSERT(data.strLocation.startsWith(strOldLocation));
         if (!data.strLocation.startsWith(strOldLocation)) {
-            TOLOG(_T("Error location of document!"));
+            TOLOG("Error location of document!");
             continue;
         }
 
-        data.strLocation.Delete(0, strOldLocation.GetLength());
+        data.strLocation.Delete(0, strOldLocation.length());
         data.strLocation.Insert(0, strDestLocation);
 
-        if (!m_db.ModifyDocumentInfo(data))
-        {
-            TOLOG(_T("Failed to move document to new folder!"));
+        if (!m_db.ModifyDocumentInfo(data)) {
+            TOLOG("Failed to move document to new folder!");
             continue;
         }
+
+        Q_EMIT moveDocument(arrayDocument.size(), i++, strOldLocation, strDestLocation, data);
     }
 
     m_db.LogDeletedFolder(strOldLocation);

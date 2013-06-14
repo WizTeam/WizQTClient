@@ -7,7 +7,7 @@
 #include "wizdef.h"
 #include "wizCategoryViewItem.h"
 #include "wizGroupAttributeForm.h"
-#include "wizNewDialog.h"
+#include "wizLineInputDialog.h"
 #include "share/wizuihelper.h"
 
 class QScrollAreaKineticScroller;
@@ -29,7 +29,7 @@ public:
     void addSeparator();
     CWizCategoryViewSpacerItem* addSpacer();
 
-    void saveSelection(const QString& str);
+    void saveSelection();
     void restoreSelection();
 
     template <class T> T* currentCategoryItem() const;
@@ -136,9 +136,6 @@ private:
 private:
     QPointer<QMenu> m_menuAllFolders;
     QPointer<QMenu> m_menuFolder;
-    QPointer<CWizNewDialog> m_MsgNewFolder;
-    QPointer<CWizNewDialog> m_MsgRenameFolder;
-    QPointer<QMessageBox> m_MsgWarning;
 
 public:
     CWizCategoryViewAllFoldersItem* findAllFolders();
@@ -163,8 +160,12 @@ public Q_SLOTS:
     void on_action_newFolder_confirmed(int result);
     void on_action_renameFolder();
     void on_action_renameFolder_confirmed(int result);
+    void on_action_renameFolder_confirmed_progress(int nMax, int nValue,
+                                                   const QString& strOldLocation,
+                                                   const QString& strNewLocation,
+                                                   const WIZDOCUMENTDATA&);
     void on_action_deleteFolder();
-    void on_action_deleteFolder_confirmed();
+    void on_action_deleteFolder_confirmed(int result);
 
 Q_SIGNALS:
     void newDocument();
@@ -194,10 +195,11 @@ public:
     CWizCategoryViewTagItem* addTagWithChildren(const WIZTAGDATA& tag);
     void removeTag(const WIZTAGDATA& tag);
 
+    void addAndSelectTag(const WIZTAGDATA& tag);
+
 private:
     QMenu* m_menuAllTags;
     QMenu* m_menuTag;
-    QPointer<CWizNewDialog> m_MsgNewTag;
 
     void initTags();
     void initTags(QTreeWidgetItem* pParent, const QString& strParentTagGUID);
@@ -216,7 +218,10 @@ protected:
 public Q_SLOTS:
     void on_action_newTag();
     void on_action_newTag_confirmed(int result);
+    void on_action_renameTag();
+    void on_action_renameTag_confirmed(int result);
     void on_action_deleteTag();
+    void on_action_deleteTag_confirmed(int result);
 };
 
 class CWizCategoryGroupsView : public CWizCategoryBaseView
@@ -244,7 +249,6 @@ private:
     QString m_strKbGUID;
     QPointer<QMenu> m_menuGroupRoot;
     QPointer<QMenu> m_menuGroup;
-    QPointer<CWizNewDialog> m_MsgNewFolder;
 
     void initGroup(CWizDatabase& db);
     void initGroup(CWizDatabase& db, QTreeWidgetItem* pParent, const QString& strParentTagGUID);
@@ -267,12 +271,16 @@ protected:
     virtual void onGroup_permissionChanged(const QString& strKbGUID);
 
 public Q_SLOTS:
+    void on_itemSelectionChanged();
+
     void on_action_markRead();
     void on_action_newDocument();
     void on_action_newTag();
     void on_action_newTag_confirmed(int result);
-    void on_action_modifyTag();
+    void on_action_renameTag();
+    void on_action_renameTag_confirmed(int result);
     void on_action_deleteTag();
+    void on_action_deleteTag_confirmed(int result);
     void on_action_openGroupAttribute();
 };
 

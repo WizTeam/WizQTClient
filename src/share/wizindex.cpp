@@ -1730,25 +1730,27 @@ CString CWizIndex::CalDocumentAttachmentInfoMD5(const WIZDOCUMENTATTACHMENTDATA&
 bool CWizIndex::ModifyTag(WIZTAGDATA& data)
 {
     if (data.strKbGUID.isEmpty()) {
-        TOLOG(_T("Failed to modify tag: kbguid is empty!"));
+        TOLOG("ModifyTag: Failed to modify tag: kbguid is empty");
         return false;
     }
 
     if (data.strGUID.IsEmpty()) {
-        TOLOG(_T("Failed to modify tag: guid is empty!"));
+        TOLOG("ModifyTag: Failed to modify tag: guid is empty");
         return false;
 	}
 
     if (data.strName.IsEmpty()) {
-		TOLOG(_T("Failed to modify tag: name is empty!"));
+        TOLOG("ModifyTag: Failed to modify tag: name is empty");
         return false;
 	}
 
-	WIZTAGDATA dataTemp;
+    WIZTAGDATA dataTemp;
     if (TagByName(data.strName, dataTemp, data.strGUID)) {
-		TOLOG1(_T("Failed to modify tag: Tag already exists: %1!"), data.strName);
-        return false;
-	}
+        if (dataTemp.strParentGUID == data.strParentGUID) {
+            TOLOG1("ModifyTag: Tag already exists with the same parent: %1", data.strName);
+            return false;
+        }
+    }
 
 	data.tModified = WizGetCurrentTime();
     data.nVersion = -1;

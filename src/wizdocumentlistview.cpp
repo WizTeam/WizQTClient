@@ -13,6 +13,8 @@
 #include "wiztaglistwidget.h"
 #include "share/wizsettings.h"
 
+#include "wizFolderSelector.h"
+
 
 class CWizDocumentListViewItem : public QListWidgetItem
 {
@@ -105,15 +107,20 @@ public:
 
 #define WIZACTION_LIST_DELETE   QObject::tr("Delete")
 #define WIZACTION_LIST_TAGS     QObject::tr("Tags...")
+#define WIZACTION_LIST_MOVE_DOCUMENT QObject::tr("Move Document")
+#define WIZACTION_LIST_COPY_DOCUMENT QObject::tr("Copy Document")
 
 CWizDocumentListView::CWizDocumentListView(CWizExplorerApp& app, QWidget *parent /*= 0*/)
     : QListWidget(parent)
     , m_app(app)
     , m_dbMgr(app.databaseManager())
     , m_tagList(NULL)
+    , m_folderSelector(NULL)
 {
     setFrameStyle(QFrame::NoFrame);
     setAttribute(Qt::WA_MacShowFocusRect, false);
+
+    connect(this, SIGNAL(itemSelectionChanged()), SLOT(on_itemSelectionChanged()));
 
     // use custom scrollbar
     setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
@@ -183,7 +190,15 @@ CWizDocumentListView::CWizDocumentListView(CWizExplorerApp& app, QWidget *parent
     m_menu = new QMenu(this);
     m_menu->addAction(WIZACTION_LIST_TAGS, this, SLOT(on_action_selectTags()));
     m_menu->addSeparator();
-    m_menu->addAction(WIZACTION_LIST_DELETE, this, SLOT(on_action_deleteDocument()));
+    QAction* actionDeleteDoc = m_menu->addAction(WIZACTION_LIST_DELETE, this, SLOT(on_action_deleteDocument()), QKeySequence::Delete);
+    m_menu->addAction(WIZACTION_LIST_MOVE_DOCUMENT, this, SLOT(on_action_moveDocument()));
+    m_menu->addAction(WIZACTION_LIST_COPY_DOCUMENT, this, SLOT(on_action_copyDocument()));
+
+    // Add to widget's actions list
+    addAction(actionDeleteDoc);
+
+    actionDeleteDoc->setShortcutContext(Qt::WidgetWithChildrenShortcut);
+
     //m_actionEncryptDocument = new QAction(tr("Encrypt Document"), m_menu);
     //connect(m_actionEncryptDocument, SIGNAL(triggered()), SLOT(on_action_encryptDocument()));
     //m_menu->addAction(m_actionEncryptDocument);
@@ -200,7 +215,10 @@ void CWizDocumentListView::resizeEvent(QResizeEvent* event)
 
 void CWizDocumentListView::setDocuments(const CWizDocumentDataArray& arrayDocument)
 {
+    //reset
     clear();
+    verticalScrollBar()->setValue(0);
+
     addDocuments(arrayDocument);
 }
 
@@ -271,18 +289,29 @@ void CWizDocumentListView::getSelectedDocuments(CWizDocumentDataArray& arrayDocu
 
 void CWizDocumentListView::contextMenuEvent(QContextMenuEvent * e)
 {
-    // reset permission
-    resetPermission();
     m_menu->popup(mapToGlobal(e->pos()));
 }
 
 void CWizDocumentListView::resetPermission()
 {
-    // disable tags if group documents inside
-    if (isSelectedGroupDocument()) {
+    bool bGroup = isSelectedWithGroupDocument();
+    bool bDeleted = isSelectedWithDeleted();
+
+    // if group documents or deleted documents selected
+    if (bGroup || bDeleted) {
         findAction(WIZACTION_LIST_TAGS)->setEnabled(false);
+
+        if (!bGroup && bDeleted) {
+            findAction(WIZACTION_LIST_MOVE_DOCUMENT)->setEnabled(true);
+            findAction(WIZACTION_LIST_COPY_DOCUMENT)->setEnabled(true);
+        } else {
+            findAction(WIZACTION_LIST_MOVE_DOCUMENT)->setEnabled(false);
+            findAction(WIZACTION_LIST_COPY_DOCUMENT)->setEnabled(false);
+        }
     } else {
         findAction(WIZACTION_LIST_TAGS)->setEnabled(true);
+        findAction(WIZACTION_LIST_MOVE_DOCUMENT)->setEnabled(true);
+        findAction(WIZACTION_LIST_COPY_DOCUMENT)->setEnabled(true);
     }
 
     // disable delete if permission is not enough
@@ -310,7 +339,21 @@ QAction* CWizDocumentListView::findAction(const QString& strName)
     return NULL;
 }
 
-bool CWizDocumentListView::isSelectedGroupDocument()
+bool CWizDocumentListView::isSelectedWithDeleted()
+{
+    QList<QListWidgetItem*> items = selectedItems();
+    foreach (QListWidgetItem* it, items) {
+        if (CWizDocumentListViewItem* item = dynamic_cast<CWizDocumentListViewItem*>(it)) {
+            if (item->document().strLocation.startsWith(LOCATION_DELETED_ITEMS)) {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+bool CWizDocumentListView::isSelectedWithGroupDocument()
 {
     QList<QListWidgetItem*> items = selectedItems();
     foreach (QListWidgetItem* it, items) {
@@ -441,6 +484,11 @@ void CWizDocumentListView::dropEvent(QDropEvent * event)
     }
 }
 
+void CWizDocumentListView::on_itemSelectionChanged()
+{
+    resetPermission();
+}
+
 void CWizDocumentListView::on_tag_created(const WIZTAGDATA& tag)
 {
     Q_UNUSED(tag);
@@ -542,6 +590,26 @@ void CWizDocumentListView::on_action_deleteDocument()
             doc.Delete();
         }
     }
+}
+
+void CWizDocumentListView::on_action_moveDocument()
+{
+
+}
+
+void CWizDocumentListView::on_action_copyDocument()
+{
+    if (!m_folderSelector) {
+        m_folderSelector = new CWizFolderSelector(this);
+        connect(m_folderSelector, SIGNAL(accepted()), SLOT(on_action_copyDocument_confirmed()));
+    }
+
+    m_folderSelector->open();
+}
+
+void CWizDocumentListView::on_action_copyDocument_confirmed()
+{
+    qDebug() << "folder selector confirmed";
 }
 
 void CWizDocumentListView::on_action_encryptDocument()

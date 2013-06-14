@@ -1,45 +1,51 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>NewTagDialog</class>
- <widget class="QDialog" name="NewTagDialog">
+ <class>CWizLineInputDialog</class>
+ <widget class="QDialog" name="CWizLineInputDialog">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
     <width>400</width>
-    <height>125</height>
+    <height>135</height>
    </rect>
   </property>
-  <property name="windowTitle">
-   <string>New Tag</string>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
   </property>
-  <widget class="QLabel" name="label">
+  <property name="windowTitle">
+   <string notr="true">Input</string>
+  </property>
+  <widget class="QLineEdit" name="editInput">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>40</y>
+     <width>361</width>
+     <height>20</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QLabel" name="labelHint">
    <property name="geometry">
     <rect>
      <x>20</x>
      <y>20</y>
-     <width>171</width>
+     <width>361</width>
      <height>16</height>
     </rect>
    </property>
    <property name="text">
-    <string>&amp;Tag name:</string>
+    <string notr="true">Hint:</string>
    </property>
    <property name="buddy">
-    <cstring>editTagName</cstring>
+    <cstring>editInput</cstring>
    </property>
   </widget>
-   <widget class="QLineEdit" name="editTagName">
-     <property name="geometry">
-       <rect>
-         <x>20</x>
-         <y>40</y>
-         <width>361</width>
-         <height>20</height>
-       </rect>
-     </property>
-   </widget>
-   <widget class="QDialogButtonBox" name="buttonBox">
+  <widget class="QDialogButtonBox" name="buttonBox">
    <property name="geometry">
     <rect>
      <x>40</x>
@@ -57,15 +63,14 @@
   </widget>
  </widget>
  <tabstops>
-  <tabstop>editTagName</tabstop>
-  <tabstop>buttonBox</tabstop>
+  <tabstop>editInput</tabstop>
  </tabstops>
  <resources/>
  <connections>
   <connection>
    <sender>buttonBox</sender>
    <signal>accepted()</signal>
-   <receiver>NewTagDialog</receiver>
+   <receiver>CWizLineInputDialog</receiver>
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -81,7 +86,7 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>rejected()</signal>
-   <receiver>NewTagDialog</receiver>
+   <receiver>CWizLineInputDialog</receiver>
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">

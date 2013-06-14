@@ -31,11 +31,13 @@
 #include "widgets/qsegmentcontrol.h"
 
 #include "wizEditorToolBar.h"
+#include "wizProgressDialog.h"
 
 
 MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     : QMainWindow(parent)
     , m_dbMgr(dbMgr)
+    , m_progress(new CWizProgressDialog(this))
     , m_settings(new CWizUserSettings(dbMgr.db()))
     , m_sync(new CWizSyncThread(*this, this))
     , m_console(new CWizConsoleDialog(*this, this))
@@ -873,7 +875,7 @@ void MainWindow::on_search_doSearch(const QString& keywords)
         return;
     }
 
-    m_category->saveSelection(keywords);
+    m_category->saveSelection();
     m_documents->clear();
 
     if (!QMetaObject::invokeMethod(m_searchIndexer->worker(), "search", \
@@ -995,6 +997,9 @@ void MainWindow::categorySwitchTo(CWizCategoryBaseView* sourceCategory, CWizCate
     if (!sourceCategory->isVisible()) {
         return;
     }
+
+    sourceCategory->saveSelection();
+    destCategory->restoreSelection();
 
     m_categorySwitchSegmentBtn->setEnabled(false);
     m_actions->actionFromName(WIZACTION_SWITCH_CATEGORY_PRIVATE)->setEnabled(false);

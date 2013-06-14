@@ -21,6 +21,7 @@
 #include "wizcategoryview.h"
 #include "wizdocumentlistview.h"
 
+class CWizProgressDialog;
 class CWizDocumentListView;
 class CWizDocumentView;
 class CWizActions;
@@ -66,6 +67,7 @@ protected:
 
 private:
     CWizDatabaseManager& m_dbMgr;
+    CWizProgressDialog* m_progress;
     CWizUserSettings* m_settings;
     QPointer<CWizSyncThread> m_sync;
     QPointer<QTimer> m_syncTimer;
@@ -133,6 +135,7 @@ public:
     CWizUserCipherForm* cipherForm() const { return m_cipherForm; }
     CWizGroupAttributeForm* groupAttributeForm() { return m_groupAttribute; }
     CWizDownloadObjectDataDialog* objectDownloadDialog() const { return m_objectDownloadDialog; }
+    CWizProgressDialog* progressDialog() const { return m_progress; }
 
     void resetPermission(const QString& strKbGUID, const QString& strDocumentOwner);
     void viewDocument(const WIZDOCUMENTDATA& data, bool addToHistory);
