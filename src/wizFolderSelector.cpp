@@ -1,27 +1,87 @@
 #include "wizFolderSelector.h"
-#include "ui_wizFolderSelector.h"
 
-CWizFolderSelector::CWizFolderSelector(QWidget *parent)
+#include <QtGui>
+
+#include "wizFolderView.h"
+
+CWizFolderSelector::CWizFolderSelector(const QString& strTitle, CWizExplorerApp& app, QWidget *parent)
     : QDialog(parent)
-    , ui(new Ui::CWizFolderSelector)
+    , m_app(app)
+    , m_bAcceptRoot(true)
+    , m_bKeepTime(true)
+    , m_bKeepTags(true)
 {
-    ui->setupUi(this);
+    setWindowTitle(strTitle);
+    setFixedSize(400, 420);
 
-    initFolders();
+    QVBoxLayout* layout = new QVBoxLayout(this);
+    setLayout(layout);
+
+    m_folderView = new CWizFolderView(app, this);
+    layout->addWidget(m_folderView);
+
+    QDialogButtonBox* buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok);
+    connect(buttonBox, SIGNAL(accepted()), SLOT(on_accept()));
+    layout->addWidget(buttonBox);
 }
 
-CWizFolderSelector::~CWizFolderSelector()
+void CWizFolderSelector::setCopyStyle()
 {
-    delete ui;
+    QVBoxLayout* lay = qobject_cast<QVBoxLayout*>(layout());
+
+    QCheckBox* checkKeepTime = new QCheckBox(tr("Keep create/update time"), this);
+    checkKeepTime->setCheckState(m_bKeepTime ? Qt::Checked : Qt::Unchecked);
+    connect(checkKeepTime, SIGNAL(stateChanged(int)), SLOT(on_checkKeepTime_stateChanged(int)));
+
+    QCheckBox* checkKeepTags = new QCheckBox(tr("Keep tags"), this);
+    checkKeepTags->setCheckState(m_bKeepTags ? Qt::Checked : Qt::Unchecked);
+    connect(checkKeepTags, SIGNAL(stateChanged(int)), SLOT(on_checkKeepTags_stateChanged(int)));
+
+    lay->insertWidget(1, checkKeepTime);
+    lay->insertWidget(2, checkKeepTags);
 }
 
-void CWizFolderSelector::showEvent(QShowEvent* event)
+QString CWizFolderSelector::selectedFolder()
 {
-    initFolders();
-    QDialog::showEvent(event);
+    CWizCategoryViewAllFoldersItem* pRoot = dynamic_cast<CWizCategoryViewAllFoldersItem*>(m_folderView->currentItem());
+    if (pRoot) {
+        return "/";
+    }
+
+    CWizCategoryViewFolderItem* p = dynamic_cast<CWizCategoryViewFolderItem*>(m_folderView->currentItem());
+    if (p) {
+        return p->location();
+    }
+
+    return NULL;
 }
 
-void CWizFolderSelector::initFolders()
+void CWizFolderSelector::on_accept()
 {
+    // accept only if user select folder item.
+    if (!m_bAcceptRoot) {
+        CWizCategoryViewFolderItem* p = dynamic_cast<CWizCategoryViewFolderItem*>(m_folderView->currentItem());
+        if (!p)
+            return;
+    }
 
+    accept();
+}
+
+void CWizFolderSelector::on_checkKeepTime_stateChanged(int state)
+{
+    if (Qt::Checked == state) {
+        m_bKeepTime = true;
+    } else {
+        m_bKeepTime = false;
+    }
+}
+
+void CWizFolderSelector::on_checkKeepTags_stateChanged(int state)
+{
+    if (Qt::Checked == state) {
+        m_bKeepTags = true;
+    } else {
+        m_bKeepTags = false;
+    }
 }

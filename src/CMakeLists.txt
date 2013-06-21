@@ -114,6 +114,9 @@ set(wiznote_SOURCES
     wizFolderSelector.cpp
     share/wizIOHostThread.cpp
     wizProgressDialog.cpp
+    wizFolderView.cpp
+    widgets/wizScrollBar.cpp
+    wizDocumentSelectionView.cpp
 )
 
 set(wiznote_HEADERS
@@ -268,13 +271,16 @@ set(wiznote_WRAP_HEADERS
     wizwelcomedialog.h
     share/wizXmlRpcServer.h
     share/wizziwreader.h
-    share/wizuihelper.h
+    #share/wizuihelper.h
     wizButton.h
     wizEditorToolBar.h
     wizEditorInsertTableForm.h
     wizFolderSelector.h
     share/wizIOHostThread.h
     wizProgressDialog.h
+    wizFolderView.h
+    widgets/wizScrollBar.h
+    wizDocumentSelectionView.h
 )
 
 set(wiznote_FORMS
@@ -292,7 +298,6 @@ set(wiznote_FORMS
     ui/wiznoteinfoform.ui
     ui/wizEditorInsertLinkForm.ui
     ui/wizEditorInsertTableForm.ui
-    ui/wizFolderSelector.ui
     ui/wizProgressDialog.ui
 )
 

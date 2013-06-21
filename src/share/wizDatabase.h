@@ -34,12 +34,10 @@ private:
     CWizDatabase& m_db;
     WIZDOCUMENTDATA m_data;
 
-public Q_SLOTS:
-    void Delete();
-    void PermanentlyDelete(void);
-    void MoveTo(QObject* pFolder);
-
 public:
+    Q_INVOKABLE void Delete();
+    Q_INVOKABLE void PermanentlyDelete(void);
+    Q_INVOKABLE void MoveTo(QObject* pFolder);
     Q_INVOKABLE bool UpdateDocument4(const QString& strHtml, const QString& strURL, int nFlags);
 };
 
@@ -57,8 +55,8 @@ public:
     bool IsInDeletedItems() const;
     void MoveToLocation(const QString& strDestLocation);
 
-    bool CanMove(const QString& strSrcLocation,
-                 const QString& strDestLocation) const;
+    static bool CanMove(const QString& strSrcLocation,
+                        const QString& strDestLocation);
 
     bool CanMove(CWizFolder* pSrc, CWizFolder* pDest) const;
 

@@ -10,6 +10,7 @@
 #include "wizLineInputDialog.h"
 #include "share/wizuihelper.h"
 
+class CWizScrollBar;
 class QScrollAreaKineticScroller;
 
 class CWizCategoryBaseView : public QTreeWidget
@@ -158,12 +159,18 @@ public Q_SLOTS:
     void on_action_newDocument();
     void on_action_newFolder();
     void on_action_newFolder_confirmed(int result);
+    void on_action_moveFolder();
+    void on_action_moveFolder_confirmed(int result);
+    void on_action_moveFolder_confirmed_progress(int nMax, int nValue,
+                                                 const QString& strOldLocation,
+                                                 const QString& strNewLocation,
+                                                 const WIZDOCUMENTDATA& data);
     void on_action_renameFolder();
     void on_action_renameFolder_confirmed(int result);
     void on_action_renameFolder_confirmed_progress(int nMax, int nValue,
                                                    const QString& strOldLocation,
                                                    const QString& strNewLocation,
-                                                   const WIZDOCUMENTDATA&);
+                                                   const WIZDOCUMENTDATA& data);
     void on_action_deleteFolder();
     void on_action_deleteFolder_confirmed(int result);
 

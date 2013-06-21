@@ -11,7 +11,7 @@
 #include "share/wizsettings.h"
 #include "share/wizuihelper.h"
 
-
+class CWizScrollBar;
 class CWizDocumentWebView;
 class CWizDatabase;
 class CWizTagListWidget;

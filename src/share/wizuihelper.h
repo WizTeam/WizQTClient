@@ -6,6 +6,7 @@
 
 #include "wizdef.h"
 
+QBrush WizGetLeftViewBrush();
 
 class CWizSpacer : public QWidget
 {
@@ -44,29 +45,5 @@ public:
     CWizSplitter(QWidget* parent = 0);
     virtual QSplitterHandle *createHandle();
 };
-
-class CWizScrollBar : public QScrollBar
-{
-    Q_OBJECT
-
-public:
-    CWizScrollBar(QWidget* parent = 0);
-    void syncWith(QScrollBar* source);
-    void show();
-
-    virtual QSize sizeHint() const;
-    virtual void mouseMoveEvent(QMouseEvent* event);
-
-public Q_SLOTS:
-    void on_sourceValueChanged(int value);
-    void on_sourceRangeChanged(int min, int max);
-    void on_valueChanged(int value);
-    void on_scrollTimeout();
-
-private:
-    QPointer<QScrollBar> m_scrollSyncSource;
-    QTimer m_timerScrollTimeout;
-};
-
 
 #endif // WIZMACHELPER_H

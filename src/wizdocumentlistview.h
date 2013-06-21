@@ -1,18 +1,18 @@
 #ifndef WIZDOCUMENTLISTVIEW_H
 #define WIZDOCUMENTLISTVIEW_H
 
-#include <QtGui>
+#include <QListWidget>
 
 #include "wizdef.h"
+#include "wizmainwindow.h"
 #include "share/wizobject.h"
 #include "share/wizThumbIndexCache.h"
 #include "share/wizuihelper.h"
 
-//#include "widgets/qscrollareakineticscroller.h"
-
 class CWizDocumentListViewItem;
 class CWizTagListWidget;
 class CWizFolderSelector;
+class CWizScrollBar;
 
 class CWizDocumentListView : public QListWidget
 {
@@ -20,8 +20,9 @@ class CWizDocumentListView : public QListWidget
 
 public:
     CWizDocumentListView(CWizExplorerApp& app, QWidget *parent = 0);
-    //virtual QSize sizeHint() const { return QSize(300, 1); }
+    CWizThumbIndexCache* thumbCache() const { return m_thumbCache; }
 
+protected:
     virtual void resizeEvent(QResizeEvent* event);
     virtual void contextMenuEvent(QContextMenuEvent* event);
     virtual void mousePressEvent(QMouseEvent* event);
@@ -37,8 +38,6 @@ private:
     CWizDatabaseManager& m_dbMgr;
     QPointer<CWizThumbIndexCache> m_thumbCache;
     CWizScrollBar* m_vScroll;
-
-    CWizFolderSelector* m_folderSelector;
 
     QPointer<QMenu> m_menu;
     QAction* m_actionEncryptDocument;
@@ -56,11 +55,14 @@ private:
 
     QPointer<QPropertyAnimation> m_scrollAnimation;
 
-    void resetPermission();
     QAction* findAction(const QString& strName);
-    bool isSelectedAllCanDelete();
-    bool isSelectedWithGroupDocument();
-    bool isSelectedWithDeleted();
+
+    void resetPermission();
+
+    // Test documents property
+    bool isDocumentsAllCanDelete(const CWizDocumentDataArray& arrayDocument);
+    bool isDocumentsWithGroupDocument(const CWizDocumentDataArray& arrayDocument);
+    bool isDocumentsWithDeleted(const CWizDocumentDataArray& arrayDocument);
 
 public:
     void setDocuments(const CWizDocumentDataArray& arrayDocument);
@@ -100,9 +102,12 @@ public Q_SLOTS:
     void on_action_selectTags();
     void on_action_deleteDocument();
     void on_action_encryptDocument();
+
     void on_action_moveDocument();
+    void on_action_moveDocument_confirmed(int result);
+
     void on_action_copyDocument();
-    void on_action_copyDocument_confirmed();
+    void on_action_copyDocument_confirmed(int result);
 
     void on_document_abstractLoaded(const WIZABSTRACT& abs);
 

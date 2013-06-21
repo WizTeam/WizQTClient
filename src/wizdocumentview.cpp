@@ -4,6 +4,8 @@
 #include <QWebElement>
 #include <QWebFrame>
 
+#include "widgets/wizScrollBar.h"
+
 #include "share/wizimagepushbutton.h"
 #include "wizdocumentwebview.h"
 #include "wiztaglistwidget.h"

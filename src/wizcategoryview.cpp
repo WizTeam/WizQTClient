@@ -4,25 +4,17 @@
 #include <QtWidgets>
 #endif
 
-#include <QHeaderView>
-#include <QPalette>
-#include <QContextMenuEvent>
-#include <QMenu>
-#include <QCursor>
-#include <QPainter>
-#include <QUrl>
+#include <QtGui>
+
+#include "widgets/wizScrollBar.h"
 
 #include "wizmainwindow.h"
-
 #include "wizProgressDialog.h"
-
 #include "share/wizdrawtexthelper.h"
 #include "wiznotestyle.h"
-
-//#include "newtagdialog.h"
 #include "share/wizsettings.h"
 #include "share/wizDatabaseManager.h"
-#include "widgets/qscrollareakineticscroller.h"
+#include "wizFolderSelector.h"
 
 /* ------------------------------ CWizCategoryBaseView ------------------------------ */
 
@@ -34,6 +26,7 @@ CWizCategoryBaseView::CWizCategoryBaseView(CWizExplorerApp& app, QWidget* parent
     , m_selectedItem(NULL)
 {
     header()->hide();
+    setAnimated(true);
     setFrameStyle(QFrame::NoFrame);
     viewport()->setAttribute(Qt::WA_AcceptTouchEvents, true);
     setAttribute(Qt::WA_MacShowFocusRect, false);
@@ -45,7 +38,6 @@ CWizCategoryBaseView::CWizCategoryBaseView(CWizExplorerApp& app, QWidget* parent
     //m_kineticScroller->setWidget(this);
 
     // use custom scrollbar
-    setAnimated(true);
     setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
     setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
@@ -484,7 +476,7 @@ void CWizCategoryBaseView::on_group_permissionChanged(const QString& strKbGUID)
 
 #define WIZACTION_PRIVATE_NEW_DOCUMENT    QObject::tr("Create new document")
 #define WIZACTION_PRIVATE_NEW_FOLDER      QObject::tr("Create new folder")
-#define WIZACTION_PRIVATE_MOVE_FOLDER     QObject::tr("Move current folder");
+#define WIZACTION_PRIVATE_MOVE_FOLDER     QObject::tr("Move current folder")
 #define WIZACTION_PRIVATE_RENAME_FOLDER   QObject::tr("Rename current folder")
 #define WIZACTION_PRIVATE_DELETE_FOLDER   QObject::tr("Delete current folder")
 
@@ -502,17 +494,20 @@ CWizCategoryView::CWizCategoryView(CWizExplorerApp& app, QWidget* parent)
     QAction* actionNewDoc = m_menuFolder->addAction(WIZACTION_PRIVATE_NEW_DOCUMENT, this, SLOT(on_action_newDocument()), QKeySequence::New);
     m_menuFolder->addAction(actionNewFolder);
     m_menuFolder->addSeparator();
+    QAction* actionMoveFolder = m_menuFolder->addAction(WIZACTION_PRIVATE_MOVE_FOLDER, this, SLOT(on_action_moveFolder()), QKeySequence("Ctrl+Shift+M"));
     QAction* actionRenameFolder = m_menuFolder->addAction(WIZACTION_PRIVATE_RENAME_FOLDER, this, SLOT(on_action_renameFolder()), QKeySequence(Qt::Key_F2));
     QAction* actionDeleteFolder = m_menuFolder->addAction(WIZACTION_PRIVATE_DELETE_FOLDER, this, SLOT(on_action_deleteFolder()), QKeySequence::Delete);
 
     // add to widget's actions list
     addAction(actionNewDoc);
     addAction(actionNewFolder);
+    addAction(actionMoveFolder);
     addAction(actionRenameFolder);
     addAction(actionDeleteFolder);
 
     actionNewDoc->setShortcutContext(Qt::WidgetWithChildrenShortcut);
     actionNewFolder->setShortcutContext(Qt::WidgetWithChildrenShortcut);
+    actionMoveFolder->setShortcutContext(Qt::WidgetWithChildrenShortcut);
     actionRenameFolder->setShortcutContext(Qt::WidgetWithChildrenShortcut);
     actionDeleteFolder->setShortcutContext(Qt::WidgetWithChildrenShortcut);
 }
@@ -774,7 +769,7 @@ CWizCategoryViewFolderItem* CWizCategoryView::findFolder(const CString& strLocat
 
     CString strCurrentLocation = "/";
     QTreeWidgetItem* parent = pAllFolders;
-    //
+
     CString strTempLocation = strLocation;
     strTempLocation.Trim('/');
     QStringList sl = strTempLocation.split("/");
@@ -782,9 +777,9 @@ CWizCategoryViewFolderItem* CWizCategoryView::findFolder(const CString& strLocat
     QStringList::const_iterator it;
     for (it = sl.begin(); it != sl.end(); it++) {
         CString strLocationName = *it;
-        ATLASSERT(!strLocationName.IsEmpty());
+        Q_ASSERT(!strLocationName.isEmpty());
         strCurrentLocation = strCurrentLocation + strLocationName + "/";
-        //
+
         bool found = false;
         int nCount = parent->childCount();
         for (int i = 0; i < nCount; i++)
@@ -798,13 +793,13 @@ CWizCategoryViewFolderItem* CWizCategoryView::findFolder(const CString& strLocat
                 continue;
             }
         }
-        //
+
         if (found)
             continue;
-        //
+
         if (!create)
             return NULL;
-        //
+
         CWizCategoryViewFolderItem* pFolderItem = new CWizCategoryViewFolderItem(m_app, strCurrentLocation, m_dbMgr.db().kbGUID());
         parent->addChild(pFolderItem);
         parent->setExpanded(true);
@@ -812,10 +807,10 @@ CWizCategoryViewFolderItem* CWizCategoryView::findFolder(const CString& strLocat
         {
             parent->sortChildren(0, Qt::AscendingOrder);
         }
-        //
+
         parent = pFolderItem;
     }
-    //
+
     return dynamic_cast<CWizCategoryViewFolderItem *>(parent);
 }
 
@@ -905,6 +900,69 @@ void CWizCategoryView::on_action_newFolder_confirmed(int result)
 
     addAndSelectFolder(strLocation);
     m_dbMgr.db().AddExtraFolder(strLocation);
+}
+
+void CWizCategoryView::on_action_moveFolder()
+{
+    CWizFolderSelector* selector = new CWizFolderSelector(tr("Move folder"), m_app, this);
+    selector->setAcceptRoot(true);
+
+    connect(selector, SIGNAL(finished(int)), SLOT(on_action_moveFolder_confirmed(int)));
+    selector->open();
+}
+
+void CWizCategoryView::on_action_moveFolder_confirmed(int result)
+{
+    CWizFolderSelector* selector = qobject_cast<CWizFolderSelector*>(sender());
+    QString strSelectedFolder = selector->selectedFolder();
+    sender()->deleteLater();
+
+    if (result != QDialog::Accepted) {
+        return;
+    }
+
+    if (strSelectedFolder.isEmpty()) {
+        return;
+    }
+
+    QString strLocation;
+    if (CWizCategoryViewFolderItem* p = currentCategoryItem<CWizCategoryViewFolderItem>()) {
+        QString strOldLocation = p->location();
+        int n = strOldLocation.lastIndexOf("/", -2);
+        strLocation = strSelectedFolder + strOldLocation.right(strOldLocation.length() - n - 1);
+
+        // move all documents to new folder
+        CWizFolder folder(m_dbMgr.db(), strOldLocation);
+        connect(&folder, SIGNAL(moveDocument(int, int, const QString&, const QString&, const WIZDOCUMENTDATA&)),
+                SLOT(on_action_moveFolder_confirmed_progress(int, int, const QString&, const QString&, const WIZDOCUMENTDATA&)));
+
+        if (!CWizFolder::CanMove(strOldLocation, strLocation)) {
+            return;
+        }
+
+        folder.MoveToLocation(strLocation);
+
+        // hide progress dialog
+        MainWindow* mainWindow = qobject_cast<MainWindow*>(m_app.mainWindow());
+        mainWindow->progressDialog()->hide();
+
+        addAndSelectFolder(strLocation);
+        on_folder_deleted(strOldLocation);
+    }
+}
+
+void CWizCategoryView::on_action_moveFolder_confirmed_progress(int nMax, int nValue,
+                                                               const QString& strOldLocation,
+                                                               const QString& strNewLocation,
+                                                               const WIZDOCUMENTDATA& data)
+{
+    MainWindow* mainWindow = qobject_cast<MainWindow*>(m_app.mainWindow());
+    CWizProgressDialog* progress = mainWindow->progressDialog();
+
+    progress->setActionString(tr("Move Document: %1 to %2").arg(strOldLocation).arg(strNewLocation));
+    progress->setNotifyString(data.strTitle);
+    progress->setProgress(nMax, nValue);
+    progress->open();
 }
 
 void CWizCategoryView::on_action_renameFolder()
@@ -1894,7 +1952,7 @@ void CWizCategoryGroupsView::on_itemSelectionChanged()
         return;
     }
 
-    onGroup_permissionChanged(p->kbGUID());
+    on_group_permissionChanged(p->kbGUID());
 }
 
 void CWizCategoryGroupsView::on_action_markRead()

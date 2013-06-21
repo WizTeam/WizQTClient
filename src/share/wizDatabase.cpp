@@ -236,7 +236,7 @@ void CWizFolder::MoveTo(QObject* dest)
 }
 
 bool CWizFolder::CanMove(const QString& strSrcLocation,
-                         const QString& strDestLocation) const
+                         const QString& strDestLocation)
 {
     if (LOCATION_DELETED_ITEMS == strSrcLocation)
         return false;

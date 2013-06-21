@@ -23,13 +23,13 @@
 
 class CWizProgressDialog;
 class CWizDocumentListView;
+class CWizDocumentSelectionView;
 class CWizDocumentView;
 class CWizActions;
 class CWizDocumentViewHistory;
 class CWizFixedSpacer;
 class CWizSplitter;
 class CWizAnimateAction;
-//class CWizSyncAnimation;
 class CWizOptionsWidget;
 class CWizStatusBar;
 
@@ -94,6 +94,7 @@ private:
     QPointer<QtSegmentControl> m_categorySwitchSegmentBtn;
     QWidget* m_categoryLayer;
     CWizDocumentListView* m_documents;
+    CWizDocumentSelectionView* m_documentSelection;
     CWizDocumentView* m_doc;
     QPointer<CWizSplitter> m_splitter;
     QPointer<CWizOptionsWidget> m_options;
@@ -247,7 +248,7 @@ public:
     QObject* CategoryCtrl() { return m_category; }
     Q_PROPERTY(QObject* CategoryCtrl READ CategoryCtrl)
 
-    QObject* DocumentsCtrl() { return m_documents; }
+    QObject* DocumentsCtrl();
     Q_PROPERTY(QObject* DocumentsCtrl READ DocumentsCtrl)
 
     QObject* DatabaseManager() { return &m_dbMgr; }
@@ -260,7 +261,6 @@ public:
     Q_INVOKABLE void ResetContextMenuAndPop(const QPoint& pos);
     Q_INVOKABLE void SetSavingDocument(bool saving);
     Q_INVOKABLE void ProcessClipboardBeforePaste(const QVariantMap& data);
-
 };
 
 #endif // WIZMAINWINDOW_H

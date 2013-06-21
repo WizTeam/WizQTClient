@@ -2,29 +2,35 @@
 #define WIZFOLDERSELECTOR_H
 
 #include <QDialog>
+#include <QPointer>
 
-namespace Ui {
-class CWizFolderSelector;
-}
+class CWizExplorerApp;
+class CWizFolderView;
 
 class CWizFolderSelector : public QDialog
 {
     Q_OBJECT
     
 public:
-    explicit CWizFolderSelector(QWidget *parent = 0);
-    ~CWizFolderSelector();
+    explicit CWizFolderSelector(const QString& strTitle, CWizExplorerApp& app, QWidget *parent = 0);
 
-    virtual void showEvent(QShowEvent* event);
-
-    QString folder() { return m_strFolder; }
+    void setCopyStyle();
+    void setAcceptRoot(bool b) { m_bAcceptRoot = b; }
+    QString selectedFolder();
 
 protected:
-    void initFolders();
-    
+    CWizExplorerApp& m_app;
+
 private:
-    Ui::CWizFolderSelector *ui;
-    QString m_strFolder;
+    QPointer<CWizFolderView> m_folderView;
+    bool m_bAcceptRoot;
+    bool m_bKeepTime;
+    bool m_bKeepTags;
+
+private Q_SLOTS:
+    void on_accept();
+    void on_checkKeepTime_stateChanged(int state);
+    void on_checkKeepTags_stateChanged(int state);
 };
 
 #endif // WIZFOLDERSELECTOR_H

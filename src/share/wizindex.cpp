@@ -961,7 +961,7 @@ bool CWizIndexBase::ModifyDocumentInfoEx(const WIZDOCUMENTDATA& dataCur)
         STR2SQL(data.strGUID).utf16()
     );
 
-    qDebug() << "ModifyDocumentInfoEx, Title: " << data.strTitle << "location: " << data.strLocation << "version: " << data.nVersion;
+    //qDebug() << "ModifyDocumentInfoEx, Title: " << data.strTitle << "location: " << data.strLocation << "version: " << data.nVersion;
 
     if (!ExecSQL(strSQL))
         return false;

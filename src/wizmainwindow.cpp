@@ -32,6 +32,7 @@
 
 #include "wizEditorToolBar.h"
 #include "wizProgressDialog.h"
+#include "wizDocumentSelectionView.h"
 
 
 MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
@@ -59,6 +60,7 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     , m_categoryGroups(new CWizCategoryGroupsView(*this, this))
     , m_categoryLayer(new QWidget(this))
     , m_documents(new CWizDocumentListView(*this, this))
+    , m_documentSelection(new CWizDocumentSelectionView(*this, this))
     , m_doc(new CWizDocumentView(*this, this))
     , m_history(new CWizDocumentViewHistory())
     , m_animateSync(new CWizAnimateAction(*this, this))
@@ -426,10 +428,10 @@ void MainWindow::initClient()
     client->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
 
     QPalette pal = client->palette();
-    QPixmap pixmapBg;
-    pixmapBg.load(::WizGetResourcesPath() + "skins/leftview_bg.png");
-    QBrush brushBg(pixmapBg);
-    pal.setBrush(QPalette::Window, brushBg);
+    //QPixmap pixmapBg;
+    //pixmapBg.load(::WizGetResourcesPath() + "skins/leftview_bg.png");
+    //QBrush brushBg(pixmapBg);
+    pal.setBrush(QPalette::Window, WizGetLeftViewBrush());
     client->setPalette(pal);
     client->setAutoFillBackground(true);
 
@@ -478,12 +480,22 @@ void MainWindow::initClient()
     m_categoryTags->hide();
     m_categoryGroups->hide();
 
+    QWidget* documentPanel = new QWidget(m_splitter);
+    QHBoxLayout* layoutDocument = new QHBoxLayout();
+    layoutDocument->setContentsMargins(0, 0, 0, 0);
+    layoutDocument->setSpacing(0);
+    documentPanel->setLayout(layoutDocument);
+    layoutDocument->addWidget(m_doc);
+    layoutDocument->addWidget(m_documentSelection);
+    m_documentSelection->hide();
+
     m_splitter->addWidget(categoryPanel);
     m_splitter->addWidget(m_documents);
-    m_splitter->addWidget(m_doc);
+    m_splitter->addWidget(documentPanel);
     m_splitter->setStretchFactor(0, 0);
     m_splitter->setStretchFactor(1, 0);
     m_splitter->setStretchFactor(2, 1);
+
 
 #ifndef Q_OS_MAC
     //connect(splitter, SIGNAL(splitterMoved(int,int)), this, SLOT(on_client_splitterMoved(int, int)));
@@ -1067,7 +1079,7 @@ void MainWindow::on_category_itemSelectionChanged()
 
 void MainWindow::on_documents_itemSelectionChanged()
 {
-    // hide
+    // hide other form
     m_cipherForm->hide();
     m_groupAttribute->sheetHide();
 
@@ -1075,15 +1087,24 @@ void MainWindow::on_documents_itemSelectionChanged()
     m_documents->getSelectedDocuments(arrayDocument);
 
     if (arrayDocument.size() == 1) {
-        //m_doc->showClient(true);
+        //if (!m_doc->isVisible()) {
+        //    m_doc->show();
+        //    m_documentSelection->hide();
+        //    //m_doc->resize(m_documentSelection->size());
+        //}
 
         if (!m_bUpdatingSelection) {
             viewDocument(arrayDocument[0], true);
         }
+    } else if (arrayDocument.size() > 1) {
+        //if (!m_documentSelection->isVisible()) {
+        //    m_documentSelection->show();
+        //    m_doc->hide();
+        //    //m_documentSelection->resize(m_doc->size());
+        //}
+//
+        //m_documentSelection->requestDocuments(arrayDocument);
     }
-    //else {
-    //    m_doc->showClient(false);
-    //}
 }
 
 void MainWindow::on_options_settingsChanged(WizOptionsType type)
@@ -1272,6 +1293,11 @@ void MainWindow::adjustToolBarSpacerToPos(int index, int pos)
 //================================================================================
 // WizExplorerApp APIs
 //================================================================================
+
+QObject* MainWindow::DocumentsCtrl()
+{
+    return m_documents;
+}
 
 QObject* MainWindow::CreateWizObject(const QString& strObjectID)
 {
