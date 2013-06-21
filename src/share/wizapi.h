@@ -12,12 +12,14 @@
 #define WIZAPI_TRUNK_SIZE   512*1024
 #define WIZAPI_PAGE_MAX     80
 
+const char* const SyncMethod_CreateAccount = "accounts.createAccount";
+
 const char* const SyncMethod_ClientLogin = "accounts.clientLogin";
 const char* const SyncMethod_ClientKeepAlive = "accounts.keepAlive";
 const char* const SyncMethod_ClientLogout = "accounts.clientLogout";
-const char* const SyncMethod_GetUserCert = "accounts.getCert";
-const char* const SyncMethod_CreateAccount = "accounts.createAccount";
 const char* const SyncMethod_GetUserInfo = "wiz.getInfo";
+
+const char* const SyncMethod_GetUserCert = "accounts.getCert";
 
 const char* const SyncMethod_GetGroupList = "accounts.getGroupKbList";
 
@@ -43,6 +45,11 @@ const char* const SyncMethod_PostDocumentData = "document.postData";
 const char* const SyncMethod_PostAttachmentData = "attachment.postData";
 
 const char* const SyncMethod_UploadObjectPart = "data.upload";
+
+// messages
+const char* const SyncMethod_getMessages = "accounts.getMessages";
+const char* const SyncMethod_setMessageStatus = "accounts.setReadStatus";
+
 
 
 

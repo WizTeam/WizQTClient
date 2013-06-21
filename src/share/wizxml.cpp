@@ -1,5 +1,7 @@
 #include "wizxml.h"
 
+#include "wizmisc.h"
+
 
 CWizXMLNode::CWizXMLNode(const CWizXMLNode& nodeSrc)
 {
@@ -131,7 +133,7 @@ bool CWizXMLNode::GetAttributeInt(const QString& strName, int& nVal)
     return true;
 }
 
-bool CWizXMLNode::GetAttributeInt64(const QString& strName, __int64& nVal)
+bool CWizXMLNode::GetAttributeInt64(const QString& strName, qint64& nVal)
 {
     QString strRet;
     if (!GetAttributeText(strName, strRet))
@@ -150,7 +152,7 @@ __int64 CWizXMLNode::GetAttributeInt64Def(const QString& strName, __int64 nDefau
     return _ttoi64(strRet);
 }
 
-bool CWizXMLNode::GetAttributeUINT(const QString& strName, UINT& nVal)
+bool CWizXMLNode::GetAttributeUINT(const QString& strName, quint32& nVal)
 {
     int n;
     if (!GetAttributeInt(strName, n))
@@ -162,7 +164,7 @@ bool CWizXMLNode::GetAttributeUINT(const QString& strName, UINT& nVal)
 
 bool CWizXMLNode::GetAttributeTimeT(const QString& strName, time_t& nVal)
 {
-    __int64 n64;
+    qint64 n64;
     if (!GetAttributeInt64(strName, n64))
         return false;
 

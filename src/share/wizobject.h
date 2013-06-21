@@ -389,6 +389,59 @@ const UINT WIZ_USERGROUP_AUTHOR = 100;
 const UINT WIZ_USERGROUP_READER = 1000;
 const UINT WIZ_USERGROUP_MAX = 10000000;
 
+struct WIZMESSAGEDATA
+{
+    // xml-prc not support  long type, transmit use string
+    qint64 nId;
+
+    // char(38)
+    QString bizGUID;    // wiz bussiness groups guid
+    QString kbGUID;
+    QString documentGUID;
+
+    QString title;  // char(768)
+
+    QString senderGUID; // char(38)
+    QString senderId;   // char(128)
+    QString senderAlias;    // char(32)
+
+    QString receiverGUID;
+    QString receiverId;
+    QString receiverAlias;
+
+    qint64 nVersion;
+
+    // 0: @ message
+    // 1: document edit meesage
+    qint32 nMessageType;
+
+    // 0: no email notify
+    // 1: email notify sended
+    // 2: email notify have not sended yet
+    qint32 nEmailStatus;
+
+    // 0: no sms notify
+    // 1: sms notify sended
+    // 2: sms notify have not sended yet
+    qint32 nSMSStatus;
+
+    // 0: not read
+    // 1: read
+    qint32 nReadStatus;
+
+    COleDateTime tCreated;
+
+    // char(1024), mssage body
+    QString message;
+
+    QString note;
+};
+
+enum WizMessageType
+{
+
+};
+
 
 struct WIZABSTRACT : public WIZOBJECTBASE
 {

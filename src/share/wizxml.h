@@ -3,7 +3,7 @@
 
 #include <QtXml>
 
-#include "wizmisc.h"
+#include "wizqthelper.h"
 
 
 class CWizXMLNode
@@ -32,8 +32,8 @@ public:
 
     bool GetAttributeText(const QString& strName, QString& strVal);
     bool GetAttributeInt(const QString& strName, int& nVal);
-    bool GetAttributeInt64(const QString& strName, __int64& nVal);
-    bool GetAttributeUINT(const QString& strName, UINT& nVal);
+    bool GetAttributeInt64(const QString& strName, qint64& nVal);
+    bool GetAttributeUINT(const QString& strName, quint32& nVal);
     bool GetAttributeTimeT(const QString& strName, time_t& nVal);
     bool GetAttributeTimeString(const QString& strName, COleDateTime& t);
     bool GetAttributeBool(const QString& strName, bool& bVal);
