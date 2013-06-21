@@ -1,6 +1,7 @@
 #include "wizXmlRpcServer.h"
 
 #include "wizdef.h"
+#include "wizmisc.h"
 
 
 CWizXmlRpcServer::CWizXmlRpcServer(const QString& strUrl)
@@ -81,13 +82,6 @@ void CWizXmlRpcServer::on_replyFinished()
     }
 
     m_replyData = reply->readAll();
-
-#ifdef WIZNOTE_DEBUG
-    QString requestFile = QDir::tempPath() + "/WizNote/" + m_strMethodName;
-    QString replyFile = QDir::tempPath() + "/WizNote/on_" + m_strMethodName;
-    WizSaveUnicodeTextToUtf8File(requestFile, QString::fromUtf8(m_requestData.constData()));
-    WizSaveUnicodeTextToUtf8File(replyFile, QString::fromUtf8(m_replyData.constData()));
-#endif
 
     QString strXml = QString::fromUtf8(m_replyData.constData());
 

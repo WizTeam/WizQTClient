@@ -1,6 +1,7 @@
 #include "wizobject.h"
 
 #include "wizxmlrpc.h"
+#include "wizmisc.h"
 
 WIZUSERINFO::WIZUSERINFO()
     : nUserLevel(0)

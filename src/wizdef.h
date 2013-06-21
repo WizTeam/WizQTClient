@@ -3,8 +3,6 @@
 
 #include <QtGlobal>
 
-#define WIZNOTE_DEBUG 1
-
 #define WIZ_CLIENT_VERSION  "1.5.18"
 #define WIZNOTE_FTS_VERSION "3"
 #define WIZNOTE_THUMB_VERSION "1"

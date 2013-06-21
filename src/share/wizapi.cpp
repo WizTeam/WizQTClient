@@ -41,6 +41,8 @@ void CWizApiBase::onXmlRpcReturn(const QString& strMethodName, CWizXmlRpcValue& 
 {
     if (strMethodName == SyncMethod_ClientLogin)
     {
+        qDebug() << "[XML-RPC]accounts.clientLogin:\n" << ret.ToString();
+
         WIZUSERINFO userInfo;
 
         // pass empty kbguid here is ok
@@ -90,6 +92,8 @@ void CWizApiBase::onXmlRpcReturn(const QString& strMethodName, CWizXmlRpcValue& 
     }
     else if (strMethodName == SyncMethod_GetGroupList)
     {
+        qDebug() << "[XML-RPC]accounts.getGroupKbList:\n" << ret.ToString();
+
         std::deque<WIZGROUPDATA> arrayGroup;
         ret.ToArray<WIZGROUPDATA>(arrayGroup, kbGUID());
         onGetGroupList(arrayGroup);

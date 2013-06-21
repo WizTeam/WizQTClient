@@ -112,7 +112,7 @@ set(wiznote_SOURCES
     wizEditorToolBar.cpp
     wizEditorInsertTableForm.cpp
     wizFolderSelector.cpp
-    share/wizIOHostThread.cpp
+    #share/wizIOHostThread.cpp
     wizProgressDialog.cpp
     wizFolderView.cpp
     widgets/wizScrollBar.cpp
@@ -276,7 +276,7 @@ set(wiznote_WRAP_HEADERS
     wizEditorToolBar.h
     wizEditorInsertTableForm.h
     wizFolderSelector.h
-    share/wizIOHostThread.h
+    #share/wizIOHostThread.h
     wizProgressDialog.h
     wizFolderView.h
     widgets/wizScrollBar.h
@@ -441,7 +441,7 @@ if(UNIX)
     endif()
 endif()
 
-set(CMAKE_CXX_FLAGS "-std=c++0x")
+#set(CMAKE_CXX_FLAGS "-std=c++0x")
 
 # bug fix: not use automoc for cmake 2.8.4 backward compatibility.
 # moc, platform specific argument should be passed to moc
