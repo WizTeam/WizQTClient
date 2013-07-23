@@ -13,13 +13,15 @@ class CWizDocumentListViewItem;
 class CWizTagListWidget;
 class CWizFolderSelector;
 class CWizScrollBar;
+class CWizUserAvatarDownloaderHost;
 
 class CWizDocumentListView : public QListWidget
 {
     Q_OBJECT
 
 public:
-    CWizDocumentListView(CWizExplorerApp& app, QWidget *parent = 0);
+    explicit CWizDocumentListView(CWizExplorerApp& app, QWidget *parent = 0);
+    virtual ~CWizDocumentListView();
     CWizThumbIndexCache* thumbCache() const { return m_thumbCache; }
 
 protected:
@@ -37,9 +39,11 @@ private:
     CWizExplorerApp& m_app;
     CWizDatabaseManager& m_dbMgr;
     QPointer<CWizThumbIndexCache> m_thumbCache;
+    CWizUserAvatarDownloaderHost* m_avatarDownloader;
     CWizScrollBar* m_vScroll;
 
-    QPointer<QMenu> m_menu;
+    QMenu* m_menuDocument;
+    QMenu* m_menuMessage;
     QAction* m_actionEncryptDocument;
     CWizTagListWidget* m_tagList;
 
@@ -66,20 +70,28 @@ private:
 
 public:
     void setDocuments(const CWizDocumentDataArray& arrayDocument);
+    void setDocuments(const CWizMessageDataArray& arrayMessage);
     void addDocuments(const CWizDocumentDataArray& arrayDocument);
+    void addDocuments(const CWizMessageDataArray& arrayMessage);
     int addDocument(const WIZDOCUMENTDATA& data, bool sort);
+    int addDocument(const WIZMESSAGEDATA& data, bool sort);
+
     bool acceptDocument(const WIZDOCUMENTDATA& document);
     void addAndSelectDocument(const WIZDOCUMENTDATA& document);
 
 public:
     void getSelectedDocuments(CWizDocumentDataArray& arrayDocument);
 
-    int documentIndexFromGUID(const CString& strGUID);
+    int documentIndexFromGUID(const QString &strGUID);
     CWizDocumentListViewItem *documentItemAt(int index);
+
+    // drawing passthrought methods
     CWizDocumentListViewItem *documentItemFromIndex(const QModelIndex &index) const;
-    WIZDOCUMENTDATA documentFromIndex(const QModelIndex &index) const;
-    WIZABSTRACT documentAbstractFromIndex(const QModelIndex &index) const;
-    CString documentTagsFromIndex(const QModelIndex &index) const;
+    const WIZDOCUMENTDATA& documentFromIndex(const QModelIndex &index) const;
+    const WIZABSTRACT& documentAbstractFromIndex(const QModelIndex &index) const;
+    const QString& documentTagsFromIndex(const QModelIndex &index) const;
+    const WIZMESSAGEDATA& messageFromIndex(const QModelIndex& index) const;
+    const QImage& messageSenderAvatarFromIndex(const QModelIndex& index) const;
 
 //#ifndef Q_OS_MAC
     // used for smoothly scroll
@@ -98,7 +110,17 @@ public Q_SLOTS:
     void on_document_deleted(const WIZDOCUMENTDATA& document);
     //void on_document_AbstractModified(const WIZDOCUMENTDATA& document);
 
-    // context menu actions
+    // message related signals
+    void on_message_created(const WIZMESSAGEDATA& data);
+    void on_message_modified(const WIZMESSAGEDATA& oldMsg,
+                             const WIZMESSAGEDATA& newMsg);
+    void on_message_deleted(const WIZMESSAGEDATA& data);
+
+    // message context menu
+    void on_action_message_mark_read();
+    void on_action_message_delete();
+
+    // document context menu
     void on_action_selectTags();
     void on_action_deleteDocument();
     void on_action_encryptDocument();
@@ -110,6 +132,7 @@ public Q_SLOTS:
     void on_action_copyDocument_confirmed(int result);
 
     void on_document_abstractLoaded(const WIZABSTRACT& abs);
+    void on_userAvatar_downloaded(const QString& strUserGUID);
 
 //#ifndef Q_OS_MAC
     // used for smoothly scroll

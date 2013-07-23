@@ -65,7 +65,7 @@ void CWizDocument::PermanentlyDelete()
     }
 
     if (!m_db.DeleteDocument(m_data, true)) {
-        TOLOG1(_T("Failed to delete document: %1"), m_data.strTitle);
+        TOLOG1("Failed to delete document: %1", m_data.strTitle);
         return;
     }
 
@@ -212,6 +212,7 @@ void CWizFolder::Delete()
         }
 
         m_db.LogDeletedFolder(Location());
+        m_db.SetObjectVersion("folder", 0);
     } else {
         CWizFolder deletedItems(m_db, LOCATION_DELETED_ITEMS);
         MoveTo(&deletedItems);
@@ -279,8 +280,8 @@ void CWizFolder::MoveToLocation(const QString& strDestLocation)
             continue;
         }
 
-        data.strLocation.Delete(0, strOldLocation.length());
-        data.strLocation.Insert(0, strDestLocation);
+        data.strLocation.remove(0, strOldLocation.length());
+        data.strLocation.insert(0, strDestLocation);
 
         if (!m_db.ModifyDocumentInfo(data)) {
             TOLOG("Failed to move document to new folder!");
@@ -291,6 +292,7 @@ void CWizFolder::MoveToLocation(const QString& strDestLocation)
     }
 
     m_db.LogDeletedFolder(strOldLocation);
+    m_db.SetObjectVersion("folder", 0);
 }
 
 
@@ -299,6 +301,7 @@ void CWizFolder::MoveToLocation(const QString& strDestLocation)
 const QString g_strAccountSection = "Account";
 const QString g_strCertSection = "Cert";
 const QString g_strGroupSection = "Groups";
+const QString g_strBizGroupSection = "BizGroups";
 const QString g_strDatabaseInfoSection = "Database";
 
 
@@ -308,39 +311,89 @@ CWizDatabase::CWizDatabase()
 {
 }
 
-bool CWizDatabase::setDatabaseInfo(const QString& strKbGUID, const QString& strDatabaseServer,
-                                   const QString& strName, int nPermission)
+//bool CWizDatabase::setDatabaseInfo(const QString& strKbGUID, const QString& strDatabaseServer,
+//                                   const QString& strName, int nPermission)
+//{
+//    Q_ASSERT(!strKbGUID.isEmpty() && !strName.isEmpty());
+
+//    m_strKbGUID = strKbGUID;
+//    m_strDatabaseServer = strDatabaseServer;
+
+//    if (m_strName != strName) {
+//        m_strName = strName;
+//        Q_EMIT databaseRename(strKbGUID);
+//    }
+
+//    if (m_nPermission != nPermission) {
+//        m_nPermission = nPermission;
+//        Q_EMIT databasePermissionChanged(strKbGUID);
+//    }
+
+//    int nErrors = 0;
+
+//    if (!SetMeta(g_strDatabaseInfoSection, "Name", strName))
+//        nErrors++;
+
+//    if (!SetMeta(g_strDatabaseInfoSection, "KbGUID", strKbGUID))
+//        nErrors++;
+
+//    if (!SetMeta(g_strDatabaseInfoSection, "Permission", QString::number(nPermission)))
+//        nErrors++;
+
+//    if (!SetMeta(g_strDatabaseInfoSection, "Version", WIZ_DATABASE_VERSION))
+//        nErrors++;
+
+//    if (nErrors > 0)
+//        return false;
+
+//    return true;
+//}
+
+bool CWizDatabase::setDatabaseInfo(const WIZDATABASEINFO& dbInfo)
 {
-    Q_ASSERT(!strKbGUID.isEmpty() && !strName.isEmpty());
+    Q_ASSERT(!dbInfo.kbGUID.isEmpty() && !dbInfo.name.isEmpty());
+    //Q_ASSERT(dbInfo.kbGUID == m_info.kbGUID);
 
-    m_strKbGUID = strKbGUID;
-    m_strDatabaseServer = strDatabaseServer;
+    m_info.bizName = dbInfo.bizName;
+    m_info.bizGUID = dbInfo.bizGUID;
 
-    if (m_strName != strName) {
-        m_strName = strName;
-        Q_EMIT databaseRename(strKbGUID);
+    m_info.kbGUID = dbInfo.kbGUID;
+    m_info.serverUrl = dbInfo.serverUrl;
+
+    if (m_info.name != dbInfo.name) {
+        m_info.name = dbInfo.name;
+        Q_EMIT databaseRename(dbInfo.kbGUID);
     }
 
-    if (m_nPermission != nPermission) {
-        m_nPermission = nPermission;
-        Q_EMIT databasePermissionChanged(strKbGUID);
+    if (m_info.nPermission != dbInfo.nPermission) {
+        m_info.nPermission = dbInfo.nPermission;
+        Q_EMIT databasePermissionChanged(dbInfo.kbGUID);
     }
 
     int nErrors = 0;
 
-    if (!SetMeta(g_strDatabaseInfoSection, "Name", strName))
+    if (!SetMeta(g_strDatabaseInfoSection, "Name", dbInfo.name))
         nErrors++;
 
-    if (!SetMeta(g_strDatabaseInfoSection, "KbGUID", strKbGUID))
+    if (!SetMeta(g_strDatabaseInfoSection, "KbGUID", dbInfo.kbGUID))
         nErrors++;
 
-    if (!SetMeta(g_strDatabaseInfoSection, "Permission", QString::number(nPermission)))
+    if (!SetMeta(g_strDatabaseInfoSection, "Permission", QString::number(dbInfo.nPermission)))
         nErrors++;
 
     if (!SetMeta(g_strDatabaseInfoSection, "Version", WIZ_DATABASE_VERSION))
         nErrors++;
 
-    if (nErrors > 0)
+    // set biz group info
+    if (!dbInfo.bizGUID.isEmpty() && !dbInfo.bizName.isEmpty()) {
+        if (!SetMeta(g_strDatabaseInfoSection, "BizName", dbInfo.bizName))
+            nErrors++;
+
+        if (!SetMeta(g_strDatabaseInfoSection, "BizGUID", dbInfo.bizGUID))
+            nErrors++;
+    }
+
+    if (nErrors)
         return false;
 
     return true;
@@ -348,14 +401,17 @@ bool CWizDatabase::setDatabaseInfo(const QString& strKbGUID, const QString& strD
 
 bool CWizDatabase::loadDatabaseInfo()
 {
-    if (m_strKbGUID.isEmpty()) {
-        m_strKbGUID = GetMetaDef(g_strDatabaseInfoSection, "KbGUID");
+    m_info.bizName = GetMetaDef(g_strDatabaseInfoSection, "BizName");
+    m_info.bizGUID = GetMetaDef(g_strDatabaseInfoSection, "BizGUID");
+
+    if (m_info.kbGUID.isEmpty()) {
+        m_info.kbGUID = GetMetaDef(g_strDatabaseInfoSection, "KbGUID");
     }
 
-    m_strName = GetMetaDef(g_strDatabaseInfoSection, "Name");
-    m_nPermission = GetMetaDef(g_strDatabaseInfoSection, "Permission").toInt();
+    m_info.name = GetMetaDef(g_strDatabaseInfoSection, "Name");
+    m_info.nPermission = GetMetaDef(g_strDatabaseInfoSection, "Permission").toInt();
 
-    if (m_strKbGUID.isEmpty() || m_strName.isEmpty()) {
+    if (m_info.kbGUID.isEmpty() || m_info.name.isEmpty()) {
         return false;
     }
 
@@ -391,7 +447,7 @@ bool CWizDatabase::openGroup(const QString& strUserId, const QString& strGroupGU
     Q_ASSERT(m_nOpenMode == notOpened);
 
     m_strUserId = strUserId;
-    m_strKbGUID = strGroupGUID;
+    m_info.kbGUID = strGroupGUID;
 
     bool ret;
 
@@ -455,7 +511,7 @@ QString CWizDatabase::GetUserAttachmentsDataPath() const
 
 QString CWizDatabase::GetGroupDataPath() const
 {
-    QString strPath = GetAccountPath() + "group/" + m_strKbGUID + "/";
+    QString strPath = GetAccountPath() + "group/" + m_info.kbGUID + "/";
     WizEnsurePathExists(strPath);
     return strPath;
 }
@@ -508,6 +564,14 @@ QString CWizDatabase::GetAttachmentFileName(const CString& strGUID) const
         Q_ASSERT(0);
 
     return QString();
+}
+
+QString CWizDatabase::GetAvatarPath() const
+{
+    QString strPath = GetAccountPath() + "avatar/";
+    WizEnsurePathExists(strPath);
+
+    return strPath;
 }
 
 bool CWizDatabase::GetUserName(QString& strUserName)
@@ -645,7 +709,8 @@ bool CWizDatabase::getUserInfo(WIZUSERINFO& userInfo)
 
 bool CWizDatabase::setUserGroupInfo(const CWizGroupDataArray& arrayGroup)
 {
-    if (!deleteMetasByName(g_strGroupSection))
+    if (!deleteMetasByName(g_strGroupSection)\
+            && !deleteMetasByName(g_strBizGroupSection))
         return false;
 
     int nTotal = arrayGroup.size();
@@ -653,24 +718,37 @@ bool CWizDatabase::setUserGroupInfo(const CWizGroupDataArray& arrayGroup)
         return false;
     }
 
-    if (!SetMeta(g_strGroupSection, "Count", QString::number(nTotal))) {
-        return false;
-    }
-
-    int nErrors = 0;
+    // collect biz group info
+    QMap<QString, QString> bizInfo;
     for (int i = 0; i < nTotal; i++) {
-        WIZGROUPDATA group(arrayGroup[i]);
-        if (!SetMeta(g_strGroupSection, QString::number(i), group.strGroupGUID)) {
-            nErrors++;
-        }
-
-        if (!SetMeta(g_strGroupSection, group.strGroupGUID, group.strGroupName)) {
-            nErrors++;
-        }
+        const WIZGROUPDATA& data = arrayGroup[i];
+        if (!data.bizGUID.isEmpty())
+            bizInfo[data.bizGUID] = data.bizName;
     }
 
-    if (nErrors > 0) {
-        return false;
+    // set biz info
+    SetMeta(g_strBizGroupSection, "Count", QString::number(bizInfo.size()));
+
+    int idx = 0;
+    QMap<QString, QString>::const_iterator it;
+    for (it = bizInfo.begin(); it != bizInfo.end(); it++) {
+        SetMeta(g_strBizGroupSection, QString::number(idx), it.key());
+        SetMeta(g_strBizGroupSection, it.key(), it.value());
+        idx++;
+    }
+
+    // set group info
+    SetMeta(g_strGroupSection, "Count", QString::number(nTotal));
+
+    for (int i = 0; i < nTotal; i++) {
+        const WIZGROUPDATA& data = arrayGroup[i];
+        SetMeta(g_strGroupSection, QString::number(i), data.strGroupGUID);
+        SetMeta(g_strGroupSection, data.strGroupGUID, data.strGroupName);
+
+        // also biz link
+        if (!data.bizGUID.isEmpty()) {
+            SetMeta(g_strBizGroupSection, data.strGroupGUID, data.bizGUID);
+        }
     }
 
     return true;
@@ -685,44 +763,166 @@ bool CWizDatabase::getUserGroupInfo(CWizGroupDataArray& arrayGroup)
         return false;
     }
 
+    // it's ok, user has no group data
     if (!bExist) {
-        return false;
+        return true;
     }
 
     int nTotal = strTotal.toInt();
     for (int i = 0; i < nTotal; i++) {
-        QString strGroupGUID = GetMetaDef(g_strGroupSection, QString::number(i));
-        QString strGroupName = GetMetaDef(g_strGroupSection, strGroupGUID);
-
         WIZGROUPDATA group;
-        group.strGroupGUID = strGroupGUID;
-        group.strGroupName = strGroupName;
+
+        group.strGroupGUID = GetMetaDef(g_strGroupSection, QString::number(i));
+        group.strGroupName = GetMetaDef(g_strGroupSection, group.strGroupGUID);
+
+        group.bizGUID = GetMetaDef(g_strBizGroupSection, group.strGroupGUID);
+
+        if (!group.bizGUID.isEmpty())
+            group.bizName = GetMetaDef(g_strBizGroupSection, group.bizGUID);
+
         arrayGroup.push_back(group);
     }
 
     return true;
 }
 
+bool CWizDatabase::getBizGroupInfo(QMap<QString, QString>& bizInfo)
+{
+    CString strTotal;
+    bool bExist;
 
-__int64 CWizDatabase::GetObjectVersion(const CString& strObjectName)
+    if(!GetMeta(g_strBizGroupSection, "Count", strTotal, "", &bExist)) {
+        return false;
+    }
+
+    if (!bExist) {
+        return true;
+    }
+
+    bizInfo.clear();
+
+    int nTotal = strTotal.toInt();
+    for (int i = 0; i < nTotal; i++) {
+        QString strBizGUID = GetMetaDef(g_strBizGroupSection, QString::number(i));
+        QString strBizName = GetMetaDef(g_strBizGroupSection, strBizGUID);
+
+        bizInfo[strBizGUID] = strBizName;
+    }
+
+    return true;
+}
+
+
+qint64 CWizDatabase::GetObjectVersion(const QString& strObjectName)
 {
     return GetMetaInt64("SYNC_INFO", strObjectName, -1) + 1;
 }
 
-bool CWizDatabase::SetObjectVersion(const CString& strObjectName, __int64 nVersion)
+bool CWizDatabase::SetObjectVersion(const QString& strObjectName, qint64 nVersion)
 {
+    qDebug() << "set object: " << strObjectName << " version: " << nVersion;
+
     return SetMetaInt64("SYNC_INFO", strObjectName, nVersion);
+}
+
+bool CWizDatabase::updateBizUser(const WIZBIZUSER& user)
+{
+    bool bRet = false;
+
+    WIZBIZUSER userTemp;
+    if (userFromGUID(user.bizGUID, user.userGUID, userTemp)) {
+        // only modify user when alias changed
+        if (userTemp.alias != user.alias) {
+            bRet = modifyUserEx(user);
+        } else {
+            bRet = true;
+        }
+    } else {
+        bRet = createUserEx(user);
+    }
+
+    if (!bRet) {
+        Q_EMIT updateError("Failed to update user: " + user.alias);
+    }
+
+    return bRet;
+}
+
+bool CWizDatabase::updateBizUsers(const CWizBizUserDataArray& arrayUser)
+{
+    // TODO: delete users not exist on remote
+    if (arrayUser.empty())
+        return false;
+
+    bool bHasError = false;
+    CWizBizUserDataArray::const_iterator it;
+    for (it = arrayUser.begin(); it != arrayUser.end(); it++)
+    {
+        const WIZBIZUSER& user = *it;
+        if (!updateBizUser(user)) {
+            bHasError = true;
+        }
+    }
+
+    return !bHasError;
+}
+
+bool CWizDatabase::updateMessage(const WIZMESSAGEDATA& msg)
+{
+    bool bRet = false;
+
+    WIZMESSAGEDATA msgTemp;
+    if (messageFromId(msg.nId, msgTemp)) {
+        bRet = modifyMessageEx(msg);
+    } else {
+        bRet = createMessageEx(msg);
+    }
+
+    if (!bRet) {
+        Q_EMIT updateError("Failed to update message: " + msg.title);
+    }
+
+    return bRet;
+}
+
+bool CWizDatabase::updateMessages(const CWizMessageDataArray& arrayMsg)
+{
+    // TODO: delete messages not exist on remote
+    if (arrayMsg.empty())
+        return false;
+
+    qint64 nVersion = -1;
+
+    bool bHasError = false;
+    CWizMessageDataArray::const_iterator it;
+    for (it = arrayMsg.begin(); it != arrayMsg.end(); it++)
+    {
+        const WIZMESSAGEDATA& msg = *it;
+        if (!updateMessage(msg)) {
+            bHasError = true;
+        }
+
+        nVersion = qMax(nVersion, msg.nVersion);
+    }
+
+    if (!bHasError) {
+        SetObjectVersion(WIZMESSAGEDATA::ObjectName(), nVersion);
+    }
+
+    return !bHasError;
 }
 
 bool CWizDatabase::UpdateDeletedGUID(const WIZDELETEDGUIDDATA& data)
 {
     bool bRet = false;
 
-    CString strType = WIZOBJECTDATA::ObjectTypeToTypeString(data.eType);
+    QString strType = WIZOBJECTDATA::ObjectTypeToTypeString(data.eType);
     bool bExists = false;
     ObjectExists(data.strGUID, strType, bExists);
     if (!bExists)
         return true;
+
+    qDebug() << "delete object: " << strType << " guid: " << data.strGUID;
 
     bRet = DeleteObject(data.strGUID, strType, false);
 
@@ -776,23 +976,16 @@ bool CWizDatabase::UpdateDocument(const WIZDOCUMENTDATAEX& data)
     bool bRet = false;
 
     WIZDOCUMENTDATAEX dataTemp;
-    if (DocumentFromGUID(data.strGUID, dataTemp))
-    {
-        if (data.nObjectPart & WIZKM_XMLRPC_OBJECT_PART_INFO)
-        {
+    if (DocumentFromGUID(data.strGUID, dataTemp)) {
+        if (data.nObjectPart & WIZKM_XMLRPC_OBJECT_PART_INFO) {
             bRet = ModifyDocumentInfoEx(data);
-            if (dataTemp.strDataMD5 != data.strDataMD5)
-            {
+            if (dataTemp.strDataMD5 != data.strDataMD5) {
                 SetObjectDataDownloaded(data.strGUID, "document", false);
             }
-        }
-        else
-        {
+        } else {
             bRet = true;
         }
-    }
-    else
-    {
+    } else {
         Q_ASSERT(data.nObjectPart & WIZKM_XMLRPC_OBJECT_PART_INFO);
 
         bRet = CreateDocumentEx(data);
@@ -802,24 +995,14 @@ bool CWizDatabase::UpdateDocument(const WIZDOCUMENTDATAEX& data)
         Q_EMIT updateError("Failed to update document: " + data.strTitle);
     }
 
-    WIZDOCUMENTDATA dataRet = data;
+    WIZDOCUMENTDATA doc(data);
 
-    bool resetVersion = false;
-    if (!data.arrayParam.empty())
-    {
-        SetDocumentParams(dataRet, data.arrayParam);
-        resetVersion = true;
-    }
-    if (!data.arrayTagGUID.empty())
-    {
-        SetDocumentTags(dataRet, data.arrayTagGUID);
-        resetVersion = true;
+    if (!data.arrayParam.empty()) {
+        SetDocumentParams(doc, data.arrayParam, false);
     }
 
-    if (resetVersion)
-    {
-        //reset document info
-        bRet = ModifyDocumentInfoEx(data);
+    if (!data.arrayTagGUID.empty()) {
+        SetDocumentTags(doc, data.arrayTagGUID, false);
     }
 
     return bRet;
@@ -830,18 +1013,14 @@ bool CWizDatabase::UpdateAttachment(const WIZDOCUMENTATTACHMENTDATAEX& data)
     bool bRet = false;
 
     WIZDOCUMENTATTACHMENTDATAEX dataTemp;
-    if (AttachmentFromGUID(data.strGUID, dataTemp))
-    {
+    if (AttachmentFromGUID(data.strGUID, dataTemp)) {
         bRet = ModifyAttachmentInfoEx(data);
 
         bool changed = dataTemp.strDataMD5 != data.strDataMD5;
-        if (changed)
-        {
+        if (changed) {
             SetObjectDataDownloaded(data.strGUID, "attachment", false);
         }
-    }
-    else
-    {
+    } else {
         bRet = CreateAttachmentEx(data);
     }
 
@@ -852,60 +1031,55 @@ bool CWizDatabase::UpdateAttachment(const WIZDOCUMENTATTACHMENTDATAEX& data)
     return bRet;
 }
 
-bool CWizDatabase::UpdateDeletedGUIDs(const std::deque<WIZDELETEDGUIDDATA>& arrayDeletedGUID)
+bool CWizDatabase::UpdateDeletedGUIDs(const CWizDeletedGUIDDataArray& arrayDeletedGUID)
 {
     if (arrayDeletedGUID.empty())
         return true;
 
-    __int64 nVersion = -1;
+    qint64 nVersion = -1;
 
     bool bHasError = false;
 
-    std::deque<WIZDELETEDGUIDDATA>::const_iterator it;
-    for (it = arrayDeletedGUID.begin(); it != arrayDeletedGUID.end(); it++)
-    {
+    CWizDeletedGUIDDataArray::const_iterator it;
+    for (it = arrayDeletedGUID.begin(); it != arrayDeletedGUID.end(); it++) {
         const WIZDELETEDGUIDDATA& data = *it;
 
-        if (!UpdateDeletedGUID(data))
-        {
+        if (!UpdateDeletedGUID(data)) {
             bHasError = true;
         }
 
-        nVersion = std::max<__int64>(nVersion, data.nVersion);
+        nVersion = qMax(nVersion, data.nVersion);
     }
 
-    if (!bHasError)
-    {
+    if (!bHasError) {
         SetObjectVersion(WIZDELETEDGUIDDATA::ObjectName(), nVersion);
     }
 
     return !bHasError;
 }
 
-bool CWizDatabase::UpdateTags(const std::deque<WIZTAGDATA>& arrayTag)
+bool CWizDatabase::UpdateTags(const CWizTagDataArray& arrayTag)
 {
     if (arrayTag.empty())
         return false;
 
-    __int64 nVersion = -1;
+    qint64 nVersion = -1;
 
     bool bHasError = false;
-    std::deque<WIZTAGDATA>::const_iterator it;
-    for (it = arrayTag.begin(); it != arrayTag.end(); it++)
-    {
+    CWizTagDataArray::const_iterator it;
+    for (it = arrayTag.begin(); it != arrayTag.end(); it++) {
         const WIZTAGDATA& tag = *it;
 
         Q_EMIT processLog("tag: " + tag.strName);
 
-        if (!UpdateTag(tag))
-        {
+        if (!UpdateTag(tag)) {
             bHasError = true;
         }
 
-        nVersion = std::max<__int64>(nVersion, tag.nVersion);
+        nVersion = qMax(nVersion, tag.nVersion);
     }
-    if (!bHasError)
-    {
+
+    if (!bHasError) {
         SetObjectVersion(WIZTAGDATA::ObjectName(), nVersion);
     }
 
@@ -913,31 +1087,28 @@ bool CWizDatabase::UpdateTags(const std::deque<WIZTAGDATA>& arrayTag)
 }
 
 
-bool CWizDatabase::UpdateStyles(const std::deque<WIZSTYLEDATA>& arrayStyle)
+bool CWizDatabase::UpdateStyles(const CWizStyleDataArray& arrayStyle)
 {
     if (arrayStyle.empty())
         return true;
 
-    __int64 nVersion = -1;
+    qint64 nVersion = -1;
 
     bool bHasError = false;
-    std::deque<WIZSTYLEDATA>::const_iterator it;
-    for (it = arrayStyle.begin(); it != arrayStyle.end(); it++)
-    {
+    CWizStyleDataArray::const_iterator it;
+    for (it = arrayStyle.begin(); it != arrayStyle.end(); it++) {
         const WIZSTYLEDATA& data = *it;
 
         Q_EMIT processLog("style: " + data.strName);
 
-        if (!UpdateStyle(data))
-        {
+        if (!UpdateStyle(data)) {
             bHasError = true;
         }
 
-        nVersion = std::max<__int64>(nVersion, data.nVersion);
+        nVersion = qMax(nVersion, data.nVersion);
     }
 
-    if (!bHasError)
-    {
+    if (!bHasError) {
         SetObjectVersion(WIZSTYLEDATA::ObjectName(), nVersion);
     }
 
@@ -949,26 +1120,23 @@ bool CWizDatabase::UpdateDocuments(const std::deque<WIZDOCUMENTDATAEX>& arrayDoc
     if (arrayDocument.empty())
         return true;
 
-    __int64 nVersion = -1;
+    qint64 nVersion = -1;
 
     bool bHasError = false;
     std::deque<WIZDOCUMENTDATAEX>::const_iterator it;
-    for (it = arrayDocument.begin(); it != arrayDocument.end(); it++)
-    {
+    for (it = arrayDocument.begin(); it != arrayDocument.end(); it++) {
         const WIZDOCUMENTDATAEX& data = *it;
 
         Q_EMIT processLog("note: " + data.strTitle);
 
-        if (!UpdateDocument(data))
-        {
+        if (!UpdateDocument(data)) {
             bHasError = true;
         }
 
-        nVersion = std::max<__int64>(nVersion, data.nVersion);
+        nVersion = qMax(nVersion, data.nVersion);
     }
 
-    if (!bHasError)
-    {
+    if (!bHasError) {
         SetObjectVersion(WIZDOCUMENTDATAEX::ObjectName(), nVersion);
     }
 
@@ -980,27 +1148,24 @@ bool CWizDatabase::UpdateAttachments(const std::deque<WIZDOCUMENTATTACHMENTDATAE
     if (arrayAttachment.empty())
         return true;
 
-    __int64 nVersion = -1;
+    qint64 nVersion = -1;
 
     bool bHasError = false;
 
     std::deque<WIZDOCUMENTATTACHMENTDATAEX>::const_iterator it;
-    for (it = arrayAttachment.begin(); it != arrayAttachment.end(); it++)
-    {
+    for (it = arrayAttachment.begin(); it != arrayAttachment.end(); it++) {
         const WIZDOCUMENTATTACHMENTDATAEX& data = *it;
 
         Q_EMIT processLog("attachment: " + data.strName);
 
-        if (!UpdateAttachment(data))
-        {
+        if (!UpdateAttachment(data)) {
             bHasError = true;
         }
 
-        nVersion = std::max<__int64>(nVersion, data.nVersion);
+        nVersion = qMax(nVersion, data.nVersion);
     }
 
-    if (!bHasError)
-    {
+    if (!bHasError) {
         SetObjectVersion(WIZDOCUMENTATTACHMENTDATAEX::ObjectName(), nVersion);
     }
 
@@ -1050,14 +1215,16 @@ bool CWizDatabase::UpdateDocumentDataMD5(WIZDOCUMENTDATA& data, const CString& s
 
     return bRet;
 }
-bool CWizDatabase::DeleteAttachment(const WIZDOCUMENTATTACHMENTDATA& data, bool bLog)
+bool CWizDatabase::DeleteAttachment(const WIZDOCUMENTATTACHMENTDATA& data,
+                                    bool bLog,
+                                    bool bReset /* = true */)
 {
-    bool bRet = CWizIndex::DeleteAttachment(data, bLog);
+    bool bRet = CWizIndex::DeleteAttachment(data, bLog, bReset);
     CString strFileName = GetAttachmentFileName(data.strGUID);
-    if (PathFileExists(strFileName))
-    {
+    if (PathFileExists(strFileName)) {
         ::WizDeleteFile(strFileName);
     }
+
     return bRet;
 }
 
@@ -1083,8 +1250,11 @@ bool CWizDatabase::GetAllObjectsNeedToBeDownloaded(std::deque<WIZOBJECTDATA>& ar
 
     return true;
 }
+
 bool CWizDatabase::UpdateSyncObjectLocalData(const WIZOBJECTDATA& data)
 {
+    qDebug() << "update object data, name: " << data.strDisplayName << "guid: " << data.strObjectGUID;
+
     if (data.eObjectType == wizobjectDocumentAttachment)
     {
         if (!SaveCompressedAttachmentData(data.strObjectGUID, data.arrayData))
@@ -1093,25 +1263,27 @@ bool CWizDatabase::UpdateSyncObjectLocalData(const WIZOBJECTDATA& data)
             return false;
         }
     }
-    else
+    else if (data.eObjectType == wizobjectDocument)
     {
+        WIZDOCUMENTDATA document;
+        if (!DocumentFromGUID(data.strObjectGUID, document)) {
+            qDebug() << "\n[Fatal] update object data failed, can't find database record!\n";
+            return false;
+        }
+
+
         CString strFileName = GetObjectFileName(data);
         if (!::WizSaveDataToFile(strFileName, data.arrayData))
         {
             Q_EMIT updateError("Failed to save document data: " + data.strDisplayName);
             return false;
         }
-    }
 
-    if (data.eObjectType == wizobjectDocument)
-    {
-        WIZDOCUMENTDATA document;
-        if (DocumentFromGUID(data.strObjectGUID, document))
-        {
-            Q_EMIT documentDataModified(document);
-        }
-
+        Q_EMIT documentDataModified(document);
         UpdateDocumentAbstract(data.strObjectGUID);
+        setDocumentSearchIndexed(data.strObjectGUID, false);
+    } else {
+        Q_ASSERT(0);
     }
 
     SetObjectDataDownloaded(data.strObjectGUID, WIZOBJECTDATA::ObjectTypeToTypeString(data.eObjectType), true);
@@ -1340,7 +1512,7 @@ bool CWizDatabase::SaveCompressedAttachmentData(const CString& strDocumentGUID, 
     return true;
 }
 
-bool CWizDatabase::UpdateDocumentAbstract(const CString& strDocumentGUID)
+bool CWizDatabase::UpdateDocumentAbstract(const QString& strDocumentGUID)
 {
     CString strFileName = GetDocumentFileName(strDocumentGUID);
     if (!PathFileExists(strFileName)) {
@@ -1349,6 +1521,7 @@ bool CWizDatabase::UpdateDocumentAbstract(const CString& strDocumentGUID)
 
     WIZDOCUMENTDATA data;
     if (!DocumentFromGUID(strDocumentGUID, data)) {
+        qDebug() << "[updateDocumentAbstract]invalide guid: " << strDocumentGUID;
         return false;
     }
 
@@ -1357,8 +1530,11 @@ bool CWizDatabase::UpdateDocumentAbstract(const CString& strDocumentGUID)
     }
 
     CString strHtmlFileName;
-    if (!DocumentToTempHtmlFile(data, strHtmlFileName))
+    if (!DocumentToTempHtmlFile(data, strHtmlFileName)) {
+        qDebug() << "[updateDocumentAbstract]decompress to temp failed, guid: "
+                 << strDocumentGUID;
         return false;
+    }
 
     CString strHtmlTempPath = WizExtractFilePath(strHtmlFileName);
 

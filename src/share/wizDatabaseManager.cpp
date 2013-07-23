@@ -1,5 +1,7 @@
 #include "wizDatabaseManager.h"
 
+#include <QDebug>
+
 CWizDatabaseManager::CWizDatabaseManager(const QString& strUserId)
     : m_strUserId(strUserId)
     , m_dbPrivate(NULL)
@@ -115,7 +117,9 @@ CWizDatabase& CWizDatabaseManager::db(const QString& strKbGUID)
         }
     }
 
-    Q_ASSERT(0);
+    qDebug() << "Wow, request db not exist: " << strKbGUID;
+    //Q_ASSERT(0);
+
     return *m_dbPrivate;
 }
 
@@ -229,6 +233,6 @@ void CWizDatabaseManager::initSignals(CWizDatabase* db)
     connect(db, SIGNAL(attachmentDeleted(const WIZDOCUMENTATTACHMENTDATA&)),
             SIGNAL(attachmentDeleted(const WIZDOCUMENTATTACHMENTDATA&)));
 
-    connect(db, SIGNAL(folderCreated(const CString&)), SIGNAL(folderCreated(const CString&)));
-    connect(db, SIGNAL(folderDeleted(const CString&)), SIGNAL(folderDeleted(const CString&)));
+    connect(db, SIGNAL(folderCreated(const QString&)), SIGNAL(folderCreated(const QString&)));
+    connect(db, SIGNAL(folderDeleted(const QString&)), SIGNAL(folderDeleted(const QString&)));
 }

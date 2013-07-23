@@ -672,6 +672,7 @@ CString WizDateTimeToIso8601String(const COleDateTime& t)
     //
     return str;
 }
+
 CString WizIntToHexEx(int n, int nWidth, BOOL bWithPrefix /*= FALSE*/)
 {
     CString strFormat = CString(_T("%0")) + WizIntToStr(nWidth) + _T("X");

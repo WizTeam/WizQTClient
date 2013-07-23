@@ -310,7 +310,7 @@ void CWizAttachmentListView::on_action_deleteAttachment()
         if (CWizAttachmentListViewItem* item = dynamic_cast<CWizAttachmentListViewItem*>(it))
         {
             CWizDatabase& db = m_dbMgr.db(item->attachment().strKbGUID);
-            db.DeleteAttachment(item->attachment(), TRUE);
+            db.DeleteAttachment(item->attachment(), true);
         }
     }
 

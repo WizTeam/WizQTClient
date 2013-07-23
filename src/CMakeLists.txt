@@ -76,13 +76,14 @@ set(wiznote_SOURCES
     html/wizhtmlreader.cpp
     html/wizhtmlcollector.cpp
     main.cpp
-    wizdocumentlistview.cpp
-    wizdocumentview.cpp
-    wizdocumentwebview.cpp
+    wizCategoryView.cpp
+    wizCategoryViewItem.cpp
+    wizDocumentListView.cpp
+    wizDocumentListViewItem.cpp
+    wizDocumentView.cpp
+    wizDocumentWebView.cpp
     wizactions.cpp
     wiznotestyle.cpp
-    wizcategoryview.cpp
-    wizCategoryViewItem.cpp
     wizLineInputDialog.cpp
     wizdownloadobjectdatadialog.cpp
     wizdocumenthistory.cpp
@@ -117,6 +118,10 @@ set(wiznote_SOURCES
     wizFolderView.cpp
     widgets/wizScrollBar.cpp
     wizDocumentSelectionView.cpp
+    share/wizGroupMessage.cpp
+    share/wizApiEntry.cpp
+    share/wizObjectDataDownloader.cpp
+    share/wizUserAvatar.cpp
 )
 
 set(wiznote_HEADERS
@@ -184,14 +189,15 @@ set(wiznote_HEADERS
     share/wizziwreader.h
     html/wizhtmlreader.h
     html/wizhtmlcollector.h
-    wizdocumentlistview.h
-    wizdocumentview.h
-    wizdocumentwebview.h
     wizdef.h
     wizactions.h
     wiznotestyle.h
-    wizcategoryview.h
+    wizCategoryView.h
     wizCategoryViewItem.h
+    wizDocumentListView.h
+    wizDocumentListViewItem.h
+    wizDocumentView.h
+    wizDocumentWebView.h
     wizdownloadobjectdatadialog.h
     wizdocumenthistory.h
     wizattachmentlistwidget.h
@@ -218,6 +224,23 @@ set(wiznote_HEADERS
     wizEditorInsertLinkForm.h
     wizUpgrade.h
     wizEditorToolBar.h
+
+    # rapidjson
+    rapidjson/allocators.h
+    rapidjson/document.h
+    rapidjson/encodedstream.h
+    rapidjson/encodings.h
+    rapidjson/filereadstream.h
+    rapidjson/filestream.h
+    rapidjson/filewritestream.h
+    rapidjson/prettywriter.h
+    rapidjson/rapidjson.h
+    rapidjson/reader.h
+    rapidjson/stringbuffer.h
+    rapidjson/reader.h
+    rapidjson/internal/pow10.h
+    rapidjson/internal/stack.h
+    rapidjson/internal/strfunc.h
 )
 
 set(wiznote_WRAP_HEADERS
@@ -231,7 +254,6 @@ set(wiznote_WRAP_HEADERS
     share/wizanimateaction.h
     share/wizapi.h
     wizattachmentlistwidget.h
-    wizcategoryview.h
     wizcertmanager.h
     share/wizcommonui.h
     wizconsoledialog.h
@@ -239,9 +261,10 @@ set(wiznote_WRAP_HEADERS
     wizcreateaccountdialog.h
     share/wizDatabase.h
     share/wizDatabaseManager.h
-    wizdocumentlistview.h
-    wizdocumentview.h
-    wizdocumentwebview.h
+    wizCategoryView.h
+    wizDocumentListView.h
+    wizDocumentView.h
+    wizDocumentWebView.h
     share/wizdownloadobjectdata.h
     wizdownloadobjectdatadialog.h
     wizEditorInsertLinkForm.h
@@ -281,6 +304,10 @@ set(wiznote_WRAP_HEADERS
     wizFolderView.h
     widgets/wizScrollBar.h
     wizDocumentSelectionView.h
+    share/wizGroupMessage.h
+    share/wizApiEntry.h
+    share/wizObjectDataDownloader.h
+    share/wizUserAvatar.h
 )
 
 set(wiznote_FORMS
@@ -352,7 +379,7 @@ endif()
 if(UNIX)
     if(APPLE)
 
-        add_executable(${PROJECT_NAME} MACOSX_BUNDLE ${wiznote_SOURCES} ${wiznote_SOURCES_MAC} ${wiznote_MOC_HEADERS} ${wiznote_FORM_HEADERS} ${wiznote_QM})
+        add_executable(${PROJECT_NAME} MACOSX_BUNDLE ${wiznote_SOURCES} ${wiznote_HEADERS} ${wiznote_SOURCES_MAC} ${wiznote_MOC_HEADERS} ${wiznote_FORM_HEADERS} ${wiznote_QM})
         set_target_properties(${PROJECT_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bundle)
 
         # this should be issue of cmake, refer: http://public.kitware.com/Bug/bug_revision_view_page.php?rev_id=958

@@ -1,6 +1,7 @@
 #include "wiznotestyle.h"
-#include "wizdocumentlistview.h"
-#include "wizcategoryview.h"
+#include "wizCategoryView.h"
+#include "wizDocumentListView.h"
+#include "wizDocumentListViewItem.h"
 #include "share/wizdrawtexthelper.h"
 #include "share/wizqthelper.h"
 #include "share/wizsettings.h"
@@ -29,6 +30,8 @@ public:
 private:
     QImage m_expandedImage;
     QImage m_collapsedImage;
+    QImage m_imgDocumentUnread;
+    QImage m_imgDefaultAvatar;
     CWizSkin9GridImage m_toolBarImage;
     CWizSkin9GridImage m_splitterShadowImage;
     CWizSkin9GridImage m_categorySelectedItemBackground;
@@ -63,6 +66,11 @@ private:
     QColor m_colorMultiLineListOtherLineSelected;
 
     QFont m_fontImagePushButtonLabel;
+
+    void drawDocumentListViewItemPrivate(const QStyleOptionViewItemV4 *option, QPainter *painter, const CWizDocumentListView *widget) const;
+    void drawDocumentListViewItemGroup(const QStyleOptionViewItemV4 *option, QPainter *painter, const CWizDocumentListView *widget) const;
+    void drawDocumentListViewItemMessage(const QStyleOptionViewItemV4 *option, QPainter *painter, const CWizDocumentListView *widget) const;
+
 protected:
     virtual void drawCategoryViewItem(const QStyleOptionViewItemV4 *option, QPainter *painter, const CWizCategoryBaseView *widget) const;
     virtual void drawDocumentListViewItem(const QStyleOptionViewItemV4 *option, QPainter *painter, const CWizDocumentListView *widget) const;
@@ -96,6 +104,9 @@ CWizNoteStyle::CWizNoteStyle(const QString& strSkinName)
     //m_expandedImage = m_expandedImage.scaled(24, 24, Qt::KeepAspectRatio);
     m_collapsedImage.load(strSkinPath + "button_collapsed.png");
     //m_collapsedImage = m_collapsedImage.scaled(24, 24, Qt::KeepAspectRatio);
+
+    m_imgDocumentUnread.load(strSkinPath + "read_btn_unread.png");
+    m_imgDefaultAvatar.load(strSkinPath + "avatar_default.png");
 
     m_toolBarImage.SetImage(strSkinPath + "toolbar_background.png", QPoint(8, 8));
     m_splitterShadowImage.SetImage(strSkinPath + "leftview_line_shadow.png", QPoint(4, 4));
@@ -145,13 +156,19 @@ void CWizNoteStyle::drawCategoryViewItem(const QStyleOptionViewItemV4 *vopt,
 {
     CWizCategoryViewItemBase* pItem = view->categoryItemFromIndex(vopt->index);
     if (NULL != dynamic_cast<const CWizCategoryViewSeparatorItem*>(pItem)) {
+
+        // Draw seperator line
+        QRect rc = subElementRect(SE_ItemViewItemFocusRect, vopt, view);
+        QPoint p1 = rc.topLeft();
+        p1.ry() += rc.height() / 2;
+        QPoint p2 = rc.topRight();
+        p2.ry() += rc.height() / 2;
+        painter->drawLine(p1, p2);
         return;
+
     } else if (NULL != dynamic_cast<const CWizCategoryViewSpacerItem*>(pItem)) {
         return;
     }
-
-//    if (view->isSeparatorItemByIndex(vopt->index))
-//        return;
 
     QPalette palette = vopt->palette;
     QStyleOptionViewItemV4 adjustedOption = *vopt;
@@ -248,12 +265,352 @@ void CWizNoteStyle::drawCategoryViewItem(const QStyleOptionViewItemV4 *vopt,
     p->restore();
 }
 
+void CWizNoteStyle::drawDocumentListViewItemPrivate(const QStyleOptionViewItemV4 *vopt,
+                                                    QPainter *p,
+                                                    const CWizDocumentListView *view) const
+{
+    WIZDOCUMENTDATA document = view->documentFromIndex(vopt->index);
+    WIZABSTRACT abstract = view->documentAbstractFromIndex(vopt->index);
+    QString tagsText = view->documentTagsFromIndex(vopt->index);
+
+    // FIXME: hard-coded background brush color
+    QPalette palette = vopt->palette;
+    palette.setColor(QPalette::Active, QPalette::Highlight, QColor(58, 81, 134));
+    palette.setColor(QPalette::Inactive, QPalette::Highlight, QColor(101, 122, 148));
+    palette.setColor(QPalette::Active, QPalette::BrightText, Qt::lightGray);
+
+    QStyleOptionViewItemV4 adjustedOption = *vopt;
+    adjustedOption.palette = palette;
+
+    QStyleOptionViewItemV4* opt = &adjustedOption;
+
+    p->save();
+    p->setClipRect(opt->rect);
+
+    QRect textLine = opt->rect;
+    textLine.adjust(4, 0, -4, 0);
+    p->setPen(m_colorDocumentsLine);
+    p->drawLine(textLine.bottomLeft(), textLine.bottomRight());
+
+    // Not use subElementRect here, because Qt have issue on KDE to get the right rect
+    //QRect textRect = subElementRect(SE_ItemViewItemText, vopt, view);
+    QRect textRect = opt->rect.adjusted(-3, -3, 0, 0);
+
+    // draw background behaviour
+    if (vopt->state.testFlag(QStyle::State_Selected)) {
+        if (view->hasFocus()) {
+            p->fillRect(vopt->rect, adjustedOption.palette.brush(QPalette::Active, QPalette::Highlight));
+        } else {
+            p->fillRect(vopt->rect, adjustedOption.palette.brush(QPalette::Inactive, QPalette::Highlight));
+        }
+    }
+
+    // draw thumb image
+    const QImage& img = abstract.image;
+    if (img.width() > 0 && img.height() > 0)
+    {
+        QRect imageRect = textRect;
+        imageRect.setLeft(imageRect.right() - IMAGE_WIDTH);
+        imageRect.adjust(4, 4, -4, -4);
+
+        if (img.width() > imageRect.width() || img.height() > imageRect.height())
+        {
+            double fRate = std::min<double>(double(imageRect.width()) / img.width(), double(imageRect.height()) / img.height());
+            int newWidth = int(img.width() * fRate);
+            int newHeight = int(img.height() * fRate);
+            //
+            int adjustX = (imageRect.width() - newWidth) / 2;
+            int adjustY = (imageRect.height() - newHeight) / 2;
+            imageRect.adjust(adjustX, adjustY, -adjustX, -adjustY);
+        }
+        else
+        {
+            int adjustX = (imageRect.width() - img.width()) / 2;
+            int adjustY = (imageRect.height() - img.height()) / 2;
+            imageRect.adjust(adjustX, adjustY, -adjustX, -adjustY);
+        }
+        p->drawImage(imageRect, img);
+        //
+        textRect.setRight(imageRect.left());
+    }
+
+    // draw the text
+    if (!vopt->text.isEmpty()) {
+        QPalette::ColorGroup cg = vopt->state & QStyle::State_Enabled
+                                  ? QPalette::Normal : QPalette::Disabled;
+        if (cg == QPalette::Normal && !(vopt->state & QStyle::State_Active))
+            cg = QPalette::Inactive;
+
+        if (vopt->state & QStyle::State_Selected) {
+            p->setPen(vopt->palette.color(cg, QPalette::HighlightedText));
+        } else {
+            p->setPen(vopt->palette.color(cg, QPalette::Text));
+        }
+
+        if (vopt->state & QStyle::State_Editing) {
+            p->setPen(vopt->palette.color(cg, QPalette::Text));
+            p->drawRect(textRect.adjusted(0, 0, -1, -1));
+        }
+
+        textRect.adjust(8, 8, -8, -8);
+
+        bool selected = vopt->state.testFlag(State_Selected);
+        QColor selectedLightColor = palette.color(QPalette::HighlightedText);
+        QColor selectedBrightColor = palette.color(QPalette::BrightText);
+
+        //QColor colorTitle = selected ? m_colorDocumentsTitleSelected : m_colorDocumentsTitle;
+
+        p->save();
+
+        // title use 13px font size
+        QFont fontTitle = p->font();
+        fontTitle.setPixelSize(13);
+        p->setFont(fontTitle);
+        QRect rcTitle = textRect;
+        rcTitle.setBottom(rcTitle.top() + p->fontMetrics().height());
+        CString strTitle = document.strTitle;
+        QColor colorTitle = selected ? selectedLightColor : m_colorDocumentsTitle;
+        ::WizDrawTextSingleLine(p, rcTitle, strTitle,  Qt::TextSingleLine | Qt::AlignVCenter, colorTitle, true);
+        p->restore();
+
+        // other text use 12px font size
+        QFont fontAbs = p->font();
+        fontAbs.setPixelSize(12);
+        p->setFont(fontAbs);
+
+        //QColor colorDate = selected ? m_colorDocumentsDateSelected : m_colorDocumentsDate;
+        QColor colorDate = selected ? selectedLightColor : m_colorDocumentsDate;
+        QRect rcInfo = rcTitle;
+        rcInfo.setBottom(rcInfo.top() + p->fontMetrics().height());
+        rcInfo.moveTo(rcInfo.left(), rcInfo.bottom() + 4);
+        //CString strInfo = document.tCreated.date().toString(Qt::DefaultLocaleShortDate) + tagsText;
+        CString strInfo = document.tCreated.toHumanFriendlyString();
+        int infoWidth = ::WizDrawTextSingleLine(p, rcInfo, strInfo,  Qt::TextSingleLine | Qt::AlignVCenter, colorDate, true);
+
+        //QColor colorSummary = selected ? m_colorDocumentsSummarySelected : m_colorDocumentsSummary;
+        QColor colorSummary = selected ? selectedBrightColor : m_colorDocumentsSummary;
+        QRect rcAbstract1 = rcInfo;
+        rcAbstract1.setLeft(rcInfo.left() + infoWidth + 16);
+        rcAbstract1.setRight(rcTitle.right());
+        CString strAbstract = abstract.text;
+        ::WizDrawTextSingleLine(p, rcAbstract1, strAbstract, Qt::TextSingleLine | Qt::AlignVCenter, colorSummary, false);
+
+        QRect rcAbstract2 = textRect;
+        rcAbstract2.setTop(rcAbstract1.bottom() + 2);
+        rcAbstract2.setBottom(rcAbstract2.top() + rcInfo.height());
+        ::WizDrawTextSingleLine(p, rcAbstract2, strAbstract, Qt::TextSingleLine | Qt::AlignVCenter, colorSummary, false);
+
+        QRect rcAbstract3 = textRect;
+        rcAbstract3.setTop(rcAbstract2.bottom() + 2);
+        rcAbstract3.setBottom(rcAbstract3.top() + rcInfo.height());
+        ::WizDrawTextSingleLine(p, rcAbstract3, strAbstract, Qt::TextSingleLine | Qt::AlignVCenter, colorSummary, true);
+    }
+
+    // draw the focus rect
+    if (vopt->state & QStyle::State_HasFocus) {
+        QStyleOptionFocusRect o;
+        o.QStyleOption::operator=(*vopt);
+
+        // The same reason as above
+        //o.rect = subElementRect(SE_ItemViewItemFocusRect, vopt, view);
+        o.rect = vopt->rect;
+
+        o.state |= QStyle::State_KeyboardFocusChange;
+        o.state |= QStyle::State_Item;
+        QPalette::ColorGroup cg = (vopt->state & QStyle::State_Enabled)
+                                  ? QPalette::Normal : QPalette::Disabled;
+        o.backgroundColor = vopt->palette.color(cg, (vopt->state & QStyle::State_Selected)
+                                                ? QPalette::Highlight : QPalette::Window);
+        drawPrimitive(QStyle::PE_FrameFocusRect, &o, p, view);
+    }
+
+    p->restore();
+}
+
+void CWizNoteStyle::drawDocumentListViewItemGroup(const QStyleOptionViewItemV4 *option,
+                                                  QPainter *painter,
+                                                  const CWizDocumentListView *widget) const
+{
+    Q_UNUSED(option);
+    Q_UNUSED(painter);
+    Q_UNUSED(widget);
+}
+
+void CWizNoteStyle::drawDocumentListViewItemMessage(const QStyleOptionViewItemV4 *vopt,
+                                                    QPainter *p,
+                                                    const CWizDocumentListView *view) const
+{
+    const WIZMESSAGEDATA& msg = view->messageFromIndex(vopt->index);
+    const QImage& imgSenderAvatar = view->messageSenderAvatarFromIndex(vopt->index);
+    const WIZABSTRACT& abstract = view->documentAbstractFromIndex(vopt->index);
+
+    // FIXME: hard-coded background brush color
+    QPalette palette = vopt->palette;
+    palette.setColor(QPalette::Active, QPalette::Highlight, QColor(58, 81, 134));
+    palette.setColor(QPalette::Inactive, QPalette::Highlight, QColor(101, 122, 148));
+    palette.setColor(QPalette::Active, QPalette::BrightText, Qt::lightGray);
+
+    QStyleOptionViewItemV4 adjustedOption = *vopt;
+    adjustedOption.palette = palette;
+
+    QStyleOptionViewItemV4* opt = &adjustedOption;
+
+    p->save();
+    p->setClipRect(opt->rect);
+
+    QRect textLine = opt->rect;
+    textLine.adjust(4, 0, -4, 0);
+    p->setPen(m_colorDocumentsLine);
+    p->drawLine(textLine.bottomLeft(), textLine.bottomRight());
+
+    // Not use subElementRect here, because Qt have issue on KDE to get the right rect
+    //QRect textRect = subElementRect(SE_ItemViewItemText, vopt, view);
+    QRect textRect = opt->rect.adjusted(-3, -3, 0, 0);
+
+    // draw background behaviour
+    if (vopt->state.testFlag(QStyle::State_Selected)) {
+        if (view->hasFocus()) {
+            p->fillRect(vopt->rect, adjustedOption.palette.brush(QPalette::Active, QPalette::Highlight));
+        } else {
+            p->fillRect(vopt->rect, adjustedOption.palette.brush(QPalette::Inactive, QPalette::Highlight));
+        }
+    }
+
+    bool selected = vopt->state.testFlag(State_Selected);
+    QColor selectedLightColor = palette.color(QPalette::HighlightedText);
+
+    // draw the text
+    if (!vopt->text.isEmpty()) {
+        QPalette::ColorGroup cg = vopt->state & QStyle::State_Enabled
+                                  ? QPalette::Normal : QPalette::Disabled;
+        if (cg == QPalette::Normal && !(vopt->state & QStyle::State_Active))
+            cg = QPalette::Inactive;
+
+        if (vopt->state & QStyle::State_Selected) {
+            p->setPen(vopt->palette.color(cg, QPalette::HighlightedText));
+        } else {
+            p->setPen(vopt->palette.color(cg, QPalette::Text));
+        }
+
+        if (vopt->state & QStyle::State_Editing) {
+            p->setPen(vopt->palette.color(cg, QPalette::Text));
+            p->drawRect(textRect.adjusted(0, 0, -1, -1));
+        }
+
+        // draw left status bar
+        QRect rcStatus = opt->rect;
+        rcStatus.setRight(20);
+
+        // draw unread message indicator, size: 9*9
+        if (msg.nReadStatus == 0) {
+            QRect rcUnread(QPoint(rcStatus.center().x() - 6, rcStatus.center().y() - 6),
+                           QPoint(rcStatus.center().x() + 3, rcStatus.center().y() + 3));
+            p->setRenderHint(QPainter::Antialiasing);
+            p->drawImage(rcUnread, m_imgDocumentUnread);
+        }
+
+        // avoid drawing on edgee
+        textRect.adjust(20, 5, -5, -5);
+
+        // draw user avatar, size: 35 * 35
+        QRect rcAvatar = textRect;
+        rcAvatar.setRight(rcAvatar.left() + 35);
+        rcAvatar.setBottom(rcAvatar.top() + 35);
+        p->setRenderHint(QPainter::Antialiasing);
+        p->setPen(QColor(180, 180, 180)); // FIXME
+
+        if (imgSenderAvatar.isNull()) {
+            p->drawImage(rcAvatar, m_imgDefaultAvatar);
+        } else {
+            p->drawImage(rcAvatar, imgSenderAvatar);
+        }
+
+        p->drawRoundedRect(rcAvatar, 3, 3);
+
+        // draw message sender
+        int nDefaultMargin = 5;
+        QRect rcTitle = textRect;
+        QColor colorTitle = selected ? selectedLightColor : m_colorDocumentsTitle;
+
+        QFont fontTitle = p->font();
+        fontTitle.setPixelSize(13);
+        fontTitle.setBold(true);
+        p->setFont(fontTitle);
+
+        rcTitle.setLeft(rcTitle.left() + rcAvatar.width() + nDefaultMargin);
+        rcTitle.setBottom(rcTitle.top() + p->fontMetrics().height());
+        p->setPen(colorTitle);
+        p->drawText(rcTitle, msg.senderAlias);
+
+        // draw message created time
+        QRect rcDate = rcTitle;
+        QColor colorDate = selected ? selectedLightColor : Qt::blue;
+        QString strDate = msg.tCreated.toHumanFriendlyString();
+
+        QFont f = p->font();
+        f.setPixelSize(12);
+        f.setBold(false);
+        p->setFont(f);
+
+        int nDateWidth = p->fontMetrics().width(strDate);
+        rcDate.setLeft(rcDate.left() + rcTitle.width() - nDateWidth - nDefaultMargin);
+
+        p->setPen(colorDate);
+        p->drawText(rcDate, strDate);
+
+        // draw message title
+        QRect rcInfo = rcTitle;
+        //QColor colorInfo = selected ? selectedLightColor : m_colorDocumentsSummary;
+        QColor colorInfo = selected ? selectedLightColor : m_colorDocumentsTitle;
+
+        QFont fontInfo = p->font();
+        fontInfo.setPixelSize(12);
+        p->setFont(fontInfo);
+
+        rcInfo.setTop(rcInfo.bottom() + nDefaultMargin);
+        rcInfo.setBottom(rcInfo.top() + p->fontMetrics().height());
+        p->setPen(colorInfo);
+
+        QString strElid = p->fontMetrics().elidedText(msg.title, Qt::ElideRight, rcInfo.width());
+        p->drawText(rcInfo, strElid);
+
+        // draw message abstract summary
+        QRect rcSummary = textRect;
+        QColor colorSummary = selected ? selectedLightColor : m_colorDocumentsSummary;
+        rcSummary.setTop(rcInfo.bottom() + nDefaultMargin);
+        rcSummary.setBottom(rcSummary.top() + p->fontMetrics().height() * 2);
+
+        p->setPen(colorSummary);
+        p->drawText(rcSummary, abstract.text);
+    }
+
+    // draw the focus rect
+    if (vopt->state & QStyle::State_HasFocus) {
+        QStyleOptionFocusRect o;
+        o.QStyleOption::operator=(*vopt);
+
+        // The same reason as above
+        //o.rect = subElementRect(SE_ItemViewItemFocusRect, vopt, view);
+        o.rect = vopt->rect;
+
+        o.state |= QStyle::State_KeyboardFocusChange;
+        o.state |= QStyle::State_Item;
+        QPalette::ColorGroup cg = (vopt->state & QStyle::State_Enabled)
+                                  ? QPalette::Normal : QPalette::Disabled;
+        o.backgroundColor = vopt->palette.color(cg, (vopt->state & QStyle::State_Selected)
+                                                ? QPalette::Highlight : QPalette::Window);
+        drawPrimitive(QStyle::PE_FrameFocusRect, &o, p, view);
+    }
+
+    p->restore();
+}
+
 
 void CWizNoteStyle::drawDocumentListViewItem(const QStyleOptionViewItemV4 *vopt, QPainter *p, const CWizDocumentListView *view) const
 {
     WIZDOCUMENTDATA document = view->documentFromIndex(vopt->index);
     WIZABSTRACT abstract = view->documentAbstractFromIndex(vopt->index);
-    CString tagsText = view->documentTagsFromIndex(vopt->index);
+    QString tagsText = view->documentTagsFromIndex(vopt->index);
 
     //palette.setColor(QPalette::All, QPalette::HighlightedText, palette.color(QPalette::Active, QPalette::Text));
     // Note that setting a saturated color here results in ugly XOR colors in the focus rect
@@ -685,7 +1042,16 @@ void CWizNoteStyle::drawControl(ControlElement element, const QStyleOption *opti
 
             if (const CWizDocumentListView *view = dynamic_cast<const CWizDocumentListView *>(widget))
             {
-                drawDocumentListViewItem(vopt, painter, view);
+                CWizDocumentListViewItem* it = view->documentItemFromIndex(vopt->index);
+                if (it->nType == CWizDocumentListViewItem::MessageDocument) {
+                    drawDocumentListViewItemMessage(vopt, painter, view);
+                } else if (it->nType == CWizDocumentListViewItem::PrivateDocument) {
+                    drawDocumentListViewItemPrivate(vopt, painter, view);
+                } else {
+                    Q_ASSERT(0);
+                }
+
+                //drawDocumentListViewItem(vopt, painter, view);
             }
             else if (const CWizMultiLineListWidget *view = dynamic_cast<const CWizMultiLineListWidget *>(widget))
             {
@@ -867,4 +1233,3 @@ QColor WizGetClientBackgroundColor(const QString& strSkinName)
     CWizSettings settings(::WizGetSkinResourcePath(strSkinName) + "skin.ini");
     return settings.GetColor("Client", "Background", QColor(0x80, 0x80, 0x80));
 }
-

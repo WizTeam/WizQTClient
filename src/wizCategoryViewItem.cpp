@@ -1,6 +1,6 @@
 #include "wizCategoryViewItem.h"
 
-#include "wizcategoryview.h"
+#include "wizCategoryView.h"
 #include "share/wizsettings.h"
 #include "wiznotestyle.h"
 #include "share/wizDatabaseManager.h"
@@ -77,7 +77,7 @@ CWizCategoryViewSpacerItem::CWizCategoryViewSpacerItem(CWizExplorerApp& app)
 int CWizCategoryViewSpacerItem::getItemHeight(int hintHeight) const
 {
     Q_UNUSED(hintHeight);
-    return 100;
+    return 12;
 }
 
 /* ------------------------------ CWizCategoryViewSeparatorItem ------------------------------ */
@@ -359,6 +359,37 @@ void CWizCategoryViewAllGroupsRootItem::getDocuments(CWizDatabase& db, CWizDocum
 {
     Q_UNUSED(db);
     Q_UNUSED(arrayDocument);
+}
+
+/* ------------------------------ CWizCategoryViewGroupRootItem ------------------------------ */
+CWizCategoryViewBizGroupRootItem::CWizCategoryViewBizGroupRootItem(CWizExplorerApp& app,
+                                                                   const QString& strName,
+                                                                   const QString& strKbGUID)
+    : CWizCategoryViewAllGroupsRootItem(app, strName, strKbGUID)
+{
+//    QIcon icon;
+//    QColor color = ::WizGetCategoryBackroundColor(app.userSettings().skin());
+//    ::WizLoadSkinIcon3(icon, app.userSettings().skin(), "groups", QIcon::Normal, QIcon::On, color);
+//    ::WizLoadSkinIcon3(icon, app.userSettings().skin(), "groups", QIcon::Selected, QIcon::On, color);
+//    setIcon(0, icon);
+//    setText(0, strName);
+}
+
+void CWizCategoryViewBizGroupRootItem::updateDocumentsCount()
+{
+//    int nChild = childCount();
+//    for (int i = 0; i > nChild; i++) {
+//        CWizCategoryViewGroupRootItem* pItem = dynamic_cast<CWizCategoryViewGroupRootItem *>(child(i));
+//        if (pItem) {
+//            pItem->updateDocumentsCount();
+//        }
+//    }
+//    int nCount = 0, nCount2 = 0;
+//    CWizDatabase& db = m_app.databaseManager().db(m_strKbGUID);
+//    db.getDocumentsSizeNoTag(nCount);
+//    setDocumentsCount(nCount, false);
+//    db.GetAllDocumentsSize(nCount2);
+//    setDocumentsCount(nCount2, true);
 }
 
 

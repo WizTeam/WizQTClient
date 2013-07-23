@@ -5,7 +5,7 @@
 #include "share/wizmisc.h"
 #include "wizdef.h"
 #include "wizmainwindow.h"
-#include "wizdocumentwebview.h"
+#include "wizDocumentWebView.h"
 #include "wizactions.h"
 
 void drawComboPrimitive(QStylePainter* p, QStyle::PrimitiveElement pe, const QStyleOption &opt);

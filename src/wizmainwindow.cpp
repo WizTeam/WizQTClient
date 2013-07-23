@@ -7,7 +7,7 @@
 #include "mac/wizmachelper.h"
 #endif
 
-#include "wizdocumentwebview.h"
+#include "wizDocumentWebView.h"
 #include "wizactions.h"
 #include "wizaboutdialog.h"
 #include "wizpreferencedialog.h"
@@ -33,6 +33,8 @@
 #include "wizEditorToolBar.h"
 #include "wizProgressDialog.h"
 #include "wizDocumentSelectionView.h"
+#include "share/wizGroupMessage.h"
+#include "share/wizObjectDataDownloader.h"
 
 
 MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
@@ -41,12 +43,15 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     , m_progress(new CWizProgressDialog(this))
     , m_settings(new CWizUserSettings(dbMgr.db()))
     , m_sync(new CWizSyncThread(*this, this))
+    , m_searchIndexer(new CWizSearchIndexer(m_dbMgr))
+    , m_messageSync(new CWizGroupMessage(dbMgr.db()))
     , m_console(new CWizConsoleDialog(*this, this))
     , m_upgrade(new CWizUpgrade())
     , m_certManager(new CWizCertManager(*this))
     , m_cipherForm(new CWizUserCipherForm(*this, this))
     , m_groupAttribute(new CWizGroupAttributeForm(*this, this))
     , m_objectDownloadDialog(new CWizDownloadObjectDataDialog(dbMgr, this))
+    , m_objectDownloaderHost(new CWizObjectDataDownloaderHost(dbMgr, this))
     #ifndef Q_OS_MAC
     , m_labelNotice(NULL)
     , m_optionsAction(NULL)
@@ -71,11 +76,12 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     , m_bRequestQuit(false)
 {
     // FTS engine thread
-    m_searchIndexer = new CWizSearchIndexerThread(m_dbMgr, this);
-    m_searchIndexer->start();
-    connect(m_searchIndexer, SIGNAL(started()), SLOT(on_searchIndexerStarted()));
-    connect(m_searchIndexer, SIGNAL(documentFind(const CWizDocumentDataArray&)), \
-            SLOT(on_searchDocumentFind(const CWizDocumentDataArray&)));
+    connect(m_searchIndexer, SIGNAL(documentFind(const WIZDOCUMENTDATAEX&)), \
+            SLOT(on_searchDocumentFind(const WIZDOCUMENTDATAEX&)));
+
+    QThread *threadFTS = new QThread();
+    m_searchIndexer->moveToThread(threadFTS);
+    threadFTS->start(QThread::LowestPriority);
 
     // upgrade check
     QThread *thread = new QThread();
@@ -104,6 +110,12 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
         m_syncTimer->setInterval(nInterval * 60 * 1000);
     }
 
+    // group messages sync thread
+    QThread* threadMessage = new QThread();
+    m_messageSync->moveToThread(threadMessage);
+    threadMessage->start();
+
+    // init GUI stuff
     m_category = m_categoryPrivate;
 
     connect(m_sync, SIGNAL(syncStarted()), SLOT(on_syncStarted()));
@@ -153,11 +165,13 @@ bool MainWindow::requestThreadsQuit()
         bOk = false;
     }
 
-    if (m_searchIndexer->isRunning()) {
-        m_searchIndexer->worker()->abort();
-        m_searchIndexer->quit();
-        bOk = false;
-    }
+    m_searchIndexer->abort();
+
+//    if (m_searchIndexer->isRunning()) {
+//        m_searchIndexer->worker()->abort();
+//        m_searchIndexer->quit();
+//        bOk = false;
+//    }
 
     return bOk;
 }
@@ -331,6 +345,11 @@ void MainWindow::initToolBar()
     CWizButton* buttonNew = new CWizButton(*this, m_toolBar);
     buttonNew->setAction(m_actions->actionFromName(WIZACTION_GLOBAL_NEW_DOCUMENT));
     m_toolBar->addWidget(buttonNew);
+
+    m_toolBar->addWidget(new CWizFixedSpacer(QSize(20, 1), m_toolBar));
+    CWizButton* btnViewMessages = new CWizButton(*this, m_toolBar);
+    btnViewMessages->setAction(m_actions->actionFromName(WIZACTION_GLOBAL_VIEW_MESSAGES));
+    m_toolBar->addWidget(btnViewMessages);
 
     m_toolBar->addWidget(new CWizSpacer(m_toolBar));
     m_searchBox = new CWizSearchBox(*this, this);
@@ -679,7 +698,19 @@ void MainWindow::on_actionNewNote_triggered()
 
     m_documentForEditing = data;
     m_documents->addAndSelectDocument(data);
+}
 
+void MainWindow::on_actionViewMessages_triggered()
+{
+    // read messages from db
+    CWizMessageDataArray arrayMsg;
+    m_dbMgr.db().getAllMessages(arrayMsg);
+
+    if (!arrayMsg.size())
+        return;
+
+    // set documents
+    m_documents->setDocuments(arrayMsg);
 }
 
 void MainWindow::on_actionEditingUndo_triggered()
@@ -852,9 +883,12 @@ void MainWindow::on_actionPreference_triggered()
 
 void MainWindow::on_actionRebuildFTS_triggered()
 {
-    if (!QMetaObject::invokeMethod(m_searchIndexer->worker(), "rebuildFTSIndex")) {
-        TOLOG("thread call to rebuild FTS failed");
-    }
+    // FIXME: ensure aborted before rebuild
+    m_searchIndexer->rebuild();
+
+//    if (!QMetaObject::invokeMethod(m_searchIndexer->worker(), "rebuildFTSIndex")) {
+//        TOLOG("thread call to rebuild FTS failed");
+//    }
 }
 
 void MainWindow::on_actionSearch_triggered()
@@ -869,14 +903,14 @@ void MainWindow::on_actionResetSearch_triggered()
     m_category->restoreSelection();
 }
 
-void MainWindow::on_searchIndexerStarted()
-{
-    QTimer::singleShot(5 * 1000, m_searchIndexer->worker(), SLOT(buildFTSIndex()));
-}
+//void MainWindow::on_searchIndexerStarted()
+//{
+//    QTimer::singleShot(5 * 1000, m_searchIndexer->worker(), SLOT(buildFTSIndex()));
+//}
 
-void MainWindow::on_searchDocumentFind(const CWizDocumentDataArray& arrayDocument)
+void MainWindow::on_searchDocumentFind(const WIZDOCUMENTDATAEX& doc)
 {
-    m_documents->addDocuments(arrayDocument);
+    m_documents->addDocument(doc, true);
     on_documents_itemSelectionChanged();
 }
 
@@ -890,11 +924,13 @@ void MainWindow::on_search_doSearch(const QString& keywords)
     m_category->saveSelection();
     m_documents->clear();
 
-    if (!QMetaObject::invokeMethod(m_searchIndexer->worker(), "search", \
-                                   Q_ARG(QString, keywords), \
-                                   Q_ARG(int, 100))) {
-        TOLOG("FTS search failed");
-    }
+    m_searchIndexer->search(keywords, 1000); // FIXME
+
+//    if (!QMetaObject::invokeMethod(m_searchIndexer->worker(), "search", \
+//                                   Q_ARG(QString, keywords), \
+//                                   Q_ARG(int, 100))) {
+//        TOLOG("FTS search failed");
+//    }
 }
 
 #ifndef Q_OS_MAC

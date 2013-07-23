@@ -12,14 +12,13 @@
 #include "share/wizsettings.h"
 #include "share/wizsyncthread.h"
 #include "wizUpgrade.h"
-//#include "wizupdater.h"
 #include "wizconsoledialog.h"
-#include "wizdocumentview.h"
+#include "wizCategoryView.h"
+#include "wizDocumentListView.h"
+#include "wizDocumentView.h"
 #include "wizcertmanager.h"
 #include "wizusercipherform.h"
 #include "wizdownloadobjectdatadialog.h"
-#include "wizcategoryview.h"
-#include "wizdocumentlistview.h"
 
 class CWizProgressDialog;
 class CWizDocumentListView;
@@ -34,9 +33,11 @@ class CWizOptionsWidget;
 class CWizStatusBar;
 
 class CWizSearchBox;
-class CWizSearchIndexerThread;
+class CWizSearchIndexer;
 
 class QtSegmentControl;
+class CWizGroupMessage;
+class CWizObjectDataDownloaderHost;
 
 
 class MainWindow
@@ -71,12 +72,15 @@ private:
     CWizUserSettings* m_settings;
     QPointer<CWizSyncThread> m_sync;
     QPointer<QTimer> m_syncTimer;
+    QPointer<CWizGroupMessage> m_messageSync;
     CWizConsoleDialog* m_console;
     QPointer<CWizUpgrade> m_upgrade;
     QPointer<CWizCertManager> m_certManager;
     QPointer<CWizUserCipherForm> m_cipherForm;
     QPointer<CWizGroupAttributeForm> m_groupAttribute;
     QPointer<CWizDownloadObjectDataDialog> m_objectDownloadDialog;
+    CWizObjectDataDownloaderHost* m_objectDownloaderHost;
+
     QToolBar* m_toolBar;
     QMenuBar* m_menuBar;
     CWizStatusBar* m_statusBar;
@@ -103,7 +107,7 @@ private:
     QPointer<CWizAnimateAction> m_animateSync;
     //QPointer<CWizSyncAnimation> m_animateSync;
 
-    QPointer<CWizSearchIndexerThread> m_searchIndexer;
+    CWizSearchIndexer* m_searchIndexer;
     QPointer<CWizSearchBox> m_searchBox;
 
     bool m_bRestart;
@@ -136,6 +140,7 @@ public:
     CWizUserCipherForm* cipherForm() const { return m_cipherForm; }
     CWizGroupAttributeForm* groupAttributeForm() { return m_groupAttribute; }
     CWizDownloadObjectDataDialog* objectDownloadDialog() const { return m_objectDownloadDialog; }
+    CWizObjectDataDownloaderHost* downloaderHost() const { return m_objectDownloaderHost; }
     CWizProgressDialog* progressDialog() const { return m_progress; }
 
     void resetPermission(const QString& strKbGUID, const QString& strDocumentOwner);
@@ -152,6 +157,7 @@ public Q_SLOTS:
     void on_actionConsole_triggered();
     void on_actionSync_triggered();
     void on_actionNewNote_triggered();
+    void on_actionViewMessages_triggered();
     //void on_actionDeleteCurrentNote_triggered();
     void on_actionLogout_triggered();
     void on_actionAbout_triggered();
@@ -189,8 +195,8 @@ public Q_SLOTS:
     void on_actionFormatInsertTime_triggered();
     void on_actionFormatRemoveFormat_triggered();
 
-    void on_searchIndexerStarted();
-    void on_searchDocumentFind(const CWizDocumentDataArray& arrayDocument);
+    //void on_searchIndexerStarted();
+    void on_searchDocumentFind(const WIZDOCUMENTDATAEX& doc);
 
     void on_actionGoBack_triggered();
     void on_actionGoForward_triggered();

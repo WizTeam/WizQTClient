@@ -6,12 +6,21 @@
 #include "wizkmcore.h"
 
 
-#define TABLE_NAME_WIZ_TAG						CString("WIZ_TAG")
-#define FIELD_LIST_WIZ_TAG						CString("TAG_GUID, TAG_GROUP_GUID, TAG_NAME, TAG_DESCRIPTION, DT_MODIFIED, WIZ_VERSION")
-#define PARAM_LIST_WIZ_TAG						CString("%s, %s, %s, %s, %s, %s")
-#define FIELD_LIST_WIZ_TAG_MODIFY				CString("TAG_GROUP_GUID=%s, TAG_NAME=%s, TAG_DESCRIPTION=%s, DT_MODIFIED=%s, WIZ_VERSION=%s")
-#define TABLE_KEY_WIZ_TAG						CString("TAG_GUID")
-#define FIELD_MODIFIED_WIZ_TAG					CString("DT_MODIFIED")
+/* ------------------------------ WIZ_TAG ------------------------------ */
+#define TABLE_NAME_WIZ_TAG  "WIZ_TAG"
+
+#define FIELD_LIST_WIZ_TAG  "\
+TAG_GUID, TAG_GROUP_GUID, TAG_NAME, TAG_DESCRIPTION, DT_MODIFIED, WIZ_VERSION"
+
+#define PARAM_LIST_WIZ_TAG  "%s, %s, %s, %s, %s, %s"
+
+#define FIELD_LIST_WIZ_TAG_MODIFY "\
+TAG_GROUP_GUID=%s, TAG_NAME=%s, TAG_DESCRIPTION=%s, DT_MODIFIED=%s, \
+WIZ_VERSION=%s"
+
+#define TABLE_KEY_WIZ_TAG   "TAG_GUID"
+
+#define FIELD_MODIFIED_WIZ_TAG  "DT_MODIFIED"
 
 enum FieldIndex_WizTag
 {
@@ -23,12 +32,22 @@ enum FieldIndex_WizTag
     tagVersion
 };
 
-#define TABLE_NAME_WIZ_STYLE					CString("WIZ_STYLE")
-#define FIELD_LIST_WIZ_STYLE					CString("STYLE_GUID, STYLE_NAME, STYLE_DESCRIPTION, STYLE_TEXT_COLOR, STYLE_BACK_COLOR, STYLE_TEXT_BOLD, STYLE_FLAG_INDEX, DT_MODIFIED, WIZ_VERSION")
-#define PARAM_LIST_WIZ_STYLE					CString("%s, %s, %s, %s, %s, %d, %d, %s, %s")
-#define FIELD_LIST_WIZ_STYLE_MODIFY				CString("STYLE_NAME=%s, STYLE_DESCRIPTION=%s, STYLE_TEXT_COLOR=%s, STYLE_BACK_COLOR=%s, STYLE_TEXT_BOLD=%d, STYLE_FLAG_INDEX=%d, DT_MODIFIED=%s, WIZ_VERSION=%s")
-#define TABLE_KEY_WIZ_STYLE						CString("STYLE_GUID")
-#define FIELD_MODIFIED_WIZ_STYLE				CString("DT_MODIFIED")
+
+/* ------------------------------ WIZ_STYLE ------------------------------ */
+#define TABLE_NAME_WIZ_STYLE    "WIZ_STYLE"
+
+#define FIELD_LIST_WIZ_STYLE "\
+STYLE_GUID, STYLE_NAME, STYLE_DESCRIPTION, STYLE_TEXT_COLOR, STYLE_BACK_COLOR, \
+STYLE_TEXT_BOLD, STYLE_FLAG_INDEX, DT_MODIFIED, WIZ_VERSION"
+
+#define PARAM_LIST_WIZ_STYLE    "%s, %s, %s, %s, %s, %d, %d, %s, %s"
+
+#define FIELD_LIST_WIZ_STYLE_MODIFY "\
+STYLE_NAME=%s, STYLE_DESCRIPTION=%s, STYLE_TEXT_COLOR=%s, STYLE_BACK_COLOR=%s, \
+STYLE_TEXT_BOLD=%d, STYLE_FLAG_INDEX=%d, DT_MODIFIED=%s, WIZ_VERSION=%s"
+
+#define TABLE_KEY_WIZ_STYLE "STYLE_GUID"
+#define FIELD_MODIFIED_WIZ_STYLE    "DT_MODIFIED"
 
 enum FieldIndex_WizStyle
 {
@@ -44,19 +63,50 @@ enum FieldIndex_WizStyle
 };
 
 
-#define TABLE_NAME_WIZ_DOCUMENT_TAG				CString("WIZ_DOCUMENT_TAG")
-#define FIELD_LIST_WIZ_DOCUMENT_TAG				CString("DOCUMENT_GUID, TAG_GUID")
-#define PARAM_LIST_WIZ_DOCUMENT_TAG				CString("%s, %s")
+/* --------------------------- WIZ_DOCUMENT_TAG --------------------------- */
+#define TABLE_NAME_WIZ_DOCUMENT_TAG "WIZ_DOCUMENT_TAG"
+#define FIELD_LIST_WIZ_DOCUMENT_TAG "DOCUMENT_GUID, TAG_GUID"
+#define PARAM_LIST_WIZ_DOCUMENT_TAG "%s, %s"
 
-#define TABLE_NAME_WIZ_DOCUMENT					CString("WIZ_DOCUMENT")
-#define FIELD_LIST_WIZ_DOCUMENT					CString("DOCUMENT_GUID, DOCUMENT_TITLE, DOCUMENT_LOCATION, DOCUMENT_NAME, DOCUMENT_SEO, DOCUMENT_URL, DOCUMENT_AUTHOR, DOCUMENT_KEYWORDS, DOCUMENT_TYPE, DOCUMENT_OWNER, DOCUMENT_FILE_TYPE, STYLE_GUID, DT_CREATED, DT_MODIFIED, DT_ACCESSED, DOCUMENT_ICON_INDEX, DOCUMENT_SYNC, DOCUMENT_PROTECT, DOCUMENT_READ_COUNT, DOCUMENT_ATTACHEMENT_COUNT, DOCUMENT_INDEXED, DT_INFO_MODIFIED, DOCUMENT_INFO_MD5, DT_DATA_MODIFIED, DOCUMENT_DATA_MD5, DT_PARAM_MODIFIED, DOCUMENT_PARAM_MD5, WIZ_VERSION")
-#define PARAM_LIST_WIZ_DOCUMENT					CString("%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %d, %d, %d, %d, %d, %d, %s, %s, %s, %s, %s, %s, %s")
-#define FIELD_LIST_WIZ_DOCUMENT_INFO_MODIFY		CString("DOCUMENT_TITLE=%s, DOCUMENT_LOCATION=%s, DOCUMENT_NAME=%s, DOCUMENT_SEO=%s, DOCUMENT_URL=%s, DOCUMENT_AUTHOR=%s, DOCUMENT_KEYWORDS=%s, DOCUMENT_TYPE=%s, DOCUMENT_OWNER=%s, DOCUMENT_FILE_TYPE=%s, STYLE_GUID=%s, DT_CREATED=%s, DT_MODIFIED=%s, DT_ACCESSED=%s, DOCUMENT_ICON_INDEX=%d, DOCUMENT_SYNC=%d, DOCUMENT_PROTECT=%d, DOCUMENT_READ_COUNT=%d, DOCUMENT_ATTACHEMENT_COUNT=%d, DOCUMENT_INDEXED=%d, DT_INFO_MODIFIED=%s, DOCUMENT_INFO_MD5=%s, WIZ_VERSION=%s")
-#define FIELD_LIST_WIZ_DOCUMENT_MODIFY			CString("DOCUMENT_TITLE=%s, DOCUMENT_LOCATION=%s, DOCUMENT_NAME=%s, DOCUMENT_SEO=%s, DOCUMENT_URL=%s, DOCUMENT_AUTHOR=%s, DOCUMENT_KEYWORDS=%s, DOCUMENT_TYPE=%s, DOCUMENT_OWNER=%s, DOCUMENT_FILE_TYPE=%s, STYLE_GUID=%s, DT_CREATED=%s, DT_MODIFIED=%s, DT_ACCESSED=%s, DOCUMENT_ICON_INDEX=%d, DOCUMENT_SYNC=%d, DOCUMENT_PROTECT=%d, DOCUMENT_READ_COUNT=%d, DOCUMENT_ATTACHEMENT_COUNT=%d, DOCUMENT_INDEXED=%d, DT_INFO_MODIFIED=%s, DOCUMENT_INFO_MD5=%s, DT_DATA_MODIFIED=%s, DOCUMENT_DATA_MD5=%s, DT_PARAM_MODIFIED=%s, DOCUMENT_PARAM_MD5=%s, WIZ_VERSION=%s")
-#define TABLE_KEY_WIZ_DOCUMENT					CString("DOCUMENT_GUID")
-#define FIELD_INFO_MODIFIED_WIZ_DOCUMENT			CString("DT_INFO_MODIFIED")
-#define FIELD_DATA_MODIFIED_WIZ_DOCUMENT			CString("DT_DATA_MODIFIED")
-#define FIELD_PARAM_MODIFIED_WIZ_DOCUMENT		CString("DT_PARAM_MODIFIED")
+
+/* ------------------------------ WIZ_DOCUMENT ------------------------------ */
+#define TABLE_NAME_WIZ_DOCUMENT "WIZ_DOCUMENT"
+
+#define FIELD_LIST_WIZ_DOCUMENT "\
+DOCUMENT_GUID, DOCUMENT_TITLE, DOCUMENT_LOCATION, DOCUMENT_NAME, DOCUMENT_SEO, \
+DOCUMENT_URL, DOCUMENT_AUTHOR, DOCUMENT_KEYWORDS, DOCUMENT_TYPE, \
+DOCUMENT_OWNER, DOCUMENT_FILE_TYPE, STYLE_GUID, DT_CREATED, DT_MODIFIED, \
+DT_ACCESSED, DOCUMENT_ICON_INDEX, DOCUMENT_SYNC, DOCUMENT_PROTECT, \
+DOCUMENT_READ_COUNT, DOCUMENT_ATTACHEMENT_COUNT, DOCUMENT_INDEXED, \
+DT_INFO_MODIFIED, DOCUMENT_INFO_MD5, DT_DATA_MODIFIED, DOCUMENT_DATA_MD5, \
+DT_PARAM_MODIFIED, DOCUMENT_PARAM_MD5, WIZ_VERSION"
+
+#define PARAM_LIST_WIZ_DOCUMENT "\
+%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %d, %d, %d, %d, \
+%d, %d, %s, %s, %s, %s, %s, %s, %s"
+
+#define FIELD_LIST_WIZ_DOCUMENT_INFO_MODIFY "\
+DOCUMENT_TITLE=%s, DOCUMENT_LOCATION=%s, DOCUMENT_NAME=%s, DOCUMENT_SEO=%s, \
+DOCUMENT_URL=%s, DOCUMENT_AUTHOR=%s, DOCUMENT_KEYWORDS=%s, DOCUMENT_TYPE=%s, \
+DOCUMENT_OWNER=%s, DOCUMENT_FILE_TYPE=%s, STYLE_GUID=%s, DT_CREATED=%s, \
+DT_MODIFIED=%s, DT_ACCESSED=%s, DOCUMENT_ICON_INDEX=%d, DOCUMENT_SYNC=%d, \
+DOCUMENT_PROTECT=%d, DOCUMENT_READ_COUNT=%d, DOCUMENT_ATTACHEMENT_COUNT=%d, \
+DOCUMENT_INDEXED=%d, DT_INFO_MODIFIED=%s, DOCUMENT_INFO_MD5=%s, WIZ_VERSION=%s"
+
+#define FIELD_LIST_WIZ_DOCUMENT_MODIFY  "\
+DOCUMENT_TITLE=%s, DOCUMENT_LOCATION=%s, DOCUMENT_NAME=%s, DOCUMENT_SEO=%s, \
+DOCUMENT_URL=%s, DOCUMENT_AUTHOR=%s, DOCUMENT_KEYWORDS=%s, DOCUMENT_TYPE=%s, \
+DOCUMENT_OWNER=%s, DOCUMENT_FILE_TYPE=%s, STYLE_GUID=%s, DT_CREATED=%s, \
+DT_MODIFIED=%s, DT_ACCESSED=%s, DOCUMENT_ICON_INDEX=%d, DOCUMENT_SYNC=%d, \
+DOCUMENT_PROTECT=%d, DOCUMENT_READ_COUNT=%d, DOCUMENT_ATTACHEMENT_COUNT=%d, \
+DOCUMENT_INDEXED=%d, DT_INFO_MODIFIED=%s, DOCUMENT_INFO_MD5=%s, \
+DT_DATA_MODIFIED=%s, DOCUMENT_DATA_MD5=%s, DT_PARAM_MODIFIED=%s, \
+DOCUMENT_PARAM_MD5=%s, WIZ_VERSION=%s"
+
+#define TABLE_KEY_WIZ_DOCUMENT  "DOCUMENT_GUID"
+#define FIELD_INFO_MODIFIED_WIZ_DOCUMENT    "DT_INFO_MODIFIED"
+#define FIELD_DATA_MODIFIED_WIZ_DOCUMENT    "DT_DATA_MODIFIED"
+#define FIELD_PARAM_MODIFIED_WIZ_DOCUMENT   "DT_PARAM_MODIFIED"
 
 enum FieldIndex_WizDocument
 {
@@ -90,14 +140,30 @@ enum FieldIndex_WizDocument
     documentVersion
 };
 
-#define TABLE_NAME_WIZ_DOCUMENT_ATTACHMENT						CString("WIZ_DOCUMENT_ATTACHMENT")
-#define FIELD_LIST_WIZ_DOCUMENT_ATTACHMENT						CString("ATTACHMENT_GUID, DOCUMENT_GUID, ATTACHMENT_NAME, ATTACHMENT_URL, ATTACHMENT_DESCRIPTION, DT_INFO_MODIFIED, ATTACHMENT_INFO_MD5, DT_DATA_MODIFIED, ATTACHMENT_DATA_MD5, WIZ_VERSION")
-#define PARAM_LIST_WIZ_DOCUMENT_ATTACHMENT						CString("%s, %s, %s, %s, %s, %s, %s, %s, %s, %s")
-#define FIELD_LIST_WIZ_DOCUMENT_ATTACHMENT_INFO_MODIFY			CString("ATTACHMENT_NAME=%s, ATTACHMENT_URL=%s, ATTACHMENT_DESCRIPTION=%s, DT_INFO_MODIFIED=%s, ATTACHMENT_INFO_MD5=%s, WIZ_VERSION=%s")
-#define FIELD_LIST_WIZ_DOCUMENT_ATTACHMENT_MODIFY				CString("ATTACHMENT_NAME=%s, ATTACHMENT_URL=%s, ATTACHMENT_DESCRIPTION=%s, DT_INFO_MODIFIED=%s, ATTACHMENT_INFO_MD5=%s, DT_DATA_MODIFIED=%s, ATTACHMENT_DATA_MD5=%s, WIZ_VERSION=%s")
-#define TABLE_KEY_WIZ_DOCUMENT_ATTACHMENT						CString("ATTACHMENT_GUID")
-#define FIELD_INFO_MODIFIED_WIZ_DOCUMENT_ATTACHMENT				CString("DT_INFO_MODIFIED")
-#define FIELD_DATA_MODIFIED_WIZ_DOCUMENT_ATTACHMENT				CString("DT_DATA_MODIFIED")
+
+/* ------------------------ WIZ_DOCUMENT_ATTACHMENT ------------------------ */
+#define TABLE_NAME_WIZ_DOCUMENT_ATTACHMENT  "WIZ_DOCUMENT_ATTACHMENT"
+
+#define FIELD_LIST_WIZ_DOCUMENT_ATTACHMENT  "\
+ATTACHMENT_GUID, DOCUMENT_GUID, ATTACHMENT_NAME, ATTACHMENT_URL, \
+ATTACHMENT_DESCRIPTION, DT_INFO_MODIFIED, ATTACHMENT_INFO_MD5, \
+DT_DATA_MODIFIED, ATTACHMENT_DATA_MD5, WIZ_VERSION"
+
+#define PARAM_LIST_WIZ_DOCUMENT_ATTACHMENT  "\
+%s, %s, %s, %s, %s, %s, %s, %s, %s, %s"
+
+#define FIELD_LIST_WIZ_DOCUMENT_ATTACHMENT_INFO_MODIFY  "\
+ATTACHMENT_NAME=%s, ATTACHMENT_URL=%s, ATTACHMENT_DESCRIPTION=%s, \
+DT_INFO_MODIFIED=%s, ATTACHMENT_INFO_MD5=%s, WIZ_VERSION=%s"
+
+#define FIELD_LIST_WIZ_DOCUMENT_ATTACHMENT_MODIFY   "\
+ATTACHMENT_NAME=%s, ATTACHMENT_URL=%s, ATTACHMENT_DESCRIPTION=%s, \
+DT_INFO_MODIFIED=%s, ATTACHMENT_INFO_MD5=%s, DT_DATA_MODIFIED=%s, \
+ATTACHMENT_DATA_MD5=%s, WIZ_VERSION=%s"
+
+#define TABLE_KEY_WIZ_DOCUMENT_ATTACHMENT   "ATTACHMENT_GUID"
+#define FIELD_INFO_MODIFIED_WIZ_DOCUMENT_ATTACHMENT "DT_INFO_MODIFIED"
+#define FIELD_DATA_MODIFIED_WIZ_DOCUMENT_ATTACHMENT "DT_DATA_MODIFIED"
 
 enum FieldIndex_WizDocumentAttachment
 {
@@ -113,10 +179,12 @@ enum FieldIndex_WizDocumentAttachment
     documentattachmentVersion
 };
 
-#define TABLE_NAME_WIZ_DOCUMENT_PARAM			CString("WIZ_DOCUMENT_PARAM")
-#define FIELD_LIST_WIZ_DOCUMENT_PARAM			CString("DOCUMENT_GUID, PARAM_NAME, PARAM_VALUE")
-#define PARAM_LIST_WIZ_DOCUMENT_PARAM			CString("%s, %s, %s")
-#define FIELD_LIST_WIZ_DOCUMENT_PARAM_MODIFY	CString("PARAM_VALUE=%s")
+
+/* ------------------------ WIZ_DOCUMENT_PARAM ------------------------ */
+#define TABLE_NAME_WIZ_DOCUMENT_PARAM   "WIZ_DOCUMENT_PARAM"
+#define FIELD_LIST_WIZ_DOCUMENT_PARAM   "DOCUMENT_GUID, PARAM_NAME, PARAM_VALUE"
+#define PARAM_LIST_WIZ_DOCUMENT_PARAM   "%s, %s, %s"
+#define FIELD_LIST_WIZ_DOCUMENT_PARAM_MODIFY    "PARAM_VALUE=%s"
 
 enum FieldIndex_WizDocumentParam
 {
@@ -125,10 +193,12 @@ enum FieldIndex_WizDocumentParam
     documentparamPARAM_VALUE
 };
 
-#define TABLE_NAME_WIZ_DELETED_GUID				CString("WIZ_DELETED_GUID")
-#define FIELD_LIST_WIZ_DELETED_GUID				CString("DELETED_GUID, GUID_TYPE, DT_DELETED")
-#define PARAM_LIST_WIZ_DELETED_GUID				CString("%s, %d, %s")
-#define FIELD_MODIFIED_DELETED_GUID				CString("DT_DELETED")
+
+/* ------------------------ WIZ_DELETED_GUID ------------------------ */
+#define TABLE_NAME_WIZ_DELETED_GUID "WIZ_DELETED_GUID"
+#define FIELD_LIST_WIZ_DELETED_GUID "DELETED_GUID, GUID_TYPE, DT_DELETED"
+#define PARAM_LIST_WIZ_DELETED_GUID "%s, %d, %s"
+#define FIELD_MODIFIED_DELETED_GUID "DT_DELETED"
 
 enum FieldIndex_WizDeletedGUID
 {
@@ -137,10 +207,14 @@ enum FieldIndex_WizDeletedGUID
     deletedguidDT_DELETED
 };
 
-#define TABLE_NAME_WIZ_META						CString("WIZ_META")
-#define FIELD_LIST_WIZ_META						CString("META_NAME, META_KEY, META_VALUE, DT_MODIFIED")
-#define PARAM_LIST_WIZ_META						CString("%s, %s, %s, %s")
-#define FIELD_LIST_WIZ_META_INFO_MODIFY			CString("META_NAME=%s, META_KEY=%s, META_VALUE=%s, DT_MODIFIED=%s")
+
+/* ------------------------------ WIZ_META ------------------------------ */
+#define TABLE_NAME_WIZ_META "WIZ_META"
+#define FIELD_LIST_WIZ_META "META_NAME, META_KEY, META_VALUE, DT_MODIFIED"
+#define PARAM_LIST_WIZ_META "%s, %s, %s, %s"
+
+#define FIELD_LIST_WIZ_META_INFO_MODIFY "\
+META_NAME=%s, META_KEY=%s, META_VALUE=%s, DT_MODIFIED=%s"
 
 enum FieldIndex_WizMeta
 {
@@ -150,11 +224,69 @@ enum FieldIndex_WizMeta
     metaDT_MODIFIED
 };
 
-#define TABLE_NAME_WIZ_OBJECT_EX                                        CString("WIZ_OBJECT_EX")
 
-#define TABLE_COUNT   9
+/* ------------------------------ WIZ_META ------------------------------ */
+#define TABLE_NAME_WIZ_OBJECT_EX    "WIZ_OBJECT_EX"
 
-const CString g_arrayTableName[TABLE_COUNT] =
+
+/* ------------------------------ WIZ_MESSAGE ------------------------------ */
+#define TABLE_NAME_WIZ_MESSAGE "WIZ_MESSAGE"
+
+#define FIELD_LIST_WIZ_MESSAGE "\
+MESSAGE_ID, BIZ_GUID, KB_GUID, DOCUMENT_GUID, SENDER, SENDER_ID, SENDER_GUID, \
+RECEIVER, RECEIVER_ID, RECEIVER_GUID, MESSAGE_TYPE, READ_STATUS, DT_CREATED, \
+MESSAGE_TITLE, MESSAGE_TEXT, WIZ_VERSION"
+
+#define PARAM_LIST_WIZ_MESSAGE "\
+%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %d, %d, %s, %s, %s, %s"
+
+#define FIELD_LIST_WIZ_MESSAGE_MODIFY "READ_STATUS=%d, WIZ_VERSION=%s"
+#define TABLE_KEY_WIZ_MESSAGE   "MESSAGE_ID"
+
+enum FieldIndex_WizMessage
+{
+    msgMESSAGE_ID,
+    msgBIZ_GUID,
+    msgKB_GUID,
+    msgDOCUMENT_GUID,
+    msgSENDER,
+    msgSENDER_ID,
+    msgSENDER_GUID,
+    msgRECEIVER,
+    msgRECEIVER_ID,
+    msgRECEIVER_GUID,
+    msgMESSAGE_TYPE,
+    msgREAD_STATUS,
+    msgDT_CREATED,
+    msgMESSAGE_TITLE,
+    msgMESSAGE_TEXT,
+    msgWIZ_VERSION
+};
+
+/* ------------------------------ WIZ_USER ------------------------------ */
+#define TABLE_NAME_WIZ_USER "WIZ_USER"
+
+#define FIELD_LIST_WIZ_USER "\
+BIZ_GUID, USER_ID, USER_GUID, USER_ALIAS, USER_PINYIN"
+
+#define PARAM_LIST_WIZ_USER "%s, %s, %s, %s, %s"
+
+#define FIELD_LIST_WIZ_USER_MODIFY "USER_ALIAS=%s, USER_PINYIN=%s"
+
+enum FieldIndex_WizUser
+{
+    userBIZ_GUID,
+    userUSER_ID,
+    userUSER_GUID,
+    userUSER_ALIAS,
+    userUSER_PINYIN
+};
+
+
+/* --------------------------------- TOTAL --------------------------------- */
+#define TABLE_COUNT 11
+
+const QString g_arrayTableName[TABLE_COUNT] =
 {
 	TABLE_NAME_WIZ_TAG,
 	TABLE_NAME_WIZ_STYLE,
@@ -164,7 +296,9 @@ const CString g_arrayTableName[TABLE_COUNT] =
 	TABLE_NAME_WIZ_DOCUMENT_TAG,
 	TABLE_NAME_WIZ_DELETED_GUID,
     TABLE_NAME_WIZ_META,
-    TABLE_NAME_WIZ_OBJECT_EX
+    TABLE_NAME_WIZ_OBJECT_EX,
+    TABLE_NAME_WIZ_MESSAGE,
+    TABLE_NAME_WIZ_USER
 };
 
 /* ------------------------------CWizIndexBase------------------------------ */
@@ -172,6 +306,15 @@ const CString g_arrayTableName[TABLE_COUNT] =
 CWizIndexBase::CWizIndexBase(void)
     : m_bUpdating(false)
 {
+    m_info.nPermission = 0;
+
+    qRegisterMetaType<WIZTAGDATA>("WIZTAGDATA");
+    qRegisterMetaType<WIZSTYLEDATA>("WIZSTYLEDATA");
+    qRegisterMetaType<WIZDOCUMENTDATA>("WIZDOCUMENTDATA");
+    qRegisterMetaType<WIZDOCUMENTATTACHMENTDATA>("WIZDOCUMENTATTACHMENTDATA");
+
+    qRegisterMetaType<WIZMESSAGEDATA>("WIZMESSAGEDATA");
+    qRegisterMetaType<WIZBIZUSER>("WIZBIZUSER");
 }
 
 CWizIndexBase::~CWizIndexBase(void)
@@ -213,7 +356,8 @@ bool CWizIndexBase::CheckTable(const QString& strTableName)
     if (m_db.tableExists(strTableName))
         return true;
 
-    CString strFileName = WizPathAddBackslash2(WizGetResourcesPath() + CString(_T("sql"))) + strTableName.toLower() + _T(".sql");
+    // create table if not exist
+    CString strFileName = WizPathAddBackslash2(WizGetResourcesPath() + "sql") + strTableName.toLower() + ".sql";
     CString strSQL;
     if (!WizLoadUnicodeTextFromFile(strFileName, strSQL))
         return false;
@@ -322,6 +466,16 @@ CString CWizIndexBase::FormatUpdateSQLFormat(const CString& strTableName,
                             strKey);
 }
 
+CString CWizIndexBase::FormatUpdateSQLByWhere(const CString& strTableName,
+                                              const CString& strFieldList,
+                                              const CString& strWhere)
+{
+    return WizFormatString3("update %1 set %2 where %3",
+                            strTableName,
+                            strFieldList,
+                            strWhere);
+}
+
 CString CWizIndexBase::FormatDeleteSQLFormat(const CString& strTableName,
                                              const CString& strKey)
 {
@@ -410,7 +564,7 @@ bool CWizIndexBase::SQLToTagDataArray(const CString& strSQL, CWizTagDataArray& a
         while (!query.eof())
         {
             WIZTAGDATA data;
-            data.strKbGUID = m_strKbGUID;
+            data.strKbGUID = m_info.kbGUID;
             data.strGUID = query.getStringField(tagTAG_GUID);
             data.strParentGUID = query.getStringField(tagTAG_GROUP_GUID);
             data.strName = query.getStringField(tagTAG_NAME);
@@ -439,7 +593,7 @@ bool CWizIndexBase::SQLToStyleDataArray(const CString& strSQL, CWizStyleDataArra
         while (!query.eof())
         {
             WIZSTYLEDATA data;
-            data.strKbGUID = m_strKbGUID;
+            data.strKbGUID = m_info.kbGUID;
             data.strGUID = query.getStringField(styleSTYLE_GUID);
             data.strName = query.getStringField(styleSTYLE_NAME);
             data.strDescription = query.getStringField(styleSTYLE_DESCRIPTION);
@@ -471,7 +625,7 @@ bool CWizIndexBase::SQLToMetaDataArray(const CString& strSQL, CWizMetaDataArray&
         while (!query.eof())
         {
             WIZMETADATA data;
-            data.strKbGUID = m_strKbGUID;
+            data.strKbGUID = m_info.kbGUID;
             data.strName = query.getStringField(metaMETA_NAME);
             data.strKey = query.getStringField(metaMETA_KEY);
             data.strValue = query.getStringField(metaMETA_VALUE);
@@ -496,7 +650,7 @@ bool CWizIndexBase::SQLToDeletedGUIDDataArray(const CString& strSQL, CWizDeleted
         while (!query.eof())
         {
             WIZDELETEDGUIDDATA data;
-            data.strKbGUID = m_strKbGUID;
+            data.strKbGUID = m_info.kbGUID;
             data.strGUID = query.getStringField(deletedguidDELETED_GUID);
             data.eType = WIZOBJECTDATA::IntToObjectType(query.getIntField(deletedguidGUID_TYPE));
             data.tDeleted = query.getTimeField(deletedguidDT_DELETED);
@@ -540,7 +694,7 @@ bool CWizIndexBase::SQLToDocumentParamDataArray(const CString& strSQL, CWizDocum
         while (!query.eof())
         {
             WIZDOCUMENTPARAMDATA data;
-            data.strKbGUID = m_strKbGUID;
+            data.strKbGUID = m_info.kbGUID;
             data.strDocumentGUID = query.getStringField(documentparamDOCUMENT_GUID);
             data.strName = query.getStringField(documentparamPARAM_NAME);
             data.strValue = query.getStringField(documentparamPARAM_VALUE);
@@ -566,7 +720,7 @@ bool CWizIndexBase::SQLToDocumentDataArray(const CString& strSQL, CWizDocumentDa
         while (!query.eof())
         {
             WIZDOCUMENTDATA data;
-            data.strKbGUID = m_strKbGUID;
+            data.strKbGUID = m_info.kbGUID;
             data.strGUID = query.getStringField(documentDOCUMENT_GUID);
             data.strTitle = query.getStringField(documentDOCUMENT_TITLE);
             data.strLocation = query.getStringField(documentDOCUMENT_LOCATION);
@@ -626,7 +780,7 @@ bool CWizIndexBase::SQLToDocumentAttachmentDataArray(const CString& strSQL,
         while (!query.eof())
         {
             WIZDOCUMENTATTACHMENTDATA data;
-            data.strKbGUID = m_strKbGUID;
+            data.strKbGUID = m_info.kbGUID;
             data.strGUID = query.getStringField(documentattachmentATTACHMENT_GUID);
             data.strDocumentGUID = query.getStringField(documentattachmentDOCUMENT_GUID);
             data.strName = query.getStringField(documentattachmentATTACHMENT_NAME);
@@ -651,9 +805,244 @@ bool CWizIndexBase::SQLToDocumentAttachmentDataArray(const CString& strSQL,
     }
 }
 
+bool CWizIndexBase::SQLToMessageDataArray(const QString& strSQL,
+                                          CWizMessageDataArray& arrayMessage)
+{
+    try
+    {
+        CppSQLite3Query query = m_db.execQuery(strSQL);
+        while (!query.eof())
+        {
+            WIZMESSAGEDATA data;
+            data.nId = query.getInt64Field(msgMESSAGE_ID);
+            data.bizGUID = query.getStringField(msgBIZ_GUID);
+            data.kbGUID = query.getStringField(msgKB_GUID);
+            data.documentGUID = query.getStringField(msgDOCUMENT_GUID);
+            data.senderAlias = query.getStringField(msgSENDER);
+            data.senderId = query.getStringField(msgSENDER_ID);
+            data.senderGUID = query.getStringField(msgSENDER_GUID);
+            data.receiverAlias = query.getStringField(msgRECEIVER);
+            data.receiverId = query.getStringField(msgRECEIVER_ID);
+            data.receiverGUID = query.getStringField(msgRECEIVER_GUID);
+            data.nMessageType = query.getIntField(msgMESSAGE_TYPE);
+            data.nReadStatus = query.getIntField(msgREAD_STATUS);
+            data.tCreated = query.getTimeField(msgDT_CREATED);
+            data.title = query.getStringField(msgMESSAGE_TITLE);
+            data.messageBody = query.getStringField(msgMESSAGE_TEXT);
+            data.nVersion = query.getInt64Field(msgWIZ_VERSION);
+            
+            arrayMessage.push_back(data);
+            query.nextRow();
+        }
+
+        return true;
+    }
+    catch (const CppSQLite3Exception& e)
+    {
+        return LogSQLException(e, strSQL);
+    }
+}
+
+bool CWizIndexBase::SQLToBizUserDataArray(const QString& strSQL,
+                                          CWizBizUserDataArray& arrayUser)
+{
+    try
+    {
+        CppSQLite3Query query = m_db.execQuery(strSQL);
+        while (!query.eof())
+        {
+            WIZBIZUSER data;
+            data.bizGUID = query.getStringField(userBIZ_GUID);
+            data.userId = query.getStringField(userUSER_ID);
+            data.userGUID = query.getStringField(userUSER_GUID);
+            data.alias = query.getStringField(userUSER_ALIAS);
+            data.pinyin = query.getStringField(userUSER_PINYIN);
+
+            arrayUser.push_back(data);
+            query.nextRow();
+        }
+
+        return true;
+    }
+    catch (const CppSQLite3Exception& e)
+    {
+        return LogSQLException(e, strSQL);
+    }
+}
+
+bool CWizIndexBase::createMessageEx(const WIZMESSAGEDATA& data)
+{
+    qDebug() << "create message, id: " << data.nId;
+
+    CString strFormat = FormatInsertSQLFormat(TABLE_NAME_WIZ_MESSAGE,
+                                              FIELD_LIST_WIZ_MESSAGE,
+                                              PARAM_LIST_WIZ_MESSAGE);
+
+    CString strSQL;
+    strSQL.Format(strFormat,
+                  WizInt64ToStr(data.nId).utf16(),
+                  STR2SQL(data.bizGUID).utf16(),
+                  STR2SQL(data.kbGUID).utf16(),
+                  STR2SQL(data.documentGUID).utf16(),
+                  STR2SQL(data.senderAlias).utf16(),
+                  STR2SQL(data.senderId).utf16(),
+                  STR2SQL(data.senderGUID).utf16(),
+                  STR2SQL(data.receiverAlias).utf16(),
+                  STR2SQL(data.receiverId).utf16(),
+                  STR2SQL(data.receiverGUID).utf16(),
+                  data.nMessageType,
+                  data.nReadStatus,
+                  TIME2SQL(data.tCreated).utf16(),
+                  STR2SQL(data.title).utf16(),
+                  STR2SQL(data.messageBody).utf16(),
+                  WizInt64ToStr(data.nVersion).utf16()
+        );
+
+
+    if (!ExecSQL(strSQL))
+        return false;
+
+    if (!m_bUpdating) {
+        emit messageCreated(data);
+    }
+
+    return true;
+}
+
+bool CWizIndexBase::modifyMessageEx(const WIZMESSAGEDATA& data)
+{
+    qDebug() << "modify message, id: " << data.nId;
+
+    WIZMESSAGEDATA dataOld;
+    messageFromId(data.nId, dataOld);
+
+    CString strFormat = FormatUpdateSQLFormat(TABLE_NAME_WIZ_MESSAGE,
+                                              FIELD_LIST_WIZ_MESSAGE_MODIFY,
+                                              TABLE_KEY_WIZ_MESSAGE);
+
+    CString strSQL;
+    strSQL.Format(strFormat,
+                  data.nReadStatus,
+                  WizInt64ToStr(data.nVersion).utf16(),
+                  WizInt64ToStr(data.nId).utf16()
+        );
+
+    if (!ExecSQL(strSQL))
+        return false;
+
+    WIZMESSAGEDATA dataNew;
+    messageFromId(data.nId, dataNew);
+
+    if (!m_bUpdating) {
+        emit messageModified(dataOld, dataNew);
+    }
+
+    return true;
+}
+
+bool CWizIndexBase::deleteMessageEx(const WIZMESSAGEDATA& data)
+{
+    qDebug() << "delete message, id: " << data.nId;
+
+    CString strFormat = FormatDeleteSQLFormat(TABLE_NAME_WIZ_MESSAGE,
+                                              TABLE_KEY_WIZ_MESSAGE);
+
+    CString strSQL;
+    strSQL.Format(strFormat,
+        WizInt64ToStr(data.nId).utf16()
+        );
+
+    if (!ExecSQL(strSQL))
+        return false;
+
+    if (!m_bUpdating) {
+        emit messageDeleted(data);
+    }
+
+    return true;
+}
+
+bool CWizIndexBase::createUserEx(const WIZBIZUSER& data)
+{
+    qDebug() << "create user, alias: " << data.alias;
+
+    Q_ASSERT(!data.bizGUID.isEmpty() && !data.userGUID.isEmpty());
+
+    CString strFormat = FormatInsertSQLFormat(TABLE_NAME_WIZ_USER,
+                                              FIELD_LIST_WIZ_USER,
+                                              PARAM_LIST_WIZ_USER);
+
+    CString strSQL;
+    strSQL.Format(strFormat,
+                  STR2SQL(data.bizGUID).utf16(),
+                  STR2SQL(data.userId).utf16(),
+                  STR2SQL(data.userGUID).utf16(),
+                  STR2SQL(data.alias).utf16(),
+                  STR2SQL(data.pinyin).utf16()
+        );
+
+
+    if (!ExecSQL(strSQL))
+        return false;
+
+    if (!m_bUpdating) {
+        emit userCreated(data);
+    }
+
+    return true;
+}
+
+bool CWizIndexBase::modifyUserEx(const WIZBIZUSER& user)
+{
+    qDebug() << "modify user, alias: " << user.alias;
+
+    Q_ASSERT(!user.bizGUID.isEmpty() && !user.userGUID.isEmpty());
+
+    // save old user info
+    WIZBIZUSER userOld;
+    userFromGUID(user.bizGUID, user.userGUID, userOld);
+
+    CString strWhere = "BIZ_GUID=%s AND USER_GUID=%s";
+    strWhere = strWhere.arg(STR2SQL(user.bizGUID)).arg(STR2SQL(user.userGUID));
+
+    CString strFormat = FormatUpdateSQLByWhere(TABLE_NAME_WIZ_USER,
+                                              FIELD_LIST_WIZ_USER_MODIFY,
+                                              strWhere);
+
+    CString strSQL;
+    strSQL.Format(strFormat,
+                  STR2SQL(user.alias).utf16(),
+                  STR2SQL(user.pinyin).utf16()
+        );
+
+    if (!ExecSQL(strSQL))
+        return false;
+
+    // read new user info
+    WIZBIZUSER userNew;
+    userFromGUID(user.bizGUID, user.userGUID, userNew);
+
+    if (!m_bUpdating) {
+        emit userModified(userOld, userNew);
+    }
+
+    return true;
+}
+
+bool CWizIndexBase::deleteUserEx(const WIZBIZUSER& data)
+{
+    qDebug() << "delete user, alias: " << data.alias;
+
+    // TODO
+
+    return true;
+}
+
 bool CWizIndexBase::CreateTagEx(const WIZTAGDATA& d)
 {
-    Q_ASSERT(d.strKbGUID == m_strKbGUID);
+    qDebug() << "create tag, name: " << d.strName;
+
+    Q_ASSERT(d.strKbGUID == m_info.kbGUID);
 
     WIZTAGDATA data = d;
     if (data.strGUID == data.strParentGUID) {
@@ -685,7 +1074,9 @@ bool CWizIndexBase::CreateTagEx(const WIZTAGDATA& d)
 
 bool CWizIndexBase::ModifyTagEx(const WIZTAGDATA& d)
 {
-    Q_ASSERT(d.strKbGUID == m_strKbGUID);
+    qDebug() << "modify tag, name: " << d.strName;
+
+    Q_ASSERT(d.strKbGUID == m_info.kbGUID);
 
     WIZTAGDATA dataOld;
     TagFromGUID(d.strGUID, dataOld);
@@ -722,7 +1113,9 @@ bool CWizIndexBase::ModifyTagEx(const WIZTAGDATA& d)
 
 bool CWizIndexBase::DeleteTagEx(const WIZTAGDATA& data)
 {
-    Q_ASSERT(data.strKbGUID == m_strKbGUID);
+    qDebug() << "delete tag, name: " << data.strName;
+
+    Q_ASSERT(data.strKbGUID == m_info.kbGUID);
 
     CString strFormat = FormatDeleteSQLFormat(TABLE_NAME_WIZ_TAG, TABLE_KEY_WIZ_TAG);
 
@@ -743,7 +1136,9 @@ bool CWizIndexBase::DeleteTagEx(const WIZTAGDATA& data)
 
 bool CWizIndexBase::CreateStyleEx(const WIZSTYLEDATA& data)
 {
-    Q_ASSERT(data.strKbGUID == m_strKbGUID);
+    qDebug() << "create style, name: " << data.strName;
+
+    Q_ASSERT(data.strKbGUID == m_info.kbGUID);
 
     CString strFormat = FormatInsertSQLFormat(TABLE_NAME_WIZ_STYLE, FIELD_LIST_WIZ_STYLE, PARAM_LIST_WIZ_STYLE);
 
@@ -773,7 +1168,9 @@ bool CWizIndexBase::CreateStyleEx(const WIZSTYLEDATA& data)
 
 bool CWizIndexBase::ModifyStyleEx(const WIZSTYLEDATA& data)
 {
-    Q_ASSERT(data.strKbGUID == m_strKbGUID);
+    qDebug() << "modify style, name: " << data.strName;
+
+    Q_ASSERT(data.strKbGUID == m_info.kbGUID);
 
     WIZSTYLEDATA dataOld;
     StyleFromGUID(data.strGUID, dataOld);
@@ -808,7 +1205,9 @@ bool CWizIndexBase::ModifyStyleEx(const WIZSTYLEDATA& data)
 
 bool CWizIndexBase::DeleteStyleEx(const WIZSTYLEDATA& data)
 {
-    Q_ASSERT(data.strKbGUID == m_strKbGUID);
+    qDebug() << "delete style, name: " << data.strName;
+
+    Q_ASSERT(data.strKbGUID == m_info.kbGUID);
 
     CString strFormat = FormatDeleteSQLFormat(TABLE_NAME_WIZ_STYLE, TABLE_KEY_WIZ_STYLE);
 
@@ -829,7 +1228,9 @@ bool CWizIndexBase::DeleteStyleEx(const WIZSTYLEDATA& data)
 
 bool CWizIndexBase::CreateDocumentEx(const WIZDOCUMENTDATA& dataNew)
 {
-    Q_ASSERT(dataNew.strKbGUID == m_strKbGUID);
+    qDebug() << "create document, title: " << dataNew.strTitle;
+
+    Q_ASSERT(dataNew.strKbGUID == m_info.kbGUID);
 
     WIZDOCUMENTDATA data = dataNew;
 
@@ -839,7 +1240,7 @@ bool CWizIndexBase::CreateDocumentEx(const WIZDOCUMENTDATA& dataNew)
         data.strTitle = "New note";
     }
 
-    if (data.strLocation.IsEmpty()) {
+    if (data.strLocation.isEmpty()) {
         TOLOG1("Document Location is empty: %1, Try to relocation to the /My Notes/", data.strTitle);
         data.strLocation = "/My Notes/";
     }
@@ -881,8 +1282,6 @@ bool CWizIndexBase::CreateDocumentEx(const WIZDOCUMENTDATA& dataNew)
         WizInt64ToStr(data.nVersion).utf16()
     );
 
-    qDebug() << "CreateDocumentEx, Title: " << data.strTitle << "location: " << data.strLocation << "version: " << data.nVersion;
-
     if (!ExecSQL(strSQL))
         return false;
 
@@ -895,7 +1294,9 @@ bool CWizIndexBase::CreateDocumentEx(const WIZDOCUMENTDATA& dataNew)
 
 bool CWizIndexBase::ModifyDocumentInfoEx(const WIZDOCUMENTDATA& dataCur)
 {
-    Q_ASSERT(dataCur.strKbGUID == m_strKbGUID);
+    qDebug() << "modify document, title: " << dataCur.strTitle;
+
+    Q_ASSERT(dataCur.strKbGUID == m_info.kbGUID);
 
     WIZDOCUMENTDATA dataOld;
     DocumentFromGUID(dataCur.strGUID, dataOld);
@@ -961,8 +1362,6 @@ bool CWizIndexBase::ModifyDocumentInfoEx(const WIZDOCUMENTDATA& dataCur)
         STR2SQL(data.strGUID).utf16()
     );
 
-    //qDebug() << "ModifyDocumentInfoEx, Title: " << data.strTitle << "location: " << data.strLocation << "version: " << data.nVersion;
-
     if (!ExecSQL(strSQL))
         return false;
 
@@ -978,7 +1377,9 @@ bool CWizIndexBase::ModifyDocumentInfoEx(const WIZDOCUMENTDATA& dataCur)
 
 bool CWizIndexBase::DeleteDocumentEx(const WIZDOCUMENTDATA& data)
 {
-    Q_ASSERT(data.strKbGUID == m_strKbGUID);
+    qDebug() << "delete document, title: " << data.strTitle;
+
+    Q_ASSERT(data.strKbGUID == m_info.kbGUID);
 
     CString strFormat = FormatDeleteSQLFormat(TABLE_NAME_WIZ_DOCUMENT, TABLE_KEY_WIZ_DOCUMENT);
 
@@ -999,7 +1400,9 @@ bool CWizIndexBase::DeleteDocumentEx(const WIZDOCUMENTDATA& data)
 
 bool CWizIndexBase::CreateAttachmentEx(const WIZDOCUMENTATTACHMENTDATA& data)
 {
-    Q_ASSERT(data.strKbGUID == m_strKbGUID);
+    qDebug() << "create attachment, name: " << data.strName;
+
+    Q_ASSERT(data.strKbGUID == m_info.kbGUID);
 
     //CString strInfoMD5 = CalDocumentAttachmentInfoMD5(data);
     //if (strInfoMD5 != data.strInfoMD5) {
@@ -1034,7 +1437,9 @@ bool CWizIndexBase::CreateAttachmentEx(const WIZDOCUMENTATTACHMENTDATA& data)
 
 bool CWizIndexBase::ModifyAttachmentInfoEx(const WIZDOCUMENTATTACHMENTDATA& data)
 {
-    Q_ASSERT(data.strKbGUID == m_strKbGUID);
+    qDebug() << "modify attachment, name: " << data.strName;
+
+    Q_ASSERT(data.strKbGUID == m_info.kbGUID);
 
     WIZDOCUMENTATTACHMENTDATA dataOld;
     AttachmentFromGUID(data.strGUID, dataOld);
@@ -1069,9 +1474,12 @@ bool CWizIndexBase::ModifyAttachmentInfoEx(const WIZDOCUMENTATTACHMENTDATA& data
 
 bool CWizIndexBase::DeleteAttachmentEx(const WIZDOCUMENTATTACHMENTDATA& data)
 {
-    Q_ASSERT(data.strKbGUID == m_strKbGUID);
+    qDebug() << "delete attachment, name: " << data.strName;
 
-    CString strFormat = FormatDeleteSQLFormat(TABLE_NAME_WIZ_DOCUMENT_ATTACHMENT, _T("ATTACHMENT_GUID"));
+    Q_ASSERT(data.strKbGUID == m_info.kbGUID);
+
+    CString strFormat = FormatDeleteSQLFormat(TABLE_NAME_WIZ_DOCUMENT_ATTACHMENT,
+                                              "ATTACHMENT_GUID");
 
     CString strSQL;
     strSQL.Format(strFormat,
@@ -1084,7 +1492,6 @@ bool CWizIndexBase::DeleteAttachmentEx(const WIZDOCUMENTATTACHMENTDATA& data)
     if (!m_bUpdating) {
         emit attachmentDeleted(data);
     }
-
 
     return true;
 }
@@ -1318,6 +1725,72 @@ bool CWizIndexBase::AttachmentFromGUID(const CString& strAttachcmentGUID,
     return true;
 }
 
+bool CWizIndexBase::messageFromId(qint64 nId, WIZMESSAGEDATA& data)
+{
+    CString strWhere;
+    strWhere.Format("MESSAGE_ID=%s", WizInt64ToStr(nId).utf16());
+
+    CString strSQL = FormatQuerySQL(TABLE_NAME_WIZ_MESSAGE,
+                                    FIELD_LIST_WIZ_MESSAGE,
+                                    strWhere);
+
+    CWizMessageDataArray arrayMessage;
+    if (!SQLToMessageDataArray(strSQL, arrayMessage)) {
+        TOLOG("[messageFromId] failed to get message by id");
+        return false;
+    }
+
+    if (arrayMessage.empty())
+        return false;
+
+    data = arrayMessage[0];
+    return true;
+}
+
+bool CWizIndexBase::userFromGUID(const QString& strUserGUID,
+                                 CWizBizUserDataArray& arrayUser)
+{
+    CString strWhere;
+    strWhere.Format("USER_GUID=%s", STR2SQL(strUserGUID).utf16());
+
+    CString strSQL = FormatQuerySQL(TABLE_NAME_WIZ_USER,
+                                    FIELD_LIST_WIZ_USER,
+                                    strWhere);
+
+    if (!SQLToBizUserDataArray(strSQL, arrayUser)) {
+        TOLOG("[userFromGUID] failed to get user by user guid");
+        return false;
+    }
+
+    if (arrayUser.empty())
+        return false;
+
+    return true;
+}
+
+bool CWizIndexBase::userFromGUID(const QString& bizGUID,
+                                 const QString& userGUID,
+                                 WIZBIZUSER& user)
+{
+    CString strWhere = "BIZ_GUID=%1 AND USER_GUID=%2";
+    strWhere = strWhere.arg(STR2SQL(bizGUID)).arg(STR2SQL(userGUID));
+
+    CString strSQL = FormatQuerySQL(TABLE_NAME_WIZ_USER,
+                                    FIELD_LIST_WIZ_USER,
+                                    strWhere);
+
+    CWizBizUserDataArray arrayUser;
+    if (!SQLToBizUserDataArray(strSQL, arrayUser)) {
+        TOLOG("[userFromGUID] failed to get user by user guid");
+        return false;
+    }
+
+    if (arrayUser.empty())
+        return false;
+
+    user = arrayUser[0];
+    return true;
+}
 
 
 /* ------------------------------CWizIndex------------------------------ */
@@ -1496,6 +1969,53 @@ bool CWizIndex::StyleByName(const CString& strName, WIZSTYLEDATA& data, const CS
     return false;
 }
 
+bool CWizIndex::createMessage(const WIZMESSAGEDATA& data)
+{
+    return createMessageEx(data);
+}
+
+bool CWizIndex::getAllMessages(CWizMessageDataArray& arrayMsg)
+{
+    QString strSQL = FormatQuerySQL(TABLE_NAME_WIZ_MESSAGE,
+                                    FIELD_LIST_WIZ_MESSAGE);
+    return SQLToMessageDataArray(strSQL, arrayMsg);
+}
+
+bool CWizIndex::setMessageReadStatus(const WIZMESSAGEDATA& msg, qint32 nRead)
+{
+    CWizMessageDataArray arrayMsg;
+    arrayMsg.push_back(msg);
+
+    return setMessageReadStatus(arrayMsg, nRead);
+}
+
+bool CWizIndex::setMessageReadStatus(const CWizMessageDataArray& arrayMsg,
+                                      qint32 nRead)
+{
+    bool ret = true;
+
+    CWizMessageDataArray::const_iterator it;
+    for (it = arrayMsg.begin(); it != arrayMsg.end(); it++) {
+        WIZMESSAGEDATA msg(*it);
+
+        if (msg.nReadStatus != nRead) {
+            msg.nReadStatus = nRead;
+            msg.nVersion = -1;
+            ret = modifyMessageEx(msg);
+        }
+    }
+
+    return ret;
+}
+
+bool CWizIndex::getModifiedMessages(CWizMessageDataArray& arrayMsg)
+{
+    CString strSQL = FormatModifiedQuerySQL(TABLE_NAME_WIZ_MESSAGE,
+                                            FIELD_LIST_WIZ_MESSAGE);
+
+    return SQLToMessageDataArray(strSQL, arrayMsg);
+}
+
 bool CWizIndex::CreateTag(const CString& strParentTagGUID,
                           const CString& strName,
                           const CString& strDescription,
@@ -1666,7 +2186,7 @@ bool CWizIndex::TitleExists(const CString& strLocation, CString strTitle)
     return true;
 }
 
-bool CWizIndex::GetNextTitle(const CString& strLocation, CString& strTitle)
+bool CWizIndex::GetNextTitle(const QString& strLocation, QString& strTitle)
 {
 	CString strTemplate(strTitle);
 	WizExtractTitleTemplate(strTemplate);
@@ -1758,16 +2278,16 @@ bool CWizIndex::ModifyTag(WIZTAGDATA& data)
 	return ModifyTagEx(data);
 }
 
-bool CWizIndex::DeleteTag(const WIZTAGDATA& data, bool bLog)
+bool CWizIndex::DeleteTag(const WIZTAGDATA& data, bool bLog, bool bReset /* = true */)
 {
-    if (!DeleteTagDocuments(data)) {
-        TOLOG1(_T("Failed to delete documents of tag: %1"), data.strName);
+    if (!DeleteTagDocuments(data, bReset)) {
+        TOLOG1("Failed to delete documents of tag: %1", data.strName);
         return false;
     }
 
     if (bLog) {
         if (!LogDeletedGUID(data.strGUID, wizobjectTag)) {
-            TOLOG(_T("Warning: Failed to log deleted tag guid!"));
+            TOLOG("Warning: Failed to log deleted tag guid!");
         }
     }
 
@@ -1822,44 +2342,47 @@ bool CWizIndex::ModifyStyle(WIZSTYLEDATA& data)
 	return ModifyStyleEx(data);
 }
 
-bool CWizIndex::DeleteStyle(const WIZSTYLEDATA& data, bool bLog)
+bool CWizIndex::DeleteStyle(const WIZSTYLEDATA& data, bool bLog, bool bReset /* = true */)
 {
-    if(!DeleteStyleDocuments(data)) {
-        TOLOG1(_T("Failed to delete documents of style: %1"), data.strName);
+    if(!DeleteStyleDocuments(data, bReset)) {
+        TOLOG1("Failed to delete documents of style: %1", data.strName);
         return false;
     }
+
     if (bLog) {
         if (!LogDeletedGUID(data.strGUID, wizobjectStyle)) {
-            TOLOG(_T("Warning: Failed to log deleted style guid!"));
+            TOLOG("Warning: Failed to log deleted style guid!");
         }
     }
 
     return DeleteStyleEx(data);
 }
 
-bool CWizIndex::ModifyDocumentInfo(WIZDOCUMENTDATA& data)
+bool CWizIndex::ModifyDocumentInfo(WIZDOCUMENTDATA& data, bool bReset /* = true */)
 {
-    if (data.strGUID.IsEmpty()) {
+    if (data.strGUID.isEmpty()) {
         TOLOG("Failed to modify document: guid is empty!");
         return false;
     }
 
-    if (data.strTitle.IsEmpty()) {
+    if (data.strTitle.isEmpty()) {
         TOLOG("Failed to modify document: title is empty!");
         return false;
 	}
 
-	data.tInfoModified = WizGetCurrentTime();
-	data.strInfoMD5 = CalDocumentInfoMD5(data);
-	data.tModified = WizGetCurrentTime();
-    data.nVersion = -1;
+    if (bReset) {
+        data.tInfoModified = WizGetCurrentTime();
+        data.strInfoMD5 = CalDocumentInfoMD5(data);
+        data.tModified = WizGetCurrentTime();
+        data.nVersion = -1;
+    }
 
 	return ModifyDocumentInfoEx(data);
 }
 
 bool CWizIndex::ModifyDocumentDateModified(WIZDOCUMENTDATA& data)
 {
-    if (data.strGUID.IsEmpty()) {
+    if (data.strGUID.isEmpty()) {
 		TOLOG(_T("Failed to modify document: guid is empty!"));
         return false;
 	}
@@ -1873,7 +2396,7 @@ bool CWizIndex::ModifyDocumentDateModified(WIZDOCUMENTDATA& data)
 
 bool CWizIndex::ModifyDocumentDataDateModified(WIZDOCUMENTDATA& data)
 {
-    if (data.strGUID.IsEmpty()) {
+    if (data.strGUID.isEmpty()) {
 		TOLOG(_T("Failed to modify document: guid is empty!"));
         return false;
     }
@@ -1916,19 +2439,21 @@ bool CWizIndex::DeleteDocument(const WIZDOCUMENTDATA& data, bool bLog)
 {
     WIZDOCUMENTDATA dataTemp = data;
 
-    if (!DeleteDocumentTags(dataTemp)) {
-        TOLOG1(_T("Failed to delete document tags: %1"), data.strTitle);
+    // don't have to reset md5 and version
+    if (!DeleteDocumentTags(dataTemp, false)) {
+        TOLOG1("Failed to delete document tags: %1", data.strTitle);
         return false;
     }
 
-    if (!DeleteDocumentParams(data.strGUID)) {
-        TOLOG1(_T("Failed to delete document params: %1"), data.strTitle);
+    // as above
+    if (!DeleteDocumentParams(data.strGUID, false)) {
+        TOLOG1("Failed to delete document params: %1", data.strTitle);
         return false;
     }
 
     if (bLog) {
         if (!LogDeletedGUID(data.strGUID, wizobjectDocument)) {
-            TOLOG(_T("Warning: Failed to log deleted document guid!"));
+            TOLOG("Warning: Failed to log deleted document guid!");
         }
     }
 
@@ -2041,13 +2566,13 @@ void CWizIndex::InitDocumentShareFlags(CWizDocumentDataArray& arrayDocument,
 
 bool CWizIndex::ModifyAttachmentInfo(WIZDOCUMENTATTACHMENTDATA& data)
 {
-    if (data.strGUID.IsEmpty()) {
-		TOLOG(_T("Failed to modify attachment: guid is empty!"));
+    if (data.strGUID.isEmpty()) {
+        TOLOG("Failed to modify attachment: guid is empty!");
         return false;
     }
 
-    if (data.strName.IsEmpty()) {
-		TOLOG(_T("Failed to modify attachment: name is empty!"));
+    if (data.strName.isEmpty()) {
+        TOLOG("Failed to modify attachment: name is empty!");
         return false;
 	}
 
@@ -2058,7 +2583,9 @@ bool CWizIndex::ModifyAttachmentInfo(WIZDOCUMENTATTACHMENTDATA& data)
 	return ModifyAttachmentInfoEx(data);
 }
 
-bool CWizIndex::DeleteAttachment(const WIZDOCUMENTATTACHMENTDATA& data, bool bLog)
+bool CWizIndex::DeleteAttachment(const WIZDOCUMENTATTACHMENTDATA& data,
+                                 bool bLog,
+                                 bool bReset)
 {
     if (!DeleteAttachmentEx(data)) {
         TOLOG1("Failed to delete attachment: %1", data.strName);
@@ -2067,11 +2594,11 @@ bool CWizIndex::DeleteAttachment(const WIZDOCUMENTATTACHMENTDATA& data, bool bLo
 
     if (bLog) {
         if (!LogDeletedGUID(data.strGUID, wizobjectDocumentAttachment)) {
-            TOLOG(_T("Warning: Failed to log deleted attachment guid!"));
+            TOLOG("Warning: Failed to log deleted attachment guid!");
         }
     }
 
-    UpdateDocumentAttachmentCount(data.strDocumentGUID);
+    UpdateDocumentAttachmentCount(data.strDocumentGUID, bReset);
 
     return true;
 }
@@ -2150,9 +2677,10 @@ bool CWizIndex::UpdateDocumentDataMD5(WIZDOCUMENTDATA& data, const CString& strZ
     return bRet;
 }
 
-bool CWizIndex::DeleteDocumentTags(WIZDOCUMENTDATA& data)
+bool CWizIndex::DeleteDocumentTags(WIZDOCUMENTDATA& data, bool bReset /* = true */)
 {
-	CString strFormat = FormatDeleteSQLFormat(TABLE_NAME_WIZ_DOCUMENT_TAG, _T("DOCUMENT_GUID"));
+    CString strFormat = FormatDeleteSQLFormat(TABLE_NAME_WIZ_DOCUMENT_TAG,
+                                              "DOCUMENT_GUID");
 
 	CString strSQL;
 	strSQL.Format(strFormat,
@@ -2162,16 +2690,22 @@ bool CWizIndex::DeleteDocumentTags(WIZDOCUMENTDATA& data)
 	if (!ExecSQL(strSQL))
         return false;
 
-    bool bRet = UpdateDocumentInfoMD5(data);
+    bool bRet = true;
+
+    if (bReset) {
+        bRet = UpdateDocumentInfoMD5(data);
+    }
 
     Q_EMIT documentTagModified(data);
 
     return bRet;
 }
 
-bool CWizIndex::DeleteDocumentParams(const CString& strDocumentGUID)
+bool CWizIndex::DeleteDocumentParams(const QString& strDocumentGUID,
+                                     bool bReset /* = true */)
 {
-	CString strFormat = FormatDeleteSQLFormat(TABLE_NAME_WIZ_DOCUMENT_PARAM, _T("DOCUMENT_GUID"));
+    CString strFormat = FormatDeleteSQLFormat(TABLE_NAME_WIZ_DOCUMENT_PARAM,
+                                              "DOCUMENT_GUID");
 
 	CString strSQL;
 	strSQL.Format(strFormat,
@@ -2181,8 +2715,9 @@ bool CWizIndex::DeleteDocumentParams(const CString& strDocumentGUID)
 	if (!ExecSQL(strSQL))
         return false;
 
-    if (!UpdateDocumentParamMD5(strDocumentGUID)) {
-		TOLOG(_T("Failed to update document param md5!"));
+    if (bReset && !UpdateDocumentParamMD5(strDocumentGUID)) {
+        TOLOG("Failed to update document param md5, guid: " + strDocumentGUID);
+        return false;
     }
 
     return true;
@@ -2197,7 +2732,7 @@ bool CWizIndex::DeleteDocumentParam(const CString& strDocumentGUID, CString strP
 
 	CString strSQL;
 	strSQL.Format(_T("delete from %s where DOCUMENT_GUID=%s and PARAM_NAME=%s"),
-        TABLE_NAME_WIZ_DOCUMENT_PARAM.utf16(),
+        QString(TABLE_NAME_WIZ_DOCUMENT_PARAM).utf16(),
         STR2SQL(strDocumentGUID).utf16(),
         STR2SQL(strParamName).utf16()
 		);
@@ -2223,7 +2758,7 @@ bool CWizIndex::DeleteDocumentParamEx(const CString& strDocumentGUID, CString st
 
 	CString strSQL;
 	strSQL.Format(_T("delete from %s where DOCUMENT_GUID=%s and PARAM_NAME like '%s%%'"),
-        TABLE_NAME_WIZ_DOCUMENT_PARAM.utf16(),
+        QString(TABLE_NAME_WIZ_DOCUMENT_PARAM).utf16(),
         STR2SQL(strDocumentGUID).utf16(),
         strParamNamePart.utf16()
 		);
@@ -2240,6 +2775,8 @@ bool CWizIndex::DeleteDocumentParamEx(const CString& strDocumentGUID, CString st
 
 bool CWizIndex::DeleteDeletedGUID(const CString& strGUID)
 {
+    qDebug() << "delete deleted, guid: " << strGUID;
+
 	CString strFormat = FormatDeleteSQLFormat(TABLE_NAME_WIZ_DELETED_GUID, _T("DELETED_GUID"));
 
 	CString strSQL;
@@ -2262,12 +2799,13 @@ bool CWizIndex::UpdateDocumentsInfoMD5(CWizDocumentDataArray& arrayDocument)
     return true;
 }
 
-bool CWizIndex::DeleteTagDocuments(const WIZTAGDATA& data)
+bool CWizIndex::DeleteTagDocuments(const WIZTAGDATA& data, bool bReset)
 {
 	CWizDocumentDataArray arrayDocument;
     GetDocumentsByTag("", data, arrayDocument, true);
 
-    CString strFormat = FormatDeleteSQLFormat(TABLE_NAME_WIZ_DOCUMENT_TAG, _T("TAG_GUID"));
+    CString strFormat = FormatDeleteSQLFormat(TABLE_NAME_WIZ_DOCUMENT_TAG,
+                                              "TAG_GUID");
 
 	CString strSQL;
 	strSQL.Format(strFormat,
@@ -2275,45 +2813,52 @@ bool CWizIndex::DeleteTagDocuments(const WIZTAGDATA& data)
         );
 
     if (!ExecSQL(strSQL)) {
-		TOLOG1(_T("Failed to delete documents of tag: %1"), data.strName);
+        TOLOG1("Failed to delete documents of tag: %1", data.strName);
         return false;
 	}
 
-	UpdateDocumentsInfoMD5(arrayDocument);
+    if (bReset) {
+        UpdateDocumentsInfoMD5(arrayDocument);
+    }
+
     return true;
 }
 
-bool CWizIndex::DeleteStyleDocuments(const WIZSTYLEDATA& data)
+bool CWizIndex::DeleteStyleDocuments(const WIZSTYLEDATA& data, bool bReset)
 {
 	CWizDocumentDataArray arrayDocument;
     GetDocumentsByStyle("", data, arrayDocument);
 
 	CString strSQL;
-	strSQL.Format(_T("update WIZ_DOCUMENT set STYLE_GUID=null where STYLE_GUID=%s"),
+    strSQL.Format("update WIZ_DOCUMENT set STYLE_GUID=null where STYLE_GUID=%s",
         STR2SQL(data.strGUID).utf16()
         );
 
     if (!ExecSQL(strSQL)) {
-		TOLOG1(_T("Failed to delete documents of style: %1"), data.strName);
+        TOLOG1("Failed to delete documents of style: %1", data.strName);
         return false;
 	}
 
-	UpdateDocumentsInfoMD5(arrayDocument);
+    if (bReset) {
+        UpdateDocumentsInfoMD5(arrayDocument);
+    }
 
     return true;
 }
 
-bool CWizIndex::SetDocumentTags(WIZDOCUMENTDATA& data, const CWizStdStringArray& arrayTagGUID)
+bool CWizIndex::SetDocumentTags(WIZDOCUMENTDATA& data,
+                                const CWizStdStringArray& arrayTagGUID,
+                                bool bReset /* = true */)
 {
-    if (!DeleteDocumentTags(data)) {
-		TOLOG(_T("Failed to delete document tags"));
+    if (!DeleteDocumentTags(data, bReset)) {
+        TOLOG("Failed to delete document tags");
         return false;
 	}
 
     CWizStdStringArray::const_iterator it;
     for (it = arrayTagGUID.begin(); it != arrayTagGUID.end(); it++) {
-        if (!InsertDocumentTag(data, *it)) {
-			TOLOG(_T("Failed to insert document-tag record!"));
+        if (!InsertDocumentTag(data, *it, bReset)) {
+            TOLOG("Failed to insert document-tag record!");
             return false;
 		}
 	}
@@ -2473,10 +3018,12 @@ bool CWizIndex::SetDocumentTagsText(WIZDOCUMENTDATA& data, const CString& strTag
     return true;
 }
 
-bool CWizIndex::InsertDocumentTag(WIZDOCUMENTDATA& data, const CString& strTagGUID)
+bool CWizIndex::InsertDocumentTag(WIZDOCUMENTDATA& data,
+                                  const CString& strTagGUID,
+                                  bool bReset /* = true */)
 {
     if (strTagGUID.IsEmpty()) {
-		TOLOG(_T("NULL Pointer or empty tag guid: insert into wiz_document_tag,!"));
+        TOLOG("NULL Pointer or empty tag guid: insert into wiz_document_tag,!");
         return false;
 	}
 
@@ -2490,15 +3037,16 @@ bool CWizIndex::InsertDocumentTag(WIZDOCUMENTDATA& data, const CString& strTagGU
         STR2SQL(strTagGUID).utf16()
         );
 
-    bool bRet = ExecSQL(strSQL)
-		&& UpdateDocumentInfoMD5(data);
-
-	if (!bRet)
+    if (!ExecSQL(strSQL))
         return false;
+
+    bool bRet = true;
+    if (bReset)
+        bRet = UpdateDocumentInfoMD5(data);
 
     Q_EMIT documentTagModified(data);
 
-    return true;
+    return bRet;
 }
 
 bool CWizIndex::DeleteDocumentTag(WIZDOCUMENTDATA& data, const CString& strTagGUID)
@@ -2633,9 +3181,9 @@ bool CWizIndex::GetMeta(CString strMetaName, CString strKey, CString& strValue, 
     return true;
 }
 
-bool CWizIndex::SetDocumentParam(const CString& strDocumentGUID,
-                                 CString strParamName,
-                                 CString strParamValue,
+bool CWizIndex::SetDocumentParam(const QString& strDocumentGUID,
+                                 const QString &strParamName,
+                                 const QString &strParamValue,
                                  bool bUpdateParamMD5)
 {
 	WIZDOCUMENTDATA data;
@@ -2647,20 +3195,20 @@ bool CWizIndex::SetDocumentParam(const CString& strDocumentGUID,
 }
 
 bool CWizIndex::SetDocumentParam(WIZDOCUMENTDATA& data,
-                                 CString strParamName,
-                                 CString strParamValue,
+                                 const QString& strName,
+                                 const QString& strValue,
                                  bool bUpdateParamMD5)
 {
-	strParamName.Trim();
-    strParamValue.Trim();
+    QString strParamName = strName.trimmed();
+    QString strParamValue = strValue.trimmed();
 
-    if (data.strGUID.IsEmpty()) {
-		TOLOG1(_T("Failed to modify document param %1: document guid is empty!"), strParamName);
+    if (data.strGUID.isEmpty()) {
+        TOLOG1("Failed to modify document param %1: document guid is empty!", strParamName);
         return false;
     }
 
-    if (strParamName.IsEmpty()) {
-		TOLOG(_T("Failed to modify document param %1: param name is empty!"));
+    if (strParamName.isEmpty()) {
+        TOLOG("Failed to modify document param %1: param name is empty!");
         return false;
 	}
 
@@ -2671,11 +3219,11 @@ bool CWizIndex::SetDocumentParam(WIZDOCUMENTDATA& data,
 	if (strOldParamValue == strParamValue)
         return true;
 
-	strParamName.MakeUpper();
+    strParamName = strParamName.toUpper();
 
 	CString strSQL;
     if (bParamExists) {
-		strSQL.Format(_T("update WIZ_DOCUMENT_PARAM set PARAM_VALUE=%s where DOCUMENT_GUID=%s and PARAM_NAME=%s"),
+        strSQL.Format("update WIZ_DOCUMENT_PARAM set PARAM_VALUE=%s where DOCUMENT_GUID=%s and PARAM_NAME=%s",
             STR2SQL(strParamValue).utf16(),
             STR2SQL(data.strGUID).utf16(),
             STR2SQL(strParamName).utf16()
@@ -2693,7 +3241,7 @@ bool CWizIndex::SetDocumentParam(WIZDOCUMENTDATA& data,
 	}
 
     if (!ExecSQL(strSQL)) {
-		TOLOG2(_T("Failed to update document %1 param: %2"), data.strTitle, strParamName);
+        TOLOG2("Failed to update document %1 param: %2", data.strTitle, strParamName);
         return false;
 	}
 
@@ -2704,18 +3252,23 @@ bool CWizIndex::SetDocumentParam(WIZDOCUMENTDATA& data,
 	}
 }
 
-bool CWizIndex::SetDocumentParams(WIZDOCUMENTDATA& data, const std::deque<WIZDOCUMENTPARAMDATA>& arrayParam)
+bool CWizIndex::SetDocumentParams(WIZDOCUMENTDATA& data,
+                                  const CWizDocumentParamDataArray& arrayParam,
+                                  bool bReset /* = true */)
 {
-	DeleteDocumentParams(data.strGUID);
+    DeleteDocumentParams(data.strGUID, bReset);
 
-    std::deque<WIZDOCUMENTPARAMDATA>::const_iterator it;
+    CWizDocumentParamDataArray::const_iterator it;
     for (it = arrayParam.begin(); it != arrayParam.end(); it++) {
-        if (!SetDocumentParam(data, it->strName, it->strValue, false)) {
-			TOLOG2(_T("Failed to set document param: %1=%2"), it->strName, it->strValue);
+        if (!SetDocumentParam(data, it->strName, it->strValue, bReset)) {
+            TOLOG2("Failed to set document param: %1=%2", it->strName, it->strValue);
 		}
 	}
 
-	UpdateDocumentParamMD5(data);
+    if (bReset) {
+        UpdateDocumentParamMD5(data);
+    }
+
     return true;
 }
 
@@ -2747,12 +3300,14 @@ bool CWizIndex::StringArrayToDocumentParams(const CString& strDocumentGUID,
     return true;
 }
 
-bool CWizIndex::SetDocumentParams(WIZDOCUMENTDATA& data, const CWizStdStringArray& arrayParam)
+bool CWizIndex::SetDocumentParams(WIZDOCUMENTDATA& data,
+                                  const CWizStdStringArray& arrayParam,
+                                  bool bReset /* = true */)
 {
-    std::deque<WIZDOCUMENTPARAMDATA> arrayRet;
+    CWizDocumentParamDataArray arrayRet;
     StringArrayToDocumentParams(data.strGUID, arrayParam, arrayRet);
 
-	return SetDocumentParams(data, arrayRet);
+    return SetDocumentParams(data, arrayRet, bReset);
 }
 
 bool CWizIndex::SetMeta(CString strMetaName, CString strKey, const CString& strValue)
@@ -3362,152 +3917,143 @@ bool CWizIndex::GetModifiedAttachments(const CWizStdStringArray& arrayLocation, 
 	return SQLToDocumentAttachmentDataArray(strSQL, arrayData);
 }
 
-bool CWizIndex::ObjectExists(const CString& strGUID, const CString& strType, bool& bExists)
+bool CWizIndex::ObjectExists(const QString& strGUID, const QString& strType, bool& bExists)
 {
 	CString strTableName;
 	CString strKeyFieldName;
 
-	if (0 == strType.CompareNoCase(_T("tag")))
+    if (0 == strType.compare("tag", Qt::CaseInsensitive))
 	{
 		strTableName = TABLE_NAME_WIZ_TAG;
 		strKeyFieldName = TABLE_KEY_WIZ_TAG;
 	}
-	else if (0 == strType.CompareNoCase(_T("style")))
+    else if (0 == strType.compare("style", Qt::CaseInsensitive))
 	{
 		strTableName = TABLE_NAME_WIZ_STYLE;
 		strKeyFieldName = TABLE_KEY_WIZ_STYLE;
 	}
-	else if (0 == strType.CompareNoCase(_T("document")))
+    else if (0 == strType.compare("document", Qt::CaseInsensitive))
 	{
 		strTableName = TABLE_NAME_WIZ_DOCUMENT;
 		strKeyFieldName = TABLE_KEY_WIZ_DOCUMENT;
 	}
-	else if (0 == strType.CompareNoCase(_T("attachment")))
+    else if (0 == strType.compare("attachment", Qt::CaseInsensitive))
 	{
 		strTableName = TABLE_NAME_WIZ_DOCUMENT_ATTACHMENT;
 		strKeyFieldName = TABLE_KEY_WIZ_DOCUMENT_ATTACHMENT;;
 	}
 	else
 	{
-        Q_ASSERT(false);
-		TOLOG1(_T("Unknown object type: %1"), strType);
+        Q_ASSERT(0);
+        TOLOG1("Unknown object type: %1", strType);
         return false;
 	}
 
-	CString strSQL = WizFormatString3(_T("select %1 from %2 where %1=%3"),
+    CString strSQL = WizFormatString3("select %1 from %2 where %1=%3",
         strKeyFieldName, strTableName, STR2SQL(strGUID));
 
 	CWizStdStringArray arrayGUID;
-	if (!SQLToStringArray(strSQL, 0, arrayGUID))
-	{
-		TOLOG(_T("Failed to check objects!"));
+    if (!SQLToStringArray(strSQL, 0, arrayGUID)) {
+        TOLOG("Failed to check objects!");
         return false;
 	}
 
-	if (arrayGUID.empty())
-	{
+    if (arrayGUID.empty()) {
         bExists = false;
         return true;
-	}
-	else if (arrayGUID.size() == 1)
-	{
+    } else if (arrayGUID.size() == 1) {
         bExists = true;
         return true;
-	}
-	else
-	{
-        Q_ASSERT(false);
+    } else {
+        Q_ASSERT(0);
         return false;
 	}
 }
 
-bool CWizIndex::DeleteObject(const CString& strGUID, const CString& strType, bool bLog)
+bool CWizIndex::DeleteObject(const QString& strGUID, const QString& strType, bool bLog)
 {
-    if (0 == strType.CompareNoCase(_T("tag")))
+    if (0 == strType.compare("tag", Qt::CaseInsensitive))
     {
         WIZTAGDATA data;
-        if (TagFromGUID(strGUID, data))
-        {
-            DeleteTag(data, bLog);
+        if (TagFromGUID(strGUID, data)) {
+            DeleteTag(data, bLog, false);
         }
         return true;
     }
-    else if (0 == strType.CompareNoCase(_T("style")))
+    else if (0 == strType.compare("style", Qt::CaseInsensitive))
     {
         WIZSTYLEDATA data;
-        if (StyleFromGUID(strGUID, data))
-        {
-            return DeleteStyle(data, bLog);
+        if (StyleFromGUID(strGUID, data)) {
+            return DeleteStyle(data, bLog, false);
         }
         return true;
     }
-    else if (0 == strType.CompareNoCase(_T("document")))
+    else if (0 == strType.compare("document", Qt::CaseInsensitive))
     {
         WIZDOCUMENTDATA data;
-        if (DocumentFromGUID(strGUID, data))
-        {
+        if (DocumentFromGUID(strGUID, data)) {
             return DeleteDocument(data, bLog);
         }
         return true;
     }
-    else if (0 == strType.CompareNoCase(_T("attachment")))
+    else if (0 == strType.compare("attachment", Qt::CaseInsensitive))
     {
         WIZDOCUMENTATTACHMENTDATA data;
-        if (AttachmentFromGUID(strGUID, data))
-        {
-            return DeleteAttachment(data, bLog);
+        if (AttachmentFromGUID(strGUID, data)) {
+            return DeleteAttachment(data, bLog, false);
         }
         return true;
     }
     else
     {
-        Q_ASSERT(false);
-        TOLOG1(_T("Unknown object type: %1"), strType);
+        Q_ASSERT(0);
+        TOLOG1("Unknown object type: %1", strType);
         return false;
     }
 }
 
 bool CWizIndex::GetObjectTableInfo(const CString& strType, CString& strTableName, CString& strKeyFieldName)
 {
-	if (0 == strType.CompareNoCase(_T("tag")))
-	{
+    if (0 == strType.CompareNoCase("tag")) {
 		strTableName = TABLE_NAME_WIZ_TAG;
 		strKeyFieldName = TABLE_KEY_WIZ_TAG;
-	}
-	else if (0 == strType.CompareNoCase(_T("style")))
-	{
+
+    } else if (0 == strType.CompareNoCase("style")) {
 		strTableName = TABLE_NAME_WIZ_STYLE;
 		strKeyFieldName = TABLE_KEY_WIZ_STYLE;
-	}
-	else if (0 == strType.CompareNoCase(_T("document")))
-	{
+
+    } else if (0 == strType.CompareNoCase("document")) {
 		strTableName = TABLE_NAME_WIZ_DOCUMENT;
 		strKeyFieldName = TABLE_KEY_WIZ_DOCUMENT;
-	}
-	else if (0 == strType.CompareNoCase(_T("attachment")))
-	{
+
+    } else if (0 == strType.CompareNoCase("attachment")) {
 		strTableName = TABLE_NAME_WIZ_DOCUMENT_ATTACHMENT;
-		strKeyFieldName = TABLE_KEY_WIZ_DOCUMENT_ATTACHMENT;;
-	}
-	else
-	{
-        Q_ASSERT(false);
-		TOLOG1(_T("Unknown object type: %1"), strType);
+        strKeyFieldName = TABLE_KEY_WIZ_DOCUMENT_ATTACHMENT;
+
+    } else if (0 == strType.CompareNoCase("message")) {
+        strTableName = TABLE_NAME_WIZ_MESSAGE;
+        strKeyFieldName = TABLE_KEY_WIZ_MESSAGE;
+
+    } else {
+        Q_ASSERT(0);
+        TOLOG1("Unknown object type: %1", strType);
         return false;
 	}
 
     return true;
 }
 
-bool CWizIndex::ModifyObjectVersion(const CString& strGUID, const CString& strType, __int64 nVersion)
+bool CWizIndex::ModifyObjectVersion(const CString& strGUID, const CString& strType, qint64 nVersion)
 {
+    qDebug() << "modifi object version, type: " << strType << " guid: " << strGUID;
+
 	CString strTableName;
 	CString strKeyFieldName;
 
     if (!GetObjectTableInfo(strType, strTableName, strKeyFieldName))
         return false;
 
-	CString strSQL = WizFormatString4(_T("update %1 set WIZ_VERSION=%2 where %3=%4"),
+    CString strSQL = WizFormatString4("update %1 set WIZ_VERSION=%2 where %3=%4",
 		strTableName,
 		WizInt64ToStr(nVersion),
 		strKeyFieldName, 
@@ -3579,37 +4125,36 @@ bool CWizIndex::GetObjectModifiedTime(const CString& strGUID, const CString& str
     return true;
 }
 
-#ifndef WIZ_NO_OBSOLETE
-
-bool CWizIndex::SearchDocumentByTitle(const CString& strTitle, const CString& strLocation, bool bIncludeSubFolders, size_t nMaxCount, CWizDocumentDataArray& arrayDocument)
+bool CWizIndex::SearchDocumentByTitle(const QString& strTitle,
+                                      const QString& strLocation,
+                                      bool bIncludeSubFolders,
+                                      int nMaxCount,
+                                      CWizDocumentDataArray& arrayDocument)
 {
-    CString strWhere = WizFormatString1(_T(" DOCUMENT_TITLE like '%%1%'"), strTitle);
+    CString strWhere = WizFormatString1(" DOCUMENT_TITLE like '%%1%'", strTitle);
 
-	if (!strLocation.IsEmpty())
-	{
-		CString strWhereLocation;
+    if (!strLocation.isEmpty()) {
+        CString strWhereLocation;
         if (bIncludeSubFolders) {
-			strWhereLocation = _T(" AND DOCUMENT_LOCATION like ") + STR2SQL(WizFormatString1(_T("%%1%"), strLocation));
+            strWhereLocation = " AND DOCUMENT_LOCATION like " + STR2SQL(WizFormatString1("%%1%", strLocation));
         } else {
-			strWhereLocation = _T(" AND DOCUMENT_LOCATION like ") + STR2SQL(WizFormatString1(_T("%%1"), strLocation));
-		}
+            strWhereLocation = " AND DOCUMENT_LOCATION like " + STR2SQL(WizFormatString1("%%1", strLocation));
+        }
 
-		strWhere += strWhereLocation;
-	}
+        strWhere += strWhereLocation;
+    }
 
-	CString strSQL = FormatQuerySQL(TABLE_NAME_WIZ_DOCUMENT, FIELD_LIST_WIZ_DOCUMENT, strWhere); 
+    CString strSQL = FormatQuerySQL(TABLE_NAME_WIZ_DOCUMENT, FIELD_LIST_WIZ_DOCUMENT, strWhere);
 
-	if (!SQLToDocumentDataArray(strSQL, arrayDocument))
+    if (!SQLToDocumentDataArray(strSQL, arrayDocument))
         return false;
 
     if (arrayDocument.size() > nMaxCount) {
-		arrayDocument.resize(nMaxCount);
-	}
+        arrayDocument.resize(nMaxCount);
+    }
 
     return true;
 }
-
-#endif
 
 CString URLToSQL(const CString& strURL)
 {
@@ -3943,7 +4488,12 @@ CString TitleToSQL(CWizIndex& index, const CString& strKeywords, const WIZSEARCH
 	}
 }
 
-bool CWizIndex::Search(const CString& strKeywords, const WIZSEARCHDATA& data, const CString& strLocation, bool bIncludeSubFolders, size_t nMaxCount, CWizDocumentDataArray& arrayDocument)
+bool CWizIndex::Search(const CString& strKeywords,
+                       const WIZSEARCHDATA& data,
+                       const CString& strLocation,
+                       bool bIncludeSubFolders,
+                       size_t nMaxCount,
+                       CWizDocumentDataArray& arrayDocument)
 {
 	if (!data.strSyntax.IsEmpty())
         return true;
@@ -3987,7 +4537,10 @@ bool CWizIndex::Search(const CString& strKeywords, const WIZSEARCHDATA& data, co
 
 }
 
-bool CWizIndex::Search(const CString& strKeywords, const CString& strLocation, bool bIncludeSubFolders, CWizDocumentDataArray& arrayDocument)
+bool CWizIndex::Search(const CString& strKeywords,
+                       const CString& strLocation,
+                       bool bIncludeSubFolders,
+                       CWizDocumentDataArray& arrayDocument)
 {
 	CWizStdStringArray arrayKeywords;
     WizSplitTextToArray(strKeywords, ' ', arrayKeywords);
@@ -4068,9 +4621,9 @@ bool CWizIndex::GetRecentDocuments(long nFlags, const CString& strDocumentType, 
 	if (strDocumentType.IsEmpty())
 	{
 		strSQL.Format(_T("select %s, MAX(%s) AS WIZ_TEMP_MODIFIED from %s where DOCUMENT_LOCATION not like %s order by WIZ_TEMP_MODIFIED desc limit 0, %d"),
-            FIELD_LIST_WIZ_DOCUMENT.utf16(),
+            QString(FIELD_LIST_WIZ_DOCUMENT).utf16(),
             strTimeField.utf16(),
-            TABLE_NAME_WIZ_DOCUMENT.utf16(),
+            QString(TABLE_NAME_WIZ_DOCUMENT).utf16(),
             STR2SQL(m_strDeletedItemsLocation + _T("%")).utf16(),
 			nCount
 			);
@@ -4078,9 +4631,9 @@ bool CWizIndex::GetRecentDocuments(long nFlags, const CString& strDocumentType, 
 	else
 	{
 		strSQL.Format(_T("select %s, MAX(%s) AS WIZ_TEMP_MODIFIED from %s where DOCUMENT_TYPE=%s and DOCUMENT_LOCATION not like %s order by WIZ_TEMP_MODIFIED desc limit 0,%d"),
-            FIELD_LIST_WIZ_DOCUMENT.utf16(),
+            QString(FIELD_LIST_WIZ_DOCUMENT).utf16(),
             strTimeField.utf16(),
-            TABLE_NAME_WIZ_DOCUMENT.utf16(),
+            QString(TABLE_NAME_WIZ_DOCUMENT).utf16(),
             STR2SQL(strDocumentType).utf16(),
             STR2SQL(m_strDeletedItemsLocation + _T("%")).utf16(),
 			nCount
@@ -4097,8 +4650,8 @@ bool CWizIndex::GetRecentDocumentsCreated(const CString& strDocumentType, int nC
 	if (strDocumentType.IsEmpty())
 	{
 		strSQL.Format(_T("select %s from %s where DOCUMENT_LOCATION not like %s order by DT_CREATED desc limit 0, %d"),
-            FIELD_LIST_WIZ_DOCUMENT.utf16(),
-            TABLE_NAME_WIZ_DOCUMENT.utf16(),
+            QString(FIELD_LIST_WIZ_DOCUMENT).utf16(),
+            QString(TABLE_NAME_WIZ_DOCUMENT).utf16(),
             STR2SQL(m_strDeletedItemsLocation + _T("%")).utf16(),
 			nCount
 			);
@@ -4106,8 +4659,8 @@ bool CWizIndex::GetRecentDocumentsCreated(const CString& strDocumentType, int nC
 	else
 	{
 		strSQL.Format(_T("select %s from %s where DOCUMENT_TYPE=%s and DOCUMENT_LOCATION not like %s order by DT_CREATED desc limit 0,%d"),
-            FIELD_LIST_WIZ_DOCUMENT.utf16(),
-            TABLE_NAME_WIZ_DOCUMENT.utf16(),
+            QString(FIELD_LIST_WIZ_DOCUMENT).utf16(),
+            QString(TABLE_NAME_WIZ_DOCUMENT).utf16(),
             STR2SQL(strDocumentType).utf16(),
             STR2SQL(m_strDeletedItemsLocation + _T("%")).utf16(),
 			nCount
@@ -4124,8 +4677,8 @@ bool CWizIndex::GetRecentDocumentsModified(const CString& strDocumentType, int n
 	if (strDocumentType.IsEmpty())
 	{
 		strSQL.Format(_T("select %s from %s where DOCUMENT_LOCATION not like %s and datetime(DT_CREATED, '+1 minute') < DT_DATA_MODIFIED order by DT_DATA_MODIFIED desc limit 0, %d"),
-            FIELD_LIST_WIZ_DOCUMENT.utf16(),
-            TABLE_NAME_WIZ_DOCUMENT.utf16(),
+            QString(FIELD_LIST_WIZ_DOCUMENT).utf16(),
+            QString(TABLE_NAME_WIZ_DOCUMENT).utf16(),
             STR2SQL(m_strDeletedItemsLocation + _T("%")).utf16(),
 			nCount
 			);
@@ -4133,8 +4686,8 @@ bool CWizIndex::GetRecentDocumentsModified(const CString& strDocumentType, int n
 	else
 	{
 		strSQL.Format(_T("select %s from %s where DOCUMENT_TYPE=%s and DOCUMENT_LOCATION not like %s and datetime(DT_CREATED, '+1 minute') < DT_DATA_MODIFIED order by DT_DATA_MODIFIED desc limit 0,%d"),
-            FIELD_LIST_WIZ_DOCUMENT.utf16(),
-            TABLE_NAME_WIZ_DOCUMENT.utf16(),
+            QString(FIELD_LIST_WIZ_DOCUMENT).utf16(),
+            QString(TABLE_NAME_WIZ_DOCUMENT).utf16(),
             STR2SQL(strDocumentType).utf16(),
             STR2SQL(m_strDeletedItemsLocation + _T("%")).utf16(),
 			nCount
@@ -4150,8 +4703,8 @@ bool CWizIndex::GetRecentDocumentsByCreatedTime(const COleDateTime& t, CWizDocum
 
     CString strSQL;
     strSQL.Format(_T("select %s from %s where DOCUMENT_LOCATION not like '/Deleted Items/%%' and DT_CREATED>=%s order by DT_CREATED desc"),
-        FIELD_LIST_WIZ_DOCUMENT.utf16(),
-        TABLE_NAME_WIZ_DOCUMENT.utf16(),
+        QString(FIELD_LIST_WIZ_DOCUMENT).utf16(),
+        QString(TABLE_NAME_WIZ_DOCUMENT).utf16(),
         strTime.utf16()
         );
 
@@ -4297,7 +4850,7 @@ __int64 CWizIndex::GetMetaInt64(const CString& strMetaName, const CString& strKe
     GetMeta(strMetaName, strKey, str);
 	if (str.IsEmpty())
 		return nDef;
-	//
+
 	return _ttoi64(str);
 }
 
@@ -4308,7 +4861,7 @@ bool CWizIndex::SetMetaInt64(const CString& strMetaName, const CString& strKey, 
 
 bool CWizIndex::deleteMetasByName(const QString& strMetaName)
 {
-    CString strFormat = FormatDeleteSQLFormat(TABLE_NAME_WIZ_META, _T("META_NAME"));
+    CString strFormat = FormatDeleteSQLFormat(TABLE_NAME_WIZ_META, "META_NAME");
 
     CString strSQL;
     strSQL.Format(strFormat,
@@ -4324,7 +4877,7 @@ bool CWizIndex::deleteMetasByName(const QString& strMetaName)
 int CWizIndex::GetDocumentAttachmentCount(const CString& strDocumentGUID)
 {
     CString strSQL;
-    strSQL.Format(_T("select count(*) from WIZ_DOCUMENT_ATTACHMENT where DOCUMENT_GUID=%s"),
+    strSQL.Format("select count(*) from WIZ_DOCUMENT_ATTACHMENT where DOCUMENT_GUID=%s",
                   STR2SQL(strDocumentGUID).utf16());
 
     CppSQLite3Query query = m_db.execQuery(strSQL);
@@ -4337,7 +4890,8 @@ int CWizIndex::GetDocumentAttachmentCount(const CString& strDocumentGUID)
     return 0;
 }
 
-void CWizIndex::UpdateDocumentAttachmentCount(const CString& strDocumentGUID)
+void CWizIndex::UpdateDocumentAttachmentCount(const CString& strDocumentGUID,
+                                              bool bReset /* = true */)
 {
     WIZDOCUMENTDATA data;
     if (!DocumentFromGUID(strDocumentGUID, data))
@@ -4345,7 +4899,7 @@ void CWizIndex::UpdateDocumentAttachmentCount(const CString& strDocumentGUID)
 
     data.nAttachmentCount = GetDocumentAttachmentCount(strDocumentGUID);
 
-    ModifyDocumentInfo(data);
+    ModifyDocumentInfo(data, bReset);
 }
 
 bool CWizIndex::GetSync(const CString& strLocation)
@@ -4873,25 +5427,25 @@ void CWizIndex::SetExtraFolder(const CWizStdStringArray& arrayLocation)
     SetMeta("FOLDERS", "EXTRA", strText);
 }
 
-void CWizIndex::GetDeletedFolder(CWizStdStringArray& arrayLocation)
-{
-    CString str = GetMetaDef("FOLDERS", "DELETED");
-    ::WizSplitTextToArray(str, '\\', arrayLocation);
-}
+//void CWizIndex::GetDeletedFolder(CWizStdStringArray& arrayLocation)
+//{
+//    CString str = GetMetaDef("FOLDERS", "DELETED");
+//    ::WizSplitTextToArray(str, '\\', arrayLocation);
+//}
 
-void CWizIndex::SetDeletedFolder(const CWizStdStringArray& arrayLocation)
-{
-    CString strText;
-    ::WizStringArrayToText(arrayLocation, strText, "\\");
-    SetMeta("FOLDERS", "DELETED", strText);
-}
+//void CWizIndex::SetDeletedFolder(const CWizStdStringArray& arrayLocation)
+//{
+//    CString strText;
+//    ::WizStringArrayToText(arrayLocation, strText, "\\");
+//    SetMeta("FOLDERS", "DELETED", strText);
+//}
 
-void CWizIndex::AddExtraFolder(const CString& strLocation)
+void CWizIndex::AddExtraFolder(const QString& strLocation)
 {
     //remove deleted list;
     RemoveFromExtraFolder(strLocation);
 
-    emit folderCreated(strLocation);
+    Q_EMIT folderCreated(strLocation);
 
     CWizStdStringArray arrayLocation;
     GetExtraFolder(arrayLocation);
@@ -4902,42 +5456,42 @@ void CWizIndex::AddExtraFolder(const CString& strLocation)
     SetExtraFolder(arrayLocation);
 }
 
-void CWizIndex::LogDeletedFolder(const CString& strLocation)
+void CWizIndex::LogDeletedFolder(const QString& strLocation)
 {
     //delete from extra folder list
     RemoveFromExtraFolder(strLocation);
-    //
-    emit folderDeleted(strLocation);
-    //
-    CWizStdStringArray arrayLocation;
-    GetDeletedFolder(arrayLocation);
-    if (-1 != ::WizFindInArray(arrayLocation, strLocation))
-        return;
-    //
-    arrayLocation.push_back(strLocation);
-    SetDeletedFolder(arrayLocation);
+
+    Q_EMIT folderDeleted(strLocation);
+
+//    CWizStdStringArray arrayLocation;
+//    GetDeletedFolder(arrayLocation);
+//    if (-1 != ::WizFindInArray(arrayLocation, strLocation))
+//        return;
+
+//    arrayLocation.push_back(strLocation);
+//    SetDeletedFolder(arrayLocation);
 }
 
-void CWizIndex::RemoveFromExtraFolder(const CString& strLocation)
+void CWizIndex::RemoveFromExtraFolder(const QString& strLocation)
 {
     CWizStdStringArray arrayLocation;
     GetExtraFolder(arrayLocation);
     int index = ::WizFindInArray(arrayLocation, strLocation);
     if (-1 == index)
         return;
-    //
+
     arrayLocation.erase(arrayLocation.begin() + index);
     SetExtraFolder(arrayLocation);
 }
 
-void CWizIndex::RemoveFromDeletedFolder(const CString& strLocation)
-{
-    CWizStdStringArray arrayLocation;
-    GetDeletedFolder(arrayLocation);
-    int index = ::WizFindInArray(arrayLocation, strLocation);
-    if (-1 == index)
-        return;
-    //
-    arrayLocation.erase(arrayLocation.begin() + index);
-    SetDeletedFolder(arrayLocation);
-}
+//void CWizIndex::RemoveFromDeletedFolder(const CString& strLocation)
+//{
+//    CWizStdStringArray arrayLocation;
+//    GetDeletedFolder(arrayLocation);
+//    int index = ::WizFindInArray(arrayLocation, strLocation);
+//    if (-1 == index)
+//        return;
+
+//    arrayLocation.erase(arrayLocation.begin() + index);
+//    SetDeletedFolder(arrayLocation);
+//}

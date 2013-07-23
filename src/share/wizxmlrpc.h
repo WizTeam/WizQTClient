@@ -174,7 +174,9 @@ public:
     bool GetBool(const QString& strName, bool& b) const;
     bool GetInt(const QString& strName, int& n) const;
     bool GetInt(const QString& strName, long& n) const;
+    //bool GetInt(const QString& strName, quint32& n) const;
     bool GetInt64(const QString& strName, qint64& n) const;
+    //bool GetInt64(const QString& strName, quint64& n) const;
     bool GetString(const QString& strName, QString& str) const;
     bool GetStr(const QString& strName, QString& str) const { return GetString(strName, str); }
     bool GetTime(const QString& strName, COleDateTime& t) const;

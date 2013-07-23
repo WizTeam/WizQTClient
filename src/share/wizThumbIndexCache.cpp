@@ -1,5 +1,7 @@
 #include "wizThumbIndexCache.h"
 
+#include <QDebug>
+
 #include "wizDatabaseManager.h"
 
 #define WIZNOTE_THUMB_CACHE_MAX 1000
@@ -8,6 +10,8 @@
 CWizThumbIndexCache::CWizThumbIndexCache(CWizExplorerApp& app)
     : m_dbMgr(app.databaseManager())
 {
+    qRegisterMetaType<WIZABSTRACT>("WIZABSTRACT");
+
     connect(&m_dbMgr, SIGNAL(documentAbstractModified(const WIZDOCUMENTDATA&)),
             SLOT(on_abstract_modified(const WIZDOCUMENTDATA&)));
 }
@@ -21,6 +25,12 @@ void CWizThumbIndexCache::get(const QString& strKbGUID,
                               const QString& strDocumentGUID,
                               bool bReload)
 {
+    // discard invalid request
+    if (!m_dbMgr.isOpened(strKbGUID)) {
+        qDebug() << "[Thumb Cache Pool]discard request, invalid kb guid: " << strKbGUID;
+        return;
+    }
+
     // search deque first
     CWizAbstractArray::iterator it;
     for (it = m_data.begin(); it != m_data.end(); it++) {
@@ -40,14 +50,18 @@ void CWizThumbIndexCache::get(const QString& strKbGUID,
     WIZABSTRACT abs;
     CWizDatabase& db = m_dbMgr.db(strKbGUID);
 
+    // update if not exist
     if (!db.PadAbstractFromGUID(strDocumentGUID, abs)) {
         if (!db.UpdateDocumentAbstract(strDocumentGUID)) {
             return;
-        } else {
-            if (!db.PadAbstractFromGUID(strDocumentGUID, abs)) {
-                return;
-            }
         }
+    }
+
+    // load again
+    if (!db.PadAbstractFromGUID(strDocumentGUID, abs)) {
+        qDebug() << "[Thumb Cache Pool]failed to load thumb cache, guid: "
+                 << strDocumentGUID;
+        return;
     }
 
     abs.strKbGUID = strKbGUID;

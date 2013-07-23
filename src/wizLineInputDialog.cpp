@@ -3,7 +3,8 @@
 
 CWizLineInputDialog::CWizLineInputDialog(const QString& strTitle,
                                          const QString& strHint,
-                                         QWidget *parent)
+                                         const QString& strDefault /* = "" */,
+                                         QWidget *parent /* = 0 */)
     : QDialog(parent)
     , ui(new Ui::CWizLineInputDialog)
 {
@@ -12,6 +13,9 @@ CWizLineInputDialog::CWizLineInputDialog(const QString& strTitle,
 
     setWindowTitle(strTitle);
     ui->labelHint->setText(strHint);
+
+    ui->editInput->setText(strDefault);
+    m_strDefault = strDefault;
 }
 
 CWizLineInputDialog::~CWizLineInputDialog()
@@ -21,5 +25,12 @@ CWizLineInputDialog::~CWizLineInputDialog()
 
 QString CWizLineInputDialog::input()
 {
-    return ui->editInput->text();
+    QString strText = ui->editInput->text();
+
+    // only trigger value change if user modified default value
+    if (strText == m_strDefault) {
+        return "";
+    }
+
+    return strText;
 }

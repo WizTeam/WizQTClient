@@ -11,40 +11,106 @@ struct WIZOBJECTBASE
     QString strKbGUID;
 };
 
+// this struct is obtained from client login api
 struct WIZUSERINFO
 {
     WIZUSERINFO();
     bool LoadFromXmlRpc(CWizXmlRpcStructValue& val, const QString& kbGUID);
     int GetMaxFileSize();
 
-    QString strDisplayName;
-    QString strUserType;
-    QString strShowAD;
-    QString strNickName;
-    QString strLanguage;
-    QString strDatabaseServer;
-    QString strUploadDataServer;
-    QString strDownloadDataServer;
-    QString strChatServer;
-    QString strBackupDatabaseServer;
-    QString strToken;
-    COleDateTime tTokenExpried;
-    QString strKbGUID;
+    // field: api_version, default: 1
 
-    QString strUserLevelName;
-    int nUserLevel;
-    int nUserPoints;
+    // field: capi_url, default: /xmlrpc
+    QString strChatUrl;
 
-    QString strSNSList;
+    // field: download_url, default: /a/download
+    QString strDownloadUrl;
 
-    QString strSystemTags;
-    QString strPushTag;
+    // field: email_verify, default: verified
 
-    int nMaxFileSize;
-
+    // field: enable_group, default: 0
     int bEnableGroup;
 
-    QString strNotice;
+    // field: expried_time
+    COleDateTime tTokenExpried;
+
+    // field: invite_code, current is 8 length char
+    QString strInviteCode;
+
+    // field: kapi_url
+    QString strDatabaseServer;
+
+    // field: kb_guid
+    QString strKbGUID;
+
+    // field: mywiz_email
+    QString strMywizEmail;
+
+    // field: notice_link, currently null
+    QString strNoticeLink;
+
+    // field: notice_text, currently null
+    QString strNoticeText;
+
+    // field: public_tags, default: config.public_tags, what's this?
+    // field: push_tags, default: config.push_tags, what's this?
+    // field: return_code, default: 200
+    // field: return_message, default: successfuly login, hello! user!
+    // field: server, currently null
+    // field: sns_list, default: sina=zh_CN name, 1
+    QString strSNSList;
+
+    // field: token
+    QString strToken;
+
+    // field: upload_size_limit
+    int nMaxFileSize;
+
+    // field: upload_url, default: /a/upload
+    QString strUploadUrl;
+
+    // ---> user struct begin
+    // field: api_version, why return two times of this field?
+
+    // field: displayname
+    QString strDisplayName;
+
+    // field: email, account id
+    QString strUserEmail;
+
+    // field: language, default: zh_CN
+    QString strLanguage;
+
+    // field: nickname
+    QString strNickName;
+
+    // field: return_code, why return two times of this field?
+
+    // field: user_guid
+    QString strUserGUID;
+
+    // <--- user struct end
+
+    // field: user_level
+    int nUserLevel;
+
+    // field: user_level_name
+    QString strUserLevelName;
+
+    // field: user_photo_url, currently null
+
+    // field: user_points
+    int nUserPoints;
+
+    // field: user_type, default: vip or free
+    QString strUserType;
+
+    // field: vip_date
+    COleDateTime tVipExpried;
+
+
+
+    QString strBackupDatabaseServer;
 };
 
 
@@ -108,13 +174,20 @@ enum WizObjectType
 
 struct WIZDOCUMENTPARAMDATA : public WIZOBJECTBASE
 {
-    CString strDocumentGUID;
-    CString strName;
-    CString strValue;
+    virtual bool LoadFromXmlRpc(CWizXmlRpcStructValue& data, const QString& kbGUID);
+    virtual bool SaveToXmlRpc(CWizXmlRpcStructValue& data) const;
 
-    virtual BOOL LoadFromXmlRpc(CWizXmlRpcStructValue& data, const QString& kbGUID);
-    virtual BOOL SaveToXmlRpc(CWizXmlRpcStructValue& data) const;
+    // helper field, indicate which document this object link to
+    QString strDocumentGUID;
+
+    // field: param_name, like: DOC_READ_COUNT
+    QString strName;
+
+    // field: param_value
+    QString strValue;
 };
+
+typedef std::deque<WIZDOCUMENTPARAMDATA> CWizDocumentParamDataArray;
 
 
 struct WIZTAGDATA : public WIZOBJECTBASE
@@ -128,7 +201,7 @@ struct WIZTAGDATA : public WIZOBJECTBASE
     CString strName;
     CString strDescription;
     COleDateTime tModified;
-    __int64 nVersion;
+    qint64 nVersion;
 
     friend bool operator< (const WIZTAGDATA& data1, const WIZTAGDATA& data2) throw();
 
@@ -142,52 +215,78 @@ struct WIZTAGDATA : public WIZOBJECTBASE
 
 bool operator< ( const WIZTAGDATA& data1, const WIZTAGDATA& data2 ) throw();
 
+typedef std::deque<WIZTAGDATA> CWizTagDataArray;
+
+
 struct WIZSTYLEDATA : public WIZOBJECTBASE
 {
     WIZSTYLEDATA();
+
+    virtual bool LoadFromXmlRpc(CWizXmlRpcStructValue& data, const QString& kbGUID);
+    virtual bool SaveToXmlRpc(CWizXmlRpcStructValue& data) const;
+
+    bool EqualForSync(const WIZSTYLEDATA& data) const;
+    static CString VersionName() { return CString(_T("style_version")); }
+    static CString ObjectName() { return CString(_T("style")); }
 
     CString strGUID;
     CString strName;
     CString strDescription;
     COLORREF crTextColor;
     COLORREF crBackColor;
-    BOOL bTextBold;
+    bool bTextBold;
     int nFlagIndex;
     COleDateTime tModified;
-    __int64 nVersion;
+    qint64 nVersion;
 
     friend bool operator< (const WIZSTYLEDATA& data1, const WIZSTYLEDATA& data2 ) throw();
-
-    bool EqualForSync(const WIZSTYLEDATA& data) const;
-    virtual bool LoadFromXmlRpc(CWizXmlRpcStructValue& data, const QString& kbGUID);
-    virtual bool SaveToXmlRpc(CWizXmlRpcStructValue& data) const;
-
-    static CString VersionName() { return CString(_T("style_version")); }
-    static CString ObjectName() { return CString(_T("style")); }
 };
 
 bool operator< (const WIZSTYLEDATA& data1, const WIZSTYLEDATA& data2 ) throw();
+
+typedef std::deque<WIZSTYLEDATA> CWizStyleDataArray;
 
 
 struct WIZDOCUMENTDATABASE : public WIZOBJECTBASE
 {
     WIZDOCUMENTDATABASE();
 
-    virtual BOOL LoadFromXmlRpc(CWizXmlRpcStructValue& data, const QString& kbGUID);
-    static CString VersionName() { return CString("document_version"); }
-    static CString ObjectName() { return CString("document"); }
+    virtual bool LoadFromXmlRpc(CWizXmlRpcStructValue& data, const QString& kbGUID);
+    static QString VersionName() { return "document_version"; }
+    static QString ObjectName() { return "document"; }
 
-    CString strGUID;
-    CString strTitle;
-    CString strLocation; // notebook
-    COleDateTime tInfoModified;
-    CString strInfoMD5;
+    // field: data_md5
+    QString strDataMD5;
+
+    // field: document_category, folder location
+    QString strLocation;
+
+    // field: document_guid
+    QString strGUID;
+
+    // field: document_title
+    QString strTitle;
+
+    // field: dt_data_modified
     COleDateTime tDataModified;
-    CString strDataMD5;
-    COleDateTime tParamModified;
-    CString strParamMD5;
-    __int64 nVersion;
 
+    // field: dt_info_modified
+    COleDateTime tInfoModified;
+
+    // field: dt_param_modified
+    COleDateTime tParamModified;
+
+    // field: info_md5
+    QString strInfoMD5;
+
+    // field: param_md5, default is empty
+    QString strParamMD5;
+
+    // field: version
+    qint64 nVersion;
+
+    // helper filed
+    // used to indicate which part of full info need download or downloaded
     int nObjectPart;
 };
 
@@ -199,28 +298,58 @@ struct WIZDOCUMENTDATA : public WIZDOCUMENTDATABASE
 
     bool EqualForSync(const WIZDOCUMENTDATA& data) const;
 
-    CString strName;
-    CString strSEO;
-    CString strURL;
-    CString strAuthor;
-    CString strKeywords;
-    CString strType;
-    CString strOwner;
-    CString strFileType;
-    CString strStyleGUID;
-    COleDateTime tCreated;
-    COleDateTime tModified;
-    COleDateTime tAccessed;
-    long nIconIndex;
-    long nSync;
-    long nProtected;
-    long nReadCount;
-    long nAttachmentCount;
-    long nIndexed;
+    // field: document_filename, default: "guid + .ziw"
+    QString strName;
 
+    // field: document_seo, default is empty
+    QString strSEO;
+
+    // filed: document_url, default is empty
+    QString strURL;
+
+    // field: document_author, default is empty
+    QString strAuthor;
+
+    // field: document_keywords, default is empty
+    QString strKeywords;
+
+    // field: document_type, default: "document"
+    QString strType;
+
+    // field: document_owner, default: creator's user id
+    QString strOwner;
+
+    // field: document_filetype, default is empty
+    QString strFileType;
+
+    // field: document_styleguid, default is empty
+    QString strStyleGUID;
+
+    // field: dt_created
+    COleDateTime tCreated;
+
+    // filed: dt_modfied
+    COleDateTime tModified;
+
+    // filed: dt_accessed
+    COleDateTime tAccessed;
+
+    // field: document_iconindex, default is 0, what's this?
+    long nIconIndex;
+
+    // field: document_protected, 1 protected, 0 none-protected
+    long nProtected;
+
+    // field: document_attachment_count
+    long nAttachmentCount;
+
+    // additional helper filed
+    long nReadCount;
+    long nIndexed;
+    long nSync;
     int nFlags;
     int nRate;
-    CString strSystemTags;
+    QString strSystemTags;
     int nShareFlags;
 };
 
@@ -233,8 +362,12 @@ struct WIZDOCUMENTDATAEX : public WIZDOCUMENTDATA
     bool ParamArrayToStringArray(CWizStdStringArray& params) const;
     virtual bool LoadFromXmlRpc(CWizXmlRpcStructValue& data, const QString& kbGUID);
 
+    // field: document_tags, guid list
     CWizStdStringArray arrayTagGUID;
-    std::deque<WIZDOCUMENTPARAMDATA> arrayParam;
+
+    // field: document_params, default is empty, WIZDOCUMENTPARAMDATA object array.
+    CWizDocumentParamDataArray arrayParam;
+
     QByteArray arrayData;
 
     bool bSkipped;
@@ -250,20 +383,20 @@ struct WIZDOCUMENTATTACHMENTDATA : public WIZOBJECTBASE
     BOOL EqualForSync(const WIZDOCUMENTATTACHMENTDATA& data) const;
     virtual BOOL LoadFromXmlRpc(CWizXmlRpcStructValue& data, const QString& kbGUID);
 
-    static CString VersionName() { return CString(_T("attachment_version")); }
-    static CString ObjectName() { return CString(_T("attachment")); }
+    static QString VersionName() { return "attachment_version"; }
+    static QString ObjectName() { return "attachment"; }
 
-    CString strKbGUID;
-    CString strGUID;
-    CString strDocumentGUID;
-    CString strName;
-    CString strURL;
-    CString strDescription;
+    QString strKbGUID;
+    QString strGUID;
+    QString strDocumentGUID;
+    QString strName;
+    QString strURL;
+    QString strDescription;
     COleDateTime tInfoModified;
-    CString strInfoMD5;
+    QString strInfoMD5;
     COleDateTime tDataModified;
-    CString strDataMD5;
-    __int64 nVersion;
+    QString strDataMD5;
+    qint64 nVersion;
 };
 
 bool operator< (const WIZDOCUMENTATTACHMENTDATA& data1,const WIZDOCUMENTATTACHMENTDATA& data2 ) throw();
@@ -280,6 +413,8 @@ struct WIZDOCUMENTATTACHMENTDATAEX : public WIZDOCUMENTATTACHMENTDATA
     int nObjectPart;
 };
 
+typedef std::deque<WIZDOCUMENTATTACHMENTDATAEX> CWizDocumentAttachmentDataArray;
+
 
 struct WIZOBJECTDATA : public WIZOBJECTBASE
 {
@@ -290,7 +425,7 @@ struct WIZOBJECTDATA : public WIZOBJECTBASE
 
     static WizObjectType IntToObjectType(int n);
     static WizObjectType TypeStringToObjectType(const CString& strType);
-    static CString ObjectTypeToTypeString(WizObjectType eType);
+    static QString ObjectTypeToTypeString(WizObjectType eType);
 
     COleDateTime tTime;
     CString strDisplayName;
@@ -305,18 +440,19 @@ struct WIZDELETEDGUIDDATA : public WIZOBJECTBASE
 {
     WIZDELETEDGUIDDATA();
 
+    virtual bool LoadFromXmlRpc(CWizXmlRpcStructValue& data, const QString& kbGUID);
+    bool SaveToXmlRpc(CWizXmlRpcStructValue& data) const;
+    bool EqualForSync(const WIZDELETEDGUIDDATA& data) const;
+    static CString VersionName() { return CString(_T("deleted_guid_version")); }
+    static CString ObjectName() { return CString(_T("deleted_guid")); }
+
     CString strGUID;
     WizObjectType eType;
     COleDateTime tDeleted;
-    __int64 nVersion;
-
-    BOOL EqualForSync(const WIZDELETEDGUIDDATA& data) const;
-    virtual BOOL LoadFromXmlRpc(CWizXmlRpcStructValue& data, const QString& kbGUID);
-    virtual BOOL SaveToXmlRpc(CWizXmlRpcStructValue& data) const;
-
-    static CString VersionName() { return CString(_T("deleted_guid_version")); }
-    static CString ObjectName() { return CString(_T("deleted_guid")); }
+    qint64 nVersion;
 };
+
+typedef std::deque<WIZDELETEDGUIDDATA> CWizDeletedGUIDDataArray;
 
 struct WIZMETADATA : public WIZOBJECTBASE
 {
@@ -333,53 +469,64 @@ struct WIZGROUPDATA
     WIZGROUPDATA(const WIZGROUPDATA& data);
     bool LoadFromXmlRpc(CWizXmlRpcStructValue& data, const QString& kbGUID);
 
-    // kb_name, aka group name
-    QString strGroupName;
+    // field: biz_guid, optional
+    // Used for grouping groups
+    QString bizGUID;
 
-    // kb_note, introduction text
-    QString strGroupNote;
+    // field: biz_name, optional
+    QString bizName;
 
-    // kb_guid
-    QString strGroupGUID;
+    // field: dt_created
+    COleDateTime tCreated;
 
-    // user_group, group permission
-    int nUserGroup;
+    // field: dt_modified
+    COleDateTime tModified;
 
+    // field: dt_role_created, not used
+    COleDateTime tRoleCreated;
+
+    // field: kapi_url
     // server_url, aka "ks"(knowledge server)
     QString strDatabaseServer;
 
-    // not used
-    QString strServerUrl;
+    // field: kb_guid
+    QString strGroupGUID;
 
-    // dt_created
-    COleDateTime tCreated;
+    // field: kb_id, not used
+    QString strId;
 
-    // dt_modified
-    COleDateTime tModified;
+    // field: kb_name, aka group name
+    QString strGroupName;
 
-    // user_name, not user id, but nick name, not used
-    QString strUserName;
+    // field: kb_note, introduction text
+    QString strGroupNote;
 
-    // role_note, text description of permission, not used
-    QString strRoleNote;
-
-    // dt_role_created, not used
-    COleDateTime tRoleCreated;
-
-    // owner_name, default is null, not used
-    QString strOwner;
-
-    // kb_type, default is "group", not used
-    QString strType;
-
-    // kb_seo, the same as kb_name, not used
+    // field: kb_seo, the same as kb_name, not used
     QString strGroupSEO;
 
-    // tag_names, default is null, not used
+    // field: kb_type, default is "group", not used
+    QString strType;
+
+    // field: owner_name, default is null, not used
+    QString strOwner;
+
+    // field: role_note
+    // text description of permission, not used
+    QString strRoleNote;
+
+    // filed: server_url, not used
+    QString strServerUrl;
+
+    // field: tag_names
+    // default "tags names api change", obsolete field now
     QString strGroupTags;
 
-    // kb_id, not used
-    QString strId;
+    // field: user_group, group permission
+    int nUserGroup;
+
+    // field: user_name
+    // not user id, but nick name, not used
+    QString strUserName;
 };
 
 const UINT WIZ_USERGROUP_ADMIN = 0;
@@ -391,56 +538,126 @@ const UINT WIZ_USERGROUP_MAX = 10000000;
 
 struct WIZMESSAGEDATA
 {
-    // xml-prc not support  long type, transmit use string
-    qint64 nId;
+    WIZMESSAGEDATA();
+    WIZMESSAGEDATA(const WIZMESSAGEDATA& data);
+    bool LoadFromXmlRpc(CWizXmlRpcStructValue& data, const QString& kbGUID);
+    static QString ObjectName() { return "message"; }
 
-    // char(38)
-    QString bizGUID;    // wiz bussiness groups guid
+    // Field: biz_guid, char(36)
+    // wiz bussiness groups guid
+    QString bizGUID;
+
+    // Field: kb_guid, char(36)
     QString kbGUID;
+
+    // Field: document_guid, char(36)
+    // indicate refered document, aware maybe this document already deleted
     QString documentGUID;
 
-    QString title;  // char(768)
+    // Field: dt_created
+    COleDateTime tCreated;
 
-    QString senderGUID; // char(38)
-    QString senderId;   // char(128)
-    QString senderAlias;    // char(32)
-
-    QString receiverGUID;
-    QString receiverId;
-    QString receiverAlias;
-
-    qint64 nVersion;
-
-    // 0: @ message
-    // 1: document edit meesage
-    qint32 nMessageType;
-
+    // Field: email_status
     // 0: no email notify
     // 1: email notify sended
     // 2: email notify have not sended yet
     qint32 nEmailStatus;
 
+    // Filed: id
+    // xml-prc not support long type, transmit use string
+    // used to set read status
+    qint64 nId;
+
+    // Field: message_body, char(1024)
+    QString messageBody;
+
+    // Field: message_type
+    // 0: @ message
+    // 1: document edited meesage
+    qint32 nMessageType;
+
+    // Filed: note
+    // not used currently
+    QString note;
+
+    // Field: read_status
+    // 0: not read
+    // 1: read
+    qint32 nReadStatus;
+
+    // Field: receiver_alias
+    QString receiverAlias;
+
+    // Field: receiver_guid, char(36)
+    QString receiverGUID;
+
+    // Field: receiver_id
+    // account id
+    QString receiverId;
+
+    // Field: sender_alias, char(32)
+    // this field may not exist
+    QString senderAlias;
+
+    // Field: sender_guid, char(36)
+    QString senderGUID;
+
+    // Field: sender_id, char(128)
+    // sender's account id
+    QString senderId;
+
+    // Field: sms_status
     // 0: no sms notify
     // 1: sms notify sended
     // 2: sms notify have not sended yet
     qint32 nSMSStatus;
 
-    // 0: not read
-    // 1: read
-    qint32 nReadStatus;
+    // Field: title, char(768)
+    // document title
+    QString title;
 
-    COleDateTime tCreated;
-
-    // char(1024), mssage body
-    QString message;
-
-    QString note;
+    // Field: version
+    qint64 nVersion;
 };
 
-enum WizMessageType
+typedef std::deque<WIZMESSAGEDATA> CWizMessageDataArray;
+
+// struct return from accounts.getValue method
+struct WIZKVRETURN
 {
+    bool LoadFromXmlRpc(CWizXmlRpcStructValue& data, const QString& kbGUID);
 
+    // field: return_code
+    // 200 ok
+    int nCode;
+
+    // field: value_of_key
+    QString value;
+
+    // field: version
+    qint64 nVersion;
 };
+
+// this struct is parsed from json document by xml-rpc kv api return field value
+struct WIZBIZUSER
+{
+    // field: alias
+    QString alias;
+
+    // field: pinyin
+    QString pinyin;
+
+    // field: user_guid
+    QString userGUID;
+
+    // field: user_id, email account name
+    QString userId;
+
+    // no field, indicate user biz group
+    QString bizGUID;
+};
+
+typedef std::deque<WIZBIZUSER> CWizBizUserDataArray;
 
 
 struct WIZABSTRACT : public WIZOBJECTBASE
@@ -533,12 +750,7 @@ struct WIZTODODATA
 
 
 typedef std::deque<WIZOBJECTDATA> CWizObjectDataArray;
-typedef std::deque<WIZTAGDATA> CWizTagDataArray;
-typedef std::deque<WIZSTYLEDATA> CWizStyleDataArray;
 typedef std::deque<WIZDOCUMENTDATAEX> CWizDocumentDataArray;
-typedef std::deque<WIZDOCUMENTPARAMDATA> CWizDocumentParamDataArray;
-typedef std::deque<WIZDELETEDGUIDDATA> CWizDeletedGUIDDataArray;
-typedef std::deque<WIZDOCUMENTATTACHMENTDATAEX> CWizDocumentAttachmentDataArray;
 typedef std::deque<WIZMETADATA> CWizMetaDataArray;
 typedef std::deque<WIZGROUPDATA> CWizGroupDataArray;
 typedef std::deque<WIZABSTRACT> CWizAbstractArray;

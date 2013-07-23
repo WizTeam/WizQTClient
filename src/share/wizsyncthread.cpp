@@ -41,10 +41,8 @@ void CWizSyncThread::run()
     if (nDays == 0) {
         m_sync->setDaysDownload(7);  // default
     } else {
-        m_sync->setDaysDownload(nDays);  // default
+        m_sync->setDaysDownload(nDays);
     }
-
-    //m_sync->setDownloadAllNotesData(m_app.userSettings().downloadAllNotesData());
 
     if (m_bNeedResetProxy)
         m_sync->resetProxy();

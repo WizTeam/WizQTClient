@@ -131,6 +131,7 @@ bool CThumbIndex::AbstractFromGUID(const CString& guid, WIZABSTRACT &abstract,co
 {
     if(!m_dbThumb.IsOpened())
         return false;
+
     CString sql = CString("select ") + FIELD_LIST_ABSTRACT + " from " + TABLE_NAME_ABSTRACT +" where ABSTRACT_GUID='"
                     + guid + ("' AND ABSTRACT_TYPE=")
                     + STR2SQL(type)

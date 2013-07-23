@@ -1,7 +1,7 @@
 #ifndef WIZINDEX_H
 #define WIZINDEX_H
 
-#include "wizmisc.h"
+//#include "wizmisc.h"
 #include "wizobject.h"
 #include "cppsqlite3.h"
 #include <map>
@@ -9,6 +9,25 @@
 
 #define WIZ_DATABASE_VERSION "1.0"
 #define WIZ_NO_OBSOLETE
+
+struct WIZDATABASEINFO
+{
+    // optional
+    QString bizName;
+    QString bizGUID;
+
+    // required, private db set to "PRIVATE"
+    QString name;
+
+    // required
+    QString kbGUID;
+
+    // required, used for syncing, no store
+    QString serverUrl;
+
+    // required, private db set to 0
+    int nPermission;
+};
 
 class CWizIndexBase : public QObject
 {
@@ -29,10 +48,14 @@ public:
     bool GetFirstRowFieldValue(const CString& strSQL, int nFieldIndex, CString& strValue);
     bool Repair(const QString& strDestFileName);
 
-    QString kbGUID() const { return m_strKbGUID; }
-    QString server() const { return m_strDatabaseServer; }
-    QString name() const { return m_strName; }
-    int permission() const { return m_nPermission; }
+    const WIZDATABASEINFO& info() { return m_info; }
+
+    // obsolete
+    QString kbGUID() const { return m_info.kbGUID; }
+    QString server() const { return m_info.serverUrl; }
+    QString name() const { return m_info.name; }
+    int permission() const { return m_info.nPermission; }
+
     QString GetDatabasePath() const { return m_strDatabasePath; }
 
     /* Raw query*/
@@ -67,6 +90,17 @@ public:
     bool GetAttachments(CWizDocumentAttachmentDataArray& arrayAttachment);
     bool AttachmentFromGUID(const CString& strAttachcmentGUID, WIZDOCUMENTATTACHMENTDATA& data);
 
+    // messages
+    bool messageFromId(qint64 id, WIZMESSAGEDATA& data);
+
+    // biz users, one user may in different biz group
+    bool userFromGUID(const QString& strUserGUID,
+                      CWizBizUserDataArray& arrayUser);
+    bool userFromGUID(const QString& bizGUID,
+                      const QString& userGUID,
+                      WIZBIZUSER& user);
+
+
 protected:
     bool LogSQLException(const CppSQLite3Exception& e, const CString& strSQL);
 
@@ -88,6 +122,10 @@ protected:
     static CString FormatUpdateSQLFormat(const CString& strTableName,
                                          const CString& strFieldList,
                                          const CString& strKey);
+
+    static CString FormatUpdateSQLByWhere(const CString& strTableName,
+                                          const CString& strFieldList,
+                                          const CString& strWhere);
 
     static CString FormatDeleteSQLFormat(const CString& strTableName,
                                          const CString& strKey);
@@ -153,8 +191,22 @@ protected:
 
     bool SQLToDocumentAttachmentDataArray(const CString& strSQL,
                                           CWizDocumentAttachmentDataArray& arrayAttachment);
+    
+    bool SQLToMessageDataArray(const QString& strSQL,
+                               CWizMessageDataArray& arrayMessage);
+
+    bool SQLToBizUserDataArray(const QString& strSQL,
+                               CWizBizUserDataArray& arrayUser);
 
 public:
+    bool createMessageEx(const WIZMESSAGEDATA& data);
+    bool modifyMessageEx(const WIZMESSAGEDATA& data);
+    bool deleteMessageEx(const WIZMESSAGEDATA& data);
+
+    bool createUserEx(const WIZBIZUSER& data);
+    bool modifyUserEx(const WIZBIZUSER& data);
+    bool deleteUserEx(const WIZBIZUSER& data);
+
     bool CreateTagEx(const WIZTAGDATA& data);
     bool ModifyTagEx(const WIZTAGDATA& data);
     bool DeleteTagEx(const WIZTAGDATA& data);
@@ -176,11 +228,7 @@ protected:
     QString m_strFileName;
     QString m_strDatabasePath;
 
-    // all data query from database will fill this field to indicate which database query from.
-    QString m_strKbGUID;
-    QString m_strDatabaseServer;
-    QString m_strName;
-    int m_nPermission;
+    WIZDATABASEINFO m_info;
 
     bool m_bUpdating;
 
@@ -208,8 +256,18 @@ Q_SIGNALS:
                             const WIZDOCUMENTATTACHMENTDATA& attachmentNew);
     void attachmentDeleted(const WIZDOCUMENTATTACHMENTDATA& attachment);
 
-    void folderCreated(const CString& strLocation);
-    void folderDeleted(const CString& strLocation);
+    void folderCreated(const QString& strLocation);
+    void folderDeleted(const QString& strLocation);
+    
+    void messageCreated(const WIZMESSAGEDATA& msg);
+    void messageModified(const WIZMESSAGEDATA& msgOld,
+                         const WIZMESSAGEDATA& msgNew);
+    void messageDeleted(const WIZMESSAGEDATA& msg);
+
+    void userCreated(const WIZBIZUSER& user);
+    void userModified(const WIZBIZUSER& userOld,
+                      const WIZBIZUSER& userNew);
+    void userDeleted(const WIZBIZUSER& user);
 };
 
 
@@ -228,21 +286,38 @@ protected:
     CString m_strDeletedItemsLocation;
 
 public:
+    /* Message related operations */
+    bool createMessage(const WIZMESSAGEDATA& data);
+    bool getAllMessages(CWizMessageDataArray& arrayMsg);
+    bool setMessageReadStatus(const WIZMESSAGEDATA& msg, qint32 nRead);
+    bool setMessageReadStatus(const CWizMessageDataArray& arrayMsg, qint32 nRead);
+    bool getModifiedMessages(CWizMessageDataArray& arrayMsg);
+    
     /* Tags related operations */
     bool CreateTag(const CString& strParentTagGUID, const CString& strName, \
                    const CString& strDescription, WIZTAGDATA& data);
     bool ModifyTag(WIZTAGDATA& data);
-    bool DeleteTag(const WIZTAGDATA& data, bool bLog);
+    bool DeleteTag(const WIZTAGDATA& data, bool bLog, bool bReset = true);
 
-    bool InsertDocumentTag(WIZDOCUMENTDATA& data, const CString& strTagGUID);
+
     bool SetDocumentTags(WIZDOCUMENTDATA& data, const CWizTagDataArray& arrayTag);
-    bool SetDocumentTags(WIZDOCUMENTDATA& data, const CWizStdStringArray& arrayTagGUID);
+
+    bool InsertDocumentTag(WIZDOCUMENTDATA& data,
+                           const CString& strTagGUID,
+                           bool bReset = true);
+
+    bool DeleteDocumentTags(WIZDOCUMENTDATA& data, bool bReset = true);
+
+    bool SetDocumentTags(WIZDOCUMENTDATA& data,
+                         const CWizStdStringArray& arrayTagGUID,
+                         bool bReset = true);
+
     bool SetDocumentTagsText(WIZDOCUMENTDATA& data, const CString& strTagsText);
 
     bool DeleteDocumentTag(WIZDOCUMENTDATA& data, const CString& strTagGUID);
-    bool DeleteDocumentTags(WIZDOCUMENTDATA& data);
+
     bool DeleteDocumentsTagsByLocation(const CString& strLocation);
-    bool DeleteTagDocuments(const WIZTAGDATA& data);
+    bool DeleteTagDocuments(const WIZTAGDATA& data, bool bReset);
 
     // Query tags by name
     bool TagByName(const CString& strName, WIZTAGDATA& data, const CString& strExceptGUID = "");
@@ -287,9 +362,9 @@ public:
                      COLORREF crTextColor, COLORREF crBackColor,
                      bool bTextBold, int nFlagIndex, WIZSTYLEDATA& data);
     bool ModifyStyle(WIZSTYLEDATA& data);
-    bool DeleteStyle(const WIZSTYLEDATA& data, bool bLog);
+    bool DeleteStyle(const WIZSTYLEDATA& data, bool bLog, bool bReset = true);
 
-    bool DeleteStyleDocuments(const WIZSTYLEDATA& data);
+    bool DeleteStyleDocuments(const WIZSTYLEDATA& data, bool bReset);
 
     // Query style by name
     bool StyleByName(const CString& strName, WIZSTYLEDATA& data,
@@ -310,28 +385,33 @@ public:
                           const CString& strDefault = QString(), \
                           bool* pbParamExists = NULL);
 
-    bool SetDocumentParam(const CString& strDocumentGUID, \
-                          CString strParamName, \
-                          CString strParamValue, \
+    bool SetDocumentParam(const QString& strDocumentGUID, \
+                          const QString& strParamName, \
+                          const QString& strParamValue, \
                           bool bUpdateParamMD5);
 
     bool SetDocumentParam(WIZDOCUMENTDATA& data, \
-                          CString strParamName, \
-                          CString strParamValue, \
+                          const QString &strParamName, \
+                          const QString &strParamValue, \
                           bool bUpdateParamMD5);
 
+    // reset flag inicate need update param md5 or reset nVersion = -1
     bool SetDocumentParams(WIZDOCUMENTDATA& data,
-                           const std::deque<WIZDOCUMENTPARAMDATA>& arrayParam);
+                           const CWizDocumentParamDataArray& arrayParam,
+                           bool bReset = true);
 
     bool SetDocumentParams(WIZDOCUMENTDATA& data,
-                           const CWizStdStringArray& arrayParam);
+                           const CWizStdStringArray& arrayParam,
+                           bool bReset = true);
+
+    bool DeleteDocumentParams(const QString& strDocumentGUID,
+                              bool bReset = true);
 
     CString CalDocumentParamInfoMD5(const WIZDOCUMENTDATA& data);
     CString CalDocumentParamInfoMD5(const CWizDocumentParamDataArray& arrayParam);
     bool UpdateDocumentParamMD5(WIZDOCUMENTDATA& data);
     bool UpdateDocumentParamMD5(const CString& strDocumentGUID);
 
-    bool DeleteDocumentParams(const CString& strDocumentGUID);
     bool DeleteDocumentParam(const CString& strDocumentGUID, CString strParamName, bool bUpdateParamMD5);
     bool DeleteDocumentParamEx(const CString& strDocumentGUID, CString strParamNamePart);
 
@@ -351,13 +431,13 @@ public:
     void GetExtraFolder(CWizStdStringArray& arrayLocation);
     void SetExtraFolder(const CWizStdStringArray& arrayLocation);
 
-    void GetDeletedFolder(CWizStdStringArray& arrayLocation);
-    void SetDeletedFolder(const CWizStdStringArray& arrayLocation);
+    //void GetDeletedFolder(CWizStdStringArray& arrayLocation);
+    //void SetDeletedFolder(const CWizStdStringArray& arrayLocation);
 
-    void AddExtraFolder(const CString& strLocation);
-    void LogDeletedFolder(const CString& strLocation);
+    void AddExtraFolder(const QString& strLocation);
+    void LogDeletedFolder(const QString& strLocation);
 
-    void RemoveFromExtraFolder(const CString& strLocation);
+    void RemoveFromExtraFolder(const QString& strLocation);
     void RemoveFromDeletedFolder(const CString& strLocation);
 
     bool IsLocationEmpty(const CString& strLocation);
@@ -384,7 +464,7 @@ public:
                         const CString& strLocation, const CString& strURL, WIZDOCUMENTDATA& data);
 
 
-    bool ModifyDocumentInfo(WIZDOCUMENTDATA& data);
+    bool ModifyDocumentInfo(WIZDOCUMENTDATA& data, bool bReset = true);
     bool ModifyDocumentDateModified(WIZDOCUMENTDATA& data);
     bool ModifyDocumentDateAccessed(WIZDOCUMENTDATA& data);
     bool ModifyDocumentDataDateModified(WIZDOCUMENTDATA& data);
@@ -472,14 +552,15 @@ public:
     CString CalDocumentInfoMD5(const WIZDOCUMENTDATA& data);
 
     /* Attachment related operations */
-    void UpdateDocumentAttachmentCount(const CString& strDocumentGUID);
+    void UpdateDocumentAttachmentCount(const CString& strDocumentGUID,
+                                       bool bReset = true);
 
     bool CreateAttachment(const CString& strDocumentGUID, const CString& strName,
                           const CString& strURL, const CString& strDescription,
                           const CString& strDataMD5, WIZDOCUMENTATTACHMENTDATA& data);
 
     bool ModifyAttachmentInfo(WIZDOCUMENTATTACHMENTDATA& data);
-    bool DeleteAttachment(const WIZDOCUMENTATTACHMENTDATA& data, bool bLog);
+    bool DeleteAttachment(const WIZDOCUMENTATTACHMENTDATA& data, bool bLog, bool bReset);
 
     // Raw Query
     int GetDocumentAttachmentCount(const CString& strDocumentGUID);
@@ -505,7 +586,7 @@ public:
     // helper
     CString CalDocumentAttachmentInfoMD5(const WIZDOCUMENTATTACHMENTDATA& data);
     bool TitleExists(const CString& strLocation, CString strTitle);
-    bool GetNextTitle(const CString& strLocation, CString& strTitle);
+    bool GetNextTitle(const QString& strLocation, QString& strTitle);
 
     /* Metas related operations */
     bool GetMetasByName(const CString& lpszMetaName, CWizMetaDataArray& arrayMeta);
@@ -532,10 +613,10 @@ public:
 
 	static CString GetLocationArraySQLWhere(const CWizStdStringArray& arrayLocation);
 
-    bool ObjectExists(const CString& strGUID, const CString& strType, bool& bExists);
-    bool DeleteObject(const CString& strGUID, const CString& strType, bool bLog);
+    bool ObjectExists(const QString &strGUID, const QString &strType, bool& bExists);
+    bool DeleteObject(const QString &strGUID, const QString &strType, bool bLog);
     bool GetObjectTableInfo(const CString& strType, CString& strTableName, CString& strKeyFieldName);
-    bool ModifyObjectVersion(const CString& strGUID, const CString& strType, __int64 nVersion);
+    bool ModifyObjectVersion(const CString& strGUID, const CString& strType, qint64 nVersion);
     bool ModifyObjectModifiedTime(const CString& strGUID, const CString& strType, const COleDateTime& t);
     bool GetObjectModifiedTime(const CString& strGUID, const CString& strType, COleDateTime& t);
 
@@ -570,6 +651,12 @@ public:
     bool getAllDocumentsNeedToBeSearchIndexed(CWizDocumentDataArray& arrayDocument);
     bool setDocumentSearchIndexed(const QString& strDocumentGUID, bool b);
 
+    bool SearchDocumentByTitle(const QString& strTitle,
+                               const QString& strLocation,
+                               bool bIncludeSubFolders,
+                               int nMaxCount,
+                               CWizDocumentDataArray& arrayDocument);
+
     bool Search(const CString& strKeywords,
                 const WIZSEARCHDATA& data,
                 const CString& strLocation,
@@ -587,12 +674,6 @@ public:
     bool GetAllLocationsDocumentCount(std::map<CString, int>& mapLocationDocumentCount);
 
 #ifndef WIZ_NO_OBSOLETE
-    bool SearchDocumentByTitle(const CString& strTitle,
-                               const CString& strLocation,
-                               bool bIncludeSubFolders,
-                               size_t nMaxCount,
-                               CWizDocumentDataArray& arrayDocument);
-
     bool IsModified();
     bool IsDocumentModified();
     bool FilterDocumentsInDeletedItems(CWizDocumentDataArray& arrayDocument);

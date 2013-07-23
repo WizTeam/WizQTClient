@@ -107,9 +107,13 @@ public:
     QString userCipherHint() { return m_ziwReader->userCipherHint(); }
     void setSaveUserCipher(bool b) { m_ziwReader->setSaveUserCipher(b); }
 
-    bool setDatabaseInfo(const QString& strKbGUID, const QString& strDatabaseServer,
-                         const QString& strName, int nPermission);
+    // obsolete
+//    bool setDatabaseInfo(const QString& strKbGUID, const QString& strDatabaseServer,
+//                         const QString& strName, int nPermission);
+
+    bool setDatabaseInfo(const WIZDATABASEINFO& dbInfo);
     bool loadDatabaseInfo();
+
     bool openPrivate(const QString& strUserId, const QString& strPassword = QString());
     bool openGroup(const QString& strUserId, const QString& strGroupGUID);
 
@@ -129,6 +133,7 @@ public:
     QString GetGroupAttachmentsDataPath() const;
     QString GetDocumentFileName(const CString& strGUID) const;
     QString GetAttachmentFileName(const CString& strGUID) const;
+    QString GetAvatarPath() const;
 
     bool GetUserName(QString& strUserName);
     bool SetUserName(const QString& strUserName);
@@ -151,8 +156,16 @@ public:
     bool getUserGroupInfo(CWizGroupDataArray& arrayGroup);
     bool setUserGroupInfo(const CWizGroupDataArray& arrayGroup);
 
-    __int64 GetObjectVersion(const CString& strObjectName);
-    bool SetObjectVersion(const CString& strObjectName, __int64 nVersion);
+    bool getBizGroupInfo(QMap<QString, QString>& bizInfo);
+
+    qint64 GetObjectVersion(const QString& strObjectName);
+    bool SetObjectVersion(const QString& strObjectName, qint64 nVersion);
+
+    bool updateBizUser(const WIZBIZUSER& user);
+    bool updateBizUsers(const CWizBizUserDataArray& arrayUser);
+
+    bool updateMessage(const WIZMESSAGEDATA& msg);
+    bool updateMessages(const CWizMessageDataArray& arrayMsg);
 
     bool UpdateDeletedGUID(const WIZDELETEDGUIDDATA& data);
     bool UpdateTag(const WIZTAGDATA& data);
@@ -160,19 +173,19 @@ public:
     bool UpdateDocument(const WIZDOCUMENTDATAEX& data);
     bool UpdateAttachment(const WIZDOCUMENTATTACHMENTDATAEX& data);
 
-    bool UpdateDeletedGUIDs(const std::deque<WIZDELETEDGUIDDATA>& arrayDeletedGUID);
-    bool UpdateTags(const std::deque<WIZTAGDATA>& arrayTag);
-    bool UpdateStyles(const std::deque<WIZSTYLEDATA>& arrayStyle);
+    bool UpdateDeletedGUIDs(const CWizDeletedGUIDDataArray& arrayDeletedGUID);
+    bool UpdateTags(const CWizTagDataArray &arrayTag);
+    bool UpdateStyles(const CWizStyleDataArray& arrayStyle);
     bool UpdateDocuments(const std::deque<WIZDOCUMENTDATAEX>& arrayDocument);
     bool UpdateAttachments(const std::deque<WIZDOCUMENTATTACHMENTDATAEX>& arrayAttachment);
 
     bool UpdateDocumentData(WIZDOCUMENTDATA& data, const QString& strHtml, const QString& strURL, int nFlags);
-    bool UpdateDocumentAbstract(const CString& strDocumentGUID);
+    bool UpdateDocumentAbstract(const QString& strDocumentGUID);
 
     virtual bool UpdateDocumentDataMD5(WIZDOCUMENTDATA& data, const CString& strZipFileName);
 
     bool DeleteTagWithChildren(const WIZTAGDATA& data, bool bLog);
-    bool DeleteAttachment(const WIZDOCUMENTATTACHMENTDATA& data, bool bLog);
+    bool DeleteAttachment(const WIZDOCUMENTATTACHMENTDATA& data, bool bLog, bool bReset = true);
 
     bool IsDocumentDownloaded(const CString& strGUID);
     bool IsAttachmentDownloaded(const CString& strGUID);

@@ -14,6 +14,7 @@ class CWizLineInputDialog : public QDialog
 public:
     explicit CWizLineInputDialog(const QString& strTitle,
                                  const QString& strHint,
+                                 const QString& strDefault = "",
                                  QWidget *parent = 0);
     ~CWizLineInputDialog();
 
@@ -22,6 +23,7 @@ public:
 
 private:
     Ui::CWizLineInputDialog *ui;
+    QString m_strDefault;
 };
 
 #endif // WIZLINEINPUTDIALOG_H

@@ -61,8 +61,8 @@ protected:
                                      const WIZDOCUMENTDATA& documentNew)
     { Q_UNUSED(documentOld); Q_UNUSED(documentNew); }
     virtual void onDocument_deleted(const WIZDOCUMENTDATA& document) { Q_UNUSED(document); }
-    virtual void onFolder_created(const CString& strLocation) { Q_UNUSED(strLocation); }
-    virtual void onFolder_deleted(const CString& strLocation) { Q_UNUSED(strLocation); }
+    virtual void onFolder_created(const QString& strLocation) { Q_UNUSED(strLocation); }
+    virtual void onFolder_deleted(const QString& strLocation) { Q_UNUSED(strLocation); }
     virtual void onTag_created(const WIZTAGDATA& tag) { Q_UNUSED(tag); }
     virtual void onTag_modified(const WIZTAGDATA& tagOld, const WIZTAGDATA& tagNew) { Q_UNUSED(tagOld); Q_UNUSED(tagNew); }
     virtual void onTag_deleted(const WIZTAGDATA& tag) { Q_UNUSED(tag); }
@@ -98,8 +98,8 @@ public Q_SLOTS:
                               const WIZDOCUMENTDATA& documentNew);
     void on_document_deleted(const WIZDOCUMENTDATA& document);
     void on_document_tag_modified(const WIZDOCUMENTDATA& document);
-    void on_folder_created(const CString& strLocation);
-    void on_folder_deleted(const CString& strLocation);
+    void on_folder_created(const QString& strLocation);
+    void on_folder_deleted(const QString& strLocation);
     void on_tag_created(const WIZTAGDATA& tag);
     void on_tag_modified(const WIZTAGDATA& tagOld, const WIZTAGDATA& tagNew);
     void on_tag_deleted(const WIZTAGDATA& tag);
@@ -140,8 +140,8 @@ private:
 
 public:
     CWizCategoryViewAllFoldersItem* findAllFolders();
-    CWizCategoryViewFolderItem* findFolder(const CString& strLocation, bool create, bool sort);
-    CWizCategoryViewFolderItem* addFolder(const CString& strLocation, bool sort);
+    CWizCategoryViewFolderItem* findFolder(const QString& strLocation, bool create, bool sort);
+    CWizCategoryViewFolderItem* addFolder(const QString& strLocation, bool sort);
 
     void addAndSelectFolder(const CString& strLocation);
 
@@ -152,8 +152,8 @@ protected:
     virtual void onDocument_created(const WIZDOCUMENTDATA& document);
     virtual void onDocument_modified(const WIZDOCUMENTDATA& documentOld,
                                      const WIZDOCUMENTDATA& documentNew);
-    virtual void onFolder_created(const CString& strLocation);
-    virtual void onFolder_deleted(const CString& strLocation);
+    virtual void onFolder_created(const QString& strLocation);
+    virtual void onFolder_deleted(const QString& strLocation);
 
 public Q_SLOTS:
     void on_action_newDocument();
@@ -238,13 +238,15 @@ class CWizCategoryGroupsView : public CWizCategoryBaseView
 public:
     CWizCategoryGroupsView(CWizExplorerApp& app, QWidget* parent);
     virtual void init();
-    virtual CWizCategoryViewTrashItem* findTrash(const QString& strKbGUID);
+
     virtual QAction* findAction(const QString& strName);
 
     void showGroupRootContextMenu(const QString& strKbGUID, QPoint pos);
     void showGroupContextMenu(const QString& strKbGUID, QPoint pos);
 
     CWizCategoryViewGroupRootItem* findGroup(const QString& strKbGUID);
+    CWizCategoryViewAllGroupsRootItem* findGroupSet(const QString& strName, bool bCreate);
+    virtual CWizCategoryViewTrashItem* findTrash(const QString& strKbGUID);
 
     CWizCategoryViewGroupItem* findTagInTree(const WIZTAGDATA& tag);
     CWizCategoryViewGroupItem* findTagInTree(const WIZTAGDATA& tag, QTreeWidgetItem* itemParent);

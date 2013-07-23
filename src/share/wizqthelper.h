@@ -125,6 +125,8 @@ public:
     int GetHour() const { return time().hour(); }
     int GetMinute() const { return time().minute(); }
     int GetSecond() const { return time().second(); }
+
+    QString toHumanFriendlyString() const;
     //
     COleDateTime &operator=(const QDateTime &other);
     COleDateTime &operator=(const COleDateTime &other);

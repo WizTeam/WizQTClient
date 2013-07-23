@@ -4,7 +4,8 @@
 #include "wizmisc.h"
 
 
-CWizXmlRpcServer::CWizXmlRpcServer(const QString& strUrl)
+CWizXmlRpcServer::CWizXmlRpcServer(const QString& strUrl, QObject* parent /* = 0 */)
+    : QObject(parent)
 {
     m_strUrl = strUrl;
     m_network = new QNetworkAccessManager(this);
@@ -32,20 +33,23 @@ void CWizXmlRpcServer::abort()
     m_network->disconnect();
 }
 
-bool CWizXmlRpcServer::xmlRpcCall(const QString& strMethodName, CWizXmlRpcValue* pParam)
+bool CWizXmlRpcServer::xmlRpcCall(CWizXmlRpcValue* pParam,
+                                  const QString& strMethodName,
+                                  const QString& arg1 /* = "" */,
+                                  const QString& arg2 /* = "" */)
 {
     m_strMethodName = strMethodName;
+    m_arg1 = arg1;
+    m_arg2 = arg2;
 
     CWizXmlRpcRequest data(strMethodName);
     data.addParam(pParam);
-
-    m_requestData = data.toData();
 
     QNetworkRequest request;
     request.setUrl(QUrl(m_strUrl));
     request.setHeader(QNetworkRequest::ContentTypeHeader, QVariant("text/xml"));
 
-    QNetworkReply* reply = m_network->post(request, m_requestData);
+    QNetworkReply* reply = m_network->post(request, data.toData());
     connect(reply, SIGNAL(finished()), SLOT(on_replyFinished()));
     connect(reply, SIGNAL(error(QNetworkReply::NetworkError)), SLOT(on_replyError(QNetworkReply::NetworkError)));
     connect(reply, SIGNAL(downloadProgress(qint64, qint64)), SLOT(on_replyDownloadProgress(qint64, qint64)));
@@ -62,7 +66,7 @@ void CWizXmlRpcServer::processError(WizXmlRpcError error, int errorCode, const Q
 void CWizXmlRpcServer::processReturn(CWizXmlRpcValue& ret)
 {
     Q_ASSERT(!m_strMethodName.isEmpty());
-    Q_EMIT xmlRpcReturn(m_strMethodName, ret);
+    Q_EMIT xmlRpcReturn(ret, m_strMethodName, m_arg1, m_arg2);
 }
 
 void CWizXmlRpcServer::on_replyFinished()
@@ -81,9 +85,7 @@ void CWizXmlRpcServer::on_replyFinished()
         return;
     }
 
-    m_replyData = reply->readAll();
-
-    QString strXml = QString::fromUtf8(m_replyData.constData());
+    QString strXml = QString::fromUtf8(reply->readAll().constData());
 
     CWizXMLDocument doc;
     if (!doc.LoadXML(strXml)) {
@@ -104,12 +106,11 @@ void CWizXmlRpcServer::on_replyFinished()
 
     if (CWizXmlRpcFaultValue* pFault = dynamic_cast<CWizXmlRpcFaultValue *>(pRet)) {
         processError(errorXmlRpcFault, pFault->GetFaultCode(), pFault->GetFaultString());
-        //delete pRet;
-        //return;
     }
 
-    reply->deleteLater();
     processReturn(*pRet);
+
+    reply->deleteLater();
 }
 
 void CWizXmlRpcServer::on_replyError(QNetworkReply::NetworkError error)

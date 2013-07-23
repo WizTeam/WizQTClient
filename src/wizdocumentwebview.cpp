@@ -1,4 +1,4 @@
-#include "wizdocumentwebview.h"
+#include "wizDocumentWebView.h"
 
 #include <QtGui>
 #include <QtWebKit>
@@ -12,6 +12,7 @@
 
 #include "wizEditorInsertLinkForm.h"
 #include "wizEditorInsertTableForm.h"
+#include "share/wizObjectDataDownloader.h"
 
 CWizDocumentWebView::CWizDocumentWebView(CWizExplorerApp& app, QWidget* parent /*= 0*/)
     : QWebView(parent)
@@ -37,8 +38,9 @@ CWizDocumentWebView::CWizDocumentWebView(CWizExplorerApp& app, QWidget* parent /
     m_cipherDialog = mainWindow->cipherForm();
     connect(m_cipherDialog, SIGNAL(accepted()), SLOT(onCipherDialogClosed()));
 
-    m_downloadDialog = mainWindow->objectDownloadDialog();
-    connect(m_downloadDialog, SIGNAL(finished(int)), SLOT(onDownloadDialogClosed(int)));
+    m_downloaderHost = mainWindow->downloaderHost();
+    connect(m_downloaderHost, SIGNAL(downloadDone(const WIZOBJECTDATA&, bool)),
+            SLOT(on_download_finished(const WIZOBJECTDATA&, bool)));
 
     // document loader thread
     m_renderer = new CWizDocumentWebViewRenderer(m_app);
@@ -147,7 +149,7 @@ void CWizDocumentWebView::viewDocument(const WIZDOCUMENTDATA& doc, bool editing)
             !PathFileExists(strDocumentFileName)) {
         window->showClient(false);
 
-        m_downloadDialog->downloadData(doc);
+        m_downloaderHost->download(doc);
 
         return;
     }
@@ -182,11 +184,15 @@ void CWizDocumentWebView::onCipherDialogClosed()
     m_renderer->load();
 }
 
-void CWizDocumentWebView::onDownloadDialogClosed(int result)
+void CWizDocumentWebView::on_download_finished(const WIZOBJECTDATA& data,
+                                               bool bSucceed)
 {
-    if (result == QDialog::Rejected) {
+    if (m_renderer->data().strKbGUID != data.strKbGUID
+            || m_renderer->data().strGUID != data.strObjectGUID)
         return;
-    }
+
+    if (!bSucceed)
+        return;
 
     m_renderer->load();
 }
@@ -522,6 +528,8 @@ bool CWizDocumentWebView::editorCommandExecuteForeColor()
     if (!m_colorDialog) {
         m_colorDialog = new QColorDialog(this);
         connect(m_colorDialog, SIGNAL(currentColorChanged(const QColor &)),
+                SLOT(on_editorCommandExecuteForeColor_accepted(const QColor&)));
+        connect(m_colorDialog, SIGNAL(colorSelected(const QColor &)),
                 SLOT(on_editorCommandExecuteForeColor_accepted(const QColor&)));
     }
 

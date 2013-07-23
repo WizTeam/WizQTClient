@@ -7,7 +7,7 @@
 #include "widgets/wizScrollBar.h"
 
 #include "share/wizimagepushbutton.h"
-#include "wizdocumentwebview.h"
+#include "wizDocumentWebView.h"
 #include "wiztaglistwidget.h"
 #include "wizattachmentlistwidget.h"
 #include "wiznoteinfoform.h"
@@ -296,9 +296,6 @@ CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
 
     connect(m_title->infoButton(), SIGNAL(clicked()), \
             SLOT(on_infoButton_clicked()));
-
-    qRegisterMetaType<WIZDOCUMENTDATA>("WIZDOCUMENTDATA");
-    qRegisterMetaType<WIZDOCUMENTATTACHMENTDATA>("WIZDOCUMENTATTACHMENTDATA");
 
     connect(&m_dbMgr, SIGNAL(documentModified(const WIZDOCUMENTDATA&, const WIZDOCUMENTDATA&)), \
             SLOT(on_document_modified(const WIZDOCUMENTDATA&, const WIZDOCUMENTDATA&)));

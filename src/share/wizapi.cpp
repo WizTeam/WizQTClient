@@ -6,15 +6,20 @@
 #include "wizsettings.h"
 #include "wizmisc.h"
 
+#include "wizApiEntry.h"
 
-CWizApiBase::CWizApiBase(const QString& strKbUrl /* = WIZ_API_URL*/)
+
+CWizApiBase::CWizApiBase(const QString& strKbUrl /* = WIZ_API_URL*/ , QObject* parent /* = 0 */)
     : m_nCurrentObjectAllSize(0)
     , m_bDownloadingObject(false)
+    , QObject(parent)
 {
-    m_server = new CWizXmlRpcServer(strKbUrl);
+    qRegisterMetaType<CWizGroupDataArray>("CWizGroupDataArray");
 
-    connect(m_server, SIGNAL(xmlRpcReturn(const QString&, CWizXmlRpcValue&)), \
-            SLOT(xmlRpcReturn(const QString&, CWizXmlRpcValue&)));
+    m_server = new CWizXmlRpcServer(strKbUrl, this);
+
+    connect(m_server, SIGNAL(xmlRpcReturn(CWizXmlRpcValue&, const QString&, const QString&, const QString&)),
+            SLOT(xmlRpcReturn(CWizXmlRpcValue&, const QString&, const QString&, const QString&)));
 
     connect(m_server, SIGNAL(xmlRpcError(const QString&, WizXmlRpcError, int, const QString&)), \
             SLOT(xmlRpcError(const QString&, WizXmlRpcError, int, const QString&)));
@@ -22,14 +27,18 @@ CWizApiBase::CWizApiBase(const QString& strKbUrl /* = WIZ_API_URL*/)
     resetProxy();
 }
 
-bool CWizApiBase::callXmlRpc(const QString& strMethodName, CWizXmlRpcValue* pVal)
+bool CWizApiBase::callXmlRpc(CWizXmlRpcValue* pVal,
+                             const QString& strMethodName,
+                             const QString& arg1 /* = "" */,
+                             const QString& arg2 /* = "" */)
 {
-    return m_server->xmlRpcCall(strMethodName, pVal);
+    return m_server->xmlRpcCall(pVal, strMethodName, arg1, arg2);
 }
 
-void CWizApiBase::xmlRpcReturn(const QString& strMethodName, CWizXmlRpcValue& ret)
+void CWizApiBase::xmlRpcReturn(CWizXmlRpcValue& ret, const QString& strMethodName,
+                               const QString& arg1, const QString& arg2)
 {
-    onXmlRpcReturn(strMethodName, ret);
+    onXmlRpcReturn(ret, strMethodName, arg1, arg2);
 }
 
 void CWizApiBase::xmlRpcError(const QString& strMethodName, WizXmlRpcError err, int errorCode, const QString& errorMessage)
@@ -37,11 +46,14 @@ void CWizApiBase::xmlRpcError(const QString& strMethodName, WizXmlRpcError err, 
     _onXmlRpcError(strMethodName, err, errorCode, errorMessage);
 }
 
-void CWizApiBase::onXmlRpcReturn(const QString& strMethodName, CWizXmlRpcValue& ret)
+void CWizApiBase::onXmlRpcReturn(CWizXmlRpcValue& ret, const QString& strMethodName,
+                                 const QString& arg1, const QString& arg2)
 {
+    Q_UNUSED(arg2);
+
     if (strMethodName == SyncMethod_ClientLogin)
     {
-        qDebug() << "[XML-RPC]accounts.clientLogin:\n" << ret.ToString();
+        //qDebug() << "\n[XML-RPC]accounts.clientLogin:\n" << ret.ToString() << "\n\n";
 
         WIZUSERINFO userInfo;
 
@@ -92,13 +104,83 @@ void CWizApiBase::onXmlRpcReturn(const QString& strMethodName, CWizXmlRpcValue& 
     }
     else if (strMethodName == SyncMethod_GetGroupList)
     {
-        qDebug() << "[XML-RPC]accounts.getGroupKbList:\n" << ret.ToString();
+        //qDebug() << "\n[XML-RPC]accounts.getGroupKbList:\n" << ret.ToString() << "\n\n";
 
         std::deque<WIZGROUPDATA> arrayGroup;
         ret.ToArray<WIZGROUPDATA>(arrayGroup, kbGUID());
         onGetGroupList(arrayGroup);
 
         Q_EMIT getGroupListDone(arrayGroup);
+    }
+    else if (strMethodName == SyncMethod_GetMessages)
+    {
+        //qDebug() << "\n[XML-RPC]accounts.getMessages:\n" << ret.ToString() << "\n\n";
+
+        CWizMessageDataArray arrayData;
+        ret.ToArray<WIZMESSAGEDATA>(arrayData, kbGUID());
+        onGetMessages(arrayData);
+    }
+    else if (strMethodName == SyncMethod_SetMessageStatus)
+    {
+        qDebug() << "\n[XML-RPC]accounts.setReadStatus:\n" << ret.ToString() << "\n\n";
+
+        onSetMessageStatus();
+    }
+    else if (strMethodName == SyncMethod_GetValue)
+    {
+        qDebug() << "\n[XML-RPC]accounts.getValue:\n" << ret.ToString() << "\n\n";
+
+        WIZKVRETURN kv;
+        ret.ToData<WIZKVRETURN>(kv, kbGUID());
+
+        if (arg1.toInt() == KVTypeUserAlias) {
+            onGetBizUsers(kv.value);
+        } else {
+            Q_ASSERT(0);
+        }
+    }
+    else if (strMethodName == SyncMethod_SetValue)
+    {
+
+    }
+    else if (strMethodName == SyncMethod_KbGetValueVersion)
+    {
+        //qDebug() << "\n[XML-RPC]kb.getValueVersion:\n" << ret.ToString() << "\n\n";
+
+        WIZKVRETURN kv;
+        ret.ToData<WIZKVRETURN>(kv, kbGUID());
+        if (arg1.toInt() == KVTypeFolders) {
+            Q_EMIT folderGetVersionDone(kv.nVersion);
+        } else {
+            Q_ASSERT(0);
+        }
+    }
+    else if (strMethodName == SyncMethod_KbGetValue)
+    {
+        qDebug() << "\n[XML-RPC]kb.getValue:\n" << ret.ToString() << "\n\n";
+
+        WIZKVRETURN kv;
+        ret.ToData<WIZKVRETURN>(kv, kbGUID());
+
+        if (arg1.toInt() == KVTypeFolders) {
+            QStringList listFolder = kv.value.split("*", QString::SkipEmptyParts);
+            Q_EMIT folderGetListDone(listFolder, kv.nVersion);
+        } else {
+            Q_ASSERT(0);
+        }
+    }
+    else if (strMethodName == SyncMethod_KbSetValue)
+    {
+        qDebug() << "\n[XML-RPC]kb.setValue:\n" << ret.ToString() << "\n\n";
+
+        WIZKVRETURN kv;
+        ret.ToData<WIZKVRETURN>(kv, kbGUID());
+
+        if (arg1.toInt() == KVTypeFolders) {
+            Q_EMIT folderPostListDone(kv.nVersion);
+        } else {
+            Q_ASSERT(0);
+        }
     }
     // deleteds
     else if (strMethodName == SyncMethod_GetDeletedList)
@@ -137,7 +219,7 @@ void CWizApiBase::onXmlRpcReturn(const QString& strMethodName, CWizXmlRpcValue& 
     // styles
     else if (strMethodName == SyncMethod_GetStyleList)
     {
-        std::deque<WIZSTYLEDATA> arrayData;
+        CWizStyleDataArray arrayData;
         ret.ToArray<WIZSTYLEDATA>(arrayData, kbGUID());
         onStyleGetList(arrayData);
     }
@@ -154,6 +236,8 @@ void CWizApiBase::onXmlRpcReturn(const QString& strMethodName, CWizXmlRpcValue& 
     // documents
     else if (strMethodName == SyncMethod_GetDocumentList)
     {
+        //qDebug() << "\n[XML-RPC]document.getList:\n" << ret.ToString() << "\n\n";
+
         std::deque<WIZDOCUMENTDATABASE> arrayData;
         ret.ToArray<WIZDOCUMENTDATABASE>(arrayData, kbGUID());
         onDocumentGetList(arrayData);
@@ -164,8 +248,10 @@ void CWizApiBase::onXmlRpcReturn(const QString& strMethodName, CWizXmlRpcValue& 
         ret.ToArray<WIZDOCUMENTDATABASE>(arrayData, kbGUID());
         onDocumentsGetInfo(arrayData);
     }
-    else if (strMethodName == SyncMethod_GetDocumentData)
+    else if (strMethodName == SyncMethod_GetDocumentFullInfo)
     {
+        //qDebug() << "\n[XML-RPC]document.getData:\n" << ret.ToString() << "\n\n";
+
         WIZDOCUMENTDATAEX data;
         ret.ToData(data, kbGUID());
         onDocumentGetData(data);
@@ -206,6 +292,8 @@ void CWizApiBase::onXmlRpcReturn(const QString& strMethodName, CWizXmlRpcValue& 
     // trunk data
     else if (strMethodName == SyncMethod_DownloadObjectPart)
     {
+        //qDebug() << "\n[XML-RPC]data.download:\n" << ret.ToString() << "\n\n";
+
         WIZOBJECTPARTDATA data;
         CWizXmlRpcFaultValue* pFault = dynamic_cast<CWizXmlRpcFaultValue *>(&ret);
         if (pFault) {
@@ -285,18 +373,47 @@ CString CWizApiBase::MakeXmlRpcPassword(const CString& strPassword)
 
 bool CWizApiBase::callClientLogin(const QString& strUserId, const QString& strPassword)
 {
+    m_strUserId = strUserId;
+    m_strPasswd = strPassword;
+
+    // fetch api url first
+    if (WizGlobal()->apiUrl().isEmpty()) {
+        qDebug() << "[WIZAPI]api entry is empty, acquire entry...";
+
+        CWizApiEntry* entry = new CWizApiEntry(this);
+        connect(entry, SIGNAL(acquireEntryFinished(const QString&)),
+                SLOT(on_acquireApiEntry_finished(const QString&)));
+        entry->getSyncUrl();
+        return true;
+    } else {
+        setKbUrl(WizGlobal()->apiUrl());
+    }
+
     if (WizGlobal()->token().isEmpty()) {
         CWizApiParamBase param;
-        param.AddString("user_id", MakeXmlRpcUserId(strUserId));
-        param.AddString("password", MakeXmlRpcPassword(strPassword));
+        param.AddString("user_id", MakeXmlRpcUserId(m_strUserId));
+        param.AddString("password", MakeXmlRpcPassword(m_strPasswd));
 
-        return callXmlRpc(SyncMethod_ClientLogin, &param);
+        return callXmlRpc(&param, SyncMethod_ClientLogin);
     } else {
-        m_strUserId = strUserId;
-        m_strPasswd = strPassword;
-
         return callClientKeepAlive();
     }
+}
+
+void CWizApiBase::on_acquireApiEntry_finished(const QString& strReply)
+{
+    sender()->deleteLater();
+
+    // if fetch api entry failed, use default one
+    if (strReply.isEmpty()) {
+        qDebug() << "[WIZAPI]failed: unable to acquire api entry!";
+    }
+
+    WizGlobal()->setApiUrl(strReply);
+
+    qDebug() << "[WIZAPI]acquire entry finished, url: " << strReply;
+
+    callClientLogin(m_strUserId, m_strPasswd);
 }
 
 bool CWizApiBase::callClientKeepAlive()
@@ -304,13 +421,13 @@ bool CWizApiBase::callClientKeepAlive()
     CWizApiParamBase param;
     param.AddString("token", WizGlobal()->token());
 
-    return callXmlRpc(SyncMethod_ClientKeepAlive, &param);
+    return callXmlRpc(&param, SyncMethod_ClientKeepAlive);
 }
 
 bool CWizApiBase::callClientLogout()
 {
     CWizApiTokenParam param(*this);
-    return callXmlRpc(SyncMethod_ClientLogout, &param);
+    return callXmlRpc(&param, SyncMethod_ClientLogout);
 }
 
 void CWizApiBase::onClientLogout()
@@ -328,7 +445,7 @@ bool CWizApiBase::callGetUserCert(const QString& strUserId, const QString& strPa
     param.AddString("user_id", MakeXmlRpcUserId(strUserId));
     param.AddString("password", MakeXmlRpcPassword(strPassword));
 
-    return callXmlRpc(SyncMethod_GetUserCert, &param);
+    return callXmlRpc(&param, SyncMethod_GetUserCert);
 }
 
 bool CWizApiBase::callCreateAccount(const CString& strUserId, const CString& strPassword)
@@ -348,18 +465,95 @@ bool CWizApiBase::callCreateAccount(const CString& strUserId, const CString& str
     param.AddString("product_name", "qtWindows");
 #endif
 
-    return callXmlRpc(SyncMethod_CreateAccount, &param);
+    return callXmlRpc(&param, SyncMethod_CreateAccount);
 }
 
 bool CWizApiBase::callGetGroupList()
 {
     CWizApiTokenParam param(*this);
-    return callXmlRpc(SyncMethod_GetGroupList, &param);
+    return callXmlRpc(&param, SyncMethod_GetGroupList);
 }
 
-bool CWizApiBase::callDeletedGetList(__int64 nVersion)
+bool CWizApiBase::callGetBizUsers(const QString& bizGUID)
 {
-    //Q_EMIT processLog(tr("Syncing deleted items, version: ") + QString::number(nVersion));
+    // special case, no kb_guid passed as filter
+    CWizApiParamBase param;
+    param.AddString("token", WizGlobal()->token());
+    param.AddString("key", QString(WIZAPI_KV_KEY_USER_ALIAS).arg(bizGUID));
+    return callXmlRpc(&param, SyncMethod_GetValue, QString::number(KVTypeUserAlias));
+}
+
+bool CWizApiBase::callFolderGetVersion()
+{
+    CWizApiTokenParam param(*this);
+    param.AddString("key", WIZAPI_KV_KEY_FOLDERS);
+    return callXmlRpc(&param, SyncMethod_KbGetValueVersion, QString::number(KVTypeFolders));
+}
+
+bool CWizApiBase::callFolderGetList()
+{
+    CWizApiTokenParam param(*this);
+    param.AddString("key", WIZAPI_KV_KEY_FOLDERS);
+    return callXmlRpc(&param, SyncMethod_KbGetValue, QString::number(KVTypeFolders));
+}
+
+bool CWizApiBase::callFolderPostList(const CWizStdStringArray& arrayFolder)
+{
+    if (!arrayFolder.size()) {
+        return false;
+    }
+
+    QString strFolders = "*";
+
+    if (arrayFolder.size() >= 2) {
+        for(int i = 0; i < arrayFolder.size() - 1; i++) {
+            strFolders = strFolders + arrayFolder.at(i) + "*";
+        }
+    }
+    strFolders += arrayFolder.back();
+
+    CWizApiTokenParam param(*this);
+    param.AddString("key", WIZAPI_KV_KEY_FOLDERS);
+    param.AddString("value_of_key", strFolders);
+    return callXmlRpc(&param, SyncMethod_KbSetValue, QString::number(KVTypeFolders));
+}
+
+bool CWizApiBase::callGetMessages(qint64 nVersion)
+{
+    CWizApiParamBase param;
+    param.AddString("token", WizGlobal()->token());
+    param.AddString("version", WizInt64ToStr(nVersion));
+
+    return callXmlRpc(&param, SyncMethod_GetMessages);
+}
+
+bool CWizApiBase::callSetMessageStatus(const QList<qint64>& ids, bool bRead)
+{
+    if (!ids.size()) {
+        return false;
+    }
+
+    QString msgs;
+
+    if (ids.size() >= 2) {
+        for (int i = 0; i < ids.size() - 1; i++) {
+            QString strId = QString::number(ids.at(i));
+            msgs += (strId + ",");
+        }
+    }
+
+    msgs += QString::number(ids.last());
+
+    CWizApiParamBase param;
+    param.AddString("token", WizGlobal()->token());
+    param.AddString("ids", msgs);
+    param.AddString("status", bRead ? "1" : "0");
+
+    return callXmlRpc(&param, SyncMethod_SetMessageStatus);
+}
+
+bool CWizApiBase::callDeletedGetList(qint64 nVersion)
+{
     return callGetList(SyncMethod_GetDeletedList, nVersion);
 }
 
@@ -369,9 +563,8 @@ bool CWizApiBase::callDeletedPostList(const std::deque<WIZDELETEDGUIDDATA>& arra
     return callPostList(SyncMethod_PostDeletedList, "deleteds", arrayData);
 }
 
-bool CWizApiBase::callTagGetList(__int64 nVersion)
+bool CWizApiBase::callTagGetList(qint64 nVersion)
 {
-    //Q_EMIT processLog(tr("Syncing tags, version: ") + QString::number(nVersion));
     return callGetList(SyncMethod_GetTagList, nVersion);
 }
 
@@ -381,9 +574,8 @@ bool CWizApiBase::callTagPostList(const std::deque<WIZTAGDATA>& arrayData)
     return callPostList(SyncMethod_PostTagList, "tags", arrayData);
 }
 
-bool CWizApiBase::callStyleGetList(__int64 nVersion)
+bool CWizApiBase::callStyleGetList(qint64 nVersion)
 {
-    //Q_EMIT processLog(tr("Syncing styles, version: ") + QString::number(nVersion));
     return callGetList(SyncMethod_GetStyleList, nVersion);
 }
 
@@ -393,10 +585,16 @@ bool CWizApiBase::callStylePostList(const std::deque<WIZSTYLEDATA>& arrayData)
     return callPostList(SyncMethod_PostStyleList, "styles", arrayData);
 }
 
-bool CWizApiBase::callDocumentGetList(__int64 nVersion)
+bool CWizApiBase::callDocumentGetList(qint64 nVersion)
 {
-    //Q_EMIT processLog(tr("Syncing note list, version: ") + QString::number(nVersion));
     return callGetList(SyncMethod_GetDocumentList, nVersion);
+}
+
+bool CWizApiBase::callDocumentGetInfo(const QString& documentGUID)
+{
+    CWizStdStringArray arrayDocumentGUID;
+    arrayDocumentGUID.push_back(documentGUID);
+    return callDocumentsGetInfo(arrayDocumentGUID);
 }
 
 bool CWizApiBase::callDocumentsGetInfo(const CWizStdStringArray& arrayDocumentGUID)
@@ -404,14 +602,21 @@ bool CWizApiBase::callDocumentsGetInfo(const CWizStdStringArray& arrayDocumentGU
     CWizApiTokenParam param(*this);
     param.AddStringArray("document_guids", arrayDocumentGUID);
 
-    return callXmlRpc(SyncMethod_GetDocumentsInfo, &param);
+    return callXmlRpc(&param, SyncMethod_GetDocumentsInfo);
+}
+
+bool CWizApiBase::callDocumentGetData(const QString& documentGUID)
+{
+    CWizApiTokenParam param(*this);
+    param.AddString("document_guid", documentGUID);
+    param.AddBool("document_info",  true);
+    param.AddBool("document_param", true);
+
+    return callXmlRpc(&param, SyncMethod_GetDocumentFullInfo);
 }
 
 bool CWizApiBase::callDocumentGetData(const WIZDOCUMENTDATABASE& data)
 {
-    //QString info = data.strTitle;
-    //Q_EMIT processLog(tr("downloading note info: ") + info);
-
     int nPart = data.nObjectPart;
     Q_ASSERT(nPart != 0);
 
@@ -420,7 +625,7 @@ bool CWizApiBase::callDocumentGetData(const WIZDOCUMENTDATABASE& data)
     param.AddBool("document_info", (nPart & WIZKM_XMKRPC_DOCUMENT_PART_INFO) ? true : false);
     param.AddBool("document_param", (nPart & WIZKM_XMKRPC_DOCUMENT_PART_PARAM) ? true : false);
 
-    return callXmlRpc(SyncMethod_GetDocumentData, &param);
+    return callXmlRpc(&param, SyncMethod_GetDocumentFullInfo);
 }
 
 bool CWizApiBase::callDocumentPostData(const WIZDOCUMENTDATAEX& data)
@@ -522,13 +727,20 @@ bool CWizApiBase::callDocumentPostData(const WIZDOCUMENTDATAEX& data)
         pDocumentStruct->AddString(_T("document_zip_md5"), WizMd5StringNoSpaceJava(infodata.arrayData));
     }
 
-    return callXmlRpc(SyncMethod_PostDocumentData, &param);
+    return callXmlRpc(&param, SyncMethod_PostDocumentData);
 }
 
-bool CWizApiBase::callAttachmentGetList(__int64 nVersion)
+bool CWizApiBase::callAttachmentGetList(qint64 nVersion)
 {
-    //Q_EMIT processLog(tr("Syncing attachment list: version: ") + QString::number(nVersion));
     return callGetList(SyncMethod_GetAttachmentList, nVersion);
+}
+
+bool CWizApiBase::callAttachmentGetInfo(const QString& attachmentGUID)
+{
+    CWizStdStringArray arrayGUID;
+    arrayGUID.push_back(attachmentGUID);
+
+    return callAttachmentsGetInfo(arrayGUID);
 }
 
 bool CWizApiBase::callAttachmentsGetInfo(const CWizStdStringArray& arrayAttachmentGUID)
@@ -536,7 +748,7 @@ bool CWizApiBase::callAttachmentsGetInfo(const CWizStdStringArray& arrayAttachme
     CWizApiTokenParam param(*this);
     param.AddStringArray("attachment_guids", arrayAttachmentGUID);
 
-    return callXmlRpc(SyncMethod_GetAttachmentsInfo, &param);
+    return callXmlRpc(&param, SyncMethod_GetAttachmentsInfo);
 }
 
 bool CWizApiBase::callAttachmentPostData(const WIZDOCUMENTATTACHMENTDATAEX& data)
@@ -590,7 +802,7 @@ bool CWizApiBase::callAttachmentPostData(const WIZDOCUMENTATTACHMENTDATAEX& data
         pAttachmentStruct->AddString(_T("attachment_zip_md5"), WizMd5StringNoSpaceJava(infodata.arrayData));
     }
 
-    return callXmlRpc(SyncMethod_PostAttachmentData, &param);
+    return callXmlRpc(&param, SyncMethod_PostAttachmentData);
 }
 
 // download trunk data
@@ -646,7 +858,7 @@ bool CWizApiBase::callDownloadDataPart(const CString& strObjectGUID, const CStri
     param.AddInt64(_T("start_pos"), pos);
     param.AddInt64(_T("part_size"), size);
 
-    return callXmlRpc(SyncMethod_DownloadObjectPart, &param);
+    return callXmlRpc(&param, SyncMethod_DownloadObjectPart);
 }
 
 void CWizApiBase::onDownloadDataPart(const WIZOBJECTPARTDATA& data)
@@ -757,7 +969,7 @@ bool CWizApiBase::callUploadDataPart(const CString& strObjectGUID, const CString
     param.AddString(_T("part_md5"), ::WizMd5StringNoSpaceJava(arrayData));
     param.AddBase64(_T("data"), arrayData);
 
-    return callXmlRpc(SyncMethod_UploadObjectPart, &param);
+    return callXmlRpc(&param, SyncMethod_UploadObjectPart);
 }
 
 void CWizApiBase::onUploadDataPart()
@@ -770,13 +982,13 @@ void CWizApiBase::onUploadDataPart()
 }
 
 
-bool CWizApiBase::callGetList(const QString& strMethodName, __int64 nVersion)
+bool CWizApiBase::callGetList(const QString& strMethodName, qint64 nVersion)
 {
     CWizApiTokenParam param(*this);
-    param.AddInt(_T("count"), WIZAPI_PAGE_MAX);
-    param.AddString(_T("version"), WizInt64ToStr(nVersion));
+    param.AddInt("count", WIZAPI_PAGE_MAX);
+    param.AddString("version", WizInt64ToStr(nVersion));
 
-    return callXmlRpc(strMethodName, &param);
+    return callXmlRpc(&param, strMethodName);
 }
 
 template <class TData>
@@ -791,7 +1003,7 @@ inline bool CWizApiBase::callPostList(const QString& strMethodName,
 
     param.AddArray<TData>(strArrayName, arrayData);
 
-    return callXmlRpc(strMethodName, &param);
+    return callXmlRpc(&param, strMethodName);
 }
 
 

@@ -20,16 +20,24 @@ public:
 
     void resetProxy() const { m_kbSync->resetProxy(); }
     void setDaysDownload(int n) { m_kbSync->setDaysDownload(n); }
-    //void setDownloadAllNotesData(bool b) const { m_kbSync->setDownloadAllNotesData(b); }
 
 private:
     CWizDatabaseManager& m_dbMgr;
-    QPointer<CWizKbSync> m_kbSync;
+    CWizKbSync* m_kbSync;
     CWizGroupDataArray m_arrayGroup;
     bool m_bStarted;
     bool m_bAborted;
 
+    void syncUserFoldersStart();
+    void uploadUserFolders();
+    void downloadUserFolders();
+    void syncUserFoldersEnd();
+
 public Q_SLOTS:
+    void on_folderGetVersionDone(qint64 nVersion);
+    void on_folderGetListDone(const QStringList& listFolder, qint64 nVersion);
+    void on_folderPostListDone(qint64 nVersion);
+
     void on_clientLoginDone();
     void on_getGroupListDone(const CWizGroupDataArray& arrayGroup);
     void on_kbSyncDone(bool bError);

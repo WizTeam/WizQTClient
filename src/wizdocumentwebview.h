@@ -11,10 +11,9 @@
 #include "wizdownloadobjectdatadialog.h"
 #include "wizusercipherform.h"
 
-
+class CWizObjectDataDownloaderHost;
 class CWizEditorInsertLinkForm;
 class CWizEditorInsertTableForm;
-
 class CWizDocumentWebView;
 
 // Renderer thread responsible for loading, saving document
@@ -108,8 +107,10 @@ private:
     bool m_bEditingMode;
     bool m_bModified;
 
-    QPointer<CWizDocumentWebViewRenderer> m_renderer;
-    QPointer<CWizDownloadObjectDataDialog> m_downloadDialog;
+    CWizDocumentWebViewRenderer* m_renderer;
+
+    CWizObjectDataDownloaderHost* m_downloaderHost;
+
     QPointer<CWizUserCipherForm> m_cipherDialog;
     QPointer<CWizEditorInsertLinkForm> m_editorInsertLinkForm;
     QPointer<CWizEditorInsertTableForm> m_editorInsertTableForm;
@@ -129,7 +130,8 @@ public Q_SLOTS:
     void on_editorFrame_contentsSizeChanged(QSize sz);
 
     void onCipherDialogClosed();
-    void onDownloadDialogClosed(int result);
+    //void onDownloadDialogClosed(int result);
+    void on_download_finished(const WIZOBJECTDATA& data, bool bSucceed);
 
     void on_editor_populateJavaScriptWindowObject();
     void on_editor_loadFinished(bool ok);

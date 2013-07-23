@@ -15,7 +15,6 @@ public:
     void startSync(const QString& strKbGUID = QString());
 
     void setDaysDownload(int n) { m_nDaysDownload = n; }
-    //void setDownloadAllNotesData(bool b) { m_bDownloadAllNotesData = b; }
 
     virtual void abort();
 
@@ -23,15 +22,6 @@ private:
     bool m_bSyncStarted;
     bool m_error;
     int m_nDaysDownload;
-    //bool m_bDownloadAllNotesData;
-
-    // This is trick used for conflict backup.
-    // cause onDocumentGetData and onDownloadObjectDataCompleted are rewrite by the class for chain call
-    // But these two methods also needed when downloading conflict documents
-    //bool m_bChained;
-
-    //WIZDOCUMENTDATABASE m_conflictedDocument;
-    //WIZDOCUMENTDATAEX m_conflictDownloadedInfo;
 
     CWizDeletedGUIDDataArray m_arrayAllDeletedsDownloaded;
     CWizDeletedGUIDDataArray m_arrayAllDeletedsNeedToBeUploaded;
@@ -43,7 +33,7 @@ private:
     CWizStyleDataArray m_arrayAllStylesNeedToBeUploaded;
 
     std::deque<WIZDOCUMENTDATABASE> m_arrayAllDocumentsNeedToBeDownloaded;
-    __int64 m_nDocumentMaxVersion;
+    qint64 m_nDocumentMaxVersion;
     bool m_bDocumentInfoError;
 
     CWizDocumentDataArray m_arrayAllDocumentsNeedToBeUploaded;
@@ -56,45 +46,45 @@ private:
 
     CWizObjectDataArray m_arrayAllObjectsNeedToBeDownloaded;
 
-
 protected:
-    virtual void onXmlRpcError(const QString& strMethodName, \
-                               WizXmlRpcError err, int errorCode, const QString& errorMessage);
+    virtual void onXmlRpcError(const QString& strMethodName,
+                               WizXmlRpcError err, int errorCode,
+                               const QString& errorMessage);
 
     // step 1: upload deleted guilds
     virtual void startUploadDeleteds();
     virtual void uploadNextDeleteds();
-    virtual void onDeletedPostList(const std::deque<WIZDELETEDGUIDDATA>& arrayData);
+    virtual void onDeletedPostList(const CWizDeletedGUIDDataArray& arrayData);
     virtual void onUploadDeletedsCompleted();
 
     // step 2: download deleted guids
     virtual void startDownloadDeleteds();
-    virtual void downloadNextDeleteds(__int64 nVersion);
-    virtual void onDeletedGetList(const std::deque<WIZDELETEDGUIDDATA>& arrayRet);
+    virtual void downloadNextDeleteds(qint64 nVersion);
+    virtual void onDeletedGetList(const CWizDeletedGUIDDataArray& arrayRet);
     virtual void onDownloadDeletedsCompleted();
 
     // step 3: upload tags
     virtual void startUploadTags();
     virtual void uploadNextTags();
-    virtual void onTagPostList(const std::deque<WIZTAGDATA>& arrayData);
+    virtual void onTagPostList(const CWizTagDataArray& arrayData);
     virtual void onUploadTagsCompleted();
 
     // step 4: download tags
     virtual void startDownloadTags();
-    virtual void downloadNextTags(__int64 nVersion);
-    virtual void onTagGetList(const std::deque<WIZTAGDATA>& arrayRet);
+    virtual void downloadNextTags(qint64 nVersion);
+    virtual void onTagGetList(const CWizTagDataArray& arrayRet);
     virtual void onDownloadTagsCompleted();
 
     // step 5: upload styles
     virtual void startUploadStyles();
     virtual void uploadNextStyles();
-    virtual void onStylePostList(const std::deque<WIZSTYLEDATA>& arrayData);
+    virtual void onStylePostList(const CWizStyleDataArray& arrayData);
     virtual void onUploadStylesCompleted();
 
     // step 6: download styles
     virtual void startDownloadStyles();
-    virtual void downloadNextStyles(__int64 nVersion);
-    virtual void onStyleGetList(const std::deque<WIZSTYLEDATA>& arrayRet);
+    virtual void downloadNextStyles(qint64 nVersion);
+    virtual void onStyleGetList(const CWizStyleDataArray& arrayRet);
     virtual void onDownloadStylesCompleted();
 
     // step 7: upload documents and just cover server data
@@ -117,7 +107,7 @@ protected:
 
     // step 9: download documents info list
     virtual void startDownloadDocumentsSimpleInfo();
-    virtual void downloadNextDocumentsSimpleInfo(__int64 nVersion);
+    virtual void downloadNextDocumentsSimpleInfo(qint64 nVersion);
     virtual void onDocumentGetList(const std::deque<WIZDOCUMENTDATABASE>& arrayRet);
     virtual void onDownloadDocumentsSimpleInfoCompleted();
 
@@ -129,7 +119,7 @@ protected:
 
     // step 11: download attachments info
     virtual void startDownloadAttachmentsInfo();
-    virtual void downloadNextAttachmentsInfo(__int64 nVersion);
+    virtual void downloadNextAttachmentsInfo(qint64 nVersion);
     virtual void onAttachmentGetList(const std::deque<WIZDOCUMENTATTACHMENTDATAEX>& arrayRet);
     virtual void onDownloadAttachmentsInfoCompleted();
 
@@ -142,13 +132,7 @@ protected:
     // step 14: clean up
     virtual void stopSync();
 
-    // conflict backup
-    //virtual void processConflictDocumentData(const WIZDOCUMENTDATAEX& data);
-    //virtual void processConflictObjectData(const WIZOBJECTDATA& data);
-
 private:
-    bool downloadDocument(const WIZDOCUMENTDATABASE& data);
-
     void filterDocuments();
     int calDocumentParts(const WIZDOCUMENTDATABASE& sourceData, \
                        const WIZDOCUMENTDATABASE& destData);

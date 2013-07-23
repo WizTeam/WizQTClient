@@ -120,10 +120,27 @@ public:
     virtual void getDocuments(CWizDatabase& db, CWizDocumentDataArray& arrayDocument);
 };
 
+class CWizCategoryViewBizGroupRootItem : public CWizCategoryViewAllGroupsRootItem
+{
+public:
+    CWizCategoryViewBizGroupRootItem(CWizExplorerApp& app,
+                                     const QString& strName,
+                                     const QString& strKbGUID);
+
+    virtual void updateDocumentsCount();
+    virtual void showContextMenu(CWizCategoryBaseView* pCtrl, QPoint pos) {}
+    virtual void getDocuments(CWizDatabase& db, CWizDocumentDataArray& arrayDocument) {}
+    //virtual bool accept(CWizDatabase& db, const WIZDOCUMENTDATA& data);
+    //void reload(CWizDatabase& db);
+};
+
 class CWizCategoryViewGroupRootItem : public CWizCategoryViewItemBase
 {
 public:
-    CWizCategoryViewGroupRootItem(CWizExplorerApp& app, const QString& strName, const QString& strKbGUID);
+    CWizCategoryViewGroupRootItem(CWizExplorerApp& app,
+                                  const QString& strName,
+                                  const QString& strKbGUID);
+
     virtual void updateDocumentsCount();
     virtual void showContextMenu(CWizCategoryBaseView* pCtrl, QPoint pos);
     virtual void getDocuments(CWizDatabase& db, CWizDocumentDataArray& arrayDocument);

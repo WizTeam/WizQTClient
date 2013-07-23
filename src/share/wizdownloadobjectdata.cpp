@@ -29,17 +29,6 @@ void CWizDownloadObjectData::startDownload()
     callClientLogin(strUserId, strPasswd);
 }
 
-void CWizDownloadObjectData::onXmlRpcError(const QString& strMethodName,
-                                           WizXmlRpcError err,
-                                           int errorCode,
-                                           const QString& errorMessage)
-{
-    CWizApi::onXmlRpcError(strMethodName, err, errorCode, errorMessage);
-    Q_EMIT downloadDone(false);
-
-    m_bInited = false;
-}
-
 void CWizDownloadObjectData::onClientLogin(const WIZUSERINFO& userInfo)
 {
     Q_UNUSED(userInfo);
@@ -83,7 +72,9 @@ void CWizDownloadObjectData::startDownloadObjectData()
 
 void CWizDownloadObjectData::onDownloadObjectDataCompleted(const WIZOBJECTDATA& data)
 {
-    CWizApi::onDownloadObjectDataCompleted(data);
+    if (!data.strObjectGUID.isEmpty())
+        CWizApi::onDownloadObjectDataCompleted(data);
+
     m_data.arrayData = data.arrayData;
     //callClientLogout();
 
@@ -95,4 +86,15 @@ void CWizDownloadObjectData::onDownloadObjectDataCompleted(const WIZOBJECTDATA& 
 void CWizDownloadObjectData::processLog(const QString& strMsg)
 {
     TOLOG(strMsg);
+}
+
+void CWizDownloadObjectData::onXmlRpcError(const QString& strMethodName,
+                                           WizXmlRpcError err,
+                                           int errorCode,
+                                           const QString& errorMessage)
+{
+    CWizApi::onXmlRpcError(strMethodName, err, errorCode, errorMessage);
+    Q_EMIT downloadDone(false);
+
+    m_bInited = false;
 }

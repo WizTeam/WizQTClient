@@ -52,6 +52,7 @@ WIZACTION* CWizActions::actionsData()
         //{"actionDeleteCurrentNote",       QObject::tr("Delete Note"), "", ""},
         {WIZACTION_GLOBAL_SYNC,             QObject::tr("Sync"), "", ""},
         {WIZACTION_GLOBAL_NEW_DOCUMENT,     QObject::tr("New Note"), "", "Ctrl+N"},
+        {WIZACTION_GLOBAL_VIEW_MESSAGES,    QObject::tr("View messages"), "", ""},
         {"actionGoBack",                    QObject::tr("Back"), "", ""},
         {"actionGoForward",                 QObject::tr("Forward"), "", ""},
         {"actionConsole",                   QObject::tr("Console"), "", ""},

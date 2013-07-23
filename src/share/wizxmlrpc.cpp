@@ -750,6 +750,26 @@ bool CWizXmlRpcStructValue::GetInt64(const QString& strName, qint64& n) const
     return true;
 }
 
+//bool CWizXmlRpcStructValue::GetInt64(const QString& strName, quint64& n) const
+//{
+//    QString str;
+//    if (!GetString(strName, str))
+//        return false;
+
+//    n = str.toULongLong();
+//    return true;
+//}
+
+//bool CWizXmlRpcStructValue::GetInt(const QString &strName, quint32& n) const
+//{
+//    int i = 0;
+//    if (!GetInt(strName, i))
+//        return false;
+
+//    n = i;
+//    return true;
+//}
+
 bool CWizXmlRpcStructValue::GetInt(const QString& strName, long& n) const
 {
 	int i = 0;

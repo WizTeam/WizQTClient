@@ -4,35 +4,49 @@
 #include "html/wizhtmlcollector.h"
 
 #include <QFile>
+#include <QMetaType>
 #include <QDebug>
 
 #define WIZ_SEARCH_INDEXER_PAGE_MAX 100
+
 
 CWizSearchIndexer::CWizSearchIndexer(CWizDatabaseManager& dbMgr, QObject *parent)
     : QObject(parent)
     , m_dbMgr(dbMgr)
     , m_bAbort(false)
 {
-    m_timerSearch.setInterval(300);
-    connect(&m_timerSearch, SIGNAL(timeout()), SLOT(on_searchTimeout()));
+    qRegisterMetaType<WIZDOCUMENTDATAEX>("WIZDOCUMENTDATAEX");
+
+    m_timerFTS.setInterval(60*1000); // default 60 seconds for every build loop
+    connect(&m_timerFTS, SIGNAL(timeout()), SLOT(on_timerFTS_timeout()));
+    m_timerFTS.start();
 
     m_strIndexPath = m_dbMgr.db().GetAccountPath() + "fts_index";
 
-    connect(&m_dbMgr, SIGNAL(documentCreated(const WIZDOCUMENTDATA&)), \
-            SLOT(on_document_created(const WIZDOCUMENTDATA&)));
-    connect(&m_dbMgr, SIGNAL(documentModified(const WIZDOCUMENTDATA&, const WIZDOCUMENTDATA&)), \
-            SLOT(on_document_modified(const WIZDOCUMENTDATA&, const WIZDOCUMENTDATA&)));
-    connect(&m_dbMgr, SIGNAL(documentDataModified(const WIZDOCUMENTDATA&)), \
-            SLOT(on_documentData_modified(const WIZDOCUMENTDATA&)));
+    // signals for deletion, database responsible for reset FTS flag when update document or attachment.
     connect(&m_dbMgr, SIGNAL(documentDeleted(const WIZDOCUMENTDATA&)), \
             SLOT(on_document_deleted(const WIZDOCUMENTDATA&)));
-
-    connect(&m_dbMgr, SIGNAL(attachmentCreated(const WIZDOCUMENTATTACHMENTDATA&)), \
-            SLOT(on_attachment_created(const WIZDOCUMENTATTACHMENTDATA&)));
-    connect(&m_dbMgr, SIGNAL(attachmentModified(const WIZDOCUMENTATTACHMENTDATA&, const WIZDOCUMENTATTACHMENTDATA&)), \
-            SLOT(on_attachment_modified(const WIZDOCUMENTATTACHMENTDATA&, const WIZDOCUMENTATTACHMENTDATA&)));
     connect(&m_dbMgr, SIGNAL(attachmentDeleted(const WIZDOCUMENTATTACHMENTDATA&)), \
             SLOT(on_attachment_deleted(const WIZDOCUMENTATTACHMENTDATA&)));
+}
+
+void CWizSearchIndexer::search(const QString &strKeywords,
+                               int nMaxSize /* = -1 */)
+{
+    m_mapDocumentSearched.clear();
+    m_nMaxResult = nMaxSize;
+    m_nResults = 0;
+
+    if (!QMetaObject::invokeMethod(this, "searchKeyword",
+                                   Q_ARG(const QString&, strKeywords))) {
+        qDebug() << "\nInvoke searchKeyword failed\n";
+    }
+}
+
+void CWizSearchIndexer::rebuild() {
+    if (!QMetaObject::invokeMethod(this, "rebuildFTSIndex")) {
+        qDebug() << "\nInvoke rebuildFTSIndex failed\n";
+    }
 }
 
 void CWizSearchIndexer::abort()
@@ -40,8 +54,15 @@ void CWizSearchIndexer::abort()
     m_bAbort = true;
 }
 
+void CWizSearchIndexer::on_timerFTS_timeout()
+{
+    buildFTSIndex();
+}
+
 bool CWizSearchIndexer::buildFTSIndex()
 {
+    m_timerFTS.stop();
+
     m_bAbort = false;
     int nErrors = 0;
 
@@ -53,6 +74,9 @@ bool CWizSearchIndexer::buildFTSIndex()
     // build group db
     int total = m_dbMgr.count();
     for (int i = 0; i < total; i++) {
+        if (m_bAbort)
+            break;
+
         if (!buildFTSIndexByDatabase(m_dbMgr.at(i))) {
             nErrors++;
         }
@@ -63,13 +87,13 @@ bool CWizSearchIndexer::buildFTSIndex()
         return false;
     }
 
-    m_bAbort = false;
-
+    m_timerFTS.start();
     return true;
 }
 
 bool CWizSearchIndexer::buildFTSIndexByDatabase(CWizDatabase& db)
 {
+    // if FTS version is lower than release, rebuild all
     int strVersion = db.getDocumentFTSVersion().toInt();
     if (strVersion < QString(WIZNOTE_FTS_VERSION).toInt()) {
         clearFlags(db);
@@ -81,6 +105,7 @@ bool CWizSearchIndexer::buildFTSIndexByDatabase(CWizDatabase& db)
     if (!db.getAllDocumentsNeedToBeSearchIndexed(arrayDocuments))
         return false;
 
+    // filter document data have not downloadeded or encrypted
     filterDocuments(db, arrayDocuments);
 
     if (arrayDocuments.empty())
@@ -92,7 +117,7 @@ bool CWizSearchIndexer::buildFTSIndexByDatabase(CWizDatabase& db)
     int nErrors = 0;
     for (int i = 0; i < arrayDocuments.size(); i++) {
         if (m_bAbort) {
-            return false;
+            break;
         }
 
         const WIZDOCUMENTDATAEX& doc = arrayDocuments.at(i);
@@ -102,11 +127,13 @@ bool CWizSearchIndexer::buildFTSIndexByDatabase(CWizDatabase& db)
             TOLOG(tr("[WARNING] failed to update: %1").arg(doc.strTitle));
             nErrors++;
         }
+
+        // release CPU
+        usleep(300);
     }
 
     if (nErrors >= 3) {
         TOLOG(tr("[WARNING] total %1 documents failed to build").arg(nErrors));
-        //TOLOG(tr("[WARNING]: Build FTS index end with error: ") + db.name());
         return false;
     }
 
@@ -114,67 +141,29 @@ bool CWizSearchIndexer::buildFTSIndexByDatabase(CWizDatabase& db)
     return true;
 }
 
-void CWizSearchIndexer::filterDocuments(CWizDatabase& db, CWizDocumentDataArray& arrayDocuments)
+void CWizSearchIndexer::filterDocuments(CWizDatabase& db, CWizDocumentDataArray& arrayDocument)
 {
-    int nCount = arrayDocuments.size();
+    int nCount = arrayDocument.size();
     for (intptr_t i = nCount - 1; i >= 0; i--) {
         bool bFilter = false;
-        WIZDOCUMENTDATAEX& doc = arrayDocuments.at(i);
+        WIZDOCUMENTDATAEX& doc = arrayDocument.at(i);
 
         if (doc.nProtected)
             bFilter = true;
 
+        QString strFileName = db.GetDocumentFileName(doc.strGUID);
+        if (!QFile::exists(strFileName))
+            bFilter = true;
+
         if (bFilter) {
-            arrayDocuments.erase(arrayDocuments.begin() + i);
+            arrayDocument.erase(arrayDocument.begin() + i);
         }
     }
-}
-
-void CWizSearchIndexer::clearFlags(CWizDatabase& db)
-{
-    if (!db.setDocumentFTSVersion("0")) {
-        TOLOG1("FATAL: Can't reset db index flag: %1", db.name());
-    }
-
-    if (!db.setAllDocumentsSearchIndexed(false)) {
-        TOLOG1("FATAL: Can't reset document index flag: %1", db.name());
-    }
-}
-
-bool CWizSearchIndexer::clear()
-{
-    if (!::WizDeleteAllFilesInFolder(m_strIndexPath)) {
-        TOLOG("Can't delete old index files while rebuild FTS index");
-        return false;
-    }
-
-    clearFlags(m_dbMgr.db());
-
-    int total = m_dbMgr.count();
-    for (int i = 0; i < total; i++) {
-        clearFlags(m_dbMgr.at(i));
-    }
-
-    return true;
-}
-
-bool CWizSearchIndexer::rebuildFTSIndex()
-{
-    if (clear()) {
-        return buildFTSIndex();
-    }
-
-    return false;
 }
 
 bool CWizSearchIndexer::updateDocument(const WIZDOCUMENTDATAEX& doc)
 {
     Q_ASSERT(!doc.strGUID.isEmpty());
-
-    // FIXME : deal with encrypted document
-    if (doc.nProtected) {
-       return true;
-    }
 
     void* pHandle = NULL;
 
@@ -183,16 +172,7 @@ bool CWizSearchIndexer::updateDocument(const WIZDOCUMENTDATAEX& doc)
         return false;
     }
 
-    bool ret;
-
-    CWizDatabase& db = m_dbMgr.db(doc.strKbGUID);
-    QString strFileName = db.GetDocumentFileName(doc.strGUID);
-    if (!QFile::exists(strFileName)) {
-        // document data have not downloaded yet
-        ret = _updateDocumentTitleOnlyImpl(pHandle, doc);
-    } else {
-        ret = _updateDocumentImpl(pHandle, doc);
-    }
+    bool ret = _updateDocumentImpl(pHandle, doc);
 
     if (!endUpdateDocument(pHandle)) {
         TOLOG("end update failed while update FTS index");
@@ -202,62 +182,10 @@ bool CWizSearchIndexer::updateDocument(const WIZDOCUMENTDATAEX& doc)
     return ret;
 }
 
-bool CWizSearchIndexer::updateDocuments(const CWizDocumentDataArray& arrayDocuments)
-{
-    Q_ASSERT(!arrayDocuments.empty());
-
-    int nErrors = 0;
-    void* pHandle = NULL;
-
-    bool ret = beginUpdateDocument(m_strIndexPath.toStdWString().c_str(), &pHandle);
-    if (!ret) {
-        TOLOG("begin update failed while update FTS index");
-        return false;
-    }
-
-    for (int i = 0;  i < arrayDocuments.size(); i++) {
-        const WIZDOCUMENTDATAEX& doc = arrayDocuments.at(i);
-        qDebug() << doc.strTitle;
-        if (!_updateDocumentImpl(pHandle, doc))
-            nErrors++;
-    }
-
-    ret = endUpdateDocument(pHandle);
-    if (!ret) {
-        TOLOG("end update failed while update FTS index");
-        return false;
-    }
-
-    if (nErrors >= 5) {
-        TOLOG(tr("total %1 documents failed to build").arg(nErrors));
-        return false;
-    }
-
-    return true;
-}
-
-bool CWizSearchIndexer::_updateDocumentTitleOnlyImpl(void *pHandle, const WIZDOCUMENTDATAEX& doc)
+bool CWizSearchIndexer::_updateDocumentImpl(void *pHandle,
+                                            const WIZDOCUMENTDATAEX& doc)
 {
     CWizDatabase& db = m_dbMgr.db(doc.strKbGUID);
-    db.setDocumentSearchIndexed(doc.strGUID, false);
-
-    bool ret = IWizCluceneSearch::updateDocument(pHandle,
-                                                 doc.strKbGUID.toStdWString().c_str(),
-                                                 doc.strGUID.toStdWString().c_str(),
-                                                 doc.strTitle.toLower().toStdWString().c_str(),
-                                                 QString().toStdWString().c_str());
-
-    if (ret) {
-        db.setDocumentSearchIndexed(doc.strGUID, true);
-    }
-
-    return ret;
-}
-
-bool CWizSearchIndexer::_updateDocumentImpl(void *pHandle, const WIZDOCUMENTDATAEX& doc)
-{
-    CWizDatabase& db = m_dbMgr.db(doc.strKbGUID);
-    db.setDocumentSearchIndexed(doc.strGUID, false);
 
     // decompress
     QString strDataFile;
@@ -294,119 +222,153 @@ bool CWizSearchIndexer::_updateDocumentImpl(void *pHandle, const WIZDOCUMENTDATA
 
 bool CWizSearchIndexer::deleteDocument(const WIZDOCUMENTDATAEX& doc)
 {
-    Q_ASSERT(!doc.strGUID.isEmpty());
+    Q_ASSERT(!doc.strKbGUID.isEmpty() && !doc.strGUID.isEmpty());
 
-    CWizDocumentDataArray arrayDocuments;
-    arrayDocuments.push_back(doc);
-    return deleteDocuments(arrayDocuments);
+    qDebug() << "\nDocument FTS deleted: " << doc.strTitle << "\n";
+
+    return IWizCluceneSearch::deleteDocument(m_strIndexPath.toStdWString().c_str(),
+                                             doc.strGUID.toStdWString().c_str());
 }
 
-bool CWizSearchIndexer::deleteDocuments(const CWizDocumentDataArray& arrayDocuments)
+bool CWizSearchIndexer::rebuildFTSIndex()
 {
-    Q_ASSERT(!arrayDocuments.empty());
-
-    bool ret = true;
-    for (int i = 0; i < arrayDocuments.size(); i++) {
-        WIZDOCUMENTDATAEX doc = arrayDocuments.at(i);
-        int ret = IWizCluceneSearch::deleteDocument(m_strIndexPath.toStdWString().c_str(),
-                                                    doc.strGUID.toStdWString().c_str());
-        if (!ret) {
-            TOLOG("delete FTS index failed: " + doc.strTitle);
-            ret = false;
-        }
+    if (clearAllFTSData()) {
+        return buildFTSIndex();
     }
 
-    return ret;
+    return false;
 }
 
-bool CWizSearchIndexer::search(const QString& strKeywords, int nMaxResult)
+void CWizSearchIndexer::clearFlags(CWizDatabase& db)
 {
-    Q_ASSERT(!strKeywords.isEmpty() && nMaxResult > 0);
+    if (!db.setDocumentFTSVersion("0")) {
+        TOLOG1("FATAL: Can't reset db index flag: %1", db.name());
+    }
 
-    m_nMaxResult = nMaxResult;
-    m_arrayDocument.clear();
-    m_bSearchEnd = false;
-    m_timerSearch.start();
+    if (!db.setAllDocumentsSearchIndexed(false)) {
+        TOLOG1("FATAL: Can't reset document index flag: %1", db.name());
+    }
+}
+
+bool CWizSearchIndexer::clearAllFTSData()
+{
+    if (!::WizDeleteAllFilesInFolder(m_strIndexPath)) {
+        TOLOG("Can't delete old index files while rebuild FTS index");
+        return false;
+    }
+
+    clearFlags(m_dbMgr.db());
+
+    int total = m_dbMgr.count();
+    for (int i = 0; i < total; i++) {
+        clearFlags(m_dbMgr.at(i));
+    }
+
+    return true;
+}
+
+void CWizSearchIndexer::searchKeyword(const QString& strKeywords)
+{
+    Q_ASSERT(!strKeywords.isEmpty());
+
+    qDebug() << "\n[Search]search: " << strKeywords;
+
+    searchDatabase(strKeywords);
+
+    if (m_nMaxResult <= m_nResults)
+        return;
 
     // NOTE: make sure convert keyword to lower case
-    return searchDocument(m_strIndexPath.toStdWString().c_str(),
-                          strKeywords.toLower().toStdWString().c_str());
+    searchDocument(m_strIndexPath.toStdWString().c_str(),
+                   strKeywords.toLower().toStdWString().c_str());
 }
 
-bool CWizSearchIndexer::onSearchProcess(const wchar_t* lpszKbGUID, const wchar_t* lpszDocumentID, const wchar_t* lpszURL)
+void CWizSearchIndexer::searchDatabase(const QString& strKeywords)
 {
-    Q_UNUSED(lpszKbGUID);
+    CWizDocumentDataArray arrayDocument;
+    m_dbMgr.db().SearchDocumentByTitle(strKeywords, NULL, true, 5000, arrayDocument);
+
+    CWizDocumentDataArray::const_iterator it;
+    for (it = arrayDocument.begin(); it != arrayDocument.end(); it++) {
+        const WIZDOCUMENTDATAEX& doc = *it;
+        m_mapDocumentSearched[doc.strGUID] = doc;
+    }
+
+    arrayDocument.clear();
+
+    int nCount = m_dbMgr.count();
+    for (int i = 0; i < nCount; i++) {
+        m_dbMgr.at(i).SearchDocumentByTitle(strKeywords, NULL, true, 5000, arrayDocument);
+
+        for (it = arrayDocument.begin(); it != arrayDocument.end(); it++) {
+            const WIZDOCUMENTDATAEX& doc = *it;
+            m_mapDocumentSearched[doc.strGUID] = doc;
+        }
+
+        arrayDocument.clear();
+    }
+
+    qDebug() << QString("[Search]Find %1 results in database").arg(m_mapDocumentSearched.size());
+
+    QMap<QString, WIZDOCUMENTDATAEX>::const_iterator i;
+    for (i = m_mapDocumentSearched.begin(); i != m_mapDocumentSearched.end(); i++) {
+        if (m_nMaxResult <= m_nResults) {
+            return;
+        }
+
+        Q_EMIT documentFind(i.value());
+        m_nResults++;
+    }
+}
+
+bool CWizSearchIndexer::onSearchProcess(const wchar_t* lpszKbGUID,
+                                        const wchar_t* lpszDocumentID,
+                                        const wchar_t* lpszURL)
+{
     Q_UNUSED(lpszURL);
+
+    if (m_nMaxResult != -1 && m_nMaxResult <= m_nResults) {
+        qDebug() << "\nSearch result is bigger than limits: " << m_nMaxResult;
+        return true;
+    }
 
     QString strKbGUID = QString::fromStdWString(lpszKbGUID);
     QString strGUID = QString::fromStdWString(lpszDocumentID);
 
+    // not searched before
+    if (m_mapDocumentSearched.contains(strGUID)) {
+        return true;
+    }
+
+    // make sure document is not belong to invalid group
+    if (!m_dbMgr.isOpened(strKbGUID)) {
+        qDebug() << "\nsearch process meet invalid kb_guid: " << strKbGUID;
+        return false;
+    }
+
+    // valid document
     WIZDOCUMENTDATA doc;
-    m_dbMgr.db(strKbGUID).DocumentFromGUID(strGUID, doc);
-    m_arrayDocument.push_back(doc);
+    if (!m_dbMgr.db(strKbGUID).DocumentFromGUID(strGUID, doc)) {
+        qDebug() << "\nsearch process meet invalide document: " << strGUID;
+        return false;
+    }
+
+    m_nResults++;
+    m_mapDocumentSearched[strGUID] = doc;
+    Q_EMIT documentFind(doc);
 
     return true;
 }
 
 bool CWizSearchIndexer::onSearchEnd()
 {
-    m_bSearchEnd = true;
+    qDebug() << "[Search]Search process end, total: " << m_nResults << "\n";
     return true;
-}
-
-void CWizSearchIndexer::on_searchTimeout()
-{
-    int total = m_arrayDocument.size();
-    if (!total && m_bSearchEnd) {
-        m_timerSearch.stop();
-        return;
-    }
-
-    CWizDocumentDataArray docs;
-    if (total >= m_nMaxResult) {
-        docs.assign(m_arrayDocument.begin(), m_arrayDocument.begin() + m_nMaxResult);
-        m_arrayDocument.erase(m_arrayDocument.begin(), m_arrayDocument.begin() + m_nMaxResult);
-    } else {
-        docs.assign(m_arrayDocument.begin(), m_arrayDocument.end());
-        m_arrayDocument.clear();
-    }
-
-    Q_EMIT documentFind(docs);
-}
-
-void CWizSearchIndexer::on_document_created(const WIZDOCUMENTDATA& doc)
-{
-    updateDocument(doc);
-}
-
-void CWizSearchIndexer::on_document_modified(const WIZDOCUMENTDATA& docOld, \
-                                            const WIZDOCUMENTDATA& docNew)
-{
-    Q_ASSERT(docOld.strGUID == docNew.strGUID);
-
-    updateDocument(docNew);
-}
-
-void CWizSearchIndexer::on_documentData_modified(const WIZDOCUMENTDATA& doc)
-{
-    updateDocument(doc);
 }
 
 void CWizSearchIndexer::on_document_deleted(const WIZDOCUMENTDATA& doc)
 {
     deleteDocument(doc);
-}
-
-void CWizSearchIndexer::on_attachment_created(const WIZDOCUMENTATTACHMENTDATA& attach)
-{
-    Q_UNUSED(attach);
-}
-
-void CWizSearchIndexer::on_attachment_modified(const WIZDOCUMENTATTACHMENTDATA& attachOld, \
-                                               const WIZDOCUMENTATTACHMENTDATA& attachNew)
-{
-    Q_UNUSED(attachOld);
-    Q_UNUSED(attachNew);
 }
 
 void CWizSearchIndexer::on_attachment_deleted(const WIZDOCUMENTATTACHMENTDATA& attach)

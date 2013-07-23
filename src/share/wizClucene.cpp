@@ -736,7 +736,7 @@ bool IWizCluceneSearch::updateDocument(void* pHandle,
                                              ));
     doc.add( *_CLNEW lucene::document::Field(_T("title"), \
                                              strTitle.c_str(), \
-                                             lucene::document::Field::STORE_NO | lucene::document::Field::INDEX_TOKENIZED
+                                             lucene::document::Field::STORE_NO | lucene::document::Field::INDEX_UNTOKENIZED
                                              ));
     doc.add( *_CLNEW lucene::document::Field(_T("contents"), \
                                              strText.c_str(), \

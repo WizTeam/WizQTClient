@@ -1,4 +1,4 @@
-#include "wizcategoryview.h"
+#include "wizCategoryView.h"
 
 #ifdef BUILD_WITH_QT5
 #include <QtWidgets>
@@ -54,9 +54,6 @@ CWizCategoryBaseView::CWizCategoryBaseView(CWizExplorerApp& app, QWidget* parent
 
     setStyle(::WizGetStyle(m_app.userSettings().skin()));
 
-    qRegisterMetaType<WIZDOCUMENTDATA>("WIZDOCUMENTDATA");
-    qRegisterMetaType<WIZTAGDATA>("WIZTAGDATA");
-
     connect(&m_dbMgr, SIGNAL(documentCreated(const WIZDOCUMENTDATA&)),
             SLOT(on_document_created(const WIZDOCUMENTDATA&)));
 
@@ -69,11 +66,11 @@ CWizCategoryBaseView::CWizCategoryBaseView(CWizExplorerApp& app, QWidget* parent
     connect(&m_dbMgr, SIGNAL(documentTagModified(const WIZDOCUMENTDATA&)),
             SLOT(on_document_tag_modified(const WIZDOCUMENTDATA&)));
 
-    connect(&m_dbMgr, SIGNAL(folderCreated(const CString&)),
-            SLOT(on_folder_created(const CString&)));
+    connect(&m_dbMgr, SIGNAL(folderCreated(const QString&)),
+            SLOT(on_folder_created(const QString&)));
 
-    connect(&m_dbMgr, SIGNAL(folderDeleted(const CString&)),
-            SLOT(on_folder_deleted(const CString&)));
+    connect(&m_dbMgr, SIGNAL(folderDeleted(const QString&)),
+            SLOT(on_folder_deleted(const QString&)));
 
     connect(&m_dbMgr, SIGNAL(tagCreated(const WIZTAGDATA&)),
             SLOT(on_tag_created(const WIZTAGDATA&)));
@@ -426,12 +423,12 @@ void CWizCategoryBaseView::on_document_tag_modified(const WIZDOCUMENTDATA& docum
     updateDocumentCount(document.strKbGUID);
 }
 
-void CWizCategoryBaseView::on_folder_created(const CString& strLocation)
+void CWizCategoryBaseView::on_folder_created(const QString& strLocation)
 {
     onFolder_created(strLocation);
 }
 
-void CWizCategoryBaseView::on_folder_deleted(const CString& strLocation)
+void CWizCategoryBaseView::on_folder_deleted(const QString& strLocation)
 {
     onFolder_deleted(strLocation);
 }
@@ -607,6 +604,7 @@ void CWizCategoryView::initFolders()
     if (arrayAllLocation.empty()) {
         const QString strNotes("/My Notes/");
         m_dbMgr.db().AddExtraFolder(strNotes);
+        m_dbMgr.db().SetObjectVersion("folder", 0);
         arrayAllLocation.push_back(strNotes);
     }
 
@@ -757,7 +755,7 @@ CWizCategoryViewAllFoldersItem* CWizCategoryView::findAllFolders()
     return NULL;
 }
 
-CWizCategoryViewFolderItem* CWizCategoryView::findFolder(const CString& strLocation, bool create, bool sort)
+CWizCategoryViewFolderItem* CWizCategoryView::findFolder(const QString& strLocation, bool create, bool sort)
 {
     CWizCategoryViewAllFoldersItem* pAllFolders = findAllFolders();
     if (!pAllFolders)
@@ -767,7 +765,7 @@ CWizCategoryViewFolderItem* CWizCategoryView::findFolder(const CString& strLocat
         return findTrash(m_dbMgr.db().kbGUID());
     }
 
-    CString strCurrentLocation = "/";
+    QString strCurrentLocation = "/";
     QTreeWidgetItem* parent = pAllFolders;
 
     CString strTempLocation = strLocation;
@@ -776,7 +774,7 @@ CWizCategoryViewFolderItem* CWizCategoryView::findFolder(const CString& strLocat
 
     QStringList::const_iterator it;
     for (it = sl.begin(); it != sl.end(); it++) {
-        CString strLocationName = *it;
+        QString strLocationName = *it;
         Q_ASSERT(!strLocationName.isEmpty());
         strCurrentLocation = strCurrentLocation + strLocationName + "/";
 
@@ -814,7 +812,7 @@ CWizCategoryViewFolderItem* CWizCategoryView::findFolder(const CString& strLocat
     return dynamic_cast<CWizCategoryViewFolderItem *>(parent);
 }
 
-CWizCategoryViewFolderItem* CWizCategoryView::addFolder(const CString& strLocation, bool sort)
+CWizCategoryViewFolderItem* CWizCategoryView::addFolder(const QString& strLocation, bool sort)
 {
     return findFolder(strLocation, true, sort);
 }
@@ -845,12 +843,12 @@ void CWizCategoryView::onDocument_modified(const WIZDOCUMENTDATA& documentOld, c
     addFolder(documentNew.strLocation, true);
 }
 
-void CWizCategoryView::onFolder_created(const CString& strLocation)
+void CWizCategoryView::onFolder_created(const QString& strLocation)
 {
     addFolder(strLocation, true);
 }
 
-void CWizCategoryView::onFolder_deleted(const CString& strLocation)
+void CWizCategoryView::onFolder_deleted(const QString& strLocation)
 {
     if (CWizCategoryViewFolderItem* pFolder = findFolder(strLocation, false, false))
     {
@@ -868,7 +866,9 @@ void CWizCategoryView::on_action_newDocument()
 
 void CWizCategoryView::on_action_newFolder()
 {
-    CWizLineInputDialog* dialog = new CWizLineInputDialog(tr("New folder"), tr("Please input folder name: "), this);
+    CWizLineInputDialog* dialog = new CWizLineInputDialog(tr("New folder"),
+                                                          tr("Please input folder name: "),
+                                                          "", this);
     connect(dialog, SIGNAL(finished(int)), SLOT(on_action_newFolder_confirmed(int)));
 
     dialog->open();
@@ -900,6 +900,7 @@ void CWizCategoryView::on_action_newFolder_confirmed(int result)
 
     addAndSelectFolder(strLocation);
     m_dbMgr.db().AddExtraFolder(strLocation);
+    m_dbMgr.db().SetObjectVersion("folder", 0);
 }
 
 void CWizCategoryView::on_action_moveFolder()
@@ -972,7 +973,9 @@ void CWizCategoryView::on_action_renameFolder()
         return;
     }
 
-    CWizLineInputDialog* dialog = new CWizLineInputDialog(tr("Rename folder"), tr("Please input new folder name: "), this);
+    CWizLineInputDialog* dialog = new CWizLineInputDialog(tr("Rename folder"),
+                                                          tr("Please input new folder name: "),
+                                                          p->name(), this);
     connect(dialog, SIGNAL(finished(int)), SLOT(on_action_renameFolder_confirmed(int)));
 
     dialog->open();
@@ -1389,7 +1392,9 @@ void CWizCategoryTagsView::onTag_deleted(const WIZTAGDATA& tag)
 
 void CWizCategoryTagsView::on_action_newTag()
 {
-    CWizLineInputDialog* dialog = new CWizLineInputDialog(tr("New tag"), tr("Please input tag name: "), this);
+    CWizLineInputDialog* dialog = new CWizLineInputDialog(tr("New tag"),
+                                                          tr("Please input tag name: "),
+                                                          "", this);
     connect(dialog, SIGNAL(finished(int)), SLOT(on_action_newTag_confirmed(int)));
 
     dialog->open();
@@ -1437,7 +1442,9 @@ void CWizCategoryTagsView::on_action_renameTag()
     if (!p)
         return;
 
-    CWizLineInputDialog* dialog = new CWizLineInputDialog(tr("Rename tag"), tr("Please input tag name: "), this);
+    CWizLineInputDialog* dialog = new CWizLineInputDialog(tr("Rename tag"),
+                                                          tr("Please input tag name: "),
+                                                          p->name(), this);
     connect(dialog, SIGNAL(finished(int)), SLOT(on_action_renameTag_confirmed(int)));
 
     dialog->open();
@@ -1501,6 +1508,8 @@ void CWizCategoryTagsView::on_action_deleteTag_confirmed(int result)
 
 /* ------------------------------ CWizCategoryGroupsView ------------------------------ */
 
+#define WIZ_PERSONAL_GROUP_ROOT_NAME QObject::tr("Personal groups")
+
 #define WIZACTION_GROUP_MARK_READ       QObject::tr("Mark all documents read")
 #define WIZACTION_GROUP_NEW_DOCUMENT    QObject::tr("Create new document")
 #define WIZACTION_GROUP_NEW_FOLDER      QObject::tr("Create new folder")
@@ -1558,7 +1567,24 @@ void CWizCategoryGroupsView::showGroupContextMenu(const QString& strKbGUID, QPoi
 
 void CWizCategoryGroupsView::init()
 {
-    CWizCategoryViewAllGroupsRootItem* pAllGroupsItem = new CWizCategoryViewAllGroupsRootItem(m_app, tr("Groups"), "");
+    // init biz groups
+    QMap<QString, QString> bizInfo;
+    m_dbMgr.db().getBizGroupInfo(bizInfo);
+
+    QMap<QString, QString>::const_iterator it;
+    for (it = bizInfo.begin(); it != bizInfo.end(); it++) {
+        CWizCategoryViewBizGroupRootItem* pBizGroupItem = new CWizCategoryViewBizGroupRootItem(m_app, it.value(), "");
+        addTopLevelItem(pBizGroupItem);
+        pBizGroupItem->setExpanded(true);
+    }
+
+    // draw seperator only if biz group exist
+    if (bizInfo.size()) {
+        addSeparator();
+    }
+
+    // init personal groups
+    CWizCategoryViewAllGroupsRootItem* pAllGroupsItem = new CWizCategoryViewAllGroupsRootItem(m_app, WIZ_PERSONAL_GROUP_ROOT_NAME, "");
     addTopLevelItem(pAllGroupsItem);
     pAllGroupsItem->setExpanded(true);
 
@@ -1572,17 +1598,27 @@ void CWizCategoryGroupsView::init()
 
 void CWizCategoryGroupsView::initGroup(CWizDatabase& db)
 {
-    QTreeWidgetItem* pAllGroupsItem = topLevelItem(0);
+    QTreeWidgetItem* pRoot = NULL;
+
+    // if biz info exist, add group to it instead of All groups root
+    if (!db.info().bizGUID.isEmpty() && !db.info().bizName.isEmpty()) {
+        pRoot = findGroupSet(db.info().bizName, true);
+    } else {
+        pRoot = findGroupSet(WIZ_PERSONAL_GROUP_ROOT_NAME, true);
+    }
+
+    Q_ASSERT(pRoot);
 
     CWizCategoryViewGroupRootItem* pGroupItem = new CWizCategoryViewGroupRootItem(m_app, db.name(), db.kbGUID());
-
-    pAllGroupsItem->addChild(pGroupItem);
+    pRoot->addChild(pGroupItem);
     initGroup(db, pGroupItem, "");
 
-    pAllGroupsItem->sortChildren(0, Qt::AscendingOrder);
+    pRoot->sortChildren(0, Qt::AscendingOrder);
 
     CWizCategoryViewTrashItem* pTrashItem = new CWizCategoryViewTrashItem(m_app, tr("Trash"), db.kbGUID());
     pGroupItem->addChild(pTrashItem);
+
+    pGroupItem->sortChildren(0, Qt::AscendingOrder);
 
     // only show trash if permission is enough
     if (db.permission() > WIZ_USERGROUP_SUPER) {
@@ -1606,12 +1642,17 @@ void CWizCategoryGroupsView::initGroup(CWizDatabase& db, QTreeWidgetItem* pParen
 
 void CWizCategoryGroupsView::initDocumentCount()
 {
-    for (int i = 0; i < topLevelItem(0)->childCount(); i++) {
-        CWizCategoryViewGroupRootItem* pGroupRoot = dynamic_cast<CWizCategoryViewGroupRootItem*>(topLevelItem(0)->child(i));
-        if (!pGroupRoot)
-            continue;
+    int nCount = topLevelItemCount();
+    for (int i = 0; i < nCount; i++) {
+        QTreeWidgetItem* pRoot = topLevelItem(i);
+        int nGroup = pRoot->childCount();
 
-        initDocumentCount(pGroupRoot, m_dbMgr.db(pGroupRoot->kbGUID()));
+        for (int j = 0; j < nGroup; j++) {
+            CWizCategoryViewGroupRootItem* p = dynamic_cast<CWizCategoryViewGroupRootItem*>(pRoot->child(j));
+            if (p) {
+                initDocumentCount(p, m_dbMgr.db(p->kbGUID()));
+            }
+        }
     }
 }
 
@@ -1698,16 +1739,47 @@ void CWizCategoryGroupsView::updateDocumentCount(const QString& strKbGUID)
 
 CWizCategoryViewGroupRootItem* CWizCategoryGroupsView::findGroup(const QString& strKbGUID)
 {
-    QTreeWidgetItem* pTop = topLevelItem(0);
-    int nCount = pTop->childCount();
-    for (int i = 0; i < nCount; i++) {
-        CWizCategoryViewGroupRootItem* pItem = dynamic_cast<CWizCategoryViewGroupRootItem *>(pTop->child(i));
-        if (pItem && (pItem->kbGUID() == strKbGUID)) {
-            return pItem;
+    for (int i = 0; i < topLevelItemCount(); i++) {
+        CWizCategoryViewAllGroupsRootItem* p = dynamic_cast<CWizCategoryViewAllGroupsRootItem *>(topLevelItem(i));
+
+        // only search under all groups root and biz group root
+        if (!p)
+            continue;
+
+        for (int j = 0; j < p->childCount(); j++) {
+            CWizCategoryViewGroupRootItem* pGroup = dynamic_cast<CWizCategoryViewGroupRootItem *>(p->child(j));
+            if (pGroup && (pGroup->kbGUID() == strKbGUID)) {
+                return pGroup;
+            }
         }
     }
 
     return NULL;
+}
+
+CWizCategoryViewAllGroupsRootItem* CWizCategoryGroupsView::findGroupSet(const QString& strName, bool bCreate)
+{
+    for (int i = 0; i < topLevelItemCount(); i++) {
+        CWizCategoryViewAllGroupsRootItem* pItem = dynamic_cast<CWizCategoryViewAllGroupsRootItem *>(topLevelItem(i));
+        if (pItem && (pItem->name() == strName)) {
+            return pItem;
+        }
+    }
+
+    CWizCategoryViewAllGroupsRootItem* p = NULL;
+    if (bCreate) {
+        if (strName == WIZ_PERSONAL_GROUP_ROOT_NAME) {
+            p = new CWizCategoryViewAllGroupsRootItem(m_app, strName, "");
+            addTopLevelItem(p);
+        } else {
+            p = new CWizCategoryViewBizGroupRootItem(m_app, strName, "");
+            insertTopLevelItem(0, p);
+        }
+
+        p->setExpanded(true);
+    }
+
+    return p;
 }
 
 CWizCategoryViewTrashItem* CWizCategoryGroupsView::findTrash(const QString& strKbGUID)
@@ -1943,16 +2015,12 @@ void CWizCategoryGroupsView::onTag_deleted(const WIZTAGDATA& tag)
 
 void CWizCategoryGroupsView::on_itemSelectionChanged()
 {
-    CWizCategoryViewAllGroupsRootItem* root = currentCategoryItem<CWizCategoryViewAllGroupsRootItem>();
-    if (root)
-        return;
-
-    CWizCategoryViewItemBase* p = currentCategoryItem<CWizCategoryViewItemBase>();
-    if (!p) {
-        return;
+    CWizCategoryViewGroupRootItem* pRoot = currentCategoryItem<CWizCategoryViewGroupRootItem>();
+    CWizCategoryViewGroupItem* pItem = currentCategoryItem<CWizCategoryViewGroupItem>();
+    if (pRoot || pItem) {
+        CWizCategoryViewItemBase* p = currentCategoryItem<CWizCategoryViewItemBase>();
+        on_group_permissionChanged(p->kbGUID());
     }
-
-    on_group_permissionChanged(p->kbGUID());
 }
 
 void CWizCategoryGroupsView::on_action_markRead()
@@ -1980,7 +2048,9 @@ void CWizCategoryGroupsView::on_action_newTag()
     if (pRoot)
         return;
 
-    CWizLineInputDialog* dialog = new CWizLineInputDialog(tr("New group folder"), tr("Please input folder name: "), this);
+    CWizLineInputDialog* dialog = new CWizLineInputDialog(tr("New group folder"),
+                                                          tr("Please input folder name: "),
+                                                          "", this);
     connect(dialog, SIGNAL(finished(int)), SLOT(on_action_newTag_confirmed(int)));
 
     dialog->open();
@@ -2032,7 +2102,9 @@ void CWizCategoryGroupsView::on_action_renameTag()
     if (!p)
         return;
 
-    CWizLineInputDialog* dialog = new CWizLineInputDialog(tr("Rename group folder"), tr("Please input folder name: "), this);
+    CWizLineInputDialog* dialog = new CWizLineInputDialog(tr("Rename group folder"),
+                                                          tr("Please input folder name: "),
+                                                          p->name(), this);
     connect(dialog, SIGNAL(finished(int)), SLOT(on_action_renameTag_confirmed(int)));
 
     dialog->open();

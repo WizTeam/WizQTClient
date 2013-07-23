@@ -20,6 +20,9 @@ class IWizGlobal : public QObject
 public:
     static IWizGlobal* instance();
 
+    QString apiUrl() const { return m_strApiUrl; }
+    void setApiUrl(const QString& strUrl) { m_strApiUrl = strUrl; }
+
     const WIZUSERINFO& userInfo() const { return m_user; }
     void setUserInfo(const WIZUSERINFO& info) { m_user = info; }
 
@@ -36,6 +39,7 @@ private:
     static IWizGlobal* m_pInstance;
 
     WIZUSERINFO m_user;
+    QString m_strApiUrl;
     QBuffer m_bufferLog;
 };
 
