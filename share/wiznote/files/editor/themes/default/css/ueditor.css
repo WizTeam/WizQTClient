@@ -131,21 +131,43 @@ div.edui-box {
 }
 /*UI工具栏、编辑区域、底部*/
 .edui-default .edui-editor {
-    border: 1px solid #ccc;
+    border: 1px solid #d4d4d4;
     background-color: white;
     position: relative;
     overflow: visible;
+    -webkit-border-radius: 4px;
+    -moz-border-radius: 4px;
+    border-radius: 4px;
 }
 
 .edui-default .edui-editor-toolbarbox {
     position: relative;
     zoom: 1;
-    display: none;
+    -webkit-box-shadow:0 1px 4px rgba(204, 204, 204, 0.6);
+    -moz-box-shadow:0 1px 4px rgba(204, 204, 204, 0.6);
+    box-shadow:0 1px 4px rgba(204, 204, 204, 0.6);
+    border-top-left-radius:2px;
+    border-top-right-radius:2px;
 }
 
 .edui-default .edui-editor-toolbarboxouter {
-    border-bottom: 1px solid #ccc;
-    background: white url(../images/toolbar_bg.png) repeat-x bottom left;
+    border-bottom: 1px solid #d4d4d4;
+    background-color: #fafafa;
+    background-image: -moz-linear-gradient(top, #ffffff, #f2f2f2);
+    background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#ffffff), to(#f2f2f2));
+    background-image: -webkit-linear-gradient(top, #ffffff, #f2f2f2);
+    background-image: -o-linear-gradient(top, #ffffff, #f2f2f2);
+    background-image: linear-gradient(to bottom, #ffffff, #f2f2f2);
+    background-repeat: repeat-x;
+    /*border: 1px solid #d4d4d4;*/
+    -webkit-border-radius: 4px;
+    -moz-border-radius: 4px;
+    border-radius: 4px;
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ffffffff', endColorstr='#fff2f2f2', GradientType=0);
+    *zoom: 1;
+    -webkit-box-shadow: 0 1px 4px rgba(0, 0, 0, 0.065);
+    -moz-box-shadow: 0 1px 4px rgba(0, 0, 0, 0.065);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.065);
 }
 
 .edui-default .edui-editor-toolbarboxinner {
@@ -155,7 +177,7 @@ div.edui-box {
 .edui-default .edui-editor-iframeholder {
     position: relative;
     /*for fix ie6 toolbarmsg under iframe bug. relative -> static */
-    /*_position: static !important;*/
+    /*_position: static !important;*
 }
 
 .edui-default .edui-editor-iframeholder textarea {
@@ -230,10 +252,10 @@ div.edui-box {
 }
 
 .edui-default .edui-bubble .edui-shadow {
-    box-shadow: 1px 1px 3px #818181;
-    -webkit-box-shadow: 2px 2px 3px #818181;
-    -moz-box-shadow: 2px 2px 3px #818181;
-    filter: progid:DXImageTransform.Microsoft.Blur(PixelRadius = '2', MakeShadow = 'true', ShadowOpacity = '0.5');
+    /*box-shadow: 1px 1px 3px #818181;*/
+    /*-webkit-box-shadow: 2px 2px 3px #818181;*/
+    /*-moz-box-shadow: 2px 2px 3px #818181;*/
+    /*filter: progid:DXImageTransform.Microsoft.Blur(PixelRadius = '2', MakeShadow = 'true', ShadowOpacity = '0.5');*/
 }
 
 .edui-default .edui-editor-toolbarmsg {
@@ -290,6 +312,14 @@ div.edui-box {
 }
 
 .edui-default .edui-for-fontfamily .edui-listitem-label {
+    min-width: 130px;
+    _width: 120px;
+    font-size: 12px;
+    height: 22px;
+    line-height: 22px;
+    padding-left: 5px;
+}
+.edui-default .edui-for-insertcode .edui-listitem-label {
     min-width: 120px;
     _width: 120px;
     font-size: 12px;
@@ -297,7 +327,6 @@ div.edui-box {
     line-height: 22px;
     padding-left: 5px;
 }
-
 .edui-default .edui-for-underline .edui-listitem-label {
     min-width: 120px;
     _width: 120px;
@@ -343,13 +372,12 @@ div.edui-box {
 }
 
 .edui-default .edui-menu .edui-popup-content {
-    background-color: white;
     padding: 3px;
 }
 
 .edui-default .edui-menu-body {
     _width: 150px;
-    min-width: 150px;
+    min-width: 170px;
     background: url("../images/sparator_v.png") repeat-y 25px;
 }
 
@@ -365,8 +393,8 @@ div.edui-box {
 .edui-default .edui-menuitem .edui-icon {
     width: 20px !important;
     height: 20px !important;
-    background: url(../images/icons.png) 0 -40px;
-    background: url(../images/icons.gif) 0 -40 px\9;
+    background: url(../images/icons.png) 0 -4000px;
+    background: url(../images/icons.gif) 0 -4000px\9;
 }
 
 .edui-default .edui-menuitem .edui-label {
@@ -393,6 +421,7 @@ div.edui-box {
     line-height: 20px;
     padding-left: 5px;
     white-space: nowrap;
+    margin: 0 3px 0 0;
 }
 
 .edui-default .edui-toolbar .edui-combox-body .edui-arrow {
@@ -405,6 +434,9 @@ div.edui-box {
 .edui-default .edui-toolbar .edui-combox .edui-combox-body {
     border: 1px solid #CCC;
     background-color: white;
+    border-radius: 2px;
+    -webkit-border-radius: 2px;
+    -moz-border-radius: 2px;
 }
 
 .edui-default .edui-toolbar .edui-combox-body .edui-splitborder {
@@ -468,6 +500,9 @@ div.edui-box {
     background-color: #ffe69f;
     padding: 0;
     border: 1px solid #dcac6c;
+    border-radius: 2px;
+    -webkit-border-radius: 2px;
+    -moz-border-radius: 2px;
 }
 
 .edui-default .edui-toolbar .edui-button .edui-state-active .edui-button-wrap {
@@ -499,6 +534,9 @@ div.edui-box {
     background-position: -60px 0;
 }
 
+.edui-default  .edui-for-fontborder .edui-icon {
+    background-position:-160px -40px;
+}
 .edui-default  .edui-for-underline .edui-icon {
     background-position: -140px 0;
 }
@@ -688,11 +726,19 @@ div.edui-box {
 }
 
 .edui-default  .edui-for-insertrow .edui-icon {
-    background-position: -740px -20px;
+    background-position: -478px -76px;
+}
+
+.edui-default  .edui-for-insertrownext .edui-icon {
+    background-position: -498px -76px;
 }
 
 .edui-default  .edui-for-insertcol .edui-icon {
-    background-position: -700px -20px;
+    background-position: -455px -76px;
+}
+
+.edui-default  .edui-for-insertcolnext  .edui-icon {
+    background-position: -429px -76px;
 }
 
 .edui-default  .edui-for-mergeright .edui-icon {
@@ -830,6 +876,54 @@ div.edui-box {
 .edui-default  .edui-for-music .edui-icon {
     background-position: -18px -40px
 }
+
+.edui-default  .edui-for-formula .edui-icon {
+    background-position: -200px -40px
+}
+
+.edui-default  .edui-for-aligntd  .edui-icon {
+    background-position: -236px -76px;
+}
+
+.edui-default  .edui-for-insertparagraphtrue  .edui-icon {
+    background-position: -625px -76px;
+}
+
+.edui-default  .edui-for-insertparagraph  .edui-icon {
+    background-position: -602px -76px;
+}
+
+.edui-default  .edui-for-insertcaption  .edui-icon {
+    background-position: -336px -76px;
+}
+
+.edui-default  .edui-for-deletecaption  .edui-icon {
+    background-position: -362px -76px;
+}
+
+.edui-default  .edui-for-inserttitle  .edui-icon {
+    background-position: -286px -76px;
+}
+
+.edui-default  .edui-for-deletetitle  .edui-icon {
+    background-position: -311px -76px;
+}
+
+.edui-default  .edui-for-aligntable  .edui-icon {
+    background-position: -440px 0;
+}
+
+.edui-default  .edui-for-tablealignment-left  .edui-icon {
+    background-position: -460px 0;
+}
+
+.edui-default  .edui-for-tablealignment-center  .edui-icon {
+    background-position: -420px 0;
+}
+
+.edui-default  .edui-for-tablealignment-right  .edui-icon {
+    background-position: -480px 0;
+}
 /*splitbutton*/
 .edui-default .edui-toolbar .edui-splitbutton-body .edui-arrow,
 .edui-default .edui-toolbar .edui-menubutton-body .edui-arrow {
@@ -918,6 +1012,8 @@ div.edui-box {
 /* 弹出菜单 */
 .edui-default .edui-popup {
     z-index: 3000;
+    background-color: #ffffff;
+
 }
 
 .edui-default .edui-popup .edui-shadow {
@@ -925,17 +1021,24 @@ div.edui-box {
     top: 0;
     width: 100%;
     height: 100%;
-    background-color: black;
-    box-shadow: 3px 3px 5px #818181;
-    -webkit-box-shadow: 3px 3px 5px #818181;
-    -moz-box-shadow: 3px 3px 5px #818181;
-    filter: progid:DXImageTransform.Microsoft.Blur(PixelRadius = '3', MakeShadow = 'true', ShadowOpacity = '0.5');
 }
 
 .edui-default .edui-popup-content {
-    border: 1px solid gray;
-    background-color: white;
+    border:1px solid #ccc;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    *border-right-width: 2px;
+    *border-bottom-width: 2px;
+    -webkit-border-radius: 6px;
+    -moz-border-radius: 6px;
+    border-radius: 6px;
+    -webkit-box-shadow: 0 3px 4px rgba(0, 0, 0, 0.2);
+    -moz-box-shadow: 0 3px 4px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 3px 4px rgba(0, 0, 0, 0.2);
+    -webkit-background-clip: padding-box;
+    -moz-background-clip: padding;
+    background-clip: padding-box;
     padding: 5px;
+    background:#ffffff;
 }
 
 .edui-default .edui-popup .edui-bordereraser {
@@ -982,12 +1085,12 @@ div.edui-box {
 .edui-default .edui-dialog-wrap {
     margin-right: 6px;
     margin-bottom: 6px;
-    border: 1px solid #c6c6c6;
 }
 
 .edui-default .edui-dialog-body {
     position: relative;
-    background-color: white;
+
+    padding:2px 0 0 2px;
     _zoom: 1;
 }
 
@@ -998,11 +1101,20 @@ div.edui-box {
     top: 0;
     width: 100%;
     height: 100%;
-    background-color: black;
-    box-shadow: 3px 3px 5px #818181;
-    -webkit-box-shadow: 3px 3px 5px #818181;
-    -moz-box-shadow: 3px 3px 5px #818181;
-    filter: progid:DXImageTransform.Microsoft.Blur(PixelRadius = '3', MakeShadow = 'true', ShadowOpacity = '0.5');
+    background-color: #ffffff;
+    border: 1px solid #ccc;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    *border-right-width: 2px;
+    *border-bottom-width: 2px;
+    -webkit-border-radius: 6px;
+    -moz-border-radius: 6px;
+    border-radius: 6px;
+    -webkit-box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+    -moz-box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+    -webkit-background-clip: padding-box;
+    -moz-background-clip: padding;
+    background-clip: padding-box;
 }
 
 .edui-default .edui-dialog-foot {
@@ -1212,7 +1324,7 @@ div.edui-box {
 /*searchreplace-dialog*/
 .edui-default .edui-for-searchreplace .edui-dialog-content {
     width: 400px;
-    height: 180px;
+    height: 220px;
 }
 
 /*help-dialog*/
@@ -1225,7 +1337,7 @@ div.edui-box {
 .edui-default .edui-for-edittable .edui-dialog-content {
     width: 540px;
     _width:590px;
-    height: 265px;
+    height: 285px;
 }
 
 /*edittip-dialog*/
@@ -1379,6 +1491,82 @@ div.edui-box {
     height: 14px;
     margin: 0;
 }
+.edui-default .edui-colorpicker-advbtn{
+    display: block;
+    text-align: center;
+    cursor: pointer;
+    height:20px;
+}
+.arrow_down{
+    background: white url('../images/arrow_down.png') no-repeat center;
+}
+.arrow_up{
+    background: white url('../images/arrow_up.png') no-repeat center;
+}
+/*高级的样式*/
+.edui-colorpicker-adv{
+    position: relative;
+    overflow: hidden;
+    height: 180px;
+    display: none;
+}
+.edui-colorpicker-plant, .edui-colorpicker-hue {
+    border: solid 1px #666;
+}
+.edui-colorpicker-pad {
+    width: 150px;
+    height: 150px;
+    left: 14px;
+    top: 13px;
+    position: absolute;
+    background: red;
+    overflow: hidden;
+    cursor: crosshair;
+}
+.edui-colorpicker-cover{
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 150px;
+    height: 150px;
+    background: url("../images/tangram-colorpicker.png") -160px -200px;
+}
+.edui-colorpicker-padDot{
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 11px;
+    height: 11px;
+    overflow: hidden;
+    background: url(../images/tangram-colorpicker.png) 0px -200px repeat-x;
+    z-index: 1000;
+
+}
+.edui-colorpicker-sliderMain {
+    position: absolute;
+    left: 171px;
+    top: 13px;
+    width: 19px;
+    height: 152px;
+    background: url(../images/tangram-colorpicker.png) -179px -12px no-repeat;
+
+}
+.edui-colorpicker-slider {
+    width: 100%;
+    height: 100%;
+    cursor: pointer;
+}
+.edui-colorpicker-thumb{
+    position: absolute;
+    top: 0;
+    cursor: pointer;
+    height: 3px;
+    left: -1px;
+    right: -1px;
+    border: 1px solid black;
+    background: white;
+    opacity: .8;
+}
 /*自动排版弹出菜单*/
 .edui-default .edui-autotypesetpicker .edui-autotypesetpicker-body {
     font-size: 12px;
@@ -1418,22 +1606,43 @@ div.edui-box {
     height: 20px;
     width: 20px;
     padding: 1px;
-    background-image: url(../images/icons.png);
-    background-image: url(../images/icons.gif) \9;
+    background-image: url(../images/table-cell-align.png);
 }
+
 .edui-default .edui-cellalignpicker-body .edui-left{
-    background-position: -460px 0;
+    background-position: 0 0;
 }
+
 .edui-default .edui-cellalignpicker-body .edui-center{
-    background-position: -420px 0;
+    background-position: -25px 0;
 }
 .edui-default .edui-cellalignpicker-body .edui-right{
-    background-position: -480px 0;
+    background-position: -51px 0;
 }
-.edui-default .edui-cellalignpicker-body td.edui-state-hover {
-    background-color: #fff5d4;
-    padding: 0;
-    border: 1px solid #dcac6c;
+
+.edui-default .edui-cellalignpicker-body td.edui-state-hover .edui-left{
+    background-position: -73px 0;
+}
+
+.edui-default .edui-cellalignpicker-body td.edui-state-hover .edui-center{
+    background-position: -98px 0;
+}
+
+.edui-default .edui-cellalignpicker-body td.edui-state-hover .edui-right{
+    background-position: -124px 0;
+}
+
+.edui-default .edui-cellalignpicker-body td.edui-cellalign-selected .edui-left {
+    background-position: -146px 0;
+    backgroun-color: #f1f4f5;
+}
+
+.edui-default .edui-cellalignpicker-body td.edui-cellalign-selected .edui-center {
+    background-position: -245px 0;
+}
+
+.edui-default .edui-cellalignpicker-body td.edui-cellalign-selected .edui-right {
+    background-position: -271px 0;
 }
 /*分隔线*/
 .edui-default .edui-toolbar .edui-separator {
@@ -1458,26 +1667,28 @@ div.edui-box {
 .edui-default .edui-for-emotion .edui-icon {
     background-position: -60px -20px;
 }
-
-.edui-default .edui-for-emotion .edui-popup-content {
-    position: relative;
-    z-index: 555
-}
-
-.edui-default .edui-for-emotion .edui-popup-content iframe {
+.edui-default .edui-for-emotion .edui-popup-content iframe
+{
     width: 514px;
     height: 380px;
     overflow: hidden;
+}
+.edui-default .edui-for-emotion .edui-popup-content
+{
+    position: relative;
+    z-index: 555
 }
 
 .edui-default .edui-for-emotion .edui-splitborder {
     display: none
 }
 
-.edui-default .edui-for-emotion .edui-splitbutton-body .edui-arrow {
+.edui-default .edui-for-emotion .edui-splitbutton-body .edui-arrow
+{
     width: 0
 }
-.edui-default .edui-toolbar .edui-for-emotion  .edui-state-active .edui-splitborder{
+.edui-default .edui-toolbar .edui-for-emotion  .edui-state-active .edui-splitborder
+{
     border-left: 1px solid transparent;
 }
 /*contextmenu*/
@@ -1509,6 +1720,16 @@ div.edui-box {
     background-color: #fff5d4;
     border: 1px solid #dcac6c;
 }
+/*弹出菜单*/
+.edui-default .edui-shortcutmenu {
+    padding: 2px;
+    width: 190px;
+    height: 50px;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
 /*粘贴弹出菜单*/
 .edui-default .edui-wordpastepop .edui-popup-content{
     border: none;

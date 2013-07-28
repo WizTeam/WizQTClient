@@ -10,7 +10,6 @@ CWizNoteInfoForm::CWizNoteInfoForm(CWizDatabaseManager& db, QWidget *parent)
 {
     ui->setupUi(this);
     setContentsMargins(8, 20, 8, 8);
-    setAutoFillBackground(true);
 
     ui->editTitle->setReadOnly(true);
     ui->editCreateTime->setReadOnly(true);

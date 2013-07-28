@@ -194,6 +194,7 @@ public Q_SLOTS:
     void on_actionFormatInsertDate_triggered();
     void on_actionFormatInsertTime_triggered();
     void on_actionFormatRemoveFormat_triggered();
+    void on_actionEditorViewSource_triggered();
 
     //void on_searchIndexerStarted();
     void on_searchDocumentFind(const WIZDOCUMENTDATAEX& doc);

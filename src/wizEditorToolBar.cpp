@@ -208,63 +208,76 @@ private:
 CWizEditorToolBar::CWizEditorToolBar(CWizExplorerApp& app, QWidget *parent)
     : QWidget(parent)
     , m_app(app)
-    //, m_bActionsInited(false)
 {
     MainWindow* mainWindow = qobject_cast<MainWindow *>(m_app.mainWindow());
     QString skin = m_app.userSettings().skin();
 
     m_comboFontFamily = new CWizToolComboBoxFont(this);
-    connect(m_comboFontFamily, SIGNAL(activated(const QString&)), SLOT(on_actionFormatFontFamily_activated(const QString&)));
+    connect(m_comboFontFamily, SIGNAL(activated(const QString&)),
+            SLOT(on_actionFormatFontFamily_activated(const QString&)));
 
     QStringList listSize;
-    listSize << "9px" << "10px" << "11px" << "12px" << "13px" << "14px" << "18px" << "24px" << "36px" << "48px" << "64px" << "72px";
+    listSize << "9px" << "10px" << "11px" << "12px" << "13px"<< "14px"
+             << "18px" << "24px" << "36px" << "48px" << "64px" << "72px";
     m_comboFontSize = new CWizToolComboBox(this);
     m_comboFontSize->addItems(listSize);
-    connect(m_comboFontSize, SIGNAL(activated(const QString&)), SLOT(on_actionFormatFontSize_activated(const QString&)));
+    connect(m_comboFontSize, SIGNAL(activated(const QString&)),
+            SLOT(on_actionFormatFontSize_activated(const QString&)));
 
     m_btnForeColor = new CWizToolButtonColor(this);
     m_btnForeColor->setIcon(::WizLoadSkinIcon(skin, "actionFormatColor"));
-    connect(m_btnForeColor, SIGNAL(clicked()), mainWindow, SLOT(on_actionFormatForeColor_triggered()));
+    connect(m_btnForeColor, SIGNAL(clicked()), mainWindow,
+            SLOT(on_actionFormatForeColor_triggered()));
 
     m_btnBold = new CWizToolButton(this);
     m_btnBold->setIcon(::WizLoadSkinIcon(skin, "actionFormatBold"));
-    connect(m_btnBold, SIGNAL(clicked()), mainWindow, SLOT(on_actionFormatBold_triggered()));
+    connect(m_btnBold, SIGNAL(clicked()), mainWindow,
+            SLOT(on_actionFormatBold_triggered()));
 
     m_btnItalic = new CWizToolButton(this);
     m_btnItalic->setIcon(::WizLoadSkinIcon(skin, "actionFormatItalic"));
-    connect(m_btnItalic, SIGNAL(clicked()), mainWindow, SLOT(on_actionFormatItalic_triggered()));
+    connect(m_btnItalic, SIGNAL(clicked()), mainWindow,
+            SLOT(on_actionFormatItalic_triggered()));
 
     m_btnUnderLine = new CWizToolButton(this);
     m_btnUnderLine->setIcon(::WizLoadSkinIcon(skin, "actionFormatUnderLine"));
-    connect(m_btnUnderLine, SIGNAL(clicked()), mainWindow, SLOT(on_actionFormatUnderLine_triggered()));
+    connect(m_btnUnderLine, SIGNAL(clicked()), mainWindow,
+            SLOT(on_actionFormatUnderLine_triggered()));
 
     m_btnJustifyLeft = new CWizToolButton(this);
     m_btnJustifyLeft->setIcon(::WizLoadSkinIcon(skin, "actionFormatJustifyLeft"));
-    connect(m_btnJustifyLeft, SIGNAL(clicked()), mainWindow, SLOT(on_actionFormatJustifyLeft_triggered()));
+    connect(m_btnJustifyLeft, SIGNAL(clicked()), mainWindow,
+            SLOT(on_actionFormatJustifyLeft_triggered()));
 
     m_btnJustifyCenter = new CWizToolButton(this);
     m_btnJustifyCenter->setIcon(::WizLoadSkinIcon(skin, "actionFormatJustifyCenter"));
-    connect(m_btnJustifyCenter, SIGNAL(clicked()), mainWindow, SLOT(on_actionFormatJustifyCenter_triggered()));
+    connect(m_btnJustifyCenter, SIGNAL(clicked()), mainWindow,
+            SLOT(on_actionFormatJustifyCenter_triggered()));
 
     m_btnJustifyRight = new CWizToolButton(this);
     m_btnJustifyRight->setIcon(::WizLoadSkinIcon(skin, "actionFormatJustifyRight"));
-    connect(m_btnJustifyRight, SIGNAL(clicked()), mainWindow, SLOT(on_actionFormatJustifyRight_triggered()));
+    connect(m_btnJustifyRight, SIGNAL(clicked()), mainWindow,
+            SLOT(on_actionFormatJustifyRight_triggered()));
 
     m_btnUnorderedList = new CWizToolButton(this);
     m_btnUnorderedList->setIcon(::WizLoadSkinIcon(skin, "actionFormatInsertUnorderedList"));
-    connect(m_btnUnorderedList, SIGNAL(clicked()), mainWindow, SLOT(on_actionFormatInsertUnorderedList_triggered()));
+    connect(m_btnUnorderedList, SIGNAL(clicked()), mainWindow,
+            SLOT(on_actionFormatInsertUnorderedList_triggered()));
 
     m_btnOrderedList = new CWizToolButton(this);
     m_btnOrderedList->setIcon(::WizLoadSkinIcon(skin, "actionFormatInsertOrderedList"));
-    connect(m_btnOrderedList, SIGNAL(clicked()), mainWindow, SLOT(on_actionFormatInsertOrderedList_triggered()));
+    connect(m_btnOrderedList, SIGNAL(clicked()), mainWindow,
+            SLOT(on_actionFormatInsertOrderedList_triggered()));
 
     m_btnTable = new CWizToolButton(this);
     m_btnTable->setIcon(::WizLoadSkinIcon(skin, "actionFormatInsertTable"));
-    connect(m_btnTable, SIGNAL(clicked()), mainWindow, SLOT(on_actionFormatInsertTable_triggered()));
+    connect(m_btnTable, SIGNAL(clicked()), mainWindow,
+            SLOT(on_actionFormatInsertTable_triggered()));
 
     m_btnHorizontal = new CWizToolButton(this);
     m_btnHorizontal->setIcon(::WizLoadSkinIcon(skin, "actionFormatInsertHorizontal"));
-    connect(m_btnHorizontal, SIGNAL(clicked()), mainWindow, SLOT(on_actionFormatInsertHorizontal_triggered()));
+    connect(m_btnHorizontal, SIGNAL(clicked()), mainWindow,
+            SLOT(on_actionFormatInsertHorizontal_triggered()));
 
     QHBoxLayout* layout = new QHBoxLayout();
     layout->setContentsMargins(3, 0, 3, 0);

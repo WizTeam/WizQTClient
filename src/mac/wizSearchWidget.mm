@@ -7,25 +7,94 @@
 #include "wizmachelper.h"
 
 // NSSearchField delegate
-@interface NSSearchTarget: NSObject
+@interface WizSearchTarget: NSObject
 {
     CWizSearchWidget* m_pTarget;
 }
--(id)initWithObject:(CWizSearchWidget*)object;
--(IBAction)onEditing:(id)sender;
+- (id)initWithObject:(CWizSearchWidget*)object;
+- (IBAction)onEditing:(id)sender;
 @end
 
-@implementation NSSearchTarget
--(id)initWithObject:(CWizSearchWidget*)object
+@implementation WizSearchTarget
+- (id)initWithObject:(CWizSearchWidget*)object
 {
     self = [super init];
     m_pTarget = object;
     return self;
 }
--(IBAction)onEditing:(id)sender
+- (IBAction)onEditing:(id)sender
 {
     QString text = WizToQString([sender stringValue]);
     m_pTarget->on_search_textChanged(text);
+}
+@end
+
+// WizSearchField
+@interface WizSearchField: NSSearchField
+- (BOOL)performKeyEquivalent:(NSEvent *)theEvent;
+- (BOOL)becomeFirstResponder;
+@end
+
+@implementation WizSearchField
+-(BOOL)performKeyEquivalent:(NSEvent *)theEvent
+{
+    if (([theEvent type] == NSKeyDown) && ([theEvent modifierFlags] & NSCommandKeyMask))
+    {
+        NSResponder * responder = [[self window] firstResponder];
+
+        if ((responder != nil) && [responder isKindOfClass:[NSTextView class]])
+        {
+            NSTextView * textView = (NSTextView *)responder;
+            NSRange range = [textView selectedRange];
+            bool bHasSelectedTexts = (range.length > 0);
+
+            unsigned short keyCode = [theEvent keyCode];
+
+            bool bHandled = false;
+
+            //6 Z, 7 X, 8 C, 9 V
+            if (keyCode == 6)
+            {
+                // Lead crash!
+//                if ([[textView undoManager] canUndo])
+//                {
+//                    [[textView undoManager] undo];
+//                    bHandled = true;
+//                }
+            }
+            else if (keyCode == 7 && bHasSelectedTexts)
+            {
+                [textView cut:self];
+                bHandled = true;
+            }
+            else if (keyCode== 8 && bHasSelectedTexts)
+            {
+                [textView copy:self];
+                bHandled = true;
+            }
+            else if (keyCode == 9)
+            {
+                [textView paste:self];
+                bHandled = true;
+            }
+
+            if (bHandled)
+                return YES;
+        }
+    }
+
+    return NO;
+}
+
+- (BOOL)becomeFirstResponder
+{
+    // FIXME: qt can't switch focus between native and alien widgets, manually do it.
+    QWidget* widget = QApplication::focusWidget();
+    if (widget) {
+        widget->clearFocus();
+    }
+
+    return YES;
 }
 @end
 
@@ -39,15 +108,15 @@ CWizSearchWidget::CWizSearchWidget(CWizExplorerApp& app, QWidget* parent /* = 0 
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 
     // Create the NSSearchField, set it on the QCocoaViewContainer.
-    NSSearchField* pSearchField = [[NSSearchField alloc] init];
+    WizSearchField* pSearchField = [[WizSearchField alloc] init];
     setCocoaView(pSearchField);
 
-    NSSearchTarget *bt = [[NSSearchTarget alloc] initWithObject:this];
+    WizSearchTarget *bt = [[WizSearchTarget alloc] initWithObject:this];
     [pSearchField setTarget: bt];
     [pSearchField setAction: @selector(onEditing:)];
 
-    NSString* strPlaceHolder = WizToNSString(QObject::tr("Search documents"));
-    [[pSearchField cell] setPlaceholderString:strPlaceHolder];
+    //NSString* strPlaceHolder = WizToNSString(QObject::tr("Search documents"));
+    //[[pSearchField cell] setPlaceholderString:strPlaceHolder];
 
     // Use a Qt menu for the search field menu.
     //QMenu *qtMenu = createMenu(this);

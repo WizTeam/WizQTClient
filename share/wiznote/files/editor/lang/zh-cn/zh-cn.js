@@ -8,13 +8,13 @@
 UE.I18N['zh-cn'] = {
     'labelMap':{
         'anchor':'锚点', 'undo':'撤销', 'redo':'重做', 'bold':'加粗', 'indent':'首行缩进', 'snapscreen':'截图',
-        'italic':'斜体', 'underline':'下划线', 'strikethrough':'删除线', 'subscript':'下标',
+        'italic':'斜体', 'underline':'下划线', 'strikethrough':'删除线', 'subscript':'下标','fontborder':'字符边框',
         'superscript':'上标', 'formatmatch':'格式刷', 'source':'源代码', 'blockquote':'引用',
         'pasteplain':'纯文本粘贴模式', 'selectall':'全选', 'print':'打印', 'preview':'预览',
         'horizontal':'分隔线', 'removeformat':'清除格式', 'time':'时间', 'date':'日期',
         'unlink':'取消链接', 'insertrow':'前插入行', 'insertcol':'前插入列', 'mergeright':'右合并单元格', 'mergedown':'下合并单元格',
         'deleterow':'删除行', 'deletecol':'删除列', 'splittorows':'拆分成行', 'splittocols':'拆分成列', 'splittocells':'完全拆分单元格',
-        'mergecells':'合并多个单元格', 'deletetable':'删除表格', 'cleardoc':'清空文档','insertparagraphbeforetable':"表格前插入行",'fontfamily':'字体', 'fontsize':'字号', 'paragraph':'段落格式', 'insertimage':'图片',
+        'mergecells':'合并多个单元格', 'deletetable':'删除表格', 'cleardoc':'清空文档','insertparagraphbeforetable':"表格前插入行",'insertcode':'代码语言','fontfamily':'字体', 'fontsize':'字号', 'paragraph':'段落格式', 'insertimage':'图片',
         'edittable':'表格属性','edittd':'单元格属性', 'link':'超链接','emotion':'表情', 'spechars':'特殊字符', 'searchreplace':'查询替换', 'map':'Baidu地图', 'gmap':'Google地图',
         'insertvideo':'视频', 'help':'帮助', 'justifyleft':'居左对齐', 'justifyright':'居右对齐', 'justifycenter':'居中对齐',
         'justifyjustify':'两端对齐', 'forecolor':'字体颜色', 'backcolor':'背景色', 'insertorderedlist':'有序列表',
@@ -46,24 +46,50 @@ UE.I18N['zh-cn'] = {
     },
     'paragraph':{'p':'段落', 'h1':'标题 1', 'h2':'标题 2', 'h3':'标题 3', 'h4':'标题 4', 'h5':'标题 5', 'h6':'标题 6'},
     'fontfamily':{
-           'songti':'宋体',
-           'kaiti':'楷体',
-           'heiti':'黑体',
-           'lishu':'隶书',
-           'yahei':'微软雅黑',
-           'andaleMono':'andale mono',
-           'arial': 'arial',
-           'arialBlack':'arial black',
-           'comicSansMs':'comic sans ms',
-           'impact':'impact',
-           'timesNewRoman':'times new roman'
+        'songti':'宋体',
+        'kaiti':'楷体',
+        'heiti':'黑体',
+        'lishu':'隶书',
+        'yahei':'微软雅黑',
+        'andaleMono':'andale mono',
+        'arial': 'arial',
+        'arialBlack':'arial black',
+        'comicSansMs':'comic sans ms',
+        'impact':'impact',
+        'timesNewRoman':'times new roman'
+    },
+    'insertcode':{
+        'as3':'ActionScript3',
+        'bash':'Bash/Shell',
+        'cpp':'C/C++',
+        'css':'Css',
+        'cf':'CodeFunction',
+        'c#':'C#',
+        'delphi':'Delphi',
+        'diff':'Diff',
+        'erlang':'Erlang',
+        'groovy':'Groovy',
+        'html':'Html',
+        'java':'Java',
+        'jfx':'JavaFx',
+        'js':'Javascript',
+        'pl':'Perl',
+        'php':'Php',
+        'plain':'Plain Text',
+        'ps':'PowerShell',
+        'python':'Python',
+        'ruby':'Ruby',
+        'scala':'Scala',
+        'sql':'Sql',
+        'vb':'Vb',
+        'xml':'Xml'
     },
     'customstyle':{
-            'tc':'标题居中',
-            'tl':'标题居左',
-            'im':'强调',
-            'hi':'明显强调'
-        },
+        'tc':'标题居中',
+        'tl':'标题居左',
+        'im':'强调',
+        'hi':'明显强调'
+    },
     elementPathTip:"元素路径",
     'wordCountTip':"字数统计",
     'wordCountMsg':'当前已输入{#count}个字符, 您还可以输入{#leave}个字符。 ',
@@ -109,7 +135,7 @@ UE.I18N['zh-cn'] = {
         'insertcol':"左插入列",
         'insertrownext':'后插入行',
         'insertcolnext':'右插入列',
-        insertcaption:'插入表格名称',
+        'insertcaption':'插入表格名称',
         'deletecaption':'删除表格名称',
         'inserttitle':'插入表格标题行',
         'deletetitle':'删除表格标题行',
@@ -122,10 +148,23 @@ UE.I18N['zh-cn'] = {
         'splittocells':"完全拆分单元格",
         'splittocols':"拆分成列",
         'splittorows':"拆分成行",
+        'tablesort':'表格排序',
+        'reversecurrent':'逆序当前',
+        'orderbyasc':'按ASCII字符升序',
+        'reversebyasc':'按ASCII字符降序',
+        'orderbynum':'按数值大小升序',
+        'reversebynum':'按数值大小降序',
+        'borderbk':'边框底纹',
+        'setcolor':'表格隔行变色',
+        'unsetcolor':'取消表格隔行变色',
+        'setbackground':'选区背景隔行',
+        'unsetbackground':'取消选区背景',
+        'redandblue':'红蓝相间',
+        'threecolorgradient':'三色渐变',
         'copy':"复制(Ctrl + c)",
         'copymsg':"请使用 'Ctrl + c'执行复制操作",
         'paste':"粘贴(Ctrl + v)",
-        'pastemsg':"请使用'Ctrl + v'执行复制操作",
+         'pastemsg':"请使用 'Ctrl + v'执行复制操作",
         'highlightcode':'插入代码'
     },
 
@@ -225,7 +264,7 @@ UE.I18N['zh-cn'] = {
     },
     'webapp':{
         tip1:"本功能由百度APP提供，如看到此页面，请各位站长首先申请百度APPKey!",
-        tip2:"申请完成之后请至editor_config.js中配置获得的appkey! ",
+        tip2:"申请完成之后请至ueditor.config.js中配置获得的appkey! ",
         applyFor:"点此申请",
         anthorApi:"百度API"
     },
@@ -336,7 +375,7 @@ UE.I18N['zh-cn'] = {
         'static':{
             'lang_input_about':'关于UEditor',
             'lang_input_shortcuts':'快捷键',
-            'lang_input_version':'版本:1.2.5',
+            'lang_input_version':'版本:1.2.6',
             'lang_input_introduction':'UEditor是由百度web前端研发部开发的所见即所得富文本web编辑器，具有轻量，可定制，注重用户体验等特点。开源基于BSD协议，允许自由使用和修改代码。',
             'lang_Txt_shortcuts':'快捷键',
             'lang_Txt_func':'功能',
@@ -350,7 +389,7 @@ UE.I18N['zh-cn'] = {
             'lang_Txt_underline':'给选中字加下划线',
             'lang_Txt_selectAll':'全部选中',
             'lang_Txt_visualEnter':'软回车',
-             'lang_Txt_fullscreen':'全屏'
+            'lang_Txt_fullscreen':'全屏'
         }
     },
     'insertframe':{
@@ -392,6 +431,8 @@ UE.I18N['zh-cn'] = {
             lang_search1:"查找",
             lang_search2:"查找",
             lang_replace:"替换",
+            lang_searchReg:'支持正则表达式，添加前后斜杠标示为正则表达式，例如“/表达式/”',
+            lang_searchReg1:'支持正则表达式，添加前后斜杠标示为正则表达式，例如“/表达式/”',
             lang_case_sensitive1:"区分大小写",
             lang_case_sensitive2:"区分大小写",
             nextFindBtn:{value:"下一个"},
@@ -416,7 +457,7 @@ UE.I18N['zh-cn'] = {
     'insertvideo':{
         'static':{
             lang_tab_insertV:"插入视频",
-            lang_tab_searchV:"搜索视频",
+//            lang_tab_searchV:"搜索视频",
             lang_video_url:"视频网址",
             lang_video_size:"视频尺寸",
             lang_videoW:"宽度",
@@ -454,6 +495,7 @@ UE.I18N['zh-cn'] = {
             'lang_tableStyle':'表格样式',
             'lang_insertCaption':'添加表格标题行',
             'lang_insertTitle':'添加表格名称行',
+            'lang_orderbycontent':"使表格内容可排序",
             'lang_tableSize':'自动调整表格尺寸',
             'lang_autoSizeContent':'按表格文字自适应',
             'lang_autoSizePage':'按页面宽度自适应',
@@ -474,6 +516,10 @@ UE.I18N['zh-cn'] = {
     'edittd':{
         'static':{
             lang_tdBkColor:'背景颜色:'
+        }
+    },
+    'formula':{
+        'static':{
         }
     },
     'wordimage':{

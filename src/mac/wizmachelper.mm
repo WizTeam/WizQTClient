@@ -7,6 +7,19 @@
 #import <AppKit/AppKit.h>
 #import <objc/objc-class.h>
 
+void setupCocoa()
+{
+    NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
+    NSDictionary* globalDomain = [defaults persistentDomainForName:@"NSGlobalDomain"];
+    //NSArray* languages = [globalDomain objectForKey:@"AppleLanguages"];
+    NSString* locale = [globalDomain objectForKey:@"AppleLocale"];
+    QLocale::setDefault(WizToQString(locale));
+    //[defaults setObject:languages forKey:@"AppleLanguages"];
+    //[defaults setObject:locale forKey:@"AppleLocale"];
+    //NSLog(@"%@\n", languages);
+    //NSLog(@"%@\n", locale);
+}
+
 void setupFullScreenMode(QMainWindow* mainWindow)
 {
     NSView *nsview = (NSView *) mainWindow->winId();

@@ -8,12 +8,12 @@
 UE.I18N['en'] = {
     'labelMap':{
         'anchor':'Anchor', 'undo':'Undo', 'redo':'Redo', 'bold':'Bold', 'indent':'Indent', 'snapscreen':'SnapScreen',
-        'italic':'Italic', 'underline':'Underline', 'strikethrough':'Strikethrough', 'subscript':'SubScript',
+        'italic':'Italic', 'underline':'Underline', 'strikethrough':'Strikethrough', 'subscript':'SubScript','fontborder':'text border',
         'superscript':'SuperScript', 'formatmatch':'Format Match', 'source':'Source', 'blockquote':'BlockQuote',
         'pasteplain':'PastePlain', 'selectall':'SelectAll', 'print':'Print', 'preview':'Preview',
         'horizontal':'Horizontal', 'removeformat':'RemoveFormat', 'time':'Time', 'date':'Date',
         'unlink':'Unlink', 'insertrow':'InsertRow', 'insertcol':'InsertCol', 'mergeright':'MergeRight', 'mergedown':'MergeDown',
-        'deleterow':'DeleteRow', 'deletecol':'DeleteCol', 'splittorows':'SplitToRows',
+        'deleterow':'DeleteRow', 'deletecol':'DeleteCol', 'splittorows':'SplitToRows','insertcode':'insert code',
         'splittocols':'SplitToCols', 'splittocells':'SplitToCells','deletecaption':'DeleteCaption','inserttitle':'InsertTitle',
         'mergecells':'MergeCells', 'deletetable':'DeleteTable', 'cleardoc':'Clear', 'insertparagraphbeforetable':"InsertParagraphBeforeTable",
         'fontfamily':'FontFamily', 'fontsize':'FontSize', 'paragraph':'Paragraph', 'insertimage':'Image','edittable':'Edit Table', edittd:'Edit Td','link':'Link',
@@ -81,6 +81,32 @@ UE.I18N['en'] = {
         'callBackErrorMsg':"The callback data is wrong,please check the config!",
         'uploadErrorMsg':"Upload error,please check your server environment! "
     },
+    'insertcode':{
+        'as3':'ActionScript3',
+        'bash':'Bash/Shell',
+        'cpp':'C/C++',
+        'css':'Css',
+        'cf':'CodeFunction',
+        'c#':'C#',
+        'delphi':'Delphi',
+        'diff':'Diff',
+        'erlang':'Erlang',
+        'groovy':'Groovy',
+        'html':'Html',
+        'java':'Java',
+        'jfx':'JavaFx',
+        'js':'Javascript',
+        'pl':'Perl',
+        'php':'Php',
+        'plain':'Plain Text',
+        'ps':'PowerShell',
+        'python':'Python',
+        'ruby':'Ruby',
+        'scala':'Scala',
+        'sql':'Sql',
+        'vb':'Vb',
+        'xml':'Xml'
+    },
     'confirmClear':"Do you confirm to clear the Document?",
     'contextMenu':{
         'delete':"Delete",
@@ -126,11 +152,24 @@ UE.I18N['en'] = {
         'splittocells':"Split to cells",
         'splittocols':"Split to Cols",
         'splittorows':"Split to Rows",
+        'tablesort':'Table sorting',
+        'reversecurrent':'Reverse current',
+        'orderbyasc':'Order By ASCII',
+        'reversebyasc':'Reverse By ASCII',
+        'orderbynum':'Order By Num',
+        'reversebynum':'Reverse By Num',
+        'borderbk':'Border shading',
+        'setcolor':'interlaced color',
+        'unsetcolor':'Cancel interlacedcolor',
+        'setbackground':'Background interlaced',
+        'unsetbackground':'Cancel Bk interlaced',
+        'redandblue':'Blue and red',
+        'threecolorgradient':'Three-color gradient',
         'copy':"Copy(Ctrl + c)",
         'copymsg':"Please use 'Ctrl + c' instead!",
         'paste':"Paste(Ctrl + v)",
         'pastemsg':"Please use 'Ctrl + v' instead!",
-        'highlightcode':'insert code'
+        'highlightcode':'Insert code'
     },
 
     'anthorMsg':"Link",
@@ -245,7 +284,7 @@ UE.I18N['en'] = {
     },
     webapp:{
         tip1:"This function provided by Baidu APP,please apply for baidu APPKey webmaster first!",
-        tip2:"And then open the file editor_config.js to set it! ",
+        tip2:"And then open the file ueditor.config.js to set it! ",
         applyFor:"APPLY FOR",
         anthorApi:"Baidu API"
     },
@@ -354,7 +393,7 @@ UE.I18N['en'] = {
         'static':{
             'lang_input_about':'About',
             'lang_input_shortcuts':'Shortcuts',
-            'lang_input_version':'Version:1.2.5',
+            'lang_input_version':'Version:1.2.6',
             'lang_input_introduction':"UEditor is developed by Baidu Co.ltd.  It is lightweight, customizable , focusing on user experience and etc. , UEditor is based on open source BSD license , allowing free use and redistribution.",
             'lang_Txt_shortcuts':'Shortcuts',
             'lang_Txt_func':'Function',
@@ -410,6 +449,8 @@ UE.I18N['en'] = {
             lang_search1:"Search",
             lang_search2:"Search",
             lang_replace:"Replace",
+            lang_searchReg:'Support regular expression ,which starts and ends with a slash ,for example "/expression/"',
+            lang_searchReg1:'Support regular expression ,which starts and ends with a slash ,for example "/expression/"',
             lang_case_sensitive1:"Case sense",
             lang_case_sensitive2:"Case sense",
             nextFindBtn:{value:"Next"},
@@ -434,7 +475,7 @@ UE.I18N['en'] = {
     insertvideo:{
         'static':{
             lang_tab_insertV:"Video",
-            lang_tab_searchV:"Search",
+//            lang_tab_searchV:"Search",
             lang_video_url:" URL ",
             lang_video_size:"Video Size",
             lang_videoW:"Width",
@@ -473,7 +514,8 @@ UE.I18N['en'] = {
             'lang_insertCaption':'Add table header row',
             'lang_insertTitle':'Add table title row',
             'lang_tableSize':'Automatically adjust table size',
-                'lang_autoSizeContent':'Adaptive by form text',
+            'lang_autoSizeContent':'Adaptive by form text',
+            'lang_orderbycontent':"Table of contents sortable",
             'lang_autoSizePage':'Page width adaptive',
             'lang_example':'Example',
             'lang_borderStyle':'Table Border',
@@ -492,6 +534,10 @@ UE.I18N['en'] = {
     'edittd':{
         'static':{
             lang_tdBkColor:'Background Color:'
+        }
+    },
+    'formula':{
+        'static':{
         }
     },
     wordimage:{

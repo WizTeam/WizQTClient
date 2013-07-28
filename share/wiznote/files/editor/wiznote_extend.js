@@ -36,9 +36,8 @@ try {
         { label:'',name:'timesNewRoman',val:'times new roman'}
     ],
     'fontsize':[9, 10, 11, 12, 13, 14, 16, 18, 24, 36, 48],
-    initialStyle:'body{font-size:13px}',
-    initialFrameWidth:400,
-    initialFrameHeight:250,
+    initialStyle: 'body{font-size:13px}',
+    fullscreen: true,
     contextMenu: [],
     elementPathEnabled: false,
     wordCount: false,
@@ -59,7 +58,11 @@ try {
     });
 
     editor.addListener("sourceModeChanged",function(type,mode){
-        m_bIsSourceMode = mode;
+    });
+
+    // hide builtin toolbar, from UE dev team.
+    editor.addListener('ready', function () {
+        document.getElementById(editor.ui.toolbars[0].id).parentNode.parentNode.style.display = 'none'
     });
 
 } catch (err) {
@@ -77,21 +80,17 @@ function setEditorHtml(html)
 
     editor.reset();
 
-    //editor.setContent(html);
-    editor.document.body.innerHTML = html;
+    editor.setContent(html);
 
     window.UE.utils.domReady(function() {
         editor.window.scrollTo(0, 0);
     });
-
-    editor.ui.setFullScreen(true);
 
     editor.addListener('contentChange', setModified);
 }
 
 function getEditorHtml() {
     return editor.getContent();
-    //return editor.document.documentElement.outerHTML;
 }
 
 function setEditing(mode) {

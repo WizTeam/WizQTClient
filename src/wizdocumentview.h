@@ -65,18 +65,13 @@ protected:
     //QTimer m_timerDelay;
     //WIZDOCUMENTDATA m_dataDelay;
 
-    QTimer m_timerSizeAdjust;
     int m_nSizeAdjustedTime;
 
-    virtual void resizeEvent(QResizeEvent* event);
     virtual void wheelEvent(QWheelEvent* event);
 
 private:
-    QPointer<QScrollArea> m_webScroll;
-    CWizScrollBar* m_vScroll;
-    CWizScrollBar* m_hScroll;
     QPointer<QLineEdit> m_editTitle;
-    QWidget* createWebScroll();
+    QWidget* createDocumentFrame();
     void showNotify(WizDocumentUserNotify type);
 
 public:
@@ -89,12 +84,6 @@ public:
     void setViewMode(WizDocumentViewMode mode);
     void setModified(bool modified);
     void settingsChanged();
-
-public:
-    // adjust scrollarea's widget (webview) size
-    void adjustSize(bool reset = false);
-    void adjustPosition(const QSize& sz, bool bOnlyHeight);
-    void adjustDocumentSize(const QSize& sz, bool bOnlyHeight);
 
 public Q_SLOTS:
     void on_titleEdit_editingFinished();
@@ -110,8 +99,6 @@ public Q_SLOTS:
 
     void on_webview_focusIn();
     void on_webview_focusOut();
-    void on_webview_sizeChanged();
-    void on_webview_adjustSizeTimeout();
 };
 
 #endif // WIZDOCUMENTVIEW_H

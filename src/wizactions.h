@@ -13,7 +13,7 @@ struct WIZACTION;
 
 #define WIZACTION_GLOBAL_SYNC               "actionSync"
 #define WIZACTION_GLOBAL_NEW_DOCUMENT       "actionNewNote"
-#define WIZACTION_GLOBAL_VIEW_MESSAGES       "actionViewMessages"
+#define WIZACTION_GLOBAL_VIEW_MESSAGES      "actionViewMessages"
 #define WIZACTION_GLOBAL_TOGGLE_CATEGORY    "actionViewToggleCategory"
 #define WIZACTION_GLOBAL_TOGGLE_FULLSCREEN  "actionViewToggleFullscreen"
 

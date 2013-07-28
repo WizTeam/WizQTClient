@@ -10,16 +10,18 @@
 #include "wizwelcomedialog.h"
 #include "share/wizsettings.h"
 #include "share/wizwin32helper.h"
+#include "mac/wizmachelper.h"
 
 
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
+
+    // enable swtich between qt widget and alien widget(cocoa)
+    // refer to: https://bugreports.qt-project.org/browse/QTBUG-11401
     a.setAttribute(Qt::AA_NativeWindows);
 
     QApplication::setApplicationName(QObject::tr("WizNote"));
-
-    //IWizGlobal::instance()->setVersion("1.3.0");
 
 #if defined Q_OS_MAC
     QDir dir(QApplication::applicationDirPath());
@@ -59,6 +61,7 @@ int main(int argc, char *argv[])
 
     // setup locale for welcome dialog
     QString strLocale = userSettings.locale();
+    QLocale::setDefault(strLocale);
 
     QTranslator translatorWizNote;
     QString strLocaleFile = WizGetLocaleFileName(strLocale);

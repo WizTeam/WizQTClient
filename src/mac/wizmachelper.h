@@ -5,6 +5,7 @@
 
 #ifdef Q_WS_MAC
 
+void setupCocoa();
 void setupFullScreenMode(QMainWindow* mainWindow);
 void toggleFullScreenMode(QMainWindow* mainWindow);
 QString WizMacGetOSVersion();

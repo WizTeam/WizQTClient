@@ -14,18 +14,29 @@
 #include "wizEditorInsertTableForm.h"
 #include "share/wizObjectDataDownloader.h"
 
+void CWizDocumentWebViewPage::triggerAction(QWebPage::WebAction action, bool checked)
+{
+    if (action == QWebPage::Back) {
+        return;
+    }
+
+    QWebPage::triggerAction(action, checked);
+}
+
 CWizDocumentWebView::CWizDocumentWebView(CWizExplorerApp& app, QWidget* parent /*= 0*/)
     : QWebView(parent)
     , m_app(app)
     , m_dbMgr(app.databaseManager())
     , m_bEditorInited(false)
-    , m_bDocumentOnLoading(false)
     , m_bModified(false)
 {
+    CWizDocumentWebViewPage* page = new CWizDocumentWebViewPage(this);
+    setPage(page);
+
     // minimum page size hint
     setMinimumSize(400, 250);
 
-    // only accept focus by mouse click
+    // only accept focus by mouse click as the best way to trigger toolbar reset
     setFocusPolicy(Qt::ClickFocus);
     setAttribute(Qt::WA_AcceptTouchEvents, false);
 
@@ -54,6 +65,55 @@ CWizDocumentWebView::CWizDocumentWebView(CWizExplorerApp& app, QWidget* parent /
     // auto save
     m_timerAutoSave.setInterval(10*1000); // 5 minutes
     connect(&m_timerAutoSave, SIGNAL(timeout()), SLOT(onTimerAutoSaveTimout()));
+}
+
+void CWizDocumentWebView::inputMethodEvent(QInputMethodEvent* event)
+{
+    QWebView::inputMethodEvent(event);
+
+    int nLength = 0;
+    int nOffset = 0;
+    for (int i = 0; i < event->attributes().size(); i++) {
+        const QInputMethodEvent::Attribute& a = event->attributes().at(i);
+        if (a.type == QInputMethodEvent::Cursor) {
+            nLength = a.length;
+            nOffset = a.start;
+            break;
+        }
+    }
+
+    // Move cursor
+    // because every time input method event triggered, old preedit text will be
+    // deleted and the new one inserted, this action made cursor restore to the
+    // beginning of the input context, move it as far as offset indicated after
+    // default implementation should correct this issue!!!
+    for (int i = 0; i < nOffset; i++) {
+        page()->triggerAction(QWebPage::MoveToNextChar);
+    }
+
+    // set modified flag is needed cause ueditor will not receive it
+    if (!event->commitString().isEmpty()) {
+        MainWindow* mainWindow = qobject_cast<MainWindow *>(m_app.mainWindow());
+        mainWindow->SetDocumentModified(true);
+    }
+}
+
+void CWizDocumentWebView::keyPressEvent(QKeyEvent* event)
+{
+    // special cases process
+    if (event->key() == Qt::Key_Escape) {
+        // FIXME: press esc will insert space at cursor if not clear focus
+        clearFocus();
+        return;
+    } else if (event->key() == Qt::Key_Backspace) {
+        if (hasFocus()) {
+            // FIXME: backspace not set modified flag
+            MainWindow* mainWindow = qobject_cast<MainWindow *>(m_app.mainWindow());
+            mainWindow->SetDocumentModified(true);
+        }
+    }
+
+    QWebView::keyPressEvent(event);
 }
 
 void CWizDocumentWebView::focusInEvent(QFocusEvent *event)
@@ -85,12 +145,6 @@ void CWizDocumentWebView::contextMenuEvent(QContextMenuEvent *event)
     window->ResetContextMenuAndPop(mapToGlobal(event->pos()));
 }
 
-void CWizDocumentWebView::wheelEvent(QWheelEvent* event)
-{
-    // propagate wheel event to parent scrollarea
-    event->ignore();
-}
-
 void CWizDocumentWebView::onTimerAutoSaveTimout()
 {
     saveDocument(false);
@@ -115,17 +169,6 @@ void CWizDocumentWebView::on_documentSaved(bool ok)
 
     MainWindow* mainWindow = qobject_cast<MainWindow *>(m_app.mainWindow());
     mainWindow->SetSavingDocument(false);
-}
-
-// UEditor can't receive all event like input method commit string change, enter key event etc.
-// so we should listening contents change events from webkit
-void CWizDocumentWebView::on_pageContentsChanged()
-{
-    if (!m_bEditorInited || m_bDocumentOnLoading)
-        return;
-
-    MainWindow* mainWindow = qobject_cast<MainWindow *>(m_app.mainWindow());
-    mainWindow->SetDocumentModified(true);
 }
 
 void CWizDocumentWebView::viewDocument(const WIZDOCUMENTDATA& doc, bool editing)
@@ -251,32 +294,18 @@ void CWizDocumentWebView::initEditorAndLoadDocument()
     connect(page(), SIGNAL(linkClicked(const QUrl&)),
             SLOT(on_editor_linkClicked(const QUrl&)));
 
-    connect(page(), SIGNAL(contentsChanged()),
-            SLOT(on_pageContentsChanged()));
-
-    connect(page(), SIGNAL(frameCreated(QWebFrame*)),
-            SLOT(on_pageFrameCreated(QWebFrame*)));
+    connect(page(), SIGNAL(selectionChanged()),
+            SLOT(on_editor_selectionChanged()));
 
     page()->mainFrame()->setHtml(strHtml, url);
 }
 
-void CWizDocumentWebView::on_pageFrameCreated(QWebFrame* frame)
+void CWizDocumentWebView::on_editor_selectionChanged()
 {
-    // two frame will be created, the editor content frame is only what we interested in.
-    if (!frame->frameName().startsWith("baidu_editor"))
-        return;
-
-    // hide frame editor frame scrollbar, use parent scrollarea's instead.
-    frame->setScrollBarPolicy(Qt::Horizontal, Qt::ScrollBarAlwaysOff);
-    frame->setScrollBarPolicy(Qt::Vertical, Qt::ScrollBarAlwaysOff);
-
-    connect(frame, SIGNAL(contentsSizeChanged(QSize)), SLOT(on_editorFrame_contentsSizeChanged(QSize)));
-}
-
-void CWizDocumentWebView::on_editorFrame_contentsSizeChanged(QSize sz)
-{
-    // try adjust width and height both
-    Q_EMIT sizeChanged();
+    if (hasFocus()) {
+        // FIXME: every time change content shuld tell webview to clean the canvas
+        update();
+    }
 }
 
 void CWizDocumentWebView::on_editor_populateJavaScriptWindowObject()
@@ -293,6 +322,8 @@ void CWizDocumentWebView::on_editor_loadFinished(bool ok)
     }
 
     m_bEditorInited = true;
+
+    //adjustSize();
     viewDocumentInEditor(m_bEditingMode);
 }
 
@@ -306,15 +337,11 @@ void CWizDocumentWebView::viewDocumentInEditor(bool editing)
     Q_ASSERT(m_bEditorInited);
     Q_ASSERT(!m_strHtmlFileName.isEmpty());
 
-    m_bDocumentOnLoading = true;
-
     QString strScript = QString("viewDocument('%1', '%2', %3);")
             .arg(document().strGUID)
             .arg(m_strHtmlFileName)
             .arg(editing ? "true" : "false");
     bool ret = page()->mainFrame()->evaluateJavaScript(strScript).toBool();
-
-    m_bDocumentOnLoading = false;
 
     MainWindow* window = qobject_cast<MainWindow *>(m_app.mainWindow());
     if (!ret) {
@@ -322,11 +349,15 @@ void CWizDocumentWebView::viewDocumentInEditor(bool editing)
         return;
     }
 
+    // FIXME: hide builtin toolbar made document iframe size is smaller than view size
+    QRect rc = geometry();
+    setGeometry(rc.adjusted(0, 0, 0, 10));
+    qApp->processEvents(QEventLoop::AllEvents);
+    setGeometry(rc);
+    qApp->processEvents(QEventLoop::AllEvents);
+
     window->showClient(true);
     m_timerAutoSave.start();
-
-    // to avoid scrollarea's size not adjusted to contents, eg: document content is duplicate
-    Q_EMIT sizeChanged();
 }
 
 void CWizDocumentWebView::setEditingDocument(bool editing)
@@ -404,10 +435,16 @@ QSize CWizDocumentWebView::editorGetScrollSize()
     return QSize(width, height);
 }
 
-void CWizDocumentWebView::editorSetFullScreen()
+int CWizDocumentWebView::editorGetDocumentWidth()
 {
-    QString strExec = "editor.ui.setFullScreen(true);";
-    page()->mainFrame()->evaluateJavaScript(strExec);
+    QString strExec = "editor.iframe.parentNode.offsetWidth;";
+    return page()->mainFrame()->evaluateJavaScript(strExec).toInt();
+}
+
+int CWizDocumentWebView::editorGetDocumentHeight()
+{
+    QString strExec = "editor.iframe.parentNode.style.height;";
+    return page()->mainFrame()->evaluateJavaScript(strExec).toInt();
 }
 
 QString CWizDocumentWebView::editorCommandQueryCommandValue(const QString& strCommand)
@@ -656,6 +693,11 @@ bool CWizDocumentWebView::editorCommandExecuteRemoveFormat()
 bool CWizDocumentWebView::editorCommandExecuteFormatMatch()
 {
     return page()->mainFrame()->evaluateJavaScript("editor.execCommand('formatMatch');").toBool();
+}
+
+bool CWizDocumentWebView::editorCommandExecuteViewSource()
+{
+    return page()->mainFrame()->evaluateJavaScript("editor.execCommand('source');").toBool();
 }
 
 bool CWizDocumentWebView::editorCommandExecuteTableDelete()

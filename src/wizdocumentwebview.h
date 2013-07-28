@@ -49,6 +49,14 @@ Q_SIGNALS:
 };
 
 
+class CWizDocumentWebViewPage: public QWebPage
+{
+public:
+    explicit CWizDocumentWebViewPage(QObject* parent = 0) : QWebPage(parent) {}
+    virtual void triggerAction(QWebPage::WebAction action, bool checked = false);
+};
+
+
 class CWizDocumentWebView : public QWebView
 {
     Q_OBJECT
@@ -69,8 +77,10 @@ public:
     void initEditorStyle();
 
     /* editor related */
+    int editorGetDocumentWidth();
+    int editorGetDocumentHeight();
     QSize editorGetScrollSize();
-    void editorSetFullScreen();
+    //void editorUpdateFullScreen();
     void editorResetFont();
     void editorFocus();
 
@@ -92,10 +102,11 @@ public:
     bool editorCommandExecuteInsertHtml(const QString& strHtml, bool bNotSerialize);
 
 protected:
+    virtual void keyPressEvent(QKeyEvent* event);
+    virtual void inputMethodEvent(QInputMethodEvent* event);
     virtual void focusInEvent(QFocusEvent* event);
     virtual void focusOutEvent(QFocusEvent* event);
     virtual void contextMenuEvent(QContextMenuEvent* event);
-    virtual void wheelEvent(QWheelEvent* event);
 
 private:
     CWizExplorerApp& m_app;
@@ -103,9 +114,10 @@ private:
     QTimer m_timerAutoSave;
     QString m_strHtmlFileName;
     bool m_bEditorInited;
-    bool m_bDocumentOnLoading;
     bool m_bEditingMode;
     bool m_bModified;
+
+    QPointer<QWebFrame> m_editorFrame;
 
     CWizDocumentWebViewRenderer* m_renderer;
 
@@ -120,17 +132,13 @@ private:
     void initEditorAndLoadDocument();
 
 Q_SIGNALS:
+    // signals used request reset info toolbar and editor toolbar
     void focusIn();
     void focusOut();
-    void sizeChanged();
 
 public Q_SLOTS:
-    void on_pageContentsChanged();
-    void on_pageFrameCreated(QWebFrame* frame);
-    void on_editorFrame_contentsSizeChanged(QSize sz);
-
+    void on_editor_selectionChanged();
     void onCipherDialogClosed();
-    //void onDownloadDialogClosed(int result);
     void on_download_finished(const WIZOBJECTDATA& data, bool bSucceed);
 
     void on_editor_populateJavaScriptWindowObject();
@@ -204,6 +212,7 @@ public Q_SLOTS:
     bool editorCommandExecuteRemoveFormat();
     bool editorCommandExecuteFormatMatch();
     bool editorCommandExecuteInsertHorizontal();
+    bool editorCommandExecuteViewSource();
 };
 
 

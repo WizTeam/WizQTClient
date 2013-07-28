@@ -49,7 +49,6 @@ WIZACTION* CWizActions::actionsData()
         {"actionAbout",                     QObject::tr("About WizNote"), "", ""},
         {"actionExit",                      QObject::tr("Exit"), "", ""},
         {"actionLogout",                    QObject::tr("Logout"), "", ""},
-        //{"actionDeleteCurrentNote",       QObject::tr("Delete Note"), "", ""},
         {WIZACTION_GLOBAL_SYNC,             QObject::tr("Sync"), "", ""},
         {WIZACTION_GLOBAL_NEW_DOCUMENT,     QObject::tr("New Note"), "", "Ctrl+N"},
         {WIZACTION_GLOBAL_VIEW_MESSAGES,    QObject::tr("View messages"), "", ""},
@@ -90,6 +89,7 @@ WIZACTION* CWizActions::actionsData()
         {"actionFormatInsertDate",          QObject::tr("Insert date"), "", "Shift+Ctrl+D"},
         {"actionFormatInsertTime",          QObject::tr("Insert time"), "", "Shift+Ctrl+Alt+D"},
         {"actionFormatRemoveFormat",        QObject::tr("Remove format"), "", ""},
+        {"actionEditorViewSource",          QObject::tr("View html source"), "", ""},
 
         {"", "", "", ""}
     };

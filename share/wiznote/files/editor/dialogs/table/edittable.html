@@ -18,6 +18,7 @@
                     <label><input type="checkbox" id="J_caption" name="style"/><var id="lang_insertTitle"></var></label>
                 </li>
             </ul>
+            <label><input type="checkbox" id="J_sorttable" name="style"/><var id="lang_orderbycontent"></var></label>
             <div class="clear"></div>
         </div>
         <div class="section">

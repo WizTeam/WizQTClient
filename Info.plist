@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>CFBundleDevelopmentRegion</key>
-	<string>English</string>
+	<string>zh_CN</string>
 	<key>CFBundleExecutable</key>
 	<string>wiznote</string>
 	<key>CFBundleGetInfoString</key>

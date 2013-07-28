@@ -132,6 +132,7 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     setWindowTitle(tr("WizNote"));
 
     restoreStatus();
+
     client()->hide();
 
 #ifdef Q_WS_MAC
@@ -836,6 +837,11 @@ void MainWindow::on_actionFormatOutdent_triggered()
 void MainWindow::on_actionFormatRemoveFormat_triggered()
 {
     m_doc->web()->editorCommandExecuteRemoveFormat();
+}
+
+void MainWindow::on_actionEditorViewSource_triggered()
+{
+    m_doc->web()->editorCommandExecuteViewSource();
 }
 
 //void MainWindow::on_actionDeleteCurrentNote_triggered()
