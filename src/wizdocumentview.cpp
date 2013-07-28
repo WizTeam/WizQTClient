@@ -237,6 +237,25 @@ private:
     QPointer<QLabel> m_labelNotify;
 };
 
+// FIXME: This should be a QT bug
+// when use input method, input as normal is fine, but input as selection text
+// will lose blink cursor, we should reset cursor position first!!!
+class CWizTitleEdit : public QLineEdit
+{
+public:
+    CWizTitleEdit(QWidget* parent = 0) : QLineEdit(parent) {}
+
+protected:
+    virtual void inputMethodEvent(QInputMethodEvent* event)
+    {
+        if (hasSelectedText()) {
+            setCursorPosition(selectionStart());
+        }
+
+        QLineEdit::inputMethodEvent(event);
+    }
+};
+
 
 CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
     : QWidget(parent)
@@ -263,15 +282,17 @@ CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
     line->setMinimumHeight(1);
     line->setStyleSheet("border-bottom-width:1;border-bottom-style:solid;border-bottom-color:#bbbbbb");
 
+
     layout->addWidget(m_title);
     layout->addWidget(line);
     layout->addWidget(m_editorToolBar);
     layout->addWidget(m_infoToolBar);
     layout->addWidget(m_notifyToolBar);
-    layout->addWidget(createDocumentFrame());
+    QWidget* doc = createDocumentFrame();
+    layout->addWidget(doc);
 
     layout->setStretchFactor(m_title, 0);
-    layout->setStretchFactor(m_web, 1);
+    layout->setStretchFactor(doc, 1);
 
     QVBoxLayout* layoutMain = new QVBoxLayout();
     layoutMain->setContentsMargins(0, 0, 0, 0);
@@ -330,7 +351,7 @@ QWidget* CWizDocumentView::createDocumentFrame()
     layoutFrame->setSpacing(0);
     docFrame->setLayout(layoutFrame);
 
-    m_editTitle = new QLineEdit(this);
+    m_editTitle = new CWizTitleEdit(this);
     m_editTitle->setAttribute(Qt::WA_MacShowFocusRect, false);
     m_editTitle->setAlignment(Qt::AlignVCenter);
     m_editTitle->setFixedHeight(30);

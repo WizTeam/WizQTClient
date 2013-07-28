@@ -424,29 +424,6 @@ void CWizDocumentWebView::editorCommandExecutePaste()
     triggerPageAction(QWebPage::Paste);
 }
 
-QSize CWizDocumentWebView::editorGetScrollSize()
-{
-    QString strExec = "editor.document.documentElement.scrollHeight;";
-    int height = page()->mainFrame()->evaluateJavaScript(strExec).toInt();
-
-    strExec = "editor.document.documentElement.scrollWidth;";
-    int width = page()->mainFrame()->evaluateJavaScript(strExec).toInt();
-
-    return QSize(width, height);
-}
-
-int CWizDocumentWebView::editorGetDocumentWidth()
-{
-    QString strExec = "editor.iframe.parentNode.offsetWidth;";
-    return page()->mainFrame()->evaluateJavaScript(strExec).toInt();
-}
-
-int CWizDocumentWebView::editorGetDocumentHeight()
-{
-    QString strExec = "editor.iframe.parentNode.style.height;";
-    return page()->mainFrame()->evaluateJavaScript(strExec).toInt();
-}
-
 QString CWizDocumentWebView::editorCommandQueryCommandValue(const QString& strCommand)
 {
     QString strExec = "editor.queryCommandValue('" + strCommand +"');";

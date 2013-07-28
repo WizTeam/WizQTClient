@@ -27,7 +27,6 @@ typedef lucene::analysis::standard::StandardTokenizer WizTokenizer;
 #endif
 
 
-
 #ifdef WIZ_FTS_ENABLE_CJK2
 
 std::wstring WizGetAppPath()
@@ -517,6 +516,7 @@ class LanguageBasedAnalyzer: public lucene::analysis::Analyzer
 {
 	TCHAR lang[100];
 	bool stem;
+
 public:
 	LanguageBasedAnalyzer(const TCHAR* language=NULL, bool stem=true)
 	{
@@ -614,13 +614,11 @@ struct WIZFTSDATA
 {
 	lucene::index::IndexWriter* writer;
 	LanguageBasedAnalyzer an;
-    //LanguageBasedAnalyzer an3;
 
     WIZFTSDATA()
     {
         writer = NULL;
-		an.setLanguage(_T("cjk"));
-        //an3.setLanguage(_T("cjk3"));
+        an.setLanguage(L"cjk");
     }
 
 	~WIZFTSDATA()

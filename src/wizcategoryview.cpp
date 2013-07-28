@@ -1618,8 +1618,6 @@ void CWizCategoryGroupsView::initGroup(CWizDatabase& db)
     CWizCategoryViewTrashItem* pTrashItem = new CWizCategoryViewTrashItem(m_app, tr("Trash"), db.kbGUID());
     pGroupItem->addChild(pTrashItem);
 
-    pGroupItem->sortChildren(0, Qt::AscendingOrder);
-
     // only show trash if permission is enough
     if (db.permission() > WIZ_USERGROUP_SUPER) {
         pTrashItem->setHidden(true);
@@ -1916,14 +1914,22 @@ CWizCategoryViewGroupItem* CWizCategoryGroupsView::findTag(const WIZTAGDATA& tag
         if (!create)
             return NULL;
 
+        // always add trash item to the end of group
         CWizCategoryViewGroupItem* pTagItem = new CWizCategoryViewGroupItem(m_app, tagParent, tag.strKbGUID);
-        parent->addChild(pTagItem);
-        parent->setExpanded(true);
-        parent = pTagItem;
+        CWizCategoryViewTrashItem* pTrash = findTrash(tag.strKbGUID);
+        if (pTrash)
+            parent->takeChild(parent->indexOfChild(pTrash));
 
+        parent->addChild(pTagItem);
         if (sort) {
             parent->sortChildren(0, Qt::AscendingOrder);
         }
+
+        if (pTrash)
+            parent->addChild(pTrash);
+
+        parent->setExpanded(true);
+        parent = pTagItem;
     }
 
     return dynamic_cast<CWizCategoryViewGroupItem *>(parent);

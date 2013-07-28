@@ -90,6 +90,7 @@
 {
     // FIXME: qt can't switch focus between native and alien widgets, manually do it.
     QWidget* widget = QApplication::focusWidget();
+
     if (widget) {
         widget->clearFocus();
     }
@@ -133,21 +134,21 @@ CWizSearchWidget::CWizSearchWidget(CWizExplorerApp& app, QWidget* parent /* = 0 
 
 void CWizSearchWidget::clear()
 {
-    NSSearchField* pSearchField = reinterpret_cast<NSSearchField* >(cocoaView());
+    WizSearchField* pSearchField = reinterpret_cast<WizSearchField *>(cocoaView());
     QString strText = WizToQString([pSearchField stringValue]);
     if (strText.isEmpty()) {
         return;
     }
 
     [pSearchField setStringValue:@""];
-    [pSearchField.window makeFirstResponder:pSearchField];
-    //[pSearchField becomeFirstResponder];
+    focus();
 }
 
 void CWizSearchWidget::focus()
 {
-    NSSearchField* pSearchField = reinterpret_cast<NSSearchField* >(cocoaView());
+    WizSearchField* pSearchField = reinterpret_cast<WizSearchField *>(cocoaView());
     [pSearchField.window makeFirstResponder:pSearchField];
+    [pSearchField selectText:pSearchField];
 }
 
 QSize CWizSearchWidget::sizeHint() const

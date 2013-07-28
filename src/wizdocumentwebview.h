@@ -77,10 +77,6 @@ public:
     void initEditorStyle();
 
     /* editor related */
-    int editorGetDocumentWidth();
-    int editorGetDocumentHeight();
-    QSize editorGetScrollSize();
-    //void editorUpdateFullScreen();
     void editorResetFont();
     void editorFocus();
 
