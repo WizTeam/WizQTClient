@@ -440,8 +440,8 @@ void MainWindow::initClient()
     layoutDocument->setSpacing(0);
     documentPanel->setLayout(layoutDocument);
     layoutDocument->addWidget(m_doc);
-//    layoutDocument->addWidget(m_documentSelection);
-//    m_documentSelection->hide();
+    layoutDocument->addWidget(m_documentSelection);
+    m_documentSelection->hide();
     // append after client
     m_doc->layout()->addWidget(m_transitionView);
     //layoutDocument->addWidget(m_transitionView);

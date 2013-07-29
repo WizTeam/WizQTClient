@@ -384,7 +384,7 @@ void CWizNoteStyle::drawDocumentListViewItemPrivate(const QStyleOptionViewItemV4
         rcInfo.setBottom(rcInfo.top() + p->fontMetrics().height());
         rcInfo.moveTo(rcInfo.left(), rcInfo.bottom() + 4);
         //CString strInfo = document.tCreated.date().toString(Qt::DefaultLocaleShortDate) + tagsText;
-        CString strInfo = document.tCreated.toHumanFriendlyString();
+        CString strInfo = document.tCreated.toHumanFriendlyString() + tagsText;
         int infoWidth = ::WizDrawTextSingleLine(p, rcInfo, strInfo,  Qt::TextSingleLine | Qt::AlignVCenter, colorDate, true);
 
         //QColor colorSummary = selected ? m_colorDocumentsSummarySelected : m_colorDocumentsSummary;

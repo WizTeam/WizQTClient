@@ -249,7 +249,7 @@ protected:
     virtual void inputMethodEvent(QInputMethodEvent* event)
     {
         if (hasSelectedText()) {
-            setCursorPosition(selectionStart());
+            del();
         }
 
         QLineEdit::inputMethodEvent(event);
@@ -329,12 +329,6 @@ CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
 
 void CWizDocumentView::wheelEvent(QWheelEvent* event)
 {
-    // avoid can't horizonal scroll on linux, show both of scrollbar
-#ifdef Q_WS_X11
-    m_vScroll->show();
-    m_hScroll->show();
-#endif
-
     QWidget::wheelEvent(event);
 }
 
@@ -548,8 +542,6 @@ void CWizDocumentView::setViewMode(WizDocumentViewMode mode)
 
 void CWizDocumentView::setModified(bool modified)
 {
-    qDebug() << "setModified, document: " << document().strTitle;
-
     m_title->setModified(modified);
     m_web->setModified(modified);
 }

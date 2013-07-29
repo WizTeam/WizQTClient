@@ -7,6 +7,8 @@
 #include <QMetaType>
 #include <QDebug>
 
+#include <unistd.h>
+
 #define WIZ_SEARCH_INDEXER_PAGE_MAX 100
 
 

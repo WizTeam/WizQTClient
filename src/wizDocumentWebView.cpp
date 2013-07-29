@@ -66,7 +66,7 @@ CWizDocumentWebView::CWizDocumentWebView(CWizExplorerApp& app, QWidget* parent /
     thread->start();
 
     // auto save
-    m_timerAutoSave.setInterval(10*1000); // 5 minutes
+    m_timerAutoSave.setInterval(5*60*1000); // 5 minutes
     connect(&m_timerAutoSave, SIGNAL(timeout()), SLOT(onTimerAutoSaveTimout()));
 }
 
