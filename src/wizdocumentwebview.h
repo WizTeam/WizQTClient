@@ -15,7 +15,9 @@ class CWizObjectDataDownloaderHost;
 class CWizEditorInsertLinkForm;
 class CWizEditorInsertTableForm;
 class CWizDocumentWebView;
+class CWizDocumentTransitionView;
 
+// FIXME: class name is not corret for this usage.
 // Renderer thread responsible for loading, saving document
 class CWizDocumentWebViewRenderer : public QObject
 {
@@ -44,7 +46,10 @@ public Q_SLOTS:
                       QString strHtml, QString strHtmlFile, int nFlags);
 
 Q_SIGNALS:
-    void documentReady(const QString& strFileName);
+    void startLoading();
+    void endLoading(const QString& strFileName, bool bOk);
+
+    void startSaving();
     void documentSaved(bool ok);
 };
 
@@ -97,6 +102,10 @@ public:
     bool editorCommandExecuteFontSize(const QString& strSize);
     bool editorCommandExecuteInsertHtml(const QString& strHtml, bool bNotSerialize);
 
+private:
+    void viewDocumentInEditor(bool editing);
+    void initEditorAndLoadDocument();
+
 protected:
     virtual void keyPressEvent(QKeyEvent* event);
     virtual void inputMethodEvent(QInputMethodEvent* event);
@@ -107,25 +116,21 @@ protected:
 private:
     CWizExplorerApp& m_app;
     CWizDatabaseManager& m_dbMgr;
+
     QTimer m_timerAutoSave;
     QString m_strHtmlFileName;
     bool m_bEditorInited;
     bool m_bEditingMode;
     bool m_bModified;
 
-    QPointer<QWebFrame> m_editorFrame;
-
     CWizDocumentWebViewRenderer* m_renderer;
-
     CWizObjectDataDownloaderHost* m_downloaderHost;
+    CWizDocumentTransitionView* m_transitionView;
 
     QPointer<CWizUserCipherForm> m_cipherDialog;
     QPointer<CWizEditorInsertLinkForm> m_editorInsertLinkForm;
     QPointer<CWizEditorInsertTableForm> m_editorInsertTableForm;
     QPointer<QColorDialog> m_colorDialog;
-
-    void viewDocumentInEditor(bool editing);
-    void initEditorAndLoadDocument();
 
 Q_SIGNALS:
     // signals used request reset info toolbar and editor toolbar
@@ -143,7 +148,7 @@ public Q_SLOTS:
 
     void onTimerAutoSaveTimout();
 
-    void on_documentReady(const QString& strFileName);
+    void on_documentReady(const QString& strFileName, bool bOk);
     void on_documentSaved(bool ok);
 
     void on_editorCommandExecuteLinkInsert_accepted();

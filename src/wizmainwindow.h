@@ -24,6 +24,7 @@ class CWizProgressDialog;
 class CWizDocumentListView;
 class CWizDocumentSelectionView;
 class CWizDocumentView;
+class CWizDocumentTransitionView;
 class CWizActions;
 class CWizDocumentViewHistory;
 class CWizFixedSpacer;
@@ -100,12 +101,12 @@ private:
     CWizDocumentListView* m_documents;
     CWizDocumentSelectionView* m_documentSelection;
     CWizDocumentView* m_doc;
+    CWizDocumentTransitionView* m_transitionView;
     QPointer<CWizSplitter> m_splitter;
     QPointer<CWizOptionsWidget> m_options;
 
     CWizDocumentViewHistory* m_history;
     QPointer<CWizAnimateAction> m_animateSync;
-    //QPointer<CWizSyncAnimation> m_animateSync;
 
     CWizSearchIndexer* m_searchIndexer;
     QPointer<CWizSearchBox> m_searchBox;
@@ -142,6 +143,7 @@ public:
     CWizDownloadObjectDataDialog* objectDownloadDialog() const { return m_objectDownloadDialog; }
     CWizObjectDataDownloaderHost* downloaderHost() const { return m_objectDownloaderHost; }
     CWizProgressDialog* progressDialog() const { return m_progress; }
+    CWizDocumentTransitionView* transitionView() const { return m_transitionView; }
 
     void resetPermission(const QString& strKbGUID, const QString& strDocumentOwner);
     void viewDocument(const WIZDOCUMENTDATA& data, bool addToHistory);
@@ -158,7 +160,6 @@ public Q_SLOTS:
     void on_actionSync_triggered();
     void on_actionNewNote_triggered();
     void on_actionViewMessages_triggered();
-    //void on_actionDeleteCurrentNote_triggered();
     void on_actionLogout_triggered();
     void on_actionAbout_triggered();
     void on_actionPreference_triggered();

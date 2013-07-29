@@ -38,7 +38,7 @@ public:
 
 // Message actions
 #define WIZACTION_LIST_MESSAGE_MARK_READ    QObject::tr("Mark as read")
-#define WIZACTION_LIST_MESSAGE_DELETE       QObject::tr("Delete")
+#define WIZACTION_LIST_MESSAGE_DELETE       QObject::tr("Delete Message(s)")
 
 CWizDocumentListView::CWizDocumentListView(CWizExplorerApp& app, QWidget *parent /*= 0*/)
     : QListWidget(parent)
@@ -288,7 +288,6 @@ void CWizDocumentListView::getSelectedDocuments(CWizDocumentDataArray& arrayDocu
         }
     }
 }
-
 
 void CWizDocumentListView::contextMenuEvent(QContextMenuEvent * e)
 {

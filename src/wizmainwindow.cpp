@@ -35,6 +35,7 @@
 #include "wizDocumentSelectionView.h"
 #include "share/wizGroupMessage.h"
 #include "share/wizObjectDataDownloader.h"
+#include "wizDocumentTransitionView.h"
 
 
 MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
@@ -52,6 +53,7 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     , m_groupAttribute(new CWizGroupAttributeForm(*this, this))
     , m_objectDownloadDialog(new CWizDownloadObjectDataDialog(dbMgr, this))
     , m_objectDownloaderHost(new CWizObjectDataDownloaderHost(dbMgr, this))
+    , m_transitionView(new CWizDocumentTransitionView(this))
     #ifndef Q_OS_MAC
     , m_labelNotice(NULL)
     , m_optionsAction(NULL)
@@ -144,7 +146,6 @@ void MainWindow::resizeEvent(QResizeEvent *event)
 {
     Q_UNUSED(event);
 
-    //m_doc->adjustSize(true);
     m_statusBar->adjustPosition();
 }
 
@@ -362,58 +363,6 @@ void MainWindow::initToolBar()
     m_toolBar->addWidget(new CWizFixedSpacer(QSize(20, 1), m_toolBar));
 
     addToolBar(m_toolBar);
-
-//#ifndef Q_OS_MAC
-//    m_toolBar->addAction(m_actions->actionFromName("actionPopupMainMenu"));
-//    m_toolBar->addWidget(new CWizFixedSpacer(QSize(2, 1), m_toolBar));
-//#endif
-
-    //m_toolBar->setStyle(WizGetStyle(m_settings->skin()));
-    //CWizSettings settings(::WizGetSkinResourcePath(m_settings->skin()) + "skin.ini");
-    //m_toolBar->layout()->setMargin(settings.GetInt("ToolBar", "Margin", m_toolBar->layout()->margin()));
-
-
-//#ifdef Q_OS_MAC
-//    addToolBar(m_toolBar);
-//
-//    m_toolBar->addWidget(new CWizFixedSpacer(QSize(20, 1), this));
-//    m_toolBar->addAction(m_actions->actionFromName("actionSync"));
-//
-//    m_toolBar->addWidget(new CWizFixedSpacer(QSize(20, 1), this));
-//    m_toolBar->addAction(m_actions->actionFromName("actionNewNote"));
-//    m_toolBar->addAction(m_actions->actionFromName("actionDeleteCurrentNote"));
-//    m_toolBar->addWidget(new CWizSpacer(this));
-
-//    CWizMacToolBar* m_toolBar = new CWizMacToolBar(this);
-//
-//    //QActionGroup* groupNavigate = new QActionGroup(this);
-//    //groupNavigate->addAction(m_actions->actionFromName("actionGoBack"));
-//    //groupNavigate->addAction(m_actions->actionFromName("actionGoForward"));
-//    //toolbar->addActionGroup(groupNavigate);
-//    //toolbar->addStandardItem(CWizMacToolBar::Space);
-//
-//    m_toolBar->addAction(m_actions->actionFromName("actionSync"));
-//    m_toolBar->addStandardItem(CWizMacToolBar::Space);
-//
-//    m_toolBar->addAction(m_actions->actionFromName("actionNewNote"));
-//    m_toolBar->addAction(m_actions->actionFromName("actionDeleteCurrentNote"));
-//    m_toolBar->addStandardItem(CWizMacToolBar::FlexibleSpace);
-//
-//    //toolbar->addAction(m_actions->actionFromName("actionOptions"));
-//    //toolbar->addStandardItem(CWizMacToolBar::Space);
-//    m_toolBar->addSearch(tr("Search"), tr("Search your notes"));
-//    connect(m_toolBar, SIGNAL(doSearch(const QString&)), SLOT(on_search_doSearch(const QString&)));
-//
-//    m_toolBar->showInWindow(this);
-
-//    QAction* pCaptureScreenAction = m_actions->actionFromName("actionCaptureScreen");
-//    m_actions->buildActionMenu(pCaptureScreenAction, this, ::WizGetAppPath() + "files/mainmenu.ini");
-//    m_toolBar->addAction(pCaptureScreenAction);
-
-//    m_labelNotice = new QLabel("", m_toolBar);
-//    m_labelNotice->setOpenExternalLinks(true);
-//    m_toolBar->addWidget(m_labelNotice);
-//    m_toolBar->addWidget(new CWizSpacer(m_toolBar));
 }
 
 QWidget* MainWindow::setupCategorySwitchButtons()
@@ -448,16 +397,9 @@ void MainWindow::initClient()
     client->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
 
     QPalette pal = client->palette();
-    //QPixmap pixmapBg;
-    //pixmapBg.load(::WizGetResourcesPath() + "skins/leftview_bg.png");
-    //QBrush brushBg(pixmapBg);
     pal.setBrush(QPalette::Window, WizGetLeftViewBrush());
     client->setPalette(pal);
     client->setAutoFillBackground(true);
-
-    //QPalette pal = client->palette();
-    //pal.setColor(QPalette::Window, WizGetClientBackgroundColor(m_settings->skin()));
-    //client->setPalette(pal);
 
     QHBoxLayout* layout = new QHBoxLayout(client);
     layout->setContentsMargins(0, 0, 0, 0);
@@ -471,14 +413,6 @@ void MainWindow::initClient()
     m_splitter = new CWizSplitter(client);
     m_splitter->setChildrenCollapsible(false);
     layout->addWidget(m_splitter);
-
-    //CWizSettings settings(::WizGetSkinResourcePath(m_settings->skin()) + "skin.ini");
-    //int splitterWidth = settings.GetInt("splitter", "Width", m_splitter->splitterWidth());
-    //m_splitter->setSplitterWidth(splitterWidth);
-    //QColor defSplitterColor = client->palette().color(QPalette::Window);
-    //QColor splitterColor = settings.GetColor("splitter", "Color", defSplitterColor);
-    //m_splitter->setSplitterColor(splitterColor);
-    //splitter->addWidget(WizInitWidgetMarginsEx(m_settings->skin(), m_category, "Category"));
 
     QWidget* categoryPanel = new QWidget(m_splitter);
     categoryPanel->setMinimumWidth(30);
@@ -506,8 +440,12 @@ void MainWindow::initClient()
     layoutDocument->setSpacing(0);
     documentPanel->setLayout(layoutDocument);
     layoutDocument->addWidget(m_doc);
-    layoutDocument->addWidget(m_documentSelection);
-    m_documentSelection->hide();
+//    layoutDocument->addWidget(m_documentSelection);
+//    m_documentSelection->hide();
+    // append after client
+    m_doc->layout()->addWidget(m_transitionView);
+    //layoutDocument->addWidget(m_transitionView);
+    m_transitionView->hide();
 
     m_splitter->addWidget(categoryPanel);
     m_splitter->addWidget(m_documents);
@@ -557,8 +495,6 @@ void MainWindow::init()
     m_categoryPrivate->baseInit();
     m_categoryTags->baseInit();
     m_categoryGroups->baseInit();
-
-    m_doc->showClient(false);
 }
 
 void MainWindow::on_syncStarted()

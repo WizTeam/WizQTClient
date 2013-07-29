@@ -122,6 +122,7 @@ set(wiznote_SOURCES
     share/wizApiEntry.cpp
     share/wizObjectDataDownloader.cpp
     share/wizUserAvatar.cpp
+    wizDocumentTransitionView.cpp
 )
 
 set(wiznote_HEADERS
@@ -308,6 +309,7 @@ set(wiznote_WRAP_HEADERS
     share/wizApiEntry.h
     share/wizObjectDataDownloader.h
     share/wizUserAvatar.h
+    wizDocumentTransitionView.h
 )
 
 set(wiznote_FORMS

@@ -13,6 +13,7 @@
 #include "wizEditorInsertLinkForm.h"
 #include "wizEditorInsertTableForm.h"
 #include "share/wizObjectDataDownloader.h"
+#include "wizDocumentTransitionView.h"
 
 void CWizDocumentWebViewPage::triggerAction(QWebPage::WebAction action, bool checked)
 {
@@ -43,7 +44,7 @@ CWizDocumentWebView::CWizDocumentWebView(CWizExplorerApp& app, QWidget* parent /
     // FIXME: should accept drop picture, attachment, link etc.
     setAcceptDrops(false);
 
-    // dialogs
+    // refers
     MainWindow* mainWindow = qobject_cast<MainWindow *>(m_app.mainWindow());
 
     m_cipherDialog = mainWindow->cipherForm();
@@ -53,9 +54,11 @@ CWizDocumentWebView::CWizDocumentWebView(CWizExplorerApp& app, QWidget* parent /
     connect(m_downloaderHost, SIGNAL(downloadDone(const WIZOBJECTDATA&, bool)),
             SLOT(on_download_finished(const WIZOBJECTDATA&, bool)));
 
+    m_transitionView = mainWindow->transitionView();
+
     // document loader thread
     m_renderer = new CWizDocumentWebViewRenderer(m_app);
-    connect(m_renderer, SIGNAL(documentReady(const QString&)), SLOT(on_documentReady(const QString&)));
+    connect(m_renderer, SIGNAL(endLoading(const QString&, bool)), SLOT(on_documentReady(const QString&, bool)));
     connect(m_renderer, SIGNAL(documentSaved(bool)), SLOT(on_documentSaved(bool)));
 
     QThread* thread = new QThread();
@@ -150,8 +153,10 @@ void CWizDocumentWebView::onTimerAutoSaveTimout()
     saveDocument(false);
 }
 
-void CWizDocumentWebView::on_documentReady(const QString& strFileName)
+void CWizDocumentWebView::on_documentReady(const QString& strFileName, bool bOk)
 {
+    Q_UNUSED(bOk);
+
     m_strHtmlFileName = strFileName;
 
     if (m_bEditorInited) {
@@ -190,9 +195,10 @@ void CWizDocumentWebView::viewDocument(const WIZDOCUMENTDATA& doc, bool editing)
     QString strDocumentFileName = db.GetDocumentFileName(doc.strGUID);
     if (!db.IsObjectDataDownloaded(doc.strGUID, "document") || \
             !PathFileExists(strDocumentFileName)) {
-        window->showClient(false);
 
         m_downloaderHost->download(doc);
+        window->showClient(false);
+        window->transitionView()->showAsMode(CWizDocumentTransitionView::Downloading);
 
         return;
     }
@@ -322,8 +328,6 @@ void CWizDocumentWebView::on_editor_loadFinished(bool ok)
     }
 
     m_bEditorInited = true;
-
-    //adjustSize();
     viewDocumentInEditor(m_bEditingMode);
 }
 
@@ -346,6 +350,7 @@ void CWizDocumentWebView::viewDocumentInEditor(bool editing)
     MainWindow* window = qobject_cast<MainWindow *>(m_app.mainWindow());
     if (!ret) {
         window->showClient(false);
+        window->transitionView()->showAsMode(CWizDocumentTransitionView::ErrorOccured);
         return;
     }
 
@@ -357,6 +362,7 @@ void CWizDocumentWebView::viewDocumentInEditor(bool editing)
     qApp->processEvents(QEventLoop::AllEvents);
 
     window->showClient(true);
+    window->transitionView()->hide();
     m_timerAutoSave.start();
 }
 
@@ -790,6 +796,8 @@ void CWizDocumentWebViewRenderer::setData(const WIZDOCUMENTDATA& doc)
 
 void CWizDocumentWebViewRenderer::load()
 {
+    Q_EMIT startLoading();
+
     if (!QMetaObject::invokeMethod(this, "viewDocumentImpl")) {
         TOLOG("Invoke viewDocumentImpl failed");
     }
@@ -800,11 +808,9 @@ void CWizDocumentWebViewRenderer::viewDocumentImpl()
     CWizDatabase& db = m_dbMgr.db(m_data.strKbGUID);
 
     QString strHtmlFileName;
-    if (!db.DocumentToTempHtmlFile(m_data, strHtmlFileName)) {
-        return;
-    }
+    bool bOk = db.DocumentToTempHtmlFile(m_data, strHtmlFileName);
 
-    Q_EMIT documentReady(strHtmlFileName);
+    Q_EMIT endLoading(strHtmlFileName, bOk);
 }
 
 void CWizDocumentWebViewRenderer::save(const WIZDOCUMENTDATA& data,
@@ -812,6 +818,8 @@ void CWizDocumentWebViewRenderer::save(const WIZDOCUMENTDATA& data,
                                        const QString& strHtmlFile,
                                        int nFlags)
 {
+    Q_EMIT startSaving();
+
     if (!QMetaObject::invokeMethod(this, "saveDocument",
                                    Q_ARG(QString, data.strKbGUID),
                                    Q_ARG(QString, data.strGUID),
