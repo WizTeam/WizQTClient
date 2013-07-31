@@ -52,7 +52,7 @@ void CWizUserCipherForm::sheetShow()
 {
     MainWindow* mainWindow = qobject_cast<MainWindow *>(m_app.mainWindow());
 
-    int x = (mainWindow->client()->size().width() - sizeHint().width()) / 2;
+    int x = (mainWindow->clientSize().width() - sizeHint().width()) / 2;
 
     const QPoint& startP = mainWindow->client()->mapTo(mainWindow, QPoint(x, -sizeHint().height()));
     const QPoint& endP = mainWindow->client()->mapTo(mainWindow, QPoint(x, 0));

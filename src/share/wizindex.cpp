@@ -2079,6 +2079,8 @@ bool CWizIndex::CreateDocument(const CString& strTitle, const CString& strName, 
                             const CString& strFileType, const CString& strStyleGUID, \
                             int nIconIndex, int nSync, int nProtected, WIZDOCUMENTDATA& data)
 {
+    Q_UNUSED(strOwner);
+
     if (strTitle.IsEmpty()) {
 		TOLOG(_T("NULL Pointer or Document title is empty: CreateDocument:Title!"));
         return false;
@@ -2094,10 +2096,9 @@ bool CWizIndex::CreateDocument(const CString& strTitle, const CString& strName, 
     data.strAuthor = strAuthor;
     data.strKeywords = strKeywords;
     data.strType = strType;
-    data.strOwner = strOwner;
+    data.strOwner = data.strOwner;
     data.strFileType = strFileType;
     data.strStyleGUID = strStyleGUID;
-	data.strOwner = WizGetComputerName();
 
 	data.tCreated = WizGetCurrentTime();
 	data.tModified = data.tCreated;
