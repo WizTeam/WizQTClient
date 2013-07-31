@@ -6,21 +6,13 @@
 WIZUSERINFO::WIZUSERINFO()
     : nUserLevel(0)
     , nUserPoints(0)
-    , nMaxFileSize(20 * 1024 * 1024)
     , bEnableGroup(false)
 {
 
 }
 
-int WIZUSERINFO::GetMaxFileSize()
+bool WIZUSERINFO::LoadFromXmlRpc(CWizXmlRpcStructValue& val)
 {
-    return std::max<int>(20 * 1024 * 1024, nMaxFileSize);
-}
-
-bool WIZUSERINFO::LoadFromXmlRpc(CWizXmlRpcStructValue& val, const QString& kbGUID)
-{
-    Q_UNUSED(kbGUID);
-
     CWizXmlRpcStructValue& data = val;
     data.GetString("token", strToken);
     data.GetTime("expried_time", tTokenExpried);
@@ -65,10 +57,8 @@ WIZUSERCERT::WIZUSERCERT()
 {
 }
 
-bool WIZUSERCERT::LoadFromXmlRpc(CWizXmlRpcStructValue& val, const QString& kbGUID)
+bool WIZUSERCERT::LoadFromXmlRpc(CWizXmlRpcStructValue& val)
 {
-    Q_UNUSED(kbGUID);
-
     CWizXmlRpcStructValue& data = val;
     data.GetStr("n", strN);
     data.GetStr("e", stre);
@@ -87,10 +77,8 @@ WIZKBINFO::WIZKBINFO()
     nTrafficUsage = 0;
 }
 
-bool WIZKBINFO::LoadFromXmlRpc(CWizXmlRpcStructValue& data, const QString& kbGUID)
+bool WIZKBINFO::LoadFromXmlRpc(CWizXmlRpcStructValue& data)
 {
-    Q_UNUSED(kbGUID);
-
     data.GetInt64(_T("storage_limit"), nStorageLimit);
     data.GetInt64(_T("storage_usage"), nStorageUsage);
     data.GetStr(_T("storage_limit_string"), strStorageLimit);
@@ -113,10 +101,8 @@ WIZOBJECTPARTDATA::WIZOBJECTPARTDATA()
 {
 }
 
-bool WIZOBJECTPARTDATA::LoadFromXmlRpc(CWizXmlRpcStructValue& data,
-                                       const QString& kbGUID)
+bool WIZOBJECTPARTDATA::LoadFromXmlRpc(CWizXmlRpcStructValue& data)
 {
-    strKbGUID = kbGUID;
     data.GetInt("eof", bEOF);
     data.GetInt64("obj_size", nObjectSize);
     data.GetString("part_md5", strPartMD5);
@@ -247,9 +233,8 @@ BOOL WIZTAGDATA::EqualForSync(const WIZTAGDATA& data) const
         && strParentGUID == data.strParentGUID;
 }
 
-BOOL WIZTAGDATA::LoadFromXmlRpc(CWizXmlRpcStructValue& data, const QString& kbGUID)
+BOOL WIZTAGDATA::LoadFromXmlRpc(CWizXmlRpcStructValue& data)
 {
-    strKbGUID = kbGUID;
     return data.GetStr(_T("tag_guid"), strGUID)
         && data.GetStr(_T("tag_group_guid"), strParentGUID)
         && data.GetStr(_T("tag_name"), strName)
@@ -299,9 +284,8 @@ BOOL WIZSTYLEDATA::EqualForSync(const WIZSTYLEDATA& data) const
             && nFlagIndex == data.nFlagIndex;
 }
 
-BOOL WIZSTYLEDATA::LoadFromXmlRpc(CWizXmlRpcStructValue& data, const QString& kbGUID)
+BOOL WIZSTYLEDATA::LoadFromXmlRpc(CWizXmlRpcStructValue& data)
 {
-    strKbGUID = kbGUID;
     data.GetStr(_T("style_description"), strDescription);
 
     return data.GetStr(_T("style_guid"), strGUID)
@@ -342,10 +326,8 @@ WIZDOCUMENTDATABASE::WIZDOCUMENTDATABASE()
 {
 }
 
-bool WIZDOCUMENTDATABASE::LoadFromXmlRpc(CWizXmlRpcStructValue& data, const QString& kbGUID)
+bool WIZDOCUMENTDATABASE::LoadFromXmlRpc(CWizXmlRpcStructValue& data)
 {
-    strKbGUID = kbGUID;
-
     data.GetString("data_md5", strDataMD5);
     data.GetString("document_category", strLocation);
     data.GetString("document_guid", strGUID);
@@ -393,10 +375,8 @@ WIZDOCUMENTDATA::~WIZDOCUMENTDATA()
 
 
 /* -------------------------- WIZDOCUMENTPARAMDATA -------------------------- */
-bool WIZDOCUMENTPARAMDATA::LoadFromXmlRpc(CWizXmlRpcStructValue& data,
-                                          const QString& kbGUID)
+bool WIZDOCUMENTPARAMDATA::LoadFromXmlRpc(CWizXmlRpcStructValue& data)
 {
-    strKbGUID = kbGUID;
     return data.GetString("param_name", strName)
         && data.GetString("param_value", strValue);
 }
@@ -422,10 +402,8 @@ bool WIZDELETEDGUIDDATA::EqualForSync(const WIZDELETEDGUIDDATA& data) const
     return TRUE;
 }
 
-bool WIZDELETEDGUIDDATA::LoadFromXmlRpc(CWizXmlRpcStructValue& data, const QString& kbGUID)
+bool WIZDELETEDGUIDDATA::LoadFromXmlRpc(CWizXmlRpcStructValue& data)
 {
-    strKbGUID = kbGUID;
-
     CString strType;
 
     bool bRet = data.GetStr(_T("deleted_guid"), strGUID)
@@ -462,9 +440,8 @@ BOOL WIZDOCUMENTATTACHMENTDATA::EqualForSync(const WIZDOCUMENTATTACHMENTDATA& da
             && strDataMD5 == data.strDataMD5;
 }
 
-BOOL WIZDOCUMENTATTACHMENTDATA::LoadFromXmlRpc(CWizXmlRpcStructValue& data, const QString& kbGUID)
+BOOL WIZDOCUMENTATTACHMENTDATA::LoadFromXmlRpc(CWizXmlRpcStructValue& data)
 {
-    strKbGUID = kbGUID;
     data.GetStr("attachment_guid", strGUID);
     data.GetStr("attachment_document_guid", strDocumentGUID);
     data.GetStr("attachment_name", strName);
@@ -527,10 +504,8 @@ BOOL WIZDOCUMENTDATAEX::ParamArrayToStringArray(CWizStdStringArray& params) cons
     return TRUE;
 }
 
-BOOL WIZDOCUMENTDATAEX::LoadFromXmlRpc(CWizXmlRpcStructValue& data, const QString& kbGUID)
+BOOL WIZDOCUMENTDATAEX::LoadFromXmlRpc(CWizXmlRpcStructValue& data)
 {
-    strKbGUID = kbGUID;
-
     bool bInfo = false;
     bool bData = false;
     bool bParam = false;
@@ -587,7 +562,7 @@ BOOL WIZDOCUMENTDATAEX::LoadFromXmlRpc(CWizXmlRpcStructValue& data, const QStrin
 
     if (bParam) {
         CWizDocumentParamDataArray params;
-        if (!data.GetArray("document_params", params, kbGUID)) {
+        if (!data.GetArray("document_params", params)) {
             TOLOG("Failed to load document param when parse xml-rpc!");
             return false;
         }
@@ -651,10 +626,8 @@ WIZGROUPDATA::WIZGROUPDATA(const WIZGROUPDATA& data)
 {
 }
 
-bool WIZGROUPDATA::LoadFromXmlRpc(CWizXmlRpcStructValue& data, const QString& kbGUID)
+bool WIZGROUPDATA::LoadFromXmlRpc(CWizXmlRpcStructValue& data)
 {
-    Q_UNUSED(kbGUID);
-
     data.GetString("biz_guid", bizGUID);
     data.GetString("biz_name", bizName);
 
@@ -713,11 +686,8 @@ WIZMESSAGEDATA::WIZMESSAGEDATA(const WIZMESSAGEDATA& data)
 {
 }
 
-bool WIZMESSAGEDATA::LoadFromXmlRpc(CWizXmlRpcStructValue& data,
-                                    const QString& kbGuid)
+bool WIZMESSAGEDATA::LoadFromXmlRpc(CWizXmlRpcStructValue& data)
 {
-    Q_UNUSED(kbGuid);
-
     data.GetString("biz_guid", bizGUID);
     data.GetString("kb_guid", kbGUID);
     data.GetString("document_guid", documentGUID);
@@ -747,10 +717,8 @@ bool WIZMESSAGEDATA::LoadFromXmlRpc(CWizXmlRpcStructValue& data,
 }
 
 /* ---------------------------- WIZKVRETURN ---------------------------- */
-bool WIZKVRETURN::LoadFromXmlRpc(CWizXmlRpcStructValue& data, const QString& kbGUID)
+bool WIZKVRETURN::LoadFromXmlRpc(CWizXmlRpcStructValue& data)
 {
-    Q_UNUSED(kbGUID);
-
     data.GetInt("return_code", nCode);
     data.GetString("value_of_key", value);
     data.GetInt64("version", nVersion);

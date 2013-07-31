@@ -26,10 +26,10 @@ public:
     virtual QString ToString() const = 0;
 
     template <class TData>
-    bool ToData(TData& data, const QString& strKbGUID);
+    bool ToData(TData& data);
 
     template <class TData>
-    bool ToArray(std::deque<TData>& arrayData, const QString& strKbGUID);
+    bool ToArray(std::deque<TData>& arrayData);
 };
 
 
@@ -132,7 +132,10 @@ public:
     virtual QString ToString() const;
 
 	template <class TData>
-    bool ToArray(std::deque<TData>& arrayRet, const QString& strKbGUID);
+    bool ToArray(std::deque<TData>& arrayRet);
+
+    template <class TData>
+    bool ToArray(std::vector<TData>& arrayRet);
 
     void Add(CWizXmlRpcValue* pValue);
     bool ToStringArray(CWizStdStringArray& arrayRet);
@@ -190,7 +193,7 @@ public:
 
 
 	template <class TData>
-    bool GetArray(const QString& strName, std::deque<TData>& arrayData, const QString& kbGUID);
+    bool GetArray(const QString& strName, std::deque<TData>& arrayData);
 
 private:
     std::map<QString, CWizXmlRpcValue*> m_map;
@@ -246,31 +249,29 @@ bool WizXmlRpcResultFromXml(CWizXMLDocument& doc, CWizXmlRpcValue** ppRet);
 // template methods
 
 template <class TData>
-inline bool CWizXmlRpcValue::ToData(TData& data, const QString& strKbGUID)
+inline bool CWizXmlRpcValue::ToData(TData& data)
 {
     if (CWizXmlRpcStructValue* pStruct = dynamic_cast<CWizXmlRpcStructValue*>(this))
     {
-        return data.LoadFromXmlRpc(*pStruct, strKbGUID);
+        return data.LoadFromXmlRpc(*pStruct);
     }
 
     return false;
 }
 
 template <class TData>
-inline bool CWizXmlRpcValue::ToArray(std::deque<TData>& arrayData,
-                                     const QString& strKbGUID)
+inline bool CWizXmlRpcValue::ToArray(std::deque<TData>& arrayData)
 {
     if (CWizXmlRpcArrayValue* pArray = dynamic_cast<CWizXmlRpcArrayValue*>(this))
     {
-        return pArray->ToArray<TData>(arrayData, strKbGUID);
+        return pArray->ToArray<TData>(arrayData);
     }
 
     return false;
 }
 
 template <class TData>
-inline bool CWizXmlRpcArrayValue::ToArray(std::deque<TData>& arrayRet,
-                                          const QString& strKbGUID)
+inline bool CWizXmlRpcArrayValue::ToArray(std::deque<TData>& arrayRet)
 {
     std::deque<CWizXmlRpcValue*>::const_iterator it;
     for (it = m_array.begin(); it != m_array.end(); it++) {
@@ -282,7 +283,7 @@ inline bool CWizXmlRpcArrayValue::ToArray(std::deque<TData>& arrayRet,
         }
 
         TData data;
-        if (!pValue->ToData<TData>(data, strKbGUID))
+        if (!pValue->ToData<TData>(data))
         {
             //TOLOG(_T("Failed load data form value"));
             return false;
@@ -294,10 +295,36 @@ inline bool CWizXmlRpcArrayValue::ToArray(std::deque<TData>& arrayRet,
     return true;
 }
 
+
+template <class TData>
+inline bool CWizXmlRpcArrayValue::ToArray(std::vector<TData>& arrayRet)
+{
+    std::deque<CWizXmlRpcValue*>::const_iterator it;
+    for (it = m_array.begin(); it != m_array.end(); it++) {
+        CWizXmlRpcValue* pValue = *it;
+        if (!pValue)
+        {
+            //TOLOG(_T("Fault error: element of array is null"));
+            return false;
+        }
+
+        TData data;
+        if (!pValue->ToData<TData>(data))
+        {
+            //TOLOG(_T("Failed load data form value"));
+            return false;
+        }
+
+        arrayRet.push_back(data);
+    }
+
+    return true;
+}
+
+
 template <class TData>
 inline bool CWizXmlRpcStructValue::GetArray(const QString& strName,
-                                            std::deque<TData>& arrayData,
-                                            const QString& kbGUID)
+                                            std::deque<TData>& arrayData)
 {
     CWizXmlRpcArrayValue* pArray = GetArray(strName);
     if (!pArray)
@@ -306,7 +333,7 @@ inline bool CWizXmlRpcStructValue::GetArray(const QString& strName,
         return false;
     }
 
-    return pArray->ToArray<TData>(arrayData, kbGUID);
+    return pArray->ToArray<TData>(arrayData);
 }
 
 template <class TData>

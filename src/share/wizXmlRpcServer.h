@@ -88,7 +88,7 @@ protected:
         return pValue->ToData<TData>(ret);
     }
     template <class TData>
-    BOOL Call(const QString& strMethodName, std::vector<TData>& arrayRet, CWizXmlRpcValue* pParam1, CWizXmlRpcValue* pParam2 = NULL, CWizXmlRpcValue* pParam3 = NULL, CWizXmlRpcValue* pParam4 = NULL)
+    BOOL Call(const QString& strMethodName, std::deque<TData>& arrayRet, CWizXmlRpcValue* pParam1, CWizXmlRpcValue* pParam2 = NULL, CWizXmlRpcValue* pParam3 = NULL, CWizXmlRpcValue* pParam4 = NULL)
     {
         CWizXmlRpcResult result;
         if (!Call(strMethodName, result, pParam1, pParam2, pParam3, pParam4))

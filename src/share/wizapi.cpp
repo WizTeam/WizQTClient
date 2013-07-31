@@ -50,6 +50,7 @@ void CWizApiBase::onXmlRpcReturn(CWizXmlRpcValue& ret, const QString& strMethodN
                                  const QString& arg1, const QString& arg2)
 {
     Q_UNUSED(arg2);
+    /*
 
     if (strMethodName == SyncMethod_ClientLogin)
     {
@@ -58,7 +59,7 @@ void CWizApiBase::onXmlRpcReturn(CWizXmlRpcValue& ret, const QString& strMethodN
         WIZUSERINFO userInfo;
 
         // pass empty kbguid here is ok
-        if (!ret.ToData<WIZUSERINFO>(userInfo, kbGUID())) {
+        if (!ret.ToData<WIZUSERINFO>(userInfo)) {
             return;
         }
 
@@ -312,6 +313,7 @@ void CWizApiBase::onXmlRpcReturn(CWizXmlRpcValue& ret, const QString& strMethodN
     {
         Q_ASSERT(0);
     }
+    */
 }
 
 void CWizApiBase::_onXmlRpcError(const QString& strMethodName,

@@ -12,11 +12,29 @@ struct WIZOBJECTBASE
 };
 
 // this struct is obtained from client login api
-struct WIZUSERINFO
+
+struct WIZUSERINFOBASE
+{
+    QString strToken;
+    QString strKbGUID;
+    QString strDatabaseServer;
+    //
+    int nMaxFileSize;
+    //
+    WIZUSERINFOBASE()
+        : nMaxFileSize(10 * 1024 * 1024)
+    {
+    }
+    int GetMaxFileSize() const
+    {
+        return std::max<int>(20 * 1024 * 1024, nMaxFileSize);;
+    }
+};
+
+struct WIZUSERINFO : public WIZUSERINFOBASE
 {
     WIZUSERINFO();
-    bool LoadFromXmlRpc(CWizXmlRpcStructValue& val, const QString& kbGUID);
-    int GetMaxFileSize();
+    virtual bool LoadFromXmlRpc(CWizXmlRpcStructValue& val);
 
     // field: api_version, default: 1
 
@@ -37,12 +55,6 @@ struct WIZUSERINFO
     // field: invite_code, current is 8 length char
     QString strInviteCode;
 
-    // field: kapi_url
-    QString strDatabaseServer;
-
-    // field: kb_guid
-    QString strKbGUID;
-
     // field: mywiz_email
     QString strMywizEmail;
 
@@ -59,12 +71,6 @@ struct WIZUSERINFO
     // field: server, currently null
     // field: sns_list, default: sina=zh_CN name, 1
     QString strSNSList;
-
-    // field: token
-    QString strToken;
-
-    // field: upload_size_limit
-    int nMaxFileSize;
 
     // field: upload_url, default: /a/upload
     QString strUploadUrl;
@@ -117,7 +123,7 @@ struct WIZUSERINFO
 struct WIZUSERCERT
 {
     WIZUSERCERT();
-    bool LoadFromXmlRpc(CWizXmlRpcStructValue& val, const QString& kbGUID);
+    bool LoadFromXmlRpc(CWizXmlRpcStructValue& val);
 
     QString strN;
     QString stre;
@@ -129,7 +135,7 @@ struct WIZUSERCERT
 struct WIZKBINFO
 {
     WIZKBINFO();
-    bool LoadFromXmlRpc(CWizXmlRpcStructValue& data, const QString& strKbGUID);
+    bool LoadFromXmlRpc(CWizXmlRpcStructValue& data);
 
     __int64 nStorageLimit;
     __int64 nStorageUsage;
@@ -146,7 +152,7 @@ struct WIZKBINFO
 struct WIZOBJECTPARTDATA : public WIZOBJECTBASE
 {
     WIZOBJECTPARTDATA();
-    bool LoadFromXmlRpc(CWizXmlRpcStructValue& data, const QString& kbGUID);
+    bool LoadFromXmlRpc(CWizXmlRpcStructValue& data);
 
     CString strObjectGUID;
     CString strObjectType;
@@ -174,7 +180,7 @@ enum WizObjectType
 
 struct WIZDOCUMENTPARAMDATA : public WIZOBJECTBASE
 {
-    virtual bool LoadFromXmlRpc(CWizXmlRpcStructValue& data, const QString& kbGUID);
+    virtual bool LoadFromXmlRpc(CWizXmlRpcStructValue& data);
     virtual bool SaveToXmlRpc(CWizXmlRpcStructValue& data) const;
 
     // helper field, indicate which document this object link to
@@ -206,7 +212,7 @@ struct WIZTAGDATA : public WIZOBJECTBASE
     friend bool operator< (const WIZTAGDATA& data1, const WIZTAGDATA& data2) throw();
 
     BOOL EqualForSync(const WIZTAGDATA& data) const;
-    virtual BOOL LoadFromXmlRpc(CWizXmlRpcStructValue& data, const QString& kbGUID);
+    virtual BOOL LoadFromXmlRpc(CWizXmlRpcStructValue& data);
     virtual BOOL SaveToXmlRpc(CWizXmlRpcStructValue& data) const;
 
     static CString VersionName() { return CString(_T("tag_version")); }
@@ -222,7 +228,7 @@ struct WIZSTYLEDATA : public WIZOBJECTBASE
 {
     WIZSTYLEDATA();
 
-    virtual bool LoadFromXmlRpc(CWizXmlRpcStructValue& data, const QString& kbGUID);
+    virtual bool LoadFromXmlRpc(CWizXmlRpcStructValue& data);
     virtual bool SaveToXmlRpc(CWizXmlRpcStructValue& data) const;
 
     bool EqualForSync(const WIZSTYLEDATA& data) const;
@@ -251,7 +257,7 @@ struct WIZDOCUMENTDATABASE : public WIZOBJECTBASE
 {
     WIZDOCUMENTDATABASE();
 
-    virtual bool LoadFromXmlRpc(CWizXmlRpcStructValue& data, const QString& kbGUID);
+    virtual bool LoadFromXmlRpc(CWizXmlRpcStructValue& data);
     static QString VersionName() { return "document_version"; }
     static QString ObjectName() { return "document"; }
 
@@ -360,7 +366,7 @@ struct WIZDOCUMENTDATAEX : public WIZDOCUMENTDATA
 
     WIZDOCUMENTDATAEX& operator= (const WIZDOCUMENTDATAEX& right);
     bool ParamArrayToStringArray(CWizStdStringArray& params) const;
-    virtual bool LoadFromXmlRpc(CWizXmlRpcStructValue& data, const QString& kbGUID);
+    virtual bool LoadFromXmlRpc(CWizXmlRpcStructValue& data);
 
     // field: document_tags, guid list
     CWizStdStringArray arrayTagGUID;
@@ -381,7 +387,7 @@ struct WIZDOCUMENTATTACHMENTDATA : public WIZOBJECTBASE
 
     friend bool operator< (const WIZDOCUMENTATTACHMENTDATA& data1,const WIZDOCUMENTATTACHMENTDATA& data2 ) throw();
     BOOL EqualForSync(const WIZDOCUMENTATTACHMENTDATA& data) const;
-    virtual BOOL LoadFromXmlRpc(CWizXmlRpcStructValue& data, const QString& kbGUID);
+    virtual BOOL LoadFromXmlRpc(CWizXmlRpcStructValue& data);
 
     static QString VersionName() { return "attachment_version"; }
     static QString ObjectName() { return "attachment"; }
@@ -440,7 +446,7 @@ struct WIZDELETEDGUIDDATA : public WIZOBJECTBASE
 {
     WIZDELETEDGUIDDATA();
 
-    virtual bool LoadFromXmlRpc(CWizXmlRpcStructValue& data, const QString& kbGUID);
+    virtual bool LoadFromXmlRpc(CWizXmlRpcStructValue& data);
     bool SaveToXmlRpc(CWizXmlRpcStructValue& data) const;
     bool EqualForSync(const WIZDELETEDGUIDDATA& data) const;
     static CString VersionName() { return CString(_T("deleted_guid_version")); }
@@ -467,7 +473,7 @@ struct WIZGROUPDATA
 {
     WIZGROUPDATA();
     WIZGROUPDATA(const WIZGROUPDATA& data);
-    bool LoadFromXmlRpc(CWizXmlRpcStructValue& data, const QString& kbGUID);
+    bool LoadFromXmlRpc(CWizXmlRpcStructValue& data);
 
     // field: biz_guid, optional
     // Used for grouping groups
@@ -540,7 +546,7 @@ struct WIZMESSAGEDATA
 {
     WIZMESSAGEDATA();
     WIZMESSAGEDATA(const WIZMESSAGEDATA& data);
-    bool LoadFromXmlRpc(CWizXmlRpcStructValue& data, const QString& kbGUID);
+    bool LoadFromXmlRpc(CWizXmlRpcStructValue& data);
     static QString ObjectName() { return "message"; }
 
     // Field: biz_guid, char(36)
@@ -625,7 +631,7 @@ typedef std::deque<WIZMESSAGEDATA> CWizMessageDataArray;
 // struct return from accounts.getValue method
 struct WIZKVRETURN
 {
-    bool LoadFromXmlRpc(CWizXmlRpcStructValue& data, const QString& kbGUID);
+    bool LoadFromXmlRpc(CWizXmlRpcStructValue& data);
 
     // field: return_code
     // 200 ok
