@@ -804,6 +804,23 @@ bool CWizXmlRpcStructValue::GetStringArray(const QString& strName, CWizStdString
 }
 
 
+
+BOOL CWizXmlRpcStructValue::ToStringMap(std::map<QString, QString>& ret) const
+{
+    for (std::map<QString, CWizXmlRpcValue*>::const_iterator it = m_map.begin();
+        it != m_map.end();
+        it++)
+    {
+        ret[it->first] = it->second->ToString();
+    }
+    //
+    return TRUE;
+}
+
+
+
+
+
 /* ------------------------- CWizXmlRpcFaultValue ------------------------- */
 CWizXmlRpcFaultValue::~CWizXmlRpcFaultValue()
 {
@@ -831,4 +848,80 @@ QString CWizXmlRpcFaultValue::GetFaultString() const
     QString str;
 	m_val.GetString(_T("faultString"), str);
 	return str;
+}
+
+
+
+
+CWizXmlRpcResult::CWizXmlRpcResult()
+    : m_pResult(NULL)
+    , m_nFaultCode(0)
+    , m_bXmlRpcSucceeded(FALSE)
+    , m_bFault(FALSE)
+{
+}
+//
+CWizXmlRpcResult::~CWizXmlRpcResult()
+{
+    if (m_pResult)
+    {
+        delete m_pResult;
+        m_pResult = NULL;
+    }
+}
+//
+void CWizXmlRpcResult::SetResult(const QString& strMethodName, CWizXmlRpcValue* pRet)
+{
+    m_pResult = pRet;
+    if (!m_pResult)
+    {
+        TOLOG1(_T("Can not execute xml-rpc: %1"), strMethodName);
+        m_bXmlRpcSucceeded = FALSE;
+        m_bFault = FALSE;
+        return;
+    }
+    //
+    m_bXmlRpcSucceeded = TRUE;
+    //
+    if (CWizXmlRpcFaultValue* pFault = GetResultValue<CWizXmlRpcFaultValue>())
+    {
+        m_bFault = TRUE;
+        //
+        m_nFaultCode = pFault->GetFaultCode();
+        m_strFaultString = pFault->GetFaultString();
+        TOLOG3(_T("Failed to call xml rpc %1: %2, %3"), strMethodName, WizIntToStr(m_nFaultCode), m_strFaultString);
+    }
+}
+//
+BOOL CWizXmlRpcResult::IsXmlRpcSucceeded() const
+{
+    return m_bXmlRpcSucceeded;
+}
+BOOL CWizXmlRpcResult::IsFault() const
+{
+    return m_bFault;
+}
+BOOL CWizXmlRpcResult::IsNoError() const
+{
+    return m_bXmlRpcSucceeded && !m_bFault && m_pResult;
+}
+BOOL CWizXmlRpcResult::GetString(QString& str) const
+{
+    if (CWizXmlRpcStringValue* pValue = GetResultValue<CWizXmlRpcStringValue>())
+    {
+        str = *pValue;
+        return TRUE;
+    }
+    //
+    return FALSE;
+}
+BOOL CWizXmlRpcResult::GetBool(BOOL& b) const
+{
+    if (CWizXmlRpcBoolValue* pValue = GetResultValue<CWizXmlRpcBoolValue>())
+    {
+        b = *pValue;
+        return TRUE;
+    }
+    //
+    return FALSE;
 }

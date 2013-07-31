@@ -1,10 +1,112 @@
 #ifndef WIZXMLRPCSERVER_H
 #define WIZXMLRPCSERVER_H
 
-#include <QtNetwork>
 #include <QString>
+#include <QNetworkAccessManager>
+#include <QEventLoop>
+#include <QNetworkReply>
 
 #include "wizxmlrpc.h"
+#include "wizmisc.h"
+
+
+
+class CWizXmlRpcEventLoop : public QEventLoop
+{
+    Q_OBJECT
+public:
+    explicit CWizXmlRpcEventLoop(QNetworkReply* pReply, QObject *parent = 0);
+private:
+    QString m_result;
+    QNetworkReply::NetworkError m_error;
+    QString m_errorString;
+
+private:
+    void doFinished(QNetworkReply* pReply);
+    void doError(QNetworkReply::NetworkError error);
+
+public:
+    QNetworkReply::NetworkError error() { return m_error; }
+    QString errorString() { return m_errorString; }
+    QString result() { return m_result; }
+
+public Q_SLOTS:
+    void on_replyFinished();
+    void on_replyError(QNetworkReply::NetworkError);
+};
+
+
+class CWizXmlRpcServerBase : public QObject
+{
+    Q_OBJECT
+
+public:
+    CWizXmlRpcServerBase(const QString& url, QObject* parent);
+protected:
+    QNetworkAccessManager* m_network;
+    QString m_strUrl;
+    //
+    int m_nLastErrorCode;
+    QString m_strLastErrorMessage;
+
+public:
+    QString GetURL() const;
+    //
+    int GetLastErrorCode();
+    QString GetLastErrorMessage();
+    //
+    virtual void OnXmlRpcError() {}
+protected:
+    BOOL GetReturnValueInStringMap(const QString& strMethodName, std::map<QString, QString>& mapRet, const QString& strName, QString& strValue);
+    //
+    bool xmlRpcCall(const QString& strMethodName, CWizXmlRpcResult& result, CWizXmlRpcValue* pParam1, CWizXmlRpcValue* pParam2 = NULL, CWizXmlRpcValue* pParam3 = NULL, CWizXmlRpcValue* pParam4 = NULL);
+    BOOL Call(const QString& strMethodName, CWizXmlRpcValue* pParam1, CWizXmlRpcValue* pParam2 = NULL, CWizXmlRpcValue* pParam3 = NULL, CWizXmlRpcValue* pParam4 = NULL);
+    BOOL Call(const QString& strMethodName, CWizXmlRpcResult& ret, CWizXmlRpcValue* pParam1, CWizXmlRpcValue* pParam2 = NULL, CWizXmlRpcValue* pParam3 = NULL, CWizXmlRpcValue* pParam4 = NULL);
+    BOOL Call(const QString& strMethodName, std::map<QString, QString>& mapRet, CWizXmlRpcValue* pParam1, CWizXmlRpcValue* pParam2 = NULL, CWizXmlRpcValue* pParam3 = NULL, CWizXmlRpcValue* pParam4 = NULL);
+    BOOL Call(const QString& strMethodName, const QString& strRetName1, QString& strRetValue1, CWizXmlRpcValue* pParam1, CWizXmlRpcValue* pParam2 = NULL, CWizXmlRpcValue* pParam3 = NULL, CWizXmlRpcValue* pParam4 = NULL);
+    BOOL Call(const QString& strMethodName, const QString& strRetName1, QString& strRetValue1, const QString& strRetName2, QString& strRetValue2, CWizXmlRpcValue* pParam1, CWizXmlRpcValue* pParam2 = NULL, CWizXmlRpcValue* pParam3 = NULL, CWizXmlRpcValue* pParam4 = NULL);
+    BOOL Call(const QString& strMethodName, const QString& strRetName1, QString& strRetValue1, const QString& strRetName2, QString& strRetValue2, const QString& strRetName3, QString& strRetValue3, CWizXmlRpcValue* pParam1, CWizXmlRpcValue* pParam2 = NULL, CWizXmlRpcValue* pParam3 = NULL, CWizXmlRpcValue* pParam4 = NULL);
+    BOOL Call(const QString& strMethodName, const QString& strRetName1, QString& strRetValue1, const QString& strRetName2, QString& strRetValue2, const QString& strRetName3, QString& strRetValue3, const QString& strRetName4, QString& strRetValue4, CWizXmlRpcValue* pParam1, CWizXmlRpcValue* pParam2 = NULL, CWizXmlRpcValue* pParam3 = NULL, CWizXmlRpcValue* pParam4 = NULL);
+    //
+    template <class TData>
+    BOOL Call(const QString& strMethodName, TData& ret, CWizXmlRpcValue* pParam1, CWizXmlRpcValue* pParam2 = NULL, CWizXmlRpcValue* pParam3 = NULL, CWizXmlRpcValue* pParam4 = NULL)
+    {
+        CWizXmlRpcResult result;
+        if (!Call(strMethodName, result, pParam1, pParam2, pParam3, pParam4))
+        {
+            TOLOG1(_T("Failed to call xml-rpc method: %1"), strMethodName);
+            return FALSE;
+        }
+        //
+        CWizXmlRpcValue* pValue = result.GetResultValue<CWizXmlRpcValue>();
+        if (!pValue)
+        {
+            TOLOG1(_T("Failed to call xml-rpc method, can not get result value: %1"), strMethodName);
+            return FALSE;
+        }
+        //
+        return pValue->ToData<TData>(ret);
+    }
+    template <class TData>
+    BOOL Call(const QString& strMethodName, std::vector<TData>& arrayRet, CWizXmlRpcValue* pParam1, CWizXmlRpcValue* pParam2 = NULL, CWizXmlRpcValue* pParam3 = NULL, CWizXmlRpcValue* pParam4 = NULL)
+    {
+        CWizXmlRpcResult result;
+        if (!Call(strMethodName, result, pParam1, pParam2, pParam3, pParam4))
+        {
+            TOLOG1(_T("Failed to call xml-rpc method: %1"), strMethodName);
+            return FALSE;
+        }
+        //
+        CWizXmlRpcArrayValue* pArray = result.GetResultValue<CWizXmlRpcArrayValue>();
+        if (!pArray)
+        {
+            TOLOG1(_T("Failed to call xml-rpc method, can not get result value: %1"), strMethodName);
+            return FALSE;
+        }
+        //
+        return pArray->ToArray<TData>(arrayRet);
+    }
+};
 
 
 class CWizXmlRpcServer : public QObject

@@ -185,6 +185,9 @@ public:
     CWizXmlRpcArrayValue* GetArray(const QString& strName) const;
     bool GetColor(const QString& strName, COLORREF& cr) const;
     bool GetStringArray(const QString& strName, CWizStdStringArray& arrayData) const;
+    //
+    bool ToStringMap(std::map<QString, QString>& ret) const;
+
 
 	template <class TData>
     bool GetArray(const QString& strName, std::deque<TData>& arrayData, const QString& kbGUID);
@@ -325,5 +328,32 @@ inline bool CWizXmlRpcStructValue::AddArray(const QString& strName, const std::d
     return true;
 }
 
+
+class CWizXmlRpcResult
+{
+    CWizXmlRpcValue* m_pResult;
+    int m_nFaultCode;
+    QString m_strFaultString;
+    BOOL m_bXmlRpcSucceeded;
+    BOOL m_bFault;
+public:
+    CWizXmlRpcResult();
+    ~CWizXmlRpcResult();
+public:
+    void SetResult(const QString& strMethodName, CWizXmlRpcValue* pRet);
+    //
+    BOOL IsXmlRpcSucceeded() const;
+    BOOL IsFault() const;
+    BOOL IsNoError() const;
+    //
+    template <class T>
+    T* GetResultValue() const
+    {
+        return dynamic_cast<T*>(m_pResult);
+    }
+    //
+    BOOL GetString(QString& str) const;
+    BOOL GetBool(BOOL& b) const;
+};
 
 #endif //WIZXMLRPC_H
