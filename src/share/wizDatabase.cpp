@@ -1297,12 +1297,12 @@ bool CWizDatabase::DeleteAttachment(const WIZDOCUMENTATTACHMENTDATA& data,
 
 bool CWizDatabase::IsDocumentDownloaded(const CString& strGUID)
 {
-    return IsObjectDataDownloaded(strGUID, "document");
+    return CWizIndex::IsObjectDataDownloaded(strGUID, "document");
 }
 
 bool CWizDatabase::IsAttachmentDownloaded(const CString& strGUID)
 {
-    return IsObjectDataDownloaded(strGUID, "attachment");
+    return CWizIndex::IsObjectDataDownloaded(strGUID, "attachment");
 }
 
 bool CWizDatabase::GetAllObjectsNeedToBeDownloaded(std::deque<WIZOBJECTDATA>& arrayData)

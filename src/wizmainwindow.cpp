@@ -37,6 +37,7 @@
 #include "share/wizObjectDataDownloader.h"
 #include "wizDocumentTransitionView.h"
 
+#include "sync/wizkmsync.h"
 
 MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     : QMainWindow(parent)
@@ -553,7 +554,8 @@ void MainWindow::on_syncProcessErrorLog(const QString& strMsg)
 void MainWindow::on_actionSync_triggered()
 {
     m_certManager->downloadUserCert();
-    m_sync->startSyncing();
+    //m_sync->startSyncing();
+    WizKMSync(this->m_dbMgr.db(""));
 }
 
 void MainWindow::on_actionNewNote_triggered()

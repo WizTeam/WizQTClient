@@ -755,6 +755,42 @@ struct WIZTODODATA
 
 
 
+const int WIZ_USER_MSG_TYPE_CALLED = 0;
+const int WIZ_USER_MSG_TYPE_MODIFIED = 1;
+
+struct WIZUSERMESSAGEDATA
+{
+    __int64 nMessageID;
+    QString strBizGUID;
+    QString strKbGUID;
+    QString strDocumentGUID;
+    QString strSenderGUID;
+    QString strSenderID;
+    QString strReceiverGUID;
+    QString strReceiverID;
+    int nMessageType;
+    int nReadStatus;	//阅读状态, 0:未读，1:已读
+    COleDateTime tCreated;
+    QString strMessageText;
+    __int64 nVersion;
+    QString strSender;
+    QString strReceiver;
+    QString strTitle;
+    //
+    WIZUSERMESSAGEDATA()
+        : nMessageID(0)
+        , nMessageType(WIZ_USER_MSG_TYPE_CALLED)
+        , nReadStatus(0)
+        , nVersion(0)
+    {
+
+    }
+    //
+
+    BOOL LoadFromXmlRpc(CWizXmlRpcStructValue& data);
+};
+typedef std::deque<WIZUSERMESSAGEDATA> CWizUserMessageDataArray;
+
 typedef std::deque<WIZOBJECTDATA> CWizObjectDataArray;
 typedef std::deque<WIZDOCUMENTDATAEX> CWizDocumentDataArray;
 typedef std::deque<WIZMETADATA> CWizMetaDataArray;

@@ -1003,3 +1003,24 @@ COLORREF WizTodoGetTextColor(const WIZTODODATA& data)
     return cr;
 }
 
+BOOL WIZUSERMESSAGEDATA::LoadFromXmlRpc(CWizXmlRpcStructValue &data)
+{
+    data.GetInt64(_T("id"), nMessageID);
+    data.GetStr(_T("biz_guid"), strBizGUID);
+    data.GetStr(_T("kb_guid"), strKbGUID);
+    data.GetStr(_T("document_guid"), strDocumentGUID);
+    data.GetStr(_T("sender_guid"), strSenderGUID);
+    data.GetStr(_T("sender_id"), strSenderID);
+    data.GetStr(_T("receiver_guid"), strReceiverGUID);
+    data.GetStr(_T("receiver_id"), strReceiverID);
+    data.GetInt(_T("message_type"), nMessageType);
+    data.GetInt(_T("read_status"), nReadStatus);
+    data.GetTime(_T("dt_created"), tCreated);
+    data.GetStr(_T("message_body"), strMessageText);
+    data.GetInt64(_T("version"), nVersion);
+    data.GetStr(_T("sender_alias"), strSender);
+    data.GetStr(_T("receiver_alias"), strReceiver);
+    data.GetStr(_T("sender_alias"), strSender);
+    data.GetStr(_T("title"), strTitle);
+    return 	TRUE;
+}

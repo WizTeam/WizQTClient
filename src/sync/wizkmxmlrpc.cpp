@@ -2,6 +2,7 @@
 
 
 #include "../share/wizXmlRpcServer.h"
+#include "../share/wizSyncableDatabase.h"
 
 
 #define WIZUSERMESSAGE_AT		0
@@ -9,64 +10,6 @@
 
 #define WIZKM_XMLRPC_ERROR_TRAFFIC_LIMIT		304
 #define WIZKM_XMLRPC_ERROR_STORAGE_LIMIT		305
-
-
-const int WIZ_USER_MSG_TYPE_CALLED = 0;
-const int WIZ_USER_MSG_TYPE_MODIFIED = 1;
-
-struct WIZUSERMESSAGEDATA
-{
-    __int64 nMessageID;
-    QString strBizGUID;
-    QString strKbGUID;
-    QString strDocumentGUID;
-    QString strSenderGUID;
-    QString strSenderID;
-    QString strReceiverGUID;
-    QString strReceiverID;
-    int nMessageType;
-    int nReadStatus;	//阅读状态, 0:未读，1:已读
-    COleDateTime tCreated;
-    QString strMessageText;
-    __int64 nVersion;
-    QString strSender;
-    QString strReceiver;
-    QString strTitle;
-    //
-    WIZUSERMESSAGEDATA()
-        : nMessageID(0)
-        , nMessageType(WIZ_USER_MSG_TYPE_CALLED)
-        , nReadStatus(0)
-        , nVersion(0)
-    {
-
-    }
-    //
-
-    BOOL LoadFromXmlRpc(CWizXmlRpcStructValue& data)
-    {
-        data.GetInt64(_T("id"), nMessageID);
-        data.GetStr(_T("biz_guid"), strBizGUID);
-        data.GetStr(_T("kb_guid"), strKbGUID);
-        data.GetStr(_T("document_guid"), strDocumentGUID);
-        data.GetStr(_T("sender_guid"), strSenderGUID);
-        data.GetStr(_T("sender_id"), strSenderID);
-        data.GetStr(_T("receiver_guid"), strReceiverGUID);
-        data.GetStr(_T("receiver_id"), strReceiverID);
-        data.GetInt(_T("message_type"), nMessageType);
-        data.GetInt(_T("read_status"), nReadStatus);
-        data.GetTime(_T("dt_created"), tCreated);
-        data.GetStr(_T("message_body"), strMessageText);
-        data.GetInt64(_T("version"), nVersion);
-        data.GetStr(_T("sender_alias"), strSender);
-        data.GetStr(_T("receiver_alias"), strReceiver);
-        data.GetStr(_T("sender_alias"), strSender);
-        data.GetStr(_T("title"), strTitle);
-        return 	TRUE;
-    }
-};
-typedef std::deque<WIZUSERMESSAGEDATA> CWizUserMessageDataArray;
-
 
 
 
@@ -2146,136 +2089,6 @@ struct WIZKEYVALUEDATA
 
 
 
-struct IWizSyncableDatabase
-{
-    virtual QString GetUserId() = 0;
-    virtual QString GetUserGUID() = 0;
-    virtual QString GetPassword() = 0;
-    virtual __int64 GetObjectVersion(const QString& strObjectType) = 0;
-    virtual BOOL SetObjectVersion(const QString& strObjectType, __int64 nVersion) = 0;
-    virtual BOOL OnDownloadDeletedList(const CWizDeletedGUIDDataArray& arrayData) = 0;
-    virtual BOOL OnDownloadTagList(const CWizTagDataArray& arrayData) = 0;
-    virtual BOOL OnDownloadStyleList(const CWizStyleDataArray& arrayData) = 0;
-    virtual BOOL OnDownloadAttachmentList(const CWizDocumentAttachmentDataArray& arrayData) = 0;
-    virtual __int64 GetObjectLocalVersion(const QString& strObjectGUID, const QString& strObjectType) = 0;
-    virtual __int64 GetObjectLocalServerVersion(const QString& strObjectGUID, const QString& strObjectType) = 0;
-    virtual BOOL SetObjectLocalServerVersion(const QString& strObjectGUID, const QString& strObjectType, __int64 nVersion) = 0;
-    //
-    virtual BOOL DocumentFromGUID(const QString& strGUID, WIZDOCUMENTDATA& dataExists) = 0;
-    virtual BOOL SetObjectDataDownloaded(const QString& strGUID, const QString& strType, BOOL downloaded) = 0;
-    virtual BOOL SetObjectServerDataInfo(const QString& strGUID, const QString& strType, COleDateTime& tServerDataModified, const QString& strServerMD5) = 0;
-    //
-    virtual BOOL OnDownloadDocument(int part, const WIZDOCUMENTDATAEX& data) = 0;
-    //
-    virtual BOOL GetObjectsNeedToBeDownloaded(CWizObjectDataArray& arrayObject) = 0;
-    virtual BOOL UpdateObjectData(const QString& strObjectGUID, const QString& strObjectType, const QByteArray& stream) = 0;
-    virtual BOOL IsObjectDataDownloaded(const QString& strGUID, const QString& strType) = 0;
-    //
-    virtual BOOL GetModifiedDeletedList(CWizDeletedGUIDDataArray& arrayData) = 0;
-    virtual BOOL GetModifiedTagList(CWizTagDataArray& arrayData) = 0;
-    virtual BOOL GetModifiedStyleList(CWizStyleDataArray& arrayData) = 0;
-    virtual BOOL GetModifiedDocumentList(CWizDocumentDataArray& arrayData) = 0;
-    virtual BOOL GetModifiedAttachmentList(CWizDocumentAttachmentDataArray& arrayData) = 0;
-    //
-    virtual BOOL InitDocumentData(const QString& strGUID, WIZDOCUMENTDATAEX& data, UINT part) = 0;
-    virtual BOOL InitAttachmentData(const QString& strGUID, WIZDOCUMENTATTACHMENTDATAEX& data, UINT part) = 0;
-
-    //
-    virtual BOOL OnUploadObject(const QString& strGUID, const QString& strObjectType) = 0;
-    //
-    virtual BOOL OnDownloadGroups(const CWizGroupDataArray& arrayGroup) = 0;
-    virtual IWizSyncableDatabase* GetGroupDatabase(const WIZGROUPDATA& group) = 0;
-    virtual void CloseGroupDatabase(IWizSyncableDatabase* pDatabase) = 0;
-    //
-    virtual void SetKbInfo(const QString& strKBGUID, const WIZKBINFO& info) = 0;
-    virtual void SetUserInfo(const WIZUSERINFO& info) = 0;
-    //
-    virtual BOOL IsGroup() = 0;
-    virtual BOOL IsGroupAdmin() = 0;
-    virtual BOOL IsGroupSuper() = 0;
-    virtual BOOL IsGroupEditor() = 0;
-    virtual BOOL IsGroupAuthor() = 0;
-    virtual BOOL IsGroupReader() = 0;
-    //
-    virtual BOOL CanEditDocument(const WIZDOCUMENTDATA& data) = 0;
-    virtual BOOL CanEditAttachment(const WIZDOCUMENTATTACHMENTDATAEX& data) = 0;
-    //
-    virtual BOOL CreateConflictedCopy(const QString& strObjectGUID, const QString& strObjectType) = 0;
-    //
-    virtual BOOL SaveLastSyncTime() = 0;
-    virtual COleDateTime GetLastSyncTime() = 0;
-    //
-    virtual long GetLocalFlags(const QString& strObjectGUID, const QString& strObjectType) = 0;
-    virtual BOOL SetLocalFlags(const QString& strObjectGUID, const QString& strObjectType, long flags) = 0;
-    //
-    //
-    virtual void GetAccountKeys(CWizStdStringArray& arrayKey) = 0;
-    virtual __int64 GetAccountLocalValueVersion(const QString& strKey) = 0;
-    virtual void SetAccountLocalValue(const QString& strKey, const QString& strValue, __int64 nServerVersion, BOOL bSaveVersion) = 0;
-
-    virtual void GetKBKeys(CWizStdStringArray& arrayKey) = 0;
-    virtual BOOL ProcessValue(const QString& strKey) = 0;
-    virtual __int64 GetLocalValueVersion(const QString& strKey) = 0;
-    virtual QString GetLocalValue(const QString& strKey) = 0;
-    virtual void SetLocalValueVersion(const QString& strKey, __int64 nServerVersion) = 0;
-    virtual void SetLocalValue(const QString& strKey, const QString& strValue, __int64 nServerVersion, BOOL bSaveVersion) = 0;
-    //
-    //virtual CComPtr<IWizBizUserCollection> GetBizUsers() = 0;
-    virtual void GetAllBizUserIds(CWizStdStringArray& arrayText) = 0;
-    //
-    //virtual CComPtr<IWizDocument> GetDocumentByGUID(const QString& strDocumentGUID) = 0;
-    virtual BOOL OnDownloadMessages(const CWizUserMessageDataArray& arrayMessage) = 0;
-    //
-    virtual void ClearError() = 0;
-    virtual void OnTrafficLimit(const QString& strErrorMessage) = 0;
-    virtual void OnStorageLimit(const QString& strErrorMessage) = 0;
-    virtual BOOL IsTrafficLimit() = 0;
-    virtual BOOL IsStorageLimit() = 0;
-};
-
-
-
-
-enum WizKMSyncProgressStatusType
-{
-    wizhttpstatustypeNormal,
-    wizhttpstatustypeWarning,
-    wizhttpstatustypeError
-};
-
-struct IWizKMSyncEvents
-{
-    virtual void OnSyncProgress(int pos) {}
-    virtual HRESULT OnText(WizKMSyncProgressStatusType type, const QString& strStatus) = 0;
-    virtual void SetStop(BOOL b) { m_bStop = b; }
-    virtual BOOL IsStop() const { return m_bStop; }
-    virtual void SetLastErrorCode(int nErrorCode);
-    virtual int GetLastErrorCode() const { return m_nLastError; }
-    virtual void SetDatabaseCount(int count) {}
-    virtual void SetCurrentDatabase(int index) {}
-    virtual void OnTrafficLimit(IWizSyncableDatabase* pDatabase) {}
-    virtual void OnStorageLimit(IWizSyncableDatabase* pDatabase) {}
-    virtual void OnUploadDocument(const QString& strDocumentGUID, BOOL bDone) {}
-    virtual void OnBeginKb(const QString& strKbGUID) {}
-    virtual void OnEndKb(const QString& strKbGUID) {}
-    //
-public:
-    void OnStatus(const QString& strText) { OnText(wizhttpstatustypeNormal, strText); }
-    void OnWarning(const QString& strText) { OnText(wizhttpstatustypeWarning, strText); }
-    void OnError(const QString& strText) { OnText(wizhttpstatustypeError, strText); }
-    //
-private:
-    BOOL m_bStop;
-    int m_nLastError;
-public:
-    IWizKMSyncEvents()
-    {
-        m_bStop = FALSE;
-        m_nLastError = 0;
-    }
-};
-
-
 #define _TR(x) (x)
 
 class CWizKMSync
@@ -3310,14 +3123,6 @@ BOOL UploadAttachment(const WIZKBINFO& kbInfo, int size, int start, int total, i
                 //
                 pDatabase->OnTrafficLimit(strMessage + _T("\n\n") + server.GetLastErrorMessage());
                 //
-                if (!strTempFileName.isEmpty()
-                    && PathFileExists(strTempFileName))
-                {
-                    local.arrayData.clear();
-                    //
-                    DeleteFile(strTempFileName);
-                }
-                //
                 //pEvents->SetStop(TRUE);
                 pEvents->OnTrafficLimit(pDatabase);
                 return FALSE;
@@ -3331,13 +3136,6 @@ BOOL UploadAttachment(const WIZKBINFO& kbInfo, int size, int start, int total, i
                 //
                 pDatabase->OnStorageLimit(strMessage + _T("\n\n") + server.GetLastErrorMessage());
                 //
-                if (!strTempFileName.isEmpty()
-                    && PathFileExists(strTempFileName))
-                {
-                    local.arrayData.clear();
-                    //
-                    DeleteFile(strTempFileName);
-                }
                 //
                 //pEvents->SetStop(TRUE);
                 pEvents->OnStorageLimit(pDatabase);
@@ -3365,14 +3163,6 @@ BOOL UploadAttachment(const WIZKBINFO& kbInfo, int size, int start, int total, i
                 pDatabase->SetObjectLocalServerVersion(local.strGUID, strObjectType, nServerVersion);
             }
         }
-    }
-    //
-    if (!strTempFileName.isEmpty()
-        && PathFileExists(strTempFileName))
-    {
-        local.arrayData.clear();
-        //
-        DeleteFile(strTempFileName);
     }
     //
     //
@@ -4116,7 +3906,7 @@ CString WizKMGetAccountsServerURL(BOOL bUseWizServer)
     return "https://as.wiz.cn/wizas/xmlrpc";
 }
 
-BOOL WizSyncDatabase(IWizKMSyncEvents* pEvents, IWizSyncableDatabase* pDatabase, BOOL bUseWizServer, BOOL bBackground)
+bool WizSyncDatabase(IWizKMSyncEvents* pEvents, IWizSyncableDatabase* pDatabase, bool bUseWizServer, bool bBackground)
 {
     pEvents->OnStatus(_TR("-------Sync start--------------"));
     pEvents->OnSyncProgress(0);

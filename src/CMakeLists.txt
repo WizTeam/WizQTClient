@@ -123,7 +123,8 @@ set(wiznote_SOURCES
     share/wizObjectDataDownloader.cpp
     share/wizUserAvatar.cpp
     wizDocumentTransitionView.cpp
-    #sync/wizkmxmlrpc.cpp
+    sync/wizkmxmlrpc.cpp
+    sync/wizkmsync.cpp
 )
 
 set(wiznote_HEADERS
@@ -226,7 +227,8 @@ set(wiznote_HEADERS
     wizEditorInsertLinkForm.h
     wizUpgrade.h
     wizEditorToolBar.h
-    #sync/wizkmxmlrpc.h
+    sync/wizkmxmlrpc.h
+    sync/wizkmsync.h
     share/wizSyncableDatabase.h
 
     # rapidjson
