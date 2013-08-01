@@ -208,7 +208,7 @@ void CWizGroupMessage::onGetMessages(const CWizMessageDataArray& messages)
     qDebug() << "[Message Sync]fetch message finished, total: " << messages.size();
 
     // update messages info
-    m_db.updateMessages(messages);
+    m_db.UpdateMessages(messages);
 
     // 4. fetch user list
     fetchBizUsers();
@@ -217,7 +217,7 @@ void CWizGroupMessage::onGetMessages(const CWizMessageDataArray& messages)
 void CWizGroupMessage::fetchBizUsers()
 {
     // biz group info is set when call getGroupKbList api
-    if (!m_db.getBizGroupInfo(m_bizInfo)) {
+    if (!m_db.GetBizGroupInfo(m_bizInfo)) {
         qDebug() << "[Message Sync]failed: unable to get biz info!";
         TOLOG("[Message Sync]failed: unable to get biz info!");
         syncEnd();
@@ -254,7 +254,7 @@ void CWizGroupMessage::onGetBizUsers(const QString& strJsonUsers)
         return;
     }
 
-    if (!m_db.updateBizUsers(arrayUser)) {
+    if (!m_db.UpdateBizUsers(arrayUser)) {
         qDebug() << "[Message Sync]failed: unable to update users!";
         syncEnd();
         return;

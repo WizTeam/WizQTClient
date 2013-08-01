@@ -78,8 +78,9 @@ Q_SIGNALS:
 
 
 class CWizDatabase
-    : public CWizIndex
-    , public CThumbIndex
+        : public CWizIndex
+        , public CThumbIndex
+        , public IWizSyncableDatabase
 {
     Q_OBJECT
 
@@ -100,6 +101,58 @@ private:
 public:
     CWizDatabase();
 
+    // IWizSyncableDatabase implementation.
+    virtual QString GetUserId() const;
+    virtual QString GetPasssword() const;
+
+    virtual WIZDATABASEINFO GetInfo() const;
+    virtual bool SetInfo(const WIZDATABASEINFO& dbInfo);
+
+    virtual qint64 GetObjectVersion(const QString& strObjectName);
+    virtual bool SetObjectVersion(const QString& strObjectName,
+                                  qint64 nVersion);
+
+    virtual bool ModifyObjectVersion(const QString& strGUID,
+                                     const QString& strType,
+                                     qint64 nVersion);
+
+    virtual bool GetBizGroupInfo(QMap<QString, QString>& bizInfo);  // kb_guid:name map
+    virtual bool UpdateBizUsers(const CWizBizUserDataArray& arrayUser);
+
+    virtual bool GetUserGroupInfo(CWizGroupDataArray& arrayGroup);
+    virtual bool SetUserGroupInfo(const CWizGroupDataArray& arrayGroup);
+
+    virtual bool GetModifiedMessages(CWizMessageDataArray& arrayMsg);
+    virtual bool UpdateMessages(const CWizMessageDataArray& arrayMsg);
+
+    virtual bool GetModifiedDeletedGUIDs(CWizDeletedGUIDDataArray& arrayData);
+    virtual bool UpdateDeletedGUIDs(const CWizDeletedGUIDDataArray& arrayDeletedGUID);
+    virtual bool DeleteDeletedGUID(const QString& strGUID);
+
+    virtual bool GetModifiedTags(CWizTagDataArray& arrayData);
+    virtual bool UpdateTags(const CWizTagDataArray &arrayTag);
+
+    virtual bool GetModifiedStyles(CWizStyleDataArray& arrayData);
+    virtual bool UpdateStyles(const CWizStyleDataArray& arrayStyle);
+
+    virtual bool GetModifiedDocuments(CWizDocumentDataArray& arrayData);
+    virtual bool UpdateDocument(const WIZDOCUMENTDATAEX& data);
+
+    virtual bool GetModifiedAttachments(CWizDocumentAttachmentDataArray& arrayData);
+    virtual bool UpdateAttachment(const WIZDOCUMENTATTACHMENTDATAEX& data);
+    virtual bool UpdateAttachments(const CWizDocumentAttachmentDataArray& arrayAttachment);
+
+    virtual bool SetObjectDataDownloaded(const QString& strGUID,
+                                         const QString& strType,
+                                         bool bDownloaded);
+
+    virtual bool LoadDocumentData(const QString& strDocumentGUID,
+                                  QByteArray& arrayData);
+
+    virtual bool LoadCompressedAttachmentData(const QString& strDocumentGUID,
+                                              QByteArray& arrayData);
+
+public:
     // CWizZiwReader passthrough methods
     bool loadUserCert();
     const QString& userCipher() const { return m_ziwReader->userCipher(); }
@@ -153,31 +206,16 @@ public:
     bool setUserInfo(const WIZUSERINFO& userInfo);
     bool getUserInfo(WIZUSERINFO& userInfo);
 
-    bool getUserGroupInfo(CWizGroupDataArray& arrayGroup);
-    bool setUserGroupInfo(const CWizGroupDataArray& arrayGroup);
-
-    bool getBizGroupInfo(QMap<QString, QString>& bizInfo);
-
-    qint64 GetObjectVersion(const QString& strObjectName);
-    bool SetObjectVersion(const QString& strObjectName, qint64 nVersion);
-
     bool updateBizUser(const WIZBIZUSER& user);
-    bool updateBizUsers(const CWizBizUserDataArray& arrayUser);
+    //bool updateBizUsers(const CWizBizUserDataArray& arrayUser);
 
     bool updateMessage(const WIZMESSAGEDATA& msg);
-    bool updateMessages(const CWizMessageDataArray& arrayMsg);
 
     bool UpdateDeletedGUID(const WIZDELETEDGUIDDATA& data);
     bool UpdateTag(const WIZTAGDATA& data);
     bool UpdateStyle(const WIZSTYLEDATA& data);
-    bool UpdateDocument(const WIZDOCUMENTDATAEX& data);
-    bool UpdateAttachment(const WIZDOCUMENTATTACHMENTDATAEX& data);
 
-    bool UpdateDeletedGUIDs(const CWizDeletedGUIDDataArray& arrayDeletedGUID);
-    bool UpdateTags(const CWizTagDataArray &arrayTag);
-    bool UpdateStyles(const CWizStyleDataArray& arrayStyle);
     bool UpdateDocuments(const std::deque<WIZDOCUMENTDATAEX>& arrayDocument);
-    bool UpdateAttachments(const std::deque<WIZDOCUMENTATTACHMENTDATAEX>& arrayAttachment);
 
     bool UpdateDocumentData(WIZDOCUMENTDATA& data, const QString& strHtml, const QString& strURL, int nFlags);
     bool UpdateDocumentAbstract(const QString& strDocumentGUID);
@@ -196,10 +234,7 @@ public:
 
     bool GetDocumentsByTag(const WIZTAGDATA& tag, CWizDocumentDataArray& arrayDocument);
 
-    bool GetModifiedDeletedGUIDs(CWizDeletedGUIDDataArray& arrayData) { return GetDeletedGUIDs(arrayData); }
-    bool LoadDocumentData(const CString& strDocumentGUID, QByteArray& arrayData);
     bool LoadAttachmentData(const CString& strDocumentGUID, QByteArray& arrayData);
-    bool LoadCompressedAttachmentData(const CString& strDocumentGUID, QByteArray& arrayData);
     bool SaveCompressedAttachmentData(const CString& strDocumentGUID, const QByteArray& arrayData);
 
     static CString GetRootLocation(const CString& strLocation);

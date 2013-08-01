@@ -1569,7 +1569,7 @@ void CWizCategoryGroupsView::init()
 {
     // init biz groups
     QMap<QString, QString> bizInfo;
-    m_dbMgr.db().getBizGroupInfo(bizInfo);
+    m_dbMgr.db().GetBizGroupInfo(bizInfo);
 
     QMap<QString, QString>::const_iterator it;
     for (it = bizInfo.begin(); it != bizInfo.end(); it++) {

@@ -324,17 +324,17 @@ protected:
     virtual void onClientLogin(const WIZUSERINFO& userInfo);
     virtual void onGetGroupList(const CWizGroupDataArray& arrayGroup);
 
-    virtual void onDeletedGetList(const std::deque<WIZDELETEDGUIDDATA>& arrayRet);
-    virtual void onDeletedPostList(const std::deque<WIZDELETEDGUIDDATA>& arrayData);
+    //virtual void onDeletedGetList(const std::deque<WIZDELETEDGUIDDATA>& arrayRet);
+    //virtual void onDeletedPostList(const std::deque<WIZDELETEDGUIDDATA>& arrayData);
 
-    virtual void onTagGetList(const std::deque<WIZTAGDATA>& arrayRet);
-    virtual void onTagPostList(const std::deque<WIZTAGDATA>& arrayData);
+    //virtual void onTagGetList(const std::deque<WIZTAGDATA>& arrayRet);
+    //virtual void onTagPostList(const std::deque<WIZTAGDATA>& arrayData);
 
-    virtual void onStyleGetList(const std::deque<WIZSTYLEDATA>& arrayRet);
-    virtual void onStylePostList(const std::deque<WIZSTYLEDATA>& arrayData);
+    //virtual void onStyleGetList(const std::deque<WIZSTYLEDATA>& arrayRet);
+    //virtual void onStylePostList(const std::deque<WIZSTYLEDATA>& arrayData);
 
-    virtual void onDocumentGetData(const WIZDOCUMENTDATAEX& data);
-    virtual void onAttachmentGetList(const std::deque<WIZDOCUMENTATTACHMENTDATAEX>& arrayRet);
+    //virtual void onDocumentGetData(const WIZDOCUMENTDATAEX& data);
+    //virtual void onAttachmentGetList(const std::deque<WIZDOCUMENTATTACHMENTDATAEX>& arrayRet);
 
     virtual void onDownloadObjectDataCompleted(const WIZOBJECTDATA& data);
     virtual void onUploadObjectDataCompleted(const WIZOBJECTDATA& data);

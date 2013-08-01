@@ -7,27 +7,29 @@
 #include <map>
 #include <set>
 
+#include "wizSyncableDatabase.h"
+
 #define WIZ_DATABASE_VERSION "1.0"
 #define WIZ_NO_OBSOLETE
 
-struct WIZDATABASEINFO
-{
-    // optional
-    QString bizName;
-    QString bizGUID;
+//struct WIZDATABASEINFO
+//{
+//    // optional
+//    QString bizName;
+//    QString bizGUID;
 
-    // required, private db set to "PRIVATE"
-    QString name;
+//    // required, private db set to "PRIVATE"
+//    QString name;
 
-    // required
-    QString kbGUID;
+//    // required
+//    QString kbGUID;
 
-    // required, used for syncing, no store
-    QString serverUrl;
+//    // required, used for syncing, no store
+//    QString serverUrl;
 
-    // required, private db set to 0
-    int nPermission;
-};
+//    // required, private db set to 0
+//    int nPermission;
+//};
 
 class CWizIndexBase : public QObject
 {

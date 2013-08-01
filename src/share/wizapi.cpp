@@ -1028,57 +1028,57 @@ void CWizApi::onGetGroupList(const CWizGroupDataArray& arrayGroup)
     if (!arrayGroup.size())
         return;
 
-    m_db->setUserGroupInfo(arrayGroup);
+    m_db->SetUserGroupInfo(arrayGroup);
 }
 
-void CWizApi::onDeletedGetList(const std::deque<WIZDELETEDGUIDDATA>& arrayRet)
-{
-    m_db->UpdateDeletedGUIDs(arrayRet);
-}
+//void CWizApi::onDeletedGetList(const std::deque<WIZDELETEDGUIDDATA>& arrayRet)
+//{
+//    m_db->UpdateDeletedGUIDs(arrayRet);
+//}
 
-void CWizApi::onDeletedPostList(const std::deque<WIZDELETEDGUIDDATA>& arrayData)
-{
-    std::deque<WIZDELETEDGUIDDATA>::const_iterator it;
-    for (it = arrayData.begin(); it != arrayData.end(); it++) {
-        m_db->DeleteDeletedGUID(it->strGUID);
-    }
-}
+//void CWizApi::onDeletedPostList(const std::deque<WIZDELETEDGUIDDATA>& arrayData)
+//{
+//    std::deque<WIZDELETEDGUIDDATA>::const_iterator it;
+//    for (it = arrayData.begin(); it != arrayData.end(); it++) {
+//        m_db->DeleteDeletedGUID(it->strGUID);
+//    }
+//}
 
-void CWizApi::onTagGetList(const std::deque<WIZTAGDATA>& arrayRet)
-{
-    m_db->UpdateTags(arrayRet);
-}
+//void CWizApi::onTagGetList(const std::deque<WIZTAGDATA>& arrayRet)
+//{
+//    m_db->UpdateTags(arrayRet);
+//}
 
-void CWizApi::onTagPostList(const std::deque<WIZTAGDATA>& arrayData)
-{
-    std::deque<WIZTAGDATA>::const_iterator it;
-    for (it = arrayData.begin(); it != arrayData.end(); it++) {
-        m_db->ModifyObjectVersion(it->strGUID, WIZTAGDATA::ObjectName(), 0);
-    }
-}
+//void CWizApi::onTagPostList(const std::deque<WIZTAGDATA>& arrayData)
+//{
+//    std::deque<WIZTAGDATA>::const_iterator it;
+//    for (it = arrayData.begin(); it != arrayData.end(); it++) {
+//        m_db->ModifyObjectVersion(it->strGUID, WIZTAGDATA::ObjectName(), 0);
+//    }
+//}
 
-void CWizApi::onStyleGetList(const std::deque<WIZSTYLEDATA>& arrayRet)
-{
-    m_db->UpdateStyles(arrayRet);
-}
+//void CWizApi::onStyleGetList(const std::deque<WIZSTYLEDATA>& arrayRet)
+//{
+//    m_db->UpdateStyles(arrayRet);
+//}
 
-void CWizApi::onStylePostList(const std::deque<WIZSTYLEDATA>& arrayData)
-{
-    std::deque<WIZSTYLEDATA>::const_iterator it;
-    for (it = arrayData.begin(); it != arrayData.end(); it++) {
-        m_db->ModifyObjectVersion(it->strGUID, WIZSTYLEDATA::ObjectName(), 0);
-    }
-}
+//void CWizApi::onStylePostList(const std::deque<WIZSTYLEDATA>& arrayData)
+//{
+//    std::deque<WIZSTYLEDATA>::const_iterator it;
+//    for (it = arrayData.begin(); it != arrayData.end(); it++) {
+//        m_db->ModifyObjectVersion(it->strGUID, WIZSTYLEDATA::ObjectName(), 0);
+//    }
+//}
 
-void CWizApi::onDocumentGetData(const WIZDOCUMENTDATAEX& data)
-{
-    m_db->UpdateDocument(data);
-}
+//void CWizApi::onDocumentGetData(const WIZDOCUMENTDATAEX& data)
+//{
+//    m_db->UpdateDocument(data);
+//}
 
-void CWizApi::onAttachmentGetList(const std::deque<WIZDOCUMENTATTACHMENTDATAEX>& arrayRet)
-{
-    m_db->UpdateAttachments(arrayRet);
-}
+//void CWizApi::onAttachmentGetList(const std::deque<WIZDOCUMENTATTACHMENTDATAEX>& arrayRet)
+//{
+//    m_db->UpdateAttachments(arrayRet);
+//}
 
 void CWizApi::onDownloadObjectDataCompleted(const WIZOBJECTDATA& data)
 {

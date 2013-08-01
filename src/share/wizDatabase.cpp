@@ -311,6 +311,246 @@ CWizDatabase::CWizDatabase()
 {
 }
 
+QString CWizDatabase::GetUserId() const
+{
+    return m_strUserId;
+}
+
+QString CWizDatabase::GetPasssword() const
+{
+    return m_strPassword;
+}
+
+WIZDATABASEINFO CWizDatabase::GetInfo() const
+{
+
+}
+bool CWizDatabase::SetInfo(const WIZDATABASEINFO& dbInfo)
+{
+
+}
+
+qint64 CWizDatabase::GetObjectVersion(const QString& strObjectName)
+{
+    return GetMetaInt64("SYNC_INFO", strObjectName, -1) + 1;
+}
+
+bool CWizDatabase::SetObjectVersion(const QString& strObjectName,
+                                    qint64 nVersion)
+{
+    qDebug() << "set object: " << strObjectName << " version: " << nVersion;
+
+    return SetMetaInt64("SYNC_INFO", strObjectName, nVersion);
+}
+
+bool CWizDatabase::ModifyObjectVersion(const QString& strGUID,
+                                       const QString& strType,
+                                       qint64 nVersion)
+{
+    return CWizIndex::ModifyObjectVersion(strGUID, strType, nVersion);
+}
+
+bool CWizDatabase::GetModifiedMessages(CWizMessageDataArray& arrayMsg)
+{
+    return CWizIndex::getModifiedMessages(arrayMsg);
+}
+
+bool CWizDatabase::UpdateMessages(const CWizMessageDataArray& arrayMsg)
+{
+    // TODO: delete messages not exist on remote
+    if (arrayMsg.empty())
+        return false;
+
+    qint64 nVersion = -1;
+
+    bool bHasError = false;
+    CWizMessageDataArray::const_iterator it;
+    for (it = arrayMsg.begin(); it != arrayMsg.end(); it++)
+    {
+        const WIZMESSAGEDATA& msg = *it;
+        if (!updateMessage(msg)) {
+            bHasError = true;
+        }
+
+        nVersion = qMax(nVersion, msg.nVersion);
+    }
+
+    if (!bHasError) {
+        SetObjectVersion(WIZMESSAGEDATA::ObjectName(), nVersion);
+    }
+
+    return !bHasError;
+}
+
+bool CWizDatabase::GetBizGroupInfo(QMap<QString, QString>& bizInfo)
+{
+    CString strTotal;
+    bool bExist;
+
+    if(!GetMeta(g_strBizGroupSection, "Count", strTotal, "", &bExist)) {
+        return false;
+    }
+
+    if (!bExist) {
+        return true;
+    }
+
+    bizInfo.clear();
+
+    int nTotal = strTotal.toInt();
+    for (int i = 0; i < nTotal; i++) {
+        QString strBizGUID = GetMetaDef(g_strBizGroupSection, QString::number(i));
+        QString strBizName = GetMetaDef(g_strBizGroupSection, strBizGUID);
+
+        bizInfo[strBizGUID] = strBizName;
+    }
+
+    return true;
+}
+
+bool CWizDatabase::GetUserGroupInfo(CWizGroupDataArray& arrayGroup)
+{
+    CString strTotal;
+    bool bExist;
+
+    if (!GetMeta(g_strGroupSection, "Count", strTotal, "", &bExist)) {
+        return false;
+    }
+
+    // it's ok, user has no group data
+    if (!bExist) {
+        return true;
+    }
+
+    int nTotal = strTotal.toInt();
+    for (int i = 0; i < nTotal; i++) {
+        WIZGROUPDATA group;
+
+        group.strGroupGUID = GetMetaDef(g_strGroupSection, QString::number(i));
+        group.strGroupName = GetMetaDef(g_strGroupSection, group.strGroupGUID);
+
+        group.bizGUID = GetMetaDef(g_strBizGroupSection, group.strGroupGUID);
+
+        if (!group.bizGUID.isEmpty())
+            group.bizName = GetMetaDef(g_strBizGroupSection, group.bizGUID);
+
+        arrayGroup.push_back(group);
+    }
+
+    return true;
+}
+
+bool CWizDatabase::SetUserGroupInfo(const CWizGroupDataArray& arrayGroup)
+{
+    if (!deleteMetasByName(g_strGroupSection)\
+            && !deleteMetasByName(g_strBizGroupSection))
+        return false;
+
+    int nTotal = arrayGroup.size();
+    if (!nTotal) {
+        return false;
+    }
+
+    // collect biz group info
+    QMap<QString, QString> bizInfo;
+    for (int i = 0; i < nTotal; i++) {
+        const WIZGROUPDATA& data = arrayGroup[i];
+        if (!data.bizGUID.isEmpty())
+            bizInfo[data.bizGUID] = data.bizName;
+    }
+
+    // set biz info
+    SetMeta(g_strBizGroupSection, "Count", QString::number(bizInfo.size()));
+
+    int idx = 0;
+    QMap<QString, QString>::const_iterator it;
+    for (it = bizInfo.begin(); it != bizInfo.end(); it++) {
+        SetMeta(g_strBizGroupSection, QString::number(idx), it.key());
+        SetMeta(g_strBizGroupSection, it.key(), it.value());
+        idx++;
+    }
+
+    // set group info
+    SetMeta(g_strGroupSection, "Count", QString::number(nTotal));
+
+    for (int i = 0; i < nTotal; i++) {
+        const WIZGROUPDATA& data = arrayGroup[i];
+        SetMeta(g_strGroupSection, QString::number(i), data.strGroupGUID);
+        SetMeta(g_strGroupSection, data.strGroupGUID, data.strGroupName);
+
+        // also biz link
+        if (!data.bizGUID.isEmpty()) {
+            SetMeta(g_strBizGroupSection, data.strGroupGUID, data.bizGUID);
+        }
+    }
+
+    return true;
+}
+
+bool CWizDatabase::GetModifiedDeletedGUIDs(CWizDeletedGUIDDataArray& arrayData)
+{
+    return GetDeletedGUIDs(arrayData);
+}
+
+bool CWizDatabase::UpdateDeletedGUIDs(const CWizDeletedGUIDDataArray& arrayDeletedGUID)
+{
+    if (arrayDeletedGUID.empty())
+        return true;
+
+    qint64 nVersion = -1;
+
+    bool bHasError = false;
+
+    CWizDeletedGUIDDataArray::const_iterator it;
+    for (it = arrayDeletedGUID.begin(); it != arrayDeletedGUID.end(); it++) {
+        const WIZDELETEDGUIDDATA& data = *it;
+
+        if (!UpdateDeletedGUID(data)) {
+            bHasError = true;
+        }
+
+        nVersion = qMax(nVersion, data.nVersion);
+    }
+
+    if (!bHasError) {
+        SetObjectVersion(WIZDELETEDGUIDDATA::ObjectName(), nVersion);
+    }
+
+    return !bHasError;
+}
+
+bool CWizDatabase::DeleteDeletedGUID(const QString& strGUID)
+{
+    return CWizIndex::DeleteDeletedGUID(strGUID);
+}
+
+bool CWizDatabase::GetModifiedTags(CWizTagDataArray& arrayData)
+{
+    return CWizIndex::GetModifiedTags(arrayData);
+}
+
+bool CWizDatabase::GetModifiedStyles(CWizStyleDataArray& arrayData)
+{
+    return CWizIndex::GetModifiedStyles(arrayData);
+}
+
+bool CWizDatabase::GetModifiedDocuments(CWizDocumentDataArray& arrayData)
+{
+    return CWizIndex::GetModifiedDocuments(arrayData);
+}
+
+bool CWizDatabase::GetModifiedAttachments(CWizDocumentAttachmentDataArray& arrayData)
+{
+    return CWizIndex::GetModifiedAttachments(arrayData);
+}
+
+bool CWizDatabase::SetObjectDataDownloaded(const QString& strGUID,
+                                           const QString& strType,
+                                           bool bDownloaded)
+{
+    return CWizIndex::SetObjectDataDownloaded(strGUID, strType, bDownloaded);
+}
+
 //bool CWizDatabase::setDatabaseInfo(const QString& strKbGUID, const QString& strDatabaseServer,
 //                                   const QString& strName, int nPermission)
 //{
@@ -352,7 +592,6 @@ CWizDatabase::CWizDatabase()
 bool CWizDatabase::setDatabaseInfo(const WIZDATABASEINFO& dbInfo)
 {
     Q_ASSERT(!dbInfo.kbGUID.isEmpty() && !dbInfo.name.isEmpty());
-    //Q_ASSERT(dbInfo.kbGUID == m_info.kbGUID);
 
     m_info.bizName = dbInfo.bizName;
     m_info.bizGUID = dbInfo.bizGUID;
@@ -707,124 +946,6 @@ bool CWizDatabase::getUserInfo(WIZUSERINFO& userInfo)
     return true;
 }
 
-bool CWizDatabase::setUserGroupInfo(const CWizGroupDataArray& arrayGroup)
-{
-    if (!deleteMetasByName(g_strGroupSection)\
-            && !deleteMetasByName(g_strBizGroupSection))
-        return false;
-
-    int nTotal = arrayGroup.size();
-    if (!nTotal) {
-        return false;
-    }
-
-    // collect biz group info
-    QMap<QString, QString> bizInfo;
-    for (int i = 0; i < nTotal; i++) {
-        const WIZGROUPDATA& data = arrayGroup[i];
-        if (!data.bizGUID.isEmpty())
-            bizInfo[data.bizGUID] = data.bizName;
-    }
-
-    // set biz info
-    SetMeta(g_strBizGroupSection, "Count", QString::number(bizInfo.size()));
-
-    int idx = 0;
-    QMap<QString, QString>::const_iterator it;
-    for (it = bizInfo.begin(); it != bizInfo.end(); it++) {
-        SetMeta(g_strBizGroupSection, QString::number(idx), it.key());
-        SetMeta(g_strBizGroupSection, it.key(), it.value());
-        idx++;
-    }
-
-    // set group info
-    SetMeta(g_strGroupSection, "Count", QString::number(nTotal));
-
-    for (int i = 0; i < nTotal; i++) {
-        const WIZGROUPDATA& data = arrayGroup[i];
-        SetMeta(g_strGroupSection, QString::number(i), data.strGroupGUID);
-        SetMeta(g_strGroupSection, data.strGroupGUID, data.strGroupName);
-
-        // also biz link
-        if (!data.bizGUID.isEmpty()) {
-            SetMeta(g_strBizGroupSection, data.strGroupGUID, data.bizGUID);
-        }
-    }
-
-    return true;
-}
-
-bool CWizDatabase::getUserGroupInfo(CWizGroupDataArray& arrayGroup)
-{
-    CString strTotal;
-    bool bExist;
-
-    if (!GetMeta(g_strGroupSection, "Count", strTotal, "", &bExist)) {
-        return false;
-    }
-
-    // it's ok, user has no group data
-    if (!bExist) {
-        return true;
-    }
-
-    int nTotal = strTotal.toInt();
-    for (int i = 0; i < nTotal; i++) {
-        WIZGROUPDATA group;
-
-        group.strGroupGUID = GetMetaDef(g_strGroupSection, QString::number(i));
-        group.strGroupName = GetMetaDef(g_strGroupSection, group.strGroupGUID);
-
-        group.bizGUID = GetMetaDef(g_strBizGroupSection, group.strGroupGUID);
-
-        if (!group.bizGUID.isEmpty())
-            group.bizName = GetMetaDef(g_strBizGroupSection, group.bizGUID);
-
-        arrayGroup.push_back(group);
-    }
-
-    return true;
-}
-
-bool CWizDatabase::getBizGroupInfo(QMap<QString, QString>& bizInfo)
-{
-    CString strTotal;
-    bool bExist;
-
-    if(!GetMeta(g_strBizGroupSection, "Count", strTotal, "", &bExist)) {
-        return false;
-    }
-
-    if (!bExist) {
-        return true;
-    }
-
-    bizInfo.clear();
-
-    int nTotal = strTotal.toInt();
-    for (int i = 0; i < nTotal; i++) {
-        QString strBizGUID = GetMetaDef(g_strBizGroupSection, QString::number(i));
-        QString strBizName = GetMetaDef(g_strBizGroupSection, strBizGUID);
-
-        bizInfo[strBizGUID] = strBizName;
-    }
-
-    return true;
-}
-
-
-qint64 CWizDatabase::GetObjectVersion(const QString& strObjectName)
-{
-    return GetMetaInt64("SYNC_INFO", strObjectName, -1) + 1;
-}
-
-bool CWizDatabase::SetObjectVersion(const QString& strObjectName, qint64 nVersion)
-{
-    qDebug() << "set object: " << strObjectName << " version: " << nVersion;
-
-    return SetMetaInt64("SYNC_INFO", strObjectName, nVersion);
-}
-
 bool CWizDatabase::updateBizUser(const WIZBIZUSER& user)
 {
     bool bRet = false;
@@ -848,7 +969,7 @@ bool CWizDatabase::updateBizUser(const WIZBIZUSER& user)
     return bRet;
 }
 
-bool CWizDatabase::updateBizUsers(const CWizBizUserDataArray& arrayUser)
+bool CWizDatabase::UpdateBizUsers(const CWizBizUserDataArray& arrayUser)
 {
     // TODO: delete users not exist on remote
     if (arrayUser.empty())
@@ -883,33 +1004,6 @@ bool CWizDatabase::updateMessage(const WIZMESSAGEDATA& msg)
     }
 
     return bRet;
-}
-
-bool CWizDatabase::updateMessages(const CWizMessageDataArray& arrayMsg)
-{
-    // TODO: delete messages not exist on remote
-    if (arrayMsg.empty())
-        return false;
-
-    qint64 nVersion = -1;
-
-    bool bHasError = false;
-    CWizMessageDataArray::const_iterator it;
-    for (it = arrayMsg.begin(); it != arrayMsg.end(); it++)
-    {
-        const WIZMESSAGEDATA& msg = *it;
-        if (!updateMessage(msg)) {
-            bHasError = true;
-        }
-
-        nVersion = qMax(nVersion, msg.nVersion);
-    }
-
-    if (!bHasError) {
-        SetObjectVersion(WIZMESSAGEDATA::ObjectName(), nVersion);
-    }
-
-    return !bHasError;
 }
 
 bool CWizDatabase::UpdateDeletedGUID(const WIZDELETEDGUIDDATA& data)
@@ -1031,33 +1125,6 @@ bool CWizDatabase::UpdateAttachment(const WIZDOCUMENTATTACHMENTDATAEX& data)
     return bRet;
 }
 
-bool CWizDatabase::UpdateDeletedGUIDs(const CWizDeletedGUIDDataArray& arrayDeletedGUID)
-{
-    if (arrayDeletedGUID.empty())
-        return true;
-
-    qint64 nVersion = -1;
-
-    bool bHasError = false;
-
-    CWizDeletedGUIDDataArray::const_iterator it;
-    for (it = arrayDeletedGUID.begin(); it != arrayDeletedGUID.end(); it++) {
-        const WIZDELETEDGUIDDATA& data = *it;
-
-        if (!UpdateDeletedGUID(data)) {
-            bHasError = true;
-        }
-
-        nVersion = qMax(nVersion, data.nVersion);
-    }
-
-    if (!bHasError) {
-        SetObjectVersion(WIZDELETEDGUIDDATA::ObjectName(), nVersion);
-    }
-
-    return !bHasError;
-}
-
 bool CWizDatabase::UpdateTags(const CWizTagDataArray& arrayTag)
 {
     if (arrayTag.empty())
@@ -1143,7 +1210,7 @@ bool CWizDatabase::UpdateDocuments(const std::deque<WIZDOCUMENTDATAEX>& arrayDoc
     return !bHasError;
 }
 
-bool CWizDatabase::UpdateAttachments(const std::deque<WIZDOCUMENTATTACHMENTDATAEX>& arrayAttachment)
+bool CWizDatabase::UpdateAttachments(const CWizDocumentAttachmentDataArray& arrayAttachment)
 {
     if (arrayAttachment.empty())
         return true;
@@ -1419,7 +1486,7 @@ bool CWizDatabase::DeleteTagWithChildren(const WIZTAGDATA& data, bool bLog)
     return true;
 }
 
-bool CWizDatabase::LoadDocumentData(const CString& strDocumentGUID, QByteArray& arrayData)
+bool CWizDatabase::LoadDocumentData(const QString& strDocumentGUID, QByteArray& arrayData)
 {
     CString strFileName = GetDocumentFileName(strDocumentGUID);
     if (!PathFileExists(strFileName))
@@ -1453,7 +1520,7 @@ bool CWizDatabase::LoadAttachmentData(const CString& strDocumentGUID, QByteArray
     return !arrayData.isEmpty();
 }
 
-bool CWizDatabase::LoadCompressedAttachmentData(const CString& strDocumentGUID, QByteArray& arrayData)
+bool CWizDatabase::LoadCompressedAttachmentData(const QString& strDocumentGUID, QByteArray& arrayData)
 {
     CString strFileName = GetAttachmentFileName(strDocumentGUID);
     if (!PathFileExists(strFileName))
