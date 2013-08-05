@@ -1,7 +1,9 @@
 #include "wizkmxmlrpc.h"
 #include "wizkmsync.h"
 #include <QThread>
-#include "../share/wizSyncableDatabase.h"
+
+//#include "../share/wizSyncableDatabase.h"
+#include "../share/wizDatabase.h"
 
 class CWizKMSyncEvents : public IWizKMSyncEvents
 {

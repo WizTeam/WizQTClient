@@ -101,16 +101,121 @@ private:
 public:
     CWizDatabase();
 
-    // IWizSyncableDatabase implementation.
-    virtual QString GetUserId() const;
-    virtual QString GetPasssword() const;
+    // -------- IWizSyncableDatabase implementation new
+    virtual QString GetUserId();
+    virtual QString GetUserGUID(); // not used currently
+    virtual QString GetPassword();
+
+    virtual qint64 GetObjectVersion(const QString& strObjectType);
+    virtual bool SetObjectVersion(const QString& strObjectType, qint64 nVersion);
+
+    virtual bool GetModifiedDeletedList(CWizDeletedGUIDDataArray& arrayData);
+    virtual bool GetModifiedTagList(CWizTagDataArray& arrayData);
+    virtual bool GetModifiedStyleList(CWizStyleDataArray& arrayData);
+    virtual bool GetModifiedDocumentList(CWizDocumentDataArray& arrayData);
+    virtual bool GetModifiedAttachmentList(CWizDocumentAttachmentDataArray& arrayData);
+    virtual bool GetObjectsNeedToBeDownloaded(CWizObjectDataArray& arrayObject);
+
+    virtual bool OnDownloadDeletedList(const CWizDeletedGUIDDataArray& arrayData);
+    virtual bool OnDownloadTagList(const CWizTagDataArray& arrayData);
+    virtual bool OnDownloadStyleList(const CWizStyleDataArray& arrayData);
+    virtual bool OnDownloadAttachmentList(const CWizDocumentAttachmentDataArray& arrayData);
+    virtual bool OnDownloadDocument(int part, const WIZDOCUMENTDATAEX& data);
+    virtual bool OnDownloadMessages(const CWizUserMessageDataArray& arrayMessage);
+
+    virtual qint64 GetObjectLocalVersion(const QString& strObjectGUID,
+                                         const QString& strObjectType);
+    virtual qint64 GetObjectLocalServerVersion(const QString& strObjectGUID,
+                                               const QString& strObjectType);
+    virtual bool SetObjectLocalServerVersion(const QString& strObjectGUID,
+                                             const QString& strObjectType,
+                                             qint64 nVersion);
+
+    virtual bool DocumentFromGUID(const QString& strGUID, WIZDOCUMENTDATA& dataExists);
+
+    virtual bool IsObjectDataDownloaded(const QString& strGUID, const QString& strType);
+    virtual bool SetObjectDataDownloaded(const QString& strGUID,
+                                         const QString& strType,
+                                         bool downloaded);
+
+    virtual bool SetObjectServerDataInfo(const QString& strGUID,
+                                         const QString& strType,
+                                         COleDateTime& tServerDataModified,
+                                         const QString& strServerMD5);
+
+    virtual bool UpdateObjectData(const QString& strObjectGUID,
+                                  const QString& strObjectType,
+                                  const QByteArray& stream);
+
+    virtual bool InitDocumentData(const QString& strGUID,
+                                  WIZDOCUMENTDATAEX& data,
+                                  UINT part);
+
+    virtual bool InitAttachmentData(const QString& strGUID,
+                                    WIZDOCUMENTATTACHMENTDATAEX& data,
+                                    UINT part);
+
+    virtual bool OnUploadObject(const QString& strGUID, const QString& strObjectType);
+    virtual bool OnDownloadGroups(const CWizGroupDataArray& arrayGroup);
+    virtual IWizSyncableDatabase* GetGroupDatabase(const WIZGROUPDATA& group);
+    virtual void CloseGroupDatabase(IWizSyncableDatabase* pDatabase);
+    virtual void SetKbInfo(const QString& strKBGUID, const WIZKBINFO& info);
+    virtual void SetUserInfo(const WIZUSERINFO& info);
+
+    virtual bool IsGroup();
+    virtual bool IsGroupAdmin();
+    virtual bool IsGroupSuper();
+    virtual bool IsGroupEditor();
+    virtual bool IsGroupAuthor();
+    virtual bool IsGroupReader();
+
+    virtual bool CanEditDocument(const WIZDOCUMENTDATA& data);
+    virtual bool CanEditAttachment(const WIZDOCUMENTATTACHMENTDATAEX& data);
+
+    virtual bool CreateConflictedCopy(const QString& strObjectGUID,
+                                      const QString& strObjectType);
+
+    virtual bool SaveLastSyncTime();
+    virtual COleDateTime GetLastSyncTime();
+
+    virtual long GetLocalFlags(const QString& strObjectGUID,
+                               const QString& strObjectType);
+    virtual bool SetLocalFlags(const QString& strObjectGUID,
+                               const QString& strObjectType,
+                               long flags);
+
+    virtual void GetAccountKeys(CWizStdStringArray& arrayKey);
+    virtual qint64 GetAccountLocalValueVersion(const QString& strKey);
+    virtual void SetAccountLocalValue(const QString& strKey,
+                                      const QString& strValue,
+                                      qint64 nServerVersion,
+                                      bool bSaveVersion);
+
+    virtual void GetKBKeys(CWizStdStringArray& arrayKey);
+    virtual bool ProcessValue(const QString& strKey);
+    virtual qint64 GetLocalValueVersion(const QString& strKey);
+    virtual QString GetLocalValue(const QString& strKey);
+    virtual void SetLocalValueVersion(const QString& strKey,
+                                      qint64 nServerVersion);
+
+    virtual void SetLocalValue(const QString& strKey, const QString& strValue,
+                               qint64 nServerVersion, bool bSaveVersion);
+
+    virtual void GetAllBizUserIds(CWizStdStringArray& arrayText);
+
+    virtual void ClearError();
+    virtual void OnTrafficLimit(const QString& strErrorMessage);
+    virtual void OnStorageLimit(const QString& strErrorMessage);
+    virtual bool IsTrafficLimit();
+    virtual bool IsStorageLimit();
+
+    // -------- IWizSyncableDatabase implementation new
+
+    // -------- IWizSyncableDatabase implementation old
+
 
     virtual WIZDATABASEINFO GetInfo() const;
     virtual bool SetInfo(const WIZDATABASEINFO& dbInfo);
-
-    virtual qint64 GetObjectVersion(const QString& strObjectName);
-    virtual bool SetObjectVersion(const QString& strObjectName,
-                                  qint64 nVersion);
 
     virtual bool ModifyObjectVersion(const QString& strGUID,
                                      const QString& strType,
@@ -125,32 +230,29 @@ public:
     virtual bool GetModifiedMessages(CWizMessageDataArray& arrayMsg);
     virtual bool UpdateMessages(const CWizMessageDataArray& arrayMsg);
 
-    virtual bool GetModifiedDeletedGUIDs(CWizDeletedGUIDDataArray& arrayData);
-    virtual bool UpdateDeletedGUIDs(const CWizDeletedGUIDDataArray& arrayDeletedGUID);
     virtual bool DeleteDeletedGUID(const QString& strGUID);
 
-    virtual bool GetModifiedTags(CWizTagDataArray& arrayData);
-    virtual bool UpdateTags(const CWizTagDataArray &arrayTag);
+    bool GetModifiedDeletedGUIDs(CWizDeletedGUIDDataArray& arrayData);
+    bool GetModifiedStyles(CWizStyleDataArray& arrayData);
+    bool GetModifiedTags(CWizTagDataArray& arrayData);
 
-    virtual bool GetModifiedStyles(CWizStyleDataArray& arrayData);
-    virtual bool UpdateStyles(const CWizStyleDataArray& arrayStyle);
+    bool UpdateDeletedGUIDs(const CWizDeletedGUIDDataArray& arrayDeletedGUID);
+    bool UpdateStyles(const CWizStyleDataArray& arrayStyle);
+    bool UpdateTags(const CWizTagDataArray &arrayTag);
+    bool GetModifiedDocuments(CWizDocumentDataArray& arrayData);
+    bool GetModifiedAttachments(CWizDocumentAttachmentDataArray& arrayData);
 
-    virtual bool GetModifiedDocuments(CWizDocumentDataArray& arrayData);
     virtual bool UpdateDocument(const WIZDOCUMENTDATAEX& data);
-
-    virtual bool GetModifiedAttachments(CWizDocumentAttachmentDataArray& arrayData);
-    virtual bool UpdateAttachment(const WIZDOCUMENTATTACHMENTDATAEX& data);
-    virtual bool UpdateAttachments(const CWizDocumentAttachmentDataArray& arrayAttachment);
-
-    virtual bool SetObjectDataDownloaded(const QString& strGUID,
-                                         const QString& strType,
-                                         bool bDownloaded);
+    bool UpdateAttachment(const WIZDOCUMENTATTACHMENTDATAEX& data);
+    bool UpdateAttachments(const CWizDocumentAttachmentDataArray& arrayAttachment);
 
     virtual bool LoadDocumentData(const QString& strDocumentGUID,
                                   QByteArray& arrayData);
 
     virtual bool LoadCompressedAttachmentData(const QString& strDocumentGUID,
                                               QByteArray& arrayData);
+
+    // ------ IWizSyncableDatabase implementation old end
 
 public:
     // CWizZiwReader passthrough methods
@@ -227,7 +329,7 @@ public:
 
     bool IsDocumentDownloaded(const CString& strGUID);
     bool IsAttachmentDownloaded(const CString& strGUID);
-    bool GetAllObjectsNeedToBeDownloaded(std::deque<WIZOBJECTDATA>& arrayData);
+    bool GetAllObjectsNeedToBeDownloaded(CWizObjectDataArray& arrayData);
     bool UpdateSyncObjectLocalData(const WIZOBJECTDATA& data);
 
     CString GetObjectFileName(const WIZOBJECTDATA& data);
@@ -270,7 +372,7 @@ public:
     Q_INVOKABLE QObject* GetFolderByLocation(const QString& strLocation, bool create);
 
     using CWizIndexBase::DocumentFromGUID;
-    Q_INVOKABLE QObject* DocumentFromGUID(const QString& strGUID);
+    //Q_INVOKABLE QObject* DocumentFromGUID(const QString& strGUID);
 
 Q_SIGNALS:
     void databaseRename(const QString& strKbGUID);

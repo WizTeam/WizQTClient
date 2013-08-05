@@ -311,23 +311,19 @@ CWizDatabase::CWizDatabase()
 {
 }
 
-QString CWizDatabase::GetUserId() const
+QString CWizDatabase::GetUserId()
 {
     return m_strUserId;
 }
 
-QString CWizDatabase::GetPasssword() const
+QString CWizDatabase::GetUserGUID()
+{
+    return QString();
+}
+
+QString CWizDatabase::GetPassword()
 {
     return m_strPassword;
-}
-
-WIZDATABASEINFO CWizDatabase::GetInfo() const
-{
-
-}
-bool CWizDatabase::SetInfo(const WIZDATABASEINFO& dbInfo)
-{
-
 }
 
 qint64 CWizDatabase::GetObjectVersion(const QString& strObjectName)
@@ -341,6 +337,325 @@ bool CWizDatabase::SetObjectVersion(const QString& strObjectName,
     qDebug() << "set object: " << strObjectName << " version: " << nVersion;
 
     return SetMetaInt64("SYNC_INFO", strObjectName, nVersion);
+}
+
+bool CWizDatabase::GetModifiedDeletedList(CWizDeletedGUIDDataArray& arrayData)
+{
+    return GetDeletedGUIDs(arrayData);
+}
+
+bool CWizDatabase::GetModifiedTagList(CWizTagDataArray& arrayData)
+{
+    return CWizIndex::GetModifiedTags(arrayData);
+}
+
+bool CWizDatabase::GetModifiedStyleList(CWizStyleDataArray& arrayData)
+{
+    return CWizIndex::GetModifiedStyles(arrayData);
+}
+
+bool CWizDatabase::GetModifiedDocumentList(CWizDocumentDataArray& arrayData)
+{
+    return CWizIndex::GetModifiedDocuments(arrayData);
+}
+
+bool CWizDatabase::GetModifiedAttachmentList(CWizDocumentAttachmentDataArray& arrayData)
+{
+    return CWizIndex::GetModifiedAttachments(arrayData);
+}
+
+bool CWizDatabase::GetObjectsNeedToBeDownloaded(CWizObjectDataArray& arrayObject)
+{
+    GetAllObjectsNeedToBeDownloaded(arrayObject);
+}
+
+bool CWizDatabase::OnDownloadDeletedList(const CWizDeletedGUIDDataArray& arrayData)
+{
+    UpdateDeletedGUIDs(arrayData);
+}
+
+bool CWizDatabase::OnDownloadTagList(const CWizTagDataArray& arrayData)
+{
+    UpdateTags(arrayData);
+}
+
+bool CWizDatabase::OnDownloadStyleList(const CWizStyleDataArray& arrayData)
+{
+    UpdateStyles(arrayData);
+}
+
+bool CWizDatabase::OnDownloadAttachmentList(const CWizDocumentAttachmentDataArray& arrayData)
+{
+    UpdateAttachments(arrayData);
+}
+
+bool CWizDatabase::OnDownloadDocument(int part, const WIZDOCUMENTDATAEX& data)
+{
+
+}
+
+bool CWizDatabase::OnDownloadMessages(const CWizUserMessageDataArray& arrayMessage)
+{
+
+}
+
+qint64 CWizDatabase::GetObjectLocalVersion(const QString& strObjectGUID,
+                                           const QString& strObjectType)
+{
+
+}
+
+qint64 CWizDatabase::GetObjectLocalServerVersion(const QString& strObjectGUID,
+                                                 const QString& strObjectType)
+{
+
+}
+
+bool CWizDatabase::SetObjectLocalServerVersion(const QString& strObjectGUID,
+                                               const QString& strObjectType,
+                                               qint64 nVersion)
+{
+
+}
+
+bool CWizDatabase::DocumentFromGUID(const QString& strGUID,
+                                    WIZDOCUMENTDATA& dataExists)
+{
+    CWizIndex::DocumentFromGUID(strGUID, dataExists);
+}
+
+bool CWizDatabase::IsObjectDataDownloaded(const QString& strGUID,
+                                          const QString& strType)
+{
+
+}
+
+bool CWizDatabase::SetObjectDataDownloaded(const QString& strGUID,
+                                           const QString& strType,
+                                           bool bDownloaded)
+{
+    return CWizIndex::SetObjectDataDownloaded(strGUID, strType, bDownloaded);
+}
+
+bool CWizDatabase::SetObjectServerDataInfo(const QString& strGUID,
+                                           const QString& strType,
+                                           COleDateTime& tServerDataModified,
+                                           const QString& strServerMD5)
+{
+
+}
+
+bool CWizDatabase::UpdateObjectData(const QString& strObjectGUID,
+                                    const QString& strObjectType,
+                                    const QByteArray& stream)
+{
+
+}
+
+bool CWizDatabase::InitDocumentData(const QString& strGUID,
+                                    WIZDOCUMENTDATAEX& data,
+                                    UINT part)
+{
+
+}
+
+bool CWizDatabase::InitAttachmentData(const QString& strGUID,
+                                      WIZDOCUMENTATTACHMENTDATAEX& data,
+                                      UINT part)
+{
+
+}
+
+bool CWizDatabase::OnUploadObject(const QString& strGUID,
+                                  const QString& strObjectType)
+{
+
+}
+
+bool CWizDatabase::OnDownloadGroups(const CWizGroupDataArray& arrayGroup)
+{
+
+}
+
+IWizSyncableDatabase* CWizDatabase::GetGroupDatabase(const WIZGROUPDATA& group)
+{
+
+}
+
+void CWizDatabase::CloseGroupDatabase(IWizSyncableDatabase* pDatabase)
+{
+
+}
+
+void CWizDatabase::SetKbInfo(const QString& strKBGUID, const WIZKBINFO& info)
+{
+
+}
+
+void CWizDatabase::SetUserInfo(const WIZUSERINFO& info)
+{
+
+}
+
+bool CWizDatabase::IsGroup()
+{
+
+}
+
+bool CWizDatabase::IsGroupAdmin()
+{
+
+}
+
+bool CWizDatabase::IsGroupSuper()
+{
+
+}
+
+bool CWizDatabase::IsGroupEditor()
+{
+
+}
+
+bool CWizDatabase::IsGroupAuthor()
+{
+
+}
+
+bool CWizDatabase::IsGroupReader()
+{
+
+}
+
+bool CWizDatabase::CanEditDocument(const WIZDOCUMENTDATA& data)
+{
+
+}
+
+bool CWizDatabase::CanEditAttachment(const WIZDOCUMENTATTACHMENTDATAEX& data)
+{
+
+}
+
+bool CWizDatabase::CreateConflictedCopy(const QString& strObjectGUID,
+                                        const QString& strObjectType)
+{
+
+}
+
+bool CWizDatabase::SaveLastSyncTime()
+{
+
+}
+
+COleDateTime CWizDatabase::GetLastSyncTime()
+{
+
+}
+
+long CWizDatabase::GetLocalFlags(const QString& strObjectGUID,
+                                 const QString& strObjectType)
+{
+
+}
+
+bool CWizDatabase::SetLocalFlags(const QString& strObjectGUID,
+                                 const QString& strObjectType,
+                                 long flags)
+{
+
+}
+
+void CWizDatabase::GetAccountKeys(CWizStdStringArray& arrayKey)
+{
+
+}
+
+qint64 CWizDatabase::GetAccountLocalValueVersion(const QString& strKey)
+{
+
+}
+
+void CWizDatabase::SetAccountLocalValue(const QString& strKey,
+                                        const QString& strValue,
+                                        qint64 nServerVersion,
+                                        bool bSaveVersion)
+{
+
+}
+
+void CWizDatabase::GetKBKeys(CWizStdStringArray& arrayKey)
+{
+
+}
+
+bool CWizDatabase::ProcessValue(const QString& strKey)
+{
+
+}
+
+qint64 CWizDatabase::GetLocalValueVersion(const QString& strKey)
+{
+
+}
+
+QString CWizDatabase::GetLocalValue(const QString& strKey)
+{
+
+}
+
+void CWizDatabase::SetLocalValueVersion(const QString& strKey,
+                                        qint64 nServerVersion)
+{
+
+}
+
+void CWizDatabase::SetLocalValue(const QString& strKey, const QString& strValue,
+                                 qint64 nServerVersion, bool bSaveVersion)
+{
+
+}
+
+void CWizDatabase::GetAllBizUserIds(CWizStdStringArray& arrayText)
+{
+
+}
+
+void CWizDatabase::ClearError()
+{
+
+}
+
+void CWizDatabase::OnTrafficLimit(const QString& strErrorMessage)
+{
+
+}
+
+void CWizDatabase::OnStorageLimit(const QString& strErrorMessage)
+{
+
+}
+
+bool CWizDatabase::IsTrafficLimit()
+{
+
+}
+
+bool CWizDatabase::IsStorageLimit()
+{
+
+}
+
+
+/* ---------------------------------------------------------------------- */
+
+WIZDATABASEINFO CWizDatabase::GetInfo() const
+{
+
+}
+bool CWizDatabase::SetInfo(const WIZDATABASEINFO& dbInfo)
+{
+
 }
 
 bool CWizDatabase::ModifyObjectVersion(const QString& strGUID,
@@ -542,13 +857,6 @@ bool CWizDatabase::GetModifiedDocuments(CWizDocumentDataArray& arrayData)
 bool CWizDatabase::GetModifiedAttachments(CWizDocumentAttachmentDataArray& arrayData)
 {
     return CWizIndex::GetModifiedAttachments(arrayData);
-}
-
-bool CWizDatabase::SetObjectDataDownloaded(const QString& strGUID,
-                                           const QString& strType,
-                                           bool bDownloaded)
-{
-    return CWizIndex::SetObjectDataDownloaded(strGUID, strType, bDownloaded);
 }
 
 //bool CWizDatabase::setDatabaseInfo(const QString& strKbGUID, const QString& strDatabaseServer,
@@ -1305,7 +1613,7 @@ bool CWizDatabase::IsAttachmentDownloaded(const CString& strGUID)
     return CWizIndex::IsObjectDataDownloaded(strGUID, "attachment");
 }
 
-bool CWizDatabase::GetAllObjectsNeedToBeDownloaded(std::deque<WIZOBJECTDATA>& arrayData)
+bool CWizDatabase::GetAllObjectsNeedToBeDownloaded(CWizObjectDataArray& arrayData)
 {
     CWizDocumentDataArray arrayDocument;
     CWizDocumentAttachmentDataArray arrayAttachment;
@@ -1792,12 +2100,12 @@ QObject* CWizDatabase::GetDeletedItemsFolder()
     return new CWizFolder(*this, GetDeletedItemsLocation());
 }
 
-QObject* CWizDatabase::DocumentFromGUID(const QString& strGUID)
-{
-    WIZDOCUMENTDATA data;
-    if (!DocumentFromGUID(strGUID, data))
-        return NULL;
+//QObject* CWizDatabase::DocumentFromGUID(const QString& strGUID)
+//{
+//    WIZDOCUMENTDATA data;
+//    if (!DocumentFromGUID(strGUID, data))
+//        return NULL;
 
-    CWizDocument* pDoc = new CWizDocument(*this, data);
-    return pDoc;
-}
+//    CWizDocument* pDoc = new CWizDocument(*this, data);
+//    return pDoc;
+//}
