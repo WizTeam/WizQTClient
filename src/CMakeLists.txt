@@ -46,13 +46,11 @@ set(wiznote_SOURCES
     share/wizxmlrpc.cpp
     share/wizXmlRpcServer.cpp
     share/wizapi.cpp
-    share/wizKbSync.cpp
-    share/wizSync.cpp
     share/wizDatabase.cpp
     share/wizDatabaseManager.cpp
     share/wizverifyaccount.cpp
     share/wizsettings.cpp
-    share/wizsyncthread.cpp
+
     share/wizui.cpp
     share/wizmd5.cpp
     share/wizhtml2zip.cpp
@@ -68,6 +66,7 @@ set(wiznote_SOURCES
     share/wizfileiconprovider.cpp
     share/wizwindowshelper.cpp
     share/wizimagepushbutton.cpp
+    share/wizIndexBase.cpp
     share/wizindex.cpp
     share/wizthumbindex.cpp
     share/wizThumbIndexCache.cpp
@@ -163,8 +162,6 @@ set(wiznote_HEADERS
     share/wizxml.h
     share/wizxmlrpc.h
     share/wizXmlRpcServer.h
-    share/wizKbSync.h
-    share/wizSync.h
     share/wizDatabase.h
     share/wizDatabaseManager.h
     share/wizverifyaccount.h
@@ -184,10 +181,10 @@ set(wiznote_HEADERS
     share/wizfileiconprovider.h
     share/wizwindowshelper.h
     share/wizimagepushbutton.h
-    share/wizindex.h
+    share/wizIndexBase.h
+    share/wizIndex.h
     share/wizthumbindex.h
     share/wizThumbIndexCache.h
-    share/wizsyncthread.h
     share/wizenc.h
     share/wizziwreader.h
     html/wizhtmlreader.h
@@ -275,8 +272,8 @@ set(wiznote_WRAP_HEADERS
     wizdownloadobjectdatadialog.h
     wizEditorInsertLinkForm.h
     wizGroupAttributeForm.h
-    share/wizindex.h
-    share/wizKbSync.h
+    share/wizIndexBase.h
+    share/wizIndex.h
     wizmainwindow.h
     share/wizmisc.h
     wizLineInputDialog.h
@@ -287,8 +284,6 @@ set(wiznote_WRAP_HEADERS
     wizSearchWidget.h
     share/wizSearchIndexer.h
     wizstatusbar.h
-    share/wizSync.h
-    share/wizsyncthread.h
     wiztaglistwidget.h
     share/wizThumbIndexCache.h
     wizupdater.h

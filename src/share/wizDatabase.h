@@ -3,9 +3,10 @@
 
 #include <QPointer>
 
-#include "wizindex.h"
+#include "wizIndex.h"
 #include "wizthumbindex.h"
 #include "wizziwreader.h"
+#include "wizSyncableDatabase.h"
 
 class CWizDatabase;
 class CWizFolder;
@@ -76,7 +77,9 @@ Q_SIGNALS:
                       const WIZDOCUMENTDATA& data);
 };
 
-
+/*
+ * High level operation layer of database
+ */
 class CWizDatabase
         : public CWizIndex
         , public CThumbIndex
@@ -101,19 +104,21 @@ private:
 public:
     CWizDatabase();
 
-    // -------- IWizSyncableDatabase implementation new
-    virtual QString GetUserId();
-    virtual QString GetUserGUID(); // not used currently
-    virtual QString GetPassword();
+    // IWizSyncableDatabase interface implementations
 
-    virtual qint64 GetObjectVersion(const QString& strObjectType);
-    virtual bool SetObjectVersion(const QString& strObjectType, qint64 nVersion);
+    virtual QString GetUserId();
+    virtual QString GetUserGUID();
+    virtual QString GetPassword();
 
     virtual bool GetModifiedDeletedList(CWizDeletedGUIDDataArray& arrayData);
     virtual bool GetModifiedTagList(CWizTagDataArray& arrayData);
     virtual bool GetModifiedStyleList(CWizStyleDataArray& arrayData);
     virtual bool GetModifiedDocumentList(CWizDocumentDataArray& arrayData);
     virtual bool GetModifiedAttachmentList(CWizDocumentAttachmentDataArray& arrayData);
+
+    virtual qint64 GetObjectVersion(const QString& strObjectType);
+    virtual bool SetObjectVersion(const QString& strObjectType, qint64 nVersion);
+
     virtual bool GetObjectsNeedToBeDownloaded(CWizObjectDataArray& arrayObject);
 
     virtual bool OnDownloadDeletedList(const CWizDeletedGUIDDataArray& arrayData);
@@ -209,17 +214,12 @@ public:
     virtual bool IsTrafficLimit();
     virtual bool IsStorageLimit();
 
-    // -------- IWizSyncableDatabase implementation new
+    // end interface implementations
+
 
     // -------- IWizSyncableDatabase implementation old
-
-
-    virtual WIZDATABASEINFO GetInfo() const;
-    virtual bool SetInfo(const WIZDATABASEINFO& dbInfo);
-
-    virtual bool ModifyObjectVersion(const QString& strGUID,
-                                     const QString& strType,
-                                     qint64 nVersion);
+    //virtual WIZDATABASEINFO GetInfo() const;
+    //virtual bool SetInfo(const WIZDATABASEINFO& dbInfo);
 
     virtual bool GetBizGroupInfo(QMap<QString, QString>& bizInfo);  // kb_guid:name map
     virtual bool UpdateBizUsers(const CWizBizUserDataArray& arrayUser);
@@ -227,32 +227,28 @@ public:
     virtual bool GetUserGroupInfo(CWizGroupDataArray& arrayGroup);
     virtual bool SetUserGroupInfo(const CWizGroupDataArray& arrayGroup);
 
-    virtual bool GetModifiedMessages(CWizMessageDataArray& arrayMsg);
-    virtual bool UpdateMessages(const CWizMessageDataArray& arrayMsg);
+    //virtual bool GetModifiedMessages(CWizMessageDataArray& arrayMsg);
+    bool UpdateMessages(const CWizMessageDataArray& arrayMsg);
 
-    virtual bool DeleteDeletedGUID(const QString& strGUID);
+    //virtual bool DeleteDeletedGUID(const QString& strGUID);
 
-    bool GetModifiedDeletedGUIDs(CWizDeletedGUIDDataArray& arrayData);
-    bool GetModifiedStyles(CWizStyleDataArray& arrayData);
-    bool GetModifiedTags(CWizTagDataArray& arrayData);
+    //bool GetModifiedDeletedGUIDs(CWizDeletedGUIDDataArray& arrayData);
+    //bool GetModifiedStyles(CWizStyleDataArray& arrayData);
+    //bool GetModifiedTags(CWizTagDataArray& arrayData);
 
     bool UpdateDeletedGUIDs(const CWizDeletedGUIDDataArray& arrayDeletedGUID);
     bool UpdateStyles(const CWizStyleDataArray& arrayStyle);
     bool UpdateTags(const CWizTagDataArray &arrayTag);
-    bool GetModifiedDocuments(CWizDocumentDataArray& arrayData);
-    bool GetModifiedAttachments(CWizDocumentAttachmentDataArray& arrayData);
+    //bool GetModifiedDocuments(CWizDocumentDataArray& arrayData);
+    //bool GetModifiedAttachments(CWizDocumentAttachmentDataArray& arrayData);
 
-    virtual bool UpdateDocument(const WIZDOCUMENTDATAEX& data);
+    bool UpdateDocument(const WIZDOCUMENTDATAEX& data);
     bool UpdateAttachment(const WIZDOCUMENTATTACHMENTDATAEX& data);
     bool UpdateAttachments(const CWizDocumentAttachmentDataArray& arrayAttachment);
 
-    virtual bool LoadDocumentData(const QString& strDocumentGUID,
-                                  QByteArray& arrayData);
-
-    virtual bool LoadCompressedAttachmentData(const QString& strDocumentGUID,
-                                              QByteArray& arrayData);
-
-    // ------ IWizSyncableDatabase implementation old end
+    bool LoadDocumentData(const QString& strDocumentGUID, QByteArray& arrayData);
+    bool LoadCompressedAttachmentData(const QString& strDocumentGUID,
+                                      QByteArray& arrayData);
 
 public:
     // CWizZiwReader passthrough methods
@@ -266,8 +262,8 @@ public:
 //    bool setDatabaseInfo(const QString& strKbGUID, const QString& strDatabaseServer,
 //                         const QString& strName, int nPermission);
 
-    bool setDatabaseInfo(const WIZDATABASEINFO& dbInfo);
-    bool loadDatabaseInfo();
+    //bool setDatabaseInfo(const WIZDATABASEINFO& dbInfo);
+    //bool loadDatabaseInfo();
 
     bool openPrivate(const QString& strUserId, const QString& strPassword = QString());
     bool openGroup(const QString& strUserId, const QString& strGroupGUID);
@@ -371,7 +367,7 @@ public:
     Q_INVOKABLE QObject* GetDeletedItemsFolder();
     Q_INVOKABLE QObject* GetFolderByLocation(const QString& strLocation, bool create);
 
-    using CWizIndexBase::DocumentFromGUID;
+    //using CWizIndexBase::DocumentFromGUID;
     //Q_INVOKABLE QObject* DocumentFromGUID(const QString& strGUID);
 
 Q_SIGNALS:

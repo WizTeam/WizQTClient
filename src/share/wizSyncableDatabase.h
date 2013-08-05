@@ -3,25 +3,6 @@
 
 #include "wizobject.h"
 
-struct WIZDATABASEINFO
-{
-    // optional
-    QString bizName;
-    QString bizGUID;
-
-    // required, private db set to "PRIVATE"
-    QString name;
-
-    // required
-    QString kbGUID;
-
-    // required, used for syncing object data, aka kapi_url
-    QString serverUrl;
-
-    // required, private db set to 0
-    int nPermission;
-};
-
 
 struct IWizSyncableDatabase
 {

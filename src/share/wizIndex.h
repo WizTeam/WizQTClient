@@ -1,288 +1,33 @@
 #ifndef WIZINDEX_H
 #define WIZINDEX_H
 
-//#include "wizmisc.h"
-#include "wizobject.h"
-#include "cppsqlite3.h"
 #include <map>
 #include <set>
 
-#include "wizSyncableDatabase.h"
+#include "wizIndexBase.h"
 
 #define WIZ_DATABASE_VERSION "1.0"
 #define WIZ_NO_OBSOLETE
 
-//struct WIZDATABASEINFO
-//{
-//    // optional
-//    QString bizName;
-//    QString bizGUID;
-
-//    // required, private db set to "PRIVATE"
-//    QString name;
-
-//    // required
-//    QString kbGUID;
-
-//    // required, used for syncing, no store
-//    QString serverUrl;
-
-//    // required, private db set to 0
-//    int nPermission;
-//};
-
-class CWizIndexBase : public QObject
-{
-    Q_OBJECT
-
-public:
-    CWizIndexBase(void);
-    ~CWizIndexBase(void);
-
-    virtual bool Open(const CString& strFileName);
-    bool IsOpened();
-    void Close();
-    bool CheckTable(const QString& strTableName);
-    bool ExecSQL(const CString& strSQL);
-    int Exec(const CString& strSQL);
-    CppSQLite3Query Query(const CString& strSQL);
-    bool HasRecord(const CString& strSQL);
-    bool GetFirstRowFieldValue(const CString& strSQL, int nFieldIndex, CString& strValue);
-    bool Repair(const QString& strDestFileName);
-
-    const WIZDATABASEINFO& info() { return m_info; }
-
-    // obsolete
-    QString kbGUID() const { return m_info.kbGUID; }
-    QString server() const { return m_info.serverUrl; }
-    QString name() const { return m_info.name; }
-    int permission() const { return m_info.nPermission; }
-
-    QString GetDatabasePath() const { return m_strDatabasePath; }
-
-    /* Raw query*/
-
-    /* Tags */
-    bool GetAllTags(CWizTagDataArray& arrayTag);
-    bool GetRootTags(CWizTagDataArray& arrayTag);
-    bool GetChildTags(const CString& strParentTagGUID, CWizTagDataArray& arrayTag); // 1 level
-    bool GetAllChildTags(const CString& strParentTagGUID, CWizTagDataArray& arrayTag);
-
-    // used to test whether tag have child or not
-    bool GetChildTagsSize(const CString& strParentTagGUID, int& size); // 1 level
-    bool GetAllChildTagsSize(const CString& strParentTagGUID, int& size);
-
-    bool TagFromGUID(const CString& strTagGUID, WIZTAGDATA& data);
-
-    // styles
-    bool GetStyles(CWizStyleDataArray& arrayStyle);
-    bool StyleFromGUID(const CString& strStyleGUID, WIZSTYLEDATA& data);
-
-    // metas
-    bool GetMetas(CWizMetaDataArray& arrayMeta);
-
-    // documents
-    bool GetAllDocuments(CWizDocumentDataArray& arrayDocument);
-    bool GetDocumentsBySQLWhere(const CString& strSQLWhere, CWizDocumentDataArray& arrayDocument);
-    bool DocumentFromGUID(const CString& strDocumentGUID, WIZDOCUMENTDATA& data);
-
-    bool GetAllDocumentsSize(int& count, bool bIncludeTrash = false);
-
-    // attachments
-    bool GetAttachments(CWizDocumentAttachmentDataArray& arrayAttachment);
-    bool AttachmentFromGUID(const CString& strAttachcmentGUID, WIZDOCUMENTATTACHMENTDATA& data);
-
-    // messages
-    bool messageFromId(qint64 id, WIZMESSAGEDATA& data);
-
-    // biz users, one user may in different biz group
-    bool userFromGUID(const QString& strUserGUID,
-                      CWizBizUserDataArray& arrayUser);
-    bool userFromGUID(const QString& bizGUID,
-                      const QString& userGUID,
-                      WIZBIZUSER& user);
-
-
-protected:
-    bool LogSQLException(const CppSQLite3Exception& e, const CString& strSQL);
-
-    void BeginUpdate() { m_bUpdating = true; }
-    void EndUpdate() { m_bUpdating = false; }
-    bool IsUpdating() const { return m_bUpdating; }
-
-    static CString FormatQuerySQL(const CString& strTableName,
-                                  const CString& strFieldList);
-
-    static CString FormatQuerySQL(const CString& strTableName,
-                                  const CString& strFieldList,
-                                  const CString& strWhere);
-
-    static CString FormatInsertSQLFormat(const CString& strTableName,
-                                         const CString& strFieldList,
-                                         const CString& strParamList);
-
-    static CString FormatUpdateSQLFormat(const CString& strTableName,
-                                         const CString& strFieldList,
-                                         const CString& strKey);
-
-    static CString FormatUpdateSQLByWhere(const CString& strTableName,
-                                          const CString& strFieldList,
-                                          const CString& strWhere);
-
-    static CString FormatDeleteSQLFormat(const CString& strTableName,
-                                         const CString& strKey);
-
-    static CString FormatQuerySQLByTime(const CString& strTableName,
-                                        const CString& strFieldList,
-                                        const CString& strFieldName,
-                                        const COleDateTime& t);
-
-    static CString FormatQuerySQLByTime2(const CString& strTableName,
-                                         const CString& strFieldList,
-                                         const CString& strInfoFieldName,
-                                         const CString& strDataFieldName,
-                                         const COleDateTime& t);
-
-    static CString FormatQuerySQLByTime3(const CString& strTableName,
-                                         const CString& strFieldList,
-                                         const CString& strInfoFieldName,
-                                         const CString& strDataFieldName,
-                                         const CString& strParamFieldName,
-                                         const COleDateTime& t);
-
-    static CString FormatModifiedQuerySQL(const CString& strTableName,
-                                          const CString& strFieldList);
-
-    static CString FormatModifiedQuerySQL2(const CString& strTableName,
-                                           const CString& strFieldList,
-                                           int nCount);
-
-    /* Basic operations */
-    bool SQLToSize(const CString& strSQL, int& size);
-
-    bool SQLToTagDataArray(const CString& strSQL,
-                           CWizTagDataArray& arrayTag);
-
-    bool SQLToStyleDataArray(const CString& strSQL,
-                             CWizStyleDataArray& arrayStyle);
-
-    bool SQLToMetaDataArray(const CString& strSQL,
-                            CWizMetaDataArray& arrayMeta);
-
-    bool SQLToDeletedGUIDDataArray(const CString& strSQL,
-                                   CWizDeletedGUIDDataArray& arrayGUID);
-
-    bool SQLToStringArray(const CString& strSQL, int nFieldIndex,
-                          CWizStdStringArray& arrayString);
-
-    bool SQLToDocumentParamDataArray(const CString& strSQL,
-                                     CWizDocumentParamDataArray& arrayParam);
-
-    bool SQLToDocumentDataArray(const CString& strSQL,
-                                CWizDocumentDataArray& arrayDocument);
-
-    virtual void InitDocumentExFields(CWizDocumentDataArray& arrayDocument,
-                                      const CWizStdStringArray& arrayGUID,
-                                      const std::map<CString, int>& mapDocumentIndex) = 0;
-
-    void InitDocumentShareFlags(CWizDocumentDataArray& arrayDocument,
-                                const CString& strDocumentGUIDs,
-                                const std::map<CString, int>& mapDocumentIndex,
-                                const CString& strTagName,
-                                int nShareFlags);
-
-    bool SQLToDocumentAttachmentDataArray(const CString& strSQL,
-                                          CWizDocumentAttachmentDataArray& arrayAttachment);
-    
-    bool SQLToMessageDataArray(const QString& strSQL,
-                               CWizMessageDataArray& arrayMessage);
-
-    bool SQLToBizUserDataArray(const QString& strSQL,
-                               CWizBizUserDataArray& arrayUser);
-
-public:
-    bool createMessageEx(const WIZMESSAGEDATA& data);
-    bool modifyMessageEx(const WIZMESSAGEDATA& data);
-    bool deleteMessageEx(const WIZMESSAGEDATA& data);
-
-    bool createUserEx(const WIZBIZUSER& data);
-    bool modifyUserEx(const WIZBIZUSER& data);
-    bool deleteUserEx(const WIZBIZUSER& data);
-
-    bool CreateTagEx(const WIZTAGDATA& data);
-    bool ModifyTagEx(const WIZTAGDATA& data);
-    bool DeleteTagEx(const WIZTAGDATA& data);
-
-    bool CreateStyleEx(const WIZSTYLEDATA& data);
-    bool ModifyStyleEx(const WIZSTYLEDATA& data);
-    bool DeleteStyleEx(const WIZSTYLEDATA& data);
-
-    bool CreateDocumentEx(const WIZDOCUMENTDATA& data);
-    bool ModifyDocumentInfoEx(const WIZDOCUMENTDATA& data);
-    bool DeleteDocumentEx(const WIZDOCUMENTDATA& data);
-
-    bool CreateAttachmentEx(const WIZDOCUMENTATTACHMENTDATA& data);
-    bool ModifyAttachmentInfoEx(const WIZDOCUMENTATTACHMENTDATA& data);
-    bool DeleteAttachmentEx(const WIZDOCUMENTATTACHMENTDATA& data);
-
-protected:
-    CppSQLite3DB m_db;
-    QString m_strFileName;
-    QString m_strDatabasePath;
-
-    WIZDATABASEINFO m_info;
-
-    bool m_bUpdating;
-
-Q_SIGNALS:
-    void tagCreated(const WIZTAGDATA& tag);
-    void tagModified(const WIZTAGDATA& tagOld,
-                     const WIZTAGDATA& tagNew);
-    void tagDeleted(const WIZTAGDATA& tag);
-
-    void styleCreated(const WIZSTYLEDATA& style);
-    void styleModified(const WIZSTYLEDATA& styleOld,
-                       const WIZSTYLEDATA& styleNew);
-    void styleDeleted(const WIZSTYLEDATA& style);
-
-    void documentCreated(const WIZDOCUMENTDATA& document);
-    void documentModified(const WIZDOCUMENTDATA& documentOld,
-                          const WIZDOCUMENTDATA& documentNew);
-    void documentDeleted(const WIZDOCUMENTDATA& document);
-    void documentDataModified(const WIZDOCUMENTDATA& document);
-    void documentAbstractModified(const WIZDOCUMENTDATA& document);
-    void documentTagModified(const WIZDOCUMENTDATA& document);
-
-    void attachmentCreated(const WIZDOCUMENTATTACHMENTDATA& attachment);
-    void attachmentModified(const WIZDOCUMENTATTACHMENTDATA& attachmentOld,
-                            const WIZDOCUMENTATTACHMENTDATA& attachmentNew);
-    void attachmentDeleted(const WIZDOCUMENTATTACHMENTDATA& attachment);
-
-    void folderCreated(const QString& strLocation);
-    void folderDeleted(const QString& strLocation);
-    
-    void messageCreated(const WIZMESSAGEDATA& msg);
-    void messageModified(const WIZMESSAGEDATA& msgOld,
-                         const WIZMESSAGEDATA& msgNew);
-    void messageDeleted(const WIZMESSAGEDATA& msg);
-
-    void userCreated(const WIZBIZUSER& user);
-    void userModified(const WIZBIZUSER& userOld,
-                      const WIZBIZUSER& userNew);
-    void userDeleted(const WIZBIZUSER& user);
-};
-
 
 /*
-Base class for database operation of sqlite layer
-*/
-class CWizIndex : public CWizIndexBase
+ * Lower operations of sqlite database
+ */
+class CWizIndex
+        : public CWizIndexBase
 {
     Q_OBJECT
+
+private:
+    WIZDATABASEINFO m_info;
 
 public:
     CWizIndex(void);
-    ~CWizIndex(void);
+
+    const WIZDATABASEINFO& info() { return m_info; }
+    QString server() const { return m_info.serverUrl; }
+    QString name() const { return m_info.name; }
+    int permission() const { return m_info.nPermission; }
 
 protected:
     CString m_strDeletedItemsLocation;
@@ -488,7 +233,7 @@ public:
 
     bool DeleteDocumentsByLocation(const CString& strLocation);
 
-    bool SetDocumentVersion(const CString& strDocumentGUID, __int64 nVersion);
+    bool SetDocumentVersion(const CString& strDocumentGUID, qint64 nVersion);
 
     void InitDocumentExFields(CWizDocumentDataArray& arrayDocument,
                               const CWizStdStringArray& arrayGUID,
@@ -596,8 +341,8 @@ public:
                  const CString& strDefault = "", bool* pbMetaExists = NULL);
     CString GetMetaDef(const CString& lpszMetaName, const CString& lpszKey, const CString& strDef = "");
     bool SetMeta(CString strMetaName, CString strKey, const CString& lpszValue);
-    __int64 GetMetaInt64(const CString& strMetaName, const CString& strKey, __int64 nDef);
-    bool SetMetaInt64(const CString& strMetaName, const CString& strKey, __int64 n);
+    qint64 GetMetaInt64(const CString& strMetaName, const CString& strKey, qint64 nDef);
+    bool SetMetaInt64(const CString& strMetaName, const CString& strKey, qint64 n);
 
     bool deleteMetasByName(const QString& strMetaName);
 
@@ -618,7 +363,10 @@ public:
     bool ObjectExists(const QString &strGUID, const QString &strType, bool& bExists);
     bool DeleteObject(const QString &strGUID, const QString &strType, bool bLog);
     bool GetObjectTableInfo(const CString& strType, CString& strTableName, CString& strKeyFieldName);
+
+    qint64 GetObjectLocalVersion(const QString &strGUID, const QString &strType);
     bool ModifyObjectVersion(const CString& strGUID, const CString& strType, qint64 nVersion);
+
     bool ModifyObjectModifiedTime(const CString& strGUID, const CString& strType, const COleDateTime& t);
     bool GetObjectModifiedTime(const CString& strGUID, const CString& strType, COleDateTime& t);
 

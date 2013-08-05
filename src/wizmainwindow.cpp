@@ -44,7 +44,7 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     , m_dbMgr(dbMgr)
     , m_progress(new CWizProgressDialog(this))
     , m_settings(new CWizUserSettings(dbMgr.db()))
-    , m_sync(new CWizSyncThread(*this, this))
+    //, m_sync(new CWizSyncThread(*this, this))
     , m_searchIndexer(new CWizSearchIndexer(m_dbMgr))
     , m_messageSync(new CWizGroupMessage(dbMgr.db()))
     , m_console(new CWizConsoleDialog(*this, this))
@@ -121,11 +121,11 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     // init GUI stuff
     m_category = m_categoryPrivate;
 
-    connect(m_sync, SIGNAL(syncStarted()), SLOT(on_syncStarted()));
-    connect(m_sync, SIGNAL(syncLogined()), SLOT(on_syncLogined()));
-    connect(m_sync, SIGNAL(processLog(const QString&)), SLOT(on_syncProcessLog(const QString&)));
-    connect(m_sync, SIGNAL(processErrorLog(const QString&)), SLOT(on_syncProcessErrorLog(const QString&)));
-    connect(m_sync, SIGNAL(syncDone(bool)), SLOT(on_syncDone(bool)));
+//    connect(m_sync, SIGNAL(syncStarted()), SLOT(on_syncStarted()));
+//    connect(m_sync, SIGNAL(syncLogined()), SLOT(on_syncLogined()));
+//    connect(m_sync, SIGNAL(processLog(const QString&)), SLOT(on_syncProcessLog(const QString&)));
+//    connect(m_sync, SIGNAL(processErrorLog(const QString&)), SLOT(on_syncProcessErrorLog(const QString&)));
+//    connect(m_sync, SIGNAL(syncDone(bool)), SLOT(on_syncDone(bool)));
 
     initActions();
     initMenuBar();
@@ -162,11 +162,11 @@ void MainWindow::showEvent(QShowEvent* event)
 bool MainWindow::requestThreadsQuit()
 {
     bool bOk = true;
-    if (m_sync->isRunning()) {
-        m_sync->abort();
-        m_sync->quit();
-        bOk = false;
-    }
+//    if (m_sync->isRunning()) {
+//        m_sync->abort();
+//        m_sync->quit();
+//        bOk = false;
+//    }
 
     m_searchIndexer->abort();
 
@@ -1101,7 +1101,7 @@ void MainWindow::on_options_settingsChanged(WizOptionsType type)
             m_syncTimer->setInterval(nInterval * 60 * 1000);
         }
 
-        m_sync->resetProxy();
+        //m_sync->resetProxy();
     } else if (wizoptionsFont == type) {
         m_doc->web()->editorResetFont();
     }

@@ -346,47 +346,47 @@ bool CWizDatabase::GetModifiedDeletedList(CWizDeletedGUIDDataArray& arrayData)
 
 bool CWizDatabase::GetModifiedTagList(CWizTagDataArray& arrayData)
 {
-    return CWizIndex::GetModifiedTags(arrayData);
+    return GetModifiedTags(arrayData);
 }
 
 bool CWizDatabase::GetModifiedStyleList(CWizStyleDataArray& arrayData)
 {
-    return CWizIndex::GetModifiedStyles(arrayData);
+    return GetModifiedStyles(arrayData);
 }
 
 bool CWizDatabase::GetModifiedDocumentList(CWizDocumentDataArray& arrayData)
 {
-    return CWizIndex::GetModifiedDocuments(arrayData);
+    return GetModifiedDocuments(arrayData);
 }
 
 bool CWizDatabase::GetModifiedAttachmentList(CWizDocumentAttachmentDataArray& arrayData)
 {
-    return CWizIndex::GetModifiedAttachments(arrayData);
+    return GetModifiedAttachments(arrayData);
 }
 
 bool CWizDatabase::GetObjectsNeedToBeDownloaded(CWizObjectDataArray& arrayObject)
 {
-    GetAllObjectsNeedToBeDownloaded(arrayObject);
+    return GetAllObjectsNeedToBeDownloaded(arrayObject);
 }
 
 bool CWizDatabase::OnDownloadDeletedList(const CWizDeletedGUIDDataArray& arrayData)
 {
-    UpdateDeletedGUIDs(arrayData);
+    return UpdateDeletedGUIDs(arrayData);
 }
 
 bool CWizDatabase::OnDownloadTagList(const CWizTagDataArray& arrayData)
 {
-    UpdateTags(arrayData);
+    return UpdateTags(arrayData);
 }
 
 bool CWizDatabase::OnDownloadStyleList(const CWizStyleDataArray& arrayData)
 {
-    UpdateStyles(arrayData);
+    return UpdateStyles(arrayData);
 }
 
 bool CWizDatabase::OnDownloadAttachmentList(const CWizDocumentAttachmentDataArray& arrayData)
 {
-    UpdateAttachments(arrayData);
+    return UpdateAttachments(arrayData);
 }
 
 bool CWizDatabase::OnDownloadDocument(int part, const WIZDOCUMENTDATAEX& data)
@@ -402,26 +402,30 @@ bool CWizDatabase::OnDownloadMessages(const CWizUserMessageDataArray& arrayMessa
 qint64 CWizDatabase::GetObjectLocalVersion(const QString& strObjectGUID,
                                            const QString& strObjectType)
 {
-
+    return CWizIndex::GetObjectLocalVersion(strObjectGUID, strObjectType);
 }
 
 qint64 CWizDatabase::GetObjectLocalServerVersion(const QString& strObjectGUID,
                                                  const QString& strObjectType)
 {
+    Q_UNUSED(strObjectGUID);
+    Q_UNUSED(strObjectType);
 
+    Q_ASSERT(0);
+    return -1;
 }
 
 bool CWizDatabase::SetObjectLocalServerVersion(const QString& strObjectGUID,
                                                const QString& strObjectType,
                                                qint64 nVersion)
 {
-
+    return ModifyObjectVersion(strObjectGUID, strObjectType, nVersion);
 }
 
 bool CWizDatabase::DocumentFromGUID(const QString& strGUID,
                                     WIZDOCUMENTDATA& dataExists)
 {
-    CWizIndex::DocumentFromGUID(strGUID, dataExists);
+    return CWizIndex::DocumentFromGUID(strGUID, dataExists);
 }
 
 bool CWizDatabase::IsObjectDataDownloaded(const QString& strGUID,
@@ -540,7 +544,12 @@ bool CWizDatabase::CanEditAttachment(const WIZDOCUMENTATTACHMENTDATAEX& data)
 bool CWizDatabase::CreateConflictedCopy(const QString& strObjectGUID,
                                         const QString& strObjectType)
 {
+    Q_UNUSED(strObjectGUID);
+    Q_UNUSED(strObjectType);
 
+    Q_ASSERT(0);
+
+    return false;
 }
 
 bool CWizDatabase::SaveLastSyncTime()
@@ -649,26 +658,27 @@ bool CWizDatabase::IsStorageLimit()
 
 /* ---------------------------------------------------------------------- */
 
-WIZDATABASEINFO CWizDatabase::GetInfo() const
-{
+//WIZDATABASEINFO CWizDatabase::GetInfo() const
+//{
 
-}
-bool CWizDatabase::SetInfo(const WIZDATABASEINFO& dbInfo)
-{
+//}
 
-}
+//bool CWizDatabase::SetInfo(const WIZDATABASEINFO& dbInfo)
+//{
 
-bool CWizDatabase::ModifyObjectVersion(const QString& strGUID,
-                                       const QString& strType,
-                                       qint64 nVersion)
-{
-    return CWizIndex::ModifyObjectVersion(strGUID, strType, nVersion);
-}
+//}
 
-bool CWizDatabase::GetModifiedMessages(CWizMessageDataArray& arrayMsg)
-{
-    return CWizIndex::getModifiedMessages(arrayMsg);
-}
+//bool CWizDatabase::ModifyObjectVersion(const QString& strGUID,
+//                                       const QString& strType,
+//                                       qint64 nVersion)
+//{
+//    return CWizIndex::ModifyObjectVersion(strGUID, strType, nVersion);
+//}
+
+//bool CWizDatabase::GetModifiedMessages(CWizMessageDataArray& arrayMsg)
+//{
+//    return CWizIndex::getModifiedMessages(arrayMsg);
+//}
 
 bool CWizDatabase::UpdateMessages(const CWizMessageDataArray& arrayMsg)
 {
@@ -802,10 +812,10 @@ bool CWizDatabase::SetUserGroupInfo(const CWizGroupDataArray& arrayGroup)
     return true;
 }
 
-bool CWizDatabase::GetModifiedDeletedGUIDs(CWizDeletedGUIDDataArray& arrayData)
-{
-    return GetDeletedGUIDs(arrayData);
-}
+//bool CWizDatabase::GetModifiedDeletedGUIDs(CWizDeletedGUIDDataArray& arrayData)
+//{
+//    return GetDeletedGUIDs(arrayData);
+//}
 
 bool CWizDatabase::UpdateDeletedGUIDs(const CWizDeletedGUIDDataArray& arrayDeletedGUID)
 {
@@ -834,30 +844,30 @@ bool CWizDatabase::UpdateDeletedGUIDs(const CWizDeletedGUIDDataArray& arrayDelet
     return !bHasError;
 }
 
-bool CWizDatabase::DeleteDeletedGUID(const QString& strGUID)
-{
-    return CWizIndex::DeleteDeletedGUID(strGUID);
-}
+//bool CWizDatabase::DeleteDeletedGUID(const QString& strGUID)
+//{
+//    return CWizIndex::DeleteDeletedGUID(strGUID);
+//}
 
-bool CWizDatabase::GetModifiedTags(CWizTagDataArray& arrayData)
-{
-    return CWizIndex::GetModifiedTags(arrayData);
-}
+//bool CWizDatabase::GetModifiedTags(CWizTagDataArray& arrayData)
+//{
+//    return CWizIndex::GetModifiedTags(arrayData);
+//}
 
-bool CWizDatabase::GetModifiedStyles(CWizStyleDataArray& arrayData)
-{
-    return CWizIndex::GetModifiedStyles(arrayData);
-}
+//bool CWizDatabase::GetModifiedStyles(CWizStyleDataArray& arrayData)
+//{
+//    return CWizIndex::GetModifiedStyles(arrayData);
+//}
 
-bool CWizDatabase::GetModifiedDocuments(CWizDocumentDataArray& arrayData)
-{
-    return CWizIndex::GetModifiedDocuments(arrayData);
-}
+//bool CWizDatabase::GetModifiedDocuments(CWizDocumentDataArray& arrayData)
+//{
+//    return CWizIndex::GetModifiedDocuments(arrayData);
+//}
 
-bool CWizDatabase::GetModifiedAttachments(CWizDocumentAttachmentDataArray& arrayData)
-{
-    return CWizIndex::GetModifiedAttachments(arrayData);
-}
+//bool CWizDatabase::GetModifiedAttachments(CWizDocumentAttachmentDataArray& arrayData)
+//{
+//    return CWizIndex::GetModifiedAttachments(arrayData);
+//}
 
 //bool CWizDatabase::setDatabaseInfo(const QString& strKbGUID, const QString& strDatabaseServer,
 //                                   const QString& strName, int nPermission)
@@ -897,73 +907,73 @@ bool CWizDatabase::GetModifiedAttachments(CWizDocumentAttachmentDataArray& array
 //    return true;
 //}
 
-bool CWizDatabase::setDatabaseInfo(const WIZDATABASEINFO& dbInfo)
-{
-    Q_ASSERT(!dbInfo.kbGUID.isEmpty() && !dbInfo.name.isEmpty());
+//bool CWizDatabase::setDatabaseInfo(const WIZDATABASEINFO& dbInfo)
+//{
+//    Q_ASSERT(!dbInfo.kbGUID.isEmpty() && !dbInfo.name.isEmpty());
 
-    m_info.bizName = dbInfo.bizName;
-    m_info.bizGUID = dbInfo.bizGUID;
+//    m_info.bizName = dbInfo.bizName;
+//    m_info.bizGUID = dbInfo.bizGUID;
 
-    m_info.kbGUID = dbInfo.kbGUID;
-    m_info.serverUrl = dbInfo.serverUrl;
+//    m_info.kbGUID = dbInfo.kbGUID;
+//    m_info.serverUrl = dbInfo.serverUrl;
 
-    if (m_info.name != dbInfo.name) {
-        m_info.name = dbInfo.name;
-        Q_EMIT databaseRename(dbInfo.kbGUID);
-    }
+//    if (m_info.name != dbInfo.name) {
+//        m_info.name = dbInfo.name;
+//        Q_EMIT databaseRename(dbInfo.kbGUID);
+//    }
 
-    if (m_info.nPermission != dbInfo.nPermission) {
-        m_info.nPermission = dbInfo.nPermission;
-        Q_EMIT databasePermissionChanged(dbInfo.kbGUID);
-    }
+//    if (m_info.nPermission != dbInfo.nPermission) {
+//        m_info.nPermission = dbInfo.nPermission;
+//        Q_EMIT databasePermissionChanged(dbInfo.kbGUID);
+//    }
 
-    int nErrors = 0;
+//    int nErrors = 0;
 
-    if (!SetMeta(g_strDatabaseInfoSection, "Name", dbInfo.name))
-        nErrors++;
+//    if (!SetMeta(g_strDatabaseInfoSection, "Name", dbInfo.name))
+//        nErrors++;
 
-    if (!SetMeta(g_strDatabaseInfoSection, "KbGUID", dbInfo.kbGUID))
-        nErrors++;
+//    if (!SetMeta(g_strDatabaseInfoSection, "KbGUID", dbInfo.kbGUID))
+//        nErrors++;
 
-    if (!SetMeta(g_strDatabaseInfoSection, "Permission", QString::number(dbInfo.nPermission)))
-        nErrors++;
+//    if (!SetMeta(g_strDatabaseInfoSection, "Permission", QString::number(dbInfo.nPermission)))
+//        nErrors++;
 
-    if (!SetMeta(g_strDatabaseInfoSection, "Version", WIZ_DATABASE_VERSION))
-        nErrors++;
+//    if (!SetMeta(g_strDatabaseInfoSection, "Version", WIZ_DATABASE_VERSION))
+//        nErrors++;
 
-    // set biz group info
-    if (!dbInfo.bizGUID.isEmpty() && !dbInfo.bizName.isEmpty()) {
-        if (!SetMeta(g_strDatabaseInfoSection, "BizName", dbInfo.bizName))
-            nErrors++;
+//    // set biz group info
+//    if (!dbInfo.bizGUID.isEmpty() && !dbInfo.bizName.isEmpty()) {
+//        if (!SetMeta(g_strDatabaseInfoSection, "BizName", dbInfo.bizName))
+//            nErrors++;
 
-        if (!SetMeta(g_strDatabaseInfoSection, "BizGUID", dbInfo.bizGUID))
-            nErrors++;
-    }
+//        if (!SetMeta(g_strDatabaseInfoSection, "BizGUID", dbInfo.bizGUID))
+//            nErrors++;
+//    }
 
-    if (nErrors)
-        return false;
+//    if (nErrors)
+//        return false;
 
-    return true;
-}
+//    return true;
+//}
 
-bool CWizDatabase::loadDatabaseInfo()
-{
-    m_info.bizName = GetMetaDef(g_strDatabaseInfoSection, "BizName");
-    m_info.bizGUID = GetMetaDef(g_strDatabaseInfoSection, "BizGUID");
+//bool CWizDatabase::loadDatabaseInfo()
+//{
+//    m_info.bizName = GetMetaDef(g_strDatabaseInfoSection, "BizName");
+//    m_info.bizGUID = GetMetaDef(g_strDatabaseInfoSection, "BizGUID");
 
-    if (m_info.kbGUID.isEmpty()) {
-        m_info.kbGUID = GetMetaDef(g_strDatabaseInfoSection, "KbGUID");
-    }
+//    if (m_info.kbGUID.isEmpty()) {
+//        m_info.kbGUID = GetMetaDef(g_strDatabaseInfoSection, "KbGUID");
+//    }
 
-    m_info.name = GetMetaDef(g_strDatabaseInfoSection, "Name");
-    m_info.nPermission = GetMetaDef(g_strDatabaseInfoSection, "Permission").toInt();
+//    m_info.name = GetMetaDef(g_strDatabaseInfoSection, "Name");
+//    m_info.nPermission = GetMetaDef(g_strDatabaseInfoSection, "Permission").toInt();
 
-    if (m_info.kbGUID.isEmpty() || m_info.name.isEmpty()) {
-        return false;
-    }
+//    if (m_info.kbGUID.isEmpty() || m_info.name.isEmpty()) {
+//        return false;
+//    }
 
-    return true;
-}
+//    return true;
+//}
 
 bool CWizDatabase::openPrivate(const QString& strUserId, const QString& strPassword /* = QString() */)
 {
@@ -984,7 +994,7 @@ bool CWizDatabase::openPrivate(const QString& strUserId, const QString& strPassw
 
     setThumbIndexVersion(WIZNOTE_THUMB_VERSION);
     m_nOpenMode = OpenPrivate;
-    loadDatabaseInfo();
+    //loadDatabaseInfo();
 
     return ret;
 }
@@ -994,7 +1004,7 @@ bool CWizDatabase::openGroup(const QString& strUserId, const QString& strGroupGU
     Q_ASSERT(m_nOpenMode == notOpened);
 
     m_strUserId = strUserId;
-    m_info.kbGUID = strGroupGUID;
+    ///m_info.kbGUID = strGroupGUID;
 
     bool ret;
 
@@ -1008,7 +1018,7 @@ bool CWizDatabase::openGroup(const QString& strUserId, const QString& strGroupGU
 
     setThumbIndexVersion(WIZNOTE_THUMB_VERSION);
     m_nOpenMode = OpenGroup;
-    loadDatabaseInfo();
+    //loadDatabaseInfo();
 
     return ret;
 }
@@ -1058,7 +1068,9 @@ QString CWizDatabase::GetUserAttachmentsDataPath() const
 
 QString CWizDatabase::GetGroupDataPath() const
 {
-    QString strPath = GetAccountPath() + "group/" + m_info.kbGUID + "/";
+    Q_ASSERT(0);
+    QString strPath = GetAccountPath() + "group/";
+    //QString strPath = GetAccountPath() + "group/" + m_info.kbGUID + "/";
     WizEnsurePathExists(strPath);
     return strPath;
 }
@@ -1743,7 +1755,8 @@ bool CWizDatabase::CreateDocumentAndInit(const CString& strHtml, \
     {
         BeginUpdate();
 
-        data.strKbGUID = kbGUID();
+        Q_ASSERT(0);
+        //data.strKbGUID = kbGUID();
         bRet = CreateDocument(strTitle, strName, strLocation, strHtmlUrl, data);
         if (bRet)
         {

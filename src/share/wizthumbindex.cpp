@@ -5,7 +5,7 @@
 
 #include "wizdef.h"
 #include "wizmisc.h"
-#include "wizindex.h"
+#include "wizIndex.h"
 
 static const char* PAD_TYPE = "PAD";
 static const char* PHONE_TYPE = "PHONE";
