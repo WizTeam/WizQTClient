@@ -18,16 +18,8 @@ class CWizIndex
 {
     Q_OBJECT
 
-private:
-    WIZDATABASEINFO m_info;
-
 public:
     CWizIndex(void);
-
-    const WIZDATABASEINFO& info() { return m_info; }
-    QString server() const { return m_info.serverUrl; }
-    QString name() const { return m_info.name; }
-    int permission() const { return m_info.nPermission; }
 
 protected:
     CString m_strDeletedItemsLocation;
@@ -336,14 +328,15 @@ public:
     bool GetNextTitle(const QString& strLocation, QString& strTitle);
 
     /* Metas related operations */
-    bool GetMetasByName(const CString& lpszMetaName, CWizMetaDataArray& arrayMeta);
+    bool GetMetasByName(const QString& lpszMetaName,
+                        CWizMetaDataArray& arrayMeta);
+
     bool GetMeta(CString strMetaName, CString strKey, CString& strValue, \
                  const CString& strDefault = "", bool* pbMetaExists = NULL);
     CString GetMetaDef(const CString& lpszMetaName, const CString& lpszKey, const CString& strDef = "");
     bool SetMeta(CString strMetaName, CString strKey, const CString& lpszValue);
     qint64 GetMetaInt64(const CString& strMetaName, const CString& strKey, qint64 nDef);
     bool SetMetaInt64(const CString& strMetaName, const CString& strKey, qint64 n);
-
     bool deleteMetasByName(const QString& strMetaName);
 
     /* Deleted related operations */

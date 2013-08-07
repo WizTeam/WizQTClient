@@ -4,6 +4,7 @@
 #include <QString>
 #include <QList>
 #include <QStringList>
+#include <QMap>
 
 #include "wizDatabase.h"
 
@@ -21,19 +22,18 @@ public:
     bool open(const QString& strKbGUID = "");
     bool openAll();
     bool isOpened(const QString& strKbGUID = "");
-    bool isPrivate(const QString& strKbGUID);
 
     // get db reference by strKbGUID (include private), or null to get private
     CWizDatabase& db(const QString& strKbGUID = "");
 
     // get all group guid list, exclude private
-    void Guids(QStringList& strings);
+    //void Guids(QStringList& strings);
     // get group db count, exclude private
     int count();
     // get group db reference by index
     CWizDatabase& at(int i);
 
-    bool removeKb(const QString& strKbGUID);
+    //bool removeKb(const QString& strKbGUID);
 
     bool close(const QString& strKbGUID = "");
     void closeAll();
@@ -42,9 +42,12 @@ private:
     QString m_strUserId;
     QString m_strPasswd;
     QPointer<CWizDatabase> m_dbPrivate;
-    QList<CWizDatabase*> m_dbGroups;
+    QMap<QString, CWizDatabase*> m_mapGroups;
 
     void initSignals(CWizDatabase* db);
+
+private Q_SLOTS:
+    void onGroupsInfoDownloaded(const CWizGroupDataArray& arrayGroups);
 
 Q_SIGNALS:
     void databaseOpened(const QString& strKbGUID);

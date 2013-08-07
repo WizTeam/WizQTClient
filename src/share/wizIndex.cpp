@@ -25,9 +25,9 @@ bool CWizIndex::GetDocumentAttachments(const CString& strDocumentGUID, CWizDocum
 	return SQLToDocumentAttachmentDataArray(strSQL, arrayAttachment);
 }
 
-bool CWizIndex::GetMetasByName(const CString& strMetaName, CWizMetaDataArray& arrayMeta)
+bool CWizIndex::GetMetasByName(const QString& strMetaName, CWizMetaDataArray& arrayMeta)
 {
-    if (strMetaName.IsEmpty()) {
+    if (strMetaName.isEmpty()) {
 		TOLOG(_T("Meta name is empty!"));
         return false;
 	}

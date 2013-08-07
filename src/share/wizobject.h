@@ -14,10 +14,10 @@ struct WIZDATABASEINFO
     QString name;
 
     // required
-    QString kbGUID;
+    //QString kbGUID;
 
     // required, used for syncing object data, aka kapi_url
-    QString serverUrl;
+    //QString serverUrl;
 
     // required, private db set to 0
     int nPermission;
@@ -562,10 +562,47 @@ const UINT WIZ_USERGROUP_AUTHOR = 100;
 const UINT WIZ_USERGROUP_READER = 1000;
 const UINT WIZ_USERGROUP_MAX = 10000000;
 
+const int WIZ_USER_MSG_TYPE_CALLED = 0;
+const int WIZ_USER_MSG_TYPE_MODIFIED = 1;
+
+struct WIZUSERMESSAGEDATA
+{
+    qint64 nMessageID;
+    QString strBizGUID;
+    QString strKbGUID;
+    QString strDocumentGUID;
+    QString strSenderGUID;
+    QString strSenderID;
+    QString strReceiverGUID;
+    QString strReceiverID;
+    int nMessageType;
+    int nReadStatus;	//阅读状态, 0:未读，1:已读
+    COleDateTime tCreated;
+    QString strMessageText;
+    qint64 nVersion;
+    QString strSender;
+    QString strReceiver;
+    QString strTitle;
+
+    WIZUSERMESSAGEDATA()
+        : nMessageID(0)
+        , nMessageType(WIZ_USER_MSG_TYPE_CALLED)
+        , nReadStatus(0)
+        , nVersion(0)
+    {
+
+    }
+
+    bool LoadFromXmlRpc(CWizXmlRpcStructValue& data);
+};
+
+typedef std::deque<WIZUSERMESSAGEDATA> CWizUserMessageDataArray;
+
 struct WIZMESSAGEDATA
 {
     WIZMESSAGEDATA();
     WIZMESSAGEDATA(const WIZMESSAGEDATA& data);
+    WIZMESSAGEDATA(const WIZUSERMESSAGEDATA& data);
     bool LoadFromXmlRpc(CWizXmlRpcStructValue& data);
     static QString ObjectName() { return "message"; }
 
@@ -771,45 +808,6 @@ struct WIZTODODATA
     CString GetLinkedDocumentGUIDString() const;
     void SetLinkedDocumentGUIDString(const CString& str);
 };
-
-
-
-
-const int WIZ_USER_MSG_TYPE_CALLED = 0;
-const int WIZ_USER_MSG_TYPE_MODIFIED = 1;
-
-struct WIZUSERMESSAGEDATA
-{
-    __int64 nMessageID;
-    QString strBizGUID;
-    QString strKbGUID;
-    QString strDocumentGUID;
-    QString strSenderGUID;
-    QString strSenderID;
-    QString strReceiverGUID;
-    QString strReceiverID;
-    int nMessageType;
-    int nReadStatus;	//阅读状态, 0:未读，1:已读
-    COleDateTime tCreated;
-    QString strMessageText;
-    __int64 nVersion;
-    QString strSender;
-    QString strReceiver;
-    QString strTitle;
-    //
-    WIZUSERMESSAGEDATA()
-        : nMessageID(0)
-        , nMessageType(WIZ_USER_MSG_TYPE_CALLED)
-        , nReadStatus(0)
-        , nVersion(0)
-    {
-
-    }
-    //
-
-    BOOL LoadFromXmlRpc(CWizXmlRpcStructValue& data);
-};
-typedef std::deque<WIZUSERMESSAGEDATA> CWizUserMessageDataArray;
 
 typedef std::deque<WIZOBJECTDATA> CWizObjectDataArray;
 typedef std::deque<WIZDOCUMENTDATAEX> CWizDocumentDataArray;

@@ -1020,7 +1020,7 @@ CWizApi::CWizApi(CWizDatabase& db, const CString& strKbUrl /* = WIZ_API_URL */)
 
 void CWizApi::onClientLogin(const WIZUSERINFO& userInfo)
 {
-    m_db->setUserInfo(userInfo);
+    //m_db->setUserInfo(userInfo);
 }
 
 void CWizApi::onGetGroupList(const CWizGroupDataArray& arrayGroup)

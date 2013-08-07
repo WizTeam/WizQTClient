@@ -132,7 +132,8 @@ void CWizObjectDataDownload::startDownload()
     QString strUserId = m_dbMgr.db().getUserId();
     QString strPasswd = m_dbMgr.db().getPassword();
 
-    callClientLogin(strUserId, strPasswd);
+    Q_ASSERT(0);
+    //callClientLogin(strUserId, strPasswd);
 }
 
 void CWizObjectDataDownload::onClientLogin(const WIZUSERINFO& userInfo)
@@ -144,7 +145,7 @@ void CWizObjectDataDownload::onClientLogin(const WIZUSERINFO& userInfo)
         kbUrl = userInfo.strDatabaseServer;
     } else {
         // if synced before, server field should exist.
-        kbUrl = m_dbMgr.db(m_data.strKbGUID).server();
+        //kbUrl = m_dbMgr.db(m_data.strKbGUID).server();
 
         if (kbUrl.isEmpty()) {
             callGetGroupList();

@@ -26,7 +26,8 @@ void CWizDownloadObjectData::startDownload()
     QString strPasswd = m_dbMgr.db().getPassword();
 
     setKbUrl(WIZ_API_URL);
-    callClientLogin(strUserId, strPasswd);
+    Q_ASSERT(0);
+    //callClientLogin(strUserId, strPasswd);
 }
 
 void CWizDownloadObjectData::onClientLogin(const WIZUSERINFO& userInfo)
@@ -41,7 +42,8 @@ void CWizDownloadObjectData::onClientLogin(const WIZUSERINFO& userInfo)
     }
 
     // group document
-    QString strKbUrl = m_dbMgr.db(m_data.strKbGUID).server();
+    //QString strKbUrl = m_dbMgr.db(m_data.strKbGUID).server();
+    QString strKbUrl;
     if (strKbUrl.isEmpty()) {
         callGetGroupList();
     } else {

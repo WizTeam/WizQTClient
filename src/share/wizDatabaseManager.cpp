@@ -4,8 +4,8 @@
 
 CWizDatabaseManager::CWizDatabaseManager(const QString& strUserId)
     : m_strUserId(strUserId)
-    , m_dbPrivate(NULL)
 {
+    m_mapGroups.clear();
 }
 
 CWizDatabaseManager::~CWizDatabaseManager()
@@ -19,25 +19,22 @@ bool CWizDatabaseManager::open(const QString& strKbGUID)
 
     CWizDatabase* db = new CWizDatabase();
 
-    bool ret = false;
-    if (strKbGUID.isEmpty()) {
-        ret = db->openPrivate(m_strUserId, m_strPasswd);
-    } else {
-        ret = db->openGroup(m_strUserId, strKbGUID);
-    }
-
-    if (!ret) {
+    if (!db->Open(m_strUserId, strKbGUID)) {
         delete db;
         return false;
     }
 
-    initSignals(db);
-
     if (strKbGUID.isEmpty()) {
+        // set password if open user private database.
+        if (!m_strPasswd.isEmpty())
+            db->SetPassword(m_strPasswd);
+
         m_dbPrivate = db;
     } else {
-        m_dbGroups.append(db);
+        m_mapGroups[strKbGUID] = db;
     }
+
+    initSignals(db);
 
     Q_EMIT databaseOpened(strKbGUID);
 
@@ -77,25 +74,9 @@ bool CWizDatabaseManager::isOpened(const QString& strKbGUID)
         return true;
     }
 
-    QList<CWizDatabase*>::const_iterator it;
-    for (it = m_dbGroups.begin(); it != m_dbGroups.end(); it++) {
-        CWizDatabase* db = *it;
-
-        if (db->kbGUID() == strKbGUID) {
-            return true;
-        }
-    }
-
-    return false;
-}
-
-bool CWizDatabaseManager::isPrivate(const QString& strKbGUID)
-{
-    Q_ASSERT(!strKbGUID.isEmpty());
-
-    if (m_dbPrivate->kbGUID() == strKbGUID) {
+    QMap<QString, CWizDatabase*>::const_iterator it = m_mapGroups.find(strKbGUID);
+    if (it != m_mapGroups.end())
         return true;
-    }
 
     return false;
 }
@@ -108,83 +89,74 @@ CWizDatabase& CWizDatabaseManager::db(const QString& strKbGUID)
         return *m_dbPrivate;
     }
 
-    QList<CWizDatabase*>::const_iterator it;
-    for (it = m_dbGroups.begin(); it != m_dbGroups.end(); it++) {
-        CWizDatabase* db = *it;
-
-        if (db->kbGUID() == strKbGUID) {
-            return *db;
-        }
+    QMap<QString, CWizDatabase*>::iterator it = m_mapGroups.find(strKbGUID);
+    if (it != m_mapGroups.end()) {
+        return *(it.value());
     }
 
-    qDebug() << "Wow, request db not exist: " << strKbGUID;
-    //Q_ASSERT(0);
+    qDebug() << "[CWizDatabaseManager] request db not exist, create it: " << strKbGUID;
 
-    return *m_dbPrivate;
-}
-
-void CWizDatabaseManager::Guids(QStringList& strings)
-{
-    QList<CWizDatabase*>::const_iterator it;
-    for (it = m_dbGroups.begin(); it != m_dbGroups.end(); it++) {
-        CWizDatabase* db = *it;
-        strings.append(db->kbGUID());
+    if (!open(strKbGUID)) {
+        qDebug() << "[CWizDatabaseManager] failed to open new datebase: " << strKbGUID;
     }
+
+    return db(strKbGUID);
 }
+
+//void CWizDatabaseManager::Guids(QStringList& strings)
+//{
+//    QList<CWizDatabase*>::const_iterator it;
+//    for (it = m_dbGroups.begin(); it != m_dbGroups.end(); it++) {
+//        CWizDatabase* db = *it;
+//        strings.append(db->kbGUID());
+//    }
+//}
 
 int CWizDatabaseManager::count()
 {
-    return m_dbGroups.size();
+    return m_mapGroups.size();
 }
 
 CWizDatabase& CWizDatabaseManager::at(int i)
 {
     Q_ASSERT(i < count() && i >= 0);
 
-    CWizDatabase* db = m_dbGroups.value(i);
+    CWizDatabase* db = m_mapGroups.values().value(i);
     return *db;
 }
 
-bool CWizDatabaseManager::removeKb(const QString& strKbGUID)
-{
-    Q_UNUSED(strKbGUID);
-    return false;
-}
+//bool CWizDatabaseManager::removeKb(const QString& strKbGUID)
+//{
+//    Q_UNUSED(strKbGUID);
+//    return false;
+//}
 
 bool CWizDatabaseManager::close(const QString& strKbGUID)
 {
     // should close all groups db before close user db.
-    if (!m_dbGroups.isEmpty()) {
-        Q_ASSERT(!strKbGUID.isEmpty());
+    if (strKbGUID.isEmpty()) {
+        Q_ASSERT(m_mapGroups.isEmpty());
     }
 
-    bool closed = false;
-    QList<CWizDatabase*>::iterator it;
-    for (it = m_dbGroups.begin(); it != m_dbGroups.end(); it++) {
-        CWizDatabase* db = *it;
-
-        if (db->kbGUID() == strKbGUID) {
-            db->Close();
-            m_dbGroups.erase(it);
-            closed = true;
-            break;
-        }
-    }
-
-    if (!closed && !strKbGUID.isEmpty()) {
+    QMap<QString, CWizDatabase*>::const_iterator it = m_mapGroups.find(strKbGUID);
+    if (it != m_mapGroups.end()) {
+        it.value()->Close();
+        m_mapGroups.remove(strKbGUID);
+    } else {
         TOLOG("WARNING: nothing closed, guid not found");
         return false;
     }
 
     Q_EMIT databaseClosed(strKbGUID);
+
     return true;
 }
 
 void CWizDatabaseManager::closeAll()
 {
-    QList<CWizDatabase*>::iterator it;
-    for (it = m_dbGroups.begin(); it != m_dbGroups.end(); it++) {
-        CWizDatabase* db = *it;
+    QList<CWizDatabase*> dbs = m_mapGroups.values();
+    for (int i = 0; i < dbs.size(); i++) {
+        CWizDatabase* db = dbs.at(i);
 
         close(db->kbGUID());
     }
@@ -195,6 +167,9 @@ void CWizDatabaseManager::closeAll()
 
 void CWizDatabaseManager::initSignals(CWizDatabase* db)
 {
+    connect(db, SIGNAL(groupsInfoDownloaded(const CWizGroupDataArray&)),
+            SLOT(onGroupsInfoDownloaded(const CWizGroupDataArray&)));
+
     connect(db, SIGNAL(databaseRename(const QString&)),
             SIGNAL(databaseRename(const QString&)));
 
@@ -235,4 +210,22 @@ void CWizDatabaseManager::initSignals(CWizDatabase* db)
 
     connect(db, SIGNAL(folderCreated(const QString&)), SIGNAL(folderCreated(const QString&)));
     connect(db, SIGNAL(folderDeleted(const QString&)), SIGNAL(folderDeleted(const QString&)));
+}
+
+void CWizDatabaseManager::onGroupsInfoDownloaded(const CWizGroupDataArray& arrayGroups)
+{
+    // set database info
+    CWizGroupDataArray::const_iterator it;
+    for (it = arrayGroups.begin(); it != arrayGroups.end(); it++) {
+        const WIZGROUPDATA& group = *it;
+
+        WIZDATABASEINFO info;
+        info.bizGUID = group.bizGUID;
+        info.bizName = group.bizName;
+        info.name = group.strGroupName;
+        info.nPermission = group.nUserGroup;
+        db(group.strGroupGUID).SetDatabaseInfo(info);
+    }
+
+    // FIXME : close database not inside group list
 }

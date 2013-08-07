@@ -33,7 +33,7 @@ public:
     QString kbGUID() const { return m_strKbGUID; }
     void setKbGUID(const QString& guid) { m_strKbGUID = guid; }
 
-    QString GetDatabasePath() const { return m_strDatabasePath; }
+    QString GetDatabasePath() const { return m_strFileName; }
 
     /* Raw query*/
 
@@ -71,6 +71,7 @@ public:
     bool messageFromId(qint64 id, WIZMESSAGEDATA& data);
 
     // biz users, one user may in different biz group
+    bool GetAllUsers(CWizBizUserDataArray& arrayUser);
     bool userFromGUID(const QString& strUserGUID,
                       CWizBizUserDataArray& arrayUser);
     bool userFromGUID(const QString& bizGUID,
@@ -79,10 +80,9 @@ public:
 
 protected:
     CppSQLite3DB m_db;
-    QString m_strFileName;
-    QString m_strDatabasePath;
 
 private:
+    QString m_strFileName;
     QString m_strKbGUID;
     bool m_bUpdating;
 

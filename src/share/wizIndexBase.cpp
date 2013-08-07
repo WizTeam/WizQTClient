@@ -23,7 +23,7 @@ CWizIndexBase::~CWizIndexBase(void)
 bool CWizIndexBase::Open(const CString& strFileName)
 {
     m_strFileName = strFileName;
-    m_strDatabasePath = WizExtractFilePath(strFileName);
+    //m_strDatabasePath = WizExtractFilePath(strFileName);
 
     try {
         m_db.open(strFileName);
@@ -1443,6 +1443,12 @@ bool CWizIndexBase::messageFromId(qint64 nId, WIZMESSAGEDATA& data)
 
     data = arrayMessage[0];
     return true;
+}
+
+bool CWizIndexBase::GetAllUsers(CWizBizUserDataArray& arrayUser)
+{
+    CString strSQL = FormatQuerySQL(TABLE_NAME_WIZ_USER, FIELD_LIST_WIZ_USER);
+    return SQLToBizUserDataArray(strSQL, arrayUser);
 }
 
 bool CWizIndexBase::userFromGUID(const QString& strUserGUID,
