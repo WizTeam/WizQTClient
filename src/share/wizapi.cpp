@@ -50,8 +50,6 @@ void CWizApiBase::onXmlRpcReturn(CWizXmlRpcValue& ret, const QString& strMethodN
                                  const QString& arg1, const QString& arg2)
 {
     Q_UNUSED(arg2);
-    /*
-
     if (strMethodName == SyncMethod_ClientLogin)
     {
         //qDebug() << "\n[XML-RPC]accounts.clientLogin:\n" << ret.ToString() << "\n\n";
@@ -73,6 +71,8 @@ void CWizApiBase::onXmlRpcReturn(CWizXmlRpcValue& ret, const QString& strMethodN
 
         Q_EMIT clientLoginDone();
     }
+    /*
+
     else if (strMethodName == SyncMethod_ClientKeepAlive)
     {
         // set kbguid

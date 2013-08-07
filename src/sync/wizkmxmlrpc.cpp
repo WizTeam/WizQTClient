@@ -2169,6 +2169,13 @@ private:
         if (!OnDownloadList<TData>(arrayData))
             return FALSE;
         //
+        for (typename std::deque<TData>::iterator it = arrayData.begin();
+             it != arrayData.end();
+             it++)
+        {
+            it->strKbGUID = m_info.strKbGUID;
+        }
+        //
         nVersion = GetObjectsVersion<TData>(nVersion, arrayData);
         //
         nVersion = std::max<__int64>(nVersion, nServerVersion);
