@@ -686,6 +686,27 @@ WIZMESSAGEDATA::WIZMESSAGEDATA(const WIZMESSAGEDATA& data)
 {
 }
 
+WIZMESSAGEDATA::WIZMESSAGEDATA(const WIZUSERMESSAGEDATA& data)
+    : nId(data.nMessageID)
+    , bizGUID(data.strBizGUID)
+    , kbGUID(data.strKbGUID)
+    , documentGUID(data.strDocumentGUID)
+    , senderAlias(data.strSender)
+    , senderGUID(data.strSenderGUID)
+    , senderId(data.strSenderID)
+    , receiverAlias(data.strReceiver)
+    , receiverGUID(data.strReceiverGUID)
+    , receiverId(data.strReceiverID)
+    , tCreated(data.tCreated)
+    , nMessageType(data.nMessageType)
+    , nReadStatus(data.nReadStatus)
+    , title(data.strTitle)
+    , messageBody(data.strMessageText)
+    , nVersion(data.nVersion)
+{
+
+}
+
 bool WIZMESSAGEDATA::LoadFromXmlRpc(CWizXmlRpcStructValue& data)
 {
     data.GetString("biz_guid", bizGUID);
