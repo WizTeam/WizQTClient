@@ -1,99 +1,10 @@
 #include "wizkmxmlrpc.h"
 
-
-#include "../share/wizXmlRpcServer.h"
-#include "../share/wizSyncableDatabase.h"
-
-
 #define WIZUSERMESSAGE_AT		0
 #define WIZUSERMESSAGE_EDIT		1
 
 #define WIZKM_XMLRPC_ERROR_TRAFFIC_LIMIT		304
 #define WIZKM_XMLRPC_ERROR_STORAGE_LIMIT		305
-
-
-
-
-class CWizKMXmlRpcServerBase : public CWizXmlRpcServerBase
-{
-public:
-    CWizKMXmlRpcServerBase(const QString& strUrl, QObject* parent);
-    BOOL GetValueVersion(const QString& strMethodPrefix, const QString& strToken, const QString& strKbGUID, const QString& strKey, __int64& nVersion);
-    BOOL GetValue(const QString& strMethodPrefix, const QString& strToken, const QString& strKbGUID, const QString& strKey, QString& strValue, __int64& nVersion);
-    BOOL SetValue(const QString& strMethodPrefix, const QString& strToken, const QString& strKbGUID, const QString& strKey, const QString& strValue, __int64& nRetVersion);
-};
-
-class WIZKMUSERINFO : public WIZUSERINFO
-{
-
-};
-
-class CWizKMAccountsServer : public CWizKMXmlRpcServerBase
-{
-public:
-    CWizKMAccountsServer(const QString& strUrl, QObject* parent);
-    virtual ~CWizKMAccountsServer(void);
-    //
-    virtual void OnXmlRpcError();
-protected:
-    BOOL m_bLogin;
-    //
-    BOOL m_bAutoLogout;
-public:
-    WIZKMUSERINFO m_retLogin;
-public:
-    BOOL Login(const QString& strUserName, const QString& strPassword, const QString& strType);
-    BOOL Logout();
-    BOOL ChangePassword(const QString& strUserName, const QString& strOldPassword, const QString& strNewPassword);
-    BOOL ChangeUserId(const QString& strUserName, const QString& strPassword, const QString& strNewUserId);
-    BOOL GetToken(const QString& strUserName, const QString& strPassword, QString& strToken);
-    BOOL GetCert(const QString& strUserName, const QString& strPassword, QString& strN, QString& stre, QString& strd, QString& strHint);
-    BOOL SetCert(const QString& strUserName, const QString& strPassword, const QString& strN, const QString& stre, const QString& strd, const QString& strHint);
-    BOOL CreateAccount(const QString& strUserName, const QString& strPassword, const QString& InviteCode);
-    void SetAutoLogout(BOOL b) { m_bAutoLogout = b; }
-    BOOL ShareSNS(const QString& strToken, const QString& strSNS, const QString& strComment, const QString& strURL, const QString& strDocumentGUID);
-    BOOL ShareGroup(const QString& strToken, const QString& strDocumentGUIDs, const QString& strGroups);
-    BOOL GetGroupList(CWizGroupDataArray& arrayGroup);
-    BOOL CreateTempGroup(const QString& strEmails, const QString& strAccessControl, const QString& strSubject, const QString& strEmailText, WIZGROUPDATA& group);
-    BOOL KeepAlive(const QString& strToken);
-    BOOL GetMessages(__int64 nVersion, CWizUserMessageDataArray& arrayMessage);
-    BOOL SetMessageReadStatus(const QString& strMessageIDs, int nStatus);
-    //
-    BOOL GetValueVersion(const QString& strKey, __int64& nVersion);
-    BOOL GetValue(const QString& strKey, QString& strValue, __int64& nVersion);
-    BOOL SetValue(const QString& strKey, const QString& strValue, __int64& nRetVersion);
-public:
-    BOOL GetWizKMDatabaseServer(QString& strServer, int& nPort, QString& strXmlRpcFile);
-    QString GetToken();
-    QString GetKbGUID();
-    int GetMaxFileSize() { return m_retLogin.GetMaxFileSize(); }
-    const WIZKMUSERINFO& GetUserInfo() const { return m_retLogin; }
-    WIZKMUSERINFO& GetUserInfo() { return m_retLogin; }
-    void SetUserInfo(const WIZKMUSERINFO& userInfo) { m_bLogin = TRUE; m_retLogin = userInfo; }
-private:
-    //
-    QString MakeXmlRpcPassword(const QString& strPassword);
-    //
-    BOOL accounts_clientLogin(const QString& strUserName, const QString& strPassword, const QString& strType, WIZKMUSERINFO& ret);
-    BOOL accounts_clientLogout(const QString& strToken);
-    BOOL accounts_keepAlive(const QString& strToken);
-    BOOL accounts_createAccount(const QString& strUserName, const QString& strPassword, const QString& strInviteCode);
-    BOOL accounts_changePassword(const QString& strUserName, const QString& strOldPassword, const QString& strNewPassword);
-    BOOL accounts_changeUserId(const QString& strUserName, const QString& strPassword, const QString& strNewUserId);
-    BOOL accounts_getToken(const QString& strUserName, const QString& strPassword, QString& strToken);
-    BOOL accounts_getCert(const QString& strUserName, const QString& strPassword, QString& strN, QString& stre, QString& strd, QString& strHint);
-    BOOL accounts_setCert(const QString& strUserName, const QString& strPassword, const QString& strN, const QString& stre, const QString& strd, const QString& strHint);
-    BOOL document_shareSNS(const QString& strToken, const QString& strSNS, const QString& strComment, const QString& strURL, const QString& strDocumentGUID);
-    BOOL document_shareGroup(const QString& strToken, const QString& strDocumentGUIDs, const QString& strGroups);
-    //
-    BOOL accounts_getGroupList(CWizGroupDataArray& arrayGroup);
-    //
-    BOOL accounts_createTempGroupKb(const QString& strEmails, const QString& strAccessControl, const QString& strSubject, const QString& strEmailText, WIZGROUPDATA& group);
-    //
-    BOOL accounts_getMessages(int nCountPerPage, __int64 nVersion, CWizUserMessageDataArray& arrayMessage);
-
-};
-
 
 
 #define WIZKM_WEBAPI_VERSION		3

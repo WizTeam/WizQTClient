@@ -139,6 +139,10 @@ struct WIZUSERINFO : public WIZUSERINFOBASE
     QString strBackupDatabaseServer;
 };
 
+struct WIZKMUSERINFO : public WIZUSERINFO
+{
+};
+
 
 struct WIZUSERCERT
 {

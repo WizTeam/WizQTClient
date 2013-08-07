@@ -3,9 +3,11 @@
 
 #include <QHash>
 #include <QDialog>
-#include "share/wizverifyaccount.h"
+//#include "share/wizverifyaccount.h"
 #include "share/wizcreateaccount.h"
 #include "share/wizsettings.h"
+
+#include "sync/wizkmxmlrpc.h"
 
 class QAbstractButton;
 class QUrl;
@@ -20,20 +22,25 @@ class WelcomeDialog : public QDialog
 
 public:
     explicit WelcomeDialog(const QString& strDefaultUserId, const QString& strLocale, QWidget* parent = 0);
-
-    void setUsers();
-    void setPassword(const QString& strPassword);
+    ~WelcomeDialog();
 
     QString userId() const;
-    QString password() const;
+    void setUsers();
 
-    ~WelcomeDialog();
+    QString password() const;
+    void setPassword(const QString& strPassword);
+
+    WIZUSERINFO userInfo() const { return m_info; }
 
 private:
     Ui::WelcomeDialog* ui;
     QString m_strDefaultUserId;
     QHash<QString, QString> m_users;
-    CWizVerifyAccount m_verifyAccount;
+    //CWizVerifyAccount m_verifyAccount;
+
+    WIZKMUSERINFO m_info;
+
+    void verifyAccountStart();
 
     void getUserPasswordPairs();
     void updateUserSettings();
@@ -43,7 +50,7 @@ private:
 public Q_SLOTS:
     virtual void accept();
 
-    void verifyAccountDone(bool succeeded, int errorCode, const QString& errorMessage);
+    //void verifyAccountDone(bool succeeded, int errorCode, const QString& errorMessage);
     void on_webView_linkClicked(const QUrl& url);
 
     void on_labelForgotPassword_linkActivated(const QString&);

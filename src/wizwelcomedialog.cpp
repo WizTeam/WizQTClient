@@ -8,6 +8,7 @@
 #include "wizcreateaccountdialog.h"
 #include "wizproxydialog.h"
 
+
 WelcomeDialog::WelcomeDialog(const QString &strDefaultUserId, const QString& strLocale, QWidget *parent)
     : QDialog(parent)
     , ui(new Ui::WelcomeDialog)
@@ -58,8 +59,8 @@ WelcomeDialog::WelcomeDialog(const QString &strDefaultUserId, const QString& str
 
     connect(ui->buttonLogin, SIGNAL(clicked()), SLOT(accept()));
 
-    connect(&m_verifyAccount, SIGNAL(done(bool, int, const QString&)), \
-            SLOT(verifyAccountDone(bool, int, const QString&)));
+//    connect(&m_verifyAccount, SIGNAL(done(bool, int, const QString&)), \
+//            SLOT(verifyAccountDone(bool, int, const QString&)));
 
     setUsers();
 
@@ -121,29 +122,44 @@ void WelcomeDialog::accept()
 
     enableControls(false);
 
-    m_verifyAccount.resetProxy();
+    verifyAccountStart();
 
-    m_verifyAccount.verifyAccount(userId(), password());
+    //m_verifyAccount.resetProxy();
+    //m_verifyAccount.verifyAccount(userId(), password());
 }
 
-void WelcomeDialog::verifyAccountDone(bool succeeded, int errorCode, const QString& errorMessage)
+void WelcomeDialog::verifyAccountStart()
 {
-    if (succeeded) {
+    CWizKMAccountsServer server(WizKMGetAccountsServerURL(true));
+    if (server.Login(userId(), password(), "normal")) {
+        m_info = server.GetUserInfo();
         updateUserSettings();
         QDialog::accept();
     } else {
-        QString msg;
-        if (errorCode == 3) {
-            msg = tr("Network Error, please check your network connection!\n\nErrorCode: ") + QString::number(errorCode);
-        } else {
-            msg = errorMessage + tr("\n\nErrorCode: ") + QString::number(errorCode);
-        }
-
-        QMessageBox::critical(this, tr("Verify account failed"), msg);
+        QMessageBox::critical(this, tr("Verify account failed"), server.GetLastErrorMessage());
     }
 
     enableControls(true);
 }
+
+//void WelcomeDialog::verifyAccountDone(bool succeeded, int errorCode, const QString& errorMessage)
+//{
+//    if (succeeded) {
+//        updateUserSettings();
+//        QDialog::accept();
+//    } else {
+//        QString msg;
+//        if (errorCode == 3) {
+//            msg = tr("Network Error, please check your network connection!\n\nErrorCode: ") + QString::number(errorCode);
+//        } else {
+//            msg = errorMessage + tr("\n\nErrorCode: ") + QString::number(errorCode);
+//        }
+//
+//        QMessageBox::critical(this, tr("Verify account failed"), msg);
+//    }
+//
+//    enableControls(true);
+//}
 
 void WelcomeDialog::updateUserSettings()
 {
@@ -261,7 +277,7 @@ void WelcomeDialog::on_labelProxySettings_linkActivated(const QString & link)
     if (QDialog::Accepted != dlg.exec())
         return;
 
-    m_verifyAccount.resetProxy();
+    //m_verifyAccount.resetProxy();
 }
 
 void WelcomeDialog::on_comboUsers_activated(const QString &userId)

@@ -94,9 +94,8 @@ int main(int argc, char *argv[])
     }
 
     // manually login
+    WelcomeDialog dlgWelcome(strUserId, strLocale);
     if (bFallback) {
-
-        WelcomeDialog dlgWelcome(strUserId, strLocale);
         if (QDialog::Accepted != dlgWelcome.exec())
             return 0;
 
@@ -145,7 +144,10 @@ int main(int argc, char *argv[])
         QMessageBox::critical(NULL, "", QObject::tr("Can not open database"));
         return 0;
     }
-    //
+
+    if (bFallback) {
+        dbMgr.db().SetUserInfo(dlgWelcome.userInfo());
+    }
 
     MainWindow w(dbMgr);
     w.show();
