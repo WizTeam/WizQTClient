@@ -32,10 +32,12 @@ private:
     QImage m_collapsedImage;
     QImage m_imgDocumentUnread;
     QImage m_imgDefaultAvatar;
+    QImage m_imgDocumentsBadge;
+    QImage m_imgDocumentsBadgeSelected;
+
     CWizSkin9GridImage m_toolBarImage;
     CWizSkin9GridImage m_splitterShadowImage;
-    //CWizSkin9GridImage m_categorySelectedItemBackground;
-    //CWizSkin9GridImage m_categorySelectedItemBackground_unfocus;
+
     CWizSkin9GridImage m_documentsSelectedItemBackground;
     CWizSkin9GridImage m_documentsSelectedItemBackgroundHot;
     CWizSkin9GridImage m_multiLineListSelectedItemBackground;
@@ -55,7 +57,7 @@ private:
     QColor m_colorCategorySelectedBackground;
     QColor m_colorCategorySelctedBackgroundNoFocus;
 
-
+    // document list view
     QColor m_colorDocumentsBackground;
     QColor m_colorDocumentsTitle;
     QColor m_colorDocumentsDate;
@@ -109,12 +111,11 @@ CWizNoteStyle::CWizNoteStyle(const QString& strSkinName)
     QString strSkinPath = ::WizGetSkinResourcePath(strSkinName);
 
     m_expandedImage.load(strSkinPath + "branch_expanded.png");
-    //m_expandedImage = m_expandedImage.scaled(24, 24, Qt::KeepAspectRatio);
     m_collapsedImage.load(strSkinPath + "branch_collapsed.png");
-    //m_collapsedImage = m_collapsedImage.scaled(24, 24, Qt::KeepAspectRatio);
-
     m_imgDocumentUnread.load(strSkinPath + "read_btn_unread.png");
     m_imgDefaultAvatar.load(strSkinPath + "avatar_default.png");
+    m_imgDocumentsBadge.load(strSkinPath + "document_normal.png");
+    m_imgDocumentsBadgeSelected.load(strSkinPath + "document_selected.png");
 
     m_toolBarImage.SetImage(strSkinPath + "toolbar_background.png", QPoint(8, 8));
     m_splitterShadowImage.SetImage(strSkinPath + "leftview_line_shadow.png", QPoint(4, 4));
@@ -352,6 +353,7 @@ void CWizNoteStyle::drawDocumentListViewItemPrivate(const QStyleOptionViewItemV4
         textRect.setRight(imageRect.left());
     }
 
+
     // draw the text
     if (!vopt->text.isEmpty()) {
         QPalette::ColorGroup cg = vopt->state & QStyle::State_Enabled
@@ -380,12 +382,26 @@ void CWizNoteStyle::drawDocumentListViewItemPrivate(const QStyleOptionViewItemV4
 
         p->save();
 
-        // title use 13px font size
+        // draw title
         QFont fontTitle = p->font();
         fontTitle.setPixelSize(13);
         p->setFont(fontTitle);
+
+        int nFontHeight = p->fontMetrics().height();
+
+        // badge icon first
+        QRect rcBadge = textRect;
+        rcBadge.setRight(rcBadge.left() + nFontHeight);
+        rcBadge.setBottom(rcBadge.top() + nFontHeight);
+        if (vopt->state & State_Selected) {
+            p->drawImage(rcBadge, m_imgDocumentsBadgeSelected);
+        } else {
+            p->drawImage(rcBadge, m_imgDocumentsBadge);
+        }
+
         QRect rcTitle = textRect;
-        rcTitle.setBottom(rcTitle.top() + p->fontMetrics().height());
+        rcTitle.setLeft(rcBadge.right() + 5);
+        rcTitle.setBottom(rcTitle.top() + nFontHeight);
         CString strTitle = document.strTitle;
         QColor colorTitle = selected ? selectedLightColor : m_colorDocumentsTitle;
         ::WizDrawTextSingleLine(p, rcTitle, strTitle,  Qt::TextSingleLine | Qt::AlignVCenter, colorTitle, true);
