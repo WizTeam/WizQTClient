@@ -63,9 +63,6 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     , m_statusBar(new CWizStatusBar(*this, this))
     , m_actions(new CWizActions(*this, this))
     , m_categoryPrivate(new CWizCategoryView(*this, this))
-    , m_categoryTags(new CWizCategoryTagsView(*this, this))
-    , m_categoryGroups(new CWizCategoryGroupsView(*this, this))
-    , m_categoryLayer(new QWidget(this))
     , m_documents(new CWizDocumentListView(*this, this))
     , m_documentSelection(new CWizDocumentSelectionView(*this, this))
     , m_doc(new CWizDocumentView(*this, this))
@@ -365,30 +362,6 @@ void MainWindow::initToolBar()
     addToolBar(m_toolBar);
 }
 
-QWidget* MainWindow::setupCategorySwitchButtons()
-{
-    QWidget* categorySwitchWidget = new QWidget(this);
-
-    m_categorySwitchSegmentBtn = new QtSegmentControl(categorySwitchWidget);
-    m_categorySwitchSegmentBtn->setSelectionBehavior(QtSegmentControl::SelectOne);
-    m_categorySwitchSegmentBtn->setCount(3);
-    m_categorySwitchSegmentBtn->setIconSize(QSize(18, 18));
-    m_categorySwitchSegmentBtn->setSegmentIcon(0, ::WizLoadSkinIcon3("folder", QIcon::Normal));
-    m_categorySwitchSegmentBtn->setSegmentIcon(1, ::WizLoadSkinIcon3("tag", QIcon::Normal));
-    m_categorySwitchSegmentBtn->setSegmentIcon(2, ::WizLoadSkinIcon3("groups", QIcon::Normal));
-    m_categorySwitchSegmentBtn->setSegmentSelected(0, true);
-    connect(m_categorySwitchSegmentBtn, SIGNAL(segmentSelected(int)), this, SLOT(on_actionCategorySwitch_triggered(int)));
-
-    QHBoxLayout* layoutCategorySwitch = new QHBoxLayout();
-    categorySwitchWidget->setLayout(layoutCategorySwitch);
-    layoutCategorySwitch->setContentsMargins(5, 0, 5, 0);
-    layoutCategorySwitch->addStretch();
-    layoutCategorySwitch->addWidget(m_categorySwitchSegmentBtn);
-    layoutCategorySwitch->addStretch();
-
-    return categorySwitchWidget;
-}
-
 void MainWindow::initClient()
 {
     QWidget* client = new QWidget(this);
@@ -405,34 +378,9 @@ void MainWindow::initClient()
     layout->setContentsMargins(0, 0, 0, 0);
     client->setLayout(layout);
 
-#ifndef Q_OS_MAC
-    WizInitWidgetMargins(m_settings->skin(), client, "Client");
-    WizInitWidgetMargins(m_settings->skin(), m_doc, "Document");
-#endif
-
     m_splitter = new CWizSplitter(client);
     m_splitter->setChildrenCollapsible(false);
     layout->addWidget(m_splitter);
-
-    QWidget* categoryPanel = new QWidget(m_splitter);
-    categoryPanel->setMinimumWidth(30);
-    QVBoxLayout* layoutCategoryPanel = new QVBoxLayout(categoryPanel);
-    categoryPanel->setLayout(layoutCategoryPanel);
-    layoutCategoryPanel->setContentsMargins(0, 0, 0, 0);
-    layoutCategoryPanel->setSpacing(0);
-    layoutCategoryPanel->addWidget(setupCategorySwitchButtons());
-    layoutCategoryPanel->addWidget(m_categoryLayer);
-
-    QHBoxLayout* layoutCategories = new QHBoxLayout(m_categoryLayer);
-    m_categoryLayer->setLayout(layoutCategories);
-    layoutCategories->setContentsMargins(0, 0, 0, 0);
-    layoutCategories->setSpacing(0);
-
-    layoutCategories->addWidget(m_categoryPrivate);
-    layoutCategories->addWidget(m_categoryTags);
-    layoutCategories->addWidget(m_categoryGroups);
-    m_categoryTags->hide();
-    m_categoryGroups->hide();
 
     QWidget* documentPanel = new QWidget(m_splitter);
     QHBoxLayout* layoutDocument = new QHBoxLayout();
@@ -444,20 +392,15 @@ void MainWindow::initClient()
     m_documentSelection->hide();
     // append after client
     m_doc->layout()->addWidget(m_transitionView);
-    //layoutDocument->addWidget(m_transitionView);
     m_transitionView->hide();
 
-    m_splitter->addWidget(categoryPanel);
+    //m_splitter->addWidget(categoryPanel);
+    m_splitter->addWidget(m_category);
     m_splitter->addWidget(m_documents);
     m_splitter->addWidget(documentPanel);
     m_splitter->setStretchFactor(0, 0);
     m_splitter->setStretchFactor(1, 0);
     m_splitter->setStretchFactor(2, 1);
-
-
-#ifndef Q_OS_MAC
-    //connect(splitter, SIGNAL(splitterMoved(int,int)), this, SLOT(on_client_splitterMoved(int, int)));
-#endif
 }
 
 //void MainWindow::resetNotice()
@@ -486,15 +429,15 @@ void MainWindow::initClient()
 void MainWindow::init()
 {
     connect(m_categoryPrivate, SIGNAL(itemSelectionChanged()), SLOT(on_category_itemSelectionChanged()));
-    connect(m_categoryTags, SIGNAL(itemSelectionChanged()), SLOT(on_category_itemSelectionChanged()));
-    connect(m_categoryGroups, SIGNAL(itemSelectionChanged()), SLOT(on_category_itemSelectionChanged()));
+    //connect(m_categoryTags, SIGNAL(itemSelectionChanged()), SLOT(on_category_itemSelectionChanged()));
+    //connect(m_categoryGroups, SIGNAL(itemSelectionChanged()), SLOT(on_category_itemSelectionChanged()));
 
     connect(m_categoryPrivate, SIGNAL(newDocument()), SLOT(on_actionNewNote_triggered()));
     connect(m_documents, SIGNAL(itemSelectionChanged()), SLOT(on_documents_itemSelectionChanged()));
 
     m_categoryPrivate->baseInit();
-    m_categoryTags->baseInit();
-    m_categoryGroups->baseInit();
+    //m_categoryTags->baseInit();
+    //m_categoryGroups->baseInit();
 }
 
 void MainWindow::on_syncStarted()
@@ -581,53 +524,53 @@ void MainWindow::on_actionNewNote_triggered()
 
         delete pFolder;
 
-    // if tag category is selected, create document at default location and also assign this tag to new document
-    } else if (m_category == m_categoryTags) {
-        bool ret = m_dbMgr.db().CreateDocumentAndInit("", "", 0, tr("New note"), "newnote", "/My Notes/", "", data);
-        if (!ret) {
-            TOLOG("Create new document failed!");
-            return;
-        }
+//    // if tag category is selected, create document at default location and also assign this tag to new document
+//    } else if (m_category == m_categoryTags) {
+//        bool ret = m_dbMgr.db().CreateDocumentAndInit("", "", 0, tr("New note"), "newnote", "/My Notes/", "", data);
+//        if (!ret) {
+//            TOLOG("Create new document failed!");
+//            return;
+//        }
 
-        if (CWizCategoryViewTagItem* p = dynamic_cast<CWizCategoryViewTagItem*>(m_categoryTags->currentItem())) {
-            CWizDocument doc(m_dbMgr.db(), data);
-            doc.AddTag(p->tag());
-        } else {
-            m_categoryTags->setCurrentItem(m_categoryTags->findAllTags());
-        }
+//        if (CWizCategoryViewTagItem* p = dynamic_cast<CWizCategoryViewTagItem*>(m_categoryTags->currentItem())) {
+//            CWizDocument doc(m_dbMgr.db(), data);
+//            doc.AddTag(p->tag());
+//        } else {
+//            m_categoryTags->setCurrentItem(m_categoryTags->findAllTags());
+//        }
 
-    // if group category is selected
-    } else if (m_category == m_categoryGroups) {
-        QString strKbGUID;
-        WIZTAGDATA tag;
-        // if group root selected
-        if (CWizCategoryViewGroupRootItem* pRoot = dynamic_cast<CWizCategoryViewGroupRootItem*>(m_categoryGroups->currentItem())) {
-            strKbGUID = pRoot->kbGUID();
-        } else if (CWizCategoryViewGroupItem* p = dynamic_cast<CWizCategoryViewGroupItem*>(m_categoryGroups->currentItem())) {
-            strKbGUID = p->kbGUID();
-            tag = p->tag();
-        } else {
-            Q_ASSERT(0);
-            return;
-        }
+//    // if group category is selected
+//    } else if (m_category == m_categoryGroups) {
+//        QString strKbGUID;
+//        WIZTAGDATA tag;
+//        // if group root selected
+//        if (CWizCategoryViewGroupRootItem* pRoot = dynamic_cast<CWizCategoryViewGroupRootItem*>(m_categoryGroups->currentItem())) {
+//            strKbGUID = pRoot->kbGUID();
+//        } else if (CWizCategoryViewGroupItem* p = dynamic_cast<CWizCategoryViewGroupItem*>(m_categoryGroups->currentItem())) {
+//            strKbGUID = p->kbGUID();
+//            tag = p->tag();
+//        } else {
+//            Q_ASSERT(0);
+//            return;
+//        }
 
-        // FIXME: root of all groups will be selected, fix this issue
-        if (strKbGUID.isEmpty()) {
-            return;
-        }
+//        // FIXME: root of all groups will be selected, fix this issue
+//        if (strKbGUID.isEmpty()) {
+//            return;
+//        }
 
-        CWizDatabase& db = m_dbMgr.db(strKbGUID);
-        bool ret = db.CreateDocumentAndInit("", "", 0, tr("New note"), "newnote", "/My Notes/", "", data);
-        if (!ret) {
-            TOLOG("Create new document for group failed!");
-            return;
-        }
+//        CWizDatabase& db = m_dbMgr.db(strKbGUID);
+//        bool ret = db.CreateDocumentAndInit("", "", 0, tr("New note"), "newnote", "/My Notes/", "", data);
+//        if (!ret) {
+//            TOLOG("Create new document for group failed!");
+//            return;
+//        }
 
-        // also assign tag(folder)
-        if (!tag.strGUID.isEmpty()) {
-            CWizDocument doc(db, data);
-            doc.AddTag(tag);
-        }
+//        // also assign tag(folder)
+//        if (!tag.strGUID.isEmpty()) {
+//            CWizDocument doc(db, data);
+//            doc.AddTag(tag);
+//        }
 
     } else {
         Q_ASSERT(0);
@@ -933,105 +876,6 @@ void MainWindow::on_actionGoForward_triggered()
     WIZDOCUMENTDATA data = m_history->forward();
     viewDocument(data, false);
     locateDocument(data);
-}
-
-void MainWindow::on_actionCategorySwitch_triggered(int index)
-{
-    QAction* action;
-    if (index == 0) {
-        action = m_actions->actionFromName(WIZACTION_SWITCH_CATEGORY_PRIVATE);
-        if (action->isEnabled())
-            action->trigger();
-    } else if (index == 1) {
-        action = m_actions->actionFromName(WIZACTION_SWITCH_CATEGORY_TAGS);
-        if (action->isEnabled())
-            action->trigger();
-    } else if (index == 2) {
-        action = m_actions->actionFromName(WIZACTION_SWITCH_CATEGORY_GROUPS);
-        if (action->isEnabled())
-            action->trigger();
-    } else {
-        Q_ASSERT(0);
-    }
-}
-
-void MainWindow::on_actionCategorySwitchPrivate_triggered()
-{
-    if (m_category == m_categoryPrivate) {
-        return;
-    }
-
-    categorySwitchTo(m_category, m_categoryPrivate);
-}
-
-void MainWindow::on_actionCategorySwitchTags_triggered()
-{
-    if (m_category == m_categoryTags) {
-        return;
-    }
-
-    categorySwitchTo(m_category, m_categoryTags);
-}
-
-void MainWindow::on_actionCategorySwitchGroups_triggered()
-{
-    if (m_category == m_categoryGroups) {
-        return;
-    }
-
-    categorySwitchTo(m_category, m_categoryGroups);
-}
-
-void MainWindow::categorySwitchTo(CWizCategoryBaseView* sourceCategory, CWizCategoryBaseView* destCategory)
-{
-    if (!sourceCategory->isVisible()) {
-        return;
-    }
-
-    sourceCategory->saveSelection();
-    destCategory->restoreSelection();
-
-    m_categorySwitchSegmentBtn->setEnabled(false);
-    m_actions->actionFromName(WIZACTION_SWITCH_CATEGORY_PRIVATE)->setEnabled(false);
-    m_actions->actionFromName(WIZACTION_SWITCH_CATEGORY_TAGS)->setEnabled(false);
-    m_actions->actionFromName(WIZACTION_SWITCH_CATEGORY_GROUPS)->setEnabled(false);
-
-    QRect rectOld(m_categoryLayer->geometry());
-
-    // break layout and do animation
-    QHBoxLayout* layout = qobject_cast<QHBoxLayout *>(m_categoryLayer->layout());
-    layout->removeWidget(sourceCategory);
-    destCategory->lower();
-    destCategory->show();
-    m_category = destCategory;
-
-    QPropertyAnimation* anim1 = new QPropertyAnimation(sourceCategory, "geometry");
-    anim1->setEasingCurve(QEasingCurve::InOutExpo);
-    anim1->setDuration(200);
-    anim1->setEndValue(QRect(rectOld.width(), 0, 0, rectOld.height()));
-    connect(anim1, SIGNAL(stateChanged(QAbstractAnimation::State, QAbstractAnimation::State)), \
-            SLOT(onAnimationCategorySwitchStateChanged(QAbstractAnimation::State, QAbstractAnimation::State)));
-
-    anim1->start();
-}
-
-void MainWindow::onAnimationCategorySwitchStateChanged(QAbstractAnimation::State newState, QAbstractAnimation::State oldState)
-{
-    if (newState == QAbstractAnimation::Stopped && oldState == QAbstractAnimation::Running) {
-        QPropertyAnimation* animate = qobject_cast<QPropertyAnimation *>(sender());
-        CWizCategoryBaseView* category = qobject_cast<CWizCategoryBaseView *>(animate->targetObject());
-        category->hide();
-
-        QHBoxLayout* layout = qobject_cast<QHBoxLayout *>(m_categoryLayer->layout());
-        layout->addWidget(category);
-
-        m_categoryLayer->update();
-
-        m_categorySwitchSegmentBtn->setEnabled(true);
-        m_actions->actionFromName(WIZACTION_SWITCH_CATEGORY_PRIVATE)->setEnabled(true);
-        m_actions->actionFromName(WIZACTION_SWITCH_CATEGORY_TAGS)->setEnabled(true);
-        m_actions->actionFromName(WIZACTION_SWITCH_CATEGORY_GROUPS)->setEnabled(true);
-    }
 }
 
 void MainWindow::on_category_itemSelectionChanged()

@@ -445,7 +445,9 @@ QString WizGetTranslatedLocaleDisplayName(int index)
 
 bool WizIsPredefinedLocation(const QString& strLocation)
 {
-    if (strLocation == "/My Notes/") {
+    if (strLocation == "/Deleted Items/") {
+        return true;
+    }else if (strLocation == "/My Notes/") {
         return true;
     } else if (strLocation == "/My Journals/") {
         return true;

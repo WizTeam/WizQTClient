@@ -25,7 +25,7 @@ public:
     BOOL GetBool(const QString& strSection, const QString& strKey, bool def = false);
     BOOL SetBool(const QString& strSection, const QString& strKey, bool def);
 
-    QColor GetColor(const QString& strSection, const QString& strKey, QColor defColor);
+    QColor GetColor(const QString& strSection, const QString& strKey, QColor defColor = "#FFFFFF");
 
     QString GetEncryptedString(const QString& strSection, const QString& strKey, const QString& strDef = "");
     BOOL SetEncryptedString(const QString& strSection, const QString& strKey, const QString& str);

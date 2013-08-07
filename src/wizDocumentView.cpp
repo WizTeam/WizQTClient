@@ -31,11 +31,11 @@ public:
 
         //m_titleEdit = new QLineEdit(this);
 
-        m_editIcon = ::WizLoadSkinIcon(m_app.userSettings().skin(), "lock");
-        m_commitIcon = ::WizLoadSkinIcon(m_app.userSettings().skin(), "unlock");
-        m_tagsIcon = ::WizLoadSkinIcon(m_app.userSettings().skin(), "tag");
-        m_attachmentIcon = ::WizLoadSkinIcon(m_app.userSettings().skin(), "attachment");
-        m_infoIcon = ::WizLoadSkinIcon(m_app.userSettings().skin(), "noteinfo");
+        m_editIcon = ::WizLoadSkinIcon(m_app.userSettings().skin(), "document_lock");
+        m_commitIcon = ::WizLoadSkinIcon(m_app.userSettings().skin(), "document_unlock");
+        m_tagsIcon = ::WizLoadSkinIcon(m_app.userSettings().skin(), "document_tag");
+        m_attachmentIcon = ::WizLoadSkinIcon(m_app.userSettings().skin(), "document_attachment");
+        m_infoIcon = ::WizLoadSkinIcon(m_app.userSettings().skin(), "document_info");
 
         m_editDocumentButton = new CWizImagePushButton(m_editIcon, "", this);
         updateEditDocumentButtonIcon(false);

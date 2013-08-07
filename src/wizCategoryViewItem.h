@@ -45,8 +45,13 @@ class CWizCategoryViewSpacerItem: public CWizCategoryViewItemBase
 {
 public:
     CWizCategoryViewSpacerItem(CWizExplorerApp& app);
-    virtual void showContextMenu(CWizCategoryBaseView* pCtrl, QPoint pos) { Q_UNUSED(pCtrl); Q_UNUSED(pos); }
-    virtual void getDocuments(CWizDatabase& db, CWizDocumentDataArray& arrayDocument) { Q_UNUSED(db); Q_UNUSED(arrayDocument); }
+
+    virtual void showContextMenu(CWizCategoryBaseView* pCtrl, QPoint pos)
+    { Q_UNUSED(pCtrl); Q_UNUSED(pos); }
+
+    virtual void getDocuments(CWizDatabase& db, CWizDocumentDataArray& arrayDocument)
+    { Q_UNUSED(db); Q_UNUSED(arrayDocument); }
+
     virtual int getItemHeight(int hintHeight) const;
 };
 
@@ -56,7 +61,59 @@ public:
     CWizCategoryViewSeparatorItem(CWizExplorerApp& app);
     virtual void showContextMenu(CWizCategoryBaseView* pCtrl, QPoint pos) { Q_UNUSED(pCtrl); Q_UNUSED(pos); }
     virtual void getDocuments(CWizDatabase& db, CWizDocumentDataArray& arrayDocument) { Q_UNUSED(db); Q_UNUSED(arrayDocument); }
-    virtual int getItemHeight(int hintHeight) const;
+    virtual int getItemHeight(int nHeight) const;
+};
+
+class CWizCategoryViewCategoryItem : public CWizCategoryViewItemBase
+{
+public:
+    CWizCategoryViewCategoryItem(CWizExplorerApp& app, const QString& strName);
+
+    virtual void showContextMenu(CWizCategoryBaseView* pCtrl, QPoint pos)
+    { Q_UNUSED(pCtrl); Q_UNUSED(pos); }
+
+    virtual void getDocuments(CWizDatabase& db,
+                              CWizDocumentDataArray& arrayDocument)
+    { Q_UNUSED(db); Q_UNUSED(arrayDocument); }
+};
+
+class CWizCategoryViewMessageRootItem : public CWizCategoryViewItemBase
+{
+public:
+    CWizCategoryViewMessageRootItem(CWizExplorerApp& app, const QString& strName);
+
+    virtual void showContextMenu(CWizCategoryBaseView* pCtrl, QPoint pos)
+    { Q_UNUSED(pCtrl); Q_UNUSED(pos); }
+
+    virtual void getDocuments(CWizDatabase& db,
+                              CWizDocumentDataArray& arrayDocument)
+    { Q_UNUSED(db); Q_UNUSED(arrayDocument); }
+};
+
+class CWizCategoryViewShortcutRootItem : public CWizCategoryViewItemBase
+{
+public:
+    CWizCategoryViewShortcutRootItem(CWizExplorerApp& app, const QString& strName);
+
+    virtual void showContextMenu(CWizCategoryBaseView* pCtrl, QPoint pos)
+    { Q_UNUSED(pCtrl); Q_UNUSED(pos); }
+
+    virtual void getDocuments(CWizDatabase& db,
+                              CWizDocumentDataArray& arrayDocument)
+    { Q_UNUSED(db); Q_UNUSED(arrayDocument); }
+};
+
+class CWizCategoryViewSearchRootItem : public CWizCategoryViewItemBase
+{
+public:
+    CWizCategoryViewSearchRootItem(CWizExplorerApp& app, const QString& strName);
+
+    virtual void showContextMenu(CWizCategoryBaseView* pCtrl, QPoint pos)
+    { Q_UNUSED(pCtrl); Q_UNUSED(pos); }
+
+    virtual void getDocuments(CWizDatabase& db,
+                              CWizDocumentDataArray& arrayDocument)
+    { Q_UNUSED(db); Q_UNUSED(arrayDocument); }
 };
 
 class CWizCategoryViewAllFoldersItem : public CWizCategoryViewItemBase
@@ -112,12 +169,31 @@ private:
     WIZTAGDATA m_tag;
 };
 
+class CWizCategoryViewStyleRootItem : public CWizCategoryViewItemBase
+{
+public:
+    CWizCategoryViewStyleRootItem(CWizExplorerApp& app, const QString& strName);
+
+    virtual void showContextMenu(CWizCategoryBaseView* pCtrl, QPoint pos)
+    { Q_UNUSED(pCtrl); Q_UNUSED(pos); }
+
+    virtual void getDocuments(CWizDatabase& db,
+                              CWizDocumentDataArray& arrayDocument)
+    { Q_UNUSED(db); Q_UNUSED(arrayDocument); }
+};
+
 class CWizCategoryViewAllGroupsRootItem : public CWizCategoryViewItemBase
 {
 public:
-    CWizCategoryViewAllGroupsRootItem(CWizExplorerApp& app, const QString& strName, const QString& strKbGUID);
-    virtual void showContextMenu(CWizCategoryBaseView* pCtrl, QPoint pos);
-    virtual void getDocuments(CWizDatabase& db, CWizDocumentDataArray& arrayDocument);
+    CWizCategoryViewAllGroupsRootItem(CWizExplorerApp& app,
+                                      const QString& strName,
+                                      const QString& strKbGUID);
+
+    virtual void showContextMenu(CWizCategoryBaseView* pCtrl, QPoint pos)
+    { Q_UNUSED(pCtrl); Q_UNUSED(pos); }
+
+    virtual void getDocuments(CWizDatabase& db, CWizDocumentDataArray& arrayDocument)
+    { Q_UNUSED(db); Q_UNUSED(arrayDocument); }
 };
 
 class CWizCategoryViewBizGroupRootItem : public CWizCategoryViewAllGroupsRootItem

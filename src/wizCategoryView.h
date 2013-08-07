@@ -11,18 +11,26 @@
 #include "share/wizuihelper.h"
 
 class CWizScrollBar;
-class QScrollAreaKineticScroller;
 
 class CWizCategoryBaseView : public QTreeWidget
 {
     Q_OBJECT
 
 public:
+    enum CategoryType {
+        General,
+        PersonalNotes,
+        EnterpriseGroups,
+        IndividualGroups
+    };
+
+public:
     CWizCategoryBaseView(CWizExplorerApp& app, QWidget *parent = 0);
     void baseInit();
 
+    int findCategoryIndex(CategoryType type);
+
     virtual CWizCategoryViewTrashItem* findTrash(const QString& strKbGUID) { Q_UNUSED(strKbGUID); return NULL; }
-    void showTrashContextMenu(QPoint pos, const QString& strKbGUID);
 
     QString selectedItemKbGUID();
     void getDocuments(CWizDocumentDataArray& arrayDocument);
@@ -35,22 +43,22 @@ public:
 
     template <class T> T* currentCategoryItem() const;
     CWizCategoryViewItemBase* categoryItemFromIndex(const QModelIndex &index) const;
-    bool isSeparatorItemByIndex(const QModelIndex &index) const;
+    bool isHelperItemByIndex(const QModelIndex &index) const;
     bool isSeparatorItemByPosition(const QPoint& pt) const;
-
-    virtual void resizeEvent(QResizeEvent* event);
-    virtual void contextMenuEvent(QContextMenuEvent* e);
-    virtual void mousePressEvent(QMouseEvent* event);
 
     bool isDragHovered() const { return m_bDragHovered; }
     QPoint dragHoveredPos() const { return m_dragHoveredPos; }
     bool validateDropDestination(const QPoint& p) const;
 
+protected:
     virtual void startDrag(Qt::DropActions supportedActions);
     virtual void dragEnterEvent(QDragEnterEvent* event);
     virtual void dragMoveEvent(QDragMoveEvent* event);
     virtual void dragLeaveEvent(QDragLeaveEvent* event);
     virtual void dropEvent(QDropEvent* event);
+
+    virtual void resizeEvent(QResizeEvent* event);
+    virtual void contextMenuEvent(QContextMenuEvent* e);
 
     virtual QModelIndex moveCursor(CursorAction cursorAction, Qt::KeyboardModifiers modifiers);
 
@@ -84,15 +92,12 @@ private:
     bool m_bDragHovered;
     QPoint m_dragHoveredPos;
 
-    QPointer<QMenu> m_menuTrash;
-    QString m_strTrashKbGUID;
+
+    //QString m_strTrashKbGUID;
 
     CWizScrollBar* m_vScroll;
-    QPointer<QScrollAreaKineticScroller> m_kineticScroller;
 
 public Q_SLOTS:
-    void on_action_emptyTrash();
-
     void on_document_created(const WIZDOCUMENTDATA& document);
     void on_document_modified(const WIZDOCUMENTDATA& documentOld,
                               const WIZDOCUMENTDATA& documentNew);
@@ -116,17 +121,49 @@ class CWizCategoryView : public CWizCategoryBaseView
 
 public:
     CWizCategoryView(CWizExplorerApp& app, QWidget *parent = 0);
+
     virtual void init();
     virtual CWizCategoryViewTrashItem* findTrash(const QString& strKbGUID);
 
-    void showAllFoldersContextMenu(QPoint pos);
+    enum CategoryMenuType
+    {
+        FolderRootItem,
+        FolderItem,
+        TagRootItem,
+        TagItem,
+        GroupRootItem,
+        GroupItem
+    };
+
+    void initMenus();
+
+    // becase Qt can't invoke two action with one shortcut keys, we can only use
+    // one QAction and for different type of usages, and delegate task, so reset
+    // menu text is necessary.
+    void resetMenu(CategoryMenuType type);
+
+    void showFolderRootContextMenu(QPoint pos);
     void showFolderContextMenu(QPoint pos);
+    void showTagRootContextMenu(QPoint pos);
+    void showTagContextMenu(QPoint pos);
+    void showGroupRootContextMenu(QPoint pos);
+    void showGroupContextMenu(QPoint pos);
+    void showTrashContextMenu(QPoint pos);
 
 private:
+    void initGeneral();
     void initFolders();
     void initFolders(QTreeWidgetItem* pParent, const QString& strParentLocation, \
                      const CWizStdStringArray& arrayAllLocation);
-    void initTrash();
+    void initTags();
+    void initTags(QTreeWidgetItem* pParent, const QString& strParentTagGUID);
+    void initStyles();
+    void initGroups();
+    void initGroup(CWizDatabase& db);
+    void initGroup(CWizDatabase& db, QTreeWidgetItem* pParent,
+                   const QString& strParentTagGUID);
+
+    CWizCategoryViewAllGroupsRootItem* findGroupSet(const QString& strName, bool bCreate);
 
     void initDocumentCount();
     int initDocumentCount(CWizCategoryViewItemBase* item,
@@ -135,8 +172,13 @@ private:
     virtual void updateDocumentCount(const QString& strKbGUID);
 
 private:
-    QPointer<QMenu> m_menuAllFolders;
+    QPointer<QMenu> m_menuFolderRoot;
     QPointer<QMenu> m_menuFolder;
+    QPointer<QMenu> m_menuTagRoot;
+    QPointer<QMenu> m_menuTag;
+    QPointer<QMenu> m_menuGroupRoot;
+    QPointer<QMenu> m_menuGroup;
+    QPointer<QMenu> m_menuTrash;
 
 public:
     CWizCategoryViewAllFoldersItem* findAllFolders();
@@ -157,22 +199,49 @@ protected:
 
 public Q_SLOTS:
     void on_action_newDocument();
-    void on_action_newFolder();
-    void on_action_newFolder_confirmed(int result);
-    void on_action_moveFolder();
-    void on_action_moveFolder_confirmed(int result);
-    void on_action_moveFolder_confirmed_progress(int nMax, int nValue,
-                                                 const QString& strOldLocation,
-                                                 const QString& strNewLocation,
-                                                 const WIZDOCUMENTDATA& data);
-    void on_action_renameFolder();
-    void on_action_renameFolder_confirmed(int result);
-    void on_action_renameFolder_confirmed_progress(int nMax, int nValue,
-                                                   const QString& strOldLocation,
-                                                   const QString& strNewLocation,
-                                                   const WIZDOCUMENTDATA& data);
-    void on_action_deleteFolder();
-    void on_action_deleteFolder_confirmed(int result);
+
+    void on_action_newItem();
+    void on_action_user_newFolder();
+    void on_action_user_newFolder_confirmed(int result);
+    void on_action_user_newTag();
+    void on_action_user_newTag_confirmed(int result);
+    void on_action_group_newFolder();
+    void on_action_group_newFolder_confirmed(int result);
+
+    void on_action_moveItem();
+    void on_action_user_moveFolder();
+    void on_action_user_moveFolder_confirmed(int result);
+    void on_action_user_moveFolder_confirmed_progress(int nMax, int nValue,
+                                                      const QString& strOldLocation,
+                                                      const QString& strNewLocation,
+                                                      const WIZDOCUMENTDATA& data);
+
+    void on_action_renameItem();
+    void on_action_user_renameFolder();
+    void on_action_user_renameFolder_confirmed(int result);
+    void on_action_user_renameFolder_confirmed_progress(int nMax, int nValue,
+                                                        const QString& strOldLocation,
+                                                        const QString& strNewLocation,
+                                                        const WIZDOCUMENTDATA& data);
+    void on_action_user_renameTag();
+    void on_action_user_renameTag_confirmed(int result);
+    void on_action_group_renameFolder();
+    void on_action_group_renameFolder_confirmed(int result);
+
+    void on_action_deleteItem();
+    void on_action_user_deleteFolder();
+    void on_action_user_deleteFolder_confirmed(int result);
+    void on_action_user_deleteTag();
+    void on_action_user_deleteTag_confirmed(int result);
+    void on_action_group_deleteFolder();
+    void on_action_group_deleteFolder_confirmed(int result);
+
+    void on_action_itemAttribute();
+    void on_action_group_attribute();
+
+    void on_action_emptyTrash();
+
+    void on_itemSelectionChanged();
 
 Q_SIGNALS:
     void newDocument();
@@ -191,9 +260,6 @@ public:
     CWizCategoryTagsView(CWizExplorerApp& app, QWidget *parent);
     virtual void init();
 
-    void showAllTagsContextMenu(QPoint pos);
-    void showTagContextMenu(QPoint pos);
-
     CWizCategoryViewAllTagsItem* findAllTags();
     CWizCategoryViewTagItem* findTag(const WIZTAGDATA& tag, bool create, bool sort);
     CWizCategoryViewTagItem* findTagInTree(const WIZTAGDATA& tag);
@@ -205,9 +271,6 @@ public:
     void addAndSelectTag(const WIZTAGDATA& tag);
 
 private:
-    QMenu* m_menuAllTags;
-    QMenu* m_menuTag;
-
     void initTags();
     void initTags(QTreeWidgetItem* pParent, const QString& strParentTagGUID);
 
@@ -221,14 +284,6 @@ protected:
     virtual void onTag_created(const WIZTAGDATA& tag);
     virtual void onTag_modified(const WIZTAGDATA& tagOld, const WIZTAGDATA& tagNew);
     virtual void onTag_deleted(const WIZTAGDATA& tag);
-
-public Q_SLOTS:
-    void on_action_newTag();
-    void on_action_newTag_confirmed(int result);
-    void on_action_renameTag();
-    void on_action_renameTag_confirmed(int result);
-    void on_action_deleteTag();
-    void on_action_deleteTag_confirmed(int result);
 };
 
 class CWizCategoryGroupsView : public CWizCategoryBaseView
@@ -237,15 +292,11 @@ class CWizCategoryGroupsView : public CWizCategoryBaseView
 
 public:
     CWizCategoryGroupsView(CWizExplorerApp& app, QWidget* parent);
-    virtual void init();
+    //virtual void init();
 
     virtual QAction* findAction(const QString& strName);
 
-    void showGroupRootContextMenu(const QString& strKbGUID, QPoint pos);
-    void showGroupContextMenu(const QString& strKbGUID, QPoint pos);
-
     CWizCategoryViewGroupRootItem* findGroup(const QString& strKbGUID);
-    CWizCategoryViewAllGroupsRootItem* findGroupSet(const QString& strName, bool bCreate);
     virtual CWizCategoryViewTrashItem* findTrash(const QString& strKbGUID);
 
     CWizCategoryViewGroupItem* findTagInTree(const WIZTAGDATA& tag);
@@ -255,12 +306,11 @@ public:
     void removeTag(const WIZTAGDATA& tag);
 
 private:
-    QString m_strKbGUID;
     QPointer<QMenu> m_menuGroupRoot;
     QPointer<QMenu> m_menuGroup;
 
-    void initGroup(CWizDatabase& db);
-    void initGroup(CWizDatabase& db, QTreeWidgetItem* pParent, const QString& strParentTagGUID);
+    //void initGroup(CWizDatabase& db);
+    //void initGroup(CWizDatabase& db, QTreeWidgetItem* pParent, const QString& strParentTagGUID);
 
     void initDocumentCount();
     void initDocumentCount(CWizCategoryViewGroupRootItem* item,
@@ -278,19 +328,6 @@ protected:
     virtual void onGroup_closed(const QString& strKbGUID);
     virtual void onGroup_rename(const QString& strKbGUID);
     virtual void onGroup_permissionChanged(const QString& strKbGUID);
-
-public Q_SLOTS:
-    void on_itemSelectionChanged();
-
-    void on_action_markRead();
-    void on_action_newDocument();
-    void on_action_newTag();
-    void on_action_newTag_confirmed(int result);
-    void on_action_renameTag();
-    void on_action_renameTag_confirmed(int result);
-    void on_action_deleteTag();
-    void on_action_deleteTag_confirmed(int result);
-    void on_action_openGroupAttribute();
 };
 
 
