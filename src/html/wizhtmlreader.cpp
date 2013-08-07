@@ -1548,7 +1548,7 @@ const unsigned short CWizHtmlReader::ReadChar(void)
 {
     ATLASSERT(m_lpszBuffer != NULL);
     if (m_dwBufPos >= m_dwBufLen)
-        return (NULL);
+        return (0);
     return (m_lpszBuffer[m_dwBufPos++]);
 }
 

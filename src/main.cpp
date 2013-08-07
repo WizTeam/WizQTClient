@@ -145,6 +145,7 @@ int main(int argc, char *argv[])
         QMessageBox::critical(NULL, "", QObject::tr("Can not open database"));
         return 0;
     }
+    //
 
     MainWindow w(dbMgr);
     w.show();

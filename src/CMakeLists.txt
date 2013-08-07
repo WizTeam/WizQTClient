@@ -67,7 +67,7 @@ set(wiznote_SOURCES
     share/wizwindowshelper.cpp
     share/wizimagepushbutton.cpp
     share/wizIndexBase.cpp
-    share/wizindex.cpp
+    share/wizIndex.cpp
     share/wizthumbindex.cpp
     share/wizThumbIndexCache.cpp
     share/wizenc.cpp
