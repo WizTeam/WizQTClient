@@ -3474,70 +3474,26 @@ BOOL CWizKMSync::DownloadObjectData()
         //
         WIZOBJECTDATA data = arrayObject[i];
         //
-        BOOL bRet = FALSE;
+        QString strMsgFormat = data.eObjectType == wizobjectDocument ? _TR("Downloading note: %1"): _TR("Downloading attachment: %1");
+        QString strStatus = WizFormatString1(strMsgFormat, data.strDisplayName);
+        m_pEvents->OnStatus(strStatus);
         //
-        QString strTempFileName = ::WizGlobal()->GetTempPath() + WizIntToStr(GetTickCount()) + _T(".tmp");
         QByteArray stream;
-        //if (spStream)
+        if (m_server.data_download(data.strObjectGUID, WIZOBJECTDATA::ObjectTypeToTypeString(data.eObjectType), stream, data.strDisplayName))
         {
-            QString strMsgFormat = data.eObjectType == wizobjectDocument ? _TR("Downloading note: %1"): _TR("Downloading attachment: %1");
-            QString strStatus = WizFormatString1(strMsgFormat, data.strDisplayName);
-            m_pEvents->OnStatus(strStatus);
-            //
-            if (m_server.data_download(data.strObjectGUID, WIZOBJECTDATA::ObjectTypeToTypeString(data.eObjectType), stream, data.strDisplayName))
+            if (m_pDatabase->UpdateObjectData(data.strObjectGUID, WIZOBJECTDATA::ObjectTypeToTypeString(data.eObjectType), stream))
             {
-                ::WizSaveDataToFile(strTempFileName, stream);
-                stream.clear();
-                //
-                //TODO: umcompress stream
-                /*
-                if (spStream = ::WizCreateReadOnlyStreamOnFile(strTempFileName))
-                {
-                    QString strTempUncompressedFileName;
-                    //
-                    if (data.eObjectType == wizobjectDocumentAttachment)
-                    {
-                        spStream = ::WizUncompressAttachmentStream(spStream, strTempUncompressedFileName);
-                        if (!spStream)
-                        {
-                            m_pEvents->OnError(WizFormatString1(_T("Failed to uncomrepss attachment: %1"), data.strDisplayName));
-                            continue;
-                        }
-                    }
-
-                    //
-                    if (m_pDatabase->UpdateObjectData(data.strObjectGUID, WIZOBJECTDATA::ObjectTypeToTypeString(data.eObjectType), spStream))
-                    {
-                        succeeded++;
-                    }
-                    else
-                    {
-                        m_pEvents->OnError(WizFormatString1(_T("Cannot save object data to local: %1!"), data.strDisplayName));
-                    }
-                    //
-                    if (!strTempUncompressedFileName.isEmpty()
-                        && PathFileExists(strTempUncompressedFileName)
-                        )
-                    {
-                        DeleteFile(strTempUncompressedFileName);
-                    }
-                }
-                else
-                {
-                    m_pEvents->OnError(WizFormatString1(_T("Failed to read temp file: %1"), strTempFileName));
-                    continue;
-                }
-                */
+                succeeded++;
             }
             else
             {
-                m_pEvents->OnError(WizFormatString1(_T("Cannot download object data from server: %1"), data.strDisplayName));
+                m_pEvents->OnError(WizFormatString1(_T("Cannot save object data to local: %1!"), data.strDisplayName));
             }
-            //
-            //spStream = NULL;
         }
-        //
-        DeleteFile(strTempFileName);
+        else
+        {
+            m_pEvents->OnError(WizFormatString1(_T("Cannot download object data from server: %1"), data.strDisplayName));
+        }
         //
         //
         int index = (int)i;
