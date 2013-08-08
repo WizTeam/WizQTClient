@@ -1059,10 +1059,8 @@ bool CWizDatabase::Open(const QString& strUserId, const QString& strKbGUID /* = 
     if (strKbGUID.isEmpty()) {
         m_bIsPersonal = true;
 
+        // user private kb_guid should be set before actually open for operating
         QString strUserKbGuid = GetMetaDef(g_strDatabaseInfoSection, "KBGUID");
-        if (strUserKbGuid.isEmpty())
-            return false;
-
         setKbGUID(strUserKbGuid);
     } else {
         m_bIsPersonal = false;

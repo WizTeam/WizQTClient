@@ -17,6 +17,14 @@ bool CWizDatabaseManager::open(const QString& strKbGUID)
 {
     Q_ASSERT(!m_strUserId.isEmpty());
 
+    // private database already opened
+    if (strKbGUID.isEmpty() && m_dbPrivate)
+        return true;
+
+    // group database already opened
+    if (m_mapGroups.find(strKbGUID) != m_mapGroups.end())
+        return true;
+
     CWizDatabase* db = new CWizDatabase();
 
     if (!db->Open(m_strUserId, strKbGUID)) {

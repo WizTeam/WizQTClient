@@ -138,16 +138,23 @@ int main(int argc, char *argv[])
     //    QMessageBox::critical(NULL, "", QObject::tr("Can not open account"));
     //    return 0;
     //}
+
+    CWizDatabase db;
+    if (db.Open(strUserId)) {
+        db.SetUserInfo(dlgWelcome.userInfo());
+        db.Close();
+    } else {
+        QMessageBox::critical(NULL, "", QObject::tr("Can not open private database"));
+        return 0;
+    }
+
     CWizDatabaseManager dbMgr(strUserId);
-    dbMgr.setPasswd(strPassword);
     if (!dbMgr.openAll()) {
         QMessageBox::critical(NULL, "", QObject::tr("Can not open database"));
         return 0;
     }
 
-    if (bFallback) {
-        dbMgr.db().SetUserInfo(dlgWelcome.userInfo());
-    }
+    dbMgr.db().SetPassword(strPassword);
 
     MainWindow w(dbMgr);
     w.show();
