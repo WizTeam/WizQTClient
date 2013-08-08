@@ -402,25 +402,25 @@ void CWizCategoryBaseView::on_action_emptyTrash()
 void CWizCategoryBaseView::on_document_created(const WIZDOCUMENTDATA& document)
 {
     onDocument_created(document);
-    updateDocumentCount(document.strKbGUID);
+    //updateDocumentCount(document.strKbGUID);
 }
 
 void CWizCategoryBaseView::on_document_modified(const WIZDOCUMENTDATA& documentOld,
                                                 const WIZDOCUMENTDATA& documentNew)
 {
     onDocument_modified(documentOld, documentNew);
-    updateDocumentCount(documentNew.strKbGUID);
+    //updateDocumentCount(documentNew.strKbGUID);
 }
 
 void CWizCategoryBaseView::on_document_deleted(const WIZDOCUMENTDATA& document)
 {
     onDocument_deleted(document);
-    updateDocumentCount(document.strKbGUID);
+    //updateDocumentCount(document.strKbGUID);
 }
 
 void CWizCategoryBaseView::on_document_tag_modified(const WIZDOCUMENTDATA& document)
 {
-    updateDocumentCount(document.strKbGUID);
+    //updateDocumentCount(document.strKbGUID);
 }
 
 void CWizCategoryBaseView::on_folder_created(const QString& strLocation)

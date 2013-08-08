@@ -3,6 +3,7 @@
 #include <QDebug>
 
 #include "wizDatabaseManager.h"
+#include "sync/wizkmxmlrpc.h"
 
 // to avoid to much load for remote serser
 #define WIZ_OBJECTDATA_DOWNLOADER_MAX 1
@@ -102,7 +103,8 @@ void CWizObjectDataDownloader::run()
     qDebug() << "[downloader host] start download object: "
              << m_data.strDisplayName << " thread: " << QThread::currentThreadId();
 
-    CWizObjectDataDownload* download = new CWizObjectDataDownload(m_dbMgr, m_data);
+    CWizObjectDataDownloadWorker* download = new CWizObjectDataDownloadWorker(m_dbMgr, m_data);
+    //CWizObjectDataDownload* download = new CWizObjectDataDownload(m_dbMgr, m_data);
     connect(download, SIGNAL(downloaded(bool)), SLOT(on_downloaded(bool)));
     download->startDownload();
 
@@ -111,6 +113,9 @@ void CWizObjectDataDownloader::run()
 
 void CWizObjectDataDownloader::on_downloaded(bool bSucceed)
 {
+    qDebug() << "[downloader host] object: "
+             << m_data.strDisplayName << " result: " << (bSucceed ? "ok" : "failed");
+
     m_bSucceed = bSucceed;
 
     // use terminate instead of quit
@@ -119,155 +124,69 @@ void CWizObjectDataDownloader::on_downloaded(bool bSucceed)
 
 
 /* ------------------------- CWizObjectDataDownload ------------------------- */
-CWizObjectDataDownload::CWizObjectDataDownload(CWizDatabaseManager& dbMgr,
-                                               const WIZOBJECTDATA& data)
-    : CWizApi(dbMgr.db(data.strKbGUID))
-    , m_dbMgr(dbMgr)
+CWizObjectDataDownloadWorker::CWizObjectDataDownloadWorker(CWizDatabaseManager& dbMgr,
+                                                           const WIZOBJECTDATA& data)
+    : m_dbMgr(dbMgr)
     , m_data(data)
 {
 }
 
-void CWizObjectDataDownload::startDownload()
+void CWizObjectDataDownloadWorker::startDownload()
 {
-    QString strUserId = m_dbMgr.db().getUserId();
-    QString strPasswd = m_dbMgr.db().getPassword();
+    // FIXME
+    CWizKMAccountsServer asServer(WizKMGetAccountsServerURL(true));
 
-    Q_ASSERT(0);
-    //callClientLogin(strUserId, strPasswd);
-}
+    QString strUserId = m_dbMgr.db().GetUserId();
+    QString strPassword = m_dbMgr.db().GetPassword();
 
-void CWizObjectDataDownload::onClientLogin(const WIZUSERINFO& userInfo)
-{
-    QString kbUrl;
-
-    // personal document
-    if (m_data.strKbGUID == userInfo.strKbGUID) {
-        kbUrl = userInfo.strDatabaseServer;
-    } else {
-        // if synced before, server field should exist.
-        //kbUrl = m_dbMgr.db(m_data.strKbGUID).server();
-
-        if (kbUrl.isEmpty()) {
-            callGetGroupList();
-            return;
-        }
-    }
-
-    setKbUrl(kbUrl);
-    setKbGUID(m_data.strKbGUID);
-
-    if (!isLocalObject()) {
-        startDownloadObjectDataInfo();
+    // FIXME: hard-coded "normal"
+    if (!asServer.Login(strUserId, strPassword, "normal")) {
+        Q_EMIT downloaded(false);
         return;
     }
 
-    startDownloadObjectData();
-}
+    WIZUSERINFOBASE info = asServer.GetUserInfo();
+    info.strKbGUID = m_data.strKbGUID;
+    bool bOk = false;
 
-void CWizObjectDataDownload::onGetGroupList(const CWizGroupDataArray& arrayGroup)
-{
-    CWizGroupDataArray::const_iterator it;
-    for (it = arrayGroup.begin(); it != arrayGroup.end(); it++) {
-        const WIZGROUPDATA& group = *it;
+    // reset info kb_guid and server url for downloading
+    if (m_data.strKbGUID != m_dbMgr.db().kbGUID()) {
+        CWizGroupDataArray arrayGroup;
+        if (!asServer.GetGroupList(arrayGroup) || arrayGroup.empty()) {
+            Q_EMIT downloaded(false);
+        }
 
-        if (group.strGroupGUID == m_data.strKbGUID) {
-
-            setKbUrl(group.strDatabaseServer);
-            setKbGUID(m_data.strKbGUID);
-
-            if (!isLocalObject()) {
-                startDownloadObjectDataInfo();
-                return;
+        CWizGroupDataArray::const_iterator it = arrayGroup.begin();
+        for (; it != arrayGroup.end(); it++) {
+            const WIZGROUPDATA& group = *it;
+            if (group.strGroupGUID == m_data.strKbGUID) {
+                info.strDatabaseServer = group.strDatabaseServer;
+                bOk = true;
+                break;
             }
-
-            startDownloadObjectData();
-            return;
         }
-    }
-}
-
-void CWizObjectDataDownload::startDownloadObjectDataInfo()
-{
-    qDebug() << "[downloader] download object info: " << m_data.strDisplayName;
-
-    if (m_data.eObjectType == wizobjectDocument) {
-        callDocumentGetData(m_data.strObjectGUID);
-    } else if (m_data.eObjectType == wizobjectDocumentAttachment) {
-        callAttachmentGetInfo(m_data.strObjectGUID);
     } else {
-        Q_ASSERT(0);
+        bOk = true;
     }
-}
 
-void CWizObjectDataDownload::onDocumentGetData(const WIZDOCUMENTDATAEX& data)
-{
-    if (!m_dbMgr.db(m_data.strKbGUID).UpdateDocument(data)) {
-        qDebug() << "[downloader] failed: unable to update document info: "
-                 << m_data.strDisplayName;
+    if (!bOk) {
         Q_EMIT downloaded(false);
         return;
     }
 
-    startDownloadObjectData();
-}
+    CWizKMDatabaseServer ksServer(info);
 
-void CWizObjectDataDownload::onAttachmentsGetInfo(const CWizDocumentAttachmentDataArray& arrayRet)
-{
-    Q_ASSERT(arrayRet.size() == 1);
-
-    const WIZDOCUMENTATTACHMENTDATAEX& data = arrayRet[0];
-
-    if (!m_dbMgr.db(m_data.strKbGUID).UpdateAttachment(data)) {
-        qDebug() << "[downloader] failed: unable to update attachment info "
-                 << m_data.strDisplayName;
+    // FIXME: should we query object before download data?
+    if (!ksServer.data_download(m_data.strObjectGUID,
+                                WIZOBJECTDATA::ObjectTypeToTypeString(m_data.eObjectType),
+                                m_data.arrayData, m_data.strDisplayName)) {
         Q_EMIT downloaded(false);
         return;
     }
 
-    startDownloadObjectData();
-}
-
-void CWizObjectDataDownload::startDownloadObjectData()
-{
-    qDebug() << "[downloader] start downloading: " << m_data.strDisplayName;
-
-    downloadObjectData(m_data);
-}
-
-void CWizObjectDataDownload::onDownloadObjectDataCompleted(const WIZOBJECTDATA& data)
-{
-    qDebug() << "[downloader] download finished: " << data.strDisplayName;
-
-    if (!data.strObjectGUID.isEmpty())
-        m_dbMgr.db(m_data.strKbGUID).UpdateSyncObjectLocalData(data);
+    m_dbMgr.db(m_data.strKbGUID).UpdateObjectData(m_data.strObjectGUID,
+                                                  WIZOBJECTDATA::ObjectTypeToTypeString(m_data.eObjectType),
+                                                  m_data.arrayData);
 
     Q_EMIT downloaded(true);
-}
-
-void CWizObjectDataDownload::onXmlRpcError(const QString& strMethodName,
-                                           WizXmlRpcError err,
-                                           int errorCode,
-                                           const QString& errorMessage)
-{
-    CWizApi::onXmlRpcError(strMethodName, err, errorCode, errorMessage);
-    Q_EMIT downloaded(false);
-}
-
-bool CWizObjectDataDownload::isLocalObject()
-{
-    if (m_data.eObjectType == wizobjectDocument) {
-        WIZDOCUMENTDATA doc;
-        if (m_dbMgr.db(m_data.strKbGUID).DocumentFromGUID(m_data.strObjectGUID, doc)) {
-            return true;
-        }
-    } else if (m_data.eObjectType == wizobjectDocumentAttachment) {
-        WIZDOCUMENTATTACHMENTDATA attach;
-        if (m_dbMgr.db(m_data.strKbGUID).AttachmentFromGUID(m_data.strObjectGUID, attach)) {
-            return true;
-        }
-    } else {
-        Q_ASSERT(0);
-    }
-
-    return false;
 }

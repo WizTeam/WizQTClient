@@ -15,6 +15,7 @@ class CWizKMSyncEvents : public IWizKMSyncEvents
     virtual HRESULT OnText(WizKMSyncProgressStatusType type, const QString& strStatus)
     {
         qDebug() << "[OnText] type: " << type << " status: " << strStatus;
+        return 0;
     }
 
     virtual void SetLastErrorCode(int nErrorCode) {}

@@ -63,37 +63,21 @@ private Q_SLOTS:
 
 
 /* ------------------------- CWizObjectDataDownload ------------------------- */
-class CWizObjectDataDownload : public CWizApi
+class CWizObjectDataDownloadWorker :  public QObject
 {
     Q_OBJECT
 
 public:
-    CWizObjectDataDownload(CWizDatabaseManager& dbMgr, const WIZOBJECTDATA& data);
+    CWizObjectDataDownloadWorker(CWizDatabaseManager& dbMgr, const WIZOBJECTDATA& data);
     void startDownload();
 
 private:
     CWizDatabaseManager& m_dbMgr;
     WIZOBJECTDATA m_data;   // current downdowing object
 
-protected:
-    virtual void onXmlRpcError(const QString& strMethodName,
-                               WizXmlRpcError err,
-                               int errorCode,
-                               const QString& errorMessage);
-
-    virtual void onClientLogin(const WIZUSERINFO& userInfo);
-    virtual void onGetGroupList(const CWizGroupDataArray& arrayGroup);
-    virtual void onDocumentGetData(const WIZDOCUMENTDATAEX& data);
-    virtual void onAttachmentsGetInfo(const CWizDocumentAttachmentDataArray& arrayRet);
-    virtual void onDownloadObjectDataCompleted(const WIZOBJECTDATA& data);
-
-    void startDownloadObjectDataInfo();
-    void startDownloadObjectData();
-
-    bool isLocalObject();
-
 Q_SIGNALS:
     void downloaded(bool succeeded);
 };
+
 
 #endif // WIZOBJECTDATADOWNLOADER_H
