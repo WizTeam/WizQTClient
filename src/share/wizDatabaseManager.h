@@ -16,8 +16,6 @@ public:
     CWizDatabaseManager(const QString& strUserId);
     ~CWizDatabaseManager();
 
-    void setPasswd(const QString& strPasswd) { m_strPasswd = strPasswd; }
-
     // open private db if strKbGUID is empty, otherwise open groups db
     bool open(const QString& strKbGUID = "");
     bool openAll();
@@ -40,7 +38,6 @@ public:
 
 private:
     QString m_strUserId;
-    QString m_strPasswd;
     QPointer<CWizDatabase> m_dbPrivate;
     QMap<QString, CWizDatabase*> m_mapGroups;
 

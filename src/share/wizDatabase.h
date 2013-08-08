@@ -2,6 +2,7 @@
 #define WIZDATABASE_H
 
 #include <QPointer>
+#include <QMap>
 
 #include "wizIndex.h"
 #include "wizthumbindex.h"
@@ -94,7 +95,7 @@ private:
     QPointer<CWizZiwReader> m_ziwReader;
 
     bool m_bIsPersonal;
-    QPointer<CWizDatabase> m_groupDb;
+    QMap<QString, CWizDatabase*> m_mapGroups;
 
 public:
     CWizDatabase();

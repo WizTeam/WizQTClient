@@ -33,10 +33,6 @@ bool CWizDatabaseManager::open(const QString& strKbGUID)
     }
 
     if (strKbGUID.isEmpty()) {
-        // set password if open user private database.
-        if (!m_strPasswd.isEmpty())
-            db->SetPassword(m_strPasswd);
-
         m_dbPrivate = db;
     } else {
         m_mapGroups[strKbGUID] = db;
@@ -176,7 +172,8 @@ void CWizDatabaseManager::closeAll()
 void CWizDatabaseManager::initSignals(CWizDatabase* db)
 {
     connect(db, SIGNAL(groupsInfoDownloaded(const CWizGroupDataArray&)),
-            SLOT(onGroupsInfoDownloaded(const CWizGroupDataArray&)));
+            SLOT(onGroupsInfoDownloaded(const CWizGroupDataArray&)),
+            Qt::BlockingQueuedConnection);
 
     connect(db, SIGNAL(databaseRename(const QString&)),
             SIGNAL(databaseRename(const QString&)));
@@ -222,6 +219,8 @@ void CWizDatabaseManager::initSignals(CWizDatabase* db)
 
 void CWizDatabaseManager::onGroupsInfoDownloaded(const CWizGroupDataArray& arrayGroups)
 {
+    qDebug() << "[CWizDatabaseManager] Group info downloaded...";
+
     // set database info
     CWizGroupDataArray::const_iterator it;
     for (it = arrayGroups.begin(); it != arrayGroups.end(); it++) {

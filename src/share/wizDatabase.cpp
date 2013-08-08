@@ -603,25 +603,36 @@ IWizSyncableDatabase* CWizDatabase::GetGroupDatabase(const WIZGROUPDATA& group)
 {
     Q_ASSERT(!group.strGroupGUID.isEmpty());
 
+    QMap<QString, CWizDatabase*>::const_iterator it = m_mapGroups.find(group.strGroupGUID);
+    if (it != m_mapGroups.end()) {
+        return it.value();
+    }
+
     CWizDatabase* db = new CWizDatabase();
     if (!db->Open(m_strUserId, group.strGroupGUID)) {
         delete db;
         return NULL;
     }
 
-    m_groupDb = db;
+    m_mapGroups[group.strGroupGUID] = db;
 
     return db;
 }
 
 void CWizDatabase::CloseGroupDatabase(IWizSyncableDatabase* pDatabase)
 {
-    if (!pDatabase) {
+    CWizDatabase* db = dynamic_cast<CWizDatabase*>(pDatabase);
+    if (!db) {
         return;
     }
 
-    m_groupDb->Close();
-    delete m_groupDb;
+    QMap<QString, CWizDatabase*>::iterator it = m_mapGroups.find(db->kbGUID());
+    if (it != m_mapGroups.end()) {
+        CWizDatabase* db = it.value();
+        db->Close();
+        delete db;
+        m_mapGroups.erase(it);
+    }
 }
 
 void CWizDatabase::SetKbInfo(const QString& strKBGUID, const WIZKBINFO& info)
@@ -1001,48 +1012,6 @@ bool CWizDatabase::UpdateDeletedGUIDs(const CWizDeletedGUIDDataArray& arrayDelet
     return !bHasError;
 }
 
-bool CWizDatabase::SetDatabaseInfo(const WIZDATABASEINFO& dbInfo)
-{
-    Q_ASSERT(!dbInfo.name.isEmpty());
-
-    m_info.bizName = dbInfo.bizName;
-    m_info.bizGUID = dbInfo.bizGUID;
-
-    if (m_info.name != dbInfo.name) {
-        m_info.name = dbInfo.name;
-        Q_EMIT databaseRename(kbGUID());
-    }
-
-    if (m_info.nPermission != dbInfo.nPermission) {
-        m_info.nPermission = dbInfo.nPermission;
-        Q_EMIT databasePermissionChanged(kbGUID());
-    }
-
-    int nErrors = 0;
-
-    if (!SetMeta(g_strDatabaseInfoSection, "Name", dbInfo.name))
-        nErrors++;
-
-    if (!SetMeta(g_strDatabaseInfoSection, "Permission", QString::number(dbInfo.nPermission)))
-        nErrors++;
-
-    if (!SetMeta(g_strDatabaseInfoSection, "Version", WIZ_DATABASE_VERSION))
-        nErrors++;
-
-    // set biz group info
-    if (!dbInfo.bizGUID.isEmpty() && !dbInfo.bizName.isEmpty()) {
-        if (!SetMeta(g_strDatabaseInfoSection, "BizName", dbInfo.bizName))
-            nErrors++;
-
-        if (!SetMeta(g_strDatabaseInfoSection, "BizGUID", dbInfo.bizGUID))
-            nErrors++;
-    }
-
-    if (nErrors)
-        return false;
-
-    return true;
-}
 
 bool CWizDatabase::Open(const QString& strUserId, const QString& strKbGUID /* = NULL */)
 {
@@ -1050,22 +1019,23 @@ bool CWizDatabase::Open(const QString& strUserId, const QString& strKbGUID /* = 
 
     m_strUserId = strUserId;
 
+    if (strKbGUID.isEmpty()) {
+        m_bIsPersonal = true;
+    } else {
+        m_bIsPersonal = false;
+        setKbGUID(strKbGUID);
+    }
+
     if (!CWizIndex::Open(GetIndexFileName())) {
         return false;
     }
 
     // user private database opened, try to load kb guid
-    // FIXME: generate a fake guid for database usage.
     if (strKbGUID.isEmpty()) {
-        m_bIsPersonal = true;
-
         // user private kb_guid should be set before actually open for operating
         QString strUserKbGuid = GetMetaDef(g_strDatabaseInfoSection, "KBGUID");
-        setKbGUID(strUserKbGuid);
-    } else {
-        m_bIsPersonal = false;
-
-        setKbGUID(strKbGUID);
+        if (!strUserKbGuid.isEmpty())
+            setKbGUID(strUserKbGuid);
     }
 
     // FIXME
@@ -1092,6 +1062,53 @@ bool CWizDatabase::LoadDatabaseInfo()
 
     return true;
 }
+
+bool CWizDatabase::SetDatabaseInfo(const WIZDATABASEINFO& dbInfo)
+{
+    Q_ASSERT(!dbInfo.name.isEmpty());
+
+    m_info.bizName = dbInfo.bizName;
+    m_info.bizGUID = dbInfo.bizGUID;
+
+    if (m_info.name != dbInfo.name) {
+        m_info.name = dbInfo.name;
+        Q_EMIT databaseRename(kbGUID());
+    }
+
+    if (m_info.nPermission != dbInfo.nPermission) {
+        m_info.nPermission = dbInfo.nPermission;
+        Q_EMIT databasePermissionChanged(kbGUID());
+    }
+
+    int nErrors = 0;
+
+    if (!SetMeta(g_strDatabaseInfoSection, "Name", dbInfo.name))
+        nErrors++;
+
+    if (!SetMeta(g_strDatabaseInfoSection, "KbGUID", kbGUID()))
+        nErrors++;
+
+    if (!SetMeta(g_strDatabaseInfoSection, "Permission", QString::number(dbInfo.nPermission)))
+        nErrors++;
+
+    if (!SetMeta(g_strDatabaseInfoSection, "Version", WIZ_DATABASE_VERSION))
+        nErrors++;
+
+    // set biz group info
+    if (!dbInfo.bizGUID.isEmpty() && !dbInfo.bizName.isEmpty()) {
+        if (!SetMeta(g_strDatabaseInfoSection, "BizName", dbInfo.bizName))
+            nErrors++;
+
+        if (!SetMeta(g_strDatabaseInfoSection, "BizGUID", dbInfo.bizGUID))
+            nErrors++;
+    }
+
+    if (nErrors)
+        return false;
+
+    return true;
+}
+
 
 QString CWizDatabase::GetAccountPath() const
 {

@@ -608,7 +608,7 @@ struct WIZMESSAGEDATA
     WIZMESSAGEDATA(const WIZMESSAGEDATA& data);
     WIZMESSAGEDATA(const WIZUSERMESSAGEDATA& data);
     bool LoadFromXmlRpc(CWizXmlRpcStructValue& data);
-    static QString ObjectName() { return "message"; }
+    static QString ObjectName() { return "messages"; }
 
     // Field: biz_guid, char(36)
     // wiz bussiness groups guid
