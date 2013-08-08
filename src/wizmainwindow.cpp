@@ -37,6 +37,8 @@
 #include "share/wizObjectDataDownloader.h"
 #include "wizDocumentTransitionView.h"
 
+#include "wizPopupButton.h"
+
 
 MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     : QMainWindow(parent)
@@ -396,11 +398,40 @@ void MainWindow::initClient()
 
     //m_splitter->addWidget(categoryPanel);
     m_splitter->addWidget(m_category);
-    m_splitter->addWidget(m_documents);
+    m_splitter->addWidget(createListView());
     m_splitter->addWidget(documentPanel);
     m_splitter->setStretchFactor(0, 0);
     m_splitter->setStretchFactor(1, 0);
     m_splitter->setStretchFactor(2, 1);
+}
+
+QWidget* MainWindow::createListView()
+{
+    QWidget* view = new QWidget(this);
+    QVBoxLayout* layoutList = new QVBoxLayout();
+    layoutList->setContentsMargins(0, 0, 0, 0);
+    layoutList->setSpacing(0);
+    view->setLayout(layoutList);
+
+    QHBoxLayout* layoutActions = new QHBoxLayout();
+    layoutActions->setContentsMargins(0, 0, 0, 0);
+    layoutList->setSpacing(0);
+
+    CWizViewTypePopupButton* viewBtn = new CWizViewTypePopupButton(*this, this);
+    layoutActions->addWidget(viewBtn);
+    QWidget* line = new QWidget(this);
+    line->setMaximumWidth(1);
+    line->setMinimumWidth(1);
+    line->setStyleSheet("border-left-width:1;border-left-style:solid;border-left-color:#969696");
+    layoutActions->addWidget(line);
+    CWizSortingPopupButton* sortBtn = new CWizSortingPopupButton(*this, this);
+    layoutActions->addWidget(sortBtn);
+    layoutActions->addStretch(0);
+
+    layoutList->addLayout(layoutActions);
+    layoutList->addWidget(m_documents);
+
+    return view;
 }
 
 //void MainWindow::resetNotice()

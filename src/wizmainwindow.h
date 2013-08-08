@@ -125,6 +125,8 @@ private:
     void initClient();
     void initStatusBar();
 
+    QWidget* createListView();
+
 public:
     // CWizDocument passthrough methods
     QSize clientSize() const { return m_splitter->widget(2)->size(); }
