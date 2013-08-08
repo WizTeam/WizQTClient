@@ -603,10 +603,12 @@ IWizSyncableDatabase* CWizDatabase::GetGroupDatabase(const WIZGROUPDATA& group)
 {
     Q_ASSERT(!group.strGroupGUID.isEmpty());
 
+    /*
     QMap<QString, CWizDatabase*>::const_iterator it = m_mapGroups.find(group.strGroupGUID);
     if (it != m_mapGroups.end()) {
         return it.value();
     }
+    */
 
     CWizDatabase* db = new CWizDatabase();
     if (!db->Open(m_strUserId, group.strGroupGUID)) {
@@ -614,7 +616,7 @@ IWizSyncableDatabase* CWizDatabase::GetGroupDatabase(const WIZGROUPDATA& group)
         return NULL;
     }
 
-    m_mapGroups[group.strGroupGUID] = db;
+    //m_mapGroups[group.strGroupGUID] = db;
 
     return db;
 }
@@ -625,6 +627,10 @@ void CWizDatabase::CloseGroupDatabase(IWizSyncableDatabase* pDatabase)
     if (!db) {
         return;
     }
+    //
+    delete db;
+
+    /*
 
     QMap<QString, CWizDatabase*>::iterator it = m_mapGroups.find(db->kbGUID());
     if (it != m_mapGroups.end()) {
@@ -633,6 +639,7 @@ void CWizDatabase::CloseGroupDatabase(IWizSyncableDatabase* pDatabase)
         delete db;
         m_mapGroups.erase(it);
     }
+    */
 }
 
 void CWizDatabase::SetKbInfo(const QString& strKBGUID, const WIZKBINFO& info)
