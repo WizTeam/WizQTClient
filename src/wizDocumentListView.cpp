@@ -293,6 +293,9 @@ void CWizDocumentListView::contextMenuEvent(QContextMenuEvent * e)
 {
     CWizDocumentListViewItem* pItem = dynamic_cast<CWizDocumentListViewItem*>(itemAt(e->pos()));
 
+    if (!pItem)
+        return;
+
     if (pItem->type() == CWizDocumentListViewItem::MessageDocument) {
         m_menuMessage->popup(mapToGlobal(e->pos()));
     } else {

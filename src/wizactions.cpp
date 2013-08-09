@@ -58,9 +58,9 @@ WIZACTION* CWizActions::actionsData()
         {"actionRebuildFTS",                QObject::tr("Rebuild full text search index"), "", ""},
         {"actionSearch",                    QObject::tr("Search document"), "", "Alt+Ctrl+F"},
         {"actionResetSearch",               QObject::tr("Reset search"), "", "Ctrl+R"},
-        {WIZACTION_SWITCH_CATEGORY_PRIVATE,     QObject::tr("Switch to Private Notes"), "", ""},
-        {WIZACTION_SWITCH_CATEGORY_TAGS,        QObject::tr("Switch to Tags"), "", ""},
-        {WIZACTION_SWITCH_CATEGORY_GROUPS,      QObject::tr("Switch to Groups"), "", ""},
+//        {WIZACTION_SWITCH_CATEGORY_PRIVATE,     QObject::tr("Switch to Private Notes"), "", ""},
+//        {WIZACTION_SWITCH_CATEGORY_TAGS,        QObject::tr("Switch to Tags"), "", ""},
+//        {WIZACTION_SWITCH_CATEGORY_GROUPS,      QObject::tr("Switch to Groups"), "", ""},
 
         // editing
         {"actionEditingUndo",               QObject::tr("Undo"), "", "Ctrl+Z"},

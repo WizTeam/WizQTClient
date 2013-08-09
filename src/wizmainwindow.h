@@ -94,10 +94,6 @@ private:
     CWizActions* m_actions;
     QPointer<CWizCategoryBaseView> m_category;
     QPointer<CWizCategoryView> m_categoryPrivate;
-    QPointer<CWizCategoryTagsView> m_categoryTags;
-    QPointer<CWizCategoryGroupsView> m_categoryGroups;
-    QPointer<QtSegmentControl> m_categorySwitchSegmentBtn;
-    QWidget* m_categoryLayer;
     CWizDocumentListView* m_documents;
     CWizDocumentSelectionView* m_documentSelection;
     CWizDocumentView* m_doc;
@@ -129,10 +125,11 @@ private:
     void initClient();
     void initStatusBar();
 
-    QWidget* setupCategorySwitchButtons();
+    QWidget* createListView();
 
 public:
     // CWizDocument passthrough methods
+    QSize clientSize() const { return m_splitter->widget(2)->size(); }
     QWidget* client() const { return m_doc->client(); }
     CWizDocumentWebView* web() const { return m_doc->web(); }
     void showClient(bool visible) const { return m_doc->showClient(visible); }
@@ -202,16 +199,6 @@ public Q_SLOTS:
 
     void on_actionGoBack_triggered();
     void on_actionGoForward_triggered();
-
-    void on_actionCategorySwitch_triggered(int index);
-    void on_actionCategorySwitchPrivate_triggered();
-    void on_actionCategorySwitchTags_triggered();
-    void on_actionCategorySwitchGroups_triggered();
-    //void on_actionCategorySwitchPrivate_triggered2(bool toggled);
-    //void on_actionCategorySwitchTags_triggered2(bool toggled);
-    //void on_actionCategorySwitchGroups_triggered2(bool toggled);
-    void categorySwitchTo(CWizCategoryBaseView* sourceCategory, CWizCategoryBaseView* destCategory);
-    void onAnimationCategorySwitchStateChanged(QAbstractAnimation::State newState, QAbstractAnimation::State oldState);
 
     void on_category_itemSelectionChanged();
     void on_documents_itemSelectionChanged();

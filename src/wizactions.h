@@ -17,10 +17,6 @@ struct WIZACTION;
 #define WIZACTION_GLOBAL_TOGGLE_CATEGORY    "actionViewToggleCategory"
 #define WIZACTION_GLOBAL_TOGGLE_FULLSCREEN  "actionViewToggleFullscreen"
 
-#define WIZACTION_SWITCH_CATEGORY_PRIVATE   "actionCategorySwitchPrivate"
-#define WIZACTION_SWITCH_CATEGORY_TAGS      "actionCategorySwitchTags"
-#define WIZACTION_SWITCH_CATEGORY_GROUPS    "actionCategorySwitchGroups"
-
 #define WIZACTION_FORMAT_BOLD               "actionFormatBold"
 #define WIZACTION_FORMAT_ITALIC             "actionFormatItalic"
 #define WIZACTION_FORMAT_UNDERLINE          "actionFormatUnderLine"

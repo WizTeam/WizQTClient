@@ -45,7 +45,9 @@ BOOL CWizSettings::SetBool(const QString& strSection, const QString& strKey, boo
     return SetInt(strSection, strKey, val ? 1 : 0);
 }
 
-QColor CWizSettings::GetColor(const QString& strSection, const QString& strKey, QColor defColor)
+QColor CWizSettings::GetColor(const QString& strSection,
+                              const QString& strKey,
+                              QColor defColor /* = "FFFFFF" */)
 {
     QString str = GetString(strSection, strKey, "");
     if (str.isEmpty())

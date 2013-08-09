@@ -52,7 +52,7 @@ void CWizGroupAttributeForm::sheetShow(const QString& strKbGUID)
 {
     MainWindow* mainWindow = qobject_cast<MainWindow *>(m_app.mainWindow());
 
-    int width = mainWindow->client()->size().width();
+    int width = mainWindow->clientSize().width();
     const QPoint& startP = mainWindow->client()->mapTo(mainWindow, QPoint(0, -sizeHint().height()));
     setGeometry(startP.x(), startP.y(), width, 380);
 

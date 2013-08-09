@@ -32,10 +32,12 @@ private:
     QImage m_collapsedImage;
     QImage m_imgDocumentUnread;
     QImage m_imgDefaultAvatar;
+    QImage m_imgDocumentsBadge;
+    QImage m_imgDocumentsBadgeSelected;
+
     CWizSkin9GridImage m_toolBarImage;
     CWizSkin9GridImage m_splitterShadowImage;
-    CWizSkin9GridImage m_categorySelectedItemBackground;
-    CWizSkin9GridImage m_categorySelectedItemBackground_unfocus;
+
     CWizSkin9GridImage m_documentsSelectedItemBackground;
     CWizSkin9GridImage m_documentsSelectedItemBackgroundHot;
     CWizSkin9GridImage m_multiLineListSelectedItemBackground;
@@ -47,10 +49,15 @@ private:
     CWizSkin9GridImage m_imagePushButtonLabel;
     CWizSkin9GridImage m_imagePushButtonLabelRed;
 
+    // category view
     QColor m_colorCategoryBackground;
-    QColor m_colorCategoryText;
+    QColor m_colorCategoryTextNormal;
     QColor m_colorCategoryTextSelected;
+    QColor m_colorCategoryTextCategoryNormal;
+    QColor m_colorCategorySelectedBackground;
+    QColor m_colorCategorySelctedBackgroundNoFocus;
 
+    // document list view
     QColor m_colorDocumentsBackground;
     QColor m_colorDocumentsTitle;
     QColor m_colorDocumentsDate;
@@ -79,6 +86,9 @@ protected:
     virtual void drawSplitter(const QStyleOption *option, QPainter *painter, const QSplitter *splitter) const;
 
     void drawcenterImage(QPainter* p, const QImage& image, const QRect& rc) const;
+    void drawCategoryViewItemCategoryItem(const CWizCategoryViewCategoryItem* pItem,
+                                          const QStyleOptionViewItemV4* vopt,
+                                          QPainter* p) const;
 
 public:
     virtual void drawControl(ControlElement element, const QStyleOption *option, QPainter *painter, const QWidget *widget) const;
@@ -100,18 +110,17 @@ CWizNoteStyle::CWizNoteStyle(const QString& strSkinName)
 {
     QString strSkinPath = ::WizGetSkinResourcePath(strSkinName);
 
-    m_expandedImage.load(strSkinPath + "button_expanded.png");
-    //m_expandedImage = m_expandedImage.scaled(24, 24, Qt::KeepAspectRatio);
-    m_collapsedImage.load(strSkinPath + "button_collapsed.png");
-    //m_collapsedImage = m_collapsedImage.scaled(24, 24, Qt::KeepAspectRatio);
-
+    m_expandedImage.load(strSkinPath + "branch_expanded.png");
+    m_collapsedImage.load(strSkinPath + "branch_collapsed.png");
     m_imgDocumentUnread.load(strSkinPath + "read_btn_unread.png");
     m_imgDefaultAvatar.load(strSkinPath + "avatar_default.png");
+    m_imgDocumentsBadge.load(strSkinPath + "document_normal.png");
+    m_imgDocumentsBadgeSelected.load(strSkinPath + "document_selected.png");
 
     m_toolBarImage.SetImage(strSkinPath + "toolbar_background.png", QPoint(8, 8));
     m_splitterShadowImage.SetImage(strSkinPath + "leftview_line_shadow.png", QPoint(4, 4));
-    m_categorySelectedItemBackground.SetImage(strSkinPath + "left_row_view_bg.tiff", QPoint(4, 4));
-    m_categorySelectedItemBackground_unfocus.SetImage(strSkinPath + "left_row_view_bg_unfocus.tiff", QPoint(4, 4));
+    //m_categorySelectedItemBackground.SetImage(strSkinPath + "left_row_view_bg.tiff", QPoint(4, 4));
+    //m_categorySelectedItemBackground_unfocus.SetImage(strSkinPath + "left_row_view_bg_unfocus.tiff", QPoint(4, 4));
     m_documentsSelectedItemBackground.SetImage(strSkinPath + "documents_selected_background.png", QPoint(4, 4));
     m_documentsSelectedItemBackgroundHot.SetImage(strSkinPath + "documents_selected_background_hot.png", QPoint(4, 4));
     m_multiLineListSelectedItemBackground.SetImage(strSkinPath + "multilinelist_selected_background.png", QPoint(4, 4));
@@ -122,12 +131,17 @@ CWizNoteStyle::CWizNoteStyle(const QString& strSkinName)
     m_imagePushButtonDisabled.SetImage(strSkinPath + "imagepushbutton_disabled.png", QPoint(4, 4));
     m_imagePushButtonLabel.SetImage(strSkinPath + "imagepushbutton_label.png", QPoint(8, 8));
     m_imagePushButtonLabelRed.SetImage(strSkinPath + "imagepushbutton_label_red.png", QPoint(8, 8));
-    //
+
     CWizSettings settings(strSkinPath + "skin.ini");
+
+    // categoryview
     m_colorCategoryBackground = settings.GetColor("Category", "Background", "#808080");
-    m_colorCategoryText = settings.GetColor("Category", "Text", "#000000");
+    m_colorCategoryTextNormal = settings.GetColor("Category", "Text", "#000000");
     m_colorCategoryTextSelected = settings.GetColor("Category", "TextSelected", "#ffffff");
-    //
+    m_colorCategoryTextCategoryNormal = settings.GetColor("Category", "ItemCategoryText", "#ffffff");
+    m_colorCategorySelectedBackground = settings.GetColor("Category", "ItemSelected", "#808080");
+    m_colorCategorySelctedBackgroundNoFocus = settings.GetColor("Category", "ItemSelectedNoFocus", "#808080");
+
     m_colorDocumentsBackground = settings.GetColor("Documents", "Background", "#ffffff");
     m_colorDocumentsTitle = settings.GetColor("Documents", "Title", "#000000");
     m_colorDocumentsDate = settings.GetColor("Documents", "Date", "#0000ff");
@@ -155,48 +169,52 @@ void CWizNoteStyle::drawCategoryViewItem(const QStyleOptionViewItemV4 *vopt,
                                          QPainter *painter, const CWizCategoryBaseView *view) const
 {
     CWizCategoryViewItemBase* pItem = view->categoryItemFromIndex(vopt->index);
-    if (NULL != dynamic_cast<const CWizCategoryViewSeparatorItem*>(pItem)) {
 
-        // Draw seperator line
-        QRect rc = subElementRect(SE_ItemViewItemFocusRect, vopt, view);
-        QPoint p1 = rc.topLeft();
-        p1.ry() += rc.height() / 2;
-        QPoint p2 = rc.topRight();
-        p2.ry() += rc.height() / 2;
-        painter->drawLine(p1, p2);
-        return;
+    if (view->isHelperItemByIndex(vopt->index)) {
+        if (NULL != dynamic_cast<const CWizCategoryViewCategoryItem*>(pItem)) {
+            painter->setPen(m_colorCategoryTextCategoryNormal);
+            painter->drawText(vopt->rect, Qt::AlignLeft | Qt::AlignVCenter, vopt->text);
+        }
 
-    } else if (NULL != dynamic_cast<const CWizCategoryViewSpacerItem*>(pItem)) {
         return;
     }
 
-    QPalette palette = vopt->palette;
-    QStyleOptionViewItemV4 adjustedOption = *vopt;
-    adjustedOption.palette = palette;
-    // We hide the focus rect in single selection as it is not required
-    if ((view->selectionMode() == QAbstractItemView::SingleSelection)
-        && !(vopt->state & State_KeyboardFocusChange)) {
-        adjustedOption.state &= ~State_HasFocus;
-    }
+//    if (NULL != dynamic_cast<const CWizCategoryViewSeparatorItem*>(pItem)) {
 
-    QStyleOptionViewItemV4* opt = &adjustedOption;
+//        // Draw seperator line
+//        QRect rc = subElementRect(SE_ItemViewItemFocusRect, vopt, view);
+//        QPoint p1 = rc.topLeft();
+//        p1.ry() += rc.height() / 2;
+//        QPoint p2 = rc.topRight();
+//        p2.ry() += rc.height() / 2;
+//        painter->drawLine(p1, p2);
+//        return;
+
+//    QPalette palette = vopt->palette;
+//    QStyleOptionViewItemV4 adjustedOption = *vopt;
+//    adjustedOption.palette = palette;
+//    // We hide the focus rect in single selection as it is not required
+//    if ((view->selectionMode() == QAbstractItemView::SingleSelection)
+//        && !(vopt->state & State_KeyboardFocusChange)) {
+//        adjustedOption.state &= ~State_HasFocus;
+//    }
+
+//    QStyleOptionViewItemV4* opt = &adjustedOption;
 
     QPainter* p = painter;
     p->save();
-    p->setClipRect(opt->rect);
+    p->setClipRect(vopt->rect);
 
     // draw the icon
-    if (!vopt->icon.isNull())
-    {
+    if (!vopt->icon.isNull()) {
+        // FIXME: draw icon little bigger than the default rect qt give us
         QRect iconRect = subElementRect(SE_ItemViewItemDecoration, vopt, view);
-
-        // draw icon little bigger than qt default rect
-        iconRect.adjust(0, -4, 4, 4);
+        //iconRect.adjust(0, -2, 2, 2);
 
         if (vopt->state.testFlag(State_Selected)) {
-            vopt->icon.paint(p, iconRect, vopt->decorationAlignment, QIcon::Selected, QIcon::Off);
+            vopt->icon.paint(p, iconRect, Qt::AlignCenter, QIcon::Selected);
         } else {
-            vopt->icon.paint(p, iconRect, vopt->decorationAlignment, QIcon::Normal, QIcon::Off);
+            vopt->icon.paint(p, iconRect, Qt::AlignCenter, QIcon::Normal);
         }
     }
 
@@ -206,10 +224,9 @@ void CWizNoteStyle::drawCategoryViewItem(const QStyleOptionViewItemV4 *vopt,
         return;
     }
 
+    // draw text little far from icon than the default
     QRect textRect = subElementRect(SE_ItemViewItemText, vopt, view);
-
-    // draw text little far from icon than qt default
-    textRect.adjust(10, 0, 0, 0);
+    //textRect.adjust(8, 0, 0, 0);
 
     // draw the text
     QPalette::ColorGroup cg = vopt->state & QStyle::State_Enabled
@@ -229,7 +246,6 @@ void CWizNoteStyle::drawCategoryViewItem(const QStyleOptionViewItemV4 *vopt,
     }
 
     // compute document count string length and leave enough space for drawing
-    //CWizCategoryViewItemBase* pItem = view->categoryItemFromIndex(vopt->index);
     QString strCount = pItem->countString;
     int nCountWidthMax;
     int nMargin = 3;
@@ -248,10 +264,13 @@ void CWizNoteStyle::drawCategoryViewItem(const QStyleOptionViewItemV4 *vopt,
     f.setPixelSize(13);
     p->setFont(f);
 
-    QColor colorText = vopt->state.testFlag(State_Selected) ? m_colorCategoryTextSelected : m_colorCategoryText;
+    QColor colorText = vopt->state.testFlag(State_Selected) ?
+                m_colorCategoryTextSelected : m_colorCategoryTextNormal;
+
     CString strText = vopt->text;
     int nWidth = ::WizDrawTextSingleLine(p, textRect, strText,
-                                         Qt::TextSingleLine | Qt::AlignVCenter, colorText, true);
+                                         Qt::TextSingleLine | Qt::AlignVCenter,
+                                         colorText, true);
 
     // only draw document count if count string is not empty
     if (!strCount.isEmpty()) {
@@ -334,6 +353,7 @@ void CWizNoteStyle::drawDocumentListViewItemPrivate(const QStyleOptionViewItemV4
         textRect.setRight(imageRect.left());
     }
 
+
     // draw the text
     if (!vopt->text.isEmpty()) {
         QPalette::ColorGroup cg = vopt->state & QStyle::State_Enabled
@@ -362,12 +382,26 @@ void CWizNoteStyle::drawDocumentListViewItemPrivate(const QStyleOptionViewItemV4
 
         p->save();
 
-        // title use 13px font size
+        // draw title
         QFont fontTitle = p->font();
         fontTitle.setPixelSize(13);
         p->setFont(fontTitle);
+
+        int nFontHeight = p->fontMetrics().height();
+
+        // badge icon first
+        QRect rcBadge = textRect;
+        rcBadge.setRight(rcBadge.left() + nFontHeight);
+        rcBadge.setBottom(rcBadge.top() + nFontHeight);
+        if (vopt->state & State_Selected) {
+            p->drawImage(rcBadge, m_imgDocumentsBadgeSelected);
+        } else {
+            p->drawImage(rcBadge, m_imgDocumentsBadge);
+        }
+
         QRect rcTitle = textRect;
-        rcTitle.setBottom(rcTitle.top() + p->fontMetrics().height());
+        rcTitle.setLeft(rcBadge.right() + 5);
+        rcTitle.setBottom(rcTitle.top() + nFontHeight);
         CString strTitle = document.strTitle;
         QColor colorTitle = selected ? selectedLightColor : m_colorDocumentsTitle;
         ::WizDrawTextSingleLine(p, rcTitle, strTitle,  Qt::TextSingleLine | Qt::AlignVCenter, colorTitle, true);
@@ -1122,12 +1156,11 @@ void CWizNoteStyle::drawPrimitive(PrimitiveElement pe, const QStyleOption *opt, 
             if (const CWizCategoryBaseView *view = dynamic_cast<const CWizCategoryBaseView *>(w))
             {
                 Q_UNUSED(view);
-                if (opt->state & QStyle::State_Children)
-                {
+
+                if (opt->state & QStyle::State_Children) {
                     bool bExpanded = (opt->state & QStyle::State_Open) ? true : false;
                     drawcenterImage(p, bExpanded ? m_expandedImage : m_collapsedImage, opt->rect);
                 }
-                //CWizNoteBaseStyle::drawPrimitive(pe, opt, p, w);
                 return;
             }
         }
@@ -1139,22 +1172,24 @@ void CWizNoteStyle::drawPrimitive(PrimitiveElement pe, const QStyleOption *opt, 
                 const QStyleOptionViewItemV4 *vopt = qstyleoption_cast<const QStyleOptionViewItemV4 *>(opt);
                 Q_ASSERT(vopt);
 
-                if (view->isSeparatorItemByPosition(vopt->rect.center()))
+                const QTreeWidgetItem* pItemBase = view->itemAt(vopt->rect.center());
+                if (NULL != dynamic_cast<const CWizCategoryViewCategoryItem *>(pItemBase)) {
+                    p->fillRect(vopt->rect, QColor(255, 255, 255, 15)); //FIXME
+                    //drawCategoryViewItemCategoryItem(pItem, vopt, p);
                     return;
+                }
 
                 if (opt->state & QStyle::State_Selected)
                 {
-                    if (!m_categorySelectedItemBackground.Valid()
-                            || !m_categorySelectedItemBackground_unfocus.Valid())
-                        return;
-
-                        QRect rect = opt->rect;
-                        rect.setWidth(p->window().width());
-                        if (opt->state & QStyle::State_HasFocus) {
-                            m_categorySelectedItemBackground.Draw(p, rect, 0);
-                        } else {
-                            m_categorySelectedItemBackground_unfocus.Draw(p, rect, 0);
-                        }
+                    QRect rect = opt->rect;
+                    rect.setWidth(p->window().width());
+                    if (opt->state & QStyle::State_HasFocus) {
+                        p->fillRect(rect, m_colorCategorySelectedBackground);
+                    } else {
+                        p->fillRect(rect, m_colorCategorySelctedBackgroundNoFocus);
+                        rect.setWidth(5); // FIXME
+                        p->fillRect(rect, m_colorCategorySelectedBackground);
+                    }
 
                         // draw the focus rect
                         //if (opt->state & QStyle::State_HasFocus)
@@ -1170,9 +1205,10 @@ void CWizNoteStyle::drawPrimitive(PrimitiveElement pe, const QStyleOption *opt, 
                         //                                           ? QPalette::Highlight : QPalette::Window);
                         //    proxy()->drawPrimitive(QStyle::PE_FrameFocusRect, &o, p, w);
                         //}
-                        return;
                 }
             }
+
+            return;
         }
         break;
     default:
@@ -1203,6 +1239,29 @@ void CWizNoteStyle::drawcenterImage(QPainter* p, const QImage& image, const QRec
     int y = rc.top() + (rc.height() - height) / 2;
 
     p->drawImage(x, y, image);
+}
+
+void CWizNoteStyle::drawCategoryViewItemCategoryItem(const CWizCategoryViewCategoryItem* pItem,
+                                                     const QStyleOptionViewItemV4 *vopt,
+                                                     QPainter* p) const
+{
+    Q_UNUSED(pItem);
+
+    p->save();
+
+    p->fillRect(vopt->rect, QColor(255, 255, 255, 15)); // FIXME
+
+    QFont f = p->font();
+    f.setPixelSize(13);
+    p->setFont(f);
+
+
+//    CString strText = vopt->text;
+//    WizDrawTextSingleLine(p, vopt->rect, strText,
+//                          Qt::TextSingleLine | Qt::AlignVCenter,
+//                          m_colorCategoryTextCategoryNormal, true);
+
+    p->restore();
 }
 
 

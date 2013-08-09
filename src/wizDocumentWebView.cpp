@@ -157,6 +157,8 @@ void CWizDocumentWebView::on_documentReady(const QString& strFileName, bool bOk)
 {
     Q_UNUSED(bOk);
 
+    // FIXME: deal with encrypted document
+
     m_strHtmlFileName = strFileName;
 
     if (m_bEditorInited) {
@@ -339,13 +341,15 @@ void CWizDocumentWebView::on_editor_linkClicked(const QUrl& url)
 void CWizDocumentWebView::viewDocumentInEditor(bool editing)
 {
     Q_ASSERT(m_bEditorInited);
-    Q_ASSERT(!m_strHtmlFileName.isEmpty());
 
-    QString strScript = QString("viewDocument('%1', '%2', %3);")
-            .arg(document().strGUID)
-            .arg(m_strHtmlFileName)
-            .arg(editing ? "true" : "false");
-    bool ret = page()->mainFrame()->evaluateJavaScript(strScript).toBool();
+    bool ret = false;
+    if (!m_strHtmlFileName.isEmpty()) {
+        QString strScript = QString("viewDocument('%1', '%2', %3);")
+                .arg(document().strGUID)
+                .arg(m_strHtmlFileName)
+                .arg(editing ? "true" : "false");
+        ret = page()->mainFrame()->evaluateJavaScript(strScript).toBool();
+    }
 
     MainWindow* window = qobject_cast<MainWindow *>(m_app.mainWindow());
     if (!ret) {

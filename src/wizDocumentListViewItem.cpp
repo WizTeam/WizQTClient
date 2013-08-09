@@ -63,7 +63,7 @@ const WIZABSTRACT& CWizDocumentListViewItem::abstract(CWizThumbIndexCache& thumb
 {
     // ask thumbCache to load abstract to pool
     if (m_abstract.strKbGUID.isEmpty()) {
-        if (!m_data.strKbGUID.isEmpty() && !m_data.strGUID.isEmpty()) {
+        if (!m_data.strGUID.isEmpty()) {
             thumbCache.load(m_data.strKbGUID, m_data.strGUID);
         } else if (!m_message.kbGUID.isEmpty() && !m_message.documentGUID.isEmpty()) {
             thumbCache.load(m_message.kbGUID, m_message.documentGUID);

@@ -1794,6 +1794,7 @@ bool CWizDatabase::CreateDocumentAndInit(const CString& strHtml, \
         BeginUpdate();
 
         data.strKbGUID = kbGUID();
+        data.strOwner = getUserId();
         bRet = CreateDocument(strTitle, strName, strLocation, strHtmlUrl, data);
         if (bRet)
         {

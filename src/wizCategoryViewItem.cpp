@@ -71,6 +71,7 @@ void CWizCategoryViewItemBase::setDocumentsCount(int nCount, bool bIncludeSub)
 CWizCategoryViewSpacerItem::CWizCategoryViewSpacerItem(CWizExplorerApp& app)
     : CWizCategoryViewItemBase(app)
 {
+    setFlags(Qt::NoItemFlags); // user can not interact with it.
     setText(0, "=");
 }
 
@@ -85,13 +86,69 @@ int CWizCategoryViewSpacerItem::getItemHeight(int hintHeight) const
 CWizCategoryViewSeparatorItem::CWizCategoryViewSeparatorItem(CWizExplorerApp& app)
     : CWizCategoryViewItemBase(app)
 {
+    setFlags(Qt::NoItemFlags); // user can not interact with it.
     setText(0, "-");
 }
 
-int CWizCategoryViewSeparatorItem::getItemHeight(int hintHeight) const
+int CWizCategoryViewSeparatorItem::getItemHeight(int nHeight) const
 {
-    Q_UNUSED(hintHeight);
+    Q_UNUSED(nHeight);
     return 12;
+}
+
+
+/* --------------------- CWizCategoryViewCategoryItem --------------------- */
+CWizCategoryViewCategoryItem::CWizCategoryViewCategoryItem(CWizExplorerApp& app,
+                                                           const QString& strName)
+    : CWizCategoryViewItemBase(app, strName)
+{
+    setFlags(Qt::NoItemFlags); // user can not interact with it.
+    setText(0, strName);
+}
+
+
+/* -------------------- CWizCategoryViewMessageRootItem -------------------- */
+CWizCategoryViewMessageRootItem::CWizCategoryViewMessageRootItem(CWizExplorerApp& app,
+                                                                 const QString& strName)
+    : CWizCategoryViewItemBase(app, strName)
+{
+    QIcon icon;
+    icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "messages_normal"),
+                 QSize(16, 16), QIcon::Normal);
+    icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "messages_selected"),
+                 QSize(16, 16), QIcon::Selected);
+    setIcon(0, icon);
+    setText(0, strName);
+}
+
+
+/* -------------------- CWizCategoryViewShortcutRootItem -------------------- */
+CWizCategoryViewShortcutRootItem::CWizCategoryViewShortcutRootItem(CWizExplorerApp& app,
+                                                                   const QString& strName)
+    : CWizCategoryViewItemBase(app, strName)
+{
+    QIcon icon;
+    icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "shortcut_normal"),
+                 QSize(16, 16), QIcon::Normal);
+    icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "shortcut_selected"),
+                 QSize(16, 16), QIcon::Selected);
+    setIcon(0, icon);
+    setText(0, strName);
+}
+
+
+/* -------------------- CWizCategoryViewSearchRootItem -------------------- */
+CWizCategoryViewSearchRootItem::CWizCategoryViewSearchRootItem(CWizExplorerApp& app,
+                                                               const QString& strName)
+    : CWizCategoryViewItemBase(app, strName)
+{
+    QIcon icon;
+    icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "search_normal"),
+                 QSize(16, 16), QIcon::Normal);
+    icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "search_selected"),
+                 QSize(16, 16), QIcon::Selected);
+    setIcon(0, icon);
+    setText(0, strName);
 }
 
 
@@ -103,14 +160,12 @@ CWizCategoryViewAllFoldersItem::CWizCategoryViewAllFoldersItem(CWizExplorerApp& 
     : CWizCategoryViewItemBase(app, strName, strKbGUID)
 {
     QIcon icon;
-    QColor color = ::WizGetCategoryBackroundColor(app.userSettings().skin());
-    ::WizLoadSkinIcon3(icon, app.userSettings().skin(), "folder", QIcon::Normal, QIcon::On, color);
-    ::WizLoadSkinIcon3(icon, app.userSettings().skin(), "folder", QIcon::Selected, QIcon::On, color);
+    icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "folders_normal"),
+                 QSize(16, 16), QIcon::Normal);
+    icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "folders_selected"),
+                 QSize(16, 16), QIcon::Selected);
     setIcon(0, icon);
-
     setText(0, strName);
-
-    //updateDocumentsCount();
 }
 
 void CWizCategoryViewAllFoldersItem::updateDocumentsCount()
@@ -146,7 +201,7 @@ bool CWizCategoryViewAllFoldersItem::accept(CWizDatabase& db, const WIZDOCUMENTD
 void CWizCategoryViewAllFoldersItem::showContextMenu(CWizCategoryBaseView* pCtrl, QPoint pos)
 {
     if (CWizCategoryView* view = dynamic_cast<CWizCategoryView *>(pCtrl)) {
-        view->showAllFoldersContextMenu(pos);
+        view->showFolderRootContextMenu(pos);
     }
 }
 
@@ -159,13 +214,19 @@ CWizCategoryViewFolderItem::CWizCategoryViewFolderItem(CWizExplorerApp& app,
     : CWizCategoryViewItemBase(app, strLocation, strKbGUID)
 {
     QIcon icon;
-    QColor color = ::WizGetCategoryBackroundColor(app.userSettings().skin());
-    ::WizLoadSkinIcon3(icon, app.userSettings().skin(), "folder", QIcon::Normal, QIcon::On, color);
-    ::WizLoadSkinIcon3(icon, app.userSettings().skin(), "folder", QIcon::Selected, QIcon::On, color);
+    if (::WizIsPredefinedLocation(strLocation) && strLocation == "/My Journals/") {
+        icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "folder_diary_normal"),
+                     QSize(16, 16), QIcon::Normal);
+        icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "folder_diary_selected"),
+                     QSize(16, 16), QIcon::Selected);
+    } else {
+        icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "folder_normal"),
+                     QSize(16, 16), QIcon::Normal);
+        icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "folder_selected"),
+                     QSize(16, 16), QIcon::Selected);
+    }
     setIcon(0, icon);
     setText(0, CWizDatabase::GetLocationDisplayName(strLocation));
-
-    //updateDocumentsCount();
 }
 
 void CWizCategoryViewFolderItem::updateDocumentsCount()
@@ -225,13 +286,12 @@ CWizCategoryViewAllTagsItem::CWizCategoryViewAllTagsItem(CWizExplorerApp& app,
     : CWizCategoryViewItemBase(app, strName, strKbGUID)
 {
     QIcon icon;
-    QColor color = ::WizGetCategoryBackroundColor(app.userSettings().skin());
-    ::WizLoadSkinIcon3(icon, app.userSettings().skin(), "tag", QIcon::Normal, QIcon::On, color);
-    ::WizLoadSkinIcon3(icon, app.userSettings().skin(), "tag", QIcon::Selected, QIcon::On, color);
+    icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "tags_normal"),
+                 QSize(16, 16), QIcon::Normal);
+    icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "tags_selected"),
+                 QSize(16, 16), QIcon::Selected);
     setIcon(0, icon);
     setText(0, strName);
-
-    //updateDocumentsCount();
 }
 
 void CWizCategoryViewAllTagsItem::updateDocumentsCount()
@@ -244,8 +304,8 @@ void CWizCategoryViewAllTagsItem::updateDocumentsCount()
 
 void CWizCategoryViewAllTagsItem::showContextMenu(CWizCategoryBaseView* pCtrl, QPoint pos)
 {
-    if (CWizCategoryTagsView* view = dynamic_cast<CWizCategoryTagsView *>(pCtrl)) {
-        view->showAllTagsContextMenu(pos);
+    if (CWizCategoryView* view = dynamic_cast<CWizCategoryView *>(pCtrl)) {
+        view->showTagRootContextMenu(pos);
     }
 }
 
@@ -275,13 +335,14 @@ CWizCategoryViewTagItem::CWizCategoryViewTagItem(CWizExplorerApp& app,
     , m_tag(tag)
 {
     QIcon icon;
-    QColor color = ::WizGetCategoryBackroundColor(app.userSettings().skin());
-    ::WizLoadSkinIcon3(icon, app.userSettings().skin(), "tag", QIcon::Normal, QIcon::On, color);
-    ::WizLoadSkinIcon3(icon, app.userSettings().skin(), "tag", QIcon::Selected, QIcon::On, color);
+
+    QString strIndex = QString::number(qrand() % 4); // FIXME: 4 random tag icon in skin
+    icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "tag_normal_" + strIndex),
+                 QSize(16, 16), QIcon::Normal);
+    icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "tag_selected"),
+                 QSize(16, 16), QIcon::Selected);
     setIcon(0, icon);
     setText(0, CWizDatabase::TagNameToDisplayName(tag.strName));
-
-    //updateDocumentsCount();
 }
 
 void CWizCategoryViewTagItem::updateDocumentsCount()
@@ -322,7 +383,7 @@ bool CWizCategoryViewTagItem::accept(CWizDatabase& db, const WIZDOCUMENTDATA& da
 
 void CWizCategoryViewTagItem::showContextMenu(CWizCategoryBaseView* pCtrl, QPoint pos)
 {
-    if (CWizCategoryTagsView* view = dynamic_cast<CWizCategoryTagsView *>(pCtrl)) {
+    if (CWizCategoryView* view = dynamic_cast<CWizCategoryView *>(pCtrl)) {
         view->showTagContextMenu(pos);
     }
 }
@@ -333,6 +394,21 @@ void CWizCategoryViewTagItem::reload(CWizDatabase& db)
     setText(0, m_tag.strName);
 }
 
+
+/* --------------------- CWizCategoryViewStyleRootItem --------------------- */
+CWizCategoryViewStyleRootItem::CWizCategoryViewStyleRootItem(CWizExplorerApp& app,
+                                                             const QString& strName)
+    : CWizCategoryViewItemBase(app, strName)
+{
+    QIcon icon;
+    icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "style_normal"),
+                 QSize(16, 16), QIcon::Normal);
+    icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "style_selected"),
+                 QSize(16, 16), QIcon::Selected);
+    setIcon(0, icon);
+    setText(0, strName);
+}
+
 /* ---------------------------- CWizCategoryViewAllGroupsRootItem ---------------------------- */
 
 CWizCategoryViewAllGroupsRootItem::CWizCategoryViewAllGroupsRootItem(CWizExplorerApp& app,
@@ -341,24 +417,12 @@ CWizCategoryViewAllGroupsRootItem::CWizCategoryViewAllGroupsRootItem(CWizExplore
     : CWizCategoryViewItemBase(app, strName, strKbGUID)
 {
     QIcon icon;
-    QColor color = ::WizGetCategoryBackroundColor(app.userSettings().skin());
-    ::WizLoadSkinIcon3(icon, app.userSettings().skin(), "groups", QIcon::Normal, QIcon::On, color);
-    ::WizLoadSkinIcon3(icon, app.userSettings().skin(), "groups", QIcon::Selected, QIcon::On, color);
+    icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "group_normal"),
+                 QSize(16, 16), QIcon::Normal);
+    icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "group_selected"),
+                 QSize(16, 16), QIcon::Selected);
     setIcon(0, icon);
-
     setText(0, strName);
-}
-
-void CWizCategoryViewAllGroupsRootItem::showContextMenu(CWizCategoryBaseView* pCtrl, QPoint pos)
-{
-    Q_UNUSED(pCtrl);
-    Q_UNUSED(pos);
-}
-
-void CWizCategoryViewAllGroupsRootItem::getDocuments(CWizDatabase& db, CWizDocumentDataArray& arrayDocument)
-{
-    Q_UNUSED(db);
-    Q_UNUSED(arrayDocument);
 }
 
 /* ------------------------------ CWizCategoryViewGroupRootItem ------------------------------ */
@@ -367,12 +431,13 @@ CWizCategoryViewBizGroupRootItem::CWizCategoryViewBizGroupRootItem(CWizExplorerA
                                                                    const QString& strKbGUID)
     : CWizCategoryViewAllGroupsRootItem(app, strName, strKbGUID)
 {
-//    QIcon icon;
-//    QColor color = ::WizGetCategoryBackroundColor(app.userSettings().skin());
-//    ::WizLoadSkinIcon3(icon, app.userSettings().skin(), "groups", QIcon::Normal, QIcon::On, color);
-//    ::WizLoadSkinIcon3(icon, app.userSettings().skin(), "groups", QIcon::Selected, QIcon::On, color);
-//    setIcon(0, icon);
-//    setText(0, strName);
+    QIcon icon;
+    icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "group_biz_normal"),
+                 QSize(16, 16), QIcon::Normal);
+    icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "group_biz_selected"),
+                 QSize(16, 16), QIcon::Selected);
+    setIcon(0, icon);
+    setText(0, strName);
 }
 
 void CWizCategoryViewBizGroupRootItem::updateDocumentsCount()
@@ -401,13 +466,12 @@ CWizCategoryViewGroupRootItem::CWizCategoryViewGroupRootItem(CWizExplorerApp& ap
     : CWizCategoryViewItemBase(app, strName, strKbGUID)
 {
     QIcon icon;
-    QColor color = ::WizGetCategoryBackroundColor(app.userSettings().skin());
-    ::WizLoadSkinIcon3(icon, app.userSettings().skin(), "groups", QIcon::Normal, QIcon::On, color);
-    ::WizLoadSkinIcon3(icon, app.userSettings().skin(), "groups", QIcon::Selected, QIcon::On, color);
+    icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "group_normal"),
+                 QSize(16, 16), QIcon::Normal);
+    icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "group_selected"),
+                 QSize(16, 16), QIcon::Selected);
     setIcon(0, icon);
     setText(0, strName);
-
-    //updateDocumentsCount();
 }
 
 void CWizCategoryViewGroupRootItem::updateDocumentsCount()
@@ -422,10 +486,8 @@ void CWizCategoryViewGroupRootItem::updateDocumentsCount()
 
 void CWizCategoryViewGroupRootItem::showContextMenu(CWizCategoryBaseView* pCtrl, QPoint pos)
 {
-    if (CWizCategoryGroupsView* view = dynamic_cast<CWizCategoryGroupsView *>(pCtrl)) {
-        if (!m_strKbGUID.isEmpty()) {
-            view->showGroupRootContextMenu(m_strKbGUID, pos);
-        }
+    if (CWizCategoryView* view = dynamic_cast<CWizCategoryView *>(pCtrl)) {
+            view->showGroupRootContextMenu(pos);
     }
 }
 
@@ -463,13 +525,12 @@ CWizCategoryViewGroupItem::CWizCategoryViewGroupItem(CWizExplorerApp& app,
     , m_tag(tag)
 {
     QIcon icon;
-    QColor color = ::WizGetCategoryBackroundColor(app.userSettings().skin());
-    ::WizLoadSkinIcon3(icon, app.userSettings().skin(), "groups", QIcon::Normal, QIcon::On, color);
-    ::WizLoadSkinIcon3(icon, app.userSettings().skin(), "groups", QIcon::Selected, QIcon::On, color);
+    icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "group_normal"),
+                 QSize(16, 16), QIcon::Normal);
+    icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "group_selected"),
+                 QSize(16, 16), QIcon::Selected);
     setIcon(0, icon);
     setText(0, CWizDatabase::TagNameToDisplayName(tag.strName));
-
-    //updateDocumentsCount();
 }
 
 void CWizCategoryViewGroupItem::updateDocumentsCount()
@@ -489,8 +550,8 @@ void CWizCategoryViewGroupItem::updateDocumentsCount()
 
 void CWizCategoryViewGroupItem::showContextMenu(CWizCategoryBaseView* pCtrl, QPoint pos)
 {
-    if (CWizCategoryGroupsView* view = dynamic_cast<CWizCategoryGroupsView *>(pCtrl)) {
-        view->showGroupContextMenu(m_strKbGUID, pos);
+    if (CWizCategoryView* view = dynamic_cast<CWizCategoryView *>(pCtrl)) {
+        view->showGroupContextMenu(pos);
     }
 }
 
@@ -528,18 +589,18 @@ CWizCategoryViewTrashItem::CWizCategoryViewTrashItem(CWizExplorerApp& app,
     : CWizCategoryViewFolderItem(app, "/Deleted Items/", strKbGUID)
 {
     QIcon icon;
-    QColor color = ::WizGetCategoryBackroundColor(app.userSettings().skin());
-    ::WizLoadSkinIcon3(icon, app.userSettings().skin(), "trash", QIcon::Normal, QIcon::On, color);
-    ::WizLoadSkinIcon3(icon, app.userSettings().skin(), "trash", QIcon::Selected, QIcon::On, color);
+    icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "trash_normal"),
+                 QSize(16, 16), QIcon::Normal);
+    icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "trash_selected"),
+                 QSize(16, 16), QIcon::Selected);
     setIcon(0, icon);
-
     setText(0, strName);
 }
 
 void CWizCategoryViewTrashItem::showContextMenu(CWizCategoryBaseView* pCtrl, QPoint pos)
 {
-    if (CWizCategoryBaseView* view = dynamic_cast<CWizCategoryBaseView *>(pCtrl)) {
-        view->showTrashContextMenu(pos, m_strKbGUID);
+    if (CWizCategoryView* view = dynamic_cast<CWizCategoryView *>(pCtrl)) {
+        view->showTrashContextMenu(pos);
     }
 }
 
