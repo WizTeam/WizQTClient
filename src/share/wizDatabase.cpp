@@ -827,7 +827,6 @@ bool CWizDatabase::ProcessValue(const QString& key)
     else if (strKey == _T("group_tag_oem")
         || strKey == _T("group_tag_config_oem"))
     {
-        //return WizIsGroupQuickClassifyOEM(*this);
         return IsGroup();
     }
     //
@@ -897,7 +896,7 @@ void CWizDatabase::SetLocalValue(const QString& key, const QString& value,
     //
     if (strKey == _T("folders"))
     {
-        //SetFolders(lpszValue, nServerVersion, bSaveVersion);
+        SetFolders(value, nServerVersion, bSaveVersion);
     }
     else if (strKey == _T("folders_pos"))
     {
@@ -1015,7 +1014,7 @@ void CWizDatabase::SetFoldersPos(const QString& foldersPos, __int64 nVersion)
     //::WizKMObjectSendMessage_ModifyPos(objecttypeFolder, NULL, _T(""));
 }
 
-void CWizDatabase::SetFolders(const QString& folders, __int64 nVersion, BOOL bSaveVersion)
+void CWizDatabase::SetFolders(const QString& folders, __int64 nVersion, bool bSaveVersion)
 {
     CString strFolders(folders);
     //
