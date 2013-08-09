@@ -2,6 +2,8 @@
 #define WIZTHUMBINDEXCACHE_H
 
 #include <QObject>
+#include <QMap>
+
 #include "wizdef.h"
 #include "wizobject.h"
 
@@ -17,7 +19,7 @@ public:
 
 private:
     CWizDatabaseManager& m_dbMgr;
-    CWizAbstractArray m_data;
+    QMap<QString, WIZABSTRACT> m_mapAbs;
 
 protected Q_SLOTS:
     void get(const QString& strKbGUID, const QString& strDocumentGUID, bool bReload);

@@ -139,13 +139,15 @@ int main(int argc, char *argv[])
     //    return 0;
     //}
 
-    CWizDatabase db;
-    if (db.Open(strUserId)) {
-        db.SetUserInfo(dlgWelcome.userInfo());
-        db.Close();
-    } else {
-        QMessageBox::critical(NULL, "", QObject::tr("Can not open private database"));
-        return 0;
+    if (bFallback) {
+        CWizDatabase db;
+        if (db.Open(strUserId)) {
+            db.SetUserInfo(dlgWelcome.userInfo());
+            db.Close();
+        } else {
+            QMessageBox::critical(NULL, "", QObject::tr("Can not open private database"));
+            return 0;
+        }
     }
 
     CWizDatabaseManager dbMgr(strUserId);
