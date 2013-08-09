@@ -227,6 +227,11 @@ public:
 
     // end interface implementations
 
+    //
+    QString GetFolders();
+    void SetFoldersPos(const QString& foldersPos, __int64 nVersion);
+    void SetFolders(const QString& folders, __int64 nVersion, bool bSaveVersion);
+
 public:
     bool Open(const QString& strUserId, const QString& strKbGUID = NULL);
     bool LoadDatabaseInfo();
