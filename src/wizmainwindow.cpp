@@ -45,7 +45,7 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     , m_dbMgr(dbMgr)
     , m_progress(new CWizProgressDialog(this))
     , m_settings(new CWizUserSettings(dbMgr.db()))
-    //, m_sync(new CWizSyncThread(*this, this))
+    , m_sync(new CWizKMSyncThread(dbMgr.db(), this))
     , m_searchIndexer(new CWizSearchIndexer(m_dbMgr))
     , m_messageSync(new CWizGroupMessage(dbMgr.db()))
     , m_console(new CWizConsoleDialog(*this, this))
@@ -527,8 +527,7 @@ void MainWindow::on_syncProcessErrorLog(const QString& strMsg)
 void MainWindow::on_actionSync_triggered()
 {
     m_certManager->downloadUserCert();
-    //m_sync->startSyncing();
-    WizKMSync(this->m_dbMgr.db(""));
+    m_sync->startSync();
 }
 
 void MainWindow::on_actionNewNote_triggered()

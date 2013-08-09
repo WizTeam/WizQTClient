@@ -312,6 +312,7 @@ set(wiznote_WRAP_HEADERS
     share/wizUserAvatar.h
     wizDocumentTransitionView.h
     wizPopupButton.h
+    sync/wizkmsync.h
 )
 
 set(wiznote_FORMS
