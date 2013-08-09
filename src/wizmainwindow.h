@@ -39,7 +39,7 @@ class CWizSearchIndexer;
 class QtSegmentControl;
 class CWizGroupMessage;
 class CWizObjectDataDownloaderHost;
-
+class CWizKMSyncThread;
 
 class MainWindow
     : public QMainWindow
@@ -71,7 +71,7 @@ private:
     CWizDatabaseManager& m_dbMgr;
     CWizProgressDialog* m_progress;
     CWizUserSettings* m_settings;
-    //QPointer<CWizSyncThread> m_sync;
+    QPointer<CWizKMSyncThread> m_sync;
     QPointer<QTimer> m_syncTimer;
     QPointer<CWizGroupMessage> m_messageSync;
     CWizConsoleDialog* m_console;

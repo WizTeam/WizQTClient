@@ -18,7 +18,7 @@ CWizThumbIndexCache::CWizThumbIndexCache(CWizExplorerApp& app)
 
 bool CWizThumbIndexCache::isFull()
 {
-    return m_data.size() > WIZNOTE_THUMB_CACHE_MAX;
+    return m_mapAbs.size() > WIZNOTE_THUMB_CACHE_MAX;
 }
 
 void CWizThumbIndexCache::get(const QString& strKbGUID,
@@ -31,18 +31,19 @@ void CWizThumbIndexCache::get(const QString& strKbGUID,
         return;
     }
 
-    // search deque first
-    CWizAbstractArray::iterator it;
-    for (it = m_data.begin(); it != m_data.end(); it++) {
-        const WIZABSTRACT& abs = *it;
+    if (isFull()) {
+        m_mapAbs.clear();
+        qDebug() << "[Thumb Cache Pool]pool is full, clear...";
+    }
 
-        if (abs.strKbGUID == strKbGUID && abs.guid == strDocumentGUID) {
-            if (bReload) {
-                m_data.erase(it);
-                break;
-            } else {
-                Q_EMIT loaded(abs);
-            }
+    // search first
+    QMap<QString, WIZABSTRACT>::iterator it =  m_mapAbs.find(strDocumentGUID);
+    if (it != m_mapAbs.end()) {
+        if (bReload) {
+            m_mapAbs.erase(it);
+        } else {
+            //qDebug() << "[Thumb Cache Pool]abtract already in the pool: " << strDocumentGUID;
+            Q_EMIT loaded(*it);
             return;
         }
     }
@@ -72,12 +73,8 @@ void CWizThumbIndexCache::get(const QString& strKbGUID,
     abs.text.replace('\n', ' ');
     abs.text.replace("\r", "");
 
-    if (!isFull()) {
-        m_data.push_back(abs);
-    } else {
-        m_data.erase(m_data.begin(), m_data.begin() + WIZNOTE_THUMB_CACHE_RESET);
-    }
-
+    //qDebug() << "[Thumb Cache Pool]load thumb cache, total: " << m_mapAbs.size();
+    m_mapAbs.insert(strDocumentGUID,abs);
     Q_EMIT loaded(abs);
 }
 
