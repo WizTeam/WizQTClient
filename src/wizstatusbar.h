@@ -25,6 +25,7 @@ private:
     CWizExplorerApp& m_app;
     QPointer<QPropertyAnimation> m_animation;
     QTimer m_animationTimer;
+    QTimer m_hideTimer;
     QLabel m_label;
     bool m_bIsVisible;
 
@@ -33,6 +34,7 @@ private:
 private Q_SLOTS:
     void on_animation_finished();
     void on_animationTimer_timeout();
+    void on_hideTimer_timeout();
 };
 
 #endif // WIZSTATUSBAR_H

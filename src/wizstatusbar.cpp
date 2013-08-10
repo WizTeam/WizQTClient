@@ -18,6 +18,10 @@ CWizStatusBar::CWizStatusBar(CWizExplorerApp& app, QWidget *parent)
 
     m_animationTimer.setInterval(100);
     connect(&m_animationTimer, SIGNAL(timeout()), SLOT(on_animationTimer_timeout()));
+
+    m_hideTimer.setInterval(3 * 1000);
+    m_hideTimer.setSingleShot(true);
+    connect(&m_hideTimer, SIGNAL(timeout()), SLOT(on_hideTimer_timeout()));
 }
 
 void CWizStatusBar::enterEvent(QEvent* event)
@@ -78,6 +82,8 @@ void CWizStatusBar::showText(const QString& strText /* = QString() */)
     show();
     raise();
 
+    m_hideTimer.start();
+
     m_bIsVisible = true;
 }
 
@@ -91,4 +97,9 @@ bool CWizStatusBar::isCursorInside()
     int y = mainWindow->size().height() - size().height() - nMargin;
     QRect rect(0, y, size().width(), size().height() + nMargin);
     return rect.contains(pos);
+}
+
+void CWizStatusBar::on_hideTimer_timeout()
+{
+    hide();
 }

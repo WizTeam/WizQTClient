@@ -206,12 +206,9 @@ public Q_SLOTS:
     void on_search_doSearch(const QString& keywords);
     void on_options_settingsChanged(WizOptionsType type);
 
-    void on_syncStarted();
     void on_syncLogined();
-    void on_syncDone(bool error);
+    void on_syncDone(bool noError);
     void on_syncProcessLog(const QString& strMsg);
-    void on_syncProcessDebugLog(const QString& strMsg);
-    void on_syncProcessErrorLog(const QString& strMsg);
 
     void on_options_restartForSettings();
 

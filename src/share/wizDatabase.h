@@ -229,8 +229,8 @@ public:
 
     //
     QString GetFolders();
-    void SetFoldersPos(const QString& foldersPos, __int64 nVersion);
-    void SetFolders(const QString& folders, __int64 nVersion, bool bSaveVersion);
+    void SetFoldersPos(const QString& foldersPos, qint64 nVersion);
+    void SetFolders(const QString& strFolders, qint64 nVersion, bool bSaveVersion);
 
 public:
     bool Open(const QString& strUserId, const QString& strKbGUID = NULL);

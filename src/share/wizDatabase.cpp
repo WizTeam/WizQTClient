@@ -212,7 +212,6 @@ void CWizFolder::Delete()
         }
 
         m_db.LogDeletedFolder(Location());
-        m_db.SetObjectVersion("folder", 0);
     } else {
         CWizFolder deletedItems(m_db, LOCATION_DELETED_ITEMS);
         MoveTo(&deletedItems);
@@ -292,7 +291,6 @@ void CWizFolder::MoveToLocation(const QString& strDestLocation)
     }
 
     m_db.LogDeletedFolder(strOldLocation);
-    m_db.SetObjectVersion("folder", 0);
 }
 
 
@@ -804,13 +802,13 @@ void CWizDatabase::GetKBKeys(CWizStdStringArray& arrayKey)
 {
     if (IsGroup())
     {
-        arrayKey.push_back(_T("group_tag_oem"));
-        arrayKey.push_back(_T("group_tag_config_oem"));
+        arrayKey.push_back("group_tag_oem");
+        arrayKey.push_back("group_tag_config_oem");
     }
     else
     {
-        arrayKey.push_back(_T("folders"));
-        arrayKey.push_back(_T("folders_pos"));
+        arrayKey.push_back("folders");
+        arrayKey.push_back("folders_pos");
     }
 }
 
@@ -818,18 +816,18 @@ bool CWizDatabase::ProcessValue(const QString& key)
 {
     CString strKey(key);
     strKey.MakeLower();
-    //
-    if (strKey == _T("folders")
-        || strKey == _T("folders_pos"))
+
+    if (strKey == "folders"
+        || strKey == "folders_pos")
     {
         return !IsGroup();
     }
-    else if (strKey == _T("group_tag_oem")
-        || strKey == _T("group_tag_config_oem"))
+    else if (strKey == "group_tag_oem"
+        || strKey == "group_tag_config_oem")
     {
         return IsGroup();
     }
-    //
+
     return TRUE;
 }
 
@@ -837,8 +835,8 @@ qint64 CWizDatabase::GetLocalValueVersion(const QString& key)
 {
     CString strKey(key);
     strKey.MakeLower();
-    //
-    if (strKey == _T("folders"))
+
+    if (strKey == "folders")
     {
         return GetMetaInt64(key, "version", 0);
     }
@@ -885,7 +883,6 @@ void CWizDatabase::SetLocalValueVersion(const QString& strKey,
                                         qint64 nServerVersion)
 {
     SetMetaInt64(strKey, "version", nServerVersion);
-
 }
 
 void CWizDatabase::SetLocalValue(const QString& key, const QString& value,
@@ -893,7 +890,7 @@ void CWizDatabase::SetLocalValue(const QString& key, const QString& value,
 {
     CString strKey(key);
     strKey.MakeLower();
-    //
+
     if (strKey == _T("folders"))
     {
         SetFolders(value, nServerVersion, bSaveVersion);
@@ -964,126 +961,117 @@ bool CWizDatabase::IsStorageLimit()
 QString CWizDatabase::GetFolders()
 {
     CWizStdStringArray arrayFolder;
-    //
     GetAllLocations(arrayFolder);
-    //
+
     CString str;
-    ::WizStringArrayToText(arrayFolder, str, _T("*"));
+    ::WizStringArrayToText(arrayFolder, str, "*");
 
     return str;
 }
-void CWizDatabase::SetFoldersPos(const QString& foldersPos, __int64 nVersion)
+void CWizDatabase::SetFoldersPos(const QString& foldersPos, qint64 nVersion)
 {
     SetLocalValueVersion("folders_pos", nVersion);
-    //
+
     CString str(foldersPos);
     str.Trim();
-    str.Trim(_T("{}"));
+    str.Trim('{');
+    str.Trim('}');
+    str.Replace("\n", "");
+    str.Replace("\r", "");
     if (str.IsEmpty())
         return;
-    //
-    str.Replace(_T("\n"), _T(""));
-    str.Replace(_T("\r"), _T(""));
-    //
+
     CWizStdStringArray arrPos;
     ::WizSplitTextToArray(str, ',', arrPos);
-    //
-    for (CWizStdStringArray::const_iterator it = arrPos.begin();
-        it != arrPos.end();
-        it++)
-    {
+
+    CWizStdStringArray::const_iterator it;
+    for (it= arrPos.begin(); it != arrPos.end(); it++) {
         CString strLine = *it;
         CString strLocation;
         CString strPos;
         if (!::WizStringSimpleSplit(strLine, ':', strLocation, strPos))
             continue;
-        //
+
         strLocation.Trim();
-        strLocation.Trim(_T("\""));
-        //
+        strLocation.Trim('\"');
+
         int nPos = _ttoi(strPos);
         if (0 == nPos)
             continue;
-        //
-        if (CWizFolder* pFolder = Getdynamic_cast<CWizFolder*>(FolderByLocation(strLocation, FALSE)))
-        {
-            pFolder->put_SortPos(nPos);
-        }
+
+        // FIXME: save folder orders to config file
+
+        //if (CWizFolder* pFolder = dynamic_cast<CWizFolder*>(GetFolderByLocation(strLocation, false)))
+        //{
+        //    pFolder->put_SortPos(nPos);
+        //}
     }
-    //
+
     //::WizKMObjectSendMessage_ModifyPos(objecttypeFolder, NULL, _T(""));
 }
 
-void CWizDatabase::SetFolders(const QString& folders, __int64 nVersion, bool bSaveVersion)
+void CWizDatabase::SetFolders(const QString& strFolders, qint64 nVersion, bool bSaveVersion)
 {
-    CString strFolders(folders);
-    //
-    if (strFolders.IsEmpty())
+    if (strFolders.isEmpty())
         return;
-    //
-    CWizStdStringArray arr;
-    ::WizSplitTextToArray(strFolders, '*', arr);
-    //
+
     std::set<CString> setServerFolders;
-    for (CWizStdStringArray::const_iterator it = arr.begin();
-        it != arr.end();
-        it++)
+    QStringList listFolders = strFolders.split('*');
+    for (QStringList::const_iterator it = listFolders.begin();
+         it != listFolders.end();
+         it++)
     {
         setServerFolders.insert(*it);
     }
-    //
+
     std::set<CString> setLocalFolders;
-    GetAllLocations(setLocalFolders);
-    //
+    CWizStdStringArray arrayLocation;
+    GetAllLocations(arrayLocation);
+
+    for (CWizStdStringArray::const_iterator it = arrayLocation.begin();
+         it != arrayLocation.end();
+         it++)
+    {
+        setLocalFolders.insert(*it);
+    }
+
     for (std::set<CString>::const_iterator it = setServerFolders.begin();
-        it != setServerFolders.end();
-        it++)
+         it != setServerFolders.end();
+         it++)
     {
         CString strLocation = *it;
-        //
-        if (0 == strLocation.Find(_T("/Deleted Items/")))
+
+        if (0 == strLocation.Find("/Deleted Items/"))
             continue;
-        //
+
         if (setLocalFolders.find(strLocation) == setLocalFolders.end())
         {
-            //server exists, local does not exists, create folders.
-            //TODO: zsb create folder
-            GetFolderByLocation(strLocation, TRUE);
+            // FIXME: server exists, local does not exists, create folders.
+            AddExtraFolder(strLocation);
         }
     }
-    //
+
     for (std::set<CString>::const_iterator it = setLocalFolders.begin();
         it != setLocalFolders.end();
         it++)
     {
         CString strLocation = *it;
-        //
-        if (0 == strLocation.Find(_T("/Deleted Items/")))
+
+        if (0 == strLocation.Find("/Deleted Items/"))
             continue;
-        //
+
         if (setServerFolders.find(strLocation) == setServerFolders.end())
         {
-            //local exists, server does not exists, delete local folders.
-            //
-            if (CWizFolder* pFolder = dynamic_cast<CWizFolder*>(GetFolderByLocation(strLocation, FALSE)))
-            {
-                //TODO: delete folder
-                /*
-                CComPtr<IWizDocumentCollection> spDocumentColl;
-                if (GetDocumentsByFolderWithChildren(spFolder, &spDocumentColl))
-                {
-                    long nCount = 0;
-                    spDocumentColl->get_Count(&nCount);
-                    if (0 == nCount)
-                    {
-                        spFolder->Delete();
-                    }
+            //FIXME: local exists, server does not exists, delete local folders.
+            int nSize = 0;
+            if (GetDocumentsSizeByLocation(strLocation, nSize, true)) {
+                if (nSize == 0) {
+                    LogDeletedFolder(strLocation);
                 }
-                */
             }
         }
     }
-    //
+
     if (bSaveVersion)
     {
         SetLocalValueVersion("folders", nVersion);

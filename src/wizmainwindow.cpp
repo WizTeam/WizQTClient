@@ -46,6 +46,7 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     , m_progress(new CWizProgressDialog(this))
     , m_settings(new CWizUserSettings(dbMgr.db()))
     , m_sync(new CWizKMSyncThread(dbMgr.db(), this))
+    , m_syncTimer(new QTimer(this))
     , m_searchIndexer(new CWizSearchIndexer(m_dbMgr))
     , m_messageSync(new CWizGroupMessage(dbMgr.db()))
     , m_console(new CWizConsoleDialog(*this, this))
@@ -98,17 +99,18 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
 #endif // Q_OS_MAC
 
     // syncing thread
-    m_syncTimer = new QTimer(this);
+    connect(m_sync, SIGNAL(processLog(const QString&)), SLOT(on_syncProcessLog(const QString&)));
+    connect(m_sync, SIGNAL(finished(bool)), SLOT(on_syncDone(bool)));
     connect(m_syncTimer, SIGNAL(timeout()), SLOT(on_actionSync_triggered()));
-    if (m_settings->syncInterval() != -1) {
-        QTimer::singleShot(3 * 1000, this, SLOT(on_actionSync_triggered()));
-    }
-
     int nInterval = m_settings->syncInterval();
     if (nInterval == 0) {
         m_syncTimer->setInterval(15 * 60 * 1000);   // default 15 minutes
     } else {
         m_syncTimer->setInterval(nInterval * 60 * 1000);
+    }
+
+    if (nInterval != -1) {
+        QTimer::singleShot(3 * 1000, this, SLOT(on_actionSync_triggered()));
     }
 
     // group messages sync thread
@@ -460,74 +462,40 @@ QWidget* MainWindow::createListView()
 void MainWindow::init()
 {
     connect(m_categoryPrivate, SIGNAL(itemSelectionChanged()), SLOT(on_category_itemSelectionChanged()));
-    //connect(m_categoryTags, SIGNAL(itemSelectionChanged()), SLOT(on_category_itemSelectionChanged()));
-    //connect(m_categoryGroups, SIGNAL(itemSelectionChanged()), SLOT(on_category_itemSelectionChanged()));
-
-    connect(m_categoryPrivate, SIGNAL(newDocument()), SLOT(on_actionNewNote_triggered()));
     connect(m_documents, SIGNAL(itemSelectionChanged()), SLOT(on_documents_itemSelectionChanged()));
+    connect(m_categoryPrivate, SIGNAL(newDocument()), SLOT(on_actionNewNote_triggered()));
 
     m_categoryPrivate->baseInit();
-    //m_categoryTags->baseInit();
-    //m_categoryGroups->baseInit();
 }
 
-void MainWindow::on_syncStarted()
+void MainWindow::on_actionSync_triggered()
 {
+    m_certManager->downloadUserCert();
+
+    m_sync->startSync();
     m_animateSync->startPlay();
     m_syncTimer->stop();
 }
 
 void MainWindow::on_syncLogined()
 {
-    //m_sync.userInfo().strNotice;
-    //::WizSetNotice(m_sync.userInfo().strNotice);
-    //
-#ifdef QT_DEBUG
-    //::WizSetNotice("/Title=test /Link=http://www.wiz.cn/");
-#endif
-    //resetNotice();
+    // FIXME: show user notify message send from server
 }
 
-void MainWindow::on_syncDone(bool error)
+void MainWindow::on_syncDone(bool noError)
 {
-    Q_UNUSED(error);
+    // FIXME: show error mark on gui if failed
+    Q_UNUSED(noError);
 
-    m_statusBar->hide();
     m_animateSync->stopPlay();
-
     if (m_settings->syncInterval() != -1) {
         m_syncTimer->start();
     }
 }
 
-void MainWindow::on_syncProcessLog(const QString& msg)
+void MainWindow::on_syncProcessLog(const QString& strMsg)
 {
-    TOLOG(msg);
-
-    QString strMsg;
-    if (msg.length() > 50) {
-        strMsg = msg.left(50) + "..";
-    } else {
-        strMsg = msg;
-    }
-
     m_statusBar->showText(strMsg);
-}
-
-void MainWindow::on_syncProcessDebugLog(const QString& strMsg)
-{
-    DEBUG_TOLOG(strMsg);
-}
-
-void MainWindow::on_syncProcessErrorLog(const QString& strMsg)
-{
-    TOLOG(strMsg);
-}
-
-void MainWindow::on_actionSync_triggered()
-{
-    m_certManager->downloadUserCert();
-    m_sync->startSync();
 }
 
 void MainWindow::on_actionNewNote_triggered()
