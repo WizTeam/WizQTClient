@@ -112,11 +112,15 @@ public:
     int syncInterval() const;
     void setSyncInterval(int minutes);
 
-    // default: 1, 7, 30, 99999(all), -1(no)
+    // time line of personal data be downloaded
+    // set: 1, 7, 30, 99999(all), -1(no), default: 9999
     int syncMethod() const;
     void setSyncMethod(int days);
 
-
+    // time line of group data be downloaded
+    // set: 1, 7, 30, 99999(all), -1(no), default: 1
+    int syncGroupMethod() const;
+    void setSyncGroupMethod(int days);
 };
 
 #endif // WIZSETTINGS_H

@@ -25,23 +25,16 @@ public:
 private:
     Ui::CWizPreferenceWindow *ui;
     CWizExplorerApp& m_app;
-    bool m_bRestart;
 
     QStringList m_locales;
-    int m_iSelectedLocale;
-
     QStringList m_skins;
-    QString m_strSelectedSkin;
-
     QPointer<QFontDialog> m_fontDialog;
 
 Q_SIGNALS:
     void settingsChanged(WizOptionsType type);
     void restartForSettings();
 
-public slots:
-    virtual void accept();
-
+public Q_SLOTS:
     void on_comboLang_currentIndexChanged(int index);
 
     void on_radioAuto_clicked(bool checked);
@@ -50,6 +43,7 @@ public slots:
 
     void on_comboSyncInterval_activated(int index);
     void on_comboSyncMethod_activated(int index);
+    void on_comboSyncGroupMethod_activated(int index);
 
     void labelProxy_linkActivated(const QString& link);
 

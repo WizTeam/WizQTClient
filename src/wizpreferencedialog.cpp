@@ -1,20 +1,14 @@
 #include "wizpreferencedialog.h"
 #include "ui_wizpreferencedialog.h"
 
-#include <QFontDialog>
-#include <QFontDatabase>
-#include <QDebug>
 
 CWizPreferenceWindow::CWizPreferenceWindow(CWizExplorerApp& app, QWidget* parent)
     : QDialog(parent)
     , ui(new Ui::CWizPreferenceWindow)
     , m_app(app)
-    , m_bRestart(false)
 {
     ui->setupUi(this);
     setWindowIcon(QIcon());
-
-    connect(ui->buttonOK, SIGNAL(clicked()), SLOT(accept()));
 
     // general tab
     ::WizGetTranslatedLocales(m_locales);
@@ -28,26 +22,7 @@ CWizPreferenceWindow::CWizPreferenceWindow(CWizExplorerApp& app, QWidget* parent
         }
     }
 
-    // just hide skin setup and upgrade notfiy on mac for convenience.
-//#ifdef Q_WS_MAC
-    //ui->groupBoxSkin->hide();
-    //ui->checkBox->hide();
-//#endif // Q_WS_MAC
-
-//    ::WizGetSkins(m_skins);
-//    for (int i = 0; i < m_skins.count(); i++) {
-//        ui->comboSkin->addItem(::WizGetSkinDisplayName(m_skins[i], userSettings().locale()));
-//    }
-
-//    QString strCurSkinName = userSettings().skin();
-//    for (int i = 0; i < ui->comboSkin->count(); i++) {
-//        if (!strCurSkinName.compare(m_skins[i])) {
-//            ui->comboSkin->setCurrentIndex(i);
-//        }
-//    }
-
     connect(ui->comboLang, SIGNAL(currentIndexChanged(int)), SLOT(on_comboLang_currentIndexChanged(int)));
-    //connect(ui->comboSkin, SIGNAL(currentIndexChanged(int)), SLOT(on_comboSkin_currentIndexChanged(int)));
 
     // reading tab
     switch (userSettings().noteViewMode())
@@ -89,8 +64,7 @@ CWizPreferenceWindow::CWizPreferenceWindow(CWizExplorerApp& app, QWidget* parent
             ui->comboSyncInterval->setCurrentIndex(1);
     }
 
-    int nMethod = userSettings().syncMethod();
-    switch (nMethod) {
+    switch (userSettings().syncMethod()) {
         case -1:
             ui->comboSyncMethod->setCurrentIndex(0);
             break;
@@ -107,15 +81,37 @@ CWizPreferenceWindow::CWizPreferenceWindow(CWizExplorerApp& app, QWidget* parent
             ui->comboSyncMethod->setCurrentIndex(4);
             break;
         default:
-            ui->comboSyncMethod->setCurrentIndex(2);
+            ui->comboSyncMethod->setCurrentIndex(4);
+    }
+
+    switch (userSettings().syncGroupMethod()) {
+        case -1:
+            ui->comboSyncGroupMethod->setCurrentIndex(0);
+            break;
+        case 1:
+            ui->comboSyncGroupMethod->setCurrentIndex(1);
+            break;
+        case 7:
+            ui->comboSyncGroupMethod->setCurrentIndex(2);
+            break;
+        case 30:
+            ui->comboSyncGroupMethod->setCurrentIndex(3);
+            break;
+        case 99999:
+            ui->comboSyncGroupMethod->setCurrentIndex(4);
+            break;
+        default:
+            ui->comboSyncGroupMethod->setCurrentIndex(1);
     }
 
     connect(ui->comboSyncInterval, SIGNAL(activated(int)), SLOT(on_comboSyncInterval_activated(int)));
     connect(ui->comboSyncMethod, SIGNAL(activated(int)), SLOT(on_comboSyncMethod_activated(int)));
+    connect(ui->comboSyncGroupMethod, SIGNAL(activated(int)), SLOT(on_comboSyncGroupMethod_activated(int)));
 
     QString proxySettings = WizFormatString1("<a href=\"proxy_settings\">%1</a>", tr("Proxy settings"));
     ui->labelProxySettings->setText(proxySettings);
-    connect(ui->labelProxySettings, SIGNAL(linkActivated(const QString&)), SLOT(labelProxy_linkActivated(const QString&)));
+    connect(ui->labelProxySettings, SIGNAL(linkActivated(const QString&)),
+            SLOT(labelProxy_linkActivated(const QString&)));
 
     // format tab
     QString strFont = QString("%1  %2").
@@ -128,13 +124,12 @@ CWizPreferenceWindow::CWizPreferenceWindow(CWizExplorerApp& app, QWidget* parent
 
 void CWizPreferenceWindow::on_comboLang_currentIndexChanged(int index)
 {
-    m_iSelectedLocale = index;
+    QString strLocaleName = m_locales[index];
+    if (strLocaleName.compare(userSettings().locale())) {
+        // FIXME: notify user change locale need restart
+        userSettings().setLocale(strLocaleName);
+    }
 }
-
-//void CWizPreferenceWindow::on_comboSkin_currentIndexChanged(int index)
-//{
-//    m_strSelectedSkin = m_skins[index];
-//}
 
 void CWizPreferenceWindow::on_radioAuto_clicked(bool chcked)
 {
@@ -213,6 +208,31 @@ void CWizPreferenceWindow::on_comboSyncMethod_activated(int index)
     Q_EMIT settingsChanged(wizoptionsSync);
 }
 
+void CWizPreferenceWindow::on_comboSyncGroupMethod_activated(int index)
+{
+    switch (index) {
+    case 0:
+        userSettings().setSyncGroupMethod(-1);
+        break;
+    case 1:
+        userSettings().setSyncGroupMethod(1);
+        break;
+    case 2:
+        userSettings().setSyncGroupMethod(7);
+        break;
+    case 3:
+        userSettings().setSyncGroupMethod(30);
+        break;
+    case 4:
+        userSettings().setSyncGroupMethod(99999);
+        break;
+    default:
+        Q_ASSERT(0);
+    }
+
+    Q_EMIT settingsChanged(wizoptionsSync);
+}
+
 void CWizPreferenceWindow::labelProxy_linkActivated(const QString& link)
 {
     Q_UNUSED(link);
@@ -251,24 +271,4 @@ void CWizPreferenceWindow::onButtonFontSelect_confirmed()
     m_app.userSettings().setDefaultFontSize(font.pointSize());
 
     Q_EMIT settingsChanged(wizoptionsFont);
-}
-
-void CWizPreferenceWindow::accept()
-{
-//    if (m_strSelectedSkin.compare(userSettings().skin())) {
-//        userSettings().setSkin(m_strSelectedSkin);
-//        m_bRestart = true;
-//    }
-
-    QString strLocaleName = m_locales[m_iSelectedLocale];
-    if (strLocaleName.compare(userSettings().locale())) {
-        userSettings().setLocale(strLocaleName);
-        m_bRestart = true;
-    }
-
-    if (m_bRestart) {
-        emit restartForSettings();
-    }
-
-    QDialog::accept();
 }

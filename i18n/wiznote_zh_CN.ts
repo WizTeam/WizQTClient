@@ -84,7 +84,7 @@
         <translation type="obsolete">下载笔记信息：</translation>
     </message>
     <message>
-        <location filename="../src/share/wizapi.cpp" line="1103"/>
+        <location filename="../src/share/wizapi.cpp" line="1105"/>
         <source>could not load document data: </source>
         <translation>无法加载笔记数据：</translation>
     </message>
@@ -93,7 +93,7 @@
         <translation type="obsolete">无法加载笔记数据：</translation>
     </message>
     <message>
-        <location filename="../src/share/wizapi.cpp" line="1139"/>
+        <location filename="../src/share/wizapi.cpp" line="1141"/>
         <source>Could not load attachment data: </source>
         <translation>无法加载附件数据：</translation>
     </message>
@@ -109,37 +109,37 @@
 <context>
     <name>CWizApiBase</name>
     <message>
-        <location filename="../src/share/wizapi.cpp" line="324"/>
+        <location filename="../src/share/wizapi.cpp" line="326"/>
         <source>Token expired, Try to request another</source>
         <translation>令牌过期，重新申请令牌</translation>
     </message>
     <message>
-        <location filename="../src/share/wizapi.cpp" line="642"/>
+        <location filename="../src/share/wizapi.cpp" line="644"/>
         <source>upload document info:</source>
         <translation>上传文档信息：</translation>
     </message>
     <message>
-        <location filename="../src/share/wizapi.cpp" line="762"/>
+        <location filename="../src/share/wizapi.cpp" line="764"/>
         <source>upload attachment info: </source>
         <translation>上传附件信息：</translation>
     </message>
     <message>
-        <location filename="../src/share/wizapi.cpp" line="814"/>
+        <location filename="../src/share/wizapi.cpp" line="816"/>
         <source>downloading note: </source>
         <translation>下载文档数据：</translation>
     </message>
     <message>
-        <location filename="../src/share/wizapi.cpp" line="819"/>
+        <location filename="../src/share/wizapi.cpp" line="821"/>
         <source>downloading attachment: </source>
         <translation>下载附件数据：</translation>
     </message>
     <message>
-        <location filename="../src/share/wizapi.cpp" line="896"/>
+        <location filename="../src/share/wizapi.cpp" line="898"/>
         <source>uploading document data: </source>
         <translation>上传文档数据：</translation>
     </message>
     <message>
-        <location filename="../src/share/wizapi.cpp" line="899"/>
+        <location filename="../src/share/wizapi.cpp" line="901"/>
         <source>uploading attachment data: </source>
         <translation>上传附件数据：</translation>
     </message>
@@ -509,47 +509,47 @@
 <context>
     <name>CWizDatabase</name>
     <message>
-        <location filename="../src/share/wizDatabase.cpp" line="1632"/>
+        <location filename="../src/share/wizDatabase.cpp" line="2277"/>
         <source>My Notes</source>
         <translation>我的笔记</translation>
     </message>
     <message>
-        <location filename="../src/share/wizDatabase.cpp" line="1634"/>
+        <location filename="../src/share/wizDatabase.cpp" line="2279"/>
         <source>My Journals</source>
         <translation>我的日记</translation>
     </message>
     <message>
-        <location filename="../src/share/wizDatabase.cpp" line="1636"/>
+        <location filename="../src/share/wizDatabase.cpp" line="2281"/>
         <source>My Events</source>
         <translation>我的事件</translation>
     </message>
     <message>
-        <location filename="../src/share/wizDatabase.cpp" line="1638"/>
+        <location filename="../src/share/wizDatabase.cpp" line="2283"/>
         <source>My Sticky Notes</source>
         <translation>我的桌面便笺</translation>
     </message>
     <message>
-        <location filename="../src/share/wizDatabase.cpp" line="1640"/>
+        <location filename="../src/share/wizDatabase.cpp" line="2285"/>
         <source>My Emails</source>
         <translation>我的电子邮件</translation>
     </message>
     <message>
-        <location filename="../src/share/wizDatabase.cpp" line="1642"/>
+        <location filename="../src/share/wizDatabase.cpp" line="2287"/>
         <source>My Drafts</source>
         <translation>我的草稿</translation>
     </message>
     <message>
-        <location filename="../src/share/wizDatabase.cpp" line="1644"/>
+        <location filename="../src/share/wizDatabase.cpp" line="2289"/>
         <source>My Tasks</source>
         <translation>我的任务</translation>
     </message>
     <message>
-        <location filename="../src/share/wizDatabase.cpp" line="1648"/>
+        <location filename="../src/share/wizDatabase.cpp" line="2293"/>
         <source>Inbox</source>
         <translation>收集箱</translation>
     </message>
     <message>
-        <location filename="../src/share/wizDatabase.cpp" line="1650"/>
+        <location filename="../src/share/wizDatabase.cpp" line="2295"/>
         <source>Completed</source>
         <translation>已完成</translation>
     </message>
@@ -1151,76 +1151,121 @@
     </message>
     <message>
         <location filename="../src/ui/wizpreferencedialog.ui" line="198"/>
-        <source>Sync method:</source>
-        <translation>数据下载方式：</translation>
+        <source>Personal sync method:</source>
+        <translation>个人笔记：</translation>
     </message>
     <message>
         <location filename="../src/ui/wizpreferencedialog.ui" line="212"/>
-        <source>Without note data(very fast)</source>
-        <translation>不下载数据（快）</translation>
+        <location filename="../src/ui/wizpreferencedialog.ui" line="247"/>
+        <source>Not download data when syncing</source>
+        <translation>同步时不下载数据</translation>
     </message>
     <message>
         <location filename="../src/ui/wizpreferencedialog.ui" line="217"/>
-        <source>Last 1 day</source>
-        <translation>最近1天的数据</translation>
+        <location filename="../src/ui/wizpreferencedialog.ui" line="252"/>
+        <source>Download recent 1 day&apos;s data</source>
+        <translation>下载最近一天的数据</translation>
     </message>
     <message>
         <location filename="../src/ui/wizpreferencedialog.ui" line="222"/>
-        <source>last 1 week</source>
-        <translation>最近1星期的数据</translation>
+        <location filename="../src/ui/wizpreferencedialog.ui" line="257"/>
+        <source>Download recent 1 week&apos;s data</source>
+        <translation>下载最近一星期的数据</translation>
     </message>
     <message>
         <location filename="../src/ui/wizpreferencedialog.ui" line="227"/>
-        <source>Last 1 month</source>
-        <translation>最近1月的数据</translation>
+        <location filename="../src/ui/wizpreferencedialog.ui" line="262"/>
+        <source>Download recent 1 month&apos;s data</source>
+        <translation>下载最近一个月的数据</translation>
     </message>
     <message>
         <location filename="../src/ui/wizpreferencedialog.ui" line="232"/>
-        <source>All data(very slow)</source>
-        <translation>所有数据（慢）</translation>
+        <location filename="../src/ui/wizpreferencedialog.ui" line="267"/>
+        <source>Download all data when syncing</source>
+        <translation>下载所有数据</translation>
     </message>
     <message>
-        <location filename="../src/ui/wizpreferencedialog.ui" line="240"/>
+        <source>Without data</source>
+        <translation type="obsolete">同步时不下载数据</translation>
+    </message>
+    <message>
+        <source>All data</source>
+        <translation type="obsolete">下载所有数据</translation>
+    </message>
+    <message>
+        <source>Last 1 week</source>
+        <translation type="obsolete">下载最近一星期的数据</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/wizpreferencedialog.ui" line="281"/>
+        <source>Group sync method:</source>
+        <translation>群组笔记：</translation>
+    </message>
+    <message>
+        <source>Sync method:</source>
+        <translation type="obsolete">数据下载方式：</translation>
+    </message>
+    <message>
+        <source>Without note data(very fast)</source>
+        <translation type="obsolete">不下载数据（快）</translation>
+    </message>
+    <message>
+        <source>Last 1 day</source>
+        <translation type="obsolete">最近1天的数据</translation>
+    </message>
+    <message>
+        <source>last 1 week</source>
+        <translation type="obsolete">最近1星期的数据</translation>
+    </message>
+    <message>
+        <source>Last 1 month</source>
+        <translation type="obsolete">最近1月的数据</translation>
+    </message>
+    <message>
+        <source>All data(very slow)</source>
+        <translation type="obsolete">所有数据（慢）</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/wizpreferencedialog.ui" line="288"/>
         <source>Reading</source>
         <translation>阅读</translation>
     </message>
     <message>
-        <location filename="../src/ui/wizpreferencedialog.ui" line="252"/>
+        <location filename="../src/ui/wizpreferencedialog.ui" line="300"/>
         <source>Default note view</source>
         <translation>默认笔记视图</translation>
     </message>
     <message>
-        <location filename="../src/ui/wizpreferencedialog.ui" line="264"/>
+        <location filename="../src/ui/wizpreferencedialog.ui" line="312"/>
         <source>Auto (Keep view state)</source>
         <translation>自动(保持视图状态)</translation>
     </message>
     <message>
-        <location filename="../src/ui/wizpreferencedialog.ui" line="290"/>
+        <location filename="../src/ui/wizpreferencedialog.ui" line="338"/>
         <source>Always open note in Reading-View</source>
         <translation>总是在阅读视图打开笔记</translation>
     </message>
     <message>
-        <location filename="../src/ui/wizpreferencedialog.ui" line="297"/>
+        <location filename="../src/ui/wizpreferencedialog.ui" line="345"/>
         <source>Format</source>
         <translation>格式</translation>
     </message>
     <message>
-        <location filename="../src/ui/wizpreferencedialog.ui" line="309"/>
+        <location filename="../src/ui/wizpreferencedialog.ui" line="357"/>
         <source>Default font</source>
         <translation>默认字体</translation>
     </message>
     <message>
-        <location filename="../src/ui/wizpreferencedialog.ui" line="343"/>
+        <location filename="../src/ui/wizpreferencedialog.ui" line="391"/>
         <source>Select</source>
         <translation>选择</translation>
     </message>
     <message>
-        <location filename="../src/ui/wizpreferencedialog.ui" line="362"/>
         <source>OK</source>
-        <translation>应用</translation>
+        <translation type="obsolete">应用</translation>
     </message>
     <message>
-        <location filename="../src/ui/wizpreferencedialog.ui" line="277"/>
+        <location filename="../src/ui/wizpreferencedialog.ui" line="325"/>
         <source>Always open note in Editing-View</source>
         <translation>总是在编辑视图打开笔记</translation>
     </message>
@@ -1265,7 +1310,7 @@
         <translation type="obsolete">English(US)</translation>
     </message>
     <message>
-        <location filename="../src/wizpreferencedialog.cpp" line="116"/>
+        <location filename="../src/wizpreferencedialog.cpp" line="111"/>
         <source>Proxy settings</source>
         <translation>代理设置</translation>
     </message>
@@ -1339,32 +1384,32 @@
 <context>
     <name>CWizSortingPopupButton</name>
     <message>
-        <location filename="../src/wizPopupButton.cpp" line="107"/>
+        <location filename="../src/wizPopupButton.cpp" line="112"/>
         <source>Sorting by created time</source>
         <translation>按创建时间排序</translation>
     </message>
     <message>
-        <location filename="../src/wizPopupButton.cpp" line="112"/>
+        <location filename="../src/wizPopupButton.cpp" line="113"/>
         <source>Sorting by updated time</source>
         <translation>按更新时间排序</translation>
     </message>
     <message>
-        <location filename="../src/wizPopupButton.cpp" line="119"/>
+        <location filename="../src/wizPopupButton.cpp" line="115"/>
         <source>Sorting by title</source>
         <translation>按标题排序</translation>
     </message>
     <message>
-        <location filename="../src/wizPopupButton.cpp" line="124"/>
+        <location filename="../src/wizPopupButton.cpp" line="116"/>
         <source>Sorting by location</source>
         <translation>按文件夹排序</translation>
     </message>
     <message>
-        <location filename="../src/wizPopupButton.cpp" line="129"/>
+        <location filename="../src/wizPopupButton.cpp" line="117"/>
         <source>Sorting by tag</source>
         <translation>按标签排序</translation>
     </message>
     <message>
-        <location filename="../src/wizPopupButton.cpp" line="134"/>
+        <location filename="../src/wizPopupButton.cpp" line="118"/>
         <source>Sorting by size</source>
         <translation>按大小排序</translation>
     </message>
@@ -1634,17 +1679,17 @@
 <context>
     <name>CWizViewTypePopupButton</name>
     <message>
-        <location filename="../src/wizPopupButton.cpp" line="75"/>
+        <location filename="../src/wizPopupButton.cpp" line="73"/>
         <source>One line view</source>
         <translation>单行视图</translation>
     </message>
     <message>
-        <location filename="../src/wizPopupButton.cpp" line="79"/>
+        <location filename="../src/wizPopupButton.cpp" line="80"/>
         <source>Two line view</source>
         <translation>两行视图</translation>
     </message>
     <message>
-        <location filename="../src/wizPopupButton.cpp" line="83"/>
+        <location filename="../src/wizPopupButton.cpp" line="85"/>
         <source>Thumbnail view</source>
         <translation>摘要视图</translation>
     </message>
@@ -1690,7 +1735,7 @@
         <translation type="obsolete">稍等片刻，保存一下进度...</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="133"/>
+        <location filename="../src/wizmainwindow.cpp" line="129"/>
         <source>WizNote</source>
         <translation>为知笔记</translation>
     </message>
@@ -1711,12 +1756,12 @@
         <translation type="obsolete">标签</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="549"/>
+        <location filename="../src/wizmainwindow.cpp" line="511"/>
         <source>New note</source>
         <translation>新建笔记</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="1192"/>
+        <location filename="../src/wizmainwindow.cpp" line="1154"/>
         <source>Saving note...</source>
         <translation>正在保存笔记...</translation>
     </message>
@@ -2113,7 +2158,12 @@
         <translation>为知笔记</translation>
     </message>
     <message>
-        <location filename="../src/main.cpp" line="145"/>
+        <location filename="../src/main.cpp" line="148"/>
+        <source>Can not open private database</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/main.cpp" line="155"/>
         <source>Can not open database</source>
         <translation>无法打开数据库</translation>
     </message>
@@ -2162,12 +2212,12 @@
         <translation>%1 B</translation>
     </message>
     <message>
-        <location filename="../src/share/wizobject.h" line="842"/>
+        <location filename="../src/share/wizobject.h" line="906"/>
         <source>$Public Notes</source>
         <translation>$完全公开的笔记</translation>
     </message>
     <message>
-        <location filename="../src/share/wizobject.h" line="847"/>
+        <location filename="../src/share/wizobject.h" line="911"/>
         <source>$Share with friends</source>
         <translation>$分享给朋友的笔记</translation>
     </message>
@@ -2644,33 +2694,31 @@
         <translation type="obsolete">代理设置</translation>
     </message>
     <message>
-        <location filename="../src/wizwelcomedialog.cpp" line="113"/>
+        <location filename="../src/wizwelcomedialog.cpp" line="114"/>
         <source>Please enter user id</source>
         <translation>请输入用户ID</translation>
     </message>
     <message>
-        <location filename="../src/wizwelcomedialog.cpp" line="118"/>
+        <location filename="../src/wizwelcomedialog.cpp" line="119"/>
         <source>Please enter user password</source>
         <translation>请输入用户密码</translation>
     </message>
     <message>
-        <location filename="../src/wizwelcomedialog.cpp" line="137"/>
         <source>Network Error, please check your network connection!
 
 ErrorCode: </source>
-        <translation>网络错误，请检查网络连接！
+        <translation type="obsolete">网络错误，请检查网络连接！
 
 错误号：</translation>
     </message>
     <message>
-        <location filename="../src/wizwelcomedialog.cpp" line="139"/>
         <source>
 
 ErrorCode: </source>
-        <translation>错误号：</translation>
+        <translation type="obsolete">错误号：</translation>
     </message>
     <message>
-        <location filename="../src/wizwelcomedialog.cpp" line="142"/>
+        <location filename="../src/wizwelcomedialog.cpp" line="139"/>
         <source>Verify account failed</source>
         <translation>验证账户失败</translation>
     </message>

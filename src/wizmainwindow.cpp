@@ -121,12 +121,6 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     // init GUI stuff
     m_category = m_categoryPrivate;
 
-//    connect(m_sync, SIGNAL(syncStarted()), SLOT(on_syncStarted()));
-//    connect(m_sync, SIGNAL(syncLogined()), SLOT(on_syncLogined()));
-//    connect(m_sync, SIGNAL(processLog(const QString&)), SLOT(on_syncProcessLog(const QString&)));
-//    connect(m_sync, SIGNAL(processErrorLog(const QString&)), SLOT(on_syncProcessErrorLog(const QString&)));
-//    connect(m_sync, SIGNAL(syncDone(bool)), SLOT(on_syncDone(bool)));
-
     initActions();
     initMenuBar();
     initToolBar();
@@ -398,7 +392,6 @@ void MainWindow::initClient()
     m_doc->layout()->addWidget(m_transitionView);
     m_transitionView->hide();
 
-    //m_splitter->addWidget(categoryPanel);
     m_splitter->addWidget(m_category);
     m_splitter->addWidget(createListView());
     m_splitter->addWidget(documentPanel);
@@ -495,7 +488,7 @@ void MainWindow::on_syncDone(bool noError)
 
 void MainWindow::on_syncProcessLog(const QString& strMsg)
 {
-    m_statusBar->showText(strMsg);
+    m_statusBar->showText(strMsg.left(40));
 }
 
 void MainWindow::on_actionNewNote_triggered()
