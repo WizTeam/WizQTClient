@@ -33,7 +33,7 @@ public:
 
     //bool removeKb(const QString& strKbGUID);
 
-    bool close(const QString& strKbGUID = "");
+    bool close(const QString& strKbGUID = NULL, bool bNotify = true);
     void closeAll();
 
 private:
@@ -44,13 +44,15 @@ private:
     void initSignals(CWizDatabase* db);
 
 private Q_SLOTS:
-    void onGroupsInfoDownloaded(const CWizGroupDataArray& arrayGroups);
+    void on_groupDatabaseOpened(CWizDatabase* db, const QString& strKbGUID);
+    void on_groupsInfoDownloaded(const CWizGroupDataArray& arrayGroups);
 
 Q_SIGNALS:
     void databaseOpened(const QString& strKbGUID);
     void databaseClosed(const QString& strKbGUID);
     void databaseRename(const QString& strKbGUID);
     void databasePermissionChanged(const QString& strKbGUID);
+    void databaseBizchanged(const QString&);
 
     // CWizDatabase passthrough signals
     void tagCreated(const WIZTAGDATA& tag);

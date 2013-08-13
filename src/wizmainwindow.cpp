@@ -100,7 +100,7 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
 
     // syncing thread
     connect(m_sync, SIGNAL(processLog(const QString&)), SLOT(on_syncProcessLog(const QString&)));
-    connect(m_sync, SIGNAL(finished(bool)), SLOT(on_syncDone(bool)));
+    connect(m_sync, SIGNAL(syncFinished(bool)), SLOT(on_syncDone(bool)));
     connect(m_syncTimer, SIGNAL(timeout()), SLOT(on_actionSync_triggered()));
     int nInterval = m_settings->syncInterval();
     if (nInterval == 0) {
@@ -458,7 +458,7 @@ void MainWindow::init()
     connect(m_documents, SIGNAL(itemSelectionChanged()), SLOT(on_documents_itemSelectionChanged()));
     connect(m_categoryPrivate, SIGNAL(newDocument()), SLOT(on_actionNewNote_triggered()));
 
-    m_categoryPrivate->baseInit();
+    m_categoryPrivate->init();
 }
 
 void MainWindow::on_actionSync_triggered()

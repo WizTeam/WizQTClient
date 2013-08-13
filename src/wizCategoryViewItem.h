@@ -3,8 +3,9 @@
 
 #include <QTreeWidget>
 
-#include "share/wizDatabase.h"
+#include "share/wizobject.h"
 
+class CWizDatabase;
 class CWizExplorerApp;
 class CWizCategoryBaseView;
 

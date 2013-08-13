@@ -17,12 +17,7 @@ bool CWizDatabaseManager::open(const QString& strKbGUID)
 {
     Q_ASSERT(!m_strUserId.isEmpty());
 
-    // private database already opened
-    if (strKbGUID.isEmpty() && m_dbPrivate)
-        return true;
-
-    // group database already opened
-    if (m_mapGroups.find(strKbGUID) != m_mapGroups.end())
+    if (isOpened(strKbGUID))
         return true;
 
     CWizDatabase* db = new CWizDatabase();
@@ -34,6 +29,11 @@ bool CWizDatabaseManager::open(const QString& strKbGUID)
 
     if (strKbGUID.isEmpty()) {
         m_dbPrivate = db;
+
+        // take ownership immediately
+        connect(db, SIGNAL(databaseOpened(CWizDatabase*, const QString&)),
+                SLOT(on_groupDatabaseOpened(CWizDatabase*, const QString&)),
+                Qt::BlockingQueuedConnection);
     } else {
         m_mapGroups[strKbGUID] = db;
     }
@@ -41,7 +41,6 @@ bool CWizDatabaseManager::open(const QString& strKbGUID)
     initSignals(db);
 
     Q_EMIT databaseOpened(strKbGUID);
-
     return true;
 }
 
@@ -74,7 +73,7 @@ bool CWizDatabaseManager::openAll()
 
 bool CWizDatabaseManager::isOpened(const QString& strKbGUID)
 {
-    if (strKbGUID.isEmpty() || m_dbPrivate->kbGUID() == strKbGUID) {
+    if (m_dbPrivate && (strKbGUID.isEmpty() || m_dbPrivate->kbGUID() == strKbGUID)) {
         return true;
     }
 
@@ -135,7 +134,7 @@ CWizDatabase& CWizDatabaseManager::at(int i)
 //    return false;
 //}
 
-bool CWizDatabaseManager::close(const QString& strKbGUID)
+bool CWizDatabaseManager::close(const QString& strKbGUID, bool bNotify)
 {
     // should close all groups db before close user db.
     if (strKbGUID.isEmpty()) {
@@ -151,7 +150,9 @@ bool CWizDatabaseManager::close(const QString& strKbGUID)
         return false;
     }
 
-    Q_EMIT databaseClosed(strKbGUID);
+    if (bNotify) {
+        Q_EMIT databaseClosed(strKbGUID);
+    }
 
     return true;
 }
@@ -172,8 +173,11 @@ void CWizDatabaseManager::closeAll()
 void CWizDatabaseManager::initSignals(CWizDatabase* db)
 {
     connect(db, SIGNAL(groupsInfoDownloaded(const CWizGroupDataArray&)),
-            SLOT(onGroupsInfoDownloaded(const CWizGroupDataArray&)),
+            SLOT(on_groupsInfoDownloaded(const CWizGroupDataArray&)),
             Qt::BlockingQueuedConnection);
+
+    //connect(db, SIGNAL(databaseOpened(const QString&)),
+    //        SIGNAL(databaseOpened(const QString&)));
 
     connect(db, SIGNAL(databaseRename(const QString&)),
             SIGNAL(databaseRename(const QString&)));
@@ -181,15 +185,22 @@ void CWizDatabaseManager::initSignals(CWizDatabase* db)
     connect(db, SIGNAL(databasePermissionChanged(const QString&)),
             SIGNAL(databasePermissionChanged(const QString&)));
 
-    connect(db, SIGNAL(tagCreated(const WIZTAGDATA&)), SIGNAL(tagCreated(const WIZTAGDATA&)));
+    connect(db, SIGNAL(databaseBizChanged(const QString&)),
+            SIGNAL(databaseBizchanged(const QString&)));
+
+    connect(db, SIGNAL(tagCreated(const WIZTAGDATA&)),
+            SIGNAL(tagCreated(const WIZTAGDATA&)));
     connect(db, SIGNAL(tagModified(const WIZTAGDATA&, const WIZTAGDATA&)),
             SIGNAL(tagModified(const WIZTAGDATA&, const WIZTAGDATA&)));
-    connect(db, SIGNAL(tagDeleted(const WIZTAGDATA&)), SIGNAL(tagDeleted(const WIZTAGDATA&)));
+    connect(db, SIGNAL(tagDeleted(const WIZTAGDATA&)),
+            SIGNAL(tagDeleted(const WIZTAGDATA&)));
 
-    connect(db, SIGNAL(styleCreated(const WIZSTYLEDATA&)), SIGNAL(styleCreated(const WIZSTYLEDATA&)));
+    connect(db, SIGNAL(styleCreated(const WIZSTYLEDATA&)),
+            SIGNAL(styleCreated(const WIZSTYLEDATA&)));
     connect(db, SIGNAL(styleModified(const WIZSTYLEDATA&, const WIZSTYLEDATA&)),
             SIGNAL(styleModified(const WIZSTYLEDATA&, const WIZSTYLEDATA&)));
-    connect(db, SIGNAL(styleDeleted(const WIZSTYLEDATA&)), SIGNAL(styleDeleted(const WIZSTYLEDATA&)));
+    connect(db, SIGNAL(styleDeleted(const WIZSTYLEDATA&)),
+            SIGNAL(styleDeleted(const WIZSTYLEDATA&)));
 
     connect(db, SIGNAL(documentCreated(const WIZDOCUMENTDATA&)),
             SIGNAL(documentCreated(const WIZDOCUMENTDATA&)));
@@ -213,11 +224,26 @@ void CWizDatabaseManager::initSignals(CWizDatabase* db)
     connect(db, SIGNAL(attachmentDeleted(const WIZDOCUMENTATTACHMENTDATA&)),
             SIGNAL(attachmentDeleted(const WIZDOCUMENTATTACHMENTDATA&)));
 
-    connect(db, SIGNAL(folderCreated(const QString&)), SIGNAL(folderCreated(const QString&)));
-    connect(db, SIGNAL(folderDeleted(const QString&)), SIGNAL(folderDeleted(const QString&)));
+    connect(db, SIGNAL(folderCreated(const QString&)),
+            SIGNAL(folderCreated(const QString&)));
+    connect(db, SIGNAL(folderDeleted(const QString&)),
+            SIGNAL(folderDeleted(const QString&)));
 }
 
-void CWizDatabaseManager::onGroupsInfoDownloaded(const CWizGroupDataArray& arrayGroups)
+void CWizDatabaseManager::on_groupDatabaseOpened(CWizDatabase* pDb, const QString& strKbGUID)
+{
+    // check if this group is already opened, to avoid memory leak!
+    if (isOpened(strKbGUID)) {
+        close(strKbGUID, false);
+    }
+
+    m_mapGroups[strKbGUID] = pDb;
+    initSignals(pDb);
+
+    Q_EMIT databaseOpened(strKbGUID);
+}
+
+void CWizDatabaseManager::on_groupsInfoDownloaded(const CWizGroupDataArray& arrayGroups)
 {
     qDebug() << "[CWizDatabaseManager] Group info downloaded...";
 

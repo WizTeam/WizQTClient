@@ -19,6 +19,7 @@
 #include "wizcertmanager.h"
 #include "wizusercipherform.h"
 #include "wizdownloadobjectdatadialog.h"
+#include "wizGroupAttributeForm.h"
 
 class CWizProgressDialog;
 class CWizDocumentListView;

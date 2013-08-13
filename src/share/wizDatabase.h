@@ -356,8 +356,10 @@ public:
 
 Q_SIGNALS:
     void groupsInfoDownloaded(const CWizGroupDataArray& arrayGroup);
+    void databaseOpened(CWizDatabase* db, const QString& strKbGUID);
     void databaseRename(const QString& strKbGUID);
     void databasePermissionChanged(const QString& strKbGUID);
+    void databaseBizChanged(const QString& strKbGUID);
     void updateError(const QString& msg);
     void processLog(const QString& msg);
 };

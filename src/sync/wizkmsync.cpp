@@ -85,5 +85,5 @@ void CWizKMSyncThread::startSync()
 void CWizKMSyncThread::on_syncFinished()
 {
     // FIXME: check last error to tell user sync succeed or not!
-    Q_EMIT finished(true);
+    Q_EMIT syncFinished(true);
 }

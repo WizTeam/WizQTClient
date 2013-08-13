@@ -1,5 +1,6 @@
 #include "wizCategoryViewItem.h"
 
+#include "wizdef.h"
 #include "wizCategoryView.h"
 #include "share/wizsettings.h"
 #include "wiznotestyle.h"

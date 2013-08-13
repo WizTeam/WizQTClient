@@ -212,6 +212,7 @@ void CWizFolder::Delete()
         }
 
         m_db.LogDeletedFolder(Location());
+        m_db.SetLocalValueVersion("folders", -1);
     } else {
         CWizFolder deletedItems(m_db, LOCATION_DELETED_ITEMS);
         MoveTo(&deletedItems);
@@ -291,6 +292,7 @@ void CWizFolder::MoveToLocation(const QString& strDestLocation)
     }
 
     m_db.LogDeletedFolder(strOldLocation);
+    m_db.SetLocalValueVersion("folders", -1);
 }
 
 
@@ -364,7 +366,12 @@ bool CWizDatabase::GetModifiedAttachmentList(CWizDocumentAttachmentDataArray& ar
 
 bool CWizDatabase::GetObjectsNeedToBeDownloaded(CWizObjectDataArray& arrayObject)
 {
+#ifdef QT_DEBUG
+    return true;
+#else
+    // FIXME
     return GetAllObjectsNeedToBeDownloaded(arrayObject);
+#endif
 }
 
 bool CWizDatabase::OnDownloadDeletedList(const CWizDeletedGUIDDataArray& arrayData)
@@ -601,43 +608,28 @@ IWizSyncableDatabase* CWizDatabase::GetGroupDatabase(const WIZGROUPDATA& group)
 {
     Q_ASSERT(!group.strGroupGUID.isEmpty());
 
-    /*
-    QMap<QString, CWizDatabase*>::const_iterator it = m_mapGroups.find(group.strGroupGUID);
-    if (it != m_mapGroups.end()) {
-        return it.value();
-    }
-    */
-
     CWizDatabase* db = new CWizDatabase();
     if (!db->Open(m_strUserId, group.strGroupGUID)) {
         delete db;
         return NULL;
     }
 
-    //m_mapGroups[group.strGroupGUID] = db;
+    // pass this pointer to database manager for signal redirect and managament
+    // CWizDatabaseManager will take ownership
+    Q_EMIT databaseOpened(db, group.strGroupGUID);
 
     return db;
 }
 
 void CWizDatabase::CloseGroupDatabase(IWizSyncableDatabase* pDatabase)
 {
-    CWizDatabase* db = dynamic_cast<CWizDatabase*>(pDatabase);
-    if (!db) {
-        return;
-    }
+    Q_UNUSED(pDatabase);
+    //CWizDatabase* db = dynamic_cast<CWizDatabase*>(pDatabase);
+    //if (!db) {
+    //    return;
+    //}
     //
-    delete db;
-
-    /*
-
-    QMap<QString, CWizDatabase*>::iterator it = m_mapGroups.find(db->kbGUID());
-    if (it != m_mapGroups.end()) {
-        CWizDatabase* db = it.value();
-        db->Close();
-        delete db;
-        m_mapGroups.erase(it);
-    }
-    */
+    //delete db;
 }
 
 void CWizDatabase::SetKbInfo(const QString& strKBGUID, const WIZKBINFO& info)
@@ -659,7 +651,7 @@ void CWizDatabase::SetUserInfo(const WIZUSERINFO& userInfo)
 
 bool CWizDatabase::IsGroup()
 {
-    if (kbGUID().isEmpty())
+    if (m_bIsPersonal)
         return false;
 
     return true;
@@ -850,23 +842,23 @@ QString CWizDatabase::GetLocalValue(const QString& key)
 {
     CString strKey(key);
     strKey.MakeLower();
-    //
-    if (strKey == _T("folders"))
+
+    if (strKey == "folders")
     {
         return GetFolders();
     }
-    else if (strKey == _T("folders_pos"))
+    else if (strKey == "folders_pos")
     {
         return "";
         //return GetFoldersPos();
     }
-    else if (strKey == _T("group_tag_oem"))
+    else if (strKey == "group_tag_oem")
     {
         Q_ASSERT(false);
         return "";
         //return GetGroupTagPropertiesOEM();
     }
-    else if (strKey == _T("group_tag_config_oem"))
+    else if (strKey == "group_tag_config_oem")
     {
         Q_ASSERT(false);
         return "";
@@ -876,7 +868,6 @@ QString CWizDatabase::GetLocalValue(const QString& key)
     {
         return CString();
     }
-
 }
 
 void CWizDatabase::SetLocalValueVersion(const QString& strKey,
@@ -891,20 +882,20 @@ void CWizDatabase::SetLocalValue(const QString& key, const QString& value,
     CString strKey(key);
     strKey.MakeLower();
 
-    if (strKey == _T("folders"))
+    if (strKey == "folders")
     {
         SetFolders(value, nServerVersion, bSaveVersion);
     }
-    else if (strKey == _T("folders_pos"))
+    else if (strKey == "folders_pos")
     {
         //SetFoldersPos(lpszValue, nServerVersion);
     }
-    else if (strKey == _T("group_tag_oem"))
+    else if (strKey == "group_tag_oem")
     {
         //SetGroupTagPropertiesOEM(lpszValue, nServerVersion);
         SetLocalValueVersion(key, nServerVersion);
     }
-    else if (strKey == _T("group_tag_config_oem"))
+    else if (strKey == "group_tag_config_oem")
     {
         //SetGroupTagConfigOEM(lpszValue, nServerVersion);
         SetLocalValueVersion(key, nServerVersion);
@@ -957,17 +948,6 @@ bool CWizDatabase::IsStorageLimit()
     return false;
 }
 
-
-QString CWizDatabase::GetFolders()
-{
-    CWizStdStringArray arrayFolder;
-    GetAllLocations(arrayFolder);
-
-    CString str;
-    ::WizStringArrayToText(arrayFolder, str, "*");
-
-    return str;
-}
 void CWizDatabase::SetFoldersPos(const QString& foldersPos, qint64 nVersion)
 {
     SetLocalValueVersion("folders_pos", nVersion);
@@ -1010,13 +990,34 @@ void CWizDatabase::SetFoldersPos(const QString& foldersPos, qint64 nVersion)
     //::WizKMObjectSendMessage_ModifyPos(objecttypeFolder, NULL, _T(""));
 }
 
+QString CWizDatabase::GetFolders()
+{
+    CWizStdStringArray arrayFolder;
+    GetAllLocations(arrayFolder);
+
+    CWizStdStringArray arrayExtra;
+    GetExtraFolder(arrayExtra);
+    for (CWizStdStringArray::const_iterator it = arrayExtra.begin();
+         it != arrayExtra.end(); it++)
+    {
+        if (-1 == ::WizFindInArray(arrayFolder, *it)) {
+            arrayFolder.push_back(*it);
+        }
+    }
+
+    CString str;
+    ::WizStringArrayToText(arrayFolder, str, "*");
+
+    return str;
+}
+
 void CWizDatabase::SetFolders(const QString& strFolders, qint64 nVersion, bool bSaveVersion)
 {
     if (strFolders.isEmpty())
         return;
 
     std::set<CString> setServerFolders;
-    QStringList listFolders = strFolders.split('*');
+    QStringList listFolders = strFolders.split('*', QString::SkipEmptyParts);
     for (QStringList::const_iterator it = listFolders.begin();
          it != listFolders.end();
          it++)
@@ -1046,7 +1047,7 @@ void CWizDatabase::SetFolders(const QString& strFolders, qint64 nVersion, bool b
 
         if (setLocalFolders.find(strLocation) == setLocalFolders.end())
         {
-            // FIXME: server exists, local does not exists, create folders.
+            // server exists, local does not exists, create folders.
             AddExtraFolder(strLocation);
         }
     }
@@ -1062,7 +1063,7 @@ void CWizDatabase::SetFolders(const QString& strFolders, qint64 nVersion, bool b
 
         if (setServerFolders.find(strLocation) == setServerFolders.end())
         {
-            //FIXME: local exists, server does not exists, delete local folders.
+            // local exists, server does not exists, delete local folders.
             int nSize = 0;
             if (GetDocumentsSizeByLocation(strLocation, nSize, true)) {
                 if (nSize == 0) {
@@ -1294,41 +1295,59 @@ bool CWizDatabase::SetDatabaseInfo(const WIZDATABASEINFO& dbInfo)
 {
     Q_ASSERT(!dbInfo.name.isEmpty());
 
-    m_info.bizName = dbInfo.bizName;
-    m_info.bizGUID = dbInfo.bizGUID;
+    int nErrors = 0;
 
+    // general
     if (m_info.name != dbInfo.name) {
         m_info.name = dbInfo.name;
+
+        if (!SetMeta(g_strDatabaseInfoSection, "Name", dbInfo.name))
+            nErrors++;
+
         Q_EMIT databaseRename(kbGUID());
     }
 
     if (m_info.nPermission != dbInfo.nPermission) {
         m_info.nPermission = dbInfo.nPermission;
+
+        if (!SetMeta(g_strDatabaseInfoSection, "Permission", QString::number(dbInfo.nPermission)))
+            nErrors++;
+
         Q_EMIT databasePermissionChanged(kbGUID());
     }
 
-    int nErrors = 0;
 
-    if (!SetMeta(g_strDatabaseInfoSection, "Name", dbInfo.name))
-        nErrors++;
+    // biz group info
+    if (!dbInfo.bizGUID.isEmpty() && !dbInfo.bizName.isEmpty()) {
+        bool bResetBiz = false;
+        if (m_info.bizGUID != dbInfo.bizGUID) {
+            m_info.bizName = dbInfo.bizName;
+
+            if (!SetMeta(g_strDatabaseInfoSection, "BizName", dbInfo.bizName))
+                nErrors++;
+
+            bResetBiz = true;
+        }
+
+        if (m_info.bizName != dbInfo.bizName) {
+            m_info.bizGUID = dbInfo.bizGUID;
+
+            if (!SetMeta(g_strDatabaseInfoSection, "BizGUID", dbInfo.bizGUID))
+                nErrors++;
+
+            bResetBiz = true;
+        }
+
+        if (bResetBiz) {
+            Q_EMIT databaseBizChanged(kbGUID());
+        }
+    }
 
     if (!SetMeta(g_strDatabaseInfoSection, "KbGUID", kbGUID()))
         nErrors++;
 
-    if (!SetMeta(g_strDatabaseInfoSection, "Permission", QString::number(dbInfo.nPermission)))
-        nErrors++;
-
     if (!SetMeta(g_strDatabaseInfoSection, "Version", WIZ_DATABASE_VERSION))
         nErrors++;
-
-    // set biz group info
-    if (!dbInfo.bizGUID.isEmpty() && !dbInfo.bizName.isEmpty()) {
-        if (!SetMeta(g_strDatabaseInfoSection, "BizName", dbInfo.bizName))
-            nErrors++;
-
-        if (!SetMeta(g_strDatabaseInfoSection, "BizGUID", dbInfo.bizGUID))
-            nErrors++;
-    }
 
     if (nErrors)
         return false;

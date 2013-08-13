@@ -45,7 +45,7 @@ private Q_SLOTS:
     void on_syncFinished();
 
 Q_SIGNALS:
-    void finished(bool noError = true);
+    void syncFinished(bool noError = true);
     void processLog(const QString& strStatus);
 };
 
