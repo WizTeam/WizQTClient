@@ -236,6 +236,7 @@ public:
     bool Open(const QString& strUserId, const QString& strKbGUID = NULL);
     bool LoadDatabaseInfo();
     bool SetDatabaseInfo(const WIZDATABASEINFO& dbInfo);
+    bool GetUserInfo(WIZUSERINFO& userInfo);
 
     // path resolve
     QString GetAccountPath() const;
@@ -264,9 +265,6 @@ public:
 
     bool SetUserCert(const QString& strN, const QString& stre, const QString& strd, const QString& strHint);
     bool GetUserCert(QString& strN, QString& stre, QString& strd, QString& strHint);
-
-    //bool setUserInfo(const WIZUSERINFO& userInfo);
-    bool GetUserInfo(WIZUSERINFO& userInfo);
 
     bool GetBizGroupInfo(QMap<QString, QString>& bizInfo);
     bool GetUserGroupInfo(CWizGroupDataArray& arrayGroup);

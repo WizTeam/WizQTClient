@@ -318,7 +318,7 @@ QString CWizDatabase::GetUserId()
 
 QString CWizDatabase::GetUserGUID()
 {
-    return QString();
+    return GetMetaDef(g_strAccountSection, "GUID");
 }
 
 QString CWizDatabase::GetPassword()
@@ -642,11 +642,13 @@ void CWizDatabase::SetUserInfo(const WIZUSERINFO& userInfo)
 {
     SetMeta(g_strDatabaseInfoSection, "KBGUID", userInfo.strKbGUID);
 
+    SetMeta(g_strAccountSection, "GUID", userInfo.strUserGUID);
     SetMeta(g_strAccountSection, "DisplayName", userInfo.strDisplayName);
     SetMeta(g_strAccountSection, "UserType", userInfo.strUserType);
     SetMeta(g_strAccountSection, "UserLevelName", userInfo.strUserLevelName);
     SetMeta(g_strAccountSection, "UserLevel", QString::number(userInfo.nUserLevel));
     SetMeta(g_strAccountSection, "UserPoints", QString::number(userInfo.nUserPoints));
+    SetMeta(g_strAccountSection, "MywizMail", userInfo.strMywizEmail);
 }
 
 bool CWizDatabase::IsGroup()
@@ -1533,11 +1535,13 @@ bool CWizDatabase::SetUserCert(const QString& strN, const QString& stre, const Q
 
 bool CWizDatabase::GetUserInfo(WIZUSERINFO& userInfo)
 {
+    userInfo.strUserGUID = GetMetaDef(g_strAccountSection, "GUID");
     userInfo.strDisplayName = GetMetaDef(g_strAccountSection, "DisplayName");
     userInfo.strUserType = GetMetaDef(g_strAccountSection, "UserType");
     userInfo.strUserLevelName = GetMetaDef(g_strAccountSection, "UserLevelName");
     userInfo.nUserLevel = GetMetaDef(g_strAccountSection, "UserLevel").toInt();
     userInfo.nUserPoints = GetMetaDef(g_strAccountSection, "UserPoints").toInt();
+    userInfo.strMywizEmail = GetMetaDef(g_strAccountSection, "MywizMail");
 
     return true;
 }

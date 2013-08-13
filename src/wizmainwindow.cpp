@@ -35,10 +35,13 @@
 #include "wizDocumentSelectionView.h"
 #include "share/wizGroupMessage.h"
 #include "share/wizObjectDataDownloader.h"
+#include "share/wizUserAvatar.h"
 #include "wizDocumentTransitionView.h"
 
 #include "sync/wizkmsync.h"
 #include "wizPopupButton.h"
+#include "widgets/wizUserInfoWidget.h"
+
 
 MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     : QMainWindow(parent)
@@ -56,6 +59,7 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     , m_groupAttribute(new CWizGroupAttributeForm(*this, this))
     , m_objectDownloadDialog(new CWizDownloadObjectDataDialog(dbMgr, this))
     , m_objectDownloaderHost(new CWizObjectDataDownloaderHost(dbMgr, this))
+    , m_avatarDownloaderHost(new CWizUserAvatarDownloaderHost(dbMgr.db().GetAvatarPath(), this))
     , m_transitionView(new CWizDocumentTransitionView(this))
     #ifndef Q_OS_MAC
     , m_labelNotice(NULL)
@@ -321,16 +325,17 @@ void MainWindow::initMenuBar()
 
 void MainWindow::initToolBar()
 {
-
 #ifdef Q_OS_MAC
     m_toolBar->setIconSize(QSize(24, 24));
     setUnifiedTitleAndToolBarOnMac(true);
 #else
     m_toolBar->setIconSize(QSize(32, 32));
 #endif
-
     m_toolBar->setMovable(false);
     m_toolBar->setToolButtonStyle(Qt::ToolButtonIconOnly);
+
+    CWizUserInfoWidget* info = new CWizUserInfoWidget(*this, m_toolBar);
+    m_toolBar->addWidget(info);
 
     m_toolBar->addWidget(new CWizFixedSpacer(QSize(40, 1), m_toolBar));
 

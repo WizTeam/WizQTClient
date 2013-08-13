@@ -11,6 +11,7 @@
 #include "wizFolderSelector.h"
 #include "wizProgressDialog.h"
 #include "share/wizUserAvatar.h"
+#include "wizmainwindow.h"
 
 
 class CWizDocumentListViewDelegate : public QStyledItemDelegate
@@ -114,7 +115,9 @@ CWizDocumentListView::CWizDocumentListView(CWizExplorerApp& app, QWidget *parent
     thread->start();
 
     // avatar downloader
-    m_avatarDownloader = new CWizUserAvatarDownloaderHost(m_dbMgr.db().GetAvatarPath(), this);
+    //m_avatarDownloader = new CWizUserAvatarDownloaderHost(m_dbMgr.db().GetAvatarPath(), this);
+    MainWindow* mainWindow = qobject_cast<MainWindow *>(m_app.mainWindow());
+    m_avatarDownloader = mainWindow->avatarHost();
     connect(m_avatarDownloader, SIGNAL(downloaded(const QString&)),
             SLOT(on_userAvatar_downloaded(const QString&)));
 

@@ -40,6 +40,7 @@ class CWizSearchIndexer;
 class QtSegmentControl;
 class CWizGroupMessage;
 class CWizObjectDataDownloaderHost;
+class CWizUserAvatarDownloaderHost;
 class CWizKMSyncThread;
 
 class MainWindow
@@ -81,7 +82,9 @@ private:
     QPointer<CWizUserCipherForm> m_cipherForm;
     QPointer<CWizGroupAttributeForm> m_groupAttribute;
     QPointer<CWizDownloadObjectDataDialog> m_objectDownloadDialog;
+
     CWizObjectDataDownloaderHost* m_objectDownloaderHost;
+    CWizUserAvatarDownloaderHost* m_avatarDownloaderHost;
 
     QToolBar* m_toolBar;
     QMenuBar* m_menuBar;
@@ -140,6 +143,7 @@ public:
     CWizGroupAttributeForm* groupAttributeForm() { return m_groupAttribute; }
     CWizDownloadObjectDataDialog* objectDownloadDialog() const { return m_objectDownloadDialog; }
     CWizObjectDataDownloaderHost* downloaderHost() const { return m_objectDownloaderHost; }
+    CWizUserAvatarDownloaderHost* avatarHost() const { return m_avatarDownloaderHost; }
     CWizProgressDialog* progressDialog() const { return m_progress; }
     CWizDocumentTransitionView* transitionView() const { return m_transitionView; }
 

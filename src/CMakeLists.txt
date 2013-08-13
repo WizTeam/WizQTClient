@@ -125,6 +125,7 @@ set(wiznote_SOURCES
     sync/wizkmxmlrpc.cpp
     sync/wizkmsync.cpp
     wizPopupButton.cpp
+    widgets/wizUserInfoWidget.cpp
 )
 
 set(wiznote_HEADERS
@@ -313,6 +314,7 @@ set(wiznote_WRAP_HEADERS
     wizDocumentTransitionView.h
     wizPopupButton.h
     sync/wizkmsync.h
+    widgets/wizUserInfoWidget.h
 )
 
 set(wiznote_FORMS
