@@ -17,15 +17,11 @@ CWizUserInfoWidget::CWizUserInfoWidget(CWizExplorerApp& app, QWidget *parent)
     setPopupMode(QToolButton::MenuButtonPopup);
 
     resetAvatar();
+    resetUserInfo();
 
     // load builtin arraw
     QString strIconPath = ::WizGetSkinResourcePath(app.userSettings().skin()) + "arrow.png";
     m_iconArraw.addFile(strIconPath);
-
-    WIZUSERINFO info;
-    if (m_db.GetUserInfo(info)) {
-        setText(info.strDisplayName.left(30)); // to avoid to long
-    }
 
     // setup menu
     m_menu = new QMenu(this);
@@ -64,10 +60,19 @@ void CWizUserInfoWidget::paintEvent(QPaintEvent *event)
         opt.icon.paint(&p, rectIcon);
     }
 
+    // draw vip indicator
+    QRect rectVip = rectIcon;
+    rectVip.setLeft(rectVip.right() + nMargin);
+    rectVip.setRight(rectVip.left() + fontMetrics().width(opt.text));
+    rectVip.setBottom(rectVip.top() + rectVip.height()/2);
+    if (!m_iconVipIndicator.isNull()) {
+        m_iconVipIndicator.paint(&p, rectVip, Qt::AlignLeft|Qt::AlignTop);
+    }
+
     // draw display name
-    QRect rectText = rectIcon;
-    rectText.setLeft(rectText.right() + nMargin);
-    rectText.setRight(rectText.left() + fontMetrics().width(opt.text));
+    QRect rectText = rectVip;
+    rectText.setBottom(rectText.bottom() + rectVip.height());
+    rectText.setTop(rectText.bottom() - rectVip.height());
     if (!opt.text.isEmpty()) {
         if (opt.state & QStyle::State_MouseOver) {
             QFont font = p.font();
@@ -97,6 +102,30 @@ void CWizUserInfoWidget::resetAvatar()
     setIcon(QIcon(strAvatarPath));
 }
 
+void CWizUserInfoWidget::resetUserInfo()
+{
+    WIZUSERINFO info;
+    if (!m_db.GetUserInfo(info))
+        return;
+
+    // FIXME:  avoid display name is too long
+    setText(info.strDisplayName.left(20));
+
+    QString iconName;
+    if (info.strUserType == "vip") {
+        iconName = "vip1.png";
+    } else if (info.strUserType == "vip2") {
+        iconName = "vip2.png";
+    } else if (info.strUserType == "vip3") {
+        iconName = "vip3.png";
+    } else {
+        iconName = "vip0.png";
+    }
+
+    QString strIconPath = ::WizGetSkinResourcePath(m_app.userSettings().skin()) + iconName;
+    m_iconVipIndicator.addFile(strIconPath);
+}
+
 void CWizUserInfoWidget::downloadAvatar()
 {
     m_avatarDownloader->download(m_db.GetUserGUID());
@@ -110,4 +139,3 @@ void CWizUserInfoWidget::on_userAvatar_downloaded(const QString& strGUID)
     resetAvatar();
     update();
 }
-

@@ -24,10 +24,12 @@ protected:
 
 private:
     CWizUserAvatarDownloaderHost* m_avatarDownloader;
+    QIcon m_iconVipIndicator;
     QIcon m_iconArraw;
     QMenu* m_menu;
 
     void resetAvatar();
+    void resetUserInfo();
 
 private Q_SLOTS:
     void downloadAvatar();
