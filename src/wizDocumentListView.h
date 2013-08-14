@@ -142,6 +142,9 @@ public Q_SLOTS:
     void on_vscrollAnimation_valueChanged(const QVariant& value);
     void on_vscrollAnimation_finished();
 //#endif // Q_OS_MAC
+
+Q_SIGNALS:
+    void documentCountChanged();
 };
 
 

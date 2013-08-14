@@ -428,10 +428,21 @@ QWidget* MainWindow::createListView()
     layoutActions->addWidget(sortBtn);
     layoutActions->addStretch(0);
 
+    m_labelDocumentsCount = new QLabel(tr("0 articles"), this);
+    m_labelDocumentsCount->setMargin(5);
+    layoutActions->addWidget(m_labelDocumentsCount);
+    connect(m_documents, SIGNAL(documentCountChanged()), SLOT(on_documents_documentCountChanged()));
+
     layoutList->addLayout(layoutActions);
     layoutList->addWidget(m_documents);
 
     return view;
+}
+
+void MainWindow::on_documents_documentCountChanged()
+{
+    QString strCount = m_labelDocumentsCount->text().replace(QRegExp("\\d+"), QString::number(m_documents->count()));
+    m_labelDocumentsCount->setText(strCount);
 }
 
 //void MainWindow::resetNotice()

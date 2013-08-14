@@ -222,6 +222,7 @@ int CWizDocumentListView::addDocument(const WIZDOCUMENTDATA& data, bool sort)
         sortItems();
     }
 
+    Q_EMIT documentCountChanged();
     return count();
 }
 
@@ -234,6 +235,7 @@ int CWizDocumentListView::addDocument(const WIZMESSAGEDATA& data, bool sort)
         sortItems();
     }
 
+    Q_EMIT documentCountChanged();
     return count();
 }
 

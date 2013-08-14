@@ -105,6 +105,8 @@ private:
     QPointer<CWizSplitter> m_splitter;
     QPointer<CWizOptionsWidget> m_options;
 
+    QLabel* m_labelDocumentsCount;
+
     CWizDocumentViewHistory* m_history;
     QPointer<CWizAnimateAction> m_animateSync;
 
@@ -207,6 +209,7 @@ public Q_SLOTS:
 
     void on_category_itemSelectionChanged();
     void on_documents_itemSelectionChanged();
+    void on_documents_documentCountChanged();
 
     void on_search_doSearch(const QString& keywords);
     void on_options_settingsChanged(WizOptionsType type);
