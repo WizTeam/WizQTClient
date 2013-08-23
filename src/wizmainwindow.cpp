@@ -69,7 +69,7 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     , m_menuBar(new QMenuBar(this))
     , m_statusBar(new CWizStatusBar(*this, this))
     , m_actions(new CWizActions(*this, this))
-    , m_categoryPrivate(new CWizCategoryView(*this, this))
+    , m_category(new CWizCategoryView(*this, this))
     , m_documents(new CWizDocumentListView(*this, this))
     , m_documentSelection(new CWizDocumentSelectionView(*this, this))
     , m_doc(new CWizDocumentView(*this, this))
@@ -123,7 +123,7 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     threadMessage->start();
 
     // init GUI stuff
-    m_category = m_categoryPrivate;
+    //m_category = m_categoryPrivate;
 
     initActions();
     initMenuBar();
@@ -337,7 +337,7 @@ void MainWindow::initToolBar()
     CWizUserInfoWidget* info = new CWizUserInfoWidget(*this, m_toolBar);
     m_toolBar->addWidget(info);
 
-    m_toolBar->addWidget(new CWizFixedSpacer(QSize(40, 1), m_toolBar));
+    m_toolBar->addWidget(new CWizFixedSpacer(QSize(60, 1), m_toolBar));
 
     CWizButton* buttonSync = new CWizButton(*this, m_toolBar);
     buttonSync->setAction(m_actions->actionFromName(WIZACTION_GLOBAL_SYNC));
@@ -348,18 +348,13 @@ void MainWindow::initToolBar()
     buttonNew->setAction(m_actions->actionFromName(WIZACTION_GLOBAL_NEW_DOCUMENT));
     m_toolBar->addWidget(buttonNew);
 
-    m_toolBar->addWidget(new CWizFixedSpacer(QSize(20, 1), m_toolBar));
-    CWizButton* btnViewMessages = new CWizButton(*this, m_toolBar);
-    btnViewMessages->setAction(m_actions->actionFromName(WIZACTION_GLOBAL_VIEW_MESSAGES));
-    m_toolBar->addWidget(btnViewMessages);
-
     m_toolBar->addWidget(new CWizSpacer(m_toolBar));
+
     m_searchBox = new CWizSearchBox(*this, this);
     connect(m_searchBox, SIGNAL(doSearch(const QString&)), SLOT(on_search_doSearch(const QString&)));
-
     m_toolBar->addWidget(m_searchBox);
-    m_toolBar->layout()->setAlignment(m_searchBox, Qt::AlignBottom);
 
+    m_toolBar->layout()->setAlignment(m_searchBox, Qt::AlignBottom);
     m_toolBar->addWidget(new CWizFixedSpacer(QSize(20, 1), m_toolBar));
 
     addToolBar(m_toolBar);
@@ -373,7 +368,7 @@ void MainWindow::initClient()
     client->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
 
     QPalette pal = client->palette();
-    pal.setBrush(QPalette::Window, WizGetLeftViewBrush());
+    pal.setBrush(QPalette::Window, QBrush("#FFFFFF"));
     client->setPalette(pal);
     client->setAutoFillBackground(true);
 
@@ -420,20 +415,25 @@ QWidget* MainWindow::createListView()
     CWizViewTypePopupButton* viewBtn = new CWizViewTypePopupButton(*this, this);
     layoutActions->addWidget(viewBtn);
     QWidget* line = new QWidget(this);
-    line->setMaximumWidth(1);
-    line->setMinimumWidth(1);
-    line->setStyleSheet("border-left-width:1;border-left-style:solid;border-left-color:#969696");
+    line->setFixedWidth(1);
+    line->setStyleSheet("border-left-width:1;border-left-style:solid;border-left-color:#d9dcdd");
     layoutActions->addWidget(line);
     CWizSortingPopupButton* sortBtn = new CWizSortingPopupButton(*this, this);
     layoutActions->addWidget(sortBtn);
     layoutActions->addStretch(0);
 
     m_labelDocumentsCount = new QLabel(tr("0 articles"), this);
+    m_labelDocumentsCount->setStyleSheet("font: 12px; color: #787878");
     m_labelDocumentsCount->setMargin(5);
     layoutActions->addWidget(m_labelDocumentsCount);
     connect(m_documents, SIGNAL(documentCountChanged()), SLOT(on_documents_documentCountChanged()));
 
+    QWidget* line2 = new QWidget(this);
+    line2->setFixedHeight(1);
+    line2->setStyleSheet("border-top-width:1;border-top-style:solid;border-top-color:#d9dcdd");
+
     layoutList->addLayout(layoutActions);
+    layoutList->addWidget(line2);
     layoutList->addWidget(m_documents);
 
     return view;
@@ -470,11 +470,11 @@ void MainWindow::on_documents_documentCountChanged()
 
 void MainWindow::init()
 {
-    connect(m_categoryPrivate, SIGNAL(itemSelectionChanged()), SLOT(on_category_itemSelectionChanged()));
-    connect(m_documents, SIGNAL(itemSelectionChanged()), SLOT(on_documents_itemSelectionChanged()));
-    connect(m_categoryPrivate, SIGNAL(newDocument()), SLOT(on_actionNewNote_triggered()));
+    connect(m_category, SIGNAL(itemSelectionChanged()), SLOT(on_category_itemSelectionChanged()));
+    connect(m_category, SIGNAL(newDocument()), SLOT(on_actionNewNote_triggered()));
+    m_category->init();
 
-    m_categoryPrivate->init();
+    connect(m_documents, SIGNAL(itemSelectionChanged()), SLOT(on_documents_itemSelectionChanged()));
 }
 
 void MainWindow::on_actionSync_triggered()
@@ -510,79 +510,7 @@ void MainWindow::on_syncProcessLog(const QString& strMsg)
 void MainWindow::on_actionNewNote_triggered()
 {
     WIZDOCUMENTDATA data;
-
-    // private category is seletected
-    if (m_category == m_categoryPrivate) {
-        CWizFolder* pFolder = m_categoryPrivate->SelectedFolder();
-        if (!pFolder) {
-            m_categoryPrivate->addAndSelectFolder("/My Notes/");
-            pFolder = m_categoryPrivate->SelectedFolder();
-
-            if (!pFolder)
-                return;
-        }
-
-        //m_dbMgr.db().CreateDocumentAndInit("<body><div>&nbsp;</div></body>", "", 0, tr("New note"), "newnote", pFolder->Location(), "", data);
-        bool ret = m_dbMgr.db().CreateDocumentAndInit("", "", 0, tr("New note"), "newnote", pFolder->Location(), "", data);
-        if (!ret) {
-            TOLOG("Create new document failed!");
-            delete pFolder;
-            return;
-        }
-
-        delete pFolder;
-
-//    // if tag category is selected, create document at default location and also assign this tag to new document
-//    } else if (m_category == m_categoryTags) {
-//        bool ret = m_dbMgr.db().CreateDocumentAndInit("", "", 0, tr("New note"), "newnote", "/My Notes/", "", data);
-//        if (!ret) {
-//            TOLOG("Create new document failed!");
-//            return;
-//        }
-
-//        if (CWizCategoryViewTagItem* p = dynamic_cast<CWizCategoryViewTagItem*>(m_categoryTags->currentItem())) {
-//            CWizDocument doc(m_dbMgr.db(), data);
-//            doc.AddTag(p->tag());
-//        } else {
-//            m_categoryTags->setCurrentItem(m_categoryTags->findAllTags());
-//        }
-
-//    // if group category is selected
-//    } else if (m_category == m_categoryGroups) {
-//        QString strKbGUID;
-//        WIZTAGDATA tag;
-//        // if group root selected
-//        if (CWizCategoryViewGroupRootItem* pRoot = dynamic_cast<CWizCategoryViewGroupRootItem*>(m_categoryGroups->currentItem())) {
-//            strKbGUID = pRoot->kbGUID();
-//        } else if (CWizCategoryViewGroupItem* p = dynamic_cast<CWizCategoryViewGroupItem*>(m_categoryGroups->currentItem())) {
-//            strKbGUID = p->kbGUID();
-//            tag = p->tag();
-//        } else {
-//            Q_ASSERT(0);
-//            return;
-//        }
-
-//        // FIXME: root of all groups will be selected, fix this issue
-//        if (strKbGUID.isEmpty()) {
-//            return;
-//        }
-
-//        CWizDatabase& db = m_dbMgr.db(strKbGUID);
-//        bool ret = db.CreateDocumentAndInit("", "", 0, tr("New note"), "newnote", "/My Notes/", "", data);
-//        if (!ret) {
-//            TOLOG("Create new document for group failed!");
-//            return;
-//        }
-
-//        // also assign tag(folder)
-//        if (!tag.strGUID.isEmpty()) {
-//            CWizDocument doc(db, data);
-//            doc.AddTag(tag);
-//        }
-
-    } else {
-        Q_ASSERT(0);
-    }
+    m_category->createDocument(data);
 
     m_documentForEditing = data;
     m_documents->addAndSelectDocument(data);
@@ -731,20 +659,6 @@ void MainWindow::on_actionEditorViewSource_triggered()
     m_doc->web()->editorCommandExecuteViewSource();
 }
 
-//void MainWindow::on_actionDeleteCurrentNote_triggered()
-//{
-//    WIZDOCUMENTDATA document = m_doc->document();
-//    if (document.strGUID.IsEmpty())
-//        return;
-//
-//    if (!m_dbMgr.isPrivate(document.strKbGUID)) {
-//        return;
-//    }
-//
-//    CWizDocument doc(m_dbMgr.db(), document);
-//    doc.Delete();
-//}
-
 void MainWindow::on_actionConsole_triggered()
 {
     m_console->show();
@@ -778,10 +692,6 @@ void MainWindow::on_actionRebuildFTS_triggered()
 {
     // FIXME: ensure aborted before rebuild
     m_searchIndexer->rebuild();
-
-//    if (!QMetaObject::invokeMethod(m_searchIndexer->worker(), "rebuildFTSIndex")) {
-//        TOLOG("thread call to rebuild FTS failed");
-//    }
 }
 
 void MainWindow::on_actionSearch_triggered()
@@ -795,11 +705,6 @@ void MainWindow::on_actionResetSearch_triggered()
     m_searchBox->focus();
     m_category->restoreSelection();
 }
-
-//void MainWindow::on_searchIndexerStarted()
-//{
-//    QTimer::singleShot(5 * 1000, m_searchIndexer->worker(), SLOT(buildFTSIndex()));
-//}
 
 void MainWindow::on_searchDocumentFind(const WIZDOCUMENTDATAEX& doc)
 {
@@ -818,12 +723,6 @@ void MainWindow::on_search_doSearch(const QString& keywords)
     m_documents->clear();
 
     m_searchIndexer->search(keywords, 1000); // FIXME
-
-//    if (!QMetaObject::invokeMethod(m_searchIndexer->worker(), "search", \
-//                                   Q_ARG(QString, keywords), \
-//                                   Q_ARG(int, 100))) {
-//        TOLOG("FTS search failed");
-//    }
 }
 
 #ifndef Q_OS_MAC
@@ -1048,7 +947,7 @@ void MainWindow::locateDocument(const WIZDOCUMENTDATA& data)
     try
     {
         m_bUpdatingSelection = true;
-        m_categoryPrivate->addAndSelectFolder(data.strLocation);
+        m_category->addAndSelectFolder(data.strLocation);
         m_documents->addAndSelectDocument(data);
     }
     catch (...)

@@ -14,15 +14,10 @@ public:
 
 protected:
     virtual void paintEvent(QPaintEvent *event);
-    virtual void mousePressEvent(QMouseEvent* event);
-    virtual void leaveEvent(QEvent *event);
     virtual QSize sizeHint() const;
 
 private:
     CWizExplorerApp& m_app;
-    QIcon m_iconDefault;
-    QIcon m_iconPressed;
-
 };
 
 #endif // WIZBUTTON_H

@@ -176,6 +176,8 @@ public:
                           const std::map<CString, int>& mapDocumentCount);
     void updateDocumentCount(const QString& strKbGUID);
 
+    void createDocument(WIZDOCUMENTDATA& data);
+
 private:
     QPointer<QMenu> m_menuFolderRoot;
     QPointer<QMenu> m_menuFolder;

@@ -579,6 +579,55 @@ void CWizCategoryView::showGroupContextMenu(QPoint pos)
     m_menuGroup->popup(pos);
 }
 
+void CWizCategoryView::createDocument(WIZDOCUMENTDATA& data)
+{
+    bool bFallback = true;
+
+    QString strKbGUID;
+    QString strLocation = "/My Notes/";
+    WIZTAGDATA tag;
+
+    if (CWizCategoryViewFolderItem* pItem = currentCategoryItem<CWizCategoryViewFolderItem>())
+    {
+        strKbGUID = m_dbMgr.db().kbGUID();
+        strLocation = pItem->location();
+        bFallback = false;
+    }
+    else if (CWizCategoryViewTagItem* pItem = currentCategoryItem<CWizCategoryViewTagItem>())
+    {
+        strKbGUID = m_dbMgr.db().kbGUID();
+        tag = pItem->tag();
+        bFallback = false;
+    }
+    else if (CWizCategoryViewGroupRootItem* pItem = currentCategoryItem<CWizCategoryViewGroupRootItem>())
+    {
+        strKbGUID = pItem->kbGUID();
+        bFallback = false;
+    }
+    else if (CWizCategoryViewGroupItem* pItem = currentCategoryItem<CWizCategoryViewGroupItem>())
+    {
+        strKbGUID = pItem->kbGUID();
+        tag = pItem->tag();
+        bFallback = false;
+    }
+
+    if (bFallback) {
+        strKbGUID = m_dbMgr.db().kbGUID();
+        addAndSelectFolder(strLocation);
+    }
+
+    bool ret = m_dbMgr.db(strKbGUID).CreateDocumentAndInit("", "", 0, tr("New note"), "newnote", strLocation, "", data);
+    if (!ret) {
+        TOLOG("Failed to new document!");
+        return;
+    }
+
+    if (!tag.strGUID.IsEmpty()) {
+        CWizDocument doc(m_dbMgr.db(strKbGUID), data);
+        doc.AddTag(tag);
+    }
+}
+
 void CWizCategoryView::on_action_newDocument()
 {
     if (currentCategoryItem<CWizCategoryViewFolderItem>()

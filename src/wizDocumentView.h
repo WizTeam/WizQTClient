@@ -26,12 +26,6 @@ class CWizTitleBar;
 class CWizInfoToolBar;
 class CWizNotifyToolbar;
 
-enum WizDocumentUserNotify
-{
-    DocumentLocked,
-    DocumentIsDeleted,
-    DocumentPermissionLack
-};
 
 class CWizDocumentView : public QWidget
 {
@@ -49,10 +43,7 @@ protected:
     CWizExplorerApp& m_app;
     CWizDatabaseManager& m_dbMgr;
     CWizUserSettings& m_userSettings;
-    QPointer<CWizTitleBar> m_title;
-    QPointer<CWizInfoToolBar> m_infoToolBar;
-    QPointer<CWizNotifyToolbar> m_notifyToolBar;
-    QPointer<CWizEditorToolBar> m_editorToolBar;
+    CWizTitleBar* m_title;
     CWizDocumentWebView* m_web;
     QPointer<QWidget> m_client;
     QPointer<CWizTagListWidget> m_tags;
@@ -61,18 +52,6 @@ protected:
 
     bool m_editingDocument;
     WizDocumentViewMode m_viewMode;
-
-    //QTimer m_timerDelay;
-    //WIZDOCUMENTDATA m_dataDelay;
-
-    int m_nSizeAdjustedTime;
-
-    virtual void wheelEvent(QWheelEvent* event);
-
-private:
-    QPointer<QLineEdit> m_editTitle;
-    QWidget* createDocumentFrame();
-    void showNotify(WizDocumentUserNotify type);
 
 public:
     bool viewDocument(const WIZDOCUMENTDATA& data, bool forceEdit);
@@ -85,17 +64,20 @@ public:
     void setModified(bool modified);
     void settingsChanged();
 
+    void showListTag();
+    void showListAttachment();
+    void showListInfo();
+
 public Q_SLOTS:
     void on_titleEdit_editingFinished();
     void on_titleEdit_returnPressed();
 
-    void on_editDocumentButton_clicked();
-    void on_tagsButton_clicked();
-    void on_attachmentButton_clicked();
-    void on_infoButton_clicked();
+    void on_segmentButton_clicked(int index);
+
+    void on_document_modified(const WIZDOCUMENTDATA& documentOld,
+                              const WIZDOCUMENTDATA& documentNew);
     void on_attachment_created(const WIZDOCUMENTATTACHMENTDATA& attachment);
     void on_attachment_deleted(const WIZDOCUMENTATTACHMENTDATA& attachment);
-    void on_document_modified(const WIZDOCUMENTDATA& documentOld, const WIZDOCUMENTDATA& documentNew);
 
     void on_webview_focusIn();
     void on_webview_focusOut();

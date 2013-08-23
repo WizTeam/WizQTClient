@@ -80,6 +80,7 @@ void CWizUserInfoWidget::paintEvent(QPaintEvent *event)
             p.setFont(font);
         }
 
+        p.setPen("#787878"); // FIXME
         p.drawText(rectText, Qt::AlignCenter, opt.text);
     }
 

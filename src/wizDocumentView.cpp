@@ -13,140 +13,50 @@
 #include "wiznoteinfoform.h"
 #include "wiznotestyle.h"
 #include "wizEditorToolBar.h"
+#include "widgets/wizSegmentedButton.h"
+#include "widgets/qsegmentcontrol.h"
 
 
-class CWizTitleBar : public QWidget
+class CWizTitleEdit : public QLineEdit
 {
 public:
-    CWizTitleBar(CWizExplorerApp& app, QWidget* parent)
-        : QWidget(parent)
-        , m_app(app)
-        , m_editing(false)
+    CWizTitleEdit(CWizExplorerApp& app, QWidget* parent = 0)
+        : QLineEdit(parent)
+        , m_dbMgr(app.databaseManager())
     {
-        setContentsMargins(4, 4, 4, 4);
+        setStyleSheet("font-size: 12px;");
+        setContentsMargins(5, 0, 0, 0);
+        setAlignment(Qt::AlignLeft | Qt::AlignBottom);
+        setAttribute(Qt::WA_MacShowFocusRect, false);
+        setFrame(false);
+    }
 
-        QHBoxLayout* layout = new QHBoxLayout(this);
-        layout->setContentsMargins(0, 0, 0, 0);
-        setLayout(layout);
+    void setDocument(const WIZDOCUMENTDATA& data, bool bEdit)
+    {
+    }
 
-        //m_titleEdit = new QLineEdit(this);
+protected:
+    virtual void inputMethodEvent(QInputMethodEvent* event)
+    {
+        // FIXME: This should be a QT bug
+        // when use input method, input as normal is fine, but input as selection text
+        // will lose blink cursor, we should reset cursor position first!!!
+        if (hasSelectedText()) {
+            del();
+        }
 
-        m_editIcon = ::WizLoadSkinIcon(m_app.userSettings().skin(), "document_lock");
-        m_commitIcon = ::WizLoadSkinIcon(m_app.userSettings().skin(), "document_unlock");
-        m_tagsIcon = ::WizLoadSkinIcon(m_app.userSettings().skin(), "document_tag");
-        m_attachmentIcon = ::WizLoadSkinIcon(m_app.userSettings().skin(), "document_attachment");
-        m_infoIcon = ::WizLoadSkinIcon(m_app.userSettings().skin(), "document_info");
+        QLineEdit::inputMethodEvent(event);
+    }
 
-        m_editDocumentButton = new CWizImagePushButton(m_editIcon, "", this);
-        updateEditDocumentButtonIcon(false);
-        m_editDocumentButton->setStyle(::WizGetStyle(m_app.userSettings().skin()));
-        m_editDocumentButton->setRedFlag(true);
-
-        m_tagsButton = new CWizImagePushButton(m_tagsIcon, "", this);
-        m_tagsButton->setStyle(::WizGetStyle(m_app.userSettings().skin()));
-
-        m_attachmentButton = new CWizImagePushButton(m_attachmentIcon, "", this);
-        m_attachmentButton->setStyle(::WizGetStyle(m_app.userSettings().skin()));
-
-        m_infoButton = new CWizImagePushButton(m_infoIcon, "", this);
-        m_infoButton->setStyle(::WizGetStyle(m_app.userSettings().skin()));
-
-        layout->addStretch();
-        //layout->addWidget(m_titleEdit);
-        layout->addWidget(m_editDocumentButton);
-        layout->addWidget(m_tagsButton);
-        layout->addWidget(m_attachmentButton);
-        layout->addWidget(m_infoButton);
-
-        //m_titleEdit->hide();
+    virtual QSize sizeHint() const
+    {
+        return QSize(fontMetrics().width(text()), fontMetrics().height() + 10);
     }
 
 private:
-    CWizExplorerApp& m_app;
-    //QPointer<QLineEdit> m_titleEdit;
-    QPointer<CWizImagePushButton> m_editDocumentButton;
-    QPointer<CWizImagePushButton> m_tagsButton;
-    QPointer<CWizImagePushButton> m_attachmentButton;
-    QPointer<CWizImagePushButton> m_infoButton;
-
-    QIcon m_editIcon;
-    QIcon m_commitIcon;
-    QIcon m_tagsIcon;
-    QIcon m_attachmentIcon;
-    QIcon m_infoIcon;
-
-    bool m_editing;
-private:
-    void updateEditDocumentButtonIcon(bool editing)
-    {
-        m_editDocumentButton->setIcon(editing ? m_commitIcon : m_editIcon);
-        m_editing = editing;
-
-        updateEditDocumentButtonTooltip();
-    }
-    void updateEditDocumentButtonTooltip()
-    {
-        QString shortcut = ::WizGetShortcut("EditNote", "Alt+1");
-        QString strSaveAndRead = QObject::tr("Save & Switch to Reading View");
-        QString strRead = QObject::tr("Switch to Reading View");
-        QString strEditNote = QObject::tr("Switch to Editing View");
-        QString strSwitchRead = m_editDocumentButton->text().isEmpty() ? strRead : strSaveAndRead;
-        QString strToolTip = m_editing ? strSwitchRead : strEditNote;
-        strToolTip += " (" + shortcut + ")";
-        m_editDocumentButton->setToolTip(strToolTip);
-        m_editDocumentButton->setShortcut(QKeySequence::fromString(shortcut));
-    }
-
-public:
-    //QLineEdit* titleEdit() const { return m_titleEdit; }
-    QPushButton* editDocumentButton() const { return m_editDocumentButton; }
-    QPushButton* tagsButton() const { return m_tagsButton; }
-    QPushButton* attachmentButton() const { return m_attachmentButton; }
-    QPushButton* infoButton() const { return m_infoButton; }
-
-    void setEditingDocument(bool editing) { updateEditDocumentButtonIcon(editing); }
-
-    void updateInformation(CWizDatabase& db, const WIZDOCUMENTDATA& doc)
-    {
-        // retrieve document info and reset
-        WIZDOCUMENTDATA data;
-        if (!db.DocumentFromGUID(doc.strGUID, data)) {
-            return;
-        }
-
-        //title
-//        if (m_titleEdit->text() != data.strTitle) {
-//            m_titleEdit->setText(data.strTitle);
-//        }
-
-        // update tags count only if it's enabled
-        if (m_tagsButton->isEnabled()) {
-            CWizStdStringArray arrayTagGUID;
-            db.GetDocumentTags(data.strGUID, arrayTagGUID);
-            QString strTagText = arrayTagGUID.empty() ? QString() : QString::number(arrayTagGUID.size());
-            m_tagsButton->setText(strTagText);
-        }
-
-        QString tagsShortcut = ::WizGetShortcut("EditNoteTags", "Alt+2");
-        QString strTagsToolTip = QObject::tr("Tags (%1)").arg(tagsShortcut);
-        m_tagsButton->setToolTip(strTagsToolTip);
-        m_tagsButton->setShortcut(QKeySequence::fromString(tagsShortcut));
-
-        //attachments
-        int nAttachmentCount = db.GetDocumentAttachmentCount(data.strGUID);
-        CString strAttachmentText = nAttachmentCount ? WizIntToStr(nAttachmentCount) : CString();
-        m_attachmentButton->setText(strAttachmentText);
-        QString attachmentShortcut = ::WizGetShortcut("EditNoteAttachments", "Alt+3");
-        m_attachmentButton->setToolTip(QObject::tr("Attachments (%1)").arg(attachmentShortcut));
-        m_attachmentButton->setShortcut(QKeySequence::fromString(attachmentShortcut));
-    }
-
-    void setModified(bool modified)
-    {
-        m_editDocumentButton->setText(modified ? "*" : "");
-        updateEditDocumentButtonTooltip();
-    }
+    CWizDatabaseManager& m_dbMgr;
 };
+
 
 class CWizInfoToolBar : public QWidget
 {
@@ -155,12 +65,15 @@ public:
         : QWidget(parent)
         , m_app(app)
     {
-        setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
         setStyleSheet("font-size: 11px; color: #646464;");
+        setContentsMargins(5, 0, 0, 0);
+
+        // FIXME: should be the same as editor toolbar
+        setFixedHeight(32);
 
         QHBoxLayout* layout = new QHBoxLayout();
-        layout->setContentsMargins(8, 0, 8, 0);
-        layout->setSpacing(15);
+        layout->setContentsMargins(0, 0, 0, 0);
+        layout->setSpacing(10);
         setLayout(layout);
 
         m_labelCreatedTime = new QLabel(this);
@@ -192,22 +105,25 @@ public:
         m_labelSize->setText(strSize);
     }
 
-    virtual QSize sizeHint() const
-    {
-        return QSize(1, 32);
-    }
-
 private:
     CWizExplorerApp& m_app;
-    QPointer<QLabel> m_labelCreatedTime;
-    QPointer<QLabel> m_labelModifiedTime;
-    QPointer<QLabel> m_labelAuthor;
-    QPointer<QLabel> m_labelSize;
+    QLabel* m_labelCreatedTime;
+    QLabel* m_labelModifiedTime;
+    QLabel* m_labelAuthor;
+    QLabel* m_labelSize;
 };
+
 
 class CWizNotifyToolbar : public QWidget
 {
 public:
+    enum NotifyType
+    {
+        DocumentLocked,
+        DocumentIsDeleted,
+        DocumentPermissionLack
+    };
+
     CWizNotifyToolbar(CWizExplorerApp& app, QWidget* parent = 0)
         : QWidget(parent)
         , m_app(app)
@@ -237,22 +153,222 @@ private:
     QPointer<QLabel> m_labelNotify;
 };
 
-// FIXME: This should be a QT bug
-// when use input method, input as normal is fine, but input as selection text
-// will lose blink cursor, we should reset cursor position first!!!
-class CWizTitleEdit : public QLineEdit
+
+class CWizTitleBar : public QWidget
 {
 public:
-    CWizTitleEdit(QWidget* parent = 0) : QLineEdit(parent) {}
+    enum Buttons {
+        ButtonEdit,
+        ButtonTag,
+        ButtonAttachment,
+        ButtonInfo
+    };
 
-protected:
-    virtual void inputMethodEvent(QInputMethodEvent* event)
+    CWizTitleBar(CWizExplorerApp& app, QWidget* parent)
+        : QWidget(parent)
+        , m_app(app)
+        , m_dbMgr(app.databaseManager())
+        , m_editing(false)
     {
-        if (hasSelectedText()) {
-            del();
+        QVBoxLayout* layout = new QVBoxLayout(this);
+        layout->setContentsMargins(0, 0, 0, 0);
+        layout->setSpacing(0);
+        setLayout(layout);
+
+        m_editTitle = new CWizTitleEdit(app, this);
+        m_infoBar = new CWizInfoToolBar(app, this);
+        m_editorBar = new CWizEditorToolBar(app, this);
+        m_notifyBar = new CWizNotifyToolbar(app, this);
+
+        m_unlockIcon = ::WizLoadSkinIcon(m_app.userSettings().skin(), "document_unlock");
+        m_lockIcon = ::WizLoadSkinIcon(m_app.userSettings().skin(), "document_lock");
+        m_tagsIcon = ::WizLoadSkinIcon(m_app.userSettings().skin(), "document_tag");
+        m_attachNoneIcon = ::WizLoadSkinIcon(m_app.userSettings().skin(), "document_attachment");
+        m_attachExistIcon = ::WizLoadSkinIcon(m_app.userSettings().skin(), "document_attachment_exist");
+        m_infoIcon = ::WizLoadSkinIcon(m_app.userSettings().skin(), "document_info");
+
+        m_segment = new QtSegmentControl(this);
+        m_segment->setSelectionBehavior(QtSegmentControl::SelectNone);
+        m_segment->setCount(4);
+        m_segment->setSegmentIcon(0, m_lockIcon);
+        m_segment->setSegmentIcon(1, m_tagsIcon);
+        m_segment->setSegmentIcon(2, m_attachNoneIcon);
+        m_segment->setSegmentIcon(3, m_infoIcon);
+        m_segment->setIconSize(QSize(16, 16));
+
+        QWidget* line1 = new QWidget(this);
+        line1->setFixedHeight(12);
+        line1->setStyleSheet("border-top-width:1;border-top-style:solid;border-top-color:#646464");
+
+        QWidget* line2 = new QWidget(this);
+        line2->setFixedHeight(1);
+        line2->setFixedWidth(10);
+        line2->setStyleSheet("border-bottom-width:1;border-bottom-style:solid;border-bottom-color:#646464");
+
+        QVBoxLayout* layoutInfo1 = new QVBoxLayout();
+        layoutInfo1->setContentsMargins(0, 0, 0, 0);
+        layoutInfo1->setSpacing(0);
+        layoutInfo1->addWidget(m_infoBar);
+        layoutInfo1->addWidget(m_editorBar);
+        layoutInfo1->addWidget(line1);
+        m_editorBar->hide();
+
+        QHBoxLayout* layoutInfo2 = new QHBoxLayout();
+        layoutInfo2->setContentsMargins(0, 0, 0, 0);
+        layoutInfo2->setSpacing(0);
+        layoutInfo2->addWidget(m_segment);
+        layoutInfo2->addWidget(line2);
+
+        QVBoxLayout* layoutInfo3 = new QVBoxLayout();
+        layoutInfo3->addStretch();
+        layoutInfo3->addLayout(layoutInfo2);
+
+        QHBoxLayout* layoutInfo4 = new QHBoxLayout();
+        layoutInfo4->setContentsMargins(0, 0, 0, 0);
+        layoutInfo4->setSpacing(0);
+        layoutInfo4->addLayout(layoutInfo1);
+        layoutInfo4->addLayout(layoutInfo3);
+
+        layout->addWidget(m_editTitle);
+        layout->addLayout(layoutInfo4);
+        layout->addWidget(m_notifyBar);
+        m_notifyBar->hide();
+    }
+
+private:
+    CWizExplorerApp& m_app;
+    CWizDatabaseManager& m_dbMgr;
+
+    CWizTitleEdit* m_editTitle;
+    CWizInfoToolBar* m_infoBar;
+    CWizEditorToolBar* m_editorBar;
+    CWizNotifyToolbar* m_notifyBar;
+    QtSegmentControl* m_segment;
+
+    QIcon m_unlockIcon;
+    QIcon m_lockIcon;
+    QIcon m_tagsIcon;
+    QIcon m_attachNoneIcon;
+    QIcon m_attachExistIcon;
+    QIcon m_infoIcon;
+
+    bool m_editing;
+    bool m_bLocked;
+
+private:
+    void updateEditDocumentButtonIcon(bool editing)
+    {
+        m_segment->setSegmentIcon(ButtonEdit, editing ? m_unlockIcon : m_lockIcon);
+        m_editing = editing;
+
+        updateEditDocumentButtonTooltip();
+    }
+
+    void updateEditDocumentButtonTooltip()
+    {
+        //QString shortcut = ::WizGetShortcut("EditNote", "Alt+1");
+        //QString strSaveAndRead = QObject::tr("Save & Switch to Reading View");
+        //QString strRead = QObject::tr("Switch to Reading View");
+        //QString strEditNote = QObject::tr("Switch to Editing View");
+        //QString strSwitchRead = m_editDocumentButton->text().isEmpty() ? strRead : strSaveAndRead;
+        //QString strToolTip = m_editing ? strSwitchRead : strEditNote;
+        //strToolTip += " (" + shortcut + ")";
+        //m_segment->setSegmentToolTip(ButtonEdit, strToolTip);
+        //m_editDocumentButton->setShortcut(QKeySequence::fromString(shortcut));
+    }
+
+public:
+    CWizTitleEdit* titleEdit() const { return m_editTitle; }
+    CWizInfoToolBar* infoBar() const { return m_infoBar; }
+    CWizEditorToolBar* editorBar() const { return m_editorBar; }
+    CWizNotifyToolbar* notifyBar() const { return m_notifyBar; }
+    QtSegmentControl* segmentButton() const { return m_segment; }
+
+    void showNotify(CWizNotifyToolbar::NotifyType type)
+    {
+        switch (type) {
+        case CWizNotifyToolbar::DocumentLocked:
+            m_notifyBar->setNotifyText(tr("The document is locked and read only, press unlock button if you need edit."));
+            break;
+        case CWizNotifyToolbar::DocumentIsDeleted:
+            m_notifyBar->setNotifyText(tr("This document is deleted, You can edit after move to other folders."));
+            break;
+        case CWizNotifyToolbar::DocumentPermissionLack:
+            m_notifyBar->setNotifyText(tr("Your permission is not enough to edit this document."));
+            break;
+        defaut:
+            Q_ASSERT(0);
         }
 
-        QLineEdit::inputMethodEvent(event);
+        m_notifyBar->show();
+    }
+
+    void setDocument(const WIZDOCUMENTDATA& data, bool editing, bool locked)
+    {
+        // indicate document is editable or not
+        m_bLocked = locked;
+
+        m_editTitle->setText(data.strTitle);
+        m_segment->setSegmentEnabled(ButtonEdit, !locked);
+        m_segment->setSegmentIcon(ButtonAttachment, data.nAttachmentCount > 0 ? m_attachExistIcon : m_attachNoneIcon);
+        m_infoBar->setDocument(data);
+
+        setEditingDocument(editing);
+    }
+
+    void setEditingDocument(bool editing)
+    {
+        // editing locked document is not allowed
+        if (editing && m_bLocked)
+            return;
+
+        // Qt-bug: Must always set this flag after setReadOnly
+        m_editTitle->setReadOnly(!editing);
+        m_editTitle->setAttribute(Qt::WA_MacShowFocusRect, false);
+
+        updateEditDocumentButtonIcon(editing);
+    }
+
+    void updateInformation(CWizDatabase& db, const WIZDOCUMENTDATA& doc)
+    {
+        // retrieve document info and reset
+        WIZDOCUMENTDATA data;
+        if (!db.DocumentFromGUID(doc.strGUID, data)) {
+            return;
+        }
+
+        //title
+//        if (m_titleEdit->text() != data.strTitle) {
+//            m_titleEdit->setText(data.strTitle);
+//        }
+
+        // update tags count only if it's enabled
+        //if (m_tagsButton->isEnabled()) {
+        //    CWizStdStringArray arrayTagGUID;
+        //    db.GetDocumentTags(data.strGUID, arrayTagGUID);
+        //    QString strTagText = arrayTagGUID.empty() ? QString() : QString::number(arrayTagGUID.size());
+        //    m_tagsButton->setText(strTagText);
+        //}
+
+        //QString tagsShortcut = ::WizGetShortcut("EditNoteTags", "Alt+2");
+        //QString strTagsToolTip = QObject::tr("Tags (%1)").arg(tagsShortcut);
+        //m_tagsButton->setToolTip(strTagsToolTip);
+        //m_tagsButton->setShortcut(QKeySequence::fromString(tagsShortcut));
+
+        //attachments
+        int nAttachmentCount = db.GetDocumentAttachmentCount(data.strGUID);
+        m_segment->setSegmentIcon(ButtonAttachment, nAttachmentCount > 0 ? m_attachExistIcon : m_attachNoneIcon);
+        //CString strAttachmentText = nAttachmentCount ? WizIntToStr(nAttachmentCount) : CString();
+        //m_attachmentButton->setText(strAttachmentText);
+        //QString attachmentShortcut = ::WizGetShortcut("EditNoteAttachments", "Alt+3");
+        //m_attachmentButton->setToolTip(QObject::tr("Attachments (%1)").arg(attachmentShortcut));
+        //m_attachmentButton->setShortcut(QKeySequence::fromString(attachmentShortcut));
+    }
+
+    void setModified(bool modified)
+    {
+        //m_editDocumentButton->setText(modified ? "*" : "");
+        //updateEditDocumentButtonTooltip();
     }
 };
 
@@ -263,36 +379,22 @@ CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
     , m_userSettings(app.userSettings())
     , m_dbMgr(app.databaseManager())
     , m_title(new CWizTitleBar(app, this))
-    , m_infoToolBar(new CWizInfoToolBar(app))
-    , m_notifyToolBar(new CWizNotifyToolbar(app))
     , m_web(new CWizDocumentWebView(app, this))
-    , m_editorToolBar(new CWizEditorToolBar(app))
     , m_editingDocument(true)
     , m_viewMode(app.userSettings().noteViewMode())
-    , m_nSizeAdjustedTime(0)
 {
-    m_client = new QWidget(this);
     QVBoxLayout* layout = new QVBoxLayout();
     layout->setContentsMargins(0, 0, 0, 0);
     layout->setSpacing(0);
+
+    m_client = new QWidget(this);
     m_client->setLayout(layout);
 
-    QWidget* line = new QWidget(this);
-    line->setMaximumHeight(1);
-    line->setMinimumHeight(1);
-    line->setStyleSheet("border-bottom-width:1;border-bottom-style:solid;border-bottom-color:#bbbbbb");
-
-
     layout->addWidget(m_title);
-    layout->addWidget(line);
-    layout->addWidget(m_editorToolBar);
-    layout->addWidget(m_infoToolBar);
-    layout->addWidget(m_notifyToolBar);
-    QWidget* doc = createDocumentFrame();
-    layout->addWidget(doc);
+    layout->addWidget(m_web);
 
     layout->setStretchFactor(m_title, 0);
-    layout->setStretchFactor(doc, 1);
+    layout->setStretchFactor(m_web, 1);
 
     QVBoxLayout* layoutMain = new QVBoxLayout();
     layoutMain->setContentsMargins(0, 0, 0, 0);
@@ -301,17 +403,14 @@ CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
 
     m_title->setEditingDocument(m_editingDocument);
 
-    connect(m_title->editDocumentButton(), SIGNAL(clicked()), \
-            SLOT(on_editDocumentButton_clicked()));
+    connect(m_title->titleEdit(), SIGNAL(editingFinished()),
+            SLOT(on_titleEdit_editingFinished()));
 
-    connect(m_title->tagsButton(), SIGNAL(clicked()), \
-            SLOT(on_tagsButton_clicked()));
+    connect(m_title->titleEdit(), SIGNAL(returnPressed()),
+            SLOT(on_titleEdit_returnPressed()));
 
-    connect(m_title->attachmentButton(), SIGNAL(clicked()), \
-            SLOT(on_attachmentButton_clicked()));
-
-    connect(m_title->infoButton(), SIGNAL(clicked()), \
-            SLOT(on_infoButton_clicked()));
+    connect(m_title->segmentButton(), SIGNAL(segmentClicked(int)),
+            SLOT(on_segmentButton_clicked(int)));
 
     connect(&m_dbMgr, SIGNAL(documentModified(const WIZDOCUMENTDATA&, const WIZDOCUMENTDATA&)), \
             SLOT(on_document_modified(const WIZDOCUMENTDATA&, const WIZDOCUMENTDATA&)));
@@ -327,58 +426,9 @@ CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
     connect(m_web, SIGNAL(focusOut()), SLOT(on_webview_focusOut()));
 }
 
-void CWizDocumentView::wheelEvent(QWheelEvent* event)
-{
-    QWidget::wheelEvent(event);
-}
-
-QWidget* CWizDocumentView::createDocumentFrame()
-{
-    QWidget* docFrame = new QWidget(this);
-
-    // only apply to current widget, not it's child or subclasses
-    docFrame->setObjectName("docFrame");
-    docFrame->setStyleSheet("QWidget#docFrame {border-radius: 5px; background-color: #FFFFFF; }");
-
-    QVBoxLayout* layoutFrame = new QVBoxLayout();
-    layoutFrame->setContentsMargins(5, 0, 5, 0);
-    layoutFrame->setSpacing(0);
-    docFrame->setLayout(layoutFrame);
-
-    m_editTitle = new CWizTitleEdit(this);
-    m_editTitle->setAttribute(Qt::WA_MacShowFocusRect, false);
-    m_editTitle->setAlignment(Qt::AlignVCenter);
-    m_editTitle->setFixedHeight(30);
-    m_editTitle->setContentsMargins(5, 0, 0, 0);
-    m_editTitle->setFrame(false);
-
-    connect(m_editTitle, SIGNAL(editingFinished()),
-            SLOT(on_titleEdit_editingFinished()));
-    connect(m_editTitle, SIGNAL(returnPressed()),
-            SLOT(on_titleEdit_returnPressed()));
-
-    QWidget* line = new QWidget(this);
-    line->setFixedHeight(1);
-    line->setStyleSheet("border-bottom-width:1;border-bottom-style:solid;border-bottom-color:#D3D3D3");
-
-    layoutFrame->addWidget(m_editTitle);
-    layoutFrame->addWidget(line);
-    layoutFrame->addWidget(m_web);
-
-    // outer most border frame
-    QWidget* docView = new QWidget(this);
-    QVBoxLayout* layoutDoc = new QVBoxLayout();
-    layoutDoc->setSizeConstraint(QLayout::SetMinimumSize);
-    layoutDoc->setContentsMargins(10, 0, 10, 5);
-    docView->setLayout(layoutDoc);
-    layoutDoc->addWidget(docFrame);
-
-    return docView;
-}
-
 CWizEditorToolBar* CWizDocumentView::editorToolBar() const
 {
-    return m_editorToolBar;
+    return m_title->editorBar();
 }
 
 void CWizDocumentView::showClient(bool visible)
@@ -392,45 +442,21 @@ void CWizDocumentView::showClient(bool visible)
 
 void CWizDocumentView::setReadOnly(bool b, bool isGroup)
 {
-    //m_title->titleEdit()->setReadOnly(b);
-
-    m_editTitle->setReadOnly(b);
-    // Qt-bug: Must always set this flag after setReadOnly
-    m_editTitle->setAttribute(Qt::WA_MacShowFocusRect, false);
-
-    m_title->editDocumentButton()->setEnabled(!b);
+    m_title->titleEdit()->setReadOnly(b);
+    m_title->segmentButton()->setSegmentEnabled(CWizTitleBar::ButtonEdit, !b);
 
     // tag is not avaliable for group
     if (isGroup) {
-        m_title->tagsButton()->setText(QString());
-        m_title->tagsButton()->setEnabled(false);
+        m_title->segmentButton()->setSegmentEnabled(CWizTitleBar::ButtonTag, false);
     } else {
-        m_title->tagsButton()->setEnabled(true);
+        m_title->segmentButton()->setSegmentEnabled(CWizTitleBar::ButtonTag, true);
     }
-}
-
-void CWizDocumentView::showNotify(WizDocumentUserNotify type)
-{
-    switch (type) {
-        case DocumentLocked:
-            m_notifyToolBar->setNotifyText(tr("The document is locked and read only, press unlock button if you need edit."));
-            break;
-        case DocumentIsDeleted:
-            m_notifyToolBar->setNotifyText(tr("This document is deleted, You can edit after move to other folders."));
-            break;
-        case DocumentPermissionLack:
-            m_notifyToolBar->setNotifyText(tr("Your permission is not enough to edit this document."));
-            break;
-        defaut:
-            Q_ASSERT(0);
-    }
-
-    m_notifyToolBar->show();
 }
 
 bool CWizDocumentView::viewDocument(const WIZDOCUMENTDATA& data, bool forceEdit)
 {
     bool edit = false;
+    bool locked = false;
 
     if (forceEdit) {
         edit = true;
@@ -448,52 +474,33 @@ bool CWizDocumentView::viewDocument(const WIZDOCUMENTDATA& data, bool forceEdit)
         }
     }
 
-    m_title->editDocumentButton()->show();
-
-    m_editTitle->setReadOnly(false);
-    // Qt-bug: Must always set this flag after setReadOnly
-    m_editTitle->setAttribute(Qt::WA_MacShowFocusRect, false);
-
-    m_notifyToolBar->hide();
 
     if (!edit) {
-        showNotify(DocumentLocked);
-        m_editTitle->setReadOnly(true);
+        m_title->showNotify(CWizNotifyToolbar::DocumentLocked);
+        edit = false;
     }
 
     if (CWizDatabase::IsInDeletedItems(data.strLocation)) {
-        m_title->editDocumentButton()->hide();
-        m_editTitle->setReadOnly(true);
-        showNotify(DocumentIsDeleted);
-
+        m_title->showNotify(CWizNotifyToolbar::DocumentIsDeleted);
         edit = false;
+        locked = true;
     }
 
-    // check user permission
-    int perm = m_dbMgr.db(data.strKbGUID).permission();
-    QString strUserId = m_dbMgr.db().getUserId();
-    // only reading is permit
-    if (perm > WIZ_USERGROUP_AUTHOR ||
-            (perm == WIZ_USERGROUP_AUTHOR && data.strOwner != strUserId)) {
-        m_title->editDocumentButton()->hide();
-        m_editTitle->setReadOnly(true);
-        showNotify(DocumentPermissionLack);
-
+    if (!m_dbMgr.db(data.strKbGUID).CanEditDocument(data)) {
+        m_title->showNotify(CWizNotifyToolbar::DocumentPermissionLack);
         edit = false;
+        locked = true;
+    }
+
+    if (edit) {
+        m_title->notifyBar()->hide();
     }
 
     // load document
-    m_editTitle->setText(data.strTitle);
+    m_title->setDocument(data, edit, locked);
     m_web->viewDocument(data, edit);
 
     m_editingDocument = edit;
-    m_title->setEditingDocument(m_editingDocument);
-    m_title->updateInformation(m_dbMgr.db(data.strKbGUID), data);
-    m_infoToolBar->setDocument(data);
-
-    m_infoToolBar->show();
-    m_editorToolBar->hide();
-
     return true;
 }
 
@@ -509,18 +516,17 @@ const WIZDOCUMENTDATA& CWizDocumentView::document()
 void CWizDocumentView::editDocument(bool editing)
 {
     if (!editing) {
-        showNotify(DocumentLocked);
-        m_editTitle->setReadOnly(true);
+        m_title->showNotify(CWizNotifyToolbar::DocumentLocked);
+        //m_editTitle->setReadOnly(true);
     } else {
-        m_notifyToolBar->hide();
-        m_editTitle->setReadOnly(false);
-        // Qt-bug: Must always set this flag after setReadOnly
-        m_editTitle->setAttribute(Qt::WA_MacShowFocusRect, false);
+        m_title->notifyBar()->hide();
+        //m_editTitle->setReadOnly(false);
     }
 
+    m_title->setEditingDocument(editing);
+    m_web->setEditingDocument(editing);
+
     m_editingDocument = editing;
-    m_title->setEditingDocument(m_editingDocument);
-    m_web->setEditingDocument(m_editingDocument);
 }
 
 void CWizDocumentView::setViewMode(WizDocumentViewMode mode)
@@ -556,7 +562,7 @@ void CWizDocumentView::on_titleEdit_editingFinished()
     WIZDOCUMENTDATA data;
     CWizDatabase& db = m_dbMgr.db(m_web->document().strKbGUID);
     if (db.DocumentFromGUID(m_web->document().strGUID, data)) {
-        QString strNewTitle = m_editTitle->text().left(255);
+        QString strNewTitle = m_title->titleEdit()->text().left(255);
         if (strNewTitle != data.strTitle) {
             data.strTitle = strNewTitle;
             db.ModifyDocumentInfo(data);
@@ -570,26 +576,27 @@ void CWizDocumentView::on_titleEdit_returnPressed()
     m_web->editorFocus();
 }
 
-void CWizDocumentView::on_editDocumentButton_clicked()
+void CWizDocumentView::on_segmentButton_clicked(int index)
 {
-    editDocument(!m_editingDocument);
-}
-
-void CWizDocumentView::on_attachmentButton_clicked()
-{
-    if (!m_attachments) {
-        m_attachments = new CWizAttachmentListWidget(m_app, topLevelWidget());
+    switch (index) {
+    case CWizTitleBar::ButtonEdit:
+        editDocument(!m_editingDocument);
+        break;
+    case CWizTitleBar::ButtonTag:
+        showListTag();
+        break;
+    case CWizTitleBar::ButtonAttachment:
+        showListAttachment();
+        break;
+    case CWizTitleBar::ButtonInfo:
+        showListInfo();
+        break;
+    default:
+        Q_ASSERT(0);
     }
-
-    m_attachments->setDocument(m_web->document());
-
-    QPushButton* btn = m_title->attachmentButton();
-    QRect rc = btn->geometry();
-    QPoint pt = btn->mapToGlobal(QPoint(rc.width() / 2, rc.height()));
-    m_attachments->showAtPoint(pt);
 }
 
-void CWizDocumentView::on_tagsButton_clicked()
+void CWizDocumentView::showListTag()
 {
     if (!m_tags) {
         m_tags = new CWizTagListWidget(m_dbMgr, topLevelWidget());
@@ -597,13 +604,25 @@ void CWizDocumentView::on_tagsButton_clicked()
 
     m_tags->setDocument(m_web->document());
 
-    QPushButton* btn = m_title->tagsButton();
-    QRect rc = btn->geometry();
-    QPoint pt = btn->mapToGlobal(QPoint(rc.width() / 2, rc.height()));
+    QRect rc = m_title->segmentButton()->segmentRect(CWizTitleBar::ButtonTag);
+    QPoint pt = m_title->segmentButton()->mapToGlobal(QPoint(rc.x() + rc.width()/2, rc.y() + rc.height()));
     m_tags->showAtPoint(pt);
 }
 
-void CWizDocumentView::on_infoButton_clicked()
+void CWizDocumentView::showListAttachment()
+{
+    if (!m_attachments) {
+        m_attachments = new CWizAttachmentListWidget(m_app, topLevelWidget());
+    }
+
+    m_attachments->setDocument(m_web->document());
+
+    QRect rc = m_title->segmentButton()->segmentRect(CWizTitleBar::ButtonAttachment);
+    QPoint pt = m_title->segmentButton()->mapToGlobal(QPoint(rc.x() + rc.width()/2, rc.y() + rc.height()));
+    m_attachments->showAtPoint(pt);
+}
+
+void CWizDocumentView::showListInfo()
 {
     if (!m_info) {
         m_info = new CWizNoteInfoForm(m_dbMgr, topLevelWidget());
@@ -611,9 +630,8 @@ void CWizDocumentView::on_infoButton_clicked()
 
     m_info->setDocument(m_web->document());
 
-    QPushButton* btn = m_title->infoButton();
-    QRect rc = btn->geometry();
-    QPoint pt = btn->mapToGlobal(QPoint(rc.width() / 2, rc.height()));
+    QRect rc = m_title->segmentButton()->segmentRect(CWizTitleBar::ButtonInfo);
+    QPoint pt = m_title->segmentButton()->mapToGlobal(QPoint(rc.x() + rc.width()/2, rc.y() + rc.height()));
     m_info->showAtPoint(pt);
 }
 
@@ -647,12 +665,12 @@ void CWizDocumentView::on_document_modified(const WIZDOCUMENTDATA& documentOld, 
 
 void CWizDocumentView::on_webview_focusIn()
 {
-    m_infoToolBar->hide();
-    m_editorToolBar->show();
+    m_title->infoBar()->hide();
+    m_title->editorBar()->show();
 }
 
 void CWizDocumentView::on_webview_focusOut()
 {
-    m_editorToolBar->hide();
-    m_infoToolBar->show();
+    m_title->editorBar()->hide();
+    m_title->infoBar()->show();
 }

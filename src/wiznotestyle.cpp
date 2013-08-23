@@ -59,6 +59,8 @@ private:
 
     // document list view
     QColor m_colorDocumentsBackground;
+    QColor m_colorDocumentsItemFocusBackground;
+    QColor m_colorDocumentsItemLoseFocusBackground;
     QColor m_colorDocumentsTitle;
     QColor m_colorDocumentsDate;
     QColor m_colorDocumentsSummary;
@@ -134,7 +136,7 @@ CWizNoteStyle::CWizNoteStyle(const QString& strSkinName)
 
     CWizSettings settings(strSkinPath + "skin.ini");
 
-    // categoryview
+    // category view
     m_colorCategoryBackground = settings.GetColor("Category", "Background", "#808080");
     m_colorCategoryTextNormal = settings.GetColor("Category", "Text", "#000000");
     m_colorCategoryTextSelected = settings.GetColor("Category", "TextSelected", "#ffffff");
@@ -142,15 +144,18 @@ CWizNoteStyle::CWizNoteStyle(const QString& strSkinName)
     m_colorCategorySelectedBackground = settings.GetColor("Category", "ItemSelected", "#808080");
     m_colorCategorySelctedBackgroundNoFocus = settings.GetColor("Category", "ItemSelectedNoFocus", "#808080");
 
+    // document list view
     m_colorDocumentsBackground = settings.GetColor("Documents", "Background", "#ffffff");
-    m_colorDocumentsTitle = settings.GetColor("Documents", "Title", "#000000");
+    m_colorDocumentsItemFocusBackground = settings.GetColor("Documents", "ItemFocusBackground", "#0c8eec");
+    m_colorDocumentsItemLoseFocusBackground = settings.GetColor("Documents", "ItemLoseFocusBackground", "#e1e1e1");
+    m_colorDocumentsTitle = settings.GetColor("Documents", "Title", "#464646");
+    m_colorDocumentsTitleSelected = settings.GetColor("Documents", "TitleSelected", "#ffffff");
     m_colorDocumentsDate = settings.GetColor("Documents", "Date", "#0000ff");
-    m_colorDocumentsSummary = settings.GetColor("Documents", "Summary", "#666666");
-    m_colorDocumentsTitleSelected = settings.GetColor("Documents", "TitleSelected", "#000000");
-    m_colorDocumentsDateSelected = settings.GetColor("Documents", "DateSelected", "#0000ff");
-    m_colorDocumentsSummarySelected = settings.GetColor("Documents", "SummarySelected", "#666666");
+    m_colorDocumentsDateSelected = settings.GetColor("Documents", "DateSelected", "#ffffff");
+    m_colorDocumentsSummary = settings.GetColor("Documents", "Summary", "#8c8c8c");
+    m_colorDocumentsSummarySelected = settings.GetColor("Documents", "SummarySelected", "#ffffff");
     m_colorDocumentsLine = settings.GetColor("Documents", "Line", "#d9dcdd");
-    //
+
     m_colorMultiLineListFirstLine = settings.GetColor("MultiLineList", "First", "#000000");
     m_colorMultiLineListFirstLineSelected = settings.GetColor("MultiLineList", "FirstSelected", "#000000");
     m_colorMultiLineListOtherLine = settings.GetColor("MultiLineList", "Other", "#666666");
@@ -292,11 +297,7 @@ void CWizNoteStyle::drawDocumentListViewItemPrivate(const QStyleOptionViewItemV4
     WIZABSTRACT abstract = view->documentAbstractFromIndex(vopt->index);
     QString tagsText = view->documentTagsFromIndex(vopt->index);
 
-    // FIXME: hard-coded background brush color
     QPalette palette = vopt->palette;
-    palette.setColor(QPalette::Active, QPalette::Highlight, QColor(58, 81, 134));
-    palette.setColor(QPalette::Inactive, QPalette::Highlight, QColor(101, 122, 148));
-    palette.setColor(QPalette::Active, QPalette::BrightText, Qt::lightGray);
 
     QStyleOptionViewItemV4 adjustedOption = *vopt;
     adjustedOption.palette = palette;
@@ -318,9 +319,9 @@ void CWizNoteStyle::drawDocumentListViewItemPrivate(const QStyleOptionViewItemV4
     // draw background behaviour
     if (vopt->state.testFlag(QStyle::State_Selected)) {
         if (view->hasFocus()) {
-            p->fillRect(vopt->rect, adjustedOption.palette.brush(QPalette::Active, QPalette::Highlight));
+            p->fillRect(vopt->rect, m_colorDocumentsItemFocusBackground);
         } else {
-            p->fillRect(vopt->rect, adjustedOption.palette.brush(QPalette::Inactive, QPalette::Highlight));
+            p->fillRect(vopt->rect, m_colorDocumentsItemLoseFocusBackground);
         }
     }
 
@@ -375,10 +376,7 @@ void CWizNoteStyle::drawDocumentListViewItemPrivate(const QStyleOptionViewItemV4
         textRect.adjust(8, 8, -8, -8);
 
         bool selected = vopt->state.testFlag(State_Selected);
-        QColor selectedLightColor = palette.color(QPalette::HighlightedText);
-        QColor selectedBrightColor = palette.color(QPalette::BrightText);
-
-        //QColor colorTitle = selected ? m_colorDocumentsTitleSelected : m_colorDocumentsTitle;
+        bool focused = vopt->state & State_HasFocus;
 
         p->save();
 
@@ -393,7 +391,7 @@ void CWizNoteStyle::drawDocumentListViewItemPrivate(const QStyleOptionViewItemV4
         QRect rcBadge = textRect;
         rcBadge.setRight(rcBadge.left() + nFontHeight);
         rcBadge.setBottom(rcBadge.top() + nFontHeight);
-        if (vopt->state & State_Selected) {
+        if (vopt->state & State_HasFocus) {
             p->drawImage(rcBadge, m_imgDocumentsBadgeSelected);
         } else {
             p->drawImage(rcBadge, m_imgDocumentsBadge);
@@ -403,7 +401,7 @@ void CWizNoteStyle::drawDocumentListViewItemPrivate(const QStyleOptionViewItemV4
         rcTitle.setLeft(rcBadge.right() + 5);
         rcTitle.setBottom(rcTitle.top() + nFontHeight);
         CString strTitle = document.strTitle;
-        QColor colorTitle = selected ? selectedLightColor : m_colorDocumentsTitle;
+        QColor colorTitle = selected && focused ? m_colorDocumentsTitleSelected : m_colorDocumentsTitle;
         ::WizDrawTextSingleLine(p, rcTitle, strTitle,  Qt::TextSingleLine | Qt::AlignVCenter, colorTitle, true);
         p->restore();
 
@@ -412,17 +410,14 @@ void CWizNoteStyle::drawDocumentListViewItemPrivate(const QStyleOptionViewItemV4
         fontAbs.setPixelSize(12);
         p->setFont(fontAbs);
 
-        //QColor colorDate = selected ? m_colorDocumentsDateSelected : m_colorDocumentsDate;
-        QColor colorDate = selected ? selectedLightColor : m_colorDocumentsDate;
+        QColor colorDate = selected && focused ? m_colorDocumentsDateSelected : m_colorDocumentsDate;
         QRect rcInfo = rcTitle;
         rcInfo.setBottom(rcInfo.top() + p->fontMetrics().height());
         rcInfo.moveTo(rcInfo.left(), rcInfo.bottom() + 4);
-        //CString strInfo = document.tCreated.date().toString(Qt::DefaultLocaleShortDate) + tagsText;
         CString strInfo = document.tCreated.toHumanFriendlyString() + tagsText;
         int infoWidth = ::WizDrawTextSingleLine(p, rcInfo, strInfo,  Qt::TextSingleLine | Qt::AlignVCenter, colorDate, true);
 
-        //QColor colorSummary = selected ? m_colorDocumentsSummarySelected : m_colorDocumentsSummary;
-        QColor colorSummary = selected ? selectedBrightColor : m_colorDocumentsSummary;
+        QColor colorSummary = selected && focused ? m_colorDocumentsSummarySelected : m_colorDocumentsSummary;
         QRect rcAbstract1 = rcInfo;
         rcAbstract1.setLeft(rcInfo.left() + infoWidth + 16);
         rcAbstract1.setRight(rcTitle.right());

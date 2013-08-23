@@ -77,57 +77,68 @@ void drawComboPrimitive(QStylePainter* p, QStyle::PrimitiveElement pe, const QSt
     p->restore();
 }
 
-class CWizToolButton : public QPushButton
+class CWizToolButton : public QToolButton
 {
 public:
-    CWizToolButton(QWidget* parent = 0) : QPushButton(parent)
+    CWizToolButton(QWidget* parent = 0) : QToolButton(parent)
     {
         setFocusPolicy(Qt::NoFocus);
         setCheckable(true);
-        setIconSize(QSize(24, 24));
-        setMaximumSize(24, 24);
+        setIconSize(QSize(16, 16));
+        //setMaximumSize(16, 16);
+        //setFixedSize(16, 16);
     }
 
+protected:
     virtual void paintEvent(QPaintEvent *event)
     {
         Q_UNUSED(event);
 
         QStylePainter p(this);
-        QStyleOptionButton option;
+        QStyleOptionToolButton option;
         initStyleOption(&option);
-        p.drawControl(QStyle::CE_PushButtonLabel, option);
+
+        QIcon::Mode mode = option.state & QStyle::State_Enabled ? QIcon::Normal : QIcon::Disabled;
+        if (mode == QIcon::Normal && (option.state & QStyle::State_HasFocus || option.state & QStyle::State_Sunken))
+            mode = QIcon::Active;
+        QIcon::State state = QIcon::Off;
+        if (option.state & QStyle::State_On)
+            state = QIcon::On;
+
+        option.icon.paint(&p, option.rect, Qt::AlignCenter, mode, state);
+
+        //p.drawControl(QStyle::CE_ToolButtonLabel, option);
+    }
+
+    virtual QSize sizeHint() const
+    {
+        return iconSize() + QSize(4, 4);
     }
 };
 
-class CWizToolButtonColor : public QPushButton
+class CWizToolButtonColor : public CWizToolButton
 {
 public:
-    CWizToolButtonColor(QWidget* parent = 0) : QPushButton(parent)
-    {
-        setFocusPolicy(Qt::NoFocus);
-        setCheckable(true);
-        setIconSize(QSize(24, 24));
-        setMaximumSize(24, 24);
-    }
-
-    virtual void paintEvent(QPaintEvent *event)
-    {
-        Q_UNUSED(event);
-
-        QStylePainter p(this);
-        QStyleOptionButton opt;
-        initStyleOption(&opt);
-        p.drawControl(QStyle::CE_PushButtonLabel, opt);
-
-        QRect rectColor(6, opt.iconSize.height() - 4, opt.iconSize.width() - 12, 4);
-        //p.setBrush(QBrush(m_color));
-        p.fillRect(QRect(rectColor), m_color);
-    }
+    CWizToolButtonColor(QWidget* parent = 0) : CWizToolButton(parent) {}
 
     void setColor(const QColor& color)
     {
         m_color = color;
         repaint();
+    }
+
+protected:
+    virtual void paintEvent(QPaintEvent *event)
+    {
+        Q_UNUSED(event);
+
+        QStylePainter p(this);
+        QStyleOptionToolButton opt;
+        initStyleOption(&opt);
+        p.drawControl(QStyle::CE_ToolButtonLabel, opt);
+
+        QRect rectColor(opt.rect.x() + 4, opt.iconSize.height() + 1, opt.iconSize.width() - 4, 4);
+        p.fillRect(QRect(rectColor), m_color);
     }
 
 private:
@@ -140,6 +151,7 @@ public:
     CWizToolComboBox(QWidget* parent = 0) : QComboBox(parent)
     {
         setFocusPolicy(Qt::NoFocus);
+        setSizeAdjustPolicy(QComboBox::AdjustToMinimumContentsLength);
         //setSizeAdjustPolicy(QComboBox::QComboBox::AdjustToMinimumContentsLength);
     }
 
@@ -154,6 +166,7 @@ public:
         repaint();
     }
 
+protected:
     virtual void paintEvent(QPaintEvent *event)
     {
         Q_UNUSED(event);
@@ -163,6 +176,11 @@ public:
 
         opt.currentText = m_strText;
         drawCombo(this, opt);
+    }
+
+    virtual QSize sizeHint() const
+    {
+        return QSize(65, fontMetrics().height());
     }
 
 private:
@@ -175,7 +193,7 @@ public:
     CWizToolComboBoxFont(QWidget* parent = 0) : QFontComboBox(parent)
     {
         setFocusPolicy(Qt::NoFocus);
-        setSizeAdjustPolicy(QComboBox::QComboBox::AdjustToMinimumContentsLength);
+        setSizeAdjustPolicy(QComboBox::AdjustToMinimumContentsLength);
         setEditable(false);
     }
 
@@ -190,6 +208,7 @@ public:
         repaint();
     }
 
+protected:
     virtual void paintEvent(QPaintEvent *event)
     {
         Q_UNUSED(event);
@@ -201,9 +220,15 @@ public:
         drawCombo(this, opt);
     }
 
+    virtual QSize sizeHint() const
+    {
+        return QSize(100, fontMetrics().height());
+    }
+
 private:
     QString m_strText;
 };
+
 
 CWizEditorToolBar::CWizEditorToolBar(CWizExplorerApp& app, QWidget *parent)
     : QWidget(parent)
@@ -281,6 +306,8 @@ CWizEditorToolBar::CWizEditorToolBar(CWizExplorerApp& app, QWidget *parent)
 
     QHBoxLayout* layout = new QHBoxLayout();
     layout->setContentsMargins(3, 0, 3, 0);
+    layout->setAlignment(Qt::AlignBottom);
+    layout->setSpacing(2);
     setLayout(layout);
 
     layout->addWidget(m_comboFontFamily);

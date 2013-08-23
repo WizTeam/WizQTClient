@@ -71,6 +71,7 @@ protected:
 
 Q_SIGNALS:
     void segmentSelected(int selected);
+    void segmentClicked(int index);
 
 private:
     QtSegmentControlPrivate *d;

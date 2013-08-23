@@ -75,12 +75,14 @@ CWizDocumentListView::CWizDocumentListView(CWizExplorerApp& app, QWidget *parent
 
     setItemDelegate(new CWizDocumentListViewDelegate(this));
 
-    // setup background
-    QPalette pal = palette();
-    pal.setColor(QPalette::Base, QColor(247,247,247));
-    setPalette(pal);
+    // setup style
+    QString strSkinName = m_app.userSettings().skin();
+    setStyle(::WizGetStyle(strSkinName));
 
-    setStyle(::WizGetStyle(m_app.userSettings().skin()));
+    QPalette pal = palette();
+    //pal.setColor(QPalette::Base, QColor(247,247,247));
+    pal.setColor(QPalette::Base, WizGetDocumentsBackroundColor(strSkinName));
+    setPalette(pal);
 
     connect(&m_dbMgr, SIGNAL(tagCreated(const WIZTAGDATA&)), \
             SLOT(on_tag_created(const WIZTAGDATA&)));

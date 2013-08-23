@@ -9,29 +9,29 @@
 
 #include "widgets/qsegmentcontrol.h"
 
-#ifdef Q_WS_MAC
-#include <QMacStyle>
-#include <Carbon/Carbon.h>
-
-extern CGContextRef qt_mac_cg_context(const QPaintDevice *);
-
-static ThemeDrawState getDrawState(QStyle::State flags)
-{
-    ThemeDrawState tds = kThemeStateActive;
-    if (flags & QStyle::State_Sunken) {
-        tds = kThemeStatePressed;
-    } else if (flags & QStyle::State_Active) {
-        if (!(flags & QStyle::State_Enabled))
-            tds = kThemeStateUnavailable;
-    } else {
-        if (flags & QStyle::State_Enabled)
-            tds = kThemeStateInactive;
-        else
-            tds = kThemeStateUnavailableInactive;
-    }
-    return tds;
-}
-#endif
+//#ifndef Q_WS_MAC
+//#include <QMacStyle>
+//#include <Carbon/Carbon.h>
+//
+//extern CGContextRef qt_mac_cg_context(const QPaintDevice *);
+//
+//static ThemeDrawState getDrawState(QStyle::State flags)
+//{
+//    ThemeDrawState tds = kThemeStateActive;
+//    if (flags & QStyle::State_Sunken) {
+//        tds = kThemeStatePressed;
+//    } else if (flags & QStyle::State_Active) {
+//        if (!(flags & QStyle::State_Enabled))
+//            tds = kThemeStateUnavailable;
+//    } else {
+//        if (flags & QStyle::State_Enabled)
+//            tds = kThemeStateInactive;
+//        else
+//            tds = kThemeStateUnavailableInactive;
+//    }
+//    return tds;
+//}
+//#endif
 
 
 class QtStyleOptionSegmentControlSegment : public QStyleOption
@@ -46,11 +46,12 @@ public:
     QString text;
     QIcon icon;
     QSize iconSize;
+    int iconMargin;
     SegmentPosition position;
     SelectedPosition selectedPositions;
 
     QtStyleOptionSegmentControlSegment()
-       : position(OnlyOneSegment), selectedPositions(NotAdjacent) { }
+        : position(OnlyOneSegment), selectedPositions(NotAdjacent), iconMargin(5) { }
     QtStyleOptionSegmentControlSegment(const QtStyleOptionSegmentControlSegment &other)
         : QStyleOption(Version, Type) { *this = other; }
 
@@ -65,48 +66,48 @@ static void drawSegmentControlSegmentSegment(const QStyleOption *option, QPainte
     // ### Change to qstyleoption_cast!
     if (const QtStyleOptionSegmentControlSegment *segment
             = static_cast<const QtStyleOptionSegmentControlSegment *>(option)) {
-#ifdef Q_WS_MAC
-        if (qobject_cast<QMacStyle *>(widget->style())) {
-            CGContextRef cg = qt_mac_cg_context(painter->device());
-            HIThemeSegmentDrawInfo sgi;
-            bool selected = (segment->state & QStyle::State_Selected);
-            sgi.version = 0;
-            // Things look the same regardless of enabled.
-            sgi.state = getDrawState(segment->state | QStyle::State_Enabled);
-            sgi.value = selected ? kThemeButtonOn : kThemeButtonOff;
-            sgi.size = kHIThemeSegmentSizeNormal;
-            sgi.kind = kHIThemeSegmentKindNormal;
-            sgi.adornment = kHIThemeSegmentAdornmentNone;
-            switch (segment->position) {
-            case QtStyleOptionSegmentControlSegment::Beginning:
-                sgi.position = kHIThemeSegmentPositionFirst;
-                if (segment->selectedPositions == QtStyleOptionSegmentControlSegment::NotAdjacent
-                    || selected)
-                    sgi.adornment |= kHIThemeSegmentAdornmentTrailingSeparator;
-                break;
-            case QtStyleOptionSegmentControlSegment::Middle:
-                sgi.position = kHIThemeSegmentPositionMiddle;
-                if (selected && !(segment->selectedPositions & QtStyleOptionSegmentControlSegment::PreviousIsSelected))
-                    sgi.adornment |= kHIThemeSegmentAdornmentLeadingSeparator;
-                if (selected || !(segment->selectedPositions & QtStyleOptionSegmentControlSegment::NextIsSelected)) // Also when we're selected.
-                    sgi.adornment |= kHIThemeSegmentAdornmentTrailingSeparator;
-                break;
-            case QStyleOptionTab::End:
-                sgi.position = kHIThemeSegmentPositionLast;
-                if (selected && !(segment->selectedPositions & QtStyleOptionSegmentControlSegment::PreviousIsSelected))
-                    sgi.adornment |= kHIThemeSegmentAdornmentLeadingSeparator;
-                break;
-            case QStyleOptionTab::OnlyOneTab:
-                sgi.position = kHIThemeSegmentPositionOnly;
-                break;
-            }
-
-            HIRect hirect = CGRectMake(segment->rect.x(), segment->rect.y(),
-                                       segment->rect.width(), segment->rect.height());
-            HIThemeDrawSegment(&hirect, &sgi, cg, kHIThemeOrientationNormal);
-            CGContextRelease(cg);
-        } else
-#endif
+//#ifndef Q_WS_MAC
+//        if (qobject_cast<QMacStyle *>(widget->style())) {
+//            CGContextRef cg = qt_mac_cg_context(painter->device());
+//            HIThemeSegmentDrawInfo sgi;
+//            bool selected = (segment->state & QStyle::State_Selected);
+//            sgi.version = 0;
+//            // Things look the same regardless of enabled.
+//            sgi.state = getDrawState(segment->state | QStyle::State_Enabled);
+//            sgi.value = selected ? kThemeButtonOn : kThemeButtonOff;
+//            sgi.size = kHIThemeSegmentSizeNormal;
+//            sgi.kind = kHIThemeSegmentKindNormal;
+//            sgi.adornment = kHIThemeSegmentAdornmentNone;
+//            switch (segment->position) {
+//            case QtStyleOptionSegmentControlSegment::Beginning:
+//                sgi.position = kHIThemeSegmentPositionFirst;
+//                if (segment->selectedPositions == QtStyleOptionSegmentControlSegment::NotAdjacent
+//                    || selected)
+//                    sgi.adornment |= kHIThemeSegmentAdornmentTrailingSeparator;
+//                break;
+//            case QtStyleOptionSegmentControlSegment::Middle:
+//                sgi.position = kHIThemeSegmentPositionMiddle;
+//                if (selected && !(segment->selectedPositions & QtStyleOptionSegmentControlSegment::PreviousIsSelected))
+//                    sgi.adornment |= kHIThemeSegmentAdornmentLeadingSeparator;
+//                if (selected || !(segment->selectedPositions & QtStyleOptionSegmentControlSegment::NextIsSelected)) // Also when we're selected.
+//                    sgi.adornment |= kHIThemeSegmentAdornmentTrailingSeparator;
+//                break;
+//            case QStyleOptionTab::End:
+//                sgi.position = kHIThemeSegmentPositionLast;
+//                if (selected && !(segment->selectedPositions & QtStyleOptionSegmentControlSegment::PreviousIsSelected))
+//                    sgi.adornment |= kHIThemeSegmentAdornmentLeadingSeparator;
+//                break;
+//            case QStyleOptionTab::OnlyOneTab:
+//                sgi.position = kHIThemeSegmentPositionOnly;
+//                break;
+//            }
+//
+//            HIRect hirect = CGRectMake(segment->rect.x(), segment->rect.y(),
+//                                       segment->rect.width(), segment->rect.height());
+//            HIThemeDrawSegment(&hirect, &sgi, cg, kHIThemeOrientationNormal);
+//            CGContextRelease(cg);
+//        } else
+//#endif
         {
             Q_UNUSED(widget);
             painter->save();
@@ -114,6 +115,8 @@ static void drawSegmentControlSegmentSegment(const QStyleOption *option, QPainte
             bool selected = (segment->state & QStyle::State_Selected);
 
             QPixmap pm;
+
+            int nIconMargin = segment->iconMargin;
 
             QSize buttonSize = widget->rect().size();
             QString key = QString("qt_segment %0 %1 %2").arg(option->state).arg(buttonSize.width()).arg(buttonSize.height());
@@ -125,31 +128,48 @@ static void drawSegmentControlSegmentSegment(const QStyleOption *option, QPainte
                 QStyleOptionButton btnOpt;
                 btnOpt.QStyleOption::operator =(*option);
                 btnOpt.state &= ~QStyle::State_HasFocus;
-                btnOpt.rect = QRect(QPoint(0, 0), buttonSize);;
+                btnOpt.rect = QRect(QPoint(0, 0), buttonSize);
                 btnOpt.state = option->state;
 
                 if (selected)
                     btnOpt.state |= QStyle::State_Sunken;
                 else
                     btnOpt.state |= QStyle::State_Raised;
+
+                // draw border
+                //QRect arcRect(btnOpt.rect.topLeft(), QSize(btnOpt.rect.height(), btnOpt.rect.height()));
+                //pmPainter.drawArc(arcRect, 115 * 16, 130 * 16);
+
+                //QLine line(btnOpt.rect.left() + nArcWidth, btnOpt.rect.top(),
+                //           btnOpt.rect.right() - nArcWidth, btnOpt.rect.top());
+                //pmPainter.drawLine(line);
+                //pmPainter.drawLine(line.translated(0, btnOpt.iconSize.height() + nMargin * 2));
+
+                //arcRect.moveRight((btnOpt.iconSize.width() + nSpace * 2) * m_cells.size() + nArcWidth * 2);
+                //p.drawArc(arcRect, 65 * 16, -130 * 16);
+
                 widget->style()->drawPrimitive(QStyle::PE_PanelButtonCommand, &btnOpt, &pmPainter, widget);
+
                 pmPainter.end();
                 QPixmapCache::insert(key, pm);
             }
-            int margin = widget->style()->pixelMetric(QStyle::PM_DefaultFrameWidth, option, widget);
+
+            //int margin = widget->style()->pixelMetric(QStyle::PM_DefaultFrameWidth, option, widget);
             switch (segment->position) {
             case QtStyleOptionSegmentControlSegment::Beginning:
                 painter->setClipRect(option->rect);
                 painter->drawPixmap(0, 0, pm);
                 painter->setOpacity(0.6);
                 painter->setPen(option->palette.dark().color());
-                painter->drawLine(option->rect.topRight() + QPoint(-1, margin), option->rect.bottomRight() + QPoint(-1, -margin));
+                //painter->drawLine(option->rect.topRight() + QPoint(-1, margin), option->rect.bottomRight() + QPoint(-1, -margin));
+                painter->drawLine(option->rect.topRight() + QPoint(-1, nIconMargin), option->rect.bottomRight() + QPoint(-1, -nIconMargin));
                 break;
             case QtStyleOptionSegmentControlSegment::Middle:
                 painter->setClipRect(option->rect);
                 painter->drawPixmap(0, 0, pm);
                 painter->setPen(option->palette.dark().color());
-                painter->drawLine(option->rect.topRight() + QPoint(-1, margin), option->rect.bottomRight() + QPoint(-1, -margin));
+                painter->drawLine(option->rect.topRight() + QPoint(-1, nIconMargin), option->rect.bottomRight() + QPoint(-1, -nIconMargin));
+                //painter->drawLine(option->rect.topRight() + QPoint(-1, margin), option->rect.bottomRight() + QPoint(-1, -margin));
                 break;
             case QStyleOptionTab::End:
                 painter->setClipRect(option->rect);
@@ -170,10 +190,10 @@ static QSize segmentSizeFromContents(const QStyleOption *option, const QSize &co
     QSize ret = contentSize;
     if (const QtStyleOptionSegmentControlSegment *segment
             = static_cast<const QtStyleOptionSegmentControlSegment *>(option)) {
-        ret.rwidth() += 20;
-        ret.rheight() += 10;
-        if (!segment->icon.isNull())
-            ret.rwidth() += 5;
+        if (!segment->icon.isNull()) {
+            ret.rwidth() += (segment->iconMargin * 2);
+            ret.rheight() += (segment->iconMargin * 2);
+        }
     }
     return ret;
 }
@@ -182,24 +202,24 @@ static void drawSegmentControlSegmentLabel(const QStyleOption *option, QPainter 
 {
     if (const QtStyleOptionSegmentControlSegment *segment
             = static_cast<const QtStyleOptionSegmentControlSegment *>(option)) {
-#ifdef Q_WS_MAC
-        if (qobject_cast<QMacStyle *>(widget->style())) {
-            QRect retRect = option->rect;
-            retRect.adjust(+11, +4, -11, -6);
-            switch (segment->position) {
-            default:
-            case QtStyleOptionSegmentControlSegment::Middle:
-                break;
-            case QtStyleOptionSegmentControlSegment::Beginning:
-            case QtStyleOptionSegmentControlSegment::End:
-                retRect.adjust(+1, 0, -1, 0);
-                break;
-            case QtStyleOptionSegmentControlSegment::OnlyOneSegment:
-                retRect.adjust(+2, 0, -2, 0);
-                break;
-            }
-        }
-#endif
+//#ifndef Q_WS_MAC
+//        if (qobject_cast<QMacStyle *>(widget->style())) {
+//            QRect retRect = option->rect;
+//            retRect.adjust(+11, +4, -11, -6);
+//            switch (segment->position) {
+//            default:
+//            case QtStyleOptionSegmentControlSegment::Middle:
+//                break;
+//            case QtStyleOptionSegmentControlSegment::Beginning:
+//            case QtStyleOptionSegmentControlSegment::End:
+//                retRect.adjust(+1, 0, -1, 0);
+//                break;
+//            case QtStyleOptionSegmentControlSegment::OnlyOneSegment:
+//                retRect.adjust(+2, 0, -2, 0);
+//                break;
+//            }
+//        }
+//#endif
         QStyleOptionButton btn;
         btn.QStyleOption::operator=(*option);
         btn.text = segment->text;
@@ -214,7 +234,7 @@ static void drawSegmentControlSegmentLabel(const QStyleOption *option, QPainter 
             //Center both icon and text
             QRect iconRect;
             QIcon::Mode mode = button->state & QStyle::State_Enabled ? QIcon::Normal : QIcon::Disabled;
-            if (mode == QIcon::Normal && button->state & QStyle::State_HasFocus)
+            if (mode == QIcon::Normal && button->state & QStyle::State_Sunken)
                 mode = QIcon::Active;
             QIcon::State state = QIcon::Off;
             if (button->state & QStyle::State_On)
@@ -228,12 +248,8 @@ static void drawSegmentControlSegmentLabel(const QStyleOption *option, QPainter 
             if (!button->text.isEmpty())
                 labelWidth += (textWidth + iconSpacing);
 
-//            iconRect = QRect(textRect.x() + (textRect.width() - labelWidth) / 2,
-//                             textRect.y() + (textRect.height() - labelHeight) / 2,
-//                             pixmap.width(), pixmap.height());
-
             iconRect = QRect(textRect.x() + (textRect.width() - labelWidth) / 2,
-                             textRect.y() + (textRect.height() - labelHeight) / 2 - 3,
+                             textRect.y() + (textRect.height() - labelHeight) / 2,
                              pixmap.width(), pixmap.height());
 
             iconRect = QStyle::visualRect(button->direction, textRect, iconRect);
@@ -267,7 +283,7 @@ static void drawSegmentControlSegmentLabel(const QStyleOption *option, QPainter 
         widget->style()->drawItemText(painter, textRect, tf, button->palette, (button->state & QStyle::State_Enabled),
                                       button->text, QPalette::ButtonText);
 
-        //widget->style()->drawControl(QStyle::CE_PushButtonLabel, &button, painter, widget);
+        //widget->style()->drawControl(QStyle::CE_PushButtonLabel, button, painter, widget);
     }
 
 }
@@ -285,8 +301,8 @@ static void drawSegmentControlSegment(const QStyleOption *option,
 {
     drawSegmentControlSegmentSegment(option, painter, widget);
     drawSegmentControlSegmentLabel(option, painter, widget);
-    if (option->state & QStyle::State_HasFocus)
-        drawSegmentControlFocusRect(option, painter, widget);
+    //if (option->state & QStyle::State_HasFocus)
+    //    drawSegmentControlFocusRect(option, painter, widget);
 }
 
 
@@ -306,8 +322,8 @@ struct SegmentInfo {
 class QtSegmentControlPrivate {
 public:
     QtSegmentControlPrivate(QtSegmentControl *myQ)
-        : q(myQ), lastSelected(-1), layoutDirty(true), pressedIndex(-1), wasPressed(-1), focusIndex(-1) {};
-    ~QtSegmentControlPrivate() {};
+        : q(myQ), lastSelected(-1), layoutDirty(true), pressedIndex(-1), wasPressed(-1), focusIndex(-1) {}
+    ~QtSegmentControlPrivate() {}
 
     void layoutSegments();
     void postUpdate(int index = -1, bool geoToo = false);
@@ -569,6 +585,7 @@ QSize QtSegmentControl::segmentSizeHint(int segment) const
 QSize QtSegmentControl::sizeHint() const
 {
     d->layoutSegments();
+
     QRect rect;
     const int segmentCount = d->segments.count();
     for (int i = 0; i < segmentCount; ++i) {
@@ -652,6 +669,8 @@ void QtSegmentControl::mousePressEvent(QMouseEvent *event)
     if (segmentEnabled(index)) {
         d->wasPressed = d->focusIndex = d->pressedIndex = segmentAt(event->pos());
         d->postUpdate(d->pressedIndex);
+
+        Q_EMIT segmentClicked(index);
     }
 }
 
@@ -692,7 +711,9 @@ void QtSegmentControl::initStyleOption(int segment, QStyleOption *option) const
 {
     if (!option || !d->validIndex(segment))
         return;
+
     option->initFrom(this);
+
     if (segment == d->pressedIndex)
         option->state |= QStyle::State_Sunken;
 

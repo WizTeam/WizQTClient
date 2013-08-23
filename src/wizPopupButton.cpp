@@ -27,9 +27,9 @@ void CWizPopupButton::paintEvent(QPaintEvent* event)
     p.setClipRect(opt.rect);
 
     // FIXME
+    p.setPen("#787878");
     if (opt.state & QStyle::State_Sunken) {
-        p.setPen("#FFFFFF"); // draw text
-        p.fillRect(opt.rect, QColor("#1F62B5"));
+        p.fillRect(opt.rect, QColor("#DADADA"));
     }
 
     // draw arraw

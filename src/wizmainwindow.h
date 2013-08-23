@@ -96,8 +96,7 @@ private:
 #endif
 
     CWizActions* m_actions;
-    QPointer<CWizCategoryBaseView> m_category;
-    QPointer<CWizCategoryView> m_categoryPrivate;
+    QPointer<CWizCategoryView> m_category;
     CWizDocumentListView* m_documents;
     CWizDocumentSelectionView* m_documentSelection;
     CWizDocumentView* m_doc;

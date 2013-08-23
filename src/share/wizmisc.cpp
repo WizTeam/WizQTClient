@@ -1801,7 +1801,9 @@ QIcon WizLoadSkinIcon(const QString& strSkinName, const QString& strIconName,
     Q_UNUSED(state);
 
     QString strIconNormal = WizGetSkinResourceFileName(strSkinName, strIconName);
-    QString strIconActive = WizGetSkinResourceFileName(strSkinName, strIconName + "_on");
+    QString strIconActive1 = WizGetSkinResourceFileName(strSkinName, strIconName + "_on");
+    QString strIconActive2 = WizGetSkinResourceFileName(strSkinName, strIconName + "_selected");
+
 
     if (!QFile::exists(strIconNormal)) {
         //TOLOG1("Can't load icon: ", strIconName);
@@ -1811,8 +1813,12 @@ QIcon WizLoadSkinIcon(const QString& strSkinName, const QString& strIconName,
     QIcon icon;
     icon.addFile(strIconNormal, QSize(), QIcon::Normal, QIcon::Off);
 
-    if (QFile::exists(strIconActive)) {
-        icon.addFile(strIconActive, QSize(), QIcon::Normal, QIcon::On);
+    if (QFile::exists(strIconActive1)) {
+        icon.addFile(strIconActive1, QSize(), QIcon::Active, QIcon::Off);
+    }
+
+    if (QFile::exists(strIconActive2)) {
+        icon.addFile(strIconActive2, QSize(), QIcon::Active, QIcon::Off);
     }
 
     return icon;
