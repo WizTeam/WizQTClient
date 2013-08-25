@@ -2,7 +2,6 @@
 
 #include <QtGui>
 
-#include "wizDocumentListViewItem.h"
 #include "wizCategoryView.h"
 #include "widgets/wizScrollBar.h"
 #include "wiznotestyle.h"
@@ -13,23 +12,6 @@
 #include "share/wizUserAvatar.h"
 #include "wizmainwindow.h"
 
-
-class CWizDocumentListViewDelegate : public QStyledItemDelegate
-{
-public:
-    CWizDocumentListViewDelegate(QWidget* parent)
-        : QStyledItemDelegate(parent)
-    {
-    }
-
-    virtual QSize sizeHint(const QStyleOptionViewItem &option,
-                           const QModelIndex &index) const
-    {
-        QSize sz = QStyledItemDelegate::sizeHint(option, index);
-        sz.setHeight(sz.height() + (option.fontMetrics.height() + 2) * 3 + 2 + 16);
-        return sz;
-    }
-};
 
 // Document actions
 #define WIZACTION_LIST_DELETE   QObject::tr("Delete")
@@ -49,6 +31,9 @@ CWizDocumentListView::CWizDocumentListView(CWizExplorerApp& app, QWidget *parent
 {
     setFrameStyle(QFrame::NoFrame);
     setAttribute(Qt::WA_MacShowFocusRect, false);
+    setSelectionMode(QAbstractItemView::ExtendedSelection);
+
+    m_viewType = app.userSettings().get("VIEW_TYPE").toInt();
 
     connect(this, SIGNAL(itemSelectionChanged()), SLOT(on_itemSelectionChanged()));
 
@@ -73,7 +58,7 @@ CWizDocumentListView::CWizDocumentListView(CWizExplorerApp& app, QWidget *parent
     connect(&m_vscrollTimer, SIGNAL(timeout()), SLOT(on_vscroll_update()));
 //#endif //Q_OS_MAC
 
-    setItemDelegate(new CWizDocumentListViewDelegate(this));
+    //setItemDelegate(new CWizDocumentListViewDelegate(app, this));
 
     // setup style
     QString strSkinName = m_app.userSettings().skin();
@@ -106,7 +91,6 @@ CWizDocumentListView::CWizDocumentListView(CWizExplorerApp& app, QWidget *parent
     connect(&m_dbMgr.db(), SIGNAL(messageDeleted(const WIZMESSAGEDATA&)),
             SLOT(on_message_deleted(const WIZMESSAGEDATA&)));
 
-
     // thumb cache
     m_thumbCache = new CWizThumbIndexCache(app);
     connect(m_thumbCache, SIGNAL(loaded(const WIZABSTRACT&)),
@@ -126,8 +110,6 @@ CWizDocumentListView::CWizDocumentListView(CWizExplorerApp& app, QWidget *parent
     setDragDropMode(QAbstractItemView::DragDrop);
     setDragEnabled(true);
     viewport()->setAcceptDrops(true);
-
-    setSelectionMode(QAbstractItemView::ExtendedSelection);
 
     // message context menu
     m_menuMessage = new QMenu(this);
@@ -215,9 +197,19 @@ void CWizDocumentListView::addDocuments(const CWizMessageDataArray& arrayMessage
     sortItems();
 }
 
-int CWizDocumentListView::addDocument(const WIZDOCUMENTDATA& data, bool sort)
+int CWizDocumentListView::addDocument(const WIZDOCUMENTDATA& doc, bool sort)
 {
+    WizDocumentListViewItemData data;
+    data.doc = doc;
+
+    if (doc.strKbGUID.isEmpty() || m_dbMgr.db().kbGUID() == doc.strKbGUID) {
+        data.nType = CWizDocumentListViewItem::TypePrivateDocument;
+    } else {
+        data.nType = CWizDocumentListViewItem::TypeGroupDocument;
+    }
+
     CWizDocumentListViewItem* pItem = new CWizDocumentListViewItem(data);
+    pItem->setSizeHint(itemSizeFromViewType());
     addItem(pItem);
 
     if (sort) {
@@ -228,9 +220,16 @@ int CWizDocumentListView::addDocument(const WIZDOCUMENTDATA& data, bool sort)
     return count();
 }
 
-int CWizDocumentListView::addDocument(const WIZMESSAGEDATA& data, bool sort)
+int CWizDocumentListView::addDocument(const WIZMESSAGEDATA& msg, bool sort)
 {
+    WizDocumentListViewItemData data;
+    data.nType = CWizDocumentListViewItem::TypeMessage;
+    data.strAuthorGUID = msg.senderGUID;
+    data.nReadStatus = msg.nReadStatus;
+    m_dbMgr.db(msg.kbGUID).DocumentFromGUID(msg.documentGUID, data.doc);
+
     CWizDocumentListViewItem* pItem = new CWizDocumentListViewItem(data);
+    pItem->setSizeHint(itemSizeFromViewType());
     addItem(pItem);
 
     if (sort) {
@@ -276,23 +275,23 @@ void CWizDocumentListView::getSelectedDocuments(CWizDocumentDataArray& arrayDocu
             continue;
 
         // if document is message type
-        if (pDocumentItem->type() == CWizDocumentListViewItem::MessageDocument) {
-            QString strKbGUID = pDocumentItem->message().kbGUID;
-            QString strGUID = pDocumentItem->message().documentGUID;
-
-            // document must have record in database.
-            WIZDOCUMENTDATA doc;
-            if (!m_dbMgr.db(strKbGUID).DocumentFromGUID(strGUID, doc)) {
-                qDebug() << "[getSelectedDocuments] failed to query document from guid";
-                continue;
-            }
-
-            // no matter document exist or not, just push it
-            arrayDocument.push_back(doc);
-
-        } else {
-            arrayDocument.push_back(pDocumentItem->document());
-        }
+        //if (pDocumentItem->type() == CWizDocumentListViewItem::TypeMessage) {
+        //    QString strKbGUID = pDocumentItem->message().kbGUID;
+        //    QString strGUID = pDocumentItem->message().documentGUID;
+        //
+        //    // document must have record in database.
+        //    WIZDOCUMENTDATA doc;
+        //    if (!m_dbMgr.db(strKbGUID).DocumentFromGUID(strGUID, doc)) {
+        //        qDebug() << "[getSelectedDocuments] failed to query document from guid";
+        //        continue;
+        //    }
+        //
+        //    // no matter document exist or not, just push it
+        //    arrayDocument.push_back(doc);
+        //
+        //} else {
+            arrayDocument.push_back(pDocumentItem->data().doc);
+        //}
     }
 }
 
@@ -303,7 +302,7 @@ void CWizDocumentListView::contextMenuEvent(QContextMenuEvent * e)
     if (!pItem)
         return;
 
-    if (pItem->type() == CWizDocumentListViewItem::MessageDocument) {
+    if (pItem->itemType() == CWizDocumentListViewItem::TypeMessage) {
         m_menuMessage->popup(mapToGlobal(e->pos()));
     } else {
         m_menuDocument->popup(mapToGlobal(e->pos()));
@@ -544,6 +543,35 @@ void CWizDocumentListView::dropEvent(QDropEvent * event)
     }
 }
 
+void CWizDocumentListView::resetItemsViewType(int type)
+{
+    m_viewType = type;
+
+    for (int i = 0; i < count(); i++) {
+        item(i)->setSizeHint(itemSizeFromViewType());
+    }
+}
+
+QSize CWizDocumentListView::itemSizeFromViewType()
+{
+    QSize sz = sizeHint();
+    switch (m_viewType) {
+    case CWizDocumentListView::TypeOneLine:
+        sz.setHeight(fontMetrics().height() + 12);
+        return sz;
+    case CWizDocumentListView::TypeTwoLine:
+        sz.setHeight(fontMetrics().height() * 2 + 15);
+        return sz;
+    case CWizDocumentListView::TypeThumbnail:
+        sz.setHeight(fontMetrics().height() * 4 + 20);
+        return sz;
+    default:
+        Q_ASSERT(0);
+    }
+
+    return sz;
+}
+
 void CWizDocumentListView::on_itemSelectionChanged()
 {
     resetPermission();
@@ -612,15 +640,15 @@ void CWizDocumentListView::on_document_abstractLoaded(const WIZABSTRACT& abs)
 
     // kbGUID also should equal
     CWizDocumentListViewItem* pItem = documentItemAt(index);
-    if (!pItem->document().strKbGUID.isEmpty() &&
-            pItem->document().strKbGUID != abs.strKbGUID) {
-        return;
-    }
+    //if (!pItem->document().strKbGUID.isEmpty() &&
+    //        pItem->document().strKbGUID != abs.strKbGUID) {
+    //    return;
+    //}
 
-    if (!pItem->message().kbGUID.isEmpty() &&
-            pItem->message().kbGUID != abs.strKbGUID) {
-        return;
-    }
+    //if (!pItem->message().kbGUID.isEmpty() &&
+    //        pItem->message().kbGUID != abs.strKbGUID) {
+    //    return;
+    //}
 
     pItem->resetAbstract(abs);
     update(indexFromItem(pItem));
@@ -631,8 +659,7 @@ void CWizDocumentListView::on_userAvatar_downloaded(const QString& strUserGUID)
     CWizDocumentListViewItem* pItem = NULL;
     for (int i = 0; i < count(); i++) {
         pItem = documentItemAt(i);
-
-        if (pItem->message().senderGUID == strUserGUID) {
+        if (pItem->data().strAuthorGUID == strUserGUID) {
             QString strFileName = m_dbMgr.db().GetAvatarPath() + strUserGUID + ".png";
             pItem->resetAvatar(strFileName);
             update(indexFromItem(pItem));
@@ -674,8 +701,10 @@ void CWizDocumentListView::on_action_message_mark_read()
     CWizMessageDataArray arrayMessage;
     foreach (QListWidgetItem* it, items) {
         if (CWizDocumentListViewItem* pItem = dynamic_cast<CWizDocumentListViewItem*>(it)) {
-            if (pItem->type() == CWizDocumentListViewItem::MessageDocument) {
-                arrayMessage.push_back(pItem->message());
+            if (pItem->itemType() == CWizDocumentListViewItem::TypeMessage) {
+                WIZMESSAGEDATA msg;
+                m_dbMgr.db().messageFromId(pItem->data().nMessageId, msg);
+                arrayMessage.push_back(msg);
             }
         }
     }
@@ -690,8 +719,10 @@ void CWizDocumentListView::on_action_message_delete()
 
     foreach (QListWidgetItem* it, items) {
         if (CWizDocumentListViewItem* pItem = dynamic_cast<CWizDocumentListViewItem*>(it)) {
-            if (pItem->type() == CWizDocumentListViewItem::MessageDocument) {
-                m_dbMgr.db().deleteMessageEx(pItem->message());
+            if (pItem->type() == CWizDocumentListViewItem::TypeMessage) {
+                WIZMESSAGEDATA msg;
+                m_dbMgr.db().messageFromId(pItem->data().nMessageId, msg);
+                m_dbMgr.db().deleteMessageEx(msg);
             }
         }
     }
@@ -724,7 +755,7 @@ void CWizDocumentListView::on_action_deleteDocument()
 
     foreach (QListWidgetItem* it, items) {
         if (CWizDocumentListViewItem* item = dynamic_cast<CWizDocumentListViewItem*>(it)) {
-            if (item->type() == CWizDocumentListViewItem::MessageDocument) {
+            if (item->type() == CWizDocumentListViewItem::TypeMessage) {
                 continue;
             }
 
@@ -841,12 +872,11 @@ void CWizDocumentListView::on_action_encryptDocument()
 
 int CWizDocumentListView::documentIndexFromGUID(const QString& strGUID)
 {
+    Q_ASSERT(!strGUID.isEmpty());
+
     for (int i = 0; i < count(); i++) {
         if (CWizDocumentListViewItem *pItem = documentItemAt(i)) {
-            if (!pItem->document().strGUID.isEmpty() && pItem->document().strGUID == strGUID) {
-                return i;
-            } else if (!pItem->message().documentGUID.isEmpty()
-                       && pItem->message().documentGUID == strGUID) {
+            if (pItem->document().strGUID == strGUID) {
                 return i;
             }
         }
@@ -865,10 +895,15 @@ CWizDocumentListViewItem *CWizDocumentListView::documentItemFromIndex(const QMod
     return dynamic_cast<CWizDocumentListViewItem*>(itemFromIndex(index));
 }
 
-const WIZMESSAGEDATA& CWizDocumentListView::messageFromIndex(const QModelIndex& index) const
+const WizDocumentListViewItemData& CWizDocumentListView::documentItemDataFromIndex(const QModelIndex& index) const
 {
-    return documentItemFromIndex(index)->message();
+    return documentItemFromIndex(index)->data();
 }
+
+//const WIZMESSAGEDATA& CWizDocumentListView::messageFromIndex(const QModelIndex& index) const
+//{
+//    return documentItemFromIndex(index)->message();
+//}
 
 const QImage& CWizDocumentListView::messageSenderAvatarFromIndex(const QModelIndex& index) const
 {

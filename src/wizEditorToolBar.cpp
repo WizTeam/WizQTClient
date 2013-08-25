@@ -85,8 +85,6 @@ public:
         setFocusPolicy(Qt::NoFocus);
         setCheckable(true);
         setIconSize(QSize(16, 16));
-        //setMaximumSize(16, 16);
-        //setFixedSize(16, 16);
     }
 
 protected:
@@ -106,8 +104,6 @@ protected:
             state = QIcon::On;
 
         option.icon.paint(&p, option.rect, Qt::AlignCenter, mode, state);
-
-        //p.drawControl(QStyle::CE_ToolButtonLabel, option);
     }
 
     virtual QSize sizeHint() const
@@ -119,7 +115,10 @@ protected:
 class CWizToolButtonColor : public CWizToolButton
 {
 public:
-    CWizToolButtonColor(QWidget* parent = 0) : CWizToolButton(parent) {}
+    CWizToolButtonColor(QWidget* parent = 0) : CWizToolButton(parent)
+    {
+        setCheckable(false);
+    }
 
     void setColor(const QColor& color)
     {
@@ -135,7 +134,15 @@ protected:
         QStylePainter p(this);
         QStyleOptionToolButton opt;
         initStyleOption(&opt);
-        p.drawControl(QStyle::CE_ToolButtonLabel, opt);
+
+        QIcon::Mode mode = opt.state & QStyle::State_Enabled ? QIcon::Normal : QIcon::Disabled;
+        if (mode == QIcon::Normal && (opt.state & QStyle::State_HasFocus || opt.state & QStyle::State_Sunken))
+            mode = QIcon::Active;
+        QIcon::State state = QIcon::Off;
+        if (opt.state & QStyle::State_On)
+            state = QIcon::On;
+
+        opt.icon.paint(&p, opt.rect, Qt::AlignCenter, mode, state);
 
         QRect rectColor(opt.rect.x() + 4, opt.iconSize.height() + 1, opt.iconSize.width() - 4, 4);
         p.fillRect(QRect(rectColor), m_color);

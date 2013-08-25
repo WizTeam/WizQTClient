@@ -9,50 +9,56 @@ class CWizDatabase;
 class CWizThumbIndexCache;
 class CWizUserAvatarDownloaderHost;
 
+struct WizDocumentListViewItemData
+{
+    int nType;
+    WIZDOCUMENTDATA doc;
+    WIZABSTRACT thumb;
+
+    // only used for private document
+    QString strTags;
+
+    // only used for group or message document
+    qint64 nMessageId;
+    int nReadStatus;    // 0: not read 1: read
+    QString strAuthorGUID; // for request author avatar
+    QImage imgAuthorAvatar;
+};
+
 class CWizDocumentListViewItem : public QListWidgetItem
 {
 public:
-    enum type {
-        PrivateDocument,
-        GroupDocument,
-        MessageDocument
+    enum ItemType {
+        TypePrivateDocument,
+        TypeGroupDocument,
+        TypeMessage
     };
 
-    explicit CWizDocumentListViewItem(const WIZDOCUMENTDATA& data);
-    explicit CWizDocumentListViewItem(const WIZMESSAGEDATA& msg);
+    explicit CWizDocumentListViewItem(const WizDocumentListViewItemData& data);
 
-    int type() { return nType; }
-
-    const WIZDOCUMENTDATA& document() const { return m_data; }
-    const QString& tags(CWizDatabase& db);
-    const WIZABSTRACT& abstract(CWizThumbIndexCache& thumbCache);
-
-    void resetAbstract(const WIZABSTRACT& abs);
-    void resetAvatar(const QString& strFileName);
+    const WizDocumentListViewItemData& data() { return m_data; }
+    const WIZDOCUMENTDATA& document() const { return m_data.doc; }
+    int itemType() const { return m_data.nType; }
     void reload(CWizDatabase& db);
 
-    // message
-    const WIZMESSAGEDATA& message() const { return m_message; }
+    const WIZABSTRACT& abstract(CWizThumbIndexCache& thumbCache);
+
     const QImage& avatar(const CWizDatabase& db,
                          CWizUserAvatarDownloaderHost& downloader);
+
+    const QString& tags(CWizDatabase& db);
+
+    // called by CWizDocumentListView when thumbCache pool is ready for reading
+    void resetAbstract(const WIZABSTRACT& abs);
+    void resetAvatar(const QString& strFileName);
 
     // used for sorting
     virtual bool operator<(const QListWidgetItem &other) const;
 
 private:
-    WIZDOCUMENTDATA m_data;
-    WIZABSTRACT m_abstract;
-    QString m_tags;
+    WizDocumentListViewItemData m_data;
 
-    WIZMESSAGEDATA m_message;
-    QImage m_imgAvatar;
-
-private:
     bool isAvatarNeedUpdate(const QString& strFileName);
-
-    // public only for quickly drawing access
-public:
-    int nType;
 };
 
 #endif // WIZDOCUMENTLISTVIEWITEM_H

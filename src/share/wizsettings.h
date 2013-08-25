@@ -80,10 +80,10 @@ private:
     QString m_strLocale;
     CWizDatabase* m_db;
 
+public:
     QString get(const QString& key) const;
     void set(const QString& key, const QString& value);
 
-public:
     QString user() const { return m_strUserId; }
     void setUser(const QString& strUser);
 

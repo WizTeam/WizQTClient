@@ -7,39 +7,55 @@
 #include "share/wizThumbIndexCache.h"
 #include "share/wizUserAvatar.h"
 
-
-CWizDocumentListViewItem::CWizDocumentListViewItem(const WIZDOCUMENTDATA& data)
+CWizDocumentListViewItem::CWizDocumentListViewItem(const WizDocumentListViewItemData& data)
     : QListWidgetItem(0, UserType)
-    , m_data(data)
 {
-    nType = PrivateDocument;
-    setText(m_data.strTitle);
+    Q_ASSERT(!data.doc.strKbGUID.isEmpty());
+    Q_ASSERT(!data.doc.strGUID.isEmpty());
+
+    m_data.nType = data.nType;
+    m_data.doc = data.doc;
+    m_data.nMessageId = data.nMessageId;
+    m_data.nReadStatus = data.nReadStatus;
+    m_data.strAuthorGUID = data.strAuthorGUID;
+
+    setText(data.doc.strTitle);
 }
 
-CWizDocumentListViewItem::CWizDocumentListViewItem(const WIZMESSAGEDATA& msg)
-    : QListWidgetItem(0, UserType)
-    , m_message(msg)
-{
-    nType = MessageDocument;
-    setText(msg.title);
-}
+//CWizDocumentListViewItem::CWizDocumentListViewItem(const WIZDOCUMENTDATA& data)
+//    : QListWidgetItem(0, UserType)
+//    , m_data(data)
+//{
+//    nType = TypePrivateDocument;
+//    setText(m_data.strTitle);
+//}
+//
+//CWizDocumentListViewItem::CWizDocumentListViewItem(const WIZMESSAGEDATA& msg)
+//    : QListWidgetItem(0, UserType)
+//    , m_message(msg)
+//{
+//    nType = TypeMessage;
+//    setText(msg.title);
+//}
 
 const QImage& CWizDocumentListViewItem::avatar(const CWizDatabase& db,
                                                CWizUserAvatarDownloaderHost& downloader)
 {
-    Q_ASSERT(m_message.nId);
+    //Q_ASSERT(!m_data.strAuthorGUID.isEmpty());
+    if (m_data.strAuthorGUID.isEmpty())
+        return m_data.imgAuthorAvatar;
 
-    if (m_imgAvatar.isNull()) {
+    if (m_data.imgAuthorAvatar.isNull()) {
         // load avatar or request downloader to download
-        QString strFileName = db.GetAvatarPath() + m_message.senderGUID + ".png";
+        QString strFileName = db.GetAvatarPath() + m_data.strAuthorGUID + ".png";
         if (isAvatarNeedUpdate(strFileName)) {
-            downloader.download(m_message.senderGUID);
+            downloader.download(m_data.strAuthorGUID);
         } else {
-            resetAvatar(strFileName);
+            m_data.imgAuthorAvatar.load(strFileName);
         }
     }
 
-    return m_imgAvatar;
+    return m_data.imgAuthorAvatar;
 }
 
 bool CWizDocumentListViewItem::isAvatarNeedUpdate(const QString& strFileName)
@@ -52,7 +68,7 @@ bool CWizDocumentListViewItem::isAvatarNeedUpdate(const QString& strFileName)
 
     QDateTime tCreated = info.created();
     QDateTime tNow = QDateTime::currentDateTime();
-    if (tCreated.daysTo(tNow) >= 1) {
+    if (tCreated.daysTo(tNow) >= 1) { // download avatar before yesterday
         return true;
     }
 
@@ -61,58 +77,48 @@ bool CWizDocumentListViewItem::isAvatarNeedUpdate(const QString& strFileName)
 
 const WIZABSTRACT& CWizDocumentListViewItem::abstract(CWizThumbIndexCache& thumbCache)
 {
-    // ask thumbCache to load abstract to pool
-    if (m_abstract.strKbGUID.isEmpty()) {
-        if (!m_data.strKbGUID.isEmpty() && !m_data.strGUID.isEmpty()) {
-            thumbCache.load(m_data.strKbGUID, m_data.strGUID);
-        } else if (!m_message.kbGUID.isEmpty() && !m_message.documentGUID.isEmpty()) {
-            thumbCache.load(m_message.kbGUID, m_message.documentGUID);
-        } else {
-            Q_ASSERT(0);
-        }
+    if (m_data.thumb.strKbGUID.isEmpty()) {
+        // ask thumbCache to load abstract to pool
+        thumbCache.load(m_data.doc.strKbGUID, m_data.doc.strGUID);
     }
 
-    // just return it
-    return m_abstract;
+    return m_data.thumb;
 }
 
 void CWizDocumentListViewItem::resetAbstract(const WIZABSTRACT& abs)
 {
-    // called by CWizDocumentListView when thumbCache pool is ready for reading
-    m_abstract.strKbGUID = abs.strKbGUID;
-    m_abstract.guid= abs.guid;
-    m_abstract.text = abs.text;
-    m_abstract.image = abs.image;
+    m_data.thumb.strKbGUID = abs.strKbGUID;
+    m_data.thumb.guid= abs.guid;
+    m_data.thumb.text = abs.text;
+    m_data.thumb.image = abs.image;
 }
 
 void CWizDocumentListViewItem::resetAvatar(const QString& strFileName)
 {
-    m_imgAvatar.load(strFileName);
+    m_data.imgAuthorAvatar.load(strFileName);
 }
 
 const QString& CWizDocumentListViewItem::tags(CWizDatabase& db)
 {
-    if (m_tags.isEmpty()) {
-        m_tags = db.GetDocumentTagDisplayNameText(m_data.strGUID);
-        m_tags = " " + m_tags;
+    Q_ASSERT(db.kbGUID() == m_data.doc.strKbGUID);
+
+    if (m_data.strTags.isEmpty()) {
+        m_data.strTags = db.GetDocumentTagDisplayNameText(m_data.doc.strGUID);
+        //m_tags = " " + m_tags;
     }
 
-    return m_tags;
+    return m_data.strTags;
 }
 
 void CWizDocumentListViewItem::reload(CWizDatabase& db)
 {
-    m_abstract = WIZABSTRACT();
-    m_tags.clear();
-    setText("");    //force repaint
+    Q_ASSERT(db.kbGUID() == m_data.doc.strKbGUID);
 
-    if (nType == PrivateDocument) {
-        db.DocumentFromGUID(m_data.strGUID, m_data);
-        setText(m_data.strTitle);
-    } else if (nType == MessageDocument) {
-        db.messageFromId(m_message.nId, m_message);
-        setText(m_message.title);
-    }
+    m_data.thumb = WIZABSTRACT();
+    m_data.strTags.clear();
+
+    db.DocumentFromGUID(m_data.doc.strGUID, m_data.doc);
+    setText(m_data.doc.strTitle);
 }
 
 bool CWizDocumentListViewItem::operator <(const QListWidgetItem &other) const
@@ -121,23 +127,28 @@ bool CWizDocumentListViewItem::operator <(const QListWidgetItem &other) const
     Q_ASSERT(pOther);
 
     // default compare use create time
-
-    if (!m_data.strGUID.isEmpty()) {
-        // use document type
-        if (pOther->m_data.tCreated == m_data.tCreated) {
-            return text().compare(other.text(), Qt::CaseInsensitive) < 0;
-        } else {
-            return pOther->m_data.tCreated < m_data.tCreated;
-        }
-
-    } else if (!m_message.documentGUID.isEmpty()) {
-        // use message type
-        if (pOther->m_message.tCreated == m_message.tCreated) {
-            return text().compare(other.text(), Qt::CaseInsensitive) < 0;
-        } else {
-            return pOther->m_message.tCreated < m_message.tCreated;
-        }
+    if (pOther->m_data.doc.tCreated == m_data.doc.tCreated) {
+        return text().compare(other.text(), Qt::CaseInsensitive) < 0;
+    } else {
+        return pOther->m_data.doc.tCreated < m_data.doc.tCreated;
     }
+
+    //if (!m_data.doc.strGUID.isEmpty()) {
+    //    // use document type
+    //    if (pOther->m_data.tCreated == m_data.tCreated) {
+    //        return text().compare(other.text(), Qt::CaseInsensitive) < 0;
+    //    } else {
+    //        return pOther->m_data.tCreated < m_data.tCreated;
+    //    }
+
+    //} else if (!m_message.documentGUID.isEmpty()) {
+    //    // use message type
+    //    if (pOther->m_message.tCreated == m_message.tCreated) {
+    //        return text().compare(other.text(), Qt::CaseInsensitive) < 0;
+    //    } else {
+    //        return pOther->m_message.tCreated < m_message.tCreated;
+    //    }
+    //}
 
     Q_ASSERT(0);
     return true;

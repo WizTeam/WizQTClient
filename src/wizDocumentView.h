@@ -50,7 +50,9 @@ protected:
     QPointer<CWizAttachmentListWidget> m_attachments;
     QPointer<CWizNoteInfoForm> m_info;
 
+    // indicate current document editing status
     bool m_editingDocument;
+
     WizDocumentViewMode m_viewMode;
 
 public:
@@ -59,20 +61,19 @@ public:
     void showClient(bool visible);
     const WIZDOCUMENTDATA& document();
     void editDocument(bool editing);
-    bool isEditingDocument() const { return m_editingDocument; }
+    //bool isEditingDocument() const { return m_editingDocument; }
     void setViewMode(WizDocumentViewMode mode);
     void setModified(bool modified);
     void settingsChanged();
-
-    void showListTag();
-    void showListAttachment();
-    void showListInfo();
 
 public Q_SLOTS:
     void on_titleEdit_editingFinished();
     void on_titleEdit_returnPressed();
 
-    void on_segmentButton_clicked(int index);
+    void on_title_editButtonClicked();
+    void on_title_tagButtonClicked();
+    void on_title_attachButtonClicked();
+    void on_title_infoButtonClicked();
 
     void on_document_modified(const WIZDOCUMENTDATA& documentOld,
                               const WIZDOCUMENTDATA& documentNew);

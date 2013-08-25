@@ -8,8 +8,8 @@
 #include "share/wizobject.h"
 #include "share/wizThumbIndexCache.h"
 #include "share/wizuihelper.h"
+#include "wizDocumentListViewItem.h"
 
-class CWizDocumentListViewItem;
 class CWizTagListWidget;
 class CWizFolderSelector;
 class CWizScrollBar;
@@ -20,8 +20,20 @@ class CWizDocumentListView : public QListWidget
     Q_OBJECT
 
 public:
+    enum ViewType {
+        TypeThumbnail,
+        TypeTwoLine,
+        TypeOneLine
+    };
+
+public:
     explicit CWizDocumentListView(CWizExplorerApp& app, QWidget *parent = 0);
     virtual ~CWizDocumentListView();
+
+    int viewType() const { return m_viewType; }
+    void resetItemsViewType(int type);
+    QSize itemSizeFromViewType();
+
     CWizThumbIndexCache* thumbCache() const { return m_thumbCache; }
 
 protected:
@@ -41,6 +53,8 @@ private:
     QPointer<CWizThumbIndexCache> m_thumbCache;
     CWizUserAvatarDownloaderHost* m_avatarDownloader;
     CWizScrollBar* m_vScroll;
+
+    int m_viewType;
 
     QMenu* m_menuDocument;
     QMenu* m_menuMessage;
@@ -74,7 +88,7 @@ public:
     void addDocuments(const CWizDocumentDataArray& arrayDocument);
     void addDocuments(const CWizMessageDataArray& arrayMessage);
     int addDocument(const WIZDOCUMENTDATA& data, bool sort);
-    int addDocument(const WIZMESSAGEDATA& data, bool sort);
+    int addDocument(const WIZMESSAGEDATA& msg, bool sort);
 
     bool acceptDocument(const WIZDOCUMENTDATA& document);
     void addAndSelectDocument(const WIZDOCUMENTDATA& document);
@@ -90,8 +104,10 @@ public:
     const WIZDOCUMENTDATA& documentFromIndex(const QModelIndex &index) const;
     const WIZABSTRACT& documentAbstractFromIndex(const QModelIndex &index) const;
     const QString& documentTagsFromIndex(const QModelIndex &index) const;
-    const WIZMESSAGEDATA& messageFromIndex(const QModelIndex& index) const;
+    //const WIZMESSAGEDATA& messageFromIndex(const QModelIndex& index) const;
     const QImage& messageSenderAvatarFromIndex(const QModelIndex& index) const;
+    const WizDocumentListViewItemData& documentItemDataFromIndex(const QModelIndex& index) const;
+
 
 //#ifndef Q_OS_MAC
     // used for smoothly scroll

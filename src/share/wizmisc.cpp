@@ -1813,10 +1813,12 @@ QIcon WizLoadSkinIcon(const QString& strSkinName, const QString& strIconName,
     QIcon icon;
     icon.addFile(strIconNormal, QSize(), QIcon::Normal, QIcon::Off);
 
+    // used for check state
     if (QFile::exists(strIconActive1)) {
-        icon.addFile(strIconActive1, QSize(), QIcon::Active, QIcon::Off);
+        icon.addFile(strIconActive1, QSize(), QIcon::Active, QIcon::On);
     }
 
+    // used for sunken state
     if (QFile::exists(strIconActive2)) {
         icon.addFile(strIconActive2, QSize(), QIcon::Active, QIcon::Off);
     }

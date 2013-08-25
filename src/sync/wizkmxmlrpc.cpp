@@ -1192,7 +1192,7 @@ BOOL CWizKMDatabaseServer::data_upload(const QString& strObjectGUID, const QStri
         ATLASSERT(curPartSize <= partSize);
         //
         const char* begin = stream.data() + start;
-        spPartStream.fromRawData(begin, curPartSize);
+        spPartStream = spPartStream.fromRawData(begin, curPartSize);
         //
         int curPartStreamSize = (int)spPartStream.size();
         ATLASSERT(curPartStreamSize == curPartSize);

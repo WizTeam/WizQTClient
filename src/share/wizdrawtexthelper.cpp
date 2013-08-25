@@ -4,7 +4,7 @@
 #include <QTextLayout>
 #include <QFontMetrics>
 
-int WizDrawTextSingleLine(QPainter* p, const QRect& rc, CString& str, int flags, QColor color, bool elidedText)
+int WizDrawTextSingleLine(QPainter* p, const QRect& rc, QString& str, int flags, QColor color, bool elidedText)
 {
     if (rc.width() <= 0)
         return 0;

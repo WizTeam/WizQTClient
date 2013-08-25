@@ -2,9 +2,11 @@
 
 #include "wizdef.h"
 #include "share/wizsettings.h"
+#include "wizDocumentListView.h"
 
 CWizPopupButton::CWizPopupButton(CWizExplorerApp& app, QWidget *parent)
     : QToolButton(parent)
+    , m_app(app)
 {
     setPopupMode(QToolButton::InstantPopup);
 
@@ -29,7 +31,7 @@ void CWizPopupButton::paintEvent(QPaintEvent* event)
     // FIXME
     p.setPen("#787878");
     if (opt.state & QStyle::State_Sunken) {
-        p.fillRect(opt.rect, QColor("#DADADA"));
+        p.fillRect(opt.rect, QColor("#dadada"));
     }
 
     // draw arraw
@@ -62,36 +64,53 @@ void CWizPopupButton::paintEvent(QPaintEvent* event)
     }
 }
 
+void CWizPopupButton::createAction(const QString& text, int type,
+                                   QMenu* menu, QActionGroup* group)
+{
+    QAction* action = new QAction(text, menu);
+    action->setData(type);
+    action->setCheckable(true);
+    menu->addAction(action);
+    group->addAction(action);
+    connect(action, SIGNAL(triggered()), SLOT(on_action_triggered()));
+}
+
+void CWizPopupButton::setActionChecked(const QMenu* menu, int type)
+{
+    QList<QAction*> listActions = menu->actions();
+    for (int i = 0; i < listActions.size(); i++) {
+        if (listActions.at(i)->data() == type) {
+            listActions.at(i)->setChecked(true);
+            setText(listActions.at(i)->text());
+        }
+    }
+}
 
 
+/* ------------------------ CWizViewTypePopupButton ------------------------ */
 CWizViewTypePopupButton::CWizViewTypePopupButton(CWizExplorerApp& app, QWidget* parent)
     : CWizPopupButton(app, parent)
 {
+    setToolButtonStyle(Qt::ToolButtonIconOnly);
+
+    // only one action can be checked
+    QActionGroup* group = new QActionGroup(this);
+    group->setExclusive(true);
+
     QMenu* menu = new QMenu(this);
-    QAction* action = NULL;
-
-    action = new QAction(tr("One line view"), menu);
-    action->setData(TypeOneLine);
-    action->setCheckable(true);
-    menu->addAction(action);
-
-    action->setChecked(true);
-
-    action = new QAction(tr("Two line view"), menu);
-    action->setData(TypeTwoLine);
-    action->setCheckable(true);
-    menu->addAction(action);
-
-    action = new QAction(tr("Thumbnail view"), menu);
-    action->setData(TypeTwoLine);
-    action->setCheckable(true);
-    menu->addAction(action);
-
+    createAction(tr("Thumbnail view"), CWizDocumentListView::TypeThumbnail, menu, group);
+    createAction(tr("Two line view"), CWizDocumentListView::TypeTwoLine, menu, group);
+    createAction(tr("One line view"), CWizDocumentListView::TypeOneLine, menu, group);
     setMenu(menu);
 
-    QString strIconPath = ::WizGetSkinResourcePath(app.userSettings().skin()) + "view.png";
-    setIcon(QIcon(strIconPath));
-    setToolButtonStyle(Qt::ToolButtonIconOnly);
+    QString strSkinPath = ::WizGetSkinResourcePath(app.userSettings().skin());
+    m_iconOneLine.addFile(strSkinPath + "view_one_line.png");
+    m_iconTwoLine.addFile(strSkinPath + "view_two_line.png");
+    m_iconThumbnail.addFile(strSkinPath + "view_thumbnail.png");
+
+    int type = m_app.userSettings().get("VIEW_TYPE").toInt();
+    setActionChecked(menu, type);
+    setActionIcon(type);
 }
 
 QSize CWizViewTypePopupButton::sizeHint() const
@@ -99,11 +118,45 @@ QSize CWizViewTypePopupButton::sizeHint() const
     return QSize(32 + 10, fontMetrics().height() + 10);
 }
 
+void CWizViewTypePopupButton::on_action_triggered()
+{
+    QAction* action = qobject_cast<QAction*>(sender());
+
+    action->setChecked(true);
+    setText(action->text());
+
+    int type = action->data().toInt();
+    setActionIcon(type);
+
+    m_app.userSettings().set("VIEW_TYPE", QString::number(type));
+
+    Q_EMIT viewTypeChanged(type);
+}
+
+void CWizViewTypePopupButton::setActionIcon(int type)
+{
+    switch (type) {
+    case CWizDocumentListView::TypeOneLine:
+        setIcon(m_iconOneLine);
+        break;
+    case CWizDocumentListView::TypeTwoLine:
+        setIcon(m_iconTwoLine);
+        break;
+    case CWizDocumentListView::TypeThumbnail:
+        setIcon(m_iconThumbnail);
+        break;
+    default:
+        Q_ASSERT(0);
+    }
+}
 
 
+/* ------------------------ CWizSortingPopupButton ------------------------ */
 CWizSortingPopupButton::CWizSortingPopupButton(CWizExplorerApp& app, QWidget *parent)
     : CWizPopupButton(app, parent)
 {
+    setToolButtonStyle(Qt::ToolButtonTextOnly);
+
     // only one action can be checked
     QActionGroup* group = new QActionGroup(this);
     group->setExclusive(true);
@@ -119,16 +172,8 @@ CWizSortingPopupButton::CWizSortingPopupButton(CWizExplorerApp& app, QWidget *pa
 
     setMenu(menu);
 
-    // FIXME: save user sorting type and restore
-    QList<QAction*> listActions = menu->actions();
-    for (int i = 0; i < listActions.size(); i++) {
-        if (listActions.at(i)->data() == SortingCreateTime) {
-            listActions.at(i)->setChecked(true);
-            setText(listActions.at(i)->text());
-        }
-    }
-
-    setToolButtonStyle(Qt::ToolButtonTextOnly);
+    int type = m_app.userSettings().get("SORT_TYPE").toInt();
+    setActionChecked(menu, type);
 }
 
 QSize CWizSortingPopupButton::sizeHint () const
@@ -136,22 +181,13 @@ QSize CWizSortingPopupButton::sizeHint () const
     return QSize(fontMetrics().width(text()) + 30, fontMetrics().height() + 10);
 }
 
-void CWizSortingPopupButton::createAction(const QString& text, SortingType type,
-                                           QMenu* menu, QActionGroup* group)
-{
-    QAction* action = new QAction(text, menu);
-    action->setData(type);
-    action->setCheckable(true);
-    menu->addAction(action);
-    group->addAction(action);
-    connect(action, SIGNAL(triggered()), SLOT(on_sortingTypeChanged()));
-}
-
-
-void CWizSortingPopupButton::on_sortingTypeChanged()
+void CWizSortingPopupButton::on_action_triggered()
 {
     QAction* action = qobject_cast<QAction*>(sender());
 
     action->setChecked(true);
     setText(action->text());
+
+    int type = action->data().toInt();
+    m_app.userSettings().set("SORT_TYPE", QString::number(type));
 }

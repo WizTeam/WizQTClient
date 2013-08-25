@@ -413,6 +413,7 @@ QWidget* MainWindow::createListView()
     layoutList->setSpacing(0);
 
     CWizViewTypePopupButton* viewBtn = new CWizViewTypePopupButton(*this, this);
+    connect(viewBtn, SIGNAL(viewTypeChanged(int)), SLOT(on_documents_viewTypeChanged(int)));
     layoutActions->addWidget(viewBtn);
     QWidget* line = new QWidget(this);
     line->setFixedWidth(1);
@@ -443,6 +444,11 @@ void MainWindow::on_documents_documentCountChanged()
 {
     QString strCount = m_labelDocumentsCount->text().replace(QRegExp("\\d+"), QString::number(m_documents->count()));
     m_labelDocumentsCount->setText(strCount);
+}
+
+void MainWindow::on_documents_viewTypeChanged(int type)
+{
+    m_documents->resetItemsViewType(type);
 }
 
 //void MainWindow::resetNotice()
@@ -518,7 +524,6 @@ void MainWindow::on_actionNewNote_triggered()
 
 void MainWindow::on_actionViewMessages_triggered()
 {
-    // read messages from db
     CWizMessageDataArray arrayMsg;
     m_dbMgr.db().getAllMessages(arrayMsg);
 

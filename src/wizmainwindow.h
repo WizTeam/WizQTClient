@@ -209,6 +209,7 @@ public Q_SLOTS:
     void on_category_itemSelectionChanged();
     void on_documents_itemSelectionChanged();
     void on_documents_documentCountChanged();
+    void on_documents_viewTypeChanged(int type);
 
     void on_search_doSearch(const QString& keywords);
     void on_options_settingsChanged(WizOptionsType type);

@@ -11,11 +11,17 @@ class CWizPopupButton : public QToolButton
 
 public:
     explicit CWizPopupButton(CWizExplorerApp &app, QWidget* parent = 0);
+    void createAction(const QString& text, int type, QMenu* menu, QActionGroup* group);
+    void setActionChecked(const QMenu* menu, int type);
 
 protected:
+    CWizExplorerApp& m_app;
     QIcon m_iconArraw;
 
     void paintEvent(QPaintEvent* event);
+
+protected Q_SLOTS:
+    virtual void on_action_triggered() = 0;
 };
 
 
@@ -23,21 +29,31 @@ class CWizViewTypePopupButton: public CWizPopupButton
 {
     Q_OBJECT
 
-    enum {
-        TypeOneLine,
-        TypeTwoLine,
-        TypeThumbnail
-    };
-
 public:
+
     explicit CWizViewTypePopupButton(CWizExplorerApp &app, QWidget* parent = 0);
+    void setActionIcon(int type);
+
+private:
+    QIcon m_iconOneLine;
+    QIcon m_iconTwoLine;
+    QIcon m_iconThumbnail;
+
+protected:
     virtual QSize sizeHint() const;
+
+protected Q_SLOTS:
+    virtual void on_action_triggered();
+
+Q_SIGNALS:
+    void viewTypeChanged(int type);
 };
 
 class CWizSortingPopupButton : public CWizPopupButton
 {
     Q_OBJECT
 
+public:
     enum SortingType {
         SortingCreateTime,
         SortingUpdateTime,
@@ -47,15 +63,13 @@ class CWizSortingPopupButton : public CWizPopupButton
         SortingSize
     };
 
-public:
     explicit CWizSortingPopupButton(CWizExplorerApp& app, QWidget *parent = 0);
+
+protected:
     virtual QSize sizeHint() const;
 
-private:
-    void createAction(const QString& text, SortingType type, QMenu* menu, QActionGroup* group);
-
-private Q_SLOTS:
-    void on_sortingTypeChanged();
+protected Q_SLOTS:
+    virtual void on_action_triggered();
 };
 
 #endif // WIZPOPUPBUTTON_H
