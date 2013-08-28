@@ -161,13 +161,13 @@ struct WIZKBINFO
     WIZKBINFO();
     bool LoadFromXmlRpc(CWizXmlRpcStructValue& data);
 
-    __int64 nStorageLimit;
-    __int64 nStorageUsage;
+    qint64 nStorageLimit;
+    qint64 nStorageUsage;
     QString strStorageLimit;
     QString strStorageUsage;
 
-    __int64 nTrafficLimit;
-    __int64 nTrafficUsage;
+    qint64 nTrafficLimit;
+    qint64 nTrafficUsage;
     QString strTrafficLimit;
     QString strTrafficUsage;
 };

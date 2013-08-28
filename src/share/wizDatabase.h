@@ -197,7 +197,7 @@ public:
                                const QString& strObjectType,
                                long flags);
 
-    // key-value api based syncing, user config, folders etc.
+    // key-value api based syncing, user config, folders, biz users list etc.
     virtual void GetAccountKeys(CWizStdStringArray& arrayKey);
     virtual qint64 GetAccountLocalValueVersion(const QString& strKey);
     virtual void SetAccountLocalValue(const QString& strKey,
@@ -233,6 +233,11 @@ public:
     QString GetFolders();
     void SetFoldersPos(const QString& foldersPos, qint64 nVersion);
     void SetFolders(const QString& strFolders, qint64 nVersion, bool bSaveVersion);
+
+    void SetBizUsers(const QString &strBizGUID, const QString& strUsers);
+    bool loadBizUsersFromJson(const QString &strBizGUID,
+                              const QString& strJsonUsers,
+                              CWizBizUserDataArray& arrayUser);
 
 public:
     bool Open(const QString& strUserId, const QString& strKbGUID = NULL);

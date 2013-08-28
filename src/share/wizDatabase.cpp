@@ -3,13 +3,14 @@
 #include <QDir>
 #include <QUrl>
 #include <QDebug>
-
+#include <QTextCodec>
 #include <algorithm>
 
 #include "wizdef.h"
 #include "wizhtml2zip.h"
 #include "zip/wizzip.h"
 #include "html/wizhtmlcollector.h"
+#include "rapidjson/document.h"
 
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -304,6 +305,9 @@ const QString g_strGroupSection = "Groups";
 const QString g_strBizGroupSection = "BizGroups";
 const QString g_strDatabaseInfoSection = "Database";
 
+#define WIZ_META_KBINFO_SECTION "KB_INFO"
+#define WIZ_META_SYNCINFO_SECTION "SYNC_INFO"
+#define VERSION_NAME_2_META_KEY(x) "KEY_" + x + "_VERSION"
 
 CWizDatabase::CWizDatabase()
     : m_ziwReader(new CWizZiwReader())
@@ -619,18 +623,23 @@ IWizSyncableDatabase* CWizDatabase::GetGroupDatabase(const WIZGROUPDATA& group)
 void CWizDatabase::CloseGroupDatabase(IWizSyncableDatabase* pDatabase)
 {
     Q_UNUSED(pDatabase);
-    //CWizDatabase* db = dynamic_cast<CWizDatabase*>(pDatabase);
-    //if (!db) {
-    //    return;
-    //}
-    //
-    //delete db;
 }
 
 void CWizDatabase::SetKbInfo(const QString& strKBGUID, const WIZKBINFO& info)
 {
-    Q_UNUSED(strKBGUID);
-    Q_UNUSED(info);
+    Q_ASSERT(strKBGUID == kbGUID() || (strKBGUID.isEmpty() && m_bIsPersonal));
+
+    SetMeta(WIZ_META_KBINFO_SECTION, "STORAGE_LIMIT_S", info.strStorageLimit);
+    SetMetaInt64(WIZ_META_KBINFO_SECTION, "STORAGE_LIMIT_N", info.nStorageLimit);
+
+    SetMeta(WIZ_META_KBINFO_SECTION, "STORAGE_USAGE_S", info.strStorageUsage);
+    SetMetaInt64(WIZ_META_KBINFO_SECTION, "STORAGE_USAGE_N", info.nStorageUsage);
+
+    SetMeta(WIZ_META_KBINFO_SECTION, "TRAFFIC_LIMIT_S", info.strTrafficLimit);
+    SetMetaInt64(WIZ_META_KBINFO_SECTION, "TRAFFIC_LIMIT_N", info.nTrafficLimit);
+
+    SetMeta(WIZ_META_KBINFO_SECTION, "TRAFFIC_USAGE_S", info.strTrafficUsage);
+    SetMetaInt64(WIZ_META_KBINFO_SECTION, "TRAFFIC_USAGE_N", info.nTrafficUsage);
 }
 
 void CWizDatabase::SetUserInfo(const WIZUSERINFO& userInfo)
@@ -740,7 +749,8 @@ COleDateTime CWizDatabase::GetLastSyncTime()
 long CWizDatabase::GetLocalFlags(const QString& strObjectGUID,
                                  const QString& strObjectType)
 {
-
+    Q_UNUSED(strObjectGUID);
+    Q_UNUSED(strObjectType);
 }
 
 bool CWizDatabase::SetLocalFlags(const QString& strObjectGUID,
@@ -750,31 +760,23 @@ bool CWizDatabase::SetLocalFlags(const QString& strObjectGUID,
 
 }
 
-const QString g_KeyValue_Key_BizUsers = _T("biz_users/");
+//const QString g_KeyValue_Key_BizUsers = _T("biz_users/");
 
 void CWizDatabase::GetAccountKeys(CWizStdStringArray& arrayKey)
 {
-    /*
-     *
-     *get biz uses by key/value
-     *
-     */
+    Q_ASSERT(!IsGroup());
 
-    /*
-    CWizStdStringArray arrayGUID;
-    GetAllBizGUIDs(arrayGUID);
-    for (CWizStdStringArray::const_iterator it = arrayGUID.begin();
-        it != arrayGUID.end();
-        it++)
-    {
-        arrayKey.push_back(CString(g_KeyValue_Key_BizUsers) + *it);
+    QMap<QString, QString> mapBiz;
+    GetBizGroupInfo(mapBiz);
+    for (QMap<QString, QString>::const_iterator it = mapBiz.begin();
+         it != mapBiz.end(); it++) {
+        arrayKey.push_back("biz_users/" + it.key());
     }
-    */
 }
 
 qint64 CWizDatabase::GetAccountLocalValueVersion(const QString& strKey)
 {
-
+    return GetMetaInt64(WIZ_META_SYNCINFO_SECTION, "KEY_" + strKey + "_VERSION", 0);
 }
 
 void CWizDatabase::SetAccountLocalValue(const QString& strKey,
@@ -782,7 +784,24 @@ void CWizDatabase::SetAccountLocalValue(const QString& strKey,
                                         qint64 nServerVersion,
                                         bool bSaveVersion)
 {
+    Q_ASSERT(!IsGroup());
 
+    if (strKey.startsWith("biz_users/", Qt::CaseInsensitive)) {
+        QMap<QString, QString> mapBiz;
+        GetBizGroupInfo(mapBiz);
+        for (QMap<QString, QString>::const_iterator it = mapBiz.begin();
+             it != mapBiz.end(); it++) {
+            if (strKey.endsWith(it.key(), Qt::CaseInsensitive)) {
+                SetBizUsers(it.key(), strValue);
+            }
+        }
+    } else {
+        Q_ASSERT(0);
+    }
+
+    if (bSaveVersion) {
+        SetMetaInt64(WIZ_META_SYNCINFO_SECTION, "KEY_" + strKey + "_VERSION", nServerVersion);
+    }
 }
 
 void CWizDatabase::GetKBKeys(CWizStdStringArray& arrayKey)
@@ -815,7 +834,7 @@ bool CWizDatabase::ProcessValue(const QString& key)
         return IsGroup();
     }
 
-    return TRUE;
+    return true;
 }
 
 qint64 CWizDatabase::GetLocalValueVersion(const QString& key)
@@ -823,14 +842,16 @@ qint64 CWizDatabase::GetLocalValueVersion(const QString& key)
     CString strKey(key);
     strKey.MakeLower();
 
-    if (strKey == "folders")
-    {
-        return GetMetaInt64(key, "version", 0);
-    }
-    else
-    {
-        return GetMetaInt64(key, "version", 0);
-    }
+    return GetMetaInt64(WIZ_META_SYNCINFO_SECTION, "KEY_" + strKey + "_VERSION", 0);
+
+    //if (strKey == "folders")
+    //{
+    //    return GetMetaInt64(key, "version", 0);
+    //}
+    //else
+    //{
+    //    return GetMetaInt64(key, "version", 0);
+    //}
 }
 
 QString CWizDatabase::GetLocalValue(const QString& key)
@@ -868,7 +889,7 @@ QString CWizDatabase::GetLocalValue(const QString& key)
 void CWizDatabase::SetLocalValueVersion(const QString& strKey,
                                         qint64 nServerVersion)
 {
-    SetMetaInt64(strKey, "version", nServerVersion);
+    SetMetaInt64(WIZ_META_SYNCINFO_SECTION, "KEY_" + strKey + "_VERSION", nServerVersion);
 }
 
 void CWizDatabase::SetLocalValue(const QString& key, const QString& value,
@@ -1090,6 +1111,56 @@ int CWizDatabase::GetObjectSyncTimeline()
 
     return nDays;
 }
+
+void CWizDatabase::SetBizUsers(const QString& strBizGUID, const QString& strJsonUsers)
+{
+    CWizBizUserDataArray arrayUser;
+
+    if (!loadBizUsersFromJson(strBizGUID, strJsonUsers, arrayUser)) {
+        return;
+    }
+
+    if (!UpdateBizUsers(arrayUser)) {
+        return;
+    }
+}
+
+bool CWizDatabase::loadBizUsersFromJson(const QString& strBizGUID,
+                                        const QString& strJsonUsers,
+                                        CWizBizUserDataArray& arrayUser)
+{
+    // QString assumes Lantin-1 when convert to and from const char* and QByteArrays
+    // set to UTF-8 as default converting to avoid messy code
+    QTextCodec::setCodecForCStrings(QTextCodec::codecForName("UTF-8"));
+
+    rapidjson::Document document;
+    document.Parse<0>(strJsonUsers.toUtf8().constData());
+
+    if (!document.IsArray()) {
+        TOLOG("Error occured when try to parse json of biz users");
+        return false;
+    }
+
+    for (rapidjson::SizeType i = 0; i < document.Size(); i++) {
+        const rapidjson::Value& u = document[i];
+        if (!u.IsObject()) {
+            TOLOG("Error occured when parse json of biz users");
+            return false;
+        }
+
+        WIZBIZUSER user;
+        user.alias = u["alias"].GetString();
+        user.pinyin = u["pinyin"].GetString();
+        user.userGUID = u["user_guid"].GetString();
+        user.userId = u["user_id"].GetString();
+        user.bizGUID = strBizGUID;
+
+        arrayUser.push_back(user);
+    }
+
+    return true;
+}
+
 
 
 /* ---------------------------------------------------------------------- */
