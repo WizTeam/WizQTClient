@@ -15,14 +15,14 @@ CWizPopupWidget::CWizPopupWidget(QWidget* parent)
 {
     setContentsMargins(8, 20, 8, 8);
 
-    QPalette pal = palette();
-    pal.setColor(QPalette::Window, "#DCDCDC"); // (215, 215, 215)
-    setPalette(pal);
+    //QPalette pal = palette();
+    //pal.setColor(QPalette::Window, "#DCDCDC"); // (215, 215, 215)
+    //setPalette(pal);
 }
 
 QSize CWizPopupWidget::sizeHint() const
 {
-    return QSize(300, 400);
+    return QSize(320, 400);
 }
 
 QRect CWizPopupWidget::getClientRect() const

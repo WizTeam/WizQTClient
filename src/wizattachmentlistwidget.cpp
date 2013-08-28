@@ -9,19 +9,16 @@
 #include "share/wizuihelper.h"
 #include "share/wizdownloadobjectdata.h"
 #include "wizdef.h"
+#include "wizButton.h"
 
 #include "wizmainwindow.h"
 
 
 class CWizAttachmentListViewItem : public QListWidgetItem
 {
-    WIZDOCUMENTATTACHMENTDATA m_attachment;
 public:
-    CWizAttachmentListViewItem(const WIZDOCUMENTATTACHMENTDATA& att)
-        : m_attachment(att)
-    {
-
-    }
+    CWizAttachmentListViewItem(const WIZDOCUMENTATTACHMENTDATA& att) : m_attachment(att) {}
+    const WIZDOCUMENTATTACHMENTDATA& attachment() const { return m_attachment; }
 
     QString detailText(const CWizAttachmentListView* view) const
     {
@@ -33,10 +30,8 @@ public:
         return strSize + "  " + strType;
     }
 
-    const WIZDOCUMENTATTACHMENTDATA& attachment() const
-    {
-        return m_attachment;
-    }
+private:
+    WIZDOCUMENTATTACHMENTDATA m_attachment;
 };
 
 #define WIZACTION_ATTACHMENT_ADD    QObject::tr("Add...")
@@ -53,10 +48,10 @@ CWizAttachmentListView::CWizAttachmentListView(CWizExplorerApp& app, QWidget* pa
     setStyle(WizGetStyle(m_app.userSettings().skin()));
     setSelectionMode(QAbstractItemView::ExtendedSelection);
     setAttribute(Qt::WA_MacShowFocusRect, false);
+    setStyleSheet("background-color: #F7F7F7");
 
     MainWindow* mainWindow = qobject_cast<MainWindow *>(m_app.mainWindow());
     m_downloadDialog = mainWindow->objectDownloadDialog();
-
     connect(this, SIGNAL(itemDoubleClicked(QListWidgetItem*)), SLOT(on_list_itemDoubleClicked(QListWidgetItem*)));
 
     // setup context menu
@@ -169,6 +164,7 @@ void CWizAttachmentListView::addAttachments()
         addItem(new CWizAttachmentListViewItem(data));
     }
 }
+
 void CWizAttachmentListView::openAttachment(CWizAttachmentListViewItem* item)
 {
     if (!item)
@@ -325,59 +321,43 @@ void CWizAttachmentListView::on_list_itemDoubleClicked(QListWidgetItem* it)
 }
 
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
+/* ----------------------- CWizAttachmentListWidget ----------------------- */
 CWizAttachmentListWidget::CWizAttachmentListWidget(CWizExplorerApp& app, QWidget* parent)
     : CWizPopupWidget(parent)
     , m_app(app)
     , m_list(new CWizAttachmentListView(app, this))
 {
-    QWidget* root = new QWidget(this);
-    root->setGeometry(0, 0, sizeHint().width(), sizeHint().height());
-    root->setContentsMargins(8, 20, 8, 8);
+    // FIXME
+    setContentsMargins(0, 20, 0, 0);
+    setStyleSheet("background-color: #FFFFFF");
+
+    QIcon iconAddAttachment = ::WizLoadSkinIcon(m_app.userSettings().skin(), "document_add_attachment");
+    QAction* actionAddAttach = new QAction(iconAddAttachment, tr("Add attachments"), this);
+    connect(actionAddAttach, SIGNAL(triggered()), SLOT(on_addAttachment_clicked()));
+    m_btnAddAttachment = new CWizButton(app, this);
+    m_btnAddAttachment->setAction(actionAddAttach);
+
+    QHBoxLayout* layoutHeader = new QHBoxLayout();
+    layoutHeader->setContentsMargins(20, 0, 20, 0);
+    layoutHeader->addWidget(new QLabel(tr("Attachments"), this));
+    layoutHeader->addStretch();
+    layoutHeader->addWidget(m_btnAddAttachment);
 
     QVBoxLayout* layoutMain = new QVBoxLayout();
     layoutMain->setContentsMargins(0, 0, 0, 0);
-    root->setLayout(layoutMain);
+    layoutMain->setSpacing(5);
+    setLayout(layoutMain);
 
-    QWidget* header = new QWidget(root);
-    QHBoxLayout* layoutHeader = new QHBoxLayout();
-    layoutHeader->setContentsMargins(0, 0, 0, 0);
-    header->setLayout(layoutHeader);
-
-    QIcon iconAddAttachment = ::WizLoadSkinIcon(m_app.userSettings().skin(), palette().window().color(), "add_attachment_button");
-    m_btnAddAttachment = new CWizImagePushButton(iconAddAttachment, "", root);
-    m_btnAddAttachment->setStyle(WizGetStyle(m_app.userSettings().skin()));
-    m_btnAddAttachment->setToolTip(tr("Add attachments"));
-    layoutHeader->addWidget(new CWizFixedSpacer(QSize(4, 2), root));
-    layoutHeader->addWidget(new QLabel(tr("Attachments"), root));
-    layoutHeader->addWidget(new CWizSpacer(root));
-    layoutHeader->addWidget(m_btnAddAttachment);
-    connect(m_btnAddAttachment, SIGNAL(clicked()), SLOT(on_addAttachment_clicked()));
-
-    QWidget* line = new QWidget(root);
-    line->setMaximumHeight(1);
-    line->setMinimumHeight(1);
-    line->setStyleSheet("border-bottom-width:1;border-bottom-style:solid;border-bottom-color:#d9dcdd");
-
-    layoutMain->addWidget(header);
-    layoutMain->addWidget(line);
+    layoutMain->addLayout(layoutHeader);
     layoutMain->addWidget(m_list);
 }
 
-void CWizAttachmentListWidget::setDocument(const WIZDOCUMENTDATA& document)
+void CWizAttachmentListWidget::setDocument(const WIZDOCUMENTDATA& doc)
 {
-    m_list->setDocument(document);;
-    resetPermission();
-}
+    m_list->setDocument(doc);;
 
-void CWizAttachmentListWidget::resetPermission()
-{
-    QString strUserId = m_app.databaseManager().db().getUserId();
-    int nPerm = m_app.databaseManager().db(m_list->document().strKbGUID).permission();
-
-    if (nPerm <= WIZ_USERGROUP_EDITOR
-            || (nPerm == WIZ_USERGROUP_AUTHOR && m_list->document().strOwner == strUserId)) {
+    // reset permission
+    if (m_app.databaseManager().db(doc.strKbGUID).CanEditDocument(doc)) {
         m_btnAddAttachment->setEnabled(true);
     } else {
         m_btnAddAttachment->setEnabled(false);

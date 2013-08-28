@@ -17,7 +17,7 @@
    <bool>false</bool>
   </property>
   <property name="styleSheet">
-   <string notr="true">background-color: rgb(240, 240, 240);</string>
+   <string notr="true">background-color: #FFFFFF</string>
   </property>
   <widget class="QWidget" name="widget" native="true">
    <property name="geometry">
@@ -29,7 +29,7 @@
     </rect>
    </property>
    <property name="styleSheet">
-    <string notr="true">background-color: rgb(208, 208, 208);</string>
+    <string notr="true">background-color: #F7F7F7;</string>
    </property>
    <widget class="QWidget" name="verticalLayoutWidget">
     <property name="geometry">
