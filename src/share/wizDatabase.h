@@ -227,7 +227,9 @@ public:
 
     // end interface implementations
 
-    //
+    // helper methods for interface
+    void SetObjectSyncTimeLine(int nDays);
+    int GetObjectSyncTimeline();
     QString GetFolders();
     void SetFoldersPos(const QString& foldersPos, qint64 nVersion);
     void SetFolders(const QString& strFolders, qint64 nVersion, bool bSaveVersion);
@@ -295,7 +297,7 @@ public:
 
     bool IsDocumentDownloaded(const CString& strGUID);
     bool IsAttachmentDownloaded(const CString& strGUID);
-    bool GetAllObjectsNeedToBeDownloaded(CWizObjectDataArray& arrayData);
+    bool GetAllObjectsNeedToBeDownloaded(CWizObjectDataArray& arrayData, int nTimeLine);
     bool UpdateSyncObjectLocalData(const WIZOBJECTDATA& data);
 
     CString GetObjectFileName(const WIZOBJECTDATA& data);

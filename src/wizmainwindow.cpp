@@ -51,7 +51,7 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     , m_sync(new CWizKMSyncThread(dbMgr.db(), this))
     , m_syncTimer(new QTimer(this))
     , m_searchIndexer(new CWizSearchIndexer(m_dbMgr))
-    , m_messageSync(new CWizGroupMessage(dbMgr.db()))
+    //, m_messageSync(new CWizGroupMessage(dbMgr.db()))
     , m_console(new CWizConsoleDialog(*this, this))
     , m_upgrade(new CWizUpgrade())
     , m_certManager(new CWizCertManager(*this))
@@ -118,9 +118,9 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     }
 
     // group messages sync thread
-    QThread* threadMessage = new QThread();
-    m_messageSync->moveToThread(threadMessage);
-    threadMessage->start();
+    //QThread* threadMessage = new QThread();
+    //m_messageSync->moveToThread(threadMessage);
+    //threadMessage->start();
 
     // init GUI stuff
     //m_category = m_categoryPrivate;

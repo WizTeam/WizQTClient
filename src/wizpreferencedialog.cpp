@@ -1,11 +1,14 @@
 #include "wizpreferencedialog.h"
 #include "ui_wizpreferencedialog.h"
 
+#include "share/wizDatabaseManager.h"
+
 
 CWizPreferenceWindow::CWizPreferenceWindow(CWizExplorerApp& app, QWidget* parent)
     : QDialog(parent)
     , ui(new Ui::CWizPreferenceWindow)
     , m_app(app)
+    , m_dbMgr(app.databaseManager())
 {
     ui->setupUi(this);
     setWindowIcon(QIcon());
@@ -187,19 +190,24 @@ void CWizPreferenceWindow::on_comboSyncMethod_activated(int index)
 {
     switch (index) {
         case 0:
-            userSettings().setSyncMethod(-1);
+            //userSettings().setSyncMethod(-1);
+            m_dbMgr.db().SetObjectSyncTimeLine(-1);
             break;
         case 1:
-            userSettings().setSyncMethod(1);
+            //userSettings().setSyncMethod(1);
+            m_dbMgr.db().SetObjectSyncTimeLine(1);
             break;
         case 2:
-            userSettings().setSyncMethod(7);
+            //userSettings().setSyncMethod(7);
+            m_dbMgr.db().SetObjectSyncTimeLine(7);
             break;
         case 3:
-            userSettings().setSyncMethod(30);
+            //userSettings().setSyncMethod(30);
+            m_dbMgr.db().SetObjectSyncTimeLine(30);
             break;
         case 4:
-            userSettings().setSyncMethod(99999);
+            //userSettings().setSyncMethod(9999);
+            m_dbMgr.db().SetObjectSyncTimeLine(9999);
             break;
         default:
             Q_ASSERT(0);
@@ -212,25 +220,37 @@ void CWizPreferenceWindow::on_comboSyncGroupMethod_activated(int index)
 {
     switch (index) {
     case 0:
-        userSettings().setSyncGroupMethod(-1);
+        //userSettings().setSyncGroupMethod(-1);
+        setSyncGroupTimeLine(-1);
         break;
     case 1:
-        userSettings().setSyncGroupMethod(1);
+        //userSettings().setSyncGroupMethod(1);
+        setSyncGroupTimeLine(1);
         break;
     case 2:
-        userSettings().setSyncGroupMethod(7);
+        //userSettings().setSyncGroupMethod(7);
+        setSyncGroupTimeLine(7);
         break;
     case 3:
-        userSettings().setSyncGroupMethod(30);
+        //userSettings().setSyncGroupMethod(30);
+        setSyncGroupTimeLine(30);
         break;
     case 4:
-        userSettings().setSyncGroupMethod(99999);
+        //userSettings().setSyncGroupMethod(9999);
+        setSyncGroupTimeLine(9999);
         break;
     default:
         Q_ASSERT(0);
     }
 
     Q_EMIT settingsChanged(wizoptionsSync);
+}
+
+void CWizPreferenceWindow::setSyncGroupTimeLine(int nDays)
+{
+    for (int i = 0; i < m_dbMgr.count(); i++) {
+        m_dbMgr.at(i).SetObjectSyncTimeLine(nDays);
+    }
 }
 
 void CWizPreferenceWindow::labelProxy_linkActivated(const QString& link)

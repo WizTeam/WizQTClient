@@ -14,6 +14,8 @@ namespace Ui {
     class CWizPreferenceWindow;
 }
 
+class CWizDatabaseManager;
+
 class CWizPreferenceWindow: public QDialog
 {
     Q_OBJECT
@@ -25,10 +27,13 @@ public:
 private:
     Ui::CWizPreferenceWindow *ui;
     CWizExplorerApp& m_app;
+    CWizDatabaseManager& m_dbMgr;
 
     QStringList m_locales;
     QStringList m_skins;
     QPointer<QFontDialog> m_fontDialog;
+
+    void setSyncGroupTimeLine(int nDays);
 
 Q_SIGNALS:
     void settingsChanged(WizOptionsType type);

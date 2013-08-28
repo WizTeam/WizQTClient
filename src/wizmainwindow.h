@@ -75,7 +75,7 @@ private:
     CWizUserSettings* m_settings;
     QPointer<CWizKMSyncThread> m_sync;
     QPointer<QTimer> m_syncTimer;
-    QPointer<CWizGroupMessage> m_messageSync;
+    //QPointer<CWizGroupMessage> m_messageSync;
     CWizConsoleDialog* m_console;
     QPointer<CWizUpgrade> m_upgrade;
     QPointer<CWizCertManager> m_certManager;

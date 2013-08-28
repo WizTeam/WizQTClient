@@ -366,12 +366,7 @@ bool CWizDatabase::GetModifiedAttachmentList(CWizDocumentAttachmentDataArray& ar
 
 bool CWizDatabase::GetObjectsNeedToBeDownloaded(CWizObjectDataArray& arrayObject)
 {
-#ifdef QT_DEBUG
-    return true;
-#else
-    // FIXME
-    return GetAllObjectsNeedToBeDownloaded(arrayObject);
-#endif
+    return GetAllObjectsNeedToBeDownloaded(arrayObject, GetObjectSyncTimeline());
 }
 
 bool CWizDatabase::OnDownloadDeletedList(const CWizDeletedGUIDDataArray& arrayData)
@@ -723,10 +718,8 @@ bool CWizDatabase::CreateConflictedCopy(const QString& strObjectGUID,
                                         const QString& strObjectType)
 {
     // FIXME
-
     Q_UNUSED(strObjectGUID);
     Q_UNUSED(strObjectType);
-
     Q_ASSERT(0);
 
     return false;
@@ -1080,6 +1073,24 @@ void CWizDatabase::SetFolders(const QString& strFolders, qint64 nVersion, bool b
         SetLocalValueVersion("folders", nVersion);
     }
 }
+
+void CWizDatabase::SetObjectSyncTimeLine(int nDays)
+{
+    SetMeta("SYNC_INFO", "TIMELINE", QString::number(nDays));
+}
+
+int CWizDatabase::GetObjectSyncTimeline()
+{
+    int nDays = GetMetaDef("SYNC_INFO", "TIMELINE").toInt();
+    if (m_bIsPersonal && !nDays) {
+        return 9999;
+    } else if (!m_bIsPersonal && !nDays) {
+        return 1;
+    }
+
+    return nDays;
+}
+
 
 /* ---------------------------------------------------------------------- */
 
@@ -1906,15 +1917,38 @@ bool CWizDatabase::IsAttachmentDownloaded(const CString& strGUID)
     return CWizIndex::IsObjectDataDownloaded(strGUID, "attachment");
 }
 
-bool CWizDatabase::GetAllObjectsNeedToBeDownloaded(CWizObjectDataArray& arrayData)
+bool CWizDatabase::GetAllObjectsNeedToBeDownloaded(CWizObjectDataArray& arrayData, int nTimeLine)
 {
     CWizDocumentDataArray arrayDocument;
     CWizDocumentAttachmentDataArray arrayAttachment;
     GetNeedToBeDownloadedDocuments(arrayDocument);
     GetNeedToBeDownloadedAttachments(arrayAttachment);
-
     arrayData.assign(arrayAttachment.begin(), arrayAttachment.end());
     arrayData.insert(arrayData.begin(), arrayDocument.begin(), arrayDocument.end());
+
+    if (nTimeLine == -1) {
+        arrayData.clear();
+        return true;
+    } else if (nTimeLine == 9999) {
+        return true;
+    } else {
+        COleDateTime tNow = ::WizGetCurrentTime();
+        size_t count = arrayData.size();
+        for (intptr_t i = count - 1; i >= 0; i--)
+        {
+            COleDateTime t = arrayData[i].tTime;
+            t = t.addDays(nTimeLine);
+            if (t < tNow) {
+                arrayData.erase(arrayData.begin() + i);
+                continue;
+            }
+
+            if (arrayData[i].eObjectType == wizobjectDocumentAttachment) {
+                arrayData.erase(arrayData.begin() + i);
+                continue;
+            }
+        }
+    }
 
     return true;
 }
