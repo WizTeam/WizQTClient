@@ -70,6 +70,7 @@ CWizUserAvatarDownloader::CWizUserAvatarDownloader(const QString& strPath,
     : QObject(parent)
     , m_strAvatarPath(strPath)
     , m_net(new QNetworkAccessManager(this))
+    , m_bDownloadDefault(false)
 {
 }
 
@@ -119,7 +120,7 @@ void CWizUserAvatarDownloader::fetchUserAvatar(const QString& strUserGUID)
 
     // remote return: http://as.wiz.cn/wizas/a/users/avatar/{userGuid}
     // do substitution and add optional default arg for downloading default avatar
-    QString requestUrl = m_strAvatarRequestUrl + "?default=true";
+    QString requestUrl = m_strAvatarRequestUrl + "?default=" + (m_bDownloadDefault ? "true" : "false");
     requestUrl.replace(QRegExp("\\{.*\\}"), strUserGUID);
 
     QNetworkReply* reply = m_net->get(QNetworkRequest(requestUrl));

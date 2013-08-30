@@ -57,6 +57,7 @@ private:
     QNetworkAccessManager* m_net;
     QString m_strAvatarPath;
     QString m_strAvatarRequestUrl;
+    bool m_bDownloadDefault; // indicate whether download default avatar
 
     QString m_strCurrentUser; // current downloading
 

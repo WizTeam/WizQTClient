@@ -80,7 +80,11 @@ void drawComboPrimitive(QStylePainter* p, QStyle::PrimitiveElement pe, const QSt
 class CWizToolButton : public QToolButton
 {
 public:
-    CWizToolButton(QWidget* parent = 0) : QToolButton(parent)
+    CWizToolButton(QWidget* parent = 0)
+        : QToolButton(parent)
+        , m_colorHoverBorder("#c8dae8")
+        , m_colorHoverFill("#e8f0f3")
+        , m_colorSunkenBorder("#0072c4")
     {
         setFocusPolicy(Qt::NoFocus);
         setCheckable(true);
@@ -88,28 +92,64 @@ public:
     }
 
 protected:
+    void drawCommonPrimitive(QPainter* p, QStyleOptionToolButton* opt)
+    {
+        QRect rectInner = opt->rect.adjusted(1, 1, -1, -1);
+        if ((opt->state & QStyle::State_MouseOver) && !(opt->state & QStyle::State_Sunken)) {
+            p->setPen(m_colorHoverBorder);
+            p->fillRect(rectInner, m_colorHoverFill);
+            p->drawRect(rectInner);
+        }
+
+        if (opt->state & QStyle::State_Sunken) {
+            p->setPen(m_colorSunkenBorder);
+            p->drawRect(rectInner);
+        }
+    }
+
     virtual void paintEvent(QPaintEvent *event)
     {
         Q_UNUSED(event);
 
-        QStylePainter p(this);
-        QStyleOptionToolButton option;
-        initStyleOption(&option);
+        QStyleOptionToolButton opt;
+        initStyleOption(&opt);
 
-        QIcon::Mode mode = option.state & QStyle::State_Enabled ? QIcon::Normal : QIcon::Disabled;
-        if (mode == QIcon::Normal && (option.state & QStyle::State_HasFocus || option.state & QStyle::State_Sunken))
+        QPainter p(this);
+        p.setClipRect(opt.rect);
+
+        drawCommonPrimitive(&p, &opt);
+
+        QIcon::Mode mode = opt.state & QStyle::State_Enabled ? QIcon::Normal : QIcon::Disabled;
+        if (mode == QIcon::Normal && (opt.state & QStyle::State_Sunken))
             mode = QIcon::Active;
         QIcon::State state = QIcon::Off;
-        if (option.state & QStyle::State_On)
+        if (opt.state & QStyle::State_On)
             state = QIcon::On;
 
-        option.icon.paint(&p, option.rect, Qt::AlignCenter, mode, state);
+        opt.icon.paint(&p, opt.rect, Qt::AlignCenter, mode, state);
+    }
+
+    virtual void leaveEvent(QEvent* event) {
+        QToolButton::leaveEvent(event);
+
+        update();
+    }
+
+    virtual void enterEvent(QEvent* event) {
+        QToolButton::enterEvent(event);
+
+        update();
     }
 
     virtual QSize sizeHint() const
     {
         return iconSize() + QSize(4, 4);
     }
+
+private:
+    QColor m_colorHoverBorder;
+    QColor m_colorHoverFill;
+    QColor m_colorSunkenBorder;
 };
 
 class CWizToolButtonColor : public CWizToolButton
@@ -131,9 +171,13 @@ protected:
     {
         Q_UNUSED(event);
 
-        QStylePainter p(this);
         QStyleOptionToolButton opt;
         initStyleOption(&opt);
+
+        QStylePainter p(this);
+        p.setClipRect(opt.rect);
+
+        drawCommonPrimitive(&p, &opt);
 
         QIcon::Mode mode = opt.state & QStyle::State_Enabled ? QIcon::Normal : QIcon::Disabled;
         if (mode == QIcon::Normal && (opt.state & QStyle::State_HasFocus || opt.state & QStyle::State_Sunken))
