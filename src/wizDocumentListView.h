@@ -30,9 +30,12 @@ public:
     explicit CWizDocumentListView(CWizExplorerApp& app, QWidget *parent = 0);
     virtual ~CWizDocumentListView();
 
-    int viewType() const { return m_viewType; }
+    int viewType() const { return m_nViewType; }
     void resetItemsViewType(int type);
     QSize itemSizeFromViewType();
+
+    int sortingType() const { return m_nSortingType; }
+    void resetItemsSortingType(int type);
 
     CWizThumbIndexCache* thumbCache() const { return m_thumbCache; }
 
@@ -54,7 +57,8 @@ private:
     CWizUserAvatarDownloaderHost* m_avatarDownloader;
     CWizScrollBar* m_vScroll;
 
-    int m_viewType;
+    int m_nViewType;
+    int m_nSortingType;
 
     QMenu* m_menuDocument;
     QMenu* m_menuMessage;
@@ -103,7 +107,7 @@ public:
     CWizDocumentListViewItem *documentItemFromIndex(const QModelIndex &index) const;
     const WIZDOCUMENTDATA& documentFromIndex(const QModelIndex &index) const;
     const WIZABSTRACT& documentAbstractFromIndex(const QModelIndex &index) const;
-    const QString& documentTagsFromIndex(const QModelIndex &index) const;
+    //const QString& documentTagsFromIndex(const QModelIndex &index) const;
     //const WIZMESSAGEDATA& messageFromIndex(const QModelIndex& index) const;
     const QImage& messageSenderAvatarFromIndex(const QModelIndex& index) const;
     const WizDocumentListViewItemData& documentItemDataFromIndex(const QModelIndex& index) const;

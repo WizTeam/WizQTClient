@@ -3,12 +3,16 @@
 #include <QFile>
 #include <QFileInfo>
 
-#include "share/wizDatabase.h"
+#include "share/wizDatabaseManager.h"
 #include "share/wizThumbIndexCache.h"
 #include "share/wizUserAvatar.h"
+#include "wizPopupButton.h"
 
-CWizDocumentListViewItem::CWizDocumentListViewItem(const WizDocumentListViewItemData& data)
+CWizDocumentListViewItem::CWizDocumentListViewItem(CWizExplorerApp& app,
+                                                   const WizDocumentListViewItemData& data)
     : QListWidgetItem(0, UserType)
+    , m_app(app)
+    , m_nSortingType(0)
 {
     Q_ASSERT(!data.doc.strKbGUID.isEmpty());
     Q_ASSERT(!data.doc.strGUID.isEmpty());
@@ -17,45 +21,32 @@ CWizDocumentListViewItem::CWizDocumentListViewItem(const WizDocumentListViewItem
     m_data.doc = data.doc;
     m_data.nMessageId = data.nMessageId;
     m_data.nReadStatus = data.nReadStatus;
-    m_data.strAuthorGUID = data.strAuthorGUID;
+    m_data.strAuthorId = data.strAuthorId;
 
     setText(data.doc.strTitle);
 }
 
-//CWizDocumentListViewItem::CWizDocumentListViewItem(const WIZDOCUMENTDATA& data)
-//    : QListWidgetItem(0, UserType)
-//    , m_data(data)
-//{
-//    nType = TypePrivateDocument;
-//    setText(m_data.strTitle);
-//}
-//
-//CWizDocumentListViewItem::CWizDocumentListViewItem(const WIZMESSAGEDATA& msg)
-//    : QListWidgetItem(0, UserType)
-//    , m_message(msg)
-//{
-//    nType = TypeMessage;
-//    setText(msg.title);
-//}
-
 const QImage& CWizDocumentListViewItem::avatar(const CWizDatabase& db,
                                                CWizUserAvatarDownloaderHost& downloader)
 {
-    //Q_ASSERT(!m_data.strAuthorGUID.isEmpty());
-    if (m_data.strAuthorGUID.isEmpty())
-        return m_data.imgAuthorAvatar;
+    Q_ASSERT(!m_data.strAuthorId.isEmpty());
 
     if (m_data.imgAuthorAvatar.isNull()) {
         // load avatar or request downloader to download
-        QString strFileName = db.GetAvatarPath() + m_data.strAuthorGUID + ".png";
+        QString strFileName = db.GetAvatarPath() + m_data.strAuthorId + ".png";
         if (isAvatarNeedUpdate(strFileName)) {
-            downloader.download(m_data.strAuthorGUID);
+            downloader.download(m_data.strAuthorId);
         } else {
             m_data.imgAuthorAvatar.load(strFileName);
         }
     }
 
     return m_data.imgAuthorAvatar;
+}
+
+void CWizDocumentListViewItem::resetAvatar(const QString& strFileName)
+{
+    m_data.imgAuthorAvatar.load(strFileName);
 }
 
 bool CWizDocumentListViewItem::isAvatarNeedUpdate(const QString& strFileName)
@@ -93,21 +84,13 @@ void CWizDocumentListViewItem::resetAbstract(const WIZABSTRACT& abs)
     m_data.thumb.image = abs.image;
 }
 
-void CWizDocumentListViewItem::resetAvatar(const QString& strFileName)
+const QString& CWizDocumentListViewItem::tags()
 {
-    m_data.imgAuthorAvatar.load(strFileName);
-}
-
-const QString& CWizDocumentListViewItem::tags(CWizDatabase& db)
-{
-    Q_ASSERT(db.kbGUID() == m_data.doc.strKbGUID);
-
-    if (m_data.strTags.isEmpty()) {
-        m_data.strTags = db.GetDocumentTagDisplayNameText(m_data.doc.strGUID);
-        //m_tags = " " + m_tags;
+    if (m_strTags.isEmpty()) {
+        m_strTags = m_app.databaseManager().db(m_data.doc.strKbGUID).GetDocumentTagDisplayNameText(m_data.doc.strGUID);
     }
 
-    return m_data.strTags;
+    return m_strTags;
 }
 
 void CWizDocumentListViewItem::reload(CWizDatabase& db)
@@ -115,41 +98,102 @@ void CWizDocumentListViewItem::reload(CWizDatabase& db)
     Q_ASSERT(db.kbGUID() == m_data.doc.strKbGUID);
 
     m_data.thumb = WIZABSTRACT();
-    m_data.strTags.clear();
+    setSortingType(m_nSortingType); // reset info
 
     db.DocumentFromGUID(m_data.doc.strGUID, m_data.doc);
     setText(m_data.doc.strTitle);
 }
 
+void CWizDocumentListViewItem::setSortingType(int type)
+{
+    m_nSortingType = type;
+
+    QString strFileName = m_app.databaseManager().db(m_data.doc.strKbGUID).GetDocumentFileName(m_data.doc.strGUID);
+    QFileInfo fi(strFileName);
+
+    if (m_data.nType == TypeGroupDocument) {
+        switch (m_nSortingType) {
+        case CWizSortingPopupButton::SortingCreateTime:
+            m_data.strInfo = m_data.doc.tCreated.toHumanFriendlyString();
+            break;
+        case CWizSortingPopupButton::SortingUpdateTime:
+            m_data.strInfo = m_data.doc.tModified.toHumanFriendlyString();
+            break;
+        case CWizSortingPopupButton::SortingTitle:
+            m_data.strInfo = m_data.doc.tModified.toHumanFriendlyString();
+            break;
+        case CWizSortingPopupButton::SortingTag:
+            m_data.strInfo = m_data.doc.tModified.toHumanFriendlyString();
+            break;
+        case CWizSortingPopupButton::SortingLocation:
+            m_data.strInfo = tags();
+            break;
+        case CWizSortingPopupButton::SortingSize:
+            if (!fi.exists()) {
+                m_data.strInfo = QObject::tr("Unknown") + " " + tags();
+            } else {
+                m_nSize = fi.size();
+                m_data.strInfo = ::WizGetFileSizeHumanReadalbe(strFileName);
+            }
+            break;
+        default:
+            Q_ASSERT(0);
+            break;
+        }
+    } else if (m_data.nType == TypePrivateDocument) {
+        switch (m_nSortingType) {
+        case CWizSortingPopupButton::SortingCreateTime:
+            m_data.strInfo = m_data.doc.tCreated.toHumanFriendlyString() + " " + tags();
+            break;
+        case CWizSortingPopupButton::SortingUpdateTime:
+            m_data.strInfo = m_data.doc.tModified.toHumanFriendlyString() + " " + tags();
+            break;
+        case CWizSortingPopupButton::SortingTitle:
+            m_data.strInfo = m_data.doc.tModified.toHumanFriendlyString() + " " + tags();
+            break;
+        case CWizSortingPopupButton::SortingTag:
+            m_data.strInfo = m_data.doc.tModified.toHumanFriendlyString() + " " + tags();
+            break;
+        case CWizSortingPopupButton::SortingLocation:
+            m_data.strInfo = m_data.doc.strLocation;
+            break;
+        case CWizSortingPopupButton::SortingSize:
+            if (!fi.exists()) {
+                m_data.strInfo = QObject::tr("Unknown") + " " + tags();
+            } else {
+                m_nSize = fi.size();
+                m_data.strInfo = ::WizGetFileSizeHumanReadalbe(strFileName) + " "  + tags();
+            }
+            break;
+        default:
+            Q_ASSERT(0);
+            break;
+        }
+    }
+}
+
 bool CWizDocumentListViewItem::operator <(const QListWidgetItem &other) const
 {
     const CWizDocumentListViewItem* pOther = dynamic_cast<const CWizDocumentListViewItem*>(&other);
-    Q_ASSERT(pOther);
+    Q_ASSERT(pOther && m_nSortingType == pOther->m_nSortingType);
 
-    // default compare use create time
-    if (pOther->m_data.doc.tCreated == m_data.doc.tCreated) {
-        return text().compare(other.text(), Qt::CaseInsensitive) < 0;
-    } else {
+    switch (m_nSortingType) {
+    case CWizSortingPopupButton::SortingCreateTime:
+        // default compare use create time
         return pOther->m_data.doc.tCreated < m_data.doc.tCreated;
+    case CWizSortingPopupButton::SortingUpdateTime:
+        return pOther->m_data.doc.tModified < m_data.doc.tModified;
+    case CWizSortingPopupButton::SortingTitle:
+        return pOther->m_data.doc.strTitle.compare(m_data.doc.strTitle);
+    case CWizSortingPopupButton::SortingLocation:
+        return pOther->m_data.doc.strLocation.compare(m_data.doc.strLocation);
+    case CWizSortingPopupButton::SortingTag:
+        return pOther->m_strTags.compare(m_strTags);
+    case CWizSortingPopupButton::SortingSize:
+        return pOther->m_nSize < m_nSize;
+    default:
+        Q_ASSERT(0);
     }
 
-    //if (!m_data.doc.strGUID.isEmpty()) {
-    //    // use document type
-    //    if (pOther->m_data.tCreated == m_data.tCreated) {
-    //        return text().compare(other.text(), Qt::CaseInsensitive) < 0;
-    //    } else {
-    //        return pOther->m_data.tCreated < m_data.tCreated;
-    //    }
-
-    //} else if (!m_message.documentGUID.isEmpty()) {
-    //    // use message type
-    //    if (pOther->m_message.tCreated == m_message.tCreated) {
-    //        return text().compare(other.text(), Qt::CaseInsensitive) < 0;
-    //    } else {
-    //        return pOther->m_message.tCreated < m_message.tCreated;
-    //    }
-    //}
-
-    Q_ASSERT(0);
     return true;
 }

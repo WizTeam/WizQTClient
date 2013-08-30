@@ -375,9 +375,8 @@ void CWizNoteStyle::drawItemPrivateThumbnail(const QStyleOptionViewItemV4* vopt,
                                              const CWizDocumentListView* view) const
 {
     // indirect access
-    WIZABSTRACT abstract = view->documentAbstractFromIndex(vopt->index);
-    WIZDOCUMENTDATA document = view->documentFromIndex(vopt->index);
-    QString tagsText = view->documentTagsFromIndex(vopt->index);
+    const WizDocumentListViewItemData& data = view->documentItemDataFromIndex(vopt->index);
+    const WIZABSTRACT& thumb = view->documentAbstractFromIndex(vopt->index);
     bool bMultiSelected = view->selectedItems().size() > 1 ? true : false;
 
     p->save();
@@ -405,7 +404,7 @@ void CWizNoteStyle::drawItemPrivateThumbnail(const QStyleOptionViewItemV4* vopt,
     QRect textRect = vopt->rect;
 
     // draw thumb image
-    const QImage& img = abstract.image;
+    const QImage& img = thumb.image;
     if (img.width() > 0 && img.height() > 0)
     {
         QRect imageRect = textRect;
@@ -457,7 +456,8 @@ void CWizNoteStyle::drawItemPrivateThumbnail(const QStyleOptionViewItemV4* vopt,
 
         QRect rcTitle(QPoint(rcBadge.right() + 5, rcBadge.top()), QPoint(textRect.right(), rcBadge.bottom()));
         QColor colorTitle = bFocused ? m_colorDocumentsTitleSelected : m_colorDocumentsTitle;
-        ::WizDrawTextSingleLine(p, rcTitle, document.strTitle,  Qt::TextSingleLine | Qt::AlignVCenter, colorTitle, true);
+        QString strTitle = data.doc.strTitle;
+        ::WizDrawTextSingleLine(p, rcTitle, strTitle,  Qt::TextSingleLine | Qt::AlignVCenter, colorTitle, true);
 
         // draw date and tags, use 12px font size
         QFont fontAbs = p->font();
@@ -467,12 +467,12 @@ void CWizNoteStyle::drawItemPrivateThumbnail(const QStyleOptionViewItemV4* vopt,
 
         QColor colorDate = bFocused ? m_colorDocumentsDateSelected : m_colorDocumentsDate;
         QRect rcInfo(textRect.left(), rcTitle.bottom() + 6, textRect.width(), nFontHeight);
-        QString strInfo = document.tCreated.toHumanFriendlyString() + tagsText;
+        QString strInfo = data.strInfo;
         int infoWidth = ::WizDrawTextSingleLine(p, rcInfo, strInfo,  Qt::TextSingleLine | Qt::AlignVCenter, colorDate, true);
 
         // there lines document summary
         QColor colorSummary = bFocused ? m_colorDocumentsSummarySelected : m_colorDocumentsSummary;
-        QString strAbstract = abstract.text;
+        QString strAbstract = thumb.text;
 
         QRect rcAbstract1(QPoint(textRect.left() + infoWidth + 4, rcInfo.top()), QPoint(textRect.right(), rcInfo.bottom()));
         ::WizDrawTextSingleLine(p, rcAbstract1, strAbstract, Qt::TextSingleLine | Qt::AlignVCenter, colorSummary, false);
@@ -491,9 +491,7 @@ void CWizNoteStyle::drawItemPrivateTwoLine(const QStyleOptionViewItemV4* vopt,
                                            QPainter* p,
                                            const CWizDocumentListView* view) const
 {
-    // indirect access
-    WIZDOCUMENTDATA document = view->documentFromIndex(vopt->index);
-    QString tagsText = view->documentTagsFromIndex(vopt->index);
+    const WizDocumentListViewItemData& data = view->documentItemDataFromIndex(vopt->index);
     bool bMultiSelected = view->selectedItems().size() > 1 ? true : false;
 
     p->save();
@@ -544,7 +542,8 @@ void CWizNoteStyle::drawItemPrivateTwoLine(const QStyleOptionViewItemV4* vopt,
 
         QRect rcTitle(QPoint(rcBadge.right() + 5, rcBadge.top()), QPoint(textRect.right(), rcBadge.bottom()));
         QColor colorTitle = bFocused ? m_colorDocumentsTitleSelected : m_colorDocumentsTitle;
-        ::WizDrawTextSingleLine(p, rcTitle, document.strTitle,  Qt::TextSingleLine | Qt::AlignVCenter, colorTitle, true);
+        QString strTitle = data.doc.strTitle;
+        ::WizDrawTextSingleLine(p, rcTitle, strTitle, Qt::TextSingleLine | Qt::AlignVCenter, colorTitle, true);
 
         // draw date and tags, use 12px font size
         QFont fontAbs = p->font();
@@ -554,7 +553,7 @@ void CWizNoteStyle::drawItemPrivateTwoLine(const QStyleOptionViewItemV4* vopt,
 
         QColor colorDate = bFocused ? m_colorDocumentsDateSelected : m_colorDocumentsDate;
         QRect rcInfo(textRect.left(), rcTitle.bottom() + 6, textRect.width(), nFontHeight);
-        QString strInfo = document.tCreated.toHumanFriendlyString() + " " + tagsText;
+        QString strInfo = data.strInfo;
         ::WizDrawTextSingleLine(p, rcInfo, strInfo,  Qt::TextSingleLine | Qt::AlignVCenter, colorDate, true);
     }
 
@@ -566,10 +565,10 @@ void CWizNoteStyle::drawItemGroupThumbnail(const QStyleOptionViewItemV4* vopt,
                                            const CWizDocumentListView* view) const
 {
     // indirect access
+    const WizDocumentListViewItemData& data = view->documentItemDataFromIndex(vopt->index);
     const WIZABSTRACT& abstract = view->documentAbstractFromIndex(vopt->index);
     const QImage& imgAuthorAvatar = view->messageSenderAvatarFromIndex(vopt->index);
     WIZDOCUMENTDATA document = view->documentFromIndex(vopt->index);
-    //QString tagsText = view->documentTagsFromIndex(vopt->index);
     bool bMultiSelected = view->selectedItems().size() > 1 ? true : false;
 
     p->save();
@@ -646,7 +645,8 @@ void CWizNoteStyle::drawItemGroupThumbnail(const QStyleOptionViewItemV4* vopt,
 
         QColor colorDate = bFocused ? m_colorDocumentsDateSelected : m_colorDocumentsDate;
         QRect rcInfo(textRect.left(), rcTitle.bottom() + 6, textRect.width(), nFontHeight);
-        QString strInfo = document.tCreated.toHumanFriendlyString() + " " + document.strOwner;
+        //QString strInfo = document.tCreated.toHumanFriendlyString() + " " + document.strOwner;
+        QString strInfo = data.strInfo;
         int infoWidth = ::WizDrawTextSingleLine(p, rcInfo, strInfo,  Qt::TextSingleLine | Qt::AlignVCenter, colorDate, true);
 
         // there lines document summary
@@ -750,7 +750,8 @@ void CWizNoteStyle::drawItemGroupTwoLine(const QStyleOptionViewItemV4* vopt,
 
         QColor colorDate = bFocused ? m_colorDocumentsDateSelected : m_colorDocumentsDate;
         QRect rcInfo(textRect.left(), rcTitle.bottom() + 6, textRect.width(), nFontHeight);
-        QString strInfo = data.doc.tCreated.toHumanFriendlyString() + " " + data.doc.strOwner;
+        //QString strInfo = data.doc.tCreated.toHumanFriendlyString() + " " + data.doc.strOwner;
+        QString strInfo =  data.strInfo;
         ::WizDrawTextSingleLine(p, rcInfo, strInfo,  Qt::TextSingleLine | Qt::AlignVCenter, colorDate, true);
     }
 

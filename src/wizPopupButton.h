@@ -70,6 +70,9 @@ protected:
 
 protected Q_SLOTS:
     virtual void on_action_triggered();
+
+Q_SIGNALS:
+    void sortingTypeChanged(int type);
 };
 
 #endif // WIZPOPUPBUTTON_H

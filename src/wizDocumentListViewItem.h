@@ -5,6 +5,7 @@
 
 #include "share/wizobject.h"
 
+class CWizExplorerApp;
 class CWizDatabase;
 class CWizThumbIndexCache;
 class CWizUserAvatarDownloaderHost;
@@ -15,13 +16,12 @@ struct WizDocumentListViewItemData
     WIZDOCUMENTDATA doc;
     WIZABSTRACT thumb;
 
-    // only used for private document
-    QString strTags;
+    QString strInfo; // for second line info drawing (auto change when sorting type change)
 
     // only used for group or message document
     qint64 nMessageId;
     int nReadStatus;    // 0: not read 1: read
-    QString strAuthorGUID; // for request author avatar
+    QString strAuthorId; // for request author avatar
     QImage imgAuthorAvatar;
 };
 
@@ -34,7 +34,10 @@ public:
         TypeMessage
     };
 
-    explicit CWizDocumentListViewItem(const WizDocumentListViewItemData& data);
+    explicit CWizDocumentListViewItem(CWizExplorerApp& app,
+                                      const WizDocumentListViewItemData& data);
+
+    void setSortingType(int type);
 
     const WizDocumentListViewItemData& data() { return m_data; }
     const WIZDOCUMENTDATA& document() const { return m_data.doc; }
@@ -46,8 +49,6 @@ public:
     const QImage& avatar(const CWizDatabase& db,
                          CWizUserAvatarDownloaderHost& downloader);
 
-    const QString& tags(CWizDatabase& db);
-
     // called by CWizDocumentListView when thumbCache pool is ready for reading
     void resetAbstract(const WIZABSTRACT& abs);
     void resetAvatar(const QString& strFileName);
@@ -56,7 +57,13 @@ public:
     virtual bool operator<(const QListWidgetItem &other) const;
 
 private:
+    CWizExplorerApp& m_app;
     WizDocumentListViewItemData m_data;
+    int m_nSortingType;
+
+    int m_nSize;
+    QString m_strTags;
+    const QString& tags();
 
     bool isAvatarNeedUpdate(const QString& strFileName);
 };

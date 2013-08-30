@@ -33,7 +33,8 @@ CWizDocumentListView::CWizDocumentListView(CWizExplorerApp& app, QWidget *parent
     setAttribute(Qt::WA_MacShowFocusRect, false);
     setSelectionMode(QAbstractItemView::ExtendedSelection);
 
-    m_viewType = app.userSettings().get("VIEW_TYPE").toInt();
+    m_nViewType = app.userSettings().get("VIEW_TYPE").toInt();
+    m_nSortingType = app.userSettings().get("SORT_TYPE").toInt();
 
     connect(this, SIGNAL(itemSelectionChanged()), SLOT(on_itemSelectionChanged()));
 
@@ -206,10 +207,12 @@ int CWizDocumentListView::addDocument(const WIZDOCUMENTDATA& doc, bool sort)
         data.nType = CWizDocumentListViewItem::TypePrivateDocument;
     } else {
         data.nType = CWizDocumentListViewItem::TypeGroupDocument;
+        data.strAuthorId = doc.strOwner;
     }
 
-    CWizDocumentListViewItem* pItem = new CWizDocumentListViewItem(data);
+    CWizDocumentListViewItem* pItem = new CWizDocumentListViewItem(m_app, data);
     pItem->setSizeHint(itemSizeFromViewType());
+    pItem->setSortingType(m_nSortingType);
     addItem(pItem);
 
     if (sort) {
@@ -224,12 +227,13 @@ int CWizDocumentListView::addDocument(const WIZMESSAGEDATA& msg, bool sort)
 {
     WizDocumentListViewItemData data;
     data.nType = CWizDocumentListViewItem::TypeMessage;
-    data.strAuthorGUID = msg.senderGUID;
+    data.strAuthorId = msg.senderId;
     data.nReadStatus = msg.nReadStatus;
     m_dbMgr.db(msg.kbGUID).DocumentFromGUID(msg.documentGUID, data.doc);
 
-    CWizDocumentListViewItem* pItem = new CWizDocumentListViewItem(data);
+    CWizDocumentListViewItem* pItem = new CWizDocumentListViewItem(m_app, data);
     pItem->setSizeHint(itemSizeFromViewType());
+    pItem->setSortingType(m_nSortingType);
     addItem(pItem);
 
     if (sort) {
@@ -274,24 +278,7 @@ void CWizDocumentListView::getSelectedDocuments(CWizDocumentDataArray& arrayDocu
         if (!pDocumentItem)
             continue;
 
-        // if document is message type
-        //if (pDocumentItem->type() == CWizDocumentListViewItem::TypeMessage) {
-        //    QString strKbGUID = pDocumentItem->message().kbGUID;
-        //    QString strGUID = pDocumentItem->message().documentGUID;
-        //
-        //    // document must have record in database.
-        //    WIZDOCUMENTDATA doc;
-        //    if (!m_dbMgr.db(strKbGUID).DocumentFromGUID(strGUID, doc)) {
-        //        qDebug() << "[getSelectedDocuments] failed to query document from guid";
-        //        continue;
-        //    }
-        //
-        //    // no matter document exist or not, just push it
-        //    arrayDocument.push_back(doc);
-        //
-        //} else {
-            arrayDocument.push_back(pDocumentItem->data().doc);
-        //}
+        arrayDocument.push_back(pDocumentItem->data().doc);
     }
 }
 
@@ -545,7 +532,7 @@ void CWizDocumentListView::dropEvent(QDropEvent * event)
 
 void CWizDocumentListView::resetItemsViewType(int type)
 {
-    m_viewType = type;
+    m_nViewType = type;
 
     for (int i = 0; i < count(); i++) {
         item(i)->setSizeHint(itemSizeFromViewType());
@@ -555,7 +542,7 @@ void CWizDocumentListView::resetItemsViewType(int type)
 QSize CWizDocumentListView::itemSizeFromViewType()
 {
     QSize sz = sizeHint();
-    switch (m_viewType) {
+    switch (m_nViewType) {
     case CWizDocumentListView::TypeOneLine:
         sz.setHeight(fontMetrics().height() + 12);
         return sz;
@@ -570,6 +557,18 @@ QSize CWizDocumentListView::itemSizeFromViewType()
     }
 
     return sz;
+}
+
+void CWizDocumentListView::resetItemsSortingType(int type)
+{
+    m_nSortingType = type;
+
+    for (int i = 0; i < count(); i++) {
+        CWizDocumentListViewItem* pItem = dynamic_cast<CWizDocumentListViewItem*>(item(i));
+        pItem->setSortingType(type);
+    }
+
+    sortItems();
 }
 
 void CWizDocumentListView::on_itemSelectionChanged()
@@ -659,7 +658,7 @@ void CWizDocumentListView::on_userAvatar_downloaded(const QString& strUserGUID)
     CWizDocumentListViewItem* pItem = NULL;
     for (int i = 0; i < count(); i++) {
         pItem = documentItemAt(i);
-        if (pItem->data().strAuthorGUID == strUserGUID) {
+        if (pItem->data().strAuthorId == strUserGUID) {
             QString strFileName = m_dbMgr.db().GetAvatarPath() + strUserGUID + ".png";
             pItem->resetAvatar(strFileName);
             update(indexFromItem(pItem));
@@ -920,10 +919,10 @@ const WIZABSTRACT& CWizDocumentListView::documentAbstractFromIndex(const QModelI
     return documentItemFromIndex(index)->abstract(*m_thumbCache);
 }
 
-const QString& CWizDocumentListView::documentTagsFromIndex(const QModelIndex &index) const
-{
-    return documentItemFromIndex(index)->tags(m_dbMgr.db());
-}
+//const QString& CWizDocumentListView::documentTagsFromIndex(const QModelIndex &index) const
+//{
+//    return documentItemFromIndex(index)->tags(m_dbMgr.db());
+//}
 
 
 //#ifndef Q_OS_MAC

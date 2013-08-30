@@ -190,4 +190,6 @@ void CWizSortingPopupButton::on_action_triggered()
 
     int type = action->data().toInt();
     m_app.userSettings().set("SORT_TYPE", QString::number(type));
+
+    Q_EMIT sortingTypeChanged(type);
 }

@@ -420,6 +420,7 @@ QWidget* MainWindow::createListView()
     line->setStyleSheet("border-left-width:1;border-left-style:solid;border-left-color:#d9dcdd");
     layoutActions->addWidget(line);
     CWizSortingPopupButton* sortBtn = new CWizSortingPopupButton(*this, this);
+    connect(sortBtn, SIGNAL(sortingTypeChanged(int)), SLOT(on_documents_sortingTypeChanged(int)));
     layoutActions->addWidget(sortBtn);
     layoutActions->addStretch(0);
 
@@ -449,6 +450,11 @@ void MainWindow::on_documents_documentCountChanged()
 void MainWindow::on_documents_viewTypeChanged(int type)
 {
     m_documents->resetItemsViewType(type);
+}
+
+void MainWindow::on_documents_sortingTypeChanged(int type)
+{
+    m_documents->resetItemsSortingType(type);
 }
 
 //void MainWindow::resetNotice()
