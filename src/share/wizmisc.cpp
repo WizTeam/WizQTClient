@@ -17,37 +17,6 @@
 #define MAX_PATH 200
 #endif
 
-#define WIZ_API_URL "http://api.wiz.cn/"
-
-QString WizApiGetUrl(const QString& strProduct, const QString& strVersion,
-                     const QString& strCommand, const QString& strExtInfo)
-{
-#ifdef _M_X64
-    QString strPlatform = "x64";
-#else
-    QString strPlatform = "x86";
-#endif
-
-    QTime time = QTime::currentTime();
-    qsrand((uint)time.msec());
-
-    // front
-    QString strUrlF = QString(WIZ_API_URL) + "?p=%1&l=%2&v=%3&c=%4&a=";
-    strUrlF = strUrlF.arg(strProduct)\
-            .arg(2052)\
-            .arg(strVersion)\
-            .arg(strCommand);
-
-            //.arg(QLocale::system())\
-
-    QString strUrlE = "&random=%1&cn=%2&plat=%3";
-    strUrlE = strUrlE.arg(qrand())\
-            .arg(::WizGetComputerName())\
-            .arg(strPlatform);
-
-    return strUrlF + strExtInfo + strUrlE;
-}
-
 QString WizGetFileSizeHumanReadalbe(const QString& strFileName)
 {
     QFileInfo info(strFileName);
@@ -1486,13 +1455,6 @@ CString WizGenGUIDLowerCaseLetterOnly()
     str.Trim('}');
     return str;
 }
-
-
-QString WizGetComputerName()
-{
-    return QHostInfo::localHostName();
-}
-
 
 /*
 BOOL WizFormatXML(CString& strXML)

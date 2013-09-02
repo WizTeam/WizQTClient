@@ -250,10 +250,13 @@ void CWizDocumentWebView::on_download_finished(const WIZOBJECTDATA& data,
 
 void CWizDocumentWebView::reloadDocument()
 {
-    //Q_ASSERT(!m_data.strGUID.isEmpty());
-//
-    //CWizDatabase& db = m_dbMgr.db(m_data.strKbGUID);
-    //db.DocumentFromGUID(m_data.strGUID, m_data);
+    Q_ASSERT(!document().strGUID.isEmpty());
+
+    WIZDOCUMENTDATA data;
+    m_dbMgr.db(document().strKbGUID).DocumentFromGUID(document().strGUID, data);
+
+    m_renderer->setData(data);
+    m_renderer->load();
 }
 
 void CWizDocumentWebView::initEditorStyle()

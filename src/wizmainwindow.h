@@ -19,7 +19,6 @@
 #include "wizcertmanager.h"
 #include "wizusercipherform.h"
 #include "wizdownloadobjectdatadialog.h"
-#include "wizGroupAttributeForm.h"
 
 class CWizProgressDialog;
 class CWizDocumentListView;
@@ -80,7 +79,6 @@ private:
     QPointer<CWizUpgrade> m_upgrade;
     QPointer<CWizCertManager> m_certManager;
     QPointer<CWizUserCipherForm> m_cipherForm;
-    QPointer<CWizGroupAttributeForm> m_groupAttribute;
     QPointer<CWizDownloadObjectDataDialog> m_objectDownloadDialog;
 
     CWizObjectDataDownloaderHost* m_objectDownloaderHost;
@@ -141,7 +139,6 @@ public:
 
     CWizActions* actions() const { return m_actions; }
     CWizUserCipherForm* cipherForm() const { return m_cipherForm; }
-    CWizGroupAttributeForm* groupAttributeForm() { return m_groupAttribute; }
     CWizDownloadObjectDataDialog* objectDownloadDialog() const { return m_objectDownloadDialog; }
     CWizObjectDataDownloaderHost* downloaderHost() const { return m_objectDownloaderHost; }
     CWizUserAvatarDownloaderHost* avatarHost() const { return m_avatarDownloaderHost; }

@@ -250,15 +250,4 @@ public:
     virtual bool accept(CWizDatabase& db, const WIZDOCUMENTDATA& data);
 };
 
-//class CWizCategoryViewSearchItem : public CWizCategoryViewItemBase
-//{
-//public:
-//    CWizCategoryViewSearchItem(CWizExplorerApp& app, const QString& keywords);
-//    virtual void showContextMenu(CWizCategoryBaseView* pCtrl, QPoint pos) { Q_UNUSED(pCtrl); Q_UNUSED(pos); }
-//    virtual void getDocuments(CWizDatabase& db, CWizDocumentDataArray& arrayDocument) { Q_UNUSED(db); Q_UNUSED(arrayDocument); }
-//    virtual bool accept(CWizDatabase& db, const WIZDOCUMENTDATA& data);
-
-//    void setKeywords(const QString& keywords);
-//};
-
 #endif // WIZCATEGORYVIEWITEM_H

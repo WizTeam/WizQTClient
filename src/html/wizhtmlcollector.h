@@ -61,7 +61,7 @@ public:
     bool toText(const QString& strHtml, QString& strPlainText);
 
 protected:
-    virtual void Characters(const CString &rText, DWORD dwAppData, bool &bAbort);
+    virtual void Characters(const CString& rText, DWORD dwAppData, bool& bAbort);
 
 private:
     QString m_strText;

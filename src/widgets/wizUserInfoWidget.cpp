@@ -1,18 +1,22 @@
 #include "wizUserInfoWidget.h"
-
-#include <QtGui>
-
 #include "wizdef.h"
 #include "share/wizsettings.h"
 #include "share/wizDatabaseManager.h"
 #include "share/wizUserAvatar.h"
 #include "../wizmainwindow.h"
+#include "share/wizApiEntry.h"
+#include "sync/wizkmxmlrpc.h"
+#include "wizWebSettingsDialog.h"
+#include "sync/wizAvatarUploader.h"
+
+#include <QtGui>
 
 
 CWizUserInfoWidget::CWizUserInfoWidget(CWizExplorerApp& app, QWidget *parent)
     : QToolButton(parent)
     , m_app(app)
     , m_db(app.databaseManager().db())
+    , m_userSettings(NULL)
 {
     setPopupMode(QToolButton::MenuButtonPopup);
 
@@ -24,8 +28,24 @@ CWizUserInfoWidget::CWizUserInfoWidget(CWizExplorerApp& app, QWidget *parent)
     m_iconArraw.addFile(strIconPath);
 
     // setup menu
-    m_menu = new QMenu(this);
+    m_menuMain = new QMenu(this);
 
+    QAction* actionAccountInfo = new QAction(tr("View account info"), m_menuMain);
+    connect(actionAccountInfo, SIGNAL(triggered()), SLOT(on_action_accountInfo_triggered()));
+
+    QAction* actionAccountSetup = new QAction(tr("Account settings"), m_menuMain);
+    connect(actionAccountSetup, SIGNAL(triggered()), SLOT(on_action_accountSetup_triggered()));
+
+    QAction* actionChangeAvatar = new QAction(tr("Change avatar"), m_menuMain);
+    connect(actionChangeAvatar, SIGNAL(triggered()), SLOT(on_action_changeAvatar_triggered()));
+
+    m_menuMain->addAction(actionAccountInfo);
+    m_menuMain->addAction(actionAccountSetup);
+    m_menuMain->addSeparator();
+    m_menuMain->addAction(actionChangeAvatar);
+    setMenu(m_menuMain);
+
+    // avatar
     MainWindow* mainWindow = qobject_cast<MainWindow *>(m_app.mainWindow());
     m_avatarDownloader = mainWindow->avatarHost();
     connect(m_avatarDownloader, SIGNAL(downloaded(const QString&)),
@@ -95,11 +115,16 @@ void CWizUserInfoWidget::paintEvent(QPaintEvent *event)
 
 void CWizUserInfoWidget::resetAvatar()
 {
-    QString strAvatarPath = m_db.GetAvatarPath() + m_db.GetUserGUID() + ".png";
-    if (!QFile::exists(strAvatarPath)) {
+    QString strAvatarPath = m_db.GetAvatarPath() + m_db.GetUserId() + ".png";
+
+    QFileInfo avatar(strAvatarPath);
+    bool bNeedUpdate = avatar.created() > QDateTime::currentDateTime().addSecs(60*60) ? true : false;
+
+    if (!avatar.exists() || bNeedUpdate) {
         strAvatarPath = ::WizGetSkinResourcePath(m_app.userSettings().skin()) + "avatar.png";
         QTimer::singleShot(3000, this, SLOT(downloadAvatar()));
     }
+
     setIcon(QIcon(strAvatarPath));
 }
 
@@ -129,14 +154,64 @@ void CWizUserInfoWidget::resetUserInfo()
 
 void CWizUserInfoWidget::downloadAvatar()
 {
-    m_avatarDownloader->download(m_db.GetUserGUID());
+    m_avatarDownloader->download(m_db.GetUserId());
 }
 
 void CWizUserInfoWidget::on_userAvatar_downloaded(const QString& strGUID)
 {
-    if (strGUID != m_db.GetUserGUID())
+    if (strGUID != m_db.GetUserId())
         return;
 
     resetAvatar();
     update();
 }
+
+void CWizUserInfoWidget::on_action_accountInfo_triggered()
+{
+
+}
+
+void CWizUserInfoWidget::on_action_accountSetup_triggered()
+{
+    QString strToken;
+    CWizKMAccountsServer server(::WizKMGetAccountsServerURL(true), NULL);
+    server.GetToken(m_db.GetUserId(), m_db.GetPassword(), strToken);
+    QString strUrl = CWizApiEntry::getAccountInfoUrl(strToken);
+
+    if (!m_userSettings) {
+        m_userSettings = new CWizWebSettingsDialog(QSize(650, 350), window()); // use toplevel window as parent
+    }
+
+    m_userSettings->load(QUrl::fromEncoded(strUrl.toAscii()));
+}
+
+void CWizUserInfoWidget::on_action_changeAvatar_triggered()
+{
+    QFileDialog dialog;
+    dialog.setAcceptMode(QFileDialog::AcceptOpen);
+    dialog.setFileMode(QFileDialog::ExistingFile);
+    dialog.setNameFilter("*.png *.jpg *.jpeg");
+
+    if (dialog.exec() != QDialog::Accepted) {
+        return;
+    }
+
+    QStringList listFiles = dialog.selectedFiles();
+    if (listFiles.size() != 1) {
+        return;
+    }
+
+    CWizAvatarUploader* uploader = new CWizAvatarUploader(m_app, this);
+    connect(uploader, SIGNAL(uploaded(bool)), SLOT(on_action_changeAvatar_uploaded(bool)));
+    uploader->upload(listFiles[0]);
+}
+
+void CWizUserInfoWidget::on_action_changeAvatar_uploaded(bool ok)
+{
+    sender()->deleteLater();
+
+    if (ok) {
+        downloadAvatar();
+    }
+}
+

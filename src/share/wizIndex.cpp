@@ -862,6 +862,7 @@ bool CWizIndex::UpdateDocumentInfoMD5(WIZDOCUMENTDATA& data)
 	data.tInfoModified = WizGetCurrentTime();
 	data.strInfoMD5 = CalDocumentInfoMD5(data);
 	data.nVersion = -1;
+
 	return ModifyDocumentInfoEx(data);
 }
 
@@ -874,13 +875,13 @@ bool CWizIndex::UpdateDocumentDataMD5(WIZDOCUMENTDATA& data, const CString& strZ
 
     // modify note data lead modify time change, recount info md5 needed
     data.strInfoMD5 = CalDocumentInfoMD5(data);
-    //data.tInfoModified = WizGetCurrentTime();
+    data.tInfoModified = WizGetCurrentTime();
 
 	data.nVersion = -1;
+
     bool bRet = ModifyDocumentInfoEx(data);
 
-    emit documentDataModified(data);
-
+    Q_EMIT documentDataModified(data);
     return bRet;
 }
 

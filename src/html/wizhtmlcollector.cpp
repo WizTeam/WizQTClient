@@ -246,6 +246,6 @@ void CWizHtmlToPlainText::Characters(const CString &rText, DWORD dwAppData, bool
     Q_UNUSED(bAbort);
 
     CString strText = rText;
-    strText.replace('\000', ' ');
+    strText.replace('\0', ' ');
     m_strText.push_back(strText + " ");
 }

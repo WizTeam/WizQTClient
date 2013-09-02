@@ -16,10 +16,29 @@
  */
 #define WIZNOTE_API_ENTRY "http://api.wiz.cn/?p=%1&l=%2&v=%3&c=%4&random=%5&cn=%6&plat=%7&debug=%8"
 
+#define WIZNOTE_API_ARG_PRODUCT "wiz"
+
+#if defined(Q_WS_MAC)
+#define WIZNOTE_API_ARG_PLATFORM "macosx"
+#elif defined(Q_WS_WIN)
+#define WIZNOTE_API_ARG_PLATFORM "windows"
+#else
+#define WIZNOTE_API_ARG_PLATFORM "linux"
+#endif
+
 // command list
 #define WIZNOTE_API_COMMAND_SYNC_HTTP "sync_http"
 #define WIZNOTE_API_COMMAND_MESSAGE_VERSION "message_version"
 #define WIZNOTE_API_COMMAND_AVATAR "avatar"
+#define WIZNOTE_API_COMMAND_UPLOAD_AVATAR "upload_avatar"
+#define WIZNOTE_API_COMMAND_USER_INFO "user_info"
+#define WIZNOTE_API_COMMAND_VIEW_GROUP "view_group"
+
+//#ifdef _M_X64
+//    QString strPlatform = "x64";
+//#else
+//    QString strPlatform = "x86";
+//#endif
 
 
 CWizApiEntry::CWizApiEntry(QObject* parent /* = 0 */)
@@ -28,12 +47,6 @@ CWizApiEntry::CWizApiEntry(QObject* parent /* = 0 */)
     m_net = new QNetworkAccessManager(this);
 
     m_strLocale = QLocale::system().name();
-
-#ifdef Q_OS_MAC
-    m_strPlatform = "macos";
-#else
-    m_strPlatform = "linux";
-#endif
 }
 
 void CWizApiEntry::getSyncUrl()
@@ -44,13 +57,13 @@ void CWizApiEntry::getSyncUrl()
     qsrand((uint)QTime::currentTime().msec());
 
     requestUrl = requestUrl\
-            .arg("wiz")\
+            .arg(WIZNOTE_API_ARG_PRODUCT)\
             .arg(m_strLocale)\
             .arg(WIZ_CLIENT_VERSION)\
             .arg(WIZNOTE_API_COMMAND_SYNC_HTTP)\
             .arg(qrand())\
             .arg(QHostInfo::localHostName())\
-            .arg(m_strPlatform)\
+            .arg(WIZNOTE_API_ARG_PLATFORM)\
             .arg("false");
 
     QNetworkReply* reply = m_net->get(QNetworkRequest(requestUrl));
@@ -65,13 +78,13 @@ void CWizApiEntry::getMessageUrl()
     qsrand((uint)QTime::currentTime().msec());
 
     requestUrl = requestUrl\
-            .arg("wiz")\
+            .arg(WIZNOTE_API_ARG_PRODUCT)\
             .arg(m_strLocale)\
             .arg(WIZ_CLIENT_VERSION)\
             .arg(WIZNOTE_API_COMMAND_MESSAGE_VERSION)\
             .arg(qrand())\
             .arg(QHostInfo::localHostName())\
-            .arg(m_strPlatform)\
+            .arg(WIZNOTE_API_ARG_PLATFORM)\
             .arg("false");
 
     QNetworkReply* reply = m_net->get(QNetworkRequest(requestUrl));
@@ -83,16 +96,34 @@ void CWizApiEntry::getAvatarUrl()
     QString requestUrl = WIZNOTE_API_ENTRY;
 
     requestUrl = requestUrl\
-            .arg("wiz")\
+            .arg(WIZNOTE_API_ARG_PRODUCT)\
             .arg(m_strLocale)\
             .arg(WIZ_CLIENT_VERSION)\
             .arg(WIZNOTE_API_COMMAND_AVATAR)\
             .arg(qrand())\
             .arg(QHostInfo::localHostName())\
-            .arg(m_strPlatform)\
+            .arg(WIZNOTE_API_ARG_PLATFORM)\
             .arg("false");
 
     QNetworkReply* reply = m_net->get(QNetworkRequest(requestUrl));
+    connect(reply, SIGNAL(finished()), SLOT(on_acquire_finished()));
+}
+
+void CWizApiEntry::getAvatarUploadUrl()
+{
+    QString strUrl = WIZNOTE_API_ENTRY;
+
+    strUrl = strUrl\
+            .arg(WIZNOTE_API_ARG_PRODUCT)\
+            .arg(QLocale::system().name())\
+            .arg(WIZ_CLIENT_VERSION)\
+            .arg(WIZNOTE_API_COMMAND_UPLOAD_AVATAR)\
+            .arg(qrand())\
+            .arg(QHostInfo::localHostName())\
+            .arg(WIZNOTE_API_ARG_PLATFORM)\
+            .arg("false");
+
+    QNetworkReply* reply = m_net->get(QNetworkRequest(strUrl));
     connect(reply, SIGNAL(finished()), SLOT(on_acquire_finished()));
 }
 
@@ -118,3 +149,44 @@ void CWizApiEntry::on_acquire_finished()
     reply->deleteLater();
 }
 
+QString CWizApiEntry::getAccountInfoUrl(const QString& strToken)
+{
+    QString strExtInfo("token=%1");
+    strExtInfo = strExtInfo.arg(strToken);
+
+    QString strUrl = QString(WIZNOTE_API_ENTRY) + "&a=%9";
+
+    strUrl = strUrl\
+            .arg(WIZNOTE_API_ARG_PRODUCT)\
+            .arg(QLocale::system().name())\
+            .arg(WIZ_CLIENT_VERSION)\
+            .arg(WIZNOTE_API_COMMAND_USER_INFO)\
+            .arg(qrand())\
+            .arg(QHostInfo::localHostName())\
+            .arg(WIZNOTE_API_ARG_PLATFORM)\
+            .arg("false")\
+            .arg(QUrl::toPercentEncoding(strExtInfo).constData());
+
+    return strUrl;
+}
+
+QString CWizApiEntry::getGroupAttributeUrl(const QString& strToken, const QString& strKbGUID)
+{
+    QString strExtInfo("token=%1&kb_guid=%2");
+    strExtInfo = strExtInfo.arg(strToken).arg(strKbGUID);
+
+    QString strUrl = QString(WIZNOTE_API_ENTRY) + "&a=%9";
+
+    strUrl = strUrl\
+            .arg(WIZNOTE_API_ARG_PRODUCT)\
+            .arg(QLocale::system().name())\
+            .arg(WIZ_CLIENT_VERSION)\
+            .arg(WIZNOTE_API_COMMAND_VIEW_GROUP)\
+            .arg(qrand())\
+            .arg(QHostInfo::localHostName())\
+            .arg(WIZNOTE_API_ARG_PLATFORM)\
+            .arg("false")\
+            .arg(QUrl::toPercentEncoding(strExtInfo).constData());
+
+    return strUrl;
+}

@@ -16,6 +16,9 @@
 #include "share/wizDatabaseManager.h"
 #include "wizFolderSelector.h"
 #include "wizLineInputDialog.h"
+#include "wizWebSettingsDialog.h"
+#include "sync/wizkmxmlrpc.h"
+#include "share/wizApiEntry.h"
 
 
 #define CATEGORY_GENERAL    QObject::tr("General")
@@ -41,6 +44,7 @@
 #define CATEGORY_ACTION_TAG_DELETE      QObject::tr("Delete current tag")
 #define CATEGORY_ACTION_GROUP_ATTRIBUTE QObject::tr("Open group attribute")
 #define CATEGORY_ACTION_GROUP_MARK_READ QObject::tr("Mark all documents read")
+#define CATEGORY_ACTION_EMPTY_TRASH     QObject::tr("Empty trash")
 
 
 /* ------------------------------ CWizCategoryBaseView ------------------------------ */
@@ -532,6 +536,11 @@ void CWizCategoryView::resetMenu(CategoryMenuType type)
                 act->setText(CATEGORY_ACTION_GROUP_ATTRIBUTE);
             }
             break;
+        case ActionEmptyTrash:
+            if (type == TrashItem) {
+                act->setText(CATEGORY_ACTION_EMPTY_TRASH);
+            }
+            break;
         default:
             continue;
         }
@@ -540,6 +549,7 @@ void CWizCategoryView::resetMenu(CategoryMenuType type)
 
 void CWizCategoryView::showTrashContextMenu(QPoint pos)
 {
+    resetMenu(TrashItem);
     m_menuTrash->popup(pos);
 }
 
@@ -1146,8 +1156,15 @@ void CWizCategoryView::on_action_group_attribute()
 {
     CWizCategoryViewItemBase* p = currentCategoryItem<CWizCategoryViewItemBase>();
     if (p && !p->kbGUID().isEmpty()) {
-        MainWindow* mainWindow = qobject_cast<MainWindow *>(m_app.mainWindow());
-        mainWindow->groupAttributeForm()->sheetShow(p->kbGUID());
+        if (!m_groupSettings) {
+            m_groupSettings = new CWizWebSettingsDialog(QSize(650, 400), window());
+        }
+
+        QString strToken;
+        CWizKMAccountsServer server(::WizKMGetAccountsServerURL(true), NULL);
+        server.GetToken(m_dbMgr.db().GetUserId(), m_dbMgr.db().GetPassword(), strToken);
+        QString strUrl = CWizApiEntry::getGroupAttributeUrl(strToken, p->kbGUID());
+        m_groupSettings->load(QUrl::fromEncoded(strUrl.toAscii()));
     }
 }
 

@@ -56,7 +56,6 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     , m_upgrade(new CWizUpgrade())
     , m_certManager(new CWizCertManager(*this))
     , m_cipherForm(new CWizUserCipherForm(*this, this))
-    , m_groupAttribute(new CWizGroupAttributeForm(*this, this))
     , m_objectDownloadDialog(new CWizDownloadObjectDataDialog(dbMgr, this))
     , m_objectDownloaderHost(new CWizObjectDataDownloaderHost(dbMgr, this))
     , m_avatarDownloaderHost(new CWizUserAvatarDownloaderHost(dbMgr.db().GetAvatarPath(), this))
@@ -154,7 +153,6 @@ void MainWindow::showEvent(QShowEvent* event)
 
     m_statusBar->hide();
     m_cipherForm->hide();
-    m_groupAttribute->hide();
 }
 
 bool MainWindow::requestThreadsQuit()
@@ -821,7 +819,6 @@ void MainWindow::on_documents_itemSelectionChanged()
 {
     // hide other form
     m_cipherForm->hide();
-    m_groupAttribute->sheetHide();
 
     CWizDocumentDataArray arrayDocument;
     m_documents->getSelectedDocuments(arrayDocument);
@@ -931,7 +928,7 @@ void MainWindow::viewDocument(const WIZDOCUMENTDATA& data, bool addToHistory)
 
     CWizDocument* doc = new CWizDocument(m_dbMgr.db(data.strKbGUID), data);
 
-    if (doc->GUID() == m_doc->document().strGUID)
+    if (doc->GUID() == m_doc->web()->document().strGUID)
         return;
 
     bool forceEdit = false;

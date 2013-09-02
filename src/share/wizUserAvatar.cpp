@@ -56,8 +56,10 @@ void CWizUserAvatarDownloaderHost::on_thread_started()
 
 void CWizUserAvatarDownloaderHost::on_downloaded(QString strUserGUID, bool bSucceed)
 {
-    if (bSucceed)
+    if (bSucceed) {
+        m_strUserCurrent.clear(); // Clear current otherwise download twice will be failed
         Q_EMIT downloaded(strUserGUID);
+    }
 
     download_impl();
 }

@@ -57,11 +57,10 @@ protected:
 
 public:
     bool viewDocument(const WIZDOCUMENTDATA& data, bool forceEdit);
+    void reloadDocument(bool bIncludeData);
     void setReadOnly(bool b, bool isGroup);
     void showClient(bool visible);
-    const WIZDOCUMENTDATA& document();
     void editDocument(bool editing);
-    //bool isEditingDocument() const { return m_editingDocument; }
     void setViewMode(WizDocumentViewMode mode);
     void setModified(bool modified);
     void settingsChanged();
@@ -77,6 +76,8 @@ public Q_SLOTS:
 
     void on_document_modified(const WIZDOCUMENTDATA& documentOld,
                               const WIZDOCUMENTDATA& documentNew);
+    void on_document_data_modified(const WIZDOCUMENTDATA& data);
+
     void on_attachment_created(const WIZDOCUMENTATTACHMENTDATA& attachment);
     void on_attachment_deleted(const WIZDOCUMENTATTACHMENTDATA& attachment);
 

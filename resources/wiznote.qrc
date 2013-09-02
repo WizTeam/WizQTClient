@@ -1,5 +1,5 @@
 <RCC>
     <qresource prefix="/">
-        <file>images/wiznote.ico</file>
+        <file alias="loading.gif">loader.gif</file>
     </qresource>
 </RCC>

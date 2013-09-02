@@ -332,7 +332,7 @@ QString CWizDatabase::GetPassword()
 
 qint64 CWizDatabase::GetObjectVersion(const QString& strObjectName)
 {
-    return GetMetaInt64("SYNC_INFO", strObjectName, -1) + 1;
+    return GetMetaInt64("SYNC_INFO", strObjectName, -1);
 }
 
 bool CWizDatabase::SetObjectVersion(const QString& strObjectName,
@@ -751,16 +751,22 @@ long CWizDatabase::GetLocalFlags(const QString& strObjectGUID,
 {
     Q_UNUSED(strObjectGUID);
     Q_UNUSED(strObjectType);
+
+    Q_ASSERT(0);
+    return 0;
 }
 
 bool CWizDatabase::SetLocalFlags(const QString& strObjectGUID,
                                  const QString& strObjectType,
                                  long flags)
 {
+    Q_UNUSED(strObjectGUID);
+    Q_UNUSED(strObjectType);
+    Q_UNUSED(flags);
 
+    Q_ASSERT(0);
+    return false;
 }
-
-//const QString g_KeyValue_Key_BizUsers = _T("biz_users/");
 
 void CWizDatabase::GetAccountKeys(CWizStdStringArray& arrayKey)
 {
@@ -1921,7 +1927,10 @@ bool CWizDatabase::UpdateAttachments(const CWizDocumentAttachmentDataArray& arra
     return !bHasError;
 }
 
-bool CWizDatabase::UpdateDocumentData(WIZDOCUMENTDATA& data, const QString& strHtml, const QString& strURL, int nFlags)
+bool CWizDatabase::UpdateDocumentData(WIZDOCUMENTDATA& data,
+                                      const QString& strHtml,
+                                      const QString& strURL,
+                                      int nFlags)
 {
     CString strProcessedHtml(strHtml);
     CString strResourcePath = GetResoucePathFromFile(strURL);
@@ -2322,6 +2331,9 @@ bool CWizDatabase::UpdateDocumentAbstract(const QString& strDocumentGUID)
 
     WIZABSTRACT abstract;
     abstract.guid = strDocumentGUID;
+
+    // remove header tag
+    strHtml.replace(QRegExp("<head>.*</head>", Qt::CaseInsensitive), "");
 
     CWizHtmlToPlainText htmlConverter;
     htmlConverter.toText(strHtml, abstract.text);

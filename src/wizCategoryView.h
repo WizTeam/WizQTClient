@@ -10,6 +10,7 @@ class CWizFolder;
 class CWizScrollBar;
 class CWizDatabaseManager;
 class CWizExplorerApp;
+class CWizWebSettingsDialog;
 
 class CWizCategoryBaseView : public QTreeWidget
 {
@@ -108,7 +109,8 @@ public:
         TagRootItem,
         TagItem,
         GroupRootItem,
-        GroupItem
+        GroupItem,
+        TrashItem
     };
 
     void initMenus();
@@ -186,6 +188,8 @@ private:
     QPointer<QMenu> m_menuGroupRoot;
     QPointer<QMenu> m_menuGroup;
     QPointer<QMenu> m_menuTrash;
+
+    QPointer<CWizWebSettingsDialog> m_groupSettings;
 
 protected Q_SLOTS:
     virtual void on_document_created(const WIZDOCUMENTDATA& document);

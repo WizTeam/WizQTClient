@@ -101,7 +101,6 @@ set(wiznote_SOURCES
     wizupgradenotifydialog.cpp
     wizcertmanager.cpp
     wizusercipherform.cpp
-    wizGroupAttributeForm.cpp
     wiznoteinfoform.cpp
     share/wizClucene.cpp
     share/wizSearchIndexer.cpp
@@ -127,6 +126,8 @@ set(wiznote_SOURCES
     wizPopupButton.cpp
     widgets/wizUserInfoWidget.cpp
     widgets/wizSegmentedButton.cpp
+    wizWebSettingsDialog.cpp
+    sync/wizAvatarUploader.cpp
 )
 
 set(wiznote_HEADERS
@@ -218,7 +219,6 @@ set(wiznote_HEADERS
     wizupgradenotifydialog.h
     wizcertmanager.h
     wizusercipherform.h
-    wizGroupAttributeForm.h
     wiznoteinfoform.h
     wizLineInputDialog.h
     share/wizClucene.h
@@ -274,7 +274,6 @@ set(wiznote_WRAP_HEADERS
     share/wizdownloadobjectdata.h
     wizdownloadobjectdatadialog.h
     wizEditorInsertLinkForm.h
-    wizGroupAttributeForm.h
     share/wizIndexBase.h
     share/wizIndex.h
     wizmainwindow.h
@@ -317,6 +316,8 @@ set(wiznote_WRAP_HEADERS
     sync/wizkmsync.h
     widgets/wizUserInfoWidget.h
     widgets/wizSegmentedButton.h
+    wizWebSettingsDialog.h
+    sync/wizAvatarUploader.h
 )
 
 set(wiznote_FORMS
@@ -342,6 +343,10 @@ set(wiznote_TRANSLATIONS
     ${CMAKE_SOURCE_DIR}/i18n/wiznote_zh_TW.ts
 )
 
+set(wiznote_RCS
+    ${CMAKE_SOURCE_DIR}/resources/wiznote.qrc
+)
+
 # resources
 file(GLOB_RECURSE wiznote_RESOURCES ${CMAKE_SOURCE_DIR}/share/wiznote/*)
 
@@ -361,6 +366,9 @@ message("Compile with Qt: ${QT_VERSION_MAJOR}.${QT_VERSION_MINOR}.${QT_VERSION_P
 
 # dynamically create ts files
 qt4_add_translation(wiznote_QM ${wiznote_TRANSLATIONS})
+
+qt4_add_resources(wiznote_RC ${wiznote_RCS})
+
 # we should copy qt internal qm files, otherwise qt can't translate some internal resources
 # https://bugreports.qt-project.org/browse/QTBUG-18662
 file(GLOB _QT_INTERNAL_TRANSLATIONS ${QT_TRANSLATIONS_DIR}/qt_*.qm)
@@ -388,7 +396,7 @@ endif()
 if(UNIX)
     if(APPLE)
 
-        add_executable(${PROJECT_NAME} MACOSX_BUNDLE ${wiznote_SOURCES} ${wiznote_HEADERS} ${wiznote_SOURCES_MAC} ${wiznote_MOC_HEADERS} ${wiznote_FORM_HEADERS} ${wiznote_QM})
+        add_executable(${PROJECT_NAME} MACOSX_BUNDLE ${wiznote_SOURCES} ${wiznote_HEADERS} ${wiznote_SOURCES_MAC} ${wiznote_MOC_HEADERS} ${wiznote_FORM_HEADERS} ${wiznote_QM} ${wiznote_RC})
         set_target_properties(${PROJECT_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bundle)
 
         # this should be issue of cmake, refer: http://public.kitware.com/Bug/bug_revision_view_page.php?rev_id=958

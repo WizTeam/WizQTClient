@@ -1994,70 +1994,82 @@ BOOL CanEditData(IWizSyncableDatabase* pDatabase, const WIZDOCUMENTATTACHMENTDAT
 int CalDocumentDataForUploadToServer(IWizSyncableDatabase* pDatabase, const QString& strObjectType, const WIZDOCUMENTDATAEX& dataLocal, const WIZDOCUMENTDATAEX& dataServer)
 {
     int nPart = 0;
-    //
+
     if (dataLocal.strInfoMD5 != dataServer.strInfoMD5
-        && dataLocal.tInfoModified > dataServer.tInfoModified)
+            && dataLocal.tInfoModified > dataServer.tInfoModified)
     {
         nPart |= WIZKM_XMLRPC_OBJECT_PART_INFO;
     }
-    if (dataLocal.strDataMD5 != dataServer.strDataMD5)
+
+    if (dataLocal.strDataMD5 != dataServer.strDataMD5
+            && dataLocal.tDataModified > dataServer.tDataModified)
     {
-        long nFlags = pDatabase->GetLocalFlags(dataLocal.strGUID, strObjectType);
-        if (-1 == nFlags)	////为了兼容以前的数据，以前没有记录这个字段，所以需要用时间来判断////
-        {
-            if (dataLocal.tDataModified > dataServer.tDataModified)
-            {
-                nPart |= WIZKM_XMLRPC_OBJECT_PART_DATA;
-            }
-        }
-        else
-        {
-            if (nFlags & WIZKM_XMLRPC_OBJECT_PART_DATA)	////本地数据修改了////
-            {
-                nPart |= WIZKM_XMLRPC_OBJECT_PART_DATA;
-            }
-        }
+        nPart |= WIZKM_XMLRPC_OBJECT_PART_DATA;
     }
-    //
+
+    //if (dataLocal.strDataMD5 != dataServer.strDataMD5)
+    //{
+    //    long nFlags = pDatabase->GetLocalFlags(dataLocal.strGUID, strObjectType);
+    //    if (-1 == nFlags)	////为了兼容以前的数据，以前没有记录这个字段，所以需要用时间来判断////
+    //    {
+    //        if (dataLocal.tDataModified > dataServer.tDataModified)
+    //        {
+    //            nPart |= WIZKM_XMLRPC_OBJECT_PART_DATA;
+    //        }
+    //    }
+    //    else
+    //    {
+    //        if (nFlags & WIZKM_XMLRPC_OBJECT_PART_DATA)	////本地数据修改了////
+    //        {
+    //            nPart |= WIZKM_XMLRPC_OBJECT_PART_DATA;
+    //        }
+    //    }
+    //}
+
     if (dataLocal.strParamMD5 != dataServer.strParamMD5
-        && dataLocal.tParamModified > dataServer.tParamModified)
+            && dataLocal.tParamModified > dataServer.tParamModified)
     {
         nPart |= WIZKM_XMLRPC_OBJECT_PART_PARAM;
     }
-    //
+
     return nPart;
 }
-
 
 int CalAttachmentDataForUploadToServer(IWizSyncableDatabase* pDatabase, const QString& strObjectType, const WIZDOCUMENTATTACHMENTDATAEX& dataLocal, const WIZDOCUMENTATTACHMENTDATAEX& dataServer)
 {
     int nPart = 0;
-    //
+
     if (dataLocal.strInfoMD5 != dataServer.strInfoMD5
-        && dataLocal.tInfoModified > dataServer.tInfoModified)
+            && dataLocal.tInfoModified > dataServer.tInfoModified)
     {
         nPart |= WIZKM_XMLRPC_OBJECT_PART_INFO;
     }
-    if (dataLocal.strDataMD5 != dataServer.strDataMD5)
+
+    if (dataLocal.strDataMD5 != dataServer.strDataMD5
+            && dataLocal.tDataModified > dataServer.tDataModified)
     {
-        long nFlags = pDatabase->GetLocalFlags(dataLocal.strGUID, strObjectType);
-        if (-1 == nFlags)	////为了兼容以前的数据，以前没有记录这个字段，所以需要用时间来判断////
-        {
-            if (dataLocal.tDataModified > dataServer.tDataModified)
-            {
-                nPart |= WIZKM_XMLRPC_OBJECT_PART_DATA;
-            }
-        }
-        else
-        {
-            if (nFlags & WIZKM_XMLRPC_OBJECT_PART_DATA)	////本地数据修改了////
-            {
-                nPart |= WIZKM_XMLRPC_OBJECT_PART_DATA;
-            }
-        }
+        nPart |= WIZKM_XMLRPC_OBJECT_PART_DATA;
     }
-    //
-    //
+
+    //if (dataLocal.strDataMD5 != dataServer.strDataMD5)
+    //{
+    //    long nFlags = pDatabase->GetLocalFlags(dataLocal.strGUID, strObjectType);
+    //    if (-1 == nFlags)	////为了兼容以前的数据，以前没有记录这个字段，所以需要用时间来判断////
+    //    {
+    //        if (dataLocal.tDataModified > dataServer.tDataModified)
+    //        {
+    //            nPart |= WIZKM_XMLRPC_OBJECT_PART_DATA;
+    //        }
+    //    }
+    //    else
+    //    {
+    //        if (nFlags & WIZKM_XMLRPC_OBJECT_PART_DATA)	////本地数据修改了////
+    //        {
+    //            nPart |= WIZKM_XMLRPC_OBJECT_PART_DATA;
+    //        }
+    //    }
+    //}
+
     return nPart;
 }
 

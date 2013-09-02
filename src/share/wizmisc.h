@@ -45,8 +45,6 @@ private:
 
 IWizGlobal* WizGlobal();
 
-QString WizApiGetUrl(const QString& strProduct, const QString& strVersion, const QString& strCommand, const QString& strExtInfo);
-
 QString WizGetTimeStamp();
 COleDateTime WizGetCurrentTime();
 bool WizStringToDateTime(const QString& str, COleDateTime& t, QString& strError);
@@ -155,8 +153,6 @@ CString WizInt64ToStr(__int64 n);
 
 CString WizGenGUIDLowerCaseLetterOnly();
 
-
-QString WizGetComputerName();
 
 #define TOLOG(x)                        WizGlobal()->WriteLog(x)
 #define TOLOG1(x, p1)                   WizGlobal()->WriteLog(WizFormatString1(x, p1))

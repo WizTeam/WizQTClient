@@ -292,7 +292,9 @@ public:
     bool UpdateAttachment(const WIZDOCUMENTATTACHMENTDATAEX& data);
     bool UpdateAttachments(const CWizDocumentAttachmentDataArray& arrayAttachment);
 
-    bool UpdateDocumentData(WIZDOCUMENTDATA& data, const QString& strHtml, const QString& strURL, int nFlags);
+    bool UpdateDocumentData(WIZDOCUMENTDATA& data, const QString& strHtml,
+                            const QString& strURL, int nFlags);
+
     bool UpdateDocumentAbstract(const QString& strDocumentGUID);
 
     virtual bool UpdateDocumentDataMD5(WIZDOCUMENTDATA& data, const CString& strZipFileName);

@@ -17,11 +17,14 @@ public:
     void getSyncUrl();
     void getMessageUrl();
     void getAvatarUrl();
+    void getAvatarUploadUrl();
+
+    static QString getAccountInfoUrl(const QString& strToken);
+    static QString getGroupAttributeUrl(const QString& strToken, const QString& strKbGUID);
 
 private:
     QNetworkAccessManager* m_net;
     QString m_strLocale;
-    QString m_strPlatform;
 
 private Q_SLOTS:
     void on_acquire_finished();

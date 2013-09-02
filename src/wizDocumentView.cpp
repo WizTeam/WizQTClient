@@ -440,6 +440,9 @@ CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
     connect(&m_dbMgr, SIGNAL(documentModified(const WIZDOCUMENTDATA&, const WIZDOCUMENTDATA&)), \
             SLOT(on_document_modified(const WIZDOCUMENTDATA&, const WIZDOCUMENTDATA&)));
 
+    connect(&m_dbMgr, SIGNAL(documentDataModified(const WIZDOCUMENTDATA&)),
+            SLOT(on_document_data_modified(const WIZDOCUMENTDATA&)));
+
     connect(&m_dbMgr, SIGNAL(attachmentCreated(const WIZDOCUMENTATTACHMENTDATA&)), \
             SLOT(on_attachment_created(const WIZDOCUMENTATTACHMENTDATA&)));
 
@@ -525,14 +528,23 @@ bool CWizDocumentView::viewDocument(const WIZDOCUMENTDATA& data, bool forceEdit)
     return true;
 }
 
-const WIZDOCUMENTDATA& CWizDocumentView::document()
+void CWizDocumentView::reloadDocument(bool bIncludeData)
 {
-    static WIZDOCUMENTDATA empty;
-    if (!isVisible())
-        return empty;
+    if (bIncludeData)
+        m_web->reloadDocument();
 
-    return m_web->document();
+    QString strKbGUID = m_web->document().strKbGUID;
+    m_title->updateInformation(m_dbMgr.db(strKbGUID), m_web->document());
 }
+
+//const WIZDOCUMENTDATA& CWizDocumentView::document()
+//{
+//    static WIZDOCUMENTDATA empty;
+//    if (!isVisible())
+//        return empty;
+//
+//    return m_web->document();
+//}
 
 void CWizDocumentView::editDocument(bool editing)
 {
@@ -652,11 +664,15 @@ void CWizDocumentView::on_document_modified(const WIZDOCUMENTDATA& documentOld, 
 {
     Q_UNUSED(documentOld);
 
-    if (document().strGUID == documentNew.strGUID) {
-        m_web->reloadDocument();
+    if (m_web->document().strGUID == documentNew.strGUID) {
+        reloadDocument(false);
+    }
+}
 
-        QString strKbGUID = m_web->document().strKbGUID;
-        m_title->updateInformation(m_dbMgr.db(strKbGUID), m_web->document());
+void CWizDocumentView::on_document_data_modified(const WIZDOCUMENTDATA& data)
+{
+     if (m_web->document().strGUID == data.strGUID) {
+        reloadDocument(true);
     }
 }
 
