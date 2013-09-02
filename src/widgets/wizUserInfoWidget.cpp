@@ -113,6 +113,22 @@ void CWizUserInfoWidget::paintEvent(QPaintEvent *event)
     }
 }
 
+void CWizUserInfoWidget::mousePressEvent(QMouseEvent* event)
+{
+    // show menu at proper position
+    if (hitButton(event->pos())) {
+        QPoint pos(event->pos().x(), sizeHint().height());
+        menu()->popup(mapToGlobal(pos), defaultAction());
+    }
+}
+
+bool CWizUserInfoWidget::hitButton(const QPoint& pos) const
+{
+    // FIXME
+    QRect rectArrow(36 + 8, 36 - fontMetrics().height(), sizeHint().width() - 36 - 4, fontMetrics().height());
+    return rectArrow.contains(pos) ? true : false;
+}
+
 void CWizUserInfoWidget::resetAvatar()
 {
     QString strAvatarPath = m_db.GetAvatarPath() + m_db.GetUserId() + ".png";

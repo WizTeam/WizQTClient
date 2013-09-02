@@ -33,13 +33,14 @@ private:
     QIcon m_iconArraw;
     QMenu* m_menuMain;
 
-    //QPointer<QFileDialog> m_dialog;
-    //QPointer<CWizAvatarUploader> m_uploader;
-
     CWizWebSettingsDialog* m_userSettings;
 
     void resetAvatar();
     void resetUserInfo();
+
+protected:
+    virtual void mousePressEvent(QMouseEvent* event);
+    virtual bool hitButton(const QPoint& pos) const;
 
 private Q_SLOTS:
     void downloadAvatar();
