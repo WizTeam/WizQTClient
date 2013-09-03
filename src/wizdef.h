@@ -5,7 +5,7 @@
 
 #define WIZ_CLIENT_VERSION  "1.5.54"
 #define WIZNOTE_FTS_VERSION "4"
-#define WIZNOTE_THUMB_VERSION "1"
+#define WIZNOTE_THUMB_VERSION "2"
 
 #if defined Q_OS_MAC
 #define WIZ_CLIENT_TYPE     "QTMAC"

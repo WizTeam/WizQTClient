@@ -226,6 +226,8 @@ bool CWizHtmlToPlainText::toText(const QString& strHtml, QString& strPlainText)
 
     strPlainText = m_strText.simplified();
 
+    qDebug() << strPlainText.left(500);
+
     return true;
 }
 
@@ -236,5 +238,5 @@ void CWizHtmlToPlainText::Characters(const CString &rText, DWORD dwAppData, bool
 
     CString strText = rText;
     strText.replace('\0', ' ');
-    m_strText.push_back(strText + " ");
+    m_strText.push_back(strText.simplified() + " ");
 }
