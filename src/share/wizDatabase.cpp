@@ -17,21 +17,21 @@
 //class CWizDocument
 
 
-CString GetResoucePathFromFile(const CString& strHtmlFileName)
+QString GetResoucePathFromFile(const QString& strHtmlFileName)
 {
-    if (!PathFileExists(strHtmlFileName))
-        return CString();
-    //
-    CString strTitle = WizExtractFileTitle(strHtmlFileName);
-    //
-    CString strPath = ::WizExtractFilePath(strHtmlFileName);
-    CString strPath1 = strPath + strTitle + "_files/";
-    CString strPath2 = strPath + strTitle + ".files/";
-    if (PathFileExists(strPath1))
+    if (!QFile::exists(strHtmlFileName))
+        return NULL;
+
+    QString strTitle = WizExtractFileTitle(strHtmlFileName);
+    QString strPath = ::WizExtractFilePath(strHtmlFileName);
+    QString strPath1 = strPath + strTitle + "_files/";
+    QString strPath2 = strPath + strTitle + ".files/";
+    if (QFile::exists(strPath1))
         return strPath1;
-    if (PathFileExists(strPath2))
+    if (QFile::exists(strPath2))
         return strPath2;
-    return CString();
+
+    return NULL;
 }
 
 CWizDocument::CWizDocument(CWizDatabase& db, const WIZDOCUMENTDATA& data)
@@ -1932,9 +1932,9 @@ bool CWizDatabase::UpdateDocumentData(WIZDOCUMENTDATA& data,
                                       const QString& strURL,
                                       int nFlags)
 {
-    CString strProcessedHtml(strHtml);
-    CString strResourcePath = GetResoucePathFromFile(strURL);
-    if (!strResourcePath.IsEmpty()) {
+    QString strProcessedHtml(strHtml);
+    QString strResourcePath = GetResoucePathFromFile(strURL);
+    if (!strResourcePath.isEmpty()) {
         QUrl urlResource = QUrl::fromLocalFile(strResourcePath);
         strProcessedHtml.replace(urlResource.toString(), "index_files/");
     }

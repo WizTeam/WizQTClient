@@ -3,11 +3,11 @@
 
 #include "wizmisc.h"
 
-bool WizHtml2Zip(const CString& strUrl, const CString& strHtml, \
-                 const CString& strResourcePath, long flags, \
-                 const CString& strMetaText, const CString& strZipFileName);
+bool WizHtml2Zip(const QString& strUrl, const QString& strHtml, \
+                 const QString& strResourcePath, long flags, \
+                 const QString& strMetaText, const QString& strZipFileName);
 
-bool WizHtml2Zip(const CString& strHtml, const CWizStdStringArray& arrayResource, \
-                 const CString& strMetaText, const CString& strZipFileName);
+bool WizHtml2Zip(const QString &strHtml, const CWizStdStringArray& arrayResource, \
+                 const QString &strMetaText, const QString &strZipFileName);
 
 #endif // WIZHTML2ZIP_H

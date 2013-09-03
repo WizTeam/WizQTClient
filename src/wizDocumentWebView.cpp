@@ -56,7 +56,10 @@ CWizDocumentWebView::CWizDocumentWebView(CWizExplorerApp& app, QWidget* parent /
 
     m_transitionView = mainWindow->transitionView();
 
-    // document loader thread
+    // loading and saving thread
+    m_timerAutoSave.setInterval(5*60*1000); // 5 minutes
+    connect(&m_timerAutoSave, SIGNAL(timeout()), SLOT(onTimerAutoSaveTimout()));
+
     m_renderer = new CWizDocumentWebViewRenderer(m_app);
     connect(m_renderer, SIGNAL(endLoading(const QString&, bool)), SLOT(on_documentReady(const QString&, bool)));
     connect(m_renderer, SIGNAL(documentSaved(bool)), SLOT(on_documentSaved(bool)));
@@ -64,10 +67,6 @@ CWizDocumentWebView::CWizDocumentWebView(CWizExplorerApp& app, QWidget* parent /
     QThread* thread = new QThread();
     m_renderer->moveToThread(thread);
     thread->start();
-
-    // auto save
-    m_timerAutoSave.setInterval(5*60*1000); // 5 minutes
-    connect(&m_timerAutoSave, SIGNAL(timeout()), SLOT(onTimerAutoSaveTimout()));
 }
 
 void CWizDocumentWebView::inputMethodEvent(QInputMethodEvent* event)
@@ -338,7 +337,82 @@ void CWizDocumentWebView::on_editor_loadFinished(bool ok)
 
 void CWizDocumentWebView::on_editor_linkClicked(const QUrl& url)
 {
+    if (isInternalUrl(url)) {
+        viewDocumentByUrl(url);
+        return;
+    }
+
     QDesktopServices::openUrl(url);
+}
+
+bool CWizDocumentWebView::isInternalUrl(const QUrl& url)
+{
+    if (url.scheme().toLower() == "wiz")
+        return true;
+    return false;
+}
+
+bool WizStringList2Map(const QStringList& list, QMap<QString, QString>& map)
+{
+    for (int i = 0; i < list.size(); i++) {
+        int indx = list[i].indexOf("=");
+        if (indx == -1) {
+            return false;
+        }
+
+        qDebug() << "key: " << list[i].left(indx).toLower();
+        qDebug() << "value: " << list[i].mid(indx + 1);
+
+        map.insert(list[i].left(indx).toLower(), list[i].mid(indx + 1));
+    }
+
+    return true;
+}
+
+void CWizDocumentWebView::viewDocumentByUrl(const QUrl& url)
+{
+    QString strUrl = url.toString();
+    if (!strUrl.startsWith("wiz:", Qt::CaseInsensitive)) {
+        return;
+    }
+
+    int indx = strUrl.indexOf('?');
+    if (indx == -1) {
+        return;
+    }
+
+    QString strOpenType = strUrl.mid(4, indx - 4).toLower();
+
+    QString strFragment = strUrl.mid(indx + 1);
+    QMap<QString, QString> mapArgs;
+    if (!WizStringList2Map(strFragment.split('&'), mapArgs)) {
+        return;
+    }
+
+    QString strGUID, strKbGUID;
+    if (strOpenType == "open_document") {
+        QMap<QString, QString>::const_iterator it = mapArgs.find("guid");
+        if (it != mapArgs.end()) {
+            strGUID = it.value();
+        }
+
+        QMap<QString, QString>::const_iterator it2 = mapArgs.find("kbguid");
+        if (it2 != mapArgs.end()) {
+            strKbGUID = it2.value();
+        }
+
+        if (strGUID.isEmpty()) {
+            return;
+        }
+
+        WIZDOCUMENTDATA doc;
+        if (!m_dbMgr.db(strKbGUID).DocumentFromGUID(strGUID, doc)) {
+            qDebug() << "Can't find user document, it maybe deleted!";
+            return;
+        }
+
+        Q_EMIT requestView(doc);
+   }
 }
 
 void CWizDocumentWebView::viewDocumentInEditor(bool editing)

@@ -208,6 +208,7 @@ public Q_SLOTS:
     void on_documents_documentCountChanged();
     void on_documents_viewTypeChanged(int type);
     void on_documents_sortingTypeChanged(int type);
+    void on_document_requestView(const WIZDOCUMENTDATA& doc);
 
     void on_search_doSearch(const QString& keywords);
     void on_options_settingsChanged(WizOptionsType type);

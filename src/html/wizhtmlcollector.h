@@ -8,50 +8,56 @@
 struct WIZHTMLFILEDATA
 {
     enum HtmlFileType { typeResource, typeFrame, typeCSS };
-    CString strUrl;
-    CString strFileName;
+    QString strUrl;
+    QString strFileName;
     HtmlFileType eType;
     bool bProcessed;
 
     WIZHTMLFILEDATA() : eType(typeResource), bProcessed(false) {}
 };
 
+/* ---------------------------- CWizHtmlFileMap ---------------------------- */
 class CWizHtmlFileMap
 {
 protected:
-    typedef std::map<CString, WIZHTMLFILEDATA> CWizHtmlFileDataMap;
+    typedef std::map<QString, WIZHTMLFILEDATA> CWizHtmlFileDataMap;
     CWizHtmlFileDataMap m_map;
 
 public:
-    bool Lookup(const CString& strUrl, CString& strFileName);
-    void Add(const CString& strUrl, const CString& strFileName, WIZHTMLFILEDATA::HtmlFileType eType, BOOL bProcessed);
+    bool Lookup(const QString& strUrl, QString& strFileName);
+    void Add(const QString& strUrl, const QString& strFileName,
+             WIZHTMLFILEDATA::HtmlFileType eType, bool bProcessed);
     void GetAll(std::deque<WIZHTMLFILEDATA>& arrayFile);
 };
 
 
+/*
+ * Collect media resources path list from html file
+ */
 class CWizHtmlCollector : public IWizHtmlReaderEvents
 {
 public:
     CWizHtmlCollector();
 
-    bool Collect(const CString& strUrl, CString& strHtml, BOOL mainPage = false);
-    bool Html2Zip(const CString& strUrl, const CString& strHtml, \
-                  const CString& strExtResourcePath, const CString& strMetaText, \
-                  const CString& strZipFileName);
+    bool Collect(const QString &strUrl, QString &strHtml, bool mainPage = false);
+    bool Html2Zip(const QString& strExtResourcePath, const QString& strMetaText, \
+                  const QString& strZipFileName);
 
+protected:
     virtual void StartTag(CWizHtmlTag *pTag, DWORD dwAppData, bool &bAbort);
     virtual void EndTag(CWizHtmlTag *pTag, DWORD dwAppData, bool &bAbort);
     virtual void Characters(const CString &rText, DWORD dwAppData, bool &bAbort);
     virtual void Comment(const CString &rComment, DWORD dwAppData, bool &bAbort);
 
-protected:
+private:
     CWizHtmlFileMap m_files;
-    BOOL m_bMainPage;
+    bool m_bMainPage;
     QUrl m_url;
     CWizStdStringArray m_ret;
 
-    virtual void ProcessTagValue(CWizHtmlTag *pTag, const CString& strAttributeName, WIZHTMLFILEDATA::HtmlFileType eType);
-    virtual CString ToResourceFileName(const CString& strFileName);
+    void ProcessTagValue(CWizHtmlTag *pTag, const QString& strAttributeName,
+                         WIZHTMLFILEDATA::HtmlFileType eType);
+    QString ToResourceFileName(const QString &strFileName);
 };
 
 class CWizHtmlToPlainText : public IWizHtmlReaderEvents

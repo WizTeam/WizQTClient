@@ -455,6 +455,12 @@ void MainWindow::on_documents_sortingTypeChanged(int type)
     m_documents->resetItemsSortingType(type);
 }
 
+void MainWindow::on_document_requestView(const WIZDOCUMENTDATA& doc)
+{
+    viewDocument(doc, false);
+}
+
+
 //void MainWindow::resetNotice()
 //{
 //#ifdef Q_OS_MAC
@@ -485,6 +491,9 @@ void MainWindow::init()
     m_category->init();
 
     connect(m_documents, SIGNAL(itemSelectionChanged()), SLOT(on_documents_itemSelectionChanged()));
+
+    connect(m_doc->web(), SIGNAL(requestView(const WIZDOCUMENTDATA&)),
+            SLOT(on_document_requestView(const WIZDOCUMENTDATA&)));
 }
 
 void MainWindow::on_actionSync_triggered()

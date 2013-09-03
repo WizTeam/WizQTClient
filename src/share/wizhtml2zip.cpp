@@ -7,22 +7,24 @@
 #include "../zip/wizzip.h"
 
 
-bool WizHtml2Zip(const CString& strUrl, const CString& strHtml, \
-                 const CString& strResourcePath, long flags, \
-                 const CString& strMetaText, const CString& strZipFileName)
+bool WizHtml2Zip(const QString& strUrl, const QString& strHtml, \
+                 const QString& strResourcePath, long flags, \
+                 const QString& strMetaText, const QString& strZipFileName)
 {
     Q_UNUSED(flags);
 
     CWizHtmlCollector collector;
 
-    CString strMainHtml = strHtml;
-    collector.Collect(strUrl, strMainHtml, true);
+    QString strMainHtml(strHtml);
+    if (!collector.Collect(strUrl, strMainHtml, true)) {
+        return false;
+    }
 
-    return collector.Html2Zip(strUrl, strHtml, strResourcePath, strMetaText, strZipFileName);
+    return collector.Html2Zip(strResourcePath, strMetaText, strZipFileName);
 }
 
-bool WizHtml2Zip(const CString& strHtml, const CWizStdStringArray& arrayResource, \
-                 const CString& strMetaText, const CString& strZipFileName)
+bool WizHtml2Zip(const QString& strHtml, const CWizStdStringArray& arrayResource, \
+                 const QString& strMetaText, const QString& strZipFileName)
 {
     CWizZipFile zip;
     if (!zip.open(strZipFileName))

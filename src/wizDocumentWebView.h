@@ -106,6 +106,9 @@ private:
     void viewDocumentInEditor(bool editing);
     void initEditorAndLoadDocument();
 
+    bool isInternalUrl(const QUrl& url);
+    void viewDocumentByUrl(const QUrl& url);
+
 protected:
     virtual void keyPressEvent(QKeyEvent* event);
     virtual void inputMethodEvent(QInputMethodEvent* event);
@@ -132,10 +135,6 @@ private:
     QPointer<CWizEditorInsertTableForm> m_editorInsertTableForm;
     QPointer<QColorDialog> m_colorDialog;
 
-Q_SIGNALS:
-    // signals used request reset info toolbar and editor toolbar
-    void focusIn();
-    void focusOut();
 
 public Q_SLOTS:
     void on_editor_selectionChanged();
@@ -214,6 +213,13 @@ public Q_SLOTS:
     bool editorCommandExecuteFormatMatch();
     bool editorCommandExecuteInsertHorizontal();
     bool editorCommandExecuteViewSource();
+
+Q_SIGNALS:
+    // signals used request reset info toolbar and editor toolbar
+    void focusIn();
+    void focusOut();
+
+    void requestView(const WIZDOCUMENTDATA& data);
 };
 
 

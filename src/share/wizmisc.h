@@ -113,8 +113,8 @@ void WizEnsurePathExists(const CString& strPath);
 void WizEnsureFileExists(const QString& strFileName);
 
 CString WizExtractFilePath(const CString& strFileName);
-CString WizExtractFileName(const CString& strFileName);
-CString WizExtractFileTitle(const CString& strFileName);
+QString WizExtractFileName(const QString& strFileName);
+QString WizExtractFileTitle(const QString& strFileName);
 CString WizExtractTitleTemplate(const CString& strFileName);
 CString WizExtractFileExt(const CString& strFileName);
 

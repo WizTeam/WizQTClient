@@ -130,29 +130,26 @@ CString WizExtractLastPathName(const CString& strFileName)
     return ::WizExtractFileName(strPath);
 }
 
-
-CString WizExtractFileName(const CString& strFileName)
+QString WizExtractFileName(const QString& strFileName)
 {
-    CString str = strFileName;
-    str.Replace('\\', '/');
+    QString str = strFileName;
+    str.replace('\\', '/');
     int index = str.lastIndexOf('/');
     if (-1 == index)
         return strFileName;
-    //
-    return strFileName.right(str.GetLength() - index - 1);
+
+    return strFileName.right(str.length() - index - 1);
 }
 
-
-CString WizExtractFileTitle(const CString& strFileName)
+QString WizExtractFileTitle(const QString &strFileName)
 {
-    CString strName = WizExtractFileName(strFileName);
-    //
+    QString strName = WizExtractFileName(strFileName);
+
     int index = strName.lastIndexOf('.');
     if (-1 == index)
         return strName;
-    //
-    return strName.left(index);
 
+    return strName.left(index);
 }
 
 CString WizExtractTitleTemplate(const CString& strFileName)
