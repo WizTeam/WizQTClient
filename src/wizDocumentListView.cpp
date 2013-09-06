@@ -33,7 +33,7 @@ CWizDocumentListView::CWizDocumentListView(CWizExplorerApp& app, QWidget *parent
     setAttribute(Qt::WA_MacShowFocusRect, false);
     setSelectionMode(QAbstractItemView::ExtendedSelection);
 
-    m_nViewType = app.userSettings().get("VIEW_TYPE").toInt();
+    m_nViewType = (ViewType)app.userSettings().get("VIEW_TYPE").toInt();
     m_nSortingType = app.userSettings().get("SORT_TYPE").toInt();
 
     connect(this, SIGNAL(itemSelectionChanged()), SLOT(on_itemSelectionChanged()));
@@ -166,16 +166,25 @@ void CWizDocumentListView::setDocuments(const CWizDocumentDataArray& arrayDocume
     clear();
     verticalScrollBar()->setValue(0);
 
-    addDocuments(arrayDocument);
-}
+    CWizMessageDataArray arrayMessage;
+    CWizDocumentDataArray::const_iterator it = arrayDocument.begin();
+    for (;it != arrayDocument.end(); it++) {
+        const WIZDOCUMENTDATAEX& data = *it;
 
-void CWizDocumentListView::setDocuments(const CWizMessageDataArray& arrayMessage)
-{
-    //reset
-    clear();
-    verticalScrollBar()->setValue(0);
+        WIZMESSAGEDATA msg;
+        if (!m_dbMgr.db().messageFromDocumentGUID(data.strGUID, msg)) {
+            arrayMessage.clear();
+            break;
+        }
 
-    addDocuments(arrayMessage);
+        arrayMessage.push_back(msg);
+    }
+
+    if (arrayMessage.size()) {
+        addMessages(arrayMessage);
+    } else {
+        addDocuments(arrayDocument);
+    }
 }
 
 void CWizDocumentListView::addDocuments(const CWizDocumentDataArray& arrayDocument)
@@ -188,11 +197,11 @@ void CWizDocumentListView::addDocuments(const CWizDocumentDataArray& arrayDocume
     sortItems();
 }
 
-void CWizDocumentListView::addDocuments(const CWizMessageDataArray& arrayMessage)
+void CWizDocumentListView::addMessages(const CWizMessageDataArray& arrayMessage)
 {
     CWizMessageDataArray::const_iterator it;
     for (it = arrayMessage.begin(); it != arrayMessage.end(); it++) {
-        addDocument(*it, false);
+        addMessage(*it, false);
     }
 
     sortItems();
@@ -211,7 +220,7 @@ int CWizDocumentListView::addDocument(const WIZDOCUMENTDATA& doc, bool sort)
     }
 
     CWizDocumentListViewItem* pItem = new CWizDocumentListViewItem(m_app, data);
-    pItem->setSizeHint(itemSizeFromViewType());
+    pItem->setSizeHint(itemSizeFromViewType(m_nViewType));
     pItem->setSortingType(m_nSortingType);
     addItem(pItem);
 
@@ -223,7 +232,7 @@ int CWizDocumentListView::addDocument(const WIZDOCUMENTDATA& doc, bool sort)
     return count();
 }
 
-int CWizDocumentListView::addDocument(const WIZMESSAGEDATA& msg, bool sort)
+int CWizDocumentListView::addMessage(const WIZMESSAGEDATA& msg, bool sort)
 {
     WizDocumentListViewItemData data;
     data.nType = CWizDocumentListViewItem::TypeMessage;
@@ -232,7 +241,7 @@ int CWizDocumentListView::addDocument(const WIZMESSAGEDATA& msg, bool sort)
     m_dbMgr.db(msg.kbGUID).DocumentFromGUID(msg.documentGUID, data.doc);
 
     CWizDocumentListViewItem* pItem = new CWizDocumentListViewItem(m_app, data);
-    pItem->setSizeHint(itemSizeFromViewType());
+    pItem->setSizeHint(itemSizeFromViewType(TypeThumbnail));
     pItem->setSortingType(m_nSortingType);
     addItem(pItem);
 
@@ -532,17 +541,17 @@ void CWizDocumentListView::dropEvent(QDropEvent * event)
 
 void CWizDocumentListView::resetItemsViewType(int type)
 {
-    m_nViewType = type;
+    m_nViewType = (ViewType)type;
 
     for (int i = 0; i < count(); i++) {
-        item(i)->setSizeHint(itemSizeFromViewType());
+        item(i)->setSizeHint(itemSizeFromViewType(m_nViewType));
     }
 }
 
-QSize CWizDocumentListView::itemSizeFromViewType()
+QSize CWizDocumentListView::itemSizeFromViewType(ViewType type)
 {
     QSize sz = sizeHint();
-    switch (m_nViewType) {
+    switch (type) {
     case CWizDocumentListView::TypeOneLine:
         sz.setHeight(fontMetrics().height() + 12);
         return sz;

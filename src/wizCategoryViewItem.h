@@ -86,9 +86,7 @@ public:
     virtual void showContextMenu(CWizCategoryBaseView* pCtrl, QPoint pos)
     { Q_UNUSED(pCtrl); Q_UNUSED(pos); }
 
-    virtual void getDocuments(CWizDatabase& db,
-                              CWizDocumentDataArray& arrayDocument)
-    { Q_UNUSED(db); Q_UNUSED(arrayDocument); }
+    virtual void getDocuments(CWizDatabase& db, CWizDocumentDataArray& arrayDocument);
 };
 
 class CWizCategoryViewShortcutRootItem : public CWizCategoryViewItemBase

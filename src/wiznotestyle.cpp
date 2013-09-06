@@ -106,9 +106,9 @@ protected:
                          QPainter* painter,
                          const CWizDocumentListView* view) const;
 
-    void drawDocumentListViewItemMessage(const QStyleOptionViewItemV4 *option,
-                                         QPainter *painter,
-                                         const CWizDocumentListView *view) const;
+    //void drawDocumentListViewItemMessage(const QStyleOptionViewItemV4 *option,
+    //                                     QPainter *painter,
+    //                                     const CWizDocumentListView *view) const;
 
     void drawcenterImage(QPainter* p, const QImage& image, const QRect& rc) const;
 
@@ -810,178 +810,108 @@ void CWizNoteStyle::drawItemOneLine(const QStyleOptionViewItemV4* vopt,
     p->restore();
 }
 
-void CWizNoteStyle::drawItemMessage(const QStyleOptionViewItemV4* option,
-                                    QPainter* painter,
-                                    const CWizDocumentListView* view) const
+void CWizNoteStyle::drawItemMessage(const QStyleOptionViewItemV4 *vopt,
+                                    QPainter *p,
+                                    const CWizDocumentListView *view) const
 {
-
-}
-
-void CWizNoteStyle::drawDocumentListViewItemMessage(const QStyleOptionViewItemV4 *vopt,
-                                                    QPainter *p,
-                                                    const CWizDocumentListView *view) const
-{
-    //const WIZMESSAGEDATA& msg = view->messageFromIndex(vopt->index);
-    const QImage& imgSenderAvatar = view->messageSenderAvatarFromIndex(vopt->index);
+    // indirect access
+    const WizDocumentListViewItemData& data = view->documentItemDataFromIndex(vopt->index);
     const WIZABSTRACT& abstract = view->documentAbstractFromIndex(vopt->index);
-
-    // FIXME: hard-coded background brush color
-    QPalette palette = vopt->palette;
-    palette.setColor(QPalette::Active, QPalette::Highlight, QColor(58, 81, 134));
-    palette.setColor(QPalette::Inactive, QPalette::Highlight, QColor(101, 122, 148));
-    palette.setColor(QPalette::Active, QPalette::BrightText, Qt::lightGray);
-
-    QStyleOptionViewItemV4 adjustedOption = *vopt;
-    adjustedOption.palette = palette;
-
-    QStyleOptionViewItemV4* opt = &adjustedOption;
+    const QImage& imgAuthorAvatar = view->messageSenderAvatarFromIndex(vopt->index);
+    WIZDOCUMENTDATA document = view->documentFromIndex(vopt->index);
+    bool bMultiSelected = view->selectedItems().size() > 1 ? true : false;
 
     p->save();
-    p->setClipRect(opt->rect);
+    p->setClipRect(vopt->rect);
 
-    QRect textLine = opt->rect;
-    textLine.adjust(4, 0, -4, 0);
+    // seperator line
+    QRect textLine = vopt->rect;
+    textLine.adjust(5, 0, -5, 0);
     p->setPen(m_colorDocumentsLine);
     p->drawLine(textLine.bottomLeft(), textLine.bottomRight());
 
-    // Not use subElementRect here, because Qt have issue on KDE to get the right rect
-    //QRect textRect = subElementRect(SE_ItemViewItemText, vopt, view);
-    QRect textRect = opt->rect.adjusted(-3, -3, 0, 0);
-
     // draw background behaviour
-    if (vopt->state.testFlag(QStyle::State_Selected)) {
-        if (view->hasFocus()) {
-            p->fillRect(vopt->rect, adjustedOption.palette.brush(QPalette::Active, QPalette::Highlight));
+    if (vopt->state & QStyle::State_Selected) {
+        if (bMultiSelected) {
+            p->fillRect(vopt->rect, m_colorDocumentsItemFocusBackground);
         } else {
-            p->fillRect(vopt->rect, adjustedOption.palette.brush(QPalette::Inactive, QPalette::Highlight));
+            if (vopt->state & QStyle::State_HasFocus) {
+                p->fillRect(vopt->rect, m_colorDocumentsItemFocusBackground);
+            } else {
+                p->fillRect(vopt->rect, m_colorDocumentsItemLoseFocusBackground);
+            }
         }
     }
 
-    bool selected = vopt->state.testFlag(State_Selected);
-    QColor selectedLightColor = palette.color(QPalette::HighlightedText);
+    QRect textRect = vopt->rect;
+
+    // draw author avatar
+    QRect rectAvatar = textRect;
+    rectAvatar.setSize(QSize(45, 45));
+    rectAvatar.adjust(6, 6 , -6, -6);
+
+    p->save();
+    p->setRenderHint(QPainter::Antialiasing);
+    if (!imgAuthorAvatar.isNull()) {
+        p->drawImage(rectAvatar, imgAuthorAvatar);
+    } else {
+        p->drawImage(rectAvatar, m_imgDefaultAvatar);
+    }
+    p->restore();
+
+    textRect.setLeft(rectAvatar.right());
 
     // draw the text
     if (!vopt->text.isEmpty()) {
-        QPalette::ColorGroup cg = vopt->state & QStyle::State_Enabled
-                                  ? QPalette::Normal : QPalette::Disabled;
-        if (cg == QPalette::Normal && !(vopt->state & QStyle::State_Active))
-            cg = QPalette::Inactive;
+        textRect.adjust(6, 6, -6, -6);
 
-        if (vopt->state & QStyle::State_Selected) {
-            p->setPen(vopt->palette.color(cg, QPalette::HighlightedText));
-        } else {
-            p->setPen(vopt->palette.color(cg, QPalette::Text));
-        }
+        //bool bFocused = vopt->state & QStyle::State_HasFocus \
+        //        && vopt->state & QStyle::State_Selected;
+        bool bFocused = vopt->state & QStyle::State_Selected;
 
-        if (vopt->state & QStyle::State_Editing) {
-            p->setPen(vopt->palette.color(cg, QPalette::Text));
-            p->drawRect(textRect.adjusted(0, 0, -1, -1));
-        }
-
-        // draw left status bar
-        QRect rcStatus = opt->rect;
-        rcStatus.setRight(20);
-
-        // draw unread message indicator, size: 9*9
-        //if (msg.nReadStatus == 0) {
-        //    QRect rcUnread(QPoint(rcStatus.center().x() - 6, rcStatus.center().y() - 6),
-        //                   QPoint(rcStatus.center().x() + 3, rcStatus.center().y() + 3));
-        //    p->setRenderHint(QPainter::Antialiasing);
-        //    p->drawImage(rcUnread, m_imgDocumentUnread);
-        //}
-
-        // avoid drawing on edgee
-        textRect.adjust(20, 5, -5, -5);
-
-        // draw user avatar, size: 35 * 35
-        QRect rcAvatar = textRect;
-        rcAvatar.setRight(rcAvatar.left() + 35);
-        rcAvatar.setBottom(rcAvatar.top() + 35);
-        p->setRenderHint(QPainter::Antialiasing);
-        p->setPen(QColor(180, 180, 180)); // FIXME
-
-        if (imgSenderAvatar.isNull()) {
-            p->drawImage(rcAvatar, m_imgDefaultAvatar);
-        } else {
-            p->drawImage(rcAvatar, imgSenderAvatar);
-        }
-
-        p->drawRoundedRect(rcAvatar, 3, 3);
-
-        // draw message sender
-        int nDefaultMargin = 5;
-        QRect rcTitle = textRect;
-        QColor colorTitle = selected ? selectedLightColor : m_colorDocumentsTitle;
-
+        // draw title
         QFont fontTitle = p->font();
         fontTitle.setPixelSize(13);
-        fontTitle.setBold(true);
         p->setFont(fontTitle);
+        int nFontHeight = p->fontMetrics().height();
 
-        rcTitle.setLeft(rcTitle.left() + rcAvatar.width() + nDefaultMargin);
-        rcTitle.setBottom(rcTitle.top() + p->fontMetrics().height());
-        p->setPen(colorTitle);
-        //p->drawText(rcTitle, msg.senderAlias);
+        // badge icon first
+        QRect rcBadge = textRect;
+        rcBadge.setSize(QSize(nFontHeight, nFontHeight));
+        if (bFocused) {
+            m_iconDocumentsBadge.paint(p, rcBadge, Qt::AlignCenter, QIcon::Active, QIcon::Off);
+        } else {
+            m_iconDocumentsBadge.paint(p, rcBadge, Qt::AlignCenter, QIcon::Normal, QIcon::Off);
+        }
 
-        // draw message created time
-        QRect rcDate = rcTitle;
-        QColor colorDate = selected ? selectedLightColor : Qt::blue;
-        //QString strDate = msg.tCreated.toHumanFriendlyString();
-        QString strDate;
+        QRect rcTitle(QPoint(rcBadge.right() + 5, rcBadge.top()), QPoint(textRect.right(), rcBadge.bottom()));
+        QColor colorTitle = bFocused ? m_colorDocumentsTitleSelected : m_colorDocumentsTitle;
+        ::WizDrawTextSingleLine(p, rcTitle, document.strTitle,  Qt::TextSingleLine | Qt::AlignVCenter, colorTitle, true);
 
-        QFont f = p->font();
-        f.setPixelSize(12);
-        f.setBold(false);
-        p->setFont(f);
+        // draw date and tags, use 12px font size
+        QFont fontAbs = p->font();
+        fontAbs.setPixelSize(12);
+        p->setFont(fontAbs);
+        nFontHeight = p->fontMetrics().height();
 
-        int nDateWidth = p->fontMetrics().width(strDate);
-        rcDate.setLeft(rcDate.left() + rcTitle.width() - nDateWidth - nDefaultMargin);
+        QColor colorDate = bFocused ? m_colorDocumentsDateSelected : m_colorDocumentsDate;
+        QRect rcInfo(textRect.left(), rcTitle.bottom() + 6, textRect.width(), nFontHeight);
+        //QString strInfo = document.tCreated.toHumanFriendlyString() + " " + document.strOwner;
+        QString strInfo = data.strInfo;
+        int infoWidth = ::WizDrawTextSingleLine(p, rcInfo, strInfo,  Qt::TextSingleLine | Qt::AlignVCenter, colorDate, true);
 
-        p->setPen(colorDate);
-        p->drawText(rcDate, strDate);
+        // there lines document summary
+        QColor colorSummary = bFocused ? m_colorDocumentsSummarySelected : m_colorDocumentsSummary;
+        QString strAbstract = abstract.text;
 
-        // draw message title
-        QRect rcInfo = rcTitle;
-        //QColor colorInfo = selected ? selectedLightColor : m_colorDocumentsSummary;
-        QColor colorInfo = selected ? selectedLightColor : m_colorDocumentsTitle;
+        QRect rcAbstract1(QPoint(textRect.left() + infoWidth + 4, rcInfo.top()), QPoint(textRect.right(), rcInfo.bottom()));
+        ::WizDrawTextSingleLine(p, rcAbstract1, strAbstract, Qt::TextSingleLine | Qt::AlignVCenter, colorSummary, false);
 
-        QFont fontInfo = p->font();
-        fontInfo.setPixelSize(12);
-        p->setFont(fontInfo);
+        QRect rcAbstract2(vopt->rect.left() + 6, rcAbstract1.bottom() + 3, vopt->rect.width() - 12, nFontHeight);
+        ::WizDrawTextSingleLine(p, rcAbstract2, strAbstract, Qt::TextSingleLine | Qt::AlignVCenter, colorSummary, false);
 
-        rcInfo.setTop(rcInfo.bottom() + nDefaultMargin);
-        rcInfo.setBottom(rcInfo.top() + p->fontMetrics().height());
-        p->setPen(colorInfo);
-
-        //QString strElid = p->fontMetrics().elidedText(msg.title, Qt::ElideRight, rcInfo.width());
-        //p->drawText(rcInfo, strElid);
-
-        // draw message abstract summary
-        QRect rcSummary = textRect;
-        QColor colorSummary = selected ? selectedLightColor : m_colorDocumentsSummary;
-        rcSummary.setTop(rcInfo.bottom() + nDefaultMargin);
-        rcSummary.setBottom(rcSummary.top() + p->fontMetrics().height() * 2);
-
-        p->setPen(colorSummary);
-        p->drawText(rcSummary, abstract.text);
-    }
-
-    // draw the focus rect
-    if (vopt->state & QStyle::State_HasFocus) {
-        QStyleOptionFocusRect o;
-        o.QStyleOption::operator=(*vopt);
-
-        // The same reason as above
-        //o.rect = subElementRect(SE_ItemViewItemFocusRect, vopt, view);
-        o.rect = vopt->rect;
-
-        o.state |= QStyle::State_KeyboardFocusChange;
-        o.state |= QStyle::State_Item;
-        QPalette::ColorGroup cg = (vopt->state & QStyle::State_Enabled)
-                                  ? QPalette::Normal : QPalette::Disabled;
-        o.backgroundColor = vopt->palette.color(cg, (vopt->state & QStyle::State_Selected)
-                                                ? QPalette::Highlight : QPalette::Window);
-        drawPrimitive(QStyle::PE_FrameFocusRect, &o, p, view);
+        QRect rcAbstract3(vopt->rect.left() + 6, rcAbstract2.bottom() + 3, vopt->rect.width() - 12, nFontHeight);
+        ::WizDrawTextSingleLine(p, rcAbstract3, strAbstract, Qt::TextSingleLine | Qt::AlignVCenter, colorSummary, true);
     }
 
     p->restore();

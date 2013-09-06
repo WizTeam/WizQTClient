@@ -122,6 +122,27 @@ CWizCategoryViewMessageRootItem::CWizCategoryViewMessageRootItem(CWizExplorerApp
     setText(0, strName);
 }
 
+void CWizCategoryViewMessageRootItem::getDocuments(CWizDatabase& db,
+                                                   CWizDocumentDataArray& arrayDocument)
+{
+    CWizMessageDataArray arrayMsg;
+    db.getAllMessages(arrayMsg);
+
+    CWizMessageDataArray::const_iterator it = arrayMsg.begin();
+    for (; it != arrayMsg.end(); it++) {
+        const WIZMESSAGEDATA& msg = *it;
+
+        WIZDOCUMENTDATAEX doc;
+        doc.strKbGUID = msg.kbGUID;
+        doc.strGUID = msg.documentGUID;
+        doc.strTitle = msg.title;
+
+        // CWizCategoryView responsible for converting to full field message data
+        // refer to CWizCategoryView::setDocuments()
+        arrayDocument.push_back(doc);
+    }
+}
+
 
 /* -------------------- CWizCategoryViewShortcutRootItem -------------------- */
 CWizCategoryViewShortcutRootItem::CWizCategoryViewShortcutRootItem(CWizExplorerApp& app,

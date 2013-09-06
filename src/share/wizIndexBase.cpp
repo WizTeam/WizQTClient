@@ -1445,6 +1445,29 @@ bool CWizIndexBase::messageFromId(qint64 nId, WIZMESSAGEDATA& data)
     return true;
 }
 
+bool CWizIndexBase::messageFromDocumentGUID(const QString& strGUID, WIZMESSAGEDATA& data)
+{
+    CString strWhere;
+    strWhere.Format("DOCUMENT_GUID=%s", STR2SQL(strGUID).utf16());
+
+    CString strSQL = FormatQuerySQL(TABLE_NAME_WIZ_MESSAGE,
+                                    FIELD_LIST_WIZ_MESSAGE,
+                                    strWhere);
+
+    CWizMessageDataArray arrayMessage;
+    if (!SQLToMessageDataArray(strSQL, arrayMessage)) {
+        TOLOG("[messageFromId] failed to get message by document guid");
+        return false;
+    }
+
+    if (arrayMessage.empty())
+        return false;
+
+    // FIXME: return the lastest message
+    data = arrayMessage[0];
+    return true;
+}
+
 bool CWizIndexBase::GetAllUsers(CWizBizUserDataArray& arrayUser)
 {
     CString strSQL = FormatQuerySQL(TABLE_NAME_WIZ_USER, FIELD_LIST_WIZ_USER);

@@ -537,14 +537,13 @@ void MainWindow::on_actionNewNote_triggered()
 
 void MainWindow::on_actionViewMessages_triggered()
 {
-    CWizMessageDataArray arrayMsg;
-    m_dbMgr.db().getAllMessages(arrayMsg);
+    //CWizMessageDataArray arrayMsg;
+    //m_dbMgr.db().getAllMessages(arrayMsg);
 
-    if (!arrayMsg.size())
-        return;
+    //if (!arrayMsg.size())
+    //    return;
 
-    // set documents
-    m_documents->setDocuments(arrayMsg);
+    //m_documents->setDocuments(arrayMsg);
 }
 
 void MainWindow::on_actionEditingUndo_triggered()

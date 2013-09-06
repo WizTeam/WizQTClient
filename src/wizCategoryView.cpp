@@ -267,10 +267,6 @@ void CWizCategoryBaseView::getDocuments(CWizDocumentDataArray& arrayDocument)
     if (!pItem)
         return;
 
-//    if (pItem->kbGUID().isEmpty()) {
-//        return;
-//    }
-
     pItem->getDocuments(m_dbMgr.db(pItem->kbGUID()), arrayDocument);
 }
 

@@ -32,7 +32,7 @@ public:
 
     int viewType() const { return m_nViewType; }
     void resetItemsViewType(int type);
-    QSize itemSizeFromViewType();
+    QSize itemSizeFromViewType(CWizDocumentListView::ViewType type);
 
     int sortingType() const { return m_nSortingType; }
     void resetItemsSortingType(int type);
@@ -57,7 +57,7 @@ private:
     CWizUserAvatarDownloaderHost* m_avatarDownloader;
     CWizScrollBar* m_vScroll;
 
-    int m_nViewType;
+    CWizDocumentListView::ViewType m_nViewType;
     int m_nSortingType;
 
     QMenu* m_menuDocument;
@@ -88,11 +88,10 @@ private:
 
 public:
     void setDocuments(const CWizDocumentDataArray& arrayDocument);
-    void setDocuments(const CWizMessageDataArray& arrayMessage);
     void addDocuments(const CWizDocumentDataArray& arrayDocument);
-    void addDocuments(const CWizMessageDataArray& arrayMessage);
+    void addMessages(const CWizMessageDataArray& arrayMessage);
     int addDocument(const WIZDOCUMENTDATA& data, bool sort);
-    int addDocument(const WIZMESSAGEDATA& msg, bool sort);
+    int addMessage(const WIZMESSAGEDATA& msg, bool sort);
 
     bool acceptDocument(const WIZDOCUMENTDATA& document);
     void addAndSelectDocument(const WIZDOCUMENTDATA& document);
