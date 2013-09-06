@@ -1410,7 +1410,7 @@ bool CWizDatabase::SetDatabaseInfo(const WIZDATABASEINFO& dbInfo)
     // biz group info
     if (!dbInfo.bizGUID.isEmpty() && !dbInfo.bizName.isEmpty()) {
         bool bResetBiz = false;
-        if (m_info.bizGUID != dbInfo.bizGUID) {
+        if (m_info.bizName != dbInfo.bizName) {
             m_info.bizName = dbInfo.bizName;
 
             if (!SetMeta(g_strDatabaseInfoSection, "BizName", dbInfo.bizName))
@@ -1419,7 +1419,7 @@ bool CWizDatabase::SetDatabaseInfo(const WIZDATABASEINFO& dbInfo)
             bResetBiz = true;
         }
 
-        if (m_info.bizName != dbInfo.bizName) {
+        if (m_info.bizGUID != dbInfo.bizGUID) {
             m_info.bizGUID = dbInfo.bizGUID;
 
             if (!SetMeta(g_strDatabaseInfoSection, "BizGUID", dbInfo.bizGUID))
