@@ -4172,7 +4172,7 @@ var fillCharReg = new RegExp(domUtils.fillChar, 'g');
                         '<html xmlns=\'http://www.w3.org/1999/xhtml\' class=\'view\' ><head>' +
                         '<style type=\'text/css\'>' +
                         //设置四周的留边
-                        '.view{padding:0;word-wrap:break-word;cursor:text;height:90%;}\n' +
+                        '.view{margin-top:0;margin-bottom:4px;margin-left:4px;margin-right:4px;word-wrap:break-word;cursor:text;height:100%;}\n' +
                         //设置默认字体和字号
                         //font-family不能呢随便改，在safari下fillchar会有解析问题
                         'body{margin:8px;font-family:sans-serif;font-size:16px;}' +
@@ -4368,7 +4368,8 @@ var fillCharReg = new RegExp(domUtils.fillChar, 'g');
             }
             !notSetHeight && (this.options.minFrameHeight = this.options.initialFrameHeight = height);
 
-            this.body.style.height = height + 'px';
+            // Modify by Albert.Zhou, FIXME: html tag reserve 8px height and this should reduced from editor height
+            this.body.style.height = height - 8 + 'px';
         },
 
         addshortcutkey: function (cmd, keys) {

@@ -7,7 +7,6 @@
 #include <QMutex>
 #include <QColorDialog>
 
-#include "wizdef.h"
 #include "wizdownloadobjectdatadialog.h"
 #include "wizusercipherform.h"
 
@@ -59,6 +58,7 @@ class CWizDocumentWebViewPage: public QWebPage
 public:
     explicit CWizDocumentWebViewPage(QObject* parent = 0) : QWebPage(parent) {}
     virtual void triggerAction(QWebPage::WebAction action, bool checked = false);
+    virtual void javaScriptConsoleMessage(const QString& message, int lineNumber, const QString& sourceID);
 };
 
 

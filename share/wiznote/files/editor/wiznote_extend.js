@@ -2,7 +2,6 @@ var
     editor = null,
     m_inited = false;
     objApp = WizExplorerApp,
-    objDatabase = objApp.Database,
     objCommon = objApp.CreateWizObject("WizKMControls.WizCommonUI"),
     m_currentGUID = "",
     m_currentFileName = "",
@@ -15,29 +14,11 @@ try {
     var strSave = "Save";
 
     var editorOption = {
-    toolbars:
-    [
-        [//saveButton, '|', //'Source',
-        'FontFamily', 'FontSize', '|', 'BackColor', 'ForeColor', 'Bold', 'Italic', 'Underline', '|',
-        'JustifyLeft', 'JustifyCenter', 'JustifyRight', '|',
-        'InsertOrderedList', 'InsertUnorderedList', '|',
-        'horizontal', 'inserttable', 'formatmatch']
-    ],
-    'fontfamily':[
-        { label:'',name:'songti',val:'宋体,SimSun'},
-        { label:'',name:'kaiti',val:'楷体,楷体_GB2312, SimKai'},
-        { label:'',name:'heiti',val:'黑体, SimHei'},
-        { label:'',name:'lishu',val:'隶书, SimLi'},
-        { label:'',name:'andaleMono',val:'andale mono'},
-        { label:'',name:'arial',val:'arial, helvetica,sans-serif'},
-        { label:'',name:'arialBlack',val:'arial black,avant garde'},
-        { label:'',name:'comicSansMs',val:'comic sans ms'},
-        { label:'',name:'impact',val:'impact,chicago'},
-        { label:'',name:'timesNewRoman',val:'times new roman'}
-    ],
-    'fontsize':[9, 10, 11, 12, 13, 14, 16, 18, 24, 36, 48],
+    toolbars: [],
     initialStyle: 'body{font-size:13px}',
     fullscreen: true,
+    autoHeightEnabled: false,
+    scaleEnabled: false,
     contextMenu: [],
     elementPathEnabled: false,
     wordCount: false,
@@ -62,7 +43,12 @@ try {
 
     // hide builtin toolbar, from UE dev team.
     editor.addListener('ready', function () {
-        document.getElementById(editor.ui.toolbars[0].id).parentNode.parentNode.style.display = 'none'
+        editor.ui.getDom('toolbarbox').style.display = 'none';
+        editor.ui.getDom('bottombar').style.display = 'none';
+        editor.ui.getDom('scalelayer').style.display = 'none';
+        editor.ui.getDom('elementpath').style.display = "none";
+        editor.ui.getDom('wordcount').style.display = "none";
+        editor.ui._updateFullScreen();
     });
 
 } catch (err) {

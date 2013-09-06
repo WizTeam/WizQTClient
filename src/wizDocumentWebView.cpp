@@ -7,9 +7,9 @@
 #include <QtWebKitWidgets>
 #endif
 
+#include "wizdef.h"
 #include "share/wizmisc.h"
 #include "wizmainwindow.h"
-
 #include "wizEditorInsertLinkForm.h"
 #include "wizEditorInsertTableForm.h"
 #include "share/wizObjectDataDownloader.h"
@@ -22,6 +22,11 @@ void CWizDocumentWebViewPage::triggerAction(QWebPage::WebAction action, bool che
     }
 
     QWebPage::triggerAction(action, checked);
+}
+
+void CWizDocumentWebViewPage::javaScriptConsoleMessage(const QString& message, int lineNumber, const QString& sourceID)
+{
+    qDebug() << "[Console]line: " << lineNumber << ", " << message;
 }
 
 CWizDocumentWebView::CWizDocumentWebView(CWizExplorerApp& app, QWidget* parent /*= 0*/)
@@ -434,13 +439,6 @@ void CWizDocumentWebView::viewDocumentInEditor(bool editing)
         window->transitionView()->showAsMode(CWizDocumentTransitionView::ErrorOccured);
         return;
     }
-
-    // FIXME: hide builtin toolbar made document iframe size is smaller than view size
-    QRect rc = geometry();
-    setGeometry(rc.adjusted(0, 0, 0, 10));
-    qApp->processEvents(QEventLoop::AllEvents);
-    setGeometry(rc);
-    qApp->processEvents(QEventLoop::AllEvents);
 
     window->showClient(true);
     window->transitionView()->hide();
