@@ -32,6 +32,7 @@ CWizUserInfoWidget::CWizUserInfoWidget(CWizExplorerApp& app, QWidget *parent)
 
     QAction* actionAccountInfo = new QAction(tr("View account info"), m_menuMain);
     connect(actionAccountInfo, SIGNAL(triggered()), SLOT(on_action_accountInfo_triggered()));
+    actionAccountInfo->setVisible(false);
 
     QAction* actionAccountSetup = new QAction(tr("Account settings"), m_menuMain);
     connect(actionAccountSetup, SIGNAL(triggered()), SLOT(on_action_accountSetup_triggered()));

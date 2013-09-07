@@ -4,7 +4,7 @@
 
 #include "share/wizmisc.h"
 #include "wizdef.h"
-#include "wizmainwindow.h"
+#include "share/wizsettings.h"
 #include "wizDocumentWebView.h"
 #include "wizactions.h"
 
@@ -285,75 +285,71 @@ CWizEditorToolBar::CWizEditorToolBar(CWizExplorerApp& app, QWidget *parent)
     : QWidget(parent)
     , m_app(app)
 {
-    MainWindow* mainWindow = qobject_cast<MainWindow *>(m_app.mainWindow());
     QString skin = m_app.userSettings().skin();
 
     m_comboFontFamily = new CWizToolComboBoxFont(this);
-    connect(m_comboFontFamily, SIGNAL(activated(const QString&)),
-            SLOT(on_actionFormatFontFamily_activated(const QString&)));
+    connect(m_comboFontFamily, SIGNAL(currentIndexChanged(const QString&)),
+            SLOT(on_comboFontFamily_indexChanged(const QString&)));
 
     QStringList listSize;
     listSize << "9px" << "10px" << "11px" << "12px" << "13px"<< "14px"
              << "18px" << "24px" << "36px" << "48px" << "64px" << "72px";
     m_comboFontSize = new CWizToolComboBox(this);
     m_comboFontSize->addItems(listSize);
-    connect(m_comboFontSize, SIGNAL(activated(const QString&)),
-            SLOT(on_actionFormatFontSize_activated(const QString&)));
+    connect(m_comboFontSize, SIGNAL(currentIndexChanged(const QString&)),
+            SLOT(on_comboFontSize_indexChanged(const QString&)));
+
+    m_btnFormatMatch = new CWizToolButton(this);
+    m_btnFormatMatch->setIcon(::WizLoadSkinIcon(skin, "actionFormatMatch"));
+    connect(m_btnFormatMatch, SIGNAL(clicked()), SLOT(on_btnFormatMatch_clicked()));
 
     m_btnForeColor = new CWizToolButtonColor(this);
-    m_btnForeColor->setIcon(::WizLoadSkinIcon(skin, "actionFormatColor"));
-    connect(m_btnForeColor, SIGNAL(clicked()), mainWindow,
-            SLOT(on_actionFormatForeColor_triggered()));
+    m_btnForeColor->setIcon(::WizLoadSkinIcon(skin, "actionFormatForeColor"));
+    connect(m_btnForeColor, SIGNAL(clicked()), SLOT(on_BtnForeColor_clicked()));
+
+    m_btnBackColor = new CWizToolButtonColor(this);
+    m_btnBackColor->setIcon(::WizLoadSkinIcon(skin, "actionFormatBackColor"));
+    connect(m_btnBackColor, SIGNAL(clicked()), SLOT(on_BtnBackColor_clicked()));
 
     m_btnBold = new CWizToolButton(this);
     m_btnBold->setIcon(::WizLoadSkinIcon(skin, "actionFormatBold"));
-    connect(m_btnBold, SIGNAL(clicked()), mainWindow,
-            SLOT(on_actionFormatBold_triggered()));
+    connect(m_btnBold, SIGNAL(clicked()), SLOT(on_btnBold_clicked()));
 
     m_btnItalic = new CWizToolButton(this);
     m_btnItalic->setIcon(::WizLoadSkinIcon(skin, "actionFormatItalic"));
-    connect(m_btnItalic, SIGNAL(clicked()), mainWindow,
-            SLOT(on_actionFormatItalic_triggered()));
+    connect(m_btnItalic, SIGNAL(clicked()), SLOT(on_btnItalic_clicked()));
 
     m_btnUnderLine = new CWizToolButton(this);
     m_btnUnderLine->setIcon(::WizLoadSkinIcon(skin, "actionFormatUnderLine"));
-    connect(m_btnUnderLine, SIGNAL(clicked()), mainWindow,
-            SLOT(on_actionFormatUnderLine_triggered()));
+    connect(m_btnUnderLine, SIGNAL(clicked()), SLOT(on_btnUnderLine_clicked()));
 
     m_btnJustifyLeft = new CWizToolButton(this);
     m_btnJustifyLeft->setIcon(::WizLoadSkinIcon(skin, "actionFormatJustifyLeft"));
-    connect(m_btnJustifyLeft, SIGNAL(clicked()), mainWindow,
-            SLOT(on_actionFormatJustifyLeft_triggered()));
+    connect(m_btnJustifyLeft, SIGNAL(clicked()), SLOT(on_btnJustifyLeft_clicked()));
 
     m_btnJustifyCenter = new CWizToolButton(this);
     m_btnJustifyCenter->setIcon(::WizLoadSkinIcon(skin, "actionFormatJustifyCenter"));
-    connect(m_btnJustifyCenter, SIGNAL(clicked()), mainWindow,
-            SLOT(on_actionFormatJustifyCenter_triggered()));
+    connect(m_btnJustifyCenter, SIGNAL(clicked()), SLOT(on_btnJustifyCenter_clicked()));
 
     m_btnJustifyRight = new CWizToolButton(this);
     m_btnJustifyRight->setIcon(::WizLoadSkinIcon(skin, "actionFormatJustifyRight"));
-    connect(m_btnJustifyRight, SIGNAL(clicked()), mainWindow,
-            SLOT(on_actionFormatJustifyRight_triggered()));
+    connect(m_btnJustifyRight, SIGNAL(clicked()), SLOT(on_btnJustifyRight_clicked()));
 
     m_btnUnorderedList = new CWizToolButton(this);
     m_btnUnorderedList->setIcon(::WizLoadSkinIcon(skin, "actionFormatInsertUnorderedList"));
-    connect(m_btnUnorderedList, SIGNAL(clicked()), mainWindow,
-            SLOT(on_actionFormatInsertUnorderedList_triggered()));
+    connect(m_btnUnorderedList, SIGNAL(clicked()), SLOT(on_btnUnorderedList_clicked()));
 
     m_btnOrderedList = new CWizToolButton(this);
     m_btnOrderedList->setIcon(::WizLoadSkinIcon(skin, "actionFormatInsertOrderedList"));
-    connect(m_btnOrderedList, SIGNAL(clicked()), mainWindow,
-            SLOT(on_actionFormatInsertOrderedList_triggered()));
+    connect(m_btnOrderedList, SIGNAL(clicked()), SLOT(on_btnOrderedList_clicked()));
 
     m_btnTable = new CWizToolButton(this);
     m_btnTable->setIcon(::WizLoadSkinIcon(skin, "actionFormatInsertTable"));
-    connect(m_btnTable, SIGNAL(clicked()), mainWindow,
-            SLOT(on_actionFormatInsertTable_triggered()));
+    connect(m_btnTable, SIGNAL(clicked()), SLOT(on_btnTable_clicked()));
 
     m_btnHorizontal = new CWizToolButton(this);
     m_btnHorizontal->setIcon(::WizLoadSkinIcon(skin, "actionFormatInsertHorizontal"));
-    connect(m_btnHorizontal, SIGNAL(clicked()), mainWindow,
-            SLOT(on_actionFormatInsertHorizontal_triggered()));
+    connect(m_btnHorizontal, SIGNAL(clicked()), SLOT(on_btnHorizontal_clicked()));
 
     QHBoxLayout* layout = new QHBoxLayout();
     layout->setContentsMargins(3, 0, 3, 0);
@@ -365,7 +361,9 @@ CWizEditorToolBar::CWizEditorToolBar(CWizExplorerApp& app, QWidget *parent)
     layout->addSpacing(6);
     layout->addWidget(m_comboFontSize);
     layout->addSpacing(12);
+    layout->addWidget(m_btnFormatMatch);
     layout->addWidget(m_btnForeColor);
+    layout->addWidget(m_btnBackColor);
     layout->addWidget(m_btnBold);
     layout->addWidget(m_btnItalic);
     layout->addWidget(m_btnUnderLine);
@@ -387,59 +385,55 @@ QSize CWizEditorToolBar::sizeHint() const
     return QSize(1, 32);
 }
 
-void CWizEditorToolBar::on_actionFormatFontFamily_activated(const QString& strFamily)
-{
-    MainWindow* mainWindow = qobject_cast<MainWindow *>(m_app.mainWindow());
-    mainWindow->web()->editorCommandExecuteFontFamily(strFamily);
-
-    m_comboFontFamily->setText(strFamily);
-}
-
-void CWizEditorToolBar::on_actionFormatFontSize_activated(const QString& strSize)
-{
-    MainWindow* mainWindow = qobject_cast<MainWindow *>(m_app.mainWindow());
-    mainWindow->web()->editorCommandExecuteFontSize(strSize);
-
-    m_comboFontSize->setText(strSize);
-}
-
 void CWizEditorToolBar::resetToolbar()
 {
+    if (!m_editor)
+        return;
+
     int state;
     QString value;
-    MainWindow* mainWindow = qobject_cast<MainWindow *>(m_app.mainWindow());
 
-    value = mainWindow->web()->editorCommandQueryCommandValue("fontFamily");
+    value = m_editor->editorCommandQueryCommandValue("fontFamily");
     m_comboFontFamily->setText(value);
 
-    value = mainWindow->web()->editorCommandQueryCommandValue("fontSize");
+    value = m_editor->editorCommandQueryCommandValue("fontSize");
     m_comboFontSize->setText(value);
 
-    value = mainWindow->web()->editorCommandQueryCommandValue("foreColor");
+    state = m_editor->editorCommandQueryCommandState("formatMatch");
+    if (state == 1) {
+        m_btnFormatMatch->setChecked(true);
+    } else {
+        m_btnFormatMatch->setChecked(false);
+    }
+
+    value = m_editor->editorCommandQueryCommandValue("foreColor");
     m_btnForeColor->setColor(QColor(value));
 
-    state = mainWindow->web()->editorCommandQueryCommandState("bold");
+    value = m_editor->editorCommandQueryCommandValue("backColor");
+    m_btnBackColor->setColor(QColor(value));
+
+    state = m_editor->editorCommandQueryCommandState("bold");
     if (state == 1) {
         m_btnBold->setChecked(true);
     } else {
         m_btnBold->setChecked(false);
     }
 
-    state = mainWindow->web()->editorCommandQueryCommandState("italic");
+    state = m_editor->editorCommandQueryCommandState("italic");
     if (state == 1) {
         m_btnItalic->setChecked(true);
     } else {
         m_btnItalic->setChecked(false);
     }
 
-    state = mainWindow->web()->editorCommandQueryCommandState("underline");
+    state = m_editor->editorCommandQueryCommandState("underline");
     if (state == 1) {
         m_btnUnderLine->setChecked(true);
     } else {
         m_btnUnderLine->setChecked(false);
     }
 
-    value = mainWindow->web()->editorCommandQueryCommandValue("justify");
+    value = m_editor->editorCommandQueryCommandValue("justify");
     if (value == "left") {
         m_btnJustifyLeft->setChecked(true);
         m_btnJustifyCenter->setChecked(false);
@@ -454,14 +448,14 @@ void CWizEditorToolBar::resetToolbar()
         m_btnJustifyRight->setChecked(true);
     }
 
-    state = mainWindow->web()->editorCommandQueryCommandState("insertOrderedList");
+    state = m_editor->editorCommandQueryCommandState("insertOrderedList");
     if (state == 1) {
         m_btnOrderedList->setChecked(true);
     } else {
         m_btnOrderedList->setChecked(false);
     }
 
-    state = mainWindow->web()->editorCommandQueryCommandState("insertUnorderedList");
+    state = m_editor->editorCommandQueryCommandState("insertUnorderedList");
     if (state == 1) {
         m_btnUnorderedList->setChecked(true);
     } else {
@@ -481,45 +475,46 @@ struct WizEditorContextMenuItem
 #define WIZEDITOR_ACTION_PASTE          QObject::tr("Paste")
 
 #define WIZEDITOR_ACTION_LINK_INSERT    QObject::tr("Insert Link")
-#define WIZEDITOR_ACTION_LINK_EDIT       QObject::tr("Edit Link")
+#define WIZEDITOR_ACTION_LINK_EDIT      QObject::tr("Edit Link")
 #define WIZEDITOR_ACTION_LINK_REMOVE    QObject::tr("Remove Link")
 
-#define WIZEDITOR_ACTION_FONT_BOLD      QObject::tr("Bold")
-#define WIZEDITOR_ACTION_FONT_ITALIC    QObject::tr("Italic")
-#define WIZEDITOR_ACTION_FONT_UNDERLINE QObject::tr("Underline")
+#define WIZEDITOR_ACTION_FONT_BOLD          QObject::tr("Bold")
+#define WIZEDITOR_ACTION_FONT_ITALIC        QObject::tr("Italic")
+#define WIZEDITOR_ACTION_FONT_UNDERLINE     QObject::tr("Underline")
 #define WIZEDITOR_ACTION_FONT_STRIKETHROUGH QObject::tr("Strike through")
-#define WIZEDITOR_ACTION_FONT_FORECOLOR QObject::tr("font color")
+#define WIZEDITOR_ACTION_FONT_FORECOLOR     QObject::tr("font color")
+#define WIZEDITOR_ACTION_FONT_BACKCOLOR     QObject::tr("background color")
 
-#define WIZEDITOR_ACTION_JUSTIFY_LEFT QObject::tr("Justify left")
-#define WIZEDITOR_ACTION_JUSTIFY_CENTER QObject::tr("Justify center")
-#define WIZEDITOR_ACTION_JUSTIFY_RIGHT QObject::tr("Justify right")
+#define WIZEDITOR_ACTION_JUSTIFY_LEFT       QObject::tr("Justify left")
+#define WIZEDITOR_ACTION_JUSTIFY_CENTER     QObject::tr("Justify center")
+#define WIZEDITOR_ACTION_JUSTIFY_RIGHT      QObject::tr("Justify right")
 
-#define WIZEDITOR_ACTION_TABLE_INSERT QObject::tr("Insert table")
-#define WIZEDITOR_ACTION_TABLE_DELETE QObject::tr("Delete table")
+#define WIZEDITOR_ACTION_TABLE_INSERT       QObject::tr("Insert table")
+#define WIZEDITOR_ACTION_TABLE_DELETE       QObject::tr("Delete table")
 
-#define WIZEDITOR_ACTION_TABLE_DELETE_ROW QObject::tr("Delete row")
+#define WIZEDITOR_ACTION_TABLE_DELETE_ROW   QObject::tr("Delete row")
 #define WIZEDITOR_ACTION_TABLE_DELETE_COLUM QObject::tr("Delete colum")
 
-#define WIZEDITOR_ACTION_TABLE_INSERT_ROW QObject::tr("Insert row")
-#define WIZEDITOR_ACTION_TABLE_INSERT_ROW_NEXT QObject::tr("Insert row next")
-#define WIZEDITOR_ACTION_TABLE_INSERT_COLUM QObject::tr("Insert colum")
-#define WIZEDITOR_ACTION_TABLE_INSERT_COLUM_NEXT QObject::tr("Insert colum next")
+#define WIZEDITOR_ACTION_TABLE_INSERT_ROW           QObject::tr("Insert row")
+#define WIZEDITOR_ACTION_TABLE_INSERT_ROW_NEXT      QObject::tr("Insert row next")
+#define WIZEDITOR_ACTION_TABLE_INSERT_COLUM         QObject::tr("Insert colum")
+#define WIZEDITOR_ACTION_TABLE_INSERT_COLUM_NEXT    QObject::tr("Insert colum next")
 
-#define WIZEDITOR_ACTION_TABLE_INSERT_CAPTION QObject::tr("Insert caption")
-#define WIZEDITOR_ACTION_TABLE_DELETE_CAPTION QObject::tr("Delete caption")
-#define WIZEDITOR_ACTION_TABLE_INSERT_TITLE QObject::tr("Insert title")
-#define WIZEDITOR_ACTION_TABLE_DELETE_TITLE QObject::tr("Delete title")
+#define WIZEDITOR_ACTION_TABLE_INSERT_CAPTION   QObject::tr("Insert caption")
+#define WIZEDITOR_ACTION_TABLE_DELETE_CAPTION   QObject::tr("Delete caption")
+#define WIZEDITOR_ACTION_TABLE_INSERT_TITLE     QObject::tr("Insert title")
+#define WIZEDITOR_ACTION_TABLE_DELETE_TITLE     QObject::tr("Delete title")
 
-#define WIZEDITOR_ACTION_TABLE_MERGE_CELLS QObject::tr("Merge cells")
-#define WIZEDITOR_ACTION_TABLE_MERGE_RIGHT QObject::tr("Merge right")
-#define WIZEDITOR_ACTION_TABLE_MERGE_DOWN QObject::tr("Merge down")
+#define WIZEDITOR_ACTION_TABLE_MERGE_CELLS  QObject::tr("Merge cells")
+#define WIZEDITOR_ACTION_TABLE_MERGE_RIGHT  QObject::tr("Merge right")
+#define WIZEDITOR_ACTION_TABLE_MERGE_DOWN   QObject::tr("Merge down")
 
-#define WIZEDITOR_ACTION_TABLE_SPLIT_CELLS QObject::tr("Split cells")
-#define WIZEDITOR_ACTION_TABLE_SPLIT_ROWS QObject::tr("Split rows")
+#define WIZEDITOR_ACTION_TABLE_SPLIT_CELLS  QObject::tr("Split cells")
+#define WIZEDITOR_ACTION_TABLE_SPLIT_ROWS   QObject::tr("Split rows")
 #define WIZEDITOR_ACTION_TABLE_SPLIT_COLUMS QObject::tr("Split colums")
 
-#define WIZEDITOR_ACTION_TABLE_AVERAGE_ROWS QObject::tr("Averaged distribute rows")
-#define WIZEDITOR_ACTION_TABLE_AVERAGE_COLUMS QObject::tr("Averaged distribute colums")
+#define WIZEDITOR_ACTION_TABLE_AVERAGE_ROWS     QObject::tr("Averaged distribute rows")
+#define WIZEDITOR_ACTION_TABLE_AVERAGE_COLUMS   QObject::tr("Averaged distribute colums")
 
 
 WizEditorContextMenuItem* CWizEditorToolBar::contextMenuData()
@@ -544,6 +539,7 @@ WizEditorContextMenuItem* CWizEditorToolBar::contextMenuData()
         {WIZEDITOR_ACTION_FONT_STRIKETHROUGH,       "strikethrough",    "editorCommandExecuteStrikeThrough"},
         {"-", "-", "-"},
         {WIZEDITOR_ACTION_FONT_FORECOLOR,           "",                 "editorCommandExecuteForeColor"},
+        {WIZEDITOR_ACTION_FONT_BACKCOLOR,           "",                 "editorCommandExecuteBackColor"},
         {"+", "+", "+"},
 
         {QObject::tr("Justify"),                    "justify",          "+"},
@@ -588,6 +584,9 @@ WizEditorContextMenuItem* CWizEditorToolBar::contextMenuData()
 
 void CWizEditorToolBar::resetContextMenuAndPop(const QPoint& pos)
 {
+    if (!m_editor)
+        return;
+
     buildMenu();
     m_menuContext->popup(pos);
 }
@@ -602,7 +601,6 @@ void CWizEditorToolBar::buildMenu()
 
     int index = 0;
     WizEditorContextMenuItem* arrayData = contextMenuData();
-    MainWindow* mainWindow = qobject_cast<MainWindow *>(m_app.mainWindow());
     while (1) {
         WizEditorContextMenuItem& item = arrayData[index];
         if (item.label.isEmpty() && item.command.isEmpty() && item.execute.isEmpty()) {
@@ -616,7 +614,7 @@ void CWizEditorToolBar::buildMenu()
 
         } else if (item.command != "+" && !item.execute.isEmpty()) {
             if (!item.command.isEmpty()) {
-                int value = mainWindow->web()->editorCommandQueryCommandState(item.command);
+                int value = m_editor->editorCommandQueryCommandState(item.command);
                 if (value == -1) {
                     index++;
                     continue;
@@ -624,7 +622,7 @@ void CWizEditorToolBar::buildMenu()
             }
 
             QString strSlot = "1" + item.execute + "()";
-            m_menuContext->addAction(item.label, mainWindow->web(), strSlot.toUtf8());
+            m_menuContext->addAction(item.label, m_editor, strSlot.toUtf8());
         } else if (item.command.isEmpty() && item.execute.isEmpty()) {
             index++;
             continue;
@@ -640,12 +638,11 @@ int CWizEditorToolBar::buildMenu(QMenu* pMenu, int indx)
 {
     int index = indx;
     bool bSkip = false;
-    MainWindow* mainWindow = qobject_cast<MainWindow *>(m_app.mainWindow());
     WizEditorContextMenuItem* arrayData = contextMenuData();
 
     WizEditorContextMenuItem& curItem = arrayData[index];
     if (curItem.command != "+") {
-        int value = mainWindow->web()->editorCommandQueryCommandState(curItem.command);
+        int value = m_editor->editorCommandQueryCommandState(curItem.command);
         if (value == -1) {
             bSkip = true;
         }
@@ -670,23 +667,23 @@ int CWizEditorToolBar::buildMenu(QMenu* pMenu, int indx)
         } else if (item.command != "+" && !item.execute.isEmpty()) {
 
             // special case
-            if (mainWindow->web()->editorCommandQueryLink()
+            if (m_editor->editorCommandQueryLink()
                     && item.label == WIZEDITOR_ACTION_LINK_INSERT) {
                 continue;
-            } else if (!mainWindow->web()->editorCommandQueryLink()
+            } else if (!m_editor->editorCommandQueryLink()
                        && item.label == WIZEDITOR_ACTION_LINK_EDIT) {
                 continue;
             }
 
             if (!item.command.isEmpty()) {
-                int value = mainWindow->web()->editorCommandQueryCommandState(item.command);
+                int value = m_editor->editorCommandQueryCommandState(item.command);
                 if (value == -1) {
                     continue;
                 }
             }
 
             QString strSlot = "1" + item.execute + "()";
-            pSubMenu->addAction(item.label, mainWindow->web(), strSlot.toUtf8());
+            pSubMenu->addAction(item.label, m_editor, strSlot.toUtf8());
 
         } else if (item.command.isEmpty() && item.execute.isEmpty()) {
             continue;
@@ -696,4 +693,111 @@ int CWizEditorToolBar::buildMenu(QMenu* pMenu, int indx)
     }
 
     return index;
+}
+
+void CWizEditorToolBar::on_comboFontFamily_indexChanged(const QString& strFamily)
+{
+    if (m_editor) {
+        m_editor->editorCommandExecuteFontFamily(strFamily);
+        m_comboFontFamily->setText(strFamily);
+    }
+}
+
+void CWizEditorToolBar::on_comboFontSize_indexChanged(const QString& strSize)
+{
+    if (m_editor) {
+        m_editor->editorCommandExecuteFontSize(strSize);
+        m_comboFontSize->setText(strSize);
+    }
+}
+
+void CWizEditorToolBar::on_btnFormatMatch_clicked()
+{
+    if (m_editor) {
+        m_editor->editorCommandExecuteFormatMatch();
+    }
+}
+
+void CWizEditorToolBar::on_BtnForeColor_clicked()
+{
+    if (m_editor) {
+        m_editor->editorCommandExecuteForeColor();
+    }
+}
+
+void CWizEditorToolBar::on_BtnBackColor_clicked()
+{
+    if (m_editor) {
+        m_editor->editorCommandExecuteBackColor();
+    }
+}
+
+void CWizEditorToolBar::on_btnBold_clicked()
+{
+    if (m_editor) {
+        m_editor->editorCommandExecuteBold();
+    }
+}
+
+void CWizEditorToolBar::on_btnItalic_clicked()
+{
+    if (m_editor) {
+        m_editor->editorCommandExecuteItalic();
+    }
+}
+
+void CWizEditorToolBar::on_btnUnderLine_clicked()
+{
+    if (m_editor) {
+        m_editor->editorCommandExecuteUnderLine();
+    }
+}
+
+void CWizEditorToolBar::on_btnJustifyLeft_clicked()
+{
+    if (m_editor) {
+        m_editor->editorCommandExecuteJustifyLeft();
+    }
+}
+
+void CWizEditorToolBar::on_btnJustifyCenter_clicked()
+{
+    if (m_editor) {
+        m_editor->editorCommandExecuteJustifyCenter();
+    }
+}
+
+void CWizEditorToolBar::on_btnJustifyRight_clicked()
+{
+    if (m_editor) {
+        m_editor->editorCommandExecuteJustifyRight();
+    }
+}
+
+void CWizEditorToolBar::on_btnUnorderedList_clicked()
+{
+    if (m_editor) {
+        m_editor->editorCommandExecuteInsertUnorderedList();
+    }
+}
+
+void CWizEditorToolBar::on_btnOrderedList_clicked()
+{
+    if (m_editor) {
+        m_editor->editorCommandExecuteInsertOrderedList();
+    }
+}
+
+void CWizEditorToolBar::on_btnTable_clicked()
+{
+    if (m_editor) {
+        m_editor->editorCommandExecuteTableInsert();
+    }
+}
+
+void CWizEditorToolBar::on_btnHorizontal_clicked()
+{
+    if (m_editor) {
+        m_editor->editorCommandExecuteInsertHorizontal();
+    }
 }

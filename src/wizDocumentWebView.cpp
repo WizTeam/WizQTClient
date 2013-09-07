@@ -622,19 +622,41 @@ bool CWizDocumentWebView::editorCommandExecuteFontSize(const QString& strSize)
     return page()->mainFrame()->evaluateJavaScript(strExec).toBool();
 }
 
-bool CWizDocumentWebView::editorCommandExecuteForeColor()
+void CWizDocumentWebView::editorCommandExecuteBackColor()
 {
     if (!m_colorDialog) {
         m_colorDialog = new QColorDialog(this);
-        connect(m_colorDialog, SIGNAL(currentColorChanged(const QColor &)),
-                SLOT(on_editorCommandExecuteForeColor_accepted(const QColor&)));
-        connect(m_colorDialog, SIGNAL(colorSelected(const QColor &)),
-                SLOT(on_editorCommandExecuteForeColor_accepted(const QColor&)));
     }
 
-    m_colorDialog->show();
+    m_colorDialog->disconnect();
 
-    return true;
+    connect(m_colorDialog, SIGNAL(currentColorChanged(const QColor &)),
+            SLOT(on_editorCommandExecuteBackColor_accepted(const QColor&)));
+    connect(m_colorDialog, SIGNAL(colorSelected(const QColor &)),
+            SLOT(on_editorCommandExecuteBackColor_accepted(const QColor&)));
+
+    m_colorDialog->show();
+}
+
+void CWizDocumentWebView::on_editorCommandExecuteBackColor_accepted(const QColor& color)
+{
+    QString strExec = "editor.execCommand('backColor', '" + color.name() + "');";
+    page()->mainFrame()->evaluateJavaScript(strExec).toBool();
+}
+
+void CWizDocumentWebView::editorCommandExecuteForeColor()
+{
+    if (!m_colorDialog) {
+        m_colorDialog = new QColorDialog(this);
+    }
+
+    m_colorDialog->disconnect();
+    connect(m_colorDialog, SIGNAL(currentColorChanged(const QColor &)),
+            SLOT(on_editorCommandExecuteForeColor_accepted(const QColor&)));
+    connect(m_colorDialog, SIGNAL(colorSelected(const QColor &)),
+            SLOT(on_editorCommandExecuteForeColor_accepted(const QColor&)));
+
+    m_colorDialog->show();
 }
 
 void CWizDocumentWebView::on_editorCommandExecuteForeColor_accepted(const QColor& color)

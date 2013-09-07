@@ -226,8 +226,6 @@ bool CWizHtmlToPlainText::toText(const QString& strHtml, QString& strPlainText)
 
     strPlainText = m_strText.simplified();
 
-    qDebug() << strPlainText.left(500);
-
     return true;
 }
 

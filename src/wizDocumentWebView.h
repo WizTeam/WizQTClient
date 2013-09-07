@@ -135,7 +135,6 @@ private:
     QPointer<CWizEditorInsertTableForm> m_editorInsertTableForm;
     QPointer<QColorDialog> m_colorDialog;
 
-
 public Q_SLOTS:
     void on_editor_selectionChanged();
     void onCipherDialogClosed();
@@ -152,7 +151,6 @@ public Q_SLOTS:
 
     void on_editorCommandExecuteLinkInsert_accepted();
     void on_editorCommandExecuteTableInsert_accepted();
-    void on_editorCommandExecuteForeColor_accepted(const QColor& color);
 
     void editorCommandExecuteCut();
     void editorCommandExecuteCopy();
@@ -161,7 +159,10 @@ public Q_SLOTS:
     /* editor API */
 
     // font
-    bool editorCommandExecuteForeColor();
+    void editorCommandExecuteBackColor();
+    void on_editorCommandExecuteBackColor_accepted(const QColor& color);
+    void editorCommandExecuteForeColor();
+    void on_editorCommandExecuteForeColor_accepted(const QColor& color);
     bool editorCommandExecuteBold();
     bool editorCommandExecuteItalic();
     bool editorCommandExecuteUnderLine();

@@ -9,6 +9,7 @@
 #include <QPointer>
 
 class CWizExplorerApp;
+class CWizDocumentWebView;
 class CWizToolButton;
 class CWizToolButtonColor;
 class CWizToolComboBox;
@@ -26,18 +27,21 @@ public:
     // editor status reflect
     void resetToolbar();
     void resetContextMenuAndPop(const QPoint& pos);
+    void setDelegate(CWizDocumentWebView* editor) { m_editor = editor; }
 
 protected:
     QSize sizeHint() const;
 
 private:
     CWizExplorerApp& m_app;
+    CWizDocumentWebView* m_editor;
     std::map<QString, QAction*> m_actions;
     QPointer<QMenu> m_menuContext;
-
     CWizToolComboBoxFont* m_comboFontFamily;
     CWizToolComboBox* m_comboFontSize;
     CWizToolButtonColor* m_btnForeColor;
+    CWizToolButtonColor* m_btnBackColor;
+    CWizToolButton* m_btnFormatMatch;
     CWizToolButton* m_btnBold;
     CWizToolButton* m_btnItalic;
     CWizToolButton* m_btnUnderLine;
@@ -54,8 +58,21 @@ private:
     int buildMenu(QMenu* pMenu, int indx);
 
 protected Q_SLOTS:
-    void on_actionFormatFontFamily_activated(const QString& strFamily);
-    void on_actionFormatFontSize_activated(const QString& strSize);
+    void on_comboFontFamily_indexChanged(const QString& strFamily);
+    void on_comboFontSize_indexChanged(const QString& strSize);
+    void on_btnFormatMatch_clicked();
+    void on_BtnForeColor_clicked();
+    void on_BtnBackColor_clicked();
+    void on_btnBold_clicked();
+    void on_btnItalic_clicked();
+    void on_btnUnderLine_clicked();
+    void on_btnJustifyLeft_clicked();
+    void on_btnJustifyCenter_clicked();
+    void on_btnJustifyRight_clicked();
+    void on_btnUnorderedList_clicked();
+    void on_btnOrderedList_clicked();
+    void on_btnTable_clicked();
+    void on_btnHorizontal_clicked();
 };
 
 #endif // WIZEDITORTOOLBAR_H

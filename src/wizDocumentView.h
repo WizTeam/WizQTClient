@@ -43,8 +43,8 @@ protected:
     CWizExplorerApp& m_app;
     CWizDatabaseManager& m_dbMgr;
     CWizUserSettings& m_userSettings;
-    CWizTitleBar* m_title;
     CWizDocumentWebView* m_web;
+    QPointer<CWizTitleBar> m_title;
     QPointer<QWidget> m_client;
     QPointer<CWizTagListWidget> m_tags;
     QPointer<CWizAttachmentListWidget> m_attachments;

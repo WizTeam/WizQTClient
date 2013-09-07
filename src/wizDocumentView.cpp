@@ -397,11 +397,13 @@ CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
     , m_app(app)
     , m_userSettings(app.userSettings())
     , m_dbMgr(app.databaseManager())
-    , m_title(new CWizTitleBar(app, this))
     , m_web(new CWizDocumentWebView(app, this))
+    , m_title(new CWizTitleBar(app, this))
     , m_editingDocument(true)
     , m_viewMode(app.userSettings().noteViewMode())
 {
+    m_title->editorBar()->setDelegate(m_web);
+
     QVBoxLayout* layout = new QVBoxLayout();
     layout->setContentsMargins(0, 0, 0, 0);
     layout->setSpacing(0);

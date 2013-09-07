@@ -1285,9 +1285,11 @@ void CWizCategoryView::initGeneral()
 
     CWizCategoryViewShortcutRootItem* pShortcutRoot = new CWizCategoryViewShortcutRootItem(m_app, CATEGORY_SHORTCUTS);
     addTopLevelItem(pShortcutRoot);
+    pShortcutRoot->setHidden(true);
 
     CWizCategoryViewSearchRootItem* pSearchRoot = new CWizCategoryViewSearchRootItem(m_app, CATEGORY_SEARCH);
     addTopLevelItem(pSearchRoot);
+    pSearchRoot->setHidden(true);
 }
 
 void CWizCategoryView::initFolders()
@@ -1420,6 +1422,7 @@ void CWizCategoryView::initStyles()
 {
     CWizCategoryViewStyleRootItem* pStyleRoot = new CWizCategoryViewStyleRootItem(m_app, CATEGORY_STYLES);
     addTopLevelItem(pStyleRoot);
+    pStyleRoot->setHidden(true);
 }
 
 void CWizCategoryView::initGroups()

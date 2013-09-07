@@ -198,28 +198,6 @@ void CWizNoteStyle::drawCategoryViewItem(const QStyleOptionViewItemV4 *vopt,
         return;
     }
 
-//    if (NULL != dynamic_cast<const CWizCategoryViewSeparatorItem*>(pItem)) {
-
-//        // Draw seperator line
-//        QRect rc = subElementRect(SE_ItemViewItemFocusRect, vopt, view);
-//        QPoint p1 = rc.topLeft();
-//        p1.ry() += rc.height() / 2;
-//        QPoint p2 = rc.topRight();
-//        p2.ry() += rc.height() / 2;
-//        painter->drawLine(p1, p2);
-//        return;
-
-//    QPalette palette = vopt->palette;
-//    QStyleOptionViewItemV4 adjustedOption = *vopt;
-//    adjustedOption.palette = palette;
-//    // We hide the focus rect in single selection as it is not required
-//    if ((view->selectionMode() == QAbstractItemView::SingleSelection)
-//        && !(vopt->state & State_KeyboardFocusChange)) {
-//        adjustedOption.state &= ~State_HasFocus;
-//    }
-
-//    QStyleOptionViewItemV4* opt = &adjustedOption;
-
     QPainter* p = painter;
     p->save();
     p->setClipRect(vopt->rect);
