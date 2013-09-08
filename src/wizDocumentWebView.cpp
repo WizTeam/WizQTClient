@@ -443,6 +443,8 @@ void CWizDocumentWebView::viewDocumentInEditor(bool editing)
     window->showClient(true);
     window->transitionView()->hide();
     m_timerAutoSave.start();
+
+    update();
 }
 
 void CWizDocumentWebView::setEditingDocument(bool editing)

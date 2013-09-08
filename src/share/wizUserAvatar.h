@@ -22,10 +22,12 @@ public:
                                           QObject* parent = 0);
 
     void download(const QString& strUserGUID);
+    void setDefault(const QString& strPath);
 
 private:
     QThread* m_thread;
     CWizUserAvatarDownloader* m_downloader;
+    QString m_strDefaultAvatarPath;
 
     QStringList m_listUser; // download pool
     QString m_strUserCurrent;
@@ -51,13 +53,17 @@ class CWizUserAvatarDownloader : public QObject
 
 public:
     CWizUserAvatarDownloader(const QString& strPath, QObject* parent = 0);
-    Q_INVOKABLE void download(const QString& strUserGUID);
+    Q_INVOKABLE void download(const QString& strUserGUID,
+                              const QString& strDefaultAvatarPath);
 
 private:
     QNetworkAccessManager* m_net;
     QString m_strAvatarPath;
     QString m_strAvatarRequestUrl;
-    bool m_bDownloadDefault; // indicate whether download default avatar
+
+    // indicate whether download default avatar or just save default
+    // as user avatar if download failed
+    QString m_strDefaultAvatarPath;
 
     QString m_strCurrentUser; // current downloading
 
@@ -70,6 +76,7 @@ private:
     QUrl redirectUrl(const QUrl& possibleRedirectUrl,
                      const QUrl& oldRedirectUrl) const;
 
+    bool saveDefaultUserAvatar();
     bool saveUserAvatar(const QString& strUserGUID, const QByteArray& bytes);
 
 private Q_SLOTS:

@@ -3215,7 +3215,7 @@ int CWizIndex::GetTrashDocumentCount()
     int nTotal = 0;
 
     CString strSQL;
-    strSQL.Format("select count(*) as DOCUMENT_COUNT from WIZ_DOCUMENT DOCUMENT_LOCATION like '/Deleted Items/%");
+    strSQL.Format("select count(*) as DOCUMENT_COUNT from WIZ_DOCUMENT where DOCUMENT_LOCATION like '/Deleted Items/%'");
     try
     {
         CppSQLite3Query query = m_db.execQuery(strSQL);

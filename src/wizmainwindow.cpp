@@ -116,14 +116,10 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
         QTimer::singleShot(3 * 1000, this, SLOT(on_actionSync_triggered()));
     }
 
-    // group messages sync thread
-    //QThread* threadMessage = new QThread();
-    //m_messageSync->moveToThread(threadMessage);
-    //threadMessage->start();
+    // misc settings
+    m_avatarDownloaderHost->setDefault(::WizGetSkinResourcePath(userSettings().skin()) + "avatar_default.png");
 
-    // init GUI stuff
-    //m_category = m_categoryPrivate;
-
+    // GUI
     initActions();
     initMenuBar();
     initToolBar();

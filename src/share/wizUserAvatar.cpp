@@ -31,6 +31,11 @@ void CWizUserAvatarDownloaderHost::download(const QString& strUserGUID)
     }
 }
 
+void CWizUserAvatarDownloaderHost::setDefault(const QString& strPath)
+{
+    m_strDefaultAvatarPath = strPath;
+}
+
 void CWizUserAvatarDownloaderHost::download_impl()
 {
     if (m_listUser.isEmpty()) {
@@ -44,7 +49,8 @@ void CWizUserAvatarDownloaderHost::download_impl()
     m_strUserCurrent = m_listUser.takeFirst();
 
     if (!QMetaObject::invokeMethod(m_downloader, "download",
-                                   Q_ARG(QString, m_strUserCurrent))) {
+                                   Q_ARG(QString, m_strUserCurrent),
+                                   Q_ARG(QString, m_strDefaultAvatarPath))) {
         qDebug() << "[Avatar Downloader]failed: unable to invoke download!";
     }
 }
@@ -72,13 +78,13 @@ CWizUserAvatarDownloader::CWizUserAvatarDownloader(const QString& strPath,
     : QObject(parent)
     , m_strAvatarPath(strPath)
     , m_net(new QNetworkAccessManager(this))
-    , m_bDownloadDefault(false)
 {
 }
 
-void CWizUserAvatarDownloader::download(const QString& strUserGUID)
+void CWizUserAvatarDownloader::download(const QString& strUserGUID, const QString& strDefaultAvatarPath)
 {
     m_strCurrentUser = strUserGUID;
+    m_strDefaultAvatarPath = strDefaultAvatarPath;
 
     if (m_strAvatarRequestUrl.isEmpty()) {
         acquireApiEntry();
@@ -122,7 +128,7 @@ void CWizUserAvatarDownloader::fetchUserAvatar(const QString& strUserGUID)
 
     // remote return: http://as.wiz.cn/wizas/a/users/avatar/{userGuid}
     // do substitution and add optional default arg for downloading default avatar
-    QString requestUrl = m_strAvatarRequestUrl + "?default=" + (m_bDownloadDefault ? "true" : "false");
+    QString requestUrl = m_strAvatarRequestUrl + "?default=" + (m_strDefaultAvatarPath.isEmpty() ? "true" : "false");
     requestUrl.replace(QRegExp("\\{.*\\}"), strUserGUID);
 
     QNetworkReply* reply = m_net->get(QNetworkRequest(requestUrl));
@@ -132,12 +138,24 @@ void CWizUserAvatarDownloader::fetchUserAvatar(const QString& strUserGUID)
 void CWizUserAvatarDownloader::on_queryUserAvatar_finished()
 {
     QNetworkReply* reply = qobject_cast<QNetworkReply *>(sender());
+    reply->deleteLater();
 
     if (reply->error()) {
         qDebug() << "[Avatar Downloader]Error occured: " << reply->errorString();
 
-        reply->deleteLater();
-        fetchUserAvatarEnd(false);
+        if (m_strDefaultAvatarPath.isEmpty()) {
+            fetchUserAvatarEnd(false);
+            return;
+        }
+
+        // fallback, avoid download frequently, the default avatar
+        // the server provided is not suit for our theme style
+        if (saveDefaultUserAvatar()) {
+            fetchUserAvatarEnd(true);
+        } else {
+            fetchUserAvatarEnd(false);
+        }
+
         return;
     }
 
@@ -161,7 +179,6 @@ void CWizUserAvatarDownloader::on_queryUserAvatar_finished()
             qDebug() << "[Avatar Downloader]failed: unable to save user avatar, guid: "
                      << m_strCurrentUser;
 
-            reply->deleteLater();
             fetchUserAvatarEnd(false);
             return;
         }
@@ -169,8 +186,6 @@ void CWizUserAvatarDownloader::on_queryUserAvatar_finished()
         qDebug() << "[Avatar Downloader]fetching finished, guid: " << m_strCurrentUser;
         fetchUserAvatarEnd(true);
     }
-
-    reply->deleteLater();
 }
 
 QUrl CWizUserAvatarDownloader::redirectUrl(const QUrl& possibleRedirectUrl,
@@ -186,6 +201,14 @@ QUrl CWizUserAvatarDownloader::redirectUrl(const QUrl& possibleRedirectUrl,
 void CWizUserAvatarDownloader::fetchUserAvatarEnd(bool bSucceed)
 {
     Q_EMIT downloaded(m_strCurrentUser, bSucceed);
+}
+
+bool CWizUserAvatarDownloader::saveDefaultUserAvatar()
+{
+    Q_ASSERT(!m_strDefaultAvatarPath.isEmpty());
+
+    QString strFileName = m_strAvatarPath + m_strCurrentUser + ".png";
+    return QFile::copy(m_strDefaultAvatarPath, strFileName);
 }
 
 bool CWizUserAvatarDownloader::saveUserAvatar(const QString& strUserGUID,
