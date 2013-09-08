@@ -15,8 +15,6 @@ CWizCategoryViewItemBase::CWizCategoryViewItemBase(CWizExplorerApp& app,
     , m_app(app)
     , m_strName(strName)
     , m_strKbGUID(strKbGUID)
-    , m_nDocuments(-1)
-    , m_nDocumentsIncludeSub(-1)
 {
 }
 
@@ -43,27 +41,14 @@ bool CWizCategoryViewItemBase::operator < (const QTreeWidgetItem &other) const
     return text(0).compare(other.text(0), Qt::CaseInsensitive) < 0;
 }
 
-int CWizCategoryViewItemBase::getDocumentsCount(bool bIncludeSub)
+void CWizCategoryViewItemBase::setDocumentsCount(int nCurrent, int nTotal)
 {
-    if (bIncludeSub) {
-        return m_nDocumentsIncludeSub;
-    } else {
-        return m_nDocuments;
-    }
-}
+    Q_ASSERT(nTotal != -1);
 
-void CWizCategoryViewItemBase::setDocumentsCount(int nCount, bool bIncludeSub)
-{
-    if (bIncludeSub) {
-        m_nDocumentsIncludeSub = nCount;
+    if (nCurrent == -1) {
+        countString = QString("(%1)").arg(nTotal);
     } else {
-        m_nDocuments = nCount;
-    }
-
-    if (m_nDocumentsIncludeSub == -1) {
-        countString = QString("(%1)").arg(m_nDocuments);
-    } else {
-        countString = QString("(%1/%2)").arg(m_nDocuments).arg(m_nDocumentsIncludeSub);
+        countString = QString("(%1/%2)").arg(nCurrent).arg(nTotal);
     }
 }
 
@@ -190,14 +175,6 @@ CWizCategoryViewAllFoldersItem::CWizCategoryViewAllFoldersItem(CWizExplorerApp& 
     setText(0, strName);
 }
 
-void CWizCategoryViewAllFoldersItem::updateDocumentsCount()
-{
-    int nCount = 0;
-    CWizDatabase& db = m_app.databaseManager().db(m_strKbGUID);
-    db.GetAllDocumentsSize(nCount);
-    setDocumentsCount(nCount, false);
-}
-
 void CWizCategoryViewAllFoldersItem::getDocuments(CWizDatabase& db, CWizDocumentDataArray& arrayDocument)
 {
     COleDateTime t = ::WizGetCurrentTime();
@@ -251,21 +228,6 @@ CWizCategoryViewFolderItem::CWizCategoryViewFolderItem(CWizExplorerApp& app,
     setText(0, CWizDatabase::GetLocationDisplayName(strLocation));
 }
 
-void CWizCategoryViewFolderItem::updateDocumentsCount()
-{
-    int nCount = 0, nCount2 = 0;
-    CWizDatabase& db = m_app.databaseManager().db(m_strKbGUID);
-    db.GetDocumentsSizeByLocation(m_strName, nCount, false);
-    setDocumentsCount(nCount, false);
-
-    CWizStdStringArray arrayLocation;
-    db.GetAllChildLocations(m_strName, arrayLocation);
-    if (arrayLocation.size()) {
-        db.GetDocumentsSizeByLocation(m_strName, nCount2, true);
-        setDocumentsCount(nCount2, true);
-    }
-}
-
 QTreeWidgetItem* CWizCategoryViewFolderItem::clone() const
 {
     return new CWizCategoryViewFolderItem(m_app, m_strName, m_strKbGUID);
@@ -316,14 +278,6 @@ CWizCategoryViewAllTagsItem::CWizCategoryViewAllTagsItem(CWizExplorerApp& app,
     setText(0, strName);
 }
 
-void CWizCategoryViewAllTagsItem::updateDocumentsCount()
-{
-    int nCount;
-    CWizDatabase& db = m_app.databaseManager().db(m_strKbGUID);
-    db.getDocumentsSizeNoTag(nCount);
-    setDocumentsCount(nCount, false);
-}
-
 void CWizCategoryViewAllTagsItem::showContextMenu(CWizCategoryBaseView* pCtrl, QPoint pos)
 {
     if (CWizCategoryView* view = dynamic_cast<CWizCategoryView *>(pCtrl)) {
@@ -365,21 +319,6 @@ CWizCategoryViewTagItem::CWizCategoryViewTagItem(CWizExplorerApp& app,
                  QSize(16, 16), QIcon::Selected);
     setIcon(0, icon);
     setText(0, CWizDatabase::TagNameToDisplayName(tag.strName));
-}
-
-void CWizCategoryViewTagItem::updateDocumentsCount()
-{
-    int nCount = 0, nCount2 = 0;
-    CWizDatabase& db = m_app.databaseManager().db(m_strKbGUID);
-    db.GetDocumentsSizeByTag(m_tag, nCount);
-    setDocumentsCount(nCount, false);
-
-    int nSizeTags = 0;
-    db.GetAllChildTagsSize(m_tag.strGUID, nSizeTags);
-    if (nSizeTags) {
-        db.GetAllDocumentsSizeByTag(m_tag, nCount2);
-        setDocumentsCount(nCount2, true);
-    }
 }
 
 QTreeWidgetItem* CWizCategoryViewTagItem::clone() const
@@ -462,24 +401,6 @@ CWizCategoryViewBizGroupRootItem::CWizCategoryViewBizGroupRootItem(CWizExplorerA
     setText(0, strName);
 }
 
-void CWizCategoryViewBizGroupRootItem::updateDocumentsCount()
-{
-//    int nChild = childCount();
-//    for (int i = 0; i > nChild; i++) {
-//        CWizCategoryViewGroupRootItem* pItem = dynamic_cast<CWizCategoryViewGroupRootItem *>(child(i));
-//        if (pItem) {
-//            pItem->updateDocumentsCount();
-//        }
-//    }
-//    int nCount = 0, nCount2 = 0;
-//    CWizDatabase& db = m_app.databaseManager().db(m_strKbGUID);
-//    db.getDocumentsSizeNoTag(nCount);
-//    setDocumentsCount(nCount, false);
-//    db.GetAllDocumentsSize(nCount2);
-//    setDocumentsCount(nCount2, true);
-}
-
-
 /* ------------------------------ CWizCategoryViewGroupRootItem ------------------------------ */
 
 CWizCategoryViewGroupRootItem::CWizCategoryViewGroupRootItem(CWizExplorerApp& app,
@@ -494,16 +415,6 @@ CWizCategoryViewGroupRootItem::CWizCategoryViewGroupRootItem(CWizExplorerApp& ap
                  QSize(16, 16), QIcon::Selected);
     setIcon(0, icon);
     setText(0, strName);
-}
-
-void CWizCategoryViewGroupRootItem::updateDocumentsCount()
-{
-    int nCount = 0, nCount2 = 0;
-    CWizDatabase& db = m_app.databaseManager().db(m_strKbGUID);
-    db.getDocumentsSizeNoTag(nCount);
-    setDocumentsCount(nCount, false);
-    db.GetAllDocumentsSize(nCount2);
-    setDocumentsCount(nCount2, true);
 }
 
 void CWizCategoryViewGroupRootItem::showContextMenu(CWizCategoryBaseView* pCtrl, QPoint pos)
@@ -553,21 +464,6 @@ CWizCategoryViewGroupItem::CWizCategoryViewGroupItem(CWizExplorerApp& app,
                  QSize(16, 16), QIcon::Selected);
     setIcon(0, icon);
     setText(0, CWizDatabase::TagNameToDisplayName(tag.strName));
-}
-
-void CWizCategoryViewGroupItem::updateDocumentsCount()
-{
-    int nCount = 0, nCount2 = 0;
-    CWizDatabase& db = m_app.databaseManager().db(m_strKbGUID);
-    db.GetDocumentsSizeByTag(m_tag, nCount);
-    setDocumentsCount(nCount, false);
-
-    int nSizeTags = 0;
-    db.GetAllChildTagsSize(m_tag.strGUID, nSizeTags);
-    if (nSizeTags) {
-        db.GetAllDocumentsSizeByTag(m_tag, nCount2);
-        setDocumentsCount(nCount2, true);
-    }
 }
 
 void CWizCategoryViewGroupItem::showContextMenu(CWizCategoryBaseView* pCtrl, QPoint pos)

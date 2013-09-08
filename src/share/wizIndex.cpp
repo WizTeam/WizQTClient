@@ -3210,6 +3210,31 @@ bool CWizIndex::GetAllLocationsDocumentCount(std::map<CString, int>& mapLocation
     return true;
 }
 
+int CWizIndex::GetTrashDocumentCount()
+{
+    int nTotal = 0;
+
+    CString strSQL;
+    strSQL.Format("select count(*) as DOCUMENT_COUNT from WIZ_DOCUMENT DOCUMENT_LOCATION like '/Deleted Items/%");
+    try
+    {
+        CppSQLite3Query query = m_db.execQuery(strSQL);
+        while (!query.eof())
+        {
+            nTotal += query.getIntField(0);
+            query.nextRow();
+        }
+    }
+    catch (const CppSQLite3Exception& e)
+    {
+        TOLOG(strSQL);
+        return LogSQLException(e, strSQL);
+    }
+
+    return nTotal;
+}
+
+
 #ifndef WIZ_NO_OBSOLETE
 bool CWizIndex::GetLocationDocumentCount(CString strLocation, bool bIncludeSubFolders, int& nDocumentCount)
 {

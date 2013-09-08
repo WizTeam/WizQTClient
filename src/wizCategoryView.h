@@ -173,10 +173,19 @@ public:
     CWizCategoryViewItemBase* findCategory(const QString& strName, bool bCreate = true);
     CWizCategoryViewTrashItem* findTrash(const QString& strKbGUID = NULL);
 
-    void initDocumentCount();
-    int initDocumentCount(CWizCategoryViewItemBase* item,
-                          const std::map<CString, int>& mapDocumentCount);
-    void updateDocumentCount(const QString& strKbGUID);
+    // document count update
+    void updateFolderDocumentCount();
+    void updateFolderDocumentCount_impl();
+    int updateFolderDocumentCount_impl(CWizCategoryViewItemBase* pItem,
+                                       const std::map<CString, int>& mapDocumentCount);
+
+    void updateTagDocumentCount(const QString& strKbGUID = NULL);
+    void updateTagDocumentCount_impl(const QString& strKbGUID = NULL);
+    int updateTagDocumentCount_impl(CWizCategoryViewItemBase* pItem,
+                                    const std::map<CString, int>& mapDocumentCount);
+
+    void updatePrivateTagDocumentCount();
+    void updateGroupTagDocumentCount(const QString &strKbGUID);
 
     void createDocument(WIZDOCUMENTDATA& data);
 
@@ -188,13 +197,20 @@ private:
     QPointer<QMenu> m_menuGroupRoot;
     QPointer<QMenu> m_menuGroup;
     QPointer<QMenu> m_menuTrash;
-
     QPointer<CWizWebSettingsDialog> m_groupSettings;
+    QPointer<QTimer> m_timerUpdateFolderCount;
+    QPointer<QTimer> m_timerUpdateTagCount;
+    QMap<QString, QTimer*> m_mapTimerUpdateGroupCount;
+
+private Q_SLOTS:
+    void on_updateFolderDocumentCount_timeout();
+    void on_updateTagDocumentCount_timeout();
+    void on_updateTagDocumentCount_mapped_timeout(const QString& strKbGUID);
 
 protected Q_SLOTS:
-    virtual void on_document_created(const WIZDOCUMENTDATA& document);
-    virtual void on_document_modified(const WIZDOCUMENTDATA& documentOld,
-                                      const WIZDOCUMENTDATA& documentNew);
+    virtual void on_document_created(const WIZDOCUMENTDATA& doc);
+    virtual void on_document_modified(const WIZDOCUMENTDATA& docOld,
+                                      const WIZDOCUMENTDATA& docNew);
     virtual void on_document_deleted(const WIZDOCUMENTDATA& doc);
     virtual void on_document_tag_modified(const WIZDOCUMENTDATA& doc);
 

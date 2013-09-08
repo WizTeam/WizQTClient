@@ -415,6 +415,7 @@ public:
     /* Helper Methods */
     bool GetAllTagsDocumentCount(std::map<CString, int>& mapTagDocumentCount);
     bool GetAllLocationsDocumentCount(std::map<CString, int>& mapLocationDocumentCount);
+    int GetTrashDocumentCount();
 
 #ifndef WIZ_NO_OBSOLETE
     bool IsModified();
