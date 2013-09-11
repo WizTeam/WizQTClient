@@ -52,6 +52,7 @@ private:
 
     // document list view
     QIcon m_iconDocumentsBadge;
+    QIcon m_iconDocumentsBadgeEncrypted;
     QIcon m_iconDocumentsAttachment;
     QColor m_colorDocumentsBackground;
     QColor m_colorDocumentsItemFocusBackground;
@@ -138,6 +139,7 @@ CWizNoteStyle::CWizNoteStyle(const QString& strSkinName)
     m_imgDefaultAvatar.load(strSkinPath + "avatar_default.png");
 
     m_iconDocumentsBadge = ::WizLoadSkinIcon(strSkinName, "document_badge");
+    m_iconDocumentsBadgeEncrypted = ::WizLoadSkinIcon(strSkinName, "document_badge_encrypted");
 
     m_multiLineListSelectedItemBackground.SetImage(strSkinPath + "multilinelist_selected_background.png", QPoint(4, 4));
     m_multiLineListSelectedItemBackgroundHot.SetImage(strSkinPath + "multilinelist_selected_background_hot.png", QPoint(4, 4));
@@ -412,10 +414,11 @@ void CWizNoteStyle::drawItemPrivateThumbnail(const QStyleOptionViewItemV4* vopt,
         // badge icon first
         QRect rcBadge = textRect;
         rcBadge.setSize(QSize(nFontHeight, nFontHeight));
+        const QIcon& badge = data.doc.nProtected ? m_iconDocumentsBadgeEncrypted : m_iconDocumentsBadge;
         if (bFocused) {
-            m_iconDocumentsBadge.paint(p, rcBadge, Qt::AlignCenter, QIcon::Active, QIcon::Off);
+            badge.paint(p, rcBadge, Qt::AlignCenter, QIcon::Active, QIcon::Off);
         } else {
-            m_iconDocumentsBadge.paint(p, rcBadge, Qt::AlignCenter, QIcon::Normal, QIcon::Off);
+            badge.paint(p, rcBadge, Qt::AlignCenter, QIcon::Normal, QIcon::Off);
         }
 
         QRect rcTitle(QPoint(rcBadge.right() + 5, rcBadge.top()), QPoint(textRect.right(), rcBadge.bottom()));
@@ -499,10 +502,11 @@ void CWizNoteStyle::drawItemPrivateTwoLine(const QStyleOptionViewItemV4* vopt,
         // badge icon first
         QRect rcBadge = textRect;
         rcBadge.setSize(QSize(nFontHeight, nFontHeight));
+        const QIcon& badge = data.doc.nProtected ? m_iconDocumentsBadgeEncrypted : m_iconDocumentsBadge;
         if (bFocused) {
-            m_iconDocumentsBadge.paint(p, rcBadge, Qt::AlignCenter, QIcon::Active, QIcon::Off);
+            badge.paint(p, rcBadge, Qt::AlignCenter, QIcon::Active, QIcon::Off);
         } else {
-            m_iconDocumentsBadge.paint(p, rcBadge, Qt::AlignCenter, QIcon::Normal, QIcon::Off);
+            badge.paint(p, rcBadge, Qt::AlignCenter, QIcon::Normal, QIcon::Off);
         }
 
         QRect rcTitle(QPoint(rcBadge.right() + 5, rcBadge.top()), QPoint(textRect.right(), rcBadge.bottom()));
@@ -774,10 +778,11 @@ void CWizNoteStyle::drawItemOneLine(const QStyleOptionViewItemV4* vopt,
         // badge icon first
         QRect rcBadge = textRect;
         rcBadge.setSize(QSize(nFontHeight, nFontHeight));
+        const QIcon& badge = document.nProtected ? m_iconDocumentsBadgeEncrypted : m_iconDocumentsBadge;
         if (bFocused) {
-            m_iconDocumentsBadge.paint(p, rcBadge, Qt::AlignCenter, QIcon::Active, QIcon::Off);
+            badge.paint(p, rcBadge, Qt::AlignCenter, QIcon::Active, QIcon::Off);
         } else {
-            m_iconDocumentsBadge.paint(p, rcBadge, Qt::AlignCenter, QIcon::Normal, QIcon::Off);
+            badge.paint(p, rcBadge, Qt::AlignCenter, QIcon::Normal, QIcon::Off);
         }
 
         QRect rcTitle(QPoint(rcBadge.right() + 5, rcBadge.top()), QPoint(textRect.right(), rcBadge.bottom()));

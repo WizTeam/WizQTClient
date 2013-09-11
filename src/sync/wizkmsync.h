@@ -41,6 +41,8 @@ protected:
 private:
     CWizDatabase& m_db;
 
+    void syncUserCert();
+
 private Q_SLOTS:
     void on_syncFinished();
 

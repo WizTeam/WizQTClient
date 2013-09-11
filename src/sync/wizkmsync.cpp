@@ -69,6 +69,8 @@ CWizKMSyncThread::CWizKMSyncThread(CWizDatabase& db, QObject* parent)
 
 void CWizKMSyncThread::run()
 {
+    syncUserCert();
+
     CWizKMSyncEvents events;
     connect(&events, SIGNAL(messageReady(const QString&)), SIGNAL(processLog(const QString&)));
     ::WizSyncDatabase(&events, &m_db, true, true);
@@ -86,4 +88,14 @@ void CWizKMSyncThread::on_syncFinished()
 {
     // FIXME: check last error to tell user sync succeed or not!
     Q_EMIT syncFinished(true);
+}
+
+void CWizKMSyncThread::syncUserCert()
+{
+    QString strN, stre, strd, strHint;
+
+    CWizKMAccountsServer serser(::WizKMGetAccountsServerURL(true));
+    if (serser.GetCert(m_db.GetUserId(), m_db.GetPassword(), strN, stre, strd, strHint)) {
+        m_db.SetUserCert(strN, stre, strd, strHint);
+    }
 }
