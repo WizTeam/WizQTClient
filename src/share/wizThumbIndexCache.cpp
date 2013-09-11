@@ -70,8 +70,6 @@ void CWizThumbIndexCache::get(const QString& strKbGUID,
     if (abs.text.isEmpty()) {
         abs.text = " ";
     }
-    abs.text.replace('\n', ' ');
-    abs.text.replace("\r", "");
 
     //qDebug() << "[Thumb Cache Pool]load thumb cache, total: " << m_mapAbs.size();
     m_mapAbs.insert(strDocumentGUID,abs);

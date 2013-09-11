@@ -2332,9 +2332,6 @@ bool CWizDatabase::UpdateDocumentAbstract(const QString& strDocumentGUID)
     WIZABSTRACT abstract;
     abstract.guid = strDocumentGUID;
 
-    // remove header tag
-    strHtml.replace(QRegExp("<head>.*</head>", Qt::CaseInsensitive), "");
-
     CWizHtmlToPlainText htmlConverter;
     htmlConverter.toText(strHtml, abstract.text);
     abstract.text = abstract.text.left(2000);
@@ -2345,7 +2342,6 @@ bool CWizDatabase::UpdateDocumentAbstract(const QString& strDocumentGUID)
     if (!arrayImageFileName.empty())
     {
         CString strImageFileName = arrayImageFileName[0];
-        //DEBUG_TOLOG1(_T("abstract image file: %1"), strImageFileName);
 
         qint64 m = 0;
         CWizStdStringArray::const_iterator it;

@@ -1802,7 +1802,7 @@ UINT CWizHtmlReader::parseDocument(void)
 				if (lTemp)
 				{
                     strCharacters += CString(&m_lpszBuffer[dwCharDataStart], dwCharDataLen);
-                    strCharacters += ch;
+                    strCharacters += QChar(ch);
 					m_dwBufPos += lTemp;
 					dwCharDataStart = m_dwBufPos;
 					dwCharDataLen = 0L;

@@ -206,21 +206,29 @@ bool CWizHtmlCollector::Html2Zip(const QString& strExtResourcePath, \
     return WizHtml2Zip(strRet, arrayAllResource, strMetaText, strZipFileName);
 }
 
-
 /* -------------------------- CWizHtmlToPlainText -------------------------- */
 CWizHtmlToPlainText::CWizHtmlToPlainText()
 {
 }
 
-bool CWizHtmlToPlainText::toText(const QString& strHtml, QString& strPlainText)
+bool CWizHtmlToPlainText::toText(const QString& strHtmlAll, QString& strPlainText)
 {
     m_strText.clear();
+
+    // remove head or title if exists
+    QString strHtml = strHtmlAll;
+    strHtml.replace(QRegExp("<head>.*</head>", Qt::CaseInsensitive), "");
+    strHtml.replace(QRegExp("<title>.*</title>", Qt::CaseInsensitive), "");
 
     CWizHtmlReader reader;
     reader.setEventHandler(this);
     reader.setBoolOption(CWizHtmlReader::resolveEntities, true);
 
     reader.Read(strHtml);
+
+    m_strText.replace('\n', ' ');
+    m_strText.replace('\r', ' ');
+    m_strText.replace('\0', ' ');
 
     strPlainText = m_strText.simplified();
 
@@ -232,7 +240,5 @@ void CWizHtmlToPlainText::Characters(const CString &rText, DWORD dwAppData, bool
     Q_UNUSED(dwAppData);
     Q_UNUSED(bAbort);
 
-    CString strText = rText;
-    strText.replace('\0', ' ');
-    m_strText.push_back(strText.simplified() + " ");
+    m_strText.push_back(rText + " ");
 }
