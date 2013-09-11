@@ -622,7 +622,7 @@ void CWizCategoryView::createDocument(WIZDOCUMENTDATA& data)
         addAndSelectFolder(strLocation);
     }
 
-    bool ret = m_dbMgr.db(strKbGUID).CreateDocumentAndInit("", "", 0, tr("New note"), "newnote", strLocation, "", data);
+    bool ret = m_dbMgr.db(strKbGUID).CreateDocumentAndInit("<p><br/></p>", "", 0, tr("New note"), "newnote", strLocation, "", data);
     if (!ret) {
         TOLOG("Failed to new document!");
         return;

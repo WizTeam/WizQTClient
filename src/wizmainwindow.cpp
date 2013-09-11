@@ -531,17 +531,6 @@ void MainWindow::on_actionNewNote_triggered()
     m_documents->addAndSelectDocument(data);
 }
 
-void MainWindow::on_actionViewMessages_triggered()
-{
-    //CWizMessageDataArray arrayMsg;
-    //m_dbMgr.db().getAllMessages(arrayMsg);
-
-    //if (!arrayMsg.size())
-    //    return;
-
-    //m_documents->setDocuments(arrayMsg);
-}
-
 void MainWindow::on_actionEditingUndo_triggered()
 {
     m_doc->web()->editorCommandExecuteUndo();
