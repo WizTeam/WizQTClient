@@ -256,8 +256,6 @@ public:
     Q_INVOKABLE QObject* CreateWizObject(const QString& strObjectID);
     Q_INVOKABLE void SetDocumentModified(bool modified);
     Q_INVOKABLE void ResetInitialStyle();
-    Q_INVOKABLE void ResetEditorToolBar();
-    Q_INVOKABLE void ResetContextMenuAndPop(const QPoint& pos);
     Q_INVOKABLE void SetSavingDocument(bool saving);
     Q_INVOKABLE void ProcessClipboardBeforePaste(const QVariantMap& data);
 };

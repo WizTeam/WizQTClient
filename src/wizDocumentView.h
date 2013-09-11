@@ -36,7 +36,6 @@ public:
     virtual QSize sizeHint() const { return QSize(200, 1); }
 
     QWidget* client() const { return m_client; }
-    CWizEditorToolBar* editorToolBar() const;
     CWizDocumentWebView* web() const { return m_web; }
 
 protected:

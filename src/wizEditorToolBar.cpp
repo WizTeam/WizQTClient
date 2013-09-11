@@ -199,11 +199,11 @@ private:
 class CWizToolComboBox : public QComboBox
 {
 public:
-    CWizToolComboBox(QWidget* parent = 0) : QComboBox(parent)
+    CWizToolComboBox(QWidget* parent = 0)
+        : QComboBox(parent)
     {
         setFocusPolicy(Qt::NoFocus);
         setSizeAdjustPolicy(QComboBox::AdjustToMinimumContentsLength);
-        //setSizeAdjustPolicy(QComboBox::QComboBox::AdjustToMinimumContentsLength);
     }
 
     void setText(const QString& strText)
@@ -216,6 +216,8 @@ public:
         m_strText = strText;
         repaint();
     }
+
+    QString text() const { return m_strText; }
 
 protected:
     virtual void paintEvent(QPaintEvent *event)
@@ -259,6 +261,8 @@ public:
         repaint();
     }
 
+    QString text() const { return m_strText; }
+
 protected:
     virtual void paintEvent(QPaintEvent *event)
     {
@@ -288,7 +292,7 @@ CWizEditorToolBar::CWizEditorToolBar(CWizExplorerApp& app, QWidget *parent)
     QString skin = m_app.userSettings().skin();
 
     m_comboFontFamily = new CWizToolComboBoxFont(this);
-    connect(m_comboFontFamily, SIGNAL(currentIndexChanged(const QString&)),
+    connect(m_comboFontFamily, SIGNAL(activated(const QString&)),
             SLOT(on_comboFontFamily_indexChanged(const QString&)));
 
     QStringList listSize;
@@ -296,7 +300,7 @@ CWizEditorToolBar::CWizEditorToolBar(CWizExplorerApp& app, QWidget *parent)
              << "18px" << "24px" << "36px" << "48px" << "64px" << "72px";
     m_comboFontSize = new CWizToolComboBox(this);
     m_comboFontSize->addItems(listSize);
-    connect(m_comboFontSize, SIGNAL(currentIndexChanged(const QString&)),
+    connect(m_comboFontSize, SIGNAL(activated(const QString&)),
             SLOT(on_comboFontSize_indexChanged(const QString&)));
 
     m_btnFormatMatch = new CWizToolButton(this);
@@ -582,13 +586,31 @@ WizEditorContextMenuItem* CWizEditorToolBar::contextMenuData()
     return arrayData;
 }
 
-void CWizEditorToolBar::resetContextMenuAndPop(const QPoint& pos)
+void CWizEditorToolBar::setDelegate(CWizDocumentWebView* editor)
+{
+    Q_ASSERT(editor);
+
+    m_editor = editor;
+
+    connect(m_editor, SIGNAL(requestShowContextMenu(QPoint)),
+            SLOT(on_delegate_requestShowContextMenu(QPoint)));
+
+    connect(m_editor, SIGNAL(selectionChanged()),
+            SLOT(on_delegate_selectionChanged()));
+}
+
+void CWizEditorToolBar::on_delegate_requestShowContextMenu(const QPoint& pos)
 {
     if (!m_editor)
         return;
 
     buildMenu();
     m_menuContext->popup(pos);
+}
+
+void CWizEditorToolBar::on_delegate_selectionChanged()
+{
+   resetToolbar();
 }
 
 void CWizEditorToolBar::buildMenu()
@@ -697,6 +719,9 @@ int CWizEditorToolBar::buildMenu(QMenu* pMenu, int indx)
 
 void CWizEditorToolBar::on_comboFontFamily_indexChanged(const QString& strFamily)
 {
+    if (strFamily == m_comboFontFamily->text())
+        return;
+
     if (m_editor) {
         m_editor->editorCommandExecuteFontFamily(strFamily);
         m_comboFontFamily->setText(strFamily);
@@ -705,6 +730,9 @@ void CWizEditorToolBar::on_comboFontFamily_indexChanged(const QString& strFamily
 
 void CWizEditorToolBar::on_comboFontSize_indexChanged(const QString& strSize)
 {
+    if (strSize == m_comboFontSize->text())
+        return;
+
     if (m_editor) {
         m_editor->editorCommandExecuteFontSize(strSize);
         m_comboFontSize->setText(strSize);

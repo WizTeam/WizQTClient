@@ -30,10 +30,6 @@ try {
     objApp.ResetInitialStyle();
     editor.render('editorArea');
 
-    editor.addListener('selectionChange', function() {
-        objApp.ResetEditorToolBar();
-    });
-
     editor.addListener('beforePaste', function(type, data) {
         objApp.ProcessClipboardBeforePaste(data);
     });
@@ -73,10 +69,6 @@ function setEditorHtml(html)
     });
 
     editor.addListener('contentChange', setModified);
-}
-
-function getEditorHtml() {
-    return editor.getContent();
 }
 
 function setEditing(mode) {

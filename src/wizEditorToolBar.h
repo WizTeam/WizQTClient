@@ -23,11 +23,7 @@ class CWizEditorToolBar : public QWidget
 
 public:
     explicit CWizEditorToolBar(CWizExplorerApp& app, QWidget *parent = 0);
-
-    // editor status reflect
-    void resetToolbar();
-    void resetContextMenuAndPop(const QPoint& pos);
-    void setDelegate(CWizDocumentWebView* editor) { m_editor = editor; }
+    void setDelegate(CWizDocumentWebView* editor);
 
 protected:
     QSize sizeHint() const;
@@ -57,6 +53,9 @@ private:
     void buildMenu();
     int buildMenu(QMenu* pMenu, int indx);
 
+    // editor status reflect
+    void resetToolbar();
+
 protected Q_SLOTS:
     void on_comboFontFamily_indexChanged(const QString& strFamily);
     void on_comboFontSize_indexChanged(const QString& strSize);
@@ -73,6 +72,9 @@ protected Q_SLOTS:
     void on_btnOrderedList_clicked();
     void on_btnTable_clicked();
     void on_btnHorizontal_clicked();
+
+    void on_delegate_requestShowContextMenu(const QPoint& pos);
+    void on_delegate_selectionChanged();
 };
 
 #endif // WIZEDITORTOOLBAR_H

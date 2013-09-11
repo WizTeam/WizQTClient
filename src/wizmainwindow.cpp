@@ -1062,16 +1062,6 @@ void MainWindow::ResetInitialStyle()
     m_doc->web()->initEditorStyle();
 }
 
-void MainWindow::ResetEditorToolBar()
-{
-    m_doc->editorToolBar()->resetToolbar();
-}
-
-void MainWindow::ResetContextMenuAndPop(const QPoint& pos)
-{
-    m_doc->editorToolBar()->resetContextMenuAndPop(pos);
-}
-
 void MainWindow::SetSavingDocument(bool saving)
 {
     //m_statusBar->setVisible(saving);

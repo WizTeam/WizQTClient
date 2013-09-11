@@ -57,8 +57,11 @@ class CWizDocumentWebViewPage: public QWebPage
 {
 public:
     explicit CWizDocumentWebViewPage(QObject* parent = 0) : QWebPage(parent) {}
-    virtual void triggerAction(QWebPage::WebAction action, bool checked = false);
+    virtual void triggerAction(QWebPage::WebAction typeAction, bool checked = false);
     virtual void javaScriptConsoleMessage(const QString& message, int lineNumber, const QString& sourceID);
+
+    void on_editorCommandCopy_triggered();
+    void on_editorCommandPaste_triggered();
 };
 
 
@@ -221,6 +224,7 @@ Q_SIGNALS:
     void focusOut();
 
     void requestView(const WIZDOCUMENTDATA& data);
+    void requestShowContextMenu(const QPoint& pos);
 };
 
 

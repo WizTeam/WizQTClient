@@ -189,6 +189,7 @@ public:
         m_editBtn = new CWizUtilButton(CWizUtilButton::Left, app, this);
         m_unlockIcon = ::WizLoadSkinIcon(m_app.userSettings().skin(), "document_unlock");
         m_lockIcon = ::WizLoadSkinIcon(m_app.userSettings().skin(), "document_lock");
+        m_unlockModifiedIcon = ::WizLoadSkinIcon(m_app.userSettings().skin(), "document_unlock_modified");
         m_editBtn->setIcon(m_lockIcon);
 
         m_tagBtn = new CWizUtilButton(CWizUtilButton::Center, app, this);
@@ -261,6 +262,7 @@ private:
     CWizUtilButton* m_infoBtn;
 
     QIcon m_unlockIcon;
+    QIcon m_unlockModifiedIcon;
     QIcon m_lockIcon;
     QIcon m_tagsIcon;
     QIcon m_attachNoneIcon;
@@ -288,7 +290,14 @@ private:
         QString strRead = tr("Switch to Reading View");
         QString strEditNote = tr("Switch to Editing View");
 
-        QString strSwitchRead = m_editBtn->text().isEmpty() ? strRead : strSaveAndRead;
+        bool bIsModified = !m_editBtn->text().isEmpty() ? true : false;
+        if (bIsModified) {
+            m_editBtn->setIcon(m_unlockModifiedIcon);
+        } else {
+            m_editBtn->setIcon(m_editing ? m_unlockIcon : m_lockIcon);
+        }
+
+        QString strSwitchRead =  bIsModified ? strRead : strSaveAndRead;
         QString strToolTip = (m_editing ? strSwitchRead : strEditNote) + " (" + shortcut + ")";;
         m_editBtn->setToolTip(strToolTip);
     }
@@ -334,6 +343,7 @@ public:
         m_attachBtn->setIcon(data.nAttachmentCount > 0 ? m_attachExistIcon : m_attachNoneIcon);
 
         setEditingDocument(editing);
+        setModified(false);
     }
 
     void setEditingDocument(bool editing)
@@ -454,11 +464,6 @@ CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
     // webview related
     connect(m_web, SIGNAL(focusIn()), SLOT(on_webview_focusIn()));
     connect(m_web, SIGNAL(focusOut()), SLOT(on_webview_focusOut()));
-}
-
-CWizEditorToolBar* CWizDocumentView::editorToolBar() const
-{
-    return m_title->editorBar();
 }
 
 void CWizDocumentView::showClient(bool visible)

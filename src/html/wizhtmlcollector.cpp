@@ -165,8 +165,6 @@ bool CWizHtmlCollector::Collect(const QString& strUrl, \
 
     ::WizStringArrayToText(m_ret, strHtml2, "");
 
-    qDebug() << strHtml2;
-
     return true;
 }
 

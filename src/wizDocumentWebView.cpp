@@ -15,17 +15,61 @@
 #include "share/wizObjectDataDownloader.h"
 #include "wizDocumentTransitionView.h"
 
-void CWizDocumentWebViewPage::triggerAction(QWebPage::WebAction action, bool checked)
+void CWizDocumentWebViewPage::triggerAction(QWebPage::WebAction typeAction, bool checked)
 {
-    if (action == QWebPage::Back) {
+    if (typeAction == QWebPage::Back || typeAction == QWebPage::Forward) {
         return;
     }
 
-    QWebPage::triggerAction(action, checked);
+    if (typeAction == QWebPage::Paste) {
+        on_editorCommandPaste_triggered();
+    }
+
+    QWebPage::triggerAction(typeAction, checked);
+
+    if (typeAction == QWebPage::Copy) {
+        on_editorCommandCopy_triggered();
+    }
+}
+
+void CWizDocumentWebViewPage::on_editorCommandCopy_triggered()
+{
+    //QClipboard* clip = QApplication::clipboard();
+    //Q_ASSERT(clip);
+
+    //qDebug() << clip->supportsSelection();
+    //qDebug() << clip->supportsFindBuffer();
+
+    //const QMimeData* mime = clip->mimeData();
+    //if (mime->hasHtml()) {
+    //    qDebug() << mime->html();
+    //}
+}
+
+void CWizDocumentWebViewPage::on_editorCommandPaste_triggered()
+{
+    //QClipboard* clip = QApplication::clipboard();
+    //Q_ASSERT(clip);
+
+    //qDebug() << clip->supportsSelection();
+    //qDebug() << clip->supportsFindBuffer();
+
+    //const QMimeData* mime1 = clip->mimeData();
+    //const QMimeData* mime2 = clip->mimeData(QClipboard::FindBuffer);
+
+    //qDebug() << mime1->formats();
+
+    //qDebug() << mime1->data("text/html");
+    //qDebug() << mime1->data("text/plain");
+    //qDebug() << mime1->imageData().toByteArray();
+
+    //qDebug() << mime1->hasImage();
 }
 
 void CWizDocumentWebViewPage::javaScriptConsoleMessage(const QString& message, int lineNumber, const QString& sourceID)
 {
+    Q_UNUSED(sourceID);
+
     qDebug() << "[Console]line: " << lineNumber << ", " << message;
 }
 
@@ -148,8 +192,7 @@ void CWizDocumentWebView::contextMenuEvent(QContextMenuEvent *event)
     if (!m_bEditorInited)
         return;
 
-    MainWindow* window = qobject_cast<MainWindow *>(m_app.mainWindow());
-    window->ResetContextMenuAndPop(mapToGlobal(event->pos()));
+    Q_EMIT requestShowContextMenu(mapToGlobal(event->pos()));
 }
 
 void CWizDocumentWebView::onTimerAutoSaveTimout()
@@ -462,7 +505,7 @@ void CWizDocumentWebView::setEditingDocument(bool editing)
 
     m_bEditingMode = editing;
 
-    bool bEditing = page()->mainFrame()->evaluateJavaScript("isEdting();").toBool();
+    bool bEditing = page()->mainFrame()->evaluateJavaScript("isEditing();").toBool();
     if (bEditing) {
         saveDocument(false);
     }
@@ -492,7 +535,7 @@ void CWizDocumentWebView::saveDocument(bool force)
     mainWindow->SetDocumentModified(false);
     mainWindow->SetSavingDocument(true);
 
-    QString strHtml = page()->mainFrame()->evaluateJavaScript("getEditorHtml();").toString();
+    QString strHtml = page()->mainFrame()->evaluateJavaScript("editor.getContent();").toString();
     m_renderer->save(document(), strHtml, m_strHtmlFileName, 0);
 }
 
@@ -505,6 +548,7 @@ void CWizDocumentWebView::editorCommandExecuteCopy()
 {
     triggerPageAction(QWebPage::Copy);
 }
+
 
 void CWizDocumentWebView::editorCommandExecutePaste()
 {
