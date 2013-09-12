@@ -27,12 +27,13 @@
 #endif
 
 // command list
-#define WIZNOTE_API_COMMAND_SYNC_HTTP "sync_http"
+#define WIZNOTE_API_COMMAND_SYNC_HTTP       "sync_http"
 #define WIZNOTE_API_COMMAND_MESSAGE_VERSION "message_version"
-#define WIZNOTE_API_COMMAND_AVATAR "avatar"
-#define WIZNOTE_API_COMMAND_UPLOAD_AVATAR "upload_avatar"
-#define WIZNOTE_API_COMMAND_USER_INFO "user_info"
-#define WIZNOTE_API_COMMAND_VIEW_GROUP "view_group"
+#define WIZNOTE_API_COMMAND_AVATAR          "avatar"
+#define WIZNOTE_API_COMMAND_UPLOAD_AVATAR   "upload_avatar"
+#define WIZNOTE_API_COMMAND_USER_INFO       "user_info"
+#define WIZNOTE_API_COMMAND_VIEW_GROUP      "view_group"
+#define WIZNOTE_API_COMMAND_FEEDBACK        "feedback"
 
 //#ifdef _M_X64
 //    QString strPlatform = "x64";
@@ -144,6 +145,8 @@ void CWizApiEntry::on_acquire_finished()
     }
 
     QString strReply = reply->readAll();
+    qDebug() << "[CWizApiEntry] reply: " << strReply;
+
     Q_EMIT acquireEntryFinished(strReply);
     reply->close();
     reply->deleteLater();
@@ -187,6 +190,23 @@ QString CWizApiEntry::getGroupAttributeUrl(const QString& strToken, const QStrin
             .arg(WIZNOTE_API_ARG_PLATFORM)\
             .arg("false")\
             .arg(QUrl::toPercentEncoding(strExtInfo).constData());
+
+    return strUrl;
+}
+
+QString CWizApiEntry::getFeedbackUrl()
+{
+    QString strUrl = WIZNOTE_API_ENTRY;
+
+    strUrl = strUrl\
+            .arg(WIZNOTE_API_ARG_PRODUCT)\
+            .arg(QLocale::system().name())\
+            .arg(WIZ_CLIENT_VERSION)\
+            .arg(WIZNOTE_API_COMMAND_FEEDBACK)\
+            .arg(qrand())\
+            .arg(QHostInfo::localHostName())\
+            .arg(WIZNOTE_API_ARG_PLATFORM)\
+            .arg("false");
 
     return strUrl;
 }

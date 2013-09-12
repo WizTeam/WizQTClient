@@ -55,9 +55,10 @@ WIZACTION* CWizActions::actionsData()
         {"actionGoBack",                    QObject::tr("Back"), "", ""},
         {"actionGoForward",                 QObject::tr("Forward"), "", ""},
         {"actionConsole",                   QObject::tr("Console"), "", ""},
-        {"actionRebuildFTS",                QObject::tr("Rebuild full text search index"), "", ""},
+        //{"actionRebuildFTS",                QObject::tr("Rebuild full text search index"), "", ""},
         {"actionSearch",                    QObject::tr("Search document"), "", "Alt+Ctrl+F"},
         {"actionResetSearch",               QObject::tr("Reset search"), "", "Ctrl+R"},
+        {"actionFeedback",                  QObject::tr("User support"), "", ""},
 
         // editing
         {"actionEditingUndo",               QObject::tr("Undo"), "", "Ctrl+Z"},

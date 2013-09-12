@@ -139,14 +139,22 @@ bool CWizDatabaseManager::close(const QString& strKbGUID, bool bNotify)
     // should close all groups db before close user db.
     if (strKbGUID.isEmpty()) {
         Q_ASSERT(m_mapGroups.isEmpty());
+
+        m_dbPrivate->Close();
+        m_dbPrivate->deleteLater();
+        return true;
     }
+
+    qDebug() << "[CWizDatabaseManager] closed database, "
+             << "kb_guid: " << m_mapGroups.value(strKbGUID)->kbGUID()
+             << " name: " << m_mapGroups.value(strKbGUID)->name();
 
     QMap<QString, CWizDatabase*>::const_iterator it = m_mapGroups.find(strKbGUID);
     if (it != m_mapGroups.end()) {
         it.value()->Close();
+        it.value()->deleteLater();
         m_mapGroups.remove(strKbGUID);
     } else {
-        TOLOG("WARNING: nothing closed, guid not found");
         return false;
     }
 
@@ -159,6 +167,8 @@ bool CWizDatabaseManager::close(const QString& strKbGUID, bool bNotify)
 
 void CWizDatabaseManager::closeAll()
 {
+    qDebug() << "[CWizDatabaseManager] total " << m_mapGroups.size() << " database needed close";
+
     QList<CWizDatabase*> dbs = m_mapGroups.values();
     for (int i = 0; i < dbs.size(); i++) {
         CWizDatabase* db = dbs.at(i);

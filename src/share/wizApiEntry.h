@@ -19,6 +19,7 @@ public:
     void getAvatarUrl();
     void getAvatarUploadUrl();
 
+    static QString getFeedbackUrl();
     static QString getAccountInfoUrl(const QString& strToken);
     static QString getGroupAttributeUrl(const QString& strToken, const QString& strKbGUID);
 

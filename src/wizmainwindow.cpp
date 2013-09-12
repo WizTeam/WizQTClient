@@ -41,6 +41,7 @@
 #include "sync/wizkmsync.h"
 #include "wizPopupButton.h"
 #include "widgets/wizUserInfoWidget.h"
+#include "share/wizApiEntry.h"
 
 
 MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
@@ -690,11 +691,21 @@ void MainWindow::on_actionPreference_triggered()
     preference.exec();
 }
 
-void MainWindow::on_actionRebuildFTS_triggered()
+void MainWindow::on_actionFeedback_triggered()
 {
-    // FIXME: ensure aborted before rebuild
-    m_searchIndexer->rebuild();
+    QString strUrl = CWizApiEntry::getFeedbackUrl();
+
+    if (strUrl.isEmpty())
+        return;
+
+    QDesktopServices::openUrl(strUrl);
 }
+
+//void MainWindow::on_actionRebuildFTS_triggered()
+//{
+//    // FIXME: ensure aborted before rebuild
+//    m_searchIndexer->rebuild();
+//}
 
 void MainWindow::on_actionSearch_triggered()
 {
