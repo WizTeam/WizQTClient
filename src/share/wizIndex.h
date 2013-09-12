@@ -73,6 +73,7 @@ public:
 
     bool GetDocumentTagsDisplayNameStringArray(const CString& strDocumentGUID, CWizStdStringArray& arrayTagDisplayName);
     CString GetDocumentTagDisplayNameText(const CString& strDocumentGUID);
+    QString GetDocumentTagTreeDisplayString(const QString& strDocumentGUID);
 
     bool GetAllParentsTagGUID(CString strTagGUID, CWizStdStringArray& arrayGUID);
     bool GetAllParentsTagGUID(CString strTagGUID, std::set<CString>& setGUID);

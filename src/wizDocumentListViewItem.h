@@ -64,6 +64,7 @@ private:
     int m_nSize;
     QString m_strTags;
     const QString& tags();
+    const QString& tagTree();
 
     bool isAvatarNeedUpdate(const QString& strFileName);
 };

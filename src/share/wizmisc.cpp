@@ -436,6 +436,50 @@ bool WizIsPredefinedLocation(const QString& strLocation)
     return false;
 }
 
+QString WizLocation2Display(const QString& strLocation)
+{
+    QString strLoc = strLocation;
+    if (strLocation.startsWith("/My Notes/"))
+    {
+        strLoc.replace("/My Notes/", QObject::tr("/My Notes/"));
+    }
+    else if (strLocation.startsWith("/My Journals/"))
+    {
+        strLoc.replace("/My Journals/", QObject::tr("/My Journals/"));
+    }
+    else if (strLocation.startsWith("/My Events/"))
+    {
+        strLoc.replace("/My Events/", QObject::tr("/My Events/"));
+    }
+    else if (strLocation.startsWith("/My Sticky Notes/"))
+    {
+        strLoc.replace("/My Sticky Notes/", QObject::tr("/My Sticky Notes/"));
+    }
+    else if (strLocation.startsWith("/My Emails/"))
+    {
+        strLoc.replace("/My Emails/", QObject::tr("/My Emails/"));
+    }
+    else if (strLocation.startsWith("/My Drafts/"))
+    {
+        strLoc.replace("/My Drafts/", QObject::tr("/My Drafts/"));
+    }
+    else if (strLocation.startsWith("/My Tasks/"))
+    {
+        strLoc.replace("/My Tasks/", QObject::tr("/My Tasks/"));
+    }
+    else if (strLocation.startsWith("/My Tasks/Inbox/"))
+    {
+        strLoc.replace("/My Tasks/Inbox/", QObject::tr("/My Tasks/Inbox/"));
+    }
+    else if (strLocation.startsWith("/My Tasks/Completed/"))
+    {
+        strLoc.replace("/My Tasks/Completed/", QObject::tr("/My Tasks/Completed/"));
+    }
+
+    return strLoc;
+}
+
+
 QString WizGetLogFileName()
 {
     //QString strLogFileName = WizGetDataStorePath() + "wiznote.log";

@@ -1160,6 +1160,37 @@ bool CWizIndex::GetDocumentTagsDisplayNameStringArray(const CString& strDocument
     return true;
 }
 
+QString CWizIndex::GetDocumentTagTreeDisplayString(const QString& strDocumentGUID)
+{
+    CWizTagDataArray arrayTag;
+    if (!GetDocumentTags(strDocumentGUID, arrayTag)) {
+        return NULL;
+    }
+
+    if (arrayTag.size() == 0)
+        return "/";
+
+    Q_ASSERT(arrayTag.size() == 1);
+
+    QString strTree;
+    const WIZTAGDATA& tag = arrayTag.at(0);
+    QString strTagGUID = tag.strGUID;
+    while (1) {
+        WIZTAGDATA data;
+        if (!TagFromGUID(strTagGUID, data))
+            return "/";
+
+        strTree += ("/" + data.strName);
+
+        if (data.strParentGUID.isEmpty())
+            break;
+
+        strTagGUID = data.strParentGUID;
+    }
+
+    return strTree + "/";
+}
+
 CString CWizIndex::GetDocumentTagDisplayNameText(const CString& strDocumentGUID)
 {
     CString strText;

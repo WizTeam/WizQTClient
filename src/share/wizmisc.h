@@ -103,6 +103,7 @@ void WizGetTranslatedLocales(QStringList& locales);
 QString WizGetTranslatedLocaleDisplayName(int index);
 
 bool WizIsPredefinedLocation(const QString& strLocation);
+QString WizLocation2Display(const QString& strLocation);
 
 qint64 WizGetFileSize(const CString& strFileName);
 QString WizGetFileSizeHumanReadalbe(const QString& strFileName);
