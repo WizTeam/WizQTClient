@@ -45,6 +45,8 @@ private:
 
 IWizGlobal* WizGlobal();
 
+QString WizGetEmailPrefix(const QString& strMail);
+
 QString WizGetTimeStamp();
 COleDateTime WizGetCurrentTime();
 bool WizStringToDateTime(const QString& str, COleDateTime& t, QString& strError);

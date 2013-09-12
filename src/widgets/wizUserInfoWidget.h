@@ -35,14 +35,16 @@ private:
 
     CWizWebSettingsDialog* m_userSettings;
 
-    void resetAvatar();
-    void resetUserInfo();
-
 protected:
     virtual void mousePressEvent(QMouseEvent* event);
     virtual bool hitButton(const QPoint& pos) const;
 
 private Q_SLOTS:
+    void resetAvatar(bool bForce);
+    void resetUserInfo();
+
+    void on_userInfo_changed();
+
     void downloadAvatar();
     void on_userAvatar_downloaded(const QString& strGUID);
     void on_action_accountInfo_triggered();

@@ -362,6 +362,7 @@ public:
     //Q_INVOKABLE QObject* DocumentFromGUID(const QString& strGUID);
 
 Q_SIGNALS:
+    void userInfoChanged();
     void groupsInfoDownloaded(const CWizGroupDataArray& arrayGroup);
     void databaseOpened(CWizDatabase* db, const QString& strKbGUID);
     void databaseRename(const QString& strKbGUID);

@@ -653,6 +653,8 @@ void CWizDatabase::SetUserInfo(const WIZUSERINFO& userInfo)
     SetMeta(g_strAccountSection, "UserLevel", QString::number(userInfo.nUserLevel));
     SetMeta(g_strAccountSection, "UserPoints", QString::number(userInfo.nUserPoints));
     SetMeta(g_strAccountSection, "MywizMail", userInfo.strMywizEmail);
+
+    Q_EMIT userInfoChanged();
 }
 
 bool CWizDatabase::IsGroup()

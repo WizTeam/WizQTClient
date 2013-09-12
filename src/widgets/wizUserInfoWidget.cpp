@@ -20,8 +20,10 @@ CWizUserInfoWidget::CWizUserInfoWidget(CWizExplorerApp& app, QWidget *parent)
 {
     setPopupMode(QToolButton::MenuButtonPopup);
 
-    resetAvatar();
+    resetAvatar(false);
     resetUserInfo();
+
+    connect(&m_db, SIGNAL(userInfoChanged()), SLOT(on_userInfo_changed()));
 
     // load builtin arraw
     QString strIconPath = ::WizGetSkinResourcePath(app.userSettings().skin()) + "arrow.png";
@@ -102,7 +104,7 @@ void CWizUserInfoWidget::paintEvent(QPaintEvent *event)
         }
 
         p.setPen("#787878"); // FIXME
-        p.drawText(rectText, Qt::AlignCenter, opt.text);
+        p.drawText(rectText, Qt::AlignLeft|Qt::AlignVCenter, opt.text);
     }
 
     // draw arraw
@@ -130,15 +132,23 @@ bool CWizUserInfoWidget::hitButton(const QPoint& pos) const
     return rectArrow.contains(pos) ? true : false;
 }
 
-void CWizUserInfoWidget::resetAvatar()
+void CWizUserInfoWidget::resetAvatar(bool bForce)
 {
     QString strAvatarPath = m_db.GetAvatarPath() + m_db.GetUserId() + ".png";
 
     QFileInfo avatar(strAvatarPath);
-    bool bNeedUpdate = avatar.created() > QDateTime::currentDateTime().addSecs(60*60) ? true : false;
-
-    if (!avatar.exists() || bNeedUpdate) {
+    if (!avatar.exists()) {
         strAvatarPath = ::WizGetSkinResourcePath(m_app.userSettings().skin()) + "avatar.png";
+    }
+
+    bool bNeedUpdate;
+    if (avatar.exists()) {
+        bNeedUpdate = avatar.created() > QDateTime::currentDateTime().addSecs(60*60*24) ? true : false;
+    } else {
+        bNeedUpdate = true;
+    }
+
+    if (bNeedUpdate || bForce) {
         QTimer::singleShot(3000, this, SLOT(downloadAvatar()));
     }
 
@@ -151,8 +161,12 @@ void CWizUserInfoWidget::resetUserInfo()
     if (!m_db.GetUserInfo(info))
         return;
 
-    // FIXME:  avoid display name is too long
-    setText(info.strDisplayName.left(20));
+    if (info.strDisplayName.isEmpty()) {
+        setText(::WizGetEmailPrefix(m_db.GetUserId()));
+    } else {
+        QString strName = fontMetrics().elidedText(info.strDisplayName, Qt::ElideRight, 150);
+        setText(strName);
+    }
 
     QString iconName;
     if (info.strUserType == "vip") {
@@ -179,7 +193,7 @@ void CWizUserInfoWidget::on_userAvatar_downloaded(const QString& strGUID)
     if (strGUID != m_db.GetUserId())
         return;
 
-    resetAvatar();
+    resetAvatar(false);
     update();
 }
 
@@ -232,3 +246,8 @@ void CWizUserInfoWidget::on_action_changeAvatar_uploaded(bool ok)
     }
 }
 
+void CWizUserInfoWidget::on_userInfo_changed()
+{
+    resetAvatar(true);
+    resetUserInfo();
+}

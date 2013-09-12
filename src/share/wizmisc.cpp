@@ -526,6 +526,15 @@ void IWizGlobal::WriteDebugLog(const CString& str)
     WriteLog(str);
 }
 
+QString WizGetEmailPrefix(const QString& strMail)
+{
+    int n = strMail.indexOf('@');
+    if (n == -1) {
+        return NULL;
+    }
+
+    return strMail.left(n);
+}
 
 CString WizIntToStr(int n)
 {
