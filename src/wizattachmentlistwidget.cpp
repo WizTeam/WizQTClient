@@ -50,9 +50,13 @@ CWizAttachmentListView::CWizAttachmentListView(CWizExplorerApp& app, QWidget* pa
     setAttribute(Qt::WA_MacShowFocusRect, false);
     setStyleSheet("background-color: #F7F7F7");
 
+    connect(this, SIGNAL(itemDoubleClicked(QListWidgetItem*)),
+            SLOT(on_list_itemDoubleClicked(QListWidgetItem*)));
+
     MainWindow* mainWindow = qobject_cast<MainWindow *>(m_app.mainWindow());
-    m_downloadDialog = mainWindow->objectDownloadDialog();
-    connect(this, SIGNAL(itemDoubleClicked(QListWidgetItem*)), SLOT(on_list_itemDoubleClicked(QListWidgetItem*)));
+    m_downloaderHost = mainWindow->downloaderHost();
+    //connect(m_downloaderHost, SIGNAL(downloadDone(const WIZOBJECTDATA&, bool)),
+    //        SLOT(on_download_finished(const WIZOBJECTDATA&, bool)));
 
     // setup context menu
     m_menu = new QMenu(this);
@@ -177,7 +181,8 @@ void CWizAttachmentListView::openAttachment(CWizAttachmentListViewItem* item)
     bool bIsLocal = db.IsObjectDataDownloaded(attachment.strGUID, "attachment");
     bool bExists = PathFileExists(db.GetAttachmentFileName(attachment.strGUID));
     if (!bIsLocal || !bExists) {
-        m_downloadDialog->downloadData(attachment);
+        //m_downloadDialog->downloadData(attachment);
+        m_downloaderHost->download(attachment);
         return;
     }
 
@@ -247,7 +252,8 @@ void CWizAttachmentListView::on_action_saveAttachmentAs()
             bool bIsLocal = db.IsObjectDataDownloaded(item->attachment().strGUID, "attachment");
             bool bExists = PathFileExists(db.GetAttachmentFileName(item->attachment().strGUID));
             if (!bIsLocal || !bExists) {
-                m_downloadDialog->downloadData(item->attachment());
+                //m_downloadDialog->downloadData(item->attachment());
+                m_downloaderHost->download(item->attachment());
                 return;
             }
 
@@ -271,7 +277,8 @@ void CWizAttachmentListView::on_action_saveAttachmentAs()
                 bool bIsLocal = db.IsObjectDataDownloaded(item->attachment().strGUID, "attachment");
                 bool bExists = PathFileExists(db.GetAttachmentFileName(item->attachment().strGUID));
                 if (!bIsLocal || !bExists) {
-                    m_downloadDialog->downloadData(item->attachment());
+                    //m_downloadDialog->downloadData(item->attachment());
+                    m_downloaderHost->download(item->attachment());
                     continue;
                 }
 

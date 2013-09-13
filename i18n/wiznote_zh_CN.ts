@@ -147,24 +147,24 @@
 <context>
     <name>CWizAttachmentListView</name>
     <message>
-        <location filename="../src/wizattachmentlistwidget.cpp" line="155"/>
+        <location filename="../src/wizattachmentlistwidget.cpp" line="159"/>
         <source>Add attachments</source>
         <translation>添加附件</translation>
     </message>
     <message>
-        <location filename="../src/wizattachmentlistwidget.cpp" line="156"/>
+        <location filename="../src/wizattachmentlistwidget.cpp" line="160"/>
         <source>/home</source>
         <translation>/home</translation>
     </message>
     <message>
-        <location filename="../src/wizattachmentlistwidget.cpp" line="157"/>
+        <location filename="../src/wizattachmentlistwidget.cpp" line="161"/>
         <source>All files(*.*)</source>
         <translation>所有文件(*.*)</translation>
     </message>
     <message>
-        <location filename="../src/wizattachmentlistwidget.cpp" line="189"/>
-        <location filename="../src/wizattachmentlistwidget.cpp" line="256"/>
-        <location filename="../src/wizattachmentlistwidget.cpp" line="283"/>
+        <location filename="../src/wizattachmentlistwidget.cpp" line="194"/>
+        <location filename="../src/wizattachmentlistwidget.cpp" line="262"/>
+        <location filename="../src/wizattachmentlistwidget.cpp" line="290"/>
         <source>Can not save attachment to %1</source>
         <translation>不能保存附件到 %1</translation>
     </message>
@@ -185,7 +185,7 @@
         <translation type="obsolete">删除</translation>
     </message>
     <message>
-        <location filename="../src/wizattachmentlistwidget.cpp" line="263"/>
+        <location filename="../src/wizattachmentlistwidget.cpp" line="269"/>
         <source>Save attachments to</source>
         <translation>保存附件到</translation>
     </message>
@@ -193,12 +193,12 @@
 <context>
     <name>CWizAttachmentListWidget</name>
     <message>
-        <location filename="../src/wizattachmentlistwidget.cpp" line="335"/>
+        <location filename="../src/wizattachmentlistwidget.cpp" line="342"/>
         <source>Add attachments</source>
         <translation>添加附件</translation>
     </message>
     <message>
-        <location filename="../src/wizattachmentlistwidget.cpp" line="342"/>
+        <location filename="../src/wizattachmentlistwidget.cpp" line="349"/>
         <source>Attachments</source>
         <translation>附件</translation>
     </message>
@@ -433,8 +433,8 @@
         <translation type="obsolete">标签</translation>
     </message>
     <message>
-        <location filename="../src/wizCategoryView.cpp" line="1488"/>
-        <location filename="../src/wizCategoryView.cpp" line="1645"/>
+        <location filename="../src/wizCategoryView.cpp" line="1494"/>
+        <location filename="../src/wizCategoryView.cpp" line="1651"/>
         <source>Trash</source>
         <translation>已删除</translation>
     </message>
@@ -1540,19 +1540,16 @@
         <translation>切换到编辑视图</translation>
     </message>
     <message>
-        <location filename="../src/wizDocumentView.cpp" line="320"/>
         <source>The document is locked and read only, press unlock button if you need edit.</source>
-        <translation>文档已锁定为只读，如需修改请点击解锁按钮.</translation>
+        <translation type="obsolete">文档已锁定为只读，如需修改请点击解锁按钮.</translation>
     </message>
     <message>
-        <location filename="../src/wizDocumentView.cpp" line="323"/>
         <source>This document is deleted, You can edit after move to other folders.</source>
-        <translation>这个文档已被删除, 请移动到其他文件夹之后再进行修改.</translation>
+        <translation type="obsolete">这个文档已被删除, 请移动到其他文件夹之后再进行修改.</translation>
     </message>
     <message>
-        <location filename="../src/wizDocumentView.cpp" line="326"/>
         <source>Your permission is not enough to edit this document.</source>
-        <translation>你的权限不够, 无法修改这个文档.</translation>
+        <translation type="obsolete">你的权限不够, 无法修改这个文档.</translation>
     </message>
     <message>
         <location filename="../src/wizDocumentView.cpp" line="388"/>
@@ -1810,7 +1807,7 @@
         <translation type="obsolete">新建笔记</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="1078"/>
+        <location filename="../src/wizmainwindow.cpp" line="1070"/>
         <source>Saving note...</source>
         <translation>正在保存笔记...</translation>
     </message>
@@ -2212,7 +2209,7 @@
     <message>
         <location filename="../src/main.cpp" line="148"/>
         <source>Can not open private database</source>
-        <translation type="unfinished"></translation>
+        <translation>无法打开个人数据库</translation>
     </message>
     <message>
         <location filename="../src/main.cpp" line="155"/>
@@ -2353,6 +2350,21 @@
         <location filename="../src/wizDocumentView.cpp" line="109"/>
         <source>Size: </source>
         <translation>大小: </translation>
+    </message>
+    <message>
+        <location filename="../src/wizDocumentView.cpp" line="320"/>
+        <source>The document is locked and read only, press unlock button if you need edit.</source>
+        <translation>文档已锁定为只读，如需修改请点击解锁按钮。</translation>
+    </message>
+    <message>
+        <location filename="../src/wizDocumentView.cpp" line="323"/>
+        <source>This document is deleted, You can edit after move to other folders.</source>
+        <translation>这个文档已被删除, 请移动到其他文件夹之后再进行修改.</translation>
+    </message>
+    <message>
+        <location filename="../src/wizDocumentView.cpp" line="326"/>
+        <source>Your permission is not enough to edit this document.</source>
+        <translation>您的权限不够, 无法修改这个文档.</translation>
     </message>
     <message>
         <location filename="../src/wizDocumentView.cpp" line="379"/>

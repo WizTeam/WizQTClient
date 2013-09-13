@@ -1640,22 +1640,6 @@ bool CWizIndex::getDocumentsNoTag(CWizDocumentDataArray& arrayDocument, bool inc
     return SQLToDocumentDataArray(strSQL, arrayDocument);
 }
 
-bool CWizIndex::getDocumentsSizeNoTag(int& size, bool includeTrash /* = false */)
-{
-    CString strWhere;
-    if (includeTrash) {
-        strWhere = "DOCUMENT_GUID not in (select distinct DOCUMENT_GUID from WIZ_DOCUMENT_TAG)";
-    } else {
-        strWhere.Format("DOCUMENT_GUID not in (select distinct DOCUMENT_GUID from WIZ_DOCUMENT_TAG) and DOCUMENT_LOCATION not like %s",
-                        STR2SQL(m_strDeletedItemsLocation + _T("%")).utf16()
-                        );
-    }
-
-    QString strSQL = FormatQuerySQL(TABLE_NAME_WIZ_DOCUMENT, "COUNT(*)", strWhere);
-
-    return SQLToSize(strSQL, size);
-}
-
 bool CWizIndex::GetDocumentsByParamName(const CString& strLocation,
                                         bool bIncludeSubFolders,
                                         CString strParamName,
@@ -3188,6 +3172,23 @@ bool CWizIndex::SetSync(const CString& strLocation, bool bSync)
 
 	return SetMeta(_T("Sync"), strRootLocationName, bSync ? _T("1") : _T("0"));
 }
+
+bool CWizIndex::GetDocumentsNoTagCount(int& nSize, bool includeTrash /* = false */)
+{
+    CString strWhere;
+    if (includeTrash) {
+        strWhere = "DOCUMENT_GUID not in (select distinct DOCUMENT_GUID from WIZ_DOCUMENT_TAG)";
+    } else {
+        strWhere.Format("DOCUMENT_GUID not in (select distinct DOCUMENT_GUID from WIZ_DOCUMENT_TAG) and DOCUMENT_LOCATION not like %s",
+                        STR2SQL(m_strDeletedItemsLocation + _T("%")).utf16()
+                        );
+    }
+
+    QString strSQL = FormatQuerySQL(TABLE_NAME_WIZ_DOCUMENT, "COUNT(*)", strWhere);
+
+    return SQLToSize(strSQL, nSize);
+}
+
 
 bool CWizIndex::GetAllTagsDocumentCount(std::map<CString, int>& mapTagDocumentCount)
 {

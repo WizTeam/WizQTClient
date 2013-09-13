@@ -6,6 +6,7 @@
 #include "share/wizimagepushbutton.h"
 #include "share/wizfileiconprovider.h"
 #include "wizdownloadobjectdatadialog.h"
+#include "share/wizObjectDataDownloader.h"
 
 
 class CWizExplorerApp;
@@ -27,7 +28,7 @@ private:
     WIZDOCUMENTDATA m_document;
     CWizFileIconProvider m_iconProvider;
     QPointer<QMenu> m_menu;
-    CWizDownloadObjectDataDialog* m_downloadDialog;
+    CWizObjectDataDownloaderHost* m_downloaderHost;
 
     void resetAttachments();
     void resetPermission();

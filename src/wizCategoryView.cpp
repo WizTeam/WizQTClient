@@ -1365,8 +1365,14 @@ void CWizCategoryView::updateTagDocumentCount_impl(const QString& strKbGUID)
     if (!pTagRoot)
         return;
 
+    int nCurrent = 0;
+    if (!m_dbMgr.db(strKbGUID).GetDocumentsNoTagCount(nCurrent)) {
+        qDebug() << "Failed to get no tag documents count, kb_guid: " << strKbGUID;
+        return;
+    }
+
     int nTotal = updateTagDocumentCount_impl(pTagRoot, mapDocumentCount);
-    pTagRoot->setDocumentsCount(-1, nTotal);
+    pTagRoot->setDocumentsCount(nCurrent, nTotal + nCurrent);
 
     // trash item
     for (int i = pTagRoot->childCount() - 1; i >= 0; i--) {

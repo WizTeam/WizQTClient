@@ -317,13 +317,13 @@ public:
     {
         switch (type) {
         case CWizNotifyToolbar::DocumentLocked:
-            m_notifyBar->setNotifyText(tr("The document is locked and read only, press unlock button if you need edit."));
+            m_notifyBar->setNotifyText(QObject::tr("The document is locked and read only, press unlock button if you need edit."));
             break;
         case CWizNotifyToolbar::DocumentIsDeleted:
-            m_notifyBar->setNotifyText(tr("This document is deleted, You can edit after move to other folders."));
+            m_notifyBar->setNotifyText(QObject::tr("This document is deleted, You can edit after move to other folders."));
             break;
         case CWizNotifyToolbar::DocumentPermissionLack:
-            m_notifyBar->setNotifyText(tr("Your permission is not enough to edit this document."));
+            m_notifyBar->setNotifyText(QObject::tr("Your permission is not enough to edit this document."));
             break;
         defaut:
             Q_ASSERT(0);

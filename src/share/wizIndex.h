@@ -213,7 +213,6 @@ public:
     bool DeleteDocument(const WIZDOCUMENTDATA& data, bool bLog);
 
     bool getDocumentsNoTag(CWizDocumentDataArray& arrayDocument, bool includeTrash = false);
-    bool getDocumentsSizeNoTag(int& size, bool includeTrash = false);
 
     bool GetDocumentsByParamName(const CString& strLocation, bool bIncludeSubFolders, \
                                  CString strParamName, CWizDocumentDataArray& arrayDocument);
@@ -414,6 +413,7 @@ public:
                 CWizDocumentDataArray& arrayDocument);
 
     /* Helper Methods */
+    bool GetDocumentsNoTagCount(int& nSize, bool includeTrash = false);
     bool GetAllTagsDocumentCount(std::map<CString, int>& mapTagDocumentCount);
     bool GetAllLocationsDocumentCount(std::map<CString, int>& mapLocationDocumentCount);
     int GetTrashDocumentCount();
