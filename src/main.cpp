@@ -94,13 +94,13 @@ int main(int argc, char *argv[])
     }
 
     // manually login
-    WelcomeDialog dlgWelcome(strUserId, strLocale);
+    CWizLoginDialog loginDialog(strUserId, strLocale);
     if (bFallback) {
-        if (QDialog::Accepted != dlgWelcome.exec())
+        if (QDialog::Accepted != loginDialog.exec())
             return 0;
 
-        strUserId = dlgWelcome.userId();
-        strPassword = dlgWelcome.password();
+        strUserId = loginDialog.userId();
+        strPassword = loginDialog.password();
     }
 
     // reset password for restart event, will not touch welcome dialog
@@ -130,25 +130,6 @@ int main(int argc, char *argv[])
     strLocaleFile = WizGetQtLocaleFileName(strLocale);
     translatorQt.load(strLocaleFile);
     a.installTranslator(&translatorQt);
-
-    // ready
-    //CWizDatabase db;
-    //if (!db.openPrivate(strUserId, strPassword))
-    //{
-    //    QMessageBox::critical(NULL, "", QObject::tr("Can not open account"));
-    //    return 0;
-    //}
-
-    if (bFallback) {
-        CWizDatabase db;
-        if (db.Open(strUserId)) {
-            db.SetUserInfo(dlgWelcome.userInfo());
-            db.Close();
-        } else {
-            QMessageBox::critical(NULL, "", QObject::tr("Can not open private database"));
-            return 0;
-        }
-    }
 
     CWizDatabaseManager dbMgr(strUserId);
     if (!dbMgr.openAll()) {
