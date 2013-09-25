@@ -1372,7 +1372,12 @@ void CWizCategoryView::updateTagDocumentCount_impl(const QString& strKbGUID)
     }
 
     int nTotal = updateTagDocumentCount_impl(pTagRoot, mapDocumentCount);
-    pTagRoot->setDocumentsCount(nCurrent, nTotal + nCurrent);
+
+    if (strKbGUID.isEmpty()) {
+        pTagRoot->setDocumentsCount(-1, nCurrent);
+    } else {
+        pTagRoot->setDocumentsCount(nCurrent, nTotal + nCurrent);
+    }
 
     // trash item
     for (int i = pTagRoot->childCount() - 1; i >= 0; i--) {

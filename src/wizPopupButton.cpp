@@ -98,6 +98,10 @@ CWizViewTypePopupButton::CWizViewTypePopupButton(CWizExplorerApp& app, QWidget* 
     group->setExclusive(true);
 
     QMenu* menu = new QMenu(this);
+    menu->setStyleSheet("\
+                        QMenu::item { padding: 2px 20px 2px 20px; spacing: 20px;}\
+                        QMenu::item:selected { border-color: darkblue; background: blue; color:white;}\
+                        ");
     createAction(tr("Thumbnail view"), CWizDocumentListView::TypeThumbnail, menu, group);
     createAction(tr("Two line view"), CWizDocumentListView::TypeTwoLine, menu, group);
     createAction(tr("One line view"), CWizDocumentListView::TypeOneLine, menu, group);
@@ -162,6 +166,11 @@ CWizSortingPopupButton::CWizSortingPopupButton(CWizExplorerApp& app, QWidget *pa
     group->setExclusive(true);
 
     QMenu* menu = new QMenu(this);
+    menu->setStyleSheet("\
+                        QMenu::item { padding: 2px 20px 2px 20px; spacing: 20px;}\
+                        QMenu::item:selected { border-color: darkblue; background: blue; color:white;}\
+                        ");
+
     createAction(tr("Sorting by created time"), SortingCreateTime, menu, group);
     createAction(tr("Sorting by updated time"), SortingUpdateTime, menu, group);
     menu->addSeparator();

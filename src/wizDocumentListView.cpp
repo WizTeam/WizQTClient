@@ -559,7 +559,7 @@ QSize CWizDocumentListView::itemSizeFromViewType(ViewType type)
         sz.setHeight(fontMetrics().height() * 2 + 15);
         return sz;
     case CWizDocumentListView::TypeThumbnail:
-        sz.setHeight(fontMetrics().height() * 4 + 20);
+        sz.setHeight(fontMetrics().height() * 4 + 30);
         return sz;
     default:
         Q_ASSERT(0);

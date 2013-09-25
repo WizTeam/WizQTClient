@@ -208,7 +208,6 @@ void CWizNoteStyle::drawCategoryViewItem(const QStyleOptionViewItemV4 *vopt,
     if (!vopt->icon.isNull()) {
         // FIXME: draw icon little bigger than the default rect qt give us
         QRect iconRect = subElementRect(SE_ItemViewItemDecoration, vopt, view);
-        //iconRect.adjust(0, -2, 2, 2);
 
         if (vopt->state.testFlag(State_Selected)) {
             vopt->icon.paint(p, iconRect, Qt::AlignCenter, QIcon::Selected);
@@ -260,7 +259,7 @@ void CWizNoteStyle::drawCategoryViewItem(const QStyleOptionViewItemV4 *vopt,
     }
 
     QFont f = p->font();
-    f.setPixelSize(13);
+    f.setPixelSize(12);
     p->setFont(f);
 
     QColor colorText = vopt->state.testFlag(State_Selected) ?
@@ -366,15 +365,15 @@ void CWizNoteStyle::drawItemPrivateThumbnail(const QStyleOptionViewItemV4* vopt,
         }
     }
 
-    QRect textRect = vopt->rect;
+    QRect textRect = vopt->rect.adjusted(0, 5, 0, 0);
 
     // draw thumb image
     const QImage& img = thumb.image;
     if (img.width() > 0 && img.height() > 0)
     {
-        QRect imageRect = textRect;
+        QRect imageRect = vopt->rect.adjusted(0, 0, -5, 0);
         imageRect.setLeft(imageRect.right() - IMAGE_WIDTH);
-        imageRect.adjust(6, 6, -6, -6); // margin
+        //imageRect.adjust(6, 6, -6, -6); // margin
 
         if (img.width() > imageRect.width() || img.height() > imageRect.height())
         {
@@ -408,6 +407,7 @@ void CWizNoteStyle::drawItemPrivateThumbnail(const QStyleOptionViewItemV4* vopt,
         // draw title
         QFont fontTitle = p->font();
         fontTitle.setPixelSize(13);
+        fontTitle.setBold(true);
         p->setFont(fontTitle);
         int nFontHeight = p->fontMetrics().height();
 
@@ -429,6 +429,7 @@ void CWizNoteStyle::drawItemPrivateThumbnail(const QStyleOptionViewItemV4* vopt,
         // draw date and tags, use 12px font size
         QFont fontAbs = p->font();
         fontAbs.setPixelSize(12);
+        fontAbs.setBold(false);
         p->setFont(fontAbs);
         nFontHeight = p->fontMetrics().height();
 
@@ -562,7 +563,7 @@ void CWizNoteStyle::drawItemGroupThumbnail(const QStyleOptionViewItemV4* vopt,
         }
     }
 
-    QRect textRect = vopt->rect;
+    QRect textRect = vopt->rect.adjusted(0, 5, 0, 0);
 
     // draw author avatar
     QRect rectAvatar = textRect;
@@ -591,6 +592,7 @@ void CWizNoteStyle::drawItemGroupThumbnail(const QStyleOptionViewItemV4* vopt,
         // draw title
         QFont fontTitle = p->font();
         fontTitle.setPixelSize(13);
+        fontTitle.setBold(true);
         p->setFont(fontTitle);
         int nFontHeight = p->fontMetrics().height();
 
@@ -610,6 +612,7 @@ void CWizNoteStyle::drawItemGroupThumbnail(const QStyleOptionViewItemV4* vopt,
         // draw date and tags, use 12px font size
         QFont fontAbs = p->font();
         fontAbs.setPixelSize(12);
+        fontAbs.setBold(false);
         p->setFont(fontAbs);
         nFontHeight = p->fontMetrics().height();
 
@@ -1243,7 +1246,7 @@ void CWizNoteStyle::drawPrimitive(PrimitiveElement pe, const QStyleOption *opt, 
 
                 if (opt->state & QStyle::State_Children) {
                     bool bExpanded = (opt->state & QStyle::State_Open) ? true : false;
-                    drawcenterImage(p, bExpanded ? m_expandedImage : m_collapsedImage, opt->rect);
+                    drawcenterImage(p, bExpanded ? m_expandedImage : m_collapsedImage, opt->rect.adjusted(8, 0, 0, 0));
                 }
                 return;
             }

@@ -48,22 +48,22 @@ public:
         rc.setWidth(1);
 
         // FIXME: generate shadow from background color
-        QColor bgColor1 = QColor(205, 205, 205);
-        QColor bgColor2 = QColor(195, 195, 195);
-        QColor bgColor3 = QColor(150, 150, 150);
+        QColor bgColor1 = QColor(165, 165, 165);
+        //QColor bgColor2 = QColor(195, 195, 195);
+        //QColor bgColor3 = QColor(150, 150, 150);
 
         painter.fillRect(rc, bgColor1);
 
-        rc.setX(rc.x() + 1);
-        painter.fillRect(rc, bgColor2);
+        //rc.setX(rc.x() + 1);
+        //painter.fillRect(rc, bgColor2);
 
-        rc.setX(rc.x() + 1);
-        painter.fillRect(rc, bgColor3);
+        //rc.setX(rc.x() + 1);
+        //painter.fillRect(rc, bgColor3);
     }
 
     virtual QSize sizeHint() const
     {
-        return QSize(3, 1);
+        return QSize(2, 1);
     }
 
 private:
@@ -74,6 +74,7 @@ private:
 CWizSplitter::CWizSplitter(QWidget* parent /*= 0*/)
     : QSplitter(parent)
 {
+    //setStyleSheet("QSplitter::handle {background-color: #A5A5A5} QSplitter::handle:horizontal {width: 1px;}");
 }
 
 QSplitterHandle *CWizSplitter::createHandle()

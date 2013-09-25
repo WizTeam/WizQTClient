@@ -458,9 +458,9 @@ CWizCategoryViewGroupItem::CWizCategoryViewGroupItem(CWizExplorerApp& app,
     , m_tag(tag)
 {
     QIcon icon;
-    icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "group_normal"),
+    icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "folder_normal"),
                  QSize(16, 16), QIcon::Normal);
-    icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "group_selected"),
+    icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "folder_selected"),
                  QSize(16, 16), QIcon::Selected);
     setIcon(0, icon);
     setText(0, CWizDatabase::TagNameToDisplayName(tag.strName));
