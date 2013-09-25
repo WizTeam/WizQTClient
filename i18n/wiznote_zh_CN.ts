@@ -898,6 +898,64 @@
     </message>
 </context>
 <context>
+    <name>CWizLoginDialog</name>
+    <message>
+        <location filename="../src/wizLoginDialog.cpp" line="45"/>
+        <source>Account Login</source>
+        <translation>账户登录</translation>
+    </message>
+    <message>
+        <location filename="../src/wizLoginDialog.cpp" line="56"/>
+        <source>Password</source>
+        <translation>密码</translation>
+    </message>
+    <message>
+        <location filename="../src/wizLoginDialog.cpp" line="57"/>
+        <source>Save password</source>
+        <translation>记住密码</translation>
+    </message>
+    <message>
+        <location filename="../src/wizLoginDialog.cpp" line="59"/>
+        <source>Auto login</source>
+        <translation>自动登录</translation>
+    </message>
+    <message>
+        <location filename="../src/wizLoginDialog.cpp" line="101"/>
+        <source>&lt;a href=&quot;javascript:void(0)&quot; style=&quot;color:#363636; text-decoration:none;&quot;&gt;New user&lt;/a&gt;</source>
+        <translation>&lt;a href=&quot;javascript:void(0)&quot; style=&quot;color:#363636; text-decoration:none;&quot;&gt;新用户&lt;/a&gt;</translation>
+    </message>
+    <message>
+        <location filename="../src/wizLoginDialog.cpp" line="106"/>
+        <source>&lt;a href=&quot;javascript:void(0)&quot; style=&quot;color:#363636; text-decoration:none;&quot;&gt;Forget password&lt;/a&gt;</source>
+        <translation>&lt;a href=&quot;javascript:void(0)&quot; style=&quot;color:#363636; text-decoration:none;&quot;&gt;找回密码&lt;/a&gt;</translation>
+    </message>
+    <message>
+        <location filename="../src/wizLoginDialog.cpp" line="111"/>
+        <source>&lt;a href=&quot;javascript:void(0)&quot; style=&quot;color:#363636; text-decoration:none;&quot;&gt;Network&lt;/a&gt;</source>
+        <translation>&lt;a href=&quot;javascript:void(0)&quot; style=&quot;color:#363636; text-decoration:none;&quot;&gt;网络&lt;/a&gt;</translation>
+    </message>
+    <message>
+        <location filename="../src/wizLoginDialog.cpp" line="116"/>
+        <source>Login</source>
+        <translation>登录</translation>
+    </message>
+    <message>
+        <location filename="../src/wizLoginDialog.cpp" line="169"/>
+        <source>Please enter user id</source>
+        <translation>请输入用户名</translation>
+    </message>
+    <message>
+        <location filename="../src/wizLoginDialog.cpp" line="174"/>
+        <source>Please enter user password</source>
+        <translation>请输入用户密码</translation>
+    </message>
+    <message>
+        <location filename="../src/wizLoginDialog.cpp" line="189"/>
+        <source>Verify account failed</source>
+        <translation>验证账户失败</translation>
+    </message>
+</context>
+<context>
     <name>CWizNewDialog</name>
     <message>
         <source>New Folder</source>
@@ -2207,12 +2265,11 @@
         <translation>为知笔记</translation>
     </message>
     <message>
-        <location filename="../src/main.cpp" line="148"/>
         <source>Can not open private database</source>
-        <translation>无法打开个人数据库</translation>
+        <translation type="obsolete">无法打开个人数据库</translation>
     </message>
     <message>
-        <location filename="../src/main.cpp" line="155"/>
+        <location filename="../src/main.cpp" line="136"/>
         <source>Can not open database</source>
         <translation>无法打开数据库</translation>
     </message>
@@ -2742,6 +2799,11 @@
         <source>Unknown</source>
         <translation>未知</translation>
     </message>
+    <message>
+        <location filename="../src/wizLoginDialog.cpp" line="222"/>
+        <source>Can not open database while update user profile</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>QuaZipFilePrivate</name>
@@ -2754,45 +2816,37 @@
 <context>
     <name>WelcomeDialog</name>
     <message>
-        <location filename="../src/ui/wizwelcomedialog.ui" line="14"/>
         <source>Welcome to WizNote</source>
         <oldsource>Welcome to Wiz</oldsource>
-        <translation>欢迎使用为知笔记</translation>
+        <translation type="obsolete">欢迎使用为知笔记</translation>
     </message>
     <message>
-        <location filename="../src/ui/wizwelcomedialog.ui" line="29"/>
         <source>User ID (Email):</source>
-        <translation>账号(Email地址):</translation>
+        <translation type="obsolete">账号(Email地址):</translation>
     </message>
     <message>
-        <location filename="../src/ui/wizwelcomedialog.ui" line="64"/>
         <source>Password:</source>
-        <translation>密码:</translation>
+        <translation type="obsolete">密码:</translation>
     </message>
     <message>
-        <location filename="../src/ui/wizwelcomedialog.ui" line="101"/>
         <source>Remember me</source>
-        <translation>记住密码</translation>
+        <translation type="obsolete">记住密码</translation>
     </message>
     <message>
-        <location filename="../src/ui/wizwelcomedialog.ui" line="120"/>
         <source>Auto login</source>
-        <translation>自动登录</translation>
+        <translation type="obsolete">自动登录</translation>
     </message>
     <message>
-        <location filename="../src/ui/wizwelcomedialog.ui" line="133"/>
         <source>&lt;a href=&quot;javascript:void(0)&quot;&gt;Proxy settings&lt;/a&gt;</source>
-        <translation>&lt;a href=&quot;javascript:void(0)&quot;&gt;代理设置&lt;/a&gt;</translation>
+        <translation type="obsolete">&lt;a href=&quot;javascript:void(0)&quot;&gt;代理设置&lt;/a&gt;</translation>
     </message>
     <message>
-        <location filename="../src/ui/wizwelcomedialog.ui" line="152"/>
         <source>&lt;a href=&quot;javascript:void(0)&quot;&gt;New to WizNote&lt;/a&gt;</source>
-        <translation>&lt;a href=&quot;javascript:void(0)&quot;&gt;新用户注册&lt;/a&gt;</translation>
+        <translation type="obsolete">&lt;a href=&quot;javascript:void(0)&quot;&gt;新用户注册&lt;/a&gt;</translation>
     </message>
     <message>
-        <location filename="../src/ui/wizwelcomedialog.ui" line="171"/>
         <source>&lt;a href=&quot;javascript:void(0)&quot;&gt;Forgot password&lt;/a&gt;</source>
-        <translation>&lt;a href=&quot;javascript:void(0)&quot;&gt;忘记密码&lt;/a&gt;</translation>
+        <translation type="obsolete">&lt;a href=&quot;javascript:void(0)&quot;&gt;忘记密码&lt;/a&gt;</translation>
     </message>
     <message>
         <source>Settings</source>
@@ -2815,28 +2869,20 @@
         <translation type="obsolete">找回密码</translation>
     </message>
     <message>
-        <location filename="../src/ui/wizwelcomedialog.ui" line="206"/>
         <source>Login</source>
-        <translation>登录</translation>
-    </message>
-    <message>
-        <location filename="../src/ui/wizwelcomedialog.ui" line="81"/>
-        <source>about:blank</source>
-        <translation></translation>
+        <translation type="obsolete">登录</translation>
     </message>
     <message>
         <source>Proxy settings</source>
         <translation type="obsolete">代理设置</translation>
     </message>
     <message>
-        <location filename="../src/wizwelcomedialog.cpp" line="114"/>
         <source>Please enter user id</source>
-        <translation>请输入用户ID</translation>
+        <translation type="obsolete">请输入用户ID</translation>
     </message>
     <message>
-        <location filename="../src/wizwelcomedialog.cpp" line="119"/>
         <source>Please enter user password</source>
-        <translation>请输入用户密码</translation>
+        <translation type="obsolete">请输入用户密码</translation>
     </message>
     <message>
         <source>Network Error, please check your network connection!
@@ -2853,9 +2899,8 @@ ErrorCode: </source>
         <translation type="obsolete">错误号：</translation>
     </message>
     <message>
-        <location filename="../src/wizwelcomedialog.cpp" line="139"/>
         <source>Verify account failed</source>
-        <translation>验证账户失败</translation>
+        <translation type="obsolete">验证账户失败</translation>
     </message>
 </context>
 <context>

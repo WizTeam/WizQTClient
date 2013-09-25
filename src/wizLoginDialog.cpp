@@ -7,33 +7,33 @@
 #include "wizproxydialog.h"
 
 
-class CWizAvatarWidget : public QLabel
-{
-public:
-    CWizAvatarWidget(QWidget* parent = 0) : QLabel(parent) {}
-
-    virtual void paintEvent(QPaintEvent* event)
-    {
-        Q_UNUSED(event);
-
-        const QPixmap* avatar = pixmap();
-        if (!avatar || avatar->isNull()) {
-            return;
-        }
-
-        int nMargin = 10;
-
-        QPainter p(this);
-        QRegion reg(nMargin, nMargin, 100, 100, QRegion::Ellipse);
-        p.setClipRegion(reg);
-        p.drawPixmap(nMargin, nMargin, *avatar);
-    }
-
-    void setAvatar(const QString& strFileName)
-    {
-        setPixmap(strFileName);
-    }
-};
+//class CWizAvatarWidget : public QLabel
+//{
+//public:
+//    CWizAvatarWidget(QWidget* parent = 0) : QLabel(parent) {}
+//
+//    virtual void paintEvent(QPaintEvent* event)
+//    {
+//        Q_UNUSED(event);
+//
+//        const QPixmap* avatar = pixmap();
+//        if (!avatar || avatar->isNull()) {
+//            return;
+//        }
+//
+//        int nMargin = 8;
+//
+//        QPainter p(this);
+//        QRegion reg(nMargin, nMargin, 102, 102, QRegion::Ellipse);
+//        p.setClipRegion(reg);
+//        p.drawPixmap(nMargin, nMargin, *avatar);
+//    }
+//
+//    void setAvatar(const QString& strFileName)
+//    {
+//        setPixmap(strFileName);
+//    }
+//};
 
 
 CWizLoginDialog::CWizLoginDialog(const QString& strDefaultUserId, const QString& strLocale, QWidget *parent)
@@ -76,12 +76,14 @@ CWizLoginDialog::CWizLoginDialog(const QString& strDefaultUserId, const QString&
     layoutInput->addSpacing(5);
     layoutInput->addLayout(layoutState);
 
-    m_avatar = new CWizAvatarWidget(this);
+    QLabel* m_avatar = new QLabel(this);
+    //m_avatar = new CWizAvatarWidget(this);
     m_avatar->setFixedSize(120, 120);
-    resetAvatar(strDefaultUserId);
+    m_avatar->setPixmap(QPixmap(":/avatar_login.png"));
+    //resetAvatar(strDefaultUserId);
 
     QHBoxLayout* layoutUser = new QHBoxLayout();
-    layoutUser->setSpacing(10);
+    layoutUser->addSpacing(20);
     layoutUser->addWidget(m_avatar);
     layoutUser->addLayout(layoutInput);
 
@@ -108,7 +110,6 @@ CWizLoginDialog::CWizLoginDialog(const QString& strDefaultUserId, const QString&
     connect(m_labelNetwork, SIGNAL(linkActivated(const QString&)),
             SLOT(on_labelNetwork_linkActivated(const QString&)));
 
-
     m_btnLogin = new QPushButton(tr("Login"), this);
     connect(m_btnLogin, SIGNAL(clicked()), SLOT(accept()));
 
@@ -120,7 +121,7 @@ CWizLoginDialog::CWizLoginDialog(const QString& strDefaultUserId, const QString&
     layoutCommon->addWidget(m_labelForgot);
     layoutCommon->addWidget(line2);
     layoutCommon->addWidget(m_labelNetwork);
-    layoutCommon->addSpacing(50);
+    layoutCommon->addStretch();
     layoutCommon->addWidget(m_btnLogin);
 
     QWidget* line3 = new QWidget(this);
@@ -138,16 +139,16 @@ CWizLoginDialog::CWizLoginDialog(const QString& strDefaultUserId, const QString&
     setUsers(strDefaultUserId);
 }
 
-void CWizLoginDialog::resetAvatar(const QString& strUserId)
-{
-    QString strAvatarFile = ::WizGetDataStorePath() + strUserId + "/avatar/" + strUserId + ".png";
-    if (!QFile::exists(strAvatarFile)) {
-        strAvatarFile = ::WizGetResourcesPath() + "skins/default/avatar.png";
-    }
-
-    QPixmap avatar(strAvatarFile);
-    m_avatar->setPixmap(avatar.scaled(100, 100, Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
-}
+//void CWizLoginDialog::resetAvatar(const QString& strUserId)
+//{
+//    QString strAvatarFile = ::WizGetDataStorePath() + strUserId + "/avatar/" + strUserId + ".png";
+//    if (!QFile::exists(strAvatarFile)) {
+//        strAvatarFile = ::WizGetResourcesPath() + "skins/default/avatar.png";
+//    }
+//
+//    QPixmap avatar(strAvatarFile);
+//    m_avatar->setPixmap(avatar.scaled(100, 100, Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
+//}
 
 QString CWizLoginDialog::userId() const
 {
@@ -257,7 +258,7 @@ void CWizLoginDialog::setUsers(const QString& strDefault)
 
 void CWizLoginDialog::setUser(const QString& strUserId)
 {
-    resetAvatar(strUserId);
+    //resetAvatar(strUserId);
 
     CWizUserSettings userSettings(strUserId);
     QString strPassword = userSettings.password();

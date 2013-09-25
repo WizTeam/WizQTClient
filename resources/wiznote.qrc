@@ -1,5 +1,6 @@
 <RCC>
     <qresource prefix="/">
         <file alias="loading.gif">loader.gif</file>
+        <file>avatar_login.png</file>
     </qresource>
 </RCC>

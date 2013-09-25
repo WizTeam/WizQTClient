@@ -9,7 +9,7 @@ class QLabel;
 class QComboBox;
 class QLineEdit;
 class QCheckBox;
-class CWizAvatarWidget;
+//class CWizAvatarWidget;
 
 
 class CWizLoginDialog : public QDialog
@@ -28,9 +28,9 @@ private:
     QCheckBox* m_checkSavePassword;
     QCheckBox* m_checkAutoLogin;
     QPushButton* m_btnLogin;
-    CWizAvatarWidget* m_avatar;
+    //CWizAvatarWidget* m_avatar;
 
-    void resetAvatar(const QString& strUserId);
+    //void resetAvatar(const QString& strUserId);
 
     void enableControls(bool bEnable);
     void doAccountVerify();
