@@ -3,23 +3,12 @@
 
 #include <QDialog>
 
-#include "wizdef.h"
-
-namespace Ui {
-    class AboutDialog;
-}
-
-class AboutDialog : public QDialog
+class CWizAboutDialog : public QDialog
 {
     Q_OBJECT
 
 public:
-    explicit AboutDialog(CWizExplorerApp& app, QWidget *parent = 0);
-    ~AboutDialog();
-
-private:
-    CWizExplorerApp& m_app;
-    Ui::AboutDialog *ui;
+    explicit CWizAboutDialog(QWidget *parent = 0);
 };
 
 #endif // WIZABOUTDIALOG_H

@@ -9,7 +9,7 @@
 
 #include "wizDocumentWebView.h"
 #include "wizactions.h"
-#include "wizaboutdialog.h"
+#include "wizAboutDialog.h"
 #include "wizpreferencedialog.h"
 #include "wizstatusbar.h"
 #include "wizupgradenotifydialog.h"
@@ -678,7 +678,7 @@ void MainWindow::on_actionLogout_triggered()
 
 void MainWindow::on_actionAbout_triggered()
 {
-    AboutDialog dlg(*this, this);
+    CWizAboutDialog dlg;
     dlg.exec();
 }
 

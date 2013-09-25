@@ -1,35 +1,31 @@
-#include "wizaboutdialog.h"
-#include "ui_wizaboutdialog.h"
+#include "wizAboutDialog.h"
 
-#include <QApplication>
-#include <QFileInfo>
+#include <QtGui>
 
+#include "wizdef.h"
 #include "share/wizmisc.h"
-#include "share/wizsettings.h"
 
 
-AboutDialog::AboutDialog(CWizExplorerApp& app, QWidget *parent)
+CWizAboutDialog::CWizAboutDialog(QWidget *parent)
     : QDialog(parent)
-    , m_app(app)
-    , ui(new Ui::AboutDialog)
 {
-    ui->setupUi(this);
-    setFixedSize(size());
-
-    QIcon iconApp = qApp->windowIcon();
-    ui->labelIcon->setPixmap(iconApp.pixmap(QSize(128, 128)));
+    QLabel* labelIcon = new QLabel(this);
+    labelIcon->setPixmap(qApp->windowIcon().pixmap(QSize(58, 58)));
 
 #if defined Q_OS_MAC
-    QString strProduct(tr("WizNote for Mac"));
+    QString strProduct("<span style=\"font-weight:bold;font-size:14px\">WizNote for Mac</span>");
 #elif defined Q_OS_LINUX
-    QString strProduct(tr("WizNote for Linux"));
+    QString strProduct("<span style=\"font-weight:bold;font-size:14px\">WizNote for Linux</span>");
 #else
-    QString strProduct(tr("WizNote for Windows"));
+    QString strProduct("<span style=\"font-weight:bold;font-size:14px\">WizNote for Windows</span>");
 #endif
+
+    QLabel* labelProduct = new QLabel(this);
+    labelProduct->setText(strProduct);
 
     QFileInfo fi(::WizGetAppFileName());
     QDateTime t = fi.lastModified();
-    QString strBuildNumber("build %1.%2.%3 %4:%5");
+    QString strBuildNumber("(%1.%2.%3 %4:%5)");
     strBuildNumber = strBuildNumber.\
             arg(t.date().year()).\
             arg(t.date().month()).\
@@ -37,15 +33,35 @@ AboutDialog::AboutDialog(CWizExplorerApp& app, QWidget *parent)
             arg(t.time().hour()).\
             arg(t.time().minute());
 
-    QString strInfo("<span style=\"font-weight:bold;font-size:16pt\">%1</span><br /><span>%2 %3</span>");
-    strInfo = strInfo.arg(strProduct, WIZ_CLIENT_VERSION, strBuildNumber);
+    QString strInfo = QString(tr("<span style=\"font-size:11px\">Version %2 %3</span>")).arg(WIZ_CLIENT_VERSION, strBuildNumber);
+    QLabel* labelBuild = new QLabel(this);
+    labelBuild->setText(strInfo);
 
-    ui->labelAbout->setTextFormat(Qt::AutoText);
-    ui->labelAbout->setText(strInfo);
-    ui->labelLink->setOpenExternalLinks(true);
-}
+    QTextBrowser* textCredits = new QTextBrowser(this);
+    textCredits->setOpenExternalLinks(true);
 
-AboutDialog::~AboutDialog()
-{
-    delete ui;
+    QString strHtml;
+    ::WizLoadUnicodeTextFromFile(":/credits.html", strHtml);
+    textCredits->setHtml(strHtml);
+
+    QLabel* labelCopyright = new QLabel(this);
+    labelCopyright->setText(tr("<span style=\"font-size:10px\">Copy Right 2013 Wiz inc. All rights reserved</span>"));
+
+    QVBoxLayout* layout = new QVBoxLayout();
+    layout->setContentsMargins(0, 10, 0, 10);
+    setLayout(layout);
+
+    layout->addWidget(labelIcon);
+    layout->addWidget(labelProduct);
+    layout->addWidget(labelBuild);
+    layout->addWidget(textCredits);
+    layout->addWidget(labelCopyright);
+    layout->setAlignment(labelIcon, Qt::AlignCenter);
+    layout->setAlignment(labelProduct, Qt::AlignCenter);
+    layout->setAlignment(labelBuild, Qt::AlignCenter);
+    layout->setAlignment(textCredits, Qt::AlignCenter);
+    layout->setAlignment(labelCopyright, Qt::AlignCenter);
+
+    setWindowFlags(Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint);
+    setFixedSize(sizeHint());
 }

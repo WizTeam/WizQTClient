@@ -90,7 +90,7 @@ set(wiznote_SOURCES
     wiztaglistwidget.cpp
     wizconsoledialog.cpp
     wizpreferencedialog.cpp
-    wizaboutdialog.cpp
+    wizAboutDialog.cpp
     wizLoginDialog.cpp
     wizproxydialog.cpp
     wizcreateaccountdialog.cpp
@@ -208,7 +208,7 @@ set(wiznote_HEADERS
     wiztaglistwidget.h
     wizconsoledialog.h
     wizpreferencedialog.h
-    wizaboutdialog.h
+    wizAboutDialog.h
     wizLoginDialog.h
     wizproxydialog.h
     wizcreateaccountdialog.h
@@ -255,7 +255,7 @@ set(wiznote_WRAP_HEADERS
     widgets/qscrollareakineticscroller.h
     widgets/qwebviewkineticscroller.h
     widgets/qsegmentcontrol.h
-    wizaboutdialog.h
+    wizAboutDialog.h
     zip/quazipfile.h
     share/wizanimateaction.h
     share/wizapi.h
@@ -325,7 +325,7 @@ set(wiznote_FORMS
     ui/wizdownloadobjectdatadialog.ui
     ui/wizconsoledialog.ui
     ui/wizpreferencedialog.ui
-    ui/wizaboutdialog.ui
+    #ui/wizaboutdialog.ui
     ui/wizproxydialog.ui
     ui/wizcreateaccountdialog.ui
     ui/wizupdaterprogressdialog.ui

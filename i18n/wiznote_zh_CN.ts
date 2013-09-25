@@ -19,22 +19,19 @@
         <translation type="obsolete">为知笔记 1.00 (测试版)</translation>
     </message>
     <message>
-        <location filename="../src/wizaboutdialog.cpp" line="23"/>
         <source>WizNote for Mac</source>
         <oldsource>WizNote for Mac %1</oldsource>
-        <translation>为知笔记 Mac版</translation>
+        <translation type="obsolete">为知笔记 Mac版</translation>
     </message>
     <message>
-        <location filename="../src/wizaboutdialog.cpp" line="25"/>
         <source>WizNote for Linux</source>
         <oldsource>WizNote for Linux %1</oldsource>
-        <translation>为知笔记 Linux版</translation>
+        <translation type="obsolete">为知笔记 Linux版</translation>
     </message>
     <message>
-        <location filename="../src/wizaboutdialog.cpp" line="27"/>
         <source>WizNote for Windows</source>
         <oldsource>WizNote for Windows %1</oldsource>
-        <translation>为知笔记 Windows版</translation>
+        <translation type="obsolete">为知笔记 Windows版</translation>
     </message>
     <message>
         <source>beta (build %1)</source>
@@ -43,6 +40,19 @@
     <message>
         <source>release (build %1)</source>
         <translation type="obsolete">正式版 (build %1)</translation>
+    </message>
+</context>
+<context>
+    <name>CWizAboutDialog</name>
+    <message>
+        <location filename="../src/wizaboutdialog.cpp" line="36"/>
+        <source>&lt;span style=&quot;font-size:11px&quot;&gt;Version %2 %3&lt;/span&gt;</source>
+        <translation>&lt;span style=&quot;font-size:11px&quot;&gt;版本 %2 %3&lt;/span&gt;</translation>
+    </message>
+    <message>
+        <location filename="../src/wizaboutdialog.cpp" line="48"/>
+        <source>&lt;span style=&quot;font-size:10px&quot;&gt;Copy Right 2013 Wiz inc. All rights reserved&lt;/span&gt;</source>
+        <translation>&lt;span style=&quot;font-size:10px&quot;&gt;版权所有 2013 我知科技. 保留一切权利&lt;/span&gt;</translation>
     </message>
 </context>
 <context>
@@ -920,37 +930,37 @@
         <translation>自动登录</translation>
     </message>
     <message>
-        <location filename="../src/wizLoginDialog.cpp" line="101"/>
+        <location filename="../src/wizLoginDialog.cpp" line="99"/>
         <source>&lt;a href=&quot;javascript:void(0)&quot; style=&quot;color:#363636; text-decoration:none;&quot;&gt;New user&lt;/a&gt;</source>
         <translation>&lt;a href=&quot;javascript:void(0)&quot; style=&quot;color:#363636; text-decoration:none;&quot;&gt;新用户&lt;/a&gt;</translation>
     </message>
     <message>
-        <location filename="../src/wizLoginDialog.cpp" line="106"/>
+        <location filename="../src/wizLoginDialog.cpp" line="104"/>
         <source>&lt;a href=&quot;javascript:void(0)&quot; style=&quot;color:#363636; text-decoration:none;&quot;&gt;Forget password&lt;/a&gt;</source>
         <translation>&lt;a href=&quot;javascript:void(0)&quot; style=&quot;color:#363636; text-decoration:none;&quot;&gt;找回密码&lt;/a&gt;</translation>
     </message>
     <message>
-        <location filename="../src/wizLoginDialog.cpp" line="111"/>
+        <location filename="../src/wizLoginDialog.cpp" line="109"/>
         <source>&lt;a href=&quot;javascript:void(0)&quot; style=&quot;color:#363636; text-decoration:none;&quot;&gt;Network&lt;/a&gt;</source>
         <translation>&lt;a href=&quot;javascript:void(0)&quot; style=&quot;color:#363636; text-decoration:none;&quot;&gt;网络&lt;/a&gt;</translation>
     </message>
     <message>
-        <location filename="../src/wizLoginDialog.cpp" line="116"/>
+        <location filename="../src/wizLoginDialog.cpp" line="113"/>
         <source>Login</source>
         <translation>登录</translation>
     </message>
     <message>
-        <location filename="../src/wizLoginDialog.cpp" line="169"/>
+        <location filename="../src/wizLoginDialog.cpp" line="166"/>
         <source>Please enter user id</source>
         <translation>请输入用户名</translation>
     </message>
     <message>
-        <location filename="../src/wizLoginDialog.cpp" line="174"/>
+        <location filename="../src/wizLoginDialog.cpp" line="171"/>
         <source>Please enter user password</source>
         <translation>请输入用户密码</translation>
     </message>
     <message>
-        <location filename="../src/wizLoginDialog.cpp" line="189"/>
+        <location filename="../src/wizLoginDialog.cpp" line="186"/>
         <source>Verify account failed</source>
         <translation>验证账户失败</translation>
     </message>
@@ -2800,7 +2810,7 @@
         <translation>未知</translation>
     </message>
     <message>
-        <location filename="../src/wizLoginDialog.cpp" line="222"/>
+        <location filename="../src/wizLoginDialog.cpp" line="219"/>
         <source>Can not open database while update user profile</source>
         <translation type="unfinished"></translation>
     </message>

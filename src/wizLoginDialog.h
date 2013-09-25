@@ -1,5 +1,5 @@
-#ifndef WIZWELCOMEDIALOG_H
-#define WIZWELCOMEDIALOG_H
+#ifndef WIZLOGINDIALOG_H
+#define WIZLOGINDIALOG_H
 
 #include <QDialog>
 
@@ -51,4 +51,4 @@ public Q_SLOTS:
     void on_checkAutoLogin_stateChanged(int state);
 };
 
-#endif // WIZWELCOMEDIALOG_H
+#endif // WIZLOGINDIALOG_H

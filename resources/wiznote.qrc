@@ -2,5 +2,6 @@
     <qresource prefix="/">
         <file alias="loading.gif">loader.gif</file>
         <file>avatar_login.png</file>
+        <file>credits.html</file>
     </qresource>
 </RCC>

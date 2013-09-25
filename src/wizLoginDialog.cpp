@@ -39,9 +39,6 @@
 CWizLoginDialog::CWizLoginDialog(const QString& strDefaultUserId, const QString& strLocale, QWidget *parent)
     : QDialog(parent)
 {
-    setWindowFlags(Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint);
-    setFixedSize(sizeHint());
-
     QLabel* labelInput = new QLabel(tr("Account Login"), this);
 
     m_comboUsers = new QComboBox(this);
@@ -135,6 +132,9 @@ CWizLoginDialog::CWizLoginDialog(const QString& strDefaultUserId, const QString&
     mainLayout->addLayout(layoutUser);
     mainLayout->addWidget(line3);
     mainLayout->addLayout(layoutCommon);
+
+    setWindowFlags(Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint);
+    setFixedSize(sizeHint());
 
     setUsers(strDefaultUserId);
 }
