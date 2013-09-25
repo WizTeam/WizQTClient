@@ -136,9 +136,12 @@ endif (TARGET cryptopp)
 
 if (APPLE)
     add_definitions (-DCRYPTOPP_DISABLE_ASM)
-    set_target_properties (${_CRYPTOPP_INSTALL_TARGETS} PROPERTIES COMPILE_FLAGS
-    "-Wno-tautological-compare -Wno-unused-value -Wno-switch")
 endif (APPLE)
+
+if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+    set_target_properties (${_CRYPTOPP_INSTALL_TARGETS} PROPERTIES COMPILE_FLAGS
+    "-Wno-tautological-compare -Wno-unused-value -Wno-switch -Wno-string-plus-int")
+endif()
 
 # Prevent MSVC from issuing the LNK4221 warning
 set_source_files_properties (strciphr.cpp simple.cpp polynomi.cpp algebra.cpp
@@ -208,8 +211,8 @@ IF (WIN32)
 endif (WIN32)
 
 if (_CRYPTOPP_INSTALL_TARGETS)
-  set_target_properties (${_CRYPTOPP_INSTALL_TARGETS} PROPERTIES PUBLIC_HEADER
-    "${PROJECT_H}")
+  #set_target_properties (${_CRYPTOPP_INSTALL_TARGETS} PROPERTIES PUBLIC_HEADER
+  #  "${PROJECT_H}")
 
   #install (TARGETS ${_CRYPTOPP_INSTALL_TARGETS}
   #  EXPORT cryptopp-targets

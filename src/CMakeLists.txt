@@ -91,7 +91,7 @@ set(wiznote_SOURCES
     wizconsoledialog.cpp
     wizpreferencedialog.cpp
     wizaboutdialog.cpp
-    wizwelcomedialog.cpp
+    wizLoginDialog.cpp
     wizproxydialog.cpp
     wizcreateaccountdialog.cpp
     wizmainwindow.cpp
@@ -209,7 +209,7 @@ set(wiznote_HEADERS
     wizconsoledialog.h
     wizpreferencedialog.h
     wizaboutdialog.h
-    wizwelcomedialog.h
+    wizLoginDialog.h
     wizproxydialog.h
     wizcreateaccountdialog.h
     wizmainwindow.h
@@ -251,7 +251,7 @@ set(wiznote_HEADERS
 
 set(wiznote_WRAP_HEADERS
     widgets/qkineticscroller_p.h
-    widgets/qkineticscroller.h
+    #widgets/qkineticscroller.h
     widgets/qscrollareakineticscroller.h
     widgets/qwebviewkineticscroller.h
     widgets/qsegmentcontrol.h
@@ -288,13 +288,13 @@ set(wiznote_WRAP_HEADERS
     wizstatusbar.h
     wiztaglistwidget.h
     share/wizThumbIndexCache.h
-    wizupdater.h
+    #wizupdater.h
     wizupdaterprogressdialog.h
     wizUpgrade.h
     wizupgradenotifydialog.h
     wizusercipherform.h
     share/wizverifyaccount.h
-    wizwelcomedialog.h
+    wizLoginDialog.h
     share/wizXmlRpcServer.h
     share/wizziwreader.h
     #share/wizuihelper.h
@@ -326,7 +326,6 @@ set(wiznote_FORMS
     ui/wizconsoledialog.ui
     ui/wizpreferencedialog.ui
     ui/wizaboutdialog.ui
-    ui/wizwelcomedialog.ui
     ui/wizproxydialog.ui
     ui/wizcreateaccountdialog.ui
     ui/wizupdaterprogressdialog.ui

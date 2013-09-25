@@ -7,7 +7,7 @@
 
 #include "wizmainwindow.h"
 #include "wizupdaterprogressdialog.h"
-#include "wizwelcomedialog.h"
+#include "wizLoginDialog.h"
 #include "share/wizsettings.h"
 #include "share/wizwin32helper.h"
 #include "mac/wizmachelper.h"

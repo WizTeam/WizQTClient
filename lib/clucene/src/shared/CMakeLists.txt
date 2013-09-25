@@ -360,3 +360,8 @@ IF ( BUILD_STATIC_LIBRARIES )
         #        DESTINATION ${LIB_DESTINATION}
         #        COMPONENT runtime )
 ENDIF ( BUILD_STATIC_LIBRARIES )
+
+if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+set_target_properties(clucene-shared-static PROPERTIES
+                        COMPILE_FLAGS "-Wno-deprecated-declarations -Wno-#warnings")
+endif()

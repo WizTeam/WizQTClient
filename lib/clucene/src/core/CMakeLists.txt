@@ -286,5 +286,8 @@ file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/CLuceneConfig.cmake" "
 #            COMPONENT development)
 #ENDIF ( LUCENE_SYS_INCLUDES )
 
-
-
+if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+    set_target_properties(clucene-core-static PROPERTIES COMPILE_FLAGS "-Wno-deprecated-declarations")
+    set_source_files_properties("./CLucene/util/MD5Digester.cpp" PROPERTIES COMPILE_FLAGS "-Wno-strncat-size")
+    set_source_files_properties("./CLucene/index/IndexWriter.cpp" PROPERTIES COMPILE_FLAGS "-Wno-string-plus-int")
+endif()

@@ -1,4 +1,4 @@
-#include "wizwelcomedialog.h"
+#include "wizLoginDialog.h"
 
 #include <QtGui>
 
@@ -65,6 +65,7 @@ CWizLoginDialog::CWizLoginDialog(const QString& strDefaultUserId, const QString&
     layoutState->addWidget(m_checkSavePassword);
     layoutState->addSpacing(10);
     layoutState->addWidget(m_checkAutoLogin);
+    layoutState->setAlignment(Qt::AlignRight);
 
     QVBoxLayout* layoutInput = new QVBoxLayout();
     layoutInput->setContentsMargins(10, 10, 10, 0);
@@ -74,7 +75,6 @@ CWizLoginDialog::CWizLoginDialog(const QString& strDefaultUserId, const QString&
     layoutInput->addWidget(m_editPassword);
     layoutInput->addSpacing(5);
     layoutInput->addLayout(layoutState);
-    layoutInput->setAlignment(layoutState, Qt::AlignRight);
 
     m_avatar = new CWizAvatarWidget(this);
     m_avatar->setFixedSize(120, 120);
