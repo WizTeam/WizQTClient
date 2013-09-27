@@ -348,10 +348,12 @@ CWizEditorToolBar::CWizEditorToolBar(CWizExplorerApp& app, QWidget *parent)
     connect(m_btnOrderedList, SIGNAL(clicked()), SLOT(on_btnOrderedList_clicked()));
 
     m_btnTable = new CWizToolButton(this);
+    m_btnTable->setCheckable(false);
     m_btnTable->setIcon(::WizLoadSkinIcon(skin, "actionFormatInsertTable"));
     connect(m_btnTable, SIGNAL(clicked()), SLOT(on_btnTable_clicked()));
 
     m_btnHorizontal = new CWizToolButton(this);
+    m_btnHorizontal->setCheckable(false);
     m_btnHorizontal->setIcon(::WizLoadSkinIcon(skin, "actionFormatInsertHorizontal"));
     connect(m_btnHorizontal, SIGNAL(clicked()), SLOT(on_btnHorizontal_clicked()));
 

@@ -503,12 +503,12 @@ void CWizDocumentWebView::setEditingDocument(bool editing)
         Q_EMIT focusIn();
     }
 
-    m_bEditingMode = editing;
-
-    bool bEditing = page()->mainFrame()->evaluateJavaScript("isEditing();").toBool();
-    if (bEditing) {
+    //bool bEditing = page()->mainFrame()->evaluateJavaScript("isEditing();").toBool();
+    if (m_bEditingMode) {
         saveDocument(false);
     }
+
+    m_bEditingMode = editing;
 
     QString strScript = QString("setEditing(%1);").arg(editing ? "true" : "false");
     page()->mainFrame()->evaluateJavaScript(strScript);

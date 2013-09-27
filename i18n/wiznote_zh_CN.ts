@@ -1598,19 +1598,16 @@
 <context>
     <name>CWizTitleBar</name>
     <message>
-        <location filename="../src/wizDocumentView.cpp" line="289"/>
         <source>Save &amp; Switch to Reading View</source>
-        <translation>保存并切换到阅读视图</translation>
+        <translation type="obsolete">保存并切换到阅读视图</translation>
     </message>
     <message>
-        <location filename="../src/wizDocumentView.cpp" line="290"/>
         <source>Switch to Reading View</source>
-        <translation>切换到阅读视图</translation>
+        <translation type="obsolete">切换到阅读视图</translation>
     </message>
     <message>
-        <location filename="../src/wizDocumentView.cpp" line="291"/>
         <source>Switch to Editing View</source>
-        <translation>切换到编辑视图</translation>
+        <translation type="obsolete">切换到编辑视图</translation>
     </message>
     <message>
         <source>The document is locked and read only, press unlock button if you need edit.</source>
@@ -1625,14 +1622,12 @@
         <translation type="obsolete">你的权限不够, 无法修改这个文档.</translation>
     </message>
     <message>
-        <location filename="../src/wizDocumentView.cpp" line="388"/>
         <source>Attachments, total:%1 (%2)</source>
-        <translation>附件，共%1个 (%2)</translation>
+        <translation type="obsolete">附件，共%1个 (%2)</translation>
     </message>
     <message>
-        <location filename="../src/wizDocumentView.cpp" line="393"/>
         <source>Information (%2)</source>
-        <translation>笔记信息 (%2)</translation>
+        <translation type="obsolete">笔记信息 (%2)</translation>
     </message>
     <message>
         <source>Tags (%1)</source>
@@ -2394,16 +2389,19 @@
         <translation>$分享给朋友的笔记</translation>
     </message>
     <message>
+        <location filename="../src/wizDocumentView.cpp" line="289"/>
         <source>Save &amp; Switch to Reading View</source>
-        <translation type="obsolete">保存并切换到阅读视图</translation>
+        <translation>保存并切换到阅读视图</translation>
     </message>
     <message>
+        <location filename="../src/wizDocumentView.cpp" line="290"/>
         <source>Switch to Reading View</source>
-        <translation type="obsolete">切换到阅读视图</translation>
+        <translation>切换到阅读视图</translation>
     </message>
     <message>
+        <location filename="../src/wizDocumentView.cpp" line="291"/>
         <source>Switch to Editing View</source>
-        <translation type="obsolete">切换到编辑视图</translation>
+        <translation>切换到编辑视图</translation>
     </message>
     <message>
         <source>Tags (%1)</source>
@@ -2448,6 +2446,16 @@
         <location filename="../src/wizDocumentView.cpp" line="379"/>
         <source>Tags, total: %1 (%2)</source>
         <translation>标签，共%1个 (%2)</translation>
+    </message>
+    <message>
+        <location filename="../src/wizDocumentView.cpp" line="388"/>
+        <source>Attachments, total:%1 (%2)</source>
+        <translation>附件，共%1个 (%2)</translation>
+    </message>
+    <message>
+        <location filename="../src/wizDocumentView.cpp" line="393"/>
+        <source>Information (%2)</source>
+        <translation>笔记信息 (%2)</translation>
     </message>
     <message>
         <source>Tags (%1): %2</source>

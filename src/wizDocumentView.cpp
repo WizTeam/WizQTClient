@@ -286,9 +286,9 @@ private:
         QString shortcut = ::WizGetShortcut("EditNote", "Alt+1");
         m_editBtn->setShortcut(QKeySequence::fromString(shortcut));
 
-        QString strSaveAndRead = tr("Save & Switch to Reading View");
-        QString strRead = tr("Switch to Reading View");
-        QString strEditNote = tr("Switch to Editing View");
+        QString strSaveAndRead = QObject::tr("Save & Switch to Reading View");
+        QString strRead = QObject::tr("Switch to Reading View");
+        QString strEditNote = QObject::tr("Switch to Editing View");
 
         bool bIsModified = !m_editBtn->text().isEmpty() ? true : false;
         if (bIsModified) {
@@ -385,12 +385,12 @@ public:
 
         int nAttachmentCount = db.GetDocumentAttachmentCount(data.strGUID);
         m_attachBtn->setIcon(nAttachmentCount > 0 ? m_attachExistIcon : m_attachNoneIcon);
-        m_attachBtn->setToolTip(tr("Attachments, total:%1 (%2)").arg(nAttachmentCount).arg(attachmentShortcut));
+        m_attachBtn->setToolTip(QObject::tr("Attachments, total:%1 (%2)").arg(nAttachmentCount).arg(attachmentShortcut));
 
         // document info
         QString infoShortcut = ::WizGetShortcut("EditNoteInfo", "Alt+4");
         m_infoBtn->setShortcut(QKeySequence::fromString(infoShortcut));
-        m_infoBtn->setToolTip(tr("Information (%2)").arg(infoShortcut));
+        m_infoBtn->setToolTip(QObject::tr("Information (%2)").arg(infoShortcut));
     }
 
     void setModified(bool modified)
@@ -505,10 +505,12 @@ bool CWizDocumentView::viewDocument(const WIZDOCUMENTDATA& data, bool forceEdit)
         }
     }
 
-    if (!edit) {
-        m_title->showNotify(CWizNotifyToolbar::DocumentLocked);
-        edit = false;
-    }
+    //if (!edit) {
+    //    m_title->showNotify(CWizNotifyToolbar::DocumentLocked);
+    //    edit = false;
+    //}
+
+    m_title->notifyBar()->hide();
 
     if (CWizDatabase::IsInDeletedItems(data.strLocation)) {
         m_title->showNotify(CWizNotifyToolbar::DocumentIsDeleted);
@@ -520,10 +522,6 @@ bool CWizDocumentView::viewDocument(const WIZDOCUMENTDATA& data, bool forceEdit)
         m_title->showNotify(CWizNotifyToolbar::DocumentPermissionLack);
         edit = false;
         locked = true;
-    }
-
-    if (edit) {
-        m_title->notifyBar()->hide();
     }
 
     // load document
@@ -560,11 +558,11 @@ void CWizDocumentView::editDocument(bool editing)
         return;
     }
 
-    if (!editing) {
-        m_title->showNotify(CWizNotifyToolbar::DocumentLocked);
-    } else {
-        m_title->notifyBar()->hide();
-    }
+    //if (!editing) {
+    //    m_title->showNotify(CWizNotifyToolbar::DocumentLocked);
+    //} else {
+    //    m_title->notifyBar()->hide();
+    //}
 
     m_title->setEditingDocument(editing);
     m_web->setEditingDocument(editing);
