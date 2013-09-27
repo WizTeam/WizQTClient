@@ -1153,7 +1153,8 @@ void CWizCategoryView::on_action_group_attribute()
     CWizCategoryViewItemBase* p = currentCategoryItem<CWizCategoryViewItemBase>();
     if (p && !p->kbGUID().isEmpty()) {
         if (!m_groupSettings) {
-            m_groupSettings = new CWizWebSettingsDialog(QSize(650, 400), window());
+            m_groupSettings = new CWizWebSettingsDialog(QSize(660, 400), window());
+            m_groupSettings->setWindowTitle(tr("Group settings"));
         }
 
         QString strToken;
@@ -2129,6 +2130,7 @@ void CWizCategoryView::on_document_created(const WIZDOCUMENTDATA& doc)
         }
 
         updateFolderDocumentCount();
+        updateTagDocumentCount();
     }
 }
 
@@ -2143,6 +2145,7 @@ void CWizCategoryView::on_document_modified(const WIZDOCUMENTDATA& docOld, const
         }
 
         updateFolderDocumentCount();
+        updateTagDocumentCount();
     }
 }
 
@@ -2152,6 +2155,7 @@ void CWizCategoryView::on_document_deleted(const WIZDOCUMENTDATA& doc)
 
     if (doc.strKbGUID == m_dbMgr.db().kbGUID() || doc.strKbGUID.isEmpty()) {
         updateFolderDocumentCount();
+        updateTagDocumentCount();
     }
 }
 

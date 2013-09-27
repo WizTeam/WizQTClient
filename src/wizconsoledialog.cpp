@@ -69,10 +69,12 @@ CWizConsoleDialog::~CWizConsoleDialog()
 
 void CWizConsoleDialog::showEvent(QShowEvent *event)
 {
-    Q_UNUSED(event);
-
     QScrollBar* vScroll = m_ui->editConsole->verticalScrollBar();
     vScroll->setValue(vScroll->maximum());
+
+    move(parentWidget()->geometry().center() - rect().center());
+
+    QDialog::showEvent(event);
 }
 
 void CWizConsoleDialog::load()

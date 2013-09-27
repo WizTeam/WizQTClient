@@ -62,6 +62,7 @@ CWizAboutDialog::CWizAboutDialog(QWidget *parent)
     layout->setAlignment(textCredits, Qt::AlignCenter);
     layout->setAlignment(labelCopyright, Qt::AlignCenter);
 
+    setWindowTitle(tr("About WizNote"));
     setWindowFlags(Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint);
     setFixedSize(sizeHint());
 }

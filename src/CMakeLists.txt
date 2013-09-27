@@ -440,7 +440,7 @@ if(UNIX)
         endif()
 
     elseif(NOT APPLE)
-        add_executable(${PROJECT_NAME} ${wiznote_SOURCES} ${wiznote_MOC_HEADERS} ${wiznote_FORM_HEADERS} ${wiznote_QM})
+        add_executable(${PROJECT_NAME} ${wiznote_SOURCES} ${wiznote_MOC_HEADERS} ${wiznote_FORM_HEADERS} ${wiznote_QM} ${wiznote_RC})
         #set_target_properties(${PROJECT_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build)
 
         # always build rpath

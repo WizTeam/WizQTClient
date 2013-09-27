@@ -12,6 +12,7 @@ CWizPreferenceWindow::CWizPreferenceWindow(CWizExplorerApp& app, QWidget* parent
 {
     ui->setupUi(this);
     setWindowIcon(QIcon());
+    setWindowTitle(tr("Preference"));
 
     // general tab
     ::WizGetTranslatedLocales(m_locales);

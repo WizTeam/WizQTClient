@@ -4,14 +4,8 @@
 <context>
     <name>AboutDialog</name>
     <message>
-        <location filename="../src/ui/wizaboutdialog.ui" line="14"/>
         <source>About WizNote</source>
-        <translation>关于为知笔记</translation>
-    </message>
-    <message>
-        <location filename="../src/ui/wizaboutdialog.ui" line="71"/>
-        <source>&lt;a href=&quot;http://www.wiz.cn/&quot;&gt;http://wiz.cn/&lt;/a&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation type="obsolete">关于为知笔记</translation>
     </message>
     <message>
         <source>WizNote 1.00 (beta)</source>
@@ -45,14 +39,19 @@
 <context>
     <name>CWizAboutDialog</name>
     <message>
-        <location filename="../src/wizaboutdialog.cpp" line="36"/>
+        <location filename="../src/wizAboutDialog.cpp" line="36"/>
         <source>&lt;span style=&quot;font-size:11px&quot;&gt;Version %2 %3&lt;/span&gt;</source>
         <translation>&lt;span style=&quot;font-size:11px&quot;&gt;版本 %2 %3&lt;/span&gt;</translation>
     </message>
     <message>
-        <location filename="../src/wizaboutdialog.cpp" line="48"/>
+        <location filename="../src/wizAboutDialog.cpp" line="48"/>
         <source>&lt;span style=&quot;font-size:10px&quot;&gt;Copy Right 2013 Wiz inc. All rights reserved&lt;/span&gt;</source>
         <translation>&lt;span style=&quot;font-size:10px&quot;&gt;版权所有 2013 我知科技. 保留一切权利&lt;/span&gt;</translation>
+    </message>
+    <message>
+        <location filename="../src/wizAboutDialog.cpp" line="65"/>
+        <source>About WizNote</source>
+        <translation>关于为知笔记</translation>
     </message>
 </context>
 <context>
@@ -395,6 +394,11 @@
         <translation>确定要删除文件夹 %1 吗？（所有文档会移动到根文件夹，这是一个安全的操作）</translation>
     </message>
     <message>
+        <location filename="../src/wizCategoryView.cpp" line="1157"/>
+        <source>Group settings</source>
+        <translation>群组设置</translation>
+    </message>
+    <message>
         <location filename="../src/wizCategoryView.cpp" line="669"/>
         <source>New folder</source>
         <translation>新建文件夹</translation>
@@ -443,8 +447,8 @@
         <translation type="obsolete">标签</translation>
     </message>
     <message>
-        <location filename="../src/wizCategoryView.cpp" line="1494"/>
-        <location filename="../src/wizCategoryView.cpp" line="1651"/>
+        <location filename="../src/wizCategoryView.cpp" line="1500"/>
+        <location filename="../src/wizCategoryView.cpp" line="1657"/>
         <source>Trash</source>
         <translation>已删除</translation>
     </message>
@@ -910,42 +914,42 @@
 <context>
     <name>CWizLoginDialog</name>
     <message>
-        <location filename="../src/wizLoginDialog.cpp" line="45"/>
+        <location filename="../src/wizLoginDialog.cpp" line="42"/>
         <source>Account Login</source>
         <translation>账户登录</translation>
     </message>
     <message>
-        <location filename="../src/wizLoginDialog.cpp" line="56"/>
+        <location filename="../src/wizLoginDialog.cpp" line="53"/>
         <source>Password</source>
         <translation>密码</translation>
     </message>
     <message>
-        <location filename="../src/wizLoginDialog.cpp" line="57"/>
+        <location filename="../src/wizLoginDialog.cpp" line="54"/>
         <source>Save password</source>
         <translation>记住密码</translation>
     </message>
     <message>
-        <location filename="../src/wizLoginDialog.cpp" line="59"/>
+        <location filename="../src/wizLoginDialog.cpp" line="56"/>
         <source>Auto login</source>
         <translation>自动登录</translation>
     </message>
     <message>
-        <location filename="../src/wizLoginDialog.cpp" line="99"/>
+        <location filename="../src/wizLoginDialog.cpp" line="96"/>
         <source>&lt;a href=&quot;javascript:void(0)&quot; style=&quot;color:#363636; text-decoration:none;&quot;&gt;New user&lt;/a&gt;</source>
         <translation>&lt;a href=&quot;javascript:void(0)&quot; style=&quot;color:#363636; text-decoration:none;&quot;&gt;新用户&lt;/a&gt;</translation>
     </message>
     <message>
-        <location filename="../src/wizLoginDialog.cpp" line="104"/>
+        <location filename="../src/wizLoginDialog.cpp" line="101"/>
         <source>&lt;a href=&quot;javascript:void(0)&quot; style=&quot;color:#363636; text-decoration:none;&quot;&gt;Forget password&lt;/a&gt;</source>
         <translation>&lt;a href=&quot;javascript:void(0)&quot; style=&quot;color:#363636; text-decoration:none;&quot;&gt;找回密码&lt;/a&gt;</translation>
     </message>
     <message>
-        <location filename="../src/wizLoginDialog.cpp" line="109"/>
+        <location filename="../src/wizLoginDialog.cpp" line="106"/>
         <source>&lt;a href=&quot;javascript:void(0)&quot; style=&quot;color:#363636; text-decoration:none;&quot;&gt;Network&lt;/a&gt;</source>
         <translation>&lt;a href=&quot;javascript:void(0)&quot; style=&quot;color:#363636; text-decoration:none;&quot;&gt;网络&lt;/a&gt;</translation>
     </message>
     <message>
-        <location filename="../src/wizLoginDialog.cpp" line="113"/>
+        <location filename="../src/wizLoginDialog.cpp" line="110"/>
         <source>Login</source>
         <translation>登录</translation>
     </message>
@@ -1365,8 +1369,9 @@
         <translation>代理设置</translation>
     </message>
     <message>
+        <location filename="../src/wizpreferencedialog.cpp" line="15"/>
         <source>Preference</source>
-        <translation type="obsolete">设置</translation>
+        <translation>偏好设置</translation>
     </message>
     <message>
         <source>Chinese</source>
@@ -1377,7 +1382,7 @@
         <translation type="obsolete">English(US)</translation>
     </message>
     <message>
-        <location filename="../src/wizpreferencedialog.cpp" line="114"/>
+        <location filename="../src/wizpreferencedialog.cpp" line="115"/>
         <source>Proxy settings</source>
         <translation>代理设置</translation>
     </message>
@@ -1451,32 +1456,32 @@
 <context>
     <name>CWizSortingPopupButton</name>
     <message>
-        <location filename="../src/wizPopupButton.cpp" line="165"/>
+        <location filename="../src/wizPopupButton.cpp" line="174"/>
         <source>Sorting by created time</source>
         <translation>按创建时间排序</translation>
     </message>
     <message>
-        <location filename="../src/wizPopupButton.cpp" line="166"/>
+        <location filename="../src/wizPopupButton.cpp" line="175"/>
         <source>Sorting by updated time</source>
         <translation>按更新时间排序</translation>
     </message>
     <message>
-        <location filename="../src/wizPopupButton.cpp" line="168"/>
+        <location filename="../src/wizPopupButton.cpp" line="177"/>
         <source>Sorting by title</source>
         <translation>按标题排序</translation>
     </message>
     <message>
-        <location filename="../src/wizPopupButton.cpp" line="169"/>
+        <location filename="../src/wizPopupButton.cpp" line="178"/>
         <source>Sorting by location</source>
         <translation>按文件夹排序</translation>
     </message>
     <message>
-        <location filename="../src/wizPopupButton.cpp" line="170"/>
+        <location filename="../src/wizPopupButton.cpp" line="179"/>
         <source>Sorting by tag</source>
         <translation>按标签排序</translation>
     </message>
     <message>
-        <location filename="../src/wizPopupButton.cpp" line="171"/>
+        <location filename="../src/wizPopupButton.cpp" line="180"/>
         <source>Sorting by size</source>
         <translation>按大小排序</translation>
     </message>
@@ -1777,6 +1782,7 @@
     </message>
     <message>
         <location filename="../src/widgets/wizUserInfoWidget.cpp" line="39"/>
+        <location filename="../src/widgets/wizUserInfoWidget.cpp" line="214"/>
         <source>Account settings</source>
         <translation>账户设置</translation>
     </message>
@@ -1789,17 +1795,17 @@
 <context>
     <name>CWizViewTypePopupButton</name>
     <message>
-        <location filename="../src/wizPopupButton.cpp" line="103"/>
+        <location filename="../src/wizPopupButton.cpp" line="107"/>
         <source>One line view</source>
         <translation>单行视图</translation>
     </message>
     <message>
-        <location filename="../src/wizPopupButton.cpp" line="102"/>
+        <location filename="../src/wizPopupButton.cpp" line="106"/>
         <source>Two line view</source>
         <translation>两行视图</translation>
     </message>
     <message>
-        <location filename="../src/wizPopupButton.cpp" line="101"/>
+        <location filename="../src/wizPopupButton.cpp" line="105"/>
         <source>Thumbnail view</source>
         <translation>摘要视图</translation>
     </message>
@@ -1850,6 +1856,11 @@
         <translation>为知笔记</translation>
     </message>
     <message>
+        <location filename="../src/wizmainwindow.cpp" line="528"/>
+        <source>Syncing...</source>
+        <translation>同步中...</translation>
+    </message>
+    <message>
         <source>Search</source>
         <translation type="obsolete">搜索</translation>
     </message>
@@ -1866,7 +1877,7 @@
         <translation type="obsolete">标签</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="422"/>
+        <location filename="../src/wizmainwindow.cpp" line="426"/>
         <source>0 articles</source>
         <translation>0 条</translation>
     </message>
@@ -1875,7 +1886,7 @@
         <translation type="obsolete">新建笔记</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="1070"/>
+        <location filename="../src/wizmainwindow.cpp" line="1080"/>
         <source>Saving note...</source>
         <translation>正在保存笔记...</translation>
     </message>

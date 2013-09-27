@@ -53,7 +53,7 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     , m_syncTimer(new QTimer(this))
     , m_searchIndexer(new CWizSearchIndexer(m_dbMgr))
     //, m_messageSync(new CWizGroupMessage(dbMgr.db()))
-    , m_console(new CWizConsoleDialog(*this, this))
+    //, m_console(new CWizConsoleDialog(*this, this))
     , m_upgrade(new CWizUpgrade())
     , m_certManager(new CWizCertManager(*this))
     , m_cipherForm(new CWizUserCipherForm(*this, this))
@@ -326,8 +326,11 @@ void MainWindow::initToolBar()
 #else
     m_toolBar->setIconSize(QSize(32, 32));
 #endif
+    m_toolBar->setContextMenuPolicy(Qt::PreventContextMenu);
     m_toolBar->setMovable(false);
     m_toolBar->setToolButtonStyle(Qt::ToolButtonIconOnly);
+
+    m_toolBar->addWidget(new CWizFixedSpacer(QSize(10, 1), m_toolBar));
 
     CWizUserInfoWidget* info = new CWizUserInfoWidget(*this, m_toolBar);
     m_toolBar->addWidget(info);
@@ -339,6 +342,7 @@ void MainWindow::initToolBar()
     m_toolBar->addWidget(buttonSync);
 
     m_toolBar->addWidget(new CWizFixedSpacer(QSize(20, 1), m_toolBar));
+
     CWizButton* buttonNew = new CWizButton(*this, m_toolBar);
     buttonNew->setAction(m_actions->actionFromName(WIZACTION_GLOBAL_NEW_DOCUMENT));
     m_toolBar->addWidget(buttonNew);
@@ -520,7 +524,9 @@ void MainWindow::on_syncDone(bool noError)
 
 void MainWindow::on_syncProcessLog(const QString& strMsg)
 {
-    m_statusBar->showText(strMsg.left(40));
+    Q_UNUSED(strMsg);
+    m_statusBar->showText(tr("Syncing..."));
+    //m_statusBar->showText(strMsg.left(40));
 }
 
 void MainWindow::on_actionNewNote_triggered()
@@ -664,6 +670,10 @@ void MainWindow::on_actionEditorViewSource_triggered()
 
 void MainWindow::on_actionConsole_triggered()
 {
+    if (!m_console) {
+      m_console = new CWizConsoleDialog(*this, window());
+    }
+
     m_console->show();
 }
 

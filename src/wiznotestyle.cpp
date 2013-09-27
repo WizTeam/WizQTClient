@@ -1144,17 +1144,17 @@ void CWizNoteStyle::drawControl(ControlElement element, const QStyleOption *opti
 {
     switch (element)
     {
-#ifndef Q_OS_MAC
-    case CE_ToolBar:
-        if (const QStyleOptionToolBar *toolbar = qstyleoption_cast<const QStyleOptionToolBar *>(option))
-        {
-            Q_UNUSED(toolbar);
-            //
-            painter->fillRect(option->rect, QColor(241, 241, 241));
-            m_toolBarImage.Draw(painter, option->rect, 0);
-        }
-        break;
-#endif
+//#ifndef Q_OS_MAC
+//    case CE_ToolBar:
+//        if (const QStyleOptionToolBar *toolbar = qstyleoption_cast<const QStyleOptionToolBar *>(option))
+//        {
+//            Q_UNUSED(toolbar);
+//            //
+//            painter->fillRect(option->rect, QColor(241, 241, 241));
+//            m_toolBarImage.Draw(painter, option->rect, 0);
+//        }
+//        break;
+//#endif
     case CE_ItemViewItem:
         {
             const QStyleOptionViewItemV4 *vopt = qstyleoption_cast<const QStyleOptionViewItemV4 *>(option);
