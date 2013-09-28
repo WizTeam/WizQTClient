@@ -439,7 +439,10 @@ bool WizIsPredefinedLocation(const QString& strLocation)
 QString WizLocation2Display(const QString& strLocation)
 {
     QString strLoc = strLocation;
-    if (strLocation.startsWith("/My Notes/"))
+    if (strLocation.startsWith("/Deleted Items/")) {
+        strLoc.replace("/Deleted Items/", QObject::tr("/Deleted Items/"));
+    }
+    else if (strLocation.startsWith("/My Notes/"))
     {
         strLoc.replace("/My Notes/", QObject::tr("/My Notes/"));
     }

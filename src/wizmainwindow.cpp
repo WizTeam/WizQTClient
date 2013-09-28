@@ -81,13 +81,13 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     , m_bReadyQuit(false)
     , m_bRequestQuit(false)
 {
-    // FTS engine thread
-    connect(m_searchIndexer, SIGNAL(documentFind(const WIZDOCUMENTDATAEX&)), \
-            SLOT(on_searchDocumentFind(const WIZDOCUMENTDATAEX&)));
-
+    // search and full text search
     QThread *threadFTS = new QThread();
     m_searchIndexer->moveToThread(threadFTS);
     threadFTS->start(QThread::LowestPriority);
+
+    //m_searchThread = new QThread();
+    //m_searchThread->start();
 
     // upgrade check
     QThread *thread = new QThread();
@@ -350,7 +350,9 @@ void MainWindow::initToolBar()
     m_toolBar->addWidget(new CWizSpacer(m_toolBar));
 
     m_searchBox = new CWizSearchBox(*this, this);
-    connect(m_searchBox, SIGNAL(doSearch(const QString&)), SLOT(on_search_doSearch(const QString&)));
+    connect(m_searchBox, SIGNAL(doSearch(const QString&)),
+            SLOT(on_search_doSearch(const QString&)));
+
     m_toolBar->addWidget(m_searchBox);
 
     m_toolBar->layout()->setAlignment(m_searchBox, Qt::AlignBottom);
@@ -745,7 +747,14 @@ void MainWindow::on_search_doSearch(const QString& keywords)
     m_category->saveSelection();
     m_documents->clear();
 
-    m_searchIndexer->search(keywords, 1000); // FIXME
+    if (!m_searcher) {
+        m_searcher = new CWizSearcher(m_dbMgr);
+        //m_searcher->moveToThread(m_searchThread);
+        connect(m_searcher, SIGNAL(documentFind(const WIZDOCUMENTDATAEX&)),
+                SLOT(on_searchDocumentFind(const WIZDOCUMENTDATAEX&)));
+    }
+
+    m_searcher->search(keywords, 1000); // FIXME
 }
 
 #ifndef Q_OS_MAC

@@ -3,11 +3,12 @@
 
 #include <QTimer>
 #include <QMap>
+#include <QThread>
 
 #include "wizClucene.h"
 #include "wizDatabaseManager.h"
 
-
+/* --------------------------- CWizSearchIndexer --------------------------- */
 class CWizSearchIndexer
         : public QObject
         , public IWizCluceneSearch
@@ -16,10 +17,8 @@ class CWizSearchIndexer
 
 public:
     explicit CWizSearchIndexer(CWizDatabaseManager& dbMgr, QObject *parent = 0);
-
     void abort();
     void rebuild();
-    void search(const QString& strKeywords, int nMaxSize = -1);
 
 private:
     bool buildFTSIndex();
@@ -34,29 +33,51 @@ private:
     bool clearAllFTSData();
     void clearFlags(CWizDatabase& db);
 
-    Q_INVOKABLE void searchKeyword(const QString& strKeywords);
-    void searchDatabase(const QString& strKeywords);
-
-protected:
-    virtual bool onSearchProcess(const wchar_t* lpszKbGUID, const wchar_t* lpszDocumentID, const wchar_t* lpszURL);
-    virtual bool onSearchEnd();
-
 private:
     CWizDatabaseManager& m_dbMgr;
     QString m_strIndexPath; // working path
     QTimer m_timerFTS;  // working interval
     bool m_bAbort;
 
-    // guid-document map, search faster
-    QMap<QString, WIZDOCUMENTDATAEX> m_mapDocumentSearched;
-    int m_nResults; // results returned
-    int m_nMaxResult;
-
-
 private Q_SLOTS:
     void on_timerFTS_timeout();
     void on_document_deleted(const WIZDOCUMENTDATA& doc);
     void on_attachment_deleted(const WIZDOCUMENTATTACHMENTDATA& attach);
+};
+
+
+/* ----------------------------- CWizSearcher ----------------------------- */
+class CWizSearcher
+        : public QThread
+        , public IWizCluceneSearch
+{
+    Q_OBJECT
+
+public:
+    explicit CWizSearcher(CWizDatabaseManager& dbMgr, QObject *parent = 0);
+    void search(const QString& strKeywords, int nMaxSize = -1);
+
+protected:
+    virtual void run();
+
+    virtual bool onSearchProcess(const wchar_t* lpszKbGUID, const wchar_t* lpszDocumentID, const wchar_t* lpszURL);
+    virtual bool onSearchEnd();
+
+private:
+    CWizDatabaseManager& m_dbMgr;
+    QString m_strIndexPath; // working path
+    QString m_strkeywords;
+    int m_nMaxResult;
+
+    // guid-document map, search faster
+    QMap<QString, WIZDOCUMENTDATAEX> m_mapDocumentSearched;
+    int m_nResults; // results returned
+
+    Q_INVOKABLE void searchKeyword(const QString& strKeywords);
+    void searchDatabase(const QString& strKeywords);
+
+public Q_SLOTS:
+    void on_searcher_started();
 
 Q_SIGNALS:
     void documentFind(const WIZDOCUMENTDATAEX& data);

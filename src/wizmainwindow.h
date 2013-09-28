@@ -34,6 +34,7 @@ class CWizOptionsWidget;
 class CWizStatusBar;
 
 class CWizSearchBox;
+class CWizSearcher;
 class CWizSearchIndexer;
 
 class QtSegmentControl;
@@ -107,6 +108,8 @@ private:
     CWizDocumentViewHistory* m_history;
     QPointer<CWizAnimateAction> m_animateSync;
 
+    //QThread* m_searchThread;
+    QPointer<CWizSearcher> m_searcher;
     CWizSearchIndexer* m_searchIndexer;
     QPointer<CWizSearchBox> m_searchBox;
 

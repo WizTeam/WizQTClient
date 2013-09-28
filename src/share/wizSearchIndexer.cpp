@@ -32,19 +32,6 @@ CWizSearchIndexer::CWizSearchIndexer(CWizDatabaseManager& dbMgr, QObject *parent
             SLOT(on_attachment_deleted(const WIZDOCUMENTATTACHMENTDATA&)));
 }
 
-void CWizSearchIndexer::search(const QString &strKeywords,
-                               int nMaxSize /* = -1 */)
-{
-    m_mapDocumentSearched.clear();
-    m_nMaxResult = nMaxSize;
-    m_nResults = 0;
-
-    if (!QMetaObject::invokeMethod(this, "searchKeyword",
-                                   Q_ARG(const QString&, strKeywords))) {
-        qDebug() << "\nInvoke searchKeyword failed\n";
-    }
-}
-
 void CWizSearchIndexer::rebuild() {
     if (!QMetaObject::invokeMethod(this, "rebuildFTSIndex")) {
         qDebug() << "\nInvoke rebuildFTSIndex failed\n";
@@ -269,7 +256,55 @@ bool CWizSearchIndexer::clearAllFTSData()
     return true;
 }
 
-void CWizSearchIndexer::searchKeyword(const QString& strKeywords)
+void CWizSearchIndexer::on_document_deleted(const WIZDOCUMENTDATA& doc)
+{
+    deleteDocument(doc);
+}
+
+void CWizSearchIndexer::on_attachment_deleted(const WIZDOCUMENTATTACHMENTDATA& attach)
+{
+    Q_UNUSED(attach);
+}
+
+
+/* ----------------------------- CWizSearcher ----------------------------- */
+CWizSearcher::CWizSearcher(CWizDatabaseManager& dbMgr, QObject *parent)
+    : QThread(parent)
+    , m_dbMgr(dbMgr)
+{
+    m_strIndexPath = m_dbMgr.db().GetAccountPath() + "fts_index";
+    connect(this, SIGNAL(started()), SLOT(on_searcher_started()));
+}
+
+void CWizSearcher::run()
+{
+    exec();
+}
+
+void CWizSearcher::search(const QString &strKeywords, int nMaxSize /* = -1 */)
+{
+    m_strkeywords = strKeywords;
+    m_nMaxResult = nMaxSize;
+
+    if (isRunning()) {
+        on_searcher_started();
+    } else {
+        start();
+    }
+}
+
+void CWizSearcher::on_searcher_started()
+{
+    m_mapDocumentSearched.clear();
+    m_nResults = 0;
+
+    if (!QMetaObject::invokeMethod(this, "searchKeyword",
+                                   Q_ARG(const QString&, m_strkeywords))) {
+        qDebug() << "\nInvoke searchKeyword failed\n";
+    }
+}
+
+void CWizSearcher::searchKeyword(const QString& strKeywords)
 {
     Q_ASSERT(!strKeywords.isEmpty());
 
@@ -285,7 +320,7 @@ void CWizSearchIndexer::searchKeyword(const QString& strKeywords)
                    strKeywords.toLower().toStdWString().c_str());
 }
 
-void CWizSearchIndexer::searchDatabase(const QString& strKeywords)
+void CWizSearcher::searchDatabase(const QString& strKeywords)
 {
     CWizDocumentDataArray arrayDocument;
     m_dbMgr.db().SearchDocumentByTitle(strKeywords, NULL, true, 5000, arrayDocument);
@@ -323,9 +358,9 @@ void CWizSearchIndexer::searchDatabase(const QString& strKeywords)
     }
 }
 
-bool CWizSearchIndexer::onSearchProcess(const wchar_t* lpszKbGUID,
-                                        const wchar_t* lpszDocumentID,
-                                        const wchar_t* lpszURL)
+bool CWizSearcher::onSearchProcess(const wchar_t* lpszKbGUID,
+                                   const wchar_t* lpszDocumentID,
+                                   const wchar_t* lpszURL)
 {
     Q_UNUSED(lpszURL);
 
@@ -362,18 +397,8 @@ bool CWizSearchIndexer::onSearchProcess(const wchar_t* lpszKbGUID,
     return true;
 }
 
-bool CWizSearchIndexer::onSearchEnd()
+bool CWizSearcher::onSearchEnd()
 {
     qDebug() << "[Search]Search process end, total: " << m_nResults << "\n";
     return true;
-}
-
-void CWizSearchIndexer::on_document_deleted(const WIZDOCUMENTDATA& doc)
-{
-    deleteDocument(doc);
-}
-
-void CWizSearchIndexer::on_attachment_deleted(const WIZDOCUMENTATTACHMENTDATA& attach)
-{
-    Q_UNUSED(attach);
 }

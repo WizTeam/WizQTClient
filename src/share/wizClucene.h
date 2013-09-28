@@ -1,6 +1,8 @@
 #ifndef WIZCLUCENE_H
 #define WIZCLUCENE_H
 
+#include <QtGlobal>
+
 // interface
 class IWizCluceneSearch
 {
@@ -18,9 +20,10 @@ protected:
 
     virtual bool onSearchProcess(const wchar_t* lpszKbGUID,
                                  const wchar_t* lpszDocumentID,
-                                 const wchar_t* lpszURL) = 0;
+                                 const wchar_t* lpszURL)
+    { Q_UNUSED(lpszKbGUID); Q_UNUSED(lpszDocumentID); Q_UNUSED(lpszURL); return true;}
 
-    virtual bool onSearchEnd() = 0;
+    virtual bool onSearchEnd() {return true;}
 };
 
 // debug related
