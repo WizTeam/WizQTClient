@@ -949,9 +949,7 @@ void CWizNoteStyle::drawMultiLineListWidgetItem(const QStyleOptionViewItemV4 *vo
 #endif
     //proxy()->drawPrimitive(PE_PanelItemViewItem, opt, p, view);
     //
-    if (!img.isNull()
-        && img.width() > 0
-        && img.height() > 0)
+    if (!img.isNull() && img.width() > 0 && img.height() > 0)
     {
         QRect imageRect = textRect;
         if (imageAlignLeft)
@@ -966,7 +964,7 @@ void CWizNoteStyle::drawMultiLineListWidgetItem(const QStyleOptionViewItemV4 *vo
             imageRect.adjust(4, 4, -4, -4);
             textRect.setRight(imageRect.left());
         }
-        //
+
         if (img.width() > imageRect.width() || img.height() > imageRect.height())
         {
             double fRate = std::min<double>(double(imageRect.width()) / img.width(), double(imageRect.height()) / img.height());
@@ -984,9 +982,8 @@ void CWizNoteStyle::drawMultiLineListWidgetItem(const QStyleOptionViewItemV4 *vo
             imageRect.adjust(adjustX, adjustY, -adjustX, -adjustY);
         }
         p->drawPixmap(imageRect, img);
-        //
     }
-    //
+
     // draw the text
     QPalette::ColorGroup cg = vopt->state & QStyle::State_Enabled
                               ? QPalette::Normal : QPalette::Disabled;
@@ -1144,17 +1141,6 @@ void CWizNoteStyle::drawControl(ControlElement element, const QStyleOption *opti
 {
     switch (element)
     {
-//#ifndef Q_OS_MAC
-//    case CE_ToolBar:
-//        if (const QStyleOptionToolBar *toolbar = qstyleoption_cast<const QStyleOptionToolBar *>(option))
-//        {
-//            Q_UNUSED(toolbar);
-//            //
-//            painter->fillRect(option->rect, QColor(241, 241, 241));
-//            m_toolBarImage.Draw(painter, option->rect, 0);
-//        }
-//        break;
-//#endif
     case CE_ItemViewItem:
         {
             const QStyleOptionViewItemV4 *vopt = qstyleoption_cast<const QStyleOptionViewItemV4 *>(option);
@@ -1163,16 +1149,6 @@ void CWizNoteStyle::drawControl(ControlElement element, const QStyleOption *opti
             if (const CWizDocumentListView *view = dynamic_cast<const CWizDocumentListView *>(widget))
             {
                 drawDocumentListViewItem(vopt, painter, view);
-                //CWizDocumentListViewItem* it = view->documentItemFromIndex(vopt->index);
-                //if (it->nType == CWizDocumentListViewItem::MessageDocument) {
-                //    drawDocumentListViewItemMessage(vopt, painter, view);
-                //} else if (it->nType == CWizDocumentListViewItem::PrivateDocument) {
-                //    drawDocumentListViewItemPrivate(vopt, painter, view);
-                //} else {
-                //    Q_ASSERT(0);
-                //}
-
-                //drawDocumentListViewItem(vopt, painter, view);
             }
             else if (const CWizMultiLineListWidget *view = dynamic_cast<const CWizMultiLineListWidget *>(widget))
             {
@@ -1277,21 +1253,6 @@ void CWizNoteStyle::drawPrimitive(PrimitiveElement pe, const QStyleOption *opt, 
                         rect.setWidth(5); // FIXME
                         p->fillRect(rect, m_colorCategorySelectedBackground);
                     }
-
-                        // draw the focus rect
-                        //if (opt->state & QStyle::State_HasFocus)
-                        //{
-                        //    QStyleOptionFocusRect o;
-                        //    o.QStyleOption::operator=(*opt);
-                        //    o.rect = rect;
-                        //    o.state |= QStyle::State_KeyboardFocusChange;
-                        //    o.state |= QStyle::State_Item;
-                        //    QPalette::ColorGroup cg = (opt->state & QStyle::State_Enabled)
-                        //                              ? QPalette::Normal : QPalette::Disabled;
-                        //    o.backgroundColor = opt->palette.color(cg, (opt->state & QStyle::State_Selected)
-                        //                                           ? QPalette::Highlight : QPalette::Window);
-                        //    proxy()->drawPrimitive(QStyle::PE_FrameFocusRect, &o, p, w);
-                        //}
                 }
             }
 
@@ -1327,31 +1288,6 @@ void CWizNoteStyle::drawcenterImage(QPainter* p, const QImage& image, const QRec
 
     p->drawImage(x, y, image);
 }
-
-//void CWizNoteStyle::drawCategoryViewItemCategoryItem(const CWizCategoryViewCategoryItem* pItem,
-//                                                     const QStyleOptionViewItemV4 *vopt,
-//                                                     QPainter* p) const
-//{
-//    Q_UNUSED(pItem);
-//
-//    p->save();
-//
-//    p->fillRect(vopt->rect, QColor(255, 255, 255, 15)); // FIXME
-//
-//    QFont f = p->font();
-//    f.setPixelSize(13);
-//    p->setFont(f);
-//
-//
-////    CString strText = vopt->text;
-////    WizDrawTextSingleLine(p, vopt->rect, strText,
-////                          Qt::TextSingleLine | Qt::AlignVCenter,
-////                          m_colorCategoryTextCategoryNormal, true);
-//
-//    p->restore();
-//}
-
-
 
 CWizNoteStyle* CWizNoteStyle::noteStyle(const QString& skinName)
 {

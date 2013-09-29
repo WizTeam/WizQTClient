@@ -299,9 +299,9 @@ void CWizDocumentListView::contextMenuEvent(QContextMenuEvent * e)
         return;
 
     if (pItem->itemType() == CWizDocumentListViewItem::TypeMessage) {
-        m_menuMessage->popup(mapToGlobal(e->pos()));
+        m_menuMessage->popup(e->globalPos());
     } else {
-        m_menuDocument->popup(mapToGlobal(e->pos()));
+        m_menuDocument->popup(e->globalPos());
     }
 }
 

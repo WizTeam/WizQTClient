@@ -201,7 +201,7 @@ void CWizAttachmentListView::openAttachment(CWizAttachmentListViewItem* item)
 void CWizAttachmentListView::contextMenuEvent(QContextMenuEvent * e)
 {
     resetPermission();
-    m_menu->popup(mapToGlobal(e->pos()));
+    m_menu->popup(e->globalPos());
 }
 
 void CWizAttachmentListView::resetPermission()
