@@ -46,6 +46,7 @@ CWizTagListWidget::CWizTagListWidget(CWizDatabaseManager& db, QWidget* parent)
     setGeometry(0, 0, sizeHint().width(), sizeHint().height());
     setContentsMargins(8, 20, 8, 8);
 
+
     QVBoxLayout* layout = new QVBoxLayout();
     layout->setContentsMargins(0, 0, 0, 0);
     setLayout(layout);
@@ -59,6 +60,14 @@ CWizTagListWidget::CWizTagListWidget(CWizDatabaseManager& db, QWidget* parent)
 
     m_list = new QListWidget(this);
     m_list->setAttribute(Qt::WA_MacShowFocusRect, false);
+
+    QPalette pal;
+#ifdef Q_OS_LINUX
+    pal.setBrush(QPalette::Base, QBrush("#D7D7D7"));
+#elif defined(Q_OS_MAC)
+    pal.setBrush(QPalette::Base, QBrush("#F7F7F7"));
+#endif
+    m_list->setPalette(pal);
 
     layout->addLayout(layoutTitle);
     layout->addWidget(m_list);

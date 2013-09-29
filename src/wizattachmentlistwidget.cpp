@@ -48,7 +48,17 @@ CWizAttachmentListView::CWizAttachmentListView(CWizExplorerApp& app, QWidget* pa
     setStyle(WizGetStyle(m_app.userSettings().skin()));
     setSelectionMode(QAbstractItemView::ExtendedSelection);
     setAttribute(Qt::WA_MacShowFocusRect, false);
-    setStyleSheet("background-color: #F7F7F7");
+
+    QPalette pal;
+#ifdef Q_OS_LINUX
+    pal.setBrush(QPalette::Base, QBrush("#D7D7D7"));
+#elif defined(Q_OS_MAC)
+    pal.setBrush(QPalette::Base, QBrush("#F7F7F7"));
+#endif
+    setPalette(pal);
+
+    //QVBoxLayout* layout = new QVBoxLayout();
+    //setStyleSheet("background-color: #F7F7F7");
 
     connect(this, SIGNAL(itemDoubleClicked(QListWidgetItem*)),
             SLOT(on_list_itemDoubleClicked(QListWidgetItem*)));
@@ -336,7 +346,7 @@ CWizAttachmentListWidget::CWizAttachmentListWidget(CWizExplorerApp& app, QWidget
 {
     // FIXME
     setContentsMargins(0, 20, 0, 0);
-    setStyleSheet("background-color: #FFFFFF");
+    //setStyleSheet("background-color: #FFFFFF");
 
     QIcon iconAddAttachment = ::WizLoadSkinIcon(m_app.userSettings().skin(), "document_add_attachment");
     QAction* actionAddAttach = new QAction(iconAddAttachment, tr("Add attachments"), this);

@@ -13,12 +13,6 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <property name="autoFillBackground">
-   <bool>false</bool>
-  </property>
-  <property name="styleSheet">
-   <string notr="true">background-color: #FFFFFF</string>
-  </property>
   <widget class="QWidget" name="widget" native="true">
    <property name="geometry">
     <rect>
@@ -28,8 +22,8 @@
      <height>351</height>
     </rect>
    </property>
-   <property name="styleSheet">
-    <string notr="true">background-color: #F7F7F7;</string>
+   <property name="autoFillBackground">
+    <bool>true</bool>
    </property>
    <widget class="QWidget" name="verticalLayoutWidget">
     <property name="geometry">

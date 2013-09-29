@@ -910,26 +910,26 @@ void CWizNoteStyle::drawMultiLineListWidgetItem(const QStyleOptionViewItemV4 *vo
     int lineCount = view->lineCount();
     int wrapTextLineText = view->wrapTextLineIndex();
     const QPixmap img = view->itemImage(vopt->index);
-    //
-    QPalette palette = vopt->palette;
-    palette.setColor(QPalette::All, QPalette::HighlightedText, palette.color(QPalette::Active, QPalette::Text));
-    // Note that setting a saturated color here results in ugly XOR colors in the focus rect
-    palette.setColor(QPalette::All, QPalette::Highlight, palette.base().color().darker(108));
-    QStyleOptionViewItemV4 adjustedOption = *vopt;
-    adjustedOption.palette = palette;
-    // We hide the  focusrect in singleselection as it is not required
-    if ((view->selectionMode() == QAbstractItemView::SingleSelection)
-        && !(vopt->state & State_KeyboardFocusChange))
-    {
-        adjustedOption.state &= ~State_HasFocus;
-    }
 
-    QStyleOptionViewItemV4* opt = &adjustedOption;
+    //QPalette palette = vopt->palette;
+    //palette.setColor(QPalette::All, QPalette::HighlightedText, palette.color(QPalette::Active, QPalette::Text));
+    //// Note that setting a saturated color here results in ugly XOR colors in the focus rect
+    //palette.setColor(QPalette::All, QPalette::Highlight, palette.base().color().darker(108));
+    //QStyleOptionViewItemV4 adjustedOption = *vopt;
+    //adjustedOption.palette = palette;
+    //// We hide the  focusrect in singleselection as it is not required
+    //if ((view->selectionMode() == QAbstractItemView::SingleSelection)
+    //    && !(vopt->state & State_KeyboardFocusChange))
+    //{
+    //    adjustedOption.state &= ~State_HasFocus;
+    //}
+
+    //QStyleOptionViewItemV4* opt = &adjustedOption;
     //
     p->save();
-    p->setClipRect(opt->rect);
+    p->setClipRect(vopt->rect);
 
-    QRect textLine = opt->rect;
+    QRect textLine = vopt->rect;
     textLine.adjust(4, 0, -4, 0);
     p->setPen(m_colorDocumentsLine);
     p->drawLine(textLine.bottomLeft(), textLine.bottomRight());
@@ -941,14 +941,14 @@ void CWizNoteStyle::drawMultiLineListWidgetItem(const QStyleOptionViewItemV4 *vo
     {
         m_multiLineListSelectedItemBackground.Draw(p, vopt->rect, 0);
     }
+
 #ifndef Q_OS_MAC
     else if (vopt->state.testFlag(State_MouseOver))
     {
         m_multiLineListSelectedItemBackgroundHot.Draw(p, vopt->rect, 0);
     }
 #endif
-    //proxy()->drawPrimitive(PE_PanelItemViewItem, opt, p, view);
-    //
+
     if (!img.isNull() && img.width() > 0 && img.height() > 0)
     {
         QRect imageRect = textRect;
@@ -999,13 +999,11 @@ void CWizNoteStyle::drawMultiLineListWidgetItem(const QStyleOptionViewItemV4 *vo
         p->setPen(vopt->palette.color(cg, QPalette::Text));
         p->drawRect(textRect.adjusted(0, 0, -1, -1));
     }
-    //
+
     textRect.adjust(8, 8, -8, -8);
-    //
     bool selected = vopt->state.testFlag(State_Selected);
-    //
     int lineHeight = vopt->fontMetrics.height() + 2;
-    //
+
     for (int line = 0; line < wrapTextLineText && line < lineCount; line++)
     {
         QColor color = (0 == line) ? (selected ? m_colorMultiLineListFirstLineSelected : m_colorMultiLineListFirstLine)
@@ -1018,7 +1016,7 @@ void CWizNoteStyle::drawMultiLineListWidgetItem(const QStyleOptionViewItemV4 *vo
         rc.setHeight(lineHeight);
         ::WizDrawTextSingleLine(p, rc, strText,  Qt::TextSingleLine | Qt::AlignVCenter, color, true);
     }
-    //
+
     int line = wrapTextLineText;
     if (line < lineCount)
     {
@@ -1049,7 +1047,7 @@ void CWizNoteStyle::drawMultiLineListWidgetItem(const QStyleOptionViewItemV4 *vo
                                                 ? QPalette::Highlight : QPalette::Window);
         proxy()->drawPrimitive(QStyle::PE_FrameFocusRect, &o, p, view);
     }
-    //
+
     p->restore();
 }
 
