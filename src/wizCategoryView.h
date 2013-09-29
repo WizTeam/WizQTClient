@@ -119,6 +119,7 @@ public:
     // one QAction and for different type of usages, and delegate task, so reset
     // menu text is necessary.
     void resetMenu(CategoryMenuType type);
+    void setActionsEnabled(bool enable);
 
     void showFolderRootContextMenu(QPoint pos);
     void showFolderContextMenu(QPoint pos);

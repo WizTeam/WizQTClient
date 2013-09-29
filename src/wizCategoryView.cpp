@@ -488,6 +488,16 @@ void CWizCategoryView::initMenus()
     m_menuGroup->addAction(actionDeleteItem);
 }
 
+void CWizCategoryView::setActionsEnabled(bool enable)
+{
+    QList<QAction*> acts = actions();
+
+    for (int i = 0; i < acts.size(); i++) {
+        QAction* act = acts.at(i);
+        act->setEnabled(enable);
+    }
+}
+
 void CWizCategoryView::resetMenu(CategoryMenuType type)
 {
     QList<QAction*> acts = actions();
@@ -1191,6 +1201,8 @@ void CWizCategoryView::on_itemSelectionChanged()
     if (pRoot || pItem) {
         CWizCategoryViewItemBase* p = currentCategoryItem<CWizCategoryViewItemBase>();
         on_group_permissionChanged(p->kbGUID());
+    } else {
+        setActionsEnabled(true); // enable all actions if selected is not group
     }
 }
 
