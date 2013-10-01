@@ -48,22 +48,28 @@ void CWizDocumentWebViewPage::on_editorCommandCopy_triggered()
 
 void CWizDocumentWebViewPage::on_editorCommandPaste_triggered()
 {
-    //QClipboard* clip = QApplication::clipboard();
-    //Q_ASSERT(clip);
+    QClipboard* clip = QApplication::clipboard();
+    Q_ASSERT(clip);
 
-    //qDebug() << clip->supportsSelection();
-    //qDebug() << clip->supportsFindBuffer();
+    //const QMimeData* mime = clip->mimeData();
+    //qDebug() << mime->formats();
+    //qDebug() << mime->data("text/html");
+    //qDebug() << mime->hasImage();
 
-    //const QMimeData* mime1 = clip->mimeData();
-    //const QMimeData* mime2 = clip->mimeData(QClipboard::FindBuffer);
+    if (!clip->image().isNull()) {
+        // save clipboard image to $TMPDIR
+        QString strTempPath = WizGlobal()->GetTempPath();
+        CString strFileName = strTempPath + WizIntToStr(GetTickCount()) + ".png";
+        if (!clip->image().save(strFileName)) {
+            TOLOG("ERROR: Can't save clipboard image to file");
+            return;
+        }
 
-    //qDebug() << mime1->formats();
-
-    //qDebug() << mime1->data("text/html");
-    //qDebug() << mime1->data("text/plain");
-    //qDebug() << mime1->imageData().toByteArray();
-
-    //qDebug() << mime1->hasImage();
+        QMimeData* data = new QMimeData();
+        QString strHtml = QString("<img border=\"0\" src=\"file://%1\" />").arg(strFileName);
+        data->setHtml(strHtml);
+        clip->setMimeData(data);
+    }
 }
 
 void CWizDocumentWebViewPage::javaScriptConsoleMessage(const QString& message, int lineNumber, const QString& sourceID)

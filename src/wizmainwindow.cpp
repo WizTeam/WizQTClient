@@ -1100,20 +1100,29 @@ void MainWindow::ProcessClipboardBeforePaste(const QVariantMap& data)
     //qDebug() << data.value("html").toString();
     //qDebug() << data.value("textContent").toString();
 
-    QClipboard* clipboard = QApplication::clipboard();
-    QImage image = clipboard->image();
-    if (!image.isNull()) {
-        qDebug() << "clipboard with image";
-        // save clipboard image to $TMPDIR
-        QString strTempPath = WizGlobal()->GetTempPath();
-        CString strFileName = strTempPath + WizIntToStr(GetTickCount()) + ".png";
-        if (!image.save(strFileName)) {
-            TOLOG("ERROR: Can't save clipboard image to file");
-            return;
-        }
-
-        QString strHtml = QString("<img border=\"0\" src=\"file://%1\" />").arg(strFileName);
-        web()->editorCommandExecuteInsertHtml(strHtml, true);
-        return;
-    }
+//    QClipboard* clipboard = QApplication::clipboard();
+//
+//#ifdef Q_OS_LINUX
+//    // on X, copy action carry formats: ("TARGETS", "MULTIPLE", "text/html", "image/bmp", "SAVE_TARGETS", "TIMESTAMP", "application/x-qt-image")
+//    // paste image copy from chromium or firefox will insert html to the end, we should remove all text if image exist
+//    const QMimeData *mimeData = clipboard->mimeData();
+//    if (mimeData->hasImage() && mimeData->hasHtml()) {
+//        QImage image = clipboard->image();
+//        clipboard->clear();
+//        clipboard->setImage(image);
+//    }
+//#endif
+//
+//    if (!clipboard->image().isNull()) {
+//        // save clipboard image to $TMPDIR
+//        QString strTempPath = WizGlobal()->GetTempPath();
+//        CString strFileName = strTempPath + WizIntToStr(GetTickCount()) + ".png";
+//        if (!clipboard->image().save(strFileName)) {
+//            TOLOG("ERROR: Can't save clipboard image to file");
+//            return;
+//        }
+//
+//        QString strHtml = QString("<img border=\"0\" src=\"file://%1\" />").arg(strFileName);
+//        web()->editorCommandExecuteInsertHtml(strHtml, true);
+//    }
 }
