@@ -108,6 +108,7 @@ void CWizDocumentListViewItem::reload(CWizDatabase& db)
 {
     Q_ASSERT(db.kbGUID() == m_data.doc.strKbGUID);
 
+    m_strTags.clear();
     m_data.thumb = WIZABSTRACT();
     setSortingType(m_nSortingType); // reset info
 

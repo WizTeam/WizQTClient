@@ -434,7 +434,6 @@ CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
 
     m_title->setEditingDocument(m_editingDocument);
 
-    m_tags = new CWizTagListWidget(m_dbMgr, topLevelWidget());
     m_attachments = new CWizAttachmentListWidget(m_app, topLevelWidget());
     m_info = new CWizNoteInfoForm(m_dbMgr, topLevelWidget());
 
@@ -624,6 +623,10 @@ void CWizDocumentView::on_title_editButtonClicked()
 
 void CWizDocumentView::on_title_tagButtonClicked()
 {
+    if (!m_tags) {
+        m_tags = new CWizTagListWidget(m_dbMgr, topLevelWidget());
+    }
+
     m_tags->setDocument(m_web->document());
 
     QRect rc = m_title->tagButton()->rect();

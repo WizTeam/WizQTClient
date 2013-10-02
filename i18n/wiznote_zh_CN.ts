@@ -525,47 +525,47 @@
 <context>
     <name>CWizDatabase</name>
     <message>
-        <location filename="../src/share/wizDatabase.cpp" line="2415"/>
+        <location filename="../src/share/wizDatabase.cpp" line="2426"/>
         <source>My Notes</source>
         <translation>我的笔记</translation>
     </message>
     <message>
-        <location filename="../src/share/wizDatabase.cpp" line="2417"/>
+        <location filename="../src/share/wizDatabase.cpp" line="2428"/>
         <source>My Journals</source>
         <translation>我的日记</translation>
     </message>
     <message>
-        <location filename="../src/share/wizDatabase.cpp" line="2419"/>
+        <location filename="../src/share/wizDatabase.cpp" line="2430"/>
         <source>My Events</source>
         <translation>我的事件</translation>
     </message>
     <message>
-        <location filename="../src/share/wizDatabase.cpp" line="2421"/>
+        <location filename="../src/share/wizDatabase.cpp" line="2432"/>
         <source>My Sticky Notes</source>
         <translation>我的桌面便笺</translation>
     </message>
     <message>
-        <location filename="../src/share/wizDatabase.cpp" line="2423"/>
+        <location filename="../src/share/wizDatabase.cpp" line="2434"/>
         <source>My Emails</source>
         <translation>我的电子邮件</translation>
     </message>
     <message>
-        <location filename="../src/share/wizDatabase.cpp" line="2425"/>
+        <location filename="../src/share/wizDatabase.cpp" line="2436"/>
         <source>My Drafts</source>
         <translation>我的草稿</translation>
     </message>
     <message>
-        <location filename="../src/share/wizDatabase.cpp" line="2427"/>
+        <location filename="../src/share/wizDatabase.cpp" line="2438"/>
         <source>My Tasks</source>
         <translation>我的任务</translation>
     </message>
     <message>
-        <location filename="../src/share/wizDatabase.cpp" line="2431"/>
+        <location filename="../src/share/wizDatabase.cpp" line="2442"/>
         <source>Inbox</source>
         <translation>收集箱</translation>
     </message>
     <message>
-        <location filename="../src/share/wizDatabase.cpp" line="2433"/>
+        <location filename="../src/share/wizDatabase.cpp" line="2444"/>
         <source>Completed</source>
         <translation>已完成</translation>
     </message>
@@ -581,7 +581,7 @@
         <translation type="obsolete">删除...</translation>
     </message>
     <message>
-        <location filename="../src/wizDocumentListView.cpp" line="829"/>
+        <location filename="../src/wizDocumentListView.cpp" line="828"/>
         <source>Move Document: %1 to %2</source>
         <translation>移动文档：%1 到 %2</translation>
     </message>
@@ -1590,7 +1590,12 @@
 <context>
     <name>CWizTagListWidget</name>
     <message>
-        <location filename="../src/wiztaglistwidget.cpp" line="56"/>
+        <location filename="../src/wiztaglistwidget.cpp" line="40"/>
+        <source>Use semicolon to seperate tags...</source>
+        <translation>使用分号分隔多个标签...</translation>
+    </message>
+    <message>
+        <location filename="../src/wiztaglistwidget.cpp" line="62"/>
         <source>Tags:</source>
         <translation>标签:</translation>
     </message>
@@ -2828,8 +2833,8 @@
         <translation>%1 小时前</translation>
     </message>
     <message>
-        <location filename="../src/wizDocumentListViewItem.cpp" line="144"/>
-        <location filename="../src/wizDocumentListViewItem.cpp" line="173"/>
+        <location filename="../src/wizDocumentListViewItem.cpp" line="145"/>
+        <location filename="../src/wizDocumentListViewItem.cpp" line="174"/>
         <source>Unknown</source>
         <translation>未知</translation>
     </message>

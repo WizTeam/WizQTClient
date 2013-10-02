@@ -593,7 +593,6 @@ void CWizDocumentListView::on_tag_modified(const WIZTAGDATA& tagOld, const WIZTA
 {
     Q_UNUSED(tagOld);
     Q_UNUSED(tagNew);
-
 }
 
 void CWizDocumentListView::on_document_created(const WIZDOCUMENTDATA& document)
@@ -621,6 +620,7 @@ void CWizDocumentListView::on_document_modified(const WIZDOCUMENTDATA& documentO
         } else {
             if (CWizDocumentListViewItem* pItem = documentItemAt(index)) {
                 pItem->reload(m_dbMgr.db(documentNew.strKbGUID));
+                update(indexFromItem(pItem));
             }
         }
     } else {
@@ -737,23 +737,22 @@ void CWizDocumentListView::on_action_message_delete()
 
 void CWizDocumentListView::on_action_selectTags()
 {
+    if (!m_tagList) {
+        m_tagList = new CWizTagListWidget(m_dbMgr, this);
+    }
+
     QList<QListWidgetItem*> items = selectedItems();
     if (items.isEmpty())
         return;
 
-    if (CWizDocumentListViewItem* item = dynamic_cast<CWizDocumentListViewItem*>(items.at(0)))
-    {
-        Q_UNUSED(item);
-
-        if (!m_tagList)
-        {
-            m_tagList = new CWizTagListWidget(m_dbMgr, this);
-            m_tagList->setLeftAlign(true);
-        }
-
-        m_tagList->setDocument(item->document());
-        m_tagList->showAtPoint(QCursor::pos());
+    CWizDocumentDataArray arrayDocument;
+    for (int i = 0; i < items.size(); i++) {
+        CWizDocumentListViewItem* pItem = dynamic_cast<CWizDocumentListViewItem*>(items.at(i));
+        arrayDocument.push_back(pItem->document());
     }
+
+    m_tagList->setDocuments(arrayDocument);
+    m_tagList->showAtPoint(QCursor::pos());
 }
 
 void CWizDocumentListView::on_action_deleteDocument()

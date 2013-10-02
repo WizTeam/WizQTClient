@@ -21,45 +21,29 @@ public:
     {
         setText(CWizDatabase::TagNameToDisplayName(tag.strName));
         setFlags(flags() | Qt::ItemIsUserCheckable);
-        setChecked(false);
-    }
-
-    void setChecked(bool b)
-    {
-        m_bChecked = b;
-        setCheckState(b ? Qt::Checked : Qt::Unchecked);
+        setCheckState(Qt::Unchecked);
     }
 
     const WIZTAGDATA& tag() const { return m_tag; }
-    bool tagState() const { return m_bChecked; }
 
 private:
     WIZTAGDATA m_tag;
-    bool m_bChecked;
 };
 
 
 CWizTagListWidget::CWizTagListWidget(CWizDatabaseManager& db, QWidget* parent)
     : CWizPopupWidget(parent)
     , m_dbMgr(db)
+    , m_bUpdating(false)
 {
-    setGeometry(0, 0, sizeHint().width(), sizeHint().height());
-    setContentsMargins(8, 20, 8, 8);
-
-
-    QVBoxLayout* layout = new QVBoxLayout();
-    layout->setContentsMargins(0, 0, 0, 0);
-    setLayout(layout);
-
-    QHBoxLayout* layoutTitle = new QHBoxLayout();
     m_tagsEdit = new QLineEdit(this);
-    layoutTitle->addWidget(new QLabel(tr("Tags:"), this));
-    layoutTitle->addWidget(m_tagsEdit);
-    layoutTitle->setSpacing(8);
-    layoutTitle->setMargin(4);
+    m_tagsEdit->setPlaceholderText(tr("Use semicolon to seperate tags..."));
+    connect(m_tagsEdit, SIGNAL(returnPressed()), SLOT(on_tagsEdit_returnPressed()));
 
     m_list = new QListWidget(this);
     m_list->setAttribute(Qt::WA_MacShowFocusRect, false);
+    connect(m_list, SIGNAL(itemChanged(QListWidgetItem*)),
+            SLOT(on_list_itemChanged(QListWidgetItem*)));
 
     QPalette pal;
 #ifdef Q_OS_LINUX
@@ -69,81 +53,146 @@ CWizTagListWidget::CWizTagListWidget(CWizDatabaseManager& db, QWidget* parent)
 #endif
     m_list->setPalette(pal);
 
+    QVBoxLayout* layout = new QVBoxLayout();
+    layout->setContentsMargins(0, 0, 0, 0);
+    setLayout(layout);
+
+    QHBoxLayout* layoutTitle = new QHBoxLayout();
+
+    layoutTitle->addWidget(new QLabel(tr("Tags:"), this));
+    layoutTitle->addWidget(m_tagsEdit);
+    layoutTitle->setSpacing(8);
+    layoutTitle->setMargin(4);
+
     layout->addLayout(layoutTitle);
     layout->addWidget(m_list);
 
-    connect(m_list, SIGNAL(itemClicked(QListWidgetItem*)), SLOT(on_list_itemClicked(QListWidgetItem*)));
-    connect(m_tagsEdit, SIGNAL(editingFinished()), SLOT(on_tagsEdit_editingFinished()));
+    setContentsMargins(8, 20, 8, 8);
+    setGeometry(0, 0, sizeHint().width(), sizeHint().height());
 }
 
-void CWizTagListWidget::setDocument(const WIZDOCUMENTDATA& data)
+void CWizTagListWidget::showEvent(QShowEvent* event)
+{
+    Q_UNUSED(event);
+
+    m_tagsEdit->clear();
+    m_tagsEdit->clearFocus();
+}
+
+void CWizTagListWidget::reloadTags()
 {
     m_list->clear();
-    m_document = data;
 
-    CWizDatabase& db = m_dbMgr.db(data.strKbGUID);
     CWizTagDataArray arrayTag;
-    db.GetAllTags(arrayTag);
-    CString strGUIDs = db.GetDocumentTagGUIDsString(m_document.strGUID);
+    m_dbMgr.db().GetAllTags(arrayTag);
 
     foreach (const WIZTAGDATA& tag, arrayTag) {
         CWizTagListWidgetItem* item = new CWizTagListWidgetItem(tag, m_list);
         m_list->addItem(item);
+    }
+}
 
-        if (-1 != strGUIDs.indexOf(tag.strGUID)) {
-            item->setChecked(true);
+void CWizTagListWidget::setDocument(const WIZDOCUMENTDATAEX& doc)
+{
+    Q_ASSERT(doc.strKbGUID == m_dbMgr.db().kbGUID());
+
+    m_bUpdating = true;
+
+    reloadTags();
+
+    m_arrayDocuments.clear();
+    m_arrayDocuments.push_back(doc);
+    QString strGUIDs = m_dbMgr.db().GetDocumentTagGUIDsString(doc.strGUID);
+
+    for (int i = 0; i < m_list->count(); i++) {
+        CWizTagListWidgetItem* pItem = dynamic_cast<CWizTagListWidgetItem*>(m_list->item(i));
+
+        if (-1 != strGUIDs.indexOf(pItem->tag().strGUID)) {
+            pItem->setCheckState(Qt::Checked);
         }
     }
 
-    updateTagsText();
+    m_bUpdating = false;
 }
 
-void CWizTagListWidget::updateTagsText()
+void CWizTagListWidget::setDocuments(const CWizDocumentDataArray& arrayDocument)
 {
-    CWizDatabase& db = m_dbMgr.db(m_document.strKbGUID);
-    QString strTagsText = db.GetDocumentTagDisplayNameText(m_document.strGUID);
-    m_tagsEdit->setText(strTagsText);
-}
+    m_bUpdating = true;
 
-void CWizTagListWidget::on_list_itemClicked(QListWidgetItem* item)
-{
-    CWizTagListWidgetItem* it = dynamic_cast<CWizTagListWidgetItem *>(item);
+    reloadTags();
+    m_arrayDocuments.clear();
 
-    bool bStateChanged = (it->checkState() && !it->tagState()) ||
-            (!it->checkState() && it->tagState());
-
-    if (!bStateChanged)
+    if (arrayDocument.size() == 0)
         return;
 
-    CWizDatabase& db = m_dbMgr.db(m_document.strKbGUID);
-    CWizDocument doc(db, m_document);
+    QString strAllGUIDs;
+    for (CWizDocumentDataArray::const_iterator it = arrayDocument.begin();
+         it != arrayDocument.end(); it++) {
+        const WIZDOCUMENTDATAEX&  doc = *it;
+        Q_ASSERT(doc.strKbGUID == m_dbMgr.db().kbGUID());
 
-    if (item->checkState()) {
-        doc.AddTag(it->tag());
-        it->setChecked(true);
-    } else {
-        doc.RemoveTag(it->tag());
-        it->setChecked(false);
+        m_arrayDocuments.push_back(doc);
+
+        strAllGUIDs += (m_dbMgr.db().GetDocumentTagGUIDsString(doc.strGUID) + ";");
     }
 
-    updateTagsText();
+    QStringList listGUIDs = strAllGUIDs.split(";");
+
+    for (int i = 0; i < m_list->count(); i++) {
+        CWizTagListWidgetItem* pItem = dynamic_cast<CWizTagListWidgetItem*>(m_list->item(i));
+
+        int n  = listGUIDs.count(pItem->tag().strGUID);
+        if (n  && n < arrayDocument.size()) {
+            pItem->setCheckState(Qt::PartiallyChecked);
+        } else if (n == arrayDocument.size()) {
+            pItem->setCheckState(Qt::Checked);
+        }
+    }
+
+    m_bUpdating = false;
 }
 
-void CWizTagListWidget::on_tagsEdit_editingFinished()
+void CWizTagListWidget::on_list_itemChanged(QListWidgetItem* pItem)
 {
-    CWizDatabase& db = m_dbMgr.db(m_document.strKbGUID);
-    CString tagsText = m_tagsEdit->text();
+    if (m_bUpdating)
+        return;
+
+    CWizTagListWidgetItem* pItemTag = dynamic_cast<CWizTagListWidgetItem *>(pItem);
+    if (!pItemTag)
+        return;
+
+    for (CWizDocumentDataArray::const_iterator it = m_arrayDocuments.begin();
+         it != m_arrayDocuments.end(); it++) {
+        CWizDocument doc(m_dbMgr.db(), *it);
+
+        if (pItemTag->checkState() == Qt::Checked) {
+            doc.AddTag(pItemTag->tag());
+        } else if (pItemTag->checkState() == Qt::Unchecked) {
+            doc.RemoveTag(pItemTag->tag());
+        } else {
+            Q_ASSERT(0);
+        }
+    }
+}
+
+void CWizTagListWidget::on_tagsEdit_returnPressed()
+{
+    QString tagsText = m_tagsEdit->text();
 
     CWizTagDataArray arrayTagNew;
-    db.TagsTextToTagArray(tagsText, arrayTagNew);
+    m_dbMgr.db().TagsTextToTagArray(tagsText, arrayTagNew);
 
-    CWizTagDataArray arrayTagOld;
-    db.GetDocumentTags(m_document.strGUID, arrayTagOld);
+    for (CWizDocumentDataArray::iterator it = m_arrayDocuments.begin();
+         it != m_arrayDocuments.end(); it++) {
+        WIZDOCUMENTDATAEX& doc = *it;
 
-    if (::WizKMDataArrayIsEqual(arrayTagOld, arrayTagNew)) {
-        return;
+        for (CWizTagDataArray::const_iterator it = arrayTagNew.begin();
+             it != arrayTagNew.end(); it++) {
+            const WIZTAGDATA& tag = *it;
+            m_dbMgr.db().InsertDocumentTag(doc, tag.strGUID);
+        }
     }
 
-    db.SetDocumentTags(m_document, arrayTagNew);
-    setDocument(m_document);    //refresh tags
+    CWizDocumentDataArray arrayDocument(m_arrayDocuments);
+    setDocuments(arrayDocument);    //refresh tags
 }

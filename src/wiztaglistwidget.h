@@ -14,20 +14,26 @@ class CWizTagListWidget : public CWizPopupWidget
 public:
     CWizTagListWidget(CWizDatabaseManager& db, QWidget* parent);
 
-    void setDocument(const WIZDOCUMENTDATA& data);
+    void setDocument(const WIZDOCUMENTDATAEX& doc);
+    void setDocuments(const CWizDocumentDataArray& arrayDocument);
+
+    virtual void showEvent(QShowEvent* event);
 
 private:
     CWizDatabaseManager& m_dbMgr;
-    WIZDOCUMENTDATA m_document;
+    CWizDocumentDataArray m_arrayDocuments;
+    bool m_bUpdating; // avoid itemChanged signal emit programmatically
 
     QPointer<QLineEdit> m_tagsEdit;
     QPointer<QListWidget> m_list;
 
-    void updateTagsText();
+    void reloadTags();
+
+    //void updateTagsText();
 
 public Q_SLOTS:
-    void on_list_itemClicked(QListWidgetItem* item);
-    void on_tagsEdit_editingFinished();
+    void on_list_itemChanged(QListWidgetItem* pItem);
+    void on_tagsEdit_returnPressed();
 };
 
 #endif // WIZTAGLISTWIDGET_H

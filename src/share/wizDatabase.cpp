@@ -126,7 +126,18 @@ bool CWizDocument::AddTag(const WIZTAGDATA& dataTag)
 
 bool CWizDocument::RemoveTag(const WIZTAGDATA& dataTag)
 {
-    return m_db.DeleteDocumentTag(m_data, dataTag.strGUID);
+    CWizStdStringArray arrayTag;
+    m_db.GetDocumentTags(m_data.strGUID, arrayTag);
+
+    if (-1 == WizFindInArray(arrayTag, dataTag.strGUID))
+        return true;
+
+    if (!m_db.DeleteDocumentTag(m_data, dataTag.strGUID)) {
+        TOLOG1(_T("Failed to delete document tag: %1"), m_data.strTitle);
+        return false;
+    }
+
+    return true;
 }
 
 void CWizDocument::Delete()
