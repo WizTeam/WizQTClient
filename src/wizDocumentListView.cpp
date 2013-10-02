@@ -384,9 +384,8 @@ bool CWizDocumentListView::isDocumentsWithGroupDocument(const CWizDocumentDataAr
 bool CWizDocumentListView::isDocumentsAllCanDelete(const CWizDocumentDataArray& arrayDocument)
 {
     foreach (const WIZDOCUMENTDATAEX& doc, arrayDocument) {
-        int nPerm = m_dbMgr.db(doc.strKbGUID).permission();
-        if (nPerm > WIZ_USERGROUP_EDITOR) {
-                return false;
+        if (!m_dbMgr.db(doc.strKbGUID).CanEditDocument(doc)) {
+            return false;
         }
     }
 
