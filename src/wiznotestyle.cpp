@@ -911,21 +911,6 @@ void CWizNoteStyle::drawMultiLineListWidgetItem(const QStyleOptionViewItemV4 *vo
     int wrapTextLineText = view->wrapTextLineIndex();
     const QPixmap img = view->itemImage(vopt->index);
 
-    //QPalette palette = vopt->palette;
-    //palette.setColor(QPalette::All, QPalette::HighlightedText, palette.color(QPalette::Active, QPalette::Text));
-    //// Note that setting a saturated color here results in ugly XOR colors in the focus rect
-    //palette.setColor(QPalette::All, QPalette::Highlight, palette.base().color().darker(108));
-    //QStyleOptionViewItemV4 adjustedOption = *vopt;
-    //adjustedOption.palette = palette;
-    //// We hide the  focusrect in singleselection as it is not required
-    //if ((view->selectionMode() == QAbstractItemView::SingleSelection)
-    //    && !(vopt->state & State_KeyboardFocusChange))
-    //{
-    //    adjustedOption.state &= ~State_HasFocus;
-    //}
-
-    //QStyleOptionViewItemV4* opt = &adjustedOption;
-    //
     p->save();
     p->setClipRect(vopt->rect);
 
@@ -934,20 +919,14 @@ void CWizNoteStyle::drawMultiLineListWidgetItem(const QStyleOptionViewItemV4 *vo
     p->setPen(m_colorDocumentsLine);
     p->drawLine(textLine.bottomLeft(), textLine.bottomRight());
 
-    QRect textRect = subElementRect(SE_ItemViewItemText, vopt, view);
+    QRect textRect = vopt->rect;
+    //QRect textRect = subElementRect(SE_ItemViewItemText, vopt, view);
 
     // draw the background
     if (vopt->state.testFlag(State_Selected))
     {
         m_multiLineListSelectedItemBackground.Draw(p, vopt->rect, 0);
     }
-
-#ifndef Q_OS_MAC
-    else if (vopt->state.testFlag(State_MouseOver))
-    {
-        m_multiLineListSelectedItemBackgroundHot.Draw(p, vopt->rect, 0);
-    }
-#endif
 
     if (!img.isNull() && img.width() > 0 && img.height() > 0)
     {
