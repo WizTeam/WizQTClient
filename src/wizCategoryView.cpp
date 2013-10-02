@@ -599,15 +599,18 @@ void CWizCategoryView::createDocument(WIZDOCUMENTDATA& data)
 {
     bool bFallback = true;
 
-    QString strKbGUID;
+    QString strKbGUID = m_dbMgr.db().kbGUID();
     QString strLocation = "/My Notes/";
     WIZTAGDATA tag;
 
+    // the item maybe private folder's trash or group trash
+    // FIXME: select group trash and trigger new note will create private document
     if (CWizCategoryViewFolderItem* pItem = currentCategoryItem<CWizCategoryViewFolderItem>())
     {
-        strKbGUID = m_dbMgr.db().kbGUID();
-        strLocation = pItem->location();
-        bFallback = false;
+        if (!CWizDatabase::IsInDeletedItems(pItem->location())) {
+            strLocation = pItem->location();
+            bFallback = false;
+        }
     }
     else if (CWizCategoryViewTagItem* pItem = currentCategoryItem<CWizCategoryViewTagItem>())
     {
@@ -628,7 +631,6 @@ void CWizCategoryView::createDocument(WIZDOCUMENTDATA& data)
     }
 
     if (bFallback) {
-        strKbGUID = m_dbMgr.db().kbGUID();
         addAndSelectFolder(strLocation);
     }
 
