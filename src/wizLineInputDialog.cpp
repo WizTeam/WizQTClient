@@ -15,6 +15,7 @@ CWizLineInputDialog::CWizLineInputDialog(const QString& strTitle,
     ui->labelHint->setText(strHint);
 
     ui->editInput->setText(strDefault);
+    ui->editInput->selectAll();
     m_strDefault = strDefault;
 }
 

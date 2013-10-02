@@ -902,7 +902,8 @@ void CWizCategoryView::on_action_renameItem()
 
 void CWizCategoryView::on_action_user_renameFolder()
 {
-    CWizCategoryViewItemBase* p = currentCategoryItem<CWizCategoryViewItemBase>();
+    CWizCategoryViewFolderItem* p = currentCategoryItem<CWizCategoryViewFolderItem>();
+    Q_ASSERT(p);
 
     CWizLineInputDialog* dialog = new CWizLineInputDialog(tr("Rename folder"),
                                                           tr("Please input new folder name: "),
@@ -933,6 +934,9 @@ void CWizCategoryView::on_action_user_renameFolder_confirmed(int result)
         QString strOldLocation = p->location();
         int n = strOldLocation.lastIndexOf("/", -2);
         strLocation = strOldLocation.left(n + 1) + strFolderName + "/";
+
+        if (strLocation == strOldLocation)
+            return;
 
         // move all documents to new folder
         CWizFolder folder(m_dbMgr.db(), strOldLocation);
