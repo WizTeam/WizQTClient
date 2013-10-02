@@ -82,8 +82,18 @@ QString CWizFileIconProvider::type(const QString& strFileName) const
     //
     return QString::fromUtf16((const ushort*)info.szTypeName);
 #else
-    QString retType = QFileIconProvider::type(QFileInfo(strFileName));
-    return retType;
+    // FIXME: more types needed
+    QFileInfo info(strFileName);
+    QString suffix = info.suffix().toLower();
+    if (suffix == "txt") {
+        return QObject::tr("text document");
+    } else if (suffix == "doc") {
+        return QObject::tr("word document");
+    } else if (suffix == "rar" || suffix == "zip" || suffix == "tar" || suffix == "gz") {
+        return suffix.toUpper() + " " + QObject::tr("Compressed file");
+    } else {
+        return suffix.toUpper() + " " + QObject::tr("File");
+    }
 #endif
 }
 
