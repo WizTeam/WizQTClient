@@ -536,7 +536,7 @@ void IWizGlobal::WriteLog(const CString& str)
 {
     QString msg(WizGetLogTime() + ": " + str + "\n");
 
-    qDebug() << msg;
+    qDebug() << str;
 
     // write to buffer who is interested in logs just need to connect readyRead signal
     m_bufferLog.open(QIODevice::Append);
