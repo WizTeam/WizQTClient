@@ -31,7 +31,7 @@ protected:
 private:
     CWizExplorerApp& m_app;
     CWizDocumentWebView* m_editor;
-    std::map<QString, QAction*> m_actions;
+    QMap<QString, QAction*> m_actions;
     QPointer<QMenu> m_menuContext;
     CWizToolComboBoxFont* m_comboFontFamily;
     CWizToolComboBox* m_comboFontSize;
@@ -55,6 +55,8 @@ private:
 
     // editor status reflect
     void resetToolbar();
+
+    QAction* actionFromName(const QString& strName);
 
 protected Q_SLOTS:
     void on_comboFontFamily_indexChanged(const QString& strFamily);

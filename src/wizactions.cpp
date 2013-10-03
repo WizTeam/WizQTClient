@@ -61,33 +61,33 @@ WIZACTION* CWizActions::actionsData()
         {"actionFeedback",                  QObject::tr("User support"), "", ""},
 
         // editing
-        {"actionEditingUndo",               QObject::tr("Undo"), "", "Ctrl+Z"},
-        {"actionEditingRedo",               QObject::tr("Redo"), "", "Shift+Ctrl+Z"},
+        {WIZACTION_EDITOR_UNDO,               QObject::tr("Undo"), "", "Ctrl+Z"},
+        {WIZACTION_EDITOR_REDO,               QObject::tr("Redo"), "", "Shift+Ctrl+Z"},
 
         // view
         {WIZACTION_GLOBAL_TOGGLE_CATEGORY,      QObject::tr("Hide category view"), QObject::tr("Show category view"), "Ctrl+Alt+s"},
         {WIZACTION_GLOBAL_TOGGLE_FULLSCREEN,    QObject::tr("Enter Fullscreen"), QObject::tr("Leave Fullscreen"), "Ctrl+Meta+f"},
 
         // format
-        {WIZACTION_FORMAT_JUSTIFYLEFT,      QObject::tr("Justify left"), "", "Ctrl+["},
-        {WIZACTION_FORMAT_JUSTIFYRIGHT,     QObject::tr("Justify right"), "", "Ctrl+]"},
-        {WIZACTION_FORMAT_JUSTIFYCENTER,    QObject::tr("Justify center"), "", "Ctrl+="},
-        {WIZACTION_FORMAT_JUSTIFYJUSTIFY,   QObject::tr("Justify both side"), "", ""},
-        {"actionFormatIndent",              QObject::tr("Indent"), "", ""},
-        {"actionFormatOutdent",             QObject::tr("Outdent"), "", ""},
-        {WIZACTION_FORMAT_UNORDEREDLIST,    QObject::tr("Convert to unoredered list"), "", "Ctrl+Alt+U"},
-        {WIZACTION_FORMAT_ORDEREDLIST,      QObject::tr("Convert to ordered list"), "", "Ctrl+Alt+O"},
-        {"actionFormatInsertTable",         QObject::tr("Insert table"), "", ""},
-        {"actionFormatInsertLink",          QObject::tr("Insert link"), "", "Ctrl+K"},
-        {WIZACTION_FORMAT_BOLD,             QObject::tr("Bold"), "", "Ctrl+B"},
-        {WIZACTION_FORMAT_ITALIC,           QObject::tr("Italic"), "", "Ctrl+I"},
-        {WIZACTION_FORMAT_UNDERLINE,        QObject::tr("Underline"), "", "Ctrl+U"},
-        {"actionFormatStrikeThrough",       QObject::tr("Strike through"), "", "Ctrl+Alt+K"},
-        {"actionFormatInsertHorizontal",    QObject::tr("Insert horizontal"), "", "Shift+Ctrl+H"},
-        {"actionFormatInsertDate",          QObject::tr("Insert date"), "", "Shift+Ctrl+D"},
-        {"actionFormatInsertTime",          QObject::tr("Insert time"), "", "Shift+Ctrl+Alt+D"},
-        {"actionFormatRemoveFormat",        QObject::tr("Remove format"), "", ""},
-        {"actionEditorViewSource",          QObject::tr("View html source"), "", ""},
+        {WIZACTION_FORMAT_JUSTIFYLEFT,          QObject::tr("Justify left"), "", "Ctrl+["},
+        {WIZACTION_FORMAT_JUSTIFYRIGHT,         QObject::tr("Justify right"), "", "Ctrl+]"},
+        {WIZACTION_FORMAT_JUSTIFYCENTER,        QObject::tr("Justify center"), "", "Ctrl+="},
+        {WIZACTION_FORMAT_JUSTIFYJUSTIFY,       QObject::tr("Justify both side"), "", ""},
+        {WIZACTION_FORMAT_INDENT,               QObject::tr("Indent"), "", ""},
+        {WIZACTION_FORMAT_OUTDENT,              QObject::tr("Outdent"), "", ""},
+        {WIZACTION_FORMAT_UNORDEREDLIST,        QObject::tr("Convert to unoredered list"), "", "Ctrl+Alt+U"},
+        {WIZACTION_FORMAT_ORDEREDLIST,          QObject::tr("Convert to ordered list"), "", "Ctrl+Alt+O"},
+        {WIZACTION_FORMAT_INSERT_TABLE,         QObject::tr("Insert table"), "", ""},
+        {WIZACTION_FORMAT_INSERT_LINK,          QObject::tr("Insert link"), "", "Ctrl+K"},
+        {WIZACTION_FORMAT_BOLD,                 QObject::tr("Bold"), "", "Ctrl+B"},
+        {WIZACTION_FORMAT_ITALIC,               QObject::tr("Italic"), "", "Ctrl+I"},
+        {WIZACTION_FORMAT_UNDERLINE,            QObject::tr("Underline"), "", "Ctrl+U"},
+        {WIZACTION_FORMAT_STRIKETHROUGH,        QObject::tr("Strike through"), "", "Ctrl+Alt+K"},
+        {WIZACTION_FORMAT_INSERT_HORIZONTAL,    QObject::tr("Insert horizontal"), "", "Shift+Ctrl+H"},
+        {WIZACTION_FORMAT_INSERT_DATE,          QObject::tr("Insert date"), "", "Shift+Ctrl+D"},
+        {WIZACTION_FORMAT_INSERT_TIME,          QObject::tr("Insert time"), "", "Shift+Ctrl+Alt+D"},
+        {WIZACTION_FORMAT_REMOVE_FORMAT,        QObject::tr("Remove format"), "", ""},
+        {WIZACTION_FORMAT_VIEW_SOURCE,          QObject::tr("View html source"), "", ""},
 
         {"", "", "", ""}
     };
@@ -273,12 +273,3 @@ void CWizActions::buildMenuBar(QMenuBar* menuBar, const QString& strFileName)
         index++;
     }
 }
-
-
-//void CWizActions::buildActionMenu(QAction* pAction, QWidget* parent, const QString& strFileName)
-//{
-//    CWizSettings settings(strFileName);
-//    //
-//    QMenu* pMenu = toMenu(parent, settings, pAction->objectName());
-//    pAction->setMenu(pMenu);
-//}

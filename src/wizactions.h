@@ -13,19 +13,30 @@ struct WIZACTION;
 
 #define WIZACTION_GLOBAL_SYNC               "actionSync"
 #define WIZACTION_GLOBAL_NEW_DOCUMENT       "actionNewNote"
-//#define WIZACTION_GLOBAL_VIEW_MESSAGES      "actionViewMessages"
 #define WIZACTION_GLOBAL_TOGGLE_CATEGORY    "actionViewToggleCategory"
 #define WIZACTION_GLOBAL_TOGGLE_FULLSCREEN  "actionViewToggleFullscreen"
 
+#define WIZACTION_EDITOR_UNDO               "actionEditingUndo"
+#define WIZACTION_EDITOR_REDO               "actionEditingRedo"
 #define WIZACTION_FORMAT_BOLD               "actionFormatBold"
 #define WIZACTION_FORMAT_ITALIC             "actionFormatItalic"
 #define WIZACTION_FORMAT_UNDERLINE          "actionFormatUnderLine"
+#define WIZACTION_FORMAT_STRIKETHROUGH      "actionFormatStrikeThrough"
 #define WIZACTION_FORMAT_UNORDEREDLIST      "actionFormatInsertUnorderedList"
 #define WIZACTION_FORMAT_ORDEREDLIST        "actionFormatInsertOrderedList"
 #define WIZACTION_FORMAT_JUSTIFYLEFT        "actionFormatJustifyLeft"
 #define WIZACTION_FORMAT_JUSTIFYRIGHT       "actionFormatJustifyRight"
 #define WIZACTION_FORMAT_JUSTIFYCENTER      "actionFormatJustifyCenter"
 #define WIZACTION_FORMAT_JUSTIFYJUSTIFY     "actionFormatJustifyJustify"
+#define WIZACTION_FORMAT_INDENT             "actionFormatIndent"
+#define WIZACTION_FORMAT_OUTDENT            "actionFormatOutdent"
+#define WIZACTION_FORMAT_INSERT_TABLE       "actionFormatInsertTable"
+#define WIZACTION_FORMAT_INSERT_LINK        "actionFormatInsertLink"
+#define WIZACTION_FORMAT_INSERT_HORIZONTAL  "actionFormatInsertHorizontal"
+#define WIZACTION_FORMAT_INSERT_DATE        "actionFormatInsertDate"
+#define WIZACTION_FORMAT_INSERT_TIME        "actionFormatInsertTime"
+#define WIZACTION_FORMAT_REMOVE_FORMAT      "actionFormatRemoveFormat"
+#define WIZACTION_FORMAT_VIEW_SOURCE        "actionEditorViewSource"
 
 
 class CWizActions
@@ -50,7 +61,6 @@ public:
     QMenu* toMenu(QWidget* parent, CWizSettings& settings, const QString& strSection);
     void buildMenu(QMenu* pMenu, CWizSettings& settings, const QString& strSection);
     void buildMenuBar(QMenuBar* menuBar, const QString& strFileName);
-//    void buildActionMenu(QAction* pAction, QWidget* parent, const QString& strFileName);
 };
 
 #endif // WIZACTIONS_H

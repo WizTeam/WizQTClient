@@ -406,10 +406,16 @@ void CWizEditorToolBar::resetToolbar()
     m_comboFontSize->setText(value);
 
     state = m_editor->editorCommandQueryCommandState("formatMatch");
-    if (state == 1) {
+    if (state == -1) {
+        m_btnFormatMatch->setEnabled(false);
+    } else if (state == 0) {
+        m_btnFormatMatch->setEnabled(true);
+        m_btnFormatMatch->setChecked(false);
+    } else if (state == 1) {
+        m_btnFormatMatch->setEnabled(true);
         m_btnFormatMatch->setChecked(true);
     } else {
-        m_btnFormatMatch->setChecked(false);
+        Q_ASSERT(0);
     }
 
     value = m_editor->editorCommandQueryCommandValue("foreColor");
@@ -419,53 +425,120 @@ void CWizEditorToolBar::resetToolbar()
     m_btnBackColor->setColor(QColor(value));
 
     state = m_editor->editorCommandQueryCommandState("bold");
-    if (state == 1) {
+    if (state == -1) {
+        m_btnBold->setEnabled(false);
+    } else if (state == 0) {
+        m_btnBold->setEnabled(true);
+        m_btnBold->setChecked(false);
+    } else if (state == 1) {
+        m_btnBold->setEnabled(true);
         m_btnBold->setChecked(true);
     } else {
-        m_btnBold->setChecked(false);
+        Q_ASSERT(0);
     }
 
     state = m_editor->editorCommandQueryCommandState("italic");
-    if (state == 1) {
+    if (state == -1) {
+        m_btnItalic->setEnabled(false);
+    } else if (state == 0) {
+        m_btnItalic->setEnabled(true);
+        m_btnItalic->setChecked(false);
+    } else if (state == 1) {
+        m_btnItalic->setEnabled(true);
         m_btnItalic->setChecked(true);
     } else {
-        m_btnItalic->setChecked(false);
+        Q_ASSERT(0);
     }
 
     state = m_editor->editorCommandQueryCommandState("underline");
-    if (state == 1) {
+    if (state == -1) {
+        m_btnUnderLine->setEnabled(false);
+    } else if (state == 0) {
+        m_btnUnderLine->setEnabled(true);
+        m_btnUnderLine->setChecked(false);
+    } else if (state == 1) {
+        m_btnUnderLine->setEnabled(true);
         m_btnUnderLine->setChecked(true);
     } else {
-        m_btnUnderLine->setChecked(false);
+        Q_ASSERT(0);
     }
 
+    state = m_editor->editorCommandQueryCommandState("justify");
     value = m_editor->editorCommandQueryCommandValue("justify");
-    if (value == "left") {
-        m_btnJustifyLeft->setChecked(true);
-        m_btnJustifyCenter->setChecked(false);
-        m_btnJustifyRight->setChecked(false);
-    } else if (value == "center") {
-        m_btnJustifyLeft->setChecked(false);
-        m_btnJustifyCenter->setChecked(true);
-        m_btnJustifyRight->setChecked(false);
-    } else if (value == "right") {
-        m_btnJustifyLeft->setChecked(false);
-        m_btnJustifyCenter->setChecked(false);
-        m_btnJustifyRight->setChecked(true);
+    if (state == -1) {
+        m_btnJustifyLeft->setEnabled(false);
+        m_btnJustifyCenter->setEnabled(false);
+        m_btnJustifyRight->setEnabled(false);
+    } else {
+        m_btnJustifyLeft->setEnabled(true);
+        m_btnJustifyCenter->setEnabled(true);
+        m_btnJustifyRight->setEnabled(true);
+
+        if (value == "left") {
+            m_btnJustifyLeft->setChecked(true);
+            m_btnJustifyCenter->setChecked(false);
+            m_btnJustifyRight->setChecked(false);
+        } else if (value == "center") {
+            m_btnJustifyLeft->setChecked(false);
+            m_btnJustifyCenter->setChecked(true);
+            m_btnJustifyRight->setChecked(false);
+        } else if (value == "right") {
+            m_btnJustifyLeft->setChecked(false);
+            m_btnJustifyCenter->setChecked(false);
+            m_btnJustifyRight->setChecked(true);
+        }
     }
 
     state = m_editor->editorCommandQueryCommandState("insertOrderedList");
-    if (state == 1) {
+    if (state == -1) {
+        m_btnOrderedList->setEnabled(false);
+    } else if (state == 0) {
+        m_btnOrderedList->setEnabled(true);
+        m_btnOrderedList->setChecked(false);
+    } else if (state == 1) {
+        m_btnOrderedList->setEnabled(true);
         m_btnOrderedList->setChecked(true);
     } else {
-        m_btnOrderedList->setChecked(false);
+        Q_ASSERT(0);
     }
 
     state = m_editor->editorCommandQueryCommandState("insertUnorderedList");
-    if (state == 1) {
+    if (state == -1) {
+        m_btnUnorderedList->setEnabled(false);
+    } else if (state == 0) {
+        m_btnUnorderedList->setEnabled(true);
+        m_btnUnorderedList->setChecked(false);
+    } else if (state == 1) {
+        m_btnUnorderedList->setEnabled(true);
         m_btnUnorderedList->setChecked(true);
     } else {
-        m_btnUnorderedList->setChecked(false);
+        Q_ASSERT(0);
+    }
+
+    state = m_editor->editorCommandQueryCommandState("insertTable");
+    if (state == -1) {
+        m_btnTable->setEnabled(false);
+    } else if (state == 0) {
+        m_btnTable->setEnabled(true);
+        m_btnTable->setChecked(false);
+    } else if (state == 1) {
+        m_btnTable->setEnabled(true);
+        m_btnTable->setChecked(true);
+    } else {
+        Q_ASSERT(0);
+    }
+
+    state = m_editor->editorCommandQueryCommandState("horizontal");
+    if (state == -1) {
+        m_btnHorizontal->setEnabled(false);
+    } else if (state == 0) {
+        m_btnHorizontal->setEnabled(true);
+        m_btnHorizontal->setChecked(false);
+    } else if (state == 1) {
+        m_btnHorizontal->setEnabled(true);
+        m_btnHorizontal->setChecked(true);
+    } else {
+        Q_ASSERT(0);
     }
 }
 
@@ -544,8 +617,8 @@ WizEditorContextMenuItem* CWizEditorToolBar::contextMenuData()
         {WIZEDITOR_ACTION_FONT_UNDERLINE,           "underline",        "editorCommandExecuteUnderLine"},
         {WIZEDITOR_ACTION_FONT_STRIKETHROUGH,       "strikethrough",    "editorCommandExecuteStrikeThrough"},
         {"-", "-", "-"},
-        {WIZEDITOR_ACTION_FONT_FORECOLOR,           "",                 "editorCommandExecuteForeColor"},
-        {WIZEDITOR_ACTION_FONT_BACKCOLOR,           "",                 "editorCommandExecuteBackColor"},
+        {WIZEDITOR_ACTION_FONT_FORECOLOR,           "foreColor",        "editorCommandExecuteForeColor"},
+        {WIZEDITOR_ACTION_FONT_BACKCOLOR,           "backColor",        "editorCommandExecuteBackColor"},
         {"+", "+", "+"},
 
         {QObject::tr("Justify"),                    "justify",          "+"},
@@ -607,12 +680,33 @@ void CWizEditorToolBar::on_delegate_requestShowContextMenu(const QPoint& pos)
         return;
 
     buildMenu();
+
+    if (!m_editor->isEditing()){
+        actionFromName(WIZEDITOR_ACTION_CUT)->setEnabled(false);
+        actionFromName(WIZEDITOR_ACTION_PASTE)->setEnabled(false);
+    } else {
+        actionFromName(WIZEDITOR_ACTION_CUT)->setEnabled(true);
+        actionFromName(WIZEDITOR_ACTION_PASTE)->setEnabled(true);
+    }
+
     m_menuContext->popup(pos);
 }
 
 void CWizEditorToolBar::on_delegate_selectionChanged()
 {
    resetToolbar();
+}
+
+QAction* CWizEditorToolBar::actionFromName(const QString& strName)
+{
+    for (QMap<QString, QAction*>::const_iterator it = m_actions.begin();
+         it != m_actions.end(); it++) {
+        if (it.key() == strName) {
+            return it.value();
+        }
+    }
+
+    Q_ASSERT(0);
 }
 
 void CWizEditorToolBar::buildMenu()
@@ -622,6 +716,7 @@ void CWizEditorToolBar::buildMenu()
     }
 
     m_menuContext->clear();
+    m_actions.clear();
 
     int index = 0;
     WizEditorContextMenuItem* arrayData = contextMenuData();
@@ -646,7 +741,7 @@ void CWizEditorToolBar::buildMenu()
             }
 
             QString strSlot = "1" + item.execute + "()";
-            m_menuContext->addAction(item.label, m_editor, strSlot.toUtf8());
+            m_actions[item.label] = m_menuContext->addAction(item.label, m_editor, strSlot.toUtf8());
         } else if (item.command.isEmpty() && item.execute.isEmpty()) {
             index++;
             continue;
@@ -707,7 +802,7 @@ int CWizEditorToolBar::buildMenu(QMenu* pMenu, int indx)
             }
 
             QString strSlot = "1" + item.execute + "()";
-            pSubMenu->addAction(item.label, m_editor, strSlot.toUtf8());
+            m_actions[item.label] = pSubMenu->addAction(item.label, m_editor, strSlot.toUtf8());
 
         } else if (item.command.isEmpty() && item.execute.isEmpty()) {
             continue;

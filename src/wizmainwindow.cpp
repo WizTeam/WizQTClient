@@ -310,12 +310,160 @@ void MainWindow::initActions()
     m_actions->init();
     m_animateSync->setAction(m_actions->actionFromName(WIZACTION_GLOBAL_SYNC));
     m_animateSync->setIcons("sync");
+
+    connect(m_doc->web(), SIGNAL(statusChanged()), SLOT(on_editor_statusChanged()));
+    on_editor_statusChanged();
 }
 
 void MainWindow::initMenuBar()
 {
     setMenuBar(m_menuBar);
     m_actions->buildMenuBar(m_menuBar, ::WizGetResourcesPath() + "files/mainmenu.ini");
+}
+
+void MainWindow::on_editor_statusChanged()
+{
+    CWizDocumentWebView* editor = m_doc->web();
+
+    if (!editor->isInited() || !editor->isEditing() || !editor->hasFocus()) {
+        m_actions->actionFromName(WIZACTION_EDITOR_UNDO)->setEnabled(false);
+        m_actions->actionFromName(WIZACTION_EDITOR_REDO)->setEnabled(false);
+        m_actions->actionFromName(WIZACTION_FORMAT_BOLD)->setEnabled(false);
+        m_actions->actionFromName(WIZACTION_FORMAT_ITALIC)->setEnabled(false);
+        m_actions->actionFromName(WIZACTION_FORMAT_UNDERLINE)->setEnabled(false);
+        m_actions->actionFromName(WIZACTION_FORMAT_STRIKETHROUGH)->setEnabled(false);
+        m_actions->actionFromName(WIZACTION_FORMAT_UNORDEREDLIST)->setEnabled(false);
+        m_actions->actionFromName(WIZACTION_FORMAT_ORDEREDLIST)->setEnabled(false);
+        m_actions->actionFromName(WIZACTION_FORMAT_JUSTIFYLEFT)->setEnabled(false);
+        m_actions->actionFromName(WIZACTION_FORMAT_JUSTIFYRIGHT)->setEnabled(false);
+        m_actions->actionFromName(WIZACTION_FORMAT_JUSTIFYCENTER)->setEnabled(false);
+        m_actions->actionFromName(WIZACTION_FORMAT_JUSTIFYJUSTIFY)->setEnabled(false);
+        m_actions->actionFromName(WIZACTION_FORMAT_INDENT)->setEnabled(false);
+        m_actions->actionFromName(WIZACTION_FORMAT_OUTDENT)->setEnabled(false);
+        m_actions->actionFromName(WIZACTION_FORMAT_INSERT_TABLE)->setEnabled(false);
+        m_actions->actionFromName(WIZACTION_FORMAT_INSERT_LINK)->setEnabled(false);
+        m_actions->actionFromName(WIZACTION_FORMAT_INSERT_HORIZONTAL)->setEnabled(false);
+        m_actions->actionFromName(WIZACTION_FORMAT_INSERT_DATE)->setEnabled(false);
+        m_actions->actionFromName(WIZACTION_FORMAT_INSERT_TIME)->setEnabled(false);
+        m_actions->actionFromName(WIZACTION_FORMAT_REMOVE_FORMAT)->setEnabled(false);
+        m_actions->actionFromName(WIZACTION_FORMAT_VIEW_SOURCE)->setEnabled(false);
+
+        return;
+    }
+
+    if (-1 == editor->editorCommandQueryCommandState("undo")) {
+        m_actions->actionFromName(WIZACTION_EDITOR_UNDO)->setEnabled(false);
+    } else {
+        m_actions->actionFromName(WIZACTION_EDITOR_UNDO)->setEnabled(true);
+    }
+
+    if (-1 == editor->editorCommandQueryCommandState("redo")) {
+        m_actions->actionFromName(WIZACTION_EDITOR_REDO)->setEnabled(false);
+    } else {
+        m_actions->actionFromName(WIZACTION_EDITOR_REDO)->setEnabled(true);
+    }
+
+    if (-1 == editor->editorCommandQueryCommandState("bold")) {
+        m_actions->actionFromName(WIZACTION_FORMAT_BOLD)->setEnabled(false);
+    } else {
+        m_actions->actionFromName(WIZACTION_FORMAT_BOLD)->setEnabled(true);
+    }
+
+    if (-1 ==editor->editorCommandQueryCommandState("italic")) {
+        m_actions->actionFromName(WIZACTION_FORMAT_ITALIC)->setEnabled(false);
+    } else {
+        m_actions->actionFromName(WIZACTION_FORMAT_ITALIC)->setEnabled(true);
+    }
+
+    if (-1 ==editor->editorCommandQueryCommandState("underline")) {
+        m_actions->actionFromName(WIZACTION_FORMAT_UNDERLINE)->setEnabled(false);
+    } else {
+        m_actions->actionFromName(WIZACTION_FORMAT_UNDERLINE)->setEnabled(true);
+    }
+
+    if (-1 ==editor->editorCommandQueryCommandState("strikethrough")) {
+        m_actions->actionFromName(WIZACTION_FORMAT_STRIKETHROUGH)->setEnabled(false);
+    } else {
+        m_actions->actionFromName(WIZACTION_FORMAT_STRIKETHROUGH)->setEnabled(true);
+    }
+
+    if (-1 ==editor->editorCommandQueryCommandState("insertUnorderedList")) {
+        m_actions->actionFromName(WIZACTION_FORMAT_UNORDEREDLIST)->setEnabled(false);
+    } else {
+        m_actions->actionFromName(WIZACTION_FORMAT_UNORDEREDLIST)->setEnabled(true);
+    }
+
+    if (-1 ==editor->editorCommandQueryCommandState("insertOrderedList")) {
+        m_actions->actionFromName(WIZACTION_FORMAT_ORDEREDLIST)->setEnabled(false);
+    } else {
+        m_actions->actionFromName(WIZACTION_FORMAT_ORDEREDLIST)->setEnabled(true);
+    }
+
+    if (-1 ==editor->editorCommandQueryCommandState("justify")) {
+        m_actions->actionFromName(WIZACTION_FORMAT_JUSTIFYLEFT)->setEnabled(false);
+        m_actions->actionFromName(WIZACTION_FORMAT_JUSTIFYRIGHT)->setEnabled(false);
+        m_actions->actionFromName(WIZACTION_FORMAT_JUSTIFYCENTER)->setEnabled(false);
+        m_actions->actionFromName(WIZACTION_FORMAT_JUSTIFYJUSTIFY)->setEnabled(false);
+    } else {
+        m_actions->actionFromName(WIZACTION_FORMAT_JUSTIFYLEFT)->setEnabled(true);
+        m_actions->actionFromName(WIZACTION_FORMAT_JUSTIFYRIGHT)->setEnabled(true);
+        m_actions->actionFromName(WIZACTION_FORMAT_JUSTIFYCENTER)->setEnabled(true);
+        m_actions->actionFromName(WIZACTION_FORMAT_JUSTIFYJUSTIFY)->setEnabled(true);
+    }
+
+    if (-1 ==editor->editorCommandQueryCommandState("indent")) {
+        m_actions->actionFromName(WIZACTION_FORMAT_INDENT)->setEnabled(false);
+    } else {
+        m_actions->actionFromName(WIZACTION_FORMAT_INDENT)->setEnabled(true);
+    }
+
+    if (-1 ==editor->editorCommandQueryCommandState("outdent")) {
+        m_actions->actionFromName(WIZACTION_FORMAT_OUTDENT)->setEnabled(false);
+    } else {
+        m_actions->actionFromName(WIZACTION_FORMAT_OUTDENT)->setEnabled(true);
+    }
+
+    if (-1 ==editor->editorCommandQueryCommandState("inserttable")) {
+        m_actions->actionFromName(WIZACTION_FORMAT_INSERT_TABLE)->setEnabled(false);
+    } else {
+        m_actions->actionFromName(WIZACTION_FORMAT_INSERT_TABLE)->setEnabled(true);
+    }
+
+    if (-1 ==editor->editorCommandQueryCommandState("link")) {
+        m_actions->actionFromName(WIZACTION_FORMAT_INSERT_LINK)->setEnabled(false);
+    } else {
+        m_actions->actionFromName(WIZACTION_FORMAT_INSERT_LINK)->setEnabled(true);
+    }
+
+    if (-1 ==editor->editorCommandQueryCommandState("horizontal")) {
+        m_actions->actionFromName(WIZACTION_FORMAT_INSERT_HORIZONTAL)->setEnabled(false);
+    } else {
+        m_actions->actionFromName(WIZACTION_FORMAT_INSERT_HORIZONTAL)->setEnabled(true);
+    }
+
+    if (-1 ==editor->editorCommandQueryCommandState("date")) {
+        m_actions->actionFromName(WIZACTION_FORMAT_INSERT_DATE)->setEnabled(false);
+    } else {
+        m_actions->actionFromName(WIZACTION_FORMAT_INSERT_DATE)->setEnabled(true);
+    }
+
+    if (-1 ==editor->editorCommandQueryCommandState("time")) {
+        m_actions->actionFromName(WIZACTION_FORMAT_INSERT_TIME)->setEnabled(false);
+    } else {
+        m_actions->actionFromName(WIZACTION_FORMAT_INSERT_TIME)->setEnabled(true);
+    }
+
+    if (-1 ==editor->editorCommandQueryCommandState("removeformat")) {
+        m_actions->actionFromName(WIZACTION_FORMAT_REMOVE_FORMAT)->setEnabled(false);
+    } else {
+        m_actions->actionFromName(WIZACTION_FORMAT_REMOVE_FORMAT)->setEnabled(true);
+    }
+
+    if (-1 ==editor->editorCommandQueryCommandState("source")) {
+        m_actions->actionFromName(WIZACTION_FORMAT_VIEW_SOURCE)->setEnabled(false);
+    } else {
+        m_actions->actionFromName(WIZACTION_FORMAT_VIEW_SOURCE)->setEnabled(true);
+    }
 }
 
 void MainWindow::initToolBar()

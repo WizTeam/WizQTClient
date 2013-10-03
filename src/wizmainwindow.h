@@ -133,6 +133,7 @@ private:
 
     QWidget* createListView();
 
+
 public:
     // CWizDocument passthrough methods
     QSize clientSize() const { return m_splitter->widget(2)->size(); }
@@ -221,6 +222,8 @@ public Q_SLOTS:
     void on_syncProcessLog(const QString& strMsg);
 
     void on_options_restartForSettings();
+
+    void on_editor_statusChanged();
 
 #ifndef Q_OS_MAC
     void on_actionPopupMainMenu_triggered();

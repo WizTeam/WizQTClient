@@ -177,6 +177,7 @@ void CWizDocumentWebView::focusInEvent(QFocusEvent *event)
 {
     if (m_bEditingMode) {
         Q_EMIT focusIn();
+        Q_EMIT statusChanged();
     }
 
     QWebView::focusInEvent(event);
@@ -184,12 +185,14 @@ void CWizDocumentWebView::focusInEvent(QFocusEvent *event)
 
 void CWizDocumentWebView::focusOutEvent(QFocusEvent *event)
 {
+
     // because qt will clear focus when context menu popup, we need keep focus there.
     if (event->reason() == Qt::PopupFocusReason) {
         return;
     }
 
     Q_EMIT focusOut();
+    Q_EMIT statusChanged();
     QWebView::focusOutEvent(event);
 }
 
@@ -370,6 +373,8 @@ void CWizDocumentWebView::on_editor_selectionChanged()
         // FIXME: every time change content shuld tell webview to clean the canvas
         update();
     }
+
+    Q_EMIT statusChanged();
 }
 
 void CWizDocumentWebView::on_editor_populateJavaScriptWindowObject()
@@ -518,6 +523,8 @@ void CWizDocumentWebView::setEditingDocument(bool editing)
 
     QString strScript = QString("setEditing(%1);").arg(editing ? "true" : "false");
     page()->mainFrame()->evaluateJavaScript(strScript);
+
+    Q_EMIT statusChanged();
 }
 
 void CWizDocumentWebView::saveDocument(bool force)

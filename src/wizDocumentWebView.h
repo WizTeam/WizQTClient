@@ -78,6 +78,9 @@ public:
     void setModified(bool bModified) { m_bModified = bModified; }
     void saveDocument(bool force);
 
+    bool isInited() const { return m_bEditorInited; }
+    bool isEditing() const { return m_bEditingMode; }
+
     const WIZDOCUMENTDATA& document() { return m_renderer->data(); }
     void reloadDocument();
 
@@ -219,6 +222,9 @@ public Q_SLOTS:
     bool editorCommandExecuteViewSource();
 
 Q_SIGNALS:
+    // signals for notify command reflect status, triggered when selection, focus, editing mode changed
+    void statusChanged();
+
     // signals used request reset info toolbar and editor toolbar
     void focusIn();
     void focusOut();
