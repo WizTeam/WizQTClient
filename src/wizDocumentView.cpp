@@ -1,5 +1,6 @@
 #include "wizDocumentView.h"
 
+#include <QtWidgets>
 #include <QtGui>
 #include <QWebElement>
 #include <QWebFrame>
@@ -14,7 +15,7 @@
 #include "wiznotestyle.h"
 #include "wizEditorToolBar.h"
 #include "widgets/wizSegmentedButton.h"
-#include "widgets/qsegmentcontrol.h"
+//#include "widgets/qsegmentcontrol.h"
 #include "wizButton.h"
 
 

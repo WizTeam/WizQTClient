@@ -1,7 +1,7 @@
 #include "wizWebSettingsDialog.h"
 
-#include <QtGui>
-#include <QtWebKit>
+#include <QtWidgets>
+#include <QWebView>
 
 CWizWebSettingsDialog::CWizWebSettingsDialog(QSize sz, QWidget *parent)
     : QDialog(parent)

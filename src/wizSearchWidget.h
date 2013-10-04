@@ -1,7 +1,7 @@
 #ifndef WIZSEARCHWIDGET_H
 #define WIZSEARCHWIDGET_H
 
-#include <QtGui>
+#include <QtWidgets>
 #include "wizdef.h"
 
 // Wrap widget for qt widget and mac native search field

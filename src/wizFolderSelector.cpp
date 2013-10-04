@@ -1,6 +1,6 @@
 #include "wizFolderSelector.h"
 
-#include <QtGui>
+#include <QtWidgets>
 
 #include "wizFolderView.h"
 

@@ -214,7 +214,7 @@ void CWizUserInfoWidget::on_action_accountSetup_triggered()
         m_userSettings->setWindowTitle(tr("Account settings"));
     }
 
-    m_userSettings->load(QUrl::fromEncoded(strUrl.toAscii()));
+    m_userSettings->load(QUrl::fromEncoded(strUrl.toUtf8()));
 }
 
 void CWizUserInfoWidget::on_action_changeAvatar_triggered()

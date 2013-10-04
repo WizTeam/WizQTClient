@@ -1,7 +1,8 @@
 #ifndef WIZPOPUPBUTTON_H
 #define WIZPOPUPBUTTON_H
 
-#include <QtGui>
+#include <QToolButton>
+#include <QActionGroup>
 
 class CWizExplorerApp;
 

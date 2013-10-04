@@ -1,7 +1,7 @@
 #include "wizconsoledialog.h"
 #include "ui_wizconsoledialog.h"
 
-#include <QtGui>
+#include <QtWidgets>
 
 #include "wizdef.h"
 #include "share/wizmisc.h"

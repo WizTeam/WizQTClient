@@ -1,6 +1,6 @@
 #include "wizEditorToolBar.h"
 
-#include <QtGui>
+#include <QtWidgets>
 
 #include "share/wizmisc.h"
 #include "wizdef.h"

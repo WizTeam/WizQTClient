@@ -1,6 +1,6 @@
 #include "wizAboutDialog.h"
 
-#include <QtGui>
+#include <QtWidgets>
 
 #include "wizdef.h"
 #include "share/wizmisc.h"

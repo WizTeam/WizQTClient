@@ -28,7 +28,7 @@
 #include "wizdocumenthistory.h"
 
 #include "wizButton.h"
-#include "widgets/qsegmentcontrol.h"
+//#include "widgets/qsegmentcontrol.h"
 
 #include "wizEditorToolBar.h"
 #include "wizProgressDialog.h"

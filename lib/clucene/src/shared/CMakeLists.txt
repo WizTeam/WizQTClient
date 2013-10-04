@@ -365,3 +365,8 @@ if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
 set_target_properties(clucene-shared-static PROPERTIES
                         COMPILE_FLAGS "-Wno-deprecated-declarations -Wno-#warnings")
 endif()
+
+if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+set_source_files_properties(${rel}/CLucene/config/gunichartables.cpp PROPERTIES
+                        COMPILE_FLAGS "-Wno-cpp")
+endif()

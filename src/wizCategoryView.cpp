@@ -1,10 +1,7 @@
 #include "wizCategoryView.h"
 
-#ifdef BUILD_WITH_QT5
 #include <QtWidgets>
-#endif
-
-#include <QtGui>
+#include <QtCore>
 
 #include "wizdef.h"
 #include "widgets/wizScrollBar.h"
@@ -1177,7 +1174,7 @@ void CWizCategoryView::on_action_group_attribute()
         CWizKMAccountsServer server(::WizKMGetAccountsServerURL(true), NULL);
         server.GetToken(m_dbMgr.db().GetUserId(), m_dbMgr.db().GetPassword(), strToken);
         QString strUrl = CWizApiEntry::getGroupAttributeUrl(strToken, p->kbGUID());
-        m_groupSettings->load(QUrl::fromEncoded(strUrl.toAscii()));
+        m_groupSettings->load(QUrl::fromEncoded(strUrl.toUtf8()));
     }
 }
 

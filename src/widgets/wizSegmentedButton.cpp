@@ -1,6 +1,6 @@
 #include "wizSegmentedButton.h"
 
-#include <QtGui>
+#include <QtWidgets>
 
 CWizSegmentedButton::CWizSegmentedButton(QWidget *parent)
     : QPushButton(parent)

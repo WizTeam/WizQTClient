@@ -1150,7 +1150,7 @@ bool CWizDatabase::loadBizUsersFromJson(const QString& strBizGUID,
 {
     // QString assumes Lantin-1 when convert to and from const char* and QByteArrays
     // set to UTF-8 as default converting to avoid messy code
-    QTextCodec::setCodecForCStrings(QTextCodec::codecForName("UTF-8"));
+    //QTextCodec::setCodecForCStrings(QTextCodec::codecForName("UTF-8"));
 
     rapidjson::Document document;
     document.Parse<0>(strJsonUsers.toUtf8().constData());

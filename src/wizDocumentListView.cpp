@@ -418,7 +418,7 @@ QPixmap WizGetDocumentDragBadget(int nCount)
     QPixmap pixmap(strFileName);
 
     if (pixmap.isNull()) {
-        return NULL;
+        return QPixmap();
     }
 
     // default

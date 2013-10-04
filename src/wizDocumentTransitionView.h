@@ -1,7 +1,7 @@
 #ifndef WIZDOCUMENTTRANSITIONVIEW_H
 #define WIZDOCUMENTTRANSITIONVIEW_H
 
-#include <QWidget>
+#include <QtWidgets>
 
 class QLabel;
 

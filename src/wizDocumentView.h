@@ -2,7 +2,6 @@
 #define WIZDOCUMENTVIEW_H
 
 #include <QWidget>
-#include <QWebView>
 #include <QPointer>
 #include <QTimer>
 

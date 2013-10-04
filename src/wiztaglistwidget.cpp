@@ -1,9 +1,6 @@
 #include "wiztaglistwidget.h"
 
-#ifdef BUILD_WITH_QT5
 #include <QtWidgets>
-#endif
-
 #include <QLineEdit>
 #include <QListWidget>
 #include <QListWidgetItem>

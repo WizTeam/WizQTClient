@@ -1,6 +1,5 @@
 #include "wizDocumentTransitionView.h"
 
-#include <QtGui>
 
 CWizDocumentTransitionView::CWizDocumentTransitionView(QWidget *parent) :
     QWidget(parent)

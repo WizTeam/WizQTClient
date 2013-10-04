@@ -11,10 +11,6 @@ set(wiznote_HEADERS_MAC
 )
 
 set(wiznote_SOURCES
-    widgets/qkineticscroller.cpp
-    widgets/qscrollareakineticscroller.cpp
-    widgets/qwebviewkineticscroller.cpp
-    widgets/qsegmentcontrol.cpp
     zip/zip.c
     zip/unzip.c
     zip/quazipnewinfo.cpp
@@ -95,7 +91,6 @@ set(wiznote_SOURCES
     wizproxydialog.cpp
     wizcreateaccountdialog.cpp
     wizmainwindow.cpp
-    wizupdater.cpp
     wizupdaterprogressdialog.cpp
     wizstatusbar.cpp
     wizupgradenotifydialog.cpp
@@ -111,12 +106,10 @@ set(wiznote_SOURCES
     wizEditorToolBar.cpp
     wizEditorInsertTableForm.cpp
     wizFolderSelector.cpp
-    #share/wizIOHostThread.cpp
     wizProgressDialog.cpp
     wizFolderView.cpp
     widgets/wizScrollBar.cpp
     wizDocumentSelectionView.cpp
-    share/wizGroupMessage.cpp
     share/wizApiEntry.cpp
     share/wizObjectDataDownloader.cpp
     share/wizUserAvatar.cpp
@@ -213,7 +206,6 @@ set(wiznote_HEADERS
     wizproxydialog.h
     wizcreateaccountdialog.h
     wizmainwindow.h
-    wizupdater.h
     wizupdaterprogressdialog.h
     wizstatusbar.h
     wizupgradenotifydialog.h
@@ -230,6 +222,23 @@ set(wiznote_HEADERS
     sync/wizkmxmlrpc.h
     sync/wizkmsync.h
     share/wizSyncableDatabase.h
+    sync/wizAvatarUploader.h
+    wizWebSettingsDialog.h
+    widgets/wizSegmentedButton.h
+    widgets/wizUserInfoWidget.h
+    wizPopupButton.h
+    wizDocumentTransitionView.h
+
+    wizButton.h
+    wizEditorInsertTableForm.h
+    wizFolderSelector.h
+    wizProgressDialog.h
+    wizFolderView.h
+    widgets/wizScrollBar.h
+    wizDocumentSelectionView.h
+    share/wizApiEntry.h
+    share/wizObjectDataDownloader.h
+    share/wizUserAvatar.h
 
     # rapidjson
     rapidjson/allocators.h
@@ -249,83 +258,11 @@ set(wiznote_HEADERS
     rapidjson/internal/strfunc.h
 )
 
-set(wiznote_WRAP_HEADERS
-    widgets/qkineticscroller_p.h
-    #widgets/qkineticscroller.h
-    widgets/qscrollareakineticscroller.h
-    widgets/qwebviewkineticscroller.h
-    widgets/qsegmentcontrol.h
-    wizAboutDialog.h
-    zip/quazipfile.h
-    share/wizanimateaction.h
-    share/wizapi.h
-    wizattachmentlistwidget.h
-    wizcertmanager.h
-    share/wizcommonui.h
-    wizconsoledialog.h
-    share/wizcreateaccount.h
-    wizcreateaccountdialog.h
-    share/wizDatabase.h
-    share/wizDatabaseManager.h
-    wizCategoryView.h
-    wizDocumentListView.h
-    wizDocumentView.h
-    wizDocumentWebView.h
-    share/wizdownloadobjectdata.h
-    wizdownloadobjectdatadialog.h
-    wizEditorInsertLinkForm.h
-    share/wizIndexBase.h
-    share/wizIndex.h
-    wizmainwindow.h
-    share/wizmisc.h
-    wizLineInputDialog.h
-    wiznoteinfoform.h
-    share/wizpopupwidget.h
-    wizpreferencedialog.h
-    wizproxydialog.h
-    wizSearchWidget.h
-    share/wizSearchIndexer.h
-    wizstatusbar.h
-    wiztaglistwidget.h
-    share/wizThumbIndexCache.h
-    #wizupdater.h
-    wizupdaterprogressdialog.h
-    wizUpgrade.h
-    wizupgradenotifydialog.h
-    wizusercipherform.h
-    share/wizverifyaccount.h
-    wizLoginDialog.h
-    share/wizXmlRpcServer.h
-    share/wizziwreader.h
-    #share/wizuihelper.h
-    wizButton.h
-    wizEditorToolBar.h
-    wizEditorInsertTableForm.h
-    wizFolderSelector.h
-    #share/wizIOHostThread.h
-    wizProgressDialog.h
-    wizFolderView.h
-    widgets/wizScrollBar.h
-    wizDocumentSelectionView.h
-    share/wizGroupMessage.h
-    share/wizApiEntry.h
-    share/wizObjectDataDownloader.h
-    share/wizUserAvatar.h
-    wizDocumentTransitionView.h
-    wizPopupButton.h
-    sync/wizkmsync.h
-    widgets/wizUserInfoWidget.h
-    widgets/wizSegmentedButton.h
-    wizWebSettingsDialog.h
-    sync/wizAvatarUploader.h
-)
-
 set(wiznote_FORMS
     ui/wizLineInputDialog.ui
     ui/wizdownloadobjectdatadialog.ui
     ui/wizconsoledialog.ui
     ui/wizpreferencedialog.ui
-    #ui/wizaboutdialog.ui
     ui/wizproxydialog.ui
     ui/wizcreateaccountdialog.ui
     ui/wizupdaterprogressdialog.ui
@@ -358,44 +295,23 @@ endif()
 message("Wiznote whill compiling as ${CMAKE_BUILD_TYPE}")
 
 # use FindQt4.cmake module
-find_package(Qt4 REQUIRED QtCore QtGui QtXml QtNetwork QtWebKit)
-include(${QT_USE_FILE})
+#find_package(Qt4 REQUIRED QtCore QtGui QtXml QtNetwork QtWebKit)
+find_package(Qt5 REQUIRED Core Widgets LinguistTools Xml Network WebKit WebKitWidgets)
+set(CMAKE_AUTOMOC ON)
+qt5_add_translation(wiznote_QM ${wiznote_TRANSLATIONS})
+qt5_wrap_ui(wiznote_FORM_HEADERS ${wiznote_FORMS})
+qt5_add_resources(wiznote_RC ${wiznote_RCS})
 
-message("Compile with Qt: ${QT_VERSION_MAJOR}.${QT_VERSION_MINOR}.${QT_VERSION_PATCH}. Location: ${QT_BINARY_DIR}")
-
-# dynamically create ts files
-qt4_add_translation(wiznote_QM ${wiznote_TRANSLATIONS})
-
-qt4_add_resources(wiznote_RC ${wiznote_RCS})
+message("Compile with Qt: ${Qt5_VERSION}.")
 
 # we should copy qt internal qm files, otherwise qt can't translate some internal resources
 # https://bugreports.qt-project.org/browse/QTBUG-18662
 file(GLOB _QT_INTERNAL_TRANSLATIONS ${QT_TRANSLATIONS_DIR}/qt_*.qm)
 
-# uic
-qt4_wrap_ui(wiznote_FORM_HEADERS ${wiznote_FORMS})
-
-# moc, automoc feature is not exist if cmake version <= 2.8.4
-if(UNIX)
-    if(APPLE)
-        qt4_wrap_cpp(wiznote_MOC_HEADERS ${wiznote_WRAP_HEADERS} OPTIONS "-DQ_OS_MAC")
-    elseif(NOT APPLE)
-        qt4_wrap_cpp(wiznote_MOC_HEADERS ${wiznote_WRAP_HEADERS} OPTIONS "-DQ_OS_LINUX")
-    endif()
-elseif(WIN32)
-    qt4_wrap_cpp(wiznote_MOC_HEADERS ${wiznote_WRAP_HEADERS} OPTIONS "-DQ_OS_WIN32")
-endif()
-
-# cmake will autogen zconf.h at BINARY_DIR
-#include_directories(${testcmake_SOURCE_DIR}/zlib ${testcmake_BINARY_DIR}/zlib)
-#link_directories(${testcmake_BINARY_DIR}/zlib)
-
-
 # build
 if(UNIX)
     if(APPLE)
-
-        add_executable(${PROJECT_NAME} MACOSX_BUNDLE ${wiznote_SOURCES} ${wiznote_HEADERS} ${wiznote_SOURCES_MAC} ${wiznote_MOC_HEADERS} ${wiznote_FORM_HEADERS} ${wiznote_QM} ${wiznote_RC})
+        add_executable(${PROJECT_NAME} MACOSX_BUNDLE ${wiznote_SOURCES} ${wiznote_HEADERS} ${wiznote_SOURCES_MAC} ${wiznote_FORM_HEADERS} ${wiznote_QM} ${wiznote_RC})
         set_target_properties(${PROJECT_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bundle)
 
         # this should be issue of cmake, refer: http://public.kitware.com/Bug/bug_revision_view_page.php?rev_id=958
@@ -440,12 +356,11 @@ if(UNIX)
         endif()
 
     elseif(NOT APPLE)
-        add_executable(${PROJECT_NAME} ${wiznote_SOURCES} ${wiznote_MOC_HEADERS} ${wiznote_FORM_HEADERS} ${wiznote_QM} ${wiznote_RC})
-        #set_target_properties(${PROJECT_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build)
+        add_executable(${PROJECT_NAME} ${wiznote_SOURCES} ${wiznote_FORM_HEADERS} ${wiznote_QM} ${wiznote_RC})
 
         # always build rpath
-        set_target_properties(${PROJECT_NAME} PROPERTIES BUILD_WITH_INSTALL_RPATH TRUE)
-        set_target_properties(${PROJECT_NAME} PROPERTIES INSTALL_RPATH "\$ORIGIN/../lib")
+#        set_target_properties(${PROJECT_NAME} PROPERTIES BUILD_WITH_INSTALL_RPATH TRUE)
+#        set_target_properties(${PROJECT_NAME} PROPERTIES INSTALL_RPATH "\$ORIGIN/../lib")
 
         install(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION bin)
         install(DIRECTORY ${CMAKE_SOURCE_DIR}/share/ DESTINATION share PATTERN ".DS_Store" EXCLUDE)
@@ -467,41 +382,25 @@ if(UNIX)
                 COMMAND ${CMAKE_COMMAND} -E copy ${_file} ${CMAKE_BINARY_DIR}/share/wiznote/languages/)
         endforeach()
 
-        if(CMAKE_BUILD_TYPE STREQUAL "Release")
-            add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-                COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/lib/
-                COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/plugins/
-                COMMAND ${CMAKE_COMMAND} -E copy ${QT_LIBRARY_DIR}/libQtCore.so.4 ${CMAKE_BINARY_DIR}/lib/
-                COMMAND ${CMAKE_COMMAND} -E copy ${QT_LIBRARY_DIR}/libQtGui.so.4 ${CMAKE_BINARY_DIR}/lib/
-                COMMAND ${CMAKE_COMMAND} -E copy ${QT_LIBRARY_DIR}/libQtNetwork.so.4 ${CMAKE_BINARY_DIR}/lib/
-                COMMAND ${CMAKE_COMMAND} -E copy ${QT_LIBRARY_DIR}/libQtWebKit.so.4 ${CMAKE_BINARY_DIR}/lib/
-                COMMAND ${CMAKE_COMMAND} -E copy ${QT_LIBRARY_DIR}/libQtXml.so.4 ${CMAKE_BINARY_DIR}/lib/
-                COMMAND ${CMAKE_COMMAND} -E copy ${QT_LIBRARY_DIR}/libQtXmlPatterns.so.4 ${CMAKE_BINARY_DIR}/lib/
-                COMMAND ${CMAKE_COMMAND} -E copy_directory ${QT_PLUGINS_DIR} ${CMAKE_BINARY_DIR}/plugins/
-            )
-        endif()
+#        if(CMAKE_BUILD_TYPE STREQUAL "Release")
+#            add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+#                COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/lib/
+#                COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/plugins/
+#                COMMAND ${CMAKE_COMMAND} -E copy ${QT_LIBRARY_DIR}/libQtCore.so.4 ${CMAKE_BINARY_DIR}/lib/
+#                COMMAND ${CMAKE_COMMAND} -E copy ${QT_LIBRARY_DIR}/libQtGui.so.4 ${CMAKE_BINARY_DIR}/lib/
+#                COMMAND ${CMAKE_COMMAND} -E copy ${QT_LIBRARY_DIR}/libQtNetwork.so.4 ${CMAKE_BINARY_DIR}/lib/
+#                COMMAND ${CMAKE_COMMAND} -E copy ${QT_LIBRARY_DIR}/libQtWebKit.so.4 ${CMAKE_BINARY_DIR}/lib/
+#                COMMAND ${CMAKE_COMMAND} -E copy ${QT_LIBRARY_DIR}/libQtXml.so.4 ${CMAKE_BINARY_DIR}/lib/
+#                COMMAND ${CMAKE_COMMAND} -E copy ${QT_LIBRARY_DIR}/libQtXmlPatterns.so.4 ${CMAKE_BINARY_DIR}/lib/
+#                COMMAND ${CMAKE_COMMAND} -E copy_directory ${QT_PLUGINS_DIR} ${CMAKE_BINARY_DIR}/plugins/
+#            )
+#        endif()
 
     endif()
 endif()
 
-#set(CMAKE_CXX_FLAGS "-std=c++0x")
+qt5_use_modules(${PROJECT_NAME} Core Widgets Xml Network WebKit WebKitWidgets)
 
-# bug fix: not use automoc for cmake 2.8.4 backward compatibility.
-# moc, platform specific argument should be passed to moc
-#if(UNIX)
-#    if(APPLE)
-#        set_target_properties(${PROJECT_NAME} PROPERTIES AUTOMOC_MOC_OPTIONS "-DQ_OS_MAC")
-#    elseif(NOT APPLE)
-#        set_target_properties(${PROJECT_NAME} PROPERTIES AUTOMOC_MOC_OPTIONS "-DQ_OS_LINUX")
-#    endif()
-#elseif(WIN32)
-#    set_target_properties(${PROJECT_NAME} PROPERTIES AUTOMOC_MOC_OPTIONS "-DQ_OS_WIN32")
-#endif()
-#set_target_properties(${PROJECT_NAME} PROPERTIES AUTOMOC true)
-
-#${clucene_SOURCE_DIR}/src/shared
-#${clucene_BINARY_DIR}/src/shared
-#${clucene_SOURCE_DIR}/src/core
 include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_CURRENT_BINARY_DIR}

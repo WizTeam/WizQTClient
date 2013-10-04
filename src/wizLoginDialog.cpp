@@ -1,6 +1,6 @@
 #include "wizLoginDialog.h"
 
-#include <QtGui>
+#include <QtWidgets>
 
 #include "sync/wizkmxmlrpc.h"
 #include "wizcreateaccountdialog.h"

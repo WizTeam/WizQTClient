@@ -1,6 +1,6 @@
 #include "wizFolderView.h"
 
-#include <QtGui>
+#include <QtWidgets>
 
 #include "widgets/wizScrollBar.h"
 

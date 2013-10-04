@@ -2,10 +2,7 @@
 
 #include <QtGui>
 #include <QtWebKit>
-
-#ifdef BUILD_WITH_QT5
 #include <QtWebKitWidgets>
-#endif
 
 #include "wizdef.h"
 #include "share/wizmisc.h"
