@@ -11,27 +11,7 @@ set(wiznote_HEADERS_MAC
 )
 
 set(wiznote_SOURCES
-    zip/zip.c
-    zip/unzip.c
-    zip/quazipnewinfo.cpp
-    zip/quazipfile.cpp
-    zip/quazip.cpp
-    zip/quacrc32.cpp
-    zip/quaadler32.cpp
-    zip/qioapi.cpp
-    zip/zutil.c
-    zip/uncompr.c
-    zip/trees.c
-    zip/inftrees.c
-    zip/inflate.c
-    zip/inffast.c
-    zip/infback.c
-    zip/gzio.c
-    zip/deflate.c
-    zip/crc32.c
-    zip/compress.c
-    zip/adler32.c
-    zip/wizzip.cpp
+    share/wizzip.cpp
     share/wizqthelper.cpp
     share/wizmisc.cpp
     share/sqlite3.c
@@ -124,30 +104,7 @@ set(wiznote_SOURCES
 )
 
 set(wiznote_HEADERS
-    zip/zip.h
-    zip/unzip.h
-    zip/quazipnewinfo.h
-    zip/quazipfileinfo.h
-    zip/quazipfile.h
-    zip/quazip_global.h
-    zip/quazip.h
-    zip/quacrc32.h
-    zip/quachecksum32.h
-    zip/quaadler32.h
-    zip/ioapi.h
-    zip/crypt.h
-    zip/zutil.h
-    zip/zlib.h
-    zip/zconf.in.h
-    zip/zconf.h
-    zip/trees.h
-    zip/inftrees.h
-    zip/inflate.h
-    zip/inffixed.h
-    zip/inffast.h
-    zip/deflate.h
-    zip/crc32.h
-    zip/wizzip.h
+    share/wizzip.h
     share/wizqthelper.h
     share/wizmisc.h
     share/sqlite3ext.h
@@ -415,9 +372,10 @@ link_directories(
 )
 
 target_link_libraries(${PROJECT_NAME}
+    quazip
     cryptlib
     clucene-core-static
     clucene-shared-static
-    ${QT_LIBRARIES}
+    #${QT_LIBRARIES}
     ${CMAKE_DL_LIBS}
 )

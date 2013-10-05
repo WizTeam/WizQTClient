@@ -8,7 +8,7 @@
 
 #include "wizdef.h"
 #include "wizhtml2zip.h"
-#include "zip/wizzip.h"
+#include "share/wizzip.h"
 #include "html/wizhtmlcollector.h"
 #include "rapidjson/document.h"
 

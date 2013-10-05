@@ -2,7 +2,7 @@
 
 #include <QFile>
 
-#include "zip/wizzip.h"
+#include "share/wizzip.h"
 #include "wizsettings.h"
 #include "wizmisc.h"
 

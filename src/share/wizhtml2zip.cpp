@@ -4,7 +4,7 @@
 
 #include "wizmisc.h"
 
-#include "../zip/wizzip.h"
+#include "../share/wizzip.h"
 
 
 bool WizHtml2Zip(const QString& strUrl, const QString& strHtml, \
