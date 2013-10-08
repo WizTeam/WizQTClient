@@ -44,15 +44,15 @@ int main(int argc, char *argv[])
 #endif
 
     // set icon
-    QIcon iconApp;
-    iconApp.addFile(WizGetResourcesPath() + "skins/wiznote16.png");
-    iconApp.addFile(WizGetResourcesPath() + "skins/wiznote24.png");
-    iconApp.addFile(WizGetResourcesPath() + "skins/wiznote32.png");
-    iconApp.addFile(WizGetResourcesPath() + "skins/wiznote48.png");
-    iconApp.addFile(WizGetResourcesPath() + "skins/wiznote64.png");
-    iconApp.addFile(WizGetResourcesPath() + "skins/wiznote128.png");
-    iconApp.addFile(WizGetResourcesPath() + "skins/wiznote256.png");
-    QApplication::setWindowIcon(iconApp);
+//    QIcon iconApp;
+//    iconApp.addFile(WizGetResourcesPath() + "skins/wiznote16.png");
+//    iconApp.addFile(WizGetResourcesPath() + "skins/wiznote24.png");
+//    iconApp.addFile(WizGetResourcesPath() + "skins/wiznote32.png");
+//    iconApp.addFile(WizGetResourcesPath() + "skins/wiznote48.png");
+//    iconApp.addFile(WizGetResourcesPath() + "skins/wiznote64.png");
+//    iconApp.addFile(WizGetResourcesPath() + "skins/wiznote128.png");
+//    iconApp.addFile(WizGetResourcesPath() + "skins/wiznote256.png");
+//    QApplication::setWindowIcon(iconApp);
 
     QString strUserId = settings.GetString("Users", "DefaultUser", "");
     QString strPassword;
