@@ -379,12 +379,12 @@ CString WizGetSettingsFileName()
 
 QString WizGetLocaleFileName(const QString& strLocale)
 {
-    return WizGetResourcesPath() + "languages/wiznote_" + strLocale + ".qm";
+    return WizGetResourcesPath() + "locales/wiznote_" + strLocale + ".qm";
 }
 
 QString WizGetQtLocaleFileName(const QString& strLocale)
 {
-    return WizGetResourcesPath() + "languages/qt_" + strLocale + ".qm";
+    return WizGetResourcesPath() + "locales/qt_" + strLocale + ".qm";
 }
 
 void WizGetTranslatedLocales(QStringList& locales)

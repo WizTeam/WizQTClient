@@ -317,7 +317,7 @@ if(UNIX)
 
         install(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION bin)
         install(DIRECTORY ${CMAKE_SOURCE_DIR}/share/ DESTINATION share/wiznote PATTERN ".DS_Store" EXCLUDE)
-        install(FILES ${wiznote_QM} ${_QT_INTERNAL_TRANSLATIONS} DESTINATION share/wiznote/languages)
+        install(FILES ${wiznote_QM} DESTINATION share/wiznote/locales)
 
         # install icons and desktop entry
         install(FILES ${CMAKE_SOURCE_DIR}/build/common/wiznote.desktop DESTINATION share/applications)
@@ -330,11 +330,11 @@ if(UNIX)
 
         if(CMAKE_BUILD_TYPE STREQUAL "Debug")
             add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-                COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/share/ ${CMAKE_BINARY_DIR}/share)
+                COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/share/ ${CMAKE_BINARY_DIR}/share/wiznote)
 
             foreach(_file ${wiznote_QM})
                 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-                    COMMAND ${CMAKE_COMMAND} -E copy ${_file} ${CMAKE_BINARY_DIR}/share/wiznote/languages/)
+                    COMMAND ${CMAKE_COMMAND} -E copy ${_file} ${CMAKE_BINARY_DIR}/share/wiznote/locales/)
             endforeach()
         endif()
     endif()
