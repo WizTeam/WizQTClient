@@ -1,6 +1,7 @@
 #ifndef WIZMAINWINDOW_H
 #define WIZMAINWINDOW_H
 
+#include <QtGlobal>
 #include <QtWidgets>
 
 #include "wizdef.h"

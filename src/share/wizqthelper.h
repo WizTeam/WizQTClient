@@ -1,6 +1,8 @@
 #ifndef WIZQTHELPER_H
 #define WIZQTHELPER_H
 
+#include <QtGlobal>
+
 #include <map>
 #include <deque>
 #include <set>

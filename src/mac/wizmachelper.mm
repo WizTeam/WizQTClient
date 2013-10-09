@@ -1,11 +1,5 @@
 #include "wizmachelper.h"
-
-#include <QPixmap>
-#include <QIcon>
-#include <QMainWindow>
-
-#import <AppKit/AppKit.h>
-#import <objc/objc-class.h>
+#include "wizmachelper_mm.h"
 
 void setupCocoa()
 {
@@ -77,35 +71,35 @@ NSArray* WizToNSArray(const QList<QString> &stringList)
     return array;
 }
 
-NSImage* WizToNSImage(const QPixmap &pixmap)
-{
-    NSBitmapImageRep *bitmapRep = [[NSBitmapImageRep alloc] initWithCGImage:pixmap.toMacCGImageRef()];
-    NSImage *image = [[NSImage alloc] init];
-    [image addRepresentation:bitmapRep];
-    [bitmapRep release];
-    return image;
-}
-
-
-
-NSImage* WizToNSImage(const QIcon &icon)
-{
-    QList<QSize> sizes = icon.availableSizes();
-    if (sizes.empty())
-        return nil;
-    //
-    QSize sz = sizes.at(0);
-    for (int i = 1; i < sizes.size(); i++)
-    {
-        if (sizes.at(i).width() > sz.width())
-        {
-            sz = sizes.at(i);
-        }
-    }
-    //
-    QPixmap pixmap = icon.pixmap(sz);
-    return WizToNSImage(pixmap);
-}
+//NSImage* WizToNSImage(const QPixmap &pixmap)
+//{
+//    NSBitmapImageRep *bitmapRep = [[NSBitmapImageRep alloc] initWithCGImage:pixmap.toMacCGImageRef()];
+//    NSImage *image = [[NSImage alloc] init];
+//    [image addRepresentation:bitmapRep];
+//    [bitmapRep release];
+//    return image;
+//}
+//
+//
+//
+//NSImage* WizToNSImage(const QIcon &icon)
+//{
+//    QList<QSize> sizes = icon.availableSizes();
+//    if (sizes.empty())
+//        return nil;
+//    //
+//    QSize sz = sizes.at(0);
+//    for (int i = 1; i < sizes.size(); i++)
+//    {
+//        if (sizes.at(i).width() > sz.width())
+//        {
+//            sz = sizes.at(i);
+//        }
+//    }
+//    //
+//    QPixmap pixmap = icon.pixmap(sz);
+//    return WizToNSImage(pixmap);
+//}
 
 NSString* WizGenGUID()
 {
@@ -179,6 +173,3 @@ void CWizChangeCocoaImplementation::changeBack(Class baseClass, SEL originalSel,
 #endif
     }
 }
-
-
-

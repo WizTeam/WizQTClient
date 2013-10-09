@@ -7,6 +7,8 @@ set(wiznote_SOURCES_MAC
 
 set(wiznote_HEADERS_MAC
     mac/wizmachelper.h
+    mac/wizmachelper_mm.h
+    mac/wizSearchWidget_mm.h
 )
 
 set(wiznote_SOURCES

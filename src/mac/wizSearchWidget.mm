@@ -1,10 +1,13 @@
-#include "../wizSearchWidget.h"
+#include "wizSearchWidget_mm.h"
 
-#ifdef Q_OS_MAC
-#ifdef QT_MAC_USE_COCOA
+// Qt5 can't find this macro!!!
+// refer to : http://qt-project.org/forums/viewthread/25033
+// and this : https://bugreports.qt-project.org/browse/QTBUG-27318
+//#ifdef QT_MAC_USE_COCOA
+
 #import <Cocoa/Cocoa.h>
 
-#include "wizmachelper.h"
+#include "wizmachelper_mm.h"
 
 // NSSearchField delegate
 @interface WizSearchTarget: NSObject
@@ -161,5 +164,4 @@ void CWizSearchWidget::on_search_textChanged(const QString& strText)
     emit doSearch(strText);
 }
 
-#endif // QT_MAC_USE_COCOA
-#endif // Q_OS_MAC
+//#endif // QT_MAC_USE_COCOA

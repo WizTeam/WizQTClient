@@ -1,6 +1,8 @@
 #include "wizSearchWidget.h"
 
-#ifndef Q_OS_MAC
+#ifdef Q_OS_MAC
+#include "mac/wizSearchWidget_mm.h"
+#else
 #include "share/wizsettings.h"
 
 CWizSearchWidget::CWizSearchWidget(CWizExplorerApp& app, QWidget* parent /* = 0 */)
