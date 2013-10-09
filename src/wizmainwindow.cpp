@@ -132,9 +132,9 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
 
     client()->hide();
 
-#ifdef Q_WS_MAC
+#ifdef Q_OS_MAC
     setupFullScreenMode(this);
-#endif
+#endif // Q_OS_MAC
 }
 
 void MainWindow::resizeEvent(QResizeEvent *event)
@@ -712,10 +712,10 @@ void MainWindow::on_actionViewToggleCategory_triggered()
 
 void MainWindow::on_actionViewToggleFullscreen_triggered()
 {
-#ifdef Q_WS_MAC
+#ifdef Q_OS_MAC
     toggleFullScreenMode(this);
     m_actions->toggleActionText(WIZACTION_GLOBAL_TOGGLE_FULLSCREEN);
-#endif
+#endif // Q_OS_MAC
 }
 
 void MainWindow::on_actionFormatJustifyLeft_triggered()

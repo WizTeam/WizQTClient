@@ -1,9 +1,9 @@
 #ifndef COCOAHELP_H
 #define COCOAHELP_H
 
-#include <QtGui>
+#ifdef Q_OS_MAC
 
-#ifdef Q_WS_MAC
+#include <QtWidgets>
 
 void setupCocoa();
 void setupFullScreenMode(QMainWindow* mainWindow);
@@ -46,6 +46,6 @@ class CWizChangeCocoaImplementation
 
 #endif // __OBJC__
 
-#endif // Q_WS_MAC
+#endif // Q_OS_MAC
 
 #endif // COCOAHELP_H

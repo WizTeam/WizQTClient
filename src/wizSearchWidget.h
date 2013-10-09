@@ -7,12 +7,12 @@
 // Wrap widget for qt widget and mac native search field
 // refer to mac/wizSearchWidget.mm for osx NSSearchField
 
-#ifdef Q_WS_MAC
+#ifdef Q_OS_MAC
 #include <QMacCocoaViewContainer>
 typedef QMacCocoaViewContainer CWizSearchWidgetBase;
 #else
 typedef QWidget CWizSearchWidgetBase;
-#endif
+#endif // Q_OS_MAC
 
 class CWizSearchWidget : public CWizSearchWidgetBase
 {
@@ -28,10 +28,10 @@ public:
 public Q_SLOTS:
     void on_search_textChanged(const QString& strText);
 
-#ifndef Q_WS_MAC
+#ifndef Q_OS_MAC
 private:
     QLineEdit* m_editSearch;
-#endif
+#endif // Q_OS_MAC
 
 Q_SIGNALS:
     void doSearch(const QString& keywords);

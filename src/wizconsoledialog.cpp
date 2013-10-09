@@ -7,7 +7,7 @@
 #include "share/wizmisc.h"
 #include "share/wizDatabaseManager.h"
 
-#ifdef Q_WS_MAC
+#ifdef Q_OS_MAC
 #include "mac/wizmachelper.h"
 #endif
 
@@ -201,9 +201,9 @@ void CWizConsoleDialog::on_btnCopyToClipboard_clicked()
 
     QString strOutput;
     strOutput += QString("Version: WizNote %1 %2\n").arg(WIZ_CLIENT_TYPE).arg(WIZ_CLIENT_VERSION);
-#ifdef Q_WS_MAC
+#ifdef Q_OS_MAC
     strOutput += QString("OS: %1\n").arg(WizMacGetOSVersion());
-#elif defined(Q_WS_X11)
+#elif defined(Q_OS_LINUX)
     // FIXME: add distribution, release number, etc..
 #endif
     strOutput += QString("Username: %1\n").arg(m_app.databaseManager().db().getUserId());

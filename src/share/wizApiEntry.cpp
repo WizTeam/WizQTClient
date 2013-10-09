@@ -18,9 +18,9 @@
 
 #define WIZNOTE_API_ARG_PRODUCT "wiz"
 
-#if defined(Q_WS_MAC)
+#if defined(Q_OS_MAC)
 #define WIZNOTE_API_ARG_PLATFORM "macosx"
-#elif defined(Q_WS_WIN)
+#elif defined(Q_OS_WIN)
 #define WIZNOTE_API_ARG_PLATFORM "windows"
 #else
 #define WIZNOTE_API_ARG_PLATFORM "linux"

@@ -215,7 +215,7 @@ void CWizActions::buildMenu(QMenu* pMenu, CWizSettings& settings, const QString&
             break;
 
         // no fullscreen mode menu
-#ifndef Q_WS_MAC
+#ifndef Q_OS_MAC
         if (strAction == WIZACTION_GLOBAL_TOGGLE_FULLSCREEN) {
             index++;
             continue;

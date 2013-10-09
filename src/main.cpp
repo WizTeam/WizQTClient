@@ -10,7 +10,6 @@
 #include "wizLoginDialog.h"
 #include "share/wizsettings.h"
 #include "share/wizwin32helper.h"
-#include "mac/wizmachelper.h"
 
 
 int main(int argc, char *argv[])

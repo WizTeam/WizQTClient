@@ -2,7 +2,7 @@
 
 #include <qglobal.h>
 
-#ifdef Q_WS_WIN32
+#ifdef Q_OS_WIN32
 
 #include <QApplication>
 #include <QFont>

@@ -72,7 +72,7 @@ QIcon CWizFileIconProvider::icon(const QString& strFileName) const
 
 QString CWizFileIconProvider::type(const QString& strFileName) const
 {
-#if defined(Q_WS_WIN)
+#if defined(Q_OS_WIN)
     long flags = SHGFI_TYPENAME | SHGFI_USEFILEATTRIBUTES;
     //
     SHFILEINFO info;

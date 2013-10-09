@@ -1,6 +1,6 @@
 #include "wizSearchWidget.h"
 
-#ifndef Q_WS_MAC
+#ifndef Q_OS_MAC
 #include "share/wizsettings.h"
 
 CWizSearchWidget::CWizSearchWidget(CWizExplorerApp& app, QWidget* parent /* = 0 */)
@@ -54,7 +54,7 @@ void CWizSearchWidget::on_search_textChanged(const QString& strText)
     emit doSearch(strText);
 }
 
-#endif // Q_WS_MAC
+#endif // Q_OS_MAC
 
 
 CWizSearchBox::CWizSearchBox(CWizExplorerApp& app, QWidget *parent)

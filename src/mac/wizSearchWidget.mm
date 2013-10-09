@@ -1,6 +1,6 @@
 #include "../wizSearchWidget.h"
 
-#ifdef Q_WS_MAC
+#ifdef Q_OS_MAC
 #ifdef QT_MAC_USE_COCOA
 #import <Cocoa/Cocoa.h>
 
@@ -162,4 +162,4 @@ void CWizSearchWidget::on_search_textChanged(const QString& strText)
 }
 
 #endif // QT_MAC_USE_COCOA
-#endif // Q_WS_MAC
+#endif // Q_OS_MAC

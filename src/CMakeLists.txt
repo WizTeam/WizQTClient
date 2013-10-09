@@ -1,7 +1,6 @@
 project(wiznote)
 
 set(wiznote_SOURCES_MAC
-    widgets/qkineticscroller_mac.mm
     mac/wizSearchWidget.mm
     mac/wizmachelper.mm
 )
@@ -240,9 +239,6 @@ set(wiznote_RCS
     ${CMAKE_SOURCE_DIR}/resources/wiznote.qrc
 )
 
-# resources
-file(GLOB_RECURSE wiznote_RESOURCES ${CMAKE_SOURCE_DIR}/share/wiznote/*)
-
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release CACHE STRING
       "Choose the type of build, options are: None Debug Release RelWithDebInfo MinSizeRel."
@@ -251,8 +247,6 @@ endif()
 
 message("Wiznote whill compiling as ${CMAKE_BUILD_TYPE}")
 
-# use FindQt4.cmake module
-#find_package(Qt4 REQUIRED QtCore QtGui QtXml QtNetwork QtWebKit)
 find_package(Qt5 REQUIRED Core Widgets LinguistTools Xml Network WebKit WebKitWidgets)
 set(CMAKE_AUTOMOC ON)
 qt5_add_translation(wiznote_QM ${wiznote_TRANSLATIONS})
@@ -268,8 +262,9 @@ file(GLOB _QT_INTERNAL_TRANSLATIONS ${QT_TRANSLATIONS_DIR}/qt_*.qm)
 # build
 if(UNIX)
     if(APPLE)
-        add_executable(${PROJECT_NAME} MACOSX_BUNDLE ${wiznote_SOURCES} ${wiznote_HEADERS} ${wiznote_SOURCES_MAC} ${wiznote_FORM_HEADERS} ${wiznote_QM} ${wiznote_RC})
+        add_executable(${PROJECT_NAME} MACOSX_BUNDLE ${wiznote_SOURCES} ${wiznote_HEADERS} ${wiznote_SOURCES_MAC} ${wiznote_HEADERS_MAC} ${wiznote_FORM_HEADERS} ${wiznote_QM} ${wiznote_RC})
         set_target_properties(${PROJECT_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bundle)
+        set_target_properties(${PROJECT_NAME} PROPERTIES AUTOMOC_MOC_OPTIONS "-DQ_OS_MAC")
 
         # this should be issue of cmake, refer: http://public.kitware.com/Bug/bug_revision_view_page.php?rev_id=958
         set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS "-F /Library/Frameworks")
@@ -284,24 +279,23 @@ if(UNIX)
         target_link_libraries(${PROJECT_NAME} ${_CARBON_LIBRARY} ${_COCOA_LIBRARY})
 
         # setup plist info
-        set_target_properties(${PROJECT_NAME} PROPERTIES MACOSX_BUNDLE_INFO_PLIST "${wiznote_SOURCE_DIR}/../Info.plist")
+        set_target_properties(${PROJECT_NAME} PROPERTIES MACOSX_BUNDLE_INFO_PLIST "${CMAKE_SOURCE_DIR}/build/osx/Info.plist")
 
         # copy resources to bundle
         set(wiznote_BUNDLE ${CMAKE_BINARY_DIR}/bundle/${PROJECT_NAME}.app)
         set(wiznote_BUNDLE_CONTENTS ${CMAKE_BINARY_DIR}/bundle/${PROJECT_NAME}.app/Contents)
         add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-            COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/share/wiznote/ ${wiznote_BUNDLE_CONTENTS}/Resources/)
+            COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/share/ ${wiznote_BUNDLE_CONTENTS}/Resources/)
 
         foreach(_file ${_QT_INTERNAL_TRANSLATIONS})
             add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-                COMMAND ${CMAKE_COMMAND} -E copy ${_file} ${wiznote_BUNDLE_CONTENTS}/Resources/languages/)
+                COMMAND ${CMAKE_COMMAND} -E copy ${_file} ${wiznote_BUNDLE_CONTENTS}/Resources/locales/)
         endforeach()
 
         # we should copy qm manually to avoid dependency issue
-        #set_source_files_properties(${wiznote_QM} PROPERTIES MACOSX_PACKAGE_LOCATION Resources/languages)
         foreach(_file ${wiznote_QM})
             add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-                COMMAND ${CMAKE_COMMAND} -E copy ${_file} ${wiznote_BUNDLE_CONTENTS}/Resources/languages/)
+                COMMAND ${CMAKE_COMMAND} -E copy ${_file} ${wiznote_BUNDLE_CONTENTS}/Resources/locales/)
         endforeach()
 
         if(CMAKE_BUILD_TYPE STREQUAL "Release")
@@ -314,6 +308,7 @@ if(UNIX)
 
     elseif(NOT APPLE)
         add_executable(${PROJECT_NAME} ${wiznote_SOURCES} ${wiznote_HEADERS} ${wiznote_FORM_HEADERS} ${wiznote_QM} ${wiznote_RC})
+        set_target_properties(${PROJECT_NAME} PROPERTIES AUTOMOC_MOC_OPTIONS "-DQ_OS_LINUX")
 
         install(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION bin)
         install(DIRECTORY ${CMAKE_SOURCE_DIR}/share/ DESTINATION share/wiznote PATTERN ".DS_Store" EXCLUDE)
