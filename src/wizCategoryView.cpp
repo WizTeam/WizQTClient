@@ -65,10 +65,10 @@ CWizCategoryBaseView::CWizCategoryBaseView(CWizExplorerApp& app, QWidget* parent
 
     // use custom scrollbar
     setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
-    setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    //setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    m_vScroll = new CWizScrollBar(this);
-    m_vScroll->syncWith(verticalScrollBar());
+    //m_vScroll = new CWizScrollBar(this);
+    //m_vScroll->syncWith(verticalScrollBar());
 
     // style
     setStyle(::WizGetStyle(m_app.userSettings().skin()));
@@ -124,8 +124,8 @@ CWizCategoryBaseView::CWizCategoryBaseView(CWizExplorerApp& app, QWidget* parent
 void CWizCategoryBaseView::resizeEvent(QResizeEvent* event)
 {
     // reset scrollbar
-    m_vScroll->resize(m_vScroll->sizeHint().width(), event->size().height());
-    m_vScroll->move(event->size().width() - m_vScroll->sizeHint().width(), 0);
+    //m_vScroll->resize(m_vScroll->sizeHint().width(), event->size().height());
+    //m_vScroll->move(event->size().width() - m_vScroll->sizeHint().width(), 0);
 
     QTreeWidget::resizeEvent(event);
 }

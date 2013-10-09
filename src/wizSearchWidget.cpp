@@ -1,9 +1,10 @@
 #include "wizSearchWidget.h"
 
-#ifdef Q_OS_MAC
-#include "mac/wizSearchWidget_mm.h"
-#else
+//#ifdef Q_OS_MAC
+//#include "mac/wizSearchWidget_mm.h"
+//#else
 #include "share/wizsettings.h"
+#include "wizdef.h"
 
 CWizSearchWidget::CWizSearchWidget(CWizExplorerApp& app, QWidget* parent /* = 0 */)
     : QWidget(parent)
@@ -18,6 +19,7 @@ CWizSearchWidget::CWizSearchWidget(CWizExplorerApp& app, QWidget* parent /* = 0 
     iconLabel->setStyleSheet("QLabel{border-width:0;border-style:outset}");
 
     m_editSearch = new QLineEdit(this);
+    m_editSearch->setTextMargins(5, 0, 0, 0);
     m_editSearch->setStyleSheet("QLineEdit{border:1px solid gray; border-radius:10px;}");
 
     // avoid focus rect on OSX, this should be a bug of qt style sheet
@@ -53,10 +55,10 @@ QSize CWizSearchWidget::sizeHint() const
 
 void CWizSearchWidget::on_search_textChanged(const QString& strText)
 {
-    emit doSearch(strText);
+    Q_EMIT doSearch(strText);
 }
 
-#endif // Q_OS_MAC
+//#endif // Q_OS_MAC
 
 
 CWizSearchBox::CWizSearchBox(CWizExplorerApp& app, QWidget *parent)

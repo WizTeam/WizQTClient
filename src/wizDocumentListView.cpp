@@ -40,10 +40,10 @@ CWizDocumentListView::CWizDocumentListView(CWizExplorerApp& app, QWidget *parent
 
     // use custom scrollbar
     setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
-    setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    //setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    m_vScroll = new CWizScrollBar(this);
-    m_vScroll->syncWith(verticalScrollBar());
+    //m_vScroll = new CWizScrollBar(this);
+    //m_vScroll->syncWith(verticalScrollBar());
 
     //QScrollAreaKineticScroller *newScroller = new QScrollAreaKineticScroller();
     //newScroller->setWidget(this);
@@ -52,11 +52,11 @@ CWizDocumentListView::CWizDocumentListView(CWizExplorerApp& app, QWidget *parent
 
 //#ifndef Q_OS_MAC
     // smoothly scroll
-    m_vscrollCurrent = 0;
-    m_vscrollOldPos = 0;
-    connect(verticalScrollBar(), SIGNAL(valueChanged(int)), SLOT(on_vscroll_valueChanged(int)));
-    connect(verticalScrollBar(), SIGNAL(actionTriggered(int)), SLOT(on_vscroll_actionTriggered(int)));
-    connect(&m_vscrollTimer, SIGNAL(timeout()), SLOT(on_vscroll_update()));
+    //m_vscrollCurrent = 0;
+    //m_vscrollOldPos = 0;
+    //connect(verticalScrollBar(), SIGNAL(valueChanged(int)), SLOT(on_vscroll_valueChanged(int)));
+    //connect(verticalScrollBar(), SIGNAL(actionTriggered(int)), SLOT(on_vscroll_actionTriggered(int)));
+    //connect(&m_vscrollTimer, SIGNAL(timeout()), SLOT(on_vscroll_update()));
 //#endif //Q_OS_MAC
 
     //setItemDelegate(new CWizDocumentListViewDelegate(app, this));
@@ -154,8 +154,8 @@ CWizDocumentListView::~CWizDocumentListView()
 void CWizDocumentListView::resizeEvent(QResizeEvent* event)
 {
     // reset scrollbar position
-    m_vScroll->resize(m_vScroll->sizeHint().width(), event->size().height());
-    m_vScroll->move(event->size().width() - m_vScroll->sizeHint().width(), 0);
+    //m_vScroll->resize(m_vScroll->sizeHint().width(), event->size().height());
+    //m_vScroll->move(event->size().width() - m_vScroll->sizeHint().width(), 0);
 
     QListWidget::resizeEvent(event);
 }
