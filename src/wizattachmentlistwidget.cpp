@@ -346,7 +346,6 @@ CWizAttachmentListWidget::CWizAttachmentListWidget(CWizExplorerApp& app, QWidget
 {
     // FIXME
     setContentsMargins(0, 20, 0, 0);
-    //setStyleSheet("background-color: #FFFFFF");
 
     QIcon iconAddAttachment = ::WizLoadSkinIcon(m_app.userSettings().skin(), "document_add_attachment");
     QAction* actionAddAttach = new QAction(iconAddAttachment, tr("Add attachments"), this);

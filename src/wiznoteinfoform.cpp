@@ -9,15 +9,15 @@ CWizNoteInfoForm::CWizNoteInfoForm(CWizDatabaseManager& db, QWidget *parent)
     , ui(new Ui::CWizNoteInfoForm)
 {
     ui->setupUi(this);
-    setContentsMargins(8, 20, 8, 8);
+    setContentsMargins(0, 20, 0, 0);
 
-    QPalette pal = ui->widget->palette();
+    QPalette pal;// = ui->widget->palette();
 #ifdef Q_OS_LINUX
-    pal.setBrush(ui->widget->backgroundRole(), QBrush("#D7D7D7"));
+    pal.setBrush(QPalette::Base, QBrush("#D7D7D7"));
 #elif defined(Q_OS_MAC)
-    pal.setBrush(ui->widget->backgroundRole(), QBrush("#F7F7F7"));
+    pal.setBrush(QPalette::Base, QBrush("#F7F7F7"));
 #endif
-    ui->widget->setPalette(pal);
+    ui->frame->setPalette(pal);
 
     ui->editTitle->setReadOnly(true);
     ui->editCreateTime->setReadOnly(true);

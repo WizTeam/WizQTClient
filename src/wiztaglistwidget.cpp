@@ -33,6 +33,8 @@ CWizTagListWidget::CWizTagListWidget(CWizDatabaseManager& db, QWidget* parent)
     , m_dbMgr(db)
     , m_bUpdating(false)
 {
+    setContentsMargins(0, 20, 0, 0);
+
     m_tagsEdit = new QLineEdit(this);
     m_tagsEdit->setPlaceholderText(tr("Use semicolon to seperate tags..."));
     connect(m_tagsEdit, SIGNAL(returnPressed()), SLOT(on_tagsEdit_returnPressed()));
@@ -64,8 +66,7 @@ CWizTagListWidget::CWizTagListWidget(CWizDatabaseManager& db, QWidget* parent)
     layout->addLayout(layoutTitle);
     layout->addWidget(m_list);
 
-    setContentsMargins(8, 20, 8, 8);
-    setGeometry(0, 0, sizeHint().width(), sizeHint().height());
+    //setGeometry(0, 0, sizeHint().width(), sizeHint().height());
 }
 
 void CWizTagListWidget::showEvent(QShowEvent* event)
