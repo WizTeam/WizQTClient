@@ -27,6 +27,10 @@ int main(int argc, char *argv[])
 
     CWizSettings settings(QDir::homePath() + "/.wiznote/wiznote.ini");
 
+    // use 3 times(30M) of Qt default usage
+    int nCacheSize = settings.value("Common/Cache", 10240*3).toInt();
+    QPixmapCache::setCacheLimit(nCacheSize);
+
 #ifdef Q_OS_WIN
     QString strDefaultFontName = settings.GetString("Common", "DefaultFont", "");
     QFont f = WizCreateWindowsUIFont(a, strDefaultFontName);

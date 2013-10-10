@@ -1,7 +1,6 @@
 #include "wizDocumentListViewItem.h"
 
-#include <QFile>
-#include <QFileInfo>
+#include <QtWidgets>
 
 #include "share/wizDatabaseManager.h"
 #include "share/wizThumbIndexCache.h"
@@ -11,6 +10,7 @@
 CWizDocumentListViewItem::CWizDocumentListViewItem(CWizExplorerApp& app,
                                                    const WizDocumentListViewItemData& data)
     : QListWidgetItem(0, UserType)
+    , QObject(0)
     , m_app(app)
     , m_nSortingType(0)
     , m_nSize(0)
@@ -25,6 +25,8 @@ CWizDocumentListViewItem::CWizDocumentListViewItem(CWizExplorerApp& app,
     m_data.strAuthorId = data.strAuthorId;
 
     setText(data.doc.strTitle);
+
+    connect(this, SIGNAL(thumbnailReloaded()), SLOT(on_thumbnailReloaded()));
 }
 
 const QImage& CWizDocumentListViewItem::avatar(const CWizDatabase& db,
@@ -48,6 +50,8 @@ const QImage& CWizDocumentListViewItem::avatar(const CWizDatabase& db,
 void CWizDocumentListViewItem::resetAvatar(const QString& strFileName)
 {
     m_data.imgAuthorAvatar.load(strFileName);
+
+    Q_EMIT thumbnailReloaded();
 }
 
 bool CWizDocumentListViewItem::isAvatarNeedUpdate(const QString& strFileName)
@@ -83,6 +87,8 @@ void CWizDocumentListViewItem::resetAbstract(const WIZABSTRACT& abs)
     m_data.thumb.guid= abs.guid;
     m_data.thumb.text = abs.text;
     m_data.thumb.image = abs.image;
+
+    Q_EMIT thumbnailReloaded();
 }
 
 const QString& CWizDocumentListViewItem::tags()
@@ -114,6 +120,8 @@ void CWizDocumentListViewItem::reload(CWizDatabase& db)
 
     db.DocumentFromGUID(m_data.doc.strGUID, m_data.doc);
     setText(m_data.doc.strTitle);
+
+    Q_EMIT thumbnailReloaded();
 }
 
 void CWizDocumentListViewItem::setSortingType(int type)
@@ -208,4 +216,11 @@ bool CWizDocumentListViewItem::operator <(const QListWidgetItem &other) const
     }
 
     return true;
+}
+
+void CWizDocumentListViewItem::on_thumbnailReloaded()
+{
+    QPixmapCache::remove(m_data.doc.strGUID + ":normal");
+    QPixmapCache::remove(m_data.doc.strGUID + ":focus");
+    QPixmapCache::remove(m_data.doc.strGUID + ":nofocus");
 }

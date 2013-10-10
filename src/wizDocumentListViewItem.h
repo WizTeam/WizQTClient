@@ -1,7 +1,8 @@
 #ifndef WIZDOCUMENTLISTVIEWITEM_H
 #define WIZDOCUMENTLISTVIEWITEM_H
 
-#include <QListWidget>
+#include <QListWidgetItem>
+#include <QObject>
 
 #include "share/wizobject.h"
 
@@ -25,8 +26,10 @@ struct WizDocumentListViewItemData
     QImage imgAuthorAvatar;
 };
 
-class CWizDocumentListViewItem : public QListWidgetItem
+class CWizDocumentListViewItem : public QObject, public QListWidgetItem
 {
+    Q_OBJECT
+
 public:
     enum ItemType {
         TypePrivateDocument,
@@ -67,6 +70,12 @@ private:
     const QString& tagTree();
 
     bool isAvatarNeedUpdate(const QString& strFileName);
+
+private Q_SLOTS:
+    void on_thumbnailReloaded();
+
+Q_SIGNALS:
+    void thumbnailReloaded();
 };
 
 #endif // WIZDOCUMENTLISTVIEWITEM_H

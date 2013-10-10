@@ -10,11 +10,7 @@
 #include "share/wizmultilinelistwidget.h"
 #include "share/wizimagepushbutton.h"
 
-#include <QtGui>
-
-#ifdef BUILD_WITH_QT5
 #include <QtWidgets>
-#endif
 
 
 class CWizCategoryBaseView;
@@ -81,6 +77,8 @@ protected:
     void drawDocumentListViewItem(const QStyleOptionViewItemV4* option,
                                   QPainter* painter,
                                   const CWizDocumentListView* view) const;
+
+    QPixmap genThumbnailPixmap(const QStyleOptionViewItemV4* vopt, const CWizDocumentListView* view) const;
 
     // different view type for different document type: user, group, message
     void drawItemPrivateThumbnail(const QStyleOptionViewItemV4* vopt,
@@ -334,44 +332,44 @@ void CWizNoteStyle::drawDocumentListViewItem(const QStyleOptionViewItemV4 *optio
     }
 }
 
-void CWizNoteStyle::drawItemPrivateThumbnail(const QStyleOptionViewItemV4* vopt,
-                                             QPainter* p,
-                                             const CWizDocumentListView* view) const
+QPixmap CWizNoteStyle::genThumbnailPixmap(const QStyleOptionViewItemV4* vopt, const CWizDocumentListView* view) const
 {
+    QRect rc = vopt->rect.translated(-vopt->rect.x(), -vopt->rect.y());
+    QPixmap pixmap(rc.size());
+    pixmap.fill(m_colorDocumentsBackground);
+    QPainter p(&pixmap);
+
     // indirect access
     const WizDocumentListViewItemData& data = view->documentItemDataFromIndex(vopt->index);
     const WIZABSTRACT& thumb = view->documentAbstractFromIndex(vopt->index);
     bool bMultiSelected = view->selectedItems().size() > 1 ? true : false;
 
-    p->save();
-    p->setClipRect(vopt->rect);
-
     // seperator line
-    QRect textLine = vopt->rect;
+    QRect textLine = rc;
     textLine.adjust(5, 0, -5, 0);
-    p->setPen(m_colorDocumentsLine);
-    p->drawLine(textLine.bottomLeft(), textLine.bottomRight());
+    p.setPen(m_colorDocumentsLine);
+    p.drawLine(textLine.bottomLeft(), textLine.bottomRight());
 
     // draw background behaviour
     if (vopt->state & QStyle::State_Selected) {
         if (bMultiSelected) {
-            p->fillRect(vopt->rect, m_colorDocumentsItemFocusBackground);
+            p.fillRect(rc, m_colorDocumentsItemFocusBackground);
         } else {
             if (vopt->state & QStyle::State_HasFocus) {
-                p->fillRect(vopt->rect, m_colorDocumentsItemFocusBackground);
+                p.fillRect(rc, m_colorDocumentsItemFocusBackground);
             } else {
-                p->fillRect(vopt->rect, m_colorDocumentsItemLoseFocusBackground);
+                p.fillRect(rc, m_colorDocumentsItemLoseFocusBackground);
             }
         }
     }
 
-    QRect textRect = vopt->rect.adjusted(0, 5, 0, 0);
+    QRect textRect = rc.adjusted(0, 5, 0, 0);
 
     // draw thumb image
     const QImage& img = thumb.image;
     if (img.width() > 0 && img.height() > 0)
     {
-        QRect imageRect = vopt->rect.adjusted(0, 0, -5, 0);
+        QRect imageRect = rc.adjusted(0, 0, -5, 0);
         imageRect.setLeft(imageRect.right() - IMAGE_WIDTH);
         //imageRect.adjust(6, 6, -6, -6); // margin
 
@@ -391,7 +389,7 @@ void CWizNoteStyle::drawItemPrivateThumbnail(const QStyleOptionViewItemV4* vopt,
             int adjustY = (imageRect.height() - img.height()) / 2;
             imageRect.adjust(adjustX, adjustY, -adjustX, -adjustY);
         }
-        p->drawImage(imageRect, img);
+        p.drawImage(imageRect, img);
 
         textRect.setRight(imageRect.left());
     }
@@ -399,59 +397,93 @@ void CWizNoteStyle::drawItemPrivateThumbnail(const QStyleOptionViewItemV4* vopt,
     // draw the text
     if (!vopt->text.isEmpty()) {
         textRect.adjust(6, 6, -6, -6);
-
-        //bool bFocused = vopt->state & QStyle::State_HasFocus \
-        //        && vopt->state & QStyle::State_Selected;
         bool bFocused = vopt->state & QStyle::State_Selected;
 
         // draw title
-        QFont fontTitle = p->font();
+        QFont fontTitle = p.font();
         fontTitle.setPixelSize(13);
         fontTitle.setBold(true);
-        p->setFont(fontTitle);
-        int nFontHeight = p->fontMetrics().height();
+        p.setFont(fontTitle);
+        int nFontHeight = p.fontMetrics().height();
 
         // badge icon first
         QRect rcBadge = textRect;
         rcBadge.setSize(QSize(nFontHeight, nFontHeight));
         const QIcon& badge = data.doc.nProtected ? m_iconDocumentsBadgeEncrypted : m_iconDocumentsBadge;
         if (bFocused) {
-            badge.paint(p, rcBadge, Qt::AlignCenter, QIcon::Active, QIcon::Off);
+            badge.paint(&p, rcBadge, Qt::AlignCenter, QIcon::Active, QIcon::Off);
         } else {
-            badge.paint(p, rcBadge, Qt::AlignCenter, QIcon::Normal, QIcon::Off);
+            badge.paint(&p, rcBadge, Qt::AlignCenter, QIcon::Normal, QIcon::Off);
         }
 
         QRect rcTitle(QPoint(rcBadge.right() + 5, rcBadge.top()), QPoint(textRect.right(), rcBadge.bottom()));
         QColor colorTitle = bFocused ? m_colorDocumentsTitleSelected : m_colorDocumentsTitle;
         QString strTitle = data.doc.strTitle;
-        ::WizDrawTextSingleLine(p, rcTitle, strTitle,  Qt::TextSingleLine | Qt::AlignVCenter, colorTitle, true);
+        ::WizDrawTextSingleLine(&p, rcTitle, strTitle,  Qt::TextSingleLine | Qt::AlignVCenter, colorTitle, true);
 
         // draw date and tags, use 12px font size
-        QFont fontAbs = p->font();
+        QFont fontAbs = p.font();
         fontAbs.setPixelSize(12);
         fontAbs.setBold(false);
-        p->setFont(fontAbs);
-        nFontHeight = p->fontMetrics().height();
+        p.setFont(fontAbs);
+        nFontHeight = p.fontMetrics().height();
 
         QColor colorDate = bFocused ? m_colorDocumentsDateSelected : m_colorDocumentsDate;
         QRect rcInfo(textRect.left(), rcTitle.bottom() + 6, textRect.width(), nFontHeight);
         QString strInfo = data.strInfo;
-        int infoWidth = ::WizDrawTextSingleLine(p, rcInfo, strInfo,  Qt::TextSingleLine | Qt::AlignVCenter, colorDate, true);
+        int infoWidth = ::WizDrawTextSingleLine(&p, rcInfo, strInfo,  Qt::TextSingleLine | Qt::AlignVCenter, colorDate, true);
 
         // there lines document summary
         QColor colorSummary = bFocused ? m_colorDocumentsSummarySelected : m_colorDocumentsSummary;
         QString strAbstract = thumb.text;
 
         QRect rcAbstract1(QPoint(textRect.left() + infoWidth + 4, rcInfo.top()), QPoint(textRect.right(), rcInfo.bottom()));
-        ::WizDrawTextSingleLine(p, rcAbstract1, strAbstract, Qt::TextSingleLine | Qt::AlignVCenter, colorSummary, false);
+        ::WizDrawTextSingleLine(&p, rcAbstract1, strAbstract, Qt::TextSingleLine | Qt::AlignVCenter, colorSummary, false);
 
         QRect rcAbstract2(textRect.left(), rcAbstract1.bottom() + 3, textRect.width(), nFontHeight);
-        ::WizDrawTextSingleLine(p, rcAbstract2, strAbstract, Qt::TextSingleLine | Qt::AlignVCenter, colorSummary, false);
+        ::WizDrawTextSingleLine(&p, rcAbstract2, strAbstract, Qt::TextSingleLine | Qt::AlignVCenter, colorSummary, false);
 
         QRect rcAbstract3(textRect.left(), rcAbstract2.bottom() + 3, textRect.width(), nFontHeight);
-        ::WizDrawTextSingleLine(p, rcAbstract3, strAbstract, Qt::TextSingleLine | Qt::AlignVCenter, colorSummary, true);
+        ::WizDrawTextSingleLine(&p, rcAbstract3, strAbstract, Qt::TextSingleLine | Qt::AlignVCenter, colorSummary, true);
     }
 
+    return pixmap;
+}
+
+void CWizNoteStyle::drawItemPrivateThumbnail(const QStyleOptionViewItemV4* vopt,
+                                             QPainter* p,
+                                             const CWizDocumentListView* view) const
+{
+    const WizDocumentListViewItemData& data = view->documentItemDataFromIndex(vopt->index);
+    bool bMultiSelected = view->selectedItems().size() > 1 ? true : false;
+
+    QString state;
+    if (vopt->state & QStyle::State_Selected) {
+        if (bMultiSelected) {
+            state = "focus";
+        } else {
+            if (vopt->state & QStyle::State_HasFocus) {
+                state = "focus";
+            } else {
+                state = "nofocus";
+            }
+        }
+    } else {
+        state = "normal";
+    }
+
+    QString strKey = QString("%1:%2").arg(data.doc.strGUID).arg(state);
+    QPixmap pm;
+    if (!QPixmapCache::find(strKey, &pm)) {
+        pm = genThumbnailPixmap(vopt, view);
+        if (!QPixmapCache::insert(strKey, pm)) {
+            qDebug() << "Failed insert thumbnail to QPixmapCache while drawing document list";
+        }
+    }
+
+    p->save();
+    p->setClipRect(vopt->rect);
+    p->drawPixmap(vopt->rect, pm);
     p->restore();
 }
 
@@ -584,9 +616,6 @@ void CWizNoteStyle::drawItemGroupThumbnail(const QStyleOptionViewItemV4* vopt,
     // draw the text
     if (!vopt->text.isEmpty()) {
         textRect.adjust(6, 6, -6, -6);
-
-        //bool bFocused = vopt->state & QStyle::State_HasFocus \
-        //        && vopt->state & QStyle::State_Selected;
         bool bFocused = vopt->state & QStyle::State_Selected;
 
         // draw title
