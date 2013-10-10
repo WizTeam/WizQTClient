@@ -259,15 +259,19 @@ qt5_add_resources(wiznote_RC ${wiznote_RCS})
 
 message("Compile with Qt: ${Qt5_VERSION}.")
 
-# we should copy qt internal qm files, otherwise qt can't translate some internal resources
-# https://bugreports.qt-project.org/browse/QTBUG-18662
-file(GLOB _QT_INTERNAL_TRANSLATIONS ${QT_TRANSLATIONS_DIR}/qt_*.qm)
 
 # build
 if(UNIX)
     if(APPLE)
         set(wiznote_LOGO ${CMAKE_SOURCE_DIR}/build/common/logo/wiznote.icns)
-        add_executable(${PROJECT_NAME} MACOSX_BUNDLE ${wiznote_SOURCES} ${wiznote_HEADERS} ${wiznote_SOURCES_MAC} ${wiznote_HEADERS_MAC} ${wiznote_FORM_HEADERS} ${wiznote_QM} ${wiznote_RC} ${wiznote_LOGO})
+
+        # we should copy qt internal qm files, otherwise qt can't translate some internal resources
+        # and also macdeployqt will not do this work for us
+        # refer to: https://bugreports.qt-project.org/browse/QTBUG-18662
+        get_filename_component(_qt5_TRANSLATIONS ${Qt5_DIR}/../../../translations/ ABSOLUTE)
+        file(GLOB _qt5_QM ${_qt5_TRANSLATIONS}/qt_*.qm)
+
+        add_executable(${PROJECT_NAME} MACOSX_BUNDLE ${wiznote_SOURCES} ${wiznote_HEADERS} ${wiznote_SOURCES_MAC} ${wiznote_HEADERS_MAC} ${wiznote_FORM_HEADERS} ${wiznote_QM} ${_qt5_QM} ${wiznote_RC} ${wiznote_LOGO})
         set_target_properties(${PROJECT_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bundle)
         set_target_properties(${PROJECT_NAME} PROPERTIES AUTOMOC_MOC_OPTIONS "-DQ_OS_MAC")
 
@@ -287,6 +291,7 @@ if(UNIX)
         set_target_properties(${PROJECT_NAME} PROPERTIES MACOSX_BUNDLE_INFO_PLIST "${CMAKE_SOURCE_DIR}/build/osx/Info.plist")
         set_source_files_properties(${wiznote_LOGO} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
         set_source_files_properties(${wiznote_QM} PROPERTIES MACOSX_PACKAGE_LOCATION Resources/locales)
+        set_source_files_properties(${_qt5_QM} PROPERTIES MACOSX_PACKAGE_LOCATION Resources/locales)
 
         # copy resources to bundle
         set(wiznote_BUNDLE ${CMAKE_BINARY_DIR}/bundle/${PROJECT_NAME}.app)
@@ -295,11 +300,12 @@ if(UNIX)
             COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/share/ ${wiznote_BUNDLE_CONTENTS}/Resources/)
 
         if(CMAKE_BUILD_TYPE STREQUAL "Release")
+            get_filename_component(_qt5_BINARY_DIR ${Qt5_DIR}/../../../bin/ ABSOLUTE)
             # resovle library dependency if build type is release
             add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-                COMMAND macdeployqt ${wiznote_BUNDLE}
+                COMMAND ${_qt5_BINARY_DIR}/macdeployqt ${wiznote_BUNDLE}
                 COMMAND ln -s /Applications ${CMAKE_BINARY_DIR}/bundle/Applications
-                COMMAND hdiutil create -srcfolder ${CMAKE_BINARY_DIR}/bundle -volname ${PROJECT_NAME} ${CMAKE_BINARY_DIR}/wiznote.dmg)
+            )
         endif()
 
     elseif(NOT APPLE)
