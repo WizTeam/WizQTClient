@@ -1,9 +1,4 @@
-#include <QtCore>
-#include <QtGui>
-
-#ifdef BUILD_WITH_QT5
 #include <QtWidgets>
-#endif
 
 #include "wizmainwindow.h"
 #include "wizupdaterprogressdialog.h"
@@ -21,13 +16,9 @@ int main(int argc, char *argv[])
     a.setAttribute(Qt::AA_NativeWindows);
 
     QApplication::setApplicationName(QObject::tr("WizNote"));
+    QApplication::setWindowIcon(QIcon(":/logo.png"));
 
-#if defined Q_OS_MAC
-    QDir dir(QApplication::applicationDirPath());
-    dir.cdUp();
-    dir.cd("PlugIns");
-    QApplication::addLibraryPath(dir.absolutePath());
-#elif defined Q_OS_LINUX
+#ifndef Q_OS_MAC
     QDir dir(QApplication::applicationDirPath());
     dir.cdUp();
     dir.cd("plugins");
@@ -41,17 +32,6 @@ int main(int argc, char *argv[])
     QFont f = WizCreateWindowsUIFont(a, strDefaultFontName);
     a.setFont(f);
 #endif
-
-    // set icon
-//    QIcon iconApp;
-//    iconApp.addFile(WizGetResourcesPath() + "skins/wiznote16.png");
-//    iconApp.addFile(WizGetResourcesPath() + "skins/wiznote24.png");
-//    iconApp.addFile(WizGetResourcesPath() + "skins/wiznote32.png");
-//    iconApp.addFile(WizGetResourcesPath() + "skins/wiznote48.png");
-//    iconApp.addFile(WizGetResourcesPath() + "skins/wiznote64.png");
-//    iconApp.addFile(WizGetResourcesPath() + "skins/wiznote128.png");
-//    iconApp.addFile(WizGetResourcesPath() + "skins/wiznote256.png");
-//    QApplication::setWindowIcon(iconApp);
 
     QString strUserId = settings.GetString("Users", "DefaultUser", "");
     QString strPassword;
