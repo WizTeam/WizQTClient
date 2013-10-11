@@ -831,7 +831,6 @@ void MainWindow::on_actionLogout_triggered()
 {
     // save state
     m_settings->setAutoLogin(false);
-    m_settings->setPassword();
     m_bLogoutRestart = true;
     on_actionExit_triggered();
 }
