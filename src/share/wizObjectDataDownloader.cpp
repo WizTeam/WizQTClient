@@ -62,7 +62,7 @@ void CWizObjectDataDownloaderHost::downloadObject()
     QMap<QString, WIZOBJECTDATA>::iterator it = m_mapObject.begin();
 
     CWizObjectDataDownloader* downloader = new CWizObjectDataDownloader(m_dbMgr, it.value());
-    connect(downloader, SIGNAL(terminated()), SLOT(on_downloader_finished()));
+    connect(downloader, SIGNAL(finished()), SLOT(on_downloader_finished()));
     downloader->start();
 
     m_mapDownloading[it.key()] = it.value();
@@ -118,8 +118,7 @@ void CWizObjectDataDownloader::on_downloaded(bool bSucceed)
 
     m_bSucceed = bSucceed;
 
-    // use terminate instead of quit
-    terminate();
+    quit();
 }
 
 
