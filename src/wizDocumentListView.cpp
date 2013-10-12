@@ -174,15 +174,17 @@ void CWizDocumentListView::setDocuments(const CWizDocumentDataArray& arrayDocume
         const WIZDOCUMENTDATAEX& data = *it;
 
         WIZMESSAGEDATA msg;
-        if (!m_dbMgr.db().messageFromDocumentGUID(data.strGUID, msg)) {
-            arrayMessage.clear();
-            break;
+        if (m_dbMgr.db().messageFromDocumentGUID(data.strGUID, msg)) {
+            arrayMessage.push_back(msg);
+            //arrayMessage.clear();
+            //break;
+        } else {
+             break;
         }
-
-        arrayMessage.push_back(msg);
     }
 
-    if (arrayMessage.size()) {
+
+    if (arrayMessage.size() == arrayDocument.size()) {
         addMessages(arrayMessage);
     } else {
         addDocuments(arrayDocument);
@@ -240,7 +242,15 @@ int CWizDocumentListView::addMessage(const WIZMESSAGEDATA& msg, bool sort)
     data.nType = CWizDocumentListViewItem::TypeMessage;
     data.strAuthorId = msg.senderId;
     data.nReadStatus = msg.nReadStatus;
-    m_dbMgr.db(msg.kbGUID).DocumentFromGUID(msg.documentGUID, data.doc);
+    data.doc.strKbGUID = msg.kbGUID;
+    data.doc.strGUID = msg.documentGUID;
+
+    // FIXME: document will be deleted while message data still stand alone
+    // we should delete these useless messages from database.
+    if (!m_dbMgr.db(msg.kbGUID).DocumentFromGUID(msg.documentGUID, data.doc)) {
+        qDebug() << "[CWizDocumentListView]Failed to add message while DocumentFromGUID: " << msg.title;
+        return count();
+    }
 
     CWizDocumentListViewItem* pItem = new CWizDocumentListViewItem(m_app, data);
     pItem->setSizeHint(itemSizeFromViewType(TypeThumbnail));
