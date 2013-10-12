@@ -51,6 +51,7 @@ void CWizFolderView::initFolders()
     if (arrayAllLocation.empty()) {
         const QString strNotes("/My Notes/");
         m_dbMgr.db().AddExtraFolder(strNotes);
+        m_dbMgr.db().SetLocalValueVersion("folders", -1);
         arrayAllLocation.push_back(strNotes);
     }
 

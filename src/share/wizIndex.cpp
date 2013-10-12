@@ -3726,71 +3726,33 @@ void CWizIndex::SetExtraFolder(const CWizStdStringArray& arrayLocation)
     SetMeta("FOLDERS", "EXTRA", strText);
 }
 
-//void CWizIndex::GetDeletedFolder(CWizStdStringArray& arrayLocation)
-//{
-//    CString str = GetMetaDef("FOLDERS", "DELETED");
-//    ::WizSplitTextToArray(str, '\\', arrayLocation);
-//}
-
-//void CWizIndex::SetDeletedFolder(const CWizStdStringArray& arrayLocation)
-//{
-//    CString strText;
-//    ::WizStringArrayToText(arrayLocation, strText, "\\");
-//    SetMeta("FOLDERS", "DELETED", strText);
-//}
-
 void CWizIndex::AddExtraFolder(const QString& strLocation)
 {
-    //remove deleted list;
-    RemoveFromExtraFolder(strLocation);
-
-    Q_EMIT folderCreated(strLocation);
-
     CWizStdStringArray arrayLocation;
     GetExtraFolder(arrayLocation);
-    if (-1 != ::WizFindInArray(arrayLocation, strLocation))
+    if (-1 != ::WizFindInArray(arrayLocation, strLocation)) {
+        TOLOG("[CWizIndex]WARNING: AddExtraFolder whill folder exist: " + strLocation);
         return;
+    }
 
     arrayLocation.push_back(strLocation);
     SetExtraFolder(arrayLocation);
+
+    Q_EMIT folderCreated(strLocation);
 }
 
 void CWizIndex::LogDeletedFolder(const QString& strLocation)
 {
-    //delete from extra folder list
-    RemoveFromExtraFolder(strLocation);
-
-    Q_EMIT folderDeleted(strLocation);
-
-//    CWizStdStringArray arrayLocation;
-//    GetDeletedFolder(arrayLocation);
-//    if (-1 != ::WizFindInArray(arrayLocation, strLocation))
-//        return;
-
-//    arrayLocation.push_back(strLocation);
-//    SetDeletedFolder(arrayLocation);
-}
-
-void CWizIndex::RemoveFromExtraFolder(const QString& strLocation)
-{
     CWizStdStringArray arrayLocation;
     GetExtraFolder(arrayLocation);
     int index = ::WizFindInArray(arrayLocation, strLocation);
-    if (-1 == index)
+    if (-1 == index) {
+        TOLOG("[CWizIndex]WARNING: DeleteExtraFolder whill folder not exist: " + strLocation);
         return;
+    }
 
     arrayLocation.erase(arrayLocation.begin() + index);
     SetExtraFolder(arrayLocation);
+
+    Q_EMIT folderDeleted(strLocation);
 }
-
-//void CWizIndex::RemoveFromDeletedFolder(const CString& strLocation)
-//{
-//    CWizStdStringArray arrayLocation;
-//    GetDeletedFolder(arrayLocation);
-//    int index = ::WizFindInArray(arrayLocation, strLocation);
-//    if (-1 == index)
-//        return;
-
-//    arrayLocation.erase(arrayLocation.begin() + index);
-//    SetDeletedFolder(arrayLocation);
-//}

@@ -303,6 +303,12 @@ void CWizFolder::MoveToLocation(const QString& strDestLocation)
         Q_EMIT moveDocument(arrayDocument.size(), i++, strOldLocation, strDestLocation, data);
     }
 
+    CWizStdStringArray arrayLocation;
+    m_db.GetExtraFolder(arrayLocation);
+    if (-1 == ::WizFindInArray(arrayLocation, strDestLocation)) {
+        m_db.AddExtraFolder(strDestLocation);
+    }
+
     m_db.LogDeletedFolder(strOldLocation);
     m_db.SetLocalValueVersion("folders", -1);
 }
