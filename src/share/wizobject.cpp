@@ -406,9 +406,11 @@ bool WIZDELETEDGUIDDATA::LoadFromXmlRpc(CWizXmlRpcStructValue& data)
 {
     CString strType;
 
+    // this field maybe "nil"
+    data.GetTime(_T("dt_deleted"), tDeleted);
+
     bool bRet = data.GetStr(_T("deleted_guid"), strGUID)
         && data.GetStr(_T("guid_type"), strType)
-        && data.GetTime(_T("dt_deleted"), tDeleted)
         && data.GetInt64(_T("version"), nVersion);
 
     eType = WIZOBJECTDATA::TypeStringToObjectType(strType);
