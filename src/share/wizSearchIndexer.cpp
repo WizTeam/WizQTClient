@@ -75,6 +75,7 @@ bool CWizSearchIndexer::buildFTSIndex()
     }
 
     m_timerFTS.start();
+
     return true;
 }
 

@@ -1,6 +1,7 @@
 #include "wizmainwindow.h"
 
-#include <QtGui>
+//#include <QtGui>
+#include <QtWidgets>
 
 #ifdef Q_OS_MAC
 #include <Carbon/Carbon.h>
@@ -860,11 +861,23 @@ void MainWindow::on_actionFeedback_triggered()
     QDesktopServices::openUrl(strUrl);
 }
 
-//void MainWindow::on_actionRebuildFTS_triggered()
-//{
-//    // FIXME: ensure aborted before rebuild
-//    m_searchIndexer->rebuild();
-//}
+void MainWindow::on_actionRebuildFTS_triggered()
+{
+    QMessageBox msg;
+    msg.setIcon(QMessageBox::Warning);
+    msg.setWindowTitle(tr("Rebuild full text search index"));
+    msg.addButton(QMessageBox::Ok);
+    msg.addButton(QMessageBox::Cancel);
+    msg.setText(tr("Rebuild full text search is quit slow if you have quite a few \
+                   documents or attachments, you do not have to use this function \
+                   while search should work as expected, this fuction is only used \
+                   as developer's issue triage purpose, use it only if you know \
+                   what you are doing!"));
+
+    if (QDialog::Accepted == msg.exec()) {
+        m_searchIndexer->rebuild();
+    }
+}
 
 void MainWindow::on_actionSearch_triggered()
 {
