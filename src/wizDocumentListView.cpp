@@ -157,6 +157,8 @@ void CWizDocumentListView::resizeEvent(QResizeEvent* event)
     //m_vScroll->resize(m_vScroll->sizeHint().width(), event->size().height());
     //m_vScroll->move(event->size().width() - m_vScroll->sizeHint().width(), 0);
 
+    QPixmapCache::clear();
+
     QListWidget::resizeEvent(event);
 }
 
