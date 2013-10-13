@@ -44,7 +44,7 @@ Different distributions or platforms
 
 ### Mac OSX
 
-(Download)[http://www.wiz.cn/wiznote-maclinux.html] from our homepage is the only way currenly. We'll push to App Store soon!
+[Download](http://www.wiz.cn/wiznote-maclinux.html) from our homepage is the only way currently. We'll push to App Store soon!
 
 ### Ubuntu
 
@@ -75,7 +75,6 @@ Wow, we have not adopted this distro yet. volunteers is stronly encouraged!
 ### others
 
 Read the compile section and compile for your own flavor!
-
 
 
 *All things done, enjoy!*
