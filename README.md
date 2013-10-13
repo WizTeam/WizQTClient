@@ -1,81 +1,80 @@
-WizQTClient
+WizNote for Mac/Linux
 ===========
 
-为知笔记跨平台客户端
 
-Wiznote是一个开源项目，个人用户使用遵循GPLv3协议，任何人都可以获得源代码，做出任何修改。
-公司用户如果想要采用，修改，分发wiznote的代码，需向我知科技有限公司取得商业授权许可，在未取得商业授权之前私自采用，分发wiznote中的部分或全部代码，都将追究其法律责任。
-
+cross-platform cloud based note-taking client
 ---
 
-### 1. 开发环境及编译说明
+WizNote is an open-sourced project, published under GPLv3 for individual/personal users and custom commercial licence for company users.
 
-Qt开发采用一般使用Qt自己的IDE：QtCreator
+This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version. This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-QtCreator具有fake Vim模式，能够使用Vim的快捷键绑定的基础上，也方便于代码调试。
+company users who want to adopt/modify/redistribute the source/binary form of this project need consult Wiz conpany and/or buy a commercial licence for your rights.
 
-qmake是Qt开发默认的makefile生成程序，鉴于qmake的各种弱点，wiznote已经不在使用qmake而转向cmake, QtCreator能够很好地支持cmake编译
 
-wiznote的编译过程已在ubuntu12.04以及OSX 10.8.2测试过
+Introduction
+---
 
-windows暂不支持
+The project is based on Qt (Qt5 currently), aimed to provide an excellent PKM(personal knowledge management) desktop environment based on cloud usage. At present, we only have Wiz cloud backend(our company) on the table. but we strong encourage developers to contribute to this project to add more cloud backend for different cloud providers like evernote, youdao, etc...even offline usage.
 
-### 1. 准备Qt库以及QtCreator：
-你有两种方式获得Qt库：从源代码编译或是使用系统内建的QT库
+PKM should be an very important thing cross through one person's life, it's unwise to stick yourself to a fixed service provider or jump around and leave your collected info/secrets behide. PKM should be the same as your mind, fly over the ocean but never splash the waves.
 
-到这里下载Qt和QtCreator：
+freedom, means knowledge, means PKM, means this WizNote client.
 
-<http://qt-project.org/downloads>
+if you are windows or portable platform users, we have WizNote for windows, ios, android from our homepage: [http://www.wiznote.com]
 
-> 当前Qt5还有bug，如果使用Qt5编译会无法运行，已经提交了bug，linux用户需要下载基于v4.8.4的源代码自行编译
 
-在ubuntu上，安装g++:
+Compile
+---
 
-\# sudo apt-get install build-essential
+build time denpendency: cmake gcc
+runtime denpendency: Qt5
 
-编译Qt库需要以下依赖：
+only three steps:
+$ cmake .
+$ make
+$ make install
 
-\#sudo apt-get install libfontconfig1-dev libfreetype6-dev libx11-dev libxcursor-dev libxext-dev libxfixes-dev libxft-dev libxi-dev libxrandr-dev libxrender-dev
+We only tested on Linux and OSX above 10.8.2. But it's still should be work on windows.
 
-我们推荐的Qt编译选项：
 
-\# ./configure -qt-libtiff -qt-libpng -qt-libmng -qt-libjpeg -nomake demo -nomake example -no-qt3support
+Different distributions or platforms
+---
 
-\# sudo make && make install
+### Mac OSX
 
-Qt会被安装到/usr/local/Trolltech这个文件夹中
+(Download)[http://www.wiz.cn/wiznote-maclinux.html] from our homepage is the only way currenly. We'll push to App Store soon!
 
-如果你打算直接使用系统内建的Qt库，直接安装即可：
+### Ubuntu
 
-\# sudo apt-get install libqt4-dev
+install from [PPA](https://launchpad.net/~wiznote-team/+archive/ppa) is much more convenient:
 
-### 3. 编译wiznote
-下载源代码：
+$ sudo add-apt-repository ppa:wiznote-team
+$ sudo apt-get update
+$ sudo apt-get install wiznote
 
-\# git clone git://github.com/WizTeam/WizQTClient.git
+Also, App Store is not so far!
 
-编译之前，打开QtCreator设置好qt的路径以及版本，然后使用QtCreator打开CMakeLists.txt文件，这是QtCreator的工程文件
+### Arch-Linux
 
-设置好shadow build的编译路径，并运行cmake之后，即可开始编译过程
+we have provide an PKGBUILD, you can install from [AUR](https://aur.archlinux.org/packages/wiznote/) use whatever AUR helpers you like.
 
-Mac OSX下为了向下兼容，需要添加环境变量:
+for example yaourt:
 
-\# export MACOSX_DEPLOYMENT_TARGET=10.6
+$ yaourt -S wiznote
 
-你可以把这个变量写入~/.profile里边，以便编译时生效
+Don't forget vote for us! More votes can make this client offical repository available!
 
-参考文档：
-<http://www.cmake.org/pipermail/cmake/2009-November/033131.html>
-<http://developer.apple.com/library/mac/#technotes/tn2064/_index.html>
 
-默认编译方式为Release,可设置为Debug默认：
+### Fedora
 
-\# CMAKE_BUILD_TYPE=Debug cmake ../wiznote *
+Wow, we have not adopted this distro yet. volunteers is stronly encouraged!
 
-Linux下，编译结果位于${CMAKE_BINARY_DIR}/build/目录下
 
-Mac下，编译结果位于${CMAKE_BINARY_DIR}/bundle/目录下
+### others
 
-如果编译模式是Release, Mac下会生成dmg包，Linux下会拷贝库文件到build目录
+Read the compile section and compile for your own flavor!
+
+
 
 *All things done, enjoy!*
