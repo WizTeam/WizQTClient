@@ -21,7 +21,7 @@ PKM should be an very important thing cross through one person's life, it's unwi
 
 freedom, means knowledge, means PKM, means this WizNote client.
 
-if you are windows or portable platform users, we have WizNote for windows, ios, android from our homepage: [http://www.wiznote.com]
+if you are windows or portable platform users, we have WizNote for windows, ios, android from our [Homepage](http://www.wiznote.com)
 
 
 Compile
@@ -31,9 +31,10 @@ build time denpendency: cmake gcc
 runtime denpendency: Qt5
 
 only three steps:
-$ cmake .
-$ make
-$ make install
+
+    $ cmake .
+    $ make
+    $ make install
 
 We only tested on Linux and OSX above 10.8.2. But it's still should be work on windows.
 
@@ -49,9 +50,9 @@ Different distributions or platforms
 
 install from [PPA](https://launchpad.net/~wiznote-team/+archive/ppa) is much more convenient:
 
-$ sudo add-apt-repository ppa:wiznote-team
-$ sudo apt-get update
-$ sudo apt-get install wiznote
+    $ sudo add-apt-repository ppa:wiznote-team
+    $ sudo apt-get update
+    $ sudo apt-get install wiznote
 
 Also, App Store is not so far!
 
@@ -61,7 +62,7 @@ we have provide an PKGBUILD, you can install from [AUR](https://aur.archlinux.or
 
 for example yaourt:
 
-$ yaourt -S wiznote
+    $ yaourt -S wiznote
 
 Don't forget vote for us! More votes can make this client offical repository available!
 
