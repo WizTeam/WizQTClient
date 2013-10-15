@@ -48,7 +48,7 @@ private Q_SLOTS:
 
 /* ----------------------------- CWizSearcher ----------------------------- */
 class CWizSearcher
-        : public QThread
+        : public QObject
         , public IWizCluceneSearch
 {
     Q_OBJECT
@@ -57,9 +57,10 @@ public:
     explicit CWizSearcher(CWizDatabaseManager& dbMgr, QObject *parent = 0);
     void search(const QString& strKeywords, int nMaxSize = -1);
 
-protected:
-    virtual void run();
+    void abort();
+    bool isAborted() { return m_bAbort; }
 
+protected:
     virtual bool onSearchProcess(const wchar_t* lpszKbGUID, const wchar_t* lpszDocumentID, const wchar_t* lpszURL);
     virtual bool onSearchEnd();
 
@@ -70,12 +71,14 @@ private:
     int m_nMaxResult;
 
     QTimer m_timer;
+    bool m_bAbort;
 
     // guid-document map, search faster
     QMap<QString, WIZDOCUMENTDATAEX> m_mapDocumentSearched;
     int m_nResults; // results returned
 
     void doSearch();
+
     Q_INVOKABLE void searchKeyword(const QString& strKeywords);
     void searchDatabase(const QString& strKeywords);
 
@@ -84,6 +87,7 @@ public Q_SLOTS:
 
 Q_SIGNALS:
     void documentFind(const WIZDOCUMENTDATAEX& data);
+    void searchEnd();
 };
 
 #endif // WIZSEARCHINDEXER_H

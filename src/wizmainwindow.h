@@ -105,8 +105,11 @@ private:
     CWizDocumentViewHistory* m_history;
     QPointer<CWizAnimateAction> m_animateSync;
 
-    //QThread* m_searchThread;
+    QThread m_searchThread;
+    QPointer<QTimer> m_searchTimer;
     QPointer<CWizSearcher> m_searcher;
+    QString m_strSearchKeywords;
+
     CWizSearchIndexer* m_searchIndexer;
     QPointer<CWizSearchBox> m_searchBox;
 
@@ -198,8 +201,9 @@ public Q_SLOTS:
     void on_actionFormatRemoveFormat_triggered();
     void on_actionEditorViewSource_triggered();
 
-    //void on_searchIndexerStarted();
+    void on_search_timeout();
     void on_searchDocumentFind(const WIZDOCUMENTDATAEX& doc);
+    void on_searchEnd();
 
     void on_actionGoBack_triggered();
     void on_actionGoForward_triggered();

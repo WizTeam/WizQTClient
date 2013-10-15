@@ -268,7 +268,7 @@ void CWizSearchIndexer::on_attachment_deleted(const WIZDOCUMENTATTACHMENTDATA& a
 
 /* ----------------------------- CWizSearcher ----------------------------- */
 CWizSearcher::CWizSearcher(CWizDatabaseManager& dbMgr, QObject *parent)
-    : QThread(parent)
+    : QObject(parent)
     , m_dbMgr(dbMgr)
 {
     m_strIndexPath = m_dbMgr.db().GetAccountPath() + "fts_index";
@@ -277,34 +277,33 @@ CWizSearcher::CWizSearcher(CWizDatabaseManager& dbMgr, QObject *parent)
     connect(&m_timer, SIGNAL(timeout()), SLOT(on_timer_timeout()));
 }
 
-void CWizSearcher::run()
-{
-    exec();
-}
-
 void CWizSearcher::search(const QString &strKeywords, int nMaxSize /* = -1 */)
 {
+    qDebug() << "search, thread: " << QThread::currentThreadId();
+
     m_strkeywords = strKeywords;
     m_nMaxResult = nMaxSize;
 
-    m_timer.start(300);
+    m_timer.start(100);
 }
 
 void CWizSearcher::on_timer_timeout()
 {
-    if (!isRunning()) {
-        start();
-        m_timer.start(300);
-        return;
+    if (!m_strkeywords.isEmpty()) {
+        doSearch();
     }
+}
 
-    doSearch();
+void CWizSearcher::abort()
+{
+    m_bAbort = true;
 }
 
 void CWizSearcher::doSearch()
 {
     m_mapDocumentSearched.clear();
     m_nResults = 0;
+    m_bAbort = false;
 
     if (!QMetaObject::invokeMethod(this, "searchKeyword",
                                    Q_ARG(const QString&, m_strkeywords))) {
@@ -317,6 +316,7 @@ void CWizSearcher::searchKeyword(const QString& strKeywords)
     Q_ASSERT(!strKeywords.isEmpty());
 
     qDebug() << "\n[Search]search: " << strKeywords;
+    qDebug() << "searchKeyword, thread: " << QThread::currentThreadId();
 
     searchDatabase(strKeywords);
 
@@ -327,29 +327,56 @@ void CWizSearcher::searchKeyword(const QString& strKeywords)
     searchDocument(m_strIndexPath.toStdWString().c_str(),
                    strKeywords.toLower().toStdWString().c_str());
 
-    exit();
+    QMap<QString, WIZDOCUMENTDATAEX>::const_iterator i;
+    for (i = m_mapDocumentSearched.begin(); i != m_mapDocumentSearched.end(); i++) {
+        if (isAborted()) {
+            break;
+        }
+
+        Q_EMIT documentFind(i.value());
+
+        // emit signal too fast may hang up gui.
+        QThread::currentThread()->msleep(3);
+    }
+
+    Q_EMIT searchEnd();
 }
 
 void CWizSearcher::searchDatabase(const QString& strKeywords)
 {
+    if (isAborted())
+        return;
+
     CWizDocumentDataArray arrayDocument;
     m_dbMgr.db().SearchDocumentByTitle(strKeywords, NULL, true, 5000, arrayDocument);
 
+
     CWizDocumentDataArray::const_iterator it;
     for (it = arrayDocument.begin(); it != arrayDocument.end(); it++) {
+        if (isAborted())
+            return;
+
         const WIZDOCUMENTDATAEX& doc = *it;
         m_mapDocumentSearched[doc.strGUID] = doc;
+        m_nResults++;
     }
 
     arrayDocument.clear();
 
     int nCount = m_dbMgr.count();
     for (int i = 0; i < nCount; i++) {
+        if (isAborted())
+            return;
+
         m_dbMgr.at(i).SearchDocumentByTitle(strKeywords, NULL, true, 5000, arrayDocument);
 
         for (it = arrayDocument.begin(); it != arrayDocument.end(); it++) {
+            if (isAborted())
+                return;
+
             const WIZDOCUMENTDATAEX& doc = *it;
             m_mapDocumentSearched[doc.strGUID] = doc;
+            m_nResults++;
         }
 
         arrayDocument.clear();
@@ -357,15 +384,15 @@ void CWizSearcher::searchDatabase(const QString& strKeywords)
 
     qDebug() << QString("[Search]Find %1 results in database").arg(m_mapDocumentSearched.size());
 
-    QMap<QString, WIZDOCUMENTDATAEX>::const_iterator i;
-    for (i = m_mapDocumentSearched.begin(); i != m_mapDocumentSearched.end(); i++) {
-        if (m_nMaxResult <= m_nResults) {
-            return;
-        }
+    //QMap<QString, WIZDOCUMENTDATAEX>::const_iterator i;
+    //for (i = m_mapDocumentSearched.begin(); i != m_mapDocumentSearched.end(); i++) {
+    //    if (m_nMaxResult <= m_nResults) {
+    //        return;
+    //    }
 
-        Q_EMIT documentFind(i.value());
-        m_nResults++;
-    }
+    //    //Q_EMIT documentFind(i.value());
+    //    m_nResults++;
+    //}
 }
 
 bool CWizSearcher::onSearchProcess(const wchar_t* lpszKbGUID,
@@ -373,6 +400,9 @@ bool CWizSearcher::onSearchProcess(const wchar_t* lpszKbGUID,
                                    const wchar_t* lpszURL)
 {
     Q_UNUSED(lpszURL);
+
+    if (isAborted())
+        return true;
 
     if (m_nMaxResult != -1 && m_nMaxResult <= m_nResults) {
         qDebug() << "\nSearch result is bigger than limits: " << m_nMaxResult;
@@ -402,7 +432,7 @@ bool CWizSearcher::onSearchProcess(const wchar_t* lpszKbGUID,
 
     m_nResults++;
     m_mapDocumentSearched[strGUID] = doc;
-    Q_EMIT documentFind(doc);
+    //Q_EMIT documentFind(doc);
 
     return true;
 }

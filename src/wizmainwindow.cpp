@@ -886,15 +886,44 @@ void MainWindow::on_actionSearch_triggered()
 
 void MainWindow::on_actionResetSearch_triggered()
 {
+    if (m_searcher) {
+        m_searcher->abort();
+    }
+
     m_searchBox->clear();
     m_searchBox->focus();
     m_category->restoreSelection();
+}
+
+void MainWindow::on_search_timeout()
+{
+    if (m_searcher) {
+        m_searchTimer->start();
+        return;
+    }
+
+    m_searcher = new CWizSearcher(m_dbMgr);
+    connect(m_searcher, SIGNAL(searchEnd()), SLOT(on_searchEnd()));
+    connect(m_searcher, SIGNAL(documentFind(const WIZDOCUMENTDATAEX&)),
+            SLOT(on_searchDocumentFind(const WIZDOCUMENTDATAEX&)));
+
+    m_searcher->moveToThread(&m_searchThread);
+    connect(&m_searchThread, SIGNAL(finished()), m_searcher, SLOT(deleteLater()));
+    m_searchThread.start();
+
+    m_searcher->search(m_strSearchKeywords, 10000);
 }
 
 void MainWindow::on_searchDocumentFind(const WIZDOCUMENTDATAEX& doc)
 {
     m_documents->addDocument(doc, true);
     on_documents_itemSelectionChanged();
+}
+
+void MainWindow::on_searchEnd()
+{
+    m_searcher->disconnect();
+    m_searchThread.exit();
 }
 
 void MainWindow::on_search_doSearch(const QString& keywords)
@@ -907,13 +936,24 @@ void MainWindow::on_search_doSearch(const QString& keywords)
     m_category->saveSelection();
     m_documents->clear();
 
-    if (!m_searcher) {
-        m_searcher = new CWizSearcher(m_dbMgr);
-        connect(m_searcher, SIGNAL(documentFind(const WIZDOCUMENTDATAEX&)),
-                SLOT(on_searchDocumentFind(const WIZDOCUMENTDATAEX&)));
+    if (!m_searchTimer) {
+        m_searchTimer = new QTimer(this);
+        m_searchTimer->setSingleShot(true);
+        m_searchTimer->setInterval(300);
+        connect(m_searchTimer, SIGNAL(timeout()), SLOT(on_search_timeout()));
     }
 
-    m_searcher->search(keywords, 1000); // FIXME
+    if (m_searcher) {
+        m_searcher->abort();
+        disconnect(m_searcher, SIGNAL(documentFind(const WIZDOCUMENTDATAEX&)));
+    }
+
+    m_strSearchKeywords = keywords;
+    m_searchTimer->start();
+
+    qDebug() << "onSearch, thread: " << QThread::currentThreadId();
+
+    //m_searcher->search(keywords, 10000); // FIXME
 }
 
 #ifndef Q_OS_MAC
