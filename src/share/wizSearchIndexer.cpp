@@ -272,7 +272,9 @@ CWizSearcher::CWizSearcher(CWizDatabaseManager& dbMgr, QObject *parent)
     , m_dbMgr(dbMgr)
 {
     m_strIndexPath = m_dbMgr.db().GetAccountPath() + "fts_index";
-    connect(this, SIGNAL(started()), SLOT(on_searcher_started()));
+
+    m_timer.setSingleShot(true);
+    connect(&m_timer, SIGNAL(timeout()), SLOT(on_timer_timeout()));
 }
 
 void CWizSearcher::run()
@@ -285,14 +287,21 @@ void CWizSearcher::search(const QString &strKeywords, int nMaxSize /* = -1 */)
     m_strkeywords = strKeywords;
     m_nMaxResult = nMaxSize;
 
-    if (isRunning()) {
-        on_searcher_started();
-    } else {
-        start();
-    }
+    m_timer.start(300);
 }
 
-void CWizSearcher::on_searcher_started()
+void CWizSearcher::on_timer_timeout()
+{
+    if (!isRunning()) {
+        start();
+        m_timer.start(300);
+        return;
+    }
+
+    doSearch();
+}
+
+void CWizSearcher::doSearch()
 {
     m_mapDocumentSearched.clear();
     m_nResults = 0;
@@ -317,6 +326,8 @@ void CWizSearcher::searchKeyword(const QString& strKeywords)
     // NOTE: make sure convert keyword to lower case
     searchDocument(m_strIndexPath.toStdWString().c_str(),
                    strKeywords.toLower().toStdWString().c_str());
+
+    exit();
 }
 
 void CWizSearcher::searchDatabase(const QString& strKeywords)

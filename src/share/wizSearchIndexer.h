@@ -69,15 +69,18 @@ private:
     QString m_strkeywords;
     int m_nMaxResult;
 
+    QTimer m_timer;
+
     // guid-document map, search faster
     QMap<QString, WIZDOCUMENTDATAEX> m_mapDocumentSearched;
     int m_nResults; // results returned
 
+    void doSearch();
     Q_INVOKABLE void searchKeyword(const QString& strKeywords);
     void searchDatabase(const QString& strKeywords);
 
 public Q_SLOTS:
-    void on_searcher_started();
+    void on_timer_timeout();
 
 Q_SIGNALS:
     void documentFind(const WIZDOCUMENTDATAEX& data);

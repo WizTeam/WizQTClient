@@ -909,7 +909,6 @@ void MainWindow::on_search_doSearch(const QString& keywords)
 
     if (!m_searcher) {
         m_searcher = new CWizSearcher(m_dbMgr);
-        //m_searcher->moveToThread(m_searchThread);
         connect(m_searcher, SIGNAL(documentFind(const WIZDOCUMENTDATAEX&)),
                 SLOT(on_searchDocumentFind(const WIZDOCUMENTDATAEX&)));
     }

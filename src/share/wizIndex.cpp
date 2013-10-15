@@ -1171,7 +1171,7 @@ QString CWizIndex::GetDocumentTagTreeDisplayString(const QString& strDocumentGUI
     if (arrayTag.size() == 0)
         return "/";
 
-    Q_ASSERT(arrayTag.size() == 1);
+    //Q_ASSERT(arrayTag.size() == 1);
 
     QString strTree;
     const WIZTAGDATA& tag = arrayTag.at(0);
