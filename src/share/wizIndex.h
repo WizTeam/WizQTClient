@@ -171,7 +171,7 @@ public:
     void GetExtraFolder(CWizStdStringArray& arrayLocation);
     void SetExtraFolder(const CWizStdStringArray& arrayLocation);
     void AddExtraFolder(const QString& strLocation);
-    void LogDeletedFolder(const QString& strLocation);
+    void DeleteExtraFolder(const QString& strLocation);
 
     bool IsLocationEmpty(const CString& strLocation);
     bool GetAllLocations(CWizStdStringArray& arrayLocation);

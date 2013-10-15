@@ -38,6 +38,12 @@ void CWizFolderView::resizeEvent(QResizeEvent* event)
     QTreeWidget::resizeEvent(event);
 }
 
+void CWizFolderView::showEvent(QShowEvent *event)
+{
+    clear();
+    initFolders();
+}
+
 void CWizFolderView::initFolders()
 {
     CWizCategoryViewAllFoldersItem* pAllFoldersItem = new CWizCategoryViewAllFoldersItem(m_app, tr("Note Folders"), m_dbMgr.db().kbGUID());
@@ -46,31 +52,25 @@ void CWizFolderView::initFolders()
     CWizStdStringArray arrayAllLocation;
     m_dbMgr.db().GetAllLocations(arrayAllLocation);
 
-    initFolders(pAllFoldersItem, "", arrayAllLocation);
-
-    if (arrayAllLocation.empty()) {
-        const QString strNotes("/My Notes/");
-        m_dbMgr.db().AddExtraFolder(strNotes);
-        m_dbMgr.db().SetLocalValueVersion("folders", -1);
-        arrayAllLocation.push_back(strNotes);
-    }
-
-    //init extra folders
+    // folder cache
     CWizStdStringArray arrayExtLocation;
     m_dbMgr.db().GetExtraFolder(arrayExtLocation);
 
-    CWizStdStringArray::const_iterator it;
-    for (it = arrayExtLocation.begin(); it != arrayExtLocation.end(); it++) {
-        QString strLocation = *it;
-
-        if (strLocation.isEmpty())
-            continue;
-
-        if (m_dbMgr.db().IsInDeletedItems(strLocation))
-            continue;
-
-        addFolder(strLocation, true);
+    if (!arrayExtLocation.empty()) {
+        for (CWizStdStringArray::const_iterator it = arrayExtLocation.begin();
+             it != arrayExtLocation.end();
+             it++) {
+            if (-1 == ::WizFindInArray(arrayAllLocation, *it)) {
+                arrayAllLocation.push_back(*it);
+            }
+        }
     }
+
+    if (arrayAllLocation.empty()) {
+        arrayAllLocation.push_back(LOCATION_DEFAULT);
+    }
+
+    initFolders(pAllFoldersItem, "", arrayAllLocation);
 
     pAllFoldersItem->setExpanded(true);
     pAllFoldersItem->sortChildren(0, Qt::AscendingOrder);

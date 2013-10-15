@@ -22,6 +22,7 @@ protected:
     CWizScrollBar* m_vScroll;
 
     virtual void resizeEvent(QResizeEvent* event);
+    virtual void showEvent(QShowEvent *event);
 
 private:
     void initFolders();

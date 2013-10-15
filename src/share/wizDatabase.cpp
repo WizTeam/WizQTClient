@@ -188,7 +188,8 @@ CWizFolder::CWizFolder(CWizDatabase& db, const QString& strLocation)
     : m_db(db)
     , m_strLocation(strLocation)
 {
-
+    Q_ASSERT(strLocation.right(1) == "/");
+    Q_ASSERT(strLocation.left(1) == "/");
 }
 
 bool CWizFolder::IsDeletedItems() const
@@ -218,15 +219,16 @@ void CWizFolder::Delete()
         return;
 
     if (IsInDeletedItems()) {
+        // FIXME: should use CWizDocument to delete document data, attachments.
         if (!m_db.DeleteDocumentsByLocation(Location())) {
             TOLOG1("Failed to delete documents by location; %1", Location());
             return;
         }
 
-        m_db.LogDeletedFolder(Location());
+        m_db.DeleteExtraFolder(Location());
         m_db.SetLocalValueVersion("folders", -1);
     } else {
-        CWizFolder deletedItems(m_db, LOCATION_DELETED_ITEMS);
+        CWizFolder deletedItems(m_db, LOCATION_DELETED_ITEMS + Location().right(Location().size() - 1));
         MoveTo(&deletedItems);
     }
 }
@@ -248,14 +250,13 @@ void CWizFolder::MoveTo(QObject* dest)
     return MoveToLocation(pFolder->Location());
 }
 
-bool CWizFolder::CanMove(const QString& strSrcLocation,
-                         const QString& strDestLocation)
+bool CWizFolder::CanMove(const QString& strSource, const QString& strDest)
 {
-    if (LOCATION_DELETED_ITEMS == strSrcLocation)
+    if (LOCATION_DELETED_ITEMS == strSource)
         return false;
 
     // sub folder relationship or the same folder
-    if (strDestLocation.startsWith(strSrcLocation))
+    if (strDest.startsWith(strSource))
         return false;
 
     return true;
@@ -303,13 +304,20 @@ void CWizFolder::MoveToLocation(const QString& strDestLocation)
         Q_EMIT moveDocument(arrayDocument.size(), i++, strOldLocation, strDestLocation, data);
     }
 
-    CWizStdStringArray arrayLocation;
-    m_db.GetExtraFolder(arrayLocation);
-    if (-1 == ::WizFindInArray(arrayLocation, strDestLocation)) {
-        m_db.AddExtraFolder(strDestLocation);
+    CWizStdStringArray arrayFolder;
+    m_db.GetExtraFolder(arrayFolder);
+    for (CWizStdStringArray::const_iterator it = arrayFolder.begin();
+         it != arrayFolder.end();
+         it++) {
+        QString strFolder = *it;
+        if (strFolder.startsWith(strOldLocation)) {
+            strFolder.remove(0, strOldLocation.length());
+            strFolder.insert(0, strDestLocation);
+            m_db.AddExtraFolder(strFolder);
+        }
     }
 
-    m_db.LogDeletedFolder(strOldLocation);
+    m_db.DeleteExtraFolder(strOldLocation);
     m_db.SetLocalValueVersion("folders", -1);
 }
 
@@ -1108,7 +1116,7 @@ void CWizDatabase::SetFolders(const QString& strFolders, qint64 nVersion, bool b
             int nSize = 0;
             if (GetDocumentsSizeByLocation(strLocation, nSize, true)) {
                 if (nSize == 0) {
-                    LogDeletedFolder(strLocation);
+                    DeleteExtraFolder(strLocation);
                 }
             }
         }

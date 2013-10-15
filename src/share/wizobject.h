@@ -912,6 +912,7 @@ inline const CString TAG_DISPLAY_NAME_SHARE_WITH_FRIENDS()
 }
 
 #define LOCATION_DELETED_ITEMS      "/Deleted Items/"
+#define LOCATION_DEFAULT            "/My Notes/"
 
 
 #endif // WIZOBJECT_H

@@ -1323,9 +1323,9 @@ bool WizSaveUnicodeTextToUtf8File(const QString& strFileName, const QByteArray& 
     return true;
 }
 
-BOOL WizSplitTextToArray(const CString& strText, QChar ch, CWizStdStringArray& arrayResult)
+bool WizSplitTextToArray(const CString& strText, QChar ch, CWizStdStringArray& arrayResult)
 {
-    QStringList strings = strText.split(ch);
+    QStringList strings = strText.split(ch, QString::SkipEmptyParts);
     arrayResult.assign(strings.begin(), strings.end());
     return TRUE;
 }

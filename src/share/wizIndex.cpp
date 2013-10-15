@@ -3731,28 +3731,43 @@ void CWizIndex::AddExtraFolder(const QString& strLocation)
     CWizStdStringArray arrayLocation;
     GetExtraFolder(arrayLocation);
     if (-1 != ::WizFindInArray(arrayLocation, strLocation)) {
-        TOLOG("[CWizIndex]WARNING: AddExtraFolder whill folder exist: " + strLocation);
         return;
     }
 
     arrayLocation.push_back(strLocation);
-    SetExtraFolder(arrayLocation);
-
     Q_EMIT folderCreated(strLocation);
+
+    // add all of it's parents
+    QString strParent = strLocation;
+    int idx = strParent.lastIndexOf("/", -2);
+    while (idx) {
+        strParent = strParent.left(idx + 1);
+        idx = strParent.lastIndexOf("/", -2);
+
+        if (-1 == ::WizFindInArray(arrayLocation, strParent)) {
+            arrayLocation.push_back(strParent);
+            Q_EMIT folderCreated(strParent);
+        }
+    }
+
+    SetExtraFolder(arrayLocation);
 }
 
-void CWizIndex::LogDeletedFolder(const QString& strLocation)
+void CWizIndex::DeleteExtraFolder(const QString& strLocation)
 {
     CWizStdStringArray arrayLocation;
     GetExtraFolder(arrayLocation);
-    int index = ::WizFindInArray(arrayLocation, strLocation);
-    if (-1 == index) {
-        TOLOG("[CWizIndex]WARNING: DeleteExtraFolder whill folder not exist: " + strLocation);
-        return;
+
+    // delete folder and all it's subfolders
+    int n = arrayLocation.size();
+    for (intptr_t i = n - 1; i >= 0; i--) {
+        QString str = arrayLocation.at(i);
+        //int idx = str.lastIndexOf("/", -2);
+        if (str.startsWith(strLocation)) {
+            arrayLocation.erase(arrayLocation.begin() + i);
+            Q_EMIT folderDeleted(str);
+        }
     }
 
-    arrayLocation.erase(arrayLocation.begin() + index);
     SetExtraFolder(arrayLocation);
-
-    Q_EMIT folderDeleted(strLocation);
 }

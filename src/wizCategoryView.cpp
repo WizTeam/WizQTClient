@@ -861,8 +861,8 @@ void CWizCategoryView::on_action_user_moveFolder_confirmed(int result)
         MainWindow* mainWindow = qobject_cast<MainWindow*>(m_app.mainWindow());
         mainWindow->progressDialog()->hide();
 
-        addAndSelectFolder(strLocation);
-        on_folder_deleted(strOldLocation);
+        //addAndSelectFolder(strLocation);
+        //on_folder_deleted(strOldLocation);
     }
 }
 
@@ -941,14 +941,15 @@ void CWizCategoryView::on_action_user_renameFolder_confirmed(int result)
         CWizFolder folder(m_dbMgr.db(), strOldLocation);
         connect(&folder, SIGNAL(moveDocument(int, int, const QString&, const QString&, const WIZDOCUMENTDATA&)),
                 SLOT(on_action_user_renameFolder_confirmed_progress(int, int, const QString&, const QString&, const WIZDOCUMENTDATA&)));
+
         folder.MoveToLocation(strLocation);
 
         // hide progress dialog
         MainWindow* mainWindow = qobject_cast<MainWindow*>(m_app.mainWindow());
         mainWindow->progressDialog()->hide();
 
-        addAndSelectFolder(strLocation);
-        on_folder_deleted(strOldLocation);
+        //addAndSelectFolder(strLocation);
+        //on_folder_deleted(strOldLocation);
     }
 }
 
@@ -1482,33 +1483,27 @@ void CWizCategoryView::initFolders()
     CWizStdStringArray arrayAllLocation;
     m_dbMgr.db().GetAllLocations(arrayAllLocation);
 
-    doLocationSanityCheck(arrayAllLocation);
-
-    initFolders(pAllFoldersItem, QString(), arrayAllLocation);
-
-    if (arrayAllLocation.empty()) {
-        const QString strNotes("/My Notes/");
-        m_dbMgr.db().AddExtraFolder(strNotes);
-        m_dbMgr.db().SetLocalValueVersion("folders", -1);
-        arrayAllLocation.push_back(strNotes);
-    }
-
-    //init extra folders
+    // folder cache
     CWizStdStringArray arrayExtLocation;
     m_dbMgr.db().GetExtraFolder(arrayExtLocation);
 
-    CWizStdStringArray::const_iterator it;
-    for (it = arrayExtLocation.begin(); it != arrayExtLocation.end(); it++) {
-        QString strLocation = *it;
-
-        if (strLocation.isEmpty())
-            continue;
-
-        if (m_dbMgr.db().IsInDeletedItems(strLocation))
-            continue;
-
-        addFolder(strLocation, true);
+    if (!arrayExtLocation.empty()) {
+        for (CWizStdStringArray::const_iterator it = arrayExtLocation.begin();
+             it != arrayExtLocation.end();
+             it++) {
+            if (-1 == ::WizFindInArray(arrayAllLocation, *it)) {
+                arrayAllLocation.push_back(*it);
+            }
+        }
     }
+
+    if (arrayAllLocation.empty()) {
+        arrayAllLocation.push_back(LOCATION_DEFAULT);
+    }
+
+    doLocationSanityCheck(arrayAllLocation);
+
+    initFolders(pAllFoldersItem, QString(), arrayAllLocation);
 
     pAllFoldersItem->setExpanded(true);
     pAllFoldersItem->sortChildren(0, Qt::AscendingOrder);
@@ -1517,6 +1512,13 @@ void CWizCategoryView::initFolders()
     pAllFoldersItem->addChild(pTrash);
 
     updateFolderDocumentCount();
+
+    // push back folders cache
+    for (CWizStdStringArray::const_iterator it = arrayAllLocation.begin();
+         it != arrayAllLocation.end();
+         it++) {
+        m_dbMgr.db().AddExtraFolder(*it);
+    }
 }
 
 void CWizCategoryView::initFolders(QTreeWidgetItem* pParent, \
@@ -1546,31 +1548,54 @@ void CWizCategoryView::doLocationSanityCheck(CWizStdStringArray& arrayLocation)
     for (intptr_t i = nCount - 1; i >= 0; i--) {
         QString strLocation = arrayLocation.at(i);
 
-        if (strLocation.left(1) != "/" && strLocation.right(1) != "/") {
-            qDebug() << "[doLocationSanityCheck]: find folder name have not respect location naming spec: " << strLocation;
+        // sub folders must have parent
+        bool bHasParent = false;
+        int idx = strLocation.lastIndexOf("/", -2);
 
-            CWizDocumentDataArray arrayDocument;
-            CWizDocumentDataArray::iterator itDoc;
-            m_dbMgr.db().GetDocumentsByLocation(strLocation, arrayDocument);
-
-            if (!strLocation.isEmpty()) {
-                strLocation = "/" + strLocation + "/";
-            } else {
-                strLocation = "/My Notes/";
+        // root: /A/
+        if (idx == 0) {
+                //qDebug() << "Folder :" << strLocation << ", it's root!'";
+                bHasParent = true;
+        } else {
+            for (CWizStdStringArray::const_iterator it = arrayLocation.begin();
+                 it != arrayLocation.end();
+                 it++) {
+                if (*it == strLocation.left(idx + 1)) {
+                    //qDebug() << "Folder :" << strLocation << ", parent:" << *it;
+                    bHasParent = true;
+                }
             }
-
-            qDebug() << "[doLocationSanityCheck]: try to amend name to : " << strLocation << ", Total: " << arrayDocument.size();
-            for (itDoc = arrayDocument.begin(); itDoc != arrayDocument.end(); itDoc++) {
-                WIZDOCUMENTDATAEX& doc = *itDoc;
-
-                qDebug() << "[doLocationSanityCheck]: title: [" + doc.strTitle + "] Location: [" + doc.strLocation + "]";
-                doc.strLocation = strLocation;
-                doc.nObjectPart = WIZKM_XMLRPC_OBJECT_PART_INFO;
-                m_dbMgr.db().UpdateDocument(doc);
-            }
-
-            arrayLocation.erase(arrayLocation.begin() + i);
         }
+
+        if (strLocation.left(1) != "/" && strLocation.right(1) != "/") {
+            qDebug() << "[doLocationSanityCheck]Find folder name have not respect location naming spec: " << strLocation;
+
+            // remove from array
+            arrayLocation.erase(arrayLocation.begin() + i);
+
+        } else if (!bHasParent) {
+            qDebug() << "[doLocationSanityCheck]Find folder not have parent: " << strLocation;
+
+            // add all of it's parents
+            QString str = strLocation;
+            int idx = str.lastIndexOf("/", -2);
+            while (idx) {
+                str = str.left(idx + 1);
+                idx = str.lastIndexOf("/", -2);
+
+                if (-1 == ::WizFindInArray(arrayLocation, str)) {
+                    arrayLocation.push_back(str);
+                }
+            }
+        }
+    }
+
+    // debug
+    qDebug() << "dump folders:";
+    for (CWizStdStringArray::const_iterator it = arrayLocation.begin();
+         it != arrayLocation.end();
+         it++) {
+        qDebug() << *it;
     }
 }
 

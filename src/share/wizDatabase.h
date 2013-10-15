@@ -55,11 +55,11 @@ public:
 
     bool IsDeletedItems() const;
     bool IsInDeletedItems() const;
+
+    // used for move and rename folder
     void MoveToLocation(const QString& strDestLocation);
 
-    static bool CanMove(const QString& strSrcLocation,
-                        const QString& strDestLocation);
-
+    static bool CanMove(const QString& strSource, const QString& strDest);
     bool CanMove(CWizFolder* pSrc, CWizFolder* pDest) const;
 
     Q_INVOKABLE void Delete();
