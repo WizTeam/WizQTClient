@@ -68,7 +68,7 @@ CWizPreferenceWindow::CWizPreferenceWindow(CWizExplorerApp& app, QWidget* parent
             ui->comboSyncInterval->setCurrentIndex(1);
     }
 
-    switch (userSettings().syncMethod()) {
+    switch (m_dbMgr.db().GetObjectSyncTimeline()) {
         case -1:
             ui->comboSyncMethod->setCurrentIndex(0);
             break;
@@ -88,7 +88,12 @@ CWizPreferenceWindow::CWizPreferenceWindow(CWizExplorerApp& app, QWidget* parent
             ui->comboSyncMethod->setCurrentIndex(4);
     }
 
-    switch (userSettings().syncGroupMethod()) {
+    int nDays = 1;
+    if (m_dbMgr.count()) {
+        nDays = m_dbMgr.at(0).GetObjectSyncTimeline();
+    }
+
+    switch (nDays) {
         case -1:
             ui->comboSyncGroupMethod->setCurrentIndex(0);
             break;
@@ -191,24 +196,19 @@ void CWizPreferenceWindow::on_comboSyncMethod_activated(int index)
 {
     switch (index) {
         case 0:
-            //userSettings().setSyncMethod(-1);
             m_dbMgr.db().SetObjectSyncTimeLine(-1);
             break;
         case 1:
-            //userSettings().setSyncMethod(1);
             m_dbMgr.db().SetObjectSyncTimeLine(1);
             break;
         case 2:
-            //userSettings().setSyncMethod(7);
             m_dbMgr.db().SetObjectSyncTimeLine(7);
             break;
         case 3:
-            //userSettings().setSyncMethod(30);
             m_dbMgr.db().SetObjectSyncTimeLine(30);
             break;
         case 4:
-            //userSettings().setSyncMethod(9999);
-            m_dbMgr.db().SetObjectSyncTimeLine(9999);
+            m_dbMgr.db().SetObjectSyncTimeLine(99999);
             break;
         default:
             Q_ASSERT(0);
@@ -221,24 +221,19 @@ void CWizPreferenceWindow::on_comboSyncGroupMethod_activated(int index)
 {
     switch (index) {
     case 0:
-        //userSettings().setSyncGroupMethod(-1);
         setSyncGroupTimeLine(-1);
         break;
     case 1:
-        //userSettings().setSyncGroupMethod(1);
         setSyncGroupTimeLine(1);
         break;
     case 2:
-        //userSettings().setSyncGroupMethod(7);
         setSyncGroupTimeLine(7);
         break;
     case 3:
-        //userSettings().setSyncGroupMethod(30);
         setSyncGroupTimeLine(30);
         break;
     case 4:
-        //userSettings().setSyncGroupMethod(9999);
-        setSyncGroupTimeLine(9999);
+        setSyncGroupTimeLine(99999);
         break;
     default:
         Q_ASSERT(0);

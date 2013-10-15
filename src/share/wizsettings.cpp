@@ -372,7 +372,7 @@ int CWizUserSettings::syncMethod() const
 {
     int nDays = get("SyncMethod").toInt();
     if (!nDays)
-        return 9999; // default all
+        return 99999; // default all
 
     return nDays;
 }
@@ -389,7 +389,6 @@ int CWizUserSettings::syncGroupMethod() const
         return 1;   // default 1 day
 
     return nDays;
-
 }
 
 void CWizUserSettings::setSyncGroupMethod(int days)

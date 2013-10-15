@@ -1137,7 +1137,7 @@ int CWizDatabase::GetObjectSyncTimeline()
 {
     int nDays = GetMetaDef("SYNC_INFO", "TIMELINE").toInt();
     if (m_bIsPersonal && !nDays) {
-        return 9999;
+        return 99999;
     } else if (!m_bIsPersonal && !nDays) {
         return 1;
     }

@@ -113,7 +113,7 @@ public:
     void setSyncInterval(int minutes);
 
     // time line of personal data be downloaded
-    // set: 1, 7, 30, 99999(all), -1(no), default: 9999
+    // set: 1, 7, 30, 99999(all), -1(no), default: 99999
     int syncMethod() const;
     void setSyncMethod(int days);
 
