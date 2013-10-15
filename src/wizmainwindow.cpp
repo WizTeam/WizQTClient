@@ -522,15 +522,14 @@ void MainWindow::initClient()
     client->setPalette(pal);
     client->setAutoFillBackground(true);
 
-    QHBoxLayout* layout = new QHBoxLayout(client);
+    QHBoxLayout* layout = new QHBoxLayout();
     layout->setContentsMargins(0, 0, 0, 0);
     client->setLayout(layout);
 
-    m_splitter = new CWizSplitter(client);
-    m_splitter->setChildrenCollapsible(false);
+    m_splitter = new CWizSplitter();
     layout->addWidget(m_splitter);
 
-    QWidget* documentPanel = new QWidget(m_splitter);
+    QWidget* documentPanel = new QWidget();
     QHBoxLayout* layoutDocument = new QHBoxLayout();
     layoutDocument->setContentsMargins(0, 0, 0, 0);
     layoutDocument->setSpacing(0);

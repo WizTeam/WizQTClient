@@ -72,7 +72,7 @@ protected:
     virtual void drawCategoryViewItem(const QStyleOptionViewItemV4 *option, QPainter *painter, const CWizCategoryBaseView *widget) const;
     virtual void drawMultiLineListWidgetItem(const QStyleOptionViewItemV4 *option, QPainter *painter, const CWizMultiLineListWidget *widget) const;
     virtual void drawImagePushButton(const QStyleOptionButton *option, QPainter *painter, const CWizImagePushButton *button) const;
-    virtual void drawSplitter(const QStyleOption *option, QPainter *painter, const QSplitter *splitter) const;
+    //virtual void drawSplitter(const QStyleOption *option, QPainter *painter, const QSplitter *splitter) const;
 
     void drawDocumentListViewItem(const QStyleOptionViewItemV4* option,
                                   QPainter* painter,
@@ -1136,12 +1136,12 @@ void CWizNoteStyle::drawImagePushButton(const QStyleOptionButton *option, QPaint
     }
 }
 
-void CWizNoteStyle::drawSplitter(const QStyleOption *option, QPainter *painter, const QSplitter *splitter) const
-{
-    QRect rectSplitter = option->rect;
-    qDebug() << rectSplitter.x() << ":" << rectSplitter.y() << ":" << rectSplitter.width() << ":" << rectSplitter.height();
-    //m_splitterShadowImage.Draw(painter, , 255);
-}
+//void CWizNoteStyle::drawSplitter(const QStyleOption *option, QPainter *painter, const QSplitter *splitter) const
+//{
+//    QRect rectSplitter = option->rect;
+//    qDebug() << rectSplitter.x() << ":" << rectSplitter.y() << ":" << rectSplitter.width() << ":" << rectSplitter.height();
+//    //m_splitterShadowImage.Draw(painter, , 255);
+//}
 
 void CWizNoteStyle::drawControl(ControlElement element, const QStyleOption *option, QPainter *painter, const QWidget *widget) const
 {
@@ -1197,15 +1197,15 @@ void CWizNoteStyle::drawControl(ControlElement element, const QStyleOption *opti
             }
         }
         break;
-    case CE_Splitter:
-    {
-        if (const QSplitter* splitter = dynamic_cast<const QSplitter *>(widget))
-        {
-            drawSplitter(option, painter, splitter);
-        } else {
-            CWizNoteBaseStyle::drawControl(element, option, painter, widget);
-        }
-    }
+    //case CE_Splitter:
+    //{
+    //    if (const QSplitter* splitter = dynamic_cast<const QSplitter *>(widget))
+    //    {
+    //        drawSplitter(option, painter, splitter);
+    //    } else {
+    //        CWizNoteBaseStyle::drawControl(element, option, painter, widget);
+    //    }
+    //}
 
     default:
         CWizNoteBaseStyle::drawControl(element, option, painter, widget);

@@ -34,47 +34,44 @@ CWizVerSpacer::CWizVerSpacer(QWidget* parent)
 class CWizSplitterHandle : public QSplitterHandle
 {
 public:
-    CWizSplitterHandle(Qt::Orientation orientation, CWizSplitter *parent)
+    CWizSplitterHandle(Qt::Orientation orientation, QSplitter* parent)
         : QSplitterHandle(orientation, parent)
-        , m_splitter(parent)
     {
+        setMask(QRegion(contentsRect()));
+        setAttribute(Qt::WA_MouseNoMask, true);
     }
 
-    virtual void paintEvent(QPaintEvent *e)
+    virtual void paintEvent(QPaintEvent *event)
     {
         QPainter painter(this);
 
-        QRect rc = e->rect();
-        rc.setWidth(1);
+        // FIXME: hard-coded
+        QColor bgColor = QColor(165, 165, 165);
+        painter.fillRect(event->rect(), bgColor);
+    }
 
-        // FIXME: generate shadow from background color
-        QColor bgColor1 = QColor(165, 165, 165);
-        //QColor bgColor2 = QColor(195, 195, 195);
-        //QColor bgColor3 = QColor(150, 150, 150);
-
-        painter.fillRect(rc, bgColor1);
-
-        //rc.setX(rc.x() + 1);
-        //painter.fillRect(rc, bgColor2);
-
-        //rc.setX(rc.x() + 1);
-        //painter.fillRect(rc, bgColor3);
+    virtual void resizeEvent(QResizeEvent *event)
+    {
+        if (orientation() == Qt::Horizontal)
+            setContentsMargins(2, 0, 2, 0);
+        else
+            setContentsMargins(0, 2, 0, 2);
+        setMask(QRegion(contentsRect()));
+        QSplitterHandle::resizeEvent(event);
     }
 
     virtual QSize sizeHint() const
     {
-        return QSize(2, 1);
+        return QSize(1, 1);
     }
-
-private:
-    CWizSplitter* m_splitter;
 };
 
 
 CWizSplitter::CWizSplitter(QWidget* parent /*= 0*/)
     : QSplitter(parent)
 {
-    //setStyleSheet("QSplitter::handle {background-color: #A5A5A5} QSplitter::handle:horizontal {width: 1px;}");
+    setHandleWidth(1);
+    setChildrenCollapsible(false);
 }
 
 QSplitterHandle *CWizSplitter::createHandle()
