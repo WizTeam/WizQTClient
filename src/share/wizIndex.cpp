@@ -243,6 +243,7 @@ bool CWizIndex::CreateTag(const CString& strParentTagGUID,
     data.strName = strName;
     data.strDescription = strDescription;
 	data.tModified = WizGetCurrentTime();
+    data.nVersion = -1;
 
 	return CreateTagEx(data);
 }

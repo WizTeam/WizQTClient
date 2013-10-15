@@ -692,7 +692,7 @@ bool CWizDatabase::IsGroup()
 
 bool CWizDatabase::IsGroupAdmin()
 {
-    if (permission() == WIZ_USERGROUP_ADMIN)
+    if (permission() <= WIZ_USERGROUP_ADMIN)
         return true;
 
     return false;
@@ -700,7 +700,7 @@ bool CWizDatabase::IsGroupAdmin()
 
 bool CWizDatabase::IsGroupSuper()
 {
-    if (permission() == WIZ_USERGROUP_SUPER)
+    if (permission() <= WIZ_USERGROUP_SUPER)
         return true;
 
     return false;
@@ -708,7 +708,7 @@ bool CWizDatabase::IsGroupSuper()
 
 bool CWizDatabase::IsGroupEditor()
 {
-    if (permission() == WIZ_USERGROUP_EDITOR)
+    if (permission() <= WIZ_USERGROUP_EDITOR)
         return true;
 
     return false;
@@ -716,7 +716,7 @@ bool CWizDatabase::IsGroupEditor()
 
 bool CWizDatabase::IsGroupAuthor()
 {
-    if (permission() == WIZ_USERGROUP_AUTHOR)
+    if (permission() <= WIZ_USERGROUP_AUTHOR)
         return true;
 
     return false;
@@ -724,7 +724,7 @@ bool CWizDatabase::IsGroupAuthor()
 
 bool CWizDatabase::IsGroupReader()
 {
-    if (permission() == WIZ_USERGROUP_READER)
+    if (permission() <= WIZ_USERGROUP_READER)
         return true;
 
     return false;

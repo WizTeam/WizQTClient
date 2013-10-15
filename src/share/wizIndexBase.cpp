@@ -744,7 +744,7 @@ bool CWizIndexBase::CreateTagEx(const WIZTAGDATA& d)
 
     WIZTAGDATA data = d;
     if (data.strGUID == data.strParentGUID) {
-        data.strParentGUID.Empty();
+        data.strParentGUID.clear();
     }
 
     CString strFormat = FormatInsertSQLFormat(TABLE_NAME_WIZ_TAG, FIELD_LIST_WIZ_TAG, PARAM_LIST_WIZ_TAG);
