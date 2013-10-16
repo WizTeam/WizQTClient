@@ -1166,6 +1166,9 @@ bool CWizDatabase::loadBizUsersFromJson(const QString& strBizGUID,
     // set to UTF-8 as default converting to avoid messy code
     //QTextCodec::setCodecForCStrings(QTextCodec::codecForName("UTF-8"));
 
+    QTextCodec* codec = QTextCodec::codecForName("UTF-8");
+    QTextDecoder* encoder = codec->makeDecoder();
+
     rapidjson::Document document;
     document.Parse<0>(strJsonUsers.toUtf8().constData());
 
@@ -1182,14 +1185,16 @@ bool CWizDatabase::loadBizUsersFromJson(const QString& strBizGUID,
         }
 
         WIZBIZUSER user;
-        user.alias = u["alias"].GetString();
-        user.pinyin = u["pinyin"].GetString();
-        user.userGUID = u["user_guid"].GetString();
-        user.userId = u["user_id"].GetString();
+        user.alias = encoder->toUnicode(u["alias"].GetString(), u["alias"].GetStringLength());
+        user.pinyin = encoder->toUnicode(u["pinyin"].GetString(), u["pinyin"].GetStringLength());
+        user.userGUID = encoder->toUnicode(u["user_guid"].GetString(), u["user_guid"].GetStringLength());
+        user.userId = encoder->toUnicode(u["user_id"].GetString(), u["user_id"].GetStringLength());
         user.bizGUID = strBizGUID;
 
         arrayUser.push_back(user);
     }
+
+    delete encoder;
 
     return true;
 }
