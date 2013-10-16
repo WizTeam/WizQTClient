@@ -318,12 +318,10 @@ if(UNIX)
 
         # install icons and desktop entry
         install(FILES ${CMAKE_SOURCE_DIR}/build/common/wiznote.desktop DESTINATION share/applications)
-        install(FILES ${CMAKE_SOURCE_DIR}/build/common/logo/wiznote16.png DESTINATION share/icons/hicolor/16x16/apps RENAME wiznote.png)
-        install(FILES ${CMAKE_SOURCE_DIR}/build/common/logo/wiznote24.png DESTINATION share/icons/hicolor/24x24/apps RENAME wiznote.png)
-        install(FILES ${CMAKE_SOURCE_DIR}/build/common/logo/wiznote32.png DESTINATION share/icons/hicolor/32x32/apps RENAME wiznote.png)
-        install(FILES ${CMAKE_SOURCE_DIR}/build/common/logo/wiznote64.png DESTINATION share/icons/hicolor/64x64/apps RENAME wiznote.png)
-        install(FILES ${CMAKE_SOURCE_DIR}/build/common/logo/wiznote128.png DESTINATION share/icons/hicolor/128x128/apps RENAME wiznote.png)
-        install(FILES ${CMAKE_SOURCE_DIR}/build/common/logo/wiznote256.png DESTINATION share/icons/hicolor/256x256/apps RENAME wiznote.png)
+
+        foreach(ICON_SIZE 8 16 24 32 48 64 128 256 512)
+            install(FILES ${CMAKE_SOURCE_DIR}/build/common/logo/wiznote${ICON_SIZE}.png DESTINATION share/icons/hicolor/${ICON_SIZE}x${ICON_SIZE}/apps RENAME wiznote.png)
+        endforeach(ICON_SIZE)
 
         if(CMAKE_BUILD_TYPE STREQUAL "Debug")
             add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
