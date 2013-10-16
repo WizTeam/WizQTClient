@@ -1,6 +1,9 @@
 #include "wizEditorToolBar.h"
 
-#include <QtWidgets>
+#include <QStylePainter>
+#include <QToolButton>
+#include <QFontComboBox>
+#include <QHBoxLayout>
 
 #include "share/wizmisc.h"
 #include "wizdef.h"
@@ -707,6 +710,7 @@ QAction* CWizEditorToolBar::actionFromName(const QString& strName)
     }
 
     Q_ASSERT(0);
+    return NULL;
 }
 
 void CWizEditorToolBar::buildMenu()

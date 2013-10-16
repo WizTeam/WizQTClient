@@ -1,6 +1,14 @@
 #include "wizLoginDialog.h"
 
-#include <QtWidgets>
+#include <QLabel>
+#include <QComboBox>
+#include <QLineEdit>
+#include <QCheckBox>
+#include <QVBoxLayout>
+#include <QHBoxLayout>
+#include <QPushButton>
+#include <QMessageBox>
+#include <QDesktopServices>
 
 #include "sync/wizkmxmlrpc.h"
 #include "wizcreateaccountdialog.h"

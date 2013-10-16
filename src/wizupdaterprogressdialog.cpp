@@ -1,6 +1,12 @@
 #include "wizupdaterprogressdialog.h"
 #include "ui_wizupdaterprogressdialog.h"
 
+#include <QMouseEvent>
+#include <QDesktopWidget>
+#include <QDir>
+#include <QTimer>
+#include <QMessageBox>
+
 #include "share/wizmisc.h"
 #include "share/wizsettings.h"
 

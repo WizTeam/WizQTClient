@@ -1,6 +1,9 @@
 #include "wizmachelper.h"
 #include "wizmachelper_mm.h"
 
+#include <QLocale>
+#include <QMainWindow>
+
 void setupCocoa()
 {
     NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];

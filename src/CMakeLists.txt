@@ -249,16 +249,46 @@ if(NOT CMAKE_BUILD_TYPE)
       FORCE)
 endif()
 
-message("Wiznote whill compiling as ${CMAKE_BUILD_TYPE}")
+if(NOT WIZNOTE_USE_QT5)
+    set(WIZNOTE_USE_QT5 OFF CACHE BOOL
+        "Build WizNote use Qt5, default is off, make sure you have libqt5 on system.")
+endif(NOT WIZNOTE_USE_QT5)
 
-find_package(Qt5 REQUIRED Core Widgets LinguistTools Xml Network WebKit WebKitWidgets)
+if(WIZNOTE_USE_QT5)
+    find_package(Qt5 REQUIRED Core Widgets LinguistTools Xml Network WebKit WebKitWidgets)
+    if(Qt5_FOUND)
+        set(QT_VERSION ${Qt5_VERSION})
+        qt5_add_translation(wiznote_QM ${wiznote_TRANSLATIONS})
+        qt5_wrap_ui(wiznote_FORM_HEADERS ${wiznote_FORMS})
+        qt5_add_resources(wiznote_RC ${wiznote_RCS})
+    else(Qt5_FOUND)
+        set(WIZNOTE_USE_QT5 OFF)
+        message("Can't find Qt5, fallback to use Qt4")
+    endif(Qt5_FOUND)
+else(WIZNOTE_USE_QT5)
+    find_package(Qt4 REQUIRED QtCore QtGui QtXml QtNetwork QtWebKit)
+    if(Qt4_FOUND)
+        set(QT_VERSION ${QTVERSION})
+        qt4_add_translation(wiznote_QM ${wiznote_TRANSLATIONS})
+        qt4_wrap_ui(wiznote_FORM_HEADERS ${wiznote_FORMS})
+        qt4_add_resources(wiznote_RC ${wiznote_RCS})
+        INCLUDE(${QT_USE_FILE})
+    else(Qt4_FOUND)
+        message("Can't find Qt4 on the system, if you have Qt5 exist, set WIZNOTE_USE_QT5 ON")
+    endif(Qt4_FOUND)
+endif(WIZNOTE_USE_QT5)
+
+if(WIZNOTE_USE_QT5)
+    get_filename_component(_qt_BINARY_DIR ${Qt5_DIR}/../../../bin/ ABSOLUTE)
+    get_filename_component(_qt_TRANSLATIONS ${Qt5_DIR}/../../../translations/ ABSOLUTE)
+else(WIZNOTE_USE_QT5)
+    set(_qt_BINARY_DIR ${QT_BINARY_DIR})
+    set(_qt_TRANSLATIONS ${QT_TRANSLATIONS_DIR})
+endif(WIZNOTE_USE_QT5)
+
 set(CMAKE_AUTOMOC ON)
-qt5_add_translation(wiznote_QM ${wiznote_TRANSLATIONS})
-qt5_wrap_ui(wiznote_FORM_HEADERS ${wiznote_FORMS})
-qt5_add_resources(wiznote_RC ${wiznote_RCS})
 
-message("Compile with Qt: ${Qt5_VERSION}.")
-
+message("WizNote whll compiling as ${CMAKE_BUILD_TYPE}, use Qt: ${QT_VERSION}")
 
 # build
 if(UNIX)
@@ -268,8 +298,7 @@ if(UNIX)
         # we should copy qt internal qm files, otherwise qt can't translate some internal resources
         # and also macdeployqt will not do this work for us
         # refer to: https://bugreports.qt-project.org/browse/QTBUG-18662
-        get_filename_component(_qt5_TRANSLATIONS ${Qt5_DIR}/../../../translations/ ABSOLUTE)
-        file(GLOB _qt5_QM ${_qt5_TRANSLATIONS}/qt_*.qm)
+        file(GLOB _qt5_QM ${_qt_TRANSLATIONS}/qt_*.qm)
 
         add_executable(${PROJECT_NAME} MACOSX_BUNDLE ${wiznote_SOURCES} ${wiznote_HEADERS} ${wiznote_SOURCES_MAC} ${wiznote_HEADERS_MAC} ${wiznote_FORM_HEADERS} ${wiznote_QM} ${_qt5_QM} ${wiznote_RC} ${wiznote_LOGO})
         set_target_properties(${PROJECT_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bundle)
@@ -300,10 +329,9 @@ if(UNIX)
             COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/share/ ${wiznote_BUNDLE_CONTENTS}/Resources/)
 
         if(CMAKE_BUILD_TYPE STREQUAL "Release")
-            get_filename_component(_qt5_BINARY_DIR ${Qt5_DIR}/../../../bin/ ABSOLUTE)
             # resovle library dependency if build type is release
             add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-                COMMAND ${_qt5_BINARY_DIR}/macdeployqt ${wiznote_BUNDLE}
+                COMMAND ${_qt_BINARY_DIR}/macdeployqt ${wiznote_BUNDLE}
                 COMMAND ln -s /Applications ${CMAKE_BINARY_DIR}/bundle/Applications
             )
         endif()
@@ -336,7 +364,11 @@ if(UNIX)
     endif()
 endif()
 
-qt5_use_modules(${PROJECT_NAME} Core Widgets Xml Network WebKit WebKitWidgets)
+if(WIZNOTE_USE_QT5)
+    qt5_use_modules(${PROJECT_NAME} Core Widgets Xml Network WebKit WebKitWidgets)
+else(WIZNOTE_USE_QT5)
+    target_link_libraries(${PROJECT_NAME} ${QT_LIBRARIES})
+endif(WIZNOTE_USE_QT5)
 
 include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}

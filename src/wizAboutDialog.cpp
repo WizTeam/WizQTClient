@@ -1,6 +1,10 @@
 #include "wizAboutDialog.h"
 
-#include <QtWidgets>
+#include <QApplication>
+#include <QLabel>
+#include <QFileInfo>
+#include <QTextBrowser>
+#include <QVBoxLayout>
 
 #include "wizdef.h"
 #include "share/wizmisc.h"

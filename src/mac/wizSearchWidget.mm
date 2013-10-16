@@ -1,6 +1,9 @@
 #include "wizSearchWidget_mm.h"
 
-#if 0
+#include <QWidget>
+#include <QApplication>
+
+//#if 0
 
 // Qt5 can't find this macro!!!
 // refer to : http://qt-project.org/forums/viewthread/25033
@@ -166,6 +169,6 @@ void CWizSearchWidget::on_search_textChanged(const QString& strText)
     emit doSearch(strText);
 }
 
-#endif
+//#endif
 
 //#endif // QT_MAC_USE_COCOA

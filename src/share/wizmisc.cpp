@@ -11,7 +11,7 @@
 #include <QPainter>
 
 #include <QtCore>
-#include <QtNetwork>
+//#include <QtNetwork>
 
 #ifndef MAX_PATH
 #define MAX_PATH 200

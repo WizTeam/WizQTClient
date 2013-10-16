@@ -2,7 +2,7 @@
 
 #include <QtGui>
 #include <QtWebKit>
-#include <QtWebKitWidgets>
+//#include <QtWebKitWidgets>
 
 #include "wizdef.h"
 #include "share/wizmisc.h"

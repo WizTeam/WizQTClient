@@ -1,6 +1,7 @@
 #include "wizDocumentListView.h"
 
-#include <QtGui>
+#include <QPixmapCache>
+#include <QCoreApplication>
 
 #include "wizCategoryView.h"
 #include "widgets/wizScrollBar.h"
@@ -40,10 +41,10 @@ CWizDocumentListView::CWizDocumentListView(CWizExplorerApp& app, QWidget *parent
 
     // use custom scrollbar
     setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
-    //setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    //m_vScroll = new CWizScrollBar(this);
-    //m_vScroll->syncWith(verticalScrollBar());
+    setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    m_vScroll = new CWizScrollBar(this);
+    m_vScroll->syncWith(verticalScrollBar());
 
     //QScrollAreaKineticScroller *newScroller = new QScrollAreaKineticScroller();
     //newScroller->setWidget(this);
@@ -154,11 +155,10 @@ CWizDocumentListView::~CWizDocumentListView()
 void CWizDocumentListView::resizeEvent(QResizeEvent* event)
 {
     // reset scrollbar position
-    //m_vScroll->resize(m_vScroll->sizeHint().width(), event->size().height());
-    //m_vScroll->move(event->size().width() - m_vScroll->sizeHint().width(), 0);
+    m_vScroll->resize(m_vScroll->sizeHint().width(), event->size().height());
+    m_vScroll->move(event->size().width() - m_vScroll->sizeHint().width(), 0);
 
     QPixmapCache::clear();
-
     QListWidget::resizeEvent(event);
 }
 
@@ -196,6 +196,8 @@ void CWizDocumentListView::addDocuments(const CWizDocumentDataArray& arrayDocume
     CWizDocumentDataArray::const_iterator it;
     for (it = arrayDocument.begin(); it != arrayDocument.end(); it++) {
         addDocument(*it, false);
+
+        //QCoreApplication::processEvents(QEventLoop::AllEvents);
     }
 
     sortItems();
@@ -581,6 +583,8 @@ QSize CWizDocumentListView::itemSizeFromViewType(ViewType type)
 
 void CWizDocumentListView::resetItemsSortingType(int type)
 {
+    QPixmapCache::clear();
+
     m_nSortingType = type;
 
     for (int i = 0; i < count(); i++) {

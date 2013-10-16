@@ -86,8 +86,7 @@ public Q_SLOTS:
     void on_timer_timeout();
 
 Q_SIGNALS:
-    void documentFind(const WIZDOCUMENTDATAEX& data);
-    void searchEnd();
+    void searchProcess(const QString& strKeywords, const CWizDocumentDataArray& arrayDocument, bool bEnd);
 };
 
 #endif // WIZSEARCHINDEXER_H

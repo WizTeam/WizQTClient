@@ -1,6 +1,10 @@
 #include "wizDocumentListViewItem.h"
 
-#include <QtWidgets>
+//#include <QtWidgets>
+
+#include <QFile>
+#include <QFileInfo>
+#include <QPixmapCache>
 
 #include "share/wizDatabaseManager.h"
 #include "share/wizThumbIndexCache.h"

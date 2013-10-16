@@ -1,4 +1,4 @@
-#include <QtWidgets>
+//#include <QtWidgets>
 
 #include "wizmainwindow.h"
 #include "wizupdaterprogressdialog.h"

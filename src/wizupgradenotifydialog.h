@@ -1,8 +1,7 @@
 #ifndef WIZPGRADENOTIFYDIALOG_H
 #define WIZPGRADENOTIFYDIALOG_H
 
-#include <QtWidgets>
-
+#include <QDialog>
 
 namespace Ui {
 class CWizUpgradeNotifyDialog;

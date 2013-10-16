@@ -1,5 +1,7 @@
 #include "wizDocumentTransitionView.h"
 
+#include <QLabel>
+#include <QVBoxLayout>
 
 CWizDocumentTransitionView::CWizDocumentTransitionView(QWidget *parent) :
     QWidget(parent)

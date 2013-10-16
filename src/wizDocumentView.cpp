@@ -1,6 +1,6 @@
 #include "wizDocumentView.h"
 
-#include <QtWidgets>
+//#include <QtWidgets>
 #include <QtGui>
 #include <QWebElement>
 #include <QWebFrame>

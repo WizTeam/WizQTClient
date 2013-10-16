@@ -1,6 +1,8 @@
 #include "wizButton.h"
 
-#include <QtWidgets>
+//#include <QtWidgets>
+#include <QStyleOptionToolButton>
+#include <QPainter>
 
 #include "wizdef.h"
 #include "share/wizmisc.h"

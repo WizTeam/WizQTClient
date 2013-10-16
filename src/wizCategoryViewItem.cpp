@@ -312,8 +312,10 @@ CWizCategoryViewTagItem::CWizCategoryViewTagItem(CWizExplorerApp& app,
 {
     QIcon icon;
 
-    QString strIndex = QString::number(qrand() % 4); // FIXME: 4 random tag icon in skin
-    icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "tag_normal_" + strIndex),
+    //QString strIndex = QString::number(qrand() % 4); // FIXME: 4 random tag icon in skin
+    //icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "tag_normal_" + strIndex),
+    //             QSize(16, 16), QIcon::Normal);
+    icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "tag_normal"),
                  QSize(16, 16), QIcon::Normal);
     icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "tag_selected"),
                  QSize(16, 16), QIcon::Selected);

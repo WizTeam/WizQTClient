@@ -10,7 +10,7 @@
 #include "share/wizmultilinelistwidget.h"
 #include "share/wizimagepushbutton.h"
 
-#include <QtWidgets>
+//#include <QtWidgets>
 
 
 class CWizCategoryBaseView;

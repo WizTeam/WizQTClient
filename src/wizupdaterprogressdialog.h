@@ -1,8 +1,9 @@
 #ifndef WIZUPDATERPROGRESSDIALOG_H
 #define WIZUPDATERPROGRESSDIALOG_H
 
-#include <QtWidgets>
+#include <QDialog>
 
+class QMouseEvent;
 
 namespace Ui {
 class CWizUpdaterDialog;

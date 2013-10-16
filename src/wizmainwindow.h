@@ -2,7 +2,7 @@
 #define WIZMAINWINDOW_H
 
 #include <QtGlobal>
-#include <QtWidgets>
+//#include <QtWidgets>
 
 #include "wizdef.h"
 #include "share/wizuihelper.h"
@@ -202,8 +202,7 @@ public Q_SLOTS:
     void on_actionEditorViewSource_triggered();
 
     void on_search_timeout();
-    void on_searchDocumentFind(const WIZDOCUMENTDATAEX& doc);
-    void on_searchEnd();
+    void on_searchProcess(const QString &strKeywords, const CWizDocumentDataArray& arrayDocument, bool bEnd);
 
     void on_actionGoBack_triggered();
     void on_actionGoForward_triggered();

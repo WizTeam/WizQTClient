@@ -2,16 +2,19 @@
 #define WIZSEARCHWIDGET_H
 
 #include <QtGlobal>
-#include <QtWidgets>
+#include <QWidget>
+#include <QLineEdit>
+#include <QLabel>
+#include <QHBoxLayout>
 
 // Wrap widget for qt widget and mac native search field
 // refer to mac/wizSearchWidget.mm for osx NSSearchField
 
-//#ifdef Q_OS_MAC
-//class CWizSearchWidget;
-//#endif
-//
-//#ifndef Q_OS_MAC
+#ifdef Q_OS_MAC
+class CWizSearchWidget;
+#endif
+
+#ifndef Q_OS_MAC
 
 class CWizExplorerApp;
 
@@ -36,7 +39,7 @@ Q_SIGNALS:
     void doSearch(const QString& keywords);
 };
 
-//#endif // Q_OS_MAC
+#endif // Q_OS_MAC
 
 class CWizExplorerApp;
 

@@ -1,7 +1,9 @@
 #include "wizconsoledialog.h"
 #include "ui_wizconsoledialog.h"
 
-#include <QtWidgets>
+#include <QTextCodec>
+#include <QFileDialog>
+#include <QClipboard>
 
 #include "wizdef.h"
 #include "share/wizmisc.h"

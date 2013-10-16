@@ -1,7 +1,7 @@
 #include "wizmainwindow.h"
 
 //#include <QtGui>
-#include <QtWidgets>
+//#include <QtWidgets>
 
 #ifdef Q_OS_MAC
 #include <Carbon/Carbon.h>
@@ -894,42 +894,22 @@ void MainWindow::on_actionResetSearch_triggered()
     m_category->restoreSelection();
 }
 
-void MainWindow::on_search_timeout()
-{
-    if (m_searcher) {
-        m_searchTimer->start();
-        return;
-    }
-
-    m_searcher = new CWizSearcher(m_dbMgr);
-    connect(m_searcher, SIGNAL(searchEnd()), SLOT(on_searchEnd()));
-    connect(m_searcher, SIGNAL(documentFind(const WIZDOCUMENTDATAEX&)),
-            SLOT(on_searchDocumentFind(const WIZDOCUMENTDATAEX&)));
-
-    m_searcher->moveToThread(&m_searchThread);
-    connect(&m_searchThread, SIGNAL(finished()), m_searcher, SLOT(deleteLater()));
-    m_searchThread.start();
-
-    m_searcher->search(m_strSearchKeywords, 10000);
-}
-
-void MainWindow::on_searchDocumentFind(const WIZDOCUMENTDATAEX& doc)
-{
-    m_documents->addDocument(doc, true);
-    on_documents_itemSelectionChanged();
-}
-
-void MainWindow::on_searchEnd()
-{
-    m_searcher->disconnect();
-    m_searchThread.exit();
-}
+//void MainWindow::on_searchDocumentFind(const WIZDOCUMENTDATAEX& doc)
+//{
+//    m_documents->addDocument(doc, true);
+//    on_documents_itemSelectionChanged();
+//}
 
 void MainWindow::on_search_doSearch(const QString& keywords)
 {
     if (keywords.isEmpty()) {
         on_actionResetSearch_triggered();
         return;
+    }
+
+    if (m_searcher) {
+        disconnect(m_searcher);
+        m_searcher->abort();
     }
 
     m_category->saveSelection();
@@ -942,17 +922,42 @@ void MainWindow::on_search_doSearch(const QString& keywords)
         connect(m_searchTimer, SIGNAL(timeout()), SLOT(on_search_timeout()));
     }
 
-    if (m_searcher) {
-        m_searcher->abort();
-        disconnect(m_searcher, SIGNAL(documentFind(const WIZDOCUMENTDATAEX&)));
-    }
-
     m_strSearchKeywords = keywords;
     m_searchTimer->start();
+}
 
-    qDebug() << "onSearch, thread: " << QThread::currentThreadId();
+void MainWindow::on_search_timeout()
+{
+    if (m_searcher) {
+        m_searchTimer->start();
+        return;
+    }
 
-    //m_searcher->search(keywords, 10000); // FIXME
+    m_searcher = new CWizSearcher(m_dbMgr);
+    connect(m_searcher, SIGNAL(searchProcess(const QString&, const CWizDocumentDataArray&, bool)),
+            SLOT(on_searchProcess(const QString&, const CWizDocumentDataArray&, bool)));
+
+    m_searcher->moveToThread(&m_searchThread);
+    connect(&m_searchThread, SIGNAL(finished()), m_searcher, SLOT(deleteLater()));
+    m_searchThread.start();
+
+    m_searcher->search(m_strSearchKeywords, 10000);
+}
+
+void MainWindow::on_searchProcess(const QString& strKeywords, const CWizDocumentDataArray& arrayDocument, bool bEnd)
+{
+    Q_ASSERT(m_searcher);
+
+    if (bEnd) {
+        m_searchThread.exit();
+    }
+
+    if (strKeywords != m_strSearchKeywords) {
+        return;
+    }
+
+    m_documents->addDocuments(arrayDocument);
+    on_documents_itemSelectionChanged();
 }
 
 #ifndef Q_OS_MAC

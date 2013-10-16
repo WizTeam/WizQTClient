@@ -1,7 +1,9 @@
 #ifndef WIZMACHELPER_MM_H
 #define WIZMACHELPER_MM_H
 
-#include <QtWidgets>
+#include <QList>
+#include <QPixmap>
+#include <QIcon>
 
 #import <AppKit/AppKit.h>
 #import <objc/objc-class.h>
