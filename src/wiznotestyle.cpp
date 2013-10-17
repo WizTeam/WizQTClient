@@ -429,7 +429,7 @@ QPixmap CWizNoteStyle::genThumbnailPixmap(const QStyleOptionViewItemV4* vopt, co
         QRect rcBadge = textRect;
         rcBadge.setSize(QSize(nFontHeight, nFontHeight));
         const QIcon& badge = data.doc.nProtected ? m_iconDocumentsBadgeEncrypted : m_iconDocumentsBadge;
-        if (vopt->state & QStyle::State_Selected) {
+        if (vopt->state & QStyle::State_Selected && bFocused) {
             badge.paint(&p, rcBadge, Qt::AlignCenter, QIcon::Active, QIcon::Off);
         } else {
             badge.paint(&p, rcBadge, Qt::AlignCenter, QIcon::Normal, QIcon::Off);
@@ -553,7 +553,7 @@ void CWizNoteStyle::drawItemPrivateTwoLine(const QStyleOptionViewItemV4* vopt,
         QRect rcBadge = textRect;
         rcBadge.setSize(QSize(nFontHeight, nFontHeight));
         const QIcon& badge = data.doc.nProtected ? m_iconDocumentsBadgeEncrypted : m_iconDocumentsBadge;
-        if (vopt->state & QStyle::State_Selected) {
+        if (vopt->state & QStyle::State_Selected && bFocused) {
             badge.paint(p, rcBadge, Qt::AlignCenter, QIcon::Active, QIcon::Off);
         } else {
             badge.paint(p, rcBadge, Qt::AlignCenter, QIcon::Normal, QIcon::Off);
@@ -655,7 +655,7 @@ void CWizNoteStyle::drawItemGroupThumbnail(const QStyleOptionViewItemV4* vopt,
         // badge icon first
         QRect rcBadge = textRect;
         rcBadge.setSize(QSize(nFontHeight, nFontHeight));
-        if (vopt->state & QStyle::State_Selected) {
+        if (vopt->state & QStyle::State_Selected && bFocused) {
             m_iconDocumentsBadge.paint(p, rcBadge, Qt::AlignCenter, QIcon::Active, QIcon::Off);
         } else {
             m_iconDocumentsBadge.paint(p, rcBadge, Qt::AlignCenter, QIcon::Normal, QIcon::Off);
@@ -763,7 +763,7 @@ void CWizNoteStyle::drawItemGroupTwoLine(const QStyleOptionViewItemV4* vopt,
         // badge icon first
         QRect rcBadge = textRect;
         rcBadge.setSize(QSize(nFontHeight, nFontHeight));
-        if (vopt->state & QStyle::State_Selected) {
+        if (vopt->state & QStyle::State_Selected && bFocused) {
             m_iconDocumentsBadge.paint(p, rcBadge, Qt::AlignCenter, QIcon::Active, QIcon::Off);
         } else {
             m_iconDocumentsBadge.paint(p, rcBadge, Qt::AlignCenter, QIcon::Normal, QIcon::Off);
@@ -840,7 +840,7 @@ void CWizNoteStyle::drawItemOneLine(const QStyleOptionViewItemV4* vopt,
         QRect rcBadge = textRect;
         rcBadge.setSize(QSize(nFontHeight, nFontHeight));
         const QIcon& badge = document.nProtected ? m_iconDocumentsBadgeEncrypted : m_iconDocumentsBadge;
-        if (vopt->state & QStyle::State_Selected) {
+        if (vopt->state & QStyle::State_Selected && bFocused) {
             badge.paint(p, rcBadge, Qt::AlignCenter, QIcon::Active, QIcon::Off);
         } else {
             badge.paint(p, rcBadge, Qt::AlignCenter, QIcon::Normal, QIcon::Off);
@@ -930,7 +930,7 @@ void CWizNoteStyle::drawItemMessage(const QStyleOptionViewItemV4 *vopt,
         // badge icon first
         QRect rcBadge = textRect;
         rcBadge.setSize(QSize(nFontHeight, nFontHeight));
-        if (vopt->state & QStyle::State_Selected) {
+        if (vopt->state & QStyle::State_Selected && bFocused) {
             m_iconDocumentsBadge.paint(p, rcBadge, Qt::AlignCenter, QIcon::Active, QIcon::Off);
         } else {
             m_iconDocumentsBadge.paint(p, rcBadge, Qt::AlignCenter, QIcon::Normal, QIcon::Off);
