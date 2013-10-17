@@ -2278,7 +2278,7 @@ qint64 CWizIndex::GetObjectLocalVersion(const QString& strGUID, const QString& s
     CString strSQL;
     strSQL = WizFormatString3("select WIZ_VERSION from %1 where %2=%3",
                             strTableName,
-                            STR2SQL(strKeyFieldName),
+                            strKeyFieldName,
                             STR2SQL(strGUID));
 
     try
