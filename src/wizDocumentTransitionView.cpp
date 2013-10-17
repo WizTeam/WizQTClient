@@ -12,6 +12,7 @@ CWizDocumentTransitionView::CWizDocumentTransitionView(QWidget *parent) :
     layout->addStretch(1);
     layout->addWidget(m_labelHint);
     layout->addStretch(1);
+    layout->setAlignment(m_labelHint, Qt::AlignCenter);
     setLayout(layout);
 }
 
