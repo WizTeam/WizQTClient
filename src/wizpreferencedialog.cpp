@@ -14,6 +14,9 @@ CWizPreferenceWindow::CWizPreferenceWindow(CWizExplorerApp& app, QWidget* parent
     setWindowIcon(QIcon());
     setWindowTitle(tr("Preference"));
 
+    // FIXME: proxy settings will back soon!!!
+    ui->labelProxySettings->hide();
+
     // general tab
     ::WizGetTranslatedLocales(m_locales);
     for (int i = 0; i < m_locales.count(); i++) {

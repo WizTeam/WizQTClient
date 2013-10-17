@@ -110,10 +110,10 @@ CWizLoginDialog::CWizLoginDialog(const QString& strDefaultUserId, const QString&
     connect(m_labelForgot, SIGNAL(linkActivated(const QString&)),
             SLOT(on_labelForgot_linkActivated(const QString&)));
 
-    QLabel* m_labelNetwork = new QLabel(this);
-    m_labelNetwork->setText(tr("<a href=\"javascript:void(0)\" style=\"color:#363636; text-decoration:none;\">Network</a>"));
-    connect(m_labelNetwork, SIGNAL(linkActivated(const QString&)),
-            SLOT(on_labelNetwork_linkActivated(const QString&)));
+    //QLabel* m_labelNetwork = new QLabel(this);
+    //m_labelNetwork->setText(tr("<a href=\"javascript:void(0)\" style=\"color:#363636; text-decoration:none;\">Network</a>"));
+    //connect(m_labelNetwork, SIGNAL(linkActivated(const QString&)),
+    //        SLOT(on_labelNetwork_linkActivated(const QString&)));
 
     m_btnLogin = new QPushButton(tr("Login"), this);
     connect(m_btnLogin, SIGNAL(clicked()), SLOT(accept()));
@@ -124,8 +124,8 @@ CWizLoginDialog::CWizLoginDialog(const QString& strDefaultUserId, const QString&
     layoutCommon->addWidget(m_labelRegister);
     layoutCommon->addWidget(line1);
     layoutCommon->addWidget(m_labelForgot);
-    layoutCommon->addWidget(line2);
-    layoutCommon->addWidget(m_labelNetwork);
+    //layoutCommon->addWidget(line2);
+    //layoutCommon->addWidget(m_labelNetwork);
     layoutCommon->addStretch();
     layoutCommon->addWidget(m_btnLogin);
 
