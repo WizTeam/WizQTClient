@@ -1,4 +1,8 @@
 #include "wiznotestyle.h"
+
+#include <QProxyStyle>
+
+
 #include "wizCategoryView.h"
 #include "wizDocumentListView.h"
 #include "wizDocumentListViewItem.h"
@@ -9,8 +13,6 @@
 #include "share/wizui.h"
 #include "share/wizmultilinelistwidget.h"
 #include "share/wizimagepushbutton.h"
-
-//#include <QtWidgets>
 
 
 class CWizCategoryBaseView;

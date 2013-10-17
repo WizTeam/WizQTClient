@@ -1,4 +1,10 @@
-//#include <QtWidgets>
+#include <QApplication>
+#include <QMessageBox>
+#include <QIcon>
+#include <QDir>
+#include <QPixmapCache>
+#include <QTranslator>
+#include <QProcess>
 
 #include "wizmainwindow.h"
 #include "wizupdaterprogressdialog.h"

@@ -1,7 +1,11 @@
 #include "wizmainwindow.h"
 
-//#include <QtGui>
-//#include <QtWidgets>
+#include <QToolBar>
+#include <QMenuBar>
+#include <QApplication>
+#include <QDesktopWidget>
+#include <QMessageBox>
+
 
 #ifdef Q_OS_MAC
 #include <Carbon/Carbon.h>

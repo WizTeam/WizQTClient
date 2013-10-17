@@ -1,6 +1,8 @@
 #include "wizDocumentSelectionView.h"
 
 #include <QGraphicsView>
+#include <QGraphicsObject>
+#include <QVBoxLayout>
 
 #include "wizdef.h"
 #include "wizmainwindow.h"

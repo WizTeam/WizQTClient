@@ -1,5 +1,7 @@
 #include "wizPopupButton.h"
 
+#include <QMenu>
+
 #include "wizdef.h"
 #include "share/wizsettings.h"
 #include "wizDocumentListView.h"

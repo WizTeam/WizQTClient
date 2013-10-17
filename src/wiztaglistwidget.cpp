@@ -1,9 +1,10 @@
 #include "wiztaglistwidget.h"
 
-//#include <QtWidgets>
 #include <QLineEdit>
 #include <QListWidget>
 #include <QListWidgetItem>
+#include <QVBoxLayout>
+#include <QLabel>
 
 #include "share/wizuihelper.h"
 #include "share/wizkmcore.h"

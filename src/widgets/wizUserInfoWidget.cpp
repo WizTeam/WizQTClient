@@ -1,4 +1,8 @@
 #include "wizUserInfoWidget.h"
+
+#include <QMenu>
+#include <QFileDialog>
+
 #include "wizdef.h"
 #include "share/wizsettings.h"
 #include "share/wizDatabaseManager.h"
@@ -9,7 +13,6 @@
 #include "wizWebSettingsDialog.h"
 #include "sync/wizAvatarUploader.h"
 
-#include <QtGui>
 
 
 CWizUserInfoWidget::CWizUserInfoWidget(CWizExplorerApp& app, QWidget *parent)

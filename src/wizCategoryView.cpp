@@ -1,7 +1,9 @@
 #include "wizCategoryView.h"
 
-//#include <QtWidgets>
-#include <QtCore>
+#include <QHeaderView>
+#include <QAction>
+#include <QMenu>
+#include <QMessageBox>
 
 #include "wizdef.h"
 #include "widgets/wizScrollBar.h"

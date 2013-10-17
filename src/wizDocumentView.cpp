@@ -1,9 +1,10 @@
 #include "wizDocumentView.h"
 
-//#include <QtWidgets>
-#include <QtGui>
 #include <QWebElement>
 #include <QWebFrame>
+#include <QLineEdit>
+#include <QLabel>
+#include <QHBoxLayout>
 
 #include "widgets/wizScrollBar.h"
 

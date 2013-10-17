@@ -2,7 +2,7 @@
 #define WIZMAINWINDOW_H
 
 #include <QtGlobal>
-//#include <QtWidgets>
+#include <QMainWindow>
 
 #include "wizdef.h"
 #include "share/wizuihelper.h"
@@ -16,6 +16,9 @@
 #include "wizcertmanager.h"
 #include "wizusercipherform.h"
 #include "wizdownloadobjectdatadialog.h"
+
+class QToolBar;
+class QLabel;
 
 class CWizProgressDialog;
 class CWizDocumentListView;

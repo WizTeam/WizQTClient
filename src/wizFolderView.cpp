@@ -1,5 +1,7 @@
 #include "wizFolderView.h"
 
+#include <QHeaderView>
+
 
 #include "widgets/wizScrollBar.h"
 

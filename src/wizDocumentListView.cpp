@@ -1,7 +1,8 @@
 #include "wizDocumentListView.h"
 
 #include <QPixmapCache>
-#include <QCoreApplication>
+#include <QApplication>
+#include <QMenu>
 
 #include "wizCategoryView.h"
 #include "widgets/wizScrollBar.h"

@@ -3,6 +3,9 @@
 #include <QBoxLayout>
 #include <QFileDialog>
 #include <QDesktopServices>
+#include <QMenu>
+#include <QMessageBox>
+#include <QLabel>
 
 #include "wiznotestyle.h"
 #include "share/wizmisc.h"

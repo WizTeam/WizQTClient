@@ -1,8 +1,7 @@
 #include "wizDocumentWebView.h"
 
-#include <QtGui>
-#include <QtWebKit>
-//#include <QtWebKitWidgets>
+#include <QApplication>
+#include <QWebFrame>
 
 #include "wizdef.h"
 #include "share/wizmisc.h"
