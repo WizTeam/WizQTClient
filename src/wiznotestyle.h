@@ -4,8 +4,6 @@
 #include <QString>
 #include <QStyle>
 
-//class QStyle;
-
 QStyle* WizGetStyle(const QString& skinName);
 
 class QColor;

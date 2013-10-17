@@ -17,7 +17,7 @@ CWizButton::CWizButton(CWizExplorerApp& app, QWidget* parent /* = 0 */)
 
 QSize CWizButton::sizeHint() const
 {
-    return iconSize() + QSize(4, 4);
+    return QSize(24, 24);
 }
 
 void CWizButton::setAction(QAction* action)

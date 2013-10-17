@@ -2,7 +2,6 @@
 
 #include <QProxyStyle>
 
-
 #include "wizCategoryView.h"
 #include "wizDocumentListView.h"
 #include "wizDocumentListViewItem.h"
@@ -58,9 +57,12 @@ private:
     QColor m_colorDocumentsTitle;
     QColor m_colorDocumentsDate;
     QColor m_colorDocumentsSummary;
-    QColor m_colorDocumentsTitleSelected;
-    QColor m_colorDocumentsDateSelected;
-    QColor m_colorDocumentsSummarySelected;
+    QColor m_colorDocumentsTitleFocus;
+    QColor m_colorDocumentsDateFocus;
+    QColor m_colorDocumentsSummaryFocus;
+    QColor m_colorDocumentsTitleLoseFocus;
+    QColor m_colorDocumentsDateLoseFocus;
+    QColor m_colorDocumentsSummaryLoseFocus;
     QColor m_colorDocumentsLine;
 
     QColor m_colorMultiLineListFirstLine;
@@ -165,18 +167,21 @@ CWizNoteStyle::CWizNoteStyle(const QString& strSkinName)
     m_colorDocumentsItemFocusBackground = settings.GetColor("Documents", "ItemFocusBackground", "#0c8eec");
     m_colorDocumentsItemLoseFocusBackground = settings.GetColor("Documents", "ItemLoseFocusBackground", "#e1e1e1");
     m_colorDocumentsTitle = settings.GetColor("Documents", "Title", "#464646");
-    m_colorDocumentsTitleSelected = settings.GetColor("Documents", "TitleSelected", "#ffffff");
-    m_colorDocumentsDate = settings.GetColor("Documents", "Date", "#0000ff");
-    m_colorDocumentsDateSelected = settings.GetColor("Documents", "DateSelected", "#ffffff");
-    m_colorDocumentsSummary = settings.GetColor("Documents", "Summary", "#8c8c8c");
-    m_colorDocumentsSummarySelected = settings.GetColor("Documents", "SummarySelected", "#ffffff");
+    m_colorDocumentsDate = settings.GetColor("Documents", "Date", "#0000FF");
+    m_colorDocumentsSummary = settings.GetColor("Documents", "Summary", "#8C8C8C");
+    m_colorDocumentsTitleFocus = settings.GetColor("Documents", "TitleFocus", "#FFFFFF");
+    m_colorDocumentsDateFocus = settings.GetColor("Documents", "DateFocus", "#FFFFFF");
+    m_colorDocumentsSummaryFocus = settings.GetColor("Documents", "SummaryFocus", "#FFFFFF");
+    m_colorDocumentsTitleLoseFocus = settings.GetColor("Documents", "TitleLoseFocus", "6A6A6A");
+    m_colorDocumentsDateLoseFocus = settings.GetColor("Documents", "DateLoseFocus", "6A6A6A");
+    m_colorDocumentsSummaryLoseFocus = settings.GetColor("Documents", "SummaryLoseFocus", "6A6A6A");
     m_colorDocumentsLine = settings.GetColor("Documents", "Line", "#d9dcdd");
 
     m_colorMultiLineListFirstLine = settings.GetColor("MultiLineList", "First", "#000000");
     m_colorMultiLineListFirstLineSelected = settings.GetColor("MultiLineList", "FirstSelected", "#000000");
     m_colorMultiLineListOtherLine = settings.GetColor("MultiLineList", "Other", "#666666");
     m_colorMultiLineListOtherLineSelected = settings.GetColor("MultiLineList", "OtherSelected", "#666666");
-    //
+
 #ifdef Q_OS_MAC
     m_fontImagePushButtonLabel = QFont("Arial Black", 9);
 #else
@@ -344,7 +349,7 @@ QPixmap CWizNoteStyle::genThumbnailPixmap(const QStyleOptionViewItemV4* vopt, co
     // indirect access
     const WizDocumentListViewItemData& data = view->documentItemDataFromIndex(vopt->index);
     const WIZABSTRACT& thumb = view->documentAbstractFromIndex(vopt->index);
-    bool bMultiSelected = view->selectedItems().size() > 1 ? true : false;
+    bool bFocused = view->hasFocus();
 
     // seperator line
     QRect textLine = rc;
@@ -354,14 +359,10 @@ QPixmap CWizNoteStyle::genThumbnailPixmap(const QStyleOptionViewItemV4* vopt, co
 
     // draw background behaviour
     if (vopt->state & QStyle::State_Selected) {
-        if (bMultiSelected) {
+        if (bFocused) {
             p.fillRect(rc, m_colorDocumentsItemFocusBackground);
         } else {
-            if (vopt->state & QStyle::State_HasFocus) {
-                p.fillRect(rc, m_colorDocumentsItemFocusBackground);
-            } else {
-                p.fillRect(rc, m_colorDocumentsItemLoseFocusBackground);
-            }
+            p.fillRect(rc, m_colorDocumentsItemLoseFocusBackground);
         }
     }
 
@@ -399,7 +400,23 @@ QPixmap CWizNoteStyle::genThumbnailPixmap(const QStyleOptionViewItemV4* vopt, co
     // draw the text
     if (!vopt->text.isEmpty()) {
         textRect.adjust(6, 6, -6, -6);
-        bool bFocused = vopt->state & QStyle::State_Selected;
+
+        QColor colorTitle, colorDate, colorSummary;
+        if (vopt->state & QStyle::State_Selected) {
+            if (bFocused) {
+                colorTitle = m_colorDocumentsTitleFocus;
+                colorDate  = m_colorDocumentsDateFocus;
+                colorSummary = m_colorDocumentsSummaryFocus;
+            } else {
+                colorTitle = m_colorDocumentsTitleLoseFocus;
+                colorDate = m_colorDocumentsDateLoseFocus;
+                colorSummary = m_colorDocumentsSummaryLoseFocus;
+            }
+        } else {
+            colorTitle = m_colorDocumentsTitle;
+            colorDate = m_colorDocumentsDate;
+            colorSummary = m_colorDocumentsSummary;
+        }
 
         // draw title
         QFont fontTitle = p.font();
@@ -412,14 +429,13 @@ QPixmap CWizNoteStyle::genThumbnailPixmap(const QStyleOptionViewItemV4* vopt, co
         QRect rcBadge = textRect;
         rcBadge.setSize(QSize(nFontHeight, nFontHeight));
         const QIcon& badge = data.doc.nProtected ? m_iconDocumentsBadgeEncrypted : m_iconDocumentsBadge;
-        if (bFocused) {
+        if (vopt->state & QStyle::State_Selected) {
             badge.paint(&p, rcBadge, Qt::AlignCenter, QIcon::Active, QIcon::Off);
         } else {
             badge.paint(&p, rcBadge, Qt::AlignCenter, QIcon::Normal, QIcon::Off);
         }
 
         QRect rcTitle(QPoint(rcBadge.right() + 5, rcBadge.top()), QPoint(textRect.right(), rcBadge.bottom()));
-        QColor colorTitle = bFocused ? m_colorDocumentsTitleSelected : m_colorDocumentsTitle;
         QString strTitle = data.doc.strTitle;
         ::WizDrawTextSingleLine(&p, rcTitle, strTitle,  Qt::TextSingleLine | Qt::AlignVCenter, colorTitle, true);
 
@@ -430,13 +446,11 @@ QPixmap CWizNoteStyle::genThumbnailPixmap(const QStyleOptionViewItemV4* vopt, co
         p.setFont(fontAbs);
         nFontHeight = p.fontMetrics().height();
 
-        QColor colorDate = bFocused ? m_colorDocumentsDateSelected : m_colorDocumentsDate;
         QRect rcInfo(textRect.left(), rcTitle.bottom() + 6, textRect.width(), nFontHeight);
         QString strInfo = data.strInfo;
         int infoWidth = ::WizDrawTextSingleLine(&p, rcInfo, strInfo,  Qt::TextSingleLine | Qt::AlignVCenter, colorDate, true);
 
         // there lines document summary
-        QColor colorSummary = bFocused ? m_colorDocumentsSummarySelected : m_colorDocumentsSummary;
         QString strAbstract = thumb.text;
 
         QRect rcAbstract1(QPoint(textRect.left() + infoWidth + 4, rcInfo.top()), QPoint(textRect.right(), rcInfo.bottom()));
@@ -457,18 +471,13 @@ void CWizNoteStyle::drawItemPrivateThumbnail(const QStyleOptionViewItemV4* vopt,
                                              const CWizDocumentListView* view) const
 {
     const WizDocumentListViewItemData& data = view->documentItemDataFromIndex(vopt->index);
-    bool bMultiSelected = view->selectedItems().size() > 1 ? true : false;
 
     QString state;
     if (vopt->state & QStyle::State_Selected) {
-        if (bMultiSelected) {
+        if (view->hasFocus()) {
             state = "focus";
         } else {
-            if (vopt->state & QStyle::State_HasFocus) {
-                state = "focus";
-            } else {
-                state = "nofocus";
-            }
+            state = "nofocus";
         }
     } else {
         state = "normal";
@@ -494,7 +503,7 @@ void CWizNoteStyle::drawItemPrivateTwoLine(const QStyleOptionViewItemV4* vopt,
                                            const CWizDocumentListView* view) const
 {
     const WizDocumentListViewItemData& data = view->documentItemDataFromIndex(vopt->index);
-    bool bMultiSelected = view->selectedItems().size() > 1 ? true : false;
+    bool bFocused = view->hasFocus();
 
     p->save();
     p->setClipRect(vopt->rect);
@@ -507,14 +516,10 @@ void CWizNoteStyle::drawItemPrivateTwoLine(const QStyleOptionViewItemV4* vopt,
 
     // draw background behaviour
     if (vopt->state & QStyle::State_Selected) {
-        if (bMultiSelected) {
+        if (bFocused) {
             p->fillRect(vopt->rect, m_colorDocumentsItemFocusBackground);
         } else {
-            if (vopt->state & QStyle::State_HasFocus) {
-                p->fillRect(vopt->rect, m_colorDocumentsItemFocusBackground);
-            } else {
-                p->fillRect(vopt->rect, m_colorDocumentsItemLoseFocusBackground);
-            }
+            p->fillRect(vopt->rect, m_colorDocumentsItemLoseFocusBackground);
         }
     }
 
@@ -524,9 +529,19 @@ void CWizNoteStyle::drawItemPrivateTwoLine(const QStyleOptionViewItemV4* vopt,
     if (!vopt->text.isEmpty()) {
         textRect.adjust(6, 6, -6, -6);
 
-        //bool bFocused = vopt->state & QStyle::State_HasFocus \
-        //        && vopt->state & QStyle::State_Selected;
-        bool bFocused = vopt->state & QStyle::State_Selected;
+        QColor colorTitle, colorDate;
+        if (vopt->state & QStyle::State_Selected) {
+            if (bFocused) {
+                colorTitle = m_colorDocumentsTitleFocus;
+                colorDate  = m_colorDocumentsDateFocus;
+            } else {
+                colorTitle = m_colorDocumentsTitleLoseFocus;
+                colorDate = m_colorDocumentsDateLoseFocus;
+            }
+        } else {
+            colorTitle = m_colorDocumentsTitle;
+            colorDate = m_colorDocumentsDate;
+        }
 
         // draw title
         QFont fontTitle = p->font();
@@ -538,14 +553,13 @@ void CWizNoteStyle::drawItemPrivateTwoLine(const QStyleOptionViewItemV4* vopt,
         QRect rcBadge = textRect;
         rcBadge.setSize(QSize(nFontHeight, nFontHeight));
         const QIcon& badge = data.doc.nProtected ? m_iconDocumentsBadgeEncrypted : m_iconDocumentsBadge;
-        if (bFocused) {
+        if (vopt->state & QStyle::State_Selected) {
             badge.paint(p, rcBadge, Qt::AlignCenter, QIcon::Active, QIcon::Off);
         } else {
             badge.paint(p, rcBadge, Qt::AlignCenter, QIcon::Normal, QIcon::Off);
         }
 
         QRect rcTitle(QPoint(rcBadge.right() + 5, rcBadge.top()), QPoint(textRect.right(), rcBadge.bottom()));
-        QColor colorTitle = bFocused ? m_colorDocumentsTitleSelected : m_colorDocumentsTitle;
         QString strTitle = data.doc.strTitle;
         ::WizDrawTextSingleLine(p, rcTitle, strTitle, Qt::TextSingleLine | Qt::AlignVCenter, colorTitle, true);
 
@@ -555,7 +569,6 @@ void CWizNoteStyle::drawItemPrivateTwoLine(const QStyleOptionViewItemV4* vopt,
         p->setFont(fontAbs);
         nFontHeight = p->fontMetrics().height();
 
-        QColor colorDate = bFocused ? m_colorDocumentsDateSelected : m_colorDocumentsDate;
         QRect rcInfo(textRect.left(), rcTitle.bottom() + 6, textRect.width(), nFontHeight);
         QString strInfo = data.strInfo;
         ::WizDrawTextSingleLine(p, rcInfo, strInfo,  Qt::TextSingleLine | Qt::AlignVCenter, colorDate, true);
@@ -573,7 +586,7 @@ void CWizNoteStyle::drawItemGroupThumbnail(const QStyleOptionViewItemV4* vopt,
     const WIZABSTRACT& abstract = view->documentAbstractFromIndex(vopt->index);
     const QImage& imgAuthorAvatar = view->messageSenderAvatarFromIndex(vopt->index);
     WIZDOCUMENTDATA document = view->documentFromIndex(vopt->index);
-    bool bMultiSelected = view->selectedItems().size() > 1 ? true : false;
+    bool bFocused =  view->hasFocus();
 
     p->save();
     p->setClipRect(vopt->rect);
@@ -586,14 +599,10 @@ void CWizNoteStyle::drawItemGroupThumbnail(const QStyleOptionViewItemV4* vopt,
 
     // draw background behaviour
     if (vopt->state & QStyle::State_Selected) {
-        if (bMultiSelected) {
+        if (bFocused) {
             p->fillRect(vopt->rect, m_colorDocumentsItemFocusBackground);
         } else {
-            if (vopt->state & QStyle::State_HasFocus) {
-                p->fillRect(vopt->rect, m_colorDocumentsItemFocusBackground);
-            } else {
-                p->fillRect(vopt->rect, m_colorDocumentsItemLoseFocusBackground);
-            }
+            p->fillRect(vopt->rect, m_colorDocumentsItemLoseFocusBackground);
         }
     }
 
@@ -618,7 +627,23 @@ void CWizNoteStyle::drawItemGroupThumbnail(const QStyleOptionViewItemV4* vopt,
     // draw the text
     if (!vopt->text.isEmpty()) {
         textRect.adjust(6, 6, -6, -6);
-        bool bFocused = vopt->state & QStyle::State_Selected;
+
+        QColor colorTitle, colorDate, colorSummary;
+        if (vopt->state & QStyle::State_Selected) {
+            if (bFocused) {
+                colorTitle = m_colorDocumentsTitleFocus;
+                colorDate  = m_colorDocumentsDateFocus;
+                colorSummary = m_colorDocumentsSummaryFocus;
+            } else {
+                colorTitle = m_colorDocumentsTitleLoseFocus;
+                colorDate = m_colorDocumentsDateLoseFocus;
+                colorSummary = m_colorDocumentsSummaryLoseFocus;
+            }
+        } else {
+            colorTitle = m_colorDocumentsTitle;
+            colorDate = m_colorDocumentsDate;
+            colorSummary = m_colorDocumentsSummary;
+        }
 
         // draw title
         QFont fontTitle = p->font();
@@ -630,14 +655,13 @@ void CWizNoteStyle::drawItemGroupThumbnail(const QStyleOptionViewItemV4* vopt,
         // badge icon first
         QRect rcBadge = textRect;
         rcBadge.setSize(QSize(nFontHeight, nFontHeight));
-        if (bFocused) {
+        if (vopt->state & QStyle::State_Selected) {
             m_iconDocumentsBadge.paint(p, rcBadge, Qt::AlignCenter, QIcon::Active, QIcon::Off);
         } else {
             m_iconDocumentsBadge.paint(p, rcBadge, Qt::AlignCenter, QIcon::Normal, QIcon::Off);
         }
 
         QRect rcTitle(QPoint(rcBadge.right() + 5, rcBadge.top()), QPoint(textRect.right(), rcBadge.bottom()));
-        QColor colorTitle = bFocused ? m_colorDocumentsTitleSelected : m_colorDocumentsTitle;
         ::WizDrawTextSingleLine(p, rcTitle, document.strTitle,  Qt::TextSingleLine | Qt::AlignVCenter, colorTitle, true);
 
         // draw date and tags, use 12px font size
@@ -647,14 +671,11 @@ void CWizNoteStyle::drawItemGroupThumbnail(const QStyleOptionViewItemV4* vopt,
         p->setFont(fontAbs);
         nFontHeight = p->fontMetrics().height();
 
-        QColor colorDate = bFocused ? m_colorDocumentsDateSelected : m_colorDocumentsDate;
         QRect rcInfo(textRect.left(), rcTitle.bottom() + 6, textRect.width(), nFontHeight);
-        //QString strInfo = document.tCreated.toHumanFriendlyString() + " " + document.strOwner;
         QString strInfo = data.strInfo;
         int infoWidth = ::WizDrawTextSingleLine(p, rcInfo, strInfo,  Qt::TextSingleLine | Qt::AlignVCenter, colorDate, true);
 
         // there lines document summary
-        QColor colorSummary = bFocused ? m_colorDocumentsSummarySelected : m_colorDocumentsSummary;
         QString strAbstract = abstract.text;
 
         QRect rcAbstract1(QPoint(textRect.left() + infoWidth + 4, rcInfo.top()), QPoint(textRect.right(), rcInfo.bottom()));
@@ -677,7 +698,7 @@ void CWizNoteStyle::drawItemGroupTwoLine(const QStyleOptionViewItemV4* vopt,
     // indirect access
     const WizDocumentListViewItemData& data = view->documentItemDataFromIndex(vopt->index);
     const QImage& imgAuthorAvatar = view->messageSenderAvatarFromIndex(vopt->index);
-    bool bMultiSelected = view->selectedItems().size() > 1 ? true : false;
+    bool bFocused = view->hasFocus();
 
     p->save();
     p->setClipRect(vopt->rect);
@@ -690,14 +711,10 @@ void CWizNoteStyle::drawItemGroupTwoLine(const QStyleOptionViewItemV4* vopt,
 
     // draw background behaviour
     if (vopt->state & QStyle::State_Selected) {
-        if (bMultiSelected) {
+        if (bFocused) {
             p->fillRect(vopt->rect, m_colorDocumentsItemFocusBackground);
         } else {
-            if (vopt->state & QStyle::State_HasFocus) {
-                p->fillRect(vopt->rect, m_colorDocumentsItemFocusBackground);
-            } else {
-                p->fillRect(vopt->rect, m_colorDocumentsItemLoseFocusBackground);
-            }
+            p->fillRect(vopt->rect, m_colorDocumentsItemLoseFocusBackground);
         }
     }
 
@@ -723,9 +740,19 @@ void CWizNoteStyle::drawItemGroupTwoLine(const QStyleOptionViewItemV4* vopt,
     if (!vopt->text.isEmpty()) {
         textRect.adjust(6, 6, -6, -6);
 
-        //bool bFocused = vopt->state & QStyle::State_HasFocus \
-        //        && vopt->state & QStyle::State_Selected;
-        bool bFocused = vopt->state & QStyle::State_Selected;
+        QColor colorTitle, colorDate;
+        if (vopt->state & QStyle::State_Selected) {
+            if (bFocused) {
+                colorTitle = m_colorDocumentsTitleFocus;
+                colorDate  = m_colorDocumentsDateFocus;
+            } else {
+                colorTitle = m_colorDocumentsTitleLoseFocus;
+                colorDate = m_colorDocumentsDateLoseFocus;
+            }
+        } else {
+            colorTitle = m_colorDocumentsTitle;
+            colorDate = m_colorDocumentsDate;
+        }
 
         // draw title
         QFont fontTitle = p->font();
@@ -736,14 +763,13 @@ void CWizNoteStyle::drawItemGroupTwoLine(const QStyleOptionViewItemV4* vopt,
         // badge icon first
         QRect rcBadge = textRect;
         rcBadge.setSize(QSize(nFontHeight, nFontHeight));
-        if (bFocused) {
+        if (vopt->state & QStyle::State_Selected) {
             m_iconDocumentsBadge.paint(p, rcBadge, Qt::AlignCenter, QIcon::Active, QIcon::Off);
         } else {
             m_iconDocumentsBadge.paint(p, rcBadge, Qt::AlignCenter, QIcon::Normal, QIcon::Off);
         }
 
         QRect rcTitle(QPoint(rcBadge.right() + 5, rcBadge.top()), QPoint(textRect.right(), rcBadge.bottom()));
-        QColor colorTitle = bFocused ? m_colorDocumentsTitleSelected : m_colorDocumentsTitle;
         QString strTitle = data.doc.strTitle;
         ::WizDrawTextSingleLine(p, rcTitle, strTitle,  Qt::TextSingleLine | Qt::AlignVCenter, colorTitle, true);
 
@@ -753,9 +779,7 @@ void CWizNoteStyle::drawItemGroupTwoLine(const QStyleOptionViewItemV4* vopt,
         p->setFont(fontAbs);
         nFontHeight = p->fontMetrics().height();
 
-        QColor colorDate = bFocused ? m_colorDocumentsDateSelected : m_colorDocumentsDate;
         QRect rcInfo(textRect.left(), rcTitle.bottom() + 6, textRect.width(), nFontHeight);
-        //QString strInfo = data.doc.tCreated.toHumanFriendlyString() + " " + data.doc.strOwner;
         QString strInfo =  data.strInfo;
         ::WizDrawTextSingleLine(p, rcInfo, strInfo,  Qt::TextSingleLine | Qt::AlignVCenter, colorDate, true);
     }
@@ -769,7 +793,7 @@ void CWizNoteStyle::drawItemOneLine(const QStyleOptionViewItemV4* vopt,
 {
     // indirect access
     WIZDOCUMENTDATA document = view->documentFromIndex(vopt->index);
-    bool bMultiSelected = view->selectedItems().size() > 1 ? true : false;
+    bool bFocused = view->hasFocus();
 
     p->save();
     p->setClipRect(vopt->rect);
@@ -782,14 +806,10 @@ void CWizNoteStyle::drawItemOneLine(const QStyleOptionViewItemV4* vopt,
 
     // draw background behaviour
     if (vopt->state & QStyle::State_Selected) {
-        if (bMultiSelected) {
+        if (bFocused) {
             p->fillRect(vopt->rect, m_colorDocumentsItemFocusBackground);
         } else {
-            if (vopt->state & QStyle::State_HasFocus) {
-                p->fillRect(vopt->rect, m_colorDocumentsItemFocusBackground);
-            } else {
-                p->fillRect(vopt->rect, m_colorDocumentsItemLoseFocusBackground);
-            }
+            p->fillRect(vopt->rect, m_colorDocumentsItemLoseFocusBackground);
         }
     }
 
@@ -799,9 +819,16 @@ void CWizNoteStyle::drawItemOneLine(const QStyleOptionViewItemV4* vopt,
     if (!vopt->text.isEmpty()) {
         textRect.adjust(6, 6, -6, -6);
 
-        //bool bFocused = vopt->state & QStyle::State_HasFocus \
-        //        && vopt->state & QStyle::State_Selected;
-        bool bFocused = vopt->state & QStyle::State_Selected;
+        QColor colorTitle;
+        if (vopt->state & QStyle::State_Selected) {
+            if (bFocused) {
+                colorTitle = m_colorDocumentsTitleFocus;
+            } else {
+                colorTitle = m_colorDocumentsTitleLoseFocus;
+            }
+        } else {
+            colorTitle = m_colorDocumentsTitle;
+        }
 
         // draw title
         QFont fontTitle = p->font();
@@ -813,14 +840,13 @@ void CWizNoteStyle::drawItemOneLine(const QStyleOptionViewItemV4* vopt,
         QRect rcBadge = textRect;
         rcBadge.setSize(QSize(nFontHeight, nFontHeight));
         const QIcon& badge = document.nProtected ? m_iconDocumentsBadgeEncrypted : m_iconDocumentsBadge;
-        if (bFocused) {
+        if (vopt->state & QStyle::State_Selected) {
             badge.paint(p, rcBadge, Qt::AlignCenter, QIcon::Active, QIcon::Off);
         } else {
             badge.paint(p, rcBadge, Qt::AlignCenter, QIcon::Normal, QIcon::Off);
         }
 
         QRect rcTitle(QPoint(rcBadge.right() + 5, rcBadge.top()), QPoint(textRect.right(), rcBadge.bottom()));
-        QColor colorTitle = bFocused ? m_colorDocumentsTitleSelected : m_colorDocumentsTitle;
         ::WizDrawTextSingleLine(p, rcTitle, document.strTitle,  Qt::TextSingleLine | Qt::AlignVCenter, colorTitle, true);
     }
 
@@ -836,7 +862,7 @@ void CWizNoteStyle::drawItemMessage(const QStyleOptionViewItemV4 *vopt,
     const WIZABSTRACT& abstract = view->documentAbstractFromIndex(vopt->index);
     const QImage& imgAuthorAvatar = view->messageSenderAvatarFromIndex(vopt->index);
     WIZDOCUMENTDATA document = view->documentFromIndex(vopt->index);
-    bool bMultiSelected = view->selectedItems().size() > 1 ? true : false;
+    bool bFocused = view->hasFocus();
 
     p->save();
     p->setClipRect(vopt->rect);
@@ -849,14 +875,10 @@ void CWizNoteStyle::drawItemMessage(const QStyleOptionViewItemV4 *vopt,
 
     // draw background behaviour
     if (vopt->state & QStyle::State_Selected) {
-        if (bMultiSelected) {
+        if (bFocused) {
             p->fillRect(vopt->rect, m_colorDocumentsItemFocusBackground);
         } else {
-            if (vopt->state & QStyle::State_HasFocus) {
-                p->fillRect(vopt->rect, m_colorDocumentsItemFocusBackground);
-            } else {
-                p->fillRect(vopt->rect, m_colorDocumentsItemLoseFocusBackground);
-            }
+            p->fillRect(vopt->rect, m_colorDocumentsItemLoseFocusBackground);
         }
     }
 
@@ -882,9 +904,22 @@ void CWizNoteStyle::drawItemMessage(const QStyleOptionViewItemV4 *vopt,
     if (!vopt->text.isEmpty()) {
         textRect.adjust(6, 6, -6, -6);
 
-        //bool bFocused = vopt->state & QStyle::State_HasFocus \
-        //        && vopt->state & QStyle::State_Selected;
-        bool bFocused = vopt->state & QStyle::State_Selected;
+        QColor colorTitle, colorDate, colorSummary;
+        if (vopt->state & QStyle::State_Selected) {
+            if (bFocused) {
+                colorTitle = m_colorDocumentsTitleFocus;
+                colorDate  = m_colorDocumentsDateFocus;
+                colorSummary = m_colorDocumentsSummaryFocus;
+            } else {
+                colorTitle = m_colorDocumentsTitleLoseFocus;
+                colorDate = m_colorDocumentsDateLoseFocus;
+                colorSummary = m_colorDocumentsSummaryLoseFocus;
+            }
+        } else {
+            colorTitle = m_colorDocumentsTitle;
+            colorDate = m_colorDocumentsDate;
+            colorSummary = m_colorDocumentsSummary;
+        }
 
         // draw title
         QFont fontTitle = p->font();
@@ -895,14 +930,13 @@ void CWizNoteStyle::drawItemMessage(const QStyleOptionViewItemV4 *vopt,
         // badge icon first
         QRect rcBadge = textRect;
         rcBadge.setSize(QSize(nFontHeight, nFontHeight));
-        if (bFocused) {
+        if (vopt->state & QStyle::State_Selected) {
             m_iconDocumentsBadge.paint(p, rcBadge, Qt::AlignCenter, QIcon::Active, QIcon::Off);
         } else {
             m_iconDocumentsBadge.paint(p, rcBadge, Qt::AlignCenter, QIcon::Normal, QIcon::Off);
         }
 
         QRect rcTitle(QPoint(rcBadge.right() + 5, rcBadge.top()), QPoint(textRect.right(), rcBadge.bottom()));
-        QColor colorTitle = bFocused ? m_colorDocumentsTitleSelected : m_colorDocumentsTitle;
         ::WizDrawTextSingleLine(p, rcTitle, document.strTitle,  Qt::TextSingleLine | Qt::AlignVCenter, colorTitle, true);
 
         // draw date and tags, use 12px font size
@@ -911,14 +945,11 @@ void CWizNoteStyle::drawItemMessage(const QStyleOptionViewItemV4 *vopt,
         p->setFont(fontAbs);
         nFontHeight = p->fontMetrics().height();
 
-        QColor colorDate = bFocused ? m_colorDocumentsDateSelected : m_colorDocumentsDate;
         QRect rcInfo(textRect.left(), rcTitle.bottom() + 6, textRect.width(), nFontHeight);
-        //QString strInfo = document.tCreated.toHumanFriendlyString() + " " + document.strOwner;
         QString strInfo = data.strInfo;
         int infoWidth = ::WizDrawTextSingleLine(p, rcInfo, strInfo,  Qt::TextSingleLine | Qt::AlignVCenter, colorDate, true);
 
         // there lines document summary
-        QColor colorSummary = bFocused ? m_colorDocumentsSummarySelected : m_colorDocumentsSummary;
         QString strAbstract = abstract.text;
 
         QRect rcAbstract1(QPoint(textRect.left() + infoWidth + 4, rcInfo.top()), QPoint(textRect.right(), rcInfo.bottom()));

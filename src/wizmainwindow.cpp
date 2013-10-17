@@ -474,16 +474,16 @@ void MainWindow::on_editor_statusChanged()
 void MainWindow::initToolBar()
 {
 #ifdef Q_OS_MAC
-    m_toolBar->setIconSize(QSize(24, 24));
     setUnifiedTitleAndToolBarOnMac(true);
-#else
-    m_toolBar->setIconSize(QSize(32, 32));
 #endif
+
+    m_toolBar->setIconSize(QSize(24, 24));
     m_toolBar->setContextMenuPolicy(Qt::PreventContextMenu);
     m_toolBar->setMovable(false);
     m_toolBar->setToolButtonStyle(Qt::ToolButtonIconOnly);
 
-    m_toolBar->addWidget(new CWizFixedSpacer(QSize(10, 1), m_toolBar));
+    // align with categoryview's root item.
+    m_toolBar->addWidget(new CWizFixedSpacer(QSize(3, 1), m_toolBar));
 
     CWizUserInfoWidget* info = new CWizUserInfoWidget(*this, m_toolBar);
     m_toolBar->addWidget(info);
