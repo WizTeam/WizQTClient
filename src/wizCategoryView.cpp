@@ -1169,7 +1169,7 @@ void CWizCategoryView::on_action_group_attribute()
     CWizCategoryViewItemBase* p = currentCategoryItem<CWizCategoryViewItemBase>();
     if (p && !p->kbGUID().isEmpty()) {
         if (!m_groupSettings) {
-            m_groupSettings = new CWizWebSettingsDialog(QSize(660, 400), window());
+            m_groupSettings = new CWizWebSettingsDialog(QSize(720, 450), window());
             m_groupSettings->setWindowTitle(tr("Group settings"));
         }
 

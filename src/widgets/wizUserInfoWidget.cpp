@@ -213,7 +213,7 @@ void CWizUserInfoWidget::on_action_accountSetup_triggered()
     QString strUrl = CWizApiEntry::getAccountInfoUrl(strToken);
 
     if (!m_userSettings) {
-        m_userSettings = new CWizWebSettingsDialog(QSize(660, 350), window()); // use toplevel window as parent
+        m_userSettings = new CWizWebSettingsDialog(QSize(720, 400), window()); // use toplevel window as parent
         m_userSettings->setWindowTitle(tr("Account settings"));
     }
 

@@ -6,6 +6,7 @@
 class QUrl;
 class QWebView;
 class QLabel;
+class QPushButton;
 
 class CWizWebSettingsDialog : public QDialog
 {
@@ -18,6 +19,7 @@ public:
 private:
     QLabel* m_labelProgress;
     QWebView* m_web;
+    QPushButton* m_btnOk;
 
 private Q_SLOTS:
     void on_web_loaded(bool ok);
