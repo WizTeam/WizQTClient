@@ -30,7 +30,6 @@ CWizWebSettingsDialog::CWizWebSettingsDialog(QSize sz, QWidget *parent)
     m_labelError = new QLabel(tr("wow, seems unable to load what you want..."), this);
     m_labelError->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     m_labelError->setAlignment(Qt::AlignCenter);
-    m_labelError->setVisible(false);
 
     m_btnOk = new QPushButton(tr("Close"), this);
     connect(m_btnOk, SIGNAL(clicked()), SLOT(accept()));
@@ -53,6 +52,8 @@ void CWizWebSettingsDialog::showEvent(QShowEvent* event)
     Q_UNUSED(event);
 
     m_web->setVisible(false);
+    m_labelError->setVisible(false);
+    m_labelProgress->setVisible(true);
 
     Q_EMIT showProgress();
 }
@@ -66,6 +67,7 @@ void CWizWebSettingsDialog::load(const QUrl& url)
 void CWizWebSettingsDialog::on_web_loaded(bool ok)
 {
     if (ok) {
+        m_movie->stop();
         m_labelProgress->setVisible(false);
         m_web->setVisible(true);
     }
@@ -73,6 +75,7 @@ void CWizWebSettingsDialog::on_web_loaded(bool ok)
 
 void CWizWebSettingsDialog::showError()
 {
+    m_movie->stop();
     m_labelProgress->setVisible(false);
     m_labelError->setVisible(true);
 }
