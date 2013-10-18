@@ -18,6 +18,7 @@
 #include "wizWebSettingsDialog.h"
 #include "sync/wizkmxmlrpc.h"
 #include "share/wizApiEntry.h"
+#include "sync/wizCloudPool.h"
 
 
 #define CATEGORY_GENERAL    QObject::tr("General")
@@ -1171,14 +1172,30 @@ void CWizCategoryView::on_action_group_attribute()
         if (!m_groupSettings) {
             m_groupSettings = new CWizWebSettingsDialog(QSize(720, 450), window());
             m_groupSettings->setWindowTitle(tr("Group settings"));
+            connect(m_groupSettings, SIGNAL(accepted()), m_groupSettings, SLOT(deleteLater()));
+            connect(m_groupSettings, SIGNAL(showProgress()), CWizCloudPool::instance(), SLOT(getToken()));
+            connect(CWizCloudPool::instance(), SIGNAL(tokenAcquired(const QString&)),
+                    SLOT(on_action_group_attribute_requested(const QString&)));
         }
 
-        QString strToken;
-        CWizKMAccountsServer server(::WizKMGetAccountsServerURL(true), NULL);
-        server.GetToken(m_dbMgr.db().GetUserId(), m_dbMgr.db().GetPassword(), strToken);
-        QString strUrl = CWizApiEntry::getGroupAttributeUrl(strToken, p->kbGUID());
-        m_groupSettings->load(QUrl::fromEncoded(strUrl.toUtf8()));
+        m_strRequestedGroupKbGUID = p->kbGUID();
+
+        m_groupSettings->open();
     }
+}
+
+void CWizCategoryView::on_action_group_attribute_requested(const QString& strToken)
+{
+    if (!m_groupSettings)
+        return;
+
+    if (strToken.isEmpty()) {
+        m_groupSettings->showError();
+        return;
+    }
+
+    QString strUrl = CWizApiEntry::getGroupAttributeUrl(strToken, m_strRequestedGroupKbGUID);
+    m_groupSettings->load(QUrl::fromEncoded(strUrl.toUtf8()));
 }
 
 void CWizCategoryView::on_action_emptyTrash()

@@ -12,6 +12,7 @@
 #include "sync/wizkmxmlrpc.h"
 #include "wizWebSettingsDialog.h"
 #include "sync/wizAvatarUploader.h"
+#include "sync/wizCloudPool.h"
 
 
 
@@ -207,16 +208,29 @@ void CWizUserInfoWidget::on_action_accountInfo_triggered()
 
 void CWizUserInfoWidget::on_action_accountSetup_triggered()
 {
-    QString strToken;
-    CWizKMAccountsServer server(::WizKMGetAccountsServerURL(true), NULL);
-    server.GetToken(m_db.GetUserId(), m_db.GetPassword(), strToken);
-    QString strUrl = CWizApiEntry::getAccountInfoUrl(strToken);
-
     if (!m_userSettings) {
         m_userSettings = new CWizWebSettingsDialog(QSize(720, 400), window()); // use toplevel window as parent
         m_userSettings->setWindowTitle(tr("Account settings"));
+        connect(m_userSettings, SIGNAL(accepted()), m_userSettings, SLOT(deleteLater()));
+        connect(m_userSettings, SIGNAL(showProgress()), CWizCloudPool::instance(), SLOT(getToken()));
+        connect(CWizCloudPool::instance(), SIGNAL(tokenAcquired(const QString&)),
+                SLOT(on_action_accountSetup_requested(const QString&)));
     }
 
+    m_userSettings->open();
+}
+
+void CWizUserInfoWidget::on_action_accountSetup_requested(const QString& strToken)
+{
+    if (!m_userSettings)
+        return;
+
+    if (strToken.isEmpty()) {
+        m_userSettings->showError();
+        return;
+    }
+
+    QString strUrl = CWizApiEntry::getAccountInfoUrl(strToken);
     m_userSettings->load(QUrl::fromEncoded(strUrl.toUtf8()));
 }
 

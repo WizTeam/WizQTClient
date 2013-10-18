@@ -47,6 +47,7 @@
 #include "wizPopupButton.h"
 #include "widgets/wizUserInfoWidget.h"
 #include "share/wizApiEntry.h"
+#include "sync/wizCloudPool.h"
 
 
 MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
@@ -86,6 +87,9 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     , m_bReadyQuit(false)
     , m_bRequestQuit(false)
 {
+    CWizCloudPool::instance()->init(&m_dbMgr);
+    //CWizCloudPool::instance()->start();
+
     // search and full text search
     QThread *threadFTS = new QThread();
     m_searchIndexer->moveToThread(threadFTS);

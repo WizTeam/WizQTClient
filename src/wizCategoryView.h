@@ -203,6 +203,8 @@ private:
     QPointer<QTimer> m_timerUpdateTagCount;
     QMap<QString, QTimer*> m_mapTimerUpdateGroupCount;
 
+    QString m_strRequestedGroupKbGUID;
+
 private Q_SLOTS:
     void on_updateFolderDocumentCount_timeout();
     void on_updateTagDocumentCount_timeout();
@@ -269,6 +271,7 @@ public Q_SLOTS:
 
     void on_action_itemAttribute();
     void on_action_group_attribute();
+    void on_action_group_attribute_requested(const QString& strToken);
 
     void on_action_emptyTrash();
 

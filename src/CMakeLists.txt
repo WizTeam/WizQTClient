@@ -99,11 +99,12 @@ set(wiznote_SOURCES
     wizDocumentTransitionView.cpp
     sync/wizkmxmlrpc.cpp
     sync/wizkmsync.cpp
+    sync/wizCloudPool.cpp
+    sync/wizAvatarUploader.cpp
     wizPopupButton.cpp
     widgets/wizUserInfoWidget.cpp
     widgets/wizSegmentedButton.cpp
     wizWebSettingsDialog.cpp
-    sync/wizAvatarUploader.cpp
 )
 
 set(wiznote_HEADERS
@@ -181,8 +182,9 @@ set(wiznote_HEADERS
     wizEditorToolBar.h
     sync/wizkmxmlrpc.h
     sync/wizkmsync.h
-    share/wizSyncableDatabase.h
+    sync/wizCloudPool.h
     sync/wizAvatarUploader.h
+    share/wizSyncableDatabase.h
     wizWebSettingsDialog.h
     widgets/wizSegmentedButton.h
     widgets/wizUserInfoWidget.h

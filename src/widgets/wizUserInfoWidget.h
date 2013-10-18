@@ -33,7 +33,7 @@ private:
     QIcon m_iconArraw;
     QMenu* m_menuMain;
 
-    CWizWebSettingsDialog* m_userSettings;
+    QPointer<CWizWebSettingsDialog> m_userSettings;
 
 protected:
     virtual void mousePressEvent(QMouseEvent* event);
@@ -49,6 +49,7 @@ private Q_SLOTS:
     void on_userAvatar_downloaded(const QString& strGUID);
     void on_action_accountInfo_triggered();
     void on_action_accountSetup_triggered();
+    void on_action_accountSetup_requested(const QString& strToken);
 
     void on_action_changeAvatar_triggered();
     void on_action_changeAvatar_uploaded(bool ok);

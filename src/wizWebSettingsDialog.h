@@ -15,9 +15,14 @@ class CWizWebSettingsDialog : public QDialog
 public:
     explicit CWizWebSettingsDialog(QSize sz, QWidget *parent = 0);
     void load(const QUrl& url);
+    void showError();
+
+protected:
+    virtual void showEvent(QShowEvent* event);
 
 private:
     QLabel* m_labelProgress;
+    QLabel* m_labelError;
     QWebView* m_web;
     QPushButton* m_btnOk;
 
@@ -25,6 +30,7 @@ private Q_SLOTS:
     void on_web_loaded(bool ok);
 
 Q_SIGNALS:
+    void showProgress();
     void loaded(bool ok);
 };
 
