@@ -4,9 +4,11 @@
 #include <QDialog>
 
 class QUrl;
-class QWebView;
 class QLabel;
+class QMovie;
+class QWebView;
 class QPushButton;
+
 
 class CWizWebSettingsDialog : public QDialog
 {
@@ -22,6 +24,7 @@ protected:
 
 private:
     QLabel* m_labelProgress;
+    QMovie* m_movie;
     QLabel* m_labelError;
     QWebView* m_web;
     QPushButton* m_btnOk;

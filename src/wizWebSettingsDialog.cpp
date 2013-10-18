@@ -19,14 +19,13 @@ CWizWebSettingsDialog::CWizWebSettingsDialog(QSize sz, QWidget *parent)
     m_web = new QWebView(this);
     connect(m_web, SIGNAL(loadFinished(bool)), SLOT(on_web_loaded(bool)));
 
-    QMovie* movie = new QMovie(this);
-    movie->setFileName(":/loading.gif");
-    movie->start();
+    m_movie = new QMovie(this);
+    m_movie->setFileName(":/loading.gif");
 
     m_labelProgress = new QLabel(this);
     m_labelProgress->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     m_labelProgress->setAlignment(Qt::AlignCenter);
-    m_labelProgress->setMovie(movie);
+    m_labelProgress->setMovie(m_movie);
 
     m_labelError = new QLabel(tr("wow, seems unable to load what you want..."), this);
     m_labelError->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
@@ -60,6 +59,7 @@ void CWizWebSettingsDialog::showEvent(QShowEvent* event)
 
 void CWizWebSettingsDialog::load(const QUrl& url)
 {
+    m_movie->start();
     m_web->load(url);
 }
 
