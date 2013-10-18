@@ -23,7 +23,7 @@
     </rect>
    </property>
    <property name="text">
-    <string>&amp;User ID (Email):</string>
+    <string>User ID (Email):</string>
    </property>
    <property name="buddy">
     <cstring>editUserId</cstring>
@@ -49,7 +49,7 @@
     </rect>
    </property>
    <property name="text">
-    <string>&amp;Password</string>
+    <string>Password:</string>
    </property>
    <property name="buddy">
     <cstring>editPassword</cstring>
@@ -91,7 +91,7 @@
     </rect>
    </property>
    <property name="text">
-    <string>&amp;Confirm Password:</string>
+    <string>Confirm Password:</string>
    </property>
    <property name="buddy">
     <cstring>editPassword2</cstring>

@@ -16,6 +16,9 @@ public:
     void init(CWizDatabaseManager* dbMgr);
 
     Q_INVOKABLE void getToken();
+    Q_INVOKABLE void registerAccount(const QString &strUserName, const QString &strPassword, const QString &strInviteCode);
+
+    QString lastErrorMessage() { return m_strLastErrorMsg; }
 
 private:
     CWizCloudPool() : m_dbMgr(0), m_aServer(0), m_bInited(false) {}
@@ -23,12 +26,17 @@ private:
     static CWizCloudPool* _instance;
     bool m_bInited;
 
+    void _init(); // internal init for thread
+
+    QString m_strLastErrorMsg;
+
 protected:
     CWizDatabaseManager* m_dbMgr;
     CWizKMAccountsServer* m_aServer;
 
 Q_SIGNALS:
     void tokenAcquired(const QString& strToken);
+    void accountRegistered(bool bOk);
 };
 
 

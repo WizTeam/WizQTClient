@@ -29,19 +29,41 @@ void CWizCloudPool::init(CWizDatabaseManager* dbMgr)
     m_bInited = true;
 }
 
+void CWizCloudPool::_init()
+{
+    if (!m_aServer) {
+        m_aServer = new CWizKMAccountsServer(::WizKMGetAccountsServerURL(true));
+    }
+}
+
 void CWizCloudPool::getToken()
 {
     Q_ASSERT(m_bInited);
     Q_ASSERT(QThread::currentThread() != qApp->thread());
 
-    if (!m_aServer) {
-        m_aServer = new CWizKMAccountsServer(::WizKMGetAccountsServerURL(true));
-    }
+    _init();
 
     QString strToken;
     if (!m_aServer->GetToken(m_dbMgr->db().GetUserId(), m_dbMgr->db().GetPassword(), strToken)) {
-        TOLOG("[CloudPool]Failed to get token");
+        m_strLastErrorMsg = m_aServer->GetLastErrorMessage();
+        TOLOG("[CWizCloudPool]Failed to get token");
     }
 
     Q_EMIT tokenAcquired(strToken);
+}
+
+void CWizCloudPool::registerAccount(const QString& strUserName, const QString& strPassword, const QString& strInviteCode)
+{
+    Q_ASSERT(QThread::currentThread() != qApp->thread());
+
+    _init();
+
+    if (!m_aServer->CreateAccount(strUserName, strPassword, strInviteCode)) {
+        m_strLastErrorMsg = m_aServer->GetLastErrorMessage();
+        TOLOG("[CWizCloudPool]Failed to register account");
+        Q_EMIT accountRegistered(false);
+        return;
+    }
+
+    Q_EMIT accountRegistered(true);
 }

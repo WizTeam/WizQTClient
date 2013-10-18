@@ -1835,19 +1835,35 @@
     </message>
     <message>
         <location filename="../src/ui/wizcreateaccountdialog.ui" line="26"/>
-        <source>&amp;User ID (Email):</source>
-        <oldsource>&amp;User ID: (Email)</oldsource>
-        <translation>用户ID(email地址)(&amp;U):</translation>
+        <source>User ID (Email):</source>
+        <translation>用户名(Email地址):</translation>
     </message>
     <message>
         <location filename="../src/ui/wizcreateaccountdialog.ui" line="52"/>
-        <source>&amp;Password</source>
-        <translation>密码(&amp;P)</translation>
+        <source>Password:</source>
+        <translation>密码:</translation>
+    </message>
+    <message>
+        <source>Password</source>
+        <translation type="obsolete">密码:</translation>
     </message>
     <message>
         <location filename="../src/ui/wizcreateaccountdialog.ui" line="94"/>
+        <source>Confirm Password:</source>
+        <translation>确认密码：</translation>
+    </message>
+    <message>
+        <source>&amp;User ID (Email):</source>
+        <oldsource>&amp;User ID: (Email)</oldsource>
+        <translation type="obsolete">用户ID(email地址)(&amp;U):</translation>
+    </message>
+    <message>
+        <source>&amp;Password</source>
+        <translation type="obsolete">密码(&amp;P)</translation>
+    </message>
+    <message>
         <source>&amp;Confirm Password:</source>
-        <translation>确认密码(&amp;C):</translation>
+        <translation type="obsolete">确认密码(&amp;C):</translation>
     </message>
     <message>
         <location filename="../src/wizcreateaccountdialog.cpp" line="40"/>

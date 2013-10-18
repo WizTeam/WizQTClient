@@ -2,7 +2,6 @@
 #define WIZCREATEACCOUNTDIALOG_H
 
 #include <QDialog>
-#include "share/wizcreateaccount.h"
 
 namespace Ui {
     class CreateAccountDialog;
@@ -11,25 +10,27 @@ namespace Ui {
 class CreateAccountDialog : public QDialog
 {
     Q_OBJECT
+
 public:
     explicit CreateAccountDialog(QWidget *parent = 0);
     ~CreateAccountDialog();
 
 private:
     Ui::CreateAccountDialog *ui;
-    //
-    CWizCreateAccount m_createAccount;
-    //
+
     void enableControls(bool b);
     QString password2() const;
+
 public:
     QString userId() const;
     QString password() const;
+
 public Q_SLOTS:
     virtual void accept();
+    void accountRegistered_done(bool bOk);
 
-private slots:
-    void createAccountDone(bool succeeded, const CString& errorMessage);
+Q_SIGNALS:
+    void registerAccount(const QString& strUser, const QString& strPassword, const QString& strInviteCode);
 };
 
 #endif // WIZCREATEACCOUNTDIALOG_H

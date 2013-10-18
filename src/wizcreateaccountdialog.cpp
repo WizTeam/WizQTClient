@@ -3,15 +3,17 @@
 
 #include <QMessageBox>
 
-CreateAccountDialog::CreateAccountDialog(QWidget *parent) :
-    QDialog(parent),
-    ui(new Ui::CreateAccountDialog),
-    m_createAccount(WIZ_API_URL)
+#include "sync/wizCloudPool.h"
+
+CreateAccountDialog::CreateAccountDialog(QWidget *parent)
+    : QDialog(parent)
+    , ui(new Ui::CreateAccountDialog)
 {
     ui->setupUi(this);
 
-    connect(&m_createAccount, SIGNAL(done(bool, const CString&)), \
-            SLOT(createAccountDone(bool, const CString&)));
+    connect(this, SIGNAL(registerAccount(const QString&, const QString&, const QString&)),
+            CWizCloudPool::instance(), SLOT(registerAccount(const QString&, const QString&, const QString&)));
+    connect(CWizCloudPool::instance(), SIGNAL(accountRegistered(bool)), SLOT(accountRegistered_done(bool)));
 }
 
 CreateAccountDialog::~CreateAccountDialog()
@@ -35,33 +37,42 @@ QString CreateAccountDialog::password2() const
 
 void CreateAccountDialog::accept()
 {
-    if (userId().isEmpty())
-    {
+    if (userId().isEmpty()) {
         QMessageBox::critical(this, "", tr("Please enter user id"));
         return;
     }
-    if (password().isEmpty())
-    {
+
+    if (password().isEmpty()) {
         QMessageBox::critical(this, "", tr("Please enter user password"));
         return;
     }
-    //
+
+    if (password() != password2()) {
+        QMessageBox::critical(this, "", tr("password is not equal, please try again."));
+        return;
+    }
+
     enableControls(false);
-    //
-    m_createAccount.createAccount(userId(), password(), "");
+
+#if defined Q_OS_MAC
+    QString strCode = "129ce11c";
+#elif defined Q_OS_LINUX
+    QString strCode = "7abd8f4a";
+#else
+    QString strCode = "8480c6d7";
+#endif
+
+    Q_EMIT registerAccount(userId(), password(), strCode);
 }
 
-void CreateAccountDialog::createAccountDone(bool succeeded, const CString& errorMessage)
+void CreateAccountDialog::accountRegistered_done(bool bOk)
 {
     enableControls(true);
-    //
-    if (succeeded)
-    {
+
+    if (bOk) {
         QDialog::accept();
-    }
-    else
-    {
-        QMessageBox::critical(this, "", errorMessage);
+    } else {
+        QMessageBox::critical(this, "", CWizCloudPool::instance()->lastErrorMessage());
     }
 }
 
