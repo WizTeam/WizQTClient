@@ -13,6 +13,10 @@
 #include "share/wizmultilinelistwidget.h"
 #include "share/wizimagepushbutton.h"
 
+#ifdef Q_OS_MAC
+#include "mac/wizmachelper.h"
+#endif
+
 
 class CWizCategoryBaseView;
 class CWizDocumentListView;
@@ -339,12 +343,28 @@ void CWizNoteStyle::drawDocumentListViewItem(const QStyleOptionViewItemV4 *optio
     }
 }
 
+
 QPixmap CWizNoteStyle::genThumbnailPixmap(const QStyleOptionViewItemV4* vopt, const CWizDocumentListView* view) const
 {
-    QRect rc = vopt->rect.translated(-vopt->rect.x(), -vopt->rect.y());
-    QPixmap pixmap(rc.size());
+    QRect rc(0, 0, vopt->rect.width(), vopt->rect.height());
+
+#ifdef Q_OS_MAC
+    //extern qt_mac_get_scalefactor(QWidget *window);
+    float factor = qt_mac_get_scalefactor(0); // should be 1 for normal and 2 for retina screen
+    QPixmap pixmap(rc.width() * factor, rc.height() * factor);
+
+    QTransform trans;
+    trans.scale(factor, factor);
+#else
+    QPixmap pixmap(rc.width(), rc.height());
+#endif
+
     pixmap.fill(m_colorDocumentsBackground);
     QPainter p(&pixmap);
+
+#ifdef Q_OS_MAC
+    p.setWorldTransform(trans);
+#endif
 
     // indirect access
     const WizDocumentListViewItemData& data = view->documentItemDataFromIndex(vopt->index);

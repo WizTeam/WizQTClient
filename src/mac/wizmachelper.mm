@@ -4,6 +4,41 @@
 #include <QLocale>
 #include <QMainWindow>
 
+#ifndef QT_MAC_USE_COCOA
+float qt_mac_get_scalefactor(QWidget *window)
+{
+    Q_UNUSED(window);
+    return HIGetScaleFactor();
+}
+#endif
+
+#ifdef QT_MAC_USE_COCOA
+float qt_mac_get_scalefactor(QWidget *window)
+    {
+    // No high-dpi support on 10.6 and below
+#if (MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_7)
+    if (QSysInfo::MacintoshVersion >= QSysInfo::MV_10_7) {
+        if (window == 0) {
+            // If there is no window given we answer the question
+            // "Are there any HiDPI screens connected?" by returning
+            // the highest scale factor found.
+            CGFloat highestScaleFactor = 1.0;
+            NSArray *screens = [NSScreen screens];
+            for (id screen in screens) {
+                highestScaleFactor = qMax(highestScaleFactor, [screen backingScaleFactor]);
+            }
+            return highestScaleFactor;
+        } else {
+            return [qt_mac_window_for(window) backingScaleFactor];
+        }
+    } else
+#endif
+    {
+        return 1.0; // return 1.0 when compiled on or running on 10.6 and lower.
+    }
+}
+#endif
+
 void setupCocoa()
 {
     NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
