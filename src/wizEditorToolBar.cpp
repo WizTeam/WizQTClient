@@ -51,7 +51,7 @@ void drawCombo(QComboBox* cm, QStyleOptionComboBox& opt)
 void drawComboPrimitive(QStylePainter* p, QStyle::PrimitiveElement pe, const QStyleOption &opt)
 {
     p->save();
-    p->setRenderHint(QPainter::Antialiasing);
+
     int xOffset = opt.direction == Qt::LeftToRight ? 2 : -1;
     QMatrix matrix;
     matrix.translate(opt.rect.center().x() + xOffset, opt.rect.center().y() + 2);
@@ -70,12 +70,13 @@ void drawComboPrimitive(QStylePainter* p, QStyle::PrimitiveElement pe, const QSt
         matrix.rotate(-90);
         break;
     }
-    path.moveTo(0, 4);
-    path.lineTo(-3, -2);
-    path.lineTo(3, -2);
+    path.moveTo(0, 2.3);
+    path.lineTo(-2.3, -2.3);
+    path.lineTo(2.3, -2.3);
     p->setMatrix(matrix);
     p->setPen(Qt::NoPen);
-    p->setBrush(QColor(0, 0, 0, 160));
+    p->setBrush(QColor(0, 0, 0, 255));
+    p->setRenderHint(QPainter::Antialiasing);
     p->drawPath(path);
     p->restore();
 }
@@ -146,7 +147,7 @@ protected:
 
     virtual QSize sizeHint() const
     {
-        return iconSize() + QSize(4, 4);
+        return QSize(20, 20);
     }
 
 private:
