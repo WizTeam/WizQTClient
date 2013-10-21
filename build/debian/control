@@ -1,13 +1,13 @@
 Source: wiznote
+Section: graphics
+Priority: standard
 Maintainer: Albert.Zhou <albert.zhou@wiz.cn>
-Priority: optional
 Build-Depends: debhelper (>= 9), cmake (>= 2.8), libqt4-dev (>= 4.8), zlib1g-dev
 Standards-Version: 2.0.38
 Homepage: http://www.wiznote.com
 
 Package: wiznote
 Architecture: any
-Section: universe/x11
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Description: Cross platform cloud based note-taking application
  WizNote is a cross platform cloud based note-taking application.
