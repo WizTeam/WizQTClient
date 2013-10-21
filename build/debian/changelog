@@ -1,4 +1,4 @@
-wiznote (2.0.38-0ppa1~raring1) raring; urgency=low
+wiznote (2.0.38-1ppa2) precise; urgency=medium
 
   * New modern theme
   * Rewrite of syncing backend, more stable, more fast
