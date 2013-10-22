@@ -419,7 +419,7 @@ void CWizCategoryView::initMenus()
 
     QAction* actionRenameItem = new QAction("ActionRenameItem", this);
     actionRenameItem->setShortcutContext(Qt::WidgetShortcut);
-    actionRenameItem->setShortcut(QKeySequence(Qt::Key_F2));
+    actionRenameItem->setShortcut(QKeySequence::SaveAs);
     actionRenameItem->setData(ActionRenameItem);
     addAction(actionRenameItem);
     connect(actionRenameItem, SIGNAL(triggered()), SLOT(on_action_renameItem()));
