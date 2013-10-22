@@ -452,6 +452,38 @@ void CWizCategoryViewGroupRootItem::reload(CWizDatabase& db)
     setText(0, db.name());
 }
 
+/* --------------------- CWizCategoryViewGroupNoTagItem --------------------- */
+CWizCategoryViewGroupNoTagItem::CWizCategoryViewGroupNoTagItem(CWizExplorerApp& app,
+                                                               const QString& strKbGUID)
+    : CWizCategoryViewItemBase(app, "Unclassified", strKbGUID)
+{
+    QIcon icon;
+    icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "folder_normal"),
+                 QSize(16, 16), QIcon::Normal);
+    icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "folder_selected"),
+                 QSize(16, 16), QIcon::Selected);
+    setIcon(0, icon);
+    setText(0, QObject::tr("Unclassified"));
+}
+
+void CWizCategoryViewGroupNoTagItem::getDocuments(CWizDatabase& db,
+                                                  CWizDocumentDataArray& arrayDocument)
+{
+    db.getDocumentsNoTag(arrayDocument);
+}
+
+bool CWizCategoryViewGroupNoTagItem::accept(CWizDatabase& db, const WIZDOCUMENTDATA& data)
+{
+    if (db.IsInDeletedItems(data.strLocation))
+        return false;
+
+    QString strTagGUIDs = db.GetDocumentTagGUIDsString(data.strGUID);
+    if (strTagGUIDs.isEmpty())
+        return true;
+
+    return false;
+}
+
 
 /* ------------------------------ CWizCategoryViewGroupItem ------------------------------ */
 

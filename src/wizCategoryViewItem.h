@@ -214,6 +214,15 @@ public:
     void reload(CWizDatabase& db);
 };
 
+class CWizCategoryViewGroupNoTagItem : public CWizCategoryViewItemBase
+{
+public:
+    CWizCategoryViewGroupNoTagItem(CWizExplorerApp& app, const QString& strKbGUID);
+    virtual void showContextMenu(CWizCategoryBaseView* pCtrl, QPoint pos) {Q_UNUSED(pCtrl); Q_UNUSED(pos);}
+    virtual void getDocuments(CWizDatabase& db, CWizDocumentDataArray& arrayDocument);
+    virtual bool accept(CWizDatabase& db, const WIZDOCUMENTDATA& data);
+};
+
 class CWizCategoryViewGroupItem : public CWizCategoryViewItemBase
 {
 public:

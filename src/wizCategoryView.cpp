@@ -1137,7 +1137,7 @@ void CWizCategoryView::on_action_group_deleteFolder()
     msgBox->addButton(QMessageBox::Ok);
     msgBox->addButton(QMessageBox::Cancel);
 
-    QString strWarning = tr("Do you really want to delete folder: %1 ? (All documents will move to root folder, It's safe.)").arg(p->tag().strName);
+    QString strWarning = tr("Do you really want to delete folder: %1 ? (All documents will move to unclassified folder, It's safe.)").arg(p->tag().strName);
     msgBox->setText(strWarning);
     msgBox->open(this, SLOT(on_action_group_deleteFolder_confirmed(int)));
 }
@@ -1420,6 +1420,13 @@ void CWizCategoryView::updateTagDocumentCount_impl(const QString& strKbGUID)
         if (CWizCategoryViewTrashItem* pTrash = dynamic_cast<CWizCategoryViewTrashItem*>(pTagRoot->child(i))) {
             pTrash->setDocumentsCount(-1, m_dbMgr.db(strKbGUID).GetTrashDocumentCount());
         }
+
+        if (CWizCategoryViewGroupNoTagItem* pItem = dynamic_cast<CWizCategoryViewGroupNoTagItem*>(pTagRoot->child(i))) {
+            int nCount = 0;
+            if (m_dbMgr.db(strKbGUID).GetDocumentsNoTagCount(nCount)) {
+                pItem->setDocumentsCount(-1, nCount);
+            }
+        }
     }
 
     update();
@@ -1438,6 +1445,11 @@ int CWizCategoryView::updateTagDocumentCount_impl(CWizCategoryViewItemBase* pIte
         else if (CWizCategoryViewGroupItem* pItemChild = dynamic_cast<CWizCategoryViewGroupItem*>(pItem->child(i)))
         {
             strGUID = pItemChild->tag().strGUID;
+        }
+        else if (CWizCategoryViewGroupNoTagItem* pItemChild = dynamic_cast<CWizCategoryViewGroupNoTagItem*>(pItem->child(i)))
+        {
+            Q_UNUSED(pItemChild);
+            continue;
         }
         else if (CWizCategoryViewTrashItem* pTrash = dynamic_cast<CWizCategoryViewTrashItem*>(pItem->child(i)))
         {
@@ -1710,6 +1722,10 @@ void CWizCategoryView::initGroup(CWizDatabase& db)
 
     CWizCategoryViewGroupRootItem* pGroupItem = new CWizCategoryViewGroupRootItem(m_app, db.name(), db.kbGUID());
     pRoot->addChild(pGroupItem);
+
+    CWizCategoryViewGroupNoTagItem* pGroupNoTagItem = new CWizCategoryViewGroupNoTagItem(m_app, db.kbGUID());
+    pGroupItem->addChild(pGroupNoTagItem);
+
     initGroup(db, pGroupItem, "");
 
     pRoot->sortChildren(0, Qt::AscendingOrder);
