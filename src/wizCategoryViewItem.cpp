@@ -110,17 +110,13 @@ CWizCategoryViewMessageRootItem::CWizCategoryViewMessageRootItem(CWizExplorerApp
 void CWizCategoryViewMessageRootItem::getDocuments(CWizDatabase& db,
                                                    CWizDocumentDataArray& arrayDocument)
 {
-    // FIXME: Add API getLastestMessages
     CWizMessageDataArray arrayMsg;
-    db.getAllMessages(arrayMsg);
+    db.getLastestMessages(arrayMsg);
 
-    CWizMessageDataArray::const_iterator it = arrayMsg.begin();
-    for (int n = 0; it != arrayMsg.end(); it++, n++) {
+    for (CWizMessageDataArray::const_iterator it = arrayMsg.begin();
+         it != arrayMsg.end();
+         it++) {
         const WIZMESSAGEDATA& msg = *it;
-
-        if (n > 200) {
-            break;
-        }
 
         WIZDOCUMENTDATAEX doc;
         doc.strKbGUID = msg.kbGUID;
@@ -433,7 +429,8 @@ void CWizCategoryViewGroupRootItem::showContextMenu(CWizCategoryBaseView* pCtrl,
 
 void CWizCategoryViewGroupRootItem::getDocuments(CWizDatabase& db, CWizDocumentDataArray& arrayDocument)
 {
-    db.getDocumentsNoTag(arrayDocument);
+    db.getLastestDocuments(arrayDocument);
+    //db.getDocumentsNoTag(arrayDocument);
 }
 
 bool CWizCategoryViewGroupRootItem::accept(CWizDatabase& db, const WIZDOCUMENTDATA& data)

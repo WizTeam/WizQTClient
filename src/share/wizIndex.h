@@ -28,6 +28,7 @@ public:
     /* Message related operations */
     bool createMessage(const WIZMESSAGEDATA& data);
     bool getAllMessages(CWizMessageDataArray& arrayMsg);
+    bool getLastestMessages(CWizMessageDataArray& arrayMsg, int nMax = 200);
     bool setMessageReadStatus(const WIZMESSAGEDATA& msg, qint32 nRead);
     bool setMessageReadStatus(const CWizMessageDataArray& arrayMsg, qint32 nRead);
     bool getModifiedMessages(CWizMessageDataArray& arrayMsg);
@@ -206,6 +207,8 @@ public:
     bool DeleteDocument(const WIZDOCUMENTDATA& data, bool bLog);
 
     bool getDocumentsNoTag(CWizDocumentDataArray& arrayDocument, bool includeTrash = false);
+
+    bool getLastestDocuments(CWizDocumentDataArray& arrayDocument, int nMax = 1000);
 
     bool GetDocumentsByParamName(const CString& strLocation, bool bIncludeSubFolders, \
                                  CString strParamName, CWizDocumentDataArray& arrayDocument);

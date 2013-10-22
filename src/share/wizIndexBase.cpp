@@ -126,6 +126,16 @@ bool CWizIndexBase::Repair(const QString& strDestFileName)
     return CppSQLite3DB::repair(m_strFileName, strDestFileName) ? true : false;
 }
 
+CString CWizIndexBase::FormatCanonicSQL(const CString& strTableName,
+                                        const CString& strFieldList,
+                                        const CString& strExt)
+{
+    return WizFormatString3("select %1 from %2 %3",
+                            strFieldList,
+                            strTableName,
+                            strExt);
+}
+
 CString CWizIndexBase::FormatQuerySQL(const CString& strTableName,
                                       const CString& strFieldList)
 {

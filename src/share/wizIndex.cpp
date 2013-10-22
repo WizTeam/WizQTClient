@@ -187,6 +187,18 @@ bool CWizIndex::getAllMessages(CWizMessageDataArray& arrayMsg)
     return SQLToMessageDataArray(strSQL, arrayMsg);
 }
 
+bool CWizIndex::getLastestMessages(CWizMessageDataArray& arrayMsg, int nMax)
+{
+    CString strExt;
+    strExt.Format("order by DT_CREATED limit 0, %s",
+                  WizIntToStr(nMax).utf16());
+    QString strSQL = FormatCanonicSQL(TABLE_NAME_WIZ_MESSAGE,
+                                      FIELD_LIST_WIZ_MESSAGE,
+                                      strExt);
+
+    return SQLToMessageDataArray(strSQL, arrayMsg);
+}
+
 bool CWizIndex::setMessageReadStatus(const WIZMESSAGEDATA& msg, qint32 nRead)
 {
     CWizMessageDataArray arrayMsg;
@@ -1638,6 +1650,16 @@ bool CWizIndex::getDocumentsNoTag(CWizDocumentDataArray& arrayDocument, bool inc
 
     QString strSQL = FormatQuerySQL(TABLE_NAME_WIZ_DOCUMENT, FIELD_LIST_WIZ_DOCUMENT, strWhere);
 
+    return SQLToDocumentDataArray(strSQL, arrayDocument);
+}
+
+bool CWizIndex::getLastestDocuments(CWizDocumentDataArray& arrayDocument, int nMax)
+{
+    CString strExt;
+    strExt.Format("where DOCUMENT_LOCATION not like %s order by DT_MODIFIED desc limit 0, %s",
+                  STR2SQL(m_strDeletedItemsLocation + "%").utf16(),
+                  WizIntToStr(nMax).utf16());
+    QString strSQL = FormatCanonicSQL(TABLE_NAME_WIZ_DOCUMENT, FIELD_LIST_WIZ_DOCUMENT, strExt);
     return SQLToDocumentDataArray(strSQL, arrayDocument);
 }
 

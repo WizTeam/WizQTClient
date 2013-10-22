@@ -94,6 +94,10 @@ protected:
     void EndUpdate() { m_bUpdating = false; }
     bool IsUpdating() const { return m_bUpdating; }
 
+    static CString FormatCanonicSQL(const CString& strTableName,
+                                    const CString& strFieldList,
+                                    const CString& strExt);
+
     static CString FormatQuerySQL(const CString& strTableName,
                                   const CString& strFieldList);
 
