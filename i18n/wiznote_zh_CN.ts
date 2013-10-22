@@ -451,10 +451,8 @@
         <translation type="obsolete">标签</translation>
     </message>
     <message>
-        <location filename="../src/wizCategoryView.cpp" line="1542"/>
-        <location filename="../src/wizCategoryView.cpp" line="1733"/>
         <source>Trash</source>
-        <translation>已删除</translation>
+        <translation type="obsolete">已删除</translation>
     </message>
     <message>
         <source>New Folder</source>
@@ -1882,7 +1880,7 @@
     <message>
         <location filename="../src/wizcreateaccountdialog.cpp" line="51"/>
         <source>password is not equal, please try again.</source>
-        <translation type="unfinished"></translation>
+        <translation>密码不一致，请重试.</translation>
     </message>
 </context>
 <context>
@@ -2916,7 +2914,12 @@
         <translation>文件</translation>
     </message>
     <message>
-        <location filename="../src/wizCategoryViewItem.cpp" line="466"/>
+        <location filename="../src/wizCategoryViewItem.cpp" line="9"/>
+        <source>Trash</source>
+        <translation>已删除</translation>
+    </message>
+    <message>
+        <location filename="../src/wizCategoryViewItem.cpp" line="10"/>
         <source>Unclassified</source>
         <translation>未分类</translation>
     </message>

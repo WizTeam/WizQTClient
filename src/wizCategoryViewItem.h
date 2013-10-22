@@ -241,7 +241,7 @@ private:
 class CWizCategoryViewTrashItem : public CWizCategoryViewFolderItem
 {
 public:
-    CWizCategoryViewTrashItem(CWizExplorerApp& app, const QString& strName, const QString& strKbGUID);
+    CWizCategoryViewTrashItem(CWizExplorerApp& app, const QString& strKbGUID);
     virtual void showContextMenu(CWizCategoryBaseView* pCtrl, QPoint pos);
     virtual void getDocuments(CWizDatabase& db, CWizDocumentDataArray& arrayDocument);
     virtual bool accept(CWizDatabase& db, const WIZDOCUMENTDATA& data);

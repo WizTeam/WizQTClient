@@ -6,6 +6,9 @@
 #include "wiznotestyle.h"
 #include "share/wizDatabaseManager.h"
 
+#define PREDEFINED_TRASH            QObject::tr("Trash")
+#define PREDEFINED_UNCLASSIFIED     QObject::tr("Unclassified")
+
 /* ------------------------------ CWizCategoryViewItemBase ------------------------------ */
 
 CWizCategoryViewItemBase::CWizCategoryViewItemBase(CWizExplorerApp& app,
@@ -38,7 +41,18 @@ int CWizCategoryViewItemBase::getItemHeight(int hintHeight) const
 
 bool CWizCategoryViewItemBase::operator < (const QTreeWidgetItem &other) const
 {
-    return text(0).compare(other.text(0), Qt::CaseInsensitive) < 0;
+    if (text(0) == PREDEFINED_UNCLASSIFIED)
+    {
+        return true;
+    }
+    else if (text(0) == PREDEFINED_TRASH)
+    {
+        return false;
+    }
+    else
+    {
+        return text(0).compare(other.text(0), Qt::CaseInsensitive) < 0;
+    }
 }
 
 void CWizCategoryViewItemBase::setDocumentsCount(int nCurrent, int nTotal)
@@ -312,10 +326,6 @@ CWizCategoryViewTagItem::CWizCategoryViewTagItem(CWizExplorerApp& app,
     , m_tag(tag)
 {
     QIcon icon;
-
-    //QString strIndex = QString::number(qrand() % 4); // FIXME: 4 random tag icon in skin
-    //icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "tag_normal_" + strIndex),
-    //             QSize(16, 16), QIcon::Normal);
     icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "tag_normal"),
                  QSize(16, 16), QIcon::Normal);
     icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "tag_selected"),
@@ -430,7 +440,6 @@ void CWizCategoryViewGroupRootItem::showContextMenu(CWizCategoryBaseView* pCtrl,
 void CWizCategoryViewGroupRootItem::getDocuments(CWizDatabase& db, CWizDocumentDataArray& arrayDocument)
 {
     db.getLastestDocuments(arrayDocument);
-    //db.getDocumentsNoTag(arrayDocument);
 }
 
 bool CWizCategoryViewGroupRootItem::accept(CWizDatabase& db, const WIZDOCUMENTDATA& data)
@@ -455,7 +464,7 @@ void CWizCategoryViewGroupRootItem::reload(CWizDatabase& db)
 /* --------------------- CWizCategoryViewGroupNoTagItem --------------------- */
 CWizCategoryViewGroupNoTagItem::CWizCategoryViewGroupNoTagItem(CWizExplorerApp& app,
                                                                const QString& strKbGUID)
-    : CWizCategoryViewItemBase(app, "Unclassified", strKbGUID)
+    : CWizCategoryViewItemBase(app, PREDEFINED_UNCLASSIFIED, strKbGUID)
 {
     QIcon icon;
     icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "folder_normal"),
@@ -463,7 +472,7 @@ CWizCategoryViewGroupNoTagItem::CWizCategoryViewGroupNoTagItem(CWizExplorerApp& 
     icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "folder_selected"),
                  QSize(16, 16), QIcon::Selected);
     setIcon(0, icon);
-    setText(0, QObject::tr("Unclassified"));
+    setText(0, PREDEFINED_UNCLASSIFIED);
 }
 
 void CWizCategoryViewGroupNoTagItem::getDocuments(CWizDatabase& db,
@@ -538,7 +547,6 @@ void CWizCategoryViewGroupItem::reload(CWizDatabase& db)
 /* ------------------------------ CWizCategoryViewTrashItem ------------------------------ */
 
 CWizCategoryViewTrashItem::CWizCategoryViewTrashItem(CWizExplorerApp& app,
-                                                     const QString& strName,
                                                      const QString& strKbGUID)
     : CWizCategoryViewFolderItem(app, "/Deleted Items/", strKbGUID)
 {
@@ -548,7 +556,7 @@ CWizCategoryViewTrashItem::CWizCategoryViewTrashItem(CWizExplorerApp& app,
     icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "trash_selected"),
                  QSize(16, 16), QIcon::Selected);
     setIcon(0, icon);
-    setText(0, strName);
+    setText(0, PREDEFINED_TRASH);
 }
 
 void CWizCategoryViewTrashItem::showContextMenu(CWizCategoryBaseView* pCtrl, QPoint pos)

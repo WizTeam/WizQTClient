@@ -1535,12 +1535,11 @@ void CWizCategoryView::initFolders()
     doLocationSanityCheck(arrayAllLocation);
 
     initFolders(pAllFoldersItem, QString(), arrayAllLocation);
+    CWizCategoryViewTrashItem* pTrash = new CWizCategoryViewTrashItem(m_app, m_dbMgr.db().kbGUID());
+    pAllFoldersItem->addChild(pTrash);
 
     pAllFoldersItem->setExpanded(true);
     pAllFoldersItem->sortChildren(0, Qt::AscendingOrder);
-
-    CWizCategoryViewTrashItem* pTrash = new CWizCategoryViewTrashItem(m_app, tr("Trash"), m_dbMgr.db().kbGUID());
-    pAllFoldersItem->addChild(pTrash);
 
     updateFolderDocumentCount();
 
@@ -1723,20 +1722,20 @@ void CWizCategoryView::initGroup(CWizDatabase& db)
     CWizCategoryViewGroupRootItem* pGroupItem = new CWizCategoryViewGroupRootItem(m_app, db.name(), db.kbGUID());
     pRoot->addChild(pGroupItem);
 
+    initGroup(db, pGroupItem, "");
+
     CWizCategoryViewGroupNoTagItem* pGroupNoTagItem = new CWizCategoryViewGroupNoTagItem(m_app, db.kbGUID());
     pGroupItem->addChild(pGroupNoTagItem);
 
-    initGroup(db, pGroupItem, "");
-
-    pRoot->sortChildren(0, Qt::AscendingOrder);
-
-    CWizCategoryViewTrashItem* pTrashItem = new CWizCategoryViewTrashItem(m_app, tr("Trash"), db.kbGUID());
+    CWizCategoryViewTrashItem* pTrashItem = new CWizCategoryViewTrashItem(m_app, db.kbGUID());
     pGroupItem->addChild(pTrashItem);
 
     // only show trash if permission is enough
     if (db.permission() > WIZ_USERGROUP_SUPER) {
         pTrashItem->setHidden(true);
     }
+
+    pGroupItem->sortChildren(0, Qt::AscendingOrder);
 }
 
 void CWizCategoryView::initGroup(CWizDatabase& db, QTreeWidgetItem* pParent, const QString& strParentTagGUID)
@@ -1795,7 +1794,7 @@ CWizCategoryViewItemBase* CWizCategoryView::findCategory(const QString& strName,
         }
 
         // insert individual group root
-        CWizCategoryViewAllGroupsRootItem* pItem  = new CWizCategoryViewAllGroupsRootItem(m_app, strName, "");
+        CWizCategoryViewAllGroupsRootItem* pItem  = new CWizCategoryViewAllGroupsRootItem(m_app, CATEGORY_GROUP, "");
         addTopLevelItem(pItem);
         pItem->setExpanded(true);
 
@@ -1922,17 +1921,13 @@ CWizCategoryViewFolderItem* CWizCategoryView::findFolder(const QString& strLocat
         if (!create)
             return NULL;
 
-        // create new folder, always add trash item to the end of folders
         CWizCategoryViewFolderItem* pFolderItem = new CWizCategoryViewFolderItem(m_app, strCurrentLocation,
                                                                                  m_dbMgr.db().kbGUID());
-        CWizCategoryViewTrashItem* pTrash  = findTrash(m_dbMgr.db().kbGUID());
-        parent->takeChild(parent->indexOfChild(pTrash));
         parent->addChild(pFolderItem);
         parent->setExpanded(true);
         if (sort) {
             parent->sortChildren(0, Qt::AscendingOrder);
         }
-        parent->addChild(pTrash);
         parent = pFolderItem;
     }
 
@@ -2150,10 +2145,7 @@ CWizCategoryViewGroupItem* CWizCategoryView::findGroupFolder(const WIZTAGDATA& t
         if (!create)
             return NULL;
 
-        // always add trash item to the end of group
         CWizCategoryViewGroupItem* pTagItem = new CWizCategoryViewGroupItem(m_app, tagParent, tag.strKbGUID);
-        CWizCategoryViewTrashItem* pTrash = findTrash(tag.strKbGUID);
-        parent->takeChild(parent->indexOfChild(pTrash));
         parent->addChild(pTagItem);
 
         parent->setExpanded(true);
@@ -2161,7 +2153,6 @@ CWizCategoryViewGroupItem* CWizCategoryView::findGroupFolder(const WIZTAGDATA& t
             parent->sortChildren(0, Qt::AscendingOrder);
         }
 
-        parent->addChild(pTrash);
         parent = pTagItem;
     }
 
@@ -2265,7 +2256,10 @@ void CWizCategoryView::on_tag_created(const WIZTAGDATA& tag)
     if (tag.strKbGUID == m_dbMgr.db().kbGUID()) {
         addTagWithChildren(tag);
     } else {
-        addGroupFolderWithChildren(tag);
+        CWizCategoryViewGroupItem* pTagItem = addGroupFolderWithChildren(tag);
+        if (pTagItem) {
+            pTagItem->parent()->sortChildren(0, Qt::AscendingOrder);
+        }
     }
 
     updateTagDocumentCount(tag.strKbGUID);
@@ -2291,6 +2285,7 @@ void CWizCategoryView::on_tag_modified(const WIZTAGDATA& tagOld, const WIZTAGDAT
         CWizCategoryViewGroupItem* pTagItem = addGroupFolderWithChildren(tagNew);
         if (pTagItem) {
             pTagItem->reload(m_dbMgr.db(tagNew.strKbGUID));
+            pTagItem->parent()->sortChildren(0, Qt::AscendingOrder);
         }
     }
 
