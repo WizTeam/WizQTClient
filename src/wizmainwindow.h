@@ -15,7 +15,7 @@
 #include "wizDocumentView.h"
 #include "wizcertmanager.h"
 #include "wizusercipherform.h"
-#include "wizdownloadobjectdatadialog.h"
+//#include "wizdownloadobjectdatadialog.h"
 
 class QToolBar;
 class QLabel;
@@ -42,6 +42,7 @@ class CWizGroupMessage;
 class CWizObjectDataDownloaderHost;
 class CWizUserAvatarDownloaderHost;
 class CWizKMSyncThread;
+class CWizUserVerifyDialog;
 
 class MainWindow
     : public QMainWindow
@@ -74,13 +75,14 @@ private:
     CWizProgressDialog* m_progress;
     CWizUserSettings* m_settings;
     QPointer<CWizKMSyncThread> m_sync;
+    QPointer<CWizUserVerifyDialog> m_userVerifyDialog;
     QPointer<QTimer> m_syncTimer;
     //QPointer<CWizGroupMessage> m_messageSync;
     QPointer<CWizConsoleDialog> m_console;
     QPointer<CWizUpgrade> m_upgrade;
     QPointer<CWizCertManager> m_certManager;
     QPointer<CWizUserCipherForm> m_cipherForm;
-    QPointer<CWizDownloadObjectDataDialog> m_objectDownloadDialog;
+    //QPointer<CWizDownloadObjectDataDialog> m_objectDownloadDialog;
 
     CWizObjectDataDownloaderHost* m_objectDownloaderHost;
     CWizUserAvatarDownloaderHost* m_avatarDownloaderHost;
@@ -147,7 +149,7 @@ public:
 
     CWizActions* actions() const { return m_actions; }
     CWizUserCipherForm* cipherForm() const { return m_cipherForm; }
-    CWizDownloadObjectDataDialog* objectDownloadDialog() const { return m_objectDownloadDialog; }
+    //CWizDownloadObjectDataDialog* objectDownloadDialog() const { return m_objectDownloadDialog; }
     CWizObjectDataDownloaderHost* downloaderHost() const { return m_objectDownloaderHost; }
     CWizUserAvatarDownloaderHost* avatarHost() const { return m_avatarDownloaderHost; }
     CWizProgressDialog* progressDialog() const { return m_progress; }
@@ -223,7 +225,9 @@ public Q_SLOTS:
     void on_options_settingsChanged(WizOptionsType type);
 
     void on_syncLogined();
-    void on_syncDone(bool noError);
+    void on_syncDone(int nErrorcode, const QString& strErrorMsg);
+    void on_syncDone_userVerified();
+
     void on_syncProcessLog(const QString& strMsg);
 
     void on_options_restartForSettings();

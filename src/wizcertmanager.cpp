@@ -58,5 +58,5 @@ void CWizCertManager::loadUserCert()
 
 bool CWizCertManager::downloadUserCert()
 {
-    return callGetUserCert(m_db.getUserId(), m_db.getPassword());
+    return callGetUserCert(m_db.getUserId(), m_db.GetPassword());
 }

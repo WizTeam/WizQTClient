@@ -542,47 +542,47 @@
 <context>
     <name>CWizDatabase</name>
     <message>
-        <location filename="../src/share/wizDatabase.cpp" line="2445"/>
+        <location filename="../src/share/wizDatabase.cpp" line="2447"/>
         <source>My Notes</source>
         <translation>我的笔记</translation>
     </message>
     <message>
-        <location filename="../src/share/wizDatabase.cpp" line="2447"/>
+        <location filename="../src/share/wizDatabase.cpp" line="2449"/>
         <source>My Journals</source>
         <translation>我的日记</translation>
     </message>
     <message>
-        <location filename="../src/share/wizDatabase.cpp" line="2449"/>
+        <location filename="../src/share/wizDatabase.cpp" line="2451"/>
         <source>My Events</source>
         <translation>我的事件</translation>
     </message>
     <message>
-        <location filename="../src/share/wizDatabase.cpp" line="2451"/>
+        <location filename="../src/share/wizDatabase.cpp" line="2453"/>
         <source>My Sticky Notes</source>
         <translation>我的桌面便笺</translation>
     </message>
     <message>
-        <location filename="../src/share/wizDatabase.cpp" line="2453"/>
+        <location filename="../src/share/wizDatabase.cpp" line="2455"/>
         <source>My Emails</source>
         <translation>我的电子邮件</translation>
     </message>
     <message>
-        <location filename="../src/share/wizDatabase.cpp" line="2455"/>
+        <location filename="../src/share/wizDatabase.cpp" line="2457"/>
         <source>My Drafts</source>
         <translation>我的草稿</translation>
     </message>
     <message>
-        <location filename="../src/share/wizDatabase.cpp" line="2457"/>
+        <location filename="../src/share/wizDatabase.cpp" line="2459"/>
         <source>My Tasks</source>
         <translation>我的任务</translation>
     </message>
     <message>
-        <location filename="../src/share/wizDatabase.cpp" line="2461"/>
+        <location filename="../src/share/wizDatabase.cpp" line="2463"/>
         <source>Inbox</source>
         <translation>收集箱</translation>
     </message>
     <message>
-        <location filename="../src/share/wizDatabase.cpp" line="2463"/>
+        <location filename="../src/share/wizDatabase.cpp" line="2465"/>
         <source>Completed</source>
         <translation>已完成</translation>
     </message>
@@ -1809,6 +1809,19 @@
     </message>
 </context>
 <context>
+    <name>CWizUserVerifyDialog</name>
+    <message>
+        <location filename="../src/wizUserVerifyDialog.cpp" line="16"/>
+        <source>User Name:</source>
+        <translation>用户名:</translation>
+    </message>
+    <message>
+        <location filename="../src/wizUserVerifyDialog.cpp" line="17"/>
+        <source>Password:</source>
+        <translation>密码:</translation>
+    </message>
+</context>
+<context>
     <name>CWizViewTypePopupButton</name>
     <message>
         <location filename="../src/wizPopupButton.cpp" line="109"/>
@@ -1905,22 +1918,28 @@
         <translation type="obsolete">稍等片刻，保存一下进度...</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="138"/>
+        <location filename="../src/wizmainwindow.cpp" line="140"/>
         <source>WizNote</source>
         <translation>为知笔记</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="697"/>
+        <location filename="../src/wizmainwindow.cpp" line="698"/>
+        <source>Wow, seems sync failed!
+Have you changed your password from other platform?</source>
+        <translation>哇，同步失败啦！是不是在其他平台改过密码？</translation>
+    </message>
+    <message>
+        <location filename="../src/wizmainwindow.cpp" line="718"/>
         <source>Syncing...</source>
         <translation>同步中...</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="886"/>
+        <location filename="../src/wizmainwindow.cpp" line="907"/>
         <source>Rebuild full text search index</source>
         <translation>重建搜索索引</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="889"/>
+        <location filename="../src/wizmainwindow.cpp" line="910"/>
         <source>Rebuild full text search is quit slow if you have quite a few                    documents or attachments, you do not have to use this function                    while search should work as expected, this fuction is only used                    as developer&apos;s issue triage purpose, use it only if you know                    what you are doing!</source>
         <translation>如果您有大量文档或附件存在，重建搜索索引会非常耗费时间，正常情况下，搜索是可以如期工作的，这个功能主要是为修复可能出现的搜索问题提供帮助，请在明确这个选项意义的情况下使用这个功能！</translation>
     </message>
@@ -1941,7 +1960,7 @@
         <translation type="obsolete">标签</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="590"/>
+        <location filename="../src/wizmainwindow.cpp" line="593"/>
         <source>0 articles</source>
         <translation>0 条</translation>
     </message>
@@ -1950,7 +1969,7 @@
         <translation type="obsolete">新建笔记</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="1311"/>
+        <location filename="../src/wizmainwindow.cpp" line="1332"/>
         <source>Saving note...</source>
         <translation>正在保存笔记...</translation>
     </message>

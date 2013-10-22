@@ -3176,19 +3176,13 @@ bool WizSyncDatabase(IWizKMSyncEvents* pEvents, IWizSyncableDatabase* pDatabase,
     {
         if (server.Login(pDatabase->GetUserId(), strPassword, _T("normal")))
             break;
-        //
-        if (server.GetLastErrorCode() != 301)
-        {
-            return FALSE;
-        }
-        //
-        //TODO: prompt user enter a new password
-        return FALSE;
-        //strPassword = pDatabase->QueryNewPassword(pEvents->GetWindow());
-        //if (strPassword.isEmpty())
-        //    return FALSE;
+
+        pEvents->SetLastErrorCode(server.GetLastErrorCode());
+        pEvents->OnError(server.GetLastErrorMessage());
+
+        return false;
     }
-    //
+
     pDatabase->SetUserInfo(server.GetUserInfo());
     //
     pEvents->OnSyncProgress(1);

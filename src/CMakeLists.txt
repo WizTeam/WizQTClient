@@ -36,7 +36,7 @@ set(wiznote_SOURCES
     share/wizwin32helper.cpp
     share/wizdrawtexthelper.cpp
     share/wizuihelper.cpp
-    share/wizdownloadobjectdata.cpp
+    #share/wizdownloadobjectdata.cpp
     share/wizcreateaccount.cpp
     share/wizcommonui.cpp
     share/wizanimateaction.cpp
@@ -63,7 +63,7 @@ set(wiznote_SOURCES
     wizactions.cpp
     wiznotestyle.cpp
     wizLineInputDialog.cpp
-    wizdownloadobjectdatadialog.cpp
+    #wizdownloadobjectdatadialog.cpp
     wizdocumenthistory.cpp
     wizattachmentlistwidget.cpp
     wiztaglistwidget.cpp
@@ -105,6 +105,7 @@ set(wiznote_SOURCES
     widgets/wizUserInfoWidget.cpp
     widgets/wizSegmentedButton.cpp
     wizWebSettingsDialog.cpp
+    wizUserVerifyDialog.cpp
 )
 
 set(wiznote_HEADERS
@@ -130,7 +131,7 @@ set(wiznote_HEADERS
     share/wizwin32helper.h
     share/wizdrawtexthelper.h
     share/wizuihelper.h
-    share/wizdownloadobjectdata.h
+    #share/wizdownloadobjectdata.h
     share/wizcreateaccount.h
     share/wizcommonui.h
     share/wizanimateaction.h
@@ -156,7 +157,7 @@ set(wiznote_HEADERS
     wizDocumentListViewItem.h
     wizDocumentView.h
     wizDocumentWebView.h
-    wizdownloadobjectdatadialog.h
+    #wizdownloadobjectdatadialog.h
     wizdocumenthistory.h
     wizattachmentlistwidget.h
     wiztaglistwidget.h
@@ -201,6 +202,7 @@ set(wiznote_HEADERS
     share/wizApiEntry.h
     share/wizObjectDataDownloader.h
     share/wizUserAvatar.h
+    wizUserVerifyDialog.cpp
 
     # rapidjson
     rapidjson/allocators.h
@@ -222,7 +224,7 @@ set(wiznote_HEADERS
 
 set(wiznote_FORMS
     ui/wizLineInputDialog.ui
-    ui/wizdownloadobjectdatadialog.ui
+    #ui/wizdownloadobjectdatadialog.ui
     ui/wizconsoledialog.ui
     ui/wizpreferencedialog.ui
     ui/wizproxydialog.ui

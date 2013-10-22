@@ -352,7 +352,9 @@ QString CWizDatabase::GetUserGUID()
 
 QString CWizDatabase::GetPassword()
 {
-    return m_strPassword;
+    CString strPassword;
+    GetPassword(strPassword);
+    return strPassword;
 }
 
 qint64 CWizDatabase::GetObjectVersion(const QString& strObjectName)
@@ -1595,7 +1597,7 @@ bool CWizDatabase::SetPassword(const QString& strPassword)
         return false;
     }
 
-    m_strPassword = strPassword;
+    //m_strPassword = strPassword;
 
     return true;
 }

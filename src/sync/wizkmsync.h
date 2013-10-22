@@ -13,7 +13,6 @@ class CWizKMSyncEvents : public QObject , public IWizKMSyncEvents
 
     virtual void OnSyncProgress(int pos);
     virtual HRESULT OnText(WizKMSyncProgressStatusType type, const QString& strStatus);
-    virtual void SetLastErrorCode(int nErrorCode);
     virtual void SetDatabaseCount(int count);
     virtual void SetCurrentDatabase(int index);
     virtual void OnTrafficLimit(IWizSyncableDatabase* pDatabase);
@@ -40,6 +39,7 @@ protected:
 
 private:
     CWizDatabase& m_db;
+    QPointer<CWizKMSyncEvents> m_pEvents;
 
     void syncUserCert();
 
@@ -47,7 +47,7 @@ private Q_SLOTS:
     void on_syncFinished();
 
 Q_SIGNALS:
-    void syncFinished(bool noError = true);
+    void syncFinished(int nErrorCode, const QString& strErrorMesssage);
     void processLog(const QString& strStatus);
 };
 

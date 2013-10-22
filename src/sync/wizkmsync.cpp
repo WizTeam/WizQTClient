@@ -20,10 +20,6 @@ HRESULT CWizKMSyncEvents::OnText(WizKMSyncProgressStatusType type, const QString
     return 0;
 }
 
-void CWizKMSyncEvents::SetLastErrorCode(int nErrorCode)
-{
-}
-
 void CWizKMSyncEvents::SetDatabaseCount(int count)
 {
     qDebug() << "[SetDatabaseCount] count = " << count;
@@ -71,9 +67,13 @@ void CWizKMSyncThread::run()
 {
     syncUserCert();
 
-    CWizKMSyncEvents events;
-    connect(&events, SIGNAL(messageReady(const QString&)), SIGNAL(processLog(const QString&)));
-    ::WizSyncDatabase(&events, &m_db, true, true);
+    if (!m_pEvents) {
+        m_pEvents = new CWizKMSyncEvents();
+        connect(m_pEvents, SIGNAL(messageReady(const QString&)), SIGNAL(processLog(const QString&)));
+    }
+
+    m_pEvents->SetLastErrorCode(0);
+    ::WizSyncDatabase(m_pEvents, &m_db, true, true);
 }
 
 void CWizKMSyncThread::startSync()
@@ -86,8 +86,9 @@ void CWizKMSyncThread::startSync()
 
 void CWizKMSyncThread::on_syncFinished()
 {
-    // FIXME: check last error to tell user sync succeed or not!
-    Q_EMIT syncFinished(true);
+    m_pEvents->deleteLater();
+
+    Q_EMIT syncFinished(m_pEvents->GetLastErrorCode(), "");
 }
 
 void CWizKMSyncThread::syncUserCert()

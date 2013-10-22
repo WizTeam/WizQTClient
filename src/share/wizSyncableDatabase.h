@@ -144,7 +144,7 @@ public:
     virtual HRESULT OnText(WizKMSyncProgressStatusType type, const QString& strStatus) = 0;
     virtual void SetStop(bool b) { m_bStop = b; }
     virtual bool IsStop() const { return m_bStop; }
-    virtual void SetLastErrorCode(int nErrorCode) {}
+    virtual void SetLastErrorCode(int nErrorCode) { m_nLastError = nErrorCode; }
     virtual int GetLastErrorCode() const { return m_nLastError; }
     virtual void SetDatabaseCount(int count) {}
     virtual void SetCurrentDatabase(int index) {}

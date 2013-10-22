@@ -90,7 +90,7 @@ class CWizDatabase
 
 private:
     QString m_strUserId;
-    QString m_strPassword;
+    //QString m_strPassword;
     WIZDATABASEINFO m_info;
     QPointer<CWizZiwReader> m_ziwReader;
 
@@ -261,7 +261,7 @@ public:
     bool SetUserName(const QString& strUserName);
 
     QString getUserId() const { return m_strUserId; }
-    QString getPassword() const { return m_strPassword; }
+    //QString getPassword() const { return m_strPassword; }
 
     QString GetEncryptedPassword();
     bool GetPassword(CString& strPassword);

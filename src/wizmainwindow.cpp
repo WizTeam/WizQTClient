@@ -49,6 +49,8 @@
 #include "share/wizApiEntry.h"
 #include "sync/wizCloudPool.h"
 
+#include "wizUserVerifyDialog.h"
+
 
 MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     : QMainWindow(parent)
@@ -63,7 +65,7 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     , m_upgrade(new CWizUpgrade())
     , m_certManager(new CWizCertManager(*this))
     , m_cipherForm(new CWizUserCipherForm(*this, this))
-    , m_objectDownloadDialog(new CWizDownloadObjectDataDialog(dbMgr, this))
+    //, m_objectDownloadDialog(new CWizDownloadObjectDataDialog(dbMgr, this))
     , m_objectDownloaderHost(new CWizObjectDataDownloaderHost(dbMgr, this))
     , m_avatarDownloaderHost(new CWizUserAvatarDownloaderHost(dbMgr.db().GetAvatarPath(), this))
     , m_transitionView(new CWizDocumentTransitionView(this))
@@ -113,7 +115,7 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
 
     // syncing thread
     connect(m_sync, SIGNAL(processLog(const QString&)), SLOT(on_syncProcessLog(const QString&)));
-    connect(m_sync, SIGNAL(syncFinished(bool)), SLOT(on_syncDone(bool)));
+    connect(m_sync, SIGNAL(syncFinished(int, QString)), SLOT(on_syncDone(int, QString)));
     connect(m_syncTimer, SIGNAL(timeout()), SLOT(on_actionSync_triggered()));
     int nInterval = m_settings->syncInterval();
     if (nInterval == 0) {
@@ -681,14 +683,32 @@ void MainWindow::on_syncLogined()
     // FIXME: show user notify message send from server
 }
 
-void MainWindow::on_syncDone(bool noError)
+void MainWindow::on_syncDone(int nErrorCode, const QString& strErrorMsg)
 {
-    // FIXME: show error mark on gui if failed
-    Q_UNUSED(noError);
+    Q_UNUSED(strErrorMsg);
 
     m_animateSync->stopPlay();
     if (m_settings->syncInterval() != -1) {
         m_syncTimer->start();
+    }
+
+    // password changed
+    if (nErrorCode == 301) {
+        if (!m_userVerifyDialog) {
+            m_userVerifyDialog = new CWizUserVerifyDialog(m_dbMgr.db().GetUserId(), tr("Wow, seems sync failed!\nHave you changed your password from other platform?"), this);
+            connect(m_userVerifyDialog, SIGNAL(accepted()), SLOT(on_syncDone_userVerified()));
+        }
+
+        m_userVerifyDialog->open();
+    }
+}
+
+void MainWindow::on_syncDone_userVerified()
+{
+    m_userVerifyDialog->deleteLater();
+
+    if (m_dbMgr.db().SetPassword(m_userVerifyDialog->password())) {
+        on_actionSync_triggered();
     }
 }
 

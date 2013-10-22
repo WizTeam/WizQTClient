@@ -1632,12 +1632,12 @@ void CWizCategoryView::doLocationSanityCheck(CWizStdStringArray& arrayLocation)
     }
 
     // debug
-    qDebug() << "dump folders:";
-    for (CWizStdStringArray::const_iterator it = arrayLocation.begin();
-         it != arrayLocation.end();
-         it++) {
-        qDebug() << *it;
-    }
+    //qDebug() << "dump folders:";
+    //for (CWizStdStringArray::const_iterator it = arrayLocation.begin();
+    //     it != arrayLocation.end();
+    //     it++) {
+    //    qDebug() << *it;
+    //}
 }
 
 void CWizCategoryView::initTags()
