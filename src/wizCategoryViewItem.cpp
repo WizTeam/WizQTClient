@@ -110,12 +110,17 @@ CWizCategoryViewMessageRootItem::CWizCategoryViewMessageRootItem(CWizExplorerApp
 void CWizCategoryViewMessageRootItem::getDocuments(CWizDatabase& db,
                                                    CWizDocumentDataArray& arrayDocument)
 {
+    // FIXME: Add API getLastestMessages
     CWizMessageDataArray arrayMsg;
     db.getAllMessages(arrayMsg);
 
     CWizMessageDataArray::const_iterator it = arrayMsg.begin();
-    for (; it != arrayMsg.end(); it++) {
+    for (int n = 0; it != arrayMsg.end(); it++, n++) {
         const WIZMESSAGEDATA& msg = *it;
+
+        if (n > 200) {
+            break;
+        }
 
         WIZDOCUMENTDATAEX doc;
         doc.strKbGUID = msg.kbGUID;
