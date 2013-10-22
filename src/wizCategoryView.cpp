@@ -1227,6 +1227,17 @@ void CWizCategoryView::on_itemSelectionChanged()
     } else {
         setActionsEnabled(true); // enable all actions if selected is not group
     }
+
+    // notify of selection
+    if (currentCategoryItem<CWizCategoryViewMessageRootItem>()) {
+        Q_EMIT documentsHint(tr("Recent meesages"));
+    } else if (currentCategoryItem<CWizCategoryViewAllFoldersItem>()) {
+        Q_EMIT documentsHint(tr("Recent notes"));
+    } else if (currentCategoryItem<CWizCategoryViewAllTagsItem>()) {
+        Q_EMIT documentsHint(tr("No tag notes"));
+    } else {
+        Q_EMIT documentsHint(currentItem()->text(0));
+    }
 }
 
 void CWizCategoryView::init()

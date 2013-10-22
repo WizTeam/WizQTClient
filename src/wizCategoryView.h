@@ -279,6 +279,7 @@ public Q_SLOTS:
 
 Q_SIGNALS:
     void newDocument();
+    void documentsHint(const QString& strHint);
 
 public:
     // Public API:

@@ -581,6 +581,13 @@ QWidget* MainWindow::createListView()
     layoutActions->addWidget(sortBtn);
     layoutActions->addStretch(0);
 
+    m_labelDocumentsHint = new QLabel(this);
+    m_labelDocumentsHint->setStyleSheet("font: 12px; color: #787878");
+    m_labelDocumentsHint->setMargin(5);
+    layoutActions->addWidget(m_labelDocumentsHint);
+    connect(m_category, SIGNAL(documentsHint(const QString&)), SLOT(on_documents_hintChanged(const QString&)));
+    connect(m_searchBox, SIGNAL(doSearch(const QString&)), SLOT(on_documents_hintChanged(const QString&)));
+
     m_labelDocumentsCount = new QLabel(tr("0 articles"), this);
     m_labelDocumentsCount->setStyleSheet("font: 12px; color: #787878");
     m_labelDocumentsCount->setMargin(5);
@@ -602,6 +609,11 @@ void MainWindow::on_documents_documentCountChanged()
 {
     QString strCount = m_labelDocumentsCount->text().replace(QRegExp("\\d+"), QString::number(m_documents->count()));
     m_labelDocumentsCount->setText(strCount);
+}
+
+void MainWindow::on_documents_hintChanged(const QString& strHint)
+{
+    m_labelDocumentsHint->setText(strHint);
 }
 
 void MainWindow::on_documents_viewTypeChanged(int type)

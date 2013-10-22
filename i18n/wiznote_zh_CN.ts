@@ -394,6 +394,21 @@
         <translation>确定要删除文件夹 %1 吗？（所有文档会移动到未分类文件夹，这是一个安全的操作）</translation>
     </message>
     <message>
+        <location filename="../src/wizCategoryView.cpp" line="1233"/>
+        <source>Recent meesages</source>
+        <translation>最近消息</translation>
+    </message>
+    <message>
+        <location filename="../src/wizCategoryView.cpp" line="1235"/>
+        <source>Recent notes</source>
+        <translation>最近笔记</translation>
+    </message>
+    <message>
+        <location filename="../src/wizCategoryView.cpp" line="1237"/>
+        <source>No tag notes</source>
+        <translation>无标签笔记</translation>
+    </message>
+    <message>
         <source>Do you really want to delete folder: %1 ? (All documents will move to root folder, It&apos;s safe.)</source>
         <translation type="obsolete">确定要删除文件夹 %1 吗？（所有文档会移动到根文件夹，这是一个安全的操作）</translation>
     </message>
@@ -583,7 +598,7 @@
         <translation type="obsolete">删除...</translation>
     </message>
     <message>
-        <location filename="../src/wizDocumentListView.cpp" line="845"/>
+        <location filename="../src/wizDocumentListView.cpp" line="848"/>
         <source>Move Document: %1 to %2</source>
         <translation>移动文档：%1 到 %2</translation>
     </message>
@@ -1895,17 +1910,17 @@
         <translation>为知笔记</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="686"/>
+        <location filename="../src/wizmainwindow.cpp" line="697"/>
         <source>Syncing...</source>
         <translation>同步中...</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="875"/>
+        <location filename="../src/wizmainwindow.cpp" line="886"/>
         <source>Rebuild full text search index</source>
         <translation>重建搜索索引</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="878"/>
+        <location filename="../src/wizmainwindow.cpp" line="889"/>
         <source>Rebuild full text search is quit slow if you have quite a few                    documents or attachments, you do not have to use this function                    while search should work as expected, this fuction is only used                    as developer&apos;s issue triage purpose, use it only if you know                    what you are doing!</source>
         <translation>如果您有大量文档或附件存在，重建搜索索引会非常耗费时间，正常情况下，搜索是可以如期工作的，这个功能主要是为修复可能出现的搜索问题提供帮助，请在明确这个选项意义的情况下使用这个功能！</translation>
     </message>
@@ -1926,7 +1941,7 @@
         <translation type="obsolete">标签</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="584"/>
+        <location filename="../src/wizmainwindow.cpp" line="590"/>
         <source>0 articles</source>
         <translation>0 条</translation>
     </message>
@@ -1935,7 +1950,7 @@
         <translation type="obsolete">新建笔记</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="1300"/>
+        <location filename="../src/wizmainwindow.cpp" line="1311"/>
         <source>Saving note...</source>
         <translation>正在保存笔记...</translation>
     </message>

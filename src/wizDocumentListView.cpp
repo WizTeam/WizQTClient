@@ -167,6 +167,9 @@ void CWizDocumentListView::setDocuments(const CWizDocumentDataArray& arrayDocume
 {
     //reset
     clear();
+
+    Q_EMIT documentCountChanged();
+
     verticalScrollBar()->setValue(0);
 
     CWizMessageDataArray arrayMessage;

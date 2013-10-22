@@ -103,6 +103,7 @@ private:
     QPointer<CWizSplitter> m_splitter;
     QPointer<CWizOptionsWidget> m_options;
 
+    QLabel* m_labelDocumentsHint;
     QLabel* m_labelDocumentsCount;
 
     CWizDocumentViewHistory* m_history;
@@ -213,6 +214,7 @@ public Q_SLOTS:
     void on_category_itemSelectionChanged();
     void on_documents_itemSelectionChanged();
     void on_documents_documentCountChanged();
+    void on_documents_hintChanged(const QString& strHint);
     void on_documents_viewTypeChanged(int type);
     void on_documents_sortingTypeChanged(int type);
     void on_document_requestView(const WIZDOCUMENTDATA& doc);
