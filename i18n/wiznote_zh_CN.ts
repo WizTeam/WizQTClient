@@ -1923,10 +1923,14 @@
         <translation>为知笔记</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="698"/>
         <source>Wow, seems sync failed!
 Have you changed your password from other platform?</source>
-        <translation>哇，同步失败啦！是不是在其他平台改过密码？</translation>
+        <translation type="obsolete">哇，同步失败啦！是不是在其他平台改过密码？</translation>
+    </message>
+    <message>
+        <location filename="../src/wizmainwindow.cpp" line="698"/>
+        <source>sorry, sync failed. please input your password and try again.</source>
+        <translation>抱歉，同步失败了。请输入您的密码再试一次。</translation>
     </message>
     <message>
         <location filename="../src/wizmainwindow.cpp" line="718"/>

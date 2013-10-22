@@ -190,7 +190,7 @@ bool CWizIndex::getAllMessages(CWizMessageDataArray& arrayMsg)
 bool CWizIndex::getLastestMessages(CWizMessageDataArray& arrayMsg, int nMax)
 {
     CString strExt;
-    strExt.Format("order by DT_CREATED limit 0, %s",
+    strExt.Format("order by DT_CREATED desc limit 0, %s",
                   WizIntToStr(nMax).utf16());
     QString strSQL = FormatCanonicSQL(TABLE_NAME_WIZ_MESSAGE,
                                       FIELD_LIST_WIZ_MESSAGE,

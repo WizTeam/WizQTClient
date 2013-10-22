@@ -695,7 +695,7 @@ void MainWindow::on_syncDone(int nErrorCode, const QString& strErrorMsg)
     // password changed
     if (nErrorCode == 301) {
         if (!m_userVerifyDialog) {
-            m_userVerifyDialog = new CWizUserVerifyDialog(m_dbMgr.db().GetUserId(), tr("Wow, seems sync failed!\nHave you changed your password from other platform?"), this);
+            m_userVerifyDialog = new CWizUserVerifyDialog(m_dbMgr.db().GetUserId(), tr("sorry, sync failed. please input your password and try again."), this);
             connect(m_userVerifyDialog, SIGNAL(accepted()), SLOT(on_syncDone_userVerified()));
         }
 
