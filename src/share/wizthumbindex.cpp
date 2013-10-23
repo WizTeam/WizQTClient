@@ -42,6 +42,7 @@ bool CThumbIndex::OpenThumb(const CString& strFileName, const QString& strVersio
 
         // need rebuild thumb index
         if (strVersion.isEmpty() || strVersion.toInt() < QString(WIZNOTE_THUMB_VERSION).toInt()) {
+            qDebug() << "Thumb update triggered...";
             if (m_dbThumb.tableExists("WIZ_ABSTRACT")) {
                 m_dbThumb.execDML("drop table WIZ_ABSTRACT");
             }
@@ -255,11 +256,11 @@ bool CThumbIndex::UpdateAbstract(const WIZABSTRACT &abstractNew, const CString& 
     else
     {
         CString strSql = CString("insert into %1 (%2) values(%3, %4, %5, ?)")
-                .arg(TABLE_NAME_ABSTRACT)
-                .arg(FIELD_LIST_ABSTRACT)
-                .arg(STR2SQL(abstractNew.guid))
-                .arg(STR2SQL(type))
-                .arg(STR2SQL(abstractNew.text));
+                      .arg(TABLE_NAME_ABSTRACT)
+                      .arg(FIELD_LIST_ABSTRACT)
+                      .arg(STR2SQL(abstractNew.guid))
+                      .arg(STR2SQL(type))
+                      .arg(STR2SQL(abstractNew.text));
 
         try
         {
@@ -269,7 +270,7 @@ bool CThumbIndex::UpdateAbstract(const WIZABSTRACT &abstractNew, const CString& 
         catch (const CppSQLite3Exception& e)
         {
             TOLOG(e.errorMessage());
-            TOLOG(strSql);
+            //TOLOG(strSql);
             return false;
         }
         catch (...)

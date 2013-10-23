@@ -913,7 +913,7 @@ void MainWindow::on_actionRebuildFTS_triggered()
                    as developer's issue triage purpose, use it only if you know \
                    what you are doing!"));
 
-    if (QDialog::Accepted == msg.exec()) {
+    if (QMessageBox::Ok == msg.exec()) {
         m_searchIndexer->rebuild();
     }
 }

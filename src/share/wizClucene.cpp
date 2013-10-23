@@ -26,241 +26,72 @@ or convert utf-16 to ucs4 on windows before tokenize
 typedef lucene::analysis::standard::StandardTokenizer WizTokenizer;
 #endif
 
+/*
+ * code port from Wiz for windows
+ */
 
-#ifdef WIZ_FTS_ENABLE_CJK2
-
-std::wstring WizGetAppPath()
-{
-    return WizExtractFilePath(WizGetAppExeFileName().c_str());
-}
-
-std::wstring WizGetAppExeFileName()
-{
-	TCHAR szFileName[1024] = {0};
-	GetModuleFileName(NULL, szFileName, 1024);
-	//
-	TCHAR szLongFileName[1024] = {0};
-	GetLongPathName(szFileName, szLongFileName, 1024);
-	//
-	*szLongFileName = _totupper(*szLongFileName);
-
-	return std::wstring(szLongFileName);
-}
-
-std::wstring WizExtractFilePath(const TCHAR* lpszFileName)
-{
-    TCHAR szDrv[MAX_PATH] = {0};
-    TCHAR szPath[MAX_PATH] = {0};
-    //
-    _tsplitpath_s(lpszFileName, szDrv, MAX_PATH, szPath, MAX_PATH, NULL, 0, NULL, 0);
-    //
-    return std::wstring(szDrv) + szPath;
-}
-
-__int64 WizGetFileSize(LPCTSTR lpszFileName)
-{
-	struct _stat  s;
-	if (0 != _tstat(lpszFileName, &s))
-		return 0;
-	//
-	return s.st_size;
-}
-
-//这个Set用来缓存词库
-std::set<std::wstring>* simWords = NULL;
-
-class CJKTokenizer2 : public lucene::analysis::Tokenizer
+class CJKTokenizer3 : public lucene::analysis::Tokenizer
 {
 public:
-	CJKTokenizer2(lucene::util::Reader* in)
-		: bufferIndex(0)
-		, dataLen(0)
-		, ioBuffer(new TCHAR[LUCENE_IO_BUFFER_SIZE])
-		, input(in)
-	{
-	}
+        CJKTokenizer3(lucene::util::Reader* in)
+                : bufferIndex(0)
+                , dataLen(0)
+                , ioBuffer(new TCHAR[LUCENE_IO_BUFFER_SIZE])
+                , input(in)
+                , offset(0)
+        {
+        }
 
 private:
+        int bufferIndex;
+        int dataLen;
+        const TCHAR* ioBuffer;
+        lucene::util::Reader* input;
+        int offset;
 
-	int bufferIndex;
-
-	int dataLen;
-
-	const TCHAR* ioBuffer;
-	//
-	lucene::util::Reader* input;
-
-#define _CJK			(  (ch>=0x3040 && ch<=0x318f) || \
-	(ch>=0x3300 && ch<=0x337f) || \
-	(ch>=0x3400 && ch<=0x3d2d) || \
-	(ch>=0x4e00 && ch<=0x9fff) || \
-	(ch>=0xf900 && ch<=0xfaff) || \
-	(ch>=0xac00 && ch<=0xd7af) ) //korean
-
+#define _CJK                        (  (ch>=0x3040 && ch<=0x318f) || \
+        (ch>=0x3300 && ch<=0x337f) || \
+        (ch>=0x3400 && ch<=0x3d2d) || \
+        (ch>=0x4e00 && ch<=0x9fff) || \
+        (ch>=0xf900 && ch<=0xfaff) || \
+        (ch>=0xac00 && ch<=0xd7af) ) //korean
 
 public:
-	//这里是lucene分词器实现的最关键的地方
-	lucene::analysis::Token* next(lucene::analysis::Token* token)
-	{
-		loadWords();
+        lucene::analysis::Token* next(lucene::analysis::Token* token)
+        {
+                TCHAR ch = 0;
 
-		std::wstring currentWord;
+                while (true)
+                {
+                        offset++;
+                        //
+                        if (bufferIndex >= dataLen)
+                        {
+                                dataLen = input->read(ioBuffer, 1, LUCENE_IO_BUFFER_SIZE);
+                                bufferIndex = 0;
+                        }
+                        //
+                        if (dataLen == -1)
+                        {
+                                return NULL;
+                        }
+                        else
+                        {
+                                ch = ioBuffer[bufferIndex++];
+                        }
 
-		while (true) {
-			WCHAR ch;
-			//
-			if (bufferIndex >= dataLen) {
-				dataLen = input->read(ioBuffer, 1, LUCENE_IO_BUFFER_SIZE);
-				bufferIndex = 0;
-			}
+                        if (_CJK)
+                        {
+                                break;
+                        }
 
-			if (dataLen == -1) {
-				if (currentWord.length() == 0) {
-					return NULL;
-				} else {
-					break;
-				}
-			} 
-			else 
-			{
-				ch = ioBuffer[bufferIndex++];                
-			}
-			//通过这个条件不难看出这里只处理了CJK_UNIFIED_IDEOGRAPHS，
-			//因此会丢掉其它的字符，如它会丢掉LATIN字符和数字
-			//这也是该lucene分词器的一个限制，您可以在此基础之上完善它，
-			//也很欢迎把您完善的结果反馈给我
-			if (_CJK)
-			{
-				if (currentWord.length() == 0) {
-					currentWord += ch;                    
-				}
-				else 
-				{
-					//这里实现了正向最大匹配法
-					std::wstring temp = currentWord;
-					temp += ch;
-					//
-					if (simWords->find(temp) != simWords->end())
-					{
-						currentWord = temp;
-					}
-					else 
-					{
-						bufferIndex--;
-						break;
-					}
-				}
-			}
-		}
-		//
-		token->set(currentWord.c_str(), 0, currentWord.length());
-		return token;
-	}
-	//
-private:
-	//装载词库，您必须明白它的逻辑和之所以这样做的目的，这样您才能理解正向最大匹配法是如何实现的
-	void loadWords() 
-	{
-		if (simWords)
-			return;
-		//
-		simWords = new std::set<std::wstring>();
-		//
-		try
-		{
-			std::wstring fileName = WizGetAppPath() + _T("files\\cjk_words.txt");
-			__int64 nSize = WizGetFileSize(fileName.c_str());
-			if (0 == nSize)
-				return;
-			//
-			std::ifstream inf(fileName.c_str(), std::ios::binary);
-			if (inf.fail())
-				return;
-			//
-			int nBufferSize = int(nSize + 10);
-			BYTE* pBuffer = new BYTE[nBufferSize];
-			if (!pBuffer)
-				return;
-			//
-			ZeroMemory(pBuffer, nBufferSize);
-			//
-			inf.read((char*)pBuffer, nSize);
-			//
-			inf.close();
-			//
-			WCHAR* p = (WCHAR*)pBuffer;
-			p++;
-			//
-#define		_goto_line_end \
-			while (*p)	\
-			{\
-				if (*p == '\r' || *p == '\n')	\
-					break;	\
-				p++;	\
-			}
-
-#define		_goto_line_begin	\
-			while (*p)		\
-			{\
-				if (*p != '\r' && *p != '\n')	\
-					break;	\
-				p++;	\
-			}
-			//
-			while (*p)
-			{
-				if (*p == '#')
-				{
-					_goto_line_end;
-				}
-				else
-				{
-					WCHAR* pBegin = p;
-					_goto_line_end;
-					//
-					if (p - pBegin >= 2)
-					{
-						addWord(std::wstring(pBegin, p));
-					}
-				}
-				//
-				_goto_line_begin;
-			}
-			//
-			delete [] pBuffer;
-		}
-		catch (const CLuceneError& err)
-		{
-			err;
-		}
-	}
-	//
-	void addWord(std::wstring& word)
-	{
-		if (word.empty())
-			return;
-		//
-		if (word.length() >= 10)
-			return;
-		//
-		simWords->insert(word);
-		//
-		while (word.length() > 2)
-		{
-			word.erase(word.end() - 1);
-			//
-			if (simWords->find(word) == simWords->end())
-			{
-				simWords->insert(word);
-			}
-		}
-	}
+                }
+                TCHAR currentWord[2] = {ch, 0};
+                token->set(currentWord, offset - 1, offset);
+                return token;
+        }
 };
 
-
-#endif
-
-#if 0
 
 const wchar_t* tokenTypeSingle = _T("single");
 const wchar_t* tokenTypeDouble = _T("double");
@@ -510,66 +341,63 @@ public:
 	}
 };
 
-#endif
 
 class LanguageBasedAnalyzer: public lucene::analysis::Analyzer
 {
-	TCHAR lang[100];
-	bool stem;
+    TCHAR lang[100];
+    bool stem;
 
 public:
-	LanguageBasedAnalyzer(const TCHAR* language=NULL, bool stem=true)
-	{
-		if ( language == NULL )
-            //wcsncpy(lang, NULL, 100);
+    LanguageBasedAnalyzer(const TCHAR* language=NULL, bool stem=true)
+    {
+        if (language == NULL)
             memset(lang, 0, 100);
-		else
-            wcsncpy(lang, language, 100);
-		this->stem = stem;
-	}
-	void setLanguage(const TCHAR* language)
-	{
+        else
+            wcsncpy(lang, language,100);
+
+        this->stem = stem;
+    }
+
+    void setLanguage(const TCHAR* language)
+    {
         wcsncpy(lang, language, 100);
-	}
-	void setStem(bool stem)
-	{
-		this->stem = stem;
-	}
+    }
 
-	lucene::analysis::TokenStream* tokenStream(const TCHAR* fieldName, lucene::util::Reader* reader)
-	{
-		lucene::analysis::TokenStream* ret = NULL;
-        if ( wcscmp(lang, _T("cjk"))==0 ) {
-            ret = new WizTokenizer(reader->__asBufferedReader());
-//			ret = new CJKTokenizer(reader);
-//		} else if ( wcscmp(lang, _T("cjk3"))==0 ) {
-//			ret = new CJKTokenizer3(reader);
-		}
-		else
-		{
+    void setStem(bool stem)
+    {
+        this->stem = stem;
+    }
+
+    lucene::analysis::TokenStream* tokenStream(const TCHAR* fieldName, lucene::util::Reader* reader)
+    {
+        lucene::analysis::TokenStream* ret = NULL;
+        if (wcscmp(lang, _T("cjk"))==0)
+        {
+            ret = new CJKTokenizer(reader);
+        }
+        else if (wcscmp(lang, _T("cjk3"))==0)
+        {
+            ret = new CJKTokenizer3(reader);
+        }
+        else
+        {
             lucene::util::BufferedReader* bufferedReader = reader->__asBufferedReader();
-            if ( bufferedReader == NULL ) {
-                lucene::util::BufferedReader* reader2 = new lucene::util::FilteredBufferedReader(reader, false);
-                ret =  new lucene::analysis::standard::StandardTokenizer(reader2, true);
-            } else {
+            if (bufferedReader == NULL)
+                ret =  new lucene::analysis::standard::StandardTokenizer(new lucene::util::FilteredBufferedReader(reader, false), true);
+            else
                 ret = new lucene::analysis::standard::StandardTokenizer(bufferedReader);
-            }
 
-            ret = new lucene::analysis::standard::StandardFilter(ret, true);
+            ret = new lucene::analysis::standard::StandardFilter(ret,true);
 
-			//if ( stem )
-			//	ret = _CLNEW SnowballFilter(ret,lang, true); //todo: should check whether snowball supports the language
+            if ( stem ) //hmm... this could be configured seperately from stem
+                ret = new lucene::analysis::ISOLatin1AccentFilter(ret, true); //todo: this should really only be applied to latin languages...
 
-			if ( stem ) //hmm... this could be configured seperately from stem
-				ret = new lucene::analysis::ISOLatin1AccentFilter(ret, true); //todo: this should really only be applied to latin languages...
+            //lower case after the latin1 filter
+            ret = new lucene::analysis::LowerCaseFilter(ret,true);
+        }
 
-			//lower case after the latin1 filter
-			ret = new lucene::analysis::LowerCaseFilter(ret,true);
-		}
-		//todo: could add a stop filter based on the language - need to fix the stoplist loader first
-
-		return ret;
-	}
+        return ret;
+    }
 };
 
 
@@ -612,23 +440,45 @@ std::string WizW2A(const std::wstring& str)
 
 struct WIZFTSDATA
 {
-	lucene::index::IndexWriter* writer;
-	LanguageBasedAnalyzer an;
+        lucene::index::IndexWriter* writer;
+        LanguageBasedAnalyzer an;
+        LanguageBasedAnalyzer an3;
 
-    WIZFTSDATA()
-    {
-        writer = NULL;
-        an.setLanguage(L"cjk");
-    }
+        WIZFTSDATA() : writer(NULL)
+        {
+                an.setLanguage(_T("cjk"));
+                an3.setLanguage(_T("cjk3"));
+        }
 
-	~WIZFTSDATA()
-    {
-        if (writer) {
-			writer->close();
-			delete writer;
-		}
-	}
+        ~WIZFTSDATA()
+        {
+                if (writer)
+                {
+                        writer->close();
+                        delete writer;
+                }
+        }
 };
+
+//struct WIZFTSDATA
+//{
+//	lucene::index::IndexWriter* writer;
+//	LanguageBasedAnalyzer an;
+//
+//    WIZFTSDATA()
+//    {
+//        writer = NULL;
+//        an.setLanguage(L"cjk");
+//    }
+//
+//	~WIZFTSDATA()
+//    {
+//        if (writer) {
+//			writer->close();
+//			delete writer;
+//		}
+//	}
+//};
 
 bool IWizCluceneSearch::beginUpdateDocument(const wchar_t* lpszIndexPath, void** ppHandle)
 {
@@ -680,7 +530,7 @@ bool IWizCluceneSearch::endUpdateDocument(void* pHandle)
     }
 
     try {
-		pData->writer->optimize();
+        pData->writer->optimize();
         pData->writer->close();
 		delete pData;
         return true;
@@ -702,20 +552,35 @@ bool IWizCluceneSearch::updateDocument(void* pHandle,
                                        const wchar_t* lpszTitle,
                                        const wchar_t* lpszText)
 {
+    Q_UNUSED(lpszTitle);
+
     assert(pHandle && lpszKbGUID && lpszDocumentID && lpszTitle && lpszText);
 
     WIZFTSDATA* pData = (WIZFTSDATA*)pHandle;
 
     std::wstring strKbGUID(lpszKbGUID);
     std::wstring strDocumentID(lpszDocumentID);
-    std::wstring strTitle(lpszTitle);
+    //std::wstring strTitle(lpszTitle);
     std::wstring strText(lpszText);
 
     try {
-        lucene::index::Term* term = _CLNEW lucene::index::Term(_T("documentid"), strDocumentID.c_str());
-        if (term) {
-            pData->writer->deleteDocuments(term);
+
+        {
+            lucene::index::Term* term = _CLNEW lucene::index::Term(_T("documentid"), strDocumentID.c_str());
+            if (term)
+            {
+                pData->writer->deleteDocuments(term);
+            }
         }
+
+        {
+            lucene::index::Term* term2 = _CLNEW lucene::index::Term(_T("documentid2"), strDocumentID.c_str());
+            if (term2)
+            {
+                pData->writer->deleteDocuments(term2);
+            }
+        }
+
     } catch (CLuceneError& e) {
 		TOLOG(_T("Indexing exception in deleteDocuments"));
 		TOLOG(e.twhat());
@@ -723,24 +588,21 @@ bool IWizCluceneSearch::updateDocument(void* pHandle,
 		TOLOG(_T("Unknown exception in deleteDocuments"));
     }
 
-    lucene::document::Document doc;
-    doc.add( *_CLNEW lucene::document::Field(_T("documentid"), \
-                                             strDocumentID.c_str(), \
-                                             lucene::document::Field::STORE_YES | lucene::document::Field::INDEX_UNTOKENIZED
-                                             ));
-    doc.add( *_CLNEW lucene::document::Field(_T("kbguid"), \
-                                             strKbGUID.c_str(), \
-                                             lucene::document::Field::STORE_YES | lucene::document::Field::INDEX_UNTOKENIZED
-                                             ));
-    doc.add( *_CLNEW lucene::document::Field(_T("title"), \
-                                             strTitle.c_str(), \
-                                             lucene::document::Field::STORE_NO | lucene::document::Field::INDEX_UNTOKENIZED
-                                             ));
-    doc.add( *_CLNEW lucene::document::Field(_T("contents"), \
-                                             strText.c_str(), \
-                                             lucene::document::Field::STORE_NO | lucene::document::Field::INDEX_TOKENIZED
-                                             ));
-    pData->writer->addDocument(&doc, &pData->an);
+    {
+        lucene::document::Document doc;
+        doc.add( *_CLNEW lucene::document::Field(_T("documentid"), strDocumentID.c_str(), lucene::document::Field::STORE_YES | lucene::document::Field::INDEX_UNTOKENIZED ) );
+        doc.add( *_CLNEW lucene::document::Field(_T("kbguid"), strKbGUID.c_str(), lucene::document::Field::STORE_YES | lucene::document::Field::INDEX_UNTOKENIZED ) );
+        doc.add( *_CLNEW lucene::document::Field(_T("contents"), strText.c_str(), lucene::document::Field::STORE_NO | lucene::document::Field::INDEX_TOKENIZED) );
+        pData->writer->addDocument(&doc, &pData->an);
+    }
+
+    {
+        lucene::document::Document doc;
+        doc.add( *_CLNEW lucene::document::Field(_T("documentid2"), strDocumentID.c_str(), lucene::document::Field::STORE_YES | lucene::document::Field::INDEX_UNTOKENIZED ) );
+        doc.add( *_CLNEW lucene::document::Field(_T("kbguid"), strKbGUID.c_str(), lucene::document::Field::STORE_YES | lucene::document::Field::INDEX_UNTOKENIZED ) );
+        doc.add( *_CLNEW lucene::document::Field(_T("contents"), strText.c_str(), lucene::document::Field::STORE_NO | lucene::document::Field::INDEX_TOKENIZED) );
+        pData->writer->addDocument(&doc, &pData->an3);
+    }
 
     return true;
 }
@@ -754,14 +616,12 @@ bool IWizCluceneSearch::searchDocument(const wchar_t* lpszIndexPath,
     std::wstring strKeywords(lpszKeywords);
 
     const wchar_t* arrAnalyzer[] = {
-#ifdef WIZ_FTS_ENABLE_CJK2
-        L"cjk2",
-#endif
         L"cjk",
+        L"cjk3",
         NULL
     };
 
-    const wchar_t* fields[] = {L"title", L"contents", NULL};
+    //const wchar_t* fields[] = {L"title", L"contents", NULL};
 
     std::set<std::string> setGUIDs;
 
@@ -773,11 +633,11 @@ bool IWizCluceneSearch::searchDocument(const wchar_t* lpszIndexPath,
 			if (!arrAnalyzer[i])
                 break;
 
-            for (int j = 0; ; j++) {
-                if (!fields[j]) break;
+            //for (int j = 0; ; j++) {
+            //    if (!fields[j]) break;
 
                 LanguageBasedAnalyzer analyzer(arrAnalyzer[i]);
-                lucene::search::Query* query = lucene::queryParser::QueryParser::parse(strKeywords.c_str(), fields[j], &analyzer);
+                lucene::search::Query* query = lucene::queryParser::QueryParser::parse(strKeywords.c_str(), L"contents", &analyzer);
 
                 if (!query) {
                     continue;
@@ -791,21 +651,23 @@ bool IWizCluceneSearch::searchDocument(const wchar_t* lpszIndexPath,
 
                 for (size_t i = 0;i < hits->length(); i++ ) {
                     lucene::document::Document* doc = &hits->doc(i);
-                    const TCHAR* title = doc->get(_T("title"));
-                    const TCHAR* docid = doc->get(_T("documentid"));
                     const TCHAR* kbid = doc->get(_T("kbguid"));
+                    const TCHAR* docid = doc->get(_T("documentid"));
+                    if (!docid) {
+                        docid = doc->get(_T("documentid2"));
+                    }
 
                     if (docid) {
                         std::string strDocumentGUID = ::WizW2A(docid);
                         if (setGUIDs.find(strDocumentGUID) == setGUIDs.end()) {
                             setGUIDs.insert(strDocumentGUID);
-                            onSearchProcess(kbid, docid, title ? title : _T(""));
+                            onSearchProcess(kbid, docid, _T(""));
                         }
                     }
                 }
 
                 _CLDELETE(query);
-            }
+            //}
         }
 
         searcher.close();
@@ -841,9 +703,20 @@ bool IWizCluceneSearch::deleteDocument(const wchar_t* lpszIndexPath,
             return false;
         }
 
-        lucene::index::Term* term = _CLNEW lucene::index::Term(_T("documentid"), strWizDocumentID.c_str());
-        if (term) {
-            reader->deleteDocuments(term);
+        {
+            lucene::index::Term* term = _CLNEW lucene::index::Term(_T("documentid"), strWizDocumentID.c_str());
+            if (term)
+            {
+                reader->deleteDocuments(term);
+            }
+        }
+
+        {
+            lucene::index::Term* term = _CLNEW lucene::index::Term(_T("documentid2"), strWizDocumentID.c_str());
+            if (term)
+            {
+                reader->deleteDocuments(term);
+            }
         }
 
         reader->close();
@@ -862,7 +735,6 @@ bool IWizCluceneSearch::deleteDocument(const wchar_t* lpszIndexPath,
 }
 
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #ifdef WIZ_FTS_ENABLE_TEST
 
 void _testCJK(const char* astr, bool ignoreSurrogates = true) 

@@ -226,12 +226,8 @@ bool CWizHtmlToPlainText::toText(const QString& strHtmlAll, QString& strPlainTex
 
     reader.Read(strHtml);
 
-    m_strText.replace('\n', ' ');
-    m_strText.replace('\r', ' ');
-    m_strText.replace('\0', ' ');
-
+    m_strText.replace('\0', ' '); // otherwise sqlite statement will be failed!
     strPlainText = m_strText.simplified();
-
     return true;
 }
 

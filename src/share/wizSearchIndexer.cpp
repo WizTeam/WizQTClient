@@ -85,6 +85,7 @@ bool CWizSearchIndexer::buildFTSIndexByDatabase(CWizDatabase& db)
     // if FTS version is lower than release, rebuild all
     int strVersion = db.getDocumentFTSVersion().toInt();
     if (strVersion < QString(WIZNOTE_FTS_VERSION).toInt()) {
+        qDebug() << "FTS index update triggered...";
         clearFlags(db);
     }
 
@@ -195,12 +196,16 @@ bool CWizSearchIndexer::_updateDocumentImpl(void *pHandle,
     CWizHtmlToPlainText htmlConverter;
     htmlConverter.toText(strHtmlData, strPlainText);
 
-    // NOTE: convert text to lower case
-    bool ret = IWizCluceneSearch::updateDocument(pHandle,
-                                                 doc.strKbGUID.toStdWString().c_str(),
-                                                 doc.strGUID.toStdWString().c_str(),
-                                                 doc.strTitle.toLower().toStdWString().c_str(),
-                                                 strPlainText.toLower().toStdWString().c_str());
+    bool ret = false;
+    if (!strPlainText.isEmpty()) {
+        ret = IWizCluceneSearch::updateDocument(pHandle,
+                                                doc.strKbGUID.toStdWString().c_str(),
+                                                doc.strGUID.toStdWString().c_str(),
+                                                doc.strTitle.toLower().toStdWString().c_str(),
+                                                strPlainText.toLower().toStdWString().c_str());
+    } else {
+        ret = true;
+    }
 
     if (ret) {
         db.setDocumentSearchIndexed(doc.strGUID, true);

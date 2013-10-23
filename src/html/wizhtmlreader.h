@@ -195,11 +195,11 @@ public:
 
 // Operations
 public:
-    UINT Read(const CString& strString);
+    UINT Read(const QString &strHtml);
 // Helpers
 protected:
 	virtual UINT parseDocument(void);
-	virtual bool parseComment(CString &rComment);
+    virtual bool parseComment(QString &rComment);
     virtual bool parseTag(CWizHtmlTag &rTag, bool &bIsOpeningTag, bool &bIsClosingTag);
     virtual void NormalizeCharacters(CString &rCharacters);
     void ResetSeekPointer(void) { m_dwBufPos = 0L; }

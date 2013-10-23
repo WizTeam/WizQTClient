@@ -4,8 +4,8 @@
 #include <QtGlobal>
 
 #define WIZ_CLIENT_VERSION  "2.0.46"
-#define WIZNOTE_FTS_VERSION "4"
-#define WIZNOTE_THUMB_VERSION "2"
+#define WIZNOTE_FTS_VERSION "5"
+#define WIZNOTE_THUMB_VERSION "3"
 
 #if defined Q_OS_MAC
 #define WIZ_CLIENT_TYPE     "QTMAC"

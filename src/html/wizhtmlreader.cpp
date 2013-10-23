@@ -1,7 +1,7 @@
 #include "wizhtmlreader.h"
 #include "share/wizmisc.h"
 
-#include <QDebug>
+#include <QChar>
 
 const COLORREF CWizHtmlElemAttr::_clrInvalid = (COLORREF)0xFFFFFFFF;
 const unsigned short CWizHtmlElemAttr::_percentMax = USHRT_MAX;
@@ -12,7 +12,7 @@ CWizHtmlElemAttr::CNamedColors CWizHtmlElemAttr::_namedColors;
 class CWizHtmlEntityResolver
 {
 private:
-    class CCharEntityRefs : public std::map<CString, unsigned short>
+    class CCharEntityRefs : public std::map<CString, unsigned char>
     {
     public:
         CCharEntityRefs()
@@ -139,7 +139,7 @@ public:
 
         // entity references always end with a semi-colon ';'
         if (lpszEnd == NULL)
-            return (0);
+            return (0U);
 
         // skip leading white-space characters
         while (::wiz_isspace(*lpszBegin))
@@ -221,7 +221,7 @@ public:
             CCharEntityRefs::const_iterator it = m_CharEntityRefs.find(strKey);
             if (it != m_CharEntityRefs.end())
             {
-                chTemp = it->second;
+                chTemp = QChar(it->second).unicode();
                 chSubst = chTemp;
                 lpszEnd = ::wiz_strinc(lpszEnd);
                 return (lpszEnd - lpszEntity);
@@ -1613,7 +1613,7 @@ bool CWizHtmlReader::setBoolOption(ReaderOptionsEnum option, bool bNewVal)
     return (bSuccess);
 }
 
-bool CWizHtmlReader::parseComment(CString &rComment)
+bool CWizHtmlReader::parseComment(QString &rComment)
 {
     ATLASSERT(m_lpszBuffer != NULL);
     if (m_dwBufPos + 4 >= m_dwBufLen)
@@ -1632,12 +1632,12 @@ bool CWizHtmlReader::parseComment(CString &rComment)
     if (lpszEnd == NULL)
         // consider everything after current buffer position a comment
     {
-        rComment = lpszBegin;
-        m_dwBufPos += (4 + rComment.GetLength());
+        rComment = QString::fromUtf16(lpszBegin);
+        m_dwBufPos += (4 + rComment.length());
         return (true);
     }
 
-    CString	strComment(lpszBegin, lpszEnd - lpszBegin);
+    QString	strComment = QString::fromUtf16(lpszBegin, lpszEnd - lpszBegin);
 
     // end of buffer?
     if (lpszEnd + 2 >= m_lpszBuffer + m_dwBufLen)
@@ -1685,8 +1685,8 @@ UINT CWizHtmlReader::parseDocument(void)
     bool bAbort = false;			// continue parsing or abort?
     bool bIsClosingTag = false;	// tag parsed is a closing tag?
     bool bIsOpeningTag = false;	// tag parsed is an opening tag?
-	CString	strCharacters;			// character data 
-	CString	strComment;				// comment data
+    QString	strCharacters;			// character data
+    QString	strComment;				// comment data
 	DWORD	dwCharDataStart = 0L;	// starting position of character data
 	DWORD	dwCharDataLen = 0L;		// length of character data
     long lTemp = 0L;				// temporary storage
@@ -1723,7 +1723,7 @@ UINT CWizHtmlReader::parseDocument(void)
 				UngetChar();
                 //
 				
-				strComment.Empty();
+                strComment.clear();
 				if (!parseComment(strComment))
 				{
 					bIsOpeningTag = false;
@@ -1742,12 +1742,12 @@ UINT CWizHtmlReader::parseDocument(void)
 				}
 
 				// clear pending notifications
-				if ( (dwCharDataLen) || (strCharacters.GetLength()) )
+                if ( (dwCharDataLen) || (strCharacters.length()) )
 				{
-					strCharacters += CString(&m_lpszBuffer[dwCharDataStart], dwCharDataLen);
-					NormalizeCharacters(strCharacters);
+                    strCharacters += QString::fromUtf16(&m_lpszBuffer[dwCharDataStart], dwCharDataLen);
+                    strCharacters = strCharacters.simplified();
 					
-					if ( (strCharacters.GetLength()) && 
+                    if ( (strCharacters.length()) &&
 						 (getEventNotify(notifyCharacters)) )
 					{
 						bAbort = false;
@@ -1755,13 +1755,13 @@ UINT CWizHtmlReader::parseDocument(void)
 						if (bAbort)	goto LEndParse;
 					}
 
-					strCharacters.Empty();
+                    strCharacters.clear();
 				}
 
 				dwCharDataLen = 0L;
 				dwCharDataStart = m_dwBufPos;
 
-				if (strComment.GetLength())
+                if (strComment.length())
 				{
 					if (getEventNotify(notifyComment))
 					{
@@ -1801,7 +1801,7 @@ UINT CWizHtmlReader::parseDocument(void)
 				
 				if (lTemp)
 				{
-                    strCharacters += CString(&m_lpszBuffer[dwCharDataStart], dwCharDataLen);
+                    strCharacters += QString::fromUtf16(&m_lpszBuffer[dwCharDataStart], dwCharDataLen);
                     strCharacters += QChar(ch);
 					m_dwBufPos += lTemp;
 					dwCharDataStart = m_dwBufPos;
@@ -1826,14 +1826,13 @@ UINT CWizHtmlReader::parseDocument(void)
 	}
 
 	// clear pending notifications
-	if ( (dwCharDataLen) || (strCharacters.GetLength()) )
+    if ( (dwCharDataLen) || (strCharacters.length()) )
 	{
-        strCharacters += CString(&m_lpszBuffer[dwCharDataStart], dwCharDataLen);
-        strCharacters += ch;
-		NormalizeCharacters(strCharacters);
-		strCharacters.TrimRight();	// explicit trailing white-space removal
+        strCharacters += QString::fromUtf16(&m_lpszBuffer[dwCharDataStart], dwCharDataLen);
+        strCharacters += QChar(ch);
+        strCharacters = strCharacters.simplified();
 
-		if ( (strCharacters.GetLength()) && 
+        if ( (strCharacters.length()) &&
 			 (getEventNotify(notifyCharacters)) )
 		{
 			bAbort = false;
@@ -1852,15 +1851,14 @@ UINT CWizHtmlReader::parseDocument(void)
 	return (m_dwBufPos);
 }
 
-UINT CWizHtmlReader::Read(const CString& strString)
+UINT CWizHtmlReader::Read(const QString& strHtml)
 {
-    const unsigned short* lpszString = strString;
+    const unsigned short* lpszString = strHtml.utf16();
 
-    m_dwBufLen = ::wiz_strlen(lpszString);
-	if (m_dwBufLen)
-	{
+    m_dwBufLen = strHtml.length();
+    if (m_dwBufLen) {
 		m_lpszBuffer = lpszString;
-		return (parseDocument());
+        return parseDocument();
 	}
 
 	return (0U);
