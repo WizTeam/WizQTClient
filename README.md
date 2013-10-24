@@ -27,28 +27,28 @@ if you are windows or portable platform users, we have WizNote for windows, ios,
 Compile
 ---
 
-build time denpendency: cmake gcc
+### Requirement:
 
-runtime denpendency: Qt4 or Qt5
+Build time denpendency: cmake gcc
 
-1. configure
+Runtime denpendency: Qt4 or Qt5
+
+### configure:
 
     $ cmake .
 
-    or if you want to build under Qt5
+    Or if you want to build under Qt5
 
     $ cmake -DWIZNOTE_USE_QT5=ON .
 
-2. make && install
+### make && install:
     
     $ make
     $ make install
 
-Q&A: people says, why I can't login when compile && run ?
-
-When you use the default compilation flag, "Release" mode is implied set. resource files have not copied to building directory.
-
-Try alternatives:
+> Q&A: people says, why I can't login when compile && run ?
+> When you use the default compilation flag, "Release" mode is implied set. resource files have not copied to building directory.
+> Try alternatives:
 
     Install it with resources under fakeroot dir:
 
@@ -58,7 +58,7 @@ Try alternatives:
 
     Or just use "Debug" mode for configure:
     
-    # cmake -DCMAKE_BUILD_TYPE=Debug .
+    $ cmake -DCMAKE_BUILD_TYPE=Debug .
 
 We have tested on Linux(ubuntu 12.04+ / Arch with Qt5) and OSX above 10.8.2.
 
