@@ -10,6 +10,8 @@
 #include <fstream>
 #include <cassert>
 
+#include <QDebug>
+
 /*
 beacuase lucene default LUCENE_MAX_WORD_LEN = 128 to tokenize field,
 change it to 1 make lucene::analysis::standard::StandardTokenizer class
@@ -112,7 +114,7 @@ private:
 	* character buffer, store the characters which are used to compose <br>
 	* the returned Token
 	*/
-	TCHAR m_buffer[LUCENE_MAX_WORD_LEN];
+    TCHAR m_buffer[LUCENE_MAX_WORD_LEN + 1];
 
 	/**
 	* I/O buffer, used to store the content of the input(one of the <br>
@@ -323,8 +325,8 @@ public:
 				}
 			}
 		}
-		//
-		m_buffer[length]='\0';
+
+        m_buffer[length]=L'\0';
 		token->set(m_buffer,start, start+length, m_tokenType);
 		retTokenLength = length;
 		return token;
