@@ -106,6 +106,7 @@ set(wiznote_SOURCES
     widgets/wizSegmentedButton.cpp
     wizWebSettingsDialog.cpp
     wizUserVerifyDialog.cpp
+    utils/styleHelper.cpp
 )
 
 set(wiznote_HEADERS
@@ -202,7 +203,8 @@ set(wiznote_HEADERS
     share/wizApiEntry.h
     share/wizObjectDataDownloader.h
     share/wizUserAvatar.h
-    wizUserVerifyDialog.cpp
+    wizUserVerifyDialog.h
+    utils/styleHelper.h
 
     # rapidjson
     rapidjson/allocators.h

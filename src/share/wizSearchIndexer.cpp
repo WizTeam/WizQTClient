@@ -127,7 +127,7 @@ bool CWizSearchIndexer::buildFTSIndexByDatabase(CWizDatabase& db)
         return false;
     }
 
-    TOLOG(tr("Build FTS index end succeed: ") + db.name());
+    //TOLOG(tr("Build FTS index end succeed: ") + db.name());
     return true;
 }
 
