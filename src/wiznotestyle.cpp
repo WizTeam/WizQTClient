@@ -909,11 +909,13 @@ void CWizNoteStyle::drawItemMessage(const QStyleOptionViewItemV4 *vopt,
         }
     }
 
-    QRect textRect = vopt->rect;
+    QRect textRect = vopt->rect.adjusted(0, 5, 0, 0);
+
+    int nAvatarHeight = Utils::styleHelper::avatarHeight();
 
     // draw author avatar
     QRect rectAvatar = textRect;
-    rectAvatar.setSize(QSize(45, 45));
+    rectAvatar.setSize(QSize(nAvatarHeight, nAvatarHeight));
     rectAvatar.adjust(6, 6 , -6, -6);
 
     p->save();
@@ -951,6 +953,7 @@ void CWizNoteStyle::drawItemMessage(const QStyleOptionViewItemV4 *vopt,
         // draw title
         QFont fontTitle = p->font();
         fontTitle.setPixelSize(13);
+        fontTitle.setBold(true);
         p->setFont(fontTitle);
         int nFontHeight = p->fontMetrics().height();
 
@@ -969,23 +972,26 @@ void CWizNoteStyle::drawItemMessage(const QStyleOptionViewItemV4 *vopt,
         // draw date and tags, use 12px font size
         QFont fontAbs = p->font();
         fontAbs.setPixelSize(12);
+        fontAbs.setBold(false);
         p->setFont(fontAbs);
         nFontHeight = p->fontMetrics().height();
 
-        QRect rcInfo(textRect.left(), rcTitle.bottom() + 6, textRect.width(), nFontHeight);
+        QRect rcInfo(textRect.left(), rectAvatar.bottom() - nFontHeight, textRect.width(), nFontHeight);
         QString strInfo = data.strInfo;
         int infoWidth = ::WizDrawTextSingleLine(p, rcInfo, strInfo,  Qt::TextSingleLine | Qt::AlignVCenter, colorDate, true);
 
         // there lines document summary
         QString strAbstract = abstract.text;
 
+        int nLineSpacing = Utils::styleHelper::lineSpacing();
+
         QRect rcAbstract1(QPoint(textRect.left() + infoWidth + 4, rcInfo.top()), QPoint(textRect.right(), rcInfo.bottom()));
         ::WizDrawTextSingleLine(p, rcAbstract1, strAbstract, Qt::TextSingleLine | Qt::AlignVCenter, colorSummary, false);
 
-        QRect rcAbstract2(vopt->rect.left() + 6, rcAbstract1.bottom() + 3, vopt->rect.width() - 12, nFontHeight);
+        QRect rcAbstract2(vopt->rect.left() + 6, rcAbstract1.bottom() + nLineSpacing, vopt->rect.width() - 12, nFontHeight);
         ::WizDrawTextSingleLine(p, rcAbstract2, strAbstract, Qt::TextSingleLine | Qt::AlignVCenter, colorSummary, false);
 
-        QRect rcAbstract3(vopt->rect.left() + 6, rcAbstract2.bottom() + 3, vopt->rect.width() - 12, nFontHeight);
+        QRect rcAbstract3(vopt->rect.left() + 6, rcAbstract2.bottom() + nLineSpacing, vopt->rect.width() - 12, nFontHeight);
         ::WizDrawTextSingleLine(p, rcAbstract3, strAbstract, Qt::TextSingleLine | Qt::AlignVCenter, colorSummary, true);
     }
 
