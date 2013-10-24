@@ -630,13 +630,12 @@ void CWizNoteStyle::drawItemGroupThumbnail(const QStyleOptionViewItemV4* vopt,
         }
     }
 
-    QRect textRect = vopt->rect.adjusted(0, 5, 0, 0);
+    QRect textRect = vopt->rect.adjusted(5, 5, 0, 0);
 
     // draw author avatar
     int nAvatarHeight = Utils::styleHelper::avatarHeight();
     QRect rectAvatar = textRect;
     rectAvatar.setSize(QSize(nAvatarHeight, nAvatarHeight));
-    rectAvatar.adjust(6, 6 , -6, -6);
 
     p->save();
     p->setRenderHint(QPainter::Antialiasing);
@@ -651,7 +650,7 @@ void CWizNoteStyle::drawItemGroupThumbnail(const QStyleOptionViewItemV4* vopt,
 
     // draw the text
     if (!vopt->text.isEmpty()) {
-        textRect.adjust(6, 6, -6, -6);
+        textRect.adjust(5, 5, -5, -5);
 
         QColor colorTitle, colorDate, colorSummary;
         if (vopt->state & QStyle::State_Selected) {
