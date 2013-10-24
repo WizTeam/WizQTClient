@@ -13,6 +13,7 @@
 #include "wizProgressDialog.h"
 #include "share/wizUserAvatar.h"
 #include "wizmainwindow.h"
+#include "utils/styleHelper.h"
 
 
 // Document actions
@@ -576,7 +577,8 @@ QSize CWizDocumentListView::itemSizeFromViewType(ViewType type)
         sz.setHeight(fontMetrics().height() * 2 + 15);
         return sz;
     case CWizDocumentListView::TypeThumbnail:
-        sz.setHeight(fontMetrics().height() * 4 + 30);
+        //sz.setHeight(fontMetrics().height() * 4 + 30);
+        sz.setHeight(Utils::styleHelper::thumbnailHeight());
         return sz;
     default:
         Q_ASSERT(0);
