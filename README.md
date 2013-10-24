@@ -47,7 +47,9 @@ Runtime denpendency: Qt4 or Qt5
     $ make install
 
 > Q&A: people says, why I can't login when compile && run ?
+
 > When you use the default compilation flag, "Release" mode is implied set. resource files have not copied to building directory.
+
 > Try alternatives:
 
     Install it with resources under fakeroot dir:
