@@ -5,6 +5,7 @@
 #include <QApplication>
 #include <QDesktopWidget>
 #include <QMessageBox>
+#include <QUndoStack>
 
 
 #ifdef Q_OS_MAC

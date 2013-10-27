@@ -2,6 +2,7 @@
 
 #include <QApplication>
 #include <QWebFrame>
+#include <QUndoStack>
 
 #include "wizdef.h"
 #include "share/wizmisc.h"
@@ -106,6 +107,8 @@ void CWizDocumentWebView::inputMethodEvent(QInputMethodEvent* event)
 {
     QWebView::inputMethodEvent(event);
 
+#ifdef Q_OS_MAC
+
     int nLength = 0;
     int nOffset = 0;
     for (int i = 0; i < event->attributes().size(); i++) {
@@ -125,6 +128,8 @@ void CWizDocumentWebView::inputMethodEvent(QInputMethodEvent* event)
     for (int i = 0; i < nOffset; i++) {
         page()->triggerAction(QWebPage::MoveToNextChar);
     }
+
+#endif // Q_OS_MAC
 }
 
 void CWizDocumentWebView::keyPressEvent(QKeyEvent* event)
@@ -342,10 +347,13 @@ void CWizDocumentWebView::on_editor_contentChanged()
 
 void CWizDocumentWebView::on_editor_selectionChanged()
 {
+
+#ifdef Q_OS_MAC
+    // FIXME: every time change content shuld tell webview to clean the canvas
     if (hasFocus()) {
-        // FIXME: every time change content shuld tell webview to clean the canvas
         update();
     }
+#endif // Q_OS_MAC
 
     Q_EMIT statusChanged();
 }
