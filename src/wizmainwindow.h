@@ -181,6 +181,13 @@ public Q_SLOTS:
     void on_actionEditingUndo_triggered();
     void on_actionEditingRedo_triggered();
 
+    void on_actionEditingCut_triggered();
+    void on_actionEditingCopy_triggered();
+    void on_actionEditingPaste_triggered();
+    void on_actionEditingPastePlain_triggered();
+    void on_actionEditingDelete_triggered();
+    void on_actionEditingSelectAll_triggered();
+
     // menu view
     void on_actionViewToggleCategory_triggered();
     void on_actionViewToggleFullscreen_triggered();
@@ -220,6 +227,7 @@ public Q_SLOTS:
     void on_documents_viewTypeChanged(int type);
     void on_documents_sortingTypeChanged(int type);
     void on_document_requestView(const WIZDOCUMENTDATA& doc);
+    void on_document_contentChanged();
 
     void on_search_doSearch(const QString& keywords);
     void on_options_settingsChanged(WizOptionsType type);
@@ -269,7 +277,6 @@ public:
     Q_PROPERTY(QObject* DatabaseManager READ DatabaseManager)
 
     Q_INVOKABLE QObject* CreateWizObject(const QString& strObjectID);
-    Q_INVOKABLE void SetDocumentModified(bool modified);
     Q_INVOKABLE void ResetInitialStyle();
     Q_INVOKABLE void SetSavingDocument(bool saving);
     Q_INVOKABLE void ProcessClipboardBeforePaste(const QVariantMap& data);

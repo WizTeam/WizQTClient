@@ -22,24 +22,6 @@ void CWizDocumentWebViewPage::triggerAction(QWebPage::WebAction typeAction, bool
     }
 
     QWebPage::triggerAction(typeAction, checked);
-
-    if (typeAction == QWebPage::Copy) {
-        on_editorCommandCopy_triggered();
-    }
-}
-
-void CWizDocumentWebViewPage::on_editorCommandCopy_triggered()
-{
-    //QClipboard* clip = QApplication::clipboard();
-    //Q_ASSERT(clip);
-
-    //qDebug() << clip->supportsSelection();
-    //qDebug() << clip->supportsFindBuffer();
-
-    //const QMimeData* mime = clip->mimeData();
-    //if (mime->hasHtml()) {
-    //    qDebug() << mime->html();
-    //}
 }
 
 void CWizDocumentWebViewPage::on_editorCommandPaste_triggered()
@@ -75,12 +57,12 @@ void CWizDocumentWebViewPage::javaScriptConsoleMessage(const QString& message, i
     qDebug() << "[Console]line: " << lineNumber << ", " << message;
 }
 
+
 CWizDocumentWebView::CWizDocumentWebView(CWizExplorerApp& app, QWidget* parent /*= 0*/)
     : QWebView(parent)
     , m_app(app)
     , m_dbMgr(app.databaseManager())
     , m_bEditorInited(false)
-    , m_bModified(false)
 {
     CWizDocumentWebViewPage* page = new CWizDocumentWebViewPage(this);
     setPage(page);
@@ -143,12 +125,6 @@ void CWizDocumentWebView::inputMethodEvent(QInputMethodEvent* event)
     for (int i = 0; i < nOffset; i++) {
         page()->triggerAction(QWebPage::MoveToNextChar);
     }
-
-    // set modified flag is needed cause ueditor will not receive it
-    if (!event->commitString().isEmpty()) {
-        MainWindow* mainWindow = qobject_cast<MainWindow *>(m_app.mainWindow());
-        mainWindow->SetDocumentModified(true);
-    }
 }
 
 void CWizDocumentWebView::keyPressEvent(QKeyEvent* event)
@@ -158,12 +134,6 @@ void CWizDocumentWebView::keyPressEvent(QKeyEvent* event)
         // FIXME: press esc will insert space at cursor if not clear focus
         clearFocus();
         return;
-    } else if (event->key() == Qt::Key_Backspace) {
-        if (hasFocus()) {
-            // FIXME: backspace not set modified flag
-            MainWindow* mainWindow = qobject_cast<MainWindow *>(m_app.mainWindow());
-            mainWindow->SetDocumentModified(true);
-        }
     }
 
     QWebView::keyPressEvent(event);
@@ -181,7 +151,6 @@ void CWizDocumentWebView::focusInEvent(QFocusEvent *event)
 
 void CWizDocumentWebView::focusOutEvent(QFocusEvent *event)
 {
-
     // because qt will clear focus when context menu popup, we need keep focus there.
     if (event->reason() == Qt::PopupFocusReason) {
         return;
@@ -360,7 +329,15 @@ void CWizDocumentWebView::initEditorAndLoadDocument()
     connect(page(), SIGNAL(selectionChanged()),
             SLOT(on_editor_selectionChanged()));
 
+    connect(page(), SIGNAL(contentsChanged()),
+            SLOT(on_editor_contentChanged()));
+
     page()->mainFrame()->setHtml(strHtml, url);
+}
+
+void CWizDocumentWebView::on_editor_contentChanged()
+{
+    Q_EMIT statusChanged();
 }
 
 void CWizDocumentWebView::on_editor_selectionChanged()
@@ -528,7 +505,7 @@ void CWizDocumentWebView::saveDocument(bool force)
     if (!m_bEditorInited)
         return;
 
-    if (!force && !m_bModified)
+    if (!force && !page()->isModified())
         return;
 
     // check note permission
@@ -541,27 +518,12 @@ void CWizDocumentWebView::saveDocument(bool force)
 
     // Must reset modified flag to avoid switching whiling saving issue!
     MainWindow* mainWindow = qobject_cast<MainWindow *>(m_app.mainWindow());
-    mainWindow->SetDocumentModified(false);
     mainWindow->SetSavingDocument(true);
 
     QString strHtml = page()->mainFrame()->evaluateJavaScript("editor.getContent();").toString();
     m_renderer->save(document(), strHtml, m_strHtmlFileName, 0);
-}
 
-void CWizDocumentWebView::editorCommandExecuteCut()
-{
-    triggerPageAction(QWebPage::Cut);
-}
-
-void CWizDocumentWebView::editorCommandExecuteCopy()
-{
-    triggerPageAction(QWebPage::Copy);
-}
-
-
-void CWizDocumentWebView::editorCommandExecutePaste()
-{
-    triggerPageAction(QWebPage::Paste);
+    page()->undoStack()->clear();
 }
 
 QString CWizDocumentWebView::editorCommandQueryCommandValue(const QString& strCommand)
@@ -613,16 +575,6 @@ bool CWizDocumentWebView::editorCommandExecuteInsertHtml(const QString& strHtml,
     QString s = bNotSerialize ? "true" : "false";
     QString strExec = QString("editor.execCommand('insertHtml', '%1', %2);").arg(strHtml).arg(s);
     return page()->mainFrame()->evaluateJavaScript(strExec).toBool();
-}
-
-bool CWizDocumentWebView::editorCommandExecuteUndo()
-{
-    return editorCommandExecuteCommand("undo");
-}
-
-bool CWizDocumentWebView::editorCommandExecuteRedo()
-{
-    return editorCommandExecuteCommand("redo");
 }
 
 bool CWizDocumentWebView::editorCommandExecuteIndent()

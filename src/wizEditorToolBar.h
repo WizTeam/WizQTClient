@@ -59,6 +59,11 @@ private:
     QAction* actionFromName(const QString& strName);
 
 protected Q_SLOTS:
+    void on_editor_google_triggered();
+    void on_editor_cut_triggered();
+    void on_editor_copy_triggered();
+    void on_editor_paste_triggered();
+
     void on_comboFontFamily_indexChanged(const QString& strFamily);
     void on_comboFontSize_indexChanged(const QString& strSize);
     void on_btnFormatMatch_clicked();

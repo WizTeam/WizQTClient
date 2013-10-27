@@ -60,7 +60,6 @@ public:
     virtual void triggerAction(QWebPage::WebAction typeAction, bool checked = false);
     virtual void javaScriptConsoleMessage(const QString& message, int lineNumber, const QString& sourceID);
 
-    void on_editorCommandCopy_triggered();
     void on_editorCommandPaste_triggered();
 };
 
@@ -75,7 +74,6 @@ public:
     // view and save
     void viewDocument(const WIZDOCUMENTDATA& doc, bool editing);
     void setEditingDocument(bool editing);
-    void setModified(bool bModified) { m_bModified = bModified; }
     void saveDocument(bool force);
 
     bool isInited() const { return m_bEditorInited; }
@@ -130,7 +128,6 @@ private:
     QString m_strHtmlFileName;
     bool m_bEditorInited;
     bool m_bEditingMode;
-    bool m_bModified;
 
     CWizDocumentWebViewRenderer* m_renderer;
     CWizObjectDataDownloaderHost* m_downloaderHost;
@@ -149,6 +146,7 @@ public Q_SLOTS:
     void on_editor_populateJavaScriptWindowObject();
     void on_editor_loadFinished(bool ok);
     void on_editor_linkClicked(const QUrl& url);
+    void on_editor_contentChanged();
 
     void onTimerAutoSaveTimout();
 
@@ -157,10 +155,6 @@ public Q_SLOTS:
 
     void on_editorCommandExecuteLinkInsert_accepted();
     void on_editorCommandExecuteTableInsert_accepted();
-
-    void editorCommandExecuteCut();
-    void editorCommandExecuteCopy();
-    void editorCommandExecutePaste();
 
     /* editor API */
 
@@ -212,8 +206,6 @@ public Q_SLOTS:
     bool editorCommandExecuteTableAverageCols();
 
     // fast operation
-    bool editorCommandExecuteUndo();
-    bool editorCommandExecuteRedo();
     bool editorCommandExecuteInsertDate();
     bool editorCommandExecuteInsertTime();
     bool editorCommandExecuteRemoveFormat();

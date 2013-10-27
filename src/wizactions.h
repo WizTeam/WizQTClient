@@ -18,6 +18,13 @@ struct WIZACTION;
 
 #define WIZACTION_EDITOR_UNDO               "actionEditingUndo"
 #define WIZACTION_EDITOR_REDO               "actionEditingRedo"
+#define WIZACTION_EDITOR_CUT                "actionEditingCut"
+#define WIZACTION_EDITOR_COPY               "actionEditingCopy"
+#define WIZACTION_EDITOR_PASTE              "actionEditingPaste"
+#define WIZACTION_EDITOR_PASTE_PLAIN        "actionEditingPastePlain"
+#define WIZACTION_EDITOR_DELETE             "actionEditingDelete"
+#define WIZACTION_EDITOR_SELECT_ALL         "actionEditingSelectAll"
+
 #define WIZACTION_FORMAT_BOLD               "actionFormatBold"
 #define WIZACTION_FORMAT_ITALIC             "actionFormatItalic"
 #define WIZACTION_FORMAT_UNDERLINE          "actionFormatUnderLine"

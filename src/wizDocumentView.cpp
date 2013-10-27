@@ -591,7 +591,6 @@ void CWizDocumentView::setViewMode(WizDocumentViewMode mode)
 void CWizDocumentView::setModified(bool modified)
 {
     m_title->setModified(modified);
-    m_web->setModified(modified);
 }
 
 void CWizDocumentView::settingsChanged()

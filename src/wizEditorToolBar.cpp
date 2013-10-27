@@ -4,6 +4,7 @@
 #include <QToolButton>
 #include <QFontComboBox>
 #include <QHBoxLayout>
+#include <QDesktopServices>
 
 #include "share/wizmisc.h"
 #include "wizdef.h"
@@ -553,6 +554,8 @@ struct WizEditorContextMenuItem
     QString execute;
 };
 
+#define WIZEDITOR_ACTION_GOOGLE         QObject::tr("Use \"Google\" search")
+
 #define WIZEDITOR_ACTION_CUT            QObject::tr("Cut")
 #define WIZEDITOR_ACTION_COPY           QObject::tr("Copy")
 #define WIZEDITOR_ACTION_PASTE          QObject::tr("Paste")
@@ -604,9 +607,12 @@ WizEditorContextMenuItem* CWizEditorToolBar::contextMenuData()
 {
     static WizEditorContextMenuItem arrayData[] =
     {
-        {WIZEDITOR_ACTION_CUT,                      "",                 "editorCommandExecuteCut"},
-        {WIZEDITOR_ACTION_COPY,                     "",                 "editorCommandExecuteCopy"},
-        {WIZEDITOR_ACTION_PASTE,                    "",                 "editorCommandExecutePaste"},
+        {WIZEDITOR_ACTION_GOOGLE,                   "",                 "on_editor_google_triggered"},
+        {"-", "-", "-"},
+
+        {WIZEDITOR_ACTION_CUT,                      "",                 "on_editor_cut_triggered"},
+        {WIZEDITOR_ACTION_COPY,                     "",                 "on_editor_copy_triggered"},
+        {WIZEDITOR_ACTION_PASTE,                    "",                 "on_editor_paste_triggered"},
         {"-", "-", "-"},
 
         {QObject::tr("Link"),                       "+",                "+"},
@@ -625,7 +631,7 @@ WizEditorContextMenuItem* CWizEditorToolBar::contextMenuData()
         {WIZEDITOR_ACTION_FONT_BACKCOLOR,           "backColor",        "editorCommandExecuteBackColor"},
         {"+", "+", "+"},
 
-        {QObject::tr("Justify"),                    "justify",          "+"},
+        {QObject::tr("Justify"),                    "+",          "+"},
         {WIZEDITOR_ACTION_JUSTIFY_LEFT,             "justify",          "editorCommandExecuteJustifyLeft"},
         {WIZEDITOR_ACTION_JUSTIFY_CENTER,           "justify",          "editorCommandExecuteJustifyCenter"},
         {WIZEDITOR_ACTION_JUSTIFY_RIGHT,            "justify",          "editorCommandExecuteJustifyRight"},
@@ -685,15 +691,22 @@ void CWizEditorToolBar::on_delegate_requestShowContextMenu(const QPoint& pos)
 
     buildMenu();
 
-    if (!m_editor->isEditing()){
-        actionFromName(WIZEDITOR_ACTION_CUT)->setEnabled(false);
-        actionFromName(WIZEDITOR_ACTION_PASTE)->setEnabled(false);
+    if (m_editor->selectedText().isEmpty()) {
+        actionFromName(WIZEDITOR_ACTION_GOOGLE)->setEnabled(false);
     } else {
+        actionFromName(WIZEDITOR_ACTION_GOOGLE)->setEnabled(true);
+    }
+
+    if (m_editor->isEditing()){
         actionFromName(WIZEDITOR_ACTION_CUT)->setEnabled(true);
         actionFromName(WIZEDITOR_ACTION_PASTE)->setEnabled(true);
+    } else {
+        actionFromName(WIZEDITOR_ACTION_CUT)->setEnabled(false);
+        actionFromName(WIZEDITOR_ACTION_PASTE)->setEnabled(false);
     }
 
     m_menuContext->popup(pos);
+    m_menuContext->update();
 }
 
 void CWizEditorToolBar::on_delegate_selectionChanged()
@@ -736,7 +749,7 @@ void CWizEditorToolBar::buildMenu()
         } else if (item.execute == "+") {
             index = buildMenu(m_menuContext, index);
 
-        } else if (item.command != "+" && !item.execute.isEmpty()) {
+        } else if (item.command != "+") {
             if (!item.command.isEmpty()) {
                 int value = m_editor->editorCommandQueryCommandState(item.command);
                 if (value == -1) {
@@ -746,10 +759,11 @@ void CWizEditorToolBar::buildMenu()
             }
 
             QString strSlot = "1" + item.execute + "()";
-            m_actions[item.label] = m_menuContext->addAction(item.label, m_editor, strSlot.toUtf8());
-        } else if (item.command.isEmpty() && item.execute.isEmpty()) {
-            index++;
-            continue;
+            if (!item.command.isEmpty()) {
+                m_actions[item.label] = m_menuContext->addAction(item.label, m_editor, strSlot.toUtf8());
+            } else {
+                m_actions[item.label] = m_menuContext->addAction(item.label, this, strSlot.toUtf8());
+            }
         } else {
             Q_ASSERT(0);
         }
@@ -761,22 +775,10 @@ void CWizEditorToolBar::buildMenu()
 int CWizEditorToolBar::buildMenu(QMenu* pMenu, int indx)
 {
     int index = indx;
-    bool bSkip = false;
+    bool bSkip = true;
     WizEditorContextMenuItem* arrayData = contextMenuData();
-
     WizEditorContextMenuItem& curItem = arrayData[index];
-    if (curItem.command != "+") {
-        int value = m_editor->editorCommandQueryCommandState(curItem.command);
-        if (value == -1) {
-            bSkip = true;
-        }
-    }
-
     QMenu* pSubMenu = new QMenu(curItem.label, pMenu);
-
-    if (!bSkip) {
-        pMenu->addMenu(pSubMenu);
-    }
 
     while(1) {
         index++;
@@ -806,6 +808,7 @@ int CWizEditorToolBar::buildMenu(QMenu* pMenu, int indx)
                 }
             }
 
+            bSkip = false;
             QString strSlot = "1" + item.execute + "()";
             m_actions[item.label] = pSubMenu->addAction(item.label, m_editor, strSlot.toUtf8());
 
@@ -816,7 +819,34 @@ int CWizEditorToolBar::buildMenu(QMenu* pMenu, int indx)
         }
     }
 
+    if (!bSkip) {
+        pMenu->addMenu(pSubMenu);
+    } else {
+        pSubMenu->deleteLater();
+    }
+
     return index;
+}
+
+void CWizEditorToolBar::on_editor_google_triggered()
+{
+    QUrl url("http://google.com/search?q=" + m_editor->page()->selectedText());
+    QDesktopServices::openUrl(url);
+}
+
+void CWizEditorToolBar::on_editor_cut_triggered()
+{
+    m_editor->triggerPageAction(QWebPage::Cut);
+}
+
+void CWizEditorToolBar::on_editor_copy_triggered()
+{
+    m_editor->triggerPageAction(QWebPage::Copy);
+}
+
+void CWizEditorToolBar::on_editor_paste_triggered()
+{
+    m_editor->triggerPageAction(QWebPage::Paste);
 }
 
 void CWizEditorToolBar::on_comboFontFamily_indexChanged(const QString& strFamily)

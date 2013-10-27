@@ -323,6 +323,9 @@ void MainWindow::initActions()
     m_animateSync->setIcons("sync");
 
     connect(m_doc->web(), SIGNAL(statusChanged()), SLOT(on_editor_statusChanged()));
+    connect(m_doc->web()->page(), SIGNAL(contentsChanged()), SLOT(on_document_contentChanged()));
+    connect(m_doc->web()->page(), SIGNAL(selectionChanged()), SLOT(on_document_contentChanged()));
+
     on_editor_statusChanged();
 }
 
@@ -339,6 +342,12 @@ void MainWindow::on_editor_statusChanged()
     if (!editor->isInited() || !editor->isEditing() || !editor->hasFocus()) {
         m_actions->actionFromName(WIZACTION_EDITOR_UNDO)->setEnabled(false);
         m_actions->actionFromName(WIZACTION_EDITOR_REDO)->setEnabled(false);
+        m_actions->actionFromName(WIZACTION_EDITOR_CUT)->setEnabled(false);
+        m_actions->actionFromName(WIZACTION_EDITOR_COPY)->setEnabled(false);
+        m_actions->actionFromName(WIZACTION_EDITOR_PASTE)->setEnabled(false);
+        m_actions->actionFromName(WIZACTION_EDITOR_PASTE_PLAIN)->setEnabled(false);
+        m_actions->actionFromName(WIZACTION_EDITOR_DELETE)->setEnabled(false);
+
         m_actions->actionFromName(WIZACTION_FORMAT_BOLD)->setEnabled(false);
         m_actions->actionFromName(WIZACTION_FORMAT_ITALIC)->setEnabled(false);
         m_actions->actionFromName(WIZACTION_FORMAT_UNDERLINE)->setEnabled(false);
@@ -362,16 +371,42 @@ void MainWindow::on_editor_statusChanged()
         return;
     }
 
-    if (-1 == editor->editorCommandQueryCommandState("undo")) {
+    if (!editor->page()->undoStack()->canUndo()) {
         m_actions->actionFromName(WIZACTION_EDITOR_UNDO)->setEnabled(false);
     } else {
         m_actions->actionFromName(WIZACTION_EDITOR_UNDO)->setEnabled(true);
     }
 
-    if (-1 == editor->editorCommandQueryCommandState("redo")) {
+    if (!editor->page()->undoStack()->canRedo()) {
         m_actions->actionFromName(WIZACTION_EDITOR_REDO)->setEnabled(false);
     } else {
         m_actions->actionFromName(WIZACTION_EDITOR_REDO)->setEnabled(true);
+    }
+
+    if (!editor->isEditing()) {
+        m_actions->actionFromName(WIZACTION_EDITOR_CUT)->setEnabled(false);
+        m_actions->actionFromName(WIZACTION_EDITOR_PASTE)->setEnabled(false);
+        m_actions->actionFromName(WIZACTION_EDITOR_PASTE_PLAIN)->setEnabled(false);
+        m_actions->actionFromName(WIZACTION_EDITOR_DELETE)->setEnabled(false);
+
+        if (!editor->page()->selectedHtml().isEmpty()) {
+            m_actions->actionFromName(WIZACTION_EDITOR_COPY)->setEnabled(true);
+        } else {
+            m_actions->actionFromName(WIZACTION_EDITOR_COPY)->setEnabled(false);
+        }
+    } else {
+        m_actions->actionFromName(WIZACTION_EDITOR_PASTE)->setEnabled(true);
+        m_actions->actionFromName(WIZACTION_EDITOR_PASTE_PLAIN)->setEnabled(true);
+
+        if (!editor->page()->selectedHtml().isEmpty()) {
+            m_actions->actionFromName(WIZACTION_EDITOR_CUT)->setEnabled(true);
+            m_actions->actionFromName(WIZACTION_EDITOR_COPY)->setEnabled(true);
+            m_actions->actionFromName(WIZACTION_EDITOR_DELETE)->setEnabled(true);
+        } else {
+            m_actions->actionFromName(WIZACTION_EDITOR_CUT)->setEnabled(false);
+            m_actions->actionFromName(WIZACTION_EDITOR_COPY)->setEnabled(false);
+            m_actions->actionFromName(WIZACTION_EDITOR_DELETE)->setEnabled(false);
+        }
     }
 
     if (-1 == editor->editorCommandQueryCommandState("bold")) {
@@ -633,6 +668,11 @@ void MainWindow::on_document_requestView(const WIZDOCUMENTDATA& doc)
     viewDocument(doc, false);
 }
 
+void MainWindow::on_document_contentChanged()
+{
+    m_doc->setModified(m_doc->web()->page()->isModified());
+}
+
 
 //void MainWindow::resetNotice()
 //{
@@ -730,12 +770,42 @@ void MainWindow::on_actionNewNote_triggered()
 
 void MainWindow::on_actionEditingUndo_triggered()
 {
-    m_doc->web()->editorCommandExecuteUndo();
+    m_doc->web()->page()->undoStack()->undo();
 }
 
 void MainWindow::on_actionEditingRedo_triggered()
 {
-    m_doc->web()->editorCommandExecuteRedo();
+    m_doc->web()->page()->undoStack()->redo();
+}
+
+void MainWindow::on_actionEditingCut_triggered()
+{
+    m_doc->web()->triggerPageAction(QWebPage::Cut);
+}
+
+void MainWindow::on_actionEditingCopy_triggered()
+{
+    m_doc->web()->triggerPageAction(QWebPage::Copy);
+}
+
+void MainWindow::on_actionEditingPaste_triggered()
+{
+    m_doc->web()->triggerPageAction(QWebPage::Paste);
+}
+
+void MainWindow::on_actionEditingPastePlain_triggered()
+{
+    qDebug() << "paste plain...";
+}
+
+void MainWindow::on_actionEditingDelete_triggered()
+{
+    qDebug() << "delete...";
+}
+
+void MainWindow::on_actionEditingSelectAll_triggered()
+{
+    m_doc->web()->triggerPageAction(QWebPage::SelectAll);
 }
 
 void MainWindow::on_actionViewToggleCategory_triggered()
@@ -1312,11 +1382,6 @@ QObject* MainWindow::CreateWizObject(const QString& strObjectID)
     }
 
     return NULL;
-}
-
-void MainWindow::SetDocumentModified(bool modified)
-{
-    m_doc->setModified(modified);
 }
 
 void MainWindow::ResetInitialStyle()

@@ -6,7 +6,6 @@ var
     m_currentGUID = "",
     m_currentFileName = "",
     m_editingMode = true;
-    m_bIsSourceMode = false;
 
 
 // setup ueditor
@@ -30,10 +29,6 @@ try {
     objApp.ResetInitialStyle();
     editor.render('editorArea');
 
-    editor.addListener('beforePaste', function(type, data) {
-        objApp.ProcessClipboardBeforePaste(data);
-    });
-
     editor.addListener("sourceModeChanged",function(type,mode){
     });
 
@@ -51,15 +46,8 @@ try {
     alert(err);
 }
 
-function setModified()
-{
-    objApp.SetDocumentModified(true);
-}
-
 function setEditorHtml(html)
 {
-    editor.removeListener('contentChange', setModified);
-
     editor.reset();
 
     editor.setContent(html);
@@ -67,8 +55,6 @@ function setEditorHtml(html)
     window.UE.utils.domReady(function() {
         editor.window.scrollTo(0, 0);
     });
-
-    editor.addListener('contentChange', setModified);
 }
 
 function setEditing(mode) {

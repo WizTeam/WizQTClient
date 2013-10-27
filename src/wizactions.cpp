@@ -61,8 +61,14 @@ WIZACTION* CWizActions::actionsData()
         {"actionFeedback",                  QObject::tr("User support"), "", ""},
 
         // editing
-        {WIZACTION_EDITOR_UNDO,               QObject::tr("Undo"), "", "Ctrl+Z"},
-        {WIZACTION_EDITOR_REDO,               QObject::tr("Redo"), "", "Shift+Ctrl+Z"},
+        {WIZACTION_EDITOR_UNDO,             QObject::tr("Undo"), "", "Ctrl+Z"},
+        {WIZACTION_EDITOR_REDO,             QObject::tr("Redo"), "", "Shift+Ctrl+Z"},
+        {WIZACTION_EDITOR_CUT,              QObject::tr("Cut"), "", "Ctrl+X"},
+        {WIZACTION_EDITOR_COPY,             QObject::tr("Copy"), "", "Ctrl+C"},
+        {WIZACTION_EDITOR_PASTE,            QObject::tr("Paste"), "", "Ctrl+V"},
+        {WIZACTION_EDITOR_PASTE_PLAIN,      QObject::tr("Paste as plain text"), "", "Shift+Ctrl+V"},
+        {WIZACTION_EDITOR_DELETE,           QObject::tr("Delete"), "", ""},
+        {WIZACTION_EDITOR_SELECT_ALL,       QObject::tr("Select all"), "", "Ctrl+A"},
 
         // view
         {WIZACTION_GLOBAL_TOGGLE_CATEGORY,      QObject::tr("Hide category view"), QObject::tr("Show category view"), "Ctrl+Alt+s"},
@@ -121,6 +127,8 @@ QAction* CWizActions::addAction(WIZACTION& action)
 
     // Used for building menu from ini file
     pAction->setObjectName(action.strName);
+
+    pAction->setShortcutContext(Qt::ApplicationShortcut);
 
     m_actions[action.strName] = pAction;
     QObject::connect(pAction, "2triggered()", m_parent, strSlot.toUtf8());
