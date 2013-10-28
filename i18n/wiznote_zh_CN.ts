@@ -542,47 +542,47 @@
 <context>
     <name>CWizDatabase</name>
     <message>
-        <location filename="../src/share/wizDatabase.cpp" line="2447"/>
+        <location filename="../src/share/wizDatabase.cpp" line="2438"/>
         <source>My Notes</source>
         <translation>我的笔记</translation>
     </message>
     <message>
-        <location filename="../src/share/wizDatabase.cpp" line="2449"/>
+        <location filename="../src/share/wizDatabase.cpp" line="2440"/>
         <source>My Journals</source>
         <translation>我的日记</translation>
     </message>
     <message>
-        <location filename="../src/share/wizDatabase.cpp" line="2451"/>
+        <location filename="../src/share/wizDatabase.cpp" line="2442"/>
         <source>My Events</source>
         <translation>我的事件</translation>
     </message>
     <message>
-        <location filename="../src/share/wizDatabase.cpp" line="2453"/>
+        <location filename="../src/share/wizDatabase.cpp" line="2444"/>
         <source>My Sticky Notes</source>
         <translation>我的桌面便笺</translation>
     </message>
     <message>
-        <location filename="../src/share/wizDatabase.cpp" line="2455"/>
+        <location filename="../src/share/wizDatabase.cpp" line="2446"/>
         <source>My Emails</source>
         <translation>我的电子邮件</translation>
     </message>
     <message>
-        <location filename="../src/share/wizDatabase.cpp" line="2457"/>
+        <location filename="../src/share/wizDatabase.cpp" line="2448"/>
         <source>My Drafts</source>
         <translation>我的草稿</translation>
     </message>
     <message>
-        <location filename="../src/share/wizDatabase.cpp" line="2459"/>
+        <location filename="../src/share/wizDatabase.cpp" line="2450"/>
         <source>My Tasks</source>
         <translation>我的任务</translation>
     </message>
     <message>
-        <location filename="../src/share/wizDatabase.cpp" line="2463"/>
+        <location filename="../src/share/wizDatabase.cpp" line="2454"/>
         <source>Inbox</source>
         <translation>收集箱</translation>
     </message>
     <message>
-        <location filename="../src/share/wizDatabase.cpp" line="2465"/>
+        <location filename="../src/share/wizDatabase.cpp" line="2456"/>
         <source>Completed</source>
         <translation>已完成</translation>
     </message>
@@ -1385,9 +1385,14 @@
         <translation>代理设置</translation>
     </message>
     <message>
-        <location filename="../src/wizpreferencedialog.cpp" line="15"/>
+        <location filename="../src/wizpreferencedialog.cpp" line="17"/>
         <source>Preference</source>
         <translation>偏好设置</translation>
+    </message>
+    <message>
+        <location filename="../src/wizpreferencedialog.cpp" line="149"/>
+        <source>Language will be changed after restart WizNote.</source>
+        <translation>语言将会在重启为知笔记后生效.</translation>
     </message>
     <message>
         <source>Chinese</source>
@@ -1398,7 +1403,7 @@
         <translation type="obsolete">English(US)</translation>
     </message>
     <message>
-        <location filename="../src/wizpreferencedialog.cpp" line="123"/>
+        <location filename="../src/wizpreferencedialog.cpp" line="125"/>
         <source>Proxy settings</source>
         <translation>代理设置</translation>
     </message>
@@ -1913,7 +1918,7 @@
         <translation type="obsolete">稍等片刻，保存一下进度...</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="140"/>
+        <location filename="../src/wizmainwindow.cpp" line="141"/>
         <source>WizNote</source>
         <translation>为知笔记</translation>
     </message>
@@ -1923,22 +1928,22 @@ Have you changed your password from other platform?</source>
         <translation type="obsolete">哇，同步失败啦！是不是在其他平台改过密码？</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="738"/>
+        <location filename="../src/wizmainwindow.cpp" line="739"/>
         <source>sorry, sync failed. please input your password and try again.</source>
         <translation>抱歉，同步失败了。请输入您的密码再试一次。</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="758"/>
+        <location filename="../src/wizmainwindow.cpp" line="759"/>
         <source>Syncing...</source>
         <translation>同步中...</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="977"/>
+        <location filename="../src/wizmainwindow.cpp" line="978"/>
         <source>Rebuild full text search index</source>
         <translation>重建搜索索引</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="980"/>
+        <location filename="../src/wizmainwindow.cpp" line="981"/>
         <source>Rebuild full text search is quit slow if you have quite a few                    documents or attachments, you do not have to use this function                    while search should work as expected, this fuction is only used                    as developer&apos;s issue triage purpose, use it only if you know                    what you are doing!</source>
         <translation>如果您有大量文档或附件存在，重建搜索索引会非常耗费时间，正常情况下，搜索是可以如期工作的，这个功能主要是为修复可能出现的搜索问题提供帮助，请在明确这个选项意义的情况下使用这个功能！</translation>
     </message>
@@ -1959,7 +1964,7 @@ Have you changed your password from other platform?</source>
         <translation type="obsolete">标签</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="628"/>
+        <location filename="../src/wizmainwindow.cpp" line="629"/>
         <source>0 articles</source>
         <translation>0 条</translation>
     </message>
@@ -1968,7 +1973,7 @@ Have you changed your password from other platform?</source>
         <translation type="obsolete">新建笔记</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="1402"/>
+        <location filename="../src/wizmainwindow.cpp" line="1398"/>
         <source>Saving note...</source>
         <translation>正在保存笔记...</translation>
     </message>
@@ -2383,7 +2388,7 @@ Have you changed your password from other platform?</source>
         <translation type="obsolete">无法打开个人数据库</translation>
     </message>
     <message>
-        <location filename="../src/main.cpp" line="125"/>
+        <location filename="../src/main.cpp" line="111"/>
         <source>Can not open database</source>
         <translation>无法打开数据库</translation>
     </message>

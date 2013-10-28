@@ -145,9 +145,8 @@ void CWizPreferenceWindow::on_comboLang_activated(int index)
 
     QMessageBox msgBox;
     msgBox.setIcon(QMessageBox::Information);
-    msgBox.setWindowTitle(tr("User language changed"));
     msgBox.addButton(QMessageBox::Ok);
-    msgBox.setText(tr("Language will be changed after restart."));
+    msgBox.setText(tr("Language will be changed after restart WizNote."));
     msgBox.exec();
 }
 
