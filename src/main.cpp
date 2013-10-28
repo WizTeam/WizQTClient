@@ -76,7 +76,7 @@ int main(int argc, char *argv[])
     bool bFallback = true;
 
     bool bAutoLogin = userSettings.autoLogin();
-    strPassword = ::WizDecryptPassword(userSettings.password());
+    strPassword = userSettings.password();
 
     if (bAutoLogin && !strPassword.isEmpty()) {
         bFallback = false;
@@ -90,20 +90,6 @@ int main(int argc, char *argv[])
 
         strUserId = loginDialog.userId();
         strPassword = loginDialog.password();
-    }
-
-    // reset password for restart event, will not touch welcome dialog
-    QStringList args = QApplication::arguments();
-    if (args.count() >= 3) {
-        for (int i = 0; i < args.count(); i++) {
-            if (!args.at(i).compare("--autologin=0")) {
-                userSettings.setAutoLogin(false);
-            } else if(!args.at(i).compare("--autologin=1")) {
-                userSettings.setAutoLogin(true);
-            } else if(!args.at(i).compare("--cleanpassword=1")) {
-                userSettings.setPassword();
-            }
-        }
     }
 
     // reset locale for current user.
@@ -126,7 +112,7 @@ int main(int argc, char *argv[])
         return 0;
     }
 
-    dbMgr.db().SetPassword(strPassword);
+    dbMgr.db().SetPassword(::WizEncryptPassword(strPassword));
 
     MainWindow w(dbMgr);
     w.show();
@@ -138,40 +124,7 @@ int main(int argc, char *argv[])
     QString strTempPath = ::WizGlobal()->GetTempPath();
     ::WizDeleteAllFilesInFolder(strTempPath);
 
-    // restart
-    if (w.isRestart())
-    {
-        userSettings.setUser(strUserId);
-
-        // reset auto login
-        bAutoLogin = userSettings.autoLogin();
-        userSettings.setAutoLogin(true);
-
-        // reset password
-        // if user did not choose remember password, stored password already cleaned from database
-        // we need store it back.
-        bool bCleanPassword = false;
-        if (userSettings.password().isEmpty()) {
-            userSettings.setPassword(::WizEncryptPassword(strPassword));
-            bCleanPassword = true;
-        }
-
-        // generate arguments
-        QStringList argsRestart;
-        if (bAutoLogin) {
-            argsRestart.append(QString("--autologin=1"));
-        } else {
-            argsRestart.append(QString("--autologin=0"));
-        }
-
-        if (bCleanPassword) {
-            argsRestart.append(QString("--cleanpassword=1"));
-        } else {
-            argsRestart.append(QString("--cleanpassword=0"));
-        }
-
-        QProcess::startDetached(argv[0], argsRestart);
-    } else if (w.isLogout()) {
+    if (w.isLogout()) {
         QProcess::startDetached(argv[0], QStringList());
     }
 

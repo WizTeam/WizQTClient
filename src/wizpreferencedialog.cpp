@@ -1,6 +1,8 @@
 #include "wizpreferencedialog.h"
 #include "ui_wizpreferencedialog.h"
 
+#include <QMessageBox>
+
 #include "share/wizDatabaseManager.h"
 
 
@@ -24,12 +26,12 @@ CWizPreferenceWindow::CWizPreferenceWindow(CWizExplorerApp& app, QWidget* parent
     }
 
     for (int i = 0; i < ui->comboLang->count(); i++) {
-        if (!m_locales[i].compare(userSettings().locale())) {
+        if (m_locales[i] == userSettings().locale()) {
             ui->comboLang->setCurrentIndex(i);
         }
     }
 
-    connect(ui->comboLang, SIGNAL(currentIndexChanged(int)), SLOT(on_comboLang_currentIndexChanged(int)));
+    connect(ui->comboLang, SIGNAL(activated(int)), SLOT(on_comboLang_currentIndexChanged(int)));
 
     // reading tab
     switch (userSettings().noteViewMode())
@@ -134,13 +136,19 @@ CWizPreferenceWindow::CWizPreferenceWindow(CWizExplorerApp& app, QWidget* parent
     connect(ui->buttonFontSelect, SIGNAL(clicked()), SLOT(onButtonFontSelect_clicked()));
 }
 
-void CWizPreferenceWindow::on_comboLang_currentIndexChanged(int index)
+void CWizPreferenceWindow::on_comboLang_activated(int index)
 {
     QString strLocaleName = m_locales[index];
     if (strLocaleName.compare(userSettings().locale())) {
-        // FIXME: notify user change locale need restart
         userSettings().setLocale(strLocaleName);
     }
+
+    QMessageBox msgBox;
+    msgBox.setIcon(QMessageBox::Information);
+    msgBox.setWindowTitle(tr("User language changed"));
+    msgBox.addButton(QMessageBox::Ok);
+    msgBox.setText(tr("Language will be changed after restart."));
+    msgBox.exec();
 }
 
 void CWizPreferenceWindow::on_radioAuto_clicked(bool chcked)

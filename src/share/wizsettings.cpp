@@ -185,28 +185,31 @@ void CWizUserSettings::set(const QString& strKey, const QString& strValue)
         CWizDatabase db;
         if (db.Open(m_strUserId)) {
             db.SetMeta(USER_SETTINGS_SECTION, strKey, strValue);
+            return;
         }
     }
 
     if (m_db) {
         m_db->SetMeta(USER_SETTINGS_SECTION, strKey, strValue);
+        return;
     }
 }
 
 QString CWizUserSettings::password() const
 {
+    QString strPassword;
     if (!m_strUserId.isEmpty()) {
         CWizDatabase db;
         if (db.Open(m_strUserId)) {
-            return db.GetMetaDef("Account", "Password");
+            strPassword = db.GetMetaDef("Account", "Password");
         }
     }
 
     if (m_db) {
-        return m_db->GetMetaDef("Account", "Password");
+        strPassword = m_db->GetMetaDef("Account", "Password");
     }
 
-    return NULL;
+    return ::WizDecryptPassword(strPassword);
 }
 
 void CWizUserSettings::setPassword(const QString& strPassword /* = NULL */)
@@ -215,11 +218,13 @@ void CWizUserSettings::setPassword(const QString& strPassword /* = NULL */)
         CWizDatabase db;
         if (db.Open(m_strUserId)) {
             db.SetMeta("Account", "Password", strPassword);
+            return;
         }
     }
 
     if (m_db) {
         m_db->SetMeta("Account", "Password", strPassword);
+        return;
     }
 }
 

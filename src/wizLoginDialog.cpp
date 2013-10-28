@@ -214,7 +214,7 @@ bool CWizLoginDialog::updateProfile(const QString& strUserId, const WIZKMUSERINF
     }
 
     if(m_checkSavePassword->checkState() == Qt::Checked) {
-        userSettings.setPassword(password());
+        userSettings.setPassword(::WizEncryptPassword(password()));
     } else {
         userSettings.setPassword();
     }
@@ -275,7 +275,7 @@ void CWizLoginDialog::setUser(const QString& strUserId)
         m_editPassword->clear();
         m_checkSavePassword->setCheckState(Qt::Unchecked);
     } else {
-        m_editPassword->setText(::WizDecryptPassword(strPassword));
+        m_editPassword->setText(strPassword);
         m_checkSavePassword->setCheckState(Qt::Checked);
     }
 }

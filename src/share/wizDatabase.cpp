@@ -354,6 +354,11 @@ QString CWizDatabase::GetPassword()
 {
     CString strPassword;
     GetPassword(strPassword);
+
+    if (!strPassword.isEmpty()) {
+        strPassword = ::WizDecryptPassword(strPassword);
+    }
+
     return strPassword;
 }
 
@@ -1576,48 +1581,34 @@ QString CWizDatabase::GetEncryptedPassword()
 
 bool CWizDatabase::GetPassword(CString& strPassword)
 {
+    if (!m_strPassword.isEmpty()) {
+        strPassword = m_strPassword;
+        return true;
+    }
+
     bool bExists = false;
     if (!GetMeta(g_strAccountSection, "Password", strPassword, "", &bExists)) {
         TOLOG("Failed to get password while GetPassword");
         return false;
     }
 
-    if (strPassword.IsEmpty())
-        return true;
+    //if (strPassword.IsEmpty())
+    //    return true;
 
-    strPassword = WizDecryptPassword(strPassword);
-
-    return true;
-}
-
-bool CWizDatabase::SetPassword(const QString& strPassword)
-{
-    if (!SetMeta(g_strAccountSection, "Password", WizEncryptPassword(strPassword))) {
-        TOLOG("Failed to set user password");
-        return false;
-    }
-
-    //m_strPassword = strPassword;
+    //strPassword = WizDecryptPassword(strPassword);
 
     return true;
 }
 
-bool CWizDatabase::SetPassword(const QString& strOldPassword, const QString& strPassword)
+bool CWizDatabase::SetPassword(const QString& strPassword, bool bSave)
 {
-    CString strOld;
-    if (!GetPassword(strOld)) {
-        TOLOG("Failed to get old password while changing password");
-        return false;
-    }
+    m_strPassword = strPassword;
 
-    if (strOld != strOldPassword) {
-        TOLOG("Invalid password while changing password");
-        return false;
-    }
-
-    if (!SetMeta(g_strAccountSection, "Password", WizEncryptPassword(strPassword))) {
-        TOLOG("Failed to set new password while changing password");
-        return false;
+    if (bSave) {
+        if (!SetMeta(g_strAccountSection, "Password", strPassword)) {
+            TOLOG("Failed to set user password");
+            return false;
+        }
     }
 
     return true;
