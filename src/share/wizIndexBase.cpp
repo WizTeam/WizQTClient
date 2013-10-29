@@ -710,7 +710,7 @@ bool CWizIndexBase::modifyUserEx(const WIZBIZUSER& user)
     WIZBIZUSER userOld;
     userFromGUID(user.bizGUID, user.userGUID, userOld);
 
-    CString strWhere = "BIZ_GUID=%s AND USER_GUID=%s";
+    CString strWhere = "BIZ_GUID=%1 AND USER_GUID=%2";
     strWhere = strWhere.arg(STR2SQL(user.bizGUID)).arg(STR2SQL(user.userGUID));
 
     CString strFormat = FormatUpdateSQLByWhere(TABLE_NAME_WIZ_USER,
