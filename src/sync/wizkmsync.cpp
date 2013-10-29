@@ -84,6 +84,13 @@ void CWizKMSyncThread::startSync()
     start();
 }
 
+void CWizKMSyncThread::stopSync()
+{
+    if (isRunning() && m_pEvents) {
+        m_pEvents->SetStop(true);
+    }
+}
+
 void CWizKMSyncThread::on_syncFinished()
 {
     m_pEvents->deleteLater();

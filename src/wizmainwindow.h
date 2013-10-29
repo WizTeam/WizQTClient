@@ -57,7 +57,8 @@ public:
     void saveStatus();
     void restoreStatus();
     ~MainWindow();
-    bool requestThreadsQuit();
+
+    void cleanOnQuit();
 
     void setRestart(bool b) { m_bRestart = b; }
     bool isRestart() const { return m_bRestart; }
@@ -66,7 +67,8 @@ public:
     bool isLogout() const { return m_bLogoutRestart; }
 
 protected:
-    virtual void resizeEvent(QResizeEvent *event);
+    virtual bool eventFilter(QObject* watched, QEvent* event);
+    virtual void resizeEvent(QResizeEvent* event);
     virtual void showEvent(QShowEvent* event);
     virtual void closeEvent(QCloseEvent* event);
 
@@ -77,12 +79,10 @@ private:
     QPointer<CWizKMSyncThread> m_sync;
     QPointer<CWizUserVerifyDialog> m_userVerifyDialog;
     QPointer<QTimer> m_syncTimer;
-    //QPointer<CWizGroupMessage> m_messageSync;
     QPointer<CWizConsoleDialog> m_console;
     QPointer<CWizUpgrade> m_upgrade;
     QPointer<CWizCertManager> m_certManager;
     QPointer<CWizUserCipherForm> m_cipherForm;
-    //QPointer<CWizDownloadObjectDataDialog> m_objectDownloadDialog;
 
     CWizObjectDataDownloaderHost* m_objectDownloaderHost;
     CWizUserAvatarDownloaderHost* m_avatarDownloaderHost;
@@ -124,11 +124,6 @@ private:
     bool m_bUpdatingSelection;
 
     WIZDOCUMENTDATA m_documentForEditing;
-
-    QTimer m_timerQuit;
-    bool m_bReadyQuit;
-    // indicate close event is fired internal or external
-    bool m_bRequestQuit;
 
 private:
     void initActions();
@@ -247,7 +242,7 @@ public Q_SLOTS:
     void on_client_splitterMoved(int pos, int index);
 #endif
 
-    void on_quitTimeout();
+    void on_application_aboutToQuit();
 
     void on_checkUpgrade_finished(bool bUpgradeAvaliable);
 

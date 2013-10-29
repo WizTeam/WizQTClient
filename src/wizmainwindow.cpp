@@ -6,6 +6,7 @@
 #include <QDesktopWidget>
 #include <QMessageBox>
 #include <QUndoStack>
+#include <QEvent>
 
 
 #ifdef Q_OS_MAC
@@ -34,7 +35,6 @@
 #include "wizdocumenthistory.h"
 
 #include "wizButton.h"
-//#include "widgets/qsegmentcontrol.h"
 
 #include "wizEditorToolBar.h"
 #include "wizProgressDialog.h"
@@ -61,12 +61,9 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     , m_sync(new CWizKMSyncThread(dbMgr.db(), this))
     , m_syncTimer(new QTimer(this))
     , m_searchIndexer(new CWizSearchIndexer(m_dbMgr))
-    //, m_messageSync(new CWizGroupMessage(dbMgr.db()))
-    //, m_console(new CWizConsoleDialog(*this, this))
     , m_upgrade(new CWizUpgrade())
     , m_certManager(new CWizCertManager(*this))
     , m_cipherForm(new CWizUserCipherForm(*this, this))
-    //, m_objectDownloadDialog(new CWizDownloadObjectDataDialog(dbMgr, this))
     , m_objectDownloaderHost(new CWizObjectDataDownloaderHost(dbMgr, this))
     , m_avatarDownloaderHost(new CWizUserAvatarDownloaderHost(dbMgr.db().GetAvatarPath(), this))
     , m_transitionView(new CWizDocumentTransitionView(this))
@@ -87,32 +84,23 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     , m_bRestart(false)
     , m_bLogoutRestart(false)
     , m_bUpdatingSelection(false)
-    , m_bReadyQuit(false)
-    , m_bRequestQuit(false)
 {
+    connect(qApp, SIGNAL(aboutToQuit()), SLOT(on_application_aboutToQuit()));
+    connect(qApp, SIGNAL(lastWindowClosed()), qApp, SLOT(quit())); // Qt bug: Qt5 bug
+    qApp->installEventFilter(this);
+
     CWizCloudPool::instance()->init(&m_dbMgr);
-    //CWizCloudPool::instance()->start();
 
     // search and full text search
     QThread *threadFTS = new QThread();
     m_searchIndexer->moveToThread(threadFTS);
     threadFTS->start(QThread::LowestPriority);
 
-    //m_searchThread = new QThread();
-    //m_searchThread->start();
-
     // upgrade check
     QThread *thread = new QThread();
     m_upgrade->moveToThread(thread);
     connect(m_upgrade, SIGNAL(checkFinished(bool)), SLOT(on_checkUpgrade_finished(bool)));
     thread->start();
-
-    // upgrade check thread
-#ifndef Q_OS_MAC
-    // start update check thread
-    //QTimer::singleShot(3 * 1000, m_upgrade, SLOT(checkUpgradeBegin()));
-    //connect(m_upgrade, SIGNAL(finished()), SLOT(on_upgradeThread_finished()));
-#endif // Q_OS_MAC
 
     // syncing thread
     connect(m_sync, SIGNAL(processLog(const QString&)), SLOT(on_syncProcessLog(const QString&)));
@@ -149,6 +137,60 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
 #endif // Q_OS_MAC
 }
 
+bool MainWindow::eventFilter(QObject* watched, QEvent* event)
+{
+    // Qt issue: issue? User quit for mac dock send close event to qApp?
+    // I was throught close event only send to widget.
+    if (watched == qApp) {
+        if (event->type() == QEvent::Close) {
+            qApp->quit();
+            return true;
+        } else {
+            return false;
+        }
+    } else {
+        return QMainWindow::eventFilter(watched, event);
+    }
+}
+
+void MainWindow::on_application_aboutToQuit()
+{
+    cleanOnQuit();
+}
+
+void MainWindow::cleanOnQuit()
+{
+    saveStatus();
+
+    // FIXME : if document not valid will lead crash
+    m_doc->web()->saveDocument(false);
+
+    m_sync->stopSync();
+    m_searchIndexer->abort();
+
+    m_sync->wait();
+}
+
+void MainWindow::closeEvent(QCloseEvent* event)
+{
+#ifdef Q_OS_MAC
+    // Qt issue: use hide() directly lead window can't be shown when click dock icon
+    // call native API instead and ignore issue event.
+    ProcessSerialNumber pn;
+    GetFrontProcess(&pn);
+    ShowHideProcess(&pn,false);
+    event->ignore();
+#else
+    event->accept();
+    qApp->quit();
+#endif
+}
+
+void MainWindow::on_actionExit_triggered()
+{
+    qApp->quit();
+}
+
 void MainWindow::resizeEvent(QResizeEvent *event)
 {
     Q_UNUSED(event);
@@ -162,84 +204,6 @@ void MainWindow::showEvent(QShowEvent* event)
 
     m_statusBar->hide();
     m_cipherForm->hide();
-}
-
-bool MainWindow::requestThreadsQuit()
-{
-    bool bOk = true;
-//    if (m_sync->isRunning()) {
-//        m_sync->abort();
-//        m_sync->quit();
-//        bOk = false;
-//    }
-
-    m_searchIndexer->abort();
-
-//    if (m_searchIndexer->isRunning()) {
-//        m_searchIndexer->worker()->abort();
-//        m_searchIndexer->quit();
-//        bOk = false;
-//    }
-
-    return bOk;
-}
-
-void MainWindow::on_quitTimeout()
-{
-    if (requestThreadsQuit()) {
-        saveStatus();
-
-        // FIXME : if document not valid will lead crash
-        m_doc->web()->saveDocument(false);
-
-        m_bReadyQuit = true;
-        // back to closeEvent
-        close();
-    }
-}
-
-void MainWindow::closeEvent(QCloseEvent* event)
-{
-    // internal close event
-    if (m_bRequestQuit) {
-        if (m_bReadyQuit) {
-            event->accept();
-            return;
-        } else {
-            event->ignore();
-            hide();
-            m_timerQuit.start();
-            return;
-        }
-    }
-
-    // system close event
-    if (isActiveWindow()) {
-        // This is bug of Qt!
-        // use hide() directly lead window can't be shown when click dock icon
-        // call native API instead
-#ifdef Q_OS_MAC
-        ProcessSerialNumber pn;
-        GetFrontProcess(&pn);
-        ShowHideProcess(&pn,false);
-#else
-        // just quit on linux
-        on_actionExit_triggered();
-#endif
-    } else {
-        on_actionExit_triggered();
-    }
-
-    event->ignore();
-}
-
-void MainWindow::on_actionExit_triggered()
-{
-    m_bRequestQuit = true;
-
-    m_timerQuit.setInterval(100);
-    connect(&m_timerQuit, SIGNAL(timeout()), SLOT(on_quitTimeout()));
-    m_timerQuit.start();
 }
 
 void MainWindow::on_checkUpgrade_finished(bool bUpgradeAvaliable)
@@ -1195,7 +1159,6 @@ void MainWindow::on_options_settingsChanged(WizOptionsType type)
             m_syncTimer->setInterval(nInterval * 60 * 1000);
         }
 
-        //m_sync->resetProxy();
     } else if (wizoptionsFont == type) {
         m_doc->web()->editorResetFont();
     }

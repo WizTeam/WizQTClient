@@ -33,6 +33,7 @@ class CWizKMSyncThread : public QThread
 public:
     CWizKMSyncThread(CWizDatabase& db, QObject* parent = 0);
     void startSync();
+    void stopSync();
 
 protected:
     virtual void run();
