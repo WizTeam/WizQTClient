@@ -1,6 +1,6 @@
 # Maintainer: Albert.Zhou <albert.zhou@wiz.cn>
 pkgname=wiznote
-pkgver=2.0.50
+pkgver=2.0.56
 pkgrel=1
 pkgdesc="Opensource cross-platform cloud based note-taking client"
 arch=('i686' 'x86_64')
@@ -12,8 +12,8 @@ install=wiznote.install
 #source=("$pkgname::git+https://github.com/WizTeam/WizQTClient.git#tag=v2.0.38") # Use git is too slow
 #md5sums=('SKIP')
 wiznote_project_name="WizQTClient"
-source=("$pkgname.tar.gz::https://github.com/WizTeam/WizQTClient/archive/v2.0.50.tar.gz")
-md5sums=('2223d2fa46dec4c7b2dcb70d4d7539ae')
+source=("$pkgname.tar.gz::https://github.com/WizTeam/WizQTClient/archive/v2.0.56.tar.gz")
+md5sums=('52c59870cee5691d3f50c0f84344714e')
 
 build() {
 	cd "$srcdir/$wiznote_project_name-$pkgver"

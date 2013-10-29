@@ -4,11 +4,11 @@ Source: https://github.com/WizTeam/WizQTClient
 
 Files: src/*
 Copyright: 2012 wiz.corp
-License: GPL-3+ and commercial
+License: GPL-3+ or commercial
  .
  This package is free software; you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
- the Free Software Foundation; either version 2 of the License, or
+ the Free Software Foundation; either version 3 of the License, or
  (at your option) any later version.
  .
  This package is distributed in the hope that it will be useful,
@@ -20,4 +20,4 @@ License: GPL-3+ and commercial
  along with this program. If not, see <http://www.gnu.org/licenses/>
  .
  On Debian systems, the complete text of the GNU General
- Public License version 2 can be found in "/usr/share/common-licenses/GPL-2".
+ Public License version 3 can be found in "/usr/share/common-licenses/GPL-2".
