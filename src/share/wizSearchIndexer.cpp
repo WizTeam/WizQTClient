@@ -101,25 +101,23 @@ bool CWizSearchIndexer::buildFTSIndexByDatabase(CWizDatabase& db)
     if (arrayDocuments.empty())
         return true;
 
-    TOLOG(tr("Build FTS index begin: ") + db.name());
-    TOLOG(tr("Total %1 documents needs to build search index").arg(arrayDocuments.size()));
-
     int nErrors = 0;
-    for (int i = 0; i < arrayDocuments.size(); i++) {
+    int nTotal = arrayDocuments.size();
+    for (int i = 0; i < nTotal; i++) {
         if (m_bAbort) {
             break;
         }
 
         const WIZDOCUMENTDATAEX& doc = arrayDocuments.at(i);
 
-        TOLOG(tr("Update search index [%1]: %2").arg(i).arg(doc.strTitle));
+        TOLOG(tr("Update search index (%1/%2): %3").arg(i).arg(nTotal).arg(doc.strTitle));
         if (!updateDocument(doc)) {
             TOLOG(tr("[WARNING] failed to update: %1").arg(doc.strTitle));
             nErrors++;
         }
 
         // release CPU
-        usleep(300);
+        usleep(100);
     }
 
     if (nErrors >= 3) {
@@ -127,7 +125,6 @@ bool CWizSearchIndexer::buildFTSIndexByDatabase(CWizDatabase& db)
         return false;
     }
 
-    //TOLOG(tr("Build FTS index end succeed: ") + db.name());
     return true;
 }
 
