@@ -603,10 +603,19 @@ void CWizCategoryView::createDocument(WIZDOCUMENTDATA& data)
     QString strLocation = "/My Notes/";
     WIZTAGDATA tag;
 
-    // the item maybe private folder's trash or group trash
-    // FIXME: select group trash and trigger new note will create private document
-    if (CWizCategoryViewFolderItem* pItem = currentCategoryItem<CWizCategoryViewFolderItem>())
+    // trash first, because it's inherited
+    if (CWizCategoryViewTrashItem* pItem = currentCategoryItem<CWizCategoryViewTrashItem>())
     {
+        // only handle group trash
+        if (pItem->kbGUID() != m_dbMgr.db().kbGUID()) {
+            strKbGUID = pItem->kbGUID();
+            strLocation = pItem->location(); // FIXME: group trash unable to fallback
+            bFallback = false;
+        }
+    }
+    else if (CWizCategoryViewFolderItem* pItem = currentCategoryItem<CWizCategoryViewFolderItem>())
+    {
+        // only handle individual folders except trash
         if (!CWizDatabase::IsInDeletedItems(pItem->location())) {
             strLocation = pItem->location();
             bFallback = false;
@@ -614,11 +623,15 @@ void CWizCategoryView::createDocument(WIZDOCUMENTDATA& data)
     }
     else if (CWizCategoryViewTagItem* pItem = currentCategoryItem<CWizCategoryViewTagItem>())
     {
-        strKbGUID = m_dbMgr.db().kbGUID();
         tag = pItem->tag();
         bFallback = false;
     }
     else if (CWizCategoryViewGroupRootItem* pItem = currentCategoryItem<CWizCategoryViewGroupRootItem>())
+    {
+        strKbGUID = pItem->kbGUID();
+        bFallback = false;
+    }
+    else if (CWizCategoryViewGroupNoTagItem* pItem = currentCategoryItem<CWizCategoryViewGroupNoTagItem>())
     {
         strKbGUID = pItem->kbGUID();
         bFallback = false;
