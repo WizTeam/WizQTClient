@@ -8,7 +8,6 @@
 
 #include "widgets/wizScrollBar.h"
 
-#include "share/wizimagepushbutton.h"
 #include "wizDocumentWebView.h"
 #include "wiztaglistwidget.h"
 #include "wizattachmentlistwidget.h"

@@ -11,7 +11,7 @@
 #include "share/wizuihelper.h"
 #include "share/wizui.h"
 #include "share/wizmultilinelistwidget.h"
-#include "share/wizimagepushbutton.h"
+//#include "share/wizimagepushbutton.h"
 
 #include "utils/styleHelper.h"
 
@@ -81,7 +81,7 @@ private:
 protected:
     virtual void drawCategoryViewItem(const QStyleOptionViewItemV4 *option, QPainter *painter, const CWizCategoryBaseView *widget) const;
     virtual void drawMultiLineListWidgetItem(const QStyleOptionViewItemV4 *option, QPainter *painter, const CWizMultiLineListWidget *widget) const;
-    virtual void drawImagePushButton(const QStyleOptionButton *option, QPainter *painter, const CWizImagePushButton *button) const;
+    //virtual void drawImagePushButton(const QStyleOptionButton *option, QPainter *painter, const CWizImagePushButton *button) const;
     //virtual void drawSplitter(const QStyleOption *option, QPainter *painter, const QSplitter *splitter) const;
 
     void drawDocumentListViewItem(const QStyleOptionViewItemV4* option,
@@ -1125,81 +1125,81 @@ void CWizNoteStyle::drawMultiLineListWidgetItem(const QStyleOptionViewItemV4 *vo
 }
 
 
-void CWizNoteStyle::drawImagePushButton(const QStyleOptionButton *option, QPainter *painter, const CWizImagePushButton *button) const
-{
-    bool disabled = false;
-    bool pressed = false;
-    bool hot = false;
-    //
-    State flags = option->state;
-    if (!(flags & State_Enabled))
-        disabled = true;
-    else if (flags & (State_Sunken | State_On))
-        pressed = true;
-    else if (flags & State_MouseOver)
-        hot = true;
-    //
-    QRect rect(option->rect);
-    QRect rectImage = rect;
-    //
-    CString label = button->text();
-    if (!label.isEmpty())
-    {
-        rectImage.setWidth(std::min<int>(16 + 16, rect.width()));
-    }
-    //
-    if (disabled)
-    {
-        m_imagePushButtonDisabled.Draw(painter, rectImage, 0);
-    }
-    else if (pressed)
-    {
-        m_imagePushButtonPressed.Draw(painter, rectImage, 0);
-    }
-    else if (hot)
-    {
-        m_imagePushButtonHot.Draw(painter, rectImage, 0);
-    }
-    else
-    {
-        m_imagePushButton.Draw(painter, rectImage, 0);
-    }
-    //
-    QIcon::Mode mode = disabled ? QIcon::Disabled : QIcon::Normal;
-    QPixmap pixmap = button->icon().pixmap(16, 16, mode);
-    if (!pixmap.isNull())
-    {
-        QPoint pt = rectImage.center();
-        pt.setX(pt.x() - pixmap.width() / 2 + 1);
-        pt.setY(pt.y() - pixmap.height() / 2 + 1);
-        //
-        painter->drawPixmap(pt, pixmap);
-    }
-    //
-    if (!label.isEmpty())
-    {
-        QRect rectLabel = rect;
-        rectLabel.setLeft(rectImage.right() - 8);
-        rectLabel.setHeight(m_imagePushButtonLabel.actualSize().height());
-        //
-        if (button->redFlag())
-        {
-            m_imagePushButtonLabelRed.Draw(painter, rectLabel, 0);
-        }
-        else
-        {
-            m_imagePushButtonLabel.Draw(painter, rectLabel, 0);
-        }
-        //
-        QRect rectLabelText = rectLabel;
-        rectLabelText.setRight(rectLabelText.right() - 2);    //shadow
-        rectLabelText.setBottom(rectLabelText.bottom() - 4);    //shadow
-        painter->save();
-        painter->setFont(m_fontImagePushButtonLabel);
-        ::WizDrawTextSingleLine(painter, rectLabelText, label,  Qt::TextSingleLine | Qt::AlignVCenter | Qt::AlignCenter, QColor(0xff, 0xff, 0xff), false);
-        painter->restore();
-    }
-}
+//void CWizNoteStyle::drawImagePushButton(const QStyleOptionButton *option, QPainter *painter, const CWizImagePushButton *button) const
+//{
+//    bool disabled = false;
+//    bool pressed = false;
+//    bool hot = false;
+//    //
+//    State flags = option->state;
+//    if (!(flags & State_Enabled))
+//        disabled = true;
+//    else if (flags & (State_Sunken | State_On))
+//        pressed = true;
+//    else if (flags & State_MouseOver)
+//        hot = true;
+//    //
+//    QRect rect(option->rect);
+//    QRect rectImage = rect;
+//    //
+//    CString label = button->text();
+//    if (!label.isEmpty())
+//    {
+//        rectImage.setWidth(std::min<int>(16 + 16, rect.width()));
+//    }
+//    //
+//    if (disabled)
+//    {
+//        m_imagePushButtonDisabled.Draw(painter, rectImage, 0);
+//    }
+//    else if (pressed)
+//    {
+//        m_imagePushButtonPressed.Draw(painter, rectImage, 0);
+//    }
+//    else if (hot)
+//    {
+//        m_imagePushButtonHot.Draw(painter, rectImage, 0);
+//    }
+//    else
+//    {
+//        m_imagePushButton.Draw(painter, rectImage, 0);
+//    }
+//    //
+//    QIcon::Mode mode = disabled ? QIcon::Disabled : QIcon::Normal;
+//    QPixmap pixmap = button->icon().pixmap(16, 16, mode);
+//    if (!pixmap.isNull())
+//    {
+//        QPoint pt = rectImage.center();
+//        pt.setX(pt.x() - pixmap.width() / 2 + 1);
+//        pt.setY(pt.y() - pixmap.height() / 2 + 1);
+//        //
+//        painter->drawPixmap(pt, pixmap);
+//    }
+//    //
+//    if (!label.isEmpty())
+//    {
+//        QRect rectLabel = rect;
+//        rectLabel.setLeft(rectImage.right() - 8);
+//        rectLabel.setHeight(m_imagePushButtonLabel.actualSize().height());
+//        //
+//        if (button->redFlag())
+//        {
+//            m_imagePushButtonLabelRed.Draw(painter, rectLabel, 0);
+//        }
+//        else
+//        {
+//            m_imagePushButtonLabel.Draw(painter, rectLabel, 0);
+//        }
+//        //
+//        QRect rectLabelText = rectLabel;
+//        rectLabelText.setRight(rectLabelText.right() - 2);    //shadow
+//        rectLabelText.setBottom(rectLabelText.bottom() - 4);    //shadow
+//        painter->save();
+//        painter->setFont(m_fontImagePushButtonLabel);
+//        ::WizDrawTextSingleLine(painter, rectLabelText, label,  Qt::TextSingleLine | Qt::AlignVCenter | Qt::AlignCenter, QColor(0xff, 0xff, 0xff), false);
+//        painter->restore();
+//    }
+//}
 
 //void CWizNoteStyle::drawSplitter(const QStyleOption *option, QPainter *painter, const QSplitter *splitter) const
 //{
@@ -1247,21 +1247,21 @@ void CWizNoteStyle::drawControl(ControlElement element, const QStyleOption *opti
             }
             break;
         }
-    case CE_PushButton:
-        {
-            const QStyleOptionButton* vopt = qstyleoption_cast<const QStyleOptionButton *>(option);
-            ATLASSERT(vopt);
-            //
-            if (const CWizImagePushButton *button = dynamic_cast<const CWizImagePushButton *>(widget))
-            {
-                drawImagePushButton(vopt, painter, button);
-            }
-            else
-            {
-                CWizNoteBaseStyle::drawControl(element, option, painter, widget);
-            }
-        }
-        break;
+    //case CE_PushButton:
+    //    {
+    //        const QStyleOptionButton* vopt = qstyleoption_cast<const QStyleOptionButton *>(option);
+    //        ATLASSERT(vopt);
+    //        //
+    //        if (const CWizImagePushButton *button = dynamic_cast<const CWizImagePushButton *>(widget))
+    //        {
+    //            drawImagePushButton(vopt, painter, button);
+    //        }
+    //        else
+    //        {
+    //            CWizNoteBaseStyle::drawControl(element, option, painter, widget);
+    //        }
+    //    }
+    //    break;
     //case CE_Splitter:
     //{
     //    if (const QSplitter* splitter = dynamic_cast<const QSplitter *>(widget))

@@ -7,7 +7,6 @@
 #include "wizdef.h"
 #include "share/wizuihelper.h"
 #include "share/wizsettings.h"
-#include "share/wizsyncthread.h"
 #include "wizUpgrade.h"
 #include "wizconsoledialog.h"
 #include "wizCategoryView.h"
@@ -268,7 +267,7 @@ public:
     QObject* DocumentsCtrl();
     Q_PROPERTY(QObject* DocumentsCtrl READ DocumentsCtrl)
 
-    QObject* DatabaseManager() { return &m_dbMgr; }
+    QObject* DatabaseManager();
     Q_PROPERTY(QObject* DatabaseManager READ DatabaseManager)
 
     Q_INVOKABLE QObject* CreateWizObject(const QString& strObjectID);

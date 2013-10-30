@@ -4,11 +4,11 @@
 #include <QListWidget>
 
 #include "wizdef.h"
-#include "wizmainwindow.h"
 #include "share/wizobject.h"
 #include "share/wizThumbIndexCache.h"
 #include "share/wizuihelper.h"
 #include "wizDocumentListViewItem.h"
+
 
 class CWizTagListWidget;
 class CWizFolderSelector;

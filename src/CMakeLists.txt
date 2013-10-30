@@ -3,14 +3,12 @@ project(wiznote)
 set(wiznote_SOURCES_MAC
     mac/wizSearchWidget.mm
     mac/wizmachelper.mm
-    mac/qmaccocoaviewcontainer.mm
 )
 
 set(wiznote_HEADERS_MAC
     mac/wizmachelper.h
     mac/wizmachelper_mm.h
     mac/wizSearchWidget_mm.h
-    mac/qmaccocoaviewcontainer.h
 )
 
 set(wiznote_SOURCES
@@ -36,7 +34,6 @@ set(wiznote_SOURCES
     share/wizwin32helper.cpp
     share/wizdrawtexthelper.cpp
     share/wizuihelper.cpp
-    #share/wizdownloadobjectdata.cpp
     share/wizcreateaccount.cpp
     share/wizcommonui.cpp
     share/wizanimateaction.cpp
@@ -44,7 +41,6 @@ set(wiznote_SOURCES
     share/wizmultilinelistwidget.cpp
     share/wizfileiconprovider.cpp
     share/wizwindowshelper.cpp
-    share/wizimagepushbutton.cpp
     share/wizIndexBase.cpp
     share/wizIndex.cpp
     share/wizthumbindex.cpp
@@ -63,7 +59,6 @@ set(wiznote_SOURCES
     wizactions.cpp
     wiznotestyle.cpp
     wizLineInputDialog.cpp
-    #wizdownloadobjectdatadialog.cpp
     wizdocumenthistory.cpp
     wizattachmentlistwidget.cpp
     wiztaglistwidget.cpp
@@ -132,7 +127,6 @@ set(wiznote_HEADERS
     share/wizwin32helper.h
     share/wizdrawtexthelper.h
     share/wizuihelper.h
-    #share/wizdownloadobjectdata.h
     share/wizcreateaccount.h
     share/wizcommonui.h
     share/wizanimateaction.h
@@ -140,7 +134,6 @@ set(wiznote_HEADERS
     share/wizmultilinelistwidget.h
     share/wizfileiconprovider.h
     share/wizwindowshelper.h
-    share/wizimagepushbutton.h
     share/wizIndexBase.h
     share/wizIndex.h
     share/wizthumbindex.h
@@ -158,7 +151,6 @@ set(wiznote_HEADERS
     wizDocumentListViewItem.h
     wizDocumentView.h
     wizDocumentWebView.h
-    #wizdownloadobjectdatadialog.h
     wizdocumenthistory.h
     wizattachmentlistwidget.h
     wiztaglistwidget.h
@@ -226,7 +218,6 @@ set(wiznote_HEADERS
 
 set(wiznote_FORMS
     ui/wizLineInputDialog.ui
-    #ui/wizdownloadobjectdatadialog.ui
     ui/wizconsoledialog.ui
     ui/wizpreferencedialog.ui
     ui/wizproxydialog.ui

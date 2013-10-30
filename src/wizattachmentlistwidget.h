@@ -3,7 +3,6 @@
 
 #include "share/wizpopupwidget.h"
 #include "share/wizmultilinelistwidget.h"
-#include "share/wizimagepushbutton.h"
 #include "share/wizfileiconprovider.h"
 #include "wizdownloadobjectdatadialog.h"
 #include "share/wizObjectDataDownloader.h"

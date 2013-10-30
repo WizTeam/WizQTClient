@@ -1336,6 +1336,11 @@ QObject* MainWindow::DocumentsCtrl()
     return m_documents;
 }
 
+QObject* MainWindow::DatabaseManager()
+{
+    return &m_dbMgr;
+}
+
 QObject* MainWindow::CreateWizObject(const QString& strObjectID)
 {
     CString str(strObjectID);

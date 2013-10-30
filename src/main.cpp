@@ -11,6 +11,7 @@
 #include "wizLoginDialog.h"
 #include "share/wizsettings.h"
 #include "share/wizwin32helper.h"
+#include "share/wizDatabaseManager.h"
 
 
 int main(int argc, char *argv[])

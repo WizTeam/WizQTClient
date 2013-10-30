@@ -6,6 +6,7 @@
 
 #include "wizdef.h"
 #include "wizmainwindow.h"
+#include "share/wizDatabaseManager.h"
 
 #define WIZ_SELECTION_ITEM_MAX 5
 #define WIZ_SELECTION_ITEM_MARGIN_Y 200

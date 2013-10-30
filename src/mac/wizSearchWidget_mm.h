@@ -5,8 +5,8 @@
 
 // Qt5 remove QMacCocoaViewContainter from mainstream, but still left headers on
 // include direcotry, it's a bug!!! critical bug!!! ugly bug!!!
-//#include <QMacCocoaViewContainer>
-#include "qmaccocoaviewcontainer.h"
+#include <QMacCocoaViewContainer>
+//#include "qmaccocoaviewcontainer.h"
 
 class CWizExplorerApp;
 
