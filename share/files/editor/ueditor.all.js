@@ -4172,7 +4172,7 @@ var fillCharReg = new RegExp(domUtils.fillChar, 'g');
                         '<html xmlns=\'http://www.w3.org/1999/xhtml\' class=\'view\' ><head>' +
                         '<style type=\'text/css\'>' +
                         //设置四周的留边
-                        '.view{margin-top:0;margin-bottom:4px;margin-left:4px;margin-right:4px;word-wrap:break-word;cursor:text;height:100%;}\n' +
+                        '.view{padding:0;word-wrap:break-word;cursor:text;height:90%;}\n' +
                         //设置默认字体和字号
                         //font-family不能呢随便改，在safari下fillchar会有解析问题
                         'body{margin:8px;font-family:sans-serif;font-size:16px;}' +
@@ -4370,6 +4370,7 @@ var fillCharReg = new RegExp(domUtils.fillChar, 'g');
 
             // Modify by Albert.Zhou, FIXME: html tag reserve 8px height and this should reduced from editor height
             this.body.style.height = height - 8 + 'px';
+            //this.body.style.height = height + 'px';
         },
 
         addshortcutkey: function (cmd, keys) {
@@ -7188,6 +7189,7 @@ UE.plugins['font'] = function () {
                 for (var p in node.attrs) {
                     switch (p) {
                         case 'size':
+                            // Modified by Albert.Zhou, map to corect font size.
                             cssStyle.push('font-size:' + ({
                                 '1':'10',
                                 '2':'12',
@@ -7197,6 +7199,7 @@ UE.plugins['font'] = function () {
                                 '6':'32',
                                 '7':'48'
                             }[node.attrs[p]] || node.attrs[p]) + 'px');
+                            //cssStyle.push('font-size:' + node.attrs[p] + 'px');
                             break;
                         case 'color':
                             cssStyle.push('color:' + node.attrs[p]);
@@ -7441,6 +7444,7 @@ UE.plugins['font'] = function () {
         })(p, fonts[p]);
     }
 };
+
 ///import core
 ///commands 超链接,取消链接
 ///commandsName  Link,Unlink
@@ -9424,60 +9428,6 @@ UE.plugins['pagebreak'] = function () {
         }
     };
 };
-///import core
-///commands 本地图片引导上传
-///commandsName  WordImage
-///commandsTitle  本地图片引导上传
-///commandsDialog  dialogs\wordimage
-
-
-UE.plugins["wordimage"] = function () {
-    var me = this,
-        images;
-    // Remove by Albert.Zhou
-    //me.addInputRule(function (root) {
-    //    utils.each(root.getNodesByTagName('img'), function (img) {
-    //        var attrs = img.attrs,
-    //            flag = parseInt(attrs.width) < 128 || parseInt(attrs.height) < 43,
-    //            opt = me.options,
-    //            src = opt.UEDITOR_HOME_URL + 'themes/default/images/spacer.gif';
-    //        if (attrs['_src'] && attrs['_src'].indexOf("file:///")!==-1) {
-    //            img.setAttr({
-    //                width:attrs.width,
-    //                height:attrs.height,
-    //                alt:attrs.alt,
-    //                word_img:attrs._src,
-    //                src:src,
-    //                _src:src,
-    //                'style':'background:url(' + ( flag ? opt.themePath + opt.theme + '/images/word.gif' : opt.langPath + opt.lang + '/images/localimage.png') + ') no-repeat center center;border:1px solid #ddd'
-    //            })
-    //        }
-    //    })
-    //});
-    me.commands['wordimage'] = {
-        execCommand:function () {
-            images = domUtils.getElementsByTagName(me.document.body, "img");
-            var urlList = [];
-            for (var i = 0, ci; ci = images[i++];) {
-                var url = ci.getAttribute("word_img");
-                url && urlList.push(url);
-            }
-            if (images.length) {
-                this["word_img"] = urlList;
-            }
-        },
-        queryCommandState:function () {
-            images = domUtils.getElementsByTagName(me.document.body, "img");
-            for (var i = 0, ci; ci = images[i++];) {
-                if (ci.getAttribute("word_img")) {
-                    return 1;
-                }
-            }
-            return -1;
-        }
-    };
-
-};
 UE.plugins['dragdrop'] = function (){
 
     var me = this;
@@ -9807,291 +9757,6 @@ UE.plugins['undo'] = function () {
     });
 
 };
-
-///import core
-///import plugins/inserthtml.js
-///import plugins/undo.js
-///import plugins/serialize.js
-///commands 粘贴
-///commandsName  PastePlain
-///commandsTitle  纯文本粘贴模式
-/*
- ** @description 粘贴
- * @author zhanyi
- */
-//UE.plugins['paste'] = function () {
-//    function getClipboardData(callback) {
-//        var doc = this.document;
-//        if (doc.getElementById('baidu_pastebin')) {
-//            return;
-//        }
-//        var range = this.selection.getRange(),
-//            bk = range.createBookmark(),
-//        //创建剪贴的容器div
-//            pastebin = doc.createElement('div');
-//        pastebin.id = 'baidu_pastebin';
-//        // Safari 要求div必须有内容，才能粘贴内容进来
-//        browser.webkit && pastebin.appendChild(doc.createTextNode(domUtils.fillChar + domUtils.fillChar));
-//        doc.body.appendChild(pastebin);
-//        //trace:717 隐藏的span不能得到top
-//        //bk.start.innerHTML = '&nbsp;';
-//        bk.start.style.display = '';
-//        pastebin.style.cssText = "position:absolute;width:1px;height:1px;overflow:hidden;left:-1000px;white-space:nowrap;top:" +
-//            //要在现在光标平行的位置加入，否则会出现跳动的问题
-//            domUtils.getXY(bk.start).y + 'px';
-//
-//        range.selectNodeContents(pastebin).select(true);
-//
-//        setTimeout(function () {
-//            if (browser.webkit) {
-//                for (var i = 0, pastebins = doc.querySelectorAll('#baidu_pastebin'), pi; pi = pastebins[i++];) {
-//                    if (domUtils.isEmptyNode(pi)) {
-//                        domUtils.remove(pi);
-//                    } else {
-//                        pastebin = pi;
-//                        break;
-//                    }
-//                }
-//            }
-//            try {
-//                pastebin.parentNode.removeChild(pastebin);
-//            } catch (e) {
-//            }
-//            range.moveToBookmark(bk).select(true);
-//            callback(pastebin);
-//        }, 0);
-//    }
-//
-//    var me = this;
-//
-//    var txtContent, htmlContent, address;
-//
-//    function filter(div) {
-//        var html;
-//        if (div.firstChild) {
-//            //去掉cut中添加的边界值
-//            var nodes = domUtils.getElementsByTagName(div, 'span');
-//            for (var i = 0, ni; ni = nodes[i++];) {
-//                if (ni.id == '_baidu_cut_start' || ni.id == '_baidu_cut_end') {
-//                    domUtils.remove(ni);
-//                }
-//            }
-//
-//            if (browser.webkit) {
-//
-//                var brs = div.querySelectorAll('div br');
-//                for (var i = 0, bi; bi = brs[i++];) {
-//                    var pN = bi.parentNode;
-//                    if (pN.tagName == 'DIV' && pN.childNodes.length == 1) {
-//                        pN.innerHTML = '<p><br/></p>';
-//                        domUtils.remove(pN);
-//                    }
-//                }
-//                var divs = div.querySelectorAll('#baidu_pastebin');
-//                for (var i = 0, di; di = divs[i++];) {
-//                    var tmpP = me.document.createElement('p');
-//                    di.parentNode.insertBefore(tmpP, di);
-//                    while (di.firstChild) {
-//                        tmpP.appendChild(di.firstChild);
-//                    }
-//                    domUtils.remove(di);
-//                }
-//
-//                var metas = div.querySelectorAll('meta');
-//                for (var i = 0, ci; ci = metas[i++];) {
-//                    domUtils.remove(ci);
-//                }
-//
-//                var brs = div.querySelectorAll('br');
-//                for (i = 0; ci = brs[i++];) {
-//                    if (/^apple-/i.test(ci.className)) {
-//                        domUtils.remove(ci);
-//                    }
-//                }
-//            }
-//            if (browser.gecko) {
-//                var dirtyNodes = div.querySelectorAll('[_moz_dirty]');
-//                for (i = 0; ci = dirtyNodes[i++];) {
-//                    ci.removeAttribute('_moz_dirty');
-//                }
-//            }
-//            if (!browser.ie) {
-//                var spans = div.querySelectorAll('span.Apple-style-span');
-//                for (var i = 0, ci; ci = spans[i++];) {
-//                    domUtils.remove(ci, true);
-//                }
-//            }
-//
-//            //ie下使用innerHTML会产生多余的\r\n字符，也会产生&nbsp;这里过滤掉
-//            html = div.innerHTML;//.replace(/>(?:(\s|&nbsp;)*?)</g,'><');
-//
-//            //过滤word粘贴过来的冗余属性
-//            html = UE.filterWord(html);
-//            //取消了忽略空白的第二个参数，粘贴过来的有些是有空白的，会被套上相关的标签
-//            var root = UE.htmlparser(html);
-//            //如果给了过滤规则就先进行过滤
-//            if (me.options.filterRules) {
-//                UE.filterNode(root, me.options.filterRules);
-//            }
-//            //执行默认的处理
-//            me.filterInputRule(root);
-//            //针对chrome的处理
-//            if (browser.webkit) {
-//                var br = root.lastChild();
-//                if (br && br.type == 'element' && br.tagName == 'br') {
-//                    root.removeChild(br)
-//                }
-//                utils.each(me.body.querySelectorAll('div'), function (node) {
-//                    if (domUtils.isEmptyBlock(node)) {
-//                        domUtils.remove(node)
-//                    }
-//                })
-//            }
-//            html = {'html': root.toHtml()};
-//            me.fireEvent('beforepaste', html, root);
-//            //抢了默认的粘贴，那后边的内容就不执行了，比如表格粘贴
-//            if(!html.html){
-//                return;
-//            }
-//            root = UE.htmlparser(html.html,true);
-//            //如果开启了纯文本模式
-//            if (me.queryCommandState('pasteplain') === 1) {
-//                me.execCommand('insertHtml', UE.filterNode(root, me.options.filterTxtRules).toHtml(), true);
-//            } else {
-//                //文本模式
-//                UE.filterNode(root, me.options.filterTxtRules);
-//                txtContent = root.toHtml();
-//                //完全模式
-//                htmlContent = html.html;
-//
-//                address = me.selection.getRange().createAddress(true);
-//                me.execCommand('insertHtml', htmlContent, true);
-//            }
-//            me.fireEvent("afterpaste", html);
-//        }
-//    }
-//
-//    me.addListener('pasteTransfer', function (cmd, plainType) {
-//
-//        if (address && txtContent && htmlContent && txtContent != htmlContent) {
-//            var range = me.selection.getRange();
-//            range.moveToAddress(address, true);
-//
-//            if (!range.collapsed) {
-//
-//                while (!domUtils.isBody(range.startContainer)
-//                    ) {
-//                    var start = range.startContainer;
-//                    if(start.nodeType == 1){
-//                        start = start.childNodes[range.startOffset];
-//                        if(!start){
-//                            range.setStartBefore(range.startContainer);
-//                            continue;
-//                        }
-//                        var pre = start.previousSibling;
-//
-//                        if(pre && pre.nodeType == 3 && new RegExp('^[\n\r\t '+domUtils.fillChar+']*$').test(pre.nodeValue)){
-//                            range.setStartBefore(pre)
-//                        }
-//                    }
-//                    if(range.startOffset == 0){
-//                        range.setStartBefore(range.startContainer);
-//                    }else{
-//                        break;
-//                    }
-//
-//                }
-//                while (!domUtils.isBody(range.endContainer)
-//                    ) {
-//                    var end = range.endContainer;
-//                    if(end.nodeType == 1){
-//                        end = end.childNodes[range.endOffset];
-//                        if(!end){
-//                            range.setEndAfter(range.endContainer);
-//                            continue;
-//                        }
-//                        var next = end.nextSibling;
-//                        if(next && next.nodeType == 3 && new RegExp('^[\n\r\t'+domUtils.fillChar+']*$').test(next.nodeValue)){
-//                            range.setEndAfter(next)
-//                        }
-//                    }
-//                    if(range.endOffset == range.endContainer[range.endContainer.nodeType == 3 ? 'nodeValue' : 'childNodes'].length){
-//                        range.setEndAfter(range.endContainer);
-//                    }else{
-//                        break;
-//                    }
-//
-//                }
-//
-//            }
-//
-//            range.deleteContents();
-//            range.select(true);
-//            me.__hasEnterExecCommand = true;
-//            var html = htmlContent;
-//            if (plainType === 2) {
-//                html = html.replace(/<(\/?)([\w\-]+)([^>]*)>/gi, function (a, b, tagName, attrs) {
-//                    tagName = tagName.toLowerCase();
-//                    if ({img: 1}[tagName]) {
-//                        return a;
-//                    }
-//                    attrs = attrs.replace(/([\w\-]*?)\s*=\s*(("([^"]*)")|('([^']*)')|([^\s>]+))/gi, function (str, atr, val) {
-//                        if ({
-//                            'src': 1,
-//                            'href': 1,
-//                            'name': 1
-//                        }[atr.toLowerCase()]) {
-//                            return atr + '=' + val + ' '
-//                        }
-//                        return ''
-//                    });
-//                    if ({
-//                        'span': 1,
-//                        'div': 1
-//                    }[tagName]) {
-//                        return ''
-//                    } else {
-//
-//                        return '<' + b + tagName + ' ' + utils.trim(attrs) + '>'
-//                    }
-//
-//                });
-//            } else if (plainType) {
-//                html = txtContent;
-//            }
-//            me.execCommand('inserthtml', html, true);
-//            me.__hasEnterExecCommand = false;
-//            var rng = me.selection.getRange();
-//            while (!domUtils.isBody(rng.startContainer) && !rng.startOffset &&
-//                rng.startContainer[rng.startContainer.nodeType == 3 ? 'nodeValue' : 'childNodes'].length
-//                ) {
-//                rng.setStartBefore(rng.startContainer);
-//            }
-//            var tmpAddress = rng.createAddress(true);
-//            address.endAddress = tmpAddress.startAddress;
-//        }
-//    });
-//    me.addListener('ready', function () {
-//        domUtils.on(me.body, 'cut', function () {
-//            var range = me.selection.getRange();
-//            if (!range.collapsed && me.undoManger) {
-//                me.undoManger.save();
-//            }
-//        });
-//
-//        //ie下beforepaste在点击右键时也会触发，所以用监控键盘才处理
-//        domUtils.on(me.body, browser.ie || browser.opera ? 'keydown' : 'paste', function (e) {
-//            if ((browser.ie || browser.opera) && ((!e.ctrlKey && !e.metaKey) || e.keyCode != '86')) {
-//                return;
-//            }
-//            getClipboardData.call(me, function (div) {
-//                filter(div);
-//            });
-//        });
-//
-//    });
-//};
-
 
 ///import core
 ///commands 有序列表,无序列表
@@ -11904,6 +11569,7 @@ UE.plugins['keystrokes'] = function() {
 
     })
 };
+
 ///import core
 ///commands 修复chrome下图片不能点击的问题
 ///commandsName  FixImgClick
@@ -17597,85 +17263,6 @@ UE.plugins['catchremoteimage'] = function () {
 
     });
 };
-///import core
-///import plugins\inserthtml.js
-///import plugins\image.js
-///commandsName  snapscreen
-///commandsTitle  截屏
-/**
- * 截屏插件
- */
-UE.plugins['snapscreen'] = function(){
-    var me = this,
-        doc,
-        snapplugin;
-
-    me.setOpt({
-        snapscreenServerPort: location.port                                    //屏幕截图的server端端口
-        ,snapscreenImgAlign: ''                                //截图的图片默认的排版方式
-        ,snapscreenHost: location.hostname                                 //屏幕截图的server端文件所在的网站地址或者ip，请不要加http://
-
-    });
-    me.commands['snapscreen'] = {
-        execCommand: function(){
-            var me = this,lang = me.getLang("snapScreen_plugin");
-            if(!snapplugin){
-                var container = me.container;
-                doc = container.ownerDocument || container.document;
-                snapplugin = doc.createElement("object");
-                try{snapplugin.type = "application/x-pluginbaidusnap";}catch(e){
-                    return;
-                }
-                snapplugin.style.cssText = "position:absolute;left:-9999px;";
-                snapplugin.setAttribute("width","0");
-                snapplugin.setAttribute("height","0");
-                container.appendChild(snapplugin);
-            }
-
-
-           var editorOptions = me.options;
-
-            var onSuccess = function(rs){
-                try{
-                    rs = eval("("+ rs +")");
-                }catch(e){
-                    alert(lang.callBackErrorMsg);
-                    return;
-                }
-
-                if(rs.state != 'SUCCESS'){
-                    alert(rs.state);
-                    return;
-                }
-                me.execCommand('insertimage', {
-                    src: editorOptions.snapscreenPath + rs.url,
-                    floatStyle: editorOptions.snapscreenImgAlign,
-                    _src:editorOptions.snapscreenPath + rs.url
-                });
-            };
-            var onStartUpload = function(){
-                //开始截图上传
-            };
-            var onError = function(){
-                alert(lang.uploadErrorMsg);
-            };
-            try{
-                var port = editorOptions.snapscreenServerPort + '';
-                editorOptions.snapscreenServerUrl = editorOptions.snapscreenServerUrl.split( editorOptions.snapscreenHost );
-                editorOptions.snapscreenServerUrl = editorOptions.snapscreenServerUrl[1] || editorOptions.snapscreenServerUrl[0];
-                if( editorOptions.snapscreenServerUrl.indexOf(":"+port) === 0 ) {
-                    editorOptions.snapscreenServerUrl = editorOptions.snapscreenServerUrl.substring( port.length+1 );
-                }
-                var ret =snapplugin.saveSnapshot(editorOptions.snapscreenHost, editorOptions.snapscreenServerUrl, port);
-                onSuccess(ret);
-            }catch(e){
-                me.ui._dialogs['snapscreenDialog'].open();
-            }
-        }
-    };
-}
-
-
 ///import core
 ///commands 插入空行
 ///commandsName  insertparagraph
