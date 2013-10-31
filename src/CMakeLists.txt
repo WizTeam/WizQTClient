@@ -102,6 +102,7 @@ set(wiznote_SOURCES
     wizWebSettingsDialog.cpp
     wizUserVerifyDialog.cpp
     utils/styleHelper.cpp
+    utils/pathresolve.cpp
 )
 
 set(wiznote_HEADERS
@@ -197,6 +198,8 @@ set(wiznote_HEADERS
     share/wizUserAvatar.h
     wizUserVerifyDialog.h
     utils/styleHelper.h
+    utils/pathresolve.h
+
 
     # rapidjson
     rapidjson/allocators.h
