@@ -13,7 +13,7 @@ install=wiznote.install
 #md5sums=('SKIP')
 wiznote_project_name="WizQTClient"
 source=("$pkgname.tar.gz::https://github.com/WizTeam/WizQTClient/archive/v2.0.59.tar.gz")
-md5sums=('52c59870cee5691d3f50c0f84344714e')
+md5sums=('dacb599d97132bb098c40549c99640e9')
 
 build() {
 	cd "$srcdir/$wiznote_project_name-$pkgver"
