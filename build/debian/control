@@ -3,7 +3,7 @@ Section: graphics
 Priority: standard
 Maintainer: Albert.Zhou <albert.zhou@wiz.cn>
 Build-Depends: debhelper (>= 9), cmake (>= 2.8), libqt4-dev (>= 4.8), libqtwebkit-dev, zlib1g-dev
-Standards-Version: 2.0.56
+Standards-Version: 2.0.59
 Homepage: http://www.wiznote.com
 
 Package: wiznote
