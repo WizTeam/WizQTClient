@@ -12,6 +12,35 @@
 #include "share/wizObjectDataDownloader.h"
 #include "wizDocumentTransitionView.h"
 
+
+/*
+ * QWebKit and Editor both have it's own undo stack, when use QWebkit to monitor
+ * the modified status and undo/redo stack, QWebPage will ask QUndoStack undoable
+ * if require modify status. this means we must push the undo command to undo
+ * stack when execute command which will modify the document, otherwise webkit
+ * can't be notified.
+ * here, we just delegate this action to editor itself.
+ */
+class EditorUndoCommand : public QUndoCommand
+{
+public:
+    EditorUndoCommand(QWebPage* page) : m_page(page) {}
+
+    virtual void undo()
+    {
+        m_page->mainFrame()->evaluateJavaScript("editor.execCommand('undo')");
+    }
+
+    virtual void redo()
+    {
+        m_page->mainFrame()->evaluateJavaScript("editor.execCommand('redo')");
+    }
+
+private:
+    QWebPage* m_page;
+};
+
+
 void CWizDocumentWebViewPage::triggerAction(QWebPage::WebAction typeAction, bool checked)
 {
     if (typeAction == QWebPage::Back || typeAction == QWebPage::Forward) {
@@ -546,6 +575,11 @@ int CWizDocumentWebView::editorCommandQueryCommandState(const QString& strComman
     return page()->mainFrame()->evaluateJavaScript(strExec).toInt();
 }
 
+/*
+ * Execute command and also save status to undostack.
+ * All commands execute from client which may modify document MUST invoke this
+ * instead of use frame's evaluateJavascript.
+ */
 bool CWizDocumentWebView::editorCommandExecuteCommand(const QString& strCommand,
                                                       const QString& arg1 /* = QString() */,
                                                       const QString& arg2 /* = QString() */,
@@ -566,7 +600,14 @@ bool CWizDocumentWebView::editorCommandExecuteCommand(const QString& strCommand,
 
     strExec += ");";
 
-    return page()->mainFrame()->evaluateJavaScript(strExec).toBool();
+    qDebug() << strExec;
+
+    bool ret = page()->mainFrame()->evaluateJavaScript(strExec).toBool();
+
+    EditorUndoCommand * cmd = new EditorUndoCommand(page());
+    page()->undoStack()->push(cmd);
+
+    return ret;
 }
 
 bool CWizDocumentWebView::editorCommandQueryLink()
@@ -581,8 +622,7 @@ bool CWizDocumentWebView::editorCommandQueryLink()
 bool CWizDocumentWebView::editorCommandExecuteInsertHtml(const QString& strHtml, bool bNotSerialize)
 {
     QString s = bNotSerialize ? "true" : "false";
-    QString strExec = QString("editor.execCommand('insertHtml', '%1', %2);").arg(strHtml).arg(s);
-    return page()->mainFrame()->evaluateJavaScript(strExec).toBool();
+    return editorCommandExecuteCommand("insertHtml", "'" + strHtml + "'", s);
 }
 
 bool CWizDocumentWebView::editorCommandExecuteIndent()
@@ -616,8 +656,7 @@ void CWizDocumentWebView::on_editorCommandExecuteLinkInsert_accepted()
     if (strUrl.lastIndexOf("http://", 0, Qt::CaseInsensitive) == -1)
         strUrl = "http://" + strUrl;
 
-    QString strScript = QString("editor.execCommand('link', {href: '%1'});").arg(strUrl);
-    page()->mainFrame()->evaluateJavaScript(strScript).toBool();
+    editorCommandExecuteCommand("link", QString("{href: '%1'}").arg(strUrl));
 }
 
 bool CWizDocumentWebView::editorCommandExecuteLinkRemove()
@@ -627,14 +666,12 @@ bool CWizDocumentWebView::editorCommandExecuteLinkRemove()
 
 bool CWizDocumentWebView::editorCommandExecuteFontFamily(const QString& strFamily)
 {
-    QString strExec = "editor.execCommand('fontFamily', '" + strFamily + "');";
-    return page()->mainFrame()->evaluateJavaScript(strExec).toBool();
+    return editorCommandExecuteCommand("fontFamily", "'" + strFamily + "'");
 }
 
 bool CWizDocumentWebView::editorCommandExecuteFontSize(const QString& strSize)
 {
-    QString strExec = "editor.execCommand('fontSize', '" + strSize + "');";
-    return page()->mainFrame()->evaluateJavaScript(strExec).toBool();
+    return editorCommandExecuteCommand("fontSize", "'" + strSize + "'");
 }
 
 void CWizDocumentWebView::editorCommandExecuteBackColor()
@@ -655,8 +692,7 @@ void CWizDocumentWebView::editorCommandExecuteBackColor()
 
 void CWizDocumentWebView::on_editorCommandExecuteBackColor_accepted(const QColor& color)
 {
-    QString strExec = "editor.execCommand('backColor', '" + color.name() + "');";
-    page()->mainFrame()->evaluateJavaScript(strExec).toBool();
+    editorCommandExecuteCommand("backColor", "'" + color.name() + "'");
 }
 
 void CWizDocumentWebView::editorCommandExecuteForeColor()
@@ -676,68 +712,57 @@ void CWizDocumentWebView::editorCommandExecuteForeColor()
 
 void CWizDocumentWebView::on_editorCommandExecuteForeColor_accepted(const QColor& color)
 {
-    QString strExec = "editor.execCommand('foreColor', '" + color.name() + "');";
-    page()->mainFrame()->evaluateJavaScript(strExec).toBool();
+    editorCommandExecuteCommand("foreColor", "'" + color.name() + "'");
 }
 
 bool CWizDocumentWebView::editorCommandExecuteBold()
 {
-    QString strExec = "editor.execCommand('bold');";
-    return page()->mainFrame()->evaluateJavaScript(strExec).toBool();
+    return editorCommandExecuteCommand("bold");
 }
 
 bool CWizDocumentWebView::editorCommandExecuteItalic()
 {
-    QString strExec = "editor.execCommand('italic');";
-    return page()->mainFrame()->evaluateJavaScript(strExec).toBool();
+    return editorCommandExecuteCommand("italic");
 }
 
 bool CWizDocumentWebView::editorCommandExecuteUnderLine()
 {
-    QString strExec = "editor.execCommand('underline');";
-    return page()->mainFrame()->evaluateJavaScript(strExec).toBool();
+    return editorCommandExecuteCommand("underline");
 }
 
 bool CWizDocumentWebView::editorCommandExecuteStrikeThrough()
 {
-    QString strExec = "editor.execCommand('strikethrough');";
-    return page()->mainFrame()->evaluateJavaScript(strExec).toBool();
+    return editorCommandExecuteCommand("strikethrough");
 }
 
 bool CWizDocumentWebView::editorCommandExecuteJustifyLeft()
 {
-    QString strExec = "editor.execCommand('justify', 'left');";
-    return page()->mainFrame()->evaluateJavaScript(strExec).toBool();
+    return editorCommandExecuteCommand("justify", "'left'");
 }
 
 bool CWizDocumentWebView::editorCommandExecuteJustifyRight()
 {
-    QString strExec = "editor.execCommand('justify', 'right');";
-    return page()->mainFrame()->evaluateJavaScript(strExec).toBool();
+    return editorCommandExecuteCommand("justify", "'right'");
 }
 
 bool CWizDocumentWebView::editorCommandExecuteJustifyCenter()
 {
-    QString strExec = "editor.execCommand('justify', 'center');";
-    return page()->mainFrame()->evaluateJavaScript(strExec).toBool();
+    return editorCommandExecuteCommand("justify", "'center'");
 }
 
 bool CWizDocumentWebView::editorCommandExecuteJustifyJustify()
 {
-    QString strExec = "editor.execCommand('justify', 'justify');";
-    return page()->mainFrame()->evaluateJavaScript(strExec).toBool();
+    return editorCommandExecuteCommand("justify", "'justify'");
 }
 
 bool CWizDocumentWebView::editorCommandExecuteInsertOrderedList()
 {
-    QString strExec = "editor.execCommand('insertOrderedList');";
-    return page()->mainFrame()->evaluateJavaScript(strExec).toBool();
+    return editorCommandExecuteCommand("insertOrderedList");
 }
 
 bool CWizDocumentWebView::editorCommandExecuteInsertUnorderedList()
 {
-    QString strExec = "editor.execCommand('insertUnorderedList');";
-    return page()->mainFrame()->evaluateJavaScript(strExec).toBool();
+    return editorCommandExecuteCommand("insertUnorderedList");
 }
 
 bool CWizDocumentWebView::editorCommandExecuteTableInsert()
@@ -761,42 +786,37 @@ void CWizDocumentWebView::on_editorCommandExecuteTableInsert_accepted()
     if (!nRows && !nCols)
         return;
 
-    QString strExec = QString("editor.execCommand('insertTable', {numRows:%1, numCols:%2, border:1});")
-            .arg(nRows)
-            .arg(nCols);
-
-    page()->mainFrame()->evaluateJavaScript(strExec).toBool();
+    editorCommandExecuteCommand("insertTable", QString("{numRows:%1, numCols:%2, border:1}").arg(nRows).arg(nCols));
 }
 
 bool CWizDocumentWebView::editorCommandExecuteInsertHorizontal()
 {
-    QString strExec = "editor.execCommand('horizontal');";
-    return page()->mainFrame()->evaluateJavaScript(strExec).toBool();
+    return editorCommandExecuteCommand("horizontal");
 }
 
 bool CWizDocumentWebView::editorCommandExecuteInsertDate()
 {
-    return page()->mainFrame()->evaluateJavaScript("editor.execCommand('date');").toBool();
+    return editorCommandExecuteCommand("date");
 }
 
 bool CWizDocumentWebView::editorCommandExecuteInsertTime()
 {
-    return page()->mainFrame()->evaluateJavaScript("editor.execCommand('time');").toBool();
+    return editorCommandExecuteCommand("time");
 }
 
 bool CWizDocumentWebView::editorCommandExecuteRemoveFormat()
 {
-    return page()->mainFrame()->evaluateJavaScript("editor.execCommand('removeFormat');").toBool();
+    return editorCommandExecuteCommand("removeFormat");
 }
 
 bool CWizDocumentWebView::editorCommandExecuteFormatMatch()
 {
-    return page()->mainFrame()->evaluateJavaScript("editor.execCommand('formatMatch');").toBool();
+    return editorCommandExecuteCommand("formatMatch");
 }
 
 bool CWizDocumentWebView::editorCommandExecuteViewSource()
 {
-    return page()->mainFrame()->evaluateJavaScript("editor.execCommand('source');").toBool();
+    return editorCommandExecuteCommand("source");
 }
 
 bool CWizDocumentWebView::editorCommandExecuteTableDelete()
