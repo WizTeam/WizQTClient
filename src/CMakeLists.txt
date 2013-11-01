@@ -340,8 +340,7 @@ if(UNIX)
         install(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION bin)
         install(DIRECTORY ${CMAKE_SOURCE_DIR}/share/ DESTINATION share/wiznote PATTERN ".DS_Store" EXCLUDE)
         install(FILES ${wiznote_QM} DESTINATION share/wiznote/locales)
-
-        # install icons and desktop entry
+        install(FILES ${CMAKE_SOURCE_DIR}/LICENSE DESTINATION share/licenses/wiznote)
         install(FILES ${CMAKE_SOURCE_DIR}/build/common/wiznote.desktop DESTINATION share/applications)
 
         foreach(ICON_SIZE 8 16 24 32 48 64 128 256 512)
