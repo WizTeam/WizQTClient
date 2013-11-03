@@ -134,7 +134,11 @@ CWizDocumentWebView::CWizDocumentWebView(CWizExplorerApp& app, QWidget* parent /
 
 void CWizDocumentWebView::inputMethodEvent(QInputMethodEvent* event)
 {
+    // On X windows, fcitx flick while preediting, only update while webview end process.
+    // maybe it's a QT-BUG?
+    setUpdatesEnabled(false);
     QWebView::inputMethodEvent(event);
+    setUpdatesEnabled(true);
 
 #ifdef Q_OS_MAC
 
@@ -170,7 +174,9 @@ void CWizDocumentWebView::keyPressEvent(QKeyEvent* event)
         return;
     }
 
+    setUpdatesEnabled(false);
     QWebView::keyPressEvent(event);
+    setUpdatesEnabled(true);
 }
 
 void CWizDocumentWebView::focusInEvent(QFocusEvent *event)
