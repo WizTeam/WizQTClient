@@ -307,11 +307,13 @@ void CWizDocumentWebView::reloadDocument()
 {
     Q_ASSERT(!document().strGUID.isEmpty());
 
-    WIZDOCUMENTDATA data;
-    m_dbMgr.db(document().strKbGUID).DocumentFromGUID(document().strGUID, data);
+    // FIXME: reload may request when update from server or locally reflected by itself
 
-    m_renderer->setData(data);
-    m_renderer->load();
+    //WIZDOCUMENTDATA data;
+    //m_dbMgr.db(document().strKbGUID).DocumentFromGUID(document().strGUID, data);
+
+    //m_renderer->setData(data);
+    //m_renderer->load();
 }
 
 void CWizDocumentWebView::initEditorStyle()
@@ -508,6 +510,8 @@ void CWizDocumentWebView::viewDocumentInEditor(bool editing)
     window->transitionView()->hide();
     m_timerAutoSave.start();
 
+    page()->undoStack()->clear();
+
     update();
 }
 
@@ -559,8 +563,6 @@ void CWizDocumentWebView::saveDocument(bool force)
 
     QString strHtml = page()->mainFrame()->evaluateJavaScript("editor.getContent();").toString();
     m_renderer->save(document(), strHtml, m_strHtmlFileName, 0);
-
-    page()->undoStack()->clear();
 }
 
 QString CWizDocumentWebView::editorCommandQueryCommandValue(const QString& strCommand)
