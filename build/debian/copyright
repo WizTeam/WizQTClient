@@ -3,8 +3,8 @@ Upstream-Name: wiznote
 Source: https://github.com/WizTeam/WizQTClient
 
 Files: src/*
-Copyright: 2012 wiz.corp
-License: GPL-3+ or commercial
+Copyright: 2013 wiz china inc.
+License: GPL-3+ or custom
  .
  This package is free software; you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by

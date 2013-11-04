@@ -84,13 +84,9 @@ Also, App Store is not so far!
 
 ### Arch-Linux
 
-we have provide an PKGBUILD, you can install from [AUR](https://aur.archlinux.org/packages/wiznote/) use whatever AUR helpers you like.
+install from offical repo:
 
-for example yaourt:
-
-    $ yaourt -S wiznote
-
-Don't forget vote for us! More votes can make this client offical repository available!
+    $ pacman -S wiznote
 
 
 ### Fedora

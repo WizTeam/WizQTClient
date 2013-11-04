@@ -615,7 +615,9 @@ void MainWindow::on_documents_documentCountChanged()
 
 void MainWindow::on_documents_hintChanged(const QString& strHint)
 {
-    m_labelDocumentsHint->setText(strHint);
+    QFontMetrics fmx(font());
+    QString strMsg = fmx.elidedText(strHint, Qt::ElideRight, 150);
+    m_labelDocumentsHint->setText(strMsg);
 }
 
 void MainWindow::on_documents_viewTypeChanged(int type)
