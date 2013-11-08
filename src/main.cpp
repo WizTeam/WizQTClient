@@ -1,3 +1,4 @@
+#include <QtGlobal>
 #include <QApplication>
 #include <QMessageBox>
 #include <QIcon>
@@ -5,7 +6,10 @@
 #include <QPixmapCache>
 #include <QTranslator>
 #include <QProcess>
+#include <QSettings>
+#include <QDesktopServices>
 
+#include <extensionsystem/pluginmanager.h>
 #include "wizmainwindow.h"
 #include "wizupdaterprogressdialog.h"
 #include "wizLoginDialog.h"
@@ -13,38 +17,100 @@
 #include "share/wizwin32helper.h"
 #include "share/wizDatabaseManager.h"
 
+using namespace ExtensionSystem;
+
+
+static inline QStringList getPluginPaths()
+{
+    QStringList rc;
+    // Figure out root:  Up one from 'bin'
+    QDir rootDir = QApplication::applicationDirPath();
+    rootDir.cdUp();
+    const QString rootDirPath = rootDir.canonicalPath();
+#if !defined(Q_OS_MAC)
+    // 1) "plugins" (Win/Linux)
+    QString pluginPath = rootDirPath;
+    pluginPath += QLatin1Char('/');
+    pluginPath += QLatin1String("/share/wiznote/plugins");
+    rc.push_back(pluginPath);
+#else
+    // 2) "PlugIns" (OS X)
+    QString pluginPath = rootDirPath;
+    pluginPath += QLatin1String("/PlugIns");
+    rc.push_back(pluginPath);
+#endif
+    // 3) <localappdata>/plugins/<ideversion>
+    //    where <localappdata> is e.g.
+    //    "%LOCALAPPDATA%\QtProject\qtcreator" on Windows Vista and later
+    //    "$XDG_DATA_HOME/data/QtProject/qtcreator" or "~/.local/share/data/QtProject/qtcreator" on Linux
+    //    "~/Library/Application Support/QtProject/Qt Creator" on Mac
+#if QT_VERSION >= 0x050000
+    pluginPath = QStandardPaths::writableLocation(QStandardPaths::DataLocation);
+#else
+    pluginPath = QDesktopServices::storageLocation(QDesktopServices::DataLocation);
+#endif
+    pluginPath += QLatin1Char('/');
+
+#if !defined(Q_OS_MAC)
+    pluginPath += QLatin1String("wiznote");
+#else
+    pluginPath += QLatin1String("WizNote");
+#endif
+    pluginPath += QLatin1String("/plugins/");
+    rc.push_back(pluginPath);
+    return rc;
+}
+
+
+#ifdef Q_OS_MAC
+#  define SHARE_PATH "/../Resources"
+#else
+#  define SHARE_PATH "/../share/wiznote"
+#endif
+
 
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
 
-    // enable swtich between qt widget and alien widget(cocoa)
-    // refer to: https://bugreports.qt-project.org/browse/QTBUG-11401
-    a.setAttribute(Qt::AA_NativeWindows);
-
     QApplication::setApplicationName(QObject::tr("WizNote"));
     QApplication::setWindowIcon(QIcon(":/logo.png"));
 
-#ifndef Q_OS_MAC
-    QDir dir(QApplication::applicationDirPath());
-    dir.cdUp();
-    dir.cd("plugins");
-    QApplication::addLibraryPath(dir.absolutePath());
+#ifdef Q_OS_MAC
+    // enable switch between qt widget and alien widget(cocoa)
+    // refer to: https://bugreports.qt-project.org/browse/QTBUG-11401
+    a.setAttribute(Qt::AA_NativeWindows);
 #endif
 
-    CWizSettings settings(QDir::homePath() + "/.wiznote/wiznote.ini");
+    QSettings::setDefaultFormat(QSettings::IniFormat);
+    QSettings::setPath(QSettings::IniFormat, QSettings::SystemScope,
+                       QCoreApplication::applicationDirPath() + QLatin1String(SHARE_PATH));
+
+    QSettings* settings = new QSettings(QSettings::IniFormat, QSettings::UserScope,
+                                        QLatin1String("wiz"), QLatin1String("wiznote"));
+
+    QSettings *globalSettings = new QSettings(QSettings::IniFormat, QSettings::SystemScope,
+                                              QLatin1String("wiz"), QLatin1String("wiznote"));
 
     // use 3 times(30M) of Qt default usage
-    int nCacheSize = settings.value("Common/Cache", 10240*3).toInt();
+    int nCacheSize = settings->value("Common/Cache", 10240*3).toInt();
     QPixmapCache::setCacheLimit(nCacheSize);
 
-#ifdef Q_OS_WIN
-    QString strDefaultFontName = settings.GetString("Common", "DefaultFont", "");
-    QFont f = WizCreateWindowsUIFont(a, strDefaultFontName);
-    a.setFont(f);
-#endif
+//#ifdef Q_OS_WIN
+//    QString strDefaultFontName = settings.GetString("Common", "DefaultFont", "");
+//    QFont f = WizCreateWindowsUIFont(a, strDefaultFontName);
+//    a.setFont(f);
+//#endif
 
-    QString strUserId = settings.GetString("Users", "DefaultUser", "");
+    PluginManager pluginManager;
+    PluginManager::setFileExtension(QLatin1String("pluginspec"));
+    PluginManager::setGlobalSettings(globalSettings);
+    PluginManager::setSettings(settings);
+
+    const QStringList pluginPaths = getPluginPaths();
+    PluginManager::setPluginPaths(pluginPaths);
+
+    QString strUserId = settings->value("Users/DefaultUser", "").toString();
     QString strPassword;
 
     CWizUserSettings userSettings(strUserId);
@@ -116,6 +182,10 @@ int main(int argc, char *argv[])
     dbMgr.db().SetPassword(::WizEncryptPassword(strPassword));
 
     MainWindow w(dbMgr);
+
+    settings->setValue("Users/DefaultUser", strUserId);
+    PluginManager::loadPlugins();
+
     w.show();
     w.init();
 

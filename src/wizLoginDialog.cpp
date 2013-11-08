@@ -199,13 +199,13 @@ void CWizLoginDialog::doAccountVerify()
 
 bool CWizLoginDialog::updateProfile(const QString& strUserId, const WIZKMUSERINFO& info)
 {
-    CWizSettings settings(::WizGetDataStorePath() + "wiznote.ini");
+    //CWizSettings settings(::WizGetDataStorePath() + "wiznote.ini");
 
     // set current login user as default user.
-    settings.SetString("Users", "DefaultUser", strUserId);
+    //settings.SetString("Users", "DefaultUser", strUserId);
 
     // login flags
-    CWizUserSettings userSettings(strUserId );
+    CWizUserSettings userSettings(strUserId);
 
     if(m_checkAutoLogin->checkState() == Qt::Checked) {
         userSettings.setAutoLogin(true);

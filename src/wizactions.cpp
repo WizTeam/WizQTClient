@@ -47,6 +47,7 @@ WIZACTION* CWizActions::actionsData()
     {
         {"actionPreference",                QObject::tr("Preference"), "", ""},
         {"actionAbout",                     QObject::tr("About WizNote"), "", ""},
+        {"actionAboutPlugins",              QObject::tr("About plugins"), "", ""},
         {"actionExit",                      QObject::tr("Exit"), "", ""},
         {"actionLogout",                    QObject::tr("Logout"), "", ""},
         {WIZACTION_GLOBAL_SYNC,             QObject::tr("Sync"), "", ""},

@@ -103,6 +103,7 @@ set(wiznote_SOURCES
     wizUserVerifyDialog.cpp
     utils/styleHelper.cpp
     utils/pathresolve.cpp
+    plugindialog.cpp
 )
 
 set(wiznote_HEADERS
@@ -199,7 +200,7 @@ set(wiznote_HEADERS
     wizUserVerifyDialog.h
     utils/styleHelper.h
     utils/pathresolve.h
-
+    plugindialog.h
 
     # rapidjson
     rapidjson/allocators.h
@@ -387,5 +388,7 @@ target_link_libraries(${PROJECT_NAME}
     cryptlib
     clucene-core-static
     clucene-shared-static
+    extensionsystem
+    aggregation
     ${CMAKE_DL_LIBS}
 )

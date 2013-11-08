@@ -52,6 +52,7 @@
 
 #include "wizUserVerifyDialog.h"
 
+#include "plugindialog.h"
 
 MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     : QMainWindow(parent)
@@ -914,8 +915,14 @@ void MainWindow::on_actionLogout_triggered()
 
 void MainWindow::on_actionAbout_triggered()
 {
-    CWizAboutDialog dlg;
-    dlg.exec();
+    CWizAboutDialog dialog(this);
+    dialog.exec();
+}
+
+void MainWindow::on_actionAboutPlugins_triggered()
+{
+    Core::Internal::PluginDialog dialog(this);
+    dialog.exec();
 }
 
 void MainWindow::on_actionPreference_triggered()
