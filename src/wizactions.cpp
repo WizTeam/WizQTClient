@@ -121,6 +121,8 @@ QAction* CWizActions::addAction(WIZACTION& action)
 
     if (action.strName == "actionAbout")
         pAction->setMenuRole(QAction::AboutRole);
+    else if (action.strName == "actionAboutPlugins")
+        pAction->setMenuRole(QAction::ApplicationSpecificRole);
     else if (action.strName == "actionPreference")
         pAction->setMenuRole(QAction::PreferencesRole);
     else if (action.strName == "actionExit")
