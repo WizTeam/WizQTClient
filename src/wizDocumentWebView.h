@@ -15,41 +15,31 @@ class CWizEditorInsertLinkForm;
 class CWizEditorInsertTableForm;
 class CWizDocumentWebView;
 class CWizDocumentTransitionView;
+class CWizDocumentWebViewWorker;
 
-// FIXME: class name is not corret for this usage.
-// Renderer thread responsible for loading, saving document
-class CWizDocumentWebViewRenderer : public QObject
+
+class CWizDocumentWebViewWorkerPool : public QObject
 {
     Q_OBJECT
 
 public:
-    CWizDocumentWebViewRenderer(CWizExplorerApp& app);
+    CWizDocumentWebViewWorkerPool(CWizExplorerApp& app, QObject* parent);
 
-    const WIZDOCUMENTDATA& data() { return m_data; }
-    void setData(const WIZDOCUMENTDATA& doc);
-
-    void load();
-    void save(const WIZDOCUMENTDATA& data,
-              const QString& strHtml,
-              const QString& strHtmlFile,
-              int nFlags);
-
-protected:
-    CWizExplorerApp& m_app;
-    CWizDatabaseManager& m_dbMgr;
-    WIZDOCUMENTDATA m_data;
+    void load(const WIZDOCUMENTDATA& doc);
+    void save(const WIZDOCUMENTDATA& doc, const QString& strHtml,
+              const QString& strHtmlFile, int nFlags);
 
 public Q_SLOTS:
-    void viewDocumentImpl();
-    void saveDocument(QString strKbGUID, QString strGUID,
-                      QString strHtml, QString strHtmlFile, int nFlags);
+    void on_timer_timeout();
 
 Q_SIGNALS:
-    void startLoading();
-    void endLoading(const QString& strFileName, bool bOk);
+    void loaded(const QString& strFileName);
+    void saved(bool ok);
 
-    void startSaving();
-    void documentSaved(bool ok);
+private:
+    CWizDatabaseManager& m_dbMgr;
+    QTimer m_timer;
+    QList<CWizDocumentWebViewWorker*> m_workers;
 };
 
 
@@ -79,7 +69,7 @@ public:
     bool isInited() const { return m_bEditorInited; }
     bool isEditing() const { return m_bEditingMode; }
 
-    const WIZDOCUMENTDATA& document() { return m_renderer->data(); }
+    const WIZDOCUMENTDATA& document() { return m_data; }
     void reloadDocument();
 
     // initialize editor style before render, only invoke once.
@@ -123,13 +113,14 @@ protected:
 private:
     CWizExplorerApp& m_app;
     CWizDatabaseManager& m_dbMgr;
+    WIZDOCUMENTDATA m_data;
 
     QTimer m_timerAutoSave;
     QString m_strHtmlFileName;
     bool m_bEditorInited;
     bool m_bEditingMode;
 
-    CWizDocumentWebViewRenderer* m_renderer;
+    CWizDocumentWebViewWorkerPool* m_workerPool;
     CWizObjectDataDownloaderHost* m_downloaderHost;
     CWizDocumentTransitionView* m_transitionView;
 
@@ -150,7 +141,7 @@ public Q_SLOTS:
 
     void onTimerAutoSaveTimout();
 
-    void on_documentReady(const QString& strFileName, bool bOk);
+    void on_documentReady(const QString& strFileName);
     void on_documentSaved(bool ok);
 
     void on_editorCommandExecuteLinkInsert_accepted();
