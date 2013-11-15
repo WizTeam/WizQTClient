@@ -49,7 +49,7 @@
         <translation>&lt;span style=&quot;font-size:10px&quot;&gt;版权所有 2013 我知科技. 保留一切权利&lt;/span&gt;</translation>
     </message>
     <message>
-        <location filename="../src/wizAboutDialog.cpp" line="69"/>
+        <location filename="../src/wizAboutDialog.cpp" line="68"/>
         <source>About WizNote</source>
         <translation>关于为知笔记</translation>
     </message>
@@ -1886,6 +1886,32 @@
         <location filename="../src/wizcreateaccountdialog.cpp" line="51"/>
         <source>password is not equal, please try again.</source>
         <translation>密码不一致，请重试.</translation>
+    </message>
+</context>
+<context>
+    <name>HelloWorld::Internal::HelloWorldPlugin</name>
+    <message>
+        <location filename="../src/plugins/helloworld/helloworldplugin.cpp" line="151"/>
+        <source>Hello World!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/plugins/helloworld/helloworldplugin.cpp" line="151"/>
+        <source>Hello World! Beautiful day today, isn&apos;t it?</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>HelloWorld::Internal::HelloWorldWindow</name>
+    <message>
+        <location filename="../src/plugins/helloworld/helloworldwindow.cpp" line="41"/>
+        <source>Focus me to activate my context!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/plugins/helloworld/helloworldwindow.cpp" line="42"/>
+        <source>Hello, world!</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
