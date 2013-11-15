@@ -1,5 +1,7 @@
 project(wiznote)
 
+add_subdirectory(plugins)
+
 set(wiznote_SOURCES_MAC
     mac/wizSearchWidget.mm
     mac/wizmachelper.mm

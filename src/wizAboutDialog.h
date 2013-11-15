@@ -8,7 +8,7 @@ class CWizAboutDialog : public QDialog
     Q_OBJECT
 
 public:
-    explicit CWizAboutDialog(QWidget *parent = 0);
+    explicit CWizAboutDialog(QWidget *parent);
 };
 
 #endif // WIZABOUTDIALOG_H
