@@ -186,27 +186,43 @@ void CWizLoginDialog::accept()
 
 void CWizLoginDialog::doAccountVerify()
 {
-    CWizKMAccountsServer server(WizKMGetAccountsServerURL(true));
-    if (server.Login(userId(), password(), "normal") &&
-            updateProfile(userId(), server.GetUserInfo())) {
-        QDialog::accept();
+    CWizUserSettings userSettings(userId());
+
+    // FIXME: should verify password if network is available to avoid attack?
+    if (password() != userSettings.password()) {
+        CWizKMAccountsServer server(WizKMGetAccountsServerURL(true));
+        if (server.Login(userId(), password(), "normal") &&
+                updateProfile(userSettings, userId(), server.GetUserInfo())) {
+
+            CWizSettings settings(::WizGetDataStorePath() + "wiznote.ini");
+            settings.SetString("Users", "DefaultUser", userId());
+
+            QDialog::accept();
+        } else {
+            QMessageBox::critical(this, tr("Verify account failed"), server.GetLastErrorMessage());
+        }
     } else {
-        QMessageBox::critical(this, tr("Verify account failed"), server.GetLastErrorMessage());
+        CWizSettings settings(::WizGetDataStorePath() + "wiznote.ini");
+        settings.SetString("Users", "DefaultUser", userId());
+
+        if (m_checkAutoLogin->checkState() == Qt::Checked) {
+            userSettings.setAutoLogin(true);
+        } else {
+            userSettings.setAutoLogin(false);
+        }
+
+        if (m_checkSavePassword->checkState() != Qt::Checked) {
+            userSettings.setPassword();
+        }
+
+        QDialog::accept();
     }
 
     enableControls(true);
 }
 
-bool CWizLoginDialog::updateProfile(const QString& strUserId, const WIZKMUSERINFO& info)
+bool CWizLoginDialog::updateProfile(CWizUserSettings& userSettings, const QString& strUserId, const WIZKMUSERINFO& info)
 {
-    CWizSettings settings(::WizGetDataStorePath() + "wiznote.ini");
-
-    // set current login user as default user.
-    settings.SetString("Users", "DefaultUser", strUserId);
-
-    // login flags
-    CWizUserSettings userSettings(strUserId );
-
     if(m_checkAutoLogin->checkState() == Qt::Checked) {
         userSettings.setAutoLogin(true);
     } else {

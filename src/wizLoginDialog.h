@@ -34,7 +34,7 @@ private:
 
     void enableControls(bool bEnable);
     void doAccountVerify();
-    bool updateProfile(const QString& strUserId, const WIZKMUSERINFO& info);
+    bool updateProfile(CWizUserSettings& settings, const QString& strUserId, const WIZKMUSERINFO& info);
 
     void setUsers(const QString& strDefault);
     void setUser(const QString& userId);
