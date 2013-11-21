@@ -5,15 +5,14 @@ file(GLOB PUBLIC_HEADERS "*.h")
 
 
 # Use system zlib on unix and Qt ZLIB on Windows
-IF(UNIX)
-	find_package(ZLIB REQUIRED)
-ELSE(UNIX)
+find_package(ZLIB)
+if(NOT ZLIB_FOUND)
 	SET(ZLIB_INCLUDE_DIRS "${QT_ROOT}/src/3rdparty/zlib" CACHE STRING "Path to ZLIB headers of Qt")
 	SET(ZLIB_LIBRARIES "")
 	IF(NOT EXISTS "${ZLIB_INCLUDE_DIRS}/zlib.h")
 		MESSAGE("Please specify a valid zlib include dir")
 	ENDIF(NOT EXISTS "${ZLIB_INCLUDE_DIRS}/zlib.h")
-ENDIF(UNIX)
+ENDIF(NOT ZLIB_FOUND)
 
 include(QtChooser)
 add_library(quazip STATIC ${SRCS} ${PUBLIC_HEADERS})

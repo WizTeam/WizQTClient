@@ -8,10 +8,5 @@ if(NOT CMAKE_BUILD_TYPE)
       FORCE)
 endif()
 
-add_subdirectory(lib/cryptopp)
-add_subdirectory(lib/clucene)
-add_subdirectory(lib/quazip)
-add_subdirectory(lib/aggregation)
-add_subdirectory(lib/extensionsystem)
-
+add_subdirectory(lib)
 add_subdirectory(src)

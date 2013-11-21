@@ -205,24 +205,6 @@ set(wiznote_HEADERS
     wizDocumentSelectionView.h
     wizUserVerifyDialog.h
     plugindialog.h
-
-
-    # rapidjson
-    rapidjson/allocators.h
-    rapidjson/document.h
-    rapidjson/encodedstream.h
-    rapidjson/encodings.h
-    rapidjson/filereadstream.h
-    rapidjson/filestream.h
-    rapidjson/filewritestream.h
-    rapidjson/prettywriter.h
-    rapidjson/rapidjson.h
-    rapidjson/reader.h
-    rapidjson/stringbuffer.h
-    rapidjson/reader.h
-    rapidjson/internal/pow10.h
-    rapidjson/internal/stack.h
-    rapidjson/internal/strfunc.h
 )
 
 set(wiznote_FORMS

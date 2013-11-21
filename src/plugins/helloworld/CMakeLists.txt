@@ -19,7 +19,7 @@ include_directories(
     ${extensionsystem_SOURCE_DIR}/..
 )
 
-target_link_libraries(helloworld ${extensionsystem})
+target_link_libraries(helloworld extensionsystem)
 
 install(FILES helloworld.pluginspec DESTINATION share/wiznote/plugins)
 
