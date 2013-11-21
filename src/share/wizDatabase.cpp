@@ -6,11 +6,13 @@
 #include <QTextCodec>
 #include <algorithm>
 
-#include "wizdef.h"
+//#include "wizdef.h"
 #include "wizhtml2zip.h"
 #include "share/wizzip.h"
 #include "html/wizhtmlcollector.h"
 #include "rapidjson/document.h"
+
+#define WIZNOTE_THUMB_VERSION "3"
 
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////

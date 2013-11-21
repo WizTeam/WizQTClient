@@ -1,6 +1,6 @@
 #include "wizXmlRpcServer.h"
 
-#include "wizdef.h"
+//#include "wizdef.h"
 #include "wizmisc.h"
 
 #include <QEventLoop>

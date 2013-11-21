@@ -47,6 +47,7 @@ WIZACTION* CWizActions::actionsData()
     {
         {"actionPreference",                QObject::tr("Preference"), "", ""},
         {"actionAbout",                     QObject::tr("About WizNote"), "", ""},
+        {"actionAboutPlugins",              QObject::tr("About plugins"), "", ""},
         {"actionExit",                      QObject::tr("Exit"), "", ""},
         {"actionLogout",                    QObject::tr("Logout"), "", ""},
         {WIZACTION_GLOBAL_SYNC,             QObject::tr("Sync"), "", ""},
@@ -120,6 +121,8 @@ QAction* CWizActions::addAction(WIZACTION& action)
 
     if (action.strName == "actionAbout")
         pAction->setMenuRole(QAction::AboutRole);
+    else if (action.strName == "actionAboutPlugins")
+        pAction->setMenuRole(QAction::ApplicationSpecificRole);
     else if (action.strName == "actionPreference")
         pAction->setMenuRole(QAction::PreferencesRole);
     else if (action.strName == "actionExit")

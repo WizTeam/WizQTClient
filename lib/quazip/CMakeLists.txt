@@ -3,14 +3,6 @@ project (QuaZip)
 file(GLOB SRCS "*.c" "*.cpp")
 file(GLOB PUBLIC_HEADERS "*.h")
 
-if(WIZNOTE_USE_QT5)
-    find_package(Qt5 REQUIRED Core)
-else(WIZNOTE_USE_QT5)
-    find_package(Qt4 REQUIRED)
-    INCLUDE(${QT_USE_FILE})
-endif(WIZNOTE_USE_QT5)
-
-set(CMAKE_AUTOMOC ON)
 
 # Use system zlib on unix and Qt ZLIB on Windows
 IF(UNIX)
@@ -23,14 +15,9 @@ ELSE(UNIX)
 	ENDIF(NOT EXISTS "${ZLIB_INCLUDE_DIRS}/zlib.h")
 ENDIF(UNIX)
 
+include(QtChooser)
 add_library(quazip STATIC ${SRCS} ${PUBLIC_HEADERS})
-set_target_properties(quazip PROPERTIES VERSION 0.5.1 SOVERSION 2)
-
-if(WIZNOTE_USE_QT5)
-    qt5_use_modules(quazip Core)
-else(WIZNOTE_USE_QT5)
-    target_link_libraries(quazip ${QT_LIBRARIES})
-endif(WIZNOTE_USE_QT5)
+qt_use_modules(quazip)
 
 # set all include directories for in and out of source builds
 include_directories(

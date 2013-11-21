@@ -52,6 +52,7 @@
 
 #include "wizUserVerifyDialog.h"
 
+#include "plugindialog.h"
 
 MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     : QMainWindow(parent)
@@ -62,7 +63,7 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     , m_syncTimer(new QTimer(this))
     , m_searchIndexer(new CWizSearchIndexer(m_dbMgr))
     , m_upgrade(new CWizUpgrade())
-    , m_certManager(new CWizCertManager(*this))
+    //, m_certManager(new CWizCertManager(*this))
     , m_cipherForm(new CWizUserCipherForm(*this, this))
     , m_objectDownloaderHost(new CWizObjectDataDownloaderHost(dbMgr, this))
     , m_avatarDownloaderHost(new CWizUserAvatarDownloaderHost(dbMgr.db().GetAvatarPath(), this))
@@ -678,7 +679,7 @@ void MainWindow::init()
 
 void MainWindow::on_actionSync_triggered()
 {
-    m_certManager->downloadUserCert();
+    //m_certManager->downloadUserCert();
 
     m_sync->startSync();
     m_animateSync->startPlay();
@@ -914,8 +915,14 @@ void MainWindow::on_actionLogout_triggered()
 
 void MainWindow::on_actionAbout_triggered()
 {
-    CWizAboutDialog dlg;
-    dlg.exec();
+    CWizAboutDialog dialog(this);
+    dialog.exec();
+}
+
+void MainWindow::on_actionAboutPlugins_triggered()
+{
+    Core::Internal::PluginDialog dialog(this);
+    dialog.exec();
 }
 
 void MainWindow::on_actionPreference_triggered()

@@ -80,7 +80,7 @@ private:
     QPointer<QTimer> m_syncTimer;
     QPointer<CWizConsoleDialog> m_console;
     QPointer<CWizUpgrade> m_upgrade;
-    QPointer<CWizCertManager> m_certManager;
+    //QPointer<CWizCertManager> m_certManager;
     QPointer<CWizUserCipherForm> m_cipherForm;
 
     CWizObjectDataDownloaderHost* m_objectDownloaderHost;
@@ -165,6 +165,7 @@ public Q_SLOTS:
     void on_actionNewNote_triggered();
     void on_actionLogout_triggered();
     void on_actionAbout_triggered();
+    void on_actionAboutPlugins_triggered();
     void on_actionPreference_triggered();
     void on_actionRebuildFTS_triggered();
     void on_actionFeedback_triggered();

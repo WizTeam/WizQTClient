@@ -49,7 +49,7 @@
         <translation>&lt;span style=&quot;font-size:10px&quot;&gt;版权所有 2013 我知科技. 保留一切权利&lt;/span&gt;</translation>
     </message>
     <message>
-        <location filename="../src/wizAboutDialog.cpp" line="69"/>
+        <location filename="../src/wizAboutDialog.cpp" line="68"/>
         <source>About WizNote</source>
         <translation>关于为知笔记</translation>
     </message>
@@ -1796,6 +1796,44 @@
     </message>
 </context>
 <context>
+    <name>Core::Internal::PluginDialog</name>
+    <message>
+        <location filename="../src/plugindialog.cpp" line="57"/>
+        <source>Details</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/plugindialog.cpp" line="58"/>
+        <source>Error Details</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/plugindialog.cpp" line="59"/>
+        <source>Close</source>
+        <translation type="unfinished">关闭</translation>
+    </message>
+    <message>
+        <location filename="../src/plugindialog.cpp" line="65"/>
+        <source>Restart required.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/plugindialog.cpp" line="81"/>
+        <source>Installed Plugins</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/plugindialog.cpp" line="131"/>
+        <source>Plugin Details of %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/plugindialog.cpp" line="151"/>
+        <source>Plugin Errors of %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>CreateAccountDialog</name>
     <message>
         <location filename="../src/ui/wizcreateaccountdialog.ui" line="14"/>
@@ -1851,13 +1889,39 @@
     </message>
 </context>
 <context>
+    <name>HelloWorld::Internal::HelloWorldPlugin</name>
+    <message>
+        <location filename="../src/plugins/helloworld/helloworldplugin.cpp" line="151"/>
+        <source>Hello World!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/plugins/helloworld/helloworldplugin.cpp" line="151"/>
+        <source>Hello World! Beautiful day today, isn&apos;t it?</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>HelloWorld::Internal::HelloWorldWindow</name>
+    <message>
+        <location filename="../src/plugins/helloworld/helloworldwindow.cpp" line="41"/>
+        <source>Focus me to activate my context!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/plugins/helloworld/helloworldwindow.cpp" line="42"/>
+        <source>Hello, world!</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>MainWindow</name>
     <message>
         <source>please wait, I&apos;ll stop working right now...</source>
         <translation type="obsolete">稍等片刻，保存一下进度...</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="129"/>
+        <location filename="../src/wizmainwindow.cpp" line="130"/>
         <source>WizNote</source>
         <translation>为知笔记</translation>
     </message>
@@ -1867,22 +1931,22 @@ Have you changed your password from other platform?</source>
         <translation type="obsolete">哇，同步失败啦！是不是在其他平台改过密码？</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="705"/>
+        <location filename="../src/wizmainwindow.cpp" line="706"/>
         <source>sorry, sync failed. please input your password and try again.</source>
         <translation>抱歉，同步失败了。请输入您的密码再试一次。</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="725"/>
+        <location filename="../src/wizmainwindow.cpp" line="726"/>
         <source>Syncing...</source>
         <translation>同步中...</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="944"/>
+        <location filename="../src/wizmainwindow.cpp" line="951"/>
         <source>Rebuild full text search index</source>
         <translation>重建搜索索引</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="947"/>
+        <location filename="../src/wizmainwindow.cpp" line="954"/>
         <source>Rebuild full text search is quit slow if you have quite a few                    documents or attachments, you do not have to use this function                    while search should work as expected, this fuction is only used                    as developer&apos;s issue triage purpose, use it only if you know                    what you are doing!</source>
         <translation>如果您有大量文档或附件存在，重建搜索索引会非常耗费时间，正常情况下，搜索是可以如期工作的，这个功能主要是为修复可能出现的搜索问题提供帮助，请在明确这个选项意义的情况下使用这个功能！</translation>
     </message>
@@ -1903,7 +1967,7 @@ Have you changed your password from other platform?</source>
         <translation type="obsolete">标签</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="593"/>
+        <location filename="../src/wizmainwindow.cpp" line="594"/>
         <source>0 articles</source>
         <translation>0 条</translation>
     </message>
@@ -1912,7 +1976,7 @@ Have you changed your password from other platform?</source>
         <translation type="obsolete">新建笔记</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="1368"/>
+        <location filename="../src/wizmainwindow.cpp" line="1375"/>
         <source>Saving note...</source>
         <translation>正在保存笔记...</translation>
     </message>
@@ -2011,12 +2075,12 @@ Have you changed your password from other platform?</source>
         <translation>帮助(&amp;H)</translation>
     </message>
     <message>
-        <location filename="../src/wizactions.cpp" line="50"/>
+        <location filename="../src/wizactions.cpp" line="51"/>
         <source>Exit</source>
         <translation>退出</translation>
     </message>
     <message>
-        <location filename="../src/wizactions.cpp" line="51"/>
+        <location filename="../src/wizactions.cpp" line="52"/>
         <source>Logout</source>
         <translation>更改用户</translation>
     </message>
@@ -2077,12 +2141,17 @@ Have you changed your password from other platform?</source>
         <translation>关于 为知笔记</translation>
     </message>
     <message>
-        <location filename="../src/wizactions.cpp" line="52"/>
+        <location filename="../src/wizactions.cpp" line="50"/>
+        <source>About plugins</source>
+        <translation>关于插件</translation>
+    </message>
+    <message>
+        <location filename="../src/wizactions.cpp" line="53"/>
         <source>Sync</source>
         <translation>同步</translation>
     </message>
     <message>
-        <location filename="../src/wizactions.cpp" line="53"/>
+        <location filename="../src/wizactions.cpp" line="54"/>
         <source>New Note</source>
         <translation>新建笔记</translation>
     </message>
@@ -2091,17 +2160,17 @@ Have you changed your password from other platform?</source>
         <translation type="obsolete">查看消息</translation>
     </message>
     <message>
-        <location filename="../src/wizactions.cpp" line="58"/>
+        <location filename="../src/wizactions.cpp" line="59"/>
         <source>Rebuild full text search index</source>
         <translation>重建搜索索引</translation>
     </message>
     <message>
-        <location filename="../src/wizactions.cpp" line="59"/>
+        <location filename="../src/wizactions.cpp" line="60"/>
         <source>Search document</source>
         <translation>搜索</translation>
     </message>
     <message>
-        <location filename="../src/wizactions.cpp" line="60"/>
+        <location filename="../src/wizactions.cpp" line="61"/>
         <source>Reset search</source>
         <translation>重置搜索</translation>
     </message>
@@ -2118,37 +2187,37 @@ Have you changed your password from other platform?</source>
         <translation type="obsolete">切换到群组栏</translation>
     </message>
     <message>
-        <location filename="../src/wizactions.cpp" line="64"/>
+        <location filename="../src/wizactions.cpp" line="65"/>
         <source>Undo</source>
         <translation>撤销</translation>
     </message>
     <message>
-        <location filename="../src/wizactions.cpp" line="65"/>
+        <location filename="../src/wizactions.cpp" line="66"/>
         <source>Redo</source>
         <translation>重做</translation>
     </message>
     <message>
-        <location filename="../src/wizactions.cpp" line="74"/>
+        <location filename="../src/wizactions.cpp" line="75"/>
         <source>Hide category view</source>
         <translation>隐藏侧边栏</translation>
     </message>
     <message>
-        <location filename="../src/wizactions.cpp" line="74"/>
+        <location filename="../src/wizactions.cpp" line="75"/>
         <source>Show category view</source>
         <translation>显示侧边栏</translation>
     </message>
     <message>
-        <location filename="../src/wizactions.cpp" line="75"/>
+        <location filename="../src/wizactions.cpp" line="76"/>
         <source>Enter Fullscreen</source>
         <translation>进入全屏幕</translation>
     </message>
     <message>
-        <location filename="../src/wizactions.cpp" line="75"/>
+        <location filename="../src/wizactions.cpp" line="76"/>
         <source>Leave Fullscreen</source>
         <translation>离开全屏幕</translation>
     </message>
     <message>
-        <location filename="../src/wizactions.cpp" line="96"/>
+        <location filename="../src/wizactions.cpp" line="97"/>
         <source>View html source</source>
         <translation>源代码模式</translation>
     </message>
@@ -2157,45 +2226,45 @@ Have you changed your password from other platform?</source>
         <translation type="obsolete">进入全屏幕</translation>
     </message>
     <message>
-        <location filename="../src/wizactions.cpp" line="78"/>
+        <location filename="../src/wizactions.cpp" line="79"/>
         <location filename="../src/wizEditorToolBar.cpp" line="574"/>
         <source>Justify left</source>
         <translation>左对齐</translation>
     </message>
     <message>
-        <location filename="../src/wizactions.cpp" line="79"/>
+        <location filename="../src/wizactions.cpp" line="80"/>
         <location filename="../src/wizEditorToolBar.cpp" line="576"/>
         <source>Justify right</source>
         <translation>右对齐</translation>
     </message>
     <message>
-        <location filename="../src/wizactions.cpp" line="80"/>
+        <location filename="../src/wizactions.cpp" line="81"/>
         <location filename="../src/wizEditorToolBar.cpp" line="575"/>
         <source>Justify center</source>
         <translation>居中</translation>
     </message>
     <message>
-        <location filename="../src/wizactions.cpp" line="81"/>
+        <location filename="../src/wizactions.cpp" line="82"/>
         <source>Justify both side</source>
         <translation>两端对齐</translation>
     </message>
     <message>
-        <location filename="../src/wizactions.cpp" line="82"/>
+        <location filename="../src/wizactions.cpp" line="83"/>
         <source>Indent</source>
         <translation>增加缩进级别</translation>
     </message>
     <message>
-        <location filename="../src/wizactions.cpp" line="83"/>
+        <location filename="../src/wizactions.cpp" line="84"/>
         <source>Outdent</source>
         <translation>减少缩进级别</translation>
     </message>
     <message>
-        <location filename="../src/wizactions.cpp" line="84"/>
+        <location filename="../src/wizactions.cpp" line="85"/>
         <source>Convert to unoredered list</source>
         <translation>转为(无序)符号列表</translation>
     </message>
     <message>
-        <location filename="../src/wizactions.cpp" line="85"/>
+        <location filename="../src/wizactions.cpp" line="86"/>
         <source>Convert to ordered list</source>
         <translation>转为(有序)编号列表</translation>
     </message>
@@ -2208,72 +2277,72 @@ Have you changed your password from other platform?</source>
         <translation type="obsolete">插入(有序)编号列表</translation>
     </message>
     <message>
-        <location filename="../src/wizactions.cpp" line="61"/>
+        <location filename="../src/wizactions.cpp" line="62"/>
         <source>User support</source>
         <translation>用户支持</translation>
     </message>
     <message>
-        <location filename="../src/wizactions.cpp" line="69"/>
+        <location filename="../src/wizactions.cpp" line="70"/>
         <source>Paste as plain text</source>
         <translation>粘贴为纯文本</translation>
     </message>
     <message>
-        <location filename="../src/wizactions.cpp" line="71"/>
+        <location filename="../src/wizactions.cpp" line="72"/>
         <source>Select all</source>
         <translation>全选</translation>
     </message>
     <message>
-        <location filename="../src/wizactions.cpp" line="86"/>
+        <location filename="../src/wizactions.cpp" line="87"/>
         <location filename="../src/wizEditorToolBar.cpp" line="578"/>
         <source>Insert table</source>
         <translation>插入表格</translation>
     </message>
     <message>
-        <location filename="../src/wizactions.cpp" line="87"/>
+        <location filename="../src/wizactions.cpp" line="88"/>
         <source>Insert link</source>
         <translation>插入链接</translation>
     </message>
     <message>
-        <location filename="../src/wizactions.cpp" line="88"/>
+        <location filename="../src/wizactions.cpp" line="89"/>
         <location filename="../src/wizEditorToolBar.cpp" line="567"/>
         <source>Bold</source>
         <translation>粗体</translation>
     </message>
     <message>
-        <location filename="../src/wizactions.cpp" line="89"/>
+        <location filename="../src/wizactions.cpp" line="90"/>
         <location filename="../src/wizEditorToolBar.cpp" line="568"/>
         <source>Italic</source>
         <translation>斜体</translation>
     </message>
     <message>
-        <location filename="../src/wizactions.cpp" line="90"/>
+        <location filename="../src/wizactions.cpp" line="91"/>
         <location filename="../src/wizEditorToolBar.cpp" line="569"/>
         <source>Underline</source>
         <translation>下划线</translation>
     </message>
     <message>
-        <location filename="../src/wizactions.cpp" line="91"/>
+        <location filename="../src/wizactions.cpp" line="92"/>
         <location filename="../src/wizEditorToolBar.cpp" line="570"/>
         <source>Strike through</source>
         <translation>删除线</translation>
     </message>
     <message>
-        <location filename="../src/wizactions.cpp" line="92"/>
+        <location filename="../src/wizactions.cpp" line="93"/>
         <source>Insert horizontal</source>
         <translation>插入水平标尺</translation>
     </message>
     <message>
-        <location filename="../src/wizactions.cpp" line="93"/>
+        <location filename="../src/wizactions.cpp" line="94"/>
         <source>Insert date</source>
         <translation>插入日期</translation>
     </message>
     <message>
-        <location filename="../src/wizactions.cpp" line="94"/>
+        <location filename="../src/wizactions.cpp" line="95"/>
         <source>Insert time</source>
         <translation>插入时间</translation>
     </message>
     <message>
-        <location filename="../src/wizactions.cpp" line="95"/>
+        <location filename="../src/wizactions.cpp" line="96"/>
         <source>Remove format</source>
         <translation>转为纯文本</translation>
     </message>
@@ -2290,12 +2359,12 @@ Have you changed your password from other platform?</source>
         <translation type="obsolete">菜单</translation>
     </message>
     <message>
-        <location filename="../src/wizactions.cpp" line="55"/>
+        <location filename="../src/wizactions.cpp" line="56"/>
         <source>Back</source>
         <translation>后退</translation>
     </message>
     <message>
-        <location filename="../src/wizactions.cpp" line="56"/>
+        <location filename="../src/wizactions.cpp" line="57"/>
         <source>Forward</source>
         <translation>前进</translation>
     </message>
@@ -2309,7 +2378,7 @@ Have you changed your password from other platform?</source>
         <translation>设置</translation>
     </message>
     <message>
-        <location filename="../src/wizactions.cpp" line="57"/>
+        <location filename="../src/wizactions.cpp" line="58"/>
         <source>Console</source>
         <translation>消息控制台</translation>
     </message>
@@ -2318,7 +2387,7 @@ Have you changed your password from other platform?</source>
         <translation type="obsolete">搜索 %1</translation>
     </message>
     <message>
-        <location filename="../src/main.cpp" line="25"/>
+        <location filename="../src/main.cpp" line="76"/>
         <source>WizNote</source>
         <translation>为知笔记</translation>
     </message>
@@ -2327,7 +2396,7 @@ Have you changed your password from other platform?</source>
         <translation type="obsolete">无法打开个人数据库</translation>
     </message>
     <message>
-        <location filename="../src/main.cpp" line="112"/>
+        <location filename="../src/main.cpp" line="178"/>
         <source>Can not open database</source>
         <translation>无法打开数据库</translation>
     </message>
@@ -2533,7 +2602,7 @@ Have you changed your password from other platform?</source>
         <translation>打开...</translation>
     </message>
     <message>
-        <location filename="../src/wizactions.cpp" line="70"/>
+        <location filename="../src/wizactions.cpp" line="71"/>
         <location filename="../src/wizattachmentlistwidget.cpp" line="43"/>
         <location filename="../src/wizDocumentListView.cpp" line="20"/>
         <source>Delete</source>
@@ -2691,19 +2760,19 @@ Have you changed your password from other platform?</source>
         <translation>删除消息</translation>
     </message>
     <message>
-        <location filename="../src/wizactions.cpp" line="66"/>
+        <location filename="../src/wizactions.cpp" line="67"/>
         <location filename="../src/wizEditorToolBar.cpp" line="559"/>
         <source>Cut</source>
         <translation>剪切</translation>
     </message>
     <message>
-        <location filename="../src/wizactions.cpp" line="67"/>
+        <location filename="../src/wizactions.cpp" line="68"/>
         <location filename="../src/wizEditorToolBar.cpp" line="560"/>
         <source>Copy</source>
         <translation>拷贝</translation>
     </message>
     <message>
-        <location filename="../src/wizactions.cpp" line="68"/>
+        <location filename="../src/wizactions.cpp" line="69"/>
         <location filename="../src/wizEditorToolBar.cpp" line="561"/>
         <source>Paste</source>
         <translation>粘贴</translation>

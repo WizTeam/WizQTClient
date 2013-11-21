@@ -51,9 +51,8 @@ CWizAboutDialog::CWizAboutDialog(QWidget *parent)
     QLabel* labelCopyright = new QLabel(this);
     labelCopyright->setText(tr("<span style=\"font-size:10px\">Copy Right 2013 Wiz inc. All rights reserved</span>"));
 
-    QVBoxLayout* layout = new QVBoxLayout();
+    QVBoxLayout* layout = new QVBoxLayout(this);
     layout->setContentsMargins(0, 10, 0, 10);
-    setLayout(layout);
 
     layout->addWidget(labelIcon);
     layout->addWidget(labelProduct);
@@ -67,6 +66,9 @@ CWizAboutDialog::CWizAboutDialog(QWidget *parent)
     layout->setAlignment(labelCopyright, Qt::AlignCenter);
 
     setWindowTitle(tr("About WizNote"));
+
+#ifndef Q_OS_LINUX
     setWindowFlags(Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint);
     setFixedSize(sizeHint());
+#endif
 }
