@@ -130,14 +130,14 @@ int main(int argc, char *argv[])
     a.installTranslator(&translatorQt);
 
     // check update if needed
-    CWizUpdaterDialog updater;
-    if (updater.checkNeedUpdate()) {
-        updater.show();
-        updater.doUpdate();
-        int ret = a.exec();
-        QProcess::startDetached(argv[0], QStringList());
-        return ret;
-    }
+    //CWizUpdaterDialog updater;
+    //if (updater.checkNeedUpdate()) {
+    //    updater.show();
+    //    updater.doUpdate();
+    //    int ret = a.exec();
+    //    QProcess::startDetached(argv[0], QStringList());
+    //    return ret;
+    //}
 
     // figure out auto login or manually login
     bool bFallback = true;

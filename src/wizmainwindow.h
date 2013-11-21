@@ -80,7 +80,7 @@ private:
     QPointer<QTimer> m_syncTimer;
     QPointer<CWizConsoleDialog> m_console;
     QPointer<CWizUpgrade> m_upgrade;
-    QPointer<CWizCertManager> m_certManager;
+    //QPointer<CWizCertManager> m_certManager;
     QPointer<CWizUserCipherForm> m_cipherForm;
 
     CWizObjectDataDownloaderHost* m_objectDownloaderHost;

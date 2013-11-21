@@ -63,7 +63,7 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     , m_syncTimer(new QTimer(this))
     , m_searchIndexer(new CWizSearchIndexer(m_dbMgr))
     , m_upgrade(new CWizUpgrade())
-    , m_certManager(new CWizCertManager(*this))
+    //, m_certManager(new CWizCertManager(*this))
     , m_cipherForm(new CWizUserCipherForm(*this, this))
     , m_objectDownloaderHost(new CWizObjectDataDownloaderHost(dbMgr, this))
     , m_avatarDownloaderHost(new CWizUserAvatarDownloaderHost(dbMgr.db().GetAvatarPath(), this))
@@ -679,7 +679,7 @@ void MainWindow::init()
 
 void MainWindow::on_actionSync_triggered()
 {
-    m_certManager->downloadUserCert();
+    //m_certManager->downloadUserCert();
 
     m_sync->startSync();
     m_animateSync->startPlay();

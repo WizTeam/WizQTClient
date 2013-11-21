@@ -24,19 +24,18 @@ set(wiznote_SOURCES
     share/wizxml.cpp
     share/wizxmlrpc.cpp
     share/wizXmlRpcServer.cpp
-    share/wizapi.cpp
+    #share/wizapi.cpp
     share/wizDatabase.cpp
     share/wizDatabaseManager.cpp
-    share/wizverifyaccount.cpp
+    #share/wizverifyaccount.cpp
     share/wizsettings.cpp
-
     share/wizui.cpp
     share/wizmd5.cpp
     share/wizhtml2zip.cpp
     share/wizwin32helper.cpp
     share/wizdrawtexthelper.cpp
     share/wizuihelper.cpp
-    share/wizcreateaccount.cpp
+    #share/wizcreateaccount.cpp
     share/wizcommonui.cpp
     share/wizanimateaction.cpp
     share/wizpopupwidget.cpp
@@ -52,6 +51,22 @@ set(wiznote_SOURCES
     html/wizhtmlreader.cpp
     html/wizhtmlcollector.cpp
     main.cpp
+    share/wizClucene.cpp
+    share/wizSearchIndexer.cpp
+    widgets/wizScrollBar.cpp
+    share/wizApiEntry.cpp
+    share/wizObjectDataDownloader.cpp
+    share/wizUserAvatar.cpp
+    sync/wizkmxmlrpc.cpp
+    sync/wizkmsync.cpp
+    sync/wizCloudPool.cpp
+    sync/wizAvatarUploader.cpp
+    widgets/wizUserInfoWidget.cpp
+    widgets/wizSegmentedButton.cpp
+    utils/styleHelper.cpp
+    utils/pathresolve.cpp
+
+    #coreplugin.cpp
     wizCategoryView.cpp
     wizCategoryViewItem.cpp
     wizDocumentListView.cpp
@@ -71,14 +86,12 @@ set(wiznote_SOURCES
     wizproxydialog.cpp
     wizcreateaccountdialog.cpp
     wizmainwindow.cpp
-    wizupdaterprogressdialog.cpp
+    #wizupdaterprogressdialog.cpp
     wizstatusbar.cpp
     wizupgradenotifydialog.cpp
-    wizcertmanager.cpp
+    #wizcertmanager.cpp
     wizusercipherform.cpp
     wiznoteinfoform.cpp
-    share/wizClucene.cpp
-    share/wizSearchIndexer.cpp
     wizSearchWidget.cpp
     wizEditorInsertLinkForm.cpp
     wizUpgrade.cpp
@@ -88,24 +101,13 @@ set(wiznote_SOURCES
     wizFolderSelector.cpp
     wizProgressDialog.cpp
     wizFolderView.cpp
-    widgets/wizScrollBar.cpp
     wizDocumentSelectionView.cpp
-    share/wizApiEntry.cpp
-    share/wizObjectDataDownloader.cpp
-    share/wizUserAvatar.cpp
     wizDocumentTransitionView.cpp
-    sync/wizkmxmlrpc.cpp
-    sync/wizkmsync.cpp
-    sync/wizCloudPool.cpp
-    sync/wizAvatarUploader.cpp
     wizPopupButton.cpp
-    widgets/wizUserInfoWidget.cpp
-    widgets/wizSegmentedButton.cpp
     wizWebSettingsDialog.cpp
     wizUserVerifyDialog.cpp
-    utils/styleHelper.cpp
-    utils/pathresolve.cpp
     plugindialog.cpp
+
 )
 
 set(wiznote_HEADERS
@@ -117,13 +119,13 @@ set(wiznote_HEADERS
     share/cppsqlite3.h
     share/wizobject.h
     share/wizkmcore.h
-    share/wizapi.h
+    #share/wizapi.h
     share/wizxml.h
     share/wizxmlrpc.h
     share/wizXmlRpcServer.h
     share/wizDatabase.h
     share/wizDatabaseManager.h
-    share/wizverifyaccount.h
+    #share/wizverifyaccount.h
     share/wizsettings.h
     share/wizui.h
     share/wizhtml2zip.h
@@ -131,7 +133,7 @@ set(wiznote_HEADERS
     share/wizwin32helper.h
     share/wizdrawtexthelper.h
     share/wizuihelper.h
-    share/wizcreateaccount.h
+    #share/wizcreateaccount.h
     share/wizcommonui.h
     share/wizanimateaction.h
     share/wizpopupwidget.h
@@ -146,6 +148,22 @@ set(wiznote_HEADERS
     share/wizziwreader.h
     html/wizhtmlreader.h
     html/wizhtmlcollector.h
+    sync/wizkmxmlrpc.h
+    sync/wizkmsync.h
+    sync/wizCloudPool.h
+    sync/wizAvatarUploader.h
+    share/wizSyncableDatabase.h
+    share/wizClucene.h
+    share/wizSearchIndexer.h
+    widgets/wizSegmentedButton.h
+    widgets/wizUserInfoWidget.h
+    widgets/wizScrollBar.h
+    share/wizApiEntry.h
+    share/wizObjectDataDownloader.h
+    share/wizUserAvatar.h
+    utils/styleHelper.h
+    utils/pathresolve.h
+
     wizdef.h
     wizactions.h
     wiznotestyle.h
@@ -165,44 +183,29 @@ set(wiznote_HEADERS
     wizproxydialog.h
     wizcreateaccountdialog.h
     wizmainwindow.h
-    wizupdaterprogressdialog.h
+    #wizupdaterprogressdialog.h
     wizstatusbar.h
     wizupgradenotifydialog.h
-    wizcertmanager.h
+    #wizcertmanager.h
     wizusercipherform.h
     wiznoteinfoform.h
     wizLineInputDialog.h
-    share/wizClucene.h
-    share/wizSearchIndexer.h
     wizSearchWidget.h
     wizEditorInsertLinkForm.h
     wizUpgrade.h
     wizEditorToolBar.h
-    sync/wizkmxmlrpc.h
-    sync/wizkmsync.h
-    sync/wizCloudPool.h
-    sync/wizAvatarUploader.h
-    share/wizSyncableDatabase.h
     wizWebSettingsDialog.h
-    widgets/wizSegmentedButton.h
-    widgets/wizUserInfoWidget.h
     wizPopupButton.h
     wizDocumentTransitionView.h
-
     wizButton.h
     wizEditorInsertTableForm.h
     wizFolderSelector.h
     wizProgressDialog.h
     wizFolderView.h
-    widgets/wizScrollBar.h
     wizDocumentSelectionView.h
-    share/wizApiEntry.h
-    share/wizObjectDataDownloader.h
-    share/wizUserAvatar.h
     wizUserVerifyDialog.h
-    utils/styleHelper.h
-    utils/pathresolve.h
     plugindialog.h
+
 
     # rapidjson
     rapidjson/allocators.h
@@ -246,50 +249,10 @@ set(wiznote_RCS
     ${CMAKE_SOURCE_DIR}/resources/wiznote.qrc
 )
 
-if(NOT CMAKE_BUILD_TYPE)
-    set(CMAKE_BUILD_TYPE Release CACHE STRING
-      "Choose the type of build, options are: None Debug Release RelWithDebInfo MinSizeRel."
-      FORCE)
-endif()
-
-if(NOT WIZNOTE_USE_QT5)
-    set(WIZNOTE_USE_QT5 OFF CACHE BOOL
-        "Build WizNote use Qt5, default is off, make sure you have libqt5 on system.")
-endif(NOT WIZNOTE_USE_QT5)
-
-if(WIZNOTE_USE_QT5)
-    find_package(Qt5 REQUIRED Core Widgets LinguistTools Xml Network WebKit WebKitWidgets)
-    #if(Qt5_FOUND)
-        set(QT_VERSION ${Qt5_VERSION})
-        qt5_add_translation(wiznote_QM ${wiznote_TRANSLATIONS})
-        qt5_wrap_ui(wiznote_FORM_HEADERS ${wiznote_FORMS})
-        qt5_add_resources(wiznote_RC ${wiznote_RCS})
-    #else(Qt5_FOUND)
-    #    set(WIZNOTE_USE_QT5 OFF)
-    #    message("Can't find Qt5, fallback to use Qt4")
-    #endif(Qt5_FOUND)
-else(WIZNOTE_USE_QT5)
-    find_package(Qt4 REQUIRED QtCore QtGui QtXml QtNetwork QtWebKit)
-    #if(Qt4_FOUND)
-        set(QT_VERSION ${QTVERSION})
-        qt4_add_translation(wiznote_QM ${wiznote_TRANSLATIONS})
-        qt4_wrap_ui(wiznote_FORM_HEADERS ${wiznote_FORMS})
-        qt4_add_resources(wiznote_RC ${wiznote_RCS})
-        INCLUDE(${QT_USE_FILE})
-    #else(Qt4_FOUND)
-    #    message(FATAL_ERROR "Can't find Qt4 on the system, if you have Qt5 exist, set WIZNOTE_USE_QT5 ON")
-    #endif(Qt4_FOUND)
-endif(WIZNOTE_USE_QT5)
-
-if(WIZNOTE_USE_QT5)
-    get_filename_component(_qt_BINARY_DIR ${Qt5_DIR}/../../../bin/ ABSOLUTE)
-    get_filename_component(_qt_TRANSLATIONS ${Qt5_DIR}/../../../translations/ ABSOLUTE)
-else(WIZNOTE_USE_QT5)
-    set(_qt_BINARY_DIR ${QT_BINARY_DIR})
-    set(_qt_TRANSLATIONS ${QT_TRANSLATIONS_DIR})
-endif(WIZNOTE_USE_QT5)
-
-set(CMAKE_AUTOMOC ON)
+include(QtChooser)
+qt_add_ui(wiznote_FORM_HEADERS ${wiznote_FORMS})
+qt_add_resources(wiznote_RC ${wiznote_RCS})
+qt_add_translation(wiznote_QM ${wiznote_TRANSLATIONS})
 
 message("WizNote whll compiling as ${CMAKE_BUILD_TYPE}, use Qt: ${QT_VERSION}")
 
@@ -301,7 +264,7 @@ if(UNIX)
         # we should copy qt internal qm files, otherwise qt can't translate some internal resources
         # and also macdeployqt will not do this work for us
         # refer to: https://bugreports.qt-project.org/browse/QTBUG-18662
-        file(GLOB _qt5_QM ${_qt_TRANSLATIONS}/qt_*.qm)
+        file(GLOB _qt5_QM ${qt_translations_dir}/qt_*.qm)
 
         add_executable(${PROJECT_NAME} MACOSX_BUNDLE ${wiznote_SOURCES} ${wiznote_HEADERS} ${wiznote_SOURCES_MAC} ${wiznote_HEADERS_MAC} ${wiznote_FORM_HEADERS} ${wiznote_QM} ${_qt5_QM} ${wiznote_RC} ${wiznote_LOGO})
         set_target_properties(${PROJECT_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bundle)
@@ -334,7 +297,7 @@ if(UNIX)
         if(CMAKE_BUILD_TYPE STREQUAL "Release")
             # resovle library dependency if build type is release
             add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-                COMMAND ${_qt_BINARY_DIR}/macdeployqt ${wiznote_BUNDLE}
+                COMMAND ${qt_binary_dir}/macdeployqt ${wiznote_BUNDLE}
                 COMMAND ln -s /Applications ${CMAKE_BINARY_DIR}/bundle/Applications
             )
         endif()
@@ -366,11 +329,7 @@ if(UNIX)
     endif()
 endif()
 
-if(WIZNOTE_USE_QT5)
-    qt5_use_modules(${PROJECT_NAME} Core Widgets Xml Network WebKit WebKitWidgets)
-else(WIZNOTE_USE_QT5)
-    target_link_libraries(${PROJECT_NAME} ${QT_LIBRARIES})
-endif(WIZNOTE_USE_QT5)
+qt_use_modules(${PROJECT_NAME})
 
 include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}

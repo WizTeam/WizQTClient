@@ -4,7 +4,7 @@
 #include <QtGui>
 #include <QSplitter>
 
-#include "wizdef.h"
+//#include "wizdef.h"
 
 QBrush WizGetLeftViewBrush();
 

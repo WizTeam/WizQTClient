@@ -318,9 +318,9 @@ void CWizLoginDialog::on_labelNetwork_linkActivated(const QString & link)
 {
     Q_UNUSED(link);
 
-    ProxyDialog dlg(this);
-    if (QDialog::Accepted != dlg.exec())
-        return;
+    //ProxyDialog dlg(this);
+    //if (QDialog::Accepted != dlg.exec())
+    //    return;
 }
 
 void CWizLoginDialog::on_comboUsers_indexChanged(const QString &userId)

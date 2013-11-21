@@ -8,7 +8,7 @@
 #include "wizdef.h"
 #include "share/wizsettings.h"
 #include "share/wizmisc.h"
-#include "wizproxydialog.h"
+//#include "wizproxydialog.h"
 
 namespace Ui {
     class CWizPreferenceWindow;

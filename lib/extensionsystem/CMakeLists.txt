@@ -41,27 +41,12 @@ set(extsys_RESOURCES
     pluginview.qrc
 )
 
-if(WIZNOTE_USE_QT5)
-    find_package(Qt5 REQUIRED Core Widgets LinguistTools)
-    qt5_wrap_ui(extsys_FORM_HEADERS ${extsys_FORMS})
-    qt5_add_resources(extsys_RC ${extsys_RESOURCES})
-else(WIZNOTE_USE_QT5)
-    find_package(Qt4 REQUIRED QtCore QtGui)
-    qt4_wrap_ui(extsys_FORM_HEADERS ${extsys_FORMS})
-    qt4_add_resources(extsys_RC ${extsys_RESOURCES})
-    INCLUDE(${QT_USE_FILE})
-endif(WIZNOTE_USE_QT5)
-
-set(CMAKE_AUTOMOC ON)
-
+include(QtChooser)
+qt_add_ui(extsys_FORM_HEADERS ${extsys_FORMS})
+qt_add_resources(extsys_RC ${extsys_RESOURCES})
+message(STATUS ${extsys_RC})
 add_library(extensionsystem SHARED ${extsys_SOURCES} ${extsys_HEADERS} ${extsys_FORM_HEADERS} ${extsys_RC})
-set_target_properties(extensionsystem PROPERTIES VERSION 1.0.0 SOVERSION 0)
-
-if(WIZNOTE_USE_QT5)
-    qt5_use_modules(extensionsystem Core Widgets)
-else(WIZNOTE_USE_QT5)
-    target_link_libraries(extensionsystem ${QT_LIBRARIES})
-endif(WIZNOTE_USE_QT5)
+qt_use_modules(extensionsystem)
 
 include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}

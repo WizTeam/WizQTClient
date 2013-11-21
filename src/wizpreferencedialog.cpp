@@ -263,10 +263,10 @@ void CWizPreferenceWindow::labelProxy_linkActivated(const QString& link)
 {
     Q_UNUSED(link);
 
-    ProxyDialog dlg(this);
-    if (QDialog::Accepted != dlg.exec()) {
-        Q_EMIT settingsChanged(wizoptionsSync);
-    }
+    //ProxyDialog dlg(this);
+    //if (QDialog::Accepted != dlg.exec()) {
+    //    Q_EMIT settingsChanged(wizoptionsSync);
+    //}
 }
 
 void CWizPreferenceWindow::onButtonFontSelect_clicked()
