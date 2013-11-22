@@ -31,4 +31,6 @@ if(APPLE)
     set_source_files_properties(${helloworld_SPEC} PROPERTIES MACOSX_PACKAGE_LOCATION .)
 else(APPLE)
     install(FILES ${helloworld_SPEC} DESTINATION .)
+    add_custom_command(TARGET helloworld POST_BUILD
+                COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/helloworld.pluginspec ${WIZNOTE_PLUGIN_DIR})
 endif(APPLE)
