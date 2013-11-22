@@ -49,9 +49,8 @@ add_library(extensionsystem SHARED ${extsys_SOURCES} ${extsys_HEADERS} ${extsys_
 qt_use_modules(extensionsystem)
 
 include_directories(
-    ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_CURRENT_BINARY_DIR}
-    ${aggregation_SOURCE_DIR}/..
+    ${libs_SOURCE_DIR}
 )
 
 target_link_libraries(extensionsystem aggregation)

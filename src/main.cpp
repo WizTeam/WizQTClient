@@ -68,7 +68,6 @@ static inline QStringList getPluginPaths()
 #  define SHARE_PATH "/../share/wiznote"
 #endif
 
-
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);

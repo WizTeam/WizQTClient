@@ -1,8 +1,6 @@
 #ifndef WIZCATEGORYVIEWITEM_H
 #define WIZCATEGORYVIEWITEM_H
 
-//#include <QTreeWidget>
-
 #include <QTreeWidgetItem>
 
 #include "share/wizobject.h"

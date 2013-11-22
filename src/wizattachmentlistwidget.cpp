@@ -13,6 +13,7 @@
 #include "share/wizdownloadobjectdata.h"
 #include "wizdef.h"
 #include "wizButton.h"
+#include "share/wizObjectDataDownloader.h"
 
 #include "wizmainwindow.h"
 

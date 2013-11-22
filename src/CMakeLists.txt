@@ -2,6 +2,7 @@ project(wiznote)
 
 add_subdirectory(plugins)
 
+
 set(wiznote_SOURCES_MAC
     mac/wizSearchWidget.mm
     mac/wizmachelper.mm
@@ -248,15 +249,15 @@ if(UNIX)
         # refer to: https://bugreports.qt-project.org/browse/QTBUG-18662
         file(GLOB _qt5_QM ${qt_translations_dir}/qt_*.qm)
 
-        add_executable(${PROJECT_NAME} MACOSX_BUNDLE ${wiznote_SOURCES} ${wiznote_HEADERS} ${wiznote_SOURCES_MAC} ${wiznote_HEADERS_MAC} ${wiznote_FORM_HEADERS} ${wiznote_QM} ${_qt5_QM} ${wiznote_RC} ${wiznote_LOGO})
-        set_target_properties(${PROJECT_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bundle)
+        add_executable(wiznote MACOSX_BUNDLE ${wiznote_SOURCES} ${wiznote_HEADERS} ${wiznote_SOURCES_MAC} ${wiznote_HEADERS_MAC} ${wiznote_FORM_HEADERS} ${wiznote_QM} ${_qt5_QM} ${wiznote_RC} ${wiznote_LOGO})
+        set_target_properties(wiznote PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
         set_target_properties(${PROJECT_NAME} PROPERTIES AUTOMOC_MOC_OPTIONS "-DQ_OS_MAC")
 
         # this should be issue of cmake, refer: http://public.kitware.com/Bug/bug_revision_view_page.php?rev_id=958
         set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS "-F /Library/Frameworks")
 
         # qmake will do this automatically
-        set_target_properties(${PROJECT_NAME} PROPERTIES COMPILE_FLAGS "-mmacosx-version-min=10.6")
+        set_target_properties(${PROJECT_NAME} PROPERTIES COMPILE_FLAGS "-mmacosx-version-min=10.7")
 
         # suppress cmake warnning when link library is not a target, refer to cmp0016 for detailed info.
         cmake_policy(SET CMP0016 OLD)
@@ -271,16 +272,16 @@ if(UNIX)
         set_source_files_properties(${_qt5_QM} PROPERTIES MACOSX_PACKAGE_LOCATION Resources/locales)
 
         # copy resources to bundle
-        set(wiznote_BUNDLE ${CMAKE_BINARY_DIR}/bundle/${PROJECT_NAME}.app)
-        set(wiznote_BUNDLE_CONTENTS ${CMAKE_BINARY_DIR}/bundle/${PROJECT_NAME}.app/Contents)
+        #set(wiznote_BUNDLE ${CMAKE_BINARY_DIR}/bundle/${PROJECT_NAME}.app)
+        #set(wiznote_BUNDLE_CONTENTS ${CMAKE_BINARY_DIR}/bundle/${PROJECT_NAME}.app/Contents)
         add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-            COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/share/ ${wiznote_BUNDLE_CONTENTS}/Resources/)
+            COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/share/ ${WIZNOTE_RESOURCE_DIR})
 
         if(CMAKE_BUILD_TYPE STREQUAL "Release")
             # resovle library dependency if build type is release
+            add_dependencies(wiznote coreplugin_plugin helloworld_plugin)
             add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-                COMMAND ${qt_binary_dir}/macdeployqt ${wiznote_BUNDLE}
-                COMMAND ln -s /Applications ${CMAKE_BINARY_DIR}/bundle/Applications
+                COMMAND ${qt_binary_dir}/macdeployqt ${WIZNOTE_ROOT_DIR}
             )
         endif()
 

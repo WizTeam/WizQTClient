@@ -7,7 +7,7 @@
 //#include <coreplugin/actionmanager/actionmanager.h>
 //#include <coreplugin/editormanager/editormanager.h>
 
-#include "wizmainwindow.h"
+//#include "wizmainwindow.h"
 
 using namespace Core;
 using namespace Core::Internal;
@@ -31,7 +31,7 @@ CorePlugin::~CorePlugin()
     //    delete m_designMode;
     //}
 
-    delete m_mainWindow;
+    //delete m_mainWindow;
 }
 
 //void CorePlugin::parseArguments(const QStringList &arguments)
@@ -63,7 +63,7 @@ bool CorePlugin::initialize(const QStringList &arguments, QString *errorMessage)
     //// Make sure we respect the process's umask when creating new files
     //Utils::SaveFile::initializeUmask();
 
-    return success;
+    return true;
 }
 
 void CorePlugin::extensionsInitialized()

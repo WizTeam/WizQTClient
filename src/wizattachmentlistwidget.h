@@ -1,17 +1,20 @@
 #ifndef WIZATTACHMENTLISTWIDGET_H
 #define WIZATTACHMENTLISTWIDGET_H
 
-#include "share/wizpopupwidget.h"
+#include <QPointer>
+
+#include "share/wizobject.h"
 #include "share/wizmultilinelistwidget.h"
+
+#include "share/wizpopupwidget.h"
 #include "share/wizfileiconprovider.h"
-#include "wizdownloadobjectdatadialog.h"
-#include "share/wizObjectDataDownloader.h"
 
 
 class CWizExplorerApp;
 class CWizDatabaseManager;
 class CWizAttachmentListViewItem;
 class CWizButton;
+class CWizObjectDataDownloaderHost;
 
 class CWizAttachmentListView : public CWizMultiLineListWidget
 {

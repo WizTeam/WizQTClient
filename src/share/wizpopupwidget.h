@@ -2,9 +2,9 @@
 #define WIZPOPUPWIDGET_H
 
 #include <QWidget>
-#include <QPropertyAnimation>
+//#include <QPropertyAnimation>
 
-#include "wizui.h"
+//#include "wizui.h"
 
 class QTimer;
 

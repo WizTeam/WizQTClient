@@ -29,7 +29,7 @@ public:
 //private:
 //    void parseArguments(const QStringList & arguments);
 
-    MainWindow *m_mainWindow;
+    //MainWindow *m_mainWindow;
 };
 
 } // namespace Internal

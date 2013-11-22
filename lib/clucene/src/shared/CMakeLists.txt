@@ -39,15 +39,15 @@ find_package(Threads REQUIRED)
 INCLUDE (CheckPthread)
 INCLUDE (CheckAtomicFunctions)
 
-find_package(ZLIB)
-IF ( ZLIB_FOUND )
-  SET ( EXTRA_LIBS ${EXTRA_LIBS} ${ZLIB_LIBRARY} )
-ELSE ( ZLIB_FOUND )
-  MESSAGE( "ZLIB not found, using local: ${clucene-ext_SOURCE_DIR}/zlib" )
-  SET(ZLIB_INCLUDE_DIR ${clucene-ext_SOURCE_DIR}/zlib )
-  SET(ZLIB_LIBRARY ${clucene-ext_BINARY_DIR})
-ENDIF ( ZLIB_FOUND )
-INCLUDE_DIRECTORIES( ${ZLIB_INCLUDE_DIR} )
+#find_package(ZLIB)
+#IF ( ZLIB_FOUND )
+#  SET ( EXTRA_LIBS ${EXTRA_LIBS} ${ZLIB_LIBRARY} )
+#ELSE ( ZLIB_FOUND )
+#  MESSAGE( "ZLIB not found, using local: ${clucene-ext_SOURCE_DIR}/zlib" )
+#  SET(ZLIB_INCLUDE_DIR ${clucene-ext_SOURCE_DIR}/zlib )
+#  SET(ZLIB_LIBRARY ${clucene-ext_BINARY_DIR})
+#ENDIF ( ZLIB_FOUND )
+INCLUDE_DIRECTORIES(${ZLIB_INCLUDE_DIR})
 
 ########################################################################
 # test for headers
@@ -303,20 +303,20 @@ MACRO (GET_SHARED_FILES result)
       ${rel}/CLucene/util/dirent.cpp
     )
 
-    IF ( NOT ZLIB_FOUND )
-      SET(${result} ${${result}}
-        ${clucene-ext_SOURCE_DIR}/zlib/adler32.c
-        ${clucene-ext_SOURCE_DIR}/zlib/compress.c
-        ${clucene-ext_SOURCE_DIR}/zlib/crc32.c
-        ${clucene-ext_SOURCE_DIR}/zlib/deflate.c
-        ${clucene-ext_SOURCE_DIR}/zlib/gzio.c
-        ${clucene-ext_SOURCE_DIR}/zlib/inffast.c
-        ${clucene-ext_SOURCE_DIR}/zlib/inflate.c
-        ${clucene-ext_SOURCE_DIR}/zlib/inftrees.c
-        ${clucene-ext_SOURCE_DIR}/zlib/trees.c
-        ${clucene-ext_SOURCE_DIR}/zlib/zutil.c
-      )
-    ENDIF ( NOT ZLIB_FOUND )
+    #IF ( NOT ZLIB_FOUND )
+    #  SET(${result} ${${result}}
+    #    ${clucene-ext_SOURCE_DIR}/zlib/adler32.c
+    #    ${clucene-ext_SOURCE_DIR}/zlib/compress.c
+    #    ${clucene-ext_SOURCE_DIR}/zlib/crc32.c
+    #    ${clucene-ext_SOURCE_DIR}/zlib/deflate.c
+    #    ${clucene-ext_SOURCE_DIR}/zlib/gzio.c
+    #    ${clucene-ext_SOURCE_DIR}/zlib/inffast.c
+    #    ${clucene-ext_SOURCE_DIR}/zlib/inflate.c
+    #    ${clucene-ext_SOURCE_DIR}/zlib/inftrees.c
+    #    ${clucene-ext_SOURCE_DIR}/zlib/trees.c
+    #    ${clucene-ext_SOURCE_DIR}/zlib/zutil.c
+    #  )
+    #ENDIF ( NOT ZLIB_FOUND )
 ENDMACRO (GET_SHARED_FILES)
 
 GET_SHARED_FILES(clucene_shared_Files ".")

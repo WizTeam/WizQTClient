@@ -1,4 +1,5 @@
 PROJECT(clucene-core)
+
 set(CMAKE_MODULE_PATH "${clucene_SOURCE_DIR}/cmake" "${clucene-shared_SOURCE_DIR}/cmake")
 
 #define command line options

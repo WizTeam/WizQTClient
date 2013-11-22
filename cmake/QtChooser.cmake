@@ -1,20 +1,13 @@
-if(NOT WIZNOTE_USE_QT5)
-    set(WIZNOTE_USE_QT5 OFF CACHE BOOL
-        "Build WizNote use Qt5, default is off.")
-endif(NOT WIZNOTE_USE_QT5)
-
 if(WIZNOTE_USE_QT5)
     find_package(Qt5 REQUIRED Core Widgets LinguistTools Xml Network WebKit WebKitWidgets)
     get_filename_component(qt_binary_dir ${Qt5_DIR}/../../../bin/ ABSOLUTE)
     get_filename_component(qt_translations_dir ${Qt5_DIR}/../../../translations/ ABSOLUTE)
     set(QT_VERSION ${Qt5_VERSION})
-
 else(WIZNOTE_USE_QT5)
     find_package(Qt4 REQUIRED QtCore QtGui QtXml QtNetwork QtWebKit)
     set(qt_binary_dir ${QT_BINARY_DIR})
     set(qt_translations_dir ${QT_TRANSLATIONS_DIR})
     set(QT_VERSION ${QTVERSION})
-
     INCLUDE(${QT_USE_FILE})
 endif(WIZNOTE_USE_QT5)
 

@@ -5,6 +5,8 @@
 #include <QFileInfo>
 #include <QTextBrowser>
 #include <QVBoxLayout>
+#include <QIcon>
+#include <QDateTime>
 
 #include "wizdef.h"
 #include "share/wizmisc.h"
@@ -66,9 +68,4 @@ CWizAboutDialog::CWizAboutDialog(QWidget *parent)
     layout->setAlignment(labelCopyright, Qt::AlignCenter);
 
     setWindowTitle(tr("About WizNote"));
-
-#ifndef Q_OS_LINUX
-    setWindowFlags(Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint);
-    setFixedSize(sizeHint());
-#endif
 }
