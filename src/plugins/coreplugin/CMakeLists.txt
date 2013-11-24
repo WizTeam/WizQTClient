@@ -21,6 +21,7 @@ include(QtChooser)
 qt_add_ui(coreplugin_FORM_HEADERS ${coreplugin_FORMS})
 add_library(coreplugin SHARED ${coreplugin_SOURCES} ${coreplugin_HEADERS} ${coreplugin_FORM_HEADERS} ${coreplugin_SPEC})
 qt_use_modules(coreplugin)
+qt_suppress_warnings(coreplugin)
 
 add_definitions(-DCORE_LIBRARY)
 

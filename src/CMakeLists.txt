@@ -310,7 +310,8 @@ if(UNIX)
     endif()
 endif()
 
-qt_use_modules(${PROJECT_NAME})
+qt_use_modules(wiznote)
+qt_suppress_warnings(wiznote)
 
 include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}

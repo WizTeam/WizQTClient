@@ -66,3 +66,8 @@ macro(qt_use_modules)
         target_link_libraries(${ARGV0} ${QT_LIBRARIES})
     endif()
 endmacro()
+
+macro(qt_suppress_warnings)
+set_target_properties(${ARGV0} PROPERTIES
+                        COMPILE_FLAGS "-Wno-#warnings")
+endmacro()

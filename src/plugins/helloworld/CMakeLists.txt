@@ -17,6 +17,7 @@ set(helloworld_SPEC
 include(QtChooser)
 add_library(helloworld SHARED ${helloworld_SOURCES} ${helloworld_HEADERS} ${helloworld_SPEC})
 qt_use_modules(helloworld)
+qt_suppress_warnings(helloworld)
 
 # set all include directories for in and out of source builds
 include_directories(

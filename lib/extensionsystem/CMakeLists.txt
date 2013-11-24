@@ -47,6 +47,7 @@ qt_add_resources(extsys_RC ${extsys_RESOURCES})
 message(STATUS ${extsys_RC})
 add_library(extensionsystem SHARED ${extsys_SOURCES} ${extsys_HEADERS} ${extsys_FORM_HEADERS} ${extsys_RC})
 qt_use_modules(extensionsystem)
+qt_suppress_warnings(extensionsystem)
 
 include_directories(
     ${CMAKE_CURRENT_BINARY_DIR}
