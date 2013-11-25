@@ -27,6 +27,8 @@ include_directories(
 
 target_link_libraries(helloworld extensionsystem)
 
-install(FILES ${helloworld_SPEC} DESTINATION .)
 add_custom_command(TARGET helloworld POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/helloworld.pluginspec ${WIZNOTE_PLUGIN_DIR})
+
+install(FILES ${helloworld_SPEC} DESTINATION share/wiznote/plugins)
+install(TARGETS helloworld DESTINATION share/wiznote/plugins)

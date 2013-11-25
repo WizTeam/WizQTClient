@@ -17,3 +17,5 @@ qt_suppress_warnings(aggregation)
 include_directories(
     ${CMAKE_CURRENT_BINARY_DIR}
 )
+
+install(TARGETS aggregation DESTINATION share/wiznote/plugins)

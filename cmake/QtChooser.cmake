@@ -68,6 +68,8 @@ macro(qt_use_modules)
 endmacro()
 
 macro(qt_suppress_warnings)
-set_target_properties(${ARGV0} PROPERTIES
-                        COMPILE_FLAGS "-Wno-#warnings")
+    if(APPLE)
+        set_target_properties(${ARGV0} PROPERTIES
+            COMPILE_FLAGS "-Wno-#warnings")
+    endif(APPLE)
 endmacro()
