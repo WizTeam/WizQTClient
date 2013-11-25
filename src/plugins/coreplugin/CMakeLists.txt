@@ -30,11 +30,6 @@ include_directories(
 )
 target_link_libraries(coreplugin extensionsystem)
 
-set_target_properties(coreplugin PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${WIZNOTE_PLUGIN_DIR})
-if(APPLE)
-    set_source_files_properties(${coreplugin_SPEC} PROPERTIES MACOSX_PACKAGE_LOCATION .)
-else(APPLE)
-    install(FILES ${coreplugin_SPEC} DESTINATION .)
-    add_custom_command(TARGET coreplugin POST_BUILD
-                    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/coreplugin.pluginspec ${WIZNOTE_PLUGIN_DIR})
-endif(APPLE)
+install(FILES ${coreplugin_SPEC} DESTINATION .)
+add_custom_command(TARGET coreplugin POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/coreplugin.pluginspec ${WIZNOTE_PLUGIN_DIR})
