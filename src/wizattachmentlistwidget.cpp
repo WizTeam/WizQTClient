@@ -19,6 +19,8 @@
 
 #include "wizmainwindow.h"
 
+using namespace Core::Internal;
+
 
 class CWizAttachmentListViewItem : public QListWidgetItem
 {

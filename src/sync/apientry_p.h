@@ -18,8 +18,9 @@ public:
     QString messageVersionUrl();
     QString avatarDownloadUrl();
     QString avatarUploadUrl();
-    QString commentUrl();
-    QString commentCountUrl();
+    QString commentUrl(const QString& strToken, const QString& strKbGUID,const QString& strGUID);
+    QString commentCountUrl(const QString& strServer, const QString& strToken,
+                            const QString& strKbGUID, const QString& strGUID);
     QString feedbackUrl();
     QString accountInfoUrl(const QString& strToken);
     QString groupAttributeUrl(const QString& strToken, const QString& strKbGUID);

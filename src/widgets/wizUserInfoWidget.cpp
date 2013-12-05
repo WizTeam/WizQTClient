@@ -15,6 +15,7 @@
 #include "sync/token.h"
 
 using namespace WizService;
+using namespace Core::Internal;
 
 
 CWizUserInfoWidget::CWizUserInfoWidget(CWizExplorerApp& app, QWidget *parent)

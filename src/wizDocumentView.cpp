@@ -17,6 +17,7 @@
 #include "widgets/wizSegmentedButton.h"
 //#include "widgets/qsegmentcontrol.h"
 #include "wizButton.h"
+#include "icore.h"
 
 
 class CWizTitleEdit : public QLineEdit
@@ -464,6 +465,9 @@ CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
     // webview related
     connect(m_web, SIGNAL(focusIn()), SLOT(on_webview_focusIn()));
     connect(m_web, SIGNAL(focusOut()), SLOT(on_webview_focusOut()));
+
+    connect(Core::ICore::instance(), SIGNAL(viewNoteRequested(CWizDocumentView*,WIZDOCUMENTDATA)),
+            SLOT(onViewNoteRequested(CWizDocumentView*,WIZDOCUMENTDATA)));
 }
 
 void CWizDocumentView::showClient(bool visible)
@@ -482,6 +486,13 @@ void CWizDocumentView::setReadOnly(bool b, bool isGroup)
 
     // tag is not avaliable for group
     m_title->tagButton()->setEnabled(!isGroup ? true : false);
+}
+
+void CWizDocumentView::onViewNoteRequested(CWizDocumentView* view, const WIZDOCUMENTDATA& doc)
+{
+    if (view == this) {
+        viewDocument(doc, false);
+    }
 }
 
 bool CWizDocumentView::viewDocument(const WIZDOCUMENTDATA& data, bool forceEdit)

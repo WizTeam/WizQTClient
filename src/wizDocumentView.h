@@ -64,6 +64,8 @@ public:
     void settingsChanged();
 
 public Q_SLOTS:
+    void onViewNoteRequested(CWizDocumentView* view, const WIZDOCUMENTDATA& doc);
+
     void on_titleEdit_editingFinished();
     void on_titleEdit_returnPressed();
 

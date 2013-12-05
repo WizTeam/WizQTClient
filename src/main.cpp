@@ -20,6 +20,7 @@
 #include "sync/apientry.h"
 
 using namespace ExtensionSystem;
+using namespace Core::Internal;
 
 
 static inline QStringList getPluginPaths()

@@ -89,6 +89,7 @@ set(wiznote_SOURCES
     wizproxydialog.cpp
     wizcreateaccountdialog.cpp
     wizmainwindow.cpp
+    icore.cpp
     #wizupdaterprogressdialog.cpp
     wizstatusbar.cpp
     wizupgradenotifydialog.cpp
@@ -190,6 +191,7 @@ set(wiznote_HEADERS
     wizproxydialog.h
     wizcreateaccountdialog.h
     wizmainwindow.h
+    icore.h
     #wizupdaterprogressdialog.h
     wizstatusbar.h
     wizupgradenotifydialog.h

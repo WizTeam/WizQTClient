@@ -140,14 +140,34 @@ QString ApiEntryPrivate::avatarUploadUrl()
     return requestUrl(WIZNOTE_API_COMMAND_UPLOAD_AVATAR, m_strAvatarUploadUrl);
 }
 
-QString ApiEntryPrivate::commentUrl()
+QString ApiEntryPrivate::commentUrl(const QString& strToken, const QString& strKbGUID,const QString& strGUID)
 {
-    return requestUrl(WIZNOTE_API_COMMAND_COMMENT, m_strCommentUrl);
+    if (m_strCommentUrl.isEmpty()) {
+        requestUrl(WIZNOTE_API_COMMAND_COMMENT, m_strCommentUrl);
+    }
+
+    QString strUrl(m_strCommentUrl);
+    strUrl.replace("{token}", strToken);
+    strUrl.replace("{kbGuid}", strKbGUID);
+    strUrl.replace("{documentGuid}", strGUID);
+
+    return strUrl;
 }
 
-QString ApiEntryPrivate::commentCountUrl()
+QString ApiEntryPrivate::commentCountUrl(const QString& strServer, const QString& strToken,
+                                         const QString& strKbGUID, const QString& strGUID)
 {
-    return requestUrl(WIZNOTE_API_COMMAND_COMMENT_COUNT, m_strCommentCountUrl);
+    if (m_strCommentCountUrl.isEmpty()) {
+        requestUrl(WIZNOTE_API_COMMAND_COMMENT_COUNT, m_strCommentCountUrl);
+    }
+
+    QString strUrl(m_strCommentCountUrl);
+    strUrl.replace("{server_host}", strServer);
+    strUrl.replace("{token}", strToken);
+    strUrl.replace("{kbGuid}", strKbGUID);
+    strUrl.replace("{documentGuid}", strGUID);
+
+    return strUrl;
 }
 
 QString ApiEntryPrivate::feedbackUrl()
@@ -203,18 +223,19 @@ QString ApiEntry::avatarUploadUrl()
     return d->avatarUploadUrl();
 }
 
-QString ApiEntry::commentUrl()
+QString ApiEntry::commentUrl(const QString& strToken, const QString& strKbGUID,const QString& strGUID)
 {
     if (!d)
         d = new ApiEntryPrivate();
-    return d->commentUrl();
+    return d->commentUrl(strToken, strKbGUID, strGUID);
 }
 
-QString ApiEntry::commentCountUrl()
+QString ApiEntry::commentCountUrl(const QString& strServer, const QString& strToken,
+                                  const QString& strKbGUID, const QString& strGUID)
 {
     if (!d)
         d = new ApiEntryPrivate();
-    return d->commentCountUrl();
+    return d->commentCountUrl(strServer, strToken, strKbGUID, strGUID);
 }
 
 QString ApiEntry::feedbackUrl()

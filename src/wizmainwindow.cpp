@@ -54,8 +54,14 @@
 
 #include "plugindialog.h"
 
+#include "icore.h"
+
+using namespace Core;
+using namespace Core::Internal;
+
 MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     : QMainWindow(parent)
+    , m_core(new ICore(this))
     , m_dbMgr(dbMgr)
     , m_progress(new CWizProgressDialog(this))
     , m_settings(new CWizUserSettings(dbMgr.db()))
@@ -1248,12 +1254,14 @@ void MainWindow::viewDocument(const WIZDOCUMENTDATA& data, bool addToHistory)
 
     resetPermission(data.strKbGUID, data.strOwner);
 
-    if (!m_doc->viewDocument(data, forceEdit))
-        return;
+    ICore::emitViewNoteRequested(m_doc, data);
 
-    if (addToHistory) {
-        m_history->addHistory(data);
-    }
+    //if (!m_doc->viewDocument(data, forceEdit))
+    //    return;
+
+    //if (addToHistory) {
+    //    m_history->addHistory(data);
+    //}
 
     //m_actions->actionFromName("actionGoBack")->setEnabled(m_history->canBack());
     //m_actions->actionFromName("actionGoForward")->setEnabled(m_history->canForward());

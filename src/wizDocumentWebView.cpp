@@ -17,6 +17,7 @@
 #include "wizDocumentTransitionView.h"
 #include "share/wizDatabaseManager.h"
 
+using namespace Core::Internal;
 
 /*
  * Load and save document

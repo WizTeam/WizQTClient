@@ -12,8 +12,9 @@ public:
     static QString messageVersionUrl();
     static QString avatarDownloadUrl();
     static QString avatarUploadUrl();
-    static QString commentUrl();
-    static QString commentCountUrl();
+    static QString commentUrl(const QString& strToken, const QString& strKbGUID,const QString& strGUID);
+    static QString commentCountUrl(const QString& strServer, const QString& strToken,
+                                   const QString& strKbGUID, const QString& strGUID);
     static QString feedbackUrl();
     static QString accountInfoUrl(const QString& strToken);
     static QString groupAttributeUrl(const QString& strToken, const QString& strKbGUID);

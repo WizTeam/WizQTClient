@@ -43,6 +43,11 @@ class CWizUserAvatarDownloaderHost;
 class CWizKMSyncThread;
 class CWizUserVerifyDialog;
 
+namespace Core {
+class ICore;
+
+namespace Internal {
+
 class MainWindow
     : public QMainWindow
     , public CWizExplorerApp
@@ -72,6 +77,7 @@ protected:
     virtual void closeEvent(QCloseEvent* event);
 
 private:
+    ICore* m_core;
     CWizDatabaseManager& m_dbMgr;
     CWizProgressDialog* m_progress;
     CWizUserSettings* m_settings;
@@ -80,7 +86,6 @@ private:
     QPointer<QTimer> m_syncTimer;
     QPointer<CWizConsoleDialog> m_console;
     QPointer<CWizUpgrade> m_upgrade;
-    //QPointer<CWizCertManager> m_certManager;
     QPointer<CWizUserCipherForm> m_cipherForm;
 
     CWizObjectDataDownloaderHost* m_objectDownloaderHost;
@@ -276,5 +281,8 @@ public:
     Q_INVOKABLE void SetSavingDocument(bool saving);
     Q_INVOKABLE void ProcessClipboardBeforePaste(const QVariantMap& data);
 };
+
+} // namespace Internal
+} // namespace Core
 
 #endif // WIZMAINWINDOW_H

@@ -20,6 +20,8 @@
 #include "sync/apientry.h"
 #include "sync/wizCloudPool.h"
 
+using namespace Core::Internal;
+
 
 #define CATEGORY_GENERAL    QObject::tr("General")
 #define CATEGORY_PERSONAL   QObject::tr("Personal notes")

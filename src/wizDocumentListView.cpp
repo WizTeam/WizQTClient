@@ -15,6 +15,8 @@
 #include "wizmainwindow.h"
 #include "utils/styleHelper.h"
 
+using namespace Core::Internal;
+
 
 // Document actions
 #define WIZACTION_LIST_DELETE   QObject::tr("Delete")

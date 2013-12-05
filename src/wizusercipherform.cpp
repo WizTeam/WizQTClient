@@ -5,6 +5,8 @@
 
 #include "wizmainwindow.h"
 
+using namespace Core::Internal;
+
 CWizUserCipherForm::CWizUserCipherForm(CWizExplorerApp& app, QWidget *parent)
     : QFrame(parent)
     , ui(new Ui::CWizUserCipherForm)
