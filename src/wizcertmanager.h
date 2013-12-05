@@ -1,6 +1,8 @@
 #ifndef CWIZCERTMANAGER_H
 #define CWIZCERTMANAGER_H
 
+#if 0
+
 #include "share/wizapi.h"
 #include "wizdef.h"
 
@@ -34,5 +36,7 @@ Q_SIGNALS:
     void done(bool succeed, const QString& errorMessage);
 
 };
+
+#endif // 0
 
 #endif // CWIZCERTMANAGER_H

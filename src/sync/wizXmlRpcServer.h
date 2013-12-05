@@ -6,8 +6,8 @@
 #include <QEventLoop>
 #include <QNetworkReply>
 
-#include "wizxmlrpc.h"
-#include "wizmisc.h"
+#include "../share/wizxmlrpc.h"
+#include "../share/wizmisc.h"
 
 
 

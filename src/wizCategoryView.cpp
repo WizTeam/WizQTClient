@@ -17,7 +17,7 @@
 #include "wizLineInputDialog.h"
 #include "wizWebSettingsDialog.h"
 #include "sync/wizkmxmlrpc.h"
-#include "share/wizApiEntry.h"
+#include "sync/apientry.h"
 #include "sync/wizCloudPool.h"
 
 
@@ -1207,7 +1207,7 @@ void CWizCategoryView::on_action_group_attribute_requested(const QString& strTok
         return;
     }
 
-    QString strUrl = CWizApiEntry::getGroupAttributeUrl(strToken, m_strRequestedGroupKbGUID);
+    QString strUrl = WizService::ApiEntry::groupAttributeUrl(strToken, m_strRequestedGroupKbGUID);
     m_groupSettings->load(QUrl::fromEncoded(strUrl.toUtf8()));
 }
 

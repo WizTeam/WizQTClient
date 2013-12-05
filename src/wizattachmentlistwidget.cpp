@@ -7,10 +7,12 @@
 #include <QMessageBox>
 #include <QLabel>
 
+#include "share/wizDatabaseManager.h"
+
 #include "wiznotestyle.h"
 #include "share/wizmisc.h"
 #include "share/wizuihelper.h"
-#include "share/wizdownloadobjectdata.h"
+//#include "share/wizdownloadobjectdata.h"
 #include "wizdef.h"
 #include "wizButton.h"
 #include "share/wizObjectDataDownloader.h"

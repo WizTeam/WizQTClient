@@ -7,8 +7,9 @@
 #include <QMutex>
 #include <QColorDialog>
 
-#include "wizdownloadobjectdatadialog.h"
+//#include "wizdownloadobjectdatadialog.h"
 #include "wizusercipherform.h"
+#include "share/wizobject.h"
 
 class CWizObjectDataDownloaderHost;
 class CWizEditorInsertLinkForm;

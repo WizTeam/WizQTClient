@@ -24,7 +24,7 @@ set(wiznote_SOURCES
     share/wizkmcore.cpp
     share/wizxml.cpp
     share/wizxmlrpc.cpp
-    share/wizXmlRpcServer.cpp
+    sync/wizXmlRpcServer.cpp
     #share/wizapi.cpp
     share/wizDatabase.cpp
     share/wizDatabaseManager.cpp
@@ -55,11 +55,13 @@ set(wiznote_SOURCES
     share/wizClucene.cpp
     share/wizSearchIndexer.cpp
     widgets/wizScrollBar.cpp
-    share/wizApiEntry.cpp
+    sync/token.cpp
+    sync/apientry.cpp
     share/wizObjectDataDownloader.cpp
     share/wizUserAvatar.cpp
     sync/wizkmxmlrpc.cpp
     sync/wizkmsync.cpp
+    sync/asyncapi.cpp
     sync/wizCloudPool.cpp
     sync/wizAvatarUploader.cpp
     widgets/wizUserInfoWidget.cpp
@@ -123,7 +125,7 @@ set(wiznote_HEADERS
     #share/wizapi.h
     share/wizxml.h
     share/wizxmlrpc.h
-    share/wizXmlRpcServer.h
+    sync/wizXmlRpcServer.h
     share/wizDatabase.h
     share/wizDatabaseManager.h
     #share/wizverifyaccount.h
@@ -151,6 +153,7 @@ set(wiznote_HEADERS
     html/wizhtmlcollector.h
     sync/wizkmxmlrpc.h
     sync/wizkmsync.h
+    sync/asyncapi.h
     sync/wizCloudPool.h
     sync/wizAvatarUploader.h
     share/wizSyncableDatabase.h
@@ -159,7 +162,10 @@ set(wiznote_HEADERS
     widgets/wizSegmentedButton.h
     widgets/wizUserInfoWidget.h
     widgets/wizScrollBar.h
-    share/wizApiEntry.h
+    sync/token.h
+    sync/token_p.h
+    sync/apientry.h
+    sync/apientry_p.h
     share/wizObjectDataDownloader.h
     share/wizUserAvatar.h
     utils/styleHelper.h

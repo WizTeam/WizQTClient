@@ -1,7 +1,7 @@
 #include "wizXmlRpcServer.h"
 
 //#include "wizdef.h"
-#include "wizmisc.h"
+#include "../share/wizmisc.h"
 
 #include <QEventLoop>
 #include <QNetworkReply>

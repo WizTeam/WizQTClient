@@ -15,6 +15,7 @@
 #include "wizEditorInsertTableForm.h"
 #include "share/wizObjectDataDownloader.h"
 #include "wizDocumentTransitionView.h"
+#include "share/wizDatabaseManager.h"
 
 
 /*

@@ -16,6 +16,8 @@
 #include "share/wizsettings.h"
 #include "share/wizwin32helper.h"
 #include "share/wizDatabaseManager.h"
+#include "sync/token.h"
+#include "sync/apientry.h"
 
 using namespace ExtensionSystem;
 
@@ -177,6 +179,9 @@ int main(int argc, char *argv[])
         QMessageBox::critical(NULL, "", QObject::tr("Can not open database"));
         return 0;
     }
+
+    WizService::Token::setUserId(strUserId);
+    WizService::Token::setPasswd(strPassword);
 
     dbMgr.db().SetPassword(::WizEncryptPassword(strPassword));
 

@@ -5,7 +5,7 @@
 #include <QMap>
 
 #include "wizobject.h"
-#include "wizapi.h"
+//#include "wizapi.h"
 
 class CWizApi;
 class CWizDatabase;

@@ -1,7 +1,7 @@
 #ifndef WIZKMXMLRPC_H
 #define WIZKMXMLRPC_H
 
-#include "../share/wizXmlRpcServer.h"
+#include "wizXmlRpcServer.h"
 #include "../share/wizSyncableDatabase.h"
 
 struct IWizKMSyncEvents;

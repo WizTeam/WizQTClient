@@ -8,12 +8,13 @@
 #include "share/wizDatabaseManager.h"
 #include "share/wizUserAvatar.h"
 #include "../wizmainwindow.h"
-#include "share/wizApiEntry.h"
+#include "sync/apientry.h"
 #include "sync/wizkmxmlrpc.h"
 #include "wizWebSettingsDialog.h"
 #include "sync/wizAvatarUploader.h"
-#include "sync/wizCloudPool.h"
+#include "sync/token.h"
 
+using namespace WizService;
 
 
 CWizUserInfoWidget::CWizUserInfoWidget(CWizExplorerApp& app, QWidget *parent)
@@ -212,16 +213,19 @@ void CWizUserInfoWidget::on_action_accountSetup_triggered()
         m_userSettings = new CWizWebSettingsDialog(QSize(720, 400), window()); // use toplevel window as parent
         m_userSettings->setWindowTitle(tr("Account settings"));
         connect(m_userSettings, SIGNAL(accepted()), m_userSettings, SLOT(deleteLater()));
-        connect(m_userSettings, SIGNAL(showProgress()), CWizCloudPool::instance(), SLOT(getToken()));
-        connect(CWizCloudPool::instance(), SIGNAL(tokenAcquired(const QString&)),
-                SLOT(on_action_accountSetup_requested(const QString&)));
+        //connect(m_userSettings, SIGNAL(showProgress()), ::instance(), SLOT(getToken()));
+        connect(Token::instance(), SIGNAL(tokenAcquired(const QString&, const QString&)),
+                SLOT(on_action_accountSetup_requested(const QString&, const QString&)));
     }
 
     m_userSettings->open();
+    Token::requestToken();
 }
 
-void CWizUserInfoWidget::on_action_accountSetup_requested(const QString& strToken)
+void CWizUserInfoWidget::on_action_accountSetup_requested(const QString& strToken, const QString& strMsg)
 {
+    Q_UNUSED(strMsg);
+
     if (!m_userSettings)
         return;
 
@@ -230,7 +234,7 @@ void CWizUserInfoWidget::on_action_accountSetup_requested(const QString& strToke
         return;
     }
 
-    QString strUrl = CWizApiEntry::getAccountInfoUrl(strToken);
+    QString strUrl = WizService::ApiEntry::accountInfoUrl(strToken);
     m_userSettings->load(QUrl::fromEncoded(strUrl.toUtf8()));
 }
 

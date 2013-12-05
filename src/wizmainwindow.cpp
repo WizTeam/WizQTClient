@@ -39,7 +39,7 @@
 #include "wizEditorToolBar.h"
 #include "wizProgressDialog.h"
 #include "wizDocumentSelectionView.h"
-#include "share/wizGroupMessage.h"
+//#include "share/wizGroupMessage.h"
 #include "share/wizObjectDataDownloader.h"
 #include "share/wizUserAvatar.h"
 #include "wizDocumentTransitionView.h"
@@ -47,7 +47,7 @@
 #include "sync/wizkmsync.h"
 #include "wizPopupButton.h"
 #include "widgets/wizUserInfoWidget.h"
-#include "share/wizApiEntry.h"
+#include "sync/apientry.h"
 #include "sync/wizCloudPool.h"
 
 #include "wizUserVerifyDialog.h"
@@ -936,7 +936,7 @@ void MainWindow::on_actionPreference_triggered()
 
 void MainWindow::on_actionFeedback_triggered()
 {
-    QString strUrl = CWizApiEntry::getFeedbackUrl();
+    QString strUrl = WizService::ApiEntry::feedbackUrl();
 
     if (strUrl.isEmpty())
         return;

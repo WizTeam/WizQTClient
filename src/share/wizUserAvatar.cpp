@@ -2,9 +2,13 @@
 
 #include <QImage>
 #include <QTimer>
+#include <QDebug>
+#include <QNetworkRequest>
+#include <QNetworkReply>
+#include <QFile>
 
 #include "wizDatabase.h"
-#include "wizApiEntry.h"
+#include "../sync/apientry.h"
 
 
 /* --------------------- CWizUserAvatarDownloaderHost --------------------- */
@@ -98,15 +102,17 @@ void CWizUserAvatarDownloader::acquireApiEntry()
 {
     qDebug() << "[Avatar Downloader]user avatar entry is empty, acquire entry...";
 
-    CWizApiEntry* entry = new CWizApiEntry(this);
-    connect(entry, SIGNAL(acquireEntryFinished(const QString&)),
-            SLOT(on_acquireUserAvatarEntry_finished(const QString&)));
-    entry->getAvatarUrl();
+    on_acquireUserAvatarEntry_finished(WizService::ApiEntry::avatarDownloadUrl());
+
+    //CWizApiEntry* entry = new CWizApiEntry(this);
+    //connect(entry, SIGNAL(entryAcquired(const QString&)),
+    //        SLOT(on_acquireUserAvatarEntry_finished(const QString&)));
+    //entry->getAvatarUrl();
 }
 
 void CWizUserAvatarDownloader::on_acquireUserAvatarEntry_finished(const QString& strReply)
 {
-    sender()->deleteLater();
+    //sender()->deleteLater();
 
     if (strReply.isEmpty()) {
         qDebug() << "[Avatar Downloader]failed to acquire avatar entry!";

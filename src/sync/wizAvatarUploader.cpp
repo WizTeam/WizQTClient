@@ -1,7 +1,7 @@
 #include "wizAvatarUploader.h"
 
 #include "wizdef.h"
-#include "share/wizApiEntry.h"
+#include "sync/apientry.h"
 #include "sync/wizkmxmlrpc.h"
 #include "share/wizDatabaseManager.h"
 
@@ -41,9 +41,11 @@ void CWizAvatarUploader::upload(const QString& strFileName)
     if (m_strFileName.isEmpty())
         return;
 
-    CWizApiEntry* apiEntry = new CWizApiEntry(this);
-    connect(apiEntry, SIGNAL(acquireEntryFinished(const QString&)), SLOT(on_acquireEntry_finished(const QString&)));
-    apiEntry->getAvatarUploadUrl();
+    upload_impl(WizService::ApiEntry::avatarUploadUrl(), m_strFileName);
+
+    //CWizApiEntry* apiEntry = new CWizApiEntry(this);
+    //connect(apiEntry, SIGNAL(entryAcquired(const QString&)), SLOT(on_acquireEntry_finished(const QString&)));
+    //apiEntry->getAvatarUploadUrl();
 }
 
 void CWizAvatarUploader::on_acquireEntry_finished(const QString& strUrl)

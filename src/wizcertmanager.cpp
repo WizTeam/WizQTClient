@@ -1,5 +1,7 @@
 #include "wizcertmanager.h"
 
+#if 0
+
 #include "share/wizDatabaseManager.h"
 
 CWizCertManager::CWizCertManager(CWizExplorerApp& app, const QString& strAccountsApiURL /* = WIZ_API_URL*/)
@@ -60,3 +62,5 @@ bool CWizCertManager::downloadUserCert()
 {
     return callGetUserCert(m_db.getUserId(), m_db.GetPassword());
 }
+
+#endif // 0
