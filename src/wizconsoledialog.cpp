@@ -8,6 +8,7 @@
 #include "wizdef.h"
 #include "share/wizmisc.h"
 #include "share/wizDatabaseManager.h"
+#include "share/wizDatabase.h"
 
 #ifdef Q_OS_MAC
 #include "mac/wizmachelper.h"

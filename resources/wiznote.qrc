@@ -4,5 +4,7 @@
         <file>avatar_login.png</file>
         <file>credits.html</file>
         <file>logo.png</file>
+        <file>notify_bg.png</file>
+        <file>notify_bg_inactive.png</file>
     </qresource>
 </RCC>

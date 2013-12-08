@@ -43,5 +43,11 @@ void ICore::emitViewNoteLoaded(CWizDocumentView* view,
     Q_EMIT m_instance->viewNoteLoaded(view, doc);
 }
 
+void ICore::emitViewNoteModeChanged(CWizDocumentView* view, bool bLocked)
+{
+    Q_EMIT m_instance->viewNoteModeChanged(view, bLocked);
+}
+
+
 
 } // namespace Core

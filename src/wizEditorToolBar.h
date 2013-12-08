@@ -2,13 +2,11 @@
 #define WIZEDITORTOOLBAR_H
 
 #include <QWidget>
-#include <QComboBox>
-#include <QColorDialog>
-#include <QMenu>
-#include <QPoint>
 #include <QPointer>
+#include <QMap>
 
-class CWizExplorerApp;
+class QString;
+class QMenu;
 class CWizDocumentWebView;
 class CWizToolButton;
 class CWizToolButtonColor;
@@ -17,19 +15,22 @@ class CWizToolComboBoxFont;
 
 struct WizEditorContextMenuItem;
 
-class CWizEditorToolBar : public QWidget
+namespace Core {
+namespace Internal {
+
+
+class EditorToolBar : public QWidget
 {
     Q_OBJECT
 
 public:
-    explicit CWizEditorToolBar(CWizExplorerApp& app, QWidget *parent = 0);
+    explicit EditorToolBar(QWidget *parent);
     void setDelegate(CWizDocumentWebView* editor);
 
 protected:
     QSize sizeHint() const;
 
 private:
-    CWizExplorerApp& m_app;
     CWizDocumentWebView* m_editor;
     QMap<QString, QAction*> m_actions;
     QPointer<QMenu> m_menuContext;
@@ -83,5 +84,9 @@ protected Q_SLOTS:
     void on_delegate_requestShowContextMenu(const QPoint& pos);
     void on_delegate_selectionChanged();
 };
+
+
+} // namespace Internal
+} // namespace Core
 
 #endif // WIZEDITORTOOLBAR_H

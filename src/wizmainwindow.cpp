@@ -55,6 +55,7 @@
 #include "plugindialog.h"
 
 #include "icore.h"
+#include "notecomments.h"
 
 using namespace Core;
 using namespace Core::Internal;
@@ -142,6 +143,8 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
 #ifdef Q_OS_MAC
     setupFullScreenMode(this);
 #endif // Q_OS_MAC
+
+    WizService::NoteComments::init();
 }
 
 bool MainWindow::eventFilter(QObject* watched, QEvent* event)
@@ -295,8 +298,8 @@ void MainWindow::initActions()
     m_animateSync->setIcons("sync");
 
     connect(m_doc->web(), SIGNAL(statusChanged()), SLOT(on_editor_statusChanged()));
-    connect(m_doc->web()->page(), SIGNAL(contentsChanged()), SLOT(on_document_contentChanged()));
-    connect(m_doc->web()->page(), SIGNAL(selectionChanged()), SLOT(on_document_contentChanged()));
+    //connect(m_doc->web()->page(), SIGNAL(contentsChanged()), SLOT(on_document_contentChanged()));
+    //connect(m_doc->web()->page(), SIGNAL(selectionChanged()), SLOT(on_document_contentChanged()));
 
     on_editor_statusChanged();
 }
@@ -503,13 +506,13 @@ void MainWindow::initToolBar()
 
     m_toolBar->addWidget(new CWizFixedSpacer(QSize(60, 1), m_toolBar));
 
-    CWizButton* buttonSync = new CWizButton(*this, m_toolBar);
+    CWizButton* buttonSync = new CWizButton(m_toolBar);
     buttonSync->setAction(m_actions->actionFromName(WIZACTION_GLOBAL_SYNC));
     m_toolBar->addWidget(buttonSync);
 
     m_toolBar->addWidget(new CWizFixedSpacer(QSize(20, 1), m_toolBar));
 
-    CWizButton* buttonNew = new CWizButton(*this, m_toolBar);
+    CWizButton* buttonNew = new CWizButton(m_toolBar);
     buttonNew->setAction(m_actions->actionFromName(WIZACTION_GLOBAL_NEW_DOCUMENT));
     m_toolBar->addWidget(buttonNew);
 
@@ -637,15 +640,10 @@ void MainWindow::on_documents_sortingTypeChanged(int type)
     m_documents->resetItemsSortingType(type);
 }
 
-void MainWindow::on_document_requestView(const WIZDOCUMENTDATA& doc)
-{
-    viewDocument(doc, false);
-}
-
-void MainWindow::on_document_contentChanged()
-{
-    m_doc->setModified(m_doc->web()->page()->isModified());
-}
+//void MainWindow::on_document_contentChanged()
+//{
+//    m_doc->setModified(m_doc->web()->page()->isModified());
+//}
 
 
 //void MainWindow::resetNotice()
@@ -678,9 +676,6 @@ void MainWindow::init()
     m_category->init();
 
     connect(m_documents, SIGNAL(itemSelectionChanged()), SLOT(on_documents_itemSelectionChanged()));
-
-    connect(m_doc->web(), SIGNAL(requestView(const WIZDOCUMENTDATA&)),
-            SLOT(on_document_requestView(const WIZDOCUMENTDATA&)));
 }
 
 void MainWindow::on_actionSync_triggered()
@@ -1195,7 +1190,7 @@ void MainWindow::resetPermission(const QString& strKbGUID, const QString& strOwn
     // Admin, Super, do anything
     if (nPerm == WIZ_USERGROUP_ADMIN || nPerm == WIZ_USERGROUP_SUPER) {
         // enable editing
-        m_doc->setReadOnly(false, isGroup);
+        //m_doc->setReadOnly(false, isGroup);
 
         // enable create tag
 
@@ -1207,7 +1202,7 @@ void MainWindow::resetPermission(const QString& strKbGUID, const QString& strOwn
 
     // Editor, only disable create tag
     } else if (nPerm == WIZ_USERGROUP_EDITOR) {
-        m_doc->setReadOnly(false, isGroup);
+        //m_doc->setReadOnly(false, isGroup);
         m_actions->actionFromName(WIZACTION_GLOBAL_NEW_DOCUMENT)->setEnabled(true);
         //m_actions->actionFromName("actionDeleteCurrentNote")->setEnabled(true);
 
@@ -1216,20 +1211,20 @@ void MainWindow::resetPermission(const QString& strKbGUID, const QString& strOwn
         m_actions->actionFromName(WIZACTION_GLOBAL_NEW_DOCUMENT)->setEnabled(true);
 
         // author is owner
-        QString strUserId = m_dbMgr.db().getUserId();
-        if (strOwner == strUserId) {
-            m_doc->setReadOnly(false, isGroup);
-            //m_actions->actionFromName("actionDeleteCurrentNote")->setEnabled(true);
+        //QString strUserId = m_dbMgr.db().getUserId();
+        //if (strOwner == strUserId) {
+        //    m_doc->setReadOnly(false, isGroup);
+        //    //m_actions->actionFromName("actionDeleteCurrentNote")->setEnabled(true);
 
-        // not owner
-        } else {
-            m_doc->setReadOnly(true, isGroup);
-            //m_actions->actionFromName("actionDeleteCurrentNote")->setEnabled(false);
-        }
+        //// not owner
+        //} else {
+        //    m_doc->setReadOnly(true, isGroup);
+        //    //m_actions->actionFromName("actionDeleteCurrentNote")->setEnabled(false);
+        //}
 
     // reader
     } else if (nPerm == WIZ_USERGROUP_READER) {
-        m_doc->setReadOnly(true, isGroup);
+        //m_doc->setReadOnly(true, isGroup);
         m_actions->actionFromName(WIZACTION_GLOBAL_NEW_DOCUMENT)->setEnabled(false);
         //m_actions->actionFromName("actionDeleteCurrentNote")->setEnabled(false);
     } else {
@@ -1243,14 +1238,14 @@ void MainWindow::viewDocument(const WIZDOCUMENTDATA& data, bool addToHistory)
 
     CWizDocument* doc = new CWizDocument(m_dbMgr.db(data.strKbGUID), data);
 
-    if (doc->GUID() == m_doc->web()->document().strGUID)
+    if (doc->GUID() == m_doc->note().strGUID)
         return;
 
-    bool forceEdit = false;
-    if (doc->GUID() == m_documentForEditing.strGUID) {
-        m_documentForEditing = WIZDOCUMENTDATA();
-        forceEdit = true;
-    }
+    //bool forceEdit = false;
+    //if (doc->GUID() == m_documentForEditing.strGUID) {
+    //    m_documentForEditing = WIZDOCUMENTDATA();
+    //    forceEdit = true;
+    //}
 
     resetPermission(data.strKbGUID, data.strOwner);
 

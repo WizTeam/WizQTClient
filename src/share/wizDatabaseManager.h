@@ -1,12 +1,22 @@
 #ifndef WIZDATABASEMANAGER_H
 #define WIZDATABASEMANAGER_H
 
-#include <QString>
-#include <QList>
-#include <QStringList>
+#include <QObject>
+#include <QPointer>
 #include <QMap>
 
-#include "wizDatabase.h"
+#include <deque>
+
+class QString;
+
+struct WIZTAGDATA;
+struct WIZSTYLEDATA;
+struct WIZDOCUMENTDATA;
+struct WIZDOCUMENTATTACHMENTDATA;
+struct WIZGROUPDATA;
+class CWizDatabase;
+
+typedef std::deque<WIZGROUPDATA> CWizGroupDataArray;
 
 class CWizDatabaseManager : public QObject
 {
@@ -15,6 +25,8 @@ class CWizDatabaseManager : public QObject
 public:
     CWizDatabaseManager(const QString& strUserId);
     ~CWizDatabaseManager();
+
+    static CWizDatabaseManager* instance();
 
     // open private db if strKbGUID is empty, otherwise open groups db
     bool open(const QString& strKbGUID = "");

@@ -5,12 +5,16 @@
 #include <QFontComboBox>
 #include <QHBoxLayout>
 #include <QDesktopServices>
+#include <QAction>
+#include <QMenu>
 
 #include "share/wizmisc.h"
 #include "wizdef.h"
 #include "share/wizsettings.h"
 #include "wizDocumentWebView.h"
 #include "wizactions.h"
+
+using namespace Core::Internal;
 
 void drawComboPrimitive(QStylePainter* p, QStyle::PrimitiveElement pe, const QStyleOption &opt);
 
@@ -290,11 +294,10 @@ private:
 };
 
 
-CWizEditorToolBar::CWizEditorToolBar(CWizExplorerApp& app, QWidget *parent)
+EditorToolBar::EditorToolBar(QWidget *parent)
     : QWidget(parent)
-    , m_app(app)
 {
-    QString skin = m_app.userSettings().skin();
+    QString skin = "default";
 
     m_comboFontFamily = new CWizToolComboBoxFont(this);
     connect(m_comboFontFamily, SIGNAL(activated(const QString&)),
@@ -391,12 +394,12 @@ CWizEditorToolBar::CWizEditorToolBar(CWizExplorerApp& app, QWidget *parent)
     layout->addStretch();
 }
 
-QSize CWizEditorToolBar::sizeHint() const
+QSize EditorToolBar::sizeHint() const
 {
     return QSize(1, 32);
 }
 
-void CWizEditorToolBar::resetToolbar()
+void EditorToolBar::resetToolbar()
 {
     if (!m_editor)
         return;
@@ -603,7 +606,7 @@ struct WizEditorContextMenuItem
 #define WIZEDITOR_ACTION_TABLE_AVERAGE_COLUMS   QObject::tr("Averaged distribute colums")
 
 
-WizEditorContextMenuItem* CWizEditorToolBar::contextMenuData()
+WizEditorContextMenuItem* EditorToolBar::contextMenuData()
 {
     static WizEditorContextMenuItem arrayData[] =
     {
@@ -671,7 +674,7 @@ WizEditorContextMenuItem* CWizEditorToolBar::contextMenuData()
     return arrayData;
 }
 
-void CWizEditorToolBar::setDelegate(CWizDocumentWebView* editor)
+void EditorToolBar::setDelegate(CWizDocumentWebView* editor)
 {
     Q_ASSERT(editor);
 
@@ -684,7 +687,7 @@ void CWizEditorToolBar::setDelegate(CWizDocumentWebView* editor)
             SLOT(on_delegate_selectionChanged()));
 }
 
-void CWizEditorToolBar::on_delegate_requestShowContextMenu(const QPoint& pos)
+void EditorToolBar::on_delegate_requestShowContextMenu(const QPoint& pos)
 {
     if (!m_editor)
         return;
@@ -709,12 +712,12 @@ void CWizEditorToolBar::on_delegate_requestShowContextMenu(const QPoint& pos)
     m_menuContext->update();
 }
 
-void CWizEditorToolBar::on_delegate_selectionChanged()
+void EditorToolBar::on_delegate_selectionChanged()
 {
    resetToolbar();
 }
 
-QAction* CWizEditorToolBar::actionFromName(const QString& strName)
+QAction* EditorToolBar::actionFromName(const QString& strName)
 {
     for (QMap<QString, QAction*>::const_iterator it = m_actions.begin();
          it != m_actions.end(); it++) {
@@ -727,7 +730,7 @@ QAction* CWizEditorToolBar::actionFromName(const QString& strName)
     return NULL;
 }
 
-void CWizEditorToolBar::buildMenu()
+void EditorToolBar::buildMenu()
 {
     if (!m_menuContext) {
         m_menuContext = new QMenu(this);
@@ -772,7 +775,7 @@ void CWizEditorToolBar::buildMenu()
     }
 }
 
-int CWizEditorToolBar::buildMenu(QMenu* pMenu, int indx)
+int EditorToolBar::buildMenu(QMenu* pMenu, int indx)
 {
     int index = indx;
     bool bSkip = true;
@@ -828,28 +831,28 @@ int CWizEditorToolBar::buildMenu(QMenu* pMenu, int indx)
     return index;
 }
 
-void CWizEditorToolBar::on_editor_google_triggered()
+void EditorToolBar::on_editor_google_triggered()
 {
     QUrl url("http://google.com/search?q=" + m_editor->page()->selectedText());
     QDesktopServices::openUrl(url);
 }
 
-void CWizEditorToolBar::on_editor_cut_triggered()
+void EditorToolBar::on_editor_cut_triggered()
 {
     m_editor->triggerPageAction(QWebPage::Cut);
 }
 
-void CWizEditorToolBar::on_editor_copy_triggered()
+void EditorToolBar::on_editor_copy_triggered()
 {
     m_editor->triggerPageAction(QWebPage::Copy);
 }
 
-void CWizEditorToolBar::on_editor_paste_triggered()
+void EditorToolBar::on_editor_paste_triggered()
 {
     m_editor->triggerPageAction(QWebPage::Paste);
 }
 
-void CWizEditorToolBar::on_comboFontFamily_indexChanged(const QString& strFamily)
+void EditorToolBar::on_comboFontFamily_indexChanged(const QString& strFamily)
 {
     if (strFamily == m_comboFontFamily->text())
         return;
@@ -860,7 +863,7 @@ void CWizEditorToolBar::on_comboFontFamily_indexChanged(const QString& strFamily
     }
 }
 
-void CWizEditorToolBar::on_comboFontSize_indexChanged(const QString& strSize)
+void EditorToolBar::on_comboFontSize_indexChanged(const QString& strSize)
 {
     if (strSize == m_comboFontSize->text())
         return;
@@ -871,91 +874,91 @@ void CWizEditorToolBar::on_comboFontSize_indexChanged(const QString& strSize)
     }
 }
 
-void CWizEditorToolBar::on_btnFormatMatch_clicked()
+void EditorToolBar::on_btnFormatMatch_clicked()
 {
     if (m_editor) {
         m_editor->editorCommandExecuteFormatMatch();
     }
 }
 
-void CWizEditorToolBar::on_BtnForeColor_clicked()
+void EditorToolBar::on_BtnForeColor_clicked()
 {
     if (m_editor) {
         m_editor->editorCommandExecuteForeColor();
     }
 }
 
-void CWizEditorToolBar::on_BtnBackColor_clicked()
+void EditorToolBar::on_BtnBackColor_clicked()
 {
     if (m_editor) {
         m_editor->editorCommandExecuteBackColor();
     }
 }
 
-void CWizEditorToolBar::on_btnBold_clicked()
+void EditorToolBar::on_btnBold_clicked()
 {
     if (m_editor) {
         m_editor->editorCommandExecuteBold();
     }
 }
 
-void CWizEditorToolBar::on_btnItalic_clicked()
+void EditorToolBar::on_btnItalic_clicked()
 {
     if (m_editor) {
         m_editor->editorCommandExecuteItalic();
     }
 }
 
-void CWizEditorToolBar::on_btnUnderLine_clicked()
+void EditorToolBar::on_btnUnderLine_clicked()
 {
     if (m_editor) {
         m_editor->editorCommandExecuteUnderLine();
     }
 }
 
-void CWizEditorToolBar::on_btnJustifyLeft_clicked()
+void EditorToolBar::on_btnJustifyLeft_clicked()
 {
     if (m_editor) {
         m_editor->editorCommandExecuteJustifyLeft();
     }
 }
 
-void CWizEditorToolBar::on_btnJustifyCenter_clicked()
+void EditorToolBar::on_btnJustifyCenter_clicked()
 {
     if (m_editor) {
         m_editor->editorCommandExecuteJustifyCenter();
     }
 }
 
-void CWizEditorToolBar::on_btnJustifyRight_clicked()
+void EditorToolBar::on_btnJustifyRight_clicked()
 {
     if (m_editor) {
         m_editor->editorCommandExecuteJustifyRight();
     }
 }
 
-void CWizEditorToolBar::on_btnUnorderedList_clicked()
+void EditorToolBar::on_btnUnorderedList_clicked()
 {
     if (m_editor) {
         m_editor->editorCommandExecuteInsertUnorderedList();
     }
 }
 
-void CWizEditorToolBar::on_btnOrderedList_clicked()
+void EditorToolBar::on_btnOrderedList_clicked()
 {
     if (m_editor) {
         m_editor->editorCommandExecuteInsertOrderedList();
     }
 }
 
-void CWizEditorToolBar::on_btnTable_clicked()
+void EditorToolBar::on_btnTable_clicked()
 {
     if (m_editor) {
         m_editor->editorCommandExecuteTableInsert();
     }
 }
 
-void CWizEditorToolBar::on_btnHorizontal_clicked()
+void EditorToolBar::on_btnHorizontal_clicked()
 {
     if (m_editor) {
         m_editor->editorCommandExecuteInsertHorizontal();

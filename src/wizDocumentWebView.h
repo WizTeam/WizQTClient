@@ -18,6 +18,12 @@ class CWizDocumentWebView;
 class CWizDocumentTransitionView;
 class CWizDocumentWebViewWorker;
 
+namespace Core {
+namespace Internal {
+class CWizDocumentView;
+} // namespace Internal
+} // namespace Core
+
 
 class CWizDocumentWebViewWorkerPool : public QObject
 {
@@ -60,7 +66,8 @@ class CWizDocumentWebView : public QWebView
     Q_OBJECT
 
 public:
-    CWizDocumentWebView(CWizExplorerApp& app, QWidget* parent = 0);
+    CWizDocumentWebView(CWizExplorerApp& app, QWidget* parent);
+    Core::Internal::CWizDocumentView* view();
 
     // view and save
     void viewDocument(const WIZDOCUMENTDATA& doc, bool editing);
@@ -70,7 +77,7 @@ public:
     bool isInited() const { return m_bEditorInited; }
     bool isEditing() const { return m_bEditingMode; }
 
-    const WIZDOCUMENTDATA& document() { return m_data; }
+    //const WIZDOCUMENTDATA& document() { return m_data; }
     void reloadDocument();
 
     // initialize editor style before render, only invoke once.
@@ -114,7 +121,7 @@ protected:
 private:
     CWizExplorerApp& m_app;
     CWizDatabaseManager& m_dbMgr;
-    WIZDOCUMENTDATA m_data;
+    //WIZDOCUMENTDATA m_data;
 
     QTimer m_timerAutoSave;
     QString m_strHtmlFileName;
@@ -213,7 +220,6 @@ Q_SIGNALS:
     void focusIn();
     void focusOut();
 
-    void requestView(const WIZDOCUMENTDATA& data);
     void requestShowContextMenu(const QPoint& pos);
 };
 

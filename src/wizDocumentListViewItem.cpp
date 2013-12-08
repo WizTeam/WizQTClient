@@ -7,6 +7,7 @@
 #include <QPixmapCache>
 
 #include "share/wizDatabaseManager.h"
+#include "share/wizDatabase.h"
 #include "share/wizThumbIndexCache.h"
 #include "share/wizUserAvatar.h"
 #include "wizPopupButton.h"

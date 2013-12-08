@@ -4,6 +4,7 @@
 #include "sync/apientry.h"
 #include "sync/wizkmxmlrpc.h"
 #include "share/wizDatabaseManager.h"
+#include "share/wizDatabase.h"
 
 #include <QtNetwork>
 #include <QImage>

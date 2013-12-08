@@ -2,14 +2,26 @@
 
 #include <QDebug>
 
+#include "wizDatabase.h"
+
+static CWizDatabaseManager* m_instance = 0;
+
+CWizDatabaseManager* CWizDatabaseManager::instance()
+{
+    return m_instance;
+}
+
 CWizDatabaseManager::CWizDatabaseManager(const QString& strUserId)
     : m_strUserId(strUserId)
 {
-    m_mapGroups.clear();
+    Q_ASSERT(!m_instance);
+
+    m_instance = this;
 }
 
 CWizDatabaseManager::~CWizDatabaseManager()
 {
+    m_instance = 0;
     closeAll();
 }
 

@@ -1,30 +1,27 @@
-#ifndef WIZDOCUMENTVIEW_H
-#define WIZDOCUMENTVIEW_H
+#ifndef CORE_WIZDOCUMENTVIEW_H
+#define CORE_WIZDOCUMENTVIEW_H
 
 #include <QWidget>
-#include <QPointer>
-#include <QTimer>
 
-#include "wizdef.h"
 #include "share/wizobject.h"
-#include "share/wizsettings.h"
-#include "share/wizuihelper.h"
-
-class CWizScrollBar;
-class CWizDocumentWebView;
-class CWizDatabase;
-class CWizTagListWidget;
-class CWizAttachmentListWidget;
-class CWizNoteInfoForm;
-class CWizEditorToolBar;
 
 class QScrollArea;
 class QLineEdit;
 
-class CWizTitleBar;
-class CWizInfoToolBar;
-class CWizNotifyToolbar;
+struct WIZDOCUMENTDATA;
+struct WIZDOCUMENTATTACHMENTDATA;
+class CWizExplorerApp;
+class CWizDatabaseManager;
+class CWizUserSettings;
+class CWizScrollBar;
+class CWizDocumentWebView;
+class CWizDatabase;
 
+
+namespace Core {
+namespace Internal {
+class TitleBar;
+class EditorToolBar;
 
 class CWizDocumentView : public QWidget
 {
@@ -42,37 +39,34 @@ protected:
     CWizDatabaseManager& m_dbMgr;
     CWizUserSettings& m_userSettings;
     CWizDocumentWebView* m_web;
-    QPointer<CWizTitleBar> m_title;
-    QPointer<QWidget> m_client;
-    QPointer<CWizTagListWidget> m_tags;
-    QPointer<CWizAttachmentListWidget> m_attachments;
-    QPointer<CWizNoteInfoForm> m_info;
+    Core::Internal::TitleBar* m_title;
+    QWidget* m_client;
 
-    // indicate current document editing status
-    bool m_editingDocument;
-
-    WizDocumentViewMode m_viewMode;
+private:
+    WIZDOCUMENTDATA m_note;
+    bool m_bLocked; // note is force locked as readonly status
+    bool m_bEditingMode; // true: editing mode, false: reading mode
+    int m_viewMode; // user defined editing mode
 
 public:
-    bool viewDocument(const WIZDOCUMENTDATA& data, bool forceEdit);
-    void reloadDocument(bool bIncludeData);
-    void setReadOnly(bool b, bool isGroup);
+    const WIZDOCUMENTDATA& note() const { return m_note; }
+    bool isLocked() const { return m_bLocked; }
+    bool isEditing() const { return m_bEditingMode; }
+    bool defaultEditingMode();
+    bool reload();
+    void reloadNote();
+    void setEditorFocus();
+
+    void initStat(const WIZDOCUMENTDATA& data, bool bEditing);
+    void viewNote(const WIZDOCUMENTDATA& data, bool forceEdit);
     void showClient(bool visible);
-    void editDocument(bool editing);
-    void setViewMode(WizDocumentViewMode mode);
+    void setEditNote(bool bEdit);
+    void setViewMode(int mode);
     void setModified(bool modified);
     void settingsChanged();
 
 public Q_SLOTS:
-    void onViewNoteRequested(CWizDocumentView* view, const WIZDOCUMENTDATA& doc);
-
-    void on_titleEdit_editingFinished();
-    void on_titleEdit_returnPressed();
-
-    void on_title_editButtonClicked();
-    void on_title_tagButtonClicked();
-    void on_title_attachButtonClicked();
-    void on_title_infoButtonClicked();
+    void onViewNoteRequested(Internal::CWizDocumentView* view, const WIZDOCUMENTDATA& doc);
 
     void on_document_modified(const WIZDOCUMENTDATA& documentOld,
                               const WIZDOCUMENTDATA& documentNew);
@@ -80,9 +74,9 @@ public Q_SLOTS:
 
     void on_attachment_created(const WIZDOCUMENTATTACHMENTDATA& attachment);
     void on_attachment_deleted(const WIZDOCUMENTATTACHMENTDATA& attachment);
-
-    void on_webview_focusIn();
-    void on_webview_focusOut();
 };
 
-#endif // WIZDOCUMENTVIEW_H
+} // namespace Internal
+} // namespace Core
+
+#endif // CORE_WIZDOCUMENTVIEW_H

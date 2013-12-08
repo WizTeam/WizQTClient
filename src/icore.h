@@ -4,12 +4,12 @@
 #include <QObject>
 
 struct WIZDOCUMENTDATA;
-class CWizDocumentView;
 
 namespace Core {
 
 namespace Internal {
 class MainWindow;
+class CWizDocumentView;
 }
 
 class ICore : public QObject
@@ -23,12 +23,17 @@ class ICore : public QObject
 public:
     static ICore* instance();
     static QWidget* mainWindow();
-    static void emitViewNoteRequested(CWizDocumentView* view, const WIZDOCUMENTDATA& doc);
-    static void emitViewNoteLoaded(CWizDocumentView* view, const WIZDOCUMENTDATA& doc);
+
+    static void emitViewNoteRequested(Internal::CWizDocumentView* view, const WIZDOCUMENTDATA& doc);
+    static void emitViewNoteLoaded(Internal::CWizDocumentView* view, const WIZDOCUMENTDATA& doc);
+    static void emitViewNoteModeChanged(Internal::CWizDocumentView* view, bool bLocked);
 
 Q_SIGNALS:
-    void viewNoteRequested(CWizDocumentView* view, const WIZDOCUMENTDATA& doc);
-    void viewNoteLoaded(CWizDocumentView* view, const WIZDOCUMENTDATA& doc);
+    void viewNoteRequested(Internal::CWizDocumentView* view, const WIZDOCUMENTDATA& doc);
+    void viewNoteLoaded(Internal::CWizDocumentView* view, const WIZDOCUMENTDATA& doc);
+    void viewNoteModeChanged(Internal::CWizDocumentView* view, bool bLocked);
+
+    void closeNoteRequested(Internal::CWizDocumentView* view);
 };
 
 } // namespace Core

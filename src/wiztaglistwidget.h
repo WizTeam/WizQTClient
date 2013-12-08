@@ -1,18 +1,25 @@
 #ifndef WIZTAGLISTWIDGET_H
 #define WIZTAGLISTWIDGET_H
 
+#include <QPointer>
+#include <deque>
+
 #include "share/wizpopupwidget.h"
-#include "share/wizDatabaseManager.h"
 
 class QLineEdit;
 class QListWidget;
 class QListWidgetItem;
 
+class CWizDatabaseManager;
+
+struct WIZDOCUMENTDATAEX;
+typedef std::deque<WIZDOCUMENTDATAEX> CWizDocumentDataArray;
+
 class CWizTagListWidget : public CWizPopupWidget
 {
     Q_OBJECT
 public:
-    CWizTagListWidget(CWizDatabaseManager& db, QWidget* parent);
+    CWizTagListWidget(QWidget* parent);
 
     void setDocument(const WIZDOCUMENTDATAEX& doc);
     void setDocuments(const CWizDocumentDataArray& arrayDocument);

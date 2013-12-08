@@ -3,6 +3,7 @@
 #include <QDebug>
 
 #include "wizDatabaseManager.h"
+#include "wizDatabase.h"
 #include "sync/wizkmxmlrpc.h"
 
 // to avoid to much load for remote serser

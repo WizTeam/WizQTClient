@@ -3,9 +3,12 @@
 
 #include <QFile>
 
-CWizNoteInfoForm::CWizNoteInfoForm(CWizDatabaseManager& db, QWidget *parent)
+#include "share/wizobject.h"
+#include "share/wizDatabaseManager.h"
+#include "share/wizDatabase.h"
+
+CWizNoteInfoForm::CWizNoteInfoForm(QWidget *parent)
     : CWizPopupWidget(parent)
-    , m_dbMgr(db)
     , ui(new Ui::CWizNoteInfoForm)
 {
     ui->setupUi(this);
@@ -41,14 +44,14 @@ void CWizNoteInfoForm::setDocument(const WIZDOCUMENTDATA& data)
 {
     Q_ASSERT(!data.strKbGUID.isEmpty());
 
-    CWizDatabase& db = m_dbMgr.db(data.strKbGUID);
+    CWizDatabase& db = CWizDatabaseManager::instance()->db(data.strKbGUID);
     QString doc = db.GetDocumentFileName(data.strGUID);
     QString sz = ::WizGetFileSizeHumanReadalbe(doc);
 
     ui->editTitle->setText(data.strTitle);
 
     // private document
-    if (data.strKbGUID == m_dbMgr.db().kbGUID()) {
+    if (data.strKbGUID == CWizDatabaseManager::instance()->db().kbGUID()) {
         ui->labelNotebook->setText(data.strLocation);
 
         QString tags = db.GetDocumentTagsText(data.strGUID);

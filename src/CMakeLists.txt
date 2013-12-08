@@ -90,6 +90,12 @@ set(wiznote_SOURCES
     wizcreateaccountdialog.cpp
     wizmainwindow.cpp
     icore.cpp
+    notecomments.cpp
+    cellbutton.cpp
+    titlebar.cpp
+    infobar.cpp
+    notifybar.cpp
+    titleedit.cpp
     #wizupdaterprogressdialog.cpp
     wizstatusbar.cpp
     wizupgradenotifydialog.cpp
@@ -192,6 +198,13 @@ set(wiznote_HEADERS
     wizcreateaccountdialog.h
     wizmainwindow.h
     icore.h
+    notecomments.h
+    notecomments_p.h
+    cellbutton.h
+    titlebar.h
+    infobar.h
+    notifybar.h
+    titleedit.h
     #wizupdaterprogressdialog.h
     wizstatusbar.h
     wizupgradenotifydialog.h

@@ -5,6 +5,7 @@
 
 #include "wizkmxmlrpc.h"
 #include "../share/wizDatabaseManager.h"
+#include "../share/wizDatabase.h"
 
 
 CWizCloudPool* CWizCloudPool::_instance = 0;

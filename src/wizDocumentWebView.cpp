@@ -16,7 +16,11 @@
 #include "share/wizObjectDataDownloader.h"
 #include "wizDocumentTransitionView.h"
 #include "share/wizDatabaseManager.h"
+#include "wizDocumentView.h"
 
+#include "icore.h"
+
+using namespace Core;
 using namespace Core::Internal;
 
 /*
@@ -249,7 +253,7 @@ void CWizDocumentWebViewPage::javaScriptConsoleMessage(const QString& message, i
 
 
 
-CWizDocumentWebView::CWizDocumentWebView(CWizExplorerApp& app, QWidget* parent /*= 0*/)
+CWizDocumentWebView::CWizDocumentWebView(CWizExplorerApp& app, QWidget* parent)
     : QWebView(parent)
     , m_app(app)
     , m_dbMgr(app.databaseManager())
@@ -366,6 +370,20 @@ void CWizDocumentWebView::contextMenuEvent(QContextMenuEvent *event)
     Q_EMIT requestShowContextMenu(mapToGlobal(event->pos()));
 }
 
+CWizDocumentView* CWizDocumentWebView::view()
+{
+    QWidget* pParent = parentWidget();
+    while(pParent) {
+        if (CWizDocumentView* view = dynamic_cast<CWizDocumentView*>(pParent)) {
+            return view;
+        }
+
+        pParent = pParent->parentWidget();
+    }
+
+    return 0;
+}
+
 void CWizDocumentWebView::onTimerAutoSaveTimout()
 {
     saveDocument(false);
@@ -405,7 +423,6 @@ void CWizDocumentWebView::viewDocument(const WIZDOCUMENTDATA& doc, bool editing)
     }
 
     // set data
-    m_data = doc;
     m_bEditingMode = editing;
 
     // download document if not exist
@@ -438,35 +455,35 @@ void CWizDocumentWebView::viewDocument(const WIZDOCUMENTDATA& doc, bool editing)
     }
 
     // ask extract and load
-    m_workerPool->load(m_data);
+    m_workerPool->load(doc);
 }
 
 void CWizDocumentWebView::onCipherDialogClosed()
 {
-    CWizDatabase& db = m_dbMgr.db(m_data.strKbGUID);
+    CWizDatabase& db = m_dbMgr.db(view()->note().strKbGUID);
 
     db.setUserCipher(m_cipherDialog->userCipher());
     db.setSaveUserCipher(m_cipherDialog->isSaveForSession());
 
-    m_workerPool->load(m_data);
+    m_workerPool->load(view()->note());
 }
 
 void CWizDocumentWebView::on_download_finished(const WIZOBJECTDATA& data,
                                                bool bSucceed)
 {
-    if (m_data.strKbGUID != data.strKbGUID
-            || m_data.strGUID != data.strObjectGUID)
+    if (view()->note().strKbGUID != data.strKbGUID
+            || view()->note().strGUID != data.strObjectGUID)
         return;
 
     if (!bSucceed)
         return;
 
-    m_workerPool->load(m_data);
+    m_workerPool->load(view()->note());
 }
 
 void CWizDocumentWebView::reloadDocument()
 {
-    Q_ASSERT(!document().strGUID.isEmpty());
+    Q_ASSERT(!view()->note().strGUID.isEmpty());
 
     // FIXME: reload may request when update from server or locally reflected by itself
 
@@ -643,7 +660,7 @@ void CWizDocumentWebView::viewDocumentByUrl(const QUrl& url)
             return;
         }
 
-        Q_EMIT requestView(doc);
+        ICore::instance()->emitViewNoteRequested(view(), doc);
    }
 }
 
@@ -654,7 +671,7 @@ void CWizDocumentWebView::viewDocumentInEditor(bool editing)
     bool ret = false;
     if (!m_strHtmlFileName.isEmpty()) {
         QString strScript = QString("viewDocument('%1', '%2', %3);")
-                .arg(document().strGUID)
+                .arg(view()->note().strGUID)
                 .arg(m_strHtmlFileName)
                 .arg(editing ? "true" : "false");
         ret = page()->mainFrame()->evaluateJavaScript(strScript).toBool();
@@ -674,6 +691,8 @@ void CWizDocumentWebView::viewDocumentInEditor(bool editing)
     page()->undoStack()->clear();
 
     update();
+
+    ICore::instance()->emitViewNoteLoaded(view(), view()->note());
 }
 
 void CWizDocumentWebView::setEditingDocument(bool editing)
@@ -711,12 +730,12 @@ void CWizDocumentWebView::saveDocument(bool force)
         return;
 
     // check note permission
-    if (!m_dbMgr.db(m_data.strKbGUID).CanEditDocument(m_data)) {
+    if (!m_dbMgr.db(view()->note().strKbGUID).CanEditDocument(view()->note())) {
         return;
     }
 
     QString strHtml = page()->mainFrame()->evaluateJavaScript("editor.getContent();").toString();
-    m_workerPool->save(m_data, strHtml, m_strHtmlFileName, 0);
+    m_workerPool->save(view()->note(), strHtml, m_strHtmlFileName, 0);
 }
 
 QString CWizDocumentWebView::editorCommandQueryCommandValue(const QString& strCommand)

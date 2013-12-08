@@ -4,6 +4,7 @@
 #include <QApplication>
 #include <QMenu>
 
+#include "share/wizDatabaseManager.h"
 #include "wizCategoryView.h"
 #include "widgets/wizScrollBar.h"
 #include "wiznotestyle.h"
@@ -762,7 +763,7 @@ void CWizDocumentListView::on_action_message_delete()
 void CWizDocumentListView::on_action_selectTags()
 {
     if (!m_tagList) {
-        m_tagList = new CWizTagListWidget(m_dbMgr, this);
+        m_tagList = new CWizTagListWidget(this);
     }
 
     QList<QListWidgetItem*> items = selectedItems();

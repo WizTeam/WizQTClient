@@ -4,9 +4,14 @@
 #include <QTimer>
 #include <QMap>
 #include <QThread>
+#include  <deque>
 
 #include "wizClucene.h"
 #include "wizDatabaseManager.h"
+
+struct WIZDOCUMENTDATAEX;
+typedef std::deque<WIZDOCUMENTDATAEX> CWizDocumentDataArray;
+
 
 /* --------------------------- CWizSearchIndexer --------------------------- */
 class CWizSearchIndexer

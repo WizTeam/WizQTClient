@@ -1,16 +1,13 @@
 #ifndef WIZATTACHMENTLISTWIDGET_H
 #define WIZATTACHMENTLISTWIDGET_H
 
-#include <QPointer>
-
 #include "share/wizobject.h"
 #include "share/wizmultilinelistwidget.h"
-
 #include "share/wizpopupwidget.h"
 #include "share/wizfileiconprovider.h"
 
+class QMenu;
 
-class CWizExplorerApp;
 class CWizDatabaseManager;
 class CWizAttachmentListViewItem;
 class CWizButton;
@@ -21,15 +18,14 @@ class CWizAttachmentListView : public CWizMultiLineListWidget
     Q_OBJECT
 
 public:
-    CWizAttachmentListView(CWizExplorerApp& app, QWidget* parent);
+    CWizAttachmentListView(QWidget* parent);
     const WIZDOCUMENTDATA& document() const { return m_document; }
 
 private:
-    CWizExplorerApp& m_app;
     CWizDatabaseManager& m_dbMgr;
     WIZDOCUMENTDATA m_document;
     CWizFileIconProvider m_iconProvider;
-    QPointer<QMenu> m_menu;
+    QMenu* m_menu;
     CWizObjectDataDownloaderHost* m_downloaderHost;
 
     void resetAttachments();
@@ -67,11 +63,10 @@ class CWizAttachmentListWidget : public CWizPopupWidget
     Q_OBJECT
 
 public:
-    CWizAttachmentListWidget(CWizExplorerApp& app, QWidget* parent);
+    CWizAttachmentListWidget(QWidget* parent);
     void setDocument(const WIZDOCUMENTDATA& document);
 
 private:
-    CWizExplorerApp& m_app;
     CWizAttachmentListView* m_list;
     CWizButton* m_btnAddAttachment;
     //CWizImagePushButton* m_btnAddAttachment;

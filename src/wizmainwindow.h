@@ -11,10 +11,10 @@
 #include "wizconsoledialog.h"
 #include "wizCategoryView.h"
 #include "wizDocumentListView.h"
-#include "wizDocumentView.h"
 #include "wizcertmanager.h"
 #include "wizusercipherform.h"
 //#include "wizdownloadobjectdatadialog.h"
+#include "wizDocumentView.h"
 
 class QToolBar;
 class QLabel;
@@ -22,7 +22,6 @@ class QLabel;
 class CWizProgressDialog;
 class CWizDocumentListView;
 class CWizDocumentSelectionView;
-class CWizDocumentView;
 class CWizDocumentTransitionView;
 class CWizActions;
 class CWizDocumentViewHistory;
@@ -43,10 +42,13 @@ class CWizUserAvatarDownloaderHost;
 class CWizKMSyncThread;
 class CWizUserVerifyDialog;
 
+class CWizDocumentWebView;
+
 namespace Core {
 class ICore;
 
 namespace Internal {
+class CWizDocumentView;
 
 class MainWindow
     : public QMainWindow
@@ -226,8 +228,7 @@ public Q_SLOTS:
     void on_documents_hintChanged(const QString& strHint);
     void on_documents_viewTypeChanged(int type);
     void on_documents_sortingTypeChanged(int type);
-    void on_document_requestView(const WIZDOCUMENTDATA& doc);
-    void on_document_contentChanged();
+    //void on_document_contentChanged();
 
     void on_search_doSearch(const QString& keywords);
     void on_options_settingsChanged(WizOptionsType type);

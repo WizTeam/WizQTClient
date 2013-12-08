@@ -6,8 +6,11 @@
 #include <QVBoxLayout>
 #include <QLabel>
 
+#include "share/wizDatabaseManager.h"
 #include "share/wizuihelper.h"
 #include "share/wizkmcore.h"
+#include "share/wizobject.h"
+#include "share/wizDatabase.h"
 
 
 class CWizTagListWidgetItem: public QListWidgetItem
@@ -29,9 +32,9 @@ private:
 };
 
 
-CWizTagListWidget::CWizTagListWidget(CWizDatabaseManager& db, QWidget* parent)
+CWizTagListWidget::CWizTagListWidget(QWidget* parent)
     : CWizPopupWidget(parent)
-    , m_dbMgr(db)
+    , m_dbMgr(*CWizDatabaseManager::instance())
     , m_bUpdating(false)
 {
     setContentsMargins(0, 20, 0, 0);

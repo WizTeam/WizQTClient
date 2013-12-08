@@ -9,6 +9,7 @@
 
 #include "wizdef.h"
 #include "html/wizhtmlcollector.h"
+#include "wizDatabase.h"
 
 
 CWizSearchIndexer::CWizSearchIndexer(CWizDatabaseManager& dbMgr, QObject *parent)
