@@ -18,6 +18,9 @@
 #include "share/wizDatabase.h"
 #include "share/wizsettings.h"
 
+#include "sync/token.h"
+#include "sync/apientry.h"
+
 using namespace Core;
 using namespace Core::Internal;
 
@@ -61,11 +64,18 @@ TitleBar::TitleBar(QWidget *parent)
     m_attachBtn->setBadgeIcon(::WizLoadSkinIcon(strTheme, "document_attachment_exist"), tr("View and add attachments"));
     connect(m_attachBtn, SIGNAL(clicked()), SLOT(onAttachButtonClicked()));
 
-    m_infoBtn = new CellButton(CellButton::Right, this);
+    m_infoBtn = new CellButton(CellButton::Center, this);
     QString infoShortcut = ::WizGetShortcut("EditNoteInfo", "Alt+4");
     m_infoBtn->setShortcut(QKeySequence::fromString(infoShortcut));
     m_infoBtn->setNormalIcon(::WizLoadSkinIcon(strTheme, "document_info"), tr("View and modify note's info"));
     connect(m_infoBtn, SIGNAL(clicked()), SLOT(onInfoButtonClicked()));
+
+    // comments
+    m_commentsBtn = new CellButton(CellButton::Right, this);
+    connect(m_commentsBtn, SIGNAL(clicked()), SLOT(onCommentsButtonClicked()));
+    connect(ICore::instance(), SIGNAL(viewNoteLoaded(Core::CWizDocumentView*, const WIZDOCUMENTDATA&)),
+            SLOT(onViewNoteLoaded(Core::CWizDocumentView*, const WIZDOCUMENTDATA&)));
+    connect(WizService::Token::instance(), SIGNAL(tokenAcquired(QString)), SLOT(onTokenAcquired(QString)));
 
     QWidget* line1 = new QWidget(this);
     line1->setFixedHeight(12);
@@ -91,6 +101,7 @@ TitleBar::TitleBar(QWidget *parent)
     layoutInfo2->addWidget(m_tagBtn);
     layoutInfo2->addWidget(m_attachBtn);
     layoutInfo2->addWidget(m_infoBtn);
+    layoutInfo2->addWidget(m_commentsBtn);
     layoutInfo2->addWidget(line2);
 
     QVBoxLayout* layoutInfo3 = new QVBoxLayout();
@@ -239,4 +250,21 @@ void TitleBar::onInfoButtonClicked()
     QRect rc = m_infoBtn->rect();
     QPoint pt = m_infoBtn->mapToGlobal(QPoint(rc.width()/2, rc.height()));
     m_info->showAtPoint(pt);
+}
+
+void TitleBar::onCommentsButtonClicked()
+{
+}
+
+void TitleBar::onViewNoteLoaded(CWizDocumentView* view, const WIZDOCUMENTDATA& note)
+{
+    WizService::Token::requestToken();
+}
+
+void TitleBar::onTokenAcquired(const QString& strToken)
+{
+    if (strToken.isEmpty())
+        return;
+
+    qDebug() << WizService::ApiEntry::commentUrl(strToken, noteView()->note().strKbGUID, noteView()->note().strGUID);
 }

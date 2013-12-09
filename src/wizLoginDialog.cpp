@@ -221,7 +221,7 @@ void CWizLoginDialog::doAccountVerify()
     enableControls(true);
 }
 
-bool CWizLoginDialog::updateProfile(CWizUserSettings& userSettings, const QString& strUserId, const WIZKMUSERINFO& info)
+bool CWizLoginDialog::updateProfile(CWizUserSettings& userSettings, const QString& strUserId, const WIZUSERINFO& info)
 {
     if(m_checkAutoLogin->checkState() == Qt::Checked) {
         userSettings.setAutoLogin(true);

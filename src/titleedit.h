@@ -6,8 +6,9 @@
 class QInputMethodEvent;
 
 namespace Core {
-namespace Internal {
 class CWizDocumentView;
+
+namespace Internal {
 
 class TitleEdit : public QLineEdit
 {

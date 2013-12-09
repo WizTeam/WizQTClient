@@ -63,8 +63,8 @@ CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
     connect(&m_dbMgr, SIGNAL(attachmentDeleted(const WIZDOCUMENTATTACHMENTDATA&)), \
             SLOT(on_attachment_deleted(const WIZDOCUMENTATTACHMENTDATA&)));
 
-    connect(Core::ICore::instance(), SIGNAL(viewNoteRequested(Internal::CWizDocumentView*,const WIZDOCUMENTDATA&)),
-            SLOT(onViewNoteRequested(Internal::CWizDocumentView*,const WIZDOCUMENTDATA&)));
+    connect(Core::ICore::instance(), SIGNAL(viewNoteRequested(Core::CWizDocumentView*,const WIZDOCUMENTDATA&)),
+            SLOT(onViewNoteRequested(Core::CWizDocumentView*,const WIZDOCUMENTDATA&)));
 }
 
 void CWizDocumentView::showClient(bool visible)

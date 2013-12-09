@@ -22,6 +22,7 @@ namespace Core {
 namespace Internal {
 class TitleBar;
 class EditorToolBar;
+} // namespace Internal
 
 class CWizDocumentView : public QWidget
 {
@@ -66,7 +67,7 @@ public:
     void settingsChanged();
 
 public Q_SLOTS:
-    void onViewNoteRequested(Internal::CWizDocumentView* view, const WIZDOCUMENTDATA& doc);
+    void onViewNoteRequested(Core::CWizDocumentView* view, const WIZDOCUMENTDATA& doc);
 
     void on_document_modified(const WIZDOCUMENTDATA& documentOld,
                               const WIZDOCUMENTDATA& documentNew);
@@ -76,7 +77,6 @@ public Q_SLOTS:
     void on_attachment_deleted(const WIZDOCUMENTATTACHMENTDATA& attachment);
 };
 
-} // namespace Internal
 } // namespace Core
 
 #endif // CORE_WIZDOCUMENTVIEW_H

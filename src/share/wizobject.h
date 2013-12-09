@@ -54,6 +54,7 @@ struct WIZUSERINFOBASE
 struct WIZUSERINFO : public WIZUSERINFOBASE
 {
     WIZUSERINFO();
+    WIZUSERINFO(const WIZUSERINFO& info);
     virtual bool LoadFromXmlRpc(CWizXmlRpcStructValue& val);
 
     // field: api_version, default: 1
@@ -139,9 +140,9 @@ struct WIZUSERINFO : public WIZUSERINFOBASE
     QString strBackupDatabaseServer;
 };
 
-struct WIZKMUSERINFO : public WIZUSERINFO
-{
-};
+//struct WIZKMUSERINFO : public WIZUSERINFO
+//{
+//};
 
 
 struct WIZUSERCERT

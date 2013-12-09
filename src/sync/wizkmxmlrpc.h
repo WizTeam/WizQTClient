@@ -33,10 +33,10 @@ protected:
     bool m_bAutoLogout;
 
 public:
-    WIZKMUSERINFO m_retLogin;
+    WIZUSERINFO m_retLogin;
 
 public:
-    bool Login(const QString& strUserName, const QString& strPassword, const QString& strType);
+    bool Login(const QString& strUserName, const QString& strPassword, const QString& strType = "normal");
     bool Logout();
     bool ChangePassword(const QString& strUserName, const QString& strOldPassword, const QString& strNewPassword);
     bool ChangeUserId(const QString& strUserName, const QString& strPassword, const QString& strNewUserId);
@@ -62,14 +62,14 @@ public:
     QString GetToken();
     QString GetKbGUID();
     int GetMaxFileSize() { return m_retLogin.GetMaxFileSize(); }
-    const WIZKMUSERINFO& GetUserInfo() const { return m_retLogin; }
-    WIZKMUSERINFO& GetUserInfo() { return m_retLogin; }
-    void SetUserInfo(const WIZKMUSERINFO& userInfo) { m_bLogin = TRUE; m_retLogin = userInfo; }
+    const WIZUSERINFO& GetUserInfo() const { return m_retLogin; }
+    WIZUSERINFO& GetUserInfo() { return m_retLogin; }
+    void SetUserInfo(const WIZUSERINFO& userInfo) { m_bLogin = TRUE; m_retLogin = userInfo; }
 
 private:
     QString MakeXmlRpcPassword(const QString& strPassword);
 
-    bool accounts_clientLogin(const QString& strUserName, const QString& strPassword, const QString& strType, WIZKMUSERINFO& ret);
+    bool accounts_clientLogin(const QString& strUserName, const QString& strPassword, const QString& strType, WIZUSERINFO& ret);
     bool accounts_clientLogout(const QString& strToken);
     bool accounts_keepAlive(const QString& strToken);
     bool accounts_createAccount(const QString& strUserName, const QString& strPassword, const QString& strInviteCode);

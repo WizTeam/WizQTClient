@@ -13,6 +13,7 @@ class CWizDocumentWebView;
 class CWizAttachmentListWidget;
 
 namespace Core {
+class CWizDocumentView;
 
 namespace Internal {
 class TitleEdit;
@@ -20,7 +21,6 @@ class InfoBar;
 class NotifyBar;
 class EditorToolBar;
 class CellButton;
-class CWizDocumentView;
 
 class TitleBar : public QWidget
 {
@@ -50,6 +50,7 @@ private:
     CellButton* m_tagBtn;
     CellButton* m_attachBtn;
     CellButton* m_infoBtn;
+    CellButton* m_commentsBtn;
 
     CWizTagListWidget* m_tags;
     CWizAttachmentListWidget* m_attachments;
@@ -60,6 +61,10 @@ public Q_SLOTS:
     void onTagButtonClicked();
     void onAttachButtonClicked();
     void onInfoButtonClicked();
+
+    void onCommentsButtonClicked();
+    void onViewNoteLoaded(Core::CWizDocumentView* view, const WIZDOCUMENTDATA& note);
+    void onTokenAcquired(const QString& strToken);
 
     void onEditorChanged();
     void onEditorFocusIn();

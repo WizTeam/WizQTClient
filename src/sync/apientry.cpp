@@ -12,6 +12,8 @@
 #include <QDebug>
 
 #include "apientry.h"
+#include "token.h"
+#include "wizkmxmlrpc.h"
 #include "wizdef.h"
 
 /*
@@ -190,6 +192,31 @@ QString ApiEntryPrivate::groupAttributeUrl(const QString& strToken, const QStrin
     return addExtendedInfo(strUrl, strExt);
 }
 
+QString ApiEntryPrivate::kUrlFromGuid(const QString& strKbGUID)
+{
+    Q_ASSERT(!Token::info().strToken.isEmpty());
+
+    if (m_mapkUrl.contains(strKbGUID))
+        return m_mapkUrl.value(strKbGUID);
+
+    const WIZUSERINFO& info = Token::info();
+    m_mapkUrl.insert(info.strKbGUID, info.strDownloadUrl);
+
+    CWizKMAccountsServer asServer(syncUrl());
+    asServer.SetUserInfo(info);
+
+    CWizGroupDataArray arrayGroup;
+    if (asServer.GetGroupList(arrayGroup)) {
+        CWizGroupDataArray::const_iterator it = arrayGroup.begin();
+        for (; it != arrayGroup.end(); it++) {
+            const WIZGROUPDATA& group = *it;
+            m_mapkUrl.insert(group.strGroupGUID, group.strDatabaseServer);
+        }
+    }
+
+    return m_mapkUrl.value(strKbGUID, 0);
+}
+
 
 
 
@@ -257,4 +284,11 @@ QString ApiEntry::groupAttributeUrl(const QString& strToken, const QString& strK
     if (!d)
         d = new ApiEntryPrivate();
     return d->groupAttributeUrl(strToken, strKbGUID);
+}
+
+QString ApiEntry::kUrlFromGuid(const QString& strKbGUID)
+{
+    if (!d)
+        d = new ApiEntryPrivate();
+    return d->kUrlFromGuid(strKbGUID);
 }

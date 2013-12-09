@@ -266,7 +266,7 @@ QString CWizKMAccountsServer::MakeXmlRpcPassword(const QString& strPassword)
 
 
 
-BOOL CWizKMAccountsServer::accounts_clientLogin(const QString& strUserName, const QString& strPassword, const QString& strType, WIZKMUSERINFO& ret)
+BOOL CWizKMAccountsServer::accounts_clientLogin(const QString& strUserName, const QString& strPassword, const QString& strType, WIZUSERINFO& ret)
 {
     DEBUG_TOLOG(_T("Start Login"));
     //
@@ -2949,7 +2949,7 @@ BOOL WizDownloadMessages(IWizKMSyncEvents* pEvents, CWizKMAccountsServer& server
             continue;
         }
         //
-        WIZKMUSERINFO userInfo = server.m_retLogin;
+        WIZUSERINFO userInfo = server.m_retLogin;
         //
         if (!group.strDatabaseServer.isEmpty())
         {
@@ -3256,7 +3256,7 @@ bool WizSyncDatabase(IWizKMSyncEvents* pEvents, IWizSyncableDatabase* pDatabase,
             continue;
         }
         //
-        WIZKMUSERINFO userInfo = server.m_retLogin;
+        WIZUSERINFO userInfo = server.m_retLogin;
         userInfo.strDatabaseServer = group.strDatabaseServer;
         userInfo.strKbGUID = group.strGroupGUID;
         //
@@ -3321,7 +3321,7 @@ bool WizSyncDatabase(IWizKMSyncEvents* pEvents, IWizSyncableDatabase* pDatabase,
             continue;
         }
         //
-        WIZKMUSERINFO userInfo = server.m_retLogin;
+        WIZUSERINFO userInfo = server.m_retLogin;
         userInfo.strDatabaseServer = group.strDatabaseServer;
         userInfo.strKbGUID = group.strGroupGUID;
         //

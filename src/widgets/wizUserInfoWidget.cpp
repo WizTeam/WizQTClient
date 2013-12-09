@@ -215,18 +215,16 @@ void CWizUserInfoWidget::on_action_accountSetup_triggered()
         m_userSettings->setWindowTitle(tr("Account settings"));
         connect(m_userSettings, SIGNAL(accepted()), m_userSettings, SLOT(deleteLater()));
         //connect(m_userSettings, SIGNAL(showProgress()), ::instance(), SLOT(getToken()));
-        connect(Token::instance(), SIGNAL(tokenAcquired(const QString&, const QString&)),
-                SLOT(on_action_accountSetup_requested(const QString&, const QString&)));
+        connect(Token::instance(), SIGNAL(tokenAcquired(const QString&)),
+                SLOT(on_action_accountSetup_requested(const QString&)));
     }
 
     m_userSettings->open();
     Token::requestToken();
 }
 
-void CWizUserInfoWidget::on_action_accountSetup_requested(const QString& strToken, const QString& strMsg)
+void CWizUserInfoWidget::on_action_accountSetup_requested(const QString& strToken)
 {
-    Q_UNUSED(strMsg);
-
     if (!m_userSettings)
         return;
 

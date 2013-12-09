@@ -2,8 +2,11 @@
 #define WIZSERVICE_TOKEN_H
 
 #include <QObject>
+#include <QDateTime>
 
 class QString;
+
+struct WIZUSERINFO;
 
 namespace WizService {
 
@@ -21,12 +24,14 @@ public:
     Token(const QString& strUserId = 0, const QString& strPasswd = 0);
     ~Token();
 
+    static const WIZUSERINFO& info();
+
     static void requestToken();
     static void setUserId(const QString& strUserId);
     static void setPasswd(const QString& strPasswd);
 
 Q_SIGNALS:
-    void tokenAcquired(QString strToken, QString strMessage);
+    void tokenAcquired(QString strToken);
 
     friend class Internal::TokenPrivate;
 };

@@ -19,9 +19,7 @@ class CWizDocumentTransitionView;
 class CWizDocumentWebViewWorker;
 
 namespace Core {
-namespace Internal {
 class CWizDocumentView;
-} // namespace Internal
 } // namespace Core
 
 
@@ -67,7 +65,7 @@ class CWizDocumentWebView : public QWebView
 
 public:
     CWizDocumentWebView(CWizExplorerApp& app, QWidget* parent);
-    Core::Internal::CWizDocumentView* view();
+    Core::CWizDocumentView* view();
 
     // view and save
     void viewDocument(const WIZDOCUMENTDATA& doc, bool editing);

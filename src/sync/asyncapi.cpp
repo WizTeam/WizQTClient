@@ -12,10 +12,33 @@ using namespace WizService;
 
 AsyncApi::AsyncApi(QObject *parent) : QObject(parent)
 {
+    qRegisterMetaType<WIZUSERINFO>("WIZUSERINFO");
 }
 
 AsyncApi::~AsyncApi()
 {
+}
+
+void AsyncApi::login(const QString& strUserId, const QString& strPasswd)
+{
+    QFuture<bool> future = QtConcurrent::run(this, &AsyncApi::login_impl, strUserId, strPasswd);
+    //QFutureWatcher<bool>* watcher = new QFutureWatcher<bool>();
+    //watcher->setFuture(future);
+    //connect(watcher, SIGNAL(finished()), SLOT(on_getToken_finished()));
+}
+
+bool AsyncApi::login_impl(const QString& strUserId, const QString& strPasswd)
+{
+    CWizKMAccountsServer asServer(ApiEntry::syncUrl());
+    bool ret = asServer.Login(strUserId, strPasswd);
+    if (!ret) {
+        m_nErrorCode = asServer.GetLastErrorCode();
+        m_strErrorMessage = asServer.GetLastErrorMessage();
+    }
+
+    Q_EMIT loginFinished(asServer.GetUserInfo());
+
+    return ret;
 }
 
 void AsyncApi::getToken(const QString& strUserId, const QString& strPasswd)

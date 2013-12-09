@@ -11,6 +11,12 @@ WIZUSERINFO::WIZUSERINFO()
 
 }
 
+WIZUSERINFO::WIZUSERINFO(const WIZUSERINFO& info)
+{
+    memcpy(this, &info, sizeof(info));
+}
+
+
 bool WIZUSERINFO::LoadFromXmlRpc(CWizXmlRpcStructValue& val)
 {
     CWizXmlRpcStructValue& data = val;

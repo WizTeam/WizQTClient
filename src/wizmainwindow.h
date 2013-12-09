@@ -46,9 +46,9 @@ class CWizDocumentWebView;
 
 namespace Core {
 class ICore;
+class CWizDocumentView;
 
 namespace Internal {
-class CWizDocumentView;
 
 class MainWindow
     : public QMainWindow
