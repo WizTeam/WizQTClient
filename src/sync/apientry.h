@@ -19,7 +19,7 @@ public:
     static QString accountInfoUrl(const QString& strToken);
     static QString groupAttributeUrl(const QString& strToken, const QString& strKbGUID);
 
-    static QString kUrlFromGuid(const QString& strKbGUID);
+    static QString kUrlFromGuid(const QString& strToken, const QString& strKbGUID);
 };
 
 } // namespace WizService

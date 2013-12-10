@@ -8,12 +8,34 @@ WIZUSERINFO::WIZUSERINFO()
     , nUserPoints(0)
     , bEnableGroup(false)
 {
-
 }
 
 WIZUSERINFO::WIZUSERINFO(const WIZUSERINFO& info)
 {
-    memcpy(this, &info, sizeof(info));
+    strToken = info.strToken;
+    strKbGUID = info.strKbGUID;
+    strDatabaseServer = info.strDatabaseServer;
+    nMaxFileSize = info.nMaxFileSize;
+    strChatUrl = info.strChatUrl;
+    strDownloadUrl = info.strDownloadUrl;
+    bEnableGroup = info.bEnableGroup;
+    tTokenExpried = info.tTokenExpried;
+    strInviteCode = info.strInviteCode;
+    strMywizEmail = info.strMywizEmail;
+    strNoticeLink = info.strNoticeLink;
+    strNoticeText = info.strNoticeText;
+    strSNSList = info.strSNSList;
+    strUploadUrl = info.strUploadUrl;
+    strDisplayName = info.strDisplayName;
+    strUserEmail = info.strUserEmail;
+    strLanguage = info.strLanguage;
+    strNickName = info.strNickName;
+    strUserGUID = info.strUserGUID;
+    nUserLevel = info.nUserLevel;
+    strUserLevelName = info.strUserLevelName;
+    nUserPoints = info.nUserPoints;
+    strUserType = info.strUserType;
+    tVipExpried = info.tVipExpried;
 }
 
 

@@ -1,6 +1,7 @@
 #include "titlebar.h"
 
 #include <QVBoxLayout>
+#include <QUrl>
 #include <QDebug>
 
 #include "icore.h"
@@ -266,5 +267,13 @@ void TitleBar::onTokenAcquired(const QString& strToken)
     if (strToken.isEmpty())
         return;
 
-    qDebug() << WizService::ApiEntry::commentUrl(strToken, noteView()->note().strKbGUID, noteView()->note().strGUID);
+    QString strKbGUID = noteView()->note().strKbGUID;
+    QString strGUID = noteView()->note().strGUID;
+
+    QUrl kUrl(WizService::ApiEntry::kUrlFromGuid(strToken, strKbGUID));
+
+    qDebug() << WizService::ApiEntry::commentCountUrl(kUrl.host(), strToken, strKbGUID, strGUID);
+
+
+    //qDebug() << WizService::ApiEntry::commentUrl(strToken, noteView()->note().strKbGUID, noteView()->note().strGUID);
 }

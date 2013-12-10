@@ -26,7 +26,7 @@ public:
     QString accountInfoUrl(const QString& strToken);
     QString groupAttributeUrl(const QString& strToken, const QString& strKbGUID);
 
-    QString kUrlFromGuid(const QString& strKbGUID);
+    QString kUrlFromGuid(const QString& strToken, const QString& strKbGUID);
 
 private:
     QString m_strSyncUrl;

@@ -3,6 +3,7 @@
 
 #include <QString>
 #include <QMutex>
+#include <QDebug>
 
 #include "wizkmxmlrpc.h"
 #include "asyncapi.h"
@@ -10,6 +11,7 @@
 using namespace WizService;
 using namespace WizService::Internal;
 
+// use 15 minutes locally, server use 20 minutes
 #define TOKEN_TIMEOUT_INTERVAL 60*15
 
 TokenPrivate::TokenPrivate(Token* token)
@@ -38,15 +40,12 @@ void TokenPrivate::requestToken()
         return;
     }
 
-    if (QDateTime::currentDateTime() >= m_info.tTokenExpried) {
-        m_api->keepAlive(m_info.strToken);
-        return;
+    if (m_info.tTokenExpried >= QDateTime::currentDateTime()) {
+        Q_EMIT q->tokenAcquired(m_info.strToken);
+        m_mutex->unlock();
+    } else {
+        m_api->keepAlive(m_info.strToken, m_info.strKbGUID);
     }
-    //else
-    //{
-    //    Q_EMIT q->tokenAcquired(m_info.strToken);
-    //    m_mutex->unlock();
-    //}
 }
 
 void TokenPrivate::setUserId(const QString& strUserId)
@@ -64,14 +63,18 @@ const WIZUSERINFO& TokenPrivate::info()
     return m_info;
 }
 
-void TokenPrivate::onLoginFinished(const WIZUSERINFO& info)
+void TokenPrivate::onLoginFinished(const WIZUSERINFO &info)
 {
-    if (!info.strToken.isEmpty()) {
+    qDebug() << "[Token]: Login Done...";
+
+    if (info.strToken.isEmpty()) {
+        Q_EMIT q->tokenAcquired(0);
+    } else {
         m_info = info;
-        return;
+        m_info.tTokenExpried = QDateTime::currentDateTime().addSecs(TOKEN_TIMEOUT_INTERVAL);
+        Q_EMIT q->tokenAcquired(info.strToken);
     }
 
-    Q_EMIT q->tokenAcquired(m_info.strToken);
     m_mutex->unlock();
 }
 
@@ -79,12 +82,16 @@ void TokenPrivate::onGetTokenFinished(const QString& strToken, const QString& st
 {
     Q_UNUSED(strMsg);
 
-    if (!strToken.isEmpty()) {
+    qDebug() << "[Token]: GetToken Done...";
+
+    if (strToken.isEmpty()) {
+        Q_EMIT q->tokenAcquired(0);
+    } else {
         m_info.strToken = strToken;
         m_info.tTokenExpried = QDateTime::currentDateTime().addSecs(TOKEN_TIMEOUT_INTERVAL);
+        Q_EMIT q->tokenAcquired(strToken);
     }
 
-    Q_EMIT q->tokenAcquired(m_info.strToken);
     m_mutex->unlock();
 }
 
@@ -92,14 +99,15 @@ void TokenPrivate::onKeepAliveFinished(bool bOk, const QString& strMsg)
 {
     Q_UNUSED(strMsg);
 
+    qDebug() << "[Token]: KeepAlive Done...";
+
     if (bOk) {
         m_info.tTokenExpried = QDateTime::currentDateTime().addSecs(TOKEN_TIMEOUT_INTERVAL);
         Q_EMIT q->tokenAcquired(m_info.strToken);
         m_mutex->unlock();
-        return;
+    } else {
+        m_api->getToken(m_strUserId, m_strPasswd);
     }
-
-    m_api->getToken(m_strUserId, m_strPasswd);
 }
 
 

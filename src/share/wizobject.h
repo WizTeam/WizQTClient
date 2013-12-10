@@ -1,6 +1,7 @@
 #ifndef WIZOBJECT_H
 #define WIZOBJECT_H
 
+#include <QMetaType>
 #include <QImage>
 #include "wizqthelper.h"
 
@@ -38,9 +39,8 @@ struct WIZUSERINFOBASE
     QString strToken;
     QString strKbGUID;
     QString strDatabaseServer;
-    //
     int nMaxFileSize;
-    //
+
     WIZUSERINFOBASE()
         : nMaxFileSize(10 * 1024 * 1024)
     {
@@ -139,6 +139,8 @@ struct WIZUSERINFO : public WIZUSERINFOBASE
 
     QString strBackupDatabaseServer;
 };
+
+Q_DECLARE_METATYPE(WIZUSERINFO)
 
 //struct WIZKMUSERINFO : public WIZUSERINFO
 //{

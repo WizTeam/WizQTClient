@@ -21,10 +21,7 @@ AsyncApi::~AsyncApi()
 
 void AsyncApi::login(const QString& strUserId, const QString& strPasswd)
 {
-    QFuture<bool> future = QtConcurrent::run(this, &AsyncApi::login_impl, strUserId, strPasswd);
-    //QFutureWatcher<bool>* watcher = new QFutureWatcher<bool>();
-    //watcher->setFuture(future);
-    //connect(watcher, SIGNAL(finished()), SLOT(on_getToken_finished()));
+    QtConcurrent::run(this, &AsyncApi::login_impl, strUserId, strPasswd);
 }
 
 bool AsyncApi::login_impl(const QString& strUserId, const QString& strPasswd)
@@ -37,70 +34,49 @@ bool AsyncApi::login_impl(const QString& strUserId, const QString& strPasswd)
     }
 
     Q_EMIT loginFinished(asServer.GetUserInfo());
-
     return ret;
 }
 
 void AsyncApi::getToken(const QString& strUserId, const QString& strPasswd)
 {
-    QFuture<bool> future = QtConcurrent::run(this, &AsyncApi::getToken_impl, strUserId, strPasswd);
-    QFutureWatcher<bool>* watcher = new QFutureWatcher<bool>();
-    watcher->setFuture(future);
-    connect(watcher, SIGNAL(finished()), SLOT(on_getToken_finished()));
+    QtConcurrent::run(this, &AsyncApi::getToken_impl, strUserId, strPasswd);
 }
 
 bool AsyncApi::getToken_impl(const QString& strUserId, const QString& strPasswd)
 {
+    QString strToken;
+
     CWizKMAccountsServer asServer(ApiEntry::syncUrl());
-    bool ret = asServer.GetToken(strUserId, strPasswd, m_strToken);
+    bool ret = asServer.GetToken(strUserId, strPasswd, strToken);
     if (!ret) {
         m_nErrorCode = asServer.GetLastErrorCode();
         m_strErrorMessage = asServer.GetLastErrorMessage();
     }
 
+    Q_EMIT getTokenFinished(strToken);
     return ret;
 }
 
-void AsyncApi::on_getToken_finished()
+void AsyncApi::keepAlive(const QString& strToken, const QString& strKbGUID)
 {
-    QFutureWatcher<bool>* watcher = dynamic_cast<QFutureWatcher<bool>*>(sender());
-    watcher->deleteLater();
-
-    if (watcher->result()) {
-        Q_EMIT getTokenFinished(m_strToken, 0);
-    } else {
-        Q_EMIT getTokenFinished(0, m_strErrorMessage);
-    }
+    QtConcurrent::run(this, &AsyncApi::keepAlive_impl, strToken, strKbGUID);
 }
 
-void AsyncApi::keepAlive(const QString& strToken)
-{
-    QFuture<bool> future = QtConcurrent::run(this, &AsyncApi::keepAlive_impl, strToken);
-    QFutureWatcher<bool>* watcher = new QFutureWatcher<bool>();
-    watcher->setFuture(future);
-    connect(watcher, SIGNAL(finished()), SLOT(on_keepAlive_finished()));
-}
-
-bool AsyncApi::keepAlive_impl(const QString& strToken)
+bool AsyncApi::keepAlive_impl(const QString& strToken, const QString& strKbGUID)
 {
     CWizKMAccountsServer asServer(ApiEntry::syncUrl());
+
+    WIZUSERINFO info;
+    info.strToken = strToken;
+    info.strKbGUID = strKbGUID;
+    asServer.SetUserInfo(info);
+
     bool ret = asServer.KeepAlive(strToken);
     if (!ret) {
         m_nErrorCode = asServer.GetLastErrorCode();
         m_strErrorMessage = asServer.GetLastErrorMessage();
     }
 
+    Q_EMIT keepAliveFinished(ret);
     return ret;
-}
-
-void AsyncApi::on_keepAlive_finished()
-{
-    QFutureWatcher<bool>* watcher = dynamic_cast<QFutureWatcher<bool>*>(sender());
-    watcher->deleteLater();
-
-    if (watcher->result()) {
-        Q_EMIT keepAliveFinished(true, 0);
-    } else {
-        Q_EMIT keepAliveFinished(false, m_strErrorMessage);
-    }
 }

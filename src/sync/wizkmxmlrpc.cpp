@@ -73,7 +73,7 @@ CWizKMAccountsServer::CWizKMAccountsServer(const QString& strUrl, QObject* paren
     : CWizKMXmlRpcServerBase(strUrl, parent)
 {
     m_bLogin = FALSE;
-    m_bAutoLogout = TRUE;
+    m_bAutoLogout = FALSE;
 }
 
 CWizKMAccountsServer::~CWizKMAccountsServer(void)
@@ -82,6 +82,12 @@ CWizKMAccountsServer::~CWizKMAccountsServer(void)
     {
         Logout();
     }
+}
+
+void CWizKMAccountsServer::SetUserInfo(const WIZUSERINFO& userInfo)
+{
+    m_bLogin = TRUE;
+    m_retLogin = userInfo;
 }
 
 void CWizKMAccountsServer::OnXmlRpcError()
@@ -322,8 +328,9 @@ BOOL CWizKMAccountsServer::accounts_clientLogout(const QString& strToken)
 }
 BOOL CWizKMAccountsServer::accounts_keepAlive(const QString& strToken)
 {
+    qDebug() << "keepAlive: " << strToken << "kb: " << GetKbGUID();
     CWizKMTokenOnlyParam param(strToken, GetKbGUID());
-    //
+
     CWizXmlRpcResult callRet;
     if (!Call(_T("accounts.keepAlive"), callRet, &param))
     {
@@ -377,6 +384,7 @@ BOOL CWizKMAccountsServer::accounts_getToken(const QString& strUserName, const Q
 
     param.AddString(_T("user_id"), strUserName);
     param.AddString(_T("password"), MakeXmlRpcPassword(strPassword));
+
     //
     if (!Call(_T("accounts.getToken"), _T("token"), strToken, &param))
     {
@@ -384,7 +392,7 @@ BOOL CWizKMAccountsServer::accounts_getToken(const QString& strUserName, const Q
         return FALSE;
     }
     DEBUG_TOLOG1(_T("Get token: %1"), strToken);
-    //
+
     return TRUE;
 }
 BOOL CWizKMAccountsServer::accounts_getCert(const QString& strUserName, const QString& strPassword, QString& strN, QString& stre, QString& strd, QString& strHint)

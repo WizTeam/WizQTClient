@@ -37,8 +37,6 @@ private Q_SLOTS:
 private:
     AsyncApi* m_api;
     WIZUSERINFO m_info;
-    //QDateTime m_time;
-    //QString m_strToken;
     QString m_strUserId;
     QString m_strPasswd;
     QMutex* m_mutex;

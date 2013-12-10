@@ -61,10 +61,11 @@ public:
     bool GetWizKMDatabaseServer(QString& strServer, int& nPort, QString& strXmlRpcFile);
     QString GetToken();
     QString GetKbGUID();
+    //void setKbGUID(const QString& strkbGUID) { m_retLogin.strKbGUID = strkbGUID; }
     int GetMaxFileSize() { return m_retLogin.GetMaxFileSize(); }
     const WIZUSERINFO& GetUserInfo() const { return m_retLogin; }
     WIZUSERINFO& GetUserInfo() { return m_retLogin; }
-    void SetUserInfo(const WIZUSERINFO& userInfo) { m_bLogin = TRUE; m_retLogin = userInfo; }
+    void SetUserInfo(const WIZUSERINFO& userInfo);
 
 private:
     QString MakeXmlRpcPassword(const QString& strPassword);
