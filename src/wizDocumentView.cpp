@@ -13,6 +13,7 @@
 #include "widgets/wizSegmentedButton.h"
 #include "wizButton.h"
 #include "share/wizsettings.h"
+#include "share/wizuihelper.h"
 
 #include "icore.h"
 #include "titlebar.h"
@@ -41,16 +42,18 @@ CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
     m_client = new QWidget(this);
     m_client->setLayout(layout);
 
-    QHBoxLayout* layoutEditor = new QHBoxLayout();
-    layoutEditor->addWidget(m_web);
-    layoutEditor->addWidget(m_comments);
+    CWizSplitter* splitter = new CWizSplitter(this);
+    //QHBoxLayout* layoutEditor = new QHBoxLayout();
+    splitter->addWidget(m_web);
+    splitter->addWidget(m_comments);
+    m_comments->page()->mainFrame()->setScrollBarPolicy(Qt::Horizontal, Qt::ScrollBarAlwaysOff);
     m_comments->hide();
 
     layout->addWidget(m_title);
-    layout->addLayout(layoutEditor);
+    layout->addWidget(splitter);
 
     layout->setStretchFactor(m_title, 0);
-    layout->setStretchFactor(layoutEditor, 1);
+    layout->setStretchFactor(splitter, 1);
 
     QVBoxLayout* layoutMain = new QVBoxLayout();
     layoutMain->setContentsMargins(0, 0, 0, 0);
