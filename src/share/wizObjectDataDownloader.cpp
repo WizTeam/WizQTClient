@@ -6,6 +6,9 @@
 #include "wizDatabase.h"
 #include "sync/wizkmxmlrpc.h"
 
+#include "../sync/token.h"
+#include "../sync/apientry.h"
+
 // to avoid to much load for remote serser
 #define WIZ_OBJECTDATA_DOWNLOADER_MAX 1
 
@@ -122,6 +125,7 @@ void CWizObjectDataDownloader::on_downloaded(bool bSucceed)
     quit();
 }
 
+using namespace WizService;
 
 /* ------------------------- CWizObjectDataDownload ------------------------- */
 CWizObjectDataDownloadWorker::CWizObjectDataDownloadWorker(CWizDatabaseManager& dbMgr,
@@ -129,50 +133,25 @@ CWizObjectDataDownloadWorker::CWizObjectDataDownloadWorker(CWizDatabaseManager& 
     : m_dbMgr(dbMgr)
     , m_data(data)
 {
+    connect(Token::instance(), SIGNAL(tokenAcquired(QString)), SLOT(onTokenAcquired(QString)));
 }
 
 void CWizObjectDataDownloadWorker::startDownload()
 {
-    // FIXME
-    CWizKMAccountsServer asServer(WizKMGetAccountsServerURL(true));
+    Token::instance()->requestToken();
+}
 
-    QString strUserId = m_dbMgr.db().GetUserId();
-    QString strPassword = m_dbMgr.db().GetPassword();
-
-    // FIXME: hard-coded "normal"
-    if (!asServer.Login(strUserId, strPassword, "normal")) {
+void CWizObjectDataDownloadWorker::onTokenAcquired(const QString& strToken)
+{
+    if (strToken.isEmpty()) {
         Q_EMIT downloaded(false);
         return;
     }
 
-    WIZUSERINFOBASE info = asServer.GetUserInfo();
+    WIZUSERINFOBASE info;
+    info.strToken = strToken;
     info.strKbGUID = m_data.strKbGUID;
-    bool bOk = false;
-
-    // reset info kb_guid and server url for downloading
-    if (m_data.strKbGUID != m_dbMgr.db().kbGUID()) {
-        CWizGroupDataArray arrayGroup;
-        if (!asServer.GetGroupList(arrayGroup) || arrayGroup.empty()) {
-            Q_EMIT downloaded(false);
-        }
-
-        CWizGroupDataArray::const_iterator it = arrayGroup.begin();
-        for (; it != arrayGroup.end(); it++) {
-            const WIZGROUPDATA& group = *it;
-            if (group.strGroupGUID == m_data.strKbGUID) {
-                info.strDatabaseServer = group.strDatabaseServer;
-                bOk = true;
-                break;
-            }
-        }
-    } else {
-        bOk = true;
-    }
-
-    if (!bOk) {
-        Q_EMIT downloaded(false);
-        return;
-    }
+    info.strDatabaseServer = ApiEntry::kUrlFromGuid(strToken, m_data.strKbGUID);
 
     CWizKMDatabaseServer ksServer(info);
 
@@ -190,3 +169,4 @@ void CWizObjectDataDownloadWorker::startDownload()
 
     Q_EMIT downloaded(true);
 }
+

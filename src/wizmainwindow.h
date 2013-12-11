@@ -36,7 +36,6 @@ class CWizSearcher;
 class CWizSearchIndexer;
 
 class QtSegmentControl;
-//class CWizGroupMessage;
 class CWizObjectDataDownloaderHost;
 class CWizUserAvatarDownloaderHost;
 class CWizKMSyncThread;
