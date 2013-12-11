@@ -26,6 +26,7 @@ CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
     , m_userSettings(app.userSettings())
     , m_dbMgr(app.databaseManager())
     , m_web(new CWizDocumentWebView(app, this))
+    , m_comments(new QWebView(this))
     , m_title(new TitleBar(this))
     , m_viewMode(app.userSettings().noteViewMode())
     , m_bLocked(false)
@@ -40,11 +41,16 @@ CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
     m_client = new QWidget(this);
     m_client->setLayout(layout);
 
+    QHBoxLayout* layoutEditor = new QHBoxLayout();
+    layoutEditor->addWidget(m_web);
+    layoutEditor->addWidget(m_comments);
+    m_comments->hide();
+
     layout->addWidget(m_title);
-    layout->addWidget(m_web);
+    layout->addLayout(layoutEditor);
 
     layout->setStretchFactor(m_title, 0);
-    layout->setStretchFactor(m_web, 1);
+    layout->setStretchFactor(layoutEditor, 1);
 
     QVBoxLayout* layoutMain = new QVBoxLayout();
     layoutMain->setContentsMargins(0, 0, 0, 0);

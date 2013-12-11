@@ -4,6 +4,7 @@
 #include <QWidget>
 #include <QIcon>
 
+class QString;
 
 struct WIZDOCUMENTDATA;
 class CWizDatabase;
@@ -50,7 +51,9 @@ private:
     CellButton* m_tagBtn;
     CellButton* m_attachBtn;
     CellButton* m_infoBtn;
+
     CellButton* m_commentsBtn;
+    QString m_commentsUrl;
 
     CWizTagListWidget* m_tags;
     CWizAttachmentListWidget* m_attachments;
@@ -65,6 +68,7 @@ public Q_SLOTS:
     void onCommentsButtonClicked();
     void onViewNoteLoaded(Core::CWizDocumentView* view, const WIZDOCUMENTDATA& note);
     void onTokenAcquired(const QString& strToken);
+    void onGetCommentsCountFinished(int nCount);
 
     void onEditorChanged();
     void onEditorFocusIn();

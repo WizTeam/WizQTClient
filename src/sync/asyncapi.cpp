@@ -1,8 +1,10 @@
 #include "asyncapi.h"
 
 #include <QtConcurrentRun>
-#include <QFutureWatcher>
-#include <QFuture>
+#include <QNetworkAccessManager>
+#include <QEventLoop>
+
+#include <rapidjson/document.h>
 
 #include "apientry.h"
 #include "wizkmxmlrpc.h"
@@ -80,3 +82,39 @@ bool AsyncApi::keepAlive_impl(const QString& strToken, const QString& strKbGUID)
     Q_EMIT keepAliveFinished(ret);
     return ret;
 }
+
+void AsyncApi::getCommentsCount(const QString& strUrl)
+{
+    QtConcurrent::run(this, &AsyncApi::getCommentsCount_impl, strUrl);
+}
+
+void AsyncApi::getCommentsCount_impl(const QString& strUrl)
+{
+    QNetworkAccessManager net;
+    QNetworkReply* reply = net.get(QNetworkRequest(strUrl));
+
+    QEventLoop loop;
+    connect(reply, SIGNAL(finished()), &loop, SLOT(quit()));
+    loop.exec();
+
+    int nTotalComments = 0;
+
+    if (reply->error()) {
+        qDebug() << "[AsyncApi]Failed to get comment count";
+        Q_EMIT getCommentsCountFinished(nTotalComments);
+        return;
+    }
+
+    QString strReply = QString::fromUtf8(reply->readAll().constData());
+
+    rapidjson::Document d;
+    d.Parse<0>(strReply.toUtf8().constData());
+    int nCode = d["return_code"].GetInt();
+
+    if (nCode == 200) {
+        nTotalComments = d["comment_count"].GetInt();
+    }
+
+    Q_EMIT getCommentsCountFinished(nTotalComments);
+}
+

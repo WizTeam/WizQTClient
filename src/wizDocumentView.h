@@ -5,6 +5,7 @@
 
 #include "share/wizobject.h"
 
+class QWebView;
 class QScrollArea;
 class QLineEdit;
 
@@ -35,11 +36,14 @@ public:
     QWidget* client() const { return m_client; }
     CWizDocumentWebView* web() const { return m_web; }
 
+    QWebView* commentView() const { return m_comments; }
+
 protected:
     CWizExplorerApp& m_app;
     CWizDatabaseManager& m_dbMgr;
     CWizUserSettings& m_userSettings;
     CWizDocumentWebView* m_web;
+    QWebView* m_comments;
     Core::Internal::TitleBar* m_title;
     QWidget* m_client;
 

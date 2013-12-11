@@ -21,6 +21,7 @@
 
 #include "sync/token.h"
 #include "sync/apientry.h"
+#include "sync/asyncapi.h"
 
 using namespace Core;
 using namespace Core::Internal;
@@ -255,25 +256,59 @@ void TitleBar::onInfoButtonClicked()
 
 void TitleBar::onCommentsButtonClicked()
 {
+    if (m_commentsUrl.isEmpty())
+        return;
+
+    QWebView* comments = noteView()->commentView();
+    if (comments->isVisible()) {
+        comments->hide();
+        return;
+    }
+
+    comments->load(m_commentsUrl);
+    comments->show();
 }
 
 void TitleBar::onViewNoteLoaded(CWizDocumentView* view, const WIZDOCUMENTDATA& note)
 {
+    Q_UNUSED(note);
+
+    if (view != noteView()) {
+        return;
+    }
+
+    m_commentsUrl.clear();
     WizService::Token::requestToken();
 }
 
 void TitleBar::onTokenAcquired(const QString& strToken)
 {
-    if (strToken.isEmpty())
+    QWebView* comments = noteView()->commentView();
+
+    if (strToken.isEmpty()) {
+        comments->hide();
         return;
+    }
 
     QString strKbGUID = noteView()->note().strKbGUID;
     QString strGUID = noteView()->note().strGUID;
+    m_commentsUrl =  WizService::ApiEntry::commentUrl(strToken, strKbGUID, strGUID);
+
+    if (comments->isVisible()) {
+        comments->load(m_commentsUrl);
+    }
 
     QUrl kUrl(WizService::ApiEntry::kUrlFromGuid(strToken, strKbGUID));
+    QString strCountUrl = WizService::ApiEntry::commentCountUrl(kUrl.host(), strToken, strKbGUID, strGUID);
 
-    qDebug() << WizService::ApiEntry::commentCountUrl(kUrl.host(), strToken, strKbGUID, strGUID);
-
-
-    //qDebug() << WizService::ApiEntry::commentUrl(strToken, noteView()->note().strKbGUID, noteView()->note().strGUID);
+    WizService::AsyncApi* api = new WizService::AsyncApi();
+    connect(api, SIGNAL(getCommentsCountFinished(int)), SLOT(onGetCommentsCountFinished(int)));
+    api->getCommentsCount(strCountUrl);
 }
+
+void TitleBar::onGetCommentsCountFinished(int nCount)
+{
+    // update gui.
+    qDebug() << "total comments:" << nCount;
+}
+

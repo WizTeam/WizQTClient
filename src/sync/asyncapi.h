@@ -2,7 +2,6 @@
 #define WIZSERVICE_ASYNCAPI_H
 
 #include <QObject>
-//#include "../share/wizobject.h"
 
 class QString;
 struct WIZUSERINFO;
@@ -20,26 +19,22 @@ public:
     void login(const QString& strUserId, const QString& strPasswd);
     void getToken(const QString& strUserId, const QString& strPasswd);
     void keepAlive(const QString& strToken, const QString& strKbGUID);
+    void getCommentsCount(const QString& strUrl);
 
 private:
-    //WIZUSERINFO m_info;
-    //QString m_strToken;
     int m_nErrorCode;
     QString m_strErrorMessage;
 
     bool login_impl(const QString& strUserId, const QString& strPasswd);
     bool getToken_impl(const QString& strUserId, const QString& strPasswd);
     bool keepAlive_impl(const QString& strToken, const QString &strKbGUID);
-
-private Q_SLOTS:
-    //void onLoginFinished();
-    //void on_getToken_finished();
-    //void on_keepAlive_finished();
+    void getCommentsCount_impl(const QString& strUrl);
 
 Q_SIGNALS:
     void loginFinished(const WIZUSERINFO& info);
     void getTokenFinished(const QString& strToken, const QString& strMsg = 0);
     void keepAliveFinished(bool bOk, const QString& strMsg = 0);
+    void getCommentsCountFinished(int i);
 };
 
 } // namespace WizService
