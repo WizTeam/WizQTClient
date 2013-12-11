@@ -68,14 +68,15 @@ void TokenPrivate::onLoginFinished(const WIZUSERINFO &info)
     qDebug() << "[Token]: Login Done...";
 
     if (info.strToken.isEmpty()) {
+        m_mutex->unlock();
         Q_EMIT q->tokenAcquired(0);
     } else {
         m_info = info;
         m_info.tTokenExpried = QDateTime::currentDateTime().addSecs(TOKEN_TIMEOUT_INTERVAL);
+        m_mutex->unlock();
         Q_EMIT q->tokenAcquired(info.strToken);
     }
 
-    m_mutex->unlock();
 }
 
 void TokenPrivate::onGetTokenFinished(const QString& strToken, const QString& strMsg)
@@ -85,14 +86,15 @@ void TokenPrivate::onGetTokenFinished(const QString& strToken, const QString& st
     qDebug() << "[Token]: GetToken Done...";
 
     if (strToken.isEmpty()) {
+        m_mutex->unlock();
         Q_EMIT q->tokenAcquired(0);
     } else {
         m_info.strToken = strToken;
         m_info.tTokenExpried = QDateTime::currentDateTime().addSecs(TOKEN_TIMEOUT_INTERVAL);
+        m_mutex->unlock();
         Q_EMIT q->tokenAcquired(strToken);
     }
 
-    m_mutex->unlock();
 }
 
 void TokenPrivate::onKeepAliveFinished(bool bOk, const QString& strMsg)
@@ -103,8 +105,8 @@ void TokenPrivate::onKeepAliveFinished(bool bOk, const QString& strMsg)
 
     if (bOk) {
         m_info.tTokenExpried = QDateTime::currentDateTime().addSecs(TOKEN_TIMEOUT_INTERVAL);
-        Q_EMIT q->tokenAcquired(m_info.strToken);
         m_mutex->unlock();
+        Q_EMIT q->tokenAcquired(m_info.strToken);
     } else {
         m_api->getToken(m_strUserId, m_strPasswd);
     }
