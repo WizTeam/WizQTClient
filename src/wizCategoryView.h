@@ -271,7 +271,9 @@ public Q_SLOTS:
 
     void on_action_itemAttribute();
     void on_action_group_attribute();
+    void on_action_group_attribute_showProgress();
     void on_action_group_attribute_requested(const QString& strToken);
+
 
     void on_action_emptyTrash();
 

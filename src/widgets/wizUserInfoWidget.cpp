@@ -214,12 +214,16 @@ void CWizUserInfoWidget::on_action_accountSetup_triggered()
         m_userSettings = new CWizWebSettingsDialog(QSize(720, 400), window()); // use toplevel window as parent
         m_userSettings->setWindowTitle(tr("Account settings"));
         connect(m_userSettings, SIGNAL(accepted()), m_userSettings, SLOT(deleteLater()));
-        //connect(m_userSettings, SIGNAL(showProgress()), ::instance(), SLOT(getToken()));
+        connect(m_userSettings, SIGNAL(showProgress()), SLOT(on_action_accountSetup_showProgress()));
         connect(Token::instance(), SIGNAL(tokenAcquired(const QString&)),
                 SLOT(on_action_accountSetup_requested(const QString&)));
     }
 
     m_userSettings->open();
+}
+
+void CWizUserInfoWidget::on_action_accountSetup_showProgress()
+{
     Token::requestToken();
 }
 

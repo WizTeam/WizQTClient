@@ -49,6 +49,7 @@ private Q_SLOTS:
     void on_userAvatar_downloaded(const QString& strGUID);
     void on_action_accountInfo_triggered();
     void on_action_accountSetup_triggered();
+    void on_action_accountSetup_showProgress();
     void on_action_accountSetup_requested(const QString& strToken);
 
     void on_action_changeAvatar_triggered();
