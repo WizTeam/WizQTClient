@@ -173,7 +173,7 @@ void MainWindow::cleanOnQuit()
     saveStatus();
 
     // FIXME : if document not valid will lead crash
-    m_doc->web()->saveDocument(false);
+    //m_doc->web()->saveDocument(false);
 
     m_sync->stopSync();
     m_searchIndexer->abort();

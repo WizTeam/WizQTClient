@@ -70,7 +70,7 @@ public:
     // view and save
     void viewDocument(const WIZDOCUMENTDATA& doc, bool editing);
     void setEditingDocument(bool editing);
-    void saveDocument(bool force);
+    void saveDocument(const WIZDOCUMENTDATA& data, bool force);
 
     bool isInited() const { return m_bEditorInited; }
     bool isEditing() const { return m_bEditingMode; }

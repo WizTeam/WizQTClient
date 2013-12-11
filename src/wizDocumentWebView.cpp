@@ -386,7 +386,7 @@ CWizDocumentView* CWizDocumentWebView::view()
 
 void CWizDocumentWebView::onTimerAutoSaveTimout()
 {
-    saveDocument(false);
+    saveDocument(view()->note(), false);
 }
 
 void CWizDocumentWebView::on_documentReady(const QString& strFileName)
@@ -418,9 +418,9 @@ void CWizDocumentWebView::viewDocument(const WIZDOCUMENTDATA& doc, bool editing)
     MainWindow* window = qobject_cast<MainWindow *>(m_app.mainWindow());
 
     // save document
-    if (m_bEditorInited) {
-        saveDocument(false);
-    }
+    //if (m_bEditorInited) {
+    //    saveDocument(false);
+    //}
 
     // set data
     m_bEditingMode = editing;
@@ -710,7 +710,7 @@ void CWizDocumentWebView::setEditingDocument(bool editing)
 
     //bool bEditing = page()->mainFrame()->evaluateJavaScript("isEditing();").toBool();
     if (m_bEditingMode) {
-        saveDocument(false);
+        saveDocument(view()->note(), false);
     }
 
     m_bEditingMode = editing;
@@ -721,7 +721,7 @@ void CWizDocumentWebView::setEditingDocument(bool editing)
     Q_EMIT statusChanged();
 }
 
-void CWizDocumentWebView::saveDocument(bool force)
+void CWizDocumentWebView::saveDocument(const WIZDOCUMENTDATA& data, bool force)
 {
     if (!m_bEditorInited)
         return;
@@ -730,12 +730,12 @@ void CWizDocumentWebView::saveDocument(bool force)
         return;
 
     // check note permission
-    if (!m_dbMgr.db(view()->note().strKbGUID).CanEditDocument(view()->note())) {
+    if (!m_dbMgr.db(data.strKbGUID).CanEditDocument(data)) {
         return;
     }
 
     QString strHtml = page()->mainFrame()->evaluateJavaScript("editor.getContent();").toString();
-    m_workerPool->save(view()->note(), strHtml, m_strHtmlFileName, 0);
+    m_workerPool->save(data, strHtml, m_strHtmlFileName, 0);
 }
 
 QString CWizDocumentWebView::editorCommandQueryCommandValue(const QString& strCommand)

@@ -75,6 +75,11 @@ CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
             SLOT(onViewNoteRequested(Core::CWizDocumentView*,const WIZDOCUMENTDATA&)));
 }
 
+CWizDocumentView::~CWizDocumentView()
+{
+    m_web->saveDocument(m_note, false);
+}
+
 void CWizDocumentView::showEvent(QShowEvent *event)
 {
     Q_UNUSED(event);
@@ -150,6 +155,8 @@ void CWizDocumentView::initStat(const WIZDOCUMENTDATA& data, bool bEditing)
 
 void CWizDocumentView::viewNote(const WIZDOCUMENTDATA& data, bool forceEdit)
 {
+    m_web->saveDocument(m_note, false);
+
     initStat(data, forceEdit);
 
     m_web->viewDocument(data, m_bEditingMode);
