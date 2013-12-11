@@ -62,7 +62,7 @@ set(wiznote_SOURCES
     sync/wizkmxmlrpc.cpp
     sync/wizkmsync.cpp
     sync/asyncapi.cpp
-    sync/wizCloudPool.cpp
+    #sync/wizCloudPool.cpp
     sync/wizAvatarUploader.cpp
     widgets/wizUserInfoWidget.cpp
     widgets/wizSegmentedButton.cpp
@@ -96,6 +96,7 @@ set(wiznote_SOURCES
     infobar.cpp
     notifybar.cpp
     titleedit.cpp
+    sync/sync.cpp
     #wizupdaterprogressdialog.cpp
     wizstatusbar.cpp
     wizupgradenotifydialog.cpp
@@ -161,7 +162,7 @@ set(wiznote_HEADERS
     sync/wizkmxmlrpc.h
     sync/wizkmsync.h
     sync/asyncapi.h
-    sync/wizCloudPool.h
+    #sync/wizCloudPool.h
     sync/wizAvatarUploader.h
     share/wizSyncableDatabase.h
     share/wizClucene.h
@@ -205,6 +206,8 @@ set(wiznote_HEADERS
     infobar.h
     notifybar.h
     titleedit.h
+    sync/sync.h
+    sync/sync_p.h
     #wizupdaterprogressdialog.h
     wizstatusbar.h
     wizupgradenotifydialog.h

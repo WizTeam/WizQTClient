@@ -3,6 +3,8 @@
 
 #include <QThread>
 
+#include "sync.h"
+
 #include "wizkmxmlrpc.h"
 
 class CWizDatabase;

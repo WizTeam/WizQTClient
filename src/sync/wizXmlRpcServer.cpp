@@ -240,6 +240,7 @@ BOOL CWizXmlRpcServerBase::Call(const QString& strMethodName, const QString& str
 }
 
 
+#if 0
 
 CWizXmlRpcServer::CWizXmlRpcServer(const QString& strUrl, QObject* parent /* = 0 */)
     : QObject(parent)
@@ -359,3 +360,5 @@ void CWizXmlRpcServer::on_replyDownloadProgress(qint64 bytesReceived, qint64 byt
 {
     emit xmlRpcReadProgress(bytesReceived, bytesTotal);
 }
+
+#endif

@@ -83,6 +83,30 @@ bool AsyncApi::keepAlive_impl(const QString& strToken, const QString& strKbGUID)
     return ret;
 }
 
+void AsyncApi::registerAccount(const QString& strUserId,
+                               const QString& strPasswd,
+                               const QString& strInviteCode)
+{
+    QtConcurrent::run(this, &AsyncApi::registerAccount_impl, strUserId, strPasswd, strInviteCode);
+}
+
+bool AsyncApi::registerAccount_impl(const QString& strUserId,
+                                    const QString& strPasswd,
+                                    const QString& strInviteCode)
+{
+    CWizKMAccountsServer aServer(ApiEntry::syncUrl());
+
+    bool ret = aServer.CreateAccount(strUserId, strPasswd, strInviteCode);
+
+    if (!ret) {
+        m_nErrorCode = aServer.GetLastErrorCode();
+        m_strErrorMessage = aServer.GetLastErrorMessage();
+    }
+
+    Q_EMIT registerAccountFinished(ret);
+    return ret;
+}
+
 void AsyncApi::getCommentsCount(const QString& strUrl)
 {
     QtConcurrent::run(this, &AsyncApi::getCommentsCount_impl, strUrl);

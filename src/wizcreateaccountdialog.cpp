@@ -3,17 +3,19 @@
 
 #include <QMessageBox>
 
-#include "sync/wizCloudPool.h"
+#include "sync/asyncapi.h"
+
+using namespace WizService;
+
 
 CreateAccountDialog::CreateAccountDialog(QWidget *parent)
     : QDialog(parent)
     , ui(new Ui::CreateAccountDialog)
 {
     ui->setupUi(this);
-
-    connect(this, SIGNAL(registerAccount(const QString&, const QString&, const QString&)),
-            CWizCloudPool::instance(), SLOT(registerAccount(const QString&, const QString&, const QString&)));
-    connect(CWizCloudPool::instance(), SIGNAL(accountRegistered(bool)), SLOT(accountRegistered_done(bool)));
+    //connect(this, SIGNAL(registerAccount(const QString&, const QString&, const QString&)),
+    //        CWizCloudPool::instance(), SLOT(registerAccount(const QString&, const QString&, const QString&)));
+    //connect(CWizCloudPool::instance(), SIGNAL(accountRegistered(bool)), SLOT(accountRegistered_done(bool)));
 }
 
 CreateAccountDialog::~CreateAccountDialog()
@@ -62,19 +64,34 @@ void CreateAccountDialog::accept()
     QString strCode = "8480c6d7";
 #endif
 
-    Q_EMIT registerAccount(userId(), password(), strCode);
+    AsyncApi* api = new AsyncApi(this);
+    connect(api, SIGNAL(registerAccountFinished(bool)), SLOT(onRegisterAccountFinished(bool)));
 }
 
-void CreateAccountDialog::accountRegistered_done(bool bOk)
+void CreateAccountDialog::onRegisterAccountFinished(bool bOk)
 {
+    AsyncApi* api = dynamic_cast<AsyncApi*>(sender());
     enableControls(true);
 
     if (bOk) {
         QDialog::accept();
     } else {
-        QMessageBox::critical(this, "", CWizCloudPool::instance()->lastErrorMessage());
+        QMessageBox::critical(this, "", api->lastErrorMessage());
     }
+
+    api->deleteLater();
 }
+
+//void CreateAccountDialog::accountRegistered_done(bool bOk)
+//{
+//    enableControls(true);
+//
+//    if (bOk) {
+//        QDialog::accept();
+//    } else {
+//        QMessageBox::critical(this, "", CWizCloudPool::instance()->lastErrorMessage());
+//    }
+//}
 
 void CreateAccountDialog::enableControls(bool b)
 {

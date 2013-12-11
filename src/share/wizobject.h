@@ -406,6 +406,23 @@ struct WIZDOCUMENTDATAEX : public WIZDOCUMENTDATA
     bool bSkipped;
 };
 
+/*
+////用于getList，获得简单信息////
+*/
+struct WIZDOCUMENTDATAEX_XMLRPC_SIMPLE : public WIZDOCUMENTDATAEX
+{
+    WIZDOCUMENTDATAEX_XMLRPC_SIMPLE()
+    {
+    }
+    WIZDOCUMENTDATAEX_XMLRPC_SIMPLE(const WIZDOCUMENTDATAEX& data)
+        : WIZDOCUMENTDATAEX(data)
+    {
+    }
+
+    bool LoadFromXmlRpc(CWizXmlRpcStructValue& data);
+};
+
+
 
 struct WIZDOCUMENTATTACHMENTDATA : public WIZOBJECTBASE
 {

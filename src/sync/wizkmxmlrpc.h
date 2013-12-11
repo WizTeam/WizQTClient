@@ -2,12 +2,11 @@
 #define WIZKMXMLRPC_H
 
 #include "wizXmlRpcServer.h"
-#include "../share/wizSyncableDatabase.h"
 
-struct IWizKMSyncEvents;
-struct  IWizSyncableDatabase;
+#define WIZKM_XMLRPC_ERROR_TRAFFIC_LIMIT		304
+#define WIZKM_XMLRPC_ERROR_STORAGE_LIMIT		305
 
-bool WizSyncDatabase(IWizKMSyncEvents* pEvents, IWizSyncableDatabase* pDatabase, bool bUseWizServer, bool bBackground);
+
 CString WizKMGetAccountsServerURL(BOOL bUseWizServer);
 
 class CWizKMXmlRpcServerBase : public CWizXmlRpcServerBase
@@ -523,57 +522,6 @@ enum WizKMSyncProgress
     syncDownloadObjectData
 };
 
-
-/*
-////用于getList，获得简单信息////
-*/
-struct WIZDOCUMENTDATAEX_XMLRPC_SIMPLE
-    : public WIZDOCUMENTDATAEX
-{
-    WIZDOCUMENTDATAEX_XMLRPC_SIMPLE()
-    {
-    }
-    WIZDOCUMENTDATAEX_XMLRPC_SIMPLE(const WIZDOCUMENTDATAEX& data)
-        : WIZDOCUMENTDATAEX(data)
-    {
-    }
-    BOOL LoadFromXmlRpc(CWizXmlRpcStructValue& data)
-    {
-        data.GetStr(_T("document_guid"), strGUID);
-        data.GetStr(_T("document_title"), strTitle);	/*用于同步过程，显示正在下载的文章标题////*/
-        data.GetStr(_T("document_category"), strLocation);	/*用于CyberArticle判断是否需要下载该文档(是否属于当前书籍）////*/
-        /*
-        data.GetStr(_T("document_filename"), strName);
-        data.GetStr(_T("document_seo"), strSEO);
-        data.GetStr(_T("document_url"), strURL);
-        data.GetStr(_T("document_author"), strAuthor);
-        data.GetStr(_T("document_keywords"), strKeywords);
-        data.GetStr(_T("document_type"), strType);
-        data.GetStr(_T("document_owner"), strOwner);
-        data.GetStr(_T("document_filetype"), strFileType);
-        data.GetStr(_T("document_styleguid"), strStyleGUID);
-        data.GetTime(_T("dt_created"), tCreated);
-        data.GetTime(_T("dt_modified"), tModified);
-        data.GetTime(_T("dt_accessed"), tAccessed);
-        data.GetInt(_T("document_iconindex"), nIconIndex);
-        data.GetInt(_T("document_protected"), nProtected);
-        data.GetInt(_T("document_readcount"), nReadCount);
-        data.GetInt(_T("document_attachment_count"), nAttachmentCount);
-        */
-        data.GetTime(_T("dt_info_modified"), tInfoModified);
-        data.GetStr(_T("info_md5"), strInfoMD5);
-        data.GetTime(_T("dt_data_modified"), tDataModified);
-        data.GetStr(_T("data_md5"), strDataMD5);
-        data.GetTime(_T("dt_param_modified"), tParamModified);
-        data.GetStr(_T("param_md5"), strParamMD5);
-        data.GetInt64(_T("version"), nVersion);
-        //
-        //data.GetArrayStringArray(_T("tags"), arrayTagGUID);
-        //
-        return !strGUID.isEmpty();
-    }
-};
-
 struct WIZKEYVALUEDATA
 {
     QString strValue;
@@ -599,133 +547,6 @@ int GetSyncStartProgress(WizKMSyncProgress progress);
 #define _TR(x) (x)
 
 
-class CWizKMSync
-{
-public:
-    CWizKMSync(IWizSyncableDatabase* pDatabase, const WIZUSERINFOBASE& info, IWizKMSyncEvents* pEvents, BOOL bGroup, BOOL bUploadOnly, QObject* parent);
-public:
-    BOOL Sync();
-    BOOL DownloadObjectData();
-protected:
-    BOOL SyncCore();
-    BOOL UploadValue(const QString& strKey);
-    BOOL DownloadValue(const QString& strKey);
-    //
-    BOOL DownloadDeletedList(__int64 nServerVersion);
-    BOOL DownloadTagList(__int64 nServerVersion);
-    BOOL DownloadStyleList(__int64 nServerVersion);
-    BOOL DownloadSimpleDocumentList(__int64 nServerVersion);
-    BOOL DownloadFullDocumentList();
-    BOOL DownloadAttachmentList(__int64 nServerVersion);
-    //
-    BOOL UploadDeletedList();
-    BOOL UploadTagList();
-    BOOL UploadStyleList();
-    BOOL UploadDocumentList();
-    BOOL UploadAttachmentList();
-    //
-    BOOL UploadKeys();
-    BOOL DownloadKeys();
-    BOOL ProcessOldKeyValues();
-private:
-    std::deque<WIZDOCUMENTDATAEX_XMLRPC_SIMPLE> m_arrayDocumentNeedToBeDownloaded;
-    int CalDocumentPartForDownloadToLocal(const WIZDOCUMENTDATAEX_XMLRPC_SIMPLE& data);
-private:
-    IWizSyncableDatabase* m_pDatabase;
-    WIZUSERINFOBASE m_info;
-    WIZKBINFO m_kbInfo;
-    IWizKMSyncEvents* m_pEvents;
-    BOOL m_bGroup;
-    BOOL m_bUploadOnly;
-    //
-    CWizKMDatabaseServer m_server;
-    //
-    std::map<QString, WIZKEYVALUEDATA> m_mapOldKeyValues;
-public:
-    template <class TData>
-    static __int64 GetObjectsVersion(__int64 nOldVersion, const std::deque<TData>& arrayData)
-    {
-        if (arrayData.empty())
-            return nOldVersion;
-        //
-        __int64 nVersion = nOldVersion;
-        for (typename std::deque<TData>::const_iterator it = arrayData.begin();
-            it != arrayData.end();
-            it++)
-        {
-            nVersion = std::max<__int64>(nOldVersion, it->nVersion);
-        }
-        return nVersion;
-    }
-private:
-    template <class TData>
-    BOOL DownloadList(__int64 nServerVersion, const QString& strObjectType, WizKMSyncProgress progress)
-    {
-        m_pEvents->OnSyncProgress(::GetSyncStartProgress(progress));
-        //
-        __int64 nVersion = m_pDatabase->GetObjectVersion(strObjectType);
-        if (nServerVersion == nVersion)
-        {
-            m_pEvents->OnStatus(_TR("No change, skip"));
-            return TRUE;
-        }
-        //
-        std::deque<TData> arrayData;
-        if (!m_server.getAllList<TData>(200, nVersion, arrayData))
-            return FALSE;
-        //
-        if (!OnDownloadList<TData>(arrayData))
-            return FALSE;
-        //
-        for (typename std::deque<TData>::iterator it = arrayData.begin();
-             it != arrayData.end();
-             it++)
-        {
-            it->strKbGUID = m_info.strKbGUID;
-        }
-        //
-        nVersion = GetObjectsVersion<TData>(nVersion, arrayData);
-        //
-        nVersion = std::max<__int64>(nVersion, nServerVersion);
-        //
-        return m_pDatabase->SetObjectVersion(strObjectType, nVersion);
-    }
-
-    template <class TData>
-    BOOL OnDownloadList(const std::deque<TData>& arrayData)
-    {
-        ATLASSERT(FALSE);
-        return FALSE;
-    }
-    template <class TData>
-    BOOL OnDownloadList(const std::deque<WIZDELETEDGUIDDATA>& arrayData)
-    {
-        return m_pDatabase->OnDownloadDeletedList(arrayData);
-    }
-    template <class TData>
-    BOOL OnDownloadList(const std::deque<WIZTAGDATA>& arrayData)
-    {
-        return m_pDatabase->OnDownloadTagList(arrayData);
-    }
-    template <class TData>
-    BOOL OnDownloadList(const std::deque<WIZSTYLEDATA>& arrayData)
-    {
-        return m_pDatabase->OnDownloadStyleList(arrayData);
-    }
-    template <class TData>
-    BOOL OnDownloadList(const std::deque<WIZDOCUMENTDATAEX>& arrayData)
-    {
-        m_arrayDocumentNeedToBeDownloaded.clear();
-        m_arrayDocumentNeedToBeDownloaded.assign(arrayData.begin(), arrayData.end());
-        //
-        return DownloadFullDocumentList();
-    }
-    template <class TData>
-    BOOL OnDownloadList(const std::deque<WIZDOCUMENTATTACHMENTDATAEX>& arrayData)
-    {
-        return m_pDatabase->OnDownloadAttachmentList(arrayData);
-    }
-};
 
 
 #endif // WIZKMXMLRPC_H

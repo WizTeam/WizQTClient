@@ -48,7 +48,6 @@
 #include "wizPopupButton.h"
 #include "widgets/wizUserInfoWidget.h"
 #include "sync/apientry.h"
-#include "sync/wizCloudPool.h"
 
 #include "wizUserVerifyDialog.h"
 
@@ -97,7 +96,7 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     connect(qApp, SIGNAL(lastWindowClosed()), qApp, SLOT(quit())); // Qt bug: Qt5 bug
     qApp->installEventFilter(this);
 
-    CWizCloudPool::instance()->init(&m_dbMgr);
+    //CWizCloudPool::instance()->init(&m_dbMgr);
 
     // search and full text search
     QThread *threadFTS = new QThread();
