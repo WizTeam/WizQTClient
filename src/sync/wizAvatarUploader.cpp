@@ -9,6 +9,8 @@
 #include <QtNetwork>
 #include <QImage>
 
+#include "apientry.h"
+
 
 CWizAvatarUploader::CWizAvatarUploader(CWizExplorerApp& app, QObject* parent)
     : QObject(parent)
@@ -72,7 +74,7 @@ void CWizAvatarUploader::upload_impl(const QString& strUrl, const QString& strFi
     file.close();
 
     QString strToken;
-    CWizKMAccountsServer server(::WizKMGetAccountsServerURL(true));
+    CWizKMAccountsServer server(WizService::ApiEntry::syncUrl());
     if (!server.GetToken(m_db.GetUserId(), m_db.GetPassword(), strToken)) {
         qDebug() << "[CWizAvatarUploader] Failed to get token";
         return;

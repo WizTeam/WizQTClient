@@ -6,9 +6,6 @@
 #define WIZKM_XMLRPC_ERROR_TRAFFIC_LIMIT		304
 #define WIZKM_XMLRPC_ERROR_STORAGE_LIMIT		305
 
-
-CString WizKMGetAccountsServerURL(BOOL bUseWizServer);
-
 class CWizKMXmlRpcServerBase : public CWizXmlRpcServerBase
 {
 public:

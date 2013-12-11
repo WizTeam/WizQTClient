@@ -2,6 +2,8 @@
 
 #include <QDebug>
 
+#include "apientry.h"
+
 #include "../share/wizDatabase.h"
 
 
@@ -102,7 +104,7 @@ void CWizKMSyncThread::syncUserCert()
 {
     QString strN, stre, strd, strHint;
 
-    CWizKMAccountsServer serser(::WizKMGetAccountsServerURL(true));
+    CWizKMAccountsServer serser(WizService::ApiEntry::syncUrl());
     if (serser.GetCert(m_db.GetUserId(), m_db.GetPassword(), strN, stre, strd, strHint)) {
         m_db.SetUserCert(strN, stre, strd, strHint);
     }

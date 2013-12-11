@@ -13,6 +13,7 @@
 #include "sync/wizkmxmlrpc.h"
 #include "wizcreateaccountdialog.h"
 #include "wizproxydialog.h"
+#include "sync/apientry.h"
 
 
 //class CWizAvatarWidget : public QLabel
@@ -190,7 +191,7 @@ void CWizLoginDialog::doAccountVerify()
 
     // FIXME: should verify password if network is available to avoid attack?
     if (password() != userSettings.password()) {
-        CWizKMAccountsServer server(WizKMGetAccountsServerURL(true));
+        CWizKMAccountsServer server(WizService::ApiEntry::syncUrl());
         if (server.Login(userId(), password(), "normal") &&
                 updateProfile(userSettings, userId(), server.GetUserInfo())) {
 

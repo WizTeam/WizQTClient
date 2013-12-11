@@ -1,6 +1,8 @@
 #include "sync.h"
 #include "sync_p.h"
 
+#include "apientry.h"
+
 #include  "../share/wizSyncableDatabase.h"
 
 void GetSyncProgressRange(WizKMSyncProgress progress, int& start, int& count)
@@ -53,7 +55,7 @@ int GetSyncStartProgress(WizKMSyncProgress progress)
 }
 
 
-CWizKMSync::CWizKMSync(IWizSyncableDatabase* pDatabase, const WIZUSERINFOBASE& info, IWizKMSyncEvents* pEvents, BOOL bGroup, BOOL bUploadOnly, QObject* parent)
+CWizKMSync::CWizKMSync(IWizSyncableDatabase* pDatabase, const WIZUSERINFOBASE& info, IWizKMSyncEvents* pEvents, bool bGroup, bool bUploadOnly, QObject* parent)
     : m_pDatabase(pDatabase)
     , m_info(info)
     , m_pEvents(pEvents)
@@ -65,37 +67,28 @@ CWizKMSync::CWizKMSync(IWizSyncableDatabase* pDatabase, const WIZUSERINFOBASE& i
     pEvents->OnError(WizFormatString1(_T("XmlRpcUrl: %1"), info.strDatabaseServer));
 #endif
 }
-BOOL CWizKMSync::Sync()
+
+bool CWizKMSync::Sync()
 {
     QString strKbGUID = m_bGroup ? m_info.strKbGUID  : QString(_T(""));
-    //
     m_pEvents->OnBeginKb(strKbGUID);
-    //
-    BOOL bRet = SyncCore();
-    //
+
+    bool bRet = SyncCore();
+
     m_pEvents->OnEndKb(strKbGUID);
-    //
     return bRet;
 }
-BOOL CWizKMSync::SyncCore()
+
+bool CWizKMSync::SyncCore()
 {
     m_pDatabase->ClearError();
-    //
     m_mapOldKeyValues.clear();
-    //
-    //CWizSingletonAppEx app;
-    //if (!app.CreateEx(m_info.strBookGUID))
-    //{
-    //    DEBUG_TOLOG(_T("Sync is running!"));
-    //    return FALSE;
-    //}
-    //
     m_pEvents->OnSyncProgress(::GetSyncStartProgress(syncDatabaseLogin));
     m_pEvents->OnStatus(_TR("Connect to server"));
-    //
+
     if (m_pEvents->IsStop())
         return FALSE;
-    //
+
     m_pEvents->OnStatus(_TR("Query server infomation"));
     if (!m_bGroup)
     {
@@ -262,7 +255,7 @@ BOOL CWizKMSync::SyncCore()
 
 
 
-BOOL CWizKMSync::UploadKeys()
+bool CWizKMSync::UploadKeys()
 {
     CWizStdStringArray arrValue;
     m_pDatabase->GetKBKeys(arrValue);
@@ -286,7 +279,7 @@ BOOL CWizKMSync::UploadKeys()
 }
 
 
-BOOL CWizKMSync::DownloadKeys()
+bool CWizKMSync::DownloadKeys()
 {
     CWizStdStringArray arrValue;
     m_pDatabase->GetKBKeys(arrValue);
@@ -312,7 +305,7 @@ BOOL CWizKMSync::DownloadKeys()
 /*
  * ////重新设置服务器的key value数据 防止被移动的文件夹没有删除
  */
-BOOL CWizKMSync::ProcessOldKeyValues()
+bool CWizKMSync::ProcessOldKeyValues()
 {
     if (m_mapOldKeyValues.empty())
         return TRUE;
@@ -332,7 +325,7 @@ BOOL CWizKMSync::ProcessOldKeyValues()
     return TRUE;
 }
 
-BOOL CWizKMSync::UploadValue(const QString& strKey)
+bool CWizKMSync::UploadValue(const QString& strKey)
 {
     if (!m_pDatabase)
         return FALSE;
@@ -358,7 +351,7 @@ BOOL CWizKMSync::UploadValue(const QString& strKey)
     //
     return TRUE;
 }
-BOOL CWizKMSync::DownloadValue(const QString& strKey)
+bool CWizKMSync::DownloadValue(const QString& strKey)
 {
     if (!m_pDatabase)
         return FALSE;
@@ -394,7 +387,7 @@ BOOL CWizKMSync::DownloadValue(const QString& strKey)
 
 
 template <class TData>
-BOOL GetModifiedObjectList(IWizSyncableDatabase* pDatabase, std::deque<TData>& arrayData)
+bool GetModifiedObjectList(IWizSyncableDatabase* pDatabase, std::deque<TData>& arrayData)
 {
     ATLASSERT(FALSE);
     return FALSE;
@@ -402,7 +395,7 @@ BOOL GetModifiedObjectList(IWizSyncableDatabase* pDatabase, std::deque<TData>& a
 
 
 template <class TData>
-BOOL GetModifiedObjectList(IWizSyncableDatabase* pDatabase, std::deque<WIZDELETEDGUIDDATA>& arrayData)
+bool GetModifiedObjectList(IWizSyncableDatabase* pDatabase, std::deque<WIZDELETEDGUIDDATA>& arrayData)
 {
     return pDatabase->GetModifiedDeletedList(arrayData);
 }
@@ -411,7 +404,7 @@ BOOL GetModifiedObjectList(IWizSyncableDatabase* pDatabase, std::deque<WIZDELETE
 
 
 template <class TData>
-BOOL GetModifiedObjectList(IWizSyncableDatabase* pDatabase, std::deque<WIZTAGDATA>& arrayData)
+bool GetModifiedObjectList(IWizSyncableDatabase* pDatabase, std::deque<WIZTAGDATA>& arrayData)
 {
     return pDatabase->GetModifiedTagList(arrayData);
 }
@@ -419,7 +412,7 @@ BOOL GetModifiedObjectList(IWizSyncableDatabase* pDatabase, std::deque<WIZTAGDAT
 
 
 template <class TData>
-BOOL GetModifiedObjectList(IWizSyncableDatabase* pDatabase, std::deque<WIZSTYLEDATA>& arrayData)
+bool GetModifiedObjectList(IWizSyncableDatabase* pDatabase, std::deque<WIZSTYLEDATA>& arrayData)
 {
     return pDatabase->GetModifiedStyleList(arrayData);
 }
@@ -427,7 +420,7 @@ BOOL GetModifiedObjectList(IWizSyncableDatabase* pDatabase, std::deque<WIZSTYLED
 
 
 template <class TData>
-BOOL GetModifiedObjectList(IWizSyncableDatabase* pDatabase, std::deque<WIZDOCUMENTDATAEX>& arrayData)
+bool GetModifiedObjectList(IWizSyncableDatabase* pDatabase, std::deque<WIZDOCUMENTDATAEX>& arrayData)
 {
     return pDatabase->GetModifiedDocumentList(arrayData);
 }
@@ -435,14 +428,14 @@ BOOL GetModifiedObjectList(IWizSyncableDatabase* pDatabase, std::deque<WIZDOCUME
 
 
 template <class TData>
-BOOL GetModifiedObjectList(IWizSyncableDatabase* pDatabase, std::deque<WIZDOCUMENTATTACHMENTDATAEX>& arrayData)
+bool GetModifiedObjectList(IWizSyncableDatabase* pDatabase, std::deque<WIZDOCUMENTATTACHMENTDATAEX>& arrayData)
 {
     return pDatabase->GetModifiedAttachmentList(arrayData);
 }
 
 
 template <class TData>
-BOOL UploadSimpleList(const QString& strObjectType, IWizKMSyncEvents* pEvents, IWizSyncableDatabase* pDatabase, CWizKMDatabaseServer& server, WizKMSyncProgress progress)
+bool UploadSimpleList(const QString& strObjectType, IWizKMSyncEvents* pEvents, IWizSyncableDatabase* pDatabase, CWizKMDatabaseServer& server, WizKMSyncProgress progress)
 {
     pEvents->OnSyncProgress(::GetSyncStartProgress(progress));
     //
@@ -471,7 +464,7 @@ BOOL UploadSimpleList(const QString& strObjectType, IWizKMSyncEvents* pEvents, I
     return TRUE;
 }
 
-BOOL CWizKMSync::UploadDeletedList()
+bool CWizKMSync::UploadDeletedList()
 {
     if (m_bGroup)
     {
@@ -481,7 +474,7 @@ BOOL CWizKMSync::UploadDeletedList()
     //
     return UploadSimpleList<WIZDELETEDGUIDDATA>(_T("deleted_guid"), m_pEvents, m_pDatabase, m_server, syncUploadDeletedList);
 }
-BOOL CWizKMSync::UploadTagList()
+bool CWizKMSync::UploadTagList()
 {
     if (m_bGroup)
     {
@@ -491,7 +484,7 @@ BOOL CWizKMSync::UploadTagList()
     //
     return UploadSimpleList<WIZTAGDATA>(_T("tag"), m_pEvents, m_pDatabase, m_server, syncUploadTagList);
 }
-BOOL CWizKMSync::UploadStyleList()
+bool CWizKMSync::UploadStyleList()
 {
     if (m_bGroup)
     {
@@ -504,20 +497,20 @@ BOOL CWizKMSync::UploadStyleList()
 
 
 template <class TData>
-BOOL InitObjectData(IWizSyncableDatabase* pDatabase, const QString& strObjectGUID, TData& data, int part)
+bool InitObjectData(IWizSyncableDatabase* pDatabase, const QString& strObjectGUID, TData& data, int part)
 {
     ATLASSERT(FALSE);
     return FALSE;
 }
 
 template <class TData>
-BOOL InitObjectData(IWizSyncableDatabase* pDatabase, const QString& strObjectGUID, WIZDOCUMENTDATAEX& data, int part)
+bool InitObjectData(IWizSyncableDatabase* pDatabase, const QString& strObjectGUID, WIZDOCUMENTDATAEX& data, int part)
 {
     return pDatabase->InitDocumentData(strObjectGUID, data, part);
 }
 
 template <class TData>
-BOOL InitObjectData(IWizSyncableDatabase* pDatabase, const QString& strObjectGUID, WIZDOCUMENTATTACHMENTDATAEX& data, int part)
+bool InitObjectData(IWizSyncableDatabase* pDatabase, const QString& strObjectGUID, WIZDOCUMENTATTACHMENTDATAEX& data, int part)
 {
     return pDatabase->InitAttachmentData(strObjectGUID, data, part);
 }
@@ -526,21 +519,21 @@ BOOL InitObjectData(IWizSyncableDatabase* pDatabase, const QString& strObjectGUI
 QByteArray WizCompressAttachmentFile(const QByteArray& stream, QString& strTempFileName, const WIZDOCUMENTATTACHMENTDATAEX& data);
 
 template <class TData>
-BOOL CanEditData(IWizSyncableDatabase* pDatabase, const TData& data)
+bool CanEditData(IWizSyncableDatabase* pDatabase, const TData& data)
 {
     ATLASSERT(FALSE);
     return FALSE;
 }
 //
 template <class TData>
-BOOL CanEditData(IWizSyncableDatabase* pDatabase, const WIZDOCUMENTDATAEX& data)
+bool CanEditData(IWizSyncableDatabase* pDatabase, const WIZDOCUMENTDATAEX& data)
 {
     ATLASSERT(pDatabase->IsGroup());
     return pDatabase->CanEditDocument(data);
 }
 //
 template <class TData>
-BOOL CanEditData(IWizSyncableDatabase* pDatabase, const WIZDOCUMENTATTACHMENTDATAEX& data)
+bool CanEditData(IWizSyncableDatabase* pDatabase, const WIZDOCUMENTATTACHMENTDATAEX& data)
 {
     ATLASSERT(pDatabase->IsGroup());
     return pDatabase->CanEditAttachment(data);
@@ -676,7 +669,7 @@ int CalObjectDataForUploadToServer(IWizSyncableDatabase* pDatabase, const QStrin
 
 
 
-BOOL UploadDocument(const WIZKBINFO& kbInfo, int size, int start, int total, int index, std::map<QString, WIZDOCUMENTDATAEX>& mapDataOnServer, WIZDOCUMENTDATAEX& local, IWizKMSyncEvents* pEvents, IWizSyncableDatabase* pDatabase, CWizKMDatabaseServer& server, const QString& strObjectType, WizKMSyncProgress progress)
+bool UploadDocument(const WIZKBINFO& kbInfo, int size, int start, int total, int index, std::map<QString, WIZDOCUMENTDATAEX>& mapDataOnServer, WIZDOCUMENTDATAEX& local, IWizKMSyncEvents* pEvents, IWizSyncableDatabase* pDatabase, CWizKMDatabaseServer& server, const QString& strObjectType, WizKMSyncProgress progress)
 {
     QString strDisplayName;
 
@@ -855,7 +848,7 @@ BOOL UploadDocument(const WIZKBINFO& kbInfo, int size, int start, int total, int
     return TRUE;
 }
 
-BOOL UploadAttachment(const WIZKBINFO& kbInfo, int size, int start, int total, int index, std::map<QString, WIZDOCUMENTATTACHMENTDATAEX>& mapDataOnServer, WIZDOCUMENTATTACHMENTDATAEX& local, IWizKMSyncEvents* pEvents, IWizSyncableDatabase* pDatabase, CWizKMDatabaseServer& server, const QString& strObjectType, WizKMSyncProgress progress)
+bool UploadAttachment(const WIZKBINFO& kbInfo, int size, int start, int total, int index, std::map<QString, WIZDOCUMENTATTACHMENTDATAEX>& mapDataOnServer, WIZDOCUMENTATTACHMENTDATAEX& local, IWizKMSyncEvents* pEvents, IWizSyncableDatabase* pDatabase, CWizKMDatabaseServer& server, const QString& strObjectType, WizKMSyncProgress progress)
 {
     QString strDisplayName;
 
@@ -1042,26 +1035,26 @@ BOOL UploadAttachment(const WIZKBINFO& kbInfo, int size, int start, int total, i
 
 
 template <class TData>
-BOOL UploadObject(const WIZKBINFO& kbInfo, int size, int start, int total, int index, std::map<QString, TData>& mapDataOnServer, TData& local, IWizKMSyncEvents* pEvents, IWizSyncableDatabase* pDatabase, CWizKMDatabaseServer& server, const QString& strObjectType, WizKMSyncProgress progress)
+bool UploadObject(const WIZKBINFO& kbInfo, int size, int start, int total, int index, std::map<QString, TData>& mapDataOnServer, TData& local, IWizKMSyncEvents* pEvents, IWizSyncableDatabase* pDatabase, CWizKMDatabaseServer& server, const QString& strObjectType, WizKMSyncProgress progress)
 {
     ATLASSERT(false);
 }
 
 template <class TData>
-BOOL UploadObject(const WIZKBINFO& kbInfo, int size, int start, int total, int index, std::map<QString, WIZDOCUMENTDATAEX>& mapDataOnServer, WIZDOCUMENTDATAEX& local, IWizKMSyncEvents* pEvents, IWizSyncableDatabase* pDatabase, CWizKMDatabaseServer& server, const QString& strObjectType, WizKMSyncProgress progress)
+bool UploadObject(const WIZKBINFO& kbInfo, int size, int start, int total, int index, std::map<QString, WIZDOCUMENTDATAEX>& mapDataOnServer, WIZDOCUMENTDATAEX& local, IWizKMSyncEvents* pEvents, IWizSyncableDatabase* pDatabase, CWizKMDatabaseServer& server, const QString& strObjectType, WizKMSyncProgress progress)
 {
     return UploadDocument(kbInfo, size, start, total, index, mapDataOnServer, local, pEvents, pDatabase, server, strObjectType, progress);
 }
 
 template <class TData>
-BOOL UploadObject(const WIZKBINFO& kbInfo, int size, int start, int total, int index, std::map<QString, WIZDOCUMENTATTACHMENTDATAEX>& mapDataOnServer, WIZDOCUMENTATTACHMENTDATAEX& local, IWizKMSyncEvents* pEvents, IWizSyncableDatabase* pDatabase, CWizKMDatabaseServer& server, const QString& strObjectType, WizKMSyncProgress progress)
+bool UploadObject(const WIZKBINFO& kbInfo, int size, int start, int total, int index, std::map<QString, WIZDOCUMENTATTACHMENTDATAEX>& mapDataOnServer, WIZDOCUMENTATTACHMENTDATAEX& local, IWizKMSyncEvents* pEvents, IWizSyncableDatabase* pDatabase, CWizKMDatabaseServer& server, const QString& strObjectType, WizKMSyncProgress progress)
 {
     return UploadAttachment(kbInfo, size, start, total, index, mapDataOnServer, local, pEvents, pDatabase, server, strObjectType, progress);
 }
 
 
 template <class TData, bool _document>
-BOOL UploadList(const WIZKBINFO& kbInfo, IWizKMSyncEvents* pEvents, IWizSyncableDatabase* pDatabase, CWizKMDatabaseServer& server, const QString& strObjectType, WizKMSyncProgress progress)
+bool UploadList(const WIZKBINFO& kbInfo, IWizKMSyncEvents* pEvents, IWizSyncableDatabase* pDatabase, CWizKMDatabaseServer& server, const QString& strObjectType, WizKMSyncProgress progress)
 {
     if (pDatabase->IsTrafficLimit())
         return FALSE;
@@ -1153,7 +1146,7 @@ BOOL UploadList(const WIZKBINFO& kbInfo, IWizKMSyncEvents* pEvents, IWizSyncable
     //
     return TRUE;
 }
-BOOL CWizKMSync::UploadDocumentList()
+bool CWizKMSync::UploadDocumentList()
 {
     if (m_bGroup)
     {
@@ -1163,7 +1156,7 @@ BOOL CWizKMSync::UploadDocumentList()
     //
     return UploadList<WIZDOCUMENTDATAEX, true>(m_kbInfo, m_pEvents, m_pDatabase, m_server, _T("document"), syncUploadDocumentList);
 }
-BOOL CWizKMSync::UploadAttachmentList()
+bool CWizKMSync::UploadAttachmentList()
 {
     if (m_bGroup)
     {
@@ -1175,28 +1168,28 @@ BOOL CWizKMSync::UploadAttachmentList()
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////
 
-BOOL CWizKMSync::DownloadDeletedList(__int64 nServerVersion)
+bool CWizKMSync::DownloadDeletedList(__int64 nServerVersion)
 {
     return DownloadList<WIZDELETEDGUIDDATA>(nServerVersion, _T("deleted_guid"), syncDownloadDeletedList);
 }
 
-BOOL CWizKMSync::DownloadTagList(__int64 nServerVersion)
+bool CWizKMSync::DownloadTagList(__int64 nServerVersion)
 {
     return DownloadList<WIZTAGDATA>(nServerVersion, _T("tag"), syncDownloadTagList);
 }
 
-BOOL CWizKMSync::DownloadStyleList(__int64 nServerVersion)
+bool CWizKMSync::DownloadStyleList(__int64 nServerVersion)
 {
     return DownloadList<WIZSTYLEDATA>(nServerVersion, _T("style"), syncDownloadStyleList);
 }
 
-BOOL CWizKMSync::DownloadSimpleDocumentList(__int64 nServerVersion)
+bool CWizKMSync::DownloadSimpleDocumentList(__int64 nServerVersion)
 {
     return DownloadList<WIZDOCUMENTDATAEX>(nServerVersion, _T("document"), syncDownloadSimpleDocumentList);
 }
 
 
-BOOL CWizKMSync::DownloadFullDocumentList()
+bool CWizKMSync::DownloadFullDocumentList()
 {
     if (m_arrayDocumentNeedToBeDownloaded.empty())
         return TRUE;
@@ -1283,7 +1276,7 @@ BOOL CWizKMSync::DownloadFullDocumentList()
 }
 
 
-BOOL CWizKMSync::DownloadAttachmentList(__int64 nServerVersion)
+bool CWizKMSync::DownloadAttachmentList(__int64 nServerVersion)
 {
     return DownloadList<WIZDOCUMENTATTACHMENTDATAEX>(nServerVersion, _T("attachment"), syncDownloadAttachmentList);
 }
@@ -1299,7 +1292,7 @@ bool WizCompareObjectByTypeAndTime(const WIZOBJECTDATA& data1, const WIZOBJECTDA
     return data1.tTime > data2.tTime;
 }
 
-BOOL CWizKMSync::DownloadObjectData()
+bool CWizKMSync::DownloadObjectData()
 {
     CWizObjectDataArray arrayObject;
     if (!m_pDatabase->GetObjectsNeedToBeDownloaded(arrayObject))
@@ -1444,7 +1437,7 @@ void DownloadAccountKeys(CWizKMAccountsServer& server, IWizSyncableDatabase* pDa
     }
 }
 
-BOOL WizDownloadMessages(IWizKMSyncEvents* pEvents, CWizKMAccountsServer& server, IWizSyncableDatabase* pDatabase, const CWizGroupDataArray& arrayGroup)
+bool WizDownloadMessages(IWizKMSyncEvents* pEvents, CWizKMAccountsServer& server, IWizSyncableDatabase* pDatabase, const CWizGroupDataArray& arrayGroup)
 {
     __int64 nOldVersion = pDatabase->GetObjectVersion(_T("Messages"));
     //
@@ -1590,7 +1583,7 @@ BOOL WizDownloadMessages(IWizKMSyncEvents* pEvents, CWizKMAccountsServer& server
     return TRUE;
 }
 
-void WizDownloadUserAvatars(IWizKMSyncEvents* pEvents, IWizSyncableDatabase* pDatabase, BOOL bBackground)
+void WizDownloadUserAvatars(IWizKMSyncEvents* pEvents, IWizSyncableDatabase* pDatabase, bool bBackground)
 {
     //
     /*
@@ -1710,23 +1703,17 @@ void WizDownloadUserAvatars(IWizKMSyncEvents* pEvents, IWizSyncableDatabase* pDa
 }
 //
 
-//TODO: get url by api.wiz.cn
-CString WizKMGetAccountsServerURL(BOOL bUseWizServer)
+bool WizSyncDatabase(IWizKMSyncEvents* pEvents, IWizSyncableDatabase* pDatabase,
+                     bool bUseWizServer, bool bBackground)
 {
-    return "https://as.wiz.cn/wizas/xmlrpc";
-}
+    Q_UNUSED(bUseWizServer);
 
-bool WizSyncDatabase(IWizKMSyncEvents* pEvents, IWizSyncableDatabase* pDatabase, bool bUseWizServer, bool bBackground)
-{
     pEvents->OnStatus(_TR("-------Sync start--------------"));
     pEvents->OnSyncProgress(0);
     pEvents->OnStatus(_TR("Connecting to server"));
-    //
-    CWizKMAccountsServer server(WizKMGetAccountsServerURL(bUseWizServer), NULL);
-    //
-    //
+
+    CWizKMAccountsServer server(WizService::ApiEntry::syncUrl());
     pEvents->OnSyncProgress(::GetSyncStartProgress(syncAccountLogin));
-    //
     pEvents->OnStatus(_TR("Signing in"));
     QString strPassword = pDatabase->GetPassword();
     while (1)
@@ -1741,9 +1728,8 @@ bool WizSyncDatabase(IWizKMSyncEvents* pEvents, IWizSyncableDatabase* pDatabase,
     }
 
     pDatabase->SetUserInfo(server.GetUserInfo());
-    //
     pEvents->OnSyncProgress(1);
-    //
+
     /*
     ////获得群组信息////
     */
@@ -1906,17 +1892,17 @@ bool WizSyncDatabase(IWizKMSyncEvents* pEvents, IWizSyncableDatabase* pDatabase,
 
 
 
-BOOL WizUploadDatabase(IWizKMSyncEvents* pEvents, IWizSyncableDatabase* pDatabase, const WIZUSERINFOBASE& info, BOOL bGroup)
+bool WizUploadDatabase(IWizKMSyncEvents* pEvents, IWizSyncableDatabase* pDatabase, const WIZUSERINFOBASE& info, bool bGroup)
 {
     CWizKMSync sync(pDatabase, info, pEvents, bGroup, TRUE, NULL);
-    BOOL bRet = sync.Sync();
+    bool bRet = sync.Sync();
     //
     return bRet;
 }
-BOOL WizSyncDatabaseOnly(IWizKMSyncEvents* pEvents, IWizSyncableDatabase* pDatabase, const WIZUSERINFOBASE& info, BOOL bGroup)
+bool WizSyncDatabaseOnly(IWizKMSyncEvents* pEvents, IWizSyncableDatabase* pDatabase, const WIZUSERINFOBASE& info, bool bGroup)
 {
     CWizKMSync sync(pDatabase, info, pEvents, bGroup, FALSE, NULL);
-    BOOL bRet = sync.Sync();
+    bool bRet = sync.Sync();
     if (bRet)
     {
         sync.DownloadObjectData();
