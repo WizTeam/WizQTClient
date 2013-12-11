@@ -17,6 +17,7 @@ class CWizUserSettings;
 class CWizScrollBar;
 class CWizDocumentWebView;
 class CWizDatabase;
+class CWizSplitter;
 
 
 namespace Core {
@@ -35,7 +36,6 @@ public:
 
     QWidget* client() const { return m_client; }
     CWizDocumentWebView* web() const { return m_web; }
-
     QWebView* commentView() const { return m_comments; }
 
 protected:
@@ -44,8 +44,11 @@ protected:
     CWizUserSettings& m_userSettings;
     CWizDocumentWebView* m_web;
     QWebView* m_comments;
+    CWizSplitter* m_splitter;
     Core::Internal::TitleBar* m_title;
     QWidget* m_client;
+
+    virtual void showEvent(QShowEvent *event);
 
 private:
     WIZDOCUMENTDATA m_note;

@@ -3,8 +3,9 @@
 #include <QVBoxLayout>
 #include <QUrl>
 #include <QDebug>
-#include <QNetworkAccessManager>
 #include <QNetworkConfigurationManager>
+#include <QSplitter>
+#include <QList>
 
 #include "icore.h"
 #include "titleedit.h"
@@ -258,12 +259,11 @@ void TitleBar::onInfoButtonClicked()
 
 bool isNetworkAccessible()
 {
-    //QNetworkAccessManager net;
     QNetworkConfigurationManager man;
-    //net.setConfiguration(man);
     return man.isOnline();
-    //return net.networkAccessible() == QNetworkAccessManager::Accessible ? true : false;
 }
+
+#define COMMENT_FRAME_WIDTH 300
 
 void TitleBar::onCommentsButtonClicked()
 {
@@ -275,6 +275,14 @@ void TitleBar::onCommentsButtonClicked()
 
     if (isNetworkAccessible()) {
         comments->load(m_commentsUrl);
+        QSplitter* splitter = qobject_cast<QSplitter*>(comments->parentWidget());
+        Q_ASSERT(splitter);
+        QList<int> li = splitter->sizes();
+        Q_ASSERT(li.size() == 2);
+        QList<int> lin;
+        lin.push_back(li.value(0) - COMMENT_FRAME_WIDTH);
+        lin.push_back(li.value(1) + COMMENT_FRAME_WIDTH);
+        splitter->setSizes(lin);
         comments->show();
     } else {
         m_commentsBtn->setEnabled(false);

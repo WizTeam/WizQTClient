@@ -42,18 +42,17 @@ CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
     m_client = new QWidget(this);
     m_client->setLayout(layout);
 
-    CWizSplitter* splitter = new CWizSplitter(this);
-    //QHBoxLayout* layoutEditor = new QHBoxLayout();
-    splitter->addWidget(m_web);
-    splitter->addWidget(m_comments);
+    m_splitter = new CWizSplitter(this);
+    m_splitter->addWidget(m_web);
+    m_splitter->addWidget(m_comments);
     m_comments->page()->mainFrame()->setScrollBarPolicy(Qt::Horizontal, Qt::ScrollBarAlwaysOff);
     m_comments->hide();
 
     layout->addWidget(m_title);
-    layout->addWidget(splitter);
+    layout->addWidget(m_splitter);
 
     layout->setStretchFactor(m_title, 0);
-    layout->setStretchFactor(splitter, 1);
+    layout->setStretchFactor(m_splitter, 1);
 
     QVBoxLayout* layoutMain = new QVBoxLayout();
     layoutMain->setContentsMargins(0, 0, 0, 0);
@@ -74,6 +73,11 @@ CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
 
     connect(Core::ICore::instance(), SIGNAL(viewNoteRequested(Core::CWizDocumentView*,const WIZDOCUMENTDATA&)),
             SLOT(onViewNoteRequested(Core::CWizDocumentView*,const WIZDOCUMENTDATA&)));
+}
+
+void CWizDocumentView::showEvent(QShowEvent *event)
+{
+    Q_UNUSED(event);
 }
 
 void CWizDocumentView::showClient(bool visible)
