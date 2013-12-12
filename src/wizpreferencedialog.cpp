@@ -16,6 +16,8 @@ CWizPreferenceWindow::CWizPreferenceWindow(CWizExplorerApp& app, QWidget* parent
     setWindowIcon(QIcon());
     setWindowTitle(tr("Preference"));
 
+    connect(ui->btnClose, SIGNAL(clicked()), SLOT(accept()));
+
     // FIXME: proxy settings will back soon!!!
     ui->labelProxySettings->hide();
 
