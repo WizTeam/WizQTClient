@@ -3,6 +3,10 @@
 #include <QRunnable>
 #include <QThreadPool>
 #include <QList>
+#include <QMimeData>
+#include <QUrl>
+#include <QDir>
+#include <QString>
 
 #include <QApplication>
 #include <QWebFrame>
@@ -270,7 +274,7 @@ CWizDocumentWebView::CWizDocumentWebView(CWizExplorerApp& app, QWidget* parent)
     setAttribute(Qt::WA_AcceptTouchEvents, false);
 
     // FIXME: should accept drop picture, attachment, link etc.
-    setAcceptDrops(false);
+    setAcceptDrops(true);
 
     // refers
     MainWindow* mainWindow = qobject_cast<MainWindow *>(m_app.mainWindow());
@@ -368,6 +372,71 @@ void CWizDocumentWebView::contextMenuEvent(QContextMenuEvent *event)
         return;
 
     Q_EMIT requestShowContextMenu(mapToGlobal(event->pos()));
+}
+
+void CWizDocumentWebView::dragEnterEvent(QDragEnterEvent *event)
+{
+    if (!isEditing())
+        return;
+
+    int nAccepted = 0;
+    if (event->mimeData()->hasUrls()) {
+        QList<QUrl> li = event->mimeData()->urls();
+        QList<QUrl>::const_iterator it;
+        for (it = li.begin(); it != li.end(); it++) {
+            QUrl url = *it;
+            if (url.toString().startsWith("file:///")) {
+                nAccepted++;
+            }
+        }
+
+        if (nAccepted == li.size()) {
+            event->acceptProposedAction();
+        }
+    }
+}
+
+bool CWizDocumentWebView::image2Html(const QString& strImageFile, QString& strHtml)
+{
+    QString strDestFile = WizGlobal()->GetTempPath() + qrand() + ".png";
+
+    qDebug() << "[Editor] copy to: " << strDestFile;
+
+    QImage img(strImageFile);
+    if (!img.save(strDestFile)) {
+        return false;
+    }
+
+    strHtml = QString("<img border=\"0\" src=\"file://%1\" />").arg(strDestFile);
+    return true;
+}
+
+void CWizDocumentWebView::dropEvent(QDropEvent* event)
+{
+    int nAccepted = 0;
+    QList<QUrl> li = event->mimeData()->urls();
+    QList<QUrl>::const_iterator it;
+    for (it = li.begin(); it != li.end(); it++) {
+        QUrl url = *it;
+        url.setScheme(0);
+
+        qDebug() << "[Editor] drop: " << url.toString();
+
+        // only process image currently
+        QImageReader reader(url.toString());
+        if (!reader.canRead())
+            continue;
+
+        QString strHtml;
+        if (image2Html(url.toString(), strHtml)) {
+            editorCommandExecuteInsertHtml(strHtml, true);
+            nAccepted++;
+        }
+    }
+
+    if (nAccepted == li.size()) {
+        event->accept();
+    }
 }
 
 CWizDocumentView* CWizDocumentWebView::view()

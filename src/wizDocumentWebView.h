@@ -115,6 +115,11 @@ protected:
     virtual void focusInEvent(QFocusEvent* event);
     virtual void focusOutEvent(QFocusEvent* event);
     virtual void contextMenuEvent(QContextMenuEvent* event);
+    virtual void dragEnterEvent(QDragEnterEvent* event);
+    virtual void dropEvent(QDropEvent* event);
+
+private:
+    bool image2Html(const QString& strImageFile, QString& strHtml);
 
 private:
     CWizExplorerApp& m_app;
