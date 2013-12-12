@@ -304,7 +304,7 @@ void TitleBar::onViewNoteLoaded(CWizDocumentView* view, const WIZDOCUMENTDATA& n
         m_commentsBtn->setEnabled(true);
 
         connect(WizService::Token::instance(), SIGNAL(tokenAcquired(QString)),
-                SLOT(onTokenAcquired(QString)));
+                SLOT(onTokenAcquired(QString)), Qt::UniqueConnection);
         WizService::Token::requestToken();
     }
 }
@@ -331,13 +331,17 @@ void TitleBar::onTokenAcquired(const QString& strToken)
     QUrl kUrl(WizService::ApiEntry::kUrlFromGuid(strToken, strKbGUID));
     QString strCountUrl = WizService::ApiEntry::commentCountUrl(kUrl.host(), strToken, strKbGUID, strGUID);
 
-    WizService::AsyncApi* api = new WizService::AsyncApi();
+    WizService::AsyncApi* api = new WizService::AsyncApi(this);
     connect(api, SIGNAL(getCommentsCountFinished(int)), SLOT(onGetCommentsCountFinished(int)));
     api->getCommentsCount(strCountUrl);
 }
 
 void TitleBar::onGetCommentsCountFinished(int nCount)
 {
+    WizService::AsyncApi* api = dynamic_cast<WizService::AsyncApi*>(sender());
+    disconnect(api);
+    api->deleteLater();
+
     // update gui.
     qDebug() << "total comments:" << nCount;
 }

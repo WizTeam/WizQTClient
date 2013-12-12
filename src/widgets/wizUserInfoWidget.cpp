@@ -223,7 +223,7 @@ void CWizUserInfoWidget::on_action_accountSetup_triggered()
 void CWizUserInfoWidget::on_action_accountSetup_showProgress()
 {
     connect(Token::instance(), SIGNAL(tokenAcquired(const QString&)),
-            SLOT(on_action_accountSetup_requested(const QString&)));
+            SLOT(on_action_accountSetup_requested(const QString&)), Qt::UniqueConnection);
 
     Token::requestToken();
 }

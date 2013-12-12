@@ -125,7 +125,7 @@ void AsyncApi::getCommentsCount_impl(const QString& strUrl)
 
     if (reply->error()) {
         qDebug() << "[AsyncApi]Failed to get comment count";
-        Q_EMIT getCommentsCountFinished(nTotalComments);
+        Q_EMIT getCommentsCountFinished(0);
         return;
     }
 

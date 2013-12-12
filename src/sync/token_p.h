@@ -39,6 +39,7 @@ private:
     WIZUSERINFO m_info;
     QString m_strUserId;
     QString m_strPasswd;
+    bool m_bProcess;
     QMutex* m_mutex;
 
     Token* q;

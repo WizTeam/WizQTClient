@@ -31,7 +31,7 @@ CWizPreferenceWindow::CWizPreferenceWindow(CWizExplorerApp& app, QWidget* parent
         }
     }
 
-    connect(ui->comboLang, SIGNAL(activated(int)), SLOT(on_comboLang_currentIndexChanged(int)));
+    connect(ui->comboLang, SIGNAL(activated(int)), SLOT(on_comboLang_activated(int)));
 
     // reading tab
     switch (userSettings().noteViewMode())
