@@ -63,7 +63,7 @@ set(wiznote_SOURCES
     sync/wizkmsync.cpp
     sync/asyncapi.cpp
     #sync/wizCloudPool.cpp
-    sync/wizAvatarUploader.cpp
+    sync/avataruploader.cpp
     widgets/wizUserInfoWidget.cpp
     widgets/wizSegmentedButton.cpp
     utils/styleHelper.cpp
@@ -163,7 +163,7 @@ set(wiznote_HEADERS
     sync/wizkmsync.h
     sync/asyncapi.h
     #sync/wizCloudPool.h
-    sync/wizAvatarUploader.h
+    sync/avataruploader.h
     share/wizSyncableDatabase.h
     share/wizClucene.h
     share/wizSearchIndexer.h

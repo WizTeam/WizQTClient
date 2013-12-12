@@ -133,16 +133,19 @@ CWizObjectDataDownloadWorker::CWizObjectDataDownloadWorker(CWizDatabaseManager& 
     : m_dbMgr(dbMgr)
     , m_data(data)
 {
-    connect(Token::instance(), SIGNAL(tokenAcquired(QString)), SLOT(onTokenAcquired(QString)));
 }
 
 void CWizObjectDataDownloadWorker::startDownload()
 {
+    connect(Token::instance(), SIGNAL(tokenAcquired(QString)),
+            SLOT(onTokenAcquired(QString)));
     Token::instance()->requestToken();
 }
 
 void CWizObjectDataDownloadWorker::onTokenAcquired(const QString& strToken)
 {
+    disconnect(Token::instance());
+
     if (strToken.isEmpty()) {
         Q_EMIT downloaded(false);
         return;

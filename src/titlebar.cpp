@@ -80,7 +80,6 @@ TitleBar::TitleBar(QWidget *parent)
     connect(m_commentsBtn, SIGNAL(clicked()), SLOT(onCommentsButtonClicked()));
     connect(ICore::instance(), SIGNAL(viewNoteLoaded(Core::CWizDocumentView*, const WIZDOCUMENTDATA&)),
             SLOT(onViewNoteLoaded(Core::CWizDocumentView*, const WIZDOCUMENTDATA&)));
-    connect(WizService::Token::instance(), SIGNAL(tokenAcquired(QString)), SLOT(onTokenAcquired(QString)));
 
     QWidget* line1 = new QWidget(this);
     line1->setFixedHeight(12);
@@ -303,12 +302,17 @@ void TitleBar::onViewNoteLoaded(CWizDocumentView* view, const WIZDOCUMENTDATA& n
     } else {
         m_commentsUrl.clear();
         m_commentsBtn->setEnabled(true);
+
+        connect(WizService::Token::instance(), SIGNAL(tokenAcquired(QString)),
+                SLOT(onTokenAcquired(QString)));
         WizService::Token::requestToken();
     }
 }
 
 void TitleBar::onTokenAcquired(const QString& strToken)
 {
+    disconnect(WizService::Token::instance());
+
     QWebView* comments = noteView()->commentView();
 
     if (strToken.isEmpty()) {

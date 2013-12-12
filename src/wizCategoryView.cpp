@@ -1192,8 +1192,6 @@ void CWizCategoryView::on_action_group_attribute()
             m_groupSettings->setWindowTitle(tr("Group settings"));
             connect(m_groupSettings, SIGNAL(accepted()), m_groupSettings, SLOT(deleteLater()));
             connect(m_groupSettings, SIGNAL(showProgress()), SLOT(on_action_group_attribute_showProgress()));
-            connect(Token::instance(), SIGNAL(tokenAcquired(const QString&)),
-                    SLOT(on_action_group_attribute_requested(const QString&)));
         }
 
         m_strRequestedGroupKbGUID = p->kbGUID();
@@ -1204,11 +1202,16 @@ void CWizCategoryView::on_action_group_attribute()
 
 void CWizCategoryView::on_action_group_attribute_showProgress()
 {
+    connect(Token::instance(), SIGNAL(tokenAcquired(const QString&)),
+            SLOT(on_action_group_attribute_requested(const QString&)));
+
     Token::instance()->requestToken();
 }
 
 void CWizCategoryView::on_action_group_attribute_requested(const QString& strToken)
 {
+    disconnect(Token::instance());
+
     if (!m_groupSettings)
         return;
 
