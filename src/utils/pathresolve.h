@@ -13,6 +13,7 @@ public:
     static QString pluginsPath();
     static QString dataStorePath();
     static QString tempPath();
+    static QString logPath();
 
     // helpers
     static void addBackslash(QString& strPath);

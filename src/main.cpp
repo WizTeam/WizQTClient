@@ -18,12 +18,12 @@
 #include "share/wizDatabaseManager.h"
 
 #include "utils/pathresolve.h"
+#include "utils/logger.h"
 #include "sync/token.h"
 #include "sync/apientry.h"
 
 using namespace ExtensionSystem;
 using namespace Core::Internal;
-
 
 static inline QStringList getPluginPaths()
 {
@@ -75,6 +75,8 @@ static inline QStringList getPluginPaths()
 
 int main(int argc, char *argv[])
 {
+    Utils::Logger logger;
+    qInstallMsgHandler(Utils::Logger::messageHandler);
     QApplication a(argc, argv);
 
     QApplication::setApplicationName(QObject::tr("WizNote"));

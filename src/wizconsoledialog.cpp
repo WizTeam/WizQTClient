@@ -14,7 +14,7 @@
 #include "mac/wizmachelper.h"
 #endif
 
-#define MAXIMUM_LOG_ENTRIES 10000
+#define MAXIMUM_LOG_ENTRIES 3000
 
 
 CWizConsoleDialog::CWizConsoleDialog(CWizExplorerApp& app, QWidget* parent)

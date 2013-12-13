@@ -42,6 +42,13 @@ QString PathResolve::dataStorePath()
     return strPath;
 }
 
+QString PathResolve::logPath()
+{
+    QString strPath = dataStorePath() + "log/";
+    ensurePathExists(strPath);
+    return strPath;
+}
+
 QString PathResolve::pluginsPath()
 {
     return resourcesPath() + "plugins/";
