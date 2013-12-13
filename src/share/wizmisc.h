@@ -30,7 +30,7 @@ public:
     void clearToken() { m_user.strToken.clear(); }
 
     QBuffer* bufferLog() { return &m_bufferLog; }
-    CString GetTempPath();
+    //CString GetTempPath();
     void WriteLog(const CString& str);
     void WriteDebugLog(const CString& str);
 

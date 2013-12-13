@@ -12,6 +12,8 @@
 #include "html/wizhtmlcollector.h"
 #include "rapidjson/document.h"
 
+#include "utils/pathresolve.h"
+
 #define WIZNOTE_THUMB_VERSION "3"
 
 
@@ -1976,7 +1978,7 @@ bool CWizDatabase::UpdateDocumentData(WIZDOCUMENTDATA& data,
             return false;
         }
     } else {
-        CString strTempFile = ::WizGlobal()->GetTempPath() + data.strGUID + "-decrypted";
+        CString strTempFile = Utils::PathResolve::tempPath() + data.strGUID + "-decrypted";
         bool bZip = ::WizHtml2Zip(strURL, strProcessedHtml, strResourcePath, nFlags, strMetaText, strTempFile);
         if (!bZip) {
             return false;
@@ -2270,7 +2272,7 @@ bool CWizDatabase::LoadCompressedAttachmentData(const QString& strDocumentGUID, 
     {
         return false;
     }
-    CString strTempZipFileName = ::WizGlobal()->GetTempPath() + WizIntToStr(GetTickCount()) + ".tmp";
+    CString strTempZipFileName = Utils::PathResolve::tempPath() + WizIntToStr(GetTickCount()) + ".tmp";
     CWizZipFile zip;
     if (!zip.open(strTempZipFileName))
     {
@@ -2297,7 +2299,7 @@ bool CWizDatabase::LoadCompressedAttachmentData(const QString& strDocumentGUID, 
 
 bool CWizDatabase::SaveCompressedAttachmentData(const CString& strDocumentGUID, const QByteArray& arrayData)
 {
-    CString strTempZipFileName = ::WizGlobal()->GetTempPath() + WizIntToStr(GetTickCount()) + ".tmp";
+    CString strTempZipFileName = Utils::PathResolve::tempPath() + WizIntToStr(GetTickCount()) + ".tmp";
     if (!WizSaveDataToFile(strTempZipFileName, arrayData))
     {
         Q_EMIT updateError("Failed to save attachment data to temp file: " + strTempZipFileName);
@@ -2485,7 +2487,7 @@ bool CWizDatabase::DocumentToTempHtmlFile(const WIZDOCUMENTDATA& document, QStri
         return false;
     }
 
-    CString strTempPath = ::WizGlobal()->GetTempPath() + document.strGUID + "/";
+    CString strTempPath = Utils::PathResolve::tempPath() + document.strGUID + "/";
     ::WizEnsurePathExists(strTempPath);
 
     if (document.nProtected) {
@@ -2497,7 +2499,7 @@ bool CWizDatabase::DocumentToTempHtmlFile(const WIZDOCUMENTDATA& document, QStri
             return false;
         }
 
-        strZipFileName = ::WizGlobal()->GetTempPath() + document.strGUID + "-decrypted";
+        strZipFileName = Utils::PathResolve::tempPath() + document.strGUID + "-decrypted";
         QFile::remove(strZipFileName);
 
         if (!m_ziwReader->decryptDataToTempFile(strZipFileName)) {

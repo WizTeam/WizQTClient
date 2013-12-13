@@ -29,6 +29,8 @@
 #include <cstdlib>
 #include <assert.h>
 
+#include "../utils/pathresolve.h"
+
 
 // Named constant for passing to CppSQLite3Exception when passing it a string
 // that cannot be deleted.
@@ -1634,7 +1636,7 @@ bool CppSQLite3DB::repair(const CString& strDBFileName, const CString& strRetFil
 {
 	try
 	{
-		CString strTempFileName = ::WizGlobal()->GetTempPath() + WizIntToStr(GetTickCount()) + _T(".tmp");
+        CString strTempFileName = Utils::PathResolve::tempPath() + WizIntToStr(GetTickCount()) + _T(".tmp");
 		//
 		CppSQLite3DB dbSrc;
         dbSrc.open(strDBFileName);

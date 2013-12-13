@@ -16,6 +16,8 @@
 #include "share/wizsettings.h"
 #include "share/wizwin32helper.h"
 #include "share/wizDatabaseManager.h"
+
+#include "utils/pathresolve.h"
 #include "sync/token.h"
 #include "sync/apientry.h"
 
@@ -201,7 +203,7 @@ int main(int argc, char *argv[])
     int ret = a.exec();
 
     // clean up
-    QString strTempPath = ::WizGlobal()->GetTempPath();
+    QString strTempPath = Utils::PathResolve::tempPath();
     ::WizDeleteAllFilesInFolder(strTempPath);
 
     if (w.isLogout()) {

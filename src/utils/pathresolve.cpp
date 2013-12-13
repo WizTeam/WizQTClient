@@ -47,6 +47,14 @@ QString PathResolve::pluginsPath()
     return resourcesPath() + "plugins/";
 }
 
+QString PathResolve::tempPath()
+{
+    QString path = QDir::tempPath() + "/WizNote/";
+    ensurePathExists(path);
+
+    return path;
+}
+
 void PathResolve::addBackslash(QString& strPath)
 {
     strPath.replace('\\', '/');

@@ -22,6 +22,7 @@
 #include "share/wizDatabaseManager.h"
 #include "wizDocumentView.h"
 
+#include "utils/pathresolve.h"
 #include "icore.h"
 
 using namespace Core;
@@ -234,7 +235,7 @@ void CWizDocumentWebViewPage::on_editorCommandPaste_triggered()
 
     if (!clip->image().isNull()) {
         // save clipboard image to $TMPDIR
-        QString strTempPath = WizGlobal()->GetTempPath();
+        QString strTempPath = Utils::PathResolve::tempPath();
         CString strFileName = strTempPath + WizIntToStr(GetTickCount()) + ".png";
         if (!clip->image().save(strFileName)) {
             TOLOG("ERROR: Can't save clipboard image to file");
@@ -398,7 +399,7 @@ void CWizDocumentWebView::dragEnterEvent(QDragEnterEvent *event)
 
 bool CWizDocumentWebView::image2Html(const QString& strImageFile, QString& strHtml)
 {
-    QString strDestFile = WizGlobal()->GetTempPath() + qrand() + ".png";
+    QString strDestFile = Utils::PathResolve::tempPath() + qrand() + ".png";
 
     qDebug() << "[Editor] copy to: " << strDestFile;
 

@@ -17,6 +17,7 @@
 #include "share/wizObjectDataDownloader.h"
 
 #include "wizmainwindow.h"
+#include "utils/pathresolve.h"
 #include "icore.h"
 
 using namespace Core::Internal;
@@ -193,7 +194,7 @@ void CWizAttachmentListView::openAttachment(CWizAttachmentListViewItem* item)
     if (!item)
         return;
 
-    CString strTempPath = ::WizGlobal()->GetTempPath();
+    CString strTempPath = Utils::PathResolve::tempPath();
     const WIZDOCUMENTATTACHMENTDATA& attachment = item->attachment();
 
     CWizDatabase& db = m_dbMgr.db(attachment.strKbGUID);

@@ -522,15 +522,15 @@ IWizGlobal::IWizGlobal()
 {
 }
 
-CString IWizGlobal::GetTempPath()
-{
-    CString path = QDir::tempPath();
-
-    path += "/WizNote/";
-    ::WizEnsurePathExists(path);
-
-    return path;
-}
+//CString IWizGlobal::GetTempPath()
+//{
+//    CString path = QDir::tempPath();
+//
+//    path += "/WizNote/";
+//    ::WizEnsurePathExists(path);
+//
+//    return path;
+//}
 
 void IWizGlobal::WriteLog(const CString& str)
 {
