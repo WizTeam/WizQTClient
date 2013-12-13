@@ -1,6 +1,7 @@
 #include "logger.h"
 
 #include <QString>
+#include <QStringList>
 #include <QFile>
 #include <QDir>
 #include <QDate>
@@ -10,6 +11,7 @@
 #include "pathresolve.h"
 
 #define LOG_LINES_MAX 10000
+#define LOG_DAYS_MAX 10
 
 namespace Utils {
 
@@ -37,6 +39,26 @@ void Logger::prepare()
     if (fOld.exists()) {
         fOld.copy(logFile());
         fOld.remove();
+    }
+
+    // remove old log
+    int d = 0;
+    QStringList liFilter;
+    while (d < LOG_DAYS_MAX) {
+        QString strDate = QDate::currentDate().addDays(-d).toString(Qt::ISODate);
+        QString strName = "wiznote_" + strDate + "*";
+        liFilter << strName;
+        d++;
+    }
+
+    QDir dirLog(PathResolve::logPath());
+    QStringList liAll = dirLog.entryList(QDir::Files);
+    QStringList liNew = dirLog.entryList(liFilter, QDir::Files);
+    for (int i = 0; i < liAll.size(); i++) {
+        if (!liNew.contains(liAll.at(i))) {
+            dirLog.remove(liAll.at(i));
+            qDebug() << "[Logger]Remove old log file:" << liAll.at(i);
+        }
     }
 }
 
