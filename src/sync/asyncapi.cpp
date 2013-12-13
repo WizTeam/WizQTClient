@@ -97,7 +97,6 @@ bool AsyncApi::registerAccount_impl(const QString& strUserId,
     CWizKMAccountsServer aServer(ApiEntry::syncUrl());
 
     bool ret = aServer.CreateAccount(strUserId, strPasswd, strInviteCode);
-
     if (!ret) {
         m_nErrorCode = aServer.GetLastErrorCode();
         m_strErrorMessage = aServer.GetLastErrorMessage();

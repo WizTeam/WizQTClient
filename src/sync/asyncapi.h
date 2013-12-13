@@ -22,6 +22,7 @@ public:
     void registerAccount(const QString& strUserId, const QString& strPasswd, const QString& strInviteCode);
     void getCommentsCount(const QString& strUrl);
 
+    int lastErrorCode() { return m_nErrorCode; }
     QString lastErrorMessage() { return m_strErrorMessage; }
 
 private:
@@ -36,8 +37,8 @@ private:
 
 Q_SIGNALS:
     void loginFinished(const WIZUSERINFO& info);
-    void getTokenFinished(const QString& strToken, const QString& strMsg = 0);
-    void keepAliveFinished(bool bOk, const QString& strMsg = 0);
+    void getTokenFinished(const QString& strToken);
+    void keepAliveFinished(bool bOk);
     void registerAccountFinished(bool bOk);
     void getCommentsCountFinished(int i);
 };

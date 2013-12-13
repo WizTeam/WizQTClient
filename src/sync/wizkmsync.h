@@ -42,11 +42,13 @@ protected:
 
 private:
     CWizDatabase& m_db;
+    WIZUSERINFO m_info;
     QPointer<CWizKMSyncEvents> m_pEvents;
 
     void syncUserCert();
 
 private Q_SLOTS:
+    void onTokenAcquired(const QString& strToken);
     void on_syncFinished();
 
 Q_SIGNALS:

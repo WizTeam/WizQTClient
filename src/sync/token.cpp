@@ -71,6 +71,16 @@ const WIZUSERINFO& TokenPrivate::info()
     return m_info;
 }
 
+int TokenPrivate::lastErrorCode() const
+{
+    return m_api->lastErrorCode();
+}
+
+QString TokenPrivate::lastErrorMessage() const
+{
+    return m_api->lastErrorMessage();
+}
+
 void TokenPrivate::onLoginFinished(const WIZUSERINFO &info)
 {
     qDebug() << "[Token]: Login Done...";
@@ -176,4 +186,14 @@ const WIZUSERINFO& Token::info()
     }
 
     return d->info();
+}
+
+QString Token::lastErrorMessage()
+{
+    return d->lastErrorMessage();
+}
+
+int Token::lastErrorCode()
+{
+    return d->lastErrorCode();
 }

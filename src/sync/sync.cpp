@@ -1703,7 +1703,8 @@ void WizDownloadUserAvatars(IWizKMSyncEvents* pEvents, IWizSyncableDatabase* pDa
 }
 //
 
-bool WizSyncDatabase(IWizKMSyncEvents* pEvents, IWizSyncableDatabase* pDatabase,
+bool WizSyncDatabase(const WIZUSERINFO& info, IWizKMSyncEvents* pEvents,
+                     IWizSyncableDatabase* pDatabase,
                      bool bUseWizServer, bool bBackground)
 {
     Q_UNUSED(bUseWizServer);
@@ -1713,19 +1714,22 @@ bool WizSyncDatabase(IWizKMSyncEvents* pEvents, IWizSyncableDatabase* pDatabase,
     pEvents->OnStatus(_TR("Connecting to server"));
 
     CWizKMAccountsServer server(WizService::ApiEntry::syncUrl());
+    server.SetUserInfo(info);
+
     pEvents->OnSyncProgress(::GetSyncStartProgress(syncAccountLogin));
     pEvents->OnStatus(_TR("Signing in"));
-    QString strPassword = pDatabase->GetPassword();
-    while (1)
-    {
-        if (server.Login(pDatabase->GetUserId(), strPassword, _T("normal")))
-            break;
 
-        pEvents->SetLastErrorCode(server.GetLastErrorCode());
-        pEvents->OnError(server.GetLastErrorMessage());
+    //QString strPassword = pDatabase->GetPassword();
+    //while (1)
+    //{
+    //    if (server.Login(pDatabase->GetUserId(), strPassword, _T("normal")))
+    //        break;
 
-        return false;
-    }
+    //    pEvents->SetLastErrorCode(server.GetLastErrorCode());
+    //    pEvents->OnError(server.GetLastErrorMessage());
+
+    //    return false;
+    //}
 
     pDatabase->SetUserInfo(server.GetUserInfo());
     pEvents->OnSyncProgress(1);

@@ -30,6 +30,9 @@ public:
     static void setUserId(const QString& strUserId);
     static void setPasswd(const QString& strPasswd);
 
+    static QString lastErrorMessage();
+    static int lastErrorCode();
+
 Q_SIGNALS:
     void tokenAcquired(QString strToken);
 

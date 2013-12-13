@@ -29,6 +29,9 @@ public:
     void setPasswd(const QString& strPasswd);
     const WIZUSERINFO& info();
 
+    int lastErrorCode() const;
+    QString lastErrorMessage() const;
+
 private Q_SLOTS:
     void onLoginFinished(const WIZUSERINFO& info);
     void onGetTokenFinished(const QString& strToken, const QString& strMsg);
