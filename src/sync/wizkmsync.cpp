@@ -92,7 +92,7 @@ void CWizKMSyncThread::startSync()
 
 void CWizKMSyncThread::onTokenAcquired(const QString& strToken)
 {
-    disconnect(Token::instance());
+    Token::instance()->disconnect(this);
 
     if (strToken.isEmpty()) {
         Q_EMIT syncFinished(Token::lastErrorCode(), Token::lastErrorMessage());

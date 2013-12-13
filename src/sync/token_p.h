@@ -34,8 +34,8 @@ public:
 
 private Q_SLOTS:
     void onLoginFinished(const WIZUSERINFO& info);
-    void onGetTokenFinished(const QString& strToken, const QString& strMsg);
-    void onKeepAliveFinished(bool bOk, const QString& strMsg);
+    void onGetTokenFinished(const QString& strToken);
+    void onKeepAliveFinished(bool bOk);
 
 private:
     AsyncApi* m_api;

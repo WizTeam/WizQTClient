@@ -62,7 +62,7 @@ void AvatarUploader::upload(const QString& strFileName)
 
 void AvatarUploader::onTokenAcquired(const QString& strToken)
 {
-    disconnect(Token::instance());
+    Token::instance()->disconnect(this);
 
     if (strToken.isEmpty()) {
         qDebug() << "[avatarUploader] failed to get token while upload avatar!";

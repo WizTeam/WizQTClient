@@ -230,7 +230,7 @@ void CWizUserInfoWidget::on_action_accountSetup_showProgress()
 
 void CWizUserInfoWidget::on_action_accountSetup_requested(const QString& strToken)
 {
-    disconnect(Token::instance());
+    Token::instance()->disconnect(this);
 
     if (!m_userSettings)
         return;

@@ -104,6 +104,7 @@ int main(int argc, char *argv[])
 //    a.setFont(f);
 //#endif
 
+
     PluginManager pluginManager;
     PluginManager::setFileExtension(QLatin1String("pluginspec"));
     PluginManager::setGlobalSettings(globalSettings);
@@ -143,6 +144,9 @@ int main(int argc, char *argv[])
 
     // figure out auto login or manually login
     bool bFallback = true;
+
+    // FIXME: move to WizService plugin initialize
+    WizService::Token token;
 
     bool bAutoLogin = userSettings.autoLogin();
     strPassword = userSettings.password();

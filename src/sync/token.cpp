@@ -21,8 +21,8 @@ TokenPrivate::TokenPrivate(Token* token)
     , m_bProcess(false)
 {
     connect(m_api, SIGNAL(loginFinished(const WIZUSERINFO&)), SLOT(onLoginFinished(const WIZUSERINFO&)));
-    connect(m_api, SIGNAL(getTokenFinished(QString, QString)), SLOT(onGetTokenFinished(QString, QString)));
-    connect(m_api, SIGNAL(keepAliveFinished(bool, QString)), SLOT(onKeepAliveFinished(bool, QString)));
+    connect(m_api, SIGNAL(getTokenFinished(QString)), SLOT(onGetTokenFinished(QString)));
+    connect(m_api, SIGNAL(keepAliveFinished(bool)), SLOT(onKeepAliveFinished(bool)));
 }
 
 TokenPrivate::~TokenPrivate()
@@ -36,9 +36,9 @@ void TokenPrivate::requestToken()
 
     QMutexLocker locker(m_mutex);
 
-    // return if still waiting for reply, to avoid dead-lock
+    // return the old one even it will be failed if still waiting for reply, to avoid dead-lock
     if (m_bProcess) {
-        Q_EMIT q->tokenAcquired(0);
+        Q_EMIT q->tokenAcquired(m_info.strToken);
         return;
     }
 
@@ -96,10 +96,8 @@ void TokenPrivate::onLoginFinished(const WIZUSERINFO &info)
     m_bProcess = false;
 }
 
-void TokenPrivate::onGetTokenFinished(const QString& strToken, const QString& strMsg)
+void TokenPrivate::onGetTokenFinished(const QString& strToken)
 {
-    Q_UNUSED(strMsg);
-
     qDebug() << "[Token]: GetToken Done...";
 
     if (strToken.isEmpty()) {
@@ -113,10 +111,8 @@ void TokenPrivate::onGetTokenFinished(const QString& strToken, const QString& st
     m_bProcess = false;
 }
 
-void TokenPrivate::onKeepAliveFinished(bool bOk, const QString& strMsg)
+void TokenPrivate::onKeepAliveFinished(bool bOk)
 {
-    Q_UNUSED(strMsg);
-
     qDebug() << "[Token]: KeepAlive Done...";
 
     if (bOk) {
@@ -163,37 +159,35 @@ void Token::requestToken()
 
 void Token::setUserId(const QString& strUserId)
 {
-    if (!m_instance) {
-        m_instance = new Token();
-    }
+    Q_ASSERT(m_instance);
 
     d->setUserId(strUserId);
 }
 
 void Token::setPasswd(const QString& strPasswd)
 {
-    if (!m_instance) {
-        m_instance = new Token();
-    }
+    Q_ASSERT(m_instance);
 
     d->setPasswd(strPasswd);
 }
 
 const WIZUSERINFO& Token::info()
 {
-    if (!m_instance) {
-        m_instance = new Token();
-    }
+    Q_ASSERT(m_instance);
 
     return d->info();
 }
 
 QString Token::lastErrorMessage()
 {
+    Q_ASSERT(m_instance);
+
     return d->lastErrorMessage();
 }
 
 int Token::lastErrorCode()
 {
+    Q_ASSERT(m_instance);
+
     return d->lastErrorCode();
 }

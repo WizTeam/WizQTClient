@@ -1210,7 +1210,7 @@ void CWizCategoryView::on_action_group_attribute_showProgress()
 
 void CWizCategoryView::on_action_group_attribute_requested(const QString& strToken)
 {
-    disconnect(Token::instance());
+    Token::instance()->disconnect(this);
 
     if (!m_groupSettings)
         return;

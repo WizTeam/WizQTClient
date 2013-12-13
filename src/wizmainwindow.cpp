@@ -992,7 +992,7 @@ void MainWindow::on_search_doSearch(const QString& keywords)
     }
 
     if (m_searcher) {
-        disconnect(m_searcher);
+        m_searcher->disconnect(this);
         m_searcher->abort();
     }
 

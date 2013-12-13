@@ -311,7 +311,7 @@ void TitleBar::onViewNoteLoaded(CWizDocumentView* view, const WIZDOCUMENTDATA& n
 
 void TitleBar::onTokenAcquired(const QString& strToken)
 {
-    disconnect(WizService::Token::instance());
+    WizService::Token::instance()->disconnect(this);
 
     QWebView* comments = noteView()->commentView();
 
@@ -339,7 +339,7 @@ void TitleBar::onTokenAcquired(const QString& strToken)
 void TitleBar::onGetCommentsCountFinished(int nCount)
 {
     WizService::AsyncApi* api = dynamic_cast<WizService::AsyncApi*>(sender());
-    disconnect(api);
+    api->disconnect(this);
     api->deleteLater();
 
     // update gui.

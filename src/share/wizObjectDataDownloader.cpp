@@ -144,7 +144,7 @@ void CWizObjectDataDownloadWorker::startDownload()
 
 void CWizObjectDataDownloadWorker::onTokenAcquired(const QString& strToken)
 {
-    disconnect(Token::instance());
+    Token::instance()->disconnect(this);
 
     if (strToken.isEmpty()) {
         Q_EMIT downloaded(false);
