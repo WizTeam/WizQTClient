@@ -1,10 +1,10 @@
-#ifndef STYLEHELPER_H
-#define STYLEHELPER_H
+#ifndef UTILS_STYLEHELPER_H
+#define UTILS_STYLEHELPER_H
 
 class QSize;
 
 namespace Utils {
-class styleHelper
+class StyleHelper
 {
 public:
     static int avatarHeight();
@@ -14,4 +14,4 @@ public:
 };
 } // namespace Utils
 
-#endif // STYLEHELPER_H
+#endif // UTILS_STYLEHELPER_H

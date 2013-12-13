@@ -66,7 +66,7 @@ set(wiznote_SOURCES
     sync/avataruploader.cpp
     widgets/wizUserInfoWidget.cpp
     widgets/wizSegmentedButton.cpp
-    utils/styleHelper.cpp
+    utils/stylehelper.cpp
     utils/pathresolve.cpp
 
     #coreplugin.cpp
@@ -176,7 +176,7 @@ set(wiznote_HEADERS
     sync/apientry_p.h
     share/wizObjectDataDownloader.h
     share/wizUserAvatar.h
-    utils/styleHelper.h
+    utils/stylehelper.h
     utils/pathresolve.h
 
     wizdef.h

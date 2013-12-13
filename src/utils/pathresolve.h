@@ -1,5 +1,5 @@
-#ifndef PATHRESOLVE_H
-#define PATHRESOLVE_H
+#ifndef UTILS_PATHRESOLVE_H
+#define UTILS_PATHRESOLVE_H
 
 class QString;
 
@@ -21,4 +21,4 @@ public:
 
 } // namespace Utils
 
-#endif // PATHRESOLVE_H
+#endif // UTILS_PATHRESOLVE_H
