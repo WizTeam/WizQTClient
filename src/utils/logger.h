@@ -28,10 +28,15 @@ private:
     QBuffer* m_buffer;
 
     void prepare();
+    void loadBuffer();
+    int log2Buffer(const QString strFileName);
+
+    QString lastLogFile(const QString strFileName);
     QString logFile();
+    QStringList allLogFiles(int nDays);
     bool logFileWritable(const QString& strFilePath);
     int lines(const QString& strFilePath);
-    QString msg2Log(const QString& strMsg);
+    QString msg2LogMsg(const QString& strMsg);
     void save(const QString& strMsg);
     void redirect(const QString& strMsg);
 };

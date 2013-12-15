@@ -7,11 +7,13 @@
 #include <QDate>
 #include <QDebug>
 #include <QBuffer>
+#include <QTextStream>
 
 #include "pathresolve.h"
 
-#define LOG_LINES_MAX 10000
+#define LOG_LINES_MAX 30000
 #define LOG_DAYS_MAX 10
+#define LOG_LINES_BUFFER_MAX 3000
 
 namespace Utils {
 
@@ -25,6 +27,7 @@ Logger::Logger()
     m_instance = this;
 
     prepare();
+    loadBuffer();
 }
 
 Logger::~Logger()
@@ -34,26 +37,18 @@ Logger::~Logger()
 
 void Logger::prepare()
 {
+    QString strLogPath = PathResolve::logPath();
     // older version: move log file to new location
     QFile fOld(PathResolve::dataStorePath() + "wiznote.log");
     if (fOld.exists()) {
-        fOld.copy(logFile());
+        fOld.copy(strLogPath + logFile() + ".old");
         fOld.remove();
     }
 
-    // remove old log
-    int d = 0;
-    QStringList liFilter;
-    while (d < LOG_DAYS_MAX) {
-        QString strDate = QDate::currentDate().addDays(-d).toString(Qt::ISODate);
-        QString strName = "wiznote_" + strDate + "*";
-        liFilter << strName;
-        d++;
-    }
-
-    QDir dirLog(PathResolve::logPath());
+    QDir dirLog(strLogPath);
     QStringList liAll = dirLog.entryList(QDir::Files);
-    QStringList liNew = dirLog.entryList(liFilter, QDir::Files);
+    QStringList liNew = allLogFiles(LOG_DAYS_MAX);
+    qDebug() << liNew;
     for (int i = 0; i < liAll.size(); i++) {
         if (!liNew.contains(liAll.at(i))) {
             dirLog.remove(liAll.at(i));
@@ -88,6 +83,38 @@ void Logger::messageHandler(QtMsgType type, const char* msg)
     }
 }
 
+QStringList Logger::allLogFiles(int nDays)
+{
+    QStringList liFilter;
+
+    if (nDays == -1) {
+        liFilter << "wiznote_*";
+    } else {
+        int d = 0;
+        while (d < nDays) {
+            QString strDate = QDate::currentDate().addDays(-d).toString(Qt::ISODate);
+            QString strName = "wiznote_" + strDate + "*";
+            liFilter << strName;
+            d++;
+        }
+    }
+
+    QDir dirLog(PathResolve::logPath());
+    return dirLog.entryList(liFilter, QDir::Files, QDir::Time);
+}
+
+QString Logger::lastLogFile(const QString strFileName)
+{
+    QDir dirLog(PathResolve::logPath());
+    QStringList liAll = dirLog.entryList(QDir::Files, QDir::Time);
+    int i = liAll.indexOf(strFileName);
+
+    if (i == -1)
+        return 0;
+
+    return liAll.at(i+1);
+}
+
 QString Logger::logFile()
 {
     QString strDate = QDate::currentDate().toString(Qt::ISODate);
@@ -99,7 +126,7 @@ QString Logger::logFile()
         id++;
     }
 
-    return strFilePath.arg(id);
+    return strFileName.arg(id);
 }
 
 bool Logger::logFileWritable(const QString& strFilePath)
@@ -126,7 +153,7 @@ int Logger::lines(const QString& strFilePath)
     return i;
 }
 
-QString Logger::msg2Log(const QString& strMsg)
+QString Logger::msg2LogMsg(const QString& strMsg)
 {
     QString strTime = QDateTime::currentDateTime().toString(Qt::ISODate);
     return strTime + ": " + strMsg + "\n";
@@ -134,16 +161,61 @@ QString Logger::msg2Log(const QString& strMsg)
 
 void Logger::save(const QString& strMsg)
 {
-    QFile f(logFile());
+    QFile f(PathResolve::logPath() + logFile());
     f.open(QIODevice::Append | QIODevice::Text);
-    f.write(msg2Log(strMsg).toUtf8());
+    f.write(msg2LogMsg(strMsg).toUtf8());
     f.close();
+}
+
+void Logger::loadBuffer()
+{
+    QString strCurrentLog = logFile();
+
+    int nLines = log2Buffer(strCurrentLog);
+    while (nLines < LOG_LINES_BUFFER_MAX) {
+        QString strLast = lastLogFile(strCurrentLog);
+        if (strLast.isEmpty()) {
+            break;
+        } else {
+            nLines += log2Buffer(strLast);
+        }
+    }
+}
+
+int Logger::log2Buffer(const QString strFileName)
+{
+    if (strFileName.isEmpty())
+        return 0;
+
+    QString strFilePath = PathResolve::logPath() + strFileName;
+    if (!QFile::exists(strFilePath))
+        return 0;
+
+    QFile f(strFilePath);
+    if (!f.open(QIODevice::ReadOnly)) {
+        return 0;
+    }
+
+    QTextStream ts(&f);
+    int nLines = 0;
+
+    m_buffer->open(QIODevice::Append);
+
+    do {
+        m_buffer->write(ts.readLine().toUtf8());
+        nLines++;
+    } while (!ts.atEnd());
+
+    f.close();
+    m_buffer->close();
+
+    return nLines;
 }
 
 void Logger::redirect(const QString& strMsg)
 {
     m_buffer->open(QIODevice::Append);
-    m_buffer->write(msg2Log(strMsg).toUtf8());
+    m_buffer->write(msg2LogMsg(strMsg).toUtf8());
     m_buffer->close();
 }
 
