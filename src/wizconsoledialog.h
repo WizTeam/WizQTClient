@@ -2,11 +2,9 @@
 #define WIZCONSOLEDIALOG_H
 
 #include <QDialog>
-#include <QScrollBar>
-#include <QFile>
-
 
 class CWizExplorerApp;
+class QByteArray;
 
 namespace Ui {
     class CWizConsoleDialog;
@@ -26,24 +24,22 @@ protected:
 private:
     CWizExplorerApp& m_app;
     Ui::CWizConsoleDialog* m_ui;
-    bool m_bAutoScroll;
 
-    QTextCodec* m_codec;
-    QString m_data;
-    int m_nEntries;
+    bool m_bAutoScroll;
+    qint64 m_nPos;
 
     void load();
-    void readByLine(QIODevice* dev);
+    void insertLog(const QByteArray& bytes);
     void resetCount();
 
 public Q_SLOTS:
-    void on_editConsole_textChanged();
-    void onEditConsole_sliderMoved(int value);
-    void on_editConsole_copyAvailable(bool yes);
-    void on_buttonClear_clicked();
-    void bufferLog_readyRead();
-    void on_btnSaveAs_clicked();
-    void on_btnCopyToClipboard_clicked();
+    void onConsoleTextChanged();
+    void onConsoleSliderMoved(int value);
+    void onConsoleCopyAvailable(bool yes);
+    void onBtnClearClicked();
+    void onLogBufferReadyRead();
+    void onBtnSaveAsClicked();
+    void onBtnCopyToClipboardClicked();
 
 };
 

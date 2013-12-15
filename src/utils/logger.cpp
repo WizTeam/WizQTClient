@@ -199,14 +199,18 @@ int Logger::log2Buffer(const QString strFileName)
     QTextStream ts(&f);
     int nLines = 0;
 
-    m_buffer->open(QIODevice::Append);
+    QByteArray bytes = m_buffer->data();
+    m_buffer->open(QIODevice::Truncate| QIODevice::Text);
 
     do {
         m_buffer->write(ts.readLine().toUtf8());
+        m_buffer->write("\n");
         nLines++;
     } while (!ts.atEnd());
 
     f.close();
+
+    m_buffer->write(bytes);
     m_buffer->close();
 
     return nLines;
@@ -214,6 +218,7 @@ int Logger::log2Buffer(const QString strFileName)
 
 void Logger::redirect(const QString& strMsg)
 {
+    // FIXME: truncate old entries
     m_buffer->open(QIODevice::Append);
     m_buffer->write(msg2LogMsg(strMsg).toUtf8());
     m_buffer->close();
