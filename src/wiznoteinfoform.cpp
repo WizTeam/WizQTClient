@@ -6,6 +6,7 @@
 #include "share/wizobject.h"
 #include "share/wizDatabaseManager.h"
 #include "share/wizDatabase.h"
+#include "utils/logger.h"
 
 CWizNoteInfoForm::CWizNoteInfoForm(QWidget *parent)
     : CWizPopupWidget(parent)

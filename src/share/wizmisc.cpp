@@ -12,6 +12,7 @@
 
 #include <QtCore>
 //#include <QtNetwork>
+#include "utils/logger.h"
 
 #ifndef MAX_PATH
 #define MAX_PATH 200
@@ -500,77 +501,6 @@ QString WizGetLogTime()
                 strTime.time().toString());
 
     return strCurrentTime;
-}
-
-
-
-IWizGlobal* WizGlobal()
-{
-    return IWizGlobal::instance();
-}
-
-IWizGlobal* IWizGlobal::m_pInstance = NULL;
-
-IWizGlobal* IWizGlobal::instance()
-{
-    if (!m_pInstance)
-          m_pInstance = new IWizGlobal();
-       return m_pInstance;
-}
-
-IWizGlobal::IWizGlobal()
-{
-}
-
-//CString IWizGlobal::GetTempPath()
-//{
-//    CString path = QDir::tempPath();
-//
-//    path += "/WizNote/";
-//    ::WizEnsurePathExists(path);
-//
-//    return path;
-//}
-
-void IWizGlobal::WriteLog(const CString& str)
-{
-    QString msg(WizGetLogTime() + ": " + str + "\n");
-
-    qDebug() << str;
-
-    // write to buffer who is interested in logs just need to connect readyRead signal
-    m_bufferLog.open(QIODevice::Append);
-    m_bufferLog.write(msg.toUtf8());
-    m_bufferLog.close();
-
-    // write to global log file
-    QString strLogFileName = WizGetLogFileName();
-    QFile f(strLogFileName);
-    f.open(QIODevice::Append | QIODevice::Text);
-    f.write(msg.toUtf8());
-    f.close();
-}
-
-void IWizGlobal::WriteDebugLog(const CString& str)
-{
-    static int writeLog = -1;
-    if (writeLog == -1)
-    {
-#ifdef QT_DEBUG
-        writeLog = 1;
-#else
-        writeLog = 0;
-        QStringList args = QCoreApplication::arguments();
-        if (-1 != args.join(" ").toLower().indexOf("debug"))
-        {
-            writeLog = 1;
-        }
-#endif
-    }
-    if (writeLog != 1)
-        return;
-    //
-    WriteLog(str);
 }
 
 QString WizGetEmailPrefix(const QString& strMail)

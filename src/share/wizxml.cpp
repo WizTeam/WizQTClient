@@ -1,6 +1,7 @@
 #include "wizxml.h"
 
 #include "wizmisc.h"
+#include "../utils/logger.h"
 
 
 CWizXMLNode::CWizXMLNode(const CWizXMLNode& nodeSrc)

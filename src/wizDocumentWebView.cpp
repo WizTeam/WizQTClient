@@ -23,6 +23,7 @@
 #include "wizDocumentView.h"
 
 #include "utils/pathresolve.h"
+#include "utils/logger.h"
 #include "icore.h"
 
 using namespace Core;

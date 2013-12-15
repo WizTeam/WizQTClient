@@ -45,16 +45,16 @@ private:
 
 
 // obsolete, should remove
-//#define TOLOG(x)                            Utils::Logger::writeLog(x)
-//#define TOLOG1(x, p1)                       Utils::Logger::writeLog(WizFormatString1(x, p1))
-//#define TOLOG2(x, p1, p2)                   Utils::Logger::writeLog(WizFormatString2(x, p1, p2))
-//#define TOLOG3(x, p1, p2, p3)               Utils::Logger::writeLog(WizFormatString3(x, p1, p2, p3))
-//#define TOLOG4(x, p1, p2, p3, p4)           Utils::Logger::writeLog(WizFormatString4(x, p1, p2, p3, p4))
-//#define DEBUG_TOLOG(x)                      Utils::Logger::writeLog(x)
-//#define DEBUG_TOLOG1(x, p1)                 Utils::Logger::writeLog(WizFormatString1(x, p1))
-//#define DEBUG_TOLOG2(x, p1, p2)             Utils::Logger::writeLog(WizFormatString2(x, p1, p2))
-//#define DEBUG_TOLOG3(x, p1, p2, p3)         Utils::Logger::writeLog(WizFormatString3(x, p1, p2, p3))
-//#define DEBUG_TOLOG4(x, p1, p2, p3, p4)     Utils::Logger::writeLog(WizFormatString4(x, p1, p2, p3, p4))
+#define TOLOG(x)                            Utils::Logger::writeLog(x)
+#define TOLOG1(x, p1)                       Utils::Logger::writeLog(WizFormatString1(x, p1))
+#define TOLOG2(x, p1, p2)                   Utils::Logger::writeLog(WizFormatString2(x, p1, p2))
+#define TOLOG3(x, p1, p2, p3)               Utils::Logger::writeLog(WizFormatString3(x, p1, p2, p3))
+#define TOLOG4(x, p1, p2, p3, p4)           Utils::Logger::writeLog(WizFormatString4(x, p1, p2, p3, p4))
+#define DEBUG_TOLOG(x)                      Utils::Logger::writeLog(x)
+#define DEBUG_TOLOG1(x, p1)                 Utils::Logger::writeLog(WizFormatString1(x, p1))
+#define DEBUG_TOLOG2(x, p1, p2)             Utils::Logger::writeLog(WizFormatString2(x, p1, p2))
+#define DEBUG_TOLOG3(x, p1, p2, p3)         Utils::Logger::writeLog(WizFormatString3(x, p1, p2, p3))
+#define DEBUG_TOLOG4(x, p1, p2, p3, p4)     Utils::Logger::writeLog(WizFormatString4(x, p1, p2, p3, p4))
 
 
 #endif // UTILS_LOGGER_H

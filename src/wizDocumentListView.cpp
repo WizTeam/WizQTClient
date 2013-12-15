@@ -15,6 +15,7 @@
 #include "share/wizUserAvatar.h"
 #include "wizmainwindow.h"
 #include "utils/stylehelper.h"
+#include "utils/logger.h"
 
 using namespace Core::Internal;
 

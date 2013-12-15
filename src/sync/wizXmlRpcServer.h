@@ -8,6 +8,7 @@
 
 #include "../share/wizxmlrpc.h"
 #include "../share/wizmisc.h"
+#include "../utils/logger.h"
 
 
 

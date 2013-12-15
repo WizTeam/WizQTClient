@@ -30,6 +30,7 @@
 #include <assert.h>
 
 #include "../utils/pathresolve.h"
+#include "../utils/logger.h"
 
 
 // Named constant for passing to CppSQLite3Exception when passing it a string

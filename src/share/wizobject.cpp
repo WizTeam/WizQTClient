@@ -2,6 +2,7 @@
 
 #include "wizxmlrpc.h"
 #include "wizmisc.h"
+#include "utils/logger.h"
 
 WIZUSERINFO::WIZUSERINFO()
     : nUserLevel(0)

@@ -12,39 +12,6 @@
 
 #define WIZNOTE_OBSOLETE
 
-
-class IWizGlobal : public QObject
-{
-    Q_OBJECT
-
-public:
-    static IWizGlobal* instance();
-
-    QString apiUrl() const { return m_strApiUrl; }
-    void setApiUrl(const QString& strUrl) { m_strApiUrl = strUrl; }
-
-    const WIZUSERINFO& userInfo() const { return m_user; }
-    void setUserInfo(const WIZUSERINFO& info) { m_user = info; }
-
-    QString token() const { return m_user.strToken; }
-    void clearToken() { m_user.strToken.clear(); }
-
-    QBuffer* bufferLog() { return &m_bufferLog; }
-    //CString GetTempPath();
-    void WriteLog(const CString& str);
-    void WriteDebugLog(const CString& str);
-
-private:
-    IWizGlobal();
-    static IWizGlobal* m_pInstance;
-
-    WIZUSERINFO m_user;
-    QString m_strApiUrl;
-    QBuffer m_bufferLog;
-};
-
-IWizGlobal* WizGlobal();
-
 QString WizGetEmailPrefix(const QString& strMail);
 
 QString WizGetTimeStamp();
@@ -156,28 +123,11 @@ CString WizInt64ToStr(__int64 n);
 
 CString WizGenGUIDLowerCaseLetterOnly();
 
-
-#define TOLOG(x)                        WizGlobal()->WriteLog(x)
-#define TOLOG1(x, p1)                   WizGlobal()->WriteLog(WizFormatString1(x, p1))
-#define TOLOG2(x, p1, p2)               WizGlobal()->WriteLog(WizFormatString2(x, p1, p2))
-#define TOLOG3(x, p1, p2, p3)           WizGlobal()->WriteLog(WizFormatString3(x, p1, p2, p3))
-#define TOLOG4(x, p1, p2, p3, p4)       WizGlobal()->WriteLog(WizFormatString4(x, p1, p2, p3, p4))
-
-
-#define DEBUG_TOLOG(x)                        WizGlobal()->WriteDebugLog(x)
-#define DEBUG_TOLOG1(x, p1)                   WizGlobal()->WriteDebugLog(WizFormatString1(x, p1))
-#define DEBUG_TOLOG2(x, p1, p2)               WizGlobal()->WriteDebugLog(WizFormatString2(x, p1, p2))
-#define DEBUG_TOLOG3(x, p1, p2, p3)           WizGlobal()->WriteDebugLog(WizFormatString3(x, p1, p2, p3))
-#define DEBUG_TOLOG4(x, p1, p2, p3, p4)       WizGlobal()->WriteDebugLog(WizFormatString4(x, p1, p2, p3, p4))
-
-
 BOOL WizBase64Encode(const QByteArray& arrayData, QString& str);
 BOOL WizBase64Decode(const QString& str, QByteArray& arrayData);
 
 CString WizStringToBase64(const CString& strSource);
 CString WizStringFromBase64(const CString& strBase64);
-
-
 
 // skin related
 QString WizGetDefaultSkinName();

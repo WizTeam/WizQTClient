@@ -8,6 +8,7 @@
 
 #include "wizmd5.h"
 #include "wizmisc.h"
+#include "utils/logger.h"
 
 
 /**

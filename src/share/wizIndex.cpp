@@ -4,6 +4,7 @@
 
 #include <algorithm>
 #include "wizkmcore.h"
+#include "utils/logger.h"
 
 
 CWizIndex::CWizIndex(void)

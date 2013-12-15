@@ -13,6 +13,7 @@
 #include "rapidjson/document.h"
 
 #include "utils/pathresolve.h"
+#include "utils/logger.h"
 
 #define WIZNOTE_THUMB_VERSION "3"
 

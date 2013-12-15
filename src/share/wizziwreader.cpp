@@ -5,6 +5,7 @@
 
 #include "wizmisc.h"
 #include "wizenc.h"
+#include "utils/logger.h"
 
 
 CWizZiwReader::CWizZiwReader(QObject *parent)
