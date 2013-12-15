@@ -1,6 +1,6 @@
 #include "icore.h"
 
-#include "wizmainwindow.h"
+//#include "wizmainwindow.h"
 
 using namespace Core::Internal;
 
@@ -26,7 +26,7 @@ ICore* ICore::instance()
     return m_instance;
 }
 
-QWidget* ICore::mainWindow()
+MainWindow* ICore::mainWindow()
 {
     return m_mainwindow;
 }

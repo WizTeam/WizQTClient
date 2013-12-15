@@ -7,6 +7,8 @@
 #include <QMessageBox>
 #include <QLabel>
 
+#include <coreplugin/icore.h>
+
 #include "share/wizDatabaseManager.h"
 
 #include "wiznotestyle.h"
@@ -18,7 +20,6 @@
 
 #include "wizmainwindow.h"
 #include "utils/pathresolve.h"
-#include "icore.h"
 
 using namespace Core::Internal;
 

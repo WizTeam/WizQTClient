@@ -3,11 +3,12 @@
 
 #include <QDebug>
 
+#include <coreplugin/icore.h>
+
 #include "wizDocumentView.h"
 #include "share/wizobject.h"
 #include "sync/token.h"
 #include "sync/apientry.h"
-#include "icore.h"
 
 using namespace Core;
 

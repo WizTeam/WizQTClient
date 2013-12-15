@@ -12,6 +12,8 @@
 #include <QWebFrame>
 #include <QUndoStack>
 
+#include <coreplugin/icore.h>
+
 #include "wizdef.h"
 #include "share/wizmisc.h"
 #include "wizmainwindow.h"
@@ -24,7 +26,6 @@
 
 #include "utils/pathresolve.h"
 #include "utils/logger.h"
-#include "icore.h"
 
 using namespace Core;
 using namespace Core::Internal;

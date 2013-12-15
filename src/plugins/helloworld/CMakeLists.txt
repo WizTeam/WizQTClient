@@ -22,10 +22,11 @@ qt_suppress_warnings(helloworld)
 # set all include directories for in and out of source builds
 include_directories(
     ${libs_SOURCE_DIR}
+    ${plugins_SOURCE_DIR}
     ${CMAKE_CURRENT_BINARY_DIR}
 )
 
-target_link_libraries(helloworld extensionsystem)
+target_link_libraries(helloworld extensionsystem coreplugin)
 
 add_custom_command(TARGET helloworld POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/helloworld.pluginspec ${WIZNOTE_PLUGIN_DIR})

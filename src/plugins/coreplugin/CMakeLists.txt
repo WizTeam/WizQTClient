@@ -4,10 +4,12 @@ set(coreplugin_HEADERS
     core_global.h
     coreplugin.h
     coreconstants.h
+    icore.h
 )
 
 set(coreplugin_SOURCES
     coreplugin.cpp
+    icore.cpp
 )
 
 set(coreplugin_FORMS

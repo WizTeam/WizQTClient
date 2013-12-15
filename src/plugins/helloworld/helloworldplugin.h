@@ -32,6 +32,12 @@
 
 #include <extensionsystem/iplugin.h>
 
+namespace Core {
+class CWizDocumentView;
+}
+
+struct WIZDOCUMENTDATA;
+
 namespace HelloWorld {
 namespace Internal {
 
@@ -50,7 +56,9 @@ public:
 
     void extensionsInitialized();
 
+
 private slots:
+    void onViewNoteLoaded(Core::CWizDocumentView* view,const WIZDOCUMENTDATA& doc);
     void sayHelloWorld();
 };
 

@@ -3,6 +3,8 @@
 
 #include <QObject>
 
+#include "core_global.h"
+
 struct WIZDOCUMENTDATA;
 
 namespace Core {
@@ -12,7 +14,7 @@ namespace Internal {
 class MainWindow;
 }
 
-class ICore : public QObject
+class CORE_EXPORT ICore : public QObject
 {
     Q_OBJECT
 
@@ -22,7 +24,7 @@ class ICore : public QObject
 
 public:
     static ICore* instance();
-    static QWidget* mainWindow();
+    static Internal::MainWindow* mainWindow();
 
     static void emitViewNoteRequested(CWizDocumentView* view, const WIZDOCUMENTDATA& doc);
     static void emitViewNoteLoaded(CWizDocumentView* view, const WIZDOCUMENTDATA& doc);

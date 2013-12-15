@@ -7,7 +7,8 @@
 #include <QSplitter>
 #include <QList>
 
-#include "icore.h"
+#include <coreplugin/icore.h>
+
 #include "titleedit.h"
 #include "cellbutton.h"
 #include "infobar.h"

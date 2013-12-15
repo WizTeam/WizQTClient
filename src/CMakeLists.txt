@@ -89,7 +89,7 @@ set(wiznote_SOURCES
     wizproxydialog.cpp
     wizcreateaccountdialog.cpp
     wizmainwindow.cpp
-    icore.cpp
+    #icore.cpp
     notecomments.cpp
     cellbutton.cpp
     titlebar.cpp
@@ -198,7 +198,7 @@ set(wiznote_HEADERS
     wizproxydialog.h
     wizcreateaccountdialog.h
     wizmainwindow.h
-    icore.h
+    #icore.h
     notecomments.h
     notecomments_p.h
     cellbutton.h
@@ -339,6 +339,7 @@ qt_use_modules(wiznote)
 qt_suppress_warnings(wiznote)
 
 include_directories(
+    ${plugins_SOURCE_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_CURRENT_BINARY_DIR}
     ${CMAKE_SOURCE_DIR}/lib
@@ -358,5 +359,6 @@ target_link_libraries(${PROJECT_NAME}
     clucene-shared-static
     extensionsystem
     aggregation
+    coreplugin
     ${CMAKE_DL_LIBS}
 )

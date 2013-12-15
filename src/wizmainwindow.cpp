@@ -14,6 +14,8 @@
 #include "mac/wizmachelper.h"
 #endif
 
+#include <coreplugin/icore.h>
+
 #include "wizDocumentWebView.h"
 #include "wizactions.h"
 #include "wizAboutDialog.h"
@@ -53,7 +55,6 @@
 
 #include "plugindialog.h"
 
-#include "icore.h"
 #include "notecomments.h"
 
 using namespace Core;

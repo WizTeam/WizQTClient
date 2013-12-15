@@ -32,7 +32,6 @@
 //#include <coreplugin/actionmanager/actionmanager.h>
 //#include <coreplugin/actionmanager/actioncontainer.h>
 //#include <coreplugin/coreconstants.h>
-//#include <coreplugin/icore.h>
 //#include <coreplugin/imode.h>
 //#include <coreplugin/modemanager.h>
 //#include <coreplugin/id.h>
@@ -43,6 +42,9 @@
 #include <QMenu>
 #include <QMessageBox>
 #include <QPushButton>
+
+#include <coreplugin/icore.h>
+#include "../../share/wizobject.h"
 
 namespace HelloWorld {
 namespace Internal {
@@ -91,6 +93,7 @@ bool HelloWorldPlugin::initialize(const QStringList &arguments, QString *errorMe
 {
     Q_UNUSED(arguments)
     Q_UNUSED(errorMessage)
+
 
     // Create a unique context for our own view, that will be used for the
     // menu entry later.
@@ -141,6 +144,17 @@ bool HelloWorldPlugin::initialize(const QStringList &arguments, QString *errorMe
 */
 void HelloWorldPlugin::extensionsInitialized()
 {
+    connect(Core::ICore::instance(), SIGNAL(viewNoteLoaded(Core::CWizDocumentView*,WIZDOCUMENTDATA)),
+            SLOT(onViewNoteLoaded(Core::CWizDocumentView*,WIZDOCUMENTDATA)));
+}
+
+
+void HelloWorldPlugin::onViewNoteLoaded(Core::CWizDocumentView* view,const WIZDOCUMENTDATA& doc)
+{
+    Q_UNUSED(view);
+    Q_UNUSED(doc);
+
+    sayHelloWorld();
 }
 
 void HelloWorldPlugin::sayHelloWorld()

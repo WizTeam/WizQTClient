@@ -6,6 +6,8 @@
 #include <QLabel>
 #include <QHBoxLayout>
 
+#include <coreplugin/icore.h>
+
 #include "share/wizDatabaseManager.h"
 #include "widgets/wizScrollBar.h"
 #include "wizDocumentWebView.h"
@@ -15,7 +17,6 @@
 #include "share/wizsettings.h"
 #include "share/wizuihelper.h"
 
-#include "icore.h"
 #include "titlebar.h"
 
 using namespace Core;
