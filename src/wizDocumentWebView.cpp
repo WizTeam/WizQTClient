@@ -87,6 +87,7 @@ public:
     }
 
     bool result() const { return m_bOk; }
+    QString guid() const { return m_strGUID; }
 
 private:
     CWizDatabase& m_db;
@@ -121,6 +122,7 @@ public:
     }
 
     QString result() const { return m_strHtmlFile; }
+    QString guid() const { return m_strGUID; }
 
 private:
     CWizDatabase& m_db;
@@ -164,10 +166,10 @@ void CWizDocumentWebViewWorkerPool::on_timer_timeout()
         if (worker->isFinished()) {
             if (worker->type() == CWizDocumentWebViewWorker::Saver) {
                 CWizDocumentWebViewSaver* saver = dynamic_cast<CWizDocumentWebViewSaver*>(worker);
-                Q_EMIT saved(saver->result());
+                Q_EMIT saved(saver->guid(), saver->result());
             } else if (worker->type() == CWizDocumentWebViewWorker::Loader) {
                 CWizDocumentWebViewLoader* loader = dynamic_cast<CWizDocumentWebViewLoader*>(worker);
-                Q_EMIT loaded(loader->result());
+                Q_EMIT loaded(loader->guid(), loader->result());
             } else {
                 Q_ASSERT(0);
             }
@@ -265,6 +267,7 @@ CWizDocumentWebView::CWizDocumentWebView(CWizExplorerApp& app, QWidget* parent)
     , m_app(app)
     , m_dbMgr(app.databaseManager())
     , m_bEditorInited(false)
+    , m_noteFrame(0)
 {
     CWizDocumentWebViewPage* page = new CWizDocumentWebViewPage(this);
     setPage(page);
@@ -296,8 +299,10 @@ CWizDocumentWebView::CWizDocumentWebView(CWizExplorerApp& app, QWidget* parent)
     connect(&m_timerAutoSave, SIGNAL(timeout()), SLOT(onTimerAutoSaveTimout()));
 
     m_workerPool = new CWizDocumentWebViewWorkerPool(m_app, this);
-    connect(m_workerPool, SIGNAL(loaded(const QString&)), SLOT(on_documentReady(const QString&)));
-    connect(m_workerPool, SIGNAL(saved(bool)), SLOT(on_documentSaved(bool)));
+    connect(m_workerPool, SIGNAL(loaded(const QString&, const QString&)),
+            SLOT(onDocumentReady(const QString&, const QString&)));
+    connect(m_workerPool, SIGNAL(saved(const QString&, bool)),
+            SLOT(onDocumentSaved(const QString&, bool)));
 }
 
 void CWizDocumentWebView::inputMethodEvent(QInputMethodEvent* event)
@@ -461,38 +466,30 @@ void CWizDocumentWebView::onTimerAutoSaveTimout()
     saveDocument(view()->note(), false);
 }
 
-void CWizDocumentWebView::on_documentReady(const QString& strFileName)
+void CWizDocumentWebView::onDocumentReady(const QString& strGUID, const QString& strFileName)
 {
-    // FIXME: deal with encrypted document
-
-    m_strHtmlFileName = strFileName;
+    m_mapFile.insert(strGUID, strFileName);
 
     if (m_bEditorInited) {
         viewDocumentInEditor(m_bEditingMode);
     } else {
-        initEditorAndLoadDocument();
+        initEditor();
     }
 }
 
-void CWizDocumentWebView::on_documentSaved(bool ok)
+void CWizDocumentWebView::onDocumentSaved(const QString& strGUID, bool ok)
 {
+    Q_UNUSED(strGUID);
+
     if (!ok) {
         TOLOG("Save document failed");
     }
-
-    //MainWindow* mainWindow = qobject_cast<MainWindow *>(m_app.mainWindow());
-    //mainWindow->SetSavingDocument(false);
 }
 
 void CWizDocumentWebView::viewDocument(const WIZDOCUMENTDATA& doc, bool editing)
 {
     // clear gui
     MainWindow* window = qobject_cast<MainWindow *>(m_app.mainWindow());
-
-    // save document
-    //if (m_bEditorInited) {
-    //    saveDocument(false);
-    //}
 
     // set data
     m_bEditingMode = editing;
@@ -591,7 +588,7 @@ void CWizDocumentWebView::editorFocus()
     page()->mainFrame()->evaluateJavaScript("editor.focus();");
 }
 
-void CWizDocumentWebView::initEditorAndLoadDocument()
+void CWizDocumentWebView::initEditor()
 {
     if (m_bEditorInited)
         return;
@@ -604,29 +601,58 @@ void CWizDocumentWebView::initEditorAndLoadDocument()
     page()->setLinkDelegationPolicy(QWebPage::DelegateAllLinks);
 
     connect(page()->mainFrame(), SIGNAL(javaScriptWindowObjectCleared()),
-            SLOT(on_editor_populateJavaScriptWindowObject()));
+            SLOT(onEditorPopulateJavaScriptWindowObject()));
 
     connect(page()->mainFrame(), SIGNAL(loadFinished(bool)),
-            SLOT(on_editor_loadFinished(bool)));
+            SLOT(onEditorLoadFinished(bool)));
 
     connect(page(), SIGNAL(linkClicked(const QUrl&)),
-            SLOT(on_editor_linkClicked(const QUrl&)));
+            SLOT(onEditorLinkClicked(const QUrl&)));
 
     connect(page(), SIGNAL(selectionChanged()),
-            SLOT(on_editor_selectionChanged()));
+            SLOT(onEditorSelectionChanged()));
 
     connect(page(), SIGNAL(contentsChanged()),
-            SLOT(on_editor_contentChanged()));
+            SLOT(onEditorContentChanged()));
 
     page()->mainFrame()->setHtml(strHtml, url);
 }
 
-void CWizDocumentWebView::on_editor_contentChanged()
+void CWizDocumentWebView::onEditorLoadFinished(bool ok)
+{
+    if (!ok) {
+        m_bEditorInited = false;
+        TOLOG("Wow, loading editor failed!");
+        return;
+    }
+
+    m_bEditorInited = true;
+    viewDocumentInEditor(m_bEditingMode);
+}
+
+QWebFrame* CWizDocumentWebView::noteFrame()
+{
+    QList<QWebFrame*> frames = page()->mainFrame()->childFrames();
+    for (int i = 0; i < frames.size(); i++) {
+        if (frames.at(i)->frameName() == "ueditor_0")
+            return frames.at(i);
+    }
+
+    return 0;
+}
+
+void CWizDocumentWebView::onEditorPopulateJavaScriptWindowObject()
+{
+    page()->mainFrame()->addToJavaScriptWindowObject("WizExplorerApp", m_app.object());
+    page()->mainFrame()->addToJavaScriptWindowObject("WizEditor", this);
+}
+
+void CWizDocumentWebView::onEditorContentChanged()
 {
     Q_EMIT statusChanged();
 }
 
-void CWizDocumentWebView::on_editor_selectionChanged()
+void CWizDocumentWebView::onEditorSelectionChanged()
 {
 
 #ifdef Q_OS_MAC
@@ -639,24 +665,7 @@ void CWizDocumentWebView::on_editor_selectionChanged()
     Q_EMIT statusChanged();
 }
 
-void CWizDocumentWebView::on_editor_populateJavaScriptWindowObject()
-{
-    page()->mainFrame()->addToJavaScriptWindowObject("WizExplorerApp", m_app.object());
-}
-
-void CWizDocumentWebView::on_editor_loadFinished(bool ok)
-{
-    if (!ok) {
-        m_bEditorInited = false;
-        TOLOG("Wow, loading editor failed!");
-        return;
-    }
-
-    m_bEditorInited = true;
-    viewDocumentInEditor(m_bEditingMode);
-}
-
-void CWizDocumentWebView::on_editor_linkClicked(const QUrl& url)
+void CWizDocumentWebView::onEditorLinkClicked(const QUrl& url)
 {
     if (isInternalUrl(url)) {
         viewDocumentByUrl(url);
@@ -740,14 +749,18 @@ void CWizDocumentWebView::viewDocumentInEditor(bool editing)
 {
     Q_ASSERT(m_bEditorInited);
 
-    bool ret = false;
-    if (!m_strHtmlFileName.isEmpty()) {
-        QString strScript = QString("viewDocument('%1', '%2', %3);")
-                .arg(view()->note().strGUID)
-                .arg(m_strHtmlFileName)
-                .arg(editing ? "true" : "false");
-        ret = page()->mainFrame()->evaluateJavaScript(strScript).toBool();
+    QString strGUID = view()->note().strGUID;
+    QString strFileName = m_mapFile.value(strGUID);
+    if (strFileName.isEmpty()) {
+        return;
     }
+
+    bool ret = false;
+    QString strScript = QString("viewDocument('%1', '%2', %3);")
+            .arg(strGUID)
+            .arg(strFileName)
+            .arg(editing ? "true" : "false");
+    ret = page()->mainFrame()->evaluateJavaScript(strScript).toBool();
 
     MainWindow* window = qobject_cast<MainWindow *>(m_app.mainWindow());
     if (!ret) {
@@ -763,8 +776,11 @@ void CWizDocumentWebView::viewDocumentInEditor(bool editing)
     page()->undoStack()->clear();
 
     update();
+}
 
-    ICore::instance()->emitViewNoteLoaded(view(), view()->note());
+void CWizDocumentWebView::onNoteLoadFinished()
+{
+    ICore::instance()->emitViewNoteLoaded(view(), view()->note(), true);
 }
 
 void CWizDocumentWebView::setEditingDocument(bool editing)
@@ -780,7 +796,6 @@ void CWizDocumentWebView::setEditingDocument(bool editing)
         Q_EMIT focusIn();
     }
 
-    //bool bEditing = page()->mainFrame()->evaluateJavaScript("isEditing();").toBool();
     if (m_bEditingMode) {
         saveDocument(view()->note(), false);
     }
@@ -806,8 +821,9 @@ void CWizDocumentWebView::saveDocument(const WIZDOCUMENTDATA& data, bool force)
         return;
     }
 
+    QString strFileName = m_mapFile.value(data.strGUID);
     QString strHtml = page()->mainFrame()->evaluateJavaScript("editor.getContent();").toString();
-    m_workerPool->save(data, strHtml, m_strHtmlFileName, 0);
+    m_workerPool->save(data, strHtml, strFileName, 0);
 }
 
 QString CWizDocumentWebView::editorCommandQueryCommandValue(const QString& strCommand)

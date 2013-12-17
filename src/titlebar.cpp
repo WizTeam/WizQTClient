@@ -79,8 +79,8 @@ TitleBar::TitleBar(QWidget *parent)
     // comments
     m_commentsBtn = new CellButton(CellButton::Right, this);
     connect(m_commentsBtn, SIGNAL(clicked()), SLOT(onCommentsButtonClicked()));
-    connect(ICore::instance(), SIGNAL(viewNoteLoaded(Core::CWizDocumentView*, const WIZDOCUMENTDATA&)),
-            SLOT(onViewNoteLoaded(Core::CWizDocumentView*, const WIZDOCUMENTDATA&)));
+    connect(ICore::instance(), SIGNAL(viewNoteLoaded(Core::CWizDocumentView*,const WIZDOCUMENTDATA&,bool)),
+            SLOT(onViewNoteLoaded(Core::CWizDocumentView*,const WIZDOCUMENTDATA&,bool)));
 
     QWidget* line1 = new QWidget(this);
     line1->setFixedHeight(12);
@@ -289,9 +289,12 @@ void TitleBar::onCommentsButtonClicked()
     }
 }
 
-void TitleBar::onViewNoteLoaded(CWizDocumentView* view, const WIZDOCUMENTDATA& note)
+void TitleBar::onViewNoteLoaded(CWizDocumentView* view, const WIZDOCUMENTDATA& note, bool bOk)
 {
     Q_UNUSED(note);
+
+    if (!bOk)
+        return;
 
     if (view != noteView()) {
         return;

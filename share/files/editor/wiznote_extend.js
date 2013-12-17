@@ -5,7 +5,8 @@ var
     objCommon = objApp.CreateWizObject("WizKMControls.WizCommonUI"),
     m_currentGUID = "",
     m_currentFileName = "",
-    m_editingMode = true;
+    m_header = null,
+    m_html = null;
 
 
 // setup ueditor
@@ -40,47 +41,61 @@ try {
         editor.ui.getDom('elementpath').style.display = "none";
         editor.ui.getDom('wordcount').style.display = "none";
         editor.ui._updateFullScreen();
+
+    });
+
+    editor.addListener('aftersetcontent', function() {
+        setTimeout(function() {WizEditor.onNoteLoadFinished();}, 3000);
     });
 
 } catch (err) {
     alert(err);
 }
 
-function setEditorHtml(html)
+function setEditorHtml(html, bEditing)
 {
     editor.reset();
-
     editor.setContent(html);
+    editor.document.head = m_header; // restore original header
+    bEditing ? editor.setEnabled() : editor.setDisabled();
 
     window.UE.utils.domReady(function() {
         editor.window.scrollTo(0, 0);
     });
 }
 
-function setEditing(mode) {
-    if (m_editingMode == mode) {
-        return;
-    }
-
-    mode ? editor.setEnabled() : editor.setDisabled();
-    m_editingMode = mode;
+function setEditing(bEditing) {
+    editor.setContent(m_html);
+    editor.document.head = m_header; // restore original header
+    bEditing ? editor.setEnabled() : editor.setDisabled();
 }
 
-function viewDocument(guid, filename, mode)
+function viewDocument(guid, filename, bEditing)
 {
     try {
         m_currentGUID = guid;
         m_currentFileName = filename;
 
         var html = objCommon.LoadTextFromFile(filename);
+        var body = html.match(/<body[\S\s]*<\/body>/g);
+        if (body) {
+            m_html = body;
+        } else {
+            m_html = html;
+        }
+
+        console.log(m_html);
+
+        //var root = window.UE.htmlparser(html);
+        //editor.filterInputRule(root);
+        //m_html = root.toHtml();
 
         if (m_inited) {
-            setEditorHtml(html);
-            setEditing(mode);
+            setEditorHtml(m_html, bEditing);
         } else {
             editor.ready(function() {
-                setEditorHtml(html);
-                setEditing(mode);
+                m_header = editor.document.head; // save original header
+                setEditorHtml(m_html, bEditing);
                 m_inited = true;
             });
         }

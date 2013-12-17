@@ -5,11 +5,13 @@ set(coreplugin_HEADERS
     coreplugin.h
     coreconstants.h
     icore.h
+    inoteview.h
 )
 
 set(coreplugin_SOURCES
     coreplugin.cpp
     icore.cpp
+    inoteview.cpp
 )
 
 set(coreplugin_FORMS

@@ -27,12 +27,12 @@ public:
     static Internal::MainWindow* mainWindow();
 
     static void emitViewNoteRequested(CWizDocumentView* view, const WIZDOCUMENTDATA& doc);
-    static void emitViewNoteLoaded(CWizDocumentView* view, const WIZDOCUMENTDATA& doc);
+    static void emitViewNoteLoaded(CWizDocumentView* view, const WIZDOCUMENTDATA& doc, bool bOk);
     static void emitViewNoteModeChanged(CWizDocumentView* view, bool bLocked);
 
 Q_SIGNALS:
     void viewNoteRequested(Core::CWizDocumentView* view, const WIZDOCUMENTDATA& doc);
-    void viewNoteLoaded(Core::CWizDocumentView* view, const WIZDOCUMENTDATA& doc);
+    void viewNoteLoaded(Core::CWizDocumentView* view, const WIZDOCUMENTDATA& doc, bool bOk);
     void viewNoteModeChanged(Core::CWizDocumentView* view, bool bLocked);
     void closeNoteRequested(Core::CWizDocumentView* view);
 };

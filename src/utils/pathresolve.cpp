@@ -1,5 +1,6 @@
 #include "pathresolve.h"
 
+#include <QtGlobal>
 #include <QApplication>
 #include <QDir>
 
@@ -40,6 +41,21 @@ QString PathResolve::dataStorePath()
 
     ensurePathExists(strPath);
     return strPath;
+}
+
+QString PathResolve::cachePath()
+{
+    QString strCachePath = qgetenv("XDG_CACHE_HOME");
+    if (strCachePath.isEmpty()) {
+#ifdef Q_OS_LINUX
+        strCachePath = qgetenv("HOME") + "/.cache/wiznote/";
+#else
+        strCachePath = dataStorePath() + "cache/";
+#endif
+    }
+
+    ensurePathExists(strCachePath);
+    return strCachePath;
 }
 
 QString PathResolve::logPath()

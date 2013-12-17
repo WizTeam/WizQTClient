@@ -66,7 +66,7 @@ public Q_SLOTS:
     void onInfoButtonClicked();
 
     void onCommentsButtonClicked();
-    void onViewNoteLoaded(Core::CWizDocumentView* view, const WIZDOCUMENTDATA& note);
+    void onViewNoteLoaded(Core::CWizDocumentView* view, const WIZDOCUMENTDATA& note, bool bOk);
     void onTokenAcquired(const QString& strToken);
     void onGetCommentsCountFinished(int nCount);
 

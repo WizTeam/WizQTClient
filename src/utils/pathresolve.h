@@ -12,6 +12,7 @@ public:
     static QString resourcesPath();
     static QString pluginsPath();
     static QString dataStorePath();
+    static QString cachePath();
     static QString tempPath();
     static QString logPath();
 

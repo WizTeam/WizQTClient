@@ -1,7 +1,5 @@
 #include "icore.h"
 
-//#include "wizmainwindow.h"
-
 using namespace Core::Internal;
 
 namespace Core {
@@ -38,9 +36,9 @@ void ICore::emitViewNoteRequested(CWizDocumentView* view,
 }
 
 void ICore::emitViewNoteLoaded(CWizDocumentView* view,
-                               const WIZDOCUMENTDATA& doc)
+                               const WIZDOCUMENTDATA& doc, bool bOk)
 {
-    Q_EMIT m_instance->viewNoteLoaded(view, doc);
+    Q_EMIT m_instance->viewNoteLoaded(view, doc, bOk);
 }
 
 void ICore::emitViewNoteModeChanged(CWizDocumentView* view, bool bLocked)

@@ -1,7 +1,7 @@
 #ifndef CORE_WIZDOCUMENTVIEW_H
 #define CORE_WIZDOCUMENTVIEW_H
 
-#include <QWidget>
+#include <coreplugin/inoteview.h>
 
 #include "share/wizobject.h"
 
@@ -19,6 +19,8 @@ class CWizDocumentWebView;
 class CWizDatabase;
 class CWizSplitter;
 
+class QWebFrame;
+
 
 namespace Core {
 namespace Internal {
@@ -26,7 +28,7 @@ class TitleBar;
 class EditorToolBar;
 } // namespace Internal
 
-class CWizDocumentView : public QWidget
+class CWizDocumentView : public INoteView
 {
     Q_OBJECT
 
@@ -74,8 +76,11 @@ public:
     void setModified(bool modified);
     void settingsChanged();
 
+    QWebFrame* noteFrame();
+
 public Q_SLOTS:
     void onViewNoteRequested(Core::CWizDocumentView* view, const WIZDOCUMENTDATA& doc);
+    void onViewNoteLoaded(Core::CWizDocumentView*,const WIZDOCUMENTDATA&,bool);
 
     void on_document_modified(const WIZDOCUMENTDATA& documentOld,
                               const WIZDOCUMENTDATA& documentNew);

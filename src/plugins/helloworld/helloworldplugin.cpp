@@ -144,8 +144,8 @@ bool HelloWorldPlugin::initialize(const QStringList &arguments, QString *errorMe
 */
 void HelloWorldPlugin::extensionsInitialized()
 {
-    connect(Core::ICore::instance(), SIGNAL(viewNoteLoaded(Core::CWizDocumentView*,WIZDOCUMENTDATA)),
-            SLOT(onViewNoteLoaded(Core::CWizDocumentView*,WIZDOCUMENTDATA)));
+    //connect(Core::ICore::instance(), SIGNAL(viewNoteLoaded(Core::CWizDocumentView*,WIZDOCUMENTDATA)),
+    //        SLOT(onViewNoteLoaded(Core::CWizDocumentView*,WIZDOCUMENTDATA)));
 }
 
 

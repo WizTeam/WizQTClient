@@ -6,6 +6,7 @@
 #include <QPointer>
 #include <QMutex>
 #include <QColorDialog>
+#include <QMap>
 
 //#include "wizdownloadobjectdatadialog.h"
 #include "wizusercipherform.h"
@@ -17,6 +18,8 @@ class CWizEditorInsertTableForm;
 class CWizDocumentWebView;
 class CWizDocumentTransitionView;
 class CWizDocumentWebViewWorker;
+
+struct WIZODUCMENTDATA;
 
 namespace Core {
 class CWizDocumentView;
@@ -38,8 +41,8 @@ public Q_SLOTS:
     void on_timer_timeout();
 
 Q_SIGNALS:
-    void loaded(const QString& strFileName);
-    void saved(bool ok);
+    void loaded(const QString strGUID, const QString& strFileName);
+    void saved(const QString strGUID, bool ok);
 
 private:
     CWizDatabaseManager& m_dbMgr;
@@ -66,6 +69,7 @@ class CWizDocumentWebView : public QWebView
 public:
     CWizDocumentWebView(CWizExplorerApp& app, QWidget* parent);
     Core::CWizDocumentView* view();
+    QWebFrame* noteFrame();
 
     // view and save
     void viewDocument(const WIZDOCUMENTDATA& doc, bool editing);
@@ -103,8 +107,9 @@ public:
     bool editorCommandExecuteInsertHtml(const QString& strHtml, bool bNotSerialize);
 
 private:
+    void initEditor();
     void viewDocumentInEditor(bool editing);
-    void initEditorAndLoadDocument();
+
 
     bool isInternalUrl(const QUrl& url);
     void viewDocumentByUrl(const QUrl& url);
@@ -124,10 +129,11 @@ private:
 private:
     CWizExplorerApp& m_app;
     CWizDatabaseManager& m_dbMgr;
-    //WIZDOCUMENTDATA m_data;
+    QMap<QString, QString> m_mapFile;
+
+    QWebFrame* m_noteFrame;
 
     QTimer m_timerAutoSave;
-    QString m_strHtmlFileName;
     bool m_bEditorInited;
     bool m_bEditingMode;
 
@@ -140,20 +146,24 @@ private:
     QPointer<CWizEditorInsertTableForm> m_editorInsertTableForm;
     QPointer<QColorDialog> m_colorDialog;
 
+public:
+    Q_INVOKABLE void onNoteLoadFinished(); // editor callback
+
 public Q_SLOTS:
-    void on_editor_selectionChanged();
+
     void onCipherDialogClosed();
     void on_download_finished(const WIZOBJECTDATA& data, bool bSucceed);
 
-    void on_editor_populateJavaScriptWindowObject();
-    void on_editor_loadFinished(bool ok);
-    void on_editor_linkClicked(const QUrl& url);
-    void on_editor_contentChanged();
+    void onEditorPopulateJavaScriptWindowObject();
+    void onEditorLoadFinished(bool ok);
+    void onEditorLinkClicked(const QUrl& url);
+    void onEditorContentChanged();
+    void onEditorSelectionChanged();
 
     void onTimerAutoSaveTimout();
 
-    void on_documentReady(const QString& strFileName);
-    void on_documentSaved(bool ok);
+    void onDocumentReady(const QString& strGUID, const QString& strFileName);
+    void onDocumentSaved(const QString& strGUID, bool ok);
 
     void on_editorCommandExecuteLinkInsert_accepted();
     void on_editorCommandExecuteTableInsert_accepted();

@@ -23,7 +23,7 @@ using namespace Core;
 using namespace Core::Internal;
 
 CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
-    : QWidget(parent)
+    : INoteView(parent)
     , m_app(app)
     , m_userSettings(app.userSettings())
     , m_dbMgr(app.databaseManager())
@@ -74,6 +74,9 @@ CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
 
     connect(Core::ICore::instance(), SIGNAL(viewNoteRequested(Core::CWizDocumentView*,const WIZDOCUMENTDATA&)),
             SLOT(onViewNoteRequested(Core::CWizDocumentView*,const WIZDOCUMENTDATA&)));
+
+    connect(Core::ICore::instance(), SIGNAL(viewNoteLoaded(Core::CWizDocumentView*,WIZDOCUMENTDATA,bool)),
+            SLOT(onViewNoteLoaded(Core::CWizDocumentView*,const WIZDOCUMENTDATA&,bool)));
 }
 
 CWizDocumentView::~CWizDocumentView()
@@ -101,6 +104,14 @@ void CWizDocumentView::onViewNoteRequested(CWizDocumentView* view, const WIZDOCU
     } else {
         viewNote(doc, false);
     }
+}
+
+void CWizDocumentView::onViewNoteLoaded(Core::CWizDocumentView* view, const WIZDOCUMENTDATA& doc, bool bOk)
+{
+    if (view != this)
+        return;
+
+    showClient(bOk);
 }
 
 bool CWizDocumentView::reload()
@@ -206,6 +217,11 @@ void CWizDocumentView::setEditorFocus()
 {
     m_web->setFocus(Qt::MouseFocusReason);
     m_web->editorFocus();
+}
+
+QWebFrame* CWizDocumentView::noteFrame()
+{
+    return m_web->noteFrame();
 }
 
 void CWizDocumentView::on_attachment_created(const WIZDOCUMENTATTACHMENTDATA& attachment)
