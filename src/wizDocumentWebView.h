@@ -84,6 +84,8 @@ public:
 
     // initialize editor style before render, only invoke once.
     void initEditorStyle();
+    QString defaultCss();
+
 
     /* editor related */
     void editorResetFont();

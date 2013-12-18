@@ -6,5 +6,6 @@
         <file>logo.png</file>
         <file>notify_bg.png</file>
         <file>notify_bg_inactive.png</file>
+        <file>default.css</file>
     </qresource>
 </RCC>

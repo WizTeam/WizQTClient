@@ -14,6 +14,7 @@ try {
     var editorOption = {
     toolbars: [],
     initialStyle: 'body{font-size:13px}',
+    enterTag: 'div',
     fullscreen: true,
     autoHeightEnabled: false,
     scaleEnabled: false,
@@ -53,11 +54,11 @@ try {
 function setEditorHtml(html, bEditing)
 {
     editor.reset();
-    if (bEditing) {
+    //if (bEditing) {
         editor.document.head.innerHTML = m_header; // restore original header
-    } else {
-        editor.document.head.innerHTML = '';
-    }
+    //} else {
+    //    editor.document.head.innerHTML = '';
+    //}
 
     bEditing ? editor.setEnabled() : editor.setDisabled();
     editor.setContent(html);
@@ -68,11 +69,11 @@ function setEditorHtml(html, bEditing)
 }
 
 function setEditing(bEditing) {
-    if (bEditing) {
+    //if (bEditing) {
         editor.document.head.innerHTML = m_header; // restore original header
-    } else {
-        editor.document.head.innerHTML = '';
-    }
+    //} else {
+    //    editor.document.head.innerHTML = '';
+    //}
 
     bEditing ? editor.setEnabled() : editor.setDisabled();
     editor.setContent(wiz_html);

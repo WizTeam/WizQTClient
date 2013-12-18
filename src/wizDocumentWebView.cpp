@@ -559,6 +559,27 @@ void CWizDocumentWebView::reloadNoteData(const WIZDOCUMENTDATA& data)
     m_workerPool->load(data);
 }
 
+QString CWizDocumentWebView::defaultCss()
+{
+    QFile f(":/default.css");
+    if (!f.open(QIODevice::ReadOnly)) {
+        qDebug() << "[Editor]Failed to get default css code";
+        return 0;
+    }
+
+    QTextStream ts(&f);
+    QString strCss = ts.readAll();
+    f.close();
+
+    QString strFont = m_app.userSettings().defaultFontFamily();
+    int nSize = m_app.userSettings().defaultFontSize();
+
+    strCss.replace("/*default-font-family*/", QString("font-family:%1;").arg(strFont));
+    strCss.replace("/*default-font-size*/", QString("font-size:%1;").arg(nSize));
+
+    return strCss;
+}
+
 void CWizDocumentWebView::initEditorStyle()
 {
     QString strFont = m_app.userSettings().defaultFontFamily();
