@@ -75,12 +75,12 @@ public:
     void viewDocument(const WIZDOCUMENTDATA& doc, bool editing);
     void setEditingDocument(bool editing);
     void saveDocument(const WIZDOCUMENTDATA& data, bool force);
+    void reloadNoteData(const WIZDOCUMENTDATA& data);
 
     bool isInited() const { return m_bEditorInited; }
     bool isEditing() const { return m_bEditingMode; }
 
     //const WIZDOCUMENTDATA& document() { return m_data; }
-    void reloadDocument();
 
     // initialize editor style before render, only invoke once.
     void initEditorStyle();

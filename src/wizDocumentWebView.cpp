@@ -7,6 +7,7 @@
 #include <QUrl>
 #include <QDir>
 #include <QString>
+#include <QRegExp>
 
 #include <QApplication>
 #include <QWebFrame>
@@ -550,17 +551,12 @@ void CWizDocumentWebView::on_download_finished(const WIZOBJECTDATA& data,
     m_workerPool->load(view()->note());
 }
 
-void CWizDocumentWebView::reloadDocument()
+void CWizDocumentWebView::reloadNoteData(const WIZDOCUMENTDATA& data)
 {
-    Q_ASSERT(!view()->note().strGUID.isEmpty());
+    Q_ASSERT(!data.strGUID.isEmpty());
 
-    // FIXME: reload may request when update from server or locally reflected by itself
-
-    //WIZDOCUMENTDATA data;
-    //m_dbMgr.db(document().strKbGUID).DocumentFromGUID(document().strGUID, data);
-
-    //m_renderer->setData(data);
-    //m_renderer->load();
+    // reload may triggered when update from server or locally reflected by modify
+    m_workerPool->load(data);
 }
 
 void CWizDocumentWebView::initEditorStyle()
@@ -745,6 +741,41 @@ void CWizDocumentWebView::viewDocumentByUrl(const QUrl& url)
    }
 }
 
+QString escapeJavascriptString(const QString & str)
+{
+    QString out;
+    QRegExp rx("(\\r|\\n|\\\\|\"|\')");
+    int pos = 0, lastPos = 0;
+
+    while ((pos = rx.indexIn(str, pos)) != -1)
+    {
+        out += str.mid(lastPos, pos - lastPos);
+
+        switch (rx.cap(1).at(0).unicode())
+        {
+        case '\r':
+            out += "\\r";
+            break;
+        case '\n':
+            out += "\\n";
+            break;
+        case '\\':
+            out += "\\\\";
+            break;
+        case '"':
+            out += "\\\"";
+            break;
+        case '\'':
+            out += "\"";
+            break;
+        }
+        pos++;
+        lastPos = pos;
+    }
+    out += str.mid(lastPos);
+    return out;
+}
+
 void CWizDocumentWebView::viewDocumentInEditor(bool editing)
 {
     Q_ASSERT(m_bEditorInited);
@@ -755,13 +786,33 @@ void CWizDocumentWebView::viewDocumentInEditor(bool editing)
         return;
     }
 
-    bool ret = false;
-    QString strScript = QString("viewDocument('%1', '%2', %3);")
-            .arg(strGUID)
-            .arg(strFileName)
-            .arg(editing ? "true" : "false");
-    ret = page()->mainFrame()->evaluateJavaScript(strScript).toBool();
+    QString strHtml;
+    bool ret = WizLoadUnicodeTextFromFile(strFileName, strHtml);
+    if (!ret) {
+        // hide client and show error
+        return;
+    }
 
+    QRegExp regex("<body.*>([\\s\\S]*)</body>", Qt::CaseInsensitive);
+    if (regex.indexIn(strHtml) != -1) {
+        strHtml = regex.cap(1);
+    }
+
+    strHtml = escapeJavascriptString(strHtml);
+
+    QString strExec = QString("viewNote('%1', %2, '%3');")
+            .arg(strGUID)
+            .arg(editing ? "true" : "false")
+            .arg(strHtml);
+
+    ret = page()->mainFrame()->evaluateJavaScript(strExec).toBool();
+    if (!ret) {
+        qDebug() << "[Editor] failed to load note: " << strExec;
+        // hide client and show error
+        return;
+    }
+
+    // show client
     MainWindow* window = qobject_cast<MainWindow *>(m_app.mainWindow());
     if (!ret) {
         window->showClient(false);
@@ -771,9 +822,9 @@ void CWizDocumentWebView::viewDocumentInEditor(bool editing)
 
     window->showClient(true);
     window->transitionView()->hide();
-    m_timerAutoSave.start();
 
     page()->undoStack()->clear();
+    m_timerAutoSave.start();
 
     update();
 }

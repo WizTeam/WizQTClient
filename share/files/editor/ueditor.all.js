@@ -6093,36 +6093,36 @@ UE.plugins['defaultfilter'] = function () {
                             node.innerHTML(browser.ie ? '&nbsp;' : '<br/>')
                         }
                         break;
-                    case 'div':
-                        if(node.getAttr('cdata_tag')){
-                            break;
-                        }
-                        //针对代码这里不处理插入代码的div
-                        val = node.getAttr('class');
-                        if(val && /^line number\d+/.test(val)){
-                            break;
-                        }
-                        if(!allowDivTransToP){
-                            break;
-                        }
-                        var tmpNode, p = UE.uNode.createElement('p');
-                        while (tmpNode = node.firstChild()) {
-                            if (tmpNode.type == 'text' || !UE.dom.dtd.$block[tmpNode.tagName]) {
-                                p.appendChild(tmpNode);
-                            } else {
-                                if (p.firstChild()) {
-                                    node.parentNode.insertBefore(p, node);
-                                    p = UE.uNode.createElement('p');
-                                } else {
-                                    node.parentNode.insertBefore(tmpNode, node);
-                                }
-                            }
-                        }
-                        if (p.firstChild()) {
-                            node.parentNode.insertBefore(p, node);
-                        }
-                        node.parentNode.removeChild(node);
-                        break;
+                    //case 'div':
+                    //    if(node.getAttr('cdata_tag')){
+                    //        break;
+                    //    }
+                    //    //针对代码这里不处理插入代码的div
+                    //    val = node.getAttr('class');
+                    //    if(val && /^line number\d+/.test(val)){
+                    //        break;
+                    //    }
+                    //    if(!allowDivTransToP){
+                    //        break;
+                    //    }
+                    //    var tmpNode, p = UE.uNode.createElement('p');
+                    //    while (tmpNode = node.firstChild()) {
+                    //        if (tmpNode.type == 'text' || !UE.dom.dtd.$block[tmpNode.tagName]) {
+                    //            p.appendChild(tmpNode);
+                    //        } else {
+                    //            if (p.firstChild()) {
+                    //                node.parentNode.insertBefore(p, node);
+                    //                p = UE.uNode.createElement('p');
+                    //            } else {
+                    //                node.parentNode.insertBefore(tmpNode, node);
+                    //            }
+                    //        }
+                    //    }
+                    //    if (p.firstChild()) {
+                    //        node.parentNode.insertBefore(p, node);
+                    //    }
+                    //    node.parentNode.removeChild(node);
+                    //    break;
                     case 'dl':
                         node.tagName = 'ul';
                         break;

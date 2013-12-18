@@ -125,7 +125,7 @@ bool CWizDocumentView::reload()
 void CWizDocumentView::reloadNote()
 {
     reload();
-    m_web->reloadDocument();
+    m_web->reloadNoteData(note());
 }
 
 bool CWizDocumentView::defaultEditingMode()

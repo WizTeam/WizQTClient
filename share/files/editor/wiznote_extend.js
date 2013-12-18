@@ -1,12 +1,10 @@
 var
     editor = null,
-    m_inited = false;
+    m_inited = false,
     objApp = WizExplorerApp,
-    objCommon = objApp.CreateWizObject("WizKMControls.WizCommonUI"),
     m_currentGUID = "",
-    m_currentFileName = "",
-    m_header = null,
-    m_html = null;
+    m_header = "",
+    wiz_html = "";
 
 
 // setup ueditor
@@ -45,7 +43,7 @@ try {
     });
 
     editor.addListener('aftersetcontent', function() {
-        setTimeout(function() {WizEditor.onNoteLoadFinished();}, 3000);
+        WizEditor.onNoteLoadFinished();
     });
 
 } catch (err) {
@@ -55,9 +53,14 @@ try {
 function setEditorHtml(html, bEditing)
 {
     editor.reset();
-    editor.setContent(html);
-    editor.document.head = m_header; // restore original header
+    if (bEditing) {
+        editor.document.head.innerHTML = m_header; // restore original header
+    } else {
+        editor.document.head.innerHTML = '';
+    }
+
     bEditing ? editor.setEnabled() : editor.setDisabled();
+    editor.setContent(html);
 
     window.UE.utils.domReady(function() {
         editor.window.scrollTo(0, 0);
@@ -65,37 +68,28 @@ function setEditorHtml(html, bEditing)
 }
 
 function setEditing(bEditing) {
-    editor.setContent(m_html);
-    editor.document.head = m_header; // restore original header
+    if (bEditing) {
+        editor.document.head.innerHTML = m_header; // restore original header
+    } else {
+        editor.document.head.innerHTML = '';
+    }
+
     bEditing ? editor.setEnabled() : editor.setDisabled();
+    editor.setContent(wiz_html);
 }
 
-function viewDocument(guid, filename, bEditing)
+function viewNote(strGUID, bEditing, strHtml)
 {
     try {
-        m_currentGUID = guid;
-        m_currentFileName = filename;
-
-        var html = objCommon.LoadTextFromFile(filename);
-        var body = html.match(/<body[\S\s]*<\/body>/g);
-        if (body) {
-            m_html = body;
-        } else {
-            m_html = html;
-        }
-
-        console.log(m_html);
-
-        //var root = window.UE.htmlparser(html);
-        //editor.filterInputRule(root);
-        //m_html = root.toHtml();
+        m_currentGUID = strGUID;
+        wiz_html = strHtml;
 
         if (m_inited) {
-            setEditorHtml(m_html, bEditing);
+            setEditorHtml(wiz_html, bEditing);
         } else {
             editor.ready(function() {
-                m_header = editor.document.head; // save original header
-                setEditorHtml(m_html, bEditing);
+                m_header = editor.document.head.innerHTML; // save original header
+                setEditorHtml(wiz_html, bEditing);
                 m_inited = true;
             });
         }
