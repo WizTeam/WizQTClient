@@ -16,7 +16,7 @@ set(markdown_RCS
 )
 
 set(markdown_SPEC
-    markdown.pluginspec
+    MarkDown.pluginspec
 )
 
 include(QtChooser)
@@ -26,6 +26,7 @@ add_library(markdown SHARED ${markdown_SOURCES} ${markdown_HEADERS} ${markdown_F
 qt_use_modules(markdown)
 qt_suppress_warnings(markdown)
 
+set_target_properties(markdown PROPERTIES LIBRARY_OUTPUT_NAME "MarkDown")
 add_definitions(-DMARKDOWN_LIBRARY)
 
 include_directories(
@@ -35,7 +36,7 @@ include_directories(
 target_link_libraries(markdown extensionsystem coreplugin)
 
 add_custom_command(TARGET markdown POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/markdown.pluginspec ${WIZNOTE_PLUGIN_DIR})
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/MarkDown.pluginspec ${WIZNOTE_PLUGIN_DIR})
 
 install(FILES ${markdown_SPEC} DESTINATION share/wiznote/plugins)
 install(TARGETS markdown DESTINATION share/wiznote/plugins)

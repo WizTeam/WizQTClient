@@ -15,6 +15,7 @@ public:
     static QString cachePath();
     static QString tempPath();
     static QString logPath();
+    static QString userSettingsFilePath();
 
     // helpers
     static void addBackslash(QString& strPath);

@@ -78,6 +78,11 @@ QString PathResolve::tempPath()
     return path;
 }
 
+QString PathResolve::userSettingsFilePath()
+{
+    return dataStorePath() + "wiznote.ini";
+}
+
 void PathResolve::addBackslash(QString& strPath)
 {
     strPath.replace('\\', '/');

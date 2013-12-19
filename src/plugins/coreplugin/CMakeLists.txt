@@ -18,7 +18,7 @@ set(coreplugin_FORMS
 )
 
 set(coreplugin_SPEC
-    coreplugin.pluginspec
+    Core.pluginspec
 )
 
 include(QtChooser)
@@ -27,6 +27,7 @@ add_library(coreplugin SHARED ${coreplugin_SOURCES} ${coreplugin_HEADERS} ${core
 qt_use_modules(coreplugin)
 qt_suppress_warnings(coreplugin)
 
+set_target_properties(coreplugin PROPERTIES LIBRARY_OUTPUT_NAME "Core")
 add_definitions(-DCORE_LIBRARY)
 
 include_directories(
@@ -35,7 +36,7 @@ include_directories(
 target_link_libraries(coreplugin extensionsystem)
 
 add_custom_command(TARGET coreplugin POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/coreplugin.pluginspec ${WIZNOTE_PLUGIN_DIR})
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/Core.pluginspec ${WIZNOTE_PLUGIN_DIR})
 
 install(FILES ${coreplugin_SPEC} DESTINATION share/wiznote/plugins)
 install(TARGETS coreplugin DESTINATION share/wiznote/plugins)

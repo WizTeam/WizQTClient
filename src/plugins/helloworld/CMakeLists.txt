@@ -11,13 +11,15 @@ set(helloworld_SOURCES
 )
 
 set(helloworld_SPEC
-    helloworld.pluginspec
+    HelloWorld.pluginspec
 )
 
 include(QtChooser)
 add_library(helloworld SHARED ${helloworld_SOURCES} ${helloworld_HEADERS} ${helloworld_SPEC})
 qt_use_modules(helloworld)
 qt_suppress_warnings(helloworld)
+
+set_target_properties(helloworld PROPERTIES LIBRARY_OUTPUT_NAME "HelloWorld")
 
 # set all include directories for in and out of source builds
 include_directories(
@@ -29,7 +31,7 @@ include_directories(
 target_link_libraries(helloworld extensionsystem coreplugin)
 
 add_custom_command(TARGET helloworld POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/helloworld.pluginspec ${WIZNOTE_PLUGIN_DIR})
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/HelloWorld.pluginspec ${WIZNOTE_PLUGIN_DIR})
 
 install(FILES ${helloworld_SPEC} DESTINATION share/wiznote/plugins)
 install(TARGETS helloworld DESTINATION share/wiznote/plugins)

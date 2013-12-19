@@ -87,7 +87,6 @@ bool HelloWorldPlugin::initialize(const QStringList &arguments, QString *errorMe
     Q_UNUSED(arguments)
     Q_UNUSED(errorMessage)
 
-
     // Create a unique context for our own view, that will be used for the
     // menu entry later.
     //Core::Context context("HelloWorld.MainView");

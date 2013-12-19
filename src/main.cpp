@@ -75,8 +75,10 @@ static inline QStringList getPluginPaths()
 
 int main(int argc, char *argv[])
 {
+    // setup logger
     Utils::Logger logger;
     qInstallMsgHandler(Utils::Logger::messageHandler);
+
     QApplication a(argc, argv);
 
     QApplication::setApplicationName(QObject::tr("WizNote"));
@@ -88,19 +90,14 @@ int main(int argc, char *argv[])
     a.setAttribute(Qt::AA_NativeWindows);
 #endif
 
+    // setup settings
     QSettings::setDefaultFormat(QSettings::IniFormat);
     QSettings::setPath(QSettings::IniFormat, QSettings::SystemScope,
                        QCoreApplication::applicationDirPath() + QLatin1String(SHARE_PATH));
-
-    QSettings* settings = new QSettings(QSettings::IniFormat, QSettings::UserScope,
-                                        QLatin1String("wiz"), QLatin1String("wiznote"));
-
     QSettings *globalSettings = new QSettings(QSettings::IniFormat, QSettings::SystemScope,
                                               QLatin1String("wiz"), QLatin1String("wiznote"));
 
-    // use 3 times(30M) of Qt default usage
-    int nCacheSize = settings->value("Common/Cache", 10240*3).toInt();
-    QPixmapCache::setCacheLimit(nCacheSize);
+    QSettings* settings = new QSettings(Utils::PathResolve::userSettingsFilePath(), QSettings::IniFormat);
 
 //#ifdef Q_OS_WIN
 //    QString strDefaultFontName = settings.GetString("Common", "DefaultFont", "");
@@ -108,7 +105,7 @@ int main(int argc, char *argv[])
 //    a.setFont(f);
 //#endif
 
-
+    // setup plugin manager
     PluginManager pluginManager;
     PluginManager::setFileExtension(QLatin1String("pluginspec"));
     PluginManager::setGlobalSettings(globalSettings);
@@ -116,6 +113,10 @@ int main(int argc, char *argv[])
 
     const QStringList pluginPaths = getPluginPaths();
     PluginManager::setPluginPaths(pluginPaths);
+
+    // use 3 times(30M) of Qt default usage
+    int nCacheSize = settings->value("Common/Cache", 10240*3).toInt();
+    QPixmapCache::setCacheLimit(nCacheSize);
 
     QString strUserId = settings->value("Users/DefaultUser", "").toString();
     QString strPassword;
