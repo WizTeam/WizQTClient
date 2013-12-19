@@ -52,6 +52,8 @@ QString PathResolve::cachePath()
 #else
         strCachePath = dataStorePath() + "cache/";
 #endif
+    } else {
+        strCachePath += "/wiznote/";
     }
 
     ensurePathExists(strCachePath);

@@ -1365,11 +1365,6 @@ QObject* MainWindow::CreateWizObject(const QString& strObjectID)
     return NULL;
 }
 
-void MainWindow::ResetInitialStyle()
-{
-    m_doc->web()->initEditorStyle();
-}
-
 void MainWindow::SetSavingDocument(bool saving)
 {
     //m_statusBar->setVisible(saving);

@@ -83,9 +83,8 @@ public:
     //const WIZDOCUMENTDATA& document() { return m_data; }
 
     // initialize editor style before render, only invoke once.
-    void initEditorStyle();
-    QString defaultCss();
-
+    bool resetDefaultCss();
+    Q_INVOKABLE QString getDefaultCssFilePath() const;
 
     /* editor related */
     void editorResetFont();
@@ -133,6 +132,8 @@ private:
     CWizDatabaseManager& m_dbMgr;
     QMap<QString, QString> m_mapFile;
 
+    QString m_strDefaultCssFilePath;
+
     QWebFrame* m_noteFrame;
 
     QTimer m_timerAutoSave;
@@ -152,7 +153,6 @@ public:
     Q_INVOKABLE void onNoteLoadFinished(); // editor callback
 
 public Q_SLOTS:
-
     void onCipherDialogClosed();
     void on_download_finished(const WIZOBJECTDATA& data, bool bSucceed);
 

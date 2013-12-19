@@ -277,7 +277,6 @@ public:
     Q_PROPERTY(QObject* DatabaseManager READ DatabaseManager)
 
     Q_INVOKABLE QObject* CreateWizObject(const QString& strObjectID);
-    Q_INVOKABLE void ResetInitialStyle();
     Q_INVOKABLE void SetSavingDocument(bool saving);
     Q_INVOKABLE void ProcessClipboardBeforePaste(const QVariantMap& data);
 };

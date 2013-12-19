@@ -119,6 +119,7 @@ set(wiznote_SOURCES
     wizUserVerifyDialog.cpp
     plugindialog.cpp
     utils/logger.cpp
+    utils/misc.cpp
 )
 
 set(wiznote_HEADERS
@@ -231,6 +232,7 @@ set(wiznote_HEADERS
     wizUserVerifyDialog.h
     plugindialog.h
     utils/logger.h
+    utils/misc.h
 )
 
 set(wiznote_FORMS

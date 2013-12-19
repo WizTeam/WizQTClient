@@ -72,7 +72,10 @@ void Markdown::render(QWebFrame* frame)
     f.close();
 
     Q_ASSERT(strExec.indexOf("${CACHE_PATH}") != -1);
-    strExec.replace("${CACHE_PATH}", cachePath());
+    QString strPath = cachePath() + "plugins/markdown/";
+    QDir dir;
+    dir.mkpath(strPath);
+    strExec.replace("${CACHE_PATH}", strPath);
 
     frame->evaluateJavaScript(strExec);
 }
@@ -98,7 +101,9 @@ QString Markdown::cachePath()
 
 bool Markdown::copyRes2Cache()
 {
-    QDir cacheDir(cachePath());
+    QString strPath = cachePath() + "plugins/markdown/";
+    QDir cacheDir(strPath);
+    cacheDir.mkpath(strPath);
 
     QStringList lsRes;
     lsRes << ":/res/markdown.js" << ":/res/inject.js"

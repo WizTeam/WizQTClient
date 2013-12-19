@@ -559,12 +559,17 @@ void CWizDocumentWebView::reloadNoteData(const WIZDOCUMENTDATA& data)
     m_workerPool->load(data);
 }
 
-QString CWizDocumentWebView::defaultCss()
+QString CWizDocumentWebView::getDefaultCssFilePath() const
+{
+    return m_strDefaultCssFilePath;
+}
+
+bool CWizDocumentWebView::resetDefaultCss()
 {
     QFile f(":/default.css");
     if (!f.open(QIODevice::ReadOnly)) {
         qDebug() << "[Editor]Failed to get default css code";
-        return 0;
+        return false;
     }
 
     QTextStream ts(&f);
@@ -575,29 +580,29 @@ QString CWizDocumentWebView::defaultCss()
     int nSize = m_app.userSettings().defaultFontSize();
 
     strCss.replace("/*default-font-family*/", QString("font-family:%1;").arg(strFont));
-    strCss.replace("/*default-font-size*/", QString("font-size:%1;").arg(nSize));
+    strCss.replace("/*default-font-size*/", QString("font-size:%1px;").arg(nSize));
 
-    return strCss;
-}
+    QString strPath = Utils::PathResolve::cachePath() + "editor/";
+    Utils::PathResolve::ensurePathExists(strPath);
 
-void CWizDocumentWebView::initEditorStyle()
-{
-    QString strFont = m_app.userSettings().defaultFontFamily();
-    int nSize = m_app.userSettings().defaultFontSize();
+    m_strDefaultCssFilePath = strPath + "default.css";
 
-    QString strExec = QString("editor.options.initialStyle = 'body{font-family:%1; font-size:%2px;} img{max-width:100%;}';")
-            .arg(strFont).arg(nSize);
-    page()->mainFrame()->evaluateJavaScript(strExec);
+    QFile f2(m_strDefaultCssFilePath);
+    if (!f2.open(QIODevice::Truncate | QIODevice::WriteOnly)) {
+        qDebug() << "[Editor]Fail to setup default css code";
+        return false;
+    }
+
+    f2.write(strCss.toUtf8());
+    f2.close();
+
+    return true;
 }
 
 void CWizDocumentWebView::editorResetFont()
 {
-    QString strFont = m_app.userSettings().defaultFontFamily();
-    int nSize = m_app.userSettings().defaultFontSize();
-
-    QString strExec = QString("editor.document.body.style.fontFamily='%1';editor.document.body.style.fontSize='%2px';")
-            .arg(strFont).arg(nSize);
-    page()->mainFrame()->evaluateJavaScript(strExec);
+    resetDefaultCss();
+    page()->mainFrame()->evaluateJavaScript("updateCss();");
 }
 
 void CWizDocumentWebView::editorFocus()
@@ -608,6 +613,9 @@ void CWizDocumentWebView::editorFocus()
 void CWizDocumentWebView::initEditor()
 {
     if (m_bEditorInited)
+        return;
+
+    if (!resetDefaultCss())
         return;
 
     QString strFileName = WizGetResourcesPath() + "files/editor/index.html";

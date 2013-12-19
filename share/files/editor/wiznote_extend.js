@@ -3,17 +3,18 @@ var
     m_inited = false,
     objApp = WizExplorerApp,
     m_currentGUID = "",
+    m_defaultCss = WizEditor.getDefaultCssFilePath(),
+    m_defaultCssVersion = 1,
     m_header = "",
     wiz_html = "";
 
 
 // setup ueditor
 try {
-    var strSave = "Save";
-
     var editorOption = {
     toolbars: [],
-    initialStyle: 'body{font-size:13px}',
+    iframeCssUrl: m_defaultCss,
+    //initialStyle: 'body{font-size:13px}',
     enterTag: 'div',
     fullscreen: true,
     autoHeightEnabled: false,
@@ -26,7 +27,7 @@ try {
     };
 
     editor = new baidu.editor.ui.Editor(editorOption);
-    objApp.ResetInitialStyle();
+    //objApp.ResetInitialStyle();
     editor.render('editorArea');
 
     editor.addListener("sourceModeChanged",function(type,mode){
@@ -44,6 +45,7 @@ try {
     });
 
     editor.addListener('aftersetcontent', function() {
+        updateCss();
         WizEditor.onNoteLoadFinished();
     });
 
@@ -54,11 +56,7 @@ try {
 function setEditorHtml(html, bEditing)
 {
     editor.reset();
-    //if (bEditing) {
-        editor.document.head.innerHTML = m_header; // restore original header
-    //} else {
-    //    editor.document.head.innerHTML = '';
-    //}
+    editor.document.head.innerHTML = m_header; // restore original header
 
     bEditing ? editor.setEnabled() : editor.setDisabled();
     editor.setContent(html);
@@ -69,11 +67,7 @@ function setEditorHtml(html, bEditing)
 }
 
 function setEditing(bEditing) {
-    //if (bEditing) {
-        editor.document.head.innerHTML = m_header; // restore original header
-    //} else {
-    //    editor.document.head.innerHTML = '';
-    //}
+    editor.document.head.innerHTML = m_header; // restore original header
 
     bEditing ? editor.setEnabled() : editor.setDisabled();
     editor.setContent(wiz_html);
@@ -99,6 +93,19 @@ function viewNote(strGUID, bEditing, strHtml)
     } catch (err) {
         alert(err);
         return false;
+    }
+}
+
+function updateCss()
+{
+    var css= editor.document.getElementsByTagName('link');
+    for (var i = 0; i < css.length; i++) {
+        if (css[i].rel != 'stylesheet') return;
+        if (css[i].type != 'text/css') return;
+        if (css[i].href.match(m_defaultCss)) {
+            css[i].href = m_defaultCss + "?v=" + m_defaultCssVersion;
+            m_defaultCssVersion++;
+        }
     }
 }
 
