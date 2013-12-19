@@ -3,10 +3,10 @@
 
 #include <extensionsystem/iplugin.h>
 
-namespace Core {
-class CWizDocumentView;
-}
 struct WIZDOCUMENTDATA;
+namespace Core {
+class INoteView;
+}
 
 class QWebFrame;
 
@@ -32,7 +32,7 @@ private:
 
 
 private Q_SLOTS:
-    void onViewNoteLoaded(Core::CWizDocumentView* view, const WIZDOCUMENTDATA& doc, bool bOk);
+    void onViewNoteLoaded(Core::INoteView* view, const WIZDOCUMENTDATA& doc, bool bOk);
 };
 
 } // namespace Internal

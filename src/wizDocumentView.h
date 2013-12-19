@@ -79,8 +79,8 @@ public:
     QWebFrame* noteFrame();
 
 public Q_SLOTS:
-    void onViewNoteRequested(Core::CWizDocumentView* view, const WIZDOCUMENTDATA& doc);
-    void onViewNoteLoaded(Core::CWizDocumentView*,const WIZDOCUMENTDATA&,bool);
+    void onViewNoteRequested(Core::INoteView* view, const WIZDOCUMENTDATA& doc);
+    void onViewNoteLoaded(Core::INoteView*,const WIZDOCUMENTDATA&,bool);
 
     void on_document_modified(const WIZDOCUMENTDATA& documentOld,
                               const WIZDOCUMENTDATA& documentNew);

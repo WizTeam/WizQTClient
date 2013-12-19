@@ -72,11 +72,11 @@ CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
     connect(&m_dbMgr, SIGNAL(attachmentDeleted(const WIZDOCUMENTATTACHMENTDATA&)), \
             SLOT(on_attachment_deleted(const WIZDOCUMENTATTACHMENTDATA&)));
 
-    connect(Core::ICore::instance(), SIGNAL(viewNoteRequested(Core::CWizDocumentView*,const WIZDOCUMENTDATA&)),
-            SLOT(onViewNoteRequested(Core::CWizDocumentView*,const WIZDOCUMENTDATA&)));
+    connect(Core::ICore::instance(), SIGNAL(viewNoteRequested(Core::INoteView*,const WIZDOCUMENTDATA&)),
+            SLOT(onViewNoteRequested(Core::INoteView*,const WIZDOCUMENTDATA&)));
 
-    connect(Core::ICore::instance(), SIGNAL(viewNoteLoaded(Core::CWizDocumentView*,WIZDOCUMENTDATA,bool)),
-            SLOT(onViewNoteLoaded(Core::CWizDocumentView*,const WIZDOCUMENTDATA&,bool)));
+    connect(Core::ICore::instance(), SIGNAL(viewNoteLoaded(Core::INoteView*,WIZDOCUMENTDATA,bool)),
+            SLOT(onViewNoteLoaded(Core::INoteView*,const WIZDOCUMENTDATA&,bool)));
 }
 
 CWizDocumentView::~CWizDocumentView()
@@ -94,7 +94,7 @@ void CWizDocumentView::showClient(bool visible)
     m_client->setVisible(visible);
 }
 
-void CWizDocumentView::onViewNoteRequested(CWizDocumentView* view, const WIZDOCUMENTDATA& doc)
+void CWizDocumentView::onViewNoteRequested(INoteView* view, const WIZDOCUMENTDATA& doc)
 {
     if (view != this)
         return;
@@ -106,7 +106,7 @@ void CWizDocumentView::onViewNoteRequested(CWizDocumentView* view, const WIZDOCU
     }
 }
 
-void CWizDocumentView::onViewNoteLoaded(Core::CWizDocumentView* view, const WIZDOCUMENTDATA& doc, bool bOk)
+void CWizDocumentView::onViewNoteLoaded(INoteView* view, const WIZDOCUMENTDATA& doc, bool bOk)
 {
     if (view != this)
         return;

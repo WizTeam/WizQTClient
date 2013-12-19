@@ -8,7 +8,7 @@
 struct WIZDOCUMENTDATA;
 
 namespace Core {
-class CWizDocumentView;
+class INoteView;
 
 namespace Internal {
 class MainWindow;
@@ -26,15 +26,13 @@ public:
     static ICore* instance();
     static Internal::MainWindow* mainWindow();
 
-    static void emitViewNoteRequested(CWizDocumentView* view, const WIZDOCUMENTDATA& doc);
-    static void emitViewNoteLoaded(CWizDocumentView* view, const WIZDOCUMENTDATA& doc, bool bOk);
-    static void emitViewNoteModeChanged(CWizDocumentView* view, bool bLocked);
+    static void emitViewNoteRequested(INoteView* view, const WIZDOCUMENTDATA& doc);
+    static void emitViewNoteLoaded(INoteView* view, const WIZDOCUMENTDATA& doc, bool bOk);
 
 Q_SIGNALS:
-    void viewNoteRequested(Core::CWizDocumentView* view, const WIZDOCUMENTDATA& doc);
-    void viewNoteLoaded(Core::CWizDocumentView* view, const WIZDOCUMENTDATA& doc, bool bOk);
-    void viewNoteModeChanged(Core::CWizDocumentView* view, bool bLocked);
-    void closeNoteRequested(Core::CWizDocumentView* view);
+    void viewNoteRequested(Core::INoteView* view, const WIZDOCUMENTDATA& doc);
+    void viewNoteLoaded(Core::INoteView* view, const WIZDOCUMENTDATA& doc, bool bOk);
+    void closeNoteRequested(Core::INoteView* view);
 };
 
 } // namespace Core

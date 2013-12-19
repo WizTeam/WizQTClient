@@ -32,12 +32,6 @@
 
 #include <extensionsystem/iplugin.h>
 
-namespace Core {
-class CWizDocumentView;
-}
-
-struct WIZDOCUMENTDATA;
-
 namespace HelloWorld {
 namespace Internal {
 
@@ -45,7 +39,6 @@ class HelloWorldPlugin
   : public ExtensionSystem::IPlugin
 {
     Q_OBJECT
-    //Q_PLUGIN_METADATA(IID "wiz.plugin" FILE "HelloWorld.json")
     Q_PLUGIN_METADATA(IID "wiz.plugin.system.internal.helloworld")
 
 public:
@@ -53,12 +46,9 @@ public:
     ~HelloWorldPlugin();
 
     bool initialize(const QStringList &arguments, QString *errorMessage);
-
     void extensionsInitialized();
 
-
 private slots:
-    void onViewNoteLoaded(Core::CWizDocumentView* view,const WIZDOCUMENTDATA& doc);
     void sayHelloWorld();
 };
 

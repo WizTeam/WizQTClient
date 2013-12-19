@@ -13,6 +13,8 @@
 #include "../../wizDocumentView.h"
 #include "../../share/wizobject.h"
 
+using namespace Core;
+
 namespace Markdown {
 namespace Internal {
 
@@ -34,11 +36,11 @@ bool Markdown::initialize(const QStringList &arguments, QString *errorMessage)
 
 void Markdown::extensionsInitialized()
 {
-    connect(Core::ICore::instance(), SIGNAL(viewNoteLoaded(Core::CWizDocumentView*,WIZDOCUMENTDATA,bool)),
-            SLOT(onViewNoteLoaded(Core::CWizDocumentView*,WIZDOCUMENTDATA,bool)));
+    connect(Core::ICore::instance(), SIGNAL(viewNoteLoaded(Core::INoteView*,WIZDOCUMENTDATA,bool)),
+            SLOT(onViewNoteLoaded(Core::INoteView*,WIZDOCUMENTDATA,bool)));
 }
 
-void Markdown::onViewNoteLoaded(Core::CWizDocumentView* view, const WIZDOCUMENTDATA& doc, bool bOk)
+void Markdown::onViewNoteLoaded(INoteView* view, const WIZDOCUMENTDATA& doc, bool bOk)
 {
     if (!bOk)
         return;

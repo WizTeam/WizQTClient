@@ -29,23 +29,17 @@ MainWindow* ICore::mainWindow()
     return m_mainwindow;
 }
 
-void ICore::emitViewNoteRequested(CWizDocumentView* view,
+void ICore::emitViewNoteRequested(INoteView* view,
                                   const WIZDOCUMENTDATA& doc)
 {
     Q_EMIT m_instance->viewNoteRequested(view, doc);
 }
 
-void ICore::emitViewNoteLoaded(CWizDocumentView* view,
+void ICore::emitViewNoteLoaded(INoteView* view,
                                const WIZDOCUMENTDATA& doc, bool bOk)
 {
     Q_EMIT m_instance->viewNoteLoaded(view, doc, bOk);
 }
-
-void ICore::emitViewNoteModeChanged(CWizDocumentView* view, bool bLocked)
-{
-    Q_EMIT m_instance->viewNoteModeChanged(view, bLocked);
-}
-
 
 
 } // namespace Core

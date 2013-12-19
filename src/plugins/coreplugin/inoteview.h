@@ -14,6 +14,7 @@ class INoteView : public QWidget
 public:
     explicit INoteView(QWidget *parent = 0);
     virtual QWebFrame* noteFrame() = 0;
+    virtual bool isEditing() const = 0;
 };
 
 } // namespace Core

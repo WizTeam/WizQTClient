@@ -81,8 +81,8 @@ TitleBar::TitleBar(QWidget *parent)
     m_commentsBtn->setNormalIcon(::WizLoadSkinIcon(strTheme, "comments"), tr("Add comments"));
     m_commentsBtn->setBadgeIcon(::WizLoadSkinIcon(strTheme, "comments_exist"), tr("View and add comments"));
     connect(m_commentsBtn, SIGNAL(clicked()), SLOT(onCommentsButtonClicked()));
-    connect(ICore::instance(), SIGNAL(viewNoteLoaded(Core::CWizDocumentView*,const WIZDOCUMENTDATA&,bool)),
-            SLOT(onViewNoteLoaded(Core::CWizDocumentView*,const WIZDOCUMENTDATA&,bool)));
+    connect(ICore::instance(), SIGNAL(viewNoteLoaded(Core::INoteView*,const WIZDOCUMENTDATA&,bool)),
+            SLOT(onViewNoteLoaded(Core::INoteView*,const WIZDOCUMENTDATA&,bool)));
 
     QWidget* line1 = new QWidget(this);
     line1->setFixedHeight(12);
@@ -291,7 +291,7 @@ void TitleBar::onCommentsButtonClicked()
     }
 }
 
-void TitleBar::onViewNoteLoaded(CWizDocumentView* view, const WIZDOCUMENTDATA& note, bool bOk)
+void TitleBar::onViewNoteLoaded(INoteView* view, const WIZDOCUMENTDATA& note, bool bOk)
 {
     Q_UNUSED(note);
 

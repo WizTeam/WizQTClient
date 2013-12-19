@@ -29,13 +29,6 @@
 
 #include "helloworldplugin.h"
 
-//#include <coreplugin/actionmanager/actionmanager.h>
-//#include <coreplugin/actionmanager/actioncontainer.h>
-//#include <coreplugin/coreconstants.h>
-//#include <coreplugin/imode.h>
-//#include <coreplugin/modemanager.h>
-//#include <coreplugin/id.h>
-
 #include <QDebug>
 #include <QtPlugin>
 #include <QAction>
@@ -144,17 +137,6 @@ bool HelloWorldPlugin::initialize(const QStringList &arguments, QString *errorMe
 */
 void HelloWorldPlugin::extensionsInitialized()
 {
-    //connect(Core::ICore::instance(), SIGNAL(viewNoteLoaded(Core::CWizDocumentView*,WIZDOCUMENTDATA)),
-    //        SLOT(onViewNoteLoaded(Core::CWizDocumentView*,WIZDOCUMENTDATA)));
-}
-
-
-void HelloWorldPlugin::onViewNoteLoaded(Core::CWizDocumentView* view,const WIZDOCUMENTDATA& doc)
-{
-    Q_UNUSED(view);
-    Q_UNUSED(doc);
-
-    sayHelloWorld();
 }
 
 void HelloWorldPlugin::sayHelloWorld()

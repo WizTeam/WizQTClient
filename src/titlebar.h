@@ -15,6 +15,7 @@ class CWizAttachmentListWidget;
 
 namespace Core {
 class CWizDocumentView;
+class INoteView;
 
 namespace Internal {
 class TitleEdit;
@@ -66,7 +67,7 @@ public Q_SLOTS:
     void onInfoButtonClicked();
 
     void onCommentsButtonClicked();
-    void onViewNoteLoaded(Core::CWizDocumentView* view, const WIZDOCUMENTDATA& note, bool bOk);
+    void onViewNoteLoaded(Core::INoteView* view, const WIZDOCUMENTDATA& note, bool bOk);
     void onTokenAcquired(const QString& strToken);
     void onGetCommentsCountFinished(int nCount);
 
