@@ -78,6 +78,8 @@ TitleBar::TitleBar(QWidget *parent)
 
     // comments
     m_commentsBtn = new CellButton(CellButton::Right, this);
+    m_commentsBtn->setNormalIcon(::WizLoadSkinIcon(strTheme, "comments"), tr("Add comments"));
+    m_commentsBtn->setBadgeIcon(::WizLoadSkinIcon(strTheme, "comments_exist"), tr("View and add comments"));
     connect(m_commentsBtn, SIGNAL(clicked()), SLOT(onCommentsButtonClicked()));
     connect(ICore::instance(), SIGNAL(viewNoteLoaded(Core::CWizDocumentView*,const WIZDOCUMENTDATA&,bool)),
             SLOT(onViewNoteLoaded(Core::CWizDocumentView*,const WIZDOCUMENTDATA&,bool)));
@@ -346,7 +348,9 @@ void TitleBar::onGetCommentsCountFinished(int nCount)
     api->disconnect(this);
     api->deleteLater();
 
-    // update gui.
-    qDebug() << "total comments:" << nCount;
+    if (nCount) {
+        m_commentsBtn->setState(CellButton::Badge);
+    } else {
+        m_commentsBtn->setState(CellButton::Normal);
+    }
 }
-
