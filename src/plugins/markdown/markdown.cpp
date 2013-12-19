@@ -49,6 +49,9 @@ void Markdown::onViewNoteLoaded(Core::CWizDocumentView* view, const WIZDOCUMENTD
     if (doc.strTitle.indexOf(".md") == -1)
         return;
 
+    if (doc.strTitle.lastIndexOf(".md") != doc.strTitle.length() - 3)
+        return;
+
     render(view->noteFrame());
 }
 
@@ -70,8 +73,6 @@ void Markdown::render(QWebFrame* frame)
     strExec.replace("${CACHE_PATH}", cachePath());
 
     frame->evaluateJavaScript(strExec);
-
-    qDebug() << frame->toHtml();
 }
 
 // FIXME: about to remove
