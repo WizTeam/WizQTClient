@@ -132,10 +132,10 @@ void AsyncApi::getCommentsCount_impl(const QString& strUrl)
 
     rapidjson::Document d;
     d.Parse<0>(strReply.toUtf8().constData());
-    int nCode = d["return_code"].GetInt();
+    int nCode = d.FindMember("return_code")->value.GetInt();
 
     if (nCode == 200) {
-        nTotalComments = d["comment_count"].GetInt();
+        nTotalComments = d.FindMember("comment_count")->value.GetInt();
     }
 
     Q_EMIT getCommentsCountFinished(nTotalComments);
