@@ -28,6 +28,7 @@ public:
 private:
     QString cachePath();
     bool copyRes2Cache();
+    bool canRender(Core::INoteView* view, const WIZDOCUMENTDATA& data);
     void render(QWebFrame* frame);
 
 

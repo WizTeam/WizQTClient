@@ -45,16 +45,25 @@ void Markdown::onViewNoteLoaded(INoteView* view, const WIZDOCUMENTDATA& doc, boo
     if (!bOk)
         return;
 
+    if (canRender(view, doc))
+        render(view->noteFrame());
+}
+
+bool Markdown::canRender(INoteView* view, const WIZDOCUMENTDATA& doc)
+{
     if (view->isEditing())
-        return;
+        return false;
 
     if (doc.strTitle.indexOf(".md") == -1)
-        return;
+        return false;
 
-    if (doc.strTitle.lastIndexOf(".md") != doc.strTitle.length() - 3)
-        return;
+    if (doc.strTitle.indexOf(".md ") != -1)
+        return true;
 
-    render(view->noteFrame());
+    if (doc.strTitle.lastIndexOf(".md") == doc.strTitle.length() - 3)
+        return true;
+
+    return false;
 }
 
 void Markdown::render(QWebFrame* frame)
