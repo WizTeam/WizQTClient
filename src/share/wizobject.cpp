@@ -2,14 +2,43 @@
 
 #include "wizxmlrpc.h"
 #include "wizmisc.h"
+#include "utils/logger.h"
 
 WIZUSERINFO::WIZUSERINFO()
     : nUserLevel(0)
     , nUserPoints(0)
     , bEnableGroup(false)
 {
-
 }
+
+WIZUSERINFO::WIZUSERINFO(const WIZUSERINFO& info)
+{
+    strToken = info.strToken;
+    strKbGUID = info.strKbGUID;
+    strDatabaseServer = info.strDatabaseServer;
+    nMaxFileSize = info.nMaxFileSize;
+    strChatUrl = info.strChatUrl;
+    strDownloadUrl = info.strDownloadUrl;
+    bEnableGroup = info.bEnableGroup;
+    tTokenExpried = info.tTokenExpried;
+    strInviteCode = info.strInviteCode;
+    strMywizEmail = info.strMywizEmail;
+    strNoticeLink = info.strNoticeLink;
+    strNoticeText = info.strNoticeText;
+    strSNSList = info.strSNSList;
+    strUploadUrl = info.strUploadUrl;
+    strDisplayName = info.strDisplayName;
+    strUserEmail = info.strUserEmail;
+    strLanguage = info.strLanguage;
+    strNickName = info.strNickName;
+    strUserGUID = info.strUserGUID;
+    nUserLevel = info.nUserLevel;
+    strUserLevelName = info.strUserLevelName;
+    nUserPoints = info.nUserPoints;
+    strUserType = info.strUserType;
+    tVipExpried = info.tVipExpried;
+}
+
 
 bool WIZUSERINFO::LoadFromXmlRpc(CWizXmlRpcStructValue& val)
 {
@@ -386,6 +415,42 @@ bool WIZDOCUMENTPARAMDATA::SaveToXmlRpc(CWizXmlRpcStructValue& data) const
     data.AddString("param_name", strName);
     data.AddString("param_value", strValue);
     return true;
+}
+
+bool WIZDOCUMENTDATAEX_XMLRPC_SIMPLE::LoadFromXmlRpc(CWizXmlRpcStructValue& data)
+{
+    data.GetStr(_T("document_guid"), strGUID);
+    data.GetStr(_T("document_title"), strTitle);	/*用于同步过程，显示正在下载的文章标题////*/
+    data.GetStr(_T("document_category"), strLocation);	/*用于CyberArticle判断是否需要下载该文档(是否属于当前书籍）////*/
+    /*
+        data.GetStr(_T("document_filename"), strName);
+        data.GetStr(_T("document_seo"), strSEO);
+        data.GetStr(_T("document_url"), strURL);
+        data.GetStr(_T("document_author"), strAuthor);
+        data.GetStr(_T("document_keywords"), strKeywords);
+        data.GetStr(_T("document_type"), strType);
+        data.GetStr(_T("document_owner"), strOwner);
+        data.GetStr(_T("document_filetype"), strFileType);
+        data.GetStr(_T("document_styleguid"), strStyleGUID);
+        data.GetTime(_T("dt_created"), tCreated);
+        data.GetTime(_T("dt_modified"), tModified);
+        data.GetTime(_T("dt_accessed"), tAccessed);
+        data.GetInt(_T("document_iconindex"), nIconIndex);
+        data.GetInt(_T("document_protected"), nProtected);
+        data.GetInt(_T("document_readcount"), nReadCount);
+        data.GetInt(_T("document_attachment_count"), nAttachmentCount);
+        */
+    data.GetTime(_T("dt_info_modified"), tInfoModified);
+    data.GetStr(_T("info_md5"), strInfoMD5);
+    data.GetTime(_T("dt_data_modified"), tDataModified);
+    data.GetStr(_T("data_md5"), strDataMD5);
+    data.GetTime(_T("dt_param_modified"), tParamModified);
+    data.GetStr(_T("param_md5"), strParamMD5);
+    data.GetInt64(_T("version"), nVersion);
+    //
+    //data.GetArrayStringArray(_T("tags"), arrayTagGUID);
+    //
+    return !strGUID.isEmpty();
 }
 
 

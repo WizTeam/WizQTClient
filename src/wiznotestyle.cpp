@@ -13,7 +13,7 @@
 #include "share/wizmultilinelistwidget.h"
 //#include "share/wizimagepushbutton.h"
 
-#include "utils/styleHelper.h"
+#include "utils/stylehelper.h"
 
 #ifdef Q_OS_MAC
 #include "mac/wizmachelper.h"
@@ -475,7 +475,7 @@ QPixmap CWizNoteStyle::genThumbnailPixmap(const QStyleOptionViewItemV4* vopt, co
         // there lines document summary
         QString strAbstract = thumb.text;
 
-        int nLineSpacing = Utils::styleHelper::lineSpacing();
+        int nLineSpacing = Utils::StyleHelper::lineSpacing();
 
         QRect rcAbstract1(QPoint(textRect.left() + infoWidth + 4, rcInfo.top()), QPoint(textRect.right(), rcInfo.bottom()));
         ::WizDrawTextSingleLine(&p, rcAbstract1, strAbstract, Qt::TextSingleLine | Qt::AlignVCenter, colorSummary, false);
@@ -633,7 +633,7 @@ void CWizNoteStyle::drawItemGroupThumbnail(const QStyleOptionViewItemV4* vopt,
     QRect textRect = vopt->rect.adjusted(5, 5, 0, 0);
 
     // draw author avatar
-    int nAvatarHeight = Utils::styleHelper::avatarHeight();
+    int nAvatarHeight = Utils::StyleHelper::avatarHeight();
     QRect rectAvatar = textRect;
     rectAvatar.setSize(QSize(nAvatarHeight, nAvatarHeight));
 
@@ -702,7 +702,7 @@ void CWizNoteStyle::drawItemGroupThumbnail(const QStyleOptionViewItemV4* vopt,
         // there lines document summary
         QString strAbstract = abstract.text;
 
-        int nLineSpacing = Utils::styleHelper::lineSpacing();
+        int nLineSpacing = Utils::StyleHelper::lineSpacing();
 
         QRect rcAbstract1(QPoint(textRect.left() + infoWidth + 4, rcInfo.top()), QPoint(textRect.right(), rcInfo.bottom()));
         ::WizDrawTextSingleLine(p, rcAbstract1, strAbstract, Qt::TextSingleLine | Qt::AlignVCenter, colorSummary, false);
@@ -910,7 +910,7 @@ void CWizNoteStyle::drawItemMessage(const QStyleOptionViewItemV4 *vopt,
 
     QRect textRect = vopt->rect.adjusted(0, 5, 0, 0);
 
-    int nAvatarHeight = Utils::styleHelper::avatarHeight();
+    int nAvatarHeight = Utils::StyleHelper::avatarHeight();
 
     // draw author avatar
     QRect rectAvatar = textRect;
@@ -982,7 +982,7 @@ void CWizNoteStyle::drawItemMessage(const QStyleOptionViewItemV4 *vopt,
         // there lines document summary
         QString strAbstract = abstract.text;
 
-        int nLineSpacing = Utils::styleHelper::lineSpacing();
+        int nLineSpacing = Utils::StyleHelper::lineSpacing();
 
         QRect rcAbstract1(QPoint(textRect.left() + infoWidth + 4, rcInfo.top()), QPoint(textRect.right(), rcInfo.bottom()));
         ::WizDrawTextSingleLine(p, rcAbstract1, strAbstract, Qt::TextSingleLine | Qt::AlignVCenter, colorSummary, false);

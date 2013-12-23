@@ -29,20 +29,15 @@
 
 #include "helloworldplugin.h"
 
-//#include <coreplugin/actionmanager/actionmanager.h>
-//#include <coreplugin/actionmanager/actioncontainer.h>
-//#include <coreplugin/coreconstants.h>
-//#include <coreplugin/icore.h>
-//#include <coreplugin/imode.h>
-//#include <coreplugin/modemanager.h>
-//#include <coreplugin/id.h>
-
 #include <QDebug>
 #include <QtPlugin>
 #include <QAction>
 #include <QMenu>
 #include <QMessageBox>
 #include <QPushButton>
+
+#include <coreplugin/icore.h>
+#include "../../share/wizobject.h"
 
 namespace HelloWorld {
 namespace Internal {

@@ -16,6 +16,8 @@ CWizPreferenceWindow::CWizPreferenceWindow(CWizExplorerApp& app, QWidget* parent
     setWindowIcon(QIcon());
     setWindowTitle(tr("Preference"));
 
+    connect(ui->btnClose, SIGNAL(clicked()), SLOT(accept()));
+
     // FIXME: proxy settings will back soon!!!
     ui->labelProxySettings->hide();
 
@@ -31,7 +33,7 @@ CWizPreferenceWindow::CWizPreferenceWindow(CWizExplorerApp& app, QWidget* parent
         }
     }
 
-    connect(ui->comboLang, SIGNAL(activated(int)), SLOT(on_comboLang_currentIndexChanged(int)));
+    connect(ui->comboLang, SIGNAL(activated(int)), SLOT(on_comboLang_activated(int)));
 
     // reading tab
     switch (userSettings().noteViewMode())

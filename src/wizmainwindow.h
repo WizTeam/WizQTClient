@@ -36,7 +36,6 @@ class CWizSearcher;
 class CWizSearchIndexer;
 
 class QtSegmentControl;
-//class CWizGroupMessage;
 class CWizObjectDataDownloaderHost;
 class CWizUserAvatarDownloaderHost;
 class CWizKMSyncThread;
@@ -46,9 +45,9 @@ class CWizDocumentWebView;
 
 namespace Core {
 class ICore;
+class CWizDocumentView;
 
 namespace Internal {
-class CWizDocumentView;
 
 class MainWindow
     : public QMainWindow
@@ -278,7 +277,6 @@ public:
     Q_PROPERTY(QObject* DatabaseManager READ DatabaseManager)
 
     Q_INVOKABLE QObject* CreateWizObject(const QString& strObjectID);
-    Q_INVOKABLE void ResetInitialStyle();
     Q_INVOKABLE void SetSavingDocument(bool saving);
     Q_INVOKABLE void ProcessClipboardBeforePaste(const QVariantMap& data);
 };

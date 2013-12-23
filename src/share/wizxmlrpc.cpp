@@ -3,6 +3,7 @@
 #include <QUrl>
 
 #include "wizmisc.h"
+#include "../utils/logger.h"
 
 
 bool WizXmlRpcValueFromXml(CWizXMLNode& nodeValue, CWizXmlRpcValue** ppRet)

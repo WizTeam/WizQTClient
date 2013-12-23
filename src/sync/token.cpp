@@ -1,9 +1,9 @@
 #include "token.h"
 #include "token_p.h"
 
+#include <QMutexLocker>
 #include <QString>
-#include <QWaitCondition>
-#include <QMutex>
+#include <QDebug>
 
 #include "wizkmxmlrpc.h"
 #include "asyncapi.h"
@@ -11,32 +11,48 @@
 using namespace WizService;
 using namespace WizService::Internal;
 
+// use 15 minutes locally, server use 20 minutes
+#define TOKEN_TIMEOUT_INTERVAL 60*15
+
 TokenPrivate::TokenPrivate(Token* token)
     : q(token)
     , m_api(new AsyncApi())
     , m_mutex(new QMutex())
-    , m_waiter(new QWaitCondition())
+    , m_bProcess(false)
 {
-    connect(m_api, SIGNAL(getTokenFinished(QString, QString)), SLOT(onGetTokenFinished(QString, QString)));
-    connect(m_api, SIGNAL(keepAliveFinished(bool, QString)), SLOT(onKeepAliveFinished(bool, QString)));
+    connect(m_api, SIGNAL(loginFinished(const WIZUSERINFO&)), SLOT(onLoginFinished(const WIZUSERINFO&)));
+    connect(m_api, SIGNAL(getTokenFinished(QString)), SLOT(onGetTokenFinished(QString)));
+    connect(m_api, SIGNAL(keepAliveFinished(bool)), SLOT(onKeepAliveFinished(bool)));
 }
 
 TokenPrivate::~TokenPrivate()
 {
     delete m_mutex;
-    delete m_waiter;
 }
 
 void TokenPrivate::requestToken()
 {
     Q_ASSERT(!m_strUserId.isEmpty() && !m_strPasswd.isEmpty());
 
-    m_mutex->lock();
+    QMutexLocker locker(m_mutex);
 
-    if (m_strToken.isEmpty()) {
-        m_api->getToken(m_strUserId, m_strPasswd);
+    // return the old one even it will be failed if still waiting for reply, to avoid dead-lock
+    if (m_bProcess) {
+        Q_EMIT q->tokenAcquired(m_info.strToken);
+        return;
+    }
+
+    if (m_info.strToken.isEmpty()) {
+        m_bProcess = true;
+        m_api->login(m_strUserId, m_strPasswd);
+        return;
+    }
+
+    if (m_info.tTokenExpried >= QDateTime::currentDateTime()) {
+        Q_EMIT q->tokenAcquired(m_info.strToken);
     } else {
-        m_api->keepAlive(m_strToken);
+        m_bProcess = true;
+        m_api->keepAlive(m_info.strToken, m_info.strKbGUID);
     }
 }
 
@@ -50,19 +66,59 @@ void TokenPrivate::setPasswd(const QString& strPasswd)
     m_strPasswd = strPasswd;
 }
 
-void TokenPrivate::onGetTokenFinished(const QString& strToken, const QString& strMsg)
+const WIZUSERINFO& TokenPrivate::info()
 {
-    m_strToken = strToken;
-    Q_EMIT q->tokenAcquired(strToken, strMsg);
-
-    m_mutex->unlock();
+    return m_info;
 }
 
-void TokenPrivate::onKeepAliveFinished(bool bOk, const QString& strMsg)
+int TokenPrivate::lastErrorCode() const
 {
+    return m_api->lastErrorCode();
+}
+
+QString TokenPrivate::lastErrorMessage() const
+{
+    return m_api->lastErrorMessage();
+}
+
+void TokenPrivate::onLoginFinished(const WIZUSERINFO &info)
+{
+    qDebug() << "[Token]: Login Done...";
+
+    if (info.strToken.isEmpty()) {
+        Q_EMIT q->tokenAcquired(0);
+    } else {
+        m_info = info;
+        m_info.tTokenExpried = QDateTime::currentDateTime().addSecs(TOKEN_TIMEOUT_INTERVAL);
+        Q_EMIT q->tokenAcquired(info.strToken);
+    }
+
+    m_bProcess = false;
+}
+
+void TokenPrivate::onGetTokenFinished(const QString& strToken)
+{
+    qDebug() << "[Token]: GetToken Done...";
+
+    if (strToken.isEmpty()) {
+        Q_EMIT q->tokenAcquired(0);
+    } else {
+        m_info.strToken = strToken;
+        m_info.tTokenExpried = QDateTime::currentDateTime().addSecs(TOKEN_TIMEOUT_INTERVAL);
+        Q_EMIT q->tokenAcquired(strToken);
+    }
+
+    m_bProcess = false;
+}
+
+void TokenPrivate::onKeepAliveFinished(bool bOk)
+{
+    qDebug() << "[Token]: KeepAlive Done...";
+
     if (bOk) {
-        Q_EMIT q->tokenAcquired(m_strToken, 0);
-        m_mutex->unlock();
+        m_info.tTokenExpried = QDateTime::currentDateTime().addSecs(TOKEN_TIMEOUT_INTERVAL);
+        Q_EMIT q->tokenAcquired(m_info.strToken);
+        m_bProcess = false;
     } else {
         m_api->getToken(m_strUserId, m_strPasswd);
     }
@@ -103,18 +159,35 @@ void Token::requestToken()
 
 void Token::setUserId(const QString& strUserId)
 {
-    if (!m_instance) {
-        m_instance = new Token();
-    }
+    Q_ASSERT(m_instance);
 
     d->setUserId(strUserId);
 }
 
 void Token::setPasswd(const QString& strPasswd)
 {
-    if (!m_instance) {
-        m_instance = new Token();
-    }
+    Q_ASSERT(m_instance);
 
     d->setPasswd(strPasswd);
+}
+
+const WIZUSERINFO& Token::info()
+{
+    Q_ASSERT(m_instance);
+
+    return d->info();
+}
+
+QString Token::lastErrorMessage()
+{
+    Q_ASSERT(m_instance);
+
+    return d->lastErrorMessage();
+}
+
+int Token::lastErrorCode()
+{
+    Q_ASSERT(m_instance);
+
+    return d->lastErrorCode();
 }

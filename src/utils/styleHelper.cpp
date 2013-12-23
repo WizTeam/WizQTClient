@@ -1,11 +1,11 @@
-#include "styleHelper.h"
+#include "stylehelper.h"
 
 #include <QFontMetrics>
 #include <QSize>
 
 namespace Utils {
 
-int styleHelper::avatarHeight()
+int StyleHelper::avatarHeight()
 {
     int nHeight = lineSpacing() * 3;
 
@@ -20,17 +20,17 @@ int styleHelper::avatarHeight()
     return nHeight;
 }
 
-int styleHelper::lineSpacing()
+int StyleHelper::lineSpacing()
 {
     return 5;
 }
 
-int styleHelper::margin()
+int StyleHelper::margin()
 {
     return 5;
 }
 
-int styleHelper::thumbnailHeight()
+int StyleHelper::thumbnailHeight()
 {
     QFont f;
     int nExtra = QFontMetrics(f).height() * 2 + margin() * 2;

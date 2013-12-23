@@ -2,6 +2,7 @@
 #define WIZSERVICE_APIENTRY_P_H
 
 #include <QObject>
+#include <QMap>
 
 class QString;
 
@@ -25,6 +26,8 @@ public:
     QString accountInfoUrl(const QString& strToken);
     QString groupAttributeUrl(const QString& strToken, const QString& strKbGUID);
 
+    QString kUrlFromGuid(const QString& strToken, const QString& strKbGUID);
+
 private:
     QString m_strSyncUrl;
     QString m_strMessageVersionUrl;
@@ -33,6 +36,7 @@ private:
     QString m_strCommentUrl;
     QString m_strCommentCountUrl;
     QString m_strFeedbackUrl;
+    QMap<QString, QString> m_mapkUrl;
 
     QString urlFromCommand(const QString& strCommand);
     QString addExtendedInfo(const QString& strUrl, const QString& strExt);

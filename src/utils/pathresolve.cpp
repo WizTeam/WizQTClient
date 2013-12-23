@@ -1,5 +1,6 @@
 #include "pathresolve.h"
 
+#include <QtGlobal>
 #include <QApplication>
 #include <QDir>
 
@@ -42,9 +43,46 @@ QString PathResolve::dataStorePath()
     return strPath;
 }
 
+QString PathResolve::cachePath()
+{
+    QString strCachePath = qgetenv("XDG_CACHE_HOME");
+    if (strCachePath.isEmpty()) {
+#ifdef Q_OS_LINUX
+        strCachePath = qgetenv("HOME") + "/.cache/wiznote/";
+#else
+        strCachePath = dataStorePath() + "cache/";
+#endif
+    } else {
+        strCachePath += "/wiznote/";
+    }
+
+    ensurePathExists(strCachePath);
+    return strCachePath;
+}
+
+QString PathResolve::logPath()
+{
+    QString strPath = dataStorePath() + "log/";
+    ensurePathExists(strPath);
+    return strPath;
+}
+
 QString PathResolve::pluginsPath()
 {
     return resourcesPath() + "plugins/";
+}
+
+QString PathResolve::tempPath()
+{
+    QString path = QDir::tempPath() + "/WizNote/";
+    ensurePathExists(path);
+
+    return path;
+}
+
+QString PathResolve::userSettingsFilePath()
+{
+    return dataStorePath() + "wiznote.ini";
 }
 
 void PathResolve::addBackslash(QString& strPath)

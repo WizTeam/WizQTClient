@@ -2,10 +2,13 @@
 #define WIZSERVICE_TOKEN_P_H
 
 #include <QObject>
+#include "../share/wizobject.h"
 
 class QString;
+class QDateTime;
 class QMutex;
-class QWaitCondition;
+
+struct WIZUSERINFO;
 
 namespace WizService {
 class Token;
@@ -24,18 +27,23 @@ public:
     void requestToken();
     void setUserId(const QString& strUserId);
     void setPasswd(const QString& strPasswd);
+    const WIZUSERINFO& info();
+
+    int lastErrorCode() const;
+    QString lastErrorMessage() const;
 
 private Q_SLOTS:
-    void onGetTokenFinished(const QString& strToken, const QString& strMsg);
-    void onKeepAliveFinished(bool bOk, const QString& strMsg);
+    void onLoginFinished(const WIZUSERINFO& info);
+    void onGetTokenFinished(const QString& strToken);
+    void onKeepAliveFinished(bool bOk);
 
 private:
     AsyncApi* m_api;
-    QString m_strToken;
+    WIZUSERINFO m_info;
     QString m_strUserId;
     QString m_strPasswd;
+    bool m_bProcess;
     QMutex* m_mutex;
-    QWaitCondition* m_waiter;
 
     Token* q;
 };

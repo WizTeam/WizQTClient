@@ -1,6 +1,7 @@
 #ifndef WIZOBJECT_H
 #define WIZOBJECT_H
 
+#include <QMetaType>
 #include <QImage>
 #include "wizqthelper.h"
 
@@ -38,9 +39,8 @@ struct WIZUSERINFOBASE
     QString strToken;
     QString strKbGUID;
     QString strDatabaseServer;
-    //
     int nMaxFileSize;
-    //
+
     WIZUSERINFOBASE()
         : nMaxFileSize(10 * 1024 * 1024)
     {
@@ -54,6 +54,7 @@ struct WIZUSERINFOBASE
 struct WIZUSERINFO : public WIZUSERINFOBASE
 {
     WIZUSERINFO();
+    WIZUSERINFO(const WIZUSERINFO& info);
     virtual bool LoadFromXmlRpc(CWizXmlRpcStructValue& val);
 
     // field: api_version, default: 1
@@ -139,9 +140,11 @@ struct WIZUSERINFO : public WIZUSERINFOBASE
     QString strBackupDatabaseServer;
 };
 
-struct WIZKMUSERINFO : public WIZUSERINFO
-{
-};
+Q_DECLARE_METATYPE(WIZUSERINFO)
+
+//struct WIZKMUSERINFO : public WIZUSERINFO
+//{
+//};
 
 
 struct WIZUSERCERT
@@ -402,6 +405,23 @@ struct WIZDOCUMENTDATAEX : public WIZDOCUMENTDATA
 
     bool bSkipped;
 };
+
+/*
+////用于getList，获得简单信息////
+*/
+struct WIZDOCUMENTDATAEX_XMLRPC_SIMPLE : public WIZDOCUMENTDATAEX
+{
+    WIZDOCUMENTDATAEX_XMLRPC_SIMPLE()
+    {
+    }
+    WIZDOCUMENTDATAEX_XMLRPC_SIMPLE(const WIZDOCUMENTDATAEX& data)
+        : WIZDOCUMENTDATAEX(data)
+    {
+    }
+
+    bool LoadFromXmlRpc(CWizXmlRpcStructValue& data);
+};
+
 
 
 struct WIZDOCUMENTATTACHMENTDATA : public WIZOBJECTBASE

@@ -32,15 +32,19 @@ private:
 
     //void resetAvatar(const QString& strUserId);
 
-    void enableControls(bool bEnable);
-    void doAccountVerify();
-    bool updateProfile(CWizUserSettings& settings, const QString& strUserId, const WIZKMUSERINFO& info);
-
     void setUsers(const QString& strDefault);
     void setUser(const QString& userId);
 
+    void doAccountVerify();
+    void doOnlineVerify();
+    bool updateGlobalProfile();
+    bool updateUserProfile(bool bLogined);
+    void enableControls(bool bEnable);
+
 public Q_SLOTS:
     virtual void accept();
+
+    void onTokenAcquired(const QString& strToken);
 
     void on_labelRegister_linkActivated(const QString&);
     void on_labelForgot_linkActivated(const QString&);

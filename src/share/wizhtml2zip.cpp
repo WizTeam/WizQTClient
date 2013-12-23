@@ -3,6 +3,7 @@
 #include "html/wizhtmlcollector.h"
 
 #include "wizmisc.h"
+#include "utils/pathresolve.h"
 
 #include "../share/wizzip.h"
 
@@ -30,12 +31,12 @@ bool WizHtml2Zip(const QString& strHtml, const CWizStdStringArray& arrayResource
     if (!zip.open(strZipFileName))
         return false;
 
-    CString strIndexFileName = WizGlobal()->GetTempPath() + WizIntToStr(GetTickCount()) + ".html";
+    CString strIndexFileName = Utils::PathResolve::tempPath() + WizIntToStr(GetTickCount()) + ".html";
     //if (!::WizSaveUnicodeTextToUnicodeFile(strIndexFileName, strHtml))
     if (!::WizSaveUnicodeTextToUtf8File(strIndexFileName, strHtml))
         return false;
 
-    CString strMetaFileName = ::WizGlobal()->GetTempPath() + WizIntToStr(GetTickCount()) + ".xml";
+    CString strMetaFileName = Utils::PathResolve::tempPath() + WizIntToStr(GetTickCount()) + ".xml";
     if (!::WizSaveUnicodeTextToUtf8File(strMetaFileName, strMetaText))
         return false;
 

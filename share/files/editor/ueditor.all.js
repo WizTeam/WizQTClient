@@ -4170,15 +4170,15 @@ var fillCharReg = new RegExp(domUtils.fillChar, 'g');
 
                 var html = ( ie && browser.version < 9  ? '' : '<!DOCTYPE html>') +
                         '<html xmlns=\'http://www.w3.org/1999/xhtml\' class=\'view\' ><head>' +
-                        '<style type=\'text/css\'>' +
+                        //'<style type=\'text/css\'>' +
                         //设置四周的留边
-                        '.view{padding:0;word-wrap:break-word;cursor:text;height:90%;}\n' +
+                        //'.view{padding:0;word-wrap:break-word;cursor:text;height:90%;}\n' +
                         //设置默认字体和字号
                         //font-family不能呢随便改，在safari下fillchar会有解析问题
-                        'body{margin:8px;font-family:sans-serif;font-size:16px;}' +
+                        //'body{margin:8px;font-family:sans-serif;font-size:16px;}' +
                         //设置段落间距
-                        'p{margin:5px 0;}</style>' +
-                        ( options.iframeCssUrl ? '<link rel=\'stylesheet\' type=\'text/css\' href=\'' + utils.unhtml(options.iframeCssUrl) + '\'/>' : '' ) +
+                        //'p{margin:5px 0;}</style>' +
+                        ( options.iframeCssUrl ? '<link rel=\'stylesheet\' type=\'text/css\' href=\'' + utils.unhtml(options.iframeCssUrl) + '?v=0\'/>' : '' ) +
                         (options.initialStyle ? '<style>' + options.initialStyle + '</style>' : '') +
                         '</head><body class=\'view\' ></body>' +
                         '<script type=\'text/javascript\' ' + (ie ? 'defer=\'defer\'' : '' ) +' id=\'_initialScript\'>' +
@@ -6093,36 +6093,36 @@ UE.plugins['defaultfilter'] = function () {
                             node.innerHTML(browser.ie ? '&nbsp;' : '<br/>')
                         }
                         break;
-                    case 'div':
-                        if(node.getAttr('cdata_tag')){
-                            break;
-                        }
-                        //针对代码这里不处理插入代码的div
-                        val = node.getAttr('class');
-                        if(val && /^line number\d+/.test(val)){
-                            break;
-                        }
-                        if(!allowDivTransToP){
-                            break;
-                        }
-                        var tmpNode, p = UE.uNode.createElement('p');
-                        while (tmpNode = node.firstChild()) {
-                            if (tmpNode.type == 'text' || !UE.dom.dtd.$block[tmpNode.tagName]) {
-                                p.appendChild(tmpNode);
-                            } else {
-                                if (p.firstChild()) {
-                                    node.parentNode.insertBefore(p, node);
-                                    p = UE.uNode.createElement('p');
-                                } else {
-                                    node.parentNode.insertBefore(tmpNode, node);
-                                }
-                            }
-                        }
-                        if (p.firstChild()) {
-                            node.parentNode.insertBefore(p, node);
-                        }
-                        node.parentNode.removeChild(node);
-                        break;
+                    //case 'div':
+                    //    if(node.getAttr('cdata_tag')){
+                    //        break;
+                    //    }
+                    //    //针对代码这里不处理插入代码的div
+                    //    val = node.getAttr('class');
+                    //    if(val && /^line number\d+/.test(val)){
+                    //        break;
+                    //    }
+                    //    if(!allowDivTransToP){
+                    //        break;
+                    //    }
+                    //    var tmpNode, p = UE.uNode.createElement('p');
+                    //    while (tmpNode = node.firstChild()) {
+                    //        if (tmpNode.type == 'text' || !UE.dom.dtd.$block[tmpNode.tagName]) {
+                    //            p.appendChild(tmpNode);
+                    //        } else {
+                    //            if (p.firstChild()) {
+                    //                node.parentNode.insertBefore(p, node);
+                    //                p = UE.uNode.createElement('p');
+                    //            } else {
+                    //                node.parentNode.insertBefore(tmpNode, node);
+                    //            }
+                    //        }
+                    //    }
+                    //    if (p.firstChild()) {
+                    //        node.parentNode.insertBefore(p, node);
+                    //    }
+                    //    node.parentNode.removeChild(node);
+                    //    break;
                     case 'dl':
                         node.tagName = 'ul';
                         break;

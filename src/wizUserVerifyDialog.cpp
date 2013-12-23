@@ -6,6 +6,8 @@
 #include <QGridLayout>
 #include <QDialogButtonBox>
 
+#include <sync/token.h>
+
 CWizUserVerifyDialog::CWizUserVerifyDialog(const QString& strUser,
                                            const QString& strHint,
                                            QWidget *parent)
@@ -51,7 +53,8 @@ QString CWizUserVerifyDialog::password()
 
 void CWizUserVerifyDialog::on_btnAccept_clicked()
 {
-    if (!m_editUser->text().isEmpty()) {
+    if (!m_editPasswd->text().isEmpty()) {
+        WizService::Token::setPasswd(m_editPasswd->text());
         accept();
     }
 }

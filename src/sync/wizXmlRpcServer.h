@@ -8,6 +8,7 @@
 
 #include "../share/wizxmlrpc.h"
 #include "../share/wizmisc.h"
+#include "../utils/logger.h"
 
 
 
@@ -109,6 +110,8 @@ protected:
 };
 
 
+#if 0
+
 class CWizXmlRpcServer : public QObject
 {
     Q_OBJECT
@@ -146,5 +149,7 @@ Q_SIGNALS:
                       const QString& arg1, const QString& arg2);
     void xmlRpcReadProgress(qint64 bytesReceived, qint64 bytesTotal);
 };
+
+#endif
 
 #endif // WIZXMLRPCSERVER_H

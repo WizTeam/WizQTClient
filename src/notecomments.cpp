@@ -3,10 +3,12 @@
 
 #include <QDebug>
 
+#include <coreplugin/icore.h>
+
+#include "wizDocumentView.h"
 #include "share/wizobject.h"
 #include "sync/token.h"
 #include "sync/apientry.h"
-#include "icore.h"
 
 using namespace Core;
 
@@ -17,9 +19,9 @@ static NoteCommentsPrivate* m_comments = 0;
 
 NoteCommentsPrivate::NoteCommentsPrivate()
 {
-    connect(ICore::instance(), SIGNAL(viewNoteLoaded(CWizDocumentView*, const WIZDOCUMENTDATA&)),
-            SLOT(onViewNoteLoaded(CWizDocumentView*, const WIZDOCUMENTDATA&)));
-    connect(Token::instance(), SIGNAL(tokenAcquired(QString,QString)), SLOT(onTokenAcquired(QString, QString)));
+    //connect(ICore::instance(), SIGNAL(viewNoteLoaded(Core::CWizDocumentView*, const WIZDOCUMENTDATA&)),
+    //        SLOT(onViewNoteLoaded(Core::CWizDocumentView*, const WIZDOCUMENTDATA&)));
+    //connect(Token::instance(), SIGNAL(tokenAcquired(QString)), SLOT(onTokenAcquired(QString)));
 }
 
 NoteCommentsPrivate::~NoteCommentsPrivate()
@@ -29,15 +31,13 @@ NoteCommentsPrivate::~NoteCommentsPrivate()
 
 void NoteCommentsPrivate::onViewNoteLoaded(CWizDocumentView* view, const WIZDOCUMENTDATA& note)
 {
-    //m_map.insert(view, note);
+    m_map.insert(view, note);
 
-    //Token::requestToken();
+    Token::requestToken();
 }
 
-void NoteCommentsPrivate::onTokenAcquired(const QString& strToken, const QString& strMsg)
+void NoteCommentsPrivate::onTokenAcquired(const QString& strToken)
 {
-    Q_UNUSED(strMsg);
-
     if (strToken.isEmpty())
         return;
 

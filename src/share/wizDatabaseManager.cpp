@@ -3,6 +3,7 @@
 #include <QDebug>
 
 #include "wizDatabase.h"
+#include "utils/logger.h"
 
 static CWizDatabaseManager* m_instance = 0;
 

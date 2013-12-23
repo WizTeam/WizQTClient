@@ -4,6 +4,7 @@
 #include <QApplication>
 
 #include "wizmisc.h"
+#include "utils/pathresolve.h"
 
 
 CWizCommonUI::CWizCommonUI(QObject* parent)
@@ -34,7 +35,7 @@ QString CWizCommonUI::ClipboardToImage(int hwnd, const QString& strOptions)
     CString strTempPath = ::WizGetCommandLineValue(strOptions, "TempPath");
     if (strTempPath.IsEmpty())
     {
-        strTempPath = WizGlobal()->GetTempPath();
+        strTempPath = Utils::PathResolve::tempPath();
     }
     else
     {

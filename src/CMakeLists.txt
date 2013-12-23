@@ -62,11 +62,11 @@ set(wiznote_SOURCES
     sync/wizkmxmlrpc.cpp
     sync/wizkmsync.cpp
     sync/asyncapi.cpp
-    sync/wizCloudPool.cpp
-    sync/wizAvatarUploader.cpp
+    #sync/wizCloudPool.cpp
+    sync/avataruploader.cpp
     widgets/wizUserInfoWidget.cpp
     widgets/wizSegmentedButton.cpp
-    utils/styleHelper.cpp
+    utils/stylehelper.cpp
     utils/pathresolve.cpp
 
     #coreplugin.cpp
@@ -89,13 +89,14 @@ set(wiznote_SOURCES
     wizproxydialog.cpp
     wizcreateaccountdialog.cpp
     wizmainwindow.cpp
-    icore.cpp
+    #icore.cpp
     notecomments.cpp
     cellbutton.cpp
     titlebar.cpp
     infobar.cpp
     notifybar.cpp
     titleedit.cpp
+    sync/sync.cpp
     #wizupdaterprogressdialog.cpp
     wizstatusbar.cpp
     wizupgradenotifydialog.cpp
@@ -117,7 +118,8 @@ set(wiznote_SOURCES
     wizWebSettingsDialog.cpp
     wizUserVerifyDialog.cpp
     plugindialog.cpp
-
+    utils/logger.cpp
+    utils/misc.cpp
 )
 
 set(wiznote_HEADERS
@@ -161,8 +163,8 @@ set(wiznote_HEADERS
     sync/wizkmxmlrpc.h
     sync/wizkmsync.h
     sync/asyncapi.h
-    sync/wizCloudPool.h
-    sync/wizAvatarUploader.h
+    #sync/wizCloudPool.h
+    sync/avataruploader.h
     share/wizSyncableDatabase.h
     share/wizClucene.h
     share/wizSearchIndexer.h
@@ -175,7 +177,7 @@ set(wiznote_HEADERS
     sync/apientry_p.h
     share/wizObjectDataDownloader.h
     share/wizUserAvatar.h
-    utils/styleHelper.h
+    utils/stylehelper.h
     utils/pathresolve.h
 
     wizdef.h
@@ -197,7 +199,7 @@ set(wiznote_HEADERS
     wizproxydialog.h
     wizcreateaccountdialog.h
     wizmainwindow.h
-    icore.h
+    #icore.h
     notecomments.h
     notecomments_p.h
     cellbutton.h
@@ -205,6 +207,8 @@ set(wiznote_HEADERS
     infobar.h
     notifybar.h
     titleedit.h
+    sync/sync.h
+    sync/sync_p.h
     #wizupdaterprogressdialog.h
     wizstatusbar.h
     wizupgradenotifydialog.h
@@ -227,6 +231,8 @@ set(wiznote_HEADERS
     wizDocumentSelectionView.h
     wizUserVerifyDialog.h
     plugindialog.h
+    utils/logger.h
+    utils/misc.h
 )
 
 set(wiznote_FORMS
@@ -335,6 +341,7 @@ qt_use_modules(wiznote)
 qt_suppress_warnings(wiznote)
 
 include_directories(
+    ${plugins_SOURCE_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_CURRENT_BINARY_DIR}
     ${CMAKE_SOURCE_DIR}/lib
@@ -354,5 +361,6 @@ target_link_libraries(${PROJECT_NAME}
     clucene-shared-static
     extensionsystem
     aggregation
+    coreplugin
     ${CMAKE_DL_LIBS}
 )

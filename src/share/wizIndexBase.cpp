@@ -2,6 +2,8 @@
 
 #include <QDebug>
 
+#include "utils/logger.h"
+
 
 CWizIndexBase::CWizIndexBase(void)
     : m_bUpdating(false)

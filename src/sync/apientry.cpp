@@ -10,8 +10,11 @@
 #include <QTime>
 #include <QString>
 #include <QDebug>
+#include <QUrl>
 
 #include "apientry.h"
+#include "token.h"
+#include "wizkmxmlrpc.h"
 #include "wizdef.h"
 
 /*
@@ -38,6 +41,7 @@
 
 // command list
 #define WIZNOTE_API_COMMAND_SYNC_HTTP       "sync_http"
+#define WIZNOTE_API_COMMAND_SYNC_HTTPS      "sync_https"
 #define WIZNOTE_API_COMMAND_MESSAGE_VERSION "message_version"
 #define WIZNOTE_API_COMMAND_AVATAR          "avatar"
 #define WIZNOTE_API_COMMAND_UPLOAD_AVATAR   "upload_avatar"
@@ -122,7 +126,7 @@ QString ApiEntryPrivate::requestUrl(const QString& strCommand, QString& strUrl)
 
 QString ApiEntryPrivate::syncUrl()
 {
-    return requestUrl(WIZNOTE_API_COMMAND_SYNC_HTTP, m_strSyncUrl);
+    return requestUrl(WIZNOTE_API_COMMAND_SYNC_HTTPS, m_strSyncUrl);
 }
 
 QString ApiEntryPrivate::messageVersionUrl()
@@ -167,7 +171,11 @@ QString ApiEntryPrivate::commentCountUrl(const QString& strServer, const QString
     strUrl.replace("{kbGuid}", strKbGUID);
     strUrl.replace("{documentGuid}", strGUID);
 
-    return strUrl;
+    // use https
+    QUrl url(strUrl);
+    url.setScheme("https");
+
+    return url.toString();
 }
 
 QString ApiEntryPrivate::feedbackUrl()
@@ -188,6 +196,35 @@ QString ApiEntryPrivate::groupAttributeUrl(const QString& strToken, const QStrin
     QString strExt = QString("token=%1&kb_guid=%2").arg(strToken).arg(strKbGUID);
     QString strUrl = urlFromCommand(WIZNOTE_API_COMMAND_VIEW_GROUP);
     return addExtendedInfo(strUrl, strExt);
+}
+
+QString ApiEntryPrivate::kUrlFromGuid(const QString& strToken, const QString& strKbGUID)
+{
+    Q_ASSERT(!strToken.isEmpty());
+
+    if (m_mapkUrl.contains(strKbGUID))
+        return m_mapkUrl.value(strKbGUID);
+
+    WIZUSERINFO info = Token::info();
+    m_mapkUrl.insert(info.strKbGUID, info.strDatabaseServer);
+    qDebug() << "user: " << info.strKbGUID << " kbUrl: " << info.strDatabaseServer;
+
+    CWizKMAccountsServer asServer(syncUrl());
+    asServer.SetUserInfo(info);
+
+    CWizGroupDataArray arrayGroup;
+    if (asServer.GetGroupList(arrayGroup)) {
+        CWizGroupDataArray::const_iterator it = arrayGroup.begin();
+        for (; it != arrayGroup.end(); it++) {
+            const WIZGROUPDATA& group = *it;
+            m_mapkUrl.insert(group.strGroupGUID, group.strDatabaseServer);
+            qDebug() << "group:" << group.strGroupGUID << " kburl: " <<  group.strDatabaseServer;
+        }
+    } else {
+        qDebug() << asServer.GetLastErrorMessage();
+    }
+
+    return m_mapkUrl.value(strKbGUID, 0);
 }
 
 
@@ -257,4 +294,11 @@ QString ApiEntry::groupAttributeUrl(const QString& strToken, const QString& strK
     if (!d)
         d = new ApiEntryPrivate();
     return d->groupAttributeUrl(strToken, strKbGUID);
+}
+
+QString ApiEntry::kUrlFromGuid(const QString& strToken, const QString& strKbGUID)
+{
+    if (!d)
+        d = new ApiEntryPrivate();
+    return d->kUrlFromGuid(strToken, strKbGUID);
 }

@@ -11,7 +11,7 @@
 #include "sync/apientry.h"
 #include "sync/wizkmxmlrpc.h"
 #include "wizWebSettingsDialog.h"
-#include "sync/wizAvatarUploader.h"
+#include "sync/avataruploader.h"
 #include "sync/token.h"
 
 using namespace WizService;
@@ -214,18 +214,23 @@ void CWizUserInfoWidget::on_action_accountSetup_triggered()
         m_userSettings = new CWizWebSettingsDialog(QSize(720, 400), window()); // use toplevel window as parent
         m_userSettings->setWindowTitle(tr("Account settings"));
         connect(m_userSettings, SIGNAL(accepted()), m_userSettings, SLOT(deleteLater()));
-        //connect(m_userSettings, SIGNAL(showProgress()), ::instance(), SLOT(getToken()));
-        connect(Token::instance(), SIGNAL(tokenAcquired(const QString&, const QString&)),
-                SLOT(on_action_accountSetup_requested(const QString&, const QString&)));
+        connect(m_userSettings, SIGNAL(showProgress()), SLOT(on_action_accountSetup_showProgress()));
     }
 
     m_userSettings->open();
+}
+
+void CWizUserInfoWidget::on_action_accountSetup_showProgress()
+{
+    connect(Token::instance(), SIGNAL(tokenAcquired(const QString&)),
+            SLOT(on_action_accountSetup_requested(const QString&)), Qt::UniqueConnection);
+
     Token::requestToken();
 }
 
-void CWizUserInfoWidget::on_action_accountSetup_requested(const QString& strToken, const QString& strMsg)
+void CWizUserInfoWidget::on_action_accountSetup_requested(const QString& strToken)
 {
-    Q_UNUSED(strMsg);
+    Token::instance()->disconnect(this);
 
     if (!m_userSettings)
         return;
@@ -255,18 +260,22 @@ void CWizUserInfoWidget::on_action_changeAvatar_triggered()
         return;
     }
 
-    CWizAvatarUploader* uploader = new CWizAvatarUploader(m_app, this);
+    AvatarUploader* uploader = new AvatarUploader(this);
     connect(uploader, SIGNAL(uploaded(bool)), SLOT(on_action_changeAvatar_uploaded(bool)));
     uploader->upload(listFiles[0]);
 }
 
 void CWizUserInfoWidget::on_action_changeAvatar_uploaded(bool ok)
 {
-    sender()->deleteLater();
+    AvatarUploader* uploader = qobject_cast<AvatarUploader*>(sender());
 
     if (ok) {
         downloadAvatar();
+    } else {
+        QMessageBox::warning(this, tr("Upload Avatar"), uploader->lastErrorMessage());
     }
+
+    uploader->deleteLater();
 }
 
 void CWizUserInfoWidget::on_userInfo_changed()

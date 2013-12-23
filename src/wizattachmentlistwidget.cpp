@@ -7,6 +7,8 @@
 #include <QMessageBox>
 #include <QLabel>
 
+#include <coreplugin/icore.h>
+
 #include "share/wizDatabaseManager.h"
 
 #include "wiznotestyle.h"
@@ -17,7 +19,7 @@
 #include "share/wizObjectDataDownloader.h"
 
 #include "wizmainwindow.h"
-#include "icore.h"
+#include "utils/pathresolve.h"
 
 using namespace Core::Internal;
 
@@ -193,7 +195,7 @@ void CWizAttachmentListView::openAttachment(CWizAttachmentListViewItem* item)
     if (!item)
         return;
 
-    CString strTempPath = ::WizGlobal()->GetTempPath();
+    CString strTempPath = Utils::PathResolve::tempPath();
     const WIZDOCUMENTATTACHMENTDATA& attachment = item->attachment();
 
     CWizDatabase& db = m_dbMgr.db(attachment.strKbGUID);

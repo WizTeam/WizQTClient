@@ -7,11 +7,11 @@
     <x>0</x>
     <y>0</y>
     <width>400</width>
-    <height>220</height>
+    <height>265</height>
    </rect>
   </property>
   <property name="sizePolicy">
-   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
     <horstretch>0</horstretch>
     <verstretch>0</verstretch>
    </sizepolicy>
@@ -19,13 +19,13 @@
   <property name="minimumSize">
    <size>
     <width>400</width>
-    <height>220</height>
+    <height>265</height>
    </size>
   </property>
   <property name="maximumSize">
    <size>
     <width>400</width>
-    <height>220</height>
+    <height>265</height>
    </size>
   </property>
   <property name="windowTitle">
@@ -37,7 +37,7 @@
      <x>0</x>
      <y>0</y>
      <width>401</width>
-     <height>221</height>
+     <height>211</height>
     </rect>
    </property>
    <property name="currentIndex">
@@ -111,7 +111,7 @@
       <rect>
        <x>10</x>
        <y>0</y>
-       <width>381</width>
+       <width>371</width>
        <height>181</height>
       </rect>
      </property>
@@ -137,7 +137,7 @@
      <widget class="QComboBox" name="comboSyncInterval">
       <property name="geometry">
        <rect>
-        <x>160</x>
+        <x>150</x>
         <y>30</y>
         <width>211</width>
         <height>26</height>
@@ -201,7 +201,7 @@
      <widget class="QComboBox" name="comboSyncMethod">
       <property name="geometry">
        <rect>
-        <x>160</x>
+        <x>150</x>
         <y>70</y>
         <width>211</width>
         <height>26</height>
@@ -236,7 +236,7 @@
      <widget class="QComboBox" name="comboSyncGroupMethod">
       <property name="geometry">
        <rect>
-        <x>160</x>
+        <x>150</x>
         <y>110</y>
         <width>211</width>
         <height>26</height>
@@ -291,8 +291,8 @@
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>10</y>
-       <width>371</width>
+       <y>0</y>
+       <width>381</width>
        <height>131</height>
       </rect>
      </property>
@@ -348,7 +348,7 @@
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>10</y>
+       <y>0</y>
        <width>371</width>
        <height>91</height>
       </rect>
@@ -396,6 +396,25 @@
      </widget>
     </widget>
    </widget>
+  </widget>
+  <widget class="QPushButton" name="btnClose">
+   <property name="geometry">
+    <rect>
+     <x>300</x>
+     <y>220</y>
+     <width>81</width>
+     <height>32</height>
+    </rect>
+   </property>
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
+   <property name="text">
+    <string>Close</string>
+   </property>
   </widget>
  </widget>
  <resources/>

@@ -1,6 +1,7 @@
 #include "wizUpgrade.h"
 
 #include "share/wizmisc.h"
+#include "utils/logger.h"
 
 #define strWhatsNewUrl "http://blog.wiz.cn/wiznotechangelog"
 #define strUpgradeHostUrl "http://download.wiz.cn"

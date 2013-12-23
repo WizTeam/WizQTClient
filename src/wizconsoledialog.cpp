@@ -1,73 +1,52 @@
 #include "wizconsoledialog.h"
 #include "ui_wizconsoledialog.h"
 
+#include <QScrollBar>
 #include <QTextCodec>
 #include <QFileDialog>
 #include <QClipboard>
+#include <QTextEdit>
+#include <QTextStream>
+#include <QMessageBox>
 
 #include "wizdef.h"
 #include "share/wizmisc.h"
 #include "share/wizDatabaseManager.h"
 #include "share/wizDatabase.h"
 
+#include "utils/logger.h"
+
 #ifdef Q_OS_MAC
 #include "mac/wizmachelper.h"
 #endif
-
-#define MAXIMUM_LOG_ENTRIES 10000
-
 
 CWizConsoleDialog::CWizConsoleDialog(CWizExplorerApp& app, QWidget* parent)
     : QDialog(parent)
     , m_app(app)
     , m_ui(new Ui::CWizConsoleDialog)
-    , m_nEntries(0)
     , m_bAutoScroll(true)
+    , m_nPos(0)
 {
     m_ui->setupUi(this);
     setWindowFlags(Qt::Tool);
 
     m_ui->editConsole->setReadOnly(true);
     m_ui->btnCopyToClipboard->setEnabled(false);
-    m_codec = QTextCodec::codecForName("UTF-8");
 
-    connect(::WizGlobal()->bufferLog(), SIGNAL(readyRead()), SLOT(bufferLog_readyRead()));
-    connect(m_ui->btnSaveAs, SIGNAL(clicked()), SLOT(on_btnSaveAs_clicked()));
-    connect(m_ui->editConsole, SIGNAL(copyAvailable(bool)), SLOT(on_editConsole_copyAvailable(bool)));
-    connect(m_ui->btnCopyToClipboard, SIGNAL(clicked()), SLOT(on_btnCopyToClipboard_clicked()));
-    connect(m_ui->buttonClear, SIGNAL(clicked()), SLOT(on_buttonClear_clicked()));
+    connect(Utils::Logger::buffer(), SIGNAL(readyRead()), SLOT(onLogBufferReadyRead()));
+    connect(m_ui->btnSaveAs, SIGNAL(clicked()), SLOT(onBtnSaveAsClicked()));
+    connect(m_ui->editConsole, SIGNAL(copyAvailable(bool)), SLOT(onConsoleCopyAvailable(bool)));
+    connect(m_ui->btnCopyToClipboard, SIGNAL(clicked()), SLOT(onBtnCopyToClipboardClicked()));
+    connect(m_ui->buttonClear, SIGNAL(clicked()), SLOT(onBtnClearClicked()));
 
-    connect(m_ui->editConsole, SIGNAL(textChanged()), SLOT(on_editConsole_textChanged()));
-    connect(m_ui->editConsole->verticalScrollBar(), SIGNAL(valueChanged(int)), SLOT(onEditConsole_sliderMoved(int)));
+    connect(m_ui->editConsole, SIGNAL(textChanged()), SLOT(onConsoleTextChanged()));
+    connect(m_ui->editConsole->verticalScrollBar(), SIGNAL(valueChanged(int)), SLOT(onConsoleSliderMoved(int)));
 
     load();
 }
 
 CWizConsoleDialog::~CWizConsoleDialog()
 {
-    if (m_nEntries < MAXIMUM_LOG_ENTRIES) {
-        return;
-    }
-
-    QString strLogFileName = ::WizGetLogFileName();
-    QFile file(strLogFileName);
-    file.open(QIODevice::Truncate | QIODevice::WriteOnly);
-
-    int i = 0;
-    QBuffer buffer;
-    buffer.setData(m_data.toUtf8());
-    buffer.open(QIODevice::ReadOnly);
-    while(i < m_nEntries) {
-        QByteArray bufLine = buffer.readLine();
-        if (i >= m_nEntries - MAXIMUM_LOG_ENTRIES) { // skip old entries
-            file.write(bufLine);
-        }
-
-        i++;
-    }
-
-    buffer.close();
-    file.close();
 }
 
 void CWizConsoleDialog::showEvent(QShowEvent *event)
@@ -80,18 +59,36 @@ void CWizConsoleDialog::showEvent(QShowEvent *event)
     QDialog::showEvent(event);
 }
 
-void CWizConsoleDialog::load()
+void CWizConsoleDialog::insertLog(const QByteArray& nBytes)
 {
-    QString strLogFileName = ::WizGetLogFileName();
-    QFile file(strLogFileName);
-    file.open(QIODevice::ReadOnly | QIODevice::Text);
-    readByLine(&file);
-    file.close();
+    QTextCursor cursor = m_ui->editConsole->textCursor();
+    cursor.movePosition(QTextCursor::End);
+    cursor.insertText(QString::fromUtf8(nBytes.data()));
 
-    resetCount();
+    m_nPos += nBytes.size();
 }
 
-void CWizConsoleDialog::onEditConsole_sliderMoved(int value)
+void CWizConsoleDialog::load()
+{
+    QByteArray bytes = Utils::Logger::buffer()->buffer();
+    insertLog(bytes);
+}
+
+void CWizConsoleDialog::onLogBufferReadyRead()
+{
+    QBuffer* buf = Utils::Logger::buffer();
+
+    if (!buf->open(QIODevice::ReadOnly)) {
+        return;
+    }
+
+    buf->seek(m_nPos);
+    insertLog(buf->readAll());
+
+    buf->close();
+}
+
+void CWizConsoleDialog::onConsoleSliderMoved(int value)
 {
     QScrollBar* scroll = qobject_cast<QScrollBar *>(sender());
     if (value == scroll->maximum()) {
@@ -101,101 +98,71 @@ void CWizConsoleDialog::onEditConsole_sliderMoved(int value)
     }
 }
 
-void CWizConsoleDialog::on_editConsole_textChanged()
+void CWizConsoleDialog::onConsoleTextChanged()
 {
     if (m_bAutoScroll) {
         QScrollBar* vScroll = m_ui->editConsole->verticalScrollBar();
         vScroll->setValue(vScroll->maximum());
     }
+
+    resetCount();
 }
 
-void CWizConsoleDialog::on_buttonClear_clicked()
+void CWizConsoleDialog::onBtnClearClicked()
 {
-    QString strLogFileName = ::WizGetLogFileName();
-    QFile file(strLogFileName);
-    file.open(QIODevice::Truncate | QIODevice::WriteOnly);
-    file.close();
-
     m_ui->editConsole->clear();
-    m_data.clear();
-    m_nEntries = 0;
-    resetCount();
-}
 
-void CWizConsoleDialog::bufferLog_readyRead()
-{
-    QBuffer* buffer = WizGlobal()->bufferLog();
-    buffer->open(QIODevice::ReadWrite);
-    // read all, to avoid write on read issue.
-    QByteArray bytesLog = buffer->readAll();
-    buffer->close();
-    buffer->setData("");
-
-    QBuffer bufLog(&bytesLog);
-    bufLog.open(QIODevice::ReadOnly);
-    readByLine(&bufLog);
-    bufLog.close();
-
-    resetCount();
-}
-
-void CWizConsoleDialog::readByLine(QIODevice* dev)
-{
-    while (1) {
-        QByteArray data = dev->readLine();
-        if (data.isEmpty()) {
-            break;
-        }
-
-        m_data += QString::fromUtf8(data);
-        QString strText = m_codec->toUnicode(data);
-
-        // use copyed cursor instead
-        QTextCursor cursor = m_ui->editConsole->textCursor();
-        cursor.movePosition(QTextCursor::End);
-        cursor.insertText(strText);
-
-        m_nEntries++;
-    }
+    Utils::Logger::buffer()->setBuffer(0);
+    m_nPos = 0;
 }
 
 void CWizConsoleDialog::resetCount()
 {
+    QBuffer* buf = Utils::Logger::buffer();
+    if (!buf->open(QIODevice::ReadOnly)) {
+        return;
+    }
+
+    int nLines = 0;
+    QTextStream ts(buf);
+    do {
+        ts.readLine();
+        nLines++;
+    } while (!ts.atEnd());
+
+    buf->close();
+
     QString strCount = m_ui->labelCount->text();
-    strCount = strCount.replace(QRegExp("%1|\\d+"), QString::number(m_nEntries));
+    strCount = strCount.replace(QRegExp("%1|\\d+"), QString::number(nLines));
     m_ui->labelCount->setText(strCount);
 }
 
-void CWizConsoleDialog::on_btnSaveAs_clicked()
+void CWizConsoleDialog::onBtnSaveAsClicked()
 {
-    QFileDialog fileDialog;
-    fileDialog.setAcceptMode(QFileDialog::AcceptSave);
-
     QString strToday = QDate::currentDate().toString(Qt::ISODate);
     QString strFileName = QString("WizNote_%1_%2.txt").arg(GetTickCount()).arg(strToday);
-    fileDialog.selectFile(strFileName);
 
-    if (fileDialog.exec() == QDialog::Accepted) {
-        QStringList files = fileDialog.selectedFiles();
-        QString selected;
-        if (files.isEmpty()) {
-            return;
-        }
+    QString strFilePath = QFileDialog::getSaveFileName(this, tr("Save log"), QDir::home().filePath(strFileName));
+    if (strFilePath.isEmpty())
+        return;
 
-        selected = files[0];
-        QFile file(selected);
-        file.open(QIODevice::Truncate | QIODevice::WriteOnly);
-        file.write(m_data.toUtf8());
-        file.close();
+    if (QFile::exists(strFilePath)) {
+        QMessageBox::warning(this, tr("Failed to save"), tr("you should select a file name which does not exists"));
+        return;
     }
+
+    QFile file(strFilePath);
+    file.open(QIODevice::Truncate | QIODevice::WriteOnly);
+    file.write(Utils::Logger::buffer()->data());
+    file.close();
 }
 
-void CWizConsoleDialog::on_editConsole_copyAvailable(bool yes)
+void CWizConsoleDialog::onConsoleCopyAvailable(bool yes)
 {
     m_ui->btnCopyToClipboard->setEnabled(yes);
 }
 
-void CWizConsoleDialog::on_btnCopyToClipboard_clicked()
+void CWizConsoleDialog::onBtnCopyToClipboardClicked()
 {
     m_ui->editConsole->copy();
 
@@ -215,5 +182,4 @@ void CWizConsoleDialog::on_btnCopyToClipboard_clicked()
     strOutput += strText;
 
     clipboard->setText(strOutput);
-
 }

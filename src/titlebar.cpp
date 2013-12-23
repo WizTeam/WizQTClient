@@ -1,9 +1,14 @@
 #include "titlebar.h"
 
 #include <QVBoxLayout>
+#include <QUrl>
 #include <QDebug>
+#include <QNetworkConfigurationManager>
+#include <QSplitter>
+#include <QList>
 
-#include "icore.h"
+#include <coreplugin/icore.h>
+
 #include "titleedit.h"
 #include "cellbutton.h"
 #include "infobar.h"
@@ -17,6 +22,10 @@
 #include "share/wizmisc.h"
 #include "share/wizDatabase.h"
 #include "share/wizsettings.h"
+
+#include "sync/token.h"
+#include "sync/apientry.h"
+#include "sync/asyncapi.h"
 
 using namespace Core;
 using namespace Core::Internal;
@@ -61,11 +70,19 @@ TitleBar::TitleBar(QWidget *parent)
     m_attachBtn->setBadgeIcon(::WizLoadSkinIcon(strTheme, "document_attachment_exist"), tr("View and add attachments"));
     connect(m_attachBtn, SIGNAL(clicked()), SLOT(onAttachButtonClicked()));
 
-    m_infoBtn = new CellButton(CellButton::Right, this);
+    m_infoBtn = new CellButton(CellButton::Center, this);
     QString infoShortcut = ::WizGetShortcut("EditNoteInfo", "Alt+4");
     m_infoBtn->setShortcut(QKeySequence::fromString(infoShortcut));
     m_infoBtn->setNormalIcon(::WizLoadSkinIcon(strTheme, "document_info"), tr("View and modify note's info"));
     connect(m_infoBtn, SIGNAL(clicked()), SLOT(onInfoButtonClicked()));
+
+    // comments
+    m_commentsBtn = new CellButton(CellButton::Right, this);
+    m_commentsBtn->setNormalIcon(::WizLoadSkinIcon(strTheme, "comments"), tr("Add comments"));
+    m_commentsBtn->setBadgeIcon(::WizLoadSkinIcon(strTheme, "comments_exist"), tr("View and add comments"));
+    connect(m_commentsBtn, SIGNAL(clicked()), SLOT(onCommentsButtonClicked()));
+    connect(ICore::instance(), SIGNAL(viewNoteLoaded(Core::INoteView*,const WIZDOCUMENTDATA&,bool)),
+            SLOT(onViewNoteLoaded(Core::INoteView*,const WIZDOCUMENTDATA&,bool)));
 
     QWidget* line1 = new QWidget(this);
     line1->setFixedHeight(12);
@@ -91,6 +108,7 @@ TitleBar::TitleBar(QWidget *parent)
     layoutInfo2->addWidget(m_tagBtn);
     layoutInfo2->addWidget(m_attachBtn);
     layoutInfo2->addWidget(m_infoBtn);
+    layoutInfo2->addWidget(m_commentsBtn);
     layoutInfo2->addWidget(line2);
 
     QVBoxLayout* layoutInfo3 = new QVBoxLayout();
@@ -239,4 +257,100 @@ void TitleBar::onInfoButtonClicked()
     QRect rc = m_infoBtn->rect();
     QPoint pt = m_infoBtn->mapToGlobal(QPoint(rc.width()/2, rc.height()));
     m_info->showAtPoint(pt);
+}
+
+bool isNetworkAccessible()
+{
+    QNetworkConfigurationManager man;
+    return man.isOnline();
+}
+
+#define COMMENT_FRAME_WIDTH 300
+
+void TitleBar::onCommentsButtonClicked()
+{
+    QWebView* comments = noteView()->commentView();
+    if (comments->isVisible()) {
+        comments->hide();
+        return;
+    }
+
+    if (isNetworkAccessible()) {
+        comments->load(m_commentsUrl);
+        QSplitter* splitter = qobject_cast<QSplitter*>(comments->parentWidget());
+        Q_ASSERT(splitter);
+        QList<int> li = splitter->sizes();
+        Q_ASSERT(li.size() == 2);
+        QList<int> lin;
+        lin.push_back(li.value(0) - COMMENT_FRAME_WIDTH);
+        lin.push_back(li.value(1) + COMMENT_FRAME_WIDTH);
+        splitter->setSizes(lin);
+        comments->show();
+    } else {
+        m_commentsBtn->setEnabled(false);
+    }
+}
+
+void TitleBar::onViewNoteLoaded(INoteView* view, const WIZDOCUMENTDATA& note, bool bOk)
+{
+    Q_UNUSED(note);
+
+    if (!bOk)
+        return;
+
+    if (view != noteView()) {
+        return;
+    }
+
+    if (!isNetworkAccessible()) {
+        noteView()->commentView()->hide();
+        m_commentsBtn->setEnabled(false);
+    } else {
+        m_commentsUrl.clear();
+        m_commentsBtn->setEnabled(true);
+
+        connect(WizService::Token::instance(), SIGNAL(tokenAcquired(QString)),
+                SLOT(onTokenAcquired(QString)), Qt::UniqueConnection);
+        WizService::Token::requestToken();
+    }
+}
+
+void TitleBar::onTokenAcquired(const QString& strToken)
+{
+    WizService::Token::instance()->disconnect(this);
+
+    QWebView* comments = noteView()->commentView();
+
+    if (strToken.isEmpty()) {
+        comments->hide();
+        return;
+    }
+
+    QString strKbGUID = noteView()->note().strKbGUID;
+    QString strGUID = noteView()->note().strGUID;
+    m_commentsUrl =  WizService::ApiEntry::commentUrl(strToken, strKbGUID, strGUID);
+
+    if (comments->isVisible()) {
+        comments->load(m_commentsUrl);
+    }
+
+    QUrl kUrl(WizService::ApiEntry::kUrlFromGuid(strToken, strKbGUID));
+    QString strCountUrl = WizService::ApiEntry::commentCountUrl(kUrl.host(), strToken, strKbGUID, strGUID);
+
+    WizService::AsyncApi* api = new WizService::AsyncApi(this);
+    connect(api, SIGNAL(getCommentsCountFinished(int)), SLOT(onGetCommentsCountFinished(int)));
+    api->getCommentsCount(strCountUrl);
+}
+
+void TitleBar::onGetCommentsCountFinished(int nCount)
+{
+    WizService::AsyncApi* api = dynamic_cast<WizService::AsyncApi*>(sender());
+    api->disconnect(this);
+    api->deleteLater();
+
+    if (nCount) {
+        m_commentsBtn->setState(CellButton::Badge);
+    } else {
+        m_commentsBtn->setState(CellButton::Normal);
+    }
 }

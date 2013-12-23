@@ -6,6 +6,8 @@
 #include <QLabel>
 #include <QHBoxLayout>
 
+#include <coreplugin/icore.h>
+
 #include "share/wizDatabaseManager.h"
 #include "widgets/wizScrollBar.h"
 #include "wizDocumentWebView.h"
@@ -13,19 +15,20 @@
 #include "widgets/wizSegmentedButton.h"
 #include "wizButton.h"
 #include "share/wizsettings.h"
+#include "share/wizuihelper.h"
 
-#include "icore.h"
 #include "titlebar.h"
 
 using namespace Core;
 using namespace Core::Internal;
 
 CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
-    : QWidget(parent)
+    : INoteView(parent)
     , m_app(app)
     , m_userSettings(app.userSettings())
     , m_dbMgr(app.databaseManager())
     , m_web(new CWizDocumentWebView(app, this))
+    , m_comments(new QWebView(this))
     , m_title(new TitleBar(this))
     , m_viewMode(app.userSettings().noteViewMode())
     , m_bLocked(false)
@@ -40,11 +43,17 @@ CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
     m_client = new QWidget(this);
     m_client->setLayout(layout);
 
+    m_splitter = new CWizSplitter(this);
+    m_splitter->addWidget(m_web);
+    m_splitter->addWidget(m_comments);
+    m_comments->page()->mainFrame()->setScrollBarPolicy(Qt::Horizontal, Qt::ScrollBarAlwaysOff);
+    m_comments->hide();
+
     layout->addWidget(m_title);
-    layout->addWidget(m_web);
+    layout->addWidget(m_splitter);
 
     layout->setStretchFactor(m_title, 0);
-    layout->setStretchFactor(m_web, 1);
+    layout->setStretchFactor(m_splitter, 1);
 
     QVBoxLayout* layoutMain = new QVBoxLayout();
     layoutMain->setContentsMargins(0, 0, 0, 0);
@@ -63,8 +72,21 @@ CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
     connect(&m_dbMgr, SIGNAL(attachmentDeleted(const WIZDOCUMENTATTACHMENTDATA&)), \
             SLOT(on_attachment_deleted(const WIZDOCUMENTATTACHMENTDATA&)));
 
-    connect(Core::ICore::instance(), SIGNAL(viewNoteRequested(Internal::CWizDocumentView*,const WIZDOCUMENTDATA&)),
-            SLOT(onViewNoteRequested(Internal::CWizDocumentView*,const WIZDOCUMENTDATA&)));
+    connect(Core::ICore::instance(), SIGNAL(viewNoteRequested(Core::INoteView*,const WIZDOCUMENTDATA&)),
+            SLOT(onViewNoteRequested(Core::INoteView*,const WIZDOCUMENTDATA&)));
+
+    connect(Core::ICore::instance(), SIGNAL(viewNoteLoaded(Core::INoteView*,WIZDOCUMENTDATA,bool)),
+            SLOT(onViewNoteLoaded(Core::INoteView*,const WIZDOCUMENTDATA&,bool)));
+}
+
+CWizDocumentView::~CWizDocumentView()
+{
+    m_web->saveDocument(m_note, false);
+}
+
+void CWizDocumentView::showEvent(QShowEvent *event)
+{
+    Q_UNUSED(event);
 }
 
 void CWizDocumentView::showClient(bool visible)
@@ -72,7 +94,7 @@ void CWizDocumentView::showClient(bool visible)
     m_client->setVisible(visible);
 }
 
-void CWizDocumentView::onViewNoteRequested(CWizDocumentView* view, const WIZDOCUMENTDATA& doc)
+void CWizDocumentView::onViewNoteRequested(INoteView* view, const WIZDOCUMENTDATA& doc)
 {
     if (view != this)
         return;
@@ -82,6 +104,14 @@ void CWizDocumentView::onViewNoteRequested(CWizDocumentView* view, const WIZDOCU
     } else {
         viewNote(doc, false);
     }
+}
+
+void CWizDocumentView::onViewNoteLoaded(INoteView* view, const WIZDOCUMENTDATA& doc, bool bOk)
+{
+    if (view != this)
+        return;
+
+    showClient(bOk);
 }
 
 bool CWizDocumentView::reload()
@@ -95,7 +125,7 @@ bool CWizDocumentView::reload()
 void CWizDocumentView::reloadNote()
 {
     reload();
-    m_web->reloadDocument();
+    m_web->reloadNoteData(note());
 }
 
 bool CWizDocumentView::defaultEditingMode()
@@ -137,6 +167,8 @@ void CWizDocumentView::initStat(const WIZDOCUMENTDATA& data, bool bEditing)
 
 void CWizDocumentView::viewNote(const WIZDOCUMENTDATA& data, bool forceEdit)
 {
+    m_web->saveDocument(m_note, false);
+
     initStat(data, forceEdit);
 
     m_web->viewDocument(data, m_bEditingMode);
@@ -185,6 +217,11 @@ void CWizDocumentView::setEditorFocus()
 {
     m_web->setFocus(Qt::MouseFocusReason);
     m_web->editorFocus();
+}
+
+QWebFrame* CWizDocumentView::noteFrame()
+{
+    return m_web->noteFrame();
 }
 
 void CWizDocumentView::on_attachment_created(const WIZDOCUMENTATTACHMENTDATA& attachment)

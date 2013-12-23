@@ -6,6 +6,7 @@
 #include <QPointer>
 #include <QMutex>
 #include <QColorDialog>
+#include <QMap>
 
 //#include "wizdownloadobjectdatadialog.h"
 #include "wizusercipherform.h"
@@ -18,10 +19,10 @@ class CWizDocumentWebView;
 class CWizDocumentTransitionView;
 class CWizDocumentWebViewWorker;
 
+struct WIZODUCMENTDATA;
+
 namespace Core {
-namespace Internal {
 class CWizDocumentView;
-} // namespace Internal
 } // namespace Core
 
 
@@ -40,8 +41,8 @@ public Q_SLOTS:
     void on_timer_timeout();
 
 Q_SIGNALS:
-    void loaded(const QString& strFileName);
-    void saved(bool ok);
+    void loaded(const QString strGUID, const QString& strFileName);
+    void saved(const QString strGUID, bool ok);
 
 private:
     CWizDatabaseManager& m_dbMgr;
@@ -67,21 +68,23 @@ class CWizDocumentWebView : public QWebView
 
 public:
     CWizDocumentWebView(CWizExplorerApp& app, QWidget* parent);
-    Core::Internal::CWizDocumentView* view();
+    Core::CWizDocumentView* view();
+    QWebFrame* noteFrame();
 
     // view and save
     void viewDocument(const WIZDOCUMENTDATA& doc, bool editing);
     void setEditingDocument(bool editing);
-    void saveDocument(bool force);
+    void saveDocument(const WIZDOCUMENTDATA& data, bool force);
+    void reloadNoteData(const WIZDOCUMENTDATA& data);
 
     bool isInited() const { return m_bEditorInited; }
     bool isEditing() const { return m_bEditingMode; }
 
     //const WIZDOCUMENTDATA& document() { return m_data; }
-    void reloadDocument();
 
     // initialize editor style before render, only invoke once.
-    void initEditorStyle();
+    bool resetDefaultCss();
+    Q_INVOKABLE QString getDefaultCssFilePath() const;
 
     /* editor related */
     void editorResetFont();
@@ -105,8 +108,9 @@ public:
     bool editorCommandExecuteInsertHtml(const QString& strHtml, bool bNotSerialize);
 
 private:
+    void initEditor();
     void viewDocumentInEditor(bool editing);
-    void initEditorAndLoadDocument();
+
 
     bool isInternalUrl(const QUrl& url);
     void viewDocumentByUrl(const QUrl& url);
@@ -117,14 +121,22 @@ protected:
     virtual void focusInEvent(QFocusEvent* event);
     virtual void focusOutEvent(QFocusEvent* event);
     virtual void contextMenuEvent(QContextMenuEvent* event);
+    virtual void dragEnterEvent(QDragEnterEvent* event);
+    virtual void dropEvent(QDropEvent* event);
+
+private:
+    bool image2Html(const QString& strImageFile, QString& strHtml);
 
 private:
     CWizExplorerApp& m_app;
     CWizDatabaseManager& m_dbMgr;
-    //WIZDOCUMENTDATA m_data;
+    QMap<QString, QString> m_mapFile;
+
+    QString m_strDefaultCssFilePath;
+
+    QWebFrame* m_noteFrame;
 
     QTimer m_timerAutoSave;
-    QString m_strHtmlFileName;
     bool m_bEditorInited;
     bool m_bEditingMode;
 
@@ -137,20 +149,23 @@ private:
     QPointer<CWizEditorInsertTableForm> m_editorInsertTableForm;
     QPointer<QColorDialog> m_colorDialog;
 
+public:
+    Q_INVOKABLE void onNoteLoadFinished(); // editor callback
+
 public Q_SLOTS:
-    void on_editor_selectionChanged();
     void onCipherDialogClosed();
     void on_download_finished(const WIZOBJECTDATA& data, bool bSucceed);
 
-    void on_editor_populateJavaScriptWindowObject();
-    void on_editor_loadFinished(bool ok);
-    void on_editor_linkClicked(const QUrl& url);
-    void on_editor_contentChanged();
+    void onEditorPopulateJavaScriptWindowObject();
+    void onEditorLoadFinished(bool ok);
+    void onEditorLinkClicked(const QUrl& url);
+    void onEditorContentChanged();
+    void onEditorSelectionChanged();
 
     void onTimerAutoSaveTimout();
 
-    void on_documentReady(const QString& strFileName);
-    void on_documentSaved(bool ok);
+    void onDocumentReady(const QString& strGUID, const QString& strFileName);
+    void onDocumentSaved(const QString& strGUID, bool ok);
 
     void on_editorCommandExecuteLinkInsert_accepted();
     void on_editorCommandExecuteTableInsert_accepted();

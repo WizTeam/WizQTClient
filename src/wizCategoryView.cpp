@@ -18,7 +18,10 @@
 #include "wizWebSettingsDialog.h"
 #include "sync/wizkmxmlrpc.h"
 #include "sync/apientry.h"
-#include "sync/wizCloudPool.h"
+
+#include "sync/token.h"
+
+using namespace WizService;
 
 using namespace Core::Internal;
 
@@ -1185,12 +1188,10 @@ void CWizCategoryView::on_action_group_attribute()
     CWizCategoryViewItemBase* p = currentCategoryItem<CWizCategoryViewItemBase>();
     if (p && !p->kbGUID().isEmpty()) {
         if (!m_groupSettings) {
-            m_groupSettings = new CWizWebSettingsDialog(QSize(720, 450), window());
+            m_groupSettings = new CWizWebSettingsDialog(QSize(720, 460), window());
             m_groupSettings->setWindowTitle(tr("Group settings"));
             connect(m_groupSettings, SIGNAL(accepted()), m_groupSettings, SLOT(deleteLater()));
-            connect(m_groupSettings, SIGNAL(showProgress()), CWizCloudPool::instance(), SLOT(getToken()));
-            connect(CWizCloudPool::instance(), SIGNAL(tokenAcquired(const QString&)),
-                    SLOT(on_action_group_attribute_requested(const QString&)));
+            connect(m_groupSettings, SIGNAL(showProgress()), SLOT(on_action_group_attribute_showProgress()));
         }
 
         m_strRequestedGroupKbGUID = p->kbGUID();
@@ -1199,8 +1200,18 @@ void CWizCategoryView::on_action_group_attribute()
     }
 }
 
+void CWizCategoryView::on_action_group_attribute_showProgress()
+{
+    connect(Token::instance(), SIGNAL(tokenAcquired(const QString&)),
+            SLOT(on_action_group_attribute_requested(const QString&)), Qt::UniqueConnection);
+
+    Token::instance()->requestToken();
+}
+
 void CWizCategoryView::on_action_group_attribute_requested(const QString& strToken)
 {
+    Token::instance()->disconnect(this);
+
     if (!m_groupSettings)
         return;
 

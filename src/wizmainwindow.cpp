@@ -14,6 +14,8 @@
 #include "mac/wizmachelper.h"
 #endif
 
+#include <coreplugin/icore.h>
+
 #include "wizDocumentWebView.h"
 #include "wizactions.h"
 #include "wizAboutDialog.h"
@@ -48,13 +50,11 @@
 #include "wizPopupButton.h"
 #include "widgets/wizUserInfoWidget.h"
 #include "sync/apientry.h"
-#include "sync/wizCloudPool.h"
 
 #include "wizUserVerifyDialog.h"
 
 #include "plugindialog.h"
 
-#include "icore.h"
 #include "notecomments.h"
 
 using namespace Core;
@@ -97,7 +97,7 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     connect(qApp, SIGNAL(lastWindowClosed()), qApp, SLOT(quit())); // Qt bug: Qt5 bug
     qApp->installEventFilter(this);
 
-    CWizCloudPool::instance()->init(&m_dbMgr);
+    //CWizCloudPool::instance()->init(&m_dbMgr);
 
     // search and full text search
     QThread *threadFTS = new QThread();
@@ -173,7 +173,7 @@ void MainWindow::cleanOnQuit()
     saveStatus();
 
     // FIXME : if document not valid will lead crash
-    m_doc->web()->saveDocument(false);
+    //m_doc->web()->saveDocument(false);
 
     m_sync->stopSync();
     m_searchIndexer->abort();
@@ -993,7 +993,7 @@ void MainWindow::on_search_doSearch(const QString& keywords)
     }
 
     if (m_searcher) {
-        disconnect(m_searcher);
+        m_searcher->disconnect(this);
         m_searcher->abort();
     }
 
@@ -1363,11 +1363,6 @@ QObject* MainWindow::CreateWizObject(const QString& strObjectID)
     }
 
     return NULL;
-}
-
-void MainWindow::ResetInitialStyle()
-{
-    m_doc->web()->initEditorStyle();
 }
 
 void MainWindow::SetSavingDocument(bool saving)

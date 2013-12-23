@@ -14,6 +14,11 @@
 #include "wizcreateaccountdialog.h"
 #include "wizproxydialog.h"
 
+#include "sync/apientry.h"
+#include "sync/token.h"
+
+using namespace WizService;
+
 
 //class CWizAvatarWidget : public QLabel
 //{
@@ -190,58 +195,73 @@ void CWizLoginDialog::doAccountVerify()
 
     // FIXME: should verify password if network is available to avoid attack?
     if (password() != userSettings.password()) {
-        CWizKMAccountsServer server(WizKMGetAccountsServerURL(true));
-        if (server.Login(userId(), password(), "normal") &&
-                updateProfile(userSettings, userId(), server.GetUserInfo())) {
+        Token::setUserId(userId());
+        Token::setPasswd(password());
+        doOnlineVerify();
+        return;
+    }
 
-            CWizSettings settings(::WizGetDataStorePath() + "wiznote.ini");
-            settings.SetString("Users", "DefaultUser", userId());
-
-            QDialog::accept();
-        } else {
-            QMessageBox::critical(this, tr("Verify account failed"), server.GetLastErrorMessage());
-        }
-    } else {
-        CWizSettings settings(::WizGetDataStorePath() + "wiznote.ini");
-        settings.SetString("Users", "DefaultUser", userId());
-
-        if (m_checkAutoLogin->checkState() == Qt::Checked) {
-            userSettings.setAutoLogin(true);
-        } else {
-            userSettings.setAutoLogin(false);
-        }
-
-        if (m_checkSavePassword->checkState() != Qt::Checked) {
-            userSettings.setPassword();
-        }
-
+    if (updateUserProfile(false) && updateGlobalProfile()) {
         QDialog::accept();
     }
 
     enableControls(true);
 }
 
-bool CWizLoginDialog::updateProfile(CWizUserSettings& userSettings, const QString& strUserId, const WIZKMUSERINFO& info)
+void CWizLoginDialog::doOnlineVerify()
 {
+    connect(Token::instance(), SIGNAL(tokenAcquired(QString)), SLOT(onTokenAcquired(QString)), Qt::UniqueConnection);
+    Token::requestToken();
+}
+
+void CWizLoginDialog::onTokenAcquired(const QString& strToken)
+{
+    Token::instance()->disconnect(this);
+
+    enableControls(true);
+
+    if (strToken.isEmpty()) {
+        QMessageBox::critical(0, tr("Verify account failed"), Token::lastErrorMessage());
+        return;
+    }
+
+    if (updateUserProfile(true) && updateGlobalProfile())
+        QDialog::accept();
+}
+
+bool CWizLoginDialog::updateGlobalProfile()
+{
+    CWizSettings settings(::WizGetDataStorePath() + "wiznote.ini");
+    settings.SetString("Users", "DefaultUser", userId());
+    return true;
+}
+
+bool CWizLoginDialog::updateUserProfile(bool bLogined)
+{
+    CWizUserSettings userSettings(userId());
+
     if(m_checkAutoLogin->checkState() == Qt::Checked) {
         userSettings.setAutoLogin(true);
     } else {
         userSettings.setAutoLogin(false);
     }
 
-    if(m_checkSavePassword->checkState() == Qt::Checked) {
-        userSettings.setPassword(::WizEncryptPassword(password()));
-    } else {
+    if(m_checkSavePassword->checkState() != Qt::Checked) {
         userSettings.setPassword();
     }
 
-    CWizDatabase db;
-    if (db.Open(strUserId)) {
-        db.SetUserInfo(info);
+    if (bLogined) {
+        if (m_checkSavePassword->checkState() == Qt::Checked)
+            userSettings.setPassword(::WizEncryptPassword(password()));
+
+        CWizDatabase db;
+        if (!db.Open(userId())) {
+            QMessageBox::critical(0, tr("Update user profile"), QObject::tr("Can not open database while update user profile"));
+            return false;
+        }
+
+        db.SetUserInfo(Token::info());
         db.Close();
-    } else {
-        QMessageBox::critical(NULL, "", QObject::tr("Can not open database while update user profile"));
-        return false;
     }
 
     return true;

@@ -2,7 +2,12 @@
 
 #include <QDebug>
 
+#include "apientry.h"
+#include "token.h"
+
 #include "../share/wizDatabase.h"
+
+using namespace WizService;
 
 
 /* ---------------------------- CWizKMSyncThead ---------------------------- */
@@ -73,7 +78,7 @@ void CWizKMSyncThread::run()
     }
 
     m_pEvents->SetLastErrorCode(0);
-    ::WizSyncDatabase(m_pEvents, &m_db, true, true);
+    ::WizSyncDatabase(m_info, m_pEvents, &m_db, true, true);
 }
 
 void CWizKMSyncThread::startSync()
@@ -81,6 +86,20 @@ void CWizKMSyncThread::startSync()
     if (isRunning())
         return;
 
+    connect(Token::instance(), SIGNAL(tokenAcquired(QString)), SLOT(onTokenAcquired(QString)), Qt::UniqueConnection);
+    Token::requestToken();
+}
+
+void CWizKMSyncThread::onTokenAcquired(const QString& strToken)
+{
+    Token::instance()->disconnect(this);
+
+    if (strToken.isEmpty()) {
+        Q_EMIT syncFinished(Token::lastErrorCode(), Token::lastErrorMessage());
+        return;
+    }
+
+    m_info = Token::info();
     start();
 }
 
@@ -102,7 +121,7 @@ void CWizKMSyncThread::syncUserCert()
 {
     QString strN, stre, strd, strHint;
 
-    CWizKMAccountsServer serser(::WizKMGetAccountsServerURL(true));
+    CWizKMAccountsServer serser(WizService::ApiEntry::syncUrl());
     if (serser.GetCert(m_db.GetUserId(), m_db.GetPassword(), strN, stre, strd, strHint)) {
         m_db.SetUserCert(strN, stre, strd, strHint);
     }

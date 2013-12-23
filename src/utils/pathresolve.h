@@ -1,5 +1,5 @@
-#ifndef PATHRESOLVE_H
-#define PATHRESOLVE_H
+#ifndef UTILS_PATHRESOLVE_H
+#define UTILS_PATHRESOLVE_H
 
 class QString;
 
@@ -12,6 +12,10 @@ public:
     static QString resourcesPath();
     static QString pluginsPath();
     static QString dataStorePath();
+    static QString cachePath();
+    static QString tempPath();
+    static QString logPath();
+    static QString userSettingsFilePath();
 
     // helpers
     static void addBackslash(QString& strPath);
@@ -20,4 +24,4 @@ public:
 
 } // namespace Utils
 
-#endif // PATHRESOLVE_H
+#endif // UTILS_PATHRESOLVE_H

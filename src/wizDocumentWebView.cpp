@@ -3,10 +3,17 @@
 #include <QRunnable>
 #include <QThreadPool>
 #include <QList>
+#include <QMimeData>
+#include <QUrl>
+#include <QDir>
+#include <QString>
+#include <QRegExp>
 
 #include <QApplication>
 #include <QWebFrame>
 #include <QUndoStack>
+
+#include <coreplugin/icore.h>
 
 #include "wizdef.h"
 #include "share/wizmisc.h"
@@ -18,7 +25,8 @@
 #include "share/wizDatabaseManager.h"
 #include "wizDocumentView.h"
 
-#include "icore.h"
+#include "utils/pathresolve.h"
+#include "utils/logger.h"
 
 using namespace Core;
 using namespace Core::Internal;
@@ -80,6 +88,7 @@ public:
     }
 
     bool result() const { return m_bOk; }
+    QString guid() const { return m_strGUID; }
 
 private:
     CWizDatabase& m_db;
@@ -114,6 +123,7 @@ public:
     }
 
     QString result() const { return m_strHtmlFile; }
+    QString guid() const { return m_strGUID; }
 
 private:
     CWizDatabase& m_db;
@@ -157,10 +167,10 @@ void CWizDocumentWebViewWorkerPool::on_timer_timeout()
         if (worker->isFinished()) {
             if (worker->type() == CWizDocumentWebViewWorker::Saver) {
                 CWizDocumentWebViewSaver* saver = dynamic_cast<CWizDocumentWebViewSaver*>(worker);
-                Q_EMIT saved(saver->result());
+                Q_EMIT saved(saver->guid(), saver->result());
             } else if (worker->type() == CWizDocumentWebViewWorker::Loader) {
                 CWizDocumentWebViewLoader* loader = dynamic_cast<CWizDocumentWebViewLoader*>(worker);
-                Q_EMIT loaded(loader->result());
+                Q_EMIT loaded(loader->guid(), loader->result());
             } else {
                 Q_ASSERT(0);
             }
@@ -230,7 +240,7 @@ void CWizDocumentWebViewPage::on_editorCommandPaste_triggered()
 
     if (!clip->image().isNull()) {
         // save clipboard image to $TMPDIR
-        QString strTempPath = WizGlobal()->GetTempPath();
+        QString strTempPath = Utils::PathResolve::tempPath();
         CString strFileName = strTempPath + WizIntToStr(GetTickCount()) + ".png";
         if (!clip->image().save(strFileName)) {
             TOLOG("ERROR: Can't save clipboard image to file");
@@ -258,6 +268,7 @@ CWizDocumentWebView::CWizDocumentWebView(CWizExplorerApp& app, QWidget* parent)
     , m_app(app)
     , m_dbMgr(app.databaseManager())
     , m_bEditorInited(false)
+    , m_noteFrame(0)
 {
     CWizDocumentWebViewPage* page = new CWizDocumentWebViewPage(this);
     setPage(page);
@@ -270,7 +281,7 @@ CWizDocumentWebView::CWizDocumentWebView(CWizExplorerApp& app, QWidget* parent)
     setAttribute(Qt::WA_AcceptTouchEvents, false);
 
     // FIXME: should accept drop picture, attachment, link etc.
-    setAcceptDrops(false);
+    setAcceptDrops(true);
 
     // refers
     MainWindow* mainWindow = qobject_cast<MainWindow *>(m_app.mainWindow());
@@ -289,8 +300,10 @@ CWizDocumentWebView::CWizDocumentWebView(CWizExplorerApp& app, QWidget* parent)
     connect(&m_timerAutoSave, SIGNAL(timeout()), SLOT(onTimerAutoSaveTimout()));
 
     m_workerPool = new CWizDocumentWebViewWorkerPool(m_app, this);
-    connect(m_workerPool, SIGNAL(loaded(const QString&)), SLOT(on_documentReady(const QString&)));
-    connect(m_workerPool, SIGNAL(saved(bool)), SLOT(on_documentSaved(bool)));
+    connect(m_workerPool, SIGNAL(loaded(const QString&, const QString&)),
+            SLOT(onDocumentReady(const QString&, const QString&)));
+    connect(m_workerPool, SIGNAL(saved(const QString&, bool)),
+            SLOT(onDocumentSaved(const QString&, bool)));
 }
 
 void CWizDocumentWebView::inputMethodEvent(QInputMethodEvent* event)
@@ -370,6 +383,71 @@ void CWizDocumentWebView::contextMenuEvent(QContextMenuEvent *event)
     Q_EMIT requestShowContextMenu(mapToGlobal(event->pos()));
 }
 
+void CWizDocumentWebView::dragEnterEvent(QDragEnterEvent *event)
+{
+    if (!isEditing())
+        return;
+
+    int nAccepted = 0;
+    if (event->mimeData()->hasUrls()) {
+        QList<QUrl> li = event->mimeData()->urls();
+        QList<QUrl>::const_iterator it;
+        for (it = li.begin(); it != li.end(); it++) {
+            QUrl url = *it;
+            if (url.toString().startsWith("file:///")) {
+                nAccepted++;
+            }
+        }
+
+        if (nAccepted == li.size()) {
+            event->acceptProposedAction();
+        }
+    }
+}
+
+bool CWizDocumentWebView::image2Html(const QString& strImageFile, QString& strHtml)
+{
+    QString strDestFile = Utils::PathResolve::tempPath() + qrand() + ".png";
+
+    qDebug() << "[Editor] copy to: " << strDestFile;
+
+    QImage img(strImageFile);
+    if (!img.save(strDestFile)) {
+        return false;
+    }
+
+    strHtml = QString("<img border=\"0\" src=\"file://%1\" />").arg(strDestFile);
+    return true;
+}
+
+void CWizDocumentWebView::dropEvent(QDropEvent* event)
+{
+    int nAccepted = 0;
+    QList<QUrl> li = event->mimeData()->urls();
+    QList<QUrl>::const_iterator it;
+    for (it = li.begin(); it != li.end(); it++) {
+        QUrl url = *it;
+        url.setScheme(0);
+
+        qDebug() << "[Editor] drop: " << url.toString();
+
+        // only process image currently
+        QImageReader reader(url.toString());
+        if (!reader.canRead())
+            continue;
+
+        QString strHtml;
+        if (image2Html(url.toString(), strHtml)) {
+            editorCommandExecuteInsertHtml(strHtml, true);
+            nAccepted++;
+        }
+    }
+
+    if (nAccepted == li.size()) {
+        event->accept();
+    }
+}
+
 CWizDocumentView* CWizDocumentWebView::view()
 {
     QWidget* pParent = parentWidget();
@@ -386,41 +464,33 @@ CWizDocumentView* CWizDocumentWebView::view()
 
 void CWizDocumentWebView::onTimerAutoSaveTimout()
 {
-    saveDocument(false);
+    saveDocument(view()->note(), false);
 }
 
-void CWizDocumentWebView::on_documentReady(const QString& strFileName)
+void CWizDocumentWebView::onDocumentReady(const QString& strGUID, const QString& strFileName)
 {
-    // FIXME: deal with encrypted document
-
-    m_strHtmlFileName = strFileName;
+    m_mapFile.insert(strGUID, strFileName);
 
     if (m_bEditorInited) {
         viewDocumentInEditor(m_bEditingMode);
     } else {
-        initEditorAndLoadDocument();
+        initEditor();
     }
 }
 
-void CWizDocumentWebView::on_documentSaved(bool ok)
+void CWizDocumentWebView::onDocumentSaved(const QString& strGUID, bool ok)
 {
+    Q_UNUSED(strGUID);
+
     if (!ok) {
         TOLOG("Save document failed");
     }
-
-    //MainWindow* mainWindow = qobject_cast<MainWindow *>(m_app.mainWindow());
-    //mainWindow->SetSavingDocument(false);
 }
 
 void CWizDocumentWebView::viewDocument(const WIZDOCUMENTDATA& doc, bool editing)
 {
     // clear gui
     MainWindow* window = qobject_cast<MainWindow *>(m_app.mainWindow());
-
-    // save document
-    if (m_bEditorInited) {
-        saveDocument(false);
-    }
 
     // set data
     m_bEditingMode = editing;
@@ -481,37 +551,58 @@ void CWizDocumentWebView::on_download_finished(const WIZOBJECTDATA& data,
     m_workerPool->load(view()->note());
 }
 
-void CWizDocumentWebView::reloadDocument()
+void CWizDocumentWebView::reloadNoteData(const WIZDOCUMENTDATA& data)
 {
-    Q_ASSERT(!view()->note().strGUID.isEmpty());
+    Q_ASSERT(!data.strGUID.isEmpty());
 
-    // FIXME: reload may request when update from server or locally reflected by itself
-
-    //WIZDOCUMENTDATA data;
-    //m_dbMgr.db(document().strKbGUID).DocumentFromGUID(document().strGUID, data);
-
-    //m_renderer->setData(data);
-    //m_renderer->load();
+    // reload may triggered when update from server or locally reflected by modify
+    m_workerPool->load(data);
 }
 
-void CWizDocumentWebView::initEditorStyle()
+QString CWizDocumentWebView::getDefaultCssFilePath() const
 {
+    return m_strDefaultCssFilePath;
+}
+
+bool CWizDocumentWebView::resetDefaultCss()
+{
+    QFile f(":/default.css");
+    if (!f.open(QIODevice::ReadOnly)) {
+        qDebug() << "[Editor]Failed to get default css code";
+        return false;
+    }
+
+    QTextStream ts(&f);
+    QString strCss = ts.readAll();
+    f.close();
+
     QString strFont = m_app.userSettings().defaultFontFamily();
     int nSize = m_app.userSettings().defaultFontSize();
 
-    QString strExec = QString("editor.options.initialStyle = 'body{font-family:%1; font-size:%2px;} img{max-width:100%;}';")
-            .arg(strFont).arg(nSize);
-    page()->mainFrame()->evaluateJavaScript(strExec);
+    strCss.replace("/*default-font-family*/", QString("font-family:%1;").arg(strFont));
+    strCss.replace("/*default-font-size*/", QString("font-size:%1px;").arg(nSize));
+
+    QString strPath = Utils::PathResolve::cachePath() + "editor/";
+    Utils::PathResolve::ensurePathExists(strPath);
+
+    m_strDefaultCssFilePath = strPath + "default.css";
+
+    QFile f2(m_strDefaultCssFilePath);
+    if (!f2.open(QIODevice::Truncate | QIODevice::WriteOnly)) {
+        qDebug() << "[Editor]Fail to setup default css code";
+        return false;
+    }
+
+    f2.write(strCss.toUtf8());
+    f2.close();
+
+    return true;
 }
 
 void CWizDocumentWebView::editorResetFont()
 {
-    QString strFont = m_app.userSettings().defaultFontFamily();
-    int nSize = m_app.userSettings().defaultFontSize();
-
-    QString strExec = QString("editor.document.body.style.fontFamily='%1';editor.document.body.style.fontSize='%2px';")
-            .arg(strFont).arg(nSize);
-    page()->mainFrame()->evaluateJavaScript(strExec);
+    resetDefaultCss();
+    page()->mainFrame()->evaluateJavaScript("updateCss();");
 }
 
 void CWizDocumentWebView::editorFocus()
@@ -519,9 +610,12 @@ void CWizDocumentWebView::editorFocus()
     page()->mainFrame()->evaluateJavaScript("editor.focus();");
 }
 
-void CWizDocumentWebView::initEditorAndLoadDocument()
+void CWizDocumentWebView::initEditor()
 {
     if (m_bEditorInited)
+        return;
+
+    if (!resetDefaultCss())
         return;
 
     QString strFileName = WizGetResourcesPath() + "files/editor/index.html";
@@ -532,29 +626,58 @@ void CWizDocumentWebView::initEditorAndLoadDocument()
     page()->setLinkDelegationPolicy(QWebPage::DelegateAllLinks);
 
     connect(page()->mainFrame(), SIGNAL(javaScriptWindowObjectCleared()),
-            SLOT(on_editor_populateJavaScriptWindowObject()));
+            SLOT(onEditorPopulateJavaScriptWindowObject()));
 
     connect(page()->mainFrame(), SIGNAL(loadFinished(bool)),
-            SLOT(on_editor_loadFinished(bool)));
+            SLOT(onEditorLoadFinished(bool)));
 
     connect(page(), SIGNAL(linkClicked(const QUrl&)),
-            SLOT(on_editor_linkClicked(const QUrl&)));
+            SLOT(onEditorLinkClicked(const QUrl&)));
 
     connect(page(), SIGNAL(selectionChanged()),
-            SLOT(on_editor_selectionChanged()));
+            SLOT(onEditorSelectionChanged()));
 
     connect(page(), SIGNAL(contentsChanged()),
-            SLOT(on_editor_contentChanged()));
+            SLOT(onEditorContentChanged()));
 
     page()->mainFrame()->setHtml(strHtml, url);
 }
 
-void CWizDocumentWebView::on_editor_contentChanged()
+void CWizDocumentWebView::onEditorLoadFinished(bool ok)
+{
+    if (!ok) {
+        m_bEditorInited = false;
+        TOLOG("Wow, loading editor failed!");
+        return;
+    }
+
+    m_bEditorInited = true;
+    viewDocumentInEditor(m_bEditingMode);
+}
+
+QWebFrame* CWizDocumentWebView::noteFrame()
+{
+    QList<QWebFrame*> frames = page()->mainFrame()->childFrames();
+    for (int i = 0; i < frames.size(); i++) {
+        if (frames.at(i)->frameName() == "ueditor_0")
+            return frames.at(i);
+    }
+
+    return 0;
+}
+
+void CWizDocumentWebView::onEditorPopulateJavaScriptWindowObject()
+{
+    page()->mainFrame()->addToJavaScriptWindowObject("WizExplorerApp", m_app.object());
+    page()->mainFrame()->addToJavaScriptWindowObject("WizEditor", this);
+}
+
+void CWizDocumentWebView::onEditorContentChanged()
 {
     Q_EMIT statusChanged();
 }
 
-void CWizDocumentWebView::on_editor_selectionChanged()
+void CWizDocumentWebView::onEditorSelectionChanged()
 {
 
 #ifdef Q_OS_MAC
@@ -567,24 +690,7 @@ void CWizDocumentWebView::on_editor_selectionChanged()
     Q_EMIT statusChanged();
 }
 
-void CWizDocumentWebView::on_editor_populateJavaScriptWindowObject()
-{
-    page()->mainFrame()->addToJavaScriptWindowObject("WizExplorerApp", m_app.object());
-}
-
-void CWizDocumentWebView::on_editor_loadFinished(bool ok)
-{
-    if (!ok) {
-        m_bEditorInited = false;
-        TOLOG("Wow, loading editor failed!");
-        return;
-    }
-
-    m_bEditorInited = true;
-    viewDocumentInEditor(m_bEditingMode);
-}
-
-void CWizDocumentWebView::on_editor_linkClicked(const QUrl& url)
+void CWizDocumentWebView::onEditorLinkClicked(const QUrl& url)
 {
     if (isInternalUrl(url)) {
         viewDocumentByUrl(url);
@@ -664,19 +770,78 @@ void CWizDocumentWebView::viewDocumentByUrl(const QUrl& url)
    }
 }
 
+QString escapeJavascriptString(const QString & str)
+{
+    QString out;
+    QRegExp rx("(\\r|\\n|\\\\|\"|\')");
+    int pos = 0, lastPos = 0;
+
+    while ((pos = rx.indexIn(str, pos)) != -1)
+    {
+        out += str.mid(lastPos, pos - lastPos);
+
+        switch (rx.cap(1).at(0).unicode())
+        {
+        case '\r':
+            out += "\\r";
+            break;
+        case '\n':
+            out += "\\n";
+            break;
+        case '\\':
+            out += "\\\\";
+            break;
+        case '"':
+            out += "\\\"";
+            break;
+        case '\'':
+            out += "\"";
+            break;
+        }
+        pos++;
+        lastPos = pos;
+    }
+    out += str.mid(lastPos);
+    return out;
+}
+
 void CWizDocumentWebView::viewDocumentInEditor(bool editing)
 {
     Q_ASSERT(m_bEditorInited);
 
-    bool ret = false;
-    if (!m_strHtmlFileName.isEmpty()) {
-        QString strScript = QString("viewDocument('%1', '%2', %3);")
-                .arg(view()->note().strGUID)
-                .arg(m_strHtmlFileName)
-                .arg(editing ? "true" : "false");
-        ret = page()->mainFrame()->evaluateJavaScript(strScript).toBool();
+    QString strGUID = view()->note().strGUID;
+    QString strFileName = m_mapFile.value(strGUID);
+    if (strFileName.isEmpty()) {
+        return;
     }
 
+    QString strHtml;
+    bool ret = WizLoadUnicodeTextFromFile(strFileName, strHtml);
+    if (!ret) {
+        // hide client and show error
+        return;
+    }
+
+    QRegExp regex("<body.*>([\\s\\S]*)</body>", Qt::CaseInsensitive);
+    if (regex.indexIn(strHtml) != -1) {
+        strHtml = regex.cap(1);
+    }
+
+    strHtml = escapeJavascriptString(strHtml);
+
+    QString strExec = QString("viewNote('%1', %2, '%3');")
+            .arg(strGUID)
+            .arg(editing ? "true" : "false")
+            .arg(strHtml);
+
+    ret = page()->mainFrame()->evaluateJavaScript(strExec).toBool();
+    if (!ret) {
+        qDebug() << "[Editor] failed to load note: " << strExec;
+        // hide client and show error
+        return;
+    }
+
+    // show client
     MainWindow* window = qobject_cast<MainWindow *>(m_app.mainWindow());
     if (!ret) {
         window->showClient(false);
@@ -686,13 +851,16 @@ void CWizDocumentWebView::viewDocumentInEditor(bool editing)
 
     window->showClient(true);
     window->transitionView()->hide();
-    m_timerAutoSave.start();
 
     page()->undoStack()->clear();
+    m_timerAutoSave.start();
 
     update();
+}
 
-    ICore::instance()->emitViewNoteLoaded(view(), view()->note());
+void CWizDocumentWebView::onNoteLoadFinished()
+{
+    ICore::instance()->emitViewNoteLoaded(view(), view()->note(), true);
 }
 
 void CWizDocumentWebView::setEditingDocument(bool editing)
@@ -708,9 +876,8 @@ void CWizDocumentWebView::setEditingDocument(bool editing)
         Q_EMIT focusIn();
     }
 
-    //bool bEditing = page()->mainFrame()->evaluateJavaScript("isEditing();").toBool();
     if (m_bEditingMode) {
-        saveDocument(false);
+        saveDocument(view()->note(), false);
     }
 
     m_bEditingMode = editing;
@@ -721,7 +888,7 @@ void CWizDocumentWebView::setEditingDocument(bool editing)
     Q_EMIT statusChanged();
 }
 
-void CWizDocumentWebView::saveDocument(bool force)
+void CWizDocumentWebView::saveDocument(const WIZDOCUMENTDATA& data, bool force)
 {
     if (!m_bEditorInited)
         return;
@@ -730,12 +897,13 @@ void CWizDocumentWebView::saveDocument(bool force)
         return;
 
     // check note permission
-    if (!m_dbMgr.db(view()->note().strKbGUID).CanEditDocument(view()->note())) {
+    if (!m_dbMgr.db(data.strKbGUID).CanEditDocument(data)) {
         return;
     }
 
+    QString strFileName = m_mapFile.value(data.strGUID);
     QString strHtml = page()->mainFrame()->evaluateJavaScript("editor.getContent();").toString();
-    m_workerPool->save(view()->note(), strHtml, m_strHtmlFileName, 0);
+    m_workerPool->save(data, strHtml, strFileName, 0);
 }
 
 QString CWizDocumentWebView::editorCommandQueryCommandValue(const QString& strCommand)

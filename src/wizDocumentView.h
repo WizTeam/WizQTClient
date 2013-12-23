@@ -1,10 +1,11 @@
 #ifndef CORE_WIZDOCUMENTVIEW_H
 #define CORE_WIZDOCUMENTVIEW_H
 
-#include <QWidget>
+#include <coreplugin/inoteview.h>
 
 #include "share/wizobject.h"
 
+class QWebView;
 class QScrollArea;
 class QLineEdit;
 
@@ -16,31 +17,41 @@ class CWizUserSettings;
 class CWizScrollBar;
 class CWizDocumentWebView;
 class CWizDatabase;
+class CWizSplitter;
+
+class QWebFrame;
 
 
 namespace Core {
 namespace Internal {
 class TitleBar;
 class EditorToolBar;
+} // namespace Internal
 
-class CWizDocumentView : public QWidget
+class CWizDocumentView : public INoteView
 {
     Q_OBJECT
 
 public:
     CWizDocumentView(CWizExplorerApp& app, QWidget* parent = 0);
+    ~CWizDocumentView();
     virtual QSize sizeHint() const { return QSize(200, 1); }
 
     QWidget* client() const { return m_client; }
     CWizDocumentWebView* web() const { return m_web; }
+    QWebView* commentView() const { return m_comments; }
 
 protected:
     CWizExplorerApp& m_app;
     CWizDatabaseManager& m_dbMgr;
     CWizUserSettings& m_userSettings;
     CWizDocumentWebView* m_web;
+    QWebView* m_comments;
+    CWizSplitter* m_splitter;
     Core::Internal::TitleBar* m_title;
     QWidget* m_client;
+
+    virtual void showEvent(QShowEvent *event);
 
 private:
     WIZDOCUMENTDATA m_note;
@@ -65,8 +76,11 @@ public:
     void setModified(bool modified);
     void settingsChanged();
 
+    QWebFrame* noteFrame();
+
 public Q_SLOTS:
-    void onViewNoteRequested(Internal::CWizDocumentView* view, const WIZDOCUMENTDATA& doc);
+    void onViewNoteRequested(Core::INoteView* view, const WIZDOCUMENTDATA& doc);
+    void onViewNoteLoaded(Core::INoteView*,const WIZDOCUMENTDATA&,bool);
 
     void on_document_modified(const WIZDOCUMENTDATA& documentOld,
                               const WIZDOCUMENTDATA& documentNew);
@@ -76,7 +90,6 @@ public Q_SLOTS:
     void on_attachment_deleted(const WIZDOCUMENTATTACHMENTDATA& attachment);
 };
 
-} // namespace Internal
 } // namespace Core
 
 #endif // CORE_WIZDOCUMENTVIEW_H

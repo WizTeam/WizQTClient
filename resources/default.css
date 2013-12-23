@@ -1,11 +1,23 @@
-body
-{
+/* editor note frame's default */
+.view {
+    padding:0;
+    word-wrap:break-word;
+    cursor:text;
+    height:90%;
+}
+
+p {
+    margin:5px 0;
+}
+
+/* windows compatible */
+body {
     /*default-font-family*/
     /*default-font-size*/
     /*default-line-height*/
+    margin:8px;
 }
-html, body
-{
+html, body {
     /*default-color*/
     /*default-background-color*/
 }

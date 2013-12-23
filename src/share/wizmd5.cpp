@@ -1,8 +1,10 @@
 #include "wizmd5.h"
-#include "wizmisc.h"
 
 #include <stdexcept>
 #include <QFile>
+
+#include "wizmisc.h"
+#include "../utils/logger.h"
 
 
 namespace wizmd5

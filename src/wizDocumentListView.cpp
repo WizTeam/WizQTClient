@@ -14,7 +14,8 @@
 #include "wizProgressDialog.h"
 #include "share/wizUserAvatar.h"
 #include "wizmainwindow.h"
-#include "utils/styleHelper.h"
+#include "utils/stylehelper.h"
+#include "utils/logger.h"
 
 using namespace Core::Internal;
 
@@ -581,7 +582,7 @@ QSize CWizDocumentListView::itemSizeFromViewType(ViewType type)
         return sz;
     case CWizDocumentListView::TypeThumbnail:
         //sz.setHeight(fontMetrics().height() * 4 + 30);
-        sz.setHeight(Utils::styleHelper::thumbnailHeight());
+        sz.setHeight(Utils::StyleHelper::thumbnailHeight());
         return sz;
     default:
         Q_ASSERT(0);

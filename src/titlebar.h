@@ -4,6 +4,7 @@
 #include <QWidget>
 #include <QIcon>
 
+class QString;
 
 struct WIZDOCUMENTDATA;
 class CWizDatabase;
@@ -13,6 +14,8 @@ class CWizDocumentWebView;
 class CWizAttachmentListWidget;
 
 namespace Core {
+class CWizDocumentView;
+class INoteView;
 
 namespace Internal {
 class TitleEdit;
@@ -20,7 +23,6 @@ class InfoBar;
 class NotifyBar;
 class EditorToolBar;
 class CellButton;
-class CWizDocumentView;
 
 class TitleBar : public QWidget
 {
@@ -51,6 +53,9 @@ private:
     CellButton* m_attachBtn;
     CellButton* m_infoBtn;
 
+    CellButton* m_commentsBtn;
+    QString m_commentsUrl;
+
     CWizTagListWidget* m_tags;
     CWizAttachmentListWidget* m_attachments;
     CWizNoteInfoForm* m_info;
@@ -60,6 +65,11 @@ public Q_SLOTS:
     void onTagButtonClicked();
     void onAttachButtonClicked();
     void onInfoButtonClicked();
+
+    void onCommentsButtonClicked();
+    void onViewNoteLoaded(Core::INoteView* view, const WIZDOCUMENTDATA& note, bool bOk);
+    void onTokenAcquired(const QString& strToken);
+    void onGetCommentsCountFinished(int nCount);
 
     void onEditorChanged();
     void onEditorFocusIn();

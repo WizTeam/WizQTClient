@@ -27,7 +27,9 @@ public:
 
 public Q_SLOTS:
     virtual void accept();
-    void accountRegistered_done(bool bOk);
+
+    void onRegisterAccountFinished(bool bOk);
+    //void accountRegistered_done(bool bOk);
 
 Q_SIGNALS:
     void registerAccount(const QString& strUser, const QString& strPassword, const QString& strInviteCode);
