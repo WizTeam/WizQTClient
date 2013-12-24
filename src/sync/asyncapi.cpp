@@ -1,6 +1,12 @@
 #include "asyncapi.h"
 
+#include <QtGlobal>
+#if QT_VERSION > 0x050000
 #include <QtConcurrent>
+#else
+#include <QtConcurrentRun>
+#endif
+
 #include <QNetworkAccessManager>
 #include <QEventLoop>
 
