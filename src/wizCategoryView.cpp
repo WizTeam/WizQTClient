@@ -72,7 +72,11 @@ CWizCategoryBaseView::CWizCategoryBaseView(CWizExplorerApp& app, QWidget* parent
     setIndentation(12);
 
     // use custom scrollbar
+#ifdef Q_OS_LINUX
+    setVerticalScrollMode(QAbstractItemView::ScrollPerItem);
+#else
     setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
+#endif
     setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     m_vScroll = new CWizScrollBar(this);
