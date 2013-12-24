@@ -123,22 +123,36 @@ void AsyncApi::getCommentsCount_impl(const QString& strUrl)
     int nTotalComments = 0;
 
     if (reply->error()) {
-        qDebug() << "[AsyncApi]Failed to get comment count";
+        qDebug() << "[AsyncApi]Failed to get comment count: " << reply->errorString();
         Q_EMIT getCommentsCountFinished(0);
         return;
     }
 
     QString strReply = QString::fromUtf8(reply->readAll().constData());
-    qDebug() << strReply;
 
+    // {"comment_count":0,"return_code":200,"return_message":"success"}
+    // {"error":"Token invalid!","error_code":301}
     rapidjson::Document d;
     d.Parse<0>(strReply.toUtf8().constData());
-    int nCode = d.FindMember("return_code")->value.GetInt();
 
-    if (nCode == 200) {
-        nTotalComments = d.FindMember("comment_count")->value.GetInt();
+    if (d.HasMember("error_code")) {
+        qDebug() << "[AsyncApi]Failed to get comment count: "
+                 << QString::fromUtf8(d.FindMember("error")->value.GetString())
+                 << " code: " << d.FindMember("error_code")->value.GetInt();
+        Q_EMIT getCommentsCountFinished(0);
+        return;
     }
 
+    if (d.HasMember("return_code")) {
+        int nCode = d.FindMember("return_code")->value.GetInt();
+        if (nCode != 200) {
+            qDebug() << "[AsyncApi]Failed to get comment count, need 200, but return "
+                     << d.FindMember("return_code")->value.GetInt();
+            Q_EMIT getCommentsCountFinished(0);
+            return;
+        }
+    }
+
+    nTotalComments = d.FindMember("comment_count")->value.GetInt();
     Q_EMIT getCommentsCountFinished(nTotalComments);
 }
-
