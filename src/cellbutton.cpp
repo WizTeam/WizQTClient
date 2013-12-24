@@ -95,7 +95,7 @@ void CellButton::paintEvent(QPaintEvent *event)
     if (opt.state & QStyle::State_On)
         state = QIcon::On;
 
-    m_backgroundIcon.paint(&p, opt.rect, Qt::AlignCenter, mode, state);
+    m_backgroundIcon.paint(&p, opt.rect, Qt::AlignCenter, QIcon::Normal, state);
 
     if (opt.icon.isNull()) {
         m_iconNomal.paint(&p, opt.rect, Qt::AlignCenter, mode, state);
