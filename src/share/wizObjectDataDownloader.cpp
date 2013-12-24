@@ -138,7 +138,7 @@ CWizObjectDataDownloadWorker::CWizObjectDataDownloadWorker(CWizDatabaseManager& 
 void CWizObjectDataDownloadWorker::startDownload()
 {
     connect(Token::instance(), SIGNAL(tokenAcquired(QString)),
-            SLOT(onTokenAcquired(QString)));
+            SLOT(onTokenAcquired(QString)), Qt::QueuedConnection);
     Token::instance()->requestToken();
 }
 

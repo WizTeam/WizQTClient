@@ -129,6 +129,7 @@ void AsyncApi::getCommentsCount_impl(const QString& strUrl)
     }
 
     QString strReply = QString::fromUtf8(reply->readAll().constData());
+    qDebug() << strReply;
 
     rapidjson::Document d;
     d.Parse<0>(strReply.toUtf8().constData());

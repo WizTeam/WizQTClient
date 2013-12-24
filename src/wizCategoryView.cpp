@@ -1207,7 +1207,7 @@ void CWizCategoryView::on_action_group_attribute()
 void CWizCategoryView::on_action_group_attribute_showProgress()
 {
     connect(Token::instance(), SIGNAL(tokenAcquired(const QString&)),
-            SLOT(on_action_group_attribute_requested(const QString&)), Qt::UniqueConnection);
+            SLOT(on_action_group_attribute_requested(const QString&)), Qt::QueuedConnection);
 
     Token::instance()->requestToken();
 }

@@ -210,7 +210,7 @@ void CWizLoginDialog::doAccountVerify()
 
 void CWizLoginDialog::doOnlineVerify()
 {
-    connect(Token::instance(), SIGNAL(tokenAcquired(QString)), SLOT(onTokenAcquired(QString)), Qt::UniqueConnection);
+    connect(Token::instance(), SIGNAL(tokenAcquired(QString)), SLOT(onTokenAcquired(QString)), Qt::QueuedConnection);
     Token::requestToken();
 }
 

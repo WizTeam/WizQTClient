@@ -310,7 +310,7 @@ void TitleBar::onViewNoteLoaded(INoteView* view, const WIZDOCUMENTDATA& note, bo
         m_commentsBtn->setEnabled(true);
 
         connect(WizService::Token::instance(), SIGNAL(tokenAcquired(QString)),
-                SLOT(onTokenAcquired(QString)), Qt::UniqueConnection);
+                SLOT(onTokenAcquired(QString)), Qt::QueuedConnection);
         WizService::Token::requestToken();
     }
 }

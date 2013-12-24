@@ -86,7 +86,7 @@ void CWizKMSyncThread::startSync()
     if (isRunning())
         return;
 
-    connect(Token::instance(), SIGNAL(tokenAcquired(QString)), SLOT(onTokenAcquired(QString)), Qt::UniqueConnection);
+    connect(Token::instance(), SIGNAL(tokenAcquired(QString)), SLOT(onTokenAcquired(QString)), Qt::QueuedConnection);
     Token::requestToken();
 }
 

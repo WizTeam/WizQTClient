@@ -36,7 +36,7 @@ void TokenPrivate::requestToken()
 
     QMutexLocker locker(m_mutex);
 
-    // return the old one even it will be failed if still waiting for reply, to avoid dead-lock
+    // return the old one even it will be failed if still waiting for reply
     if (m_bProcess) {
         Q_EMIT q->tokenAcquired(m_info.strToken);
         return;

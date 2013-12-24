@@ -56,7 +56,7 @@ void AvatarUploader::upload(const QString& strFileName)
     }
 
     connect(Token::instance(), SIGNAL(tokenAcquired(QString)),
-            SLOT(onTokenAcquired(QString)), Qt::UniqueConnection);
+            SLOT(onTokenAcquired(QString)), Qt::QueuedConnection);
     Token::instance()->requestToken();
 }
 
