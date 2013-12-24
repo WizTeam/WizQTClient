@@ -2,6 +2,7 @@
 
 #include <QMenu>
 #include <QFileDialog>
+#include <QMessageBox>
 
 #include "wizdef.h"
 #include "share/wizsettings.h"

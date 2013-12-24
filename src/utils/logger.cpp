@@ -62,6 +62,7 @@ QBuffer* Logger::buffer()
     return m_instance->m_buffer;
 }
 
+#if QT_VERSION < 0x050000
 void Logger::messageHandler(QtMsgType type, const char* msg)
 {
     m_instance->save(QString::fromUtf8(msg));
@@ -82,6 +83,30 @@ void Logger::messageHandler(QtMsgType type, const char* msg)
         abort();
     }
 }
+#else
+void Logger::messageHandler(QtMsgType type, const QMessageLogContext& context, const QString &msg)
+{
+    Q_UNUSED(context);
+
+    m_instance->save(msg);
+    m_instance->redirect(msg);
+
+    switch (type) {
+    case QtDebugMsg:
+        fprintf(stderr, "[DEBUG] %s\n", msg.toUtf8().constData());
+        break;
+    case QtWarningMsg:
+        fprintf(stderr, "[WARNING]: %s\n", msg.toUtf8().constData());
+        break;
+    case QtCriticalMsg:
+        fprintf(stderr, "[CRITICAL]: %s\n", msg.toUtf8().constData());
+        break;
+    case QtFatalMsg:
+        fprintf(stderr, "[FATAL]: %s\n", msg.toUtf8().constData());
+        abort();
+    }
+}
+#endif
 
 QStringList Logger::allLogFiles(int nDays)
 {

@@ -16,7 +16,11 @@ public:
     Logger();
     ~Logger();
 
+#if QT_VERSION < 0x050000
     static void messageHandler(QtMsgType type, const char* msg);
+#else
+    static void messageHandler(QtMsgType type, const QMessageLogContext &context, const QString &msg);
+#endif
 
     // who is interested in logs just need to connect readyRead signal
     static QBuffer* buffer();
