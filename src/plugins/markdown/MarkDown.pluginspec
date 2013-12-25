@@ -1,4 +1,4 @@
-<plugin name="MarkDown" version="1.0" compatVersion="1.0" experimental="false">
+<plugin name="MarkDown" version="1.1" compatVersion="1.0" experimental="false">
     <vendor>Wiz.Inc</vendor>
     <copyright>(C) 2013 Wiz.Inc</copyright>
     <license>
