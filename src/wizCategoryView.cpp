@@ -30,7 +30,6 @@ using namespace Core::Internal;
 #define CATEGORY_PERSONAL   QObject::tr("Personal notes")
 #define CATEGORY_ENTERPRISE QObject::tr("Enterprise groups")
 #define CATEGORY_INDIVIDUAL QObject::tr("Individual groups")
-#define CATEGORY_MESSAGES   QObject::tr("Message Center")
 #define CATEGORY_SHORTCUTS  QObject::tr("Shortcuts")
 #define CATEGORY_SEARCH     QObject::tr("Quick search")
 #define CATEGORY_FOLDERS    QObject::tr("Note folders")

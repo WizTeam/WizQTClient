@@ -7,6 +7,7 @@ namespace Utils {
 class StyleHelper
 {
 public:
+    static QSize avatarSize();
     static int avatarHeight();
     static int lineSpacing();
     static int margin();

@@ -134,9 +134,14 @@ QString ApiEntryPrivate::messageVersionUrl()
     return requestUrl(WIZNOTE_API_COMMAND_MESSAGE_VERSION, m_strMessageVersionUrl);
 }
 
-QString ApiEntryPrivate::avatarDownloadUrl()
+QString ApiEntryPrivate::avatarDownloadUrl(const QString& strUserGUID)
 {
-    return requestUrl(WIZNOTE_API_COMMAND_AVATAR, m_strAvatarDownloadUrl);
+    QString strRawUrl(requestUrl(WIZNOTE_API_COMMAND_AVATAR, m_strAvatarDownloadUrl));
+
+    // http://as.wiz.cn/wizas/a/users/avatar/{userGuid}
+    strRawUrl.replace(QRegExp("\\{.*\\}"), strUserGUID);
+    strRawUrl += "?default=false"; // Do not download server default avatar
+    return strRawUrl;
 }
 
 QString ApiEntryPrivate::avatarUploadUrl()
@@ -246,11 +251,11 @@ QString ApiEntry::messageVersionUrl()
     return d->messageVersionUrl();
 }
 
-QString ApiEntry::avatarDownloadUrl()
+QString ApiEntry::avatarDownloadUrl(const QString& strUserGUID)
 {
     if (!d)
         d = new ApiEntryPrivate();
-    return d->avatarDownloadUrl();
+    return d->avatarDownloadUrl(strUserGUID);
 }
 
 QString ApiEntry::avatarUploadUrl()

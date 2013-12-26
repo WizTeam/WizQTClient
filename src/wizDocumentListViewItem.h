@@ -49,8 +49,7 @@ public:
 
     const WIZABSTRACT& abstract(CWizThumbIndexCache& thumbCache);
 
-    const QImage& avatar(const CWizDatabase& db,
-                         CWizUserAvatarDownloaderHost& downloader);
+    const QImage& avatar(const CWizDatabase& db);
 
     // called by CWizDocumentListView when thumbCache pool is ready for reading
     void resetAbstract(const WIZABSTRACT& abs);

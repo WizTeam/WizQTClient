@@ -151,7 +151,7 @@ public Q_SLOTS:
     void on_action_copyDocument_confirmed(int result);
 
     void on_document_abstractLoaded(const WIZABSTRACT& abs);
-    void on_userAvatar_downloaded(const QString& strUserGUID);
+    //void on_userAvatar_downloaded(const QString& strUserGUID);
 
 //#ifndef Q_OS_MAC
     // used for smoothly scroll

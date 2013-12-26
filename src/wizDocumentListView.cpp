@@ -12,10 +12,11 @@
 #include "share/wizsettings.h"
 #include "wizFolderSelector.h"
 #include "wizProgressDialog.h"
-#include "share/wizUserAvatar.h"
 #include "wizmainwindow.h"
 #include "utils/stylehelper.h"
 #include "utils/logger.h"
+
+#include "sync/avatar.h"
 
 using namespace Core::Internal;
 
@@ -56,28 +57,11 @@ CWizDocumentListView::CWizDocumentListView(CWizExplorerApp& app, QWidget *parent
     m_vScroll = new CWizScrollBar(this);
     m_vScroll->syncWith(verticalScrollBar());
 
-    //QScrollAreaKineticScroller *newScroller = new QScrollAreaKineticScroller();
-    //newScroller->setWidget(this);
-    //m_kinecticScroll = new QsKineticScroller(this);
-    //m_kinecticScroll->enableKineticScrollFor(this);
-
-//#ifndef Q_OS_MAC
-    // smoothly scroll
-    //m_vscrollCurrent = 0;
-    //m_vscrollOldPos = 0;
-    //connect(verticalScrollBar(), SIGNAL(valueChanged(int)), SLOT(on_vscroll_valueChanged(int)));
-    //connect(verticalScrollBar(), SIGNAL(actionTriggered(int)), SLOT(on_vscroll_actionTriggered(int)));
-    //connect(&m_vscrollTimer, SIGNAL(timeout()), SLOT(on_vscroll_update()));
-//#endif //Q_OS_MAC
-
-    //setItemDelegate(new CWizDocumentListViewDelegate(app, this));
-
     // setup style
     QString strSkinName = m_app.userSettings().skin();
     setStyle(::WizGetStyle(strSkinName));
 
     QPalette pal = palette();
-    //pal.setColor(QPalette::Base, QColor(247,247,247));
     pal.setColor(QPalette::Base, WizGetDocumentsBackroundColor(strSkinName));
     setPalette(pal);
 
@@ -114,10 +98,10 @@ CWizDocumentListView::CWizDocumentListView(CWizExplorerApp& app, QWidget *parent
 
     // avatar downloader
     //m_avatarDownloader = new CWizUserAvatarDownloaderHost(m_dbMgr.db().GetAvatarPath(), this);
-    MainWindow* mainWindow = qobject_cast<MainWindow *>(m_app.mainWindow());
-    m_avatarDownloader = mainWindow->avatarHost();
-    connect(m_avatarDownloader, SIGNAL(downloaded(const QString&)),
-            SLOT(on_userAvatar_downloaded(const QString&)));
+    //MainWindow* mainWindow = qobject_cast<MainWindow *>(m_app.mainWindow());
+    //m_avatarDownloader = mainWindow->avatarHost();
+    //connect(WizService::Internal::AvatarHost::instance(), SIGNAL(downloaded(const QString&)),
+    //        SLOT(on_userAvatar_downloaded(const QString&)));
 
     setDragDropMode(QAbstractItemView::DragDrop);
     setDragEnabled(true);
@@ -691,18 +675,18 @@ void CWizDocumentListView::on_document_abstractLoaded(const WIZABSTRACT& abs)
     update(indexFromItem(pItem));
 }
 
-void CWizDocumentListView::on_userAvatar_downloaded(const QString& strUserGUID)
-{
-    CWizDocumentListViewItem* pItem = NULL;
-    for (int i = 0; i < count(); i++) {
-        pItem = documentItemAt(i);
-        if (pItem->data().strAuthorId == strUserGUID) {
-            QString strFileName = m_dbMgr.db().GetAvatarPath() + strUserGUID + ".png";
-            pItem->resetAvatar(strFileName);
-            update(indexFromItem(pItem));
-        }
-    }
-}
+//void CWizDocumentListView::on_userAvatar_downloaded(const QString& strUserGUID)
+//{
+//    CWizDocumentListViewItem* pItem = NULL;
+//    for (int i = 0; i < count(); i++) {
+//        pItem = documentItemAt(i);
+//        if (pItem->data().strAuthorId == strUserGUID) {
+//            QString strFileName = m_dbMgr.db().GetAvatarPath() + strUserGUID + ".png";
+//            pItem->resetAvatar(strFileName);
+//            update(indexFromItem(pItem));
+//        }
+//    }
+//}
 
 void CWizDocumentListView::on_message_created(const WIZMESSAGEDATA& data)
 {
@@ -943,7 +927,7 @@ const WizDocumentListViewItemData& CWizDocumentListView::documentItemDataFromInd
 
 const QImage& CWizDocumentListView::messageSenderAvatarFromIndex(const QModelIndex& index) const
 {
-    return documentItemFromIndex(index)->avatar(m_dbMgr.db(), *m_avatarDownloader);
+    return documentItemFromIndex(index)->avatar(m_dbMgr.db());
 }
 
 const WIZDOCUMENTDATA& CWizDocumentListView::documentFromIndex(const QModelIndex &index) const

@@ -10,7 +10,7 @@ class ApiEntry
 public:
     static QString syncUrl();
     static QString messageVersionUrl();
-    static QString avatarDownloadUrl();
+    static QString avatarDownloadUrl(const QString& strUserGUID);
     static QString avatarUploadUrl();
     static QString commentUrl(const QString& strToken, const QString& strKbGUID,const QString& strGUID);
     static QString commentCountUrl(const QString& strServer, const QString& strToken,

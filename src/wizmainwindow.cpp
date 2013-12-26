@@ -41,15 +41,15 @@
 #include "wizEditorToolBar.h"
 #include "wizProgressDialog.h"
 #include "wizDocumentSelectionView.h"
-//#include "share/wizGroupMessage.h"
 #include "share/wizObjectDataDownloader.h"
-#include "share/wizUserAvatar.h"
 #include "wizDocumentTransitionView.h"
+#include "messagelistview.h"
 
-#include "sync/wizkmsync.h"
 #include "wizPopupButton.h"
 #include "widgets/wizUserInfoWidget.h"
 #include "sync/apientry.h"
+#include "sync/wizkmsync.h"
+#include "sync/avatar.h"
 
 #include "wizUserVerifyDialog.h"
 
@@ -59,6 +59,7 @@
 
 using namespace Core;
 using namespace Core::Internal;
+using namespace WizService::Internal;
 
 MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     : QMainWindow(parent)
@@ -73,7 +74,7 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     //, m_certManager(new CWizCertManager(*this))
     , m_cipherForm(new CWizUserCipherForm(*this, this))
     , m_objectDownloaderHost(new CWizObjectDataDownloaderHost(dbMgr, this))
-    , m_avatarDownloaderHost(new CWizUserAvatarDownloaderHost(dbMgr.db().GetAvatarPath(), this))
+    //, m_avatarDownloaderHost(new CWizUserAvatarDownloaderHost(dbMgr.db().GetAvatarPath(), this))
     , m_transitionView(new CWizDocumentTransitionView(this))
     #ifndef Q_OS_MAC
     , m_labelNotice(NULL)
@@ -85,6 +86,8 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     , m_actions(new CWizActions(*this, this))
     , m_category(new CWizCategoryView(*this, this))
     , m_documents(new CWizDocumentListView(*this, this))
+    , m_noteList(NULL)
+    , m_msgList(new MessageListView(this))
     , m_documentSelection(new CWizDocumentSelectionView(*this, this))
     , m_doc(new CWizDocumentView(*this, this))
     , m_history(new CWizDocumentViewHistory())
@@ -125,8 +128,11 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
         QTimer::singleShot(3 * 1000, this, SLOT(on_actionSync_triggered()));
     }
 
+    WizService::Internal::AvatarHost* avatarHost = new WizService::Internal::AvatarHost();
+    Q_UNUSED(avatarHost);
+
     // misc settings
-    m_avatarDownloaderHost->setDefault(::WizGetSkinResourcePath(userSettings().skin()) + "avatar_default.png");
+    //m_avatarDownloaderHost->setDefault(::WizGetSkinResourcePath(userSettings().skin()) + "avatar_default.png");
 
     // GUI
     initActions();
@@ -562,20 +568,30 @@ void MainWindow::initClient()
     m_transitionView->hide();
 
     m_splitter->addWidget(m_category);
-    m_splitter->addWidget(createListView());
+
+    QWidget* wlist = new QWidget(this);
+    QHBoxLayout* layoutList = new QHBoxLayout();
+    layoutList->setContentsMargins(0, 0, 0, 0);
+    layoutList->setSpacing(0);
+    layoutList->addWidget(createListView());
+    layoutList->addWidget(m_msgList);
+    wlist->setLayout(layoutList);
+    m_splitter->addWidget(wlist);
     m_splitter->addWidget(documentPanel);
     m_splitter->setStretchFactor(0, 0);
     m_splitter->setStretchFactor(1, 0);
     m_splitter->setStretchFactor(2, 1);
+
+    //m_msgList->hide();
 }
 
 QWidget* MainWindow::createListView()
 {
-    QWidget* view = new QWidget(this);
+    m_noteList = new QWidget(this);
     QVBoxLayout* layoutList = new QVBoxLayout();
     layoutList->setContentsMargins(0, 0, 0, 0);
     layoutList->setSpacing(0);
-    view->setLayout(layoutList);
+    m_noteList->setLayout(layoutList);
 
     QHBoxLayout* layoutActions = new QHBoxLayout();
     layoutActions->setContentsMargins(0, 0, 0, 0);
@@ -614,7 +630,7 @@ QWidget* MainWindow::createListView()
     layoutList->addWidget(line2);
     layoutList->addWidget(m_documents);
 
-    return view;
+    return m_noteList;
 }
 
 void MainWindow::on_documents_documentCountChanged()
@@ -1113,16 +1129,30 @@ void MainWindow::on_category_itemSelectionChanged()
     if (!category)
         return;
 
-    QString kbGUID = category->selectedItemKbGUID();
-    if (!kbGUID.isEmpty()) {
-        resetPermission(kbGUID, "");
-    }
+    if (category->currentItem()->text(0) == CATEGORY_MESSAGES) {
+        m_msgList->show();
+        m_noteList->hide();
 
-    category->getDocuments(arrayDocument);
-    m_documents->setDocuments(arrayDocument);
+        CWizMessageDataArray arrayMsg;
+        m_dbMgr.db().getLastestMessages(arrayMsg);
+        m_msgList->setMessages(arrayMsg);
 
-    if (arrayDocument.empty()) {
-        on_documents_itemSelectionChanged();
+
+        return;
+    } else {
+        m_noteList->show();
+        m_msgList->hide();
+        QString kbGUID = category->selectedItemKbGUID();
+        if (!kbGUID.isEmpty()) {
+            resetPermission(kbGUID, "");
+        }
+
+        category->getDocuments(arrayDocument);
+        m_documents->setDocuments(arrayDocument);
+
+        if (arrayDocument.empty()) {
+            on_documents_itemSelectionChanged();
+        }
     }
 }
 

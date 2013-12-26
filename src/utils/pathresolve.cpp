@@ -34,6 +34,11 @@ QString PathResolve::resourcesPath()
 #endif
 }
 
+QString PathResolve::themePath(const QString& strThemeName)
+{
+    return resourcesPath() + "skins/" + strThemeName + "/";
+}
+
 QString PathResolve::dataStorePath()
 {
     QString strPath = QDir::homePath();
@@ -58,6 +63,13 @@ QString PathResolve::cachePath()
 
     ensurePathExists(strCachePath);
     return strCachePath;
+}
+
+QString PathResolve::avatarPath()
+{
+    QString strPath = cachePath() + "avatar/";
+    ensurePathExists(strPath);
+    return strPath;
 }
 
 QString PathResolve::logPath()

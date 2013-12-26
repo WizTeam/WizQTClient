@@ -5,6 +5,11 @@
 
 namespace Utils {
 
+QSize StyleHelper::avatarSize()
+{
+    return QSize(avatarHeight(), avatarHeight());
+}
+
 int StyleHelper::avatarHeight()
 {
     int nHeight = lineSpacing() * 3;

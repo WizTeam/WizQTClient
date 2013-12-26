@@ -9,8 +9,9 @@
 #include "share/wizDatabaseManager.h"
 #include "share/wizDatabase.h"
 #include "share/wizThumbIndexCache.h"
-#include "share/wizUserAvatar.h"
 #include "wizPopupButton.h"
+
+#include "sync/avatar.h"
 
 CWizDocumentListViewItem::CWizDocumentListViewItem(CWizExplorerApp& app,
                                                    const WizDocumentListViewItemData& data)
@@ -34,19 +35,18 @@ CWizDocumentListViewItem::CWizDocumentListViewItem(CWizExplorerApp& app,
     connect(this, SIGNAL(thumbnailReloaded()), SLOT(on_thumbnailReloaded()));
 }
 
-const QImage& CWizDocumentListViewItem::avatar(const CWizDatabase& db,
-                                               CWizUserAvatarDownloaderHost& downloader)
+const QImage& CWizDocumentListViewItem::avatar(const CWizDatabase& db)
 {
     Q_ASSERT(!m_data.strAuthorId.isEmpty());
 
     if (m_data.imgAuthorAvatar.isNull()) {
         // load avatar or request downloader to download
-        QString strFileName = db.GetAvatarPath() + m_data.strAuthorId + ".png";
-        if (isAvatarNeedUpdate(strFileName)) {
-            downloader.download(m_data.strAuthorId);
-        } else {
-            m_data.imgAuthorAvatar.load(strFileName);
-        }
+        //QString strFileName = db.GetAvatarPath() + m_data.strAuthorId + ".png";
+        //if (isAvatarNeedUpdate(strFileName)) {
+        WizService::Internal::AvatarHost::load(m_data.strAuthorId);
+        //} else {
+        //    m_data.imgAuthorAvatar.load(strFileName);
+        //}
     }
 
     return m_data.imgAuthorAvatar;

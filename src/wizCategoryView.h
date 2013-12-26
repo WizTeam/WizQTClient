@@ -12,6 +12,8 @@ class CWizDatabaseManager;
 class CWizExplorerApp;
 class CWizWebSettingsDialog;
 
+#define CATEGORY_MESSAGES   QObject::tr("Message Center")
+
 class CWizCategoryBaseView : public QTreeWidget
 {
     Q_OBJECT
