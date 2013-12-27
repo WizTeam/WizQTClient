@@ -96,12 +96,8 @@ CWizDocumentListView::CWizDocumentListView(CWizExplorerApp& app, QWidget *parent
     m_thumbCache->moveToThread(thread);
     thread->start();
 
-    // avatar downloader
-    //m_avatarDownloader = new CWizUserAvatarDownloaderHost(m_dbMgr.db().GetAvatarPath(), this);
-    //MainWindow* mainWindow = qobject_cast<MainWindow *>(m_app.mainWindow());
-    //m_avatarDownloader = mainWindow->avatarHost();
-    //connect(WizService::Internal::AvatarHost::instance(), SIGNAL(downloaded(const QString&)),
-    //        SLOT(on_userAvatar_downloaded(const QString&)));
+    connect(WizService::Internal::AvatarHost::instance(), SIGNAL(loaded(const QString&)),
+            SLOT(on_userAvatar_loaded(const QString&)));
 
     setDragDropMode(QAbstractItemView::DragDrop);
     setDragEnabled(true);
@@ -152,7 +148,8 @@ void CWizDocumentListView::resizeEvent(QResizeEvent* event)
     m_vScroll->resize(m_vScroll->sizeHint().width(), event->size().height());
     m_vScroll->move(event->size().width() - m_vScroll->sizeHint().width(), 0);
 
-    QPixmapCache::clear();
+    // FIXME!!!
+    //QPixmapCache::clear();
     QListWidget::resizeEvent(event);
 }
 
@@ -581,7 +578,8 @@ QSize CWizDocumentListView::itemSizeFromViewType(ViewType type)
 
 void CWizDocumentListView::resetItemsSortingType(int type)
 {
-    QPixmapCache::clear();
+    // FIXME!!!
+    //QPixmapCache::clear();
 
     m_nSortingType = type;
 
@@ -675,18 +673,18 @@ void CWizDocumentListView::on_document_abstractLoaded(const WIZABSTRACT& abs)
     update(indexFromItem(pItem));
 }
 
-//void CWizDocumentListView::on_userAvatar_downloaded(const QString& strUserGUID)
-//{
-//    CWizDocumentListViewItem* pItem = NULL;
-//    for (int i = 0; i < count(); i++) {
-//        pItem = documentItemAt(i);
-//        if (pItem->data().strAuthorId == strUserGUID) {
-//            QString strFileName = m_dbMgr.db().GetAvatarPath() + strUserGUID + ".png";
-//            pItem->resetAvatar(strFileName);
-//            update(indexFromItem(pItem));
-//        }
-//    }
-//}
+void CWizDocumentListView::on_userAvatar_loaded(const QString& strUserGUID)
+{
+    CWizDocumentListViewItem* pItem = NULL;
+    for (int i = 0; i < count(); i++) {
+        pItem = documentItemAt(i);
+        if (pItem->data().strAuthorId == strUserGUID) {
+            //QString strFileName = m_dbMgr.db().GetAvatarPath() + strUserGUID + ".png";
+            //pItem->resetAvatar(strFileName);
+            update(indexFromItem(pItem));
+        }
+    }
+}
 
 void CWizDocumentListView::on_message_created(const WIZMESSAGEDATA& data)
 {
@@ -925,10 +923,10 @@ const WizDocumentListViewItemData& CWizDocumentListView::documentItemDataFromInd
 //    return documentItemFromIndex(index)->message();
 //}
 
-const QImage& CWizDocumentListView::messageSenderAvatarFromIndex(const QModelIndex& index) const
-{
-    return documentItemFromIndex(index)->avatar(m_dbMgr.db());
-}
+//const QImage& CWizDocumentListView::messageSenderAvatarFromIndex(const QModelIndex& index) const
+//{
+//    return documentItemFromIndex(index)->avatar(m_dbMgr.db());
+//}
 
 const WIZDOCUMENTDATA& CWizDocumentListView::documentFromIndex(const QModelIndex &index) const
 {

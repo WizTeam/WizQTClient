@@ -35,22 +35,22 @@ CWizDocumentListViewItem::CWizDocumentListViewItem(CWizExplorerApp& app,
     connect(this, SIGNAL(thumbnailReloaded()), SLOT(on_thumbnailReloaded()));
 }
 
-const QImage& CWizDocumentListViewItem::avatar(const CWizDatabase& db)
-{
-    Q_ASSERT(!m_data.strAuthorId.isEmpty());
-
-    if (m_data.imgAuthorAvatar.isNull()) {
-        // load avatar or request downloader to download
-        //QString strFileName = db.GetAvatarPath() + m_data.strAuthorId + ".png";
-        //if (isAvatarNeedUpdate(strFileName)) {
-        WizService::Internal::AvatarHost::load(m_data.strAuthorId);
-        //} else {
-        //    m_data.imgAuthorAvatar.load(strFileName);
-        //}
-    }
-
-    return m_data.imgAuthorAvatar;
-}
+//const QImage& CWizDocumentListViewItem::avatar(const CWizDatabase& db)
+//{
+//    Q_ASSERT(!m_data.strAuthorId.isEmpty());
+//
+//    if (m_data.imgAuthorAvatar.isNull()) {
+//        // load avatar or request downloader to download
+//        //QString strFileName = db.GetAvatarPath() + m_data.strAuthorId + ".png";
+//        //if (isAvatarNeedUpdate(strFileName)) {
+//        WizService::Internal::AvatarHost::load(m_data.strAuthorId);
+//        //} else {
+//        //    m_data.imgAuthorAvatar.load(strFileName);
+//        //}
+//    }
+//
+//    return m_data.imgAuthorAvatar;
+//}
 
 void CWizDocumentListViewItem::resetAvatar(const QString& strFileName)
 {

@@ -23,7 +23,7 @@ public:
     void addMessages(const CWizMessageDataArray& arrayMsg);
     void addMessage(const WIZMESSAGEDATA& msg, bool sort);
 
-    const WIZMESSAGEDATA& MessageFromIndex(const QModelIndex &index) const;
+    WIZMESSAGEDATA MessageFromIndex(const QModelIndex &index) const;
 
 protected:
     virtual void resizeEvent(QResizeEvent* event);

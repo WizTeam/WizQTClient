@@ -49,7 +49,6 @@
 #include "widgets/wizUserInfoWidget.h"
 #include "sync/apientry.h"
 #include "sync/wizkmsync.h"
-#include "sync/avatar.h"
 
 #include "wizUserVerifyDialog.h"
 
@@ -127,9 +126,6 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     if (nInterval != -1) {
         QTimer::singleShot(3 * 1000, this, SLOT(on_actionSync_triggered()));
     }
-
-    WizService::Internal::AvatarHost* avatarHost = new WizService::Internal::AvatarHost();
-    Q_UNUSED(avatarHost);
 
     // misc settings
     //m_avatarDownloaderHost->setDefault(::WizGetSkinResourcePath(userSettings().skin()) + "avatar_default.png");

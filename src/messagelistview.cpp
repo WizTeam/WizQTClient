@@ -119,12 +119,12 @@ void MessageListView::addMessage(const WIZMESSAGEDATA& msg, bool sort)
 {
     // FIXME: document will be deleted while message data still stand alone
     // we should delete these useless messages from database.
-    WIZDOCUMENTDATA data;
-    CWizDatabase& db = CWizDatabaseManager::instance()->db(msg.kbGUID);
-    if (!db.DocumentFromGUID(msg.documentGUID, data)) {
-        qDebug() << "[MessageListView]Failed to find note of message: " << msg.title;
-        return;
-    }
+    //WIZDOCUMENTDATA data;
+    //CWizDatabase& db = CWizDatabaseManager::instance()->db();
+    //if (!db.DocumentFromGUID(msg.documentGUID, data)) {
+    //    qDebug() << "[MessageListView]Failed to find note of message: " << msg.title;
+    //    return;
+    //}
 
     MessageListViewItem* pItem = new MessageListViewItem(msg);
     pItem->setSizeHint(QSize(sizeHint().width(), fontMetrics().height() * 5));
@@ -137,7 +137,7 @@ void MessageListView::addMessage(const WIZMESSAGEDATA& msg, bool sort)
     Q_EMIT sizeChanged(count());
 }
 
-const WIZMESSAGEDATA& MessageListView::MessageFromIndex(const QModelIndex &index) const
+WIZMESSAGEDATA MessageListView::MessageFromIndex(const QModelIndex &index) const
 {
     MessageListViewItem* pItem = dynamic_cast<MessageListViewItem*>(itemFromIndex(index));
     if (pItem)

@@ -21,6 +21,7 @@
 #include "utils/logger.h"
 #include "sync/token.h"
 #include "sync/apientry.h"
+#include "sync/avatar.h"
 
 using namespace ExtensionSystem;
 using namespace Core::Internal;
@@ -198,6 +199,9 @@ int main(int argc, char *argv[])
     WizService::Token::setPasswd(strPassword);
 
     dbMgr.db().SetPassword(::WizEncryptPassword(strPassword));
+
+    // FIXME: move to plugins
+    WizService::Internal::AvatarHost avatarHost;
 
     MainWindow w(dbMgr);
 

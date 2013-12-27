@@ -54,7 +54,6 @@ private:
     CWizExplorerApp& m_app;
     CWizDatabaseManager& m_dbMgr;
     QPointer<CWizThumbIndexCache> m_thumbCache;
-    CWizUserAvatarDownloaderHost* m_avatarDownloader;
     CWizScrollBar* m_vScroll;
 
     CWizDocumentListView::ViewType m_nViewType;
@@ -151,7 +150,7 @@ public Q_SLOTS:
     void on_action_copyDocument_confirmed(int result);
 
     void on_document_abstractLoaded(const WIZABSTRACT& abs);
-    //void on_userAvatar_downloaded(const QString& strUserGUID);
+    void on_userAvatar_loaded(const QString& strUserGUID);
 
 //#ifndef Q_OS_MAC
     // used for smoothly scroll

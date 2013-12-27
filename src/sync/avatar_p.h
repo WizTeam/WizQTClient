@@ -50,6 +50,7 @@ public:
     void load(const QString& strUserGUID, bool bForce);
     bool avatar(const QString& strUserId, QPixmap* pixmap);
 
+    bool isLoaded(const QString& strUserId);
     QString keyFromGuid(const QString& strUserGUID) const;
     QString defaultKey() const;
 

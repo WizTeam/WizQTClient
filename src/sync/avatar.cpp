@@ -106,7 +106,7 @@ bool AvatarDownloader::save(const QString& strUserGUID, const QByteArray& bytes)
 AvatarHostPrivate::AvatarHostPrivate(AvatarHost* avatarHost)
     : q(avatarHost)
 {
-    m_downloader = new AvatarDownloader(this);
+    m_downloader = new AvatarDownloader();
     connect(m_downloader, SIGNAL(downloaded(QString, bool)),
             SLOT(on_downloaded(QString, bool)));
 
@@ -118,6 +118,14 @@ AvatarHostPrivate::AvatarHostPrivate(AvatarHost* avatarHost)
     loadCacheDefault();
 }
 
+bool AvatarHostPrivate::isLoaded(const QString& strUserId)
+{
+    QPixmap pm;
+    bool ret = QPixmapCache::find(keyFromGuid(strUserId), pm);
+    qDebug() << "[AvatarHost]search: " << keyFromGuid(strUserId) << "result:" << ret;
+    return ret;
+}
+
 bool AvatarHostPrivate::isNeedUpdate(const QString& strUserGUID)
 {
     QString strFilePath = Utils::PathResolve::avatarPath() + strUserGUID + ".png";
@@ -125,11 +133,11 @@ bool AvatarHostPrivate::isNeedUpdate(const QString& strUserGUID)
         return true;
     }
 
+    QPixmap pm(strFilePath);
     QFileInfo info(strFilePath);
-
     QDateTime tCreated = info.created();
     QDateTime tNow = QDateTime::currentDateTime();
-    if (tCreated.daysTo(tNow) >= 1) { // download avatar before yesterday
+    if (tCreated.daysTo(tNow) >= 1 || pm.isNull()) { // download avatar before yesterday or pixmap is not valid
         return true;
     }
 
@@ -139,6 +147,7 @@ bool AvatarHostPrivate::isNeedUpdate(const QString& strUserGUID)
 void AvatarHostPrivate::loadCache(const QString& strUserGUID)
 {
     QString strFilePath = Utils::PathResolve::avatarPath() + strUserGUID + ".png";
+    qDebug() << "[AvatarHost]load avatar: " << strFilePath;
     loadCacheFromFile(keyFromGuid(strUserGUID), strFilePath);
 }
 
@@ -152,18 +161,21 @@ void AvatarHostPrivate::loadCacheFromFile(const QString& key, const QString& str
     QPixmap pixmap(strFilePath);
 
     if(pixmap.isNull()) {
-        qDebug() << "[AvatarDownloader]failed to load cache: " << strFilePath;
+        qDebug() << "[AvatarHost]failed to load cache: " << strFilePath;
         return;
     }
 
     pixmap = pixmap.scaled(Utils::StyleHelper::avatarSize(),
                            Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
 
-    QPixmapCache::remove(key);
+    Q_ASSERT(!pixmap.isNull());
+
     if (!QPixmapCache::insert(key, pixmap)) {
-        qDebug() << "[AvatarDownloader]failed to insert cache: " << strFilePath;
+        qDebug() << "[AvatarHost]failed to insert cache: " << strFilePath;
         return;
     }
+
+    qDebug() << "[AvatarHost]loaded: " << key;
 }
 
 QString AvatarHostPrivate::keyFromGuid(const QString& strUserGUID) const
@@ -179,11 +191,13 @@ QString AvatarHostPrivate::defaultKey() const
 bool AvatarHostPrivate::avatar(const QString& strUserId, QPixmap* pixmap)
 {
     if (QPixmapCache::find(keyFromGuid(strUserId), pixmap)) {
-        load(strUserId, false);
         return true;
     }
 
+    load(strUserId, false);
+
     if (QPixmapCache::find(defaultKey(), pixmap)) {
+        qDebug() << "[AvatarHost]default avatar returned";
         return true;
     }
 
@@ -197,12 +211,16 @@ void AvatarHostPrivate::load(const QString& strUserGUID, bool bForce)
         if (!m_listUser.contains(strUserGUID) && strUserGUID != m_strUserCurrent) {
             m_listUser.append(strUserGUID);
             m_thread->start();
-            return;
         }
+
+        return;
     }
 
-    loadCache(strUserGUID);
-    Q_EMIT q->loaded(strUserGUID);
+    QPixmap pm;
+    if (!QPixmapCache::find(keyFromGuid(strUserGUID), pm)) {
+        loadCache(strUserGUID);
+        Q_EMIT q->loaded(strUserGUID);
+    }
 }
 
 void AvatarHostPrivate::download_impl()
@@ -273,6 +291,11 @@ void AvatarHost::load(const QString& strUserGUID, bool bForce)
 bool AvatarHost::avatar(const QString& strUserId, QPixmap* pixmap)
 {
     return d->avatar(strUserId, pixmap);
+}
+
+bool AvatarHost::isLoaded(const QString& strUserId)
+{
+    return d->isLoaded(strUserId);
 }
 
 // For user want to retrive avatar from global pixmap cache
