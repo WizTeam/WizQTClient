@@ -44,8 +44,34 @@ private:
     CWizDatabase& m_db;
     WIZUSERINFO m_info;
     QPointer<CWizKMSyncEvents> m_pEvents;
+    bool m_bNeedSyncAll;
+    bool m_bNeedAccquireToken;
+    QDateTime m_tLastSyncAll;
+    bool m_bBusy;
+
+    //
+    CWizKMAccountsServer m_serverAccounts;
+    bool checkTokenCore();
+    bool checkToken();
+    //
+    bool needSyncAll();
+    bool needQuickSync();
+    bool needAccquireToken();
+    bool onIdle();
+    //
+    bool syncAll();
+    bool quickSync();
+    bool accquireToken();
 
     void syncUserCert();
+
+    //
+    void onLogin();
+
+private:
+    std::vector<QObject*> m_arrTokenListener;
+public:
+    void acquireToken(QObject* pObject);
 
 private Q_SLOTS:
     void onTokenAcquired(const QString& strToken);
