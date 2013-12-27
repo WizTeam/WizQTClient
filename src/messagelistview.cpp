@@ -142,6 +142,8 @@ const WIZMESSAGEDATA& MessageListView::MessageFromIndex(const QModelIndex &index
     MessageListViewItem* pItem = dynamic_cast<MessageListViewItem*>(itemFromIndex(index));
     if (pItem)
         return pItem->data();
+
+    return WIZMESSAGEDATA();
 }
 
 

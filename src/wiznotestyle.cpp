@@ -479,23 +479,11 @@ QPixmap CWizNoteStyle::genThumbnailPixmap(const QStyleOptionViewItemV4* vopt, co
 {
     QRect rc(0, 0, vopt->rect.width(), vopt->rect.height());
 
-#ifdef Q_OS_MAC
-    //extern qt_mac_get_scalefactor(QWidget *window);
-    float factor = qt_mac_get_scalefactor(0); // should be 1 for normal and 2 for retina screen
-    QPixmap pixmap(rc.width() * factor, rc.height() * factor);
-
-    QTransform trans;
-    trans.scale(factor, factor);
-#else
-    QPixmap pixmap(rc.width(), rc.height());
-#endif
-
+    QPixmap pixmap = Utils::StyleHelper::pixmapFromDevice(rc.size());
     pixmap.fill(m_colorDocumentsBackground);
-    QPainter p(&pixmap);
 
-#ifdef Q_OS_MAC
-    p.setWorldTransform(trans);
-#endif
+    QPainter p(&pixmap);
+    Utils::StyleHelper::initPainterByDevice(&p);
 
     // indirect access
     const WizDocumentListViewItemData& data = view->documentItemDataFromIndex(vopt->index);

@@ -11,6 +11,7 @@
 #include <QFileInfo>
 #include <QPixmap>
 #include <QPixmapCache>
+#include <QDateTime>
 
 #include "apientry.h"
 #include "../utils/pathresolve.h"

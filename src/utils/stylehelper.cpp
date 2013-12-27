@@ -2,8 +2,38 @@
 
 #include <QFontMetrics>
 #include <QSize>
+#include <QRect>
+#include <QTransform>
+#include <QPainter>
+
+#ifdef Q_OS_MAC
+#include "mac/wizmachelper.h"
+#endif
 
 namespace Utils {
+
+void StyleHelper::initPainterByDevice(QPainter* p)
+{
+#ifdef Q_OS_MAC
+    float factor = qt_mac_get_scalefactor(0); // factor == 2 on retina
+
+    QTransform trans;
+    trans.scale(factor, factor);
+    p->setWorldTransform(trans);
+#endif
+}
+
+QPixmap StyleHelper::pixmapFromDevice(const QSize& sz)
+{
+#ifdef Q_OS_MAC
+    float factor = qt_mac_get_scalefactor(0); // factor == 2 on retina
+    QSize sz2 = sz * factor;
+#else
+    QSize sz2 = sz;
+#endif
+
+    return QPixmap(sz2);
+}
 
 QSize StyleHelper::avatarSize()
 {
