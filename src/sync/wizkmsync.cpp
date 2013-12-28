@@ -13,13 +13,13 @@ using namespace WizService;
 /* ---------------------------- CWizKMSyncThead ---------------------------- */
 void CWizKMSyncEvents::OnSyncProgress(int pos)
 {
-    qDebug() << "[OnSyncProgress] pos = " << pos;
+    Q_UNUSED(pos);
 }
 
 HRESULT CWizKMSyncEvents::OnText(WizKMSyncProgressStatusType type, const QString& strStatus)
 {
-    qDebug() << "[OnText] type: " << type << " status: " << strStatus;
-    TOLOG(strStatus);
+    Q_UNUSED(type);
+    qDebug() << "[Sync]" << strStatus;
 
     Q_EMIT messageReady(strStatus);
     return 0;
@@ -27,12 +27,12 @@ HRESULT CWizKMSyncEvents::OnText(WizKMSyncProgressStatusType type, const QString
 
 void CWizKMSyncEvents::SetDatabaseCount(int count)
 {
-    qDebug() << "[SetDatabaseCount] count = " << count;
+    qDebug() << "[Sync]SetDatabaseCount count = " << count;
 }
 
 void CWizKMSyncEvents::SetCurrentDatabase(int index)
 {
-    qDebug() << "[SetCurrentDatabase] index = " << index;
+    qDebug() << "[Sync]SetCurrentDatabase index = " << index;
 }
 
 void CWizKMSyncEvents::OnTrafficLimit(IWizSyncableDatabase* pDatabase)
@@ -46,17 +46,17 @@ void CWizKMSyncEvents::OnStorageLimit(IWizSyncableDatabase* pDatabase)
 
 void CWizKMSyncEvents::OnUploadDocument(const QString& strDocumentGUID, bool bDone)
 {
-    qDebug() << "[SetCurrentDatabase] guid: " << strDocumentGUID;
+    qDebug() << "[Sync]SetCurrentDatabase guid: " << strDocumentGUID;
 }
 
 void CWizKMSyncEvents::OnBeginKb(const QString& strKbGUID)
 {
-    qDebug() << "[OnBeginKb] kb_guid: " << strKbGUID;
+    qDebug() << "[Sync]OnBeginKb kb_guid: " << strKbGUID;
 }
 
 void CWizKMSyncEvents::OnEndKb(const QString& strKbGUID)
 {
-    qDebug() << "[OnEndKb] kb_guid: " << strKbGUID;
+    qDebug() << "[Sync]OnEndKb kb_guid: " << strKbGUID;
 }
 
 
