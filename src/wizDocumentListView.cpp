@@ -455,7 +455,7 @@ QPixmap WizGetDocumentDragBadget(int nCount)
     p.setBrush(brush);
 
     p.drawEllipse(rectBadget);
-    p.drawText(rectBadget,  Qt::AlignCenter, QString::number(nCount));
+    p.drawText(rectBadget,  Qt::AlignVCenter, QString::number(nCount));
 
     // draw badget on icon
     QPixmap pixmapDragIcon(szPixmap.width() + rectBadget.width() / 2, szPixmap.height());

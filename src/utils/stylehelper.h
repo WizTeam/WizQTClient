@@ -16,12 +16,13 @@ class StyleHelper
 public:
     enum State {
         Normal,
-        Active,
+        Active
     };
 
     static void initPainterByDevice(QPainter* p);
     static QPixmap pixmapFromDevice(const QSize& sz);
     static int lineSpacing();
+    static int leading();
     static int margin();
     static int thumbnailHeight();
 

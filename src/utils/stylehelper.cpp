@@ -66,9 +66,10 @@ QColor StyleHelper::listViewBackground(int stat)
         return QColor(st.value("Documents/ItemLoseFocusBackground", "#e1e1e1").toString());
     } else if (stat == Active) {
         return QColor(st.value("Documents/ItemFocusBackground", "#0c8eec").toString());
-    } else {
-        Q_ASSERT(0);
     }
+
+    Q_ASSERT(0);
+    return QColor();
 }
 
 QColor StyleHelper::listViewTitle(int stat)
@@ -78,9 +79,10 @@ QColor StyleHelper::listViewTitle(int stat)
         return QColor(st.value("Documents/TitleLoseFocus", "#6A6A6A").toString());
     } else if (stat == Active) {
         return QColor(st.value("Documents/Title", "#464646").toString());
-    } else {
-        Q_ASSERT(0);
     }
+
+    Q_ASSERT(0);
+    return QColor();
 }
 
 void StyleHelper::drawListViewBackground(QPainter* p, const QRect& rc, bool bFocus, bool bSelect)
@@ -158,7 +160,7 @@ QRect StyleHelper::drawText(QPainter* p, const QRect& rc, QString& str, int nLin
 
     int nWidth = 0;
     int nHeight = 0;
-    int nHeightLine = p->fontMetrics().height();
+    int nHeightLine = p->fontMetrics().height() + leading();
 
     QRect rcRet(rc.x(), rc.y(), rc.width(), nHeightLine);
     QTextLayout textLayout(str, p->font());
@@ -184,7 +186,7 @@ QRect StyleHelper::drawText(QPainter* p, const QRect& rc, QString& str, int nLin
         p->drawText(rcRet, nFlags, lineText);
 
         nHeight += nHeightLine;
-        rcRet.setRect(rc.x(), rc.y() + nHeightLine, nWidth, nHeight);
+        rcRet.setRect(rc.x(), rc.y() + nHeight, nWidth, nHeightLine);
 
         nLines--;
     }
@@ -199,6 +201,11 @@ QRect StyleHelper::drawText(QPainter* p, const QRect& rc, QString& str, int nLin
 int StyleHelper::lineSpacing()
 {
     return 5;
+}
+
+int StyleHelper::leading()
+{
+    return 3;
 }
 
 int StyleHelper::margin()

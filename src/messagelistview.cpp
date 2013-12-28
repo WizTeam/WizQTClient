@@ -195,22 +195,20 @@ void MessageListView::drawItem(QPainter* p, const QStyleOptionViewItemV4* vopt) 
     QFont f(Utils::StyleHelper::fontNormal());
 
     QString strSender = data.senderAlias.isEmpty() ? data.senderId : data.senderAlias;
-    QRect rectSender = Utils::StyleHelper::drawText(p, rcd, strSender, 1, 0, p->pen().color(), f);
-    rcd.setTop(rectSender.bottom() + nMargin);
+    QRect rectSender = Utils::StyleHelper::drawText(p, rcd, strSender, 1, Qt::AlignVCenter, p->pen().color(), f);
+    rcd.setTop(rectSender.bottom());
 
     QRect rcBottom(rcd);
     rcBottom.setTop(rcd.bottom() - QFontMetrics(f).height());
     QString strTime = Utils::Misc::time2humanReadable(data.tCreated);
-    QRect rcTime = Utils::StyleHelper::drawText(p, rcBottom, strTime, 1, Qt::AlignRight, p->pen().color(), f);
+    QRect rcTime = Utils::StyleHelper::drawText(p, rcBottom, strTime, 1, Qt::AlignRight | Qt::AlignVCenter, p->pen().color(), f);
 
     p->save();
 
     QSize sz(rcd.width() - nMargin * 2, rcd.height() - rcTime.height() - nMargin);
     QRect rcMsg(rcd.x() + nMargin, rcd.y() + nMargin + 4, sz.width() - nMargin * 2, sz.height() - nMargin * 2);
-    //p->drawRect(rcMsg);
     QString strMsg = data.title.isEmpty() ? " " : data.title;
-    QRect rcMsg2 = Utils::StyleHelper::drawText(p, rcMsg, strMsg, 2, 0, p->pen().color(), f);
-    //p->drawRect(rcMsg2);
+    QRect rcMsg2 = Utils::StyleHelper::drawText(p, rcMsg, strMsg, 2, Qt::AlignVCenter, p->pen().color(), f);
 
     QPolygon po = Utils::StyleHelper::bubbleFromSize(sz, 4);
     po.translate(rcd.topLeft());

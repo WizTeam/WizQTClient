@@ -155,6 +155,7 @@ bool CWizKMSyncThread::syncAll()
 
     m_pEvents->deleteLater();
     Q_EMIT syncFinished(m_pEvents->GetLastErrorCode(), "");
+    return true;
 }
 
 // FIXME: remove this to syncing flow

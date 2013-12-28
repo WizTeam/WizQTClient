@@ -532,7 +532,7 @@ QPixmap CWizNoteStyle::genThumbnailPixmap(const QStyleOptionViewItemV4* vopt, co
         QRect rcTitle(QPoint(rcBadge.right() + 5, rcBadge.top()), QPoint(textRect.right(), rcBadge.bottom()));
         QString strTitle = data.doc.strTitle;
         //::WizDrawTextSingleLine(&p, rcTitle, strTitle,  Qt::TextSingleLine | Qt::AlignVCenter, colorTitle, true);
-        Utils::StyleHelper::drawText(&p, rcTitle, strTitle, 1, 0, colorTitle, fontTitle);
+        Utils::StyleHelper::drawText(&p, rcTitle, strTitle, 1, Qt::AlignVCenter, colorTitle, fontTitle);
 
         // draw date and tags, use 12px font size
         QFont fontAbs = p.font();
