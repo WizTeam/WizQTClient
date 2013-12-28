@@ -3,9 +3,11 @@
 #include <QListWidgetItem>
 #include <QScrollBar>
 #include <QResizeEvent>
+#include <QPainter>
 #include <QDebug>
 
 #include "utils/stylehelper.h"
+#include "utils/misc.h"
 #include "sync/avatar.h"
 
 #include "share/wizDatabaseManager.h"
@@ -29,6 +31,13 @@ public:
 
     const WIZMESSAGEDATA& data() const { return m_data; }
 
+    virtual bool operator <(const QListWidgetItem &other) const
+    {
+        const MessageListViewItem* pOther = dynamic_cast<const MessageListViewItem*>(&other);
+        return pOther->m_data.tCreated < m_data.tCreated;
+    }
+
+
     //void setSortingType(int type);
 
     //const WizDocumentListViewItemData& data() { return m_data; }
@@ -44,12 +53,6 @@ public:
     //// called by CWizDocumentListView when thumbCache pool is ready for reading
     //void resetAbstract(const WIZABSTRACT& abs);
     //void resetAvatar(const QString& strFileName);
-
-    //// used for sorting
-    //virtual bool operator<(const QListWidgetItem &other) const
-    //{
-
-    //}
 
 private:
     WIZMESSAGEDATA m_data;
@@ -150,7 +153,14 @@ MessageListViewItem* MessageListView::messageItem(int row) const
     return pItem;
 }
 
-const WIZMESSAGEDATA& MessageListView::messageFromIndex(const QModelIndex &index) const
+MessageListViewItem* MessageListView::messageItem(const QModelIndex& index) const
+{
+    MessageListViewItem* pItem = dynamic_cast<MessageListViewItem*>(itemFromIndex(index));
+    Q_ASSERT(pItem);
+    return pItem;
+}
+
+const WIZMESSAGEDATA& MessageListView::messageFromIndex(const QModelIndex& index) const
 {
     MessageListViewItem* pItem = dynamic_cast<MessageListViewItem*>(itemFromIndex(index));
     Q_ASSERT(pItem);
@@ -165,6 +175,47 @@ void MessageListView::onAvatarLoaded(const QString& strUserId)
             update(indexFromItem(pItem));
         }
     }
+}
+
+void MessageListView::drawItem(QPainter* p, const QStyleOptionViewItemV4* vopt) const
+{
+    int nMargin = Utils::StyleHelper::margin();
+    Utils::StyleHelper::drawListViewSeperator(p, vopt->rect);
+    Utils::StyleHelper::drawListViewBackground(p, vopt->rect, hasFocus(), vopt->state & QStyle::State_Selected);
+
+    QRect rcd = vopt->rect.adjusted(5, 5, -5, -5);
+
+    const WIZMESSAGEDATA& data = messageFromIndex(vopt->index);
+
+    QPixmap pmAvatar;
+    WizService::Internal::AvatarHost::avatar(data.senderId, &pmAvatar);
+    QRect rectAvatar = Utils::StyleHelper::drawAvatar(p, rcd, pmAvatar);
+    rcd.setLeft(rectAvatar.right() + nMargin);
+
+    QFont f(Utils::StyleHelper::fontNormal());
+
+    QString strSender = data.senderAlias.isEmpty() ? data.senderId : data.senderAlias;
+    QRect rectSender = Utils::StyleHelper::drawText(p, rcd, strSender, 1, 0, p->pen().color(), f);
+    rcd.setTop(rectSender.bottom() + nMargin);
+
+    QRect rcBottom(rcd);
+    rcBottom.setTop(rcd.bottom() - QFontMetrics(f).height());
+    QString strTime = Utils::Misc::time2humanReadable(data.tCreated);
+    QRect rcTime = Utils::StyleHelper::drawText(p, rcBottom, strTime, 1, Qt::AlignRight, p->pen().color(), f);
+
+    p->save();
+
+    QSize sz(rcd.width() - nMargin * 2, rcd.height() - rcTime.height() - nMargin);
+    QRect rcMsg(rcd.x() + nMargin, rcd.y() + nMargin + 4, sz.width() - nMargin * 2, sz.height() - nMargin * 2);
+    //p->drawRect(rcMsg);
+    QString strMsg = data.title.isEmpty() ? " " : data.title;
+    QRect rcMsg2 = Utils::StyleHelper::drawText(p, rcMsg, strMsg, 2, 0, p->pen().color(), f);
+    //p->drawRect(rcMsg2);
+
+    QPolygon po = Utils::StyleHelper::bubbleFromSize(sz, 4);
+    po.translate(rcd.topLeft());
+    p->drawPolygon(po);
+    p->restore();
 }
 
 

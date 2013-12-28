@@ -306,57 +306,27 @@ void CWizNoteStyle::drawMessageListViewItem(const QStyleOptionViewItemV4* vopt,
                                             QPainter* p,
                                             const MessageListView *view) const
 {
+    //view->drawItem(p, vopt);
+    //return;
+
     // indirect access
     const WIZMESSAGEDATA& data = view->messageFromIndex(vopt->index);
-    //const WIZABSTRACT& abstract = view->documentAbstractFromIndex(vopt->index);
-    //const QImage& imgAuthorAvatar = view->messageSenderAvatarFromIndex(vopt->index);
-    //QImage imgAuthorAvatar;
-    //WIZDOCUMENTDATA document = view->documentFromIndex(vopt->index);
     bool bFocused = view->hasFocus();
 
     p->save();
     p->setClipRect(vopt->rect);
 
-    // seperator line
-    QRect textLine = vopt->rect;
-    textLine.adjust(5, 0, -5, 0);
-    p->setPen(m_colorDocumentsLine);
-    p->drawLine(textLine.bottomLeft(), textLine.bottomRight());
+    Utils::StyleHelper::drawListViewSeperator(p, vopt->rect);
+    Utils::StyleHelper::drawListViewBackground(p, vopt->rect, view->hasFocus(), vopt->state & State_Selected);
 
-    // draw background behaviour
-    if (vopt->state & QStyle::State_Selected) {
-        if (bFocused) {
-            p->fillRect(vopt->rect, m_colorDocumentsItemFocusBackground);
-        } else {
-            p->fillRect(vopt->rect, m_colorDocumentsItemLoseFocusBackground);
-        }
-    }
+    QRect textRect = vopt->rect.adjusted(5, 5, 0, 0);
 
-    QRect textRect = vopt->rect.adjusted(0, 5, 0, 0);
-
-    int nAvatarHeight = Utils::StyleHelper::avatarHeight();
-
-    // draw author avatar
-    QRect rectAvatar = textRect;
-    rectAvatar.setSize(QSize(nAvatarHeight, nAvatarHeight));
-    rectAvatar.adjust(6, 6 , -6, -6);
-
-    p->save();
-    p->setRenderHint(QPainter::Antialiasing);
     QPixmap pmAvatar;
     WizService::Internal::AvatarHost::avatar(data.senderId, &pmAvatar);
-    p->drawPixmap(rectAvatar, pmAvatar);
-    //if (!imgAuthorAvatar.isNull()) {
-    //    p->drawImage(rectAvatar, imgAuthorAvatar);
-    //} else {
-    //    p->drawImage(rectAvatar, m_imgDefaultAvatar);
-    //}
-    p->restore();
-
+    QRect rectAvatar = Utils::StyleHelper::drawAvatar(p, textRect, pmAvatar);
     textRect.setLeft(rectAvatar.right());
 
     // draw the text
-    if (!vopt->text.isEmpty()) {
         textRect.adjust(6, 6, -6, -6);
 
         QColor colorTitle, colorDate, colorSummary;
@@ -402,25 +372,6 @@ void CWizNoteStyle::drawMessageListViewItem(const QStyleOptionViewItemV4* vopt,
         fontAbs.setBold(false);
         p->setFont(fontAbs);
         nFontHeight = p->fontMetrics().height();
-
-        //QRect rcInfo(textRect.left(), rectAvatar.bottom() - nFontHeight, textRect.width(), nFontHeight);
-        //QString strInfo = data.strInfo;
-        //int infoWidth = ::WizDrawTextSingleLine(p, rcInfo, strInfo,  Qt::TextSingleLine | Qt::AlignVCenter, colorDate, true);
-
-        // there lines document summary
-        //QString strAbstract = abstract.text;
-
-        //int nLineSpacing = Utils::StyleHelper::lineSpacing();
-
-        //QRect rcAbstract1(QPoint(textRect.left() + infoWidth + 4, rcInfo.top()), QPoint(textRect.right(), rcInfo.bottom()));
-        //::WizDrawTextSingleLine(p, rcAbstract1, strAbstract, Qt::TextSingleLine | Qt::AlignVCenter, colorSummary, false);
-
-        //QRect rcAbstract2(vopt->rect.left() + 6, rcAbstract1.bottom() + nLineSpacing, vopt->rect.width() - 12, nFontHeight);
-        //::WizDrawTextSingleLine(p, rcAbstract2, strAbstract, Qt::TextSingleLine | Qt::AlignVCenter, colorSummary, false);
-
-        //QRect rcAbstract3(vopt->rect.left() + 6, rcAbstract2.bottom() + nLineSpacing, vopt->rect.width() - 12, nFontHeight);
-        //::WizDrawTextSingleLine(p, rcAbstract3, strAbstract, Qt::TextSingleLine | Qt::AlignVCenter, colorSummary, true);
-    }
 
     p->restore();
 
@@ -580,7 +531,8 @@ QPixmap CWizNoteStyle::genThumbnailPixmap(const QStyleOptionViewItemV4* vopt, co
 
         QRect rcTitle(QPoint(rcBadge.right() + 5, rcBadge.top()), QPoint(textRect.right(), rcBadge.bottom()));
         QString strTitle = data.doc.strTitle;
-        ::WizDrawTextSingleLine(&p, rcTitle, strTitle,  Qt::TextSingleLine | Qt::AlignVCenter, colorTitle, true);
+        //::WizDrawTextSingleLine(&p, rcTitle, strTitle,  Qt::TextSingleLine | Qt::AlignVCenter, colorTitle, true);
+        Utils::StyleHelper::drawText(&p, rcTitle, strTitle, 1, 0, colorTitle, fontTitle);
 
         // draw date and tags, use 12px font size
         QFont fontAbs = p.font();
@@ -1348,7 +1300,8 @@ void CWizNoteStyle::drawControl(ControlElement element, const QStyleOption *opti
 
             if (const MessageListView* view = dynamic_cast<const MessageListView*>(widget))
             {
-                drawMessageListViewItem(vopt, painter, view);
+                view->drawItem(painter, vopt);
+                //drawMessageListViewItem(vopt, painter, view);
             }
             else if (const CWizDocumentListView *view = dynamic_cast<const CWizDocumentListView *>(widget))
             {

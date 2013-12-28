@@ -26,7 +26,10 @@ public:
     void addMessage(const WIZMESSAGEDATA& msg, bool sort);
 
     MessageListViewItem* messageItem(int row) const;
-    const WIZMESSAGEDATA& messageFromIndex(const QModelIndex &index) const;
+    MessageListViewItem* messageItem(const QModelIndex& index) const;
+    const WIZMESSAGEDATA& messageFromIndex(const QModelIndex& index) const;
+
+    void drawItem(QPainter* p, const QStyleOptionViewItemV4* vopt) const;
 
 protected:
     virtual void resizeEvent(QResizeEvent* event);
