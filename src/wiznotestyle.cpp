@@ -307,7 +307,7 @@ void CWizNoteStyle::drawMessageListViewItem(const QStyleOptionViewItemV4* vopt,
                                             const MessageListView *view) const
 {
     // indirect access
-    const WIZMESSAGEDATA& data = view->MessageFromIndex(vopt->index);
+    const WIZMESSAGEDATA& data = view->messageFromIndex(vopt->index);
     //const WIZABSTRACT& abstract = view->documentAbstractFromIndex(vopt->index);
     //const QImage& imgAuthorAvatar = view->messageSenderAvatarFromIndex(vopt->index);
     //QImage imgAuthorAvatar;

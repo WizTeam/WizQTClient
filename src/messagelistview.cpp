@@ -5,6 +5,9 @@
 #include <QResizeEvent>
 #include <QDebug>
 
+#include "utils/stylehelper.h"
+#include "sync/avatar.h"
+
 #include "share/wizDatabaseManager.h"
 #include "share/wizDatabase.h"
 #include "share/wizobject.h"
@@ -86,6 +89,8 @@ MessageListView::MessageListView(QWidget *parent) : QListWidget(parent)
     setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     m_vScroll = new CWizScrollBar(this);
     m_vScroll->syncWith(verticalScrollBar());
+
+    connect(AvatarHost::instance(), SIGNAL(loaded(const QString&)), SLOT(onAvatarLoaded(const QString&)));
 }
 
 void MessageListView::resizeEvent(QResizeEvent* event)
@@ -127,7 +132,8 @@ void MessageListView::addMessage(const WIZMESSAGEDATA& msg, bool sort)
     //}
 
     MessageListViewItem* pItem = new MessageListViewItem(msg);
-    pItem->setSizeHint(QSize(sizeHint().width(), fontMetrics().height() * 5));
+    //pItem->setSizeHint(QSize(sizeHint().width(), fontMetrics().height() * 5));
+    pItem->setSizeHint(QSize(sizeHint().width(), Utils::StyleHelper::thumbnailHeight()));
     addItem(pItem);
 
     if (sort) {
@@ -137,13 +143,28 @@ void MessageListView::addMessage(const WIZMESSAGEDATA& msg, bool sort)
     Q_EMIT sizeChanged(count());
 }
 
-WIZMESSAGEDATA MessageListView::MessageFromIndex(const QModelIndex &index) const
+MessageListViewItem* MessageListView::messageItem(int row) const
+{
+    MessageListViewItem* pItem = dynamic_cast<MessageListViewItem*>(item(row));
+    Q_ASSERT(pItem);
+    return pItem;
+}
+
+const WIZMESSAGEDATA& MessageListView::messageFromIndex(const QModelIndex &index) const
 {
     MessageListViewItem* pItem = dynamic_cast<MessageListViewItem*>(itemFromIndex(index));
-    if (pItem)
-        return pItem->data();
+    Q_ASSERT(pItem);
+    return pItem->data();
+}
 
-    return WIZMESSAGEDATA();
+void MessageListView::onAvatarLoaded(const QString& strUserId)
+{
+    for (int i = 0; i < count(); i++) {
+        MessageListViewItem* pItem = messageItem(i);
+        if (pItem->data().senderId == strUserId) {
+            update(indexFromItem(pItem));
+        }
+    }
 }
 
 

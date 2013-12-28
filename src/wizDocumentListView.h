@@ -106,8 +106,6 @@ public:
     const WIZDOCUMENTDATA& documentFromIndex(const QModelIndex &index) const;
     const WIZABSTRACT& documentAbstractFromIndex(const QModelIndex &index) const;
     //const QString& documentTagsFromIndex(const QModelIndex &index) const;
-    //const WIZMESSAGEDATA& messageFromIndex(const QModelIndex& index) const;
-    const QImage& messageSenderAvatarFromIndex(const QModelIndex& index) const;
     const WizDocumentListViewItemData& documentItemDataFromIndex(const QModelIndex& index) const;
 
 

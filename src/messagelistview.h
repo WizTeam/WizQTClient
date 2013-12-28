@@ -12,6 +12,8 @@ typedef std::deque<WIZMESSAGEDATA> CWizMessageDataArray;
 namespace WizService {
 namespace Internal {
 
+class MessageListViewItem;
+
 class MessageListView : public QListWidget
 {
     Q_OBJECT
@@ -23,7 +25,8 @@ public:
     void addMessages(const CWizMessageDataArray& arrayMsg);
     void addMessage(const WIZMESSAGEDATA& msg, bool sort);
 
-    WIZMESSAGEDATA MessageFromIndex(const QModelIndex &index) const;
+    MessageListViewItem* messageItem(int row) const;
+    const WIZMESSAGEDATA& messageFromIndex(const QModelIndex &index) const;
 
 protected:
     virtual void resizeEvent(QResizeEvent* event);
@@ -33,6 +36,9 @@ private:
 
 Q_SIGNALS:
     void sizeChanged(int nCount);
+
+private Q_SLOTS:
+    void onAvatarLoaded(const QString& strUserId);
 };
 
 } // namespace Internal

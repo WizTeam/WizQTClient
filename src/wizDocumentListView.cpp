@@ -918,16 +918,6 @@ const WizDocumentListViewItemData& CWizDocumentListView::documentItemDataFromInd
     return documentItemFromIndex(index)->data();
 }
 
-//const WIZMESSAGEDATA& CWizDocumentListView::messageFromIndex(const QModelIndex& index) const
-//{
-//    return documentItemFromIndex(index)->message();
-//}
-
-//const QImage& CWizDocumentListView::messageSenderAvatarFromIndex(const QModelIndex& index) const
-//{
-//    return documentItemFromIndex(index)->avatar(m_dbMgr.db());
-//}
-
 const WIZDOCUMENTDATA& CWizDocumentListView::documentFromIndex(const QModelIndex &index) const
 {
     return documentItemFromIndex(index)->document();
