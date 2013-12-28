@@ -75,6 +75,7 @@ MessageListView::MessageListView(QWidget *parent) : QListWidget(parent)
     setFrameStyle(QFrame::NoFrame);
     setAttribute(Qt::WA_MacShowFocusRect, false);
     setSelectionMode(QAbstractItemView::ExtendedSelection);
+    setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
 
     QString strSkinName = "default"; // FIXME
     setStyle(::WizGetStyle(strSkinName));

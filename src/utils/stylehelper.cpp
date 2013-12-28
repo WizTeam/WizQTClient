@@ -164,6 +164,10 @@ QRect StyleHelper::drawText(QPainter* p, const QRect& rc, QString& str, int nLin
 
     QRect rcRet(rc.x(), rc.y(), rc.width(), nHeightLine);
     QTextLayout textLayout(str, p->font());
+    QTextOption opt = textLayout.textOption();
+    opt.setWrapMode(QTextOption::WrapAnywhere);
+    textLayout.setTextOption(opt);
+
     textLayout.beginLayout();
     while (nLines) {
         QTextLine line = textLayout.createLine();

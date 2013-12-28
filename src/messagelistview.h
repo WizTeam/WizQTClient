@@ -20,6 +20,7 @@ class MessageListView : public QListWidget
 
 public:
     explicit MessageListView(QWidget *parent = 0);
+    virtual QSize sizeHint() const { return QSize(200, 1); }
 
     void setMessages(const CWizMessageDataArray& arrayMsg);
     void addMessages(const CWizMessageDataArray& arrayMsg);
@@ -32,6 +33,7 @@ public:
     void drawItem(QPainter* p, const QStyleOptionViewItemV4* vopt) const;
 
 protected:
+
     virtual void resizeEvent(QResizeEvent* event);
 
 private:
