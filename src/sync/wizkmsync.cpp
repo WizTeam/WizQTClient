@@ -61,180 +61,47 @@ void CWizKMSyncEvents::OnEndKb(const QString& strKbGUID)
 
 
 /* ---------------------------- CWizKMSyncThead ---------------------------- */
+
+#define FULL_SYNC_INTERVAL 15*60
+
 CWizKMSyncThread::CWizKMSyncThread(CWizDatabase& db, QObject* parent)
     : QThread(parent)
     , m_db(db)
-    , m_server(::WizService::ApiEntry::syncUrl())
     , m_bNeedSyncAll(true)
-    , m_bBusy(false)
-    , m_bNeedAccquireToken(false)
+    , m_pEvents(NULL)
 {
     m_tLastSyncAll = QDateTime::currentDateTime();
-    connect(this, SIGNAL(finished()), SLOT(on_syncFinished()));
-}
-
-bool CWizKMSyncThread::checkTokenCore()
-{
-    if (!m_server.m_userInfo.strToken.isEmpty())
-    {
-        if (m_server.keepAlive(m_server.m_userInfo.strToken))
-            return true;
-    }
-
-    if (server.Login(m_db.getUserId(), m_db.GetPassword()))
-        return true;
-    //
-    return false;
-}
-bool CWizKMSyncThread::checkToken()
-{
-    if (checkTokenCore())
-    {
-        onLogin();  //send messages
-        return true;
-    }
-    return false;
-}
-
-void CWizKMSyncThread::OnLogin()
-{
-    //TODO: 发送消息
-    //然后清空消息队列
-    //send message for accquire token
-    Q_EMIT tokenAcquired(Token::lastErrorCode(), Token::lastErrorMessage());
-    disconnect(this, IGNAL(tokenAcquired(QString)));
 }
 
 void CWizKMSyncThread::run()
 {
-    while (1)
-    {
-        if (m_pEvents && m_pEvents->IsStop())
-        {
-            break;
-        }
-        //
-        //
-        if (needSyncAll())
-        {
-            syncAll();
-            m_tLastSyncAll = QDateTime::currentDateTime();
-        }
-        else if (needQuickSync())
-        {
-            quickSync();
-        }
-        else if (needAccquireToken())
-        {
-            accquireToken();
-        }
-        else
-        {
-            onIdle();
-        }
-    }
-}
-bool CWizKMSyncThread::needSyncAll()
-{
-    if (m_bNeedSyncAll)
-        return true;
-    //
-    QDateTime tNow = QDateTime::currentDateTime();
-    if (tNow.toTime_t() - m_tLastSyncAll.toTime_t() > 15 * 60)
-    {
-        m_bNeedSyncAll = true;
-    }
-    //
-    return m_bNeedSyncAll;
-}
-bool CWizKMSyncThread::needQuickSync()
-{
-    return false;
-}
-bool CWizKMSyncThread::needAccquireToken()
-{
-    return m_bNeedAccquireToken;
-}
-bool CWizKMSyncThread::onIdle()
-{
-    sleep(1000);    //sleep 1 seconds
-    return true;
-}
-bool CWizKMSyncThread::syncAll()
-{
-    class CBusyHelper
-    {
-        CBusyHelper(bool& b)
-        {
-            b = true;
-        }
-        ~CBusyHelper()
-        {
-            b = false;
-        }
-    };
-    //    //
-    m_bNeedSyncAll = false;
-    //
-    if (!checkToken())
-        return false;
-    //
-    CBusyHelper busy(m_bBusy);
-    Q_UNUSED(busy);
-    //
-    syncUserCert();
-
-    if (!m_pEvents) {
-        m_pEvents = new CWizKMSyncEvents();
-        connect(m_pEvents, SIGNAL(messageReady(const QString&)), SIGNAL(processLog(const QString&)));
-    }
-
-    m_pEvents->SetLastErrorCode(0);
-    ::WizSyncDatabase(m_info, m_pEvents, &m_db, true, true);
-}
-bool CWizKMSyncThread::quickSync()
-{
-    if (!checkToken())
-        return false;
-    //
-    return true;
-}
-
-bool CWizKMSyncThread::accquireToken()
-{
-    return checkToken();
-}
-
-void CWizKMSyncThread::acquireToken(QObject* pObject, const QMethod& slot)
-{
-    //TODO: 在这里处理请求token的部分,连接事件
-    //
-    connect(this, SIGNAL(tokenAcquired(QString)), pObject, slot, Qt::QueuedConnection);
-    //
-    //如果当前正在同步,那么可以直接发送当前的token.
-    if (m_bBusy)    //token is valid
-    {
-        onLogin();
-    }
-    else
-    {
-        //否则设置获取token,下个循环的时候,将会自动获取token并发送消息.
-        m_bNeedAccquireToken = true;
-    }
+    doSync();
+    exec();
 }
 
 void CWizKMSyncThread::startSync()
 {
-    if (isRunning())
+    qDebug() << "[Sync]startSync, thread: " << QThread::currentThreadId();
+    if (isRunning()) {
+        qDebug() << "[Sync]syncing is started, request is schedued"; //FIXME: schedued request
         return;
+    }
 
-    start();
-    //connect(Token::instance(), SIGNAL(tokenAcquired(QString)), SLOT(onTokenAcquired(QString)), Qt::QueuedConnection);
-    //Token::requestToken();
+    trySync();
+}
+
+void CWizKMSyncThread::trySync()
+{
+    qDebug() << "[Sync]trySync, thread: " << QThread::currentThreadId();
+
+    connect(Token::instance(), SIGNAL(tokenAcquired(QString)), SLOT(onTokenAcquired(QString)), Qt::QueuedConnection);
+    Token::requestToken();
 }
 
 void CWizKMSyncThread::onTokenAcquired(const QString& strToken)
 {
+    qDebug() << "[Sync]token acquired, thread: " << QThread::currentThreadId();
+
     Token::instance()->disconnect(this);
 
     if (strToken.isEmpty()) {
@@ -243,23 +110,54 @@ void CWizKMSyncThread::onTokenAcquired(const QString& strToken)
     }
 
     m_info = Token::info();
+
     start();
 }
 
-void CWizKMSyncThread::stopSync()
+void CWizKMSyncThread::doSync()
 {
-    if (isRunning() && m_pEvents) {
-        m_pEvents->SetStop(true);
+    if (needSyncAll())
+    {
+        syncAll();
+        m_tLastSyncAll = QDateTime::currentDateTime();
+    }
+    else if (needQuickSync())
+    {
+        quickSync();
     }
 }
 
-void CWizKMSyncThread::on_syncFinished()
+bool CWizKMSyncThread::needSyncAll()
 {
-    m_pEvents->deleteLater();
+    if (m_bNeedSyncAll)
+        return true;
 
+    QDateTime tNow = QDateTime::currentDateTime();
+    if (m_tLastSyncAll.secsTo(QDateTime::currentDateTime()) > FULL_SYNC_INTERVAL)
+    {
+        m_bNeedSyncAll = true;
+    }
+
+    return m_bNeedSyncAll;
+}
+
+bool CWizKMSyncThread::syncAll()
+{
+    m_bNeedSyncAll = false;
+
+    syncUserCert();
+
+    m_pEvents = new CWizKMSyncEvents();
+    connect(m_pEvents, SIGNAL(messageReady(const QString&)), SIGNAL(processLog(const QString&)));
+
+    m_pEvents->SetLastErrorCode(0);
+    ::WizSyncDatabase(m_info, m_pEvents, &m_db, true, true);
+
+    m_pEvents->deleteLater();
     Q_EMIT syncFinished(m_pEvents->GetLastErrorCode(), "");
 }
 
+// FIXME: remove this to syncing flow
 void CWizKMSyncThread::syncUserCert()
 {
     QString strN, stre, strd, strHint;
@@ -267,5 +165,23 @@ void CWizKMSyncThread::syncUserCert()
     CWizKMAccountsServer serser(WizService::ApiEntry::syncUrl());
     if (serser.GetCert(m_db.GetUserId(), m_db.GetPassword(), strN, stre, strd, strHint)) {
         m_db.SetUserCert(strN, stre, strd, strHint);
+    }
+}
+
+bool CWizKMSyncThread::needQuickSync()
+{
+    return false;
+}
+
+bool CWizKMSyncThread::quickSync()
+{
+    Q_EMIT syncFinished(0, NULL);
+    return true;
+}
+
+void CWizKMSyncThread::stopSync()
+{
+    if (isRunning() && m_pEvents) {
+        m_pEvents->SetStop(true);
     }
 }

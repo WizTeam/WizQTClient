@@ -4,7 +4,6 @@
 #include <QThread>
 
 #include "sync.h"
-
 #include "wizkmxmlrpc.h"
 
 class CWizDatabase;
@@ -41,41 +40,25 @@ protected:
     virtual void run();
 
 private:
+    QThread* m_worker;
     CWizDatabase& m_db;
     WIZUSERINFO m_info;
-    QPointer<CWizKMSyncEvents> m_pEvents;
+    CWizKMSyncEvents* m_pEvents;
     bool m_bNeedSyncAll;
-    bool m_bNeedAccquireToken;
     QDateTime m_tLastSyncAll;
-    bool m_bBusy;
 
-    //
-    CWizKMAccountsServer m_serverAccounts;
-    bool checkTokenCore();
-    bool checkToken();
-    //
+    Q_INVOKABLE void trySync();
+    void doSync();
+
     bool needSyncAll();
     bool needQuickSync();
-    bool needAccquireToken();
-    bool onIdle();
-    //
     bool syncAll();
     bool quickSync();
-    bool accquireToken();
 
     void syncUserCert();
 
-    //
-    void onLogin();
-
-private:
-    std::vector<QObject*> m_arrTokenListener;
-public:
-    void acquireToken(QObject* pObject);
-
 private Q_SLOTS:
     void onTokenAcquired(const QString& strToken);
-    void on_syncFinished();
 
 Q_SIGNALS:
     void syncFinished(int nErrorCode, const QString& strErrorMesssage);
