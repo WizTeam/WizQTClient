@@ -21,8 +21,6 @@ namespace Internal {
 
 class MessageListViewItem : public QListWidgetItem
 {
-    //Q_OBJECT
-
 public:
     explicit MessageListViewItem(const WIZMESSAGEDATA& data)
     {
@@ -37,36 +35,42 @@ public:
         return pOther->m_data.tCreated < m_data.tCreated;
     }
 
+    void paint(QPainter* p, const QStyleOptionViewItemV4* vopt) const
+    {
+        QRect rcd = vopt->rect.adjusted(5, 5, -5, -5);
+        int nMargin = Utils::StyleHelper::margin();
 
-    //void setSortingType(int type);
+        QPixmap pmAvatar;
+        WizService::Internal::AvatarHost::avatar(m_data.senderId, &pmAvatar);
+        QRect rectAvatar = Utils::StyleHelper::drawAvatar(p, rcd, pmAvatar);
+        rcd.setLeft(rectAvatar.right());
 
-    //const WizDocumentListViewItemData& data() { return m_data; }
-    //const WIZDOCUMENTDATA& document() const { return m_data.doc; }
-    //int itemType() const { return m_data.nType; }
-    //void reload(CWizDatabase& db);
+        QFont f(Utils::StyleHelper::fontNormal());
 
-    //const WIZABSTRACT& abstract(CWizThumbIndexCache& thumbCache);
+        QString strSender = m_data.senderAlias.isEmpty() ? m_data.senderId : m_data.senderAlias;
+        QRect rectSender = Utils::StyleHelper::drawText(p, rcd, strSender, 1, Qt::AlignVCenter, p->pen().color(), f);
+        rcd.setTop(rectSender.bottom());
 
-    //const QImage& avatar(const CWizDatabase& db,
-    //                     CWizUserAvatarDownloaderHost& downloader);
+        QRect rcBottom(rcd);
+        rcBottom.setTop(rcd.bottom() - QFontMetrics(f).height());
+        QString strTime = Utils::Misc::time2humanReadable(m_data.tCreated);
+        QRect rcTime = Utils::StyleHelper::drawText(p, rcBottom, strTime, 1, Qt::AlignRight | Qt::AlignVCenter, p->pen().color(), f);
 
-    //// called by CWizDocumentListView when thumbCache pool is ready for reading
-    //void resetAbstract(const WIZABSTRACT& abs);
-    //void resetAvatar(const QString& strFileName);
+        p->save();
+
+        QSize sz(rcd.width() - nMargin * 2, rcd.height() - rcTime.height() - nMargin);
+        QRect rcMsg(rcd.x(), rcd.y() + 4 + nMargin, sz.width(), sz.height());
+        QString strMsg = m_data.title.isEmpty() ? " " : m_data.title;
+        QRect rcMsg2 = Utils::StyleHelper::drawText(p, rcMsg, strMsg, 2, Qt::AlignVCenter, p->pen().color(), f);
+
+        QPolygon po = Utils::StyleHelper::bubbleFromSize(sz, 4);
+        po.translate(rcd.topLeft());
+        p->drawPolygon(po);
+        p->restore();
+    }
 
 private:
     WIZMESSAGEDATA m_data;
-    //QString m_strLocation;
-    //const QString& tags();
-    //const QString& tagTree();
-
-    //bool isAvatarNeedUpdate(const QString& strFileName);
-
-//private Q_SLOTS:
-//    void on_thumbnailReloaded();
-//
-//Q_SIGNALS:
-//    void thumbnailReloaded();
 };
 
 
@@ -180,41 +184,10 @@ void MessageListView::onAvatarLoaded(const QString& strUserId)
 
 void MessageListView::drawItem(QPainter* p, const QStyleOptionViewItemV4* vopt) const
 {
-    int nMargin = Utils::StyleHelper::margin();
     Utils::StyleHelper::drawListViewSeperator(p, vopt->rect);
     Utils::StyleHelper::drawListViewBackground(p, vopt->rect, hasFocus(), vopt->state & QStyle::State_Selected);
 
-    QRect rcd = vopt->rect.adjusted(5, 5, -5, -5);
-
-    const WIZMESSAGEDATA& data = messageFromIndex(vopt->index);
-
-    QPixmap pmAvatar;
-    WizService::Internal::AvatarHost::avatar(data.senderId, &pmAvatar);
-    QRect rectAvatar = Utils::StyleHelper::drawAvatar(p, rcd, pmAvatar);
-    rcd.setLeft(rectAvatar.right() + nMargin);
-
-    QFont f(Utils::StyleHelper::fontNormal());
-
-    QString strSender = data.senderAlias.isEmpty() ? data.senderId : data.senderAlias;
-    QRect rectSender = Utils::StyleHelper::drawText(p, rcd, strSender, 1, Qt::AlignVCenter, p->pen().color(), f);
-    rcd.setTop(rectSender.bottom());
-
-    QRect rcBottom(rcd);
-    rcBottom.setTop(rcd.bottom() - QFontMetrics(f).height());
-    QString strTime = Utils::Misc::time2humanReadable(data.tCreated);
-    QRect rcTime = Utils::StyleHelper::drawText(p, rcBottom, strTime, 1, Qt::AlignRight | Qt::AlignVCenter, p->pen().color(), f);
-
-    p->save();
-
-    QSize sz(rcd.width() - nMargin * 2, rcd.height() - rcTime.height() - nMargin);
-    QRect rcMsg(rcd.x() + nMargin, rcd.y() + nMargin + 4, sz.width() - nMargin * 2, sz.height() - nMargin * 2);
-    QString strMsg = data.title.isEmpty() ? " " : data.title;
-    QRect rcMsg2 = Utils::StyleHelper::drawText(p, rcMsg, strMsg, 2, Qt::AlignVCenter, p->pen().color(), f);
-
-    QPolygon po = Utils::StyleHelper::bubbleFromSize(sz, 4);
-    po.translate(rcd.topLeft());
-    p->drawPolygon(po);
-    p->restore();
+    messageItem(vopt->index)->paint(p, vopt);
 }
 
 

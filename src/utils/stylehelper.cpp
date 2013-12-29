@@ -11,6 +11,7 @@
 #include <QDebug>
 
 #include "pathresolve.h"
+#include "../share/wizmisc.h"
 
 #ifdef Q_OS_MAC
 #include "mac/wizmachelper.h"
@@ -53,6 +54,33 @@ QString StyleHelper::themeName()
     return strTheme;
 }
 
+QIcon StyleHelper::loadIcon(const QString& strName)
+{
+    QString strIconNormal = ::WizGetSkinResourceFileName(themeName(), strName);
+    QString strIconActive1 = ::WizGetSkinResourceFileName(themeName(), strName+ "_on");
+    QString strIconActive2 = ::WizGetSkinResourceFileName(themeName(), strName+ "_selected");
+
+    if (!QFile::exists(strIconNormal)) {
+        qDebug() << "load icon failed, filePath:" << strIconNormal;
+        return QIcon();
+    }
+
+    QIcon icon;
+    icon.addFile(strIconNormal, QSize(), QIcon::Normal, QIcon::Off);
+
+    // used for check state
+    if (QFile::exists(strIconActive1)) {
+        icon.addFile(strIconActive1, QSize(), QIcon::Active, QIcon::On);
+    }
+
+    // used for sunken state
+    if (QFile::exists(strIconActive2)) {
+        icon.addFile(strIconActive2, QSize(), QIcon::Active, QIcon::Off);
+    }
+
+    return icon;
+}
+
 QColor StyleHelper::listViewSeperator()
 {
     QSettings st(PathResolve::themePath(themeName()) + "skin.ini");
@@ -83,6 +111,18 @@ QColor StyleHelper::listViewTitle(int stat)
 
     Q_ASSERT(0);
     return QColor();
+}
+
+QIcon StyleHelper::listViewBadge(int type)
+{
+    if (type == BadgeNormal) {
+        return loadIcon("document_badge");
+    } else if (type == BadgeEncryted){
+        return loadIcon("document_badge_encrypted");
+    }
+
+    Q_ASSERT(0);
+    return QIcon();
 }
 
 void StyleHelper::drawListViewBackground(QPainter* p, const QRect& rc, bool bFocus, bool bSelect)
@@ -163,6 +203,8 @@ QRect StyleHelper::drawText(QPainter* p, const QRect& rc, QString& str, int nLin
     int nHeightLine = p->fontMetrics().height() + leading();
 
     QRect rcRet(rc.x(), rc.y(), rc.width(), nHeightLine);
+    rcRet.adjust(margin(), 0, -margin(), 0);
+
     QTextLayout textLayout(str, p->font());
     QTextOption opt = textLayout.textOption();
     opt.setWrapMode(QTextOption::WrapAnywhere);
@@ -191,15 +233,59 @@ QRect StyleHelper::drawText(QPainter* p, const QRect& rc, QString& str, int nLin
 
         nHeight += nHeightLine;
         rcRet.setRect(rc.x(), rc.y() + nHeight, nWidth, nHeightLine);
+        rcRet.adjust(margin(), 0, -margin(), 0);
 
         nLines--;
     }
     textLayout.endLayout();
 
     rcRet.setRect(rc.x(), rc.y(), nWidth, nHeight);
+    rcRet.adjust(margin(), 0, -margin(), 0);
+
     p->restore();
 
     return rcRet;
+}
+
+QRect StyleHelper::drawThumbnailPixmap(QPainter* p, const QRect& rc, const QPixmap& pm)
+{
+    if (pm.isNull()) {
+        qDebug() << "[WARNING]pixmap is null when drawing thumbnail";
+        return QRect(rc.x(), rc.y(), 0, 0);
+    }
+
+    QRect rcd = rc.adjusted(rc.width() - rc.height(), margin(), -margin(), -margin());
+
+    int nWidth = 0, nHeight = 0;
+    if (pm.width() > rcd.width() || pm.height() > rcd.height()) {
+        double fRate = qMin<double>(double(rcd.width()) / pm.width(), double(rcd.height()) / pm.height());
+        nWidth = int(pm.width() * fRate);
+        nHeight = int(pm.height() * fRate);
+    } else {
+        nWidth = pm.width();
+        nHeight = pm.height();
+    }
+
+    int adjustX = (rcd.width() - nWidth) / 2;
+    int adjustY = (rcd.height() - nHeight) / 2;
+    rcd.adjust(adjustX, adjustY, -adjustX, -adjustY);
+    p->drawPixmap(rcd, pm);
+
+    return rcd;
+}
+
+QRect StyleHelper::drawBadgeIcon(QPainter* p, const QRect& rc, int height, int type, bool bFocus, bool bSelect)
+{
+    QIcon badge(listViewBadge(type));
+    QRect rcb = rc.adjusted(margin(), margin(), 0, 0);
+    rcb.setSize(QSize(height, height));
+    if (bSelect && bFocus) {
+        badge.paint(p, rcb, Qt::AlignBottom, QIcon::Active, QIcon::Off);
+    } else {
+        badge.paint(p, rcb, Qt::AlignBottom, QIcon::Normal, QIcon::Off);
+    }
+
+    return rcb;
 }
 
 int StyleHelper::lineSpacing()
