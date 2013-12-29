@@ -12,7 +12,11 @@ class CWizDatabaseManager;
 class CWizExplorerApp;
 class CWizWebSettingsDialog;
 
-#define CATEGORY_MESSAGES   QObject::tr("Message Center")
+#define CATEGORY_MESSAGES_ALL               QObject::tr("Message Center")
+#define CATEGORY_MESSAGES_SEND_TO_ME        QObject::tr("Send to me")
+#define CATEGORY_MESSAGES_MODIFY            QObject::tr("Note modified")
+#define CATEGORY_MESSAGES_COMMENTS          QObject::tr("Comments")
+#define CATEGORY_MESSAGES_SEND_FROM_ME      QObject::tr("Send from me")
 
 class CWizCategoryBaseView : public QTreeWidget
 {

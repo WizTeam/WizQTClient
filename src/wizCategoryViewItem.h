@@ -72,15 +72,26 @@ public:
     { Q_UNUSED(db); Q_UNUSED(arrayDocument); }
 };
 
-class CWizCategoryViewMessageRootItem : public CWizCategoryViewItemBase
+class CWizCategoryViewMessageItem : public CWizCategoryViewItemBase
 {
 public:
-    CWizCategoryViewMessageRootItem(CWizExplorerApp& app, const QString& strName);
+    enum FilterType {
+        All,
+        SendToMe,
+        ModifyNote,
+        Comment,
+        SendFromMe
+    };
+
+    CWizCategoryViewMessageItem(CWizExplorerApp& app, const QString& strName, int nFilter);
 
     virtual void showContextMenu(CWizCategoryBaseView* pCtrl, QPoint pos)
     { Q_UNUSED(pCtrl); Q_UNUSED(pos); }
 
     virtual void getDocuments(CWizDatabase& db, CWizDocumentDataArray& arrayDocument);
+
+private:
+    int m_nFilter;
 };
 
 class CWizCategoryViewShortcutRootItem : public CWizCategoryViewItemBase

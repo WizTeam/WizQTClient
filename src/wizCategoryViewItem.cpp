@@ -108,8 +108,8 @@ CWizCategoryViewCategoryItem::CWizCategoryViewCategoryItem(CWizExplorerApp& app,
 
 
 /* -------------------- CWizCategoryViewMessageRootItem -------------------- */
-CWizCategoryViewMessageRootItem::CWizCategoryViewMessageRootItem(CWizExplorerApp& app,
-                                                                 const QString& strName)
+CWizCategoryViewMessageItem::CWizCategoryViewMessageItem(CWizExplorerApp& app,
+                                                                 const QString& strName, int nFilterType)
     : CWizCategoryViewItemBase(app, strName)
 {
     QIcon icon;
@@ -119,9 +119,11 @@ CWizCategoryViewMessageRootItem::CWizCategoryViewMessageRootItem(CWizExplorerApp
                  QSize(16, 16), QIcon::Selected);
     setIcon(0, icon);
     setText(0, strName);
+
+    m_nFilter = nFilterType;
 }
 
-void CWizCategoryViewMessageRootItem::getDocuments(CWizDatabase& db,
+void CWizCategoryViewMessageItem::getDocuments(CWizDatabase& db,
                                                    CWizDocumentDataArray& arrayDocument)
 {
     CWizMessageDataArray arrayMsg;

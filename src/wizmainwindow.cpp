@@ -687,6 +687,7 @@ void MainWindow::init()
     connect(m_category, SIGNAL(newDocument()), SLOT(on_actionNewNote_triggered()));
     m_category->init();
 
+    connect(m_msgList, SIGNAL(itemSelectionChanged()), SLOT(on_message_itemSelectionChanged()));
     connect(m_documents, SIGNAL(itemSelectionChanged()), SLOT(on_documents_itemSelectionChanged()));
 }
 
@@ -1125,14 +1126,19 @@ void MainWindow::on_category_itemSelectionChanged()
     if (!category)
         return;
 
-    if (category->currentItem()->text(0) == CATEGORY_MESSAGES) {
+    // FIXME: use id instead of name.
+    QString strName = category->currentItem()->text(0);
+    if (strName == CATEGORY_MESSAGES_ALL ||
+            strName == CATEGORY_MESSAGES_SEND_TO_ME ||
+            strName == CATEGORY_MESSAGES_MODIFY ||
+            strName == CATEGORY_MESSAGES_COMMENTS ||
+            strName == CATEGORY_MESSAGES_SEND_FROM_ME) {
         m_msgList->show();
         m_noteList->hide();
 
         CWizMessageDataArray arrayMsg;
         m_dbMgr.db().getLastestMessages(arrayMsg);
         m_msgList->setMessages(arrayMsg);
-
 
         return;
     } else {
@@ -1161,23 +1167,28 @@ void MainWindow::on_documents_itemSelectionChanged()
     m_documents->getSelectedDocuments(arrayDocument);
 
     if (arrayDocument.size() == 1) {
-        //if (!m_doc->isVisible()) {
-        //    m_doc->show();
-        //    m_documentSelection->hide();
-        //    //m_doc->resize(m_documentSelection->size());
-        //}
-
         if (!m_bUpdatingSelection) {
             viewDocument(arrayDocument[0], true);
         }
-    } else if (arrayDocument.size() > 1) {
-        //if (!m_documentSelection->isVisible()) {
-        //    m_documentSelection->show();
-        //    m_doc->hide();
-        //    //m_documentSelection->resize(m_doc->size());
-        //}
-//
-        //m_documentSelection->requestDocuments(arrayDocument);
+    }
+}
+
+void MainWindow::on_message_itemSelectionChanged()
+{
+    m_cipherForm->hide();
+
+    QList<WIZMESSAGEDATA> listMsg;
+    m_msgList->selectedMessages(listMsg);
+
+    if (listMsg.size() == 1) {
+        WIZMESSAGEDATA msg(listMsg[0]);
+        WIZDOCUMENTDATA doc;
+        if (!m_dbMgr.db(msg.kbGUID).DocumentFromGUID(msg.documentGUID, doc)) {
+            qDebug() << "can't find note from message info: " << msg.title;
+            return;
+        }
+
+        viewDocument(doc, true);
     }
 }
 

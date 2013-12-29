@@ -45,7 +45,7 @@ void AvatarDownloader::on_queryUserAvatar_finished()
     reply->deleteLater();
 
     if (reply->error()) {
-        qDebug() << "[AvatarDownloader]Error occured: " << reply->errorString();
+        qDebug() << "[AvatarHost]Error occured: " << reply->errorString();
         fetchUserAvatarEnd(false);
         return;
     }
@@ -55,7 +55,7 @@ void AvatarDownloader::on_queryUserAvatar_finished()
     m_urlRedirectedTo = redirectUrl(possibleRedirectUrl.toUrl(), m_urlRedirectedTo);
 
     if(!m_urlRedirectedTo.isEmpty()) {
-        qDebug() << "[AvatarDownloader]fetching redirected, url: "
+        qDebug() << "[AvatarHost]fetching redirected, url: "
                  << m_urlRedirectedTo.toString();
 
         QNetworkReply* replyNext = m_net->get(QNetworkRequest(m_urlRedirectedTo));
@@ -67,12 +67,12 @@ void AvatarDownloader::on_queryUserAvatar_finished()
         QByteArray bReply = reply->readAll();
 
         if (!save(m_strCurrentUser, bReply)) {
-            qDebug() << "[AvatarDownloader]failed: unable to save user avatar, guid: " << m_strCurrentUser;
+            qDebug() << "[AvatarHost]failed: unable to save user avatar, guid: " << m_strCurrentUser;
             fetchUserAvatarEnd(false);
             return;
         }
 
-        qDebug() << "[Avatar Downloader]fetching finished, guid: " << m_strCurrentUser;
+        qDebug() << "[AvatarHost]fetching finished, guid: " << m_strCurrentUser;
         fetchUserAvatarEnd(true);
     }
 }
@@ -147,7 +147,7 @@ bool AvatarHostPrivate::isNeedUpdate(const QString& strUserGUID)
 void AvatarHostPrivate::loadCache(const QString& strUserGUID)
 {
     QString strFilePath = Utils::PathResolve::avatarPath() + strUserGUID + ".png";
-    qDebug() << "[AvatarHost]load avatar: " << strFilePath;
+    //qDebug() << "[AvatarHost]load avatar: " << strFilePath;
     loadCacheFromFile(keyFromGuid(strUserGUID), strFilePath);
 }
 
@@ -175,7 +175,7 @@ void AvatarHostPrivate::loadCacheFromFile(const QString& key, const QString& str
         return;
     }
 
-    qDebug() << "[AvatarHost]loaded: " << key;
+    //qDebug() << "[AvatarHost]loaded: " << key;
 }
 
 QString AvatarHostPrivate::keyFromGuid(const QString& strUserGUID) const
@@ -197,7 +197,7 @@ bool AvatarHostPrivate::avatar(const QString& strUserId, QPixmap* pixmap)
     load(strUserId, false);
 
     if (QPixmapCache::find(defaultKey(), pixmap)) {
-        qDebug() << "[AvatarHost]default avatar returned";
+        //qDebug() << "[AvatarHost]default avatar returned";
         return true;
     }
 
@@ -226,7 +226,7 @@ void AvatarHostPrivate::load(const QString& strUserGUID, bool bForce)
 void AvatarHostPrivate::download_impl()
 {
     if (m_listUser.isEmpty()) {
-        qDebug() << "[Avatar Downloader]download pool is clean, thread: "
+        qDebug() << "[AvatarHost]download pool is clean, thread: "
                  << QThread::currentThreadId();
 
         m_thread->quit();
@@ -237,7 +237,7 @@ void AvatarHostPrivate::download_impl()
 
     if (!QMetaObject::invokeMethod(m_downloader, "download",
                                    Q_ARG(QString, m_strUserCurrent))) {
-        qDebug() << "[Avatar Downloader]failed: unable to invoke download!";
+        qDebug() << "[AvatarHost]failed: unable to invoke download!";
     }
 }
 

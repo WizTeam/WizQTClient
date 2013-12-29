@@ -1258,7 +1258,7 @@ void CWizCategoryView::on_itemSelectionChanged()
     }
 
     // notify of selection
-    if (currentCategoryItem<CWizCategoryViewMessageRootItem>()) {
+    if (currentCategoryItem<CWizCategoryViewMessageItem>()) {
         Q_EMIT documentsHint(tr("Recent meesages"));
     } else if (currentCategoryItem<CWizCategoryViewAllFoldersItem>()) {
         Q_EMIT documentsHint(tr("Recent notes"));
@@ -1528,8 +1528,15 @@ void CWizCategoryView::initGeneral()
     CWizCategoryViewCategoryItem* pCategoryItem = new CWizCategoryViewCategoryItem(m_app, CATEGORY_GENERAL);
     addTopLevelItem(pCategoryItem);
 
-    CWizCategoryViewMessageRootItem* pMsgRoot = new CWizCategoryViewMessageRootItem(m_app, CATEGORY_MESSAGES);
-    addTopLevelItem(pMsgRoot);
+    CWizCategoryViewMessageItem* pMsg = new CWizCategoryViewMessageItem(m_app, CATEGORY_MESSAGES_ALL, CWizCategoryViewMessageItem::All);
+    addTopLevelItem(pMsg);
+
+    QList<QTreeWidgetItem*> pList;
+    pList.append(new CWizCategoryViewMessageItem(m_app, CATEGORY_MESSAGES_SEND_TO_ME, CWizCategoryViewMessageItem::SendToMe));
+    pList.append(new CWizCategoryViewMessageItem(m_app, CATEGORY_MESSAGES_MODIFY, CWizCategoryViewMessageItem::ModifyNote));
+    pList.append(new CWizCategoryViewMessageItem(m_app, CATEGORY_MESSAGES_COMMENTS, CWizCategoryViewMessageItem::Comment));
+    pList.append(new CWizCategoryViewMessageItem(m_app, CATEGORY_MESSAGES_SEND_FROM_ME, CWizCategoryViewMessageItem::SendFromMe));
+    pMsg->addChildren(pList);
 
     CWizCategoryViewShortcutRootItem* pShortcutRoot = new CWizCategoryViewShortcutRootItem(m_app, CATEGORY_SHORTCUTS);
     addTopLevelItem(pShortcutRoot);

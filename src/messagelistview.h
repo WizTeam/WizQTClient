@@ -25,6 +25,9 @@ public:
     void setMessages(const CWizMessageDataArray& arrayMsg);
     void addMessages(const CWizMessageDataArray& arrayMsg);
     void addMessage(const WIZMESSAGEDATA& msg, bool sort);
+    void selectedMessages(QList<WIZMESSAGEDATA>& arrayMsg);
+
+
 
     MessageListViewItem* messageItem(int row) const;
     MessageListViewItem* messageItem(const QModelIndex& index) const;

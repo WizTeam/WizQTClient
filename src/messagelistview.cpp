@@ -59,12 +59,12 @@ public:
         p->save();
 
         QSize sz(rcd.width() - nMargin * 2, rcd.height() - rcTime.height() - nMargin);
-        QRect rcMsg(rcd.x(), rcd.y() + 4 + nMargin, sz.width(), sz.height());
+        QRect rcMsg(rcd.x() + nMargin, rcd.y() + 4 + nMargin, sz.width(), sz.height());
         QString strMsg = m_data.title.isEmpty() ? " " : m_data.title;
         QRect rcMsg2 = Utils::StyleHelper::drawText(p, rcMsg, strMsg, 2, Qt::AlignVCenter, p->pen().color(), f);
 
         QPolygon po = Utils::StyleHelper::bubbleFromSize(sz, 4);
-        po.translate(rcd.topLeft());
+        po.translate(rcd.left() + nMargin, rcd.top());
         p->drawPolygon(po);
         p->restore();
     }
@@ -130,17 +130,7 @@ void MessageListView::addMessages(const CWizMessageDataArray& arrayMessage)
 
 void MessageListView::addMessage(const WIZMESSAGEDATA& msg, bool sort)
 {
-    // FIXME: document will be deleted while message data still stand alone
-    // we should delete these useless messages from database.
-    //WIZDOCUMENTDATA data;
-    //CWizDatabase& db = CWizDatabaseManager::instance()->db();
-    //if (!db.DocumentFromGUID(msg.documentGUID, data)) {
-    //    qDebug() << "[MessageListView]Failed to find note of message: " << msg.title;
-    //    return;
-    //}
-
     MessageListViewItem* pItem = new MessageListViewItem(msg);
-    //pItem->setSizeHint(QSize(sizeHint().width(), fontMetrics().height() * 5));
     pItem->setSizeHint(QSize(sizeHint().width(), Utils::StyleHelper::thumbnailHeight()));
     addItem(pItem);
 
@@ -149,6 +139,16 @@ void MessageListView::addMessage(const WIZMESSAGEDATA& msg, bool sort)
     }
 
     Q_EMIT sizeChanged(count());
+}
+
+void MessageListView::selectedMessages(QList<WIZMESSAGEDATA>& arrayMsg)
+{
+    QList<QListWidgetItem*> items = selectedItems();
+
+    foreach(QListWidgetItem* item, items) {
+        MessageListViewItem* pItem = dynamic_cast<MessageListViewItem*>(item);
+        arrayMsg.push_back(pItem->data());
+    }
 }
 
 MessageListViewItem* MessageListView::messageItem(int row) const
