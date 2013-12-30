@@ -430,20 +430,26 @@ void StyleHelper::drawListViewItemThumb(QPainter* p, const QRect& rc, int nBadge
 
     QFont fontTitle= Utils::StyleHelper::fontHead();
     int nFontHeight = QFontMetrics(fontTitle).height();
-    QRect rcTitle = Utils::StyleHelper::drawBadgeIcon(p, rcd, nFontHeight, nBadgeType, bFocused, bSelected);
 
-    rcTitle.setCoords(rcTitle.right(), rcTitle.y(), rcd.right(), rcd.y());
-    QString strTitle(title);
-    QColor colorTitle = Utils::StyleHelper::listViewItemTitle(bSelected, bFocused);
-    rcTitle = Utils::StyleHelper::drawText(p, rcTitle, strTitle, 1, Qt::AlignVCenter, colorTitle, fontTitle);
-    rcd.adjust(0, rcTitle.height() + margin(), 0, 0);
+    if (!title.isEmpty()) {
+        QRect rcTitle = Utils::StyleHelper::drawBadgeIcon(p, rcd, nFontHeight, nBadgeType, bFocused, bSelected);
+
+        rcTitle.setCoords(rcTitle.right(), rcTitle.y(), rcd.right(), rcd.y());
+        QString strTitle(title);
+        QColor colorTitle = Utils::StyleHelper::listViewItemTitle(bSelected, bFocused);
+        rcTitle = Utils::StyleHelper::drawText(p, rcTitle, strTitle, 1, Qt::AlignVCenter, colorTitle, fontTitle);
+        rcd.adjust(0, rcTitle.height() + margin(), 0, 0);
+    }
 
     QFont fontThumb = Utils::StyleHelper::fontNormal();
     nFontHeight = QFontMetrics(fontThumb).height();
 
-    QString strInfo(lead);
-    QColor colorDate = Utils::StyleHelper::listViewItemLead(bSelected, bFocused);
-    QRect rcLead = Utils::StyleHelper::drawText(p, rcd, strInfo, 1, Qt::AlignVCenter, colorDate, fontThumb);
+    QRect rcLead;
+    if (!lead.isEmpty()) {
+        QString strInfo(lead);
+        QColor colorDate = Utils::StyleHelper::listViewItemLead(bSelected, bFocused);
+        rcLead = Utils::StyleHelper::drawText(p, rcd, strInfo, 1, Qt::AlignVCenter, colorDate, fontThumb);
+    }
 
     if (!abs.isEmpty()) {
         QString strText(abs);

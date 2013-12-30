@@ -238,18 +238,34 @@ void CWizDocumentListViewItem::on_thumbnailReloaded()
 void CWizDocumentListViewItem::draw(QPainter* p, const QStyleOptionViewItemV4* vopt, int nViewType) const
 {
     int nItemType = itemType();
+    QString strKey = cacheKey();
+    QPixmap pm;
+
+    if (!QPixmapCache::find(strKey, &pm)) {
+        pm = draw_impl(vopt, nItemType, nViewType);
+        if (!QPixmapCache::insert(strKey, pm)) {
+            qDebug() << "Failed insert thumbnail to QPixmapCache while drawing document list";
+        }
+    }
+
+    p->save();
+    p->setClipRect(vopt->rect);
+    p->drawPixmap(vopt->rect, pm);
+    p->restore();
+}
+
+QPixmap CWizDocumentListViewItem::draw_impl(const QStyleOptionViewItemV4* vopt, int nItemType, int nViewType) const
+{
     if (nItemType == CWizDocumentListViewItem::TypePrivateDocument)
     {
         switch (nViewType) {
         case CWizDocumentListView::TypeThumbnail:
-            drawPrivateSummaryView(p, vopt);
-            break;
+            return drawPrivateSummaryView_impl(vopt);
         case CWizDocumentListView::TypeTwoLine:
+            return drawPrivateTwoLineView_impl(vopt);
             //drawItemPrivateTwoLine(option, painter, view);
-            break;
         case CWizDocumentListView::TypeOneLine:
             //drawItemOneLine(option, painter, view);
-            break;
         default:
             Q_ASSERT(0);
             break;
@@ -259,14 +275,11 @@ void CWizDocumentListViewItem::draw(QPainter* p, const QStyleOptionViewItemV4* v
     {
         switch (nViewType) {
         case CWizDocumentListView::TypeThumbnail:
-            drawGroupSummaryView(p, vopt);
-            break;
+            return drawGroupSummaryView_impl(vopt);
         case CWizDocumentListView::TypeTwoLine:
-            //drawItemGroupTwoLine(option, painter, view);
-            break;
+            return drawGroupTwoLineView_impl(vopt);
         case CWizDocumentListView::TypeOneLine:
             //drawItemOneLine(option, painter, view);
-            break;
         default:
             Q_ASSERT(0);
             break;
@@ -274,53 +287,19 @@ void CWizDocumentListViewItem::draw(QPainter* p, const QStyleOptionViewItemV4* v
     }
 }
 
-void CWizDocumentListViewItem::drawPrivateSummaryView(QPainter* p, const QStyleOptionViewItemV4* vopt) const
-{
-    QString strKey = cacheKey(m_data.doc.strGUID, vopt->state & QStyle::State_Selected, listWidget()->hasFocus());
-
-    QPixmap pm;
-    if (!QPixmapCache::find(strKey, &pm)) {
-        pm = drawPrivateSummaryView_impl(vopt);
-        if (!QPixmapCache::insert(strKey, pm)) {
-            qDebug() << "Failed insert thumbnail to QPixmapCache while drawing document list";
-        }
-    }
-
-    p->save();
-    p->setClipRect(vopt->rect);
-    p->drawPixmap(vopt->rect, pm);
-    p->restore();
-}
-
-void CWizDocumentListViewItem::drawGroupSummaryView(QPainter* p, const QStyleOptionViewItemV4* vopt) const
-{
-    QString strKey = cacheKey(m_data.doc.strGUID, vopt->state & QStyle::State_Selected, listWidget()->hasFocus());
-
-    QPixmap pm;
-    if (!QPixmapCache::find(strKey, &pm)) {
-        pm = drawGroupSummaryView_impl(vopt);
-        if (!QPixmapCache::insert(strKey, pm)) {
-            qDebug() << "Failed insert thumbnail to QPixmapCache while drawing document list";
-        }
-    }
-
-    p->save();
-    p->setClipRect(vopt->rect);
-    p->drawPixmap(vopt->rect, pm);
-    p->restore();
-}
-
-
 void CWizDocumentListViewItem::setNeedUpdate() const
 {
-    QPixmapCache::remove(cacheKey(m_data.doc.strGUID, isSelected(), listWidget()->hasFocus()));
+    QPixmapCache::remove(cacheKey());
 }
 
-QString CWizDocumentListViewItem::cacheKey(const QString& strGUID, bool bSelected, bool bFocused) const
+QString CWizDocumentListViewItem::cacheKey() const
 {
+    CWizDocumentListView* view = qobject_cast<CWizDocumentListView*>(listWidget());
+    Q_ASSERT(view);
+
     QString stat;
-    if (bSelected) {
-        if (bFocused)
+    if (isSelected()) {
+        if (view->hasFocus())
             stat = "Focus";
         else
             stat = "LoseFocus";
@@ -328,7 +307,7 @@ QString CWizDocumentListViewItem::cacheKey(const QString& strGUID, bool bSelecte
         stat = "Normal";
     }
 
-    return "Core::ListItem::" + strGUID + "::" + stat;
+    return "Core::ListItem::" + m_data.doc.strGUID + "::" + view->viewType() + "::" + stat;
 }
 
 QPixmap CWizDocumentListViewItem::drawPrivateSummaryView_impl(const QStyleOptionViewItemV4* vopt) const
@@ -378,3 +357,37 @@ QPixmap CWizDocumentListViewItem::drawGroupSummaryView_impl(const QStyleOptionVi
     return pm;
 }
 
+QPixmap CWizDocumentListViewItem::drawPrivateTwoLineView_impl(const QStyleOptionViewItemV4* vopt) const
+{
+    bool bSelected = vopt->state & QStyle::State_Selected;
+    bool bFocused = listWidget()->hasFocus();
+
+    QPainter p;
+    QPixmap pm(Utils::StyleHelper::pixmapFromDevice(vopt->rect.size()));
+    QRect rcd = Utils::StyleHelper::initListViewItemPainter(&p, &pm, vopt->rect, bFocused, bSelected);
+
+    int nType = m_data.doc.nProtected ? Utils::StyleHelper::BadgeEncryted : Utils::StyleHelper::BadgeNormal;
+    Utils::StyleHelper::drawListViewItemThumb(&p, rcd, nType, m_data.doc.strTitle, m_data.strInfo, NULL, bFocused, bSelected);
+
+    return pm;
+}
+
+QPixmap CWizDocumentListViewItem::drawGroupTwoLineView_impl(const QStyleOptionViewItemV4* vopt) const
+{
+    bool bSelected = vopt->state & QStyle::State_Selected;
+    bool bFocused = listWidget()->hasFocus();
+
+    QPainter p;
+    QPixmap pm(Utils::StyleHelper::pixmapFromDevice(vopt->rect.size()));
+    QRect rcd = Utils::StyleHelper::initListViewItemPainter(&p, &pm, vopt->rect, bFocused, bSelected);
+
+    QPixmap pmAvatar;
+    WizService::Internal::AvatarHost::avatar(m_data.strAuthorId, &pmAvatar);
+    QRect rcAvatar = Utils::StyleHelper::drawAvatar(&p, rcd, pmAvatar);
+    rcd.setLeft(rcAvatar.right());
+
+    int nType = m_data.doc.nProtected ? Utils::StyleHelper::BadgeEncryted : Utils::StyleHelper::BadgeNormal;
+    Utils::StyleHelper::drawListViewItemThumb(&p, rcd, nType, m_data.doc.strTitle, m_data.strInfo, NULL, bFocused, bSelected);
+
+    return pm;
+}

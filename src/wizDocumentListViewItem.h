@@ -63,12 +63,15 @@ public:
 
     // drawing
     void draw(QPainter* p, const QStyleOptionViewItemV4* vopt, int nViewType) const;
-    void drawPrivateSummaryView(QPainter* p, const QStyleOptionViewItemV4* vopt) const;
-    void drawGroupSummaryView(QPainter* p, const QStyleOptionViewItemV4* vopt) const;
+    void setNeedUpdate() const;
+    QString cacheKey() const;
+
+private:
+    QPixmap draw_impl(const QStyleOptionViewItemV4* vopt, int nItemType, int nViewType) const;
     QPixmap drawPrivateSummaryView_impl(const QStyleOptionViewItemV4* vopt) const;
     QPixmap drawGroupSummaryView_impl(const QStyleOptionViewItemV4* vopt) const;
-    void setNeedUpdate() const;
-    QString cacheKey(const QString& strGUID, bool bSelected, bool bFocused) const;
+    QPixmap drawPrivateTwoLineView_impl(const QStyleOptionViewItemV4* vopt) const;
+    QPixmap drawGroupTwoLineView_impl(const QStyleOptionViewItemV4* vopt) const;
 
 private:
     CWizExplorerApp& m_app;

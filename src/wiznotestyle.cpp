@@ -295,7 +295,8 @@ void CWizNoteStyle::drawDocumentListViewItem(const QStyleOptionViewItemV4 *optio
             view->drawItem(painter, option);
             break;
         case CWizDocumentListView::TypeTwoLine:
-            drawItemPrivateTwoLine(option, painter, view);
+            view->drawItem(painter, option);
+            //drawItemPrivateTwoLine(option, painter, view);
             break;
         case CWizDocumentListView::TypeOneLine:
             drawItemOneLine(option, painter, view);
@@ -313,7 +314,8 @@ void CWizNoteStyle::drawDocumentListViewItem(const QStyleOptionViewItemV4 *optio
             view->drawItem(painter, option);
             break;
         case CWizDocumentListView::TypeTwoLine:
-            drawItemGroupTwoLine(option, painter, view);
+            //drawItemGroupTwoLine(option, painter, view);
+            view->drawItem(painter, option);
             break;
         case CWizDocumentListView::TypeOneLine:
             drawItemOneLine(option, painter, view);
