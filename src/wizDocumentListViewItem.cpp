@@ -1,17 +1,23 @@
 #include "wizDocumentListViewItem.h"
 
-//#include <QtWidgets>
-
 #include <QFile>
 #include <QFileInfo>
-#include <QPixmapCache>
 
+#include <QPixmapCache>
+#include <QPainter>
+#include <QStyleOptionViewItemV4>
+
+#include "wizDocumentListView.h"
 #include "share/wizDatabaseManager.h"
 #include "share/wizDatabase.h"
 #include "share/wizThumbIndexCache.h"
 #include "wizPopupButton.h"
 
+#include "thumbcache.h"
 #include "sync/avatar.h"
+#include "utils/stylehelper.h"
+
+using namespace Core;
 
 CWizDocumentListViewItem::CWizDocumentListViewItem(CWizExplorerApp& app,
                                                    const WizDocumentListViewItemData& data)
@@ -34,23 +40,6 @@ CWizDocumentListViewItem::CWizDocumentListViewItem(CWizExplorerApp& app,
 
     connect(this, SIGNAL(thumbnailReloaded()), SLOT(on_thumbnailReloaded()));
 }
-
-//const QImage& CWizDocumentListViewItem::avatar(const CWizDatabase& db)
-//{
-//    Q_ASSERT(!m_data.strAuthorId.isEmpty());
-//
-//    if (m_data.imgAuthorAvatar.isNull()) {
-//        // load avatar or request downloader to download
-//        //QString strFileName = db.GetAvatarPath() + m_data.strAuthorId + ".png";
-//        //if (isAvatarNeedUpdate(strFileName)) {
-//        WizService::Internal::AvatarHost::load(m_data.strAuthorId);
-//        //} else {
-//        //    m_data.imgAuthorAvatar.load(strFileName);
-//        //}
-//    }
-//
-//    return m_data.imgAuthorAvatar;
-//}
 
 void CWizDocumentListViewItem::resetAvatar(const QString& strFileName)
 {
@@ -76,11 +65,21 @@ bool CWizDocumentListViewItem::isAvatarNeedUpdate(const QString& strFileName)
     return false;
 }
 
-const WIZABSTRACT& CWizDocumentListViewItem::abstract(CWizThumbIndexCache& thumbCache)
+//const WIZABSTRACT& CWizDocumentListViewItem::abstract()
+//{
+//    if (m_data.thumb.strKbGUID.isEmpty()) {
+//        // ask thumbCache to load abstract to pool
+//        thumbCache.load(m_data.doc.strKbGUID, m_data.doc.strGUID);
+//    }
+//
+//    return m_data.thumb;
+//}
+
+const WIZABSTRACT& CWizDocumentListViewItem::abstract(CWizThumbIndexCache* thumbCache)
 {
-    if (m_data.thumb.strKbGUID.isEmpty()) {
+    if (thumbCache && m_data.thumb.strKbGUID.isEmpty()) {
         // ask thumbCache to load abstract to pool
-        thumbCache.load(m_data.doc.strKbGUID, m_data.doc.strGUID);
+        thumbCache->load(m_data.doc.strKbGUID, m_data.doc.strGUID);
     }
 
     return m_data.thumb;
@@ -229,3 +228,226 @@ void CWizDocumentListViewItem::on_thumbnailReloaded()
     QPixmapCache::remove(m_data.doc.strGUID + ":focus");
     QPixmapCache::remove(m_data.doc.strGUID + ":nofocus");
 }
+
+//void CWizDocumentListViewItem::onThumbCacheLoaded(const QString& strKbGUID, const QString& strGUID)
+//{
+//    if (strKbGUID == m_data.doc.strKbGUID && strGUID == m_data.doc.strGUID)
+//        setNeedUpdate();
+//}
+
+void CWizDocumentListViewItem::draw(QPainter* p, const QStyleOptionViewItemV4* vopt, int nViewType) const
+{
+    int nItemType = itemType();
+    if (nItemType == CWizDocumentListViewItem::TypePrivateDocument)
+    {
+        switch (nViewType) {
+        case CWizDocumentListView::TypeThumbnail:
+            drawPrivateSummaryView(p, vopt);
+            break;
+        case CWizDocumentListView::TypeTwoLine:
+            //drawItemPrivateTwoLine(option, painter, view);
+            break;
+        case CWizDocumentListView::TypeOneLine:
+            //drawItemOneLine(option, painter, view);
+            break;
+        default:
+            Q_ASSERT(0);
+            break;
+        }
+    }
+    else if (nItemType == CWizDocumentListViewItem::TypeGroupDocument)
+    {
+        switch (nViewType) {
+        case CWizDocumentListView::TypeThumbnail:
+            drawGroupSummaryView(p, vopt);
+            break;
+        case CWizDocumentListView::TypeTwoLine:
+            //drawItemGroupTwoLine(option, painter, view);
+            break;
+        case CWizDocumentListView::TypeOneLine:
+            //drawItemOneLine(option, painter, view);
+            break;
+        default:
+            Q_ASSERT(0);
+            break;
+        }
+    }
+}
+
+void CWizDocumentListViewItem::drawPrivateSummaryView(QPainter* p, const QStyleOptionViewItemV4* vopt) const
+{
+    QString strKey = cacheKey(m_data.doc.strGUID, vopt->state & QStyle::State_Selected, listWidget()->hasFocus());
+
+    QPixmap pm;
+    if (!QPixmapCache::find(strKey, &pm)) {
+        pm = drawPrivateSummaryView_impl(p, vopt);
+        if (!QPixmapCache::insert(strKey, pm)) {
+            qDebug() << "Failed insert thumbnail to QPixmapCache while drawing document list";
+        }
+    }
+
+    p->save();
+    p->setClipRect(vopt->rect);
+    p->drawPixmap(vopt->rect, pm);
+    p->restore();
+}
+
+void CWizDocumentListViewItem::drawGroupSummaryView(QPainter* p, const QStyleOptionViewItemV4* vopt) const
+{
+    QString strKey = cacheKey(m_data.doc.strGUID, vopt->state & QStyle::State_Selected, listWidget()->hasFocus());
+
+    QPixmap pm;
+    if (!QPixmapCache::find(strKey, &pm)) {
+        pm = drawGroupSummaryView_impl(vopt);
+        if (!QPixmapCache::insert(strKey, pm)) {
+            qDebug() << "Failed insert thumbnail to QPixmapCache while drawing document list";
+        }
+    }
+
+    p->save();
+    p->setClipRect(vopt->rect);
+    p->drawPixmap(vopt->rect, pm);
+    p->restore();
+}
+
+
+void CWizDocumentListViewItem::setNeedUpdate() const
+{
+    QPixmapCache::remove(cacheKey(m_data.doc.strGUID, isSelected(), listWidget()->hasFocus()));
+}
+
+QString CWizDocumentListViewItem::cacheKey(const QString& strGUID, bool bSelected, bool bFocused) const
+{
+    QString stat;
+    if (bSelected) {
+        if (bFocused)
+            stat = "Focus";
+        else
+            stat = "LoseFocus";
+    } else {
+        stat = "Normal";
+    }
+
+    return "Core::ListItem::" + strGUID + "::" + stat;
+}
+
+QPixmap CWizDocumentListViewItem::drawPrivateSummaryView_impl(QPainter* p2, const QStyleOptionViewItemV4* vopt) const
+{
+    bool bSelected = vopt->state & QStyle::State_Selected;
+    bool bFocused = listWidget()->hasFocus();
+
+    WIZABSTRACT thumb;
+    ThumbCache::instance()->find(m_data.doc.strKbGUID, m_data.doc.strGUID, thumb);
+
+    QRect rc(0, 0, vopt->rect.width(), vopt->rect.height());
+
+    QPixmap pm(Utils::StyleHelper::pixmapFromDevice(rc.size()));
+    pm.fill(Utils::StyleHelper::listViewBackground());
+
+    QPainter p(&pm);
+    Utils::StyleHelper::initPainterByDevice(&p);
+
+    Utils::StyleHelper::drawListViewItemSeperator(&p, rc);
+    Utils::StyleHelper::drawListViewItemBackground(&p, rc, bFocused, bSelected);
+
+    int nMargin = Utils::StyleHelper::margin();
+    QRect rcd(rc.adjusted(nMargin, nMargin, -nMargin, -nMargin));
+
+    if (!thumb.image.isNull()) {
+        QPixmap pmt = QPixmap::fromImage(thumb.image);
+        QRect rcp = Utils::StyleHelper::drawThumbnailPixmap(&p, rcd, pmt);
+        rcd.setRight(rcp.left());
+    }
+
+    // draw title
+    QFont fontTitle= Utils::StyleHelper::fontHead();
+    int nFontHeight = QFontMetrics(fontTitle).height();
+    int nType = m_data.doc.nProtected ? Utils::StyleHelper::BadgeEncryted : Utils::StyleHelper::BadgeNormal;
+    QRect rcTitle = Utils::StyleHelper::drawBadgeIcon(&p, rcd, nFontHeight, nType, bFocused, bSelected);
+
+    rcTitle.setCoords(rcTitle.right(), rcTitle.y(), rcd.right(), rcd.y());
+    QString strTitle = m_data.doc.strTitle;
+    QColor colorTitle = Utils::StyleHelper::listViewItemTitle(bSelected, bFocused);
+    rcTitle = Utils::StyleHelper::drawText(&p, rcTitle, strTitle, 1, Qt::AlignVCenter, colorTitle, fontTitle);
+    rcd.adjust(0, rcTitle.height() + nMargin, 0, 0);
+
+    QFont fontThumb = Utils::StyleHelper::fontNormal();
+    nFontHeight = QFontMetrics(fontThumb).height();
+
+    QString strInfo = m_data.strInfo;
+    QColor colorDate = Utils::StyleHelper::listViewItemLead(bSelected, bFocused);
+    QRect rcLead = Utils::StyleHelper::drawText(&p, rcd, strInfo, 1, Qt::AlignVCenter, colorDate, fontThumb);
+
+    if (!thumb.text.IsEmpty()) {
+        QString strText = thumb.text;
+        QColor colorSummary = Utils::StyleHelper::listViewItemSummary(bSelected, bFocused);
+
+        QRect rcLine1(rcd.adjusted(rcLead.width() + nMargin, 0, 0, 0));
+        rcLine1 = Utils::StyleHelper::drawText(&p, rcLine1, strText, 1, Qt::AlignVCenter, colorSummary, fontThumb, false);
+
+        QRect rcLine2(rcd.adjusted(0, rcLine1.height(), 0, 0));
+        rcLine2 = Utils::StyleHelper::drawText(&p, rcLine2, strText, 2, Qt::AlignVCenter, colorSummary, fontThumb);
+    }
+
+    return pm;
+}
+
+QPixmap CWizDocumentListViewItem::drawGroupSummaryView_impl(const QStyleOptionViewItemV4* vopt) const
+{
+    bool bSelected = vopt->state & QStyle::State_Selected;
+    bool bFocused = listWidget()->hasFocus();
+
+    WIZABSTRACT thumb;
+    ThumbCache::instance()->find(m_data.doc.strKbGUID, m_data.doc.strGUID, thumb);
+
+    QRect rc(0, 0, vopt->rect.width(), vopt->rect.height());
+
+    QPixmap pm(Utils::StyleHelper::pixmapFromDevice(rc.size()));
+    pm.fill(Utils::StyleHelper::listViewBackground());
+
+    QPainter p(&pm);
+    Utils::StyleHelper::initPainterByDevice(&p);
+
+    Utils::StyleHelper::drawListViewItemSeperator(&p, rc);
+    Utils::StyleHelper::drawListViewItemBackground(&p, rc, bFocused, bSelected);
+
+    int nMargin = Utils::StyleHelper::margin();
+    QRect rcd(rc.adjusted(nMargin, nMargin, -nMargin, -nMargin));
+
+    QPixmap pmAvatar;
+    WizService::Internal::AvatarHost::avatar(m_data.strAuthorId, &pmAvatar);
+    QRect rcAvatar = Utils::StyleHelper::drawAvatar(&p, rcd, pmAvatar);
+    rcd.setLeft(rcAvatar.right());
+
+    QFont fontTitle = Utils::StyleHelper::fontHead();
+    int nFontHeight = QFontMetrics(fontTitle).height();
+    int nType = m_data.doc.nProtected ? Utils::StyleHelper::BadgeEncryted : Utils::StyleHelper::BadgeNormal;
+    QRect rcTitle = Utils::StyleHelper::drawBadgeIcon(&p, rcd, nFontHeight, nType, bFocused, bSelected);
+
+    rcTitle.setCoords(rcTitle.right(), rcTitle.y(), rcd.right(), rcd.y());
+    QString strTitle = m_data.doc.strTitle;
+    QColor colorTitle = Utils::StyleHelper::listViewItemTitle(bSelected, bFocused);
+    rcTitle = Utils::StyleHelper::drawText(&p, rcTitle, strTitle, 1, Qt::AlignVCenter, colorTitle, fontTitle);
+    rcd.adjust(0, rcTitle.height() + nMargin, 0, 0);
+
+    QFont fontThumb = Utils::StyleHelper::fontNormal();
+    nFontHeight = QFontMetrics(fontThumb).height();
+
+    QString strInfo = m_data.strInfo;
+    QColor colorDate = Utils::StyleHelper::listViewItemLead(bSelected, bFocused);
+    QRect rcLead = Utils::StyleHelper::drawText(&p, rcd, strInfo, 1, Qt::AlignVCenter, colorDate, fontThumb);
+
+    if (!thumb.text.IsEmpty()) {
+        QString strText = thumb.text;
+        QColor colorSummary = Utils::StyleHelper::listViewItemSummary(bSelected, bFocused);
+
+        QRect rcLine1(rcd.adjusted(rcLead.width() + nMargin, 0, 0, 0));
+        rcLine1 = Utils::StyleHelper::drawText(&p, rcLine1, strText, 1, Qt::AlignVCenter, colorSummary, fontThumb, false);
+
+        QRect rcLine2(rcd.adjusted(0, rcLine1.height(), 0, 0));
+        rcLine2 = Utils::StyleHelper::drawText(&p, rcLine2, strText, 2, Qt::AlignVCenter, colorSummary, fontThumb);
+    }
+
+    return pm;
+}
+

@@ -6,6 +6,8 @@
 
 #include "share/wizobject.h"
 
+class QPixmap;
+
 class CWizExplorerApp;
 class CWizDatabase;
 class CWizThumbIndexCache;
@@ -47,7 +49,8 @@ public:
     int itemType() const { return m_data.nType; }
     void reload(CWizDatabase& db);
 
-    const WIZABSTRACT& abstract(CWizThumbIndexCache& thumbCache);
+    //const WIZABSTRACT& abstract();
+    const WIZABSTRACT& abstract(CWizThumbIndexCache *thumbCache);
 
     const QImage& avatar(const CWizDatabase& db);
 
@@ -57,6 +60,15 @@ public:
 
     // used for sorting
     virtual bool operator<(const QListWidgetItem &other) const;
+
+    // drawing
+    void draw(QPainter* p, const QStyleOptionViewItemV4* vopt, int nViewType) const;
+    void drawPrivateSummaryView(QPainter* p, const QStyleOptionViewItemV4* vopt) const;
+    void drawGroupSummaryView(QPainter* p, const QStyleOptionViewItemV4* vopt) const;
+    QPixmap drawPrivateSummaryView_impl(QPainter* p, const QStyleOptionViewItemV4* vopt) const;
+    QPixmap drawGroupSummaryView_impl(const QStyleOptionViewItemV4* vopt) const;
+    void setNeedUpdate() const;
+    QString cacheKey(const QString& strGUID, bool bSelected, bool bFocused) const;
 
 private:
     CWizExplorerApp& m_app;
@@ -71,6 +83,7 @@ private:
     bool isAvatarNeedUpdate(const QString& strFileName);
 
 private Q_SLOTS:
+    //void onThumbCacheLoaded(const QString& strKbGUID, const QString& strGUID);
     void on_thumbnailReloaded();
 
 Q_SIGNALS:

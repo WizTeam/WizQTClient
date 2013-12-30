@@ -17,7 +17,9 @@
 #include "utils/logger.h"
 
 #include "sync/avatar.h"
+#include "thumbcache.h"
 
+using namespace Core;
 using namespace Core::Internal;
 
 
@@ -88,13 +90,16 @@ CWizDocumentListView::CWizDocumentListView(CWizExplorerApp& app, QWidget *parent
             SLOT(on_message_deleted(const WIZMESSAGEDATA&)));
 
     // thumb cache
-    m_thumbCache = new CWizThumbIndexCache(app);
-    connect(m_thumbCache, SIGNAL(loaded(const WIZABSTRACT&)),
-            SLOT(on_document_abstractLoaded(const WIZABSTRACT&)));
+    //m_thumbCache = new CWizThumbIndexCache(app);
+    //connect(m_thumbCache, SIGNAL(loaded(const WIZABSTRACT&)),
+    //        SLOT(on_document_abstractLoaded(const WIZABSTRACT&)));
 
-    QThread *thread = new QThread();
-    m_thumbCache->moveToThread(thread);
-    thread->start();
+    //QThread *thread = new QThread();
+    //m_thumbCache->moveToThread(thread);
+    //thread->start();
+
+    connect(ThumbCache::instance(), SIGNAL(loaded(const QString& ,const QString&)),
+            SLOT(onThumbCacheLoaded(const QString&, const QString&)));
 
     connect(WizService::Internal::AvatarHost::instance(), SIGNAL(loaded(const QString&)),
             SLOT(on_userAvatar_loaded(const QString&)));
@@ -150,7 +155,9 @@ void CWizDocumentListView::resizeEvent(QResizeEvent* event)
 
     // FIXME!!!
     //QPixmapCache::clear();
+    setItemsNeedUpdate();
     QListWidget::resizeEvent(event);
+
 }
 
 void CWizDocumentListView::setDocuments(const CWizDocumentDataArray& arrayDocument)
@@ -580,6 +587,7 @@ void CWizDocumentListView::resetItemsSortingType(int type)
 {
     // FIXME!!!
     //QPixmapCache::clear();
+    setItemsNeedUpdate();
 
     m_nSortingType = type;
 
@@ -679,8 +687,19 @@ void CWizDocumentListView::on_userAvatar_loaded(const QString& strUserGUID)
     for (int i = 0; i < count(); i++) {
         pItem = documentItemAt(i);
         if (pItem->data().strAuthorId == strUserGUID) {
-            //QString strFileName = m_dbMgr.db().GetAvatarPath() + strUserGUID + ".png";
-            //pItem->resetAvatar(strFileName);
+            update(indexFromItem(pItem));
+        }
+    }
+}
+
+void CWizDocumentListView::onThumbCacheLoaded(const QString& strKbGUID, const QString& strGUID)
+{
+    setItemsNeedUpdate(strKbGUID, strGUID);
+
+    CWizDocumentListViewItem* pItem = NULL;
+    for (int i = 0; i < count(); i++) {
+        pItem = documentItemAt(i);
+        if (pItem->data().doc.strKbGUID == strKbGUID && pItem->data().doc.strGUID == strGUID) {
             update(indexFromItem(pItem));
         }
     }
@@ -925,7 +944,7 @@ const WIZDOCUMENTDATA& CWizDocumentListView::documentFromIndex(const QModelIndex
 
 const WIZABSTRACT& CWizDocumentListView::documentAbstractFromIndex(const QModelIndex &index) const
 {
-    return documentItemFromIndex(index)->abstract(*m_thumbCache);
+    return documentItemFromIndex(index)->abstract(0);
 }
 
 //const QString& CWizDocumentListView::documentTagsFromIndex(const QModelIndex &index) const
@@ -1056,3 +1075,32 @@ void CWizDocumentListView::on_vscroll_actionTriggered(int action)
     }
 }
 //#endif // Q_OS_MAC
+
+void CWizDocumentListView::drawItem(QPainter* p, const QStyleOptionViewItemV4* vopt) const
+{
+    CWizDocumentListViewItem* pItem = documentItemFromIndex(vopt->index);
+    if (pItem)
+        pItem->draw(p, vopt, viewType());
+}
+
+void CWizDocumentListView::setItemsNeedUpdate(const QString& strKbGUID, const QString& strGUID)
+{
+    if (strKbGUID.isEmpty() || strGUID.isEmpty()) {
+        for (int i = 0; i < count(); i++) {
+            CWizDocumentListViewItem* pItem = dynamic_cast<CWizDocumentListViewItem*>(item(i));
+            Q_ASSERT(pItem);
+
+            pItem->setNeedUpdate();
+        }
+
+        return;
+    }
+
+    CWizDocumentListViewItem* pItem = NULL;
+    for (int i = 0; i < count(); i++) {
+        pItem = documentItemAt(i);
+        if (pItem->data().doc.strKbGUID == strKbGUID && pItem->data().doc.strGUID == strGUID) {
+            pItem->setNeedUpdate();
+        }
+    }
+}

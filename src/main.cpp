@@ -22,6 +22,7 @@
 #include "sync/token.h"
 #include "sync/apientry.h"
 #include "sync/avatar.h"
+#include "thumbcache.h"
 
 using namespace ExtensionSystem;
 using namespace Core::Internal;
@@ -158,6 +159,7 @@ int main(int argc, char *argv[])
     // FIXME: move to WizService plugin initialize
     WizService::Token token;
 
+
     bool bAutoLogin = userSettings.autoLogin();
     strPassword = userSettings.password();
 
@@ -202,6 +204,9 @@ int main(int argc, char *argv[])
 
     // FIXME: move to plugins
     WizService::Internal::AvatarHost avatarHost;
+
+    // FIXME: move to core plugin initialize
+    Core::ThumbCache cache;
 
     MainWindow w(dbMgr);
 

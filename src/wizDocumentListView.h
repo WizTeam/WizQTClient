@@ -37,7 +37,10 @@ public:
     int sortingType() const { return m_nSortingType; }
     void resetItemsSortingType(int type);
 
-    CWizThumbIndexCache* thumbCache() const { return m_thumbCache; }
+    //CWizThumbIndexCache* thumbCache() const { return m_thumbCache; }
+
+    void setItemsNeedUpdate(const QString& strKbGUID = 0, const QString& strGUID = 0);
+    void drawItem(QPainter*p, const QStyleOptionViewItemV4* vopt) const;
 
 protected:
     virtual void resizeEvent(QResizeEvent* event);
@@ -53,7 +56,7 @@ protected:
 private:
     CWizExplorerApp& m_app;
     CWizDatabaseManager& m_dbMgr;
-    QPointer<CWizThumbIndexCache> m_thumbCache;
+    //QPointer<CWizThumbIndexCache> m_thumbCache;
     CWizScrollBar* m_vScroll;
 
     CWizDocumentListView::ViewType m_nViewType;
@@ -149,6 +152,8 @@ public Q_SLOTS:
 
     void on_document_abstractLoaded(const WIZABSTRACT& abs);
     void on_userAvatar_loaded(const QString& strUserGUID);
+    void onThumbCacheLoaded(const QString& strKbGUID, const QString& strGUID);
+
 
 //#ifndef Q_OS_MAC
     // used for smoothly scroll

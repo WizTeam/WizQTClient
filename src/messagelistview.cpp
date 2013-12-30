@@ -184,8 +184,8 @@ void MessageListView::onAvatarLoaded(const QString& strUserId)
 
 void MessageListView::drawItem(QPainter* p, const QStyleOptionViewItemV4* vopt) const
 {
-    Utils::StyleHelper::drawListViewSeperator(p, vopt->rect);
-    Utils::StyleHelper::drawListViewBackground(p, vopt->rect, hasFocus(), vopt->state & QStyle::State_Selected);
+    Utils::StyleHelper::drawListViewItemSeperator(p, vopt->rect);
+    Utils::StyleHelper::drawListViewItemBackground(p, vopt->rect, hasFocus(), vopt->state & QStyle::State_Selected);
 
     messageItem(vopt->index)->paint(p, vopt);
 }

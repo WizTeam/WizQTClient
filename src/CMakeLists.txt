@@ -122,6 +122,7 @@ set(wiznote_SOURCES
     utils/logger.cpp
     utils/misc.cpp
     messagelistview.cpp
+    thumbcache.cpp
 )
 
 set(wiznote_HEADERS
@@ -238,6 +239,8 @@ set(wiznote_HEADERS
     utils/logger.h
     utils/misc.h
     messagelistview.h
+    thumbcache.h
+    thumbcache_p.h
 )
 
 set(wiznote_FORMS

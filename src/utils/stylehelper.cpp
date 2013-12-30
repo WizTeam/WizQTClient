@@ -81,13 +81,19 @@ QIcon StyleHelper::loadIcon(const QString& strName)
     return icon;
 }
 
-QColor StyleHelper::listViewSeperator()
+QColor StyleHelper::listViewBackground()
+{
+    QSettings st(PathResolve::themePath(themeName()) + "skin.ini");
+    return QColor(st.value("Documents/Background", "#ffffff").toString());
+}
+
+QColor StyleHelper::listViewItemSeperator()
 {
     QSettings st(PathResolve::themePath(themeName()) + "skin.ini");
     return QColor(st.value("Documents/Line", "#d9dcdd").toString());
 }
 
-QColor StyleHelper::listViewBackground(int stat)
+QColor StyleHelper::listViewItemBackground(int stat)
 {
     QSettings st(PathResolve::themePath(themeName()) + "skin.ini");
     if (stat == Normal) {
@@ -100,17 +106,46 @@ QColor StyleHelper::listViewBackground(int stat)
     return QColor();
 }
 
-QColor StyleHelper::listViewTitle(int stat)
+QColor StyleHelper::listViewItemTitle(bool bSelected, bool bFocused)
 {
     QSettings st(PathResolve::themePath(themeName()) + "skin.ini");
-    if (stat == Normal) {
-        return QColor(st.value("Documents/TitleLoseFocus", "#6A6A6A").toString());
-    } else if (stat == Active) {
+    if (bSelected) {
+        if (bFocused) {
+            return QColor(st.value("Documents/TitleFocus", "#ffffff").toString());
+        } else {
+            return QColor(st.value("Documents/TitleLoseFocus", "#6a6a6a").toString());
+        }
+    } else {
         return QColor(st.value("Documents/Title", "#464646").toString());
     }
+}
 
-    Q_ASSERT(0);
-    return QColor();
+QColor StyleHelper::listViewItemLead(bool bSelected, bool bFocused)
+{
+    QSettings st(PathResolve::themePath(themeName()) + "skin.ini");
+    if (bSelected) {
+        if (bFocused) {
+            return QColor(st.value("Documents/DateFocus", "#ffffff").toString());
+        } else {
+            return QColor(st.value("Documents/DateLoseFocus", "#6a6a6a").toString());
+        }
+    } else {
+        return QColor(st.value("Documents/Date", "#0000ff").toString());
+    }
+}
+
+QColor StyleHelper::listViewItemSummary(bool bSelected, bool bFocused)
+{
+    QSettings st(PathResolve::themePath(themeName()) + "skin.ini");
+    if (bSelected) {
+        if (bFocused) {
+            return QColor(st.value("Documents/SummaryFocus", "#ffffff").toString());
+        } else {
+            return QColor(st.value("Documents/SummaryLoseFocus", "#6a6a6a").toString());
+        }
+    } else {
+        return QColor(st.value("Documents/Summary", "#8c8c8c").toString());
+    }
 }
 
 QIcon StyleHelper::listViewBadge(int type)
@@ -125,23 +160,23 @@ QIcon StyleHelper::listViewBadge(int type)
     return QIcon();
 }
 
-void StyleHelper::drawListViewBackground(QPainter* p, const QRect& rc, bool bFocus, bool bSelect)
+void StyleHelper::drawListViewItemBackground(QPainter* p, const QRect& rc, bool bFocus, bool bSelect)
 {
     if (bSelect) {
         if (bFocus) {
-            p->fillRect(rc, listViewBackground(Active));
+            p->fillRect(rc, listViewItemBackground(Active));
         } else {
-            p->fillRect(rc, listViewBackground(Normal));
+            p->fillRect(rc, listViewItemBackground(Normal));
         }
     }
 }
 
-void StyleHelper::drawListViewSeperator(QPainter* p, const QRect& rc)
+void StyleHelper::drawListViewItemSeperator(QPainter* p, const QRect& rc)
 {
     QRect rcLine = rc;
     rcLine.adjust(5, 0, -5, 0);
     p->save();
-    p->setPen(listViewSeperator());
+    p->setPen(listViewItemSeperator());
     p->drawLine(rcLine.bottomLeft(), rcLine.bottomRight());
     p->restore();
 }
@@ -180,7 +215,7 @@ QRect StyleHelper::drawAvatar(QPainter* p, const QRect& rc, const QPixmap& pm)
 }
 
 QRect StyleHelper::drawText(QPainter* p, const QRect& rc, QString& str, int nLines,
-                          int nFlags, const QColor& color, const QFont& font)
+                          int nFlags, const QColor& color, const QFont& font, bool bElided)
 {
     Q_ASSERT(rc.width() > 0);
 
@@ -220,7 +255,7 @@ QRect StyleHelper::drawText(QPainter* p, const QRect& rc, QString& str, int nLin
         line.setLineWidth(rcRet.width());
 
         QString lineText;
-        if (nLines == 1) { // the last line
+        if (nLines == 1 && bElided) { // the last line
             lineText = p->fontMetrics().elidedText(str, Qt::ElideRight, rcRet.width());
             nWidth = qMax<int>(p->fontMetrics().width(lineText), nWidth);
         } else {
@@ -239,7 +274,7 @@ QRect StyleHelper::drawText(QPainter* p, const QRect& rc, QString& str, int nLin
     }
     textLayout.endLayout();
 
-    rcRet.setRect(rc.x(), rc.y(), nWidth, nHeight);
+    rcRet.setRect(rc.x(), rc.y(), nWidth + margin(), nHeight);
     rcRet.adjust(margin(), 0, -margin(), 0);
 
     p->restore();
@@ -350,7 +385,8 @@ QFont StyleHelper::fontHead()
     }
 
     f.setFamily(strFont);
-    f.setPixelSize(12);
+    f.setPixelSize(13);
+    f.setBold(true);
 
     return f;
 }

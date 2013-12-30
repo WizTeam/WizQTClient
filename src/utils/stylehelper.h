@@ -17,7 +17,8 @@ class StyleHelper
 public:
     enum TextState {
         Normal,
-        Active
+        Active,
+        Selected
     };
 
     enum BadgeType {
@@ -35,16 +36,20 @@ public:
     static QString themeName();
     static QIcon loadIcon(const QString& strName);
 
-    static QColor listViewSeperator();
-    static QColor listViewBackground(int stat);
-    static QColor listViewTitle(int stat);
+    static QColor listViewBackground();
+    static QColor listViewItemSeperator();
+    static QColor listViewItemBackground(int stat);
+    static QColor listViewItemTitle(bool bSelected, bool bFocused);
+    static QColor listViewItemLead(bool bSelected, bool bFocused);
+    static QColor listViewItemSummary(bool bSelected, bool bFocused);
+
     static QIcon listViewBadge(int type);
     static QPolygon bubbleFromSize(const QSize& sz, int nAngle = 10, bool bAlignLeft = true);
     static QRect drawText(QPainter* p, const QRect& rc, QString& str, int nLines,
-                        int nFlags, const QColor& color, const QFont& font);
+                        int nFlags, const QColor& color, const QFont& font, bool bElided = true);
 
-    static void drawListViewSeperator(QPainter* p, const QRect& rc);
-    static void drawListViewBackground(QPainter* p, const QRect& rc, bool bFocus, bool bSelect);
+    static void drawListViewItemSeperator(QPainter* p, const QRect& rc);
+    static void drawListViewItemBackground(QPainter* p, const QRect& rc, bool bFocus, bool bSelect);
     static QRect drawThumbnailPixmap(QPainter* p, const QRect& rc, const QPixmap& pm);
     static QRect drawBadgeIcon(QPainter* p, const QRect& rc, int height, int type, bool bFocus, bool bSelect);
 
