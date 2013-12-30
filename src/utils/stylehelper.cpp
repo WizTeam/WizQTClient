@@ -407,4 +407,54 @@ QFont StyleHelper::fontNormal()
     return f;
 }
 
+QRect StyleHelper::initListViewItemPainter(QPainter* p, QPixmap* pm, const QRect& lrc, bool bFocused, bool bSelected)
+{
+    QRect rc(0, 0, lrc.width(), lrc.height());
+
+    pm->fill(Utils::StyleHelper::listViewBackground());
+
+    p->begin(pm);
+    Utils::StyleHelper::initPainterByDevice(p);
+    Utils::StyleHelper::drawListViewItemSeperator(p, rc);
+    Utils::StyleHelper::drawListViewItemBackground(p, rc, bFocused, bSelected);
+
+    int nMargin = Utils::StyleHelper::margin();
+    return rc.adjusted(nMargin, nMargin, -nMargin, -nMargin);
+}
+
+void StyleHelper::drawListViewItemThumb(QPainter* p, const QRect& rc, int nBadgeType,
+                                        const QString& title, const QString& lead, const QString& abs,
+                                        bool bFocused, bool bSelected)
+{
+    QRect rcd(rc);
+
+    QFont fontTitle= Utils::StyleHelper::fontHead();
+    int nFontHeight = QFontMetrics(fontTitle).height();
+    QRect rcTitle = Utils::StyleHelper::drawBadgeIcon(p, rcd, nFontHeight, nBadgeType, bFocused, bSelected);
+
+    rcTitle.setCoords(rcTitle.right(), rcTitle.y(), rcd.right(), rcd.y());
+    QString strTitle(title);
+    QColor colorTitle = Utils::StyleHelper::listViewItemTitle(bSelected, bFocused);
+    rcTitle = Utils::StyleHelper::drawText(p, rcTitle, strTitle, 1, Qt::AlignVCenter, colorTitle, fontTitle);
+    rcd.adjust(0, rcTitle.height() + margin(), 0, 0);
+
+    QFont fontThumb = Utils::StyleHelper::fontNormal();
+    nFontHeight = QFontMetrics(fontThumb).height();
+
+    QString strInfo(lead);
+    QColor colorDate = Utils::StyleHelper::listViewItemLead(bSelected, bFocused);
+    QRect rcLead = Utils::StyleHelper::drawText(p, rcd, strInfo, 1, Qt::AlignVCenter, colorDate, fontThumb);
+
+    if (!abs.isEmpty()) {
+        QString strText(abs);
+        QRect rcLine1(rcd.adjusted(rcLead.width() + margin(), 0, 0, 0));
+        QColor colorSummary = Utils::StyleHelper::listViewItemSummary(bSelected, bFocused);
+        rcLine1 = Utils::StyleHelper::drawText(p, rcLine1, strText, 1, Qt::AlignVCenter, colorSummary, fontThumb, false);
+
+        QRect rcLine2(rcd.adjusted(0, rcLine1.height(), 0, 0));
+        rcLine2 = Utils::StyleHelper::drawText(p, rcLine2, strText, 2, Qt::AlignVCenter, colorSummary, fontThumb);
+    }
+}
+
+
 } // namespace Utils

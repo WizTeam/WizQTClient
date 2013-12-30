@@ -43,6 +43,13 @@ public:
     static QColor listViewItemLead(bool bSelected, bool bFocused);
     static QColor listViewItemSummary(bool bSelected, bool bFocused);
 
+    static QRect initListViewItemPainter(QPainter* p, QPixmap* pm, const QRect& lrc, bool bFocused, bool bSelected);
+    static void drawListViewItemThumb(QPainter* p, const QRect& rc, int nBadgeType,
+                                      const QString& title, const QString& lead, const QString& abs,
+                                      bool bFocused, bool bSelected);
+
+    //static void drawListViewItem(QPainter* p, const QRect& rc);
+
     static QIcon listViewBadge(int type);
     static QPolygon bubbleFromSize(const QSize& sz, int nAngle = 10, bool bAlignLeft = true);
     static QRect drawText(QPainter* p, const QRect& rc, QString& str, int nLines,

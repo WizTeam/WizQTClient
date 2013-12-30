@@ -280,7 +280,7 @@ void CWizDocumentListViewItem::drawPrivateSummaryView(QPainter* p, const QStyleO
 
     QPixmap pm;
     if (!QPixmapCache::find(strKey, &pm)) {
-        pm = drawPrivateSummaryView_impl(p, vopt);
+        pm = drawPrivateSummaryView_impl(vopt);
         if (!QPixmapCache::insert(strKey, pm)) {
             qDebug() << "Failed insert thumbnail to QPixmapCache while drawing document list";
         }
@@ -331,7 +331,7 @@ QString CWizDocumentListViewItem::cacheKey(const QString& strGUID, bool bSelecte
     return "Core::ListItem::" + strGUID + "::" + stat;
 }
 
-QPixmap CWizDocumentListViewItem::drawPrivateSummaryView_impl(QPainter* p2, const QStyleOptionViewItemV4* vopt) const
+QPixmap CWizDocumentListViewItem::drawPrivateSummaryView_impl(const QStyleOptionViewItemV4* vopt) const
 {
     bool bSelected = vopt->state & QStyle::State_Selected;
     bool bFocused = listWidget()->hasFocus();
@@ -339,19 +339,9 @@ QPixmap CWizDocumentListViewItem::drawPrivateSummaryView_impl(QPainter* p2, cons
     WIZABSTRACT thumb;
     ThumbCache::instance()->find(m_data.doc.strKbGUID, m_data.doc.strGUID, thumb);
 
-    QRect rc(0, 0, vopt->rect.width(), vopt->rect.height());
-
-    QPixmap pm(Utils::StyleHelper::pixmapFromDevice(rc.size()));
-    pm.fill(Utils::StyleHelper::listViewBackground());
-
-    QPainter p(&pm);
-    Utils::StyleHelper::initPainterByDevice(&p);
-
-    Utils::StyleHelper::drawListViewItemSeperator(&p, rc);
-    Utils::StyleHelper::drawListViewItemBackground(&p, rc, bFocused, bSelected);
-
-    int nMargin = Utils::StyleHelper::margin();
-    QRect rcd(rc.adjusted(nMargin, nMargin, -nMargin, -nMargin));
+    QPainter p;
+    QPixmap pm(Utils::StyleHelper::pixmapFromDevice(vopt->rect.size()));
+    QRect rcd = Utils::StyleHelper::initListViewItemPainter(&p, &pm, vopt->rect, bFocused, bSelected);
 
     if (!thumb.image.isNull()) {
         QPixmap pmt = QPixmap::fromImage(thumb.image);
@@ -359,35 +349,8 @@ QPixmap CWizDocumentListViewItem::drawPrivateSummaryView_impl(QPainter* p2, cons
         rcd.setRight(rcp.left());
     }
 
-    // draw title
-    QFont fontTitle= Utils::StyleHelper::fontHead();
-    int nFontHeight = QFontMetrics(fontTitle).height();
     int nType = m_data.doc.nProtected ? Utils::StyleHelper::BadgeEncryted : Utils::StyleHelper::BadgeNormal;
-    QRect rcTitle = Utils::StyleHelper::drawBadgeIcon(&p, rcd, nFontHeight, nType, bFocused, bSelected);
-
-    rcTitle.setCoords(rcTitle.right(), rcTitle.y(), rcd.right(), rcd.y());
-    QString strTitle = m_data.doc.strTitle;
-    QColor colorTitle = Utils::StyleHelper::listViewItemTitle(bSelected, bFocused);
-    rcTitle = Utils::StyleHelper::drawText(&p, rcTitle, strTitle, 1, Qt::AlignVCenter, colorTitle, fontTitle);
-    rcd.adjust(0, rcTitle.height() + nMargin, 0, 0);
-
-    QFont fontThumb = Utils::StyleHelper::fontNormal();
-    nFontHeight = QFontMetrics(fontThumb).height();
-
-    QString strInfo = m_data.strInfo;
-    QColor colorDate = Utils::StyleHelper::listViewItemLead(bSelected, bFocused);
-    QRect rcLead = Utils::StyleHelper::drawText(&p, rcd, strInfo, 1, Qt::AlignVCenter, colorDate, fontThumb);
-
-    if (!thumb.text.IsEmpty()) {
-        QString strText = thumb.text;
-        QColor colorSummary = Utils::StyleHelper::listViewItemSummary(bSelected, bFocused);
-
-        QRect rcLine1(rcd.adjusted(rcLead.width() + nMargin, 0, 0, 0));
-        rcLine1 = Utils::StyleHelper::drawText(&p, rcLine1, strText, 1, Qt::AlignVCenter, colorSummary, fontThumb, false);
-
-        QRect rcLine2(rcd.adjusted(0, rcLine1.height(), 0, 0));
-        rcLine2 = Utils::StyleHelper::drawText(&p, rcLine2, strText, 2, Qt::AlignVCenter, colorSummary, fontThumb);
-    }
+    Utils::StyleHelper::drawListViewItemThumb(&p, rcd, nType, m_data.doc.strTitle, m_data.strInfo, thumb.text, bFocused, bSelected);
 
     return pm;
 }
@@ -400,53 +363,17 @@ QPixmap CWizDocumentListViewItem::drawGroupSummaryView_impl(const QStyleOptionVi
     WIZABSTRACT thumb;
     ThumbCache::instance()->find(m_data.doc.strKbGUID, m_data.doc.strGUID, thumb);
 
-    QRect rc(0, 0, vopt->rect.width(), vopt->rect.height());
-
-    QPixmap pm(Utils::StyleHelper::pixmapFromDevice(rc.size()));
-    pm.fill(Utils::StyleHelper::listViewBackground());
-
-    QPainter p(&pm);
-    Utils::StyleHelper::initPainterByDevice(&p);
-
-    Utils::StyleHelper::drawListViewItemSeperator(&p, rc);
-    Utils::StyleHelper::drawListViewItemBackground(&p, rc, bFocused, bSelected);
-
-    int nMargin = Utils::StyleHelper::margin();
-    QRect rcd(rc.adjusted(nMargin, nMargin, -nMargin, -nMargin));
+    QPainter p;
+    QPixmap pm(Utils::StyleHelper::pixmapFromDevice(vopt->rect.size()));
+    QRect rcd = Utils::StyleHelper::initListViewItemPainter(&p, &pm, vopt->rect, bFocused, bSelected);
 
     QPixmap pmAvatar;
     WizService::Internal::AvatarHost::avatar(m_data.strAuthorId, &pmAvatar);
     QRect rcAvatar = Utils::StyleHelper::drawAvatar(&p, rcd, pmAvatar);
     rcd.setLeft(rcAvatar.right());
 
-    QFont fontTitle = Utils::StyleHelper::fontHead();
-    int nFontHeight = QFontMetrics(fontTitle).height();
     int nType = m_data.doc.nProtected ? Utils::StyleHelper::BadgeEncryted : Utils::StyleHelper::BadgeNormal;
-    QRect rcTitle = Utils::StyleHelper::drawBadgeIcon(&p, rcd, nFontHeight, nType, bFocused, bSelected);
-
-    rcTitle.setCoords(rcTitle.right(), rcTitle.y(), rcd.right(), rcd.y());
-    QString strTitle = m_data.doc.strTitle;
-    QColor colorTitle = Utils::StyleHelper::listViewItemTitle(bSelected, bFocused);
-    rcTitle = Utils::StyleHelper::drawText(&p, rcTitle, strTitle, 1, Qt::AlignVCenter, colorTitle, fontTitle);
-    rcd.adjust(0, rcTitle.height() + nMargin, 0, 0);
-
-    QFont fontThumb = Utils::StyleHelper::fontNormal();
-    nFontHeight = QFontMetrics(fontThumb).height();
-
-    QString strInfo = m_data.strInfo;
-    QColor colorDate = Utils::StyleHelper::listViewItemLead(bSelected, bFocused);
-    QRect rcLead = Utils::StyleHelper::drawText(&p, rcd, strInfo, 1, Qt::AlignVCenter, colorDate, fontThumb);
-
-    if (!thumb.text.IsEmpty()) {
-        QString strText = thumb.text;
-        QColor colorSummary = Utils::StyleHelper::listViewItemSummary(bSelected, bFocused);
-
-        QRect rcLine1(rcd.adjusted(rcLead.width() + nMargin, 0, 0, 0));
-        rcLine1 = Utils::StyleHelper::drawText(&p, rcLine1, strText, 1, Qt::AlignVCenter, colorSummary, fontThumb, false);
-
-        QRect rcLine2(rcd.adjusted(0, rcLine1.height(), 0, 0));
-        rcLine2 = Utils::StyleHelper::drawText(&p, rcLine2, strText, 2, Qt::AlignVCenter, colorSummary, fontThumb);
-    }
+    Utils::StyleHelper::drawListViewItemThumb(&p, rcd, nType, m_data.doc.strTitle, m_data.strInfo, thumb.text, bFocused, bSelected);
 
     return pm;
 }

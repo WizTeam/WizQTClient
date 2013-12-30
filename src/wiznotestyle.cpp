@@ -93,20 +93,9 @@ protected:
                                   QPainter* painter,
                                   const CWizDocumentListView* view) const;
 
-    QPixmap genThumbnailPixmap(const QStyleOptionViewItemV4* vopt, const CWizDocumentListView* view) const;
-
-    // different view type for different document type: user, group, message
-    void drawItemPrivateThumbnail(const QStyleOptionViewItemV4* vopt,
-                                  QPainter* p,
-                                  const CWizDocumentListView* view) const;
-
     void drawItemPrivateTwoLine(const QStyleOptionViewItemV4* vopt,
                                 QPainter* p,
                                 const CWizDocumentListView* view) const;
-
-    //void drawItemGroupThumbnail(const QStyleOptionViewItemV4* vopt,
-    //                            QPainter* p,
-    //                            const CWizDocumentListView* view) const;
 
     void drawItemGroupTwoLine(const QStyleOptionViewItemV4* vopt,
                               QPainter* p,
@@ -115,14 +104,6 @@ protected:
     void drawItemOneLine(const QStyleOptionViewItemV4* vopt,
                          QPainter* p,
                          const CWizDocumentListView* view) const;
-
-    //void drawItemMessage(const QStyleOptionViewItemV4* option,
-    //                     QPainter* painter,
-    //                     const CWizDocumentListView* view) const;
-
-    //void drawDocumentListViewItemMessage(const QStyleOptionViewItemV4 *option,
-    //                                     QPainter *painter,
-    //                                     const CWizDocumentListView *view) const;
 
     void drawcenterImage(QPainter* p, const QImage& image, const QRect& rc) const;
 
@@ -352,138 +333,6 @@ void CWizNoteStyle::drawDocumentListViewItem(const QStyleOptionViewItemV4 *optio
     }
 }
 
-
-QPixmap CWizNoteStyle::genThumbnailPixmap(const QStyleOptionViewItemV4* vopt, const CWizDocumentListView* view) const
-{
-    QRect rc(0, 0, vopt->rect.width(), vopt->rect.height());
-
-    QPixmap pixmap = Utils::StyleHelper::pixmapFromDevice(rc.size());
-    pixmap.fill(m_colorDocumentsBackground);
-
-    QPainter p(&pixmap);
-    Utils::StyleHelper::initPainterByDevice(&p);
-
-    // indirect access
-    const WizDocumentListViewItemData& data = view->documentItemDataFromIndex(vopt->index);
-    const WIZABSTRACT& thumb = view->documentAbstractFromIndex(vopt->index);
-    bool bFocused = view->hasFocus();
-
-    Utils::StyleHelper::drawListViewItemSeperator(&p, rc);
-    Utils::StyleHelper::drawListViewItemBackground(&p, rc, view->hasFocus(), vopt->state & QStyle::State_Selected);
-
-    QRect textRect(rc);
-
-    if (!thumb.image.isNull()) {
-        QPixmap pm = QPixmap::fromImage(thumb.image);
-        QRect rcp = Utils::StyleHelper::drawThumbnailPixmap(&p, textRect, pm);
-
-        textRect.setRight(rcp.left());
-    }
-
-    // draw the text
-    if (!vopt->text.isEmpty()) {
-        textRect.adjust(6, 6, -6, -6);
-
-        QColor colorTitle, colorDate, colorSummary;
-        if (vopt->state & QStyle::State_Selected) {
-            if (bFocused) {
-                colorTitle = m_colorDocumentsTitleFocus;
-                colorDate  = m_colorDocumentsDateFocus;
-                colorSummary = m_colorDocumentsSummaryFocus;
-            } else {
-                colorTitle = m_colorDocumentsTitleLoseFocus;
-                colorDate = m_colorDocumentsDateLoseFocus;
-                colorSummary = m_colorDocumentsSummaryLoseFocus;
-            }
-        } else {
-            colorTitle = m_colorDocumentsTitle;
-            colorDate = m_colorDocumentsDate;
-            colorSummary = m_colorDocumentsSummary;
-        }
-
-        // draw title
-        QFont fontTitle = p.font();
-        fontTitle.setPixelSize(13);
-        fontTitle.setBold(true);
-        p.setFont(fontTitle);
-        int nFontHeight = p.fontMetrics().height();
-
-        // badge icon first
-        QRect rcBadge = textRect;
-        rcBadge.setSize(QSize(nFontHeight, nFontHeight));
-        const QIcon& badge = data.doc.nProtected ? m_iconDocumentsBadgeEncrypted : m_iconDocumentsBadge;
-        if (vopt->state & QStyle::State_Selected && bFocused) {
-            badge.paint(&p, rcBadge, Qt::AlignCenter, QIcon::Active, QIcon::Off);
-        } else {
-            badge.paint(&p, rcBadge, Qt::AlignCenter, QIcon::Normal, QIcon::Off);
-        }
-
-        QRect rcTitle(QPoint(rcBadge.right(), textRect.top()), QPoint(textRect.right(), rcBadge.bottom()));
-        QString strTitle = data.doc.strTitle;
-        //::WizDrawTextSingleLine(&p, rcTitle, strTitle,  Qt::TextSingleLine | Qt::AlignVCenter, colorTitle, true);
-        Utils::StyleHelper::drawText(&p, rcTitle, strTitle, 1, Qt::AlignVCenter, colorTitle, fontTitle);
-
-        // draw date and tags, use 12px font size
-        QFont fontAbs = p.font();
-        fontAbs.setPixelSize(12);
-        fontAbs.setBold(false);
-        p.setFont(fontAbs);
-        nFontHeight = p.fontMetrics().height();
-
-        QRect rcInfo(textRect.left(), rcTitle.bottom() + 6, textRect.width(), nFontHeight);
-        QString strInfo = data.strInfo;
-        int infoWidth = ::WizDrawTextSingleLine(&p, rcInfo, strInfo,  Qt::TextSingleLine | Qt::AlignVCenter, colorDate, true);
-
-        // there lines document summary
-        QString strAbstract = thumb.text;
-
-        int nLineSpacing = Utils::StyleHelper::lineSpacing();
-
-        QRect rcAbstract1(QPoint(textRect.left() + infoWidth + 4, rcInfo.top()), QPoint(textRect.right(), rcInfo.bottom()));
-        ::WizDrawTextSingleLine(&p, rcAbstract1, strAbstract, Qt::TextSingleLine | Qt::AlignVCenter, colorSummary, false);
-
-        QRect rcAbstract2(textRect.left(), rcAbstract1.bottom() + nLineSpacing, textRect.width(), nFontHeight);
-        ::WizDrawTextSingleLine(&p, rcAbstract2, strAbstract, Qt::TextSingleLine | Qt::AlignVCenter, colorSummary, false);
-
-        QRect rcAbstract3(textRect.left(), rcAbstract2.bottom() + nLineSpacing, textRect.width(), nFontHeight);
-        ::WizDrawTextSingleLine(&p, rcAbstract3, strAbstract, Qt::TextSingleLine | Qt::AlignVCenter, colorSummary, true);
-    }
-
-    return pixmap;
-}
-
-void CWizNoteStyle::drawItemPrivateThumbnail(const QStyleOptionViewItemV4* vopt,
-                                             QPainter* p,
-                                             const CWizDocumentListView* view) const
-{
-    const WizDocumentListViewItemData& data = view->documentItemDataFromIndex(vopt->index);
-
-    QString state;
-    if (vopt->state & QStyle::State_Selected) {
-        if (view->hasFocus()) {
-            state = "focus";
-        } else {
-            state = "nofocus";
-        }
-    } else {
-        state = "normal";
-    }
-
-    QString strKey = QString("%1:%2").arg(data.doc.strGUID).arg(state);
-    QPixmap pm;
-    if (!QPixmapCache::find(strKey, &pm)) {
-        pm = genThumbnailPixmap(vopt, view);
-        if (!QPixmapCache::insert(strKey, pm)) {
-            qDebug() << "Failed insert thumbnail to QPixmapCache while drawing document list";
-        }
-    }
-
-    p->save();
-    p->setClipRect(vopt->rect);
-    p->drawPixmap(vopt->rect, pm);
-    p->restore();
-}
-
 void CWizNoteStyle::drawItemPrivateTwoLine(const QStyleOptionViewItemV4* vopt,
                                            QPainter* p,
                                            const CWizDocumentListView* view) const
@@ -562,126 +411,6 @@ void CWizNoteStyle::drawItemPrivateTwoLine(const QStyleOptionViewItemV4* vopt,
 
     p->restore();
 }
-
-//void CWizNoteStyle::drawItemGroupThumbnail(const QStyleOptionViewItemV4* vopt,
-//                                           QPainter* p,
-//                                           const CWizDocumentListView* view) const
-//{
-//    // indirect access
-//    const WizDocumentListViewItemData& data = view->documentItemDataFromIndex(vopt->index);
-//    const WIZABSTRACT& abstract = view->documentAbstractFromIndex(vopt->index);
-//    //const QImage& imgAuthorAvatar = view->messageSenderAvatarFromIndex(vopt->index);
-//    WIZDOCUMENTDATA document = view->documentFromIndex(vopt->index);
-//    bool bFocused =  view->hasFocus();
-//
-//    p->save();
-//    p->setClipRect(vopt->rect);
-//
-//    // seperator line
-//    QRect textLine = vopt->rect;
-//    textLine.adjust(5, 0, -5, 0);
-//    p->setPen(m_colorDocumentsLine);
-//    p->drawLine(textLine.bottomLeft(), textLine.bottomRight());
-//
-//    // draw background behaviour
-//    if (vopt->state & QStyle::State_Selected) {
-//        if (bFocused) {
-//            p->fillRect(vopt->rect, m_colorDocumentsItemFocusBackground);
-//        } else {
-//            p->fillRect(vopt->rect, m_colorDocumentsItemLoseFocusBackground);
-//        }
-//    }
-//
-//    QRect textRect = vopt->rect.adjusted(5, 5, 0, 0);
-//
-//    // draw author avatar
-//    int nAvatarHeight = Utils::StyleHelper::avatarHeight();
-//    QRect rectAvatar = textRect;
-//    rectAvatar.setSize(QSize(nAvatarHeight, nAvatarHeight));
-//
-//    p->save();
-//    p->setRenderHint(QPainter::Antialiasing);
-//    QPixmap pmAvatar;
-//    WizService::Internal::AvatarHost::avatar(data.strAuthorId, &pmAvatar);
-//    p->drawPixmap(rectAvatar, pmAvatar);
-//
-//    //if (!imgAuthorAvatar.isNull()) {
-//    //    p->drawImage(rectAvatar, imgAuthorAvatar);
-//    //} else {
-//    //    p->drawImage(rectAvatar, m_imgDefaultAvatar);
-//    //}
-//    p->restore();
-//
-//    textRect.setLeft(rectAvatar.right());
-//
-//    // draw the text
-//    if (!vopt->text.isEmpty()) {
-//        textRect.adjust(5, 5, -5, -5);
-//
-//        QColor colorTitle, colorDate, colorSummary;
-//        if (vopt->state & QStyle::State_Selected) {
-//            if (bFocused) {
-//                colorTitle = m_colorDocumentsTitleFocus;
-//                colorDate  = m_colorDocumentsDateFocus;
-//                colorSummary = m_colorDocumentsSummaryFocus;
-//            } else {
-//                colorTitle = m_colorDocumentsTitleLoseFocus;
-//                colorDate = m_colorDocumentsDateLoseFocus;
-//                colorSummary = m_colorDocumentsSummaryLoseFocus;
-//            }
-//        } else {
-//            colorTitle = m_colorDocumentsTitle;
-//            colorDate = m_colorDocumentsDate;
-//            colorSummary = m_colorDocumentsSummary;
-//        }
-//
-//        // draw title
-//        QFont fontTitle = p->font();
-//        fontTitle.setPixelSize(13);
-//        fontTitle.setBold(true);
-//        p->setFont(fontTitle);
-//        int nFontHeight = p->fontMetrics().height();
-//
-//        // badge icon first
-//        QRect rcBadge = textRect;
-//        rcBadge.setSize(QSize(nFontHeight, nFontHeight));
-//        if (vopt->state & QStyle::State_Selected && bFocused) {
-//            m_iconDocumentsBadge.paint(p, rcBadge, Qt::AlignCenter, QIcon::Active, QIcon::Off);
-//        } else {
-//            m_iconDocumentsBadge.paint(p, rcBadge, Qt::AlignCenter, QIcon::Normal, QIcon::Off);
-//        }
-//
-//        QRect rcTitle(QPoint(rcBadge.right() + 5, rcBadge.top()), QPoint(textRect.right(), rcBadge.bottom()));
-//        ::WizDrawTextSingleLine(p, rcTitle, document.strTitle,  Qt::TextSingleLine | Qt::AlignVCenter, colorTitle, true);
-//
-//        // draw date and tags, use 12px font size
-//        QFont fontAbs = p->font();
-//        fontAbs.setPixelSize(12);
-//        fontAbs.setBold(false);
-//        p->setFont(fontAbs);
-//        nFontHeight = p->fontMetrics().height();
-//
-//        QRect rcInfo(textRect.left(), rectAvatar.bottom() - nFontHeight, textRect.width(), nFontHeight);
-//        QString strInfo = data.strInfo;
-//        int infoWidth = ::WizDrawTextSingleLine(p, rcInfo, strInfo,  Qt::TextSingleLine | Qt::AlignVCenter, colorDate, true);
-//
-//        // there lines document summary
-//        QString strAbstract = abstract.text;
-//
-//        int nLineSpacing = Utils::StyleHelper::lineSpacing();
-//
-//        QRect rcAbstract1(QPoint(textRect.left() + infoWidth + 4, rcInfo.top()), QPoint(textRect.right(), rcInfo.bottom()));
-//        ::WizDrawTextSingleLine(p, rcAbstract1, strAbstract, Qt::TextSingleLine | Qt::AlignVCenter, colorSummary, false);
-//
-//        QRect rcAbstract2(vopt->rect.left() + 6, rcAbstract1.bottom() + nLineSpacing, vopt->rect.width() - 12, nFontHeight);
-//        ::WizDrawTextSingleLine(p, rcAbstract2, strAbstract, Qt::TextSingleLine | Qt::AlignVCenter, colorSummary, false);
-//
-//        QRect rcAbstract3(vopt->rect.left() + 6, rcAbstract2.bottom() + nLineSpacing, vopt->rect.width() - 12, nFontHeight);
-//        ::WizDrawTextSingleLine(p, rcAbstract3, strAbstract, Qt::TextSingleLine | Qt::AlignVCenter, colorSummary, true);
-//    }
-//
-//    p->restore();
-//}
 
 void CWizNoteStyle::drawItemGroupTwoLine(const QStyleOptionViewItemV4* vopt,
                                          QPainter* p,
