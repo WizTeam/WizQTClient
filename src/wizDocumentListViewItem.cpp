@@ -286,7 +286,7 @@ QPixmap CWizDocumentListViewItem::draw_impl(const QStyleOptionViewItemV4* vopt, 
     }
 
     Q_ASSERT(0);
-    return NULL;
+    return QPixmap();
 }
 
 void CWizDocumentListViewItem::setNeedUpdate() const

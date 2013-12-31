@@ -81,6 +81,28 @@ QIcon StyleHelper::loadIcon(const QString& strName)
     return icon;
 }
 
+void StyleHelper::drawTreeViewBadge(QPainter* p, const QRect& rc, const QString& str)
+{
+    QFont f(p->font());
+    QRect rcd(rc.adjusted(2, 2, -5, -2));
+    int nWidth = QFontMetrics(f).width(str);
+    int nHeight = QFontMetrics(f).height();
+    if (nWidth > rcd.width() || nHeight > rcd.height()) {
+        qDebug() << "[WARNING] not enough space for drawing badge string";
+    }
+
+    nWidth = (nWidth < rcd.height()) ? rcd.height() : nWidth;
+
+    rcd.setLeft(rcd.right() - nWidth);
+    p->setRenderHints(QPainter::Antialiasing);
+    p->setBrush(Qt::blue);
+    p->setPen(Qt::blue);
+    p->drawEllipse(rcd);
+
+    p->setPen(Qt::white);
+    p->drawText(rcd, Qt::AlignCenter, str);
+}
+
 int StyleHelper::listViewItemHeight(int nType)
 {
     QFont f;

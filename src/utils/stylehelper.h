@@ -42,6 +42,8 @@ public:
     static QString themeName();
     static QIcon loadIcon(const QString& strName);
 
+    static void drawTreeViewBadge(QPainter* p, const QRect& rc, const QString& str);
+
     static int listViewItemHeight(int nType);
     static QColor listViewBackground();
     static QColor listViewItemSeperator();
