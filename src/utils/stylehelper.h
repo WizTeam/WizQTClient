@@ -23,7 +23,7 @@ public:
 
     enum BadgeType {
         BadgeNormal,
-        BadgeEncryted,
+        BadgeEncryted
     };
 
     enum ListViewType {

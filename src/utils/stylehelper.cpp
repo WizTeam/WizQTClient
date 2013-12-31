@@ -93,6 +93,7 @@ int StyleHelper::listViewItemHeight(int nType)
         return thumbnailHeight() + margin() * 2;
     default:
         Q_ASSERT(0);
+        return 0;
     }
 }
 

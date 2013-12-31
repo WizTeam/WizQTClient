@@ -37,8 +37,8 @@ public:
 
     void paint(QPainter* p, const QStyleOptionViewItemV4* vopt) const
     {
-        QRect rcd = vopt->rect.adjusted(5, 5, -5, -5);
         int nMargin = Utils::StyleHelper::margin();
+        QRect rcd = vopt->rect.adjusted(nMargin, nMargin, -nMargin, -nMargin);
 
         QPixmap pmAvatar;
         WizService::Internal::AvatarHost::avatar(m_data.senderId, &pmAvatar);
@@ -57,15 +57,16 @@ public:
         QString strTime = Utils::Misc::time2humanReadable(m_data.tCreated);
         QRect rcTime = Utils::StyleHelper::drawText(p, rcBottom, strTime, 1, Qt::AlignRight | Qt::AlignVCenter, p->pen().color(), f);
 
-        p->save();
-
         QSize sz(rcd.width() - nMargin * 2, rcd.height() - rcTime.height() - nMargin);
         QRect rcMsg(rcd.x() + nMargin, rcd.y() + 4 + nMargin, sz.width(), sz.height());
         QString strMsg = m_data.title.isEmpty() ? " " : m_data.title;
-        QRect rcMsg2 = Utils::StyleHelper::drawText(p, rcMsg, strMsg, 2, Qt::AlignVCenter, p->pen().color(), f);
+        rcMsg = Utils::StyleHelper::drawText(p, rcMsg, strMsg, 2, Qt::AlignVCenter, p->pen().color(), f);
 
         QPolygon po = Utils::StyleHelper::bubbleFromSize(sz, 4);
         po.translate(rcd.left() + nMargin, rcd.top());
+
+        p->save();
+        p->setPen(Utils::StyleHelper::listViewItemSeperator());
         p->drawPolygon(po);
         p->restore();
     }
@@ -132,7 +133,10 @@ void MessageListView::addMessages(const CWizMessageDataArray& arrayMessage)
 void MessageListView::addMessage(const WIZMESSAGEDATA& msg, bool sort)
 {
     MessageListViewItem* pItem = new MessageListViewItem(msg);
-    pItem->setSizeHint(QSize(sizeHint().width(), Utils::StyleHelper::thumbnailHeight()));
+
+    int nHeight = Utils::StyleHelper::thumbnailHeight() + Utils::StyleHelper::margin() * 2;
+    pItem->setSizeHint(QSize(sizeHint().width(), nHeight));
+
     addItem(pItem);
 
     if (sort) {
