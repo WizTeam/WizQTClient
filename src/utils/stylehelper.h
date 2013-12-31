@@ -26,6 +26,12 @@ public:
         BadgeEncryted,
     };
 
+    enum ListViewType {
+        ListTypeThumb,
+        ListTypeTwoLine,
+        ListTypeOneLine
+    };
+
     static void initPainterByDevice(QPainter* p);
     static QPixmap pixmapFromDevice(const QSize& sz);
     static int lineSpacing();
@@ -36,6 +42,7 @@ public:
     static QString themeName();
     static QIcon loadIcon(const QString& strName);
 
+    static int listViewItemHeight(int nType);
     static QColor listViewBackground();
     static QColor listViewItemSeperator();
     static QColor listViewItemBackground(int stat);
@@ -64,8 +71,8 @@ public:
     static QSize avatarSize();
     static QRect drawAvatar(QPainter* p, const QRect& rc, const QPixmap& pm);
 
-    static QFont fontHead();
-    static QFont fontNormal();
+    static int fontHead(QFont& f);
+    static int fontNormal(QFont& f);
 };
 } // namespace Utils
 

@@ -45,14 +45,15 @@ public:
         QRect rectAvatar = Utils::StyleHelper::drawAvatar(p, rcd, pmAvatar);
         rcd.setLeft(rectAvatar.right());
 
-        QFont f(Utils::StyleHelper::fontNormal());
+        QFont f;
+        int nHeight = Utils::StyleHelper::fontNormal(f);
 
         QString strSender = m_data.senderAlias.isEmpty() ? m_data.senderId : m_data.senderAlias;
         QRect rectSender = Utils::StyleHelper::drawText(p, rcd, strSender, 1, Qt::AlignVCenter, p->pen().color(), f);
         rcd.setTop(rectSender.bottom());
 
         QRect rcBottom(rcd);
-        rcBottom.setTop(rcd.bottom() - QFontMetrics(f).height());
+        rcBottom.setTop(rcd.bottom() - nHeight);
         QString strTime = Utils::Misc::time2humanReadable(m_data.tCreated);
         QRect rcTime = Utils::StyleHelper::drawText(p, rcBottom, strTime, 1, Qt::AlignRight | Qt::AlignVCenter, p->pen().color(), f);
 

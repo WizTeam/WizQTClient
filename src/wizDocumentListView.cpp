@@ -227,7 +227,8 @@ int CWizDocumentListView::addDocument(const WIZDOCUMENTDATA& doc, bool sort)
     }
 
     CWizDocumentListViewItem* pItem = new CWizDocumentListViewItem(m_app, data);
-    pItem->setSizeHint(itemSizeFromViewType(m_nViewType));
+    //pItem->setSizeHint(itemSizeFromViewType(m_nViewType));
+    pItem->setSizeHint(QSize(sizeHint().width(), Utils::StyleHelper::listViewItemHeight(m_nViewType)));
     pItem->setSortingType(m_nSortingType);
     addItem(pItem);
 
@@ -558,7 +559,8 @@ void CWizDocumentListView::resetItemsViewType(int type)
     m_nViewType = (ViewType)type;
 
     for (int i = 0; i < count(); i++) {
-        item(i)->setSizeHint(itemSizeFromViewType(m_nViewType));
+        item(i)->setSizeHint(QSize(sizeHint().width(), Utils::StyleHelper::listViewItemHeight(m_nViewType)));
+        //item(i)->setSizeHint(itemSizeFromViewType(m_nViewType));
     }
 }
 

@@ -81,6 +81,22 @@ QIcon StyleHelper::loadIcon(const QString& strName)
     return icon;
 }
 
+int StyleHelper::listViewItemHeight(int nType)
+{
+    QFont f;
+    switch (nType) {
+    case ListTypeOneLine:
+        return fontHead(f) + margin() * 4;
+    case ListTypeTwoLine:
+        return fontHead(f) + fontNormal(f) + margin() * 5;
+    case ListTypeThumb:
+        return thumbnailHeight() + margin() * 2;
+    default:
+        Q_ASSERT(0);
+    }
+}
+
+
 QColor StyleHelper::listViewBackground()
 {
     QSettings st(PathResolve::themePath(themeName()) + "skin.ini");
@@ -188,17 +204,8 @@ QSize StyleHelper::avatarSize()
 
 int StyleHelper::avatarHeight()
 {
-    int nHeight = lineSpacing() * 3;
-
     QFont f;
-    f.setPixelSize(13);
-    f.setBold(true);
-    nHeight += QFontMetrics(f).height();
-    f.setPixelSize(12);
-    f.setBold(false);
-    nHeight += QFontMetrics(f).height();
-
-    return nHeight;
+    return fontHead(f) + fontNormal(f) + margin() * 3;
 }
 
 QRect StyleHelper::drawAvatar(QPainter* p, const QRect& rc, const QPixmap& pm)
@@ -274,8 +281,8 @@ QRect StyleHelper::drawText(QPainter* p, const QRect& rc, QString& str, int nLin
     }
     textLayout.endLayout();
 
-    rcRet.setRect(rc.x(), rc.y(), nWidth + margin(), nHeight);
-    rcRet.adjust(margin(), 0, -margin(), 0);
+    rcRet.setRect(rc.x() + margin(), rc.y(), nWidth + margin(), nHeight);
+    //rcRet.adjust(margin(), 0, -margin(), 0);
 
     p->restore();
 
@@ -341,8 +348,7 @@ int StyleHelper::margin()
 int StyleHelper::thumbnailHeight()
 {
     QFont f;
-    int nExtra = QFontMetrics(f).height() * 2 + margin() * 2;
-    return margin() * 2 + avatarHeight() + nExtra;
+    return fontHead(f) + fontNormal(f) * 3 + margin() * 5;
 }
 
 QPolygon StyleHelper::bubbleFromSize(const QSize& sz, int nAngle, bool bAlignLeft)
@@ -374,10 +380,8 @@ QPolygon StyleHelper::bubbleFromSize(const QSize& sz, int nAngle, bool bAlignLef
     return QPolygon(ps);
 }
 
-QFont StyleHelper::fontHead()
+int StyleHelper::fontHead(QFont& f)
 {
-    QFont f;
-
     QSettings st(PathResolve::userSettingsFilePath());
     QString strFont = st.value("theme/fontFamily").toString();
     if (strFont.isEmpty()) {
@@ -388,13 +392,11 @@ QFont StyleHelper::fontHead()
     f.setPixelSize(13);
     f.setBold(true);
 
-    return f;
+    return QFontMetrics(f).height();
 }
 
-QFont StyleHelper::fontNormal()
+int StyleHelper::fontNormal(QFont& f)
 {
-    QFont f;
-
     QSettings st(PathResolve::userSettingsFilePath());
     QString strFont = st.value("theme/fontFamily").toString();
     if (strFont.isEmpty()) {
@@ -404,7 +406,7 @@ QFont StyleHelper::fontNormal()
     f.setFamily(strFont);
     f.setPixelSize(12);
 
-    return f;
+    return QFontMetrics(f).height();
 }
 
 QRect StyleHelper::initListViewItemPainter(QPainter* p, QPixmap* pm, const QRect& lrc, bool bFocused, bool bSelected)
@@ -428,21 +430,21 @@ void StyleHelper::drawListViewItemThumb(QPainter* p, const QRect& rc, int nBadge
 {
     QRect rcd(rc);
 
-    QFont fontTitle= Utils::StyleHelper::fontHead();
-    int nFontHeight = QFontMetrics(fontTitle).height();
+    QFont fontTitle;
+    int nFontHeight = Utils::StyleHelper::fontHead(fontTitle);
 
     if (!title.isEmpty()) {
         QRect rcTitle = Utils::StyleHelper::drawBadgeIcon(p, rcd, nFontHeight, nBadgeType, bFocused, bSelected);
 
-        rcTitle.setCoords(rcTitle.right(), rcTitle.y(), rcd.right(), rcd.y());
+        rcTitle.setCoords(rcTitle.right(), rcTitle.y(), rcd.right(), rcd.bottom());
         QString strTitle(title);
         QColor colorTitle = Utils::StyleHelper::listViewItemTitle(bSelected, bFocused);
         rcTitle = Utils::StyleHelper::drawText(p, rcTitle, strTitle, 1, Qt::AlignVCenter, colorTitle, fontTitle);
         rcd.adjust(0, rcTitle.height() + margin(), 0, 0);
     }
 
-    QFont fontThumb = Utils::StyleHelper::fontNormal();
-    nFontHeight = QFontMetrics(fontThumb).height();
+    QFont fontThumb;
+    nFontHeight = Utils::StyleHelper::fontNormal(fontThumb);
 
     QRect rcLead;
     if (!lead.isEmpty()) {
@@ -453,7 +455,7 @@ void StyleHelper::drawListViewItemThumb(QPainter* p, const QRect& rc, int nBadge
 
     if (!abs.isEmpty()) {
         QString strText(abs);
-        QRect rcLine1(rcd.adjusted(rcLead.width() + margin(), 0, 0, 0));
+        QRect rcLine1(rcd.adjusted(rcLead.width(), 0, 0, 0));
         QColor colorSummary = Utils::StyleHelper::listViewItemSummary(bSelected, bFocused);
         rcLine1 = Utils::StyleHelper::drawText(p, rcLine1, strText, 1, Qt::AlignVCenter, colorSummary, fontThumb, false);
 
