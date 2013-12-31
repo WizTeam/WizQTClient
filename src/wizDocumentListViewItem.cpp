@@ -263,9 +263,8 @@ QPixmap CWizDocumentListViewItem::draw_impl(const QStyleOptionViewItemV4* vopt, 
             return drawPrivateSummaryView_impl(vopt);
         case CWizDocumentListView::TypeTwoLine:
             return drawPrivateTwoLineView_impl(vopt);
-            //drawItemPrivateTwoLine(option, painter, view);
         case CWizDocumentListView::TypeOneLine:
-            //drawItemOneLine(option, painter, view);
+            return drawOneLineView_impl(vopt);
         default:
             Q_ASSERT(0);
             break;
@@ -279,7 +278,7 @@ QPixmap CWizDocumentListViewItem::draw_impl(const QStyleOptionViewItemV4* vopt, 
         case CWizDocumentListView::TypeTwoLine:
             return drawGroupTwoLineView_impl(vopt);
         case CWizDocumentListView::TypeOneLine:
-            //drawItemOneLine(option, painter, view);
+            return drawOneLineView_impl(vopt);
         default:
             Q_ASSERT(0);
             break;
@@ -388,6 +387,21 @@ QPixmap CWizDocumentListViewItem::drawGroupTwoLineView_impl(const QStyleOptionVi
 
     int nType = m_data.doc.nProtected ? Utils::StyleHelper::BadgeEncryted : Utils::StyleHelper::BadgeNormal;
     Utils::StyleHelper::drawListViewItemThumb(&p, rcd, nType, m_data.doc.strTitle, m_data.strInfo, NULL, bFocused, bSelected);
+
+    return pm;
+}
+
+QPixmap CWizDocumentListViewItem::drawOneLineView_impl(const  QStyleOptionViewItemV4* vopt) const
+{
+    bool bSelected = vopt->state & QStyle::State_Selected;
+    bool bFocused = listWidget()->hasFocus();
+
+    QPainter p;
+    QPixmap pm(Utils::StyleHelper::pixmapFromDevice(vopt->rect.size()));
+    QRect rcd = Utils::StyleHelper::initListViewItemPainter(&p, &pm, vopt->rect, bFocused, bSelected);
+
+    int nType = m_data.doc.nProtected ? Utils::StyleHelper::BadgeEncryted : Utils::StyleHelper::BadgeNormal;
+    Utils::StyleHelper::drawListViewItemThumb(&p, rcd, nType, m_data.doc.strTitle, NULL, NULL, bFocused, bSelected);
 
     return pm;
 }

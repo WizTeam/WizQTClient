@@ -72,6 +72,7 @@ private:
     QPixmap drawGroupSummaryView_impl(const QStyleOptionViewItemV4* vopt) const;
     QPixmap drawPrivateTwoLineView_impl(const QStyleOptionViewItemV4* vopt) const;
     QPixmap drawGroupTwoLineView_impl(const QStyleOptionViewItemV4* vopt) const;
+    QPixmap drawOneLineView_impl(const  QStyleOptionViewItemV4* vopt) const;
 
 private:
     CWizExplorerApp& m_app;
