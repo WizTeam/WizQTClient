@@ -180,7 +180,7 @@ void CWizNoteStyle::drawCategoryViewItem(const QStyleOptionViewItemV4 *vopt,
 
     p->save();
 
-    bool bSelected = vopt->state & State_Selected;
+    bool bSelected = vopt->state.testFlag(State_Selected);
 
     if (!vopt->icon.isNull()) {
         QRect iconRect = subElementRect(SE_ItemViewItemDecoration, vopt, view);

@@ -238,16 +238,16 @@ void CWizDocumentListViewItem::on_thumbnailReloaded()
 void CWizDocumentListViewItem::draw(QPainter* p, const QStyleOptionViewItemV4* vopt, int nViewType) const
 {
     int nItemType = itemType();
-    QString strKey = cacheKey();
+    //QString strKey = cacheKey();
     QPixmap pm;
 
-    if (!QPixmapCache::find(strKey, &pm)) {
+    //if (!QPixmapCache::find(strKey, &pm)) {
         pm = draw_impl(vopt, nItemType, nViewType);
-        Q_ASSERT(!pm.isNull());
-        if (!QPixmapCache::insert(strKey, pm)) {
-            qDebug() << "Failed insert thumbnail to QPixmapCache while drawing document list";
-        }
-    }
+    //    Q_ASSERT(!pm.isNull());
+    //    if (!QPixmapCache::insert(strKey, pm)) {
+    //        qDebug() << "Failed insert thumbnail to QPixmapCache while drawing document list";
+    //    }
+    //}
 
     p->save();
     p->setClipRect(vopt->rect);
