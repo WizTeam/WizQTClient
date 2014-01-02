@@ -172,7 +172,9 @@ void CWizNoteStyle::drawCategoryViewItem(const QStyleOptionViewItemV4 *vopt,
     if (view->isHelperItemByIndex(vopt->index)) {
         if (NULL != dynamic_cast<const CWizCategoryViewCategoryItem*>(pItem)) {
             QString str = vopt->text;
-            Utils::StyleHelper::drawText(p, vopt->rect, str, 1, Qt::AlignVCenter, Utils::StyleHelper::treeViewItemCategoryText(), p->font());
+            QRect rc(vopt->rect);
+            rc.setTop(rc.top() + 3);
+            Utils::StyleHelper::drawText(p, rc, str, 1, Qt::AlignVCenter, Utils::StyleHelper::treeViewItemCategoryText(), p->font());
         }
 
         return;

@@ -111,7 +111,7 @@ QColor StyleHelper::treeViewItemCategoryBackground()
 QColor StyleHelper::treeViewItemCategoryText()
 {
     QSettings st(PathResolve::themePath(themeName()) + "skin.ini");
-    return QColor(st.value("Category/ItemCategoryText", "#ffffff").toString());
+    return QColor(st.value("Category/ItemCategoryText", "#697882").toString());
 }
 
 QColor StyleHelper::treeViewItemText(bool bSelected)
