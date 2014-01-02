@@ -91,9 +91,7 @@ private:
 public:
     void setDocuments(const CWizDocumentDataArray& arrayDocument);
     void addDocuments(const CWizDocumentDataArray& arrayDocument);
-    void addMessages(const CWizMessageDataArray& arrayMessage);
     int addDocument(const WIZDOCUMENTDATA& data, bool sort);
-    int addMessage(const WIZMESSAGEDATA& msg, bool sort);
 
     bool acceptDocument(const WIZDOCUMENTDATA& document);
     void addAndSelectDocument(const WIZDOCUMENTDATA& document);

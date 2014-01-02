@@ -169,27 +169,7 @@ void CWizDocumentListView::setDocuments(const CWizDocumentDataArray& arrayDocume
 
     verticalScrollBar()->setValue(0);
 
-    CWizMessageDataArray arrayMessage;
-    CWizDocumentDataArray::const_iterator it = arrayDocument.begin();
-    for (;it != arrayDocument.end(); it++) {
-        const WIZDOCUMENTDATAEX& data = *it;
-
-        WIZMESSAGEDATA msg;
-        if (m_dbMgr.db().messageFromDocumentGUID(data.strGUID, msg)) {
-            arrayMessage.push_back(msg);
-            //arrayMessage.clear();
-            //break;
-        } else {
-             break;
-        }
-    }
-
-
-    if (arrayMessage.size() == arrayDocument.size()) {
-        addMessages(arrayMessage);
-    } else {
-        addDocuments(arrayDocument);
-    }
+    addDocuments(arrayDocument);
 }
 
 void CWizDocumentListView::addDocuments(const CWizDocumentDataArray& arrayDocument)
@@ -199,16 +179,6 @@ void CWizDocumentListView::addDocuments(const CWizDocumentDataArray& arrayDocume
         addDocument(*it, false);
 
         //QCoreApplication::processEvents(QEventLoop::AllEvents);
-    }
-
-    sortItems();
-}
-
-void CWizDocumentListView::addMessages(const CWizMessageDataArray& arrayMessage)
-{
-    CWizMessageDataArray::const_iterator it;
-    for (it = arrayMessage.begin(); it != arrayMessage.end(); it++) {
-        addMessage(*it, false);
     }
 
     sortItems();
@@ -229,35 +199,6 @@ int CWizDocumentListView::addDocument(const WIZDOCUMENTDATA& doc, bool sort)
     CWizDocumentListViewItem* pItem = new CWizDocumentListViewItem(m_app, data);
     //pItem->setSizeHint(itemSizeFromViewType(m_nViewType));
     pItem->setSizeHint(QSize(sizeHint().width(), Utils::StyleHelper::listViewItemHeight(m_nViewType)));
-    pItem->setSortingType(m_nSortingType);
-    addItem(pItem);
-
-    if (sort) {
-        sortItems();
-    }
-
-    Q_EMIT documentCountChanged();
-    return count();
-}
-
-int CWizDocumentListView::addMessage(const WIZMESSAGEDATA& msg, bool sort)
-{
-    WizDocumentListViewItemData data;
-    data.nType = CWizDocumentListViewItem::TypeMessage;
-    data.strAuthorId = msg.senderId;
-    data.nReadStatus = msg.nReadStatus;
-    data.doc.strKbGUID = msg.kbGUID;
-    data.doc.strGUID = msg.documentGUID;
-
-    // FIXME: document will be deleted while message data still stand alone
-    // we should delete these useless messages from database.
-    if (!m_dbMgr.db(msg.kbGUID).DocumentFromGUID(msg.documentGUID, data.doc)) {
-        qDebug() << "[CWizDocumentListView]Failed to add message while DocumentFromGUID: " << msg.title;
-        return count();
-    }
-
-    CWizDocumentListViewItem* pItem = new CWizDocumentListViewItem(m_app, data);
-    pItem->setSizeHint(itemSizeFromViewType(TypeThumbnail));
     pItem->setSortingType(m_nSortingType);
     addItem(pItem);
 

@@ -58,17 +58,23 @@ public:
         QRect rcTime = Utils::StyleHelper::drawText(p, rcBottom, strTime, 1, Qt::AlignRight | Qt::AlignVCenter, p->pen().color(), f);
 
         QSize sz(rcd.width() - nMargin * 2, rcd.height() - rcTime.height() - nMargin);
+        if (!vopt->state.testFlag(QStyle::State_Selected)) {
+            QPolygon po = Utils::StyleHelper::bubbleFromSize(sz, 4);
+            po.translate(rcd.left() + nMargin, rcd.top());
+
+            p->save();
+            if (!m_data.nReadStatus) {
+                p->setBrush(QBrush("#f5f5f5"));
+            }
+            p->setPen("#dcdcdc");
+            p->drawPolygon(po);
+            p->restore();
+        }
+
         QRect rcMsg(rcd.x() + nMargin, rcd.y() + 4 + nMargin, sz.width(), sz.height());
         QString strMsg = m_data.title.isEmpty() ? " " : m_data.title;
         rcMsg = Utils::StyleHelper::drawText(p, rcMsg, strMsg, 2, Qt::AlignVCenter, p->pen().color(), f);
 
-        QPolygon po = Utils::StyleHelper::bubbleFromSize(sz, 4);
-        po.translate(rcd.left() + nMargin, rcd.top());
-
-        p->save();
-        p->setPen(Utils::StyleHelper::listViewItemSeperator());
-        p->drawPolygon(po);
-        p->restore();
     }
 
 private:
