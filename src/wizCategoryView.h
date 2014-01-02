@@ -43,6 +43,8 @@ public:
     QPoint dragHoveredPos() const { return m_dragHoveredPos; }
     bool validateDropDestination(const QPoint& p) const;
 
+    void drawItem(QPainter* p, const QStyleOptionViewItemV4 *vopt) const;
+
 protected:
     virtual void startDrag(Qt::DropActions supportedActions);
     virtual void dragEnterEvent(QDragEnterEvent* event);

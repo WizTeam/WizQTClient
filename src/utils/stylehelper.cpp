@@ -81,9 +81,89 @@ QIcon StyleHelper::loadIcon(const QString& strName)
     return icon;
 }
 
+QColor StyleHelper::treeViewBackground()
+{
+    QSettings st(PathResolve::themePath(themeName()) + "skin.ini");
+    return QColor(st.value("Category/Background", "#808080").toString());
+}
+
+QColor StyleHelper::treeViewItemBackground(int stat)
+{
+    QSettings st(PathResolve::themePath(themeName()) + "skin.ini");
+    if (stat == Selected) {
+        return QColor(st.value("Category/ItemSelectedNoFocus", "#26292b").toString());
+    } else if (stat == Active) {
+        return QColor(st.value("Category/ItemSelected", "#0073c5").toString());
+    }
+
+    Q_ASSERT(0);
+    return QColor();
+}
+
+QColor StyleHelper::treeViewItemCategoryBackground()
+{
+    QSettings st(PathResolve::themePath(themeName()) + "skin.ini");
+    QColor co(st.value("Category/ItemCategory", "#ffffff").toString());
+    co.setAlpha(15);
+    return co;
+}
+
+QColor StyleHelper::treeViewItemCategoryText()
+{
+    QSettings st(PathResolve::themePath(themeName()) + "skin.ini");
+    return QColor(st.value("Category/ItemCategoryText", "#ffffff").toString());
+}
+
+QColor StyleHelper::treeViewItemText(bool bSelected)
+{
+    QSettings st(PathResolve::themePath(themeName()) + "skin.ini");
+    if (bSelected) {
+        return QColor(st.value("Category/TextSelected", "#ffffff").toString());
+    } else {
+        return QColor(st.value("Category/Text", "#a0aaaf").toString());
+    }
+}
+
+QColor StyleHelper::treeViewItemTextExtend(bool bSelected)
+{
+    QSettings st(PathResolve::themePath(themeName()) + "skin.ini");
+    if (bSelected) {
+        return QColor(st.value("Category/TextExtendSelected", "#e6e6e6").toString());
+    } else {
+        return QColor(st.value("Category/TextExtend", "#969696").toString());
+    }
+}
+
+void StyleHelper::drawTreeViewItemBackground(QPainter* p, const QRect& rc, bool bFocused)
+{
+    QRect rcd(rc);
+    QColor bg1 = treeViewItemBackground(Active);
+    QColor bg2 = treeViewItemBackground(Selected);
+
+    p->save();
+    if (bFocused) {
+        p->fillRect(rcd, bg1);
+    } else {
+        p->fillRect(rcd, bg2);
+        rcd.setWidth(5); // FIXME
+        p->fillRect(rcd, bg1);
+    }
+    p->restore();
+}
+
+void StyleHelper::drawTreeViewItemIcon(QPainter* p, const QRect& rc, const QIcon& icn, bool bSelected)
+{
+    if (bSelected) {
+        icn.paint(p, rc, Qt::AlignCenter, QIcon::Selected);
+    } else {
+        icn.paint(p, rc, Qt::AlignCenter, QIcon::Normal);
+    }
+}
+
 void StyleHelper::drawTreeViewBadge(QPainter* p, const QRect& rc, const QString& str)
 {
-    QFont f(p->font());
+    QFont f;
+    f.setPixelSize(11);
     QRect rcd(rc.adjusted(2, 2, -5, -2));
     int nWidth = QFontMetrics(f).width(str);
     int nHeight = QFontMetrics(f).height();
@@ -93,14 +173,19 @@ void StyleHelper::drawTreeViewBadge(QPainter* p, const QRect& rc, const QString&
 
     nWidth = (nWidth < rcd.height()) ? rcd.height() : nWidth;
 
+    p->save();
+
+    QColor co = treeViewItemBackground(Active);
     rcd.setLeft(rcd.right() - nWidth);
     p->setRenderHints(QPainter::Antialiasing);
-    p->setBrush(Qt::blue);
-    p->setPen(Qt::blue);
+    p->setBrush(co);
+    p->setPen(co);
     p->drawEllipse(rcd);
 
     p->setPen(Qt::white);
     p->drawText(rcd, Qt::AlignCenter, str);
+
+    p->restore();
 }
 
 int StyleHelper::listViewItemHeight(int nType)
@@ -247,8 +332,6 @@ QRect StyleHelper::drawAvatar(QPainter* p, const QRect& rc, const QPixmap& pm)
 QRect StyleHelper::drawText(QPainter* p, const QRect& rc, QString& str, int nLines,
                           int nFlags, const QColor& color, const QFont& font, bool bElided)
 {
-    Q_ASSERT(rc.width() > 0);
-
     if (str.isEmpty()) {
         qDebug() << "[WARNING]: the text should not be empty when drawing!";
         return QRect();
@@ -257,6 +340,10 @@ QRect StyleHelper::drawText(QPainter* p, const QRect& rc, QString& str, int nLin
     QFontMetrics fm(font);
     if (rc.height() < (fm.height() + fm.leading()) * nLines) {
         qDebug() << "[WARNING]: space is not enough for drawing!";
+    }
+
+    if (rc.width() < fm.width(str)) {
+        qDebug() << "[WARNING]: width should bigger font metrics when drawing!";
     }
 
     p->save();
@@ -428,6 +515,20 @@ int StyleHelper::fontNormal(QFont& f)
 
     f.setFamily(strFont);
     f.setPixelSize(12);
+
+    return QFontMetrics(f).height();
+}
+
+int StyleHelper::fontExtend(QFont& f)
+{
+    QSettings st(PathResolve::userSettingsFilePath());
+    QString strFont = st.value("theme/fontFamily").toString();
+    if (strFont.isEmpty()) {
+        st.setValue("theme/fontFamily", f.family());
+    }
+
+    f.setFamily(strFont);
+    f.setPixelSize(10);
 
     return QFontMetrics(f).height();
 }

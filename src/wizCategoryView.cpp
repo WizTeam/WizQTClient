@@ -390,6 +390,16 @@ bool CWizCategoryBaseView::validateDropDestination(const QPoint& p) const
     return false;
 }
 
+void CWizCategoryBaseView::drawItem(QPainter* p, const QStyleOptionViewItemV4 *vopt) const
+{
+    CWizCategoryViewItemBase* pItem = categoryItemFromIndex(vopt->index);
+    Q_ASSERT(pItem);
+
+    if (pItem)
+        pItem->draw(p, vopt);
+}
+
+
 /* ------------------------------ CWizCategoryPrivateView ------------------------------ */
 CWizCategoryView::CWizCategoryView(CWizExplorerApp& app, QWidget* parent)
     : CWizCategoryBaseView(app, parent)

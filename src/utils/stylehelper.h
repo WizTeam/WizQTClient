@@ -42,6 +42,15 @@ public:
     static QString themeName();
     static QIcon loadIcon(const QString& strName);
 
+    static QColor treeViewBackground();
+    static QColor treeViewItemBackground(int stat);
+    static QColor treeViewItemCategoryBackground();
+    static QColor treeViewItemCategoryText();
+    static QColor treeViewItemText(bool bSelected);
+    static QColor treeViewItemTextExtend(bool bSelected);
+
+    static void drawTreeViewItemBackground(QPainter* p, const QRect& rc, bool bFocused);
+    static void drawTreeViewItemIcon(QPainter* p, const QRect& rc, const QIcon& icn, bool bSelected);
     static void drawTreeViewBadge(QPainter* p, const QRect& rc, const QString& str);
 
     static int listViewItemHeight(int nType);
@@ -75,6 +84,8 @@ public:
 
     static int fontHead(QFont& f);
     static int fontNormal(QFont& f);
+    static int fontExtend(QFont& f);
+
 };
 } // namespace Utils
 

@@ -66,6 +66,88 @@ void CWizCategoryViewItemBase::setDocumentsCount(int nCurrent, int nTotal)
     }
 }
 
+void CWizCategoryViewItemBase::draw(QPainter* p, const QStyleOptionViewItemV4 *vopt) const
+{
+#if 0
+    if (!vopt->icon.isNull()) {
+        QRect iconRect = subElementRect(SE_ItemViewItemDecoration, vopt, view);
+
+        if (vopt->state.testFlag(State_Selected)) {
+            vopt->icon.paint(p, iconRect, Qt::AlignCenter, QIcon::Selected);
+        } else {
+            vopt->icon.paint(p, iconRect, Qt::AlignCenter, QIcon::Normal);
+        }
+    }
+
+    // text should not empty
+    if (vopt->text.isEmpty()) {
+        Q_ASSERT(0);
+        return;
+    }
+
+    // draw text little far from icon than the default
+    QRect textRect = subElementRect(SE_ItemViewItemText, vopt, view);
+    //textRect.adjust(8, 0, 0, 0);
+
+    // draw the text
+    QPalette::ColorGroup cg = vopt->state & QStyle::State_Enabled
+            ? QPalette::Normal : QPalette::Disabled;
+    if (cg == QPalette::Normal && !(vopt->state & QStyle::State_Active))
+        cg = QPalette::Inactive;
+
+    if (vopt->state & QStyle::State_Selected) {
+        p->setPen(vopt->palette.color(cg, QPalette::HighlightedText));
+    } else {
+        p->setPen(vopt->palette.color(cg, QPalette::Text));
+    }
+
+    if (vopt->state & QStyle::State_Editing) {
+        p->setPen(vopt->palette.color(cg, QPalette::Text));
+        p->drawRect(textRect.adjusted(0, 0, -1, -1));
+    }
+
+    // compute document count string length and leave enough space for drawing
+    QString strCount = pItem->countString;
+    int nCountWidthMax;
+    int nMargin = 3;
+    QFont fontCount = p->font();
+    fontCount.setPointSize(10);
+
+    if (!strCount.isEmpty()) {
+        QFont fontOld = p->font();
+        p->setFont(fontCount);
+        nCountWidthMax = p->fontMetrics().width(strCount) + nMargin;
+        textRect.adjust(0, 0, -nCountWidthMax, 0);
+        p->setFont(fontOld);
+    }
+
+    QFont f = p->font();
+    f.setPixelSize(12);
+    p->setFont(f);
+
+    QColor colorText = vopt->state.testFlag(State_Selected) ?
+                m_colorCategoryTextSelected : m_colorCategoryTextNormal;
+
+    CString strText = vopt->text;
+    int nWidth = ::WizDrawTextSingleLine(p, textRect, strText,
+                                         Qt::TextSingleLine | Qt::AlignVCenter,
+                                         colorText, true);
+
+    // only draw document count if count string is not empty
+    if (!strCount.isEmpty()) {
+        p->setFont(fontCount);
+        textRect.adjust(nWidth + nMargin, 0, nCountWidthMax, 0);
+        QColor colorCount = vopt->state.testFlag(State_Selected) ? QColor(230, 230, 230) : QColor(150, 150, 150);
+        CString strCount2(strCount);
+        ::WizDrawTextSingleLine(p, textRect, strCount2,  Qt::TextSingleLine | Qt::AlignVCenter, colorCount, false);
+    }
+
+    p->restore();
+
+#endif
+}
+
+
 /* ------------------------------ CWizCategoryViewSpacerItem ------------------------------ */
 
 CWizCategoryViewSpacerItem::CWizCategoryViewSpacerItem(CWizExplorerApp& app)

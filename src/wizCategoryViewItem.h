@@ -17,6 +17,8 @@ public:
     virtual void getDocuments(CWizDatabase& db, CWizDocumentDataArray& arrayDocument) = 0;
     virtual bool accept(CWizDatabase& db, const WIZDOCUMENTDATA& data) { Q_UNUSED(db); Q_UNUSED(data); return false; }
 
+    virtual void draw(QPainter* p, const QStyleOptionViewItemV4 *vopt) const;
+
     virtual QVariant data(int column, int role) const;
     virtual int getItemHeight(int hintHeight) const;
     virtual bool operator<(const QTreeWidgetItem &other) const;

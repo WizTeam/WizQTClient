@@ -59,21 +59,21 @@ private:
     QColor m_colorCategorySelctedBackgroundNoFocus;
 
     // document list view
-    QIcon m_iconDocumentsBadge;
-    QIcon m_iconDocumentsBadgeEncrypted;
-    QIcon m_iconDocumentsAttachment;
+    //QIcon m_iconDocumentsBadge;
+    //QIcon m_iconDocumentsBadgeEncrypted;
+    //QIcon m_iconDocumentsAttachment;
     QColor m_colorDocumentsBackground;
-    QColor m_colorDocumentsItemFocusBackground;
-    QColor m_colorDocumentsItemLoseFocusBackground;
-    QColor m_colorDocumentsTitle;
-    QColor m_colorDocumentsDate;
-    QColor m_colorDocumentsSummary;
-    QColor m_colorDocumentsTitleFocus;
-    QColor m_colorDocumentsDateFocus;
-    QColor m_colorDocumentsSummaryFocus;
-    QColor m_colorDocumentsTitleLoseFocus;
-    QColor m_colorDocumentsDateLoseFocus;
-    QColor m_colorDocumentsSummaryLoseFocus;
+    //QColor m_colorDocumentsItemFocusBackground;
+    //QColor m_colorDocumentsItemLoseFocusBackground;
+    //QColor m_colorDocumentsTitle;
+    //QColor m_colorDocumentsDate;
+    //QColor m_colorDocumentsSummary;
+    //QColor m_colorDocumentsTitleFocus;
+    //QColor m_colorDocumentsDateFocus;
+    //QColor m_colorDocumentsSummaryFocus;
+    //QColor m_colorDocumentsTitleLoseFocus;
+    //QColor m_colorDocumentsDateLoseFocus;
+    //QColor m_colorDocumentsSummaryLoseFocus;
     QColor m_colorDocumentsLine;
 
     QColor m_colorMultiLineListFirstLine;
@@ -113,8 +113,8 @@ CWizNoteStyle::CWizNoteStyle(const QString& strSkinName)
     m_imgDocumentUnread.load(strSkinPath + "read_btn_unread.png");
     m_imgDefaultAvatar.load(strSkinPath + "avatar_default.png");
 
-    m_iconDocumentsBadge = ::WizLoadSkinIcon(strSkinName, "document_badge");
-    m_iconDocumentsBadgeEncrypted = ::WizLoadSkinIcon(strSkinName, "document_badge_encrypted");
+    //m_iconDocumentsBadge = ::WizLoadSkinIcon(strSkinName, "document_badge");
+    //m_iconDocumentsBadgeEncrypted = ::WizLoadSkinIcon(strSkinName, "document_badge_encrypted");
 
     m_multiLineListSelectedItemBackground.SetImage(strSkinPath + "multilinelist_selected_background.png", QPoint(4, 4));
     m_multiLineListSelectedItemBackgroundHot.SetImage(strSkinPath + "multilinelist_selected_background_hot.png", QPoint(4, 4));
@@ -137,17 +137,17 @@ CWizNoteStyle::CWizNoteStyle(const QString& strSkinName)
 
     // document list view
     m_colorDocumentsBackground = settings.GetColor("Documents", "Background", "#ffffff");
-    m_colorDocumentsItemFocusBackground = settings.GetColor("Documents", "ItemFocusBackground", "#0c8eec");
-    m_colorDocumentsItemLoseFocusBackground = settings.GetColor("Documents", "ItemLoseFocusBackground", "#e1e1e1");
-    m_colorDocumentsTitle = settings.GetColor("Documents", "Title", "#464646");
-    m_colorDocumentsDate = settings.GetColor("Documents", "Date", "#0000FF");
-    m_colorDocumentsSummary = settings.GetColor("Documents", "Summary", "#8C8C8C");
-    m_colorDocumentsTitleFocus = settings.GetColor("Documents", "TitleFocus", "#FFFFFF");
-    m_colorDocumentsDateFocus = settings.GetColor("Documents", "DateFocus", "#FFFFFF");
-    m_colorDocumentsSummaryFocus = settings.GetColor("Documents", "SummaryFocus", "#FFFFFF");
-    m_colorDocumentsTitleLoseFocus = settings.GetColor("Documents", "TitleLoseFocus", "6A6A6A");
-    m_colorDocumentsDateLoseFocus = settings.GetColor("Documents", "DateLoseFocus", "6A6A6A");
-    m_colorDocumentsSummaryLoseFocus = settings.GetColor("Documents", "SummaryLoseFocus", "6A6A6A");
+    //m_colorDocumentsItemFocusBackground = settings.GetColor("Documents", "ItemFocusBackground", "#0c8eec");
+    //m_colorDocumentsItemLoseFocusBackground = settings.GetColor("Documents", "ItemLoseFocusBackground", "#e1e1e1");
+    //m_colorDocumentsTitle = settings.GetColor("Documents", "Title", "#464646");
+    //m_colorDocumentsDate = settings.GetColor("Documents", "Date", "#0000FF");
+    //m_colorDocumentsSummary = settings.GetColor("Documents", "Summary", "#8C8C8C");
+    //m_colorDocumentsTitleFocus = settings.GetColor("Documents", "TitleFocus", "#FFFFFF");
+    //m_colorDocumentsDateFocus = settings.GetColor("Documents", "DateFocus", "#FFFFFF");
+    //m_colorDocumentsSummaryFocus = settings.GetColor("Documents", "SummaryFocus", "#FFFFFF");
+    //m_colorDocumentsTitleLoseFocus = settings.GetColor("Documents", "TitleLoseFocus", "6A6A6A");
+    //m_colorDocumentsDateLoseFocus = settings.GetColor("Documents", "DateLoseFocus", "6A6A6A");
+    //m_colorDocumentsSummaryLoseFocus = settings.GetColor("Documents", "SummaryLoseFocus", "6A6A6A");
     m_colorDocumentsLine = settings.GetColor("Documents", "Line", "#d9dcdd");
 
     m_colorMultiLineListFirstLine = settings.GetColor("MultiLineList", "First", "#000000");
@@ -165,96 +165,54 @@ CWizNoteStyle::CWizNoteStyle(const QString& strSkinName)
 
 
 void CWizNoteStyle::drawCategoryViewItem(const QStyleOptionViewItemV4 *vopt,
-                                         QPainter *painter, const CWizCategoryBaseView *view) const
+                                         QPainter *p, const CWizCategoryBaseView *view) const
 {
     CWizCategoryViewItemBase* pItem = view->categoryItemFromIndex(vopt->index);
 
+    p->save();
+
     if (view->isHelperItemByIndex(vopt->index)) {
         if (NULL != dynamic_cast<const CWizCategoryViewCategoryItem*>(pItem)) {
-            painter->setPen(m_colorCategoryTextCategoryNormal);
-            painter->drawText(vopt->rect, Qt::AlignLeft | Qt::AlignVCenter, vopt->text);
+            QString str = vopt->text;
+            Utils::StyleHelper::drawText(p, vopt->rect, str, 1, Qt::AlignVCenter, Utils::StyleHelper::treeViewItemCategoryText(), p->font());
         }
 
         return;
     }
 
-    QPainter* p = painter;
-    p->save();
-    p->setClipRect(vopt->rect);
+    bool bSelected = vopt->state & State_Selected;
 
-    // draw the icon
     if (!vopt->icon.isNull()) {
-        // FIXME: draw icon little bigger than the default rect qt give us
         QRect iconRect = subElementRect(SE_ItemViewItemDecoration, vopt, view);
-
-        if (vopt->state.testFlag(State_Selected)) {
-            vopt->icon.paint(p, iconRect, Qt::AlignCenter, QIcon::Selected);
-        } else {
-            vopt->icon.paint(p, iconRect, Qt::AlignCenter, QIcon::Normal);
-        }
+        Utils::StyleHelper::drawTreeViewItemIcon(p, iconRect, vopt->icon, bSelected);
     }
 
-    // text should not empty
-    if (vopt->text.isEmpty()) {
-        Q_ASSERT(0);
-        return;
-    }
+    QRect rcd = subElementRect(SE_ItemViewItemText, vopt, view);
 
-    // draw text little far from icon than the default
-    QRect textRect = subElementRect(SE_ItemViewItemText, vopt, view);
-    //textRect.adjust(8, 0, 0, 0);
+    QFont f;
+    Utils::StyleHelper::fontNormal(f);
 
-    // draw the text
-    QPalette::ColorGroup cg = vopt->state & QStyle::State_Enabled
-            ? QPalette::Normal : QPalette::Disabled;
-    if (cg == QPalette::Normal && !(vopt->state & QStyle::State_Active))
-        cg = QPalette::Inactive;
-
-    if (vopt->state & QStyle::State_Selected) {
-        p->setPen(vopt->palette.color(cg, QPalette::HighlightedText));
-    } else {
-        p->setPen(vopt->palette.color(cg, QPalette::Text));
-    }
-
-    if (vopt->state & QStyle::State_Editing) {
-        p->setPen(vopt->palette.color(cg, QPalette::Text));
-        p->drawRect(textRect.adjusted(0, 0, -1, -1));
-    }
+    QFont fontCount;
+    Utils::StyleHelper::fontExtend(fontCount);
 
     // compute document count string length and leave enough space for drawing
+    QRect rct(rcd);
     QString strCount = pItem->countString;
-    int nCountWidthMax;
-    int nMargin = 3;
-    QFont fontCount = p->font();
-    fontCount.setPointSize(10);
-
     if (!strCount.isEmpty()) {
-        QFont fontOld = p->font();
-        p->setFont(fontCount);
-        nCountWidthMax = p->fontMetrics().width(strCount) + nMargin;
-        textRect.adjust(0, 0, -nCountWidthMax, 0);
-        p->setFont(fontOld);
+        int nCountWidthMax = QFontMetrics(f).width(strCount);
+        rct.adjust(0, 0, -nCountWidthMax, 0);
     }
 
-    QFont f = p->font();
-    f.setPixelSize(12);
-    p->setFont(f);
+    QString strText = vopt->text;
+    if (!strText.isEmpty()) {
+        QColor colorText = Utils::StyleHelper::treeViewItemText(bSelected);
+        rct = Utils::StyleHelper::drawText(p, rct, strText, 1, Qt::AlignBottom, colorText, f);
+    }
 
-    QColor colorText = vopt->state.testFlag(State_Selected) ?
-                m_colorCategoryTextSelected : m_colorCategoryTextNormal;
-
-    CString strText = vopt->text;
-    int nWidth = ::WizDrawTextSingleLine(p, textRect, strText,
-                                         Qt::TextSingleLine | Qt::AlignVCenter,
-                                         colorText, true);
-
-    // only draw document count if count string is not empty
     if (!strCount.isEmpty()) {
-        p->setFont(fontCount);
-        textRect.adjust(nWidth + nMargin, 0, nCountWidthMax, 0);
-        QColor colorCount = vopt->state.testFlag(State_Selected) ? QColor(230, 230, 230) : QColor(150, 150, 150);
-        CString strCount2(strCount);
-        ::WizDrawTextSingleLine(p, textRect, strCount2,  Qt::TextSingleLine | Qt::AlignVCenter, colorCount, false);
+        rcd.adjust(rct.width(), 0, 0, 0);
+        QColor colorCount = Utils::StyleHelper::treeViewItemTextExtend(bSelected);
+        Utils::StyleHelper::drawText(p, rcd, strCount, 1, Qt::AlignBottom, colorCount, fontCount);
     }
 
     p->restore();
@@ -493,23 +451,30 @@ void CWizNoteStyle::drawPrimitive(PrimitiveElement pe, const QStyleOption *opt, 
 
                 const QTreeWidgetItem* pItemBase = view->itemAt(vopt->rect.center());
                 if (NULL != dynamic_cast<const CWizCategoryViewCategoryItem *>(pItemBase)) {
-                    p->fillRect(vopt->rect, QColor(255, 255, 255, 15)); //FIXME
+                    p->fillRect(vopt->rect, Utils::StyleHelper::treeViewItemCategoryBackground());
+                    //p->fillRect(vopt->rect, QColor(255, 255, 255, 15)); //FIXME
                     //drawCategoryViewItemCategoryItem(pItem, vopt, p);
                     return;
                 }
 
-                if (opt->state & QStyle::State_Selected)
-                {
-                    QRect rect = opt->rect;
-                    rect.setWidth(p->window().width());
-                    if (opt->state & QStyle::State_HasFocus) {
-                        p->fillRect(rect, m_colorCategorySelectedBackground);
-                    } else {
-                        p->fillRect(rect, m_colorCategorySelctedBackgroundNoFocus);
-                        rect.setWidth(5); // FIXME
-                        p->fillRect(rect, m_colorCategorySelectedBackground);
-                    }
+                if (opt->state & State_Selected) {
+                    QRect rc(vopt->rect);
+                    rc.setWidth(p->window().width());
+                    Utils::StyleHelper::drawTreeViewItemBackground(p, rc, opt->state & State_HasFocus);
                 }
+
+                //if (opt->state & QStyle::State_Selected)
+                //{
+                //    QRect rect = opt->rect;
+                //    rect.setWidth(p->window().width());
+                //    if (opt->state & QStyle::State_HasFocus) {
+                //        p->fillRect(rect, m_colorCategorySelectedBackground);
+                //    } else {
+                //        p->fillRect(rect, m_colorCategorySelctedBackgroundNoFocus);
+                //        rect.setWidth(5); // FIXME
+                //        p->fillRect(rect, m_colorCategorySelectedBackground);
+                //    }
+                //}
             }
 
             return;
