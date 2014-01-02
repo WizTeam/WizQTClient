@@ -243,6 +243,7 @@ void CWizDocumentListViewItem::draw(QPainter* p, const QStyleOptionViewItemV4* v
 
     if (!QPixmapCache::find(strKey, &pm)) {
         pm = draw_impl(vopt, nItemType, nViewType);
+        Q_ASSERT(!pm.isNull());
         if (!QPixmapCache::insert(strKey, pm)) {
             qDebug() << "Failed insert thumbnail to QPixmapCache while drawing document list";
         }

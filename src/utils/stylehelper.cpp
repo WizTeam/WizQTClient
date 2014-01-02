@@ -339,12 +339,12 @@ QRect StyleHelper::drawText(QPainter* p, const QRect& rc, QString& str, int nLin
 
     QFontMetrics fm(font);
     if (rc.height() < (fm.height() + fm.leading()) * nLines) {
-        qDebug() << "[WARNING]: space is not enough for drawing!";
+        qDebug() << "[WARNING]: space is not enough for drawing! text: " << str.left(30) << "...";
     }
 
-    if (rc.width() < fm.width(str)) {
-        qDebug() << "[WARNING]: width should bigger font metrics when drawing!";
-    }
+    //if (rc.width() * nLines < fm.width(str)) {
+    //    qDebug() << "[WARNING]: width should bigger than font metrics when drawing! text:" << str.left(30) << "...";
+    //}
 
     p->save();
     p->setPen(color);

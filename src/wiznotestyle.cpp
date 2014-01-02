@@ -169,8 +169,6 @@ void CWizNoteStyle::drawCategoryViewItem(const QStyleOptionViewItemV4 *vopt,
 {
     CWizCategoryViewItemBase* pItem = view->categoryItemFromIndex(vopt->index);
 
-    p->save();
-
     if (view->isHelperItemByIndex(vopt->index)) {
         if (NULL != dynamic_cast<const CWizCategoryViewCategoryItem*>(pItem)) {
             QString str = vopt->text;
@@ -180,6 +178,8 @@ void CWizNoteStyle::drawCategoryViewItem(const QStyleOptionViewItemV4 *vopt,
         return;
     }
 
+    p->save();
+
     bool bSelected = vopt->state & State_Selected;
 
     if (!vopt->icon.isNull()) {
@@ -187,16 +187,19 @@ void CWizNoteStyle::drawCategoryViewItem(const QStyleOptionViewItemV4 *vopt,
         Utils::StyleHelper::drawTreeViewItemIcon(p, iconRect, vopt->icon, bSelected);
     }
 
-    QRect rcd = subElementRect(SE_ItemViewItemText, vopt, view);
-
     QFont f;
-    Utils::StyleHelper::fontNormal(f);
+    int nHeight1 = Utils::StyleHelper::fontNormal(f);
 
     QFont fontCount;
-    Utils::StyleHelper::fontExtend(fontCount);
+    int nHeight2 = Utils::StyleHelper::fontExtend(fontCount);
+
+    QRect rcd = subElementRect(SE_ItemViewItemText, vopt, view);
+    int nAdjustHeight1 = (rcd.height() - nHeight1)/2;
+    int nAdjustHeight2 = (rcd.height() - nHeight2)/2;
 
     // compute document count string length and leave enough space for drawing
     QRect rct(rcd);
+    rct.adjust(0, nAdjustHeight1, 0, 0);
     QString strCount = pItem->countString;
     if (!strCount.isEmpty()) {
         int nCountWidthMax = QFontMetrics(f).width(strCount);
@@ -210,7 +213,7 @@ void CWizNoteStyle::drawCategoryViewItem(const QStyleOptionViewItemV4 *vopt,
     }
 
     if (!strCount.isEmpty()) {
-        rcd.adjust(rct.width(), 0, 0, 0);
+        rcd.adjust(rct.width(), nAdjustHeight2, 0, 0);
         QColor colorCount = Utils::StyleHelper::treeViewItemTextExtend(bSelected);
         Utils::StyleHelper::drawText(p, rcd, strCount, 1, Qt::AlignBottom, colorCount, fontCount);
     }
