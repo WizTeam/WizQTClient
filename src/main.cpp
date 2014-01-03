@@ -100,6 +100,12 @@ int main(int argc, char *argv[])
     //QSettings::setDefaultFormat(QSettings::IniFormat);
     //QSettings::setPath(QSettings::IniFormat, QSettings::SystemScope,
     //                   QCoreApplication::applicationDirPath() + QLatin1String(SHARE_PATH));
+
+#ifdef Q_OS_MAC
+    QSettings::setPath(QSettings::IniFormat, QSettings::UserScope,
+                       Utils::PathResolve::dataStorePath());
+#endif
+
     QSettings *globalSettings = new QSettings(QSettings::IniFormat, QSettings::UserScope,
                                               QLatin1String("wiz"), QLatin1String("wiznote"));
 
