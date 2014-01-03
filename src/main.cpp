@@ -98,7 +98,7 @@ int main(int argc, char *argv[])
 
     // setup settings
     QSettings::setDefaultFormat(QSettings::IniFormat);
-    QSettings* globalSettings = new QSettings(Utils::PathResolve::globalSettingsFilePath());
+    QSettings* globalSettings = new QSettings(Utils::PathResolve::globalSettingsFilePath(), QSettings::IniFormat);
 
 //#ifdef Q_OS_WIN
 //    QString strDefaultFontName = settings.GetString("Common", "DefaultFont", "");
@@ -118,7 +118,7 @@ int main(int argc, char *argv[])
     int nCacheSize = globalSettings->value("Common/Cache", 10240*3).toInt();
     QPixmapCache::setCacheLimit(nCacheSize);
 
-    QString strUserId = globalSettings->value("Users/DefaultUser", "").toString();
+    QString strUserId = globalSettings->value("Users/DefaultUser").toString();
     QString strPassword;
 
     CWizUserSettings userSettings(strUserId);
