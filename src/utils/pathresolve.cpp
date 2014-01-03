@@ -92,9 +92,14 @@ QString PathResolve::tempPath()
     return path;
 }
 
-QString PathResolve::userSettingsFilePath()
+QString PathResolve::globalSettingsFilePath()
 {
     return dataStorePath() + "wiznote.ini";
+}
+
+QString PathResolve::userSettingsFilePath(const QString strUserId)
+{
+    return dataStorePath() + strUserId + "/wiznote.ini";
 }
 
 void PathResolve::addBackslash(QString& strPath)

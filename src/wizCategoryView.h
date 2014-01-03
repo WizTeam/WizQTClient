@@ -11,6 +11,7 @@ class CWizScrollBar;
 class CWizDatabaseManager;
 class CWizExplorerApp;
 class CWizWebSettingsDialog;
+class QSettings;
 
 #define CATEGORY_MESSAGES_ALL               QObject::tr("Message Center")
 #define CATEGORY_MESSAGES_SEND_TO_ME        QObject::tr("Send to me")
@@ -24,6 +25,7 @@ class CWizCategoryBaseView : public QTreeWidget
 
 public:
     CWizCategoryBaseView(CWizExplorerApp& app, QWidget *parent = 0);
+    virtual ~CWizCategoryBaseView();
 
     QString selectedItemKbGUID();
     void getDocuments(CWizDocumentDataArray& arrayDocument);
@@ -97,6 +99,17 @@ class CWizCategoryView : public CWizCategoryBaseView
 public:
     CWizCategoryView(CWizExplorerApp& app, QWidget *parent = 0);
     void init();
+
+    QString m_strSelectedId;
+    QString selectedId(QSettings* settings);
+
+    void loadState();
+    void loadChildState(QTreeWidgetItem* pi, QSettings* settings);
+    void loadItemState(QTreeWidgetItem* pi, QSettings* settings);
+    void saveState();
+    void saveChildState(QTreeWidgetItem* pi, QSettings* settings);
+    void saveItemState(QTreeWidgetItem* pi, QSettings* settings);
+    void saveSelected(QSettings* settings);
 
     // action user data
     enum CategoryActions

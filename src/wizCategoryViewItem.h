@@ -26,6 +26,8 @@ public:
     const QString& kbGUID() const { return m_strKbGUID; }
     const QString& name() const { return m_strName; }
 
+    QString id() const;
+
     void setDocumentsCount(int nCurrent, int nTotal);
 
 protected:

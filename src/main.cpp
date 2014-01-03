@@ -97,13 +97,12 @@ int main(int argc, char *argv[])
 #endif
 
     // setup settings
-    QSettings::setDefaultFormat(QSettings::IniFormat);
-    QSettings::setPath(QSettings::IniFormat, QSettings::SystemScope,
-                       QCoreApplication::applicationDirPath() + QLatin1String(SHARE_PATH));
-    QSettings *globalSettings = new QSettings(QSettings::IniFormat, QSettings::SystemScope,
+    //QSettings::setDefaultFormat(QSettings::IniFormat);
+    //QSettings::setPath(QSettings::IniFormat, QSettings::SystemScope,
+    //                   QCoreApplication::applicationDirPath() + QLatin1String(SHARE_PATH));
+    QSettings *globalSettings = new QSettings(QSettings::IniFormat, QSettings::UserScope,
                                               QLatin1String("wiz"), QLatin1String("wiznote"));
 
-    QSettings* settings = new QSettings(Utils::PathResolve::userSettingsFilePath(), QSettings::IniFormat);
 
 //#ifdef Q_OS_WIN
 //    QString strDefaultFontName = settings.GetString("Common", "DefaultFont", "");
@@ -115,16 +114,15 @@ int main(int argc, char *argv[])
     PluginManager pluginManager;
     PluginManager::setFileExtension(QLatin1String("pluginspec"));
     PluginManager::setGlobalSettings(globalSettings);
-    PluginManager::setSettings(settings);
 
     const QStringList pluginPaths = getPluginPaths();
     PluginManager::setPluginPaths(pluginPaths);
 
     // use 3 times(30M) of Qt default usage
-    int nCacheSize = settings->value("Common/Cache", 10240*3).toInt();
+    int nCacheSize = globalSettings->value("Common/Cache", 10240*3).toInt();
     QPixmapCache::setCacheLimit(nCacheSize);
 
-    QString strUserId = settings->value("Users/DefaultUser", "").toString();
+    QString strUserId = globalSettings->value("Users/DefaultUser", "").toString();
     QString strPassword;
 
     CWizUserSettings userSettings(strUserId);
@@ -177,6 +175,9 @@ int main(int argc, char *argv[])
         strPassword = loginDialog.password();
     }
 
+    QSettings* settings = new QSettings(Utils::PathResolve::userSettingsFilePath(strUserId), QSettings::IniFormat);
+    PluginManager::setSettings(settings);
+
     // reset locale for current user.
     userSettings.setUser(strUserId);
     strLocale = userSettings.locale();
@@ -210,7 +211,7 @@ int main(int argc, char *argv[])
 
     MainWindow w(dbMgr);
 
-    settings->setValue("Users/DefaultUser", strUserId);
+    //settings->setValue("Users/DefaultUser", strUserId);
     PluginManager::loadPlugins();
 
     w.show();

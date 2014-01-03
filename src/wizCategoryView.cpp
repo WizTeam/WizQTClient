@@ -5,6 +5,8 @@
 #include <QMenu>
 #include <QMessageBox>
 
+#include <extensionsystem/pluginmanager.h>
+
 #include "wizdef.h"
 #include "widgets/wizScrollBar.h"
 #include "wizmainwindow.h"
@@ -130,6 +132,10 @@ CWizCategoryBaseView::CWizCategoryBaseView(CWizExplorerApp& app, QWidget* parent
 
     connect(&m_dbMgr, SIGNAL(databaseBizchanged(const QString&)),
             SLOT(on_group_bizChanged(const QString&)));
+}
+
+CWizCategoryBaseView::~CWizCategoryBaseView()
+{
 }
 
 void CWizCategoryBaseView::resizeEvent(QResizeEvent* event)
@@ -398,6 +404,7 @@ void CWizCategoryBaseView::drawItem(QPainter* p, const QStyleOptionViewItemV4 *v
     if (pItem)
         pItem->draw(p, vopt);
 }
+
 
 
 /* ------------------------------ CWizCategoryPrivateView ------------------------------ */
@@ -1287,7 +1294,9 @@ void CWizCategoryView::init()
     initStyles();
     initGroups();
 
-    setCurrentItem(findCategory(CATEGORY_FOLDERS));
+    loadState();
+
+    //setCurrentItem(findCategory(CATEGORY_FOLDERS));
 }
 
 void CWizCategoryView::updateFolderDocumentCount()
@@ -2489,4 +2498,113 @@ CWizFolder* CWizCategoryView::SelectedFolder()
         return NULL;
 
     return new CWizFolder(m_dbMgr.db(), pItem->location());
+}
+
+
+#define TREEVIEW_STATE "TreeState"
+#define TREEVIEW_SELECTED_ITEM "SelectedItemID"
+
+void CWizCategoryView::loadState()
+{
+    QSettings* settings = ExtensionSystem::PluginManager::settings();
+    m_strSelectedId = selectedId(settings);
+
+    for (int i = 0 ; i < topLevelItemCount(); i++) {
+        loadChildState(topLevelItem(i), settings);
+    }
+}
+
+void CWizCategoryView::loadChildState(QTreeWidgetItem* pItem, QSettings* settings)
+{
+    loadItemState(pItem, settings);
+
+    if (!m_strSelectedId.isEmpty()) {
+        CWizCategoryViewItemBase* pi = dynamic_cast<CWizCategoryViewItemBase*>(pItem);
+        Q_ASSERT(pi);
+        if (pi->id() == m_strSelectedId) {
+            setCurrentItem(pItem);
+        }
+    }
+
+    for (int i = 0; i < pItem->childCount(); i++) {
+        loadChildState(pItem->child(i), settings);
+    }
+}
+
+void CWizCategoryView::loadItemState(QTreeWidgetItem* pi, QSettings* settings)
+{
+    if (!pi || !settings)
+        return;
+
+    CWizCategoryViewItemBase* pItem = dynamic_cast<CWizCategoryViewItemBase*>(pi);
+    Q_ASSERT(pItem);
+
+    QString strId = pItem->id();
+    settings->beginGroup(TREEVIEW_STATE);
+    bool bExpand = settings->value(strId).toBool();
+    settings->endGroup();
+
+    if (bExpand)
+        expandItem(pItem);
+    else
+        collapseItem(pItem);
+}
+
+QString CWizCategoryView::selectedId(QSettings* settings)
+{
+    settings->beginGroup(TREEVIEW_STATE);
+    QString strItem = settings->value(TREEVIEW_SELECTED_ITEM).toString();
+    settings->endGroup();
+
+    return strItem;
+}
+
+void CWizCategoryView::saveState()
+{
+    QSettings* settings = ExtensionSystem::PluginManager::settings();
+    for (int i = 0 ; i < topLevelItemCount(); i++) {
+        saveChildState(topLevelItem(i), settings);
+    }
+
+    saveSelected(settings);
+
+    settings->sync();
+}
+
+void CWizCategoryView::saveChildState(QTreeWidgetItem* pItem, QSettings* settings)
+{
+    saveItemState(pItem, settings);
+
+    for (int i = 0; i < pItem->childCount(); i++) {
+        saveChildState(pItem->child(i), settings);
+    }
+}
+
+void CWizCategoryView::saveItemState(QTreeWidgetItem* pi, QSettings *settings)
+{
+   if (!pi || !settings)
+       return;
+
+   CWizCategoryViewItemBase* pItem = dynamic_cast<CWizCategoryViewItemBase*>(pi);
+   Q_ASSERT(pItem);
+
+   QString strId = pItem->id();
+   bool bExpand = pItem->isExpanded() ? true : false;
+
+   settings->beginGroup(TREEVIEW_STATE);
+   settings->setValue(strId, bExpand);
+   settings->endGroup();
+}
+
+void CWizCategoryView::saveSelected(QSettings* settings)
+{
+    if (!settings)
+        return;
+
+    CWizCategoryViewItemBase* pItem = dynamic_cast<CWizCategoryViewItemBase*>(currentItem());
+    Q_ASSERT(pItem);
+
+    settings->beginGroup(TREEVIEW_STATE);
+    settings->setValue(TREEVIEW_SELECTED_ITEM, pItem->id());
+    settings->endGroup();
 }

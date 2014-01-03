@@ -10,6 +10,8 @@
 #include <QTextLayout>
 #include <QDebug>
 
+#include <extensionsystem/pluginmanager.h>
+
 #include "pathresolve.h"
 #include "../share/wizmisc.h"
 
@@ -44,10 +46,10 @@ QPixmap StyleHelper::pixmapFromDevice(const QSize& sz)
 
 QString StyleHelper::themeName()
 {
-    QSettings st(PathResolve::userSettingsFilePath());
-    QString strTheme = st.value("theme/name").toString();
+    QSettings* st = ExtensionSystem::PluginManager::settings();
+    QString strTheme = st->value("Theme/Name").toString();
     if (strTheme.isEmpty()) {
-        st.setValue("theme/name", "default");
+        st->setValue("Theme/Name", "default");
         return "default";
     }
 
@@ -492,10 +494,10 @@ QPolygon StyleHelper::bubbleFromSize(const QSize& sz, int nAngle, bool bAlignLef
 
 int StyleHelper::fontHead(QFont& f)
 {
-    QSettings st(PathResolve::userSettingsFilePath());
-    QString strFont = st.value("theme/fontFamily").toString();
+    QSettings* st = ExtensionSystem::PluginManager::settings();
+    QString strFont = st->value("Theme/FontFamily").toString();
     if (strFont.isEmpty()) {
-        st.setValue("theme/fontFamily", f.family());
+        st->setValue("Theme/FontFamily", f.family());
     }
 
     f.setFamily(strFont);
@@ -507,10 +509,10 @@ int StyleHelper::fontHead(QFont& f)
 
 int StyleHelper::fontNormal(QFont& f)
 {
-    QSettings st(PathResolve::userSettingsFilePath());
-    QString strFont = st.value("theme/fontFamily").toString();
+    QSettings* st = ExtensionSystem::PluginManager::settings();
+    QString strFont = st->value("Theme/FontFamily").toString();
     if (strFont.isEmpty()) {
-        st.setValue("theme/fontFamily", f.family());
+        st->setValue("Theme/FontFamily", f.family());
     }
 
     f.setFamily(strFont);
@@ -521,10 +523,10 @@ int StyleHelper::fontNormal(QFont& f)
 
 int StyleHelper::fontExtend(QFont& f)
 {
-    QSettings st(PathResolve::userSettingsFilePath());
-    QString strFont = st.value("theme/fontFamily").toString();
+    QSettings* st = ExtensionSystem::PluginManager::settings();
+    QString strFont = st->value("Theme/FontFamily").toString();
     if (strFont.isEmpty()) {
-        st.setValue("theme/fontFamily", f.family());
+        st->setValue("Theme/FontFamily", f.family());
     }
 
     f.setFamily(strFont);

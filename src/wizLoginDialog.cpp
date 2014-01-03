@@ -10,6 +10,8 @@
 #include <QMessageBox>
 #include <QDesktopServices>
 
+#include <extensionsystem/pluginmanager.h>
+
 #include "sync/wizkmxmlrpc.h"
 #include "wizcreateaccountdialog.h"
 #include "wizproxydialog.h"
@@ -231,8 +233,8 @@ void CWizLoginDialog::onTokenAcquired(const QString& strToken)
 
 bool CWizLoginDialog::updateGlobalProfile()
 {
-    CWizSettings settings(::WizGetDataStorePath() + "wiznote.ini");
-    settings.SetString("Users", "DefaultUser", userId());
+    QSettings* settings = ExtensionSystem::PluginManager::globalSettings();
+    settings->setValue("Users/DefaultUser", userId());
     return true;
 }
 

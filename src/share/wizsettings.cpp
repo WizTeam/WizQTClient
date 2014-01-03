@@ -163,6 +163,38 @@ void CWizUserSettings::setUser(const QString& strUser)
     }
 }
 
+QString CWizUserSettings::get(const QString& section, const QString& strKey) const
+{
+    if (!m_strUserId.isEmpty()) {
+        CWizDatabase db;
+        if (db.Open(m_strUserId)) {
+            return db.GetMetaDef(section, strKey);
+        }
+    }
+
+    if (m_db) {
+        return m_db->GetMetaDef(section, strKey);
+    }
+
+    return NULL;
+}
+
+void CWizUserSettings::set(const QString& section, const QString& strKey, const QString& strValue)
+{
+    if (!m_strUserId.isEmpty()) {
+        CWizDatabase db;
+        if (db.Open(m_strUserId)) {
+            db.SetMeta(section, strKey, strValue);
+            return;
+        }
+    }
+
+    if (m_db) {
+        m_db->SetMeta(section, strKey, strValue);
+        return;
+    }
+}
+
 QString CWizUserSettings::get(const QString& strKey) const
 {
     if (!m_strUserId.isEmpty()) {
@@ -260,15 +292,15 @@ QString CWizUserSettings::skin()
         }
     }
 
-    CWizSettings settings(::WizGetDataStorePath() + "wiznote.ini");
-    strSkinName = settings.GetString("Common", "Skin");
+    //CWizSettings settings(::WizGetDataStorePath() + "wiznote.ini");
+    //strSkinName = settings.GetString("Common", "Skin");
 
-    if (!strSkinName.isEmpty()) {
-        if (PathFileExists(::WizGetSkinResourcePath(strSkinName))) {
-            m_strSkinName = strSkinName;
-            return strSkinName;
-        }
-    }
+    //if (!strSkinName.isEmpty()) {
+    //    if (PathFileExists(::WizGetSkinResourcePath(strSkinName))) {
+    //        m_strSkinName = strSkinName;
+    //        return strSkinName;
+    //    }
+    //}
 
     // default skin depends on user's OS
     return ::WizGetDefaultSkinName();
@@ -295,13 +327,13 @@ QString CWizUserSettings::locale()
         return strLocale;
     }
 
-    CWizSettings settings(::WizGetDataStorePath() + "wiznote.ini");
-    strLocale = settings.GetString("Common", "Locale");
+    //CWizSettings settings(::WizGetDataStorePath() + "wiznote.ini");
+    //strLocale = settings.GetString("Common", "Locale");
 
-    if (!strLocale.isEmpty()) {
-        m_strLocale = strLocale;
-        return strLocale;
-    }
+    //if (!strLocale.isEmpty()) {
+    //    m_strLocale = strLocale;
+    //    return strLocale;
+    //}
 
     strLocale = QLocale::system().name();
     if (::PathFileExists(::WizGetLocaleFileName(strLocale))) {

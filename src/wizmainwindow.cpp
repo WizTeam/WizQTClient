@@ -14,6 +14,7 @@
 #include "mac/wizmachelper.h"
 #endif
 
+#include <extensionsystem/pluginmanager.h>
 #include <coreplugin/icore.h>
 
 #include "wizDocumentWebView.h"
@@ -172,6 +173,7 @@ void MainWindow::on_application_aboutToQuit()
 
 void MainWindow::cleanOnQuit()
 {
+    m_category->saveState();
     saveStatus();
 
     // FIXME : if document not valid will lead crash
@@ -271,15 +273,15 @@ MainWindow::~MainWindow()
 
 void MainWindow::saveStatus()
 {
-    CWizSettings settings(WizGetSettingsFileName());
-    settings.setValue("window/geometry", saveGeometry());
-    settings.setValue("window/splitter", m_splitter->saveState());
+    QSettings* settings = ExtensionSystem::PluginManager::settings();
+    settings->setValue("Window/Geometry", saveGeometry());
+    settings->setValue("Window/Splitter", m_splitter->saveState());
 }
 
 void MainWindow::restoreStatus()
 {
-    CWizSettings settings(WizGetSettingsFileName());
-    QByteArray geometry = settings.value("window/geometry").toByteArray();
+    QSettings* settings = ExtensionSystem::PluginManager::settings();
+    QByteArray geometry = settings->value("Window/Geometry").toByteArray();
 
     // main window
     if (geometry.isEmpty()) {
@@ -290,7 +292,7 @@ void MainWindow::restoreStatus()
         restoreGeometry(geometry);
     }
 
-    m_splitter->restoreState(settings.value("window/splitter").toByteArray());
+    m_splitter->restoreState(settings->value("Window/Splitter").toByteArray());
 }
 
 void MainWindow::initActions()

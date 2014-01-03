@@ -55,6 +55,11 @@ bool CWizCategoryViewItemBase::operator < (const QTreeWidgetItem &other) const
     }
 }
 
+QString CWizCategoryViewItemBase::id() const
+{
+    return ::WizMd5StringNoSpaceJava(QString(text(0) + m_strKbGUID).toUtf8());
+}
+
 void CWizCategoryViewItemBase::setDocumentsCount(int nCurrent, int nTotal)
 {
     Q_ASSERT(nTotal != -1);
