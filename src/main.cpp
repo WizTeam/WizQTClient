@@ -97,18 +97,8 @@ int main(int argc, char *argv[])
 #endif
 
     // setup settings
-    //QSettings::setDefaultFormat(QSettings::IniFormat);
-    //QSettings::setPath(QSettings::IniFormat, QSettings::SystemScope,
-    //                   QCoreApplication::applicationDirPath() + QLatin1String(SHARE_PATH));
-
-#ifdef Q_OS_MAC
-    QSettings::setPath(QSettings::IniFormat, QSettings::UserScope,
-                       Utils::PathResolve::dataStorePath());
-#endif
-
-    QSettings *globalSettings = new QSettings(QSettings::IniFormat, QSettings::UserScope,
-                                              QLatin1String("wiz"), QLatin1String("wiznote"));
-
+    QSettings::setDefaultFormat(QSettings::IniFormat);
+    QSettings* globalSettings = new QSettings(Utils::PathResolve::globalSettingsFilePath());
 
 //#ifdef Q_OS_WIN
 //    QString strDefaultFontName = settings.GetString("Common", "DefaultFont", "");

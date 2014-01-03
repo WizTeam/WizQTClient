@@ -3,6 +3,7 @@
 #include <QtGlobal>
 #include <QApplication>
 #include <QDir>
+#include <QDebug>
 
 namespace Utils {
 
@@ -94,7 +95,19 @@ QString PathResolve::tempPath()
 
 QString PathResolve::globalSettingsFilePath()
 {
-    return dataStorePath() + "wiznote.ini";
+    QString strConfigHome = qgetenv("XDG_CONFIG_HOME");
+    if (strConfigHome.isEmpty()) {
+#ifdef Q_OS_LINUX
+        strConfigHome = qgetenv("HOME") + "/.config/wiz/";
+#else
+        strConfigHome = dataStorePath();
+#endif
+    } else {
+        strConfigHome += "/wiz/";
+    }
+
+    ensurePathExists(strConfigHome);
+    return strConfigHome + "wiznote.ini";
 }
 
 QString PathResolve::userSettingsFilePath(const QString strUserId)
