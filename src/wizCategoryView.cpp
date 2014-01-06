@@ -1987,10 +1987,8 @@ CWizCategoryViewFolderItem* CWizCategoryView::findFolder(const QString& strLocat
         if (!create)
             return NULL;
 
-        CWizCategoryViewFolderItem* pFolderItem = new CWizCategoryViewFolderItem(m_app, strCurrentLocation,
-                                                                                 m_dbMgr.db().kbGUID());
+        CWizCategoryViewFolderItem* pFolderItem = new CWizCategoryViewFolderItem(m_app, strCurrentLocation, m_dbMgr.db().kbGUID());
         parent->addChild(pFolderItem);
-        parent->setExpanded(true);
         if (sort) {
             parent->sortChildren(0, Qt::AscendingOrder);
         }
@@ -2081,7 +2079,6 @@ CWizCategoryViewTagItem* CWizCategoryView::findTag(const WIZTAGDATA& tag, bool c
 
         CWizCategoryViewTagItem* pTagItem = new CWizCategoryViewTagItem(m_app, tagParent, m_dbMgr.db().kbGUID());
         parent->addChild(pTagItem);
-        parent->setExpanded(true);
         if (sort) {
             parent->sortChildren(0, Qt::AscendingOrder);
         }
@@ -2213,8 +2210,6 @@ CWizCategoryViewGroupItem* CWizCategoryView::findGroupFolder(const WIZTAGDATA& t
 
         CWizCategoryViewGroupItem* pTagItem = new CWizCategoryViewGroupItem(m_app, tagParent, tag.strKbGUID);
         parent->addChild(pTagItem);
-
-        parent->setExpanded(true);
         if (sort) {
             parent->sortChildren(0, Qt::AscendingOrder);
         }

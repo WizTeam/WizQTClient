@@ -121,8 +121,10 @@ set(wiznote_SOURCES
     plugindialog.cpp
     utils/logger.cpp
     utils/misc.cpp
+    utils/pinyin.cpp
     messagelistview.cpp
     thumbcache.cpp
+    messagecompleter.cpp
 )
 
 set(wiznote_HEADERS
@@ -238,9 +240,11 @@ set(wiznote_HEADERS
     plugindialog.h
     utils/logger.h
     utils/misc.h
+    utils/pinyin.h
     messagelistview.h
     thumbcache.h
     thumbcache_p.h
+    messagecompleter.h
 )
 
 set(wiznote_FORMS

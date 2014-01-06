@@ -26,6 +26,7 @@
 #include "sync/token.h"
 #include "sync/apientry.h"
 #include "sync/asyncapi.h"
+#include "messagecompleter.h"
 
 using namespace Core;
 using namespace Core::Internal;
@@ -41,6 +42,8 @@ TitleBar::TitleBar(QWidget *parent)
     , m_info(NULL)
     , m_attachments(NULL)
 {
+    m_editTitle->setCompleter(new WizService::MessageCompleter(m_editTitle));
+
     // FIXME
     QString strTheme = "default";
 
