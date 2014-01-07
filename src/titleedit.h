@@ -25,10 +25,11 @@ public:
 protected:
     QSize sizeHint() const;
     virtual void inputMethodEvent(QInputMethodEvent* event);
-    virtual void keyPressEvent(QKeyEvent* event);
+    virtual void keyPressEvent(QKeyEvent* e);
 
 private:
     QCompleter* c;
+    QChar m_separator;
 
     void updateCompleterPopupItems(const QString& completionPrefix);
     QString textUnderCursor();

@@ -14,7 +14,6 @@ class MessageCompleter : public QCompleter
 
 public:
     explicit MessageCompleter(QWidget* parent);
-    void init();
 
 private:
     QLineEdit* m_title;

@@ -3,6 +3,7 @@
 #include <QCompleter>
 #include <QAbstractItemView>
 #include <QKeyEvent>
+#include <QScrollBar>
 #include <QDebug>
 
 #include "share/wizDatabaseManager.h"
@@ -15,6 +16,7 @@ using namespace Core::Internal;
 TitleEdit::TitleEdit(QWidget *parent)
     : QLineEdit(parent)
     , c(NULL)
+    , m_separator('@')
 {
     setStyleSheet("font-size: 12px;");
     setContentsMargins(5, 0, 0, 0);
@@ -48,53 +50,68 @@ void TitleEdit::inputMethodEvent(QInputMethodEvent* event)
     //}
 }
 
-void TitleEdit::keyPressEvent(QKeyEvent* event)
+void TitleEdit::keyPressEvent(QKeyEvent* e)
 {
     if (c && c->popup()->isVisible()) {
-        switch (event->key()) {
-        case Qt::Key_Enter:
-        case Qt::Key_Return:
-        case Qt::Key_Escape:
-        case Qt::Key_Tab:
-        case Qt::Key_Backtab:
-             event->ignore();
-             return;
-        default:
-            break;
-        }
+        // The following keys are forwarded by the completer to the widget
+       switch (e->key()) {
+       case Qt::Key_Enter:
+       case Qt::Key_Return:
+       case Qt::Key_Escape:
+       case Qt::Key_Tab:
+       case Qt::Key_Backtab:
+            e->ignore();
+            return; // let the completer do default behavior
+       default:
+           break;
+       }
     }
 
-    QLineEdit::keyPressEvent(event);
+    QLineEdit::keyPressEvent(e);
 
-    QString strCompPrefix = textUnderCursor();
-    if (strCompPrefix != c->completionPrefix()) {
-        updateCompleterPopupItems(strCompPrefix);
+    QString completionPrefix = textUnderCursor();
+    bool isSeparator = (completionPrefix == QString(m_separator));
+
+    bool isShortcut = isSeparator;
+
+    const bool ctrlOrShift = e->modifiers() & (Qt::ControlModifier | Qt::ShiftModifier);
+    if (!c || (ctrlOrShift && e->text().isEmpty()))
+        return;
+
+    static QString eow("~!#$%^&*()_+{}|:\"<>?,./;'[]\\-="); // end of word
+    bool hasModifier = isShortcut && !ctrlOrShift;
+
+    if (!isShortcut && (hasModifier || e->text().isEmpty()
+                        //|| completionPrefix.length() < 3
+                      || eow.contains(e->text().right(1)))) {
+        c->popup()->hide();
+        return;
     }
 
-    if (event->text().size() && strCompPrefix.size()) {
-        c->complete();
+    if (completionPrefix != c->completionPrefix()) {
+        updateCompleterPopupItems(completionPrefix);
     }
 
-    if (!strCompPrefix.size()) {
-        completer()->popup()->hide();
-    }
+    QRect cr = cursorRect();
+    cr.setWidth(c->popup()->sizeHintForColumn(0)
+                + c->popup()->verticalScrollBar()->sizeHint().width());
+    c->complete(cr); // popup it up!
 }
 
 void TitleEdit::updateCompleterPopupItems(const QString& completionPrefix)
 {
-    completer()->setCompletionPrefix(completionPrefix);
-    completer()->popup()->setCurrentIndex(completer()->completionModel()->index(0, 0));
+    c->setCompletionPrefix(completionPrefix);
+    c->popup()->setCurrentIndex(completer()->completionModel()->index(0, 0));
 }
 
 QString TitleEdit::textUnderCursor()
 {
     QString strText;
     int i = cursorPosition() - 1;
-    while (i >= 0 && text().at(i) != ' ') {
+    while (i >= 0 && text().at(i) != m_separator) {
         strText = text().at(i) + strText;
         i--;
     }
-
     qDebug() << strText;
 
     return strText;
@@ -145,8 +162,12 @@ void TitleEdit::onInsertCompletion(const QString& completion)
     if (c->widget() != this)
         return;
 
-    int extra = completion.length() - c->completionPrefix().length();
-    setText(text() + completion.right(extra) + " ");
+    QString strOrigin = text();
+
+    QString strExtra = c->model()->data(c->currentIndex(), Qt::EditRole).toString();
+    qDebug() << strExtra;
+    int nDel = completion.length() - c->completionPrefix().length();
+    setText(strOrigin.left(strOrigin.size() - nDel) + strExtra + " ");
 }
 
 void TitleEdit::onTitleEditingFinished()
