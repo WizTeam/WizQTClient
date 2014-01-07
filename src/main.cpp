@@ -24,8 +24,6 @@
 #include "sync/avatar.h"
 #include "thumbcache.h"
 
-#include "utils/pinyin.h"
-
 using namespace ExtensionSystem;
 using namespace Core::Internal;
 

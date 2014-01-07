@@ -3,6 +3,7 @@
 
 #include <QLineEdit>
 
+class QCompleter;
 class QInputMethodEvent;
 
 namespace Core {
@@ -18,14 +19,24 @@ public:
     explicit TitleEdit(QWidget *parent);
     void setReadOnly(bool b);
 
+    void setCompleter(QCompleter* completer);
+    QCompleter* completer() const { return c; }
+
 protected:
-    void inputMethodEvent(QInputMethodEvent* event);
     QSize sizeHint() const;
+    virtual void inputMethodEvent(QInputMethodEvent* event);
+    virtual void keyPressEvent(QKeyEvent* event);
 
 private:
+    QCompleter* c;
+
+    void updateCompleterPopupItems(const QString& completionPrefix);
+    QString textUnderCursor();
+
     CWizDocumentView* noteView();
 
 private Q_SLOTS:
+    void onInsertCompletion(const QString& completion);
     void onTitleEditingFinished();
     void onTitleReturnPressed();
 };

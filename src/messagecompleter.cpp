@@ -4,12 +4,37 @@
 #include <QStringList>
 #include <QStringListModel>
 #include <QAbstractItemView>
+#include <QListView>
 #include <QDebug>
 
+#include "sync/avatar.h"
 #include "share/wizDatabaseManager.h"
 #include "share/wizDatabase.h"
+#include "utils/pinyin.h"
 
 namespace WizService {
+
+class MessageCompleterModel : public QStringListModel
+{
+public:
+    MessageCompleterModel(QObject* parent = 0)
+        : QStringListModel(parent)
+    {
+
+    }
+};
+
+class MessageCompleterPopup : public QListView
+{
+public:
+    MessageCompleterPopup(QWidget* parent = 0)
+        : QListView(parent)
+    {
+        //setViewMode(QListView::IconMode);
+        //setFlow(QListView::TopToBottom);
+        //setMovement(QListView::Static);
+    }
+};
 
 MessageCompleter::MessageCompleter(QWidget *parent)
     : QCompleter(parent)
@@ -17,15 +42,18 @@ MessageCompleter::MessageCompleter(QWidget *parent)
     m_title = qobject_cast<QLineEdit*>(parent);
     Q_ASSERT(m_title);
 
-    connect(m_title, SIGNAL(textChanged(const QString&)), SLOT(onTitleTextChanged(const QString&)));
+    //connect(this, SIGNAL(activated(const QString&)), SLOT(onInsertCompletion(const QString&)));
 
-    //m_view = popup();
-    setCompletionMode(QCompleter::PopupCompletion);
-    setCompletionPrefix("@");
+    //connect(m_title, SIGNAL(textChanged(const QString&)), SLOT(onTitleTextChanged(const QString&)));
+
+    setCompletionMode(QCompleter::UnfilteredPopupCompletion);
     setCaseSensitivity(Qt::CaseInsensitive);
-    setFilterMode(Qt::MatchStartsWith);
 
     init();
+
+    MessageCompleterPopup* popup = new MessageCompleterPopup();
+    popup->setModel(model());
+    setPopup(popup);
 }
 
 void MessageCompleter::init()
@@ -35,30 +63,29 @@ void MessageCompleter::init()
         return;
     }
 
-    QStringList lsUsers;
+    MessageCompleterModel* model = new MessageCompleterModel(this);
+
     CWizBizUserDataArray::const_iterator it = arrayUser.begin();
     for (; it != arrayUser.end(); it++) {
         const WIZBIZUSER& user = *it;
-        lsUsers += user.alias;
+
+        wchar_t name[user.alias.size()];
+        user.alias.toWCharArray(name);
+        QString py;
+        WizToolsChinese2PinYin(name, WIZ_C2P_POLYPHONE, py);
+
+        QPixmap pm;
+        Internal::AvatarHost::avatar(user.userId, &pm);
+
+        model->insertRows(0, 1);
+        QModelIndex i = model->index(0);
+        model->setData(i, py, Qt::EditRole);
+        model->setData(i, user.alias, Qt::DisplayRole);
+        model->setData(i, pm, Qt::DecorationRole);
     }
 
-    qDebug() << lsUsers;
-
-    QStringListModel* model = new QStringListModel(this);
-    model->setStringList(lsUsers);
     setModel(model);
-
-    //m_view->setModel(model);
-    //setPopup(m_view);
 }
-
-void MessageCompleter::onTitleTextChanged(const QString& str)
-{
-    qDebug() << str;
-    if (str.endsWith("@"))
-        complete();
-}
-
 
 
 } // namespace WizService

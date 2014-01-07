@@ -19,9 +19,6 @@ public:
 private:
     QLineEdit* m_title;
     QAbstractItemView* m_view;
-
-private Q_SLOTS:
-    void onTitleTextChanged(const QString& str);
 };
 
 } // namespace WizService
