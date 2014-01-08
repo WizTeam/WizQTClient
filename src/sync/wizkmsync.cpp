@@ -76,7 +76,7 @@ CWizKMSyncThread::CWizKMSyncThread(CWizDatabase& db, QObject* parent)
 void CWizKMSyncThread::run()
 {
     doSync();
-    exec();
+    //exec();
 }
 
 void CWizKMSyncThread::startSync()
@@ -86,6 +86,8 @@ void CWizKMSyncThread::startSync()
         qDebug() << "[Sync]syncing is started, request is schedued"; //FIXME: schedued request
         return;
     }
+
+    m_bNeedSyncAll = true;
 
     trySync();
 }
@@ -116,6 +118,8 @@ void CWizKMSyncThread::onTokenAcquired(const QString& strToken)
 
 void CWizKMSyncThread::doSync()
 {
+    qDebug() << "[Sync]syncing started, thread:" << QThread::currentThreadId();
+
     if (needSyncAll())
     {
         syncAll();
