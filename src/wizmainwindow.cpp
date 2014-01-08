@@ -273,14 +273,14 @@ MainWindow::~MainWindow()
 
 void MainWindow::saveStatus()
 {
-    QSettings* settings = ExtensionSystem::PluginManager::settings();
+    QSettings* settings = ExtensionSystem::PluginManager::globalSettings();
     settings->setValue("Window/Geometry", saveGeometry());
     settings->setValue("Window/Splitter", m_splitter->saveState());
 }
 
 void MainWindow::restoreStatus()
 {
-    QSettings* settings = ExtensionSystem::PluginManager::settings();
+    QSettings* settings = ExtensionSystem::PluginManager::globalSettings();
     QByteArray geometry = settings->value("Window/Geometry").toByteArray();
 
     // main window
@@ -580,7 +580,7 @@ void MainWindow::initClient()
     m_splitter->setStretchFactor(1, 0);
     m_splitter->setStretchFactor(2, 1);
 
-    //m_msgList->hide();
+    m_msgList->hide();
 }
 
 QWidget* MainWindow::createListView()
