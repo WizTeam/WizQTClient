@@ -585,8 +585,10 @@ void StyleHelper::drawListViewItemThumb(QPainter* p, const QRect& rc, int nBadge
         QColor colorSummary = Utils::StyleHelper::listViewItemSummary(bSelected, bFocused);
         rcLine1 = Utils::StyleHelper::drawText(p, rcLine1, strText, 1, Qt::AlignVCenter, colorSummary, fontThumb, false);
 
-        QRect rcLine2(rcd.adjusted(0, rcLine1.height(), 0, 0));
-        rcLine2 = Utils::StyleHelper::drawText(p, rcLine2, strText, 2, Qt::AlignVCenter, colorSummary, fontThumb);
+        if (!strText.isEmpty()) {
+            QRect rcLine2(rcd.adjusted(0, rcLine1.height(), 0, 0));
+            rcLine2 = Utils::StyleHelper::drawText(p, rcLine2, strText, 2, Qt::AlignVCenter, colorSummary, fontThumb);
+        }
     }
 }
 
