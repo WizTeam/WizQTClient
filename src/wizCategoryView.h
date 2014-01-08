@@ -154,7 +154,7 @@ private:
     void initGeneral();
     void initFolders();
     void initFolders(QTreeWidgetItem* pParent, const QString& strParentLocation, \
-                     const CWizStdStringArray& arrayAllLocation);
+                     const CWizStdStringArray& arrayAllLocation, const QMap<QString, int> &mfpos);
     void initTags();
     void initTags(QTreeWidgetItem* pParent, const QString& strParentTagGUID);
     void initStyles();

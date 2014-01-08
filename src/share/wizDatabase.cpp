@@ -5,8 +5,10 @@
 #include <QDebug>
 #include <QTextCodec>
 #include <algorithm>
+#include <QSettings>
 
-//#include "wizdef.h"
+#include <extensionsystem/pluginmanager.h>
+
 #include "wizhtml2zip.h"
 #include "share/wizzip.h"
 #include "html/wizhtmlcollector.h"
@@ -949,7 +951,7 @@ void CWizDatabase::SetLocalValue(const QString& key, const QString& value,
     }
     else if (strKey == "folders_pos")
     {
-        //SetFoldersPos(lpszValue, nServerVersion);
+        SetFoldersPos(value, nServerVersion);
     }
     else if (strKey == "group_tag_oem")
     {
@@ -1040,15 +1042,11 @@ void CWizDatabase::SetFoldersPos(const QString& foldersPos, qint64 nVersion)
         if (0 == nPos)
             continue;
 
-        // FIXME: save folder orders to config file
+        QSettings* setting = ExtensionSystem::PluginManager::settings();
+        setting->setValue("FolderPosition/" + strLocation, nPos);
 
-        //if (CWizFolder* pFolder = dynamic_cast<CWizFolder*>(GetFolderByLocation(strLocation, false)))
-        //{
-        //    pFolder->put_SortPos(nPos);
-        //}
+        // FIXME: send folder position changed signal
     }
-
-    //::WizKMObjectSendMessage_ModifyPos(objecttypeFolder, NULL, _T(""));
 }
 
 QString CWizDatabase::GetFolders()
