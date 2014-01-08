@@ -2,6 +2,7 @@
 
 #include <QLineEdit>
 #include <QStringList>
+#include <QStringListModel>
 #include <QAbstractListModel>
 #include <QAbstractItemView>
 #include <QListView>
@@ -44,7 +45,7 @@ public:
                 py = py.replace(",", "");
             }
 
-            insertRows(0, 1);
+            m_users.insert(0, UserItem());
             m_users[0].strUserId = user.userId;
             m_users[0].strAlias = user.alias;
             m_users[0].strPinyin = py;
@@ -53,15 +54,13 @@ public:
 
     virtual int rowCount(const QModelIndex& parent = QModelIndex()) const
     {
-        if (parent.isValid())
-            return 0;
-
+        Q_UNUSED(parent);
         return m_users.size();
     }
 
-    virtual QVariant data(const QModelIndex &index, int role) const
+    virtual QVariant data(const QModelIndex& index, int role) const
     {
-        if (index.row() <= 0 || index.row() >= m_users.size()) {
+        if (index.row() < 0 || index.row() >= m_users.size()) {
             return QVariant();
         }
 
@@ -73,42 +72,21 @@ public:
             QPixmap pm;
             Internal::AvatarHost::avatar(m_users[index.row()].strUserId, &pm);
             return pm;
+        } else if (role == Qt::ToolTipRole) {
+            return m_users[index.row()].strUserId;
         }
 
         return QVariant();
     }
 
-    virtual bool setData(const QModelIndex &index, const QVariant &value, int role)
+    QStringList users() const
     {
-        if (index.row() >= 0 && index.row() < m_users.size()) {
-            if (role == Qt::EditRole) {
-                m_users[index.row()].strPinyin = value.toString();
-                Q_EMIT dataChanged(index, index);
-                return true;
-            } else if (role == Qt::DisplayRole) {
-                m_users[index.row()].strAlias = value.toString();
-                Q_EMIT dataChanged(index, index);
-                return true;
-            }
+        QStringList lsUser;
+        foreach(UserItem user, m_users) {
+            lsUser << user.strPinyin;
         }
 
-        return false;
-    }
-
-    virtual bool insertRows(int row, int count, const QModelIndex &parent = QModelIndex())
-    {
-        if (count < 1 || row < 0 || row > rowCount(parent))
-            return false;
-
-        beginInsertRows(QModelIndex(), row, row + count - 1);
-
-        for (int r = 0; r < count; r++) {
-            m_users.insert(row, UserItem());
-        }
-
-        endInsertRows();
-
-        return true;
+        return lsUser;
     }
 
 private:
@@ -145,7 +123,7 @@ public:
     MessageCompleterPopup(QWidget* parent = 0)
         : QListView(parent)
     {
-        setItemDelegate(new MessageCompleterPopupDelegate());
+        //setItemDelegate(new MessageCompleterPopupDelegate(this));
     }
 };
 
@@ -156,19 +134,26 @@ MessageCompleter::MessageCompleter(QWidget *parent)
     m_title = qobject_cast<QLineEdit*>(parent);
     Q_ASSERT(m_title);
 
-    setCompletionMode(QCompleter::UnfilteredPopupCompletion);
     setModelSorting(QCompleter::CaseInsensitivelySortedModel);
     setCaseSensitivity(Qt::CaseInsensitive);
     setWrapAround(false);
 
+    setCompletionColumn(0);
+    setCompletionRole(Qt::EditRole);
+
     CWizBizUserDataArray arrayUser;
     if (CWizDatabaseManager::instance()->db().GetAllUsers(arrayUser)) {
         MessageCompleterModel* model = new MessageCompleterModel(arrayUser, this);
-        setModel(model);
+        //m_model = new MessageCompleterModel(arrayUser, this);
+
+        m_model = new QStringListModel(model->users(), this);
+        setModel(m_model);
 
         MessageCompleterPopup* popup = new MessageCompleterPopup();
-        popup->setModel(model);
+        popup->setModel(m_model);
         setPopup(popup);
+
+        popup->setItemDelegate(new MessageCompleterPopupDelegate(this));
     }
 }
 

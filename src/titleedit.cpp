@@ -100,8 +100,15 @@ void TitleEdit::keyPressEvent(QKeyEvent* e)
 
 void TitleEdit::updateCompleterPopupItems(const QString& completionPrefix)
 {
+    //qDebug() << "update prefix: " << completionPrefix;
+    //qDebug() << "dump model:";
+    //for (int i = 0; i < c->model()->rowCount(); i++) {
+    //    QModelIndex idx = c->model()->index(i, 0);
+    //    qDebug() << c->model()->data(idx, Qt::EditRole);
+    //}
+
     c->setCompletionPrefix(completionPrefix);
-    c->popup()->setCurrentIndex(completer()->completionModel()->index(0, 0));
+    c->popup()->setCurrentIndex(c->completionModel()->index(0, 0));
 }
 
 QString TitleEdit::textUnderCursor()
@@ -112,7 +119,10 @@ QString TitleEdit::textUnderCursor()
         strText = text().at(i) + strText;
         i--;
     }
-    qDebug() << strText;
+
+    if (-1 == i) {
+        return NULL;
+    }
 
     return strText;
 }
@@ -154,19 +164,18 @@ void TitleEdit::setCompleter(QCompleter* completer)
     c->setWidget(this);
     c->setCompletionMode(QCompleter::PopupCompletion);
     c->setCaseSensitivity(Qt::CaseInsensitive);
-    QObject::connect(c, SIGNAL(activated(const QString&)), SLOT(onInsertCompletion(const QString&)));
+
+    connect(c, SIGNAL(activated(const QModelIndex &)), SLOT(onInsertCompletion(const QModelIndex &)));
 }
 
-void TitleEdit::onInsertCompletion(const QString& completion)
+void TitleEdit::onInsertCompletion(const QModelIndex& index)
 {
     if (c->widget() != this)
         return;
 
     QString strOrigin = text();
-
-    QString strExtra = c->model()->data(c->currentIndex(), Qt::EditRole).toString();
-    qDebug() << strExtra;
-    int nDel = completion.length() - c->completionPrefix().length();
+    QString strExtra = c->completionModel()->data(index, Qt::DisplayRole).toString();
+    int nDel = textUnderCursor().size();
     setText(strOrigin.left(strOrigin.size() - nDel) + strExtra + " ");
 }
 

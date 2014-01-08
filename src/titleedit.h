@@ -4,6 +4,7 @@
 #include <QLineEdit>
 
 class QCompleter;
+class QModelIndex;
 class QInputMethodEvent;
 
 namespace Core {
@@ -37,7 +38,7 @@ private:
     CWizDocumentView* noteView();
 
 private Q_SLOTS:
-    void onInsertCompletion(const QString& completion);
+    void onInsertCompletion(const QModelIndex &index);
     void onTitleEditingFinished();
     void onTitleReturnPressed();
 };

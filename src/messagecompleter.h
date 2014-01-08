@@ -5,6 +5,8 @@
 
 class QLineEdit;
 class QAbstractItemView;
+class QStringListModel;
+class MessageCompleterModel;
 
 namespace WizService {
 
@@ -17,7 +19,8 @@ public:
 
 private:
     QLineEdit* m_title;
-    QAbstractItemView* m_view;
+    QStringListModel* m_model;
+    //MessageCompleterModel* m_model;
 };
 
 } // namespace WizService
