@@ -79,16 +79,6 @@ public:
         return QVariant();
     }
 
-    QStringList users() const
-    {
-        QStringList lsUser;
-        foreach(UserItem user, m_users) {
-            lsUser << user.strPinyin;
-        }
-
-        return lsUser;
-    }
-
 private:
     QList<UserItem> m_users;
 };
@@ -134,7 +124,7 @@ MessageCompleter::MessageCompleter(QWidget *parent)
     m_title = qobject_cast<QLineEdit*>(parent);
     Q_ASSERT(m_title);
 
-    setModelSorting(QCompleter::CaseInsensitivelySortedModel);
+    //setModelSorting(QCompleter::CaseInsensitivelySortedModel);
     setCaseSensitivity(Qt::CaseInsensitive);
     setWrapAround(false);
 
@@ -144,16 +134,13 @@ MessageCompleter::MessageCompleter(QWidget *parent)
     CWizBizUserDataArray arrayUser;
     if (CWizDatabaseManager::instance()->db().GetAllUsers(arrayUser)) {
         MessageCompleterModel* model = new MessageCompleterModel(arrayUser, this);
-        //m_model = new MessageCompleterModel(arrayUser, this);
-
-        m_model = new QStringListModel(model->users(), this);
-        setModel(m_model);
+        setModel(model);
 
         MessageCompleterPopup* popup = new MessageCompleterPopup();
-        popup->setModel(m_model);
+        popup->setModel(model);
         setPopup(popup);
 
-        popup->setItemDelegate(new MessageCompleterPopupDelegate(this));
+        //popup->setItemDelegate(new MessageCompleterPopupDelegate(this));
     }
 }
 

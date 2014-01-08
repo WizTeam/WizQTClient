@@ -100,13 +100,6 @@ void TitleEdit::keyPressEvent(QKeyEvent* e)
 
 void TitleEdit::updateCompleterPopupItems(const QString& completionPrefix)
 {
-    //qDebug() << "update prefix: " << completionPrefix;
-    //qDebug() << "dump model:";
-    //for (int i = 0; i < c->model()->rowCount(); i++) {
-    //    QModelIndex idx = c->model()->index(i, 0);
-    //    qDebug() << c->model()->data(idx, Qt::EditRole);
-    //}
-
     c->setCompletionPrefix(completionPrefix);
     c->popup()->setCurrentIndex(c->completionModel()->index(0, 0));
 }
