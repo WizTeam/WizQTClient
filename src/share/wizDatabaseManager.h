@@ -84,6 +84,8 @@ Q_SIGNALS:
     void attachmentDeleted(const WIZDOCUMENTATTACHMENTDATA& attachment);
     void folderCreated(const QString& strLocation);
     void folderDeleted(const QString& strLocation);
+    void folderPositionChanged();
+
 };
 
 #endif // WIZDATABASEMANAGER_H

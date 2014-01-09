@@ -1015,6 +1015,8 @@ void CWizDatabase::SetFoldersPos(const QString& foldersPos, qint64 nVersion)
 {
     SetLocalValueVersion("folders_pos", nVersion);
 
+    bool bPositionChanged = false;
+
     CString str(foldersPos);
     str.Trim();
     str.Trim('{');
@@ -1043,9 +1045,15 @@ void CWizDatabase::SetFoldersPos(const QString& foldersPos, qint64 nVersion)
             continue;
 
         QSettings* setting = ExtensionSystem::PluginManager::settings();
-        setting->setValue("FolderPosition/" + strLocation, nPos);
+        int nPosOld = setting->value("FolderPosition/" + strLocation).toInt();
+        if (nPosOld != nPos) {
+            setting->setValue("FolderPosition/" + strLocation, nPos);
+            bPositionChanged = true;
+        }
+    }
 
-        // FIXME: send folder position changed signal
+    if (bPositionChanged) {
+        Q_EMIT folderPositionChanged();
     }
 }
 

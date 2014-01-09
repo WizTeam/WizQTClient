@@ -251,6 +251,8 @@ void CWizDatabaseManager::initSignals(CWizDatabase* db)
             SIGNAL(folderCreated(const QString&)));
     connect(db, SIGNAL(folderDeleted(const QString&)),
             SIGNAL(folderDeleted(const QString&)));
+    connect(db, SIGNAL(folderPositionChanged()),
+            SIGNAL(folderPositionChanged()));
 }
 
 void CWizDatabaseManager::on_groupDatabaseOpened(CWizDatabase* pDb, const QString& strKbGUID)

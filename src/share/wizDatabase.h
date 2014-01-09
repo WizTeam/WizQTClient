@@ -369,6 +369,8 @@ Q_SIGNALS:
     void databaseBizChanged(const QString& strKbGUID);
     void updateError(const QString& msg);
     void processLog(const QString& msg);
+
+    void folderPositionChanged();
 };
 
 

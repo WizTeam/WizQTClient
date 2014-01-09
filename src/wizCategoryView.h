@@ -79,6 +79,7 @@ protected Q_SLOTS:
 
     virtual void on_folder_created(const QString& strLocation) { Q_UNUSED(strLocation); }
     virtual void on_folder_deleted(const QString& strLocation) { Q_UNUSED(strLocation); }
+    virtual void on_folder_positionChanged() {}
 
     virtual void on_tag_created(const WIZTAGDATA& tag) { Q_UNUSED(tag); }
     virtual void on_tag_modified(const WIZTAGDATA& tagOld, const WIZTAGDATA& tagNew) { Q_UNUSED(tagOld); Q_UNUSED(tagNew); }
@@ -171,6 +172,13 @@ public:
     CWizCategoryViewFolderItem* addFolder(const QString& strLocation, bool sort);
     void addAndSelectFolder(const CString& strLocation);
 
+    void resortFolders();
+    void resortFolders(QTreeWidgetItem *pFolder, const QMap<QString, int>& mfpos);
+
+    void getAllFolders(CWizStdStringArray& arrayAllLocation);
+    void getAllFolders(CWizStdStringArray& arrayAllLocation, CWizCategoryViewFolderItem* pFolder);
+
+
     // tags
     CWizCategoryViewTagItem* findTag(const WIZTAGDATA& tag, bool create, bool sort);
     CWizCategoryViewTagItem* addTagWithChildren(const WIZTAGDATA& tag);
@@ -240,6 +248,7 @@ protected Q_SLOTS:
 
     virtual void on_folder_created(const QString& strLocation);
     virtual void on_folder_deleted(const QString& strLocation);
+    virtual void on_folder_positionChanged();
 
     virtual void on_tag_created(const WIZTAGDATA& tag);
     virtual void on_tag_modified(const WIZTAGDATA& tagOld, const WIZTAGDATA& tagNew);
