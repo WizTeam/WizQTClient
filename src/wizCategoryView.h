@@ -172,6 +172,9 @@ public:
     CWizCategoryViewFolderItem* addFolder(const QString& strLocation, bool sort);
     void addAndSelectFolder(const CString& strLocation);
 
+    void sortFolders();
+    void sortFolders(CWizCategoryViewFolderItem* pItem);
+
     void resortFolders();
     void resortFolders(QTreeWidgetItem *pFolder, const QMap<QString, int>& mfpos);
 

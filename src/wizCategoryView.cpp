@@ -1636,6 +1636,41 @@ void CWizCategoryView::getAllFolders(CWizStdStringArray& arrayAllLocation, CWizC
     }
 }
 
+void CWizCategoryView::sortFolders()
+{
+    CWizCategoryViewAllFoldersItem* pFolderRoot = dynamic_cast<CWizCategoryViewAllFoldersItem *>(findCategory(CATEGORY_FOLDERS));
+    if (!pFolderRoot)
+        return;
+
+    pFolderRoot->sortChildren(0, Qt::AscendingOrder);
+
+    for (int i = 1; i < pFolderRoot->childCount(); i++)
+    {
+        CWizCategoryViewFolderItem* pFolder = dynamic_cast<CWizCategoryViewFolderItem*>(pFolderRoot->child(i));
+        if (!pFolder)
+            return;
+
+        sortFolders(pFolder);
+    }
+}
+
+void CWizCategoryView::sortFolders(CWizCategoryViewFolderItem* pItem)
+{
+    if (!pItem)
+        return;
+
+    pItem->sortChildren(0, Qt::AscendingOrder);
+
+    for (int i = 1; i < pItem->childCount(); i++)
+    {
+        CWizCategoryViewFolderItem* pFolder = dynamic_cast<CWizCategoryViewFolderItem*>(pItem->child(i));
+        if (!pFolder)
+            return;
+
+        sortFolders(pFolder);
+    }
+}
+
 void CWizCategoryView::resortFolders()
 {
     CWizCategoryViewAllFoldersItem* pFolderRoot = dynamic_cast<CWizCategoryViewAllFoldersItem *>(findCategory(CATEGORY_FOLDERS));
@@ -1722,6 +1757,7 @@ void CWizCategoryView::initFolders()
 
     pAllFoldersItem->setExpanded(true);
 
+    sortFolders();
     updateFolderDocumentCount();
 
     // push back folders cache
@@ -1739,7 +1775,7 @@ void CWizCategoryView::initFolders(QTreeWidgetItem* pParent, \
 {
     CWizStdStringArray arrayLocation;
     CWizDatabase::GetChildLocations(arrayAllLocation, strParentLocation, arrayLocation);
-    sortFolderByPosition(arrayLocation, mfpos);
+    //sortFolderByPosition(arrayLocation, mfpos);
 
     CWizStdStringArray::const_iterator it;
     for (it = arrayLocation.begin(); it != arrayLocation.end(); it++) {
@@ -2432,7 +2468,7 @@ void CWizCategoryView::on_folder_deleted(const QString& strLocation)
 
 void CWizCategoryView::on_folder_positionChanged()
 {
-    resortFolders();
+    sortFolders();
 }
 
 void CWizCategoryView::on_tag_created(const WIZTAGDATA& tag)

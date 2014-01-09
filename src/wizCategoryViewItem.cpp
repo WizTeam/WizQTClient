@@ -1,5 +1,9 @@
 #include "wizCategoryViewItem.h"
 
+#include <QDebug>
+
+#include <extensionsystem/pluginmanager.h>
+
 #include "wizdef.h"
 #include "wizCategoryView.h"
 #include "share/wizsettings.h"
@@ -364,6 +368,28 @@ QString CWizCategoryViewFolderItem::name() const
 {
     return CWizDatabase::GetLocationName(m_strName);
 }
+
+bool CWizCategoryViewFolderItem::operator < (const QTreeWidgetItem &other) const
+{
+    QTreeWidgetItem* pItem = other.clone();
+    CWizCategoryViewFolderItem* pOther = dynamic_cast<CWizCategoryViewFolderItem*>(pItem);
+    if (!pOther) {
+        //qDebug() << "[WARNING] compare folder item with item other than folder!";
+        delete pItem;
+        return false;
+    }
+
+    int nThis = 0, nOther = 0;
+    if (!pOther->location().isEmpty()) {
+        QSettings* setting = ExtensionSystem::PluginManager::settings();
+        nOther = setting->value("FolderPosition/" + pOther->location()).toInt();
+        nThis = setting->value("FolderPosition/" + location()).toInt();
+    }
+
+    delete pOther;
+    return nThis < nOther;
+}
+
 
 
 /* ------------------------------ CWizCategoryViewAllTagsItem ------------------------------ */
