@@ -371,11 +371,8 @@ QString CWizCategoryViewFolderItem::name() const
 
 bool CWizCategoryViewFolderItem::operator < (const QTreeWidgetItem &other) const
 {
-    QTreeWidgetItem* pItem = other.clone();
-    CWizCategoryViewFolderItem* pOther = dynamic_cast<CWizCategoryViewFolderItem*>(pItem);
+    const CWizCategoryViewFolderItem* pOther = dynamic_cast<const CWizCategoryViewFolderItem*>(&other);
     if (!pOther) {
-        //qDebug() << "[WARNING] compare folder item with item other than folder!";
-        delete pItem;
         return false;
     }
 
@@ -386,7 +383,6 @@ bool CWizCategoryViewFolderItem::operator < (const QTreeWidgetItem &other) const
         nThis = setting->value("FolderPosition/" + location()).toInt();
     }
 
-    delete pOther;
     return nThis < nOther;
 }
 
