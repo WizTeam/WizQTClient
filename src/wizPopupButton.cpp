@@ -61,7 +61,8 @@ void CWizPopupButton::paintEvent(QPaintEvent* event)
         QRect rectText = opt.rect;
         rectText.setLeft(rectText.left() + nMargin);
         rectText.setRight(rectText.right() - nArrawWidth - nMargin * 2);
-        p.drawText(rectText, Qt::AlignCenter, opt.text);
+        QString str = fontMetrics().elidedText(opt.text, Qt::ElideRight, rectText.width());
+        p.drawText(rectText, Qt::AlignCenter, str);
         return;
     }
 }

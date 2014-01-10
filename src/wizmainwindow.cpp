@@ -586,6 +586,7 @@ void MainWindow::initClient()
 QWidget* MainWindow::createListView()
 {
     m_noteList = new QWidget(this);
+    m_noteList->setMinimumWidth(100);
     QVBoxLayout* layoutList = new QVBoxLayout();
     layoutList->setContentsMargins(0, 0, 0, 0);
     layoutList->setSpacing(0);
