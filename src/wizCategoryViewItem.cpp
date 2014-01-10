@@ -413,8 +413,10 @@ void CWizCategoryViewAllTagsItem::showContextMenu(CWizCategoryBaseView* pCtrl, Q
 
 void CWizCategoryViewAllTagsItem::getDocuments(CWizDatabase& db, CWizDocumentDataArray& arrayDocument)
 {
+    Q_UNUSED(db);
+    Q_UNUSED(arrayDocument);
     // no deleted
-    db.getDocumentsNoTag(arrayDocument);
+    //db.getDocumentsNoTag(arrayDocument);
 }
 
 bool CWizCategoryViewAllTagsItem::accept(CWizDatabase& db, const WIZDOCUMENTDATA& data)
