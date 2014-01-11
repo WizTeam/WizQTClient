@@ -1,7 +1,10 @@
 #include "sync.h"
 #include "sync_p.h"
 
+#include <QString>
+
 #include "apientry.h"
+#include "rapidjson/document.h"
 
 #include  "../share/wizSyncableDatabase.h"
 
@@ -1703,6 +1706,91 @@ void WizDownloadUserAvatars(IWizKMSyncEvents* pEvents, IWizSyncableDatabase* pDa
 }
 //
 
+QString downloadFromUrl(const QString& strUrl)
+{
+    QNetworkAccessManager net;
+    QNetworkReply* reply = net.get(QNetworkRequest(strUrl));
+
+    QEventLoop loop;
+    loop.connect(reply, SIGNAL(finished()), SLOT(quit()));
+    loop.exec();
+
+    if (reply->error()) {
+        return NULL;
+    }
+
+    return QString::fromUtf8(reply->readAll().constData());
+}
+
+bool resultFromJson(const QString& strJsonRaw, const QString& strKey, QString& strResult, int& nCode)
+{
+    if (strJsonRaw.isEmpty() || strKey.isEmpty()) {
+        return false;
+    }
+
+    rapidjson::Document d;
+    d.Parse<0>(strJsonRaw.toUtf8().constData());
+
+    if (d.HasMember("error_code")) {
+        nCode = d.FindMember("error_code")->value.GetInt();
+        strResult = QString::fromUtf8(d.FindMember("error")->value.GetString());
+        return false;
+    }
+
+    if (d.HasMember("return_code")) {
+        nCode = d.FindMember("return_code")->value.GetInt();
+        if (nCode == 200) {
+            if (d.FindMember(strKey.toUtf8().constData())->value.IsArray()) { // FIXME
+            //strResult = d.FindMember(strKey.toUtf8().constData())->value.GetString();
+                //strResult = strJsonRaw.section("(\[).*(\])");
+                qDebug() << strResult;
+                return true;
+            }
+        } else {
+            strResult = QString::fromUtf8(d.FindMember("return_message")->value.GetString());
+            return false;
+        }
+    }
+
+    return false;
+}
+
+void syncGroupUsers(CWizKMAccountsServer& server, const CWizGroupDataArray& arrayGroup,
+                    IWizKMSyncEvents* pEvents, IWizSyncableDatabase* pDatabase, bool background)
+{
+    QString strt = pDatabase->meta("SYNC_INFO", "DownloadGroupUsers");
+    if (!strt.isEmpty()) {
+        if (QDateTime::fromString(strt).addDays(1) > QDateTime::currentDateTime()) {
+            if (background) {
+                return;
+            }
+        }
+    }
+
+    for (CWizGroupDataArray::const_iterator it = arrayGroup.begin();
+         it != arrayGroup.end();
+         it++)
+    {
+        const WIZGROUPDATA& g = *it;
+        if (!g.bizGUID.isEmpty()) {
+            int nCode;
+            QString strJson;
+
+            QString strUrl = WizService::ApiEntry::groupUsersUrl(server.GetToken(), g.bizGUID, g.strGroupGUID);
+            QString strJsonRaw = downloadFromUrl(strUrl);
+
+            if (resultFromJson(strJsonRaw, "result", strJson, nCode) && !strJson.isEmpty()) {
+                pDatabase->setBizGroupUsers(g.strGroupGUID, strJson);
+            }
+        }
+
+        if (pEvents->IsStop())
+            return;
+    }
+
+    pDatabase->setMeta("SYNC_INFO", "DownloadGroupUsers", QDateTime::currentDateTime().toString());
+}
+
 bool WizSyncDatabase(const WIZUSERINFO& info, IWizKMSyncEvents* pEvents,
                      IWizSyncableDatabase* pDatabase,
                      bool bUseWizServer, bool bBackground)
@@ -1779,7 +1867,12 @@ bool WizSyncDatabase(const WIZUSERINFO& info, IWizKMSyncEvents* pEvents,
     //
     if (pEvents->IsStop())
         return FALSE;
-    //
+
+    pEvents->OnStatus("Sync group users");
+    syncGroupUsers(server, arrayGroup, pEvents, pDatabase, bBackground);
+    if (pEvents->IsStop())
+        return false;
+
     pEvents->OnStatus(_TR("-------sync groups--------------"));
     //
     for (CWizGroupDataArray::const_iterator itGroup = arrayGroup.begin();

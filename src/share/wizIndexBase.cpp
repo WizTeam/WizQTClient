@@ -1507,12 +1507,12 @@ bool CWizIndexBase::userFromGUID(const QString& strUserGUID,
     return true;
 }
 
-bool CWizIndexBase::userFromGUID(const QString& bizGUID,
+bool CWizIndexBase::userFromGUID(const QString& strKbGUID,
                                  const QString& userGUID,
                                  WIZBIZUSER& user)
 {
     CString strWhere = "BIZ_GUID=%1 AND USER_GUID=%2";
-    strWhere = strWhere.arg(STR2SQL(bizGUID)).arg(STR2SQL(userGUID));
+    strWhere = strWhere.arg(STR2SQL(strKbGUID)).arg(STR2SQL(userGUID));
 
     CString strSQL = FormatQuerySQL(TABLE_NAME_WIZ_USER,
                                     FIELD_LIST_WIZ_USER,

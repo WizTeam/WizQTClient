@@ -74,8 +74,8 @@ public:
     // biz users, one user may in different biz group
     bool GetAllUsers(CWizBizUserDataArray& arrayUser);
     bool userFromGUID(const QString& strUserGUID,
-                      CWizBizUserDataArray& arrayUser);
-    bool userFromGUID(const QString& bizGUID,
+                      CWizBizUserDataArray &arrayUser);
+    bool userFromGUID(const QString& strKbGUID,
                       const QString& userGUID,
                       WIZBIZUSER& user);
 

@@ -175,6 +175,7 @@ public:
 public Q_SLOTS:
     void on_actionExit_triggered();
     void on_actionConsole_triggered();
+    void on_actionAutoSync_triggered();
     void on_actionSync_triggered();
     void on_actionNewNote_triggered();
     void on_actionLogout_triggered();

@@ -116,7 +116,7 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     // syncing thread
     connect(m_sync, SIGNAL(processLog(const QString&)), SLOT(on_syncProcessLog(const QString&)));
     connect(m_sync, SIGNAL(syncFinished(int, QString)), SLOT(on_syncDone(int, QString)));
-    connect(m_syncTimer, SIGNAL(timeout()), SLOT(on_actionSync_triggered()));
+    connect(m_syncTimer, SIGNAL(timeout()), SLOT(on_actionAutoSync_triggered()));
     int nInterval = m_settings->syncInterval();
     if (nInterval == 0) {
         m_syncTimer->setInterval(15 * 60 * 1000);   // default 15 minutes
@@ -125,7 +125,7 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     }
 
     if (nInterval != -1) {
-        QTimer::singleShot(3 * 1000, this, SLOT(on_actionSync_triggered()));
+        QTimer::singleShot(3 * 1000, this, SLOT(on_actionAutoSync_triggered()));
     }
 
     // misc settings
@@ -694,11 +694,16 @@ void MainWindow::init()
     connect(m_documents, SIGNAL(itemSelectionChanged()), SLOT(on_documents_itemSelectionChanged()));
 }
 
+void MainWindow::on_actionAutoSync_triggered()
+{
+    m_sync->startSync();
+    m_animateSync->startPlay();
+    m_syncTimer->stop();
+}
+
 void MainWindow::on_actionSync_triggered()
 {
-    //m_certManager->downloadUserCert();
-
-    m_sync->startSync();
+    m_sync->startSync(false);
     m_animateSync->startPlay();
     m_syncTimer->stop();
 }

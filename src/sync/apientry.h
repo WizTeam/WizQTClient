@@ -18,6 +18,7 @@ public:
     static QString feedbackUrl();
     static QString accountInfoUrl(const QString& strToken);
     static QString groupAttributeUrl(const QString& strToken, const QString& strKbGUID);
+    static QString groupUsersUrl(const QString& strToken, const QString& strBizGUID, const QString& strkbGUID);
 
     static QString kUrlFromGuid(const QString& strToken, const QString& strKbGUID);
 };

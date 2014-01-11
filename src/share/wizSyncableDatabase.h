@@ -118,6 +118,10 @@ struct IWizSyncableDatabase
     virtual void OnStorageLimit(const QString& strErrorMessage) = 0;
     virtual bool IsTrafficLimit() = 0;
     virtual bool IsStorageLimit() = 0;
+
+    virtual bool setMeta(const QString& strSection, const QString& strKey, const QString& strValue) = 0;
+    virtual QString meta(const QString& strSection, const QString& strKey) = 0;
+    virtual void setBizGroupUsers(const QString& strkbGUID, const QString& strJson) = 0;
 };
 
 

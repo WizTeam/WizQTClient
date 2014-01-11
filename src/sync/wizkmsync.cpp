@@ -69,6 +69,7 @@ CWizKMSyncThread::CWizKMSyncThread(CWizDatabase& db, QObject* parent)
     , m_db(db)
     , m_bNeedSyncAll(true)
     , m_pEvents(NULL)
+    , m_bBackground(true)
 {
     m_tLastSyncAll = QDateTime::currentDateTime();
 }
@@ -76,10 +77,9 @@ CWizKMSyncThread::CWizKMSyncThread(CWizDatabase& db, QObject* parent)
 void CWizKMSyncThread::run()
 {
     doSync();
-    //exec();
 }
 
-void CWizKMSyncThread::startSync()
+void CWizKMSyncThread::startSync(bool bBackground)
 {
     qDebug() << "[Sync]startSync, thread: " << QThread::currentThreadId();
     if (isRunning()) {
@@ -88,6 +88,7 @@ void CWizKMSyncThread::startSync()
     }
 
     m_bNeedSyncAll = true;
+    m_bBackground = bBackground;
 
     trySync();
 }
@@ -155,7 +156,7 @@ bool CWizKMSyncThread::syncAll()
     connect(m_pEvents, SIGNAL(messageReady(const QString&)), SIGNAL(processLog(const QString&)));
 
     m_pEvents->SetLastErrorCode(0);
-    ::WizSyncDatabase(m_info, m_pEvents, &m_db, true, true);
+    ::WizSyncDatabase(m_info, m_pEvents, &m_db, true, m_bBackground);
 
     m_pEvents->deleteLater();
     Q_EMIT syncFinished(m_pEvents->GetLastErrorCode(), "");

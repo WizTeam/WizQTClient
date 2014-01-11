@@ -25,6 +25,7 @@ public:
     QString feedbackUrl();
     QString accountInfoUrl(const QString& strToken);
     QString groupAttributeUrl(const QString& strToken, const QString& strKbGUID);
+    QString groupUsersUrl(const QString& strToken, const QString& strBizGUID, const QString& strkbGUID);
 
     QString kUrlFromGuid(const QString& strToken, const QString& strKbGUID);
 

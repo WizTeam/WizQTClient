@@ -33,13 +33,14 @@ class CWizKMSyncThread : public QThread
 
 public:
     CWizKMSyncThread(CWizDatabase& db, QObject* parent = 0);
-    void startSync();
+    void startSync(bool bBackground = true);
     void stopSync();
 
 protected:
     virtual void run();
 
 private:
+    bool m_bBackground;
     QThread* m_worker;
     CWizDatabase& m_db;
     WIZUSERINFO m_info;

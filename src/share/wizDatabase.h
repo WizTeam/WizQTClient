@@ -225,6 +225,10 @@ public:
     virtual bool IsTrafficLimit();
     virtual bool IsStorageLimit();
 
+    virtual bool setMeta(const QString& strSection, const QString& strKey, const QString& strValue);
+    virtual QString meta(const QString& strSection, const QString& strKey);
+    virtual void setBizGroupUsers(const QString& strkbGUID, const QString& strJson);
+
     // end interface implementations
 
     // helper methods for interface

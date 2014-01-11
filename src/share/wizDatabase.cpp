@@ -1011,6 +1011,21 @@ bool CWizDatabase::IsStorageLimit()
     return false;
 }
 
+bool CWizDatabase::setMeta(const QString& strSection, const QString& strKey, const QString& strValue)
+{
+    return SetMeta(strSection, strKey, strValue);
+}
+
+QString CWizDatabase::meta(const QString& strSection, const QString& strKey)
+{
+    return GetMetaDef(strSection, strKey);
+}
+
+void CWizDatabase::setBizGroupUsers(const QString& strkbGUID, const QString& strJson)
+{
+    SetBizUsers(strkbGUID, strJson);
+}
+
 void CWizDatabase::SetFoldersPos(const QString& foldersPos, qint64 nVersion)
 {
     SetLocalValueVersion("folders_pos", nVersion);
@@ -1192,6 +1207,7 @@ bool CWizDatabase::loadBizUsersFromJson(const QString& strBizGUID,
 
     if (!document.IsArray()) {
         TOLOG("Error occured when try to parse json of biz users");
+        qDebug() << strJsonUsers;
         return false;
     }
 
@@ -1677,11 +1693,11 @@ bool CWizDatabase::updateBizUser(const WIZBIZUSER& user)
     WIZBIZUSER userTemp;
     if (userFromGUID(user.bizGUID, user.userGUID, userTemp)) {
         // only modify user when alias changed
-        if (userTemp.alias != user.alias) {
-            bRet = modifyUserEx(user);
-        } else {
-            bRet = true;
-        }
+        //if (userTemp.alias != user.alias) {
+        bRet = modifyUserEx(user);
+        //} else {
+        //    bRet = true;
+        //}
     } else {
         bRet = createUserEx(user);
     }
