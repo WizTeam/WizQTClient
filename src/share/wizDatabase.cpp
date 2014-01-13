@@ -813,12 +813,12 @@ void CWizDatabase::GetAccountKeys(CWizStdStringArray& arrayKey)
 {
     Q_ASSERT(!IsGroup());
 
-    QMap<QString, QString> mapBiz;
-    GetBizGroupInfo(mapBiz);
-    for (QMap<QString, QString>::const_iterator it = mapBiz.begin();
-         it != mapBiz.end(); it++) {
-        arrayKey.push_back("biz_users/" + it.key());
-    }
+    //QMap<QString, QString> mapBiz;
+    //GetBizGroupInfo(mapBiz);
+    //for (QMap<QString, QString>::const_iterator it = mapBiz.begin();
+    //     it != mapBiz.end(); it++) {
+    //    arrayKey.push_back("biz_users/" + it.key());
+    //}
 }
 
 qint64 CWizDatabase::GetAccountLocalValueVersion(const QString& strKey)
@@ -1192,29 +1192,39 @@ void CWizDatabase::SetBizUsers(const QString& strBizGUID, const QString& strJson
 }
 
 bool CWizDatabase::loadBizUsersFromJson(const QString& strBizGUID,
-                                        const QString& strJsonUsers,
+                                        const QString& strJsonRaw,
                                         CWizBizUserDataArray& arrayUser)
 {
-    // QString assumes Lantin-1 when convert to and from const char* and QByteArrays
-    // set to UTF-8 as default converting to avoid messy code
-    //QTextCodec::setCodecForCStrings(QTextCodec::codecForName("UTF-8"));
+    rapidjson::Document d;
+    d.Parse<0>(strJsonRaw.toUtf8().constData());
+
+    if (d.FindMember("error_code")) {
+        qDebug() << QString::fromUtf8(d.FindMember("error")->value.GetString());
+        return false;
+    }
+
+    if (d.FindMember("return_code")) {
+        int nCode = d.FindMember("return_code")->value.GetInt();
+        if (nCode != 200) {
+            qDebug() << QString::fromUtf8(d.FindMember("return_message")->value.GetString()) << ", code = " << nCode;
+            return false;
+        }
+    }
+
+    if (!d.FindMember("result")) {
+        qDebug() << "Error occured when try to parse json of biz users";
+        qDebug() << strJsonRaw;
+        return false;
+    }
 
     QTextCodec* codec = QTextCodec::codecForName("UTF-8");
     QTextDecoder* encoder = codec->makeDecoder();
 
-    rapidjson::Document document;
-    document.Parse<0>(strJsonUsers.toUtf8().constData());
-
-    if (!document.IsArray()) {
-        TOLOG("Error occured when try to parse json of biz users");
-        qDebug() << strJsonUsers;
-        return false;
-    }
-
-    for (rapidjson::SizeType i = 0; i < document.Size(); i++) {
-        const rapidjson::Value& u = document[i];
+    const rapidjson::Value& users = d["result"];
+    for (rapidjson::SizeType i = 0; i < users.Size(); i++) {
+        const rapidjson::Value& u = users[i];
         if (!u.IsObject()) {
-            TOLOG("Error occured when parse json of biz users");
+            qDebug() << "Error occured when parse json of biz users";
             return false;
         }
 

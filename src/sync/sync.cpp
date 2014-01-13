@@ -1722,39 +1722,6 @@ QString downloadFromUrl(const QString& strUrl)
     return QString::fromUtf8(reply->readAll().constData());
 }
 
-bool resultFromJson(const QString& strJsonRaw, const QString& strKey, QString& strResult, int& nCode)
-{
-    if (strJsonRaw.isEmpty() || strKey.isEmpty()) {
-        return false;
-    }
-
-    rapidjson::Document d;
-    d.Parse<0>(strJsonRaw.toUtf8().constData());
-
-    if (d.HasMember("error_code")) {
-        nCode = d.FindMember("error_code")->value.GetInt();
-        strResult = QString::fromUtf8(d.FindMember("error")->value.GetString());
-        return false;
-    }
-
-    if (d.HasMember("return_code")) {
-        nCode = d.FindMember("return_code")->value.GetInt();
-        if (nCode == 200) {
-            if (d.FindMember(strKey.toUtf8().constData())->value.IsArray()) { // FIXME
-            //strResult = d.FindMember(strKey.toUtf8().constData())->value.GetString();
-                //strResult = strJsonRaw.section("(\[).*(\])");
-                qDebug() << strResult;
-                return true;
-            }
-        } else {
-            strResult = QString::fromUtf8(d.FindMember("return_message")->value.GetString());
-            return false;
-        }
-    }
-
-    return false;
-}
-
 void syncGroupUsers(CWizKMAccountsServer& server, const CWizGroupDataArray& arrayGroup,
                     IWizKMSyncEvents* pEvents, IWizSyncableDatabase* pDatabase, bool background)
 {
@@ -1767,21 +1734,19 @@ void syncGroupUsers(CWizKMAccountsServer& server, const CWizGroupDataArray& arra
         }
     }
 
+    pEvents->OnStatus("Sync group users");
+
     for (CWizGroupDataArray::const_iterator it = arrayGroup.begin();
          it != arrayGroup.end();
          it++)
     {
         const WIZGROUPDATA& g = *it;
         if (!g.bizGUID.isEmpty()) {
-            int nCode;
-            QString strJson;
-
             QString strUrl = WizService::ApiEntry::groupUsersUrl(server.GetToken(), g.bizGUID, g.strGroupGUID);
             QString strJsonRaw = downloadFromUrl(strUrl);
 
-            if (resultFromJson(strJsonRaw, "result", strJson, nCode) && !strJson.isEmpty()) {
-                pDatabase->setBizGroupUsers(g.strGroupGUID, strJson);
-            }
+            if (!strJsonRaw.isEmpty())
+                pDatabase->setBizGroupUsers(g.strGroupGUID, strJsonRaw);
         }
 
         if (pEvents->IsStop())
@@ -1840,7 +1805,9 @@ bool WizSyncDatabase(const WIZUSERINFO& info, IWizKMSyncEvents* pEvents,
     */
     pEvents->OnStatus(_TR("Downloading settings"));
     DownloadAccountKeys(server, pDatabase);
-    //
+
+    syncGroupUsers(server, arrayGroup, pEvents, pDatabase, bBackground);
+
     /*
     ////下载消息////
     */
@@ -1867,11 +1834,6 @@ bool WizSyncDatabase(const WIZUSERINFO& info, IWizKMSyncEvents* pEvents,
     //
     if (pEvents->IsStop())
         return FALSE;
-
-    pEvents->OnStatus("Sync group users");
-    syncGroupUsers(server, arrayGroup, pEvents, pDatabase, bBackground);
-    if (pEvents->IsStop())
-        return false;
 
     pEvents->OnStatus(_TR("-------sync groups--------------"));
     //

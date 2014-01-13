@@ -240,7 +240,7 @@ public:
 
     void SetBizUsers(const QString &strBizGUID, const QString& strUsers);
     bool loadBizUsersFromJson(const QString &strBizGUID,
-                              const QString& strJsonUsers,
+                              const QString& strJsonRaw,
                               CWizBizUserDataArray& arrayUser);
 
 public:
