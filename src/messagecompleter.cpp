@@ -10,10 +10,16 @@
 #include <QItemDelegate>
 #include <QDebug>
 
+#include <coreplugin/icore.h>
+
 #include "sync/avatar.h"
 #include "share/wizDatabaseManager.h"
 #include "share/wizDatabase.h"
 #include "utils/pinyin.h"
+
+#include "wizDocumentView.h"
+
+using namespace Core;
 
 namespace WizService {
 
@@ -124,25 +130,54 @@ MessageCompleter::MessageCompleter(QWidget *parent)
     m_title = qobject_cast<QLineEdit*>(parent);
     Q_ASSERT(m_title);
 
-    //setModelSorting(QCompleter::CaseInsensitivelySortedModel);
     setCaseSensitivity(Qt::CaseInsensitive);
     setWrapAround(false);
 
     setCompletionColumn(0);
     setCompletionRole(Qt::EditRole);
 
+    connect(Core::ICore::instance(), SIGNAL(viewNoteLoaded(Core::INoteView*,const WIZDOCUMENTDATA&,bool)),
+            SLOT(onNoteLoaded(Core::INoteView*,const WIZDOCUMENTDATA&,bool)));
+}
+
+CWizDocumentView* MessageCompleter::noteView()
+{
+    QWidget* pParent = m_title->parentWidget();
+    while (pParent) {
+        CWizDocumentView* view = dynamic_cast<CWizDocumentView*>(pParent);
+        if (view) {
+            return view;
+        }
+
+        pParent = pParent->parentWidget();
+    }
+
+    Q_ASSERT(0);
+    return 0;
+}
+
+void MessageCompleter::onNoteLoaded(Core::INoteView* view, const WIZDOCUMENTDATA& doc, bool ok)
+{
+    if (view != noteView())
+        return;
+
+    if (!ok)
+        return;
+
+    update(doc.strKbGUID);
+}
+
+void MessageCompleter::update(const QString& strKbGUID)
+{
     CWizBizUserDataArray arrayUser;
-    if (CWizDatabaseManager::instance()->db().GetAllUsers(arrayUser)) {
+    if (CWizDatabaseManager::instance()->db().users(strKbGUID, arrayUser)) {
         MessageCompleterModel* model = new MessageCompleterModel(arrayUser, this);
         setModel(model);
 
         MessageCompleterPopup* popup = new MessageCompleterPopup();
         popup->setModel(model);
         setPopup(popup);
-
-        //popup->setItemDelegate(new MessageCompleterPopupDelegate(this));
     }
 }
-
 
 } // namespace WizService

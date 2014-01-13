@@ -78,6 +78,7 @@ public:
     bool userFromGUID(const QString& strKbGUID,
                       const QString& userGUID,
                       WIZBIZUSER& user);
+    bool users(const QString& strKbGUID, CWizBizUserDataArray& arrayUser);
 
 protected:
     CppSQLite3DB m_db;

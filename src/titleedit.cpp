@@ -69,20 +69,25 @@ void TitleEdit::keyPressEvent(QKeyEvent* e)
 
     QLineEdit::keyPressEvent(e);
 
-    QString completionPrefix = textUnderCursor();
-    bool isSeparator = (completionPrefix == QString(m_separator));
+    if (!c)
+        return;
 
-    bool isShortcut = isSeparator;
+    QString completionPrefix = textUnderCursor();
+    bool isSeparator = completionPrefix.isEmpty() ? false : true;
+
+    if (!isSeparator) {
+        c->popup()->hide();
+        return;
+    }
 
     const bool ctrlOrShift = e->modifiers() & (Qt::ControlModifier | Qt::ShiftModifier);
     if (!c || (ctrlOrShift && e->text().isEmpty()))
         return;
 
     static QString eow("~!#$%^&*()_+{}|:\"<>?,./;'[]\\-="); // end of word
-    bool hasModifier = isShortcut && !ctrlOrShift;
+    bool hasModifier = isSeparator && !ctrlOrShift;
 
-    if (!isShortcut && (hasModifier || e->text().isEmpty()
-                        //|| completionPrefix.length() < 3
+    if (!isSeparator && (hasModifier || e->text().isEmpty()
                       || eow.contains(e->text().right(1)))) {
         c->popup()->hide();
         return;
