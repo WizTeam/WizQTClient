@@ -822,17 +822,25 @@ void CWizDocumentWebView::viewDocumentInEditor(bool editing)
         return;
     }
 
+    strHtml = escapeJavascriptString(strHtml);
+
+    QString strHead;
+    QRegExp regh("<head.*>([\\s\\S]*)</head>", Qt::CaseInsensitive);
+    if (regh.indexIn(strHtml) != -1) {
+        strHead = regh.cap(1).simplified();
+    }
+    strHead += "<link rel=\"stylesheet\" type=\"text/css\" href=\"" + m_strDefaultCssFilePath + "\">";
+
     QRegExp regex("<body.*>([\\s\\S]*)</body>", Qt::CaseInsensitive);
     if (regex.indexIn(strHtml) != -1) {
         strHtml = regex.cap(1);
     }
 
-    strHtml = escapeJavascriptString(strHtml);
-
-    QString strExec = QString("viewNote('%1', %2, '%3');")
+    QString strExec = QString("viewNote('%1', %2, '%3', '%4');")
             .arg(strGUID)
             .arg(editing ? "true" : "false")
-            .arg(strHtml);
+            .arg(strHtml)
+            .arg(strHead);
 
     ret = page()->mainFrame()->evaluateJavaScript(strExec).toBool();
     if (!ret) {

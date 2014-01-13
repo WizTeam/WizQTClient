@@ -1780,7 +1780,7 @@ void CWizCategoryView::initFolders(QTreeWidgetItem* pParent, \
     CWizStdStringArray::const_iterator it;
     for (it = arrayLocation.begin(); it != arrayLocation.end(); it++) {
         CString strLocation = *it;
-        qDebug() << strLocation;
+        //qDebug() << strLocation;
 
         if (m_dbMgr.db().IsInDeletedItems(strLocation))
             continue;
