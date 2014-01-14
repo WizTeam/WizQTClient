@@ -73,7 +73,7 @@ void TitleEdit::keyPressEvent(QKeyEvent* e)
         return;
 
     QString completionPrefix = textUnderCursor();
-    bool isSeparator = completionPrefix.isEmpty() ? false : true;
+    bool isSeparator = (!completionPrefix.isEmpty() || text().at(cursorPosition() - 1) == m_separator) ? true : false;
 
     if (!isSeparator) {
         c->popup()->hide();
