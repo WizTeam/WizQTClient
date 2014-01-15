@@ -142,7 +142,6 @@ public:
     virtual bool accept(CWizDatabase& db, const WIZDOCUMENTDATA& data);
     virtual bool operator < (const QTreeWidgetItem &other) const;
 
-
     virtual QTreeWidgetItem* clone() const;
 
     QString location() const { return m_strName; }
@@ -165,6 +164,7 @@ public:
     virtual void showContextMenu(CWizCategoryBaseView* pCtrl, QPoint pos);
     virtual void getDocuments(CWizDatabase& db, CWizDocumentDataArray& arrayDocument);
     virtual bool accept(CWizDatabase& db, const WIZDOCUMENTDATA& data);
+    virtual bool operator < (const QTreeWidgetItem &other) const;
 
     virtual QTreeWidgetItem *clone() const;
 

@@ -218,6 +218,13 @@ STDMETHODIMP WizToolsChinese2PinYin(LPCWSTR lpszText, UINT flags, QString& pbstr
 	return WizToolsChinese2PinYinEx(lpszText, flags, _T(","), pbstrTextResult);
 }
 
+int chinese2pinyin(const QString& strChinese, QString& strPinYin, UINT flags)
+{
+    wchar_t str[strChinese.size()];
+    strChinese.toWCharArray(str);
+    return WizToolsChinese2PinYin(str, flags, strPinYin);
+}
+
 void TestPinYin()
 {
 

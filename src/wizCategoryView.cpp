@@ -1735,9 +1735,11 @@ void CWizCategoryView::initTags()
 {
     CWizCategoryViewAllTagsItem* pAllTagsItem = new CWizCategoryViewAllTagsItem(m_app, CATEGORY_TAGS, m_dbMgr.db().kbGUID());
     addTopLevelItem(pAllTagsItem);
-    pAllTagsItem->setExpanded(true);
 
     initTags(pAllTagsItem, "");
+
+    pAllTagsItem->setExpanded(true);
+    pAllTagsItem->sortChildren(0, Qt::AscendingOrder);
 
     updateTagDocumentCount();
 }
@@ -1754,6 +1756,8 @@ void CWizCategoryView::initTags(QTreeWidgetItem* pParent, const QString& strPare
 
         initTags(pTagItem, it->strGUID);
     }
+
+    pParent->sortChildren(0, Qt::AscendingOrder);
 }
 
 void CWizCategoryView::initStyles()

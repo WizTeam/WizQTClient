@@ -4,6 +4,8 @@
 
 #include <extensionsystem/pluginmanager.h>
 
+#include "utils/pinyin.h"
+
 #include "wizdef.h"
 #include "wizCategoryView.h"
 #include "share/wizsettings.h"
@@ -480,6 +482,25 @@ void CWizCategoryViewTagItem::reload(CWizDatabase& db)
     db.TagFromGUID(m_tag.strGUID, m_tag);
     setText(0, m_tag.strName);
 }
+
+bool CWizCategoryViewTagItem::operator < (const QTreeWidgetItem &other) const
+{
+    const CWizCategoryViewTagItem* pOther = dynamic_cast<const CWizCategoryViewTagItem*>(&other);
+    if (!pOther) {
+        return false;
+    }
+
+    QString strThis, strOther;
+    ::chinese2pinyin(text(0), strThis, WIZ_C2P_POLYPHONE);
+    ::chinese2pinyin(pOther->text(0), strOther, WIZ_C2P_POLYPHONE);
+
+    if (strThis.isEmpty()) {
+        return true;
+    }
+
+    return strThis.compare(strOther, Qt::CaseInsensitive) < 0;
+}
+
 
 
 /* --------------------- CWizCategoryViewStyleRootItem --------------------- */
