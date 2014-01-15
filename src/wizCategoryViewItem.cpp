@@ -1,6 +1,8 @@
 #include "wizCategoryViewItem.h"
 
 #include <QDebug>
+#include <QTextCodec>
+#include <CString>
 
 #include <extensionsystem/pluginmanager.h>
 
@@ -27,6 +29,53 @@ CWizCategoryViewItemBase::CWizCategoryViewItemBase(CWizExplorerApp& app,
 {
 }
 
+bool IsSimpChinese()
+{
+    QLocale local = QLocale::system();
+    QString name = local.name().toLower();
+    if (name == "zh_cn"
+        || name == "zh-cn")
+    {
+        return true;
+    }
+    return false;
+}
+bool CWizCategoryViewItemBase::operator < (const QTreeWidgetItem &other) const
+{
+    const CWizCategoryViewItemBase* pOther = dynamic_cast<const CWizCategoryViewItemBase*>(&other);
+    if (!pOther)
+        return false;
+    //
+    int nThis = getSortOrder();
+    int nOther = pOther->getSortOrder();
+    //
+    if (nThis != nOther)
+    {
+        return nThis < nOther;
+    }
+    //
+
+
+    QString strThis = text(0);
+    QString strOther = pOther->text(0);
+    //
+    static bool isSimpChinese = IsSimpChinese();
+    if (isSimpChinese)
+    {
+        QByteArray arrThis = QTextCodec::codecForName("GBK")->fromUnicode(strThis);
+        QByteArray arrOther = QTextCodec::codecForName("GBK")->fromUnicode(strOther);
+        //
+        std::string strThisA(arrThis.data(), arrThis.size());
+        std::string strOtherA(arrOther.data(), arrOther.size());
+        //
+        return strThisA.compare(strOtherA.c_str()) < 0;
+    }
+    else
+    {
+        return strThis.compare(strOther) < 0;
+    }
+}
+
 QVariant CWizCategoryViewItemBase::data(int column, int role) const
 {
     if (role == Qt::SizeHintRole) {
@@ -45,21 +94,6 @@ int CWizCategoryViewItemBase::getItemHeight(int hintHeight) const
     return hintHeight;
 }
 
-bool CWizCategoryViewItemBase::operator < (const QTreeWidgetItem &other) const
-{
-    if (text(0) == PREDEFINED_UNCLASSIFIED)
-    {
-        return true;
-    }
-    else if (text(0) == PREDEFINED_TRASH)
-    {
-        return false;
-    }
-    else
-    {
-        return text(0).compare(other.text(0), Qt::CaseInsensitive) < 0;
-    }
-}
 
 QString CWizCategoryViewItemBase::id() const
 {
@@ -482,25 +516,6 @@ void CWizCategoryViewTagItem::reload(CWizDatabase& db)
     db.TagFromGUID(m_tag.strGUID, m_tag);
     setText(0, m_tag.strName);
 }
-
-bool CWizCategoryViewTagItem::operator < (const QTreeWidgetItem &other) const
-{
-    const CWizCategoryViewTagItem* pOther = dynamic_cast<const CWizCategoryViewTagItem*>(&other);
-    if (!pOther) {
-        return false;
-    }
-
-    QString strThis, strOther;
-    ::chinese2pinyin(text(0), strThis, WIZ_C2P_POLYPHONE);
-    ::chinese2pinyin(pOther->text(0), strOther, WIZ_C2P_POLYPHONE);
-
-    if (strThis.isEmpty()) {
-        return true;
-    }
-
-    return strThis.compare(strOther, Qt::CaseInsensitive) < 0;
-}
-
 
 
 /* --------------------- CWizCategoryViewStyleRootItem --------------------- */

@@ -30,6 +30,9 @@ public:
 
     void setDocumentsCount(int nCurrent, int nTotal);
 
+    //
+    virtual int getSortOrder() const { return 0; }
+
 protected:
     CWizExplorerApp& m_app;
     QString m_strName;
@@ -164,7 +167,6 @@ public:
     virtual void showContextMenu(CWizCategoryBaseView* pCtrl, QPoint pos);
     virtual void getDocuments(CWizDatabase& db, CWizDocumentDataArray& arrayDocument);
     virtual bool accept(CWizDatabase& db, const WIZDOCUMENTDATA& data);
-    virtual bool operator < (const QTreeWidgetItem &other) const;
 
     virtual QTreeWidgetItem *clone() const;
 
@@ -236,6 +238,7 @@ public:
     virtual void showContextMenu(CWizCategoryBaseView* pCtrl, QPoint pos) {Q_UNUSED(pCtrl); Q_UNUSED(pos);}
     virtual void getDocuments(CWizDatabase& db, CWizDocumentDataArray& arrayDocument);
     virtual bool accept(CWizDatabase& db, const WIZDOCUMENTDATA& data);
+    virtual int getSortOrder() const { return 10; }
 };
 
 class CWizCategoryViewGroupItem : public CWizCategoryViewItemBase
@@ -249,6 +252,7 @@ public:
 
     const WIZTAGDATA& tag() const { return m_tag; }
 
+    virtual int getSortOrder() const { return 11; }
 private:
     WIZTAGDATA m_tag;
 };
@@ -260,6 +264,7 @@ public:
     virtual void showContextMenu(CWizCategoryBaseView* pCtrl, QPoint pos);
     virtual void getDocuments(CWizDatabase& db, CWizDocumentDataArray& arrayDocument);
     virtual bool accept(CWizDatabase& db, const WIZDOCUMENTDATA& data);
+    virtual int getSortOrder() const { return 12; }
 };
 
 #endif // WIZCATEGORYVIEWITEM_H

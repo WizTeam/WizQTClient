@@ -1757,7 +1757,7 @@ void CWizCategoryView::initTags(QTreeWidgetItem* pParent, const QString& strPare
         initTags(pTagItem, it->strGUID);
     }
 
-    pParent->sortChildren(0, Qt::AscendingOrder);
+   pParent->sortChildren(0, Qt::AscendingOrder);
 }
 
 void CWizCategoryView::initStyles()
@@ -1772,6 +1772,9 @@ void CWizCategoryView::initGroups()
     QMap<QString, QString> bizInfo;
     m_dbMgr.db().GetBizGroupInfo(bizInfo);
 
+    //
+    std::vector<CWizCategoryViewItemBase*> arrayGroupsItem;
+    //
     if (!bizInfo.isEmpty()) {
         CWizCategoryViewSpacerItem* pSpacer = new CWizCategoryViewSpacerItem(m_app);
         addTopLevelItem(pSpacer);
@@ -1784,6 +1787,7 @@ void CWizCategoryView::initGroups()
             CWizCategoryViewBizGroupRootItem* pBizGroupItem = new CWizCategoryViewBizGroupRootItem(m_app, it.value(), "");
             addTopLevelItem(pBizGroupItem);
             pBizGroupItem->setExpanded(true);
+            arrayGroupsItem.push_back(pBizGroupItem);
         }
     }
 
@@ -1798,12 +1802,22 @@ void CWizCategoryView::initGroups()
         CWizCategoryViewAllGroupsRootItem* pAllGroupsItem = new CWizCategoryViewAllGroupsRootItem(m_app, CATEGORY_GROUP, "");
         addTopLevelItem(pAllGroupsItem);
         pAllGroupsItem->setExpanded(true);
+        arrayGroupsItem.push_back(pAllGroupsItem);
     }
 
     for (int i = 0; i < nTotal; i++) {
         initGroup(m_dbMgr.at(i));
         updateTagDocumentCount(m_dbMgr.at(i).kbGUID());
     }
+    //
+    for (std::vector<CWizCategoryViewItemBase*>::const_iterator it = arrayGroupsItem.begin();
+         it != arrayGroupsItem.end();
+         it++)
+    {
+        CWizCategoryViewItemBase* pItem = *it;
+        pItem->sortChildren(0, Qt::AscendingOrder);
+    }
+
 }
 
 void CWizCategoryView::initGroup(CWizDatabase& db)
@@ -1856,6 +1870,8 @@ void CWizCategoryView::initGroup(CWizDatabase& db, QTreeWidgetItem* pParent, con
 
         initGroup(db, pTagItem, it->strGUID);
     }
+    //
+    pParent->sortChildren(0, Qt::AscendingOrder);
 }
 
 CWizCategoryViewItemBase* CWizCategoryView::findCategory(const QString& strName, bool bCreate)
