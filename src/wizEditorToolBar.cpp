@@ -709,8 +709,7 @@ void EditorToolBar::on_delegate_requestShowContextMenu(const QPoint& pos)
     }
 
 #ifdef QT_DEBUG
-    QMenu* subm = m_editor->page()->createStandardContextMenu();
-    m_menuContext->addMenu(subm);
+    m_menuContext->addAction(m_editor->pageAction(QWebPage::InspectElement));
 #endif
 
     m_menuContext->popup(pos);

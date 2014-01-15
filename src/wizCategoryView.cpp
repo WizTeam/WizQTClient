@@ -1298,8 +1298,6 @@ void CWizCategoryView::init()
     initGroups();
 
     loadState();
-
-    //setCurrentItem(findCategory(CATEGORY_FOLDERS));
 }
 
 void CWizCategoryView::updateFolderDocumentCount()
@@ -1569,73 +1567,6 @@ void CWizCategoryView::initGeneral()
     pSearchRoot->setHidden(true);
 }
 
-void getFolderPositionMap(const CWizStdStringArray& arrayAllLocation, QMap<QString, int>& mfpos)
-{
-    CWizStdStringArray::const_iterator it;
-    for (it = arrayAllLocation.begin(); it != arrayAllLocation.end(); it++) {
-        const CString& strLocation = *it;
-        QSettings* setting = ExtensionSystem::PluginManager::settings();
-        int i = setting->value("FolderPosition/" + strLocation).toInt();
-        mfpos.insert(strLocation, i);
-    }
-}
-
-void sortFolderByPosition(CWizStdStringArray& arrayLocation, const QMap<QString, int>& mfpos)
-{
-    QList<CString> arrayFolder;
-
-    for (CWizStdStringArray::iterator it = arrayLocation.begin();
-         it != arrayLocation.end();
-         it++)
-    {
-        const CString& folder1 = *it;
-
-        for (int i = 0; i < arrayFolder.size(); i++) {
-            const CString& folder2 = arrayFolder.at(i);
-            if (mfpos.value(folder1) < mfpos.value(folder2)) {
-                arrayFolder.insert(i, folder1);
-                break;
-            }
-        }
-
-        if (!arrayFolder.contains(folder1)) {
-            arrayFolder.push_back(folder1);
-        }
-    }
-
-    arrayLocation.clear();
-    arrayLocation.assign(arrayFolder.begin(), arrayFolder.end());
-}
-
-void CWizCategoryView::getAllFolders(CWizStdStringArray& arrayAllLocation)
-{
-    CWizCategoryViewAllFoldersItem* pFolderRoot = dynamic_cast<CWizCategoryViewAllFoldersItem *>(findCategory(CATEGORY_FOLDERS));
-    if (!pFolderRoot)
-        return;
-
-    arrayAllLocation.clear();
-    for (int i = 0; i < pFolderRoot->childCount(); i++) {
-        CWizCategoryViewFolderItem* pFolder = dynamic_cast<CWizCategoryViewFolderItem*>(pFolderRoot->child(i));
-        if (!pFolder)
-            continue;
-
-        getAllFolders(arrayAllLocation, pFolder);
-    }
-}
-
-void CWizCategoryView::getAllFolders(CWizStdStringArray& arrayAllLocation, CWizCategoryViewFolderItem* pFolder)
-{
-    arrayAllLocation.push_back(pFolder->location());
-
-    for (int i = 0; i < pFolder->childCount(); i++) {
-        CWizCategoryViewFolderItem* pFolderChild = dynamic_cast<CWizCategoryViewFolderItem*>(pFolder->child(i));
-        if (!pFolderChild)
-            return;
-
-        getAllFolders(arrayAllLocation, pFolderChild);
-    }
-}
-
 void CWizCategoryView::sortFolders()
 {
     CWizCategoryViewAllFoldersItem* pFolderRoot = dynamic_cast<CWizCategoryViewAllFoldersItem *>(findCategory(CATEGORY_FOLDERS));
@@ -1668,50 +1599,6 @@ void CWizCategoryView::sortFolders(CWizCategoryViewFolderItem* pItem)
             return;
 
         sortFolders(pFolder);
-    }
-}
-
-void CWizCategoryView::resortFolders()
-{
-    CWizCategoryViewAllFoldersItem* pFolderRoot = dynamic_cast<CWizCategoryViewAllFoldersItem *>(findCategory(CATEGORY_FOLDERS));
-    if (!pFolderRoot)
-        return;
-
-    CWizStdStringArray arrayAllLocation;
-    getAllFolders(arrayAllLocation);
-
-    QMap<QString, int> mfpos;
-    getFolderPositionMap(arrayAllLocation, mfpos);
-
-    resortFolders(pFolderRoot, mfpos);
-}
-
-void CWizCategoryView::resortFolders(QTreeWidgetItem* pFolder, const QMap<QString, int>& mfpos)
-{
-    if (!pFolder)
-        return;
-
-    for (int i = 1; i < pFolder->childCount(); i++)
-    {
-        CWizCategoryViewFolderItem* pChild = dynamic_cast<CWizCategoryViewFolderItem*>(pFolder->child(i));
-
-        int j = i - 1;
-
-        while (j >= 0)
-        {
-            CWizCategoryViewFolderItem* pChild2 = dynamic_cast<CWizCategoryViewFolderItem*>(pFolder->child(j));
-            if (mfpos.value(pChild2->location()) > mfpos.value(pChild->location()))
-            {
-                pFolder->removeChild(pChild2);
-                pFolder->insertChild(j+1, pChild2);
-            }
-
-            j--;
-        }
-    }
-
-    for (int i = 0; i < pFolder->childCount(); i++) {
-        resortFolders(pFolder->child(i), mfpos);
     }
 }
 
@@ -1749,9 +1636,7 @@ void CWizCategoryView::initFolders()
 
     doLocationSanityCheck(arrayAllLocation);
 
-    QMap<QString, int> mfpos;
-    getFolderPositionMap(arrayAllLocation, mfpos);
-    initFolders(pAllFoldersItem, QString(), arrayAllLocation, mfpos);
+    initFolders(pAllFoldersItem, QString(), arrayAllLocation);
     CWizCategoryViewTrashItem* pTrash = new CWizCategoryViewTrashItem(m_app, m_dbMgr.db().kbGUID());
     pAllFoldersItem->addChild(pTrash);
 
@@ -1770,17 +1655,14 @@ void CWizCategoryView::initFolders()
 
 void CWizCategoryView::initFolders(QTreeWidgetItem* pParent, \
                                    const QString& strParentLocation, \
-                                   const CWizStdStringArray& arrayAllLocation,
-                                   const QMap<QString, int>& mfpos)
+                                   const CWizStdStringArray& arrayAllLocation)
 {
     CWizStdStringArray arrayLocation;
     CWizDatabase::GetChildLocations(arrayAllLocation, strParentLocation, arrayLocation);
-    //sortFolderByPosition(arrayLocation, mfpos);
 
     CWizStdStringArray::const_iterator it;
     for (it = arrayLocation.begin(); it != arrayLocation.end(); it++) {
         CString strLocation = *it;
-        //qDebug() << strLocation;
 
         if (m_dbMgr.db().IsInDeletedItems(strLocation))
             continue;
@@ -1788,7 +1670,7 @@ void CWizCategoryView::initFolders(QTreeWidgetItem* pParent, \
         CWizCategoryViewFolderItem* pFolderItem = new CWizCategoryViewFolderItem(m_app, strLocation, m_dbMgr.db().kbGUID());
         pParent->addChild(pFolderItem);
 
-        initFolders(pFolderItem, strLocation, arrayAllLocation, mfpos);
+        initFolders(pFolderItem, strLocation, arrayAllLocation);
     }
 }
 

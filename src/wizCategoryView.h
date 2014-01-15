@@ -155,7 +155,7 @@ private:
     void initGeneral();
     void initFolders();
     void initFolders(QTreeWidgetItem* pParent, const QString& strParentLocation, \
-                     const CWizStdStringArray& arrayAllLocation, const QMap<QString, int> &mfpos);
+                     const CWizStdStringArray& arrayAllLocation);//, const QMap<QString, int> &mfpos);
     void initTags();
     void initTags(QTreeWidgetItem* pParent, const QString& strParentTagGUID);
     void initStyles();
@@ -174,13 +174,6 @@ public:
 
     void sortFolders();
     void sortFolders(CWizCategoryViewFolderItem* pItem);
-
-    void resortFolders();
-    void resortFolders(QTreeWidgetItem *pFolder, const QMap<QString, int>& mfpos);
-
-    void getAllFolders(CWizStdStringArray& arrayAllLocation);
-    void getAllFolders(CWizStdStringArray& arrayAllLocation, CWizCategoryViewFolderItem* pFolder);
-
 
     // tags
     CWizCategoryViewTagItem* findTag(const WIZTAGDATA& tag, bool create, bool sort);
