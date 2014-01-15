@@ -73,8 +73,7 @@ void TitleEdit::keyPressEvent(QKeyEvent* e)
         return;
 
     QString completionPrefix = textUnderCursor();
-    int i = cursorPosition() - 1;
-    bool isSeparator = (!completionPrefix.isEmpty() || text().at(i > 0 ? i : 0) == m_separator) ? true : false;
+    bool isSeparator = (!completionPrefix.isEmpty() || charBeforeCursor() == m_separator) ? true : false;
 
     if (!isSeparator) {
         c->popup()->hide();
@@ -124,6 +123,15 @@ QString TitleEdit::textUnderCursor()
     }
 
     return strText;
+}
+
+QChar TitleEdit::charBeforeCursor()
+{
+    int i = cursorPosition() - 1;
+    if (i >= 0)
+        return text().at(i);
+
+    return QChar();
 }
 
 CWizDocumentView* TitleEdit::noteView()

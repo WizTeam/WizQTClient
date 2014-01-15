@@ -34,6 +34,7 @@ private:
 
     void updateCompleterPopupItems(const QString& completionPrefix);
     QString textUnderCursor();
+    QChar charBeforeCursor();
 
     CWizDocumentView* noteView();
 
