@@ -5,8 +5,10 @@
 #include <QDebug>
 #include <QTextCodec>
 #include <algorithm>
+#include <QSettings>
 
-//#include "wizdef.h"
+#include <extensionsystem/pluginmanager.h>
+
 #include "wizhtml2zip.h"
 #include "share/wizzip.h"
 #include "html/wizhtmlcollector.h"
@@ -811,12 +813,12 @@ void CWizDatabase::GetAccountKeys(CWizStdStringArray& arrayKey)
 {
     Q_ASSERT(!IsGroup());
 
-    QMap<QString, QString> mapBiz;
-    GetBizGroupInfo(mapBiz);
-    for (QMap<QString, QString>::const_iterator it = mapBiz.begin();
-         it != mapBiz.end(); it++) {
-        arrayKey.push_back("biz_users/" + it.key());
-    }
+    //QMap<QString, QString> mapBiz;
+    //GetBizGroupInfo(mapBiz);
+    //for (QMap<QString, QString>::const_iterator it = mapBiz.begin();
+    //     it != mapBiz.end(); it++) {
+    //    arrayKey.push_back("biz_users/" + it.key());
+    //}
 }
 
 qint64 CWizDatabase::GetAccountLocalValueVersion(const QString& strKey)
@@ -949,7 +951,7 @@ void CWizDatabase::SetLocalValue(const QString& key, const QString& value,
     }
     else if (strKey == "folders_pos")
     {
-        //SetFoldersPos(lpszValue, nServerVersion);
+        SetFoldersPos(value, nServerVersion);
     }
     else if (strKey == "group_tag_oem")
     {
@@ -1009,9 +1011,26 @@ bool CWizDatabase::IsStorageLimit()
     return false;
 }
 
+bool CWizDatabase::setMeta(const QString& strSection, const QString& strKey, const QString& strValue)
+{
+    return SetMeta(strSection, strKey, strValue);
+}
+
+QString CWizDatabase::meta(const QString& strSection, const QString& strKey)
+{
+    return GetMetaDef(strSection, strKey);
+}
+
+void CWizDatabase::setBizGroupUsers(const QString& strkbGUID, const QString& strJson)
+{
+    SetBizUsers(strkbGUID, strJson);
+}
+
 void CWizDatabase::SetFoldersPos(const QString& foldersPos, qint64 nVersion)
 {
     SetLocalValueVersion("folders_pos", nVersion);
+
+    bool bPositionChanged = false;
 
     CString str(foldersPos);
     str.Trim();
@@ -1040,15 +1059,17 @@ void CWizDatabase::SetFoldersPos(const QString& foldersPos, qint64 nVersion)
         if (0 == nPos)
             continue;
 
-        // FIXME: save folder orders to config file
-
-        //if (CWizFolder* pFolder = dynamic_cast<CWizFolder*>(GetFolderByLocation(strLocation, false)))
-        //{
-        //    pFolder->put_SortPos(nPos);
-        //}
+        QSettings* setting = ExtensionSystem::PluginManager::settings();
+        int nPosOld = setting->value("FolderPosition/" + strLocation).toInt();
+        if (nPosOld != nPos) {
+            setting->setValue("FolderPosition/" + strLocation, nPos);
+            bPositionChanged = true;
+        }
     }
 
-    //::WizKMObjectSendMessage_ModifyPos(objecttypeFolder, NULL, _T(""));
+    if (bPositionChanged) {
+        Q_EMIT folderPositionChanged();
+    }
 }
 
 QString CWizDatabase::GetFolders()
@@ -1171,28 +1192,39 @@ void CWizDatabase::SetBizUsers(const QString& strBizGUID, const QString& strJson
 }
 
 bool CWizDatabase::loadBizUsersFromJson(const QString& strBizGUID,
-                                        const QString& strJsonUsers,
+                                        const QString& strJsonRaw,
                                         CWizBizUserDataArray& arrayUser)
 {
-    // QString assumes Lantin-1 when convert to and from const char* and QByteArrays
-    // set to UTF-8 as default converting to avoid messy code
-    //QTextCodec::setCodecForCStrings(QTextCodec::codecForName("UTF-8"));
+    rapidjson::Document d;
+    d.Parse<0>(strJsonRaw.toUtf8().constData());
+
+    if (d.FindMember("error_code")) {
+        qDebug() << QString::fromUtf8(d.FindMember("error")->value.GetString());
+        return false;
+    }
+
+    if (d.FindMember("return_code")) {
+        int nCode = d.FindMember("return_code")->value.GetInt();
+        if (nCode != 200) {
+            qDebug() << QString::fromUtf8(d.FindMember("return_message")->value.GetString()) << ", code = " << nCode;
+            return false;
+        }
+    }
+
+    if (!d.FindMember("result")) {
+        qDebug() << "Error occured when try to parse json of biz users";
+        qDebug() << strJsonRaw;
+        return false;
+    }
 
     QTextCodec* codec = QTextCodec::codecForName("UTF-8");
     QTextDecoder* encoder = codec->makeDecoder();
 
-    rapidjson::Document document;
-    document.Parse<0>(strJsonUsers.toUtf8().constData());
-
-    if (!document.IsArray()) {
-        TOLOG("Error occured when try to parse json of biz users");
-        return false;
-    }
-
-    for (rapidjson::SizeType i = 0; i < document.Size(); i++) {
-        const rapidjson::Value& u = document[i];
+    const rapidjson::Value& users = d["result"];
+    for (rapidjson::SizeType i = 0; i < users.Size(); i++) {
+        const rapidjson::Value& u = users[i];
         if (!u.IsObject()) {
-            TOLOG("Error occured when parse json of biz users");
+            qDebug() << "Error occured when parse json of biz users";
             return false;
         }
 
@@ -1671,11 +1703,11 @@ bool CWizDatabase::updateBizUser(const WIZBIZUSER& user)
     WIZBIZUSER userTemp;
     if (userFromGUID(user.bizGUID, user.userGUID, userTemp)) {
         // only modify user when alias changed
-        if (userTemp.alias != user.alias) {
-            bRet = modifyUserEx(user);
-        } else {
-            bRet = true;
-        }
+        //if (userTemp.alias != user.alias) {
+        bRet = modifyUserEx(user);
+        //} else {
+        //    bRet = true;
+        //}
     } else {
         bRet = createUserEx(user);
     }

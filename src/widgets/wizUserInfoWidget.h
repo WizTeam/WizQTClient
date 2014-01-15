@@ -9,7 +9,6 @@ class QFileDialog;
 
 class CWizDatabase;
 class CWizExplorerApp;
-class CWizUserAvatarDownloaderHost;
 class CWizWebSettingsDialog;
 
 
@@ -28,7 +27,6 @@ protected:
     virtual QSize sizeHint() const;
 
 private:
-    CWizUserAvatarDownloaderHost* m_avatarDownloader;
     QIcon m_iconVipIndicator;
     QIcon m_iconArraw;
     QMenu* m_menuMain;
@@ -40,13 +38,13 @@ protected:
     virtual bool hitButton(const QPoint& pos) const;
 
 private Q_SLOTS:
-    void resetAvatar(bool bForce);
+    //void resetAvatar(bool bForce);
     void resetUserInfo();
 
     void on_userInfo_changed();
 
-    void downloadAvatar();
-    void on_userAvatar_downloaded(const QString& strGUID);
+    //void downloadAvatar();
+    void on_userAvatar_loaded(const QString& strGUID);
     void on_action_accountInfo_triggered();
     void on_action_accountSetup_triggered();
     void on_action_accountSetup_showProgress();

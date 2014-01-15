@@ -84,6 +84,9 @@ public:
     QString get(const QString& key) const;
     void set(const QString& key, const QString& value);
 
+    QString get(const QString& section, const QString& strKey) const;
+    void set(const QString& section, const QString& strKey, const QString& strValue);
+
     QString user() const { return m_strUserId; }
     void setUser(const QString& strUser);
 

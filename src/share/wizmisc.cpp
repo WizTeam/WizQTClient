@@ -1651,11 +1651,11 @@ CString WizStringFromBase64(const CString& strBase64)
 
 QString WizGetDefaultSkinName()
 {
-#ifdef Q_OS_LINUX
-    return "ubuntu";
-#else
+//#ifdef Q_OS_LINUX
+//    return "ubuntu";
+//#else
     return "default";
-#endif
+//#endif
 }
 
 QString WizGetSkinResourcePath(const QString& strSkinName)

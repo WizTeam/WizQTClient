@@ -43,6 +43,12 @@ class CWizUserVerifyDialog;
 
 class CWizDocumentWebView;
 
+namespace WizService {
+namespace Internal {
+class MessageListView;
+}
+}
+
 namespace Core {
 class ICore;
 class CWizDocumentView;
@@ -90,7 +96,7 @@ private:
     QPointer<CWizUserCipherForm> m_cipherForm;
 
     CWizObjectDataDownloaderHost* m_objectDownloaderHost;
-    CWizUserAvatarDownloaderHost* m_avatarDownloaderHost;
+    //CWizUserAvatarDownloaderHost* m_avatarDownloaderHost;
 
     QToolBar* m_toolBar;
     QMenuBar* m_menuBar;
@@ -104,6 +110,8 @@ private:
     CWizActions* m_actions;
     QPointer<CWizCategoryView> m_category;
     CWizDocumentListView* m_documents;
+    WizService::Internal::MessageListView* m_msgList;
+    QWidget* m_noteList;
     CWizDocumentSelectionView* m_documentSelection;
     CWizDocumentView* m_doc;
     CWizDocumentTransitionView* m_transitionView;
@@ -151,7 +159,7 @@ public:
     CWizUserCipherForm* cipherForm() const { return m_cipherForm; }
     //CWizDownloadObjectDataDialog* objectDownloadDialog() const { return m_objectDownloadDialog; }
     CWizObjectDataDownloaderHost* downloaderHost() const { return m_objectDownloaderHost; }
-    CWizUserAvatarDownloaderHost* avatarHost() const { return m_avatarDownloaderHost; }
+    //CWizUserAvatarDownloaderHost* avatarHost() const { return m_avatarDownloaderHost; }
     CWizProgressDialog* progressDialog() const { return m_progress; }
     CWizDocumentTransitionView* transitionView() const { return m_transitionView; }
 
@@ -167,6 +175,7 @@ public:
 public Q_SLOTS:
     void on_actionExit_triggered();
     void on_actionConsole_triggered();
+    void on_actionAutoSync_triggered();
     void on_actionSync_triggered();
     void on_actionNewNote_triggered();
     void on_actionLogout_triggered();
@@ -223,6 +232,7 @@ public Q_SLOTS:
 
     void on_category_itemSelectionChanged();
     void on_documents_itemSelectionChanged();
+    void on_message_itemSelectionChanged();
     void on_documents_documentCountChanged();
     void on_documents_hintChanged(const QString& strHint);
     void on_documents_viewTypeChanged(int type);

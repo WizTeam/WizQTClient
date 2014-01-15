@@ -1,5 +1,13 @@
 #include "wizCategoryViewItem.h"
 
+#include <QDebug>
+#include <QTextCodec>
+#include <CString>
+
+#include <extensionsystem/pluginmanager.h>
+
+#include "utils/pinyin.h"
+
 #include "wizdef.h"
 #include "wizCategoryView.h"
 #include "share/wizsettings.h"
@@ -21,6 +29,52 @@ CWizCategoryViewItemBase::CWizCategoryViewItemBase(CWizExplorerApp& app,
 {
 }
 
+bool IsSimpChinese()
+{
+    QLocale local = QLocale::system();
+    QString name = local.name().toLower();
+    if (name == "zh_cn"
+        || name == "zh-cn")
+    {
+        return true;
+    }
+    return false;
+}
+bool CWizCategoryViewItemBase::operator < (const QTreeWidgetItem &other) const
+{
+    const CWizCategoryViewItemBase* pOther = dynamic_cast<const CWizCategoryViewItemBase*>(&other);
+    if (!pOther)
+        return false;
+    //
+    int nThis = getSortOrder();
+    int nOther = pOther->getSortOrder();
+    //
+    if (nThis != nOther)
+    {
+        return nThis < nOther;
+    }
+    //
+    QString strThis = text(0).toLower();
+    QString strOther = pOther->text(0).toLower();
+    //
+    static bool isSimpChinese = IsSimpChinese();
+    if (isSimpChinese)
+    {
+        if (QTextCodec* pCodec = QTextCodec::codecForName("GBK"))
+        {
+            QByteArray arrThis = pCodec->fromUnicode(strThis);
+            QByteArray arrOther = pCodec->fromUnicode(strOther);
+            //
+            std::string strThisA(arrThis.data(), arrThis.size());
+            std::string strOtherA(arrOther.data(), arrOther.size());
+            //
+            return strThisA.compare(strOtherA.c_str()) < 0;
+        }
+    }
+    //
+    return strThis.compare(strOther) < 0;
+}
+
 QVariant CWizCategoryViewItemBase::data(int column, int role) const
 {
     if (role == Qt::SizeHintRole) {
@@ -39,20 +93,10 @@ int CWizCategoryViewItemBase::getItemHeight(int hintHeight) const
     return hintHeight;
 }
 
-bool CWizCategoryViewItemBase::operator < (const QTreeWidgetItem &other) const
+
+QString CWizCategoryViewItemBase::id() const
 {
-    if (text(0) == PREDEFINED_UNCLASSIFIED)
-    {
-        return true;
-    }
-    else if (text(0) == PREDEFINED_TRASH)
-    {
-        return false;
-    }
-    else
-    {
-        return text(0).compare(other.text(0), Qt::CaseInsensitive) < 0;
-    }
+    return ::WizMd5StringNoSpaceJava(QString(text(0) + m_strKbGUID).toUtf8());
 }
 
 void CWizCategoryViewItemBase::setDocumentsCount(int nCurrent, int nTotal)
@@ -65,6 +109,88 @@ void CWizCategoryViewItemBase::setDocumentsCount(int nCurrent, int nTotal)
         countString = QString("(%1/%2)").arg(nCurrent).arg(nTotal);
     }
 }
+
+void CWizCategoryViewItemBase::draw(QPainter* p, const QStyleOptionViewItemV4 *vopt) const
+{
+#if 0
+    if (!vopt->icon.isNull()) {
+        QRect iconRect = subElementRect(SE_ItemViewItemDecoration, vopt, view);
+
+        if (vopt->state.testFlag(State_Selected)) {
+            vopt->icon.paint(p, iconRect, Qt::AlignCenter, QIcon::Selected);
+        } else {
+            vopt->icon.paint(p, iconRect, Qt::AlignCenter, QIcon::Normal);
+        }
+    }
+
+    // text should not empty
+    if (vopt->text.isEmpty()) {
+        Q_ASSERT(0);
+        return;
+    }
+
+    // draw text little far from icon than the default
+    QRect textRect = subElementRect(SE_ItemViewItemText, vopt, view);
+    //textRect.adjust(8, 0, 0, 0);
+
+    // draw the text
+    QPalette::ColorGroup cg = vopt->state & QStyle::State_Enabled
+            ? QPalette::Normal : QPalette::Disabled;
+    if (cg == QPalette::Normal && !(vopt->state & QStyle::State_Active))
+        cg = QPalette::Inactive;
+
+    if (vopt->state & QStyle::State_Selected) {
+        p->setPen(vopt->palette.color(cg, QPalette::HighlightedText));
+    } else {
+        p->setPen(vopt->palette.color(cg, QPalette::Text));
+    }
+
+    if (vopt->state & QStyle::State_Editing) {
+        p->setPen(vopt->palette.color(cg, QPalette::Text));
+        p->drawRect(textRect.adjusted(0, 0, -1, -1));
+    }
+
+    // compute document count string length and leave enough space for drawing
+    QString strCount = pItem->countString;
+    int nCountWidthMax;
+    int nMargin = 3;
+    QFont fontCount = p->font();
+    fontCount.setPointSize(10);
+
+    if (!strCount.isEmpty()) {
+        QFont fontOld = p->font();
+        p->setFont(fontCount);
+        nCountWidthMax = p->fontMetrics().width(strCount) + nMargin;
+        textRect.adjust(0, 0, -nCountWidthMax, 0);
+        p->setFont(fontOld);
+    }
+
+    QFont f = p->font();
+    f.setPixelSize(12);
+    p->setFont(f);
+
+    QColor colorText = vopt->state.testFlag(State_Selected) ?
+                m_colorCategoryTextSelected : m_colorCategoryTextNormal;
+
+    CString strText = vopt->text;
+    int nWidth = ::WizDrawTextSingleLine(p, textRect, strText,
+                                         Qt::TextSingleLine | Qt::AlignVCenter,
+                                         colorText, true);
+
+    // only draw document count if count string is not empty
+    if (!strCount.isEmpty()) {
+        p->setFont(fontCount);
+        textRect.adjust(nWidth + nMargin, 0, nCountWidthMax, 0);
+        QColor colorCount = vopt->state.testFlag(State_Selected) ? QColor(230, 230, 230) : QColor(150, 150, 150);
+        CString strCount2(strCount);
+        ::WizDrawTextSingleLine(p, textRect, strCount2,  Qt::TextSingleLine | Qt::AlignVCenter, colorCount, false);
+    }
+
+    p->restore();
+
+#endif
+}
+
 
 /* ------------------------------ CWizCategoryViewSpacerItem ------------------------------ */
 
@@ -108,8 +234,8 @@ CWizCategoryViewCategoryItem::CWizCategoryViewCategoryItem(CWizExplorerApp& app,
 
 
 /* -------------------- CWizCategoryViewMessageRootItem -------------------- */
-CWizCategoryViewMessageRootItem::CWizCategoryViewMessageRootItem(CWizExplorerApp& app,
-                                                                 const QString& strName)
+CWizCategoryViewMessageItem::CWizCategoryViewMessageItem(CWizExplorerApp& app,
+                                                                 const QString& strName, int nFilterType)
     : CWizCategoryViewItemBase(app, strName)
 {
     QIcon icon;
@@ -119,9 +245,11 @@ CWizCategoryViewMessageRootItem::CWizCategoryViewMessageRootItem(CWizExplorerApp
                  QSize(16, 16), QIcon::Selected);
     setIcon(0, icon);
     setText(0, strName);
+
+    m_nFilter = nFilterType;
 }
 
-void CWizCategoryViewMessageRootItem::getDocuments(CWizDatabase& db,
+void CWizCategoryViewMessageItem::getDocuments(CWizDatabase& db,
                                                    CWizDocumentDataArray& arrayDocument)
 {
     CWizMessageDataArray arrayMsg;
@@ -276,6 +404,24 @@ QString CWizCategoryViewFolderItem::name() const
     return CWizDatabase::GetLocationName(m_strName);
 }
 
+bool CWizCategoryViewFolderItem::operator < (const QTreeWidgetItem &other) const
+{
+    const CWizCategoryViewFolderItem* pOther = dynamic_cast<const CWizCategoryViewFolderItem*>(&other);
+    if (!pOther) {
+        return false;
+    }
+
+    int nThis = 0, nOther = 0;
+    if (!pOther->location().isEmpty()) {
+        QSettings* setting = ExtensionSystem::PluginManager::settings();
+        nOther = setting->value("FolderPosition/" + pOther->location()).toInt();
+        nThis = setting->value("FolderPosition/" + location()).toInt();
+    }
+
+    return nThis < nOther;
+}
+
+
 
 /* ------------------------------ CWizCategoryViewAllTagsItem ------------------------------ */
 
@@ -302,8 +448,10 @@ void CWizCategoryViewAllTagsItem::showContextMenu(CWizCategoryBaseView* pCtrl, Q
 
 void CWizCategoryViewAllTagsItem::getDocuments(CWizDatabase& db, CWizDocumentDataArray& arrayDocument)
 {
+    Q_UNUSED(db);
+    Q_UNUSED(arrayDocument);
     // no deleted
-    db.getDocumentsNoTag(arrayDocument);
+    //db.getDocumentsNoTag(arrayDocument);
 }
 
 bool CWizCategoryViewAllTagsItem::accept(CWizDatabase& db, const WIZDOCUMENTDATA& data)

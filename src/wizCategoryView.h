@@ -11,6 +11,13 @@ class CWizScrollBar;
 class CWizDatabaseManager;
 class CWizExplorerApp;
 class CWizWebSettingsDialog;
+class QSettings;
+
+#define CATEGORY_MESSAGES_ALL               QObject::tr("Message Center")
+#define CATEGORY_MESSAGES_SEND_TO_ME        QObject::tr("Send to me")
+#define CATEGORY_MESSAGES_MODIFY            QObject::tr("Note modified")
+#define CATEGORY_MESSAGES_COMMENTS          QObject::tr("Comments")
+#define CATEGORY_MESSAGES_SEND_FROM_ME      QObject::tr("Send from me")
 
 class CWizCategoryBaseView : public QTreeWidget
 {
@@ -18,6 +25,7 @@ class CWizCategoryBaseView : public QTreeWidget
 
 public:
     CWizCategoryBaseView(CWizExplorerApp& app, QWidget *parent = 0);
+    virtual ~CWizCategoryBaseView();
 
     QString selectedItemKbGUID();
     void getDocuments(CWizDocumentDataArray& arrayDocument);
@@ -36,6 +44,8 @@ public:
     bool isDragHovered() const { return m_bDragHovered; }
     QPoint dragHoveredPos() const { return m_dragHoveredPos; }
     bool validateDropDestination(const QPoint& p) const;
+
+    void drawItem(QPainter* p, const QStyleOptionViewItemV4 *vopt) const;
 
 protected:
     virtual void startDrag(Qt::DropActions supportedActions);
@@ -69,6 +79,7 @@ protected Q_SLOTS:
 
     virtual void on_folder_created(const QString& strLocation) { Q_UNUSED(strLocation); }
     virtual void on_folder_deleted(const QString& strLocation) { Q_UNUSED(strLocation); }
+    virtual void on_folder_positionChanged() {}
 
     virtual void on_tag_created(const WIZTAGDATA& tag) { Q_UNUSED(tag); }
     virtual void on_tag_modified(const WIZTAGDATA& tagOld, const WIZTAGDATA& tagNew) { Q_UNUSED(tagOld); Q_UNUSED(tagNew); }
@@ -89,6 +100,17 @@ class CWizCategoryView : public CWizCategoryBaseView
 public:
     CWizCategoryView(CWizExplorerApp& app, QWidget *parent = 0);
     void init();
+
+    QString m_strSelectedId;
+    QString selectedId(QSettings* settings);
+
+    void loadState();
+    void loadChildState(QTreeWidgetItem* pi, QSettings* settings);
+    void loadItemState(QTreeWidgetItem* pi, QSettings* settings);
+    void saveState();
+    void saveChildState(QTreeWidgetItem* pi, QSettings* settings);
+    void saveItemState(QTreeWidgetItem* pi, QSettings* settings);
+    void saveSelected(QSettings* settings);
 
     // action user data
     enum CategoryActions
@@ -133,7 +155,7 @@ private:
     void initGeneral();
     void initFolders();
     void initFolders(QTreeWidgetItem* pParent, const QString& strParentLocation, \
-                     const CWizStdStringArray& arrayAllLocation);
+                     const CWizStdStringArray& arrayAllLocation);//, const QMap<QString, int> &mfpos);
     void initTags();
     void initTags(QTreeWidgetItem* pParent, const QString& strParentTagGUID);
     void initStyles();
@@ -149,6 +171,9 @@ public:
     CWizCategoryViewFolderItem* findFolder(const QString& strLocation, bool create, bool sort);
     CWizCategoryViewFolderItem* addFolder(const QString& strLocation, bool sort);
     void addAndSelectFolder(const CString& strLocation);
+
+    void sortFolders();
+    void sortFolders(CWizCategoryViewFolderItem* pItem);
 
     // tags
     CWizCategoryViewTagItem* findTag(const WIZTAGDATA& tag, bool create, bool sort);
@@ -219,6 +244,7 @@ protected Q_SLOTS:
 
     virtual void on_folder_created(const QString& strLocation);
     virtual void on_folder_deleted(const QString& strLocation);
+    virtual void on_folder_positionChanged();
 
     virtual void on_tag_created(const WIZTAGDATA& tag);
     virtual void on_tag_modified(const WIZTAGDATA& tagOld, const WIZTAGDATA& tagNew);

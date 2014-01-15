@@ -134,9 +134,14 @@ QString ApiEntryPrivate::messageVersionUrl()
     return requestUrl(WIZNOTE_API_COMMAND_MESSAGE_VERSION, m_strMessageVersionUrl);
 }
 
-QString ApiEntryPrivate::avatarDownloadUrl()
+QString ApiEntryPrivate::avatarDownloadUrl(const QString& strUserGUID)
 {
-    return requestUrl(WIZNOTE_API_COMMAND_AVATAR, m_strAvatarDownloadUrl);
+    QString strRawUrl(requestUrl(WIZNOTE_API_COMMAND_AVATAR, m_strAvatarDownloadUrl));
+
+    // http://as.wiz.cn/wizas/a/users/avatar/{userGuid}
+    strRawUrl.replace(QRegExp("\\{.*\\}"), strUserGUID);
+    strRawUrl += "?default=false"; // Do not download server default avatar
+    return strRawUrl;
 }
 
 QString ApiEntryPrivate::avatarUploadUrl()
@@ -198,6 +203,18 @@ QString ApiEntryPrivate::groupAttributeUrl(const QString& strToken, const QStrin
     return addExtendedInfo(strUrl, strExt);
 }
 
+QString ApiEntryPrivate::groupUsersUrl(const QString& strToken, const QString& strBizGUID, const QString& strkbGUID)
+{
+    QUrl url(syncUrl());
+    QString strExt = QString("?token=%1&biz_guid=%2&kb_guid=%3&t=%4")
+            .arg(strToken)
+            .arg(strBizGUID)
+            .arg(strkbGUID)
+            .arg(qrand());
+
+    return url.scheme() + "://" + url.host() + "/wizas/a/biz/user_aliases" + strExt;
+}
+
 QString ApiEntryPrivate::kUrlFromGuid(const QString& strToken, const QString& strKbGUID)
 {
     Q_ASSERT(!strToken.isEmpty());
@@ -246,11 +263,11 @@ QString ApiEntry::messageVersionUrl()
     return d->messageVersionUrl();
 }
 
-QString ApiEntry::avatarDownloadUrl()
+QString ApiEntry::avatarDownloadUrl(const QString& strUserGUID)
 {
     if (!d)
         d = new ApiEntryPrivate();
-    return d->avatarDownloadUrl();
+    return d->avatarDownloadUrl(strUserGUID);
 }
 
 QString ApiEntry::avatarUploadUrl()
@@ -294,6 +311,13 @@ QString ApiEntry::groupAttributeUrl(const QString& strToken, const QString& strK
     if (!d)
         d = new ApiEntryPrivate();
     return d->groupAttributeUrl(strToken, strKbGUID);
+}
+
+QString ApiEntry::groupUsersUrl(const QString& strToken, const QString& strBizGUID, const QString& strkbGUID)
+{
+    if (!d)
+        d = new ApiEntryPrivate();
+    return d->groupUsersUrl(strToken, strBizGUID, strkbGUID);
 }
 
 QString ApiEntry::kUrlFromGuid(const QString& strToken, const QString& strKbGUID)

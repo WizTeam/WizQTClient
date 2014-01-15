@@ -273,6 +273,10 @@ CWizDocumentWebView::CWizDocumentWebView(CWizExplorerApp& app, QWidget* parent)
     CWizDocumentWebViewPage* page = new CWizDocumentWebViewPage(this);
     setPage(page);
 
+#ifdef QT_DEBUG
+    settings()->globalSettings()->setAttribute(QWebSettings::DeveloperExtrasEnabled, true);
+#endif
+
     // minimum page size hint
     setMinimumSize(400, 250);
 
@@ -310,9 +314,13 @@ void CWizDocumentWebView::inputMethodEvent(QInputMethodEvent* event)
 {
     // On X windows, fcitx flick while preediting, only update while webview end process.
     // maybe it's a QT-BUG?
+#ifdef Q_OS_LINUX
     setUpdatesEnabled(false);
     QWebView::inputMethodEvent(event);
     setUpdatesEnabled(true);
+#else
+    QWebView::inputMethodEvent(event);
+#endif
 
 #ifdef Q_OS_MAC
 
@@ -348,9 +356,14 @@ void CWizDocumentWebView::keyPressEvent(QKeyEvent* event)
         return;
     }
 
+#ifdef Q_OS_LINUX
     setUpdatesEnabled(false);
     QWebView::keyPressEvent(event);
     setUpdatesEnabled(true);
+#else
+    QWebView::keyPressEvent(event);
+#endif
+
 }
 
 void CWizDocumentWebView::focusInEvent(QFocusEvent *event)
@@ -822,17 +835,25 @@ void CWizDocumentWebView::viewDocumentInEditor(bool editing)
         return;
     }
 
+    strHtml = escapeJavascriptString(strHtml);
+
+    QString strHead;
+    QRegExp regh("<head.*>([\\s\\S]*)</head>", Qt::CaseInsensitive);
+    if (regh.indexIn(strHtml) != -1) {
+        strHead = regh.cap(1).simplified();
+    }
+    strHead += "<link rel=\"stylesheet\" type=\"text/css\" href=\"" + m_strDefaultCssFilePath + "\">";
+
     QRegExp regex("<body.*>([\\s\\S]*)</body>", Qt::CaseInsensitive);
     if (regex.indexIn(strHtml) != -1) {
         strHtml = regex.cap(1);
     }
 
-    strHtml = escapeJavascriptString(strHtml);
-
-    QString strExec = QString("viewNote('%1', %2, '%3');")
+    QString strExec = QString("viewNote('%1', %2, '%3', '%4');")
             .arg(strGUID)
             .arg(editing ? "true" : "false")
-            .arg(strHtml);
+            .arg(strHtml)
+            .arg(strHead);
 
     ret = page()->mainFrame()->evaluateJavaScript(strExec).toBool();
     if (!ret) {

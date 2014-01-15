@@ -225,6 +225,10 @@ public:
     virtual bool IsTrafficLimit();
     virtual bool IsStorageLimit();
 
+    virtual bool setMeta(const QString& strSection, const QString& strKey, const QString& strValue);
+    virtual QString meta(const QString& strSection, const QString& strKey);
+    virtual void setBizGroupUsers(const QString& strkbGUID, const QString& strJson);
+
     // end interface implementations
 
     // helper methods for interface
@@ -236,7 +240,7 @@ public:
 
     void SetBizUsers(const QString &strBizGUID, const QString& strUsers);
     bool loadBizUsersFromJson(const QString &strBizGUID,
-                              const QString& strJsonUsers,
+                              const QString& strJsonRaw,
                               CWizBizUserDataArray& arrayUser);
 
 public:
@@ -369,6 +373,8 @@ Q_SIGNALS:
     void databaseBizChanged(const QString& strKbGUID);
     void updateError(const QString& msg);
     void processLog(const QString& msg);
+
+    void folderPositionChanged();
 };
 
 

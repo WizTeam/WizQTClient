@@ -1,7 +1,10 @@
 #include "sync.h"
 #include "sync_p.h"
 
+#include <QString>
+
 #include "apientry.h"
+#include "rapidjson/document.h"
 
 #include  "../share/wizSyncableDatabase.h"
 
@@ -1703,6 +1706,56 @@ void WizDownloadUserAvatars(IWizKMSyncEvents* pEvents, IWizSyncableDatabase* pDa
 }
 //
 
+QString downloadFromUrl(const QString& strUrl)
+{
+    QNetworkAccessManager net;
+    QNetworkReply* reply = net.get(QNetworkRequest(strUrl));
+
+    QEventLoop loop;
+    loop.connect(reply, SIGNAL(finished()), SLOT(quit()));
+    loop.exec();
+
+    if (reply->error()) {
+        return NULL;
+    }
+
+    return QString::fromUtf8(reply->readAll().constData());
+}
+
+void syncGroupUsers(CWizKMAccountsServer& server, const CWizGroupDataArray& arrayGroup,
+                    IWizKMSyncEvents* pEvents, IWizSyncableDatabase* pDatabase, bool background)
+{
+    QString strt = pDatabase->meta("SYNC_INFO", "DownloadGroupUsers");
+    if (!strt.isEmpty()) {
+        if (QDateTime::fromString(strt).addDays(1) > QDateTime::currentDateTime()) {
+            if (background) {
+                return;
+            }
+        }
+    }
+
+    pEvents->OnStatus("Sync group users");
+
+    for (CWizGroupDataArray::const_iterator it = arrayGroup.begin();
+         it != arrayGroup.end();
+         it++)
+    {
+        const WIZGROUPDATA& g = *it;
+        if (!g.bizGUID.isEmpty()) {
+            QString strUrl = WizService::ApiEntry::groupUsersUrl(server.GetToken(), g.bizGUID, g.strGroupGUID);
+            QString strJsonRaw = downloadFromUrl(strUrl);
+
+            if (!strJsonRaw.isEmpty())
+                pDatabase->setBizGroupUsers(g.strGroupGUID, strJsonRaw);
+        }
+
+        if (pEvents->IsStop())
+            return;
+    }
+
+    pDatabase->setMeta("SYNC_INFO", "DownloadGroupUsers", QDateTime::currentDateTime().toString());
+}
+
 bool WizSyncDatabase(const WIZUSERINFO& info, IWizKMSyncEvents* pEvents,
                      IWizSyncableDatabase* pDatabase,
                      bool bUseWizServer, bool bBackground)
@@ -1752,7 +1805,9 @@ bool WizSyncDatabase(const WIZUSERINFO& info, IWizKMSyncEvents* pEvents,
     */
     pEvents->OnStatus(_TR("Downloading settings"));
     DownloadAccountKeys(server, pDatabase);
-    //
+
+    syncGroupUsers(server, arrayGroup, pEvents, pDatabase, bBackground);
+
     /*
     ////下载消息////
     */
@@ -1779,7 +1834,7 @@ bool WizSyncDatabase(const WIZUSERINFO& info, IWizKMSyncEvents* pEvents,
     //
     if (pEvents->IsStop())
         return FALSE;
-    //
+
     pEvents->OnStatus(_TR("-------sync groups--------------"));
     //
     for (CWizGroupDataArray::const_iterator itGroup = arrayGroup.begin();

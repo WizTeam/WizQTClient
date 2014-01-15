@@ -37,7 +37,10 @@ public:
     int sortingType() const { return m_nSortingType; }
     void resetItemsSortingType(int type);
 
-    CWizThumbIndexCache* thumbCache() const { return m_thumbCache; }
+    //CWizThumbIndexCache* thumbCache() const { return m_thumbCache; }
+
+    void setItemsNeedUpdate(const QString& strKbGUID = 0, const QString& strGUID = 0);
+    void drawItem(QPainter*p, const QStyleOptionViewItemV4* vopt) const;
 
 protected:
     virtual void resizeEvent(QResizeEvent* event);
@@ -53,15 +56,14 @@ protected:
 private:
     CWizExplorerApp& m_app;
     CWizDatabaseManager& m_dbMgr;
-    QPointer<CWizThumbIndexCache> m_thumbCache;
-    CWizUserAvatarDownloaderHost* m_avatarDownloader;
+    //QPointer<CWizThumbIndexCache> m_thumbCache;
     CWizScrollBar* m_vScroll;
 
     CWizDocumentListView::ViewType m_nViewType;
     int m_nSortingType;
 
     QMenu* m_menuDocument;
-    QMenu* m_menuMessage;
+    //QMenu* m_menuMessage;
     QAction* m_actionEncryptDocument;
     CWizTagListWidget* m_tagList;
 
@@ -89,9 +91,7 @@ private:
 public:
     void setDocuments(const CWizDocumentDataArray& arrayDocument);
     void addDocuments(const CWizDocumentDataArray& arrayDocument);
-    void addMessages(const CWizMessageDataArray& arrayMessage);
     int addDocument(const WIZDOCUMENTDATA& data, bool sort);
-    int addMessage(const WIZMESSAGEDATA& msg, bool sort);
 
     bool acceptDocument(const WIZDOCUMENTDATA& document);
     void addAndSelectDocument(const WIZDOCUMENTDATA& document);
@@ -107,8 +107,6 @@ public:
     const WIZDOCUMENTDATA& documentFromIndex(const QModelIndex &index) const;
     const WIZABSTRACT& documentAbstractFromIndex(const QModelIndex &index) const;
     //const QString& documentTagsFromIndex(const QModelIndex &index) const;
-    //const WIZMESSAGEDATA& messageFromIndex(const QModelIndex& index) const;
-    const QImage& messageSenderAvatarFromIndex(const QModelIndex& index) const;
     const WizDocumentListViewItemData& documentItemDataFromIndex(const QModelIndex& index) const;
 
 
@@ -130,14 +128,14 @@ public Q_SLOTS:
     //void on_document_AbstractModified(const WIZDOCUMENTDATA& document);
 
     // message related signals
-    void on_message_created(const WIZMESSAGEDATA& data);
-    void on_message_modified(const WIZMESSAGEDATA& oldMsg,
-                             const WIZMESSAGEDATA& newMsg);
-    void on_message_deleted(const WIZMESSAGEDATA& data);
+    //void on_message_created(const WIZMESSAGEDATA& data);
+    //void on_message_modified(const WIZMESSAGEDATA& oldMsg,
+    //                         const WIZMESSAGEDATA& newMsg);
+    //void on_message_deleted(const WIZMESSAGEDATA& data);
 
     // message context menu
-    void on_action_message_mark_read();
-    void on_action_message_delete();
+    //void on_action_message_mark_read();
+    //void on_action_message_delete();
 
     // document context menu
     void on_action_selectTags();
@@ -151,7 +149,9 @@ public Q_SLOTS:
     void on_action_copyDocument_confirmed(int result);
 
     void on_document_abstractLoaded(const WIZABSTRACT& abs);
-    void on_userAvatar_downloaded(const QString& strUserGUID);
+    void on_userAvatar_loaded(const QString& strUserGUID);
+    void onThumbCacheLoaded(const QString& strKbGUID, const QString& strGUID);
+
 
 //#ifndef Q_OS_MAC
     // used for smoothly scroll

@@ -5,6 +5,8 @@
 #include <QMenu>
 #include <QMessageBox>
 
+#include <extensionsystem/pluginmanager.h>
+
 #include "wizdef.h"
 #include "widgets/wizScrollBar.h"
 #include "wizmainwindow.h"
@@ -30,7 +32,6 @@ using namespace Core::Internal;
 #define CATEGORY_PERSONAL   QObject::tr("Personal notes")
 #define CATEGORY_ENTERPRISE QObject::tr("Enterprise groups")
 #define CATEGORY_INDIVIDUAL QObject::tr("Individual groups")
-#define CATEGORY_MESSAGES   QObject::tr("Message Center")
 #define CATEGORY_SHORTCUTS  QObject::tr("Shortcuts")
 #define CATEGORY_SEARCH     QObject::tr("Quick search")
 #define CATEGORY_FOLDERS    QObject::tr("Note folders")
@@ -108,6 +109,9 @@ CWizCategoryBaseView::CWizCategoryBaseView(CWizExplorerApp& app, QWidget* parent
     connect(&m_dbMgr, SIGNAL(folderDeleted(const QString&)),
             SLOT(on_folder_deleted(const QString&)));
 
+    connect(&m_dbMgr, SIGNAL(folderPositionChanged()),
+            SLOT(on_folder_positionChanged()));
+
     connect(&m_dbMgr, SIGNAL(tagCreated(const WIZTAGDATA&)),
             SLOT(on_tag_created(const WIZTAGDATA&)));
 
@@ -131,6 +135,10 @@ CWizCategoryBaseView::CWizCategoryBaseView(CWizExplorerApp& app, QWidget* parent
 
     connect(&m_dbMgr, SIGNAL(databaseBizchanged(const QString&)),
             SLOT(on_group_bizChanged(const QString&)));
+}
+
+CWizCategoryBaseView::~CWizCategoryBaseView()
+{
 }
 
 void CWizCategoryBaseView::resizeEvent(QResizeEvent* event)
@@ -391,7 +399,18 @@ bool CWizCategoryBaseView::validateDropDestination(const QPoint& p) const
     return false;
 }
 
-/* ------------------------------ CWizCategoryPrivateView ------------------------------ */
+void CWizCategoryBaseView::drawItem(QPainter* p, const QStyleOptionViewItemV4 *vopt) const
+{
+    CWizCategoryViewItemBase* pItem = categoryItemFromIndex(vopt->index);
+    Q_ASSERT(pItem);
+
+    if (pItem)
+        pItem->draw(p, vopt);
+}
+
+
+
+/* ------------------------------ CWizCategoryView ------------------------------ */
 CWizCategoryView::CWizCategoryView(CWizExplorerApp& app, QWidget* parent)
     : CWizCategoryBaseView(app, parent)
 {
@@ -1259,7 +1278,7 @@ void CWizCategoryView::on_itemSelectionChanged()
     }
 
     // notify of selection
-    if (currentCategoryItem<CWizCategoryViewMessageRootItem>()) {
+    if (currentCategoryItem<CWizCategoryViewMessageItem>()) {
         Q_EMIT documentsHint(tr("Recent meesages"));
     } else if (currentCategoryItem<CWizCategoryViewAllFoldersItem>()) {
         Q_EMIT documentsHint(tr("Recent notes"));
@@ -1278,7 +1297,7 @@ void CWizCategoryView::init()
     initStyles();
     initGroups();
 
-    setCurrentItem(findCategory(CATEGORY_FOLDERS));
+    loadState();
 }
 
 void CWizCategoryView::updateFolderDocumentCount()
@@ -1529,8 +1548,15 @@ void CWizCategoryView::initGeneral()
     CWizCategoryViewCategoryItem* pCategoryItem = new CWizCategoryViewCategoryItem(m_app, CATEGORY_GENERAL);
     addTopLevelItem(pCategoryItem);
 
-    CWizCategoryViewMessageRootItem* pMsgRoot = new CWizCategoryViewMessageRootItem(m_app, CATEGORY_MESSAGES);
-    addTopLevelItem(pMsgRoot);
+    CWizCategoryViewMessageItem* pMsg = new CWizCategoryViewMessageItem(m_app, CATEGORY_MESSAGES_ALL, CWizCategoryViewMessageItem::All);
+    addTopLevelItem(pMsg);
+
+    //QList<QTreeWidgetItem*> pList;
+    //pList.append(new CWizCategoryViewMessageItem(m_app, CATEGORY_MESSAGES_SEND_TO_ME, CWizCategoryViewMessageItem::SendToMe));
+    //pList.append(new CWizCategoryViewMessageItem(m_app, CATEGORY_MESSAGES_MODIFY, CWizCategoryViewMessageItem::ModifyNote));
+    //pList.append(new CWizCategoryViewMessageItem(m_app, CATEGORY_MESSAGES_COMMENTS, CWizCategoryViewMessageItem::Comment));
+    //pList.append(new CWizCategoryViewMessageItem(m_app, CATEGORY_MESSAGES_SEND_FROM_ME, CWizCategoryViewMessageItem::SendFromMe));
+    //pMsg->addChildren(pList);
 
     CWizCategoryViewShortcutRootItem* pShortcutRoot = new CWizCategoryViewShortcutRootItem(m_app, CATEGORY_SHORTCUTS);
     addTopLevelItem(pShortcutRoot);
@@ -1539,6 +1565,41 @@ void CWizCategoryView::initGeneral()
     CWizCategoryViewSearchRootItem* pSearchRoot = new CWizCategoryViewSearchRootItem(m_app, CATEGORY_SEARCH);
     addTopLevelItem(pSearchRoot);
     pSearchRoot->setHidden(true);
+}
+
+void CWizCategoryView::sortFolders()
+{
+    CWizCategoryViewAllFoldersItem* pFolderRoot = dynamic_cast<CWizCategoryViewAllFoldersItem *>(findCategory(CATEGORY_FOLDERS));
+    if (!pFolderRoot)
+        return;
+
+    pFolderRoot->sortChildren(0, Qt::AscendingOrder);
+
+    for (int i = 1; i < pFolderRoot->childCount(); i++)
+    {
+        CWizCategoryViewFolderItem* pFolder = dynamic_cast<CWizCategoryViewFolderItem*>(pFolderRoot->child(i));
+        if (!pFolder)
+            return;
+
+        sortFolders(pFolder);
+    }
+}
+
+void CWizCategoryView::sortFolders(CWizCategoryViewFolderItem* pItem)
+{
+    if (!pItem)
+        return;
+
+    pItem->sortChildren(0, Qt::AscendingOrder);
+
+    for (int i = 1; i < pItem->childCount(); i++)
+    {
+        CWizCategoryViewFolderItem* pFolder = dynamic_cast<CWizCategoryViewFolderItem*>(pItem->child(i));
+        if (!pFolder)
+            return;
+
+        sortFolders(pFolder);
+    }
 }
 
 void CWizCategoryView::initFolders()
@@ -1580,8 +1641,8 @@ void CWizCategoryView::initFolders()
     pAllFoldersItem->addChild(pTrash);
 
     pAllFoldersItem->setExpanded(true);
-    pAllFoldersItem->sortChildren(0, Qt::AscendingOrder);
 
+    sortFolders();
     updateFolderDocumentCount();
 
     // push back folders cache
@@ -1674,9 +1735,11 @@ void CWizCategoryView::initTags()
 {
     CWizCategoryViewAllTagsItem* pAllTagsItem = new CWizCategoryViewAllTagsItem(m_app, CATEGORY_TAGS, m_dbMgr.db().kbGUID());
     addTopLevelItem(pAllTagsItem);
-    pAllTagsItem->setExpanded(true);
 
     initTags(pAllTagsItem, "");
+
+    pAllTagsItem->setExpanded(true);
+    pAllTagsItem->sortChildren(0, Qt::AscendingOrder);
 
     updateTagDocumentCount();
 }
@@ -1693,6 +1756,8 @@ void CWizCategoryView::initTags(QTreeWidgetItem* pParent, const QString& strPare
 
         initTags(pTagItem, it->strGUID);
     }
+
+   pParent->sortChildren(0, Qt::AscendingOrder);
 }
 
 void CWizCategoryView::initStyles()
@@ -1707,6 +1772,9 @@ void CWizCategoryView::initGroups()
     QMap<QString, QString> bizInfo;
     m_dbMgr.db().GetBizGroupInfo(bizInfo);
 
+    //
+    std::vector<CWizCategoryViewItemBase*> arrayGroupsItem;
+    //
     if (!bizInfo.isEmpty()) {
         CWizCategoryViewSpacerItem* pSpacer = new CWizCategoryViewSpacerItem(m_app);
         addTopLevelItem(pSpacer);
@@ -1719,6 +1787,7 @@ void CWizCategoryView::initGroups()
             CWizCategoryViewBizGroupRootItem* pBizGroupItem = new CWizCategoryViewBizGroupRootItem(m_app, it.value(), "");
             addTopLevelItem(pBizGroupItem);
             pBizGroupItem->setExpanded(true);
+            arrayGroupsItem.push_back(pBizGroupItem);
         }
     }
 
@@ -1733,12 +1802,22 @@ void CWizCategoryView::initGroups()
         CWizCategoryViewAllGroupsRootItem* pAllGroupsItem = new CWizCategoryViewAllGroupsRootItem(m_app, CATEGORY_GROUP, "");
         addTopLevelItem(pAllGroupsItem);
         pAllGroupsItem->setExpanded(true);
+        arrayGroupsItem.push_back(pAllGroupsItem);
     }
 
     for (int i = 0; i < nTotal; i++) {
         initGroup(m_dbMgr.at(i));
         updateTagDocumentCount(m_dbMgr.at(i).kbGUID());
     }
+    //
+    for (std::vector<CWizCategoryViewItemBase*>::const_iterator it = arrayGroupsItem.begin();
+         it != arrayGroupsItem.end();
+         it++)
+    {
+        CWizCategoryViewItemBase* pItem = *it;
+        pItem->sortChildren(0, Qt::AscendingOrder);
+    }
+
 }
 
 void CWizCategoryView::initGroup(CWizDatabase& db)
@@ -1791,6 +1870,8 @@ void CWizCategoryView::initGroup(CWizDatabase& db, QTreeWidgetItem* pParent, con
 
         initGroup(db, pTagItem, it->strGUID);
     }
+    //
+    pParent->sortChildren(0, Qt::AscendingOrder);
 }
 
 CWizCategoryViewItemBase* CWizCategoryView::findCategory(const QString& strName, bool bCreate)
@@ -1962,10 +2043,8 @@ CWizCategoryViewFolderItem* CWizCategoryView::findFolder(const QString& strLocat
         if (!create)
             return NULL;
 
-        CWizCategoryViewFolderItem* pFolderItem = new CWizCategoryViewFolderItem(m_app, strCurrentLocation,
-                                                                                 m_dbMgr.db().kbGUID());
+        CWizCategoryViewFolderItem* pFolderItem = new CWizCategoryViewFolderItem(m_app, strCurrentLocation, m_dbMgr.db().kbGUID());
         parent->addChild(pFolderItem);
-        parent->setExpanded(true);
         if (sort) {
             parent->sortChildren(0, Qt::AscendingOrder);
         }
@@ -2056,7 +2135,6 @@ CWizCategoryViewTagItem* CWizCategoryView::findTag(const WIZTAGDATA& tag, bool c
 
         CWizCategoryViewTagItem* pTagItem = new CWizCategoryViewTagItem(m_app, tagParent, m_dbMgr.db().kbGUID());
         parent->addChild(pTagItem);
-        parent->setExpanded(true);
         if (sort) {
             parent->sortChildren(0, Qt::AscendingOrder);
         }
@@ -2188,8 +2266,6 @@ CWizCategoryViewGroupItem* CWizCategoryView::findGroupFolder(const WIZTAGDATA& t
 
         CWizCategoryViewGroupItem* pTagItem = new CWizCategoryViewGroupItem(m_app, tagParent, tag.strKbGUID);
         parent->addChild(pTagItem);
-
-        parent->setExpanded(true);
         if (sort) {
             parent->sortChildren(0, Qt::AscendingOrder);
         }
@@ -2290,6 +2366,11 @@ void CWizCategoryView::on_folder_deleted(const QString& strLocation)
             parent->removeChild(pFolder);
         }
     }
+}
+
+void CWizCategoryView::on_folder_positionChanged()
+{
+    sortFolders();
 }
 
 void CWizCategoryView::on_tag_created(const WIZTAGDATA& tag)
@@ -2473,4 +2554,113 @@ CWizFolder* CWizCategoryView::SelectedFolder()
         return NULL;
 
     return new CWizFolder(m_dbMgr.db(), pItem->location());
+}
+
+
+#define TREEVIEW_STATE "TreeState"
+#define TREEVIEW_SELECTED_ITEM "SelectedItemID"
+
+void CWizCategoryView::loadState()
+{
+    QSettings* settings = ExtensionSystem::PluginManager::settings();
+    m_strSelectedId = selectedId(settings);
+
+    for (int i = 0 ; i < topLevelItemCount(); i++) {
+        loadChildState(topLevelItem(i), settings);
+    }
+}
+
+void CWizCategoryView::loadChildState(QTreeWidgetItem* pItem, QSettings* settings)
+{
+    loadItemState(pItem, settings);
+
+    if (!m_strSelectedId.isEmpty()) {
+        CWizCategoryViewItemBase* pi = dynamic_cast<CWizCategoryViewItemBase*>(pItem);
+        Q_ASSERT(pi);
+        if (pi->id() == m_strSelectedId) {
+            setCurrentItem(pItem);
+        }
+    }
+
+    for (int i = 0; i < pItem->childCount(); i++) {
+        loadChildState(pItem->child(i), settings);
+    }
+}
+
+void CWizCategoryView::loadItemState(QTreeWidgetItem* pi, QSettings* settings)
+{
+    if (!pi || !settings)
+        return;
+
+    CWizCategoryViewItemBase* pItem = dynamic_cast<CWizCategoryViewItemBase*>(pi);
+    Q_ASSERT(pItem);
+
+    QString strId = pItem->id();
+    settings->beginGroup(TREEVIEW_STATE);
+    bool bExpand = settings->value(strId).toBool();
+    settings->endGroup();
+
+    if (bExpand)
+        expandItem(pItem);
+    else
+        collapseItem(pItem);
+}
+
+QString CWizCategoryView::selectedId(QSettings* settings)
+{
+    settings->beginGroup(TREEVIEW_STATE);
+    QString strItem = settings->value(TREEVIEW_SELECTED_ITEM).toString();
+    settings->endGroup();
+
+    return strItem;
+}
+
+void CWizCategoryView::saveState()
+{
+    QSettings* settings = ExtensionSystem::PluginManager::settings();
+    for (int i = 0 ; i < topLevelItemCount(); i++) {
+        saveChildState(topLevelItem(i), settings);
+    }
+
+    saveSelected(settings);
+
+    settings->sync();
+}
+
+void CWizCategoryView::saveChildState(QTreeWidgetItem* pItem, QSettings* settings)
+{
+    saveItemState(pItem, settings);
+
+    for (int i = 0; i < pItem->childCount(); i++) {
+        saveChildState(pItem->child(i), settings);
+    }
+}
+
+void CWizCategoryView::saveItemState(QTreeWidgetItem* pi, QSettings *settings)
+{
+   if (!pi || !settings)
+       return;
+
+   CWizCategoryViewItemBase* pItem = dynamic_cast<CWizCategoryViewItemBase*>(pi);
+   Q_ASSERT(pItem);
+
+   QString strId = pItem->id();
+   bool bExpand = pItem->isExpanded() ? true : false;
+
+   settings->beginGroup(TREEVIEW_STATE);
+   settings->setValue(strId, bExpand);
+   settings->endGroup();
+}
+
+void CWizCategoryView::saveSelected(QSettings* settings)
+{
+    if (!settings)
+        return;
+
+    CWizCategoryViewItemBase* pItem = dynamic_cast<CWizCategoryViewItemBase*>(currentItem());
+    Q_ASSERT(pItem);
+
+    settings->beginGroup(TREEVIEW_STATE);
+    settings->setValue(TREEVIEW_SELECTED_ITEM, pItem->id());
+    settings->endGroup();
 }

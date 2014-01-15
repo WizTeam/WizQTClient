@@ -58,7 +58,8 @@ set(wiznote_SOURCES
     sync/token.cpp
     sync/apientry.cpp
     share/wizObjectDataDownloader.cpp
-    share/wizUserAvatar.cpp
+    #share/wizUserAvatar.cpp
+    sync/avatar.cpp
     sync/wizkmxmlrpc.cpp
     sync/wizkmsync.cpp
     sync/asyncapi.cpp
@@ -120,6 +121,10 @@ set(wiznote_SOURCES
     plugindialog.cpp
     utils/logger.cpp
     utils/misc.cpp
+    utils/pinyin.cpp
+    messagelistview.cpp
+    thumbcache.cpp
+    messagecompleter.cpp
 )
 
 set(wiznote_HEADERS
@@ -176,7 +181,9 @@ set(wiznote_HEADERS
     sync/apientry.h
     sync/apientry_p.h
     share/wizObjectDataDownloader.h
-    share/wizUserAvatar.h
+    #share/wizUserAvatar.h
+    sync/avatar.h
+    sync/avatar_p.h
     utils/stylehelper.h
     utils/pathresolve.h
 
@@ -233,6 +240,11 @@ set(wiznote_HEADERS
     plugindialog.h
     utils/logger.h
     utils/misc.h
+    utils/pinyin.h
+    messagelistview.h
+    thumbcache.h
+    thumbcache_p.h
+    messagecompleter.h
 )
 
 set(wiznote_FORMS

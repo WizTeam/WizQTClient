@@ -3,6 +3,7 @@
 #include <QtGlobal>
 #include <QApplication>
 #include <QDir>
+#include <QDebug>
 
 namespace Utils {
 
@@ -34,6 +35,11 @@ QString PathResolve::resourcesPath()
 #endif
 }
 
+QString PathResolve::themePath(const QString& strThemeName)
+{
+    return resourcesPath() + "skins/" + strThemeName + "/";
+}
+
 QString PathResolve::dataStorePath()
 {
     QString strPath = QDir::homePath();
@@ -60,6 +66,13 @@ QString PathResolve::cachePath()
     return strCachePath;
 }
 
+QString PathResolve::avatarPath()
+{
+    QString strPath = cachePath() + "avatar/";
+    ensurePathExists(strPath);
+    return strPath;
+}
+
 QString PathResolve::logPath()
 {
     QString strPath = dataStorePath() + "log/";
@@ -80,9 +93,26 @@ QString PathResolve::tempPath()
     return path;
 }
 
-QString PathResolve::userSettingsFilePath()
+QString PathResolve::globalSettingsFilePath()
 {
-    return dataStorePath() + "wiznote.ini";
+    QString strConfigHome = qgetenv("XDG_CONFIG_HOME");
+    if (strConfigHome.isEmpty()) {
+#ifdef Q_OS_LINUX
+        strConfigHome = qgetenv("HOME") + "/.config/wiz/";
+#else
+        strConfigHome = dataStorePath();
+#endif
+    } else {
+        strConfigHome += "/wiz/";
+    }
+
+    ensurePathExists(strConfigHome);
+    return strConfigHome + "wiznote.ini";
+}
+
+QString PathResolve::userSettingsFilePath(const QString strUserId)
+{
+    return dataStorePath() + strUserId + "/wiznote.ini";
 }
 
 void PathResolve::addBackslash(QString& strPath)
