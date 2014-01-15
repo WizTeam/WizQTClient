@@ -54,26 +54,25 @@ bool CWizCategoryViewItemBase::operator < (const QTreeWidgetItem &other) const
         return nThis < nOther;
     }
     //
-
-
-    QString strThis = text(0);
-    QString strOther = pOther->text(0);
+    QString strThis = text(0).toLower();
+    QString strOther = pOther->text(0).toLower();
     //
     static bool isSimpChinese = IsSimpChinese();
     if (isSimpChinese)
     {
-        QByteArray arrThis = QTextCodec::codecForName("GBK")->fromUnicode(strThis);
-        QByteArray arrOther = QTextCodec::codecForName("GBK")->fromUnicode(strOther);
-        //
-        std::string strThisA(arrThis.data(), arrThis.size());
-        std::string strOtherA(arrOther.data(), arrOther.size());
-        //
-        return strThisA.compare(strOtherA.c_str()) < 0;
+        if (QTextCodec* pCodec = QTextCodec::codecForName("GBK"))
+        {
+            QByteArray arrThis = pCodec->fromUnicode(strThis);
+            QByteArray arrOther = pCodec->fromUnicode(strOther);
+            //
+            std::string strThisA(arrThis.data(), arrThis.size());
+            std::string strOtherA(arrOther.data(), arrOther.size());
+            //
+            return strThisA.compare(strOtherA.c_str()) < 0;
+        }
     }
-    else
-    {
-        return strThis.compare(strOther) < 0;
-    }
+    //
+    return strThis.compare(strOther) < 0;
 }
 
 QVariant CWizCategoryViewItemBase::data(int column, int role) const
