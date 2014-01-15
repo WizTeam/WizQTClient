@@ -25,15 +25,15 @@ void NotifyBar::showNotify(int type)
 {
     switch (type) {
     case NotifyBar::Locked:
-        m_labelNotify->setText(QObject::tr("The document is locked and read only, press unlock button if you need edit."));
+        m_labelNotify->setText(QObject::tr("The note is locked and read only, press unlock button if you need edit."));
         show();
         break;
     case NotifyBar::Deleted:
-        m_labelNotify->setText(QObject::tr("This document is deleted, You can edit after move to other folders."));
+        m_labelNotify->setText(QObject::tr("This note is deleted, You can edit after move to other folders."));
         show();
         break;
     case NotifyBar::PermissionLack:
-        m_labelNotify->setText(QObject::tr("Your permission is not enough to edit this document."));
+        m_labelNotify->setText(QObject::tr("Your permission is not enough to edit this note."));
         show();
         break;
     default:

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE TS>
-<TS version="2.1" language="zh_CN">
+<TS version="2.0" language="zh_CN">
 <context>
     <name>AboutDialog</name>
     <message>
@@ -302,70 +302,70 @@
         <translation type="obsolete">笔记文件夹</translation>
     </message>
     <message>
-        <location filename="../src/wizCategoryView.cpp" line="703"/>
-        <location filename="../src/wizCategoryView.cpp" line="788"/>
-        <location filename="../src/wizCategoryView.cpp" line="1033"/>
+        <location filename="../src/wizCategoryView.cpp" line="723"/>
+        <location filename="../src/wizCategoryView.cpp" line="808"/>
+        <location filename="../src/wizCategoryView.cpp" line="1053"/>
         <source>Please input folder name: </source>
         <translation>请输入文件夹名称：</translation>
     </message>
     <message>
-        <location filename="../src/wizCategoryView.cpp" line="741"/>
+        <location filename="../src/wizCategoryView.cpp" line="761"/>
         <source>New tag</source>
         <translation>新建标签</translation>
     </message>
     <message>
-        <location filename="../src/wizCategoryView.cpp" line="742"/>
-        <location filename="../src/wizCategoryView.cpp" line="999"/>
+        <location filename="../src/wizCategoryView.cpp" line="762"/>
+        <location filename="../src/wizCategoryView.cpp" line="1019"/>
         <source>Please input tag name: </source>
         <translation>请输入标签名称：</translation>
     </message>
     <message>
-        <location filename="../src/wizCategoryView.cpp" line="787"/>
+        <location filename="../src/wizCategoryView.cpp" line="807"/>
         <source>New group folder</source>
         <translation>新建群组文件夹</translation>
     </message>
     <message>
-        <location filename="../src/wizCategoryView.cpp" line="998"/>
+        <location filename="../src/wizCategoryView.cpp" line="1018"/>
         <source>Rename tag</source>
         <translation>重命名标签</translation>
     </message>
     <message>
-        <location filename="../src/wizCategoryView.cpp" line="1032"/>
+        <location filename="../src/wizCategoryView.cpp" line="1052"/>
         <source>Rename group folder</source>
         <translation>重命名群组文件夹</translation>
     </message>
     <message>
-        <location filename="../src/wizCategoryView.cpp" line="1125"/>
+        <location filename="../src/wizCategoryView.cpp" line="1145"/>
         <source>Delete tag</source>
         <translation>删除标签</translation>
     </message>
     <message>
-        <location filename="../src/wizCategoryView.cpp" line="1129"/>
+        <location filename="../src/wizCategoryView.cpp" line="1149"/>
         <source>Do you really want to delete tag: %1 ? (include child tags if any)</source>
         <translation>确定要删除标签 %1 吗？（如果存在子标签也将被删除）</translation>
     </message>
     <message>
-        <location filename="../src/wizCategoryView.cpp" line="1157"/>
+        <location filename="../src/wizCategoryView.cpp" line="1177"/>
         <source>Delete group folder</source>
         <translation>删除群组文件夹</translation>
     </message>
     <message>
-        <location filename="../src/wizCategoryView.cpp" line="1161"/>
+        <location filename="../src/wizCategoryView.cpp" line="1181"/>
         <source>Do you really want to delete folder: %1 ? (All documents will move to unclassified folder, It&apos;s safe.)</source>
         <translation>确定要删除文件夹 %1 吗？（所有文档会移动到未分类文件夹，这是一个安全的操作）</translation>
     </message>
     <message>
-        <location filename="../src/wizCategoryView.cpp" line="1262"/>
+        <location filename="../src/wizCategoryView.cpp" line="1282"/>
         <source>Recent meesages</source>
         <translation>最近消息</translation>
     </message>
     <message>
-        <location filename="../src/wizCategoryView.cpp" line="1264"/>
+        <location filename="../src/wizCategoryView.cpp" line="1284"/>
         <source>Recent notes</source>
         <translation>最近笔记</translation>
     </message>
     <message>
-        <location filename="../src/wizCategoryView.cpp" line="1266"/>
+        <location filename="../src/wizCategoryView.cpp" line="1286"/>
         <source>No tag notes</source>
         <translation>无标签笔记</translation>
     </message>
@@ -374,12 +374,12 @@
         <translation type="obsolete">确定要删除文件夹 %1 吗？（所有文档会移动到根文件夹，这是一个安全的操作）</translation>
     </message>
     <message>
-        <location filename="../src/wizCategoryView.cpp" line="1195"/>
+        <location filename="../src/wizCategoryView.cpp" line="1215"/>
         <source>Group settings</source>
         <translation>群组设置</translation>
     </message>
     <message>
-        <location filename="../src/wizCategoryView.cpp" line="702"/>
+        <location filename="../src/wizCategoryView.cpp" line="722"/>
         <source>New folder</source>
         <translation>新建文件夹</translation>
     </message>
@@ -388,33 +388,33 @@
         <translation type="obsolete">个人笔记</translation>
     </message>
     <message>
-        <location filename="../src/wizCategoryView.cpp" line="846"/>
+        <location filename="../src/wizCategoryView.cpp" line="866"/>
         <source>Move folder</source>
         <translation>移动文件夹</translation>
     </message>
     <message>
-        <location filename="../src/wizCategoryView.cpp" line="932"/>
+        <location filename="../src/wizCategoryView.cpp" line="952"/>
         <source>Please input new folder name: </source>
         <translation>请输入新的文件夹名：</translation>
     </message>
     <message>
-        <location filename="../src/wizCategoryView.cpp" line="931"/>
+        <location filename="../src/wizCategoryView.cpp" line="951"/>
         <source>Rename folder</source>
         <translation>重命名文件夹</translation>
     </message>
     <message>
-        <location filename="../src/wizCategoryView.cpp" line="658"/>
+        <location filename="../src/wizCategoryView.cpp" line="678"/>
         <source>New note</source>
         <translation>新建笔记</translation>
     </message>
     <message>
-        <location filename="../src/wizCategoryView.cpp" line="1097"/>
+        <location filename="../src/wizCategoryView.cpp" line="1117"/>
         <source>Do you really want to delete all documents inside folder: %1 ? (All documents will move to trash folder and remove from cloud server)</source>
         <translation>确定要删除文件夹%1 内的所有文档吗？（所有文档将会被移动到已删除，并从云端服务器移除）</translation>
     </message>
     <message>
-        <location filename="../src/wizCategoryView.cpp" line="901"/>
-        <location filename="../src/wizCategoryView.cpp" line="988"/>
+        <location filename="../src/wizCategoryView.cpp" line="921"/>
+        <location filename="../src/wizCategoryView.cpp" line="1008"/>
         <source>Move Document: %1 to %2</source>
         <translation>移动文档：%1 到 %2</translation>
     </message>
@@ -435,7 +435,7 @@
         <translation type="obsolete">新建文件夹</translation>
     </message>
     <message>
-        <location filename="../src/wizCategoryView.cpp" line="1093"/>
+        <location filename="../src/wizCategoryView.cpp" line="1113"/>
         <source>Delete Folder</source>
         <translation>删除文件夹</translation>
     </message>
@@ -518,47 +518,47 @@
 <context>
     <name>CWizDatabase</name>
     <message>
-        <location filename="../src/share/wizDatabase.cpp" line="2443"/>
+        <location filename="../src/share/wizDatabase.cpp" line="2475"/>
         <source>My Notes</source>
         <translation>我的笔记</translation>
     </message>
     <message>
-        <location filename="../src/share/wizDatabase.cpp" line="2445"/>
+        <location filename="../src/share/wizDatabase.cpp" line="2477"/>
         <source>My Journals</source>
         <translation>我的日记</translation>
     </message>
     <message>
-        <location filename="../src/share/wizDatabase.cpp" line="2447"/>
+        <location filename="../src/share/wizDatabase.cpp" line="2479"/>
         <source>My Events</source>
         <translation>我的事件</translation>
     </message>
     <message>
-        <location filename="../src/share/wizDatabase.cpp" line="2449"/>
+        <location filename="../src/share/wizDatabase.cpp" line="2481"/>
         <source>My Sticky Notes</source>
         <translation>我的桌面便笺</translation>
     </message>
     <message>
-        <location filename="../src/share/wizDatabase.cpp" line="2451"/>
+        <location filename="../src/share/wizDatabase.cpp" line="2483"/>
         <source>My Emails</source>
         <translation>我的电子邮件</translation>
     </message>
     <message>
-        <location filename="../src/share/wizDatabase.cpp" line="2453"/>
+        <location filename="../src/share/wizDatabase.cpp" line="2485"/>
         <source>My Drafts</source>
         <translation>我的草稿</translation>
     </message>
     <message>
-        <location filename="../src/share/wizDatabase.cpp" line="2455"/>
+        <location filename="../src/share/wizDatabase.cpp" line="2487"/>
         <source>My Tasks</source>
         <translation>我的任务</translation>
     </message>
     <message>
-        <location filename="../src/share/wizDatabase.cpp" line="2459"/>
+        <location filename="../src/share/wizDatabase.cpp" line="2491"/>
         <source>Inbox</source>
         <translation>收集箱</translation>
     </message>
     <message>
-        <location filename="../src/share/wizDatabase.cpp" line="2461"/>
+        <location filename="../src/share/wizDatabase.cpp" line="2493"/>
         <source>Completed</source>
         <translation>已完成</translation>
     </message>
@@ -574,7 +574,7 @@
         <translation type="obsolete">删除...</translation>
     </message>
     <message>
-        <location filename="../src/wizDocumentListView.cpp" line="840"/>
+        <location filename="../src/wizDocumentListView.cpp" line="802"/>
         <source>Move Document: %1 to %2</source>
         <translation>移动文档：%1 到 %2</translation>
     </message>
@@ -900,37 +900,37 @@
 <context>
     <name>CWizLoginDialog</name>
     <message>
-        <location filename="../src/wizLoginDialog.cpp" line="55"/>
+        <location filename="../src/wizLoginDialog.cpp" line="57"/>
         <source>Account Login</source>
         <translation>账户登录</translation>
     </message>
     <message>
-        <location filename="../src/wizLoginDialog.cpp" line="66"/>
+        <location filename="../src/wizLoginDialog.cpp" line="68"/>
         <source>Password</source>
         <translation>密码</translation>
     </message>
     <message>
-        <location filename="../src/wizLoginDialog.cpp" line="67"/>
+        <location filename="../src/wizLoginDialog.cpp" line="69"/>
         <source>Save password</source>
         <translation>记住密码</translation>
     </message>
     <message>
-        <location filename="../src/wizLoginDialog.cpp" line="69"/>
+        <location filename="../src/wizLoginDialog.cpp" line="71"/>
         <source>Auto login</source>
         <translation>自动登录</translation>
     </message>
     <message>
-        <location filename="../src/wizLoginDialog.cpp" line="109"/>
+        <location filename="../src/wizLoginDialog.cpp" line="111"/>
         <source>&lt;a href=&quot;javascript:void(0)&quot; style=&quot;color:#363636; text-decoration:none;&quot;&gt;New user&lt;/a&gt;</source>
         <translation>&lt;a href=&quot;javascript:void(0)&quot; style=&quot;color:#363636; text-decoration:none;&quot;&gt;新用户&lt;/a&gt;</translation>
     </message>
     <message>
-        <location filename="../src/wizLoginDialog.cpp" line="114"/>
+        <location filename="../src/wizLoginDialog.cpp" line="116"/>
         <source>&lt;a href=&quot;javascript:void(0)&quot; style=&quot;color:#363636; text-decoration:none;&quot;&gt;Forget password&lt;/a&gt;</source>
         <translation>&lt;a href=&quot;javascript:void(0)&quot; style=&quot;color:#363636; text-decoration:none;&quot;&gt;找回密码&lt;/a&gt;</translation>
     </message>
     <message>
-        <location filename="../src/wizLoginDialog.cpp" line="259"/>
+        <location filename="../src/wizLoginDialog.cpp" line="261"/>
         <source>Update user profile</source>
         <translation>更新用户属性</translation>
     </message>
@@ -939,22 +939,22 @@
         <translation type="obsolete">&lt;a href=&quot;javascript:void(0)&quot; style=&quot;color:#363636; text-decoration:none;&quot;&gt;网络&lt;/a&gt;</translation>
     </message>
     <message>
-        <location filename="../src/wizLoginDialog.cpp" line="123"/>
+        <location filename="../src/wizLoginDialog.cpp" line="125"/>
         <source>Login</source>
         <translation>登录</translation>
     </message>
     <message>
-        <location filename="../src/wizLoginDialog.cpp" line="179"/>
+        <location filename="../src/wizLoginDialog.cpp" line="181"/>
         <source>Please enter user id</source>
         <translation>请输入用户名</translation>
     </message>
     <message>
-        <location filename="../src/wizLoginDialog.cpp" line="184"/>
+        <location filename="../src/wizLoginDialog.cpp" line="186"/>
         <source>Please enter user password</source>
         <translation>请输入用户密码</translation>
     </message>
     <message>
-        <location filename="../src/wizLoginDialog.cpp" line="224"/>
+        <location filename="../src/wizLoginDialog.cpp" line="226"/>
         <source>Verify account failed</source>
         <translation>验证账户失败</translation>
     </message>
@@ -1441,32 +1441,32 @@
 <context>
     <name>CWizSortingPopupButton</name>
     <message>
-        <location filename="../src/wizPopupButton.cpp" line="176"/>
+        <location filename="../src/wizPopupButton.cpp" line="177"/>
         <source>Sorting by created time</source>
         <translation>按创建时间排序</translation>
     </message>
     <message>
-        <location filename="../src/wizPopupButton.cpp" line="177"/>
+        <location filename="../src/wizPopupButton.cpp" line="178"/>
         <source>Sorting by updated time</source>
         <translation>按更新时间排序</translation>
     </message>
     <message>
-        <location filename="../src/wizPopupButton.cpp" line="179"/>
+        <location filename="../src/wizPopupButton.cpp" line="180"/>
         <source>Sorting by title</source>
         <translation>按标题排序</translation>
     </message>
     <message>
-        <location filename="../src/wizPopupButton.cpp" line="180"/>
+        <location filename="../src/wizPopupButton.cpp" line="181"/>
         <source>Sorting by location</source>
         <translation>按文件夹排序</translation>
     </message>
     <message>
-        <location filename="../src/wizPopupButton.cpp" line="181"/>
+        <location filename="../src/wizPopupButton.cpp" line="182"/>
         <source>Sorting by tag</source>
         <translation>按标签排序</translation>
     </message>
     <message>
-        <location filename="../src/wizPopupButton.cpp" line="182"/>
+        <location filename="../src/wizPopupButton.cpp" line="183"/>
         <source>Sorting by size</source>
         <translation>按大小排序</translation>
     </message>
@@ -1792,17 +1792,17 @@
 <context>
     <name>CWizViewTypePopupButton</name>
     <message>
-        <location filename="../src/wizPopupButton.cpp" line="109"/>
+        <location filename="../src/wizPopupButton.cpp" line="110"/>
         <source>One line view</source>
         <translation>单行视图</translation>
     </message>
     <message>
-        <location filename="../src/wizPopupButton.cpp" line="108"/>
+        <location filename="../src/wizPopupButton.cpp" line="109"/>
         <source>Two line view</source>
         <translation>两行视图</translation>
     </message>
     <message>
-        <location filename="../src/wizPopupButton.cpp" line="107"/>
+        <location filename="../src/wizPopupButton.cpp" line="108"/>
         <source>Thumbnail view</source>
         <translation>摘要视图</translation>
     </message>
@@ -1827,37 +1827,37 @@
 <context>
     <name>Core::Internal::MainWindow</name>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="139"/>
+        <location filename="../src/wizmainwindow.cpp" line="140"/>
         <source>WizNote</source>
         <translation>为知笔记</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="615"/>
+        <location filename="../src/wizmainwindow.cpp" line="618"/>
         <source>0 articles</source>
         <translation>0 条</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="720"/>
+        <location filename="../src/wizmainwindow.cpp" line="728"/>
         <source>sorry, sync failed. please input your password and try again.</source>
         <translation>抱歉，同步失败了。请输入您的密码再试一次。</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="740"/>
+        <location filename="../src/wizmainwindow.cpp" line="748"/>
         <source>Syncing...</source>
         <translation>同步中...</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="965"/>
+        <location filename="../src/wizmainwindow.cpp" line="973"/>
         <source>Rebuild full text search index</source>
         <translation>重建搜索索引</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="968"/>
+        <location filename="../src/wizmainwindow.cpp" line="976"/>
         <source>Rebuild full text search is quit slow if you have quite a few                    documents or attachments, you do not have to use this function                    while search should work as expected, this fuction is only used                    as developer&apos;s issue triage purpose, use it only if you know                    what you are doing!</source>
         <translation>如果您有大量文档或附件存在，重建搜索索引会非常耗费时间，正常情况下，搜索是可以如期工作的，这个功能主要是为修复可能出现的搜索问题提供帮助，请在明确这个选项意义的情况下使用这个功能！</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="1410"/>
+        <location filename="../src/wizmainwindow.cpp" line="1418"/>
         <source>Saving note...</source>
         <translation>正在保存笔记...</translation>
     </message>
@@ -1903,47 +1903,47 @@
 <context>
     <name>Core::Internal::TitleBar</name>
     <message>
-        <location filename="../src/titlebar.cpp" line="55"/>
+        <location filename="../src/titlebar.cpp" line="58"/>
         <source>Switch to Editing View</source>
         <translation>切换到编辑视图</translation>
     </message>
     <message>
-        <location filename="../src/titlebar.cpp" line="56"/>
+        <location filename="../src/titlebar.cpp" line="59"/>
         <source>Switch to Reading View</source>
         <translation>切换到阅读视图</translation>
     </message>
     <message>
-        <location filename="../src/titlebar.cpp" line="57"/>
+        <location filename="../src/titlebar.cpp" line="60"/>
         <source>Save and switch to Reading View</source>
         <translation>保存并切换到阅读视图</translation>
     </message>
     <message>
-        <location filename="../src/titlebar.cpp" line="63"/>
+        <location filename="../src/titlebar.cpp" line="66"/>
         <source>View and add tags</source>
         <translation>浏览并添加标签</translation>
     </message>
     <message>
-        <location filename="../src/titlebar.cpp" line="69"/>
+        <location filename="../src/titlebar.cpp" line="72"/>
         <source>Add attachments</source>
         <translation>添加附件</translation>
     </message>
     <message>
-        <location filename="../src/titlebar.cpp" line="70"/>
+        <location filename="../src/titlebar.cpp" line="73"/>
         <source>View and add attachments</source>
         <translation>浏览并添加附件</translation>
     </message>
     <message>
-        <location filename="../src/titlebar.cpp" line="76"/>
+        <location filename="../src/titlebar.cpp" line="79"/>
         <source>View and modify note&apos;s info</source>
         <translation>浏览并修改笔记属性</translation>
     </message>
     <message>
-        <location filename="../src/titlebar.cpp" line="81"/>
+        <location filename="../src/titlebar.cpp" line="84"/>
         <source>Add comments</source>
         <translation>添加评论</translation>
     </message>
     <message>
-        <location filename="../src/titlebar.cpp" line="82"/>
+        <location filename="../src/titlebar.cpp" line="85"/>
         <source>View and add comments</source>
         <translation>浏览并添加评论</translation>
     </message>
@@ -2006,221 +2006,276 @@
 <context>
     <name>ExtensionSystem::Internal::PluginDetailsView</name>
     <message>
+        <location filename="../lib/extensionsystem/plugindetailsview.ui" line="34"/>
         <source>Description:</source>
-        <translation type="vanished">描述:</translation>
+        <translation>描述:</translation>
     </message>
     <message>
+        <location filename="../lib/extensionsystem/plugindetailsview.ui" line="69"/>
         <source>Name:</source>
-        <translation type="vanished">名称:</translation>
+        <translation>名称:</translation>
     </message>
     <message>
+        <location filename="../lib/extensionsystem/plugindetailsview.ui" line="82"/>
         <source>Compatibility version:</source>
-        <translation type="vanished">兼容版本:</translation>
+        <translation>兼容版本:</translation>
     </message>
     <message>
+        <location filename="../lib/extensionsystem/plugindetailsview.ui" line="107"/>
         <source>Dependencies:</source>
-        <translation type="vanished">依赖:</translation>
+        <translation>依赖:</translation>
     </message>
     <message>
+        <location filename="../lib/extensionsystem/plugindetailsview.ui" line="142"/>
         <source>Version:</source>
-        <translation type="vanished">版本:</translation>
+        <translation>版本:</translation>
     </message>
     <message>
+        <location filename="../lib/extensionsystem/plugindetailsview.ui" line="155"/>
         <source>Vendor:</source>
-        <translation type="vanished">作者:</translation>
+        <translation>作者:</translation>
     </message>
     <message>
+        <location filename="../lib/extensionsystem/plugindetailsview.ui" line="171"/>
         <source>Location:</source>
-        <translation type="vanished">位置:</translation>
+        <translation>位置:</translation>
     </message>
     <message>
+        <location filename="../lib/extensionsystem/plugindetailsview.ui" line="194"/>
         <source>Platforms:</source>
-        <translation type="vanished">平台:</translation>
+        <translation>平台:</translation>
     </message>
     <message>
+        <location filename="../lib/extensionsystem/plugindetailsview.ui" line="204"/>
         <source>URL:</source>
-        <translation type="vanished">网址：</translation>
+        <translation>网址：</translation>
     </message>
     <message>
+        <location filename="../lib/extensionsystem/plugindetailsview.ui" line="234"/>
         <source>Group:</source>
-        <translation type="vanished">分组:</translation>
+        <translation>分组:</translation>
     </message>
     <message>
+        <location filename="../lib/extensionsystem/plugindetailsview.ui" line="264"/>
         <source>Copyright:</source>
-        <translation type="vanished">版权:</translation>
+        <translation>版权:</translation>
     </message>
     <message>
+        <location filename="../lib/extensionsystem/plugindetailsview.ui" line="286"/>
         <source>License:</source>
-        <translation type="vanished">授权:</translation>
+        <translation>授权:</translation>
     </message>
 </context>
 <context>
     <name>ExtensionSystem::Internal::PluginErrorOverview</name>
     <message>
-        <source>The following plugins have errors and cannot be loaded:</source>
-        <translation type="vanished">以下插件有问题导致无法加载:</translation>
+        <location filename="../lib/extensionsystem/pluginerroroverview.ui" line="14"/>
+        <source>Qt Creator - Plugin loader messages</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../lib/extensionsystem/pluginerroroverview.ui" line="20"/>
+        <source>The following plugins have errors and cannot be loaded:</source>
+        <translation>以下插件有问题导致无法加载:</translation>
+    </message>
+    <message>
+        <location filename="../lib/extensionsystem/pluginerroroverview.ui" line="33"/>
         <source>Details:</source>
-        <translation type="vanished">详细:</translation>
+        <translation>详细:</translation>
     </message>
 </context>
 <context>
     <name>ExtensionSystem::Internal::PluginErrorView</name>
     <message>
+        <location filename="../lib/extensionsystem/pluginerrorview.ui" line="19"/>
         <source>State:</source>
-        <translation type="vanished">状态:</translation>
+        <translation>状态:</translation>
     </message>
     <message>
+        <location filename="../lib/extensionsystem/pluginerrorview.ui" line="35"/>
         <source>Error message:</source>
-        <translation type="vanished">错误信息:</translation>
+        <translation>错误信息:</translation>
     </message>
 </context>
 <context>
     <name>ExtensionSystem::Internal::PluginSpecPrivate</name>
     <message>
+        <location filename="../lib/extensionsystem/pluginspec.cpp" line="524"/>
         <source>Cannot open file %1 for reading: %2</source>
-        <translation type="vanished">无法打开 %1 进行读取: %2</translation>
+        <translation>无法打开 %1 进行读取: %2</translation>
     </message>
     <message>
+        <location filename="../lib/extensionsystem/pluginspec.cpp" line="541"/>
         <source>Error parsing file %1: %2, at line %3, column %4</source>
-        <translation type="vanished">解析文件 %1 错误: %2, 行%3, 列%4</translation>
+        <translation>解析文件 %1 错误: %2, 行%3, 列%4</translation>
     </message>
 </context>
 <context>
     <name>ExtensionSystem::Internal::PluginView</name>
     <message>
+        <location filename="../lib/extensionsystem/pluginview.ui" line="60"/>
         <source>Name</source>
-        <translation type="vanished">名称</translation>
+        <translation>名称</translation>
     </message>
     <message>
+        <location filename="../lib/extensionsystem/pluginview.ui" line="65"/>
         <source>Load</source>
-        <translation type="vanished">状态</translation>
+        <translation>状态</translation>
     </message>
     <message>
+        <location filename="../lib/extensionsystem/pluginview.ui" line="70"/>
         <source>Version</source>
-        <translation type="vanished">版本</translation>
+        <translation>版本</translation>
     </message>
     <message>
+        <location filename="../lib/extensionsystem/pluginview.ui" line="75"/>
         <source>Vendor</source>
-        <translation type="vanished">作者</translation>
+        <translation>作者</translation>
     </message>
 </context>
 <context>
     <name>ExtensionSystem::PluginDetailsView</name>
     <message>
+        <location filename="../lib/extensionsystem/plugindetailsview.cpp" line="80"/>
         <source>None</source>
-        <translation type="vanished">默认</translation>
+        <translation>默认</translation>
     </message>
     <message>
+        <location filename="../lib/extensionsystem/plugindetailsview.cpp" line="89"/>
         <source>All</source>
-        <translation type="vanished">所有</translation>
+        <translation>所有</translation>
     </message>
 </context>
 <context>
     <name>ExtensionSystem::PluginErrorOverview</name>
     <message>
+        <location filename="../lib/extensionsystem/pluginerroroverview.cpp" line="44"/>
         <source>Continue</source>
-        <translation type="vanished">继续</translation>
+        <translation>继续</translation>
     </message>
 </context>
 <context>
     <name>ExtensionSystem::PluginErrorView</name>
     <message>
+        <location filename="../lib/extensionsystem/pluginerrorview.cpp" line="77"/>
         <source>Invalid</source>
-        <translation type="vanished">无效</translation>
+        <translation>无效</translation>
     </message>
     <message>
+        <location filename="../lib/extensionsystem/pluginerrorview.cpp" line="78"/>
         <source>Description file found, but error on read</source>
-        <translation type="vanished">描述文件存在,但无法读取</translation>
+        <translation>描述文件存在,但无法读取</translation>
     </message>
     <message>
+        <location filename="../lib/extensionsystem/pluginerrorview.cpp" line="81"/>
         <source>Read</source>
-        <translation type="vanished">读取</translation>
+        <translation>读取</translation>
     </message>
     <message>
+        <location filename="../lib/extensionsystem/pluginerrorview.cpp" line="82"/>
         <source>Description successfully read</source>
-        <translation type="vanished">描述文件读取成功</translation>
+        <translation>描述文件读取成功</translation>
     </message>
     <message>
+        <location filename="../lib/extensionsystem/pluginerrorview.cpp" line="85"/>
         <source>Resolved</source>
-        <translation type="vanished">解析</translation>
+        <translation>解析</translation>
     </message>
     <message>
+        <location filename="../lib/extensionsystem/pluginerrorview.cpp" line="86"/>
         <source>Dependencies are successfully resolved</source>
-        <translation type="vanished">依赖关系解析成功</translation>
+        <translation>依赖关系解析成功</translation>
     </message>
     <message>
+        <location filename="../lib/extensionsystem/pluginerrorview.cpp" line="89"/>
         <source>Loaded</source>
-        <translation type="vanished">加载</translation>
+        <translation>加载</translation>
     </message>
     <message>
+        <location filename="../lib/extensionsystem/pluginerrorview.cpp" line="90"/>
         <source>Library is loaded</source>
-        <translation type="vanished">链接库已加载</translation>
+        <translation>链接库已加载</translation>
     </message>
     <message>
+        <location filename="../lib/extensionsystem/pluginerrorview.cpp" line="93"/>
         <source>Initialized</source>
-        <translation type="vanished">初始化</translation>
+        <translation>初始化</translation>
     </message>
     <message>
+        <location filename="../lib/extensionsystem/pluginerrorview.cpp" line="94"/>
         <source>Plugin&apos;s initialization function succeeded</source>
-        <translation type="vanished">插件初始化调用成功</translation>
+        <translation>插件初始化调用成功</translation>
     </message>
     <message>
+        <location filename="../lib/extensionsystem/pluginerrorview.cpp" line="97"/>
         <source>Running</source>
-        <translation type="vanished">运行</translation>
+        <translation>运行</translation>
     </message>
     <message>
+        <location filename="../lib/extensionsystem/pluginerrorview.cpp" line="98"/>
         <source>Plugin successfully loaded and running</source>
-        <translation type="vanished">插件加载并运行成功</translation>
+        <translation>插件加载并运行成功</translation>
     </message>
     <message>
+        <location filename="../lib/extensionsystem/pluginerrorview.cpp" line="101"/>
         <source>Stopped</source>
-        <translation type="vanished">停止</translation>
+        <translation>停止</translation>
     </message>
     <message>
+        <location filename="../lib/extensionsystem/pluginerrorview.cpp" line="102"/>
         <source>Plugin was shut down</source>
-        <translation type="vanished">插件已关闭</translation>
+        <translation>插件已关闭</translation>
     </message>
     <message>
+        <location filename="../lib/extensionsystem/pluginerrorview.cpp" line="105"/>
         <source>Deleted</source>
-        <translation type="vanished">删除</translation>
+        <translation>删除</translation>
     </message>
     <message>
+        <location filename="../lib/extensionsystem/pluginerrorview.cpp" line="106"/>
         <source>Plugin ended its life cycle and was deleted</source>
-        <translation type="vanished">插件已结束并删除</translation>
+        <translation>插件已结束并删除</translation>
     </message>
 </context>
 <context>
     <name>ExtensionSystem::PluginManager</name>
     <message>
+        <location filename="../lib/extensionsystem/pluginmanager.cpp" line="1082"/>
         <source>Circular dependency detected:</source>
-        <translation type="vanished">检测到循环依赖:</translation>
+        <translation>检测到循环依赖:</translation>
     </message>
     <message>
+        <location filename="../lib/extensionsystem/pluginmanager.cpp" line="1086"/>
         <source>%1(%2) depends on</source>
-        <translation type="vanished">%1(%2) 依赖于</translation>
+        <translation>%1(%2) 依赖于</translation>
     </message>
     <message>
+        <location filename="../lib/extensionsystem/pluginmanager.cpp" line="1090"/>
         <source>%1(%2)</source>
-        <translation type="vanished">%1(%2)</translation>
+        <translation>%1(%2)</translation>
     </message>
     <message>
+        <location filename="../lib/extensionsystem/pluginmanager.cpp" line="1105"/>
+        <location filename="../lib/extensionsystem/pluginmanager.cpp" line="1151"/>
         <source>Cannot load plugin because dependency failed to load: %1(%2)
 Reason: %3</source>
-        <translation type="vanished">因为依赖关系有问题导致无法加载插件: %1(%2)
+        <translation>因为依赖关系有问题导致无法加载插件: %1(%2)
 原因: %3</translation>
     </message>
 </context>
 <context>
     <name>ExtensionSystem::PluginView</name>
     <message>
+        <location filename="../lib/extensionsystem/pluginview.cpp" line="158"/>
+        <location filename="../lib/extensionsystem/pluginview.cpp" line="179"/>
+        <location filename="../lib/extensionsystem/pluginview.cpp" line="234"/>
         <source>Load on Startup</source>
-        <translation type="vanished">启动时加载</translation>
+        <translation>启动时加载</translation>
     </message>
     <message>
+        <location filename="../lib/extensionsystem/pluginview.cpp" line="167"/>
         <source>Utilities</source>
-        <translation type="vanished">实用工具</translation>
+        <translation>实用工具</translation>
     </message>
 </context>
 <context>
@@ -2332,14 +2387,111 @@ Have you changed your password from other platform?</source>
     </message>
 </context>
 <context>
-    <name>PluginSpec</name>
+    <name>PluginManager</name>
     <message>
-        <source>&apos;%1&apos; misses attribute &apos;%2&apos;</source>
-        <translation type="vanished">&apos;%1&apos; 缺少属性 &apos;%2&apos;</translation>
+        <location filename="../lib/extensionsystem/optionsparser.cpp" line="122"/>
+        <source>The plugin &apos;%1&apos; is specified twice for testing.</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../lib/extensionsystem/optionsparser.cpp" line="130"/>
+        <location filename="../lib/extensionsystem/optionsparser.cpp" line="147"/>
+        <location filename="../lib/extensionsystem/optionsparser.cpp" line="167"/>
+        <source>The plugin &apos;%1&apos; does not exist.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../lib/extensionsystem/optionsparser.cpp" line="218"/>
+        <source>Unknown option %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../lib/extensionsystem/optionsparser.cpp" line="230"/>
+        <source>The option %1 requires an argument.</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>PluginSpec</name>
+    <message>
+        <location filename="../lib/extensionsystem/pluginspec.cpp" line="591"/>
+        <source>&apos;%1&apos; misses attribute &apos;%2&apos;</source>
+        <translation>&apos;%1&apos; 缺少属性 &apos;%2&apos;</translation>
+    </message>
+    <message>
+        <location filename="../lib/extensionsystem/pluginspec.cpp" line="596"/>
         <source>&apos;%1&apos; has invalid format</source>
-        <translation type="vanished">&apos;%1&apos; 具有无效的格式</translation>
+        <translation>&apos;%1&apos; 具有无效的格式</translation>
+    </message>
+    <message>
+        <location filename="../lib/extensionsystem/pluginspec.cpp" line="601"/>
+        <source>Invalid element &apos;%1&apos;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../lib/extensionsystem/pluginspec.cpp" line="606"/>
+        <source>Unexpected closing element &apos;%1&apos;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../lib/extensionsystem/pluginspec.cpp" line="611"/>
+        <source>Unexpected token</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../lib/extensionsystem/pluginspec.cpp" line="620"/>
+        <source>Expected element &apos;%1&apos; as top level element</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../lib/extensionsystem/pluginspec.cpp" line="879"/>
+        <source>Resolving dependencies failed because state != Read</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../lib/extensionsystem/pluginspec.cpp" line="898"/>
+        <source>Could not resolve dependency &apos;%1(%2)&apos;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../lib/extensionsystem/pluginspec.cpp" line="946"/>
+        <source>Loading the library failed because state != Resolved</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../lib/extensionsystem/pluginspec.cpp" line="982"/>
+        <source>Plugin is not valid (does not derive from IPlugin)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../lib/extensionsystem/pluginspec.cpp" line="1002"/>
+        <source>Initializing the plugin failed because state != Loaded</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../lib/extensionsystem/pluginspec.cpp" line="1007"/>
+        <source>Internal error: have no plugin instance to initialize</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../lib/extensionsystem/pluginspec.cpp" line="1013"/>
+        <source>Plugin initialization failed: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../lib/extensionsystem/pluginspec.cpp" line="1031"/>
+        <source>Cannot perform extensionsInitialized because state != Initialized</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../lib/extensionsystem/pluginspec.cpp" line="1036"/>
+        <source>Internal error: have no plugin instance to perform extensionsInitialized</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../lib/extensionsystem/pluginspec.cpp" line="1055"/>
+        <source>Internal error: have no plugin instance to perform delayedInitialize</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -2726,7 +2878,7 @@ Have you changed your password from other platform?</source>
         <translation type="obsolete">搜索 %1</translation>
     </message>
     <message>
-        <location filename="../src/main.cpp" line="89"/>
+        <location filename="../src/main.cpp" line="90"/>
         <source>WizNote</source>
         <translation>为知笔记</translation>
     </message>
@@ -2735,7 +2887,7 @@ Have you changed your password from other platform?</source>
         <translation type="obsolete">无法打开个人数据库</translation>
     </message>
     <message>
-        <location filename="../src/main.cpp" line="194"/>
+        <location filename="../src/main.cpp" line="193"/>
         <source>Can not open database</source>
         <translation>无法打开数据库</translation>
     </message>
@@ -2880,19 +3032,16 @@ Have you changed your password from other platform?</source>
         <translation>大小: </translation>
     </message>
     <message>
-        <location filename="../src/notifybar.cpp" line="28"/>
         <source>The document is locked and read only, press unlock button if you need edit.</source>
-        <translation>文档已锁定为只读，如需修改请点击解锁按钮。</translation>
+        <translation type="obsolete">文档已锁定为只读，如需修改请点击解锁按钮。</translation>
     </message>
     <message>
-        <location filename="../src/notifybar.cpp" line="32"/>
         <source>This document is deleted, You can edit after move to other folders.</source>
-        <translation>这个文档已被删除, 请移动到其他文件夹之后再进行修改.</translation>
+        <translation type="obsolete">这个文档已被删除, 请移动到其他文件夹之后再进行修改.</translation>
     </message>
     <message>
-        <location filename="../src/notifybar.cpp" line="36"/>
         <source>Your permission is not enough to edit this document.</source>
-        <translation>您的权限不够, 无法修改这个文档.</translation>
+        <translation type="obsolete">您的权限不够, 无法修改这个文档.</translation>
     </message>
     <message>
         <source>Tags, total: %1 (%2)</source>
@@ -2937,117 +3086,117 @@ Have you changed your password from other platform?</source>
     <message>
         <location filename="../src/wizactions.cpp" line="71"/>
         <location filename="../src/wizattachmentlistwidget.cpp" line="50"/>
-        <location filename="../src/wizDocumentListView.cpp" line="25"/>
+        <location filename="../src/wizDocumentListView.cpp" line="27"/>
         <source>Delete</source>
         <translation>删除</translation>
     </message>
     <message>
-        <location filename="../src/wizCategoryView.cpp" line="50"/>
+        <location filename="../src/wizCategoryView.cpp" line="52"/>
         <source>Mark all documents read</source>
         <translation>标记所有笔记为已读</translation>
     </message>
     <message>
-        <location filename="../src/wizCategoryView.cpp" line="41"/>
+        <location filename="../src/wizCategoryView.cpp" line="43"/>
         <source>Create new document</source>
         <translation>新建笔记</translation>
     </message>
     <message>
-        <location filename="../src/wizCategoryView.cpp" line="29"/>
+        <location filename="../src/wizCategoryView.cpp" line="31"/>
         <source>General</source>
         <translation>常用</translation>
     </message>
     <message>
-        <location filename="../src/wizCategoryView.cpp" line="30"/>
+        <location filename="../src/wizCategoryView.cpp" line="32"/>
         <source>Personal notes</source>
         <translation>个人笔记</translation>
     </message>
     <message>
-        <location filename="../src/wizCategoryView.cpp" line="31"/>
+        <location filename="../src/wizCategoryView.cpp" line="33"/>
         <source>Enterprise groups</source>
         <translation>企业群组</translation>
     </message>
     <message>
-        <location filename="../src/wizCategoryView.cpp" line="32"/>
+        <location filename="../src/wizCategoryView.cpp" line="34"/>
         <source>Individual groups</source>
         <translation>个人群组</translation>
     </message>
     <message>
-        <location filename="../src/wizCategoryView.h" line="15"/>
+        <location filename="../src/wizCategoryView.h" line="16"/>
         <source>Message Center</source>
         <translation>消息中心</translation>
     </message>
     <message>
-        <location filename="../src/wizCategoryView.h" line="16"/>
+        <location filename="../src/wizCategoryView.h" line="17"/>
         <source>Send to me</source>
         <translation>提到我的消息</translation>
     </message>
     <message>
-        <location filename="../src/wizCategoryView.h" line="17"/>
+        <location filename="../src/wizCategoryView.h" line="18"/>
         <source>Note modified</source>
         <translation>笔记被修改消息</translation>
     </message>
     <message>
-        <location filename="../src/wizCategoryView.h" line="18"/>
+        <location filename="../src/wizCategoryView.h" line="19"/>
         <source>Comments</source>
         <translation>评论消息</translation>
     </message>
     <message>
-        <location filename="../src/wizCategoryView.h" line="19"/>
+        <location filename="../src/wizCategoryView.h" line="20"/>
         <source>Send from me</source>
         <translation>我发出的消息</translation>
     </message>
     <message>
-        <location filename="../src/wizCategoryView.cpp" line="33"/>
+        <location filename="../src/wizCategoryView.cpp" line="35"/>
         <source>Shortcuts</source>
         <translation>快捷方式</translation>
     </message>
     <message>
-        <location filename="../src/wizCategoryView.cpp" line="34"/>
+        <location filename="../src/wizCategoryView.cpp" line="36"/>
         <source>Quick search</source>
         <translation>快速搜索</translation>
     </message>
     <message>
-        <location filename="../src/wizCategoryView.cpp" line="35"/>
+        <location filename="../src/wizCategoryView.cpp" line="37"/>
         <source>Note folders</source>
         <translation>文件夹</translation>
     </message>
     <message>
-        <location filename="../src/wizCategoryView.cpp" line="36"/>
+        <location filename="../src/wizCategoryView.cpp" line="38"/>
         <source>Tags</source>
         <translation>标签</translation>
     </message>
     <message>
-        <location filename="../src/wizCategoryView.cpp" line="37"/>
+        <location filename="../src/wizCategoryView.cpp" line="39"/>
         <source>Styles</source>
         <translation>样式</translation>
     </message>
     <message>
-        <location filename="../src/wizCategoryView.cpp" line="38"/>
+        <location filename="../src/wizCategoryView.cpp" line="40"/>
         <source>My groups</source>
         <translation>我的群组</translation>
     </message>
     <message>
-        <location filename="../src/wizCategoryView.cpp" line="42"/>
+        <location filename="../src/wizCategoryView.cpp" line="44"/>
         <source>Create new folder</source>
         <translation>新建文件夹</translation>
     </message>
     <message>
-        <location filename="../src/wizCategoryView.cpp" line="43"/>
+        <location filename="../src/wizCategoryView.cpp" line="45"/>
         <source>Move current folder</source>
         <translation>移动文件夹</translation>
     </message>
     <message>
-        <location filename="../src/wizCategoryView.cpp" line="46"/>
+        <location filename="../src/wizCategoryView.cpp" line="48"/>
         <source>Create new tag</source>
         <translation>新建标签</translation>
     </message>
     <message>
-        <location filename="../src/wizCategoryView.cpp" line="47"/>
+        <location filename="../src/wizCategoryView.cpp" line="49"/>
         <source>Change current tag name</source>
         <translation>重命名标签</translation>
     </message>
     <message>
-        <location filename="../src/wizCategoryView.cpp" line="51"/>
+        <location filename="../src/wizCategoryView.cpp" line="53"/>
         <source>Empty trash</source>
         <translation>清空废纸篓</translation>
     </message>
@@ -3064,7 +3213,7 @@ Have you changed your password from other platform?</source>
         <translation type="obsolete">重命名标签</translation>
     </message>
     <message>
-        <location filename="../src/wizCategoryView.cpp" line="48"/>
+        <location filename="../src/wizCategoryView.cpp" line="50"/>
         <source>Delete current tag</source>
         <translation>删除标签</translation>
     </message>
@@ -3073,42 +3222,42 @@ Have you changed your password from other platform?</source>
         <translation type="obsolete">个人群组</translation>
     </message>
     <message>
-        <location filename="../src/wizCategoryView.cpp" line="49"/>
+        <location filename="../src/wizCategoryView.cpp" line="51"/>
         <source>Open group attribute</source>
         <translation>群组属性</translation>
     </message>
     <message>
-        <location filename="../src/wizCategoryView.cpp" line="44"/>
+        <location filename="../src/wizCategoryView.cpp" line="46"/>
         <source>Change current folder name</source>
         <translation>重命名文件夹</translation>
     </message>
     <message>
-        <location filename="../src/wizCategoryView.cpp" line="45"/>
+        <location filename="../src/wizCategoryView.cpp" line="47"/>
         <source>Delete current folder</source>
         <translation>删除文件夹</translation>
     </message>
     <message>
-        <location filename="../src/wizDocumentListView.cpp" line="26"/>
+        <location filename="../src/wizDocumentListView.cpp" line="28"/>
         <source>Tags...</source>
         <translation>标签...</translation>
     </message>
     <message>
-        <location filename="../src/wizDocumentListView.cpp" line="27"/>
+        <location filename="../src/wizDocumentListView.cpp" line="29"/>
         <source>Move Document</source>
         <translation>移动文档</translation>
     </message>
     <message>
-        <location filename="../src/wizDocumentListView.cpp" line="28"/>
+        <location filename="../src/wizDocumentListView.cpp" line="30"/>
         <source>Copy Document</source>
         <translation>拷贝文档</translation>
     </message>
     <message>
-        <location filename="../src/wizDocumentListView.cpp" line="31"/>
+        <location filename="../src/wizDocumentListView.cpp" line="33"/>
         <source>Mark as read</source>
         <translation>标记为已读</translation>
     </message>
     <message>
-        <location filename="../src/wizDocumentListView.cpp" line="32"/>
+        <location filename="../src/wizDocumentListView.cpp" line="34"/>
         <source>Delete Message(s)</source>
         <translation>删除消息</translation>
     </message>
@@ -3308,13 +3457,13 @@ Have you changed your password from other platform?</source>
         <translation>%1 小时前</translation>
     </message>
     <message>
-        <location filename="../src/wizDocumentListViewItem.cpp" line="158"/>
-        <location filename="../src/wizDocumentListViewItem.cpp" line="187"/>
+        <location filename="../src/wizDocumentListViewItem.cpp" line="157"/>
+        <location filename="../src/wizDocumentListViewItem.cpp" line="186"/>
         <source>Unknown</source>
         <translation>未知</translation>
     </message>
     <message>
-        <location filename="../src/wizLoginDialog.cpp" line="259"/>
+        <location filename="../src/wizLoginDialog.cpp" line="261"/>
         <source>Can not open database while update user profile</source>
         <translation>更新用户档案时无法打开数据库</translation>
     </message>
@@ -3339,21 +3488,73 @@ Have you changed your password from other platform?</source>
         <translation>文件</translation>
     </message>
     <message>
-        <location filename="../src/wizCategoryViewItem.cpp" line="9"/>
+        <location filename="../src/wizCategoryViewItem.cpp" line="17"/>
         <source>Trash</source>
         <translation>已删除</translation>
     </message>
     <message>
-        <location filename="../src/wizCategoryViewItem.cpp" line="10"/>
+        <location filename="../src/wizCategoryViewItem.cpp" line="18"/>
         <source>Unclassified</source>
         <translation>未分类</translation>
+    </message>
+    <message>
+        <location filename="../src/notifybar.cpp" line="28"/>
+        <source>The note is locked and read only, press unlock button if you need edit.</source>
+        <translation>笔记已锁定为只读，如需修改请点击解锁按钮。</translation>
+    </message>
+    <message>
+        <location filename="../src/notifybar.cpp" line="32"/>
+        <source>This note is deleted, You can edit after move to other folders.</source>
+        <translation>这个笔记已被删除, 请移动到其他文件夹之后再进行修改.</translation>
+    </message>
+    <message>
+        <location filename="../src/notifybar.cpp" line="36"/>
+        <source>Your permission is not enough to edit this note.</source>
+        <translation>你的权限不够, 无法修改这个笔记。</translation>
+    </message>
+</context>
+<context>
+    <name>QuaGzipFile</name>
+    <message>
+        <location filename="../lib/quazip/quagzipfile.cpp" line="36"/>
+        <source>QIODevice::Append is not supported for GZIP</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../lib/quazip/quagzipfile.cpp" line="42"/>
+        <source>Opening gzip for both reading and writing is not supported</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../lib/quazip/quagzipfile.cpp" line="50"/>
+        <source>You can open a gzip either for reading or for writing. Which is it?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../lib/quazip/quagzipfile.cpp" line="56"/>
+        <source>Could not gzopen() file</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>QuaZIODevice</name>
+    <message>
+        <location filename="../lib/quazip/quaziodevice.cpp" line="121"/>
+        <source>QIODevice::Append is not supported for QuaZIODevice</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../lib/quazip/quaziodevice.cpp" line="126"/>
+        <source>QIODevice::ReadWrite is not supported for QuaZIODevice</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
     <name>QuaZipFilePrivate</name>
     <message>
+        <location filename="../lib/quazip/quazipfile.cpp" line="217"/>
         <source>ZIP/UNZIP API error %1</source>
-        <translation type="obsolete">ZIP/UNZIP API 错误 %1</translation>
+        <translation type="unfinished">ZIP/UNZIP API 错误 %1</translation>
     </message>
 </context>
 <context>
