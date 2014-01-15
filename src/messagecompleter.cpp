@@ -77,7 +77,7 @@ public:
         } else if (role == Qt::DecorationRole) {
             QPixmap pm;
             Internal::AvatarHost::avatar(m_users[index.row()].strUserId, &pm);
-            return pm;
+            return pm.scaled(28, 28, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
         } else if (role == Qt::ToolTipRole) {
             return m_users[index.row()].strUserId;
         }
@@ -119,7 +119,16 @@ public:
     MessageCompleterPopup(QWidget* parent = 0)
         : QListView(parent)
     {
-        //setItemDelegate(new MessageCompleterPopupDelegate(this));
+    }
+
+    virtual int sizeHintForRow (int row) const
+    {
+        return QListView::sizeHintForRow(row) + spacing() * 2;
+    }
+
+    virtual int sizeHintForColumn(int column) const
+    {
+        return QListView::sizeHintForColumn(column) + spacing() * 2;
     }
 };
 
@@ -176,6 +185,10 @@ void MessageCompleter::update(const QString& strKbGUID)
 
         MessageCompleterPopup* popup = new MessageCompleterPopup();
         popup->setModel(model);
+        popup->setSpacing(2);
+        popup->setUniformItemSizes(true);
+        popup->setResizeMode(QListView::Adjust);
+
         setPopup(popup);
     }
 }

@@ -100,7 +100,7 @@ void TitleEdit::keyPressEvent(QKeyEvent* e)
 
     QRect cr = cursorRect();
     cr.setWidth(c->popup()->sizeHintForColumn(0)
-                + c->popup()->verticalScrollBar()->sizeHint().width());
+                + c->popup()->verticalScrollBar()->sizeHint().width() + 20); // bigger
     c->complete(cr); // popup it up!
 }
 
