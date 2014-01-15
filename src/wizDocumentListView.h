@@ -63,7 +63,7 @@ private:
     int m_nSortingType;
 
     QMenu* m_menuDocument;
-    QMenu* m_menuMessage;
+    //QMenu* m_menuMessage;
     QAction* m_actionEncryptDocument;
     CWizTagListWidget* m_tagList;
 
@@ -128,14 +128,14 @@ public Q_SLOTS:
     //void on_document_AbstractModified(const WIZDOCUMENTDATA& document);
 
     // message related signals
-    void on_message_created(const WIZMESSAGEDATA& data);
-    void on_message_modified(const WIZMESSAGEDATA& oldMsg,
-                             const WIZMESSAGEDATA& newMsg);
-    void on_message_deleted(const WIZMESSAGEDATA& data);
+    //void on_message_created(const WIZMESSAGEDATA& data);
+    //void on_message_modified(const WIZMESSAGEDATA& oldMsg,
+    //                         const WIZMESSAGEDATA& newMsg);
+    //void on_message_deleted(const WIZMESSAGEDATA& data);
 
     // message context menu
-    void on_action_message_mark_read();
-    void on_action_message_delete();
+    //void on_action_message_mark_read();
+    //void on_action_message_delete();
 
     // document context menu
     void on_action_selectTags();

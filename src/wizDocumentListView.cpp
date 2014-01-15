@@ -29,9 +29,6 @@ using namespace Core::Internal;
 #define WIZACTION_LIST_MOVE_DOCUMENT QObject::tr("Move Document")
 #define WIZACTION_LIST_COPY_DOCUMENT QObject::tr("Copy Document")
 
-// Message actions
-#define WIZACTION_LIST_MESSAGE_MARK_READ    QObject::tr("Mark as read")
-#define WIZACTION_LIST_MESSAGE_DELETE       QObject::tr("Delete Message(s)")
 
 CWizDocumentListView::CWizDocumentListView(CWizExplorerApp& app, QWidget *parent /*= 0*/)
     : QListWidget(parent)
@@ -83,11 +80,11 @@ CWizDocumentListView::CWizDocumentListView(CWizExplorerApp& app, QWidget *parent
             SLOT(on_document_deleted(const WIZDOCUMENTDATA&)));
 
     // message
-    connect(&m_dbMgr.db(), SIGNAL(messageModified(const WIZMESSAGEDATA&, const WIZMESSAGEDATA&)),
-            SLOT(on_message_modified(const WIZMESSAGEDATA&, const WIZMESSAGEDATA&)));
+    //connect(&m_dbMgr.db(), SIGNAL(messageModified(const WIZMESSAGEDATA&, const WIZMESSAGEDATA&)),
+    //        SLOT(on_message_modified(const WIZMESSAGEDATA&, const WIZMESSAGEDATA&)));
 
-    connect(&m_dbMgr.db(), SIGNAL(messageDeleted(const WIZMESSAGEDATA&)),
-            SLOT(on_message_deleted(const WIZMESSAGEDATA&)));
+    //connect(&m_dbMgr.db(), SIGNAL(messageDeleted(const WIZMESSAGEDATA&)),
+    //        SLOT(on_message_deleted(const WIZMESSAGEDATA&)));
 
     // thumb cache
     //m_thumbCache = new CWizThumbIndexCache(app);
@@ -109,11 +106,11 @@ CWizDocumentListView::CWizDocumentListView(CWizExplorerApp& app, QWidget *parent
     viewport()->setAcceptDrops(true);
 
     // message context menu
-    m_menuMessage = new QMenu(this);
-    m_menuMessage->addAction(WIZACTION_LIST_MESSAGE_MARK_READ, this,
-                             SLOT(on_action_message_mark_read()));
-    m_menuMessage->addAction(WIZACTION_LIST_MESSAGE_DELETE, this,
-                             SLOT(on_action_message_delete()));
+    //m_menuMessage = new QMenu(this);
+    //m_menuMessage->addAction(WIZACTION_LIST_MESSAGE_MARK_READ, this,
+    //                         SLOT(on_action_message_mark_read()));
+    //m_menuMessage->addAction(WIZACTION_LIST_MESSAGE_DELETE, this,
+    //                         SLOT(on_action_message_delete()));
 
     // document context menu
     m_menuDocument = new QMenu(this);
@@ -255,11 +252,11 @@ void CWizDocumentListView::contextMenuEvent(QContextMenuEvent * e)
     if (!pItem)
         return;
 
-    if (pItem->itemType() == CWizDocumentListViewItem::TypeMessage) {
-        m_menuMessage->popup(e->globalPos());
-    } else {
-        m_menuDocument->popup(e->globalPos());
-    }
+    //if (pItem->itemType() == CWizDocumentListViewItem::TypeMessage) {
+    //    m_menuMessage->popup(e->globalPos());
+    //} else {
+    m_menuDocument->popup(e->globalPos());
+    //}
 }
 
 void CWizDocumentListView::resetPermission()
@@ -648,66 +645,66 @@ void CWizDocumentListView::onThumbCacheLoaded(const QString& strKbGUID, const QS
     }
 }
 
-void CWizDocumentListView::on_message_created(const WIZMESSAGEDATA& data)
-{
+//void CWizDocumentListView::on_message_created(const WIZMESSAGEDATA& data)
+//{
+//
+//}
+//
+//void CWizDocumentListView::on_message_modified(const WIZMESSAGEDATA& oldMsg,
+//                                               const WIZMESSAGEDATA& newMsg)
+//{
+//    Q_UNUSED(oldMsg);
+//
+//    int index = documentIndexFromGUID(newMsg.documentGUID);
+//    if (-1 != index) {
+//        if (CWizDocumentListViewItem* pItem = documentItemAt(index)) {
+//            pItem->reload(m_dbMgr.db());
+//            update(indexFromItem(pItem));
+//        }
+//    }
+//}
+//
+//void CWizDocumentListView::on_message_deleted(const WIZMESSAGEDATA& data)
+//{
+//    int index = documentIndexFromGUID(data.documentGUID);
+//    if (-1 != index) {
+//        takeItem(index);
+//    }
+//}
 
-}
-
-void CWizDocumentListView::on_message_modified(const WIZMESSAGEDATA& oldMsg,
-                                               const WIZMESSAGEDATA& newMsg)
-{
-    Q_UNUSED(oldMsg);
-
-    int index = documentIndexFromGUID(newMsg.documentGUID);
-    if (-1 != index) {
-        if (CWizDocumentListViewItem* pItem = documentItemAt(index)) {
-            pItem->reload(m_dbMgr.db());
-            update(indexFromItem(pItem));
-        }
-    }
-}
-
-void CWizDocumentListView::on_message_deleted(const WIZMESSAGEDATA& data)
-{
-    int index = documentIndexFromGUID(data.documentGUID);
-    if (-1 != index) {
-        takeItem(index);
-    }
-}
-
-void CWizDocumentListView::on_action_message_mark_read()
-{
-    QList<QListWidgetItem*> items = selectedItems();
-
-    CWizMessageDataArray arrayMessage;
-    foreach (QListWidgetItem* it, items) {
-        if (CWizDocumentListViewItem* pItem = dynamic_cast<CWizDocumentListViewItem*>(it)) {
-            if (pItem->itemType() == CWizDocumentListViewItem::TypeMessage) {
-                WIZMESSAGEDATA msg;
-                m_dbMgr.db().messageFromId(pItem->data().nMessageId, msg);
-                arrayMessage.push_back(msg);
-            }
-        }
-    }
-
-    // 1 means read
-    m_dbMgr.db().setMessageReadStatus(arrayMessage, 1);
-}
-
-void CWizDocumentListView::on_action_message_delete()
-{
-    QList<QListWidgetItem*> items = selectedItems();
-
-    foreach (QListWidgetItem* it, items) {
-        if (CWizDocumentListViewItem* pItem = dynamic_cast<CWizDocumentListViewItem*>(it)) {
-            if (pItem->type() == CWizDocumentListViewItem::TypeMessage) {
-                WIZMESSAGEDATA msg;
-                m_dbMgr.db().messageFromId(pItem->data().nMessageId, msg);
-                m_dbMgr.db().deleteMessageEx(msg);
-            }
-        }
-    }
-}
+//void CWizDocumentListView::on_action_message_mark_read()
+//{
+//    QList<QListWidgetItem*> items = selectedItems();
+//
+//    CWizMessageDataArray arrayMessage;
+//    foreach (QListWidgetItem* it, items) {
+//        if (CWizDocumentListViewItem* pItem = dynamic_cast<CWizDocumentListViewItem*>(it)) {
+//            if (pItem->itemType() == CWizDocumentListViewItem::TypeMessage) {
+//                WIZMESSAGEDATA msg;
+//                m_dbMgr.db().messageFromId(pItem->data().nMessageId, msg);
+//                arrayMessage.push_back(msg);
+//            }
+//        }
+//    }
+//
+//    // 1 means read
+//    m_dbMgr.db().setMessageReadStatus(arrayMessage, 1);
+//}
+//
+//void CWizDocumentListView::on_action_message_delete()
+//{
+//    QList<QListWidgetItem*> items = selectedItems();
+//
+//    foreach (QListWidgetItem* it, items) {
+//        if (CWizDocumentListViewItem* pItem = dynamic_cast<CWizDocumentListViewItem*>(it)) {
+//            if (pItem->type() == CWizDocumentListViewItem::TypeMessage) {
+//                WIZMESSAGEDATA msg;
+//                m_dbMgr.db().messageFromId(pItem->data().nMessageId, msg);
+//                m_dbMgr.db().deleteMessageEx(msg);
+//            }
+//        }
+//    }
+//}
 
 void CWizDocumentListView::on_action_selectTags()
 {
