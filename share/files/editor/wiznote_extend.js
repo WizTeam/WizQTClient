@@ -14,9 +14,9 @@ var
 try {
     var editorOption = {
     toolbars: [],
-    iframeCssUrl: m_defaultCss,
+    //iframeCssUrl: m_defaultCss,
     //initialStyle: 'body{font-size:13px}',
-    enterTag: 'div',
+    //enterTag: 'div',
     fullscreen: true,
     autoHeightEnabled: false,
     scaleEnabled: false,
@@ -81,7 +81,7 @@ function setEditing(bEditing) {
         editor.document.head.innerHTML = wiz_head;
     }
 
-    editor.document.body.innertHTML = wiz_html;
+    editor.document.body.innerHTML = wiz_html;
     editor.fireEvent('aftersetcontent');
     editor.fireEvent('contentchange');
 

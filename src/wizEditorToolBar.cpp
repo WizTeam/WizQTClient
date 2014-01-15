@@ -708,6 +708,11 @@ void EditorToolBar::on_delegate_requestShowContextMenu(const QPoint& pos)
         actionFromName(WIZEDITOR_ACTION_PASTE)->setEnabled(false);
     }
 
+#ifdef QT_DEBUG
+    QMenu* subm = m_editor->page()->createStandardContextMenu();
+    m_menuContext->addMenu(subm);
+#endif
+
     m_menuContext->popup(pos);
     m_menuContext->update();
 }
