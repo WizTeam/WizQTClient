@@ -4,15 +4,15 @@
 #include <QLocale>
 #include <QMainWindow>
 
-#ifndef QT_MAC_USE_COCOA
-float qt_mac_get_scalefactor(QWidget *window)
-{
-    Q_UNUSED(window);
-    return HIGetScaleFactor();
-}
-#endif
+//#ifndef QT_MAC_USE_COCOA
+//float qt_mac_get_scalefactor(QWidget *window)
+//{
+//    Q_UNUSED(window);
+//    return HIGetScaleFactor();
+//}
+//#endif
 
-#ifdef QT_MAC_USE_COCOA
+//#ifdef QT_MAC_USE_COCOA
 float qt_mac_get_scalefactor(QWidget *window)
     {
     // No high-dpi support on 10.6 and below
@@ -29,7 +29,8 @@ float qt_mac_get_scalefactor(QWidget *window)
             }
             return highestScaleFactor;
         } else {
-            return [qt_mac_window_for(window) backingScaleFactor];
+            //return [qt_mac_window_for(window) backingScaleFactor];
+            return [[NSScreen mainScreen] backingScaleFactor];
         }
     } else
 #endif
@@ -37,7 +38,7 @@ float qt_mac_get_scalefactor(QWidget *window)
         return 1.0; // return 1.0 when compiled on or running on 10.6 and lower.
     }
 }
-#endif
+//#endif
 
 void setupCocoa()
 {
