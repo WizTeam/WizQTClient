@@ -93,7 +93,7 @@ int main(int argc, char *argv[])
 #ifdef Q_OS_MAC
     // enable switch between qt widget and alien widget(cocoa)
     // refer to: https://bugreports.qt-project.org/browse/QTBUG-11401
-    a.setAttribute(Qt::AA_NativeWindows);
+    //a.setAttribute(Qt::AA_NativeWindows);
 #endif
 
     // setup settings
