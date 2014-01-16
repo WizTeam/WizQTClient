@@ -41,7 +41,7 @@
 #include <QDebug>
 #include <QPixmap>
 #include "wizmactoolbardelegate.h"
-#include "wizmachelper.h"
+#include "wizmachelper_mm.h"
 #include "wizmacactionhelper.h"
 
 

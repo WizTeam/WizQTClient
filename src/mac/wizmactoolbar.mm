@@ -37,15 +37,32 @@
  **
  ****************************************************************************/
 
-#include <QtGui/QApplication>
+#include <QApplication>
 #include <QtDeclarative/QDeclarativeView>
-#include <QtCore/QtCore>
+#include <QtCore>
 #include <QAction>
 #include "wizmachelper.h"
 #include "wizmactoolbar.h"
 #include "wizmactoolbardelegate.h"
 
 #import <AppKit/AppKit.h>
+
+class CWizNSAutoReleasePool
+{
+public:
+    CWizNSAutoReleasePool()
+    {
+        pool = [[NSAutoreleasePool alloc] init];
+    }
+
+    ~CWizNSAutoReleasePool()
+    {
+       [pool release];
+    }
+
+private:
+    NSAutoreleasePool* pool;
+};
 
 class CWizMacToolBarPrivate
 {
@@ -120,7 +137,11 @@ void CWizMacToolBar::showInTargetWindow()
 void CWizMacToolBar::showInWindowImpl(QWidget *window)
 {
     CWizNSAutoReleasePool pool;
-    NSWindow *macWindow = qt_mac_window_for(window);
+
+    NSView *nsview = (NSView *)window->winId();
+    NSWindow *macWindow = [nsview window];
+
+    //NSWindow *macWindow = qt_mac_window_for(window);
 //    qDebug() << "macWindow" << macWindow;
 
 

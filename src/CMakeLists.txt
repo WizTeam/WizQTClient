@@ -6,12 +6,18 @@ add_subdirectory(plugins)
 set(wiznote_SOURCES_MAC
     mac/wizSearchWidget.mm
     mac/wizmachelper.mm
+    mac/wizmactoolbar.mm
+    mac/wizmactoolbardelegate.mm
+    mac/wizmacactionhelper.cpp
 )
 
 set(wiznote_HEADERS_MAC
     mac/wizmachelper.h
     mac/wizmachelper_mm.h
     mac/wizSearchWidget_mm.h
+    mac/wizmactoolbar.h
+    mac/wizmactoolbardelegate.h
+    mac/wizmacactionhelper.h
 )
 
 set(wiznote_SOURCES

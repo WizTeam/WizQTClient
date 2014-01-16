@@ -8,7 +8,7 @@
 #import <AppKit/AppKit.h>
 #include <QtCore/QString>
 #include <QtCore/QHash>
-#include <QtGui/QAction>
+#include <QAction>
 
 #include "wizmactoolbar.h"
 

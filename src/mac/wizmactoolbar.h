@@ -7,7 +7,7 @@
 #include <QtCore/QObject>
 #include <QtCore/QString>
 #include <QtCore/QUrl>
-#include <QtGui/QAction>
+#include <QAction>
 #include <QtDeclarative/QDeclarativeListProperty>
 #include <QtDeclarative/QDeclarativeParserStatus>
 
