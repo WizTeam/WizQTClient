@@ -1,5 +1,6 @@
 #include <QDebug>
 #include <QPixmap>
+#include <QMacNativeWidget>
 
 #include "wizmactoolbardelegate.h"
 #include "wizmachelper_mm.h"
@@ -64,8 +65,10 @@ public:
         [item setAction : @selector(itemClicked:)];
         [item setEnabled: (m_action->isEnabled() ? YES : NO)];
 
+        [item setMinSize:NSMakeSize(24, 24)];
+        [item setMaxSize:NSMakeSize(24, 24)];
+
         m_item = item;
-        //
         return item;
     }
     virtual void trigger()
@@ -312,6 +315,48 @@ public:
     }
 };
 
+class CWizMacToolBarWidgetItem : public CWizMacToolBarItem
+{
+public:
+    CWizMacToolBarWidgetItem(CWizMacToolBarDelegate* delegate, QWidget* widget, const QString& label, const QString& tooltip)
+        : m_delegate(delegate)
+        , m_id(WizGenGUID())
+        , m_widget(widget)
+        , m_strLabel(label)
+        , m_strTooltip(tooltip)
+    {
+    }
+
+    QWidget* widget() const { return m_widget; }
+
+    virtual NSString* itemIdentifier() const { return m_id; }
+
+    virtual NSToolbarItem* toItem()
+    {
+        NSString* itemId = itemIdentifier();
+        NSToolbarItem* pItem = [[[NSToolbarItem alloc] initWithItemIdentifier: itemId] autorelease];
+        NSString* labelString = WizToNSString(m_strLabel);
+        NSString* tooltipString = WizToNSString(m_strTooltip);
+        [pItem setLabel: labelString];
+        [pItem setPaletteLabel: labelString];
+        [pItem setToolTip: tooltipString];
+
+        NSView *nsview = (NSView *) m_widget->winId();
+        [pItem setView: nsview];
+        [pItem setMinSize:NSMakeSize(m_widget->sizeHint().width(), m_widget->sizeHint().height())];
+        [pItem setMaxSize:NSMakeSize(m_widget->sizeHint().width(), m_widget->sizeHint().height())];
+
+        return pItem;
+    }
+
+private:
+    CWizMacToolBarDelegate* m_delegate;
+    NSString* m_id;
+    QWidget* m_widget;
+    QString m_strLabel;
+    QString m_strTooltip;
+};
+
 
 
 class CWizMacToolBarSearchItem : public CWizMacToolBarItem
@@ -545,11 +590,17 @@ NSMutableArray *itemIdentifiers(const QList<CWizMacToolBarItem *> *items, bool c
 
 - (CWizSearchWidget*)addSearch:(const QString&)label tooltip:(const QString&)tooltip
 {
-    CWizMacToolBarSearchItem* pItem = new CWizMacToolBarSearchItem(self, label, tooltip);
-    items->append(pItem);
-    return pItem->widget();
+    CWizSearchWidget* widget = new CWizSearchWidget();
+    //CWizMacToolBarSearchItem* pItem = new CWizMacToolBarSearchItem(self, label, tooltip);
+    //items->append(pItem);
+    items->append(new CWizMacToolBarWidgetItem(self, widget, label, tooltip));
+    return widget;
 }
 
+- (void)addWidget:(QWidget *)widget label:(const QString&)label tooltip:(const QString&)tooltip
+{
+    items->append(new CWizMacToolBarWidgetItem(self, widget, label, tooltip));
+}
 
 - (CWizMacToolBarItem*) itemFromItemIdentifier: (NSString*)itemIdentifier
 {

@@ -83,7 +83,7 @@ CWizMacToolBar::CWizMacToolBar(QWidget *parent)
     [d->toolbar setAllowsUserCustomization:NO];
     //  [d->Toolbar setAutosavesConfiguration:YES];
     [d->toolbar setDisplayMode:NSToolbarDisplayModeIconOnly];
-    [d->toolbar setSizeMode: NSToolbarSizeModeSmall];
+    //[d->toolbar setSizeMode: NSToolbarSizeModeSmall];
     [d->toolbar setDelegate: d->delegate];
 
     setFocusPolicy(Qt::StrongFocus);
@@ -163,6 +163,10 @@ CWizSearchWidget* CWizMacToolBar::addSearch(const QString& label, const QString&
     return [d->delegate addSearch:label tooltip:tooltip];
 }
 
+void CWizMacToolBar::addWidget(QWidget* widget, const QString& label, const QString& tooltip)
+{
+    [d->delegate addWidget:widget label:label tooltip:tooltip];
+}
 
 void CWizMacToolBar::onSearchEndEditing(const QString& str)
 {

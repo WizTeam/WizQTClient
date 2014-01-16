@@ -109,6 +109,8 @@ CWizSearchWidget::CWizSearchWidget(QWidget* parent /* = 0 */)
 
     // Create the NSSearchField, set it on the QCocoaViewContainer.
     WizSearchField* pSearchField = [[WizSearchField alloc] init];
+    [pSearchField setAutoresizesSubviews: YES];
+    [pSearchField setAutoresizingMask: NSViewHeightSizable | NSViewWidthSizable];
     setCocoaView(pSearchField);
 
     WizSearchTarget *bt = [[WizSearchTarget alloc] initWithObject:this];
@@ -152,7 +154,7 @@ void CWizSearchWidget::focus()
 
 QSize CWizSearchWidget::sizeHint() const
 {
-    return QSize(400, height());
+    return QSize(300, 50);
 }
 
 void CWizSearchWidget::on_search_textChanged(const QString& strText)

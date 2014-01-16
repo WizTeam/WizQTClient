@@ -505,6 +505,14 @@ void MainWindow::initToolBar()
 
 #ifdef Q_OS_MAC
     m_toolBar->showInWindow(this);
+
+    CWizUserInfoWidget* info = new CWizUserInfoWidget(*this, m_toolBar);
+    //QMacNativeWidget* nwd = new QMacNativeWidget();
+    //QHBoxLayout* layout = new QHBoxLayout();
+    //nwd->setLayout(layout);
+    //layout->addWidget(info);
+    m_toolBar->addWidget(info, "", "");
+
     m_toolBar->addAction(m_actions->actionFromName(WIZACTION_GLOBAL_SYNC));
     m_toolBar->addStandardItem(CWizMacToolBar::Space);
     m_toolBar->addAction(m_actions->actionFromName(WIZACTION_GLOBAL_NEW_DOCUMENT));
