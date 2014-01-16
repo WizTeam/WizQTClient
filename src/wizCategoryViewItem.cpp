@@ -2,7 +2,7 @@
 
 #include <QDebug>
 #include <QTextCodec>
-#include <CString>
+#include <cstring>
 
 #include <extensionsystem/pluginmanager.h>
 
