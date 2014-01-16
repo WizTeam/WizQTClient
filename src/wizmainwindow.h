@@ -41,6 +41,8 @@ class CWizUserAvatarDownloaderHost;
 class CWizKMSyncThread;
 class CWizUserVerifyDialog;
 
+class CWizMacToolBar;
+
 class CWizDocumentWebView;
 
 namespace WizService {
@@ -98,7 +100,12 @@ private:
     CWizObjectDataDownloaderHost* m_objectDownloaderHost;
     //CWizUserAvatarDownloaderHost* m_avatarDownloaderHost;
 
+#ifdef Q_OS_MAC
+    CWizMacToolBar* m_toolBar;
+#else
     QToolBar* m_toolBar;
+#endif
+
     QMenuBar* m_menuBar;
     CWizStatusBar* m_statusBar;
 

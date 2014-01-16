@@ -75,8 +75,6 @@ public:
 CWizMacToolBar::CWizMacToolBar(QWidget *parent)
     : QWidget(parent)
 {
-    //qDebug() << "CWizMacToolBar()";
-
     CWizNSAutoReleasePool pool;
 
     d = new CWizMacToolBarPrivate();
@@ -84,8 +82,8 @@ CWizMacToolBar::CWizMacToolBar(QWidget *parent)
     d->delegate = [[CWizMacToolBarDelegate alloc] initWithToolbar:d->toolbar qtToolBar:this];
     [d->toolbar setAllowsUserCustomization:NO];
     //  [d->Toolbar setAutosavesConfiguration:YES];
-    [d->toolbar setDisplayMode:NSToolbarDisplayModeIconAndLabel];
-    //[d->Toolbar setSizeMode: NSToolbarSizeModeSmall];
+    [d->toolbar setDisplayMode:NSToolbarDisplayModeIconOnly];
+    [d->toolbar setSizeMode: NSToolbarSizeModeSmall];
     [d->toolbar setDelegate: d->delegate];
 
     setFocusPolicy(Qt::StrongFocus);
@@ -124,7 +122,7 @@ void CWizMacToolBar::setSizeMode(SizeMode sizeMode)
 void CWizMacToolBar::showInWindow(QWidget *window)
 {
     d->m_targetWindow = window;
-    QTimer::singleShot(300, this, SLOT(showInTargetWindow()));
+    QTimer::singleShot(100, this, SLOT(showInTargetWindow()));
 }
 
 // internal invokable, show the Toolbar in m_targetWindow
@@ -141,18 +139,8 @@ void CWizMacToolBar::showInWindowImpl(QWidget *window)
     NSView *nsview = (NSView *)window->winId();
     NSWindow *macWindow = [nsview window];
 
-    //NSWindow *macWindow = qt_mac_window_for(window);
-//    qDebug() << "macWindow" << macWindow;
-
-
- //   qDebug() << "CWizMacToolBar NSWidnow setToolbar";
-//    [macWindow orderOut: macWindow];
     [macWindow setToolbar: d->toolbar];
     [d->toolbar setVisible: YES];
-    //[macWindow orderFront: macWindow];
-    //    [macWindow setShowsToolbarButton:YES];
-
-//    d->delegate
 }
 
 void CWizMacToolBar::addActionGroup(QActionGroup* actionGroup)

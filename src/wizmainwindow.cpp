@@ -12,6 +12,7 @@
 #ifdef Q_OS_MAC
 #include <Carbon/Carbon.h>
 #include "mac/wizmachelper.h"
+#include "mac/wizmactoolbar.h"
 #endif
 
 #include <extensionsystem/pluginmanager.h>
@@ -80,7 +81,11 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     , m_labelNotice(NULL)
     , m_optionsAction(NULL)
     #endif
+    #ifdef Q_OS_MAC
+    , m_toolBar(new CWizMacToolBar(this))
+    #else
     , m_toolBar(new QToolBar("Main", this))
+    #endif
     , m_menuBar(new QMenuBar(this))
     , m_statusBar(new CWizStatusBar(*this, this))
     , m_actions(new CWizActions(*this, this))
@@ -497,6 +502,13 @@ void MainWindow::initToolBar()
     setUnifiedTitleAndToolBarOnMac(true);
 #endif
 
+#ifdef Q_OS_MAC
+    m_toolBar->showInWindow(this);
+    m_toolBar->addAction(m_actions->actionFromName(WIZACTION_GLOBAL_SYNC));
+    m_toolBar->addAction(m_actions->actionFromName(WIZACTION_GLOBAL_NEW_DOCUMENT));
+#else
+    addToolBar(m_toolBar);
+
     m_toolBar->setIconSize(QSize(24, 24));
     m_toolBar->setContextMenuPolicy(Qt::PreventContextMenu);
     m_toolBar->setMovable(false);
@@ -530,8 +542,7 @@ void MainWindow::initToolBar()
 
     m_toolBar->layout()->setAlignment(m_searchBox, Qt::AlignBottom);
     m_toolBar->addWidget(new CWizFixedSpacer(QSize(20, 1), m_toolBar));
-
-    addToolBar(m_toolBar);
+#endif
 }
 
 void MainWindow::initClient()
