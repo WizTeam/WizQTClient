@@ -14,6 +14,7 @@
 
 class CWizMacToolBarPrivate;
 class CWizMacToolBarItem;
+class CWizSearchWidget;
 
 class CWizMacToolBar
     : public QWidget
@@ -65,7 +66,7 @@ public:
     void addActionGroup(QActionGroup* actionGroup);
     void addAction(QAction* action);
     void addStandardItem(StandardItem standardItem);
-    void addSearch(const QString& label, const QString& tooltip);
+    CWizSearchWidget* addSearch(const QString& label, const QString& tooltip);
 
     void onSearchEndEditing(const QString& str);
 

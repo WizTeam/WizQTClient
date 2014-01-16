@@ -1,48 +1,10 @@
-/****************************************************************************
- **
- ** Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies).
- ** All rights reserved.
- ** Contact: Nokia Corporation (qt-info@nokia.com)
- **
- ** This file is part of the examples of the Qt Toolkit.
- **
- ** You may use this file under the terms of the BSD license as follows:
- **
- ** "Redistribution and use in source and binary forms, with or without
- ** modification, are permitted provided that the following conditions are
- ** met:
- **   * Redistributions of source code must retain the above copyright
- **     notice, this list of conditions and the following disclaimer.
- **   * Redistributions in binary form must reproduce the above copyright
- **     notice, this list of conditions and the following disclaimer in
- **     the documentation and/or other materials provided with the
- **     distribution.
- **   * Neither the name of Nokia Corporation and its Subsidiary(-ies) nor
- **     the names of its contributors may be used to endorse or promote
- **     products derived from this software without specific prior written
- **     permission.
- **
- ** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- ** "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- ** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
- ** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
- ** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
- ** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOTgall
- ** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
- ** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
- ** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- ** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- ** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE."
- ** $QT_END_LICENSE$
- **
- ****************************************************************************/
-
-
 #include <QDebug>
 #include <QPixmap>
+
 #include "wizmactoolbardelegate.h"
 #include "wizmachelper_mm.h"
 #include "wizmacactionhelper.h"
+#include "wizSearchWidget_mm.h"
 
 
 void CWizMacActionHelper::on_action_changed()
@@ -358,7 +320,8 @@ public:
     CWizMacToolBarSearchItem(CWizMacToolBarDelegate* delegate, const QString& label, const QString& tooltip)
         : m_delegate(delegate)
         , m_id(WizGenGUID())
-        , m_searchFieldOutlet(nil)
+        //, m_searchFieldOutlet(nil)
+        , m_searchField(new CWizSearchWidget())
         , m_strLabel(label)
         , m_strTooltip(tooltip)
 
@@ -367,10 +330,13 @@ public:
 private:
     CWizMacToolBarDelegate* m_delegate;
     NSString* m_id;
-    NSSearchField* m_searchFieldOutlet;
+    //NSSearchField* m_searchFieldOutlet;
+    CWizSearchWidget* m_searchField;
     QString m_strLabel;
     QString m_strTooltip;
 public:
+    CWizSearchWidget* widget() const { return m_searchField; }
+
     virtual NSString* itemIdentifier() const
     {
         return m_id;
@@ -389,22 +355,19 @@ public:
         [toolbarItem setPaletteLabel: labelString];
         [toolbarItem setToolTip: tooltipString];
 
-        m_searchFieldOutlet = [[NSSearchField alloc] initWithFrame:NSRectFromString(@"{0, 0}, {150, 26}")];
-        [m_searchFieldOutlet setDelegate: m_delegate];
-        [m_searchFieldOutlet setTarget: m_delegate];
-        [m_searchFieldOutlet setAction: @selector(searchUsingToolbarSearchField:)];
+        //m_searchField = new CWizSearchWidget();
+        //m_searchFieldOutlet = [[NSSearchField alloc] initWithFrame:NSRectFromString(@"{0, 0}, {150, 26}")];
+        //[m_searchFieldOutlet setDelegate: m_delegate];
+        //[m_searchFieldOutlet setTarget: m_delegate];
+        //[m_searchFieldOutlet setAction: @selector(searchUsingToolbarSearchField:)];
 
         // Use a custom view, a text field, for the search item
-        [toolbarItem setView: m_searchFieldOutlet];
-        [toolbarItem setMinSize:NSMakeSize(30, NSHeight([m_searchFieldOutlet frame]))];
-        [toolbarItem setMaxSize:NSMakeSize(250,NSHeight([m_searchFieldOutlet frame]))];
-
-
+        [toolbarItem setView: m_searchField->cocoaView()];
+        [toolbarItem setMinSize:NSMakeSize(30, NSHeight([m_searchField->cocoaView() frame]))];
+        [toolbarItem setMaxSize:NSMakeSize(250,NSHeight([m_searchField->cocoaView() frame]))];
 
         return toolbarItem;
     }
-
-
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -580,9 +543,11 @@ NSMutableArray *itemIdentifiers(const QList<CWizMacToolBarItem *> *items, bool c
     items->append(new CWizMacToolBarStandardItem(standardItem));
 }
 
-- (void)addSearch:(const QString&)label tooltip:(const QString&)tooltip
+- (CWizSearchWidget*)addSearch:(const QString&)label tooltip:(const QString&)tooltip
 {
-    items->append(new CWizMacToolBarSearchItem(self, label, tooltip));
+    CWizMacToolBarSearchItem* pItem = new CWizMacToolBarSearchItem(self, label, tooltip);
+    items->append(pItem);
+    return pItem->widget();
 }
 
 

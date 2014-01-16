@@ -23,7 +23,7 @@ class CWizSearchWidget : public QWidget
     Q_OBJECT
 
 public:
-    CWizSearchWidget(CWizExplorerApp& app, QWidget* parent = 0);
+    CWizSearchWidget(QWidget* parent = 0);
     void clear();
     void focus();
 

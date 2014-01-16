@@ -3,13 +3,6 @@
 #include <QWidget>
 #include <QApplication>
 
-//#if 0
-
-// Qt5 can't find this macro!!!
-// refer to : http://qt-project.org/forums/viewthread/25033
-// and this : https://bugreports.qt-project.org/browse/QTBUG-27318
-//#ifdef QT_MAC_USE_COCOA
-
 #import <Cocoa/Cocoa.h>
 
 #include "wizmachelper_mm.h"
@@ -107,11 +100,9 @@
 }
 @end
 
-CWizSearchWidget::CWizSearchWidget(CWizExplorerApp& app, QWidget* parent /* = 0 */)
+CWizSearchWidget::CWizSearchWidget(QWidget* parent /* = 0 */)
     : QMacCocoaViewContainer(0, parent)
 {
-    Q_UNUSED(app);
-
     // Many Cocoa objects create temporary autorelease objects,
     // so create a pool to catch them.
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
@@ -168,7 +159,3 @@ void CWizSearchWidget::on_search_textChanged(const QString& strText)
 {
     emit doSearch(strText);
 }
-
-//#endif
-
-//#endif // QT_MAC_USE_COCOA

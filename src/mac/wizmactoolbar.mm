@@ -158,9 +158,9 @@ void CWizMacToolBar::addStandardItem(StandardItem standardItem)
     [d->delegate addStandardItem:standardItem];
 }
 
-void CWizMacToolBar::addSearch(const QString& label, const QString& tooltip)
+CWizSearchWidget* CWizMacToolBar::addSearch(const QString& label, const QString& tooltip)
 {
-    [d->delegate addSearch:label tooltip:tooltip];
+    return [d->delegate addSearch:label tooltip:tooltip];
 }
 
 
