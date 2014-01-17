@@ -22,6 +22,8 @@ protected:
     virtual void paintEvent(QPaintEvent *event);
     //
     virtual QPixmap getAvatar();
+    //
+    virtual int textWidth() const;
 
 protected:
     virtual void mousePressEvent(QMouseEvent* event);

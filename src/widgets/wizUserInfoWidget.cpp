@@ -73,6 +73,8 @@ void CWizUserInfoWidget::resetUserInfo()
         QString strName = fontMetrics().elidedText(info.strDisplayName, Qt::ElideRight, 150);
         setText(strName);
     }
+    //
+    m_textWidth = fontMetrics().width(text());
 
     QString iconName;
     if (info.strUserType == "vip") {
@@ -87,6 +89,7 @@ void CWizUserInfoWidget::resetUserInfo()
 
     QString strIconPath = ::WizGetSkinResourcePath(m_app.userSettings().skin()) + iconName;
     m_iconVipIndicator.addFile(strIconPath);
+    //
 }
 
 void CWizUserInfoWidget::on_userAvatar_loaded(const QString& strGUID)
@@ -189,5 +192,6 @@ QPixmap CWizUserInfoWidget::getAvatar()
 QSize CWizUserInfoWidget::sizeHint() const
 {
     // FIXME: builtin avatar size (36, 36), margin = 4 * 2, arraw width = 10
-    return QSize(36 + fontMetrics().width(text()) + 18, 36);
+
+    return QSize(36 + textWidth() + 24, 36);
 }

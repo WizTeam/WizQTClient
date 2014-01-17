@@ -93,6 +93,11 @@ bool CWizUserInfoWidgetBase::hitButton(const QPoint& pos) const
     return rectArrow.contains(pos) ? true : false;
 }
 
+int CWizUserInfoWidgetBase::textWidth() const
+{
+    return fontMetrics().size(text()).width;
+}
+
 
 #endif //Q_OS_MAC
 

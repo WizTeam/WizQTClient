@@ -19,13 +19,24 @@ protected:
     QIcon m_iconVipIndicator;
     QIcon m_iconArraw;
     QMenu* m_menuPopup;
+    //
+    int m_textWidth;
+    int m_textHeight;
 
     void setMenu(QMenu* menu) { m_menuPopup = menu; }
     //
+    void calTextSize();
+public:
+
     QString text() const;
     void setText(QString val);
     //
+    void showMenu();
+    //
     virtual QPixmap getAvatar() { return QPixmap(); }
+    virtual QIcon getArrow() { return m_iconArraw; }
+    virtual int textWidth() const;
+    virtual int textHeight() const;
 };
 
 

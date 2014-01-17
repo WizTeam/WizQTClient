@@ -8,4 +8,6 @@ QString CWizUserInfoWidgetBaseMac::text() const
 void CWizUserInfoWidgetBaseMac::setText(QString val)
 {
     m_text = val;
+    m_textWidth = 0;
+    calTextSize();
 }
