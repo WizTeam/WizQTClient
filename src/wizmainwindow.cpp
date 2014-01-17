@@ -49,12 +49,7 @@
 #include "messagelistview.h"
 
 #include "wizPopupButton.h"
-
-#ifdef Q_OS_MAC
-#include "mac/wizUserInfoWidget_mm.h"
-#else
 #include "widgets/wizUserInfoWidget.h"
-#endif
 #include "sync/apientry.h"
 #include "sync/wizkmsync.h"
 

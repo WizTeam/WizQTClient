@@ -1,19 +1,21 @@
 #ifndef WIZUSERINFOWIDGET_H
 #define WIZUSERINFOWIDGET_H
 
-#include <QToolButton>
-#include <QPointer>
 
-class QMenu;
-class QFileDialog;
+#ifdef Q_OS_MAC
+#include "mac/wizUserInfoWidgetBaseMac_mm.h"
+#define WIZUSERINFOWIDGETBASE CWizUserInfoWidgetBaseMac
+#else
+#include "widgets/wizUserInfoWidgetBase.h"
+#define WIZUSERINFOWIDGETBASE CWizUserInfoWidgetBase
+#endif
 
-class CWizDatabase;
 class CWizExplorerApp;
+class CWizDatabase;
+class QMenu;
 class CWizWebSettingsDialog;
 
-#ifndef Q_OS_MAC
-
-class CWizUserInfoWidget : public QToolButton
+class CWizUserInfoWidget : public WIZUSERINFOWIDGETBASE
 {
     Q_OBJECT
 
@@ -23,28 +25,16 @@ public:
 protected:
     CWizExplorerApp& m_app;
     CWizDatabase& m_db;
-
-    virtual void paintEvent(QPaintEvent *event);
-    virtual QSize sizeHint() const;
-
-private:
-    QIcon m_iconVipIndicator;
-    QIcon m_iconArraw;
     QMenu* m_menuMain;
+    CWizWebSettingsDialog* m_userSettings;
 
-    QPointer<CWizWebSettingsDialog> m_userSettings;
-
-protected:
-    virtual void mousePressEvent(QMouseEvent* event);
-    virtual bool hitButton(const QPoint& pos) const;
-
-private Q_SLOTS:
-    //void resetAvatar(bool bForce);
+    virtual QPixmap getAvatar();
+    virtual QSize sizeHint() const;
+protected Q_SLOTS:
     void resetUserInfo();
 
     void on_userInfo_changed();
 
-    //void downloadAvatar();
     void on_userAvatar_loaded(const QString& strGUID);
     void on_action_accountInfo_triggered();
     void on_action_accountSetup_triggered();
@@ -53,7 +43,8 @@ private Q_SLOTS:
 
     void on_action_changeAvatar_triggered();
     void on_action_changeAvatar_uploaded(bool ok);
+
 };
 
-#endif //#ifndef Q_OS_MAC
+
 #endif // WIZUSERINFOWIDGET_H

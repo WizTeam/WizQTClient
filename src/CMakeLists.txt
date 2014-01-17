@@ -9,7 +9,8 @@ set(wiznote_SOURCES_MAC
     mac/wizmactoolbar.mm
     mac/wizmactoolbardelegate.mm
     mac/wizmacactionhelper.cpp
-    mac/wizUserInfoWidget.mm
+    mac/wizUserInfoWidgetBaseMac.mm
+    mac/wizUserInfoWidgetBaseMac_mm.cpp
 )
 
 set(wiznote_HEADERS_MAC
@@ -19,7 +20,7 @@ set(wiznote_HEADERS_MAC
     mac/wizmactoolbar.h
     mac/wizmactoolbardelegate.h
     mac/wizmacactionhelper.h
-    mac/wizUserInfoWidget_mm.h
+    mac/wizUserInfoWidgetBaseMac_mm.h
 )
 
 set(wiznote_SOURCES
@@ -74,6 +75,7 @@ set(wiznote_SOURCES
     #sync/wizCloudPool.cpp
     sync/avataruploader.cpp
     widgets/wizUserInfoWidget.cpp
+    widgets/wizUserInfoWidgetBase.cpp
     widgets/wizSegmentedButton.cpp
     utils/stylehelper.cpp
     utils/pathresolve.cpp
@@ -183,6 +185,7 @@ set(wiznote_HEADERS
     share/wizSearchIndexer.h
     widgets/wizSegmentedButton.h
     widgets/wizUserInfoWidget.h
+    widgets/wizUserInfoWidgetBase.h
     widgets/wizScrollBar.h
     sync/token.h
     sync/token_p.h
