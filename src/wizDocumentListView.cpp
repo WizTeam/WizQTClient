@@ -47,8 +47,11 @@ CWizDocumentListView::CWizDocumentListView(CWizExplorerApp& app, QWidget *parent
 
     // scroll bar
     setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
+#ifdef Q_OS_MAC
     verticalScrollBar()->setSingleStep(10);
-
+#else
+    verticalScrollBar()->setSingleStep(30);
+#endif
 
 #ifdef WIZNOTE_CUSTOM_SCROLLBAR
     setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);

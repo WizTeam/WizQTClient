@@ -9,6 +9,15 @@
 class CWizExplorerApp;
 class CWizScrollBar;
 
+#ifdef Q_OS_LINUX
+#define WIZNOTE_CUSTOM_SCROLLBAR
+#else
+#if QT_VERSION < 0x050000
+#define WIZNOTE_CUSTOM_SCROLLBAR
+#endif
+#endif
+
+
 class CWizFolderView : public QTreeWidget
 {
     Q_OBJECT
@@ -19,7 +28,10 @@ public:
 protected:
     CWizExplorerApp& m_app;
     CWizDatabaseManager& m_dbMgr;
+
+#ifdef WIZNOTE_CUSTOM_SCROLLBAR
     CWizScrollBar* m_vScroll;
+#endif
 
     virtual void resizeEvent(QResizeEvent* event);
     virtual void showEvent(QShowEvent *event);

@@ -74,7 +74,11 @@ CWizCategoryBaseView::CWizCategoryBaseView(CWizExplorerApp& app, QWidget* parent
 
     // scrollbar
     setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
+#ifdef Q_OS_MAC
     verticalScrollBar()->setSingleStep(10);
+#else
+    verticalScrollBar()->setSingleStep(30);
+#endif
 
 #ifdef WIZNOTE_CUSTOM_SCROLLBAR
     setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);

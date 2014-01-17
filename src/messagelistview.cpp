@@ -101,16 +101,20 @@ MessageListView::MessageListView(QWidget *parent) : QListWidget(parent)
     setPalette(pal);
 
     setCursor(QCursor(Qt::ArrowCursor));
-    // use custom scrollbar
-#ifdef Q_OS_LINUX
-    setVerticalScrollMode(QAbstractItemView::ScrollPerItem);
-#else
+
     setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
+#ifdef Q_OS_MAC
+    verticalScrollBar()->setSingleStep(10);
+#else
+    verticalScrollBar()->setSingleStep(30);
 #endif
+
+#ifdef WIZNOTE_CUSTOM_SCROLLBAR
     setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     m_vScroll = new CWizScrollBar(this);
     m_vScroll->syncWith(verticalScrollBar());
+#endif
 
     m_menu = new QMenu(this);
     m_menu->addAction(WIZACTION_LIST_MESSAGE_MARK_READ, this,
@@ -135,9 +139,11 @@ MessageListView::MessageListView(QWidget *parent) : QListWidget(parent)
 
 void MessageListView::resizeEvent(QResizeEvent* event)
 {
+#ifdef WIZNOTE_CUSTOM_SCROLLBAR
     // reset scrollbar position
     m_vScroll->resize(m_vScroll->sizeHint().width(), event->size().height());
     m_vScroll->move(event->size().width() - m_vScroll->sizeHint().width(), 0);
+#endif
 
     QListWidget::resizeEvent(event);
 }
