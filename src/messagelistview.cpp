@@ -87,7 +87,9 @@ private:
 #define WIZACTION_LIST_MESSAGE_MARK_READ    QObject::tr("Mark as read")
 #define WIZACTION_LIST_MESSAGE_DELETE       QObject::tr("Delete Message(s)")
 
-MessageListView::MessageListView(QWidget *parent) : QListWidget(parent)
+MessageListView::MessageListView(QWidget *parent)
+    : QListWidget(parent)
+    , m_pCurrentItem(NULL)
 {
     setFrameStyle(QFrame::NoFrame);
     setAttribute(Qt::WA_MacShowFocusRect, false);
@@ -111,11 +113,19 @@ MessageListView::MessageListView(QWidget *parent) : QListWidget(parent)
     m_vScroll = new CWizScrollBar(this);
     m_vScroll->syncWith(verticalScrollBar());
 
+    // init
+    m_timerRead.setInterval(100);
+    m_timerRead.setSingleShot(true);
+    connect(&m_timerRead, SIGNAL(timeout()), SLOT(onReadTimeout()));
+
     m_menu = new QMenu(this);
     m_menu->addAction(WIZACTION_LIST_MESSAGE_MARK_READ, this,
                       SLOT(on_action_message_mark_read()));
     m_menu->addAction(WIZACTION_LIST_MESSAGE_DELETE, this,
                       SLOT(on_action_message_delete()));
+
+    connect(this, SIGNAL(currentItemChanged(QListWidgetItem*,QListWidgetItem*)),
+            SLOT(onCurrentItemChanged(QListWidgetItem*,QListWidgetItem*)));
 
     connect(&CWizDatabaseManager::instance()->db(),
             SIGNAL(messageCreated(const WIZMESSAGEDATA&)),
@@ -229,7 +239,13 @@ const WIZMESSAGEDATA& MessageListView::messageFromIndex(const QModelIndex& index
     return pItem->data();
 }
 
+void MessageListView::drawItem(QPainter* p, const QStyleOptionViewItemV4* vopt) const
+{
+    Utils::StyleHelper::drawListViewItemSeperator(p, vopt->rect);
+    Utils::StyleHelper::drawListViewItemBackground(p, vopt->rect, hasFocus(), vopt->state & QStyle::State_Selected);
 
+    messageItem(vopt->index)->paint(p, vopt);
+}
 
 void MessageListView::onAvatarLoaded(const QString& strUserId)
 {
@@ -241,12 +257,21 @@ void MessageListView::onAvatarLoaded(const QString& strUserId)
     }
 }
 
-void MessageListView::drawItem(QPainter* p, const QStyleOptionViewItemV4* vopt) const
+void MessageListView::onCurrentItemChanged(QListWidgetItem* current,QListWidgetItem* previous)
 {
-    Utils::StyleHelper::drawListViewItemSeperator(p, vopt->rect);
-    Utils::StyleHelper::drawListViewItemBackground(p, vopt->rect, hasFocus(), vopt->state & QStyle::State_Selected);
+    if (current) {
+        m_pCurrentItem = current;
+        m_timerRead.start();
+    }
+}
 
-    messageItem(vopt->index)->paint(p, vopt);
+void MessageListView::onReadTimeout()
+{
+    if (m_pCurrentItem) {
+        MessageListViewItem* pItem = dynamic_cast<MessageListViewItem*>(m_pCurrentItem);
+        if (pItem && !pItem->data().nReadStatus)
+            CWizDatabaseManager::instance()->db().setMessageReadStatus(pItem->data(), 1);
+    }
 }
 
 void MessageListView::on_action_message_mark_read()
