@@ -1,5 +1,8 @@
 #include "wizUserInfoWidget.h"
 
+
+#ifndef Q_OS_MAC
+
 #include <QMenu>
 #include <QFileDialog>
 #include <QMessageBox>
@@ -300,3 +303,5 @@ void CWizUserInfoWidget::on_userInfo_changed()
     AvatarHost::load(m_db.GetUserId(), true);
     resetUserInfo();
 }
+
+#endif //#ifndef Q_OS_MAC

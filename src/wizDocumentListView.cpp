@@ -64,6 +64,8 @@ CWizDocumentListView::CWizDocumentListView(CWizExplorerApp& app, QWidget *parent
     pal.setColor(QPalette::Base, WizGetDocumentsBackroundColor(strSkinName));
     setPalette(pal);
 
+    setCursor(QCursor(Qt::ArrowCursor));
+    //
     connect(&m_dbMgr, SIGNAL(tagCreated(const WIZTAGDATA&)), \
             SLOT(on_tag_created(const WIZTAGDATA&)));
 

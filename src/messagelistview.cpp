@@ -100,6 +100,7 @@ MessageListView::MessageListView(QWidget *parent) : QListWidget(parent)
     pal.setColor(QPalette::Base, WizGetDocumentsBackroundColor(strSkinName));
     setPalette(pal);
 
+    setCursor(QCursor(Qt::ArrowCursor));
     // use custom scrollbar
 #ifdef Q_OS_LINUX
     setVerticalScrollMode(QAbstractItemView::ScrollPerItem);

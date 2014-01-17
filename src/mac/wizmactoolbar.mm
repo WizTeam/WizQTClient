@@ -158,7 +158,7 @@ void CWizMacToolBar::addSearch(const QString& label, const QString& tooltip)
     [d->delegate addSearch:label tooltip:tooltip];
 }
 
-void CWizMacToolBar::addWidget(QWidget* widget, const QString& label, const QString& tooltip)
+void CWizMacToolBar::addWidget(QMacCocoaViewContainer* widget, const QString& label, const QString& tooltip)
 {
     [d->delegate addWidget:widget label:label tooltip:tooltip];
 }

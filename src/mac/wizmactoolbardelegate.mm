@@ -1,6 +1,6 @@
 #include <QDebug>
 #include <QPixmap>
-#include <QMacNativeWidget>
+#include <QMacCocoaViewContainer>
 
 #include "wizmactoolbardelegate.h"
 #include "wizmachelper_mm.h"
@@ -155,7 +155,7 @@ public:
 class CWizMacToolBarWidgetItem : public CWizMacToolBarItem
 {
 public:
-    CWizMacToolBarWidgetItem(CWizMacToolBarDelegate* delegate, QWidget* widget, const QString& label, const QString& tooltip)
+    CWizMacToolBarWidgetItem(CWizMacToolBarDelegate* delegate, QMacCocoaViewContainer* widget, const QString& label, const QString& tooltip)
         : m_delegate(delegate)
         , m_id(WizGenGUID())
         , m_widget(widget)
@@ -164,7 +164,7 @@ public:
     {
     }
 
-    QWidget* widget() const { return m_widget; }
+    QMacCocoaViewContainer* widget() const { return m_widget; }
 
     virtual NSString* itemIdentifier() const { return m_id; }
 
@@ -178,7 +178,7 @@ public:
         [pItem setPaletteLabel: labelString];
         [pItem setToolTip: tooltipString];
 
-        NSView *nsview = (NSView *) m_widget->winId();
+        NSView *nsview = m_widget->cocoaView();
         [pItem setView: nsview];
         [pItem setMinSize:NSMakeSize(m_widget->sizeHint().width(), m_widget->sizeHint().height())];
         [pItem setMaxSize:NSMakeSize(m_widget->sizeHint().width(), m_widget->sizeHint().height())];
@@ -189,7 +189,7 @@ public:
 private:
     CWizMacToolBarDelegate* m_delegate;
     NSString* m_id;
-    QWidget* m_widget;
+    QMacCocoaViewContainer* m_widget;
     QString m_strLabel;
     QString m_strTooltip;
 };
@@ -425,7 +425,7 @@ NSMutableArray *itemIdentifiers(const QList<CWizMacToolBarItem *> *items, bool c
     items->append(pItem);
 }
 
-- (void)addWidget:(QWidget *)widget label:(const QString&)label tooltip:(const QString&)tooltip
+- (void)addWidget:(QMacCocoaViewContainer *)widget label:(const QString&)label tooltip:(const QString&)tooltip
 {
     items->append(new CWizMacToolBarWidgetItem(self, widget, label, tooltip));
 }

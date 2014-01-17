@@ -11,6 +11,7 @@ class CWizDatabase;
 class CWizExplorerApp;
 class CWizWebSettingsDialog;
 
+#ifndef Q_OS_MAC
 
 class CWizUserInfoWidget : public QToolButton
 {
@@ -54,4 +55,5 @@ private Q_SLOTS:
     void on_action_changeAvatar_uploaded(bool ok);
 };
 
+#endif //#ifndef Q_OS_MAC
 #endif // WIZUSERINFOWIDGET_H

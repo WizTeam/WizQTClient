@@ -49,7 +49,12 @@
 #include "messagelistview.h"
 
 #include "wizPopupButton.h"
+
+#ifdef Q_OS_MAC
+#include "mac/wizUserInfoWidget_mm.h"
+#else
 #include "widgets/wizUserInfoWidget.h"
+#endif
 #include "sync/apientry.h"
 #include "sync/wizkmsync.h"
 
@@ -507,10 +512,6 @@ void MainWindow::initToolBar()
     m_toolBar->showInWindow(this);
 
     CWizUserInfoWidget* info = new CWizUserInfoWidget(*this, m_toolBar);
-    //QMacNativeWidget* nwd = new QMacNativeWidget();
-    //QHBoxLayout* layout = new QHBoxLayout();
-    //nwd->setLayout(layout);
-    //layout->addWidget(info);
     m_toolBar->addWidget(info, "", "");
 
     m_toolBar->addStandardItem(CWizMacToolBar::Space);

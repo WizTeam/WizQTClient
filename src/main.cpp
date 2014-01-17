@@ -96,6 +96,7 @@ int main(int argc, char *argv[])
     //a.setAttribute(Qt::AA_NativeWindows);
 #endif
 
+
     // setup settings
     QSettings::setDefaultFormat(QSettings::IniFormat);
     QSettings* globalSettings = new QSettings(Utils::PathResolve::globalSettingsFilePath(), QSettings::IniFormat);
@@ -204,6 +205,8 @@ int main(int argc, char *argv[])
 
     // FIXME: move to core plugin initialize
     Core::ThumbCache cache;
+
+
 
     MainWindow w(dbMgr);
 

@@ -58,7 +58,7 @@ protected:
     virtual void contextMenuEvent(QContextMenuEvent* e);
 
     virtual QModelIndex moveCursor(CursorAction cursorAction, Qt::KeyboardModifiers modifiers);
-
+    //
 protected:
     CWizExplorerApp& m_app;
     CWizDatabaseManager& m_dbMgr;

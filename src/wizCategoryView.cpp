@@ -89,6 +89,8 @@ CWizCategoryBaseView::CWizCategoryBaseView(CWizExplorerApp& app, QWidget* parent
     QPalette pal = palette();
     pal.setBrush(QPalette::Base, colorBg);
     setPalette(pal);
+    //
+    setCursor(QCursor(Qt::ArrowCursor));
 
     // signals from database
     connect(&m_dbMgr, SIGNAL(documentCreated(const WIZDOCUMENTDATA&)),

@@ -9,6 +9,7 @@ set(wiznote_SOURCES_MAC
     mac/wizmactoolbar.mm
     mac/wizmactoolbardelegate.mm
     mac/wizmacactionhelper.cpp
+    mac/wizUserInfoWidget.mm
 )
 
 set(wiznote_HEADERS_MAC
@@ -18,6 +19,7 @@ set(wiznote_HEADERS_MAC
     mac/wizmactoolbar.h
     mac/wizmactoolbardelegate.h
     mac/wizmacactionhelper.h
+    mac/wizUserInfoWidget_mm.h
 )
 
 set(wiznote_SOURCES

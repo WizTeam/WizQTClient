@@ -13,7 +13,7 @@
 #include "wizmactoolbar.h"
 
 class CWizMacToolBarItem;
-class QWidget;
+class QMacCocoaViewContainer;
 
 
 
@@ -43,7 +43,7 @@ class QWidget;
 - (void)addAction:(QAction *)action;
 - (void)addStandardItem:(CWizMacToolBar::StandardItem)standardItem;
 - (void)addSearch:(const QString&)label tooltip:(const QString&)tooltip;
-- (void)addWidget:(QWidget *)widget label:(const QString&)label tooltip:(const QString&)tooltip;
+- (void)addWidget:(QMacCocoaViewContainer *)widget label:(const QString&)label tooltip:(const QString&)tooltip;
 
 - (CWizMacToolBarItem*) itemFromItemIdentifier: (NSString*)itemIdentifier;
 - (NSToolbarItem*) itemIdentifierToItem: (NSString*)itemIdentifier;
