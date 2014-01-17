@@ -5,11 +5,13 @@
 #include <QResizeEvent>
 #include <QPainter>
 #include <QMenu>
+#include <QList>
 #include <QDebug>
 
 #include "utils/stylehelper.h"
 #include "utils/misc.h"
 #include "sync/avatar.h"
+#include "sync/asyncapi.h"
 
 #include "share/wizDatabaseManager.h"
 #include "share/wizDatabase.h"
@@ -87,7 +89,10 @@ private:
 #define WIZACTION_LIST_MESSAGE_MARK_READ    QObject::tr("Mark as read")
 #define WIZACTION_LIST_MESSAGE_DELETE       QObject::tr("Delete Message(s)")
 
-MessageListView::MessageListView(QWidget *parent) : QListWidget(parent)
+MessageListView::MessageListView(QWidget *parent)
+    : QListWidget(parent)
+    , m_pCurrentItem(NULL)
+    , m_api(NULL)
 {
     setFrameStyle(QFrame::NoFrame);
     setAttribute(Qt::WA_MacShowFocusRect, false);
@@ -116,11 +121,23 @@ MessageListView::MessageListView(QWidget *parent) : QListWidget(parent)
     m_vScroll->syncWith(verticalScrollBar());
 #endif
 
+    // init
+    m_timerRead.setInterval(100);
+    m_timerRead.setSingleShot(true);
+    connect(&m_timerRead, SIGNAL(timeout()), SLOT(onReadTimeout()));
+
+    m_timerTriggerSync.setInterval(5000);
+    m_timerTriggerSync.setSingleShot(true);
+    connect(&m_timerTriggerSync, SIGNAL(timeout()), SLOT(onSyncTimeout()));
+
     m_menu = new QMenu(this);
     m_menu->addAction(WIZACTION_LIST_MESSAGE_MARK_READ, this,
                       SLOT(on_action_message_mark_read()));
     m_menu->addAction(WIZACTION_LIST_MESSAGE_DELETE, this,
                       SLOT(on_action_message_delete()));
+
+    connect(this, SIGNAL(currentItemChanged(QListWidgetItem*,QListWidgetItem*)),
+            SLOT(onCurrentItemChanged(QListWidgetItem*,QListWidgetItem*)));
 
     connect(&CWizDatabaseManager::instance()->db(),
             SIGNAL(messageCreated(const WIZMESSAGEDATA&)),
@@ -236,7 +253,13 @@ const WIZMESSAGEDATA& MessageListView::messageFromIndex(const QModelIndex& index
     return pItem->data();
 }
 
+void MessageListView::drawItem(QPainter* p, const QStyleOptionViewItemV4* vopt) const
+{
+    Utils::StyleHelper::drawListViewItemSeperator(p, vopt->rect);
+    Utils::StyleHelper::drawListViewItemBackground(p, vopt->rect, hasFocus(), vopt->state & QStyle::State_Selected);
 
+    messageItem(vopt->index)->paint(p, vopt);
+}
 
 void MessageListView::onAvatarLoaded(const QString& strUserId)
 {
@@ -248,12 +271,51 @@ void MessageListView::onAvatarLoaded(const QString& strUserId)
     }
 }
 
-void MessageListView::drawItem(QPainter* p, const QStyleOptionViewItemV4* vopt) const
+void MessageListView::onCurrentItemChanged(QListWidgetItem* current,QListWidgetItem* previous)
 {
-    Utils::StyleHelper::drawListViewItemSeperator(p, vopt->rect);
-    Utils::StyleHelper::drawListViewItemBackground(p, vopt->rect, hasFocus(), vopt->state & QStyle::State_Selected);
+    Q_UNUSED(previous);
 
-    messageItem(vopt->index)->paint(p, vopt);
+    if (current) {
+        MessageListViewItem* pItem = dynamic_cast<MessageListViewItem*>(current);
+        if (pItem && !pItem->data().nReadStatus) {
+            m_pCurrentItem = pItem;
+            m_timerRead.start();
+        }
+    }
+}
+
+void MessageListView::onReadTimeout()
+{
+    if (m_pCurrentItem && !m_pCurrentItem->data().nReadStatus) {
+        CWizDatabaseManager::instance()->db().setMessageReadStatus(m_pCurrentItem->data(), 1);
+        m_lsIds.push_back(m_pCurrentItem->data().nId);
+        m_timerTriggerSync.start();
+    }
+}
+
+void MessageListView::onSyncTimeout()
+{
+    if (!m_api) {
+        m_api = new WizService::AsyncApi(this);
+    }
+
+    QString ids;
+    for (int i = 0; i < m_lsIds.size(); i++) {
+        ids += QString::number(m_lsIds.at(i));
+
+        if (i != m_lsIds.size() - 1) {
+            ids += ",";
+        }
+    }
+
+    if (ids.isEmpty())
+        return;
+
+    qDebug() << "upload messages read status:" << ids;
+
+    m_api->setMessageStatus(ids, 1);
+
+    m_lsIds.clear();
 }
 
 void MessageListView::on_action_message_mark_read()
