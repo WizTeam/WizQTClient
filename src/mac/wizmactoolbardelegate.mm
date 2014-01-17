@@ -8,10 +8,26 @@
 #include "wizSearchWidget_mm.h"
 
 
-void CWizMacActionHelper::on_action_changed()
-{
-    m_item->onActionChanged();
-}
+//@interface CWizToolBarActionItemView: NSView {
+//NSImage* m_image;
+//}
+//- (void)setImage:(NSImage*)image;
+//@end
+//
+//@implementation CWizToolBarActionItemView
+//- (void)drawRect:(NSRect)dirtyRect
+//{
+//    CGRect rect = [self frame];
+//    //[[NSColor windowBackgroundColor] set];
+//    //[NSBezierPath fillRect:rect];
+//    [m_image drawRepresentation:[m_image bestRepresentationForRect:rect context:nil hints:nil] inRect:rect];
+//}
+//- (void)setImage:(NSImage*)image
+//{
+//    m_image = image;
+//}
+//@end
+
 
 
 class CWizMacToolBarActionItem : public CWizMacToolBarItem
@@ -24,8 +40,7 @@ public:
         , m_item(nil)
     {
         m_nsImages = [[NSMutableDictionary alloc] init];
-        //
-        new CWizMacActionHelper(this, action, this);
+        connect(action, SIGNAL(changed()), SLOT(on_action_changed()));
     }
     virtual ~CWizMacToolBarActionItem()
     {
@@ -38,6 +53,8 @@ private:
     NSString* m_id;
     NSToolbarItem* m_item;
     NSMutableDictionary* m_nsImages;
+    //CWizToolBarActionItemView* m_view;
+
 public:
     virtual NSString* itemIdentifier() const
     {
@@ -53,11 +70,17 @@ public:
         [item setPaletteLabel:[item label]];
         [item setToolTip: WizToNSString(m_action->toolTip())];
 
+        //m_view = [[CWizToolBarActionItemView alloc] init];
+        //[m_view setAutoresizesSubviews: YES];
+        //[m_view setAutoresizingMask: NSViewHeightSizable | NSViewWidthSizable];
+        //[item setView:m_view];
+
         // a reference to and not a copy of the pixmap data.
         QIcon icon = m_action->icon();
         if (!icon.isNull())
         {
-            NSImage* image = WizToNSImage(icon);
+            NSImage* image = WizToNSImage(icon, QSize(24, 24));
+            //[m_view setImage:image];
             [item setImage:image];
         }
 
@@ -88,6 +111,7 @@ public:
             if (img)
             {
                 [m_item setImage:img];
+                //[m_view setImage:img];
             }
         }
     }
@@ -105,11 +129,17 @@ public:
             }
         }
         //
-        NSImage* img = WizToNSImage(icon);
+        NSImage* img = WizToNSImage(icon, QSize(24, 24));
         //
         [m_nsImages setObject:img forKey:key];
         //
         return img;
+    }
+
+private Q_SLOTS:
+    void on_action_changed()
+    {
+        onActionChanged();
     }
 };
 

@@ -1,8 +1,7 @@
 #include "wizmacactionhelper.h"
 #include <QAction>
 
-
-#ifdef Q_OS_MAC
+#if 0
 CWizMacActionHelper::CWizMacActionHelper(CWizMacToolBarItem* item, QAction* action, QObject* parent)
     : QObject(parent)
     , m_item(item)

@@ -3,6 +3,7 @@
 
 #include <QLocale>
 #include <QMainWindow>
+#include <QSize>
 #include <QDebug>
 #include <qmacfunctions.h>
 
@@ -115,28 +116,31 @@ NSArray* WizToNSArray(const QList<QString> &stringList)
 NSImage* WizToNSImage(const QPixmap &pixmap)
 {
     CGImageRef iref = QtMac::toCGImageRef(pixmap);
-    NSBitmapImageRep *bitmapRep = [[NSBitmapImageRep alloc] initWithCGImage:iref];
-    NSImage *image = [[NSImage alloc] init];
-    [image addRepresentation:bitmapRep];
-    [bitmapRep release];
+    NSSize sz = NSMakeSize(pixmap.width(), pixmap.height());
+    NSImage *image = [[NSImage alloc] initWithCGImage:iref size:sz];
     return image;
 }
 
-NSImage* WizToNSImage(const QIcon &icon)
+NSImage* WizToNSImage(const QIcon &icon, const QSize& size)
 {
-    QList<QSize> sizes = icon.availableSizes();
-    if (sizes.empty())
-        return nil;
-    //
-    QSize sz = sizes.at(0);
-    for (int i = 1; i < sizes.size(); i++)
-    {
-        if (sizes.at(i).width() > sz.width())
+    QSize sz = size;
+    if (sz.isNull()) {
+        QList<QSize> sizes = icon.availableSizes();
+        if (sizes.empty())
+            return nil;
+
+        QSize sz1 = sizes.at(0);
+        for (int i = 1; i < sizes.size(); i++)
         {
-            sz = sizes.at(i);
+            if (sizes.at(i).width() > sz1.width())
+            {
+                sz1 = sizes.at(i);
+            }
         }
+
+        sz1 = sz;
     }
-    //
+
     QPixmap pixmap = icon.pixmap(sz);
     return WizToNSImage(pixmap);
 }
