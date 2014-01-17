@@ -11,6 +11,8 @@ struct WIZMESSAGEDATA;
 typedef std::deque<WIZMESSAGEDATA> CWizMessageDataArray;
 
 namespace WizService {
+class AsyncApi;
+
 namespace Internal {
 
 class MessageListViewItem;
@@ -43,8 +45,11 @@ private:
     CWizScrollBar* m_vScroll;
     QMenu* m_menu;
 
-    QListWidgetItem* m_pCurrentItem;
+    MessageListViewItem* m_pCurrentItem;
     QTimer m_timerRead;
+    QList<qint64> m_lsIds;
+    QTimer m_timerTriggerSync;
+    WizService::AsyncApi* m_api;
 
 Q_SIGNALS:
     void sizeChanged(int nCount);
@@ -52,6 +57,7 @@ Q_SIGNALS:
 private Q_SLOTS:
     void onCurrentItemChanged(QListWidgetItem* current, QListWidgetItem* previous);
     void onReadTimeout();
+    void onSyncTimeout();
 
     void onAvatarLoaded(const QString& strUserId);
 

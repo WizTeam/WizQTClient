@@ -24,6 +24,7 @@ public:
     explicit TokenPrivate(Token* token);
     ~TokenPrivate();
 
+    QString token();
     void requestToken();
     void setUserId(const QString& strUserId);
     void setPasswd(const QString& strPasswd);

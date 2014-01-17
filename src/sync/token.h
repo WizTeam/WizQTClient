@@ -26,7 +26,8 @@ public:
 
     static const WIZUSERINFO& info();
 
-    static void requestToken();
+    static QString token(); // sync
+    static void requestToken(); // async
     static void setUserId(const QString& strUserId);
     static void setPasswd(const QString& strPasswd);
 
