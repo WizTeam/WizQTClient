@@ -38,25 +38,20 @@ class QWidget;
 - (NSArray *)toolbarSelectableItemIdentifiers:(NSToolbar *)Toolbar;
 
 - (BOOL) control:(NSControl *)control textShouldEndEditing:(NSText *)fieldEditor;
-//- (BOOL) textShouldEndEditing:(NSText *) textObject;
 - (void) searchUsingToolbarSearchField:(id) sender;
-//- (void)mouseDown:(NSEvent *) event;
 
-- (void)addActionGroup:(QActionGroup *)actionGroup;
 - (void)addAction:(QAction *)action;
 - (void)addStandardItem:(CWizMacToolBar::StandardItem)standardItem;
-- (CWizSearchWidget*)addSearch:(const QString&)label tooltip:(const QString&)tooltip;
+- (void)addSearch:(const QString&)label tooltip:(const QString&)tooltip;
 - (void)addWidget:(QWidget *)widget label:(const QString&)label tooltip:(const QString&)tooltip;
 
 - (CWizMacToolBarItem*) itemFromItemIdentifier: (NSString*)itemIdentifier;
 - (NSToolbarItem*) itemIdentifierToItem: (NSString*)itemIdentifier;
 
-- (CWizMacToolBarItem*) itemFromItemIdentifierWithChildren: (NSString*)itemIdentifier;
-- (CWizMacToolBarItem*) findItemGroup: (NSString*)itemIdentifier;
-
-
 - (void) viewSizeChanged:(NSNotification*)notification;
 - (IBAction)itemClicked:(id)sender;
+
+- (CWizSearchWidget*) getSearchWidget;
 @end
 
 

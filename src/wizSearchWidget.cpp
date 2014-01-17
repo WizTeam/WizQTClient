@@ -60,29 +60,3 @@ void CWizSearchWidget::on_search_textChanged(const QString& strText)
 
 #endif // Q_OS_MAC
 
-
-CWizSearchBox::CWizSearchBox(CWizExplorerApp& app, QWidget *parent)
-    : QWidget(parent)
-{
-    s = new CWizSearchWidget(this);
-    connect(s, SIGNAL(doSearch(const QString&)), SIGNAL(doSearch(const QString&)));
-}
-
-QSize CWizSearchBox::sizeHint() const
-{
-#ifdef Q_OS_MAC
-    return s->sizeHint() + QSize(6, 2);
-#else
-    return s->sizeHint() + QSize(8, 4);
-#endif
-}
-
-void CWizSearchBox::clear()
-{
-    s->clear();
-}
-
-void CWizSearchBox::focus()
-{
-    s->focus();
-}

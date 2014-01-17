@@ -143,11 +143,6 @@ void CWizMacToolBar::showInWindowImpl(QWidget *window)
     [d->toolbar setVisible: YES];
 }
 
-void CWizMacToolBar::addActionGroup(QActionGroup* actionGroup)
-{
-    [d->delegate addActionGroup:actionGroup];
-}
-
 void CWizMacToolBar::addAction(QAction* action)
 {
     [d->delegate addAction:action];
@@ -158,9 +153,9 @@ void CWizMacToolBar::addStandardItem(StandardItem standardItem)
     [d->delegate addStandardItem:standardItem];
 }
 
-CWizSearchWidget* CWizMacToolBar::addSearch(const QString& label, const QString& tooltip)
+void CWizMacToolBar::addSearch(const QString& label, const QString& tooltip)
 {
-    return [d->delegate addSearch:label tooltip:tooltip];
+    [d->delegate addSearch:label tooltip:tooltip];
 }
 
 void CWizMacToolBar::addWidget(QWidget* widget, const QString& label, const QString& tooltip)
@@ -173,3 +168,7 @@ void CWizMacToolBar::onSearchEndEditing(const QString& str)
     emit doSearch(str);
 }
 
+CWizSearchWidget* CWizMacToolBar::getSearchWidget()
+{
+    return [d->delegate getSearchWidget];
+}

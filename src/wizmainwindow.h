@@ -31,7 +31,6 @@ class CWizAnimateAction;
 class CWizOptionsWidget;
 class CWizStatusBar;
 
-class CWizSearchBox;
 class CWizSearchWidget;
 class CWizSearcher;
 class CWizSearchIndexer;
@@ -138,7 +137,6 @@ private:
     QString m_strSearchKeywords;
 
     CWizSearchIndexer* m_searchIndexer;
-    //QPointer<CWizSearchBox> m_searchBox;
     QPointer<CWizSearchWidget> m_search;
 
     bool m_bRestart;

@@ -41,25 +41,6 @@ Q_SIGNALS:
 
 #endif // Q_OS_MAC
 
-class CWizExplorerApp;
-
-class CWizSearchBox : public QWidget
-{
-    Q_OBJECT
-
-private:
-    CWizSearchWidget* s;
-
-public:
-    explicit CWizSearchBox(CWizExplorerApp& app, QWidget *parent = 0);
-    virtual QSize sizeHint() const;
-
-    void clear();
-    void focus();
-
-Q_SIGNALS:
-    void doSearch(const QString& keywords);
-};
 
 
 #endif // WIZSEARCHWIDGET_H

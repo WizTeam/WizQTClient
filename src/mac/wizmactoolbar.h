@@ -64,13 +64,14 @@ public:
     void showInWindow(QWidget *window);
 
     // Add actions to the Toolbar
-    void addActionGroup(QActionGroup* actionGroup);
     void addAction(QAction* action);
     void addStandardItem(StandardItem standardItem);
-    CWizSearchWidget* addSearch(const QString& label, const QString& tooltip);
+    void addSearch(const QString& label, const QString& tooltip);
     void addWidget(QWidget* widget, const QString& label, const QString& tooltip);
 
     void onSearchEndEditing(const QString& str);
+    //
+    CWizSearchWidget* getSearchWidget();
 
 private:
     void showInWindowImpl(QWidget *window);

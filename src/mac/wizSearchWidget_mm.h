@@ -3,8 +3,6 @@
 
 #include <QMacCocoaViewContainer>
 
-class CWizExplorerApp;
-
 class CWizSearchWidget : public QMacCocoaViewContainer
 {
     Q_OBJECT
