@@ -109,7 +109,7 @@ MessageListView::MessageListView(QWidget *parent)
 
     setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
 #ifdef Q_OS_MAC
-    verticalScrollBar()->setSingleStep(10);
+    verticalScrollBar()->setSingleStep(15);
 #else
     verticalScrollBar()->setSingleStep(30);
 #endif
