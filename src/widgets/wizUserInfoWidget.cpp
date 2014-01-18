@@ -74,7 +74,7 @@ void CWizUserInfoWidget::resetUserInfo()
         setText(strName);
     }
     //
-    m_textWidth = fontMetrics().width(text());
+    //m_textWidth = fontMetrics().width(text());
 
     QString iconName;
     if (info.strUserType == "vip") {

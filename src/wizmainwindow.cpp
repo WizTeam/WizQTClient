@@ -520,7 +520,7 @@ void MainWindow::initToolBar()
 #else
     addToolBar(m_toolBar);
 
-    m_toolBar->setIconSize(QSize(24, 24));
+    m_toolBar->setIconSize(QSize(32, 32));
     m_toolBar->setContextMenuPolicy(Qt::PreventContextMenu);
     m_toolBar->setMovable(false);
     m_toolBar->setToolButtonStyle(Qt::ToolButtonIconOnly);

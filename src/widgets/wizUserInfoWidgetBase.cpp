@@ -48,15 +48,15 @@ void CWizUserInfoWidgetBase::paintEvent(QPaintEvent *event)
     QRect rectVip = rectIcon;
     rectVip.setLeft(rectVip.right() + nMargin);
     rectVip.setRight(rectVip.left() + fontMetrics().width(opt.text));
-    rectVip.setBottom(rectVip.top() + rectVip.height()/2);
-    if (!m_iconVipIndicator.isNull()) {
-        m_iconVipIndicator.paint(&p, rectVip, Qt::AlignLeft|Qt::AlignTop);
-    }
+    //rectVip.setBottom(rectVip.top() + rectVip.height()/2);
+    //if (!m_iconVipIndicator.isNull()) {
+    //    m_iconVipIndicator.paint(&p, rectVip, Qt::AlignLeft|Qt::AlignTop);
+    //}
 
     // draw display name
     QRect rectText = rectVip;
-    rectText.setBottom(rectText.bottom() + rectVip.height());
-    rectText.setTop(rectText.bottom() - rectVip.height());
+    //rectText.setBottom(rectText.bottom() + rectVip.height());
+    //rectText.setTop(rectText.bottom() - rectVip.height());
     if (!opt.text.isEmpty()) {
         if (opt.state & QStyle::State_MouseOver) {
             QFont font = p.font();
@@ -72,8 +72,9 @@ void CWizUserInfoWidgetBase::paintEvent(QPaintEvent *event)
     QRect rectArrow = rectText;
     rectArrow.setLeft(rectArrow.right() + nMargin);
     rectArrow.setRight(rectArrow.left() + nArrawWidth);
-    if (!m_iconArraw.isNull()) {
-        m_iconArraw.paint(&p, rectArrow, Qt::AlignVCenter, QIcon::Normal);
+    QIcon arrow = getArrow();
+    if (!arrow.isNull()) {
+        arrow.paint(&p, rectArrow, Qt::AlignVCenter, QIcon::Normal);
     }
 }
 
@@ -95,7 +96,7 @@ bool CWizUserInfoWidgetBase::hitButton(const QPoint& pos) const
 
 int CWizUserInfoWidgetBase::textWidth() const
 {
-    return fontMetrics().size(text()).width;
+    return fontMetrics().width(text());
 }
 void CWizUserInfoWidgetBase::updateUI()
 {
