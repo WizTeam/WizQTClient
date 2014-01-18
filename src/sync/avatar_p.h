@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QStringList>
 #include <QUrl>
+#include <QSize>
 
 class QNetworkAccessManager;
 
@@ -47,13 +48,13 @@ class AvatarHostPrivate: public QObject
 
 public:
     explicit AvatarHostPrivate(AvatarHost* avatarHost);
-    void load(const QString& strUserGUID, bool bForce);
-    bool avatar(const QString& strUserId, QPixmap* pixmap);
+    void load(const QString& strUserGUID, bool bForce, const QSize& sz);
+    bool avatar(const QString& strUserId, QPixmap* pixmap, const QSize& sz);
     QPixmap orgAvatar(const QString& strUserId);
 
     bool isLoaded(const QString& strUserId);
-    QString keyFromGuid(const QString& strUserGUID) const;
-    QString defaultKey() const;
+    QString keyFromGuid(const QString& strUserGUID, const QSize& sz) const;
+    QString defaultKey(const QSize& sz) const;
 
 private:
     QThread* m_thread;
@@ -63,9 +64,9 @@ private:
     QString m_strUserCurrent;
 
     bool isNeedUpdate(const QString& strUserGUID);
-    void loadCache(const QString& strUserGUID);
-    void loadCacheDefault();
-    void loadCacheFromFile(const QString &key, const QString& strFilePath);
+    void loadCache(const QString& strUserGUID, const QSize& sz);
+    void loadCacheDefault(const QSize& sz);
+    void loadCacheFromFile(const QString &key, const QString& strFilePath, const QSize& sz);
     //
     QPixmap loadOrg(const QString& strUserGUID, bool bForce);
     QPixmap loadOrg(const QString& strUserGUID);

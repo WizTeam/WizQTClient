@@ -12,6 +12,7 @@
 #include <QPixmap>
 #include <QPixmapCache>
 #include <QDateTime>
+#include <QSize>
 
 #include "apientry.h"
 #include "../utils/pathresolve.h"
@@ -115,14 +116,14 @@ AvatarHostPrivate::AvatarHostPrivate(AvatarHost* avatarHost)
 
     m_downloader->moveToThread(m_thread);
 
-    loadCacheDefault();
+    loadCacheDefault(QSize());
 }
 
 bool AvatarHostPrivate::isLoaded(const QString& strUserId)
 {
     QPixmap pm;
-    bool ret = QPixmapCache::find(keyFromGuid(strUserId), pm);
-    qDebug() << "[AvatarHost]search: " << keyFromGuid(strUserId) << "result:" << ret;
+    bool ret = QPixmapCache::find(keyFromGuid(strUserId, QSize()), pm);
+    qDebug() << "[AvatarHost]search: " << keyFromGuid(strUserId, QSize()) << "result:" << ret;
     return ret;
 }
 
@@ -144,11 +145,11 @@ bool AvatarHostPrivate::isNeedUpdate(const QString& strUserGUID)
     return false;
 }
 
-void AvatarHostPrivate::loadCache(const QString& strUserGUID)
+void AvatarHostPrivate::loadCache(const QString& strUserGUID, const QSize &sz)
 {
     QString strFilePath = Utils::PathResolve::avatarPath() + strUserGUID + ".png";
     //qDebug() << "[AvatarHost]load avatar: " << strFilePath;
-    loadCacheFromFile(keyFromGuid(strUserGUID), strFilePath);
+    loadCacheFromFile(keyFromGuid(strUserGUID, sz), strFilePath, sz);
 }
 
 
@@ -159,13 +160,14 @@ QPixmap AvatarHostPrivate::loadOrg(const QString& strUserGUID)
     return QPixmap(strFilePath);
 }
 
-void AvatarHostPrivate::loadCacheDefault()
+void AvatarHostPrivate::loadCacheDefault(const QSize& sz)
 {
-    loadCacheFromFile(defaultKey(), Utils::PathResolve::themePath("default") + "avatar_default.png");
+    loadCacheFromFile(defaultKey(sz), Utils::PathResolve::themePath("default") + "avatar_default.png", sz);
 }
 
-void AvatarHostPrivate::loadCacheFromFile(const QString& key, const QString& strFilePath)
+void AvatarHostPrivate::loadCacheFromFile(const QString& key, const QString& strFilePath, const QSize& sz)
 {
+    qDebug() << key;
     QPixmap pixmap(strFilePath);
 
     if(pixmap.isNull()) {
@@ -173,8 +175,8 @@ void AvatarHostPrivate::loadCacheFromFile(const QString& key, const QString& str
         return;
     }
 
-    pixmap = pixmap.scaled(Utils::StyleHelper::avatarSize(),
-                           Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+    QSize asize = sz.isValid() ? sz : Utils::StyleHelper::avatarSize();
+    pixmap = pixmap.scaled(asize, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
 
     Q_ASSERT(!pixmap.isNull());
 
@@ -186,25 +188,31 @@ void AvatarHostPrivate::loadCacheFromFile(const QString& key, const QString& str
     //qDebug() << "[AvatarHost]loaded: " << key;
 }
 
-QString AvatarHostPrivate::keyFromGuid(const QString& strUserGUID) const
+QString AvatarHostPrivate::keyFromGuid(const QString& strUserGUID, const QSize& sz) const
 {
-    return "WizService::Avatar::" + strUserGUID;
+    if (!sz.isValid())
+        return "WizService::Avatar::"+ strUserGUID;
+    else
+        return "WizService::Avatar::"+ QString::number(sz.width()) + "::" + QString::number(sz.height()) + "::" + strUserGUID;
 }
 
-QString AvatarHostPrivate::defaultKey() const
+QString AvatarHostPrivate::defaultKey(const QSize& sz) const
 {
-    return "WizService::Avatar::Default";
+    if (!sz.isValid())
+        return "WizService::Avatar::Default";
+    else
+        return "WizService::Avatar::" + QString::number(sz.width()) + "::" + QString::number(sz.height()) + "::Default";
 }
 
-bool AvatarHostPrivate::avatar(const QString& strUserId, QPixmap* pixmap)
+bool AvatarHostPrivate::avatar(const QString& strUserId, QPixmap* pixmap, const QSize& sz)
 {
-    if (QPixmapCache::find(keyFromGuid(strUserId), pixmap)) {
+    if (QPixmapCache::find(keyFromGuid(strUserId, sz), pixmap)) {
         return true;
     }
 
-    load(strUserId, false);
+    load(strUserId, false, sz);
 
-    if (QPixmapCache::find(defaultKey(), pixmap)) {
+    if (QPixmapCache::find(defaultKey(sz), pixmap)) {
         //qDebug() << "[AvatarHost]default avatar returned";
         return true;
     }
@@ -232,7 +240,7 @@ QPixmap AvatarHostPrivate::loadOrg(const QString& strUserGUID, bool bForce)
     return loadOrg(strUserGUID);
 }
 
-void AvatarHostPrivate::load(const QString& strUserGUID, bool bForce)
+void AvatarHostPrivate::load(const QString& strUserGUID, bool bForce, const QSize& sz)
 {
     if (isNeedUpdate(strUserGUID) || bForce) {
         if (!m_listUser.contains(strUserGUID) && strUserGUID != m_strUserCurrent) {
@@ -244,8 +252,8 @@ void AvatarHostPrivate::load(const QString& strUserGUID, bool bForce)
     }
 
     QPixmap pm;
-    if (!QPixmapCache::find(keyFromGuid(strUserGUID), pm)) {
-        loadCache(strUserGUID);
+    if (!QPixmapCache::find(keyFromGuid(strUserGUID, sz), pm)) {
+        loadCache(strUserGUID, sz);
         Q_EMIT q->loaded(strUserGUID);
     }
 }
@@ -277,7 +285,7 @@ void AvatarHostPrivate::on_downloaded(QString strUserGUID, bool bSucceed)
 {
     if (bSucceed) {
         m_strUserCurrent.clear(); // Clear current otherwise download twice will be failed
-        loadCache(strUserGUID);
+        loadCache(strUserGUID, QSize());
         Q_EMIT q->loaded(strUserGUID);
     }
 
@@ -311,13 +319,13 @@ AvatarHost* AvatarHost::instance()
 // if bForce == true, download it from server and update cache, default is false
 void AvatarHost::load(const QString& strUserGUID, bool bForce)
 {
-    d->load(strUserGUID, bForce);
+    d->load(strUserGUID, bForce, QSize());
 }
 
 // retrieve pixmap from cache, return default avatar if not exist
-bool AvatarHost::avatar(const QString& strUserId, QPixmap* pixmap)
+bool AvatarHost::avatar(const QString& strUserId, QPixmap* pixmap, const QSize& sz)
 {
-    return d->avatar(strUserId, pixmap);
+    return d->avatar(strUserId, pixmap, sz);
 }
 QPixmap AvatarHost::orgAvatar(const QString& strUserId)
 {
@@ -331,11 +339,11 @@ bool AvatarHost::isLoaded(const QString& strUserId)
 // For user want to retrive avatar from global pixmap cache
 QString AvatarHost::keyFromGuid(const QString& strUserGUID)
 {
-    return d->keyFromGuid(strUserGUID);
+    return d->keyFromGuid(strUserGUID, QSize());
 }
 
 // the default avatar's key for fallback drawing
 QString AvatarHost::defaultKey()
 {
-    return d->defaultKey();
+    return d->defaultKey(QSize());
 }

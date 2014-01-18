@@ -129,7 +129,7 @@ NSImage* WizToNSImage(const QPixmap &pixmap)
 NSImage* WizToNSImage(const QIcon &icon, const QSize& size)
 {
     QSize sz = size;
-    if (sz.isNull() || sz.width() <= 0 || sz.height() <= 0) {
+    if (!sz.isValid() || sz.width() <= 0 || sz.height() <= 0) {
         QList<QSize> sizes = icon.availableSizes();
         if (sizes.empty())
             return nil;
