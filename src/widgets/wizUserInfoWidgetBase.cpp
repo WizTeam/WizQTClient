@@ -97,7 +97,9 @@ int CWizUserInfoWidgetBase::textWidth() const
 {
     return fontMetrics().size(text()).width;
 }
-
+void CWizUserInfoWidgetBase::updateUI()
+{
+}
 
 #endif //Q_OS_MAC
 

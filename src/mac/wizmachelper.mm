@@ -115,6 +115,11 @@ NSArray* WizToNSArray(const QList<QString> &stringList)
 
 NSImage* WizToNSImage(const QPixmap &pixmap)
 {
+    if (pixmap.isNull())
+    {
+        qDebug() << "WizToNSImage failed: pixmap is null";
+        return nil;
+    }
     CGImageRef iref = QtMac::toCGImageRef(pixmap);
     NSSize sz = NSMakeSize(pixmap.width(), pixmap.height());
     NSImage *image = [[NSImage alloc] initWithCGImage:iref size:sz];
@@ -124,7 +129,7 @@ NSImage* WizToNSImage(const QPixmap &pixmap)
 NSImage* WizToNSImage(const QIcon &icon, const QSize& size)
 {
     QSize sz = size;
-    if (sz.isNull()) {
+    if (sz.isNull() || sz.width() <= 0 || sz.height() <= 0) {
         QList<QSize> sizes = icon.availableSizes();
         if (sizes.empty())
             return nil;
@@ -138,7 +143,7 @@ NSImage* WizToNSImage(const QIcon &icon, const QSize& size)
             }
         }
 
-        sz1 = sz;
+        sz = sz1;
     }
 
     QPixmap pixmap = icon.pixmap(sz);

@@ -22,7 +22,8 @@
     NSEnumerator *screenEnumerator = [[NSScreen screens] objectEnumerator];
     NSScreen *screen;
     while ((screen = [screenEnumerator nextObject]) && !NSMouseInRect(mouseLocation, screen.frame, NO))
-        ;
+    {
+    }
 
     return screen;
 }
@@ -65,10 +66,6 @@
     m_oldTracking = 0;
     return self;
 }
-- (NSPoint) menuPos
-{
-    return [self convertToScreenFromLocalPoint: m_menuPos relativeToView:self];
-}
 - (NSFont*) font
 {
     return m_font;
@@ -99,9 +96,12 @@
 }
 - (void)drawRect:(NSRect)dirtyRect
 {
-    int nAvatarWidth = 36;
+    const int nAvatarWidth = 36;
     //
     CGRect rect = [self frame];
+    //
+    //[[NSColor whiteColor] set];
+    //[NSBezierPath fillRect:rect];
     //
     CGRect avatarRect = rect;
     avatarRect.size.width = nAvatarWidth;
@@ -117,14 +117,10 @@
             imageRect.origin = NSZeroPoint;
             imageRect.size = imageSize;
             //
-            [img drawInRect: avatarRect
-                   fromRect:imageRect
-                  operation:NSCompositeSourceOver
-                   fraction:1];
+            [img drawInRect: avatarRect fromRect:imageRect operation:NSCompositeSourceOver fraction:1];
+            [img release];
         }
     }
-    //
-
     //
     CGRect textRect = rect;
     textRect.origin.x = avatarRect.origin.x + avatarRect.size.width + 8;
@@ -135,7 +131,7 @@
     {
         int fontHeight = m_widget->textHeight();
         //
-        CGFloat yOffset = (textRect.size.height - fontHeight) / 2.0 + textRect.origin.y;
+        CGFloat yOffset = (textRect.size.height - fontHeight) / 2.0 + textRect.origin.y - 2;
         textRect = CGRectMake(textRect.origin.x, yOffset, textRect.size.width, fontHeight);
         //
         NSNumber* underLine = [[NSNumber alloc] initWithInteger: (m_mouseIn ? 1 :0 )];
@@ -173,18 +169,34 @@
             int y = rect.origin.y + (rect.size.height - imageSize.height) / 2;
             NSPoint pt;
             pt.x = x;
-            pt.y = y - 2;
+            pt.y = y - 4;
             //
             [img drawAtPoint:(NSPoint)pt fromRect:(NSRect)imageRect operation:NSCompositeSourceOver fraction:(CGFloat)1];
+            [img release];
         }
     }
 }
+
 
 - (void)mouseDown:(NSEvent *)theEvent
 {
     [super mouseDown:theEvent];
     //
-    m_widget->showMenu();
+    NSPoint pt = [self convertPoint:m_menuPos toView:nil];
+    //
+    NSEvent* newEvent = [NSEvent mouseEventWithType:[theEvent type]
+            location:pt
+            modifierFlags:[theEvent modifierFlags]
+            timestamp:[theEvent timestamp ]
+            windowNumber:[theEvent windowNumber ]
+            context:[theEvent context]
+            eventNumber:[theEvent eventNumber ]
+            clickCount:[theEvent clickCount ]
+            pressure:[theEvent pressure]];
+    //
+    NSMenu* menu = m_widget->getNSMewnu();
+    //
+    [NSMenu popUpContextMenu:menu withEvent:newEvent forView:self];
 }
 
 - (void)mouseEntered:(NSEvent *)theEvent
@@ -254,17 +266,19 @@ int CWizUserInfoWidgetBaseMac::textHeight() const
     return m_textHeight;
 }
 
-void CWizUserInfoWidgetBaseMac::showMenu()
+NSMenu* CWizUserInfoWidgetBaseMac::getNSMewnu()
 {
     if (!m_menuPopup)
-        return;
+        return nil;
     //
+    return m_menuPopup->toNSMenu();
+}
+
+void CWizUserInfoWidgetBaseMac::updateUI()
+{
     WizUserInfoView* view = (WizUserInfoView *)cocoaView();
     if (!view)
         return;
     //
-    NSPoint pt = [view menuPos];
-    QPoint pos(pt.x, pt.y);
-    //
-    m_menuPopup->popup(pos);
+    [view setNeedsDisplay: YES];
 }

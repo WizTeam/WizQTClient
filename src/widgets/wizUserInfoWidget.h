@@ -27,8 +27,11 @@ protected:
     CWizDatabase& m_db;
     QMenu* m_menuMain;
     CWizWebSettingsDialog* m_userSettings;
+    QIcon m_iconVipIndicator;
+    QIcon m_iconArraw;
 
     virtual QPixmap getAvatar();
+    virtual QIcon getArrow() { return m_iconArraw; }
     virtual QSize sizeHint() const;
 protected Q_SLOTS:
     void resetUserInfo();

@@ -6,6 +6,9 @@
 #include <QIcon>
 
 class QMenu;
+#ifdef Q_OS_OSX
+Q_FORWARD_DECLARE_OBJC_CLASS(NSMenu);
+#endif
 
 class CWizUserInfoWidgetBaseMac : public QMacCocoaViewContainer
 {
@@ -16,8 +19,6 @@ public:
 
 protected:
     QString m_text;
-    QIcon m_iconVipIndicator;
-    QIcon m_iconArraw;
     QMenu* m_menuPopup;
     //
     int m_textWidth;
@@ -26,15 +27,17 @@ protected:
     void setMenu(QMenu* menu) { m_menuPopup = menu; }
     //
     void calTextSize();
+    //
+    void updateUI();
 public:
 
     QString text() const;
     void setText(QString val);
     //
-    void showMenu();
+    NSMenu* getNSMewnu();
     //
     virtual QPixmap getAvatar() { return QPixmap(); }
-    virtual QIcon getArrow() { return m_iconArraw; }
+    virtual QIcon getArrow() { return QIcon(); }
     virtual int textWidth() const;
     virtual int textHeight() const;
 };

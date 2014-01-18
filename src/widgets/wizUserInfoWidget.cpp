@@ -90,6 +90,7 @@ void CWizUserInfoWidget::resetUserInfo()
     QString strIconPath = ::WizGetSkinResourcePath(m_app.userSettings().skin()) + iconName;
     m_iconVipIndicator.addFile(strIconPath);
     //
+    updateUI();
 }
 
 void CWizUserInfoWidget::on_userAvatar_loaded(const QString& strGUID)

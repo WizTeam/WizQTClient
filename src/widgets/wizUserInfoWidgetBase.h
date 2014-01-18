@@ -16,15 +16,15 @@ public:
     explicit CWizUserInfoWidgetBase(QWidget *parent = 0);
 
 protected:
-    QIcon m_iconVipIndicator;
-    QIcon m_iconArraw;
-protected:
     virtual void paintEvent(QPaintEvent *event);
     //
-    virtual QPixmap getAvatar();
+    virtual QPixmap getAvatar() { return QPixmap(); }
+    virtual QIcon getArrow() { return QIcon(); }
     //
     virtual int textWidth() const;
 
+    //
+    void updateUI();
 protected:
     virtual void mousePressEvent(QMouseEvent* event);
     virtual bool hitButton(const QPoint& pos) const;
