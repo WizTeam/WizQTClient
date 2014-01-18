@@ -67,10 +67,6 @@ private:
     void loadCache(const QString& strUserGUID, const QSize& sz);
     void loadCacheDefault(const QSize& sz);
     void loadCacheFromFile(const QString &key, const QString& strFilePath, const QSize& sz);
-    //
-    QPixmap loadOrg(const QString& strUserGUID, bool bForce);
-    QPixmap loadOrg(const QString& strUserGUID);
-
 
     void download_impl();
 
