@@ -23,6 +23,7 @@ public:
     static void load(const QString& strUserGUID, bool bForce = false);
     static bool isLoaded(const QString& strUserId);
     static bool avatar(const QString& strUserId, QPixmap* pixmap, const QSize& sz=QSize());
+    static QPixmap orgAvatar(const QString& strUserId);
     static QString keyFromGuid(const QString& strUserGUID);
     static QString defaultKey();
 
