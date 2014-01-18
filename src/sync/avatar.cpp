@@ -210,12 +210,17 @@ bool AvatarHostPrivate::avatar(const QString& strUserId, QPixmap* pixmap)
     load(strUserId, false);
 
     if (QPixmapCache::find(defaultKey(), pixmap)) {
-        //qDebug() << "[AvatarHost]default avatar returned";
+        return true;
+    } else {
+        loadCacheDefault();
+    }
+
+    if (QPixmapCache::find(defaultKey(), pixmap)) {
         return true;
     }
 
-    return false;
     Q_ASSERT(0);
+    return false;
 }
 
 QPixmap AvatarHostPrivate::orgAvatar(const QString& strUserId)
