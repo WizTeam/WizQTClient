@@ -53,8 +53,12 @@
 
             bool bHandled = false;
 
-            //6 Z, 7 X, 8 C, 9 V
-            if (keyCode == 6)
+            //0 A, 6 Z, 7 X, 8 C, 9 V
+            if (keyCode == 0) {
+                [textView selectAll:self];
+                bHandled = true;
+            }
+            else if (keyCode == 6)
             {
                 // Lead crash!
 //                if ([[textView undoManager] canUndo])
