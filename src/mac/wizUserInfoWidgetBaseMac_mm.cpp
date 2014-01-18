@@ -16,6 +16,31 @@ void CWizUserInfoWidgetBaseMac::setText(QString val)
     m_textWidth = 0;
     calTextSize();
 }
+
+QPixmap corpAvatar(const QPixmap& org)
+{
+    if (org.isNull())
+        return org;
+    //
+    QSize sz = org.size();
+    //
+    int width = sz.width();
+    int height = sz.height();
+    if (width == height)
+        return org;
+    //
+    if (width > height)
+    {
+        int xOffset = (width - height) / 2;
+        return org.copy(xOffset, 0, height, height);
+    }
+    else
+    {
+        int yOffset = (height - width) / 2;
+        return org.copy(0, yOffset, width, width);
+    }
+}
+
 QPixmap CWizUserInfoWidgetBaseMac::getCircleAvatar(int width, int height)
 {
     if (width <= 0 || height <= 0)
@@ -32,6 +57,8 @@ QPixmap CWizUserInfoWidgetBaseMac::getCircleAvatar(int width, int height)
     QPixmap org = AvatarHost::orgAvatar(userId());
     if (org.isNull())
         return org;
+    //
+    org = corpAvatar(org);
     //
     int largeWidth = width * 8;
     int largeHeight = height * 8;
