@@ -1,7 +1,6 @@
 #include "wizUserInfoWidgetBaseMac_mm.h"
 #include "wizmachelper_mm.h"
 
-
 #include <QWidget>
 #include <QMenu>
 
@@ -138,6 +137,8 @@
         textRect = CGRectMake(textRect.origin.x, yOffset, textRect.size.width, fontHeight);
         //
         NSNumber* underLine = [[NSNumber alloc] initWithInteger: (m_mouseIn ? 1 :0 )];
+        NSColor* textColor = [NSColor colorWithDeviceRed:0x78/255.0 green:0x78/255.0 blue:0x78/255.0 alpha:1.0];
+
 
         NSString* nsText = ::WizToNSString(text);
         //
@@ -148,6 +149,7 @@
                 paragraphStyle, NSParagraphStyleAttributeName,
                 m_font, NSFontAttributeName,
                 underLine, NSUnderlineStyleAttributeName,
+                textColor, NSForegroundColorAttributeName,
                 nil];
 
         [nsText drawInRect:textRect withAttributes:attributes];
