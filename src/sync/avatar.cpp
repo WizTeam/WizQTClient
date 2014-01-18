@@ -156,7 +156,12 @@ QPixmap AvatarHostPrivate::loadOrg(const QString& strUserGUID)
 {
     QString strFilePath = Utils::PathResolve::avatarPath() + strUserGUID + ".png";
     //
-    return QPixmap(strFilePath);
+    QPixmap ret(strFilePath);
+    if (!ret.isNull())
+        return ret;
+    //
+    QString defaultFilePath = Utils::PathResolve::themePath("default") + "avatar_default.png";
+    return QPixmap(defaultFilePath);
 }
 
 void AvatarHostPrivate::loadCacheDefault()
