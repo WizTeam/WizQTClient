@@ -201,7 +201,7 @@ void CWizNoteStyle::drawCategoryViewItem(const QStyleOptionViewItemV4 *vopt,
 
     // compute document count string length and leave enough space for drawing
     QRect rct(rcd);
-    rct.adjust(0, nAdjustHeight1, 0, 0);
+    rct.adjust(0, nAdjustHeight1, 0, -nAdjustHeight1);
     QString strCount = pItem->countString;
     if (!strCount.isEmpty()) {
         int nCountWidthMax = QFontMetrics(f).width(strCount);
@@ -211,13 +211,13 @@ void CWizNoteStyle::drawCategoryViewItem(const QStyleOptionViewItemV4 *vopt,
     QString strText = vopt->text;
     if (!strText.isEmpty()) {
         QColor colorText = Utils::StyleHelper::treeViewItemText(bSelected);
-        rct = Utils::StyleHelper::drawText(p, rct, strText, 1, Qt::AlignBottom, colorText, f);
+        rct = Utils::StyleHelper::drawText(p, rct, strText, 1, Qt::AlignTop, colorText, f);
     }
 
     if (!strCount.isEmpty()) {
         rcd.adjust(rct.width(), nAdjustHeight2, 0, 0);
         QColor colorCount = Utils::StyleHelper::treeViewItemTextExtend(bSelected);
-        Utils::StyleHelper::drawText(p, rcd, strCount, 1, Qt::AlignBottom, colorCount, fontCount);
+        Utils::StyleHelper::drawText(p, rcd, strCount, 1, Qt::AlignTop, colorCount, fontCount);
     }
 
     p->restore();
