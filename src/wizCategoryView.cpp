@@ -1149,7 +1149,7 @@ void CWizCategoryView::on_action_user_deleteTag()
 
     // FIXME : as above
 
-    QMessageBox* msgBox = new QMessageBox(this);
+    QMessageBox* msgBox = new QMessageBox();
     msgBox->setWindowTitle(tr("Delete tag"));
     msgBox->addButton(QMessageBox::Ok);
     msgBox->addButton(QMessageBox::Cancel);
