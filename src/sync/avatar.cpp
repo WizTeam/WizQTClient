@@ -167,7 +167,9 @@ void AvatarHostPrivate::loadCacheFromFile(const QString& key, const QString& str
     }
 
     QSize asize = sz.isValid() ? sz : Utils::StyleHelper::avatarSize();
-    pixmap = pixmap.scaled(asize, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+    if (asize.width() < pixmap.width() && asize.height() < pixmap.height()) {
+        pixmap = pixmap.scaled(asize, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+    }
 
     Q_ASSERT(!pixmap.isNull());
 
