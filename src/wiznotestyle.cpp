@@ -196,8 +196,8 @@ void CWizNoteStyle::drawCategoryViewItem(const QStyleOptionViewItemV4 *vopt,
     int nHeight2 = Utils::StyleHelper::fontExtend(fontCount);
 
     QRect rcd = subElementRect(SE_ItemViewItemText, vopt, view);
-    int nAdjustHeight1 = (rcd.height() - nHeight1)/2;
-    int nAdjustHeight2 = (rcd.height() - nHeight2)/2;
+    int nAdjustHeight1 = (rcd.height() - nHeight1 + 1) / 2;
+    int nAdjustHeight2 = (rcd.height() - nHeight2 + 1) / 2;
 
     // compute document count string length and leave enough space for drawing
     QRect rct(rcd);

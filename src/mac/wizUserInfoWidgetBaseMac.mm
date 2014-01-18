@@ -257,7 +257,7 @@ void CWizUserInfoWidgetBaseMac::calTextSize()
 
         NSSize size = [nsText sizeWithAttributes:attributes];
         //
-        m_textWidth = size.width + 16;
+        m_textWidth = size.width + 4;
         m_textHeight = size.height;
     }
 }

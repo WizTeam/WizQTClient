@@ -111,13 +111,13 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     // search and full text search
     QThread *threadFTS = new QThread();
     m_searchIndexer->moveToThread(threadFTS);
-    threadFTS->start(QThread::LowestPriority);
+    threadFTS->start(QThread::IdlePriority);
 
     // upgrade check
     QThread *thread = new QThread();
     m_upgrade->moveToThread(thread);
     connect(m_upgrade, SIGNAL(checkFinished(bool)), SLOT(on_checkUpgrade_finished(bool)));
-    thread->start();
+    thread->start(QThread::IdlePriority);
 
     // syncing thread
     connect(m_sync, SIGNAL(processLog(const QString&)), SLOT(on_syncProcessLog(const QString&)));

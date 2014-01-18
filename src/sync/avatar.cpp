@@ -111,6 +111,7 @@ AvatarHostPrivate::AvatarHostPrivate(AvatarHost* avatarHost)
             SLOT(on_downloaded(QString, bool)));
 
     m_thread = new QThread(this);
+    m_thread->setPriority(QThread::IdlePriority);
     connect(m_thread, SIGNAL(started()), SLOT(on_thread_started()));
 
     m_downloader->moveToThread(m_thread);
