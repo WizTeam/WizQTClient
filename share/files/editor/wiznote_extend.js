@@ -57,11 +57,12 @@ try {
 function setEditorHtml(html, bEditing)
 {
     editor.reset();
-    if (bEditing) {
-        editor.document.head.innerHTML = wiz_head + m_header; // restore original header
-    } else {
-        editor.document.head.innerHTML = wiz_head;
-    }
+    editor.document.head.innerHTML = wiz_head;
+    //if (bEditing) {
+    //    editor.document.head.innerHTML = wiz_head + m_header; // restore original header
+    //} else {
+    //    editor.document.head.innerHTML = wiz_head;
+    //}
 
     editor.document.body.innerHTML = html;
     editor.fireEvent('aftersetcontent');
@@ -74,12 +75,14 @@ function setEditorHtml(html, bEditing)
     });
 }
 
+
 function setEditing(bEditing) {
-    if (bEditing) {
-        editor.document.head.innerHTML = wiz_head + m_header; // restore original header
-    } else {
-        editor.document.head.innerHTML = wiz_head;
-    }
+    editor.document.head.innerHTML = wiz_head;
+    //if (bEditing) {
+    //    editor.document.head.innerHTML = wiz_head + m_header; // restore original header
+    //} else {
+    //    editor.document.head.innerHTML = wiz_head;
+    //}
 
     editor.document.body.innerHTML = wiz_html;
     editor.fireEvent('aftersetcontent');

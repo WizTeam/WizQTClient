@@ -923,7 +923,13 @@ void CWizDocumentWebView::saveDocument(const WIZDOCUMENTDATA& data, bool force)
     }
 
     QString strFileName = m_mapFile.value(data.strGUID);
+    QString strHead = page()->mainFrame()->evaluateJavaScript("editor.document.head.innerHTML;").toString();
+    QRegExp regHead("<link[^>]*" + m_strDefaultCssFilePath + "[^>]*>", Qt::CaseInsensitive);
+    strHead.replace(regHead, "");
+
     QString strHtml = page()->mainFrame()->evaluateJavaScript("editor.getContent();").toString();
+    strHtml = "<html><head>" + strHead + "</head><body>" + strHtml + "</body></html>";
+
     m_workerPool->save(data, strHtml, strFileName, 0);
 }
 
