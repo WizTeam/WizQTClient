@@ -1018,7 +1018,7 @@ bool CWizDocumentWebView::editorCommandExecuteOutdent()
 bool CWizDocumentWebView::editorCommandExecuteLinkInsert()
 {
     if (!m_editorInsertLinkForm) {
-        m_editorInsertLinkForm = new CWizEditorInsertLinkForm(this);
+        m_editorInsertLinkForm = new CWizEditorInsertLinkForm(window());
         connect(m_editorInsertLinkForm, SIGNAL(accepted()), SLOT(on_editorCommandExecuteLinkInsert_accepted()));
     }
 
@@ -1148,7 +1148,7 @@ bool CWizDocumentWebView::editorCommandExecuteInsertUnorderedList()
 bool CWizDocumentWebView::editorCommandExecuteTableInsert()
 {
     if (!m_editorInsertTableForm) {
-        m_editorInsertTableForm = new CWizEditorInsertTableForm(this);
+        m_editorInsertTableForm = new CWizEditorInsertTableForm(window());
         connect(m_editorInsertTableForm, SIGNAL(accepted()), SLOT(on_editorCommandExecuteTableInsert_accepted()));
     }
 

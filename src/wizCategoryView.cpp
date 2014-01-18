@@ -1117,7 +1117,7 @@ void CWizCategoryView::on_action_user_deleteFolder()
     // 2. show progress windows when delete
 
     // setup warning messagebox
-    QMessageBox* msgBox = new QMessageBox();
+    QMessageBox* msgBox = new QMessageBox(window());
     msgBox->setWindowTitle(tr("Delete Folder"));
     msgBox->addButton(QMessageBox::Ok);
     msgBox->addButton(QMessageBox::Cancel);
@@ -1149,7 +1149,7 @@ void CWizCategoryView::on_action_user_deleteTag()
 
     // FIXME : as above
 
-    QMessageBox* msgBox = new QMessageBox();
+    QMessageBox* msgBox = new QMessageBox(window());
     msgBox->setWindowTitle(tr("Delete tag"));
     msgBox->addButton(QMessageBox::Ok);
     msgBox->addButton(QMessageBox::Cancel);
@@ -1181,7 +1181,7 @@ void CWizCategoryView::on_action_group_deleteFolder()
 
     // FIXME: as above
 
-    QMessageBox* msgBox = new QMessageBox();
+    QMessageBox* msgBox = new QMessageBox(window());
     msgBox->setWindowTitle(tr("Delete group folder"));
     msgBox->addButton(QMessageBox::Ok);
     msgBox->addButton(QMessageBox::Cancel);
