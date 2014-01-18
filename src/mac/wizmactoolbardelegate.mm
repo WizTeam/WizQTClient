@@ -79,7 +79,7 @@ public:
         QIcon icon = m_action->icon();
         if (!icon.isNull())
         {
-            NSImage* image = WizToNSImage(icon, QSize(24, 24));
+            NSImage* image = WizToNSImage(icon, QSize(32, 32));
             //[m_view setImage:image];
             [item setImage:image];
         }
