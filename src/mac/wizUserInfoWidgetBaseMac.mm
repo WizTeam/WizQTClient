@@ -283,5 +283,7 @@ void CWizUserInfoWidgetBaseMac::updateUI()
     if (!view)
         return;
     //
+    m_circleAvatar = QPixmap();
+    //
     [view setNeedsDisplay: YES];
 }
