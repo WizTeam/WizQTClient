@@ -30,6 +30,21 @@
 
 
 
+CWizMacActionHelper::CWizMacActionHelper(CWizMacToolBarItem* item, QAction* action, QObject* parent)
+    : QObject(parent)
+    , m_item(item)
+{
+    connect(action, SIGNAL(changed()), SLOT(on_action_changed()));
+}
+
+
+void CWizMacActionHelper::on_action_changed()
+{
+    m_item->onActionChanged();
+}
+
+
+
 class CWizMacToolBarActionItem : public CWizMacToolBarItem
 {
 public:
@@ -38,6 +53,7 @@ public:
         , m_action(action)
         , m_id(WizGenGUID())
         , m_item(nil)
+        , m_helper(this, action, NULL)
     {
         m_nsImages = [[NSMutableDictionary alloc] init];
         connect(action, SIGNAL(changed()), SLOT(on_action_changed()));
@@ -48,6 +64,7 @@ public:
     }
 
 private:
+    CWizMacActionHelper m_helper;
     CWizMacToolBarDelegate* m_delegate;
     QAction* m_action;
     NSString* m_id;
@@ -129,7 +146,7 @@ public:
             }
         }
         //
-        NSImage* img = WizToNSImage(icon, QSize(24, 24));
+        NSImage* img = WizToNSImage(icon, QSize(32, 32));
         //
         [m_nsImages setObject:img forKey:key];
         //

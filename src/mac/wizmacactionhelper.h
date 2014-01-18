@@ -1,7 +1,6 @@
 #ifndef WIZMACACTIONHELPER_H
 #define WIZMACACTIONHELPER_H
 
-#if 0
 #include <QObject>
 
 class CWizMacToolBarItem;
@@ -20,7 +19,5 @@ private:
 public Q_SLOTS:
     void on_action_changed();
 };
-
-#endif
 
 #endif // WIZMACACTIONHELPER_H
