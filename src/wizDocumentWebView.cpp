@@ -876,7 +876,12 @@ void CWizDocumentWebView::viewDocumentInEditor(bool editing)
     page()->undoStack()->clear();
     m_timerAutoSave.start();
 
-    update();
+    if (editing) {
+        setFocus(Qt::MouseFocusReason);
+        editorFocus();
+    }
+
+    //update();
 }
 
 void CWizDocumentWebView::onNoteLoadFinished()
@@ -905,6 +910,11 @@ void CWizDocumentWebView::setEditingDocument(bool editing)
 
     QString strScript = QString("setEditing(%1);").arg(editing ? "true" : "false");
     page()->mainFrame()->evaluateJavaScript(strScript);
+
+    if (editing) {
+        setFocus(Qt::MouseFocusReason);
+        editorFocus();
+    }
 
     Q_EMIT statusChanged();
 }
