@@ -729,7 +729,7 @@ void CWizCategoryView::on_action_user_newFolder()
 {
     CWizLineInputDialog* dialog = new CWizLineInputDialog(tr("New folder"),
                                                           tr("Please input folder name: "),
-                                                          "", this);
+                                                          "", window());
 
     connect(dialog, SIGNAL(finished(int)), SLOT(on_action_user_newFolder_confirmed(int)));
 
@@ -768,7 +768,7 @@ void CWizCategoryView::on_action_user_newTag()
 {
     CWizLineInputDialog* dialog = new CWizLineInputDialog(tr("New tag"),
                                                           tr("Please input tag name: "),
-                                                          "", this);
+                                                          "", window());
     connect(dialog, SIGNAL(finished(int)), SLOT(on_action_user_newTag_confirmed(int)));
 
     dialog->open();
@@ -814,7 +814,7 @@ void CWizCategoryView::on_action_group_newFolder()
 {
     CWizLineInputDialog* dialog = new CWizLineInputDialog(tr("New group folder"),
                                                           tr("Please input folder name: "),
-                                                          "", this);
+                                                          "", window());
 
     connect(dialog, SIGNAL(finished(int)), SLOT(on_action_group_newFolder_confirmed(int)));
 
@@ -871,7 +871,7 @@ void CWizCategoryView::on_action_moveItem()
 
 void CWizCategoryView::on_action_user_moveFolder()
 {
-    CWizFolderSelector* selector = new CWizFolderSelector(tr("Move folder"), m_app, this);
+    CWizFolderSelector* selector = new CWizFolderSelector(tr("Move folder"), m_app, window());
     selector->setAcceptRoot(true);
 
     connect(selector, SIGNAL(finished(int)), SLOT(on_action_user_moveFolder_confirmed(int)));
@@ -958,7 +958,7 @@ void CWizCategoryView::on_action_user_renameFolder()
 
     CWizLineInputDialog* dialog = new CWizLineInputDialog(tr("Rename folder"),
                                                           tr("Please input new folder name: "),
-                                                          p->name(), this);
+                                                          p->name(), window());
     connect(dialog, SIGNAL(finished(int)), SLOT(on_action_user_renameFolder_confirmed(int)));
 
     dialog->open();
@@ -1025,7 +1025,7 @@ void CWizCategoryView::on_action_user_renameTag()
 
     CWizLineInputDialog* dialog = new CWizLineInputDialog(tr("Rename tag"),
                                                           tr("Please input tag name: "),
-                                                          p->name(), this);
+                                                          p->name(), window());
 
     connect(dialog, SIGNAL(finished(int)), SLOT(on_action_user_renameTag_confirmed(int)));
 
@@ -1059,7 +1059,7 @@ void CWizCategoryView::on_action_group_renameFolder()
 
     CWizLineInputDialog* dialog = new CWizLineInputDialog(tr("Rename group folder"),
                                                           tr("Please input folder name: "),
-                                                          p->name(), this);
+                                                          p->name(), window());
 
     connect(dialog, SIGNAL(finished(int)), SLOT(on_action_group_renameFolder_confirmed(int)));
 
@@ -1117,7 +1117,7 @@ void CWizCategoryView::on_action_user_deleteFolder()
     // 2. show progress windows when delete
 
     // setup warning messagebox
-    QMessageBox* msgBox = new QMessageBox(this);
+    QMessageBox* msgBox = new QMessageBox();
     msgBox->setWindowTitle(tr("Delete Folder"));
     msgBox->addButton(QMessageBox::Ok);
     msgBox->addButton(QMessageBox::Cancel);
@@ -1181,7 +1181,7 @@ void CWizCategoryView::on_action_group_deleteFolder()
 
     // FIXME: as above
 
-    QMessageBox* msgBox = new QMessageBox(this);
+    QMessageBox* msgBox = new QMessageBox();
     msgBox->setWindowTitle(tr("Delete group folder"));
     msgBox->addButton(QMessageBox::Ok);
     msgBox->addButton(QMessageBox::Cancel);
