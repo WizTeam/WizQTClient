@@ -211,13 +211,21 @@ void CWizNoteStyle::drawCategoryViewItem(const QStyleOptionViewItemV4 *vopt,
     QString strText = vopt->text;
     if (!strText.isEmpty()) {
         QColor colorText = Utils::StyleHelper::treeViewItemText(bSelected);
-        rct = Utils::StyleHelper::drawText(p, rct, strText, 1, Qt::AlignTop, colorText, f);
+
+        p->setPen(colorText);
+        QRect rcBound;
+        p->drawText(rct, Qt::AlignTop, strText, &rcBound);
+        //
+        rct = rcBound;
     }
 
     if (!strCount.isEmpty()) {
-        rcd.adjust(rct.width(), nAdjustHeight2, 0, 0);
+        rcd.adjust(rct.width() + 4, nAdjustHeight2 + 2, 0, 0);
         QColor colorCount = Utils::StyleHelper::treeViewItemTextExtend(bSelected);
-        Utils::StyleHelper::drawText(p, rcd, strCount, 1, Qt::AlignTop, colorCount, fontCount);
+        p->setPen(colorCount);
+        p->setFont(fontCount);
+        p->drawText(rcd, Qt::AlignTop, strCount);
+        //Utils::StyleHelper::drawText(rcRet, Qt::AlignCenter, lineText);(p, rcd, strCount, 1, , colorCount, fontCount);
     }
 
     p->restore();
