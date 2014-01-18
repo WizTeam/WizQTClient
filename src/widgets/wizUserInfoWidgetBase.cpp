@@ -89,7 +89,7 @@ void CWizUserInfoWidgetBase::mousePressEvent(QMouseEvent* event)
 bool CWizUserInfoWidgetBase::hitButton(const QPoint& pos) const
 {
     // FIXME
-    QRect rectArrow(36 + 8, 36 - fontMetrics().height(), sizeHint().width() - 36 - 4, fontMetrics().height());
+    QRect rectArrow(32 + 8, 32 - fontMetrics().height(), sizeHint().width() - 32 - 4, fontMetrics().height());
     return rectArrow.contains(pos) ? true : false;
 }
 

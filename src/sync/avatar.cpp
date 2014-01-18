@@ -151,6 +151,14 @@ void AvatarHostPrivate::loadCache(const QString& strUserGUID)
     loadCacheFromFile(keyFromGuid(strUserGUID), strFilePath);
 }
 
+
+QPixmap AvatarHostPrivate::loadOrg(const QString& strUserGUID)
+{
+    QString strFilePath = Utils::PathResolve::avatarPath() + strUserGUID + ".png";
+    //
+    return QPixmap(strFilePath);
+}
+
 void AvatarHostPrivate::loadCacheDefault()
 {
     loadCacheFromFile(defaultKey(), Utils::PathResolve::themePath("default") + "avatar_default.png");
@@ -203,6 +211,25 @@ bool AvatarHostPrivate::avatar(const QString& strUserId, QPixmap* pixmap)
 
     return false;
     Q_ASSERT(0);
+}
+
+QPixmap AvatarHostPrivate::orgAvatar(const QString& strUserId)
+{
+    return loadOrg(strUserId, false);
+}
+
+
+QPixmap AvatarHostPrivate::loadOrg(const QString& strUserGUID, bool bForce)
+{
+    if (isNeedUpdate(strUserGUID) || bForce) {
+        if (!m_listUser.contains(strUserGUID) && strUserGUID != m_strUserCurrent) {
+            m_listUser.append(strUserGUID);
+            m_thread->start();
+        }
+
+        return QPixmap();
+    }
+    return loadOrg(strUserGUID);
 }
 
 void AvatarHostPrivate::load(const QString& strUserGUID, bool bForce)
@@ -292,7 +319,10 @@ bool AvatarHost::avatar(const QString& strUserId, QPixmap* pixmap)
 {
     return d->avatar(strUserId, pixmap);
 }
-
+QPixmap AvatarHost::orgAvatar(const QString& strUserId)
+{
+    return d->orgAvatar(strUserId);
+}
 bool AvatarHost::isLoaded(const QString& strUserId)
 {
     return d->isLoaded(strUserId);

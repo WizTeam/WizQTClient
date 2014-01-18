@@ -182,7 +182,10 @@ void CWizUserInfoWidget::on_userInfo_changed()
     AvatarHost::load(m_db.GetUserId(), true);
     resetUserInfo();
 }
-
+QString CWizUserInfoWidget::userId()
+{
+    return m_db.getUserId();
+}
 QPixmap CWizUserInfoWidget::getAvatar()
 {
     QPixmap pixmap;
@@ -194,5 +197,5 @@ QSize CWizUserInfoWidget::sizeHint() const
 {
     // FIXME: builtin avatar size (36, 36), margin = 4 * 2, arraw width = 10
 
-    return QSize(36 + textWidth() + 24, 36);
+    return QSize(32+ textWidth() + 24, 32);
 }

@@ -96,7 +96,7 @@
 }
 - (void)drawRect:(NSRect)dirtyRect
 {
-    const int nAvatarWidth = 36;
+    const int nAvatarWidth = 32;
     //
     CGRect rect = [self frame];
     //
@@ -105,8 +105,11 @@
     //
     CGRect avatarRect = rect;
     avatarRect.size.width = nAvatarWidth;
+    avatarRect.size.height = nAvatarWidth;
+    avatarRect.size.height -= 4;
+    avatarRect.size.width -= 4;
     //
-    QPixmap pixmap = m_widget->getAvatar();
+    QPixmap pixmap = m_widget->getCircleAvatar(avatarRect.size.width, avatarRect.size.height);
     if (!pixmap.isNull())
     {
         NSImage* img = ::WizToNSImage(pixmap);

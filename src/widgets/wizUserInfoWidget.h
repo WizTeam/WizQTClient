@@ -33,6 +33,7 @@ protected:
     virtual QPixmap getAvatar();
     virtual QIcon getArrow() { return m_iconArraw; }
     virtual QSize sizeHint() const;
+    virtual QString userId();
 protected Q_SLOTS:
     void resetUserInfo();
 
