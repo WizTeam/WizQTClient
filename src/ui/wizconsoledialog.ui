@@ -35,9 +35,9 @@
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>20</y>
+     <y>30</y>
      <width>481</width>
-     <height>351</height>
+     <height>321</height>
     </rect>
    </property>
    <property name="styleSheet">
@@ -51,7 +51,7 @@
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>376</y>
+     <y>10</y>
      <width>161</width>
      <height>20</height>
     </rect>
@@ -63,16 +63,16 @@
     <string>Total %1 entries</string>
    </property>
    <property name="alignment">
-    <set>Qt::AlignCenter</set>
+    <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
    </property>
   </widget>
   <widget class="QPushButton" name="btnSaveAs">
    <property name="geometry">
     <rect>
-     <x>190</x>
-     <y>370</y>
+     <x>170</x>
+     <y>360</y>
      <width>131</width>
-     <height>20</height>
+     <height>32</height>
     </rect>
    </property>
    <property name="text">
@@ -85,11 +85,17 @@
   <widget class="QPushButton" name="btnCopyToClipboard">
    <property name="geometry">
     <rect>
-     <x>340</x>
-     <y>370</y>
+     <x>330</x>
+     <y>360</y>
      <width>151</width>
-     <height>21</height>
+     <height>32</height>
     </rect>
+   </property>
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
    </property>
    <property name="text">
     <string>Copy to clipboard</string>
@@ -97,14 +103,17 @@
    <property name="autoDefault">
     <bool>false</bool>
    </property>
+   <property name="default">
+    <bool>false</bool>
+   </property>
   </widget>
   <widget class="QPushButton" name="buttonClear">
    <property name="geometry">
     <rect>
-     <x>380</x>
-     <y>0</y>
+     <x>30</x>
+     <y>360</y>
      <width>111</width>
-     <height>21</height>
+     <height>32</height>
     </rect>
    </property>
    <property name="text">
