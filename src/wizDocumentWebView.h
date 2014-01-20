@@ -53,12 +53,17 @@ private:
 
 class CWizDocumentWebViewPage: public QWebPage
 {
+    Q_OBJECT
+
 public:
     explicit CWizDocumentWebViewPage(QObject* parent = 0) : QWebPage(parent) {}
     virtual void triggerAction(QWebPage::WebAction typeAction, bool checked = false);
     virtual void javaScriptConsoleMessage(const QString& message, int lineNumber, const QString& sourceID);
 
     void on_editorCommandPaste_triggered();
+
+Q_SIGNALS:
+    void actionTriggered(QWebPage::WebAction act);
 };
 
 
@@ -110,7 +115,7 @@ public:
 private:
     void initEditor();
     void viewDocumentInEditor(bool editing);
-    void resetTitle();
+    void tryResetTitle();
 
     bool isInternalUrl(const QUrl& url);
     void viewDocumentByUrl(const QUrl& url);
@@ -140,6 +145,7 @@ private:
     bool m_bEditorInited;
     bool m_bEditingMode;
     bool m_bNewNote;
+    bool m_bNewNoteTitleInited;
 
     CWizDocumentWebViewWorkerPool* m_workerPool;
     CWizObjectDataDownloaderHost* m_downloaderHost;
@@ -154,6 +160,7 @@ public:
     Q_INVOKABLE void onNoteLoadFinished(); // editor callback
 
 public Q_SLOTS:
+    void onActionTriggered(QWebPage::WebAction act);
     void onCipherDialogClosed();
     void on_download_finished(const WIZOBJECTDATA& data, bool bSucceed);
 

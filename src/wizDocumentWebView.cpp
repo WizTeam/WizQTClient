@@ -8,6 +8,7 @@
 #include <QDir>
 #include <QString>
 #include <QRegExp>
+#include <QAction>
 
 #include <QApplication>
 #include <QWebFrame>
@@ -227,6 +228,8 @@ void CWizDocumentWebViewPage::triggerAction(QWebPage::WebAction typeAction, bool
     }
 
     QWebPage::triggerAction(typeAction, checked);
+
+    Q_EMIT actionTriggered(typeAction);
 }
 
 void CWizDocumentWebViewPage::on_editorCommandPaste_triggered()
@@ -270,6 +273,7 @@ CWizDocumentWebView::CWizDocumentWebView(CWizExplorerApp& app, QWidget* parent)
     , m_dbMgr(app.databaseManager())
     , m_bEditorInited(false)
     , m_bNewNote(false)
+    , m_bNewNoteTitleInited(false)
     , m_noteFrame(0)
 {
     CWizDocumentWebViewPage* page = new CWizDocumentWebViewPage(this);
@@ -278,6 +282,8 @@ CWizDocumentWebView::CWizDocumentWebView(CWizExplorerApp& app, QWidget* parent)
 #ifdef QT_DEBUG
     settings()->globalSettings()->setAttribute(QWebSettings::DeveloperExtrasEnabled, true);
 #endif
+
+    connect(page, SIGNAL(actionTriggered(QWebPage::WebAction)), SLOT(onActionTriggered(QWebPage::WebAction)));
 
     // minimum page size hint
     setMinimumSize(400, 250);
@@ -366,8 +372,8 @@ void CWizDocumentWebView::keyPressEvent(QKeyEvent* event)
     QWebView::keyPressEvent(event);
 #endif
 
-    if ((event->key() == Qt::Key_Enter || event->key() == Qt::Key_Return) && m_bNewNote) {
-        resetTitle();
+    if (event->key() == Qt::Key_Enter || event->key() == Qt::Key_Return) {
+        tryResetTitle();
     }
 }
 
@@ -423,15 +429,44 @@ void CWizDocumentWebView::dragEnterEvent(QDragEnterEvent *event)
     }
 }
 
-void CWizDocumentWebView::resetTitle()
+void CWizDocumentWebView::onActionTriggered(QWebPage::WebAction act)
 {
+    if (act == QWebPage::Paste)
+        tryResetTitle();
+}
+
+QString str2title(const QString& str)
+{
+    int idx = str.size() - 1;
+    static QString eol("，。？~!#$%^&*()_+{}|:\"<>?,./;'[]\\-="); // end of line
+    foreach(QChar c, eol) {
+        int i = str.indexOf(c, 0, Qt::CaseInsensitive);
+        if (i != -1 && i < idx) {
+            idx = i;
+        }
+    }
+
+    return str.left(idx);
+}
+
+void CWizDocumentWebView::tryResetTitle()
+{
+    if (m_bNewNoteTitleInited)
+        return;
+
     QWebFrame* f = noteFrame();
     if (!f)
         return;
 
     QString strTitle = f->documentElement().findFirst("body").findFirst("p").toPlainText();
-    if (!strTitle.isEmpty())
-        view()->resetTitle(strTitle);
+    strTitle = str2title(strTitle.left(255));
+
+    if (strTitle.isEmpty())
+        return;
+
+    view()->resetTitle(strTitle);
+
+    m_bNewNoteTitleInited = true;
 }
 
 bool CWizDocumentWebView::image2Html(const QString& strImageFile, QString& strHtml)
@@ -524,6 +559,7 @@ void CWizDocumentWebView::viewDocument(const WIZDOCUMENTDATA& doc, bool editing)
     // set data
     m_bEditingMode = editing;
     m_bNewNote = doc.tCreated.secsTo(QDateTime::currentDateTime()) == 0 ? true : false;
+    m_bNewNoteTitleInited = m_bNewNote ? false : true;
 
     // download document if not exist
     CWizDatabase& db = m_dbMgr.db(doc.strKbGUID);
