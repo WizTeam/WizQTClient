@@ -962,11 +962,13 @@ void MainWindow::on_actionAbout_triggered()
     dialog.exec();
 }
 
+#ifdef QT_DEBUG
 void MainWindow::on_actionAboutPlugins_triggered()
 {
     Core::Internal::PluginDialog dialog(this);
     dialog.exec();
 }
+#endif
 
 void MainWindow::on_actionPreference_triggered()
 {

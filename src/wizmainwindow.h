@@ -187,7 +187,9 @@ public Q_SLOTS:
     void on_actionNewNote_triggered();
     void on_actionLogout_triggered();
     void on_actionAbout_triggered();
+#ifdef QT_DEBUG
     void on_actionAboutPlugins_triggered();
+#endif
     void on_actionPreference_triggered();
     void on_actionRebuildFTS_triggered();
     void on_actionFeedback_triggered();

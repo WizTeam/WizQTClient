@@ -47,7 +47,9 @@ WIZACTION* CWizActions::actionsData()
     {
         {"actionPreference",                QObject::tr("Preference"), "", ""},
         {"actionAbout",                     QObject::tr("About WizNote"), "", ""},
+#ifdef QT_DEBUG
         {"actionAboutPlugins",              QObject::tr("About plugins"), "", ""},
+#endif
         {"actionExit",                      QObject::tr("Exit"), "", ""},
         {"actionLogout",                    QObject::tr("Logout"), "", ""},
         {WIZACTION_GLOBAL_SYNC,             QObject::tr("Sync"), "", ""},
@@ -228,6 +230,13 @@ void CWizActions::buildMenu(QMenu* pMenu, CWizSettings& settings, const QString&
         // no fullscreen mode menu
 #ifndef Q_OS_MAC
         if (strAction == WIZACTION_GLOBAL_TOGGLE_FULLSCREEN) {
+            index++;
+            continue;
+        }
+#endif
+
+#ifndef QT_DEBUG
+        if (strAction == "actionAboutPlugins") {
             index++;
             continue;
         }
