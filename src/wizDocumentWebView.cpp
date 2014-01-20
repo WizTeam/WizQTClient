@@ -8,9 +8,11 @@
 #include <QDir>
 #include <QString>
 #include <QRegExp>
+#include <QAction>
 
 #include <QApplication>
 #include <QWebFrame>
+#include <QWebElement>
 #include <QUndoStack>
 
 #include <coreplugin/icore.h>
@@ -226,6 +228,8 @@ void CWizDocumentWebViewPage::triggerAction(QWebPage::WebAction typeAction, bool
     }
 
     QWebPage::triggerAction(typeAction, checked);
+
+    Q_EMIT actionTriggered(typeAction);
 }
 
 void CWizDocumentWebViewPage::on_editorCommandPaste_triggered()
@@ -268,6 +272,8 @@ CWizDocumentWebView::CWizDocumentWebView(CWizExplorerApp& app, QWidget* parent)
     , m_app(app)
     , m_dbMgr(app.databaseManager())
     , m_bEditorInited(false)
+    , m_bNewNote(false)
+    , m_bNewNoteTitleInited(false)
     , m_noteFrame(0)
 {
     CWizDocumentWebViewPage* page = new CWizDocumentWebViewPage(this);
@@ -276,6 +282,8 @@ CWizDocumentWebView::CWizDocumentWebView(CWizExplorerApp& app, QWidget* parent)
 #ifdef QT_DEBUG
     settings()->globalSettings()->setAttribute(QWebSettings::DeveloperExtrasEnabled, true);
 #endif
+
+    connect(page, SIGNAL(actionTriggered(QWebPage::WebAction)), SLOT(onActionTriggered(QWebPage::WebAction)));
 
     // minimum page size hint
     setMinimumSize(400, 250);
@@ -364,6 +372,9 @@ void CWizDocumentWebView::keyPressEvent(QKeyEvent* event)
     QWebView::keyPressEvent(event);
 #endif
 
+    if (event->key() == Qt::Key_Enter || event->key() == Qt::Key_Return) {
+        tryResetTitle();
+    }
 }
 
 void CWizDocumentWebView::focusInEvent(QFocusEvent *event)
@@ -416,6 +427,50 @@ void CWizDocumentWebView::dragEnterEvent(QDragEnterEvent *event)
             event->acceptProposedAction();
         }
     }
+}
+
+void CWizDocumentWebView::onActionTriggered(QWebPage::WebAction act)
+{
+    if (act == QWebPage::Paste)
+        tryResetTitle();
+}
+
+QString str2title(const QString& str)
+{
+    int idx = str.size() - 1;
+    static QString eol("，。？~!#$%^&*()_+{}|:\"<>?,./;'[]\\-="); // end of line
+    foreach(QChar c, eol) {
+        int i = str.indexOf(c, 0, Qt::CaseInsensitive);
+        if (i != -1 && i < idx) {
+            idx = i;
+        }
+    }
+
+    return str.left(idx);
+}
+
+void CWizDocumentWebView::tryResetTitle()
+{
+    if (m_bNewNoteTitleInited)
+        return;
+
+    // if note already modified, maybe title changed by use manuallly
+    if (view()->note().tCreated.secsTo(view()->note().tModified) != 0)
+        return;
+
+    QWebFrame* f = noteFrame();
+    if (!f)
+        return;
+
+    QString strTitle = f->documentElement().findFirst("body").findFirst("p").toPlainText();
+    strTitle = str2title(strTitle.left(255));
+
+    if (strTitle.isEmpty())
+        return;
+
+    view()->resetTitle(strTitle);
+
+    m_bNewNoteTitleInited = true;
 }
 
 bool CWizDocumentWebView::image2Html(const QString& strImageFile, QString& strHtml)
@@ -507,6 +562,8 @@ void CWizDocumentWebView::viewDocument(const WIZDOCUMENTDATA& doc, bool editing)
 
     // set data
     m_bEditingMode = editing;
+    m_bNewNote = doc.tCreated.secsTo(QDateTime::currentDateTime()) == 0 ? true : false;
+    m_bNewNoteTitleInited = m_bNewNote ? false : true;
 
     // download document if not exist
     CWizDatabase& db = m_dbMgr.db(doc.strKbGUID);
@@ -676,6 +733,7 @@ QWebFrame* CWizDocumentWebView::noteFrame()
             return frames.at(i);
     }
 
+    Q_ASSERT(0);
     return 0;
 }
 
@@ -876,7 +934,12 @@ void CWizDocumentWebView::viewDocumentInEditor(bool editing)
     page()->undoStack()->clear();
     m_timerAutoSave.start();
 
-    update();
+    if (editing) {
+        setFocus(Qt::MouseFocusReason);
+        editorFocus();
+    }
+
+    //update();
 }
 
 void CWizDocumentWebView::onNoteLoadFinished()
@@ -905,6 +968,11 @@ void CWizDocumentWebView::setEditingDocument(bool editing)
 
     QString strScript = QString("setEditing(%1);").arg(editing ? "true" : "false");
     page()->mainFrame()->evaluateJavaScript(strScript);
+
+    if (editing) {
+        setFocus(Qt::MouseFocusReason);
+        editorFocus();
+    }
 
     Q_EMIT statusChanged();
 }
@@ -1008,7 +1076,7 @@ bool CWizDocumentWebView::editorCommandExecuteOutdent()
 bool CWizDocumentWebView::editorCommandExecuteLinkInsert()
 {
     if (!m_editorInsertLinkForm) {
-        m_editorInsertLinkForm = new CWizEditorInsertLinkForm(this);
+        m_editorInsertLinkForm = new CWizEditorInsertLinkForm(window());
         connect(m_editorInsertLinkForm, SIGNAL(accepted()), SLOT(on_editorCommandExecuteLinkInsert_accepted()));
     }
 
@@ -1138,7 +1206,7 @@ bool CWizDocumentWebView::editorCommandExecuteInsertUnorderedList()
 bool CWizDocumentWebView::editorCommandExecuteTableInsert()
 {
     if (!m_editorInsertTableForm) {
-        m_editorInsertTableForm = new CWizEditorInsertTableForm(this);
+        m_editorInsertTableForm = new CWizEditorInsertTableForm(window());
         connect(m_editorInsertTableForm, SIGNAL(accepted()), SLOT(on_editorCommandExecuteTableInsert_accepted()));
     }
 

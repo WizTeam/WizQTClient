@@ -20,21 +20,25 @@ CWizFolderView::CWizFolderView(CWizExplorerApp& app, QWidget *parent)
     setAttribute(Qt::WA_MacShowFocusRect, false);
     setStyle(::WizGetStyle(m_app.userSettings().skin()));
 
-    // use custom scrollbar
     setVerticalScrollMode(QAbstractItemView::ScrollPerItem);
+
+#ifdef WIZNOTE_CUSTOM_SCROLLBAR
     setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     m_vScroll = new CWizScrollBar(this);
     m_vScroll->syncWith(verticalScrollBar());
+#endif
 
     initFolders();
 }
 
 void CWizFolderView::resizeEvent(QResizeEvent* event)
 {
+#ifdef WIZNOTE_CUSTOM_SCROLLBAR
     // reset scrollbar
     m_vScroll->resize(m_vScroll->sizeHint().width(), event->size().height());
     m_vScroll->move(event->size().width() - m_vScroll->sizeHint().width(), 0);
+#endif
 
     QTreeWidget::resizeEvent(event);
 }

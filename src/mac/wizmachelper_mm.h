@@ -3,6 +3,7 @@
 
 #include <QList>
 #include <QPixmap>
+#include <QSize>
 #include <QIcon>
 
 #import <AppKit/AppKit.h>
@@ -23,7 +24,7 @@ QString WizToQString(NSString *string);
 NSString* WizToNSString(const QString &string);
 NSArray* WizToNSArray(const QList<QString> &stringList);
 NSImage* WizToNSImage(const QPixmap &pixmap);
-NSImage* WizToNSImage(const QIcon &icon);
+NSImage* WizToNSImage(const QIcon &icon, const QSize &size = QSize());
 NSString* WizGenGUID();
 
 class CWizChangeCocoaImplementation

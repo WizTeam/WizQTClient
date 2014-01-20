@@ -6,16 +6,16 @@
 #include "share/wizsettings.h"
 #include "wizdef.h"
 
-CWizSearchWidget::CWizSearchWidget(CWizExplorerApp& app, QWidget* parent /* = 0 */)
+CWizSearchWidget::CWizSearchWidget(QWidget* parent /* = 0 */)
     : QWidget(parent)
 {
     QSizePolicy sizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     setSizePolicy(sizePolicy);
     setContentsMargins(1, 1, 1, 1);
 
-    QIcon icon = ::WizLoadSkinIcon(app.userSettings().skin(), palette().window().color(), "search");
+    //QIcon icon = ::WizLoadSkinIcon(app.userSettings().skin(), palette().window().color(), "search");
     QLabel* iconLabel = new QLabel(this);
-    iconLabel->setPixmap(icon.pixmap(16, 16));
+    //iconLabel->setPixmap(icon.pixmap(16, 16));
     iconLabel->setStyleSheet("QLabel{border-width:0;border-style:outset}");
 
     m_editSearch = new QLineEdit(this);
@@ -60,29 +60,3 @@ void CWizSearchWidget::on_search_textChanged(const QString& strText)
 
 #endif // Q_OS_MAC
 
-
-CWizSearchBox::CWizSearchBox(CWizExplorerApp& app, QWidget *parent)
-    : QWidget(parent)
-{
-    s = new CWizSearchWidget(app, this);
-    connect(s, SIGNAL(doSearch(const QString&)), SIGNAL(doSearch(const QString&)));
-}
-
-QSize CWizSearchBox::sizeHint() const
-{
-#ifdef Q_OS_MAC
-    return s->sizeHint() + QSize(6, 2);
-#else
-    return s->sizeHint() + QSize(8, 4);
-#endif
-}
-
-void CWizSearchBox::clear()
-{
-    s->clear();
-}
-
-void CWizSearchBox::focus()
-{
-    s->focus();
-}

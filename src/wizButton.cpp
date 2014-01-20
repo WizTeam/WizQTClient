@@ -15,7 +15,11 @@ CWizButton::CWizButton(QWidget* parent)
 
 QSize CWizButton::sizeHint() const
 {
+#ifdef Q_OS_LINUX
+    return QSize(32, 32);
+#else
     return QSize(24, 24);
+#endif
 }
 
 void CWizButton::setAction(QAction* action)

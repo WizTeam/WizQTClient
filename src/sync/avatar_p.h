@@ -49,6 +49,7 @@ public:
     explicit AvatarHostPrivate(AvatarHost* avatarHost);
     void load(const QString& strUserGUID, bool bForce);
     bool avatar(const QString& strUserId, QPixmap* pixmap);
+    QPixmap orgAvatar(const QString& strUserId);
 
     bool isLoaded(const QString& strUserId);
     QString keyFromGuid(const QString& strUserGUID) const;
@@ -65,6 +66,10 @@ private:
     void loadCache(const QString& strUserGUID);
     void loadCacheDefault();
     void loadCacheFromFile(const QString &key, const QString& strFilePath);
+    //
+    QPixmap loadOrg(const QString& strUserGUID, bool bForce);
+    QPixmap loadOrg(const QString& strUserGUID);
+
 
     void download_impl();
 

@@ -7,13 +7,15 @@
 #include <QtCore/QObject>
 #include <QtCore/QString>
 #include <QtCore/QUrl>
-#include <QtGui/QAction>
+#include <QAction>
 #include <QtDeclarative/QDeclarativeListProperty>
 #include <QtDeclarative/QDeclarativeParserStatus>
 
 
 class CWizMacToolBarPrivate;
 class CWizMacToolBarItem;
+class CWizSearchWidget;
+class QMacCocoaViewContainer;
 
 class CWizMacToolBar
     : public QWidget
@@ -62,12 +64,14 @@ public:
     void showInWindow(QWidget *window);
 
     // Add actions to the Toolbar
-    void addActionGroup(QActionGroup* actionGroup);
     void addAction(QAction* action);
     void addStandardItem(StandardItem standardItem);
     void addSearch(const QString& label, const QString& tooltip);
+    void addWidget(QMacCocoaViewContainer* widget, const QString& label, const QString& tooltip);
 
     void onSearchEndEditing(const QString& str);
+    //
+    CWizSearchWidget* getSearchWidget();
 
 private:
     void showInWindowImpl(QWidget *window);

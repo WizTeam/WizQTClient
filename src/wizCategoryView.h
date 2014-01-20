@@ -19,6 +19,16 @@ class QSettings;
 #define CATEGORY_MESSAGES_COMMENTS          QObject::tr("Comments")
 #define CATEGORY_MESSAGES_SEND_FROM_ME      QObject::tr("Send from me")
 
+
+#ifdef Q_OS_LINUX
+#define WIZNOTE_CUSTOM_SCROLLBAR
+#else
+//#if QT_VERSION < 0x050000
+#define WIZNOTE_CUSTOM_SCROLLBAR
+//#endif
+#endif
+
+
 class CWizCategoryBaseView : public QTreeWidget
 {
     Q_OBJECT
@@ -58,7 +68,7 @@ protected:
     virtual void contextMenuEvent(QContextMenuEvent* e);
 
     virtual QModelIndex moveCursor(CursorAction cursorAction, Qt::KeyboardModifiers modifiers);
-
+    //
 protected:
     CWizExplorerApp& m_app;
     CWizDatabaseManager& m_dbMgr;
@@ -67,7 +77,10 @@ protected:
 private:
     bool m_bDragHovered;
     QPoint m_dragHoveredPos;
+
+#ifdef WIZNOTE_CUSTOM_SCROLLBAR
     CWizScrollBar* m_vScroll;
+#endif
 
 protected Q_SLOTS:
     virtual void on_document_created(const WIZDOCUMENTDATA& doc) { Q_UNUSED(doc); }

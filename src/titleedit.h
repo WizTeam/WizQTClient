@@ -18,6 +18,7 @@ class TitleEdit : public QLineEdit
 
 public:
     explicit TitleEdit(QWidget *parent);
+    void resetTitle(const QString& strTitle);
     void setReadOnly(bool b);
 
     void setCompleter(QCompleter* completer);

@@ -75,6 +75,7 @@ public:
     void setViewMode(int mode);
     void setModified(bool modified);
     void settingsChanged();
+    void resetTitle(const QString& strTitle);
 
     QWebFrame* noteFrame();
 

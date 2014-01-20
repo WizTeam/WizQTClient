@@ -10,6 +10,14 @@ class CWizScrollBar;
 struct WIZMESSAGEDATA;
 typedef std::deque<WIZMESSAGEDATA> CWizMessageDataArray;
 
+#ifdef Q_OS_LINUX
+#define WIZNOTE_CUSTOM_SCROLLBAR
+#else
+//#if QT_VERSION < 0x050000
+#define WIZNOTE_CUSTOM_SCROLLBAR
+//#endif
+#endif
+
 namespace WizService {
 class AsyncApi;
 
@@ -42,8 +50,10 @@ protected:
     virtual void contextMenuEvent(QContextMenuEvent* event);
 
 private:
-    CWizScrollBar* m_vScroll;
     QMenu* m_menu;
+#ifdef WIZNOTE_CUSTOM_SCROLLBAR
+    CWizScrollBar* m_vScroll;
+#endif
 
     MessageListViewItem* m_pCurrentItem;
     QTimer m_timerRead;
