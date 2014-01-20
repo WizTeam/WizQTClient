@@ -31,9 +31,9 @@
   <widget class="QPushButton" name="buttonNow">
    <property name="geometry">
     <rect>
-     <x>290</x>
+     <x>240</x>
      <y>270</y>
-     <width>101</width>
+     <width>151</width>
      <height>27</height>
     </rect>
    </property>
@@ -59,7 +59,7 @@
   <customwidget>
    <class>QWebView</class>
    <extends>QWidget</extends>
-   <header>QtWebKit/QWebView</header>
+   <header>QtWebKitWidgets/QWebView</header>
   </customwidget>
  </customwidgets>
  <resources/>
