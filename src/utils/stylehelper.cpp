@@ -330,7 +330,21 @@ QRect StyleHelper::drawAvatar(QPainter* p, const QRect& rc, const QPixmap& pm)
 
     return rectAvatar;
 }
-
+int StyleHelper::drawSingleLineText(QPainter* p, const QRect& rc, QString& str, int nFlags, const QColor& color, const QFont& font)
+{
+    QPen oldpen = p->pen();
+    QFont oldFont = p->font();
+    //
+    p->setPen(color);
+    p->setFont(font);
+    QRect out;
+    p->drawText(rc, nFlags | Qt::TextSingleLine, str, &out);
+    //
+    p->setPen(oldpen);
+    p->setFont(oldFont);
+    //
+    return out.right();
+}
 QRect StyleHelper::drawText(QPainter* p, const QRect& rc, QString& str, int nLines,
                           int nFlags, const QColor& color, const QFont& font, bool bElided)
 {
