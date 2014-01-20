@@ -38,7 +38,7 @@ public:
     void updateInfo(const WIZDOCUMENTDATA& doc);
     void setEditingDocument(bool editing);
     void updateEditButton(bool bEditing);
-
+    void resetTitle(const QString& strTitle);
 
 private:
     CWizDocumentWebView* m_editor;

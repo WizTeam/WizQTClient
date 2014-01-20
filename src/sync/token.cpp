@@ -7,6 +7,7 @@
 
 #include "wizkmxmlrpc.h"
 #include "asyncapi.h"
+#include "apientry.h"
 
 using namespace WizService;
 using namespace WizService::Internal;
@@ -28,6 +29,50 @@ TokenPrivate::TokenPrivate(Token* token)
 TokenPrivate::~TokenPrivate()
 {
     delete m_mutex;
+}
+
+QString TokenPrivate::token()
+{
+    Q_ASSERT(!m_strUserId.isEmpty() && !m_strPasswd.isEmpty());
+
+    if (m_bProcess)
+        return m_info.strToken;
+
+    CWizKMAccountsServer asServer(ApiEntry::syncUrl());
+    if (m_info.strToken.isEmpty()) {
+        if (asServer.Login(m_strUserId, m_strPasswd)) {
+            m_info = asServer.GetUserInfo();
+            m_info.tTokenExpried = QDateTime::currentDateTime().addSecs(TOKEN_TIMEOUT_INTERVAL);
+            return m_info.strToken;
+        } else {
+            return QString();
+        }
+    }
+
+    if (m_info.tTokenExpried >= QDateTime::currentDateTime()) {
+        return m_info.strToken;
+    } else {
+        WIZUSERINFO info;
+        info.strToken = m_info.strToken;
+        info.strKbGUID = m_info.strKbGUID;
+        asServer.SetUserInfo(info);
+
+        if (asServer.KeepAlive(m_info.strToken)) {
+            m_info.tTokenExpried = QDateTime::currentDateTime().addSecs(TOKEN_TIMEOUT_INTERVAL);
+            return m_info.strToken;
+        } else {
+            QString strToken;
+            if (asServer.GetToken(m_strUserId, m_strPasswd, strToken)) {
+                m_info.strToken = strToken;
+                m_info.tTokenExpried = QDateTime::currentDateTime().addSecs(TOKEN_TIMEOUT_INTERVAL);
+                return m_info.strToken;
+            } else {
+                return QString();
+            }
+        }
+    }
+
+    Q_ASSERT(0);
 }
 
 void TokenPrivate::requestToken()
@@ -148,6 +193,12 @@ Token::~Token()
 Token* Token::instance()
 {
     return m_instance;
+}
+
+QString Token::token()
+{
+    Q_ASSERT(m_instance);
+    return d->token();
 }
 
 void Token::requestToken()

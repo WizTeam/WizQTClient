@@ -3,16 +3,19 @@
 
 #include <QLocale>
 #include <QMainWindow>
+#include <QSize>
+#include <QDebug>
+#include <qmacfunctions.h>
 
-#ifndef QT_MAC_USE_COCOA
-float qt_mac_get_scalefactor(QWidget *window)
-{
-    Q_UNUSED(window);
-    return HIGetScaleFactor();
-}
-#endif
+//#ifndef QT_MAC_USE_COCOA
+//float qt_mac_get_scalefactor(QWidget *window)
+//{
+//    Q_UNUSED(window);
+//    return HIGetScaleFactor();
+//}
+//#endif
 
-#ifdef QT_MAC_USE_COCOA
+//#ifdef QT_MAC_USE_COCOA
 float qt_mac_get_scalefactor(QWidget *window)
     {
     // No high-dpi support on 10.6 and below
@@ -29,7 +32,8 @@ float qt_mac_get_scalefactor(QWidget *window)
             }
             return highestScaleFactor;
         } else {
-            return [qt_mac_window_for(window) backingScaleFactor];
+            //return [qt_mac_window_for(window) backingScaleFactor];
+            return [[NSScreen mainScreen] backingScaleFactor];
         }
     } else
 #endif
@@ -37,7 +41,7 @@ float qt_mac_get_scalefactor(QWidget *window)
         return 1.0; // return 1.0 when compiled on or running on 10.6 and lower.
     }
 }
-#endif
+//#endif
 
 void setupCocoa()
 {
@@ -109,35 +113,42 @@ NSArray* WizToNSArray(const QList<QString> &stringList)
     return array;
 }
 
-//NSImage* WizToNSImage(const QPixmap &pixmap)
-//{
-//    NSBitmapImageRep *bitmapRep = [[NSBitmapImageRep alloc] initWithCGImage:pixmap.toMacCGImageRef()];
-//    NSImage *image = [[NSImage alloc] init];
-//    [image addRepresentation:bitmapRep];
-//    [bitmapRep release];
-//    return image;
-//}
-//
-//
-//
-//NSImage* WizToNSImage(const QIcon &icon)
-//{
-//    QList<QSize> sizes = icon.availableSizes();
-//    if (sizes.empty())
-//        return nil;
-//    //
-//    QSize sz = sizes.at(0);
-//    for (int i = 1; i < sizes.size(); i++)
-//    {
-//        if (sizes.at(i).width() > sz.width())
-//        {
-//            sz = sizes.at(i);
-//        }
-//    }
-//    //
-//    QPixmap pixmap = icon.pixmap(sz);
-//    return WizToNSImage(pixmap);
-//}
+NSImage* WizToNSImage(const QPixmap &pixmap)
+{
+    if (pixmap.isNull())
+    {
+        qDebug() << "WizToNSImage failed: pixmap is null";
+        return nil;
+    }
+    CGImageRef iref = QtMac::toCGImageRef(pixmap);
+    NSSize sz = NSMakeSize(pixmap.width(), pixmap.height());
+    NSImage *image = [[NSImage alloc] initWithCGImage:iref size:sz];
+    return image;
+}
+
+NSImage* WizToNSImage(const QIcon &icon, const QSize& size)
+{
+    QSize sz = size;
+    if (sz.isNull() || sz.width() <= 0 || sz.height() <= 0) {
+        QList<QSize> sizes = icon.availableSizes();
+        if (sizes.empty())
+            return nil;
+
+        QSize sz1 = sizes.at(0);
+        for (int i = 1; i < sizes.size(); i++)
+        {
+            if (sizes.at(i).width() > sz1.width())
+            {
+                sz1 = sizes.at(i);
+            }
+        }
+
+        sz = sz1;
+    }
+
+    QPixmap pixmap = icon.pixmap(sz);
+    return WizToNSImage(pixmap);
+}
 
 NSString* WizGenGUID()
 {

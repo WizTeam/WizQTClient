@@ -72,16 +72,20 @@ CWizCategoryBaseView::CWizCategoryBaseView(CWizExplorerApp& app, QWidget* parent
     setTextElideMode(Qt::ElideMiddle);
     setIndentation(12);
 
-    // use custom scrollbar
-#ifdef Q_OS_LINUX
-    setVerticalScrollMode(QAbstractItemView::ScrollPerItem);
-#else
+    // scrollbar
     setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
+#ifdef Q_OS_MAC
+    verticalScrollBar()->setSingleStep(10);
+#else
+    verticalScrollBar()->setSingleStep(30);
 #endif
+
+#ifdef WIZNOTE_CUSTOM_SCROLLBAR
     setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     m_vScroll = new CWizScrollBar(this);
     m_vScroll->syncWith(verticalScrollBar());
+#endif
 
     // style
     setStyle(::WizGetStyle(m_app.userSettings().skin()));
@@ -89,6 +93,8 @@ CWizCategoryBaseView::CWizCategoryBaseView(CWizExplorerApp& app, QWidget* parent
     QPalette pal = palette();
     pal.setBrush(QPalette::Base, colorBg);
     setPalette(pal);
+    //
+    setCursor(QCursor(Qt::ArrowCursor));
 
     // signals from database
     connect(&m_dbMgr, SIGNAL(documentCreated(const WIZDOCUMENTDATA&)),
@@ -143,9 +149,11 @@ CWizCategoryBaseView::~CWizCategoryBaseView()
 
 void CWizCategoryBaseView::resizeEvent(QResizeEvent* event)
 {
+#ifdef WIZNOTE_CUSTOM_SCROLLBAR
     // reset scrollbar
     m_vScroll->resize(m_vScroll->sizeHint().width(), event->size().height());
     m_vScroll->move(event->size().width() - m_vScroll->sizeHint().width(), 0);
+#endif
 
     QTreeWidget::resizeEvent(event);
 }
@@ -721,7 +729,7 @@ void CWizCategoryView::on_action_user_newFolder()
 {
     CWizLineInputDialog* dialog = new CWizLineInputDialog(tr("New folder"),
                                                           tr("Please input folder name: "),
-                                                          "", this);
+                                                          "", window());
 
     connect(dialog, SIGNAL(finished(int)), SLOT(on_action_user_newFolder_confirmed(int)));
 
@@ -760,7 +768,7 @@ void CWizCategoryView::on_action_user_newTag()
 {
     CWizLineInputDialog* dialog = new CWizLineInputDialog(tr("New tag"),
                                                           tr("Please input tag name: "),
-                                                          "", this);
+                                                          "", window());
     connect(dialog, SIGNAL(finished(int)), SLOT(on_action_user_newTag_confirmed(int)));
 
     dialog->open();
@@ -806,7 +814,7 @@ void CWizCategoryView::on_action_group_newFolder()
 {
     CWizLineInputDialog* dialog = new CWizLineInputDialog(tr("New group folder"),
                                                           tr("Please input folder name: "),
-                                                          "", this);
+                                                          "", window());
 
     connect(dialog, SIGNAL(finished(int)), SLOT(on_action_group_newFolder_confirmed(int)));
 
@@ -863,7 +871,7 @@ void CWizCategoryView::on_action_moveItem()
 
 void CWizCategoryView::on_action_user_moveFolder()
 {
-    CWizFolderSelector* selector = new CWizFolderSelector(tr("Move folder"), m_app, this);
+    CWizFolderSelector* selector = new CWizFolderSelector(tr("Move folder"), m_app, window());
     selector->setAcceptRoot(true);
 
     connect(selector, SIGNAL(finished(int)), SLOT(on_action_user_moveFolder_confirmed(int)));
@@ -950,7 +958,7 @@ void CWizCategoryView::on_action_user_renameFolder()
 
     CWizLineInputDialog* dialog = new CWizLineInputDialog(tr("Rename folder"),
                                                           tr("Please input new folder name: "),
-                                                          p->name(), this);
+                                                          p->name(), window());
     connect(dialog, SIGNAL(finished(int)), SLOT(on_action_user_renameFolder_confirmed(int)));
 
     dialog->open();
@@ -1017,7 +1025,7 @@ void CWizCategoryView::on_action_user_renameTag()
 
     CWizLineInputDialog* dialog = new CWizLineInputDialog(tr("Rename tag"),
                                                           tr("Please input tag name: "),
-                                                          p->name(), this);
+                                                          p->name(), window());
 
     connect(dialog, SIGNAL(finished(int)), SLOT(on_action_user_renameTag_confirmed(int)));
 
@@ -1051,7 +1059,7 @@ void CWizCategoryView::on_action_group_renameFolder()
 
     CWizLineInputDialog* dialog = new CWizLineInputDialog(tr("Rename group folder"),
                                                           tr("Please input folder name: "),
-                                                          p->name(), this);
+                                                          p->name(), window());
 
     connect(dialog, SIGNAL(finished(int)), SLOT(on_action_group_renameFolder_confirmed(int)));
 
@@ -1109,7 +1117,7 @@ void CWizCategoryView::on_action_user_deleteFolder()
     // 2. show progress windows when delete
 
     // setup warning messagebox
-    QMessageBox* msgBox = new QMessageBox(this);
+    QMessageBox* msgBox = new QMessageBox(window());
     msgBox->setWindowTitle(tr("Delete Folder"));
     msgBox->addButton(QMessageBox::Ok);
     msgBox->addButton(QMessageBox::Cancel);
@@ -1141,7 +1149,7 @@ void CWizCategoryView::on_action_user_deleteTag()
 
     // FIXME : as above
 
-    QMessageBox* msgBox = new QMessageBox(this);
+    QMessageBox* msgBox = new QMessageBox(window());
     msgBox->setWindowTitle(tr("Delete tag"));
     msgBox->addButton(QMessageBox::Ok);
     msgBox->addButton(QMessageBox::Cancel);
@@ -1173,7 +1181,7 @@ void CWizCategoryView::on_action_group_deleteFolder()
 
     // FIXME: as above
 
-    QMessageBox* msgBox = new QMessageBox(this);
+    QMessageBox* msgBox = new QMessageBox(window());
     msgBox->setWindowTitle(tr("Delete group folder"));
     msgBox->addButton(QMessageBox::Ok);
     msgBox->addButton(QMessageBox::Cancel);

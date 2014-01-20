@@ -9,11 +9,19 @@
 #include "share/wizuihelper.h"
 #include "wizDocumentListViewItem.h"
 
-
 class CWizTagListWidget;
 class CWizFolderSelector;
 class CWizScrollBar;
 class CWizUserAvatarDownloaderHost;
+
+#ifdef Q_OS_LINUX
+#define WIZNOTE_CUSTOM_SCROLLBAR
+#else
+//#if QT_VERSION < 0x050000
+#define WIZNOTE_CUSTOM_SCROLLBAR
+//#endif
+#endif
+
 
 class CWizDocumentListView : public QListWidget
 {
@@ -57,7 +65,9 @@ private:
     CWizExplorerApp& m_app;
     CWizDatabaseManager& m_dbMgr;
     //QPointer<CWizThumbIndexCache> m_thumbCache;
+#ifdef WIZNOTE_CUSTOM_SCROLLBAR
     CWizScrollBar* m_vScroll;
+#endif
 
     CWizDocumentListView::ViewType m_nViewType;
     int m_nSortingType;

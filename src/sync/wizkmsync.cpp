@@ -114,7 +114,7 @@ void CWizKMSyncThread::onTokenAcquired(const QString& strToken)
 
     m_info = Token::info();
 
-    start();
+    start(QThread::IdlePriority);
 }
 
 void CWizKMSyncThread::doSync()

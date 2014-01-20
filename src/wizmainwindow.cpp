@@ -7,11 +7,15 @@
 #include <QMessageBox>
 #include <QUndoStack>
 #include <QEvent>
-
+#include <QHBoxLayout>
 
 #ifdef Q_OS_MAC
 #include <Carbon/Carbon.h>
 #include "mac/wizmachelper.h"
+#include "mac/wizmactoolbar.h"
+#include "mac/wizSearchWidget_mm.h"
+#else
+#include "wizSearchWidget.h"
 #endif
 
 #include <extensionsystem/pluginmanager.h>
@@ -31,8 +35,6 @@
 #include "share/wizsettings.h"
 #include "share/wizanimateaction.h"
 #include "share/wizSearchIndexer.h"
-
-#include "wizSearchWidget.h"
 
 #include "wiznotestyle.h"
 #include "wizdocumenthistory.h"
@@ -80,7 +82,11 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     , m_labelNotice(NULL)
     , m_optionsAction(NULL)
     #endif
+    #ifdef Q_OS_MAC
+    , m_toolBar(new CWizMacToolBar(this))
+    #else
     , m_toolBar(new QToolBar("Main", this))
+    #endif
     , m_menuBar(new QMenuBar(this))
     , m_statusBar(new CWizStatusBar(*this, this))
     , m_actions(new CWizActions(*this, this))
@@ -105,13 +111,13 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     // search and full text search
     QThread *threadFTS = new QThread();
     m_searchIndexer->moveToThread(threadFTS);
-    threadFTS->start(QThread::LowestPriority);
+    threadFTS->start(QThread::IdlePriority);
 
     // upgrade check
     QThread *thread = new QThread();
     m_upgrade->moveToThread(thread);
     connect(m_upgrade, SIGNAL(checkFinished(bool)), SLOT(on_checkUpgrade_finished(bool)));
-    thread->start();
+    thread->start(QThread::IdlePriority);
 
     // syncing thread
     connect(m_sync, SIGNAL(processLog(const QString&)), SLOT(on_syncProcessLog(const QString&)));
@@ -497,7 +503,24 @@ void MainWindow::initToolBar()
     setUnifiedTitleAndToolBarOnMac(true);
 #endif
 
-    m_toolBar->setIconSize(QSize(24, 24));
+#ifdef Q_OS_MAC
+    m_toolBar->showInWindow(this);
+
+    CWizUserInfoWidget* info = new CWizUserInfoWidget(*this, m_toolBar);
+    m_toolBar->addWidget(info, "", "");
+
+    m_toolBar->addStandardItem(CWizMacToolBar::Space);
+    m_toolBar->addAction(m_actions->actionFromName(WIZACTION_GLOBAL_SYNC));
+    m_toolBar->addStandardItem(CWizMacToolBar::Space);
+    m_toolBar->addAction(m_actions->actionFromName(WIZACTION_GLOBAL_NEW_DOCUMENT));
+    m_toolBar->addStandardItem(CWizMacToolBar::FlexibleSpace);
+    m_toolBar->addSearch(tr("Search"), "");
+    //
+    m_search = m_toolBar->getSearchWidget();
+#else
+    addToolBar(m_toolBar);
+
+    m_toolBar->setIconSize(QSize(32, 32));
     m_toolBar->setContextMenuPolicy(Qt::PreventContextMenu);
     m_toolBar->setMovable(false);
     m_toolBar->setToolButtonStyle(Qt::ToolButtonIconOnly);
@@ -522,16 +545,15 @@ void MainWindow::initToolBar()
 
     m_toolBar->addWidget(new CWizSpacer(m_toolBar));
 
-    m_searchBox = new CWizSearchBox(*this, this);
-    connect(m_searchBox, SIGNAL(doSearch(const QString&)),
-            SLOT(on_search_doSearch(const QString&)));
+    m_search = new CWizSearchWidget(this);
 
-    m_toolBar->addWidget(m_searchBox);
+    m_toolBar->addWidget(m_search);
 
-    m_toolBar->layout()->setAlignment(m_searchBox, Qt::AlignBottom);
+    m_toolBar->layout()->setAlignment(m_search, Qt::AlignBottom);
     m_toolBar->addWidget(new CWizFixedSpacer(QSize(20, 1), m_toolBar));
-
-    addToolBar(m_toolBar);
+#endif
+    //
+    connect(m_search, SIGNAL(doSearch(const QString&)), SLOT(on_search_doSearch(const QString&)));
 }
 
 void MainWindow::initClient()
@@ -613,7 +635,6 @@ QWidget* MainWindow::createListView()
     m_labelDocumentsHint->setMargin(5);
     layoutActions->addWidget(m_labelDocumentsHint);
     connect(m_category, SIGNAL(documentsHint(const QString&)), SLOT(on_documents_hintChanged(const QString&)));
-    connect(m_searchBox, SIGNAL(doSearch(const QString&)), SLOT(on_documents_hintChanged(const QString&)));
 
     m_labelDocumentsCount = new QLabel(tr("0 articles"), this);
     m_labelDocumentsCount->setStyleSheet("font: 12px; color: #787878");
@@ -986,7 +1007,7 @@ void MainWindow::on_actionRebuildFTS_triggered()
 
 void MainWindow::on_actionSearch_triggered()
 {
-    m_searchBox->focus();
+    m_search->focus();
 }
 
 void MainWindow::on_actionResetSearch_triggered()
@@ -995,8 +1016,8 @@ void MainWindow::on_actionResetSearch_triggered()
         m_searcher->abort();
     }
 
-    m_searchBox->clear();
-    m_searchBox->focus();
+    m_search->clear();
+    m_search->focus();
     m_category->restoreSelection();
 }
 

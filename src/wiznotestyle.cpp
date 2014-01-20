@@ -190,34 +190,29 @@ void CWizNoteStyle::drawCategoryViewItem(const QStyleOptionViewItemV4 *vopt,
     }
 
     QFont f;
-    int nHeight1 = Utils::StyleHelper::fontNormal(f);
+    Utils::StyleHelper::fontNormal(f);
 
     QFont fontCount;
-    int nHeight2 = Utils::StyleHelper::fontExtend(fontCount);
+    Utils::StyleHelper::fontExtend(fontCount);
 
-    QRect rcd = subElementRect(SE_ItemViewItemText, vopt, view);
-    int nAdjustHeight1 = (rcd.height() - nHeight1)/2;
-    int nAdjustHeight2 = (rcd.height() - nHeight2)/2;
-
-    // compute document count string length and leave enough space for drawing
-    QRect rct(rcd);
-    rct.adjust(0, nAdjustHeight1, 0, 0);
+    QRect rcText = subElementRect(SE_ItemViewItemText, vopt, view);
     QString strCount = pItem->countString;
-    if (!strCount.isEmpty()) {
-        int nCountWidthMax = QFontMetrics(f).width(strCount);
-        rct.adjust(0, 0, -nCountWidthMax, 0);
-    }
 
     QString strText = vopt->text;
     if (!strText.isEmpty()) {
         QColor colorText = Utils::StyleHelper::treeViewItemText(bSelected);
-        rct = Utils::StyleHelper::drawText(p, rct, strText, 1, Qt::AlignBottom, colorText, f);
+
+        p->setPen(colorText);
+        int right = Utils::StyleHelper::drawSingleLineText(p, rcText, strText, Qt::AlignVCenter, colorText, f);
+        //
+        rcText.setLeft(right + 4);
     }
 
     if (!strCount.isEmpty()) {
-        rcd.adjust(rct.width(), nAdjustHeight2, 0, 0);
+        QRect rcCount = rcText;
+        rcCount.setTop(rcCount.top() + 1);  //add extra 1 pixel for vcenter / 2
         QColor colorCount = Utils::StyleHelper::treeViewItemTextExtend(bSelected);
-        Utils::StyleHelper::drawText(p, rcd, strCount, 1, Qt::AlignBottom, colorCount, fontCount);
+        Utils::StyleHelper::drawSingleLineText(p, rcCount, strCount, Qt::AlignVCenter, colorCount, fontCount);
     }
 
     p->restore();

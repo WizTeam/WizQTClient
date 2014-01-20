@@ -21,6 +21,7 @@ public:
     void keepAlive(const QString& strToken, const QString& strKbGUID);
     void registerAccount(const QString& strUserId, const QString& strPasswd, const QString& strInviteCode);
     void getCommentsCount(const QString& strUrl);
+    void setMessageStatus(const QString& ids, bool bRead);
 
     int lastErrorCode() { return m_nErrorCode; }
     QString lastErrorMessage() { return m_strErrorMessage; }
@@ -34,6 +35,7 @@ private:
     bool keepAlive_impl(const QString& strToken, const QString &strKbGUID);
     bool registerAccount_impl(const QString& strUserId, const QString& strPasswd, const QString& strInviteCode);
     void getCommentsCount_impl(const QString& strUrl);
+    void setMessageStatus_impl(const QString& ids, bool bRead);
 
 Q_SIGNALS:
     void loginFinished(const WIZUSERINFO& info);

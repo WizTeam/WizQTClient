@@ -150,6 +150,15 @@ CWizDocumentView* TitleEdit::noteView()
     return 0;
 }
 
+void TitleEdit::resetTitle(const QString& strTitle)
+{
+    if (strTitle.isEmpty())
+        return;
+
+    setText(strTitle);
+    onTitleEditingFinished();
+}
+
 void TitleEdit::setReadOnly(bool b)
 {
     QLineEdit::setReadOnly(b);

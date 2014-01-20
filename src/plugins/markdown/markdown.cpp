@@ -18,15 +18,15 @@ using namespace Core;
 namespace Markdown {
 namespace Internal {
 
-Markdown::Markdown()
+MarkdownPlugin::MarkdownPlugin()
 {
 }
 
-Markdown::~Markdown()
+MarkdownPlugin::~MarkdownPlugin()
 {
 }
 
-bool Markdown::initialize(const QStringList &arguments, QString *errorMessage)
+bool MarkdownPlugin::initialize(const QStringList &arguments, QString *errorMessage)
 {
     Q_UNUSED(arguments);
     Q_UNUSED(errorMessage);
@@ -34,13 +34,13 @@ bool Markdown::initialize(const QStringList &arguments, QString *errorMessage)
     return copyRes2Cache();
 }
 
-void Markdown::extensionsInitialized()
+void MarkdownPlugin::extensionsInitialized()
 {
     connect(Core::ICore::instance(), SIGNAL(viewNoteLoaded(Core::INoteView*,WIZDOCUMENTDATA,bool)),
             SLOT(onViewNoteLoaded(Core::INoteView*,WIZDOCUMENTDATA,bool)));
 }
 
-void Markdown::onViewNoteLoaded(INoteView* view, const WIZDOCUMENTDATA& doc, bool bOk)
+void MarkdownPlugin::onViewNoteLoaded(INoteView* view, const WIZDOCUMENTDATA& doc, bool bOk)
 {
     if (!bOk)
         return;
@@ -49,7 +49,7 @@ void Markdown::onViewNoteLoaded(INoteView* view, const WIZDOCUMENTDATA& doc, boo
         render(view->noteFrame());
 }
 
-bool Markdown::canRender(INoteView* view, const WIZDOCUMENTDATA& doc)
+bool MarkdownPlugin::canRender(INoteView* view, const WIZDOCUMENTDATA& doc)
 {
     if (view->isEditing())
         return false;
@@ -66,7 +66,7 @@ bool Markdown::canRender(INoteView* view, const WIZDOCUMENTDATA& doc)
     return false;
 }
 
-void Markdown::render(QWebFrame* frame)
+void MarkdownPlugin::render(QWebFrame* frame)
 {
     Q_ASSERT(frame);
 
@@ -90,7 +90,7 @@ void Markdown::render(QWebFrame* frame)
 }
 
 // FIXME: about to remove
-QString Markdown::cachePath()
+QString MarkdownPlugin::cachePath()
 {
     QString strCachePath = qgetenv("XDG_CACHE_HOME");
     if (strCachePath.isEmpty()) {
@@ -108,7 +108,7 @@ QString Markdown::cachePath()
     return strCachePath;
 }
 
-bool Markdown::copyRes2Cache()
+bool MarkdownPlugin::copyRes2Cache()
 {
     QString strPath = cachePath() + "plugins/markdown/";
     QDir cacheDir(strPath);
@@ -146,4 +146,4 @@ bool Markdown::copyRes2Cache()
 } // namespce Internal
 } // namespce Markdown
 
-Q_EXPORT_PLUGIN(Markdown::Internal::Markdown)
+Q_EXPORT_PLUGIN(Markdown::Internal::MarkdownPlugin)

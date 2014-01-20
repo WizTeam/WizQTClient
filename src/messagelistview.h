@@ -2,6 +2,7 @@
 #define WIZSERVICE_INTERNAL_MESSAGELISTVIEW_H
 
 #include <QListWidget>
+#include <QTimer>
 #include <deque>
 
 class CWizScrollBar;
@@ -9,7 +10,17 @@ class CWizScrollBar;
 struct WIZMESSAGEDATA;
 typedef std::deque<WIZMESSAGEDATA> CWizMessageDataArray;
 
+#ifdef Q_OS_LINUX
+#define WIZNOTE_CUSTOM_SCROLLBAR
+#else
+//#if QT_VERSION < 0x050000
+#define WIZNOTE_CUSTOM_SCROLLBAR
+//#endif
+#endif
+
 namespace WizService {
+class AsyncApi;
+
 namespace Internal {
 
 class MessageListViewItem;
@@ -39,13 +50,25 @@ protected:
     virtual void contextMenuEvent(QContextMenuEvent* event);
 
 private:
-    CWizScrollBar* m_vScroll;
     QMenu* m_menu;
+#ifdef WIZNOTE_CUSTOM_SCROLLBAR
+    CWizScrollBar* m_vScroll;
+#endif
+
+    MessageListViewItem* m_pCurrentItem;
+    QTimer m_timerRead;
+    QList<qint64> m_lsIds;
+    QTimer m_timerTriggerSync;
+    WizService::AsyncApi* m_api;
 
 Q_SIGNALS:
     void sizeChanged(int nCount);
 
 private Q_SLOTS:
+    void onCurrentItemChanged(QListWidgetItem* current, QListWidgetItem* previous);
+    void onReadTimeout();
+    void onSyncTimeout();
+
     void onAvatarLoaded(const QString& strUserId);
 
     void on_action_message_mark_read();

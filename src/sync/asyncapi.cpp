@@ -14,6 +14,7 @@
 
 #include "apientry.h"
 #include "wizkmxmlrpc.h"
+#include "token.h"
 
 using namespace WizService;
 
@@ -161,4 +162,31 @@ void AsyncApi::getCommentsCount_impl(const QString& strUrl)
 
     nTotalComments = d.FindMember("comment_count")->value.GetInt();
     Q_EMIT getCommentsCountFinished(nTotalComments);
+}
+
+void AsyncApi::setMessageStatus(const QString& ids, bool bRead)
+{
+    QtConcurrent::run(this, &AsyncApi::setMessageStatus_impl, ids, bRead);
+}
+
+void AsyncApi::setMessageStatus_impl(const QString& ids, bool bRead)
+{
+    QString strToken = Token::token();
+    qDebug() << "set message status, strken:" << strToken;
+
+    if (strToken.isEmpty()) {
+        return;
+    }
+
+    CWizKMAccountsServer aServer(ApiEntry::syncUrl());
+
+    WIZUSERINFO info = Token::info();
+    info.strToken = strToken;
+    aServer.SetUserInfo(info);
+
+    bool ret = aServer.SetMessageReadStatus(ids, bRead);
+    if (!ret) {
+        m_nErrorCode = aServer.GetLastErrorCode();
+        m_strErrorMessage = aServer.GetLastErrorMessage();
+    }
 }

@@ -31,7 +31,7 @@ class CWizAnimateAction;
 class CWizOptionsWidget;
 class CWizStatusBar;
 
-class CWizSearchBox;
+class CWizSearchWidget;
 class CWizSearcher;
 class CWizSearchIndexer;
 
@@ -40,6 +40,8 @@ class CWizObjectDataDownloaderHost;
 class CWizUserAvatarDownloaderHost;
 class CWizKMSyncThread;
 class CWizUserVerifyDialog;
+
+class CWizMacToolBar;
 
 class CWizDocumentWebView;
 
@@ -98,7 +100,12 @@ private:
     CWizObjectDataDownloaderHost* m_objectDownloaderHost;
     //CWizUserAvatarDownloaderHost* m_avatarDownloaderHost;
 
+#ifdef Q_OS_MAC
+    CWizMacToolBar* m_toolBar;
+#else
     QToolBar* m_toolBar;
+#endif
+
     QMenuBar* m_menuBar;
     CWizStatusBar* m_statusBar;
 
@@ -130,7 +137,7 @@ private:
     QString m_strSearchKeywords;
 
     CWizSearchIndexer* m_searchIndexer;
-    QPointer<CWizSearchBox> m_searchBox;
+    QPointer<CWizSearchWidget> m_search;
 
     bool m_bRestart;
     bool m_bLogoutRestart;

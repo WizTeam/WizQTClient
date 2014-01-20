@@ -3,13 +3,6 @@
 #include <QWidget>
 #include <QApplication>
 
-//#if 0
-
-// Qt5 can't find this macro!!!
-// refer to : http://qt-project.org/forums/viewthread/25033
-// and this : https://bugreports.qt-project.org/browse/QTBUG-27318
-//#ifdef QT_MAC_USE_COCOA
-
 #import <Cocoa/Cocoa.h>
 
 #include "wizmachelper_mm.h"
@@ -60,8 +53,12 @@
 
             bool bHandled = false;
 
-            //6 Z, 7 X, 8 C, 9 V
-            if (keyCode == 6)
+            //0 A, 6 Z, 7 X, 8 C, 9 V
+            if (keyCode == 0) {
+                [textView selectAll:self];
+                bHandled = true;
+            }
+            else if (keyCode == 6)
             {
                 // Lead crash!
 //                if ([[textView undoManager] canUndo])
@@ -107,17 +104,17 @@
 }
 @end
 
-CWizSearchWidget::CWizSearchWidget(CWizExplorerApp& app, QWidget* parent /* = 0 */)
+CWizSearchWidget::CWizSearchWidget(QWidget* parent /* = 0 */)
     : QMacCocoaViewContainer(0, parent)
 {
-    Q_UNUSED(app);
-
     // Many Cocoa objects create temporary autorelease objects,
     // so create a pool to catch them.
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 
     // Create the NSSearchField, set it on the QCocoaViewContainer.
     WizSearchField* pSearchField = [[WizSearchField alloc] init];
+    [pSearchField setAutoresizesSubviews: YES];
+    [pSearchField setAutoresizingMask: NSViewHeightSizable | NSViewWidthSizable];
     setCocoaView(pSearchField);
 
     WizSearchTarget *bt = [[WizSearchTarget alloc] initWithObject:this];
@@ -161,14 +158,10 @@ void CWizSearchWidget::focus()
 
 QSize CWizSearchWidget::sizeHint() const
 {
-    return QSize(400, height());
+    return QSize(300, 50);
 }
 
 void CWizSearchWidget::on_search_textChanged(const QString& strText)
 {
     emit doSearch(strText);
 }
-
-//#endif
-
-//#endif // QT_MAC_USE_COCOA

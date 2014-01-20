@@ -37,15 +37,32 @@
  **
  ****************************************************************************/
 
-#include <QtGui/QApplication>
+#include <QApplication>
 #include <QtDeclarative/QDeclarativeView>
-#include <QtCore/QtCore>
+#include <QtCore>
 #include <QAction>
 #include "wizmachelper.h"
 #include "wizmactoolbar.h"
 #include "wizmactoolbardelegate.h"
 
 #import <AppKit/AppKit.h>
+
+class CWizNSAutoReleasePool
+{
+public:
+    CWizNSAutoReleasePool()
+    {
+        pool = [[NSAutoreleasePool alloc] init];
+    }
+
+    ~CWizNSAutoReleasePool()
+    {
+       [pool release];
+    }
+
+private:
+    NSAutoreleasePool* pool;
+};
 
 class CWizMacToolBarPrivate
 {
@@ -58,8 +75,6 @@ public:
 CWizMacToolBar::CWizMacToolBar(QWidget *parent)
     : QWidget(parent)
 {
-    //qDebug() << "CWizMacToolBar()";
-
     CWizNSAutoReleasePool pool;
 
     d = new CWizMacToolBarPrivate();
@@ -67,8 +82,8 @@ CWizMacToolBar::CWizMacToolBar(QWidget *parent)
     d->delegate = [[CWizMacToolBarDelegate alloc] initWithToolbar:d->toolbar qtToolBar:this];
     [d->toolbar setAllowsUserCustomization:NO];
     //  [d->Toolbar setAutosavesConfiguration:YES];
-    [d->toolbar setDisplayMode:NSToolbarDisplayModeIconAndLabel];
-    //[d->Toolbar setSizeMode: NSToolbarSizeModeSmall];
+    [d->toolbar setDisplayMode:NSToolbarDisplayModeIconOnly];
+    //[d->toolbar setSizeMode: NSToolbarSizeModeSmall];
     [d->toolbar setDelegate: d->delegate];
 
     setFocusPolicy(Qt::StrongFocus);
@@ -107,7 +122,7 @@ void CWizMacToolBar::setSizeMode(SizeMode sizeMode)
 void CWizMacToolBar::showInWindow(QWidget *window)
 {
     d->m_targetWindow = window;
-    QTimer::singleShot(300, this, SLOT(showInTargetWindow()));
+    QTimer::singleShot(100, this, SLOT(showInTargetWindow()));
 }
 
 // internal invokable, show the Toolbar in m_targetWindow
@@ -120,23 +135,12 @@ void CWizMacToolBar::showInTargetWindow()
 void CWizMacToolBar::showInWindowImpl(QWidget *window)
 {
     CWizNSAutoReleasePool pool;
-    NSWindow *macWindow = qt_mac_window_for(window);
-//    qDebug() << "macWindow" << macWindow;
 
+    NSView *nsview = (NSView *)window->winId();
+    NSWindow *macWindow = [nsview window];
 
- //   qDebug() << "CWizMacToolBar NSWidnow setToolbar";
-//    [macWindow orderOut: macWindow];
     [macWindow setToolbar: d->toolbar];
     [d->toolbar setVisible: YES];
-    //[macWindow orderFront: macWindow];
-    //    [macWindow setShowsToolbarButton:YES];
-
-//    d->delegate
-}
-
-void CWizMacToolBar::addActionGroup(QActionGroup* actionGroup)
-{
-    [d->delegate addActionGroup:actionGroup];
 }
 
 void CWizMacToolBar::addAction(QAction* action)
@@ -154,9 +158,17 @@ void CWizMacToolBar::addSearch(const QString& label, const QString& tooltip)
     [d->delegate addSearch:label tooltip:tooltip];
 }
 
+void CWizMacToolBar::addWidget(QMacCocoaViewContainer* widget, const QString& label, const QString& tooltip)
+{
+    [d->delegate addWidget:widget label:label tooltip:tooltip];
+}
 
 void CWizMacToolBar::onSearchEndEditing(const QString& str)
 {
     emit doSearch(str);
 }
 
+CWizSearchWidget* CWizMacToolBar::getSearchWidget()
+{
+    return [d->delegate getSearchWidget];
+}

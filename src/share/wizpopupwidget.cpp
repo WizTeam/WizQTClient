@@ -48,6 +48,7 @@ void CWizPopupWidget::showAtPoint(const QPoint& pt)
     int left = pt.x() - xOffset;
     int top = pt.y() - yOffset;
 
+#if 0
     m_pos.setX(left);
     m_pos.setY(top);
 
@@ -66,7 +67,9 @@ void CWizPopupWidget::showAtPoint(const QPoint& pt)
     group->addAnimation(anim2);
 
     group->start();
+#endif
 
+    setGeometry(left, top, sizeHint().width(), sizeHint().height());
     show();
 }
 

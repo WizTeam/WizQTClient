@@ -13,14 +13,14 @@ class QWebFrame;
 namespace Markdown {
 namespace Internal {
 
-class Markdown : public ExtensionSystem::IPlugin
+class MarkdownPlugin : public ExtensionSystem::IPlugin
 {
     Q_OBJECT
     Q_PLUGIN_METADATA(IID "wiz.plugin.system.internal.markdown")
 
 public:
-    Markdown();
-    ~Markdown();
+    MarkdownPlugin();
+    ~MarkdownPlugin();
 
     bool initialize(const QStringList& arguments, QString* errorMessage = 0);
     void extensionsInitialized();
