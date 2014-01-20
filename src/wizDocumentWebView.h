@@ -110,7 +110,7 @@ public:
 private:
     void initEditor();
     void viewDocumentInEditor(bool editing);
-
+    void resetTitle();
 
     bool isInternalUrl(const QUrl& url);
     void viewDocumentByUrl(const QUrl& url);
@@ -139,6 +139,7 @@ private:
     QTimer m_timerAutoSave;
     bool m_bEditorInited;
     bool m_bEditingMode;
+    bool m_bNewNote;
 
     CWizDocumentWebViewWorkerPool* m_workerPool;
     CWizObjectDataDownloaderHost* m_downloaderHost;

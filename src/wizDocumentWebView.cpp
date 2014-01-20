@@ -11,6 +11,7 @@
 
 #include <QApplication>
 #include <QWebFrame>
+#include <QWebElement>
 #include <QUndoStack>
 
 #include <coreplugin/icore.h>
@@ -268,6 +269,7 @@ CWizDocumentWebView::CWizDocumentWebView(CWizExplorerApp& app, QWidget* parent)
     , m_app(app)
     , m_dbMgr(app.databaseManager())
     , m_bEditorInited(false)
+    , m_bNewNote(false)
     , m_noteFrame(0)
 {
     CWizDocumentWebViewPage* page = new CWizDocumentWebViewPage(this);
@@ -364,6 +366,9 @@ void CWizDocumentWebView::keyPressEvent(QKeyEvent* event)
     QWebView::keyPressEvent(event);
 #endif
 
+    if ((event->key() == Qt::Key_Enter || event->key() == Qt::Key_Return) && m_bNewNote) {
+        resetTitle();
+    }
 }
 
 void CWizDocumentWebView::focusInEvent(QFocusEvent *event)
@@ -416,6 +421,17 @@ void CWizDocumentWebView::dragEnterEvent(QDragEnterEvent *event)
             event->acceptProposedAction();
         }
     }
+}
+
+void CWizDocumentWebView::resetTitle()
+{
+    QWebFrame* f = noteFrame();
+    if (!f)
+        return;
+
+    QString strTitle = f->documentElement().findFirst("body").findFirst("p").toPlainText();
+    if (!strTitle.isEmpty())
+        view()->resetTitle(strTitle);
 }
 
 bool CWizDocumentWebView::image2Html(const QString& strImageFile, QString& strHtml)
@@ -507,6 +523,7 @@ void CWizDocumentWebView::viewDocument(const WIZDOCUMENTDATA& doc, bool editing)
 
     // set data
     m_bEditingMode = editing;
+    m_bNewNote = doc.tCreated.secsTo(QDateTime::currentDateTime()) == 0 ? true : false;
 
     // download document if not exist
     CWizDatabase& db = m_dbMgr.db(doc.strKbGUID);
@@ -676,6 +693,7 @@ QWebFrame* CWizDocumentWebView::noteFrame()
             return frames.at(i);
     }
 
+    Q_ASSERT(0);
     return 0;
 }
 

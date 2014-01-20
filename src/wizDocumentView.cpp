@@ -213,6 +213,11 @@ void CWizDocumentView::settingsChanged()
     setViewMode(m_userSettings.noteViewMode());
 }
 
+void CWizDocumentView::resetTitle(const QString& strTitle)
+{
+    m_title->resetTitle(strTitle);
+}
+
 void CWizDocumentView::setEditorFocus()
 {
     m_web->setFocus(Qt::MouseFocusReason);
