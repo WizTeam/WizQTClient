@@ -69,7 +69,7 @@
   <widget class="QPushButton" name="btnSaveAs">
    <property name="geometry">
     <rect>
-     <x>170</x>
+     <x>215</x>
      <y>360</y>
      <width>131</width>
      <height>32</height>
@@ -85,7 +85,7 @@
   <widget class="QPushButton" name="btnCopyToClipboard">
    <property name="geometry">
     <rect>
-     <x>330</x>
+     <x>346</x>
      <y>360</y>
      <width>151</width>
      <height>32</height>
@@ -110,7 +110,7 @@
   <widget class="QPushButton" name="buttonClear">
    <property name="geometry">
     <rect>
-     <x>30</x>
+     <x>5</x>
      <y>360</y>
      <width>111</width>
      <height>32</height>
