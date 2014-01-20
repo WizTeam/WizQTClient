@@ -454,6 +454,10 @@ void CWizDocumentWebView::tryResetTitle()
     if (m_bNewNoteTitleInited)
         return;
 
+    // if note already modified, maybe title changed by use manuallly
+    if (view()->note().tCreated.secsTo(view()->note().tModified) != 0)
+        return;
+
     QWebFrame* f = noteFrame();
     if (!f)
         return;
