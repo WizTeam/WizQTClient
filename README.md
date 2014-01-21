@@ -1,10 +1,7 @@
-WizNote for Mac/Linux
-===========
+# WizNote for Mac/Linux
 
 
-cross-platform cloud based note-taking client
----
-
+## cross-platform cloud based note-taking client
 WizNote is an open-sourced project, published under GPLv3 for individual/personal users and custom commercial licence for company users.
 
 This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version. This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
@@ -12,8 +9,7 @@ This program is free software: you can redistribute it and/or modify it under th
 company users who want to adopt/modify/redistribute the source/binary form of this project need consult Wiz conpany and/or buy a commercial licence for your rights.
 
 
-Introduction
----
+## Introduction
 
 The project is based on Qt, aimed to provide an excellent PKM(personal knowledge management) desktop environment based on cloud usage. At present, we only have Wiz cloud backend(our company) on the table. but we strong encourage developers to contribute to this project to add more cloud backend for different cloud providers like evernote, youdao, etc...even offline usage.
 
@@ -24,8 +20,7 @@ freedom, means knowledge, means PKM, means this WizNote client.
 if you are windows or portable platform users, we have WizNote for windows, ios, android from our [Homepage](http://www.wiznote.com)
 
 
-Compile
----
+## Compile
 
 ### Requirement:
 
