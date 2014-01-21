@@ -38,7 +38,7 @@ static inline QStringList getPluginPaths()
     // 1) "plugins" (Win/Linux)
     QString pluginPath = rootDirPath;
     pluginPath += QLatin1Char('/');
-    pluginPath += QLatin1String("/share/wiznote/plugins");
+    pluginPath += QLatin1String("/lib/wiznote/plugins");
     rc.push_back(pluginPath);
 #else
     // 2) "PlugIns" (OS X)

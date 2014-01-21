@@ -38,5 +38,5 @@ target_link_libraries(coreplugin extensionsystem)
 add_custom_command(TARGET coreplugin POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/Core.pluginspec ${WIZNOTE_PLUGIN_DIR})
 
-install(FILES ${coreplugin_SPEC} DESTINATION share/wiznote/plugins)
-install(TARGETS coreplugin DESTINATION share/wiznote/plugins)
+install(FILES ${coreplugin_SPEC} DESTINATION lib/wiznote/plugins)
+install(TARGETS coreplugin DESTINATION lib/wiznote/plugins)

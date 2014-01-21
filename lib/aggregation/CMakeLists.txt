@@ -18,4 +18,4 @@ include_directories(
     ${CMAKE_CURRENT_BINARY_DIR}
 )
 
-install(TARGETS aggregation DESTINATION share/wiznote/plugins)
+install(TARGETS aggregation DESTINATION lib/wiznote/plugins)

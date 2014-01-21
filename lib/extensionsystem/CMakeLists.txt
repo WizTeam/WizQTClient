@@ -60,4 +60,4 @@ if(UNIX AND NOT APPLE)
     target_link_libraries(extensionsystem ${CMAKE_DL_LIBS})
 endif(UNIX AND NOT APPLE)
 
-install(TARGETS extensionsystem DESTINATION share/wiznote/plugins)
+install(TARGETS extensionsystem DESTINATION lib/wiznote/plugins)
