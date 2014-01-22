@@ -1745,7 +1745,7 @@ UINT CWizHtmlReader::parseDocument(void)
                 if ( (dwCharDataLen) || (strCharacters.length()) )
 				{
                     strCharacters += QString::fromUtf16(&m_lpszBuffer[dwCharDataStart], dwCharDataLen);
-                    strCharacters = strCharacters.simplified();
+                    //strCharacters = strCharacters.simplified();
 					
                     if ( (strCharacters.length()) &&
 						 (getEventNotify(notifyCharacters)) )
@@ -1830,7 +1830,7 @@ UINT CWizHtmlReader::parseDocument(void)
 	{
         strCharacters += QString::fromUtf16(&m_lpszBuffer[dwCharDataStart], dwCharDataLen);
         strCharacters += QChar(ch);
-        strCharacters = strCharacters.simplified();
+        //strCharacters = strCharacters.simplified();
 
         if ( (strCharacters.length()) &&
 			 (getEventNotify(notifyCharacters)) )
