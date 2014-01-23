@@ -6,12 +6,14 @@ set(coreplugin_HEADERS
     coreconstants.h
     icore.h
     inoteview.h
+    itreeview.h
 )
 
 set(coreplugin_SOURCES
     coreplugin.cpp
     icore.cpp
     inoteview.cpp
+    itreeview.cpp
 )
 
 set(coreplugin_FORMS

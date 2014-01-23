@@ -56,7 +56,7 @@ using namespace Core::Internal;
 /* ------------------------------ CWizCategoryBaseView ------------------------------ */
 
 CWizCategoryBaseView::CWizCategoryBaseView(CWizExplorerApp& app, QWidget* parent)
-    : QTreeWidget(parent)
+    : ITreeView(parent)
     , m_app(app)
     , m_dbMgr(app.databaseManager())
     , m_bDragHovered(false)
@@ -141,10 +141,6 @@ CWizCategoryBaseView::CWizCategoryBaseView(CWizExplorerApp& app, QWidget* parent
 
     connect(&m_dbMgr, SIGNAL(databaseBizchanged(const QString&)),
             SLOT(on_group_bizChanged(const QString&)));
-}
-
-CWizCategoryBaseView::~CWizCategoryBaseView()
-{
 }
 
 void CWizCategoryBaseView::mousePressEvent(QMouseEvent* event)
@@ -436,6 +432,13 @@ CWizCategoryView::CWizCategoryView(CWizExplorerApp& app, QWidget* parent)
     initMenus();
 
     connect(this, SIGNAL(itemSelectionChanged()), SLOT(on_itemSelectionChanged()));
+
+    ExtensionSystem::PluginManager::addObject(this);
+}
+
+CWizCategoryView::~CWizCategoryView()
+{
+    ExtensionSystem::PluginManager::removeObject(this);
 }
 
 void CWizCategoryView::initMenus()

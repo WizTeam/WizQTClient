@@ -1,9 +1,8 @@
 #ifndef WIZCATEGORYCTRL_H
 #define WIZCATEGORYCTRL_H
 
-#include <QTreeWidget>
 #include <QPointer>
-
+#include <coreplugin/itreeview.h>
 #include "wizCategoryViewItem.h"
 
 class CWizFolder;
@@ -28,14 +27,12 @@ class QSettings;
 //#endif
 #endif
 
-
-class CWizCategoryBaseView : public QTreeWidget
+class CWizCategoryBaseView : public Core::ITreeView
 {
     Q_OBJECT
 
 public:
     CWizCategoryBaseView(CWizExplorerApp& app, QWidget *parent = 0);
-    virtual ~CWizCategoryBaseView();
 
     QString selectedItemKbGUID();
     void getDocuments(CWizDocumentDataArray& arrayDocument);
@@ -115,6 +112,7 @@ class CWizCategoryView : public CWizCategoryBaseView
 
 public:
     CWizCategoryView(CWizExplorerApp& app, QWidget *parent = 0);
+    virtual ~CWizCategoryView();
     void init();
 
     QString m_strSelectedId;

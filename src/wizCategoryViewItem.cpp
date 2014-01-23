@@ -20,6 +20,8 @@
 #define PREDEFINED_TRASH            QObject::tr("Trash")
 #define PREDEFINED_UNCLASSIFIED     QObject::tr("Unclassified")
 
+using namespace Core;
+
 /* ------------------------------ CWizCategoryViewItemBase ------------------------------ */
 
 CWizCategoryViewItemBase::CWizCategoryViewItemBase(CWizExplorerApp& app,
@@ -275,7 +277,7 @@ void CWizCategoryViewMessageItem::setUnread(int nCount)
 
    CWizCategoryBaseView* view = dynamic_cast<CWizCategoryBaseView*>(treeWidget());
    Q_ASSERT(view);
-   view->update();
+   view->updateItem(this);
 }
 
 QString CWizCategoryViewMessageItem::unreadString() const

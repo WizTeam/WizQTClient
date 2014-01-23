@@ -1076,7 +1076,7 @@ void MainWindow::on_search_timeout()
 
 void MainWindow::on_searchProcess(const QString& strKeywords, const CWizDocumentDataArray& arrayDocument, bool bEnd)
 {
-    Q_ASSERT(m_searcher);
+    //Q_ASSERT(m_searcher);
 
     if (bEnd) {
         m_searchThread.exit();

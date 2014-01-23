@@ -8,6 +8,8 @@
 #include <QList>
 #include <QDebug>
 
+#include <extensionsystem/pluginmanager.h>
+
 #include "utils/stylehelper.h"
 #include "utils/misc.h"
 #include "sync/avatar.h"
@@ -18,6 +20,10 @@
 #include "share/wizobject.h"
 #include "wiznotestyle.h"
 #include "widgets/wizScrollBar.h"
+
+#include "wizCategoryView.h"
+#include "wizCategoryViewItem.h"
+#include "coreplugin/itreeview.h"
 
 namespace WizService {
 namespace Internal {
@@ -322,6 +328,22 @@ void MessageListView::onSyncTimeout()
     m_lsIds.clear();
 }
 
+void MessageListView::updateTreeItem()
+{
+    CWizCategoryView* tree = ExtensionSystem::PluginManager::getObject<CWizCategoryView>();
+    if (tree) {
+        CWizCategoryViewItemBase* pBase = tree->findCategory(CATEGORY_MESSAGES_ALL, false);
+        if (!pBase)
+            return;
+
+        CWizCategoryViewMessageItem* pItem = dynamic_cast<CWizCategoryViewMessageItem*>(pBase);
+        Q_ASSERT(pItem);
+
+        int nUnread = CWizDatabaseManager::instance()->db().getUnreadMessageCount();
+        pItem->setUnread(nUnread);
+    }
+}
+
 void MessageListView::on_action_message_mark_read()
 {
     QList<WIZMESSAGEDATA> arrayMsg;
@@ -333,6 +355,8 @@ void MessageListView::on_action_message_mark_read()
     }
 
     CWizDatabaseManager::instance()->db().setMessageReadStatus(arrayMessage, 1);
+
+    updateTreeItem();
 }
 
 void MessageListView::on_action_message_delete()
@@ -343,6 +367,8 @@ void MessageListView::on_action_message_delete()
     for (int i = 0; i < arrayMsg.size(); i++) {
         CWizDatabaseManager::instance()->db().deleteMessageEx(arrayMsg.at(i));
     }
+
+    updateTreeItem();
 }
 
 void MessageListView::on_message_created(const WIZMESSAGEDATA& msg)
@@ -350,6 +376,8 @@ void MessageListView::on_message_created(const WIZMESSAGEDATA& msg)
     if (rowFromId(msg.nId) == -1) {
         addMessage(msg, true);
     }
+
+    updateTreeItem();
 }
 
 void MessageListView::on_message_modified(const WIZMESSAGEDATA& oldMsg,
@@ -364,6 +392,8 @@ void MessageListView::on_message_modified(const WIZMESSAGEDATA& oldMsg,
             update(indexFromItem(pItem));
         }
     }
+
+    updateTreeItem();
 }
 
 void MessageListView::on_message_deleted(const WIZMESSAGEDATA& msg)
@@ -372,6 +402,8 @@ void MessageListView::on_message_deleted(const WIZMESSAGEDATA& msg)
     if (i != -1) {
         takeItem(i);
     }
+
+    updateTreeItem();
 }
 
 
