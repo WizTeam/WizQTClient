@@ -11,6 +11,7 @@ set(wiznote_SOURCES_MAC
     mac/wizmacactionhelper.cpp
     mac/wizUserInfoWidgetBaseMac.mm
     mac/wizUserInfoWidgetBaseMac_mm.cpp
+    utils/notify.mm
 )
 
 set(wiznote_HEADERS_MAC
@@ -132,6 +133,7 @@ set(wiznote_SOURCES
     utils/logger.cpp
     utils/misc.cpp
     utils/pinyin.cpp
+    utils/notify.cpp
     messagelistview.cpp
     thumbcache.cpp
     messagecompleter.cpp
@@ -252,6 +254,7 @@ set(wiznote_HEADERS
     utils/logger.h
     utils/misc.h
     utils/pinyin.h
+    utils/notify.h
     messagelistview.h
     thumbcache.h
     thumbcache_p.h
@@ -313,6 +316,9 @@ if(UNIX)
         cmake_policy(SET CMP0016 OLD)
         find_library(_CARBON_LIBRARY Carbon)
         find_library(_COCOA_LIBRARY Cocoa)
+
+        # please set env: MACOSX_DEPLOYMENT_TARGET = 10.8 to ~/.bash_profile if you need NSUserNotification support.
+        message("use cocoa library: ${_COCOA_LIBRARY}")
         target_link_libraries(${PROJECT_NAME} ${_CARBON_LIBRARY} ${_COCOA_LIBRARY})
 
         # setup plist info and logo
