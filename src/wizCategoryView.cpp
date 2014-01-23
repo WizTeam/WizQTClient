@@ -2501,6 +2501,9 @@ void CWizCategoryView::on_group_permissionChanged(const QString& strKbGUID)
 {
     // only reset action if item is selected
     CWizCategoryViewItemBase* pItem = currentCategoryItem<CWizCategoryViewItemBase>();
+    if (!pItem)
+        return;
+
     if (pItem->kbGUID() != strKbGUID)
         return;
 
