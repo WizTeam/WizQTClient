@@ -61,6 +61,8 @@ private:
     QTimer m_timerTriggerSync;
     WizService::AsyncApi* m_api;
 
+    void updateTreeItem();
+
 Q_SIGNALS:
     void sizeChanged(int nCount);
 
