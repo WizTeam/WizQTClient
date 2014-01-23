@@ -216,6 +216,9 @@ void CWizNoteStyle::drawCategoryViewItem(const QStyleOptionViewItemV4 *vopt,
     }
 
     p->restore();
+
+    // FIXME: this is used for drawing additional badge, please merge it.
+    view->categoryItemFromIndex(vopt->index)->draw(p, vopt);
 }
 
 void CWizNoteStyle::drawMultiLineListWidgetItem(const QStyleOptionViewItemV4 *vopt, QPainter *p, const CWizMultiLineListWidget *view) const

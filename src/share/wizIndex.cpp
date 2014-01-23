@@ -235,6 +235,33 @@ bool CWizIndex::getModifiedMessages(CWizMessageDataArray& arrayMsg)
     return SQLToMessageDataArray(strSQL, arrayMsg);
 }
 
+bool CWizIndex::getUnreadMessages(CWizMessageDataArray& arrayMsg)
+{
+    CString strExt;
+    strExt.Format("where READ_STATUS=0 order by DT_CREATED desc");
+    QString strSQL = FormatCanonicSQL(TABLE_NAME_WIZ_MESSAGE,
+                                      FIELD_LIST_WIZ_MESSAGE,
+                                      strExt);
+
+    return SQLToMessageDataArray(strSQL, arrayMsg);
+}
+
+int CWizIndex::getUnreadMessageCount()
+{
+    CString strSQL;
+    strSQL.Format("select count(*) from WIZ_MESSAGE where READ_STATUS=0");
+
+    CppSQLite3Query query = m_db.execQuery(strSQL);
+
+    if (!query.eof()) {
+        int nCount = query.getIntField(0);
+        return nCount;
+    }
+
+    return 0;
+}
+
+
 bool CWizIndex::CreateTag(const CString& strParentTagGUID,
                           const CString& strName,
                           const CString& strDescription,
