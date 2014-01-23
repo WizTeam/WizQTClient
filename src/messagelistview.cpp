@@ -68,7 +68,11 @@ public:
 
             p->save();
             if (!m_data.nReadStatus) {
+#ifdef Q_OS_MAC
                 p->setBrush(QBrush("#f5f5f5"));
+#else
+                p->setBrush(QBrush("#dcdcdc"));
+#endif
             }
             p->setPen("#dcdcdc");
             p->drawPolygon(po);
