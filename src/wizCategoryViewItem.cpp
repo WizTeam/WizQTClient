@@ -8,6 +8,7 @@
 #include <extensionsystem/pluginmanager.h>
 #include "utils/pinyin.h"
 #include "utils/stylehelper.h"
+#include "utils/notify.h"
 
 #include "wizCategoryView.h"
 
@@ -262,6 +263,19 @@ void CWizCategoryViewMessageItem::getMessages(CWizDatabase& db, CWizMessageDataA
     } else {
         db.getLastestMessages(arrayMsg);
     }
+}
+
+void CWizCategoryViewMessageItem::setUnread(int nCount)
+{
+   m_nUnread = nCount;
+
+#ifdef Q_OS_MAC
+    Utils::Notify::setDockBadge(nCount);
+#endif
+
+   CWizCategoryBaseView* view = dynamic_cast<CWizCategoryBaseView*>(treeWidget());
+   Q_ASSERT(view);
+   view->update();
 }
 
 QString CWizCategoryViewMessageItem::unreadString() const

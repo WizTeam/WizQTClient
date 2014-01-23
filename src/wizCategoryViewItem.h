@@ -100,7 +100,7 @@ public:
     { Q_UNUSED(db); Q_UNUSED(arrayDocument); }
 
     void getMessages(CWizDatabase& db, CWizMessageDataArray& arrayMsg);
-    void setUnread(int nCount) { m_nUnread = nCount; }
+    void setUnread(int nCount);
     QString unreadString() const;
     bool hitTestUnread();
 
