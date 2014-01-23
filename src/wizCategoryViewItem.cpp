@@ -2,14 +2,16 @@
 
 #include <QDebug>
 #include <QTextCodec>
+#include <QPainter>
 #include <cstring>
 
 #include <extensionsystem/pluginmanager.h>
-
 #include "utils/pinyin.h"
+#include "utils/stylehelper.h"
+
+#include "wizCategoryView.h"
 
 #include "wizdef.h"
-#include "wizCategoryView.h"
 #include "share/wizsettings.h"
 #include "wiznotestyle.h"
 #include "share/wizDatabaseManager.h"
@@ -112,6 +114,9 @@ void CWizCategoryViewItemBase::setDocumentsCount(int nCurrent, int nTotal)
 
 void CWizCategoryViewItemBase::draw(QPainter* p, const QStyleOptionViewItemV4 *vopt) const
 {
+    Q_UNUSED(p);
+    Q_UNUSED(vopt);
+
 #if 0
     if (!vopt->icon.isNull()) {
         QRect iconRect = subElementRect(SE_ItemViewItemDecoration, vopt, view);
@@ -237,6 +242,7 @@ CWizCategoryViewCategoryItem::CWizCategoryViewCategoryItem(CWizExplorerApp& app,
 CWizCategoryViewMessageItem::CWizCategoryViewMessageItem(CWizExplorerApp& app,
                                                                  const QString& strName, int nFilterType)
     : CWizCategoryViewItemBase(app, strName)
+    , m_nUnread(0)
 {
     QIcon icon;
     icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "messages_normal"),
@@ -249,26 +255,69 @@ CWizCategoryViewMessageItem::CWizCategoryViewMessageItem(CWizExplorerApp& app,
     m_nFilter = nFilterType;
 }
 
-void CWizCategoryViewMessageItem::getDocuments(CWizDatabase& db,
-                                                   CWizDocumentDataArray& arrayDocument)
+void CWizCategoryViewMessageItem::getMessages(CWizDatabase& db, CWizMessageDataArray& arrayMsg)
 {
-    CWizMessageDataArray arrayMsg;
-    db.getLastestMessages(arrayMsg);
-
-    for (CWizMessageDataArray::const_iterator it = arrayMsg.begin();
-         it != arrayMsg.end();
-         it++) {
-        const WIZMESSAGEDATA& msg = *it;
-
-        WIZDOCUMENTDATAEX doc;
-        doc.strKbGUID = msg.kbGUID;
-        doc.strGUID = msg.documentGUID;
-        doc.strTitle = msg.title;
-
-        // CWizCategoryView responsible for converting to full field message data
-        // refer to CWizCategoryView::setDocuments()
-        arrayDocument.push_back(doc);
+    if (hitTestUnread()) {
+        db.getUnreadMessages(arrayMsg);
+    } else {
+        db.getLastestMessages(arrayMsg);
     }
+}
+
+QString CWizCategoryViewMessageItem::unreadString() const
+{
+    if (m_nUnread > 999)
+        return "999+";
+    else
+        return QString::number(m_nUnread);
+}
+
+bool CWizCategoryViewMessageItem::hitTestUnread()
+{
+    CWizCategoryBaseView* view = dynamic_cast<CWizCategoryBaseView*>(treeWidget());
+    Q_ASSERT(view);
+
+    if (m_rcUnread.isNull()) {
+        QFont f;
+        Utils::StyleHelper::fontExtend(f);
+        int nWidth = QFontMetrics(f).width(unreadString());
+        m_rcUnread = view->visualItemRect(this);
+        m_rcUnread.adjust(5, 5, -5, -5);
+        m_rcUnread.setLeft(m_rcUnread.right() - nWidth);
+    }
+
+    return m_rcUnread.contains(view->hitPoint());
+}
+
+void CWizCategoryViewMessageItem::draw(QPainter* p, const QStyleOptionViewItemV4 *vopt) const
+{
+    if (!m_nUnread)
+        return;
+
+    p->save();
+
+    QFont f;
+    Utils::StyleHelper::fontExtend(f);
+    p->setFont(f);
+
+    int nMargin = 5;
+    int nWidth = p->fontMetrics().width(unreadString()) + 2 * nMargin;
+    int nHeight = vopt->rect.height() - 2 * nMargin;
+    if (nWidth < nHeight)
+        nWidth = nHeight;
+    QRect rcb(vopt->rect.right() - nWidth - nMargin, vopt->rect.y(), nWidth + nMargin, vopt->rect.height());
+    rcb.adjust(nMargin, nMargin, -nMargin, -nMargin);
+
+    p->setRenderHint(QPainter::Antialiasing);
+
+    p->setPen(QColor("#2874c9"));
+    p->setBrush(QColor("#2874c9"));
+    p->drawEllipse(rcb);
+
+    p->setPen(QColor("#ffffff"));
+    p->drawText(rcb, Qt::AlignCenter, unreadString());
+
+    p->restore();
 }
 
 

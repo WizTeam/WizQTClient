@@ -1158,21 +1158,31 @@ void MainWindow::on_category_itemSelectionChanged()
     if (!category)
         return;
 
-    // FIXME: use id instead of name.
-    QString strName = category->currentItem()->text(0);
-    if (strName == CATEGORY_MESSAGES_ALL ||
-            strName == CATEGORY_MESSAGES_SEND_TO_ME ||
-            strName == CATEGORY_MESSAGES_MODIFY ||
-            strName == CATEGORY_MESSAGES_COMMENTS ||
-            strName == CATEGORY_MESSAGES_SEND_FROM_ME) {
+    CWizCategoryViewMessageItem* pItem = category->currentCategoryItem<CWizCategoryViewMessageItem>();
+    if (pItem) {
         m_msgList->show();
         m_noteList->hide();
 
         CWizMessageDataArray arrayMsg;
-        m_dbMgr.db().getLastestMessages(arrayMsg);
+        pItem->getMessages(m_dbMgr.db(), arrayMsg);
         m_msgList->setMessages(arrayMsg);
-
         return;
+
+    // FIXME: use id instead of name.
+    //QString strName = category->currentItem()->text(0);
+    //if (strName == CATEGORY_MESSAGES_ALL ||
+    //        strName == CATEGORY_MESSAGES_SEND_TO_ME ||
+    //        strName == CATEGORY_MESSAGES_MODIFY ||
+    //        strName == CATEGORY_MESSAGES_COMMENTS ||
+    //        strName == CATEGORY_MESSAGES_SEND_FROM_ME) {
+    //    m_msgList->show();
+    //    m_noteList->hide();
+
+    //    CWizMessageDataArray arrayMsg;
+    //    m_dbMgr.db().getLastestMessages(arrayMsg);
+    //    m_msgList->setMessages(arrayMsg);
+
+    //    return;
     } else {
         m_noteList->show();
         m_msgList->hide();

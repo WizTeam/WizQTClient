@@ -147,6 +147,14 @@ CWizCategoryBaseView::~CWizCategoryBaseView()
 {
 }
 
+void CWizCategoryBaseView::mousePressEvent(QMouseEvent* event)
+{
+    // saved for child item which need test hit position.
+    m_hitPos = event->pos();
+
+    QTreeWidget::mousePressEvent(event);
+}
+
 void CWizCategoryBaseView::resizeEvent(QResizeEvent* event)
 {
 #ifdef WIZNOTE_CUSTOM_SCROLLBAR
@@ -1562,6 +1570,7 @@ void CWizCategoryView::initGeneral()
     addTopLevelItem(pCategoryItem);
 
     CWizCategoryViewMessageItem* pMsg = new CWizCategoryViewMessageItem(m_app, CATEGORY_MESSAGES_ALL, CWizCategoryViewMessageItem::All);
+    pMsg->setUnread(m_dbMgr.db().getUnreadMessageCount());
     addTopLevelItem(pMsg);
 
     //QList<QTreeWidgetItem*> pList;

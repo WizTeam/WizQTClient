@@ -56,8 +56,10 @@ public:
     bool validateDropDestination(const QPoint& p) const;
 
     void drawItem(QPainter* p, const QStyleOptionViewItemV4 *vopt) const;
+    QPoint hitPoint() const { return m_hitPos; }
 
 protected:
+    virtual void mousePressEvent(QMouseEvent* event);
     virtual void startDrag(Qt::DropActions supportedActions);
     virtual void dragEnterEvent(QDragEnterEvent* event);
     virtual void dragMoveEvent(QDragMoveEvent* event);
@@ -68,13 +70,14 @@ protected:
     virtual void contextMenuEvent(QContextMenuEvent* e);
 
     virtual QModelIndex moveCursor(CursorAction cursorAction, Qt::KeyboardModifiers modifiers);
-    //
+
 protected:
     CWizExplorerApp& m_app;
     CWizDatabaseManager& m_dbMgr;
     QTreeWidgetItem* m_selectedItem;
 
 private:
+    QPoint m_hitPos;
     bool m_bDragHovered;
     QPoint m_dragHoveredPos;
 

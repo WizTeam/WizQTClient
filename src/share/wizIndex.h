@@ -32,7 +32,9 @@ public:
     bool setMessageReadStatus(const WIZMESSAGEDATA& msg, qint32 nRead);
     bool setMessageReadStatus(const CWizMessageDataArray& arrayMsg, qint32 nRead);
     bool getModifiedMessages(CWizMessageDataArray& arrayMsg);
-    
+    bool getUnreadMessages(CWizMessageDataArray& arrayMsg);
+    int getUnreadMessageCount();
+
     /* Tags related operations */
     bool CreateTag(const CString& strParentTagGUID, const CString& strName, \
                    const CString& strDescription, WIZTAGDATA& data);

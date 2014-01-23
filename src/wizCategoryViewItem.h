@@ -91,14 +91,23 @@ public:
     };
 
     CWizCategoryViewMessageItem(CWizExplorerApp& app, const QString& strName, int nFilter);
+    virtual void draw(QPainter* p, const QStyleOptionViewItemV4 *vopt) const;
 
     virtual void showContextMenu(CWizCategoryBaseView* pCtrl, QPoint pos)
     { Q_UNUSED(pCtrl); Q_UNUSED(pos); }
 
-    virtual void getDocuments(CWizDatabase& db, CWizDocumentDataArray& arrayDocument);
+    virtual void getDocuments(CWizDatabase& db, CWizDocumentDataArray& arrayDocument)
+    { Q_UNUSED(db); Q_UNUSED(arrayDocument); }
+
+    void getMessages(CWizDatabase& db, CWizMessageDataArray& arrayMsg);
+    void setUnread(int nCount) { m_nUnread = nCount; }
+    QString unreadString() const;
+    bool hitTestUnread();
 
 private:
     int m_nFilter;
+    int m_nUnread;
+    QRect m_rcUnread;
 };
 
 class CWizCategoryViewShortcutRootItem : public CWizCategoryViewItemBase
