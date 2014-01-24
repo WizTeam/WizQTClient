@@ -331,7 +331,6 @@ void CWizDocumentWebView::inputMethodEvent(QInputMethodEvent* event)
 #endif
 
 #ifdef Q_OS_MAC
-
     int nLength = 0;
     int nOffset = 0;
     for (int i = 0; i < event->attributes().size(); i++) {
@@ -349,6 +348,21 @@ void CWizDocumentWebView::inputMethodEvent(QInputMethodEvent* event)
     // beginning of the input context, move it as far as offset indicated after
     // default implementation should correct this issue!!!
     for (int i = 0; i < nOffset; i++) {
+        page()->triggerAction(QWebPage::MoveToNextChar);
+    }
+
+#elif defined(Q_OS_LINUX)
+    int nLength = 0;
+    for (int i = 0; i < event->attributes().size(); i++) {
+        const QInputMethodEvent::Attribute& a = event->attributes().at(i);
+        if (a.type == QInputMethodEvent::TextFormat) {
+            nLength = a.length;
+            break;
+        }
+    }
+
+    // Move cursor
+    for (int i = 0; i < nLength; i++) {
         page()->triggerAction(QWebPage::MoveToNextChar);
     }
 
