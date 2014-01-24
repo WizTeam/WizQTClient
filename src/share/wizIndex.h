@@ -272,7 +272,7 @@ public:
     bool DocumentFromLocationAndName(const CString& strLocation, const CString& strName, WIZDOCUMENTDATA& data);
 
     // Query by time
-    bool GetDocumentsByTime(const COleDateTime& t, CWizDocumentDataArray& arrayData);
+    bool GetDocumentsByTime(const QDateTime &t, CWizDocumentDataArray& arrayData);
     bool GetRecentDocuments(long nFlags, const CString& strDocumentType, int nCount, CWizDocumentDataArray& arrayDocument);
     bool GetRecentDocumentsCreated(const CString& strDocumentType, int nCount, CWizDocumentDataArray& arrayDocument);
     bool GetRecentDocumentsModified(const CString& strDocumentType, int nCount, CWizDocumentDataArray& arrayDocument);

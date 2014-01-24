@@ -137,7 +137,7 @@ protected:
                                          const CString& strInfoFieldName,
                                          const CString& strDataFieldName,
                                          const CString& strParamFieldName,
-                                         const COleDateTime& t);
+                                         const QDateTime &t);
 
     static CString FormatModifiedQuerySQL(const CString& strTableName,
                                           const CString& strFieldList);

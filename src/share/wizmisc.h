@@ -111,6 +111,7 @@ CString WizDateTimeToIso8601String(const COleDateTime& t);
 BOOL WizIso8601StringToDateTime(CString str, COleDateTime& t, CString& strError);
 CString WizDateTimeToString(const COleDateTime& t);
 CString WizStringToSQL(const CString& str);
+CString WizTimeToSQL(const QDateTime &t);
 CString WizTimeToSQL(const COleDateTime& t);
 CString WizColorToString(COLORREF cr);
 CString WizColorToString(const QColor& cr);

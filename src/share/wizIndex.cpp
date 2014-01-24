@@ -2052,7 +2052,7 @@ bool CWizIndex::GetStylesByTime(const COleDateTime& t, CWizStyleDataArray& array
 	return SQLToStyleDataArray(strSQL, arrayData);
 }
 
-bool CWizIndex::GetDocumentsByTime(const COleDateTime& t, CWizDocumentDataArray& arrayData)
+bool CWizIndex::GetDocumentsByTime(const QDateTime& t, CWizDocumentDataArray& arrayData)
 {
 	CString strSQL = FormatQuerySQLByTime3(TABLE_NAME_WIZ_DOCUMENT, FIELD_LIST_WIZ_DOCUMENT, 
 		FIELD_INFO_MODIFIED_WIZ_DOCUMENT, 

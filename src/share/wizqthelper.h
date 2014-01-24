@@ -117,6 +117,7 @@ class COleDateTime: public QDateTime
 {
 public:
     COleDateTime() :QDateTime() { *this = QDateTime::currentDateTime(); }
+    COleDateTime(const QDateTime& other) { *this = other; }
     COleDateTime(int year, int month, int day, int hour, int minute, int second) : QDateTime(QDate(year, month, day), QTime(hour, minute, second))  {}
     //
     COleDateTime(time_t t) { this->setTime_t(t);}

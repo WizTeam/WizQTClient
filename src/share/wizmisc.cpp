@@ -874,6 +874,14 @@ CString WizTimeToSQL(const COleDateTime& t)
     return CString(_T("'")) + str + _T("'");
 }
 
+CString WizTimeToSQL(const QDateTime& t)
+{
+    COleDateTime t2(t);
+    CString str = WizDateTimeToString(t2);
+    return CString(_T("'")) + str + _T("'");
+}
+
+
 
 CString WizColorToSQL(COLORREF cr)
 {

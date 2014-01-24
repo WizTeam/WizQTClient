@@ -612,6 +612,26 @@ CWizCategoryViewAllGroupsRootItem::CWizCategoryViewAllGroupsRootItem(CWizExplore
     setText(0, strName);
 }
 
+void CWizCategoryViewAllGroupsRootItem::getDocuments(CWizDatabase& db, CWizDocumentDataArray& arrayDocument)
+{
+    Q_UNUSED(db);
+
+    for (int i = 0; i < childCount(); i++) {
+        CWizCategoryViewGroupRootItem* pGroup = dynamic_cast<CWizCategoryViewGroupRootItem*>(child(i));
+        Q_ASSERT(pGroup);
+        if (!pGroup)
+            return;
+
+        CWizDatabase& db = CWizDatabaseManager::instance()->db(pGroup->kbGUID());
+
+        CWizDocumentDataArray arrayDoc;
+        if (db.GetDocumentsByTime(QDateTime::currentDateTime().addDays(-3), arrayDocument)) {
+            arrayDocument.insert(arrayDocument.begin(), arrayDoc.begin(), arrayDoc.end());
+        }
+    }
+}
+
+
 /* ------------------------------ CWizCategoryViewGroupRootItem ------------------------------ */
 CWizCategoryViewBizGroupRootItem::CWizCategoryViewBizGroupRootItem(CWizExplorerApp& app,
                                                                    const QString& strName,
@@ -626,6 +646,26 @@ CWizCategoryViewBizGroupRootItem::CWizCategoryViewBizGroupRootItem(CWizExplorerA
     setIcon(0, icon);
     setText(0, strName);
 }
+
+void CWizCategoryViewBizGroupRootItem::getDocuments(CWizDatabase& db, CWizDocumentDataArray& arrayDocument)
+{
+    Q_UNUSED(db);
+
+    for (int i = 0; i < childCount(); i++) {
+        CWizCategoryViewGroupRootItem* pGroup = dynamic_cast<CWizCategoryViewGroupRootItem*>(child(i));
+        Q_ASSERT(pGroup);
+        if (!pGroup)
+            return;
+
+        CWizDatabase& db = CWizDatabaseManager::instance()->db(pGroup->kbGUID());
+
+        CWizDocumentDataArray arrayDoc;
+        if (db.GetDocumentsByTime(QDateTime::currentDateTime().addDays(-3), arrayDocument)) {
+            arrayDocument.insert(arrayDocument.begin(), arrayDoc.begin(), arrayDoc.end());
+        }
+    }
+}
+
 
 /* ------------------------------ CWizCategoryViewGroupRootItem ------------------------------ */
 
