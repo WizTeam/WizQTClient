@@ -223,7 +223,7 @@ CString CWizIndexBase::FormatQuerySQLByTime3(const CString& strTableName,
                                              const CString& strInfoFieldName,
                                              const CString& strDataFieldName,
                                              const CString& strParamFieldName,
-                                             const COleDateTime& t)
+                                             const QDateTime& t)
 {
     return WizFormatString6(_T("select %1 from %2 where %3 >= %6 or %4 >= %6 or %5 >= %6"),
                             strFieldList,
