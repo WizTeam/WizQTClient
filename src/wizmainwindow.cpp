@@ -20,10 +20,10 @@
 
 #include <extensionsystem/pluginmanager.h>
 #include <coreplugin/icore.h>
+#include <coreplugin/aboutdialog.h>
 
 #include "wizDocumentWebView.h"
 #include "wizactions.h"
-#include "wizAboutDialog.h"
 #include "wizpreferencedialog.h"
 #include "wizstatusbar.h"
 #include "wizupgradenotifydialog.h"
@@ -958,7 +958,7 @@ void MainWindow::on_actionLogout_triggered()
 
 void MainWindow::on_actionAbout_triggered()
 {
-    CWizAboutDialog dialog(this);
+    AboutDialog dialog(this);
     dialog.exec();
 }
 

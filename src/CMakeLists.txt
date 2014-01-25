@@ -96,7 +96,6 @@ set(wiznote_SOURCES
     wiztaglistwidget.cpp
     wizconsoledialog.cpp
     wizpreferencedialog.cpp
-    wizAboutDialog.cpp
     wizLoginDialog.cpp
     wizproxydialog.cpp
     wizcreateaccountdialog.cpp
@@ -214,7 +213,6 @@ set(wiznote_HEADERS
     wiztaglistwidget.h
     wizconsoledialog.h
     wizpreferencedialog.h
-    wizAboutDialog.h
     wizLoginDialog.h
     wizproxydialog.h
     wizcreateaccountdialog.h

@@ -1,6 +1,8 @@
 #include "misc.h"
 
 #include <QDateTime>
+#include <QFile>
+#include <QTextStream>
 
 namespace Utils {
 
@@ -42,6 +44,20 @@ QString Misc::time2humanReadable(const QDateTime& time) {
 
     return QString("Error");
 }
+
+bool Misc::loadUnicodeTextFromFile(const QString& strFileName, QString& strText)
+{
+    QFile file(strFileName);
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
+        return false;
+
+    QTextStream stream(&file);
+    strText = stream.readAll();
+    file.close();
+
+    return true;
+}
+
 
 
 } // namespace Utils

@@ -7,6 +7,7 @@ set(coreplugin_HEADERS
     icore.h
     inoteview.h
     itreeview.h
+    aboutdialog.h
 )
 
 set(coreplugin_SOURCES
@@ -14,6 +15,7 @@ set(coreplugin_SOURCES
     icore.cpp
     inoteview.cpp
     itreeview.cpp
+    aboutdialog.cpp
 )
 
 set(coreplugin_FORMS
@@ -34,6 +36,7 @@ add_definitions(-DCORE_LIBRARY)
 
 include_directories(
     ${libs_SOURCE_DIR}
+    ${wiznote_SOURCE_DIR} #FIXME
 )
 target_link_libraries(coreplugin extensionsystem)
 
