@@ -1,4 +1,4 @@
-#include "wizAboutDialog.h"
+#include "aboutdialog.h"
 
 #include <QApplication>
 #include <QLabel>
@@ -8,11 +8,13 @@
 #include <QIcon>
 #include <QDateTime>
 
+#include <utils/misc.h>
 #include "wizdef.h"
-#include "share/wizmisc.h"
 
+using namespace Core;
+using namespace Core::Internal;
 
-CWizAboutDialog::CWizAboutDialog(QWidget *parent)
+AboutDialog::AboutDialog(QWidget *parent)
     : QDialog(parent)
 {
     QLabel* labelIcon = new QLabel(this);
@@ -29,7 +31,8 @@ CWizAboutDialog::CWizAboutDialog(QWidget *parent)
     QLabel* labelProduct = new QLabel(this);
     labelProduct->setText(strProduct);
 
-    QFileInfo fi(::WizGetAppFileName());
+    QString strPath = QApplication::applicationDirPath();
+    QFileInfo fi(strPath);
     QDateTime t = fi.lastModified();
     QString strBuildNumber("(%1.%2.%3 %4:%5)");
     strBuildNumber = strBuildNumber.\
@@ -45,9 +48,10 @@ CWizAboutDialog::CWizAboutDialog(QWidget *parent)
 
     QTextBrowser* textCredits = new QTextBrowser(this);
     textCredits->setOpenExternalLinks(true);
+    textCredits->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
     QString strHtml;
-    ::WizLoadUnicodeTextFromFile(":/credits.html", strHtml);
+    Utils::Misc::loadUnicodeTextFromFile(":/credits.html", strHtml);
     textCredits->setHtml(strHtml);
 
     QLabel* labelCopyright = new QLabel(this);

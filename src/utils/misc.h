@@ -10,8 +10,7 @@ class Misc
 {
 public:
     static QString time2humanReadable(const QDateTime& time);
-
-    //static bool copyRes2Cache(const QString& strName, const QString& strFilePath);
+    static bool loadUnicodeTextFromFile(const QString& strFileName, QString& strText);
 };
 
 } // namespace Utils
