@@ -201,7 +201,7 @@ int main(int argc, char *argv[])
     dbMgr.db().SetPassword(::WizEncryptPassword(strPassword));
 
     // FIXME: move to plugins
-    WizService::Internal::AvatarHost avatarHost;
+    WizService::AvatarHost avatarHost;
 
     // FIXME: move to core plugin initialize
     Core::ThumbCache cache;

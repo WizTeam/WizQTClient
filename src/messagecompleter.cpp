@@ -76,7 +76,7 @@ public:
             return m_users[index.row()].strAlias;
         } else if (role == Qt::DecorationRole) {
             QPixmap pm;
-            Internal::AvatarHost::avatar(m_users[index.row()].strUserId, &pm);
+            AvatarHost::avatar(m_users[index.row()].strUserId, &pm);
             return pm.scaled(28, 28, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
         } else if (role == Qt::ToolTipRole) {
             return m_users[index.row()].strUserId;

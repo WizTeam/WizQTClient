@@ -104,7 +104,7 @@ CWizDocumentListView::CWizDocumentListView(CWizExplorerApp& app, QWidget *parent
     connect(ThumbCache::instance(), SIGNAL(loaded(const QString& ,const QString&)),
             SLOT(onThumbCacheLoaded(const QString&, const QString&)));
 
-    connect(WizService::Internal::AvatarHost::instance(), SIGNAL(loaded(const QString&)),
+    connect(WizService::AvatarHost::instance(), SIGNAL(loaded(const QString&)),
             SLOT(on_userAvatar_loaded(const QString&)));
 
     setDragDropMode(QAbstractItemView::DragDrop);
