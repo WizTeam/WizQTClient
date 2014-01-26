@@ -631,6 +631,26 @@ void CWizCategoryViewAllGroupsRootItem::getDocuments(CWizDatabase& db, CWizDocum
     }
 }
 
+bool CWizCategoryViewAllGroupsRootItem::accept(CWizDatabase& db, const WIZDOCUMENTDATA& data)
+{
+    Q_UNUSED(db);
+
+    QDateTime t(QDateTime::currentDateTime().addDays(-3));
+    for (int i = 0; i < childCount(); i++) {
+        CWizCategoryViewGroupRootItem* pGroup = dynamic_cast<CWizCategoryViewGroupRootItem*>(child(i));
+        Q_ASSERT(pGroup);
+        if (!pGroup)
+            continue;
+
+        if (pGroup->kbGUID() == data.strKbGUID) {
+            if (data.tDataModified > t || data.tInfoModified > t || data.tParamModified > t)
+                return true;
+        }
+    }
+
+    return false;
+}
+
 
 /* ------------------------------ CWizCategoryViewGroupRootItem ------------------------------ */
 CWizCategoryViewBizGroupRootItem::CWizCategoryViewBizGroupRootItem(CWizExplorerApp& app,
@@ -664,6 +684,26 @@ void CWizCategoryViewBizGroupRootItem::getDocuments(CWizDatabase& db, CWizDocume
             arrayDocument.insert(arrayDocument.begin(), arrayDoc.begin(), arrayDoc.end());
         }
     }
+}
+
+bool CWizCategoryViewBizGroupRootItem::accept(CWizDatabase& db, const WIZDOCUMENTDATA& data)
+{
+    Q_UNUSED(db);
+
+    QDateTime t(QDateTime::currentDateTime().addDays(-3));
+    for (int i = 0; i < childCount(); i++) {
+        CWizCategoryViewGroupRootItem* pGroup = dynamic_cast<CWizCategoryViewGroupRootItem*>(child(i));
+        Q_ASSERT(pGroup);
+        if (!pGroup)
+            continue;
+
+        if (pGroup->kbGUID() == data.strKbGUID) {
+            if (data.tDataModified > t || data.tInfoModified > t || data.tParamModified > t)
+                return true;
+        }
+    }
+
+    return false;
 }
 
 
