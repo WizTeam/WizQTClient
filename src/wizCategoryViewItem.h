@@ -17,6 +17,9 @@ public:
     virtual void getDocuments(CWizDatabase& db, CWizDocumentDataArray& arrayDocument) = 0;
     virtual bool accept(CWizDatabase& db, const WIZDOCUMENTDATA& data) { Q_UNUSED(db); Q_UNUSED(data); return false; }
 
+    virtual bool acceptDrop(const WIZDOCUMENTDATA& data) const { Q_UNUSED(data); return false; }
+    virtual void drop(const WIZDOCUMENTDATA& data) { Q_UNUSED(data); }
+
     virtual void draw(QPainter* p, const QStyleOptionViewItemV4 *vopt) const;
 
     virtual QVariant data(int column, int role) const;
@@ -152,6 +155,9 @@ public:
     virtual void showContextMenu(CWizCategoryBaseView* pCtrl, QPoint pos);
     virtual void getDocuments(CWizDatabase& db, CWizDocumentDataArray& arrayDocument);
     virtual bool accept(CWizDatabase& db, const WIZDOCUMENTDATA& data);
+    virtual bool acceptDrop(const WIZDOCUMENTDATA& data) const;
+    virtual void drop(const WIZDOCUMENTDATA& data);
+
     virtual bool operator < (const QTreeWidgetItem &other) const;
 
     virtual QTreeWidgetItem* clone() const;
@@ -176,6 +182,8 @@ public:
     virtual void showContextMenu(CWizCategoryBaseView* pCtrl, QPoint pos);
     virtual void getDocuments(CWizDatabase& db, CWizDocumentDataArray& arrayDocument);
     virtual bool accept(CWizDatabase& db, const WIZDOCUMENTDATA& data);
+    virtual bool acceptDrop(const WIZDOCUMENTDATA& data) const;
+    virtual void drop(const WIZDOCUMENTDATA& data);
 
     virtual QTreeWidgetItem *clone() const;
 
@@ -257,6 +265,7 @@ public:
     virtual void showContextMenu(CWizCategoryBaseView* pCtrl, QPoint pos);
     virtual void getDocuments(CWizDatabase& db, CWizDocumentDataArray& arrayDocument);
     virtual bool accept(CWizDatabase& db, const WIZDOCUMENTDATA& data);
+    virtual bool acceptDrop(const WIZDOCUMENTDATA& data) const;
     void reload(CWizDatabase& db);
 
     const WIZTAGDATA& tag() const { return m_tag; }

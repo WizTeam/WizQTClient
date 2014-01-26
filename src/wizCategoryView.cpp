@@ -186,6 +186,22 @@ void CWizCategoryBaseView::startDrag(Qt::DropActions supportedActions)
     }
 }
 
+void mime2Note(const QByteArray& bMime, CWizDocumentDataArray& arrayDocument)
+{
+    QString strMime(QString::fromUtf8(bMime));
+    QStringList lsNotes = strMime.split(";");
+    for (int i = 0; i < lsNotes.size(); i++) {
+        QStringList lsMeta = lsNotes[i].split(":");
+        Q_ASSERT(lsMeta.size() == 2);
+
+        CWizDatabase& db = CWizDatabaseManager::instance()->db(lsMeta[0]);
+
+        WIZDOCUMENTDATA data;
+        if (db.DocumentFromGUID(lsMeta[1], data))
+            arrayDocument.push_back(data);
+    }
+}
+
 void CWizCategoryBaseView::dragEnterEvent(QDragEnterEvent *event)
 {
     m_bDragHovered = true;
@@ -201,9 +217,32 @@ void CWizCategoryBaseView::dragMoveEvent(QDragMoveEvent *event)
     m_dragHoveredPos = event->pos();
     repaint();
 
-    if (event->mimeData()->hasFormat(WIZNOTE_MIMEFORMAT_DOCUMENTS)) {
-        event->acceptProposedAction();
+    if (!event->mimeData()->hasFormat(WIZNOTE_MIMEFORMAT_DOCUMENTS))
+        return;
+
+    CWizCategoryViewItemBase* pItem = itemAt(event->pos());
+    if (!pItem)
+        return;
+
+    CWizDocumentDataArray arrayDocument;
+    mime2Note(event->mimeData()->data(WIZNOTE_MIMEFORMAT_DOCUMENTS), arrayDocument);
+
+    if (!arrayDocument.size())
+        return;
+
+    int nAccept = 0;
+    for (CWizDocumentDataArray::const_iterator it = arrayDocument.begin();
+         it != arrayDocument.end();
+         it++)
+    {
+        if (pItem->acceptDrop(*it))
+            nAccept++;
     }
+
+    if (nAccept == arrayDocument.size())
+        event->acceptProposedAction();
+    else
+        event->ignore();
 }
 
 void CWizCategoryBaseView::dragLeaveEvent(QDragLeaveEvent* event)
@@ -221,42 +260,27 @@ void CWizCategoryBaseView::dropEvent(QDropEvent * event)
     m_dragHoveredPos = QPoint();
     repaint();
 
-    if (event->mimeData()->hasFormat(WIZNOTE_MIMEFORMAT_DOCUMENTS))
+    if (!event->mimeData()->hasFormat(WIZNOTE_MIMEFORMAT_DOCUMENTS))
+        return;
+
+    CWizDocumentDataArray arrayDocument;
+    mime2Note(event->mimeData()->data(WIZNOTE_MIMEFORMAT_DOCUMENTS), arrayDocument);
+
+    if (!arrayDocument.size())
+        return;
+
+    CWizCategoryViewItemBase* pItem = itemAt(event->pos());
+    if (!pItem)
+        return;
+
+    for (CWizDocumentDataArray::const_iterator it = arrayDocument.begin();
+         it != arrayDocument.end();
+         it++)
     {
-        QByteArray data = event->mimeData()->data(WIZNOTE_MIMEFORMAT_DOCUMENTS);
-        QString strDocumentGUIDs = QString::fromUtf8(data, data.length());
-        CWizStdStringArray arrayDocumentGUID;
-        ::WizSplitTextToArray(strDocumentGUIDs, ';', arrayDocumentGUID);
-
-        if (CWizCategoryViewTagItem* item = dynamic_cast<CWizCategoryViewTagItem*>(itemAt(event->pos())))
-        {
-            foreach (const CString& strDocumentGUID, arrayDocumentGUID)
-            {
-                WIZDOCUMENTDATA dataDocument;
-                if (m_dbMgr.db().DocumentFromGUID(strDocumentGUID, dataDocument))
-                {
-                    CWizDocument doc(m_dbMgr.db(), dataDocument);
-                    doc.AddTag(item->tag());
-                }
-            }
-        }
-        else if (CWizCategoryViewFolderItem* item = dynamic_cast<CWizCategoryViewFolderItem*>(itemAt(event->pos())))
-        {
-            CWizFolder folder(m_dbMgr.db(), item->location());
-
-            foreach (const CString& strDocumentGUID, arrayDocumentGUID)
-            {
-                WIZDOCUMENTDATA dataDocument;
-                if (m_dbMgr.db().DocumentFromGUID(strDocumentGUID, dataDocument))
-                {
-                    CWizDocument doc(m_dbMgr.db(), dataDocument);
-                    doc.MoveDocument(&folder);
-                }
-            }
-        }
-
-        event->acceptProposedAction();
+        pItem->drop(*it);
     }
+
+    event->accept();
 }
 
 void CWizCategoryBaseView::addSeparator()
@@ -328,6 +352,11 @@ void CWizCategoryBaseView::restoreSelection()
     m_selectedItem = NULL;
 
     //Q_EMIT itemSelectionChanged();
+}
+
+CWizCategoryViewItemBase* CWizCategoryBaseView::itemAt(const QPoint& p) const
+{
+    return dynamic_cast<CWizCategoryViewItemBase*>(QTreeWidget::itemAt(p));
 }
 
 template <class T> inline  T* CWizCategoryBaseView::currentCategoryItem() const
