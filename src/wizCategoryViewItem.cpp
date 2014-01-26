@@ -260,7 +260,7 @@ CWizCategoryViewMessageItem::CWizCategoryViewMessageItem(CWizExplorerApp& app,
 
 void CWizCategoryViewMessageItem::getMessages(CWizDatabase& db, CWizMessageDataArray& arrayMsg)
 {
-    if (hitTestUnread()) {
+    if (hitTestUnread() && m_nUnread) {
         db.getUnreadMessages(arrayMsg);
     } else {
         db.getLastestMessages(arrayMsg);
