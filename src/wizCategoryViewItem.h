@@ -266,6 +266,8 @@ public:
     virtual void getDocuments(CWizDatabase& db, CWizDocumentDataArray& arrayDocument);
     virtual bool accept(CWizDatabase& db, const WIZDOCUMENTDATA& data);
     virtual bool acceptDrop(const WIZDOCUMENTDATA& data) const;
+    virtual void drop(const WIZDOCUMENTDATA& data);
+
     void reload(CWizDatabase& db);
 
     const WIZTAGDATA& tag() const { return m_tag; }

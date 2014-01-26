@@ -884,13 +884,31 @@ bool CWizCategoryViewGroupItem::acceptDrop(const WIZDOCUMENTDATA& data) const
 {
     // only accept notes from current group
     if (data.strKbGUID == kbGUID()) {
-        //CWizDatabase& db = CWizDatabaseManager::instance()->db(kbGUID());
-        //QString strTagGUIDs = db.GetDocumentTagGUIDsString(data.strGUID);
-        //if (strTagGUIDs.indexOf(m_tag.strGUID) == -1)
         return true;
     }
 
     return false;
+}
+
+void CWizCategoryViewGroupItem::drop(const WIZDOCUMENTDATA& data)
+{
+    if (!acceptDrop(data))
+        return;
+
+    // skip
+    CWizTagDataArray arrayTag;
+    CWizDatabase& db = CWizDatabaseManager::instance()->db(kbGUID());
+    if (!db.GetDocumentTags(data.strGUID, arrayTag)) {
+        return;
+    }
+
+    Q_ASSERT(arrayTag.size() == 1);
+    if (arrayTag.size() != 1)
+        return;
+
+    CWizDocument doc(db, data);
+    doc.RemoveTag(arrayTag[0]);
+    doc.AddTag(tag());
 }
 
 void CWizCategoryViewGroupItem::reload(CWizDatabase& db)
