@@ -5,7 +5,6 @@
 
 #include "wizdef.h"
 #include "share/wizobject.h"
-#include "share/wizThumbIndexCache.h"
 #include "share/wizuihelper.h"
 #include "wizDocumentListViewItem.h"
 
@@ -64,7 +63,6 @@ protected:
 private:
     CWizExplorerApp& m_app;
     CWizDatabaseManager& m_dbMgr;
-    //QPointer<CWizThumbIndexCache> m_thumbCache;
 #ifdef WIZNOTE_CUSTOM_SCROLLBAR
     CWizScrollBar* m_vScroll;
 #endif
@@ -115,10 +113,7 @@ public:
     // drawing passthrought methods
     CWizDocumentListViewItem *documentItemFromIndex(const QModelIndex &index) const;
     const WIZDOCUMENTDATA& documentFromIndex(const QModelIndex &index) const;
-    const WIZABSTRACT& documentAbstractFromIndex(const QModelIndex &index) const;
-    //const QString& documentTagsFromIndex(const QModelIndex &index) const;
     const WizDocumentListViewItemData& documentItemDataFromIndex(const QModelIndex& index) const;
-
 
 //#ifndef Q_OS_MAC
     // used for smoothly scroll
@@ -135,7 +130,6 @@ public Q_SLOTS:
     void on_document_created(const WIZDOCUMENTDATA& document);
     void on_document_modified(const WIZDOCUMENTDATA& documentOld, const WIZDOCUMENTDATA& documentNew);
     void on_document_deleted(const WIZDOCUMENTDATA& document);
-    //void on_document_AbstractModified(const WIZDOCUMENTDATA& document);
 
     // message related signals
     //void on_message_created(const WIZMESSAGEDATA& data);

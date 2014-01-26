@@ -10,7 +10,6 @@
 #include "wizDocumentListView.h"
 #include "share/wizDatabaseManager.h"
 #include "share/wizDatabase.h"
-#include "share/wizThumbIndexCache.h"
 #include "wizPopupButton.h"
 
 #include "thumbcache.h"
@@ -63,26 +62,6 @@ bool CWizDocumentListViewItem::isAvatarNeedUpdate(const QString& strFileName)
     }
 
     return false;
-}
-
-//const WIZABSTRACT& CWizDocumentListViewItem::abstract()
-//{
-//    if (m_data.thumb.strKbGUID.isEmpty()) {
-//        // ask thumbCache to load abstract to pool
-//        thumbCache.load(m_data.doc.strKbGUID, m_data.doc.strGUID);
-//    }
-//
-//    return m_data.thumb;
-//}
-
-const WIZABSTRACT& CWizDocumentListViewItem::abstract(CWizThumbIndexCache* thumbCache)
-{
-    if (thumbCache && m_data.thumb.strKbGUID.isEmpty()) {
-        // ask thumbCache to load abstract to pool
-        thumbCache->load(m_data.doc.strKbGUID, m_data.doc.strGUID);
-    }
-
-    return m_data.thumb;
 }
 
 void CWizDocumentListViewItem::resetAbstract(const WIZABSTRACT& abs)

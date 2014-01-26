@@ -9,7 +9,6 @@ class QGraphicsView;
 
 class CWizExplorerApp;
 class CWizDatabaseManager;
-class CWizThumbIndexCache;
 
 class CWizDocumentSelectionView : public QWidget
 {
@@ -22,7 +21,6 @@ public:
 protected:
     CWizExplorerApp& m_app;
     CWizDatabaseManager& m_dbMgr;
-    CWizThumbIndexCache* m_thumbCache;
     QGraphicsView* m_graphicsView;
 
     virtual void showEvent(QShowEvent* event);

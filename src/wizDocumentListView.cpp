@@ -901,17 +901,6 @@ const WIZDOCUMENTDATA& CWizDocumentListView::documentFromIndex(const QModelIndex
     return documentItemFromIndex(index)->document();
 }
 
-const WIZABSTRACT& CWizDocumentListView::documentAbstractFromIndex(const QModelIndex &index) const
-{
-    return documentItemFromIndex(index)->abstract(0);
-}
-
-//const QString& CWizDocumentListView::documentTagsFromIndex(const QModelIndex &index) const
-//{
-//    return documentItemFromIndex(index)->tags(m_dbMgr.db());
-//}
-
-
 //#ifndef Q_OS_MAC
 //void CWizDocumentListView::updateGeometries()
 //{
