@@ -56,7 +56,6 @@ set(wiznote_SOURCES
     share/wizIndexBase.cpp
     share/wizIndex.cpp
     share/wizthumbindex.cpp
-    share/wizThumbIndexCache.cpp
     share/wizenc.cpp
     share/wizziwreader.cpp
     html/wizhtmlreader.cpp
@@ -171,7 +170,6 @@ set(wiznote_HEADERS
     share/wizIndexBase.h
     share/wizIndex.h
     share/wizthumbindex.h
-    share/wizThumbIndexCache.h
     share/wizenc.h
     share/wizziwreader.h
     html/wizhtmlreader.h

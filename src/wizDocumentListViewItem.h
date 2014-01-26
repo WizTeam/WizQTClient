@@ -10,7 +10,6 @@ class QPixmap;
 
 class CWizExplorerApp;
 class CWizDatabase;
-class CWizThumbIndexCache;
 class CWizUserAvatarDownloaderHost;
 
 struct WizDocumentListViewItemData
@@ -49,9 +48,6 @@ public:
     int itemType() const { return m_data.nType; }
     void reload(CWizDatabase& db);
 
-    //const WIZABSTRACT& abstract();
-    const WIZABSTRACT& abstract(CWizThumbIndexCache *thumbCache);
-
     const QImage& avatar(const CWizDatabase& db);
 
     // called by CWizDocumentListView when thumbCache pool is ready for reading
@@ -87,7 +83,6 @@ private:
     bool isAvatarNeedUpdate(const QString& strFileName);
 
 private Q_SLOTS:
-    //void onThumbCacheLoaded(const QString& strKbGUID, const QString& strGUID);
     void on_thumbnailReloaded();
 
 Q_SIGNALS:
