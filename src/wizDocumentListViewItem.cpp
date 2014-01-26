@@ -329,7 +329,7 @@ QPixmap CWizDocumentListViewItem::drawGroupSummaryView_impl(const QStyleOptionVi
     QRect rcd = Utils::StyleHelper::initListViewItemPainter(&p, &pm, vopt->rect, bFocused, bSelected);
 
     QPixmap pmAvatar;
-    WizService::Internal::AvatarHost::avatar(m_data.strAuthorId, &pmAvatar);
+    WizService::AvatarHost::avatar(m_data.strAuthorId, &pmAvatar);
     QRect rcAvatar = Utils::StyleHelper::drawAvatar(&p, rcd, pmAvatar);
     rcd.setLeft(rcAvatar.right());
 
@@ -364,7 +364,7 @@ QPixmap CWizDocumentListViewItem::drawGroupTwoLineView_impl(const QStyleOptionVi
     QRect rcd = Utils::StyleHelper::initListViewItemPainter(&p, &pm, vopt->rect, bFocused, bSelected);
 
     QPixmap pmAvatar;
-    WizService::Internal::AvatarHost::avatar(m_data.strAuthorId, &pmAvatar);
+    WizService::AvatarHost::avatar(m_data.strAuthorId, &pmAvatar);
     QRect rcAvatar = Utils::StyleHelper::drawAvatar(&p, rcd, pmAvatar);
     rcd.setLeft(rcAvatar.right());
 

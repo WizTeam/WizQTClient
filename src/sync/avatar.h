@@ -9,6 +9,7 @@ class QPixmap;
 namespace WizService {
 namespace Internal {
 class AvatarHostPrivate;
+}
 
 class AvatarHost: public QObject
 {
@@ -32,7 +33,6 @@ Q_SIGNALS:
     friend class Internal::AvatarHostPrivate;
 };
 
-} // namespace Internal
 } // namespace WizService
 
 #endif // WIZSERVICE_AVATAR_H

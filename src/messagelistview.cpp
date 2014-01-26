@@ -51,7 +51,7 @@ public:
         QRect rcd = vopt->rect.adjusted(nMargin, nMargin, -nMargin, -nMargin);
 
         QPixmap pmAvatar;
-        WizService::Internal::AvatarHost::avatar(m_data.senderId, &pmAvatar);
+        WizService::AvatarHost::avatar(m_data.senderId, &pmAvatar);
         QRect rectAvatar = Utils::StyleHelper::drawAvatar(p, rcd, pmAvatar);
         rcd.setLeft(rectAvatar.right());
 

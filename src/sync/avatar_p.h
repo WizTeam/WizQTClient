@@ -8,9 +8,10 @@
 class QNetworkAccessManager;
 
 namespace WizService {
+class AvatarHost;
+
 namespace Internal {
 
-class AvatarHost;
 
 class AvatarDownloader : public QObject
 {
