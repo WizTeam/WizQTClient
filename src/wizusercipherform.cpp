@@ -52,6 +52,7 @@ void CWizUserCipherForm::showEvent(QShowEvent* event)
 
 void CWizUserCipherForm::sheetShow()
 {
+#if 0
     MainWindow* mainWindow = qobject_cast<MainWindow *>(m_app.mainWindow());
 
     int x = (mainWindow->clientSize().width() - sizeHint().width()) / 2;
@@ -64,7 +65,12 @@ void CWizUserCipherForm::sheetShow()
     animation->setStartValue(startP);
     animation->setEndValue(endP);
     animation->start();
+#endif
 
+    MainWindow* mainWindow = qobject_cast<MainWindow *>(m_app.mainWindow());
+    int x = (mainWindow->clientSize().width() - sizeHint().width()) / 2;
+    const QPoint& endP = mainWindow->client()->mapTo(mainWindow, QPoint(x, 0));
+    setGeometry(endP.x(), endP.y(), sizeHint().width(), sizeHint().height());
     show();
 
     ui->editUserCipher->setFocus(Qt::MouseFocusReason);
