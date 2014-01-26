@@ -350,22 +350,6 @@ void CWizDocumentWebView::inputMethodEvent(QInputMethodEvent* event)
     for (int i = 0; i < nOffset; i++) {
         page()->triggerAction(QWebPage::MoveToNextChar);
     }
-
-#elif defined(Q_OS_LINUX)
-    int nLength = 0;
-    for (int i = 0; i < event->attributes().size(); i++) {
-        const QInputMethodEvent::Attribute& a = event->attributes().at(i);
-        if (a.type == QInputMethodEvent::TextFormat) {
-            nLength = a.length;
-            break;
-        }
-    }
-
-    // Move cursor
-    for (int i = 0; i < nLength; i++) {
-        page()->triggerAction(QWebPage::MoveToNextChar);
-    }
-
 #endif // Q_OS_MAC
 }
 
@@ -638,6 +622,10 @@ void CWizDocumentWebView::on_download_finished(const WIZOBJECTDATA& data,
 void CWizDocumentWebView::reloadNoteData(const WIZDOCUMENTDATA& data)
 {
     Q_ASSERT(!data.strGUID.isEmpty());
+
+    // reset only if user not in editing mode
+    if (m_bEditingMode && hasFocus())
+        return;
 
     // reload may triggered when update from server or locally reflected by modify
     m_workerPool->load(data);
