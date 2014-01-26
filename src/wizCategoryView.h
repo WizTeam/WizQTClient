@@ -43,6 +43,7 @@ public:
     void saveSelection();
     void restoreSelection();
 
+    CWizCategoryViewItemBase* itemAt(const QPoint& p) const;
     template <class T> T* currentCategoryItem() const;
     CWizCategoryViewItemBase* categoryItemFromIndex(const QModelIndex &index) const;
     bool isHelperItemByIndex(const QModelIndex &index) const;

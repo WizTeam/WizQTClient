@@ -457,6 +457,30 @@ bool CWizCategoryViewFolderItem::accept(CWizDatabase& db, const WIZDOCUMENTDATA&
     return false;
 }
 
+bool CWizCategoryViewFolderItem::acceptDrop(const WIZDOCUMENTDATA& data) const
+{
+    // only accept note from user db
+    if (data.strKbGUID == kbGUID())
+        return true;
+
+    return false;
+}
+
+void CWizCategoryViewFolderItem::drop(const WIZDOCUMENTDATA& data)
+{
+   if (!acceptDrop(data)) {
+       return;
+   }
+
+   if (m_strName == data.strLocation)   // skip
+       return;
+
+   CWizDatabase& db = CWizDatabaseManager::instance()->db(kbGUID());
+   CWizFolder folder(db, location());
+   CWizDocument doc(db, data);
+   doc.MoveDocument(&folder);
+}
+
 void CWizCategoryViewFolderItem::showContextMenu(CWizCategoryBaseView* pCtrl, QPoint pos)
 {
     if (CWizCategoryView* view = dynamic_cast<CWizCategoryView *>(pCtrl)) {
@@ -559,13 +583,39 @@ void CWizCategoryViewTagItem::getDocuments(CWizDatabase& db, CWizDocumentDataArr
 
 bool CWizCategoryViewTagItem::accept(CWizDatabase& db, const WIZDOCUMENTDATA& data)
 {
-    CString strTagGUIDs = db.GetDocumentTagGUIDsString(data.strGUID);
+    if (data.strKbGUID == kbGUID()) {
+        QString strTagGUIDs = db.GetDocumentTagGUIDsString(data.strGUID);
+        if (strTagGUIDs.indexOf(m_tag.strGUID) != -1)
+            return true;
+    }
 
-    if (strTagGUIDs.Find(m_tag.strGUID) != -1 && data.strKbGUID == kbGUID()) {
+    return false;
+}
+
+bool CWizCategoryViewTagItem::acceptDrop(const WIZDOCUMENTDATA& data) const
+{
+    // only accept drop from user db
+    if (data.strKbGUID == kbGUID()) {
         return true;
     }
 
     return false;
+}
+
+void CWizCategoryViewTagItem::drop(const WIZDOCUMENTDATA& data)
+{
+    if (!acceptDrop(data)) {
+        return;
+    }
+
+    // skip
+    CWizDatabase& db = CWizDatabaseManager::instance()->db(kbGUID());
+    QString strTagGUIDs = db.GetDocumentTagGUIDsString(data.strGUID);
+    if (strTagGUIDs.indexOf(m_tag.strGUID) != -1)
+        return;
+
+    CWizDocument doc(db, data);
+    doc.AddTag(tag());
 }
 
 void CWizCategoryViewTagItem::showContextMenu(CWizCategoryBaseView* pCtrl, QPoint pos)
@@ -824,6 +874,19 @@ bool CWizCategoryViewGroupItem::accept(CWizDatabase& db, const WIZDOCUMENTDATA& 
 
     QString strTagGUIDs = db.GetDocumentTagGUIDsString(data.strGUID);
     if (strTagGUIDs.indexOf(m_tag.strGUID) != -1 && data.strKbGUID == kbGUID()) {
+        return true;
+    }
+
+    return false;
+}
+
+bool CWizCategoryViewGroupItem::acceptDrop(const WIZDOCUMENTDATA& data) const
+{
+    // only accept notes from current group
+    if (data.strKbGUID == kbGUID()) {
+        //CWizDatabase& db = CWizDatabaseManager::instance()->db(kbGUID());
+        //QString strTagGUIDs = db.GetDocumentTagGUIDsString(data.strGUID);
+        //if (strTagGUIDs.indexOf(m_tag.strGUID) == -1)
         return true;
     }
 

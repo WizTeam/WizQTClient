@@ -424,12 +424,31 @@ QPixmap WizGetDocumentDragBadget(int nCount)
     return pixmapDragIcon;
 }
 
+QString note2Mime(const CWizDocumentDataArray& arrayDocument)
+{
+    CWizStdStringArray arrayGUID;
+
+    for (CWizDocumentDataArray::const_iterator it = arrayDocument.begin();
+         it != arrayDocument.end();
+         it++)
+    {
+        const WIZDOCUMENTDATA& data = *it;
+        arrayGUID.push_back(data.strKbGUID + ":" + data.strGUID);
+    }
+
+    CString strMime;
+    ::WizStringArrayToText(arrayGUID, strMime, ";");
+
+    return strMime;
+}
+
 void CWizDocumentListView::startDrag(Qt::DropActions supportedActions)
 {
     Q_UNUSED(supportedActions);
 
-    CWizStdStringArray arrayGUID;
+    //CWizStdStringArray arrayGUID;
 
+    CWizDocumentDataArray arrayDocument;
     QList<QListWidgetItem*> items = selectedItems();
     foreach (QListWidgetItem* it, items) {
         if (CWizDocumentListViewItem* item = dynamic_cast<CWizDocumentListViewItem*>(it)) {
@@ -437,20 +456,27 @@ void CWizDocumentListView::startDrag(Qt::DropActions supportedActions)
             if (item->document().strKbGUID != m_dbMgr.db().kbGUID())
                 return;
 
-            arrayGUID.push_back((item->document().strGUID));
+            arrayDocument.push_back(item->document());
+
+            //arrayGUID.push_back(item->document().strGUID);
         }
     }
 
-    if (arrayGUID.empty())
+    if (!arrayDocument.size())
         return;
 
-    CString strGUIDs;
-    ::WizStringArrayToText(arrayGUID, strGUIDs, ";");
+    QString strMime = note2Mime(arrayDocument);
+
+    //if (arrayGUID.empty())
+    //    return;
+
+    //CString strGUIDs;
+    //::WizStringArrayToText(arrayGUID, strGUIDs, ";");
 
     QDrag* drag = new QDrag(this);
 
     QMimeData* mimeData = new QMimeData();
-    mimeData->setData(WIZNOTE_MIMEFORMAT_DOCUMENTS, strGUIDs.toUtf8());
+    mimeData->setData(WIZNOTE_MIMEFORMAT_DOCUMENTS, strMime.toUtf8());
     drag->setMimeData(mimeData);
 
     drag->setPixmap(WizGetDocumentDragBadget(items.size()));
