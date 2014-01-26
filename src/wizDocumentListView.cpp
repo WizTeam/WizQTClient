@@ -446,19 +446,11 @@ void CWizDocumentListView::startDrag(Qt::DropActions supportedActions)
 {
     Q_UNUSED(supportedActions);
 
-    //CWizStdStringArray arrayGUID;
-
     CWizDocumentDataArray arrayDocument;
     QList<QListWidgetItem*> items = selectedItems();
     foreach (QListWidgetItem* it, items) {
         if (CWizDocumentListViewItem* item = dynamic_cast<CWizDocumentListViewItem*>(it)) {
-            // not support drag group document currently
-            if (item->document().strKbGUID != m_dbMgr.db().kbGUID())
-                return;
-
             arrayDocument.push_back(item->document());
-
-            //arrayGUID.push_back(item->document().strGUID);
         }
     }
 
@@ -467,14 +459,7 @@ void CWizDocumentListView::startDrag(Qt::DropActions supportedActions)
 
     QString strMime = note2Mime(arrayDocument);
 
-    //if (arrayGUID.empty())
-    //    return;
-
-    //CString strGUIDs;
-    //::WizStringArrayToText(arrayGUID, strGUIDs, ";");
-
     QDrag* drag = new QDrag(this);
-
     QMimeData* mimeData = new QMimeData();
     mimeData->setData(WIZNOTE_MIMEFORMAT_DOCUMENTS, strMime.toUtf8());
     drag->setMimeData(mimeData);
