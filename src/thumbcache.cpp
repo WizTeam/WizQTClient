@@ -62,18 +62,23 @@ void ThumbCachePrivate::load_impl(const QString& strKbGUID, const QString& strGU
     WIZABSTRACT abs;
     CWizDatabase& db = CWizDatabaseManager::instance()->db(strKbGUID);
 
+    bool bUpdated = false;
+
     // update if not exist
-    if (!db.PadAbstractFromGUID(strGUID, abs)) {
-        qDebug() << "[ThumbCache]thumb not exist, update: " << strGUID;
-        if (!db.UpdateDocumentAbstract(strGUID)) {
-            return;
+    if (db.PadAbstractFromGUID(strGUID, abs)) {
+        bUpdated = false;
+    } else {
+        qDebug() << "[ThumbCache]thumb not exist, try update: " << strGUID;
+        if (db.UpdateDocumentAbstract(strGUID)) {
+            bUpdated = true;
+        } else {
+            bUpdated = false;
         }
     }
 
-    // load again
-    if (!db.PadAbstractFromGUID(strGUID, abs)) {
+    // load again if updated
+    if (bUpdated && !db.PadAbstractFromGUID(strGUID, abs)) {
         qDebug() << "[ThumCache]failed to load thumb from db: " << strGUID;
-        return;
     }
 
     abs.strKbGUID = strKbGUID;
