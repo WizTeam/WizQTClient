@@ -210,6 +210,7 @@ public:
     { Q_UNUSED(pCtrl); Q_UNUSED(pos); }
 
     virtual void getDocuments(CWizDatabase& db, CWizDocumentDataArray& arrayDocument);
+    virtual bool accept(CWizDatabase& db, const WIZDOCUMENTDATA& data);
 };
 
 class CWizCategoryViewBizGroupRootItem : public CWizCategoryViewAllGroupsRootItem
@@ -223,6 +224,7 @@ public:
     { Q_UNUSED(pCtrl); Q_UNUSED(pos); }
 
     virtual void getDocuments(CWizDatabase& db, CWizDocumentDataArray& arrayDocument);
+    virtual bool accept(CWizDatabase& db, const WIZDOCUMENTDATA& data);
 };
 
 class CWizCategoryViewGroupRootItem : public CWizCategoryViewItemBase
