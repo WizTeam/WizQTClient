@@ -8,7 +8,8 @@
 #include <QIcon>
 #include <QDateTime>
 
-#include <utils/misc.h>
+#include <QTextStream>
+//#include <utils/misc.h>
 #include "wizdef.h"
 
 using namespace Core;
@@ -51,7 +52,15 @@ AboutDialog::AboutDialog(QWidget *parent)
     textCredits->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
     QString strHtml;
-    Utils::Misc::loadUnicodeTextFromFile(":/credits.html", strHtml);
+
+    QFile file(":/credits.html");
+    if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        QTextStream stream(&file);
+        strHtml = stream.readAll();
+        file.close();
+    }
+
+    //Utils::Misc::loadUnicodeTextFromFile(":/credits.html", strHtml);
     textCredits->setHtml(strHtml);
 
     QLabel* labelCopyright = new QLabel(this);
