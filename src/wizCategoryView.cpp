@@ -359,10 +359,6 @@ CWizCategoryViewItemBase* CWizCategoryBaseView::itemAt(const QPoint& p) const
     return dynamic_cast<CWizCategoryViewItemBase*>(QTreeWidget::itemAt(p));
 }
 
-template <class T> inline  T* CWizCategoryBaseView::currentCategoryItem() const
-{
-    return dynamic_cast<T*>(currentItem());
-}
 
 CWizCategoryViewItemBase* CWizCategoryBaseView::categoryItemFromIndex(const QModelIndex &index) const
 {

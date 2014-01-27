@@ -44,7 +44,12 @@ public:
     void restoreSelection();
 
     CWizCategoryViewItemBase* itemAt(const QPoint& p) const;
-    template <class T> T* currentCategoryItem() const;
+
+    template <class T> T* currentCategoryItem() const
+    {
+        return dynamic_cast<T*>(currentItem());
+    }
+
     CWizCategoryViewItemBase* categoryItemFromIndex(const QModelIndex &index) const;
     bool isHelperItemByIndex(const QModelIndex &index) const;
     bool isSeparatorItemByPosition(const QPoint& pt) const;
