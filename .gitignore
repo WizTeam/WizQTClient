@@ -2,3 +2,4 @@
 .DS_Store
 tags
 CMakeLists.txt.user*
+!macos-package/.DS_Store
