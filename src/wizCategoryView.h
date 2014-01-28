@@ -181,6 +181,7 @@ private:
     void initStyles();
     void initGroups();
     void initGroup(CWizDatabase& db);
+    void initGroup(CWizDatabase& db, bool& itemCreeated);
     void initGroup(CWizDatabase& db, QTreeWidgetItem* pParent,
                    const QString& strParentTagGUID);
 

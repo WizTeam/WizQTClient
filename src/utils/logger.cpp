@@ -135,9 +135,12 @@ QString Logger::lastLogFile(const QString strFileName)
     int i = liAll.indexOf(strFileName);
 
     if (i == -1)
-        return 0;
+        return QString();
+    //
+    if (i + 1 >= liAll.size())
+        return QString();
 
-    return liAll.at(i+1);
+    return liAll.at(i + 1);
 }
 
 QString Logger::logFile()

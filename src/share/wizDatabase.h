@@ -247,6 +247,7 @@ public:
     bool Open(const QString& strUserId, const QString& strKbGUID = NULL);
     bool LoadDatabaseInfo();
     bool SetDatabaseInfo(const WIZDATABASEINFO& dbInfo);
+    bool InitDatabaseInfo(const WIZDATABASEINFO& dbInfo);
     bool GetUserInfo(WIZUSERINFO& userInfo);
 
     // path resolve

@@ -3,6 +3,7 @@
 #include <QDebug>
 
 #include "wizDatabase.h"
+#include "wizobject.h"
 #include "utils/logger.h"
 
 static CWizDatabaseManager* m_instance = 0;
@@ -26,7 +27,7 @@ CWizDatabaseManager::~CWizDatabaseManager()
     closeAll();
 }
 
-bool CWizDatabaseManager::open(const QString& strKbGUID)
+bool CWizDatabaseManager::openWithInfo(const QString& strKbGUID, const WIZDATABASEINFO* pInfo)
 {
     Q_ASSERT(!m_strUserId.isEmpty());
 
@@ -38,6 +39,11 @@ bool CWizDatabaseManager::open(const QString& strKbGUID)
     if (!db->Open(m_strUserId, strKbGUID)) {
         delete db;
         return false;
+    }
+    //
+    if (pInfo)
+    {
+        db->InitDatabaseInfo(*pInfo);
     }
 
     if (strKbGUID.isEmpty()) {
@@ -55,6 +61,10 @@ bool CWizDatabaseManager::open(const QString& strKbGUID)
 
     Q_EMIT databaseOpened(strKbGUID);
     return true;
+}
+bool CWizDatabaseManager::open(const QString& strKbGUID)
+{
+    return openWithInfo(strKbGUID, NULL);
 }
 
 bool CWizDatabaseManager::openAll()
@@ -95,6 +105,31 @@ bool CWizDatabaseManager::isOpened(const QString& strKbGUID)
         return true;
 
     return false;
+}
+CWizDatabase& CWizDatabaseManager::addDb(const QString& strKbGUID, const WIZDATABASEINFO& info)
+{
+    Q_ASSERT(m_dbPrivate);
+
+    if (strKbGUID.isEmpty() || m_dbPrivate->kbGUID() == strKbGUID) {
+        CWizDatabase& db = *m_dbPrivate;
+        db.SetDatabaseInfo(info);
+        return db;
+    }
+
+    QMap<QString, CWizDatabase*>::iterator it = m_mapGroups.find(strKbGUID);
+    if (it != m_mapGroups.end()) {
+        CWizDatabase& db = *(it.value());
+        db.SetDatabaseInfo(info);
+        return db;
+    }
+
+    qDebug() << "[CWizDatabaseManager] request db not exist, create it: " << strKbGUID;
+
+    if (!openWithInfo(strKbGUID, &info)) {
+        qDebug() << "[CWizDatabaseManager] failed to open new datebase: " << strKbGUID;
+    }
+
+    return db(strKbGUID);
 }
 
 CWizDatabase& CWizDatabaseManager::db(const QString& strKbGUID)
@@ -282,6 +317,8 @@ void CWizDatabaseManager::on_groupsInfoDownloaded(const CWizGroupDataArray& arra
         info.bizName = group.bizName;
         info.name = group.strGroupName;
         info.nPermission = group.nUserGroup;
+        //
+        addDb(group.strGroupGUID, info);
         db(group.strGroupGUID).SetDatabaseInfo(info);
     }
 

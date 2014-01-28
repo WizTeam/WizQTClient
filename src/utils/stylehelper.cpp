@@ -544,7 +544,7 @@ int StyleHelper::fontExtend(QFont& f)
     }
 
     f.setFamily(strFont);
-    f.setPixelSize(10);
+    f.setPixelSize(9);
 
     return QFontMetrics(f).height();
 }

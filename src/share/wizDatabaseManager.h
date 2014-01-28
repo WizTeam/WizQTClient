@@ -15,6 +15,7 @@ struct WIZDOCUMENTDATA;
 struct WIZDOCUMENTATTACHMENTDATA;
 struct WIZGROUPDATA;
 class CWizDatabase;
+struct WIZDATABASEINFO;
 
 typedef std::deque<WIZGROUPDATA> CWizGroupDataArray;
 
@@ -30,11 +31,13 @@ public:
 
     // open private db if strKbGUID is empty, otherwise open groups db
     bool open(const QString& strKbGUID = "");
+    bool openWithInfo(const QString& strKbGUID, const WIZDATABASEINFO* pInfo);
     bool openAll();
     bool isOpened(const QString& strKbGUID = "");
 
     // get db reference by strKbGUID (include private), or null to get private
     CWizDatabase& db(const QString& strKbGUID = "");
+    CWizDatabase& addDb(const QString& strKbGUID, const WIZDATABASEINFO& info);
 
     // get all group guid list, exclude private
     //void Guids(QStringList& strings);

@@ -1868,9 +1868,15 @@ void CWizCategoryView::initGroups()
 
 void CWizCategoryView::initGroup(CWizDatabase& db)
 {
+    bool itemCreeated = false;
+    initGroup(db, itemCreeated);
+}
+void CWizCategoryView::initGroup(CWizDatabase& db, bool& itemCreeated)
+{
+    itemCreeated = false;
     if (findGroup(db.kbGUID()))
         return;
-
+    //
     QTreeWidgetItem* pRoot = NULL;
 
     // if biz info exist, append group to it instead of individual groups root
@@ -1885,6 +1891,8 @@ void CWizCategoryView::initGroup(CWizDatabase& db)
         return;
     }
 
+    itemCreeated = true;
+    //
     CWizCategoryViewGroupRootItem* pGroupItem = new CWizCategoryViewGroupRootItem(m_app, db.name(), db.kbGUID());
     pRoot->addChild(pGroupItem);
 
@@ -2475,7 +2483,21 @@ void CWizCategoryView::on_group_opened(const QString& strKbGUID)
 {
     Q_ASSERT(!strKbGUID.isEmpty());
 
-    initGroup(m_dbMgr.db(strKbGUID));
+    bool itemCreated = false;
+    initGroup(m_dbMgr.db(strKbGUID), itemCreated);
+    //
+    if (itemCreated)
+    {
+        CWizCategoryViewGroupRootItem* pItem = findGroup(strKbGUID);
+        if (pItem) {
+            QTreeWidgetItem* parent = pItem->parent();
+            if (parent) {
+                if (parent->childCount() >= 2) {
+                    parent->sortChildren(0, Qt::AscendingOrder);
+                }
+            }
+        }
+    }
 }
 
 void CWizCategoryView::on_group_closed(const QString& strKbGUID)
@@ -2705,9 +2727,14 @@ void CWizCategoryView::saveSelected(QSettings* settings)
 {
     if (!settings)
         return;
+    //
+    QTreeWidgetItem *curr = currentItem();
+    if (!curr)
+        return;
 
-    CWizCategoryViewItemBase* pItem = dynamic_cast<CWizCategoryViewItemBase*>(currentItem());
-    Q_ASSERT(pItem);
+    CWizCategoryViewItemBase* pItem = dynamic_cast<CWizCategoryViewItemBase*>(curr);
+    if (!pItem)
+        return;
 
     settings->beginGroup(TREEVIEW_STATE);
     settings->setValue(TREEVIEW_SELECTED_ITEM, pItem->id());

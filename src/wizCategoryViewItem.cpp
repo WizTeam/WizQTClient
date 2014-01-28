@@ -309,19 +309,26 @@ void CWizCategoryViewMessageItem::draw(QPainter* p, const QStyleOptionViewItemV4
 {
     if (!m_nUnread)
         return;
+    //
+    QString text = unreadString();
+    if (text.isEmpty())
+        return;
 
     p->save();
 
     QFont f;
     Utils::StyleHelper::fontExtend(f);
     p->setFont(f);
-
-    int nMargin = 5;
-    int nWidth = p->fontMetrics().width(unreadString()) + 2 * nMargin;
-    int nHeight = vopt->rect.height() - 2 * nMargin;
+    //
+    int nMargin = 4;
+    QSize szText = p->fontMetrics().size(0, text);
+    int nWidth = szText.width() + 2 * nMargin;
+    int nHeight = szText.height() + 2 * nMargin;
     if (nWidth < nHeight)
         nWidth = nHeight;
-    QRect rcb(vopt->rect.right() - nWidth - nMargin, vopt->rect.y(), nWidth + nMargin, vopt->rect.height());
+    //
+    int nTop = vopt->rect.y() + (vopt->rect.height() - nHeight) / 2;
+    QRect rcb(vopt->rect.right() - nWidth - nMargin, nTop, nWidth, nHeight);
     rcb.adjust(nMargin, nMargin, -nMargin, -nMargin);
 
     p->setRenderHint(QPainter::Antialiasing);
@@ -331,7 +338,7 @@ void CWizCategoryViewMessageItem::draw(QPainter* p, const QStyleOptionViewItemV4
     p->drawEllipse(rcb);
 
     p->setPen(QColor("#ffffff"));
-    p->drawText(rcb, Qt::AlignCenter, unreadString());
+    p->drawText(rcb, Qt::AlignCenter, text);
 
     p->restore();
 }
@@ -801,6 +808,7 @@ bool CWizCategoryViewGroupRootItem::accept(CWizDatabase& db, const WIZDOCUMENTDA
 
 void CWizCategoryViewGroupRootItem::reload(CWizDatabase& db)
 {
+    m_strName = db.name();
     setText(0, db.name());
 }
 
@@ -902,12 +910,17 @@ void CWizCategoryViewGroupItem::drop(const WIZDOCUMENTDATA& data)
         return;
     }
 
-    Q_ASSERT(arrayTag.size() == 1);
-    if (arrayTag.size() != 1)
-        return;
-
+    //Q_ASSERT(arrayTag.size() == 1);
     CWizDocument doc(db, data);
-    doc.RemoveTag(arrayTag[0]);
+    if (arrayTag.size() > 0)
+    {
+        for (CWizTagDataArray::const_iterator it = arrayTag.begin();
+            it != arrayTag.end();
+            it++)
+        {
+            doc.RemoveTag(*it);
+        }
+    }
     doc.AddTag(tag());
 }
 
