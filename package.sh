@@ -14,6 +14,8 @@ cmake -DWIZNOTE_USE_QT5=YES -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=~/Qt5
 make -j5 && \
 cd ../WizQTClient
 
+setFile -a V ${package_home}/wiznote-disk-cover.jpg
+
 current_date=`date "+%Y-%m-%d"`
 rm -f "${package_output_path}/tmp.dmg"
 rm -f "${package_output_path}/wiznote-${current_date}.dmg"
