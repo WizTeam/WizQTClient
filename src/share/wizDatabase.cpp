@@ -1457,6 +1457,41 @@ bool CWizDatabase::LoadDatabaseInfo()
     return true;
 }
 
+
+bool CWizDatabase::InitDatabaseInfo(const WIZDATABASEINFO& dbInfo)
+{
+    Q_ASSERT(!dbInfo.name.isEmpty());
+
+    int nErrors = 0;
+
+    // general
+    if (!SetMeta(g_strDatabaseInfoSection, "Name", dbInfo.name))
+        nErrors++;
+    if (!SetMeta(g_strDatabaseInfoSection, "Permission", QString::number(dbInfo.nPermission)))
+        nErrors++;
+    // biz group info
+    if (!dbInfo.bizGUID.isEmpty() && !dbInfo.bizName.isEmpty()) {
+        if (!SetMeta(g_strDatabaseInfoSection, "BizName", dbInfo.bizName))
+            nErrors++;
+        if (!SetMeta(g_strDatabaseInfoSection, "BizGUID", dbInfo.bizGUID))
+            nErrors++;
+    }
+
+    if (!SetMeta(g_strDatabaseInfoSection, "KbGUID", kbGUID()))
+        nErrors++;
+
+    if (!SetMeta(g_strDatabaseInfoSection, "Version", WIZ_DATABASE_VERSION))
+        nErrors++;
+    //
+    LoadDatabaseInfo();
+
+    if (nErrors)
+        return false;
+
+    return true;
+}
+
+
 bool CWizDatabase::SetDatabaseInfo(const WIZDATABASEINFO& dbInfo)
 {
     Q_ASSERT(!dbInfo.name.isEmpty());
