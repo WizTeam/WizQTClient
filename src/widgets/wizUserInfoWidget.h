@@ -29,6 +29,9 @@ protected:
     CWizWebSettingsDialog* m_userSettings;
     QIcon m_iconVipIndicator;
     QIcon m_iconArraw;
+    QPixmap m_circleAvatar;
+    //
+    QPixmap getCircleAvatar(int width, int height);
 
     virtual QPixmap getAvatar();
     virtual QIcon getArrow() { return m_iconArraw; }
