@@ -20,7 +20,7 @@ void CWizUserInfoWidgetBase::paintEvent(QPaintEvent *event)
 {
     Q_UNUSED(event);
 
-    int nAvatarWidth = 36;
+    int nAvatarWidth = 32;
     int nArrawWidth = 10;
     int nMargin = 4;
 
