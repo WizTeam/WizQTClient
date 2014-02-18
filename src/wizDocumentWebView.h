@@ -85,6 +85,11 @@ public:
     bool isInited() const { return m_bEditorInited; }
     bool isEditing() const { return m_bEditingMode; }
 
+    Q_INVOKABLE QString currentNoteGUID();
+    Q_INVOKABLE QString currentNoteHtml();
+    Q_INVOKABLE QString currentNoteHead();
+    Q_INVOKABLE bool currentIsEditing();
+
     //const WIZDOCUMENTDATA& document() { return m_data; }
 
     // initialize editor style before render, only invoke once.
@@ -146,6 +151,11 @@ private:
     bool m_bEditingMode;
     bool m_bNewNote;
     bool m_bNewNoteTitleInited;
+    //
+    QString m_strCurrentNoteGUID;
+    QString m_strCurrentNoteHead;
+    QString m_strCurrentNoteHtml;
+    bool m_bCurrentEditing;
 
     CWizDocumentWebViewWorkerPool* m_workerPool;
     CWizObjectDataDownloaderHost* m_downloaderHost;
@@ -242,6 +252,7 @@ Q_SIGNALS:
     // signals used request reset info toolbar and editor toolbar
     void focusIn();
     void focusOut();
+    //
 
     void requestShowContextMenu(const QPoint& pos);
 };
