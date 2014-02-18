@@ -115,6 +115,12 @@ function viewNote(strGUID, bEditing, strHtml, strHead)
     }
 }
 
+function viewCurrentNote()
+{
+    return viewNote(WizEditor.currentNoteGUID(), WizEditor.currentIsEditing(),
+                    WizEditor.currentNoteHtml(), WizEditor.currentNoteHead());
+}
+
 function updateCss()
 {
     var css= editor.document.getElementsByTagName('link');

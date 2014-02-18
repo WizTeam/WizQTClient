@@ -275,6 +275,7 @@ CWizDocumentWebView::CWizDocumentWebView(CWizExplorerApp& app, QWidget* parent)
     , m_bNewNote(false)
     , m_bNewNoteTitleInited(false)
     , m_noteFrame(0)
+    , m_bCurrentEditing(false)
 {
     CWizDocumentWebViewPage* page = new CWizDocumentWebViewPage(this);
     setPage(page);
@@ -878,6 +879,23 @@ QString escapeJavascriptString(const QString & str)
     return out;
 }
 
+QString CWizDocumentWebView::currentNoteGUID()
+{
+    return m_strCurrentNoteGUID;
+}
+QString CWizDocumentWebView::currentNoteHtml()
+{
+    return m_strCurrentNoteHtml;
+}
+QString CWizDocumentWebView::currentNoteHead()
+{
+    return m_strCurrentNoteHead;
+}
+bool CWizDocumentWebView::currentIsEditing()
+{
+    return m_bCurrentEditing;
+}
+
 void CWizDocumentWebView::viewDocumentInEditor(bool editing)
 {
     Q_ASSERT(m_bEditorInited);
@@ -895,7 +913,7 @@ void CWizDocumentWebView::viewDocumentInEditor(bool editing)
         return;
     }
 
-    strHtml = escapeJavascriptString(strHtml);
+    //strHtml = escapeJavascriptString(strHtml);
 
     QString strHead;
     QRegExp regh("<head.*>([\\s\\S]*)</head>", Qt::CaseInsensitive);
@@ -909,11 +927,19 @@ void CWizDocumentWebView::viewDocumentInEditor(bool editing)
         strHtml = regex.cap(1);
     }
 
+    m_strCurrentNoteGUID = strGUID;
+    m_strCurrentNoteHead = strHead;
+    m_strCurrentNoteHtml = strHtml;
+    m_bCurrentEditing = editing;
+    //
+    /*
     QString strExec = QString("viewNote('%1', %2, '%3', '%4');")
             .arg(strGUID)
             .arg(editing ? "true" : "false")
             .arg(strHtml)
             .arg(strHead);
+            */
+    QString strExec = QString("viewCurrentNote();");
 
     ret = page()->mainFrame()->evaluateJavaScript(strExec).toBool();
     if (!ret) {
