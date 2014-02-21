@@ -1261,6 +1261,23 @@ bool WizSaveUnicodeTextToUtf8File(const QString& strFileName, const QByteArray& 
     return true;
 }
 
+
+bool WizSaveUnicodeTextToUtf8File(const QString& strFileName, const QString& strText, bool addBom)
+{
+    QFile file(strFileName);
+    if (!file.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate))
+        return false;
+
+    QTextStream stream(&file);
+    stream.setCodec("UTF-8");
+    stream.setGenerateByteOrderMark(addBom ? true : false);
+    stream << strText;
+    stream.flush();
+    file.close();
+
+    return true;
+}
+
 bool WizSplitTextToArray(const CString& strText, QChar ch, CWizStdStringArray& arrayResult)
 {
     QStringList strings = strText.split(ch, QString::SkipEmptyParts);
