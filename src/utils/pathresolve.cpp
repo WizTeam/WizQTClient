@@ -95,16 +95,7 @@ QString PathResolve::tempPath()
 
 QString PathResolve::globalSettingsFilePath()
 {
-    QString strConfigHome = qgetenv("XDG_CONFIG_HOME");
-    if (strConfigHome.isEmpty()) {
-#ifdef Q_OS_LINUX
-        strConfigHome = qgetenv("HOME") + "/.config/wiz/";
-#else
-        strConfigHome = dataStorePath();
-#endif
-    } else {
-        strConfigHome += "/wiz/";
-    }
+    QString strConfigHome = dataStorePath();
 
     ensurePathExists(strConfigHome);
     return strConfigHome + "wiznote.ini";

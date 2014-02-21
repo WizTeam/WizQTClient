@@ -9,6 +9,8 @@
 #include <QSettings>
 #include <QDesktopServices>
 
+#include <sys/stat.h>
+
 #include <extensionsystem/pluginmanager.h>
 #include "wizmainwindow.h"
 #include "wizupdaterprogressdialog.h"
@@ -75,6 +77,64 @@ static inline QStringList getPluginPaths()
 #  define SHARE_PATH "/../share/wiznote"
 #endif
 
+const char* g_lpszDesktopFileName = "\
+[Desktop Entry]\n\
+Exec=%1wiznote\n\
+Icon=wiznote\n\
+Type=Application\n\
+Terminal=false\n\
+Name=%2\n\
+GenericName=%3\n\
+Categories=WizNote;\n\
+Name[en_US]=WizNote\n\
+GenericName[en_US.UTF-8]=WizNote\n\
+";
+
+
+void installOnLinux()
+{
+    QString appPath = WizGetAppPath();
+    QString strText = WizFormatString3(g_lpszDesktopFileName,
+                                       appPath,
+                                       QObject::tr("WizNote"),
+                                       QObject::tr("WizNote"));
+    //
+    QString applicationsPath = QDir::homePath() + "/.local/share/applications/";
+    ::WizEnsurePathExists(applicationsPath);
+    //
+    QString iconsBasePath = QDir::homePath() + "/.local/share/icons/hicolor/";
+    ::WizEnsurePathExists(applicationsPath);
+    //
+    CWizStdStringArray arrayIconSize;
+    arrayIconSize.push_back("16");
+    arrayIconSize.push_back("32");
+    arrayIconSize.push_back("48");
+    arrayIconSize.push_back("64");
+    arrayIconSize.push_back("128");
+    arrayIconSize.push_back("256");
+    for (CWizStdStringArray::const_iterator it = arrayIconSize.begin();
+        it != arrayIconSize.end();
+        it++)
+    {
+        QString iconSize = *it;
+        QString iconPathName = iconSize + "x" + iconSize;
+        QString iconFullPath = iconsBasePath + iconPathName + "/apps/";
+        WizEnsurePathExists(iconFullPath);
+        //
+        QString resourceName = ":/logo_" + iconSize + ".png";
+        QPixmap pixmap(resourceName);
+        if (pixmap.isNull())
+            continue;
+        //
+        pixmap.save(iconFullPath + "wiznote.png");
+    }
+
+    QString desktopFileName = applicationsPath + "wiznote.desktop";
+    ::WizSaveUnicodeTextToUtf8File(desktopFileName, strText, false);
+    //
+    chmod(desktopFileName.toUtf8(), ACCESSPERMS);
+}
+
 int main(int argc, char *argv[])
 {
     // setup logger
@@ -88,7 +148,14 @@ int main(int argc, char *argv[])
     QApplication a(argc, argv);
 
     QApplication::setApplicationName(QObject::tr("WizNote"));
-    QApplication::setWindowIcon(QIcon(":/logo.png"));
+    QIcon icon;
+    icon.addPixmap(QPixmap(":/logo_16.png"));
+    icon.addPixmap(QPixmap(":/logo_32.png"));
+    icon.addPixmap(QPixmap(":/logo_48.png"));
+    icon.addPixmap(QPixmap(":/logo_96.png"));
+    icon.addPixmap(QPixmap(":/logo_128.png"));
+    icon.addPixmap(QPixmap(":/logo_256.png"));
+    QApplication::setWindowIcon(icon);
 
 #ifdef Q_OS_MAC
     // enable switch between qt widget and alien widget(cocoa)
@@ -138,6 +205,14 @@ int main(int argc, char *argv[])
     translatorQt.load(strLocaleFile);
     a.installTranslator(&translatorQt);
 
+#ifndef Q_OS_MAC
+    if (globalSettings->value("Common/Installed", 0).toInt() == 0)
+    {
+        globalSettings->setValue("Common/Installed", 1);
+        installOnLinux();
+    }
+#endif
+
     // check update if needed
     //CWizUpdaterDialog updater;
     //if (updater.checkNeedUpdate()) {
@@ -174,7 +249,8 @@ int main(int argc, char *argv[])
 
     QSettings* settings = new QSettings(Utils::PathResolve::userSettingsFilePath(strUserId), QSettings::IniFormat);
     PluginManager::setSettings(settings);
-
+    //
+    //
     // reset locale for current user.
     userSettings.setUser(strUserId);
     strLocale = userSettings.locale();

@@ -106,6 +106,7 @@ bool WizLoadUnicodeTextFromFile(const QString& strFileName, QString& steText);
 bool WizSaveUnicodeTextToUtf16File(const QString& strFileName, const QString& strText);
 bool WizSaveUnicodeTextToUtf8File(const QString& strFileName, const QString& strText);
 bool WizSaveUnicodeTextToUtf8File(const QString& strFileName, const QByteArray& strText);
+bool WizSaveUnicodeTextToUtf8File(const QString& strFileName, const QString& strText, bool addBom);
 
 CString WizDateTimeToIso8601String(const COleDateTime& t);
 BOOL WizIso8601StringToDateTime(CString str, COleDateTime& t, CString& strError);
