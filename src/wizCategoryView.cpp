@@ -765,11 +765,12 @@ void CWizCategoryView::on_action_user_newFolder()
 {
     CWizLineInputDialog* dialog = new CWizLineInputDialog(tr("New folder"),
                                                           tr("Please input folder name: "),
-                                                          "", window());
+                                                          "", m_app.mainWindow());      //use mainWindow as parent
 
     connect(dialog, SIGNAL(finished(int)), SLOT(on_action_user_newFolder_confirmed(int)));
 
-    dialog->open();
+    dialog->exec();
+
 }
 
 void CWizCategoryView::on_action_user_newFolder_confirmed(int result)
@@ -807,7 +808,7 @@ void CWizCategoryView::on_action_user_newTag()
                                                           "", window());
     connect(dialog, SIGNAL(finished(int)), SLOT(on_action_user_newTag_confirmed(int)));
 
-    dialog->open();
+    dialog->exec();
 }
 
 void CWizCategoryView::on_action_user_newTag_confirmed(int result)
@@ -854,7 +855,7 @@ void CWizCategoryView::on_action_group_newFolder()
 
     connect(dialog, SIGNAL(finished(int)), SLOT(on_action_group_newFolder_confirmed(int)));
 
-    dialog->open();
+    dialog->exec();
 }
 
 void CWizCategoryView::on_action_group_newFolder_confirmed(int result)
@@ -911,7 +912,7 @@ void CWizCategoryView::on_action_user_moveFolder()
     selector->setAcceptRoot(true);
 
     connect(selector, SIGNAL(finished(int)), SLOT(on_action_user_moveFolder_confirmed(int)));
-    selector->open();
+    selector->exec();
 }
 
 void CWizCategoryView::on_action_user_moveFolder_confirmed(int result)
@@ -965,7 +966,7 @@ void CWizCategoryView::on_action_user_moveFolder_confirmed_progress(int nMax, in
     progress->setActionString(tr("Move Document: %1 to %2").arg(strOldLocation).arg(strNewLocation));
     progress->setNotifyString(data.strTitle);
     progress->setProgress(nMax, nValue);
-    progress->open();
+    progress->exec();
 }
 
 void CWizCategoryView::on_action_renameItem()
@@ -994,10 +995,11 @@ void CWizCategoryView::on_action_user_renameFolder()
 
     CWizLineInputDialog* dialog = new CWizLineInputDialog(tr("Rename folder"),
                                                           tr("Please input new folder name: "),
-                                                          p->name(), window());
+                                                          p->name(),window());
+
     connect(dialog, SIGNAL(finished(int)), SLOT(on_action_user_renameFolder_confirmed(int)));
 
-    dialog->open();
+    dialog->exec();
 }
 
 void CWizCategoryView::on_action_user_renameFolder_confirmed(int result)
@@ -1052,7 +1054,7 @@ void CWizCategoryView::on_action_user_renameFolder_confirmed_progress(int nMax, 
     progress->setActionString(tr("Move Document: %1 to %2").arg(strOldLocation).arg(strNewLocation));
     progress->setNotifyString(data.strTitle);
     progress->setProgress(nMax, nValue);
-    progress->open();
+    progress->exec();
 }
 
 void CWizCategoryView::on_action_user_renameTag()
@@ -1065,7 +1067,7 @@ void CWizCategoryView::on_action_user_renameTag()
 
     connect(dialog, SIGNAL(finished(int)), SLOT(on_action_user_renameTag_confirmed(int)));
 
-    dialog->open();
+    dialog->exec();
 }
 
 void CWizCategoryView::on_action_user_renameTag_confirmed(int result)
@@ -1099,7 +1101,7 @@ void CWizCategoryView::on_action_group_renameFolder()
 
     connect(dialog, SIGNAL(finished(int)), SLOT(on_action_group_renameFolder_confirmed(int)));
 
-    dialog->open();
+    dialog->exec();
 }
 
 void CWizCategoryView::on_action_group_renameFolder_confirmed(int result)
@@ -1160,7 +1162,8 @@ void CWizCategoryView::on_action_user_deleteFolder()
 
     QString strWarning = tr("Do you really want to delete all documents inside folder: %1 ? (All documents will move to trash folder and remove from cloud server)").arg(p->location());
     msgBox->setText(strWarning);
-    msgBox->open(this, SLOT(on_action_user_deleteFolder_confirmed(int)));
+    connect(msgBox,SIGNAL(finished(int)),this,SLOT(on_action_user_deleteFolder_confirmed(int)));
+    msgBox->exec();
 }
 
 void CWizCategoryView::on_action_user_deleteFolder_confirmed(int result)
@@ -1192,7 +1195,8 @@ void CWizCategoryView::on_action_user_deleteTag()
 
     QString strWarning = tr("Do you really want to delete tag: %1 ? (include child tags if any)").arg(p->tag().strName);
     msgBox->setText(strWarning);
-    msgBox->open(this, SLOT(on_action_user_deleteTag_confirmed(int)));
+    connect(msgBox,SIGNAL(finished(int)),this,SLOT(on_action_user_deleteTag_confirmed(int)));
+    msgBox->exec();
 }
 
 void CWizCategoryView::on_action_user_deleteTag_confirmed(int result)
@@ -1224,7 +1228,8 @@ void CWizCategoryView::on_action_group_deleteFolder()
 
     QString strWarning = tr("Do you really want to delete folder: %1 ? (All documents will move to unclassified folder, It's safe.)").arg(p->tag().strName);
     msgBox->setText(strWarning);
-    msgBox->open(this, SLOT(on_action_group_deleteFolder_confirmed(int)));
+    connect(msgBox,SIGNAL(finished(int)),this,SLOT(on_action_group_deleteFolder_confirmed(int)));
+    msgBox->exec();
 }
 
 void CWizCategoryView::on_action_group_deleteFolder_confirmed(int result)
@@ -1263,7 +1268,7 @@ void CWizCategoryView::on_action_group_attribute()
 
         m_strRequestedGroupKbGUID = p->kbGUID();
 
-        m_groupSettings->open();
+        m_groupSettings->exec();
     }
 }
 

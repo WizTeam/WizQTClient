@@ -40,7 +40,7 @@ Q_SIGNALS:
     void restartForSettings();
 
 public Q_SLOTS:
-    void on_comboLang_activated(int index);
+    void on_comboLang_currentIndexChanged(int index);
 
     void on_radioAuto_clicked(bool checked);
     void on_radioAlwaysReading_clicked(bool checked);
@@ -54,6 +54,7 @@ public Q_SLOTS:
 
     void onButtonFontSelect_clicked();
     void onButtonFontSelect_confirmed();
+
 };
 
 
