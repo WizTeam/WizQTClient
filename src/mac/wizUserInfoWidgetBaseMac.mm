@@ -108,7 +108,7 @@
     avatarRect.size.height -= 4;
     avatarRect.size.width -= 4;
     //
-    QPixmap pixmap = m_widget->getCircleAvatar(avatarRect.size.width, avatarRect.size.height);
+    QPixmap pixmap = m_widget->getAvatar(avatarRect.size.width, avatarRect.size.height);
     if (!pixmap.isNull())
     {
         NSImage* img = ::WizToNSImage(pixmap);
@@ -284,8 +284,6 @@ void CWizUserInfoWidgetBaseMac::updateUI()
     WizUserInfoView* view = (WizUserInfoView *)cocoaView();
     if (!view)
         return;
-    //
-    m_circleAvatar = QPixmap();
     //
     [view setNeedsDisplay: YES];
 }

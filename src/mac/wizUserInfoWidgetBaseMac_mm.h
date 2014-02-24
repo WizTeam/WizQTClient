@@ -24,24 +24,20 @@ protected:
     int m_textWidth;
     int m_textHeight;
     //
-    QPixmap m_circleAvatar;
-
     void setMenu(QMenu* menu) { m_menuPopup = menu; }
     //
     void calTextSize();
     //
-    void updateUI();
+    virtual void updateUI();
 public:
 
     QString text() const;
     void setText(QString val);
 
-    virtual QPixmap getCircleAvatar(int width, int height);
-    //
     NSMenu* getNSMewnu();
     //
     virtual QString userId() { return QString(); }
-    virtual QPixmap getAvatar() { return QPixmap(); }
+    virtual QPixmap getAvatar(int width, int height) { return QPixmap(); }
     virtual QIcon getArrow() { return QIcon(); }
     virtual int textWidth() const;
     virtual int textHeight() const;

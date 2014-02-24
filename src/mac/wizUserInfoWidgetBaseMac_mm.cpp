@@ -17,6 +17,7 @@ void CWizUserInfoWidgetBaseMac::setText(QString val)
     calTextSize();
 }
 
+/*
 QPixmap corpAvatar(const QPixmap& org)
 {
     if (org.isNull())
@@ -80,3 +81,4 @@ QPixmap CWizUserInfoWidgetBaseMac::getCircleAvatar(int width, int height)
     //
     return m_circleAvatar;
 }
+*/

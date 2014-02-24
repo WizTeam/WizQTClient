@@ -186,6 +186,11 @@ QString CWizUserInfoWidget::userId()
 {
     return m_db.getUserId();
 }
+void CWizUserInfoWidget::updateUI()
+{
+    m_circleAvatar = QPixmap();
+    WIZUSERINFOWIDGETBASE::updateUI();
+}
 
 
 
@@ -255,14 +260,9 @@ QPixmap CWizUserInfoWidget::getCircleAvatar(int width, int height)
 
 
 
-QPixmap CWizUserInfoWidget::getAvatar()
+QPixmap CWizUserInfoWidget::getAvatar(int width, int height)
 {
-    return getCircleAvatar(32, 32);
-    /*
-    QPixmap pixmap;
-    AvatarHost::avatar(m_db.getUserId(), &pixmap);
-    return pixmap;
-    */
+    return getCircleAvatar(width, width);
 }
 
 QSize CWizUserInfoWidget::sizeHint() const
