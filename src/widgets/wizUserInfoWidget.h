@@ -33,10 +33,11 @@ protected:
     //
     QPixmap getCircleAvatar(int width, int height);
 
-    virtual QPixmap getAvatar();
+    virtual QPixmap getAvatar(int width, int height);
     virtual QIcon getArrow() { return m_iconArraw; }
     virtual QSize sizeHint() const;
     virtual QString userId();
+    virtual void updateUI();
 protected Q_SLOTS:
     void resetUserInfo();
 
