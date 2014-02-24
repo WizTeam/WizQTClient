@@ -25,7 +25,6 @@ CWizUserInfoWidget::CWizUserInfoWidget(CWizExplorerApp& app, QWidget *parent)
     : WIZUSERINFOWIDGETBASE(parent)
     , m_app(app)
     , m_db(app.databaseManager().db())
-    , m_userSettings(NULL)
 {
     connect(AvatarHost::instance(), SIGNAL(loaded(const QString&)),
             SLOT(on_userAvatar_loaded(const QString&)));
@@ -108,39 +107,13 @@ void CWizUserInfoWidget::on_action_accountInfo_triggered()
 
 void CWizUserInfoWidget::on_action_accountSetup_triggered()
 {
-    if (!m_userSettings) {
-        m_userSettings = new CWizWebSettingsDialog(QSize(720, 400), window()); // use toplevel window as parent
-        m_userSettings->setWindowTitle(tr("Account settings"));
-        connect(m_userSettings, SIGNAL(accepted()), m_userSettings, SLOT(deleteLater()));
-        connect(m_userSettings, SIGNAL(showProgress()), SLOT(on_action_accountSetup_showProgress()));
-    }
+    QString strUrl = WizService::ApiEntry::accountInfoUrl(WIZ_TOKEN_IN_URL_REPLACE_PART);
+    CWizWebSettingsDialog* pDlg = new CWizWebSettingsWithTokenDialog(strUrl, QSize(800, 400), window());
 
-    m_userSettings->exec();
+    pDlg->exec();
+    delete pDlg;
 }
 
-void CWizUserInfoWidget::on_action_accountSetup_showProgress()
-{
-    connect(Token::instance(), SIGNAL(tokenAcquired(const QString&)),
-            SLOT(on_action_accountSetup_requested(const QString&)), Qt::QueuedConnection);
-
-    Token::requestToken();
-}
-
-void CWizUserInfoWidget::on_action_accountSetup_requested(const QString& strToken)
-{
-    Token::instance()->disconnect(this);
-
-    if (!m_userSettings)
-        return;
-
-    if (strToken.isEmpty()) {
-        m_userSettings->showError();
-        return;
-    }
-
-    QString strUrl = WizService::ApiEntry::accountInfoUrl(strToken);
-    m_userSettings->load(QUrl::fromEncoded(strUrl.toUtf8()));
-}
 
 void CWizUserInfoWidget::on_action_changeAvatar_triggered()
 {

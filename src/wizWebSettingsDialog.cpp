@@ -1,4 +1,5 @@
 #include "wizWebSettingsDialog.h"
+#include "sync/token.h"
 
 #include <QWebView>
 #include <QMovie>
@@ -6,8 +7,11 @@
 #include <QLabel>
 #include <QPushButton>
 
-CWizWebSettingsDialog::CWizWebSettingsDialog(QSize sz, QWidget *parent)
+using namespace WizService;
+
+CWizWebSettingsDialog::CWizWebSettingsDialog(QString url, QSize sz, QWidget *parent)
     : QDialog(parent)
+    , m_url(url)
 {
     setContentsMargins(0, 0, 0, 0);
     setFixedSize(sz);
@@ -47,22 +51,23 @@ CWizWebSettingsDialog::CWizWebSettingsDialog(QSize sz, QWidget *parent)
     layout->setAlignment(m_btnOk, Qt::AlignRight|Qt::AlignBottom);
 }
 
-void CWizWebSettingsDialog::showEvent(QShowEvent* event)
+void CWizWebSettingsDialog::load()
 {
-    Q_UNUSED(event);
-
     m_web->setVisible(false);
     m_labelError->setVisible(false);
     m_labelProgress->setVisible(true);
 
-    Q_EMIT showProgress();
+    m_movie->start();
+    m_web->load(m_url);
 }
 
-void CWizWebSettingsDialog::load(const QUrl& url)
+void CWizWebSettingsDialog::showEvent(QShowEvent* event)
 {
-    m_movie->start();
-    m_web->load(url);
+    QDialog::showEvent(event);
+    //
+    load();
 }
+
 
 void CWizWebSettingsDialog::on_web_loaded(bool ok)
 {
@@ -78,4 +83,31 @@ void CWizWebSettingsDialog::showError()
     m_movie->stop();
     m_labelProgress->setVisible(false);
     m_labelError->setVisible(true);
+}
+
+
+void CWizWebSettingsWithTokenDialog::load()
+{
+    m_web->setVisible(false);
+    m_labelError->setVisible(false);
+    m_labelProgress->setVisible(true);
+
+    m_movie->start();
+
+    connect(Token::instance(), SIGNAL(tokenAcquired(const QString&)),
+            SLOT(on_token_acquired(const QString&)), Qt::QueuedConnection);
+
+    Token::requestToken();
+}
+
+void CWizWebSettingsWithTokenDialog::on_token_acquired(const QString& token)
+{
+    if (token.isEmpty()) {
+        showError();
+        return;
+    }
+    //
+    QString url = m_url;
+    url.replace(QString(WIZ_TOKEN_IN_URL_REPLACE_PART), token);
+    m_web->load(url);
 }

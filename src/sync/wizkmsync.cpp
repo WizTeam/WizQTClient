@@ -72,6 +72,7 @@ CWizKMSyncThread::CWizKMSyncThread(CWizDatabase& db, QObject* parent)
     , m_bBackground(true)
 {
     m_tLastSyncAll = QDateTime::currentDateTime();
+    m_pEvents = new CWizKMSyncEvents();
 }
 
 void CWizKMSyncThread::run()
@@ -152,7 +153,6 @@ bool CWizKMSyncThread::syncAll()
 
     syncUserCert();
 
-    m_pEvents = new CWizKMSyncEvents();
     connect(m_pEvents, SIGNAL(messageReady(const QString&)), SIGNAL(processLog(const QString&)));
 
     m_pEvents->SetLastErrorCode(0);

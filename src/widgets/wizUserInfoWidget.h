@@ -26,7 +26,6 @@ protected:
     CWizExplorerApp& m_app;
     CWizDatabase& m_db;
     QMenu* m_menuMain;
-    CWizWebSettingsDialog* m_userSettings;
     QIcon m_iconVipIndicator;
     QIcon m_iconArraw;
     QPixmap m_circleAvatar;
@@ -46,8 +45,6 @@ protected Q_SLOTS:
     void on_userAvatar_loaded(const QString& strGUID);
     void on_action_accountInfo_triggered();
     void on_action_accountSetup_triggered();
-    void on_action_accountSetup_showProgress();
-    void on_action_accountSetup_requested(const QString& strToken);
 
     void on_action_changeAvatar_triggered();
     void on_action_changeAvatar_uploaded(bool ok);
