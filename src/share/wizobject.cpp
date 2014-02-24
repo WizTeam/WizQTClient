@@ -722,6 +722,22 @@ bool WIZGROUPDATA::LoadFromXmlRpc(CWizXmlRpcStructValue& data)
             && !strDatabaseServer.isEmpty();
 }
 
+WIZBIZDATA::WIZBIZDATA()
+    : bizUserRole(10000)
+{
+
+}
+
+WIZBIZDATA::WIZBIZDATA(const WIZBIZDATA& data)
+    : bizName(data.bizName)
+    , bizGUID(data.bizGUID)
+    , bizUserRole(data.bizUserRole)
+{
+}
+bool WIZBIZDATA::LoadFromXmlRpc(CWizXmlRpcStructValue& data)
+{
+    return true;
+}
 
 /* ---------------------------- WIZMESSAGEDATA ---------------------------- */
 WIZMESSAGEDATA::WIZMESSAGEDATA()

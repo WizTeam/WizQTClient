@@ -479,11 +479,30 @@ BOOL CWizKMAccountsServer::accounts_getGroupList(CWizGroupDataArray& arrayGroup)
     std::deque<WIZGROUPDATA> arrayWrap;
     if (!Call(_T("accounts.getGroupKbList"), arrayWrap, &param))
     {
-        TOLOG(_T("document.getGroupKbList failure!"));
+        TOLOG(_T("accounts.getGroupKbList failure!"));
         return FALSE;
     }
     //
     arrayGroup.assign(arrayWrap.begin(), arrayWrap.end());
+    //
+    return TRUE;
+}
+bool CWizKMAccountsServer::accounts_getBizList(CWizBizDataArray& arrayBiz)
+{
+    CWizKMTokenOnlyParam param(GetToken(), GetKbGUID());
+    if (WIZKM_WEBAPI_VERSION < 4)
+    {
+        param.ChangeApiVersion(4);
+    }
+    //
+    std::deque<WIZBIZDATA> arrayWrap;
+    if (!Call(_T("accounts.getUserBibList"), arrayWrap, &param))
+    {
+        TOLOG(_T("accounts.getUserBibList failure!"));
+        return FALSE;
+    }
+    //
+    arrayBiz.assign(arrayWrap.begin(), arrayWrap.end());
     //
     return TRUE;
 }
