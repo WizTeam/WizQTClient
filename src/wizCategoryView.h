@@ -216,7 +216,14 @@ public:
 
     // helper
     QAction* findAction(CategoryActions type);
-    CWizCategoryViewItemBase* findCategory(const QString& strName, bool bCreate = true);
+
+    CWizCategoryViewItemBase* findBizGroupsRootItem(const WIZBIZDATA& biz, bool bCreate = true);
+    CWizCategoryViewItemBase* findOwnGroupsRootItem(bool bCreate = true);
+    CWizCategoryViewItemBase* findJionedGroupsRootItem(bool bCreate = true);
+    CWizCategoryViewItemBase* findGroupsRootItem(const WIZGROUPDATA& group, bool bCreate = true);
+    CWizCategoryViewItemBase* findAllFolderItem();
+    CWizCategoryViewItemBase* findAllTagsItem();
+    CWizCategoryViewItemBase* findAllMessagesItem();
     CWizCategoryViewTrashItem* findTrash(const QString& strKbGUID = NULL);
 
     // document count update

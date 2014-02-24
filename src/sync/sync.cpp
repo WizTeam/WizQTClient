@@ -1790,9 +1790,16 @@ bool WizSyncDatabase(const WIZUSERINFO& info, IWizKMSyncEvents* pEvents,
     /*
     ////获得群组信息////
     */
+    //
+    CWizBizDataArray arrayBiz;
+    if (server.GetBizList(arrayBiz))
+    {
+        pDatabase->OnDownloadBizs(arrayBiz);
+    }
+
+    //
     CWizGroupDataArray arrayGroup;
-    if (server.GetGroupList(arrayGroup)
-        && !arrayGroup.empty())
+    if (server.GetGroupList(arrayGroup))
     {
         pDatabase->OnDownloadGroups(arrayGroup);
     }

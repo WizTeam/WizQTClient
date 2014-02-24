@@ -518,6 +518,15 @@ struct WIZGROUPDATA
     WIZGROUPDATA();
     WIZGROUPDATA(const WIZGROUPDATA& data);
     bool LoadFromXmlRpc(CWizXmlRpcStructValue& data);
+    //
+    bool IsBiz() const
+    {
+        return !bizGUID.isEmpty();
+    }
+    bool IsOwn() const
+    {
+        return bOwn;
+    }
 
     // field: biz_guid, optional
     // Used for grouping groups
@@ -577,6 +586,8 @@ struct WIZGROUPDATA
     // field: user_name
     // not user id, but nick name, not used
     QString strUserName;
+    //
+    bool bOwn;
 };
 
 const UINT WIZ_USERGROUP_ADMIN = 0;
@@ -587,6 +598,12 @@ const UINT WIZ_USERGROUP_READER = 1000;
 const UINT WIZ_USERGROUP_MAX = 10000000;
 
 
+const UINT WIZ_BIZROLE_OWNER			= 0;
+const UINT WIZ_BIZROLE_ADMIN			= 10;
+const UINT WIZ_BIZROLE_HR				= 100;
+const UINT WIZ_BIZROLE_NORMAL			= 1000;
+const UINT WIZ_BIZROLE_GUEST			= 10000;
+const UINT WIZ_BIZROLE_MAX				= 10000000;
 
 struct WIZBIZDATA
 {
@@ -597,6 +614,7 @@ struct WIZBIZDATA
     QString bizGUID;
     QString bizName;
     int bizUserRole;
+    int bizLevel;
 };
 
 

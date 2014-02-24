@@ -332,7 +332,7 @@ void MessageListView::updateTreeItem()
 {
     CWizCategoryView* tree = ExtensionSystem::PluginManager::getObject<CWizCategoryView>();
     if (tree) {
-        CWizCategoryViewItemBase* pBase = tree->findCategory(CATEGORY_MESSAGES_ALL, false);
+        CWizCategoryViewItemBase* pBase = tree->findAllMessagesItem();
         if (!pBase)
             return;
 

@@ -44,6 +44,7 @@ public:
     bool ShareSNS(const QString& strToken, const QString& strSNS, const QString& strComment, const QString& strURL, const QString& strDocumentGUID);
     bool ShareGroup(const QString& strToken, const QString& strDocumentGUIDs, const QString& strGroups);
     bool GetGroupList(CWizGroupDataArray& arrayGroup);
+    bool GetBizList(CWizBizDataArray& arrayBiz);
     bool CreateTempGroup(const QString& strEmails, const QString& strAccessControl, const QString& strSubject, const QString& strEmailText, WIZGROUPDATA& group);
     bool KeepAlive(const QString& strToken);
     bool GetMessages(__int64 nVersion, CWizUserMessageDataArray& arrayMessage);

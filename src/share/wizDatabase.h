@@ -171,6 +171,7 @@ public:
     virtual void SetUserInfo(const WIZUSERINFO& info);
     virtual void SetKbInfo(const QString& strKBGUID, const WIZKBINFO& info);
     virtual bool OnDownloadGroups(const CWizGroupDataArray& arrayGroup);
+    virtual bool OnDownloadBizs(const CWizBizDataArray& arrayBiz);
     virtual IWizSyncableDatabase* GetGroupDatabase(const WIZGROUPDATA& group);
     virtual void CloseGroupDatabase(IWizSyncableDatabase* pDatabase);
 
@@ -277,9 +278,17 @@ public:
     bool SetUserCert(const QString& strN, const QString& stre, const QString& strd, const QString& strHint);
     bool GetUserCert(QString& strN, QString& stre, QString& strd, QString& strHint);
 
-    bool GetBizGroupInfo(QMap<QString, QString>& bizInfo);
+    //bool GetBizGroupInfo(QMap<QString, QString>& bizInfo);
     bool GetUserGroupInfo(CWizGroupDataArray& arrayGroup);
     bool SetUserGroupInfo(const CWizGroupDataArray& arrayGroup);
+    bool SetUserBizInfo(const CWizBizDataArray& arrayBiz);
+    bool GetUserBizInfo(bool bAllowEmptyBiz, CWizBizDataArray& arrayBiz);
+    bool GetBizData(const QString& bizGUID, WIZBIZDATA& biz);
+    bool GetGroupData(const QString& groupGUID, WIZGROUPDATA& group);
+    //
+    static bool IsEmptyBiz(const CWizGroupDataArray& arrayGroup, const QString& bizGUID);
+    static bool GetOwnGroups(const CWizGroupDataArray& arrayAllGroup, CWizGroupDataArray& arrayOwnGroup);
+    static bool GetJionedGroups(const CWizGroupDataArray& arrayAllGroup, CWizGroupDataArray& arrayJionedGroup);
 
     bool updateBizUser(const WIZBIZUSER& user);
     bool UpdateBizUsers(const CWizBizUserDataArray& arrayUser);
@@ -368,6 +377,7 @@ public:
 Q_SIGNALS:
     void userInfoChanged();
     void groupsInfoDownloaded(const CWizGroupDataArray& arrayGroup);
+    void bizInfoDownloaded(const CWizBizDataArray& arrayBiz);
     void databaseOpened(CWizDatabase* db, const QString& strKbGUID);
     void databaseRename(const QString& strKbGUID);
     void databasePermissionChanged(const QString& strKbGUID);

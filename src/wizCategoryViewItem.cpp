@@ -20,6 +20,15 @@
 #define PREDEFINED_TRASH            QObject::tr("Trash")
 #define PREDEFINED_UNCLASSIFIED     QObject::tr("Unclassified")
 
+#define CATEGORY_OWN_GROUPS      QObject::tr("My Groups")
+#define CATEGORY_OTHER_GROUPS      QObject::tr("Other Groups")
+
+
+#define WIZ_CATEGORY_SECTION_GENERAL QObject::tr("General")
+#define WIZ_CATEGORY_SECTION_PERSONAL QObject::tr("Personal Notes")
+#define WIZ_CATEGORY_SECTION_GROUPS QObject::tr("Team & Groups")
+
+
 using namespace Core;
 
 /* ------------------------------ CWizCategoryViewItemBase ------------------------------ */
@@ -305,6 +314,11 @@ bool CWizCategoryViewMessageItem::hitTestUnread()
     return m_rcUnread.contains(view->hitPoint());
 }
 
+QString CWizCategoryViewMessageItem::getSectionName()
+{
+    return WIZ_CATEGORY_SECTION_GENERAL;
+}
+
 void CWizCategoryViewMessageItem::draw(QPainter* p, const QStyleOptionViewItemV4 *vopt) const
 {
     if (!m_nUnread)
@@ -411,6 +425,12 @@ bool CWizCategoryViewAllFoldersItem::accept(CWizDatabase& db, const WIZDOCUMENTD
 
     return false;
 }
+
+QString CWizCategoryViewAllFoldersItem::getSectionName()
+{
+    return WIZ_CATEGORY_SECTION_GENERAL;
+}
+
 
 void CWizCategoryViewAllFoldersItem::showContextMenu(CWizCategoryBaseView* pCtrl, QPoint pos)
 {
@@ -560,6 +580,10 @@ bool CWizCategoryViewAllTagsItem::accept(CWizDatabase& db, const WIZDOCUMENTDATA
     return false;
 }
 
+QString CWizCategoryViewAllTagsItem::getSectionName()
+{
+    return WIZ_CATEGORY_SECTION_GENERAL;
+}
 
 /* ------------------------------ CWizCategoryViewTagItem ------------------------------ */
 
@@ -653,12 +677,15 @@ CWizCategoryViewStyleRootItem::CWizCategoryViewStyleRootItem(CWizExplorerApp& ap
     setText(0, strName);
 }
 
-/* ---------------------------- CWizCategoryViewAllGroupsRootItem ---------------------------- */
+QString CWizCategoryViewStyleRootItem::getSectionName()
+{
+    return WIZ_CATEGORY_SECTION_GENERAL;
+}
 
-CWizCategoryViewAllGroupsRootItem::CWizCategoryViewAllGroupsRootItem(CWizExplorerApp& app,
-                                                                     const QString& strName,
-                                                                     const QString& strKbGUID)
-    : CWizCategoryViewItemBase(app, strName, strKbGUID)
+/* ---------------------------- CWizCategoryViewGroupsRootItem ---------------------------- */
+
+CWizCategoryViewGroupsRootItem::CWizCategoryViewGroupsRootItem(CWizExplorerApp& app, const QString& strName)
+    : CWizCategoryViewItemBase(app, strName, "")
 {
     QIcon icon;
     icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "group_normal"),
@@ -669,7 +696,7 @@ CWizCategoryViewAllGroupsRootItem::CWizCategoryViewAllGroupsRootItem(CWizExplore
     setText(0, strName);
 }
 
-void CWizCategoryViewAllGroupsRootItem::getDocuments(CWizDatabase& db, CWizDocumentDataArray& arrayDocument)
+void CWizCategoryViewGroupsRootItem::getDocuments(CWizDatabase& db, CWizDocumentDataArray& arrayDocument)
 {
     Q_UNUSED(db);
 
@@ -688,7 +715,7 @@ void CWizCategoryViewAllGroupsRootItem::getDocuments(CWizDatabase& db, CWizDocum
     }
 }
 
-bool CWizCategoryViewAllGroupsRootItem::accept(CWizDatabase& db, const WIZDOCUMENTDATA& data)
+bool CWizCategoryViewGroupsRootItem::accept(CWizDatabase& db, const WIZDOCUMENTDATA& data)
 {
     Q_UNUSED(db);
 
@@ -707,13 +734,17 @@ bool CWizCategoryViewAllGroupsRootItem::accept(CWizDatabase& db, const WIZDOCUME
 
     return false;
 }
+QString CWizCategoryViewGroupsRootItem::getSectionName()
+{
+    return WIZ_CATEGORY_SECTION_GROUPS;
+}
 
 
 /* ------------------------------ CWizCategoryViewGroupRootItem ------------------------------ */
 CWizCategoryViewBizGroupRootItem::CWizCategoryViewBizGroupRootItem(CWizExplorerApp& app,
-                                                                   const QString& strName,
-                                                                   const QString& strKbGUID)
-    : CWizCategoryViewAllGroupsRootItem(app, strName, strKbGUID)
+                                                                   const WIZBIZDATA& biz)
+    : CWizCategoryViewGroupsRootItem(app, biz.bizName)
+    , m_biz(biz)
 {
     QIcon icon;
     icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "group_biz_normal"),
@@ -721,55 +752,10 @@ CWizCategoryViewBizGroupRootItem::CWizCategoryViewBizGroupRootItem(CWizExplorerA
     icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "group_biz_selected"),
                  QSize(16, 16), QIcon::Selected);
     setIcon(0, icon);
-    setText(0, strName);
 }
 
-void CWizCategoryViewBizGroupRootItem::getDocuments(CWizDatabase& db, CWizDocumentDataArray& arrayDocument)
-{
-    Q_UNUSED(db);
-
-    for (int i = 0; i < childCount(); i++) {
-        CWizCategoryViewGroupRootItem* pGroup = dynamic_cast<CWizCategoryViewGroupRootItem*>(child(i));
-        Q_ASSERT(pGroup);
-        if (!pGroup)
-            return;
-
-        CWizDatabase& db = CWizDatabaseManager::instance()->db(pGroup->kbGUID());
-
-        CWizDocumentDataArray arrayDoc;
-        if (db.GetDocumentsByTime(QDateTime::currentDateTime().addDays(-3), arrayDocument)) {
-            arrayDocument.insert(arrayDocument.begin(), arrayDoc.begin(), arrayDoc.end());
-        }
-    }
-}
-
-bool CWizCategoryViewBizGroupRootItem::accept(CWizDatabase& db, const WIZDOCUMENTDATA& data)
-{
-    Q_UNUSED(db);
-
-    QDateTime t(QDateTime::currentDateTime().addDays(-3));
-    for (int i = 0; i < childCount(); i++) {
-        CWizCategoryViewGroupRootItem* pGroup = dynamic_cast<CWizCategoryViewGroupRootItem*>(child(i));
-        Q_ASSERT(pGroup);
-        if (!pGroup)
-            continue;
-
-        if (pGroup->kbGUID() == data.strKbGUID) {
-            if (data.tDataModified > t || data.tInfoModified > t || data.tParamModified > t)
-                return true;
-        }
-    }
-
-    return false;
-}
-
-
-/* ------------------------------ CWizCategoryViewGroupRootItem ------------------------------ */
-
-CWizCategoryViewGroupRootItem::CWizCategoryViewGroupRootItem(CWizExplorerApp& app,
-                                                             const QString& strName,
-                                                             const QString& strKbGUID)
-    : CWizCategoryViewItemBase(app, strName, strKbGUID)
+CWizCategoryViewOwnGroupRootItem::CWizCategoryViewOwnGroupRootItem(CWizExplorerApp& app)
+    : CWizCategoryViewGroupsRootItem(app, CATEGORY_OWN_GROUPS)
 {
     QIcon icon;
     icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "group_normal"),
@@ -777,7 +763,38 @@ CWizCategoryViewGroupRootItem::CWizCategoryViewGroupRootItem(CWizExplorerApp& ap
     icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "group_selected"),
                  QSize(16, 16), QIcon::Selected);
     setIcon(0, icon);
-    setText(0, strName);
+}
+
+
+CWizCategoryViewJionedGroupRootItem::CWizCategoryViewJionedGroupRootItem(CWizExplorerApp& app)
+    : CWizCategoryViewGroupsRootItem(app, CATEGORY_OTHER_GROUPS)
+{
+    QIcon icon;
+    icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "group_normal"),
+                 QSize(16, 16), QIcon::Normal);
+    icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "group_selected"),
+                 QSize(16, 16), QIcon::Selected);
+    setIcon(0, icon);
+}
+
+
+
+
+
+/* ------------------------------ CWizCategoryViewGroupRootItem ------------------------------ */
+
+CWizCategoryViewGroupRootItem::CWizCategoryViewGroupRootItem(CWizExplorerApp& app,
+                                                             const WIZGROUPDATA& group)
+    : CWizCategoryViewItemBase(app, group.strGroupName, group.strGroupGUID)
+    , m_group(group)
+{
+    QIcon icon;
+    icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "group_normal"),
+                 QSize(16, 16), QIcon::Normal);
+    icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "group_selected"),
+                 QSize(16, 16), QIcon::Selected);
+    setIcon(0, icon);
+    setText(0, m_strName);
 }
 
 void CWizCategoryViewGroupRootItem::showContextMenu(CWizCategoryBaseView* pCtrl, QPoint pos)
