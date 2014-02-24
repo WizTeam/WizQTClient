@@ -2,9 +2,3 @@
 .DS_Store
 tags
 CMakeLists.txt.user*
-
-src/ui/wizMessageConfirmDialog.ui
-
-src/wizMessageConfirmDialog.cpp
-
-src/wizMessageConfirmDialog.h
