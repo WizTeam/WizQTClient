@@ -79,6 +79,7 @@ private:
     bool document_shareGroup(const QString& strToken, const QString& strDocumentGUIDs, const QString& strGroups);
 
     bool accounts_getGroupList(CWizGroupDataArray& arrayGroup);
+    bool accounts_getBizList(CWizBizDataArray& arrayBiz);
     bool accounts_createTempGroupKb(const QString& strEmails, const QString& strAccessControl, const QString& strSubject, const QString& strEmailText, WIZGROUPDATA& group);
     bool accounts_getMessages(int nCountPerPage, __int64 nVersion, CWizUserMessageDataArray& arrayMessage);
 };

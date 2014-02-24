@@ -586,6 +586,20 @@ const UINT WIZ_USERGROUP_AUTHOR = 100;
 const UINT WIZ_USERGROUP_READER = 1000;
 const UINT WIZ_USERGROUP_MAX = 10000000;
 
+
+
+struct WIZBIZDATA
+{
+    WIZBIZDATA();
+    WIZBIZDATA(const WIZBIZDATA& data);
+    bool LoadFromXmlRpc(CWizXmlRpcStructValue& data);
+
+    QString bizGUID;
+    QString bizName;
+    int bizUserRole;
+};
+
+
 const int WIZ_USER_MSG_TYPE_CALLED = 0;
 const int WIZ_USER_MSG_TYPE_MODIFIED = 1;
 
@@ -838,6 +852,7 @@ typedef std::deque<WIZDOCUMENTDATAEX> CWizDocumentDataArray;
 typedef std::deque<WIZMETADATA> CWizMetaDataArray;
 typedef std::deque<WIZGROUPDATA> CWizGroupDataArray;
 typedef std::deque<WIZABSTRACT> CWizAbstractArray;
+typedef std::deque<WIZBIZDATA> CWizBizDataArray;
 
 
 
