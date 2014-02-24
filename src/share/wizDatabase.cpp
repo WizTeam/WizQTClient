@@ -334,7 +334,6 @@ void CWizFolder::MoveToLocation(const QString& strDestLocation)
 const QString g_strAccountSection = "Account";
 const QString g_strCertSection = "Cert";
 const QString g_strGroupSection = "Groups";
-const QString g_strBizGroupSection = "BizGroups";
 const QString g_strDatabaseInfoSection = "Database";
 
 #define WIZ_META_KBINFO_SECTION "KB_INFO"
@@ -642,6 +641,12 @@ bool CWizDatabase::OnDownloadGroups(const CWizGroupDataArray& arrayGroup)
     return SetUserGroupInfo(arrayGroup);
 }
 
+bool CWizDatabase::OnDownloadBizs(const CWizBizDataArray& arrayBiz)
+{
+    Q_EMIT bizInfoDownloaded(arrayBiz);
+    return SetUserBizInfo(arrayBiz);
+}
+
 IWizSyncableDatabase* CWizDatabase::GetGroupDatabase(const WIZGROUPDATA& group)
 {
     Q_ASSERT(!group.strGroupGUID.isEmpty());
@@ -834,6 +839,7 @@ void CWizDatabase::SetAccountLocalValue(const QString& strKey,
     Q_ASSERT(!IsGroup());
 
     if (strKey.startsWith("biz_users/", Qt::CaseInsensitive)) {
+        /*
         QMap<QString, QString> mapBiz;
         GetBizGroupInfo(mapBiz);
         for (QMap<QString, QString>::const_iterator it = mapBiz.begin();
@@ -842,6 +848,7 @@ void CWizDatabase::SetAccountLocalValue(const QString& strKey,
                 SetBizUsers(it.key(), strValue);
             }
         }
+        */
     } else {
         Q_ASSERT(0);
     }
@@ -1274,31 +1281,161 @@ bool CWizDatabase::UpdateMessages(const CWizMessageDataArray& arrayMsg)
     return !bHasError;
 }
 
-bool CWizDatabase::GetBizGroupInfo(QMap<QString, QString>& bizInfo)
+bool CWizDatabase::SetUserBizInfo(const CWizBizDataArray& arrayBiz)
 {
-    CString strTotal;
-    bool bExist;
-
-    if(!GetMeta(g_strBizGroupSection, "Count", strTotal, "", &bExist)) {
-        return false;
+    SetMeta("Bizs", "Count", QString::number(arrayBiz.size()));
+    //
+    for (int i = 0; i < arrayBiz.size(); i++)
+    {
+        const WIZBIZDATA& biz = arrayBiz[i];
+        QString bizSection = "Biz_" + QString::number(i);
+        SetMeta(bizSection, "GUID", biz.bizGUID);
+        SetMeta(bizSection, "Name", biz.bizName);
+        SetMeta(bizSection, "UserRole", QString::number(biz.bizUserRole));
+        SetMeta(bizSection, "Level", QString::number(biz.bizLevel));
     }
+}
+//
+//
+bool CWizDatabase::IsEmptyBiz(const CWizGroupDataArray& arrayGroup, const QString& bizGUID)
+{
+    for (CWizGroupDataArray::const_iterator it = arrayGroup.begin();
+         it != arrayGroup.end();
+         it++)
+    {
+        if (it->bizGUID == bizGUID)
+            return true;
+    }
+    return false;
+}
 
-    if (!bExist) {
+bool CWizDatabase::GetUserBizInfo(bool bAllowEmptyBiz, CWizBizDataArray& arrayBiz)
+{
+    CWizGroupDataArray arrayGroup;
+    GetUserGroupInfo(arrayGroup);
+    //
+    BOOL inited = false;
+    int count = GetMetaDef("Bizs", "Count").toInt();
+    //
+    for (int i = 0; i < count; i++)
+    {
+        QString bizSection = "Biz_" + QString::number(i);
+        //
+        WIZBIZDATA biz;
+        biz.bizGUID = GetMetaDef(bizSection, "GUID");
+        biz.bizName = GetMetaDef(bizSection, "Name");
+        biz.bizUserRole = GetMetaDef(bizSection, "UserRole").toInt();
+        biz.bizLevel = GetMetaDef(bizSection, "Level").toInt();
+        //
+        if (bAllowEmptyBiz || !IsEmptyBiz(arrayGroup, biz.bizGUID))
+        {
+            arrayBiz.push_back(biz);
+        }
+        //
+        inited = true;
+    }
+    //
+    if (inited)
         return true;
+    //
+    QString section = "BizGroups";
+    //
+    count = GetMetaDef(section, "Count").toInt();
+    for (int i = 0; i < count; i++)
+    {
+        WIZBIZDATA biz;
+        biz.bizGUID = GetMetaDef(section, QString::number(i));
+        biz.bizName = GetMetaDef(section, biz.bizGUID);
+        //
+        arrayBiz.push_back(biz);
     }
+    //
+    return true;
+}
+bool CWizDatabase::GetBizData(const QString& bizGUID, WIZBIZDATA& biz)
+{
+    CWizBizDataArray arrayBiz;
+    if (!GetUserBizInfo(true, arrayBiz))
+        return false;
+    //
+    for (CWizBizDataArray::const_iterator it = arrayBiz.begin();
+         it != arrayBiz.end();
+         it++)
+    {
+        if (it->bizGUID == bizGUID)
+        {
+            biz = *it;
+            return true;
+        }
+    }
+    return false;
+}
 
-    bizInfo.clear();
+bool CWizDatabase::GetGroupData(const QString& groupGUID, WIZGROUPDATA& group)
+{
+    group.strGroupGUID = groupGUID;
+    group.strGroupName = GetMetaDef(g_strGroupSection, groupGUID);
 
-    int nTotal = strTotal.toInt();
+    group.bizGUID = GetMetaDef(g_strGroupSection, groupGUID + "_BizGUID");
+    group.bizGUID = GetMetaDef(g_strGroupSection, groupGUID + "_BizName");
+    group.bOwn = GetMetaDef(g_strGroupSection, groupGUID + "_Own") == "1";
+    group.nUserGroup = GetMetaDef(g_strGroupSection, groupGUID + "_Role", QString::number(WIZ_USERGROUP_MAX)).toInt();
+
+    return !group.strGroupName.isEmpty();
+}
+
+bool CWizDatabase::GetOwnGroups(const CWizGroupDataArray& arrayAllGroup, CWizGroupDataArray& arrayOwnGroup)
+{
+    for (CWizGroupDataArray::const_iterator it = arrayAllGroup.begin();
+         it != arrayAllGroup.end();
+         it++)
+    {
+        if (it->IsBiz())
+            continue;
+        if (it->IsOwn())
+        {
+            arrayOwnGroup.push_back(*it);
+        }
+    }
+    return true;
+}
+
+bool CWizDatabase::GetJionedGroups(const CWizGroupDataArray& arrayAllGroup, CWizGroupDataArray& arrayJionedGroup)
+{
+    for (CWizGroupDataArray::const_iterator it = arrayAllGroup.begin();
+         it != arrayAllGroup.end();
+         it++)
+    {
+        if (it->IsBiz())
+            continue;
+        if (!it->IsOwn())
+        {
+            arrayJionedGroup.push_back(*it);
+        }
+    }
+    return true;
+}
+
+bool CWizDatabase::SetUserGroupInfo(const CWizGroupDataArray& arrayGroup)
+{
+    int nTotal = arrayGroup.size();
+    // set group info
+    SetMeta(g_strGroupSection, "Count", QString::number(nTotal));
+
     for (int i = 0; i < nTotal; i++) {
-        QString strBizGUID = GetMetaDef(g_strBizGroupSection, QString::number(i));
-        QString strBizName = GetMetaDef(g_strBizGroupSection, strBizGUID);
+        const WIZGROUPDATA& group = arrayGroup[i];
+        SetMeta(g_strGroupSection, QString::number(i), group.strGroupGUID);
+        SetMeta(g_strGroupSection, group.strGroupGUID, group.strGroupName);
 
-        bizInfo[strBizGUID] = strBizName;
+        SetMeta(g_strGroupSection, group.strGroupGUID + "_BizGUID", group.bizGUID);
+        SetMeta(g_strGroupSection, group.strGroupGUID + "_BizName", group.bizGUID);
+        SetMeta(g_strGroupSection, group.strGroupGUID + "_Own", group.bOwn ? "1" : "0");
+        SetMeta(g_strGroupSection, group.strGroupGUID + "_Role", QString::number(group.nUserGroup));
     }
 
     return true;
 }
+
 
 bool CWizDatabase::GetUserGroupInfo(CWizGroupDataArray& arrayGroup)
 {
@@ -1319,61 +1456,10 @@ bool CWizDatabase::GetUserGroupInfo(CWizGroupDataArray& arrayGroup)
         WIZGROUPDATA group;
 
         group.strGroupGUID = GetMetaDef(g_strGroupSection, QString::number(i));
-        group.strGroupName = GetMetaDef(g_strGroupSection, group.strGroupGUID);
-
-        group.bizGUID = GetMetaDef(g_strBizGroupSection, group.strGroupGUID);
-
-        if (!group.bizGUID.isEmpty())
-            group.bizName = GetMetaDef(g_strBizGroupSection, group.bizGUID);
-
+        //
+        GetGroupData(group.strGroupGUID, group);
+        //
         arrayGroup.push_back(group);
-    }
-
-    return true;
-}
-
-bool CWizDatabase::SetUserGroupInfo(const CWizGroupDataArray& arrayGroup)
-{
-    if (!deleteMetasByName(g_strGroupSection)\
-            && !deleteMetasByName(g_strBizGroupSection))
-        return false;
-
-    int nTotal = arrayGroup.size();
-    if (!nTotal) {
-        return false;
-    }
-
-    // collect biz group info
-    QMap<QString, QString> bizInfo;
-    for (int i = 0; i < nTotal; i++) {
-        const WIZGROUPDATA& data = arrayGroup[i];
-        if (!data.bizGUID.isEmpty())
-            bizInfo[data.bizGUID] = data.bizName;
-    }
-
-    // set biz info
-    SetMeta(g_strBizGroupSection, "Count", QString::number(bizInfo.size()));
-
-    int idx = 0;
-    QMap<QString, QString>::const_iterator it;
-    for (it = bizInfo.begin(); it != bizInfo.end(); it++) {
-        SetMeta(g_strBizGroupSection, QString::number(idx), it.key());
-        SetMeta(g_strBizGroupSection, it.key(), it.value());
-        idx++;
-    }
-
-    // set group info
-    SetMeta(g_strGroupSection, "Count", QString::number(nTotal));
-
-    for (int i = 0; i < nTotal; i++) {
-        const WIZGROUPDATA& data = arrayGroup[i];
-        SetMeta(g_strGroupSection, QString::number(i), data.strGroupGUID);
-        SetMeta(g_strGroupSection, data.strGroupGUID, data.strGroupName);
-
-        // also biz link
-        if (!data.bizGUID.isEmpty()) {
-            SetMeta(g_strBizGroupSection, data.strGroupGUID, data.bizGUID);
-        }
     }
 
     return true;

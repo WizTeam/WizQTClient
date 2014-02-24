@@ -5,6 +5,7 @@
 
 #include "share/wizobject.h"
 
+
 class CWizDatabase;
 class CWizExplorerApp;
 class CWizCategoryBaseView;
@@ -35,6 +36,10 @@ public:
 
     //
     virtual int getSortOrder() const { return 0; }
+
+    //
+    virtual QString getSectionName() { return QString(); }
+    virtual QString getSectionType() { return QString(); }
 
 protected:
     CWizExplorerApp& m_app;
@@ -107,6 +112,11 @@ public:
     QString unreadString() const;
     bool hitTestUnread();
 
+
+    virtual QString getSectionName();
+    virtual QString getSectionType() { return QString("General"); }
+
+
 private:
     int m_nFilter;
     int m_nUnread;
@@ -146,6 +156,8 @@ public:
     virtual void showContextMenu(CWizCategoryBaseView* pCtrl, QPoint pos);
     virtual void getDocuments(CWizDatabase& db, CWizDocumentDataArray& arrayDocument);
     virtual bool accept(CWizDatabase& db, const WIZDOCUMENTDATA& data);
+    virtual QString getSectionName();
+    virtual QString getSectionType() { return QString("Personal"); }
 };
 
 class CWizCategoryViewFolderItem : public CWizCategoryViewItemBase
@@ -173,6 +185,8 @@ public:
     virtual void showContextMenu(CWizCategoryBaseView* pCtrl, QPoint pos);
     virtual void getDocuments(CWizDatabase& db, CWizDocumentDataArray& arrayDocument);
     virtual bool accept(CWizDatabase& db, const WIZDOCUMENTDATA& data);
+    virtual QString getSectionName();
+    virtual QString getSectionType() { return QString("Personal"); }
 };
 
 class CWizCategoryViewTagItem : public CWizCategoryViewItemBase
@@ -205,42 +219,62 @@ public:
     virtual void getDocuments(CWizDatabase& db,
                               CWizDocumentDataArray& arrayDocument)
     { Q_UNUSED(db); Q_UNUSED(arrayDocument); }
+    virtual QString getSectionName();
+    virtual QString getSectionType() { return QString("Personal"); }
 };
 
-class CWizCategoryViewAllGroupsRootItem : public CWizCategoryViewItemBase
+class CWizCategoryViewGroupsRootItem : public CWizCategoryViewItemBase
 {
 public:
-    CWizCategoryViewAllGroupsRootItem(CWizExplorerApp& app,
-                                      const QString& strName,
-                                      const QString& strKbGUID);
+    CWizCategoryViewGroupsRootItem(CWizExplorerApp& app, const QString& strName);
 
     virtual void showContextMenu(CWizCategoryBaseView* pCtrl, QPoint pos)
     { Q_UNUSED(pCtrl); Q_UNUSED(pos); }
 
     virtual void getDocuments(CWizDatabase& db, CWizDocumentDataArray& arrayDocument);
     virtual bool accept(CWizDatabase& db, const WIZDOCUMENTDATA& data);
+    virtual QString getSectionName();
+    virtual QString getSectionType() { return QString("Groups"); }
 };
 
-class CWizCategoryViewBizGroupRootItem : public CWizCategoryViewAllGroupsRootItem
+class CWizCategoryViewBizGroupRootItem : public CWizCategoryViewGroupsRootItem
 {
+    WIZBIZDATA m_biz;
 public:
     CWizCategoryViewBizGroupRootItem(CWizExplorerApp& app,
-                                     const QString& strName,
-                                     const QString& strKbGUID);
+                                     const WIZBIZDATA& biz);
+
+    virtual void showContextMenu(CWizCategoryBaseView* pCtrl, QPoint pos)
+    { Q_UNUSED(pCtrl); Q_UNUSED(pos); }
+    //
+    const WIZBIZDATA biz() const { return m_biz; }
+};
+class CWizCategoryViewOwnGroupRootItem : public CWizCategoryViewGroupsRootItem
+{
+public:
+    CWizCategoryViewOwnGroupRootItem(CWizExplorerApp& app);
+
+    virtual void showContextMenu(CWizCategoryBaseView* pCtrl, QPoint pos)
+    { Q_UNUSED(pCtrl); Q_UNUSED(pos); }
+};
+
+class CWizCategoryViewJionedGroupRootItem : public CWizCategoryViewGroupsRootItem
+{
+public:
+    CWizCategoryViewJionedGroupRootItem(CWizExplorerApp& app);
 
     virtual void showContextMenu(CWizCategoryBaseView* pCtrl, QPoint pos)
     { Q_UNUSED(pCtrl); Q_UNUSED(pos); }
 
-    virtual void getDocuments(CWizDatabase& db, CWizDocumentDataArray& arrayDocument);
-    virtual bool accept(CWizDatabase& db, const WIZDOCUMENTDATA& data);
 };
+
 
 class CWizCategoryViewGroupRootItem : public CWizCategoryViewItemBase
 {
+    WIZGROUPDATA m_group;
 public:
     CWizCategoryViewGroupRootItem(CWizExplorerApp& app,
-                                  const QString& strName,
-                                  const QString& strKbGUID);
+                                  const WIZGROUPDATA& group);
 
     virtual void showContextMenu(CWizCategoryBaseView* pCtrl, QPoint pos);
     virtual void getDocuments(CWizDatabase& db, CWizDocumentDataArray& arrayDocument);
