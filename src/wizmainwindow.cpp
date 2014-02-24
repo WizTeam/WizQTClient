@@ -750,7 +750,7 @@ void MainWindow::on_syncDone(int nErrorCode, const QString& strErrorMsg)
             connect(m_userVerifyDialog, SIGNAL(accepted()), SLOT(on_syncDone_userVerified()));
         }
 
-        m_userVerifyDialog->open();
+        m_userVerifyDialog->exec();
     }
 }
 

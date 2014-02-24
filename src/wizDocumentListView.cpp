@@ -756,7 +756,7 @@ void CWizDocumentListView::on_action_moveDocument()
     selector->setAcceptRoot(false);
 
     connect(selector, SIGNAL(finished(int)), SLOT(on_action_moveDocument_confirmed(int)));
-    selector->open();
+    selector->exec();
 }
 
 void CWizDocumentListView::on_action_moveDocument_confirmed(int result)
@@ -807,7 +807,7 @@ void CWizDocumentListView::on_action_moveDocument_confirmed(int result)
             progress->setActionString(tr("Move Document: %1 to %2").arg(data.strLocation).arg(strSelectedFolder));
             progress->setNotifyString(data.strTitle);
             progress->setProgress(arrayDocument.size(), i);
-            progress->open();
+            progress->exec();
 
             i++;
         }
@@ -824,7 +824,7 @@ void CWizDocumentListView::on_action_copyDocument()
     selector->setAcceptRoot(false);
 
     connect(selector, SIGNAL(finished(int)), SLOT(on_action_copyDocument_confirmed(int)));
-    selector->open();
+    selector->exec();
 }
 
 void CWizDocumentListView::on_action_copyDocument_confirmed(int result)

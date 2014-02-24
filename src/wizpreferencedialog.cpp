@@ -2,6 +2,7 @@
 #include "ui_wizpreferencedialog.h"
 
 #include <QMessageBox>
+#include <QFontDialog>
 
 #include "share/wizDatabaseManager.h"
 
@@ -23,6 +24,7 @@ CWizPreferenceWindow::CWizPreferenceWindow(CWizExplorerApp& app, QWidget* parent
 
     // general tab
     ::WizGetTranslatedLocales(m_locales);
+    ui->comboLang->blockSignals(true);
     for (int i = 0; i < m_locales.count(); i++) {
         ui->comboLang->addItem(::WizGetTranslatedLocaleDisplayName(i));
     }
@@ -32,6 +34,7 @@ CWizPreferenceWindow::CWizPreferenceWindow(CWizExplorerApp& app, QWidget* parent
             ui->comboLang->setCurrentIndex(i);
         }
     }
+    ui->comboLang->blockSignals(false);
 
     connect(ui->comboLang, SIGNAL(activated(int)), SLOT(on_comboLang_activated(int)));
 
@@ -136,20 +139,6 @@ CWizPreferenceWindow::CWizPreferenceWindow(CWizExplorerApp& app, QWidget* parent
     ui->editFont->setText(strFont);
 
     connect(ui->buttonFontSelect, SIGNAL(clicked()), SLOT(onButtonFontSelect_clicked()));
-}
-
-void CWizPreferenceWindow::on_comboLang_activated(int index)
-{
-    QString strLocaleName = m_locales[index];
-    if (strLocaleName.compare(userSettings().locale())) {
-        userSettings().setLocale(strLocaleName);
-    }
-
-    QMessageBox msgBox;
-    msgBox.setIcon(QMessageBox::Information);
-    msgBox.addButton(QMessageBox::Ok);
-    msgBox.setText(tr("Language will be changed after restart WizNote."));
-    msgBox.exec();
 }
 
 void CWizPreferenceWindow::on_radioAuto_clicked(bool chcked)
@@ -286,7 +275,8 @@ void CWizPreferenceWindow::onButtonFontSelect_clicked()
     QFont font(strFont, nSize);
     m_fontDialog->setCurrentFont(font);
 
-    m_fontDialog->open(this, SLOT(onButtonFontSelect_confirmed()));
+    connect(m_fontDialog,SIGNAL(accepted()),this,SLOT(onButtonFontSelect_confirmed()));
+    m_fontDialog->exec();
 }
 
 void CWizPreferenceWindow::onButtonFontSelect_confirmed()
@@ -299,4 +289,21 @@ void CWizPreferenceWindow::onButtonFontSelect_confirmed()
     m_app.userSettings().setDefaultFontSize(font.pointSize());
 
     Q_EMIT settingsChanged(wizoptionsFont);
+}
+
+void CWizPreferenceWindow::on_comboLang_currentIndexChanged(int index)
+{
+    QString strLocaleName = m_locales[index];
+    if (strLocaleName.compare(userSettings().locale())) {
+        userSettings().setLocale(strLocaleName);
+    }
+
+    QMessageBox msgBox(this);
+    msgBox.setIcon(QMessageBox::Information);
+    msgBox.addButton(QMessageBox::Ok);
+    msgBox.setText(tr("Language will be changed after restart WizNote."));
+    msgBox.setWindowModality(Qt::ApplicationModal);
+    msgBox.exec();
+
+
 }

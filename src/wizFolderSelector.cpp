@@ -22,7 +22,7 @@ CWizFolderSelector::CWizFolderSelector(const QString& strTitle, CWizExplorerApp&
     m_folderView = new CWizFolderView(app, this);
     layout->addWidget(m_folderView);
 
-    QDialogButtonBox* buttonBox = new QDialogButtonBox(QDialogButtonBox::Apply | QDialogButtonBox::Cancel);
+    QDialogButtonBox* buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
     connect(buttonBox, SIGNAL(accepted()), SLOT(on_accept()));
     connect(buttonBox, SIGNAL(rejected()), SLOT(reject()));
     layout->addWidget(buttonBox);

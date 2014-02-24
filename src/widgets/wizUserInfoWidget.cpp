@@ -115,7 +115,7 @@ void CWizUserInfoWidget::on_action_accountSetup_triggered()
         connect(m_userSettings, SIGNAL(showProgress()), SLOT(on_action_accountSetup_showProgress()));
     }
 
-    m_userSettings->open();
+    m_userSettings->exec();
 }
 
 void CWizUserInfoWidget::on_action_accountSetup_showProgress()
