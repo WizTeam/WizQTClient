@@ -962,10 +962,10 @@ void CWizDocumentWebView::viewDocumentInEditor(bool editing)
     page()->undoStack()->clear();
     m_timerAutoSave.start();
 
-    if (editing) {
-        setFocus(Qt::MouseFocusReason);
-        editorFocus();
-    }
+//    if (editing) {                //shouldn't focus the editor,otherwise the titleBar will twinkle.
+//        setFocus(Qt::MouseFocusReason);
+//        editorFocus();
+//    }
 
     //update();
 }
