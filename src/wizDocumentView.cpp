@@ -203,7 +203,7 @@ void CWizDocumentView::setViewMode(int mode)
         setEditNote(false);
         break;
     default:
-        Q_ASSERT(0);
+//        Q_ASSERT(0);           //when set to the auto mode,do nonthing
         break;
     }
 }

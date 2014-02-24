@@ -977,7 +977,9 @@ void CWizDocumentWebView::onNoteLoadFinished()
 
 void CWizDocumentWebView::setEditingDocument(bool editing)
 {
-    Q_ASSERT(m_bEditorInited);
+    //Q_ASSERT(m_bEditorInited);      //
+    if(!m_bEditorInited)
+        return;             //If editor wasn't initialized,just return.
 
     // show editor toolbar properly
     if (!editing && hasFocus()) {
