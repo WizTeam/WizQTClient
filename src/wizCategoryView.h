@@ -9,7 +9,6 @@ class CWizFolder;
 class CWizScrollBar;
 class CWizDatabaseManager;
 class CWizExplorerApp;
-class CWizWebSettingsDialog;
 class QSettings;
 
 #define CATEGORY_MESSAGES_ALL               QObject::tr("Message Center")
@@ -244,7 +243,6 @@ private:
     QPointer<QMenu> m_menuGroupRoot;
     QPointer<QMenu> m_menuGroup;
     QPointer<QMenu> m_menuTrash;
-    QPointer<CWizWebSettingsDialog> m_groupSettings;
     QPointer<QTimer> m_timerUpdateFolderCount;
     QPointer<QTimer> m_timerUpdateTagCount;
     QMap<QString, QTimer*> m_mapTimerUpdateGroupCount;
@@ -318,8 +316,6 @@ public Q_SLOTS:
 
     void on_action_itemAttribute();
     void on_action_group_attribute();
-    void on_action_group_attribute_showProgress();
-    void on_action_group_attribute_requested(const QString& strToken);
 
 
     void on_action_emptyTrash();

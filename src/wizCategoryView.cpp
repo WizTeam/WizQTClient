@@ -1257,44 +1257,22 @@ void CWizCategoryView::on_action_itemAttribute()
 
 void CWizCategoryView::on_action_group_attribute()
 {
+
     CWizCategoryViewItemBase* p = currentCategoryItem<CWizCategoryViewItemBase>();
     if (p && !p->kbGUID().isEmpty()) {
-        if (!m_groupSettings) {
-            m_groupSettings = new CWizWebSettingsDialog(QSize(720, 460), window());
-            m_groupSettings->setWindowTitle(tr("Group settings"));
-            connect(m_groupSettings, SIGNAL(accepted()), m_groupSettings, SLOT(deleteLater()));
-            connect(m_groupSettings, SIGNAL(showProgress()), SLOT(on_action_group_attribute_showProgress()));
-        }
+
+        QString strUrl = WizService::ApiEntry::groupAttributeUrl(WIZ_TOKEN_IN_URL_REPLACE_PART, m_strRequestedGroupKbGUID);
+        //
+        CWizWebSettingsDialog* pDlg = new CWizWebSettingsWithTokenDialog(strUrl, QSize(800, 400), window());
+        pDlg->setWindowTitle(tr("Group settings"));
+        pDlg->exec();
+        //
+        delete pDlg;
 
         m_strRequestedGroupKbGUID = p->kbGUID();
-
-        m_groupSettings->exec();
     }
 }
 
-void CWizCategoryView::on_action_group_attribute_showProgress()
-{
-    connect(Token::instance(), SIGNAL(tokenAcquired(const QString&)),
-            SLOT(on_action_group_attribute_requested(const QString&)), Qt::QueuedConnection);
-
-    Token::instance()->requestToken();
-}
-
-void CWizCategoryView::on_action_group_attribute_requested(const QString& strToken)
-{
-    Token::instance()->disconnect(this);
-
-    if (!m_groupSettings)
-        return;
-
-    if (strToken.isEmpty()) {
-        m_groupSettings->showError();
-        return;
-    }
-
-    QString strUrl = WizService::ApiEntry::groupAttributeUrl(strToken, m_strRequestedGroupKbGUID);
-    m_groupSettings->load(QUrl::fromEncoded(strUrl.toUtf8()));
-}
 
 void CWizCategoryView::on_action_emptyTrash()
 {

@@ -199,6 +199,9 @@ void MainWindow::cleanOnQuit()
 
 void MainWindow::closeEvent(QCloseEvent* event)
 {
+    event->accept();
+    qApp->quit();
+/*
 #ifdef Q_OS_MAC
     // Qt issue: use hide() directly lead window can't be shown when click dock icon
     // call native API instead and ignore issue event.
@@ -210,6 +213,7 @@ void MainWindow::closeEvent(QCloseEvent* event)
     event->accept();
     qApp->quit();
 #endif
+*/
 }
 
 void MainWindow::on_actionExit_triggered()
