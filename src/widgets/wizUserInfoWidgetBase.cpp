@@ -35,7 +35,7 @@ void CWizUserInfoWidgetBase::paintEvent(QPaintEvent *event)
     rectIcon.setLeft(rectIcon.left());
     rectIcon.setRight(rectIcon.left() + nAvatarWidth);
 
-    QPixmap pixmap = getAvatar();
+    QPixmap pixmap = getAvatar(nAvatarWidth, nAvatarWidth);
     if (!pixmap.isNull())
     {
         p.drawPixmap(rectIcon, pixmap);
