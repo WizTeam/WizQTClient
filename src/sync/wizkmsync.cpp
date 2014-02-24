@@ -158,7 +158,6 @@ bool CWizKMSyncThread::syncAll()
     m_pEvents->SetLastErrorCode(0);
     ::WizSyncDatabase(m_info, m_pEvents, &m_db, true, m_bBackground);
 
-    m_pEvents->deleteLater();
     Q_EMIT syncFinished(m_pEvents->GetLastErrorCode(), "");
     return true;
 }
