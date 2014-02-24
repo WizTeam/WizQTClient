@@ -1082,7 +1082,8 @@ bool CWizDocumentWebView::editorCommandExecuteLinkInsert()
 
     QString strUrl = page()->mainFrame()->evaluateJavaScript("WizGetLinkUrl();").toString();
     m_editorInsertLinkForm->setUrl(strUrl);
-    m_editorInsertLinkForm->open();
+
+    m_editorInsertLinkForm->exec();
 
     return true;
 }
@@ -1125,7 +1126,7 @@ void CWizDocumentWebView::editorCommandExecuteBackColor()
     connect(m_colorDialog, SIGNAL(colorSelected(const QColor &)),
             SLOT(on_editorCommandExecuteBackColor_accepted(const QColor&)));
 
-    m_colorDialog->show();
+    m_colorDialog->exec();
 }
 
 void CWizDocumentWebView::on_editorCommandExecuteBackColor_accepted(const QColor& color)
@@ -1145,7 +1146,7 @@ void CWizDocumentWebView::editorCommandExecuteForeColor()
     connect(m_colorDialog, SIGNAL(colorSelected(const QColor &)),
             SLOT(on_editorCommandExecuteForeColor_accepted(const QColor&)));
 
-    m_colorDialog->show();
+    m_colorDialog->exec();
 }
 
 void CWizDocumentWebView::on_editorCommandExecuteForeColor_accepted(const QColor& color)
@@ -1211,7 +1212,7 @@ bool CWizDocumentWebView::editorCommandExecuteTableInsert()
     }
 
     m_editorInsertTableForm->clear();
-    m_editorInsertTableForm->open();
+    m_editorInsertTableForm->exec();
 
     return true;
 }
