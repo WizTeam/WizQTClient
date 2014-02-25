@@ -109,5 +109,8 @@ void CWizWebSettingsWithTokenDialog::on_token_acquired(const QString& token)
     //
     QString url = m_url;
     url.replace(QString(WIZ_TOKEN_IN_URL_REPLACE_PART), token);
-    m_web->load(url);
+    //
+    QUrl u = QUrl::fromEncoded(url.toUtf8());
+    //
+    m_web->load(u);
 }

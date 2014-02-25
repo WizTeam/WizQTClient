@@ -1156,8 +1156,8 @@ void MainWindow::on_actionGoForward_triggered()
 
 void MainWindow::on_category_itemClicked(QTreeWidgetItem *item)
 {
-    CWizCategoryViewFolderItem* fItem = dynamic_cast<CWizCategoryViewFolderItem *>(item);
-    if(fItem && fItem->buttonHitTestUnread())
+    CWizCategoryViewItemBase* fItem = dynamic_cast<CWizCategoryViewItemBase *>(item);
+    if(fItem && fItem->extraButtonClickTest())
     {
         QMessageBox::information(this,"Info","Folder addButton clicked");
     }

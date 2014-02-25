@@ -690,6 +690,7 @@ WIZGROUPDATA::WIZGROUPDATA(const WIZGROUPDATA& data)
     , strGroupTags(data.strGroupTags)
     , nUserGroup(data.nUserGroup)
     , strUserName(data.strUserName)
+    , bOwn(data.bOwn)
 {
 }
 
@@ -716,6 +717,11 @@ bool WIZGROUPDATA::LoadFromXmlRpc(CWizXmlRpcStructValue& data)
     data.GetString("tag_names", strGroupTags);
     data.GetInt("user_group", nUserGroup);
     data.GetString("user_name", strUserName);
+    //
+    QString owner;
+    data.GetString("is_kb_owner", owner);
+    owner = owner.toLower();
+    bOwn = (owner == "1" || owner == "true");
 
     return !strGroupName.isEmpty()
             && !strGroupGUID.isEmpty()
@@ -723,7 +729,7 @@ bool WIZGROUPDATA::LoadFromXmlRpc(CWizXmlRpcStructValue& data)
 }
 
 WIZBIZDATA::WIZBIZDATA()
-    : bizUserRole(10000)
+    : bizUserRole(WIZ_BIZROLE_MAX)
 {
 
 }
@@ -732,11 +738,18 @@ WIZBIZDATA::WIZBIZDATA(const WIZBIZDATA& data)
     : bizName(data.bizName)
     , bizGUID(data.bizGUID)
     , bizUserRole(data.bizUserRole)
+    , bizLevel(data.bizLevel)
 {
 }
 bool WIZBIZDATA::LoadFromXmlRpc(CWizXmlRpcStructValue& data)
 {
-    return true;
+    data.GetStr(_T("biz_name"), bizName);
+    data.GetStr(_T("biz_guid"), bizGUID);
+    data.GetInt(_T("user_group"), bizUserRole);
+    data.GetInt(_T("biz_level"), bizLevel);
+
+    return !bizGUID.isEmpty()
+            && !bizName.isEmpty();
 }
 
 /* ---------------------------- WIZMESSAGEDATA ---------------------------- */

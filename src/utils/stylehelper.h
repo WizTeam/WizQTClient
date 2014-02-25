@@ -48,6 +48,7 @@ public:
     static QColor treeViewItemCategoryText();
     static QColor treeViewItemText(bool bSelected);
     static QColor treeViewItemTextExtend(bool bSelected);
+    static QColor treeViewItemLinkText();
 
     static void drawTreeViewItemBackground(QPainter* p, const QRect& rc, bool bFocused);
     static void drawTreeViewItemIcon(QPainter* p, const QRect& rc, const QIcon& icn, bool bSelected);

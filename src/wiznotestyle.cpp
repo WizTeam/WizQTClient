@@ -82,6 +82,7 @@ private:
     QColor m_colorMultiLineListOtherLineSelected;
 
     QFont m_fontImagePushButtonLabel;
+    QFont m_fontLink;
 
 protected:
     virtual void drawCategoryViewItem(const QStyleOptionViewItemV4 *option, QPainter *painter, const CWizCategoryBaseView *widget) const;
@@ -161,6 +162,10 @@ CWizNoteStyle::CWizNoteStyle(const QString& strSkinName)
     m_fontImagePushButtonLabel = QFont("Arial Black", 8);
 #endif
     m_fontImagePushButtonLabel.setBold(true);
+    //
+    m_fontLink.setItalic(true);
+    //m_fontLink.setUnderline(true);
+    m_fontLink.setPixelSize(m_fontLink.pixelSize() - 4);
 }
 
 
@@ -170,11 +175,17 @@ void CWizNoteStyle::drawCategoryViewItem(const QStyleOptionViewItemV4 *vopt,
     CWizCategoryViewItemBase* pItem = view->categoryItemFromIndex(vopt->index);
 
     if (view->isHelperItemByIndex(vopt->index)) {
-        if (NULL != dynamic_cast<const CWizCategoryViewCategoryItem*>(pItem)) {
+        if (NULL != dynamic_cast<const CWizCategoryViewSectionItem*>(pItem)) {
             QString str = vopt->text;
             QRect rc(vopt->rect);
-            rc.setTop(rc.top() + 3);
-            Utils::StyleHelper::drawText(p, rc, str, 1, Qt::AlignVCenter, Utils::StyleHelper::treeViewItemCategoryText(), p->font());
+            rc.setTop(rc.top() + 12);
+            Utils::StyleHelper::drawSingleLineText(p, rc, str, Qt::AlignVCenter, Utils::StyleHelper::treeViewItemCategoryText(), p->font());
+        }
+        else if (NULL != dynamic_cast<const CWizCategoryViewLinkItem*>(pItem)) {
+            QString str = vopt->text;
+            QRect rc(vopt->rect);
+            rc.setLeft(rc.left() + 16);
+            Utils::StyleHelper::drawSingleLineText(p, rc, str, Qt::AlignVCenter, Utils::StyleHelper::treeViewItemLinkText(), m_fontLink);
         }
 
         return;
@@ -453,8 +464,11 @@ void CWizNoteStyle::drawPrimitive(PrimitiveElement pe, const QStyleOption *opt, 
                 Q_ASSERT(vopt);
 
                 const QTreeWidgetItem* pItemBase = view->itemAt(vopt->rect.center());
-                if (NULL != dynamic_cast<const CWizCategoryViewCategoryItem *>(pItemBase)) {
-                    p->fillRect(vopt->rect, Utils::StyleHelper::treeViewItemCategoryBackground());
+                if (NULL != dynamic_cast<const CWizCategoryViewSectionItem *>(pItemBase)) {
+                    //p->fillRect(vopt->rect, Utils::StyleHelper::treeViewBackground());
+                    QRect rc = vopt->rect;
+                    rc.setTop(rc.bottom());
+                    p->fillRect(rc, Utils::StyleHelper::treeViewItemCategoryBackground());
                     //p->fillRect(vopt->rect, QColor(255, 255, 255, 15)); //FIXME
                     //drawCategoryViewItemCategoryItem(pItem, vopt, p);
                     return;

@@ -29,6 +29,11 @@ public:
 
     QString kUrlFromGuid(const QString& strToken, const QString& strKbGUID);
 
+    QString createGroupUrl(const QString& strToken);
+    QString standardCommandUrl(const QString& strCommand);
+    QString standardCommandUrl(const QString& strCommand, const QString& strToken);
+    QString standardCommandUrl(const QString& strCommand, const QString& strToken, const QString& strExtInfo);
+
 private:
     QString m_strSyncUrl;
     QString m_strMessageVersionUrl;

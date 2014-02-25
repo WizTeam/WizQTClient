@@ -5,6 +5,7 @@
 
 #include "share/wizobject.h"
 
+
 class CWizDatabase;
 class CWizExplorerApp;
 class CWizCategoryBaseView;
@@ -36,10 +37,13 @@ public:
     //
     virtual int getSortOrder() const { return 0; }
 
+    //
+    virtual QString getSectionName() { return QString(); }
+
     //Plus Button
-    virtual void setPlusButtonIco(const QPixmap&){}
-    virtual bool getPlusButtonIco(QPixmap& ){return false;}
-    virtual bool plusButtonClickTest(){return false;}
+    virtual bool containsExtraButton() const {return false;}
+    virtual bool getExtraButtonIco(QPixmap& ) const {return false;}
+    virtual bool extraButtonClickTest();
 
 protected:
     CWizExplorerApp& m_app;
@@ -51,40 +55,20 @@ public:
     QString countString;
 };
 
-class CWizCategoryViewSpacerItem: public CWizCategoryViewItemBase
+
+
+class CWizCategoryViewSectionItem : public CWizCategoryViewItemBase
 {
 public:
-    CWizCategoryViewSpacerItem(CWizExplorerApp& app);
-
-    virtual void showContextMenu(CWizCategoryBaseView* pCtrl, QPoint pos)
-    { Q_UNUSED(pCtrl); Q_UNUSED(pos); }
-
-    virtual void getDocuments(CWizDatabase& db, CWizDocumentDataArray& arrayDocument)
-    { Q_UNUSED(db); Q_UNUSED(arrayDocument); }
-
-    virtual int getItemHeight(int hintHeight) const;
-};
-
-class CWizCategoryViewSeparatorItem : public CWizCategoryViewItemBase
-{
-public:
-    CWizCategoryViewSeparatorItem(CWizExplorerApp& app);
+    CWizCategoryViewSectionItem(CWizExplorerApp& app, const QString& strName, int sortOrder);
     virtual void showContextMenu(CWizCategoryBaseView* pCtrl, QPoint pos) { Q_UNUSED(pCtrl); Q_UNUSED(pos); }
     virtual void getDocuments(CWizDatabase& db, CWizDocumentDataArray& arrayDocument) { Q_UNUSED(db); Q_UNUSED(arrayDocument); }
     virtual int getItemHeight(int nHeight) const;
-};
+    virtual int getSortOrder() const { return m_sortOrder; }
+    void reset(const QString& sectionName, int sortOrder);
+protected:
+    int m_sortOrder;
 
-class CWizCategoryViewCategoryItem : public CWizCategoryViewItemBase
-{
-public:
-    CWizCategoryViewCategoryItem(CWizExplorerApp& app, const QString& strName);
-
-    virtual void showContextMenu(CWizCategoryBaseView* pCtrl, QPoint pos)
-    { Q_UNUSED(pCtrl); Q_UNUSED(pos); }
-
-    virtual void getDocuments(CWizDatabase& db,
-                              CWizDocumentDataArray& arrayDocument)
-    { Q_UNUSED(db); Q_UNUSED(arrayDocument); }
 };
 
 class CWizCategoryViewMessageItem : public CWizCategoryViewItemBase
@@ -111,6 +95,11 @@ public:
     void setUnread(int nCount);
     QString unreadString() const;
     bool hitTestUnread();
+
+
+    virtual QString getSectionName();
+    virtual int getSortOrder() const { return 10; }
+
 
 private:
     int m_nFilter;
@@ -151,6 +140,8 @@ public:
     virtual void showContextMenu(CWizCategoryBaseView* pCtrl, QPoint pos);
     virtual void getDocuments(CWizDatabase& db, CWizDocumentDataArray& arrayDocument);
     virtual bool accept(CWizDatabase& db, const WIZDOCUMENTDATA& data);
+    virtual QString getSectionName();
+    virtual int getSortOrder() const { return 20; }
 };
 
 class CWizCategoryViewFolderItem : public CWizCategoryViewItemBase
@@ -170,8 +161,8 @@ public:
     QString location() const { return m_strName; }
     QString name() const;
 
-    virtual void draw(QPainter* p, const QStyleOptionViewItemV4 *vopt) const;
-    bool buttonHitTestUnread();
+    virtual bool containsExtraButton() const {return false;}
+    virtual bool getExtraButtonIco(QPixmap& pix) const;
 
 private:
     QRect m_rcUnread;
@@ -185,6 +176,8 @@ public:
     virtual void showContextMenu(CWizCategoryBaseView* pCtrl, QPoint pos);
     virtual void getDocuments(CWizDatabase& db, CWizDocumentDataArray& arrayDocument);
     virtual bool accept(CWizDatabase& db, const WIZDOCUMENTDATA& data);
+    virtual QString getSectionName();
+    virtual int getSortOrder() const { return 21; }
 };
 
 class CWizCategoryViewTagItem : public CWizCategoryViewItemBase
@@ -217,47 +210,104 @@ public:
     virtual void getDocuments(CWizDatabase& db,
                               CWizDocumentDataArray& arrayDocument)
     { Q_UNUSED(db); Q_UNUSED(arrayDocument); }
+    virtual QString getSectionName();
+    virtual int getSortOrder() const { return 22; }
 };
 
-class CWizCategoryViewAllGroupsRootItem : public CWizCategoryViewItemBase
+class CWizCategoryViewGroupsRootItem : public CWizCategoryViewItemBase
 {
 public:
-    CWizCategoryViewAllGroupsRootItem(CWizExplorerApp& app,
-                                      const QString& strName,
-                                      const QString& strKbGUID);
+    CWizCategoryViewGroupsRootItem(CWizExplorerApp& app, const QString& strName);
 
     virtual void showContextMenu(CWizCategoryBaseView* pCtrl, QPoint pos)
     { Q_UNUSED(pCtrl); Q_UNUSED(pos); }
 
     virtual void getDocuments(CWizDatabase& db, CWizDocumentDataArray& arrayDocument);
     virtual bool accept(CWizDatabase& db, const WIZDOCUMENTDATA& data);
+    virtual QString getSectionName();
 };
 
-class CWizCategoryViewBizGroupRootItem : public CWizCategoryViewAllGroupsRootItem
+class CWizCategoryViewBizGroupRootItem : public CWizCategoryViewGroupsRootItem
 {
+    WIZBIZDATA m_biz;
 public:
     CWizCategoryViewBizGroupRootItem(CWizExplorerApp& app,
-                                     const QString& strName,
-                                     const QString& strKbGUID);
+                                     const WIZBIZDATA& biz);
 
     virtual void showContextMenu(CWizCategoryBaseView* pCtrl, QPoint pos)
     { Q_UNUSED(pCtrl); Q_UNUSED(pos); }
-
-    virtual void getDocuments(CWizDatabase& db, CWizDocumentDataArray& arrayDocument);
-    virtual bool accept(CWizDatabase& db, const WIZDOCUMENTDATA& data);
+    //
+    const WIZBIZDATA biz() const { return m_biz; }
+    virtual int getSortOrder() const { return 30; }
+    //
+    bool isOwner();
+    bool isAdmin();
 };
+class CWizCategoryViewOwnGroupRootItem : public CWizCategoryViewGroupsRootItem
+{
+public:
+    CWizCategoryViewOwnGroupRootItem(CWizExplorerApp& app);
+
+    virtual void showContextMenu(CWizCategoryBaseView* pCtrl, QPoint pos)
+    { Q_UNUSED(pCtrl); Q_UNUSED(pos); }
+    virtual int getSortOrder() const { return 31; }
+};
+
+class CWizCategoryViewJionedGroupRootItem : public CWizCategoryViewGroupsRootItem
+{
+public:
+    CWizCategoryViewJionedGroupRootItem(CWizExplorerApp& app);
+
+    virtual void showContextMenu(CWizCategoryBaseView* pCtrl, QPoint pos)
+    { Q_UNUSED(pCtrl); Q_UNUSED(pos); }
+    virtual int getSortOrder() const { return 32; }
+};
+
+class CWizCategoryViewLinkItem : public CWizCategoryViewItemBase
+{
+public:
+    CWizCategoryViewLinkItem(CWizExplorerApp& app, const QString& strName, int commandId)
+        : CWizCategoryViewItemBase(app, strName)
+        , m_commandId(commandId) { setFlags(Qt::NoItemFlags); setText(0, strName); }
+
+    virtual void showContextMenu(CWizCategoryBaseView* pCtrl, QPoint pos)
+    { Q_UNUSED(pCtrl); Q_UNUSED(pos); }
+    virtual void getDocuments(CWizDatabase& db,
+                              CWizDocumentDataArray& arrayDocument)
+    { Q_UNUSED(db); Q_UNUSED(arrayDocument); }
+    int commandId() const { return m_commandId; }
+protected:
+    int m_commandId;
+};
+
+class CWizCategoryViewCreateGroupLinkItem : public CWizCategoryViewLinkItem
+{
+public:
+    CWizCategoryViewCreateGroupLinkItem(CWizExplorerApp& app, const QString& strName, int commandId)
+        : CWizCategoryViewLinkItem(app, strName, commandId) {}
+    //
+    virtual QString getSectionName();
+    virtual int getSortOrder() const { return 33; }
+
+    virtual bool containsExtraButton() const {return true;}
+    virtual bool getExtraButtonIco(QPixmap& pix) const;
+};
+
 
 class CWizCategoryViewGroupRootItem : public CWizCategoryViewItemBase
 {
+    WIZGROUPDATA m_group;
 public:
     CWizCategoryViewGroupRootItem(CWizExplorerApp& app,
-                                  const QString& strName,
-                                  const QString& strKbGUID);
+                                  const WIZGROUPDATA& group);
 
     virtual void showContextMenu(CWizCategoryBaseView* pCtrl, QPoint pos);
     virtual void getDocuments(CWizDatabase& db, CWizDocumentDataArray& arrayDocument);
     virtual bool accept(CWizDatabase& db, const WIZDOCUMENTDATA& data);
     void reload(CWizDatabase& db);
+    //
+    bool isAdmin(CWizDatabase& db);
+    bool isOwner(CWizDatabase& db);
 };
 
 class CWizCategoryViewGroupNoTagItem : public CWizCategoryViewItemBase

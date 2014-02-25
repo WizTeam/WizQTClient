@@ -36,8 +36,6 @@ public:
     QString selectedItemKbGUID();
     void getDocuments(CWizDocumentDataArray& arrayDocument);
     bool acceptDocument(const WIZDOCUMENTDATA& document);
-    void addSeparator();
-    CWizCategoryViewSpacerItem* addSpacer();
 
     void saveSelection();
     void restoreSelection();
@@ -51,7 +49,6 @@ public:
 
     CWizCategoryViewItemBase* categoryItemFromIndex(const QModelIndex &index) const;
     bool isHelperItemByIndex(const QModelIndex &index) const;
-    bool isSeparatorItemByPosition(const QPoint& pt) const;
 
     bool isDragHovered() const { return m_bDragHovered; }
     QPoint dragHoveredPos() const { return m_dragHoveredPos; }
@@ -183,6 +180,12 @@ private:
     void initGroup(CWizDatabase& db, bool& itemCreeated);
     void initGroup(CWizDatabase& db, QTreeWidgetItem* pParent,
                    const QString& strParentTagGUID);
+    //
+    void resetCreateGroupLink();
+
+
+    //
+    void resetSections();
 
     void doLocationSanityCheck(CWizStdStringArray& arrayLocation);
 
@@ -216,7 +219,14 @@ public:
 
     // helper
     QAction* findAction(CategoryActions type);
-    CWizCategoryViewItemBase* findCategory(const QString& strName, bool bCreate = true);
+
+    CWizCategoryViewItemBase* findBizGroupsRootItem(const WIZBIZDATA& biz, bool bCreate = true);
+    CWizCategoryViewItemBase* findOwnGroupsRootItem(bool bCreate = true);
+    CWizCategoryViewItemBase* findJionedGroupsRootItem(bool bCreate = true);
+    CWizCategoryViewItemBase* findGroupsRootItem(const WIZGROUPDATA& group, bool bCreate = true);
+    CWizCategoryViewItemBase* findAllFolderItem();
+    CWizCategoryViewItemBase* findAllTagsItem();
+    CWizCategoryViewItemBase* findAllMessagesItem();
     CWizCategoryViewTrashItem* findTrash(const QString& strKbGUID = NULL);
 
     // document count update
@@ -234,6 +244,15 @@ public:
     void updateGroupTagDocumentCount(const QString &strKbGUID);
 
     void createDocument(WIZDOCUMENTDATA& data);
+    //
+    void showWebDialogWithToken(const QString& windowTitle, const QString& url);
+    //
+    void createGroup();
+    void viewGroupInfo(const QString& groupGUID);
+    void manageGroup(const QString& groupGUID);
+    void viewBizInfo(const QString& bizGUID);
+    void manageBiz(const QString& bizGUID);
+
 
 private:
     QPointer<QMenu> m_menuFolderRoot;
@@ -321,6 +340,7 @@ public Q_SLOTS:
     void on_action_emptyTrash();
 
     void on_itemSelectionChanged();
+    void on_itemClicked(QTreeWidgetItem *item, int column);
 
 Q_SIGNALS:
     void newDocument();

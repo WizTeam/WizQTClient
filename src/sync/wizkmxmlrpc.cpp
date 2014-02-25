@@ -184,6 +184,11 @@ BOOL CWizKMAccountsServer::GetGroupList(CWizGroupDataArray& arrayGroup)
     return accounts_getGroupList(arrayGroup);
 }
 
+BOOL CWizKMAccountsServer::GetBizList(CWizBizDataArray& arrayBiz)
+{
+    return accounts_getBizList(arrayBiz);
+}
+
 BOOL CWizKMAccountsServer::CreateTempGroup(const QString& strEmails, const QString& strAccessControl, const QString& strSubject, const QString& strEmailText, WIZGROUPDATA& group)
 {
     return accounts_createTempGroupKb(strEmails, strAccessControl, strSubject, strEmailText, group);
@@ -496,9 +501,9 @@ bool CWizKMAccountsServer::accounts_getBizList(CWizBizDataArray& arrayBiz)
     }
     //
     std::deque<WIZBIZDATA> arrayWrap;
-    if (!Call(_T("accounts.getUserBibList"), arrayWrap, &param))
+    if (!Call(_T("accounts.getUserBizs"), arrayWrap, &param))
     {
-        TOLOG(_T("accounts.getUserBibList failure!"));
+        TOLOG(_T("accounts.getUserBizs failure!"));
         return FALSE;
     }
     //
