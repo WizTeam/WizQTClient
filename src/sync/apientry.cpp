@@ -203,6 +203,26 @@ QString ApiEntryPrivate::createGroupUrl(const QString& strToken)
     return addExtendedInfo(strUrl, strExt);
 }
 
+QString ApiEntryPrivate::standardCommandUrl(const QString& strCommand)
+{
+    QString strUrl = urlFromCommand(strCommand);
+    return strUrl;
+}
+
+QString ApiEntryPrivate::standardCommandUrl(const QString& strCommand, const QString& strToken)
+{
+    QString strExt = QString("token=%1").arg(strToken);
+    QString strUrl = urlFromCommand(strCommand);
+    return addExtendedInfo(strUrl, strExt);
+}
+
+QString ApiEntryPrivate::standardCommandUrl(const QString& strCommand, const QString& strToken, const QString& strExtInfo)
+{
+    QString strExt = QString("token=%1").arg(strToken) + "&" + strExtInfo;
+    QString strUrl = urlFromCommand(strCommand);
+    return addExtendedInfo(strUrl, strExt);
+}
+
 QString ApiEntryPrivate::groupAttributeUrl(const QString& strToken, const QString& strKbGUID)
 {
     QString strExt = QString("token=%1&kb_guid=%2").arg(strToken).arg(strKbGUID);
@@ -319,6 +339,26 @@ QString ApiEntry::createGroupUrl(const QString& strToken)
         d = new ApiEntryPrivate();
     return d->createGroupUrl(strToken);
 }
+QString ApiEntry::standardCommandUrl(const QString& strCommand)
+{
+    if (!d)
+        d = new ApiEntryPrivate();
+    return d->standardCommandUrl(strCommand);
+}
+
+QString ApiEntry::standardCommandUrl(const QString& strCommand, const QString& strToken)
+{
+    if (!d)
+        d = new ApiEntryPrivate();
+    return d->standardCommandUrl(strCommand, strToken);
+}
+QString ApiEntry::standardCommandUrl(const QString& strCommand, const QString& strToken, const QString& strExtInfo)
+{
+    if (!d)
+        d = new ApiEntryPrivate();
+    return d->standardCommandUrl(strCommand, strToken, strExtInfo);
+}
+
 
 QString ApiEntry::groupAttributeUrl(const QString& strToken, const QString& strKbGUID)
 {

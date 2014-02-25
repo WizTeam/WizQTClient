@@ -5,6 +5,13 @@
 #include <QImage>
 #include "wizqthelper.h"
 
+const UINT WIZ_USERGROUP_ADMIN = 0;
+const UINT WIZ_USERGROUP_SUPER = 10;
+const UINT WIZ_USERGROUP_EDITOR = 50;
+const UINT WIZ_USERGROUP_AUTHOR = 100;
+const UINT WIZ_USERGROUP_READER = 1000;
+const UINT WIZ_USERGROUP_MAX = 10000000;
+
 struct WIZDATABASEINFO
 {
     // optional
@@ -22,6 +29,14 @@ struct WIZDATABASEINFO
 
     // required, private db set to 0
     int nPermission;
+    //
+    bool bOwner;
+    //
+    WIZDATABASEINFO()
+        : nPermission(WIZ_USERGROUP_MAX)
+        , bOwner(false)
+    {
+    }
 };
 
 
@@ -590,12 +605,6 @@ struct WIZGROUPDATA
     bool bOwn;
 };
 
-const UINT WIZ_USERGROUP_ADMIN = 0;
-const UINT WIZ_USERGROUP_SUPER = 10;
-const UINT WIZ_USERGROUP_EDITOR = 50;
-const UINT WIZ_USERGROUP_AUTHOR = 100;
-const UINT WIZ_USERGROUP_READER = 1000;
-const UINT WIZ_USERGROUP_MAX = 10000000;
 
 
 const UINT WIZ_BIZROLE_OWNER			= 0;
