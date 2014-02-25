@@ -163,7 +163,6 @@ CWizNoteStyle::CWizNoteStyle(const QString& strSkinName)
 #endif
     m_fontImagePushButtonLabel.setBold(true);
     //
-    m_fontLink = QApplication::font();
     m_fontLink.setItalic(true);
     //m_fontLink.setUnderline(true);
     m_fontLink.setPixelSize(m_fontLink.pixelSize() - 4);
@@ -201,7 +200,7 @@ void CWizNoteStyle::drawCategoryViewItem(const QStyleOptionViewItemV4 *vopt,
         Utils::StyleHelper::drawTreeViewItemIcon(p, iconRect, vopt->icon, bSelected);
     }
 
-    QFont f = QApplication::font();
+    QFont f;
     Utils::StyleHelper::fontNormal(f);
 
     QFont fontCount;
