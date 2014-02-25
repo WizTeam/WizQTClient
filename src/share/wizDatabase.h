@@ -181,6 +181,7 @@ public:
     virtual bool IsGroupEditor();
     virtual bool IsGroupAuthor();
     virtual bool IsGroupReader();
+    virtual bool IsGroupOwner();
 
     virtual bool CanEditDocument(const WIZDOCUMENTDATA& data);
     virtual bool CanEditAttachment(const WIZDOCUMENTATTACHMENTDATAEX& data);

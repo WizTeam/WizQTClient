@@ -246,6 +246,12 @@ public:
     void createDocument(WIZDOCUMENTDATA& data);
     //
     void showWebDialogWithToken(const QString& windowTitle, const QString& url);
+    //
+    void createGroup();
+    void viewGroupInfo(const QString& groupGUID);
+    void manageGroup(const QString& groupGUID);
+    void viewBizInfo(const QString& bizGUID);
+    void manageBiz(const QString& bizGUID);
 
 
 private:

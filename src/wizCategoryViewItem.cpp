@@ -735,6 +735,16 @@ CWizCategoryViewBizGroupRootItem::CWizCategoryViewBizGroupRootItem(CWizExplorerA
     setIcon(0, icon);
 }
 
+bool CWizCategoryViewBizGroupRootItem::isOwner()
+{
+    return m_biz.bizUserRole == WIZ_BIZROLE_OWNER;
+}
+
+bool CWizCategoryViewBizGroupRootItem::isAdmin()
+{
+    return m_biz.bizUserRole <= WIZ_BIZROLE_HR;
+}
+
 CWizCategoryViewOwnGroupRootItem::CWizCategoryViewOwnGroupRootItem(CWizExplorerApp& app)
     : CWizCategoryViewGroupsRootItem(app, CATEGORY_OWN_GROUPS)
 {
@@ -811,6 +821,15 @@ void CWizCategoryViewGroupRootItem::reload(CWizDatabase& db)
 {
     m_strName = db.name();
     setText(0, db.name());
+}
+bool CWizCategoryViewGroupRootItem::isAdmin(CWizDatabase& db)
+{
+    return db.IsGroupAdmin();
+}
+
+bool CWizCategoryViewGroupRootItem::isOwner(CWizDatabase& db)
+{
+    return db.IsGroupOwner();
 }
 
 /* --------------------- CWizCategoryViewGroupNoTagItem --------------------- */

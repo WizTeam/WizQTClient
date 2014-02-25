@@ -718,6 +718,11 @@ bool CWizDatabase::IsGroupAdmin()
     return false;
 }
 
+bool CWizDatabase::IsGroupOwner()
+{
+    return m_info.bOwner;
+}
+
 bool CWizDatabase::IsGroupSuper()
 {
     if (permission() <= WIZ_USERGROUP_SUPER)
@@ -1387,6 +1392,18 @@ bool CWizDatabase::GetGroupData(const QString& groupGUID, WIZGROUPDATA& group)
     group.bizGUID = GetMetaDef(g_strGroupSection, groupGUID + "_BizName");
     group.bOwn = GetMetaDef(g_strGroupSection, groupGUID + "_Own") == "1";
     group.nUserGroup = GetMetaDef(g_strGroupSection, groupGUID + "_Role", QString::number(WIZ_USERGROUP_MAX)).toInt();
+    //
+    if (group.bizGUID.isEmpty())
+    {
+        //load biz data from old settings
+        //
+        QString section = "BizGroups";
+        group.bizGUID = GetMetaDef(section, group.strGroupGUID);
+        if (!group.bizGUID.isEmpty())
+        {
+            group.bizName = GetMetaDef(section, group.bizGUID);
+        }
+    }
 
     return !group.strGroupName.isEmpty();
 }
@@ -1546,6 +1563,7 @@ bool CWizDatabase::LoadDatabaseInfo()
 
     m_info.name = GetMetaDef(g_strDatabaseInfoSection, "Name");
     m_info.nPermission = GetMetaDef(g_strDatabaseInfoSection, "Permission").toInt();
+    m_info.bOwner = GetMetaDef(g_strDatabaseInfoSection, "Owner") == "1";
 
     return true;
 }
@@ -1562,6 +1580,9 @@ bool CWizDatabase::InitDatabaseInfo(const WIZDATABASEINFO& dbInfo)
         nErrors++;
     if (!SetMeta(g_strDatabaseInfoSection, "Permission", QString::number(dbInfo.nPermission)))
         nErrors++;
+    if (!SetMeta(g_strDatabaseInfoSection, "Owner", dbInfo.bOwner ? "1" : "0"))
+        nErrors++;
+
     // biz group info
     if (!dbInfo.bizGUID.isEmpty() && !dbInfo.bizName.isEmpty()) {
         if (!SetMeta(g_strDatabaseInfoSection, "BizName", dbInfo.bizName))

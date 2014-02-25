@@ -227,6 +227,9 @@ public:
     //
     const WIZBIZDATA biz() const { return m_biz; }
     virtual int getSortOrder() const { return 30; }
+    //
+    bool isOwner();
+    bool isAdmin();
 };
 class CWizCategoryViewOwnGroupRootItem : public CWizCategoryViewGroupsRootItem
 {
@@ -287,6 +290,9 @@ public:
     virtual void getDocuments(CWizDatabase& db, CWizDocumentDataArray& arrayDocument);
     virtual bool accept(CWizDatabase& db, const WIZDOCUMENTDATA& data);
     void reload(CWizDatabase& db);
+    //
+    bool isAdmin(CWizDatabase& db);
+    bool isOwner(CWizDatabase& db);
 };
 
 class CWizCategoryViewGroupNoTagItem : public CWizCategoryViewItemBase
