@@ -9,6 +9,7 @@
 #include <QVector>
 #include <QTextLayout>
 #include <QDebug>
+#include <QApplication>
 
 #include <extensionsystem/pluginmanager.h>
 
@@ -114,6 +115,11 @@ QColor StyleHelper::treeViewItemCategoryText()
 {
     QSettings st(PathResolve::themePath(themeName()) + "skin.ini");
     return QColor(st.value("Category/ItemCategoryText", "#697882").toString());
+}
+QColor StyleHelper::treeViewItemLinkText()
+{
+    QSettings st(PathResolve::themePath(themeName()) + "skin.ini");
+    return QColor(st.value("Category/ItemLinkText", "#a0aaaf").toString());
 }
 
 QColor StyleHelper::treeViewItemText(bool bSelected)
@@ -515,7 +521,7 @@ int StyleHelper::fontHead(QFont& f)
     }
 
     f.setFamily(strFont);
-    f.setPixelSize(13);
+    //f.setPixelSize(13);
     f.setBold(true);
 
     return QFontMetrics(f).height();
@@ -530,7 +536,7 @@ int StyleHelper::fontNormal(QFont& f)
     }
 
     f.setFamily(strFont);
-    f.setPixelSize(12);
+    //f.setPixelSize(12);
 
     return QFontMetrics(f).height();
 }
