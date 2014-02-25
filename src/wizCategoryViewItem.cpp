@@ -500,6 +500,64 @@ QString CWizCategoryViewFolderItem::name() const
     return CWizDatabase::GetLocationName(m_strName);
 }
 
+void CWizCategoryViewFolderItem::draw(QPainter *p, const QStyleOptionViewItemV4 *vopt) const
+{
+
+    p->save();
+
+    QFont f;
+    Utils::StyleHelper::fontExtend(f);
+    p->setFont(f);
+    //
+    QString text="+";
+    int nMargin = 4;
+    QSize szText = p->fontMetrics().size(0, text);
+    int nWidth = szText.width() + 2 * nMargin;
+    int nHeight = szText.height() + 2 * nMargin;
+    if (nWidth < nHeight)
+        nWidth = nHeight;
+    //
+    int nTop = vopt->rect.y() + (vopt->rect.height() - nHeight) / 2;
+    QRect rcb(vopt->rect.right() - nWidth - nMargin, nTop, nWidth, nHeight);
+    rcb.adjust(nMargin, nMargin, -nMargin, -nMargin);
+
+    p->setRenderHint(QPainter::Antialiasing);
+
+    if(vopt->state & QStyle::State_Selected)
+    {
+        p->setPen(QColor("#780000"));
+        p->setBrush(QColor("#780000"));
+    }
+    else
+    {
+        p->setPen(QColor("#2874c9"));
+        p->setBrush(QColor("#2874c9"));
+    }
+    p->drawEllipse(rcb);
+
+    p->setPen(QColor("#ffffff"));
+    p->drawText(rcb, Qt::AlignCenter, text);
+
+    p->restore();
+}
+
+bool CWizCategoryViewFolderItem::buttonHitTestUnread()
+{
+    CWizCategoryBaseView* view = dynamic_cast<CWizCategoryBaseView*>(treeWidget());
+    Q_ASSERT(view);
+
+    if (m_rcUnread.isNull()) {
+        QFont f;
+        Utils::StyleHelper::fontExtend(f);
+        int nWidth = QFontMetrics(f).width("+");
+        m_rcUnread = view->visualItemRect(this);
+        m_rcUnread.adjust(5, 5, -5, -5);
+        m_rcUnread.setLeft(m_rcUnread.right() - nWidth-4);
+    }
+
+    return m_rcUnread.contains(view->hitPoint());
+}
+
 bool CWizCategoryViewFolderItem::operator < (const QTreeWidgetItem &other) const
 {
     const CWizCategoryViewFolderItem* pOther = dynamic_cast<const CWizCategoryViewFolderItem*>(&other);

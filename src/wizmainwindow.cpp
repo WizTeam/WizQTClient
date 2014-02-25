@@ -719,6 +719,7 @@ void MainWindow::init()
 {
     connect(m_category, SIGNAL(itemSelectionChanged()), SLOT(on_category_itemSelectionChanged()));
     connect(m_category, SIGNAL(newDocument()), SLOT(on_actionNewNote_triggered()));
+    connect(m_category,SIGNAL(itemClicked(QTreeWidgetItem *, int)),this,SLOT(on_category_itemClicked(QTreeWidgetItem *)));
     m_category->init();
 
     connect(m_msgList, SIGNAL(itemSelectionChanged()), SLOT(on_message_itemSelectionChanged()));
@@ -1151,6 +1152,15 @@ void MainWindow::on_actionGoForward_triggered()
     WIZDOCUMENTDATA data = m_history->forward();
     viewDocument(data, false);
     locateDocument(data);
+}
+
+void MainWindow::on_category_itemClicked(QTreeWidgetItem *item)
+{
+    CWizCategoryViewFolderItem* fItem = dynamic_cast<CWizCategoryViewFolderItem *>(item);
+    if(fItem && fItem->buttonHitTestUnread())
+    {
+        QMessageBox::information(this,"Info","Folder addButton clicked");
+    }
 }
 
 void MainWindow::on_category_itemSelectionChanged()

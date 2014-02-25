@@ -36,6 +36,11 @@ public:
     //
     virtual int getSortOrder() const { return 0; }
 
+    //Plus Button
+    virtual void setPlusButtonIco(const QPixmap&){}
+    virtual bool getPlusButtonIco(QPixmap& ){return false;}
+    virtual bool plusButtonClickTest(){return false;}
+
 protected:
     CWizExplorerApp& m_app;
     QString m_strName;
@@ -164,6 +169,13 @@ public:
 
     QString location() const { return m_strName; }
     QString name() const;
+
+    virtual void draw(QPainter* p, const QStyleOptionViewItemV4 *vopt) const;
+    bool buttonHitTestUnread();
+
+private:
+    QRect m_rcUnread;
+    QPixmap m_plusButtonIco;
 };
 
 class CWizCategoryViewAllTagsItem : public CWizCategoryViewItemBase
