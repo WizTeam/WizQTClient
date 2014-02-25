@@ -45,7 +45,7 @@ CWizCategoryViewItemBase::CWizCategoryViewItemBase(CWizExplorerApp& app,
 
 bool IsSimpChinese()
 {
-    QLocale local = QLocale::system();
+    QLocale local;
     QString name = local.name().toLower();
     if (name == "zh_cn"
         || name == "zh-cn")
@@ -208,45 +208,26 @@ void CWizCategoryViewItemBase::draw(QPainter* p, const QStyleOptionViewItemV4 *v
 #endif
 }
 
+/* ------------------------------ CWizCategoryViewSectionItem ------------------------------ */
 
-/* ------------------------------ CWizCategoryViewSpacerItem ------------------------------ */
-
-CWizCategoryViewSpacerItem::CWizCategoryViewSpacerItem(CWizExplorerApp& app)
-    : CWizCategoryViewItemBase(app)
-{
-    setFlags(Qt::NoItemFlags); // user can not interact with it.
-    setText(0, "=");
-}
-
-int CWizCategoryViewSpacerItem::getItemHeight(int hintHeight) const
-{
-    Q_UNUSED(hintHeight);
-    return 12;
-}
-
-/* ------------------------------ CWizCategoryViewSeparatorItem ------------------------------ */
-
-CWizCategoryViewSeparatorItem::CWizCategoryViewSeparatorItem(CWizExplorerApp& app)
-    : CWizCategoryViewItemBase(app)
-{
-    setFlags(Qt::NoItemFlags); // user can not interact with it.
-    setText(0, "-");
-}
-
-int CWizCategoryViewSeparatorItem::getItemHeight(int nHeight) const
-{
-    Q_UNUSED(nHeight);
-    return 12;
-}
-
-
-/* --------------------- CWizCategoryViewCategoryItem --------------------- */
-CWizCategoryViewCategoryItem::CWizCategoryViewCategoryItem(CWizExplorerApp& app,
-                                                           const QString& strName)
-    : CWizCategoryViewItemBase(app, strName)
+CWizCategoryViewSectionItem::CWizCategoryViewSectionItem(CWizExplorerApp& app, const QString& strName, int sortOrder)
+    : CWizCategoryViewItemBase(app, strName, "")
+    , m_sortOrder(sortOrder)
 {
     setFlags(Qt::NoItemFlags); // user can not interact with it.
     setText(0, strName);
+}
+
+int CWizCategoryViewSectionItem::getItemHeight(int nHeight) const
+{
+    return nHeight + 12;
+}
+void CWizCategoryViewSectionItem::reset(const QString& sectionName, int sortOrder)
+{
+    m_strName = sectionName;
+    m_sortOrder = sortOrder;
+    //
+    setText(0, sectionName);
 }
 
 
@@ -428,7 +409,7 @@ bool CWizCategoryViewAllFoldersItem::accept(CWizDatabase& db, const WIZDOCUMENTD
 
 QString CWizCategoryViewAllFoldersItem::getSectionName()
 {
-    return WIZ_CATEGORY_SECTION_GENERAL;
+    return WIZ_CATEGORY_SECTION_PERSONAL;
 }
 
 
@@ -582,7 +563,7 @@ bool CWizCategoryViewAllTagsItem::accept(CWizDatabase& db, const WIZDOCUMENTDATA
 
 QString CWizCategoryViewAllTagsItem::getSectionName()
 {
-    return WIZ_CATEGORY_SECTION_GENERAL;
+    return WIZ_CATEGORY_SECTION_PERSONAL;
 }
 
 /* ------------------------------ CWizCategoryViewTagItem ------------------------------ */
@@ -679,7 +660,7 @@ CWizCategoryViewStyleRootItem::CWizCategoryViewStyleRootItem(CWizExplorerApp& ap
 
 QString CWizCategoryViewStyleRootItem::getSectionName()
 {
-    return WIZ_CATEGORY_SECTION_GENERAL;
+    return WIZ_CATEGORY_SECTION_PERSONAL;
 }
 
 /* ---------------------------- CWizCategoryViewGroupsRootItem ---------------------------- */
@@ -778,7 +759,10 @@ CWizCategoryViewJionedGroupRootItem::CWizCategoryViewJionedGroupRootItem(CWizExp
 }
 
 
-
+QString CWizCategoryViewCreateGroupLinkItem::getSectionName()
+{
+    return WIZ_CATEGORY_SECTION_GROUPS;
+}
 
 
 /* ------------------------------ CWizCategoryViewGroupRootItem ------------------------------ */

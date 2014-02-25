@@ -283,6 +283,7 @@ public:
     bool SetUserGroupInfo(const CWizGroupDataArray& arrayGroup);
     bool SetUserBizInfo(const CWizBizDataArray& arrayBiz);
     bool GetUserBizInfo(bool bAllowEmptyBiz, CWizBizDataArray& arrayBiz);
+    bool GetUserBizInfo(bool bAllowEmptyBiz, const CWizGroupDataArray& arrayAllGroup, CWizBizDataArray& arrayBiz);
     bool GetBizData(const QString& bizGUID, WIZBIZDATA& biz);
     bool GetGroupData(const QString& groupGUID, WIZGROUPDATA& group);
     //

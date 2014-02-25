@@ -29,6 +29,8 @@ public:
 
     QString kUrlFromGuid(const QString& strToken, const QString& strKbGUID);
 
+    QString createGroupUrl(const QString& strToken);
+
 private:
     QString m_strSyncUrl;
     QString m_strMessageVersionUrl;

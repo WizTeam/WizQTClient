@@ -196,6 +196,13 @@ QString ApiEntryPrivate::accountInfoUrl(const QString& strToken)
     return addExtendedInfo(strUrl, strExt);
 }
 
+QString ApiEntryPrivate::createGroupUrl(const QString& strToken)
+{
+    QString strExt = QString("token=%1").arg(strToken);
+    QString strUrl = urlFromCommand("create_group");
+    return addExtendedInfo(strUrl, strExt);
+}
+
 QString ApiEntryPrivate::groupAttributeUrl(const QString& strToken, const QString& strKbGUID)
 {
     QString strExt = QString("token=%1&kb_guid=%2").arg(strToken).arg(strKbGUID);
@@ -304,6 +311,13 @@ QString ApiEntry::accountInfoUrl(const QString& strToken)
     if (!d)
         d = new ApiEntryPrivate();
     return d->accountInfoUrl(strToken);
+}
+
+QString ApiEntry::createGroupUrl(const QString& strToken)
+{
+    if (!d)
+        d = new ApiEntryPrivate();
+    return d->createGroupUrl(strToken);
 }
 
 QString ApiEntry::groupAttributeUrl(const QString& strToken, const QString& strKbGUID)

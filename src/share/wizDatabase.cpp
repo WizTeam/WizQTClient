@@ -636,15 +636,16 @@ bool CWizDatabase::OnUploadObject(const QString& strGUID,
 
 bool CWizDatabase::OnDownloadGroups(const CWizGroupDataArray& arrayGroup)
 {
+    bool ret = SetUserGroupInfo(arrayGroup);
     Q_EMIT groupsInfoDownloaded(arrayGroup);
-
-    return SetUserGroupInfo(arrayGroup);
+    return ret;
 }
 
 bool CWizDatabase::OnDownloadBizs(const CWizBizDataArray& arrayBiz)
 {
+    bool ret = SetUserBizInfo(arrayBiz);
     Q_EMIT bizInfoDownloaded(arrayBiz);
-    return SetUserBizInfo(arrayBiz);
+    return ret;
 }
 
 IWizSyncableDatabase* CWizDatabase::GetGroupDatabase(const WIZGROUPDATA& group)
@@ -1304,9 +1305,9 @@ bool CWizDatabase::IsEmptyBiz(const CWizGroupDataArray& arrayGroup, const QStrin
          it++)
     {
         if (it->bizGUID == bizGUID)
-            return true;
+            return false;
     }
-    return false;
+    return true;
 }
 
 bool CWizDatabase::GetUserBizInfo(bool bAllowEmptyBiz, CWizBizDataArray& arrayBiz)
@@ -1314,6 +1315,11 @@ bool CWizDatabase::GetUserBizInfo(bool bAllowEmptyBiz, CWizBizDataArray& arrayBi
     CWizGroupDataArray arrayGroup;
     GetUserGroupInfo(arrayGroup);
     //
+    return GetUserBizInfo(bAllowEmptyBiz, arrayGroup, arrayBiz);
+}
+//
+bool CWizDatabase::GetUserBizInfo(bool bAllowEmptyBiz, const CWizGroupDataArray& arrayGroup, CWizBizDataArray& arrayBiz)
+{
     BOOL inited = false;
     int count = GetMetaDef("Bizs", "Count").toInt();
     //
@@ -1338,6 +1344,7 @@ bool CWizDatabase::GetUserBizInfo(bool bAllowEmptyBiz, CWizBizDataArray& arrayBi
     if (inited)
         return true;
     //
+    //init from old data
     QString section = "BizGroups";
     //
     count = GetMetaDef(section, "Count").toInt();

@@ -749,7 +749,7 @@ bool WIZBIZDATA::LoadFromXmlRpc(CWizXmlRpcStructValue& data)
     data.GetInt(_T("biz_level"), bizLevel);
 
     return !bizGUID.isEmpty()
-            && bizName.isEmpty();
+            && !bizName.isEmpty();
 }
 
 /* ---------------------------- WIZMESSAGEDATA ---------------------------- */

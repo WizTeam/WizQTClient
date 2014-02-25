@@ -66,6 +66,7 @@ void CreateAccountDialog::accept()
 
     AsyncApi* api = new AsyncApi(this);
     connect(api, SIGNAL(registerAccountFinished(bool)), SLOT(onRegisterAccountFinished(bool)));
+    api->registerAccount(userId(), password(), strCode);
 }
 
 void CreateAccountDialog::onRegisterAccountFinished(bool bOk)
