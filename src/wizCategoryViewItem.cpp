@@ -4,6 +4,7 @@
 #include <QTextCodec>
 #include <QPainter>
 #include <cstring>
+#include <QFile>
 
 #include <extensionsystem/pluginmanager.h>
 #include "utils/pinyin.h"
@@ -126,9 +127,6 @@ void CWizCategoryViewItemBase::setDocumentsCount(int nCurrent, int nTotal)
 
 bool CWizCategoryViewItemBase::extraButtonClickTest()
 {
-    if(!containsExtraButton())
-        return false;
-
     QPixmap pixmap;
     if(!getExtraButtonIco(pixmap) || pixmap.isNull())
         return false;
@@ -148,7 +146,7 @@ bool CWizCategoryViewItemBase::extraButtonClickTest()
 void CWizCategoryViewItemBase::draw(QPainter* p, const QStyleOptionViewItemV4 *vopt) const
 {
     QPixmap pixmap;
-    if(containsExtraButton() && getExtraButtonIco(pixmap) && !pixmap.isNull())
+    if(getExtraButtonIco(pixmap) && !pixmap.isNull())
     {
         p->save();
 
@@ -272,29 +270,45 @@ void CWizCategoryViewSectionItem::reset(const QString& sectionName, int sortOrde
     setText(0, sectionName);
 }
 
-bool CWizCategoryViewSectionItem::containsExtraButton() const
+void CWizCategoryViewSectionItem::setExtraButtonIco(const QString &file)
 {
-    if(WIZ_CATEGORY_SECTION_GROUPS == this->name())
-        return true;
-
-    return false;
+    m_extraButtonIco=file;
 }
 
 bool CWizCategoryViewSectionItem::getExtraButtonIco(QPixmap &pix) const
 {
-    if(!containsExtraButton())
+    if(QFile::exists(m_extraButtonIco))
+    {
+        QPixmap tmpPix(m_extraButtonIco);
+        pix=tmpPix;
+
+        return true;
+    }
+    return false;
+}
+
+bool CWizCategoryViewSectionItem::extraButtonClickTest()
+{
+    QPixmap pixmap;
+    if(!getExtraButtonIco(pixmap) || pixmap.isNull())
         return false;
 
-    QPixmap tmpPix(":/plus.png");
-    pix=tmpPix;
+    CWizCategoryBaseView* view = dynamic_cast<CWizCategoryBaseView*>(treeWidget());
+    Q_ASSERT(view);
 
-    return true;
+    int nWidth = pixmap.size().width();
+    QRect btnRect = view->visualItemRect(this);
+    btnRect.adjust(5, 5, -5, -5);
+    int rightMargin=4;
+    btnRect.setLeft(btnRect.right() - nWidth-3*rightMargin);
+
+    return btnRect.contains(view->hitPoint());
 }
 
 void CWizCategoryViewSectionItem::draw(QPainter *p, const QStyleOptionViewItemV4 *vopt) const
 {
     QPixmap pixmap;
-    if(containsExtraButton() && getExtraButtonIco(pixmap) && !pixmap.isNull())
+    if(getExtraButtonIco(pixmap) && !pixmap.isNull())
     {
         p->save();
 
@@ -306,8 +320,8 @@ void CWizCategoryViewSectionItem::draw(QPainter *p, const QStyleOptionViewItemV4
             nWidth = nHeight;
         //
         int nTop = vopt->rect.y() + (vopt->rect.height() - nHeight) / 2;
-        QRect rcb(vopt->rect.right() - nWidth - 2*nMargin, nTop, nWidth, nHeight);
-        rcb.adjust(0, nMargin, -nMargin, -nMargin);
+        QRect rcb(vopt->rect.right() - nWidth - 2*nMargin, nTop+nMargin, nWidth, nHeight);
+        rcb.adjust(0, nMargin, -2*nMargin, -nMargin);
 
         p->setRenderHint(QPainter::Antialiasing);
         p->drawPixmap(rcb,pixmap);
@@ -587,17 +601,6 @@ QString CWizCategoryViewFolderItem::name() const
     return CWizDatabase::GetLocationName(m_strName);
 }
 
-bool CWizCategoryViewFolderItem::getExtraButtonIco(QPixmap &pix) const
-{
-    if(!containsExtraButton())
-        return false;
-
-    QPixmap tmpPix(10,10);
-    pix=tmpPix;
-
-    return true;
-}
-
 bool CWizCategoryViewFolderItem::operator < (const QTreeWidgetItem &other) const
 {
     const CWizCategoryViewFolderItem* pOther = dynamic_cast<const CWizCategoryViewFolderItem*>(&other);
@@ -777,7 +780,7 @@ CWizCategoryViewGroupsRootItem::CWizCategoryViewGroupsRootItem(CWizExplorerApp& 
 void CWizCategoryViewGroupsRootItem::showContextMenu(CWizCategoryBaseView *pCtrl, QPoint pos)
 {
     if (CWizCategoryView* view = dynamic_cast<CWizCategoryView *>(pCtrl)) {
-        view->showGroupRootContextMenu(pos);
+        view->showGroupRootContextMenu_normal(pos);
     }
 }
 
@@ -842,7 +845,14 @@ CWizCategoryViewBizGroupRootItem::CWizCategoryViewBizGroupRootItem(CWizExplorerA
 void CWizCategoryViewBizGroupRootItem::showContextMenu(CWizCategoryBaseView *pCtrl, QPoint pos)
 {
     if (CWizCategoryView* view = dynamic_cast<CWizCategoryView *>(pCtrl)) {
-        view->showBizGroupRootContextMenu(pos);
+        if(isAdmin())
+        {
+            view->showBizGroupRootContextMenu_admin(pos);
+        }
+        else
+        {
+            view->showBizGroupRootContextMenu_normal(pos);
+        }
     }
 }
 
@@ -913,7 +923,18 @@ CWizCategoryViewGroupRootItem::CWizCategoryViewGroupRootItem(CWizExplorerApp& ap
 void CWizCategoryViewGroupRootItem::showContextMenu(CWizCategoryBaseView* pCtrl, QPoint pos)
 {
     if (CWizCategoryView* view = dynamic_cast<CWizCategoryView *>(pCtrl)) {
-            view->showGroupRootContextMenu(pos);
+        if(isOwner(m_app.databaseManager().db(m_strKbGUID)))
+        {
+            view->showGroupRootContextMenu_owner(pos);
+        }
+        else if(isAdmin(m_app.databaseManager().db(m_strKbGUID)))
+        {
+            view->showGroupRootContextMenu_admin(pos);
+        }
+        else
+        {
+            view->showGroupRootContextMenu_normal(pos);
+        }
     }
 }
 
