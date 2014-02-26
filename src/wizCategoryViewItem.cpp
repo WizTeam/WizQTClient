@@ -291,6 +291,27 @@ bool CWizCategoryViewSectionItem::getExtraButtonIco(QPixmap &pix) const
     return true;
 }
 
+bool CWizCategoryViewSectionItem::extraButtonClickTest()
+{
+    if(!containsExtraButton())
+        return false;
+
+    QPixmap pixmap;
+    if(!getExtraButtonIco(pixmap) || pixmap.isNull())
+        return false;
+
+    CWizCategoryBaseView* view = dynamic_cast<CWizCategoryBaseView*>(treeWidget());
+    Q_ASSERT(view);
+
+    int nWidth = pixmap.size().width();
+    QRect btnRect = view->visualItemRect(this);
+    btnRect.adjust(5, 5, -5, -5);
+    int rightMargin=4;
+    btnRect.setLeft(btnRect.right() - nWidth-3*rightMargin);
+
+    return btnRect.contains(view->hitPoint());
+}
+
 void CWizCategoryViewSectionItem::draw(QPainter *p, const QStyleOptionViewItemV4 *vopt) const
 {
     QPixmap pixmap;
@@ -306,8 +327,8 @@ void CWizCategoryViewSectionItem::draw(QPainter *p, const QStyleOptionViewItemV4
             nWidth = nHeight;
         //
         int nTop = vopt->rect.y() + (vopt->rect.height() - nHeight) / 2;
-        QRect rcb(vopt->rect.right() - nWidth - 2*nMargin, nTop, nWidth, nHeight);
-        rcb.adjust(0, nMargin, -nMargin, -nMargin);
+        QRect rcb(vopt->rect.right() - nWidth - 2*nMargin, nTop+nMargin, nWidth, nHeight);
+        rcb.adjust(0, nMargin, -2*nMargin, -nMargin);
 
         p->setRenderHint(QPainter::Antialiasing);
         p->drawPixmap(rcb,pixmap);

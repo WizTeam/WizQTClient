@@ -70,6 +70,7 @@ public:
 
     virtual bool containsExtraButton() const;
     virtual bool getExtraButtonIco(QPixmap& pix) const;
+    virtual bool extraButtonClickTest();
 
     virtual void draw(QPainter* p, const QStyleOptionViewItemV4 *vopt) const;
 
