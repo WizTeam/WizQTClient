@@ -646,7 +646,7 @@ QWidget* MainWindow::createListView()
     layoutActions->addWidget(m_labelDocumentsHint);
     connect(m_category, SIGNAL(documentsHint(const QString&)), SLOT(on_documents_hintChanged(const QString&)));
 
-    m_labelDocumentsCount = new QLabel(tr("0 articles"), this);
+    m_labelDocumentsCount = new QLabel("", this);
     m_labelDocumentsCount->setStyleSheet("font: 12px; color: #787878");
     m_labelDocumentsCount->setMargin(5);
     layoutActions->addWidget(m_labelDocumentsCount);
@@ -665,8 +665,17 @@ QWidget* MainWindow::createListView()
 
 void MainWindow::on_documents_documentCountChanged()
 {
-    QString strCount = m_labelDocumentsCount->text().replace(QRegExp("\\d+"), QString::number(m_documents->count()));
-    m_labelDocumentsCount->setText(strCount);
+    QString text;
+    int count = m_documents->count();
+    if (count == 1)
+    {
+        text = tr("1 note");
+    }
+    else if (count > 1)
+    {
+        text = tr("%1 notes").arg(count);
+    }
+    m_labelDocumentsCount->setText(text);
 }
 
 void MainWindow::on_documents_hintChanged(const QString& strHint)
