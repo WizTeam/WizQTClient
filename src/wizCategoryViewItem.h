@@ -40,7 +40,7 @@ public:
     //
     virtual QString getSectionName() { return QString(); }
 
-    //Plus Button
+    //Extra Button
     virtual void setExtraButtonIcon(const QString &file){ m_extraButtonIcon = QPixmap(file); }
     virtual bool getExtraButtonIcon(QPixmap& ret) const;
     virtual QRect getExtraButtonRect(const QRect &itemBorder) const;
