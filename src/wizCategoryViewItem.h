@@ -41,14 +41,16 @@ public:
     virtual QString getSectionName() { return QString(); }
 
     //Plus Button
-    virtual void setExtraButtonIco(const QString &file){Q_UNUSED(file)}
-    virtual bool getExtraButtonIco(QPixmap& ) const {return false;}
+    virtual void setExtraButtonIcon(const QString &file){ m_extraButtonIcon = QPixmap(file); }
+    virtual bool getExtraButtonIcon(QPixmap& ret) const { ret = m_extraButtonIcon; return !m_extraButtonIcon.isNull(); }
+    virtual QRect getExtraButtonRect();
     virtual bool extraButtonClickTest();
 
 protected:
     CWizExplorerApp& m_app;
     QString m_strName;
     QString m_strKbGUID;
+    QPixmap m_extraButtonIcon;
 
     // for quickly access by drawing
 public:
@@ -66,17 +68,8 @@ public:
     virtual int getItemHeight(int nHeight) const;
     virtual int getSortOrder() const { return m_sortOrder; }
     void reset(const QString& sectionName, int sortOrder);
-
-    virtual void setExtraButtonIco(const QString &file);
-    virtual bool getExtraButtonIco(QPixmap& pix) const;
-    virtual bool extraButtonClickTest();
-
-    virtual void draw(QPainter* p, const QStyleOptionViewItemV4 *vopt) const;
-
 protected:
     int m_sortOrder;
-    QString m_extraButtonIco;
-
 };
 
 class CWizCategoryViewMessageItem : public CWizCategoryViewItemBase
