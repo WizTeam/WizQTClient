@@ -50,8 +50,11 @@ using namespace Core::Internal;
 #define CATEGORY_ACTION_TAG_RENAME      QObject::tr("Change current tag name")
 #define CATEGORY_ACTION_TAG_DELETE      QObject::tr("Delete current tag")
 #define CATEGORY_ACTION_GROUP_ATTRIBUTE QObject::tr("Open group attribute")
+#define CATEGORY_ACTION_BIZ_GROUP_ATTRIBUTE QObject::tr("Open biz group attribute")
 #define CATEGORY_ACTION_GROUP_MARK_READ QObject::tr("Mark all documents read")
 #define CATEGORY_ACTION_EMPTY_TRASH     QObject::tr("Empty trash")
+#define CATEGORY_ACTION_MANAGE_GROUP     QObject::tr("Manage group")
+#define CATEGORY_ACTION_QUIT_GROUP     QObject::tr("Quit group")
 
 
 #define LINK_COMMAND_ID_CREATE_GROUP        100
@@ -502,6 +505,18 @@ void CWizCategoryView::initMenus()
     addAction(actionTrash);
     connect(actionTrash, SIGNAL(triggered()), SLOT(on_action_emptyTrash()));
 
+    QAction* actionQuitGroup = new QAction("QuitGroup", this);
+    actionQuitGroup->setShortcutContext(Qt::WidgetShortcut);
+    actionQuitGroup->setData(ActionQuitGroup);
+    addAction(actionQuitGroup);
+    //connect(actionQuitGroup, SIGNAL(triggered()), SLOT(on_action_itemAttribute()));
+
+    QAction* actionManageGroup = new QAction("ManageGroup", this);
+    actionManageGroup->setShortcutContext(Qt::WidgetShortcut);
+    actionManageGroup->setData(ActionItemManage);
+    addAction(actionManageGroup);
+    connect(actionManageGroup, SIGNAL(triggered()), SLOT(on_action_itemManage()));
+
     // trash menu
     m_menuTrash = new QMenu(this);
     m_menuTrash->addAction(actionTrash);
@@ -536,6 +551,18 @@ void CWizCategoryView::initMenus()
     m_menuGroupRoot->addAction(actionNewItem);
     m_menuGroupRoot->addSeparator();
     m_menuGroupRoot->addAction(actionItemAttr);
+    m_menuGroupRoot->addAction(actionManageGroup);
+    m_menuGroupRoot->addAction(actionQuitGroup);
+
+    //biz group root menu
+    m_menuBizGroupRoot = new QMenu(this);
+    m_menuBizGroupRoot->addAction(actionItemAttr);
+    m_menuBizGroupRoot->addAction(actionManageGroup);
+
+
+    //own group root menu
+    m_menuOwnGroupRoot = new QMenu(this);
+    m_menuOwnGroupRoot->addAction(actionManageGroup);
 
     // group menu
     m_menuGroup = new QMenu(this);
@@ -598,11 +625,23 @@ void CWizCategoryView::resetMenu(CategoryMenuType type)
         case ActionItemAttribute:
             if (type == GroupRootItem) {
                 act->setText(CATEGORY_ACTION_GROUP_ATTRIBUTE);
+            }else if(type == BizGroupRootItem){
+                act->setText(CATEGORY_ACTION_BIZ_GROUP_ATTRIBUTE);
             }
             break;
         case ActionEmptyTrash:
             if (type == TrashItem) {
                 act->setText(CATEGORY_ACTION_EMPTY_TRASH);
+            }
+            break;
+        case ActionQuitGroup:
+            if(type == GroupRootItem){
+                act->setText(CATEGORY_ACTION_QUIT_GROUP);
+            }
+            break;
+        case ActionItemManage:
+            if(type == BizGroupRootItem || type == GroupRootItem){
+                act->setText(CATEGORY_ACTION_MANAGE_GROUP);
             }
             break;
         default:
@@ -645,6 +684,18 @@ void CWizCategoryView::showGroupRootContextMenu(QPoint pos)
 {
     resetMenu(GroupRootItem);
     m_menuGroupRoot->popup(pos);
+}
+
+void CWizCategoryView::showBizGroupRootContextMenu(QPoint pos)
+{
+    resetMenu(BizGroupRootItem);
+    m_menuBizGroupRoot->popup(pos);
+}
+
+void CWizCategoryView::showOwnGroupRootContextMenu(QPoint pos)
+{
+    resetMenu(OwnGroupRootItem);
+    m_menuOwnGroupRoot->popup(pos);
 }
 
 void CWizCategoryView::showGroupContextMenu(QPoint pos)
@@ -1239,6 +1290,10 @@ void CWizCategoryView::on_action_itemAttribute()
     {
         on_action_group_attribute();
     }
+    else if(currentCategoryItem<CWizCategoryViewBizGroupRootItem>())
+    {
+        on_action_bizgroup_attribute();
+    }
 }
 
 void CWizCategoryView::on_action_group_attribute()
@@ -1252,6 +1307,49 @@ void CWizCategoryView::on_action_group_attribute()
         showWebDialogWithToken(tr("Group settings"), strUrl);
 
         m_strRequestedGroupKbGUID = p->kbGUID();
+    }
+}
+
+void CWizCategoryView::on_action_manageGroup()
+{
+    CWizCategoryViewItemBase* p = currentCategoryItem<CWizCategoryViewItemBase>();
+    if (p && !p->kbGUID().isEmpty()) {
+//        QString strUrl = WizService::ApiEntry::groupAttributeUrl(WIZ_TOKEN_IN_URL_REPLACE_PART, m_strRequestedGroupKbGUID);
+//        //
+//        showWebDialogWithToken(tr("Group settings"), strUrl);
+//        m_strRequestedGroupKbGUID = p->kbGUID();
+
+        manageGroup(p->kbGUID());
+    }
+}
+
+void CWizCategoryView::on_action_bizgroup_attribute()
+{
+    CWizCategoryViewItemBase* p = currentCategoryItem<CWizCategoryViewItemBase>();
+    if (p && !p->kbGUID().isEmpty()) {
+
+        viewBizInfo(p->kbGUID());
+    }
+}
+
+void CWizCategoryView::on_action_itemManage()
+{
+    if (currentCategoryItem<CWizCategoryViewGroupRootItem>())
+    {
+        on_action_manageGroup();
+    }
+    else if(currentCategoryItem<CWizCategoryViewBizGroupRootItem>())
+    {
+        on_action_manageBizGroup();
+    }
+}
+
+void CWizCategoryView::on_action_manageBizGroup()
+{
+    CWizCategoryViewItemBase* p = currentCategoryItem<CWizCategoryViewItemBase>();
+    if (p && !p->kbGUID().isEmpty()) {
+
+        manageBiz(p->kbGUID());
     }
 }
 
@@ -1310,6 +1408,13 @@ void CWizCategoryView::on_itemClicked(QTreeWidgetItem *item, int column)
     if (CWizCategoryViewLinkItem* pLink = dynamic_cast<CWizCategoryViewLinkItem*>(item))
     {
         if (LINK_COMMAND_ID_CREATE_GROUP == pLink->commandId())
+        {
+            createGroup();
+        }
+    }
+    else if (CWizCategoryViewSectionItem* sItem = dynamic_cast<CWizCategoryViewSectionItem*>(item))
+    {
+        if(CATEGORY_TEAM_GROUPS == sItem->name() && sItem->extraButtonClickTest())
         {
             createGroup();
         }

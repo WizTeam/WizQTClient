@@ -137,7 +137,9 @@ public:
         ActionRenameItem,
         ActionDeleteItem,
         ActionItemAttribute,
-        ActionEmptyTrash
+        ActionEmptyTrash,
+        ActionQuitGroup,
+        ActionItemManage
     };
 
     enum CategoryMenuType
@@ -148,7 +150,9 @@ public:
         TagItem,
         GroupRootItem,
         GroupItem,
-        TrashItem
+        TrashItem,
+        BizGroupRootItem,
+        OwnGroupRootItem
     };
 
     void initMenus();
@@ -164,6 +168,8 @@ public:
     void showTagRootContextMenu(QPoint pos);
     void showTagContextMenu(QPoint pos);
     void showGroupRootContextMenu(QPoint pos);
+    void showBizGroupRootContextMenu(QPoint pos);
+    void showOwnGroupRootContextMenu(QPoint pos);
     void showGroupContextMenu(QPoint pos);
     void showTrashContextMenu(QPoint pos);
 
@@ -260,6 +266,8 @@ private:
     QPointer<QMenu> m_menuTagRoot;
     QPointer<QMenu> m_menuTag;
     QPointer<QMenu> m_menuGroupRoot;
+    QPointer<QMenu> m_menuBizGroupRoot;
+    QPointer<QMenu> m_menuOwnGroupRoot;
     QPointer<QMenu> m_menuGroup;
     QPointer<QMenu> m_menuTrash;
     QPointer<QTimer> m_timerUpdateFolderCount;
@@ -335,6 +343,11 @@ public Q_SLOTS:
 
     void on_action_itemAttribute();
     void on_action_group_attribute();
+    void on_action_bizgroup_attribute();
+
+    void on_action_itemManage();
+    void on_action_manageGroup();
+    void on_action_manageBizGroup();
 
 
     void on_action_emptyTrash();

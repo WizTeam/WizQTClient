@@ -272,6 +272,50 @@ void CWizCategoryViewSectionItem::reset(const QString& sectionName, int sortOrde
     setText(0, sectionName);
 }
 
+bool CWizCategoryViewSectionItem::containsExtraButton() const
+{
+    if(WIZ_CATEGORY_SECTION_GROUPS == this->name())
+        return true;
+
+    return false;
+}
+
+bool CWizCategoryViewSectionItem::getExtraButtonIco(QPixmap &pix) const
+{
+    if(!containsExtraButton())
+        return false;
+
+    QPixmap tmpPix(":/plus.png");
+    pix=tmpPix;
+
+    return true;
+}
+
+void CWizCategoryViewSectionItem::draw(QPainter *p, const QStyleOptionViewItemV4 *vopt) const
+{
+    QPixmap pixmap;
+    if(containsExtraButton() && getExtraButtonIco(pixmap) && !pixmap.isNull())
+    {
+        p->save();
+
+        int nMargin = 4;
+        QSize szText = pixmap.size();
+        int nWidth = szText.width() + 2 * nMargin;
+        int nHeight = szText.height() + 2 * nMargin;
+        if (nWidth < nHeight)
+            nWidth = nHeight;
+        //
+        int nTop = vopt->rect.y() + (vopt->rect.height() - nHeight) / 2;
+        QRect rcb(vopt->rect.right() - nWidth - 2*nMargin, nTop, nWidth, nHeight);
+        rcb.adjust(0, nMargin, -nMargin, -nMargin);
+
+        p->setRenderHint(QPainter::Antialiasing);
+        p->drawPixmap(rcb,pixmap);
+
+        p->restore();
+    }
+}
+
 
 /* -------------------- CWizCategoryViewMessageRootItem -------------------- */
 CWizCategoryViewMessageItem::CWizCategoryViewMessageItem(CWizExplorerApp& app,
@@ -730,6 +774,13 @@ CWizCategoryViewGroupsRootItem::CWizCategoryViewGroupsRootItem(CWizExplorerApp& 
     setText(0, strName);
 }
 
+void CWizCategoryViewGroupsRootItem::showContextMenu(CWizCategoryBaseView *pCtrl, QPoint pos)
+{
+    if (CWizCategoryView* view = dynamic_cast<CWizCategoryView *>(pCtrl)) {
+        view->showGroupRootContextMenu(pos);
+    }
+}
+
 void CWizCategoryViewGroupsRootItem::getDocuments(CWizDatabase& db, CWizDocumentDataArray& arrayDocument)
 {
     Q_UNUSED(db);
@@ -788,6 +839,13 @@ CWizCategoryViewBizGroupRootItem::CWizCategoryViewBizGroupRootItem(CWizExplorerA
     setIcon(0, icon);
 }
 
+void CWizCategoryViewBizGroupRootItem::showContextMenu(CWizCategoryBaseView *pCtrl, QPoint pos)
+{
+    if (CWizCategoryView* view = dynamic_cast<CWizCategoryView *>(pCtrl)) {
+        view->showBizGroupRootContextMenu(pos);
+    }
+}
+
 bool CWizCategoryViewBizGroupRootItem::isOwner()
 {
     return m_biz.bizUserRole == WIZ_BIZROLE_OWNER;
@@ -809,6 +867,15 @@ CWizCategoryViewOwnGroupRootItem::CWizCategoryViewOwnGroupRootItem(CWizExplorerA
     setIcon(0, icon);
 }
 
+void CWizCategoryViewOwnGroupRootItem::showContextMenu(CWizCategoryBaseView *pCtrl, QPoint pos)
+{
+    Q_UNUSED(pCtrl)
+    Q_UNUSED(pos)
+//    if (CWizCategoryView* view = dynamic_cast<CWizCategoryView *>(pCtrl)) {
+//        view->showOwnGroupRootContextMenu(pos);
+//    }
+}
+
 
 CWizCategoryViewJionedGroupRootItem::CWizCategoryViewJionedGroupRootItem(CWizExplorerApp& app)
     : CWizCategoryViewGroupsRootItem(app, CATEGORY_OTHER_GROUPS)
@@ -826,18 +893,6 @@ QString CWizCategoryViewCreateGroupLinkItem::getSectionName()
 {
     return WIZ_CATEGORY_SECTION_GROUPS;
 }
-
-bool CWizCategoryViewCreateGroupLinkItem::getExtraButtonIco(QPixmap &pix) const
-{
-    if(!containsExtraButton())
-        return false;
-
-    QPixmap tmpPix(10,10);
-    pix=tmpPix;
-
-    return true;
-}
-
 
 /* ------------------------------ CWizCategoryViewGroupRootItem ------------------------------ */
 

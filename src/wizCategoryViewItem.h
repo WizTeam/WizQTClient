@@ -42,6 +42,7 @@ public:
 
     //Plus Button
     virtual bool containsExtraButton() const {return false;}
+    virtual void setExtraButtonIco(const QString &file){Q_UNUSED(file)}
     virtual bool getExtraButtonIco(QPixmap& ) const {return false;}
     virtual bool extraButtonClickTest();
 
@@ -66,8 +67,15 @@ public:
     virtual int getItemHeight(int nHeight) const;
     virtual int getSortOrder() const { return m_sortOrder; }
     void reset(const QString& sectionName, int sortOrder);
+
+    virtual bool containsExtraButton() const;
+    virtual bool getExtraButtonIco(QPixmap& pix) const;
+
+    virtual void draw(QPainter* p, const QStyleOptionViewItemV4 *vopt) const;
+
 protected:
     int m_sortOrder;
+    QString extraButtonIco;
 
 };
 
@@ -219,12 +227,12 @@ class CWizCategoryViewGroupsRootItem : public CWizCategoryViewItemBase
 public:
     CWizCategoryViewGroupsRootItem(CWizExplorerApp& app, const QString& strName);
 
-    virtual void showContextMenu(CWizCategoryBaseView* pCtrl, QPoint pos)
-    { Q_UNUSED(pCtrl); Q_UNUSED(pos); }
+    virtual void showContextMenu(CWizCategoryBaseView* pCtrl, QPoint pos);
 
     virtual void getDocuments(CWizDatabase& db, CWizDocumentDataArray& arrayDocument);
     virtual bool accept(CWizDatabase& db, const WIZDOCUMENTDATA& data);
     virtual QString getSectionName();
+
 };
 
 class CWizCategoryViewBizGroupRootItem : public CWizCategoryViewGroupsRootItem
@@ -234,8 +242,7 @@ public:
     CWizCategoryViewBizGroupRootItem(CWizExplorerApp& app,
                                      const WIZBIZDATA& biz);
 
-    virtual void showContextMenu(CWizCategoryBaseView* pCtrl, QPoint pos)
-    { Q_UNUSED(pCtrl); Q_UNUSED(pos); }
+    virtual void showContextMenu(CWizCategoryBaseView* pCtrl, QPoint pos);
     //
     const WIZBIZDATA biz() const { return m_biz; }
     virtual int getSortOrder() const { return 30; }
@@ -248,8 +255,8 @@ class CWizCategoryViewOwnGroupRootItem : public CWizCategoryViewGroupsRootItem
 public:
     CWizCategoryViewOwnGroupRootItem(CWizExplorerApp& app);
 
-    virtual void showContextMenu(CWizCategoryBaseView* pCtrl, QPoint pos)
-    { Q_UNUSED(pCtrl); Q_UNUSED(pos); }
+    virtual void showContextMenu(CWizCategoryBaseView* pCtrl, QPoint pos);
+
     virtual int getSortOrder() const { return 31; }
 };
 
@@ -258,8 +265,6 @@ class CWizCategoryViewJionedGroupRootItem : public CWizCategoryViewGroupsRootIte
 public:
     CWizCategoryViewJionedGroupRootItem(CWizExplorerApp& app);
 
-    virtual void showContextMenu(CWizCategoryBaseView* pCtrl, QPoint pos)
-    { Q_UNUSED(pCtrl); Q_UNUSED(pos); }
     virtual int getSortOrder() const { return 32; }
 };
 
@@ -289,8 +294,7 @@ public:
     virtual QString getSectionName();
     virtual int getSortOrder() const { return 33; }
 
-    virtual bool containsExtraButton() const {return true;}
-    virtual bool getExtraButtonIco(QPixmap& pix) const;
+
 };
 
 
