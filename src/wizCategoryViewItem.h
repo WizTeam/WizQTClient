@@ -41,7 +41,6 @@ public:
     virtual QString getSectionName() { return QString(); }
 
     //Plus Button
-    virtual bool containsExtraButton() const {return false;}
     virtual void setExtraButtonIco(const QString &file){Q_UNUSED(file)}
     virtual bool getExtraButtonIco(QPixmap& ) const {return false;}
     virtual bool extraButtonClickTest();
@@ -68,7 +67,7 @@ public:
     virtual int getSortOrder() const { return m_sortOrder; }
     void reset(const QString& sectionName, int sortOrder);
 
-    virtual bool containsExtraButton() const;
+    virtual void setExtraButtonIco(const QString &file);
     virtual bool getExtraButtonIco(QPixmap& pix) const;
     virtual bool extraButtonClickTest();
 
@@ -76,7 +75,7 @@ public:
 
 protected:
     int m_sortOrder;
-    QString extraButtonIco;
+    QString m_extraButtonIco;
 
 };
 
@@ -170,12 +169,8 @@ public:
     QString location() const { return m_strName; }
     QString name() const;
 
-    virtual bool containsExtraButton() const {return false;}
-    virtual bool getExtraButtonIco(QPixmap& pix) const;
-
 private:
     QRect m_rcUnread;
-    QPixmap m_plusButtonIco;
 };
 
 class CWizCategoryViewAllTagsItem : public CWizCategoryViewItemBase
@@ -265,6 +260,8 @@ class CWizCategoryViewJionedGroupRootItem : public CWizCategoryViewGroupsRootIte
 {
 public:
     CWizCategoryViewJionedGroupRootItem(CWizExplorerApp& app);
+    virtual void showContextMenu(CWizCategoryBaseView* pCtrl, QPoint pos)
+    { Q_UNUSED(pCtrl); Q_UNUSED(pos); }
 
     virtual int getSortOrder() const { return 32; }
 };

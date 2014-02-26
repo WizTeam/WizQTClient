@@ -4,6 +4,7 @@
 #include <QTextCodec>
 #include <QPainter>
 #include <cstring>
+#include <QFile>
 
 #include <extensionsystem/pluginmanager.h>
 #include "utils/pinyin.h"
@@ -126,9 +127,6 @@ void CWizCategoryViewItemBase::setDocumentsCount(int nCurrent, int nTotal)
 
 bool CWizCategoryViewItemBase::extraButtonClickTest()
 {
-    if(!containsExtraButton())
-        return false;
-
     QPixmap pixmap;
     if(!getExtraButtonIco(pixmap) || pixmap.isNull())
         return false;
@@ -148,7 +146,7 @@ bool CWizCategoryViewItemBase::extraButtonClickTest()
 void CWizCategoryViewItemBase::draw(QPainter* p, const QStyleOptionViewItemV4 *vopt) const
 {
     QPixmap pixmap;
-    if(containsExtraButton() && getExtraButtonIco(pixmap) && !pixmap.isNull())
+    if(getExtraButtonIco(pixmap) && !pixmap.isNull())
     {
         p->save();
 
@@ -272,30 +270,25 @@ void CWizCategoryViewSectionItem::reset(const QString& sectionName, int sortOrde
     setText(0, sectionName);
 }
 
-bool CWizCategoryViewSectionItem::containsExtraButton() const
+void CWizCategoryViewSectionItem::setExtraButtonIco(const QString &file)
 {
-    if(WIZ_CATEGORY_SECTION_GROUPS == this->name())
-        return true;
-
-    return false;
+    m_extraButtonIco=file;
 }
 
 bool CWizCategoryViewSectionItem::getExtraButtonIco(QPixmap &pix) const
 {
-    if(!containsExtraButton())
-        return false;
+    if(QFile::exists(m_extraButtonIco))
+    {
+        QPixmap tmpPix(m_extraButtonIco);
+        pix=tmpPix;
 
-    QPixmap tmpPix(":/plus.png");
-    pix=tmpPix;
-
-    return true;
+        return true;
+    }
+    return false;
 }
 
 bool CWizCategoryViewSectionItem::extraButtonClickTest()
 {
-    if(!containsExtraButton())
-        return false;
-
     QPixmap pixmap;
     if(!getExtraButtonIco(pixmap) || pixmap.isNull())
         return false;
@@ -315,7 +308,7 @@ bool CWizCategoryViewSectionItem::extraButtonClickTest()
 void CWizCategoryViewSectionItem::draw(QPainter *p, const QStyleOptionViewItemV4 *vopt) const
 {
     QPixmap pixmap;
-    if(containsExtraButton() && getExtraButtonIco(pixmap) && !pixmap.isNull())
+    if(getExtraButtonIco(pixmap) && !pixmap.isNull())
     {
         p->save();
 
@@ -608,17 +601,6 @@ QString CWizCategoryViewFolderItem::name() const
     return CWizDatabase::GetLocationName(m_strName);
 }
 
-bool CWizCategoryViewFolderItem::getExtraButtonIco(QPixmap &pix) const
-{
-    if(!containsExtraButton())
-        return false;
-
-    QPixmap tmpPix(10,10);
-    pix=tmpPix;
-
-    return true;
-}
-
 bool CWizCategoryViewFolderItem::operator < (const QTreeWidgetItem &other) const
 {
     const CWizCategoryViewFolderItem* pOther = dynamic_cast<const CWizCategoryViewFolderItem*>(&other);
@@ -798,7 +780,7 @@ CWizCategoryViewGroupsRootItem::CWizCategoryViewGroupsRootItem(CWizExplorerApp& 
 void CWizCategoryViewGroupsRootItem::showContextMenu(CWizCategoryBaseView *pCtrl, QPoint pos)
 {
     if (CWizCategoryView* view = dynamic_cast<CWizCategoryView *>(pCtrl)) {
-        view->showGroupRootContextMenu(pos);
+        view->showGroupRootContextMenu_normal(pos);
     }
 }
 
@@ -863,7 +845,14 @@ CWizCategoryViewBizGroupRootItem::CWizCategoryViewBizGroupRootItem(CWizExplorerA
 void CWizCategoryViewBizGroupRootItem::showContextMenu(CWizCategoryBaseView *pCtrl, QPoint pos)
 {
     if (CWizCategoryView* view = dynamic_cast<CWizCategoryView *>(pCtrl)) {
-        view->showBizGroupRootContextMenu(pos);
+        if(isAdmin())
+        {
+            view->showBizGroupRootContextMenu_admin(pos);
+        }
+        else
+        {
+            view->showBizGroupRootContextMenu_normal(pos);
+        }
     }
 }
 
@@ -934,7 +923,18 @@ CWizCategoryViewGroupRootItem::CWizCategoryViewGroupRootItem(CWizExplorerApp& ap
 void CWizCategoryViewGroupRootItem::showContextMenu(CWizCategoryBaseView* pCtrl, QPoint pos)
 {
     if (CWizCategoryView* view = dynamic_cast<CWizCategoryView *>(pCtrl)) {
-            view->showGroupRootContextMenu(pos);
+        if(isOwner(m_app.databaseManager().db(m_strKbGUID)))
+        {
+            view->showGroupRootContextMenu_owner(pos);
+        }
+        else if(isAdmin(m_app.databaseManager().db(m_strKbGUID)))
+        {
+            view->showGroupRootContextMenu_admin(pos);
+        }
+        else
+        {
+            view->showGroupRootContextMenu_normal(pos);
+        }
     }
 }
 
