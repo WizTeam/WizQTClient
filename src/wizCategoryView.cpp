@@ -546,35 +546,35 @@ void CWizCategoryView::initMenus()
     m_menuTag->addAction(actionDeleteItem);
 
     // group root menu normal
-    m_menuGroupRoot_normal = new QMenu(this);
-    m_menuGroupRoot_normal->addAction(actionNewDoc);
-    m_menuGroupRoot_normal->addAction(actionNewItem);
-    m_menuGroupRoot_normal->addSeparator();
-    m_menuGroupRoot_normal->addAction(actionItemAttr);
-    m_menuGroupRoot_normal->addAction(actionQuitGroup);
+    m_menuNormalGroupRoot = new QMenu(this);
+    m_menuNormalGroupRoot->addAction(actionNewDoc);
+    m_menuNormalGroupRoot->addAction(actionNewItem);
+    m_menuNormalGroupRoot->addSeparator();
+    m_menuNormalGroupRoot->addAction(actionItemAttr);
+    m_menuNormalGroupRoot->addAction(actionQuitGroup);
 
     // group root menu admin
-    m_menuGroupRoot_admin = new QMenu(this);
-    m_menuGroupRoot_admin->addAction(actionNewDoc);
-    m_menuGroupRoot_admin->addAction(actionNewItem);
-    m_menuGroupRoot_admin->addSeparator();
-    m_menuGroupRoot_admin->addAction(actionManageGroup);
-    m_menuGroupRoot_admin->addAction(actionQuitGroup);
+    m_menuAdminGroupRoot = new QMenu(this);
+    m_menuAdminGroupRoot->addAction(actionNewDoc);
+    m_menuAdminGroupRoot->addAction(actionNewItem);
+    m_menuAdminGroupRoot->addSeparator();
+    m_menuAdminGroupRoot->addAction(actionManageGroup);
+    m_menuAdminGroupRoot->addAction(actionQuitGroup);
 
     // group root menu normal
-    m_menuGroupRoot_owner = new QMenu(this);
-    m_menuGroupRoot_owner->addAction(actionNewDoc);
-    m_menuGroupRoot_owner->addAction(actionNewItem);
-    m_menuGroupRoot_owner->addSeparator();
-    m_menuGroupRoot_owner->addAction(actionManageGroup);
+    m_menuOwnerGroupRoot = new QMenu(this);
+    m_menuOwnerGroupRoot->addAction(actionNewDoc);
+    m_menuOwnerGroupRoot->addAction(actionNewItem);
+    m_menuOwnerGroupRoot->addSeparator();
+    m_menuOwnerGroupRoot->addAction(actionManageGroup);
 
     //biz group root menu normal
-    m_menuBizGroupRoot_normal = new QMenu(this);
-    m_menuBizGroupRoot_normal->addAction(actionItemAttr);
+    m_menuNormalBizGroupRoot = new QMenu(this);
+    m_menuNormalBizGroupRoot->addAction(actionItemAttr);
 
     //biz group root menu admin
-    m_menuBizGroupRoot_admin = new QMenu(this);
-    m_menuBizGroupRoot_admin->addAction(actionManageGroup);
+    m_menuAdminBizGroupRoot = new QMenu(this);
+    m_menuAdminBizGroupRoot->addAction(actionManageGroup);
 
 
     // group menu
@@ -693,34 +693,34 @@ void CWizCategoryView::showTagContextMenu(QPoint pos)
     m_menuTag->popup(pos);
 }
 
-void CWizCategoryView::showGroupRootContextMenu_normal(QPoint pos)
+void CWizCategoryView::showNormalGroupRootContextMenu(QPoint pos)
 {
     resetMenu(GroupRootItem);
-    m_menuGroupRoot_normal->popup(pos);
+    m_menuNormalGroupRoot->popup(pos);
 }
 
-void CWizCategoryView::showGroupRootContextMenu_admin(QPoint pos)
+void CWizCategoryView::showAdminGroupRootContextMenu(QPoint pos)
 {
     resetMenu(GroupRootItem);
-    m_menuGroupRoot_admin->popup(pos);
+    m_menuAdminGroupRoot->popup(pos);
 }
 
-void CWizCategoryView::showGroupRootContextMenu_owner(QPoint pos)
+void CWizCategoryView::showOwnerGroupRootContextMenu(QPoint pos)
 {
     resetMenu(GroupRootItem);
-    m_menuGroupRoot_owner->popup(pos);
+    m_menuOwnerGroupRoot->popup(pos);
 }
 
-void CWizCategoryView::showBizGroupRootContextMenu_normal(QPoint pos)
+void CWizCategoryView::showNormalBizGroupRootContextMenu(QPoint pos)
 {
     resetMenu(BizGroupRootItem);
-    m_menuBizGroupRoot_normal->popup(pos);
+    m_menuNormalBizGroupRoot->popup(pos);
 }
 
-void CWizCategoryView::showBizGroupRootContextMenu_admin(QPoint pos)
+void CWizCategoryView::showAdminBizGroupRootContextMenu(QPoint pos)
 {
     resetMenu(BizGroupRootItem);
-    m_menuBizGroupRoot_admin->popup(pos);
+    m_menuAdminBizGroupRoot->popup(pos);
 }
 
 void CWizCategoryView::showGroupContextMenu(QPoint pos)
@@ -1564,7 +1564,7 @@ void CWizCategoryView::resetSections()
                     if(CATEGORY_TEAM_GROUPS == sectionName)
                     {
                         QString strIconPath = ::WizGetSkinResourcePath(m_app.userSettings().skin()) + "plus.png";
-                        pExistingSection->setExtraButtonIco(strIconPath);
+                        pExistingSection->setExtraButtonIcon(strIconPath);
                     }
                     insertTopLevelItem(i, pExistingSection);
                     i++;

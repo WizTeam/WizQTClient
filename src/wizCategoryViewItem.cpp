@@ -125,20 +125,38 @@ void CWizCategoryViewItemBase::setDocumentsCount(int nCurrent, int nTotal)
     }
 }
 
+bool CWizCategoryViewItemBase::getExtraButtonIcon(QPixmap &ret) const
+{
+    ret = m_extraButtonIcon;
+    return !m_extraButtonIcon.isNull();
+}
+
+QRect CWizCategoryViewItemBase::getExtraButtonRect(const QRect &itemBorder) const
+{
+    int nMargin = 4;
+    QSize szBtn = m_extraButtonIcon.size();
+    int nWidth = szBtn.width() + 2 * nMargin;
+    int nHeight = szBtn.height() + 2 * nMargin;
+    //
+    int nTop = itemBorder.y() + (itemBorder.height() - nHeight) / 2;
+    QRect rcb(itemBorder.right() - nWidth - nMargin, nTop, nWidth, nHeight);
+    rcb.adjust(nMargin, nMargin, -nMargin, -nMargin);
+    return rcb;
+}
+
 bool CWizCategoryViewItemBase::extraButtonClickTest()
 {
     QPixmap pixmap;
-    if(!getExtraButtonIco(pixmap) || pixmap.isNull())
+    if(!getExtraButtonIcon(pixmap) || pixmap.isNull())
         return false;
 
     CWizCategoryBaseView* view = dynamic_cast<CWizCategoryBaseView*>(treeWidget());
     Q_ASSERT(view);
 
-    int nWidth = pixmap.size().width();
-    QRect btnRect = view->visualItemRect(this);
-    btnRect.adjust(5, 5, -5, -5);
-    int rightMargin=4;
-    btnRect.setLeft(btnRect.right() - nWidth-rightMargin);
+    QRect itemBorder = view->visualItemRect(this);
+    QRect btnRect = getExtraButtonRect(itemBorder);
+    int clickDist = 2;
+    btnRect.adjust(-clickDist, -clickDist, clickDist, clickDist);
 
     return btnRect.contains(view->hitPoint());
 }
@@ -146,23 +164,13 @@ bool CWizCategoryViewItemBase::extraButtonClickTest()
 void CWizCategoryViewItemBase::draw(QPainter* p, const QStyleOptionViewItemV4 *vopt) const
 {
     QPixmap pixmap;
-    if(getExtraButtonIco(pixmap) && !pixmap.isNull())
+    if(getExtraButtonIcon(pixmap) && !pixmap.isNull())
     {
         p->save();
 
-        int nMargin = 4;
-        QSize szText = pixmap.size();
-        int nWidth = szText.width() + 2 * nMargin;
-        int nHeight = szText.height() + 2 * nMargin;
-        if (nWidth < nHeight)
-            nWidth = nHeight;
-        //
-        int nTop = vopt->rect.y() + (vopt->rect.height() - nHeight) / 2;
-        QRect rcb(vopt->rect.right() - nWidth - nMargin, nTop, nWidth, nHeight);
-        rcb.adjust(nMargin, nMargin, -nMargin, -nMargin);
-
+        QRect rcb = getExtraButtonRect(vopt->rect);
         p->setRenderHint(QPainter::Antialiasing);
-        p->drawPixmap(rcb,pixmap);
+        p->drawPixmap(rcb, pixmap);
 
         p->restore();
     }
@@ -270,64 +278,18 @@ void CWizCategoryViewSectionItem::reset(const QString& sectionName, int sortOrde
     setText(0, sectionName);
 }
 
-void CWizCategoryViewSectionItem::setExtraButtonIco(const QString &file)
+QRect CWizCategoryViewSectionItem::getExtraButtonRect(const QRect &itemBorder) const
 {
-    m_extraButtonIco=file;
-}
+    int nMargin = 4;
+    QSize szBtn = m_extraButtonIcon.size();
+    int nWidth = szBtn.width() + 2 * nMargin;
+    int nHeight = szBtn.height() + 2 * nMargin;
 
-bool CWizCategoryViewSectionItem::getExtraButtonIco(QPixmap &pix) const
-{
-    if(QFile::exists(m_extraButtonIco))
-    {
-        QPixmap tmpPix(m_extraButtonIco);
-        pix=tmpPix;
-
-        return true;
-    }
-    return false;
-}
-
-bool CWizCategoryViewSectionItem::extraButtonClickTest()
-{
-    QPixmap pixmap;
-    if(!getExtraButtonIco(pixmap) || pixmap.isNull())
-        return false;
-
-    CWizCategoryBaseView* view = dynamic_cast<CWizCategoryBaseView*>(treeWidget());
-    Q_ASSERT(view);
-
-    int nWidth = pixmap.size().width();
-    QRect btnRect = view->visualItemRect(this);
-    btnRect.adjust(5, 5, -5, -5);
-    int rightMargin=4;
-    btnRect.setLeft(btnRect.right() - nWidth-3*rightMargin);
-
-    return btnRect.contains(view->hitPoint());
-}
-
-void CWizCategoryViewSectionItem::draw(QPainter *p, const QStyleOptionViewItemV4 *vopt) const
-{
-    QPixmap pixmap;
-    if(getExtraButtonIco(pixmap) && !pixmap.isNull())
-    {
-        p->save();
-
-        int nMargin = 4;
-        QSize szText = pixmap.size();
-        int nWidth = szText.width() + 2 * nMargin;
-        int nHeight = szText.height() + 2 * nMargin;
-        if (nWidth < nHeight)
-            nWidth = nHeight;
-        //
-        int nTop = vopt->rect.y() + (vopt->rect.height() - nHeight) / 2;
-        QRect rcb(vopt->rect.right() - nWidth - 2*nMargin, nTop+nMargin, nWidth, nHeight);
-        rcb.adjust(0, nMargin, -2*nMargin, -nMargin);
-
-        p->setRenderHint(QPainter::Antialiasing);
-        p->drawPixmap(rcb,pixmap);
-
-        p->restore();
-    }
+    //
+    int nTop = itemBorder.y() + (itemBorder.height() - nHeight) / 2 + 1.5 * nMargin;
+    QRect rcb(itemBorder.right() - nWidth - 2 * nMargin, nTop, nWidth, nHeight);
+    rcb.adjust(nMargin, nMargin, -nMargin, -nMargin);
+    return rcb;
 }
 
 
@@ -780,7 +742,7 @@ CWizCategoryViewGroupsRootItem::CWizCategoryViewGroupsRootItem(CWizExplorerApp& 
 void CWizCategoryViewGroupsRootItem::showContextMenu(CWizCategoryBaseView *pCtrl, QPoint pos)
 {
     if (CWizCategoryView* view = dynamic_cast<CWizCategoryView *>(pCtrl)) {
-        view->showGroupRootContextMenu_normal(pos);
+        view->showNormalGroupRootContextMenu(pos);
     }
 }
 
@@ -847,11 +809,11 @@ void CWizCategoryViewBizGroupRootItem::showContextMenu(CWizCategoryBaseView *pCt
     if (CWizCategoryView* view = dynamic_cast<CWizCategoryView *>(pCtrl)) {
         if(isAdmin())
         {
-            view->showBizGroupRootContextMenu_admin(pos);
+            view->showAdminBizGroupRootContextMenu(pos);
         }
         else
         {
-            view->showBizGroupRootContextMenu_normal(pos);
+            view->showNormalBizGroupRootContextMenu(pos);
         }
     }
 }
@@ -925,15 +887,15 @@ void CWizCategoryViewGroupRootItem::showContextMenu(CWizCategoryBaseView* pCtrl,
     if (CWizCategoryView* view = dynamic_cast<CWizCategoryView *>(pCtrl)) {
         if(isOwner(m_app.databaseManager().db(m_strKbGUID)))
         {
-            view->showGroupRootContextMenu_owner(pos);
+            view->showOwnerGroupRootContextMenu(pos);
         }
         else if(isAdmin(m_app.databaseManager().db(m_strKbGUID)))
         {
-            view->showGroupRootContextMenu_admin(pos);
+            view->showAdminGroupRootContextMenu(pos);
         }
         else
         {
-            view->showGroupRootContextMenu_normal(pos);
+            view->showNormalGroupRootContextMenu(pos);
         }
     }
 }

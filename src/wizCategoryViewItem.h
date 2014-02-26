@@ -42,8 +42,8 @@ public:
 
     //Plus Button
     virtual void setExtraButtonIcon(const QString &file){ m_extraButtonIcon = QPixmap(file); }
-    virtual bool getExtraButtonIcon(QPixmap& ret) const { ret = m_extraButtonIcon; return !m_extraButtonIcon.isNull(); }
-    virtual QRect getExtraButtonRect();
+    virtual bool getExtraButtonIcon(QPixmap& ret) const;
+    virtual QRect getExtraButtonRect(const QRect &itemBorder) const;
     virtual bool extraButtonClickTest();
 
 protected:
@@ -68,6 +68,8 @@ public:
     virtual int getItemHeight(int nHeight) const;
     virtual int getSortOrder() const { return m_sortOrder; }
     void reset(const QString& sectionName, int sortOrder);
+
+    virtual QRect getExtraButtonRect(const QRect &itemBorder) const;
 protected:
     int m_sortOrder;
 };

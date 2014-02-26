@@ -167,11 +167,11 @@ public:
     void showFolderContextMenu(QPoint pos);
     void showTagRootContextMenu(QPoint pos);
     void showTagContextMenu(QPoint pos);
-    void showGroupRootContextMenu_normal(QPoint pos);
-    void showGroupRootContextMenu_admin(QPoint pos);
-    void showGroupRootContextMenu_owner(QPoint pos);
-    void showBizGroupRootContextMenu_normal(QPoint pos);
-    void showBizGroupRootContextMenu_admin(QPoint pos);
+    void showNormalGroupRootContextMenu(QPoint pos);
+    void showAdminGroupRootContextMenu(QPoint pos);
+    void showOwnerGroupRootContextMenu(QPoint pos);
+    void showNormalBizGroupRootContextMenu(QPoint pos);
+    void showAdminBizGroupRootContextMenu(QPoint pos);
     void showGroupContextMenu(QPoint pos);
     void showTrashContextMenu(QPoint pos);
 
@@ -267,11 +267,11 @@ private:
     QPointer<QMenu> m_menuFolder;
     QPointer<QMenu> m_menuTagRoot;
     QPointer<QMenu> m_menuTag;
-    QPointer<QMenu> m_menuGroupRoot_normal;
-    QPointer<QMenu> m_menuGroupRoot_admin;
-    QPointer<QMenu> m_menuGroupRoot_owner;
-    QPointer<QMenu> m_menuBizGroupRoot_normal;
-    QPointer<QMenu> m_menuBizGroupRoot_admin;
+    QPointer<QMenu> m_menuNormalGroupRoot;
+    QPointer<QMenu> m_menuAdminGroupRoot;
+    QPointer<QMenu> m_menuOwnerGroupRoot;
+    QPointer<QMenu> m_menuNormalBizGroupRoot;
+    QPointer<QMenu> m_menuAdminBizGroupRoot;
     QPointer<QMenu> m_menuGroup;
     QPointer<QMenu> m_menuTrash;
     QPointer<QTimer> m_timerUpdateFolderCount;
