@@ -749,15 +749,32 @@ void CWizDocumentListView::on_action_deleteDocument()
 {
     QList<QListWidgetItem*> items = selectedItems();
 
+    int index = -1;
     foreach (QListWidgetItem* it, items) {
         if (CWizDocumentListViewItem* item = dynamic_cast<CWizDocumentListViewItem*>(it)) {
             if (item->type() == CWizDocumentListViewItem::TypeMessage) {
                 continue;
             }
 
+            index = indexFromItem(item).row();
             CWizDocument doc(m_dbMgr.db(item->document().strKbGUID), item->document());
             doc.Delete();
         }
+    }
+
+    //change to next document
+    int nItemCount = this->count();
+    if(index >= nItemCount)
+    {
+        index = nItemCount - 1;
+    }
+    if(-1 < index)
+    {
+        setItemSelected(documentItemAt(index), true);
+    }
+    else
+    {
+        emit lastDocumentDeleted();
     }
 }
 

@@ -28,6 +28,7 @@ public:
 
     static void emitViewNoteRequested(INoteView* view, const WIZDOCUMENTDATA& doc);
     static void emitViewNoteLoaded(INoteView* view, const WIZDOCUMENTDATA& doc, bool bOk);
+    static void emitCloseNoteRequested(INoteView* view);
 
 Q_SIGNALS:
     void viewNoteRequested(Core::INoteView* view, const WIZDOCUMENTDATA& doc);

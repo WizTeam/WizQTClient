@@ -678,6 +678,11 @@ void MainWindow::on_documents_documentCountChanged()
     m_labelDocumentsCount->setText(text);
 }
 
+void MainWindow::on_documents_lastDocumentDeleted()
+{
+    ICore::instance()->emitCloseNoteRequested(m_doc);
+}
+
 void MainWindow::on_documents_hintChanged(const QString& strHint)
 {
     QFontMetrics fmx(font());
@@ -732,6 +737,7 @@ void MainWindow::init()
 
     connect(m_msgList, SIGNAL(itemSelectionChanged()), SLOT(on_message_itemSelectionChanged()));
     connect(m_documents, SIGNAL(itemSelectionChanged()), SLOT(on_documents_itemSelectionChanged()));
+    connect(m_documents, SIGNAL(lastDocumentDeleted()), SLOT(on_documents_lastDocumentDeleted()));
 }
 
 void MainWindow::on_actionAutoSync_triggered()

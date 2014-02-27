@@ -77,6 +77,9 @@ CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
 
     connect(Core::ICore::instance(), SIGNAL(viewNoteLoaded(Core::INoteView*,WIZDOCUMENTDATA,bool)),
             SLOT(onViewNoteLoaded(Core::INoteView*,const WIZDOCUMENTDATA&,bool)));
+
+    connect(Core::ICore::instance(), SIGNAL(closeNoteRequested(Core::INoteView*)),
+            SLOT(onCloseNoteRequested(Core::INoteView*)));
 }
 
 CWizDocumentView::~CWizDocumentView()
@@ -253,6 +256,13 @@ void CWizDocumentView::on_document_modified(const WIZDOCUMENTDATA& documentOld, 
         return;
 
     reload();
+}
+
+void CWizDocumentView::onCloseNoteRequested(INoteView *view)
+{
+    Q_UNUSED(view)
+
+    showClient(false);
 }
 
 void CWizDocumentView::on_document_data_modified(const WIZDOCUMENTDATA& data)

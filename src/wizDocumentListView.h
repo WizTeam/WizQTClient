@@ -168,6 +168,7 @@ public Q_SLOTS:
 
 Q_SIGNALS:
     void documentCountChanged();
+    void lastDocumentDeleted();
 };
 
 

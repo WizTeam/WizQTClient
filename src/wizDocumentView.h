@@ -82,6 +82,7 @@ public:
 public Q_SLOTS:
     void onViewNoteRequested(Core::INoteView* view, const WIZDOCUMENTDATA& doc);
     void onViewNoteLoaded(Core::INoteView*,const WIZDOCUMENTDATA&,bool);
+    void onCloseNoteRequested(Core::INoteView* view);
 
     void on_document_modified(const WIZDOCUMENTDATA& documentOld,
                               const WIZDOCUMENTDATA& documentNew);
