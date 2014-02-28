@@ -362,6 +362,8 @@ public:
     bool DocumentToTempHtmlFile(const WIZDOCUMENTDATA& document, \
                                 QString& strTempHtmlFileName);
 
+    bool IsFileAccessible(const WIZDOCUMENTDATA& document);
+
     // CWizZiwReader passthrough methods
     bool loadUserCert();
     const QString& userCipher() const { return m_ziwReader->userCipher(); }

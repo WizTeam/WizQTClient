@@ -171,7 +171,7 @@ public:
 
 public Q_SLOTS:
     void onActionTriggered(QWebPage::WebAction act);
-    void onCipherDialogClosed();
+    void onCipherCheckRequest();
     void on_download_finished(const WIZOBJECTDATA& data, bool bSucceed);
 
     void onEditorPopulateJavaScriptWindowObject();

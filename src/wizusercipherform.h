@@ -1,7 +1,7 @@
 #ifndef WIZUSERCIPHERFORM_H
 #define WIZUSERCIPHERFORM_H
 
-#include <QFrame>
+#include <QDialog>
 
 #include "wizdef.h"
 
@@ -9,7 +9,8 @@ namespace Ui {
 class CWizUserCipherForm;
 }
 
-class CWizUserCipherForm : public QFrame
+class QPropertyAnimation;
+class CWizUserCipherForm : public QDialog
 {
     Q_OBJECT
     
@@ -22,7 +23,10 @@ public:
     const QString& userCipher() const { return m_userCipher; }
     bool isSaveForSession() const { return m_bSaveForSession; }
 
-    void sheetShow();
+//    void sheetShow();
+
+    void cipherError();
+    void cipherCorrect();
 
 protected:
     virtual QSize sizeHint();
@@ -34,12 +38,13 @@ private:
 
     bool m_bSaveForSession;
     QString m_userCipher;
+    QPropertyAnimation* m_animation;
 
 Q_SIGNALS:
-    void accepted();
+    void cipherCheckRequest();
 
 public Q_SLOTS:
-    void accept();
+    void onButtonOK_clicked();
     void onCheckSave_stateChanged(int state);
 
 };

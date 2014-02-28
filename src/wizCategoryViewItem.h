@@ -21,7 +21,7 @@ public:
     virtual bool acceptDrop(const WIZDOCUMENTDATA& data) const { Q_UNUSED(data); return false; }
     virtual void drop(const WIZDOCUMENTDATA& data) { Q_UNUSED(data); }
 
-    virtual void draw(QPainter* p, const QStyleOptionViewItemV4 *vopt) const;
+    virtual void draw(QPainter* p, const QStyleOptionViewItemV4* vopt) const;
 
     virtual QVariant data(int column, int role) const;
     virtual int getItemHeight(int hintHeight) const;
@@ -43,7 +43,7 @@ public:
     //Extra Button
     virtual void setExtraButtonIcon(const QString &file){ m_extraButtonIcon = QPixmap(file); }
     virtual bool getExtraButtonIcon(QPixmap& ret) const;
-    virtual QRect getExtraButtonRect(const QRect &itemBorder) const;
+    virtual QRect getExtraButtonRect(const QRect& itemBorder) const;
     virtual bool extraButtonClickTest();
 
 protected:
@@ -69,7 +69,8 @@ public:
     virtual int getSortOrder() const { return m_sortOrder; }
     void reset(const QString& sectionName, int sortOrder);
 
-    virtual QRect getExtraButtonRect(const QRect &itemBorder) const;
+    virtual QRect getExtraButtonRect(const QRect& itemBorder) const;
+    virtual void draw(QPainter* p, const QStyleOptionViewItemV4* vopt) const;
 protected:
     int m_sortOrder;
 };

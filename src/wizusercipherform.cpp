@@ -8,28 +8,29 @@
 using namespace Core::Internal;
 
 CWizUserCipherForm::CWizUserCipherForm(CWizExplorerApp& app, QWidget *parent)
-    : QFrame(parent)
+    : QDialog(parent)
     , ui(new Ui::CWizUserCipherForm)
     , m_app(app)
     , m_bSaveForSession(false)
 {
     ui->setupUi(this);
-
+    this->setFixedSize(350, 140);
     ui->editUserCipher->setEchoMode(QLineEdit::Password);
 
-    setFrameShadow(QFrame::Raised);
-    setFrameShape(QFrame::StyledPanel);
-    setAutoFillBackground(true);
-    setAttribute(Qt::WA_MacShowFocusRect, true);
+    m_animation = new QPropertyAnimation(ui->editUserCipher, "pos");
 
-    connect(ui->buttonOk, SIGNAL(clicked()), SLOT(accept()));
-    connect(ui->editUserCipher, SIGNAL(returnPressed()), ui->buttonOk, SIGNAL(clicked()));
+    connect(ui->buttonOk, SIGNAL(clicked()), SLOT(onButtonOK_clicked()));
     connect(ui->checkSave, SIGNAL(stateChanged(int)), SLOT(onCheckSave_stateChanged(int)));
+
 }
 
 CWizUserCipherForm::~CWizUserCipherForm()
 {
     delete ui;
+
+    if (NULL != m_animation){
+        delete m_animation;
+    }
 }
 
 QSize CWizUserCipherForm::sizeHint()
@@ -47,9 +48,9 @@ void CWizUserCipherForm::showEvent(QShowEvent* event)
     ui->editUserCipher->clear();
     ui->checkSave->setChecked(false);
 
-    raise();
 }
 
+/*
 void CWizUserCipherForm::sheetShow()
 {
 #if 0
@@ -68,22 +69,43 @@ void CWizUserCipherForm::sheetShow()
 #endif
 
     MainWindow* mainWindow = qobject_cast<MainWindow *>(m_app.mainWindow());
-    int x = (mainWindow->clientSize().width() - sizeHint().width()) / 2;
-    const QPoint& endP = mainWindow->client()->mapTo(mainWindow, QPoint(x, 0));
-    setGeometry(endP.x(), endP.y(), sizeHint().width(), sizeHint().height());
+    const QPoint& topLeft = mainWindow->client()->mapTo(mainWindow, QPoint(-1,-1));
+    setGeometry(topLeft.x(), topLeft.y(), mainWindow->clientSize().width() + 1, mainWindow->clientSize().height() + 1);
     show();
 
     ui->editUserCipher->setFocus(Qt::MouseFocusReason);
+}*/
+
+void CWizUserCipherForm::cipherError()
+{
+    QPoint pos = ui->editUserCipher->pos();
+    m_animation->setDuration(500);
+    m_animation->setEasingCurve(QEasingCurve::InOutQuad);
+    m_animation->setStartValue(QPoint(pos.x() + 5, pos.y()));
+    m_animation->setEndValue(QPoint(pos.x() - 5, pos.y()));
+    m_animation->start();
+
+    m_animation->setDuration(250);
+    m_animation->setEasingCurve(QEasingCurve::InOutQuad);
+    m_animation->setStartValue(QPoint(pos.x() - 5, pos.y()));
+    m_animation->setEndValue(pos);
+    m_animation->start();
+
+    ui->editUserCipher->selectAll();
 }
 
-void CWizUserCipherForm::accept()
+void CWizUserCipherForm::cipherCorrect()
+{
+    ui->editUserCipher->setText(QString());
+    ui->checkSave->setCheckState(Qt::Unchecked);
+    this->hide();
+}
+
+void CWizUserCipherForm::onButtonOK_clicked()
 {
     m_userCipher = ui->editUserCipher->text();
-    ui->editUserCipher->clear();
 
-    hide();
-
-    emit accepted();
+    emit cipherCheckRequest();
 }
 
 void CWizUserCipherForm::onCheckSave_stateChanged(int state)

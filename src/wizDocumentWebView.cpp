@@ -300,7 +300,7 @@ CWizDocumentWebView::CWizDocumentWebView(CWizExplorerApp& app, QWidget* parent)
     MainWindow* mainWindow = qobject_cast<MainWindow *>(m_app.mainWindow());
 
     m_cipherDialog = mainWindow->cipherForm();
-    connect(m_cipherDialog, SIGNAL(accepted()), SLOT(onCipherDialogClosed()));
+    connect(m_cipherDialog, SIGNAL(cipherCheckRequest()), SLOT(onCipherCheckRequest()));
 
     m_downloaderHost = mainWindow->downloaderHost();
     connect(m_downloaderHost, SIGNAL(downloadDone(const WIZOBJECTDATA&, bool)),
@@ -587,7 +587,7 @@ void CWizDocumentWebView::viewDocument(const WIZDOCUMENTDATA& doc, bool editing)
             window->showClient(false);
 
             m_cipherDialog->setHint(db.userCipherHint());
-            m_cipherDialog->sheetShow();
+            m_cipherDialog->show();
 
             return;
         }
@@ -597,14 +597,23 @@ void CWizDocumentWebView::viewDocument(const WIZDOCUMENTDATA& doc, bool editing)
     m_workerPool->load(doc);
 }
 
-void CWizDocumentWebView::onCipherDialogClosed()
+void CWizDocumentWebView::onCipherCheckRequest()
 {
-    CWizDatabase& db = m_dbMgr.db(view()->note().strKbGUID);
+    const WIZDOCUMENTDATA& noteData = view()->note();
+    CWizDatabase& db = m_dbMgr.db(noteData.strKbGUID);
 
     db.setUserCipher(m_cipherDialog->userCipher());
     db.setSaveUserCipher(m_cipherDialog->isSaveForSession());
 
-    m_workerPool->load(view()->note());
+    if(!db.IsFileAccessible(noteData))
+    {
+        m_cipherDialog->cipherError();
+        db.setUserCipher(QString());
+        db.setSaveUserCipher(false);
+        return;
+    }
+    m_cipherDialog->cipherCorrect();
+    m_workerPool->load(noteData);
 }
 
 void CWizDocumentWebView::on_download_finished(const WIZOBJECTDATA& data,

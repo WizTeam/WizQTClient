@@ -2706,6 +2706,26 @@ bool CWizDatabase::DocumentToTempHtmlFile(const WIZDOCUMENTDATA& document, QStri
     return PathFileExists(strTempHtmlFileName);
 }
 
+bool CWizDatabase::IsFileAccessible(const WIZDOCUMENTDATA& document)
+{
+    CString strZipFileName = GetDocumentFileName(document.strGUID);
+    if (!PathFileExists(strZipFileName)) {
+        return false;
+    }
+
+    if (document.nProtected) {
+        if (userCipher().isEmpty()) {
+            return false;
+        }
+
+        if (!m_ziwReader->isFileAccessible(strZipFileName)) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
 QObject* CWizDatabase::GetFolderByLocation(const QString& strLocation, bool create)
 {
     Q_UNUSED(create);

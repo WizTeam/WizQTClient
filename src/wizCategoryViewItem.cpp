@@ -131,15 +131,15 @@ bool CWizCategoryViewItemBase::getExtraButtonIcon(QPixmap &ret) const
     return !m_extraButtonIcon.isNull();
 }
 
-QRect CWizCategoryViewItemBase::getExtraButtonRect(const QRect &itemBorder) const
+QRect CWizCategoryViewItemBase::getExtraButtonRect(const QRect& rcItemBorder) const
 {
     int nMargin = 4;
     QSize szBtn = m_extraButtonIcon.size();
     int nWidth = szBtn.width() + 2 * nMargin;
     int nHeight = szBtn.height() + 2 * nMargin;
     //
-    int nTop = itemBorder.y() + (itemBorder.height() - nHeight) / 2;
-    QRect rcb(itemBorder.right() - nWidth - nMargin, nTop, nWidth, nHeight);
+    int nTop = rcItemBorder.y() + (rcItemBorder.height() - nHeight) / 2;
+    QRect rcb(rcItemBorder.right() - nWidth - nMargin, nTop, nWidth, nHeight);
     rcb.adjust(nMargin, nMargin, -nMargin, -nMargin);
     return rcb;
 }
@@ -153,15 +153,15 @@ bool CWizCategoryViewItemBase::extraButtonClickTest()
     CWizCategoryBaseView* view = dynamic_cast<CWizCategoryBaseView*>(treeWidget());
     Q_ASSERT(view);
 
-    QRect itemBorder = view->visualItemRect(this);
-    QRect btnRect = getExtraButtonRect(itemBorder);
-    int clickDist = 2;
-    btnRect.adjust(-clickDist, -clickDist, clickDist, clickDist);
+    QRect rcIemBorder = view->visualItemRect(this);
+    QRect btnRect = getExtraButtonRect(rcIemBorder);
+    int nClickDist = 2;
+    btnRect.adjust(-nClickDist, -nClickDist, nClickDist, nClickDist);
 
     return btnRect.contains(view->hitPoint());
 }
 
-void CWizCategoryViewItemBase::draw(QPainter* p, const QStyleOptionViewItemV4 *vopt) const
+void CWizCategoryViewItemBase::draw(QPainter* p, const QStyleOptionViewItemV4* vopt) const
 {
     QPixmap pixmap;
     if(getExtraButtonIcon(pixmap) && !pixmap.isNull())
@@ -278,7 +278,7 @@ void CWizCategoryViewSectionItem::reset(const QString& sectionName, int sortOrde
     setText(0, sectionName);
 }
 
-QRect CWizCategoryViewSectionItem::getExtraButtonRect(const QRect &itemBorder) const
+QRect CWizCategoryViewSectionItem::getExtraButtonRect(const QRect& itemBorder) const
 {
     int nMargin = 4;
     QSize szBtn = m_extraButtonIcon.size();
@@ -290,6 +290,15 @@ QRect CWizCategoryViewSectionItem::getExtraButtonRect(const QRect &itemBorder) c
     QRect rcb(itemBorder.right() - nWidth - 2 * nMargin, nTop, nWidth, nHeight);
     rcb.adjust(nMargin, nMargin, -nMargin, -nMargin);
     return rcb;
+}
+
+void CWizCategoryViewSectionItem::draw(QPainter* p, const QStyleOptionViewItemV4* vopt) const
+{
+    QRect rc = vopt->rect;
+    rc.setTop(rc.bottom());
+    p->fillRect(rc, Utils::StyleHelper::treeViewItemCategoryBackground());
+
+    CWizCategoryViewItemBase::draw(p, vopt);
 }
 
 
