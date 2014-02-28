@@ -1335,7 +1335,7 @@ void CWizCategoryView::on_action_groupAttribute()
 
 //        m_strRequestedGroupKbGUID = p->kbGUID();
         if (p->isBizGroup()) {
-            viewBizGroupInfo(p->kbGUID());
+            viewBizGroupInfo(p->kbGUID(), p->bizGUID());
         } else {
             viewPersonalGroupInfo(p->kbGUID());
         }
@@ -1465,9 +1465,9 @@ void CWizCategoryView::viewPersonalGroupInfo(const QString& groupGUID)
     showWebDialogWithToken(tr("View group info"), strUrl);
 }
 
-void CWizCategoryView::viewBizGroupInfo(const QString& groupGUID)
+void CWizCategoryView::viewBizGroupInfo(const QString& groupGUID, const QString& bizGUID)
 {
-    QString extInfo = "kb=" + groupGUID;
+    QString extInfo = "kb=" + groupGUID + "&&biz=" + bizGUID;
     QString strUrl = WizService::ApiEntry::standardCommandUrl("view_biz_group", WIZ_TOKEN_IN_URL_REPLACE_PART, extInfo);
     showWebDialogWithToken(tr("View group info"), strUrl);
 }

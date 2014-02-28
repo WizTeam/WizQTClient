@@ -308,6 +308,7 @@ public:
     bool isOwner(CWizDatabase& db);
 
     bool isBizGroup() const;
+    QString bizGUID() const;
 };
 
 class CWizCategoryViewGroupNoTagItem : public CWizCategoryViewItemBase

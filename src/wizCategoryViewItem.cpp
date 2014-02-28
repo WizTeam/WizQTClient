@@ -948,6 +948,11 @@ bool CWizCategoryViewGroupRootItem::isBizGroup() const
     return m_group.IsBiz();
 }
 
+QString CWizCategoryViewGroupRootItem::bizGUID() const
+{
+    return m_group.bizGUID;
+}
+
 /* --------------------- CWizCategoryViewGroupNoTagItem --------------------- */
 CWizCategoryViewGroupNoTagItem::CWizCategoryViewGroupNoTagItem(CWizExplorerApp& app,
                                                                const QString& strKbGUID)
