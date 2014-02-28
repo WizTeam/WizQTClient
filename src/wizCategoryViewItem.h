@@ -306,6 +306,8 @@ public:
     //
     bool isAdmin(CWizDatabase& db);
     bool isOwner(CWizDatabase& db);
+
+    bool isBizGroup() const;
 };
 
 class CWizCategoryViewGroupNoTagItem : public CWizCategoryViewItemBase

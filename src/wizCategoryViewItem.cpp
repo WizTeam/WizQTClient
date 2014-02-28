@@ -815,16 +815,16 @@ CWizCategoryViewBizGroupRootItem::CWizCategoryViewBizGroupRootItem(CWizExplorerA
 
 void CWizCategoryViewBizGroupRootItem::showContextMenu(CWizCategoryBaseView *pCtrl, QPoint pos)
 {
-    if (CWizCategoryView* view = dynamic_cast<CWizCategoryView *>(pCtrl)) {
-        if(isAdmin())
-        {
-            view->showAdminBizGroupRootContextMenu(pos);
-        }
-        else
-        {
-            view->showNormalBizGroupRootContextMenu(pos);
-        }
-    }
+//    if (CWizCategoryView* view = dynamic_cast<CWizCategoryView *>(pCtrl)) {
+//        if(isAdmin())
+//        {
+//            view->showAdminBizGroupRootContextMenu(pos);
+//        }
+//        else
+//        {
+//            view->showNormalBizGroupRootContextMenu(pos);
+//        }
+//    }
 }
 
 bool CWizCategoryViewBizGroupRootItem::isOwner()
@@ -941,6 +941,11 @@ bool CWizCategoryViewGroupRootItem::isAdmin(CWizDatabase& db)
 bool CWizCategoryViewGroupRootItem::isOwner(CWizDatabase& db)
 {
     return db.IsGroupOwner();
+}
+
+bool CWizCategoryViewGroupRootItem::isBizGroup() const
+{
+    return m_group.IsBiz();
 }
 
 /* --------------------- CWizCategoryViewGroupNoTagItem --------------------- */

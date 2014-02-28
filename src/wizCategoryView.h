@@ -256,8 +256,10 @@ public:
     void showWebDialogWithToken(const QString& windowTitle, const QString& url);
     //
     void createGroup();
-    void viewGroupInfo(const QString& groupGUID);
-    void manageGroup(const QString& groupGUID);
+    void viewPersonalGroupInfo(const QString& groupGUID);
+    void viewBizGroupInfo(const QString& groupGUID);
+    void managePersonalGroup(const QString& groupGUID);
+    void manageBizGroup(const QString& groupGUID);
     void viewBizInfo(const QString& bizGUID);
     void manageBiz(const QString& bizGUID);
 
@@ -346,12 +348,12 @@ public Q_SLOTS:
     void on_action_group_deleteFolder_confirmed(int result);
 
     void on_action_itemAttribute();
-    void on_action_group_attribute();
-    void on_action_bizgroup_attribute();
+    void on_action_groupAttribute();
+    void on_action_bizgAttribute();
 
     void on_action_itemManage();
     void on_action_manageGroup();
-    void on_action_manageBizGroup();
+    void on_action_manageBiz();
 
 
     void on_action_emptyTrash();

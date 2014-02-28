@@ -54,6 +54,7 @@ using namespace Core::Internal;
 #define CATEGORY_ACTION_GROUP_MARK_READ QObject::tr("Mark all documents read")
 #define CATEGORY_ACTION_EMPTY_TRASH     QObject::tr("Empty trash")
 #define CATEGORY_ACTION_MANAGE_GROUP     QObject::tr("Manage group")
+#define CATEGORY_ACTION_MANAGE_BIZ     QObject::tr("Manage biz")
 #define CATEGORY_ACTION_QUIT_GROUP     QObject::tr("Quit group")
 
 
@@ -638,7 +639,7 @@ void CWizCategoryView::resetMenu(CategoryMenuType type)
         case ActionItemAttribute:
             if (type == GroupRootItem) {
                 act->setText(CATEGORY_ACTION_GROUP_ATTRIBUTE);
-            }else if(type == BizGroupRootItem){
+            } else if (type == BizGroupRootItem) {
                 act->setText(CATEGORY_ACTION_BIZ_GROUP_ATTRIBUTE);
             }
             break;
@@ -648,13 +649,15 @@ void CWizCategoryView::resetMenu(CategoryMenuType type)
             }
             break;
         case ActionQuitGroup:
-            if(type == GroupRootItem){
+            if (type == GroupRootItem) {
                 act->setText(CATEGORY_ACTION_QUIT_GROUP);
             }
             break;
         case ActionItemManage:
-            if(type == BizGroupRootItem || type == GroupRootItem){
+            if (type == GroupRootItem) {
                 act->setText(CATEGORY_ACTION_MANAGE_GROUP);
+            }else if (type == BizGroupRootItem) {
+                act->setText(CATEGORY_ACTION_MANAGE_BIZ);
             }
             break;
         default:
@@ -1310,45 +1313,48 @@ void CWizCategoryView::on_action_group_deleteFolder_confirmed(int result)
 
 void CWizCategoryView::on_action_itemAttribute()
 {
-    if (currentCategoryItem<CWizCategoryViewGroupRootItem>()
-            || currentCategoryItem<CWizCategoryViewGroupItem>())
+    if (currentCategoryItem<CWizCategoryViewGroupRootItem>())
     {
-        on_action_group_attribute();
+        on_action_groupAttribute();
     }
     else if(currentCategoryItem<CWizCategoryViewBizGroupRootItem>())
     {
-        on_action_bizgroup_attribute();
+        on_action_bizgAttribute();
     }
 }
 
-void CWizCategoryView::on_action_group_attribute()
+void CWizCategoryView::on_action_groupAttribute()
 {
 
-    CWizCategoryViewItemBase* p = currentCategoryItem<CWizCategoryViewItemBase>();
+    CWizCategoryViewGroupRootItem* p = currentCategoryItem<CWizCategoryViewGroupRootItem>();
     if (p && !p->kbGUID().isEmpty()) {
 
-        QString strUrl = WizService::ApiEntry::groupAttributeUrl(WIZ_TOKEN_IN_URL_REPLACE_PART, m_strRequestedGroupKbGUID);
-        //
-        showWebDialogWithToken(tr("Group settings"), strUrl);
+//        QString strUrl = WizService::ApiEntry::groupAttributeUrl(WIZ_TOKEN_IN_URL_REPLACE_PART, m_strRequestedGroupKbGUID);
+//        //
+//        showWebDialogWithToken(tr("Group settings"), strUrl);
 
-        m_strRequestedGroupKbGUID = p->kbGUID();
+//        m_strRequestedGroupKbGUID = p->kbGUID();
+        if (p->isBizGroup()) {
+            viewBizGroupInfo(p->kbGUID());
+        } else {
+            viewPersonalGroupInfo(p->kbGUID());
+        }
     }
 }
 
 void CWizCategoryView::on_action_manageGroup()
 {
-    CWizCategoryViewItemBase* p = currentCategoryItem<CWizCategoryViewItemBase>();
+    CWizCategoryViewGroupRootItem* p = currentCategoryItem<CWizCategoryViewGroupRootItem>();
     if (p && !p->kbGUID().isEmpty()) {
-//        QString strUrl = WizService::ApiEntry::groupAttributeUrl(WIZ_TOKEN_IN_URL_REPLACE_PART, m_strRequestedGroupKbGUID);
-//        //
-//        showWebDialogWithToken(tr("Group settings"), strUrl);
-//        m_strRequestedGroupKbGUID = p->kbGUID();
-
-        manageGroup(p->kbGUID());
+        if (p->isBizGroup()) {
+            manageBizGroup(p->kbGUID());
+        } else {
+            managePersonalGroup(p->kbGUID());
+        }
     }
 }
 
-void CWizCategoryView::on_action_bizgroup_attribute()
+void CWizCategoryView::on_action_bizgAttribute()
 {
     CWizCategoryViewItemBase* p = currentCategoryItem<CWizCategoryViewItemBase>();
     if (p && !p->kbGUID().isEmpty()) {
@@ -1365,11 +1371,11 @@ void CWizCategoryView::on_action_itemManage()
     }
     else if(currentCategoryItem<CWizCategoryViewBizGroupRootItem>())
     {
-        on_action_manageBizGroup();
+        on_action_manageBiz();
     }
 }
 
-void CWizCategoryView::on_action_manageBizGroup()
+void CWizCategoryView::on_action_manageBiz()
 {
     CWizCategoryViewItemBase* p = currentCategoryItem<CWizCategoryViewItemBase>();
     if (p && !p->kbGUID().isEmpty()) {
@@ -1452,24 +1458,41 @@ void CWizCategoryView::createGroup()
     showWebDialogWithToken(tr("Create new group"), strUrl);
 }
 
-void CWizCategoryView::viewGroupInfo(const QString& groupGUID)
+void CWizCategoryView::viewPersonalGroupInfo(const QString& groupGUID)
 {
     QString extInfo = "kb=" + groupGUID;
-    QString strUrl = WizService::ApiEntry::standardCommandUrl("view_group", WIZ_TOKEN_IN_URL_REPLACE_PART, extInfo);
+    QString strUrl = WizService::ApiEntry::standardCommandUrl("view_personal_group", WIZ_TOKEN_IN_URL_REPLACE_PART, extInfo);
     showWebDialogWithToken(tr("View group info"), strUrl);
 }
-void CWizCategoryView::manageGroup(const QString& groupGUID)
+
+void CWizCategoryView::viewBizGroupInfo(const QString& groupGUID)
 {
     QString extInfo = "kb=" + groupGUID;
-    QString strUrl = WizService::ApiEntry::standardCommandUrl("manage_group", WIZ_TOKEN_IN_URL_REPLACE_PART, extInfo);
+    QString strUrl = WizService::ApiEntry::standardCommandUrl("view_biz_group", WIZ_TOKEN_IN_URL_REPLACE_PART, extInfo);
+    showWebDialogWithToken(tr("View group info"), strUrl);
+}
+
+void CWizCategoryView::managePersonalGroup(const QString& groupGUID)
+{
+    QString extInfo = "kb=" + groupGUID;
+    QString strUrl = WizService::ApiEntry::standardCommandUrl("manage_personal_group", WIZ_TOKEN_IN_URL_REPLACE_PART, extInfo);
     showWebDialogWithToken(tr("Manage group"), strUrl);
 }
+
+void CWizCategoryView::manageBizGroup(const QString& groupGUID)
+{
+    QString extInfo = "kb=" + groupGUID;
+    QString strUrl = WizService::ApiEntry::standardCommandUrl("manage_biz_group", WIZ_TOKEN_IN_URL_REPLACE_PART, extInfo);
+    showWebDialogWithToken(tr("Manage group"), strUrl);
+}
+
 void CWizCategoryView::viewBizInfo(const QString& bizGUID)
 {
     QString extInfo = "biz=" + bizGUID;
     QString strUrl = WizService::ApiEntry::standardCommandUrl("view_biz", WIZ_TOKEN_IN_URL_REPLACE_PART, extInfo);
     showWebDialogWithToken(tr("View team info"), strUrl);
 }
+
 void CWizCategoryView::manageBiz(const QString& bizGUID)
 {
     QString extInfo = "biz=" + bizGUID;
