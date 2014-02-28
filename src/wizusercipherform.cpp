@@ -92,6 +92,7 @@ void CWizUserCipherForm::cipherError()
     m_animation->start();
 
     ui->editUserCipher->selectAll();
+    ui->editUserCipher->setFocus();
 }
 
 void CWizUserCipherForm::cipherCorrect()

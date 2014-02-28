@@ -218,7 +218,7 @@ void MainWindow::closeEvent(QCloseEvent* event)
 
 void MainWindow::on_actionExit_triggered()
 {
-    qApp->quit();
+    qApp->exit();
 }
 
 void MainWindow::resizeEvent(QResizeEvent *event)
