@@ -225,7 +225,7 @@ void CWizDocumentView::viewNote(const WIZDOCUMENTDATA& data, bool forceEdit)
         if (db.userCipher().isEmpty()) {
             m_passwordView->setHint(db.userCipherHint());
             m_tab->setCurrentWidget(m_passwordView);
-
+            m_passwordView->setCipherEditorFocus();
 
             return;
         }
@@ -356,6 +356,9 @@ void CWizDocumentView::on_download_finished(const WIZOBJECTDATA &data, bool bSuc
 
     if (!bSucceed)
         return;
+
+    MainWindow* mainWindow = qobject_cast<MainWindow *>(m_app.mainWindow());
+    mainWindow->transitionView()->setVisible(false);
 
     viewNote(m_note,m_bEditingMode);
 }
