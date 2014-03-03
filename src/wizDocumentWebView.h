@@ -105,6 +105,7 @@ class CWizDocumentWebView : public QWebView
 
 public:
     CWizDocumentWebView(CWizExplorerApp& app, QWidget* parent);
+    ~CWizDocumentWebView();
     Core::CWizDocumentView* view();
     QWebFrame* noteFrame();
 

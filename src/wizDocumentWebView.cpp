@@ -340,6 +340,14 @@ CWizDocumentWebView::CWizDocumentWebView(CWizExplorerApp& app, QWidget* parent)
             SLOT(onDocumentSaved(const QString&, bool)));
 }
 
+CWizDocumentWebView::~CWizDocumentWebView()
+{
+    if (0 != m_docLoadThread) {
+        delete m_docLoadThread;
+        m_docLoadThread = 0;
+    }
+}
+
 void CWizDocumentWebView::inputMethodEvent(QInputMethodEvent* event)
 {
     // On X windows, fcitx flick while preediting, only update while webview end process.
