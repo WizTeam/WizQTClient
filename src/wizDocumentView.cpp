@@ -357,6 +357,9 @@ void CWizDocumentView::on_download_finished(const WIZOBJECTDATA &data, bool bSuc
     if (!bSucceed)
         return;
 
+    MainWindow* mainWindow = qobject_cast<MainWindow *>(m_app.mainWindow());
+    mainWindow->transitionView()->setVisible(false);
+
     viewNote(m_note,m_bEditingMode);
 }
 

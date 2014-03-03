@@ -18,9 +18,11 @@ CWizUserCipherForm::CWizUserCipherForm(CWizExplorerApp& app, QWidget *parent)
 
     setAutoFillBackground(true);
     setAttribute(Qt::WA_MacShowFocusRect, true);
+    setBackgroundRole(QPalette::Midlight);
 
     m_animation = new QPropertyAnimation(ui->editUserCipher, "pos");
 
+    connect(ui->editUserCipher, SIGNAL(returnPressed()), SLOT(onButtonOK_clicked()));
     connect(ui->buttonOk, SIGNAL(clicked()), SLOT(onButtonOK_clicked()));
     connect(ui->checkSave, SIGNAL(stateChanged(int)), SLOT(onCheckSave_stateChanged(int)));
 
