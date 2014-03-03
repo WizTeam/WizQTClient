@@ -125,3 +125,8 @@ void CWizUserCipherForm::setHint(const QString& strHint)
 {
     ui->labelHint->setText(strHint);
 }
+
+void CWizUserCipherForm::setCipherEditorFocus()
+{
+    ui->editUserCipher->setFocus();
+}

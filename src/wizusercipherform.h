@@ -24,6 +24,7 @@ public:
     bool isSaveForSession() const { return m_bSaveForSession; }
 
 //    void sheetShow();
+    void setCipherEditorFocus();
 
     void cipherError();
     void cipherCorrect();

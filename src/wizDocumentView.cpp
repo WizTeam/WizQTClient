@@ -225,7 +225,7 @@ void CWizDocumentView::viewNote(const WIZDOCUMENTDATA& data, bool forceEdit)
         if (db.userCipher().isEmpty()) {
             m_passwordView->setHint(db.userCipherHint());
             m_tab->setCurrentWidget(m_passwordView);
-
+            m_passwordView->setCipherEditorFocus();
 
             return;
         }
