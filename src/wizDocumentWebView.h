@@ -7,6 +7,7 @@
 #include <QMutex>
 #include <QColorDialog>
 #include <QMap>
+#include <QThread>
 
 //#include "wizdownloadobjectdatadialog.h"
 #include "wizdef.h"
@@ -27,6 +28,33 @@ class CWizDocumentView;
 } // namespace Core
 
 
+class CWizDocumentWebViewLoaderThread : public QThread
+{
+    Q_OBJECT
+public:
+    CWizDocumentWebViewLoaderThread(CWizDatabaseManager& dbMgr);
+
+    void load(const WIZDOCUMENTDATA& doc);
+
+    virtual void run();
+
+    QString result() const { return m_strHtmlFile; }
+    QString guid() const { return m_strLoadingGUID; }
+
+Q_SIGNALS:
+    void loaded(const QString strGUID, const QString& strFileName);
+
+private:
+    CWizDatabaseManager& m_dbMgr;
+    QString m_strLoadingGUID;
+    QString m_strLoadingKbGUID;
+    QString m_strNewGUID;
+    QString m_strNewKbGUID;
+    QString m_strHtmlFile;
+    QMutex m_mutex;
+
+};
+
 class CWizDocumentWebViewWorkerPool : public QObject
 {
     Q_OBJECT
@@ -34,7 +62,7 @@ class CWizDocumentWebViewWorkerPool : public QObject
 public:
     CWizDocumentWebViewWorkerPool(CWizExplorerApp& app, QObject* parent);
 
-    void load(const WIZDOCUMENTDATA& doc);
+    //void load(const WIZDOCUMENTDATA& doc);
     void save(const WIZDOCUMENTDATA& doc, const QString& strHtml,
               const QString& strHtmlFile, int nFlags);
 
@@ -49,6 +77,9 @@ private:
     CWizDatabaseManager& m_dbMgr;
     QTimer m_timer;
     QList<CWizDocumentWebViewWorker*> m_workers;
+
+private:
+    //bool isDocInLoadingQueue(const WIZDOCUMENTDATA& doc);
 };
 
 
@@ -160,6 +191,7 @@ private:
 
     CWizDocumentWebViewWorkerPool* m_workerPool;
     CWizDocumentTransitionView* m_transitionView;
+    CWizDocumentWebViewLoaderThread* m_docLoadThread;
 
     QPointer<CWizEditorInsertLinkForm> m_editorInsertLinkForm;
     QPointer<CWizEditorInsertTableForm> m_editorInsertTableForm;

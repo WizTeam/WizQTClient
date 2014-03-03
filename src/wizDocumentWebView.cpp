@@ -102,6 +102,7 @@ private:
     bool m_bOk;
 };
 
+/*
 class CWizDocumentWebViewLoader : public CWizDocumentWebViewWorker
 {
 public:
@@ -133,7 +134,7 @@ private:
     QString m_strGUID;
     QString m_strHtmlFile;
 };
-
+*/
 
 CWizDocumentWebViewWorkerPool::CWizDocumentWebViewWorkerPool(CWizExplorerApp& app, QObject* parent)
     : m_dbMgr(app.databaseManager())
@@ -143,8 +144,13 @@ CWizDocumentWebViewWorkerPool::CWizDocumentWebViewWorkerPool(CWizExplorerApp& ap
     connect(&m_timer, SIGNAL(timeout()), SLOT(on_timer_timeout()));
 }
 
+/*
 void CWizDocumentWebViewWorkerPool::load(const WIZDOCUMENTDATA& doc)
 {
+    if (isDocInLoadingQueue(doc)) {
+        return;
+    }
+
     CWizDatabase& db = m_dbMgr.db(doc.strKbGUID);
     CWizDocumentWebViewLoader* loader = new CWizDocumentWebViewLoader(db, doc.strGUID);
     m_workers.push_back(loader);
@@ -152,6 +158,21 @@ void CWizDocumentWebViewWorkerPool::load(const WIZDOCUMENTDATA& doc)
     QThreadPool::globalInstance()->start(loader);
     m_timer.start();
 }
+*/
+
+/*
+bool CWizDocumentWebViewWorkerPool::isDocInLoadingQueue(const WIZDOCUMENTDATA &doc)
+{
+    for (int i = m_workers.count() -1; i >= 0; i--) {
+        CWizDocumentWebViewLoader* loader = dynamic_cast<CWizDocumentWebViewLoader*>(m_workers.at(i));
+        if (loader && loader->guid() == doc.strGUID) {
+            return true;
+        }
+    }
+
+    return false;
+}
+*/
 
 void CWizDocumentWebViewWorkerPool::save(const WIZDOCUMENTDATA& doc, const QString& strHtml,
           const QString& strHtmlFile, int nFlags)
@@ -171,9 +192,9 @@ void CWizDocumentWebViewWorkerPool::on_timer_timeout()
             if (worker->type() == CWizDocumentWebViewWorker::Saver) {
                 CWizDocumentWebViewSaver* saver = dynamic_cast<CWizDocumentWebViewSaver*>(worker);
                 Q_EMIT saved(saver->guid(), saver->result());
-            } else if (worker->type() == CWizDocumentWebViewWorker::Loader) {
-                CWizDocumentWebViewLoader* loader = dynamic_cast<CWizDocumentWebViewLoader*>(worker);
-                Q_EMIT loaded(loader->guid(), loader->result());
+//            } else if (worker->type() == CWizDocumentWebViewWorker::Loader) {
+//                CWizDocumentWebViewLoader* loader = dynamic_cast<CWizDocumentWebViewLoader*>(worker);
+//                Q_EMIT loaded(loader->guid(), loader->result());
             } else {
                 Q_ASSERT(0);
             }
@@ -303,6 +324,10 @@ CWizDocumentWebView::CWizDocumentWebView(CWizExplorerApp& app, QWidget* parent)
 
 
     m_transitionView = mainWindow->transitionView();
+
+    m_docLoadThread = new CWizDocumentWebViewLoaderThread(m_dbMgr);
+    connect(m_docLoadThread, SIGNAL(loaded(const QString&, const QString&)),
+            SLOT(onDocumentReady(const QString&, const QString&)));
 
     // loading and saving thread
     m_timerAutoSave.setInterval(5*60*1000); // 5 minutes
@@ -558,7 +583,8 @@ void CWizDocumentWebView::viewDocument(const WIZDOCUMENTDATA& doc, bool editing)
     m_bNewNoteTitleInited = m_bNewNote ? false : true;
 
     // ask extract and load
-    m_workerPool->load(doc);
+//    m_workerPool->load(doc);
+    m_docLoadThread->load(doc);
 }
 
 void CWizDocumentWebView::reloadNoteData(const WIZDOCUMENTDATA& data)
@@ -570,7 +596,8 @@ void CWizDocumentWebView::reloadNoteData(const WIZDOCUMENTDATA& data)
         return;
 
     // reload may triggered when update from server or locally reflected by modify
-    m_workerPool->load(data);
+//    m_workerPool->load(data);
+    m_docLoadThread->load(data);
 }
 
 QString CWizDocumentWebView::getDefaultCssFilePath() const
@@ -1322,4 +1349,44 @@ bool CWizDocumentWebView::editorCommandExecuteTableAverageRows()
 bool CWizDocumentWebView::editorCommandExecuteTableAverageCols()
 {
     return editorCommandExecuteCommand("averagedistributecol");
+}
+
+
+CWizDocumentWebViewLoaderThread::CWizDocumentWebViewLoaderThread(CWizDatabaseManager &dbMgr):m_dbMgr(dbMgr)
+{
+}
+
+void CWizDocumentWebViewLoaderThread::load(const WIZDOCUMENTDATA &doc)
+{
+    m_mutex.lock();
+    m_strNewGUID = doc.strGUID;
+    m_strNewKbGUID = doc.strKbGUID;
+    m_mutex.unlock();
+
+    start();
+}
+
+void CWizDocumentWebViewLoaderThread::run()
+{
+    while (true) {
+        m_mutex.lock();
+        m_strLoadingGUID = m_strNewGUID;
+        m_strLoadingKbGUID = m_strNewKbGUID;
+        m_mutex.unlock();
+
+        CWizDatabase& db = m_dbMgr.db(m_strLoadingKbGUID);
+        WIZDOCUMENTDATA data;
+        if (!db.DocumentFromGUID(m_strLoadingGUID, data)) {
+            return;
+        }
+        db.DocumentToTempHtmlFile(data, m_strHtmlFile);
+
+        m_mutex.lock();
+        if (m_strLoadingGUID == m_strNewGUID) {
+            emit loaded(m_strLoadingGUID, m_strHtmlFile);
+            m_mutex.unlock();
+            return;
+        }
+        m_mutex.unlock();
+    };
 }
