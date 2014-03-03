@@ -18,7 +18,7 @@ class CWizScrollBar;
 class CWizDocumentWebView;
 class CWizDatabase;
 class CWizSplitter;
-
+class QStackedWidget;
 class QWebFrame;
 
 
@@ -37,7 +37,7 @@ public:
     ~CWizDocumentView();
     virtual QSize sizeHint() const { return QSize(200, 1); }
 
-    QWidget* client() const { return m_client; }
+    QWidget* client() const;
     CWizDocumentWebView* web() const { return m_web; }
     QWebView* commentView() const { return m_comments; }
 
@@ -49,7 +49,9 @@ protected:
     QWebView* m_comments;
     CWizSplitter* m_splitter;
     Core::Internal::TitleBar* m_title;
-    QWidget* m_client;
+    QWidget* m_docView;
+    QWidget* m_passwordView;
+    QStackedWidget* m_tab;
 
     virtual void showEvent(QShowEvent *event);
 

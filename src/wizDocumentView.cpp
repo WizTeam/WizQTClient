@@ -5,6 +5,7 @@
 #include <QLineEdit>
 #include <QLabel>
 #include <QHBoxLayout>
+#include <QStackedWidget>
 
 #include <coreplugin/icore.h>
 
@@ -36,12 +37,20 @@ CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
 {
     m_title->setEditor(m_web);
 
-    QVBoxLayout* layout = new QVBoxLayout();
-    layout->setContentsMargins(0, 0, 0, 0);
-    layout->setSpacing(0);
+    QVBoxLayout* layoutDoc = new QVBoxLayout();
+    layoutDoc->setContentsMargins(0, 0, 0, 0);
+    layoutDoc->setSpacing(0);
 
-    m_client = new QWidget(this);
-    m_client->setLayout(layout);
+    m_docView = new QWidget(this);
+    m_docView->setLayout(layoutDoc);
+
+    m_tab = new QStackedWidget(this);
+    //
+    m_passwordView = new QWidget(this);
+    //
+    m_tab->addWidget(m_docView);
+    m_tab->addWidget(m_passwordView);
+    //m_tab->setCurrentWidget(m_passwordView);
 
     m_splitter = new CWizSplitter(this);
     m_splitter->addWidget(m_web);
@@ -49,16 +58,16 @@ CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
     m_comments->page()->mainFrame()->setScrollBarPolicy(Qt::Horizontal, Qt::ScrollBarAlwaysOff);
     m_comments->hide();
 
-    layout->addWidget(m_title);
-    layout->addWidget(m_splitter);
+    layoutDoc->addWidget(m_title);
+    layoutDoc->addWidget(m_splitter);
 
-    layout->setStretchFactor(m_title, 0);
-    layout->setStretchFactor(m_splitter, 1);
+    layoutDoc->setStretchFactor(m_title, 0);
+    layoutDoc->setStretchFactor(m_splitter, 1);
 
     QVBoxLayout* layoutMain = new QVBoxLayout();
     layoutMain->setContentsMargins(0, 0, 0, 0);
     setLayout(layoutMain);
-    layoutMain->addWidget(m_client);
+    layoutMain->addWidget(m_tab);
 
     connect(&m_dbMgr, SIGNAL(documentModified(const WIZDOCUMENTDATA&, const WIZDOCUMENTDATA&)), \
             SLOT(on_document_modified(const WIZDOCUMENTDATA&, const WIZDOCUMENTDATA&)));
@@ -87,6 +96,10 @@ CWizDocumentView::~CWizDocumentView()
     m_web->saveDocument(m_note, false);
 }
 
+QWidget* CWizDocumentView::client() const
+{
+    return m_tab;
+}
 void CWizDocumentView::showEvent(QShowEvent *event)
 {
     Q_UNUSED(event);
@@ -94,7 +107,7 @@ void CWizDocumentView::showEvent(QShowEvent *event)
 
 void CWizDocumentView::showClient(bool visible)
 {
-    m_client->setVisible(visible);
+    m_tab->setVisible(visible);
 }
 
 void CWizDocumentView::onViewNoteRequested(INoteView* view, const WIZDOCUMENTDATA& doc)
