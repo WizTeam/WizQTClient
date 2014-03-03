@@ -14,7 +14,7 @@ CWizUserCipherForm::CWizUserCipherForm(CWizExplorerApp& app, QWidget *parent)
     , m_bSaveForSession(false)
 {
     ui->setupUi(this);
-    this->setFixedSize(350, 140);
+    setFixedSize(350, 140);
     ui->editUserCipher->setEchoMode(QLineEdit::Password);
 
     m_animation = new QPropertyAnimation(ui->editUserCipher, "pos");
@@ -99,7 +99,7 @@ void CWizUserCipherForm::cipherCorrect()
 {
     ui->editUserCipher->setText(QString());
     ui->checkSave->setCheckState(Qt::Unchecked);
-    this->hide();
+    hide();
 }
 
 void CWizUserCipherForm::onButtonOK_clicked()
