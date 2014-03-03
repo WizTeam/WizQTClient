@@ -11,6 +11,7 @@
 #include <QAction>
 
 #include <QApplication>
+#include <QWebPage>
 #include <QWebFrame>
 #include <QWebElement>
 #include <QUndoStack>
@@ -299,12 +300,7 @@ CWizDocumentWebView::CWizDocumentWebView(CWizExplorerApp& app, QWidget* parent)
     // refers
     MainWindow* mainWindow = qobject_cast<MainWindow *>(m_app.mainWindow());
 
-    m_cipherDialog = mainWindow->cipherForm();
-    connect(m_cipherDialog, SIGNAL(cipherCheckRequest()), SLOT(onCipherCheckRequest()));
 
-    m_downloaderHost = mainWindow->downloaderHost();
-    connect(m_downloaderHost, SIGNAL(downloadDone(const WIZOBJECTDATA&, bool)),
-            SLOT(on_download_finished(const WIZOBJECTDATA&, bool)));
 
     m_transitionView = mainWindow->transitionView();
 
@@ -556,77 +552,13 @@ void CWizDocumentWebView::onDocumentSaved(const QString& strGUID, bool ok)
 
 void CWizDocumentWebView::viewDocument(const WIZDOCUMENTDATA& doc, bool editing)
 {
-    // clear gui
-    MainWindow* window = qobject_cast<MainWindow *>(m_app.mainWindow());
-
     // set data
     m_bEditingMode = editing;
     m_bNewNote = doc.tCreated.secsTo(QDateTime::currentDateTime()) == 0 ? true : false;
     m_bNewNoteTitleInited = m_bNewNote ? false : true;
 
-    // download document if not exist
-    CWizDatabase& db = m_dbMgr.db(doc.strKbGUID);
-    QString strDocumentFileName = db.GetDocumentFileName(doc.strGUID);
-    if (!db.IsObjectDataDownloaded(doc.strGUID, "document") || \
-            !PathFileExists(strDocumentFileName)) {
-
-        m_downloaderHost->download(doc);
-        window->showClient(false);
-        window->transitionView()->showAsMode(CWizDocumentTransitionView::Downloading);
-
-        return;
-    }
-
-    // ask user cipher if needed
-    if (doc.nProtected) {
-        if(!db.loadUserCert()) {
-            return;
-        }
-
-        if (db.userCipher().isEmpty()) {
-            window->showClient(false);
-
-            m_cipherDialog->setHint(db.userCipherHint());
-            m_cipherDialog->show();
-
-            return;
-        }
-    }
-
     // ask extract and load
     m_workerPool->load(doc);
-}
-
-void CWizDocumentWebView::onCipherCheckRequest()
-{
-    const WIZDOCUMENTDATA& noteData = view()->note();
-    CWizDatabase& db = m_dbMgr.db(noteData.strKbGUID);
-
-    db.setUserCipher(m_cipherDialog->userCipher());
-    db.setSaveUserCipher(m_cipherDialog->isSaveForSession());
-
-    if(!db.IsFileAccessible(noteData))
-    {
-        m_cipherDialog->cipherError();
-        db.setUserCipher(QString());
-        db.setSaveUserCipher(false);
-        return;
-    }
-    m_cipherDialog->cipherCorrect();
-    m_workerPool->load(noteData);
-}
-
-void CWizDocumentWebView::on_download_finished(const WIZOBJECTDATA& data,
-                                               bool bSucceed)
-{
-    if (view()->note().strKbGUID != data.strKbGUID
-            || view()->note().strGUID != data.strObjectGUID)
-        return;
-
-    if (!bSucceed)
-        return;
-
-    m_workerPool->load(view()->note());
 }
 
 void CWizDocumentWebView::reloadNoteData(const WIZDOCUMENTDATA& data)

@@ -18,6 +18,8 @@ class CWizScrollBar;
 class CWizDocumentWebView;
 class CWizDatabase;
 class CWizSplitter;
+class CWizUserCipherForm;
+class CWizObjectDataDownloaderHost;
 class QStackedWidget;
 class QWebFrame;
 
@@ -45,13 +47,17 @@ protected:
     CWizExplorerApp& m_app;
     CWizDatabaseManager& m_dbMgr;
     CWizUserSettings& m_userSettings;
+    CWizObjectDataDownloaderHost* m_downloaderHost;
+
+    QStackedWidget* m_tab;
+
+    QWidget* m_docView;
     CWizDocumentWebView* m_web;
     QWebView* m_comments;
     CWizSplitter* m_splitter;
     Core::Internal::TitleBar* m_title;
-    QWidget* m_docView;
-    QWidget* m_passwordView;
-    QStackedWidget* m_tab;
+
+    CWizUserCipherForm* m_passwordView;
 
     virtual void showEvent(QShowEvent *event);
 
@@ -86,12 +92,19 @@ public Q_SLOTS:
     void onViewNoteLoaded(Core::INoteView*,const WIZDOCUMENTDATA&,bool);
     void onCloseNoteRequested(Core::INoteView* view);
 
+    void onCipherCheckRequest();
+
+    void on_download_finished(const WIZOBJECTDATA& data, bool bSucceed);
+
     void on_document_modified(const WIZDOCUMENTDATA& documentOld,
                               const WIZDOCUMENTDATA& documentNew);
     void on_document_data_modified(const WIZDOCUMENTDATA& data);
 
     void on_attachment_created(const WIZDOCUMENTATTACHMENTDATA& attachment);
     void on_attachment_deleted(const WIZDOCUMENTATTACHMENTDATA& attachment);
+
+private:
+    void loadNote(const WIZDOCUMENTDATA &doc);
 };
 
 } // namespace Core

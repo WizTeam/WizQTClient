@@ -1,7 +1,7 @@
 #ifndef WIZUSERCIPHERFORM_H
 #define WIZUSERCIPHERFORM_H
 
-#include <QDialog>
+#include <QWidget>
 
 #include "wizdef.h"
 
@@ -10,7 +10,7 @@ class CWizUserCipherForm;
 }
 
 class QPropertyAnimation;
-class CWizUserCipherForm : public QDialog
+class CWizUserCipherForm : public QWidget
 {
     Q_OBJECT
     

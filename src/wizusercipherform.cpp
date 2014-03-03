@@ -8,14 +8,16 @@
 using namespace Core::Internal;
 
 CWizUserCipherForm::CWizUserCipherForm(CWizExplorerApp& app, QWidget *parent)
-    : QDialog(parent)
+    : QWidget(parent)
     , ui(new Ui::CWizUserCipherForm)
     , m_app(app)
     , m_bSaveForSession(false)
 {
     ui->setupUi(this);
-    setFixedSize(350, 140);
     ui->editUserCipher->setEchoMode(QLineEdit::Password);
+
+    setAutoFillBackground(true);
+    setAttribute(Qt::WA_MacShowFocusRect, true);
 
     m_animation = new QPropertyAnimation(ui->editUserCipher, "pos");
 
@@ -99,7 +101,6 @@ void CWizUserCipherForm::cipherCorrect()
 {
     ui->editUserCipher->setText(QString());
     ui->checkSave->setCheckState(Qt::Unchecked);
-    hide();
 }
 
 void CWizUserCipherForm::onButtonOK_clicked()

@@ -9,8 +9,9 @@
 #include <QMap>
 
 //#include "wizdownloadobjectdatadialog.h"
-#include "wizusercipherform.h"
+#include "wizdef.h"
 #include "share/wizobject.h"
+
 
 class CWizObjectDataDownloaderHost;
 class CWizEditorInsertLinkForm;
@@ -158,10 +159,8 @@ private:
     bool m_bCurrentEditing;
 
     CWizDocumentWebViewWorkerPool* m_workerPool;
-    CWizObjectDataDownloaderHost* m_downloaderHost;
     CWizDocumentTransitionView* m_transitionView;
 
-    QPointer<CWizUserCipherForm> m_cipherDialog;
     QPointer<CWizEditorInsertLinkForm> m_editorInsertLinkForm;
     QPointer<CWizEditorInsertTableForm> m_editorInsertTableForm;
     QPointer<QColorDialog> m_colorDialog;
@@ -171,8 +170,6 @@ public:
 
 public Q_SLOTS:
     void onActionTriggered(QWebPage::WebAction act);
-    void onCipherCheckRequest();
-    void on_download_finished(const WIZOBJECTDATA& data, bool bSucceed);
 
     void onEditorPopulateJavaScriptWindowObject();
     void onEditorLoadFinished(bool ok);

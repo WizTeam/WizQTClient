@@ -1,10 +1,10 @@
 #ifndef WIZDOWNLOADOBJECTDATA_H
 #define WIZDOWNLOADOBJECTDATA_H
 
-#include "wizapi.h"
 #include "wizDatabaseManager.h"
+#include "../sync/wizXmlRpcServer.h"
 
-class CWizDownloadObjectData : public CWizApi
+class CWizDownloadObjectData
 {
     Q_OBJECT
 
