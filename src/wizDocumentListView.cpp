@@ -763,7 +763,7 @@ void CWizDocumentListView::on_action_deleteDocument()
     }
 
     //change to next document
-    int nItemCount = this->count();
+    int nItemCount = count();
     if(index >= nItemCount)
     {
         index = nItemCount - 1;
