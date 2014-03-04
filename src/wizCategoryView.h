@@ -238,17 +238,15 @@ public:
     CWizCategoryViewTrashItem* findTrash(const QString& strKbGUID = NULL);
 
     // document count update
-    void updateFolderDocumentCount();
-    void updateFolderDocumentCount_impl();
-    int updateFolderDocumentCount_impl(CWizCategoryViewItemBase* pItem,
-                                       const std::map<CString, int>& mapDocumentCount);
+    void updatePrivateFolderDocumentCount();
+    void updatePrivateFolderDocumentCount_impl();
 
-    void updateTagDocumentCount(const QString& strKbGUID = NULL);
-    void updateTagDocumentCount_impl(const QString& strKbGUID = NULL);
-    int updateTagDocumentCount_impl(CWizCategoryViewItemBase* pItem,
-                                    const std::map<CString, int>& mapDocumentCount);
+    void updateGroupFolderDocumentCount(const QString& strKbGUID);
+    void updateGroupFolderDocumentCount_impl(const QString& strKbGUID);
 
     void updatePrivateTagDocumentCount();
+    void updatePrivateTagDocumentCount_impl(const QString& strKbGUID = NULL);
+
     void updateGroupTagDocumentCount(const QString &strKbGUID);
 
     void createDocument(WIZDOCUMENTDATA& data);
@@ -283,9 +281,9 @@ private:
     QString m_strRequestedGroupKbGUID;
 
 private Q_SLOTS:
-    void on_updateFolderDocumentCount_timeout();
-    void on_updateTagDocumentCount_timeout();
-    void on_updateTagDocumentCount_mapped_timeout(const QString& strKbGUID);
+    void on_updatePrivateFolderDocumentCount_timeout();
+    void on_updatePrivateTagDocumentCount_timeout();
+    void on_updateGroupFolderDocumentCount_mapped_timeout(const QString& strKbGUID);
 
 protected Q_SLOTS:
     virtual void on_document_created(const WIZDOCUMENTDATA& doc);
@@ -368,6 +366,13 @@ Q_SIGNALS:
 public:
     // Public API:
     Q_INVOKABLE CWizFolder* SelectedFolder();
+
+private:
+    int getChildFolderDocumentCount(CWizCategoryViewItemBase* pItem,
+                                       const std::map<CString, int>& mapDocumentCount);
+
+    int getChildTagDocumentCount(CWizCategoryViewItemBase* pItem,
+                                    const std::map<CString, int>& mapDocumentCount);
 };
 
 
