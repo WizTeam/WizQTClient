@@ -343,6 +343,7 @@ CWizDocumentWebView::CWizDocumentWebView(CWizExplorerApp& app, QWidget* parent)
 CWizDocumentWebView::~CWizDocumentWebView()
 {
     if (0 != m_docLoadThread) {
+        m_docLoadThread->wait();
         delete m_docLoadThread;
         m_docLoadThread = 0;
     }
