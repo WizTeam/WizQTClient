@@ -326,8 +326,8 @@ CWizDocumentWebView::CWizDocumentWebView(CWizExplorerApp& app, QWidget* parent)
     m_transitionView = mainWindow->transitionView();
 
     m_docLoadThread = new CWizDocumentWebViewLoaderThread(m_dbMgr);
-    connect(m_docLoadThread, SIGNAL(loaded(const QString&, const QString&)),
-            SLOT(onDocumentReady(const QString&, const QString&)));
+    connect(m_docLoadThread, SIGNAL(loaded(const QString, const QString)),
+            SLOT(onDocumentReady(const QString, const QString)), Qt::QueuedConnection);
 
     // loading and saving thread
     m_timerAutoSave.setInterval(5*60*1000); // 5 minutes
@@ -563,7 +563,7 @@ void CWizDocumentWebView::onTimerAutoSaveTimout()
     saveDocument(view()->note(), false);
 }
 
-void CWizDocumentWebView::onDocumentReady(const QString& strGUID, const QString& strFileName)
+void CWizDocumentWebView::onDocumentReady(const QString strGUID, const QString strFileName)
 {
     m_mapFile.insert(strGUID, strFileName);
 
@@ -1366,35 +1366,58 @@ CWizDocumentWebViewLoaderThread::CWizDocumentWebViewLoaderThread(CWizDatabaseMan
 
 void CWizDocumentWebViewLoaderThread::load(const WIZDOCUMENTDATA &doc)
 {
-    m_mutex.lock();
-    m_strNewGUID = doc.strGUID;
-    m_strNewKbGUID = doc.strKbGUID;
-    m_mutex.unlock();
+    setCurrentDoc(doc.strKbGUID, doc.strGUID);
 
-    start();
+    if (!isRunning())
+    {
+        start();
+    }
 }
 
 void CWizDocumentWebViewLoaderThread::run()
 {
     while (true) {
-        m_mutex.lock();
-        m_strLoadingGUID = m_strNewGUID;
-        m_strLoadingKbGUID = m_strNewKbGUID;
-        m_mutex.unlock();
-
-        CWizDatabase& db = m_dbMgr.db(m_strLoadingKbGUID);
+        QString kbGuid;
+        QString docGuid;
+        PeekCurrentDocGUID(kbGuid, docGuid);
+        //
+        CWizDatabase& db = m_dbMgr.db(kbGuid);
         WIZDOCUMENTDATA data;
-        if (!db.DocumentFromGUID(m_strLoadingGUID, data)) {
-            return;
+        if (!db.DocumentFromGUID(docGuid, data)) {
+            continue;
         }
-        db.DocumentToTempHtmlFile(data, m_strHtmlFile);
-
-        m_mutex.lock();
-        if (m_strLoadingGUID == m_strNewGUID) {
-            emit loaded(m_strLoadingGUID, m_strHtmlFile);
-            m_mutex.unlock();
-            return;
+        //
+        QString strHtmlFile;
+        if (db.DocumentToTempHtmlFile(data, strHtmlFile))
+        {
+            emit loaded(docGuid, strHtmlFile);
         }
-        m_mutex.unlock();
     };
 }
+
+void CWizDocumentWebViewLoaderThread::setCurrentDoc(QString kbGUID, QString docGUID)
+{
+    QMutexLocker locker(&m_mutex);
+    Q_UNUSED(locker);
+    //
+    m_strCurrentKbGUID = kbGUID;
+    m_strCurrentDocGUID = docGUID;
+    //
+    m_waitForData.wakeAll();
+}
+
+void CWizDocumentWebViewLoaderThread::PeekCurrentDocGUID(QString& kbGUID, QString& docGUID)
+{
+    QMutexLocker locker(&m_mutex);
+    Q_UNUSED(locker);
+    //
+    if (m_strCurrentKbGUID.isEmpty())
+        m_waitForData.wait(&m_mutex);
+    //
+    kbGUID = m_strCurrentKbGUID;
+    docGUID = m_strCurrentDocGUID;
+    //
+    m_strCurrentKbGUID.clear();
+    m_strCurrentDocGUID.clear();
+}
+

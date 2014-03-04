@@ -8,6 +8,7 @@
 #include <QColorDialog>
 #include <QMap>
 #include <QThread>
+#include <QWaitCondition>
 
 //#include "wizdownloadobjectdatadialog.h"
 #include "wizdef.h"
@@ -36,22 +37,19 @@ public:
 
     void load(const WIZDOCUMENTDATA& doc);
 
+protected:
     virtual void run();
-
-    QString result() const { return m_strHtmlFile; }
-    QString guid() const { return m_strLoadingGUID; }
-
+    //
+    void setCurrentDoc(QString kbGuid, QString docGuid);
+    void PeekCurrentDocGUID(QString& kbGUID, QString& docGUID);
 Q_SIGNALS:
-    void loaded(const QString strGUID, const QString& strFileName);
-
+    void loaded(const QString strGUID, const QString strFileName);
 private:
     CWizDatabaseManager& m_dbMgr;
-    QString m_strLoadingGUID;
-    QString m_strLoadingKbGUID;
-    QString m_strNewGUID;
-    QString m_strNewKbGUID;
-    QString m_strHtmlFile;
+    QString m_strCurrentKbGUID;
+    QString m_strCurrentDocGUID;
     QMutex m_mutex;
+    QWaitCondition m_waitForData;
 
 };
 
@@ -212,7 +210,7 @@ public Q_SLOTS:
 
     void onTimerAutoSaveTimout();
 
-    void onDocumentReady(const QString& strGUID, const QString& strFileName);
+    void onDocumentReady(const QString strGUID, const QString strFileName);
     void onDocumentSaved(const QString& strGUID, bool ok);
 
     void on_editorCommandExecuteLinkInsert_accepted();
