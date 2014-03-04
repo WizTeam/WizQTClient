@@ -1713,10 +1713,10 @@ void CWizCategoryView::updateGroupFolderDocumentCount_impl(const QString &strKbG
         return;
     }
 
-    CWizCategoryViewItemBase* pTagRoot = NULL;
-    pTagRoot = findGroup(strKbGUID);
+    CWizCategoryViewItemBase* pGroupRoot = NULL;
+    pGroupRoot = findGroup(strKbGUID);
 
-    if (!pTagRoot)
+    if (!pGroupRoot)
         return;
 
     int nCurrent = 0;
@@ -1725,17 +1725,17 @@ void CWizCategoryView::updateGroupFolderDocumentCount_impl(const QString &strKbG
         return;
     }
 
-    int nTotal = getChildTagDocumentCount(pTagRoot, mapDocumentCount);
-    pTagRoot->setDocumentsCount(nCurrent, nTotal + nCurrent);
+    int nTotal = getChildTagDocumentCount(pGroupRoot, mapDocumentCount);
+    pGroupRoot->setDocumentsCount(nCurrent, nTotal + nCurrent);
 
 
     // trash item
-    for (int i = pTagRoot->childCount() - 1; i >= 0; i--) {
-        if (CWizCategoryViewTrashItem* pTrash = dynamic_cast<CWizCategoryViewTrashItem*>(pTagRoot->child(i))) {
+    for (int i = pGroupRoot->childCount() - 1; i >= 0; i--) {
+        if (CWizCategoryViewTrashItem* pTrash = dynamic_cast<CWizCategoryViewTrashItem*>(pGroupRoot->child(i))) {
             pTrash->setDocumentsCount(-1, m_dbMgr.db(strKbGUID).GetTrashDocumentCount());
         }
 
-        if (CWizCategoryViewGroupNoTagItem* pItem = dynamic_cast<CWizCategoryViewGroupNoTagItem*>(pTagRoot->child(i))) {
+        if (CWizCategoryViewGroupNoTagItem* pItem = dynamic_cast<CWizCategoryViewGroupNoTagItem*>(pGroupRoot->child(i))) {
             int nCount = 0;
             if (m_dbMgr.db(strKbGUID).GetDocumentsNoTagCount(nCount)) {
                 pItem->setDocumentsCount(-1, nCount);
@@ -1804,13 +1804,13 @@ void CWizCategoryView::updatePrivateTagDocumentCount_impl(const QString& strKbGU
         return;
     }
 
-    int nTotal = getChildTagDocumentCount(pTagRoot, mapDocumentCount);
+    getChildTagDocumentCount(pTagRoot, mapDocumentCount);
 
-    if (strKbGUID.isEmpty()) {
-        pTagRoot->setDocumentsCount(-1, nCurrent);
-    } else {
-        pTagRoot->setDocumentsCount(nCurrent, nTotal + nCurrent);
-    }
+//    if (strKbGUID.isEmpty()) {
+//        pTagRoot->setDocumentsCount(-1, nCurrent);
+//    } else {
+//        pTagRoot->setDocumentsCount(nCurrent, nTotal + nCurrent);
+//    }
 
     // trash item
     for (int i = pTagRoot->childCount() - 1; i >= 0; i--) {
