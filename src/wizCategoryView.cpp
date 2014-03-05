@@ -1755,9 +1755,8 @@ void CWizCategoryView::updateGroupFolderDocumentCount_impl(const QString &strKbG
         return;
     }
 
-    int nTotal = getChildTagDocumentCount(pGroupRoot, mapDocumentCount);
-    pGroupRoot->setDocumentsCount(nCurrent, nTotal + nCurrent);
-
+    int nTotalChild = 0;
+    updateChildTagDocumentCount(pGroupRoot, mapDocumentCount, nTotalChild);
 
     // trash item
     for (int i = pGroupRoot->childCount() - 1; i >= 0; i--) {
@@ -1834,13 +1833,8 @@ void CWizCategoryView::updatePrivateTagDocumentCount_impl(const QString& strKbGU
         return;
     }
 
-    getChildTagDocumentCount(pTagRoot, mapDocumentCount);
-
-//    if (strKbGUID.isEmpty()) {
-//        pTagRoot->setDocumentsCount(-1, nCurrent);
-//    } else {
-//        pTagRoot->setDocumentsCount(nCurrent, nTotal + nCurrent);
-//    }
+    int nTotalChild = 0;
+    updateChildTagDocumentCount(pTagRoot, mapDocumentCount, nTotalChild);
 
     // trash item
     for (int i = pTagRoot->childCount() - 1; i >= 0; i--) {
@@ -1859,10 +1853,9 @@ void CWizCategoryView::updatePrivateTagDocumentCount_impl(const QString& strKbGU
     update();
 }
 
-int CWizCategoryView::getChildTagDocumentCount(CWizCategoryViewItemBase* pItem,
-                                                  const std::map<CString, int>& mapDocumentCount)
+void CWizCategoryView::updateChildTagDocumentCount(CWizCategoryViewItemBase* pItem,
+                                                  const std::map<CString, int>& mapDocumentCount, int &allCount)
 {
-    int nTotal = 0;
     for (int i = 0; i < pItem->childCount(); i++) {
         QString strGUID;
         if (CWizCategoryViewTagItem* pItemChild = dynamic_cast<CWizCategoryViewTagItem*>(pItem->child(i)))
@@ -1893,7 +1886,8 @@ int CWizCategoryView::getChildTagDocumentCount(CWizCategoryViewItemBase* pItem,
                 nCurrentChild = itCurrent->second;
             }
 
-            int nTotalChild = getChildTagDocumentCount(pItemChild, mapDocumentCount);
+            int nTotalChild = 0;
+            updateChildTagDocumentCount(pItemChild, mapDocumentCount, nTotalChild);
 
             nTotalChild += nCurrentChild;
 
@@ -1903,11 +1897,9 @@ int CWizCategoryView::getChildTagDocumentCount(CWizCategoryViewItemBase* pItem,
                 pItemChild->setDocumentsCount(-1, nTotalChild);
             }
 
-            nTotal += nTotalChild;
+            allCount += nTotalChild;
         }
     }
-
-    return nTotal;
 }
 
 void CWizCategoryView::initGeneral()

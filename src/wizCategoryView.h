@@ -371,8 +371,8 @@ private:
     void updateChildFolderDocumentCount(CWizCategoryViewItemBase* pItem,
                                        const std::map<CString, int>& mapDocumentCount, int& allCount);
 
-    int getChildTagDocumentCount(CWizCategoryViewItemBase* pItem,
-                                    const std::map<CString, int>& mapDocumentCount);
+    void updateChildTagDocumentCount(CWizCategoryViewItemBase* pItem,
+                                    const std::map<CString, int>& mapDocumentCount, int& allCount);
 };
 
 
