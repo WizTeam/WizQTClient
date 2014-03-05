@@ -745,9 +745,24 @@ void CWizCategoryView::createDocument(WIZDOCUMENTDATA& data)
     {
         // only handle group trash
         if (pItem->kbGUID() != m_dbMgr.db().kbGUID()) {
-            strKbGUID = pItem->kbGUID();
-            strLocation = pItem->location(); // FIXME: group trash unable to fallback
+            CWizCategoryViewGroupRootItem* pRItem =
+                    dynamic_cast<CWizCategoryViewGroupRootItem*>(pItem->parent());
+
+            Q_ASSERT(pRItem);
+
+            strKbGUID = pRItem->kbGUID();
             bFallback = false;
+
+            //set noTag item as current item.
+            selectedItems().clear();
+            for (int i = 0; i < pRItem->childCount(); i++) {
+                CWizCategoryViewGroupNoTagItem* pNoTag =
+                        dynamic_cast<CWizCategoryViewGroupNoTagItem*>(pRItem->child(i));
+                if (0 != pNoTag) {
+                    setCurrentItem(pNoTag);
+                    break;
+                }
+            }
         }
     }
     else if (CWizCategoryViewFolderItem* pItem = currentCategoryItem<CWizCategoryViewFolderItem>())
