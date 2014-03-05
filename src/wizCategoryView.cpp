@@ -1755,7 +1755,9 @@ void CWizCategoryView::updateGroupFolderDocumentCount_impl(const QString &strKbG
         return;
     }
 
-    getChildTagDocumentCount(pGroupRoot, mapDocumentCount);
+    int nTotal = getChildTagDocumentCount(pGroupRoot, mapDocumentCount);
+    pGroupRoot->setDocumentsCount(nCurrent, nTotal + nCurrent);
+
 
     // trash item
     for (int i = pGroupRoot->childCount() - 1; i >= 0; i--) {

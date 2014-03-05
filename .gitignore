@@ -4,4 +4,3 @@ tags
 CMakeLists.txt.user*
 !macos-package/.DS_Store
 *.autosave
-macos-package/.DS_store
