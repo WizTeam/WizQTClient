@@ -6,14 +6,14 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>350</width>
-    <height>140</height>
+    <width>324</width>
+    <height>136</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>CipherForm</string>
   </property>
-  <layout class="QHBoxLayout" name="horizontalLayout">
+  <layout class="QHBoxLayout" name="horizontalLayout_4">
    <item>
     <spacer name="horizontalSpacer">
      <property name="orientation">
@@ -28,7 +28,10 @@
     </spacer>
    </item>
    <item>
-    <layout class="QVBoxLayout" name="verticalLayout">
+    <layout class="QVBoxLayout" name="verticalLayout_2">
+     <property name="spacing">
+      <number>5</number>
+     </property>
      <item>
       <spacer name="verticalSpacer">
        <property name="orientation">
@@ -36,25 +39,15 @@
        </property>
        <property name="sizeHint" stdset="0">
         <size>
-         <width>20</width>
+         <width>14</width>
          <height>13</height>
         </size>
        </property>
       </spacer>
      </item>
      <item>
-      <layout class="QGridLayout" name="gridLayout">
-       <item row="1" column="1">
-        <widget class="QLabel" name="labelHint">
-         <property name="text">
-          <string>N/A</string>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="0">
+      <layout class="QHBoxLayout" name="horizontalLayout_2">
+       <item>
         <widget class="QLabel" name="label">
          <property name="text">
           <string>Cipher:</string>
@@ -64,7 +57,56 @@
          </property>
         </widget>
        </item>
-       <item row="1" column="0">
+       <item>
+        <widget class="QLineEdit" name="editUserCipher"/>
+       </item>
+       <item>
+        <layout class="QVBoxLayout" name="verticalLayout">
+         <property name="leftMargin">
+          <number>5</number>
+         </property>
+         <property name="bottomMargin">
+          <number>2</number>
+         </property>
+         <item>
+          <widget class="QPushButton" name="buttonOk">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>26</width>
+             <height>26</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>Ok</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <layout class="QHBoxLayout" name="horizontalLayout">
+       <item>
+        <spacer name="horizontalSpacer_4">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
         <widget class="QLabel" name="label_2">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
@@ -80,8 +122,28 @@
          </property>
         </widget>
        </item>
-       <item row="0" column="1">
-        <widget class="QLineEdit" name="editUserCipher"/>
+       <item>
+        <widget class="QLabel" name="labelHint">
+         <property name="text">
+          <string>N/A</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="horizontalSpacer_3">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
        </item>
       </layout>
      </item>
@@ -94,13 +156,6 @@
          </property>
         </widget>
        </item>
-       <item>
-        <widget class="QPushButton" name="buttonOk">
-         <property name="text">
-          <string>Ok</string>
-         </property>
-        </widget>
-       </item>
       </layout>
      </item>
      <item>
@@ -110,8 +165,8 @@
        </property>
        <property name="sizeHint" stdset="0">
         <size>
-         <width>20</width>
-         <height>40</height>
+         <width>278</width>
+         <height>13</height>
         </size>
        </property>
       </spacer>
@@ -134,7 +189,6 @@
   </layout>
  </widget>
  <tabstops>
-  <tabstop>buttonOk</tabstop>
   <tabstop>checkSave</tabstop>
   <tabstop>editUserCipher</tabstop>
  </tabstops>

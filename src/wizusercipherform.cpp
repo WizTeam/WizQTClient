@@ -14,11 +14,19 @@ CWizUserCipherForm::CWizUserCipherForm(CWizExplorerApp& app, QWidget *parent)
     , m_bSaveForSession(false)
 {
     ui->setupUi(this);
+    ui->checkSave->setVisible(false);
     ui->editUserCipher->setEchoMode(QLineEdit::Password);
 
     setAutoFillBackground(true);
     setAttribute(Qt::WA_MacShowFocusRect, true);
     setBackgroundRole(QPalette::Midlight);
+
+    QString strIconPath = ::WizGetSkinResourcePath(m_app.userSettings().skin()) + "check.png";
+    QIcon ico(strIconPath);
+    ui->buttonOk->setIcon(ico);
+    ui->buttonOk->setText(QString());
+    QSize szBtn(26, 26);
+    ui->buttonOk->setMaximumSize(szBtn);
 
     m_animation = new QPropertyAnimation(ui->editUserCipher, "pos");
 
@@ -123,7 +131,14 @@ void CWizUserCipherForm::onCheckSave_stateChanged(int state)
 
 void CWizUserCipherForm::setHint(const QString& strHint)
 {
-    ui->labelHint->setText(strHint);
+    if (strHint.isEmpty()) {
+        ui->labelHint->setVisible(false);
+        ui->label_2->setVisible(false);
+    } else {
+        ui->labelHint->setText(strHint);
+        ui->labelHint->setVisible(true);
+        ui->label_2->setVisible(true);
+    }
 }
 
 void CWizUserCipherForm::setCipherEditorFocus()
