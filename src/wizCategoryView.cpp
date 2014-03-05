@@ -1026,10 +1026,6 @@ void CWizCategoryView::on_action_user_moveFolder_confirmed(int result)
 
         folder.MoveToLocation(strLocation);
 
-        // hide progress dialog
-        MainWindow* mainWindow = qobject_cast<MainWindow*>(m_app.mainWindow());
-        mainWindow->progressDialog()->hide();
-
         //addAndSelectFolder(strLocation);
         //on_folder_deleted(strOldLocation);
     }
@@ -1042,11 +1038,14 @@ void CWizCategoryView::on_action_user_moveFolder_confirmed_progress(int nMax, in
 {
     MainWindow* mainWindow = qobject_cast<MainWindow*>(m_app.mainWindow());
     CWizProgressDialog* progress = mainWindow->progressDialog();
+    progress->setVisible(true);
 
     progress->setActionString(tr("Move Document: %1 to %2").arg(strOldLocation).arg(strNewLocation));
     progress->setNotifyString(data.strTitle);
     progress->setProgress(nMax, nValue);
-    progress->exec();
+    if (nMax == nValue + 1) {
+        progress->setVisible(false);
+    }
 }
 
 void CWizCategoryView::on_action_renameItem()
@@ -1114,10 +1113,6 @@ void CWizCategoryView::on_action_user_renameFolder_confirmed(int result)
 
         folder.MoveToLocation(strLocation);
 
-        // hide progress dialog
-        MainWindow* mainWindow = qobject_cast<MainWindow*>(m_app.mainWindow());
-        mainWindow->progressDialog()->hide();
-
         //addAndSelectFolder(strLocation);
         //on_folder_deleted(strOldLocation);
     }
@@ -1130,11 +1125,14 @@ void CWizCategoryView::on_action_user_renameFolder_confirmed_progress(int nMax, 
 {
     MainWindow* mainWindow = qobject_cast<MainWindow*>(m_app.mainWindow());
     CWizProgressDialog* progress = mainWindow->progressDialog();
+    progress->setVisible(true);
 
     progress->setActionString(tr("Move Document: %1 to %2").arg(strOldLocation).arg(strNewLocation));
     progress->setNotifyString(data.strTitle);
     progress->setProgress(nMax, nValue);
-    progress->exec();
+    if (nMax == nValue + 1) {
+        progress->setVisible(false);
+    }
 }
 
 void CWizCategoryView::on_action_user_renameTag()
