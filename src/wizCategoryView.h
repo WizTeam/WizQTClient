@@ -171,7 +171,7 @@ public:
     void showAdminGroupRootContextMenu(QPoint pos);
     void showOwnerGroupRootContextMenu(QPoint pos);
     void showNormalBizGroupRootContextMenu(QPoint pos);
-    void showAdminBizGroupRootContextMenu(QPoint pos);
+    void showAdminBizGroupRootContextMenu(QPoint pos, bool usable = true);
     void showGroupContextMenu(QPoint pos);
     void showTrashContextMenu(QPoint pos);
 

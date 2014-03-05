@@ -975,7 +975,7 @@
     <message>
         <location filename="../src/ui/wiznoteinfoform.ui" line="14"/>
         <source>Form</source>
-        <translation type="unfinished"></translation>
+        <translation>笔记信息</translation>
     </message>
     <message>
         <location filename="../src/ui/wiznoteinfoform.ui" line="43"/>
@@ -1413,17 +1413,17 @@
     <message>
         <location filename="../src/share/wizSearchIndexer.cpp" line="115"/>
         <source>Update search index (%1/%2): %3</source>
-        <translation type="unfinished"></translation>
+        <translation>更新查询索引(%1/%2): %3</translation>
     </message>
     <message>
         <location filename="../src/share/wizSearchIndexer.cpp" line="117"/>
         <source>[WARNING] failed to update: %1</source>
-        <translation type="unfinished"></translation>
+        <translation>[警告] 更新失败: %1</translation>
     </message>
     <message>
         <location filename="../src/share/wizSearchIndexer.cpp" line="126"/>
         <source>[WARNING] total %1 documents failed to build</source>
-        <translation type="unfinished"></translation>
+        <translation>[警告] 共 %1 个文件构建失败</translation>
     </message>
     <message>
         <source>Build FTS index begin for: </source>
@@ -1688,7 +1688,7 @@
     <message>
         <location filename="../src/ui/wizupgradenotifydialog.ui" line="27"/>
         <source>about:blank</source>
-        <translation type="unfinished"></translation>
+        <translation>相关内容：暂无</translation>
     </message>
     <message>
         <location filename="../src/ui/wizupgradenotifydialog.ui" line="41"/>
@@ -1724,7 +1724,7 @@
     <message>
         <location filename="../src/ui/wizusercipherform.ui" line="14"/>
         <source>Form</source>
-        <translation type="unfinished"></translation>
+        <translation>请输入阅读密码</translation>
     </message>
     <message>
         <location filename="../src/ui/wizusercipherform.ui" line="26"/>
@@ -2071,7 +2071,7 @@
     <message>
         <location filename="../lib/extensionsystem/pluginerroroverview.ui" line="14"/>
         <source>Qt Creator - Plugin loader messages</source>
-        <translation type="unfinished"></translation>
+        <translation>Qt Creator 插件加载信息</translation>
     </message>
     <message>
         <location filename="../lib/extensionsystem/pluginerroroverview.ui" line="20"/>
@@ -2283,12 +2283,12 @@ Reason: %3</source>
     <message>
         <location filename="../src/plugins/helloworld/helloworldplugin.cpp" line="146"/>
         <source>Hello World!</source>
-        <translation type="unfinished"></translation>
+        <translation>世界，你好！</translation>
     </message>
     <message>
         <location filename="../src/plugins/helloworld/helloworldplugin.cpp" line="146"/>
         <source>Hello World! Beautiful day today, isn&apos;t it?</source>
-        <translation type="unfinished"></translation>
+        <translation>世界，你好！今天真是一个好天气，不是吗？</translation>
     </message>
 </context>
 <context>
@@ -2398,17 +2398,17 @@ Have you changed your password from other platform?</source>
         <location filename="../lib/extensionsystem/optionsparser.cpp" line="147"/>
         <location filename="../lib/extensionsystem/optionsparser.cpp" line="167"/>
         <source>The plugin &apos;%1&apos; does not exist.</source>
-        <translation type="unfinished"></translation>
+        <translation>插件 &apos;%1&apos; 不存在。</translation>
     </message>
     <message>
         <location filename="../lib/extensionsystem/optionsparser.cpp" line="218"/>
         <source>Unknown option %1</source>
-        <translation type="unfinished"></translation>
+        <translation>未知选项 %1</translation>
     </message>
     <message>
         <location filename="../lib/extensionsystem/optionsparser.cpp" line="230"/>
         <source>The option %1 requires an argument.</source>
-        <translation type="unfinished"></translation>
+        <translation>选项 %1 需要一个参数。</translation>
     </message>
 </context>
 <context>

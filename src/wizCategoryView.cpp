@@ -506,17 +506,23 @@ void CWizCategoryView::initMenus()
     addAction(actionTrash);
     connect(actionTrash, SIGNAL(triggered()), SLOT(on_action_emptyTrash()));
 
-    QAction* actionQuitGroup = new QAction("QuitGroup", this);
-    actionQuitGroup->setShortcutContext(Qt::WidgetShortcut);
-    actionQuitGroup->setData(ActionQuitGroup);
-    addAction(actionQuitGroup);
+//    QAction* actionQuitGroup = new QAction("QuitGroup", this);
+//    actionQuitGroup->setShortcutContext(Qt::WidgetShortcut);
+//    actionQuitGroup->setData(ActionQuitGroup);
+//    addAction(actionQuitGroup);
     //connect(actionQuitGroup, SIGNAL(triggered()), SLOT(on_action_itemAttribute()));
 
     QAction* actionManageGroup = new QAction("ManageGroup", this);
     actionManageGroup->setShortcutContext(Qt::WidgetShortcut);
     actionManageGroup->setData(ActionItemManage);
     addAction(actionManageGroup);
-    connect(actionManageGroup, SIGNAL(triggered()), SLOT(on_action_itemManage()));
+    connect(actionManageGroup, SIGNAL(triggered()), SLOT(on_action_manageGroup()));
+
+    QAction* actionManageBiz = new QAction("ManageGroup", this);
+    actionManageBiz->setShortcutContext(Qt::WidgetShortcut);
+    actionManageBiz->setData(ActionItemManage);
+    addAction(actionManageBiz);
+    connect(actionManageBiz, SIGNAL(triggered()), SLOT(on_action_manageBiz()));
 
     // trash menu
     m_menuTrash = new QMenu(this);
@@ -552,7 +558,7 @@ void CWizCategoryView::initMenus()
     m_menuNormalGroupRoot->addAction(actionNewItem);
     m_menuNormalGroupRoot->addSeparator();
     m_menuNormalGroupRoot->addAction(actionItemAttr);
-    m_menuNormalGroupRoot->addAction(actionQuitGroup);
+//    m_menuNormalGroupRoot->addAction(actionQuitGroup);
 
     // group root menu admin
     m_menuAdminGroupRoot = new QMenu(this);
@@ -560,7 +566,7 @@ void CWizCategoryView::initMenus()
     m_menuAdminGroupRoot->addAction(actionNewItem);
     m_menuAdminGroupRoot->addSeparator();
     m_menuAdminGroupRoot->addAction(actionManageGroup);
-    m_menuAdminGroupRoot->addAction(actionQuitGroup);
+//    m_menuAdminGroupRoot->addAction(actionQuitGroup);
 
     // group root menu normal
     m_menuOwnerGroupRoot = new QMenu(this);
@@ -575,7 +581,7 @@ void CWizCategoryView::initMenus()
 
     //biz group root menu admin
     m_menuAdminBizGroupRoot = new QMenu(this);
-    m_menuAdminBizGroupRoot->addAction(actionManageGroup);
+    m_menuAdminBizGroupRoot->addAction(actionManageBiz);
 
 
     // group menu
@@ -720,9 +726,15 @@ void CWizCategoryView::showNormalBizGroupRootContextMenu(QPoint pos)
     m_menuNormalBizGroupRoot->popup(pos);
 }
 
-void CWizCategoryView::showAdminBizGroupRootContextMenu(QPoint pos)
+void CWizCategoryView::showAdminBizGroupRootContextMenu(QPoint pos, bool usable)
 {
     resetMenu(BizGroupRootItem);
+
+    const QList<QAction*>& acts = m_menuAdminBizGroupRoot->actions();
+    foreach (QAction* act,  acts) {
+        act->setEnabled(usable);
+    }
+
     m_menuAdminBizGroupRoot->popup(pos);
 }
 
@@ -1390,10 +1402,9 @@ void CWizCategoryView::on_action_itemManage()
 
 void CWizCategoryView::on_action_manageBiz()
 {
-    CWizCategoryViewItemBase* p = currentCategoryItem<CWizCategoryViewItemBase>();
-    if (p && !p->kbGUID().isEmpty()) {
-
-        manageBiz(p->kbGUID());
+    CWizCategoryViewBizGroupRootItem* p = currentCategoryItem<CWizCategoryViewBizGroupRootItem>();
+    if (p && !p->biz().bizGUID.isEmpty()) {
+        manageBiz(p->biz().bizGUID);
     }
 }
 

@@ -815,16 +815,17 @@ CWizCategoryViewBizGroupRootItem::CWizCategoryViewBizGroupRootItem(CWizExplorerA
 
 void CWizCategoryViewBizGroupRootItem::showContextMenu(CWizCategoryBaseView *pCtrl, QPoint pos)
 {
-//    if (CWizCategoryView* view = dynamic_cast<CWizCategoryView *>(pCtrl)) {
-//        if(isAdmin())
-//        {
-//            view->showAdminBizGroupRootContextMenu(pos);
-//        }
-//        else
-//        {
+    if (CWizCategoryView* view = dynamic_cast<CWizCategoryView *>(pCtrl)) {
+        if(isAdmin())
+        {
+            view->showAdminBizGroupRootContextMenu(pos);
+        }
+        else
+        {
 //            view->showNormalBizGroupRootContextMenu(pos);
-//        }
-//    }
+            view->showAdminBizGroupRootContextMenu(pos, false);
+        }
+    }
 }
 
 bool CWizCategoryViewBizGroupRootItem::isOwner()

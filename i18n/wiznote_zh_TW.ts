@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE TS>
-<TS version="2.1" language="zh_CN">
+<TS version="2.0" language="zh_CN">
 <context>
     <name>AboutDialog</name>
     <message>
@@ -94,7 +94,7 @@
     </message>
     <message>
         <source>could not load document data: </source>
-        <translation type="vanished">無法加載筆記資料：</translation>
+        <translation>無法加載筆記資料：</translation>
     </message>
     <message>
         <source>Can not load document data: </source>
@@ -102,7 +102,7 @@
     </message>
     <message>
         <source>Could not load attachment data: </source>
-        <translation type="vanished">無法加載附件資料：</translation>
+        <translation>無法加載附件資料：</translation>
     </message>
     <message>
         <source>downloading note: </source>
@@ -117,31 +117,31 @@
     <name>CWizApiBase</name>
     <message>
         <source>Token expired, Try to request another</source>
-        <translation type="vanished">令牌過期，重新申請令牌</translation>
+        <translation>令牌過期，重新申請令牌</translation>
     </message>
     <message>
         <source>upload document info:</source>
-        <translation type="vanished">上傳文件資訊：</translation>
+        <translation>上傳文件資訊：</translation>
     </message>
     <message>
         <source>upload attachment info: </source>
-        <translation type="vanished">上傳附件資訊：</translation>
+        <translation>上傳附件資訊：</translation>
     </message>
     <message>
         <source>downloading note: </source>
-        <translation type="vanished">下載文件資料：</translation>
+        <translation>下載文件資料：</translation>
     </message>
     <message>
         <source>downloading attachment: </source>
-        <translation type="vanished">下載附件資料：</translation>
+        <translation>下載附件資料：</translation>
     </message>
     <message>
         <source>uploading document data: </source>
-        <translation type="vanished">上傳文件資料：</translation>
+        <translation>上傳文件資料：</translation>
     </message>
     <message>
         <source>uploading attachment data: </source>
-        <translation type="vanished">上傳附件資料：</translation>
+        <translation>上傳附件資料：</translation>
     </message>
 </context>
 <context>
@@ -497,22 +497,22 @@
     <message>
         <location filename="../src/ui/wizconsoledialog.ui" line="120"/>
         <source>Clear Log</source>
-        <translation>清除</translation>
+        <translation type="unfinished">清除</translation>
     </message>
     <message>
         <location filename="../src/wizconsoledialog.cpp" line="145"/>
         <source>Save log</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">保存日誌</translation>
     </message>
     <message>
         <location filename="../src/wizconsoledialog.cpp" line="150"/>
         <source>Failed to save</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">保存失敗</translation>
     </message>
     <message>
         <location filename="../src/wizconsoledialog.cpp" line="150"/>
         <source>you should select a file name which does not exists</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">你應當使用一個不重復的名稱進行保存</translation>
     </message>
 </context>
 <context>
@@ -583,21 +583,21 @@
     <name>CWizDocumentTransitionView</name>
     <message>
         <source>Downloading document from cloud server...</source>
-        <translation type="vanished">正在從雲伺服器下載文件，稍等片刻...</translation>
+        <translation>正在從雲伺服器下載文件，稍等片刻...</translation>
     </message>
     <message>
         <source>Error occured while loading document.</source>
-        <translation type="vanished">文件加載失敗啦.</translation>
+        <translation>文件加載失敗啦.</translation>
     </message>
     <message>
         <location filename="../src/wizDocumentTransitionView.cpp" line="24"/>
         <source>Downloading note from cloud server...</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">正在從雲伺服器下載筆記，稍等片刻...</translation>
     </message>
     <message>
         <location filename="../src/wizDocumentTransitionView.cpp" line="26"/>
         <source>Error occured while loading note.</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">筆記加載失敗啦.</translation>
     </message>
 </context>
 <context>
@@ -2316,7 +2316,7 @@ Reason: %3</source>
     </message>
     <message>
         <source>WizNote</source>
-        <translation type="vanished">爲知筆記</translation>
+        <translation>爲知筆記</translation>
     </message>
     <message>
         <source>Wow, seems sync failed!
@@ -2325,19 +2325,19 @@ Have you changed your password from other platform?</source>
     </message>
     <message>
         <source>sorry, sync failed. please input your password and try again.</source>
-        <translation type="vanished">抱歉，同步失敗了。請輸入您的密碼再試一次。</translation>
+        <translation>抱歉，同步失敗了。請輸入您的密碼再試一次。</translation>
     </message>
     <message>
         <source>Syncing...</source>
-        <translation type="vanished">同步中...</translation>
+        <translation>同步中...</translation>
     </message>
     <message>
         <source>Rebuild full text search index</source>
-        <translation type="vanished">重建搜尋索引</translation>
+        <translation>重建搜尋索引</translation>
     </message>
     <message>
         <source>Rebuild full text search is quit slow if you have quite a few                    documents or attachments, you do not have to use this function                    while search should work as expected, this fuction is only used                    as developer&apos;s issue triage purpose, use it only if you know                    what you are doing!</source>
-        <translation type="vanished">如果您有大量文件或附件存在，重建搜尋索引會非常耗費時間，正常情況下，搜尋是可以如期工作的，這個功能主要是爲修復可能出現的搜尋問題提供幫助，請在明確這個選項意義的情況下使用這個功能！</translation>
+        <translation>如果您有大量文件或附件存在，重建搜尋索引會非常耗費時間，正常情況下，搜尋是可以如期工作的，這個功能主要是爲修復可能出現的搜尋問題提供幫助，請在明確這個選項意義的情況下使用這個功能！</translation>
     </message>
     <message>
         <source>Search</source>
@@ -2357,7 +2357,7 @@ Have you changed your password from other platform?</source>
     </message>
     <message>
         <source>0 articles</source>
-        <translation type="vanished">0 條</translation>
+        <translation>0 條</translation>
     </message>
     <message>
         <source>New note</source>
@@ -2365,7 +2365,7 @@ Have you changed your password from other platform?</source>
     </message>
     <message>
         <source>Saving note...</source>
-        <translation type="vanished">正在保存筆記...</translation>
+        <translation>正在保存筆記...</translation>
     </message>
 </context>
 <context>
@@ -3001,15 +3001,15 @@ Have you changed your password from other platform?</source>
     </message>
     <message>
         <source>Save &amp; Switch to Reading View</source>
-        <translation type="vanished">保存並切換到閱讀檢視方式</translation>
+        <translation>保存並切換到閱讀檢視方式</translation>
     </message>
     <message>
         <source>Switch to Reading View</source>
-        <translation type="vanished">切換到閱讀檢視方式</translation>
+        <translation>切換到閱讀檢視方式</translation>
     </message>
     <message>
         <source>Switch to Editing View</source>
-        <translation type="vanished">切換到編輯檢視方式</translation>
+        <translation>切換到編輯檢視方式</translation>
     </message>
     <message>
         <source>Tags (%1)</source>
@@ -3037,27 +3037,27 @@ Have you changed your password from other platform?</source>
     </message>
     <message>
         <source>The document is locked and read only, press unlock button if you need edit.</source>
-        <translation type="vanished">文件已鎖定爲唯讀，如需修改請點擊解鎖按鈕。</translation>
+        <translation>文件已鎖定爲唯讀，如需修改請點擊解鎖按鈕。</translation>
     </message>
     <message>
         <source>This document is deleted, You can edit after move to other folders.</source>
-        <translation type="vanished">這個文件已被刪除, 請移動到其他資料夾之後再進行修改.</translation>
+        <translation>這個文件已被刪除, 請移動到其他資料夾之後再進行修改.</translation>
     </message>
     <message>
         <source>Your permission is not enough to edit this document.</source>
-        <translation type="vanished">您的權限不夠, 無法修改這個文件.</translation>
+        <translation>您的權限不夠, 無法修改這個文件.</translation>
     </message>
     <message>
         <source>Tags, total: %1 (%2)</source>
-        <translation type="vanished">標籤，共%1個 (%2)</translation>
+        <translation>標籤，共%1個 (%2)</translation>
     </message>
     <message>
         <source>Attachments, total:%1 (%2)</source>
-        <translation type="vanished">附件，共%1個 (%2)</translation>
+        <translation>附件，共%1個 (%2)</translation>
     </message>
     <message>
         <source>Information (%2)</source>
-        <translation type="vanished">筆記資訊 (%2)</translation>
+        <translation>筆記資訊 (%2)</translation>
     </message>
     <message>
         <source>Tags (%1): %2</source>
