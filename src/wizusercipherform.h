@@ -47,6 +47,7 @@ Q_SIGNALS:
 public Q_SLOTS:
     void onButtonOK_clicked();
     void onCheckSave_stateChanged(int state);
+    void onCipher_changed(const QString& text);
 
 };
 

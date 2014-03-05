@@ -2,7 +2,6 @@ project(wiznote)
 
 add_subdirectory(plugins)
 
-
 set(wiznote_SOURCES_MAC
     mac/wizSearchWidget.mm
     mac/wizmachelper.mm
@@ -135,6 +134,7 @@ set(wiznote_SOURCES
     messagelistview.cpp
     thumbcache.cpp
     messagecompleter.cpp
+    widgets/wizImageButton.cpp
 )
 
 set(wiznote_HEADERS
@@ -255,6 +255,7 @@ set(wiznote_HEADERS
     thumbcache.h
     thumbcache_p.h
     messagecompleter.h
+    widgets/wizImageButton.h
 )
 
 set(wiznote_FORMS
@@ -276,6 +277,8 @@ set(wiznote_TRANSLATIONS
     ${CMAKE_SOURCE_DIR}/i18n/wiznote_zh_CN.ts
     ${CMAKE_SOURCE_DIR}/i18n/wiznote_zh_TW.ts
 )
+
+
 
 set(wiznote_RCS
     ${CMAKE_SOURCE_DIR}/resources/wiznote.qrc

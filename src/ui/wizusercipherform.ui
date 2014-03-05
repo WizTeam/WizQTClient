@@ -69,7 +69,7 @@
           <number>2</number>
          </property>
          <item>
-          <widget class="QPushButton" name="buttonOk">
+          <widget class="wizImageButton" name="buttonOk">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
              <horstretch>0</horstretch>
@@ -83,7 +83,7 @@
             </size>
            </property>
            <property name="text">
-            <string>Ok</string>
+            <string/>
            </property>
           </widget>
          </item>
@@ -188,6 +188,13 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>wizImageButton</class>
+   <extends>QPushButton</extends>
+   <header>widgets/wizImageButton.h</header>
+  </customwidget>
+ </customwidgets>
  <tabstops>
   <tabstop>checkSave</tabstop>
   <tabstop>editUserCipher</tabstop>
