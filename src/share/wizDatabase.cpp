@@ -1300,6 +1300,8 @@ bool CWizDatabase::SetUserBizInfo(const CWizBizDataArray& arrayBiz)
         SetMeta(bizSection, "UserRole", QString::number(biz.bizUserRole));
         SetMeta(bizSection, "Level", QString::number(biz.bizLevel));
     }
+    //
+    return true;
 }
 //
 //

@@ -491,8 +491,11 @@ QStringList JlCompress::extractDir(QString fileCompressed, QString dir) {
 
     QDir directory(dir);
     for (int i=0; i<lst.count(); i++) {
-        QString absFilePath = directory.absoluteFilePath(lst.at(i));
-        if (!extractFile(zip, lst.at(i), absFilePath)) {
+        QString fileName = lst.at(i);
+        if (fileName.endsWith('/') || fileName.endsWith('\\'))
+            continue;
+        QString absFilePath = directory.absoluteFilePath(fileName);
+        if (!extractFile(zip, fileName, absFilePath)) {
             delete zip;
             removeFile(lst);
             return QStringList();
