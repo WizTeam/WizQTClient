@@ -368,8 +368,8 @@ public:
     Q_INVOKABLE CWizFolder* SelectedFolder();
 
 private:
-    int getChildFolderDocumentCount(CWizCategoryViewItemBase* pItem,
-                                       const std::map<CString, int>& mapDocumentCount);
+    void updateChildFolderDocumentCount(CWizCategoryViewItemBase* pItem,
+                                       const std::map<CString, int>& mapDocumentCount, int& allCount);
 
     int getChildTagDocumentCount(CWizCategoryViewItemBase* pItem,
                                     const std::map<CString, int>& mapDocumentCount);

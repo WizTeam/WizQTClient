@@ -1657,7 +1657,8 @@ void CWizCategoryView::updatePrivateFolderDocumentCount_impl()
         return;
 
     // folder items
-    int nTotal = getChildFolderDocumentCount(pFolderRoot, mapDocumentCount);
+    int nTotal = 0;
+    updateChildFolderDocumentCount(pFolderRoot, mapDocumentCount, nTotal);
     pFolderRoot->setDocumentsCount(-1, nTotal);
 
     // trash item
@@ -1670,10 +1671,10 @@ void CWizCategoryView::updatePrivateFolderDocumentCount_impl()
     update();
 }
 
-int CWizCategoryView::getChildFolderDocumentCount(CWizCategoryViewItemBase* pItem,
-                                                     const std::map<CString, int>& mapDocumentCount)
+void CWizCategoryView::updateChildFolderDocumentCount(CWizCategoryViewItemBase* pItem,
+                                                     const std::map<CString, int>& mapDocumentCount,
+                                                     int& allCount)
 {
-    int nTotal = 0;
     for (int i = 0; i < pItem->childCount(); i++) {
         if (CWizCategoryViewItemBase* pItemChild = dynamic_cast<CWizCategoryViewItemBase*>(pItem->child(i))) {
             int nCurrentChild = 0;
@@ -1682,7 +1683,8 @@ int CWizCategoryView::getChildFolderDocumentCount(CWizCategoryViewItemBase* pIte
                 nCurrentChild = itCurrent->second;
             }
 
-            int nTotalChild = getChildFolderDocumentCount(pItemChild, mapDocumentCount);
+            int nTotalChild = 0;
+            updateChildFolderDocumentCount(pItemChild, mapDocumentCount, nTotalChild);
 
             nTotalChild += nCurrentChild;
 
@@ -1692,11 +1694,15 @@ int CWizCategoryView::getChildFolderDocumentCount(CWizCategoryViewItemBase* pIte
                 pItemChild->setDocumentsCount(-1, nTotalChild);
             }
 
-            nTotal += nTotalChild;
+            if (CWizCategoryViewFolderItem* pFolder = dynamic_cast<CWizCategoryViewFolderItem*>(pItemChild))
+            {
+                if (!pFolder->location().startsWith(LOCATION_DELETED_ITEMS))
+                {
+                    allCount += nTotalChild;
+                }
+            }
         }
     }
-
-    return nTotal;
 }
 
 void CWizCategoryView::updateGroupFolderDocumentCount(const QString& strKbGUID)
