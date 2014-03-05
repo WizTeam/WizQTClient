@@ -1220,9 +1220,9 @@ void CWizCategoryView::on_action_deleteItem()
 {
     if (CWizCategoryViewFolderItem* p = currentCategoryItem<CWizCategoryViewFolderItem>())
     {
-        if (!::WizIsPredefinedLocation(p->location())) {
+        //if (!::WizIsPredefinedLocation(p->location())) {
             on_action_user_deleteFolder();
-        }
+        //}
     }
     else if (currentCategoryItem<CWizCategoryViewTagItem>())
     {
@@ -1250,7 +1250,7 @@ void CWizCategoryView::on_action_user_deleteFolder()
     msgBox->addButton(QMessageBox::Ok);
     msgBox->addButton(QMessageBox::Cancel);
 
-    QString strWarning = tr("Do you really want to delete all documents inside folder: %1 ? (All documents will move to trash folder and remove from cloud server)").arg(p->location());
+    QString strWarning = tr("Do you really want to delete all notes inside folder: %1 ? (All notes will move to trash folder and remove from cloud server)").arg(p->location());
     msgBox->setText(strWarning);
     connect(msgBox,SIGNAL(finished(int)),this,SLOT(on_action_user_deleteFolder_confirmed(int)));
     msgBox->exec();
@@ -1316,7 +1316,7 @@ void CWizCategoryView::on_action_group_deleteFolder()
     msgBox->addButton(QMessageBox::Ok);
     msgBox->addButton(QMessageBox::Cancel);
 
-    QString strWarning = tr("Do you really want to delete folder: %1 ? (All documents will move to unclassified folder, It's safe.)").arg(p->tag().strName);
+    QString strWarning = tr("Do you really want to delete folder: %1 ? (All notes will move to unclassified folder, It's safe.)").arg(p->tag().strName);
     msgBox->setText(strWarning);
     connect(msgBox,SIGNAL(finished(int)),this,SLOT(on_action_group_deleteFolder_confirmed(int)));
     msgBox->exec();
