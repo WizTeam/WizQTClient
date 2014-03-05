@@ -673,7 +673,14 @@ void MainWindow::on_documents_documentCountChanged()
     }
     else if (count > 1)
     {
-        text = tr("%1 notes").arg(count);
+        if (count >= 1000)
+        {
+            text = tr("%1 notes").arg("1000+");
+        }
+        else
+        {
+            text = tr("%1 notes").arg(count);
+        }
     }
     m_labelDocumentsCount->setText(text);
 }
@@ -1178,8 +1185,11 @@ void MainWindow::on_category_itemSelectionChanged()
 
     CWizCategoryViewMessageItem* pItem = category->currentCategoryItem<CWizCategoryViewMessageItem>();
     if (pItem) {
-        m_msgList->show();
-        m_noteList->hide();
+        if (!m_msgList->isVisible())
+        {
+            m_msgList->show();
+            m_noteList->hide();
+        }
 
         CWizMessageDataArray arrayMsg;
         pItem->getMessages(m_dbMgr.db(), arrayMsg);
@@ -1202,8 +1212,11 @@ void MainWindow::on_category_itemSelectionChanged()
 
     //    return;
     } else {
-        m_noteList->show();
-        m_msgList->hide();
+        if (!m_noteList->isVisible())
+        {
+            m_noteList->show();
+            m_msgList->hide();
+        }
         QString kbGUID = category->selectedItemKbGUID();
         if (!kbGUID.isEmpty()) {
             resetPermission(kbGUID, "");
