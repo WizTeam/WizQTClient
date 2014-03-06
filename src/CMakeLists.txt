@@ -264,7 +264,6 @@ set(wiznote_FORMS
     ui/wizpreferencedialog.ui
     ui/wizproxydialog.ui
     ui/wizcreateaccountdialog.ui
-    ui/wizupdaterprogressdialog.ui
     ui/wizupgradenotifydialog.ui
     ui/wizusercipherform.ui
     ui/wiznoteinfoform.ui

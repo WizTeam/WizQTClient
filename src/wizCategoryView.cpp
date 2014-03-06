@@ -1052,7 +1052,7 @@ void CWizCategoryView::on_action_user_moveFolder_confirmed_progress(int nMax, in
     CWizProgressDialog* progress = mainWindow->progressDialog();
     progress->setVisible(true);
 
-    progress->setActionString(tr("Move Document: %1 to %2").arg(strOldLocation).arg(strNewLocation));
+    progress->setActionString(tr("Move Note: %1 to %2").arg(strOldLocation).arg(strNewLocation));
     progress->setNotifyString(data.strTitle);
     progress->setProgress(nMax, nValue);
     if (nMax == nValue + 1) {
@@ -1139,7 +1139,7 @@ void CWizCategoryView::on_action_user_renameFolder_confirmed_progress(int nMax, 
     CWizProgressDialog* progress = mainWindow->progressDialog();
     progress->setVisible(true);
 
-    progress->setActionString(tr("Move Document: %1 to %2").arg(strOldLocation).arg(strNewLocation));
+    progress->setActionString(tr("Move Note: %1 to %2").arg(strOldLocation).arg(strNewLocation));
     progress->setNotifyString(data.strTitle);
     progress->setProgress(nMax, nValue);
     if (nMax == nValue + 1) {
@@ -1316,7 +1316,7 @@ void CWizCategoryView::on_action_group_deleteFolder()
     msgBox->addButton(QMessageBox::Ok);
     msgBox->addButton(QMessageBox::Cancel);
 
-    QString strWarning = tr("Do you really want to delete folder: %1 ? (All notes will move to unclassified folder, It's safe.)").arg(p->tag().strName);
+    QString strWarning = tr("Do you really want to delete folder: %1? (All notes will move to unclassified folder, It's safe.)").arg(p->tag().strName);
     msgBox->setText(strWarning);
     connect(msgBox,SIGNAL(finished(int)),this,SLOT(on_action_group_deleteFolder_confirmed(int)));
     msgBox->exec();

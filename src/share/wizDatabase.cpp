@@ -304,7 +304,7 @@ void CWizFolder::MoveToLocation(const QString& strDestLocation)
         data.strLocation.insert(0, strDestLocation);
 
         if (!m_db.ModifyDocumentInfo(data)) {
-            TOLOG("Failed to move document to new folder!");
+            TOLOG("Failed to move note to new folder!");
             continue;
         }
 
