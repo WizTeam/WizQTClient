@@ -3484,7 +3484,7 @@ Have you changed your password from other platform?</source>
     <message>
         <location filename="../src/notifybar.cpp" line="28"/>
         <source>The note is locked and read only, press unlock button if you need edit.</source>
-        <translation>笔记已锁定为只读，如需修改请点击解锁按钮。</translation>
+        <translation type="unfinished">笔记已锁定为只读, 如需修改请点击解锁按钮。</translation>
     </message>
     <message>
         <location filename="../src/notifybar.cpp" line="32"/>
