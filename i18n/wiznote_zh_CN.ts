@@ -232,6 +232,54 @@
     </message>
 </context>
 <context>
+    <name>CWizDatabase</name>
+    <message>
+        <location filename="../src/share/wizDatabase.cpp" line="2626"/>
+        <source>My Notes</source>
+        <translation>我的笔记</translation>
+    </message>
+    <message>
+        <location filename="../src/share/wizDatabase.cpp" line="2628"/>
+        <source>My Journals</source>
+        <translation>我的日记</translation>
+    </message>
+    <message>
+        <location filename="../src/share/wizDatabase.cpp" line="2630"/>
+        <source>My Events</source>
+        <translation>我的事件</translation>
+    </message>
+    <message>
+        <location filename="../src/share/wizDatabase.cpp" line="2632"/>
+        <source>My Sticky Notes</source>
+        <translation>我的桌面便笺</translation>
+    </message>
+    <message>
+        <location filename="../src/share/wizDatabase.cpp" line="2634"/>
+        <source>My Emails</source>
+        <translation>我的电子邮件</translation>
+    </message>
+    <message>
+        <location filename="../src/share/wizDatabase.cpp" line="2636"/>
+        <source>My Drafts</source>
+        <translation>我的草稿</translation>
+    </message>
+    <message>
+        <location filename="../src/share/wizDatabase.cpp" line="2638"/>
+        <source>My Tasks</source>
+        <translation>我的任务</translation>
+    </message>
+    <message>
+        <location filename="../src/share/wizDatabase.cpp" line="2642"/>
+        <source>Inbox</source>
+        <translation>收集箱</translation>
+    </message>
+    <message>
+        <location filename="../src/share/wizDatabase.cpp" line="2644"/>
+        <source>Completed</source>
+        <translation>已完成</translation>
+    </message>
+</context>
+<context>
     <name>CWizDocumentListView</name>
     <message>
         <location filename="../src/wizDocumentListView.cpp" line="835"/>
@@ -700,6 +748,29 @@
     </message>
 </context>
 <context>
+    <name>CWizSearchIndexer</name>
+    <message>
+        <location filename="../src/share/wizSearchIndexer.cpp" line="76"/>
+        <source>Build FTS index meet error, we&apos;ll rebuild it when restart</source>
+        <translation>构建索引数据遇到问题，下次启动时重试</translation>
+    </message>
+    <message>
+        <location filename="../src/share/wizSearchIndexer.cpp" line="115"/>
+        <source>Update search index (%1/%2): %3</source>
+        <translation>更新查询索引(%1/%2): %3</translation>
+    </message>
+    <message>
+        <location filename="../src/share/wizSearchIndexer.cpp" line="117"/>
+        <source>[WARNING] failed to update: %1</source>
+        <translation>[警告] 更新失败: %1</translation>
+    </message>
+    <message>
+        <location filename="../src/share/wizSearchIndexer.cpp" line="126"/>
+        <source>[WARNING] total %1 documents failed to build</source>
+        <translation>[警告] 共 %1 个文件构建失败</translation>
+    </message>
+</context>
+<context>
     <name>CWizSortingPopupButton</name>
     <message>
         <location filename="../src/wizPopupButton.cpp" line="177"/>
@@ -809,7 +880,7 @@
     <message>
         <location filename="../src/ui/wizusercipherform.ui" line="14"/>
         <source>Password</source>
-        <translation>粘贴</translation>
+        <translation>密碼</translation>
     </message>
     <message>
         <location filename="../src/ui/wizusercipherform.ui" line="53"/>
@@ -830,6 +901,29 @@
         <location filename="../src/ui/wizusercipherform.ui" line="155"/>
         <source>Remember for this session</source>
         <translation>记住密码（当前会话）</translation>
+    </message>
+</context>
+<context>
+    <name>CWizUserInfoWidget</name>
+    <message>
+        <location filename="../src/widgets/wizUserInfoWidget.cpp" line="45"/>
+        <source>View account info</source>
+        <translation>账户信息</translation>
+    </message>
+    <message>
+        <location filename="../src/widgets/wizUserInfoWidget.cpp" line="49"/>
+        <source>Account settings</source>
+        <translation>账户设置</translation>
+    </message>
+    <message>
+        <location filename="../src/widgets/wizUserInfoWidget.cpp" line="52"/>
+        <source>Change avatar</source>
+        <translation>更改头像</translation>
+    </message>
+    <message>
+        <location filename="../src/widgets/wizUserInfoWidget.cpp" line="147"/>
+        <source>Upload Avatar</source>
+        <translation>上传头像</translation>
     </message>
 </context>
 <context>
@@ -871,9 +965,8 @@
         <translation>哇，好像暂时没办法加载...</translation>
     </message>
     <message>
-        <location filename="../src/wizWebSettingsDialog.cpp" line="38"/>
         <source>Close</source>
-        <translation>关闭</translation>
+        <translation type="obsolete">关闭</translation>
     </message>
 </context>
 <context>
@@ -1140,14 +1233,14 @@
         <translation>列表</translation>
     </message>
     <message>
-        <location filename="../src/wizactions.cpp" line="39"/>
         <location filename="../src/wizEditorToolBar.cpp" line="643"/>
+        <location filename="../src/wizactions.cpp" line="39"/>
         <source>Table</source>
         <translation>表格</translation>
     </message>
     <message>
-        <location filename="../src/wizactions.cpp" line="40"/>
         <location filename="../src/wizEditorToolBar.cpp" line="621"/>
+        <location filename="../src/wizactions.cpp" line="40"/>
         <source>Link</source>
         <translation>链接</translation>
     </message>
@@ -1222,20 +1315,20 @@
         <translation>源代码模式</translation>
     </message>
     <message>
-        <location filename="../src/wizactions.cpp" line="81"/>
         <location filename="../src/wizEditorToolBar.cpp" line="577"/>
+        <location filename="../src/wizactions.cpp" line="81"/>
         <source>Justify left</source>
         <translation>左对齐</translation>
     </message>
     <message>
-        <location filename="../src/wizactions.cpp" line="82"/>
         <location filename="../src/wizEditorToolBar.cpp" line="579"/>
+        <location filename="../src/wizactions.cpp" line="82"/>
         <source>Justify right</source>
         <translation>右对齐</translation>
     </message>
     <message>
-        <location filename="../src/wizactions.cpp" line="83"/>
         <location filename="../src/wizEditorToolBar.cpp" line="578"/>
+        <location filename="../src/wizactions.cpp" line="83"/>
         <source>Justify center</source>
         <translation>居中</translation>
     </message>
@@ -1285,8 +1378,8 @@
         <translation>全选</translation>
     </message>
     <message>
-        <location filename="../src/wizactions.cpp" line="89"/>
         <location filename="../src/wizEditorToolBar.cpp" line="581"/>
+        <location filename="../src/wizactions.cpp" line="89"/>
         <source>Insert table</source>
         <translation>插入表格</translation>
     </message>
@@ -1296,26 +1389,26 @@
         <translation>插入链接</translation>
     </message>
     <message>
-        <location filename="../src/wizactions.cpp" line="91"/>
         <location filename="../src/wizEditorToolBar.cpp" line="570"/>
+        <location filename="../src/wizactions.cpp" line="91"/>
         <source>Bold</source>
         <translation>粗体</translation>
     </message>
     <message>
-        <location filename="../src/wizactions.cpp" line="92"/>
         <location filename="../src/wizEditorToolBar.cpp" line="571"/>
+        <location filename="../src/wizactions.cpp" line="92"/>
         <source>Italic</source>
         <translation>斜体</translation>
     </message>
     <message>
-        <location filename="../src/wizactions.cpp" line="93"/>
         <location filename="../src/wizEditorToolBar.cpp" line="572"/>
+        <location filename="../src/wizactions.cpp" line="93"/>
         <source>Underline</source>
         <translation>下划线</translation>
     </message>
     <message>
-        <location filename="../src/wizactions.cpp" line="94"/>
         <location filename="../src/wizEditorToolBar.cpp" line="573"/>
+        <location filename="../src/wizactions.cpp" line="94"/>
         <source>Strike through</source>
         <translation>删除线</translation>
     </message>
@@ -1412,11 +1505,11 @@
         <translation>打开...</translation>
     </message>
     <message>
-        <location filename="../src/wizactions.cpp" line="73"/>
-        <location filename="../src/wizattachmentlistwidget.cpp" line="50"/>
         <location filename="../src/wizCategoryView.cpp" line="48"/>
         <location filename="../src/wizCategoryView.cpp" line="51"/>
         <location filename="../src/wizDocumentListView.cpp" line="27"/>
+        <location filename="../src/wizactions.cpp" line="73"/>
+        <location filename="../src/wizattachmentlistwidget.cpp" line="50"/>
         <source>Delete</source>
         <translation>删除</translation>
     </message>
@@ -1561,12 +1654,12 @@
     <message>
         <location filename="../src/wizDocumentListView.cpp" line="29"/>
         <source>Move Note</source>
-        <translation></translation>
+        <translation>移动笔记</translation>
     </message>
     <message>
         <location filename="../src/wizDocumentListView.cpp" line="30"/>
         <source>Copy Note</source>
-        <translation></translation>
+        <translation>复制笔记</translation>
     </message>
     <message>
         <location filename="../src/messagelistview.cpp" line="99"/>
@@ -1579,20 +1672,20 @@
         <translation>删除消息</translation>
     </message>
     <message>
-        <location filename="../src/wizactions.cpp" line="69"/>
         <location filename="../src/wizEditorToolBar.cpp" line="562"/>
+        <location filename="../src/wizactions.cpp" line="69"/>
         <source>Cut</source>
         <translation>剪切</translation>
     </message>
     <message>
-        <location filename="../src/wizactions.cpp" line="70"/>
         <location filename="../src/wizEditorToolBar.cpp" line="563"/>
+        <location filename="../src/wizactions.cpp" line="70"/>
         <source>Copy</source>
         <translation>拷贝</translation>
     </message>
     <message>
-        <location filename="../src/wizactions.cpp" line="71"/>
         <location filename="../src/wizEditorToolBar.cpp" line="564"/>
+        <location filename="../src/wizactions.cpp" line="71"/>
         <source>Paste</source>
         <translation>粘贴</translation>
     </message>
@@ -1770,17 +1863,179 @@
     <message>
         <location filename="../src/notifybar.cpp" line="28"/>
         <source>The note is locked and read only, press unlock button if you need edit.</source>
-        <translation>笔记已锁定为只读，如需修改请点击解锁按钮。</translation>
+        <translation>笔记已锁定为只读, 如需修改请点击解锁按钮。</translation>
     </message>
     <message>
         <location filename="../src/notifybar.cpp" line="32"/>
         <source>This note is deleted, You can edit after move to other folders.</source>
-        <translation>这个笔记已被删除, 请移动到其他文件夹之后再进行修改.</translation>
+        <translation>这个笔记已被删除, 请移动到其他文件夹之后再进行修改。</translation>
     </message>
     <message>
         <location filename="../src/notifybar.cpp" line="36"/>
         <source>Your permission is not enough to edit this note.</source>
         <translation>你的权限不够, 无法修改这个笔记。</translation>
+    </message>
+    <message>
+        <location filename="../src/utils/misc.cpp" line="15"/>
+        <location filename="../src/share/wizqthelper.cpp" line="25"/>
+        <source>Yesterday</source>
+        <translation>昨天</translation>
+    </message>
+    <message>
+        <location filename="../src/utils/misc.cpp" line="17"/>
+        <location filename="../src/share/wizqthelper.cpp" line="27"/>
+        <source>The day before yesterday</source>
+        <translation>前天</translation>
+    </message>
+    <message>
+        <location filename="../src/utils/misc.cpp" line="24"/>
+        <location filename="../src/share/wizqthelper.cpp" line="34"/>
+        <source>Just now</source>
+        <translation>刚才</translation>
+    </message>
+    <message>
+        <location filename="../src/utils/misc.cpp" line="28"/>
+        <location filename="../src/share/wizqthelper.cpp" line="38"/>
+        <source>1 minute ago</source>
+        <translation>1分钟前</translation>
+    </message>
+    <message>
+        <location filename="../src/utils/misc.cpp" line="32"/>
+        <location filename="../src/share/wizqthelper.cpp" line="42"/>
+        <source>%1 minutes ago</source>
+        <translation>%1 分钟前</translation>
+    </message>
+    <message>
+        <location filename="../src/utils/misc.cpp" line="37"/>
+        <location filename="../src/share/wizqthelper.cpp" line="47"/>
+        <source>1 hour ago</source>
+        <translation>1小时前</translation>
+    </message>
+    <message>
+        <location filename="../src/utils/misc.cpp" line="41"/>
+        <location filename="../src/share/wizqthelper.cpp" line="51"/>
+        <source>%1 hours ago</source>
+        <translation>%1 小时前</translation>
+    </message>
+    <message>
+        <location filename="../src/share/wizfileiconprovider.cpp" line="91"/>
+        <source>text document</source>
+        <translation>文本文档</translation>
+    </message>
+    <message>
+        <location filename="../src/share/wizfileiconprovider.cpp" line="93"/>
+        <source>word document</source>
+        <translation>Word文档</translation>
+    </message>
+    <message>
+        <location filename="../src/share/wizfileiconprovider.cpp" line="95"/>
+        <source>Compressed file</source>
+        <translation>压缩文件</translation>
+    </message>
+    <message>
+        <location filename="../src/share/wizfileiconprovider.cpp" line="97"/>
+        <source>File</source>
+        <translation>文件</translation>
+    </message>
+    <message>
+        <location filename="../src/share/wizmisc.cpp" line="402"/>
+        <source>Simplified Chinese</source>
+        <translation>简体中文</translation>
+    </message>
+    <message>
+        <location filename="../src/share/wizmisc.cpp" line="404"/>
+        <source>Traditional Chinese</source>
+        <translation>繁體中文</translation>
+    </message>
+    <message>
+        <location filename="../src/share/wizmisc.cpp" line="406"/>
+        <source>English(US)</source>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="../src/share/wizmisc.cpp" line="444"/>
+        <source>/Deleted Items/</source>
+        <translation>/已删除/</translation>
+    </message>
+    <message>
+        <location filename="../src/share/wizmisc.cpp" line="448"/>
+        <source>/My Notes/</source>
+        <translation>/我的笔记/</translation>
+    </message>
+    <message>
+        <location filename="../src/share/wizmisc.cpp" line="452"/>
+        <source>/My Journals/</source>
+        <translation>/我的日记/</translation>
+    </message>
+    <message>
+        <location filename="../src/share/wizmisc.cpp" line="456"/>
+        <source>/My Events/</source>
+        <translation>/我的事件/</translation>
+    </message>
+    <message>
+        <location filename="../src/share/wizmisc.cpp" line="460"/>
+        <source>/My Sticky Notes/</source>
+        <translation>/我的桌面便笺/</translation>
+    </message>
+    <message>
+        <location filename="../src/share/wizmisc.cpp" line="464"/>
+        <source>/My Emails/</source>
+        <translation>/我的电子邮件/</translation>
+    </message>
+    <message>
+        <location filename="../src/share/wizmisc.cpp" line="468"/>
+        <source>/My Drafts/</source>
+        <translation>/我的草稿/</translation>
+    </message>
+    <message>
+        <location filename="../src/share/wizmisc.cpp" line="472"/>
+        <source>/My Tasks/</source>
+        <translation>/我的任务/</translation>
+    </message>
+    <message>
+        <location filename="../src/share/wizmisc.cpp" line="476"/>
+        <source>/My Tasks/Inbox/</source>
+        <translation>/我的任务/收集箱/</translation>
+    </message>
+    <message>
+        <location filename="../src/share/wizmisc.cpp" line="480"/>
+        <source>/My Tasks/Completed/</source>
+        <translation>/我的任务/已完成/</translation>
+    </message>
+    <message>
+        <location filename="../src/share/wizmisc.cpp" line="830"/>
+        <source>%1 TB</source>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="../src/share/wizmisc.cpp" line="832"/>
+        <source>%1 GB</source>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="../src/share/wizmisc.cpp" line="834"/>
+        <source>%1 MB</source>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="../src/share/wizmisc.cpp" line="836"/>
+        <source>%1 KB</source>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="../src/share/wizmisc.cpp" line="837"/>
+        <source>%1 byte(s)</source>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="../src/share/wizobject.h" line="968"/>
+        <source>$Public Notes</source>
+        <translation>$完全公开的笔记</translation>
+    </message>
+    <message>
+        <location filename="../src/share/wizobject.h" line="973"/>
+        <source>$Share with friends</source>
+        <translation>$分享给朋友的笔记</translation>
     </message>
 </context>
 </TS>
