@@ -35,20 +35,15 @@ CWizWebSettingsDialog::CWizWebSettingsDialog(QString url, QSize sz, QWidget *par
     m_labelError->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     m_labelError->setAlignment(Qt::AlignCenter);
 
-    m_btnOk = new QPushButton(tr("Close"), this);
-    connect(m_btnOk, SIGNAL(clicked()), SLOT(accept()));
-
     QVBoxLayout* layout = new QVBoxLayout(this);
     layout->setAlignment(Qt::AlignCenter);
-    layout->setContentsMargins(20, 0, 20, 20);
+    layout->setContentsMargins(0, 0, 0, 0);
     layout->setSpacing(0);
     setLayout(layout);
 
     layout->addWidget(m_labelProgress);
     layout->addWidget(m_labelError);
     layout->addWidget(m_web);
-    layout->addWidget(m_btnOk);
-    layout->setAlignment(m_btnOk, Qt::AlignRight|Qt::AlignBottom);
 }
 
 void CWizWebSettingsDialog::load()
