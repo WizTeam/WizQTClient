@@ -816,7 +816,7 @@ CWizCategoryViewBizGroupRootItem::CWizCategoryViewBizGroupRootItem(CWizExplorerA
 void CWizCategoryViewBizGroupRootItem::showContextMenu(CWizCategoryBaseView *pCtrl, QPoint pos)
 {
     if (CWizCategoryView* view = dynamic_cast<CWizCategoryView *>(pCtrl)) {
-        if(isAdmin())
+        if(isHr())
         {
             view->showAdminBizGroupRootContextMenu(pos);
         }
@@ -832,8 +832,12 @@ bool CWizCategoryViewBizGroupRootItem::isOwner()
 {
     return m_biz.bizUserRole == WIZ_BIZROLE_OWNER;
 }
-
 bool CWizCategoryViewBizGroupRootItem::isAdmin()
+{
+    return m_biz.bizUserRole == WIZ_BIZROLE_ADMIN;
+}
+
+bool CWizCategoryViewBizGroupRootItem::isHr()
 {
     return m_biz.bizUserRole <= WIZ_BIZROLE_HR;
 }
@@ -936,6 +940,15 @@ void CWizCategoryViewGroupRootItem::reload(CWizDatabase& db)
 }
 bool CWizCategoryViewGroupRootItem::isAdmin(CWizDatabase& db)
 {
+    if (isBizGroup())
+    {
+        if (CWizCategoryViewBizGroupRootItem* pBiz = dynamic_cast<CWizCategoryViewBizGroupRootItem *>(parent()))
+        {
+            if (pBiz->isAdmin())
+                return true;
+        }
+    }
+    //
     return db.IsGroupAdmin();
 }
 

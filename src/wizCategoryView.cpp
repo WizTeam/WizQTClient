@@ -1372,7 +1372,7 @@ void CWizCategoryView::on_action_manageGroup()
     CWizCategoryViewGroupRootItem* p = currentCategoryItem<CWizCategoryViewGroupRootItem>();
     if (p && !p->kbGUID().isEmpty()) {
         if (p->isBizGroup()) {
-            manageBizGroup(p->kbGUID());
+            manageBizGroup(p->kbGUID(), p->bizGUID());
         } else {
             managePersonalGroup(p->kbGUID());
         }
@@ -1503,9 +1503,9 @@ void CWizCategoryView::managePersonalGroup(const QString& groupGUID)
     showWebDialogWithToken(tr("Manage group"), strUrl);
 }
 
-void CWizCategoryView::manageBizGroup(const QString& groupGUID)
+void CWizCategoryView::manageBizGroup(const QString& groupGUID, const QString& bizGUID)
 {
-    QString extInfo = "kb=" + groupGUID;
+    QString extInfo = "kb=" + groupGUID + "&biz=" + bizGUID;
     QString strUrl = WizService::ApiEntry::standardCommandUrl("manage_biz_group", WIZ_TOKEN_IN_URL_REPLACE_PART, extInfo);
     showWebDialogWithToken(tr("Manage group"), strUrl);
 }

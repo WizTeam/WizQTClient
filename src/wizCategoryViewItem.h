@@ -241,6 +241,7 @@ public:
     //
     bool isOwner();
     bool isAdmin();
+    bool isHr();
 };
 class CWizCategoryViewOwnGroupRootItem : public CWizCategoryViewGroupsRootItem
 {

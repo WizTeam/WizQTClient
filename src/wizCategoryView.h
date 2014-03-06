@@ -257,7 +257,7 @@ public:
     void viewPersonalGroupInfo(const QString& groupGUID);
     void viewBizGroupInfo(const QString& groupGUID, const QString& bizGUID);
     void managePersonalGroup(const QString& groupGUID);
-    void manageBizGroup(const QString& groupGUID);
+    void manageBizGroup(const QString& groupGUID, const QString& bizGUID);
     void viewBizInfo(const QString& bizGUID);
     void manageBiz(const QString& bizGUID);
 
