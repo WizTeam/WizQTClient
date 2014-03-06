@@ -350,6 +350,8 @@ void CWizLoginDialog::on_labelRegister_linkActivated(const QString& strUrl)
     m_comboUsers->insertItem(0, strUserId);
     m_comboUsers->setCurrentIndex(0);
     m_editPassword->setText(strPassword);
+    enableControls(false);
+    doAccountVerify();
 }
 
 void CWizLoginDialog::on_labelNetwork_linkActivated(const QString & link)

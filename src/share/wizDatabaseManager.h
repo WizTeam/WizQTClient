@@ -4,7 +4,7 @@
 #include <QObject>
 #include <QPointer>
 #include <QMap>
-
+#include <QMutex>
 #include <deque>
 
 class QString;
@@ -52,6 +52,7 @@ public:
     void closeAll();
 
 private:
+    QMutex m_mutex;
     QString m_strUserId;
     QPointer<CWizDatabase> m_dbPrivate;
     QMap<QString, CWizDatabase*> m_mapGroups;

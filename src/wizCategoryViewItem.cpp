@@ -4,6 +4,7 @@
 #include <QTextCodec>
 #include <QPainter>
 #include <cstring>
+#include <QFile>
 
 #include <extensionsystem/pluginmanager.h>
 #include "utils/pinyin.h"
@@ -124,10 +125,57 @@ void CWizCategoryViewItemBase::setDocumentsCount(int nCurrent, int nTotal)
     }
 }
 
-void CWizCategoryViewItemBase::draw(QPainter* p, const QStyleOptionViewItemV4 *vopt) const
+bool CWizCategoryViewItemBase::getExtraButtonIcon(QPixmap &ret) const
 {
-    Q_UNUSED(p);
-    Q_UNUSED(vopt);
+    ret = m_extraButtonIcon;
+    return !m_extraButtonIcon.isNull();
+}
+
+QRect CWizCategoryViewItemBase::getExtraButtonRect(const QRect& rcItemBorder) const
+{
+    int nMargin = 4;
+    QSize szBtn = m_extraButtonIcon.size();
+    int nWidth = szBtn.width() + 2 * nMargin;
+    int nHeight = szBtn.height() + 2 * nMargin;
+    //
+    int nTop = rcItemBorder.y() + (rcItemBorder.height() - nHeight) / 2;
+    QRect rcb(rcItemBorder.right() - nWidth - nMargin, nTop, nWidth, nHeight);
+    rcb.adjust(nMargin, nMargin, -nMargin, -nMargin);
+    return rcb;
+}
+
+bool CWizCategoryViewItemBase::extraButtonClickTest()
+{
+    QPixmap pixmap;
+    if(!getExtraButtonIcon(pixmap) || pixmap.isNull())
+        return false;
+
+    CWizCategoryBaseView* view = dynamic_cast<CWizCategoryBaseView*>(treeWidget());
+    Q_ASSERT(view);
+
+    QRect rcIemBorder = view->visualItemRect(this);
+    QRect btnRect = getExtraButtonRect(rcIemBorder);
+    int nClickDist = 2;
+    btnRect.adjust(-nClickDist, -nClickDist, nClickDist, nClickDist);
+
+    return btnRect.contains(view->hitPoint());
+}
+
+void CWizCategoryViewItemBase::draw(QPainter* p, const QStyleOptionViewItemV4* vopt) const
+{
+    QPixmap pixmap;
+    if(getExtraButtonIcon(pixmap) && !pixmap.isNull())
+    {
+        p->save();
+
+        QRect rcb = getExtraButtonRect(vopt->rect);
+        p->setRenderHint(QPainter::Antialiasing);
+        p->drawPixmap(rcb, pixmap);
+
+        p->restore();
+    }
+
+
 
 #if 0
     if (!vopt->icon.isNull()) {
@@ -228,6 +276,29 @@ void CWizCategoryViewSectionItem::reset(const QString& sectionName, int sortOrde
     m_sortOrder = sortOrder;
     //
     setText(0, sectionName);
+}
+
+QRect CWizCategoryViewSectionItem::getExtraButtonRect(const QRect& itemBorder) const
+{
+    int nMargin = 4;
+    QSize szBtn = m_extraButtonIcon.size();
+    int nWidth = szBtn.width() + 2 * nMargin;
+    int nHeight = szBtn.height() + 2 * nMargin;
+
+    //
+    int nTop = itemBorder.y() + (itemBorder.height() - nHeight) / 2 + 1.5 * nMargin;
+    QRect rcb(itemBorder.right() - nWidth - 2 * nMargin, nTop, nWidth, nHeight);
+    rcb.adjust(nMargin, nMargin, -nMargin, -nMargin);
+    return rcb;
+}
+
+void CWizCategoryViewSectionItem::draw(QPainter* p, const QStyleOptionViewItemV4* vopt) const
+{
+    QRect rc = vopt->rect;
+    rc.setTop(rc.bottom());
+    p->fillRect(rc, Utils::StyleHelper::treeViewItemCategoryBackground());
+
+    CWizCategoryViewItemBase::draw(p, vopt);
 }
 
 
@@ -677,6 +748,13 @@ CWizCategoryViewGroupsRootItem::CWizCategoryViewGroupsRootItem(CWizExplorerApp& 
     setText(0, strName);
 }
 
+void CWizCategoryViewGroupsRootItem::showContextMenu(CWizCategoryBaseView *pCtrl, QPoint pos)
+{
+    if (CWizCategoryView* view = dynamic_cast<CWizCategoryView *>(pCtrl)) {
+        view->showNormalGroupRootContextMenu(pos);
+    }
+}
+
 void CWizCategoryViewGroupsRootItem::getDocuments(CWizDatabase& db, CWizDocumentDataArray& arrayDocument)
 {
     Q_UNUSED(db);
@@ -735,12 +813,31 @@ CWizCategoryViewBizGroupRootItem::CWizCategoryViewBizGroupRootItem(CWizExplorerA
     setIcon(0, icon);
 }
 
+void CWizCategoryViewBizGroupRootItem::showContextMenu(CWizCategoryBaseView *pCtrl, QPoint pos)
+{
+    if (CWizCategoryView* view = dynamic_cast<CWizCategoryView *>(pCtrl)) {
+        if(isHr())
+        {
+            view->showAdminBizGroupRootContextMenu(pos);
+        }
+        else
+        {
+//            view->showNormalBizGroupRootContextMenu(pos);
+            view->showAdminBizGroupRootContextMenu(pos, false);
+        }
+    }
+}
+
 bool CWizCategoryViewBizGroupRootItem::isOwner()
 {
     return m_biz.bizUserRole == WIZ_BIZROLE_OWNER;
 }
-
 bool CWizCategoryViewBizGroupRootItem::isAdmin()
+{
+    return m_biz.bizUserRole == WIZ_BIZROLE_ADMIN;
+}
+
+bool CWizCategoryViewBizGroupRootItem::isHr()
 {
     return m_biz.bizUserRole <= WIZ_BIZROLE_HR;
 }
@@ -754,6 +851,15 @@ CWizCategoryViewOwnGroupRootItem::CWizCategoryViewOwnGroupRootItem(CWizExplorerA
     icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "group_selected"),
                  QSize(16, 16), QIcon::Selected);
     setIcon(0, icon);
+}
+
+void CWizCategoryViewOwnGroupRootItem::showContextMenu(CWizCategoryBaseView *pCtrl, QPoint pos)
+{
+    Q_UNUSED(pCtrl)
+    Q_UNUSED(pos)
+//    if (CWizCategoryView* view = dynamic_cast<CWizCategoryView *>(pCtrl)) {
+//        view->showOwnGroupRootContextMenu(pos);
+//    }
 }
 
 
@@ -774,7 +880,6 @@ QString CWizCategoryViewCreateGroupLinkItem::getSectionName()
     return WIZ_CATEGORY_SECTION_GROUPS;
 }
 
-
 /* ------------------------------ CWizCategoryViewGroupRootItem ------------------------------ */
 
 CWizCategoryViewGroupRootItem::CWizCategoryViewGroupRootItem(CWizExplorerApp& app,
@@ -794,7 +899,18 @@ CWizCategoryViewGroupRootItem::CWizCategoryViewGroupRootItem(CWizExplorerApp& ap
 void CWizCategoryViewGroupRootItem::showContextMenu(CWizCategoryBaseView* pCtrl, QPoint pos)
 {
     if (CWizCategoryView* view = dynamic_cast<CWizCategoryView *>(pCtrl)) {
-            view->showGroupRootContextMenu(pos);
+        if(isOwner(m_app.databaseManager().db(m_strKbGUID)))
+        {
+            view->showOwnerGroupRootContextMenu(pos);
+        }
+        else if(isAdmin(m_app.databaseManager().db(m_strKbGUID)))
+        {
+            view->showAdminGroupRootContextMenu(pos);
+        }
+        else
+        {
+            view->showNormalGroupRootContextMenu(pos);
+        }
     }
 }
 
@@ -824,12 +940,31 @@ void CWizCategoryViewGroupRootItem::reload(CWizDatabase& db)
 }
 bool CWizCategoryViewGroupRootItem::isAdmin(CWizDatabase& db)
 {
+    if (isBizGroup())
+    {
+        if (CWizCategoryViewBizGroupRootItem* pBiz = dynamic_cast<CWizCategoryViewBizGroupRootItem *>(parent()))
+        {
+            if (pBiz->isAdmin())
+                return true;
+        }
+    }
+    //
     return db.IsGroupAdmin();
 }
 
 bool CWizCategoryViewGroupRootItem::isOwner(CWizDatabase& db)
 {
     return db.IsGroupOwner();
+}
+
+bool CWizCategoryViewGroupRootItem::isBizGroup() const
+{
+    return m_group.IsBiz();
+}
+
+QString CWizCategoryViewGroupRootItem::bizGUID() const
+{
+    return m_group.bizGUID;
 }
 
 /* --------------------- CWizCategoryViewGroupNoTagItem --------------------- */

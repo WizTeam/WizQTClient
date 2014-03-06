@@ -137,7 +137,9 @@ public:
         ActionRenameItem,
         ActionDeleteItem,
         ActionItemAttribute,
-        ActionEmptyTrash
+        ActionEmptyTrash,
+        ActionQuitGroup,
+        ActionItemManage
     };
 
     enum CategoryMenuType
@@ -148,7 +150,9 @@ public:
         TagItem,
         GroupRootItem,
         GroupItem,
-        TrashItem
+        TrashItem,
+        BizGroupRootItem,
+        OwnGroupRootItem
     };
 
     void initMenus();
@@ -163,7 +167,11 @@ public:
     void showFolderContextMenu(QPoint pos);
     void showTagRootContextMenu(QPoint pos);
     void showTagContextMenu(QPoint pos);
-    void showGroupRootContextMenu(QPoint pos);
+    void showNormalGroupRootContextMenu(QPoint pos);
+    void showAdminGroupRootContextMenu(QPoint pos);
+    void showOwnerGroupRootContextMenu(QPoint pos);
+    void showNormalBizGroupRootContextMenu(QPoint pos);
+    void showAdminBizGroupRootContextMenu(QPoint pos, bool usable = true);
     void showGroupContextMenu(QPoint pos);
     void showTrashContextMenu(QPoint pos);
 
@@ -230,17 +238,15 @@ public:
     CWizCategoryViewTrashItem* findTrash(const QString& strKbGUID = NULL);
 
     // document count update
-    void updateFolderDocumentCount();
-    void updateFolderDocumentCount_impl();
-    int updateFolderDocumentCount_impl(CWizCategoryViewItemBase* pItem,
-                                       const std::map<CString, int>& mapDocumentCount);
+    void updatePrivateFolderDocumentCount();
+    void updatePrivateFolderDocumentCount_impl();
 
-    void updateTagDocumentCount(const QString& strKbGUID = NULL);
-    void updateTagDocumentCount_impl(const QString& strKbGUID = NULL);
-    int updateTagDocumentCount_impl(CWizCategoryViewItemBase* pItem,
-                                    const std::map<CString, int>& mapDocumentCount);
+    void updateGroupFolderDocumentCount(const QString& strKbGUID);
+    void updateGroupFolderDocumentCount_impl(const QString& strKbGUID);
 
     void updatePrivateTagDocumentCount();
+    void updatePrivateTagDocumentCount_impl(const QString& strKbGUID = NULL);
+
     void updateGroupTagDocumentCount(const QString &strKbGUID);
 
     void createDocument(WIZDOCUMENTDATA& data);
@@ -248,8 +254,10 @@ public:
     void showWebDialogWithToken(const QString& windowTitle, const QString& url);
     //
     void createGroup();
-    void viewGroupInfo(const QString& groupGUID);
-    void manageGroup(const QString& groupGUID);
+    void viewPersonalGroupInfo(const QString& groupGUID);
+    void viewBizGroupInfo(const QString& groupGUID, const QString& bizGUID);
+    void managePersonalGroup(const QString& groupGUID);
+    void manageBizGroup(const QString& groupGUID, const QString& bizGUID);
     void viewBizInfo(const QString& bizGUID);
     void manageBiz(const QString& bizGUID);
 
@@ -259,7 +267,11 @@ private:
     QPointer<QMenu> m_menuFolder;
     QPointer<QMenu> m_menuTagRoot;
     QPointer<QMenu> m_menuTag;
-    QPointer<QMenu> m_menuGroupRoot;
+    QPointer<QMenu> m_menuNormalGroupRoot;
+    QPointer<QMenu> m_menuAdminGroupRoot;
+    QPointer<QMenu> m_menuOwnerGroupRoot;
+    QPointer<QMenu> m_menuNormalBizGroupRoot;
+    QPointer<QMenu> m_menuAdminBizGroupRoot;
     QPointer<QMenu> m_menuGroup;
     QPointer<QMenu> m_menuTrash;
     QPointer<QTimer> m_timerUpdateFolderCount;
@@ -269,9 +281,9 @@ private:
     QString m_strRequestedGroupKbGUID;
 
 private Q_SLOTS:
-    void on_updateFolderDocumentCount_timeout();
-    void on_updateTagDocumentCount_timeout();
-    void on_updateTagDocumentCount_mapped_timeout(const QString& strKbGUID);
+    void on_updatePrivateFolderDocumentCount_timeout();
+    void on_updatePrivateTagDocumentCount_timeout();
+    void on_updateGroupFolderDocumentCount_mapped_timeout(const QString& strKbGUID);
 
 protected Q_SLOTS:
     virtual void on_document_created(const WIZDOCUMENTDATA& doc);
@@ -334,7 +346,12 @@ public Q_SLOTS:
     void on_action_group_deleteFolder_confirmed(int result);
 
     void on_action_itemAttribute();
-    void on_action_group_attribute();
+    void on_action_groupAttribute();
+    void on_action_bizgAttribute();
+
+    void on_action_itemManage();
+    void on_action_manageGroup();
+    void on_action_manageBiz();
 
 
     void on_action_emptyTrash();
@@ -349,6 +366,13 @@ Q_SIGNALS:
 public:
     // Public API:
     Q_INVOKABLE CWizFolder* SelectedFolder();
+
+private:
+    void updateChildFolderDocumentCount(CWizCategoryViewItemBase* pItem,
+                                       const std::map<CString, int>& mapDocumentCount, int& allCount);
+
+    void updateChildTagDocumentCount(CWizCategoryViewItemBase* pItem,
+                                    const std::map<CString, int>& mapDocumentCount, int& allCount);
 };
 
 

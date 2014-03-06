@@ -304,7 +304,7 @@ void CWizFolder::MoveToLocation(const QString& strDestLocation)
         data.strLocation.insert(0, strDestLocation);
 
         if (!m_db.ModifyDocumentInfo(data)) {
-            TOLOG("Failed to move document to new folder!");
+            TOLOG("Failed to move note to new folder!");
             continue;
         }
 
@@ -1300,6 +1300,8 @@ bool CWizDatabase::SetUserBizInfo(const CWizBizDataArray& arrayBiz)
         SetMeta(bizSection, "UserRole", QString::number(biz.bizUserRole));
         SetMeta(bizSection, "Level", QString::number(biz.bizLevel));
     }
+    //
+    return true;
 }
 //
 //
@@ -2704,6 +2706,26 @@ bool CWizDatabase::DocumentToTempHtmlFile(const WIZDOCUMENTDATA& document, QStri
     WizSaveUnicodeTextToUtf8File(strTempHtmlFileName, strText);
 
     return PathFileExists(strTempHtmlFileName);
+}
+
+bool CWizDatabase::IsFileAccessible(const WIZDOCUMENTDATA& document)
+{
+    CString strZipFileName = GetDocumentFileName(document.strGUID);
+    if (!PathFileExists(strZipFileName)) {
+        return false;
+    }
+
+    if (document.nProtected) {
+        if (userCipher().isEmpty()) {
+            return false;
+        }
+
+        if (!m_ziwReader->isFileAccessible(strZipFileName)) {
+            return false;
+        }
+    }
+
+    return true;
 }
 
 QObject* CWizDatabase::GetFolderByLocation(const QString& strLocation, bool create)

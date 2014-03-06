@@ -11,6 +11,7 @@
 #include <QAction>
 
 #include <QApplication>
+#include <QWebPage>
 #include <QWebFrame>
 #include <QWebElement>
 #include <QUndoStack>
@@ -101,6 +102,7 @@ private:
     bool m_bOk;
 };
 
+/*
 class CWizDocumentWebViewLoader : public CWizDocumentWebViewWorker
 {
 public:
@@ -132,7 +134,7 @@ private:
     QString m_strGUID;
     QString m_strHtmlFile;
 };
-
+*/
 
 CWizDocumentWebViewWorkerPool::CWizDocumentWebViewWorkerPool(CWizExplorerApp& app, QObject* parent)
     : m_dbMgr(app.databaseManager())
@@ -142,8 +144,13 @@ CWizDocumentWebViewWorkerPool::CWizDocumentWebViewWorkerPool(CWizExplorerApp& ap
     connect(&m_timer, SIGNAL(timeout()), SLOT(on_timer_timeout()));
 }
 
+/*
 void CWizDocumentWebViewWorkerPool::load(const WIZDOCUMENTDATA& doc)
 {
+    if (isDocInLoadingQueue(doc)) {
+        return;
+    }
+
     CWizDatabase& db = m_dbMgr.db(doc.strKbGUID);
     CWizDocumentWebViewLoader* loader = new CWizDocumentWebViewLoader(db, doc.strGUID);
     m_workers.push_back(loader);
@@ -151,6 +158,21 @@ void CWizDocumentWebViewWorkerPool::load(const WIZDOCUMENTDATA& doc)
     QThreadPool::globalInstance()->start(loader);
     m_timer.start();
 }
+*/
+
+/*
+bool CWizDocumentWebViewWorkerPool::isDocInLoadingQueue(const WIZDOCUMENTDATA &doc)
+{
+    for (int i = m_workers.count() -1; i >= 0; i--) {
+        CWizDocumentWebViewLoader* loader = dynamic_cast<CWizDocumentWebViewLoader*>(m_workers.at(i));
+        if (loader && loader->guid() == doc.strGUID) {
+            return true;
+        }
+    }
+
+    return false;
+}
+*/
 
 void CWizDocumentWebViewWorkerPool::save(const WIZDOCUMENTDATA& doc, const QString& strHtml,
           const QString& strHtmlFile, int nFlags)
@@ -170,9 +192,9 @@ void CWizDocumentWebViewWorkerPool::on_timer_timeout()
             if (worker->type() == CWizDocumentWebViewWorker::Saver) {
                 CWizDocumentWebViewSaver* saver = dynamic_cast<CWizDocumentWebViewSaver*>(worker);
                 Q_EMIT saved(saver->guid(), saver->result());
-            } else if (worker->type() == CWizDocumentWebViewWorker::Loader) {
-                CWizDocumentWebViewLoader* loader = dynamic_cast<CWizDocumentWebViewLoader*>(worker);
-                Q_EMIT loaded(loader->guid(), loader->result());
+//            } else if (worker->type() == CWizDocumentWebViewWorker::Loader) {
+//                CWizDocumentWebViewLoader* loader = dynamic_cast<CWizDocumentWebViewLoader*>(worker);
+//                Q_EMIT loaded(loader->guid(), loader->result());
             } else {
                 Q_ASSERT(0);
             }
@@ -299,14 +321,13 @@ CWizDocumentWebView::CWizDocumentWebView(CWizExplorerApp& app, QWidget* parent)
     // refers
     MainWindow* mainWindow = qobject_cast<MainWindow *>(m_app.mainWindow());
 
-    m_cipherDialog = mainWindow->cipherForm();
-    connect(m_cipherDialog, SIGNAL(accepted()), SLOT(onCipherDialogClosed()));
 
-    m_downloaderHost = mainWindow->downloaderHost();
-    connect(m_downloaderHost, SIGNAL(downloadDone(const WIZOBJECTDATA&, bool)),
-            SLOT(on_download_finished(const WIZOBJECTDATA&, bool)));
 
     m_transitionView = mainWindow->transitionView();
+
+    m_docLoadThread = new CWizDocumentWebViewLoaderThread(m_dbMgr);
+    connect(m_docLoadThread, SIGNAL(loaded(const QString, const QString)),
+            SLOT(onDocumentReady(const QString, const QString)), Qt::QueuedConnection);
 
     // loading and saving thread
     m_timerAutoSave.setInterval(5*60*1000); // 5 minutes
@@ -317,6 +338,14 @@ CWizDocumentWebView::CWizDocumentWebView(CWizExplorerApp& app, QWidget* parent)
             SLOT(onDocumentReady(const QString&, const QString&)));
     connect(m_workerPool, SIGNAL(saved(const QString&, bool)),
             SLOT(onDocumentSaved(const QString&, bool)));
+}
+
+CWizDocumentWebView::~CWizDocumentWebView()
+{
+    if (0 != m_docLoadThread) {
+        delete m_docLoadThread;
+        m_docLoadThread = 0;
+    }
 }
 
 void CWizDocumentWebView::inputMethodEvent(QInputMethodEvent* event)
@@ -534,7 +563,7 @@ void CWizDocumentWebView::onTimerAutoSaveTimout()
     saveDocument(view()->note(), false);
 }
 
-void CWizDocumentWebView::onDocumentReady(const QString& strGUID, const QString& strFileName)
+void CWizDocumentWebView::onDocumentReady(const QString strGUID, const QString strFileName)
 {
     m_mapFile.insert(strGUID, strFileName);
 
@@ -556,68 +585,14 @@ void CWizDocumentWebView::onDocumentSaved(const QString& strGUID, bool ok)
 
 void CWizDocumentWebView::viewDocument(const WIZDOCUMENTDATA& doc, bool editing)
 {
-    // clear gui
-    MainWindow* window = qobject_cast<MainWindow *>(m_app.mainWindow());
-
     // set data
     m_bEditingMode = editing;
     m_bNewNote = doc.tCreated.secsTo(QDateTime::currentDateTime()) == 0 ? true : false;
     m_bNewNoteTitleInited = m_bNewNote ? false : true;
 
-    // download document if not exist
-    CWizDatabase& db = m_dbMgr.db(doc.strKbGUID);
-    QString strDocumentFileName = db.GetDocumentFileName(doc.strGUID);
-    if (!db.IsObjectDataDownloaded(doc.strGUID, "document") || \
-            !PathFileExists(strDocumentFileName)) {
-
-        m_downloaderHost->download(doc);
-        window->showClient(false);
-        window->transitionView()->showAsMode(CWizDocumentTransitionView::Downloading);
-
-        return;
-    }
-
-    // ask user cipher if needed
-    if (doc.nProtected) {
-        if(!db.loadUserCert()) {
-            return;
-        }
-
-        if (db.userCipher().isEmpty()) {
-            window->showClient(false);
-
-            m_cipherDialog->setHint(db.userCipherHint());
-            m_cipherDialog->sheetShow();
-
-            return;
-        }
-    }
-
     // ask extract and load
-    m_workerPool->load(doc);
-}
-
-void CWizDocumentWebView::onCipherDialogClosed()
-{
-    CWizDatabase& db = m_dbMgr.db(view()->note().strKbGUID);
-
-    db.setUserCipher(m_cipherDialog->userCipher());
-    db.setSaveUserCipher(m_cipherDialog->isSaveForSession());
-
-    m_workerPool->load(view()->note());
-}
-
-void CWizDocumentWebView::on_download_finished(const WIZOBJECTDATA& data,
-                                               bool bSucceed)
-{
-    if (view()->note().strKbGUID != data.strKbGUID
-            || view()->note().strGUID != data.strObjectGUID)
-        return;
-
-    if (!bSucceed)
-        return;
-
-    m_workerPool->load(view()->note());
+//    m_workerPool->load(doc);
+    m_docLoadThread->load(doc);
 }
 
 void CWizDocumentWebView::reloadNoteData(const WIZDOCUMENTDATA& data)
@@ -629,7 +604,8 @@ void CWizDocumentWebView::reloadNoteData(const WIZDOCUMENTDATA& data)
         return;
 
     // reload may triggered when update from server or locally reflected by modify
-    m_workerPool->load(data);
+//    m_workerPool->load(data);
+    m_docLoadThread->load(data);
 }
 
 QString CWizDocumentWebView::getDefaultCssFilePath() const
@@ -1382,3 +1358,66 @@ bool CWizDocumentWebView::editorCommandExecuteTableAverageCols()
 {
     return editorCommandExecuteCommand("averagedistributecol");
 }
+
+
+CWizDocumentWebViewLoaderThread::CWizDocumentWebViewLoaderThread(CWizDatabaseManager &dbMgr):m_dbMgr(dbMgr)
+{
+}
+
+void CWizDocumentWebViewLoaderThread::load(const WIZDOCUMENTDATA &doc)
+{
+    setCurrentDoc(doc.strKbGUID, doc.strGUID);
+
+    if (!isRunning())
+    {
+        start();
+    }
+}
+
+void CWizDocumentWebViewLoaderThread::run()
+{
+    while (true) {
+        QString kbGuid;
+        QString docGuid;
+        PeekCurrentDocGUID(kbGuid, docGuid);
+        //
+        CWizDatabase& db = m_dbMgr.db(kbGuid);
+        WIZDOCUMENTDATA data;
+        if (!db.DocumentFromGUID(docGuid, data)) {
+            continue;
+        }
+        //
+        QString strHtmlFile;
+        if (db.DocumentToTempHtmlFile(data, strHtmlFile))
+        {
+            emit loaded(docGuid, strHtmlFile);
+        }
+    };
+}
+
+void CWizDocumentWebViewLoaderThread::setCurrentDoc(QString kbGUID, QString docGUID)
+{
+    QMutexLocker locker(&m_mutex);
+    Q_UNUSED(locker);
+    //
+    m_strCurrentKbGUID = kbGUID;
+    m_strCurrentDocGUID = docGUID;
+    //
+    m_waitForData.wakeAll();
+}
+
+void CWizDocumentWebViewLoaderThread::PeekCurrentDocGUID(QString& kbGUID, QString& docGUID)
+{
+    QMutexLocker locker(&m_mutex);
+    Q_UNUSED(locker);
+    //
+    if (m_strCurrentKbGUID.isEmpty())
+        m_waitForData.wait(&m_mutex);
+    //
+    kbGUID = m_strCurrentKbGUID;
+    docGUID = m_strCurrentDocGUID;
+    //
+    m_strCurrentKbGUID.clear();
+    m_strCurrentDocGUID.clear();
+}
+

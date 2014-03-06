@@ -1663,6 +1663,9 @@ bool CWizHtmlReader::parseTag(CWizHtmlTag &rTag,
                               bool &bIsClosingTag)
 {
     ATLASSERT(m_lpszBuffer != NULL);
+    if (m_dwBufPos + 3 > m_dwBufLen)
+        return true;
+    //
     ATLASSERT(m_dwBufPos + 3 <= m_dwBufLen);
 
     UINT nRetVal = rTag.parseFromStr(&m_lpszBuffer[m_dwBufPos],

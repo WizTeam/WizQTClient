@@ -464,11 +464,11 @@ void CWizNoteStyle::drawPrimitive(PrimitiveElement pe, const QStyleOption *opt, 
                 Q_ASSERT(vopt);
 
                 const QTreeWidgetItem* pItemBase = view->itemAt(vopt->rect.center());
-                if (NULL != dynamic_cast<const CWizCategoryViewSectionItem *>(pItemBase)) {
+                const CWizCategoryViewSectionItem *secItem = dynamic_cast<const CWizCategoryViewSectionItem *>(pItemBase);
+                if (NULL != secItem) {
+
+                    secItem->draw(p,vopt);
                     //p->fillRect(vopt->rect, Utils::StyleHelper::treeViewBackground());
-                    QRect rc = vopt->rect;
-                    rc.setTop(rc.bottom());
-                    p->fillRect(rc, Utils::StyleHelper::treeViewItemCategoryBackground());
                     //p->fillRect(vopt->rect, QColor(255, 255, 255, 15)); //FIXME
                     //drawCategoryViewItemCategoryItem(pItem, vopt, p);
                     return;

@@ -192,9 +192,9 @@ void MainWindow::cleanOnQuit()
     {
         if (m_sync->isFinished())
             break;
-        m_sync->wait(1);
-        QApplication::processEvents();
+        sleep(1);
     }
+    //QApplication::processEvents();
 }
 
 void MainWindow::closeEvent(QCloseEvent* event)
@@ -218,7 +218,7 @@ void MainWindow::closeEvent(QCloseEvent* event)
 
 void MainWindow::on_actionExit_triggered()
 {
-    qApp->quit();
+    qApp->exit();
 }
 
 void MainWindow::resizeEvent(QResizeEvent *event)
@@ -646,7 +646,7 @@ QWidget* MainWindow::createListView()
     layoutActions->addWidget(m_labelDocumentsHint);
     connect(m_category, SIGNAL(documentsHint(const QString&)), SLOT(on_documents_hintChanged(const QString&)));
 
-    m_labelDocumentsCount = new QLabel(tr("0 articles"), this);
+    m_labelDocumentsCount = new QLabel("", this);
     m_labelDocumentsCount->setStyleSheet("font: 12px; color: #787878");
     m_labelDocumentsCount->setMargin(5);
     layoutActions->addWidget(m_labelDocumentsCount);
@@ -665,8 +665,29 @@ QWidget* MainWindow::createListView()
 
 void MainWindow::on_documents_documentCountChanged()
 {
-    QString strCount = m_labelDocumentsCount->text().replace(QRegExp("\\d+"), QString::number(m_documents->count()));
-    m_labelDocumentsCount->setText(strCount);
+    QString text;
+    int count = m_documents->count();
+    if (count == 1)
+    {
+        text = tr("1 note");
+    }
+    else if (count > 1)
+    {
+        if (count >= 1000)
+        {
+            text = tr("%1 notes").arg("1000+");
+        }
+        else
+        {
+            text = tr("%1 notes").arg(count);
+        }
+    }
+    m_labelDocumentsCount->setText(text);
+}
+
+void MainWindow::on_documents_lastDocumentDeleted()
+{
+    ICore::instance()->emitCloseNoteRequested(m_doc);
 }
 
 void MainWindow::on_documents_hintChanged(const QString& strHint)
@@ -723,6 +744,7 @@ void MainWindow::init()
 
     connect(m_msgList, SIGNAL(itemSelectionChanged()), SLOT(on_message_itemSelectionChanged()));
     connect(m_documents, SIGNAL(itemSelectionChanged()), SLOT(on_documents_itemSelectionChanged()));
+    connect(m_documents, SIGNAL(lastDocumentDeleted()), SLOT(on_documents_lastDocumentDeleted()));
 }
 
 void MainWindow::on_actionAutoSync_triggered()
@@ -999,11 +1021,7 @@ void MainWindow::on_actionRebuildFTS_triggered()
     msg.setWindowTitle(tr("Rebuild full text search index"));
     msg.addButton(QMessageBox::Ok);
     msg.addButton(QMessageBox::Cancel);
-    msg.setText(tr("Rebuild full text search is quit slow if you have quite a few \
-                   documents or attachments, you do not have to use this function \
-                   while search should work as expected, this fuction is only used \
-                   as developer's issue triage purpose, use it only if you know \
-                   what you are doing!"));
+    msg.setText(tr("Rebuild full text search is quit slow if you have quite a few notes or attachments, you do not have to use this function while search should work as expected."));
 
     if (QMessageBox::Ok == msg.exec()) {
         m_searchIndexer->rebuild();
@@ -1163,8 +1181,11 @@ void MainWindow::on_category_itemSelectionChanged()
 
     CWizCategoryViewMessageItem* pItem = category->currentCategoryItem<CWizCategoryViewMessageItem>();
     if (pItem) {
-        m_msgList->show();
-        m_noteList->hide();
+        if (!m_msgList->isVisible())
+        {
+            m_msgList->show();
+            m_noteList->hide();
+        }
 
         CWizMessageDataArray arrayMsg;
         pItem->getMessages(m_dbMgr.db(), arrayMsg);
@@ -1187,8 +1208,11 @@ void MainWindow::on_category_itemSelectionChanged()
 
     //    return;
     } else {
-        m_noteList->show();
-        m_msgList->hide();
+        if (!m_noteList->isVisible())
+        {
+            m_noteList->show();
+            m_msgList->hide();
+        }
         QString kbGUID = category->selectedItemKbGUID();
         if (!kbGUID.isEmpty()) {
             resetPermission(kbGUID, "");

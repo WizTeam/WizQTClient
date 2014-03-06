@@ -7,10 +7,13 @@
 #include <QMutex>
 #include <QColorDialog>
 #include <QMap>
+#include <QThread>
+#include <QWaitCondition>
 
 //#include "wizdownloadobjectdatadialog.h"
-#include "wizusercipherform.h"
+#include "wizdef.h"
 #include "share/wizobject.h"
+
 
 class CWizObjectDataDownloaderHost;
 class CWizEditorInsertLinkForm;
@@ -26,6 +29,30 @@ class CWizDocumentView;
 } // namespace Core
 
 
+class CWizDocumentWebViewLoaderThread : public QThread
+{
+    Q_OBJECT
+public:
+    CWizDocumentWebViewLoaderThread(CWizDatabaseManager& dbMgr);
+
+    void load(const WIZDOCUMENTDATA& doc);
+
+protected:
+    virtual void run();
+    //
+    void setCurrentDoc(QString kbGuid, QString docGuid);
+    void PeekCurrentDocGUID(QString& kbGUID, QString& docGUID);
+Q_SIGNALS:
+    void loaded(const QString strGUID, const QString strFileName);
+private:
+    CWizDatabaseManager& m_dbMgr;
+    QString m_strCurrentKbGUID;
+    QString m_strCurrentDocGUID;
+    QMutex m_mutex;
+    QWaitCondition m_waitForData;
+
+};
+
 class CWizDocumentWebViewWorkerPool : public QObject
 {
     Q_OBJECT
@@ -33,7 +60,7 @@ class CWizDocumentWebViewWorkerPool : public QObject
 public:
     CWizDocumentWebViewWorkerPool(CWizExplorerApp& app, QObject* parent);
 
-    void load(const WIZDOCUMENTDATA& doc);
+    //void load(const WIZDOCUMENTDATA& doc);
     void save(const WIZDOCUMENTDATA& doc, const QString& strHtml,
               const QString& strHtmlFile, int nFlags);
 
@@ -48,6 +75,9 @@ private:
     CWizDatabaseManager& m_dbMgr;
     QTimer m_timer;
     QList<CWizDocumentWebViewWorker*> m_workers;
+
+private:
+    //bool isDocInLoadingQueue(const WIZDOCUMENTDATA& doc);
 };
 
 
@@ -73,6 +103,7 @@ class CWizDocumentWebView : public QWebView
 
 public:
     CWizDocumentWebView(CWizExplorerApp& app, QWidget* parent);
+    ~CWizDocumentWebView();
     Core::CWizDocumentView* view();
     QWebFrame* noteFrame();
 
@@ -158,10 +189,9 @@ private:
     bool m_bCurrentEditing;
 
     CWizDocumentWebViewWorkerPool* m_workerPool;
-    CWizObjectDataDownloaderHost* m_downloaderHost;
     CWizDocumentTransitionView* m_transitionView;
+    CWizDocumentWebViewLoaderThread* m_docLoadThread;
 
-    QPointer<CWizUserCipherForm> m_cipherDialog;
     QPointer<CWizEditorInsertLinkForm> m_editorInsertLinkForm;
     QPointer<CWizEditorInsertTableForm> m_editorInsertTableForm;
     QPointer<QColorDialog> m_colorDialog;
@@ -171,8 +201,6 @@ public:
 
 public Q_SLOTS:
     void onActionTriggered(QWebPage::WebAction act);
-    void onCipherDialogClosed();
-    void on_download_finished(const WIZOBJECTDATA& data, bool bSucceed);
 
     void onEditorPopulateJavaScriptWindowObject();
     void onEditorLoadFinished(bool ok);
@@ -182,7 +210,7 @@ public Q_SLOTS:
 
     void onTimerAutoSaveTimout();
 
-    void onDocumentReady(const QString& strGUID, const QString& strFileName);
+    void onDocumentReady(const QString strGUID, const QString strFileName);
     void onDocumentSaved(const QString& strGUID, bool ok);
 
     void on_editorCommandExecuteLinkInsert_accepted();

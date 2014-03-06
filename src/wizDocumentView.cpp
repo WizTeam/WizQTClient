@@ -5,9 +5,13 @@
 #include <QLineEdit>
 #include <QLabel>
 #include <QHBoxLayout>
+#include <QStackedWidget>
 
 #include <coreplugin/icore.h>
 
+#include "wizmainwindow.h"
+#include "wizDocumentTransitionView.h"
+#include "share/wizObjectDataDownloader.h"
 #include "share/wizDatabaseManager.h"
 #include "widgets/wizScrollBar.h"
 #include "wizDocumentWebView.h"
@@ -16,6 +20,7 @@
 #include "wizButton.h"
 #include "share/wizsettings.h"
 #include "share/wizuihelper.h"
+#include "wizusercipherform.h"
 
 #include "titlebar.h"
 
@@ -36,12 +41,23 @@ CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
 {
     m_title->setEditor(m_web);
 
-    QVBoxLayout* layout = new QVBoxLayout();
-    layout->setContentsMargins(0, 0, 0, 0);
-    layout->setSpacing(0);
+    QVBoxLayout* layoutDoc = new QVBoxLayout();
+    layoutDoc->setContentsMargins(0, 0, 0, 0);
+    layoutDoc->setSpacing(0);
 
-    m_client = new QWidget(this);
-    m_client->setLayout(layout);
+    m_docView = new QWidget(this);
+    m_docView->setLayout(layoutDoc);
+
+    m_tab = new QStackedWidget(this);
+    //
+    MainWindow* mainWindow = qobject_cast<MainWindow *>(m_app.mainWindow());
+    m_passwordView = mainWindow->cipherForm();
+    m_passwordView->setGeometry(this->geometry());
+    connect(m_passwordView, SIGNAL(cipherCheckRequest()), SLOT(onCipherCheckRequest()));
+    //
+    m_tab->addWidget(m_docView);
+    m_tab->addWidget(m_passwordView);
+    m_tab->setCurrentWidget(m_docView);
 
     m_splitter = new CWizSplitter(this);
     m_splitter->addWidget(m_web);
@@ -49,16 +65,20 @@ CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
     m_comments->page()->mainFrame()->setScrollBarPolicy(Qt::Horizontal, Qt::ScrollBarAlwaysOff);
     m_comments->hide();
 
-    layout->addWidget(m_title);
-    layout->addWidget(m_splitter);
+    layoutDoc->addWidget(m_title);
+    layoutDoc->addWidget(m_splitter);
 
-    layout->setStretchFactor(m_title, 0);
-    layout->setStretchFactor(m_splitter, 1);
+    layoutDoc->setStretchFactor(m_title, 0);
+    layoutDoc->setStretchFactor(m_splitter, 1);
 
-    QVBoxLayout* layoutMain = new QVBoxLayout();
+    QVBoxLayout* layoutMain = new QVBoxLayout(this);
     layoutMain->setContentsMargins(0, 0, 0, 0);
     setLayout(layoutMain);
-    layoutMain->addWidget(m_client);
+    layoutMain->addWidget(m_tab);
+
+    m_downloaderHost = mainWindow->downloaderHost();
+    connect(m_downloaderHost, SIGNAL(downloadDone(const WIZOBJECTDATA&, bool)),
+            SLOT(on_download_finished(const WIZOBJECTDATA&, bool)));
 
     connect(&m_dbMgr, SIGNAL(documentModified(const WIZDOCUMENTDATA&, const WIZDOCUMENTDATA&)), \
             SLOT(on_document_modified(const WIZDOCUMENTDATA&, const WIZDOCUMENTDATA&)));
@@ -77,6 +97,9 @@ CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
 
     connect(Core::ICore::instance(), SIGNAL(viewNoteLoaded(Core::INoteView*,WIZDOCUMENTDATA,bool)),
             SLOT(onViewNoteLoaded(Core::INoteView*,const WIZDOCUMENTDATA&,bool)));
+
+    connect(Core::ICore::instance(), SIGNAL(closeNoteRequested(Core::INoteView*)),
+            SLOT(onCloseNoteRequested(Core::INoteView*)));
 }
 
 CWizDocumentView::~CWizDocumentView()
@@ -84,6 +107,10 @@ CWizDocumentView::~CWizDocumentView()
     m_web->saveDocument(m_note, false);
 }
 
+QWidget* CWizDocumentView::client() const
+{
+    return m_tab;
+}
 void CWizDocumentView::showEvent(QShowEvent *event)
 {
     Q_UNUSED(event);
@@ -91,7 +118,7 @@ void CWizDocumentView::showEvent(QShowEvent *event)
 
 void CWizDocumentView::showClient(bool visible)
 {
-    m_client->setVisible(visible);
+    m_tab->setVisible(visible);
 }
 
 void CWizDocumentView::onViewNoteRequested(INoteView* view, const WIZDOCUMENTDATA& doc)
@@ -167,15 +194,44 @@ void CWizDocumentView::initStat(const WIZDOCUMENTDATA& data, bool bEditing)
 
 void CWizDocumentView::viewNote(const WIZDOCUMENTDATA& data, bool forceEdit)
 {
+    MainWindow* window = qobject_cast<MainWindow *>(m_app.mainWindow());
+
     m_web->saveDocument(m_note, false);
 
-    initStat(data, forceEdit);
-
-    m_web->viewDocument(data, m_bEditingMode);
-    m_title->setNote(data, m_bEditingMode, m_bLocked);
-
-    // save last
     m_note = data;
+    initStat(data, forceEdit);
+    m_tab->setCurrentWidget(m_docView);
+    m_tab->setVisible(true);
+
+    // download document if not exist
+    CWizDatabase& db = m_dbMgr.db(data.strKbGUID);
+    QString strDocumentFileName = db.GetDocumentFileName(data.strGUID);
+    if (!db.IsObjectDataDownloaded(data.strGUID, "document") || \
+            !PathFileExists(strDocumentFileName)) {
+
+        window->downloaderHost()->download(data);
+        window->showClient(false);
+        window->transitionView()->showAsMode(CWizDocumentTransitionView::Downloading);
+
+        return;
+    }
+
+    // ask user cipher if needed
+    if (data.nProtected) {
+        if(!db.loadUserCert()) {
+            return;
+        }
+
+        if (db.userCipher().isEmpty()) {
+            m_passwordView->setHint(db.userCipherHint());
+            m_tab->setCurrentWidget(m_passwordView);
+            m_passwordView->setCipherEditorFocus();
+
+            return;
+        }
+    }
+
+    loadNote(data);
 }
 
 void CWizDocumentView::setEditNote(bool bEdit)
@@ -245,6 +301,15 @@ void CWizDocumentView::on_attachment_deleted(const WIZDOCUMENTATTACHMENTDATA& at
     reload();
 }
 
+void CWizDocumentView::loadNote(const WIZDOCUMENTDATA& doc)
+{
+    m_web->viewDocument(doc, m_bEditingMode);
+    m_title->setNote(doc, m_bEditingMode, m_bLocked);
+
+    // save last
+    m_note = doc;
+}
+
 void CWizDocumentView::on_document_modified(const WIZDOCUMENTDATA& documentOld, const WIZDOCUMENTDATA& documentNew)
 {
     Q_UNUSED(documentOld);
@@ -253,6 +318,49 @@ void CWizDocumentView::on_document_modified(const WIZDOCUMENTDATA& documentOld, 
         return;
 
     reload();
+}
+
+void CWizDocumentView::onCloseNoteRequested(INoteView *view)
+{
+    Q_UNUSED(view)
+
+    showClient(false);
+}
+
+void CWizDocumentView::onCipherCheckRequest()
+{
+    const WIZDOCUMENTDATA& noteData = note();
+    CWizDatabase& db = m_dbMgr.db(noteData.strKbGUID);
+
+    db.setUserCipher(m_passwordView->userCipher());
+    db.setSaveUserCipher(m_passwordView->isSaveForSession());
+
+    if (!db.IsFileAccessible(noteData))
+    {
+        m_passwordView->cipherError();
+        db.setUserCipher(QString());
+        db.setSaveUserCipher(false);
+        return;
+    }
+    m_passwordView->cipherCorrect();
+
+    m_tab->setCurrentWidget(m_docView);
+    loadNote(noteData);
+}
+
+void CWizDocumentView::on_download_finished(const WIZOBJECTDATA &data, bool bSucceed)
+{
+    if (m_note.strKbGUID != data.strKbGUID
+            || m_note.strGUID != data.strObjectGUID)
+        return;
+
+    if (!bSucceed)
+        return;
+
+    MainWindow* mainWindow = qobject_cast<MainWindow *>(m_app.mainWindow());
+    mainWindow->transitionView()->setVisible(false);
+
+    viewNote(m_note,m_bEditingMode);
 }
 
 void CWizDocumentView::on_document_data_modified(const WIZDOCUMENTDATA& data)

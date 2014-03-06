@@ -101,6 +101,33 @@ ZiwEncryptType CWizZiwReader::encryptType()
     }
 }
 
+bool CWizZiwReader::isFileAccessible(const QString& encryptedFile)
+{
+    if (!setFile(encryptedFile)) {
+        return false;
+    }
+
+    if (!decryptRSAdPart(m_d)) {
+        return false;
+    }
+
+    QByteArray ziwCipher;
+    if(!decryptZiwCipher(ziwCipher)) {
+        return false;
+    }
+
+    QByteArray encryptedData, rawData;
+    if (!loadZiwData(encryptedFile, encryptedData)) {
+       return false;
+    }
+
+    if (!WizAESDecryptToString((const unsigned char *)(ziwCipher.constData()), encryptedData, rawData)) {
+        return false;
+    }
+
+    return true;
+}
+
 void CWizZiwReader::setRSAKeys(const QByteArray& strN, \
                                const QByteArray& stre, \
                                const QByteArray& str_encrypted_d, \

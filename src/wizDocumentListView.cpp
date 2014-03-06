@@ -26,8 +26,8 @@ using namespace Core::Internal;
 // Document actions
 #define WIZACTION_LIST_DELETE   QObject::tr("Delete")
 #define WIZACTION_LIST_TAGS     QObject::tr("Tags...")
-#define WIZACTION_LIST_MOVE_DOCUMENT QObject::tr("Move Document")
-#define WIZACTION_LIST_COPY_DOCUMENT QObject::tr("Copy Document")
+#define WIZACTION_LIST_MOVE_DOCUMENT QObject::tr("Move Note")
+#define WIZACTION_LIST_COPY_DOCUMENT QObject::tr("Copy Note")
 
 
 CWizDocumentListView::CWizDocumentListView(CWizExplorerApp& app, QWidget *parent /*= 0*/)
@@ -749,21 +749,38 @@ void CWizDocumentListView::on_action_deleteDocument()
 {
     QList<QListWidgetItem*> items = selectedItems();
 
+    int index = -1;
     foreach (QListWidgetItem* it, items) {
         if (CWizDocumentListViewItem* item = dynamic_cast<CWizDocumentListViewItem*>(it)) {
             if (item->type() == CWizDocumentListViewItem::TypeMessage) {
                 continue;
             }
 
+            index = indexFromItem(item).row();
             CWizDocument doc(m_dbMgr.db(item->document().strKbGUID), item->document());
             doc.Delete();
         }
+    }
+
+    //change to next document
+    int nItemCount = count();
+    if(index >= nItemCount)
+    {
+        index = nItemCount - 1;
+    }
+    if(-1 < index)
+    {
+        setItemSelected(documentItemAt(index), true);
+    }
+    else
+    {
+        emit lastDocumentDeleted();
     }
 }
 
 void CWizDocumentListView::on_action_moveDocument()
 {
-    CWizFolderSelector* selector = new CWizFolderSelector("Move documents", m_app, this);
+    CWizFolderSelector* selector = new CWizFolderSelector("Move notes", m_app, this);
     selector->setAcceptRoot(false);
 
     connect(selector, SIGNAL(finished(int)), SLOT(on_action_moveDocument_confirmed(int)));
@@ -815,7 +832,7 @@ void CWizDocumentListView::on_action_moveDocument_confirmed(int result)
             CWizDocument doc(m_dbMgr.db(), data);
             doc.MoveDocument(&folder);
 
-            progress->setActionString(tr("Move Document: %1 to %2").arg(data.strLocation).arg(strSelectedFolder));
+            progress->setActionString(tr("Move Note: %1 to %2").arg(data.strLocation).arg(strSelectedFolder));
             progress->setNotifyString(data.strTitle);
             progress->setProgress(arrayDocument.size(), i);
             progress->exec();

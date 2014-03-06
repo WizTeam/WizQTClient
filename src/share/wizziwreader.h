@@ -56,6 +56,9 @@ public:
 
     ZiwEncryptType encryptType();
 
+    //call setUserCipher and setRSAKeys before use this
+    bool isFileAccessible(const QString& encryptedFile);
+
 private:
     QString m_strFileName;
     WIZZIWHEADER m_header;

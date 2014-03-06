@@ -240,6 +240,7 @@ public Q_SLOTS:
     void on_documents_itemSelectionChanged();
     void on_message_itemSelectionChanged();
     void on_documents_documentCountChanged();
+    void on_documents_lastDocumentDeleted();
     void on_documents_hintChanged(const QString& strHint);
     void on_documents_viewTypeChanged(int type);
     void on_documents_sortingTypeChanged(int type);

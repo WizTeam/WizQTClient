@@ -41,5 +41,10 @@ void ICore::emitViewNoteLoaded(INoteView* view,
     Q_EMIT m_instance->viewNoteLoaded(view, doc, bOk);
 }
 
+void ICore::emitCloseNoteRequested(INoteView *view)
+{
+    Q_EMIT m_instance->closeNoteRequested(view);
+}
+
 
 } // namespace Core

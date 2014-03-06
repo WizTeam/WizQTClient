@@ -18,7 +18,9 @@ class CWizScrollBar;
 class CWizDocumentWebView;
 class CWizDatabase;
 class CWizSplitter;
-
+class CWizUserCipherForm;
+class CWizObjectDataDownloaderHost;
+class QStackedWidget;
 class QWebFrame;
 
 
@@ -37,7 +39,7 @@ public:
     ~CWizDocumentView();
     virtual QSize sizeHint() const { return QSize(200, 1); }
 
-    QWidget* client() const { return m_client; }
+    QWidget* client() const;
     CWizDocumentWebView* web() const { return m_web; }
     QWebView* commentView() const { return m_comments; }
 
@@ -45,11 +47,17 @@ protected:
     CWizExplorerApp& m_app;
     CWizDatabaseManager& m_dbMgr;
     CWizUserSettings& m_userSettings;
+    CWizObjectDataDownloaderHost* m_downloaderHost;
+
+    QStackedWidget* m_tab;
+
+    QWidget* m_docView;
     CWizDocumentWebView* m_web;
     QWebView* m_comments;
     CWizSplitter* m_splitter;
     Core::Internal::TitleBar* m_title;
-    QWidget* m_client;
+
+    CWizUserCipherForm* m_passwordView;
 
     virtual void showEvent(QShowEvent *event);
 
@@ -82,6 +90,11 @@ public:
 public Q_SLOTS:
     void onViewNoteRequested(Core::INoteView* view, const WIZDOCUMENTDATA& doc);
     void onViewNoteLoaded(Core::INoteView*,const WIZDOCUMENTDATA&,bool);
+    void onCloseNoteRequested(Core::INoteView* view);
+
+    void onCipherCheckRequest();
+
+    void on_download_finished(const WIZOBJECTDATA& data, bool bSucceed);
 
     void on_document_modified(const WIZDOCUMENTDATA& documentOld,
                               const WIZDOCUMENTDATA& documentNew);
@@ -89,6 +102,9 @@ public Q_SLOTS:
 
     void on_attachment_created(const WIZDOCUMENTATTACHMENTDATA& attachment);
     void on_attachment_deleted(const WIZDOCUMENTATTACHMENTDATA& attachment);
+
+private:
+    void loadNote(const WIZDOCUMENTDATA &doc);
 };
 
 } // namespace Core
