@@ -232,6 +232,54 @@
     </message>
 </context>
 <context>
+    <name>CWizDatabase</name>
+    <message>
+        <location filename="../src/share/wizDatabase.cpp" line="2626"/>
+        <source>My Notes</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/share/wizDatabase.cpp" line="2628"/>
+        <source>My Journals</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/share/wizDatabase.cpp" line="2630"/>
+        <source>My Events</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/share/wizDatabase.cpp" line="2632"/>
+        <source>My Sticky Notes</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/share/wizDatabase.cpp" line="2634"/>
+        <source>My Emails</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/share/wizDatabase.cpp" line="2636"/>
+        <source>My Drafts</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/share/wizDatabase.cpp" line="2638"/>
+        <source>My Tasks</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/share/wizDatabase.cpp" line="2642"/>
+        <source>Inbox</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/share/wizDatabase.cpp" line="2644"/>
+        <source>Completed</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>CWizDocumentListView</name>
     <message>
         <location filename="../src/wizDocumentListView.cpp" line="835"/>
@@ -700,6 +748,29 @@
     </message>
 </context>
 <context>
+    <name>CWizSearchIndexer</name>
+    <message>
+        <location filename="../src/share/wizSearchIndexer.cpp" line="76"/>
+        <source>Build FTS index meet error, we&apos;ll rebuild it when restart</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/share/wizSearchIndexer.cpp" line="115"/>
+        <source>Update search index (%1/%2): %3</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/share/wizSearchIndexer.cpp" line="117"/>
+        <source>[WARNING] failed to update: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/share/wizSearchIndexer.cpp" line="126"/>
+        <source>[WARNING] total %1 notes failed to build</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>CWizSortingPopupButton</name>
     <message>
         <location filename="../src/wizPopupButton.cpp" line="177"/>
@@ -892,11 +963,6 @@
         <location filename="../src/wizWebSettingsDialog.cpp" line="34"/>
         <source>wow, seems unable to load what you want...</source>
         <translation>哇，好像暫時沒辦法加載...</translation>
-    </message>
-    <message>
-        <location filename="../src/wizWebSettingsDialog.cpp" line="38"/>
-        <source>Close</source>
-        <translation>關閉</translation>
     </message>
 </context>
 <context>
@@ -1807,37 +1873,164 @@
     </message>
     <message>
         <location filename="../src/utils/misc.cpp" line="15"/>
+        <location filename="../src/share/wizqthelper.cpp" line="25"/>
         <source>Yesterday</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../src/utils/misc.cpp" line="17"/>
+        <location filename="../src/share/wizqthelper.cpp" line="27"/>
         <source>The day before yesterday</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../src/utils/misc.cpp" line="24"/>
+        <location filename="../src/share/wizqthelper.cpp" line="34"/>
         <source>Just now</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../src/utils/misc.cpp" line="28"/>
+        <location filename="../src/share/wizqthelper.cpp" line="38"/>
         <source>1 minute ago</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../src/utils/misc.cpp" line="32"/>
+        <location filename="../src/share/wizqthelper.cpp" line="42"/>
         <source>%1 minutes ago</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../src/utils/misc.cpp" line="37"/>
+        <location filename="../src/share/wizqthelper.cpp" line="47"/>
         <source>1 hour ago</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../src/utils/misc.cpp" line="41"/>
+        <location filename="../src/share/wizqthelper.cpp" line="51"/>
         <source>%1 hours ago</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/share/wizobject.h" line="968"/>
+        <source>$Public Notes</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/share/wizobject.h" line="973"/>
+        <source>$Share with friends</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/share/wizfileiconprovider.cpp" line="91"/>
+        <source>text document</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/share/wizfileiconprovider.cpp" line="93"/>
+        <source>word document</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/share/wizfileiconprovider.cpp" line="95"/>
+        <source>Compressed file</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/share/wizfileiconprovider.cpp" line="97"/>
+        <source>File</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/share/wizmisc.cpp" line="402"/>
+        <source>Simplified Chinese</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/share/wizmisc.cpp" line="404"/>
+        <source>Traditional Chinese</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/share/wizmisc.cpp" line="406"/>
+        <source>English(US)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/share/wizmisc.cpp" line="444"/>
+        <source>/Deleted Items/</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/share/wizmisc.cpp" line="448"/>
+        <source>/My Notes/</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/share/wizmisc.cpp" line="452"/>
+        <source>/My Journals/</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/share/wizmisc.cpp" line="456"/>
+        <source>/My Events/</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/share/wizmisc.cpp" line="460"/>
+        <source>/My Sticky Notes/</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/share/wizmisc.cpp" line="464"/>
+        <source>/My Emails/</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/share/wizmisc.cpp" line="468"/>
+        <source>/My Drafts/</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/share/wizmisc.cpp" line="472"/>
+        <source>/My Tasks/</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/share/wizmisc.cpp" line="476"/>
+        <source>/My Tasks/Inbox/</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/share/wizmisc.cpp" line="480"/>
+        <source>/My Tasks/Completed/</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/share/wizmisc.cpp" line="830"/>
+        <source>%1 TB</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/share/wizmisc.cpp" line="832"/>
+        <source>%1 GB</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/share/wizmisc.cpp" line="834"/>
+        <source>%1 MB</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/share/wizmisc.cpp" line="836"/>
+        <source>%1 KB</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/share/wizmisc.cpp" line="837"/>
+        <source>%1 byte(s)</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

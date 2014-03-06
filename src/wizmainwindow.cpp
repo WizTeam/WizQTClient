@@ -193,8 +193,8 @@ void MainWindow::cleanOnQuit()
         if (m_sync->isFinished())
             break;
         sleep(1);
-        QApplication::processEvents();
     }
+    //QApplication::processEvents();
 }
 
 void MainWindow::closeEvent(QCloseEvent* event)
