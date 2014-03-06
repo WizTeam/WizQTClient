@@ -833,6 +833,29 @@
     </message>
 </context>
 <context>
+    <name>CWizUserInfoWidget</name>
+    <message>
+        <location filename="../src/widgets/wizUserInfoWidget.cpp" line="45"/>
+        <source>View account info</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/widgets/wizUserInfoWidget.cpp" line="49"/>
+        <source>Account settings</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/widgets/wizUserInfoWidget.cpp" line="52"/>
+        <source>Change avatar</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/widgets/wizUserInfoWidget.cpp" line="147"/>
+        <source>Upload Avatar</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>CWizUserVerifyDialog</name>
     <message>
         <location filename="../src/wizUserVerifyDialog.cpp" line="18"/>
@@ -1781,6 +1804,41 @@
         <location filename="../src/notifybar.cpp" line="36"/>
         <source>Your permission is not enough to edit this note.</source>
         <translation type="unfinished">你的權限不夠, 無法修改這個筆記。</translation>
+    </message>
+    <message>
+        <location filename="../src/utils/misc.cpp" line="15"/>
+        <source>Yesterday</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/utils/misc.cpp" line="17"/>
+        <source>The day before yesterday</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/utils/misc.cpp" line="24"/>
+        <source>Just now</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/utils/misc.cpp" line="28"/>
+        <source>1 minute ago</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/utils/misc.cpp" line="32"/>
+        <source>%1 minutes ago</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/utils/misc.cpp" line="37"/>
+        <source>1 hour ago</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/utils/misc.cpp" line="41"/>
+        <source>%1 hours ago</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 </TS>

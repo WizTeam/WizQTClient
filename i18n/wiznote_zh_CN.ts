@@ -833,6 +833,29 @@
     </message>
 </context>
 <context>
+    <name>CWizUserInfoWidget</name>
+    <message>
+        <location filename="../src/widgets/wizUserInfoWidget.cpp" line="45"/>
+        <source>View account info</source>
+        <translation>显示账户信息</translation>
+    </message>
+    <message>
+        <location filename="../src/widgets/wizUserInfoWidget.cpp" line="49"/>
+        <source>Account settings</source>
+        <translation>账户设置</translation>
+    </message>
+    <message>
+        <location filename="../src/widgets/wizUserInfoWidget.cpp" line="52"/>
+        <source>Change avatar</source>
+        <translation>更改头像</translation>
+    </message>
+    <message>
+        <location filename="../src/widgets/wizUserInfoWidget.cpp" line="147"/>
+        <source>Upload Avatar</source>
+        <translation>上传头像</translation>
+    </message>
+</context>
+<context>
     <name>CWizUserVerifyDialog</name>
     <message>
         <location filename="../src/wizUserVerifyDialog.cpp" line="18"/>
@@ -1781,6 +1804,41 @@
         <location filename="../src/notifybar.cpp" line="36"/>
         <source>Your permission is not enough to edit this note.</source>
         <translation>你的权限不够, 无法修改这个笔记。</translation>
+    </message>
+    <message>
+        <location filename="../src/utils/misc.cpp" line="15"/>
+        <source>Yesterday</source>
+        <translation>昨天</translation>
+    </message>
+    <message>
+        <location filename="../src/utils/misc.cpp" line="17"/>
+        <source>The day before yesterday</source>
+        <translation>前天</translation>
+    </message>
+    <message>
+        <location filename="../src/utils/misc.cpp" line="24"/>
+        <source>Just now</source>
+        <translation>刚刚</translation>
+    </message>
+    <message>
+        <location filename="../src/utils/misc.cpp" line="28"/>
+        <source>1 minute ago</source>
+        <translation>1分钟前</translation>
+    </message>
+    <message>
+        <location filename="../src/utils/misc.cpp" line="32"/>
+        <source>%1 minutes ago</source>
+        <translation>%1 分钟前</translation>
+    </message>
+    <message>
+        <location filename="../src/utils/misc.cpp" line="37"/>
+        <source>1 hour ago</source>
+        <translation>1小时前</translation>
+    </message>
+    <message>
+        <location filename="../src/utils/misc.cpp" line="41"/>
+        <source>%1 hours ago</source>
+        <translation>%1 小时前</translation>
     </message>
 </context>
 </TS>
