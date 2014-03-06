@@ -256,7 +256,7 @@
     <message>
         <location filename="../src/share/wizDatabase.cpp" line="2634"/>
         <source>My Emails</source>
-        <translation>我的电子邮件</translation>
+        <translation>我的邮件</translation>
     </message>
     <message>
         <location filename="../src/share/wizDatabase.cpp" line="2636"/>
@@ -752,22 +752,22 @@
     <message>
         <location filename="../src/share/wizSearchIndexer.cpp" line="76"/>
         <source>Build FTS index meet error, we&apos;ll rebuild it when restart</source>
-        <translation>构建索引数据遇到问题，下次启动时重试</translation>
+        <translation>建立全文索引失败，将会重新启动</translation>
     </message>
     <message>
         <location filename="../src/share/wizSearchIndexer.cpp" line="115"/>
         <source>Update search index (%1/%2): %3</source>
-        <translation>更新查询索引(%1/%2): %3</translation>
+        <translation>更新搜索索引(%1/%2): %3</translation>
     </message>
     <message>
         <location filename="../src/share/wizSearchIndexer.cpp" line="117"/>
         <source>[WARNING] failed to update: %1</source>
-        <translation>[警告] 更新失败: %1</translation>
+        <translation>【警告】 更新失败: %1</translation>
     </message>
     <message>
         <location filename="../src/share/wizSearchIndexer.cpp" line="126"/>
         <source>[WARNING] total %1 documents failed to build</source>
-        <translation>[警告] 共 %1 个文件构建失败</translation>
+        <translation>【警告】 共 %1 个文件构建失败</translation>
     </message>
 </context>
 <context>
@@ -880,7 +880,7 @@
     <message>
         <location filename="../src/ui/wizusercipherform.ui" line="14"/>
         <source>Password</source>
-        <translation>密碼</translation>
+        <translation>密码</translation>
     </message>
     <message>
         <location filename="../src/ui/wizusercipherform.ui" line="53"/>
@@ -1891,7 +1891,7 @@
         <location filename="../src/utils/misc.cpp" line="24"/>
         <location filename="../src/share/wizqthelper.cpp" line="34"/>
         <source>Just now</source>
-        <translation>刚才</translation>
+        <translation>刚刚</translation>
     </message>
     <message>
         <location filename="../src/utils/misc.cpp" line="28"/>
@@ -1980,7 +1980,7 @@
     <message>
         <location filename="../src/share/wizmisc.cpp" line="464"/>
         <source>/My Emails/</source>
-        <translation>/我的电子邮件/</translation>
+        <translation>/我的邮件/</translation>
     </message>
     <message>
         <location filename="../src/share/wizmisc.cpp" line="468"/>
@@ -2025,7 +2025,7 @@
     <message>
         <location filename="../src/share/wizmisc.cpp" line="837"/>
         <source>%1 byte(s)</source>
-        <translation></translation>
+        <translation>%1 字节</translation>
     </message>
     <message>
         <location filename="../src/share/wizobject.h" line="968"/>
