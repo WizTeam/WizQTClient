@@ -123,7 +123,7 @@ bool CWizSearchIndexer::buildFTSIndexByDatabase(CWizDatabase& db)
     }
 
     if (nErrors >= 3) {
-        TOLOG(tr("[WARNING] total %1 documents failed to build").arg(nErrors));
+        TOLOG(tr("[WARNING] total %1 notes failed to build").arg(nErrors));
         return false;
     }
 
