@@ -88,7 +88,7 @@
     <message>
         <location filename="../src/wizCategoryView.cpp" line="1253"/>
         <source>Do you really want to delete all notes inside folder: %1 ? (All notes will move to trash folder and remove from cloud server)</source>
-        <translation>确定要删除文件夹%1 内的所有笔记吗？（所有笔记将会被移动到已删除，并从云端服务器移除）</translation>
+        <translation>确定要删除文件夹 %1 内的所有笔记吗？（所有笔记将会被移动到已删除，并从云端服务器移除）</translation>
     </message>
     <message>
         <location filename="../src/wizCategoryView.cpp" line="1282"/>
@@ -108,7 +108,7 @@
     <message>
         <location filename="../src/wizCategoryView.cpp" line="1319"/>
         <source>Do you really want to delete folder: %1? (All notes will move to unclassified folder, It&apos;s safe.)</source>
-        <translation>是否要删除文件夹: %1? （所有笔记将会被移动到未分类）</translation>
+        <translation>是否要删除文件夹: %1？（所有笔记将会被移动到未分类）</translation>
     </message>
     <message>
         <location filename="../src/wizCategoryView.cpp" line="1482"/>
@@ -150,7 +150,7 @@
     <message>
         <location filename="../src/wizCategoryView.cpp" line="1454"/>
         <source>Recent notes</source>
-        <translation>最近笔记</translation>
+        <translation>近期笔记</translation>
     </message>
     <message>
         <location filename="../src/wizCategoryView.cpp" line="1456"/>
@@ -297,7 +297,7 @@
     <message>
         <location filename="../src/wizDocumentTransitionView.cpp" line="26"/>
         <source>Error occured while loading note.</source>
-        <translation>笔记加载失败啦.</translation>
+        <translation>笔记加载失败。</translation>
     </message>
 </context>
 <context>
@@ -320,7 +320,7 @@
     <message>
         <location filename="../src/wizdownloadobjectdatadialog.cpp" line="64"/>
         <source>wow, download failed! please check your network connection</source>
-        <translation>哇，下载出错啦！检查一下网络吧</translation>
+        <translation>下载出错，请检查网络</translation>
     </message>
 </context>
 <context>
@@ -962,7 +962,7 @@
     <message>
         <location filename="../src/wizWebSettingsDialog.cpp" line="34"/>
         <source>wow, seems unable to load what you want...</source>
-        <translation>哇，好像暂时没办法加载...</translation>
+        <translation>无法打开网页，请重试...</translation>
     </message>
     <message>
         <source>Close</source>
