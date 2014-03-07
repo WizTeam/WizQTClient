@@ -256,7 +256,7 @@
     <message>
         <location filename="../src/share/wizDatabase.cpp" line="2634"/>
         <source>My Emails</source>
-        <translation>我的電子郵件</translation>
+        <translation>我的郵件</translation>
     </message>
     <message>
         <location filename="../src/share/wizDatabase.cpp" line="2636"/>
@@ -762,12 +762,12 @@
     <message>
         <location filename="../src/share/wizSearchIndexer.cpp" line="117"/>
         <source>[WARNING] failed to update: %1</source>
-        <translation>[警告]更新失败: %1</translation>
+        <translation>【警告】更新失败: %1</translation>
     </message>
     <message>
         <location filename="../src/share/wizSearchIndexer.cpp" line="126"/>
         <source>[WARNING] total %1 documents failed to build</source>
-        <translation>[警告] 總計 %1 个檔案搆建失敗</translation>
+        <translation>【警告】 總計 %1 个檔案搆建失敗</translation>
     </message>
 </context>
 <context>
@@ -1537,22 +1537,22 @@
     <message>
         <location filename="../src/wizCategoryView.h" line="15"/>
         <source>Send to me</source>
-        <translation>提到我的消息</translation>
+        <translation>提到我的訊息</translation>
     </message>
     <message>
         <location filename="../src/wizCategoryView.h" line="16"/>
         <source>Note modified</source>
-        <translation>筆記被修改消息</translation>
+        <translation>筆記被修改訊息</translation>
     </message>
     <message>
         <location filename="../src/wizCategoryView.h" line="17"/>
         <source>Comments</source>
-        <translation>評論消息</translation>
+        <translation>評論訊息</translation>
     </message>
     <message>
         <location filename="../src/wizCategoryView.h" line="18"/>
         <source>Send from me</source>
-        <translation>我發出的消息</translation>
+        <translation>我發出的訊息</translation>
     </message>
     <message>
         <location filename="../src/wizCategoryView.cpp" line="33"/>
@@ -1980,7 +1980,7 @@
     <message>
         <location filename="../src/share/wizmisc.cpp" line="464"/>
         <source>/My Emails/</source>
-        <translation>/我的電子郵件/</translation>
+        <translation>/我的郵件/</translation>
     </message>
     <message>
         <location filename="../src/share/wizmisc.cpp" line="468"/>
