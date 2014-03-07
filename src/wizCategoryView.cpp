@@ -1353,12 +1353,6 @@ void CWizCategoryView::on_action_groupAttribute()
 
     CWizCategoryViewGroupRootItem* p = currentCategoryItem<CWizCategoryViewGroupRootItem>();
     if (p && !p->kbGUID().isEmpty()) {
-
-//        QString strUrl = WizService::ApiEntry::groupAttributeUrl(WIZ_TOKEN_IN_URL_REPLACE_PART, m_strRequestedGroupKbGUID);
-//        //
-//        showWebDialogWithToken(tr("Group settings"), strUrl);
-
-//        m_strRequestedGroupKbGUID = p->kbGUID();
         if (p->isBizGroup()) {
             viewBizGroupInfo(p->kbGUID(), p->bizGUID());
         } else {
