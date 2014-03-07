@@ -1664,7 +1664,7 @@ bool CWizHtmlReader::parseTag(CWizHtmlTag &rTag,
 {
     ATLASSERT(m_lpszBuffer != NULL);
     if (m_dwBufPos + 3 > m_dwBufLen)
-        return true;
+        return false;
     //
     ATLASSERT(m_dwBufPos + 3 <= m_dwBufLen);
 
