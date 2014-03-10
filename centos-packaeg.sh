@@ -33,6 +33,7 @@ cd plugins
 cp ../../../../WizQTClient-Release-Linux/lib/wiznote/plugins/libextensionsystem.so ./
 cp ../../../../WizQTClient-Release-Linux/lib/wiznote/plugins/libaggregation.so ./
 cp ../../../../WizQTClient-Release-Linux/lib/wiznote/plugins/libCore.so ./
+cp ../../../../WizQTClient-Release-Linux/lib/wiznote/plugins/libMarkDown.so ./
 
 cd ..
 cd ..
