@@ -188,12 +188,16 @@ void MainWindow::cleanOnQuit()
     m_sync->stopSync();
     m_searchIndexer->abort();
 
-    while (1)
+    if (m_sync
+            && m_sync->isRunning())
     {
-        if (m_sync->isFinished())
-            break;
-        sleep(1);
-        QApplication::processEvents();
+        while (1)
+        {
+            if (m_sync->isFinished())
+                break;
+            sleep(1);
+            QApplication::processEvents();
+        }
     }
 
 }
