@@ -8,6 +8,8 @@
 #include "wizSearchWidget_mm.h"
 
 
+
+
 //@interface CWizToolBarActionItemView: NSView {
 //NSImage* m_image;
 //}
@@ -365,6 +367,10 @@ NSMutableArray *itemIdentifiers(const QList<CWizMacToolBarItem *> *items, bool c
     return [self itemIdentifierToItem:itemIdentifier];
 }
 
+-(BOOL)validateToolbarItem:(NSToolbarItem *)toolbarItem
+{
+    return [toolbarItem isEnabled];
+}
 - (BOOL) resignFirstResponder
 {
     return YES;
