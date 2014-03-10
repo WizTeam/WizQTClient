@@ -826,6 +826,7 @@ void CWizDocumentListView::on_action_moveDocument_confirmed(int result)
     } else {
         MainWindow* mainWindow = qobject_cast<MainWindow*>(m_app.mainWindow());
         CWizProgressDialog* progress = mainWindow->progressDialog();
+        progress->show();
 
         int i = 0;
         foreach (const WIZDOCUMENTDATAEX& data, arrayDocument) {
@@ -835,7 +836,6 @@ void CWizDocumentListView::on_action_moveDocument_confirmed(int result)
             progress->setActionString(tr("Move Note: %1 to %2").arg(data.strLocation).arg(strSelectedFolder));
             progress->setNotifyString(data.strTitle);
             progress->setProgress(arrayDocument.size(), i);
-            progress->exec();
 
             i++;
         }

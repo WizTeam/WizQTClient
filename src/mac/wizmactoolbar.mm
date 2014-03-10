@@ -38,7 +38,6 @@
  ****************************************************************************/
 
 #include <QApplication>
-#include <QtDeclarative/QDeclarativeView>
 #include <QtCore>
 #include <QAction>
 #include "wizmachelper.h"

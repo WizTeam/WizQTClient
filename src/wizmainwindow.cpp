@@ -188,13 +188,18 @@ void MainWindow::cleanOnQuit()
     m_sync->stopSync();
     m_searchIndexer->abort();
 
-    while (1)
+    if (m_sync
+            && m_sync->isRunning())
     {
-        if (m_sync->isFinished())
-            break;
-        sleep(1);
+        while (1)
+        {
+            if (m_sync->isFinished())
+                break;
+            sleep(1);
+            QApplication::processEvents();
+        }
     }
-    //QApplication::processEvents();
+
 }
 
 void MainWindow::closeEvent(QCloseEvent* event)
@@ -805,7 +810,10 @@ void MainWindow::on_syncProcessLog(const QString& strMsg)
 void MainWindow::on_actionNewNote_triggered()
 {
     WIZDOCUMENTDATA data;
-    m_category->createDocument(data);
+    if (!m_category->createDocument(data))
+    {
+        return;
+    }
 
     m_documentForEditing = data;
     m_documents->addAndSelectDocument(data);

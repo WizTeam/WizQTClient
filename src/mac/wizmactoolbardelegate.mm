@@ -8,6 +8,8 @@
 #include "wizSearchWidget_mm.h"
 
 
+
+
 //@interface CWizToolBarActionItemView: NSView {
 //NSImage* m_image;
 //}
@@ -79,6 +81,9 @@ public:
     }
     virtual NSToolbarItem* toItem()
     {
+        if (m_item != nil)
+            return m_item;
+        //
         NSString* itemId = itemIdentifier();
         //
         NSToolbarItem *item = [[[NSToolbarItem alloc] initWithItemIdentifier: itemId] autorelease];
@@ -104,7 +109,7 @@ public:
         [item setTarget : m_delegate];
         [item setAction : @selector(itemClicked:)];
         [item setEnabled: (m_action->isEnabled() ? YES : NO)];
-
+        //
         [item setMinSize:NSMakeSize(24, 24)];
         [item setMaxSize:NSMakeSize(24, 24)];
 
@@ -119,7 +124,12 @@ public:
     {
         if (m_item)
         {
-            [m_item setEnabled: (m_action->isEnabled() ? YES : NO)];
+            bool oldEnabled = [m_item isEnabled] ? true : false;
+            bool newEnabled = m_action->isEnabled() ? true : false;
+            if (oldEnabled != newEnabled)
+            {
+                [m_item setEnabled: (newEnabled ? YES : NO)];
+            }
             //
             QIcon icon = m_action->icon();
             //qDebug() << icon.cacheKey();
@@ -357,6 +367,10 @@ NSMutableArray *itemIdentifiers(const QList<CWizMacToolBarItem *> *items, bool c
     return [self itemIdentifierToItem:itemIdentifier];
 }
 
+-(BOOL)validateToolbarItem:(NSToolbarItem *)toolbarItem
+{
+    return [toolbarItem isEnabled];
+}
 - (BOOL) resignFirstResponder
 {
     return YES;

@@ -744,7 +744,7 @@ void CWizCategoryView::showGroupContextMenu(QPoint pos)
     m_menuGroup->popup(pos);
 }
 
-void CWizCategoryView::createDocument(WIZDOCUMENTDATA& data)
+bool CWizCategoryView::createDocument(WIZDOCUMENTDATA& data)
 {
     bool bFallback = true;
 
@@ -810,17 +810,26 @@ void CWizCategoryView::createDocument(WIZDOCUMENTDATA& data)
     if (bFallback) {
         addAndSelectFolder(strLocation);
     }
+    //
+    CWizDatabase& db = m_dbMgr.db(strKbGUID);
+    if (db.IsGroup()
+            && !db.IsGroupAuthor())
+    {
+        return false;
+    }
 
     bool ret = m_dbMgr.db(strKbGUID).CreateDocumentAndInit("<p><br/></p>", "", 0, tr("New note"), "newnote", strLocation, "", data);
     if (!ret) {
         TOLOG("Failed to new document!");
-        return;
+        return false;
     }
 
     if (!tag.strGUID.IsEmpty()) {
         CWizDocument doc(m_dbMgr.db(strKbGUID), data);
         doc.AddTag(tag);
     }
+    //
+    return true;
 }
 
 void CWizCategoryView::on_action_newDocument()
@@ -1353,12 +1362,6 @@ void CWizCategoryView::on_action_groupAttribute()
 
     CWizCategoryViewGroupRootItem* p = currentCategoryItem<CWizCategoryViewGroupRootItem>();
     if (p && !p->kbGUID().isEmpty()) {
-
-//        QString strUrl = WizService::ApiEntry::groupAttributeUrl(WIZ_TOKEN_IN_URL_REPLACE_PART, m_strRequestedGroupKbGUID);
-//        //
-//        showWebDialogWithToken(tr("Group settings"), strUrl);
-
-//        m_strRequestedGroupKbGUID = p->kbGUID();
         if (p->isBizGroup()) {
             viewBizGroupInfo(p->kbGUID(), p->bizGUID());
         } else {

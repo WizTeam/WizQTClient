@@ -1002,6 +1002,7 @@ void CWizDocumentWebView::saveDocument(const WIZDOCUMENTDATA& data, bool force)
     strHead.replace(regHead, "");
 
     QString strHtml = page()->mainFrame()->evaluateJavaScript("editor.getContent();").toString();
+    //QString strPlainTxt = page()->mainFrame()->evaluateJavaScript("editor.getPlainTxt();").toString();
     strHtml = "<html><head>" + strHead + "</head><body>" + strHtml + "</body></html>";
 
     m_workerPool->save(data, strHtml, strFileName, 0);

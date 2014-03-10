@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Form</string>
+   <string>Note Info</string>
   </property>
   <widget class="QFrame" name="frame">
    <property name="geometry">
