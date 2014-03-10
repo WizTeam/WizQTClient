@@ -327,6 +327,7 @@ public:
     bool GetDocumentsByTag(const WIZTAGDATA& tag, CWizDocumentDataArray& arrayDocument);
 
     bool LoadDocumentData(const QString& strDocumentGUID, QByteArray& arrayData);
+    bool WriteDataToDocument(const QString& strDocumentGUID, QByteArray& arrayData);
     bool LoadAttachmentData(const CString& strDocumentGUID,
                             QByteArray& arrayData);
     bool LoadCompressedAttachmentData(const QString& strDocumentGUID,

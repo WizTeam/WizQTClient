@@ -18,10 +18,13 @@ public:
     virtual void getDocuments(CWizDatabase& db, CWizDocumentDataArray& arrayDocument) = 0;
     virtual bool accept(CWizDatabase& db, const WIZDOCUMENTDATA& data) { Q_UNUSED(db); Q_UNUSED(data); return false; }
 
+    //NOTE: data used nowhere, could delete
     virtual bool acceptDrop(const WIZDOCUMENTDATA& data) const { Q_UNUSED(data); return false; }
     virtual void drop(const WIZDOCUMENTDATA& data) { Q_UNUSED(data); }
 
     virtual void draw(QPainter* p, const QStyleOptionViewItemV4* vopt) const;
+
+    virtual void drawDragEntered(QPainter* p, const QRect &rect) const;
 
     virtual QVariant data(int column, int role) const;
     virtual int getItemHeight(int hintHeight) const;
@@ -45,6 +48,8 @@ public:
     virtual bool getExtraButtonIcon(QPixmap& ret) const;
     virtual QRect getExtraButtonRect(const QRect& itemBorder) const;
     virtual bool extraButtonClickTest();
+
+    bool createNewDocByExistDoc(const WIZDOCUMENTDATA& existDoc, WIZDOCUMENTDATA& newDoc);
 
 protected:
     CWizExplorerApp& m_app;

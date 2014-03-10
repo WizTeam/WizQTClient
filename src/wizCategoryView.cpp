@@ -243,8 +243,9 @@ void CWizCategoryBaseView::dragMoveEvent(QDragMoveEvent *event)
          it != arrayDocument.end();
          it++)
     {
-        if (pItem->acceptDrop(*it))
+        if (pItem->acceptDrop(*it)) {
             nAccept++;
+        }
     }
 
     if (nAccept == arrayDocument.size())
@@ -260,6 +261,7 @@ void CWizCategoryBaseView::dragLeaveEvent(QDragLeaveEvent* event)
     m_bDragHovered = false;
     m_dragHoveredPos = QPoint();
     repaint();
+
 }
 
 void CWizCategoryBaseView::dropEvent(QDropEvent * event)
@@ -411,6 +413,8 @@ bool CWizCategoryBaseView::validateDropDestination(const QPoint& p) const
 {
     if (p.isNull())
         return false;
+
+    return true;
 
     CWizCategoryViewFolderItem* itemFolder = dynamic_cast<CWizCategoryViewFolderItem*>(itemAt(p));
     if (itemFolder) {

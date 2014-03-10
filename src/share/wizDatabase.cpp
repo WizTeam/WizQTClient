@@ -2432,6 +2432,21 @@ bool CWizDatabase::LoadDocumentData(const QString& strDocumentGUID, QByteArray& 
     return !arrayData.isEmpty();
 }
 
+bool CWizDatabase::WriteDataToDocument(const QString &strDocumentGUID, QByteArray &arrayData)
+{
+    CString strFileName = GetDocumentFileName(strDocumentGUID);
+    if (!PathFileExists(strFileName))
+    {
+        return false;
+    }
+
+    QFile file(strFileName);
+    if (!file.open(QFile::WriteOnly))
+        return false;
+
+    return (file.write(arrayData) != -1);
+}
+
 bool CWizDatabase::LoadAttachmentData(const CString& strDocumentGUID, QByteArray& arrayData)
 {
     CString strFileName = GetAttachmentFileName(strDocumentGUID);

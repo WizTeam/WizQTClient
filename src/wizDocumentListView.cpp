@@ -450,6 +450,7 @@ void CWizDocumentListView::startDrag(Qt::DropActions supportedActions)
     QList<QListWidgetItem*> items = selectedItems();
     foreach (QListWidgetItem* it, items) {
         if (CWizDocumentListViewItem* item = dynamic_cast<CWizDocumentListViewItem*>(it)) {
+//            CWizDatabase& db = CWizDatabaseManager::instance()->db(item->document().strKbGUID);
             arrayDocument.push_back(item->document());
         }
     }

@@ -10,8 +10,13 @@
 #include "utils/pinyin.h"
 #include "utils/stylehelper.h"
 #include "utils/notify.h"
+#include "utils/logger.h"
 
 #include "wizCategoryView.h"
+#include "wizmainwindow.h"
+#include "wizDocumentTransitionView.h"
+#include "share/wizObjectDataDownloader.h"
+#include "wizProgressDialog.h"
 
 #include "wizdef.h"
 #include "share/wizsettings.h"
@@ -161,6 +166,47 @@ bool CWizCategoryViewItemBase::extraButtonClickTest()
     return btnRect.contains(view->hitPoint());
 }
 
+bool CWizCategoryViewItemBase::createNewDocByExistDoc(const WIZDOCUMENTDATA &existDoc, WIZDOCUMENTDATA &newDoc)
+{
+    CWizCategoryView* cateView = dynamic_cast<CWizCategoryView*>(treeWidget());
+    if (cateView) {
+        cateView->setCurrentItem(this);
+
+        CWizDatabase& db = CWizDatabaseManager::instance()->db(kbGUID());
+        //create new file
+        newDoc = existDoc;
+        newDoc.strKbGUID = m_strKbGUID;
+        cateView->createDocument(newDoc);
+        newDoc.strTitle = existDoc.strTitle;
+        newDoc.nVersion = 0;
+        db.UpdateDocument(newDoc);
+
+        CWizDatabase& sourceDb = CWizDatabaseManager::instance()->db(existDoc.strKbGUID);
+        Internal::MainWindow* window = qobject_cast<Internal::MainWindow *>(m_app.mainWindow());
+        QString strDocumentFileName = sourceDb.GetDocumentFileName(existDoc.strGUID);
+        if (!sourceDb.IsObjectDataDownloaded(existDoc.strGUID, "document") ||
+                !PathFileExists(strDocumentFileName)) {
+            window->downloaderHost()->download(existDoc);
+            window->showClient(false);
+            window->transitionView()->showAsMode(CWizDocumentTransitionView::Downloading);
+
+            CWizProgressDialog dlg;
+            dlg.setActionString(QObject::tr("downloading document"));
+            dlg.setNotifyString(QObject::tr("downloading,please wait."));
+            dlg.setProgress(100,30);
+            QObject::connect(window->downloaderHost(), SIGNAL(downloadDone(WIZOBJECTDATA,bool)), &dlg, SLOT(accept()));
+            dlg.exec();
+        }
+
+
+        QByteArray ba;
+        sourceDb.LoadDocumentData(existDoc.strGUID, ba);
+        db.WriteDataToDocument(newDoc.strGUID, ba);
+        return true;
+    }
+    return false;
+}
+
 void CWizCategoryViewItemBase::draw(QPainter* p, const QStyleOptionViewItemV4* vopt) const
 {
     QPixmap pixmap;
@@ -254,6 +300,17 @@ void CWizCategoryViewItemBase::draw(QPainter* p, const QStyleOptionViewItemV4* v
     p->restore();
 
 #endif
+}
+
+void CWizCategoryViewItemBase::drawDragEntered(QPainter *p, const QRect& rect) const
+{
+    p->save();
+
+    p->setPen(Qt::blue);
+    p->setBrush(Qt::NoBrush);
+    p->drawRect(rect);
+
+    p->restore();
 }
 
 /* ------------------------------ CWizCategoryViewSectionItem ------------------------------ */
@@ -538,11 +595,12 @@ bool CWizCategoryViewFolderItem::accept(CWizDatabase& db, const WIZDOCUMENTDATA&
 
 bool CWizCategoryViewFolderItem::acceptDrop(const WIZDOCUMENTDATA& data) const
 {
+    Q_UNUSED(data);
     // only accept note from user db
-    if (data.strKbGUID == kbGUID())
-        return true;
+//    if (data.strKbGUID == kbGUID())
+//        return true;
 
-    return false;
+    return true;
 }
 
 void CWizCategoryViewFolderItem::drop(const WIZDOCUMENTDATA& data)
@@ -555,9 +613,20 @@ void CWizCategoryViewFolderItem::drop(const WIZDOCUMENTDATA& data)
        return;
 
    CWizDatabase& db = CWizDatabaseManager::instance()->db(kbGUID());
-   CWizFolder folder(db, location());
-   CWizDocument doc(db, data);
-   doc.MoveDocument(&folder);
+   if (kbGUID() == data.strKbGUID) {
+       CWizFolder folder(db, location());
+       CWizDocument doc(db, data);
+       doc.MoveDocument(&folder);
+   } else {
+       //copy from sourcedata
+       CWizCategoryView* cateView = dynamic_cast<CWizCategoryView*>(treeWidget());
+       if (cateView) {
+           cateView->setCurrentItem(this);
+
+           WIZDOCUMENTDATA newData;
+           createNewDocByExistDoc(data, newData);
+       }
+   }
 }
 
 void CWizCategoryViewFolderItem::showContextMenu(CWizCategoryBaseView* pCtrl, QPoint pos)
@@ -1045,10 +1114,15 @@ bool CWizCategoryViewGroupItem::accept(CWizDatabase& db, const WIZDOCUMENTDATA& 
 
 bool CWizCategoryViewGroupItem::acceptDrop(const WIZDOCUMENTDATA& data) const
 {
-    // only accept notes from current group
-    if (data.strKbGUID == kbGUID()) {
+    CWizDatabase& db = CWizDatabaseManager::instance()->db(kbGUID());
+    if (WIZ_USERGROUP_AUTHOR >= db.permission()) {
         return true;
     }
+
+    // only accept notes from current group
+//    if (data.strKbGUID == kbGUID()) {
+//        return true;
+//    }
 
     return false;
 }
@@ -1058,25 +1132,33 @@ void CWizCategoryViewGroupItem::drop(const WIZDOCUMENTDATA& data)
     if (!acceptDrop(data))
         return;
 
+    CWizDatabase& db = CWizDatabaseManager::instance()->db(kbGUID());
+
     // skip
     CWizTagDataArray arrayTag;
-    CWizDatabase& db = CWizDatabaseManager::instance()->db(kbGUID());
     if (!db.GetDocumentTags(data.strGUID, arrayTag)) {
         return;
     }
 
-    //Q_ASSERT(arrayTag.size() == 1);
-    CWizDocument doc(db, data);
-    if (arrayTag.size() > 0)
-    {
-        for (CWizTagDataArray::const_iterator it = arrayTag.begin();
-            it != arrayTag.end();
-            it++)
+    if(data.strKbGUID == m_strKbGUID)   {
+        //doc form same root
+        //Q_ASSERT(arrayTag.size() == 1);
+        CWizDocument doc(db, data);
+        if (arrayTag.size() > 0)
         {
-            doc.RemoveTag(*it);
+            for (CWizTagDataArray::const_iterator it = arrayTag.begin();
+                 it != arrayTag.end();
+                 it++)
+            {
+                doc.RemoveTag(*it);
+            }
         }
+        doc.AddTag(tag());
+    } else {
+        //doc form other root,copy the file
+        WIZDOCUMENTDATA newData;
+        createNewDocByExistDoc(data, newData);
     }
-    doc.AddTag(tag());
 }
 
 void CWizCategoryViewGroupItem::reload(CWizDatabase& db)
