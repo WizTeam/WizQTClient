@@ -806,7 +806,10 @@ void MainWindow::on_syncProcessLog(const QString& strMsg)
 void MainWindow::on_actionNewNote_triggered()
 {
     WIZDOCUMENTDATA data;
-    m_category->createDocument(data);
+    if (!m_category->createDocument(data))
+    {
+        return;
+    }
 
     m_documentForEditing = data;
     m_documents->addAndSelectDocument(data);

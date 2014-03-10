@@ -249,7 +249,7 @@ public:
 
     void updateGroupTagDocumentCount(const QString &strKbGUID);
 
-    void createDocument(WIZDOCUMENTDATA& data);
+    bool createDocument(WIZDOCUMENTDATA& data);
     //
     void showWebDialogWithToken(const QString& windowTitle, const QString& url);
     //
