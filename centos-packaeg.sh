@@ -34,6 +34,9 @@ cp ../../../../WizQTClient-Release-Linux/lib/wiznote/plugins/libextensionsystem.
 cp ../../../../WizQTClient-Release-Linux/lib/wiznote/plugins/libaggregation.so ./
 cp ../../../../WizQTClient-Release-Linux/lib/wiznote/plugins/libCore.so ./
 cp ../../../../WizQTClient-Release-Linux/lib/wiznote/plugins/libMarkDown.so ./
+cp ../../../../WizQTClient-Release-Linux/lib/wiznote/plugins/MarkDown.pluginspec ./
+cp ../../../../WizQTClient-Release-Linux/lib/wiznote/plugins/Core.pluginspec ./
+
 
 cd ..
 cd ..
