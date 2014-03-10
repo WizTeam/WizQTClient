@@ -269,8 +269,9 @@ void TitleBar::onInfoButtonClicked()
 
 bool isNetworkAccessible()
 {
-    QNetworkConfigurationManager man;
-    return man.isOnline();
+    return true;
+    //QNetworkConfigurationManager man;
+    //return man.isOnline();
 }
 
 #define COMMENT_FRAME_WIDTH 300
