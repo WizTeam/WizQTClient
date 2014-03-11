@@ -270,7 +270,9 @@ void CWizCategoryBaseView::dropEvent(QDropEvent * event)
 {
     m_bDragHovered = false;
     m_dragHoveredPos = QPoint();
-    repaint();
+
+    m_dragDocArray.clear();
+    viewport()->repaint();
 
     if (!event->mimeData()->hasFormat(WIZNOTE_MIMEFORMAT_DOCUMENTS))
         return;

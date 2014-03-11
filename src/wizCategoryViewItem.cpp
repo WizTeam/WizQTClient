@@ -166,46 +166,45 @@ bool CWizCategoryViewItemBase::extraButtonClickTest()
     return btnRect.contains(view->hitPoint());
 }
 
-bool CWizCategoryViewItemBase::createNewDocByExistDoc(const WIZDOCUMENTDATA &existDoc, WIZDOCUMENTDATA &newDoc)
+bool CWizCategoryViewItemBase::createNewDoc(WIZDOCUMENTDATA &newDoc)
 {
-    CWizCategoryView* cateView = dynamic_cast<CWizCategoryView*>(treeWidget());
-    if (cateView) {
-        cateView->setCurrentItem(this);
-
-        CWizDatabase& db = CWizDatabaseManager::instance()->db(kbGUID());
-        //create new file
-        newDoc = existDoc;
-        newDoc.strKbGUID = m_strKbGUID;
-        cateView->createDocument(newDoc);
-        newDoc.strTitle = existDoc.strTitle;
-        newDoc.nVersion = 0;
-        db.UpdateDocument(newDoc);
-
-        CWizDatabase& sourceDb = CWizDatabaseManager::instance()->db(existDoc.strKbGUID);
-        Internal::MainWindow* window = qobject_cast<Internal::MainWindow *>(m_app.mainWindow());
-        QString strDocumentFileName = sourceDb.GetDocumentFileName(existDoc.strGUID);
-        if (!sourceDb.IsObjectDataDownloaded(existDoc.strGUID, "document") ||
-                !PathFileExists(strDocumentFileName)) {
-            window->downloaderHost()->download(existDoc);
-            window->showClient(false);
-            window->transitionView()->showAsMode(CWizDocumentTransitionView::Downloading);
-
-            CWizProgressDialog dlg;
-            dlg.setActionString(QObject::tr("downloading document"));
-            dlg.setNotifyString(QObject::tr("downloading,please wait."));
-            //TODO: connect download status to progress dialog
-            dlg.setProgress(100,30);
-            QObject::connect(window->downloaderHost(), SIGNAL(downloadDone(WIZOBJECTDATA,bool)), &dlg, SLOT(accept()));
-            dlg.exec();
-        }
-
-
-        QByteArray ba;
-        sourceDb.LoadDocumentData(existDoc.strGUID, ba);
-        db.WriteDataToDocument(newDoc.strGUID, ba);
-        return true;
-    }
+    Q_UNUSED(newDoc);
     return false;
+}
+
+bool CWizCategoryViewItemBase::copyDocumentData(const WIZDOCUMENTDATA &existDoc, WIZDOCUMENTDATA &newDoc)
+{
+    if (existDoc.strGUID.isEmpty() || newDoc.strGUID.isEmpty())
+        return false;
+
+    CWizDatabase& sourceDb = CWizDatabaseManager::instance()->db(existDoc.strKbGUID);
+    CWizDatabase& targetDb = CWizDatabaseManager::instance()->db(newDoc.strKbGUID);
+
+    newDoc.strTitle = existDoc.strTitle;
+    newDoc.nVersion = (newDoc.nVersion >= 0) ? newDoc.nVersion : 0;
+    targetDb.UpdateDocument(newDoc);
+
+    Internal::MainWindow* window = qobject_cast<Internal::MainWindow *>(m_app.mainWindow());
+    QString strDocumentFileName = sourceDb.GetDocumentFileName(existDoc.strGUID);
+    if (!sourceDb.IsObjectDataDownloaded(existDoc.strGUID, "document") ||
+            !PathFileExists(strDocumentFileName)) {
+        window->downloaderHost()->download(existDoc);
+        window->showClient(false);
+        window->transitionView()->showAsMode(CWizDocumentTransitionView::Downloading);
+
+        CWizProgressDialog dlg;
+        dlg.setActionString(QObject::tr("downloading document"));
+        dlg.setNotifyString(QObject::tr("downloading,please wait."));
+        //TODO: connect download status to progress dialog
+        dlg.setProgress(100,30);
+        QObject::connect(window->downloaderHost(), SIGNAL(downloadDone(WIZOBJECTDATA,bool)), &dlg, SLOT(accept()));
+        dlg.exec();
+    }
+
+    QByteArray ba;
+    sourceDb.LoadDocumentData(existDoc.strGUID, ba);
+    targetDb.WriteDataToDocument(newDoc.strGUID, ba);
+    return true;
 }
 
 void CWizCategoryViewItemBase::draw(QPainter* p, const QStyleOptionViewItemV4* vopt) const
@@ -620,12 +619,9 @@ void CWizCategoryViewFolderItem::drop(const WIZDOCUMENTDATA& data)
        doc.MoveDocument(&folder);
    } else {
        //copy from sourcedata
-       CWizCategoryView* cateView = dynamic_cast<CWizCategoryView*>(treeWidget());
-       if (cateView) {
-           cateView->setCurrentItem(this);
-
-           WIZDOCUMENTDATA newData;
-           createNewDocByExistDoc(data, newData);
+       WIZDOCUMENTDATA newData;
+       if (createNewDoc(newData)) {
+           copyDocumentData(data, newData);
        }
    }
 }
@@ -640,6 +636,22 @@ void CWizCategoryViewFolderItem::showContextMenu(CWizCategoryBaseView* pCtrl, QP
 QString CWizCategoryViewFolderItem::name() const
 {
     return CWizDatabase::GetLocationName(m_strName);
+}
+
+bool CWizCategoryViewFolderItem::createNewDoc(WIZDOCUMENTDATA &newDoc)
+{
+    CWizDatabase& db = CWizDatabaseManager::instance()->db(kbGUID());
+    //create new file
+    newDoc.strKbGUID = m_strKbGUID;
+    QString strLocation = (location() == LOCATION_DELETED_ITEMS) ? LOCATION_DEFAULT : location();
+
+    bool ret = db.CreateDocumentAndInit("<p><br/></p>", "", 0, QObject::tr("New note"), "newnote", strLocation, "", newDoc);
+    if (!ret) {
+        TOLOG("Failed to new document!");
+        return false;
+    }
+
+    return true;
 }
 
 bool CWizCategoryViewFolderItem::operator < (const QTreeWidgetItem &other) const
@@ -1163,7 +1175,9 @@ void CWizCategoryViewGroupItem::drop(const WIZDOCUMENTDATA& data)
     } else {
         //doc form other root,copy the file
         WIZDOCUMENTDATA newData;
-        createNewDocByExistDoc(data, newData);
+        if (createNewDoc(newData)) {
+            copyDocumentData(data, newData);
+        }
     }
 }
 
@@ -1171,6 +1185,27 @@ void CWizCategoryViewGroupItem::reload(CWizDatabase& db)
 {
     db.TagFromGUID(m_tag.strGUID, m_tag);
     setText(0, m_tag.strName);
+}
+
+bool CWizCategoryViewGroupItem::createNewDoc(WIZDOCUMENTDATA &newDoc)
+{
+    CWizDatabase& db = CWizDatabaseManager::instance()->db(kbGUID());
+
+    newDoc.strKbGUID = m_strKbGUID;
+    QString strLocation = LOCATION_DEFAULT;
+
+    bool ret = db.CreateDocumentAndInit("<p><br/></p>", "", 0, QObject::tr("New note"), "newnote", strLocation, "", newDoc);
+    if (!ret) {
+        TOLOG("Failed to new document!");
+        return false;
+    }
+
+    if (!m_tag.strGUID.IsEmpty()) {
+        CWizDocument doc(db, newDoc);
+        doc.AddTag(m_tag);
+    }
+
+    return true;
 }
 
 

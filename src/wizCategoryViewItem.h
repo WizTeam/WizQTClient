@@ -49,7 +49,8 @@ public:
     virtual QRect getExtraButtonRect(const QRect& itemBorder) const;
     virtual bool extraButtonClickTest();
 
-    bool createNewDocByExistDoc(const WIZDOCUMENTDATA& existDoc, WIZDOCUMENTDATA& newDoc);
+    virtual bool createNewDoc(WIZDOCUMENTDATA& newDoc);
+    bool copyDocumentData(const WIZDOCUMENTDATA& existDoc, WIZDOCUMENTDATA& newDoc);
 
 protected:
     CWizExplorerApp& m_app;
@@ -169,6 +170,8 @@ public:
 
     QString location() const { return m_strName; }
     QString name() const;
+
+    bool createNewDoc(WIZDOCUMENTDATA& newDoc);
 
 private:
     QRect m_rcUnread;
@@ -342,6 +345,8 @@ public:
     const WIZTAGDATA& tag() const { return m_tag; }
 
     virtual int getSortOrder() const { return 11; }
+
+    bool createNewDoc(WIZDOCUMENTDATA& newDoc);
 private:
     WIZTAGDATA m_tag;
 };
