@@ -223,7 +223,6 @@ void CWizCategoryBaseView::dragEnterEvent(QDragEnterEvent *event)
 void CWizCategoryBaseView::dragMoveEvent(QDragMoveEvent *event)
 {
     m_dragHoveredPos = event->pos();
-    repaint();
 
     if (!event->mimeData()->hasFormat(WIZNOTE_MIMEFORMAT_DOCUMENTS))
         return;
@@ -232,15 +231,15 @@ void CWizCategoryBaseView::dragMoveEvent(QDragMoveEvent *event)
     if (!pItem)
         return;
 
-    CWizDocumentDataArray arrayDocument;
-    mime2Note(event->mimeData()->data(WIZNOTE_MIMEFORMAT_DOCUMENTS), arrayDocument);
+    m_dragDocArray.clear();
+    mime2Note(event->mimeData()->data(WIZNOTE_MIMEFORMAT_DOCUMENTS), m_dragDocArray);
 
-    if (!arrayDocument.size())
+    if (!m_dragDocArray.size())
         return;
 
     int nAccept = 0;
-    for (CWizDocumentDataArray::const_iterator it = arrayDocument.begin();
-         it != arrayDocument.end();
+    for (CWizDocumentDataArray::const_iterator it = m_dragDocArray.begin();
+         it != m_dragDocArray.end();
          it++)
     {
         if (pItem->acceptDrop(*it)) {
@@ -248,10 +247,12 @@ void CWizCategoryBaseView::dragMoveEvent(QDragMoveEvent *event)
         }
     }
 
-    if (nAccept == arrayDocument.size())
+    if (nAccept == m_dragDocArray.size())
         event->acceptProposedAction();
     else
         event->ignore();
+
+    viewport()->repaint();
 }
 
 void CWizCategoryBaseView::dragLeaveEvent(QDragLeaveEvent* event)
@@ -260,8 +261,9 @@ void CWizCategoryBaseView::dragLeaveEvent(QDragLeaveEvent* event)
 
     m_bDragHovered = false;
     m_dragHoveredPos = QPoint();
-    repaint();
 
+    m_dragDocArray.clear();
+    viewport()->repaint();
 }
 
 void CWizCategoryBaseView::dropEvent(QDropEvent * event)
@@ -414,19 +416,13 @@ bool CWizCategoryBaseView::validateDropDestination(const QPoint& p) const
     if (p.isNull())
         return false;
 
-    return true;
+    if (m_dragDocArray.empty())
+        return false;
 
-    CWizCategoryViewFolderItem* itemFolder = dynamic_cast<CWizCategoryViewFolderItem*>(itemAt(p));
-    if (itemFolder) {
-        return true;
-    }
+    CWizCategoryViewItemBase* itemBase = itemAt(p);
+    WIZDOCUMENTDATAEX data = *m_dragDocArray.begin();
+    return (itemBase && itemBase->acceptDrop(data));
 
-    CWizCategoryViewTagItem* itemTag = dynamic_cast<CWizCategoryViewTagItem*>(itemAt(p));
-    if (itemTag) {
-        return true;
-    }
-
-    return false;
 }
 
 void CWizCategoryBaseView::drawItem(QPainter* p, const QStyleOptionViewItemV4 *vopt) const

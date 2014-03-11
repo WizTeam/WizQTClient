@@ -79,6 +79,7 @@ private:
     QPoint m_hitPos;
     bool m_bDragHovered;
     QPoint m_dragHoveredPos;
+    CWizDocumentDataArray m_dragDocArray;
 
 #ifdef WIZNOTE_CUSTOM_SCROLLBAR
     CWizScrollBar* m_vScroll;

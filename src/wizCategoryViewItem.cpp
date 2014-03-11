@@ -193,6 +193,7 @@ bool CWizCategoryViewItemBase::createNewDocByExistDoc(const WIZDOCUMENTDATA &exi
             CWizProgressDialog dlg;
             dlg.setActionString(QObject::tr("downloading document"));
             dlg.setNotifyString(QObject::tr("downloading,please wait."));
+            //TODO: connect download status to progress dialog
             dlg.setProgress(100,30);
             QObject::connect(window->downloaderHost(), SIGNAL(downloadDone(WIZOBJECTDATA,bool)), &dlg, SLOT(accept()));
             dlg.exec();
