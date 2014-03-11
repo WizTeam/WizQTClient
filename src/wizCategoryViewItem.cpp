@@ -1143,8 +1143,12 @@ void CWizCategoryViewGroupItem::drop(const WIZDOCUMENTDATA& data)
 
     if(data.strKbGUID == m_strKbGUID)   {
         //doc form same root
-        //Q_ASSERT(arrayTag.size() == 1);
         CWizDocument doc(db, data);
+        if (data.strLocation == LOCATION_DELETED_ITEMS) {
+            CWizFolder folder(db, LOCATION_DEFAULT);
+            doc.MoveDocument(&folder);
+        }
+
         if (arrayTag.size() > 0)
         {
             for (CWizTagDataArray::const_iterator it = arrayTag.begin();
@@ -1155,6 +1159,7 @@ void CWizCategoryViewGroupItem::drop(const WIZDOCUMENTDATA& data)
             }
         }
         doc.AddTag(tag());
+
     } else {
         //doc form other root,copy the file
         WIZDOCUMENTDATA newData;
