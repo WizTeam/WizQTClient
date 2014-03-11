@@ -67,6 +67,7 @@ void CWizObjectDataDownloaderHost::downloadObject()
 
     CWizObjectDataDownloader* downloader = new CWizObjectDataDownloader(m_dbMgr, it.value());
     connect(downloader, SIGNAL(finished()), SLOT(on_downloader_finished()));
+    connect(downloader, SIGNAL(downloadProgress(int,int)), SIGNAL(downloadProgress(int,int)));
     downloader->start();
 
     m_mapDownloading[it.key()] = it.value();
@@ -110,6 +111,7 @@ void CWizObjectDataDownloader::run()
     CWizObjectDataDownloadWorker* download = new CWizObjectDataDownloadWorker(m_dbMgr, m_data);
     //CWizObjectDataDownload* download = new CWizObjectDataDownload(m_dbMgr, m_data);
     connect(download, SIGNAL(downloaded(bool)), SLOT(on_downloaded(bool)));
+    connect(download, SIGNAL(downloadProgress(int,int)), SIGNAL(downloadProgress(int,int)));
     download->startDownload();
 
     exec();
@@ -157,6 +159,7 @@ void CWizObjectDataDownloadWorker::onTokenAcquired(const QString& strToken)
     info.strDatabaseServer = ApiEntry::kUrlFromGuid(strToken, m_data.strKbGUID);
 
     CWizKMDatabaseServer ksServer(info);
+    connect(&ksServer, SIGNAL(downloadProgress(int, int)), SIGNAL(downloadProgress(int,int)));
 
     // FIXME: should we query object before download data?
     if (!ksServer.data_download(m_data.strObjectGUID,

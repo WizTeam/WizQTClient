@@ -17,6 +17,8 @@ public:
 
     void setActionString(const QString& strAction);
     void setNotifyString(const QString& strNotify);
+
+public slots:
     void setProgress(int nMax, int nCurrent);
     
 private:

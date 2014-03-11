@@ -12,6 +12,7 @@
 class CWizDatabase;
 class CWizFolder;
 class CWizDocument;
+class CWizObjectDataDownloaderHost;
 
 class CWizDocument : public QObject
 {
@@ -166,6 +167,14 @@ public:
 
     virtual bool OnUploadObject(const QString& strGUID,
                                 const QString& strObjectType);
+
+    //copy and move
+    virtual bool CopyDocumentTo(const QString& strGUID, CWizDatabase& targetDB,
+                                  const QString& targetGUID, CWizObjectDataDownloaderHost *downloaderHost);
+    virtual bool CopyDocumentData(const WIZDOCUMENTDATA& sourceDoc, CWizDatabase& targetDB,
+                                  WIZDOCUMENTDATA& targetDoc, CWizObjectDataDownloaderHost *downloaderHost);
+    virtual bool CopyDocumentAttachment(const WIZDOCUMENTDATA& sourceDoc, CWizDatabase& targetDB,
+                                        WIZDOCUMENTDATA& targetDoc, CWizObjectDataDownloaderHost *downloaderHost);
 
     // info and groups
     virtual void SetUserInfo(const WIZUSERINFO& info);

@@ -172,41 +172,6 @@ bool CWizCategoryViewItemBase::createNewDoc(WIZDOCUMENTDATA &newDoc)
     return false;
 }
 
-bool CWizCategoryViewItemBase::copyDocumentData(const WIZDOCUMENTDATA &existDoc, WIZDOCUMENTDATA &newDoc)
-{
-    if (existDoc.strGUID.isEmpty() || newDoc.strGUID.isEmpty())
-        return false;
-
-    CWizDatabase& sourceDb = CWizDatabaseManager::instance()->db(existDoc.strKbGUID);
-    CWizDatabase& targetDb = CWizDatabaseManager::instance()->db(newDoc.strKbGUID);
-
-    newDoc.strTitle = existDoc.strTitle;
-    newDoc.nVersion = (newDoc.nVersion >= 0) ? newDoc.nVersion : 0;
-    targetDb.UpdateDocument(newDoc);
-
-    Internal::MainWindow* window = qobject_cast<Internal::MainWindow *>(m_app.mainWindow());
-    QString strDocumentFileName = sourceDb.GetDocumentFileName(existDoc.strGUID);
-    if (!sourceDb.IsObjectDataDownloaded(existDoc.strGUID, "document") ||
-            !PathFileExists(strDocumentFileName)) {
-        window->downloaderHost()->download(existDoc);
-        window->showClient(false);
-        window->transitionView()->showAsMode(CWizDocumentTransitionView::Downloading);
-
-        CWizProgressDialog dlg;
-        dlg.setActionString(QObject::tr("downloading document"));
-        dlg.setNotifyString(QObject::tr("downloading,please wait."));
-        //TODO: connect download status to progress dialog
-        dlg.setProgress(100,30);
-        QObject::connect(window->downloaderHost(), SIGNAL(downloadDone(WIZOBJECTDATA,bool)), &dlg, SLOT(accept()));
-        dlg.exec();
-    }
-
-    QByteArray ba;
-    sourceDb.LoadDocumentData(existDoc.strGUID, ba);
-    targetDb.WriteDataToDocument(newDoc.strGUID, ba);
-    return true;
-}
-
 void CWizCategoryViewItemBase::draw(QPainter* p, const QStyleOptionViewItemV4* vopt) const
 {
     QPixmap pixmap;
@@ -609,11 +574,12 @@ void CWizCategoryViewFolderItem::drop(const WIZDOCUMENTDATA& data)
        return;
    }
 
-   if (m_strName == data.strLocation)   // skip
-       return;
+//   if (m_strName == data.strLocation)   // skip
+//       return;
 
    CWizDatabase& db = CWizDatabaseManager::instance()->db(kbGUID());
    if (kbGUID() == data.strKbGUID) {
+        //move doc
        CWizFolder folder(db, location());
        CWizDocument doc(db, data);
        doc.MoveDocument(&folder);
@@ -621,7 +587,10 @@ void CWizCategoryViewFolderItem::drop(const WIZDOCUMENTDATA& data)
        //copy from sourcedata
        WIZDOCUMENTDATA newData;
        if (createNewDoc(newData)) {
-           copyDocumentData(data, newData);
+           CWizDatabase& sourceDb = CWizDatabaseManager::instance()->db(data.strKbGUID);
+           CWizDatabase& targetDb = CWizDatabaseManager::instance()->db(newData.strKbGUID);
+           Internal::MainWindow* window = qobject_cast<Internal::MainWindow *>(m_app.mainWindow());
+           sourceDb.CopyDocumentTo(data.strGUID, targetDb, newData.strGUID, window->downloaderHost());
        }
    }
 }
@@ -1176,7 +1145,10 @@ void CWizCategoryViewGroupItem::drop(const WIZDOCUMENTDATA& data)
         //doc form other root,copy the file
         WIZDOCUMENTDATA newData;
         if (createNewDoc(newData)) {
-            copyDocumentData(data, newData);
+            CWizDatabase& sourceDb = CWizDatabaseManager::instance()->db(data.strKbGUID);
+            CWizDatabase& targetDb = CWizDatabaseManager::instance()->db(newData.strKbGUID);
+            Internal::MainWindow* window = qobject_cast<Internal::MainWindow *>(m_app.mainWindow());
+            sourceDb.CopyDocumentTo(data.strGUID, targetDb, newData.strGUID, window->downloaderHost());
         }
     }
 }

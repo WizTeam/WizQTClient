@@ -50,7 +50,6 @@ public:
     virtual bool extraButtonClickTest();
 
     virtual bool createNewDoc(WIZDOCUMENTDATA& newDoc);
-    bool copyDocumentData(const WIZDOCUMENTDATA& existDoc, WIZDOCUMENTDATA& newDoc);
 
 protected:
     CWizExplorerApp& m_app;
