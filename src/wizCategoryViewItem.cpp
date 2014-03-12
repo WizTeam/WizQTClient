@@ -966,6 +966,62 @@ bool CWizCategoryViewGroupRootItem::accept(CWizDatabase& db, const WIZDOCUMENTDA
     return false;
 }
 
+bool CWizCategoryViewGroupRootItem::acceptDrop(const WIZDOCUMENTDATA &data) const
+{
+    Q_UNUSED(data);
+
+    CWizDatabase& db = CWizDatabaseManager::instance()->db(kbGUID());
+    if (WIZ_USERGROUP_AUTHOR >= db.permission()) {
+        return true;
+    }
+
+    return false;
+}
+
+void CWizCategoryViewGroupRootItem::drop(const WIZDOCUMENTDATA &data, bool forceCopy)
+{
+    if (!acceptDrop(data))
+        return;
+
+    CWizDatabase& db = CWizDatabaseManager::instance()->db(kbGUID());
+
+    // skip
+    CWizTagDataArray arrayTag;
+    if (!db.GetDocumentTags(data.strGUID, arrayTag)) {
+        return;
+    }
+
+    if(!forceCopy && data.strKbGUID == m_strKbGUID)   {
+        //doc form same root
+        CWizDocument doc(db, data);
+        if (data.strLocation == LOCATION_DELETED_ITEMS) {
+            CWizFolder folder(db, LOCATION_DEFAULT);
+            doc.MoveDocument(&folder);
+        }
+
+        if (arrayTag.size() > 0)
+        {
+            for (CWizTagDataArray::const_iterator it = arrayTag.begin();
+                 it != arrayTag.end();
+                 it++)
+            {
+                doc.RemoveTag(*it);
+            }
+        }
+
+    } else {
+        //doc form other root,copy the file
+        CWizDatabase& sourceDb = CWizDatabaseManager::instance()->db(data.strKbGUID);
+        CWizDatabase& targetDb = CWizDatabaseManager::instance()->db(kbGUID());
+        QString strLocation = LOCATION_DEFAULT;
+        Internal::MainWindow* window = qobject_cast<Internal::MainWindow *>(m_app.mainWindow());
+        QString strNewDocGUID;
+        WIZTAGDATA tagEmpty;
+        sourceDb.CopyDocumentTo(data.strGUID, targetDb, strLocation, tagEmpty, strNewDocGUID, window->downloaderHost());
+//        sourceDb.CopyDocumentTo(data.strGUID, targetDb, newData.strGUID, window->downloaderHost());
+    }
+}
+
 void CWizCategoryViewGroupRootItem::reload(CWizDatabase& db)
 {
     m_strName = db.name();
@@ -1078,15 +1134,12 @@ bool CWizCategoryViewGroupItem::accept(CWizDatabase& db, const WIZDOCUMENTDATA& 
 
 bool CWizCategoryViewGroupItem::acceptDrop(const WIZDOCUMENTDATA& data) const
 {
+    Q_UNUSED(data);
+
     CWizDatabase& db = CWizDatabaseManager::instance()->db(kbGUID());
     if (WIZ_USERGROUP_AUTHOR >= db.permission()) {
         return true;
     }
-
-    // only accept notes from current group
-//    if (data.strKbGUID == kbGUID()) {
-//        return true;
-//    }
 
     return false;
 }

@@ -2918,12 +2918,13 @@ bool CWizDatabase::tryAccessDocument(const WIZDOCUMENTDATA &doc)
             return false;
 
         strPassWord = passwordDlg.textValue();
-
         setUserCipher(strPassWord);
-        if (!IsFileAccessible(doc)) {
-            QMessageBox::information(0, tr("Info"), tr("password error!"));
-            return false;
-        }
+    }
+
+    if (!IsFileAccessible(doc)) {
+        QMessageBox::information(0, tr("Info"), tr("password error!"));
+        setUserCipher(QString());
+        return false;
     }
     return true;
 }
