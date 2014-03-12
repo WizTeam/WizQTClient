@@ -6,6 +6,8 @@
 #include <QTextCodec>
 #include <algorithm>
 #include <QSettings>
+#include <QInputDialog>
+#include <QMessageBox>
 
 #include <extensionsystem/pluginmanager.h>
 
@@ -18,6 +20,7 @@
 #include "utils/logger.h"
 #include "wizObjectDataDownloader.h"
 #include "wizProgressDialog.h"
+#include "wizusercipherform.h"
 
 #define WIZNOTE_THUMB_VERSION "3"
 
@@ -636,6 +639,45 @@ bool CWizDatabase::OnUploadObject(const QString& strGUID,
     }
 }
 
+bool CWizDatabase::CopyDocumentTo(const QString &strGUID, CWizDatabase &targetDB, const QString &strTargetLocation,
+                                  const WIZTAGDATA &targetTag, QString &strResultGUID, CWizObjectDataDownloaderHost *downloaderHost)
+{
+    if (!downloaderHost)
+        return false;
+
+    WIZDOCUMENTDATA sourceDoc;
+    if (!DocumentFromGUID(strGUID, sourceDoc))
+        return false;
+
+    if (!tryAccessDocument(sourceDoc))
+        return false;
+
+    //create new doc
+    WIZDOCUMENTDATA newDoc;
+    newDoc.strKbGUID = targetDB.kbGUID();
+
+    bool ret = targetDB.CreateDocumentAndInit("<p><br/></p>", "", 0, QObject::tr("New note"), "newnote", strTargetLocation, "", newDoc);
+    if (!ret) {
+        TOLOG("Failed to new document!");
+        return false;
+    }
+
+    if (!targetTag.strGUID.IsEmpty()) {
+        CWizDocument doc(targetDB, newDoc);
+        doc.AddTag(targetTag);
+    }
+    strResultGUID = newDoc.strGUID;
+
+    //copy Data
+    if (!CopyDocumentData(sourceDoc, targetDB, newDoc, downloaderHost))
+        return false;
+
+    if (!CopyDocumentAttachment(sourceDoc, targetDB, newDoc, downloaderHost))
+        return false;
+
+    return true;
+}
+
 bool CWizDatabase::CopyDocumentTo(const QString &strGUID, CWizDatabase &targetDB,
                                     const QString& targetGUID, CWizObjectDataDownloaderHost* downloaderHost)
 {
@@ -650,6 +692,8 @@ bool CWizDatabase::CopyDocumentTo(const QString &strGUID, CWizDatabase &targetDB
     if (!targetDB.DocumentFromGUID(targetGUID, targetDoc))
         return false;
 
+    if(!tryAccessDocument(sourceDoc))
+        return false;
 
     if (!CopyDocumentData(sourceDoc, targetDB, targetDoc, downloaderHost))
         return false;
@@ -684,9 +728,13 @@ bool CWizDatabase::CopyDocumentData(const WIZDOCUMENTDATA& sourceDoc, CWizDataba
     }
 
     //copy document data
-    QByteArray ba;
-    LoadDocumentData(sourceDoc.strGUID, ba);
-    targetDB.WriteDataToDocument(targetDoc.strGUID, ba);
+    QString strHtmlFile;
+    if (!DocumentToTempHtmlFile(sourceDoc, strHtmlFile))
+        return false;
+
+    QString strHtml;
+    ::WizLoadUtf8TextFromFile(strHtmlFile, strHtml);
+    targetDB.UpdateDocumentData(targetDoc, strHtml, strFileName, 0);
 
     return true;
 }
@@ -2850,6 +2898,34 @@ QObject* CWizDatabase::GetFolderByLocation(const QString& strLocation, bool crea
     Q_UNUSED(create);
 
     return new CWizFolder(*this, strLocation);
+}
+
+bool CWizDatabase::tryAccessDocument(const WIZDOCUMENTDATA &doc)
+{
+    if (doc.nProtected && userCipher().isEmpty()) {
+        if(!loadUserCert()) {
+            return false;
+        }
+
+        QString strPassWord;
+        QInputDialog passwordDlg;
+        passwordDlg.setWindowTitle(tr("Doucment  %1  PassWord").arg(doc.strTitle));
+        passwordDlg.setLabelText(tr("PassWord :"));
+        passwordDlg.setTextEchoMode(QLineEdit::Password);
+        passwordDlg.setFixedSize(350, passwordDlg.height());
+
+        if (passwordDlg.exec() != QDialog::Accepted)
+            return false;
+
+        strPassWord = passwordDlg.textValue();
+
+        setUserCipher(strPassWord);
+        if (!IsFileAccessible(doc)) {
+            QMessageBox::information(0, tr("Info"), tr("password error!"));
+            return false;
+        }
+    }
+    return true;
 }
 
 QObject* CWizDatabase::GetDeletedItemsFolder()

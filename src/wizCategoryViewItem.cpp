@@ -166,12 +166,6 @@ bool CWizCategoryViewItemBase::extraButtonClickTest()
     return btnRect.contains(view->hitPoint());
 }
 
-bool CWizCategoryViewItemBase::createNewDoc(WIZDOCUMENTDATA &newDoc)
-{
-    Q_UNUSED(newDoc);
-    return false;
-}
-
 void CWizCategoryViewItemBase::draw(QPainter* p, const QStyleOptionViewItemV4* vopt) const
 {
     QPixmap pixmap;
@@ -568,7 +562,7 @@ bool CWizCategoryViewFolderItem::acceptDrop(const WIZDOCUMENTDATA& data) const
     return true;
 }
 
-void CWizCategoryViewFolderItem::drop(const WIZDOCUMENTDATA& data)
+void CWizCategoryViewFolderItem::drop(const WIZDOCUMENTDATA& data, bool forceCopy)
 {
    if (!acceptDrop(data)) {
        return;
@@ -578,20 +572,22 @@ void CWizCategoryViewFolderItem::drop(const WIZDOCUMENTDATA& data)
 //       return;
 
    CWizDatabase& db = CWizDatabaseManager::instance()->db(kbGUID());
-   if (kbGUID() == data.strKbGUID) {
+   if (!forceCopy && kbGUID() == data.strKbGUID) {
         //move doc
        CWizFolder folder(db, location());
        CWizDocument doc(db, data);
        doc.MoveDocument(&folder);
    } else {
        //copy from sourcedata
-       WIZDOCUMENTDATA newData;
-       if (createNewDoc(newData)) {
-           CWizDatabase& sourceDb = CWizDatabaseManager::instance()->db(data.strKbGUID);
-           CWizDatabase& targetDb = CWizDatabaseManager::instance()->db(newData.strKbGUID);
-           Internal::MainWindow* window = qobject_cast<Internal::MainWindow *>(m_app.mainWindow());
-           sourceDb.CopyDocumentTo(data.strGUID, targetDb, newData.strGUID, window->downloaderHost());
-       }
+       CWizDatabase& sourceDb = CWizDatabaseManager::instance()->db(data.strKbGUID);
+       CWizDatabase& targetDb = CWizDatabaseManager::instance()->db(kbGUID());
+       Internal::MainWindow* window = qobject_cast<Internal::MainWindow *>(m_app.mainWindow());
+       QString strLocation = (location() == LOCATION_DELETED_ITEMS) ? LOCATION_DEFAULT : location();
+       WIZTAGDATA tagEmpty;
+       QString strNewDocGUID;
+       sourceDb.CopyDocumentTo(data.strGUID, targetDb, strLocation, tagEmpty, strNewDocGUID, window->downloaderHost());
+       //sourceDb.CopyDocumentTo(data.strGUID, targetDb, newData.strGUID, window->downloaderHost());
+
    }
 }
 
@@ -605,22 +601,6 @@ void CWizCategoryViewFolderItem::showContextMenu(CWizCategoryBaseView* pCtrl, QP
 QString CWizCategoryViewFolderItem::name() const
 {
     return CWizDatabase::GetLocationName(m_strName);
-}
-
-bool CWizCategoryViewFolderItem::createNewDoc(WIZDOCUMENTDATA &newDoc)
-{
-    CWizDatabase& db = CWizDatabaseManager::instance()->db(kbGUID());
-    //create new file
-    newDoc.strKbGUID = m_strKbGUID;
-    QString strLocation = (location() == LOCATION_DELETED_ITEMS) ? LOCATION_DEFAULT : location();
-
-    bool ret = db.CreateDocumentAndInit("<p><br/></p>", "", 0, QObject::tr("New note"), "newnote", strLocation, "", newDoc);
-    if (!ret) {
-        TOLOG("Failed to new document!");
-        return false;
-    }
-
-    return true;
 }
 
 bool CWizCategoryViewFolderItem::operator < (const QTreeWidgetItem &other) const
@@ -736,8 +716,10 @@ bool CWizCategoryViewTagItem::acceptDrop(const WIZDOCUMENTDATA& data) const
     return false;
 }
 
-void CWizCategoryViewTagItem::drop(const WIZDOCUMENTDATA& data)
+void CWizCategoryViewTagItem::drop(const WIZDOCUMENTDATA& data, bool forceCopy)
 {
+    Q_UNUSED(forceCopy);
+
     if (!acceptDrop(data)) {
         return;
     }
@@ -1109,7 +1091,7 @@ bool CWizCategoryViewGroupItem::acceptDrop(const WIZDOCUMENTDATA& data) const
     return false;
 }
 
-void CWizCategoryViewGroupItem::drop(const WIZDOCUMENTDATA& data)
+void CWizCategoryViewGroupItem::drop(const WIZDOCUMENTDATA& data, bool forceCopy)
 {
     if (!acceptDrop(data))
         return;
@@ -1122,7 +1104,7 @@ void CWizCategoryViewGroupItem::drop(const WIZDOCUMENTDATA& data)
         return;
     }
 
-    if(data.strKbGUID == m_strKbGUID)   {
+    if(!forceCopy && data.strKbGUID == m_strKbGUID)   {
         //doc form same root
         CWizDocument doc(db, data);
         if (data.strLocation == LOCATION_DELETED_ITEMS) {
@@ -1143,13 +1125,13 @@ void CWizCategoryViewGroupItem::drop(const WIZDOCUMENTDATA& data)
 
     } else {
         //doc form other root,copy the file
-        WIZDOCUMENTDATA newData;
-        if (createNewDoc(newData)) {
-            CWizDatabase& sourceDb = CWizDatabaseManager::instance()->db(data.strKbGUID);
-            CWizDatabase& targetDb = CWizDatabaseManager::instance()->db(newData.strKbGUID);
-            Internal::MainWindow* window = qobject_cast<Internal::MainWindow *>(m_app.mainWindow());
-            sourceDb.CopyDocumentTo(data.strGUID, targetDb, newData.strGUID, window->downloaderHost());
-        }
+        CWizDatabase& sourceDb = CWizDatabaseManager::instance()->db(data.strKbGUID);
+        CWizDatabase& targetDb = CWizDatabaseManager::instance()->db(kbGUID());
+        QString strLocation = LOCATION_DEFAULT;
+        Internal::MainWindow* window = qobject_cast<Internal::MainWindow *>(m_app.mainWindow());
+        QString strNewDocGUID;
+        sourceDb.CopyDocumentTo(data.strGUID, targetDb, strLocation, m_tag, strNewDocGUID, window->downloaderHost());
+//        sourceDb.CopyDocumentTo(data.strGUID, targetDb, newData.strGUID, window->downloaderHost());
     }
 }
 
@@ -1158,28 +1140,6 @@ void CWizCategoryViewGroupItem::reload(CWizDatabase& db)
     db.TagFromGUID(m_tag.strGUID, m_tag);
     setText(0, m_tag.strName);
 }
-
-bool CWizCategoryViewGroupItem::createNewDoc(WIZDOCUMENTDATA &newDoc)
-{
-    CWizDatabase& db = CWizDatabaseManager::instance()->db(kbGUID());
-
-    newDoc.strKbGUID = m_strKbGUID;
-    QString strLocation = LOCATION_DEFAULT;
-
-    bool ret = db.CreateDocumentAndInit("<p><br/></p>", "", 0, QObject::tr("New note"), "newnote", strLocation, "", newDoc);
-    if (!ret) {
-        TOLOG("Failed to new document!");
-        return false;
-    }
-
-    if (!m_tag.strGUID.IsEmpty()) {
-        CWizDocument doc(db, newDoc);
-        doc.AddTag(m_tag);
-    }
-
-    return true;
-}
-
 
 /* ------------------------------ CWizCategoryViewTrashItem ------------------------------ */
 

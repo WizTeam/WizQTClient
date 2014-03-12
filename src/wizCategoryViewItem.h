@@ -20,7 +20,7 @@ public:
 
     //NOTE: data used nowhere, could delete
     virtual bool acceptDrop(const WIZDOCUMENTDATA& data) const { Q_UNUSED(data); return false; }
-    virtual void drop(const WIZDOCUMENTDATA& data) { Q_UNUSED(data); }
+    virtual void drop(const WIZDOCUMENTDATA& data, bool forceCopy = false) { Q_UNUSED(data); Q_UNUSED(forceCopy);}
 
     virtual void draw(QPainter* p, const QStyleOptionViewItemV4* vopt) const;
 
@@ -48,8 +48,6 @@ public:
     virtual bool getExtraButtonIcon(QPixmap& ret) const;
     virtual QRect getExtraButtonRect(const QRect& itemBorder) const;
     virtual bool extraButtonClickTest();
-
-    virtual bool createNewDoc(WIZDOCUMENTDATA& newDoc);
 
 protected:
     CWizExplorerApp& m_app;
@@ -161,7 +159,7 @@ public:
     virtual void getDocuments(CWizDatabase& db, CWizDocumentDataArray& arrayDocument);
     virtual bool accept(CWizDatabase& db, const WIZDOCUMENTDATA& data);
     virtual bool acceptDrop(const WIZDOCUMENTDATA& data) const;
-    virtual void drop(const WIZDOCUMENTDATA& data);
+    virtual void drop(const WIZDOCUMENTDATA& data, bool forceCopy = false);
 
     virtual bool operator < (const QTreeWidgetItem &other) const;
 
@@ -169,8 +167,6 @@ public:
 
     QString location() const { return m_strName; }
     QString name() const;
-
-    bool createNewDoc(WIZDOCUMENTDATA& newDoc);
 
 private:
     QRect m_rcUnread;
@@ -195,7 +191,7 @@ public:
     virtual void getDocuments(CWizDatabase& db, CWizDocumentDataArray& arrayDocument);
     virtual bool accept(CWizDatabase& db, const WIZDOCUMENTDATA& data);
     virtual bool acceptDrop(const WIZDOCUMENTDATA& data) const;
-    virtual void drop(const WIZDOCUMENTDATA& data);
+    virtual void drop(const WIZDOCUMENTDATA& data, bool forceCopy = false);
 
     virtual QTreeWidgetItem *clone() const;
 
@@ -337,7 +333,7 @@ public:
     virtual void getDocuments(CWizDatabase& db, CWizDocumentDataArray& arrayDocument);
     virtual bool accept(CWizDatabase& db, const WIZDOCUMENTDATA& data);
     virtual bool acceptDrop(const WIZDOCUMENTDATA& data) const;
-    virtual void drop(const WIZDOCUMENTDATA& data);
+    virtual void drop(const WIZDOCUMENTDATA& data, bool forceCopy = false);
 
     void reload(CWizDatabase& db);
 
@@ -345,7 +341,6 @@ public:
 
     virtual int getSortOrder() const { return 11; }
 
-    bool createNewDoc(WIZDOCUMENTDATA& newDoc);
 private:
     WIZTAGDATA m_tag;
 };

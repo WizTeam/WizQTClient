@@ -4,6 +4,7 @@
 #include <QAction>
 #include <QMenu>
 #include <QMessageBox>
+#include <QApplication>
 
 #include <extensionsystem/pluginmanager.h>
 
@@ -287,11 +288,13 @@ void CWizCategoryBaseView::dropEvent(QDropEvent * event)
     if (!pItem)
         return;
 
+    bool forceCopy = (QApplication::keyboardModifiers() == Qt::ControlModifier);
+
     for (CWizDocumentDataArray::const_iterator it = arrayDocument.begin();
          it != arrayDocument.end();
          it++)
     {
-        pItem->drop(*it);
+        pItem->drop(*it, forceCopy);
     }
 
     event->accept();

@@ -124,6 +124,9 @@ void CWizObjectDataDownloader::on_downloaded(bool bSucceed)
 
     m_bSucceed = bSucceed;
 
+    CWizObjectDataDownloadWorker* downWorker = qobject_cast<CWizObjectDataDownloadWorker*>(sender());
+    downWorker->deleteLater();
+
     quit();
 }
 

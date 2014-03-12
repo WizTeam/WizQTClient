@@ -217,7 +217,9 @@ int CWizDocumentListView::addDocument(const WIZDOCUMENTDATA& doc, bool sort)
 
 bool CWizDocumentListView::acceptDocument(const WIZDOCUMENTDATA& document)
 {
-    return m_app.category().acceptDocument(document);
+    bool categoryAccpet = m_app.category().acceptDocument(document);
+    bool kbGUIDSame = (m_app.category().selectedItemKbGUID() == document.strKbGUID);
+    return categoryAccpet && kbGUIDSame;
 }
 
 void CWizDocumentListView::addAndSelectDocument(const WIZDOCUMENTDATA& document)
