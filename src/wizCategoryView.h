@@ -111,7 +111,6 @@ protected Q_SLOTS:
     virtual void on_group_bizChanged(const QString& strKbGUID) { Q_UNUSED(strKbGUID); }
 
     void on_dragHovered_timeOut();
-    void on_itemExpand(CWizCategoryViewItemBase*item);
 };
 
 

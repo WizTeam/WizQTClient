@@ -156,7 +156,6 @@ CWizCategoryBaseView::CWizCategoryBaseView(CWizExplorerApp& app, QWidget* parent
 
     connect(m_dragHoveredTimer, SIGNAL(timeout()), SLOT(on_dragHovered_timeOut()));
 
-    connect(this, SIGNAL(itemExpanded(QTreeWidgetItem*)), SLOT(on_itemExpand(CWizCategoryViewItemBase*)));
 }
 
 CWizCategoryBaseView::~CWizCategoryBaseView()
@@ -240,7 +239,6 @@ void CWizCategoryBaseView::dragEnterEvent(QDragEnterEvent *event)
 void CWizCategoryBaseView::dragMoveEvent(QDragMoveEvent *event)
 {
     m_dragHoveredPos = event->pos();
-    m_dragHoveredTimer->stop();
 
     if (!event->mimeData()->hasFormat(WIZNOTE_MIMEFORMAT_DOCUMENTS))
         return;
@@ -248,6 +246,12 @@ void CWizCategoryBaseView::dragMoveEvent(QDragMoveEvent *event)
     CWizCategoryViewItemBase* pItem = itemAt(event->pos());
     if (!pItem)
         return;
+
+    if (m_dragHoveredItem != pItem) {
+        m_dragHoveredTimer->stop();
+        m_dragHoveredItem = pItem;
+        m_dragHoveredTimer->start(1000);
+    }
 
     m_dragDocArray.clear();
     mime2Note(event->mimeData()->data(WIZNOTE_MIMEFORMAT_DOCUMENTS), m_dragDocArray);
@@ -266,9 +270,7 @@ void CWizCategoryBaseView::dragMoveEvent(QDragMoveEvent *event)
     }
 
     if (nAccept == m_dragDocArray.size()) {
-        m_dragHoveredItem = pItem;
-        m_dragHoveredTimer->start(1000);
-        event->acceptProposedAction();
+        event->acceptProposedAction();     
     }
     else
         event->ignore();
@@ -442,24 +444,8 @@ void CWizCategoryBaseView::on_dragHovered_timeOut()
 {
     if (m_dragHoveredItem) {
         m_dragHoveredTimer->stop();
-//        m_dragHoveredItem->;
-        setItemsExpandable(true);
-        setAutoExpandDelay(0);
         expandItem(m_dragHoveredItem);
-        m_dragHoveredItem->setExpanded(true);
-        m_dragHoveredItem = 0;
-        sortItems(0, Qt::AscendingOrder);
-        update();
-        updateItem(m_dragHoveredItem);
         viewport()->repaint();
-    }
-}
-
-void CWizCategoryBaseView::on_itemExpand(CWizCategoryViewItemBase *item)
-{
-    if (item) {
-       int a=0;
-       a++;
     }
 }
 
