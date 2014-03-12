@@ -5,6 +5,7 @@
 #include <QMenu>
 #include <QMessageBox>
 #include <QApplication>
+#include <QTimer>
 
 #include <extensionsystem/pluginmanager.h>
 
@@ -70,6 +71,8 @@ CWizCategoryBaseView::CWizCategoryBaseView(CWizExplorerApp& app, QWidget* parent
     , m_dbMgr(app.databaseManager())
     , m_bDragHovered(false)
     , m_selectedItem(NULL)
+    , m_dragHoveredTimer(new QTimer())
+    , m_dragHoveredItem(0)
 {
     // basic features
     header()->hide();
@@ -150,6 +153,19 @@ CWizCategoryBaseView::CWizCategoryBaseView(CWizExplorerApp& app, QWidget* parent
 
     connect(&m_dbMgr, SIGNAL(databaseBizchanged(const QString&)),
             SLOT(on_group_bizChanged(const QString&)));
+
+    connect(m_dragHoveredTimer, SIGNAL(timeout()), SLOT(on_dragHovered_timeOut()));
+
+    connect(this, SIGNAL(itemExpanded(QTreeWidgetItem*)), SLOT(on_itemExpand(CWizCategoryViewItemBase*)));
+}
+
+CWizCategoryBaseView::~CWizCategoryBaseView()
+{
+    if (!m_dragHoveredTimer) {
+        m_dragHoveredTimer->stop();
+        delete m_dragHoveredTimer;
+        m_dragHoveredTimer = 0;
+    }
 }
 
 void CWizCategoryBaseView::mousePressEvent(QMouseEvent* event)
@@ -224,6 +240,7 @@ void CWizCategoryBaseView::dragEnterEvent(QDragEnterEvent *event)
 void CWizCategoryBaseView::dragMoveEvent(QDragMoveEvent *event)
 {
     m_dragHoveredPos = event->pos();
+    m_dragHoveredTimer->stop();
 
     if (!event->mimeData()->hasFormat(WIZNOTE_MIMEFORMAT_DOCUMENTS))
         return;
@@ -248,8 +265,11 @@ void CWizCategoryBaseView::dragMoveEvent(QDragMoveEvent *event)
         }
     }
 
-    if (nAccept == m_dragDocArray.size())
+    if (nAccept == m_dragDocArray.size()) {
+        m_dragHoveredItem = pItem;
+        m_dragHoveredTimer->start(1000);
         event->acceptProposedAction();
+    }
     else
         event->ignore();
 
@@ -262,6 +282,8 @@ void CWizCategoryBaseView::dragLeaveEvent(QDragLeaveEvent* event)
 
     m_bDragHovered = false;
     m_dragHoveredPos = QPoint();
+    m_dragHoveredTimer->stop();
+    m_dragHoveredItem = 0;
 
     m_dragDocArray.clear();
     viewport()->repaint();
@@ -414,6 +436,31 @@ QModelIndex CWizCategoryBaseView::moveCursor(CursorAction cursorAction, Qt::Keyb
     }
 
     return index;
+}
+
+void CWizCategoryBaseView::on_dragHovered_timeOut()
+{
+    if (m_dragHoveredItem) {
+        m_dragHoveredTimer->stop();
+//        m_dragHoveredItem->;
+        setItemsExpandable(true);
+        setAutoExpandDelay(0);
+        expandItem(m_dragHoveredItem);
+        m_dragHoveredItem->setExpanded(true);
+        m_dragHoveredItem = 0;
+        sortItems(0, Qt::AscendingOrder);
+        update();
+        updateItem(m_dragHoveredItem);
+        viewport()->repaint();
+    }
+}
+
+void CWizCategoryBaseView::on_itemExpand(CWizCategoryViewItemBase *item)
+{
+    if (item) {
+       int a=0;
+       a++;
+    }
 }
 
 bool CWizCategoryBaseView::validateDropDestination(const QPoint& p) const

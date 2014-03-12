@@ -721,7 +721,7 @@ bool CWizDatabase::CopyDocumentData(const WIZDOCUMENTDATA& sourceDoc, CWizDataba
         CWizProgressDialog dlg;
         dlg.setActionString(QObject::tr("download document ")+sourceDoc.strTitle);
         dlg.setNotifyString(QObject::tr("downloading,please wait."));
-        dlg.setProgress(0,100);
+        dlg.setProgress(100,0);
         connect(downloaderHost, SIGNAL(downloadProgress(int,int)), &dlg, SLOT(setProgress(int,int)));
         connect(downloaderHost, SIGNAL(downloadDone(WIZOBJECTDATA,bool)), &dlg, SLOT(accept()));
         dlg.exec();
@@ -758,7 +758,7 @@ bool CWizDatabase::CopyDocumentAttachment(const WIZDOCUMENTDATA& sourceDoc, CWiz
                 CWizProgressDialog dlg;
                 dlg.setActionString(QObject::tr("download attachment ")+attachData.strName);
                 dlg.setNotifyString(QObject::tr("downloading,please wait."));
-                dlg.setProgress(0,100);
+                dlg.setProgress(100,0);
                 connect(downloaderHost, SIGNAL(downloadProgress(int,int)), &dlg, SLOT(setProgress(int,int)));
                 connect(downloaderHost, SIGNAL(downloadDone(WIZOBJECTDATA,bool)), &dlg, SLOT(accept()));
                 dlg.exec();
