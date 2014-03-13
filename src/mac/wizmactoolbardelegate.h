@@ -37,7 +37,7 @@ class QMacCocoaViewContainer;
 - (NSArray *)toolbarAllowedItemIdentifiers:(NSToolbar*)Toolbar;
 - (NSArray *)toolbarSelectableItemIdentifiers:(NSToolbar *)Toolbar;
 
-- (BOOL)validateToolbarItem:(NSToolbarItem *)theItem;
+//- (BOOL)validateToolbarItem:(NSToolbarItem *)theItem;
 
 - (BOOL) control:(NSControl *)control textShouldEndEditing:(NSText *)fieldEditor;
 - (void) searchUsingToolbarSearchField:(id) sender;
