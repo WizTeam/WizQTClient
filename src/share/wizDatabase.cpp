@@ -21,6 +21,7 @@
 #include "wizObjectDataDownloader.h"
 #include "wizProgressDialog.h"
 #include "wizusercipherform.h"
+#include "wizDatabaseManager.h"
 
 #define WIZNOTE_THUMB_VERSION "3"
 
@@ -681,11 +682,12 @@ bool CWizDatabase::CopyDocumentTo(const QString &strGUID, CWizDatabase &targetDB
     newDoc.tCreated = sourceDoc.tCreated;
     newDoc.tAccessed = sourceDoc.tAccessed;
     newDoc.tDataModified = sourceDoc.tDataModified;
-    newDoc.tInfoModified = sourceDoc.tInfoModified;
     newDoc.tModified = sourceDoc.tModified;
+    newDoc.tInfoModified = sourceDoc.tInfoModified;
     newDoc.tParamModified = sourceDoc.tParamModified;
     newDoc.nVersion = (newDoc.nVersion >= 0) ? newDoc.nVersion : 0;
     targetDB.UpdateDocument(newDoc);
+    targetDB.UpdateDocumentAttachmentCount(newDoc.strGUID, false);
 
     return true;
 }
@@ -803,6 +805,8 @@ IWizSyncableDatabase* CWizDatabase::GetGroupDatabase(const WIZGROUPDATA& group)
 {
     Q_ASSERT(!group.strGroupGUID.isEmpty());
 
+    CWizDatabaseManager::instance()->db(group.strGroupGUID);
+
     CWizDatabase* db = new CWizDatabase();
     if (!db->Open(m_strUserId, group.strGroupGUID)) {
         delete db;
@@ -811,14 +815,20 @@ IWizSyncableDatabase* CWizDatabase::GetGroupDatabase(const WIZGROUPDATA& group)
 
     // pass this pointer to database manager for signal redirect and managament
     // CWizDatabaseManager will take ownership
-    Q_EMIT databaseOpened(db, group.strGroupGUID);
+    //Q_EMIT databaseOpened(db, group.strGroupGUID);
 
     return db;
 }
 
 void CWizDatabase::CloseGroupDatabase(IWizSyncableDatabase* pDatabase)
 {
-    Q_UNUSED(pDatabase);
+    CWizDatabase* db = dynamic_cast<CWizDatabase*>(pDatabase);
+
+    Q_ASSERT(db);
+
+    db->Close();
+    delete db;
+
 }
 
 void CWizDatabase::SetKbInfo(const QString& strKBGUID, const WIZKBINFO& info)

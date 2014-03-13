@@ -137,8 +137,8 @@ CWizDatabase& CWizDatabaseManager::addDb(const QString& strKbGUID, const WIZDATA
 
 CWizDatabase& CWizDatabaseManager::db(const QString& strKbGUID)
 {
-    //QMutexLocker locker(&m_mutex);
-    //Q_UNUSED(locker);
+    QMutexLocker locker(&m_mutex);
+    Q_UNUSED(locker);
     //
     Q_ASSERT(m_dbPrivate);
 
