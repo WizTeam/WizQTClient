@@ -2911,29 +2911,31 @@ QObject* CWizDatabase::GetFolderByLocation(const QString& strLocation, bool crea
 
 bool CWizDatabase::tryAccessDocument(const WIZDOCUMENTDATA &doc)
 {
-    if (doc.nProtected && userCipher().isEmpty()) {
-        if(!loadUserCert()) {
-            return false;
+    if (doc.nProtected) {
+        if (userCipher().isEmpty()) {
+            if(!loadUserCert()) {
+                return false;
+            }
+
+            QString strPassWord;
+            QInputDialog passwordDlg;
+            passwordDlg.setWindowTitle(tr("Doucment  %1  PassWord").arg(doc.strTitle));
+            passwordDlg.setLabelText(tr("PassWord :"));
+            passwordDlg.setTextEchoMode(QLineEdit::Password);
+            passwordDlg.setFixedSize(350, passwordDlg.height());
+
+            if (passwordDlg.exec() != QDialog::Accepted)
+                return false;
+
+            strPassWord = passwordDlg.textValue();
+            setUserCipher(strPassWord);
         }
 
-        QString strPassWord;
-        QInputDialog passwordDlg;
-        passwordDlg.setWindowTitle(tr("Doucment  %1  PassWord").arg(doc.strTitle));
-        passwordDlg.setLabelText(tr("PassWord :"));
-        passwordDlg.setTextEchoMode(QLineEdit::Password);
-        passwordDlg.setFixedSize(350, passwordDlg.height());
-
-        if (passwordDlg.exec() != QDialog::Accepted)
+        if (!IsFileAccessible(doc)) {
+            QMessageBox::information(0, tr("Info"), tr("password error!"));
+            setUserCipher(QString());
             return false;
-
-        strPassWord = passwordDlg.textValue();
-        setUserCipher(strPassWord);
-    }
-
-    if (!IsFileAccessible(doc)) {
-        QMessageBox::information(0, tr("Info"), tr("password error!"));
-        setUserCipher(QString());
-        return false;
+        }
     }
     return true;
 }

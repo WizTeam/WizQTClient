@@ -582,7 +582,8 @@ void CWizCategoryViewFolderItem::drop(const WIZDOCUMENTDATA& data, bool forceCop
        CWizDatabase& sourceDb = CWizDatabaseManager::instance()->db(data.strKbGUID);
        CWizDatabase& targetDb = CWizDatabaseManager::instance()->db(kbGUID());
        Internal::MainWindow* window = qobject_cast<Internal::MainWindow *>(m_app.mainWindow());
-       QString strLocation = (location() == LOCATION_DELETED_ITEMS) ? LOCATION_DEFAULT : location();
+       //QString strLocation = (location() == LOCATION_DELETED_ITEMS) ? LOCATION_DEFAULT : location();
+       QString strLocation = location();
        WIZTAGDATA tagEmpty;
        QString strNewDocGUID;
        sourceDb.CopyDocumentTo(data.strGUID, targetDb, strLocation, tagEmpty, strNewDocGUID, window->downloaderHost());
