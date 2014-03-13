@@ -354,6 +354,7 @@ public:
     virtual void showContextMenu(CWizCategoryBaseView* pCtrl, QPoint pos);
     virtual void getDocuments(CWizDatabase& db, CWizDocumentDataArray& arrayDocument);
     virtual bool accept(CWizDatabase& db, const WIZDOCUMENTDATA& data);
+    virtual bool acceptDrop(const WIZDOCUMENTDATA& data) const;
     virtual int getSortOrder() const { return 12; }
 };
 

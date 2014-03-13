@@ -1226,6 +1226,17 @@ bool CWizCategoryViewTrashItem::accept(CWizDatabase& db, const WIZDOCUMENTDATA& 
     return db.IsInDeletedItems(data.strLocation);
 }
 
+bool CWizCategoryViewTrashItem::acceptDrop(const WIZDOCUMENTDATA &data) const
+{
+    Q_UNUSED(data);
+
+    CWizCategoryViewGroupRootItem* parentItem = dynamic_cast<CWizCategoryViewGroupRootItem*>(parent());
+    if (parentItem)
+        return false;
+
+    return true;
+}
+
 
 /* ------------------------------ CWizCategoryViewSearchItem ------------------------------ */
 
