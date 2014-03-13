@@ -3,6 +3,7 @@
 
 #include <QtGlobal>
 #include <QObject>
+#include <QMutex>
 
 class QBuffer;
 
@@ -12,37 +13,34 @@ class Logger : public QObject
 {
     Q_OBJECT
 
-public:
+protected:
     Logger();
     ~Logger();
+public:
 
 #if QT_VERSION < 0x050000
     static void messageHandler(QtMsgType type, const char* msg);
 #else
     static void messageHandler(QtMsgType type, const QMessageLogContext &context, const QString &msg);
 #endif
-
-    // who is interested in logs just need to connect readyRead signal
-    static QBuffer* buffer();
-
-    // obsolete method, will be removed
     static void writeLog(const QString& strMsg);
+    static void getAllLogs(QString& text);
+    static Logger* logger();
+private Q_SLOTS:
+    void onBuffer_readRead() { emit readyRead(); }
+Q_SIGNALS:
+    void readyRead();
 
 private:
+    QMutex m_mutex;
     QBuffer* m_buffer;
 
-    void prepare();
-    void loadBuffer();
-    int log2Buffer(const QString strFileName);
+    void getAll(QString& text);
 
-    QString lastLogFile(const QString strFileName);
-    QString logFile();
-    QStringList allLogFiles(int nDays);
-    bool logFileWritable(const QString& strFilePath);
-    int lines(const QString& strFilePath);
+    QString logFileName();
     QString msg2LogMsg(const QString& strMsg);
-    void save(const QString& strMsg);
-    void redirect(const QString& strMsg);
+    void saveToLogFile(const QString& strMsg);
+    void addToBuffer(const QString& strMsg);
 };
 
 } // namespace Utils

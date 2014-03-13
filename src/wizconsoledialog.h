@@ -29,7 +29,7 @@ private:
     qint64 m_nPos;
 
     void load();
-    void insertLog(const QByteArray& bytes);
+    void insertLog(const QString& text);
     void resetCount();
 
 public Q_SLOTS:

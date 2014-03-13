@@ -28,12 +28,12 @@ CWizConsoleDialog::CWizConsoleDialog(CWizExplorerApp& app, QWidget* parent)
     , m_nPos(0)
 {
     m_ui->setupUi(this);
-    setWindowFlags(Qt::Tool);
+    //setWindowFlags(Qt::Tool);
 
     m_ui->editConsole->setReadOnly(true);
     m_ui->btnCopyToClipboard->setEnabled(false);
 
-    connect(Utils::Logger::buffer(), SIGNAL(readyRead()), SLOT(onLogBufferReadyRead()));
+    connect(Utils::Logger::logger(), SIGNAL(readyRead()), SLOT(onLogBufferReadyRead()));
     connect(m_ui->btnSaveAs, SIGNAL(clicked()), SLOT(onBtnSaveAsClicked()));
     connect(m_ui->editConsole, SIGNAL(copyAvailable(bool)), SLOT(onConsoleCopyAvailable(bool)));
     connect(m_ui->btnCopyToClipboard, SIGNAL(clicked()), SLOT(onBtnCopyToClipboardClicked()));
@@ -42,6 +42,7 @@ CWizConsoleDialog::CWizConsoleDialog(CWizExplorerApp& app, QWidget* parent)
     connect(m_ui->editConsole, SIGNAL(textChanged()), SLOT(onConsoleTextChanged()));
     connect(m_ui->editConsole->verticalScrollBar(), SIGNAL(valueChanged(int)), SLOT(onConsoleSliderMoved(int)));
 
+    //
     load();
 }
 
@@ -59,33 +60,23 @@ void CWizConsoleDialog::showEvent(QShowEvent *event)
     QDialog::showEvent(event);
 }
 
-void CWizConsoleDialog::insertLog(const QByteArray& nBytes)
+void CWizConsoleDialog::insertLog(const QString& text)
 {
     QTextCursor cursor = m_ui->editConsole->textCursor();
     cursor.movePosition(QTextCursor::End);
-    cursor.insertText(QString::fromUtf8(nBytes.data()));
-
-    m_nPos += nBytes.size();
+    cursor.insertText(text);
 }
 
 void CWizConsoleDialog::load()
 {
-    QByteArray bytes = Utils::Logger::buffer()->buffer();
-    insertLog(bytes);
+    QString text;
+    Utils::Logger::getAllLogs(text);
+    insertLog(text);
 }
 
 void CWizConsoleDialog::onLogBufferReadyRead()
 {
-    QBuffer* buf = Utils::Logger::buffer();
-
-    if (!buf->open(QIODevice::ReadOnly)) {
-        return;
-    }
-
-    buf->seek(m_nPos);
-    insertLog(buf->readAll());
-
-    buf->close();
+    load();
 }
 
 void CWizConsoleDialog::onConsoleSliderMoved(int value)
@@ -111,30 +102,10 @@ void CWizConsoleDialog::onConsoleTextChanged()
 void CWizConsoleDialog::onBtnClearClicked()
 {
     m_ui->editConsole->clear();
-
-    Utils::Logger::buffer()->setBuffer(0);
-    m_nPos = 0;
 }
 
 void CWizConsoleDialog::resetCount()
 {
-    QBuffer* buf = Utils::Logger::buffer();
-    if (!buf->open(QIODevice::ReadOnly)) {
-        return;
-    }
-
-    int nLines = 0;
-    QTextStream ts(buf);
-    do {
-        ts.readLine();
-        nLines++;
-    } while (!ts.atEnd());
-
-    buf->close();
-
-    QString strCount = m_ui->labelCount->text();
-    strCount = strCount.replace(QRegExp("%1|\\d+"), QString::number(nLines));
-    m_ui->labelCount->setText(strCount);
 }
 
 void CWizConsoleDialog::onBtnSaveAsClicked()
@@ -150,10 +121,12 @@ void CWizConsoleDialog::onBtnSaveAsClicked()
         QMessageBox::warning(this, tr("Failed to save"), tr("you should select a file name which does not exists"));
         return;
     }
+    //
+    QString text = m_ui->editConsole->document()->toPlainText();
 
     QFile file(strFilePath);
     file.open(QIODevice::Truncate | QIODevice::WriteOnly);
-    file.write(Utils::Logger::buffer()->data());
+    file.write(text.toUtf8());
     file.close();
 }
 
