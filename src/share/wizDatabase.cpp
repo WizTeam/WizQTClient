@@ -675,6 +675,15 @@ bool CWizDatabase::CopyDocumentTo(const QString &strGUID, CWizDatabase &targetDB
     if (!CopyDocumentAttachment(sourceDoc, targetDB, newDoc, downloaderHost))
         return false;
 
+    newDoc.tCreated = sourceDoc.tCreated;
+    newDoc.tAccessed = sourceDoc.tAccessed;
+    newDoc.tDataModified = sourceDoc.tDataModified;
+    newDoc.tInfoModified = sourceDoc.tInfoModified;
+    newDoc.tModified = sourceDoc.tModified;
+    newDoc.tParamModified = sourceDoc.tParamModified;
+    newDoc.nVersion = (newDoc.nVersion >= 0) ? newDoc.nVersion : 0;
+    targetDB.UpdateDocument(newDoc);
+
     return true;
 }
 

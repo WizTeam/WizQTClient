@@ -169,11 +169,11 @@ public:
                                 const QString& strObjectType);
 
     //copy and move
-    //create new doc and copy doc
+    //create new doc and copy data, set the new doc time as the source doc.
     virtual bool CopyDocumentTo(const QString& strGUID, CWizDatabase& targetDB,
                                   const QString& strTargetLocation, const WIZTAGDATA &targetTag,
                                 QString& strResultGUID, CWizObjectDataDownloaderHost *downloaderHost);
-    //copy doc to exist doc
+    //copy docData and attachment to exist doc, wouldn't change the targetDoc created time.
     virtual bool CopyDocumentTo(const QString& strGUID, CWizDatabase& targetDB,
                                   const QString& targetGUID, CWizObjectDataDownloaderHost *downloaderHost);
     virtual bool CopyDocumentData(const WIZDOCUMENTDATA& sourceDoc, CWizDatabase& targetDB,

@@ -586,8 +586,6 @@ void CWizCategoryViewFolderItem::drop(const WIZDOCUMENTDATA& data, bool forceCop
        WIZTAGDATA tagEmpty;
        QString strNewDocGUID;
        sourceDb.CopyDocumentTo(data.strGUID, targetDb, strLocation, tagEmpty, strNewDocGUID, window->downloaderHost());
-       //sourceDb.CopyDocumentTo(data.strGUID, targetDb, newData.strGUID, window->downloaderHost());
-
    }
 }
 
@@ -1018,7 +1016,6 @@ void CWizCategoryViewGroupRootItem::drop(const WIZDOCUMENTDATA &data, bool force
         QString strNewDocGUID;
         WIZTAGDATA tagEmpty;
         sourceDb.CopyDocumentTo(data.strGUID, targetDb, strLocation, tagEmpty, strNewDocGUID, window->downloaderHost());
-//        sourceDb.CopyDocumentTo(data.strGUID, targetDb, newData.strGUID, window->downloaderHost());
     }
 }
 
@@ -1184,7 +1181,6 @@ void CWizCategoryViewGroupItem::drop(const WIZDOCUMENTDATA& data, bool forceCopy
         Internal::MainWindow* window = qobject_cast<Internal::MainWindow *>(m_app.mainWindow());
         QString strNewDocGUID;
         sourceDb.CopyDocumentTo(data.strGUID, targetDb, strLocation, m_tag, strNewDocGUID, window->downloaderHost());
-//        sourceDb.CopyDocumentTo(data.strGUID, targetDb, newData.strGUID, window->downloaderHost());
     }
 }
 
