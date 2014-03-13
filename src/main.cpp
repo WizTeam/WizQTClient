@@ -136,8 +136,7 @@ void installOnLinux()
 
 int main(int argc, char *argv[])
 {
-    // setup logger
-    Utils::Logger logger;
+    //
 #if QT_VERSION < 0x050000
     qInstallMsgHandler(Utils::Logger::messageHandler);
 #else
