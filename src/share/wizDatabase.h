@@ -176,10 +176,15 @@ public:
     //copy docData and attachment to exist doc, wouldn't change the targetDoc created time.
     virtual bool CopyDocumentTo(const QString& strGUID, CWizDatabase& targetDB,
                                   const QString& targetGUID, CWizObjectDataDownloaderHost *downloaderHost);
+    //if file doesn't exits, download it.
+    bool makeSureDocumentExits(const WIZDOCUMENTDATA& doc, CWizObjectDataDownloaderHost* downloaderHost);
+    bool tryAccessDocument(const WIZDOCUMENTDATA& doc);
+    //should make sure sourceDoc already exist before use this.
     virtual bool CopyDocumentData(const WIZDOCUMENTDATA& sourceDoc, CWizDatabase& targetDB,
-                                  WIZDOCUMENTDATA& targetDoc, CWizObjectDataDownloaderHost *downloaderHost);
+                                  WIZDOCUMENTDATA& targetDoc);
     virtual bool CopyDocumentAttachment(const WIZDOCUMENTDATA& sourceDoc, CWizDatabase& targetDB,
                                         WIZDOCUMENTDATA& targetDoc, CWizObjectDataDownloaderHost *downloaderHost);
+
 
     // info and groups
     virtual void SetUserInfo(const WIZUSERINFO& info);
@@ -407,7 +412,7 @@ Q_SIGNALS:
     void folderPositionChanged();
 
 private:
-    bool tryAccessDocument(const WIZDOCUMENTDATA& doc);
+
 };
 
 
