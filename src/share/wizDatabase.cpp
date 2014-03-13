@@ -729,14 +729,18 @@ bool CWizDatabase::CopyDocumentData(const WIZDOCUMENTDATA& sourceDoc, CWizDataba
     targetDB.UpdateDocument(targetDoc);
 
     //copy document data
-    QString strHtmlFile;
-    if (!DocumentToTempHtmlFile(sourceDoc, strHtmlFile))
-        return false;
+//    QString strHtmlFile;
+//    if (!DocumentToTempHtmlFile(sourceDoc, strHtmlFile))
+//        return false;
 
-    QString strHtml;
-    ::WizLoadUtf8TextFromFile(strHtmlFile, strHtml);
-    QString strFileName = GetDocumentFileName(sourceDoc.strGUID);
-    targetDB.UpdateDocumentData(targetDoc, strHtml, strFileName, 0);
+//    QString strHtml;
+//    ::WizLoadUtf8TextFromFile(strHtmlFile, strHtml);
+//    QString strFileName = GetDocumentFileName(sourceDoc.strGUID);
+//    targetDB.UpdateDocumentData(targetDoc, strHtml, strFileName, 0);
+
+    QByteArray ba;
+    LoadDocumentData(sourceDoc.strGUID, ba);
+    targetDB.WriteDataToDocument(targetDoc.strGUID, ba);
 
     return true;
 }
