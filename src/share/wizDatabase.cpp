@@ -656,11 +656,13 @@ bool CWizDatabase::CopyDocumentTo(const QString &strGUID, CWizDatabase &targetDB
     if (!tryAccessDocument(sourceDoc))
         return false;
 
+    QString strHtml;
+    if (!LoadDocumentDataToHtml(sourceDoc, strHtml))
+        return false;
+
     //create new doc
     WIZDOCUMENTDATA newDoc;
-    newDoc.strKbGUID = targetDB.kbGUID();
-
-    bool ret = targetDB.CreateDocumentAndInit("<p><br/></p>", "", 0, QObject::tr("New note"), "newnote", strTargetLocation, "", newDoc);
+    bool ret = targetDB.CreateDocumentAndInit(sourceDoc, strHtml, strTargetLocation, newDoc);
     if (!ret) {
         TOLOG("Failed to new document!");
         return false;
@@ -672,14 +674,9 @@ bool CWizDatabase::CopyDocumentTo(const QString &strGUID, CWizDatabase &targetDB
     }
     strResultGUID = newDoc.strGUID;
 
-    //copy Data
-    if (!CopyDocumentData(sourceDoc, targetDB, newDoc))
-        return false;
-
     if (!CopyDocumentAttachment(sourceDoc, targetDB, newDoc, downloaderHost))
         return false;
 
-    newDoc.strTitle = sourceDoc.strTitle;
     newDoc.tCreated = sourceDoc.tCreated;
     newDoc.tAccessed = sourceDoc.tAccessed;
     newDoc.tDataModified = sourceDoc.tDataModified;
@@ -692,24 +689,25 @@ bool CWizDatabase::CopyDocumentTo(const QString &strGUID, CWizDatabase &targetDB
     return true;
 }
 
-bool CWizDatabase::CopyDocumentData(const WIZDOCUMENTDATA& sourceDoc, CWizDatabase& targetDB,
-                                    WIZDOCUMENTDATA& targetDoc)
+bool CWizDatabase::LoadDocumentDataToHtml(const WIZDOCUMENTDATA& sourceDoc, QString &strHtml)
 {
     //copy document data
-//    QString strHtmlFile;
-//    if (!DocumentToTempHtmlFile(sourceDoc, strHtmlFile))
-//        return false;
+    QString strHtmlFile;
+    if (!DocumentToTempHtmlFile(sourceDoc, strHtmlFile))
+        return false;
 
-//    QString strHtml;
-//    ::WizLoadUtf8TextFromFile(strHtmlFile, strHtml);
-//    QString strFileName = GetDocumentFileName(sourceDoc.strGUID);
-//    targetDB.UpdateDocumentData(targetDoc, strHtml, strFileName, 0);
+     if (::WizLoadUnicodeTextFromFile(strHtmlFile, strHtml)) {
+         strHtml.remove("<html><head></head><body >");
+         strHtml.remove("</body></html>");
+         return true;
+     }
 
-    QByteArray ba;
-    LoadDocumentData(sourceDoc.strGUID, ba);
-    targetDB.WriteDataToDocument(targetDoc.strGUID, ba);
+     return false;
 
-    return true;
+
+//    QByteArray ba;
+//    LoadDocumentData(sourceDoc.strGUID, ba);
+//    strHtml.WriteDataToDocument(targetDoc.strGUID, ba);
 }
 
 bool CWizDatabase::CopyDocumentAttachment(const WIZDOCUMENTDATA& sourceDoc, CWizDatabase& targetDB,
@@ -727,7 +725,7 @@ bool CWizDatabase::CopyDocumentAttachment(const WIZDOCUMENTDATA& sourceDoc, CWiz
         if (attachData.strDocumentGUID == sourceDoc.strGUID) {
             if (!IsAttachmentDownloaded(attachData.strDocumentGUID) && !PathFileExists(GetAttachmentFileName(attachData.strGUID))) {
                 CWizProgressDialog dlg;
-                dlg.setActionString(QObject::tr("Download Note %1 ").arg(sourceDoc.strTitle));
+                dlg.setActionString(QObject::tr("Download File %1 ").arg(sourceDoc.strTitle));
                 dlg.setNotifyString(QObject::tr("Downloading, please wait..."));
                 dlg.setProgress(100, 0);
                 connect(downloaderHost, SIGNAL(downloadProgress(int, int)), &dlg, SLOT(setProgress(int, int)));
@@ -2504,6 +2502,35 @@ bool CWizDatabase::CreateDocumentAndInit(const CString& strHtml, \
             bRet = UpdateDocumentData(data, strHtml, strURL, nFlags);
 
             Q_EMIT documentCreated(data);
+        }
+    }
+    catch (...)
+    {
+
+    }
+
+    EndUpdate();
+
+    return bRet;
+}
+
+bool CWizDatabase::CreateDocumentAndInit(const WIZDOCUMENTDATA& sourceDoc,const QString& strHtml , const QString& strLocation, WIZDOCUMENTDATA& newDoc)
+{
+    bool bRet = false;
+    try
+    {
+        BeginUpdate();
+
+        newDoc.strKbGUID = kbGUID();
+        newDoc.strOwner = getUserId();
+        bRet = CreateDocument(sourceDoc.strTitle, sourceDoc.strName, strLocation, "", sourceDoc.strAuthor,
+                              sourceDoc.strKeywords, sourceDoc.strType, GetUserId(), sourceDoc.strFileType,
+                              sourceDoc.strStyleGUID, 0, 0, 0, newDoc);
+        if (bRet)
+        {
+            bRet = UpdateDocumentData(newDoc, strHtml, "", 0);
+
+            Q_EMIT documentCreated(newDoc);
         }
     }
     catch (...)

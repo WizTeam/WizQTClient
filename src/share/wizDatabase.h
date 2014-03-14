@@ -176,11 +176,7 @@ public:
     //if file doesn't exist, download it.
     bool makeSureDocumentExist(const WIZDOCUMENTDATA& doc, CWizObjectDataDownloaderHost* downloaderHost);
     bool tryAccessDocument(const WIZDOCUMENTDATA& doc);
-    //should make sure sourceDoc already exist before use this.
-    virtual bool CopyDocumentData(const WIZDOCUMENTDATA& sourceDoc, CWizDatabase& targetDB,
-                                  WIZDOCUMENTDATA& targetDoc);
-    virtual bool CopyDocumentAttachment(const WIZDOCUMENTDATA& sourceDoc, CWizDatabase& targetDB,
-                                        WIZDOCUMENTDATA& targetDoc, CWizObjectDataDownloaderHost* downloaderHost);
+
 
 
     // info and groups
@@ -371,6 +367,11 @@ public:
                                const CString& strURL, \
                                WIZDOCUMENTDATA& data);
 
+    bool CreateDocumentAndInit(const WIZDOCUMENTDATA& sourceDoc,  \
+                               const QString& strHtml, \
+                               const QString& strLocation, \
+                               WIZDOCUMENTDATA& newDoc);
+
     bool AddAttachment(const WIZDOCUMENTDATA& document, \
                        const CString& strFileName, \
                        WIZDOCUMENTATTACHMENTDATA& dataRet);
@@ -409,7 +410,10 @@ Q_SIGNALS:
     void folderPositionChanged();
 
 private:
-
+    //should make sure sourceDoc already exist before use this.
+    bool LoadDocumentDataToHtml(const WIZDOCUMENTDATA& doc, QString& strHtml);
+    bool CopyDocumentAttachment(const WIZDOCUMENTDATA& sourceDoc, CWizDatabase& targetDB,
+                                        WIZDOCUMENTDATA& targetDoc, CWizObjectDataDownloaderHost* downloaderHost);
 };
 
 
