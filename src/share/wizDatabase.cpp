@@ -650,7 +650,7 @@ bool CWizDatabase::CopyDocumentTo(const QString &strGUID, CWizDatabase &targetDB
     if (!DocumentFromGUID(strGUID, sourceDoc))
         return false;
 
-    if (!makeSureDocumentExits(sourceDoc, downloaderHost))
+    if (!makeSureDocumentExist(sourceDoc, downloaderHost))
         return false;
 
     if (!tryAccessDocument(sourceDoc))
@@ -2915,7 +2915,7 @@ bool CWizDatabase::tryAccessDocument(const WIZDOCUMENTDATA &doc)
     return true;
 }
 
-bool CWizDatabase::makeSureDocumentExits(const WIZDOCUMENTDATA& doc, CWizObjectDataDownloaderHost* downloaderHost)
+bool CWizDatabase::makeSureDocumentExist(const WIZDOCUMENTDATA& doc, CWizObjectDataDownloaderHost* downloaderHost)
 {
     if(!downloaderHost || doc.strGUID.isEmpty())
         return false;
