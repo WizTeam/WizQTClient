@@ -545,9 +545,8 @@ bool CWizCategoryViewFolderItem::accept(CWizDatabase& db, const WIZDOCUMENTDATA&
 {
     Q_UNUSED(db);
 
-    if (m_strName == data.strLocation && data.strKbGUID == kbGUID()) {
+    if (m_strName == data.strLocation && data.strKbGUID == kbGUID())
         return true;
-    }
 
     return false;
 }
@@ -564,9 +563,8 @@ bool CWizCategoryViewFolderItem::acceptDrop(const WIZDOCUMENTDATA& data) const
 
 void CWizCategoryViewFolderItem::drop(const WIZDOCUMENTDATA& data, bool forceCopy)
 {
-   if (!acceptDrop(data)) {
+   if (!acceptDrop(data))
        return;
-   }
 
 //   if (m_strName == data.strLocation)   // skip
 //       return;
@@ -953,14 +951,12 @@ void CWizCategoryViewGroupRootItem::getDocuments(CWizDatabase& db, CWizDocumentD
 
 bool CWizCategoryViewGroupRootItem::accept(CWizDatabase& db, const WIZDOCUMENTDATA& data)
 {
-    if (db.IsInDeletedItems(data.strLocation)) {
+    if (db.IsInDeletedItems(data.strLocation))
         return false;
-    }
 
     QString strTagGUIDs = db.GetDocumentTagGUIDsString(data.strGUID);
-    if (strTagGUIDs.isEmpty() && data.strKbGUID == kbGUID()) {
+    if (strTagGUIDs.isEmpty() && data.strKbGUID == kbGUID())
         return true;
-    }
 
     return false;
 }
@@ -970,9 +966,8 @@ bool CWizCategoryViewGroupRootItem::acceptDrop(const WIZDOCUMENTDATA &data) cons
     Q_UNUSED(data);
 
     CWizDatabase& db = CWizDatabaseManager::instance()->db(kbGUID());
-    if (WIZ_USERGROUP_AUTHOR >= db.permission()) {
+    if (WIZ_USERGROUP_AUTHOR >= db.permission())
         return true;
-    }
 
     return false;
 }
@@ -986,11 +981,10 @@ void CWizCategoryViewGroupRootItem::drop(const WIZDOCUMENTDATA &data, bool force
 
     // skip
     CWizTagDataArray arrayTag;
-    if (!db.GetDocumentTags(data.strGUID, arrayTag)) {
+    if (!db.GetDocumentTags(data.strGUID, arrayTag))
         return;
-    }
 
-    if(!forceCopy && data.strKbGUID == m_strKbGUID)   {
+    if (!forceCopy && data.strKbGUID == m_strKbGUID) {
         //doc form same root
         CWizDocument doc(db, data);
         if (data.strLocation == LOCATION_DELETED_ITEMS) {
@@ -998,16 +992,13 @@ void CWizCategoryViewGroupRootItem::drop(const WIZDOCUMENTDATA &data, bool force
             doc.MoveDocument(&folder);
         }
 
-        if (arrayTag.size() > 0)
-        {
+        if (arrayTag.size() > 0) {
             for (CWizTagDataArray::const_iterator it = arrayTag.begin();
                  it != arrayTag.end();
-                 it++)
-            {
+                 it++) {
                 doc.RemoveTag(*it);
             }
         }
-
     } else {
         //doc form other root,copy the file
         CWizDatabase& sourceDb = CWizDatabaseManager::instance()->db(data.strKbGUID);
@@ -1025,6 +1016,7 @@ void CWizCategoryViewGroupRootItem::reload(CWizDatabase& db)
     m_strName = db.name();
     setText(0, db.name());
 }
+
 bool CWizCategoryViewGroupRootItem::isAdmin(CWizDatabase& db)
 {
     if (isBizGroup())
@@ -1118,14 +1110,12 @@ void CWizCategoryViewGroupItem::getDocuments(CWizDatabase& db, CWizDocumentDataA
 
 bool CWizCategoryViewGroupItem::accept(CWizDatabase& db, const WIZDOCUMENTDATA& data)
 {
-    if (db.IsInDeletedItems(data.strLocation)) {
+    if (db.IsInDeletedItems(data.strLocation))
         return false;
-    }
 
     QString strTagGUIDs = db.GetDocumentTagGUIDsString(data.strGUID);
-    if (strTagGUIDs.indexOf(m_tag.strGUID) != -1 && data.strKbGUID == kbGUID()) {
+    if (strTagGUIDs.indexOf(m_tag.strGUID) != -1 && data.strKbGUID == kbGUID())
         return true;
-    }
 
     return false;
 }

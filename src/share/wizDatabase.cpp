@@ -725,15 +725,15 @@ bool CWizDatabase::CopyDocumentAttachment(const WIZDOCUMENTDATA& sourceDoc, CWiz
     for (it = arrayAttachment.begin(); it != arrayAttachment.end(); it++) {
         WIZDOCUMENTATTACHMENTDATAEX attachData(*it);
         if (attachData.strDocumentGUID == sourceDoc.strGUID) {
-            if(!IsAttachmentDownloaded(attachData.strDocumentGUID) && !PathFileExists(GetAttachmentFileName(attachData.strGUID))) {
-                downloaderHost->download(attachData);
-
+            if (!IsAttachmentDownloaded(attachData.strDocumentGUID) && !PathFileExists(GetAttachmentFileName(attachData.strGUID))) {
                 CWizProgressDialog dlg;
-                dlg.setActionString(QObject::tr("download attachment ")+attachData.strName);
-                dlg.setNotifyString(QObject::tr("downloading,please wait."));
-                dlg.setProgress(100,0);
-                connect(downloaderHost, SIGNAL(downloadProgress(int,int)), &dlg, SLOT(setProgress(int,int)));
-                connect(downloaderHost, SIGNAL(downloadDone(WIZOBJECTDATA,bool)), &dlg, SLOT(accept()));
+                dlg.setActionString(QObject::tr("Download Note %1 ").arg(sourceDoc.strTitle));
+                dlg.setNotifyString(QObject::tr("Downloading, please wait..."));
+                dlg.setProgress(100, 0);
+                connect(downloaderHost, SIGNAL(downloadProgress(int, int)), &dlg, SLOT(setProgress(int, int)));
+                connect(downloaderHost, SIGNAL(downloadDone(WIZOBJECTDATA, bool)), &dlg, SLOT(accept()));
+
+                downloaderHost->download(attachData);
                 if (dlg.exec() != QDialog::Accepted)
                     continue;
             }
@@ -743,9 +743,8 @@ bool CWizDatabase::CopyDocumentAttachment(const WIZDOCUMENTDATA& sourceDoc, CWiz
             CString targetAttacPath = targetDB.GetAttachmentsDataPath();
             CString strTempFileName = targetAttacPath + attachData.strName;
             ::WizGetNextFileName(strTempFileName);
-            if (!::WizCopyFile(GetAttachmentFileName(attachData.strGUID), strTempFileName, FALSE)) {
+            if (!::WizCopyFile(GetAttachmentFileName(attachData.strGUID), strTempFileName, FALSE))
                 continue;
-            }
 
             WIZDOCUMENTATTACHMENTDATAEX newAttach = attachData;
             newAttach.strKbGUID = targetDoc.strKbGUID;
@@ -2888,14 +2887,13 @@ bool CWizDatabase::tryAccessDocument(const WIZDOCUMENTDATA &doc)
 {
     if (doc.nProtected) {
         if (userCipher().isEmpty()) {
-            if(!loadUserCert()) {
+            if (!loadUserCert())
                 return false;
-            }
 
             QString strPassWord;
             QInputDialog passwordDlg;
-            passwordDlg.setWindowTitle(tr("Doucment  %1  PassWord").arg(doc.strTitle));
-            passwordDlg.setLabelText(tr("PassWord :"));
+            passwordDlg.setWindowTitle(tr("Doucment  %1  Password").arg(doc.strTitle));
+            passwordDlg.setLabelText(tr("Password :"));
             passwordDlg.setTextEchoMode(QLineEdit::Password);
             passwordDlg.setFixedSize(350, passwordDlg.height());
 

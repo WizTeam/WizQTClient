@@ -180,7 +180,7 @@ public:
     virtual bool CopyDocumentData(const WIZDOCUMENTDATA& sourceDoc, CWizDatabase& targetDB,
                                   WIZDOCUMENTDATA& targetDoc);
     virtual bool CopyDocumentAttachment(const WIZDOCUMENTDATA& sourceDoc, CWizDatabase& targetDB,
-                                        WIZDOCUMENTDATA& targetDoc, CWizObjectDataDownloaderHost *downloaderHost);
+                                        WIZDOCUMENTDATA& targetDoc, CWizObjectDataDownloaderHost* downloaderHost);
 
 
     // info and groups
