@@ -1920,8 +1920,6 @@ bool WizSyncDatabase(const WIZUSERINFO& info, IWizKMSyncEvents* pEvents,
         //
         WIZGROUPDATA group = *itGroup;
         //
-        //pEvents->OnSyncProgress(0);
-        //pEvents->OnStatus(WizFormatString1(_TR("-------Sync group: %1--------------"), group.strGroupName));
         //
         IWizSyncableDatabase* pGroupDatabase = pDatabase->GetGroupDatabase(group);
         if (!pGroupDatabase)

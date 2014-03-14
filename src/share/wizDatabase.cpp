@@ -679,44 +679,15 @@ bool CWizDatabase::CopyDocumentTo(const QString &strGUID, CWizDatabase &targetDB
     if (!CopyDocumentAttachment(sourceDoc, targetDB, newDoc, downloaderHost))
         return false;
 
+    newDoc.strTitle = sourceDoc.strTitle;
     newDoc.tCreated = sourceDoc.tCreated;
     newDoc.tAccessed = sourceDoc.tAccessed;
     newDoc.tDataModified = sourceDoc.tDataModified;
     newDoc.tModified = sourceDoc.tModified;
     newDoc.tInfoModified = sourceDoc.tInfoModified;
     newDoc.tParamModified = sourceDoc.tParamModified;
-    newDoc.nVersion = (newDoc.nVersion >= 0) ? newDoc.nVersion : 0;
-    targetDB.UpdateDocument(newDoc);
-    targetDB.UpdateDocumentAttachmentCount(newDoc.strGUID, false);
-
-    return true;
-}
-
-bool CWizDatabase::CopyDocumentTo(const QString &strGUID, CWizDatabase &targetDB,
-                                    const QString& targetGUID, CWizObjectDataDownloaderHost* downloaderHost)
-{
-    if (!downloaderHost)
-        return false;
-
-    WIZDOCUMENTDATA sourceDoc;
-    if (!DocumentFromGUID(strGUID, sourceDoc))
-        return false;
-
-    WIZDOCUMENTDATA targetDoc;
-    if (!targetDB.DocumentFromGUID(targetGUID, targetDoc))
-        return false;
-
-    if (!makeSureDocumentExits(sourceDoc, downloaderHost))
-        return false;
-
-    if(!tryAccessDocument(sourceDoc))
-        return false;
-
-    if (!CopyDocumentData(sourceDoc, targetDB, targetDoc))
-        return false;
-
-    if (!CopyDocumentAttachment(sourceDoc, targetDB, targetDoc, downloaderHost))
-        return false;
+    newDoc.nAttachmentCount = targetDB.GetDocumentAttachmentCount(newDoc.strGUID);
+    targetDB.ModifyDocumentInfoEx(newDoc);
 
     return true;
 }
@@ -724,10 +695,6 @@ bool CWizDatabase::CopyDocumentTo(const QString &strGUID, CWizDatabase &targetDB
 bool CWizDatabase::CopyDocumentData(const WIZDOCUMENTDATA& sourceDoc, CWizDatabase& targetDB,
                                     WIZDOCUMENTDATA& targetDoc)
 {
-    targetDoc.strTitle = sourceDoc.strTitle;
-    targetDoc.nVersion = (targetDoc.nVersion >= 0) ? targetDoc.nVersion : 0;
-    targetDB.UpdateDocument(targetDoc);
-
     //copy document data
 //    QString strHtmlFile;
 //    if (!DocumentToTempHtmlFile(sourceDoc, strHtmlFile))
@@ -784,6 +751,7 @@ bool CWizDatabase::CopyDocumentAttachment(const WIZDOCUMENTDATA& sourceDoc, CWiz
             newAttach.strKbGUID = targetDoc.strKbGUID;
             newAttach.strGUID = QString();
             newAttach.strURL = strTempFileName;
+            newAttach.nVersion = -1;
             targetDB.AddAttachment(targetDoc, strTempFileName, newAttach);
         }
     }
@@ -819,8 +787,9 @@ IWizSyncableDatabase* CWizDatabase::GetGroupDatabase(const WIZGROUPDATA& group)
 
     // pass this pointer to database manager for signal redirect and managament
     // CWizDatabaseManager will take ownership
-    //Q_EMIT databaseOpened(db, group.strGroupGUID);
+//    Q_EMIT databaseOpened(db, group.strGroupGUID);
 
+//    CWizDatabase* db = &CWizDatabaseManager::instance()->db(group.strGroupGUID);
     return db;
 }
 
@@ -831,7 +800,7 @@ void CWizDatabase::CloseGroupDatabase(IWizSyncableDatabase* pDatabase)
     Q_ASSERT(db);
 
     db->Close();
-    delete db;
+    db->deleteLater();
 
 }
 
@@ -2953,14 +2922,15 @@ bool CWizDatabase::makeSureDocumentExits(const WIZDOCUMENTDATA& doc, CWizObjectD
 
     QString strFileName = GetDocumentFileName(doc.strGUID);
     if (!IsDocumentDownloaded(doc.strGUID) || !PathFileExists(strFileName)) {
-        downloaderHost->download(doc);
-
         CWizProgressDialog dlg;
         dlg.setActionString(QObject::tr("download document ")+doc.strTitle);
         dlg.setNotifyString(QObject::tr("downloading,please wait."));
         dlg.setProgress(100,0);
         connect(downloaderHost, SIGNAL(downloadProgress(int,int)), &dlg, SLOT(setProgress(int,int)));
         connect(downloaderHost, SIGNAL(downloadDone(WIZOBJECTDATA,bool)), &dlg, SLOT(accept()));
+
+        downloaderHost->download(doc);
+
         dlg.exec();
     }
 
