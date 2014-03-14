@@ -24,8 +24,6 @@ public:
 
     virtual void draw(QPainter* p, const QStyleOptionViewItemV4* vopt) const;
 
-    virtual void drawDragEntered(QPainter* p, const QRect &rect) const;
-
     virtual QVariant data(int column, int role) const;
     virtual int getItemHeight(int hintHeight) const;
     virtual bool operator<(const QTreeWidgetItem &other) const;

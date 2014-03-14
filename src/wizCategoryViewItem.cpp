@@ -261,17 +261,6 @@ void CWizCategoryViewItemBase::draw(QPainter* p, const QStyleOptionViewItemV4* v
 #endif
 }
 
-void CWizCategoryViewItemBase::drawDragEntered(QPainter *p, const QRect& rect) const
-{
-    p->save();
-
-    p->setPen(Qt::blue);
-    p->setBrush(Qt::NoBrush);
-    p->drawRect(rect);
-
-    p->restore();
-}
-
 /* ------------------------------ CWizCategoryViewSectionItem ------------------------------ */
 
 CWizCategoryViewSectionItem::CWizCategoryViewSectionItem(CWizExplorerApp& app, const QString& strName, int sortOrder)
