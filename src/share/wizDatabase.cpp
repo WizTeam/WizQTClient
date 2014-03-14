@@ -777,30 +777,30 @@ IWizSyncableDatabase* CWizDatabase::GetGroupDatabase(const WIZGROUPDATA& group)
 {
     Q_ASSERT(!group.strGroupGUID.isEmpty());
 
-    CWizDatabaseManager::instance()->db(group.strGroupGUID);
+//    CWizDatabaseManager::instance()->db(group.strGroupGUID);
 
-    CWizDatabase* db = new CWizDatabase();
-    if (!db->Open(m_strUserId, group.strGroupGUID)) {
-        delete db;
-        return NULL;
-    }
+//    CWizDatabase* db = new CWizDatabase();
+//    if (!db->Open(m_strUserId, group.strGroupGUID)) {
+//        delete db;
+//        return NULL;
+//    }
 
     // pass this pointer to database manager for signal redirect and managament
     // CWizDatabaseManager will take ownership
 //    Q_EMIT databaseOpened(db, group.strGroupGUID);
 
-//    CWizDatabase* db = &CWizDatabaseManager::instance()->db(group.strGroupGUID);
+    CWizDatabase* db = &CWizDatabaseManager::instance()->db(group.strGroupGUID);
     return db;
 }
 
 void CWizDatabase::CloseGroupDatabase(IWizSyncableDatabase* pDatabase)
 {
-    CWizDatabase* db = dynamic_cast<CWizDatabase*>(pDatabase);
+//    CWizDatabase* db = dynamic_cast<CWizDatabase*>(pDatabase);
 
-    Q_ASSERT(db);
+//    Q_ASSERT(db);
 
-    db->Close();
-    db->deleteLater();
+//    db->Close();
+//    db->deleteLater();
 
 }
 
