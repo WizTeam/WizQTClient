@@ -342,7 +342,7 @@ public:
     //if "forceLoadData == false", try to decrypt encrypted file before load doc data.
     bool LoadDocumentData(const QString& strDocumentGUID, QByteArray& arrayData,
                           bool forceLoadData = true);
-    bool WriteDataToDocument(const QString& strDocumentGUID, QByteArray& arrayData);
+    bool WriteDataToDocument(const QString& strDocumentGUID, const QByteArray &arrayData);
     bool LoadAttachmentData(const CString& strDocumentGUID,
                             QByteArray& arrayData);
     bool LoadCompressedAttachmentData(const QString& strDocumentGUID,
@@ -371,7 +371,7 @@ public:
                                WIZDOCUMENTDATA& data);
 
     bool CreateDocumentAndInit(const WIZDOCUMENTDATA& sourceDoc,  \
-                               const QString& strHtml, \
+                               const QByteArray& baData, \
                                const QString& strLocation, \
                                WIZDOCUMENTDATA& newDoc);
 

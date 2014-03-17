@@ -656,10 +656,13 @@ bool CWizDatabase::CopyDocumentTo(const QString &strGUID, CWizDatabase &targetDB
     if (!tryAccessDocument(sourceDoc))
         return false;
 
+    QByteArray ba;
+    if (!LoadDocumentData(sourceDoc.strGUID, ba, false))
+        return false;
+
     //create new doc
     WIZDOCUMENTDATA newDoc;
-    QString strHtml = "<p><br/></p>";
-    bool ret = targetDB.CreateDocumentAndInit(sourceDoc, strHtml, strTargetLocation, newDoc);
+    bool ret = targetDB.CreateDocumentAndInit(sourceDoc, ba, strTargetLocation, newDoc);
     if (!ret) {
         TOLOG("Failed to new document!");
         return false;
@@ -670,9 +673,6 @@ bool CWizDatabase::CopyDocumentTo(const QString &strGUID, CWizDatabase &targetDB
         doc.AddTag(targetTag);
     }
     strResultGUID = newDoc.strGUID;
-
-    if (!CopyDocumentData(sourceDoc, targetDB, newDoc))
-        return false;
 
     if (!CopyDocumentAttachment(sourceDoc, targetDB, newDoc, downloaderHost))
         return false;
@@ -2501,7 +2501,8 @@ bool CWizDatabase::CreateDocumentAndInit(const CString& strHtml, \
     return bRet;
 }
 
-bool CWizDatabase::CreateDocumentAndInit(const WIZDOCUMENTDATA& sourceDoc,const QString& strHtml , const QString& strLocation, WIZDOCUMENTDATA& newDoc)
+bool CWizDatabase::CreateDocumentAndInit(const WIZDOCUMENTDATA& sourceDoc, const QByteArray& baData,
+                                         const QString& strLocation, WIZDOCUMENTDATA& newDoc)
 {
     bool bRet = false;
     try
@@ -2515,7 +2516,14 @@ bool CWizDatabase::CreateDocumentAndInit(const WIZDOCUMENTDATA& sourceDoc,const 
                               sourceDoc.strStyleGUID, 0, 0, 0, newDoc);
         if (bRet)
         {
-            bRet = UpdateDocumentData(newDoc, strHtml, "", 0);
+            if (WriteDataToDocument(newDoc.strGUID, baData)) {
+                SetObjectDataDownloaded(newDoc.strGUID, "document", true);
+
+                CString strFileName = GetDocumentFileName(newDoc.strGUID);
+                bRet = UpdateDocumentDataMD5(newDoc, strFileName);
+            } else {
+                bRet = false;
+            }
 
             Q_EMIT documentCreated(newDoc);
         }
@@ -2602,16 +2610,12 @@ bool CWizDatabase::LoadDocumentData(const QString& strDocumentGUID, QByteArray& 
     return !arrayData.isEmpty();
 }
 
-bool CWizDatabase::WriteDataToDocument(const QString &strDocumentGUID, QByteArray &arrayData)
+bool CWizDatabase::WriteDataToDocument(const QString& strDocumentGUID, const QByteArray& arrayData)
 {
     CString strFileName = GetDocumentFileName(strDocumentGUID);
-    if (!PathFileExists(strFileName))
-    {
-        return false;
-    }
 
     QFile file(strFileName);
-    if (!file.open(QFile::WriteOnly))
+    if (!file.open(QFile::WriteOnly | QIODevice::Truncate))
         return false;
 
     return (file.write(arrayData) != -1);
