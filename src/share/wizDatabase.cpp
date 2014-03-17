@@ -656,12 +656,9 @@ bool CWizDatabase::CopyDocumentTo(const QString &strGUID, CWizDatabase &targetDB
     if (!tryAccessDocument(sourceDoc))
         return false;
 
-    QString strHtml;
-    if (!LoadDocumentDataToHtml(sourceDoc, strHtml))
-        return false;
-
     //create new doc
     WIZDOCUMENTDATA newDoc;
+    QString strHtml = "<p><br/></p>";
     bool ret = targetDB.CreateDocumentAndInit(sourceDoc, strHtml, strTargetLocation, newDoc);
     if (!ret) {
         TOLOG("Failed to new document!");
@@ -673,6 +670,9 @@ bool CWizDatabase::CopyDocumentTo(const QString &strGUID, CWizDatabase &targetDB
         doc.AddTag(targetTag);
     }
     strResultGUID = newDoc.strGUID;
+
+    if (!CopyDocumentData(sourceDoc, targetDB, newDoc))
+        return false;
 
     if (!CopyDocumentAttachment(sourceDoc, targetDB, newDoc, downloaderHost))
         return false;
@@ -689,25 +689,12 @@ bool CWizDatabase::CopyDocumentTo(const QString &strGUID, CWizDatabase &targetDB
     return true;
 }
 
-bool CWizDatabase::LoadDocumentDataToHtml(const WIZDOCUMENTDATA& sourceDoc, QString &strHtml)
+bool CWizDatabase::CopyDocumentData(const WIZDOCUMENTDATA& sourceDoc, CWizDatabase &targetDB, WIZDOCUMENTDATA &targetDoc)
 {
-    //copy document data
-    QString strHtmlFile;
-    if (!DocumentToTempHtmlFile(sourceDoc, strHtmlFile))
-        return false;
-
-     if (::WizLoadUnicodeTextFromFile(strHtmlFile, strHtml)) {
-         strHtml.remove("<html><head></head><body >");
-         strHtml.remove("</body></html>");
-         return true;
-     }
-
-     return false;
-
-
-//    QByteArray ba;
-//    LoadDocumentData(sourceDoc.strGUID, ba);
-//    strHtml.WriteDataToDocument(targetDoc.strGUID, ba);
+    QByteArray ba;
+    LoadDocumentData(sourceDoc.strGUID, ba, false);
+    targetDB.WriteDataToDocument(targetDoc.strGUID, ba);
+    return true;
 }
 
 bool CWizDatabase::CopyDocumentAttachment(const WIZDOCUMENTDATA& sourceDoc, CWizDatabase& targetDB,
@@ -725,7 +712,7 @@ bool CWizDatabase::CopyDocumentAttachment(const WIZDOCUMENTDATA& sourceDoc, CWiz
         if (attachData.strDocumentGUID == sourceDoc.strGUID) {
             if (!IsAttachmentDownloaded(attachData.strDocumentGUID) && !PathFileExists(GetAttachmentFileName(attachData.strGUID))) {
                 CWizProgressDialog dlg;
-                dlg.setActionString(QObject::tr("Download File %1 ").arg(sourceDoc.strTitle));
+                dlg.setActionString(QObject::tr("Download Attachment %1 ").arg(sourceDoc.strTitle));
                 dlg.setNotifyString(QObject::tr("Downloading, please wait..."));
                 dlg.setProgress(100, 0);
                 connect(downloaderHost, SIGNAL(downloadProgress(int, int)), &dlg, SLOT(setProgress(int, int)));
@@ -2575,12 +2562,35 @@ bool CWizDatabase::DeleteTagWithChildren(const WIZTAGDATA& data, bool bLog)
     return true;
 }
 
-bool CWizDatabase::LoadDocumentData(const QString& strDocumentGUID, QByteArray& arrayData)
+bool CWizDatabase::LoadDocumentData(const QString& strDocumentGUID, QByteArray& arrayData, bool forceLoadData)
 {
     CString strFileName = GetDocumentFileName(strDocumentGUID);
     if (!PathFileExists(strFileName))
     {
         return false;
+    }
+
+    if (!forceLoadData) {
+        WIZDOCUMENTDATA document;
+        if (!DocumentFromGUID(strDocumentGUID, document))
+            return false;
+
+        if (document.nProtected) {
+            if (userCipher().isEmpty())
+                return false;
+
+            if (!m_ziwReader->setFile(strFileName))
+                return false;
+
+            strFileName = Utils::PathResolve::tempPath() + document.strGUID + "-decrypted";
+            QFile::remove(strFileName);
+
+            if (!m_ziwReader->decryptDataToTempFile(strFileName)) {
+                // force clear usercipher
+                m_ziwReader->setUserCipher(QString());
+                return false;
+            }
+        }
     }
 
     QFile file(strFileName);

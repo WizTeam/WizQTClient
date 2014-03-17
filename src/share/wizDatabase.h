@@ -338,7 +338,10 @@ public:
 
     bool GetDocumentsByTag(const WIZTAGDATA& tag, CWizDocumentDataArray& arrayDocument);
 
-    bool LoadDocumentData(const QString& strDocumentGUID, QByteArray& arrayData);
+    //if "forceLoadData == true", just load doc data, don't care it was encrypted or not.
+    //if "forceLoadData == false", try to decrypt encrypted file before load doc data.
+    bool LoadDocumentData(const QString& strDocumentGUID, QByteArray& arrayData,
+                          bool forceLoadData = true);
     bool WriteDataToDocument(const QString& strDocumentGUID, QByteArray& arrayData);
     bool LoadAttachmentData(const CString& strDocumentGUID,
                             QByteArray& arrayData);
@@ -411,7 +414,8 @@ Q_SIGNALS:
 
 private:
     //should make sure sourceDoc already exist before use this.
-    bool LoadDocumentDataToHtml(const WIZDOCUMENTDATA& doc, QString& strHtml);
+    bool CopyDocumentData(const WIZDOCUMENTDATA& doc, CWizDatabase& targetDB,
+                                WIZDOCUMENTDATA& targetDoc);
     bool CopyDocumentAttachment(const WIZDOCUMENTDATA& sourceDoc, CWizDatabase& targetDB,
                                         WIZDOCUMENTDATA& targetDoc, CWizObjectDataDownloaderHost* downloaderHost);
 };
