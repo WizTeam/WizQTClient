@@ -1237,13 +1237,15 @@ void MainWindow::on_category_itemSelectionChanged()
 
 void MainWindow::on_documents_itemSelectionChanged()
 {
-    // hide other form
-    m_cipherForm->hide();
-
     CWizDocumentDataArray arrayDocument;
     m_documents->getSelectedDocuments(arrayDocument);
 
     if (arrayDocument.size() == 1) {
+        // hide other form
+        if (0 == arrayDocument[0].nProtected) {
+            m_cipherForm->hide();
+        }
+
         if (!m_bUpdatingSelection) {
             viewDocument(arrayDocument[0], true);
         }
