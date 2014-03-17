@@ -689,7 +689,7 @@ bool CWizDatabase::CopyDocumentTo(const QString &strGUID, CWizDatabase &targetDB
     return true;
 }
 
-bool CWizDatabase::CopyDocumentData(const WIZDOCUMENTDATA& sourceDoc, CWizDatabase &targetDB, WIZDOCUMENTDATA &targetDoc)
+bool CWizDatabase::CopyDocumentData(const WIZDOCUMENTDATA& sourceDoc, CWizDatabase& targetDB, WIZDOCUMENTDATA& targetDoc)
 {
     QByteArray ba;
     LoadDocumentData(sourceDoc.strGUID, ba, false);

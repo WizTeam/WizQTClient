@@ -414,7 +414,7 @@ Q_SIGNALS:
 
 private:
     //should make sure sourceDoc already exist before use this.
-    bool CopyDocumentData(const WIZDOCUMENTDATA& doc, CWizDatabase& targetDB,
+    bool CopyDocumentData(const WIZDOCUMENTDATA& sourceDoc, CWizDatabase& targetDB,
                                 WIZDOCUMENTDATA& targetDoc);
     bool CopyDocumentAttachment(const WIZDOCUMENTDATA& sourceDoc, CWizDatabase& targetDB,
                                         WIZDOCUMENTDATA& targetDoc, CWizObjectDataDownloaderHost* downloaderHost);
