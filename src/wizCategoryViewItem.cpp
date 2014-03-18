@@ -543,9 +543,6 @@ bool CWizCategoryViewFolderItem::accept(CWizDatabase& db, const WIZDOCUMENTDATA&
 bool CWizCategoryViewFolderItem::acceptDrop(const WIZDOCUMENTDATA& data) const
 {
     Q_UNUSED(data);
-    // only accept note from user db
-//    if (data.strKbGUID == kbGUID())
-//        return true;
 
     return true;
 }
@@ -555,25 +552,23 @@ void CWizCategoryViewFolderItem::drop(const WIZDOCUMENTDATA& data, bool forceCop
    if (!acceptDrop(data))
        return;
 
-//   if (m_strName == data.strLocation)   // skip
-//       return;
+   CWizDatabase& myDb = CWizDatabaseManager::instance()->db(kbGUID());
 
-   CWizDatabase& db = CWizDatabaseManager::instance()->db(kbGUID());
-   if (!forceCopy && kbGUID() == data.strKbGUID) {
-        //move doc
-       CWizFolder folder(db, location());
-       CWizDocument doc(db, data);
+   if (!forceCopy && kbGUID() == data.strKbGUID)
+   {
+       CWizFolder folder(myDb, location());
+       CWizDocument doc(myDb, data);
        doc.MoveDocument(&folder);
-   } else {
-       //copy from sourcedata
+   }
+   else
+   {
        CWizDatabase& sourceDb = CWizDatabaseManager::instance()->db(data.strKbGUID);
-       CWizDatabase& targetDb = CWizDatabaseManager::instance()->db(kbGUID());
        Internal::MainWindow* window = qobject_cast<Internal::MainWindow *>(m_app.mainWindow());
        //QString strLocation = (location() == LOCATION_DELETED_ITEMS) ? LOCATION_DEFAULT : location();
        QString strLocation = location();
        WIZTAGDATA tagEmpty;
        QString strNewDocGUID;
-       sourceDb.CopyDocumentTo(data.strGUID, targetDb, strLocation, tagEmpty, strNewDocGUID, window->downloaderHost());
+       sourceDb.CopyDocumentTo(data.strGUID, myDb, strLocation, tagEmpty, strNewDocGUID, window->downloaderHost());
    }
 }
 
@@ -966,37 +961,35 @@ void CWizCategoryViewGroupRootItem::drop(const WIZDOCUMENTDATA &data, bool force
     if (!acceptDrop(data))
         return;
 
-    CWizDatabase& db = CWizDatabaseManager::instance()->db(kbGUID());
+    CWizDatabase& myDb = CWizDatabaseManager::instance()->db(kbGUID());
 
-    // skip
-    CWizTagDataArray arrayTag;
-    if (!db.GetDocumentTags(data.strGUID, arrayTag))
-        return;
-
-    if (!forceCopy && data.strKbGUID == m_strKbGUID) {
-        //doc form same root
-        CWizDocument doc(db, data);
-        if (data.strLocation == LOCATION_DELETED_ITEMS) {
-            CWizFolder folder(db, LOCATION_DEFAULT);
+    if (!forceCopy && data.strKbGUID == m_strKbGUID)
+    {
+        CWizDocument doc(myDb, data);
+        if (data.strLocation == LOCATION_DELETED_ITEMS)
+        {
+            CWizFolder folder(myDb, LOCATION_DEFAULT);
             doc.MoveDocument(&folder);
         }
 
-        if (arrayTag.size() > 0) {
-            for (CWizTagDataArray::const_iterator it = arrayTag.begin();
-                 it != arrayTag.end();
-                 it++) {
+        CWizTagDataArray arrayTag;
+        myDb.GetDocumentTags(data.strGUID, arrayTag);
+        if (arrayTag.size() > 0)
+        {
+            for (CWizTagDataArray::const_iterator it = arrayTag.begin(); it != arrayTag.end(); it++)
+            {
                 doc.RemoveTag(*it);
             }
         }
-    } else {
-        //doc form other root,copy the file
+    }
+    else
+    {
         CWizDatabase& sourceDb = CWizDatabaseManager::instance()->db(data.strKbGUID);
-        CWizDatabase& targetDb = CWizDatabaseManager::instance()->db(kbGUID());
         QString strLocation = LOCATION_DEFAULT;
         Internal::MainWindow* window = qobject_cast<Internal::MainWindow *>(m_app.mainWindow());
         QString strNewDocGUID;
         WIZTAGDATA tagEmpty;
-        sourceDb.CopyDocumentTo(data.strGUID, targetDb, strLocation, tagEmpty, strNewDocGUID, window->downloaderHost());
+        sourceDb.CopyDocumentTo(data.strGUID, myDb, strLocation, tagEmpty, strNewDocGUID, window->downloaderHost());
     }
 }
 
@@ -1126,41 +1119,36 @@ void CWizCategoryViewGroupItem::drop(const WIZDOCUMENTDATA& data, bool forceCopy
     if (!acceptDrop(data))
         return;
 
-    CWizDatabase& db = CWizDatabaseManager::instance()->db(kbGUID());
+    CWizDatabase& myDb = CWizDatabaseManager::instance()->db(kbGUID());
 
-    // skip
-    CWizTagDataArray arrayTag;
-    if (!db.GetDocumentTags(data.strGUID, arrayTag)) {
-        return;
-    }
-
-    if(!forceCopy && data.strKbGUID == m_strKbGUID)   {
-        //doc form same root
-        CWizDocument doc(db, data);
-        if (data.strLocation == LOCATION_DELETED_ITEMS) {
-            CWizFolder folder(db, LOCATION_DEFAULT);
+    if (!forceCopy && data.strKbGUID == m_strKbGUID)
+    {
+        CWizDocument doc(myDb, data);
+        if (data.strLocation == LOCATION_DELETED_ITEMS)
+        {
+            CWizFolder folder(myDb, LOCATION_DEFAULT);
             doc.MoveDocument(&folder);
         }
 
+        CWizTagDataArray arrayTag;
+        myDb.GetDocumentTags(data.strGUID, arrayTag);
         if (arrayTag.size() > 0)
         {
-            for (CWizTagDataArray::const_iterator it = arrayTag.begin();
-                 it != arrayTag.end();
-                 it++)
+            for (CWizTagDataArray::const_iterator it = arrayTag.begin(); it != arrayTag.end(); it++)
             {
                 doc.RemoveTag(*it);
             }
         }
         doc.AddTag(tag());
 
-    } else {
-        //doc form other root,copy the file
+    }
+    else
+    {
         CWizDatabase& sourceDb = CWizDatabaseManager::instance()->db(data.strKbGUID);
-        CWizDatabase& targetDb = CWizDatabaseManager::instance()->db(kbGUID());
         QString strLocation = LOCATION_DEFAULT;
         Internal::MainWindow* window = qobject_cast<Internal::MainWindow *>(m_app.mainWindow());
         QString strNewDocGUID;
-        sourceDb.CopyDocumentTo(data.strGUID, targetDb, strLocation, m_tag, strNewDocGUID, window->downloaderHost());
+        sourceDb.CopyDocumentTo(data.strGUID, myDb, strLocation, m_tag, strNewDocGUID, window->downloaderHost());
     }
 }
 

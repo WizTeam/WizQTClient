@@ -175,9 +175,9 @@ public:
                                 QString& strResultGUID, CWizObjectDataDownloaderHost *downloaderHost);
     //if file doesn't exist, download it.
     bool makeSureDocumentExist(const WIZDOCUMENTDATA& doc, CWizObjectDataDownloaderHost* downloaderHost);
+    bool makeSureAttachmentExist(const WIZDOCUMENTATTACHMENTDATAEX& attachData,
+                                 CWizObjectDataDownloaderHost* downloaderHost);
     bool tryAccessDocument(const WIZDOCUMENTDATA& doc);
-
-
 
     // info and groups
     virtual void SetUserInfo(const WIZUSERINFO& info);
@@ -373,6 +373,7 @@ public:
     bool CreateDocumentAndInit(const WIZDOCUMENTDATA& sourceDoc,  \
                                const QByteArray& baData, \
                                const QString& strLocation, \
+                               const WIZTAGDATA& tag, \
                                WIZDOCUMENTDATA& newDoc);
 
     bool AddAttachment(const WIZDOCUMENTDATA& document, \
@@ -414,10 +415,14 @@ Q_SIGNALS:
 
 private:
     //should make sure sourceDoc already exist before use this.
-    bool CopyDocumentData(const WIZDOCUMENTDATA& sourceDoc, CWizDatabase& targetDB,
+    bool CopyDocumentData(const WIZDOCUMENTDATA& sourceDoc, CWizDatabase& targetDB, \
                                 WIZDOCUMENTDATA& targetDoc);
-    bool CopyDocumentAttachment(const WIZDOCUMENTDATA& sourceDoc, CWizDatabase& targetDB,
+    bool CopyDocumentAttachment(const WIZDOCUMENTDATA& sourceDoc, CWizDatabase& targetDB, \
                                         WIZDOCUMENTDATA& targetDoc, CWizObjectDataDownloaderHost* downloaderHost);
+    bool CopyDocumentAttachment(const WIZDOCUMENTATTACHMENTDATAEX& sourceData, \
+                                const CWizDatabase& targetDB, WIZDOCUMENTATTACHMENTDATAEX& targetData, \
+                                QString& strFileName);
+
 };
 
 

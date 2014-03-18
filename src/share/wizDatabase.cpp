@@ -643,9 +643,6 @@ bool CWizDatabase::OnUploadObject(const QString& strGUID,
 bool CWizDatabase::CopyDocumentTo(const QString &strGUID, CWizDatabase &targetDB, const QString &strTargetLocation,
                                   const WIZTAGDATA &targetTag, QString &strResultGUID, CWizObjectDataDownloaderHost *downloaderHost)
 {
-    if (!downloaderHost)
-        return false;
-
     WIZDOCUMENTDATA sourceDoc;
     if (!DocumentFromGUID(strGUID, sourceDoc))
         return false;
@@ -660,18 +657,13 @@ bool CWizDatabase::CopyDocumentTo(const QString &strGUID, CWizDatabase &targetDB
     if (!LoadDocumentData(sourceDoc.strGUID, ba, false))
         return false;
 
-    //create new doc
     WIZDOCUMENTDATA newDoc;
-    bool ret = targetDB.CreateDocumentAndInit(sourceDoc, ba, strTargetLocation, newDoc);
-    if (!ret) {
+    if (!targetDB.CreateDocumentAndInit(sourceDoc, ba, strTargetLocation, targetTag, newDoc))
+    {
         TOLOG("Failed to new document!");
         return false;
     }
 
-    if (!targetTag.strGUID.IsEmpty()) {
-        CWizDocument doc(targetDB, newDoc);
-        doc.AddTag(targetTag);
-    }
     strResultGUID = newDoc.strGUID;
 
     if (!CopyDocumentAttachment(sourceDoc, targetDB, newDoc, downloaderHost))
@@ -700,46 +692,45 @@ bool CWizDatabase::CopyDocumentData(const WIZDOCUMENTDATA& sourceDoc, CWizDataba
 bool CWizDatabase::CopyDocumentAttachment(const WIZDOCUMENTDATA& sourceDoc, CWizDatabase& targetDB,
                                           WIZDOCUMENTDATA& targetDoc, CWizObjectDataDownloaderHost* downloaderHost)
 {
-    if (!downloaderHost)
-        return false;
-
-    //copy attachment
     CWizDocumentAttachmentDataArray arrayAttachment;
     GetAttachments(arrayAttachment);
-    CWizDocumentAttachmentDataArray::const_iterator it;
-    for (it = arrayAttachment.begin(); it != arrayAttachment.end(); it++) {
+
+    for (CWizDocumentAttachmentDataArray::const_iterator it = arrayAttachment.begin();
+         it != arrayAttachment.end(); it++)
+    {
         WIZDOCUMENTATTACHMENTDATAEX attachData(*it);
-        if (attachData.strDocumentGUID == sourceDoc.strGUID) {
-            if (!IsAttachmentDownloaded(attachData.strDocumentGUID) && !PathFileExists(GetAttachmentFileName(attachData.strGUID))) {
-                CWizProgressDialog dlg;
-                dlg.setActionString(QObject::tr("Download Attachment %1 ").arg(sourceDoc.strTitle));
-                dlg.setNotifyString(QObject::tr("Downloading, please wait..."));
-                dlg.setProgress(100, 0);
-                connect(downloaderHost, SIGNAL(downloadProgress(int, int)), &dlg, SLOT(setProgress(int, int)));
-                connect(downloaderHost, SIGNAL(downloadDone(WIZOBJECTDATA, bool)), &dlg, SLOT(accept()));
-
-                downloaderHost->download(attachData);
-                if (dlg.exec() != QDialog::Accepted)
-                    continue;
-            }
-            if (!PathFileExists(GetAttachmentFileName(attachData.strGUID)))
+        if (attachData.strDocumentGUID == sourceDoc.strGUID)
+        {
+            if (!makeSureAttachmentExist(attachData, downloaderHost))
                 continue;
 
-            CString targetAttacPath = targetDB.GetAttachmentsDataPath();
-            CString strTempFileName = targetAttacPath + attachData.strName;
-            ::WizGetNextFileName(strTempFileName);
-            if (!::WizCopyFile(GetAttachmentFileName(attachData.strGUID), strTempFileName, FALSE))
+            WIZDOCUMENTATTACHMENTDATAEX newAttach;
+            QString strNewAttachFileName;
+            if (!CopyDocumentAttachment(attachData, targetDB, newAttach, strNewAttachFileName))
                 continue;
 
-            WIZDOCUMENTATTACHMENTDATAEX newAttach = attachData;
             newAttach.strKbGUID = targetDoc.strKbGUID;
-            newAttach.strGUID = QString();
-            newAttach.strURL = strTempFileName;
             newAttach.nVersion = -1;
-            targetDB.AddAttachment(targetDoc, strTempFileName, newAttach);
+            targetDB.AddAttachment(targetDoc, strNewAttachFileName, newAttach);
         }
     }
 
+    return true;
+}
+
+bool CWizDatabase::CopyDocumentAttachment(const WIZDOCUMENTATTACHMENTDATAEX& sourceData,
+                                          const CWizDatabase& targetDB, WIZDOCUMENTATTACHMENTDATAEX& targetData, QString& strFileName)
+{
+    CString targetAttachPath = targetDB.GetAttachmentsDataPath();
+    CString strTempFileName = targetAttachPath + sourceData.strName;
+    ::WizGetNextFileName(strTempFileName);
+    if (!::WizCopyFile(GetAttachmentFileName(sourceData.strGUID), strTempFileName, FALSE))
+        return false;
+
+    targetData = sourceData;
+    targetData.strGUID = QString();
+    targetData.strURL = strTempFileName;
+    strFileName = strTempFileName;
     return true;
 }
 
@@ -2502,7 +2493,7 @@ bool CWizDatabase::CreateDocumentAndInit(const CString& strHtml, \
 }
 
 bool CWizDatabase::CreateDocumentAndInit(const WIZDOCUMENTDATA& sourceDoc, const QByteArray& baData,
-                                         const QString& strLocation, WIZDOCUMENTDATA& newDoc)
+                                         const QString& strLocation, const WIZTAGDATA& tag, WIZDOCUMENTDATA& newDoc)
 {
     bool bRet = false;
     try
@@ -2534,6 +2525,11 @@ bool CWizDatabase::CreateDocumentAndInit(const WIZDOCUMENTDATA& sourceDoc, const
     }
 
     EndUpdate();
+
+    if (!tag.strGUID.IsEmpty()) {
+        CWizDocument doc(*this, newDoc);
+        doc.AddTag(tag);
+    }
 
     return bRet;
 }
@@ -2956,11 +2952,15 @@ bool CWizDatabase::tryAccessDocument(const WIZDOCUMENTDATA &doc)
 
 bool CWizDatabase::makeSureDocumentExist(const WIZDOCUMENTDATA& doc, CWizObjectDataDownloaderHost* downloaderHost)
 {
-    if(!downloaderHost || doc.strGUID.isEmpty())
+    if (doc.strGUID.isEmpty())
         return false;
 
     QString strFileName = GetDocumentFileName(doc.strGUID);
-    if (!IsDocumentDownloaded(doc.strGUID) || !PathFileExists(strFileName)) {
+    if (!IsDocumentDownloaded(doc.strGUID) || !PathFileExists(strFileName))
+    {
+        if (!downloaderHost)
+            return false;
+
         CWizProgressDialog dlg;
         dlg.setActionString(QObject::tr("download document ")+doc.strTitle);
         dlg.setNotifyString(QObject::tr("downloading,please wait."));
@@ -2974,6 +2974,33 @@ bool CWizDatabase::makeSureDocumentExist(const WIZDOCUMENTDATA& doc, CWizObjectD
     }
 
     return PathFileExists(strFileName);
+}
+
+bool CWizDatabase::makeSureAttachmentExist(const WIZDOCUMENTATTACHMENTDATAEX &attachData,
+                                           CWizObjectDataDownloaderHost *downloaderHost)
+{
+    if (attachData.strGUID.isEmpty())
+        return false;
+
+    QString strAttachmentFileName = GetAttachmentFileName(attachData.strGUID);
+    if (!IsAttachmentDownloaded(attachData.strDocumentGUID) && !PathFileExists(strAttachmentFileName))
+    {
+        if (!downloaderHost)
+            return false;
+
+        CWizProgressDialog dlg;
+        dlg.setActionString(QObject::tr("Download Attachment %1 ").arg(attachData.strName));
+        dlg.setNotifyString(QObject::tr("Downloading, please wait..."));
+        dlg.setProgress(100, 0);
+        connect(downloaderHost, SIGNAL(downloadProgress(int, int)), &dlg, SLOT(setProgress(int, int)));
+        connect(downloaderHost, SIGNAL(downloadDone(WIZOBJECTDATA, bool)), &dlg, SLOT(accept()));
+
+        downloaderHost->download(attachData);
+
+        dlg.exec() ;
+    }
+
+    return PathFileExists(strAttachmentFileName);
 }
 
 QObject* CWizDatabase::GetDeletedItemsFolder()
