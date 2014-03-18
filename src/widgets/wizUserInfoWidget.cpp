@@ -97,6 +97,10 @@ void CWizUserInfoWidget::on_userAvatar_loaded(const QString& strGUID)
     if (strGUID != m_db.GetUserId())
         return;
 
+    QSize szAvatar = m_circleAvatar.size();
+    m_circleAvatar = QPixmap();
+    getCircleAvatar(szAvatar.width(), szAvatar.height());
+
     update();
 }
 
@@ -142,7 +146,6 @@ void CWizUserInfoWidget::on_action_changeAvatar_uploaded(bool ok)
 
     if (ok) {
         AvatarHost::load(m_db.GetUserId(), true);
-        //downloadAvatar();
     } else {
         QMessageBox::warning(this, tr("Upload Avatar"), uploader->lastErrorMessage());
     }
