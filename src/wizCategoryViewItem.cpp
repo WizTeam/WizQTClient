@@ -968,7 +968,7 @@ void CWizCategoryViewGroupRootItem::drop(const WIZDOCUMENTDATA &data, bool force
         CWizDocument doc(myDb, data);
         if (data.strLocation == LOCATION_DELETED_ITEMS)
         {
-            CWizFolder folder(myDb, LOCATION_DEFAULT);
+            CWizFolder folder(myDb, myDb.GetDefaultNoteLocation());
             doc.MoveDocument(&folder);
         }
 
@@ -985,7 +985,7 @@ void CWizCategoryViewGroupRootItem::drop(const WIZDOCUMENTDATA &data, bool force
     else
     {
         CWizDatabase& sourceDb = CWizDatabaseManager::instance()->db(data.strKbGUID);
-        QString strLocation = LOCATION_DEFAULT;
+        QString strLocation = myDb.GetDefaultNoteLocation();
         Internal::MainWindow* window = qobject_cast<Internal::MainWindow *>(m_app.mainWindow());
         QString strNewDocGUID;
         WIZTAGDATA tagEmpty;
@@ -1126,7 +1126,7 @@ void CWizCategoryViewGroupItem::drop(const WIZDOCUMENTDATA& data, bool forceCopy
         CWizDocument doc(myDb, data);
         if (data.strLocation == LOCATION_DELETED_ITEMS)
         {
-            CWizFolder folder(myDb, LOCATION_DEFAULT);
+            CWizFolder folder(myDb, myDb.GetDefaultNoteLocation());
             doc.MoveDocument(&folder);
         }
 
@@ -1145,7 +1145,7 @@ void CWizCategoryViewGroupItem::drop(const WIZDOCUMENTDATA& data, bool forceCopy
     else
     {
         CWizDatabase& sourceDb = CWizDatabaseManager::instance()->db(data.strKbGUID);
-        QString strLocation = LOCATION_DEFAULT;
+        QString strLocation = myDb.GetDefaultNoteLocation();
         Internal::MainWindow* window = qobject_cast<Internal::MainWindow *>(m_app.mainWindow());
         QString strNewDocGUID;
         sourceDb.CopyDocumentTo(data.strGUID, myDb, strLocation, m_tag, strNewDocGUID, window->downloaderHost());

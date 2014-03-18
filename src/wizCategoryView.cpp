@@ -788,7 +788,7 @@ bool CWizCategoryView::createDocument(WIZDOCUMENTDATA& data)
     bool bFallback = true;
 
     QString strKbGUID = m_dbMgr.db().kbGUID();
-    QString strLocation = "/My Notes/";
+    QString strLocation = m_dbMgr.db().GetDefaultNoteLocation();
     WIZTAGDATA tag;
 
     // trash first, because it's inherited
@@ -857,6 +857,7 @@ bool CWizCategoryView::createDocument(WIZDOCUMENTDATA& data)
         return false;
     }
 
+    strLocation = m_dbMgr.db(strKbGUID).GetDefaultNoteLocation();
     bool ret = m_dbMgr.db(strKbGUID).CreateDocumentAndInit("<p><br/></p>", "", 0, tr("New note"), "newnote", strLocation, "", data);
     if (!ret) {
         TOLOG("Failed to new document!");
@@ -2034,7 +2035,7 @@ void CWizCategoryView::initFolders()
     }
 
     if (arrayAllLocation.empty()) {
-        arrayAllLocation.push_back(LOCATION_DEFAULT);
+        arrayAllLocation.push_back(m_dbMgr.db().GetDefaultNoteLocation());
     }
 
     doLocationSanityCheck(arrayAllLocation);

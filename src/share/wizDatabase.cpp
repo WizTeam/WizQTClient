@@ -1848,6 +1848,14 @@ QString CWizDatabase::GetAvatarPath() const
     return strPath;
 }
 
+QString CWizDatabase::GetDefaultNoteLocation() const
+{
+    if (m_strUserId.isEmpty())
+        return LOCATION_DEFAULT;
+    else
+        return "/"+m_strUserId+"/";
+}
+
 bool CWizDatabase::GetUserName(QString& strUserName)
 {
     strUserName = GetMetaDef(g_strAccountSection, "UserName");

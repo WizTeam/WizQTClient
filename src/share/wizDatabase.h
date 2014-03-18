@@ -275,6 +275,7 @@ public:
     QString GetDocumentFileName(const QString& strGUID) const;
     QString GetAttachmentFileName(const QString& strGUID) const;
     QString GetAvatarPath() const;
+    QString GetDefaultNoteLocation() const;
 
     bool GetUserName(QString& strUserName);
     bool SetUserName(const QString& strUserName);
