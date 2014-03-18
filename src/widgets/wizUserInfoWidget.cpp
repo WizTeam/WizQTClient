@@ -97,11 +97,7 @@ void CWizUserInfoWidget::on_userAvatar_loaded(const QString& strGUID)
     if (strGUID != m_db.GetUserId())
         return;
 
-    QSize szAvatar = m_circleAvatar.size();
-    m_circleAvatar = QPixmap();
-    getCircleAvatar(szAvatar.width(), szAvatar.height());
-
-    update();
+    updateUI();
 }
 
 void CWizUserInfoWidget::on_action_accountInfo_triggered()
@@ -167,7 +163,6 @@ void CWizUserInfoWidget::updateUI()
     m_circleAvatar = QPixmap();
     WIZUSERINFOWIDGETBASE::updateUI();
 }
-
 
 
 QPixmap corpAvatar(const QPixmap& org)

@@ -37,6 +37,7 @@ protected:
     virtual QSize sizeHint() const;
     virtual QString userId();
     virtual void updateUI();
+
 protected Q_SLOTS:
     void resetUserInfo();
 
