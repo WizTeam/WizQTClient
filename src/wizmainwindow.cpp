@@ -175,6 +175,15 @@ void MainWindow::on_application_aboutToQuit()
     cleanOnQuit();
 }
 
+class SleepThread : public QThread
+{
+ public :
+     static void sleep(long iSleepTime)
+     {
+          QThread::sleep(iSleepTime);
+     }
+};
+
 void MainWindow::cleanOnQuit()
 {
     m_category->saveState();
@@ -193,7 +202,7 @@ void MainWindow::cleanOnQuit()
         {
             if (m_sync->isFinished())
                 break;
-            sleep(1);
+            SleepThread::sleep(1);
             QApplication::processEvents();
         }
     }
