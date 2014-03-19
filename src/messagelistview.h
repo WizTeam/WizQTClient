@@ -48,6 +48,7 @@ public:
 protected:
     virtual void resizeEvent(QResizeEvent* event);
     virtual void contextMenuEvent(QContextMenuEvent* event);
+    virtual void wheelEvent(QWheelEvent* event);
 
 private:
     QMenu* m_menu;
