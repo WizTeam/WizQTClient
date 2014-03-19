@@ -1850,7 +1850,7 @@ QString CWizDatabase::GetAvatarPath() const
 
 QString CWizDatabase::GetDefaultNoteLocation() const
 {
-    if (m_strUserId.isEmpty())
+    if (m_bIsPersonal)
         return LOCATION_DEFAULT;
     else
         return "/"+m_strUserId+"/";

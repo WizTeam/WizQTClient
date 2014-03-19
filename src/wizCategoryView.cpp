@@ -832,17 +832,20 @@ bool CWizCategoryView::createDocument(WIZDOCUMENTDATA& data)
     else if (CWizCategoryViewGroupRootItem* pItem = currentCategoryItem<CWizCategoryViewGroupRootItem>())
     {
         strKbGUID = pItem->kbGUID();
+        strLocation = m_dbMgr.db(strKbGUID).GetDefaultNoteLocation();
         bFallback = false;
     }
     else if (CWizCategoryViewGroupNoTagItem* pItem = currentCategoryItem<CWizCategoryViewGroupNoTagItem>())
     {
         strKbGUID = pItem->kbGUID();
+        strLocation = m_dbMgr.db(strKbGUID).GetDefaultNoteLocation();
         bFallback = false;
     }
     else if (CWizCategoryViewGroupItem* pItem = currentCategoryItem<CWizCategoryViewGroupItem>())
     {
         strKbGUID = pItem->kbGUID();
         tag = pItem->tag();
+        strLocation = m_dbMgr.db(strKbGUID).GetDefaultNoteLocation();
         bFallback = false;
     }
 
@@ -857,9 +860,9 @@ bool CWizCategoryView::createDocument(WIZDOCUMENTDATA& data)
         return false;
     }
 
-    strLocation = m_dbMgr.db(strKbGUID).GetDefaultNoteLocation();
-    bool ret = m_dbMgr.db(strKbGUID).CreateDocumentAndInit("<p><br/></p>", "", 0, tr("New note"), "newnote", strLocation, "", data);
-    if (!ret) {
+
+    if (!m_dbMgr.db(strKbGUID).CreateDocumentAndInit("<p><br/></p>", "", 0, tr("New note"), "newnote", strLocation, "", data))
+    {
         TOLOG("Failed to new document!");
         return false;
     }
