@@ -406,6 +406,19 @@ void MessageListView::on_message_deleted(const WIZMESSAGEDATA& msg)
     updateTreeItem();
 }
 
+void MessageListView::wheelEvent(QWheelEvent* event)
+{
+    int delta = event->delta();
+    delta = delta / 3;
+    QWheelEvent* newEvent = new QWheelEvent(event->pos(),
+                                          event->globalPos(),
+                                          delta,
+                                          event->buttons(),
+                                          event->modifiers(),
+                                          event->orientation());
+    QListWidget::wheelEvent(newEvent);
+}
+
 
 } // namespace Internal
 } // namespace WizService
