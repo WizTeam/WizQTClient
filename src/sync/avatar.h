@@ -31,6 +31,11 @@ Q_SIGNALS:
     void loaded(const QString& strUserGUID);
 
     friend class Internal::AvatarHostPrivate;
+
+public:
+
+    static QPixmap corpImage(const QPixmap& org);
+    static QPixmap circleImage(const QPixmap& org, int width, int height);
 };
 
 } // namespace WizService
