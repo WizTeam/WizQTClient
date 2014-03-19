@@ -1179,6 +1179,8 @@ BOOL CWizKMDatabaseServer::data_download(const QString& strObjectGUID, const QSt
             break;
         //
         startPos = nDownloadedSize;
+
+        emit downloadProgress(nAllSize, nDownloadedSize);
     }
     //
     __int64 nStreamSize = stream.size();

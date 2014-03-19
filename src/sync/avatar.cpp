@@ -12,6 +12,7 @@
 #include <QPixmap>
 #include <QPixmapCache>
 #include <QDateTime>
+#include <QPainter>
 
 #include "apientry.h"
 #include "../utils/pathresolve.h"
@@ -179,8 +180,12 @@ void AvatarHostPrivate::loadCacheFromFile(const QString& key, const QString& str
         return;
     }
 
-    pixmap = pixmap.scaled(Utils::StyleHelper::avatarSize(),
-                           Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+    //
+    QSize sz = Utils::StyleHelper::avatarSize();
+    pixmap = AvatarHost::circleImage(pixmap, sz.width(), sz.height());
+    //
+    if (pixmap.isNull())
+        return;
 
     Q_ASSERT(!pixmap.isNull());
 
@@ -349,4 +354,51 @@ QString AvatarHost::keyFromGuid(const QString& strUserGUID)
 QString AvatarHost::defaultKey()
 {
     return d->defaultKey();
+}
+
+QPixmap AvatarHost::corpImage(const QPixmap& org)
+{
+    if (org.isNull())
+        return org;
+    //
+    QSize sz = org.size();
+    //
+    int width = sz.width();
+    int height = sz.height();
+    if (width == height)
+        return org;
+    //
+    if (width > height)
+    {
+        int xOffset = (width - height) / 2;
+        return org.copy(xOffset, 0, height, height);
+    }
+    else
+    {
+        int yOffset = (height - width) / 2;
+        return org.copy(0, yOffset, width, width);
+    }
+}
+
+QPixmap AvatarHost::circleImage(const QPixmap& src, int width, int height)
+{
+    QPixmap org = corpImage(src);
+    //
+    int largeWidth = width * 8;
+    int largeHeight = height * 8;
+    //
+    QPixmap orgResized = org.scaled(QSize(largeWidth, largeHeight), Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+    //
+    QPixmap largePixmap(QSize(largeWidth, largeHeight));
+    largePixmap.fill(QColor(Qt::transparent));
+    //
+    QPainter painter(&largePixmap);
+    //
+    painter.setRenderHint(QPainter::HighQualityAntialiasing, true);
+    QPainterPath path;
+    path.addEllipse(0, 0, largeWidth, largeHeight);
+    painter.setClipPath(path);
+    painter.drawPixmap(0, 0, orgResized);
+    //
+    return largePixmap.scaled(QSize(width, height), Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
 }

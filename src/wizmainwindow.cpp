@@ -25,7 +25,6 @@
 #include "wizDocumentWebView.h"
 #include "wizactions.h"
 #include "wizpreferencedialog.h"
-#include "wizstatusbar.h"
 #include "wizupgradenotifydialog.h"
 
 #include "share/wizcommonui.h"
@@ -88,7 +87,6 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     , m_toolBar(new QToolBar("Main", this))
     #endif
     , m_menuBar(new QMenuBar(this))
-    , m_statusBar(new CWizStatusBar(*this, this))
     , m_actions(new CWizActions(*this, this))
     , m_category(new CWizCategoryView(*this, this))
     , m_documents(new CWizDocumentListView(*this, this))
@@ -177,6 +175,15 @@ void MainWindow::on_application_aboutToQuit()
     cleanOnQuit();
 }
 
+class SleepThread : public QThread
+{
+ public :
+     static void sleep(long iSleepTime)
+     {
+          QThread::sleep(iSleepTime);
+     }
+};
+
 void MainWindow::cleanOnQuit()
 {
     m_category->saveState();
@@ -195,7 +202,7 @@ void MainWindow::cleanOnQuit()
         {
             if (m_sync->isFinished())
                 break;
-            sleep(1);
+            SleepThread::sleep(1);
             QApplication::processEvents();
         }
     }
@@ -229,16 +236,17 @@ void MainWindow::on_actionExit_triggered()
 void MainWindow::resizeEvent(QResizeEvent *event)
 {
     Q_UNUSED(event);
-
-    m_statusBar->adjustPosition();
 }
 
 void MainWindow::showEvent(QShowEvent* event)
 {
     Q_UNUSED(event);
 
-    m_statusBar->hide();
     m_cipherForm->hide();
+    //
+#ifdef Q_OS_MAC
+    m_toolBar->showInWindow(this);
+#endif
 }
 
 void MainWindow::on_checkUpgrade_finished(bool bUpgradeAvaliable)
@@ -803,8 +811,6 @@ void MainWindow::on_syncDone_userVerified()
 void MainWindow::on_syncProcessLog(const QString& strMsg)
 {
     Q_UNUSED(strMsg);
-    m_statusBar->showText(tr("Syncing..."));
-    //m_statusBar->showText(strMsg.left(40));
 }
 
 void MainWindow::on_actionNewNote_triggered()
@@ -1194,6 +1200,16 @@ void MainWindow::on_category_itemSelectionChanged()
             m_msgList->show();
             m_noteList->hide();
         }
+        /*
+         * 在点击MessageItem的时候,为了重新刷新当前消息,强制发送了itemSelectionChanged消息
+         * 因此需要在这个地方避免重复刷新两次消息列表
+         */
+        static QTime lastTime(0, 0, 0);
+        QTime last = lastTime;
+        QTime now = QTime::currentTime();
+        lastTime = now;
+        if (last.msecsTo(now) < 300)
+            return;
 
         CWizMessageDataArray arrayMsg;
         pItem->getMessages(m_dbMgr.db(), arrayMsg);
@@ -1237,13 +1253,15 @@ void MainWindow::on_category_itemSelectionChanged()
 
 void MainWindow::on_documents_itemSelectionChanged()
 {
-    // hide other form
-    m_cipherForm->hide();
-
     CWizDocumentDataArray arrayDocument;
     m_documents->getSelectedDocuments(arrayDocument);
 
     if (arrayDocument.size() == 1) {
+        // hide other form
+        if (0 == arrayDocument[0].nProtected) {
+            m_cipherForm->hide();
+        }
+
         if (!m_bUpdatingSelection) {
             viewDocument(arrayDocument[0], true);
         }
@@ -1481,14 +1499,6 @@ QObject* MainWindow::CreateWizObject(const QString& strObjectID)
 
 void MainWindow::SetSavingDocument(bool saving)
 {
-    //m_statusBar->setVisible(saving);
-    if (saving) {
-        //m_statusBar->setVisible(true);
-        m_statusBar->showText(tr("Saving note..."));
-        //qApp->processEvents(QEventLoop::AllEvents);
-    } else {
-        m_statusBar->hide();
-    }
 }
 
 void MainWindow::ProcessClipboardBeforePaste(const QVariantMap& data)

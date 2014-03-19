@@ -29,7 +29,6 @@ class CWizFixedSpacer;
 class CWizSplitter;
 class CWizAnimateAction;
 class CWizOptionsWidget;
-class CWizStatusBar;
 
 class CWizSearchWidget;
 class CWizSearcher;
@@ -107,7 +106,6 @@ private:
 #endif
 
     QMenuBar* m_menuBar;
-    CWizStatusBar* m_statusBar;
 
 #ifndef Q_OS_MAC
     QLabel* m_labelNotice;
@@ -150,7 +148,6 @@ private:
     void initMenuBar();
     void initToolBar();
     void initClient();
-    void initStatusBar();
 
     QWidget* createListView();
 

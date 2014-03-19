@@ -35,6 +35,7 @@ private Q_SLOTS:
 
 Q_SIGNALS:
     void downloadDone(const WIZOBJECTDATA& data, bool bSucceed);
+    void downloadProgress(int totalSize, int loadedSize);
 };
 
 /* ------------------------ CWizObjectDataDownloader ------------------------ */
@@ -51,6 +52,9 @@ public:
 
     WIZOBJECTDATA data() const { return m_data; }
     bool succeed() const { return m_bSucceed; }
+
+signals:
+    void downloadProgress(int totalSize, int loadedSize);
 
 private:
     CWizDatabaseManager& m_dbMgr;
@@ -80,6 +84,7 @@ public Q_SLOTS:
 
 Q_SIGNALS:
     void downloaded(bool succeeded);
+    void downloadProgress(int totalSize, int loadedSize);
 };
 
 

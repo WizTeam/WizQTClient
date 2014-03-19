@@ -145,6 +145,7 @@ struct WIZOBJECTVERSION
 
 class CWizKMDatabaseServer: public CWizKMXmlRpcServerBase
 {
+    Q_OBJECT
 public:
     CWizKMDatabaseServer(const WIZUSERINFOBASE& kbInfo, QObject* parent = 0);
     virtual ~CWizKMDatabaseServer();
@@ -195,6 +196,9 @@ public:
 
 public:
     virtual int GetCountPerPage();
+
+signals:
+    void downloadProgress(int totalSize, int loadedSize);
 
 protected:
     BOOL document_getData2(const QString& strDocumentGUID, UINT nParts, WIZDOCUMENTDATAEX& ret);

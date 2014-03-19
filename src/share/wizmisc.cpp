@@ -1216,6 +1216,20 @@ bool WizLoadUnicodeTextFromFile(const QString& strFileName, QString& strText)
     return true;
 }
 
+bool WizLoadUtf8TextFromFile(const QString& strFileName, QString& strText)
+{
+    QFile file(strFileName);
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
+        return false;
+
+    QTextStream stream(&file);
+    stream.setCodec("UTF-8");
+    strText = stream.readAll();
+    file.close();
+
+    return true;
+}
+
 bool WizSaveUnicodeTextToUtf16File(const CString& strFileName, const CString& strText)
 {
     QFile file(strFileName);
@@ -2120,3 +2134,4 @@ CWaitCursor::~CWaitCursor()
 {
     QApplication::restoreOverrideCursor();
 }
+

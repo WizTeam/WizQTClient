@@ -12,6 +12,7 @@
 class CWizDatabase;
 class CWizFolder;
 class CWizDocument;
+class CWizObjectDataDownloaderHost;
 
 class CWizDocument : public QObject
 {
@@ -167,6 +168,17 @@ public:
     virtual bool OnUploadObject(const QString& strGUID,
                                 const QString& strObjectType);
 
+    //copy Document
+    //create new doc and copy data, set the new doc time as the source doc.
+    virtual bool CopyDocumentTo(const QString& strGUID, CWizDatabase& targetDB,
+                                  const QString& strTargetLocation, const WIZTAGDATA &targetTag,
+                                QString& strResultGUID, CWizObjectDataDownloaderHost *downloaderHost);
+    //if file doesn't exist, download it.
+    bool makeSureDocumentExist(const WIZDOCUMENTDATA& doc, CWizObjectDataDownloaderHost* downloaderHost);
+    bool makeSureAttachmentExist(const WIZDOCUMENTATTACHMENTDATAEX& attachData,
+                                 CWizObjectDataDownloaderHost* downloaderHost);
+    bool tryAccessDocument(const WIZDOCUMENTDATA& doc);
+
     // info and groups
     virtual void SetUserInfo(const WIZUSERINFO& info);
     virtual void SetKbInfo(const QString& strKBGUID, const WIZKBINFO& info);
@@ -263,6 +275,7 @@ public:
     QString GetDocumentFileName(const QString& strGUID) const;
     QString GetAttachmentFileName(const QString& strGUID) const;
     QString GetAvatarPath() const;
+    QString GetDefaultNoteLocation() const;
 
     bool GetUserName(QString& strUserName);
     bool SetUserName(const QString& strUserName);
@@ -326,7 +339,11 @@ public:
 
     bool GetDocumentsByTag(const WIZTAGDATA& tag, CWizDocumentDataArray& arrayDocument);
 
-    bool LoadDocumentData(const QString& strDocumentGUID, QByteArray& arrayData);
+    //if "forceLoadData == true", just load doc data, don't care it was encrypted or not.
+    //if "forceLoadData == false", try to decrypt encrypted file before load doc data.
+    bool LoadDocumentData(const QString& strDocumentGUID, QByteArray& arrayData,
+                          bool forceLoadData = true);
+    bool WriteDataToDocument(const QString& strDocumentGUID, const QByteArray &arrayData);
     bool LoadAttachmentData(const CString& strDocumentGUID,
                             QByteArray& arrayData);
     bool LoadCompressedAttachmentData(const QString& strDocumentGUID,
@@ -353,6 +370,12 @@ public:
                                const CString& strLocation, \
                                const CString& strURL, \
                                WIZDOCUMENTDATA& data);
+
+    bool CreateDocumentAndInit(const WIZDOCUMENTDATA& sourceDoc,  \
+                               const QByteArray& baData, \
+                               const QString& strLocation, \
+                               const WIZTAGDATA& tag, \
+                               WIZDOCUMENTDATA& newDoc);
 
     bool AddAttachment(const WIZDOCUMENTDATA& document, \
                        const CString& strFileName, \
@@ -390,6 +413,17 @@ Q_SIGNALS:
     void processLog(const QString& msg);
 
     void folderPositionChanged();
+
+private:
+    //should make sure sourceDoc already exist before use this.
+    bool CopyDocumentData(const WIZDOCUMENTDATA& sourceDoc, CWizDatabase& targetDB, \
+                                WIZDOCUMENTDATA& targetDoc);
+    bool CopyDocumentAttachment(const WIZDOCUMENTDATA& sourceDoc, CWizDatabase& targetDB, \
+                                        WIZDOCUMENTDATA& targetDoc, CWizObjectDataDownloaderHost* downloaderHost);
+    bool CopyDocumentAttachment(const WIZDOCUMENTATTACHMENTDATAEX& sourceData, \
+                                const CWizDatabase& targetDB, WIZDOCUMENTATTACHMENTDATAEX& targetData, \
+                                QString& strFileName);
+
 };
 
 

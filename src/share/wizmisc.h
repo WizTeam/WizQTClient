@@ -103,6 +103,7 @@ QString WizDecryptPassword(const QString& strEncryptedText);
 
 
 bool WizLoadUnicodeTextFromFile(const QString& strFileName, QString& steText);
+bool WizLoadUtf8TextFromFile(const QString& strFileName, QString& strText);
 bool WizSaveUnicodeTextToUtf16File(const QString& strFileName, const QString& strText);
 bool WizSaveUnicodeTextToUtf8File(const QString& strFileName, const QString& strText);
 bool WizSaveUnicodeTextToUtf8File(const QString& strFileName, const QByteArray& strText);

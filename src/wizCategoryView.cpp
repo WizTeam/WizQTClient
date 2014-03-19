@@ -4,6 +4,8 @@
 #include <QAction>
 #include <QMenu>
 #include <QMessageBox>
+#include <QApplication>
+#include <QTimer>
 
 #include <extensionsystem/pluginmanager.h>
 
@@ -69,6 +71,8 @@ CWizCategoryBaseView::CWizCategoryBaseView(CWizExplorerApp& app, QWidget* parent
     , m_dbMgr(app.databaseManager())
     , m_bDragHovered(false)
     , m_selectedItem(NULL)
+    , m_dragHoveredTimer(new QTimer())
+    , m_dragHoveredItem(0)
 {
     // basic features
     header()->hide();
@@ -149,6 +153,18 @@ CWizCategoryBaseView::CWizCategoryBaseView(CWizExplorerApp& app, QWidget* parent
 
     connect(&m_dbMgr, SIGNAL(databaseBizchanged(const QString&)),
             SLOT(on_group_bizChanged(const QString&)));
+
+    connect(m_dragHoveredTimer, SIGNAL(timeout()), SLOT(on_dragHovered_timeOut()));
+
+}
+
+CWizCategoryBaseView::~CWizCategoryBaseView()
+{
+    if (!m_dragHoveredTimer) {
+        m_dragHoveredTimer->stop();
+        delete m_dragHoveredTimer;
+        m_dragHoveredTimer = 0;
+    }
 }
 
 void CWizCategoryBaseView::mousePressEvent(QMouseEvent* event)
@@ -223,7 +239,6 @@ void CWizCategoryBaseView::dragEnterEvent(QDragEnterEvent *event)
 void CWizCategoryBaseView::dragMoveEvent(QDragMoveEvent *event)
 {
     m_dragHoveredPos = event->pos();
-    repaint();
 
     if (!event->mimeData()->hasFormat(WIZNOTE_MIMEFORMAT_DOCUMENTS))
         return;
@@ -232,25 +247,35 @@ void CWizCategoryBaseView::dragMoveEvent(QDragMoveEvent *event)
     if (!pItem)
         return;
 
-    CWizDocumentDataArray arrayDocument;
-    mime2Note(event->mimeData()->data(WIZNOTE_MIMEFORMAT_DOCUMENTS), arrayDocument);
+    if (m_dragHoveredItem != pItem) {
+        m_dragHoveredTimer->stop();
+        m_dragHoveredItem = pItem;
+        m_dragHoveredTimer->start(1000);
+    }
 
-    if (!arrayDocument.size())
+    m_dragDocArray.clear();
+    mime2Note(event->mimeData()->data(WIZNOTE_MIMEFORMAT_DOCUMENTS), m_dragDocArray);
+
+    if (!m_dragDocArray.size())
         return;
 
     int nAccept = 0;
-    for (CWizDocumentDataArray::const_iterator it = arrayDocument.begin();
-         it != arrayDocument.end();
+    for (CWizDocumentDataArray::const_iterator it = m_dragDocArray.begin();
+         it != m_dragDocArray.end();
          it++)
     {
-        if (pItem->acceptDrop(*it))
+        if (pItem->acceptDrop(*it)) {
             nAccept++;
+        }
     }
 
-    if (nAccept == arrayDocument.size())
-        event->acceptProposedAction();
+    if (nAccept == m_dragDocArray.size()) {
+        event->acceptProposedAction();     
+    }
     else
         event->ignore();
+
+    viewport()->repaint();
 }
 
 void CWizCategoryBaseView::dragLeaveEvent(QDragLeaveEvent* event)
@@ -259,14 +284,20 @@ void CWizCategoryBaseView::dragLeaveEvent(QDragLeaveEvent* event)
 
     m_bDragHovered = false;
     m_dragHoveredPos = QPoint();
-    repaint();
+    m_dragHoveredTimer->stop();
+    m_dragHoveredItem = 0;
+
+    m_dragDocArray.clear();
+    viewport()->repaint();
 }
 
 void CWizCategoryBaseView::dropEvent(QDropEvent * event)
 {
     m_bDragHovered = false;
     m_dragHoveredPos = QPoint();
-    repaint();
+
+    m_dragDocArray.clear();
+
 
     if (!event->mimeData()->hasFormat(WIZNOTE_MIMEFORMAT_DOCUMENTS))
         return;
@@ -281,13 +312,16 @@ void CWizCategoryBaseView::dropEvent(QDropEvent * event)
     if (!pItem)
         return;
 
+    bool forceCopy = (QApplication::keyboardModifiers() == Qt::ControlModifier);
+
     for (CWizDocumentDataArray::const_iterator it = arrayDocument.begin();
          it != arrayDocument.end();
          it++)
     {
-        pItem->drop(*it);
+        pItem->drop(*it, forceCopy);
     }
 
+    viewport()->repaint();
     event->accept();
 }
 
@@ -407,22 +441,27 @@ QModelIndex CWizCategoryBaseView::moveCursor(CursorAction cursorAction, Qt::Keyb
     return index;
 }
 
+void CWizCategoryBaseView::on_dragHovered_timeOut()
+{
+    if (m_dragHoveredItem) {
+        m_dragHoveredTimer->stop();
+        expandItem(m_dragHoveredItem);
+        viewport()->repaint();
+    }
+}
+
 bool CWizCategoryBaseView::validateDropDestination(const QPoint& p) const
 {
     if (p.isNull())
         return false;
 
-    CWizCategoryViewFolderItem* itemFolder = dynamic_cast<CWizCategoryViewFolderItem*>(itemAt(p));
-    if (itemFolder) {
-        return true;
-    }
+    if (m_dragDocArray.empty())
+        return false;
 
-    CWizCategoryViewTagItem* itemTag = dynamic_cast<CWizCategoryViewTagItem*>(itemAt(p));
-    if (itemTag) {
-        return true;
-    }
+    CWizCategoryViewItemBase* itemBase = itemAt(p);
+    WIZDOCUMENTDATAEX data = *m_dragDocArray.begin();
+    return (itemBase && itemBase->acceptDrop(data));
 
-    return false;
 }
 
 void CWizCategoryBaseView::drawItem(QPainter* p, const QStyleOptionViewItemV4 *vopt) const
@@ -749,7 +788,7 @@ bool CWizCategoryView::createDocument(WIZDOCUMENTDATA& data)
     bool bFallback = true;
 
     QString strKbGUID = m_dbMgr.db().kbGUID();
-    QString strLocation = "/My Notes/";
+    QString strLocation = m_dbMgr.db().GetDefaultNoteLocation();
     WIZTAGDATA tag;
 
     // trash first, because it's inherited
@@ -793,17 +832,20 @@ bool CWizCategoryView::createDocument(WIZDOCUMENTDATA& data)
     else if (CWizCategoryViewGroupRootItem* pItem = currentCategoryItem<CWizCategoryViewGroupRootItem>())
     {
         strKbGUID = pItem->kbGUID();
+        strLocation = m_dbMgr.db(strKbGUID).GetDefaultNoteLocation();
         bFallback = false;
     }
     else if (CWizCategoryViewGroupNoTagItem* pItem = currentCategoryItem<CWizCategoryViewGroupNoTagItem>())
     {
         strKbGUID = pItem->kbGUID();
+        strLocation = m_dbMgr.db(strKbGUID).GetDefaultNoteLocation();
         bFallback = false;
     }
     else if (CWizCategoryViewGroupItem* pItem = currentCategoryItem<CWizCategoryViewGroupItem>())
     {
         strKbGUID = pItem->kbGUID();
         tag = pItem->tag();
+        strLocation = m_dbMgr.db(strKbGUID).GetDefaultNoteLocation();
         bFallback = false;
     }
 
@@ -818,8 +860,9 @@ bool CWizCategoryView::createDocument(WIZDOCUMENTDATA& data)
         return false;
     }
 
-    bool ret = m_dbMgr.db(strKbGUID).CreateDocumentAndInit("<p><br/></p>", "", 0, tr("New note"), "newnote", strLocation, "", data);
-    if (!ret) {
+
+    if (!m_dbMgr.db(strKbGUID).CreateDocumentAndInit("<p><br/></p>", "", 0, tr("New note"), "newnote", strLocation, "", data))
+    {
         TOLOG("Failed to new document!");
         return false;
     }
@@ -1470,12 +1513,16 @@ void CWizCategoryView::on_itemClicked(QTreeWidgetItem *item, int column)
             createGroup();
         }
     }
-    else if (CWizCategoryViewSectionItem* sItem = dynamic_cast<CWizCategoryViewSectionItem*>(item))
+    else if (CWizCategoryViewSectionItem* pItem = dynamic_cast<CWizCategoryViewSectionItem*>(item))
     {
-        if(CATEGORY_TEAM_GROUPS == sItem->name() && sItem->extraButtonClickTest())
+        if(CATEGORY_TEAM_GROUPS == pItem->name() && pItem->extraButtonClickTest())
         {
             createGroup();
         }
+    }
+    else if (CWizCategoryViewMessageItem* pItem = dynamic_cast<CWizCategoryViewMessageItem*>(item))
+    {
+        emit itemSelectionChanged();
     }
 }
 
@@ -1995,7 +2042,7 @@ void CWizCategoryView::initFolders()
     }
 
     if (arrayAllLocation.empty()) {
-        arrayAllLocation.push_back(LOCATION_DEFAULT);
+        arrayAllLocation.push_back(m_dbMgr.db().GetDefaultNoteLocation());
     }
 
     doLocationSanityCheck(arrayAllLocation);

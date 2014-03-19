@@ -10,8 +10,13 @@
 #include "utils/pinyin.h"
 #include "utils/stylehelper.h"
 #include "utils/notify.h"
+#include "utils/logger.h"
 
 #include "wizCategoryView.h"
+#include "wizmainwindow.h"
+#include "wizDocumentTransitionView.h"
+#include "share/wizObjectDataDownloader.h"
+#include "wizProgressDialog.h"
 
 #include "wizdef.h"
 #include "share/wizsettings.h"
@@ -118,10 +123,20 @@ void CWizCategoryViewItemBase::setDocumentsCount(int nCurrent, int nTotal)
 {
     Q_ASSERT(nTotal != -1);
 
-    if (nCurrent == -1) {
-        countString = QString("(%1)").arg(nTotal);
-    } else {
-        countString = QString("(%1/%2)").arg(nCurrent).arg(nTotal);
+    if (nCurrent == -1)
+    {
+        if (nTotal == 0)
+        {
+            m_countString = "";
+        }
+        else
+        {
+            m_countString = QString("(%1)").arg(nTotal);
+        }
+    }
+    else
+    {
+        m_countString = QString("(%1/%2)").arg(nCurrent).arg(nTotal);
     }
 }
 
@@ -134,7 +149,9 @@ bool CWizCategoryViewItemBase::getExtraButtonIcon(QPixmap &ret) const
 QRect CWizCategoryViewItemBase::getExtraButtonRect(const QRect& rcItemBorder) const
 {
     int nMargin = 4;
-    QSize szBtn = m_extraButtonIcon.size();
+    QSize szBtn(16, 16);
+    if (!m_extraButtonIcon.isNull())
+        szBtn = m_extraButtonIcon.size();
     int nWidth = szBtn.width() + 2 * nMargin;
     int nHeight = szBtn.height() + 2 * nMargin;
     //
@@ -216,7 +233,7 @@ void CWizCategoryViewItemBase::draw(QPainter* p, const QStyleOptionViewItemV4* v
     }
 
     // compute document count string length and leave enough space for drawing
-    QString strCount = pItem->countString;
+    QString strCount = pItem->m_countString;
     int nCountWidthMax;
     int nMargin = 3;
     QFont fontCount = p->font();
@@ -303,6 +320,9 @@ void CWizCategoryViewSectionItem::draw(QPainter* p, const QStyleOptionViewItemV4
 
 
 /* -------------------- CWizCategoryViewMessageRootItem -------------------- */
+QPoint CWizCategoryViewMessageItem::m_ptUnreadOffset;   //avoid const error
+QSize CWizCategoryViewMessageItem::m_szUnreadSize;
+
 CWizCategoryViewMessageItem::CWizCategoryViewMessageItem(CWizExplorerApp& app,
                                                                  const QString& strName, int nFilterType)
     : CWizCategoryViewItemBase(app, strName)
@@ -343,8 +363,10 @@ void CWizCategoryViewMessageItem::setUnread(int nCount)
 
 QString CWizCategoryViewMessageItem::unreadString() const
 {
-    if (m_nUnread > 999)
-        return "999+";
+    if (m_nUnread <= 0)
+        return "";
+    else if (m_nUnread > 99)
+        return "99+";
     else
         return QString::number(m_nUnread);
 }
@@ -354,16 +376,20 @@ bool CWizCategoryViewMessageItem::hitTestUnread()
     CWizCategoryBaseView* view = dynamic_cast<CWizCategoryBaseView*>(treeWidget());
     Q_ASSERT(view);
 
-    if (m_rcUnread.isNull()) {
-        QFont f;
-        Utils::StyleHelper::fontExtend(f);
-        int nWidth = QFontMetrics(f).width(unreadString());
-        m_rcUnread = view->visualItemRect(this);
-        m_rcUnread.adjust(5, 5, -5, -5);
-        m_rcUnread.setLeft(m_rcUnread.right() - nWidth);
-    }
+    QRect rcItem = view->visualItemRect(this);
+    //
+    QPoint pt = view->hitPoint();
+    //
+    int x = rcItem.right() - m_ptUnreadOffset.x() - m_szUnreadSize.width();
+    int y = rcItem.top() + m_ptUnreadOffset.y();
+    QRect rcUnread = QRect(x, y, m_szUnreadSize.width(), m_szUnreadSize.height());
+    //
+    int left = rcUnread.left();
+    int top = rcUnread.top();
+    int right = rcUnread.right();
+    int bottom = rcUnread.bottom();
 
-    return m_rcUnread.contains(view->hitPoint());
+    return rcUnread.contains(pt);
 }
 
 QString CWizCategoryViewMessageItem::getSectionName()
@@ -386,27 +412,38 @@ void CWizCategoryViewMessageItem::draw(QPainter* p, const QStyleOptionViewItemV4
     Utils::StyleHelper::fontExtend(f);
     p->setFont(f);
     //
-    int nMargin = 4;
     QSize szText = p->fontMetrics().size(0, text);
-    int nWidth = szText.width() + 2 * nMargin;
-    int nHeight = szText.height() + 2 * nMargin;
+    int textWidth = szText.width();
+    int textHeight = szText.height();
+    //
+    int nMargin = textHeight / 3;
+    //
+    int nWidth = textWidth + 2 * nMargin;
+    int nHeight = textHeight + 2 * nMargin;
     if (nWidth < nHeight)
         nWidth = nHeight;
     //
+    QRect rcExtButton = getExtraButtonRect(vopt->rect);
+    //
     int nTop = vopt->rect.y() + (vopt->rect.height() - nHeight) / 2;
-    QRect rcb(vopt->rect.right() - nWidth - nMargin, nTop, nWidth, nHeight);
-    rcb.adjust(nMargin, nMargin, -nMargin, -nMargin);
+    int nLeft = rcExtButton.right() - nWidth - 2;
+    QRect rcb(nLeft, nTop, nWidth, nHeight);
 
     p->setRenderHint(QPainter::Antialiasing);
 
     p->setPen(QColor("#2874c9"));
     p->setBrush(QColor("#2874c9"));
-    p->drawEllipse(rcb);
-
+    p->drawRoundedRect(rcb, rcb.height() / 2, rcb.height() / 2);
+    //
     p->setPen(QColor("#ffffff"));
     p->drawText(rcb, Qt::AlignCenter, text);
 
     p->restore();
+    //
+    m_ptUnreadOffset.setX(vopt->rect.right() - rcb.right());
+    m_ptUnreadOffset.setY(rcb.top() - vopt->rect.top());
+    //
+    m_szUnreadSize = rcb.size();
 }
 
 
@@ -529,35 +566,42 @@ bool CWizCategoryViewFolderItem::accept(CWizDatabase& db, const WIZDOCUMENTDATA&
 {
     Q_UNUSED(db);
 
-    if (m_strName == data.strLocation && data.strKbGUID == kbGUID()) {
+    if (m_strName == data.strLocation && data.strKbGUID == kbGUID())
         return true;
-    }
 
     return false;
 }
 
 bool CWizCategoryViewFolderItem::acceptDrop(const WIZDOCUMENTDATA& data) const
 {
-    // only accept note from user db
-    if (data.strKbGUID == kbGUID())
-        return true;
+    Q_UNUSED(data);
 
-    return false;
+    return true;
 }
 
-void CWizCategoryViewFolderItem::drop(const WIZDOCUMENTDATA& data)
+void CWizCategoryViewFolderItem::drop(const WIZDOCUMENTDATA& data, bool forceCopy)
 {
-   if (!acceptDrop(data)) {
+   if (!acceptDrop(data))
        return;
+
+   CWizDatabase& myDb = CWizDatabaseManager::instance()->db(kbGUID());
+
+   if (!forceCopy && kbGUID() == data.strKbGUID)
+   {
+       CWizFolder folder(myDb, location());
+       CWizDocument doc(myDb, data);
+       doc.MoveDocument(&folder);
    }
-
-   if (m_strName == data.strLocation)   // skip
-       return;
-
-   CWizDatabase& db = CWizDatabaseManager::instance()->db(kbGUID());
-   CWizFolder folder(db, location());
-   CWizDocument doc(db, data);
-   doc.MoveDocument(&folder);
+   else
+   {
+       CWizDatabase& sourceDb = CWizDatabaseManager::instance()->db(data.strKbGUID);
+       Internal::MainWindow* window = qobject_cast<Internal::MainWindow *>(m_app.mainWindow());
+       //QString strLocation = (location() == LOCATION_DELETED_ITEMS) ? LOCATION_DEFAULT : location();
+       QString strLocation = location();
+       WIZTAGDATA tagEmpty;
+       QString strNewDocGUID;
+       sourceDb.CopyDocumentTo(data.strGUID, myDb, strLocation, tagEmpty, strNewDocGUID, window->downloaderHost());
+   }
 }
 
 void CWizCategoryViewFolderItem::showContextMenu(CWizCategoryBaseView* pCtrl, QPoint pos)
@@ -685,8 +729,10 @@ bool CWizCategoryViewTagItem::acceptDrop(const WIZDOCUMENTDATA& data) const
     return false;
 }
 
-void CWizCategoryViewTagItem::drop(const WIZDOCUMENTDATA& data)
+void CWizCategoryViewTagItem::drop(const WIZDOCUMENTDATA& data, bool forceCopy)
 {
+    Q_UNUSED(forceCopy);
+
     if (!acceptDrop(data)) {
         return;
     }
@@ -921,16 +967,62 @@ void CWizCategoryViewGroupRootItem::getDocuments(CWizDatabase& db, CWizDocumentD
 
 bool CWizCategoryViewGroupRootItem::accept(CWizDatabase& db, const WIZDOCUMENTDATA& data)
 {
-    if (db.IsInDeletedItems(data.strLocation)) {
+    if (db.IsInDeletedItems(data.strLocation))
         return false;
-    }
 
     QString strTagGUIDs = db.GetDocumentTagGUIDsString(data.strGUID);
-    if (strTagGUIDs.isEmpty() && data.strKbGUID == kbGUID()) {
+    if (strTagGUIDs.isEmpty() && data.strKbGUID == kbGUID())
         return true;
-    }
 
     return false;
+}
+
+bool CWizCategoryViewGroupRootItem::acceptDrop(const WIZDOCUMENTDATA &data) const
+{
+    Q_UNUSED(data);
+
+    CWizDatabase& db = CWizDatabaseManager::instance()->db(kbGUID());
+    if (WIZ_USERGROUP_AUTHOR >= db.permission())
+        return true;
+
+    return false;
+}
+
+void CWizCategoryViewGroupRootItem::drop(const WIZDOCUMENTDATA &data, bool forceCopy)
+{
+    if (!acceptDrop(data))
+        return;
+
+    CWizDatabase& myDb = CWizDatabaseManager::instance()->db(kbGUID());
+
+    if (!forceCopy && data.strKbGUID == m_strKbGUID)
+    {
+        CWizDocument doc(myDb, data);
+        if (data.strLocation == LOCATION_DELETED_ITEMS)
+        {
+            CWizFolder folder(myDb, myDb.GetDefaultNoteLocation());
+            doc.MoveDocument(&folder);
+        }
+
+        CWizTagDataArray arrayTag;
+        myDb.GetDocumentTags(data.strGUID, arrayTag);
+        if (arrayTag.size() > 0)
+        {
+            for (CWizTagDataArray::const_iterator it = arrayTag.begin(); it != arrayTag.end(); it++)
+            {
+                doc.RemoveTag(*it);
+            }
+        }
+    }
+    else
+    {
+        CWizDatabase& sourceDb = CWizDatabaseManager::instance()->db(data.strKbGUID);
+        QString strLocation = myDb.GetDefaultNoteLocation();
+        Internal::MainWindow* window = qobject_cast<Internal::MainWindow *>(m_app.mainWindow());
+        QString strNewDocGUID;
+        WIZTAGDATA tagEmpty;
+        sourceDb.CopyDocumentTo(data.strGUID, myDb, strLocation, tagEmpty, strNewDocGUID, window->downloaderHost());
+    }
 }
 
 void CWizCategoryViewGroupRootItem::reload(CWizDatabase& db)
@@ -938,6 +1030,7 @@ void CWizCategoryViewGroupRootItem::reload(CWizDatabase& db)
     m_strName = db.name();
     setText(0, db.name());
 }
+
 bool CWizCategoryViewGroupRootItem::isAdmin(CWizDatabase& db)
 {
     if (isBizGroup())
@@ -1031,52 +1124,64 @@ void CWizCategoryViewGroupItem::getDocuments(CWizDatabase& db, CWizDocumentDataA
 
 bool CWizCategoryViewGroupItem::accept(CWizDatabase& db, const WIZDOCUMENTDATA& data)
 {
-    if (db.IsInDeletedItems(data.strLocation)) {
+    if (db.IsInDeletedItems(data.strLocation))
         return false;
-    }
 
     QString strTagGUIDs = db.GetDocumentTagGUIDsString(data.strGUID);
-    if (strTagGUIDs.indexOf(m_tag.strGUID) != -1 && data.strKbGUID == kbGUID()) {
+    if (strTagGUIDs.indexOf(m_tag.strGUID) != -1 && data.strKbGUID == kbGUID())
         return true;
-    }
 
     return false;
 }
 
 bool CWizCategoryViewGroupItem::acceptDrop(const WIZDOCUMENTDATA& data) const
 {
-    // only accept notes from current group
-    if (data.strKbGUID == kbGUID()) {
+    Q_UNUSED(data);
+
+    CWizDatabase& db = CWizDatabaseManager::instance()->db(kbGUID());
+    if (WIZ_USERGROUP_AUTHOR >= db.permission()) {
         return true;
     }
 
     return false;
 }
 
-void CWizCategoryViewGroupItem::drop(const WIZDOCUMENTDATA& data)
+void CWizCategoryViewGroupItem::drop(const WIZDOCUMENTDATA& data, bool forceCopy)
 {
     if (!acceptDrop(data))
         return;
 
-    // skip
-    CWizTagDataArray arrayTag;
-    CWizDatabase& db = CWizDatabaseManager::instance()->db(kbGUID());
-    if (!db.GetDocumentTags(data.strGUID, arrayTag)) {
-        return;
-    }
+    CWizDatabase& myDb = CWizDatabaseManager::instance()->db(kbGUID());
 
-    //Q_ASSERT(arrayTag.size() == 1);
-    CWizDocument doc(db, data);
-    if (arrayTag.size() > 0)
+    if (!forceCopy && data.strKbGUID == m_strKbGUID)
     {
-        for (CWizTagDataArray::const_iterator it = arrayTag.begin();
-            it != arrayTag.end();
-            it++)
+        CWizDocument doc(myDb, data);
+        if (data.strLocation == LOCATION_DELETED_ITEMS)
         {
-            doc.RemoveTag(*it);
+            CWizFolder folder(myDb, myDb.GetDefaultNoteLocation());
+            doc.MoveDocument(&folder);
         }
+
+        CWizTagDataArray arrayTag;
+        myDb.GetDocumentTags(data.strGUID, arrayTag);
+        if (arrayTag.size() > 0)
+        {
+            for (CWizTagDataArray::const_iterator it = arrayTag.begin(); it != arrayTag.end(); it++)
+            {
+                doc.RemoveTag(*it);
+            }
+        }
+        doc.AddTag(tag());
+
     }
-    doc.AddTag(tag());
+    else
+    {
+        CWizDatabase& sourceDb = CWizDatabaseManager::instance()->db(data.strKbGUID);
+        QString strLocation = myDb.GetDefaultNoteLocation();
+        Internal::MainWindow* window = qobject_cast<Internal::MainWindow *>(m_app.mainWindow());
+        QString strNewDocGUID;
+        sourceDb.CopyDocumentTo(data.strGUID, myDb, strLocation, m_tag, strNewDocGUID, window->downloaderHost());
+    }
 }
 
 void CWizCategoryViewGroupItem::reload(CWizDatabase& db)
@@ -1084,7 +1189,6 @@ void CWizCategoryViewGroupItem::reload(CWizDatabase& db)
     db.TagFromGUID(m_tag.strGUID, m_tag);
     setText(0, m_tag.strName);
 }
-
 
 /* ------------------------------ CWizCategoryViewTrashItem ------------------------------ */
 
@@ -1116,6 +1220,17 @@ void CWizCategoryViewTrashItem::getDocuments(CWizDatabase& db, CWizDocumentDataA
 bool CWizCategoryViewTrashItem::accept(CWizDatabase& db, const WIZDOCUMENTDATA& data)
 {
     return db.IsInDeletedItems(data.strLocation);
+}
+
+bool CWizCategoryViewTrashItem::acceptDrop(const WIZDOCUMENTDATA &data) const
+{
+    Q_UNUSED(data);
+
+    CWizCategoryViewGroupRootItem* parentItem = dynamic_cast<CWizCategoryViewGroupRootItem*>(parent());
+    if (parentItem)
+        return false;
+
+    return true;
 }
 
 

@@ -32,6 +32,7 @@ class CWizCategoryBaseView : public Core::ITreeView
 
 public:
     CWizCategoryBaseView(CWizExplorerApp& app, QWidget *parent = 0);
+    ~CWizCategoryBaseView();
 
     QString selectedItemKbGUID();
     void getDocuments(CWizDocumentDataArray& arrayDocument);
@@ -79,6 +80,9 @@ private:
     QPoint m_hitPos;
     bool m_bDragHovered;
     QPoint m_dragHoveredPos;
+    CWizDocumentDataArray m_dragDocArray;
+    QTimer* m_dragHoveredTimer;
+    CWizCategoryViewItemBase* m_dragHoveredItem;
 
 #ifdef WIZNOTE_CUSTOM_SCROLLBAR
     CWizScrollBar* m_vScroll;
@@ -105,6 +109,8 @@ protected Q_SLOTS:
     virtual void on_group_renamed(const QString& strKbGUID) { Q_UNUSED(strKbGUID); }
     virtual void on_group_permissionChanged(const QString& strKbGUID) { Q_UNUSED(strKbGUID); }
     virtual void on_group_bizChanged(const QString& strKbGUID) { Q_UNUSED(strKbGUID); }
+
+    void on_dragHovered_timeOut();
 };
 
 
