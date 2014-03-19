@@ -77,11 +77,11 @@ QPixmap CWizMultiLineListWidget::itemImage(const QModelIndex& index) const
 }
 
 bool CWizMultiLineListWidget::itemExtraImage(const QModelIndex& index, const QRect& itemBound,
-                                              QRect& imgRect, QPixmap& extraPix) const
+                                              QRect& rcImage, QPixmap& extraPix) const
 {
     Q_UNUSED(index);
     Q_UNUSED(itemBound);
-    Q_UNUSED(imgRect);
+    Q_UNUSED(rcImage);
     Q_UNUSED(extraPix);
 
     return false;

@@ -359,7 +359,7 @@ void CWizDocumentListViewItem::drawOneLineView_impl(QPainter* p, const  QStyleOp
     Utils::StyleHelper::drawListViewItemThumb(p, rcd, nType, m_data.doc.strTitle, NULL, NULL, bFocused, bSelected);
 }
 
-bool CWizDocumentListViewItem::drawSyncStatus(QPainter* p, const QStyleOptionViewItemV4* vopt, int nViewType) const
+void CWizDocumentListViewItem::drawSyncStatus(QPainter* p, const QStyleOptionViewItemV4* vopt, int nViewType) const
 {
     Q_UNUSED(nViewType);
 
@@ -374,7 +374,7 @@ bool CWizDocumentListViewItem::drawSyncStatus(QPainter* p, const QStyleOptionVie
         strIconPath = ::WizGetSkinResourcePath(m_app.userSettings().skin()) + "downloading.bmp";
     }
     else
-        return false;
+        return;
 
     p->save();
     int nMargin = 3;
@@ -386,5 +386,5 @@ bool CWizDocumentListViewItem::drawSyncStatus(QPainter* p, const QStyleOptionVie
     p->drawPixmap(rcSync, pix);
     p->restore();
 
-    return true;
+    return;
 }

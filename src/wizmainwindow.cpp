@@ -8,6 +8,7 @@
 #include <QUndoStack>
 #include <QEvent>
 #include <QHBoxLayout>
+#include <QLabel>
 
 #ifdef Q_OS_MAC
 #include <Carbon/Carbon.h>

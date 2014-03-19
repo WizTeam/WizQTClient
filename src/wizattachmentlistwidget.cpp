@@ -148,7 +148,7 @@ QPixmap CWizAttachmentListView::itemImage(const QModelIndex& index) const
     return QPixmap();
 }
 
-bool CWizAttachmentListView::itemExtraImage(const QModelIndex& index, const QRect& itemBound, QRect& imgRect, QPixmap& extraPix) const
+bool CWizAttachmentListView::itemExtraImage(const QModelIndex& index, const QRect& itemBound, QRect& rcImage, QPixmap& extraPix) const
 {
     if (const CWizAttachmentListViewItem* item = attachmentItemFromIndex(index))
     {
@@ -170,9 +170,9 @@ bool CWizAttachmentListView::itemExtraImage(const QModelIndex& index, const QRec
         extraPix = fullPix.copy(0, 0, fullPix.height(), fullPix.height());
         extraPix.setMask(extraPix.createMaskFromColor(Qt::black, Qt::MaskInColor));
         int nMargin = 3;
-        imgRect.setLeft(itemBound.right() - extraPix.width() - nMargin);
-        imgRect.setTop(itemBound.bottom() - extraPix.height() - nMargin);
-        imgRect.setSize(extraPix.size());
+        rcImage.setLeft(itemBound.right() - extraPix.width() - nMargin);
+        rcImage.setTop(itemBound.bottom() - extraPix.height() - nMargin);
+        rcImage.setSize(extraPix.size());
 
         return true;
     }
