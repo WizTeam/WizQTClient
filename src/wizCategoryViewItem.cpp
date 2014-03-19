@@ -123,10 +123,20 @@ void CWizCategoryViewItemBase::setDocumentsCount(int nCurrent, int nTotal)
 {
     Q_ASSERT(nTotal != -1);
 
-    if (nCurrent == -1) {
-        countString = QString("(%1)").arg(nTotal);
-    } else {
-        countString = QString("(%1/%2)").arg(nCurrent).arg(nTotal);
+    if (nCurrent == -1)
+    {
+        if (nTotal == 0)
+        {
+            m_countString = "";
+        }
+        else
+        {
+            m_countString = QString("(%1)").arg(nTotal);
+        }
+    }
+    else
+    {
+        m_countString = QString("(%1/%2)").arg(nCurrent).arg(nTotal);
     }
 }
 
@@ -223,7 +233,7 @@ void CWizCategoryViewItemBase::draw(QPainter* p, const QStyleOptionViewItemV4* v
     }
 
     // compute document count string length and leave enough space for drawing
-    QString strCount = pItem->countString;
+    QString strCount = pItem->m_countString;
     int nCountWidthMax;
     int nMargin = 3;
     QFont fontCount = p->font();
