@@ -164,31 +164,6 @@ void CWizUserInfoWidget::updateUI()
     WIZUSERINFOWIDGETBASE::updateUI();
 }
 
-
-QPixmap corpAvatar(const QPixmap& org)
-{
-    if (org.isNull())
-        return org;
-    //
-    QSize sz = org.size();
-    //
-    int width = sz.width();
-    int height = sz.height();
-    if (width == height)
-        return org;
-    //
-    if (width > height)
-    {
-        int xOffset = (width - height) / 2;
-        return org.copy(xOffset, 0, height, height);
-    }
-    else
-    {
-        int yOffset = (height - width) / 2;
-        return org.copy(0, yOffset, width, width);
-    }
-}
-
 QPixmap CWizUserInfoWidget::getCircleAvatar(int width, int height)
 {
     if (width <= 0 || height <= 0)
@@ -206,26 +181,7 @@ QPixmap CWizUserInfoWidget::getCircleAvatar(int width, int height)
     if (org.isNull())
         return org;
     //
-    org = corpAvatar(org);
-    //
-    int largeWidth = width * 8;
-    int largeHeight = height * 8;
-    //
-    QPixmap orgResized = org.scaled(QSize(largeWidth, largeHeight), Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
-    //
-    QPixmap largePixmap(QSize(largeWidth, largeHeight));
-    largePixmap.fill(QColor(Qt::transparent));
-    //
-    QPainter painter(&largePixmap);
-    //
-    painter.setRenderHint(QPainter::HighQualityAntialiasing, true);
-    QPainterPath path;
-    path.addEllipse(0, 0, largeWidth, largeHeight);
-    painter.setClipPath(path);
-    painter.drawPixmap(0, 0, orgResized);
-    //
-    m_circleAvatar = largePixmap.scaled(QSize(width, height), Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
-    //
+    m_circleAvatar = AvatarHost::circleImage(org, width, height);
     return m_circleAvatar;
 }
 
