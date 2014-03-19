@@ -4,7 +4,10 @@
 #include <QWidget>
 #include <QMenu>
 
+
+#if QT_VERSION >= 0x050200
 #import <Cocoa/Cocoa.h>
+#endif
 
 @interface NSScreen (PointConversion)
 + (NSScreen *)currentScreenForMouseLocation;
@@ -157,6 +160,10 @@
     //
     m_menuPos.x = textRect.origin.x - self.frame.origin.x;
     m_menuPos.y = textRect.origin.y - self.frame.origin.y;
+#if QT_VERSION >= 0x050200
+#else
+    m_menuPos.y += textRect.size.height;
+#endif
     //
     //
     QIcon iconArrow = m_widget->getArrow();
@@ -183,11 +190,14 @@
 }
 
 
-- (void)mouseDown:(NSEvent *)theEvent
+- (void)mouseUp:(NSEvent *)theEvent
 {
-    [super mouseDown:theEvent];
+    [super mouseUp:theEvent];
     //
     NSPoint pt = [self convertPoint:m_menuPos toView:nil];
+    //
+#if QT_VERSION >= 0x050200
+    NSMenu* menu = m_widget->getNSMewnu();
     //
     NSEvent* newEvent = [NSEvent mouseEventWithType:[theEvent type]
             location:pt
@@ -199,9 +209,16 @@
             clickCount:[theEvent clickCount ]
             pressure:[theEvent pressure]];
     //
-    NSMenu* menu = m_widget->getNSMewnu();
-    //
     [NSMenu popUpContextMenu:menu withEvent:newEvent forView:self];
+#else
+    if (QMenu* menu = m_widget->getMenu())
+    {
+        int x = m_menuPos.x;
+        int y = m_widget->height() - m_menuPos.y;
+        QPoint ptScreen = m_widget->mapToGlobal(QPoint(x, y));
+        menu->popup(ptScreen);
+    }
+#endif
 }
 
 - (void)mouseEntered:(NSEvent *)theEvent
@@ -271,6 +288,7 @@ int CWizUserInfoWidgetBaseMac::textHeight() const
     return m_textHeight;
 }
 
+#if QT_VERSION >= 0x050200
 NSMenu* CWizUserInfoWidgetBaseMac::getNSMewnu()
 {
     if (!m_menuPopup)
@@ -278,6 +296,7 @@ NSMenu* CWizUserInfoWidgetBaseMac::getNSMewnu()
     //
     return m_menuPopup->toNSMenu();
 }
+#endif
 
 void CWizUserInfoWidgetBaseMac::updateUI()
 {

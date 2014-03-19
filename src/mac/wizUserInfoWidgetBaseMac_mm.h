@@ -34,7 +34,11 @@ public:
     QString text() const;
     void setText(QString val);
 
+#if QT_VERSION >= 0x050200
     NSMenu* getNSMewnu();
+#else
+    QMenu* getMenu() { return m_menuPopup; }
+#endif
     //
     virtual QString userId() { return QString(); }
     virtual QPixmap getAvatar(int width, int height) { return QPixmap(); }

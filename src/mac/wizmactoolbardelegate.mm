@@ -234,8 +234,11 @@ public:
         [pItem setLabel: labelString];
         [pItem setPaletteLabel: labelString];
         [pItem setToolTip: tooltipString];
-
+#if QT_VERSION >= 0x050200
         NSView *nsview = m_widget->cocoaView();
+#else
+        NSView* nsview = (NSView *)m_widget->cocoaView();
+#endif
         [pItem setView: nsview];
         [pItem setMinSize:NSMakeSize(m_widget->sizeHint().width(), m_widget->sizeHint().height())];
         [pItem setMaxSize:NSMakeSize(m_widget->sizeHint().width(), m_widget->sizeHint().height())];
@@ -293,9 +296,14 @@ public:
         [toolbarItem setToolTip: tooltipString];
 
         // Use a custom view, a text field, for the search item
-        [toolbarItem setView: m_searchField->cocoaView()];
-        [toolbarItem setMinSize:NSMakeSize(30, NSHeight([m_searchField->cocoaView() frame]))];
-        [toolbarItem setMaxSize:NSMakeSize(250,NSHeight([m_searchField->cocoaView() frame]))];
+#if QT_VERSION >= 0x050200
+        NSView* nsview = m_searchField->cocoaView();
+#else
+        NSView* nsview = (NSView *)m_searchField->cocoaView();
+#endif
+        [toolbarItem setView: nsview];
+        [toolbarItem setMinSize:NSMakeSize(30, NSHeight([nsview frame]))];
+        [toolbarItem setMaxSize:NSMakeSize(250,NSHeight([nsview frame]))];
 
         return toolbarItem;
     }
