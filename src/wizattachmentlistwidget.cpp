@@ -148,6 +148,37 @@ QPixmap CWizAttachmentListView::itemImage(const QModelIndex& index) const
     return QPixmap();
 }
 
+bool CWizAttachmentListView::itemExtraImage(const QModelIndex& index, const QRect& itemBound, QRect& imgRect, QPixmap& extraPix) const
+{
+    if (const CWizAttachmentListViewItem* item = attachmentItemFromIndex(index))
+    {
+        QString strIcoPath;
+        CWizDatabase& db = m_dbMgr.db(item->attachment().strKbGUID);
+        MainWindow* mainWindow = qobject_cast<MainWindow *>(Core::ICore::mainWindow());
+        if (!db.IsAttachmentDownloaded(item->attachment().strGUID))
+        {
+            strIcoPath = ::WizGetSkinResourcePath(mainWindow->userSettings().skin()) + "downloading.bmp";
+        }
+        else if (db.IsAttachmentModified(item->attachment().strGUID))
+        {
+            strIcoPath = ::WizGetSkinResourcePath(mainWindow->userSettings().skin()) + "uploading.bmp";
+        }
+        else
+            return false;
+
+        QPixmap fullPix(strIcoPath);
+        extraPix = fullPix.copy(0, 0, fullPix.height(), fullPix.height());
+        extraPix.setMask(extraPix.createMaskFromColor(Qt::black, Qt::MaskInColor));
+        int nMargin = 3;
+        imgRect.setLeft(itemBound.right() - extraPix.width() - nMargin);
+        imgRect.setTop(itemBound.bottom() - extraPix.height() - nMargin);
+        imgRect.setSize(extraPix.size());
+
+        return true;
+    }
+
+    return false;
+}
 
 void CWizAttachmentListView::resetAttachments()
 {

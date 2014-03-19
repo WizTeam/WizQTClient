@@ -356,6 +356,14 @@ void CWizNoteStyle::drawMultiLineListWidgetItem(const QStyleOptionViewItemV4 *vo
         proxy()->drawPrimitive(QStyle::PE_FrameFocusRect, &o, p, view);
     }
 
+    //draw extra image
+    QRect rcExtra;
+    QPixmap pixExtra;
+    if (view->itemExtraImage(vopt->index, vopt->rect, rcExtra, pixExtra))
+    {
+        p->drawPixmap(rcExtra, pixExtra);
+    }
+
     p->restore();
 }
 

@@ -10,6 +10,7 @@
 #include "wizDocumentListView.h"
 #include "share/wizDatabaseManager.h"
 #include "share/wizDatabase.h"
+#include "share/wizsettings.h"
 #include "wizPopupButton.h"
 
 #include "thumbcache.h"
@@ -231,6 +232,7 @@ void CWizDocumentListViewItem::draw(QPainter* p, const QStyleOptionViewItemV4* v
     p->save();
     p->setClipRect(vopt->rect);
     p->drawPixmap(vopt->rect, pm);
+    drawSyncStatus(p, vopt, nViewType);
     p->restore();
 }
 
@@ -387,4 +389,34 @@ QPixmap CWizDocumentListViewItem::drawOneLineView_impl(const  QStyleOptionViewIt
     Utils::StyleHelper::drawListViewItemThumb(&p, rcd, nType, m_data.doc.strTitle, NULL, NULL, bFocused, bSelected);
 
     return pm;
+}
+
+bool CWizDocumentListViewItem::drawSyncStatus(QPainter* p, const QStyleOptionViewItemV4* vopt, int nViewType) const
+{
+    Q_UNUSED(nViewType);
+
+    QString strIconPath;
+    CWizDatabase& db = m_app.databaseManager().db(m_data.doc.strKbGUID);
+    if (db.IsDocumentModified(m_data.doc.strGUID))
+    {
+        strIconPath = ::WizGetSkinResourcePath(m_app.userSettings().skin()) + "uploading.bmp";
+    }
+    else if (!db.IsDocumentDownloaded(m_data.doc.strGUID))
+    {
+        strIconPath = ::WizGetSkinResourcePath(m_app.userSettings().skin()) + "downloading.bmp";
+    }
+    else
+        return false;
+
+    p->save();
+    int nMargin = 3;
+    QPixmap fullPic(strIconPath);
+    QPixmap pix = fullPic.copy(0, 0, fullPic.height(), fullPic.height());
+    pix.setMask(pix.createMaskFromColor(Qt::black, Qt::MaskInColor));
+    QRect rcSync(vopt->rect.right() - pix.width() - nMargin, vopt->rect.bottom() - pix.height() - nMargin,
+                 pix.width(), pix.height());
+    p->drawPixmap(rcSync, pix);
+    p->restore();
+
+    return true;
 }

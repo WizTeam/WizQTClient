@@ -358,6 +358,8 @@ public:
     qint64 GetObjectLocalVersion(const QString &strGUID, const QString &strType);
     bool ModifyObjectVersion(const CString& strGUID, const CString& strType, qint64 nVersion);
 
+    bool IsObjectDataModified(const CString& strGUID, const CString& strType);
+
     bool ModifyObjectModifiedTime(const CString& strGUID, const CString& strType, const COleDateTime& t);
     bool GetObjectModifiedTime(const CString& strGUID, const CString& strType, COleDateTime& t);
 

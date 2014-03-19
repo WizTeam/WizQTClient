@@ -69,6 +69,7 @@ private:
     QPixmap drawPrivateTwoLineView_impl(const QStyleOptionViewItemV4* vopt) const;
     QPixmap drawGroupTwoLineView_impl(const QStyleOptionViewItemV4* vopt) const;
     QPixmap drawOneLineView_impl(const  QStyleOptionViewItemV4* vopt) const;
+    bool drawSyncStatus(QPainter* p, const QStyleOptionViewItemV4* vopt, int nViewType) const;
 
 private:
     CWizExplorerApp& m_app;
