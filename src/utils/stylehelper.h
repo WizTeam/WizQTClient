@@ -62,7 +62,7 @@ public:
     static QColor listViewItemLead(bool bSelected, bool bFocused);
     static QColor listViewItemSummary(bool bSelected, bool bFocused);
 
-    static QRect initListViewItemPainter(QPainter* p, QPixmap* pm, const QRect& lrc, bool bFocused, bool bSelected);
+    static QRect initListViewItemPainter(QPainter* p, const QRect& lrc, bool bFocused, bool bSelected);
     static void drawListViewItemThumb(QPainter* p, const QRect& rc, int nBadgeType,
                                       const QString& title, const QString& lead, const QString& abs,
                                       bool bFocused, bool bSelected);

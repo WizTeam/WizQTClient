@@ -207,7 +207,7 @@ void CWizNoteStyle::drawCategoryViewItem(const QStyleOptionViewItemV4 *vopt,
     Utils::StyleHelper::fontExtend(fontCount);
 
     QRect rcText = subElementRect(SE_ItemViewItemText, vopt, view);
-    QString strCount = pItem->countString;
+    QString strCount = pItem->countString();
 
     QString strText = vopt->text;
     if (!strText.isEmpty()) {

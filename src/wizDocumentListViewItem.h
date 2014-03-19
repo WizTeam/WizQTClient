@@ -24,7 +24,6 @@ struct WizDocumentListViewItemData
     qint64 nMessageId;
     int nReadStatus;    // 0: not read 1: read
     QString strAuthorId; // for request author avatar
-    QImage imgAuthorAvatar;
 };
 
 class CWizDocumentListViewItem : public QObject, public QListWidgetItem
@@ -63,12 +62,12 @@ public:
     QString cacheKey() const;
 
 private:
-    QPixmap draw_impl(const QStyleOptionViewItemV4* vopt, int nItemType, int nViewType) const;
-    QPixmap drawPrivateSummaryView_impl(const QStyleOptionViewItemV4* vopt) const;
-    QPixmap drawGroupSummaryView_impl(const QStyleOptionViewItemV4* vopt) const;
-    QPixmap drawPrivateTwoLineView_impl(const QStyleOptionViewItemV4* vopt) const;
-    QPixmap drawGroupTwoLineView_impl(const QStyleOptionViewItemV4* vopt) const;
-    QPixmap drawOneLineView_impl(const  QStyleOptionViewItemV4* vopt) const;
+    void draw_impl(QPainter* p, const QStyleOptionViewItemV4* vopt, int nItemType, int nViewType) const;
+    void drawPrivateSummaryView_impl(QPainter* p, const QStyleOptionViewItemV4* vopt) const;
+    void drawGroupSummaryView_impl(QPainter* p, const QStyleOptionViewItemV4* vopt) const;
+    void drawPrivateTwoLineView_impl(QPainter* p, const QStyleOptionViewItemV4* vopt) const;
+    void drawGroupTwoLineView_impl(QPainter* p, const QStyleOptionViewItemV4* vopt) const;
+    void drawOneLineView_impl(QPainter* p, const  QStyleOptionViewItemV4* vopt) const;
     bool drawSyncStatus(QPainter* p, const QStyleOptionViewItemV4* vopt, int nViewType) const;
 
 private:

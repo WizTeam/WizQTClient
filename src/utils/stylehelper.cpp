@@ -555,14 +555,10 @@ int StyleHelper::fontExtend(QFont& f)
     return QFontMetrics(f).height();
 }
 
-QRect StyleHelper::initListViewItemPainter(QPainter* p, QPixmap* pm, const QRect& lrc, bool bFocused, bool bSelected)
+QRect StyleHelper::initListViewItemPainter(QPainter* p, const QRect& lrc, bool bFocused, bool bSelected)
 {
-    QRect rc(0, 0, lrc.width(), lrc.height());
+    QRect rc = lrc;
 
-    pm->fill(Utils::StyleHelper::listViewBackground());
-
-    p->begin(pm);
-    Utils::StyleHelper::initPainterByDevice(p);
     Utils::StyleHelper::drawListViewItemSeperator(p, rc);
     Utils::StyleHelper::drawListViewItemBackground(p, rc, bFocused, bSelected);
 

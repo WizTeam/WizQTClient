@@ -25,7 +25,6 @@
 #include "wizDocumentWebView.h"
 #include "wizactions.h"
 #include "wizpreferencedialog.h"
-#include "wizstatusbar.h"
 #include "wizupgradenotifydialog.h"
 
 #include "share/wizcommonui.h"
@@ -88,7 +87,6 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     , m_toolBar(new QToolBar("Main", this))
     #endif
     , m_menuBar(new QMenuBar(this))
-    , m_statusBar(new CWizStatusBar(*this, this))
     , m_actions(new CWizActions(*this, this))
     , m_category(new CWizCategoryView(*this, this))
     , m_documents(new CWizDocumentListView(*this, this))
@@ -229,16 +227,17 @@ void MainWindow::on_actionExit_triggered()
 void MainWindow::resizeEvent(QResizeEvent *event)
 {
     Q_UNUSED(event);
-
-    m_statusBar->adjustPosition();
 }
 
 void MainWindow::showEvent(QShowEvent* event)
 {
     Q_UNUSED(event);
 
-    m_statusBar->hide();
     m_cipherForm->hide();
+    //
+#ifdef Q_OS_MAC
+    m_toolBar->showInWindow(this);
+#endif
 }
 
 void MainWindow::on_checkUpgrade_finished(bool bUpgradeAvaliable)
@@ -803,8 +802,6 @@ void MainWindow::on_syncDone_userVerified()
 void MainWindow::on_syncProcessLog(const QString& strMsg)
 {
     Q_UNUSED(strMsg);
-    m_statusBar->showText(tr("Syncing..."));
-    //m_statusBar->showText(strMsg.left(40));
 }
 
 void MainWindow::on_actionNewNote_triggered()
@@ -1194,6 +1191,16 @@ void MainWindow::on_category_itemSelectionChanged()
             m_msgList->show();
             m_noteList->hide();
         }
+        /*
+         * 在点击MessageItem的时候,为了重新刷新当前消息,强制发送了itemSelectionChanged消息
+         * 因此需要在这个地方避免重复刷新两次消息列表
+         */
+        static QTime lastTime(0, 0, 0);
+        QTime last = lastTime;
+        QTime now = QTime::currentTime();
+        lastTime = now;
+        if (last.msecsTo(now) < 300)
+            return;
 
         CWizMessageDataArray arrayMsg;
         pItem->getMessages(m_dbMgr.db(), arrayMsg);
@@ -1483,14 +1490,6 @@ QObject* MainWindow::CreateWizObject(const QString& strObjectID)
 
 void MainWindow::SetSavingDocument(bool saving)
 {
-    //m_statusBar->setVisible(saving);
-    if (saving) {
-        //m_statusBar->setVisible(true);
-        m_statusBar->showText(tr("Saving note..."));
-        //qApp->processEvents(QEventLoop::AllEvents);
-    } else {
-        m_statusBar->hide();
-    }
 }
 
 void MainWindow::ProcessClipboardBeforePaste(const QVariantMap& data)

@@ -940,17 +940,30 @@ void CWizDocumentListView::wheelEvent(QWheelEvent* event)
         //return;
     //}
 
-//#ifdef Q_OS_MAC
-//    QWheelEvent* wEvent = new QWheelEvent(event->pos(),
-//                                          event->globalPos(),
-//                                          event->delta()/2,
-//                                          event->buttons(),
-//                                          event->modifiers(),
-//                                          event->orientation());
-//#endif
+#ifdef Q_OS_MAC
 
+    int delta = event->delta();
+    switch (m_nViewType)
+    {
+    case TypeThumbnail:
+        delta = delta / 3;
+        break;
+    case TypeTwoLine:
+        delta = int(delta / 1.5);
+        break;
+    default:
+        break;
+    }
+    QWheelEvent* newEvent = new QWheelEvent(event->pos(),
+                                          event->globalPos(),
+                                          delta,
+                                          event->buttons(),
+                                          event->modifiers(),
+                                          event->orientation());
+    QListWidget::wheelEvent(newEvent);
+#else
     QListWidget::wheelEvent(event);
-
+#endif
 }
 
 void CWizDocumentListView::vscrollBeginUpdate(int delta)

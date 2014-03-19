@@ -47,15 +47,15 @@ public:
     virtual QRect getExtraButtonRect(const QRect& itemBorder) const;
     virtual bool extraButtonClickTest();
 
+    //
+    virtual QString countString() const { return m_countString; }
+
 protected:
     CWizExplorerApp& m_app;
     QString m_strName;
     QString m_strKbGUID;
     QPixmap m_extraButtonIcon;
-
-    // for quickly access by drawing
-public:
-    QString countString;
+    QString m_countString;
 };
 
 
@@ -101,7 +101,6 @@ public:
     QString unreadString() const;
     bool hitTestUnread();
 
-
     virtual QString getSectionName();
     virtual int getSortOrder() const { return 10; }
 
@@ -109,7 +108,8 @@ public:
 private:
     int m_nFilter;
     int m_nUnread;
-    QRect m_rcUnread;
+    static QPoint m_ptUnreadOffset;
+    static QSize m_szUnreadSize;
 };
 
 class CWizCategoryViewShortcutRootItem : public CWizCategoryViewItemBase
