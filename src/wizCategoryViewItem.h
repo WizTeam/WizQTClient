@@ -101,7 +101,6 @@ public:
     QString unreadString() const;
     bool hitTestUnread();
 
-
     virtual QString getSectionName();
     virtual int getSortOrder() const { return 10; }
 
@@ -109,7 +108,8 @@ public:
 private:
     int m_nFilter;
     int m_nUnread;
-    QRect m_rcUnread;
+    static QPoint m_ptUnreadOffset;
+    static QSize m_szUnreadSize;
 };
 
 class CWizCategoryViewShortcutRootItem : public CWizCategoryViewItemBase

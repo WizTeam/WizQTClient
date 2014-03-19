@@ -1194,6 +1194,16 @@ void MainWindow::on_category_itemSelectionChanged()
             m_msgList->show();
             m_noteList->hide();
         }
+        /*
+         * 在点击MessageItem的时候,为了重新刷新当前消息,强制发送了itemSelectionChanged消息
+         * 因此需要在这个地方避免重复刷新两次消息列表
+         */
+        static QTime lastTime(0, 0, 0);
+        QTime last = lastTime;
+        QTime now = QTime::currentTime();
+        lastTime = now;
+        if (last.msecsTo(now) < 300)
+            return;
 
         CWizMessageDataArray arrayMsg;
         pItem->getMessages(m_dbMgr.db(), arrayMsg);

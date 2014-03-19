@@ -1513,12 +1513,16 @@ void CWizCategoryView::on_itemClicked(QTreeWidgetItem *item, int column)
             createGroup();
         }
     }
-    else if (CWizCategoryViewSectionItem* sItem = dynamic_cast<CWizCategoryViewSectionItem*>(item))
+    else if (CWizCategoryViewSectionItem* pItem = dynamic_cast<CWizCategoryViewSectionItem*>(item))
     {
-        if(CATEGORY_TEAM_GROUPS == sItem->name() && sItem->extraButtonClickTest())
+        if(CATEGORY_TEAM_GROUPS == pItem->name() && pItem->extraButtonClickTest())
         {
             createGroup();
         }
+    }
+    else if (CWizCategoryViewMessageItem* pItem = dynamic_cast<CWizCategoryViewMessageItem*>(item))
+    {
+        emit itemSelectionChanged();
     }
 }
 
