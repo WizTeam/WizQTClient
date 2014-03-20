@@ -35,6 +35,8 @@ public:
     CWizKMSyncThread(CWizDatabase& db, QObject* parent = 0);
     void startSync(bool bBackground = true);
     void stopSync();
+    //
+    void addQuickSyncKb(const QString& kbGuid);
 
 protected:
     virtual void run();
@@ -47,6 +49,8 @@ private:
     CWizKMSyncEvents* m_pEvents;
     bool m_bNeedSyncAll;
     QDateTime m_tLastSyncAll;
+    //
+    std::set<QString> m_setQuickSyncKb;
 
     Q_INVOKABLE void trySync();
     void doSync();

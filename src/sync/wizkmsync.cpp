@@ -62,7 +62,7 @@ void CWizKMSyncEvents::OnEndKb(const QString& strKbGUID)
 
 /* ---------------------------- CWizKMSyncThead ---------------------------- */
 
-#define FULL_SYNC_INTERVAL 15*60
+#define FULL_SYNC_INTERVAL 15 * 60
 
 CWizKMSyncThread::CWizKMSyncThread(CWizDatabase& db, QObject* parent)
     : QThread(parent)
@@ -139,7 +139,7 @@ bool CWizKMSyncThread::needSyncAll()
         return true;
 
     QDateTime tNow = QDateTime::currentDateTime();
-    if (m_tLastSyncAll.secsTo(QDateTime::currentDateTime()) > FULL_SYNC_INTERVAL)
+    if (m_tLastSyncAll.secsTo(tNow) > FULL_SYNC_INTERVAL)
     {
         m_bNeedSyncAll = true;
     }
