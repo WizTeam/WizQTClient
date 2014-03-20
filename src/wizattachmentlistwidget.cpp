@@ -211,14 +211,26 @@ void CWizAttachmentListView::addAttachments()
                              tr("Add attachments"),
                              tr("/home"),
                              tr("All files(*.*)"));
+    //
+    CWizDatabase& db = m_dbMgr.db(m_document.strKbGUID);
 
+    bool ok = false;
     foreach (QString fileName, files)
     {
         WIZDOCUMENTATTACHMENTDATA data;
         data.strKbGUID = m_document.strKbGUID; // needed by under layer
-        m_dbMgr.db(m_document.strKbGUID).AddAttachment(m_document, fileName, data);
+        if (db.AddAttachment(m_document, fileName, data))
+        {
+            ok = true;
+        }
         addItem(new CWizAttachmentListViewItem(data));
     }
+    //
+    if (ok)
+    {
+        MainWindow::quickSyncKb(db.IsGroup() ? db.kbGUID() : "");
+    }
+
 }
 
 void CWizAttachmentListView::openAttachment(CWizAttachmentListViewItem* item)

@@ -28,23 +28,19 @@ public:
     void requestToken();
     void setUserId(const QString& strUserId);
     void setPasswd(const QString& strPasswd);
-    const WIZUSERINFO& info();
+    WIZUSERINFO info();
 
     int lastErrorCode() const;
     QString lastErrorMessage() const;
 
-private Q_SLOTS:
-    void onLoginFinished(const WIZUSERINFO& info);
-    void onGetTokenFinished(const QString& strToken);
-    void onKeepAliveFinished(bool bOk);
-
 private:
-    AsyncApi* m_api;
     WIZUSERINFO m_info;
     QString m_strUserId;
     QString m_strPasswd;
-    bool m_bProcess;
+    bool m_bProcessing;
     QMutex* m_mutex;
+    int m_lastErrorCode;
+    QString m_lastErrorMessage;
 
     Token* q;
 };

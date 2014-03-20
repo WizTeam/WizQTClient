@@ -33,10 +33,14 @@ class CWizKMSyncThread : public QThread
 
 public:
     CWizKMSyncThread(CWizDatabase& db, QObject* parent = 0);
-    void startSync(bool bBackground = true);
+    ~CWizKMSyncThread();
+    void startSyncAll(bool bBackground = true);
     void stopSync();
     //
     void addQuickSyncKb(const QString& kbGuid);
+
+public:
+    static void quickSyncKb(const QString& kbGuid); //thread safe
 
 protected:
     virtual void run();
@@ -50,22 +54,26 @@ private:
     bool m_bNeedSyncAll;
     QDateTime m_tLastSyncAll;
     //
+    QMutex m_mutex;
     std::set<QString> m_setQuickSyncKb;
+    QDateTime m_tLastKbModified;
 
-    Q_INVOKABLE void trySync();
-    void doSync();
+    bool doSync();
 
+    bool prepareToken();
     bool needSyncAll();
     bool needQuickSync();
     bool syncAll();
     bool quickSync();
 
     void syncUserCert();
-
-private Q_SLOTS:
-    void onTokenAcquired(const QString& strToken);
+    //
+    bool peekQuickSyncKb(QString& kbGuid);
+    //
+    friend class CWizKMSyncThreadHelper;
 
 Q_SIGNALS:
+    void syncStarted(bool syncAll);
     void syncFinished(int nErrorCode, const QString& strErrorMesssage);
     void processLog(const QString& strStatus);
 };
