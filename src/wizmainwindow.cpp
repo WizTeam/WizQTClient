@@ -796,6 +796,8 @@ void MainWindow::on_syncDone(int nErrorCode, const QString& strErrorMsg)
 
         m_userVerifyDialog->exec();
     }
+
+    m_documents->viewport()->update();
 }
 
 void MainWindow::on_syncDone_userVerified()
