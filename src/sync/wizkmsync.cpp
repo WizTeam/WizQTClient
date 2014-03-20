@@ -107,12 +107,6 @@ void CWizKMSyncThread::run()
 
 void CWizKMSyncThread::startSyncAll(bool bBackground)
 {
-    qDebug() << "[Sync]startSync, thread: " << QThread::currentThreadId();
-    if (isRunning()) {
-        qDebug() << "[Sync]syncing is started, request is schedued"; //FIXME: schedued request
-        return;
-    }
-
     m_bNeedSyncAll = true;
     m_bBackground = bBackground;
 }

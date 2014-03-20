@@ -413,6 +413,8 @@ void CWizDocumentWebView::onDocumentSaved(const QString kbGUID, const QString st
     {
         TOLOG("Save document failed");
     }
+    //
+    ::MainWindow::quickSyncKb(kbGUID);
 }
 
 void CWizDocumentWebView::viewDocument(const WIZDOCUMENTDATA& doc, bool editing)
