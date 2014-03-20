@@ -433,7 +433,7 @@ QModelIndex CWizCategoryBaseView::moveCursor(CursorAction cursorAction, Qt::Keyb
                 return indexFromItem(pBelow);
             }
         default:
-            Q_ASSERT(false);
+            //Q_ASSERT(false);
             break;
         }
     }
