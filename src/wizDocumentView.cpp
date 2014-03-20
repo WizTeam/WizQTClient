@@ -38,6 +38,7 @@ CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
     , m_viewMode(app.userSettings().noteViewMode())
     , m_bLocked(false)
     , m_bEditingMode(false)
+    , m_noteLoaded(false)
 {
     m_title->setEditor(m_web);
 
@@ -198,6 +199,7 @@ void CWizDocumentView::viewNote(const WIZDOCUMENTDATA& data, bool forceEdit)
 
     m_web->saveDocument(m_note, false);
 
+    m_noteLoaded = false;
     m_note = data;
     initStat(data, forceEdit);
     m_tab->setCurrentWidget(m_docView);
@@ -308,6 +310,8 @@ void CWizDocumentView::loadNote(const WIZDOCUMENTDATA& doc)
 
     // save last
     m_note = doc;
+    //
+    m_noteLoaded = true;
 }
 
 void CWizDocumentView::on_document_modified(const WIZDOCUMENTDATA& documentOld, const WIZDOCUMENTDATA& documentNew)

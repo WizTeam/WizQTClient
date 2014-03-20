@@ -987,6 +987,9 @@ void CWizDocumentWebView::saveDocument(const WIZDOCUMENTDATA& data, bool force)
 {
     if (!m_bEditorInited)
         return;
+    //
+    if (!view()->noteLoaded())  //encrypting note & has been loaded
+        return;
 
     if (!force && !page()->isModified())
         return;
