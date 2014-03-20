@@ -169,7 +169,7 @@ bool CWizAttachmentListView::itemExtraImage(const QModelIndex& index, const QRec
         QPixmap fullPix(strIcoPath);
         extraPix = fullPix.copy(0, 0, fullPix.height(), fullPix.height());
         extraPix.setMask(extraPix.createMaskFromColor(Qt::black, Qt::MaskInColor));
-        int nMargin = 3;
+        int nMargin = -1;
         rcImage.setLeft(itemBound.right() - extraPix.width() - nMargin);
         rcImage.setTop(itemBound.bottom() - extraPix.height() - nMargin);
         rcImage.setSize(extraPix.size());
