@@ -377,7 +377,7 @@ void CWizDocumentListViewItem::drawSyncStatus(QPainter* p, const QStyleOptionVie
         return;
 
     p->save();
-    int nMargin = 3;
+    int nMargin = -1;
     QPixmap fullPic(strIconPath);
     QPixmap pix = fullPic.copy(0, 0, fullPic.height(), fullPic.height());
     pix.setMask(pix.createMaskFromColor(Qt::black, Qt::MaskInColor));
