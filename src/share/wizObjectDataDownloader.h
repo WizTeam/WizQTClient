@@ -3,9 +3,9 @@
 
 #include <QThread>
 #include <QMap>
+#include <QRunnable>
 
 #include "wizobject.h"
-//#include "wizapi.h"
 
 class CWizApi;
 class CWizDatabase;
@@ -25,66 +25,36 @@ public:
 private:
     CWizDatabaseManager& m_dbMgr;
     QMap<QString, WIZOBJECTDATA> m_mapObject;   // download pool
-    QMap<QString, WIZOBJECTDATA> m_mapDownloading;  // working pool
-    //int m_nDownloader; // current downloader count
-
-    void downloadObject();
 
 private Q_SLOTS:
-    void on_downloader_finished();
+    void on_downloadDone(QString data, bool bSucceed);
+    void on_downloadProgress(QString data, int totalSize, int loadedSize);
 
 Q_SIGNALS:
     void downloadDone(const WIZOBJECTDATA& data, bool bSucceed);
     void downloadProgress(int totalSize, int loadedSize);
 };
 
-/* ------------------------ CWizObjectDataDownloader ------------------------ */
-// thread wrapper for download flow
 
-class CWizObjectDataDownloader : public QThread
+class CWizDownloadObjectRunnable
+        : public QObject
+        , public QRunnable
 {
     Q_OBJECT
-
 public:
-    explicit CWizObjectDataDownloader(CWizDatabaseManager& dbMgr,
-                                      const WIZOBJECTDATA& data);
+    CWizDownloadObjectRunnable(CWizDatabaseManager& dbMgr, const WIZOBJECTDATA& data);
     virtual void run();
-
-    WIZOBJECTDATA data() const { return m_data; }
-    bool succeed() const { return m_bSucceed; }
-
-signals:
-    void downloadProgress(int totalSize, int loadedSize);
-
 private:
     CWizDatabaseManager& m_dbMgr;
     WIZOBJECTDATA m_data;
-    bool m_bSucceed;
-
-private Q_SLOTS:
-    void on_downloaded(bool bSucceed);
-};
-
-
-/* ------------------------- CWizObjectDataDownload ------------------------- */
-class CWizObjectDataDownloadWorker :  public QObject
-{
-    Q_OBJECT
-
-public:
-    CWizObjectDataDownloadWorker(CWizDatabaseManager& dbMgr, const WIZOBJECTDATA& data);
-    void startDownload();
-
+    //
 private:
-    CWizDatabaseManager& m_dbMgr;
-    WIZOBJECTDATA m_data;   // current downdowing object
-
-public Q_SLOTS:
-    void onTokenAcquired(const QString& strToken);
-
+    bool download();
+private Q_SLOTS:
+    void on_downloadProgress(int totalSize, int loadedSize);
 Q_SIGNALS:
-    void downloaded(bool succeeded);
-    void downloadProgress(int totalSize, int loadedSize);
+    void downloadDone(QString objectGuid, bool bSucceed);
+    void downloadProgress(QString objectGuid, int totalSize, int loadedSize);
 };
 
 

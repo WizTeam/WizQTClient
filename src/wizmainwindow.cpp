@@ -70,7 +70,6 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     , m_progress(new CWizProgressDialog(this))
     , m_settings(new CWizUserSettings(dbMgr.db()))
     , m_sync(new CWizKMSyncThread(dbMgr.db(), this))
-    , m_syncTimer(new QTimer(this))
     , m_searchIndexer(new CWizSearchIndexer(m_dbMgr))
     , m_upgrade(new CWizUpgrade())
     //, m_certManager(new CWizCertManager(*this))
@@ -120,18 +119,8 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
 
     // syncing thread
     connect(m_sync, SIGNAL(processLog(const QString&)), SLOT(on_syncProcessLog(const QString&)));
+    connect(m_sync, SIGNAL(syncStarted(bool)), SLOT(on_syncStarted(bool)));
     connect(m_sync, SIGNAL(syncFinished(int, QString)), SLOT(on_syncDone(int, QString)));
-    connect(m_syncTimer, SIGNAL(timeout()), SLOT(on_actionAutoSync_triggered()));
-    int nInterval = m_settings->syncInterval();
-    if (nInterval == 0) {
-        m_syncTimer->setInterval(15 * 60 * 1000);   // default 15 minutes
-    } else {
-        m_syncTimer->setInterval(nInterval * 60 * 1000);
-    }
-
-    if (nInterval != -1) {
-        QTimer::singleShot(3 * 1000, this, SLOT(on_actionAutoSync_triggered()));
-    }
 
     // misc settings
     //m_avatarDownloaderHost->setDefault(::WizGetSkinResourcePath(userSettings().skin()) + "avatar_default.png");
@@ -153,6 +142,8 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
 #endif // Q_OS_MAC
 
     WizService::NoteComments::init();
+    //
+    m_sync->start(QThread::IdlePriority);
 }
 
 bool MainWindow::eventFilter(QObject* watched, QEvent* event)
@@ -763,16 +754,12 @@ void MainWindow::init()
 
 void MainWindow::on_actionAutoSync_triggered()
 {
-    m_sync->startSync();
-    m_animateSync->startPlay();
-    m_syncTimer->stop();
+    m_sync->startSyncAll();
 }
 
 void MainWindow::on_actionSync_triggered()
 {
-    m_sync->startSync(false);
-    m_animateSync->startPlay();
-    m_syncTimer->stop();
+    m_sync->startSyncAll(false);
 }
 
 void MainWindow::on_syncLogined()
@@ -780,14 +767,25 @@ void MainWindow::on_syncLogined()
     // FIXME: show user notify message send from server
 }
 
+void MainWindow::on_syncStarted(bool syncAll)
+{
+    m_animateSync->startPlay();
+    //
+    if (syncAll)
+    {
+        qDebug() << "[Sync] Syncing all notes...";
+    }
+    else
+    {
+        qDebug() << "[Sync] Quick syncing notes...";
+    }
+}
+
 void MainWindow::on_syncDone(int nErrorCode, const QString& strErrorMsg)
 {
     Q_UNUSED(strErrorMsg);
 
     m_animateSync->stopPlay();
-    if (m_settings->syncInterval() != -1) {
-        m_syncTimer->start();
-    }
 
     // password changed
     if (nErrorCode == 301) {
@@ -1294,14 +1292,6 @@ void MainWindow::on_options_settingsChanged(WizOptionsType type)
         m_doc->settingsChanged();
     } else if (wizoptionsSync == type) {
 
-        int nInterval = m_settings->syncInterval();
-        if (nInterval == -1) {
-            m_syncTimer->stop();
-        } else {
-            nInterval = nInterval < 5 ? 5 : nInterval;
-            m_syncTimer->setInterval(nInterval * 60 * 1000);
-        }
-
     } else if (wizoptionsFont == type) {
         m_doc->web()->editorResetFont();
     }
@@ -1534,4 +1524,8 @@ void MainWindow::ProcessClipboardBeforePaste(const QVariantMap& data)
 //        QString strHtml = QString("<img border=\"0\" src=\"file://%1\" />").arg(strFileName);
 //        web()->editorCommandExecuteInsertHtml(strHtml, true);
 //    }
+}
+void MainWindow::quickSyncKb(const QString& kbGuid)
+{
+    CWizKMSyncThread::quickSyncKb(kbGuid);
 }

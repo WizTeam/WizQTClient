@@ -24,7 +24,7 @@ public:
     Token(const QString& strUserId = 0, const QString& strPasswd = 0);
     ~Token();
 
-    static const WIZUSERINFO& info();
+    static WIZUSERINFO info();
 
     static QString token(); // sync
     static void requestToken(); // async

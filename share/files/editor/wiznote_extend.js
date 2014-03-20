@@ -159,6 +159,11 @@ function WizGetLinkUrl() {
 //////////      WizTodoFunc
 
 
+function setDocumentModified() {
+	WizEditor.setModified(true);
+}
+
+
 var WizTodo = (function () {
 
     var WIZ_HTML_CLASS_WIZ_TODO = 'wiz-todo';
@@ -307,10 +312,12 @@ var WizTodo = (function () {
                     classValue += ' wiz-todo-label-checked';
                 }           
             }
+	    setDocumentModified();
             //          
             todoEle.src = imgSrc;
             todoEle.setAttribute('state', state);
             label.setAttribute('class', classValue);
+	    
         }
         //
         for (var i in todos) {
