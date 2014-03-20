@@ -238,7 +238,6 @@ private:
     QWebPage* m_page;
 };
 
-
 void CWizDocumentWebViewPage::triggerAction(QWebPage::WebAction typeAction, bool checked)
 {
     if (typeAction == QWebPage::Back || typeAction == QWebPage::Forward) {
@@ -692,6 +691,12 @@ void CWizDocumentWebView::initEditor()
     page()->mainFrame()->setHtml(strHtml, url);
 }
 
+void CWizDocumentWebView::initTodoListEnvironment()
+{
+    QString strScript = QString("WizTodo.init(%1, %2);").arg("editor.document").arg("window");
+    page()->mainFrame()->evaluateJavaScript(strScript);
+}
+
 void CWizDocumentWebView::onEditorLoadFinished(bool ok)
 {
     if (!ok) {
@@ -944,6 +949,7 @@ void CWizDocumentWebView::viewDocumentInEditor(bool editing)
 //    }
 
     //update();
+
 }
 
 void CWizDocumentWebView::onNoteLoadFinished()
@@ -973,7 +979,7 @@ void CWizDocumentWebView::setEditingDocument(bool editing)
     m_bEditingMode = editing;
 
     QString strScript = QString("setEditing(%1);").arg(editing ? "true" : "false");
-    page()->mainFrame()->evaluateJavaScript(strScript);
+    page()->mainFrame()->evaluateJavaScript(strScript);  
 
     if (editing) {
         setFocus(Qt::MouseFocusReason);
@@ -1243,6 +1249,17 @@ bool CWizDocumentWebView::editorCommandExecuteInsertHorizontal()
     return editorCommandExecuteCommand("horizontal");
 }
 
+bool CWizDocumentWebView::editorCommandExecuteInsertTodoList()
+{
+    QString strExec = "WizTodo.insertOneTodo();";
+    bool ret = page()->mainFrame()->evaluateJavaScript(strExec).toBool();
+
+    EditorUndoCommand * cmd = new EditorUndoCommand(page());
+    page()->undoStack()->push(cmd);
+
+    return ret;
+}
+
 bool CWizDocumentWebView::editorCommandExecuteInsertDate()
 {
     return editorCommandExecuteCommand("date");
@@ -1266,6 +1283,11 @@ bool CWizDocumentWebView::editorCommandExecuteFormatMatch()
 bool CWizDocumentWebView::editorCommandExecuteViewSource()
 {
     return editorCommandExecuteCommand("source");
+}
+
+QString CWizDocumentWebView::getDefaultImageFilePath() const
+{
+    return ::WizGetSkinResourcePath(m_app.userSettings().skin());
 }
 
 bool CWizDocumentWebView::editorCommandExecuteTableDelete()
@@ -1424,4 +1446,3 @@ void CWizDocumentWebViewLoaderThread::PeekCurrentDocGUID(QString& kbGUID, QStrin
     m_strCurrentKbGUID.clear();
     m_strCurrentDocGUID.clear();
 }
-

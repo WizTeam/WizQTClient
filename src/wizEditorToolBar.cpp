@@ -365,6 +365,11 @@ EditorToolBar::EditorToolBar(QWidget *parent)
     m_btnHorizontal->setIcon(::WizLoadSkinIcon(skin, "actionFormatInsertHorizontal"));
     connect(m_btnHorizontal, SIGNAL(clicked()), SLOT(on_btnHorizontal_clicked()));
 
+    m_btnTodoList = new CWizToolButton(this);
+    m_btnTodoList->setCheckable(false);
+    m_btnTodoList->setIcon(::WizLoadSkinIcon(skin, "actionFormatInsertTodoList"));
+    connect(m_btnTodoList, SIGNAL(clicked()), SLOT(on_btnTodoList_clicked()));
+
     QHBoxLayout* layout = new QHBoxLayout();
     layout->setContentsMargins(3, 0, 3, 0);
     layout->setAlignment(Qt::AlignBottom);
@@ -391,6 +396,7 @@ EditorToolBar::EditorToolBar(QWidget *parent)
     layout->addSpacing(12);
     layout->addWidget(m_btnTable);
     layout->addWidget(m_btnHorizontal);
+    layout->addWidget(m_btnTodoList);
     layout->addStretch();
 }
 
@@ -966,5 +972,12 @@ void EditorToolBar::on_btnHorizontal_clicked()
 {
     if (m_editor) {
         m_editor->editorCommandExecuteInsertHorizontal();
+    }
+}
+
+void EditorToolBar::on_btnTodoList_clicked()
+{
+    if (m_editor) {
+        m_editor->editorCommandExecuteInsertTodoList();
     }
 }
