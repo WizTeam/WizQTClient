@@ -900,6 +900,9 @@ bool CWizDocumentWebView::editorCommandExecuteCommand(const QString& strCommand,
     EditorUndoCommand * cmd = new EditorUndoCommand(page());
     page()->undoStack()->push(cmd);
 
+    //
+    setContentsChanged(true);
+
     return ret;
 }
 
