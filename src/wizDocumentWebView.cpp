@@ -558,6 +558,8 @@ void CWizDocumentWebView::onEditorPopulateJavaScriptWindowObject()
 
 void CWizDocumentWebView::onEditorContentChanged()
 {
+    setContentsChanged(true);
+    //
     Q_EMIT statusChanged();
 }
 
@@ -825,14 +827,16 @@ void CWizDocumentWebView::saveDocument(const WIZDOCUMENTDATA& data, bool force)
     if (!view()->noteLoaded())  //encrypting note & has been loaded
         return;
 
-    if (!force && !page()->isModified())
+    if (!force && !isContentsChanged())
         return;
 
     // check note permission
     if (!m_dbMgr.db(data.strKbGUID).CanEditDocument(data)) {
         return;
     }
-
+    //
+    setContentsChanged(false);
+    //
     QString strFileName = m_mapFile.value(data.strGUID);
     QString strHead = page()->mainFrame()->evaluateJavaScript("editor.document.head.innerHTML;").toString();
     QRegExp regHead("<link[^>]*" + m_strDefaultCssFilePath + "[^>]*>", Qt::CaseInsensitive);

@@ -152,6 +152,9 @@ public:
     bool editorCommandExecuteFontSize(const QString& strSize);
     bool editorCommandExecuteInsertHtml(const QString& strHtml, bool bNotSerialize);
 
+    //
+    Q_INVOKABLE bool isContentsChanged() { return m_bContentsChanged; }
+    Q_INVOKABLE void setContentsChanged(bool b) { m_bContentsChanged = b; }
 private:
     void initEditor();
     void viewDocumentInEditor(bool editing);
@@ -191,6 +194,8 @@ private:
     QString m_strCurrentNoteHead;
     QString m_strCurrentNoteHtml;
     bool m_bCurrentEditing;
+    //
+    bool m_bContentsChanged;
 
     CWizDocumentTransitionView* m_transitionView;
     CWizDocumentWebViewLoaderThread* m_docLoadThread;
