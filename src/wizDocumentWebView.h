@@ -152,6 +152,9 @@ public:
     bool editorCommandExecuteFontSize(const QString& strSize);
     bool editorCommandExecuteInsertHtml(const QString& strHtml, bool bNotSerialize);
 
+    //
+    Q_INVOKABLE bool isContentsChanged() { return m_bContentsChanged; }
+    Q_INVOKABLE void setContentsChanged(bool b) { m_bContentsChanged = b; }
 private:
     void initEditor();
     void viewDocumentInEditor(bool editing);
@@ -186,12 +189,13 @@ private:
     bool m_bEditingMode;
     bool m_bNewNote;
     bool m_bNewNoteTitleInited;
-    bool m_bModified;
     //
     QString m_strCurrentNoteGUID;
     QString m_strCurrentNoteHead;
     QString m_strCurrentNoteHtml;
     bool m_bCurrentEditing;
+    //
+    bool m_bContentsChanged;
 
     CWizDocumentTransitionView* m_transitionView;
     CWizDocumentWebViewLoaderThread* m_docLoadThread;
@@ -281,7 +285,6 @@ public Q_SLOTS:
 
     void initTodoListEnvironment();
     QString getDefaultImageFilePath() const;
-    void setModified(bool bModified);
 
 Q_SIGNALS:
     // signals for notify command reflect status, triggered when selection, focus, editing mode changed

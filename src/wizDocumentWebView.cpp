@@ -125,7 +125,6 @@ CWizDocumentWebView::CWizDocumentWebView(CWizExplorerApp& app, QWidget* parent)
     , m_bNewNoteTitleInited(false)
     , m_noteFrame(0)
     , m_bCurrentEditing(false)
-    , m_bModified(false)
 {
     CWizDocumentWebViewPage* page = new CWizDocumentWebViewPage(this);
     setPage(page);
@@ -564,6 +563,8 @@ void CWizDocumentWebView::onEditorPopulateJavaScriptWindowObject()
 
 void CWizDocumentWebView::onEditorContentChanged()
 {
+    setContentsChanged(true);
+    //
     Q_EMIT statusChanged();
 }
 
@@ -832,16 +833,16 @@ void CWizDocumentWebView::saveDocument(const WIZDOCUMENTDATA& data, bool force)
     if (!view()->noteLoaded())  //encrypting note & has been loaded
         return;
 
-    if (!force && !page()->isModified() && !m_bModified)
+    if (!force && !isContentsChanged())
         return;
 
     // check note permission
     if (!m_dbMgr.db(data.strKbGUID).CanEditDocument(data)) {
         return;
     }
-
-    m_bModified = false;
-
+    //
+    setContentsChanged(false);
+    //
     QString strFileName = m_mapFile.value(data.strGUID);
     QString strHead = page()->mainFrame()->evaluateJavaScript("editor.document.head.innerHTML;").toString();
     QRegExp regHead("<link[^>]*" + m_strDefaultCssFilePath + "[^>]*>", Qt::CaseInsensitive);
@@ -1127,10 +1128,6 @@ QString CWizDocumentWebView::getDefaultImageFilePath() const
     return ::WizGetSkinResourcePath(m_app.userSettings().skin());
 }
 
-void CWizDocumentWebView::setModified(bool bModified)
-{
-    m_bModified = bModified;
-}
 
 bool CWizDocumentWebView::editorCommandExecuteTableDelete()
 {
