@@ -1289,7 +1289,6 @@ void CWizDocumentWebViewLoaderThread::PeekCurrentDocGUID(QString& kbGUID, QStrin
     m_strCurrentDocGUID.clear();
 }
 
-
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
