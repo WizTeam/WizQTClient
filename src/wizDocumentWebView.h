@@ -280,7 +280,11 @@ public Q_SLOTS:
     bool editorCommandExecuteRemoveFormat();
     bool editorCommandExecuteFormatMatch();
     bool editorCommandExecuteInsertHorizontal();
+    bool editorCommandExecuteInsertTodoList();
     bool editorCommandExecuteViewSource();
+
+    void initTodoListEnvironment();
+    QString getDefaultImageFilePath() const;
 
 Q_SIGNALS:
     // signals for notify command reflect status, triggered when selection, focus, editing mode changed
