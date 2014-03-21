@@ -160,9 +160,8 @@ function WizGetLinkUrl() {
 
 
 function setDocumentModified() {
-	WizEditor.setModified(true);
+	WizEditor.setContentsChanged(true);
 }
-
 
 var WizTodo = (function () {
 
@@ -312,12 +311,11 @@ var WizTodo = (function () {
                     classValue += ' wiz-todo-label-checked';
                 }           
             }
-	    setDocumentModified();
+	        setDocumentModified();
             //          
             todoEle.src = imgSrc;
             todoEle.setAttribute('state', state);
             label.setAttribute('class', classValue);
-	    
         }
         //
         for (var i in todos) {
