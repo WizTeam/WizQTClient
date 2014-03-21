@@ -423,9 +423,10 @@ void CWizDocumentWebView::viewDocument(const WIZDOCUMENTDATA& doc, bool editing)
     m_bEditingMode = editing;
     m_bNewNote = doc.tCreated.secsTo(QDateTime::currentDateTime()) == 0 ? true : false;
     m_bNewNoteTitleInited = m_bNewNote ? false : true;
+    //
+    setContentsChanged(false);
 
     // ask extract and load
-//    m_workerPool->load(doc);
     m_docLoadThread->load(doc);
 }
 
@@ -438,7 +439,6 @@ void CWizDocumentWebView::reloadNoteData(const WIZDOCUMENTDATA& data)
         return;
 
     // reload may triggered when update from server or locally reflected by modify
-//    m_workerPool->load(data);
     m_docLoadThread->load(data);
 }
 

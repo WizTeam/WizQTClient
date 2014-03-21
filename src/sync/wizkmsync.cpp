@@ -270,7 +270,7 @@ bool CWizKMSyncThread::needQuickSync()
     QDateTime tNow = QDateTime::currentDateTime();
     int seconds = m_tLastKbModified.secsTo(tNow);
     //
-    if (seconds >= 10)
+    if (seconds >= 3)
         return true;
     //
     return false;
