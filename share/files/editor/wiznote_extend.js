@@ -203,9 +203,9 @@ var WizTodo = (function () {
 
     function pasteHtmlAtCaret(html, selectPastedContent) {
         var sel, range, retNode;
-        if (window.getSelection) {
+        if (document.getSelection) {
             // IE9 and non-IE
-            sel = window.getSelection();
+            sel = document.getSelection();
             if (sel.getRangeAt && sel.rangeCount) {
                 range = sel.getRangeAt(0);
                 range.deleteContents();
@@ -700,8 +700,6 @@ var WizTodo = (function () {
         setCaret(label);
         //
         reBindAction();
-
-        alert("In insertOneTodo");
     }
 
     function getParentTodoLabelElement(start) {

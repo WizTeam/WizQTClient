@@ -536,7 +536,7 @@ void CWizDocumentWebView::initEditor()
 
 void CWizDocumentWebView::initTodoListEnvironment()
 {
-    QString strScript = QString("WizTodo.init(%1, %2);").arg("editor.document").arg("window");
+    QString strScript = QString("WizTodo.init(%1, %2);").arg("editor.document").arg("editor");
     page()->mainFrame()->evaluateJavaScript(strScript);
 }
 
