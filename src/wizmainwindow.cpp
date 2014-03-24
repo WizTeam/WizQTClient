@@ -365,6 +365,7 @@ void MainWindow::on_editor_statusChanged()
         m_actions->actionFromName(WIZACTION_FORMAT_INSERT_HORIZONTAL)->setEnabled(false);
         m_actions->actionFromName(WIZACTION_FORMAT_INSERT_DATE)->setEnabled(false);
         m_actions->actionFromName(WIZACTION_FORMAT_INSERT_TIME)->setEnabled(false);
+        m_actions->actionFromName(WIZACTION_FORMAT_INSERT_TODOLIST)->setEnabled(false);
         m_actions->actionFromName(WIZACTION_FORMAT_REMOVE_FORMAT)->setEnabled(false);
         m_actions->actionFromName(WIZACTION_FORMAT_VIEW_SOURCE)->setEnabled(false);
 
@@ -509,6 +510,12 @@ void MainWindow::on_editor_statusChanged()
         m_actions->actionFromName(WIZACTION_FORMAT_VIEW_SOURCE)->setEnabled(false);
     } else {
         m_actions->actionFromName(WIZACTION_FORMAT_VIEW_SOURCE)->setEnabled(true);
+    }
+
+    if (-1 ==editor->editorCommandQueryCommandState("todoList")) {
+        m_actions->actionFromName(WIZACTION_FORMAT_INSERT_TODOLIST)->setEnabled(false);
+    } else {
+        m_actions->actionFromName(WIZACTION_FORMAT_INSERT_TODOLIST)->setEnabled(true);
     }
 }
 
@@ -984,6 +991,11 @@ void MainWindow::on_actionFormatRemoveFormat_triggered()
 void MainWindow::on_actionEditorViewSource_triggered()
 {
     m_doc->web()->editorCommandExecuteViewSource();
+}
+
+void MainWindow::on_actionFormatInsertTodoList_triggered()
+{
+    m_doc->web()->editorCommandExecuteInsertTodoList();
 }
 
 void MainWindow::on_actionConsole_triggered()

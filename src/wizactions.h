@@ -44,6 +44,7 @@ struct WIZACTION;
 #define WIZACTION_FORMAT_INSERT_TIME        "actionFormatInsertTime"
 #define WIZACTION_FORMAT_REMOVE_FORMAT      "actionFormatRemoveFormat"
 #define WIZACTION_FORMAT_VIEW_SOURCE        "actionEditorViewSource"
+#define WIZACTION_FORMAT_INSERT_TODOLIST    "actionFormatInsertTodoList"
 
 
 class CWizActions

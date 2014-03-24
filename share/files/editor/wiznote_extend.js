@@ -176,8 +176,8 @@ var WizTodo = (function () {
         var displayStyle = "";
         if (ele) { 
             try { 
-                if (windowEdit.getComputedStyle) {
-                    displayStyle = windowEdit.getComputedStyle(ele, null).getPropertyValue('display');
+                if (window.getComputedStyle) {
+                    displayStyle = window.getComputedStyle(ele, null).getPropertyValue('display');
                 } else {
                     displayStyle = ele.currentStyle.display;
                 }
@@ -297,9 +297,12 @@ var WizTodo = (function () {
         for (var i = ele.childNodes.length - 1; i >= 0; i --) {
             var child = ele.childNodes[i];
             //
-            if (child.nodeType == 3 && child.nodeValue == "") {
-                ele.removeChild(child);
+            if (child.nodeType == 3) {
+                if (child.nodeValue == "" || child.nodeValue == "&#8203;") {
+                    ele.removeChild(child);
+                }
             }
+
 
         }
     }
@@ -308,19 +311,32 @@ var WizTodo = (function () {
         if (!ele)
             return false;
         //
-        // if (ele.tagName.toString().toLowerCase() == 'body')
-        //  return true;
+        if (!ele.hasChildNodes())
+            return false;
+        //
         removeInvalidText(ele);
         //
-        var childnodes = ele.childNodes;
-        if (!childnodes || childnodes.length < 1 || !childnodes[0].getAttribute)
-            return false;
-        if (childnodes.length < 1)
-            return false;
+        var label = null;
+        var todoimg = null;
+        var child = ele.childNodes[0];
+        while (child) {
+            if (isLabel(child)) {
+                label = child;
+                break;
+            }
+            if (isTodoImage(child)) {
+                todoimg = child;
+                break;
+            }
+            //
+            if (!child.hasChildNodes())
+                break;
+            //
+            child = child.childNodes[0];
+        }
         //
-        var firstChild = childnodes[0];
-        if (-1 != getClassValue(firstChild).indexOf('wiz-todo-label')) {
-            var todoLabel = firstChild;
+        if (label) {
+            var todoLabel = label;
             removeInvalidText(todoLabel);
             //
             var childnodes = todoLabel.childNodes;
@@ -333,12 +349,13 @@ var WizTodo = (function () {
             if (-1 != getClassValue(childnodes[0]).indexOf(WIZ_HTML_CLASS_WIZ_TODO))
                 return true;
         }
-        else if (-1 != getClassValue(firstChild).indexOf(WIZ_HTML_CLASS_WIZ_TODO)) {
+        else if (todoimg) {
             return true;
         }
         //
         return false;
     }
+
 
     var g_canInsertWizTodo = false;
     function canInsertWizTodo() {

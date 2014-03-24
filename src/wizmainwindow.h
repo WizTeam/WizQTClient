@@ -226,6 +226,7 @@ public Q_SLOTS:
     void on_actionFormatInsertTime_triggered();
     void on_actionFormatRemoveFormat_triggered();
     void on_actionEditorViewSource_triggered();
+    void on_actionFormatInsertTodoList_triggered();
 
     void on_search_timeout();
     void on_searchProcess(const QString &strKeywords, const CWizDocumentDataArray& arrayDocument, bool bEnd);
