@@ -169,8 +169,16 @@ CWizDocumentWebView::CWizDocumentWebView(CWizExplorerApp& app, QWidget* parent)
 CWizDocumentWebView::~CWizDocumentWebView()
 {
     if (m_docLoadThread) {
+        m_docLoadThread->stop();
         m_docLoadThread->quit();
         m_docLoadThread->deleteLater();
+        m_docLoadThread = NULL;
+    }
+    if (m_docSaverThread) {
+        m_docSaverThread->stop();
+        m_docSaverThread->quit();
+        m_docSaverThread->deleteLater();
+        m_docSaverThread = NULL;
     }
 }
 
@@ -423,9 +431,10 @@ void CWizDocumentWebView::viewDocument(const WIZDOCUMENTDATA& doc, bool editing)
     m_bEditingMode = editing;
     m_bNewNote = doc.tCreated.secsTo(QDateTime::currentDateTime()) == 0 ? true : false;
     m_bNewNoteTitleInited = m_bNewNote ? false : true;
+    //
+    setContentsChanged(false);
 
     // ask extract and load
-//    m_workerPool->load(doc);
     m_docLoadThread->load(doc);
 }
 
@@ -438,7 +447,6 @@ void CWizDocumentWebView::reloadNoteData(const WIZDOCUMENTDATA& data)
         return;
 
     // reload may triggered when update from server or locally reflected by modify
-//    m_workerPool->load(data);
     m_docLoadThread->load(data);
 }
 
@@ -900,6 +908,9 @@ bool CWizDocumentWebView::editorCommandExecuteCommand(const QString& strCommand,
     EditorUndoCommand * cmd = new EditorUndoCommand(page());
     page()->undoStack()->push(cmd);
 
+    //
+    setContentsChanged(true);
+
     return ret;
 }
 
@@ -1229,6 +1240,7 @@ bool CWizDocumentWebView::editorCommandExecuteTableAverageCols()
 
 CWizDocumentWebViewLoaderThread::CWizDocumentWebViewLoaderThread(CWizDatabaseManager &dbMgr)
     : m_dbMgr(dbMgr)
+    , m_stop(false)
 {
 }
 
@@ -1241,17 +1253,33 @@ void CWizDocumentWebViewLoaderThread::load(const WIZDOCUMENTDATA &doc)
         start();
     }
 }
+void CWizDocumentWebViewLoaderThread::stop()
+{
+    m_stop = true;
+    //
+    m_waitForData.wakeAll();
+}
 
 void CWizDocumentWebViewLoaderThread::run()
 {
-    while (true) {
+    while (true)
+    {
+        if (m_stop)
+            return;
+        //
         QString kbGuid;
         QString docGuid;
         PeekCurrentDocGUID(kbGuid, docGuid);
+        if (m_stop)
+            return;
+        //
+        if (kbGuid.isEmpty())
+            continue;
         //
         CWizDatabase& db = m_dbMgr.db(kbGuid);
         WIZDOCUMENTDATA data;
-        if (!db.DocumentFromGUID(docGuid, data)) {
+        if (!db.DocumentFromGUID(docGuid, data))
+        {
             continue;
         }
         //
@@ -1295,6 +1323,7 @@ void CWizDocumentWebViewLoaderThread::PeekCurrentDocGUID(QString& kbGUID, QStrin
 
 CWizDocumentWebViewSaverThread::CWizDocumentWebViewSaverThread(CWizDatabaseManager &dbMgr)
     : m_dbMgr(dbMgr)
+    , m_stop(false)
 {
 }
 
@@ -1320,6 +1349,12 @@ void CWizDocumentWebViewSaverThread::save(const WIZDOCUMENTDATA& doc, const QStr
     }
 }
 
+void CWizDocumentWebViewSaverThread::stop()
+{
+    m_stop = true;
+    m_waitForData.wakeAll();
+}
+
 void CWizDocumentWebViewSaverThread::PeekData(SAVEDATA& data)
 {
     QMutexLocker locker(&m_mutex);
@@ -1327,10 +1362,15 @@ void CWizDocumentWebViewSaverThread::PeekData(SAVEDATA& data)
     //
     while (1)
     {
+        if (m_stop)
+            return;
+        //
         if (m_arrayData.empty())
         {
             m_waitForData.wait(&m_mutex);
         }
+        if (m_stop)
+            return;
         //
         if (m_arrayData.empty())
             continue;
@@ -1347,8 +1387,16 @@ void CWizDocumentWebViewSaverThread::run()
 {
     while (true)
     {
+        if (m_stop)
+            return;
+        //
         SAVEDATA data;
         PeekData(data);
+        if (m_stop)
+            return;
+        //
+        if (data.doc.strGUID.isEmpty())
+            continue;
         //
         CWizDatabase& db = m_dbMgr.db(data.doc.strKbGUID);
         //

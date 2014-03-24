@@ -36,6 +36,8 @@ public:
     CWizDocumentWebViewLoaderThread(CWizDatabaseManager& dbMgr);
 
     void load(const WIZDOCUMENTDATA& doc);
+    //
+    void stop();
 
 protected:
     virtual void run();
@@ -50,7 +52,7 @@ private:
     QString m_strCurrentDocGUID;
     QMutex m_mutex;
     QWaitCondition m_waitForData;
-
+    bool m_stop;
 };
 
 class CWizDocumentWebViewSaverThread : public QThread
@@ -61,6 +63,9 @@ public:
 
     void save(const WIZDOCUMENTDATA& doc, const QString& strHtml,
               const QString& strHtmlFile, int nFlags);
+
+    //
+    void stop();
 
 private:
     struct SAVEDATA
@@ -82,6 +87,7 @@ private:
     CWizDatabaseManager& m_dbMgr;
     QMutex m_mutex;
     QWaitCondition m_waitForData;
+    bool m_stop;
 };
 
 
