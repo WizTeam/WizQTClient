@@ -330,6 +330,8 @@ public:
     bool DeleteTagWithChildren(const WIZTAGDATA& data, bool bLog);
     bool DeleteAttachment(const WIZDOCUMENTATTACHMENTDATA& data, bool bLog, bool bReset = true);
 
+    bool IsDocumentModified(const CString& strGUID);
+    bool IsAttachmentModified(const CString& strGUID);
     bool IsDocumentDownloaded(const CString& strGUID);
     bool IsAttachmentDownloaded(const CString& strGUID);
     bool GetAllObjectsNeedToBeDownloaded(CWizObjectDataArray& arrayData, int nTimeLine);

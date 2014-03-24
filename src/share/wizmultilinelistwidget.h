@@ -14,6 +14,7 @@ public:
     virtual QString itemText(const QModelIndex& index, int line) const;
     virtual QColor itemTextColor(const QModelIndex& index, int line, bool selected, QColor defColor) const;
     virtual QPixmap itemImage(const QModelIndex& index) const;
+    virtual bool itemExtraImage(const QModelIndex& index, const QRect& itemBound, QRect& rcImage, QPixmap& extraPix) const;
     //
     int lineCount() const;
 };

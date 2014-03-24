@@ -6,6 +6,7 @@
 #include "token.h"
 
 #include "../share/wizDatabase.h"
+#include "sync_p.h"
 
 using namespace WizService;
 
@@ -62,75 +63,88 @@ void CWizKMSyncEvents::OnEndKb(const QString& strKbGUID)
 
 /* ---------------------------- CWizKMSyncThead ---------------------------- */
 
-#define FULL_SYNC_INTERVAL 15*60
+#define FULL_SYNC_INTERVAL 15 * 60
 
+static CWizKMSyncThread* g_pSyncThread = NULL;
 CWizKMSyncThread::CWizKMSyncThread(CWizDatabase& db, QObject* parent)
     : QThread(parent)
     , m_db(db)
-    , m_bNeedSyncAll(true)
+    , m_bNeedSyncAll(false)
     , m_pEvents(NULL)
     , m_bBackground(true)
+    , m_mutex(QMutex::Recursive)
 {
-    m_tLastSyncAll = QDateTime::currentDateTime();
+    int delaySeconds = - 15 * 60 + 10;   //delay for 10 seconds
+    m_tLastSyncAll = QDateTime::currentDateTime().addSecs(delaySeconds);
+    //
     m_pEvents = new CWizKMSyncEvents();
+    //
+    connect(m_pEvents, SIGNAL(messageReady(const QString&)), SIGNAL(processLog(const QString&)));
+    //
+    g_pSyncThread = this;
+}
+CWizKMSyncThread::~CWizKMSyncThread()
+{
+    g_pSyncThread = NULL;
 }
 
 void CWizKMSyncThread::run()
 {
-    doSync();
+    while (1)
+    {
+        if (m_pEvents->IsStop())
+            return;
+        //
+        if (doSync())
+        {
+        }
+        else
+        {
+            sleep(1);    //idle
+        }
+    }
 }
 
-void CWizKMSyncThread::startSync(bool bBackground)
+void CWizKMSyncThread::startSyncAll(bool bBackground)
 {
-    qDebug() << "[Sync]startSync, thread: " << QThread::currentThreadId();
-    if (isRunning()) {
-        qDebug() << "[Sync]syncing is started, request is schedued"; //FIXME: schedued request
-        return;
-    }
-
     m_bNeedSyncAll = true;
     m_bBackground = bBackground;
-
-    trySync();
 }
 
-void CWizKMSyncThread::trySync()
+
+bool CWizKMSyncThread::prepareToken()
 {
-    qDebug() << "[Sync]trySync, thread: " << QThread::currentThreadId();
-
-    connect(Token::instance(), SIGNAL(tokenAcquired(QString)), SLOT(onTokenAcquired(QString)), Qt::QueuedConnection);
-    Token::requestToken();
-}
-
-void CWizKMSyncThread::onTokenAcquired(const QString& strToken)
-{
-    qDebug() << "[Sync]token acquired, thread: " << QThread::currentThreadId();
-
-    Token::instance()->disconnect(this);
-
-    if (strToken.isEmpty()) {
+    QString token = Token::token();
+    if (token.isEmpty())
+    {
         Q_EMIT syncFinished(Token::lastErrorCode(), Token::lastErrorMessage());
-        return;
+        return false;
     }
-
+    //
     m_info = Token::info();
-
-    start(QThread::IdlePriority);
+    //
+    return true;
 }
 
-void CWizKMSyncThread::doSync()
+bool CWizKMSyncThread::doSync()
 {
-    qDebug() << "[Sync]syncing started, thread:" << QThread::currentThreadId();
-
     if (needSyncAll())
     {
+        qDebug() << "[Sync] syncing all started, thread:" << QThread::currentThreadId();
+
         syncAll();
         m_tLastSyncAll = QDateTime::currentDateTime();
+        return true;
     }
     else if (needQuickSync())
     {
+        qDebug() << "[Sync] quick syncing started, thread:" << QThread::currentThreadId();
+        //
         quickSync();
+        return true;
     }
+    //
+    return false;
 }
 
 bool CWizKMSyncThread::needSyncAll()
@@ -139,7 +153,8 @@ bool CWizKMSyncThread::needSyncAll()
         return true;
 
     QDateTime tNow = QDateTime::currentDateTime();
-    if (m_tLastSyncAll.secsTo(QDateTime::currentDateTime()) > FULL_SYNC_INTERVAL)
+    int seconds = m_tLastSyncAll.secsTo(tNow);
+    if (seconds > FULL_SYNC_INTERVAL)
     {
         m_bNeedSyncAll = true;
     }
@@ -147,20 +162,91 @@ bool CWizKMSyncThread::needSyncAll()
     return m_bNeedSyncAll;
 }
 
+
+class CWizKMSyncThreadHelper
+{
+    CWizKMSyncThread* m_pThread;
+public:
+    CWizKMSyncThreadHelper(CWizKMSyncThread* pThread, bool syncAll)
+        :m_pThread(pThread)
+    {
+        Q_EMIT m_pThread->syncStarted(syncAll);
+    }
+    ~CWizKMSyncThreadHelper()
+    {
+        Q_EMIT m_pThread->syncFinished(m_pThread->m_pEvents->GetLastErrorCode(), "");
+    }
+};
+
 bool CWizKMSyncThread::syncAll()
 {
     m_bNeedSyncAll = false;
+    //
+    CWizKMSyncThreadHelper helper(this, true);
+    Q_UNUSED(helper);
+    //
+    m_pEvents->SetLastErrorCode(0);
+    if (!prepareToken())
+        return false;
 
     syncUserCert();
 
-    connect(m_pEvents, SIGNAL(messageReady(const QString&)), SIGNAL(processLog(const QString&)));
-
-    m_pEvents->SetLastErrorCode(0);
     ::WizSyncDatabase(m_info, m_pEvents, &m_db, true, m_bBackground);
 
-    Q_EMIT syncFinished(m_pEvents->GetLastErrorCode(), "");
     return true;
 }
+
+
+bool CWizKMSyncThread::quickSync()
+{
+    CWizKMSyncThreadHelper helper(this, false);
+    //
+    Q_UNUSED(helper);
+    //
+    if (!prepareToken())
+        return false;
+    //
+    QString kbGuid;
+    while (peekQuickSyncKb(kbGuid))
+    {
+        if (kbGuid.isEmpty())
+        {
+            CWizKMSync syncPrivate(&m_db, m_info, m_pEvents, FALSE, TRUE, NULL);
+            //
+            if (syncPrivate.Sync())
+            {
+                m_db.SaveLastSyncTime();
+            }
+        }
+        else
+        {
+            WIZGROUPDATA group;
+            if (m_db.GetGroupData(kbGuid, group))
+            {
+                IWizSyncableDatabase* pGroupDatabase = m_db.GetGroupDatabase(group);
+                //
+                WIZUSERINFO userInfo = m_info;
+                userInfo.strDatabaseServer = group.strDatabaseServer;
+                userInfo.strKbGUID = group.strGroupGUID;
+                //
+                CWizKMSync syncGroup(pGroupDatabase, userInfo, m_pEvents, TRUE, TRUE, NULL);
+                //
+                if (syncGroup.Sync())
+                {
+                    pGroupDatabase->SaveLastSyncTime();
+                }
+                //
+                m_db.CloseGroupDatabase(pGroupDatabase);
+            }
+        }
+
+    }
+    //
+    //
+    return true;
+}
+
+
 
 // FIXME: remove this to syncing flow
 void CWizKMSyncThread::syncUserCert()
@@ -175,18 +261,54 @@ void CWizKMSyncThread::syncUserCert()
 
 bool CWizKMSyncThread::needQuickSync()
 {
+    QMutexLocker locker(&m_mutex);
+    Q_UNUSED(locker);
+    //
+    if (m_setQuickSyncKb.empty())
+        return false;
+    //
+    QDateTime tNow = QDateTime::currentDateTime();
+    int seconds = m_tLastKbModified.secsTo(tNow);
+    //
+    if (seconds >= 3)
+        return true;
+    //
     return false;
 }
 
-bool CWizKMSyncThread::quickSync()
-{
-    Q_EMIT syncFinished(0, NULL);
-    return true;
-}
 
 void CWizKMSyncThread::stopSync()
 {
     if (isRunning() && m_pEvents) {
         m_pEvents->SetStop(true);
     }
+}
+void CWizKMSyncThread::addQuickSyncKb(const QString& kbGuid)
+{
+    QMutexLocker locker(&m_mutex);
+    Q_UNUSED(locker);
+    //
+    m_setQuickSyncKb.insert(kbGuid);
+    //
+    m_tLastKbModified = QDateTime::currentDateTime();
+}
+
+bool CWizKMSyncThread::peekQuickSyncKb(QString& kbGuid)
+{
+    QMutexLocker locker(&m_mutex);
+    Q_UNUSED(locker);
+    //
+    if (m_setQuickSyncKb.empty())
+        return false;
+    //
+    kbGuid = *m_setQuickSyncKb.begin();
+    m_setQuickSyncKb.erase(m_setQuickSyncKb.begin());
+    return true;
+}
+void CWizKMSyncThread::quickSyncKb(const QString& kbGuid)
+{
+    if (!g_pSyncThread)
+        return;
+    //
+    g_pSyncThread->addQuickSyncKb(kbGuid);
 }

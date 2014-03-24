@@ -433,7 +433,7 @@ QModelIndex CWizCategoryBaseView::moveCursor(CursorAction cursorAction, Qt::Keyb
                 return indexFromItem(pBelow);
             }
         default:
-            Q_ASSERT(false);
+            //Q_ASSERT(false);
             break;
         }
     }
@@ -540,7 +540,7 @@ void CWizCategoryView::initMenus()
 
     QAction* actionTrash = new QAction("ActionEmptyTrash", this);
     actionTrash->setShortcutContext(Qt::WidgetShortcut);
-    actionDeleteItem->setShortcut(QKeySequence("Ctrl+Shift+Delete"));
+    actionTrash->setShortcut(QKeySequence("Ctrl+Shift+Delete"));
     actionTrash->setData(ActionEmptyTrash);
     addAction(actionTrash);
     connect(actionTrash, SIGNAL(triggered()), SLOT(on_action_emptyTrash()));

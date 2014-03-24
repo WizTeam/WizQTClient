@@ -34,6 +34,7 @@ public:
     void setKbGUID(const QString& guid) { m_strKbGUID = guid; }
 
     QString GetDatabasePath() const { return m_strFileName; }
+    virtual QString GetDefaultNoteLocation() const { return LOCATION_DEFAULT; }
 
     /* Raw query*/
 

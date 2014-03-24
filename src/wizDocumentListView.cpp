@@ -752,6 +752,7 @@ void CWizDocumentListView::on_action_deleteDocument()
 {
     QList<QListWidgetItem*> items = selectedItems();
 
+    blockSignals(true);
     int index = -1;
     foreach (QListWidgetItem* it, items) {
         if (CWizDocumentListViewItem* item = dynamic_cast<CWizDocumentListViewItem*>(it)) {
@@ -764,6 +765,7 @@ void CWizDocumentListView::on_action_deleteDocument()
             doc.Delete();
         }
     }
+    blockSignals(false);
 
     //change to next document
     int nItemCount = count();
@@ -771,6 +773,7 @@ void CWizDocumentListView::on_action_deleteDocument()
     {
         index = nItemCount - 1;
     }
+
     if(-1 < index)
     {
         setItemSelected(documentItemAt(index), true);

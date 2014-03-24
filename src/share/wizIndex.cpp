@@ -2367,7 +2367,13 @@ bool CWizIndex::ModifyObjectVersion(const CString& strGUID, const CString& strTy
 		strKeyFieldName, 
         STR2SQL(strGUID));
 
-	return ExecSQL(strSQL);
+    return ExecSQL(strSQL);
+}
+
+bool CWizIndex::IsObjectDataModified(const CString& strGUID, const CString& strType)
+{
+    qint64 nVersion = GetObjectLocalVersion(strGUID, strType);
+    return  -1 == nVersion;
 }
 
 bool CWizIndex::ModifyObjectModifiedTime(const CString& strGUID, const CString& strType, const COleDateTime& t)

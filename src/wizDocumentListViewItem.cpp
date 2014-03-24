@@ -10,6 +10,7 @@
 #include "wizDocumentListView.h"
 #include "share/wizDatabaseManager.h"
 #include "share/wizDatabase.h"
+#include "share/wizsettings.h"
 #include "wizPopupButton.h"
 
 #include "thumbcache.h"
@@ -216,6 +217,7 @@ void CWizDocumentListViewItem::draw(QPainter* p, const QStyleOptionViewItemV4* v
 {
     int nItemType = itemType();
     draw_impl(p, vopt, nItemType, nViewType);
+    drawSyncStatus(p, vopt, nViewType);
 }
 
 void CWizDocumentListViewItem::draw_impl(QPainter* p, const QStyleOptionViewItemV4* vopt, int nItemType, int nViewType) const
@@ -355,4 +357,34 @@ void CWizDocumentListViewItem::drawOneLineView_impl(QPainter* p, const  QStyleOp
 
     int nType = m_data.doc.nProtected ? Utils::StyleHelper::BadgeEncryted : Utils::StyleHelper::BadgeNormal;
     Utils::StyleHelper::drawListViewItemThumb(p, rcd, nType, m_data.doc.strTitle, NULL, NULL, bFocused, bSelected);
+}
+
+void CWizDocumentListViewItem::drawSyncStatus(QPainter* p, const QStyleOptionViewItemV4* vopt, int nViewType) const
+{
+    Q_UNUSED(nViewType);
+
+    QString strIconPath;
+    CWizDatabase& db = m_app.databaseManager().db(m_data.doc.strKbGUID);
+    if (db.IsDocumentModified(m_data.doc.strGUID))
+    {
+        strIconPath = ::WizGetSkinResourcePath(m_app.userSettings().skin()) + "uploading.bmp";
+    }
+    else if (!db.IsDocumentDownloaded(m_data.doc.strGUID))
+    {
+        strIconPath = ::WizGetSkinResourcePath(m_app.userSettings().skin()) + "downloading.bmp";
+    }
+    else
+        return;
+
+    p->save();
+    int nMargin = -1;
+    QPixmap fullPic(strIconPath);
+    QPixmap pix = fullPic.copy(0, 0, fullPic.height(), fullPic.height());
+    pix.setMask(pix.createMaskFromColor(Qt::black, Qt::MaskInColor));
+    QRect rcSync(vopt->rect.right() - pix.width() - nMargin, vopt->rect.bottom() - pix.height() - nMargin,
+                 pix.width(), pix.height());
+    p->drawPixmap(rcSync, pix);
+    p->restore();
+
+    return;
 }

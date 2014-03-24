@@ -68,6 +68,7 @@ private:
     void drawPrivateTwoLineView_impl(QPainter* p, const QStyleOptionViewItemV4* vopt) const;
     void drawGroupTwoLineView_impl(QPainter* p, const QStyleOptionViewItemV4* vopt) const;
     void drawOneLineView_impl(QPainter* p, const  QStyleOptionViewItemV4* vopt) const;
+    void drawSyncStatus(QPainter* p, const QStyleOptionViewItemV4* vopt, int nViewType) const;
 
 private:
     CWizExplorerApp& m_app;

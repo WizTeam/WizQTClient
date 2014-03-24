@@ -66,6 +66,7 @@ private:
     bool m_bLocked; // note is force locked as readonly status
     bool m_bEditingMode; // true: editing mode, false: reading mode
     int m_viewMode; // user defined editing mode
+    bool m_noteLoaded;
 
 public:
     const WIZDOCUMENTDATA& note() const { return m_note; }
@@ -75,6 +76,7 @@ public:
     bool reload();
     void reloadNote();
     void setEditorFocus();
+    bool noteLoaded() const { return m_noteLoaded; }
 
     void initStat(const WIZDOCUMENTDATA& data, bool bEditing);
     void viewNote(const WIZDOCUMENTDATA& data, bool forceEdit);

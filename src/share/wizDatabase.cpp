@@ -2317,6 +2317,16 @@ bool CWizDatabase::DeleteAttachment(const WIZDOCUMENTATTACHMENTDATA& data,
     return bRet;
 }
 
+bool CWizDatabase::IsDocumentModified(const CString& strGUID)
+{
+    return CWizIndex::IsObjectDataModified(strGUID, "document");
+}
+
+bool CWizDatabase::IsAttachmentModified(const CString& strGUID)
+{
+    return CWizIndex::IsObjectDataModified(strGUID, "attachment");
+}
+
 bool CWizDatabase::IsDocumentDownloaded(const CString& strGUID)
 {
     return CWizIndex::IsObjectDataDownloaded(strGUID, "document");

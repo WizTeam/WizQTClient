@@ -20,7 +20,7 @@ WIZUSERINFO::WIZUSERINFO(const WIZUSERINFO& info)
     strChatUrl = info.strChatUrl;
     strDownloadUrl = info.strDownloadUrl;
     bEnableGroup = info.bEnableGroup;
-    tTokenExpried = info.tTokenExpried;
+    //tTokenExpried = info.tTokenExpried;
     strInviteCode = info.strInviteCode;
     strMywizEmail = info.strMywizEmail;
     strNoticeLink = info.strNoticeLink;

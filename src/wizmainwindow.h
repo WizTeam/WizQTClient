@@ -91,7 +91,6 @@ private:
     CWizUserSettings* m_settings;
     QPointer<CWizKMSyncThread> m_sync;
     QPointer<CWizUserVerifyDialog> m_userVerifyDialog;
-    QPointer<QTimer> m_syncTimer;
     QPointer<CWizConsoleDialog> m_console;
     QPointer<CWizUpgrade> m_upgrade;
     QPointer<CWizUserCipherForm> m_cipherForm;
@@ -160,17 +159,18 @@ public:
     void showClient(bool visible) const { return m_doc->showClient(visible); }
 
     CWizActions* actions() const { return m_actions; }
-    CWizUserCipherForm* cipherForm() const { return m_cipherForm; }
     //CWizDownloadObjectDataDialog* objectDownloadDialog() const { return m_objectDownloadDialog; }
     CWizObjectDataDownloaderHost* downloaderHost() const { return m_objectDownloaderHost; }
     //CWizUserAvatarDownloaderHost* avatarHost() const { return m_avatarDownloaderHost; }
     CWizProgressDialog* progressDialog() const { return m_progress; }
     CWizDocumentTransitionView* transitionView() const { return m_transitionView; }
+    CWizUserCipherForm* cipherForm() const { return m_cipherForm; }
 
     void resetPermission(const QString& strKbGUID, const QString& strDocumentOwner);
     void viewDocument(const WIZDOCUMENTDATA& data, bool addToHistory);
     void locateDocument(const WIZDOCUMENTDATA& data);
-
+    //
+    static void quickSyncKb(const QString& kbGuid);
 #ifndef Q_OS_MAC
     CWizFixedSpacer* findFixedSpacer(int index);
     void adjustToolBarSpacerToPos(int index, int pos);
@@ -247,6 +247,7 @@ public Q_SLOTS:
     void on_options_settingsChanged(WizOptionsType type);
 
     void on_syncLogined();
+    void on_syncStarted(bool syncAll);
     void on_syncDone(int nErrorcode, const QString& strErrorMsg);
     void on_syncDone_userVerified();
 

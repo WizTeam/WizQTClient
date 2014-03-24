@@ -44,6 +44,7 @@ protected:
     virtual int imageWidth() const;
     virtual QString itemText(const QModelIndex& index, int line) const;
     virtual QPixmap itemImage(const QModelIndex& index) const;
+    virtual bool itemExtraImage(const QModelIndex& index, const QRect& itemBound, QRect& rcImage, QPixmap& extraPix) const;
 
     virtual void contextMenuEvent(QContextMenuEvent * e);
 
