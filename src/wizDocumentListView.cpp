@@ -940,8 +940,6 @@ void CWizDocumentListView::wheelEvent(QWheelEvent* event)
         //return;
     //}
 
-#ifdef Q_OS_MAC
-
     int delta = event->delta();
     switch (m_nViewType)
     {
@@ -961,9 +959,6 @@ void CWizDocumentListView::wheelEvent(QWheelEvent* event)
                                           event->modifiers(),
                                           event->orientation());
     QListWidget::wheelEvent(newEvent);
-#else
-    QListWidget::wheelEvent(event);
-#endif
 }
 
 void CWizDocumentListView::vscrollBeginUpdate(int delta)
