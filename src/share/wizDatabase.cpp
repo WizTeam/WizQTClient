@@ -1503,6 +1503,7 @@ bool CWizDatabase::GetGroupData(const QString& groupGUID, WIZGROUPDATA& group)
     group.bizGUID = GetMetaDef(g_strGroupSection, groupGUID + "_BizName");
     group.bOwn = GetMetaDef(g_strGroupSection, groupGUID + "_Own") == "1";
     group.nUserGroup = GetMetaDef(g_strGroupSection, groupGUID + "_Role", QString::number(WIZ_USERGROUP_MAX)).toInt();
+    group.strDatabaseServer = GetMetaDef(g_strGroupSection, group.strGroupGUID + "_DatabaseServer");
     //
     if (group.bizGUID.isEmpty())
     {
@@ -1566,6 +1567,7 @@ bool CWizDatabase::SetUserGroupInfo(const CWizGroupDataArray& arrayGroup)
         SetMeta(g_strGroupSection, group.strGroupGUID + "_BizName", group.bizGUID);
         SetMeta(g_strGroupSection, group.strGroupGUID + "_Own", group.bOwn ? "1" : "0");
         SetMeta(g_strGroupSection, group.strGroupGUID + "_Role", QString::number(group.nUserGroup));
+        SetMeta(g_strGroupSection, group.strGroupGUID + "_DatabaseServer", group.strDatabaseServer);
     }
 
     return true;

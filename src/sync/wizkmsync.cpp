@@ -226,11 +226,12 @@ bool CWizKMSyncThread::quickSync()
                 IWizSyncableDatabase* pGroupDatabase = m_db.GetGroupDatabase(group);
                 //
                 WIZUSERINFO userInfo = m_info;
-                //userInfo.strDatabaseServer = group.strDatabaseServer;
-                QString token = WizService::Token::token();
-                userInfo.strToken = token;
                 userInfo.strKbGUID = group.strGroupGUID;
-                userInfo.strDatabaseServer = WizService::ApiEntry::kUrlFromGuid(token, userInfo.strKbGUID);
+                userInfo.strDatabaseServer = group.strDatabaseServer;
+                if (userInfo.strDatabaseServer.isEmpty())
+                {
+                    userInfo.strDatabaseServer = WizService::ApiEntry::kUrlFromGuid(userInfo.strToken, userInfo.strKbGUID);
+                }
                 //
                 CWizKMSync syncGroup(pGroupDatabase, userInfo, m_pEvents, TRUE, TRUE, NULL);
                 //
