@@ -1231,7 +1231,7 @@ void CWizDatabase::SetFolders(const QString& strFolders, qint64 nVersion, bool b
 
     std::set<CString> setLocalFolders;
     CWizStdStringArray arrayLocation;
-    GetAllLocations(arrayLocation);
+    GetAllLocationsWithExtra(arrayLocation);
 
     for (CWizStdStringArray::const_iterator it = arrayLocation.begin();
          it != arrayLocation.end();
@@ -1269,8 +1269,10 @@ void CWizDatabase::SetFolders(const QString& strFolders, qint64 nVersion, bool b
         {
             // local exists, server does not exists, delete local folders.
             int nSize = 0;
-            if (GetDocumentsSizeByLocation(strLocation, nSize, true)) {
-                if (nSize == 0) {
+            if (GetDocumentsCountByLocation(strLocation, nSize, true))
+            {
+                if (nSize == 0)
+                {
                     DeleteExtraFolder(strLocation);
                 }
             }

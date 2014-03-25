@@ -1873,8 +1873,8 @@ bool CWizIndex::GetDocumentsByTags(bool bAnd, const CString& strLocation,
 	return SQLToDocumentDataArray(strSQL, arrayDocument);
 }
 
-bool CWizIndex::GetDocumentsSizeByLocation(const CString& strLocation,
-                                           int& size,
+bool CWizIndex::GetDocumentsCountByLocation(const CString& strLocation,
+                                           int& count,
                                            bool bIncludeSubFolders /* = false */)
 {
     CString strWhere;
@@ -1887,7 +1887,7 @@ bool CWizIndex::GetDocumentsSizeByLocation(const CString& strLocation,
     }
 
     CString strSQL = FormatQuerySQL(TABLE_NAME_WIZ_DOCUMENT, "COUNT(*)", strWhere);
-    return SQLToSize(strSQL, size);
+    return SQLToSize(strSQL, count);
 }
 
 bool CWizIndex::GetDocumentsByLocation(const CString& strLocation,
@@ -3489,6 +3489,24 @@ bool CWizIndex::GetAllLocations(CWizStdStringArray& arrayLocation)
 {
     QString strSQL = "select distinct DOCUMENT_LOCATION from WIZ_DOCUMENT";
 	return SQLToStringArray(strSQL, 0, arrayLocation);
+}
+
+void CWizIndex::GetAllLocationsWithExtra(CWizStdStringArray& arrayLocation)
+{
+    GetAllLocations(arrayLocation);
+
+    CWizStdStringArray arrayExtra;
+    GetExtraFolder(arrayExtra);
+    //
+    for (CWizStdStringArray::const_iterator it = arrayExtra.begin();
+         it != arrayExtra.end();
+         it++)
+    {
+        if (::WizFindInArray(arrayLocation, *it) == -1)
+        {
+            arrayLocation.push_back(*it);
+        }
+    }
 }
 
 bool CWizIndex::GetAllChildLocations(const CString& strLocation, CWizStdStringArray& arrayLocation)
