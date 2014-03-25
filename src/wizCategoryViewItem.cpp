@@ -970,8 +970,7 @@ bool CWizCategoryViewGroupRootItem::accept(CWizDatabase& db, const WIZDOCUMENTDA
     if (db.IsInDeletedItems(data.strLocation))
         return false;
 
-    QString strTagGUIDs = db.GetDocumentTagGUIDsString(data.strGUID);
-    if (strTagGUIDs.isEmpty() && data.strKbGUID == kbGUID())
+    if (data.strKbGUID == kbGUID())
         return true;
 
     return false;
