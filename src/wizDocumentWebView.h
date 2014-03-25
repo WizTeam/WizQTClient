@@ -90,6 +90,24 @@ private:
     bool m_stop;
 };
 
+class JSEnvironmentHelper : public QObject
+{
+    Q_OBJECT
+public:
+    JSEnvironmentHelper(CWizExplorerApp& app, CWizDatabaseManager& dbMgr, Core::CWizDocumentView* view);
+
+public slots:
+    QString getDefaultImageFilePath() const;
+    QString getUserAvatarFilePath() const;
+    QString getUserAlias() ;
+    QString getFormatedDateTime() const;
+    bool isPersonalDocument();
+
+private:
+    CWizExplorerApp& m_app;
+    CWizDatabaseManager& m_dbMgr;
+    Core::CWizDocumentView* m_view;
+};
 
 class CWizDocumentWebViewPage: public QWebPage
 {
@@ -211,6 +229,7 @@ private:
     QPointer<CWizEditorInsertTableForm> m_editorInsertTableForm;
     QPointer<QColorDialog> m_colorDialog;
 
+    JSEnvironmentHelper *m_jsHelper;
 public:
     Q_INVOKABLE void onNoteLoadFinished(); // editor callback
 
@@ -289,8 +308,8 @@ public Q_SLOTS:
     bool editorCommandExecuteInsertTodoList();
     bool editorCommandExecuteViewSource();
 
+    // js func
     void initTodoListEnvironment();
-    QString getDefaultImageFilePath() const;
 
 Q_SIGNALS:
     // signals for notify command reflect status, triggered when selection, focus, editing mode changed
@@ -303,6 +322,5 @@ Q_SIGNALS:
 
     void requestShowContextMenu(const QPoint& pos);
 };
-
 
 #endif // WIZDOCUMENTWEBVIEW_H
