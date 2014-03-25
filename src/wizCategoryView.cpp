@@ -2025,8 +2025,9 @@ void CWizCategoryView::initFolders()
     addTopLevelItem(pAllFoldersItem);
 
     CWizStdStringArray arrayAllLocation;
-    m_dbMgr.db().GetAllLocations(arrayAllLocation);
+    m_dbMgr.db().GetAllLocationsWithExtra(arrayAllLocation);
 
+    /*
     // folder cache
     CWizStdStringArray arrayExtLocation;
     m_dbMgr.db().GetExtraFolder(arrayExtLocation);
@@ -2040,6 +2041,7 @@ void CWizCategoryView::initFolders()
             }
         }
     }
+    */
 
     if (arrayAllLocation.empty()) {
         arrayAllLocation.push_back(m_dbMgr.db().GetDefaultNoteLocation());

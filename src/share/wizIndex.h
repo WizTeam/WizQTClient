@@ -179,6 +179,7 @@ public:
     bool IsLocationEmpty(const CString& strLocation);
     bool GetAllLocations(CWizStdStringArray& arrayLocation);
     bool GetAllChildLocations(const CString& strLocation, CWizStdStringArray& arrayLocation);
+    void GetAllLocationsWithExtra(CWizStdStringArray& arrayLocation);
 
     // Extend
     bool GetSync(const CString& strLocation);
@@ -256,8 +257,8 @@ public:
     bool GetDocumentsByGUIDs(const CWizStdStringArray& arrayGUID, CWizDocumentDataArray& arrayDocument);
 
     // Query by location(folder)
-    bool GetDocumentsSizeByLocation(const CString& strLocation,
-                                    int& size,
+    bool GetDocumentsCountByLocation(const CString& strLocation,
+                                    int& count,
                                     bool bIncludeSubFolders = false);
 
     bool GetDocumentsByLocation(const CString& strLocation,
