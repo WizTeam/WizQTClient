@@ -1476,7 +1476,7 @@ QString JSEnvironmentHelper::getUserAlias()
 QString JSEnvironmentHelper::getFormatedDateTime() const
 {
     COleDateTime time = QDateTime::currentDateTime();
-    return ::WizDateTimeToString(time);
+    return ::WizDateToLocalString(time);
 }
 
 bool JSEnvironmentHelper::isPersonalDocument()
