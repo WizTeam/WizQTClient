@@ -51,6 +51,7 @@ public:
     void load(const QString& strUserGUID, bool bForce);
     bool avatar(const QString& strUserId, QPixmap* pixmap);
     QPixmap orgAvatar(const QString& strUserId);
+    bool customSizeAvatar(const QString& strUserGUID, int width, int height, QString& strFilePath);
 
     bool isLoaded(const QString& strUserId);
     QString keyFromGuid(const QString& strUserGUID) const;
@@ -70,7 +71,6 @@ private:
     //
     QPixmap loadOrg(const QString& strUserGUID, bool bForce);
     QPixmap loadOrg(const QString& strUserGUID);
-
 
     void download_impl();
 

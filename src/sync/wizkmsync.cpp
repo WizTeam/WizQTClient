@@ -203,12 +203,12 @@ bool CWizKMSyncThread::quickSync()
     //
     Q_UNUSED(helper);
     //
-    if (!prepareToken())
-        return false;
-    //
     QString kbGuid;
     while (peekQuickSyncKb(kbGuid))
     {
+        if (!prepareToken())
+            return false;
+
         if (kbGuid.isEmpty())
         {
             CWizKMSync syncPrivate(&m_db, m_info, m_pEvents, FALSE, TRUE, NULL);

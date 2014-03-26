@@ -26,6 +26,7 @@ public:
     static QPixmap orgAvatar(const QString& strUserId);
     static QString keyFromGuid(const QString& strUserGUID);
     static QString defaultKey();
+    static bool customSizeAvatar(const QString& strUserGUID, int width, int height, QString& strFileName);
 
 Q_SIGNALS:
     void loaded(const QString& strUserGUID);

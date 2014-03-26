@@ -1455,8 +1455,8 @@ BOOL WizStringSimpleSplit(const CString& str, char ch, CString& strLeft, CString
 
 CString WizDateToLocalString(const COleDateTime& t)
 {
-    Q_UNUSED(t);
-    return CString();
+    COleDateTime localDateTime = t.toLocalTime();
+    return localDateTime.toString(Qt::DefaultLocaleShortDate);
 }
 
 intptr_t WizStrStrI_Pos(const CString& str, const CString& strFind, int nStart /*= 0*/)
