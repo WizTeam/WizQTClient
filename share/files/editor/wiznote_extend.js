@@ -1027,7 +1027,7 @@ var WizTodo = (function () {
             style.parentElement.removeChild(style);
         }
         //
-        var strStyle = '.wiz-todo {cursor: default; padding: 0 8px 0 2px; } .wiz-todo-label-checked { text-decoration: line-through; color: #666;} .wiz-todo-label-unchecked {text-decoration: initial;}';
+        var strStyle = '.wiz-todo {cursor: default; padding: 0 8px 0 2px; vertical-align: -10%;} .wiz-todo-label-checked { text-decoration: line-through; color: #666;} .wiz-todo-label-unchecked {text-decoration: initial;} .wiz-todo-completed-info {padding-left: 8px; font-style:italic;} .wiz-todo-avatar { vertical-align: -10%; padding-right:4px;}';
         //
         var objStyle = document.createElement('style');
         objStyle.type = 'text/css';

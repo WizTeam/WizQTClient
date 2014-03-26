@@ -556,7 +556,8 @@ QString MainWindow::getFormatedDateTime() const
 bool MainWindow::isPersonalDocument() const
 {
     QString strKbGUID = m_doc->note().strKbGUID;
-    return strKbGUID.isEmpty();
+    QString dbKbGUID = m_dbMgr.db().kbGUID();
+    return strKbGUID.isEmpty() || (strKbGUID == dbKbGUID);
 }
 
 void MainWindow::initToolBar()
