@@ -9,6 +9,7 @@
 #include <QEvent>
 #include <QHBoxLayout>
 #include <QLabel>
+#include <QFileDialog>
 
 #ifdef Q_OS_MAC
 #include <Carbon/Carbon.h>
@@ -1110,6 +1111,18 @@ void MainWindow::on_actionResetSearch_triggered()
     m_category->restoreSelection();
 }
 
+void MainWindow::on_actionSaveAsPDF_triggered()
+{
+    if (CWizDocumentWebView* web = m_doc->web())
+    {
+        QString fileName = QFileDialog::getSaveFileName (this, QString(), QString(), tr("PDF Files (*.pdf)"));
+        if (!fileName.isEmpty())
+        {
+            web->saveAsPDF(fileName);
+        }
+    }
+}
+
 //void MainWindow::on_searchDocumentFind(const WIZDOCUMENTDATAEX& doc)
 //{
 //    m_documents->addDocument(doc, true);
@@ -1118,323 +1131,323 @@ void MainWindow::on_actionResetSearch_triggered()
 
 void MainWindow::on_search_doSearch(const QString& keywords)
 {
-    if (keywords.isEmpty()) {
-        on_actionResetSearch_triggered();
-        return;
-    }
+if (keywords.isEmpty()) {
+on_actionResetSearch_triggered();
+return;
+}
 
-    if (m_searcher) {
-        m_searcher->disconnect(this);
-        m_searcher->abort();
-        m_searchThread.quit();
-    }
+if (m_searcher) {
+m_searcher->disconnect(this);
+m_searcher->abort();
+m_searchThread.quit();
+}
 
-    m_category->saveSelection();
-    m_documents->clear();
+m_category->saveSelection();
+m_documents->clear();
 
-    if (!m_searchTimer) {
-        m_searchTimer = new QTimer(this);
-        m_searchTimer->setSingleShot(true);
-        m_searchTimer->setInterval(300);
-        connect(m_searchTimer, SIGNAL(timeout()), SLOT(on_search_timeout()));
-    }
+if (!m_searchTimer) {
+m_searchTimer = new QTimer(this);
+m_searchTimer->setSingleShot(true);
+m_searchTimer->setInterval(300);
+connect(m_searchTimer, SIGNAL(timeout()), SLOT(on_search_timeout()));
+}
 
-    m_strSearchKeywords = keywords;
-    m_searchTimer->start();
+m_strSearchKeywords = keywords;
+m_searchTimer->start();
 }
 
 void MainWindow::on_search_timeout()
 {
-    if (m_searcher) {
-        m_searchTimer->start();
-        return;
-    }
+if (m_searcher) {
+m_searchTimer->start();
+return;
+}
 
-    m_searcher = new CWizSearcher(m_dbMgr);
-    connect(m_searcher, SIGNAL(searchProcess(const QString&, const CWizDocumentDataArray&, bool)),
-            SLOT(on_searchProcess(const QString&, const CWizDocumentDataArray&, bool)));
+m_searcher = new CWizSearcher(m_dbMgr);
+connect(m_searcher, SIGNAL(searchProcess(const QString&, const CWizDocumentDataArray&, bool)),
+    SLOT(on_searchProcess(const QString&, const CWizDocumentDataArray&, bool)));
 
-    m_searcher->moveToThread(&m_searchThread);
-    connect(&m_searchThread, SIGNAL(finished()), m_searcher, SLOT(deleteLater()));
-    m_searchThread.start();
+m_searcher->moveToThread(&m_searchThread);
+connect(&m_searchThread, SIGNAL(finished()), m_searcher, SLOT(deleteLater()));
+m_searchThread.start();
 
-    m_searcher->search(m_strSearchKeywords, 10000);
+m_searcher->search(m_strSearchKeywords, 10000);
 }
 
 void MainWindow::on_searchProcess(const QString& strKeywords, const CWizDocumentDataArray& arrayDocument, bool bEnd)
 {
-    //Q_ASSERT(m_searcher);
+//Q_ASSERT(m_searcher);
 
-    if (bEnd) {
-        m_searchThread.exit();
-    }
+if (bEnd) {
+m_searchThread.exit();
+}
 
-    if (strKeywords != m_strSearchKeywords) {
-        return;
-    }
+if (strKeywords != m_strSearchKeywords) {
+return;
+}
 
-    m_documents->addDocuments(arrayDocument);
-    on_documents_itemSelectionChanged();
+m_documents->addDocuments(arrayDocument);
+on_documents_itemSelectionChanged();
 }
 
 #ifndef Q_OS_MAC
 void MainWindow::on_actionPopupMainMenu_triggered()
 {
-    QAction* pAction = m_actions->actionFromName("actionPopupMainMenu");
-    QRect rc = m_toolBar->actionGeometry(pAction);
-    QPoint pt = m_toolBar->mapToGlobal(QPoint(rc.left(), rc.bottom()));
+QAction* pAction = m_actions->actionFromName("actionPopupMainMenu");
+QRect rc = m_toolBar->actionGeometry(pAction);
+QPoint pt = m_toolBar->mapToGlobal(QPoint(rc.left(), rc.bottom()));
 
-    CWizSettings settings(::WizGetResourcesPath() + "files/mainmenu.ini");
+CWizSettings settings(::WizGetResourcesPath() + "files/mainmenu.ini");
 
-    QMenu* pMenu = new QMenu(this);
-    m_actions->buildMenu(pMenu, settings, pAction->objectName());
+QMenu* pMenu = new QMenu(this);
+m_actions->buildMenu(pMenu, settings, pAction->objectName());
 
-    pMenu->popup(pt);
+pMenu->popup(pt);
 }
 
 void MainWindow::on_client_splitterMoved(int pos, int index)
 {
-    if (0 == index)
-    {
-    }
-    else if (1 == index)
-    {
-        QPoint pt(pos, 0);
-        //
-        pt = m_splitter->mapToGlobal(pt);
-        //
-        adjustToolBarSpacerToPos(0, pt.x());
-    }
-    else if (2 == index)
-    {
-        QPoint pt(pos, 0);
+if (0 == index)
+{
+}
+else if (1 == index)
+{
+QPoint pt(pos, 0);
+//
+pt = m_splitter->mapToGlobal(pt);
+//
+adjustToolBarSpacerToPos(0, pt.x());
+}
+else if (2 == index)
+{
+QPoint pt(pos, 0);
 
-        pt = m_splitter->mapToGlobal(pt);
+pt = m_splitter->mapToGlobal(pt);
 
-        adjustToolBarSpacerToPos(1, pt.x());
-    }
+adjustToolBarSpacerToPos(1, pt.x());
+}
 }
 
 #endif
 
 void MainWindow::on_actionGoBack_triggered()
 {
-    if (!m_history->canBack())
-        return;
+if (!m_history->canBack())
+return;
 
-    WIZDOCUMENTDATA data = m_history->back();
-    viewDocument(data, false);
-    locateDocument(data);
+WIZDOCUMENTDATA data = m_history->back();
+viewDocument(data, false);
+locateDocument(data);
 }
 
 void MainWindow::on_actionGoForward_triggered()
 {
-    if (!m_history->canForward())
-        return;
+if (!m_history->canForward())
+return;
 
-    WIZDOCUMENTDATA data = m_history->forward();
-    viewDocument(data, false);
-    locateDocument(data);
+WIZDOCUMENTDATA data = m_history->forward();
+viewDocument(data, false);
+locateDocument(data);
 }
 
 void MainWindow::on_category_itemSelectionChanged()
 {
-    CWizDocumentDataArray arrayDocument;
+CWizDocumentDataArray arrayDocument;
 
-    CWizCategoryBaseView* category = qobject_cast<CWizCategoryBaseView *>(sender());
-    if (!category)
-        return;
+CWizCategoryBaseView* category = qobject_cast<CWizCategoryBaseView *>(sender());
+if (!category)
+return;
 
-    CWizCategoryViewMessageItem* pItem = category->currentCategoryItem<CWizCategoryViewMessageItem>();
-    if (pItem) {
-        if (!m_msgList->isVisible())
-        {
-            m_msgList->show();
-            m_noteList->hide();
-        }
-        /*
-         * 在点击MessageItem的时候,为了重新刷新当前消息,强制发送了itemSelectionChanged消息
-         * 因此需要在这个地方避免重复刷新两次消息列表
-         */
-        static QTime lastTime(0, 0, 0);
-        QTime last = lastTime;
-        QTime now = QTime::currentTime();
-        lastTime = now;
-        if (last.msecsTo(now) < 300)
-            return;
+CWizCategoryViewMessageItem* pItem = category->currentCategoryItem<CWizCategoryViewMessageItem>();
+if (pItem) {
+if (!m_msgList->isVisible())
+{
+    m_msgList->show();
+    m_noteList->hide();
+}
+/*
+ * 在点击MessageItem的时候,为了重新刷新当前消息,强制发送了itemSelectionChanged消息
+ * 因此需要在这个地方避免重复刷新两次消息列表
+ */
+static QTime lastTime(0, 0, 0);
+QTime last = lastTime;
+QTime now = QTime::currentTime();
+lastTime = now;
+if (last.msecsTo(now) < 300)
+    return;
 
-        CWizMessageDataArray arrayMsg;
-        pItem->getMessages(m_dbMgr.db(), arrayMsg);
-        m_msgList->setMessages(arrayMsg);
-        return;
+CWizMessageDataArray arrayMsg;
+pItem->getMessages(m_dbMgr.db(), arrayMsg);
+m_msgList->setMessages(arrayMsg);
+return;
 
-    // FIXME: use id instead of name.
-    //QString strName = category->currentItem()->text(0);
-    //if (strName == CATEGORY_MESSAGES_ALL ||
-    //        strName == CATEGORY_MESSAGES_SEND_TO_ME ||
-    //        strName == CATEGORY_MESSAGES_MODIFY ||
-    //        strName == CATEGORY_MESSAGES_COMMENTS ||
-    //        strName == CATEGORY_MESSAGES_SEND_FROM_ME) {
-    //    m_msgList->show();
-    //    m_noteList->hide();
+// FIXME: use id instead of name.
+//QString strName = category->currentItem()->text(0);
+//if (strName == CATEGORY_MESSAGES_ALL ||
+//        strName == CATEGORY_MESSAGES_SEND_TO_ME ||
+//        strName == CATEGORY_MESSAGES_MODIFY ||
+//        strName == CATEGORY_MESSAGES_COMMENTS ||
+//        strName == CATEGORY_MESSAGES_SEND_FROM_ME) {
+//    m_msgList->show();
+//    m_noteList->hide();
 
-    //    CWizMessageDataArray arrayMsg;
-    //    m_dbMgr.db().getLastestMessages(arrayMsg);
-    //    m_msgList->setMessages(arrayMsg);
+//    CWizMessageDataArray arrayMsg;
+//    m_dbMgr.db().getLastestMessages(arrayMsg);
+//    m_msgList->setMessages(arrayMsg);
 
-    //    return;
-    } else {
-        if (!m_noteList->isVisible())
-        {
-            m_noteList->show();
-            m_msgList->hide();
-        }
-        QString kbGUID = category->selectedItemKbGUID();
-        if (!kbGUID.isEmpty()) {
-            resetPermission(kbGUID, "");
-        }
+//    return;
+} else {
+if (!m_noteList->isVisible())
+{
+    m_noteList->show();
+    m_msgList->hide();
+}
+QString kbGUID = category->selectedItemKbGUID();
+if (!kbGUID.isEmpty()) {
+    resetPermission(kbGUID, "");
+}
 
-        category->getDocuments(arrayDocument);
-        m_documents->setDocuments(arrayDocument);
+category->getDocuments(arrayDocument);
+m_documents->setDocuments(arrayDocument);
 
-        if (arrayDocument.empty()) {
-            on_documents_itemSelectionChanged();
-        }
-    }
+if (arrayDocument.empty()) {
+    on_documents_itemSelectionChanged();
+}
+}
 }
 
 void MainWindow::on_documents_itemSelectionChanged()
 {
-    CWizDocumentDataArray arrayDocument;
-    m_documents->getSelectedDocuments(arrayDocument);
+CWizDocumentDataArray arrayDocument;
+m_documents->getSelectedDocuments(arrayDocument);
 
-    if (arrayDocument.size() == 1) {
-        // hide other form
-        if (0 == arrayDocument[0].nProtected) {
-            m_cipherForm->hide();
-        }
+if (arrayDocument.size() == 1) {
+// hide other form
+if (0 == arrayDocument[0].nProtected) {
+    m_cipherForm->hide();
+}
 
-        if (!m_bUpdatingSelection) {
-            viewDocument(arrayDocument[0], true);
-        }
-    }
+if (!m_bUpdatingSelection) {
+    viewDocument(arrayDocument[0], true);
+}
+}
 }
 
 void MainWindow::on_message_itemSelectionChanged()
 {
-    m_cipherForm->hide();
+m_cipherForm->hide();
 
-    QList<WIZMESSAGEDATA> listMsg;
-    m_msgList->selectedMessages(listMsg);
+QList<WIZMESSAGEDATA> listMsg;
+m_msgList->selectedMessages(listMsg);
 
-    if (listMsg.size() == 1) {
-        WIZMESSAGEDATA msg(listMsg[0]);
-        WIZDOCUMENTDATA doc;
-        if (!m_dbMgr.db(msg.kbGUID).DocumentFromGUID(msg.documentGUID, doc)) {
-            qDebug() << "can't find note from message info: " << msg.title;
-            return;
-        }
+if (listMsg.size() == 1) {
+WIZMESSAGEDATA msg(listMsg[0]);
+WIZDOCUMENTDATA doc;
+if (!m_dbMgr.db(msg.kbGUID).DocumentFromGUID(msg.documentGUID, doc)) {
+    qDebug() << "can't find note from message info: " << msg.title;
+    return;
+}
 
-        viewDocument(doc, true);
-    }
+viewDocument(doc, true);
+}
 }
 
 void MainWindow::on_options_settingsChanged(WizOptionsType type)
 {
-    if (wizoptionsNoteView == type) {
-        m_doc->settingsChanged();
-    } else if (wizoptionsSync == type) {
+if (wizoptionsNoteView == type) {
+m_doc->settingsChanged();
+} else if (wizoptionsSync == type) {
 
-    } else if (wizoptionsFont == type) {
-        m_doc->web()->editorResetFont();
-    }
+} else if (wizoptionsFont == type) {
+m_doc->web()->editorResetFont();
+}
 }
 
 void MainWindow::on_options_restartForSettings()
 {
-    m_bRestart = true;
-    on_actionExit_triggered();
+m_bRestart = true;
+on_actionExit_triggered();
 }
 
 void MainWindow::resetPermission(const QString& strKbGUID, const QString& strOwner)
 {
-    Q_ASSERT(!strKbGUID.isEmpty());
+Q_ASSERT(!strKbGUID.isEmpty());
 
-    int nPerm = m_dbMgr.db(strKbGUID).permission();
-    bool isGroup = m_dbMgr.db().kbGUID() != strKbGUID;
+int nPerm = m_dbMgr.db(strKbGUID).permission();
+bool isGroup = m_dbMgr.db().kbGUID() != strKbGUID;
 
-    // Admin, Super, do anything
-    if (nPerm == WIZ_USERGROUP_ADMIN || nPerm == WIZ_USERGROUP_SUPER) {
-        // enable editing
-        //m_doc->setReadOnly(false, isGroup);
+// Admin, Super, do anything
+if (nPerm == WIZ_USERGROUP_ADMIN || nPerm == WIZ_USERGROUP_SUPER) {
+// enable editing
+//m_doc->setReadOnly(false, isGroup);
 
-        // enable create tag
+// enable create tag
 
-        // enable new document
-        m_actions->actionFromName(WIZACTION_GLOBAL_NEW_DOCUMENT)->setEnabled(true);
+// enable new document
+m_actions->actionFromName(WIZACTION_GLOBAL_NEW_DOCUMENT)->setEnabled(true);
 
-        // enable delete document
-        //m_actions->actionFromName("actionDeleteCurrentNote")->setEnabled(true);
+// enable delete document
+//m_actions->actionFromName("actionDeleteCurrentNote")->setEnabled(true);
 
-    // Editor, only disable create tag
-    } else if (nPerm == WIZ_USERGROUP_EDITOR) {
-        //m_doc->setReadOnly(false, isGroup);
-        m_actions->actionFromName(WIZACTION_GLOBAL_NEW_DOCUMENT)->setEnabled(true);
-        //m_actions->actionFromName("actionDeleteCurrentNote")->setEnabled(true);
+// Editor, only disable create tag
+} else if (nPerm == WIZ_USERGROUP_EDITOR) {
+//m_doc->setReadOnly(false, isGroup);
+m_actions->actionFromName(WIZACTION_GLOBAL_NEW_DOCUMENT)->setEnabled(true);
+//m_actions->actionFromName("actionDeleteCurrentNote")->setEnabled(true);
 
-    // Author
-    } else if (nPerm == WIZ_USERGROUP_AUTHOR) {
-        m_actions->actionFromName(WIZACTION_GLOBAL_NEW_DOCUMENT)->setEnabled(true);
+// Author
+} else if (nPerm == WIZ_USERGROUP_AUTHOR) {
+m_actions->actionFromName(WIZACTION_GLOBAL_NEW_DOCUMENT)->setEnabled(true);
 
-        // author is owner
-        //QString strUserId = m_dbMgr.db().getUserId();
-        //if (strOwner == strUserId) {
-        //    m_doc->setReadOnly(false, isGroup);
-        //    //m_actions->actionFromName("actionDeleteCurrentNote")->setEnabled(true);
+// author is owner
+//QString strUserId = m_dbMgr.db().getUserId();
+//if (strOwner == strUserId) {
+//    m_doc->setReadOnly(false, isGroup);
+//    //m_actions->actionFromName("actionDeleteCurrentNote")->setEnabled(true);
 
-        //// not owner
-        //} else {
-        //    m_doc->setReadOnly(true, isGroup);
-        //    //m_actions->actionFromName("actionDeleteCurrentNote")->setEnabled(false);
-        //}
+//// not owner
+//} else {
+//    m_doc->setReadOnly(true, isGroup);
+//    //m_actions->actionFromName("actionDeleteCurrentNote")->setEnabled(false);
+//}
 
-    // reader
-    } else if (nPerm == WIZ_USERGROUP_READER) {
-        //m_doc->setReadOnly(true, isGroup);
-        m_actions->actionFromName(WIZACTION_GLOBAL_NEW_DOCUMENT)->setEnabled(false);
-        //m_actions->actionFromName("actionDeleteCurrentNote")->setEnabled(false);
-    } else {
-        Q_ASSERT(0);
-    }
+// reader
+} else if (nPerm == WIZ_USERGROUP_READER) {
+//m_doc->setReadOnly(true, isGroup);
+m_actions->actionFromName(WIZACTION_GLOBAL_NEW_DOCUMENT)->setEnabled(false);
+//m_actions->actionFromName("actionDeleteCurrentNote")->setEnabled(false);
+} else {
+Q_ASSERT(0);
+}
 }
 
 void MainWindow::viewDocument(const WIZDOCUMENTDATA& data, bool addToHistory)
 {
-    Q_ASSERT(!data.strKbGUID.isEmpty());
+Q_ASSERT(!data.strKbGUID.isEmpty());
 
-    CWizDocument* doc = new CWizDocument(m_dbMgr.db(data.strKbGUID), data);
+CWizDocument* doc = new CWizDocument(m_dbMgr.db(data.strKbGUID), data);
 
-    if (doc->GUID() == m_doc->note().strGUID)
-        return;
+if (doc->GUID() == m_doc->note().strGUID)
+return;
 
-    //bool forceEdit = false;
-    //if (doc->GUID() == m_documentForEditing.strGUID) {
-    //    m_documentForEditing = WIZDOCUMENTDATA();
-    //    forceEdit = true;
-    //}
+//bool forceEdit = false;
+//if (doc->GUID() == m_documentForEditing.strGUID) {
+//    m_documentForEditing = WIZDOCUMENTDATA();
+//    forceEdit = true;
+//}
 
-    resetPermission(data.strKbGUID, data.strOwner);
+resetPermission(data.strKbGUID, data.strOwner);
 
-    ICore::emitViewNoteRequested(m_doc, data);
+ICore::emitViewNoteRequested(m_doc, data);
 
-    //if (!m_doc->viewDocument(data, forceEdit))
-    //    return;
+//if (!m_doc->viewDocument(data, forceEdit))
+//    return;
 
-    //if (addToHistory) {
-    //    m_history->addHistory(data);
-    //}
+//if (addToHistory) {
+//    m_history->addHistory(data);
+//}
 
-    //m_actions->actionFromName("actionGoBack")->setEnabled(m_history->canBack());
+//m_actions->actionFromName("actionGoBack")->setEnabled(m_history->canBack());
     //m_actions->actionFromName("actionGoForward")->setEnabled(m_history->canForward());
 }
 

@@ -189,6 +189,7 @@ public Q_SLOTS:
     void on_actionFeedback_triggered();
     void on_actionSearch_triggered();
     void on_actionResetSearch_triggered();
+    void on_actionSaveAsPDF_triggered();
 
     // menu editing
     void on_actionEditingUndo_triggered();
@@ -261,7 +262,7 @@ public Q_SLOTS:
     //js environment func
     QString getDefaultImageFilePath() const;
     QString getUserAvatarFilePath() const;
-    QString getUserAlias() const ;
+    QString getUserAlias() const;
     QString getFormatedDateTime() const;
     bool isPersonalDocument() const;
 

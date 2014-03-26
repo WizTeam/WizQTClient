@@ -9,6 +9,7 @@
 #include <QString>
 #include <QRegExp>
 #include <QAction>
+#include <QPrinter>
 
 #include <QApplication>
 #include <QWebPage>
@@ -1230,6 +1231,22 @@ bool CWizDocumentWebView::editorCommandExecuteTableAverageCols()
     return editorCommandExecuteCommand("averagedistributecol");
 }
 
+void CWizDocumentWebView::saveAsPDF(const QString& fileName)
+{
+    if (QWebFrame* frame = noteFrame())
+    {
+        if (::PathFileExists(fileName))
+        {
+            ::DeleteFile(fileName);
+        }
+        //
+        QPrinter printer;
+        printer.setOutputFormat(QPrinter::PdfFormat);
+        printer.setOutputFileName(fileName);
+        //
+        frame->print(&printer);
+    }
+}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -1420,5 +1437,4 @@ void CWizDocumentWebViewSaverThread::run()
 
     };
 }
-
 
