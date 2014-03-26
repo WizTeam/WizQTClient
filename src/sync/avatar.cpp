@@ -168,7 +168,7 @@ QPixmap AvatarHostPrivate::loadOrg(const QString& strUserGUID)
 
 bool AvatarHostPrivate::customSizeAvatar(const QString& strUserGUID, int width, int height, QString& strFilePath)
 {
-    strFilePath = Utils::PathResolve::avatarPath() + strUserGUID + QString::number(width) + "x" + QString::number(height) + ".png";
+    strFilePath = Utils::PathResolve::tempPath() + strUserGUID + QString::number(width) + "x" + QString::number(height) + ".png";
     if (QFile::exists(strFilePath))
         return true;
 
