@@ -9,6 +9,7 @@
 #include <QString>
 #include <QRegExp>
 #include <QAction>
+#include <QPrinter>
 
 #include <QApplication>
 #include <QWebPage>
@@ -27,7 +28,6 @@
 #include "wizDocumentTransitionView.h"
 #include "share/wizDatabaseManager.h"
 #include "wizDocumentView.h"
-#include "sync/avatar.h"
 
 #include "utils/pathresolve.h"
 #include "utils/logger.h"
@@ -127,7 +127,6 @@ CWizDocumentWebView::CWizDocumentWebView(CWizExplorerApp& app, QWidget* parent)
     , m_noteFrame(0)
     , m_bCurrentEditing(false)
     , m_bContentsChanged(false)
-    , m_jsHelper(0)
 {
     CWizDocumentWebViewPage* page = new CWizDocumentWebViewPage(this);
     setPage(page);
@@ -181,10 +180,6 @@ CWizDocumentWebView::~CWizDocumentWebView()
         m_docSaverThread->quit();
         m_docSaverThread->deleteLater();
         m_docSaverThread = NULL;
-    }
-    if (m_jsHelper) {
-        delete m_jsHelper;
-        m_jsHelper = NULL;
     }
 }
 
@@ -574,11 +569,6 @@ void CWizDocumentWebView::onEditorPopulateJavaScriptWindowObject()
 {
     page()->mainFrame()->addToJavaScriptWindowObject("WizExplorerApp", m_app.object());
     page()->mainFrame()->addToJavaScriptWindowObject("WizEditor", this);
-    if (!m_jsHelper)
-    {
-        m_jsHelper = new JSEnvironmentHelper(m_app, m_dbMgr, view());
-    }
-    page()->mainFrame()->addToJavaScriptWindowObject("WizJSHelper", m_jsHelper);
 }
 
 void CWizDocumentWebView::onEditorContentChanged()
@@ -1446,61 +1436,5 @@ void CWizDocumentWebViewSaverThread::run()
         emit saved(kbGuid, doc.strGUID, ok);
 
     };
-}
-
-
-JSEnvironmentHelper::JSEnvironmentHelper(CWizExplorerApp& app, CWizDatabaseManager& dbMgr, CWizDocumentView* view) :
-    m_app(app),
-    m_dbMgr(dbMgr),
-    m_view(view)
-{
-}
-
-QString JSEnvironmentHelper::getDefaultImageFilePath() const
-{
-    return ::WizGetSkinResourcePath(m_app.userSettings().skin());
-}
-
-QString JSEnvironmentHelper::getUserAvatarFilePath() const
-{
-    QString strFileName;
-    QString strUserID = m_dbMgr.db().GetUserId();
-    if (WizService::AvatarHost::customSizeAvatar(strUserID, 16, 16, strFileName))
-        return strFileName;
-
-
-    return QString();
-}
-
-QString JSEnvironmentHelper::getUserAlias()
-{
-    if (m_view)
-    {
-        QString strKbGUID = m_view->note().strKbGUID;
-        CWizDatabase& personDb = m_dbMgr.db();
-        QString strUserGUID = personDb.GetUserGUID();
-        WIZBIZUSER bizUser;
-        personDb.userFromGUID(strKbGUID, strUserGUID, bizUser);
-        return bizUser.alias;
-    }
-
-    return QString();
-}
-
-QString JSEnvironmentHelper::getFormatedDateTime() const
-{
-    COleDateTime time = QDateTime::currentDateTime();
-    return ::WizDateToLocalString(time);
-}
-
-bool JSEnvironmentHelper::isPersonalDocument()
-{
-    if (m_view)
-    {
-        QString strKbGUID = m_view->note().strKbGUID;
-        return strKbGUID.isEmpty();
-    }
-
-    return false;
 }
 

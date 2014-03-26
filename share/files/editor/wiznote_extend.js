@@ -176,7 +176,7 @@ var WizTodo = (function () {
 
     function getFormatedDateTime() {
         //
-        return WizJSHelper.getFormatedDateTime();
+        return objApp.getFormatedDateTime();
     }
 
     function initWiz() {
@@ -408,7 +408,7 @@ var WizTodo = (function () {
 
     var g_todoImagePath = "";
     function initTodoImagePath() {
-        g_todoImagePath = WizJSHelper.getDefaultImageFilePath();
+        g_todoImagePath = objApp.getDefaultImageFilePath();
     }
 
     function reBindAction() {
@@ -426,8 +426,8 @@ var WizTodo = (function () {
                             "<span class='%5'>completed at %6.</span>";
                 //
                 var dt = getFormatedDateTime();
-                var userName = WizJSHelper.getUserAlias();
-                var avatar = WizJSHelper.getUserAvatarFilePath();
+                var userName = objApp.getUserAlias();
+                var avatar = objApp.getUserAvatarFilePath();
                 //
                 html = html.replace('%3', avatar);
                 html = html.replace('%7', userName);
@@ -528,7 +528,7 @@ var WizTodo = (function () {
             todoEle.setAttribute('state', state);
             label.setAttribute('class', classValue);
             //
-            if (!WizJSHelper.isPersonalDocument()) {
+            if (!objApp.isPersonalDocument()) {
                 addCompletedInfo(label, !isChecked);
             }
         }
@@ -1027,7 +1027,7 @@ var WizTodo = (function () {
             style.parentElement.removeChild(style);
         }
         //
-        var strStyle = '.wiz-todo {cursor: default; padding: 0 8px 0 2px; } .wiz-todo-label-checked { text-decoration: line-through; color: #666;} .wiz-todo-label-unchecked {text-decoration: initial;}';
+        var strStyle = '.wiz-todo {cursor: default; padding: 0 8px 0 2px; vertical-align: -10%;} .wiz-todo-label-checked { text-decoration: line-through; color: #666;} .wiz-todo-label-unchecked {text-decoration: initial;} .wiz-todo-completed-info {padding-left: 8px; font-style:italic;} .wiz-todo-avatar { vertical-align: -10%; padding-right:4px;}';
         //
         var objStyle = document.createElement('style');
         objStyle.type = 'text/css';

@@ -9,6 +9,7 @@
 #include <QEvent>
 #include <QHBoxLayout>
 #include <QLabel>
+#include <QFileDialog>
 
 #ifdef Q_OS_MAC
 #include <Carbon/Carbon.h>
@@ -52,6 +53,7 @@
 #include "widgets/wizUserInfoWidget.h"
 #include "sync/apientry.h"
 #include "sync/wizkmsync.h"
+#include "sync/avatar.h"
 
 #include "wizUserVerifyDialog.h"
 
@@ -517,6 +519,45 @@ void MainWindow::on_editor_statusChanged()
     } else {
         m_actions->actionFromName(WIZACTION_FORMAT_INSERT_TODOLIST)->setEnabled(true);
     }
+}
+
+QString MainWindow::getDefaultImageFilePath() const
+{
+    return ::WizGetSkinResourcePath(m_settings->skin());
+}
+
+QString MainWindow::getUserAvatarFilePath() const
+{
+    QString strFileName;
+    QString strUserID = m_dbMgr.db().GetUserId();
+    if (WizService::AvatarHost::customSizeAvatar(strUserID, 16, 16, strFileName))
+        return strFileName;
+
+
+    return QString();
+}
+
+QString MainWindow::getUserAlias() const
+{
+    QString strKbGUID = m_doc->note().strKbGUID;
+    CWizDatabase& personDb = m_dbMgr.db();
+    QString strUserGUID = personDb.GetUserGUID();
+    WIZBIZUSER bizUser;
+    personDb.userFromGUID(strKbGUID, strUserGUID, bizUser);
+    return bizUser.alias;
+}
+
+QString MainWindow::getFormatedDateTime() const
+{
+    COleDateTime time = QDateTime::currentDateTime();
+    return ::WizDateToLocalString(time);
+}
+
+bool MainWindow::isPersonalDocument() const
+{
+    QString strKbGUID = m_doc->note().strKbGUID;
+    QString dbKbGUID = m_dbMgr.db().kbGUID();
+    return strKbGUID.isEmpty() || (strKbGUID == dbKbGUID);
 }
 
 void MainWindow::initToolBar()

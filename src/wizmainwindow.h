@@ -259,6 +259,13 @@ public Q_SLOTS:
 
     void on_editor_statusChanged();
 
+    //js environment func
+    QString getDefaultImageFilePath() const;
+    QString getUserAvatarFilePath() const;
+    QString getUserAlias() const;
+    QString getFormatedDateTime() const;
+    bool isPersonalDocument() const;
+
 #ifndef Q_OS_MAC
     void on_actionPopupMainMenu_triggered();
     void on_client_splitterMoved(int pos, int index);
