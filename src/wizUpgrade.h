@@ -11,7 +11,7 @@ class CWizUpgrade : public QObject
 
 public:
     explicit CWizUpgrade(QObject *parent = 0);
-    void beginCheck();
+    void startCheck();
 
     QString getWhatsNewUrl();
 
@@ -31,6 +31,9 @@ public Q_SLOTS:
 
 Q_SIGNALS:
     void checkFinished(bool bUpgradeAvaliable);
+
+private:
+    void beginCheck();
 };
 
 #endif // WIZUPGRADE_H

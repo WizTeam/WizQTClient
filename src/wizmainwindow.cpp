@@ -113,12 +113,6 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     m_searchIndexer->moveToThread(threadFTS);
     threadFTS->start(QThread::IdlePriority);
 
-    // upgrade check
-    QThread *thread = new QThread();
-    m_upgrade->moveToThread(thread);
-    connect(m_upgrade, SIGNAL(checkFinished(bool)), SLOT(on_checkUpgrade_finished(bool)));
-    thread->start(QThread::IdlePriority);
-
     // syncing thread
     connect(m_sync, SIGNAL(processLog(const QString&)), SLOT(on_syncProcessLog(const QString&)));
     connect(m_sync, SIGNAL(syncStarted(bool)), SLOT(on_syncStarted(bool)));
@@ -138,6 +132,15 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     restoreStatus();
 
     client()->hide();
+
+    // upgrade check
+    QThread *thread = new QThread(this);
+    m_upgrade->moveToThread(thread);
+    connect(m_upgrade, SIGNAL(checkFinished(bool)), SLOT(on_checkUpgrade_finished(bool)));
+    thread->start(QThread::IdlePriority);
+    if (userSettings().autoCheckUpdate()) {
+        checkWizUpdate();
+    }
 
 #ifdef Q_OS_MAC
     setupFullScreenMode(this);
@@ -1481,6 +1484,11 @@ void MainWindow::locateDocument(const WIZDOCUMENTDATA& data)
     m_bUpdatingSelection = false;
 }
 
+void MainWindow::checkWizUpdate()
+{
+    m_upgrade->startCheck();
+}
+
 #ifndef Q_OS_MAC
 CWizFixedSpacer* MainWindow::findFixedSpacer(int index)
 {
@@ -1527,7 +1535,6 @@ void MainWindow::adjustToolBarSpacerToPos(int index, int pos)
     //
     spacer->adjustWidth(width);
 }
-
 
 #endif
 

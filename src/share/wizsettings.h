@@ -96,6 +96,9 @@ public:
     bool autoLogin() const;
     void setAutoLogin(bool bAutoLogin);
 
+    bool autoCheckUpdate() const;
+    void setAutoCheckUpdate(bool bAutoCheckUpdate);
+
     QString locale();
     void setLocale(const QString& strLocale);
 

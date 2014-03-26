@@ -275,6 +275,21 @@ void CWizUserSettings::setAutoLogin(bool bAutoLogin)
     set("AutoLogin", bAutoLogin ? "1" : "0");
 }
 
+bool CWizUserSettings::autoCheckUpdate() const
+{
+    QString strAutoCheckUpdate = get("AutoCheckUpdate");
+    if (!strAutoCheckUpdate.isEmpty()) {
+        return strAutoCheckUpdate.toInt() ? true : false;
+    }
+
+    return true;
+}
+
+void CWizUserSettings::setAutoCheckUpdate(bool bAutoCheckUpdate)
+{
+    set("AutoCheckUpdate", bAutoCheckUpdate ? "1" : "0");
+}
+
 QString CWizUserSettings::skin()
 {
     // just return because no skin selection from v1.4

@@ -5,6 +5,7 @@
 #include <QFontDialog>
 
 #include "share/wizDatabaseManager.h"
+#include "wizmainwindow.h"
 
 
 CWizPreferenceWindow::CWizPreferenceWindow(CWizExplorerApp& app, QWidget* parent)
@@ -35,6 +36,11 @@ CWizPreferenceWindow::CWizPreferenceWindow(CWizExplorerApp& app, QWidget* parent
         }
     }
     ui->comboLang->blockSignals(false);
+
+    ui->checkBox->blockSignals(true);
+    Qt::CheckState checkState = userSettings().autoCheckUpdate() ? Qt::Checked : Qt::Unchecked;
+    ui->checkBox->setCheckState(checkState);
+    ui->checkBox->blockSignals(false);
 
     connect(ui->comboLang, SIGNAL(activated(int)), SLOT(on_comboLang_activated(int)));
 
@@ -306,4 +312,15 @@ void CWizPreferenceWindow::on_comboLang_currentIndexChanged(int index)
     msgBox.exec();
 
 
+}
+
+void CWizPreferenceWindow::on_checkBox_stateChanged(int arg1)
+{
+    bool autoUpdate = (arg1 == Qt::Checked);
+    m_app.userSettings().setAutoCheckUpdate(autoUpdate);
+
+    if (autoUpdate) {
+        Core::Internal::MainWindow* mainWindow = qobject_cast<Core::Internal::MainWindow*>(m_app.mainWindow());
+        mainWindow->checkWizUpdate();
+    }
 }

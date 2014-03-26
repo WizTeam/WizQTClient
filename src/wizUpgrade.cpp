@@ -22,6 +22,10 @@ CWizUpgrade::CWizUpgrade(QObject *parent) :
     QObject(parent)
 {
     connect(&m_timerCheck, SIGNAL(timeout()), SLOT(on_timerCheck_timeout()));
+}
+
+void CWizUpgrade::startCheck()
+{
     m_timerCheck.start(60 * 1000);
 }
 

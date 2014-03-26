@@ -176,6 +176,8 @@ public:
     void adjustToolBarSpacerToPos(int index, int pos);
 #endif
 
+    void checkWizUpdate();
+
 public Q_SLOTS:
     void on_actionExit_triggered();
     void on_actionConsole_triggered();
