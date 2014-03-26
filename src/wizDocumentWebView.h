@@ -90,25 +90,6 @@ private:
     bool m_stop;
 };
 
-class JSEnvironmentHelper : public QObject
-{
-    Q_OBJECT
-public:
-    JSEnvironmentHelper(CWizExplorerApp& app, CWizDatabaseManager& dbMgr, Core::CWizDocumentView* view);
-
-public slots:
-    QString getDefaultImageFilePath() const;
-    QString getUserAvatarFilePath() const;
-    QString getUserAlias() ;
-    QString getFormatedDateTime() const;
-    bool isPersonalDocument();
-
-private:
-    CWizExplorerApp& m_app;
-    CWizDatabaseManager& m_dbMgr;
-    Core::CWizDocumentView* m_view;
-};
-
 class CWizDocumentWebViewPage: public QWebPage
 {
     Q_OBJECT
@@ -229,7 +210,6 @@ private:
     QPointer<CWizEditorInsertTableForm> m_editorInsertTableForm;
     QPointer<QColorDialog> m_colorDialog;
 
-    JSEnvironmentHelper *m_jsHelper;
 public:
     Q_INVOKABLE void onNoteLoadFinished(); // editor callback
 
