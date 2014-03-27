@@ -10,6 +10,7 @@
 #include <QRegExp>
 #include <QAction>
 #include <QPrinter>
+#include <QFileDialog>
 
 #include <QApplication>
 #include <QWebPage>
@@ -1109,6 +1110,17 @@ bool CWizDocumentWebView::editorCommandExecuteInsertTodoList()
     page()->undoStack()->push(cmd);
 
     return ret;
+}
+
+bool CWizDocumentWebView::editorCommandExecuteInsertImage()
+{
+    QString strImgFile = QFileDialog::getOpenFileName(0, tr("Image File"), "/home", tr("Images (*.png *.bmp *.jpg)"));
+    if (strImgFile.isEmpty())
+        return false;
+
+    QPixmap pix(strImgFile);
+    return editorCommandExecuteCommand("insertImage", QString("{src:'%1', width:%2, height:%3}")
+                                       .arg(strImgFile).arg(pix.width()).arg(pix.height()));
 }
 
 bool CWizDocumentWebView::editorCommandExecuteInsertDate()

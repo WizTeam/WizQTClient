@@ -289,6 +289,7 @@ public Q_SLOTS:
     bool editorCommandExecuteFormatMatch();
     bool editorCommandExecuteInsertHorizontal();
     bool editorCommandExecuteInsertTodoList();
+    bool editorCommandExecuteInsertImage();
     bool editorCommandExecuteViewSource();
 
     // js func

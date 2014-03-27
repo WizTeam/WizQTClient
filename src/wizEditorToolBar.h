@@ -50,6 +50,7 @@ private:
     CWizToolButton* m_btnTable;
     CWizToolButton* m_btnHorizontal;
     CWizToolButton* m_btnTodoList;
+    CWizToolButton* m_btnImage;
 
     WizEditorContextMenuItem* contextMenuData();
     void buildMenu();
@@ -82,6 +83,7 @@ protected Q_SLOTS:
     void on_btnTable_clicked();
     void on_btnHorizontal_clicked();
     void on_btnTodoList_clicked();
+    void on_btnImage_clicked();
 
     void on_delegate_requestShowContextMenu(const QPoint& pos);
     void on_delegate_selectionChanged();

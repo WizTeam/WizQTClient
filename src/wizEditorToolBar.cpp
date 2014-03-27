@@ -370,6 +370,11 @@ EditorToolBar::EditorToolBar(QWidget *parent)
     m_btnTodoList->setIcon(::WizLoadSkinIcon(skin, "actionFormatInsertTodoList"));
     connect(m_btnTodoList, SIGNAL(clicked()), SLOT(on_btnTodoList_clicked()));
 
+    m_btnImage = new CWizToolButton(this);
+    m_btnImage->setCheckable(false);
+    m_btnImage->setIcon(::WizLoadSkinIcon(skin, "actionFormatInsertImage"));
+    connect(m_btnImage, SIGNAL(clicked()), SLOT(on_btnImage_clicked()));
+
     QHBoxLayout* layout = new QHBoxLayout();
     layout->setContentsMargins(3, 0, 3, 0);
     layout->setAlignment(Qt::AlignBottom);
@@ -397,6 +402,7 @@ EditorToolBar::EditorToolBar(QWidget *parent)
     layout->addWidget(m_btnTable);
     layout->addWidget(m_btnHorizontal);
     layout->addWidget(m_btnTodoList);
+    layout->addWidget(m_btnImage);
     layout->addStretch();
 }
 
@@ -979,5 +985,12 @@ void EditorToolBar::on_btnTodoList_clicked()
 {
     if (m_editor) {
         m_editor->editorCommandExecuteInsertTodoList();
+    }
+}
+
+void EditorToolBar::on_btnImage_clicked()
+{
+    if (m_editor) {
+        m_editor->editorCommandExecuteInsertImage();
     }
 }
