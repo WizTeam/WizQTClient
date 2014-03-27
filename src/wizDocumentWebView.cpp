@@ -854,6 +854,7 @@ void CWizDocumentWebView::saveDocument(const WIZDOCUMENTDATA& data, bool force)
     //
     setContentsChanged(false);
     //
+
     QString strFileName = m_mapFile.value(data.strGUID);
     QString strHead = page()->mainFrame()->evaluateJavaScript("editor.document.head.innerHTML;").toString();
     QRegExp regHead("<link[^>]*" + m_strDefaultCssFilePath + "[^>]*>", Qt::CaseInsensitive);
@@ -1114,7 +1115,7 @@ bool CWizDocumentWebView::editorCommandExecuteInsertTodoList()
 
 bool CWizDocumentWebView::editorCommandExecuteInsertImage()
 {
-    QString strImgFile = QFileDialog::getOpenFileName(0, tr("Image File"), "/home", tr("Images (*.png *.bmp *.jpg)"));
+    QString strImgFile = QFileDialog::getOpenFileName(0, tr("Image File"), QDir::homePath(), tr("Images (*.png *.bmp *.gif *.jpg)"));
     if (strImgFile.isEmpty())
         return false;
 

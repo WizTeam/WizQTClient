@@ -1883,6 +1883,12 @@ bool CWizDatabase::SetUserName(const QString& strUserName)
     return true;
 }
 
+bool CWizDatabase::GetUserDisplayName(QString &strDisplayName)
+{
+    strDisplayName = GetMetaDef(g_strAccountSection, "DISPLAYNAME");
+    return true;
+}
+
 QString CWizDatabase::GetEncryptedPassword()
 {
     return GetMetaDef(g_strAccountSection, "Password");

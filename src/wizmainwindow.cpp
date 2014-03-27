@@ -73,7 +73,7 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     , m_settings(new CWizUserSettings(dbMgr.db()))
     , m_sync(new CWizKMSyncThread(dbMgr.db(), this))
     , m_searchIndexer(new CWizSearchIndexer(m_dbMgr))
-    , m_upgrade(new CWizUpgrade())
+    , m_upgrade(new CWizUpgrade(this))
     //, m_certManager(new CWizCertManager(*this))
     , m_cipherForm(new CWizUserCipherForm(*this, this))
     , m_objectDownloaderHost(new CWizObjectDataDownloaderHost(dbMgr, this))
@@ -109,7 +109,7 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     //CWizCloudPool::instance()->init(&m_dbMgr);
 
     // search and full text search
-    QThread *threadFTS = new QThread();
+    QThread *threadFTS = new QThread(this);
     m_searchIndexer->moveToThread(threadFTS);
     threadFTS->start(QThread::IdlePriority);
 
@@ -524,7 +524,7 @@ void MainWindow::on_editor_statusChanged()
     }
 }
 
-QString MainWindow::getDefaultImageFilePath() const
+QString MainWindow::getSkinResourcePath() const
 {
     return ::WizGetSkinResourcePath(m_settings->skin());
 }
@@ -547,7 +547,15 @@ QString MainWindow::getUserAlias() const
     QString strUserGUID = personDb.GetUserGUID();
     WIZBIZUSER bizUser;
     personDb.userFromGUID(strKbGUID, strUserGUID, bizUser);
-    return bizUser.alias;
+    if (!bizUser.alias.isEmpty()) {
+        return bizUser.alias;
+    } else {
+        QString strUserName;
+        personDb.GetUserDisplayName(strUserName);
+        return strUserName;
+    }
+
+    return QString();
 }
 
 QString MainWindow::getFormatedDateTime() const

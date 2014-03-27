@@ -262,7 +262,7 @@ public Q_SLOTS:
     void on_editor_statusChanged();
 
     //js environment func
-    QString getDefaultImageFilePath() const;
+    QString getSkinResourcePath() const;
     QString getUserAvatarFilePath() const;
     QString getUserAlias() const;
     QString getFormatedDateTime() const;

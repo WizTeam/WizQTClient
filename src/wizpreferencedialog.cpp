@@ -42,8 +42,6 @@ CWizPreferenceWindow::CWizPreferenceWindow(CWizExplorerApp& app, QWidget* parent
     ui->checkBox->setCheckState(checkState);
     ui->checkBox->blockSignals(false);
 
-    connect(ui->comboLang, SIGNAL(activated(int)), SLOT(on_comboLang_activated(int)));
-
     // reading tab
     switch (userSettings().noteViewMode())
     {
