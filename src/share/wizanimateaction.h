@@ -21,6 +21,7 @@ public:
     void setIcons(const QString& strIconBaseName);
     void startPlay();
     void stopPlay();
+    bool isPlaying();
 
 private:
     CWizExplorerApp& m_app;

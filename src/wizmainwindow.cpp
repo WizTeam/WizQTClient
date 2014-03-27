@@ -811,6 +811,7 @@ void MainWindow::on_actionAutoSync_triggered()
 void MainWindow::on_actionSync_triggered()
 {
     m_sync->startSyncAll(false);
+    m_animateSync->startPlay();
 }
 
 void MainWindow::on_syncLogined()
@@ -820,7 +821,10 @@ void MainWindow::on_syncLogined()
 
 void MainWindow::on_syncStarted(bool syncAll)
 {
-    m_animateSync->startPlay();
+    if (!m_animateSync->isPlaying())
+    {
+        m_animateSync->startPlay();
+    }
     //
     if (syncAll)
     {
