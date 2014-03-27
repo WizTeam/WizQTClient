@@ -122,6 +122,7 @@ public:
     void saveDocument(const WIZDOCUMENTDATA& data, bool force);
     void reloadNoteData(const WIZDOCUMENTDATA& data);
 
+
     bool isInited() const { return m_bEditorInited; }
     bool isEditing() const { return m_bEditingMode; }
 
@@ -171,6 +172,9 @@ private:
     bool isInternalUrl(const QUrl& url);
     void viewDocumentByUrl(const QUrl& url);
 
+    void documentToString(const WIZDOCUMENTDATA& data, QString& strHtml);
+    void stringToDocument(const WIZDOCUMENTDATA& data, QString &strHtml);
+
 protected:
     virtual void keyPressEvent(QKeyEvent* event);
     virtual void inputMethodEvent(QInputMethodEvent* event);
@@ -204,6 +208,8 @@ private:
     bool m_bCurrentEditing;
     //
     bool m_bContentsChanged;
+
+    bool m_docLoadeding;
 
     CWizDocumentTransitionView* m_transitionView;
     CWizDocumentWebViewLoaderThread* m_docLoadThread;
