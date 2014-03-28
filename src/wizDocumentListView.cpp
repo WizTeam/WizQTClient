@@ -16,6 +16,7 @@
 #include "utils/stylehelper.h"
 #include "utils/logger.h"
 #include "sync/apientry.h"
+#include "wizWebSettingsDialog.h"
 
 #include "sync/avatar.h"
 #include "thumbcache.h"
@@ -309,7 +310,7 @@ void CWizDocumentListView::resetPermission()
         findAction(WIZACTION_LIST_DELETE)->setEnabled(true);
     }
 
-    // disable document history if selection is not only one
+    // disable note history if selection is not only one
     if (items.count() != 1) {
         findAction(WIZACTION_LIST_DOCUMENT_HISTORY)->setEnabled(false);
     } else {
