@@ -29,7 +29,7 @@ using namespace Core::Internal;
 #define WIZACTION_LIST_TAGS     QObject::tr("Tags...")
 #define WIZACTION_LIST_MOVE_DOCUMENT QObject::tr("Move Note")
 #define WIZACTION_LIST_COPY_DOCUMENT QObject::tr("Copy Note")
-#define WIZACTION_LIST_DOCUMENT_HISTORY QObject::tr("Doucment History")
+#define WIZACTION_LIST_DOCUMENT_HISTORY QObject::tr("Note History")
 
 
 CWizDocumentListView::CWizDocumentListView(CWizExplorerApp& app, QWidget *parent /*= 0*/)
@@ -693,7 +693,7 @@ void CWizDocumentListView::on_action_documentHistory()
                                       item->document().strGUID, item->document().strKbGUID);
     QString strUrl = WizService::ApiEntry::standardCommandUrl("document_history", WIZ_TOKEN_IN_URL_REPLACE_PART, strExt);
 
-    showWebDialogWithToken(tr("Document History"), strUrl, window());
+    showWebDialogWithToken(tr("Note History"), strUrl, window());
 }
 
 //void CWizDocumentListView::on_message_created(const WIZMESSAGEDATA& data)
