@@ -128,7 +128,6 @@ CWizDocumentWebView::CWizDocumentWebView(CWizExplorerApp& app, QWidget* parent)
     , m_noteFrame(0)
     , m_bCurrentEditing(false)
     , m_bContentsChanged(false)
-    , m_docLoadeding(false)
 {
     CWizDocumentWebViewPage* page = new CWizDocumentWebViewPage(this);
     setPage(page);
@@ -670,46 +669,7 @@ void CWizDocumentWebView::viewDocumentByUrl(const QUrl& url)
         }
 
         ICore::instance()->emitViewNoteRequested(view(), doc);
-    }
-}
-
-void CWizDocumentWebView::documentToString(const WIZDOCUMENTDATA &data, QString &strHtml)
-{
-    QString strHead = page()->mainFrame()->evaluateJavaScript("editor.document.head.innerHTML;").toString();
-    QRegExp regHead("<link[^>]*" + m_strDefaultCssFilePath + "[^>]*>", Qt::CaseInsensitive);
-    strHead.replace(regHead, "");
-
-    strHtml = page()->mainFrame()->evaluateJavaScript("editor.getContent();").toString();
-    //QString strPlainTxt = page()->mainFrame()->evaluateJavaScript("editor.getPlainTxt();").toString();
-    strHtml = "<html><head>" + strHead + "</head><body>" + strHtml + "</body></html>";
-}
-
-void CWizDocumentWebView::stringToDocument(const WIZDOCUMENTDATA& data, QString& strHtml)
-{
-    QString strHead;
-    QRegExp regh("<head.*>([\\s\\S]*)</head>", Qt::CaseInsensitive);
-    if (regh.indexIn(strHtml) != -1) {
-        strHead = regh.cap(1).simplified();
-    }
-    strHead += "<link rel=\"stylesheet\" type=\"text/css\" href=\"" + m_strDefaultCssFilePath + "\">";
-
-    QRegExp regex("<body.*>([\\s\\S]*)</body>", Qt::CaseInsensitive);
-    if (regex.indexIn(strHtml) != -1) {
-        strHtml = regex.cap(1);
-    }
-
-    m_strCurrentNoteGUID = data.strGUID;
-    m_strCurrentNoteHead = strHead;
-    m_strCurrentNoteHtml = strHtml;
-    m_bCurrentEditing = false;
-    //
-
-    QString strExec = QString("viewCurrentNote();");
-
-    int ret = page()->mainFrame()->evaluateJavaScript(strExec).toBool();
-    if (!ret) {
-        qDebug() << "[Editor] failed to load note: " << strExec;
-    }
+   }
 }
 
 QString escapeJavascriptString(const QString & str)
@@ -841,9 +801,7 @@ void CWizDocumentWebView::viewDocumentInEditor(bool editing)
 
 void CWizDocumentWebView::onNoteLoadFinished()
 {
-    if (!m_docLoadeding) {
-        ICore::instance()->emitViewNoteLoaded(view(), view()->note(), true);
-    }
+    ICore::instance()->emitViewNoteLoaded(view(), view()->note(), true);
 }
 
 void CWizDocumentWebView::setEditingDocument(bool editing)
@@ -863,26 +821,12 @@ void CWizDocumentWebView::setEditingDocument(bool editing)
 
     if (m_bEditingMode) {
         saveDocument(view()->note(), false);
-        QString strHtml;
-        documentToString(view()->note(), strHtml);
-
-        m_docLoadeding = true;
-        QString strScript = QString("setEditing(%1);").arg(editing ? "true" : "false");
-        page()->mainFrame()->evaluateJavaScript(strScript);
-        m_docLoadeding = false;
-        stringToDocument(view()->note(), strHtml);
-
-    } else {
-        QString strScript = QString("setEditing(%1);").arg(editing ? "true" : "false");
-        page()->mainFrame()->evaluateJavaScript(strScript);
     }
-
-
 
     m_bEditingMode = editing;
 
-
-
+    QString strScript = QString("setEditing(%1);").arg(editing ? "true" : "false");
+    page()->mainFrame()->evaluateJavaScript(strScript);  
 
     if (editing) {
         setFocus(Qt::MouseFocusReason);
@@ -917,6 +861,12 @@ void CWizDocumentWebView::saveDocument(const WIZDOCUMENTDATA& data, bool force)
     strHead.replace(regHead, "");
 
     QString strHtml = page()->mainFrame()->evaluateJavaScript("editor.getContent();").toString();
+    //
+    m_strCurrentNoteHtml = strHtml;
+    //
+    page()->mainFrame()->evaluateJavaScript(("updateCurrentNoteHtml();"));
+
+    //
     //QString strPlainTxt = page()->mainFrame()->evaluateJavaScript("editor.getPlainTxt();").toString();
     strHtml = "<html><head>" + strHead + "</head><body>" + strHtml + "</body></html>";
 

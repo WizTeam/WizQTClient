@@ -37,7 +37,7 @@ bool MarkdownPlugin::initialize(const QStringList &arguments, QString *errorMess
 void MarkdownPlugin::extensionsInitialized()
 {
     connect(Core::ICore::instance(), SIGNAL(viewNoteLoaded(Core::INoteView*,WIZDOCUMENTDATA,bool)),
-            SLOT(onViewNoteLoaded(Core::INoteView*,WIZDOCUMENTDATA,bool)), Qt::UniqueConnection);
+            SLOT(onViewNoteLoaded(Core::INoteView*,WIZDOCUMENTDATA,bool)));
 }
 
 void MarkdownPlugin::onViewNoteLoaded(INoteView* view, const WIZDOCUMENTDATA& doc, bool bOk)

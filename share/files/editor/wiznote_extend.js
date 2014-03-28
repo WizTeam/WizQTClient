@@ -123,6 +123,15 @@ function viewCurrentNote()
                     WizEditor.currentNoteHtml(), WizEditor.currentNoteHead());
 }
 
+function updateCurrentNoteHtml()
+{
+    if (m_currentGUID == WizEditor.currentNoteGUID())
+    {
+        wiz_html = WizEditor.currentNoteHtml();
+        //wiz_head = WizEditor.currentNoteHead();
+    }
+}
+
 function updateCss()
 {
     var css= editor.document.getElementsByTagName('link');
