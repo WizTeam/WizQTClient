@@ -188,7 +188,7 @@ public:
     /* Document related operations */
     virtual bool UpdateDocumentInfoMD5(WIZDOCUMENTDATA& data);
     bool UpdateDocumentsInfoMD5(CWizDocumentDataArray& arrayDocument);
-    virtual bool UpdateDocumentDataMD5(WIZDOCUMENTDATA& data, const CString& strZipFileName);
+    virtual bool UpdateDocumentDataMD5(WIZDOCUMENTDATA& data, const CString& strZipFileName, bool notifyDataModify = true);
 
     bool CreateDocument(const CString& strTitle, const CString& strName, \
                         const CString& strLocation, const CString& strURL, \

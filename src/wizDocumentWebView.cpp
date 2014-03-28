@@ -1440,7 +1440,9 @@ void CWizDocumentWebViewSaverThread::run()
         //
         qDebug() << "Saving note: " << doc.strTitle;
 
-        bool ok = db.UpdateDocumentData(doc, data.html, data.htmlFile, data.flags);
+        sleep(10);
+        bool notify = false;    //don't notify
+        bool ok = db.UpdateDocumentData(doc, data.html, data.htmlFile, data.flags, notify);
         //
         if (ok)
         {

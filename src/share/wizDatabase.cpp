@@ -2270,7 +2270,8 @@ bool CWizDatabase::UpdateAttachments(const CWizDocumentAttachmentDataArray& arra
 bool CWizDatabase::UpdateDocumentData(WIZDOCUMENTDATA& data,
                                       const QString& strHtml,
                                       const QString& strURL,
-                                      int nFlags)
+                                      int nFlags,
+                                      bool notifyDataModify /*= true*/)
 {
     QString strProcessedHtml(strHtml);
     QString strResourcePath = GetResoucePathFromFile(strURL);
@@ -2302,12 +2303,12 @@ bool CWizDatabase::UpdateDocumentData(WIZDOCUMENTDATA& data,
 
     SetObjectDataDownloaded(data.strGUID, "document", true);
 
-    return UpdateDocumentDataMD5(data, strZipFileName);
+    return UpdateDocumentDataMD5(data, strZipFileName, notifyDataModify);
 }
 
-bool CWizDatabase::UpdateDocumentDataMD5(WIZDOCUMENTDATA& data, const CString& strZipFileName)
+bool CWizDatabase::UpdateDocumentDataMD5(WIZDOCUMENTDATA& data, const CString& strZipFileName, bool notifyDataModify /*= true*/)
 {
-    bool bRet = CWizIndex::UpdateDocumentDataMD5(data, strZipFileName);
+    bool bRet = CWizIndex::UpdateDocumentDataMD5(data, strZipFileName, notifyDataModify);
 
     UpdateDocumentAbstract(data.strGUID);
 

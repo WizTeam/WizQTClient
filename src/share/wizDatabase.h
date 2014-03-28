@@ -322,11 +322,11 @@ public:
     bool UpdateAttachments(const CWizDocumentAttachmentDataArray& arrayAttachment);
 
     bool UpdateDocumentData(WIZDOCUMENTDATA& data, const QString& strHtml,
-                            const QString& strURL, int nFlags);
+                            const QString& strURL, int nFlags, bool notifyDataModify = true);
 
     bool UpdateDocumentAbstract(const QString& strDocumentGUID);
 
-    virtual bool UpdateDocumentDataMD5(WIZDOCUMENTDATA& data, const CString& strZipFileName);
+    virtual bool UpdateDocumentDataMD5(WIZDOCUMENTDATA& data, const CString& strZipFileName, bool notifyDataModify = true);
 
     bool DeleteTagWithChildren(const WIZTAGDATA& data, bool bLog);
     bool DeleteAttachment(const WIZDOCUMENTATTACHMENTDATA& data, bool bLog, bool bReset = true);

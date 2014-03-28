@@ -907,7 +907,7 @@ bool CWizIndex::UpdateDocumentInfoMD5(WIZDOCUMENTDATA& data)
 	return ModifyDocumentInfoEx(data);
 }
 
-bool CWizIndex::UpdateDocumentDataMD5(WIZDOCUMENTDATA& data, const CString& strZipFileName)
+bool CWizIndex::UpdateDocumentDataMD5(WIZDOCUMENTDATA& data, const CString& strZipFileName, bool notifyDataModify /*= true*/)
 {
     data.tModified = WizGetCurrentTime();
 
@@ -922,7 +922,11 @@ bool CWizIndex::UpdateDocumentDataMD5(WIZDOCUMENTDATA& data, const CString& strZ
 
     bool bRet = ModifyDocumentInfoEx(data);
 
-    Q_EMIT documentDataModified(data);
+    if (notifyDataModify)
+    {
+        Q_EMIT documentDataModified(data);
+    }
+    //
     return bRet;
 }
 
