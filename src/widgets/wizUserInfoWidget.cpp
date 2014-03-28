@@ -42,14 +42,14 @@ CWizUserInfoWidget::CWizUserInfoWidget(CWizExplorerApp& app, QWidget *parent)
     // setup menu
     m_menuMain = new QMenu(this);
 
-    QAction* actionAccountInfo = new QAction(tr("View account info"), m_menuMain);
+    QAction* actionAccountInfo = new QAction(tr("View account info..."), m_menuMain);
     connect(actionAccountInfo, SIGNAL(triggered()), SLOT(on_action_accountInfo_triggered()));
     actionAccountInfo->setVisible(false);
 
-    QAction* actionAccountSetup = new QAction(tr("Account settings"), m_menuMain);
+    QAction* actionAccountSetup = new QAction(tr("Account settings..."), m_menuMain);
     connect(actionAccountSetup, SIGNAL(triggered()), SLOT(on_action_accountSetup_triggered()));
 
-    QAction* actionChangeAvatar = new QAction(tr("Change avatar"), m_menuMain);
+    QAction* actionChangeAvatar = new QAction(tr("Change avatar..."), m_menuMain);
     connect(actionChangeAvatar, SIGNAL(triggered()), SLOT(on_action_changeAvatar_triggered()));
 
     m_menuMain->addAction(actionAccountInfo);

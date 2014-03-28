@@ -2991,8 +2991,8 @@ bool CWizDatabase::makeSureDocumentExist(const WIZDOCUMENTDATA& doc, CWizObjectD
             return false;
 
         CWizProgressDialog dlg;
-        dlg.setActionString(QObject::tr("download document ")+doc.strTitle);
-        dlg.setNotifyString(QObject::tr("downloading,please wait."));
+        dlg.setActionString(QObject::tr("Download Note %1 ").arg(doc.strTitle));
+        dlg.setNotifyString(QObject::tr("Downloading,please wait..."));
         dlg.setProgress(100,0);
         connect(downloaderHost, SIGNAL(downloadProgress(int,int)), &dlg, SLOT(setProgress(int,int)));
         connect(downloaderHost, SIGNAL(downloadDone(WIZOBJECTDATA,bool)), &dlg, SLOT(accept()));
@@ -3026,7 +3026,7 @@ bool CWizDatabase::makeSureAttachmentExist(const WIZDOCUMENTATTACHMENTDATAEX &at
 
         downloaderHost->download(attachData);
 
-        dlg.exec() ;
+        dlg.exec();
     }
 
     return PathFileExists(strAttachmentFileName);
