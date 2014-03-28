@@ -1454,15 +1454,6 @@ void CWizCategoryView::on_action_manageBiz()
     }
 }
 
-void CWizCategoryView::showWebDialogWithToken(const QString& windowTitle, const QString& url)
-{
-    CWizWebSettingsDialog* pDlg = new CWizWebSettingsWithTokenDialog(url, QSize(800, 480), window());
-    pDlg->setWindowTitle(windowTitle);
-    pDlg->exec();
-    //
-    delete pDlg;
-}
-
 void CWizCategoryView::on_action_emptyTrash()
 {
     // FIXME: show progress
@@ -1529,49 +1520,49 @@ void CWizCategoryView::on_itemClicked(QTreeWidgetItem *item, int column)
 void CWizCategoryView::createGroup()
 {
     QString strUrl = WizService::ApiEntry::standardCommandUrl("create_group", WIZ_TOKEN_IN_URL_REPLACE_PART);
-    showWebDialogWithToken(tr("Create new group"), strUrl);
+    showWebDialogWithToken(tr("Create new group"), strUrl, window());
 }
 
 void CWizCategoryView::viewPersonalGroupInfo(const QString& groupGUID)
 {
     QString extInfo = "kb=" + groupGUID;
     QString strUrl = WizService::ApiEntry::standardCommandUrl("view_personal_group", WIZ_TOKEN_IN_URL_REPLACE_PART, extInfo);
-    showWebDialogWithToken(tr("View group info"), strUrl);
+    showWebDialogWithToken(tr("View group info"), strUrl, window());
 }
 
 void CWizCategoryView::viewBizGroupInfo(const QString& groupGUID, const QString& bizGUID)
 {
     QString extInfo = "kb=" + groupGUID + "&&biz=" + bizGUID;
     QString strUrl = WizService::ApiEntry::standardCommandUrl("view_biz_group", WIZ_TOKEN_IN_URL_REPLACE_PART, extInfo);
-    showWebDialogWithToken(tr("View group info"), strUrl);
+    showWebDialogWithToken(tr("View group info"), strUrl, window());
 }
 
 void CWizCategoryView::managePersonalGroup(const QString& groupGUID)
 {
     QString extInfo = "kb=" + groupGUID;
     QString strUrl = WizService::ApiEntry::standardCommandUrl("manage_personal_group", WIZ_TOKEN_IN_URL_REPLACE_PART, extInfo);
-    showWebDialogWithToken(tr("Manage group"), strUrl);
+    showWebDialogWithToken(tr("Manage group"), strUrl, window());
 }
 
 void CWizCategoryView::manageBizGroup(const QString& groupGUID, const QString& bizGUID)
 {
     QString extInfo = "kb=" + groupGUID + "&biz=" + bizGUID;
     QString strUrl = WizService::ApiEntry::standardCommandUrl("manage_biz_group", WIZ_TOKEN_IN_URL_REPLACE_PART, extInfo);
-    showWebDialogWithToken(tr("Manage group"), strUrl);
+    showWebDialogWithToken(tr("Manage group"), strUrl, window());
 }
 
 void CWizCategoryView::viewBizInfo(const QString& bizGUID)
 {
     QString extInfo = "biz=" + bizGUID;
     QString strUrl = WizService::ApiEntry::standardCommandUrl("view_biz", WIZ_TOKEN_IN_URL_REPLACE_PART, extInfo);
-    showWebDialogWithToken(tr("View team info"), strUrl);
+    showWebDialogWithToken(tr("View team info"), strUrl, window());
 }
 
 void CWizCategoryView::manageBiz(const QString& bizGUID)
 {
     QString extInfo = "biz=" + bizGUID;
     QString strUrl = WizService::ApiEntry::standardCommandUrl("manage_biz", WIZ_TOKEN_IN_URL_REPLACE_PART, extInfo);
-    showWebDialogWithToken(tr("Manage team"), strUrl);
+    showWebDialogWithToken(tr("Manage team"), strUrl, window());
 }
 
 

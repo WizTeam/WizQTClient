@@ -161,6 +161,9 @@ CString WizMakeValidFileNameNoPathReturn(const CString& strFileName);
 bool WizSaveDataToFile(const QString& strFileName, const QByteArray& arrayData);
 bool WizLoadDataFromFile(const QString& strFileName, QByteArray& arrayData);
 
+//web dialog
+void showWebDialogWithToken(const QString& windowTitle, const QString& url, QWidget* parent = 0);
+
 class CWizBufferAlloc
 {
 public:

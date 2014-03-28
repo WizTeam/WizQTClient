@@ -1,4 +1,5 @@
 #include "wizsettings.h"
+#include "wizWebSettingsDialog.h"
 
 #include <QApplication>
 #include <stdlib.h>
@@ -2135,3 +2136,13 @@ CWaitCursor::~CWaitCursor()
     QApplication::restoreOverrideCursor();
 }
 
+
+
+void showWebDialogWithToken(const QString& windowTitle, const QString& url, QWidget* parent)
+{
+    CWizWebSettingsDialog* pDlg = new CWizWebSettingsWithTokenDialog(url, QSize(800, 480), parent);
+    pDlg->setWindowTitle(windowTitle);
+    pDlg->exec();
+    //
+    delete pDlg;
+}

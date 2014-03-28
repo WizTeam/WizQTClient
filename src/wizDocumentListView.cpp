@@ -15,6 +15,7 @@
 #include "wizmainwindow.h"
 #include "utils/stylehelper.h"
 #include "utils/logger.h"
+#include "sync/apientry.h"
 
 #include "sync/avatar.h"
 #include "thumbcache.h"
@@ -28,6 +29,7 @@ using namespace Core::Internal;
 #define WIZACTION_LIST_TAGS     QObject::tr("Tags...")
 #define WIZACTION_LIST_MOVE_DOCUMENT QObject::tr("Move Note")
 #define WIZACTION_LIST_COPY_DOCUMENT QObject::tr("Copy Note")
+#define WIZACTION_LIST_DOCUMENT_HISTORY QObject::tr("Doucment History")
 
 
 CWizDocumentListView::CWizDocumentListView(CWizExplorerApp& app, QWidget *parent /*= 0*/)
@@ -140,6 +142,9 @@ CWizDocumentListView::CWizDocumentListView(CWizExplorerApp& app, QWidget *parent
     actionDeleteDoc->setShortcutContext(Qt::WidgetWithChildrenShortcut);
     actionMoveDoc->setShortcutContext(Qt::WidgetWithChildrenShortcut);
     //actionCopyDoc->setShortcutContext(Qt::WidgetWithChildrenShortcut);
+
+    m_menuDocument->addAction(WIZACTION_LIST_DOCUMENT_HISTORY, this,
+                              SLOT(on_action_documentHistory()));
 
     //m_actionEncryptDocument = new QAction(tr("Encrypt Document"), m_menu);
     //connect(m_actionEncryptDocument, SIGNAL(triggered()), SLOT(on_action_encryptDocument()));
@@ -302,6 +307,13 @@ void CWizDocumentListView::resetPermission()
         findAction(WIZACTION_LIST_DELETE)->setEnabled(false);
     } else {
         findAction(WIZACTION_LIST_DELETE)->setEnabled(true);
+    }
+
+    // disable document history if selection is not only one
+    if (items.count() != 1) {
+        findAction(WIZACTION_LIST_DOCUMENT_HISTORY)->setEnabled(false);
+    } else {
+        findAction(WIZACTION_LIST_DOCUMENT_HISTORY)->setEnabled(true);
     }
 }
 
@@ -665,6 +677,23 @@ void CWizDocumentListView::onThumbCacheLoaded(const QString& strKbGUID, const QS
             update(indexFromItem(pItem));
         }
     }
+}
+
+void CWizDocumentListView::on_action_documentHistory()
+{
+    QList<QListWidgetItem*> items = selectedItems();
+    if (items.count() != 1)
+        return;
+
+   CWizDocumentListViewItem* item = dynamic_cast<CWizDocumentListViewItem*>(items.first());
+   if (!item)
+       return;
+
+    CString strExt = WizFormatString2(_T("obj_guid=%1&kb_guid=%2&obj_type=document"),
+                                      item->document().strGUID, item->document().strKbGUID);
+    QString strUrl = WizService::ApiEntry::standardCommandUrl("document_history", WIZ_TOKEN_IN_URL_REPLACE_PART, strExt);
+
+    showWebDialogWithToken(tr("Document History"), strUrl, window());
 }
 
 //void CWizDocumentListView::on_message_created(const WIZMESSAGEDATA& data)

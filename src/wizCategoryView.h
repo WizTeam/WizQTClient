@@ -257,8 +257,6 @@ public:
 
     bool createDocument(WIZDOCUMENTDATA& data);
     //
-    void showWebDialogWithToken(const QString& windowTitle, const QString& url);
-    //
     void createGroup();
     void viewPersonalGroupInfo(const QString& groupGUID);
     void viewBizGroupInfo(const QString& groupGUID, const QString& bizGUID);
