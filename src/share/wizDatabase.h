@@ -3,7 +3,6 @@
 
 #include <QPointer>
 #include <QMap>
-#include <QMutex>
 
 #include "wizIndex.h"
 #include "wizthumbindex.h"
@@ -98,8 +97,6 @@ private:
 
     bool m_bIsPersonal;
     QMap<QString, CWizDatabase*> m_mapGroups;
-
-    QMutex m_mutexTempFile;
 
 public:
     CWizDatabase();

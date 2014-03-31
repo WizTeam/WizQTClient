@@ -8,7 +8,6 @@
 #include <QSettings>
 #include <QInputDialog>
 #include <QMessageBox>
-#include <QMutexLocker>
 
 #include <extensionsystem/pluginmanager.h>
 
@@ -2886,9 +2885,6 @@ bool CWizDatabase::DocumentToTempHtmlFile(const WIZDOCUMENTDATA& document,
     if (!PathFileExists(strZipFileName)) {
         return false;
     }
-
-    QMutexLocker fileLocker(&m_mutexTempFile);
-    Q_UNUSED(fileLocker);
 
     CString strTempPath = Utils::PathResolve::tempPath() + document.strGUID + "/";
     ::WizEnsurePathExists(strTempPath);
