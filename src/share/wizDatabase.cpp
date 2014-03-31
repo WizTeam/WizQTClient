@@ -8,6 +8,7 @@
 #include <QSettings>
 #include <QInputDialog>
 #include <QMessageBox>
+#include <QMutexLocker>
 
 #include <extensionsystem/pluginmanager.h>
 
@@ -2740,7 +2741,7 @@ bool CWizDatabase::UpdateDocumentAbstract(const QString& strDocumentGUID)
     }
 
     CString strHtmlFileName;
-    if (!DocumentToTempHtmlFile(data, strHtmlFileName)) {
+    if (!DocumentToTempHtmlFile(data, strHtmlFileName, "uindex.html")) {
         qDebug() << "[updateDocumentAbstract]decompress to temp failed, guid: "
                  << strDocumentGUID;
         return false;
@@ -2878,12 +2879,16 @@ bool CWizDatabase::loadUserCert()
     return true;
 }
 
-bool CWizDatabase::DocumentToTempHtmlFile(const WIZDOCUMENTDATA& document, QString& strTempHtmlFileName)
+bool CWizDatabase::DocumentToTempHtmlFile(const WIZDOCUMENTDATA& document,
+                                          QString& strTempHtmlFileName, const QString& strTargetFileNameWithoutPath)
 {
     CString strZipFileName = GetDocumentFileName(document.strGUID);
     if (!PathFileExists(strZipFileName)) {
         return false;
     }
+
+    QMutexLocker fileLocker(&m_mutexTempFile);
+    Q_UNUSED(fileLocker);
 
     CString strTempPath = Utils::PathResolve::tempPath() + document.strGUID + "/";
     ::WizEnsurePathExists(strTempPath);
@@ -2909,7 +2914,7 @@ bool CWizDatabase::DocumentToTempHtmlFile(const WIZDOCUMENTDATA& document, QStri
 
     CWizUnzipFile::extractZip(strZipFileName, strTempPath);
 
-    strTempHtmlFileName = strTempPath + "index.html";
+    strTempHtmlFileName = strTempPath + strTargetFileNameWithoutPath;
 
     QString strText;
     ::WizLoadUnicodeTextFromFile(strTempHtmlFileName, strText);
