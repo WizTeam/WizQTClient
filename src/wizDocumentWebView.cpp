@@ -831,6 +831,7 @@ void CWizDocumentWebView::setEditingDocument(bool editing)
     if (editing) {
         setFocus(Qt::MouseFocusReason);
         editorFocus();
+        initTodoListEnvironment();
     }
 
     Q_EMIT statusChanged();
