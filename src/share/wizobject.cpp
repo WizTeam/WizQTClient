@@ -739,14 +739,18 @@ WIZBIZDATA::WIZBIZDATA(const WIZBIZDATA& data)
     , bizGUID(data.bizGUID)
     , bizUserRole(data.bizUserRole)
     , bizLevel(data.bizLevel)
+    , bizIsDue(data.bizIsDue)
 {
 }
+
 bool WIZBIZDATA::LoadFromXmlRpc(CWizXmlRpcStructValue& data)
 {
     data.GetStr(_T("biz_name"), bizName);
     data.GetStr(_T("biz_guid"), bizGUID);
     data.GetInt(_T("user_group"), bizUserRole);
     data.GetInt(_T("biz_level"), bizLevel);
+    //data.GetBool(_T("biz_is_due"), bizIsDue);
+    bizIsDue = true;
 
     return !bizGUID.isEmpty()
             && !bizName.isEmpty();

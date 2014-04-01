@@ -1450,7 +1450,7 @@ void CWizCategoryView::on_action_manageBiz()
 {
     CWizCategoryViewBizGroupRootItem* p = currentCategoryItem<CWizCategoryViewBizGroupRootItem>();
     if (p && !p->biz().bizGUID.isEmpty()) {
-        manageBiz(p->biz().bizGUID);
+        manageBiz(p->biz().bizGUID, false);
     }
 }
 
@@ -1515,6 +1515,60 @@ void CWizCategoryView::on_itemClicked(QTreeWidgetItem *item, int column)
     {
         emit itemSelectionChanged();
     }
+    else if (CWizCategoryViewBizGroupRootItem* pItem = dynamic_cast<CWizCategoryViewBizGroupRootItem*>(item))
+    {
+        if (pItem->extraButtonClickTest() && pItem->isHr())
+        {
+            manageBiz(pItem->biz().bizGUID, true);
+        }
+    }
+    else if (CWizCategoryViewGroupRootItem* pItem = dynamic_cast<CWizCategoryViewGroupRootItem*>(item))
+    {
+        if (pItem->extraButtonClickTest())
+        {
+            promptGroupSpaceExcess(pItem->kbGUID(), pItem->bizGUID());
+        }
+    }
+}
+
+void CWizCategoryView::updateGroupsData()
+{
+    CWizGroupDataArray arrayGroup;
+    m_dbMgr.db().GetUserGroupInfo(arrayGroup);
+    //
+    CWizBizDataArray arrayBiz;
+    m_dbMgr.db().GetUserBizInfo(false, arrayGroup, arrayBiz);
+    //
+    for (CWizBizDataArray::const_iterator it = arrayBiz.begin(); it != arrayBiz.end(); it++)
+    {
+        const WIZBIZDATA& biz = *it;
+        CWizCategoryViewItemBase* pBizGroupItem = findBizGroupsRootItem(biz, false);
+        setBizRootItemExtraButton(pBizGroupItem, biz);
+    }
+    //
+    CWizGroupDataArray arrayOwnGroup;
+    CWizDatabase::GetOwnGroups(arrayGroup, arrayOwnGroup);
+    if (!arrayOwnGroup.empty())
+    {
+        for (CWizGroupDataArray::const_iterator it = arrayOwnGroup.begin(); it != arrayOwnGroup.end(); it++)
+        {
+            const WIZGROUPDATA& group = *it;
+            CWizCategoryViewGroupRootItem* pOwnGroupItem = findGroup(group.strGroupGUID);
+            setGroupRootItemExtraButton(pOwnGroupItem, group);
+        }
+    }
+    //
+    CWizGroupDataArray arrayJionedGroup;
+    CWizDatabase::GetJionedGroups(arrayGroup, arrayJionedGroup);
+    if (!arrayJionedGroup.empty())
+    {
+        for (CWizGroupDataArray::const_iterator it = arrayJionedGroup.begin(); it != arrayJionedGroup.end(); it++)
+        {
+            const WIZGROUPDATA& group = *it;
+            CWizCategoryViewGroupRootItem* pOwnGroupItem = findGroup(group.strGroupGUID);
+            setGroupRootItemExtraButton(pOwnGroupItem, group);
+        }
+    }
 }
 
 void CWizCategoryView::createGroup()
@@ -1551,6 +1605,13 @@ void CWizCategoryView::manageBizGroup(const QString& groupGUID, const QString& b
     showWebDialogWithToken(tr("Manage group"), strUrl, window());
 }
 
+void CWizCategoryView::promptGroupSpaceExcess(const QString &groupGUID, const QString &bizGUID)
+{
+    QString extInfo = "kb=" + groupGUID + "&biz=" + bizGUID;
+    QString strUrl = WizService::ApiEntry::standardCommandUrl("manage_biz_group", WIZ_TOKEN_IN_URL_REPLACE_PART, extInfo);
+    showWebDialogWithToken(tr("Group Space Excess"), strUrl, window());
+}
+
 void CWizCategoryView::viewBizInfo(const QString& bizGUID)
 {
     QString extInfo = "biz=" + bizGUID;
@@ -1558,10 +1619,14 @@ void CWizCategoryView::viewBizInfo(const QString& bizGUID)
     showWebDialogWithToken(tr("View team info"), strUrl, window());
 }
 
-void CWizCategoryView::manageBiz(const QString& bizGUID)
+void CWizCategoryView::manageBiz(const QString& bizGUID, bool bUpgrade)
 {
     QString extInfo = "biz=" + bizGUID;
     QString strUrl = WizService::ApiEntry::standardCommandUrl("manage_biz", WIZ_TOKEN_IN_URL_REPLACE_PART, extInfo);
+    if (bUpgrade)
+    {
+        strUrl += _T("&p=payment");
+    }
     showWebDialogWithToken(tr("Manage team"), strUrl, window());
 }
 
@@ -1943,6 +2008,38 @@ void CWizCategoryView::updateChildTagDocumentCount(CWizCategoryViewItemBase* pIt
     }
 }
 
+void CWizCategoryView::setBizRootItemExtraButton(CWizCategoryViewItemBase* pItem, const WIZBIZDATA& bizData)
+{
+    if (pItem)
+    {
+        if (bizData.bizIsDue || m_dbMgr.db(bizData.bizGUID).IsBizServiceExpr())
+        {
+            QString strIconPath = ::WizGetSkinResourcePath(m_app.userSettings().skin()) + "bizDue.png";
+            pItem->setExtraButtonIcon(strIconPath);
+        }
+        else
+        {
+            pItem->setExtraButtonIcon("");
+        }
+    }
+}
+
+void CWizCategoryView::setGroupRootItemExtraButton(CWizCategoryViewItemBase* pItem, const WIZGROUPDATA& gData)
+{
+    if (pItem)
+    {
+        if (m_dbMgr.db(gData.strGroupGUID).IsStorageLimit())
+        {
+            QString strIconPath = ::WizGetSkinResourcePath(m_app.userSettings().skin()) + "bizDue.png";
+            pItem->setExtraButtonIcon(strIconPath);
+        }
+        else
+        {
+            pItem->setExtraButtonIcon("");
+        }
+    }
+}
+
 void CWizCategoryView::initGeneral()
 {
     //CWizCategoryViewCategoryItem* pCategoryItem = new CWizCategoryViewCategoryItem(m_app, CATEGORY_GENERAL);
@@ -2189,6 +2286,8 @@ void CWizCategoryView::initGroups()
     {
         const WIZBIZDATA& biz = *it;
         CWizCategoryViewBizGroupRootItem* pBizGroupItem = new CWizCategoryViewBizGroupRootItem(m_app, biz);
+        setBizRootItemExtraButton(pBizGroupItem, biz);
+
         addTopLevelItem(pBizGroupItem);
         pBizGroupItem->setExpanded(true);
         arrayGroupsItem.push_back(pBizGroupItem);
@@ -2288,6 +2387,9 @@ void CWizCategoryView::initGroup(CWizDatabase& db, bool& itemCreeated)
     //
     CWizCategoryViewGroupRootItem* pGroupItem = new CWizCategoryViewGroupRootItem(m_app, group);
     pRoot->addChild(pGroupItem);
+
+    //
+    setGroupRootItemExtraButton(pGroupItem, group);
 
     initGroup(db, pGroupItem, "");
 

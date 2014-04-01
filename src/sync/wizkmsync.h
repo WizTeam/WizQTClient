@@ -18,6 +18,7 @@ class CWizKMSyncEvents : public QObject , public IWizKMSyncEvents
     virtual void SetCurrentDatabase(int index);
     virtual void OnTrafficLimit(IWizSyncableDatabase* pDatabase);
     virtual void OnStorageLimit(IWizSyncableDatabase* pDatabase);
+    virtual void OnBizServiceExpr(IWizSyncableDatabase* pDatabase);
     virtual void OnUploadDocument(const QString& strDocumentGUID, bool bDone);
     virtual void OnBeginKb(const QString& strKbGUID);
     virtual void OnEndKb(const QString& strKbGUID);

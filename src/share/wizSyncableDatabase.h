@@ -63,6 +63,7 @@ struct IWizSyncableDatabase
     virtual bool OnDownloadBizs(const CWizBizDataArray& arrayBiz) = 0;
     virtual IWizSyncableDatabase* GetGroupDatabase(const WIZGROUPDATA& group) = 0;
     virtual void CloseGroupDatabase(IWizSyncableDatabase* pDatabase) = 0;
+    virtual IWizSyncableDatabase* GetPersonalDatabase() = 0;
 
     virtual void SetKbInfo(const QString& strKBGUID, const WIZKBINFO& info) = 0;
     virtual void SetUserInfo(const WIZUSERINFO& info) = 0;
@@ -117,8 +118,10 @@ struct IWizSyncableDatabase
     virtual void ClearError() = 0;
     virtual void OnTrafficLimit(const QString& strErrorMessage) = 0;
     virtual void OnStorageLimit(const QString& strErrorMessage) = 0;
+    virtual void OnBizServiceExpr(const QString& strErrorMessage) = 0;
     virtual bool IsTrafficLimit() = 0;
     virtual bool IsStorageLimit() = 0;
+    virtual bool IsBizServiceExpr() = 0;
 
     virtual bool setMeta(const QString& strSection, const QString& strKey, const QString& strValue) = 0;
     virtual QString meta(const QString& strSection, const QString& strKey) = 0;
@@ -155,6 +158,7 @@ public:
     virtual void SetCurrentDatabase(int index) {}
     virtual void OnTrafficLimit(IWizSyncableDatabase* pDatabase) {}
     virtual void OnStorageLimit(IWizSyncableDatabase* pDatabase) {}
+    virtual void OnBizServiceExpr(IWizSyncableDatabase* pDatabase) {}
     virtual void OnUploadDocument(const QString& strDocumentGUID, bool bDone) {}
     virtual void OnBeginKb(const QString& strKbGUID) {}
     virtual void OnEndKb(const QString& strKbGUID) {}

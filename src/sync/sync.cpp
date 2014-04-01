@@ -8,6 +8,8 @@
 
 #include  "../share/wizSyncableDatabase.h"
 
+#define IDS_BIZ_SERVICE_EXPR    "Your {p} business service has expired."
+
 void GetSyncProgressRange(WizKMSyncProgress progress, int& start, int& count)
 {
     int data[syncDownloadObjectData - syncAccountLogin + 1] = {
@@ -806,6 +808,16 @@ bool UploadDocument(const WIZKBINFO& kbInfo, int size, int start, int total, int
                 pEvents->OnStorageLimit(pDatabase);
                 return FALSE;
             }
+            else if (server.GetLastErrorCode() == WIZKM_XMLRPC_ERROR_BIZ_SERVICE_EXPR)
+            {
+                CString strMessage = WizFormatString0(IDS_BIZ_SERVICE_EXPR);
+                //
+                pDatabase->OnBizServiceExpr(strMessage);
+                //
+                //pEvents->SetStop(TRUE);
+                pEvents->OnBizServiceExpr(pDatabase);
+                return FALSE;
+            }
         }
     }
     //
@@ -991,6 +1003,16 @@ bool UploadAttachment(const WIZKBINFO& kbInfo, int size, int start, int total, i
                 pEvents->OnStorageLimit(pDatabase);
                 return FALSE;
             }
+            else if (server.GetLastErrorCode() == WIZKM_XMLRPC_ERROR_BIZ_SERVICE_EXPR)
+            {
+                CString strMessage = WizFormatString0(IDS_BIZ_SERVICE_EXPR);
+                //
+                pDatabase->OnBizServiceExpr(strMessage);
+                //
+                //pEvents->SetStop(TRUE);
+                pEvents->OnBizServiceExpr(pDatabase);
+                return FALSE;
+            }
         }
     }
     //
@@ -1135,6 +1157,7 @@ bool UploadList(const WIZKBINFO& kbInfo, IWizKMSyncEvents* pEvents, IWizSyncable
                     {
                     case WIZKM_XMLRPC_ERROR_TRAFFIC_LIMIT:
                     case WIZKM_XMLRPC_ERROR_STORAGE_LIMIT:
+                    case WIZKM_XMLRPC_ERROR_BIZ_SERVICE_EXPR:
                         return FALSE;
                     }
                 }

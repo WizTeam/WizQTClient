@@ -38,11 +38,20 @@ void CWizKMSyncEvents::SetCurrentDatabase(int index)
 
 void CWizKMSyncEvents::OnTrafficLimit(IWizSyncableDatabase* pDatabase)
 {
+    // FIXME
+    Q_UNUSED(pDatabase);
 }
 
 void CWizKMSyncEvents::OnStorageLimit(IWizSyncableDatabase* pDatabase)
 {
+    // FIXME
+    Q_UNUSED(pDatabase);
+}
 
+void CWizKMSyncEvents::OnBizServiceExpr(IWizSyncableDatabase *pDatabase)
+{
+    // FIXME
+    Q_UNUSED(pDatabase);
 }
 
 void CWizKMSyncEvents::OnUploadDocument(const QString& strDocumentGUID, bool bDone)

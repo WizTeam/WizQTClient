@@ -624,6 +624,7 @@ struct WIZBIZDATA
     QString bizName;
     int bizUserRole;
     int bizLevel;
+    bool bizIsDue;
 };
 
 

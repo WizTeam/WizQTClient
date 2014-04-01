@@ -262,8 +262,9 @@ public:
     void viewBizGroupInfo(const QString& groupGUID, const QString& bizGUID);
     void managePersonalGroup(const QString& groupGUID);
     void manageBizGroup(const QString& groupGUID, const QString& bizGUID);
+    void promptGroupSpaceExcess(const QString& groupGUID, const QString& bizGUID);
     void viewBizInfo(const QString& bizGUID);
-    void manageBiz(const QString& bizGUID);
+    void manageBiz(const QString& bizGUID, bool bUpgrade);
 
 
 private:
@@ -363,6 +364,8 @@ public Q_SLOTS:
     void on_itemSelectionChanged();
     void on_itemClicked(QTreeWidgetItem *item, int column);
 
+    void updateGroupsData();
+
 Q_SIGNALS:
     void newDocument();
     void documentsHint(const QString& strHint);
@@ -377,6 +380,11 @@ private:
 
     void updateChildTagDocumentCount(CWizCategoryViewItemBase* pItem,
                                     const std::map<CString, int>& mapDocumentCount, int& allCount);
+
+    void setBizRootItemExtraButton(CWizCategoryViewItemBase* pItem, \
+                                     const WIZBIZDATA& bizData);
+    void setGroupRootItemExtraButton(CWizCategoryViewItemBase* pItem, \
+                                     const WIZGROUPDATA& gData);
 };
 
 

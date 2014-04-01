@@ -861,6 +861,8 @@ void MainWindow::on_syncDone(int nErrorCode, const QString& strErrorMsg)
     }
 
     m_documents->viewport()->update();
+    m_category->updateGroupsData();
+    m_category->viewport()->update();
 }
 
 void MainWindow::on_syncDone_userVerified()

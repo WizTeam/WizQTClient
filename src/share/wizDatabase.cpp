@@ -25,6 +25,9 @@
 
 #define WIZNOTE_THUMB_VERSION "3"
 
+#define WIZKMSYNC_EXIT_TRAFFIC_LIMIT		304
+#define WIZKMSYNC_EXIT_STORAGE_LIMIT		305
+#define WIZKMSYNC_EXIT_BIZ_SERVICE_EXPR		380
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //class CWizDocument
@@ -779,6 +782,12 @@ void CWizDatabase::CloseGroupDatabase(IWizSyncableDatabase* pDatabase)
 
 }
 
+IWizSyncableDatabase* CWizDatabase::GetPersonalDatabase()
+{
+    CWizDatabase* db = &CWizDatabaseManager::instance()->db();
+    return db;
+}
+
 void CWizDatabase::SetKbInfo(const QString& strKBGUID, const WIZKBINFO& info)
 {
     Q_ASSERT(strKBGUID == kbGUID() || (strKBGUID.isEmpty() && m_bIsPersonal));
@@ -1111,14 +1120,38 @@ void CWizDatabase::ClearError()
 
 void CWizDatabase::OnTrafficLimit(const QString& strErrorMessage)
 {
-    // FIXME
-    Q_UNUSED(strErrorMessage);
+    IWizSyncableDatabase* db = GetPersonalDatabase();
+    if (!db)
+        return;
+    //
+    CString strBizGUID = m_info.bizGUID;
+    //
+    db->setMeta(strBizGUID, _T("LastSyncErrorCode"), QString::number(WIZKMSYNC_EXIT_TRAFFIC_LIMIT));
+    db->setMeta(strBizGUID, _T("LastSyncErrorMessage"), strErrorMessage);
 }
 
 void CWizDatabase::OnStorageLimit(const QString& strErrorMessage)
 {
-    // FIXME
-    Q_UNUSED(strErrorMessage);
+    IWizSyncableDatabase* db = GetPersonalDatabase();
+    if (!db)
+        return;
+    //
+    CString strBizGUID = m_info.bizGUID;
+    //
+    db->setMeta(strBizGUID, _T("LastSyncErrorCode"), QString::number(WIZKMSYNC_EXIT_STORAGE_LIMIT));
+    db->setMeta(strBizGUID, _T("LastSyncErrorMessage"), strErrorMessage);
+}
+
+void CWizDatabase::OnBizServiceExpr(const QString &strErrorMessage)
+{
+    IWizSyncableDatabase* db = GetPersonalDatabase();
+    if (!db)
+        return;
+    //
+    CString strBizGUID = m_info.bizGUID;
+    //
+    db->setMeta(strBizGUID, _T("LastSyncErrorCode"), QString::number(WIZKMSYNC_EXIT_BIZ_SERVICE_EXPR));
+    db->setMeta(strBizGUID, _T("LastSyncErrorMessage"), strErrorMessage);
 }
 
 bool CWizDatabase::IsTrafficLimit()
@@ -1129,8 +1162,28 @@ bool CWizDatabase::IsTrafficLimit()
 
 bool CWizDatabase::IsStorageLimit()
 {
-    // FIXME
-    return false;
+//    IWizSyncableDatabase* db = GetPersonalDatabase();
+//    if (!db)
+//        return false;
+
+//    CString strBizGUID = m_info.bizGUID;
+//    QString strLastError = db->meta(strBizGUID, _T("LastSyncErrorCode"));
+
+//    return strLastError.toInt() == WIZKMSYNC_EXIT_STORAGE_LIMIT;
+
+    return true;
+}
+
+bool CWizDatabase::IsBizServiceExpr()
+{
+    IWizSyncableDatabase* db = GetPersonalDatabase();
+    if (!db)
+        return false;
+
+    CString strBizGUID = m_info.bizGUID;
+    QString strLastError = db->meta(strBizGUID, _T("LastSyncErrorCode"));
+
+    return strLastError.toInt() == WIZKMSYNC_EXIT_BIZ_SERVICE_EXPR;
 }
 
 bool CWizDatabase::setMeta(const QString& strSection, const QString& strKey, const QString& strValue)
@@ -1410,6 +1463,8 @@ bool CWizDatabase::SetUserBizInfo(const CWizBizDataArray& arrayBiz)
         SetMeta(bizSection, "Name", biz.bizName);
         SetMeta(bizSection, "UserRole", QString::number(biz.bizUserRole));
         SetMeta(bizSection, "Level", QString::number(biz.bizLevel));
+        QString BizIsDue = biz.bizIsDue ? "1" : "0";
+        SetMeta(bizSection, "IsDue", BizIsDue);
     }
     //
     return true;
@@ -1450,6 +1505,7 @@ bool CWizDatabase::GetUserBizInfo(bool bAllowEmptyBiz, const CWizGroupDataArray&
         biz.bizName = GetMetaDef(bizSection, "Name");
         biz.bizUserRole = GetMetaDef(bizSection, "UserRole").toInt();
         biz.bizLevel = GetMetaDef(bizSection, "Level").toInt();
+        biz.bizIsDue = GetMetaDef(bizSection, "IsDue") == "1";
         //
         if (bAllowEmptyBiz || !IsEmptyBiz(arrayGroup, biz.bizGUID))
         {

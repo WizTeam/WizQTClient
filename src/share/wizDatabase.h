@@ -186,6 +186,7 @@ public:
     virtual bool OnDownloadBizs(const CWizBizDataArray& arrayBiz);
     virtual IWizSyncableDatabase* GetGroupDatabase(const WIZGROUPDATA& group);
     virtual void CloseGroupDatabase(IWizSyncableDatabase* pDatabase);
+    virtual IWizSyncableDatabase* GetPersonalDatabase();
 
     virtual bool IsGroup();
     virtual bool IsGroupAdmin();
@@ -236,8 +237,10 @@ public:
     virtual void ClearError();
     virtual void OnTrafficLimit(const QString& strErrorMessage);
     virtual void OnStorageLimit(const QString& strErrorMessage);
+    virtual void OnBizServiceExpr(const QString& strErrorMessage);
     virtual bool IsTrafficLimit();
     virtual bool IsStorageLimit();
+    virtual bool IsBizServiceExpr();
 
     virtual bool setMeta(const QString& strSection, const QString& strKey, const QString& strValue);
     virtual QString meta(const QString& strSection, const QString& strKey);

@@ -5,6 +5,7 @@
 
 #define WIZKM_XMLRPC_ERROR_TRAFFIC_LIMIT		304
 #define WIZKM_XMLRPC_ERROR_STORAGE_LIMIT		305
+#define WIZKM_XMLRPC_ERROR_BIZ_SERVICE_EXPR		380
 
 class CWizKMXmlRpcServerBase : public CWizXmlRpcServerBase
 {
