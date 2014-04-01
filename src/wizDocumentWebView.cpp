@@ -151,8 +151,6 @@ CWizDocumentWebView::CWizDocumentWebView(CWizExplorerApp& app, QWidget* parent)
     // refers
     MainWindow* mainWindow = qobject_cast<MainWindow *>(m_app.mainWindow());
 
-
-
     m_transitionView = mainWindow->transitionView();
 
     m_docLoadThread = new CWizDocumentWebViewLoaderThread(m_dbMgr);

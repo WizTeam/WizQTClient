@@ -772,13 +772,20 @@ var WizTodo = (function () {
             if (!label.hasChildNodes()) 
                 return false;
             //
-            var childnodes = label.childNodes;
-            if (childnodes.length != 1)
+            var child0 = label.childNodes[0];
+            //
+            if (!isTodoImage(child0))
                 return false;
             //
-            if (!childnodes[0].getAttribute || -1 == getClassValue(childnodes[0]).indexOf(WIZ_HTML_CLASS_WIZ_TODO))
-                return false;
-            //
+            var nextSib = child0.nextSibling;
+            while (nextSib) {
+                if (!nextSib.tagName)
+                    return false;
+                if (!isEmptyNode(nextSib) || !emptyCanRemove(nextSib))
+                    return false;
+                //
+                nextSib = nextSib.nextSibling;
+            }
             if (1 != rng.startOffset || 1 != rng.endOffset)
                 return false;
             //
@@ -972,7 +979,7 @@ var WizTodo = (function () {
         // deleteEmptyLabel();
         //
         var strHTML = "<label class='wiz-todo-label wiz-todo-label-unchecked'>" + 
-                        "<img id='%1' class='wiz-todo wiz-img-cannot-drag' src='%2' state='unchecked'>" + 
+                        "<img id='%1' class='wiz-todo wiz-img-cannot-drag' src='%2' state='unchecked'><span class='wiz-todo-tail'></span>" + 
                       "</label>";
         //
         strHTML = strHTML.replace("%1", 'wiz_todo_' + Date.now() + '_' + Math.floor((Math.random()*1000000) + 1));
@@ -1110,6 +1117,28 @@ var WizTodo = (function () {
         ele.parentElement.removeChild(ele);
     }
 
+    function WIZTODOMAKEOBJECT( s ) {
+        for (var k in s) {
+            s[k.toUpperCase()] = s[k];
+        }
+        return s;
+    }
+
+    g_emptyCanRemove = WIZTODOMAKEOBJECT({a:1,abbr:1,acronym:1,address:1,b:1,bdo:1,big:1,cite:1,code:1,del:1,dfn:1,em:1,font:1,i:1,ins:1,label:1,kbd:1,q:1,s:1,samp:1,small:1,span:1,strike:1,strong:1,sub:1,sup:1,tt:1,u:1,'var':1});
+
+    function emptyCanRemove(node) {
+        if (!node)
+            return false;
+        //
+        if (!node.tagName)
+            return false;
+        //
+        if (isEmptyNode(node) && g_emptyCanRemove[node.tagName])
+            return true;
+        //
+        return false;
+    }
+
     function removeBlockElement(ele) {
         if (!ele)
             return null;
@@ -1135,6 +1164,10 @@ var WizTodo = (function () {
                 continue;
             }
             else if (child.tagName && child.tagName.toLowerCase() == 'br') {
+                child.parentElement.removeChild(child);
+                continue;
+            }
+            else if (emptyCanRemove(child)) {
                 child.parentElement.removeChild(child);
                 continue;
             }
@@ -1224,7 +1257,24 @@ var WizTodo = (function () {
         if (isWizTodoBlockElement(parentEle) && isTodoAtFirst(parentEle)) {
 
             if (isSelectionExactlyAfterTodoImage() && hasPrevSiblingTodo(parentEle)) {
-                label.parentElement.removeChild(label);
+
+                var hasBr = false;
+                var nextSib = label.nextSibling;
+                while (nextSib) {
+                    if (nextSib.tagName && nextSib.tagName.toLowerCase() == 'br') {
+                        hasBr = true;
+                        break;
+                    }
+
+                    //
+                    nextSib = nextSib.nextSibling;
+                }
+                var p = label.parentElement;
+                p.removeChild(label);
+                if (!hasBr) {
+                    p.appendChild(document.createElement('br'));
+                }
+                setCaret(p);
                 //
                 g_canInsertWizTodo = false;
                 return;
