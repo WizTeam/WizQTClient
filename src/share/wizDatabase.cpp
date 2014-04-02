@@ -1132,46 +1132,34 @@ void CWizDatabase::OnTrafficLimit(const QString& strErrorMessage)
 
 void CWizDatabase::OnStorageLimit(const QString& strErrorMessage)
 {
-    IWizSyncableDatabase* db = GetPersonalDatabase();
-    if (!db)
-        return;
-    //
     CString strBizGUID = m_info.bizGUID;
     //
-    db->setMeta(strBizGUID, _T("LastSyncErrorCode"), QString::number(WIZKMSYNC_EXIT_STORAGE_LIMIT));
-    db->setMeta(strBizGUID, _T("LastSyncErrorMessage"), strErrorMessage);
+    setMeta(strBizGUID, _T("LastSyncErrorCode"), QString::number(WIZKMSYNC_EXIT_STORAGE_LIMIT));
+    setMeta(strBizGUID, _T("LastSyncErrorMessage"), strErrorMessage);
 }
 
 void CWizDatabase::OnBizServiceExpr(const QString &strErrorMessage)
 {
-    IWizSyncableDatabase* db = GetPersonalDatabase();
-    if (!db)
-        return;
-    //
     CString strBizGUID = m_info.bizGUID;
     //
-    db->setMeta(strBizGUID, _T("LastSyncErrorCode"), QString::number(WIZKMSYNC_EXIT_BIZ_SERVICE_EXPR));
-    db->setMeta(strBizGUID, _T("LastSyncErrorMessage"), strErrorMessage);
+    setMeta(strBizGUID, _T("LastSyncErrorCode"), QString::number(WIZKMSYNC_EXIT_BIZ_SERVICE_EXPR));
+    setMeta(strBizGUID, _T("LastSyncErrorMessage"), strErrorMessage);
 }
 
 bool CWizDatabase::IsTrafficLimit()
 {
-    // FIXME
-    return false;
+    CString strBizGUID = m_info.bizGUID;
+    QString strLastError = meta(strBizGUID, _T("LastSyncErrorCode"));
+
+    return strLastError.toInt() == WIZKMSYNC_EXIT_TRAFFIC_LIMIT;
 }
 
 bool CWizDatabase::IsStorageLimit()
 {
-//    IWizSyncableDatabase* db = GetPersonalDatabase();
-//    if (!db)
-//        return false;
+    CString strBizGUID = m_info.bizGUID;
+    QString strLastError = meta(strBizGUID, _T("LastSyncErrorCode"));
 
-//    CString strBizGUID = m_info.bizGUID;
-//    QString strLastError = db->meta(strBizGUID, _T("LastSyncErrorCode"));
-
-//    return strLastError.toInt() == WIZKMSYNC_EXIT_STORAGE_LIMIT;
-
-    return true;
+    return strLastError.toInt() == WIZKMSYNC_EXIT_STORAGE_LIMIT;
 }
 
 bool CWizDatabase::IsBizServiceExpr()
@@ -1184,6 +1172,20 @@ bool CWizDatabase::IsBizServiceExpr()
     QString strLastError = db->meta(strBizGUID, _T("LastSyncErrorCode"));
 
     return strLastError.toInt() == WIZKMSYNC_EXIT_BIZ_SERVICE_EXPR;
+}
+
+bool CWizDatabase::GetStorageLimitMessage(QString &strErrorMessage)
+{
+    CString strBizGUID = m_info.bizGUID;
+    QString strLastError = meta(strBizGUID, _T("LastSyncErrorCode"));
+
+    if (strLastError.toInt() == WIZKMSYNC_EXIT_STORAGE_LIMIT)
+    {
+        strErrorMessage = meta(strBizGUID, _T("LastSyncErrorMessage"));
+        return true;
+    }
+
+    return false;
 }
 
 bool CWizDatabase::setMeta(const QString& strSection, const QString& strKey, const QString& strValue)

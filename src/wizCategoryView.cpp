@@ -1605,11 +1605,18 @@ void CWizCategoryView::manageBizGroup(const QString& groupGUID, const QString& b
     showWebDialogWithToken(tr("Manage group"), strUrl, window());
 }
 
-void CWizCategoryView::promptGroupSpaceExcess(const QString &groupGUID, const QString &bizGUID)
+void CWizCategoryView::promptGroupSpaceExcess(const QString &groupGUID, const QString &/*bizGUID*/)
 {
-    QString extInfo = "kb=" + groupGUID + "&biz=" + bizGUID;
-    QString strUrl = WizService::ApiEntry::standardCommandUrl("manage_biz_group", WIZ_TOKEN_IN_URL_REPLACE_PART, extInfo);
-    showWebDialogWithToken(tr("Group Space Excess"), strUrl, window());
+    //QString extInfo = "kb=" + groupGUID + "&biz=" + bizGUID;
+    //QString strUrl = WizService::ApiEntry::standardCommandUrl("manage_biz_group", WIZ_TOKEN_IN_URL_REPLACE_PART, extInfo);
+    //showWebDialogWithToken(tr("Group Space Excess"), strUrl, window());
+
+    CWizDatabase& db = m_dbMgr.db(groupGUID);
+    QString strErrorMsg;
+    if (db.GetStorageLimitMessage(strErrorMsg))
+    {
+        QMessageBox::information(this, tr("Storage Limit Info"), strErrorMsg);
+    }
 }
 
 void CWizCategoryView::viewBizInfo(const QString& bizGUID)

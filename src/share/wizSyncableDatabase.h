@@ -122,6 +122,7 @@ struct IWizSyncableDatabase
     virtual bool IsTrafficLimit() = 0;
     virtual bool IsStorageLimit() = 0;
     virtual bool IsBizServiceExpr() = 0;
+    virtual bool GetStorageLimitMessage(QString& strErrorMessage) = 0;
 
     virtual bool setMeta(const QString& strSection, const QString& strKey, const QString& strValue) = 0;
     virtual QString meta(const QString& strSection, const QString& strKey) = 0;

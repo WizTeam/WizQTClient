@@ -241,6 +241,7 @@ public:
     virtual bool IsTrafficLimit();
     virtual bool IsStorageLimit();
     virtual bool IsBizServiceExpr();
+    virtual bool GetStorageLimitMessage(QString& strErrorMessage);
 
     virtual bool setMeta(const QString& strSection, const QString& strKey, const QString& strValue);
     virtual QString meta(const QString& strSection, const QString& strKey);

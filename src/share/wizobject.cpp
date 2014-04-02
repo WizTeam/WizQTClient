@@ -749,8 +749,7 @@ bool WIZBIZDATA::LoadFromXmlRpc(CWizXmlRpcStructValue& data)
     data.GetStr(_T("biz_guid"), bizGUID);
     data.GetInt(_T("user_group"), bizUserRole);
     data.GetInt(_T("biz_level"), bizLevel);
-    //data.GetBool(_T("biz_is_due"), bizIsDue);
-    bizIsDue = true;
+    data.GetBool(_T("biz_is_due"), bizIsDue);
 
     return !bizGUID.isEmpty()
             && !bizName.isEmpty();
