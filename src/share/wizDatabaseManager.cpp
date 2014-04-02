@@ -15,6 +15,7 @@ CWizDatabaseManager* CWizDatabaseManager::instance()
 
 CWizDatabaseManager::CWizDatabaseManager(const QString& strUserId)
     : m_strUserId(strUserId)
+    , m_mutex(QMutex::Recursive)
 {
     Q_ASSERT(!m_instance);
 
