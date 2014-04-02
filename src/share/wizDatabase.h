@@ -432,6 +432,7 @@ private:
                                 const CWizDatabase& targetDB, WIZDOCUMENTATTACHMENTDATAEX& targetData, \
                                 QString& strFileName);
 
+    bool GetBizMetaName(const QString& strBizGUID, QString& strMetaName);
 };
 
 
