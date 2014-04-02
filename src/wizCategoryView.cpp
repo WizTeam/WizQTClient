@@ -1526,7 +1526,7 @@ void CWizCategoryView::on_itemClicked(QTreeWidgetItem *item, int column)
     {
         if (pItem->extraButtonClickTest())
         {
-            promptGroupSpaceExcess(pItem->kbGUID(), pItem->bizGUID());
+            promptGroupStorageLimitMessage(pItem->kbGUID(), pItem->bizGUID());
         }
     }
 }
@@ -1605,7 +1605,7 @@ void CWizCategoryView::manageBizGroup(const QString& groupGUID, const QString& b
     showWebDialogWithToken(tr("Manage group"), strUrl, window());
 }
 
-void CWizCategoryView::promptGroupSpaceExcess(const QString &groupGUID, const QString &/*bizGUID*/)
+void CWizCategoryView::promptGroupStorageLimitMessage(const QString &groupGUID, const QString &/*bizGUID*/)
 {
     //QString extInfo = "kb=" + groupGUID + "&biz=" + bizGUID;
     //QString strUrl = WizService::ApiEntry::standardCommandUrl("manage_biz_group", WIZ_TOKEN_IN_URL_REPLACE_PART, extInfo);

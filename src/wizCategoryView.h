@@ -262,7 +262,7 @@ public:
     void viewBizGroupInfo(const QString& groupGUID, const QString& bizGUID);
     void managePersonalGroup(const QString& groupGUID);
     void manageBizGroup(const QString& groupGUID, const QString& bizGUID);
-    void promptGroupSpaceExcess(const QString& groupGUID, const QString& bizGUID);
+    void promptGroupStorageLimitMessage(const QString& groupGUID, const QString& bizGUID);
     void viewBizInfo(const QString& bizGUID);
     void manageBiz(const QString& bizGUID, bool bUpgrade);
 

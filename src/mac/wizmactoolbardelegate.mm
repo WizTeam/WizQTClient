@@ -58,7 +58,7 @@ public:
         , m_helper(this, action, NULL)
     {
         m_nsImages = [[NSMutableDictionary alloc] init];
-        connect(action, SIGNAL(changed()), SLOT(on_action_changed()));
+        //connect(action, SIGNAL(changed()), SLOT(on_action_changed()));
     }
     virtual ~CWizMacToolBarActionItem()
     {
