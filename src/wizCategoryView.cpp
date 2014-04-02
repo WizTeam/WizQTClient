@@ -107,6 +107,7 @@ CWizCategoryBaseView::CWizCategoryBaseView(CWizExplorerApp& app, QWidget* parent
     setPalette(pal);
     //
     setCursor(QCursor(Qt::ArrowCursor));
+    setMouseTracking(true);
 
     // signals from database
     connect(&m_dbMgr, SIGNAL(documentCreated(const WIZDOCUMENTDATA&)),
@@ -173,6 +174,26 @@ void CWizCategoryBaseView::mousePressEvent(QMouseEvent* event)
     m_hitPos = event->pos();
 
     QTreeWidget::mousePressEvent(event);
+}
+
+void CWizCategoryBaseView::mouseMoveEvent(QMouseEvent* event)
+{
+    QPoint msPos = event->pos();
+    CWizCategoryViewItemBase* pItem =  itemAt(msPos);
+    if (!pItem)
+        return;
+
+    QRect rcExtra = pItem->getExtraButtonRect(visualItemRect(pItem));
+    if (rcExtra.contains(msPos))
+    {
+        m_app.mainWindow()->setCursor(Qt::PointingHandCursor);
+    }
+    else
+    {
+        m_app.mainWindow()->setCursor(Qt::ArrowCursor);
+    }
+
+    QTreeWidget::mouseMoveEvent(event);
 }
 
 void CWizCategoryBaseView::resizeEvent(QResizeEvent* event)

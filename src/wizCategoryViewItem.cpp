@@ -150,8 +150,11 @@ QRect CWizCategoryViewItemBase::getExtraButtonRect(const QRect& rcItemBorder) co
 {
     int nMargin = 4;
     QSize szBtn(16, 16);
-    if (!m_extraButtonIcon.isNull())
+    if (!m_extraButtonIcon.isNull()) {
         szBtn = m_extraButtonIcon.size();
+    } else {
+        return QRect(0, 0, 0, 0);
+    }
     int nWidth = szBtn.width() + 2 * nMargin;
     int nHeight = szBtn.height() + 2 * nMargin;
     //
