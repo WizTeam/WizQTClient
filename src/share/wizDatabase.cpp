@@ -1153,13 +1153,15 @@ void CWizDatabase::OnStorageLimit(const QString& strErrorMessage)
     setMeta(WIZKMSYNC_EXIT_INFO, _T("LastSyncErrorMessage"), strErrorMessage);
 }
 
-void CWizDatabase::OnBizServiceExpr(const QString &strErrorMessage)
+void CWizDatabase::OnBizServiceExpr(const QString& strBizGUID, const QString& strErrorMessage)
 {
+    if (strBizGUID.isEmpty())
+        return;
+
     IWizSyncableDatabase* db = GetPersonalDatabase();
     if (!db)
         return;
 
-    CString strBizGUID = m_info.bizGUID;
     QString strMetaSection;
     if (!GetBizMetaName(strBizGUID, strMetaSection))
         return;
@@ -1574,6 +1576,21 @@ bool CWizDatabase::GetBizData(const QString& bizGUID, WIZBIZDATA& biz)
         }
     }
     return false;
+}
+
+bool CWizDatabase::GetBizGUID(const QString &strGroupGUID, QString &strBizGUID)
+{
+    if (strGroupGUID.isEmpty())
+        return false;
+
+    IWizSyncableDatabase* db = GetPersonalDatabase();
+    if (!db)
+        return false;
+
+    QString groupSection = strGroupGUID+"_BIZGUID";
+    strBizGUID = meta("GROUPS", groupSection);
+
+    return true;
 }
 
 bool CWizDatabase::GetGroupData(const QString& groupGUID, WIZGROUPDATA& group)

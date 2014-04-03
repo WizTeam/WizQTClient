@@ -237,7 +237,7 @@ public:
     virtual void ClearError();
     virtual void OnTrafficLimit(const QString& strErrorMessage);
     virtual void OnStorageLimit(const QString& strErrorMessage);
-    virtual void OnBizServiceExpr(const QString& strErrorMessage);
+    virtual void OnBizServiceExpr(const QString& strBizGUID, const QString& strErrorMessage);
     virtual bool IsTrafficLimit();
     virtual bool IsStorageLimit();
     virtual bool IsBizServiceExpr(const QString& strBizGUID);
@@ -304,6 +304,7 @@ public:
     bool GetUserBizInfo(bool bAllowEmptyBiz, CWizBizDataArray& arrayBiz);
     bool GetUserBizInfo(bool bAllowEmptyBiz, const CWizGroupDataArray& arrayAllGroup, CWizBizDataArray& arrayBiz);
     bool GetBizData(const QString& bizGUID, WIZBIZDATA& biz);
+    bool GetBizGUID(const QString& strGroupGUID, QString& strBizGUID);
     bool GetGroupData(const QString& groupGUID, WIZGROUPDATA& group);
     //
     static bool IsEmptyBiz(const CWizGroupDataArray& arrayGroup, const QString& bizGUID);

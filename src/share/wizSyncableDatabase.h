@@ -111,6 +111,7 @@ struct IWizSyncableDatabase
 
     //virtual CComPtr<IWizBizUserCollection> GetBizUsers() = 0;
     virtual void GetAllBizUserIds(CWizStdStringArray& arrayText) = 0;
+    virtual bool GetBizGUID(const QString& strGroupGUID, QString& strBizGUID) = 0;
 
     //virtual CComPtr<IWizDocument> GetDocumentByGUID(const QString& strDocumentGUID) = 0;
     virtual bool OnDownloadMessages(const CWizUserMessageDataArray& arrayMessage) = 0;
@@ -118,7 +119,7 @@ struct IWizSyncableDatabase
     virtual void ClearError() = 0;
     virtual void OnTrafficLimit(const QString& strErrorMessage) = 0;
     virtual void OnStorageLimit(const QString& strErrorMessage) = 0;
-    virtual void OnBizServiceExpr(const QString& strErrorMessage) = 0;
+    virtual void OnBizServiceExpr(const QString& strBizGUID, const QString& strErrorMessage) = 0;
     virtual bool IsTrafficLimit() = 0;
     virtual bool IsStorageLimit() = 0;
     virtual bool IsBizServiceExpr(const QString& strBizGUID) = 0;

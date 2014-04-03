@@ -812,7 +812,9 @@ bool UploadDocument(const WIZKBINFO& kbInfo, int size, int start, int total, int
             {
                 CString strMessage = WizFormatString0(IDS_BIZ_SERVICE_EXPR);
                 //
-                pDatabase->OnBizServiceExpr(strMessage);
+                QString strBizGUID;
+                pDatabase->GetBizGUID(local.strKbGUID, strBizGUID);
+                pDatabase->OnBizServiceExpr(strBizGUID, strMessage);
                 //
                 //pEvents->SetStop(TRUE);
                 pEvents->OnBizServiceExpr(pDatabase);
@@ -1007,7 +1009,9 @@ bool UploadAttachment(const WIZKBINFO& kbInfo, int size, int start, int total, i
             {
                 CString strMessage = WizFormatString0(IDS_BIZ_SERVICE_EXPR);
                 //
-                pDatabase->OnBizServiceExpr(strMessage);
+                QString strBizGUID;
+                pDatabase->GetBizGUID(local.strKbGUID, strBizGUID);
+                pDatabase->OnBizServiceExpr(strBizGUID, strMessage);
                 //
                 //pEvents->SetStop(TRUE);
                 pEvents->OnBizServiceExpr(pDatabase);
