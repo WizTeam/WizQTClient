@@ -33,6 +33,18 @@ if(NOT WIZNOTE_USE_QT5)
 endif(NOT WIZNOTE_USE_QT5)
 
 if(APPLE)
+    if(NOT APPSTORE_BUILD)
+        set(APPSTORE_BUILD OFF CACHE BOOL
+            "Build WizNote used for apple appstore upload.")
+    endif(NOT APPSTORE_BUILD)
+
+    if(APPSTORE_BUILD)
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -gdwarf-2")
+        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -gdwarf-2")
+    endif(APPSTORE_BUILD)
+endif(APPLE)
+
+if(APPLE)
     set(WIZNOTE_ROOT_DIR ${CMAKE_BINARY_DIR}/wiznote.app)
     set(WIZNOTE_PLUGIN_DIR ${WIZNOTE_ROOT_DIR}/Contents/PlugIns)
     set(WIZNOTE_RESOURCE_DIR ${WIZNOTE_ROOT_DIR}/Contents/Resources)
