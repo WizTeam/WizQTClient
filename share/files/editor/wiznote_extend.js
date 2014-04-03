@@ -100,12 +100,12 @@ function viewNote(strGUID, bEditing, strHtml, strHead)
 
         if (m_inited) {
             setEditorHtml(wiz_html, bEditing);
-	    WizEditor.initTodoListEnvironment();
+        WizEditor.initTodoListEnvironment();
         } else {
             editor.ready(function() {
                 m_header = editor.document.head.innerHTML; // save original header
                 setEditorHtml(wiz_html, bEditing);
-		WizEditor.initTodoListEnvironment();
+        WizEditor.initTodoListEnvironment();
                 m_inited = true;
             });
         }
@@ -143,6 +143,7 @@ function updateCss()
             m_defaultCssVersion++;
         }
     }
+    initDefaultCss(editor.document);
 }
 
 // helper functions
@@ -165,9 +166,36 @@ function WizGetLinkUrl() {
 }
 
 
-var WIZ_CLIENT = 'qt';
 
-function WizTodoQtHelper(external) {
+function initDefaultCss(document) {
+    var WIZ_TODO_STYLE_ID = 'wiz_todo_style_id';
+    var WIZ_STYLE = 'wiz_style';
+    var WIZ_LINK_VERSION = 'wiz_link_version';
+    var WIZ_TODO_STYLE_VERSION = "01.00.01";
+    var WIZ_TODO_JS_VERSION = "01.00.10";
+
+    var style = document.getElementById(WIZ_TODO_STYLE_ID);
+    if (style && !!style.getAttribute && style.getAttribute(WIZ_LINK_VERSION) >= WIZ_TODO_STYLE_VERSION)
+        return;
+    //
+    if (style && style.parentElement) { 
+        style.parentElement.removeChild(style);
+    }
+    //
+    var strStyle = '.wiz-todo, .wiz-todo-img {cursor: default; padding: 0 8px 0 2px; vertical-align: -10%;-webkit-user-select: none;} .wiz-todo-label-checked { text-decoration: line-through; color: #666;} .wiz-todo-label-unchecked {text-decoration: initial;} .wiz-todo-completed-info {padding-left: 8px; font-style:italic;} .wiz-todo-avatar { vertical-align: -10%; padding-right:4px;}';
+    //
+    var objStyle = document.createElement('style');
+    objStyle.type = 'text/css';
+    objStyle.textContent = strStyle;
+    objStyle.id = WIZ_TODO_STYLE_ID;
+    // objStyle.setAttribute(WIZ_STYLE, 'unsave');
+    objStyle.setAttribute(WIZ_LINK_VERSION, WIZ_TODO_STYLE_VERSION);
+    //
+    document.head.appendChild(objStyle);
+}
+
+
+function WizTodoQtHelper() {
 
     this.getUserAlias = getUserAlias;
     this.getUserAvatarFileName = getUserAvatarFileName;
@@ -177,9 +205,7 @@ function WizTodoQtHelper(external) {
     this.getCheckedImageFileName = getCheckedImageFileName;
     this.getUnCheckedImageFileName = getUnCheckedImageFileName;
     this.initCss = initCss;
-
-    (function init() {
-    })();
+    this.canEdit = canEdit;
 
     function getUserAlias() {
         return objApp.getUserAlias();
@@ -209,61 +235,40 @@ function WizTodoQtHelper(external) {
         return objApp.getSkinResourcePath() + "unchecked.png";
     }
 
+    function canEdit() {
+        return editor.body.contentEditable == "true";
+    }
+
     function initCss(document) {
-        var WIZ_TODO_STYLE_ID = 'wiz_todo_style_id';
-        var WIZ_STYLE = 'wiz_style';
-        var WIZ_LINK_VERSION = 'wiz_link_version';
-        var WIZ_TODO_STYLE_VERSION = "01.00.00";
-        var WIZ_TODO_JS_VERSION = "01.00.10";
-
-        var style = document.getElementById(WIZ_TODO_STYLE_ID);
-        if (style && !!style.getAttribute && style.getAttribute(WIZ_LINK_VERSION) >= WIZ_TODO_STYLE_VERSION)
-            return;
-        //
-        if (style && style.parentElement) { 
-            style.parentElement.removeChild(style);
-        }
-        //
-        var strStyle = '.wiz-todo {cursor: default; padding: 0 8px 0 2px; vertical-align: -10%;-webkit-user-select: none;} .wiz-todo-label-checked { text-decoration: line-through; color: #666;} .wiz-todo-label-unchecked {text-decoration: initial;} .wiz-todo-completed-info {padding-left: 8px; font-style:italic;} .wiz-todo-avatar { vertical-align: -10%; padding-right:4px;}';
-        //
-        var objStyle = document.createElement('style');
-        objStyle.type = 'text/css';
-        objStyle.textContent = strStyle;
-        objStyle.id = WIZ_TODO_STYLE_ID;
-        // objStyle.setAttribute(WIZ_STYLE, 'unsave');
-        objStyle.setAttribute(WIZ_LINK_VERSION, WIZ_TODO_STYLE_VERSION);
-        //
-        document.head.appendChild(objStyle);
+        initDefaultCss(document);
     }
 }
 
-//////////      WizTodoFunc
-
-
-
-function getWizTodoHelper(external) {
-
-    switch(WIZ_CLIENT) {
-        case 'windows':
-            return new WizTodoWindowsHelper(external);
-        case 'qt':
-            return new WizTodoQtHelper(external);
-        case 'iphone':
-            break;
-        case 'web':
-            break;
-        case 'android':
-            break;
-    }
-}
 
 var WizTodo = (function () {
 
-    var WIZ_HTML_CLASS_WIZ_TODO = 'wiz-todo';
+    var WIZ_HTML_CLASS_WIZ_TODO = 'wiz-todo-img';
     var WIZ_HTML_CLASS_CANNOT_DRAG = 'wiz-img-cannot-drag';
     var WIZ_HTML_TODO_COMPLETED_INFO = 'wiz-todo-completed-info';
     var editorDocument = null;
     var todoHelper = null;
+
+    function getTodoHelper(wizClient) {
+
+        switch(wizClient) {
+            case 'windows':
+                return new WizTodoWindowsHelper(external);
+            case 'qt':
+                return new WizTodoQtHelper();
+            case 'iphone':
+                break;
+            case 'web':
+                break;
+            case 'android':
+                return new WizTodoAndroidHelper();
+                break;
+        }
+    }
 
     function getElementDisply(ele) {
         var displayStyle = "";
@@ -536,171 +541,162 @@ var WizTodo = (function () {
         return !!g_canInsertWizTodo;
     }
 
-    function reBindAction() {
-        var todos = editorDocument.getElementsByClassName('wiz-todo');
+    function addCompletedInfo(label, isChecked, todoId) {
+        if (!label)
+            return;
         //
-        function addCompletedInfo(label, isChecked) {
-            if (!label)
+        if (isChecked) {
+            var html =  "<span class='wiz-todo-account'>" + 
+                                "<img src='%1' class='%2'>" +
+                                "%3, " + 
+                        "</span>" + 
+                        "<span class='wiz-todo-dt'>%4.</span>";
+            //
+            var dt = todoHelper.getFormatedDateTime();
+            var userName = todoHelper.getUserAlias();
+            var avatar = todoHelper.getUserAvatarFileName();
+            //
+            html = html.replace('%1', avatar);
+            html = html.replace('%2', WIZ_HTML_CLASS_CANNOT_DRAG + ' ' + 'wiz-todo-avatar');
+            html = html.replace('%3', userName);
+            html = html.replace('%4', dt);
+            //
+            var info = editorDocument.createElement('span');
+            info.className = WIZ_HTML_TODO_COMPLETED_INFO;
+            info.innerHTML = html;
+            info.setAttribute('wiz_todo_id', todoId);
+            //
+            for (var i = label.childNodes.length - 1; i >= 0; i --) {
+                var child = label.childNodes[i];
+                //
+                if (child.tagName && child.tagName.toLowerCase() == 'br') {
+                    label.removeChild(child);
+                }
+            }
+            //
+            var nextSib = label.nextElementSibling;
+            while (nextSib) {
+                if (isLabel(nextSib)) {
+                    label.parentElement.insertBefore(info, nextSib);
+                    break;
+                }
+                //
+                if (nextSib.tagName.toLowerCase() == 'br') {
+                    label.parentElement.insertBefore(info, nextSib);
+                    break;
+                }
+                //
+                nextSib = nextSib.nextElementSibling;
+            }
+            //
+            if (!nextSib) {
+                label.parentElement.appendChild(info);
+            }
+            //
+            setCaret(info);
+        }
+        else {// todo: find todo id
+            var info = label.parentElement.getElementsByClassName(WIZ_HTML_TODO_COMPLETED_INFO);
+            if (!info || info.length < 1)
                 return;
             //
-            if (isChecked) {
-                var html =  "<span class='wiz-todo-account'>" + 
-                                    "<img src='%1' class='%2'>" +
-                                    "%3, " + 
-                            "</span>" + 
-                            "<span class='wiz-todo-dt'>%4.</span>";
+            for (var i = 0; i < info.length; i ++) {
+                var child = info[0];
+                var tmpLabel = child.getElementsByClassName('wiz-todo-label');
+                var chileNextSib = child.nextElementSibling;
                 //
-                var dt = todoHelper.getFormatedDateTime();
-                var userName = todoHelper.getUserAlias();
-                var avatar = todoHelper.getUserAvatarFileName();
-                //
-                html = html.replace('%1', avatar);
-                html = html.replace('%2', WIZ_HTML_CLASS_CANNOT_DRAG + ' ' + 'wiz-todo-avatar');
-                html = html.replace('%3', userName);
-                html = html.replace('%4', dt);
-                //
-                var info = editorDocument.createElement('span');
-                info.className = WIZ_HTML_TODO_COMPLETED_INFO;
-                info.innerHTML = html;
-                //
-                for (var i = label.childNodes.length - 1; i >= 0; i --) {
-                    var child = label.childNodes[i];
-                    //
-                    if (child.tagName && child.tagName.toLowerCase() == 'br') {
-                        label.removeChild(child);
+                if (tmpLabel && tmpLabel.length > 0) {
+                    var nextSib = tmpLabel[0];
+                    while (nextSib) {
+                        var tmpNext = nextSib;
+                        nextSib = nextSib.nextSibling;
+                        child.parentElement.insertBefore(tmpNext, chileNextSib);
                     }
-                }
-                //
-                var nextSib = label.nextElementSibling;
-                while (nextSib) {
-                    if (isLabel(nextSib)) {
-                        label.parentElement.insertBefore(info, nextSib);
-                        break;
-                    }
-                    //
-                    if (nextSib.tagName.toLowerCase() == 'br') {
-                        label.parentElement.insertBefore(info, nextSib);
-                        break;
-                    }
-                    //
-                    nextSib = nextSib.nextElementSibling;
-                }
-                //
-                if (!nextSib) {
-                    label.parentElement.appendChild(info);
-                }
-                //
-                setCaret(info);
-            }
-            else {
-                var info = label.parentElement.getElementsByClassName(WIZ_HTML_TODO_COMPLETED_INFO);
-                if (!info || info.length < 1)
-                    return;
-                //
-                for (var i = 0; i < info.length; i ++) {
-                    var child = info[0];
-                    var tmpLabel = child.getElementsByClassName('wiz-todo-label');
-                    var chileNextSib = child.nextElementSibling;
-                    //
-                    if (tmpLabel && tmpLabel.length > 0) {
-                        var nextSib = tmpLabel[0];
-                        while (nextSib) {
-                            var tmpNext = nextSib;
-                            nextSib = nextSib.nextSibling;
-                            child.parentElement.insertBefore(tmpNext, chileNextSib);
-                        }
-                    }
-                }
-                //
-                var nextSib = label.nextElementSibling;
-                while (nextSib) {
-                    if (isLabel(nextSib))
-                        break;
-                    //
-                    if (isCompletedInfo(nextSib)) {
-                        var tmpNode = nextSib;
-                        nextSib = nextSib.nextElementSibling;
-                        label.parentElement.removeChild(tmpNode);
-                        continue;
-                    }
-                    //
-                    nextSib = nextSib.nextElementSibling;
-                }
-            }
-        }
-
-        function onTodoClick(todoEle) {
-            //
-            var label = getParentTodoLabelElement(todoEle);
-            // todo img add a label parent.
-            if (!label) {
-                label = editorDocument.createElement('label');
-                label.className = 'wiz-todo-label wiz-todo-label-unchecked';
-                todoEle.parentElement.insertBefore(label, todoEle);
-                var nextSib = todoEle;
-                while (nextSib) {
-                    //
-                    label.appendChild(nextSib);
-                    //
-                    nextSib = nextSib.nextSibling;
                 }
             }
             //
-            var classValue = getClassValue(label);
-            //
-            var isChecked = todoEle.getAttribute('state') == 'checked';
-            var imgSrc = isChecked ? todoHelper.getUnCheckedImageFileName() : todoHelper.getCheckedImageFileName();
-            var state = isChecked ? 'unchecked' : 'checked';
-            //
-            if (isChecked) {
-                if (-1 != classValue.indexOf('wiz-todo-label-checked')) {
-                    classValue = classValue.replace('wiz-todo-label-checked', 'wiz-todo-label-unchecked');
-                }
-                else {
-                    classValue += ' wiz-todo-label-unchecked';
-                }
-            } 
-            else {
-                //
-                if (-1 != classValue.indexOf('wiz-todo-label-unchecked')) {
-                    classValue = classValue.replace('wiz-todo-label-unchecked', 'wiz-todo-label-checked');
-                }
-                else {
-                    classValue += ' wiz-todo-label-checked';
-                }
-            }
-            //          
-            todoEle.src = imgSrc;
-            todoEle.setAttribute('state', state);
-            label.setAttribute('class', classValue);
-            //
-            if (!todoHelper.isPersonalDocument()) {
-                addCompletedInfo(label, !isChecked);
-            }
-            //
-            var nextSib = label.nextSibling;
+            var nextSib = label.nextElementSibling;
             while (nextSib) {
-                //
-                var tmpNext = nextSib;
-                nextSib = nextSib.nextSibling;
-                //
-                if (isLabel(tmpNext) || isCompletedInfo(tmpNext))
+                if (isLabel(nextSib))
                     break;
                 //
-                label.appendChild(tmpNext);
+                if (isCompletedInfo(nextSib)) {
+                    var tmpNode = nextSib;
+                    nextSib = nextSib.nextElementSibling;
+                    label.parentElement.removeChild(tmpNode);
+                    continue;
+                }
+                //
+                nextSib = nextSib.nextElementSibling;
             }
-            todoHelper.setDocumentModified();
-            //
-            // if (curWizDoc && curWizDoc.CanEdit) {
-            //  external.ExecuteCommand('editdocument');
-            // }
+        }
+    }
+
+    function onTodoClick(todoEle) {
+        //
+        var label = getParentTodoLabelElement(todoEle);
+        // todo img add a label parent.
+        if (!label) {
+            label = editorDocument.createElement('label');
+            label.className = 'wiz-todo-label wiz-todo-label-unchecked';
+            todoEle.parentElement.insertBefore(label, todoEle);
+            var nextSib = todoEle;
+            while (nextSib) {
+                //
+                label.appendChild(nextSib);
+                //
+                nextSib = nextSib.nextSibling;
+            }
         }
         //
-        for (var i in todos) {
-            todos[i].onclick = function(e) {
-                onTodoClick(this);
+        var classValue = getClassValue(label);
+        //
+        var isChecked = todoEle.getAttribute('state') == 'checked';
+        var imgSrc = isChecked ? todoHelper.getUnCheckedImageFileName() : todoHelper.getCheckedImageFileName();
+        var state = isChecked ? 'unchecked' : 'checked';
+        //
+        if (isChecked) {
+            if (-1 != classValue.indexOf('wiz-todo-label-checked')) {
+                classValue = classValue.replace('wiz-todo-label-checked', 'wiz-todo-label-unchecked');
+            }
+            else {
+                classValue += ' wiz-todo-label-unchecked';
+            }
+        } 
+        else {
+            //
+            if (-1 != classValue.indexOf('wiz-todo-label-unchecked')) {
+                classValue = classValue.replace('wiz-todo-label-unchecked', 'wiz-todo-label-checked');
+            }
+            else {
+                classValue += ' wiz-todo-label-checked';
             }
         }
+        //          
+        todoEle.src = imgSrc;
+        todoEle.setAttribute('state', state);
+        label.setAttribute('class', classValue);
+        //
+        if (!todoHelper.isPersonalDocument()) {
+            addCompletedInfo(label, !isChecked, todoEle.id);
+        }
+        //
+        var nextSib = label.nextSibling;
+        while (nextSib) {
+            //
+            var tmpNext = nextSib;
+            nextSib = nextSib.nextSibling;
+            //
+            if (isLabel(tmpNext) || isCompletedInfo(tmpNext))
+                break;
+            //
+            label.appendChild(tmpNext);
+        }
+        todoHelper.setDocumentModified();
+        //
+        // if (curWizDoc && curWizDoc.CanEdit) {
+        //  external.ExecuteCommand('editdocument');
+        // }
     }
     
     function isEmptyLabel(label) {
@@ -826,7 +822,7 @@ var WizTodo = (function () {
         }
     }
 
-    function isSelectionDirectlyInBody() {
+    function getSelectionBlockParent() {
         var rng = editorDocument.getSelection().getRangeAt(0);
         //
         var p = rng.startContainer;
@@ -836,19 +832,33 @@ var WizTodo = (function () {
         }
         //
         if (p && p.tagName.toString().toLowerCase() == 'body')
-            return true;
+            return p;
+        if (p && p.id && p.id == 'content-view-body')
+            return p;
         //
-        return false;
+        return null;
     }
 
-    function wrapBodyInlineChildren() {
-        if (!editorDocument.body)
+    function isMainEditable(ele) {
+        if (!ele)
+            return false;
+        if (ele && ele.tagName.toString().toLowerCase() == 'body')
+            return true;
+        // editable div of android 
+        if (ele && ele.id && ele.id == 'content-view-body')
+            return true;
+        //
+        return true;
+    }
+
+    function wrapMainEditableInlineChildren(editableNode) {
+        if (!editableNode)
             return;
         //
-        if (!editorDocument.body.hasChildNodes())
+        if (!editableNode.hasChildNodes())
             return;
         //
-        var childnodes = editorDocument.body.childNodes;
+        var childnodes = editableNode.childNodes;
         //
         var div = editorDocument.createElement('div');
         //
@@ -864,7 +874,7 @@ var WizTodo = (function () {
         if (div.hasChildNodes()) { 
             var sel = editorDocument.getSelection();
             //
-            editorDocument.body.insertBefore(div, editorDocument.body.firstChild);
+            editableNode.insertBefore(div, editableNode.firstChild);
             //
             range = editorDocument.createRange();
             range.setStartAfter(div.lastChild);
@@ -979,7 +989,7 @@ var WizTodo = (function () {
         // deleteEmptyLabel();
         //
         var strHTML = "<label class='wiz-todo-label wiz-todo-label-unchecked'>" + 
-                        "<img id='%1' class='wiz-todo wiz-img-cannot-drag' src='%2' state='unchecked'><span class='wiz-todo-tail'></span>" + 
+                        "<img id='%1' class='wiz-todo-img wiz-img-cannot-drag' src='%2' state='unchecked'><span class='wiz-todo-tail'></span>" + 
                       "</label>";
         //
         strHTML = strHTML.replace("%1", 'wiz_todo_' + Date.now() + '_' + Math.floor((Math.random()*1000000) + 1));
@@ -988,8 +998,9 @@ var WizTodo = (function () {
         var label = pasteHtmlAtCaret(strHTML, false);
         removeNestLabel(label);
         //
-        if (isSelectionDirectlyInBody()) {
-            wrapBodyInlineChildren();
+        var p = getSelectionBlockParent();
+        if (isMainEditable(p)) {
+            wrapMainEditableInlineChildren(p);
         }
         //
         mergeNextSibilingTextChild(label, !!fromKeyUp);
@@ -997,8 +1008,6 @@ var WizTodo = (function () {
         divideFromParentLabel(label);
         //
         setCaret(label);
-        //
-        reBindAction();
         //
         return label;
     }
@@ -1225,6 +1234,9 @@ var WizTodo = (function () {
     }
 
     function onKeyDown(e) {
+        if (!todoHelper.canEdit())
+            return;
+        //
         if (13 != e.keyCode) // Return key
             return;
         //
@@ -1317,11 +1329,6 @@ var WizTodo = (function () {
     }
 
     function onKeyUp(e) {
-        if (8 == e.keyCode) {// Backspace
-            reBindAction();
-            return;
-        }
-        /*
         if (13 != e.keyCode) // Return key
             return;
         //
@@ -1330,32 +1337,43 @@ var WizTodo = (function () {
         }
         else {
             deleteEmptyLabel();
-        }*/
+        }
+    }
+
+    function onDocumentClick(e) {
+        if (!todoHelper.canEdit())
+            return;
+        //
+        var node = e.target;
+        if (!node)
+            return;
+        if (!node.className)
+            return;
+        if (-1 != getClassValue(node).indexOf('wiz-todo-img')) {
+            onTodoClick(node);
+        }
     }
 
     function registerEvent() {
         editorDocument.removeEventListener('keydown', onKeyDown);
-        editorDocument.removeEventListener('keyup', onKeyUp);
+        // editorDocument.removeEventListener('keyup', onKeyUp);
+        editorDocument.removeEventListener('click', onDocumentClick);
         //
         editorDocument.addEventListener('keydown', onKeyDown);
-        editorDocument.addEventListener('keyup', onKeyUp);
+        // editorDocument.addEventListener('keyup', onKeyUp);
+        editorDocument.addEventListener('click', onDocumentClick);
     }
 
-    function init(doc, ext) { 
-        if (!doc) {
-            if (console) {
-                console.log('WizTodo, init, doc: ' + doc.toString());
-            }
-            return;
+    function init(wizClient) { 
+        if (wizClient == 'qt') {
+            var ueditor = document.getElementById('ueditor_0');
         }
         //
-        editorDocument = doc;
-        external = ext;
-        todoHelper = getWizTodoHelper(external);
+        editorDocument = ueditor ? ueditor.contentDocument : document;
+        //
+        todoHelper = getTodoHelper(wizClient);
         //
         registerEvent();
-        //
-        reBindAction();
         //
         todoHelper.initCss(editorDocument);
     }
@@ -1365,9 +1383,3 @@ var WizTodo = (function () {
         insertOneTodo: insertOneTodo
     }
 })();
-
-    if ('windows' == WIZ_CLIENT) {
-        (function () {
-            WizTodo.init(document, external);
-        })();
-    }

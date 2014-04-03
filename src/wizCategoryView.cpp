@@ -2040,7 +2040,7 @@ void CWizCategoryView::setBizRootItemExtraButton(CWizCategoryViewItemBase* pItem
 {
     if (pItem)
     {
-        if (bizData.bizIsDue || m_dbMgr.db(bizData.bizGUID).IsBizServiceExpr())
+        if (bizData.bizIsDue || m_dbMgr.db().IsBizServiceExpr(bizData.bizGUID))
         {
             QString strIconPath = ::WizGetSkinResourcePath(m_app.userSettings().skin()) + "bizDue.png";
             pItem->setExtraButtonIcon(strIconPath);

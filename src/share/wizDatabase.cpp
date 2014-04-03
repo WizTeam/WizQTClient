@@ -1182,13 +1182,12 @@ bool CWizDatabase::IsStorageLimit()
     return strLastError.toInt() == WIZKMSYNC_EXIT_STORAGE_LIMIT;
 }
 
-bool CWizDatabase::IsBizServiceExpr()
+bool CWizDatabase::IsBizServiceExpr(const QString& strBizGUID)
 {
     IWizSyncableDatabase* db = GetPersonalDatabase();
     if (!db)
         return false;
 
-    CString strBizGUID = m_info.bizGUID;
     QString strMetaSection;
     if (!GetBizMetaName(strBizGUID, strMetaSection))
         return false;
