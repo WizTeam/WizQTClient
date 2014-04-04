@@ -230,6 +230,7 @@ void CWizDocumentWebView::keyPressEvent(QKeyEvent* event)
              && event->modifiers() == Qt::ControlModifier)
     {
         saveDocument(view()->note(), false);
+        saveTodoListCheckState();
         return;
     }
 
@@ -245,6 +246,7 @@ void CWizDocumentWebView::keyPressEvent(QKeyEvent* event)
         tryResetTitle();
     }
 }
+
 
 void CWizDocumentWebView::focusInEvent(QFocusEvent *event)
 {
@@ -538,6 +540,16 @@ void CWizDocumentWebView::initTodoListEnvironment()
 {
     QString strScript = QString("WizTodo.init('qt');");
     page()->mainFrame()->evaluateJavaScript(strScript);
+    strScript = QString("WizTodoReadChecked.init('qt');");
+    page()->mainFrame()->evaluateJavaScript(strScript);
+
+}
+
+void CWizDocumentWebView::saveTodoListCheckState()
+{
+    QString strScript = QString("WizTodoReadChecked.onDocumentClose();");
+    page()->mainFrame()->evaluateJavaScript(strScript);
+
 }
 
 void CWizDocumentWebView::onEditorLoadFinished(bool ok)
@@ -819,6 +831,8 @@ void CWizDocumentWebView::setEditingDocument(bool editing)
 
     if (m_bEditingMode) {
         saveDocument(view()->note(), false);
+    } else {
+        saveTodoListCheckState();
     }
 
     m_bEditingMode = editing;
@@ -829,8 +843,9 @@ void CWizDocumentWebView::setEditingDocument(bool editing)
     if (editing) {
         setFocus(Qt::MouseFocusReason);
         editorFocus();
-        initTodoListEnvironment();
     }
+
+    initTodoListEnvironment();
 
     Q_EMIT statusChanged();
 }

@@ -3,6 +3,7 @@
 
 #include <QPointer>
 #include <QMap>
+#include <QMutex>
 
 #include "wizIndex.h"
 #include "wizthumbindex.h"
@@ -97,6 +98,7 @@ private:
 
     bool m_bIsPersonal;
     QMap<QString, CWizDatabase*> m_mapGroups;
+    QMutex m_mtxTempFile;
 
 public:
     CWizDatabase();
@@ -393,6 +395,9 @@ public:
     bool DocumentToTempHtmlFile(const WIZDOCUMENTDATA& document, \
                                 QString& strTempHtmlFileName, \
                                 const QString& strTargetFileNameWithoutPath = "index.html");
+    bool extractZiwFileToTempFolder(const WIZDOCUMENTDATA& document, QString& strTempFolder);
+    bool encryptTempFolderToZiwFile(WIZDOCUMENTDATA& document, const QString& strTempFoler, \
+                                    const QString& strIndexFile, const QStringList& strResourceList);
 
     bool IsFileAccessible(const WIZDOCUMENTDATA& document);
 

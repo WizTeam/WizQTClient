@@ -294,6 +294,7 @@ public Q_SLOTS:
 
     // js func
     void initTodoListEnvironment();
+    void saveTodoListCheckState();
 
 Q_SIGNALS:
     // signals for notify command reflect status, triggered when selection, focus, editing mode changed

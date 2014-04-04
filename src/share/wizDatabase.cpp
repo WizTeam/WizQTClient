@@ -2977,14 +2977,36 @@ bool CWizDatabase::loadUserCert()
 
 bool CWizDatabase::DocumentToTempHtmlFile(const WIZDOCUMENTDATA& document,
                                           QString& strTempHtmlFileName, const QString& strTargetFileNameWithoutPath)
+{    
+    QString strTempPath;
+    if (!extractZiwFileToTempFolder(document, strTempPath))
+        return false;
+
+    strTempHtmlFileName = strTempPath + "index.html";
+
+    m_mtxTempFile.lock();
+    QString strText;
+    ::WizLoadUnicodeTextFromFile(strTempHtmlFileName, strText);
+
+    QUrl url = QUrl::fromLocalFile(strTempPath + "index_files/");
+    strText.replace("index_files/", url.toString());
+
+    strTempHtmlFileName = strTempPath + strTargetFileNameWithoutPath;
+    WizSaveUnicodeTextToUtf8File(strTempHtmlFileName, strText);
+    m_mtxTempFile.unlock();
+
+    return PathFileExists(strTempHtmlFileName);
+}
+
+bool CWizDatabase::extractZiwFileToTempFolder(const WIZDOCUMENTDATA& document, QString& strTempFolder)
 {
     CString strZipFileName = GetDocumentFileName(document.strGUID);
     if (!PathFileExists(strZipFileName)) {
         return false;
     }
 
-    CString strTempPath = Utils::PathResolve::tempPath() + document.strGUID + "/";
-    ::WizEnsurePathExists(strTempPath);
+    strTempFolder = Utils::PathResolve::tempPath() + document.strGUID + "/";
+    ::WizEnsurePathExists(strTempFolder);
 
     if (document.nProtected) {
         if (userCipher().isEmpty()) {
@@ -3005,19 +3027,47 @@ bool CWizDatabase::DocumentToTempHtmlFile(const WIZDOCUMENTDATA& document,
         }
     }
 
-    CWizUnzipFile::extractZip(strZipFileName, strTempPath);
+    return CWizUnzipFile::extractZip(strZipFileName, strTempFolder);
+}
 
-    strTempHtmlFileName = strTempPath + strTargetFileNameWithoutPath;
+bool CWizDatabase::encryptTempFolderToZiwFile(WIZDOCUMENTDATA &document, const QString &strTempFoler, \
+                                              const QString& strIndexFile, const QStringList& strResourceList)
+{
+    CWizDocument doc(*this, document);
+    CString strMetaText = doc.GetMetaText();
 
-    QString strText;
-    ::WizLoadUnicodeTextFromFile(strTempHtmlFileName, strText);
+    //copy resources to temp folder
+    QString strResourcePath = strTempFoler + "index_files/";
+    for (int i = 0; i < strResourceList.count(); i++) {
+        QFileInfo fInfo(strResourceList.at(i));
+        if (fInfo.exists()) {
+            QFile::copy(strResourceList.at(i), strResourcePath + fInfo.fileName());
+        }
+    }
 
-    QUrl url = QUrl::fromLocalFile(strTempPath + "index_files/");
-    strText.replace("index_files/", url.toString());
+    CString strZipFileName = GetDocumentFileName(document.strGUID);
+    QString strHtml;
+    ::WizLoadUnicodeTextFromFile(strIndexFile, strHtml);
+    if (!document.nProtected) {
+        bool bZip = ::WizHtml2Zip("", strHtml, strResourcePath, 0, strMetaText, strZipFileName);
+        if (!bZip) {
+            return false;
+        }
+    } else {
+        CString strTempFile = Utils::PathResolve::tempPath() + document.strGUID + "-decrypted";
+        bool bZip = ::WizHtml2Zip("", strHtml, strResourcePath, 0, strMetaText, strTempFile);
+        if (!bZip) {
+            return false;
+        }
 
-    WizSaveUnicodeTextToUtf8File(strTempHtmlFileName, strText);
+        if (!m_ziwReader->encryptDataToTempFile(strTempFile, strZipFileName)) {
+            return false;
+        }
+    }
 
-    return PathFileExists(strTempHtmlFileName);
+    SetObjectDataDownloaded(document.strGUID, "document", true);
+
+    return UpdateDocumentDataMD5(document, strZipFileName, true);
 }
 
 bool CWizDatabase::IsFileAccessible(const WIZDOCUMENTDATA& document)

@@ -263,10 +263,13 @@ public Q_SLOTS:
 
     //js environment func
     QString getSkinResourcePath() const;
-    QString getUserAvatarFilePath() const;
+    QString getUserAvatarFilePath(int size) const;
     QString getUserAlias() const;
     QString getFormatedDateTime() const;
     bool isPersonalDocument() const;
+    QString getCurrentNoteHtml() const;
+    void saveHtmlToCurrentNote(const QString& strHtml, const QString& strResource);
+    bool hasEditPermissionOnCurrentNote() const;
 
 #ifndef Q_OS_MAC
     void on_actionPopupMainMenu_triggered();

@@ -208,6 +208,7 @@ void MainWindow::cleanOnQuit()
 
 void MainWindow::closeEvent(QCloseEvent* event)
 {
+    m_doc->web()->saveTodoListCheckState();
     event->accept();
     qApp->quit();
 /*
@@ -529,11 +530,11 @@ QString MainWindow::getSkinResourcePath() const
     return ::WizGetSkinResourcePath(m_settings->skin());
 }
 
-QString MainWindow::getUserAvatarFilePath() const
+QString MainWindow::getUserAvatarFilePath(int size) const
 {
     QString strFileName;
     QString strUserID = m_dbMgr.db().GetUserId();
-    if (WizService::AvatarHost::customSizeAvatar(strUserID, 16, 16, strFileName))
+    if (WizService::AvatarHost::customSizeAvatar(strUserID, size, size, strFileName))
         return strFileName;
 
 
@@ -569,6 +570,42 @@ bool MainWindow::isPersonalDocument() const
     QString strKbGUID = m_doc->note().strKbGUID;
     QString dbKbGUID = m_dbMgr.db().kbGUID();
     return strKbGUID.isEmpty() || (strKbGUID == dbKbGUID);
+}
+
+QString MainWindow::getCurrentNoteHtml() const
+{
+    CWizDatabase& db = m_dbMgr.db(m_doc->note().strKbGUID);
+    QString strFolder;
+    if (db.extractZiwFileToTempFolder(m_doc->note(), strFolder))
+    {
+        QString strHtmlFile = strFolder + "index.html";
+        QString strHtml;
+        ::WizLoadUnicodeTextFromFile(strHtmlFile, strHtml);
+        return strHtml;
+    }
+
+    return QString();
+}
+
+void MainWindow::saveHtmlToCurrentNote(const QString &strHtml, const QString& strResource)
+{
+    WIZDOCUMENTDATA docData = m_doc->note();
+    CWizDatabase& db = m_dbMgr.db(docData.strKbGUID);
+    QString strFolder;
+    if (db.extractZiwFileToTempFolder(m_doc->note(), strFolder))
+    {
+        QString strHtmlFile = strFolder + "index.html";
+        ::WizSaveUnicodeTextToUtf8File(strHtmlFile, strHtml);
+        QStringList strResourceList = strResource.split('*');
+        db.encryptTempFolderToZiwFile(docData, strFolder, strHtmlFile, strResourceList);
+    }
+}
+
+bool MainWindow::hasEditPermissionOnCurrentNote() const
+{
+    WIZDOCUMENTDATA docData = m_doc->note();
+    CWizDatabase& db = m_dbMgr.db(docData.strKbGUID);
+    return db.CanEditDocument(docData);
 }
 
 void MainWindow::initToolBar()
@@ -1342,6 +1379,7 @@ void MainWindow::on_documents_itemSelectionChanged()
 {
     CWizDocumentDataArray arrayDocument;
     m_documents->getSelectedDocuments(arrayDocument);
+    m_doc->web()->saveTodoListCheckState();
 
     if (arrayDocument.size() == 1) {
         // hide other form
