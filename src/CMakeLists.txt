@@ -370,10 +370,14 @@ if(APPLE)
         set(APPCERT "wiznote")
         add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
             COMMAND dsymutil ${WIZNOTE_ROOT_DIR}/Contents/MacOS/wiznote -o wiznote.app.dSYM)
+
         #add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
         #    COMMAND codesign -f -s ${APPCERT} -v -entitlements ${MACOSX_BUNDLE_INFO_PLIST} ${PROJECT_NAME}.app)
+        ##You can leave out "–entitlements MyEntitlements.plist" if you are not using sandboxing.
+
         #add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-        #    COMMAND productbuild -component ${PROJECT_NAME}.app /Applications -sign ${APPCERT} ${PROJECT_NAME}.pkg)
+        #    COMMAND productbuild --component ${PROJECT_NAME}.app /Applications -sign ${APPCERT} ${PROJECT_NAME}.pkg)
+        ##
     endif(APPSTORE_BUILD)
 endif(APPLE)
 
