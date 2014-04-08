@@ -218,7 +218,7 @@ bool CWizKMSyncThread::quickSync()
         if (!prepareToken())
             return false;
 
-        if (kbGuid.isEmpty())
+        if (kbGuid.isEmpty() || m_db.kbGUID() == kbGuid)
         {
             CWizKMSync syncPrivate(&m_db, m_info, m_pEvents, FALSE, TRUE, NULL);
             //

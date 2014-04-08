@@ -598,6 +598,7 @@ void MainWindow::saveHtmlToCurrentNote(const QString &strHtml, const QString& st
         ::WizSaveUnicodeTextToUtf8File(strHtmlFile, strHtml);
         QStringList strResourceList = strResource.split('*');
         db.encryptTempFolderToZiwFile(docData, strFolder, strHtmlFile, strResourceList);
+        quickSyncKb(docData.strKbGUID);
     }
 }
 
