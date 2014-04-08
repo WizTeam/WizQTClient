@@ -1391,6 +1391,9 @@ var WizTodo = (function () {
     function onKeyUp(e) {
         if (13 != e.keyCode) // Return key
             return;
+
+        if (!todoHelper.canEdit())
+            return;
         //
         if (!canInsertWizTodo()) { 
             var sel = editorDocument.getSelection();

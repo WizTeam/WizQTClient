@@ -3035,6 +3035,8 @@ bool CWizDatabase::encryptTempFolderToZiwFile(WIZDOCUMENTDATA &document, const Q
 {
     CWizDocument doc(*this, document);
     CString strMetaText = doc.GetMetaText();
+    QString strOldZiwFile = GetDocumentFileName(doc.GUID());
+    QFile::remove(strOldZiwFile);
 
     //copy resources to temp folder
     QString strResourcePath = strTempFoler + "index_files/";
