@@ -170,14 +170,24 @@ void TitleBar::setEditor(CWizDocumentWebView* editor)
 
 void TitleBar::onEditorFocusIn()
 {
-    m_infoBar->hide();
-    m_editorBar->show();
+    showEditorBar();
 }
 
 void TitleBar::onEditorFocusOut()
 {
+    showInfoBar();
+}
+
+void TitleBar::showInfoBar()
+{
     m_editorBar->hide();
     m_infoBar->show();
+}
+
+void TitleBar::showEditorBar()
+{
+    m_infoBar->hide();
+    m_editorBar->show();
 }
 
 void TitleBar::onEditorChanged()
@@ -206,6 +216,11 @@ void TitleBar::setEditingDocument(bool editing)
 {
     m_editTitle->setReadOnly(!editing);
     m_editBtn->setState(editing ? CellButton::Checked : CellButton::Normal);
+    if (editing) {
+        showEditorBar();
+    } else {
+        showInfoBar();
+    }
 }
 
 void TitleBar::updateEditButton(bool editing)
