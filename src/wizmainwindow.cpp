@@ -208,7 +208,6 @@ void MainWindow::cleanOnQuit()
 
 void MainWindow::closeEvent(QCloseEvent* event)
 {
-    m_doc->web()->saveTodoListCheckState();
     event->accept();
     qApp->quit();
 /*

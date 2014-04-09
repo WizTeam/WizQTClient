@@ -538,11 +538,16 @@ void CWizDocumentWebView::initEditor()
 
 void CWizDocumentWebView::initTodoListEnvironment()
 {
-    QString strScript = QString("WizTodo.init('qt');");
-    page()->mainFrame()->evaluateJavaScript(strScript);
-    strScript = QString("WizTodoReadChecked.init('qt');");
-    page()->mainFrame()->evaluateJavaScript(strScript);
-
+    if (m_bEditingMode)
+    {
+        QString strScript = QString("WizTodo.init('qt');");
+        page()->mainFrame()->evaluateJavaScript(strScript);
+    }
+    else
+    {
+        QString strScript = QString("WizTodoReadChecked.init('qt');");
+        page()->mainFrame()->evaluateJavaScript(strScript);
+    }
 }
 
 void CWizDocumentWebView::saveTodoListCheckState()
