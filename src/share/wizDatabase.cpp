@@ -3031,40 +3031,47 @@ bool CWizDatabase::extractZiwFileToTempFolder(const WIZDOCUMENTDATA& document, Q
 }
 
 bool CWizDatabase::encryptTempFolderToZiwFile(WIZDOCUMENTDATA &document, const QString &strTempFoler, \
-                                              const QString& strIndexFile, const QStringList& strResourceList)
+                                              const QString &strIndexFile, const QStringList &strResourceList)
 {
     CWizDocument doc(*this, document);
     CString strMetaText = doc.GetMetaText();
-    QString strOldZiwFile = GetDocumentFileName(doc.GUID());
-    QFile::remove(strOldZiwFile);
+    QString strZipFileName = GetDocumentFileName(doc.GUID());
+    QFile::remove(strZipFileName);
+
+    //copy index file
+    QString strFolderIndex = strTempFoler + "index.html";
+    if (strIndexFile != strFolderIndex)
+    {
+        QFile::remove(strFolderIndex);
+        QFile::copy(strIndexFile, strFolderIndex);
+    }
 
     //copy resources to temp folder
     QString strResourcePath = strTempFoler + "index_files/";
-    for (int i = 0; i < strResourceList.count(); i++) {
+    for (int i = 0; i < strResourceList.count(); i++)
+    {
         QFileInfo fInfo(strResourceList.at(i));
-        if (fInfo.exists()) {
+        if (fInfo.exists())
+        {
             QFile::copy(strResourceList.at(i), strResourcePath + fInfo.fileName());
         }
     }
 
-    CString strZipFileName = GetDocumentFileName(document.strGUID);
-    QString strHtml;
-    ::WizLoadUnicodeTextFromFile(strIndexFile, strHtml);
-    if (!document.nProtected) {
-        bool bZip = ::WizHtml2Zip("", strHtml, strResourcePath, 0, strMetaText, strZipFileName);
-        if (!bZip) {
+    if (!document.nProtected)
+    {
+        bool bZip = ::WizFolder2Zip(strTempFoler, strMetaText, strZipFileName);
+        if (!bZip)
             return false;
-        }
-    } else {
+    }
+    else
+    {
         CString strTempFile = Utils::PathResolve::tempPath() + document.strGUID + "-decrypted";
-        bool bZip = ::WizHtml2Zip("", strHtml, strResourcePath, 0, strMetaText, strTempFile);
-        if (!bZip) {
+        bool bZip = ::WizFolder2Zip(strTempFoler, strMetaText, strZipFileName);
+        if (!bZip)
             return false;
-        }
 
-        if (!m_ziwReader->encryptDataToTempFile(strTempFile, strZipFileName)) {
+        if (!m_ziwReader->encryptDataToTempFile(strTempFile, strZipFileName))
             return false;
-        }
     }
 
     SetObjectDataDownloaded(document.strGUID, "document", true);
