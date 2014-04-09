@@ -146,13 +146,13 @@ bool CWizCategoryViewItemBase::getExtraButtonIcon(QPixmap &ret) const
     return !m_extraButtonIcon.isNull();
 }
 
-QRect CWizCategoryViewItemBase::getExtraButtonRect(const QRect& rcItemBorder) const
+QRect CWizCategoryViewItemBase::getExtraButtonRect(const QRect &rcItemBorder, bool ignoreIconExist) const
 {
     int nMargin = 4;
     QSize szBtn(16, 16);
     if (!m_extraButtonIcon.isNull()) {
         szBtn = m_extraButtonIcon.size();
-    } else {
+    } else if (!ignoreIconExist){
         return QRect(0, 0, 0, 0);
     }
     int nWidth = szBtn.width() + 2 * nMargin;
@@ -298,10 +298,15 @@ void CWizCategoryViewSectionItem::reset(const QString& sectionName, int sortOrde
     setText(0, sectionName);
 }
 
-QRect CWizCategoryViewSectionItem::getExtraButtonRect(const QRect& itemBorder) const
+QRect CWizCategoryViewSectionItem::getExtraButtonRect(const QRect &itemBorder, bool ignoreIconExist) const
 {
     int nMargin = 4;
-    QSize szBtn = m_extraButtonIcon.size();
+    QSize szBtn(16, 16);
+    if (!m_extraButtonIcon.isNull()) {
+        szBtn = m_extraButtonIcon.size();
+    } else if (!ignoreIconExist){
+        return QRect(0, 0, 0, 0);
+    }
     int nWidth = szBtn.width() + 2 * nMargin;
     int nHeight = szBtn.height() + 2 * nMargin;
 
@@ -426,7 +431,7 @@ void CWizCategoryViewMessageItem::draw(QPainter* p, const QStyleOptionViewItemV4
     if (nWidth < nHeight)
         nWidth = nHeight;
     //
-    QRect rcExtButton = getExtraButtonRect(vopt->rect);
+    QRect rcExtButton = getExtraButtonRect(vopt->rect, true);
     //
     int nTop = vopt->rect.y() + (vopt->rect.height() - nHeight) / 2;
     int nLeft = rcExtButton.right() - nWidth - 2;
@@ -448,7 +453,6 @@ void CWizCategoryViewMessageItem::draw(QPainter* p, const QStyleOptionViewItemV4
     //
     m_szUnreadSize = rcb.size();
 }
-
 
 /* -------------------- CWizCategoryViewShortcutRootItem -------------------- */
 CWizCategoryViewShortcutRootItem::CWizCategoryViewShortcutRootItem(CWizExplorerApp& app,

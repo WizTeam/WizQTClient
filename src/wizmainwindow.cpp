@@ -1377,9 +1377,9 @@ void MainWindow::on_category_itemSelectionChanged()
 
 void MainWindow::on_documents_itemSelectionChanged()
 {
+    m_doc->web()->saveTodoListCheckState();
     CWizDocumentDataArray arrayDocument;
     m_documents->getSelectedDocuments(arrayDocument);
-    m_doc->web()->saveTodoListCheckState();
 
     if (arrayDocument.size() == 1) {
         // hide other form
