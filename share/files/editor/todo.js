@@ -13,7 +13,7 @@ function initDefaultCss(document, destNode) {
 		style.parentElement.removeChild(style);
 	}
 	//
-	var strStyle = '.wiz-todo, .wiz-todo-img {width: 16px; height: 16px; cursor: default; padding: 0 10px 0 2px; vertical-align: -10%;-webkit-user-select: none;} .wiz-todo-label { display: inline-block; padding-top: 8px; padding-bottom: 8px; line-height: 1;} .wiz-todo-label-checked { text-decoration: line-through; color: #666;} .wiz-todo-label-unchecked {text-decoration: initial;} .wiz-todo-completed-info {padding-left: 44px; display: inline-block; } .wiz-todo-avatar { width:20px; height: 20px; vertical-align: -20%; margin-right:10px; border-radius: 2px;} .wiz-todo-account, .wiz-todo-dt { color: #666; }';
+	var strStyle = '.wiz-todo, .wiz-todo-img {width: 16px; height: 16px; cursor: default; padding: 0 10px 0 2px; vertical-align: -10%;-webkit-user-select: none;} .wiz-todo-label { display: inline-block; padding-top: 4px; padding-bottom: 4px; line-height: 1;} .wiz-todo-label-checked { text-decoration: line-through; color: #666;} .wiz-todo-label-unchecked {text-decoration: initial;} .wiz-todo-completed-info {padding-left: 44px; display: inline-block; } .wiz-todo-avatar { width:20px; height: 20px; vertical-align: -20%; margin-right:10px; border-radius: 2px;} .wiz-todo-account, .wiz-todo-dt { color: #666; }';
 	//
 	var objStyle = document.createElement('style');
 	objStyle.type = 'text/css';
@@ -163,7 +163,29 @@ function WizTodoQtHelper() {
     }
 
     function initCss(document) {
-    	initDefaultCss(document, document.body);
+    	var WIZ_TODO_STYLE_ID = 'wiz_todo_style_id';
+		var WIZ_STYLE = 'wiz_style';
+		var WIZ_LINK_VERSION = 'wiz_link_version';
+		var WIZ_TODO_STYLE_VERSION = "01.00.04";
+
+		var style = document.getElementById(WIZ_TODO_STYLE_ID);
+		if (style && !!style.getAttribute && style.getAttribute(WIZ_LINK_VERSION) >= WIZ_TODO_STYLE_VERSION)
+			return;
+		//
+		if (style && style.parentElement) { 
+			style.parentElement.removeChild(style);
+		}
+		//
+		var strStyle = '.wiz-todo, .wiz-todo-img {width: 16px; height: 16px; cursor: default; padding: 0 10px 0 2px; vertical-align: -10%;-webkit-user-select: none;} .wiz-todo-label { display: inline-block; padding-top: 4px; padding-bottom: 4px; line-height: 1;} .wiz-todo-label-checked { text-decoration: line-through; color: #666;} .wiz-todo-label-unchecked {text-decoration: initial;} .wiz-todo-completed-info {padding-left: 44px; display: inline-block; } .wiz-todo-avatar { width:20px; height: 20px; vertical-align: -20%; margin-right:10px; border-radius: 2px;} .wiz-todo-account, .wiz-todo-dt { color: #666; }';
+		//
+		var objStyle = document.createElement('style');
+		objStyle.type = 'text/css';
+		objStyle.textContent = strStyle;
+		objStyle.id = WIZ_TODO_STYLE_ID;
+		// objStyle.setAttribute(WIZ_STYLE, 'unsave');
+		objStyle.setAttribute(WIZ_LINK_VERSION, WIZ_TODO_STYLE_VERSION);
+		//
+		document.body.appendChild(objStyle);
     }  
 
     function setDocumentType(type) {
