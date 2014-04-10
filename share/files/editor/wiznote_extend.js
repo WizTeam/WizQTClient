@@ -100,12 +100,12 @@ function viewNote(strGUID, bEditing, strHtml, strHead)
 
         if (m_inited) {
             setEditorHtml(wiz_html, bEditing);
-        WizEditor.initTodoListEnvironment();
+        WizEditor.initCheckListEnvironment();
         } else {
             editor.ready(function() {
                 m_header = editor.document.head.innerHTML; // save original header
                 setEditorHtml(wiz_html, bEditing);
-        WizEditor.initTodoListEnvironment();
+        WizEditor.initCheckListEnvironment();
                 m_inited = true;
             });
         }

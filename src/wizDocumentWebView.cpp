@@ -230,7 +230,7 @@ void CWizDocumentWebView::keyPressEvent(QKeyEvent* event)
              && event->modifiers() == Qt::ControlModifier)
     {
         saveDocument(view()->note(), false);
-        saveTodoListCheckState();
+        saveCheckListCheckState();
         return;
     }
 
@@ -424,7 +424,8 @@ void CWizDocumentWebView::onDocumentSaved(const QString kbGUID, const QString st
         TOLOG("Save document failed");
     }
     //
-    ::MainWindow::quickSyncKb(kbGUID);
+    MainWindow* mainWindow = qobject_cast<MainWindow*>(m_app.mainWindow());
+    mainWindow->quickSyncKb(kbGUID);
 }
 
 void CWizDocumentWebView::viewDocument(const WIZDOCUMENTDATA& doc, bool editing)
@@ -537,7 +538,7 @@ void CWizDocumentWebView::initEditor()
     page()->mainFrame()->setHtml(strHtml, url);
 }
 
-void CWizDocumentWebView::initTodoListEnvironment()
+void CWizDocumentWebView::initCheckListEnvironment()
 {
     if (m_bEditingMode)
     {
@@ -551,11 +552,10 @@ void CWizDocumentWebView::initTodoListEnvironment()
     }
 }
 
-void CWizDocumentWebView::saveTodoListCheckState()
+void CWizDocumentWebView::saveCheckListCheckState()
 {
     QString strScript = QString("WizTodoReadChecked.onDocumentClose();");
     page()->mainFrame()->evaluateJavaScript(strScript);
-
 }
 
 void CWizDocumentWebView::onEditorLoadFinished(bool ok)
@@ -838,7 +838,7 @@ void CWizDocumentWebView::setEditingDocument(bool editing)
     if (m_bEditingMode) {
         saveDocument(view()->note(), false);
     } else {
-        saveTodoListCheckState();
+        saveCheckListCheckState();
     }
 
     m_bEditingMode = editing;
@@ -851,7 +851,7 @@ void CWizDocumentWebView::setEditingDocument(bool editing)
         editorFocus();
     }
 
-    initTodoListEnvironment();
+    initCheckListEnvironment();
 
     Q_EMIT statusChanged();
 }
@@ -1128,7 +1128,7 @@ bool CWizDocumentWebView::editorCommandExecuteInsertHorizontal()
     return editorCommandExecuteCommand("horizontal");
 }
 
-bool CWizDocumentWebView::editorCommandExecuteInsertTodoList()
+bool CWizDocumentWebView::editorCommandExecuteInsertCheckList()
 {
     QString strExec = "WizTodo.insertOneTodo();";
     bool ret = page()->mainFrame()->evaluateJavaScript(strExec).toBool();
@@ -1460,6 +1460,7 @@ void CWizDocumentWebViewSaverThread::run()
         //
         qDebug() << "Saving note: " << doc.strTitle;
 
+        ::MainWindow::increaseUnfinishedOprtCounter(1);
         bool notify = false;    //don't notify
         bool ok = db.UpdateDocumentData(doc, data.html, data.htmlFile, data.flags, notify);
         //
@@ -1471,6 +1472,8 @@ void CWizDocumentWebViewSaverThread::run()
         {
             qDebug() << "Save note failed: " << doc.strTitle;
         }
+
+        ::MainWindow::reduceUnfinishedOprtCounter(1);
         //
         QString kbGuid = db.IsGroup() ? db.kbGUID() : "";
         emit saved(kbGuid, doc.strGUID, ok);

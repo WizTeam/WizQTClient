@@ -288,13 +288,13 @@ public Q_SLOTS:
     bool editorCommandExecuteRemoveFormat();
     bool editorCommandExecuteFormatMatch();
     bool editorCommandExecuteInsertHorizontal();
-    bool editorCommandExecuteInsertTodoList();
+    bool editorCommandExecuteInsertCheckList();
     bool editorCommandExecuteInsertImage();
     bool editorCommandExecuteViewSource();
 
     // js func
-    void initTodoListEnvironment();
-    void saveTodoListCheckState();
+    void initCheckListEnvironment();
+    void saveCheckListCheckState();
 
 Q_SIGNALS:
     // signals for notify command reflect status, triggered when selection, focus, editing mode changed

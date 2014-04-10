@@ -365,10 +365,10 @@ EditorToolBar::EditorToolBar(QWidget *parent)
     m_btnHorizontal->setIcon(::WizLoadSkinIcon(skin, "actionFormatInsertHorizontal"));
     connect(m_btnHorizontal, SIGNAL(clicked()), SLOT(on_btnHorizontal_clicked()));
 
-    m_btnTodoList = new CWizToolButton(this);
-    m_btnTodoList->setCheckable(false);
-    m_btnTodoList->setIcon(::WizLoadSkinIcon(skin, "actionFormatInsertTodoList"));
-    connect(m_btnTodoList, SIGNAL(clicked()), SLOT(on_btnTodoList_clicked()));
+    m_btnCheckList = new CWizToolButton(this);
+    m_btnCheckList->setCheckable(false);
+    m_btnCheckList->setIcon(::WizLoadSkinIcon(skin, "actionFormatInsertCheckList"));
+    connect(m_btnCheckList, SIGNAL(clicked()), SLOT(on_btnCheckList_clicked()));
 
     m_btnImage = new CWizToolButton(this);
     m_btnImage->setCheckable(false);
@@ -401,7 +401,7 @@ EditorToolBar::EditorToolBar(QWidget *parent)
     layout->addSpacing(12);
     layout->addWidget(m_btnTable);
     layout->addWidget(m_btnHorizontal);
-    layout->addWidget(m_btnTodoList);
+    layout->addWidget(m_btnCheckList);
     layout->addWidget(m_btnImage);
     layout->addStretch();
 }
@@ -981,10 +981,10 @@ void EditorToolBar::on_btnHorizontal_clicked()
     }
 }
 
-void EditorToolBar::on_btnTodoList_clicked()
+void EditorToolBar::on_btnCheckList_clicked()
 {
     if (m_editor) {
-        m_editor->editorCommandExecuteInsertTodoList();
+        m_editor->editorCommandExecuteInsertCheckList();
     }
 }
 

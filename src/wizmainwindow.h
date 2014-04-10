@@ -140,6 +140,8 @@ private:
     bool m_bLogoutRestart;
     bool m_bUpdatingSelection;
 
+    static int m_bUnfinishOprtCounter;
+
     WIZDOCUMENTDATA m_documentForEditing;
 
 private:
@@ -177,6 +179,9 @@ public:
 #endif
 
     void checkWizUpdate();
+
+    static void increaseUnfinishedOprtCounter(int unfinishedOprt = 1);
+    static void reduceUnfinishedOprtCounter(int finishedOprt = 1);
 
 public Q_SLOTS:
     void on_actionExit_triggered();
@@ -229,7 +234,7 @@ public Q_SLOTS:
     void on_actionFormatInsertTime_triggered();
     void on_actionFormatRemoveFormat_triggered();
     void on_actionEditorViewSource_triggered();
-    void on_actionFormatInsertTodoList_triggered();
+    void on_actionFormatInsertCheckList_triggered();
 
     void on_search_timeout();
     void on_searchProcess(const QString &strKeywords, const CWizDocumentDataArray& arrayDocument, bool bEnd);

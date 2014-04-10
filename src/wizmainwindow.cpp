@@ -65,6 +65,8 @@ using namespace Core;
 using namespace Core::Internal;
 using namespace WizService::Internal;
 
+int MainWindow::m_bUnfinishOprtCounter = 0;
+
 MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     : QMainWindow(parent)
     , m_core(new ICore(this))
@@ -204,6 +206,19 @@ void MainWindow::cleanOnQuit()
         }
     }
 
+    if (m_bUnfinishOprtCounter > 0)
+    {
+        m_progress->setActionString(tr("Saving notes"));
+        m_progress->setNotifyString(tr("Saving notes,please wait..."));
+        m_progress->setProgress(m_bUnfinishOprtCounter + 1, 1);
+        m_progress->show();
+        while (m_bUnfinishOprtCounter > 0)
+        {
+            sleep(1);
+            m_progress->setProgress(m_bUnfinishOprtCounter + 1, 1);
+        }
+        m_progress->hide();
+    }
 }
 
 void MainWindow::closeEvent(QCloseEvent* event)
@@ -370,7 +385,7 @@ void MainWindow::on_editor_statusChanged()
         m_actions->actionFromName(WIZACTION_FORMAT_INSERT_HORIZONTAL)->setEnabled(false);
         m_actions->actionFromName(WIZACTION_FORMAT_INSERT_DATE)->setEnabled(false);
         m_actions->actionFromName(WIZACTION_FORMAT_INSERT_TIME)->setEnabled(false);
-        m_actions->actionFromName(WIZACTION_FORMAT_INSERT_TODOLIST)->setEnabled(false);
+        m_actions->actionFromName(WIZACTION_FORMAT_INSERT_CHECKLIST)->setEnabled(false);
         m_actions->actionFromName(WIZACTION_FORMAT_REMOVE_FORMAT)->setEnabled(false);
         m_actions->actionFromName(WIZACTION_FORMAT_VIEW_SOURCE)->setEnabled(false);
 
@@ -517,10 +532,10 @@ void MainWindow::on_editor_statusChanged()
         m_actions->actionFromName(WIZACTION_FORMAT_VIEW_SOURCE)->setEnabled(true);
     }
 
-    if (-1 ==editor->editorCommandQueryCommandState("todoList")) {
-        m_actions->actionFromName(WIZACTION_FORMAT_INSERT_TODOLIST)->setEnabled(false);
+    if (-1 ==editor->editorCommandQueryCommandState("checklist")) {
+        m_actions->actionFromName(WIZACTION_FORMAT_INSERT_CHECKLIST)->setEnabled(false);
     } else {
-        m_actions->actionFromName(WIZACTION_FORMAT_INSERT_TODOLIST)->setEnabled(true);
+        m_actions->actionFromName(WIZACTION_FORMAT_INSERT_CHECKLIST)->setEnabled(true);
     }
 }
 
@@ -1089,9 +1104,9 @@ void MainWindow::on_actionEditorViewSource_triggered()
     m_doc->web()->editorCommandExecuteViewSource();
 }
 
-void MainWindow::on_actionFormatInsertTodoList_triggered()
+void MainWindow::on_actionFormatInsertCheckList_triggered()
 {
-    m_doc->web()->editorCommandExecuteInsertTodoList();
+    m_doc->web()->editorCommandExecuteInsertCheckList();
 }
 
 void MainWindow::on_actionConsole_triggered()
@@ -1378,7 +1393,7 @@ void MainWindow::on_category_itemSelectionChanged()
 
 void MainWindow::on_documents_itemSelectionChanged()
 {
-    m_doc->web()->saveTodoListCheckState();
+    m_doc->web()->saveCheckListCheckState();
     CWizDocumentDataArray arrayDocument;
     m_documents->getSelectedDocuments(arrayDocument);
 
@@ -1540,6 +1555,16 @@ void MainWindow::locateDocument(const WIZDOCUMENTDATA& data)
 void MainWindow::checkWizUpdate()
 {
     m_upgrade->startCheck();
+}
+
+void MainWindow::increaseUnfinishedOprtCounter(int unfinishedOprt)
+{
+    m_bUnfinishOprtCounter += unfinishedOprt;
+}
+
+void MainWindow::reduceUnfinishedOprtCounter(int finishedOprt)
+{
+    m_bUnfinishOprtCounter -= finishedOprt;
 }
 
 #ifndef Q_OS_MAC
