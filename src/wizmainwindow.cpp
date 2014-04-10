@@ -929,7 +929,7 @@ void MainWindow::on_actionNewNote_triggered()
 
     m_documentForEditing = data;
     m_documents->addAndSelectDocument(data);
-    m_doc->setEditorFocus();
+    m_doc->web()->setEditingDocument(true);
 }
 
 void MainWindow::on_actionEditingUndo_triggered()
