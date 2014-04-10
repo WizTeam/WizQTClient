@@ -134,7 +134,7 @@ void installOnLinux()
     chmod(desktopFileName.toUtf8(), ACCESSPERMS);
 }
 
-int main(int argc, char *argv[])
+int mainCore(int argc, char *argv[])
 {
     //
 #if QT_VERSION < 0x050000
@@ -291,14 +291,20 @@ int main(int argc, char *argv[])
     w.init();
 
     int ret = a.exec();
+    if (w.isLogout()) {
+        QProcess::startDetached(argv[0], QStringList());
+    }
+
+    return ret;
+}
+
+int main(int argc, char *argv[])
+{
+    int ret = mainCore(argc, argv);
 
     // clean up
     QString strTempPath = Utils::PathResolve::tempPath();
     ::WizDeleteAllFilesInFolder(strTempPath);
-
-    if (w.isLogout()) {
-        QProcess::startDetached(argv[0], QStringList());
-    }
 
     return ret;
 }
