@@ -186,11 +186,17 @@ void CWizCategoryBaseView::mouseMoveEvent(QMouseEvent* event)
     QRect rcExtra = pItem->getExtraButtonRect(visualItemRect(pItem));
     if (rcExtra.contains(msPos))
     {
-        m_app.mainWindow()->setCursor(Qt::PointingHandCursor);
+        if (cursor().shape() != Qt::PointingHandCursor)
+        {
+            setCursor(Qt::PointingHandCursor);
+        }
     }
     else
     {
-        m_app.mainWindow()->setCursor(Qt::ArrowCursor);
+        if (cursor().shape() != Qt::ArrowCursor)
+        {
+            setCursor(Qt::ArrowCursor);
+        }
     }
 
     QTreeWidget::mouseMoveEvent(event);
