@@ -175,7 +175,7 @@ CWizDocumentWebView::~CWizDocumentWebView()
         m_docLoadThread = NULL;
     }
     if (m_docSaverThread) {
-        m_docSaverThread->stop();
+        m_docSaverThread->waitAndStop();
         m_docSaverThread->quit();
         m_docSaverThread->deleteLater();
         m_docSaverThread = NULL;
@@ -1399,6 +1399,19 @@ void CWizDocumentWebViewSaverThread::save(const WIZDOCUMENTDATA& doc, const QStr
         start();
     }
 }
+void CWizDocumentWebViewSaverThread::waitAndStop()
+{
+    while (1)
+    {
+        if (!isRunning())
+            return;
+        //
+        stop();
+        //
+        msleep(100);
+        QApplication::processEvents();
+    }
+}
 
 void CWizDocumentWebViewSaverThread::stop()
 {
@@ -1413,18 +1426,18 @@ void CWizDocumentWebViewSaverThread::PeekData(SAVEDATA& data)
     //
     while (1)
     {
-        if (m_stop)
-            return;
-        //
         if (m_arrayData.empty())
         {
             m_waitForData.wait(&m_mutex);
         }
-        if (m_stop)
-            return;
         //
         if (m_arrayData.empty())
+        {
+            if (m_stop)
+                return;
+            //
             continue;
+        }
         //
         data = m_arrayData[0];
         m_arrayData.erase(m_arrayData.begin());
@@ -1438,16 +1451,16 @@ void CWizDocumentWebViewSaverThread::run()
 {
     while (true)
     {
-        if (m_stop)
-            return;
-        //
         SAVEDATA data;
         PeekData(data);
-        if (m_stop)
-            return;
         //
         if (data.doc.strGUID.isEmpty())
+        {
+            if (m_stop)
+                return;
+            //
             continue;
+        }
         //
         CWizDatabase& db = m_dbMgr.db(data.doc.strKbGUID);
         //
@@ -1460,7 +1473,6 @@ void CWizDocumentWebViewSaverThread::run()
         //
         qDebug() << "Saving note: " << doc.strTitle;
 
-        ::MainWindow::increaseUnfinishedOprtCounter(1);
         bool notify = false;    //don't notify
         bool ok = db.UpdateDocumentData(doc, data.html, data.htmlFile, data.flags, notify);
         //
@@ -1473,8 +1485,6 @@ void CWizDocumentWebViewSaverThread::run()
             qDebug() << "Save note failed: " << doc.strTitle;
         }
 
-        ::MainWindow::reduceUnfinishedOprtCounter(1);
-        //
         QString kbGuid = db.IsGroup() ? db.kbGUID() : "";
         emit saved(kbGuid, doc.strGUID, ok);
 

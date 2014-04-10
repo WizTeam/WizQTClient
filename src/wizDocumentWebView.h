@@ -65,7 +65,7 @@ public:
               const QString& strHtmlFile, int nFlags);
 
     //
-    void stop();
+    void waitAndStop();
 
 private:
     struct SAVEDATA
@@ -80,6 +80,7 @@ private:
 protected:
     virtual void run();
     //
+    void stop();
     void PeekData(SAVEDATA& data);
 Q_SIGNALS:
     void saved(const QString kbGUID, const QString strGUID, bool ok);

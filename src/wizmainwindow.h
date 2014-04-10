@@ -140,8 +140,6 @@ private:
     bool m_bLogoutRestart;
     bool m_bUpdatingSelection;
 
-    static int m_bUnfinishOprtCounter;
-
     WIZDOCUMENTDATA m_documentForEditing;
 
 private:
@@ -179,9 +177,6 @@ public:
 #endif
 
     void checkWizUpdate();
-
-    static void increaseUnfinishedOprtCounter(int unfinishedOprt = 1);
-    static void reduceUnfinishedOprtCounter(int finishedOprt = 1);
 
 public Q_SLOTS:
     void on_actionExit_triggered();

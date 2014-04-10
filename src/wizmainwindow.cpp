@@ -65,8 +65,6 @@ using namespace Core;
 using namespace Core::Internal;
 using namespace WizService::Internal;
 
-int MainWindow::m_bUnfinishOprtCounter = 0;
-
 MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     : QMainWindow(parent)
     , m_core(new ICore(this))
@@ -181,6 +179,10 @@ class SleepThread : public QThread
      {
           QThread::sleep(iSleepTime);
      }
+     static void msleep(long iSleepTime)
+     {
+          QThread::msleep(iSleepTime);
+     }
 };
 
 void MainWindow::cleanOnQuit()
@@ -201,23 +203,9 @@ void MainWindow::cleanOnQuit()
         {
             if (m_sync->isFinished())
                 break;
-            SleepThread::sleep(1);
+            SleepThread::msleep(100);
             QApplication::processEvents();
         }
-    }
-
-    if (m_bUnfinishOprtCounter > 0)
-    {
-        m_progress->setActionString(tr("Saving notes"));
-        m_progress->setNotifyString(tr("Saving notes,please wait..."));
-        m_progress->setProgress(m_bUnfinishOprtCounter + 1, 1);
-        m_progress->show();
-        while (m_bUnfinishOprtCounter > 0)
-        {
-            sleep(1);
-            m_progress->setProgress(m_bUnfinishOprtCounter + 1, 1);
-        }
-        m_progress->hide();
     }
 }
 
@@ -1555,16 +1543,6 @@ void MainWindow::locateDocument(const WIZDOCUMENTDATA& data)
 void MainWindow::checkWizUpdate()
 {
     m_upgrade->startCheck();
-}
-
-void MainWindow::increaseUnfinishedOprtCounter(int unfinishedOprt)
-{
-    m_bUnfinishOprtCounter += unfinishedOprt;
-}
-
-void MainWindow::reduceUnfinishedOprtCounter(int finishedOprt)
-{
-    m_bUnfinishOprtCounter -= finishedOprt;
 }
 
 #ifndef Q_OS_MAC
