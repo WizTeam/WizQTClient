@@ -773,7 +773,13 @@ var WizTodo = (function () {
 				//
 				if (!nextSib.tagName)
 					return false;
-				if (!isEmptyNode(nextSib) || !g_emptyCanRemove[nextSib.tagName])
+				//
+				removeInvalidText(nextSib);
+				//
+				if (!isEmptyNode(nextSib)) 
+					return false;
+				//
+				if (nextSib.tagName.toLowerCase() != 'br' && !g_emptyCanRemove[nextSib.tagName])
 					return false;
 				//
 				nextSib = nextSib.nextSibling;
@@ -1347,7 +1353,12 @@ var WizTodo = (function () {
 		//
 		if (isWizTodoBlockElement(parentEle) && isTodoAtFirst(parentEle)) {
 
-			if (isSelectionExactlyAfterTodoImage() && hasPrevSiblingTodo(parentEle)) {
+			var pp = parentEle;
+			if (isInUeditor() && parentEle.parentElement.tagName && parentEle.parentElement.tagName.toLowerCase() == 'li') {
+				pp = parentEle.parentElement;
+			}
+
+			if (isSelectionExactlyAfterTodoImage() && hasPrevSiblingTodo(pp)) {
 
 				var hasBr = false;
 				var nextSib = label.nextSibling;
@@ -1360,12 +1371,26 @@ var WizTodo = (function () {
 					//
 					nextSib = nextSib.nextSibling;
 				}
-				var p = label.parentElement;
-				p.removeChild(label);
-				if (!hasBr) {
-					p.appendChild(document.createElement('br'));
+				//
+				if (isInUeditor() && pp === parentEle.parentElement) {
+					var ppp = pp.parentElement;
+					ppp.removeChild(pp);
+					//
+					var div = editorDocument.createElement('div');
+					div.appendChild(editorDocument.createElement('br'));
+					//
+					ppp.parentElement.insertBefore(div, ppp.nextSibling);
+					//
+					setCaret(div);
 				}
-				setCaret(p);
+				else {
+					var p = label.parentElement;
+					p.removeChild(label);
+					if (!hasBr) {
+						p.appendChild(editorDocument.createElement('br'));
+					}
+					setCaret(p);
+				}
 				//
 				g_canInsertWizTodo = false;
 				return;
@@ -1384,11 +1409,15 @@ var WizTodo = (function () {
 				ele.innerHTML = "<br/>";
 				//
 				var pp = parentEle.parentElement;
+				var isInLiNodeInUE = false;
+				//
 				if (isInUeditor() && pp && pp.tagName && pp.tagName.toLowerCase() == 'li') {
 					var liNode = editorDocument.createElement('li');
 					liNode.appendChild(ele);
 					//
-					pp.parentElement.insertBefore(liNode, pp.nextSibling);	
+					pp.parentElement.insertBefore(liNode, pp.nextSibling);
+					//
+					isInLiNodeInUE = true;
 				}
 				else {
 					parentEle.parentElement.insertBefore(ele, parentEle.nextSibling);
@@ -1408,7 +1437,7 @@ var WizTodo = (function () {
 				removeBlockElement(firstChild);
 				//
 				e.preventDefault();
-				if (isInUeditor()) {
+				if (isInLiNodeInUE) {
 					e.stopPropagation();
 				}
 				//
@@ -1444,6 +1473,10 @@ var WizTodo = (function () {
 			//
 			var node = removeBlockElement(p.firstChild);
 			if (node && node.tagName && node.tagName.toLowerCase() != 'hr') {
+				if (node.tagName.toLowerCase() == 'br') {
+					node = node.parentElement;
+				}
+				//
 				setCaret(node);
 			}
 			else {

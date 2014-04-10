@@ -926,6 +926,7 @@ void MainWindow::on_actionNewNote_triggered()
 
     m_documentForEditing = data;
     m_documents->addAndSelectDocument(data);
+    m_doc->setEditorFocus();
 }
 
 void MainWindow::on_actionEditingUndo_triggered()

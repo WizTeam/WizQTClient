@@ -501,6 +501,7 @@ void CWizDocumentWebView::editorResetFont()
 void CWizDocumentWebView::editorFocus()
 {
     page()->mainFrame()->evaluateJavaScript("editor.focus();");
+    emit focusIn();
 }
 
 void CWizDocumentWebView::initEditor()

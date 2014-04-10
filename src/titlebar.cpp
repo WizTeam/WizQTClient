@@ -216,11 +216,6 @@ void TitleBar::setEditingDocument(bool editing)
 {
     m_editTitle->setReadOnly(!editing);
     m_editBtn->setState(editing ? CellButton::Checked : CellButton::Normal);
-    if (editing) {
-        showEditorBar();
-    } else {
-        showInfoBar();
-    }
 }
 
 void TitleBar::updateEditButton(bool editing)
