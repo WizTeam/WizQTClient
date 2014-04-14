@@ -724,11 +724,6 @@ void CWizDocumentWebView::saveReadingViewDocument(const WIZDOCUMENTDATA &data, b
 
     QString strScript = QString("WizTodoReadChecked.onDocumentClose();");
     page()->mainFrame()->evaluateJavaScript(strScript);
-
-    //
-    QString strHtml = page()->mainFrame()->evaluateJavaScript("editor.getContent();").toString();
-    m_strCurrentNoteHtml = strHtml;
-    page()->mainFrame()->evaluateJavaScript(("updateCurrentNoteHtml();"));
 }
 
 QString escapeJavascriptString(const QString & str)
@@ -878,19 +873,31 @@ void CWizDocumentWebView::setEditingDocument(bool editing)
         Q_EMIT focusIn();
     }
 
-    saveDocument(view()->note(), false);
+    const WIZDOCUMENTDATA& docData = view()->note();
+    saveDocument(docData, false);
 
+    bool bOldEditingMode = m_bEditingMode;
     m_bEditingMode = editing;
 
-    QString strScript = QString("setEditing(%1);").arg(editing ? "true" : "false");
-    page()->mainFrame()->evaluateJavaScript(strScript);  
+    //
+    CWizDatabase& db = m_dbMgr.db(docData.strKbGUID);
+    if (!bOldEditingMode && db.IsDocumentModified(docData.strGUID))
+    {
+        viewDocument(view()->note(), editing);
+    }
+    else
+    {
+        QString strScript = QString("setEditing(%1);").arg(editing ? "true" : "false");
+        page()->mainFrame()->evaluateJavaScript(strScript);
+        initCheckListEnvironment();
+    }
+
 
     if (editing) {
         setFocus(Qt::MouseFocusReason);
         editorFocus();
     }
 
-    initCheckListEnvironment();
 
     Q_EMIT statusChanged();
 }
