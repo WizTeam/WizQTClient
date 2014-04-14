@@ -334,9 +334,9 @@ void CWizDocumentWebView::tryResetTitle()
 
     QString strTitle = f->documentElement().findFirst("body").findFirst("p").toPlainText();
     strTitle = str2title(strTitle.left(255));
-    if (strTitle.indexOf('\n') != -1)
+    if (int index = strTitle.indexOf('\n') != -1)
     {
-        strTitle = strTitle.left(strTitle.indexOf('\n'));
+        strTitle = strTitle.left(index);
     }
 
     if (strTitle.isEmpty())
@@ -778,6 +778,36 @@ bool CWizDocumentWebView::currentIsEditing()
     return m_bCurrentEditing;
 }
 
+void CWizDocumentWebView::updateNoteHtml()
+{
+    WIZDOCUMENTDATA doc = view()->note();
+    CWizDatabase& db = m_dbMgr.db(doc.strKbGUID);
+    QString strFileName;
+    if (db.DocumentToTempHtmlFile(doc, strFileName))
+    {
+        QString strHtml;
+        if (!WizLoadUnicodeTextFromFile(strFileName, strHtml))
+            return;
+
+        QString strHead;
+        QRegExp regh("<head.*>([\\s\\S]*)</head>", Qt::CaseInsensitive);
+        if (regh.indexIn(strHtml) != -1) {
+            strHead = regh.cap(1).simplified();
+        }
+        strHead += "<link rel=\"stylesheet\" type=\"text/css\" href=\"" + m_strDefaultCssFilePath + "\">";
+
+        QRegExp regex("<body.*>([\\s\\S]*)</body>", Qt::CaseInsensitive);
+        if (regex.indexIn(strHtml) != -1) {
+            strHtml = regex.cap(1);
+        }
+
+        m_strCurrentNoteGUID = doc.strGUID;
+        m_strCurrentNoteHead = strHead;
+        m_strCurrentNoteHtml = strHtml;
+        page()->mainFrame()->evaluateJavaScript(("updateCurrentNoteHtml();"));
+    }
+}
+
 void CWizDocumentWebView::viewDocumentInEditor(bool editing)
 {
     Q_ASSERT(m_bEditorInited);
@@ -876,22 +906,11 @@ void CWizDocumentWebView::setEditingDocument(bool editing)
     const WIZDOCUMENTDATA& docData = view()->note();
     saveDocument(docData, false);
 
-    bool bOldEditingMode = m_bEditingMode;
     m_bEditingMode = editing;
-
     //
-    CWizDatabase& db = m_dbMgr.db(docData.strKbGUID);
-    if (!bOldEditingMode && db.IsDocumentModified(docData.strGUID))
-    {
-        viewDocument(view()->note(), editing);
-    }
-    else
-    {
-        QString strScript = QString("setEditing(%1);").arg(editing ? "true" : "false");
-        page()->mainFrame()->evaluateJavaScript(strScript);
-        initCheckListEnvironment();
-    }
-
+    QString strScript = QString("setEditing(%1);").arg(editing ? "true" : "false");
+    page()->mainFrame()->evaluateJavaScript(strScript);
+    initCheckListEnvironment();
 
     if (editing) {
         setFocus(Qt::MouseFocusReason);

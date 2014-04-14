@@ -602,6 +602,8 @@ void MainWindow::saveHtmlToCurrentNote(const QString &strHtml, const QString& st
         db.encryptTempFolderToZiwFile(docData, strFolder, strHtmlFile, strResourceList);
         quickSyncKb(docData.strKbGUID);
     }
+
+    m_doc->web()->updateNoteHtml();
 }
 
 bool MainWindow::hasEditPermissionOnCurrentNote() const
@@ -609,6 +611,14 @@ bool MainWindow::hasEditPermissionOnCurrentNote() const
     WIZDOCUMENTDATA docData = m_doc->note();
     CWizDatabase& db = m_dbMgr.db(docData.strKbGUID);
     return db.CanEditDocument(docData);
+}
+
+void MainWindow::setDocumentType(const QString &strType)
+{
+    WIZDOCUMENTDATA docData = m_doc->note();
+    CWizDatabase& db = m_dbMgr.db(docData.strKbGUID);
+    docData.strType = strType;
+    db.ModifyDocumentInfoEx(docData);
 }
 
 void MainWindow::initToolBar()

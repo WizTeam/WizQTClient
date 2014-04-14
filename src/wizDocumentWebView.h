@@ -131,6 +131,8 @@ public:
     Q_INVOKABLE QString currentNoteHead();
     Q_INVOKABLE bool currentIsEditing();
 
+    //only update Html in JS editor, wouldn't refresh WebView display
+    void updateNoteHtml();
     //const WIZDOCUMENTDATA& document() { return m_data; }
 
     // initialize editor style before render, only invoke once.

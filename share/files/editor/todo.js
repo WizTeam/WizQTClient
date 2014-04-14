@@ -118,7 +118,6 @@ function WizTodoWindowsHelper(external) {
 
 function WizTodoQtHelper() {
 
-    this.wizDoc = editor.document;
     this.getUserAlias = getUserAlias;
     this.getUserAvatarFileName = getUserAvatarFileName;
     this.isPersonalDocument = isPersonalDocument;
@@ -190,7 +189,7 @@ function WizTodoQtHelper() {
     }  
 
     function setDocumentType(type) {
-        this.wizDoc.Type = type;
+        objApp.setDocumentType(type);
     } 
 }
 
