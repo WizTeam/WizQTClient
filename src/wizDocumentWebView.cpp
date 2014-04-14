@@ -685,6 +685,19 @@ void CWizDocumentWebView::viewDocumentByUrl(const QUrl& url)
     }
 }
 
+void CWizDocumentWebView::splitHtmlToHeadAndBody(const QString& strHtml, QString& strHead, QString& strBody)
+{
+    QRegExp regh("<head.*>([\\s\\S]*)</head>", Qt::CaseInsensitive);
+    if (regh.indexIn(strHtml) != -1) {
+        strHead = regh.cap(1).simplified();
+    }
+
+    QRegExp regex("<body.*>([\\s\\S]*)</body>", Qt::CaseInsensitive);
+    if (regex.indexIn(strHtml) != -1) {
+        strBody = regex.cap(1);
+    }
+}
+
 void CWizDocumentWebView::saveEditingViewDocument(const WIZDOCUMENTDATA &data, bool force)
 {
     if (!force && !isContentsChanged())
@@ -789,21 +802,10 @@ void CWizDocumentWebView::updateNoteHtml()
         if (!WizLoadUnicodeTextFromFile(strFileName, strHtml))
             return;
 
-        QString strHead;
-        QRegExp regh("<head.*>([\\s\\S]*)</head>", Qt::CaseInsensitive);
-        if (regh.indexIn(strHtml) != -1) {
-            strHead = regh.cap(1).simplified();
-        }
-        strHead += "<link rel=\"stylesheet\" type=\"text/css\" href=\"" + m_strDefaultCssFilePath + "\">";
-
-        QRegExp regex("<body.*>([\\s\\S]*)</body>", Qt::CaseInsensitive);
-        if (regex.indexIn(strHtml) != -1) {
-            strHtml = regex.cap(1);
-        }
+        splitHtmlToHeadAndBody(strHtml, m_strCurrentNoteHead, m_strCurrentNoteHtml);
+        m_strCurrentNoteHead += "<link rel=\"stylesheet\" type=\"text/css\" href=\"" + m_strDefaultCssFilePath + "\">";
 
         m_strCurrentNoteGUID = doc.strGUID;
-        m_strCurrentNoteHead = strHead;
-        m_strCurrentNoteHtml = strHtml;
         page()->mainFrame()->evaluateJavaScript(("updateCurrentNoteHtml();"));
     }
 }
@@ -827,21 +829,11 @@ void CWizDocumentWebView::viewDocumentInEditor(bool editing)
 
     //strHtml = escapeJavascriptString(strHtml);
 
-    QString strHead;
-    QRegExp regh("<head.*>([\\s\\S]*)</head>", Qt::CaseInsensitive);
-    if (regh.indexIn(strHtml) != -1) {
-        strHead = regh.cap(1).simplified();
-    }
-    strHead += "<link rel=\"stylesheet\" type=\"text/css\" href=\"" + m_strDefaultCssFilePath + "\">";
+    splitHtmlToHeadAndBody(strHtml, m_strCurrentNoteHead, m_strCurrentNoteHtml);
 
-    QRegExp regex("<body.*>([\\s\\S]*)</body>", Qt::CaseInsensitive);
-    if (regex.indexIn(strHtml) != -1) {
-        strHtml = regex.cap(1);
-    }
+    m_strCurrentNoteHead += "<link rel=\"stylesheet\" type=\"text/css\" href=\"" + m_strDefaultCssFilePath + "\">";
 
     m_strCurrentNoteGUID = strGUID;
-    m_strCurrentNoteHead = strHead;
-    m_strCurrentNoteHtml = strHtml;
     m_bCurrentEditing = editing;
     //
     /*

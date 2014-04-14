@@ -174,6 +174,8 @@ private:
     bool isInternalUrl(const QUrl& url);
     void viewDocumentByUrl(const QUrl& url);
 
+    void splitHtmlToHeadAndBody(const QString& strHtml, QString& strHead, QString& strBody);
+
     //
     void saveEditingViewDocument(const WIZDOCUMENTDATA& data, bool force);
     void saveReadingViewDocument(const WIZDOCUMENTDATA& data, bool force);
