@@ -172,6 +172,10 @@ private:
     bool isInternalUrl(const QUrl& url);
     void viewDocumentByUrl(const QUrl& url);
 
+    //
+    void saveEditingViewDocument(const WIZDOCUMENTDATA& data, bool force);
+    void saveReadingViewDocument(const WIZDOCUMENTDATA& data, bool force);
+
 protected:
     virtual void keyPressEvent(QKeyEvent* event);
     virtual void inputMethodEvent(QInputMethodEvent* event);
@@ -295,7 +299,6 @@ public Q_SLOTS:
 
     // js func
     void initCheckListEnvironment();
-    void saveCheckListCheckState();
 
 Q_SIGNALS:
     // signals for notify command reflect status, triggered when selection, focus, editing mode changed

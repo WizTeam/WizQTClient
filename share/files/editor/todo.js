@@ -1,4 +1,4 @@
-﻿
+
 function initDefaultCss(document, destNode) {
 	var WIZ_TODO_STYLE_ID = 'wiz_todo_style_id';
 	var WIZ_STYLE = 'wiz_style';
@@ -163,11 +163,12 @@ function WizTodoQtHelper() {
     }
 
     function initCss(document) {
+        
     	var WIZ_TODO_STYLE_ID = 'wiz_todo_style_id';
 		var WIZ_STYLE = 'wiz_style';
 		var WIZ_LINK_VERSION = 'wiz_link_version';
 		var WIZ_TODO_STYLE_VERSION = "01.00.04";
-
+        
 		var style = document.getElementById(WIZ_TODO_STYLE_ID);
 		if (style && !!style.getAttribute && style.getAttribute(WIZ_LINK_VERSION) >= WIZ_TODO_STYLE_VERSION)
 			return;
@@ -185,7 +186,7 @@ function WizTodoQtHelper() {
 		// objStyle.setAttribute(WIZ_STYLE, 'unsave');
 		objStyle.setAttribute(WIZ_LINK_VERSION, WIZ_TODO_STYLE_VERSION);
 		//
-		document.body.appendChild(objStyle);
+		document.head.appendChild(objStyle);
     }  
 
     function setDocumentType(type) {
@@ -1548,8 +1549,7 @@ var WizTodo = (function () {
 		editorDocument.addEventListener('touchend', onTouchEnd);
 	}
 
-	function init(wizClient) { 
-
+	function init(wizClient) {
 		var ueditor = null;
 		if (wizClient == 'qt') {
 			ueditor = document.getElementById('ueditor_0');

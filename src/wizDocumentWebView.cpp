@@ -230,7 +230,6 @@ void CWizDocumentWebView::keyPressEvent(QKeyEvent* event)
              && event->modifiers() == Qt::ControlModifier)
     {
         saveDocument(view()->note(), false);
-        saveCheckListCheckState();
         return;
     }
 
@@ -552,12 +551,6 @@ void CWizDocumentWebView::initCheckListEnvironment()
     }
 }
 
-void CWizDocumentWebView::saveCheckListCheckState()
-{
-    QString strScript = QString("WizTodoReadChecked.onDocumentClose();");
-    page()->mainFrame()->evaluateJavaScript(strScript);
-}
-
 void CWizDocumentWebView::onEditorLoadFinished(bool ok)
 {
     if (!ok) {
@@ -685,7 +678,53 @@ void CWizDocumentWebView::viewDocumentByUrl(const QUrl& url)
         }
 
         ICore::instance()->emitViewNoteRequested(view(), doc);
-   }
+    }
+}
+
+void CWizDocumentWebView::saveEditingViewDocument(const WIZDOCUMENTDATA &data, bool force)
+{
+    if (!force && !isContentsChanged())
+        return;
+
+    // check note permission
+    if (!m_dbMgr.db(data.strKbGUID).CanEditDocument(data)) {
+        return;
+    }
+    //
+    setContentsChanged(false);
+    //
+
+    QString strFileName = m_mapFile.value(data.strGUID);
+    QString strHead = page()->mainFrame()->evaluateJavaScript("editor.document.head.innerHTML;").toString();
+    m_strCurrentNoteHead = strHead;
+    QRegExp regHead("<link[^>]*" + m_strDefaultCssFilePath + "[^>]*>", Qt::CaseInsensitive);
+    strHead.replace(regHead, "");
+
+    QString strHtml = page()->mainFrame()->evaluateJavaScript("editor.getContent();").toString();
+    //
+    m_strCurrentNoteHtml = strHtml;
+    //
+    page()->mainFrame()->evaluateJavaScript(("updateCurrentNoteHtml();"));
+
+    //
+    //QString strPlainTxt = page()->mainFrame()->evaluateJavaScript("editor.getPlainTxt();").toString();
+    strHtml = "<html><head>" + strHead + "</head><body>" + strHtml + "</body></html>";
+
+    m_docSaverThread->save(data, strHtml, strFileName, 0);
+}
+
+void CWizDocumentWebView::saveReadingViewDocument(const WIZDOCUMENTDATA &data, bool force)
+{
+    Q_UNUSED(data);
+    Q_UNUSED(force);
+
+    QString strScript = QString("WizTodoReadChecked.onDocumentClose();");
+    page()->mainFrame()->evaluateJavaScript(strScript);
+
+    //
+    QString strHtml = page()->mainFrame()->evaluateJavaScript("editor.getContent();").toString();
+    m_strCurrentNoteHtml = strHtml;
+    page()->mainFrame()->evaluateJavaScript(("updateCurrentNoteHtml();"));
 }
 
 QString escapeJavascriptString(const QString & str)
@@ -835,11 +874,7 @@ void CWizDocumentWebView::setEditingDocument(bool editing)
         Q_EMIT focusIn();
     }
 
-    if (m_bEditingMode) {
-        saveDocument(view()->note(), false);
-    } else {
-        saveCheckListCheckState();
-    }
+    saveDocument(view()->note(), false);
 
     m_bEditingMode = editing;
 
@@ -864,33 +899,14 @@ void CWizDocumentWebView::saveDocument(const WIZDOCUMENTDATA& data, bool force)
     if (!view()->noteLoaded())  //encrypting note & has been loaded
         return;
 
-    if (!force && !isContentsChanged())
-        return;
-
-    // check note permission
-    if (!m_dbMgr.db(data.strKbGUID).CanEditDocument(data)) {
-        return;
+    if (m_bEditingMode)
+    {
+        saveEditingViewDocument(data, force);
     }
-    //
-    setContentsChanged(false);
-    //
-
-    QString strFileName = m_mapFile.value(data.strGUID);
-    QString strHead = page()->mainFrame()->evaluateJavaScript("editor.document.head.innerHTML;").toString();
-    QRegExp regHead("<link[^>]*" + m_strDefaultCssFilePath + "[^>]*>", Qt::CaseInsensitive);
-    strHead.replace(regHead, "");
-
-    QString strHtml = page()->mainFrame()->evaluateJavaScript("editor.getContent();").toString();
-    //
-    m_strCurrentNoteHtml = strHtml;
-    //
-    page()->mainFrame()->evaluateJavaScript(("updateCurrentNoteHtml();"));
-
-    //
-    //QString strPlainTxt = page()->mainFrame()->evaluateJavaScript("editor.getPlainTxt();").toString();
-    strHtml = "<html><head>" + strHead + "</head><body>" + strHtml + "</body></html>";
-
-    m_docSaverThread->save(data, strHtml, strFileName, 0);
+    else
+    {
+        saveReadingViewDocument(data, force);
+    }
 }
 
 QString CWizDocumentWebView::editorCommandQueryCommandValue(const QString& strCommand)
