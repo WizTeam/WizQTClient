@@ -334,6 +334,10 @@ void CWizDocumentWebView::tryResetTitle()
 
     QString strTitle = f->documentElement().findFirst("body").findFirst("p").toPlainText();
     strTitle = str2title(strTitle.left(255));
+    if (strTitle.indexOf('\n') != -1)
+    {
+        strTitle = strTitle.left(strTitle.indexOf('\n'));
+    }
 
     if (strTitle.isEmpty())
         return;
