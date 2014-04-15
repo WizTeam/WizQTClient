@@ -695,6 +695,8 @@ void CWizDocumentWebView::splitHtmlToHeadAndBody(const QString& strHtml, QString
     QRegExp regex("<body.*>([\\s\\S]*)</body>", Qt::CaseInsensitive);
     if (regex.indexIn(strHtml) != -1) {
         strBody = regex.cap(1);
+    } else {
+        strBody = strHtml;
     }
 }
 

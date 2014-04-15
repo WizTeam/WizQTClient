@@ -613,7 +613,7 @@ bool MainWindow::hasEditPermissionOnCurrentNote() const
     return db.CanEditDocument(docData);
 }
 
-void MainWindow::setDocumentType(const QString &strType)
+void MainWindow::setCurrentDocumentType(const QString &strType)
 {
     WIZDOCUMENTDATA docData = m_doc->note();
     CWizDatabase& db = m_dbMgr.db(docData.strKbGUID);

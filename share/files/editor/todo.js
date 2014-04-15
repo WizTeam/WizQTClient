@@ -189,7 +189,7 @@ function WizTodoQtHelper() {
     }  
 
     function setDocumentType(type) {
-        objApp.setDocumentType(type);
+        objApp.setCurrentDocumentType(type);
     } 
 }
 
