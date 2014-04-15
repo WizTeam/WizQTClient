@@ -1544,11 +1544,18 @@ void CWizCategoryView::on_itemClicked(QTreeWidgetItem *item, int column)
     }
     else if (CWizCategoryViewBizGroupRootItem* pItem = dynamic_cast<CWizCategoryViewBizGroupRootItem*>(item))
     {
-        if (pItem->extraButtonClickTest() && pItem->isHr())
+        if (pItem->extraButtonClickTest())
         {
-            manageBiz(pItem->biz().bizGUID, true);
+            if (pItem->isHr())
+            {
+                manageBiz(pItem->biz().bizGUID, true);
+            }
+            else
+            {
+                QMessageBox::information(0, tr("Info"), tr("You are not a Biz administrator, can't manage this Biz."));
+            }
         }
-    }
+    }    
     else if (CWizCategoryViewGroupRootItem* pItem = dynamic_cast<CWizCategoryViewGroupRootItem*>(item))
     {
         if (pItem->extraButtonClickTest())
