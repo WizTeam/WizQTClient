@@ -1656,11 +1656,11 @@ void CWizCategoryView::viewBizInfo(const QString& bizGUID)
 void CWizCategoryView::manageBiz(const QString& bizGUID, bool bUpgrade)
 {
     QString extInfo = "biz=" + bizGUID;
-    QString strUrl = WizService::ApiEntry::standardCommandUrl("manage_biz", WIZ_TOKEN_IN_URL_REPLACE_PART, extInfo);
     if (bUpgrade)
     {
-        strUrl += _T("&p=payment");
+        extInfo += _T("&p=payment");
     }
+    QString strUrl = WizService::ApiEntry::standardCommandUrl("manage_biz", WIZ_TOKEN_IN_URL_REPLACE_PART, extInfo);
     showWebDialogWithToken(tr("Manage team"), strUrl, window());
 }
 
