@@ -131,6 +131,8 @@ public:
     Q_INVOKABLE QString currentNoteHead();
     Q_INVOKABLE bool currentIsEditing();
 
+    //only update Html in JS editor, wouldn't refresh WebView display
+    void updateNoteHtml();
     //const WIZDOCUMENTDATA& document() { return m_data; }
 
     // initialize editor style before render, only invoke once.
@@ -171,6 +173,12 @@ private:
 
     bool isInternalUrl(const QUrl& url);
     void viewDocumentByUrl(const QUrl& url);
+
+    void splitHtmlToHeadAndBody(const QString& strHtml, QString& strHead, QString& strBody);
+
+    //
+    void saveEditingViewDocument(const WIZDOCUMENTDATA& data, bool force);
+    void saveReadingViewDocument(const WIZDOCUMENTDATA& data, bool force);
 
 protected:
     virtual void keyPressEvent(QKeyEvent* event);
@@ -295,7 +303,6 @@ public Q_SLOTS:
 
     // js func
     void initCheckListEnvironment();
-    void saveCheckListCheckState();
 
 Q_SIGNALS:
     // signals for notify command reflect status, triggered when selection, focus, editing mode changed

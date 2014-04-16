@@ -270,6 +270,7 @@ public Q_SLOTS:
     QString getCurrentNoteHtml() const;
     void saveHtmlToCurrentNote(const QString& strHtml, const QString& strResource);
     bool hasEditPermissionOnCurrentNote() const;
+    void setCurrentDocumentType(const QString& strType);
 
 #ifndef Q_OS_MAC
     void on_actionPopupMainMenu_triggered();

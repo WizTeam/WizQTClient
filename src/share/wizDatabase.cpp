@@ -3076,7 +3076,10 @@ bool CWizDatabase::encryptTempFolderToZiwFile(WIZDOCUMENTDATA &document, const Q
 
     SetObjectDataDownloaded(document.strGUID, "document", true);
 
-    return UpdateDocumentDataMD5(document, strZipFileName, true);
+    /*不需要将笔记modified信息通知关联内容.此前页面显示已是最新,不需要relaod.如果relaod较大笔记
+    可能会造成页面闪烁*/
+    bool notify = false;
+    return UpdateDocumentDataMD5(document, strZipFileName, notify);
 }
 
 bool CWizDatabase::IsFileAccessible(const WIZDOCUMENTDATA& document)

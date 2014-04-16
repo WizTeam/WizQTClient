@@ -602,6 +602,8 @@ void MainWindow::saveHtmlToCurrentNote(const QString &strHtml, const QString& st
         db.encryptTempFolderToZiwFile(docData, strFolder, strHtmlFile, strResourceList);
         quickSyncKb(docData.strKbGUID);
     }
+
+    m_doc->web()->updateNoteHtml();
 }
 
 bool MainWindow::hasEditPermissionOnCurrentNote() const
@@ -609,6 +611,14 @@ bool MainWindow::hasEditPermissionOnCurrentNote() const
     WIZDOCUMENTDATA docData = m_doc->note();
     CWizDatabase& db = m_dbMgr.db(docData.strKbGUID);
     return db.CanEditDocument(docData);
+}
+
+void MainWindow::setCurrentDocumentType(const QString &strType)
+{
+    WIZDOCUMENTDATA docData = m_doc->note();
+    CWizDatabase& db = m_dbMgr.db(docData.strKbGUID);
+    docData.strType = strType;
+    db.ModifyDocumentInfoEx(docData);
 }
 
 void MainWindow::initToolBar()
@@ -929,7 +939,7 @@ void MainWindow::on_actionNewNote_triggered()
 
     m_documentForEditing = data;
     m_documents->addAndSelectDocument(data);
-    m_doc->setEditorFocus();
+    m_doc->web()->setEditingDocument(true);
 }
 
 void MainWindow::on_actionEditingUndo_triggered()
@@ -1381,7 +1391,6 @@ void MainWindow::on_category_itemSelectionChanged()
 
 void MainWindow::on_documents_itemSelectionChanged()
 {
-    m_doc->web()->saveCheckListCheckState();
     CWizDocumentDataArray arrayDocument;
     m_documents->getSelectedDocuments(arrayDocument);
 

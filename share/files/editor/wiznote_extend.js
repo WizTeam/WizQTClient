@@ -71,10 +71,10 @@ function setEditorHtml(html, bEditing)
     bEditing ? editor.setEnabled() : editor.setDisabled();
 
     window.UE.utils.domReady(function() {
+        WizEditor.initCheckListEnvironment();
         editor.window.scrollTo(0, 0);
     });
 }
-
 
 function setEditing(bEditing) {
     editor.document.head.innerHTML = wiz_head;
@@ -100,13 +100,11 @@ function viewNote(strGUID, bEditing, strHtml, strHead)
 
         if (m_inited) {
             setEditorHtml(wiz_html, bEditing);
-        WizEditor.initCheckListEnvironment();
         } else {
             editor.ready(function() {
-                m_header = editor.document.head.innerHTML; // save original header
-                setEditorHtml(wiz_html, bEditing);
-        WizEditor.initCheckListEnvironment();
-                m_inited = true;
+            m_header = editor.document.head.innerHTML; // save original header
+            setEditorHtml(wiz_html, bEditing);
+            m_inited = true;
             });
         }
         
@@ -128,7 +126,7 @@ function updateCurrentNoteHtml()
     if (m_currentGUID == WizEditor.currentNoteGUID())
     {
         wiz_html = WizEditor.currentNoteHtml();
-        //wiz_head = WizEditor.currentNoteHead();
+        wiz_head = WizEditor.currentNoteHead();
     }
 }
 
