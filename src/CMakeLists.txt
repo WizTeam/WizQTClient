@@ -364,26 +364,6 @@ if(UNIX)
     endif()
 endif()
 
-# apple appstore
-if(APPLE)
-    if(APPSTORE_BUILD)
-        set(APPCERT "wiznote")
-        add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-            COMMAND dsymutil ${WIZNOTE_ROOT_DIR}/Contents/MacOS/wiznote -o wiznote.app.dSYM)
-
-        #add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-        #    COMMAND codesign -f -s ${APPCERT} -v -entitlements ${MACOSX_BUNDLE_INFO_PLIST} ${PROJECT_NAME}.app)
-        ##You can leave out "–entitlements MyEntitlements.plist" if you are not using sandboxing.
-
-        add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-            COMMAND productbuild --component ${WIZNOTE_ROOT_DIR} /Applications ${PROJECT_NAME}.pkg)
-        #add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-        #   COMMAND productbuild --component ${PROJECT_NAME}.app /Applications -sign ${APPCERT} ${PROJECT_NAME}.pkg)
-
-        ##
-    endif(APPSTORE_BUILD)
-endif(APPLE)
-
 qt_use_modules(wiznote)
 qt_suppress_warnings(wiznote)
 
@@ -411,3 +391,82 @@ target_link_libraries(${PROJECT_NAME}
     coreplugin
     ${CMAKE_DL_LIBS}
 )
+
+# apple appstore
+if(APPLE)
+    if(APPSTORE_BUILD)
+        set(APPCERT "3rd Party Mac Developer Application: Wei Shijun")
+        set(INSTALLERCERT "3rd Party Mac Developer Installer: Wei Shijun")
+        #add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+         #   COMMAND dsymutil ${WIZNOTE_ROOT_DIR}/Contents/MacOS/wiznote -o wiznote.app.dSYM)
+
+        if(NOT WIZNOTE_USE_QT5)
+            set(WIZFRAMEWORK
+                ${WIZNOTE_CONTENTS_DIR}/Frameworks/QtCore.framework/Versions/4/QtCore
+                ${WIZNOTE_CONTENTS_DIR}/Frameworks/QtGui.framework/Versions/4/QtGui
+                ${WIZNOTE_CONTENTS_DIR}/Frameworks/QtNetwork.framework/Versions/4/QtNetwork
+                ${WIZNOTE_CONTENTS_DIR}/Frameworks/QtWebKit.framework/Versions/4/QtWebKit
+                ${WIZNOTE_CONTENTS_DIR}/Frameworks/QtXml.framework/Versions/4/QtXml
+                ${WIZNOTE_CONTENTS_DIR}/Frameworks/QtXmlPatterns.framework/Versions/4/QtXmlPatterns
+                )
+
+        elseif(NOT WIZNOTE_USE_QT5)
+            set(WIZFRAMEWORK
+                ${WIZNOTE_CONTENTS_DIR}/Frameworks/QtCore.framework/Versions/5/QtCore
+                ${WIZNOTE_CONTENTS_DIR}/Frameworks/QtGui.framework/Versions/5/QtGui
+                ${WIZNOTE_CONTENTS_DIR}/Frameworks/QtNetwork.framework/Versions/5/QtNetwork
+                ${WIZNOTE_CONTENTS_DIR}/Frameworks/QtWebKit.framework/Versions/5/QtWebKit
+                ${WIZNOTE_CONTENTS_DIR}/Frameworks/QtXml.framework/Versions/5/QtXml
+                ${WIZNOTE_CONTENTS_DIR}/Frameworks/QtXmlPatterns.framework/Versions/5/QtXmlPatterns
+                )
+        endif(NOT WIZNOTE_USE_QT5)
+
+            set(WIZPLUGINS
+                ${WIZNOTE_CONTENTS_DIR}/PlugIns/accessible/libqtaccessiblewidgets.dylib
+                ${WIZNOTE_CONTENTS_DIR}/PlugIns/bearer/libqcorewlanbearer.dylib
+                ${WIZNOTE_CONTENTS_DIR}/PlugIns/codecs/libqcncodecs.dylib
+                ${WIZNOTE_CONTENTS_DIR}/PlugIns/codecs/libqjpcodecs.dylib
+                ${WIZNOTE_CONTENTS_DIR}/PlugIns/codecs/libqkrcodecs.dylib
+                ${WIZNOTE_CONTENTS_DIR}/PlugIns/codecs/libqtwcodecs.dylib
+                ${WIZNOTE_CONTENTS_DIR}/PlugIns/imageformats/libqgif.dylib
+                ${WIZNOTE_CONTENTS_DIR}/PlugIns/imageformats/libqico.dylib
+                ${WIZNOTE_CONTENTS_DIR}/PlugIns/imageformats/libqjpeg.dylib
+                ${WIZNOTE_CONTENTS_DIR}/PlugIns/imageformats/libqmng.dylib
+                ${WIZNOTE_CONTENTS_DIR}/PlugIns/imageformats/libqtga.dylib
+                ${WIZNOTE_CONTENTS_DIR}/PlugIns/imageformats/libqtiff.dylib
+                ${WIZNOTE_CONTENTS_DIR}/PlugIns/libCore.dylib
+                ${WIZNOTE_CONTENTS_DIR}/PlugIns/libHelloWorld.dylib
+                ${WIZNOTE_CONTENTS_DIR}/PlugIns/libMarkDown.dylib
+                ${WIZNOTE_CONTENTS_DIR}/PlugIns/libaggregation.dylib
+                ${WIZNOTE_CONTENTS_DIR}/PlugIns/libextensionsystem.dylib)
+
+            add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+                COMMAND chmod -R 777 ${WIZNOTE_CONTENTS_DIR}/Frameworks/ )
+            add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+                COMMAND chmod -R 777 ${WIZNOTE_CONTENTS_DIR}/PlugIns/ )
+
+
+
+
+        MESSAGE(STATUS "CODESIGNFOR FRAMEWORK")
+        add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+            COMMAND codesign -f -s ${APPCERT}  ${WIZFRAMEWORK})
+
+        MESSAGE(STATUS "CODESIGNFOR PLUGINS")
+        add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+            COMMAND codesign -f -s ${APPCERT}  ${WIZPLUGINS})
+
+        add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+           COMMAND codesign -f -s ${APPCERT}  ${WIZNOTE_ROOT_DIR})
+        #set_target_properties(${PROJECT_NAME} PROPERTIES MACOSX_BUNDLE_INFO_ENTITLEPLIST "${CMAKE_SOURCE_DIR}/build/osx/Entitlements.plist")
+        #add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+        #   COMMAND codesign -f -s ${APPCERT} -v -entitlements ${MACOSX_BUNDLE_INFO_PLIST} ${PROJECT_NAME}.app)
+        ##You can leave out "–entitlements MyEntitlements.plist" if you are not using sandboxing.
+
+        #add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+        #    COMMAND productbuild --component ${WIZNOTE_ROOT_DIR} /Applications ${PROJECT_NAME}.pkg)
+        add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+           COMMAND productbuild --component ${PROJECT_NAME}.app /Applications --sign ${INSTALLERCERT} ${PROJECT_NAME}.pkg)
+
+    endif(APPSTORE_BUILD)
+endif(APPLE)
