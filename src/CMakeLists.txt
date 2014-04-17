@@ -397,6 +397,7 @@ if(APPLE)
     if(APPSTORE_BUILD)
         set(APPCERT "3rd Party Mac Developer Application: Wei Shijun")
         set(INSTALLERCERT "3rd Party Mac Developer Installer: Wei Shijun")
+        set(MACOSX_BUNDLE_ENTITLEPLIST ${CMAKE_SOURCE_DIR}/build/osx/WizNote-Entitlements.plist)
         #add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
          #   COMMAND dsymutil ${WIZNOTE_ROOT_DIR}/Contents/MacOS/wiznote -o wiznote.app.dSYM)
 
@@ -457,7 +458,7 @@ if(APPLE)
             COMMAND codesign -f -s ${APPCERT}  ${WIZPLUGINS})
 
         add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-           COMMAND codesign -f -s ${APPCERT}  ${WIZNOTE_ROOT_DIR})
+           COMMAND codesign -f -s ${APPCERT} -v --entitlements ${MACOSX_BUNDLE_ENTITLEPLIST}  ${WIZNOTE_ROOT_DIR})
         #set_target_properties(${PROJECT_NAME} PROPERTIES MACOSX_BUNDLE_INFO_ENTITLEPLIST "${CMAKE_SOURCE_DIR}/build/osx/Entitlements.plist")
         #add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
         #   COMMAND codesign -f -s ${APPCERT} -v -entitlements ${MACOSX_BUNDLE_INFO_PLIST} ${PROJECT_NAME}.app)
@@ -466,7 +467,7 @@ if(APPLE)
         #add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
         #    COMMAND productbuild --component ${WIZNOTE_ROOT_DIR} /Applications ${PROJECT_NAME}.pkg)
         add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-           COMMAND productbuild --component ${PROJECT_NAME}.app /Applications --sign ${INSTALLERCERT} ${PROJECT_NAME}.pkg)
+           COMMAND productbuild --component ${WIZNOTE_ROOT_DIR} /Applications --sign ${INSTALLERCERT} ${PROJECT_NAME}.pkg)
 
     endif(APPSTORE_BUILD)
 endif(APPLE)

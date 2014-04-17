@@ -170,6 +170,14 @@ NSString* WizGenGUID()
 }
 
 
+QString GetDataStorePath()
+{
+    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+    NSString *basePath = ([paths count] > 0) ? [paths objectAtIndex:0] : nil;
+    QString strPath = WizToQString(basePath);
+    return strPath;
+}
+
 CWizChangeCocoaImplementation::CWizChangeCocoaImplementation(Class baseClass, SEL originalSel,
      Class proxyClass, SEL replacementSel, SEL backupSel, bool apply)
     : _baseClass(baseClass), _originalSel(originalSel), _backupSel(backupSel), _apply(apply)

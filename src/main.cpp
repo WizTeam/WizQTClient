@@ -146,7 +146,7 @@ int main(int argc, char *argv[])
     QApplication a(argc, argv);
 
     QApplication::setApplicationName(QObject::tr("WizNote"));
-    QApplication::setOrganizationName(QObject::tr("WizTeam"));
+    QApplication::setOrganizationName(QObject::tr("cn.wiz.wiznoteformac"));
 
     QIcon icon;
     icon.addPixmap(QPixmap(":/logo_16.png"));
