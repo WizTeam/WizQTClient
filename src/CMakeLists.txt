@@ -425,6 +425,7 @@ if(APPLE)
             set(WIZPLUGINS
                 ${WIZNOTE_CONTENTS_DIR}/PlugIns/accessible/libqtaccessiblewidgets.dylib
                 ${WIZNOTE_CONTENTS_DIR}/PlugIns/bearer/libqcorewlanbearer.dylib
+                ${WIZNOTE_CONTENTS_DIR}/PlugIns/bearer/libqgenericbearer.dylib
                 ${WIZNOTE_CONTENTS_DIR}/PlugIns/codecs/libqcncodecs.dylib
                 ${WIZNOTE_CONTENTS_DIR}/PlugIns/codecs/libqjpcodecs.dylib
                 ${WIZNOTE_CONTENTS_DIR}/PlugIns/codecs/libqkrcodecs.dylib
