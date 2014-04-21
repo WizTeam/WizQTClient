@@ -14,6 +14,8 @@
 #include <QtCore>
 //#include <QtNetwork>
 #include "utils/logger.h"
+#include "utils/pathresolve.h"
+#include "mac/wizmachelper.h"
 
 
 #ifndef MAX_PATH
@@ -325,69 +327,11 @@ QString WizDecryptPassword(const QString& strEncryptedText)
     return QString::fromUtf8(data);
 }
 
-QString WizGetAppPath()
-{
-    QString strPath = QApplication::applicationDirPath();
-    ::WizPathAddBackslash(strPath);
-    return strPath;
-}
 
 QString WizGetAppFileName()
 {
     QString strPath = QApplication::applicationFilePath();
     return strPath;
-}
-
-QString WizGetResourcesPath()
-{
-#ifdef Q_OS_MAC
-    QDir dir(WizGetAppPath());
-    dir.cdUp();
-    dir.cd("Resources");
-    QString strPath = dir.path();
-    WizPathAddBackslash(strPath);
-    return strPath;
-#elif defined Q_OS_LINUX
-    QDir dir(WizGetAppPath());
-    dir.cdUp();
-    dir.cd("share/wiznote");
-    QString strPath = dir.path();
-    WizPathAddBackslash(strPath);
-    return strPath;
-#else
-    return WizGetAppPath();
-#endif
-}
-
-QString WizGetDataStorePath()
-{
-    QString strPath = QDir::homePath();
-    strPath += "/.wiznote/";
-
-    ::WizEnsurePathExists(strPath);
-    return strPath;
-}
-
-QString WizGetUpgradePath()
-{
-    QString strPath = WizGetDataStorePath() + "/update/";
-    WizEnsurePathExists(strPath);
-    return strPath;
-}
-
-CString WizGetSettingsFileName()
-{
-    return WizGetDataStorePath() + "wiznote.ini";
-}
-
-QString WizGetLocaleFileName(const QString& strLocale)
-{
-    return WizGetResourcesPath() + "locales/wiznote_" + strLocale + ".qm";
-}
-
-QString WizGetQtLocaleFileName(const QString& strLocale)
-{
-    return WizGetResourcesPath() + "locales/qt_" + strLocale + ".qm";
 }
 
 void WizGetTranslatedLocales(QStringList& locales)
@@ -486,13 +430,6 @@ QString WizLocation2Display(const QString& strLocation)
 }
 
 
-QString WizGetLogFileName()
-{
-    //QString strLogFileName = WizGetDataStorePath() + "wiznote.log";
-    //WizEnsureFileExists(strLogFileName);
-    //return strLogFileName;
-    return WizGetDataStorePath() + "wiznote.log";
-}
 
 QString WizGetLogTime()
 {
@@ -1701,14 +1638,13 @@ QString WizGetDefaultSkinName()
 
 QString WizGetSkinResourcePath(const QString& strSkinName)
 {
-    Q_ASSERT(!strSkinName.isEmpty());
-    return WizGetResourcesPath() + "skins/" + strSkinName + "/";
+    return Utils::PathResolve::skinResourcesPath(strSkinName);
 }
 
 void WizGetSkins(QStringList& skins)
 {
     CWizStdStringArray folders;
-    ::WizEnumFolders(::WizGetResourcesPath() + "skins/", folders, 0);
+    ::WizEnumFolders(Utils::PathResolve::resourcesPath() + "skins/", folders, 0);
 
     foreach (const CString& path, folders)
     {

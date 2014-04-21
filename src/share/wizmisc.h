@@ -57,19 +57,11 @@ BOOL WizStringSimpleSplit(const CString& str, char ch, CString& strLeft, CString
 
 CString WizDateToLocalString(const COleDateTime& t);
 
-QString WizGetAppPath();
-QString WizGetAppFileName();
-QString WizGetResourcesPath();
-QString WizGetDataStorePath();
-QString WizGetUpgradePath();
-CString WizGetSettingsFileName();
-QString WizGetLogFileName();
-QString WizGetLocaleFileName(const QString& strLocale);
-QString WizGetQtLocaleFileName(const QString& strLocale);
 void WizGetTranslatedLocales(QStringList& locales);
 QString WizGetTranslatedLocaleDisplayName(int index);
 
 bool WizIsPredefinedLocation(const QString& strLocation);
+QString WizGetAppFileName();
 QString WizLocation2Display(const QString& strLocation);
 
 qint64 WizGetFileSize(const CString& strFileName);

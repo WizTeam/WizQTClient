@@ -2,8 +2,9 @@
 #include "ui_wizproxydialog.h"
 
 #include "share/wizsettings.h"
-
 #include "share/wizmisc.h"
+
+#include "utils/pathresolve.h"
 
 ProxyDialog::ProxyDialog(QWidget *parent) :
     QDialog(parent),
@@ -11,7 +12,7 @@ ProxyDialog::ProxyDialog(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    CWizSettings settings(WizGetSettingsFileName());
+    CWizSettings settings(Utils::PathResolve::globalSettingsFile());
     ui->editAddress->setText(settings.GetProxyHost());
     ui->editPort->setText(WizIntToStr(settings.GetProxyPort()));
     ui->editUserName->setText(settings.GetProxyUserName());
@@ -47,7 +48,7 @@ void ProxyDialog::enableControl(bool b)
 
 void ProxyDialog::accept()
 {
-    CWizSettings settings(WizGetSettingsFileName());
+    CWizSettings settings(Utils::PathResolve::globalSettingsFile());
     settings.SetProxyHost(ui->editAddress->text());
     settings.SetProxyPort(ui->editPort->text().toInt());
     settings.SetProxyUserName(ui->editUserName->text());

@@ -409,6 +409,10 @@ if(APPLE)
                 ${WIZNOTE_CONTENTS_DIR}/Frameworks/QtWebKit.framework/Versions/4/QtWebKit
                 ${WIZNOTE_CONTENTS_DIR}/Frameworks/QtXml.framework/Versions/4/QtXml
                 ${WIZNOTE_CONTENTS_DIR}/Frameworks/QtXmlPatterns.framework/Versions/4/QtXmlPatterns
+                ${WIZNOTE_CONTENTS_DIR}/PlugIns/codecs/libqcncodecs.dylib
+                ${WIZNOTE_CONTENTS_DIR}/PlugIns/codecs/libqjpcodecs.dylib
+                ${WIZNOTE_CONTENTS_DIR}/PlugIns/codecs/libqkrcodecs.dylib
+                ${WIZNOTE_CONTENTS_DIR}/PlugIns/codecs/libqtwcodecs.dylib
                 )
 
         elseif(NOT WIZNOTE_USE_QT5)
@@ -426,10 +430,6 @@ if(APPLE)
                 ${WIZNOTE_CONTENTS_DIR}/PlugIns/accessible/libqtaccessiblewidgets.dylib
                 ${WIZNOTE_CONTENTS_DIR}/PlugIns/bearer/libqcorewlanbearer.dylib
                 ${WIZNOTE_CONTENTS_DIR}/PlugIns/bearer/libqgenericbearer.dylib
-                ${WIZNOTE_CONTENTS_DIR}/PlugIns/codecs/libqcncodecs.dylib
-                ${WIZNOTE_CONTENTS_DIR}/PlugIns/codecs/libqjpcodecs.dylib
-                ${WIZNOTE_CONTENTS_DIR}/PlugIns/codecs/libqkrcodecs.dylib
-                ${WIZNOTE_CONTENTS_DIR}/PlugIns/codecs/libqtwcodecs.dylib
                 ${WIZNOTE_CONTENTS_DIR}/PlugIns/imageformats/libqgif.dylib
                 ${WIZNOTE_CONTENTS_DIR}/PlugIns/imageformats/libqico.dylib
                 ${WIZNOTE_CONTENTS_DIR}/PlugIns/imageformats/libqjpeg.dylib
@@ -460,15 +460,11 @@ if(APPLE)
 
         add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
            COMMAND codesign -f -s ${APPCERT} -v --entitlements ${MACOSX_BUNDLE_ENTITLEPLIST}  ${WIZNOTE_ROOT_DIR})
-        #set_target_properties(${PROJECT_NAME} PROPERTIES MACOSX_BUNDLE_INFO_ENTITLEPLIST "${CMAKE_SOURCE_DIR}/build/osx/Entitlements.plist")
-        #add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-        #   COMMAND codesign -f -s ${APPCERT} -v -entitlements ${MACOSX_BUNDLE_INFO_PLIST} ${PROJECT_NAME}.app)
-        ##You can leave out "–entitlements MyEntitlements.plist" if you are not using sandboxing.
 
-        #add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-        #    COMMAND productbuild --component ${WIZNOTE_ROOT_DIR} /Applications ${PROJECT_NAME}.pkg)
         add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-           COMMAND productbuild --component ${WIZNOTE_ROOT_DIR} /Applications --sign ${INSTALLERCERT} ${PROJECT_NAME}.pkg)
+            COMMAND cd ${CMAKE_BINARY_DIR})
+        #add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+        #   COMMAND productbuild --component ${WIZNOTE_ROOT_DIR} /Applications --sign ${INSTALLERCERT} ${PROJECT_NAME}.pkg)
 
     endif(APPSTORE_BUILD)
 endif(APPLE)

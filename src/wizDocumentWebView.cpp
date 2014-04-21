@@ -509,7 +509,7 @@ void CWizDocumentWebView::initEditor()
     if (!resetDefaultCss())
         return;
 
-    QString strFileName = WizGetResourcesPath() + "files/editor/index.html";
+    QString strFileName = Utils::PathResolve::resourcesPath() + "files/editor/index.html";
     QString strHtml;
     ::WizLoadUnicodeTextFromFile(strFileName, strHtml);
     QUrl url = QUrl::fromLocalFile(strFileName);

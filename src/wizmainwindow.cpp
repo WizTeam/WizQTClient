@@ -36,6 +36,8 @@
 #include "share/wizsettings.h"
 #include "share/wizanimateaction.h"
 #include "share/wizSearchIndexer.h"
+#include "share/wizObjectDataDownloader.h"
+#include "utils/pathresolve.h"
 
 #include "wiznotestyle.h"
 #include "wizdocumenthistory.h"
@@ -45,7 +47,6 @@
 #include "wizEditorToolBar.h"
 #include "wizProgressDialog.h"
 #include "wizDocumentSelectionView.h"
-#include "share/wizObjectDataDownloader.h"
 #include "wizDocumentTransitionView.h"
 #include "messagelistview.h"
 
@@ -337,7 +338,7 @@ void MainWindow::initActions()
 void MainWindow::initMenuBar()
 {
     setMenuBar(m_menuBar);
-    m_actions->buildMenuBar(m_menuBar, ::WizGetResourcesPath() + "files/mainmenu.ini");
+    m_actions->buildMenuBar(m_menuBar, Utils::PathResolve::resourcesPath() + "files/mainmenu.ini");
 }
 
 void MainWindow::on_editor_statusChanged()

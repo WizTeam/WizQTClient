@@ -1,4 +1,5 @@
 #include "wizsettings.h"
+#include "utils/pathresolve.h"
 
 #include <QLocale>
 
@@ -138,7 +139,7 @@ void CWizSettings::SetProxyStatus(bool val)
 
 CString WizGetShortcut(const CString& strName, const CString& strDef /*= ""*/)
 {
-    CWizSettings settings(WizGetSettingsFileName());
+    CWizSettings settings(Utils::PathResolve::globalSettingsFile());
     return settings.GetString("Shortcut", strName, strDef);
 }
 
@@ -351,7 +352,7 @@ QString CWizUserSettings::locale()
     //}
 
     strLocale = QLocale::system().name();
-    if (::PathFileExists(::WizGetLocaleFileName(strLocale))) {
+    if (::PathFileExists(Utils::PathResolve::localeFileName(strLocale))) {
         m_strLocale = strLocale;
         return strLocale;
     }

@@ -12,12 +12,14 @@
 
 #include <extensionsystem/pluginmanager.h>
 
-#include "sync/wizkmxmlrpc.h"
 #include "wizcreateaccountdialog.h"
 #include "wizproxydialog.h"
 
+#include "sync/wizkmxmlrpc.h"
 #include "sync/apientry.h"
 #include "sync/token.h"
+
+#include "utils/pathresolve.h"
 
 using namespace WizService;
 
@@ -272,7 +274,7 @@ bool CWizLoginDialog::updateUserProfile(bool bLogined)
 void CWizLoginDialog::setUsers(const QString& strDefault)
 {
     CWizStdStringArray usersFolder;
-    ::WizEnumFolders(::WizGetDataStorePath(), usersFolder, 0);
+    ::WizEnumFolders(Utils::PathResolve::dataStorePath(), usersFolder, 0);
 
     for(CWizStdStringArray::const_iterator it = usersFolder.begin();
         it != usersFolder.end(); it++)

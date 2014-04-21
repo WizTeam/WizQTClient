@@ -15,6 +15,7 @@
 #include "wizmainwindow.h"
 #include "utils/stylehelper.h"
 #include "utils/logger.h"
+#include "utils/pathresolve.h"
 #include "sync/apientry.h"
 #include "wizWebSettingsDialog.h"
 
@@ -391,7 +392,7 @@ void CWizDocumentListView::mouseMoveEvent(QMouseEvent* event)
 
 QPixmap WizGetDocumentDragBadget(int nCount)
 {
-    QString strFileName = WizGetResourcesPath() + "skins/document_drag.png";
+    QString strFileName = Utils::PathResolve::resourcesPath() + "skins/document_drag.png";
     QPixmap pixmap(strFileName);
 
     if (pixmap.isNull()) {

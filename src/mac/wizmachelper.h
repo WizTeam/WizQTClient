@@ -15,8 +15,6 @@ void setupFullScreenMode(QMainWindow* mainWindow);
 void toggleFullScreenMode(QMainWindow* mainWindow);
 QString WizMacGetOSVersion();
 
-QString GetDataStorePath();
-
 #endif // Q_OS_MAC
 
 #endif // COCOAHELP_H
