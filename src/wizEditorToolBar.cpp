@@ -7,12 +7,19 @@
 #include <QDesktopServices>
 #include <QAction>
 #include <QMenu>
+#include <QDebug>
+#include <QFileDialog>
+#include <QMessageBox>
+#include <QDir>
+#include <QDesktopServices>
+
 
 #include "share/wizmisc.h"
 #include "wizdef.h"
 #include "share/wizsettings.h"
 #include "wizDocumentWebView.h"
 #include "wizactions.h"
+#include "utils/pathresolve.h"
 
 using namespace Core::Internal;
 
@@ -992,5 +999,26 @@ void EditorToolBar::on_btnImage_clicked()
 {
     if (m_editor) {
         m_editor->editorCommandExecuteInsertImage();
+//        QString userName = QDesktopServices::storageLocation(QDesktopServices::HomeLocation);
+//        qDebug() << "username : " << userName;
+//        QString strWizFolder = "/Users/lxn/.wiznote/";
+//        QDir wizDir(strWizFolder);
+//        if (wizDir.exists())
+//        {
+//            QMessageBox messageBox;
+//            messageBox.setWindowTitle(tr("Info"));
+//            messageBox.setText(tr("copy old files"));
+//            messageBox.addButton(QMessageBox::Ok);
+//            messageBox.addButton(QMessageBox::Cancel);
+//            if (messageBox.exec() == QMessageBox::Ok)
+//            {
+//                QStringList entryList = wizDir.entryList();
+//                foreach (QString file, entryList)
+//                {
+//                    QFile sourceFile(file);
+//                    sourceFile.copy(Utils::PathResolve::dataStorePath() + sourceFile.fileName());
+//                }
+//            }
+//        }
     }
 }

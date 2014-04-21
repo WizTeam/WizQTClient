@@ -463,8 +463,8 @@ if(APPLE)
 
         add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
             COMMAND cd ${CMAKE_BINARY_DIR})
-        #add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-        #   COMMAND productbuild --component ${WIZNOTE_ROOT_DIR} /Applications --sign ${INSTALLERCERT} ${PROJECT_NAME}.pkg)
+        add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+           COMMAND productbuild --component ${WIZNOTE_ROOT_DIR} /Applications --sign ${INSTALLERCERT} ${PROJECT_NAME}.pkg)
 
     endif(APPSTORE_BUILD)
 endif(APPLE)
