@@ -94,10 +94,10 @@ QString MarkdownPlugin::cachePath()
 {
     QString strCachePath = qgetenv("XDG_CACHE_HOME");
     if (strCachePath.isEmpty()) {
-#ifdef Q_OS_LINUX
-        strCachePath = qgetenv("HOME") + "/.cache/wiznote/";
+#ifdef Q_OS_MAC
+        strCachePath = QDir::homePath() + "/Library/Caches/";
 #else
-        strCachePath = qgetenv("HOME") + "/.wiznote/cache/";
+        strCachePath = qgetenv("HOME") + "/.cache/wiznote/";
 #endif
     } else {
         strCachePath += "/wiznote/";
