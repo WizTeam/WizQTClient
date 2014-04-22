@@ -26,6 +26,9 @@ public:
     static QString standardCommandUrl(const QString& strCommand, const QString& strToken, const QString& strExtInfo);
 
     static QString kUrlFromGuid(const QString& strToken, const QString& strKbGUID);
+
+    // Determine whether the network connection is available by syncurl
+    static bool isNetworkConnectionAvailable();
 };
 
 } // namespace WizService

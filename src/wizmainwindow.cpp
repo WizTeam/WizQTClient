@@ -869,8 +869,14 @@ void MainWindow::on_actionAutoSync_triggered()
 
 void MainWindow::on_actionSync_triggered()
 {
-    m_sync->startSyncAll(false);
-    m_animateSync->startPlay();
+    if (WizService::ApiEntry::isNetworkConnectionAvailable())
+    {
+        syncAllData();
+    }
+    else
+    {
+        QMessageBox::information(this, tr("Info"), tr("Connection is not available, please check your network connection."));
+    }
 }
 
 void MainWindow::on_syncLogined()
@@ -921,7 +927,7 @@ void MainWindow::on_syncDone_userVerified()
     m_userVerifyDialog->deleteLater();
 
     if (m_dbMgr.db().SetPassword(m_userVerifyDialog->password())) {
-        on_actionSync_triggered();
+        syncAllData();
     }
 }
 
@@ -1676,7 +1682,13 @@ void MainWindow::ProcessClipboardBeforePaste(const QVariantMap& data)
 //
 //        QString strHtml = QString("<img border=\"0\" src=\"file://%1\" />").arg(strFileName);
 //        web()->editorCommandExecuteInsertHtml(strHtml, true);
-//    }
+    //    }
+}
+
+void MainWindow::syncAllData()
+{
+    m_sync->startSyncAll(false);
+    m_animateSync->startPlay();
 }
 void MainWindow::quickSyncKb(const QString& kbGuid)
 {

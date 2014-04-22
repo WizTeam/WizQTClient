@@ -223,6 +223,13 @@ QString ApiEntryPrivate::standardCommandUrl(const QString& strCommand, const QSt
     return addExtendedInfo(strUrl, strExt);
 }
 
+bool ApiEntryPrivate::isNetworkConnectionAvailable()
+{
+    QString strCmdUrl= urlFromCommand(WIZNOTE_API_COMMAND_SYNC_HTTPS);
+    QString strTmpUrl = requestUrl(strCmdUrl);
+    return !strTmpUrl.isEmpty();
+}
+
 QString ApiEntryPrivate::groupAttributeUrl(const QString& strToken, const QString& strKbGUID)
 {
     QString strExt = QString("token=%1&kb_guid=%2").arg(strToken).arg(strKbGUID);
@@ -379,4 +386,12 @@ QString ApiEntry::kUrlFromGuid(const QString& strToken, const QString& strKbGUID
     if (!d)
         d = new ApiEntryPrivate();
     return d->kUrlFromGuid(strToken, strKbGUID);
+}
+
+bool ApiEntry::isNetworkConnectionAvailable()
+{
+    if (!d)
+        d = new ApiEntryPrivate();
+
+    return d->isNetworkConnectionAvailable();
 }
