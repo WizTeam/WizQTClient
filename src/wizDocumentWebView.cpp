@@ -349,7 +349,13 @@ void CWizDocumentWebView::tryResetTitle()
 
 bool CWizDocumentWebView::image2Html(const QString& strImageFile, QString& strHtml)
 {
-    QString strDestFile = Utils::PathResolve::tempPath() + qrand() + ".png";
+    QString strDestName = Utils::PathResolve::tempPath() + "p" + QString::number(qrand());
+    QString strDestFile =  strDestName + ".png";
+    while (PathFileExists(strDestFile))
+    {
+        strDestName += QString::number((qrand() + 1) % 100 );
+        strDestFile = strDestName + ".png";
+    }
 
     qDebug() << "[Editor] copy to: " << strDestFile;
 
