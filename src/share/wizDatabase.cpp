@@ -1887,7 +1887,7 @@ QString CWizDatabase::GetAccountPath() const
 {
     Q_ASSERT(!m_strUserId.isEmpty());
 
-    QString strPath = ::WizGetDataStorePath()+ m_strUserId + "/";
+    QString strPath = Utils::PathResolve::dataStorePath() + m_strUserId + "/";
     WizEnsurePathExists(strPath);
 
     return strPath;

@@ -162,7 +162,7 @@ QPixmap AvatarHostPrivate::loadOrg(const QString& strUserGUID)
     if (!ret.isNull())
         return ret;
     //
-    QString defaultFilePath = Utils::PathResolve::themePath("default") + "avatar_default.png";
+    QString defaultFilePath = Utils::PathResolve::skinResourcesPath("default") + "avatar_default.png";
     return QPixmap(defaultFilePath);
 }
 
@@ -182,7 +182,7 @@ bool AvatarHostPrivate::customSizeAvatar(const QString& strUserGUID, int width, 
 
 void AvatarHostPrivate::loadCacheDefault()
 {
-    loadCacheFromFile(defaultKey(), Utils::PathResolve::themePath("default") + "avatar_default.png");
+    loadCacheFromFile(defaultKey(), Utils::PathResolve::skinResourcesPath("default") + "avatar_default.png");
 }
 
 void AvatarHostPrivate::loadCacheFromFile(const QString& key, const QString& strFilePath)

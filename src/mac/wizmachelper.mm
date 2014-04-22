@@ -169,7 +169,6 @@ NSString* WizGenGUID()
     return [str lowercaseString];
 }
 
-
 CWizChangeCocoaImplementation::CWizChangeCocoaImplementation(Class baseClass, SEL originalSel,
      Class proxyClass, SEL replacementSel, SEL backupSel, bool apply)
     : _baseClass(baseClass), _originalSel(originalSel), _backupSel(backupSel), _apply(apply)
