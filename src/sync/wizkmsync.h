@@ -39,6 +39,7 @@ public:
     void stopSync();
     //
     void addQuickSyncKb(const QString& kbGuid);
+    bool clearCurrentToken();
 
 public:
     static void quickSyncKb(const QString& kbGuid); //thread safe

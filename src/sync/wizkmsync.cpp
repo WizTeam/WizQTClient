@@ -161,6 +161,11 @@ bool CWizKMSyncThread::doSync()
     return false;
 }
 
+bool CWizKMSyncThread::clearCurrentToken()
+{
+    Token::clearToken();
+}
+
 bool CWizKMSyncThread::needSyncAll()
 {
     if (m_bNeedSyncAll)

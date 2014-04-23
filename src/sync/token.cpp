@@ -117,6 +117,11 @@ void TokenPrivate::requestToken()
     QThreadPool::globalInstance()->start(new GetTokenRunnable(this));
 }
 
+void TokenPrivate::clearToken()
+{
+    m_info.strToken.clear();
+}
+
 void TokenPrivate::setUserId(const QString& strUserId)
 {
     m_strUserId = strUserId;
@@ -186,6 +191,11 @@ void Token::requestToken()
     Q_ASSERT(m_instance);
 
     d->requestToken();
+}
+
+void Token::clearToken()
+{
+    d->clearToken();
 }
 
 void Token::setUserId(const QString& strUserId)

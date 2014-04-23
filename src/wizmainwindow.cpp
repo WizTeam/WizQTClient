@@ -909,6 +909,7 @@ void MainWindow::on_syncDone(int nErrorCode, const QString& strErrorMsg)
 
     // password changed
     if (nErrorCode == 301) {
+        m_settings->setPassword("");
         if (!m_userVerifyDialog) {
             m_userVerifyDialog = new CWizUserVerifyDialog(m_dbMgr.db().GetUserId(), tr("sorry, sync failed. please input your password and try again."), this);
             connect(m_userVerifyDialog, SIGNAL(accepted()), SLOT(on_syncDone_userVerified()));
@@ -927,6 +928,7 @@ void MainWindow::on_syncDone_userVerified()
     m_userVerifyDialog->deleteLater();
 
     if (m_dbMgr.db().SetPassword(m_userVerifyDialog->password())) {
+        m_sync->clearCurrentToken();
         syncAllData();
     }
 }

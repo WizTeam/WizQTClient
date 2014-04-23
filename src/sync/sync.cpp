@@ -1823,6 +1823,11 @@ bool WizSyncDatabase(const WIZUSERINFO& info, IWizKMSyncEvents* pEvents,
     {
         pDatabase->OnDownloadBizs(arrayBiz);
     }
+    else
+    {
+        pEvents->SetLastErrorCode(server.GetLastErrorCode());
+        return false;
+    }
 
     //
     CWizGroupDataArray arrayGroup;

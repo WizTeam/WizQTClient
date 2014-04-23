@@ -197,11 +197,15 @@ void CWizLoginDialog::doAccountVerify()
 {
     CWizUserSettings userSettings(userId());
 
-    // FIXME: should verify password if network is available to avoid attack?
-    if (password() != userSettings.password()) {
+    if (ApiEntry::isNetworkConnectionAvailable())
+    {
         Token::setUserId(userId());
         Token::setPasswd(password());
         doOnlineVerify();
+        return;
+    }
+    else if (password() != userSettings.password())
+    {
         return;
     }
 
