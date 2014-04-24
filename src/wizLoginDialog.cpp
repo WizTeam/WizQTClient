@@ -195,25 +195,11 @@ void CWizLoginDialog::accept()
 
 void CWizLoginDialog::doAccountVerify()
 {
-    CWizUserSettings userSettings(userId());
-
-    if (ApiEntry::isNetworkConnectionAvailable())
-    {
-        Token::setUserId(userId());
-        Token::setPasswd(password());
-        doOnlineVerify();
-        return;
-    }
-    else if (password() != userSettings.password())
-    {
-        return;
-    }
-
-    if (updateUserProfile(false) && updateGlobalProfile()) {
-        QDialog::accept();
-    }
-
-    enableControls(true);
+    /*登录时进行联网密码验证,如果验证失败,判断失败原因.如果是无法连接服务器,
+     * 则使用本地保存的密码判断用户是否能够登录*/
+    Token::setUserId(userId());
+    Token::setPasswd(password());
+    doOnlineVerify();
 }
 
 void CWizLoginDialog::doOnlineVerify()
@@ -227,10 +213,30 @@ void CWizLoginDialog::onTokenAcquired(const QString& strToken)
     Token::instance()->disconnect(this);
 
     enableControls(true);
-
-    if (strToken.isEmpty()) {
-        QMessageBox::critical(0, tr("Verify account failed"), Token::lastErrorMessage());
-        return;
+    if (strToken.isEmpty())
+    {
+        int nErrorCode = Token::lastErrorCode();
+        // network unavailable
+        if (QNetworkReply::ProtocolUnknownError == nErrorCode)
+        {
+            CWizUserSettings userSettings(userId());
+            if (password() != userSettings.password())
+            {
+                QMessageBox::information(this, tr("Info"), tr("Connection is not available, please check your network connection."));
+                return;
+            }
+            else
+            {
+                // login use local data
+                QDialog::accept();
+                return;
+            }
+        }
+        else
+        {
+            QMessageBox::critical(0, tr("Verify account failed"), Token::lastErrorMessage());
+            return;
+        }
     }
 
     if (updateUserProfile(true) && updateGlobalProfile())

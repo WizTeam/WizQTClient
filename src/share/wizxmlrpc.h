@@ -6,11 +6,12 @@
 
 enum WizXmlRpcError
 {
-    errorNetwork,
+    errorNetwork = -987,
     errorContentType,
     errorXmlFormat,
     errorXmlRpcFormat,
-    errorXmlRpcFault
+    errorXmlRpcFault,
+    errorUserPassword
 };
 
 

@@ -869,13 +869,13 @@ void MainWindow::on_actionAutoSync_triggered()
 
 void MainWindow::on_actionSync_triggered()
 {
-    if (WizService::ApiEntry::isNetworkConnectionAvailable())
+    if (::WizIsOffline())
     {
-        syncAllData();
+        QMessageBox::information(this, tr("Info"), tr("Connection is not available, please check your network connection."));
     }
     else
     {
-        QMessageBox::information(this, tr("Info"), tr("Connection is not available, please check your network connection."));
+        syncAllData();
     }
 }
 
@@ -908,7 +908,7 @@ void MainWindow::on_syncDone(int nErrorCode, const QString& strErrorMsg)
     m_animateSync->stopPlay();
 
     // password changed
-    if (nErrorCode == 301) {
+    if (errorUserPassword == nErrorCode) {
         m_settings->setPassword("");
         if (!m_userVerifyDialog) {
             m_userVerifyDialog = new CWizUserVerifyDialog(m_dbMgr.db().GetUserId(), tr("sorry, sync failed. please input your password and try again."), this);
