@@ -11,7 +11,9 @@ enum WizXmlRpcError
     errorXmlFormat,
     errorXmlRpcFormat,
     errorXmlRpcFault,
-    errorUserPassword
+    errorTokenInvalid,
+    errorPermissionException,
+    errorWizAllError
 };
 
 

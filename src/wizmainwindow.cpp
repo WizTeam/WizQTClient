@@ -908,7 +908,7 @@ void MainWindow::on_syncDone(int nErrorCode, const QString& strErrorMsg)
     m_animateSync->stopPlay();
 
     // password changed
-    if (errorUserPassword == nErrorCode) {
+    if (errorTokenInvalid == nErrorCode) {
         m_settings->setPassword("");
         if (!m_userVerifyDialog) {
             m_userVerifyDialog = new CWizUserVerifyDialog(m_dbMgr.db().GetUserId(), tr("sorry, sync failed. please input your password and try again."), this);

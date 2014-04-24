@@ -843,10 +843,14 @@ int CWizXmlRpcFaultValue::GetFaultCode() const
 	m_val.GetInt(_T("faultCode"), nCode);
     /* 此处不能返回Wiz服务器定义的 301,因为QT将 301 定义为连接协议无效.现在需要通过错误代码判断连接状态.
     NOTE：如果Wiz服务器错误代码变更,或者QT错误代码变更,需要修改此处*/
-    if (301 == nCode)
-    {
-        return errorUserPassword;
+    if (301 == nCode) {
+        return errorTokenInvalid;
+    } else if (302 == nCode) {
+        return errorPermissionException;
+    } else if (399 == nCode) {
+        return errorWizAllError;
     }
+
 	return nCode;
 }
 
