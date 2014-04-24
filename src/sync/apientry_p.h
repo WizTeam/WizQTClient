@@ -34,8 +34,6 @@ public:
     QString standardCommandUrl(const QString& strCommand, const QString& strToken);
     QString standardCommandUrl(const QString& strCommand, const QString& strToken, const QString& strExtInfo);
 
-    // Determine whether the network connection is available by syncurl
-    bool isNetworkConnectionAvailable();
 private:
     QString m_strSyncUrl;
     QString m_strMessageVersionUrl;

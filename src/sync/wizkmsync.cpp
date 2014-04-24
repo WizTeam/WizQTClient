@@ -123,11 +123,6 @@ void CWizKMSyncThread::startSyncAll(bool bBackground)
 
 bool CWizKMSyncThread::prepareToken()
 {
-    if (!WizService::ApiEntry::isNetworkConnectionAvailable())
-    {
-        return false;
-    }
-
     QString token = Token::token();
     if (token.isEmpty())
     {

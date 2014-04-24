@@ -27,8 +27,6 @@ public:
 
     static QString kUrlFromGuid(const QString& strToken, const QString& strKbGUID);
 
-    // Determine whether the network connection is available by syncurl
-    static bool isNetworkConnectionAvailable();
 };
 
 } // namespace WizService
