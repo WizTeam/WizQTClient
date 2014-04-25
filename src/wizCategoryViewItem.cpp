@@ -98,9 +98,9 @@ bool CWizCategoryViewItemBase::operator < (const QTreeWidgetItem &other) const
 QVariant CWizCategoryViewItemBase::data(int column, int role) const
 {
     if (role == Qt::SizeHintRole) {
-        int fontHeight = treeWidget()->fontMetrics().height();
-        int defHeight = fontHeight + 8;
-        int height = getItemHeight(defHeight);
+        //int fontHeight = treeWidget()->fontMetrics().height();
+        //int defHeight = fontHeight + 8;
+        int height = Utils::StyleHelper::treeViewItemHeight();//getItemHeight(defHeight);
         QSize sz(-1, height);
         return QVariant(sz);
     } else {
@@ -321,7 +321,7 @@ void CWizCategoryViewSectionItem::draw(QPainter* p, const QStyleOptionViewItemV4
 {
     QRect rc = vopt->rect;
     rc.setTop(rc.bottom());
-    p->fillRect(rc, Utils::StyleHelper::treeViewItemCategoryBackground());
+    p->fillRect(rc, Utils::StyleHelper::treeViewItemBottomLine());
 
     CWizCategoryViewItemBase::draw(p, vopt);
 }
@@ -439,11 +439,11 @@ void CWizCategoryViewMessageItem::draw(QPainter* p, const QStyleOptionViewItemV4
 
     p->setRenderHint(QPainter::Antialiasing);
 
-    p->setPen(QColor("#2874c9"));
-    p->setBrush(QColor("#2874c9"));
+    p->setPen(Utils::StyleHelper::treeViewItemMessageBackground());
+    p->setBrush(Utils::StyleHelper::treeViewItemMessageBackground());
     p->drawRoundedRect(rcb, rcb.height() / 2, rcb.height() / 2);
     //
-    p->setPen(QColor("#ffffff"));
+    p->setPen(Utils::StyleHelper::treeViewItemMessageText());
     p->drawText(rcb, Qt::AlignCenter, text);
 
     p->restore();

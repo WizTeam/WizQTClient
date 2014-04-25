@@ -38,6 +38,7 @@
 #include "share/wizSearchIndexer.h"
 #include "share/wizObjectDataDownloader.h"
 #include "utils/pathresolve.h"
+#include "utils/stylehelper.h"
 
 #include "wiznotestyle.h"
 #include "wizdocumenthistory.h"
@@ -636,7 +637,7 @@ void MainWindow::initToolBar()
 
     m_toolBar->addStandardItem(CWizMacToolBar::Space);
     m_toolBar->addAction(m_actions->actionFromName(WIZACTION_GLOBAL_SYNC));
-    m_toolBar->addStandardItem(CWizMacToolBar::Space);
+    //m_toolBar->addStandardItem(CWizMacToolBar::Space);
     m_toolBar->addAction(m_actions->actionFromName(WIZACTION_GLOBAL_NEW_DOCUMENT));
     m_toolBar->addStandardItem(CWizMacToolBar::FlexibleSpace);
     m_toolBar->addSearch(tr("Search"), "");
@@ -645,7 +646,7 @@ void MainWindow::initToolBar()
 #else
     addToolBar(m_toolBar);
 
-    m_toolBar->setIconSize(QSize(32, 32));
+    m_toolBar->setIconSize(QSize(24, 24));
     m_toolBar->setContextMenuPolicy(Qt::PreventContextMenu);
     m_toolBar->setMovable(false);
     m_toolBar->setToolButtonStyle(Qt::ToolButtonIconOnly);
@@ -744,11 +745,12 @@ QWidget* MainWindow::createListView()
     layoutList->setSpacing(0);
 
     CWizViewTypePopupButton* viewBtn = new CWizViewTypePopupButton(*this, this);
+    viewBtn->setFixedHeight(Utils::StyleHelper::listViewSortControlWidgetHeight());
     connect(viewBtn, SIGNAL(viewTypeChanged(int)), SLOT(on_documents_viewTypeChanged(int)));
     layoutActions->addWidget(viewBtn);
     QWidget* line = new QWidget(this);
     line->setFixedWidth(1);
-    line->setStyleSheet("border-left-width:1;border-left-style:solid;border-left-color:#d9dcdd");
+    line->setStyleSheet("border-left-width:1;border-left-style:solid;border-left-color:#DADAD9");
     layoutActions->addWidget(line);
     CWizSortingPopupButton* sortBtn = new CWizSortingPopupButton(*this, this);
     connect(sortBtn, SIGNAL(sortingTypeChanged(int)), SLOT(on_documents_sortingTypeChanged(int)));
@@ -769,7 +771,7 @@ QWidget* MainWindow::createListView()
 
     QWidget* line2 = new QWidget(this);
     line2->setFixedHeight(1);
-    line2->setStyleSheet("border-top-width:1;border-top-style:solid;border-top-color:#d9dcdd");
+    line2->setStyleSheet("border-top-width:1;border-top-style:solid;border-top-color:#DADAD9");
 
     layoutList->addLayout(layoutActions);
     layoutList->addWidget(line2);

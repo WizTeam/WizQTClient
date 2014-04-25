@@ -81,6 +81,7 @@ private:
     const QString& tagTree();
 
     bool isAvatarNeedUpdate(const QString& strFileName);
+    bool isContainsAttachment() const;
 
 private Q_SLOTS:
     void on_thumbnailReloaded();
