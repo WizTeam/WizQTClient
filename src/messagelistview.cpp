@@ -53,7 +53,8 @@ public:
         QPixmap pmAvatar;
         WizService::AvatarHost::avatar(m_data.senderId, &pmAvatar);
         QRect rectAvatar = Utils::StyleHelper::drawAvatar(p, rcd, pmAvatar);
-        rcd.setLeft(rectAvatar.right());
+        int nAvatarRightMargin = 4;
+        rcd.setLeft(rectAvatar.right() + nAvatarRightMargin);
 
         QFont f;
         int nHeight = Utils::StyleHelper::fontNormal(f);

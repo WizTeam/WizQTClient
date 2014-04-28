@@ -47,6 +47,7 @@ TitleBar::TitleBar(QWidget *parent)
     int nTitleHeight = Utils::StyleHelper::titleEditorHeight();
     m_editTitle->setFixedHeight(nTitleHeight);
     m_editTitle->setAlignment(Qt::AlignVCenter);
+    m_editTitle->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
 
     int nEditToolBarHeight = Utils::StyleHelper::editToolBarHeight();
     m_editorBar->setFixedHeight(nEditToolBarHeight);
@@ -114,7 +115,6 @@ TitleBar::TitleBar(QWidget *parent)
     layoutInfo2->setContentsMargins(0, 0, 0, 0);
     layoutInfo2->setSpacing(0);
     layoutInfo2->addWidget(m_editTitle);
-    layoutInfo2->addStretch(0);
     layoutInfo2->addWidget(m_editBtn);
     layoutInfo2->addWidget(m_tagBtn);
     layoutInfo2->addWidget(m_attachBtn);

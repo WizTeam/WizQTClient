@@ -493,7 +493,8 @@ QRect StyleHelper::drawAttachIcon(QPainter* p, const QRect& rc, bool bFocus, boo
 {
     QIcon attachIcon(loadIcon("document_containsattach"));
     QSize iconSize = rc.size();
-    QRect rcb = rc.adjusted(margin(), margin(), 0, 0);
+    int nLeftMargin = 2;
+    QRect rcb = rc.adjusted(nLeftMargin, margin(), 0, 0);
     rcb.setSize(iconSize);
     if (bSelect && bFocus) {
         attachIcon.paint(p, rcb, Qt::AlignTop, QIcon::Active, QIcon::On);
@@ -630,7 +631,7 @@ void StyleHelper::drawListViewItemThumb(QPainter* p, const QRect& rc, int nBadge
     if (!title.isEmpty()) {
         QRect rcTitle = Utils::StyleHelper::drawBadgeIcon(p, rcd, nFontHeight, nBadgeType, bFocused, bSelected);
 
-        int nSpace4AttachIcon = 18;
+        int nSpace4AttachIcon = 20;
         rcTitle.setCoords(rcTitle.right(), rcTitle.y(), rcd.right() - nSpace4AttachIcon, rcd.bottom());
         QString strTitle(title);
         QColor colorTitle = Utils::StyleHelper::listViewItemTitle(bSelected, bFocused);

@@ -326,7 +326,8 @@ void CWizDocumentListViewItem::drawGroupSummaryView_impl(QPainter* p, const QSty
     QPixmap pmAvatar;
     WizService::AvatarHost::avatar(m_data.strAuthorId, &pmAvatar);
     QRect rcAvatar = Utils::StyleHelper::drawAvatar(p, rcd, pmAvatar);
-    rcd.setLeft(rcAvatar.right());
+    int nAvatarRightMargin = 4;
+    rcd.setLeft(rcAvatar.right() + nAvatarRightMargin);
 
     int nType = m_data.doc.nProtected ? Utils::StyleHelper::BadgeEncryted : Utils::StyleHelper::BadgeNormal;
     bool bContainsAttach = isContainsAttachment();
@@ -355,7 +356,8 @@ void CWizDocumentListViewItem::drawGroupTwoLineView_impl(QPainter* p, const QSty
     QPixmap pmAvatar;
     WizService::AvatarHost::avatar(m_data.strAuthorId, &pmAvatar);
     QRect rcAvatar = Utils::StyleHelper::drawAvatar(p, rcd, pmAvatar);
-    rcd.setLeft(rcAvatar.right());
+    int nAvatarRightMargin = 4;
+    rcd.setLeft(rcAvatar.right() + nAvatarRightMargin);
 
     int nType = m_data.doc.nProtected ? Utils::StyleHelper::BadgeEncryted : Utils::StyleHelper::BadgeNormal;
     bool bContainsAttach = isContainsAttachment();
