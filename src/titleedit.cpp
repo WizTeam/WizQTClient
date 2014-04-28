@@ -9,6 +9,7 @@
 #include "share/wizDatabaseManager.h"
 #include "share/wizDatabase.h"
 #include "wizDocumentView.h"
+#include "wizmainwindow.h"
 
 using namespace Core;
 using namespace Core::Internal;
@@ -204,6 +205,7 @@ void TitleEdit::onTitleEditingFinished()
         if (strNewTitle != data.strTitle) {
             data.strTitle = strNewTitle;
             db.ModifyDocumentInfo(data);
+            MainWindow::quickSyncKb(data.strKbGUID);
         }
     }
 }
