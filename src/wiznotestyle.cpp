@@ -38,6 +38,8 @@ public:
 private:
     QImage m_expandedImage;
     QImage m_collapsedImage;
+    QImage m_expandedImageSelected;
+    QImage m_collapsedImageSelected;
     QImage m_imgDocumentUnread;
     QImage m_imgDefaultAvatar;
 
@@ -111,6 +113,8 @@ CWizNoteStyle::CWizNoteStyle(const QString& strSkinName)
 
     m_expandedImage.load(strSkinPath + "branch_expanded.png");
     m_collapsedImage.load(strSkinPath + "branch_collapsed.png");
+    m_expandedImageSelected.load(strSkinPath + "branch_expandedSelected.png");
+    m_collapsedImageSelected.load(strSkinPath + "branch_collapsedSelected.png");
     m_imgDocumentUnread.load(strSkinPath + "read_btn_unread.png");
     m_imgDefaultAvatar.load(strSkinPath + "avatar_default.png");
 
@@ -460,7 +464,11 @@ void CWizNoteStyle::drawPrimitive(PrimitiveElement pe, const QStyleOption *opt, 
 
                 if (opt->state & QStyle::State_Children) {
                     bool bExpanded = (opt->state & QStyle::State_Open) ? true : false;
-                    drawcenterImage(p, bExpanded ? m_expandedImage : m_collapsedImage, opt->rect.adjusted(8, 0, 0, 0));
+                    if ((opt->state & QStyle::State_Selected) && (opt->state & State_HasFocus)) {
+                        drawcenterImage(p, bExpanded ? m_expandedImageSelected : m_collapsedImageSelected, opt->rect.adjusted(8, 0, 0, 0));
+                    } else {
+                        drawcenterImage(p, bExpanded ? m_expandedImage : m_collapsedImage, opt->rect.adjusted(8, 0, 0, 0));
+                    }
                 }
                 return;
             }
