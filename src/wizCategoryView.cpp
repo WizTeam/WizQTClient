@@ -898,6 +898,11 @@ bool CWizCategoryView::createDocument(WIZDOCUMENTDATA& data)
         CWizDocument doc(m_dbMgr.db(strKbGUID), data);
         doc.AddTag(tag);
     }
+
+    /*FIXME:
+     *创建笔记后快速同步笔记到服务器,防止用户新建笔记后使用评论功能时因服务器无该篇笔记导致问题.*/
+    MainWindow* mainWindow = qobject_cast<MainWindow*>(m_app.mainWindow());
+    mainWindow->quickSyncKb(data.strKbGUID);
     //
     return true;
 }
