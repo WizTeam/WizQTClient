@@ -630,7 +630,8 @@ void StyleHelper::drawListViewItemThumb(QPainter* p, const QRect& rc, int nBadge
     if (!title.isEmpty()) {
         QRect rcTitle = Utils::StyleHelper::drawBadgeIcon(p, rcd, nFontHeight, nBadgeType, bFocused, bSelected);
 
-        rcTitle.setCoords(rcTitle.right(), rcTitle.y(), rcd.right(), rcd.bottom());
+        int nSpace4AttachIcon = 18;
+        rcTitle.setCoords(rcTitle.right(), rcTitle.y(), rcd.right() - nSpace4AttachIcon, rcd.bottom());
         QString strTitle(title);
         QColor colorTitle = Utils::StyleHelper::listViewItemTitle(bSelected, bFocused);
         QRect rcAttach = Utils::StyleHelper::drawText(p, rcTitle, strTitle, 1, Qt::AlignVCenter, colorTitle, fontTitle);

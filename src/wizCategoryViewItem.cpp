@@ -5,6 +5,7 @@
 #include <QPainter>
 #include <cstring>
 #include <QFile>
+#include <QStyle>
 
 #include <extensionsystem/pluginmanager.h>
 #include "utils/pinyin.h"
@@ -439,12 +440,23 @@ void CWizCategoryViewMessageItem::draw(QPainter* p, const QStyleOptionViewItemV4
 
     p->setRenderHint(QPainter::Antialiasing);
 
-    p->setPen(Utils::StyleHelper::treeViewItemMessageBackground());
-    p->setBrush(Utils::StyleHelper::treeViewItemMessageBackground());
-    p->drawRoundedRect(rcb, rcb.height() / 2, rcb.height() / 2);
+    if (vopt->state.testFlag(QStyle::State_Selected) && vopt->state.testFlag(QStyle::State_HasFocus))
+    {
+        p->setPen(Utils::StyleHelper::treeViewItemMessageText());
+        p->setBrush(Utils::StyleHelper::treeViewItemMessageText());
+        p->drawRoundedRect(rcb, rcb.height() / 2, rcb.height() / 2);
+        p->setPen(Utils::StyleHelper::treeViewItemMessageBackground());
+        p->drawText(rcb, Qt::AlignCenter, text);
+    }
+    else
+    {
+        p->setPen(Utils::StyleHelper::treeViewItemMessageBackground());
+        p->setBrush(Utils::StyleHelper::treeViewItemMessageBackground());
+        p->drawRoundedRect(rcb, rcb.height() / 2, rcb.height() / 2);
+        p->setPen(Utils::StyleHelper::treeViewItemMessageText());
+        p->drawText(rcb, Qt::AlignCenter, text);
+    }
     //
-    p->setPen(Utils::StyleHelper::treeViewItemMessageText());
-    p->drawText(rcb, Qt::AlignCenter, text);
 
     p->restore();
     //
