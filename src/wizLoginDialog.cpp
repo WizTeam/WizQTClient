@@ -195,11 +195,20 @@ void CWizLoginDialog::accept()
 
 void CWizLoginDialog::doAccountVerify()
 {
-    /*登录时进行联网密码验证,如果验证失败,判断失败原因.如果是无法连接服务器,
-     * 则使用本地保存的密码判断用户是否能够登录*/
-    Token::setUserId(userId());
-    Token::setPasswd(password());
-    doOnlineVerify();
+    CWizUserSettings userSettings(userId());
+
+    // FIXME: should verify password if network is available to avoid attack?
+    if (password() != userSettings.password()) {
+        Token::setUserId(userId());
+        Token::setPasswd(password());
+        doOnlineVerify();
+        return;
+    }
+
+    if (updateUserProfile(false) && updateGlobalProfile()) {
+        QDialog::accept();
+    }
+    enableControls(true);
 }
 
 void CWizLoginDialog::doOnlineVerify()
