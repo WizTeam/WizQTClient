@@ -33,10 +33,10 @@ void drawCombo(QComboBox* cm, QStyleOptionComboBox& opt)
         //painter.drawRect(rectSub);
         rectSub.adjust(6, 0, -12, 0);
 
-        subOpt.rect = rectSub.adjusted(0, 1, 0, -rectSub.height()/2);
-        drawComboPrimitive(&painter, QStyle::PE_IndicatorArrowUp, subOpt);
+//        subOpt.rect = rectSub.adjusted(0, 1, 0, -rectSub.height()/2);
+//        drawComboPrimitive(&painter, QStyle::PE_IndicatorArrowUp, subOpt);
 
-        subOpt.rect = rectSub.adjusted(0, rectSub.height()/2 + 5, 0, -rectSub.height()/2);
+        subOpt.rect = rectSub.adjusted(0, rectSub.height()/2 - 3, 0, -rectSub.height()/2 + 3);
         drawComboPrimitive(&painter, QStyle::PE_IndicatorArrowDown, subOpt);
     }
 
@@ -377,7 +377,7 @@ EditorToolBar::EditorToolBar(QWidget *parent)
 
     QHBoxLayout* layout = new QHBoxLayout();
     layout->setContentsMargins(3, 0, 3, 0);
-    layout->setAlignment(Qt::AlignBottom);
+    layout->setAlignment(Qt::AlignVCenter);
     layout->setSpacing(2);
     setLayout(layout);
 

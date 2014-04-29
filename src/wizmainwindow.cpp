@@ -38,6 +38,7 @@
 #include "share/wizSearchIndexer.h"
 #include "share/wizObjectDataDownloader.h"
 #include "utils/pathresolve.h"
+#include "utils/stylehelper.h"
 
 #include "wiznotestyle.h"
 #include "wizdocumenthistory.h"
@@ -636,7 +637,7 @@ void MainWindow::initToolBar()
 
     m_toolBar->addStandardItem(CWizMacToolBar::Space);
     m_toolBar->addAction(m_actions->actionFromName(WIZACTION_GLOBAL_SYNC));
-    m_toolBar->addStandardItem(CWizMacToolBar::Space);
+    //m_toolBar->addStandardItem(CWizMacToolBar::Space);
     m_toolBar->addAction(m_actions->actionFromName(WIZACTION_GLOBAL_NEW_DOCUMENT));
     m_toolBar->addStandardItem(CWizMacToolBar::FlexibleSpace);
     m_toolBar->addSearch(tr("Search"), "");
@@ -645,7 +646,7 @@ void MainWindow::initToolBar()
 #else
     addToolBar(m_toolBar);
 
-    m_toolBar->setIconSize(QSize(32, 32));
+    m_toolBar->setIconSize(QSize(24, 24));
     m_toolBar->setContextMenuPolicy(Qt::PreventContextMenu);
     m_toolBar->setMovable(false);
     m_toolBar->setToolButtonStyle(Qt::ToolButtonIconOnly);
@@ -744,11 +745,12 @@ QWidget* MainWindow::createListView()
     layoutList->setSpacing(0);
 
     CWizViewTypePopupButton* viewBtn = new CWizViewTypePopupButton(*this, this);
+    viewBtn->setFixedHeight(Utils::StyleHelper::listViewSortControlWidgetHeight());
     connect(viewBtn, SIGNAL(viewTypeChanged(int)), SLOT(on_documents_viewTypeChanged(int)));
     layoutActions->addWidget(viewBtn);
     QWidget* line = new QWidget(this);
     line->setFixedWidth(1);
-    line->setStyleSheet("border-left-width:1;border-left-style:solid;border-left-color:#d9dcdd");
+    line->setStyleSheet("border-left-width:1;border-left-style:solid;border-left-color:#DADAD9");
     layoutActions->addWidget(line);
     CWizSortingPopupButton* sortBtn = new CWizSortingPopupButton(*this, this);
     connect(sortBtn, SIGNAL(sortingTypeChanged(int)), SLOT(on_documents_sortingTypeChanged(int)));
@@ -769,7 +771,7 @@ QWidget* MainWindow::createListView()
 
     QWidget* line2 = new QWidget(this);
     line2->setFixedHeight(1);
-    line2->setStyleSheet("border-top-width:1;border-top-style:solid;border-top-color:#d9dcdd");
+    line2->setStyleSheet("border-top-width:1;border-top-style:solid;border-top-color:#DADAD9");
 
     layoutList->addLayout(layoutActions);
     layoutList->addWidget(line2);
@@ -869,8 +871,14 @@ void MainWindow::on_actionAutoSync_triggered()
 
 void MainWindow::on_actionSync_triggered()
 {
-    m_sync->startSyncAll(false);
-    m_animateSync->startPlay();
+    if (::WizIsOffline())
+    {
+        QMessageBox::information(this, tr("Info"), tr("Connection is not available, please check your network connection."));
+    }
+    else
+    {
+        syncAllData();
+    }
 }
 
 void MainWindow::on_syncLogined()
@@ -902,7 +910,8 @@ void MainWindow::on_syncDone(int nErrorCode, const QString& strErrorMsg)
     m_animateSync->stopPlay();
 
     // password changed
-    if (nErrorCode == 301) {
+    if (errorTokenInvalid == nErrorCode) {
+        m_settings->setPassword("");
         if (!m_userVerifyDialog) {
             m_userVerifyDialog = new CWizUserVerifyDialog(m_dbMgr.db().GetUserId(), tr("sorry, sync failed. please input your password and try again."), this);
             connect(m_userVerifyDialog, SIGNAL(accepted()), SLOT(on_syncDone_userVerified()));
@@ -921,7 +930,8 @@ void MainWindow::on_syncDone_userVerified()
     m_userVerifyDialog->deleteLater();
 
     if (m_dbMgr.db().SetPassword(m_userVerifyDialog->password())) {
-        on_actionSync_triggered();
+        m_sync->clearCurrentToken();
+        syncAllData();
     }
 }
 
@@ -1267,7 +1277,7 @@ void MainWindow::on_actionPopupMainMenu_triggered()
     QRect rc = m_toolBar->actionGeometry(pAction);
     QPoint pt = m_toolBar->mapToGlobal(QPoint(rc.left(), rc.bottom()));
 
-    CWizSettings settings(::WizGetResourcesPath() + "files/mainmenu.ini");
+    CWizSettings settings(Utils::PathResolve::resourcesPath() + "files/mainmenu.ini");
 
     QMenu* pMenu = new QMenu(this);
     m_actions->buildMenu(pMenu, settings, pAction->objectName());
@@ -1676,7 +1686,13 @@ void MainWindow::ProcessClipboardBeforePaste(const QVariantMap& data)
 //
 //        QString strHtml = QString("<img border=\"0\" src=\"file://%1\" />").arg(strFileName);
 //        web()->editorCommandExecuteInsertHtml(strHtml, true);
-//    }
+    //    }
+}
+
+void MainWindow::syncAllData()
+{
+    m_sync->startSyncAll(false);
+    m_animateSync->startPlay();
 }
 void MainWindow::quickSyncKb(const QString& kbGuid)
 {

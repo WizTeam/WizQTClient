@@ -50,11 +50,14 @@ QString PathResolve::skinResourcesPath(const QString &strSkinName)
 QString PathResolve::dataStorePath()
 {
     QString strPath;
+    strPath= QDir::homePath();
 #ifdef Q_OS_MAC
-    strPath= QDir::homePath();
-    strPath += "/Documents/";
+    #ifdef BUILD4APPSTORE
+        strPath += "/Documents/";
+    #else
+        strPath += "/.wiznote/";
+    #endif
 #else
-    strPath= QDir::homePath();
     strPath += "/.wiznote/";
 #endif
     ensurePathExists(strPath);
@@ -66,7 +69,11 @@ QString PathResolve::cachePath()
     QString strCachePath = qgetenv("XDG_CACHE_HOME");
     if (strCachePath.isEmpty()) {
 #ifdef Q_OS_MAC
+    #ifdef BUILD4APPSTORE
         strCachePath = QDir::homePath() + "/Library/Caches/";
+    #else
+        strCachePath = dataStorePath() + "cache/";
+    #endif
 #else
         strCachePath = qgetenv("HOME") + "/.cache/wiznote/";
 #endif
@@ -89,7 +96,11 @@ QString PathResolve::logFilePath()
 {
     QString strPath;
 #ifdef Q_OS_MAC
-    strPath = QDir::homePath() + "/Library/Logs/";
+    #ifdef BUILD4APPSTORE
+        strPath = QDir::homePath() + "/Library/Logs/";
+    #else
+        strPath = dataStorePath() + "log/";
+    #endif
 #else
     strPath = dataStorePath() + "log/";
 #endif

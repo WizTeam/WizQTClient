@@ -208,7 +208,6 @@ void CWizLoginDialog::doAccountVerify()
     if (updateUserProfile(false) && updateGlobalProfile()) {
         QDialog::accept();
     }
-
     enableControls(true);
 }
 
@@ -223,10 +222,30 @@ void CWizLoginDialog::onTokenAcquired(const QString& strToken)
     Token::instance()->disconnect(this);
 
     enableControls(true);
-
-    if (strToken.isEmpty()) {
-        QMessageBox::critical(0, tr("Verify account failed"), Token::lastErrorMessage());
-        return;
+    if (strToken.isEmpty())
+    {
+        int nErrorCode = Token::lastErrorCode();
+        // network unavailable
+        if (QNetworkReply::ProtocolUnknownError == nErrorCode)
+        {
+            CWizUserSettings userSettings(userId());
+            if (password() != userSettings.password())
+            {
+                QMessageBox::information(this, tr("Info"), tr("Connection is not available, please check your network connection."));
+                return;
+            }
+            else
+            {
+                // login use local data
+                QDialog::accept();
+                return;
+            }
+        }
+        else
+        {
+            QMessageBox::critical(0, tr("Verify account failed"), Token::lastErrorMessage());
+            return;
+        }
     }
 
     if (updateUserProfile(true) && updateGlobalProfile())

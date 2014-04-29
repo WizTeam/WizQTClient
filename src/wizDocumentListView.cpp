@@ -616,7 +616,9 @@ void CWizDocumentListView::on_document_modified(const WIZDOCUMENTDATA& documentO
         } else {
             if (CWizDocumentListViewItem* pItem = documentItemAt(index)) {
                 pItem->reload(m_dbMgr.db(documentNew.strKbGUID));
+                pItem->setSortingType(m_nSortingType);
                 update(indexFromItem(pItem));
+                sortItems();
             }
         }
     } else {

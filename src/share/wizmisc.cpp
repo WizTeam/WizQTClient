@@ -13,6 +13,7 @@
 
 #include <QtCore>
 //#include <QtNetwork>
+#include <QNetworkConfigurationManager>
 #include "utils/logger.h"
 #include "utils/pathresolve.h"
 #include "mac/wizmachelper.h"
@@ -2082,4 +2083,11 @@ void showWebDialogWithToken(const QString& windowTitle, const QString& url, QWid
     pDlg->exec();
     //
     delete pDlg;
+}
+
+
+bool WizIsOffline()
+{
+    QNetworkConfigurationManager mgr;
+    return !mgr.isOnline();
 }

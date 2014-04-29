@@ -309,6 +309,9 @@ public:
     Q_INVOKABLE QObject* CreateWizObject(const QString& strObjectID);
     Q_INVOKABLE void SetSavingDocument(bool saving);
     Q_INVOKABLE void ProcessClipboardBeforePaste(const QVariantMap& data);
+
+private:
+    void syncAllData();
 };
 
 } // namespace Internal
