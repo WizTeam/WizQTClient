@@ -52,12 +52,21 @@ CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
     m_tab = new QStackedWidget(this);
     //
     MainWindow* mainWindow = qobject_cast<MainWindow *>(m_app.mainWindow());
-    m_passwordView = mainWindow->cipherForm();
+    m_passwordView = new CWizUserCipherForm(m_app, this);
     m_passwordView->setGeometry(this->geometry());
     connect(m_passwordView, SIGNAL(cipherCheckRequest()), SLOT(onCipherCheckRequest()));
     //
+    m_msgWidget = new QWidget(this);
+    QVBoxLayout* layoutMsg = new QVBoxLayout();
+    m_msgWidget->setLayout(layoutMsg);
+    m_msgLabel = new QLabel(m_msgWidget);
+    m_msgLabel->setAlignment(Qt::AlignCenter);
+    m_msgLabel->setWordWrap(true);
+    layoutMsg->addWidget(m_msgLabel);
+    //
     m_tab->addWidget(m_docView);
     m_tab->addWidget(m_passwordView);
+    m_tab->addWidget(m_msgWidget);
     m_tab->setCurrentWidget(m_docView);
 
     m_splitter = new CWizSplitter(this);
@@ -202,7 +211,10 @@ void CWizDocumentView::viewNote(const WIZDOCUMENTDATA& data, bool forceEdit)
     m_noteLoaded = false;
     m_note = data;
     initStat(data, forceEdit);
-    m_tab->setCurrentWidget(m_docView);
+
+    if (m_tab->currentWidget() != m_docView) {
+        m_tab->setCurrentWidget(m_docView);
+    }
     m_tab->setVisible(true);
 
     // download document if not exist
@@ -234,6 +246,46 @@ void CWizDocumentView::viewNote(const WIZDOCUMENTDATA& data, bool forceEdit)
     }
 
     loadNote(data);
+}
+
+void CWizDocumentView::reviewCurrentNote()
+{
+    Q_ASSERT(!m_note.strGUID.isEmpty());
+
+    m_tab->setVisible(true);
+    initStat(m_note, m_bEditingMode);
+
+    // download document if not exist
+    CWizDatabase& db = m_dbMgr.db(m_note.strKbGUID);
+    QString strDocumentFileName = db.GetDocumentFileName(m_note.strGUID);
+    if (!db.IsObjectDataDownloaded(m_note.strGUID, "document") || \
+            !PathFileExists(strDocumentFileName)) {
+        MainWindow* window = qobject_cast<MainWindow *>(m_app.mainWindow());
+        window->downloaderHost()->download(m_note);
+        window->showClient(false);
+        window->transitionView()->showAsMode(CWizDocumentTransitionView::Downloading);
+
+        return;
+    }
+
+    // ask user cipher if needed
+    if (m_note.nProtected) {
+        if(!db.loadUserCert()) {
+            return;
+        }
+
+        if (db.userCipher().isEmpty()) {
+            m_passwordView->setHint(db.userCipherHint());
+            m_tab->setCurrentWidget(m_passwordView);
+            m_passwordView->setCipherEditorFocus();
+
+            return;
+        }
+    }
+
+    if (m_tab->currentWidget() != m_docView) {
+        m_tab->setCurrentWidget(m_docView);
+    }
 }
 
 void CWizDocumentView::setEditNote(bool bEdit)
@@ -274,6 +326,14 @@ void CWizDocumentView::settingsChanged()
 void CWizDocumentView::resetTitle(const QString& strTitle)
 {
     m_title->resetTitle(strTitle);
+}
+
+void CWizDocumentView::promptMessage(const QString &strMsg)
+{
+    m_tab->setCurrentWidget(m_msgWidget);
+    m_tab->setVisible(true);
+
+    m_msgLabel->setText(strMsg);
 }
 
 void CWizDocumentView::setEditorFocus()

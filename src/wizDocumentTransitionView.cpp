@@ -18,8 +18,6 @@ CWizDocumentTransitionView::CWizDocumentTransitionView(QWidget *parent) :
 
 void CWizDocumentTransitionView::showAsMode(TransitionMode mode)
 {
-    Q_UNUSED(mode);
-
     if (mode == Downloading) {
         m_labelHint->setText(tr("Downloading note from cloud server..."));
     } else if (mode == ErrorOccured) {
