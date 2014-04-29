@@ -30,7 +30,7 @@ CWizUserCipherForm::CWizUserCipherForm(CWizExplorerApp& app, QWidget *parent)
     QString strIconDown = ::WizGetSkinResourcePath(m_app.userSettings().skin())
             + "mac_icons_password_done_down.png";
 
-    QSize szBtn(26, 26);
+    QSize szBtn(22, 22);
     ui->buttonOk->setMinimumSize(szBtn);
     ui->buttonOk->setMaximumSize(szBtn);
     ui->buttonOk->setIconNormal(strIconNormal);
@@ -116,6 +116,7 @@ void CWizUserCipherForm::cipherError()
     m_animation->setEndValue(pos);
     m_animation->start();
 
+    ui->editUserCipher->setGeometry(QRect(pos, ui->editUserCipher->size()));
     ui->editUserCipher->selectAll();
     ui->editUserCipher->setFocus();
 }

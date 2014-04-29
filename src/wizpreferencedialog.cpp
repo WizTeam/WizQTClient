@@ -5,6 +5,7 @@
 #include <QFontDialog>
 
 #include "share/wizDatabaseManager.h"
+#include "wizmainwindow.h"
 
 
 CWizPreferenceWindow::CWizPreferenceWindow(CWizExplorerApp& app, QWidget* parent)
@@ -36,7 +37,10 @@ CWizPreferenceWindow::CWizPreferenceWindow(CWizExplorerApp& app, QWidget* parent
     }
     ui->comboLang->blockSignals(false);
 
-    connect(ui->comboLang, SIGNAL(activated(int)), SLOT(on_comboLang_activated(int)));
+    ui->checkBox->blockSignals(true);
+    Qt::CheckState checkState = userSettings().autoCheckUpdate() ? Qt::Checked : Qt::Unchecked;
+    ui->checkBox->setCheckState(checkState);
+    ui->checkBox->blockSignals(false);
 
     // reading tab
     switch (userSettings().noteViewMode())
@@ -51,10 +55,6 @@ CWizPreferenceWindow::CWizPreferenceWindow(CWizExplorerApp& app, QWidget* parent
             ui->radioAuto->setChecked(true);
             break;
     }
-
-    connect(ui->radioAuto, SIGNAL(clicked(bool)), SLOT(on_radioAuto_clicked(bool)));
-    connect(ui->radioAlwaysReading, SIGNAL(clicked(bool)), SLOT(on_radioAlwaysReading_clicked(bool)));
-    connect(ui->radioAlwaysEditing, SIGNAL(clicked(bool)), SLOT(on_radioAlwaysEditing_clicked(bool)));
 
     // syncing tab
     int nInterval = userSettings().syncInterval();
@@ -306,4 +306,15 @@ void CWizPreferenceWindow::on_comboLang_currentIndexChanged(int index)
     msgBox.exec();
 
 
+}
+
+void CWizPreferenceWindow::on_checkBox_stateChanged(int arg1)
+{
+    bool autoUpdate = (arg1 == Qt::Checked);
+    m_app.userSettings().setAutoCheckUpdate(autoUpdate);
+
+    if (autoUpdate) {
+        Core::Internal::MainWindow* mainWindow = qobject_cast<Core::Internal::MainWindow*>(m_app.mainWindow());
+        mainWindow->checkWizUpdate();
+    }
 }

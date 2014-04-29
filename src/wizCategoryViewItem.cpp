@@ -5,6 +5,7 @@
 #include <QPainter>
 #include <cstring>
 #include <QFile>
+#include <QStyle>
 
 #include <extensionsystem/pluginmanager.h>
 #include "utils/pinyin.h"
@@ -98,9 +99,9 @@ bool CWizCategoryViewItemBase::operator < (const QTreeWidgetItem &other) const
 QVariant CWizCategoryViewItemBase::data(int column, int role) const
 {
     if (role == Qt::SizeHintRole) {
-        int fontHeight = treeWidget()->fontMetrics().height();
-        int defHeight = fontHeight + 8;
-        int height = getItemHeight(defHeight);
+        //int fontHeight = treeWidget()->fontMetrics().height();
+        //int defHeight = fontHeight + 8;
+        int height = Utils::StyleHelper::treeViewItemHeight();//getItemHeight(defHeight);
         QSize sz(-1, height);
         return QVariant(sz);
     } else {
@@ -146,17 +147,20 @@ bool CWizCategoryViewItemBase::getExtraButtonIcon(QPixmap &ret) const
     return !m_extraButtonIcon.isNull();
 }
 
-QRect CWizCategoryViewItemBase::getExtraButtonRect(const QRect& rcItemBorder) const
+QRect CWizCategoryViewItemBase::getExtraButtonRect(const QRect &rcItemBorder, bool ignoreIconExist) const
 {
     int nMargin = 4;
     QSize szBtn(16, 16);
-    if (!m_extraButtonIcon.isNull())
+    if (!m_extraButtonIcon.isNull()) {
         szBtn = m_extraButtonIcon.size();
+    } else if (!ignoreIconExist){
+        return QRect(0, 0, 0, 0);
+    }
     int nWidth = szBtn.width() + 2 * nMargin;
     int nHeight = szBtn.height() + 2 * nMargin;
     //
     int nTop = rcItemBorder.y() + (rcItemBorder.height() - nHeight) / 2;
-    QRect rcb(rcItemBorder.right() - nWidth - nMargin, nTop, nWidth, nHeight);
+    QRect rcb(rcItemBorder.right() - nWidth - 2 * nMargin, nTop, nWidth, nHeight);
     rcb.adjust(nMargin, nMargin, -nMargin, -nMargin);
     return rcb;
 }
@@ -295,10 +299,15 @@ void CWizCategoryViewSectionItem::reset(const QString& sectionName, int sortOrde
     setText(0, sectionName);
 }
 
-QRect CWizCategoryViewSectionItem::getExtraButtonRect(const QRect& itemBorder) const
+QRect CWizCategoryViewSectionItem::getExtraButtonRect(const QRect &itemBorder, bool ignoreIconExist) const
 {
     int nMargin = 4;
-    QSize szBtn = m_extraButtonIcon.size();
+    QSize szBtn(16, 16);
+    if (!m_extraButtonIcon.isNull()) {
+        szBtn = m_extraButtonIcon.size();
+    } else if (!ignoreIconExist){
+        return QRect(0, 0, 0, 0);
+    }
     int nWidth = szBtn.width() + 2 * nMargin;
     int nHeight = szBtn.height() + 2 * nMargin;
 
@@ -313,7 +322,7 @@ void CWizCategoryViewSectionItem::draw(QPainter* p, const QStyleOptionViewItemV4
 {
     QRect rc = vopt->rect;
     rc.setTop(rc.bottom());
-    p->fillRect(rc, Utils::StyleHelper::treeViewItemCategoryBackground());
+    p->fillRect(rc, Utils::StyleHelper::treeViewItemBottomLine());
 
     CWizCategoryViewItemBase::draw(p, vopt);
 }
@@ -423,7 +432,7 @@ void CWizCategoryViewMessageItem::draw(QPainter* p, const QStyleOptionViewItemV4
     if (nWidth < nHeight)
         nWidth = nHeight;
     //
-    QRect rcExtButton = getExtraButtonRect(vopt->rect);
+    QRect rcExtButton = getExtraButtonRect(vopt->rect, true);
     //
     int nTop = vopt->rect.y() + (vopt->rect.height() - nHeight) / 2;
     int nLeft = rcExtButton.right() - nWidth - 2;
@@ -431,12 +440,23 @@ void CWizCategoryViewMessageItem::draw(QPainter* p, const QStyleOptionViewItemV4
 
     p->setRenderHint(QPainter::Antialiasing);
 
-    p->setPen(QColor("#2874c9"));
-    p->setBrush(QColor("#2874c9"));
-    p->drawRoundedRect(rcb, rcb.height() / 2, rcb.height() / 2);
+    if (vopt->state.testFlag(QStyle::State_Selected) && vopt->state.testFlag(QStyle::State_HasFocus))
+    {
+        p->setPen(Utils::StyleHelper::treeViewItemMessageText());
+        p->setBrush(Utils::StyleHelper::treeViewItemMessageText());
+        p->drawRoundedRect(rcb, rcb.height() / 2, rcb.height() / 2);
+        p->setPen(Utils::StyleHelper::treeViewItemMessageBackground());
+        p->drawText(rcb, Qt::AlignCenter, text);
+    }
+    else
+    {
+        p->setPen(Utils::StyleHelper::treeViewItemMessageBackground());
+        p->setBrush(Utils::StyleHelper::treeViewItemMessageBackground());
+        p->drawRoundedRect(rcb, rcb.height() / 2, rcb.height() / 2);
+        p->setPen(Utils::StyleHelper::treeViewItemMessageText());
+        p->drawText(rcb, Qt::AlignCenter, text);
+    }
     //
-    p->setPen(QColor("#ffffff"));
-    p->drawText(rcb, Qt::AlignCenter, text);
 
     p->restore();
     //
@@ -445,7 +465,6 @@ void CWizCategoryViewMessageItem::draw(QPainter* p, const QStyleOptionViewItemV4
     //
     m_szUnreadSize = rcb.size();
 }
-
 
 /* -------------------- CWizCategoryViewShortcutRootItem -------------------- */
 CWizCategoryViewShortcutRootItem::CWizCategoryViewShortcutRootItem(CWizExplorerApp& app,
@@ -970,8 +989,7 @@ bool CWizCategoryViewGroupRootItem::accept(CWizDatabase& db, const WIZDOCUMENTDA
     if (db.IsInDeletedItems(data.strLocation))
         return false;
 
-    QString strTagGUIDs = db.GetDocumentTagGUIDsString(data.strGUID);
-    if (strTagGUIDs.isEmpty() && data.strKbGUID == kbGUID())
+    if (data.strKbGUID == kbGUID())
         return true;
 
     return false;

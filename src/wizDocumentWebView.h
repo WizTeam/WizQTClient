@@ -65,7 +65,7 @@ public:
               const QString& strHtmlFile, int nFlags);
 
     //
-    void stop();
+    void waitAndStop();
 
 private:
     struct SAVEDATA
@@ -80,6 +80,7 @@ private:
 protected:
     virtual void run();
     //
+    void stop();
     void PeekData(SAVEDATA& data);
 Q_SIGNALS:
     void saved(const QString kbGUID, const QString strGUID, bool ok);
@@ -89,7 +90,6 @@ private:
     QWaitCondition m_waitForData;
     bool m_stop;
 };
-
 
 class CWizDocumentWebViewPage: public QWebPage
 {
@@ -131,6 +131,8 @@ public:
     Q_INVOKABLE QString currentNoteHead();
     Q_INVOKABLE bool currentIsEditing();
 
+    //only update Html in JS editor, wouldn't refresh WebView display
+    void updateNoteHtml();
     //const WIZDOCUMENTDATA& document() { return m_data; }
 
     // initialize editor style before render, only invoke once.
@@ -159,6 +161,9 @@ public:
     bool editorCommandExecuteInsertHtml(const QString& strHtml, bool bNotSerialize);
 
     //
+    void saveAsPDF(const QString& fileName);
+
+    //
     Q_INVOKABLE bool isContentsChanged() { return m_bContentsChanged; }
     Q_INVOKABLE void setContentsChanged(bool b) { m_bContentsChanged = b; }
 private:
@@ -168,6 +173,12 @@ private:
 
     bool isInternalUrl(const QUrl& url);
     void viewDocumentByUrl(const QUrl& url);
+
+    void splitHtmlToHeadAndBody(const QString& strHtml, QString& strHead, QString& strBody);
+
+    //
+    void saveEditingViewDocument(const WIZDOCUMENTDATA& data, bool force);
+    void saveReadingViewDocument(const WIZDOCUMENTDATA& data, bool force);
 
 protected:
     virtual void keyPressEvent(QKeyEvent* event);
@@ -286,11 +297,12 @@ public Q_SLOTS:
     bool editorCommandExecuteRemoveFormat();
     bool editorCommandExecuteFormatMatch();
     bool editorCommandExecuteInsertHorizontal();
-    bool editorCommandExecuteInsertTodoList();
+    bool editorCommandExecuteInsertCheckList();
+    bool editorCommandExecuteInsertImage();
     bool editorCommandExecuteViewSource();
 
-    void initTodoListEnvironment();
-    QString getDefaultImageFilePath() const;
+    // js func
+    void initCheckListEnvironment();
 
 Q_SIGNALS:
     // signals for notify command reflect status, triggered when selection, focus, editing mode changed
@@ -303,6 +315,5 @@ Q_SIGNALS:
 
     void requestShowContextMenu(const QPoint& pos);
 };
-
 
 #endif // WIZDOCUMENTWEBVIEW_H

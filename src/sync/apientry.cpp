@@ -380,3 +380,4 @@ QString ApiEntry::kUrlFromGuid(const QString& strToken, const QString& strKbGUID
         d = new ApiEntryPrivate();
     return d->kUrlFromGuid(strToken, strKbGUID);
 }
+

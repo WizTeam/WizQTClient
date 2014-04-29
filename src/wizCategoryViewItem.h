@@ -43,8 +43,8 @@ public:
 
     //Extra Button
     virtual void setExtraButtonIcon(const QString &file){ m_extraButtonIcon = QPixmap(file); }
-    virtual bool getExtraButtonIcon(QPixmap& ret) const;
-    virtual QRect getExtraButtonRect(const QRect& itemBorder) const;
+    virtual bool getExtraButtonIcon(QPixmap &ret) const;
+    virtual QRect getExtraButtonRect(const QRect &itemBorder, bool ignoreIconExist = false) const;
     virtual bool extraButtonClickTest();
 
     //
@@ -70,7 +70,7 @@ public:
     virtual int getSortOrder() const { return m_sortOrder; }
     void reset(const QString& sectionName, int sortOrder);
 
-    virtual QRect getExtraButtonRect(const QRect& itemBorder) const;
+    virtual QRect getExtraButtonRect(const QRect &itemBorder, bool ignoreIconExist = false) const;
     virtual void draw(QPainter* p, const QStyleOptionViewItemV4* vopt) const;
 protected:
     int m_sortOrder;

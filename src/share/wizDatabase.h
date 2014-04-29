@@ -3,6 +3,7 @@
 
 #include <QPointer>
 #include <QMap>
+#include <QMutex>
 
 #include "wizIndex.h"
 #include "wizthumbindex.h"
@@ -97,6 +98,7 @@ private:
 
     bool m_bIsPersonal;
     QMap<QString, CWizDatabase*> m_mapGroups;
+    QMutex m_mtxTempFile;
 
 public:
     CWizDatabase();
@@ -186,6 +188,7 @@ public:
     virtual bool OnDownloadBizs(const CWizBizDataArray& arrayBiz);
     virtual IWizSyncableDatabase* GetGroupDatabase(const WIZGROUPDATA& group);
     virtual void CloseGroupDatabase(IWizSyncableDatabase* pDatabase);
+    virtual IWizSyncableDatabase* GetPersonalDatabase();
 
     virtual bool IsGroup();
     virtual bool IsGroupAdmin();
@@ -236,8 +239,11 @@ public:
     virtual void ClearError();
     virtual void OnTrafficLimit(const QString& strErrorMessage);
     virtual void OnStorageLimit(const QString& strErrorMessage);
+    virtual void OnBizServiceExpr(const QString& strBizGUID, const QString& strErrorMessage);
     virtual bool IsTrafficLimit();
     virtual bool IsStorageLimit();
+    virtual bool IsBizServiceExpr(const QString& strBizGUID);
+    virtual bool GetStorageLimitMessage(QString& strErrorMessage);
 
     virtual bool setMeta(const QString& strSection, const QString& strKey, const QString& strValue);
     virtual QString meta(const QString& strSection, const QString& strKey);
@@ -279,6 +285,7 @@ public:
 
     bool GetUserName(QString& strUserName);
     bool SetUserName(const QString& strUserName);
+    bool GetUserDisplayName(QString& strDisplayName);
 
     QString getUserId() const { return m_strUserId; }
     //QString getPassword() const { return m_strPassword; }
@@ -299,6 +306,7 @@ public:
     bool GetUserBizInfo(bool bAllowEmptyBiz, CWizBizDataArray& arrayBiz);
     bool GetUserBizInfo(bool bAllowEmptyBiz, const CWizGroupDataArray& arrayAllGroup, CWizBizDataArray& arrayBiz);
     bool GetBizData(const QString& bizGUID, WIZBIZDATA& biz);
+    bool GetBizGUID(const QString& strGroupGUID, QString& strBizGUID);
     bool GetGroupData(const QString& groupGUID, WIZGROUPDATA& group);
     //
     static bool IsEmptyBiz(const CWizGroupDataArray& arrayGroup, const QString& bizGUID);
@@ -321,11 +329,11 @@ public:
     bool UpdateAttachments(const CWizDocumentAttachmentDataArray& arrayAttachment);
 
     bool UpdateDocumentData(WIZDOCUMENTDATA& data, const QString& strHtml,
-                            const QString& strURL, int nFlags);
+                            const QString& strURL, int nFlags, bool notifyDataModify = true);
 
     bool UpdateDocumentAbstract(const QString& strDocumentGUID);
 
-    virtual bool UpdateDocumentDataMD5(WIZDOCUMENTDATA& data, const CString& strZipFileName);
+    virtual bool UpdateDocumentDataMD5(WIZDOCUMENTDATA& data, const CString& strZipFileName, bool notifyDataModify = true);
 
     bool DeleteTagWithChildren(const WIZTAGDATA& data, bool bLog);
     bool DeleteAttachment(const WIZDOCUMENTATTACHMENTDATA& data, bool bLog, bool bReset = true);
@@ -385,7 +393,11 @@ public:
 
 
     bool DocumentToTempHtmlFile(const WIZDOCUMENTDATA& document, \
-                                QString& strTempHtmlFileName);
+                                QString& strTempHtmlFileName, \
+                                const QString& strTargetFileNameWithoutPath = "index.html");
+    bool extractZiwFileToTempFolder(const WIZDOCUMENTDATA& document, QString& strTempFolder);
+    bool encryptTempFolderToZiwFile(WIZDOCUMENTDATA& document, const QString& strTempFoler, \
+                                    const QString& strIndexFile, const QStringList& strResourceList);
 
     bool IsFileAccessible(const WIZDOCUMENTDATA& document);
 
@@ -426,6 +438,7 @@ private:
                                 const CWizDatabase& targetDB, WIZDOCUMENTATTACHMENTDATAEX& targetData, \
                                 QString& strFileName);
 
+    bool GetBizMetaName(const QString& strBizGUID, QString& strMetaName);
 };
 
 

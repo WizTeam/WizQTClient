@@ -38,11 +38,20 @@ void CWizKMSyncEvents::SetCurrentDatabase(int index)
 
 void CWizKMSyncEvents::OnTrafficLimit(IWizSyncableDatabase* pDatabase)
 {
+    // FIXME
+    Q_UNUSED(pDatabase);
 }
 
 void CWizKMSyncEvents::OnStorageLimit(IWizSyncableDatabase* pDatabase)
 {
+    // FIXME
+    Q_UNUSED(pDatabase);
+}
 
+void CWizKMSyncEvents::OnBizServiceExpr(IWizSyncableDatabase *pDatabase)
+{
+    // FIXME
+    Q_UNUSED(pDatabase);
 }
 
 void CWizKMSyncEvents::OnUploadDocument(const QString& strDocumentGUID, bool bDone)
@@ -147,6 +156,11 @@ bool CWizKMSyncThread::doSync()
     return false;
 }
 
+bool CWizKMSyncThread::clearCurrentToken()
+{
+    Token::clearToken();
+}
+
 bool CWizKMSyncThread::needSyncAll()
 {
     if (m_bNeedSyncAll)
@@ -203,13 +217,13 @@ bool CWizKMSyncThread::quickSync()
     //
     Q_UNUSED(helper);
     //
-    if (!prepareToken())
-        return false;
-    //
     QString kbGuid;
     while (peekQuickSyncKb(kbGuid))
     {
-        if (kbGuid.isEmpty())
+        if (!prepareToken())
+            return false;
+
+        if (kbGuid.isEmpty() || m_db.kbGUID() == kbGuid)
         {
             CWizKMSync syncPrivate(&m_db, m_info, m_pEvents, FALSE, TRUE, NULL);
             //
@@ -226,8 +240,12 @@ bool CWizKMSyncThread::quickSync()
                 IWizSyncableDatabase* pGroupDatabase = m_db.GetGroupDatabase(group);
                 //
                 WIZUSERINFO userInfo = m_info;
-                userInfo.strDatabaseServer = group.strDatabaseServer;
                 userInfo.strKbGUID = group.strGroupGUID;
+                userInfo.strDatabaseServer = group.strDatabaseServer;
+                if (userInfo.strDatabaseServer.isEmpty())
+                {
+                    userInfo.strDatabaseServer = WizService::ApiEntry::kUrlFromGuid(userInfo.strToken, userInfo.strKbGUID);
+                }
                 //
                 CWizKMSync syncGroup(pGroupDatabase, userInfo, m_pEvents, TRUE, TRUE, NULL);
                 //

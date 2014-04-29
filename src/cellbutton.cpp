@@ -29,8 +29,8 @@ CellButton::CellButton(Position pos, QWidget *parent)
 
     m_pos = pos;
 
-    QString strTheme = ExtensionSystem::PluginManager::globalSettings()->value("theme", "default").toString();
-    m_backgroundIcon = ::WizLoadSkinIcon(strTheme, strName);
+    //QString strTheme = ExtensionSystem::PluginManager::globalSettings()->value("theme", "default").toString();
+    //m_backgroundIcon = ::WizLoadSkinIcon(strTheme, strName);
 }
 
 void CellButton::setNormalIcon(const QIcon& icon, const QString& strTips)
@@ -95,7 +95,13 @@ void CellButton::paintEvent(QPaintEvent *event)
     if (opt.state & QStyle::State_On)
         state = QIcon::On;
 
-    m_backgroundIcon.paint(&p, opt.rect, Qt::AlignCenter, QIcon::Normal, state);
+    if (m_pos == Center || m_pos == Right)
+    {
+        p.setPen(QColor("#F8F8F8"));
+        QRect rcBorder = rect();
+        p.drawLine(rcBorder.topLeft(), rcBorder.bottomLeft());
+    }
+    //m_backgroundIcon.paint(&p, opt.rect, Qt::AlignCenter, QIcon::Normal, state);
 
     if (opt.icon.isNull()) {
         m_iconNomal.paint(&p, opt.rect, Qt::AlignCenter, mode, state);

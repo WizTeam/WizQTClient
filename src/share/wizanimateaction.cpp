@@ -57,6 +57,11 @@ void CWizAnimateAction::nextIcon()
     m_action->setIcon(m_icons.at(index));
 }
 
+bool CWizAnimateAction::isPlaying()
+{
+    return m_timer->isActive();
+}
+
 void CWizAnimateAction::startPlay()
 {
     if (!m_action)

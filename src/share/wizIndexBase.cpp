@@ -3,6 +3,7 @@
 #include <QDebug>
 
 #include "utils/logger.h"
+#include "utils/pathresolve.h"
 
 
 CWizIndexBase::CWizIndexBase(void)
@@ -57,7 +58,7 @@ bool CWizIndexBase::CheckTable(const QString& strTableName)
         return true;
 
     // create table if not exist
-    CString strFileName = WizPathAddBackslash2(WizGetResourcesPath() + "sql") + strTableName.toLower() + ".sql";
+    CString strFileName = WizPathAddBackslash2(Utils::PathResolve::resourcesPath() + "sql") + strTableName.toLower() + ".sql";
     CString strSQL;
     if (!WizLoadUnicodeTextFromFile(strFileName, strSQL))
         return false;

@@ -38,6 +38,8 @@ public:
 private:
     QImage m_expandedImage;
     QImage m_collapsedImage;
+    QImage m_expandedImageSelected;
+    QImage m_collapsedImageSelected;
     QImage m_imgDocumentUnread;
     QImage m_imgDefaultAvatar;
 
@@ -111,6 +113,8 @@ CWizNoteStyle::CWizNoteStyle(const QString& strSkinName)
 
     m_expandedImage.load(strSkinPath + "branch_expanded.png");
     m_collapsedImage.load(strSkinPath + "branch_collapsed.png");
+    m_expandedImageSelected.load(strSkinPath + "branch_expandedSelected.png");
+    m_collapsedImageSelected.load(strSkinPath + "branch_collapsedSelected.png");
     m_imgDocumentUnread.load(strSkinPath + "read_btn_unread.png");
     m_imgDefaultAvatar.load(strSkinPath + "avatar_default.png");
 
@@ -129,12 +133,12 @@ CWizNoteStyle::CWizNoteStyle(const QString& strSkinName)
     CWizSettings settings(strSkinPath + "skin.ini");
 
     // category view
-    m_colorCategoryBackground = settings.GetColor("Category", "Background", "#808080");
-    m_colorCategoryTextNormal = settings.GetColor("Category", "Text", "#000000");
+    m_colorCategoryBackground = QColor("#F2F2EA");//settings.GetColor("Category", "Background", "#F2F2EA");
+    m_colorCategoryTextNormal = QColor("#777775");//settings.GetColor("Category", "Text", "#777775");
     m_colorCategoryTextSelected = settings.GetColor("Category", "TextSelected", "#ffffff");
     m_colorCategoryTextCategoryNormal = settings.GetColor("Category", "ItemCategoryText", "#ffffff");
-    m_colorCategorySelectedBackground = settings.GetColor("Category", "ItemSelected", "#808080");
-    m_colorCategorySelctedBackgroundNoFocus = settings.GetColor("Category", "ItemSelectedNoFocus", "#808080");
+    m_colorCategorySelectedBackground = QColor(Qt::blue);//settings.GetColor("Category", "ItemSelected", "#FFFFFF");
+    m_colorCategorySelctedBackgroundNoFocus = QColor(Qt::blue);//settings.GetColor("Category", "ItemSelectedNoFocus", "#FFFFFF");
 
     // document list view
     m_colorDocumentsBackground = settings.GetColor("Documents", "Background", "#ffffff");
@@ -172,6 +176,18 @@ CWizNoteStyle::CWizNoteStyle(const QString& strSkinName)
 void CWizNoteStyle::drawCategoryViewItem(const QStyleOptionViewItemV4 *vopt,
                                          QPainter *p, const CWizCategoryBaseView *view) const
 {
+    if (view->isDragHovered() && view->validateDropDestination(view->dragHoveredPos())) {
+        QRect rect = view->visualItemRect(view->itemAt(view->dragHoveredPos()));
+        QPen pen;
+        pen.setStyle(Qt::SolidLine);
+        pen.setCapStyle(Qt::RoundCap);
+        pen.setColor(QColor("#3498DB"));
+        pen.setWidth(1);
+        p->setPen(pen);
+        rect.setWidth(rect.width() - 2);
+        p->drawRect(rect);
+    }
+
     CWizCategoryViewItemBase* pItem = view->categoryItemFromIndex(vopt->index);
 
     if (view->isHelperItemByIndex(vopt->index)) {
@@ -194,10 +210,11 @@ void CWizNoteStyle::drawCategoryViewItem(const QStyleOptionViewItemV4 *vopt,
     p->save();
 
     bool bSelected = vopt->state.testFlag(State_Selected);
-
+    int nLeftMargin = 4;
     if (!vopt->icon.isNull()) {
         QRect iconRect = subElementRect(SE_ItemViewItemDecoration, vopt, view);
-        Utils::StyleHelper::drawTreeViewItemIcon(p, iconRect, vopt->icon, bSelected);
+        iconRect.adjust(nLeftMargin, 0, nLeftMargin, 0);
+        Utils::StyleHelper::drawTreeViewItemIcon(p, iconRect, vopt->icon, bSelected && (vopt->state & State_HasFocus));
     }
 
     QFont f;
@@ -207,11 +224,12 @@ void CWizNoteStyle::drawCategoryViewItem(const QStyleOptionViewItemV4 *vopt,
     Utils::StyleHelper::fontExtend(fontCount);
 
     QRect rcText = subElementRect(SE_ItemViewItemText, vopt, view);
+    rcText.adjust(nLeftMargin * 2, 0, nLeftMargin * 2, 0);
     QString strCount = pItem->countString();
 
     QString strText = vopt->text;
     if (!strText.isEmpty()) {
-        QColor colorText = Utils::StyleHelper::treeViewItemText(bSelected);
+        QColor colorText = Utils::StyleHelper::treeViewItemText(bSelected && (vopt->state & State_HasFocus));
 
         p->setPen(colorText);
         int right = Utils::StyleHelper::drawSingleLineText(p, rcText, strText, Qt::AlignVCenter, colorText, f);
@@ -222,7 +240,7 @@ void CWizNoteStyle::drawCategoryViewItem(const QStyleOptionViewItemV4 *vopt,
     if (!strCount.isEmpty()) {
         QRect rcCount = rcText;
         rcCount.setTop(rcCount.top() + 1);  //add extra 1 pixel for vcenter / 2
-        QColor colorCount = Utils::StyleHelper::treeViewItemTextExtend(bSelected);
+        QColor colorCount = Utils::StyleHelper::treeViewItemTextExtend(bSelected && (vopt->state & State_HasFocus));
         Utils::StyleHelper::drawSingleLineText(p, rcCount, strCount, Qt::AlignVCenter, colorCount, fontCount);
     }
 
@@ -392,18 +410,6 @@ void CWizNoteStyle::drawControl(ControlElement element, const QStyleOption *opti
             }
             else if (const CWizCategoryBaseView *view = dynamic_cast<const CWizCategoryBaseView *>(widget))
             {
-                if (view->isDragHovered() && view->validateDropDestination(view->dragHoveredPos())) {
-                    QRect rect = view->visualItemRect(view->itemAt(view->dragHoveredPos()));
-                    QPen pen;
-                    pen.setStyle(Qt::SolidLine);
-                    pen.setCapStyle(Qt::RoundCap);
-                    pen.setColor(Qt::blue);
-                    pen.setWidth(2);
-                    painter->setPen(pen);
-                    rect.setWidth(rect.width() - 2);
-                    painter->drawRect(rect);
-                }
-
                 drawCategoryViewItem(vopt, painter, view);
             }
             else
@@ -458,7 +464,11 @@ void CWizNoteStyle::drawPrimitive(PrimitiveElement pe, const QStyleOption *opt, 
 
                 if (opt->state & QStyle::State_Children) {
                     bool bExpanded = (opt->state & QStyle::State_Open) ? true : false;
-                    drawcenterImage(p, bExpanded ? m_expandedImage : m_collapsedImage, opt->rect.adjusted(8, 0, 0, 0));
+                    if ((opt->state & QStyle::State_Selected) && (opt->state & State_HasFocus)) {
+                        drawcenterImage(p, bExpanded ? m_expandedImageSelected : m_collapsedImageSelected, opt->rect.adjusted(8, 0, 0, 0));
+                    } else {
+                        drawcenterImage(p, bExpanded ? m_expandedImage : m_collapsedImage, opt->rect.adjusted(8, 0, 0, 0));
+                    }
                 }
                 return;
             }
@@ -474,11 +484,7 @@ void CWizNoteStyle::drawPrimitive(PrimitiveElement pe, const QStyleOption *opt, 
                 const QTreeWidgetItem* pItemBase = view->itemAt(vopt->rect.center());
                 const CWizCategoryViewSectionItem *secItem = dynamic_cast<const CWizCategoryViewSectionItem *>(pItemBase);
                 if (NULL != secItem) {
-
                     secItem->draw(p,vopt);
-                    //p->fillRect(vopt->rect, Utils::StyleHelper::treeViewBackground());
-                    //p->fillRect(vopt->rect, QColor(255, 255, 255, 15)); //FIXME
-                    //drawCategoryViewItemCategoryItem(pItem, vopt, p);
                     return;
                 }
 

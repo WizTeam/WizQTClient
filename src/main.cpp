@@ -92,7 +92,7 @@ GenericName[en_US.UTF-8]=WizNote\n\
 
 void installOnLinux()
 {
-    QString appPath = WizGetAppPath();
+    QString appPath = Utils::PathResolve::appPath();
     QString strText = WizFormatString3(g_lpszDesktopFileName,
                                        appPath,
                                        QObject::tr("WizNote"),
@@ -134,7 +134,7 @@ void installOnLinux()
     chmod(desktopFileName.toUtf8(), ACCESSPERMS);
 }
 
-int main(int argc, char *argv[])
+int mainCore(int argc, char *argv[])
 {
     //
 #if QT_VERSION < 0x050000
@@ -146,6 +146,8 @@ int main(int argc, char *argv[])
     QApplication a(argc, argv);
 
     QApplication::setApplicationName(QObject::tr("WizNote"));
+    QApplication::setOrganizationName(QObject::tr("cn.wiz.wiznoteformac"));
+
     QIcon icon;
     icon.addPixmap(QPixmap(":/logo_16.png"));
     icon.addPixmap(QPixmap(":/logo_32.png"));
@@ -164,7 +166,7 @@ int main(int argc, char *argv[])
 
     // setup settings
     QSettings::setDefaultFormat(QSettings::IniFormat);
-    QSettings* globalSettings = new QSettings(Utils::PathResolve::globalSettingsFilePath(), QSettings::IniFormat);
+    QSettings* globalSettings = new QSettings(Utils::PathResolve::globalSettingsFile(), QSettings::IniFormat);
 
 //#ifdef Q_OS_WIN
 //    QString strDefaultFontName = settings.GetString("Common", "DefaultFont", "");
@@ -194,12 +196,12 @@ int main(int argc, char *argv[])
     QLocale::setDefault(strLocale);
 
     QTranslator translatorWizNote;
-    QString strLocaleFile = WizGetLocaleFileName(strLocale);
+    QString strLocaleFile = Utils::PathResolve::localeFileName(strLocale);
     translatorWizNote.load(strLocaleFile);
     a.installTranslator(&translatorWizNote);
 
     QTranslator translatorQt;
-    strLocaleFile = WizGetQtLocaleFileName(strLocale);
+    strLocaleFile = Utils::PathResolve::qtLocaleFileName(strLocale);
     translatorQt.load(strLocaleFile);
     a.installTranslator(&translatorQt);
 
@@ -245,7 +247,7 @@ int main(int argc, char *argv[])
         strPassword = loginDialog.password();
     }
 
-    QSettings* settings = new QSettings(Utils::PathResolve::userSettingsFilePath(strUserId), QSettings::IniFormat);
+    QSettings* settings = new QSettings(Utils::PathResolve::userSettingsFile(strUserId), QSettings::IniFormat);
     PluginManager::setSettings(settings);
     //
     //
@@ -254,12 +256,12 @@ int main(int argc, char *argv[])
     strLocale = userSettings.locale();
 
     a.removeTranslator(&translatorWizNote);
-    strLocaleFile = WizGetLocaleFileName(strLocale);
+    strLocaleFile = Utils::PathResolve::localeFileName(strLocale);
     translatorWizNote.load(strLocaleFile);
     a.installTranslator(&translatorWizNote);
 
     a.removeTranslator(&translatorQt);
-    strLocaleFile = WizGetQtLocaleFileName(strLocale);
+    strLocaleFile = Utils::PathResolve::qtLocaleFileName(strLocale);
     translatorQt.load(strLocaleFile);
     a.installTranslator(&translatorQt);
 
@@ -291,14 +293,20 @@ int main(int argc, char *argv[])
     w.init();
 
     int ret = a.exec();
+    if (w.isLogout()) {
+        QProcess::startDetached(argv[0], QStringList());
+    }
+
+    return ret;
+}
+
+int main(int argc, char *argv[])
+{
+    int ret = mainCore(argc, argv);
 
     // clean up
     QString strTempPath = Utils::PathResolve::tempPath();
     ::WizDeleteAllFilesInFolder(strTempPath);
-
-    if (w.isLogout()) {
-        QProcess::startDetached(argv[0], QStringList());
-    }
 
     return ret;
 }

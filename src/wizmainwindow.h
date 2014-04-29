@@ -176,6 +176,8 @@ public:
     void adjustToolBarSpacerToPos(int index, int pos);
 #endif
 
+    void checkWizUpdate();
+
 public Q_SLOTS:
     void on_actionExit_triggered();
     void on_actionConsole_triggered();
@@ -189,6 +191,7 @@ public Q_SLOTS:
     void on_actionFeedback_triggered();
     void on_actionSearch_triggered();
     void on_actionResetSearch_triggered();
+    void on_actionSaveAsPDF_triggered();
 
     // menu editing
     void on_actionEditingUndo_triggered();
@@ -226,6 +229,7 @@ public Q_SLOTS:
     void on_actionFormatInsertTime_triggered();
     void on_actionFormatRemoveFormat_triggered();
     void on_actionEditorViewSource_triggered();
+    void on_actionFormatInsertCheckList_triggered();
 
     void on_search_timeout();
     void on_searchProcess(const QString &strKeywords, const CWizDocumentDataArray& arrayDocument, bool bEnd);
@@ -256,6 +260,17 @@ public Q_SLOTS:
     void on_options_restartForSettings();
 
     void on_editor_statusChanged();
+
+    //js environment func
+    QString getSkinResourcePath() const;
+    QString getUserAvatarFilePath(int size) const;
+    QString getUserAlias() const;
+    QString getFormatedDateTime() const;
+    bool isPersonalDocument() const;
+    QString getCurrentNoteHtml() const;
+    void saveHtmlToCurrentNote(const QString& strHtml, const QString& strResource);
+    bool hasEditPermissionOnCurrentNote() const;
+    void setCurrentDocumentType(const QString& strType);
 
 #ifndef Q_OS_MAC
     void on_actionPopupMainMenu_triggered();
@@ -294,6 +309,9 @@ public:
     Q_INVOKABLE QObject* CreateWizObject(const QString& strObjectID);
     Q_INVOKABLE void SetSavingDocument(bool saving);
     Q_INVOKABLE void ProcessClipboardBeforePaste(const QVariantMap& data);
+
+private:
+    void syncAllData();
 };
 
 } // namespace Internal

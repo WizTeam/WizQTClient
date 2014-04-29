@@ -11,27 +11,31 @@
 	<key>CFBundleIconFile</key>
 	<string>wiznote.icns</string>
 	<key>CFBundleIdentifier</key>
-	<string></string>
+	<string>cn.wiz.wiznoteformac</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
-	<key>CFBundleLongVersionString</key>
-	<string></string>
+	<key>CFBundleShortVersionString</key>
+	<string>2.1.5</string>
+	<key>LSApplicationCategoryType</key>
+	<string>public.app-category.productivity</string>
 	<key>CFBundleName</key>
+	<string>WizNote</string>
+	<key>CFBundleDisplayName</key>
 	<string>WizNote</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
-	<key>CFBundleShortVersionString</key>
-	<string></string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
 	<key>CFBundleVersion</key>
-	<string></string>
+	<string>2.1.5</string>
 	<key>CSResourcesFileMapped</key>
 	<true/>
 	<key>LSRequiresCarbon</key>
 	<true/>
 	<key>NSHumanReadableCopyright</key>
-	<string></string>
+	<string>&amp;copy;2011-2014 Wiz Corporation.</string>
+	<key>ForAppStore</key>
+	<true/>
 	<key>NSHighResolutionCapable</key>
 	<true/>
 </dict>

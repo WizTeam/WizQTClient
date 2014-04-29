@@ -58,7 +58,7 @@ public:
         , m_helper(this, action, NULL)
     {
         m_nsImages = [[NSMutableDictionary alloc] init];
-        connect(action, SIGNAL(changed()), SLOT(on_action_changed()));
+        //connect(action, SIGNAL(changed()), SLOT(on_action_changed()));
     }
     virtual ~CWizMacToolBarActionItem()
     {
@@ -110,8 +110,8 @@ public:
         [item setAction : @selector(itemClicked:)];
         [item setEnabled: (m_action->isEnabled() ? YES : NO)];
         //
-        [item setMinSize:NSMakeSize(24, 24)];
-        [item setMaxSize:NSMakeSize(24, 24)];
+        [item setMinSize:NSMakeSize(16, 16)];
+        [item setMaxSize:NSMakeSize(64, 64)];
 
         m_item = item;
         return item;
@@ -302,7 +302,7 @@ public:
         NSView* nsview = (NSView *)m_searchField->cocoaView();
 #endif
         [toolbarItem setView: nsview];
-        [toolbarItem setMinSize:NSMakeSize(30, NSHeight([nsview frame]))];
+        [toolbarItem setMinSize:NSMakeSize(24, NSHeight([nsview frame]))];
         [toolbarItem setMaxSize:NSMakeSize(250,NSHeight([nsview frame]))];
 
         return toolbarItem;

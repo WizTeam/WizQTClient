@@ -53,11 +53,17 @@ public:
         QPixmap pmAvatar;
         WizService::AvatarHost::avatar(m_data.senderId, &pmAvatar);
         QRect rectAvatar = Utils::StyleHelper::drawAvatar(p, rcd, pmAvatar);
-        rcd.setLeft(rectAvatar.right());
+        int nAvatarRightMargin = 4;
+        rcd.setLeft(rectAvatar.right() + nAvatarRightMargin);
 
         QFont f;
         int nHeight = Utils::StyleHelper::fontNormal(f);
 
+        p->save();
+        if (vopt->state.testFlag(QStyle::State_Selected) && vopt->state.testFlag(QStyle::State_HasFocus))
+        {
+            p->setPen("#FFFFFF");
+        }
         QString strSender = m_data.senderAlias.isEmpty() ? m_data.senderId : m_data.senderAlias;
         QRect rectSender = Utils::StyleHelper::drawText(p, rcd, strSender, 1, Qt::AlignVCenter, p->pen().color(), f);
         rcd.setTop(rectSender.bottom());
@@ -68,10 +74,20 @@ public:
         QRect rcTime = Utils::StyleHelper::drawText(p, rcBottom, strTime, 1, Qt::AlignRight | Qt::AlignVCenter, p->pen().color(), f);
 
         QSize sz(rcd.width() - nMargin * 2, rcd.height() - rcTime.height() - nMargin);
-        if (!vopt->state.testFlag(QStyle::State_Selected)) {
-            QPolygon po = Utils::StyleHelper::bubbleFromSize(sz, 4);
-            po.translate(rcd.left() + nMargin, rcd.top());
+        QPolygon po = Utils::StyleHelper::bubbleFromSize(sz, 4);
+        po.translate(rcd.left() + nMargin, rcd.top());
 
+        if (vopt->state.testFlag(QStyle::State_Selected)) {
+            p->save();
+            p->setBrush(Qt::NoBrush);
+            if (vopt->state.testFlag(QStyle::State_HasFocus)) {
+                p->setPen("#2a7aaf");
+            } else {
+                p->setPen("#a9b6bd");
+            }
+            p->drawPolygon(po);
+            p->restore();
+        } else {
             p->save();
             if (!m_data.nReadStatus) {
 #ifdef Q_OS_MAC
@@ -88,7 +104,7 @@ public:
         QRect rcMsg(rcd.x() + nMargin, rcd.y() + 4 + nMargin, sz.width(), sz.height());
         QString strMsg = m_data.title.isEmpty() ? " " : m_data.title;
         rcMsg = Utils::StyleHelper::drawText(p, rcMsg, strMsg, 2, Qt::AlignVCenter, p->pen().color(), f);
-
+        p->restore();
     }
 
 private:

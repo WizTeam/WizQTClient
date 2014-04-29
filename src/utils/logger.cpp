@@ -79,7 +79,7 @@ void Logger::messageHandler(QtMsgType type, const QMessageLogContext& context, c
 
 QString Logger::logFileName()
 {
-    QString strFileName = PathResolve::logPath() + "wiznote.log";
+    QString strFileName = PathResolve::logFile();
 
     if (::WizGetFileSize(strFileName) > 10 * 1024 * 1024)
     {

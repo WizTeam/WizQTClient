@@ -10226,6 +10226,9 @@ UE.plugins['list'] = function () {
         }
         var keyCode = evt.keyCode || evt.which;
         if (keyCode == 13 && !evt.shiftKey) {//回车
+            if (editor.body.contentEditable == 'false')
+                return null;
+
             var rng = me.selection.getRange(),
                 parent = domUtils.findParent(rng.startContainer,function(node){return domUtils.isBlockElm(node)},true),
                 li = domUtils.findParentByTagName(rng.startContainer,'li',true);

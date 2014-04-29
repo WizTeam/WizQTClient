@@ -5,12 +5,13 @@
 #endif
 
 #include "share/wizmisc.h"
+#include "utils/pathresolve.h"
 #include <QLabel>
 
 QBrush WizGetLeftViewBrush()
 {
     QPixmap pixmapBg;
-    pixmapBg.load(::WizGetResourcesPath() + "skins/leftview_bg.png");
+    pixmapBg.load(Utils::PathResolve::resourcesPath() + "skins/leftview_bg.png");
     return QBrush(pixmapBg);
 }
 
