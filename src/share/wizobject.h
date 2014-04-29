@@ -833,48 +833,6 @@ typedef std::deque<WIZDOCUMENTLOCATIONDATA> CDocumentLocationArray;
 
 
 
-enum WIZTODOSTATE
-{
-    todoState0,
-    todoState25,
-    todoState50,
-    todoState75,
-    todoState100,
-    todoStateMixed
-};
-
-enum WIZTODOPRIOR
-{
-    todoPriorNotUrgentAndNotImportant = -1,
-    todoPriorNormal = 0,
-    todoPriorImportant = 1,
-    todoPriorUrgent = 2,
-    todoPriorUrgentAndImportant = 3
-};
-
-struct WIZTODODATA
-{
-    CString strText;
-    WIZTODOSTATE eState;
-    WIZTODOPRIOR ePrior;
-    CWizStdStringArray arrayLinkedDocumentGUID;
-    BOOL bBlank;
-    //
-    COleDateTime tCreated;
-    COleDateTime tModified;
-    COleDateTime tCompleted;
-    //
-    __int64 nOrder;
-    //
-    WIZTODODATA();
-    WIZTODODATA(const CString& str, WIZTODOSTATE state, WIZTODOPRIOR prior);
-    //
-    void InitTime();
-    void AddLink(const CString& strDocumentGUID);
-    CString GetLinkedDocumentGUIDString() const;
-    void SetLinkedDocumentGUIDString(const CString& str);
-};
-
 typedef std::deque<WIZOBJECTDATA> CWizObjectDataArray;
 typedef std::deque<WIZDOCUMENTDATAEX> CWizDocumentDataArray;
 typedef std::deque<WIZMETADATA> CWizMetaDataArray;
@@ -882,30 +840,6 @@ typedef std::deque<WIZGROUPDATA> CWizGroupDataArray;
 typedef std::deque<WIZABSTRACT> CWizAbstractArray;
 typedef std::deque<WIZBIZDATA> CWizBizDataArray;
 
-
-
-struct WIZTODODATAEX : public WIZTODODATA
-{
-    typedef std::deque<WIZTODODATAEX> CWizTodoDataExArray;
-    //
-    CWizTodoDataExArray arrayChild;
-    //
-    WIZTODODATAEX();
-    WIZTODODATAEX(const WIZTODODATA& data);
-    //
-public:
-    int AddChild(const WIZTODODATAEX& data);
-    //
-    static BOOL WizTodoDataArrayFindLinkedDocument(const CWizTodoDataExArray& arrayData, const CString& strDocumentGUID);
-    static int WizTodoDataArrayFindText(const CWizTodoDataExArray& arrayData, const CString& strText);
-    static BOOL WizTodoDataItemCopyAndCombine(WIZTODODATAEX& itemDest, const WIZTODODATAEX& itemOther);
-    static BOOL WizTodoDataArrayCombine(WIZTODODATAEX::CWizTodoDataExArray& arrayDest, const WIZTODODATAEX::CWizTodoDataExArray& arrayOther);
-    static BOOL WizTodoDataArrayRemoveMultiItem(WIZTODODATAEX::CWizTodoDataExArray& arrayData);
-    void AddCompletedDate(const CString& strTextExt);
-};
-
-
-COLORREF WizTodoGetTextColor(const WIZTODODATA& data);
 
 template <class TData>
 __int64 WizObjectsGetMaxVersion(const std::deque<TData>& arrayData)
@@ -923,24 +857,6 @@ __int64 WizObjectsGetMaxVersion(const std::deque<TData>& arrayData)
     //
     return nVersion;
 }
-
-
-
-const COLORREF WIZ_TODO_TEXT_COLOR_DEFAULT = RGB(0, 0, 0);
-const COLORREF WIZ_TODO_TEXT_COLOR_DEFAULT_COMPLETED = RGB(0x66, 0x66, 0x66);
-
-const COLORREF WIZ_TODO_TEXT_COLOR_URGENT_COMPLATED = RGB(0xFF, 0x64, 0x64);
-const COLORREF WIZ_TODO_TEXT_COLOR_URGENTANDIMPORTANT_COMPLETED = RGB(0xFF, 0x64, 0x64);
-
-const COLORREF WIZ_TODO_TEXT_COLOR_URGENT = RGB(255, 0, 0);
-const COLORREF WIZ_TODO_TEXT_COLOR_URGENTANDIMPORTANTR = RGB(255, 0, 0);
-
-const COLORREF WIZ_TODO_TEXT_COLOR_NOTURGENTANDNOTIMPORTANT = RGB(128, 128, 128);
-
-
-#define WIZTODODATE_DOCUMENT_PARAM_NAME										_T("todolist_date")
-#define WIZTODODATE_DOCUMENT_PARAM_NAME_COLLECTED_UNCOMPLETED_TASKS			_T("todolist_date_cut")
-#define WIZTODODATE_DOCUMENT_PARAM_NAME_REMOVED_UNCOMPLETED_TASKS			_T("todolist_date_rut")
 
 
 #define WIZDOCUMENT_SHARE_NONE			0

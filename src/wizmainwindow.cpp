@@ -77,7 +77,6 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     , m_searchIndexer(new CWizSearchIndexer(m_dbMgr))
     , m_upgrade(new CWizUpgrade())
     //, m_certManager(new CWizCertManager(*this))
-    , m_cipherForm(new CWizUserCipherForm(*this, this))
     , m_objectDownloaderHost(new CWizObjectDataDownloaderHost(dbMgr, this))
     //, m_avatarDownloaderHost(new CWizUserAvatarDownloaderHost(dbMgr.db().GetAvatarPath(), this))
     , m_transitionView(new CWizDocumentTransitionView(this))
@@ -244,7 +243,6 @@ void MainWindow::showEvent(QShowEvent* event)
 {
     Q_UNUSED(event);
 
-    m_cipherForm->hide();
     //
 #ifdef Q_OS_MAC
     m_toolBar->showInWindow(this);
@@ -1406,11 +1404,6 @@ void MainWindow::on_documents_itemSelectionChanged()
     m_documents->getSelectedDocuments(arrayDocument);
 
     if (arrayDocument.size() == 1) {
-        // hide other form
-        if (0 == arrayDocument[0].nProtected) {
-            m_cipherForm->hide();
-        }
-
         if (!m_bUpdatingSelection) {
             viewDocument(arrayDocument[0], true);
         }
@@ -1419,8 +1412,6 @@ void MainWindow::on_documents_itemSelectionChanged()
 
 void MainWindow::on_message_itemSelectionChanged()
 {
-    m_cipherForm->hide();
-
     QList<WIZMESSAGEDATA> listMsg;
     m_msgList->selectedMessages(listMsg);
 
@@ -1428,10 +1419,9 @@ void MainWindow::on_message_itemSelectionChanged()
         WIZMESSAGEDATA msg(listMsg[0]);
         WIZDOCUMENTDATA doc;
         if (!m_dbMgr.db(msg.kbGUID).DocumentFromGUID(msg.documentGUID, doc)) {
-            qDebug() << "can't find note from message info: " << msg.title;
+            m_doc->promptMessage(tr("Can't find note %1 , may be it has been deleted.").arg(msg.title));
             return;
         }
-
         viewDocument(doc, true);
     }
 }
@@ -1521,7 +1511,10 @@ void MainWindow::viewDocument(const WIZDOCUMENTDATA& data, bool addToHistory)
     CWizDocument* doc = new CWizDocument(m_dbMgr.db(data.strKbGUID), data);
 
     if (doc->GUID() == m_doc->note().strGUID)
+    {
+        m_doc->reviewCurrentNote();
         return;
+    }
 
     //bool forceEdit = false;
     //if (doc->GUID() == m_documentForEditing.strGUID) {

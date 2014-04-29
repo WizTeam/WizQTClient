@@ -325,12 +325,12 @@
 <context>
     <name>CWizDocumentTransitionView</name>
     <message>
-        <location filename="../src/wizDocumentTransitionView.cpp" line="24"/>
+        <location filename="../src/wizDocumentTransitionView.cpp" line="22"/>
         <source>Downloading note from cloud server...</source>
         <translation>正在從雲伺服器下載筆記，稍等片刻...</translation>
     </message>
     <message>
-        <location filename="../src/wizDocumentTransitionView.cpp" line="26"/>
+        <location filename="../src/wizDocumentTransitionView.cpp" line="24"/>
         <source>Error occured while loading note.</source>
         <translation>筆記加載失敗啦.</translation>
     </message>
@@ -1026,53 +1026,58 @@
 <context>
     <name>Core::Internal::MainWindow</name>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="132"/>
+        <location filename="../src/wizmainwindow.cpp" line="131"/>
         <source>WizNote</source>
         <translation>爲知筆記</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="643"/>
+        <location filename="../src/wizmainwindow.cpp" line="641"/>
         <source>Search</source>
         <translation>搜尋</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="789"/>
+        <location filename="../src/wizmainwindow.cpp" line="787"/>
         <source>1 note</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="795"/>
-        <location filename="../src/wizmainwindow.cpp" line="799"/>
+        <location filename="../src/wizmainwindow.cpp" line="793"/>
+        <location filename="../src/wizmainwindow.cpp" line="797"/>
         <source>%1 notes</source>
         <translation>%1 條筆記</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="876"/>
+        <location filename="../src/wizmainwindow.cpp" line="874"/>
         <source>Info</source>
         <translation>提示</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="876"/>
+        <location filename="../src/wizmainwindow.cpp" line="874"/>
         <source>Connection is not available, please check your network connection.</source>
         <translation>網絡連接不可用,請檢查網絡連接.</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="916"/>
+        <location filename="../src/wizmainwindow.cpp" line="914"/>
         <source>sorry, sync failed. please input your password and try again.</source>
         <translation>抱歉，同步失敗了。請輸入您的密碼再試一次。</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="1198"/>
+        <location filename="../src/wizmainwindow.cpp" line="1196"/>
         <source>PDF Files (*.pdf)</source>
         <translation>PDF 檔案 (*.pdf)</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="1168"/>
+        <location filename="../src/wizmainwindow.cpp" line="1428"/>
+        <source>Can&apos;t find note %1 , may be it has been deleted.</source>
+        <translation type="unfinished">找不到筆記 %1 , 該篇筆記可能已被刪除。</translation>
+    </message>
+    <message>
+        <location filename="../src/wizmainwindow.cpp" line="1166"/>
         <source>Rebuild full text search index</source>
         <translation>重建搜尋索引</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="1171"/>
+        <location filename="../src/wizmainwindow.cpp" line="1169"/>
         <source>Rebuild full text search is quit slow if you have quite a few notes or attachments, you do not have to use this function while search should work as expected.</source>
         <translation>重建全文搜索索引會非常慢。只有在您的搜索出現異常的時候才需要使用這個功能。</translation>
     </message>
