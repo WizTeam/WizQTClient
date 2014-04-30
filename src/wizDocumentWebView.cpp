@@ -831,6 +831,8 @@ void CWizDocumentWebView::viewDocumentInEditor(bool editing)
 
     //strHtml = escapeJavascriptString(strHtml);
 
+    m_strCurrentNoteHead.clear();
+    m_strCurrentNoteHtml.clear();
     splitHtmlToHeadAndBody(strHtml, m_strCurrentNoteHead, m_strCurrentNoteHtml);
 
     m_strCurrentNoteHead += "<link rel=\"stylesheet\" type=\"text/css\" href=\"" + m_strDefaultCssFilePath + "\">";
