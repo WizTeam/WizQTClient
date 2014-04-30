@@ -948,6 +948,8 @@ void MainWindow::on_actionNewNote_triggered()
 
     m_documentForEditing = data;
     m_documents->addAndSelectDocument(data);
+    m_doc->web()->setFocus(Qt::MouseFocusReason);
+    m_doc->web()->editorFocus();
 }
 
 void MainWindow::on_actionEditingUndo_triggered()
