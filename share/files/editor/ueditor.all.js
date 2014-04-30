@@ -14332,6 +14332,9 @@ UE.plugins['list'] = function () {
         }
         var keyCode = evt.keyCode || evt.which;
         if (keyCode == 13 && !evt.shiftKey) {//回车
+            if (editor.body.contentEditable == 'false')
+                return null;
+            
             var rng = me.selection.getRange(),
                 parent = domUtils.findParent(rng.startContainer,function(node){return domUtils.isBlockElm(node)},true),
                 li = domUtils.findParentByTagName(rng.startContainer,'li',true);
@@ -16010,7 +16013,7 @@ UE.plugins['fiximgclick'] = (function () {
                 var range = me.selection.getRange(),
                     img = range.getClosedNode();
 
-                if (img && img.tagName == 'IMG' && me.body.contentEditable!="false") {
+                if (img && img.tagName == 'IMG' && img.className.indexOf("WizNormalImg")!=-1 && me.body.contentEditable!="false") {
                     if (!imageScale) {
                         imageScale = new Scale();
                         imageScale.init(me);

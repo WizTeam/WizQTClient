@@ -358,7 +358,7 @@ bool CWizDocumentWebView::image2Html(const QString& strImageFile, QString& strHt
         return false;
     }
 
-    strHtml = QString("<img border=\"0\" src=\"file://%1\" />").arg(strDestFile);
+    strHtml = QString("<img class=\"WizNormalImg\" border=\"0\" src=\"file://%1\" />").arg(strDestFile);
     return true;
 }
 
@@ -1187,9 +1187,11 @@ bool CWizDocumentWebView::editorCommandExecuteInsertImage()
     if (strImgFile.isEmpty())
         return false;
 
-    QPixmap pix(strImgFile);
-    return editorCommandExecuteCommand("insertImage", QString("{src:'%1', width:%2, height:%3}")
-                                       .arg(strImgFile).arg(pix.width()).arg(pix.height()));
+//    QPixmap pix(strImgFile);
+//    return editorCommandExecuteCommand("insertImage", QString("{src:'%1', class:\"WizNormalImg\", width:%2, height:%3}")
+//                                       .arg(strImgFile).arg(pix.width()).arg(pix.height()));
+    QString strHtml = QString("<img class=\"WizNormalImg\" border=\"0\" src=\"%1\">").arg(strImgFile);
+    return editorCommandExecuteInsertHtml(strHtml, true);
 }
 
 bool CWizDocumentWebView::editorCommandExecuteInsertDate()
