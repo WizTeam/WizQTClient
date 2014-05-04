@@ -337,6 +337,12 @@ if(UNIX)
             add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
                 COMMAND ${qt_binary_dir}/macdeployqt ${WIZNOTE_ROOT_DIR}
             )
+        elseif(APPSTORE_BUILD)
+            # resovle library dependency if build type is APPSTORE_BUILD even under debug model
+            add_dependencies(wiznote coreplugin_plugin helloworld_plugin)
+            add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+                COMMAND ${qt_binary_dir}/macdeployqt ${WIZNOTE_ROOT_DIR}
+            )
         endif()
 
     elseif(NOT APPLE)
@@ -396,7 +402,6 @@ target_link_libraries(${PROJECT_NAME}
 if(APPLE)
     if(APPSTORE_BUILD)
         set(APPCERT "3rd Party Mac Developer Application: Wei Shijun")
-        set(INSTALLERCERT "3rd Party Mac Developer Installer: Wei Shijun")
         set(MACOSX_BUNDLE_ENTITLEPLIST ${CMAKE_SOURCE_DIR}/build/osx/WizNote-Entitlements.plist)
         #add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
          #   COMMAND dsymutil ${WIZNOTE_ROOT_DIR}/Contents/MacOS/wiznote -o wiznote.app.dSYM)
@@ -460,11 +465,6 @@ if(APPLE)
 
         add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
            COMMAND codesign -f -s ${APPCERT} -v --entitlements ${MACOSX_BUNDLE_ENTITLEPLIST}  ${WIZNOTE_ROOT_DIR})
-
-        add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-            COMMAND cd ${CMAKE_BINARY_DIR})
-        add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-           COMMAND productbuild --component ${WIZNOTE_ROOT_DIR} /Applications --sign ${INSTALLERCERT} ${PROJECT_NAME}.pkg)
 
     endif(APPSTORE_BUILD)
 endif(APPLE)
