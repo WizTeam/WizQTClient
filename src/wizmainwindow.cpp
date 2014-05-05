@@ -946,13 +946,13 @@ void MainWindow::on_actionNewNote_triggered()
         return;
     }
 
-    //set editor disable to move focus out, otherwise editor couldn't be focued.
-    m_doc->web()->setEditorDisable();
+    //FIXME:这个地方存在Bug,只能在Editor为disable的情况下才能设置焦点.
+    m_doc->web()->setEditorEnable(false);
 
     m_documentForEditing = data;
     m_documents->addAndSelectDocument(data);
     m_doc->web()->setFocus(Qt::MouseFocusReason);
-
+    setActionsEnableForNewNote();
 }
 
 void MainWindow::on_actionEditingUndo_triggered()
@@ -1690,6 +1690,30 @@ void MainWindow::syncAllData()
 {
     m_sync->startSyncAll(false);
     m_animateSync->startPlay();
+}
+
+void MainWindow::setActionsEnableForNewNote()
+{
+    m_actions->actionFromName(WIZACTION_FORMAT_BOLD)->setEnabled(true);
+    m_actions->actionFromName(WIZACTION_FORMAT_ITALIC)->setEnabled(true);
+    m_actions->actionFromName(WIZACTION_FORMAT_UNDERLINE)->setEnabled(true);
+    m_actions->actionFromName(WIZACTION_FORMAT_STRIKETHROUGH)->setEnabled(true);
+    m_actions->actionFromName(WIZACTION_FORMAT_UNORDEREDLIST)->setEnabled(true);
+    m_actions->actionFromName(WIZACTION_FORMAT_ORDEREDLIST)->setEnabled(true);
+    m_actions->actionFromName(WIZACTION_FORMAT_JUSTIFYLEFT)->setEnabled(true);
+    m_actions->actionFromName(WIZACTION_FORMAT_JUSTIFYRIGHT)->setEnabled(true);
+    m_actions->actionFromName(WIZACTION_FORMAT_JUSTIFYCENTER)->setEnabled(true);
+    m_actions->actionFromName(WIZACTION_FORMAT_JUSTIFYJUSTIFY)->setEnabled(true);
+    m_actions->actionFromName(WIZACTION_FORMAT_INDENT)->setEnabled(true);
+    m_actions->actionFromName(WIZACTION_FORMAT_OUTDENT)->setEnabled(true);
+    m_actions->actionFromName(WIZACTION_FORMAT_INSERT_TABLE)->setEnabled(true);
+    m_actions->actionFromName(WIZACTION_FORMAT_INSERT_LINK)->setEnabled(true);
+    m_actions->actionFromName(WIZACTION_FORMAT_INSERT_HORIZONTAL)->setEnabled(true);
+    m_actions->actionFromName(WIZACTION_FORMAT_INSERT_DATE)->setEnabled(true);
+    m_actions->actionFromName(WIZACTION_FORMAT_INSERT_TIME)->setEnabled(true);
+    m_actions->actionFromName(WIZACTION_FORMAT_INSERT_CHECKLIST)->setEnabled(true);
+    m_actions->actionFromName(WIZACTION_FORMAT_REMOVE_FORMAT)->setEnabled(true);
+    m_actions->actionFromName(WIZACTION_FORMAT_VIEW_SOURCE)->setEnabled(true);
 }
 void MainWindow::quickSyncKb(const QString& kbGuid)
 {

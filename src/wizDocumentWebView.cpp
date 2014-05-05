@@ -508,10 +508,19 @@ void CWizDocumentWebView::editorFocus()
     emit focusIn();
 }
 
-void CWizDocumentWebView::setEditorDisable()
+void CWizDocumentWebView::setEditorEnable(bool enalbe)
 {
-    clearFocus();
-    page()->mainFrame()->evaluateJavaScript("editor.setDisabled();");
+    if (enalbe)
+    {
+        page()->mainFrame()->evaluateJavaScript("editor.setEnabled();");
+        setFocus();
+    }
+    else
+    {
+        //    page()->mainFrame()->evaluateJavaScript("editor.reset();");
+        page()->mainFrame()->evaluateJavaScript("editor.setDisabled();");
+        clearFocus();
+    }
 }
 
 void CWizDocumentWebView::initEditor()
@@ -608,7 +617,7 @@ void CWizDocumentWebView::onEditorSelectionChanged()
 //    }
 #endif // Q_OS_MAC
 
-    //Q_EMIT statusChanged();
+//    Q_EMIT statusChanged();
 }
 
 void CWizDocumentWebView::onEditorLinkClicked(const QUrl& url)
@@ -1336,6 +1345,7 @@ void CWizDocumentWebView::saveAsPDF(const QString& fileName)
         frame->print(&printer);
     }
 }
+
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 
