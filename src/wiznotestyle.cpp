@@ -52,37 +52,6 @@ private:
     CWizSkin9GridImage m_imagePushButtonLabel;
     CWizSkin9GridImage m_imagePushButtonLabelRed;
 
-    // category view
-    QColor m_colorCategoryBackground;
-    QColor m_colorCategoryTextNormal;
-    QColor m_colorCategoryTextSelected;
-    QColor m_colorCategoryTextCategoryNormal;
-    QColor m_colorCategorySelectedBackground;
-    QColor m_colorCategorySelctedBackgroundNoFocus;
-
-    // document list view
-    //QIcon m_iconDocumentsBadge;
-    //QIcon m_iconDocumentsBadgeEncrypted;
-    //QIcon m_iconDocumentsAttachment;
-    QColor m_colorDocumentsBackground;
-    //QColor m_colorDocumentsItemFocusBackground;
-    //QColor m_colorDocumentsItemLoseFocusBackground;
-    //QColor m_colorDocumentsTitle;
-    //QColor m_colorDocumentsDate;
-    //QColor m_colorDocumentsSummary;
-    //QColor m_colorDocumentsTitleFocus;
-    //QColor m_colorDocumentsDateFocus;
-    //QColor m_colorDocumentsSummaryFocus;
-    //QColor m_colorDocumentsTitleLoseFocus;
-    //QColor m_colorDocumentsDateLoseFocus;
-    //QColor m_colorDocumentsSummaryLoseFocus;
-    QColor m_colorDocumentsLine;
-
-    QColor m_colorMultiLineListFirstLine;
-    QColor m_colorMultiLineListFirstLineSelected;
-    QColor m_colorMultiLineListOtherLine;
-    QColor m_colorMultiLineListOtherLineSelected;
-
     QFont m_fontImagePushButtonLabel;
     QFont m_fontLink;
 
@@ -95,10 +64,6 @@ public:
     virtual void drawControl(ControlElement element, const QStyleOption *option, QPainter *painter, const QWidget *widget) const;
     virtual void drawPrimitive(PrimitiveElement pe, const QStyleOption *opt, QPainter *p, const QWidget *w = 0) const;
     virtual int	pixelMetric(PixelMetric metric, const QStyleOption* option = 0, const QWidget* widget = 0 ) const;
-
-public:
-    QColor categoryBackground() { return m_colorCategoryBackground; }
-    QColor documentsBackground() { return m_colorDocumentsBackground; }
 
 public:
     static CWizNoteStyle* noteStyle(const QString& skinName);
@@ -130,36 +95,6 @@ CWizNoteStyle::CWizNoteStyle(const QString& strSkinName)
     m_imagePushButtonLabel.SetImage(strSkinPath + "imagepushbutton_label.png", QPoint(8, 8));
     m_imagePushButtonLabelRed.SetImage(strSkinPath + "imagepushbutton_label_red.png", QPoint(8, 8));
 
-    CWizSettings settings(strSkinPath + "skin.ini");
-
-    // category view
-    m_colorCategoryBackground = QColor("#F2F2EA");//settings.GetColor("Category", "Background", "#F2F2EA");
-    m_colorCategoryTextNormal = QColor("#777775");//settings.GetColor("Category", "Text", "#777775");
-    m_colorCategoryTextSelected = settings.GetColor("Category", "TextSelected", "#ffffff");
-    m_colorCategoryTextCategoryNormal = settings.GetColor("Category", "ItemCategoryText", "#ffffff");
-    m_colorCategorySelectedBackground = QColor(Qt::blue);//settings.GetColor("Category", "ItemSelected", "#FFFFFF");
-    m_colorCategorySelctedBackgroundNoFocus = QColor(Qt::blue);//settings.GetColor("Category", "ItemSelectedNoFocus", "#FFFFFF");
-
-    // document list view
-    m_colorDocumentsBackground = settings.GetColor("Documents", "Background", "#ffffff");
-    //m_colorDocumentsItemFocusBackground = settings.GetColor("Documents", "ItemFocusBackground", "#0c8eec");
-    //m_colorDocumentsItemLoseFocusBackground = settings.GetColor("Documents", "ItemLoseFocusBackground", "#e1e1e1");
-    //m_colorDocumentsTitle = settings.GetColor("Documents", "Title", "#464646");
-    //m_colorDocumentsDate = settings.GetColor("Documents", "Date", "#0000FF");
-    //m_colorDocumentsSummary = settings.GetColor("Documents", "Summary", "#8C8C8C");
-    //m_colorDocumentsTitleFocus = settings.GetColor("Documents", "TitleFocus", "#FFFFFF");
-    //m_colorDocumentsDateFocus = settings.GetColor("Documents", "DateFocus", "#FFFFFF");
-    //m_colorDocumentsSummaryFocus = settings.GetColor("Documents", "SummaryFocus", "#FFFFFF");
-    //m_colorDocumentsTitleLoseFocus = settings.GetColor("Documents", "TitleLoseFocus", "6A6A6A");
-    //m_colorDocumentsDateLoseFocus = settings.GetColor("Documents", "DateLoseFocus", "6A6A6A");
-    //m_colorDocumentsSummaryLoseFocus = settings.GetColor("Documents", "SummaryLoseFocus", "6A6A6A");
-    m_colorDocumentsLine = settings.GetColor("Documents", "Line", "#d9dcdd");
-
-    m_colorMultiLineListFirstLine = settings.GetColor("MultiLineList", "First", "#000000");
-    m_colorMultiLineListFirstLineSelected = settings.GetColor("MultiLineList", "FirstSelected", "#000000");
-    m_colorMultiLineListOtherLine = settings.GetColor("MultiLineList", "Other", "#666666");
-    m_colorMultiLineListOtherLineSelected = settings.GetColor("MultiLineList", "OtherSelected", "#666666");
-
 #ifdef Q_OS_MAC
     m_fontImagePushButtonLabel = QFont("Arial Black", 9);
 #else
@@ -171,6 +106,7 @@ CWizNoteStyle::CWizNoteStyle(const QString& strSkinName)
     //m_fontLink.setUnderline(true);
     m_fontLink.setPixelSize(m_fontLink.pixelSize() - 4);
 }
+
 
 
 void CWizNoteStyle::drawCategoryViewItem(const QStyleOptionViewItemV4 *vopt,
@@ -263,7 +199,7 @@ void CWizNoteStyle::drawMultiLineListWidgetItem(const QStyleOptionViewItemV4 *vo
 
     QRect textLine = vopt->rect;
     textLine.adjust(4, 0, -4, 0);
-    p->setPen(m_colorDocumentsLine);
+    p->setPen(Utils::StyleHelper::listViewItemSeperator());
     p->drawLine(textLine.bottomLeft(), textLine.bottomRight());
 
     QRect textRect = vopt->rect;
@@ -332,8 +268,8 @@ void CWizNoteStyle::drawMultiLineListWidgetItem(const QStyleOptionViewItemV4 *vo
 
     for (int line = 0; line < wrapTextLineText && line < lineCount; line++)
     {
-        QColor color = (0 == line) ? (selected ? m_colorMultiLineListFirstLineSelected : m_colorMultiLineListFirstLine)
-            : (selected ? m_colorMultiLineListOtherLineSelected : m_colorMultiLineListOtherLine);
+        QColor color = (0 == line) ? Utils::StyleHelper::listViewMultiLineFirstLine(selected)
+            : Utils::StyleHelper::listViewMultiLineOtherLine(selected);
         //
         CString strText = view->itemText(vopt->index, line);
         color = view->itemTextColor(vopt->index, line, selected, color);
@@ -349,7 +285,7 @@ void CWizNoteStyle::drawMultiLineListWidgetItem(const QStyleOptionViewItemV4 *vo
         CString strText = view->itemText(vopt->index, line);
         for (; line < lineCount; line++)
         {
-            QColor color = selected ? m_colorMultiLineListOtherLineSelected : m_colorMultiLineListOtherLine;
+            QColor color = Utils::StyleHelper::listViewMultiLineOtherLine(selected);
             //
             color = view->itemTextColor(vopt->index, line, selected, color);
             QRect rc = textRect;
@@ -464,7 +400,7 @@ void CWizNoteStyle::drawPrimitive(PrimitiveElement pe, const QStyleOption *opt, 
 
                 if (opt->state & QStyle::State_Children) {
                     bool bExpanded = (opt->state & QStyle::State_Open) ? true : false;
-                    if ((opt->state & QStyle::State_Selected) && (opt->state & State_HasFocus)) {
+                    if ((opt->state & QStyle::State_Selected) && view->hasFocus()) {        //(opt->state & State_HasFocus)
                         drawcenterImage(p, bExpanded ? m_expandedImageSelected : m_collapsedImageSelected, opt->rect.adjusted(8, 0, 0, 0));
                     } else {
                         drawcenterImage(p, bExpanded ? m_expandedImage : m_collapsedImage, opt->rect.adjusted(8, 0, 0, 0));
@@ -550,20 +486,4 @@ CWizNoteStyle* CWizNoteStyle::noteStyle(const QString& skinName)
 QStyle* WizGetStyle(const QString& skinName)
 {
     return CWizNoteStyle::noteStyle(skinName);
-}
-
-QColor WizGetCategoryBackroundColor(const QString& skinName)
-{
-    return CWizNoteStyle::noteStyle(skinName)->categoryBackground();
-}
-
-QColor WizGetDocumentsBackroundColor(const QString& skinName)
-{
-    return CWizNoteStyle::noteStyle(skinName)->documentsBackground();
-}
-
-QColor WizGetClientBackgroundColor(const QString& strSkinName)
-{
-    CWizSettings settings(::WizGetSkinResourcePath(strSkinName) + "skin.ini");
-    return settings.GetColor("Client", "Background", QColor(0x80, 0x80, 0x80));
 }
