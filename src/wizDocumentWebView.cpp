@@ -508,6 +508,12 @@ void CWizDocumentWebView::editorFocus()
     emit focusIn();
 }
 
+void CWizDocumentWebView::setEditorDisable()
+{
+    clearFocus();
+    page()->mainFrame()->evaluateJavaScript("editor.setDisabled();");
+}
+
 void CWizDocumentWebView::initEditor()
 {
     if (m_bEditorInited)
@@ -589,7 +595,7 @@ void CWizDocumentWebView::onEditorContentChanged()
 {
     setContentsChanged(true);
     //
-    Q_EMIT statusChanged();
+    //Q_EMIT statusChanged();
 }
 
 void CWizDocumentWebView::onEditorSelectionChanged()
@@ -597,12 +603,12 @@ void CWizDocumentWebView::onEditorSelectionChanged()
 
 #ifdef Q_OS_MAC
     // FIXME: every time change content shuld tell webview to clean the canvas
-    if (hasFocus()) {
-        update();
-    }
+//    if (hasFocus()) {
+//        update();
+//    }
 #endif // Q_OS_MAC
 
-    Q_EMIT statusChanged();
+    //Q_EMIT statusChanged();
 }
 
 void CWizDocumentWebView::onEditorLinkClicked(const QUrl& url)

@@ -946,10 +946,13 @@ void MainWindow::on_actionNewNote_triggered()
         return;
     }
 
+    //set editor disable to move focus out, otherwise editor couldn't be focued.
+    m_doc->web()->setEditorDisable();
+
     m_documentForEditing = data;
     m_documents->addAndSelectDocument(data);
     m_doc->web()->setFocus(Qt::MouseFocusReason);
-    m_doc->web()->editorFocus();
+
 }
 
 void MainWindow::on_actionEditingUndo_triggered()

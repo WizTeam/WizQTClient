@@ -142,6 +142,7 @@ public:
     /* editor related */
     void editorResetFont();
     void editorFocus();
+    void setEditorDisable();
 
     // -1: command invalid
     // 0: available
