@@ -308,7 +308,7 @@ void CWizDocumentWebView::onActionTriggered(QWebPage::WebAction act)
 QString str2title(const QString& str)
 {
     int idx = str.size() - 1;
-    static QString eol("，。？~!#$%^&*()_+{}|:\"<>?,./;'[]\\-="); // end of line
+    static QString eol("，。？~!#$%^&*()_+{}|:\"<>?,./;'[]\\-=\n\r"); // end of line
     foreach(QChar c, eol) {
         int i = str.indexOf(c, 0, Qt::CaseInsensitive);
         if (i != -1 && i < idx) {
@@ -334,11 +334,6 @@ void CWizDocumentWebView::tryResetTitle()
 
     QString strTitle = f->documentElement().findFirst("body").findFirst("p").toPlainText();
     strTitle = str2title(strTitle.left(255));
-    if (int index = strTitle.indexOf('\n') != -1)
-    {
-        strTitle = strTitle.left(index);
-    }
-
     if (strTitle.isEmpty())
         return;
 
