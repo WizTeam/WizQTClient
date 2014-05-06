@@ -916,6 +916,19 @@ void MainWindow::on_syncDone(int nErrorCode, const QString& strErrorMsg)
         }
 
         m_userVerifyDialog->exec();
+    } else if (301 == nErrorCode) {
+        //network avaliable, show message once
+        static bool showMessageAgain = true;
+        if (showMessageAgain) {
+            QMessageBox messageBox(this);
+            messageBox.setIcon(QMessageBox::Information);
+            messageBox.setText(tr("Connection is not available, please check your network connection."));
+            QAbstractButton *btnDontShowAgain =
+                    messageBox.addButton(tr("Don't show this again"), QMessageBox::ActionRole);
+            messageBox.addButton(QMessageBox::Ok);
+            messageBox.exec();
+            showMessageAgain = messageBox.clickedButton() != btnDontShowAgain;
+        }
     }
 
     m_documents->viewport()->update();
