@@ -916,7 +916,7 @@ void MainWindow::on_syncDone(int nErrorCode, const QString& strErrorMsg)
         }
 
         m_userVerifyDialog->exec();
-    } else if (301 == nErrorCode) {
+    } else if (QNetworkReply::ProtocolUnknownError == nErrorCode) {
         //network avaliable, show message once
         static bool showMessageAgain = true;
         if (showMessageAgain) {
