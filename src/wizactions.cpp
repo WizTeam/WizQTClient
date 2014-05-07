@@ -59,7 +59,8 @@ WIZACTION* CWizActions::actionsData()
         {"actionRebuildFTS",                QObject::tr("Rebuild full text search index"), "", ""},
         {"actionSearch",                    QObject::tr("Search note"), "", "Alt+Ctrl+F"},
         {"actionResetSearch",               QObject::tr("Reset search"), "", "Ctrl+R"},
-        {"actionFeedback",                  QObject::tr("User support..."), "", ""},
+        {"actionFeedback",                  QObject::tr("User feedback..."), "", ""},
+        {"actionSupport",                  QObject::tr("User support..."), "", ""},
 
         // editing
         {WIZACTION_EDITOR_UNDO,             QObject::tr("Undo"), "", "Ctrl+Z"},

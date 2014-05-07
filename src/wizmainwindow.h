@@ -187,6 +187,7 @@ public Q_SLOTS:
     void on_actionPreference_triggered();
     void on_actionRebuildFTS_triggered();
     void on_actionFeedback_triggered();
+    void on_actionSupport_triggered();
     void on_actionSearch_triggered();
     void on_actionResetSearch_triggered();
     void on_actionSaveAsPDF_triggered();

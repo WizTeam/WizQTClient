@@ -1176,6 +1176,16 @@ void MainWindow::on_actionFeedback_triggered()
     QDesktopServices::openUrl(strUrl);
 }
 
+void MainWindow::on_actionSupport_triggered()
+{
+    QString strUrl = WizService::ApiEntry::supportUrl();
+
+    if (strUrl.isEmpty())
+        return;
+
+    QDesktopServices::openUrl(strUrl);
+}
+
 void MainWindow::on_actionRebuildFTS_triggered()
 {
     QMessageBox msg;
