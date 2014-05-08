@@ -10,6 +10,7 @@ class QString;
 class QPolygon;
 class QFont;
 class QIcon;
+class CWizSettings;
 
 namespace Utils {
 class StyleHelper
@@ -67,6 +68,8 @@ public:
     static QColor listViewItemTitle(bool bSelected, bool bFocused);
     static QColor listViewItemLead(bool bSelected, bool bFocused);
     static QColor listViewItemSummary(bool bSelected, bool bFocused);
+    static QColor listViewMultiLineFirstLine(bool bSelected);
+    static QColor listViewMultiLineOtherLine(bool bSelected);
 
     static QRect initListViewItemPainter(QPainter* p, const QRect& lrc, bool bFocused, bool bSelected);
     static void drawListViewItemThumb(QPainter* p, const QRect& rc, int nBadgeType,
@@ -98,6 +101,8 @@ public:
     static int titleEditorHeight();
     static int editToolBarHeight();
 
+private:
+    static CWizSettings* m_settings;
 };
 } // namespace Utils
 

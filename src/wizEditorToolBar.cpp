@@ -335,6 +335,10 @@ EditorToolBar::EditorToolBar(QWidget *parent)
     m_btnUnderLine->setIcon(::WizLoadSkinIcon(skin, "actionFormatUnderLine"));
     connect(m_btnUnderLine, SIGNAL(clicked()), SLOT(on_btnUnderLine_clicked()));
 
+    m_btnStrikeThrough = new CWizToolButton(this);
+    m_btnStrikeThrough->setIcon(::WizLoadSkinIcon(skin, "actionFormatStrikeThrough"));
+    connect(m_btnStrikeThrough, SIGNAL(clicked()), SLOT(on_btnStrikeThrough_clicked()));
+
     m_btnJustifyLeft = new CWizToolButton(this);
     m_btnJustifyLeft->setIcon(::WizLoadSkinIcon(skin, "actionFormatJustifyLeft"));
     connect(m_btnJustifyLeft, SIGNAL(clicked()), SLOT(on_btnJustifyLeft_clicked()));
@@ -391,6 +395,7 @@ EditorToolBar::EditorToolBar(QWidget *parent)
     layout->addWidget(m_btnBold);
     layout->addWidget(m_btnItalic);
     layout->addWidget(m_btnUnderLine);
+    layout->addWidget(m_btnStrikeThrough);
     layout->addSpacing(12);
     layout->addWidget(m_btnJustifyLeft);
     layout->addWidget(m_btnJustifyCenter);
@@ -479,6 +484,19 @@ void EditorToolBar::resetToolbar()
     } else if (state == 1) {
         m_btnUnderLine->setEnabled(true);
         m_btnUnderLine->setChecked(true);
+    } else {
+        Q_ASSERT(0);
+    }
+
+    state = m_editor->editorCommandQueryCommandState("strikethrough");
+    if (state == -1) {
+        m_btnStrikeThrough->setEnabled(false);
+    } else if (state == 0) {
+        m_btnStrikeThrough->setEnabled(true);
+        m_btnStrikeThrough->setChecked(false);
+    } else if (state == 1) {
+        m_btnStrikeThrough->setEnabled(true);
+        m_btnStrikeThrough->setChecked(true);
     } else {
         Q_ASSERT(0);
     }
@@ -929,6 +947,13 @@ void EditorToolBar::on_btnUnderLine_clicked()
 {
     if (m_editor) {
         m_editor->editorCommandExecuteUnderLine();
+    }
+}
+
+void EditorToolBar::on_btnStrikeThrough_clicked()
+{
+    if (m_editor) {
+        m_editor->editorCommandExecuteStrikeThrough();
     }
 }
 

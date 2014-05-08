@@ -2,9 +2,9 @@
     <qresource prefix="/">
         <file>res/markdown.js</file>
         <file>res/inject.js</file>
-        <file>res/marked.js</file>
         <file>res/highlight.pack.js</file>
         <file>res/jquery.min.js</file>
         <file>res/github2.css</file>
+        <file>res/marked.min.js</file>
     </qresource>
 </RCC>

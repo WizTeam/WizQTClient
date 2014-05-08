@@ -5,7 +5,6 @@
 #include <QRect>
 #include <QTransform>
 #include <QPainter>
-#include <QSettings>
 #include <QVector>
 #include <QTextLayout>
 #include <QDebug>
@@ -15,12 +14,15 @@
 
 #include "pathresolve.h"
 #include "../share/wizmisc.h"
+#include "../share/wizsettings.h"
 
 #ifdef Q_OS_MAC
 #include "mac/wizmachelper.h"
 #endif
 
 namespace Utils {
+
+CWizSettings* StyleHelper::m_settings = 0;
 
 void StyleHelper::initPainterByDevice(QPainter* p)
 {
@@ -91,17 +93,22 @@ int StyleHelper::treeViewItemHeight()
 
 QColor StyleHelper::treeViewBackground()
 {
-    QSettings st(PathResolve::themePath(themeName()) + "skin.ini");
-    return QColor(st.value("Category/Background", "#808080").toString());
+    if (!m_settings) {
+        m_settings = new CWizSettings(PathResolve::themePath(themeName()) + "skin.ini");
+    }
+    return QColor(m_settings->value("Category/Background", "#000000").toString());
 }
 
 QColor StyleHelper::treeViewItemBackground(int stat)
 {
-    QSettings st(PathResolve::themePath(themeName()) + "skin.ini");
+    if (!m_settings) {
+        m_settings = new CWizSettings(PathResolve::themePath(themeName()) + "skin.ini");
+    }
+
     if (stat == Selected) {
-        return QColor(st.value("Category/ItemSelectedNoFocus", "#D3E4ED").toString());
+        return QColor(m_settings->value("Category/ItemSelectedNoFocus", "#D3E4ED").toString());
     } else if (stat == Active) {
-        return QColor(st.value("Category/ItemSelected", "#3498DB").toString());
+        return QColor(m_settings->value("Category/ItemSelected", "#3498DB").toString());
     }
 
     Q_ASSERT(0);
@@ -110,58 +117,74 @@ QColor StyleHelper::treeViewItemBackground(int stat)
 
 QColor StyleHelper::treeViewItemCategoryBackground()
 {
-    QSettings st(PathResolve::themePath(themeName()) + "skin.ini");
-    QColor co(st.value("Category/ItemCategory", "#ffffff").toString());
+    if (!m_settings) {
+        m_settings = new CWizSettings(PathResolve::themePath(themeName()) + "skin.ini");
+    }
+    QColor co(m_settings->value("Category/ItemCategory", "#ffffff").toString());
     co.setAlpha(15);
     return co;
 }
 
 QColor StyleHelper::treeViewItemCategoryText()
 {
-    QSettings st(PathResolve::themePath(themeName()) + "skin.ini");
-    return QColor(st.value("Category/ItemCategoryText", "#777775").toString());
+    if (!m_settings) {
+        m_settings = new CWizSettings(PathResolve::themePath(themeName()) + "skin.ini");
+    }
+    return QColor(m_settings->value("Category/ItemCategoryText", "#777775").toString());
 }
 QColor StyleHelper::treeViewItemLinkText()
 {
-    QSettings st(PathResolve::themePath(themeName()) + "skin.ini");
-    return QColor(st.value("Category/ItemLinkText", "#a0aaaf").toString());
+    if (!m_settings) {
+        m_settings = new CWizSettings(PathResolve::themePath(themeName()) + "skin.ini");
+    }
+    return QColor(m_settings->value("Category/ItemLinkText", "#a0aaaf").toString());
 }
 
 QColor StyleHelper::treeViewItemBottomLine()
 {
-    QSettings st(PathResolve::themePath(themeName()) + "skin.ini");
-    return QColor(st.value("Category/ItemBottomLine", "#DFDFD7").toString());
+    if (!m_settings) {
+        m_settings = new CWizSettings(PathResolve::themePath(themeName()) + "skin.ini");
+    }
+    return QColor(m_settings->value("Category/ItemBottomLine", "#DFDFD7").toString());
 }
 
 QColor StyleHelper::treeViewItemMessageBackground()
 {
-    QSettings st(PathResolve::themePath(themeName()) + "skin.ini");
-    return QColor(st.value("Category/ItemMessageBackground", "#3498DB").toString());
+    if (!m_settings) {
+        m_settings = new CWizSettings(PathResolve::themePath(themeName()) + "skin.ini");
+    }
+    return QColor(m_settings->value("Category/ItemMessageBackground", "#3498DB").toString());
 }
 
 QColor StyleHelper::treeViewItemMessageText()
 {
-    QSettings st(PathResolve::themePath(themeName()) + "skin.ini");
-    return QColor(st.value("Category/ItemMessageText", "#FFFFFF").toString());
+    if (!m_settings) {
+        m_settings = new CWizSettings(PathResolve::themePath(themeName()) + "skin.ini");
+    }
+    return QColor(m_settings->value("Category/ItemMessageText", "#FFFFFF").toString());
 }
 
 QColor StyleHelper::treeViewItemText(bool bSelected)
 {
-    QSettings st(PathResolve::themePath(themeName()) + "skin.ini");
+    if (!m_settings) {
+        m_settings = new CWizSettings(PathResolve::themePath(themeName()) + "skin.ini");
+    }
     if (bSelected) {
-        return QColor(st.value("Category/TextSelected", "#ffffff").toString());
+        return QColor(m_settings->value("Category/TextSelected", "#ffffff").toString());
     } else {
-        return QColor(st.value("Category/Text", "#777775").toString());
+        return QColor(m_settings->value("Category/Text", "#777775").toString());
     }
 }
 
 QColor StyleHelper::treeViewItemTextExtend(bool bSelected)
 {
-    QSettings st(PathResolve::themePath(themeName()) + "skin.ini");
+    if (!m_settings) {
+        m_settings = new CWizSettings(PathResolve::themePath(themeName()) + "skin.ini");
+    }
     if (bSelected) {
-        return QColor(st.value("Category/TextExtendSelected", "#e6e6e6").toString());
+        return QColor(m_settings->value("Category/TextExtendSelected", "#e6e6e6").toString());
     } else {
-        return QColor(st.value("Category/TextExtend", "#969696").toString());
+        return QColor(m_settings->value("Category/TextExtend", "#969696").toString());
     }
 }
 
@@ -219,8 +242,10 @@ void StyleHelper::drawTreeViewBadge(QPainter* p, const QRect& rc, const QString&
 
 int StyleHelper::listViewSortControlWidgetHeight()
 {
-    QSettings st(PathResolve::themePath(themeName()) + "skin.ini");
-    return st.value("Documents/SortControlWidgetHeight", 30).toInt();
+    if (!m_settings) {
+        m_settings = new CWizSettings(PathResolve::themePath(themeName()) + "skin.ini");
+    }
+    return m_settings->value("Documents/SortControlWidgetHeight", 30).toInt();
 }
 
 int StyleHelper::listViewItemHeight(int nType)
@@ -242,23 +267,29 @@ int StyleHelper::listViewItemHeight(int nType)
 
 QColor StyleHelper::listViewBackground()
 {
-    QSettings st(PathResolve::themePath(themeName()) + "skin.ini");
-    return QColor(st.value("Documents/Background", "#F9F9F8").toString());
+    if (!m_settings) {
+        m_settings = new CWizSettings(PathResolve::themePath(themeName()) + "skin.ini");
+    }
+    return QColor(m_settings->value("Documents/Background", "#F9F9F8").toString());
 }
 
 QColor StyleHelper::listViewItemSeperator()
 {
-    QSettings st(PathResolve::themePath(themeName()) + "skin.ini");
-    return QColor(st.value("Documents/Line", "#DADAD9").toString());
+    if (!m_settings) {
+        m_settings = new CWizSettings(PathResolve::themePath(themeName()) + "skin.ini");
+    }
+    return QColor(m_settings->value("Documents/Line", "#DADAD9").toString());
 }
 
 QColor StyleHelper::listViewItemBackground(int stat)
 {
-    QSettings st(PathResolve::themePath(themeName()) + "skin.ini");
+    if (!m_settings) {
+        m_settings = new CWizSettings(PathResolve::themePath(themeName()) + "skin.ini");
+    }
     if (stat == Normal) {
-        return QColor(st.value("Documents/ItemLoseFocusBackground", "#D3E4ED").toString());
+        return QColor(m_settings->value("Documents/ItemLoseFocusBackground", "#D3E4ED").toString());
     } else if (stat == Active) {
-        return QColor(st.value("Documents/ItemFocusBackground", "#3498DB").toString());
+        return QColor(m_settings->value("Documents/ItemFocusBackground", "#3498DB").toString());
     }
 
     Q_ASSERT(0);
@@ -267,43 +298,75 @@ QColor StyleHelper::listViewItemBackground(int stat)
 
 QColor StyleHelper::listViewItemTitle(bool bSelected, bool bFocused)
 {
-    QSettings st(PathResolve::themePath(themeName()) + "skin.ini");
+    if (!m_settings) {
+        m_settings = new CWizSettings(PathResolve::themePath(themeName()) + "skin.ini");
+    }
     if (bSelected) {
         if (bFocused) {
-            return QColor(st.value("Documents/TitleFocus", "#ffffff").toString());
+            return QColor(m_settings->value("Documents/TitleFocus", "#ffffff").toString());
         } else {
-            return QColor(st.value("Documents/TitleLoseFocus", "#6a6a6a").toString());
+            return QColor(m_settings->value("Documents/TitleLoseFocus", "#6a6a6a").toString());
         }
     } else {
-        return QColor(st.value("Documents/Title", "#464646").toString());
+        return QColor(m_settings->value("Documents/Title", "#464646").toString());
     }
 }
 
 QColor StyleHelper::listViewItemLead(bool bSelected, bool bFocused)
 {
-    QSettings st(PathResolve::themePath(themeName()) + "skin.ini");
+    if (!m_settings) {
+        m_settings = new CWizSettings(PathResolve::themePath(themeName()) + "skin.ini");
+    }
     if (bSelected) {
         if (bFocused) {
-            return QColor(st.value("Documents/DateFocus", "#ffffff").toString());
+            return QColor(m_settings->value("Documents/DateFocus", "#ffffff").toString());
         } else {
-            return QColor(st.value("Documents/DateLoseFocus", "#6a6a6a").toString());
+            return QColor(m_settings->value("Documents/DateLoseFocus", "#6a6a6a").toString());
         }
     } else {
-        return QColor(st.value("Documents/Date", "#3498DB").toString());
+        return QColor(m_settings->value("Documents/Date", "#3498DB").toString());
     }
 }
 
 QColor StyleHelper::listViewItemSummary(bool bSelected, bool bFocused)
 {
-    QSettings st(PathResolve::themePath(themeName()) + "skin.ini");
+    if (!m_settings) {
+        m_settings = new CWizSettings(PathResolve::themePath(themeName()) + "skin.ini");
+    }
     if (bSelected) {
         if (bFocused) {
-            return QColor(st.value("Documents/SummaryFocus", "#ffffff").toString());
+            return QColor(m_settings->value("Documents/SummaryFocus", "#ffffff").toString());
         } else {
-            return QColor(st.value("Documents/SummaryLoseFocus", "#6a6a6a").toString());
+            return QColor(m_settings->value("Documents/SummaryLoseFocus", "#6a6a6a").toString());
         }
     } else {
-        return QColor(st.value("Documents/Summary", "#8c8c8c").toString());
+        return QColor(m_settings->value("Documents/Summary", "#8c8c8c").toString());
+    }
+}
+
+QColor StyleHelper::listViewMultiLineFirstLine(bool bSelected)
+{
+    if (!m_settings) {
+        m_settings = new CWizSettings(PathResolve::themePath(themeName()) + "skin.ini");
+    }
+
+    if (bSelected) {
+        return QColor(m_settings->value("MultiLineList/FirstSelected", "#000000").toString());
+    } else {
+        return QColor(m_settings->value("MultiLineList/First", "#000000").toString());
+    }
+}
+
+QColor StyleHelper::listViewMultiLineOtherLine(bool bSelected)
+{
+    if (!m_settings) {
+        m_settings = new CWizSettings(PathResolve::themePath(themeName()) + "skin.ini");
+    }
+
+    if (bSelected) {
+        return QColor(m_settings->value("MultiLineList/OtherSelected", "#666666").toString());
+    } else {
+        return QColor(m_settings->value("MultiLineList/Other", "#666666").toString());
     }
 }
 

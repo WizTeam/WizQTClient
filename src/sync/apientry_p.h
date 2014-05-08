@@ -23,6 +23,7 @@ public:
     QString commentCountUrl(const QString& strServer, const QString& strToken,
                             const QString& strKbGUID, const QString& strGUID);
     QString feedbackUrl();
+    QString supportUrl();
     QString accountInfoUrl(const QString& strToken);
     QString groupAttributeUrl(const QString& strToken, const QString& strKbGUID);
     QString groupUsersUrl(const QString& strToken, const QString& strBizGUID, const QString& strkbGUID);

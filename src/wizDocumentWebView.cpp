@@ -308,7 +308,7 @@ void CWizDocumentWebView::onActionTriggered(QWebPage::WebAction act)
 QString str2title(const QString& str)
 {
     int idx = str.size() - 1;
-    static QString eol("，。？~!#$%^&*()_+{}|:\"<>?,./;'[]\\-="); // end of line
+    static QString eol("，。？~!#$%^&*()_+{}|:\"<>?,./;'[]\\-=\n\r"); // end of line
     foreach(QChar c, eol) {
         int i = str.indexOf(c, 0, Qt::CaseInsensitive);
         if (i != -1 && i < idx) {
@@ -332,13 +332,17 @@ void CWizDocumentWebView::tryResetTitle()
     if (!f)
         return;
 
-    QString strTitle = f->documentElement().findFirst("body").findFirst("p").toPlainText();
-    strTitle = str2title(strTitle.left(255));
-    if (int index = strTitle.indexOf('\n') != -1)
+    // remove baidu bookmark
+    QWebElement docPElement = f->documentElement().findFirst("body").findFirst("p");
+    QWebElement docSpanElement = docPElement.findFirst("span");
+    QString spanClass = docSpanElement.attribute("id");
+    if (spanClass.indexOf("baidu_bookmark") != -1)
     {
-        strTitle = strTitle.left(index);
+        docPElement.removeFromDocument();
     }
 
+    QString strTitle = page()->mainFrame()->evaluateJavaScript("editor.getPlainTxt();").toString();
+    strTitle = str2title(strTitle.left(255));
     if (strTitle.isEmpty())
         return;
 
@@ -358,7 +362,7 @@ bool CWizDocumentWebView::image2Html(const QString& strImageFile, QString& strHt
         return false;
     }
 
-    strHtml = QString("<img border=\"0\" src=\"file://%1\" />").arg(strDestFile);
+    strHtml = QString("<img class=\"WizNormalImg\" border=\"0\" src=\"file://%1\" />").arg(strDestFile);
     return true;
 }
 
@@ -508,6 +512,21 @@ void CWizDocumentWebView::editorFocus()
     emit focusIn();
 }
 
+void CWizDocumentWebView::setEditorEnable(bool enalbe)
+{
+    if (enalbe)
+    {
+        page()->mainFrame()->evaluateJavaScript("editor.setEnabled();");
+        setFocus();
+    }
+    else
+    {
+        //    page()->mainFrame()->evaluateJavaScript("editor.reset();");
+        page()->mainFrame()->evaluateJavaScript("editor.setDisabled();");
+        clearFocus();
+    }
+}
+
 void CWizDocumentWebView::initEditor()
 {
     if (m_bEditorInited)
@@ -589,7 +608,7 @@ void CWizDocumentWebView::onEditorContentChanged()
 {
     setContentsChanged(true);
     //
-    Q_EMIT statusChanged();
+    //Q_EMIT statusChanged();
 }
 
 void CWizDocumentWebView::onEditorSelectionChanged()
@@ -602,7 +621,7 @@ void CWizDocumentWebView::onEditorSelectionChanged()
     }
 #endif // Q_OS_MAC
 
-    Q_EMIT statusChanged();
+//    Q_EMIT statusChanged();
 }
 
 void CWizDocumentWebView::onEditorLinkClicked(const QUrl& url)
@@ -831,6 +850,8 @@ void CWizDocumentWebView::viewDocumentInEditor(bool editing)
 
     //strHtml = escapeJavascriptString(strHtml);
 
+    m_strCurrentNoteHead.clear();
+    m_strCurrentNoteHtml.clear();
     splitHtmlToHeadAndBody(strHtml, m_strCurrentNoteHead, m_strCurrentNoteHtml);
 
     m_strCurrentNoteHead += "<link rel=\"stylesheet\" type=\"text/css\" href=\"" + m_strDefaultCssFilePath + "\">";
@@ -1185,9 +1206,11 @@ bool CWizDocumentWebView::editorCommandExecuteInsertImage()
     if (strImgFile.isEmpty())
         return false;
 
-    QPixmap pix(strImgFile);
-    return editorCommandExecuteCommand("insertImage", QString("{src:'%1', width:%2, height:%3}")
-                                       .arg(strImgFile).arg(pix.width()).arg(pix.height()));
+//    QPixmap pix(strImgFile);
+//    return editorCommandExecuteCommand("insertImage", QString("{src:'%1', class:\"WizNormalImg\", width:%2, height:%3}")
+//                                       .arg(strImgFile).arg(pix.width()).arg(pix.height()));
+    QString strHtml = QString("<img class=\"WizNormalImg\" border=\"0\" src=\"%1\">").arg(strImgFile);
+    return editorCommandExecuteInsertHtml(strHtml, true);
 }
 
 bool CWizDocumentWebView::editorCommandExecuteInsertDate()
@@ -1326,6 +1349,7 @@ void CWizDocumentWebView::saveAsPDF(const QString& fileName)
         frame->print(&printer);
     }
 }
+
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 
