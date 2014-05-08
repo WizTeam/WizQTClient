@@ -48,7 +48,7 @@ WIZACTION* CWizActions::actionsData()
         {"actionPreference",                QObject::tr("Preference..."), "", ""},
         {"actionAbout",                     QObject::tr("About WizNote..."), "", ""},
         {"actionExit",                      QObject::tr("Exit"), "", ""},
-        {"actionLogout",                    QObject::tr("Logout"), "", ""},
+        {"actionLogout",                    QObject::tr("Logout..."), "", ""},
         {WIZACTION_GLOBAL_SYNC,             QObject::tr("Sync"), "", ""},
         {WIZACTION_GLOBAL_NEW_DOCUMENT,     QObject::tr("New Note"), "", "Ctrl+N"},
         {WIZACTION_GLOBAL_SAVE_AS_PDF,      QObject::tr("Save as PDF..."), "", ""},

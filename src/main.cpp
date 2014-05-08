@@ -293,12 +293,15 @@ int mainCore(int argc, char *argv[])
     w.init();
 
     int ret = a.exec();
-#ifndef BUILD4APPSTORE
-    //could cause crash under appstore version
     if (w.isLogout()) {
+#ifndef BUILD4APPSTORE
         QProcess::startDetached(argv[0], QStringList());
-    }
+#else
+        QString strAppFile = QApplication::applicationDirPath().remove("/Contents/MacOS");
+        QProcess::startDetached("/usr/bin/open", QStringList() <<strAppFile);
 #endif
+    }
+
 
     return ret;
 }
