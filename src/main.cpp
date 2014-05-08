@@ -293,9 +293,12 @@ int mainCore(int argc, char *argv[])
     w.init();
 
     int ret = a.exec();
+#ifndef BUILD4APPSTORE
+    //could cause crash under appstore version
     if (w.isLogout()) {
         QProcess::startDetached(argv[0], QStringList());
     }
+#endif
 
     return ret;
 }

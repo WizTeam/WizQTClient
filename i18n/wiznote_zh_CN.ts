@@ -1290,7 +1290,7 @@
     <message>
         <location filename="../src/wizactions.cpp" line="51"/>
         <source>Logout</source>
-        <translation>更改用户</translation>
+        <translation type="unfinished">注销</translation>
     </message>
     <message>
         <location filename="../src/wizactions.cpp" line="30"/>
