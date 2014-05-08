@@ -332,7 +332,16 @@ void CWizDocumentWebView::tryResetTitle()
     if (!f)
         return;
 
-    QString strTitle = f->documentElement().findFirst("body").findFirst("p").toPlainText();
+    // remove baidu bookmark
+    QWebElement docPElement = f->documentElement().findFirst("body").findFirst("p");
+    QWebElement docSpanElement = docPElement.findFirst("span");
+    QString spanClass = docSpanElement.attribute("id");
+    if (spanClass.indexOf("baidu_bookmark") != -1)
+    {
+        docPElement.removeFromDocument();
+    }
+
+    QString strTitle = page()->mainFrame()->evaluateJavaScript("editor.getPlainTxt();").toString();
     strTitle = str2title(strTitle.left(255));
     if (strTitle.isEmpty())
         return;
