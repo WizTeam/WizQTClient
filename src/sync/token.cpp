@@ -12,18 +12,14 @@
 using namespace WizService;
 using namespace WizService::Internal;
 
-// use 15 minutes locally, server use 20 minutes
-#define TOKEN_TIMEOUT_INTERVAL 60*15
+// use 5 minutes locally, server use 20 minutes
+#define TOKEN_TIMEOUT_INTERVAL 60 * 5
 
 TokenPrivate::TokenPrivate(Token* token)
     : q(token)
-    , m_api(new AsyncApi())
-    , m_mutex(new QMutex())
-    , m_bProcess(false)
+    , m_mutex(new QMutex(QMutex::Recursive))
+    , m_bProcessing(false)
 {
-    connect(m_api, SIGNAL(loginFinished(const WIZUSERINFO&)), SLOT(onLoginFinished(const WIZUSERINFO&)));
-    connect(m_api, SIGNAL(getTokenFinished(QString)), SLOT(onGetTokenFinished(QString)));
-    connect(m_api, SIGNAL(keepAliveFinished(bool)), SLOT(onKeepAliveFinished(bool)));
 }
 
 TokenPrivate::~TokenPrivate()
@@ -33,40 +29,57 @@ TokenPrivate::~TokenPrivate()
 
 QString TokenPrivate::token()
 {
+    QMutexLocker locker(m_mutex);
+    Q_UNUSED(locker);
+    //
     Q_ASSERT(!m_strUserId.isEmpty() && !m_strPasswd.isEmpty());
 
-    if (m_bProcess)
-        return m_info.strToken;
-
     CWizKMAccountsServer asServer(ApiEntry::syncUrl());
-    if (m_info.strToken.isEmpty()) {
-        if (asServer.Login(m_strUserId, m_strPasswd)) {
+    if (m_info.strToken.isEmpty())
+    {
+        if (asServer.Login(m_strUserId, m_strPasswd))
+        {
             m_info = asServer.GetUserInfo();
             m_info.tTokenExpried = QDateTime::currentDateTime().addSecs(TOKEN_TIMEOUT_INTERVAL);
             return m_info.strToken;
-        } else {
+        }
+        else
+        {
+            m_lastErrorCode = asServer.GetLastErrorCode();
+            m_lastErrorMessage = asServer.GetLastErrorMessage();
             return QString();
         }
     }
-
-    if (m_info.tTokenExpried >= QDateTime::currentDateTime()) {
+    //
+    if (m_info.tTokenExpried >= QDateTime::currentDateTime())
+    {
         return m_info.strToken;
-    } else {
+    }
+    else
+    {
         WIZUSERINFO info;
         info.strToken = m_info.strToken;
         info.strKbGUID = m_info.strKbGUID;
         asServer.SetUserInfo(info);
 
-        if (asServer.KeepAlive(m_info.strToken)) {
+        if (asServer.KeepAlive(m_info.strToken))
+        {
             m_info.tTokenExpried = QDateTime::currentDateTime().addSecs(TOKEN_TIMEOUT_INTERVAL);
             return m_info.strToken;
-        } else {
+        }
+        else
+        {
             QString strToken;
-            if (asServer.GetToken(m_strUserId, m_strPasswd, strToken)) {
+            if (asServer.GetToken(m_strUserId, m_strPasswd, strToken))
+            {
                 m_info.strToken = strToken;
                 m_info.tTokenExpried = QDateTime::currentDateTime().addSecs(TOKEN_TIMEOUT_INTERVAL);
                 return m_info.strToken;
-            } else {
+            }
+            else
+            {
+                m_lastErrorCode = asServer.GetLastErrorCode();
+                m_lastErrorMessage = asServer.GetLastErrorMessage();
                 return QString();
             }
         }
@@ -77,28 +90,36 @@ QString TokenPrivate::token()
 
 void TokenPrivate::requestToken()
 {
-    Q_ASSERT(!m_strUserId.isEmpty() && !m_strPasswd.isEmpty());
-
-    QMutexLocker locker(m_mutex);
-
-    // return the old one even it will be failed if still waiting for reply
-    if (m_bProcess) {
-        Q_EMIT q->tokenAcquired(m_info.strToken);
+    if (m_bProcessing)
+    {
+        qDebug() << "Querying token...";
         return;
     }
+    //
+    class GetTokenRunnable : public QRunnable
+    {
+        TokenPrivate* m_p;
+    public:
+        GetTokenRunnable(TokenPrivate* p)
+            : m_p(p)
+        {
+        }
 
-    if (m_info.strToken.isEmpty()) {
-        m_bProcess = true;
-        m_api->login(m_strUserId, m_strPasswd);
-        return;
-    }
+        void run()
+        {
+            m_p->m_bProcessing = true;
+            QString token = m_p->token();
+            m_p->m_bProcessing = false;
+            Q_EMIT m_p->q->tokenAcquired(token);
+        }
+    };
+    //
+    QThreadPool::globalInstance()->start(new GetTokenRunnable(this));
+}
 
-    if (m_info.tTokenExpried >= QDateTime::currentDateTime()) {
-        Q_EMIT q->tokenAcquired(m_info.strToken);
-    } else {
-        m_bProcess = true;
-        m_api->keepAlive(m_info.strToken, m_info.strKbGUID);
-    }
+void TokenPrivate::clearToken()
+{
+    m_info.strToken.clear();
 }
 
 void TokenPrivate::setUserId(const QString& strUserId)
@@ -111,65 +132,29 @@ void TokenPrivate::setPasswd(const QString& strPasswd)
     m_strPasswd = strPasswd;
 }
 
-const WIZUSERINFO& TokenPrivate::info()
+WIZUSERINFO TokenPrivate::info()
 {
+    QMutexLocker locker(m_mutex);
+    Q_UNUSED(locker);
+    //
     return m_info;
 }
 
 int TokenPrivate::lastErrorCode() const
 {
-    return m_api->lastErrorCode();
+    QMutexLocker locker(m_mutex);
+    Q_UNUSED(locker);
+    //
+    return m_lastErrorCode;
 }
 
 QString TokenPrivate::lastErrorMessage() const
 {
-    return m_api->lastErrorMessage();
+    QMutexLocker locker(m_mutex);
+    Q_UNUSED(locker);
+    //
+    return m_lastErrorMessage;
 }
-
-void TokenPrivate::onLoginFinished(const WIZUSERINFO &info)
-{
-    qDebug() << "[Token]: Login Done...";
-
-    if (info.strToken.isEmpty()) {
-        Q_EMIT q->tokenAcquired(0);
-    } else {
-        m_info = info;
-        m_info.tTokenExpried = QDateTime::currentDateTime().addSecs(TOKEN_TIMEOUT_INTERVAL);
-        Q_EMIT q->tokenAcquired(info.strToken);
-    }
-
-    m_bProcess = false;
-}
-
-void TokenPrivate::onGetTokenFinished(const QString& strToken)
-{
-    qDebug() << "[Token]: GetToken Done...";
-
-    if (strToken.isEmpty()) {
-        Q_EMIT q->tokenAcquired(0);
-    } else {
-        m_info.strToken = strToken;
-        m_info.tTokenExpried = QDateTime::currentDateTime().addSecs(TOKEN_TIMEOUT_INTERVAL);
-        Q_EMIT q->tokenAcquired(strToken);
-    }
-
-    m_bProcess = false;
-}
-
-void TokenPrivate::onKeepAliveFinished(bool bOk)
-{
-    qDebug() << "[Token]: KeepAlive Done...";
-
-    if (bOk) {
-        m_info.tTokenExpried = QDateTime::currentDateTime().addSecs(TOKEN_TIMEOUT_INTERVAL);
-        Q_EMIT q->tokenAcquired(m_info.strToken);
-        m_bProcess = false;
-    } else {
-        m_api->getToken(m_strUserId, m_strPasswd);
-    }
-}
-
-
 
 
 static TokenPrivate* d = 0;
@@ -208,6 +193,11 @@ void Token::requestToken()
     d->requestToken();
 }
 
+void Token::clearToken()
+{
+    d->clearToken();
+}
+
 void Token::setUserId(const QString& strUserId)
 {
     Q_ASSERT(m_instance);
@@ -222,7 +212,7 @@ void Token::setPasswd(const QString& strPasswd)
     d->setPasswd(strPasswd);
 }
 
-const WIZUSERINFO& Token::info()
+WIZUSERINFO Token::info()
 {
     Q_ASSERT(m_instance);
 

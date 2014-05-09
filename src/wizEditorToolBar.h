@@ -42,6 +42,7 @@ private:
     CWizToolButton* m_btnBold;
     CWizToolButton* m_btnItalic;
     CWizToolButton* m_btnUnderLine;
+    CWizToolButton* m_btnStrikeThrough;
     CWizToolButton* m_btnJustifyLeft;
     CWizToolButton* m_btnJustifyCenter;
     CWizToolButton* m_btnJustifyRight;
@@ -49,6 +50,8 @@ private:
     CWizToolButton* m_btnOrderedList;
     CWizToolButton* m_btnTable;
     CWizToolButton* m_btnHorizontal;
+    CWizToolButton* m_btnCheckList;
+    CWizToolButton* m_btnImage;
 
     WizEditorContextMenuItem* contextMenuData();
     void buildMenu();
@@ -73,6 +76,7 @@ protected Q_SLOTS:
     void on_btnBold_clicked();
     void on_btnItalic_clicked();
     void on_btnUnderLine_clicked();
+    void on_btnStrikeThrough_clicked();
     void on_btnJustifyLeft_clicked();
     void on_btnJustifyCenter_clicked();
     void on_btnJustifyRight_clicked();
@@ -80,6 +84,8 @@ protected Q_SLOTS:
     void on_btnOrderedList_clicked();
     void on_btnTable_clicked();
     void on_btnHorizontal_clicked();
+    void on_btnCheckList_clicked();
+    void on_btnImage_clicked();
 
     void on_delegate_requestShowContextMenu(const QPoint& pos);
     void on_delegate_selectionChanged();

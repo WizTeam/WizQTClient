@@ -21,16 +21,29 @@ CWizUserCipherForm::CWizUserCipherForm(CWizExplorerApp& app, QWidget *parent)
     setAttribute(Qt::WA_MacShowFocusRect, true);
     setBackgroundRole(QPalette::Midlight);
 
-    QString strIconPath = ::WizGetSkinResourcePath(m_app.userSettings().skin()) + "check.png";
-    QIcon ico(strIconPath);
-    ui->buttonOk->setIcon(ico);
-    ui->buttonOk->setText(QString());
-    QSize szBtn(26, 26);
+
+
+    QString strIconNormal = ::WizGetSkinResourcePath(m_app.userSettings().skin())
+            + "mac_icons_password_done.png";
+    QString strIconHot = ::WizGetSkinResourcePath(m_app.userSettings().skin())
+            + "mac_icons_password_done_hot.png";
+    QString strIconDown = ::WizGetSkinResourcePath(m_app.userSettings().skin())
+            + "mac_icons_password_done_down.png";
+
+    QSize szBtn(22, 22);
+    ui->buttonOk->setMinimumSize(szBtn);
     ui->buttonOk->setMaximumSize(szBtn);
+    ui->buttonOk->setIconNormal(strIconNormal);
+    ui->buttonOk->setIconHot(strIconHot);
+    ui->buttonOk->setIconDown(strIconDown);
+    ui->buttonOk->setStatusNormal();
+    ui->buttonOk->setLockNormalStatus(true);
 
     m_animation = new QPropertyAnimation(ui->editUserCipher, "pos");
 
     connect(ui->editUserCipher, SIGNAL(returnPressed()), SLOT(onButtonOK_clicked()));
+    connect(ui->editUserCipher, SIGNAL(textChanged(const QString&)),
+            SLOT(onCipher_changed(const QString&)));
     connect(ui->buttonOk, SIGNAL(clicked()), SLOT(onButtonOK_clicked()));
     connect(ui->checkSave, SIGNAL(stateChanged(int)), SLOT(onCheckSave_stateChanged(int)));
 
@@ -103,6 +116,7 @@ void CWizUserCipherForm::cipherError()
     m_animation->setEndValue(pos);
     m_animation->start();
 
+    ui->editUserCipher->setGeometry(QRect(pos, ui->editUserCipher->size()));
     ui->editUserCipher->selectAll();
     ui->editUserCipher->setFocus();
 }
@@ -115,9 +129,11 @@ void CWizUserCipherForm::cipherCorrect()
 
 void CWizUserCipherForm::onButtonOK_clicked()
 {
-    m_userCipher = ui->editUserCipher->text();
+    if (!ui->editUserCipher->text().isEmpty()) {
+        m_userCipher = ui->editUserCipher->text();
 
-    emit cipherCheckRequest();
+        emit cipherCheckRequest();
+    }
 }
 
 void CWizUserCipherForm::onCheckSave_stateChanged(int state)
@@ -126,6 +142,17 @@ void CWizUserCipherForm::onCheckSave_stateChanged(int state)
         m_bSaveForSession = true;
     } else {
         m_bSaveForSession = false;
+    }
+}
+
+void CWizUserCipherForm::onCipher_changed(const QString &text)
+{
+    if (text.isEmpty()) {
+        ui->buttonOk->setStatusNormal();
+        ui->buttonOk->setLockNormalStatus(true);
+    } else {
+        ui->buttonOk->setLockNormalStatus(false);
+        ui->buttonOk->setStatusHot();
     }
 }
 

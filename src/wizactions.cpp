@@ -45,23 +45,22 @@ WIZACTION* CWizActions::actionsData()
 
     static WIZACTION arrayActions[] =
     {
-        {"actionPreference",                QObject::tr("Preference"), "", ""},
-        {"actionAbout",                     QObject::tr("About WizNote"), "", ""},
-#ifdef QT_DEBUG
-        {"actionAboutPlugins",              QObject::tr("About plugins"), "", ""},
-#endif
+        {"actionPreference",                QObject::tr("Preference..."), "", ""},
+        {"actionAbout",                     QObject::tr("About WizNote..."), "", ""},
         {"actionExit",                      QObject::tr("Exit"), "", ""},
-        {"actionLogout",                    QObject::tr("Logout"), "", ""},
+        {"actionLogout",                    QObject::tr("Logout..."), "", ""},
         {WIZACTION_GLOBAL_SYNC,             QObject::tr("Sync"), "", ""},
         {WIZACTION_GLOBAL_NEW_DOCUMENT,     QObject::tr("New Note"), "", "Ctrl+N"},
+        {WIZACTION_GLOBAL_SAVE_AS_PDF,      QObject::tr("Save as PDF..."), "", ""},
         //{WIZACTION_GLOBAL_VIEW_MESSAGES,    QObject::tr("View messages"), "", ""},
         {"actionGoBack",                    QObject::tr("Back"), "", ""},
         {"actionGoForward",                 QObject::tr("Forward"), "", ""},
-        {"actionConsole",                   QObject::tr("Console"), "", ""},
+        {"actionConsole",                   QObject::tr("Console..."), "", ""},
         {"actionRebuildFTS",                QObject::tr("Rebuild full text search index"), "", ""},
-        {"actionSearch",                    QObject::tr("Search document"), "", "Alt+Ctrl+F"},
+        {"actionSearch",                    QObject::tr("Search note"), "", "Alt+Ctrl+F"},
         {"actionResetSearch",               QObject::tr("Reset search"), "", "Ctrl+R"},
-        {"actionFeedback",                  QObject::tr("User support"), "", ""},
+        {"actionFeedback",                  QObject::tr("User feedback..."), "", ""},
+        {"actionSupport",                  QObject::tr("User support..."), "", ""},
 
         // editing
         {WIZACTION_EDITOR_UNDO,             QObject::tr("Undo"), "", "Ctrl+Z"},
@@ -95,8 +94,9 @@ WIZACTION* CWizActions::actionsData()
         {WIZACTION_FORMAT_INSERT_HORIZONTAL,    QObject::tr("Insert horizontal"), "", "Shift+Ctrl+H"},
         {WIZACTION_FORMAT_INSERT_DATE,          QObject::tr("Insert date"), "", "Shift+Ctrl+D"},
         {WIZACTION_FORMAT_INSERT_TIME,          QObject::tr("Insert time"), "", "Shift+Ctrl+Alt+D"},
+        {WIZACTION_FORMAT_INSERT_CHECKLIST,      QObject::tr("Insert check list"), "", "Ctrl+O"},
         {WIZACTION_FORMAT_REMOVE_FORMAT,        QObject::tr("Remove format"), "", ""},
-        {WIZACTION_FORMAT_VIEW_SOURCE,          QObject::tr("View html source"), "", ""},
+        {WIZACTION_FORMAT_VIEW_SOURCE,          QObject::tr("View html source..."), "", ""},
 
         {"", "", "", ""}
     };
@@ -123,8 +123,6 @@ QAction* CWizActions::addAction(WIZACTION& action)
 
     if (action.strName == "actionAbout")
         pAction->setMenuRole(QAction::AboutRole);
-    else if (action.strName == "actionAboutPlugins")
-        pAction->setMenuRole(QAction::ApplicationSpecificRole);
     else if (action.strName == "actionPreference")
         pAction->setMenuRole(QAction::PreferencesRole);
     else if (action.strName == "actionExit")
@@ -230,13 +228,6 @@ void CWizActions::buildMenu(QMenu* pMenu, CWizSettings& settings, const QString&
         // no fullscreen mode menu
 #ifndef Q_OS_MAC
         if (strAction == WIZACTION_GLOBAL_TOGGLE_FULLSCREEN) {
-            index++;
-            continue;
-        }
-#endif
-
-#ifndef QT_DEBUG
-        if (strAction == "actionAboutPlugins") {
             index++;
             continue;
         }

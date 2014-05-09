@@ -10,6 +10,7 @@ class QString;
 class QPolygon;
 class QFont;
 class QIcon;
+class CWizSettings;
 
 namespace Utils {
 class StyleHelper
@@ -42,6 +43,7 @@ public:
     static QString themeName();
     static QIcon loadIcon(const QString& strName);
 
+    static int treeViewItemHeight();
     static QColor treeViewBackground();
     static QColor treeViewItemBackground(int stat);
     static QColor treeViewItemCategoryBackground();
@@ -49,10 +51,15 @@ public:
     static QColor treeViewItemText(bool bSelected);
     static QColor treeViewItemTextExtend(bool bSelected);
     static QColor treeViewItemLinkText();
+    static QColor treeViewItemBottomLine();
+    static QColor treeViewItemMessageBackground();
+    static QColor treeViewItemMessageText();
 
     static void drawTreeViewItemBackground(QPainter* p, const QRect& rc, bool bFocused);
     static void drawTreeViewItemIcon(QPainter* p, const QRect& rc, const QIcon& icn, bool bSelected);
     static void drawTreeViewBadge(QPainter* p, const QRect& rc, const QString& str);
+
+    static int listViewSortControlWidgetHeight();
 
     static int listViewItemHeight(int nType);
     static QColor listViewBackground();
@@ -61,11 +68,13 @@ public:
     static QColor listViewItemTitle(bool bSelected, bool bFocused);
     static QColor listViewItemLead(bool bSelected, bool bFocused);
     static QColor listViewItemSummary(bool bSelected, bool bFocused);
+    static QColor listViewMultiLineFirstLine(bool bSelected);
+    static QColor listViewMultiLineOtherLine(bool bSelected);
 
-    static QRect initListViewItemPainter(QPainter* p, QPixmap* pm, const QRect& lrc, bool bFocused, bool bSelected);
+    static QRect initListViewItemPainter(QPainter* p, const QRect& lrc, bool bFocused, bool bSelected);
     static void drawListViewItemThumb(QPainter* p, const QRect& rc, int nBadgeType,
                                       const QString& title, const QString& lead, const QString& abs,
-                                      bool bFocused, bool bSelected);
+                                      bool bFocused, bool bSelected, bool bContainsAttach);
 
     //static void drawListViewItem(QPainter* p, const QRect& rc);
 
@@ -79,6 +88,7 @@ public:
     static void drawListViewItemBackground(QPainter* p, const QRect& rc, bool bFocus, bool bSelect);
     static QRect drawThumbnailPixmap(QPainter* p, const QRect& rc, const QPixmap& pm);
     static QRect drawBadgeIcon(QPainter* p, const QRect& rc, int height, int type, bool bFocus, bool bSelect);
+    static QRect drawAttachIcon(QPainter* p, const QRect& rc, bool bFocus, bool bSelect);
 
     static int avatarHeight();
     static QSize avatarSize();
@@ -88,6 +98,11 @@ public:
     static int fontNormal(QFont& f);
     static int fontExtend(QFont& f);
 
+    static int titleEditorHeight();
+    static int editToolBarHeight();
+
+private:
+    static CWizSettings* m_settings;
 };
 } // namespace Utils
 

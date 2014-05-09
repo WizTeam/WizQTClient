@@ -11,18 +11,25 @@ public:
     static QString appPath();
     static QString resourcesPath();
     static QString themePath(const QString& strThemeName);
+    static QString skinResourcesPath(const QString& strSkinName);
     static QString pluginsPath();
     static QString dataStorePath();
     static QString cachePath();
     static QString avatarPath();
     static QString tempPath();
-    static QString logPath();
-    static QString globalSettingsFilePath();
-    static QString userSettingsFilePath(const QString strUserId);
+    static QString upgradePath();
+    static QString logFile();
+    static QString globalSettingsFile();
+    static QString userSettingsFile(const QString strUserId);
+    static QString qtLocaleFileName(const QString& strLocale);
+    static QString localeFileName(const QString& strLocale);
 
     // helpers
     static void addBackslash(QString& strPath);
     static void ensurePathExists(const QString& path);
+
+private:
+    static QString logFilePath();
 };
 
 } // namespace Utils

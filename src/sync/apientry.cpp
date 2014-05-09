@@ -48,6 +48,7 @@
 #define WIZNOTE_API_COMMAND_USER_INFO       "user_info"
 #define WIZNOTE_API_COMMAND_VIEW_GROUP      "view_group"
 #define WIZNOTE_API_COMMAND_FEEDBACK        "feedback"
+#define WIZNOTE_API_COMMAND_SUPPORT        "support"
 #define WIZNOTE_API_COMMAND_COMMENT         "comment"
 #define WIZNOTE_API_COMMAND_COMMENT_COUNT   "comment_count"
 
@@ -189,6 +190,11 @@ QString ApiEntryPrivate::feedbackUrl()
     return m_strFeedbackUrl;
 }
 
+QString ApiEntryPrivate::supportUrl()
+{
+    return urlFromCommand(WIZNOTE_API_COMMAND_SUPPORT);
+}
+
 QString ApiEntryPrivate::accountInfoUrl(const QString& strToken)
 {
     QString strExt = QString("token=%1").arg(strToken);
@@ -326,6 +332,13 @@ QString ApiEntry::feedbackUrl()
     return d->feedbackUrl();
 }
 
+QString ApiEntry::supportUrl()
+{
+    if (!d)
+        d = new ApiEntryPrivate();
+    return d->supportUrl();
+}
+
 QString ApiEntry::accountInfoUrl(const QString& strToken)
 {
     if (!d)
@@ -380,3 +393,4 @@ QString ApiEntry::kUrlFromGuid(const QString& strToken, const QString& strKbGUID
         d = new ApiEntryPrivate();
     return d->kUrlFromGuid(strToken, strKbGUID);
 }
+

@@ -3,6 +3,7 @@
 
 #include <QPointer>
 #include <QMap>
+#include <QMutex>
 
 #include "wizIndex.h"
 #include "wizthumbindex.h"
@@ -12,6 +13,7 @@
 class CWizDatabase;
 class CWizFolder;
 class CWizDocument;
+class CWizObjectDataDownloaderHost;
 
 class CWizDocument : public QObject
 {
@@ -96,6 +98,7 @@ private:
 
     bool m_bIsPersonal;
     QMap<QString, CWizDatabase*> m_mapGroups;
+    QMutex m_mtxTempFile;
 
 public:
     CWizDatabase();
@@ -167,6 +170,17 @@ public:
     virtual bool OnUploadObject(const QString& strGUID,
                                 const QString& strObjectType);
 
+    //copy Document
+    //create new doc and copy data, set the new doc time as the source doc.
+    virtual bool CopyDocumentTo(const QString& strGUID, CWizDatabase& targetDB,
+                                  const QString& strTargetLocation, const WIZTAGDATA &targetTag,
+                                QString& strResultGUID, CWizObjectDataDownloaderHost *downloaderHost);
+    //if file doesn't exist, download it.
+    bool makeSureDocumentExist(const WIZDOCUMENTDATA& doc, CWizObjectDataDownloaderHost* downloaderHost);
+    bool makeSureAttachmentExist(const WIZDOCUMENTATTACHMENTDATAEX& attachData,
+                                 CWizObjectDataDownloaderHost* downloaderHost);
+    bool tryAccessDocument(const WIZDOCUMENTDATA& doc);
+
     // info and groups
     virtual void SetUserInfo(const WIZUSERINFO& info);
     virtual void SetKbInfo(const QString& strKBGUID, const WIZKBINFO& info);
@@ -174,6 +188,7 @@ public:
     virtual bool OnDownloadBizs(const CWizBizDataArray& arrayBiz);
     virtual IWizSyncableDatabase* GetGroupDatabase(const WIZGROUPDATA& group);
     virtual void CloseGroupDatabase(IWizSyncableDatabase* pDatabase);
+    virtual IWizSyncableDatabase* GetPersonalDatabase();
 
     virtual bool IsGroup();
     virtual bool IsGroupAdmin();
@@ -224,8 +239,11 @@ public:
     virtual void ClearError();
     virtual void OnTrafficLimit(const QString& strErrorMessage);
     virtual void OnStorageLimit(const QString& strErrorMessage);
+    virtual void OnBizServiceExpr(const QString& strBizGUID, const QString& strErrorMessage);
     virtual bool IsTrafficLimit();
     virtual bool IsStorageLimit();
+    virtual bool IsBizServiceExpr(const QString& strBizGUID);
+    virtual bool GetStorageLimitMessage(QString& strErrorMessage);
 
     virtual bool setMeta(const QString& strSection, const QString& strKey, const QString& strValue);
     virtual QString meta(const QString& strSection, const QString& strKey);
@@ -263,9 +281,11 @@ public:
     QString GetDocumentFileName(const QString& strGUID) const;
     QString GetAttachmentFileName(const QString& strGUID) const;
     QString GetAvatarPath() const;
+    QString GetDefaultNoteLocation() const;
 
     bool GetUserName(QString& strUserName);
     bool SetUserName(const QString& strUserName);
+    bool GetUserDisplayName(QString& strDisplayName);
 
     QString getUserId() const { return m_strUserId; }
     //QString getPassword() const { return m_strPassword; }
@@ -286,6 +306,7 @@ public:
     bool GetUserBizInfo(bool bAllowEmptyBiz, CWizBizDataArray& arrayBiz);
     bool GetUserBizInfo(bool bAllowEmptyBiz, const CWizGroupDataArray& arrayAllGroup, CWizBizDataArray& arrayBiz);
     bool GetBizData(const QString& bizGUID, WIZBIZDATA& biz);
+    bool GetBizGUID(const QString& strGroupGUID, QString& strBizGUID);
     bool GetGroupData(const QString& groupGUID, WIZGROUPDATA& group);
     //
     static bool IsEmptyBiz(const CWizGroupDataArray& arrayGroup, const QString& bizGUID);
@@ -308,15 +329,17 @@ public:
     bool UpdateAttachments(const CWizDocumentAttachmentDataArray& arrayAttachment);
 
     bool UpdateDocumentData(WIZDOCUMENTDATA& data, const QString& strHtml,
-                            const QString& strURL, int nFlags);
+                            const QString& strURL, int nFlags, bool notifyDataModify = true);
 
     bool UpdateDocumentAbstract(const QString& strDocumentGUID);
 
-    virtual bool UpdateDocumentDataMD5(WIZDOCUMENTDATA& data, const CString& strZipFileName);
+    virtual bool UpdateDocumentDataMD5(WIZDOCUMENTDATA& data, const CString& strZipFileName, bool notifyDataModify = true);
 
     bool DeleteTagWithChildren(const WIZTAGDATA& data, bool bLog);
     bool DeleteAttachment(const WIZDOCUMENTATTACHMENTDATA& data, bool bLog, bool bReset = true);
 
+    bool IsDocumentModified(const CString& strGUID);
+    bool IsAttachmentModified(const CString& strGUID);
     bool IsDocumentDownloaded(const CString& strGUID);
     bool IsAttachmentDownloaded(const CString& strGUID);
     bool GetAllObjectsNeedToBeDownloaded(CWizObjectDataArray& arrayData, int nTimeLine);
@@ -326,7 +349,11 @@ public:
 
     bool GetDocumentsByTag(const WIZTAGDATA& tag, CWizDocumentDataArray& arrayDocument);
 
-    bool LoadDocumentData(const QString& strDocumentGUID, QByteArray& arrayData);
+    //if "forceLoadData == true", just load doc data, don't care it was encrypted or not.
+    //if "forceLoadData == false", try to decrypt encrypted file before load doc data.
+    bool LoadDocumentData(const QString& strDocumentGUID, QByteArray& arrayData,
+                          bool forceLoadData = true);
+    bool WriteDataToDocument(const QString& strDocumentGUID, const QByteArray &arrayData);
     bool LoadAttachmentData(const CString& strDocumentGUID,
                             QByteArray& arrayData);
     bool LoadCompressedAttachmentData(const QString& strDocumentGUID,
@@ -354,13 +381,23 @@ public:
                                const CString& strURL, \
                                WIZDOCUMENTDATA& data);
 
+    bool CreateDocumentAndInit(const WIZDOCUMENTDATA& sourceDoc,  \
+                               const QByteArray& baData, \
+                               const QString& strLocation, \
+                               const WIZTAGDATA& tag, \
+                               WIZDOCUMENTDATA& newDoc);
+
     bool AddAttachment(const WIZDOCUMENTDATA& document, \
                        const CString& strFileName, \
                        WIZDOCUMENTATTACHMENTDATA& dataRet);
 
 
     bool DocumentToTempHtmlFile(const WIZDOCUMENTDATA& document, \
-                                QString& strTempHtmlFileName);
+                                QString& strTempHtmlFileName, \
+                                const QString& strTargetFileNameWithoutPath = "index.html");
+    bool extractZiwFileToTempFolder(const WIZDOCUMENTDATA& document, QString& strTempFolder);
+    bool encryptTempFolderToZiwFile(WIZDOCUMENTDATA& document, const QString& strTempFoler, \
+                                    const QString& strIndexFile, const QStringList& strResourceList);
 
     bool IsFileAccessible(const WIZDOCUMENTDATA& document);
 
@@ -390,6 +427,18 @@ Q_SIGNALS:
     void processLog(const QString& msg);
 
     void folderPositionChanged();
+
+private:
+    //should make sure sourceDoc already exist before use this.
+    bool CopyDocumentData(const WIZDOCUMENTDATA& sourceDoc, CWizDatabase& targetDB, \
+                                WIZDOCUMENTDATA& targetDoc);
+    bool CopyDocumentAttachment(const WIZDOCUMENTDATA& sourceDoc, CWizDatabase& targetDB, \
+                                        WIZDOCUMENTDATA& targetDoc, CWizObjectDataDownloaderHost* downloaderHost);
+    bool CopyDocumentAttachment(const WIZDOCUMENTATTACHMENTDATAEX& sourceData, \
+                                const CWizDatabase& targetDB, WIZDOCUMENTATTACHMENTDATAEX& targetData, \
+                                QString& strFileName);
+
+    bool GetBizMetaName(const QString& strBizGUID, QString& strMetaName);
 };
 
 

@@ -4,6 +4,7 @@
 #include <QApplication>
 #include <QDir>
 #include <QDebug>
+#include "mac/wizmachelper.h"
 
 namespace Utils {
 
@@ -40,11 +41,25 @@ QString PathResolve::themePath(const QString& strThemeName)
     return resourcesPath() + "skins/" + strThemeName + "/";
 }
 
+QString PathResolve::skinResourcesPath(const QString &strSkinName)
+{
+    Q_ASSERT(!strSkinName.isEmpty());
+    return resourcesPath() + "skins/" + strSkinName + "/";
+}
+
 QString PathResolve::dataStorePath()
 {
-    QString strPath = QDir::homePath();
+    QString strPath;
+    strPath= QDir::homePath();
+#ifdef Q_OS_MAC
+    #ifdef BUILD4APPSTORE
+        strPath += "/Documents/";
+    #else
+        strPath += "/.wiznote/";
+    #endif
+#else
     strPath += "/.wiznote/";
-
+#endif
     ensurePathExists(strPath);
     return strPath;
 }
@@ -53,10 +68,14 @@ QString PathResolve::cachePath()
 {
     QString strCachePath = qgetenv("XDG_CACHE_HOME");
     if (strCachePath.isEmpty()) {
-#ifdef Q_OS_LINUX
-        strCachePath = qgetenv("HOME") + "/.cache/wiznote/";
-#else
+#ifdef Q_OS_MAC
+    #ifdef BUILD4APPSTORE
+        strCachePath = QDir::homePath() + "/Library/Caches/";
+    #else
         strCachePath = dataStorePath() + "cache/";
+    #endif
+#else
+        strCachePath = qgetenv("HOME") + "/.cache/wiznote/";
 #endif
     } else {
         strCachePath += "/wiznote/";
@@ -73,11 +92,27 @@ QString PathResolve::avatarPath()
     return strPath;
 }
 
-QString PathResolve::logPath()
+QString PathResolve::logFilePath()
 {
-    QString strPath = dataStorePath() + "log/";
+    QString strPath;
+#ifdef Q_OS_MAC
+    #ifdef BUILD4APPSTORE
+        strPath = QDir::homePath() + "/Library/Logs/";
+    #else
+        strPath = dataStorePath() + "log/";
+    #endif
+#else
+    strPath = dataStorePath() + "log/";
+#endif
+
     ensurePathExists(strPath);
     return strPath;
+}
+
+QString PathResolve::logFile()
+{
+    QString strLogfile = logFilePath() + "wiznote.log";
+    return strLogfile;
 }
 
 QString PathResolve::pluginsPath()
@@ -88,12 +123,19 @@ QString PathResolve::pluginsPath()
 QString PathResolve::tempPath()
 {
     QString path = QDir::tempPath() + "/WizNote/";
-    ensurePathExists(path);
 
+    ensurePathExists(path);
     return path;
 }
 
-QString PathResolve::globalSettingsFilePath()
+QString PathResolve::upgradePath()
+{
+    QString strPath = dataStorePath() + "/update/";
+    ensurePathExists(strPath);
+    return strPath;
+}
+
+QString PathResolve::globalSettingsFile()
 {
     QString strConfigHome = dataStorePath();
 
@@ -101,9 +143,19 @@ QString PathResolve::globalSettingsFilePath()
     return strConfigHome + "wiznote.ini";
 }
 
-QString PathResolve::userSettingsFilePath(const QString strUserId)
+QString PathResolve::userSettingsFile(const QString strUserId)
 {
     return dataStorePath() + strUserId + "/wiznote.ini";
+}
+
+QString PathResolve::qtLocaleFileName(const QString &strLocale)
+{
+    return resourcesPath() + "locales/qt_" + strLocale + ".qm";
+}
+
+QString PathResolve::localeFileName(const QString &strLocale)
+{
+    return resourcesPath() + "locales/wiznote_" + strLocale + ".qm";
 }
 
 void PathResolve::addBackslash(QString& strPath)

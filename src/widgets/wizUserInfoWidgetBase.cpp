@@ -100,6 +100,7 @@ int CWizUserInfoWidgetBase::textWidth() const
 }
 void CWizUserInfoWidgetBase::updateUI()
 {
+    update();
 }
 
 #endif //Q_OS_MAC

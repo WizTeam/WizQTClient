@@ -8,6 +8,8 @@
 #include "wizSearchWidget_mm.h"
 
 
+
+
 //@interface CWizToolBarActionItemView: NSView {
 //NSImage* m_image;
 //}
@@ -56,7 +58,7 @@ public:
         , m_helper(this, action, NULL)
     {
         m_nsImages = [[NSMutableDictionary alloc] init];
-        connect(action, SIGNAL(changed()), SLOT(on_action_changed()));
+        //connect(action, SIGNAL(changed()), SLOT(on_action_changed()));
     }
     virtual ~CWizMacToolBarActionItem()
     {
@@ -79,6 +81,9 @@ public:
     }
     virtual NSToolbarItem* toItem()
     {
+        if (m_item != nil)
+            return m_item;
+        //
         NSString* itemId = itemIdentifier();
         //
         NSToolbarItem *item = [[[NSToolbarItem alloc] initWithItemIdentifier: itemId] autorelease];
@@ -104,9 +109,9 @@ public:
         [item setTarget : m_delegate];
         [item setAction : @selector(itemClicked:)];
         [item setEnabled: (m_action->isEnabled() ? YES : NO)];
-
-        [item setMinSize:NSMakeSize(24, 24)];
-        [item setMaxSize:NSMakeSize(24, 24)];
+        //
+        [item setMinSize:NSMakeSize(16, 16)];
+        [item setMaxSize:NSMakeSize(64, 64)];
 
         m_item = item;
         return item;
@@ -119,7 +124,12 @@ public:
     {
         if (m_item)
         {
-            [m_item setEnabled: (m_action->isEnabled() ? YES : NO)];
+            bool oldEnabled = [m_item isEnabled] ? true : false;
+            bool newEnabled = m_action->isEnabled() ? true : false;
+            if (oldEnabled != newEnabled)
+            {
+                [m_item setEnabled: (newEnabled ? YES : NO)];
+            }
             //
             QIcon icon = m_action->icon();
             //qDebug() << icon.cacheKey();
@@ -224,8 +234,11 @@ public:
         [pItem setLabel: labelString];
         [pItem setPaletteLabel: labelString];
         [pItem setToolTip: tooltipString];
-
+#if QT_VERSION >= 0x050200
         NSView *nsview = m_widget->cocoaView();
+#else
+        NSView* nsview = (NSView *)m_widget->cocoaView();
+#endif
         [pItem setView: nsview];
         [pItem setMinSize:NSMakeSize(m_widget->sizeHint().width(), m_widget->sizeHint().height())];
         [pItem setMaxSize:NSMakeSize(m_widget->sizeHint().width(), m_widget->sizeHint().height())];
@@ -283,9 +296,14 @@ public:
         [toolbarItem setToolTip: tooltipString];
 
         // Use a custom view, a text field, for the search item
-        [toolbarItem setView: m_searchField->cocoaView()];
-        [toolbarItem setMinSize:NSMakeSize(30, NSHeight([m_searchField->cocoaView() frame]))];
-        [toolbarItem setMaxSize:NSMakeSize(250,NSHeight([m_searchField->cocoaView() frame]))];
+#if QT_VERSION >= 0x050200
+        NSView* nsview = m_searchField->cocoaView();
+#else
+        NSView* nsview = (NSView *)m_searchField->cocoaView();
+#endif
+        [toolbarItem setView: nsview];
+        [toolbarItem setMinSize:NSMakeSize(24, NSHeight([nsview frame]))];
+        [toolbarItem setMaxSize:NSMakeSize(250,NSHeight([nsview frame]))];
 
         return toolbarItem;
     }
@@ -357,6 +375,10 @@ NSMutableArray *itemIdentifiers(const QList<CWizMacToolBarItem *> *items, bool c
     return [self itemIdentifierToItem:itemIdentifier];
 }
 
+//-(BOOL)validateToolbarItem:(NSToolbarItem *)toolbarItem
+//{
+//    return [toolbarItem isEnabled];
+//}
 - (BOOL) resignFirstResponder
 {
     return YES;

@@ -19,10 +19,11 @@ UE.I18N['zh-cn'] = {
         'insertvideo':'视频', 'help':'帮助', 'justifyleft':'居左对齐', 'justifyright':'居右对齐', 'justifycenter':'居中对齐',
         'justifyjustify':'两端对齐', 'forecolor':'字体颜色', 'backcolor':'背景色', 'insertorderedlist':'有序列表',
         'insertunorderedlist':'无序列表', 'fullscreen':'全屏', 'directionalityltr':'从左向右输入', 'directionalityrtl':'从右向左输入',
-        'rowspacingtop':'段前距', 'rowspacingbottom':'段后距', 'highlightcode':'插入代码', 'pagebreak':'分页', 'insertframe':'插入Iframe', 'imagenone':'默认',
+        'rowspacingtop':'段前距', 'rowspacingbottom':'段后距',  'pagebreak':'分页', 'insertframe':'插入Iframe', 'imagenone':'默认',
         'imageleft':'左浮动', 'imageright':'右浮动', 'attachment':'附件', 'imagecenter':'居中', 'wordimage':'图片转存',
         'lineheight':'行间距','edittip' :'编辑提示','customstyle':'自定义标题', 'autotypeset':'自动排版', 'webapp':'百度应用',
-        'touppercase':'字母大写', 'tolowercase':'字母小写','background':'背景','template':'模板','scrawl':'涂鸦','music':'音乐',inserttable:'插入表格'
+        'touppercase':'字母大写', 'tolowercase':'字母小写','background':'背景','template':'模板','scrawl':'涂鸦','music':'音乐',inserttable:'插入表格',
+        'drafts': '从草稿箱加载', 'charts': '图表'
     },
     'insertorderedlist':{
         'num':'1,2,3...',
@@ -120,6 +121,7 @@ UE.I18N['zh-cn'] = {
         'tablecenter':'居中显示',
         'tableright':'右浮动',
         'edittd':"单元格属性",
+        'setbordervisible':'设置表格边线可见',
         'justifyleft':'左对齐',
         'justifyright':'右对齐',
         'justifycenter':'居中对齐',
@@ -139,6 +141,8 @@ UE.I18N['zh-cn'] = {
         'deletecaption':'删除表格名称',
         'inserttitle':'插入表格标题行',
         'deletetitle':'删除表格标题行',
+        'inserttitlecol':'插入表格标题列',
+        'deletetitlecol':'删除表格标题列',
         'averageDiseRow':'平均分布各行',
         'averageDisCol':'平均分布各列',
         'mergeright':"向右合并",
@@ -149,6 +153,8 @@ UE.I18N['zh-cn'] = {
         'splittocols':"拆分成列",
         'splittorows':"拆分成行",
         'tablesort':'表格排序',
+        'enablesort':'设置表格可排序',
+        'disablesort':'取消表格可排序',
         'reversecurrent':'逆序当前',
         'orderbyasc':'按ASCII字符升序',
         'reversebyasc':'按ASCII字符降序',
@@ -164,8 +170,7 @@ UE.I18N['zh-cn'] = {
         'copy':"复制(Ctrl + c)",
         'copymsg':"请使用 'Ctrl + c'执行复制操作",
         'paste':"粘贴(Ctrl + v)",
-         'pastemsg':"请使用 'Ctrl + v'执行复制操作",
-        'highlightcode':'插入代码'
+         'pastemsg':"请使用 'Ctrl + v'执行复制操作"
     },
 
     'anthorMsg':"链接",
@@ -208,9 +213,10 @@ UE.I18N['zh-cn'] = {
     'background':{
         'static':{
             'lang_background_normal':'背景设置',
-            'lang_background_local':'本地图片',
+            'lang_background_local':'在线图片',
             'lang_background_set':'选项',
-            'lang_background_none':'无',
+            'lang_background_none':'无背景色',
+            'lang_background_colored':'有背景色',
             'lang_background_color':'颜色设置',
             'lang_background_netimg':'网络图片',
             'lang_background_align':'对齐方式',
@@ -243,7 +249,8 @@ UE.I18N['zh-cn'] = {
             'imgSearchReset':{value:"清空搜索"},
             'upload':{style:'background: url(upload.png);'},
             'duiqi':{style:'background: url(imglabel.png) -12px 2px no-repeat;'},
-            'lang_savePath':'选择保存目录'
+            'lang_savePath':'选择保存目录：',
+            'lang_load_savePath': '正在读取目录...'
         },
         'netError':"网络链接错误，请检查配置后重试！",
         'noUploadImage':"当前未上传过任何图片！",
@@ -314,6 +321,29 @@ UE.I18N['zh-cn'] = {
             'lang_input_anchorName':'锚点名字：'
         }
     },
+    'charts':{
+        'static':{
+            'lang_data_source':'数据源：',
+            'lang_chart_format': '图表格式：',
+            'lang_data_align': '数据对齐方式',
+            'lang_chart_align_same': '数据源与图表X轴Y轴一致',
+            'lang_chart_align_reverse': '数据源与图表X轴Y轴相反',
+            'lang_chart_title': '图表标题',
+            'lang_chart_main_title': '主标题：',
+            'lang_chart_sub_title': '子标题：',
+            'lang_chart_x_title': 'X轴标题：',
+            'lang_chart_y_title': 'Y轴标题：',
+            'lang_chart_tip': '提示文字',
+            'lang_cahrt_tip_prefix': '提示文字前缀：',
+            'lang_cahrt_tip_description': '仅饼图有效， 当鼠标移动到饼图中相应的块上时，提示框内的文字的前缀',
+            'lang_chart_data_unit': '数据单位',
+            'lang_chart_data_unit_title': '单位：',
+            'lang_chart_data_unit_description': '显示在每个数据点上的数据的单位， 比如： 温度的单位 ℃',
+            'lang_chart_type': '图表类型：',
+            'lang_prev_btn': '上一个',
+            'lang_next_btn': '下一个'
+        }
+    },
     'attachment':{
         'static':{
             'lang_input_fileStatus':' 当前未上传文件',
@@ -346,12 +376,6 @@ UE.I18N['zh-cn'] = {
         'fileCanceling':'取消中，请等待……',
         'stopUploading':'上传已停止……'
     },
-    'highlightcode':{
-        'static':{
-            'lang_input_selectLang':'选择语言'
-        },
-        importCode:'请输入代码'
-    },
     'emotion':{
         'static':{
             'lang_input_choice':'精选',
@@ -375,7 +399,7 @@ UE.I18N['zh-cn'] = {
         'static':{
             'lang_input_about':'关于UEditor',
             'lang_input_shortcuts':'快捷键',
-            'lang_input_version':'版本:1.2.6',
+            'lang_input_version':'版本:1.3.6',
             'lang_input_introduction':'UEditor是由百度web前端研发部开发的所见即所得富文本web编辑器，具有轻量，可定制，注重用户体验等特点。开源基于BSD协议，允许自由使用和修改代码。',
             'lang_Txt_shortcuts':'快捷键',
             'lang_Txt_func':'功能',
@@ -419,7 +443,8 @@ UE.I18N['zh-cn'] = {
             lang_city:"城市",
             lang_address:"地址",
             city:{value:"北京"},
-            lang_search:"搜索"
+            lang_search:"搜索",
+            lang_dynamicmap:"插入动态地图"
         },
         cityMsg:"请选择城市",
         errorMsg:"抱歉，找不到该位置！"
@@ -457,7 +482,8 @@ UE.I18N['zh-cn'] = {
     'insertvideo':{
         'static':{
             lang_tab_insertV:"插入视频",
-//            lang_tab_searchV:"搜索视频",
+            lang_tab_searchV:"搜索视频",
+            lang_tab_uploadV:"上传视频",
             lang_video_url:"视频网址",
             lang_video_size:"视频尺寸",
             lang_videoW:"宽度",
@@ -466,7 +492,17 @@ UE.I18N['zh-cn'] = {
             videoSearchTxt:{value:"请输入搜索关键字！"},
             videoType:{options:["全部", "热门", "娱乐", "搞笑", "体育", "科技", "综艺"]},
             videoSearchBtn:{value:"百度一下"},
-            videoSearchReset:{value:"清空结果"}
+            videoSearchReset:{value:"清空结果"},
+
+            'lang_input_fileStatus':' 当前未上传文件',
+            'startUpload':{style:"background:url(upload.png) no-repeat;"},
+
+            lang_upload_size:"视频尺寸",
+            lang_upload_width:"宽度",
+            lang_upload_height:"高度",
+            lang_upload_alignment:"对齐方式",
+            lang_format_advice:"建议使用mp4格式."
+
         },
         numError:"请输入正确的数值，如123,400",
         floatLeft:"左浮动",
@@ -477,7 +513,35 @@ UE.I18N['zh-cn'] = {
         loading:" &nbsp;视频加载中，请等待……",
         clickToSelect:"点击选中",
         goToSource:'访问源视频',
-        noVideo:" &nbsp; &nbsp;抱歉，找不到对应的视频，请重试！"
+        noVideo:" &nbsp; &nbsp;抱歉，找不到对应的视频，请重试！",
+
+
+        'browseFiles':'文件浏览…',
+        'uploadSuccess':'上传成功!',
+        'delSuccessFile':'从成功队列中移除',
+        'delFailSaveFile':'移除保存失败文件',
+        'statusPrompt':' 个文件已上传！ ',
+        'flashVersionError':'当前Flash版本过低，请更新FlashPlayer后重试！',
+        'flashLoadingError':'Flash加载失败!请检查路径或网络状态',
+        'fileUploadReady':'等待上传……',
+        'delUploadQueue':'从上传队列中移除',
+        'limitPrompt1':'单次不能选择超过',
+        'limitPrompt2':'个文件！请重新选择！',
+        'delFailFile':'移除失败文件',
+        'fileSizeLimit':'文件大小超出限制！',
+        'emptyFile':'空文件无法上传！',
+        'fileTypeError':'文件类型错误！',
+        'unknownError':'未知错误！',
+        'fileUploading':'上传中，请等待……',
+        'cancelUpload':'取消上传',
+        'netError':'网络错误',
+        'failUpload':'上传失败!',
+        'serverIOError':'服务器IO错误！',
+        'noAuthority':'无权限！',
+        'fileNumLimit':'上传个数限制',
+        'failCheck':'验证失败，本次上传被跳过！',
+        'fileCanceling':'取消中，请等待……',
+        'stopUploading':'上传已停止……'
     },
     'spechars':{
         'static':{},
@@ -488,13 +552,15 @@ UE.I18N['zh-cn'] = {
         xlzm:"希腊字母",
         ewzm:"俄文字符",
         pyzm:"拼音字母",
-        zyzf:"注音及其他"
+        yyyb:"英语音标",
+        zyzf:"其他"
     },
     'edittable':{
         'static':{
             'lang_tableStyle':'表格样式',
-            'lang_insertCaption':'添加表格标题行',
-            'lang_insertTitle':'添加表格名称行',
+            'lang_insertCaption':'添加表格名称行',
+            'lang_insertTitle':'添加表格标题行',
+            'lang_insertTitleCol':'添加表格标题列',
             'lang_orderbycontent':"使表格内容可排序",
             'lang_tableSize':'自动调整表格尺寸',
             'lang_autoSizeContent':'按表格文字自适应',
@@ -505,7 +571,8 @@ UE.I18N['zh-cn'] = {
         },
         captionName:'表格名称',
         titleName:'标题',
-        cellsName:'内容'
+        cellsName:'内容',
+        errorMsg:'有合并单元格，不可排序'
     },
     'edittip':{
         'static':{

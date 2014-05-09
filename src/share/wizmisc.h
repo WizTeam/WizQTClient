@@ -57,19 +57,11 @@ BOOL WizStringSimpleSplit(const CString& str, char ch, CString& strLeft, CString
 
 CString WizDateToLocalString(const COleDateTime& t);
 
-QString WizGetAppPath();
-QString WizGetAppFileName();
-QString WizGetResourcesPath();
-QString WizGetDataStorePath();
-QString WizGetUpgradePath();
-CString WizGetSettingsFileName();
-QString WizGetLogFileName();
-QString WizGetLocaleFileName(const QString& strLocale);
-QString WizGetQtLocaleFileName(const QString& strLocale);
 void WizGetTranslatedLocales(QStringList& locales);
 QString WizGetTranslatedLocaleDisplayName(int index);
 
 bool WizIsPredefinedLocation(const QString& strLocation);
+QString WizGetAppFileName();
 QString WizLocation2Display(const QString& strLocation);
 
 qint64 WizGetFileSize(const CString& strFileName);
@@ -103,6 +95,7 @@ QString WizDecryptPassword(const QString& strEncryptedText);
 
 
 bool WizLoadUnicodeTextFromFile(const QString& strFileName, QString& steText);
+bool WizLoadUtf8TextFromFile(const QString& strFileName, QString& strText);
 bool WizSaveUnicodeTextToUtf16File(const QString& strFileName, const QString& strText);
 bool WizSaveUnicodeTextToUtf8File(const QString& strFileName, const QString& strText);
 bool WizSaveUnicodeTextToUtf8File(const QString& strFileName, const QByteArray& strText);
@@ -159,6 +152,11 @@ CString WizMakeValidFileNameNoPathReturn(const CString& strFileName);
 
 bool WizSaveDataToFile(const QString& strFileName, const QByteArray& arrayData);
 bool WizLoadDataFromFile(const QString& strFileName, QByteArray& arrayData);
+
+//web dialog
+void showWebDialogWithToken(const QString& windowTitle, const QString& url, QWidget* parent = 0);
+
+bool WizIsOffline();
 
 class CWizBufferAlloc
 {

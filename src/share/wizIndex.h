@@ -179,6 +179,7 @@ public:
     bool IsLocationEmpty(const CString& strLocation);
     bool GetAllLocations(CWizStdStringArray& arrayLocation);
     bool GetAllChildLocations(const CString& strLocation, CWizStdStringArray& arrayLocation);
+    void GetAllLocationsWithExtra(CWizStdStringArray& arrayLocation);
 
     // Extend
     bool GetSync(const CString& strLocation);
@@ -187,7 +188,7 @@ public:
     /* Document related operations */
     virtual bool UpdateDocumentInfoMD5(WIZDOCUMENTDATA& data);
     bool UpdateDocumentsInfoMD5(CWizDocumentDataArray& arrayDocument);
-    virtual bool UpdateDocumentDataMD5(WIZDOCUMENTDATA& data, const CString& strZipFileName);
+    virtual bool UpdateDocumentDataMD5(WIZDOCUMENTDATA& data, const CString& strZipFileName, bool notifyDataModify = true);
 
     bool CreateDocument(const CString& strTitle, const CString& strName, \
                         const CString& strLocation, const CString& strURL, \
@@ -256,8 +257,8 @@ public:
     bool GetDocumentsByGUIDs(const CWizStdStringArray& arrayGUID, CWizDocumentDataArray& arrayDocument);
 
     // Query by location(folder)
-    bool GetDocumentsSizeByLocation(const CString& strLocation,
-                                    int& size,
+    bool GetDocumentsCountByLocation(const CString& strLocation,
+                                    int& count,
                                     bool bIncludeSubFolders = false);
 
     bool GetDocumentsByLocation(const CString& strLocation,
@@ -357,6 +358,8 @@ public:
 
     qint64 GetObjectLocalVersion(const QString &strGUID, const QString &strType);
     bool ModifyObjectVersion(const CString& strGUID, const CString& strType, qint64 nVersion);
+
+    bool IsObjectDataModified(const CString& strGUID, const CString& strType);
 
     bool ModifyObjectModifiedTime(const CString& strGUID, const CString& strType, const COleDateTime& t);
     bool GetObjectModifiedTime(const CString& strGUID, const CString& strType, COleDateTime& t);

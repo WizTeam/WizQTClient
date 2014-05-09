@@ -15,6 +15,9 @@
 #include "wizmainwindow.h"
 #include "utils/stylehelper.h"
 #include "utils/logger.h"
+#include "utils/pathresolve.h"
+#include "sync/apientry.h"
+#include "wizWebSettingsDialog.h"
 
 #include "sync/avatar.h"
 #include "thumbcache.h"
@@ -26,8 +29,9 @@ using namespace Core::Internal;
 // Document actions
 #define WIZACTION_LIST_DELETE   QObject::tr("Delete")
 #define WIZACTION_LIST_TAGS     QObject::tr("Tags...")
-#define WIZACTION_LIST_MOVE_DOCUMENT QObject::tr("Move Document")
-#define WIZACTION_LIST_COPY_DOCUMENT QObject::tr("Copy Document")
+#define WIZACTION_LIST_MOVE_DOCUMENT QObject::tr("Move Note...")
+#define WIZACTION_LIST_COPY_DOCUMENT QObject::tr("Copy Note")
+#define WIZACTION_LIST_DOCUMENT_HISTORY QObject::tr("Note History...")
 
 
 CWizDocumentListView::CWizDocumentListView(CWizExplorerApp& app, QWidget *parent /*= 0*/)
@@ -65,7 +69,7 @@ CWizDocumentListView::CWizDocumentListView(CWizExplorerApp& app, QWidget *parent
     setStyle(::WizGetStyle(strSkinName));
 
     QPalette pal = palette();
-    pal.setColor(QPalette::Base, WizGetDocumentsBackroundColor(strSkinName));
+    pal.setColor(QPalette::Base, Utils::StyleHelper::listViewBackground());
     setPalette(pal);
 
     setCursor(QCursor(Qt::ArrowCursor));
@@ -140,6 +144,9 @@ CWizDocumentListView::CWizDocumentListView(CWizExplorerApp& app, QWidget *parent
     actionDeleteDoc->setShortcutContext(Qt::WidgetWithChildrenShortcut);
     actionMoveDoc->setShortcutContext(Qt::WidgetWithChildrenShortcut);
     //actionCopyDoc->setShortcutContext(Qt::WidgetWithChildrenShortcut);
+
+    m_menuDocument->addAction(WIZACTION_LIST_DOCUMENT_HISTORY, this,
+                              SLOT(on_action_documentHistory()));
 
     //m_actionEncryptDocument = new QAction(tr("Encrypt Document"), m_menu);
     //connect(m_actionEncryptDocument, SIGNAL(triggered()), SLOT(on_action_encryptDocument()));
@@ -217,7 +224,9 @@ int CWizDocumentListView::addDocument(const WIZDOCUMENTDATA& doc, bool sort)
 
 bool CWizDocumentListView::acceptDocument(const WIZDOCUMENTDATA& document)
 {
-    return m_app.category().acceptDocument(document);
+    bool categoryAccpet = m_app.category().acceptDocument(document);
+    bool kbGUIDSame = (m_app.category().selectedItemKbGUID() == document.strKbGUID);
+    return categoryAccpet && kbGUIDSame;
 }
 
 void CWizDocumentListView::addAndSelectDocument(const WIZDOCUMENTDATA& document)
@@ -301,6 +310,13 @@ void CWizDocumentListView::resetPermission()
     } else {
         findAction(WIZACTION_LIST_DELETE)->setEnabled(true);
     }
+
+    // disable note history if selection is not only one
+    if (items.count() != 1) {
+        findAction(WIZACTION_LIST_DOCUMENT_HISTORY)->setEnabled(false);
+    } else {
+        findAction(WIZACTION_LIST_DOCUMENT_HISTORY)->setEnabled(true);
+    }
 }
 
 QAction* CWizDocumentListView::findAction(const QString& strName)
@@ -376,7 +392,7 @@ void CWizDocumentListView::mouseMoveEvent(QMouseEvent* event)
 
 QPixmap WizGetDocumentDragBadget(int nCount)
 {
-    QString strFileName = WizGetResourcesPath() + "skins/document_drag.png";
+    QString strFileName = Utils::PathResolve::resourcesPath() + "skins/document_drag.png";
     QPixmap pixmap(strFileName);
 
     if (pixmap.isNull()) {
@@ -450,6 +466,7 @@ void CWizDocumentListView::startDrag(Qt::DropActions supportedActions)
     QList<QListWidgetItem*> items = selectedItems();
     foreach (QListWidgetItem* it, items) {
         if (CWizDocumentListViewItem* item = dynamic_cast<CWizDocumentListViewItem*>(it)) {
+//            CWizDatabase& db = CWizDatabaseManager::instance()->db(item->document().strKbGUID);
             arrayDocument.push_back(item->document());
         }
     }
@@ -599,7 +616,9 @@ void CWizDocumentListView::on_document_modified(const WIZDOCUMENTDATA& documentO
         } else {
             if (CWizDocumentListViewItem* pItem = documentItemAt(index)) {
                 pItem->reload(m_dbMgr.db(documentNew.strKbGUID));
+                pItem->setSortingType(m_nSortingType);
                 update(indexFromItem(pItem));
+                sortItems();
             }
         }
     } else {
@@ -662,6 +681,23 @@ void CWizDocumentListView::onThumbCacheLoaded(const QString& strKbGUID, const QS
             update(indexFromItem(pItem));
         }
     }
+}
+
+void CWizDocumentListView::on_action_documentHistory()
+{
+    QList<QListWidgetItem*> items = selectedItems();
+    if (items.count() != 1)
+        return;
+
+   CWizDocumentListViewItem* item = dynamic_cast<CWizDocumentListViewItem*>(items.first());
+   if (!item)
+       return;
+
+    CString strExt = WizFormatString2(_T("obj_guid=%1&kb_guid=%2&obj_type=document"),
+                                      item->document().strGUID, item->document().strKbGUID);
+    QString strUrl = WizService::ApiEntry::standardCommandUrl("document_history", WIZ_TOKEN_IN_URL_REPLACE_PART, strExt);
+
+    showWebDialogWithToken(tr("Note History"), strUrl, window());
 }
 
 //void CWizDocumentListView::on_message_created(const WIZMESSAGEDATA& data)
@@ -749,6 +785,7 @@ void CWizDocumentListView::on_action_deleteDocument()
 {
     QList<QListWidgetItem*> items = selectedItems();
 
+    blockSignals(true);
     int index = -1;
     foreach (QListWidgetItem* it, items) {
         if (CWizDocumentListViewItem* item = dynamic_cast<CWizDocumentListViewItem*>(it)) {
@@ -761,6 +798,7 @@ void CWizDocumentListView::on_action_deleteDocument()
             doc.Delete();
         }
     }
+    blockSignals(false);
 
     //change to next document
     int nItemCount = count();
@@ -768,6 +806,7 @@ void CWizDocumentListView::on_action_deleteDocument()
     {
         index = nItemCount - 1;
     }
+
     if(-1 < index)
     {
         setItemSelected(documentItemAt(index), true);
@@ -780,7 +819,7 @@ void CWizDocumentListView::on_action_deleteDocument()
 
 void CWizDocumentListView::on_action_moveDocument()
 {
-    CWizFolderSelector* selector = new CWizFolderSelector("Move documents", m_app, this);
+    CWizFolderSelector* selector = new CWizFolderSelector("Move notes", m_app, this);
     selector->setAcceptRoot(false);
 
     connect(selector, SIGNAL(finished(int)), SLOT(on_action_moveDocument_confirmed(int)));
@@ -826,16 +865,16 @@ void CWizDocumentListView::on_action_moveDocument_confirmed(int result)
     } else {
         MainWindow* mainWindow = qobject_cast<MainWindow*>(m_app.mainWindow());
         CWizProgressDialog* progress = mainWindow->progressDialog();
+        progress->show();
 
         int i = 0;
         foreach (const WIZDOCUMENTDATAEX& data, arrayDocument) {
             CWizDocument doc(m_dbMgr.db(), data);
             doc.MoveDocument(&folder);
 
-            progress->setActionString(tr("Move Document: %1 to %2").arg(data.strLocation).arg(strSelectedFolder));
+            progress->setActionString(tr("Move Note: %1 to %2").arg(data.strLocation).arg(strSelectedFolder));
             progress->setNotifyString(data.strTitle);
             progress->setProgress(arrayDocument.size(), i);
-            progress->exec();
 
             i++;
         }
@@ -934,17 +973,25 @@ void CWizDocumentListView::wheelEvent(QWheelEvent* event)
         //return;
     //}
 
-//#ifdef Q_OS_MAC
-//    QWheelEvent* wEvent = new QWheelEvent(event->pos(),
-//                                          event->globalPos(),
-//                                          event->delta()/2,
-//                                          event->buttons(),
-//                                          event->modifiers(),
-//                                          event->orientation());
-//#endif
-
-    QListWidget::wheelEvent(event);
-
+    int delta = event->delta();
+    switch (m_nViewType)
+    {
+    case TypeThumbnail:
+        delta = delta / 3;
+        break;
+    case TypeTwoLine:
+        delta = int(delta / 1.5);
+        break;
+    default:
+        break;
+    }
+    QWheelEvent* newEvent = new QWheelEvent(event->pos(),
+                                          event->globalPos(),
+                                          delta,
+                                          event->buttons(),
+                                          event->modifiers(),
+                                          event->orientation());
+    QListWidget::wheelEvent(newEvent);
 }
 
 void CWizDocumentListView::vscrollBeginUpdate(int delta)

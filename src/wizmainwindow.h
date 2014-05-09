@@ -29,7 +29,6 @@ class CWizFixedSpacer;
 class CWizSplitter;
 class CWizAnimateAction;
 class CWizOptionsWidget;
-class CWizStatusBar;
 
 class CWizSearchWidget;
 class CWizSearcher;
@@ -92,10 +91,8 @@ private:
     CWizUserSettings* m_settings;
     QPointer<CWizKMSyncThread> m_sync;
     QPointer<CWizUserVerifyDialog> m_userVerifyDialog;
-    QPointer<QTimer> m_syncTimer;
     QPointer<CWizConsoleDialog> m_console;
     QPointer<CWizUpgrade> m_upgrade;
-    QPointer<CWizUserCipherForm> m_cipherForm;
 
     CWizObjectDataDownloaderHost* m_objectDownloaderHost;
     //CWizUserAvatarDownloaderHost* m_avatarDownloaderHost;
@@ -107,7 +104,6 @@ private:
 #endif
 
     QMenuBar* m_menuBar;
-    CWizStatusBar* m_statusBar;
 
 #ifndef Q_OS_MAC
     QLabel* m_labelNotice;
@@ -150,7 +146,6 @@ private:
     void initMenuBar();
     void initToolBar();
     void initClient();
-    void initStatusBar();
 
     QWidget* createListView();
 
@@ -163,7 +158,6 @@ public:
     void showClient(bool visible) const { return m_doc->showClient(visible); }
 
     CWizActions* actions() const { return m_actions; }
-    CWizUserCipherForm* cipherForm() const { return m_cipherForm; }
     //CWizDownloadObjectDataDialog* objectDownloadDialog() const { return m_objectDownloadDialog; }
     CWizObjectDataDownloaderHost* downloaderHost() const { return m_objectDownloaderHost; }
     //CWizUserAvatarDownloaderHost* avatarHost() const { return m_avatarDownloaderHost; }
@@ -173,11 +167,14 @@ public:
     void resetPermission(const QString& strKbGUID, const QString& strDocumentOwner);
     void viewDocument(const WIZDOCUMENTDATA& data, bool addToHistory);
     void locateDocument(const WIZDOCUMENTDATA& data);
-
+    //
+    static void quickSyncKb(const QString& kbGuid);
 #ifndef Q_OS_MAC
     CWizFixedSpacer* findFixedSpacer(int index);
     void adjustToolBarSpacerToPos(int index, int pos);
 #endif
+
+    void checkWizUpdate();
 
 public Q_SLOTS:
     void on_actionExit_triggered();
@@ -190,8 +187,10 @@ public Q_SLOTS:
     void on_actionPreference_triggered();
     void on_actionRebuildFTS_triggered();
     void on_actionFeedback_triggered();
+    void on_actionSupport_triggered();
     void on_actionSearch_triggered();
     void on_actionResetSearch_triggered();
+    void on_actionSaveAsPDF_triggered();
 
     // menu editing
     void on_actionEditingUndo_triggered();
@@ -229,6 +228,7 @@ public Q_SLOTS:
     void on_actionFormatInsertTime_triggered();
     void on_actionFormatRemoveFormat_triggered();
     void on_actionEditorViewSource_triggered();
+    void on_actionFormatInsertCheckList_triggered();
 
     void on_search_timeout();
     void on_searchProcess(const QString &strKeywords, const CWizDocumentDataArray& arrayDocument, bool bEnd);
@@ -250,6 +250,7 @@ public Q_SLOTS:
     void on_options_settingsChanged(WizOptionsType type);
 
     void on_syncLogined();
+    void on_syncStarted(bool syncAll);
     void on_syncDone(int nErrorcode, const QString& strErrorMsg);
     void on_syncDone_userVerified();
 
@@ -258,6 +259,17 @@ public Q_SLOTS:
     void on_options_restartForSettings();
 
     void on_editor_statusChanged();
+
+    //js environment func
+    QString getSkinResourcePath() const;
+    QString getUserAvatarFilePath(int size) const;
+    QString getUserAlias() const;
+    QString getFormatedDateTime() const;
+    bool isPersonalDocument() const;
+    QString getCurrentNoteHtml() const;
+    void saveHtmlToCurrentNote(const QString& strHtml, const QString& strResource);
+    bool hasEditPermissionOnCurrentNote() const;
+    void setCurrentDocumentType(const QString& strType);
 
 #ifndef Q_OS_MAC
     void on_actionPopupMainMenu_triggered();
@@ -296,6 +308,12 @@ public:
     Q_INVOKABLE QObject* CreateWizObject(const QString& strObjectID);
     Q_INVOKABLE void SetSavingDocument(bool saving);
     Q_INVOKABLE void ProcessClipboardBeforePaste(const QVariantMap& data);
+
+private:
+    void syncAllData();
+
+    //FIXME：新建笔记时,为了将光标移到编辑器中,需要将Editor的模式设置为disable,此处需要将actions设置为可用
+    void setActionsEnableForNewNote();
 };
 
 } // namespace Internal

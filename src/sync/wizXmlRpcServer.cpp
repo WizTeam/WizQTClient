@@ -81,7 +81,6 @@ QString CWizXmlRpcServerBase::GetLastErrorMessage()
     return m_strLastErrorMessage;
 }
 
-
 bool CWizXmlRpcServerBase::xmlRpcCall(const QString& strMethodName, CWizXmlRpcResult& result, CWizXmlRpcValue* pParam1, CWizXmlRpcValue* pParam2 /*= NULL*/, CWizXmlRpcValue* pParam3 /*= NULL*/, CWizXmlRpcValue* pParam4 /*= NULL*/)
 {
     CWizXmlRpcRequest data(strMethodName);

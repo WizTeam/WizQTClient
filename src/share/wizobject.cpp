@@ -20,7 +20,7 @@ WIZUSERINFO::WIZUSERINFO(const WIZUSERINFO& info)
     strChatUrl = info.strChatUrl;
     strDownloadUrl = info.strDownloadUrl;
     bEnableGroup = info.bEnableGroup;
-    tTokenExpried = info.tTokenExpried;
+    //tTokenExpried = info.tTokenExpried;
     strInviteCode = info.strInviteCode;
     strMywizEmail = info.strMywizEmail;
     strNoticeLink = info.strNoticeLink;
@@ -739,14 +739,17 @@ WIZBIZDATA::WIZBIZDATA(const WIZBIZDATA& data)
     , bizGUID(data.bizGUID)
     , bizUserRole(data.bizUserRole)
     , bizLevel(data.bizLevel)
+    , bizIsDue(data.bizIsDue)
 {
 }
+
 bool WIZBIZDATA::LoadFromXmlRpc(CWizXmlRpcStructValue& data)
 {
     data.GetStr(_T("biz_name"), bizName);
     data.GetStr(_T("biz_guid"), bizGUID);
     data.GetInt(_T("user_group"), bizUserRole);
     data.GetInt(_T("biz_level"), bizLevel);
+    data.GetBool(_T("is_due"), bizIsDue);
 
     return !bizGUID.isEmpty()
             && !bizName.isEmpty();
@@ -843,282 +846,6 @@ bool WIZKVRETURN::LoadFromXmlRpc(CWizXmlRpcStructValue& data)
     return nCode == 200;
 }
 
-
-WIZTODODATA::WIZTODODATA()
-{
-    nOrder = 0;
-    bBlank = FALSE;
-    eState = todoState0;
-    ePrior = todoPriorNormal;
-    //
-    InitTime();
-}
-
-WIZTODODATA::WIZTODODATA(const CString& str, WIZTODOSTATE state, WIZTODOPRIOR prior)
-    : strText(str)
-    , eState(state)
-    , ePrior(prior)
-{
-    nOrder = 0;
-    bBlank = FALSE;
-    //
-    InitTime();
-}
-    //
-void WIZTODODATA::InitTime()
-{
-    static int index = 0;
-    index++;
-    //
-    tCreated = WizGetCurrentTime();
-    tModified = WizGetCurrentTime();
-    tCompleted = WizGetCurrentTime();
-    //
-    nOrder = WizTimeGetTimeT(tCreated);
-    nOrder = nOrder * 1000;
-    nOrder = nOrder + index;
-}
-
-void WIZTODODATA::AddLink(const CString& strDocumentGUID)
-{
-    arrayLinkedDocumentGUID.push_back(strDocumentGUID);
-}
-
-CString WIZTODODATA::GetLinkedDocumentGUIDString() const
-{
-    CString strText;
-    WizStringArrayToText(arrayLinkedDocumentGUID, strText, _T(";"));
-    return strText;
-}
-
-void WIZTODODATA::SetLinkedDocumentGUIDString(const CString& str)
-{
-    WizSplitTextToArray(str, ';', arrayLinkedDocumentGUID);
-}
-
-WIZTODODATAEX::WIZTODODATAEX()
-{
-
-}
-
-WIZTODODATAEX::WIZTODODATAEX(const WIZTODODATA& data)
-    : WIZTODODATA(data)
-{
-
-}
-
-int WIZTODODATAEX::AddChild(const WIZTODODATAEX& data)
-{
-    arrayChild.push_back(data);
-    return arrayChild.size() - 1;
-}
-
-BOOL WIZTODODATAEX::WizTodoDataArrayFindLinkedDocument(const CWizTodoDataExArray& arrayData, const CString& strDocumentGUID)
-{
-    for (CWizTodoDataExArray::const_iterator it = arrayData.begin();
-    it != arrayData.end();
-    it++)
-    {
-        if (-1 != WizFindInArrayNoCase(it->arrayLinkedDocumentGUID, strDocumentGUID))
-            return TRUE;
-        //
-        if (WizTodoDataArrayFindLinkedDocument(it->arrayChild, strDocumentGUID))
-            return TRUE;
-    }
-    //
-    return FALSE;
-}
-
-int WIZTODODATAEX::WizTodoDataArrayFindText(const CWizTodoDataExArray& arrayData, const CString& strText)
-{
-    for (CWizTodoDataExArray::const_iterator it = arrayData.begin();
-    it != arrayData.end();
-    it++)
-    {
-        if (0 == it->strText.CompareNoCase(strText))
-            return it - arrayData.begin();
-    }
-    //
-    return -1;
-}
-
-BOOL WIZTODODATAEX::WizTodoDataItemCopyAndCombine(WIZTODODATAEX& itemDest, const WIZTODODATAEX& itemOther)
-{
-    BOOL bCombined = FALSE;
-    //
-    if (itemDest.eState < itemOther.eState)
-    {
-        itemDest.eState = itemOther.eState;
-        bCombined = TRUE;
-    }
-    if (itemDest.tCompleted < itemOther.tCompleted)
-    {
-        itemDest.tCompleted = itemOther.tCompleted;
-        bCombined = TRUE;
-    }
-    if (itemDest.tModified < itemOther.tModified)
-    {
-        itemDest.tModified = itemOther.tModified;
-        bCombined = TRUE;
-    }
-    if (itemDest.tCreated < itemOther.tCreated)
-    {
-        itemDest.tCreated = itemOther.tCreated;
-        bCombined = TRUE;
-    }
-    if (itemDest.arrayLinkedDocumentGUID != itemOther.arrayLinkedDocumentGUID)
-    {
-        itemDest.arrayLinkedDocumentGUID.insert(itemDest.arrayLinkedDocumentGUID.begin(), itemOther.arrayLinkedDocumentGUID.begin(), itemOther.arrayLinkedDocumentGUID.end());
-        ::WizStringArrayRemoveMultiElement(itemDest.arrayLinkedDocumentGUID);
-        bCombined = TRUE;
-    }
-    //
-    if (WizTodoDataArrayCombine(itemDest.arrayChild, itemOther.arrayChild))
-    {
-        bCombined = TRUE;
-    }
-    //
-    return bCombined;
-}
-
-BOOL WIZTODODATAEX::WizTodoDataArrayCombine(WIZTODODATAEX::CWizTodoDataExArray& arrayDest, const WIZTODODATAEX::CWizTodoDataExArray& arrayOther)
-{
-    BOOL bCombined = FALSE;
-    //
-    for (WIZTODODATAEX::CWizTodoDataExArray::const_iterator it = arrayOther.begin();
-    it != arrayOther.end();
-    it++)
-    {
-        intptr_t nIndex = WIZTODODATAEX::WizTodoDataArrayFindText(arrayDest, it->strText);
-        //
-        if (-1 == nIndex)
-        {
-            arrayDest.push_back(*it);
-            bCombined = TRUE;
-        }
-        else
-        {
-            WIZTODODATAEX& itemDest = arrayDest[nIndex];
-            const WIZTODODATAEX& itemOther = *it;
-            //
-            if (WizTodoDataItemCopyAndCombine(itemDest, itemOther))
-            {
-                bCombined = TRUE;
-            }
-        }
-    }
-    //
-    return bCombined;
-}
-
-BOOL WIZTODODATAEX::WizTodoDataArrayRemoveMultiItem(WIZTODODATAEX::CWizTodoDataExArray& arrayData)
-{
-    BOOL bCombined = FALSE;
-    //
-    std::deque<int> arrayMultiIndex;
-    //
-    std::map<CString, int> mapTextAndIndex;
-    for (WIZTODODATAEX::CWizTodoDataExArray::iterator it = arrayData.begin();
-    it != arrayData.end();
-    it++)
-    {
-        WIZTODODATAEX& dataCurr = *it;
-        int nIndex = (int)(it - arrayData.begin());
-        //
-        CString strText = it->strText;
-        strText.MakeLower();
-        //
-        std::map<CString, int>::const_iterator itMap = mapTextAndIndex.find(strText);
-        if (itMap == mapTextAndIndex.end())
-        {
-            mapTextAndIndex[strText] = nIndex;
-            //
-            if (!dataCurr.arrayChild.empty())
-            {
-                bCombined = WizTodoDataArrayRemoveMultiItem(dataCurr.arrayChild);
-            }
-        }
-        else
-        {
-            WIZTODODATAEX& dataDest = arrayData[itMap->second];
-            WIZTODODATAEX::WizTodoDataItemCopyAndCombine(dataDest, dataCurr);
-            //
-            arrayMultiIndex.push_back(nIndex);
-            //
-            bCombined = TRUE;
-        }
-    }
-    //
-    if (arrayMultiIndex.empty())
-        return bCombined;
-    //
-    size_t nMultiIndexCount = arrayMultiIndex.size();
-    for (intptr_t i = nMultiIndexCount - 1; i >= 0; i--)
-    {
-        int nIndex = arrayMultiIndex[i];
-        //
-        arrayData.erase(arrayData.begin() + nIndex);
-    }
-    //
-    return TRUE;
-}
-
-void WIZTODODATAEX::AddCompletedDate(const CString& strTextExt)
-{
-    CString strTime = WizFormatString1(_T("[%1]"), WizDateToLocalString(tCompleted));
-    //
-    strText = strTime + strTextExt + strText;
-    //
-    std::map<CString, int> mapTextAndIndex;
-    for (WIZTODODATAEX::CWizTodoDataExArray::iterator it = arrayChild.begin();
-    it != arrayChild.end();
-    it++)
-    {
-        WIZTODODATAEX& dataCurr = *it;
-        dataCurr.AddCompletedDate(strTextExt);
-    }
-}
-
-
-COLORREF WizTodoGetTextColor(const WIZTODODATA& data)
-{
-    COLORREF cr = WIZ_TODO_TEXT_COLOR_DEFAULT;
-    //
-    if (todoState100 == data.eState)
-    {
-        cr = WIZ_TODO_TEXT_COLOR_DEFAULT_COMPLETED;
-        switch (data.ePrior)
-        {
-        case todoPriorUrgent:
-            cr = WIZ_TODO_TEXT_COLOR_URGENT_COMPLATED;
-            break;
-        case todoPriorUrgentAndImportant:
-            cr = WIZ_TODO_TEXT_COLOR_URGENTANDIMPORTANT_COMPLETED;
-            break;
-        default:
-            break;
-        }
-    }
-    else
-    {
-        switch (data.ePrior)
-        {
-        case todoPriorUrgent:
-            cr = WIZ_TODO_TEXT_COLOR_URGENT;
-            break;
-        case todoPriorUrgentAndImportant:
-            cr = WIZ_TODO_TEXT_COLOR_URGENTANDIMPORTANTR;
-            break;
-        case todoPriorNotUrgentAndNotImportant:
-            cr = WIZ_TODO_TEXT_COLOR_NOTURGENTANDNOTIMPORTANT;
-            break;
-        default:
-            break;
-        }
-    }
-    //
-    return cr;
-}
 
 BOOL WIZUSERMESSAGEDATA::LoadFromXmlRpc(CWizXmlRpcStructValue &data)
 {

@@ -76,6 +76,17 @@ QPixmap CWizMultiLineListWidget::itemImage(const QModelIndex& index) const
     return QPixmap();
 }
 
+bool CWizMultiLineListWidget::itemExtraImage(const QModelIndex& index, const QRect& itemBound,
+                                              QRect& rcImage, QPixmap& extraPix) const
+{
+    Q_UNUSED(index);
+    Q_UNUSED(itemBound);
+    Q_UNUSED(rcImage);
+    Q_UNUSED(extraPix);
+
+    return false;
+}
+
 int CWizMultiLineListWidget::lineCount() const
 {
     if (const CWizMultiLineListWidgetDelegate* delegate = dynamic_cast<const CWizMultiLineListWidgetDelegate*>(itemDelegate()))

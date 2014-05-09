@@ -1,4 +1,5 @@
 #include "wizsettings.h"
+#include "wizWebSettingsDialog.h"
 
 #include <QApplication>
 #include <stdlib.h>
@@ -12,7 +13,11 @@
 
 #include <QtCore>
 //#include <QtNetwork>
+#include <QNetworkConfigurationManager>
 #include "utils/logger.h"
+#include "utils/pathresolve.h"
+#include "mac/wizmachelper.h"
+
 
 #ifndef MAX_PATH
 #define MAX_PATH 200
@@ -323,69 +328,11 @@ QString WizDecryptPassword(const QString& strEncryptedText)
     return QString::fromUtf8(data);
 }
 
-QString WizGetAppPath()
-{
-    QString strPath = QApplication::applicationDirPath();
-    ::WizPathAddBackslash(strPath);
-    return strPath;
-}
 
 QString WizGetAppFileName()
 {
     QString strPath = QApplication::applicationFilePath();
     return strPath;
-}
-
-QString WizGetResourcesPath()
-{
-#ifdef Q_OS_MAC
-    QDir dir(WizGetAppPath());
-    dir.cdUp();
-    dir.cd("Resources");
-    QString strPath = dir.path();
-    WizPathAddBackslash(strPath);
-    return strPath;
-#elif defined Q_OS_LINUX
-    QDir dir(WizGetAppPath());
-    dir.cdUp();
-    dir.cd("share/wiznote");
-    QString strPath = dir.path();
-    WizPathAddBackslash(strPath);
-    return strPath;
-#else
-    return WizGetAppPath();
-#endif
-}
-
-QString WizGetDataStorePath()
-{
-    QString strPath = QDir::homePath();
-    strPath += "/.wiznote/";
-
-    ::WizEnsurePathExists(strPath);
-    return strPath;
-}
-
-QString WizGetUpgradePath()
-{
-    QString strPath = WizGetDataStorePath() + "/update/";
-    WizEnsurePathExists(strPath);
-    return strPath;
-}
-
-CString WizGetSettingsFileName()
-{
-    return WizGetDataStorePath() + "wiznote.ini";
-}
-
-QString WizGetLocaleFileName(const QString& strLocale)
-{
-    return WizGetResourcesPath() + "locales/wiznote_" + strLocale + ".qm";
-}
-
-QString WizGetQtLocaleFileName(const QString& strLocale)
-{
-    return WizGetResourcesPath() + "locales/qt_" + strLocale + ".qm";
 }
 
 void WizGetTranslatedLocales(QStringList& locales)
@@ -484,13 +431,6 @@ QString WizLocation2Display(const QString& strLocation)
 }
 
 
-QString WizGetLogFileName()
-{
-    //QString strLogFileName = WizGetDataStorePath() + "wiznote.log";
-    //WizEnsureFileExists(strLogFileName);
-    //return strLogFileName;
-    return WizGetDataStorePath() + "wiznote.log";
-}
 
 QString WizGetLogTime()
 {
@@ -1216,6 +1156,20 @@ bool WizLoadUnicodeTextFromFile(const QString& strFileName, QString& strText)
     return true;
 }
 
+bool WizLoadUtf8TextFromFile(const QString& strFileName, QString& strText)
+{
+    QFile file(strFileName);
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
+        return false;
+
+    QTextStream stream(&file);
+    stream.setCodec("UTF-8");
+    strText = stream.readAll();
+    file.close();
+
+    return true;
+}
+
 bool WizSaveUnicodeTextToUtf16File(const CString& strFileName, const CString& strText)
 {
     QFile file(strFileName);
@@ -1441,8 +1395,8 @@ BOOL WizStringSimpleSplit(const CString& str, char ch, CString& strLeft, CString
 
 CString WizDateToLocalString(const COleDateTime& t)
 {
-    Q_UNUSED(t);
-    return CString();
+    COleDateTime localDateTime = t.toLocalTime();
+    return localDateTime.toString(Qt::DefaultLocaleShortDate);
 }
 
 intptr_t WizStrStrI_Pos(const CString& str, const CString& strFind, int nStart /*= 0*/)
@@ -1685,14 +1639,13 @@ QString WizGetDefaultSkinName()
 
 QString WizGetSkinResourcePath(const QString& strSkinName)
 {
-    Q_ASSERT(!strSkinName.isEmpty());
-    return WizGetResourcesPath() + "skins/" + strSkinName + "/";
+    return Utils::PathResolve::skinResourcesPath(strSkinName);
 }
 
 void WizGetSkins(QStringList& skins)
 {
     CWizStdStringArray folders;
-    ::WizEnumFolders(::WizGetResourcesPath() + "skins/", folders, 0);
+    ::WizEnumFolders(Utils::PathResolve::resourcesPath() + "skins/", folders, 0);
 
     foreach (const CString& path, folders)
     {
@@ -2119,4 +2072,22 @@ CWaitCursor::CWaitCursor()
 CWaitCursor::~CWaitCursor()
 {
     QApplication::restoreOverrideCursor();
+}
+
+
+
+void showWebDialogWithToken(const QString& windowTitle, const QString& url, QWidget* parent)
+{
+    CWizWebSettingsDialog* pDlg = new CWizWebSettingsWithTokenDialog(url, QSize(800, 480), parent);
+    pDlg->setWindowTitle(windowTitle);
+    pDlg->exec();
+    //
+    delete pDlg;
+}
+
+
+bool WizIsOffline()
+{
+    QNetworkConfigurationManager mgr;
+    return !mgr.isOnline();
 }

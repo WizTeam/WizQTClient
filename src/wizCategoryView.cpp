@@ -4,6 +4,8 @@
 #include <QAction>
 #include <QMenu>
 #include <QMessageBox>
+#include <QApplication>
+#include <QTimer>
 
 #include <extensionsystem/pluginmanager.h>
 
@@ -11,8 +13,8 @@
 #include "widgets/wizScrollBar.h"
 #include "wizmainwindow.h"
 #include "wizProgressDialog.h"
-#include "share/wizdrawtexthelper.h"
 #include "wiznotestyle.h"
+#include "share/wizdrawtexthelper.h"
 #include "share/wizsettings.h"
 #include "share/wizDatabaseManager.h"
 #include "wizFolderSelector.h"
@@ -20,8 +22,8 @@
 #include "wizWebSettingsDialog.h"
 #include "sync/wizkmxmlrpc.h"
 #include "sync/apientry.h"
-
 #include "sync/token.h"
+#include "utils/stylehelper.h"
 
 using namespace WizService;
 
@@ -41,20 +43,20 @@ using namespace Core::Internal;
 
 
 // for context menu text
-#define CATEGORY_ACTION_DOCUMENT_NEW    QObject::tr("Create new document")
-#define CATEGORY_ACTION_FOLDER_NEW      QObject::tr("Create new folder")
-#define CATEGORY_ACTION_FOLDER_MOVE     QObject::tr("Move current folder")
-#define CATEGORY_ACTION_FOLDER_RENAME   QObject::tr("Change current folder name")
-#define CATEGORY_ACTION_FOLDER_DELETE   QObject::tr("Delete current folder")
-#define CATEGORY_ACTION_TAG_NEW         QObject::tr("Create new tag")
-#define CATEGORY_ACTION_TAG_RENAME      QObject::tr("Change current tag name")
-#define CATEGORY_ACTION_TAG_DELETE      QObject::tr("Delete current tag")
-#define CATEGORY_ACTION_GROUP_ATTRIBUTE QObject::tr("Open group attribute")
-#define CATEGORY_ACTION_BIZ_GROUP_ATTRIBUTE QObject::tr("Open bizGroup attribute")
-#define CATEGORY_ACTION_GROUP_MARK_READ QObject::tr("Mark all documents read")
-#define CATEGORY_ACTION_EMPTY_TRASH     QObject::tr("Empty trash")
-#define CATEGORY_ACTION_MANAGE_GROUP     QObject::tr("Manage group")
-#define CATEGORY_ACTION_MANAGE_BIZ     QObject::tr("Manage biz")
+#define CATEGORY_ACTION_DOCUMENT_NEW    QObject::tr("New note")
+#define CATEGORY_ACTION_FOLDER_NEW      QObject::tr("New folder...")
+#define CATEGORY_ACTION_FOLDER_MOVE     QObject::tr("Move to...")
+#define CATEGORY_ACTION_FOLDER_RENAME   QObject::tr("Rename...")
+#define CATEGORY_ACTION_FOLDER_DELETE   QObject::tr("Delete")
+#define CATEGORY_ACTION_TAG_NEW         QObject::tr("New tag...")
+#define CATEGORY_ACTION_TAG_RENAME      QObject::tr("Rename...")
+#define CATEGORY_ACTION_TAG_DELETE      QObject::tr("Delete")
+#define CATEGORY_ACTION_GROUP_ATTRIBUTE QObject::tr("View group info...")
+#define CATEGORY_ACTION_BIZ_GROUP_ATTRIBUTE QObject::tr("View team info...")
+#define CATEGORY_ACTION_GROUP_MARK_READ QObject::tr("Mark all read")
+#define CATEGORY_ACTION_EMPTY_TRASH     QObject::tr("Empty deleted items")
+#define CATEGORY_ACTION_MANAGE_GROUP     QObject::tr("Manage group...")
+#define CATEGORY_ACTION_MANAGE_BIZ     QObject::tr("Manage team...")
 #define CATEGORY_ACTION_QUIT_GROUP     QObject::tr("Quit group")
 
 
@@ -69,6 +71,8 @@ CWizCategoryBaseView::CWizCategoryBaseView(CWizExplorerApp& app, QWidget* parent
     , m_dbMgr(app.databaseManager())
     , m_bDragHovered(false)
     , m_selectedItem(NULL)
+    , m_dragHoveredTimer(new QTimer())
+    , m_dragHoveredItem(0)
 {
     // basic features
     header()->hide();
@@ -97,12 +101,13 @@ CWizCategoryBaseView::CWizCategoryBaseView(CWizExplorerApp& app, QWidget* parent
 
     // style
     setStyle(::WizGetStyle(m_app.userSettings().skin()));
-    QColor colorBg = WizGetCategoryBackroundColor(m_app.userSettings().skin());
+    QColor colorBg = Utils::StyleHelper::treeViewBackground();
     QPalette pal = palette();
     pal.setBrush(QPalette::Base, colorBg);
     setPalette(pal);
     //
     setCursor(QCursor(Qt::ArrowCursor));
+    setMouseTracking(true);
 
     // signals from database
     connect(&m_dbMgr, SIGNAL(documentCreated(const WIZDOCUMENTDATA&)),
@@ -149,6 +154,18 @@ CWizCategoryBaseView::CWizCategoryBaseView(CWizExplorerApp& app, QWidget* parent
 
     connect(&m_dbMgr, SIGNAL(databaseBizchanged(const QString&)),
             SLOT(on_group_bizChanged(const QString&)));
+
+    connect(m_dragHoveredTimer, SIGNAL(timeout()), SLOT(on_dragHovered_timeOut()));
+
+}
+
+CWizCategoryBaseView::~CWizCategoryBaseView()
+{
+    if (!m_dragHoveredTimer) {
+        m_dragHoveredTimer->stop();
+        delete m_dragHoveredTimer;
+        m_dragHoveredTimer = 0;
+    }
 }
 
 void CWizCategoryBaseView::mousePressEvent(QMouseEvent* event)
@@ -157,6 +174,32 @@ void CWizCategoryBaseView::mousePressEvent(QMouseEvent* event)
     m_hitPos = event->pos();
 
     QTreeWidget::mousePressEvent(event);
+}
+
+void CWizCategoryBaseView::mouseMoveEvent(QMouseEvent* event)
+{
+    QPoint msPos = event->pos();
+    CWizCategoryViewItemBase* pItem =  itemAt(msPos);
+    if (!pItem)
+        return;
+
+    QRect rcExtra = pItem->getExtraButtonRect(visualItemRect(pItem));
+    if (rcExtra.contains(msPos))
+    {
+        if (cursor().shape() != Qt::PointingHandCursor)
+        {
+            setCursor(Qt::PointingHandCursor);
+        }
+    }
+    else
+    {
+        if (cursor().shape() != Qt::ArrowCursor)
+        {
+            setCursor(Qt::ArrowCursor);
+        }
+    }
+
+    QTreeWidget::mouseMoveEvent(event);
 }
 
 void CWizCategoryBaseView::resizeEvent(QResizeEvent* event)
@@ -223,7 +266,6 @@ void CWizCategoryBaseView::dragEnterEvent(QDragEnterEvent *event)
 void CWizCategoryBaseView::dragMoveEvent(QDragMoveEvent *event)
 {
     m_dragHoveredPos = event->pos();
-    repaint();
 
     if (!event->mimeData()->hasFormat(WIZNOTE_MIMEFORMAT_DOCUMENTS))
         return;
@@ -232,25 +274,35 @@ void CWizCategoryBaseView::dragMoveEvent(QDragMoveEvent *event)
     if (!pItem)
         return;
 
-    CWizDocumentDataArray arrayDocument;
-    mime2Note(event->mimeData()->data(WIZNOTE_MIMEFORMAT_DOCUMENTS), arrayDocument);
+    if (m_dragHoveredItem != pItem) {
+        m_dragHoveredTimer->stop();
+        m_dragHoveredItem = pItem;
+        m_dragHoveredTimer->start(1000);
+    }
 
-    if (!arrayDocument.size())
+    m_dragDocArray.clear();
+    mime2Note(event->mimeData()->data(WIZNOTE_MIMEFORMAT_DOCUMENTS), m_dragDocArray);
+
+    if (!m_dragDocArray.size())
         return;
 
     int nAccept = 0;
-    for (CWizDocumentDataArray::const_iterator it = arrayDocument.begin();
-         it != arrayDocument.end();
+    for (CWizDocumentDataArray::const_iterator it = m_dragDocArray.begin();
+         it != m_dragDocArray.end();
          it++)
     {
-        if (pItem->acceptDrop(*it))
+        if (pItem->acceptDrop(*it)) {
             nAccept++;
+        }
     }
 
-    if (nAccept == arrayDocument.size())
-        event->acceptProposedAction();
+    if (nAccept == m_dragDocArray.size()) {
+        event->acceptProposedAction();     
+    }
     else
         event->ignore();
+
+    viewport()->repaint();
 }
 
 void CWizCategoryBaseView::dragLeaveEvent(QDragLeaveEvent* event)
@@ -259,14 +311,20 @@ void CWizCategoryBaseView::dragLeaveEvent(QDragLeaveEvent* event)
 
     m_bDragHovered = false;
     m_dragHoveredPos = QPoint();
-    repaint();
+    m_dragHoveredTimer->stop();
+    m_dragHoveredItem = 0;
+
+    m_dragDocArray.clear();
+    viewport()->repaint();
 }
 
 void CWizCategoryBaseView::dropEvent(QDropEvent * event)
 {
     m_bDragHovered = false;
     m_dragHoveredPos = QPoint();
-    repaint();
+
+    m_dragDocArray.clear();
+
 
     if (!event->mimeData()->hasFormat(WIZNOTE_MIMEFORMAT_DOCUMENTS))
         return;
@@ -281,13 +339,16 @@ void CWizCategoryBaseView::dropEvent(QDropEvent * event)
     if (!pItem)
         return;
 
+    bool forceCopy = (QApplication::keyboardModifiers() == Qt::ControlModifier);
+
     for (CWizDocumentDataArray::const_iterator it = arrayDocument.begin();
          it != arrayDocument.end();
          it++)
     {
-        pItem->drop(*it);
+        pItem->drop(*it, forceCopy);
     }
 
+    viewport()->repaint();
     event->accept();
 }
 
@@ -399,7 +460,7 @@ QModelIndex CWizCategoryBaseView::moveCursor(CursorAction cursorAction, Qt::Keyb
                 return indexFromItem(pBelow);
             }
         default:
-            Q_ASSERT(false);
+            //Q_ASSERT(false);
             break;
         }
     }
@@ -407,22 +468,27 @@ QModelIndex CWizCategoryBaseView::moveCursor(CursorAction cursorAction, Qt::Keyb
     return index;
 }
 
+void CWizCategoryBaseView::on_dragHovered_timeOut()
+{
+    if (m_dragHoveredItem) {
+        m_dragHoveredTimer->stop();
+        expandItem(m_dragHoveredItem);
+        viewport()->repaint();
+    }
+}
+
 bool CWizCategoryBaseView::validateDropDestination(const QPoint& p) const
 {
     if (p.isNull())
         return false;
 
-    CWizCategoryViewFolderItem* itemFolder = dynamic_cast<CWizCategoryViewFolderItem*>(itemAt(p));
-    if (itemFolder) {
-        return true;
-    }
+    if (m_dragDocArray.empty())
+        return false;
 
-    CWizCategoryViewTagItem* itemTag = dynamic_cast<CWizCategoryViewTagItem*>(itemAt(p));
-    if (itemTag) {
-        return true;
-    }
+    CWizCategoryViewItemBase* itemBase = itemAt(p);
+    WIZDOCUMENTDATAEX data = *m_dragDocArray.begin();
+    return (itemBase && itemBase->acceptDrop(data));
 
-    return false;
 }
 
 void CWizCategoryBaseView::drawItem(QPainter* p, const QStyleOptionViewItemV4 *vopt) const
@@ -501,7 +567,7 @@ void CWizCategoryView::initMenus()
 
     QAction* actionTrash = new QAction("ActionEmptyTrash", this);
     actionTrash->setShortcutContext(Qt::WidgetShortcut);
-    actionDeleteItem->setShortcut(QKeySequence("Ctrl+Shift+Delete"));
+    actionTrash->setShortcut(QKeySequence("Ctrl+Shift+Delete"));
     actionTrash->setData(ActionEmptyTrash);
     addAction(actionTrash);
     connect(actionTrash, SIGNAL(triggered()), SLOT(on_action_emptyTrash()));
@@ -744,12 +810,12 @@ void CWizCategoryView::showGroupContextMenu(QPoint pos)
     m_menuGroup->popup(pos);
 }
 
-void CWizCategoryView::createDocument(WIZDOCUMENTDATA& data)
+bool CWizCategoryView::createDocument(WIZDOCUMENTDATA& data)
 {
     bool bFallback = true;
 
     QString strKbGUID = m_dbMgr.db().kbGUID();
-    QString strLocation = "/My Notes/";
+    QString strLocation = m_dbMgr.db().GetDefaultNoteLocation();
     WIZTAGDATA tag;
 
     // trash first, because it's inherited
@@ -793,34 +859,52 @@ void CWizCategoryView::createDocument(WIZDOCUMENTDATA& data)
     else if (CWizCategoryViewGroupRootItem* pItem = currentCategoryItem<CWizCategoryViewGroupRootItem>())
     {
         strKbGUID = pItem->kbGUID();
+        strLocation = m_dbMgr.db(strKbGUID).GetDefaultNoteLocation();
         bFallback = false;
     }
     else if (CWizCategoryViewGroupNoTagItem* pItem = currentCategoryItem<CWizCategoryViewGroupNoTagItem>())
     {
         strKbGUID = pItem->kbGUID();
+        strLocation = m_dbMgr.db(strKbGUID).GetDefaultNoteLocation();
         bFallback = false;
     }
     else if (CWizCategoryViewGroupItem* pItem = currentCategoryItem<CWizCategoryViewGroupItem>())
     {
         strKbGUID = pItem->kbGUID();
         tag = pItem->tag();
+        strLocation = m_dbMgr.db(strKbGUID).GetDefaultNoteLocation();
         bFallback = false;
     }
 
     if (bFallback) {
         addAndSelectFolder(strLocation);
     }
+    //
+    CWizDatabase& db = m_dbMgr.db(strKbGUID);
+    if (db.IsGroup()
+            && !db.IsGroupAuthor())
+    {
+        return false;
+    }
 
-    bool ret = m_dbMgr.db(strKbGUID).CreateDocumentAndInit("<p><br/></p>", "", 0, tr("New note"), "newnote", strLocation, "", data);
-    if (!ret) {
+
+    if (!m_dbMgr.db(strKbGUID).CreateDocumentAndInit("<p><br/></p>", "", 0, tr("New note"), "newnote", strLocation, "", data))
+    {
         TOLOG("Failed to new document!");
-        return;
+        return false;
     }
 
     if (!tag.strGUID.IsEmpty()) {
         CWizDocument doc(m_dbMgr.db(strKbGUID), data);
         doc.AddTag(tag);
     }
+
+    /*FIXME:
+     *创建笔记后快速同步笔记到服务器,防止用户新建笔记后使用评论功能时因服务器无该篇笔记导致问题.*/
+    MainWindow* mainWindow = qobject_cast<MainWindow*>(m_app.mainWindow());
+    mainWindow->quickSyncKb(data.strKbGUID);
+    //
+    return true;
 }
 
 void CWizCategoryView::on_action_newDocument()
@@ -1052,7 +1136,7 @@ void CWizCategoryView::on_action_user_moveFolder_confirmed_progress(int nMax, in
     CWizProgressDialog* progress = mainWindow->progressDialog();
     progress->setVisible(true);
 
-    progress->setActionString(tr("Move Document: %1 to %2").arg(strOldLocation).arg(strNewLocation));
+    progress->setActionString(tr("Move Note: %1 to %2").arg(strOldLocation).arg(strNewLocation));
     progress->setNotifyString(data.strTitle);
     progress->setProgress(nMax, nValue);
     if (nMax == nValue + 1) {
@@ -1139,7 +1223,7 @@ void CWizCategoryView::on_action_user_renameFolder_confirmed_progress(int nMax, 
     CWizProgressDialog* progress = mainWindow->progressDialog();
     progress->setVisible(true);
 
-    progress->setActionString(tr("Move Document: %1 to %2").arg(strOldLocation).arg(strNewLocation));
+    progress->setActionString(tr("Move Note: %1 to %2").arg(strOldLocation).arg(strNewLocation));
     progress->setNotifyString(data.strTitle);
     progress->setProgress(nMax, nValue);
     if (nMax == nValue + 1) {
@@ -1316,7 +1400,7 @@ void CWizCategoryView::on_action_group_deleteFolder()
     msgBox->addButton(QMessageBox::Ok);
     msgBox->addButton(QMessageBox::Cancel);
 
-    QString strWarning = tr("Do you really want to delete folder: %1 ? (All notes will move to unclassified folder, It's safe.)").arg(p->tag().strName);
+    QString strWarning = tr("Do you really want to delete folder: %1? (All notes will move to unclassified folder, It's safe.)").arg(p->tag().strName);
     msgBox->setText(strWarning);
     connect(msgBox,SIGNAL(finished(int)),this,SLOT(on_action_group_deleteFolder_confirmed(int)));
     msgBox->exec();
@@ -1353,12 +1437,6 @@ void CWizCategoryView::on_action_groupAttribute()
 
     CWizCategoryViewGroupRootItem* p = currentCategoryItem<CWizCategoryViewGroupRootItem>();
     if (p && !p->kbGUID().isEmpty()) {
-
-//        QString strUrl = WizService::ApiEntry::groupAttributeUrl(WIZ_TOKEN_IN_URL_REPLACE_PART, m_strRequestedGroupKbGUID);
-//        //
-//        showWebDialogWithToken(tr("Group settings"), strUrl);
-
-//        m_strRequestedGroupKbGUID = p->kbGUID();
         if (p->isBizGroup()) {
             viewBizGroupInfo(p->kbGUID(), p->bizGUID());
         } else {
@@ -1372,7 +1450,7 @@ void CWizCategoryView::on_action_manageGroup()
     CWizCategoryViewGroupRootItem* p = currentCategoryItem<CWizCategoryViewGroupRootItem>();
     if (p && !p->kbGUID().isEmpty()) {
         if (p->isBizGroup()) {
-            manageBizGroup(p->kbGUID());
+            manageBizGroup(p->kbGUID(), p->bizGUID());
         } else {
             managePersonalGroup(p->kbGUID());
         }
@@ -1404,17 +1482,8 @@ void CWizCategoryView::on_action_manageBiz()
 {
     CWizCategoryViewBizGroupRootItem* p = currentCategoryItem<CWizCategoryViewBizGroupRootItem>();
     if (p && !p->biz().bizGUID.isEmpty()) {
-        manageBiz(p->biz().bizGUID);
+        manageBiz(p->biz().bizGUID, false);
     }
-}
-
-void CWizCategoryView::showWebDialogWithToken(const QString& windowTitle, const QString& url)
-{
-    CWizWebSettingsDialog* pDlg = new CWizWebSettingsWithTokenDialog(url, QSize(800, 480), window());
-    pDlg->setWindowTitle(windowTitle);
-    pDlg->exec();
-    //
-    delete pDlg;
 }
 
 void CWizCategoryView::on_action_emptyTrash()
@@ -1467,11 +1536,76 @@ void CWizCategoryView::on_itemClicked(QTreeWidgetItem *item, int column)
             createGroup();
         }
     }
-    else if (CWizCategoryViewSectionItem* sItem = dynamic_cast<CWizCategoryViewSectionItem*>(item))
+    else if (CWizCategoryViewSectionItem* pItem = dynamic_cast<CWizCategoryViewSectionItem*>(item))
     {
-        if(CATEGORY_TEAM_GROUPS == sItem->name() && sItem->extraButtonClickTest())
+        if(CATEGORY_TEAM_GROUPS == pItem->name() && pItem->extraButtonClickTest())
         {
             createGroup();
+        }
+    }
+    else if (CWizCategoryViewMessageItem* pItem = dynamic_cast<CWizCategoryViewMessageItem*>(item))
+    {
+        emit itemSelectionChanged();
+    }
+    else if (CWizCategoryViewBizGroupRootItem* pItem = dynamic_cast<CWizCategoryViewBizGroupRootItem*>(item))
+    {
+        if (pItem->extraButtonClickTest())
+        {
+            if (pItem->isHr())
+            {
+                manageBiz(pItem->biz().bizGUID, true);
+            }
+            else
+            {
+                QMessageBox::information(0, tr("Info"), tr("You are not a Biz administrator, can't manage this Biz."));
+            }
+        }
+    }    
+    else if (CWizCategoryViewGroupRootItem* pItem = dynamic_cast<CWizCategoryViewGroupRootItem*>(item))
+    {
+        if (pItem->extraButtonClickTest())
+        {
+            promptGroupStorageLimitMessage(pItem->kbGUID(), pItem->bizGUID());
+        }
+    }
+}
+
+void CWizCategoryView::updateGroupsData()
+{
+    CWizGroupDataArray arrayGroup;
+    m_dbMgr.db().GetUserGroupInfo(arrayGroup);
+    //
+    CWizBizDataArray arrayBiz;
+    m_dbMgr.db().GetUserBizInfo(false, arrayGroup, arrayBiz);
+    //
+    for (CWizBizDataArray::const_iterator it = arrayBiz.begin(); it != arrayBiz.end(); it++)
+    {
+        const WIZBIZDATA& biz = *it;
+        CWizCategoryViewItemBase* pBizGroupItem = findBizGroupsRootItem(biz, false);
+        setBizRootItemExtraButton(pBizGroupItem, biz);
+    }
+    //
+    CWizGroupDataArray arrayOwnGroup;
+    CWizDatabase::GetOwnGroups(arrayGroup, arrayOwnGroup);
+    if (!arrayOwnGroup.empty())
+    {
+        for (CWizGroupDataArray::const_iterator it = arrayOwnGroup.begin(); it != arrayOwnGroup.end(); it++)
+        {
+            const WIZGROUPDATA& group = *it;
+            CWizCategoryViewGroupRootItem* pOwnGroupItem = findGroup(group.strGroupGUID);
+            setGroupRootItemExtraButton(pOwnGroupItem, group);
+        }
+    }
+    //
+    CWizGroupDataArray arrayJionedGroup;
+    CWizDatabase::GetJionedGroups(arrayGroup, arrayJionedGroup);
+    if (!arrayJionedGroup.empty())
+    {
+        for (CWizGroupDataArray::const_iterator it = arrayJionedGroup.begin(); it != arrayJionedGroup.end(); it++)
+        {
+            const WIZGROUPDATA& group = *it;
+            CWizCategoryViewGroupRootItem* pOwnGroupItem = findGroup(group.strGroupGUID);
+            setGroupRootItemExtraButton(pOwnGroupItem, group);
         }
     }
 }
@@ -1479,49 +1613,67 @@ void CWizCategoryView::on_itemClicked(QTreeWidgetItem *item, int column)
 void CWizCategoryView::createGroup()
 {
     QString strUrl = WizService::ApiEntry::standardCommandUrl("create_group", WIZ_TOKEN_IN_URL_REPLACE_PART);
-    showWebDialogWithToken(tr("Create new group"), strUrl);
+    showWebDialogWithToken(tr("Create new group"), strUrl, window());
 }
 
 void CWizCategoryView::viewPersonalGroupInfo(const QString& groupGUID)
 {
     QString extInfo = "kb=" + groupGUID;
     QString strUrl = WizService::ApiEntry::standardCommandUrl("view_personal_group", WIZ_TOKEN_IN_URL_REPLACE_PART, extInfo);
-    showWebDialogWithToken(tr("View group info"), strUrl);
+    showWebDialogWithToken(tr("View group info"), strUrl, window());
 }
 
 void CWizCategoryView::viewBizGroupInfo(const QString& groupGUID, const QString& bizGUID)
 {
     QString extInfo = "kb=" + groupGUID + "&&biz=" + bizGUID;
     QString strUrl = WizService::ApiEntry::standardCommandUrl("view_biz_group", WIZ_TOKEN_IN_URL_REPLACE_PART, extInfo);
-    showWebDialogWithToken(tr("View group info"), strUrl);
+    showWebDialogWithToken(tr("View group info"), strUrl, window());
 }
 
 void CWizCategoryView::managePersonalGroup(const QString& groupGUID)
 {
     QString extInfo = "kb=" + groupGUID;
     QString strUrl = WizService::ApiEntry::standardCommandUrl("manage_personal_group", WIZ_TOKEN_IN_URL_REPLACE_PART, extInfo);
-    showWebDialogWithToken(tr("Manage group"), strUrl);
+    showWebDialogWithToken(tr("Manage group"), strUrl, window());
 }
 
-void CWizCategoryView::manageBizGroup(const QString& groupGUID)
+void CWizCategoryView::manageBizGroup(const QString& groupGUID, const QString& bizGUID)
 {
-    QString extInfo = "kb=" + groupGUID;
+    QString extInfo = "kb=" + groupGUID + "&biz=" + bizGUID;
     QString strUrl = WizService::ApiEntry::standardCommandUrl("manage_biz_group", WIZ_TOKEN_IN_URL_REPLACE_PART, extInfo);
-    showWebDialogWithToken(tr("Manage group"), strUrl);
+    showWebDialogWithToken(tr("Manage group"), strUrl, window());
+}
+
+void CWizCategoryView::promptGroupStorageLimitMessage(const QString &groupGUID, const QString &/*bizGUID*/)
+{
+    //QString extInfo = "kb=" + groupGUID + "&biz=" + bizGUID;
+    //QString strUrl = WizService::ApiEntry::standardCommandUrl("manage_biz_group", WIZ_TOKEN_IN_URL_REPLACE_PART, extInfo);
+    //showWebDialogWithToken(tr("Group Space Excess"), strUrl, window());
+
+    CWizDatabase& db = m_dbMgr.db(groupGUID);
+    QString strErrorMsg;
+    if (db.GetStorageLimitMessage(strErrorMsg))
+    {
+        QMessageBox::information(this, tr("Storage Limit Info"), strErrorMsg);
+    }
 }
 
 void CWizCategoryView::viewBizInfo(const QString& bizGUID)
 {
     QString extInfo = "biz=" + bizGUID;
     QString strUrl = WizService::ApiEntry::standardCommandUrl("view_biz", WIZ_TOKEN_IN_URL_REPLACE_PART, extInfo);
-    showWebDialogWithToken(tr("View team info"), strUrl);
+    showWebDialogWithToken(tr("View team info"), strUrl, window());
 }
 
-void CWizCategoryView::manageBiz(const QString& bizGUID)
+void CWizCategoryView::manageBiz(const QString& bizGUID, bool bUpgrade)
 {
     QString extInfo = "biz=" + bizGUID;
+    if (bUpgrade)
+    {
+        extInfo += _T("&p=payment");
+    }
     QString strUrl = WizService::ApiEntry::standardCommandUrl("manage_biz", WIZ_TOKEN_IN_URL_REPLACE_PART, extInfo);
-    showWebDialogWithToken(tr("Manage team"), strUrl);
+    showWebDialogWithToken(tr("Manage team"), strUrl, window());
 }
 
 
@@ -1755,9 +1907,8 @@ void CWizCategoryView::updateGroupFolderDocumentCount_impl(const QString &strKbG
         return;
     }
 
-    int nTotal = getChildTagDocumentCount(pGroupRoot, mapDocumentCount);
-    pGroupRoot->setDocumentsCount(nCurrent, nTotal + nCurrent);
-
+    int nTotalChild = 0;
+    updateChildTagDocumentCount(pGroupRoot, mapDocumentCount, nTotalChild);
 
     // trash item
     for (int i = pGroupRoot->childCount() - 1; i >= 0; i--) {
@@ -1834,13 +1985,8 @@ void CWizCategoryView::updatePrivateTagDocumentCount_impl(const QString& strKbGU
         return;
     }
 
-    getChildTagDocumentCount(pTagRoot, mapDocumentCount);
-
-//    if (strKbGUID.isEmpty()) {
-//        pTagRoot->setDocumentsCount(-1, nCurrent);
-//    } else {
-//        pTagRoot->setDocumentsCount(nCurrent, nTotal + nCurrent);
-//    }
+    int nTotalChild = 0;
+    updateChildTagDocumentCount(pTagRoot, mapDocumentCount, nTotalChild);
 
     // trash item
     for (int i = pTagRoot->childCount() - 1; i >= 0; i--) {
@@ -1859,10 +2005,9 @@ void CWizCategoryView::updatePrivateTagDocumentCount_impl(const QString& strKbGU
     update();
 }
 
-int CWizCategoryView::getChildTagDocumentCount(CWizCategoryViewItemBase* pItem,
-                                                  const std::map<CString, int>& mapDocumentCount)
+void CWizCategoryView::updateChildTagDocumentCount(CWizCategoryViewItemBase* pItem,
+                                                  const std::map<CString, int>& mapDocumentCount, int &allCount)
 {
-    int nTotal = 0;
     for (int i = 0; i < pItem->childCount(); i++) {
         QString strGUID;
         if (CWizCategoryViewTagItem* pItemChild = dynamic_cast<CWizCategoryViewTagItem*>(pItem->child(i)))
@@ -1893,7 +2038,8 @@ int CWizCategoryView::getChildTagDocumentCount(CWizCategoryViewItemBase* pItem,
                 nCurrentChild = itCurrent->second;
             }
 
-            int nTotalChild = getChildTagDocumentCount(pItemChild, mapDocumentCount);
+            int nTotalChild = 0;
+            updateChildTagDocumentCount(pItemChild, mapDocumentCount, nTotalChild);
 
             nTotalChild += nCurrentChild;
 
@@ -1903,11 +2049,41 @@ int CWizCategoryView::getChildTagDocumentCount(CWizCategoryViewItemBase* pItem,
                 pItemChild->setDocumentsCount(-1, nTotalChild);
             }
 
-            nTotal += nTotalChild;
+            allCount += nTotalChild;
         }
     }
+}
 
-    return nTotal;
+void CWizCategoryView::setBizRootItemExtraButton(CWizCategoryViewItemBase* pItem, const WIZBIZDATA& bizData)
+{
+    if (pItem)
+    {
+        if (bizData.bizIsDue || m_dbMgr.db().IsBizServiceExpr(bizData.bizGUID))
+        {
+            QString strIconPath = ::WizGetSkinResourcePath(m_app.userSettings().skin()) + "bizDue.png";
+            pItem->setExtraButtonIcon(strIconPath);
+        }
+        else
+        {
+            pItem->setExtraButtonIcon("");
+        }
+    }
+}
+
+void CWizCategoryView::setGroupRootItemExtraButton(CWizCategoryViewItemBase* pItem, const WIZGROUPDATA& gData)
+{
+    if (pItem)
+    {
+        if (m_dbMgr.db(gData.strGroupGUID).IsStorageLimit())
+        {
+            QString strIconPath = ::WizGetSkinResourcePath(m_app.userSettings().skin()) + "bizDue.png";
+            pItem->setExtraButtonIcon(strIconPath);
+        }
+        else
+        {
+            pItem->setExtraButtonIcon("");
+        }
+    }
 }
 
 void CWizCategoryView::initGeneral()
@@ -1983,8 +2159,9 @@ void CWizCategoryView::initFolders()
     addTopLevelItem(pAllFoldersItem);
 
     CWizStdStringArray arrayAllLocation;
-    m_dbMgr.db().GetAllLocations(arrayAllLocation);
+    m_dbMgr.db().GetAllLocationsWithExtra(arrayAllLocation);
 
+    /*
     // folder cache
     CWizStdStringArray arrayExtLocation;
     m_dbMgr.db().GetExtraFolder(arrayExtLocation);
@@ -1998,9 +2175,10 @@ void CWizCategoryView::initFolders()
             }
         }
     }
+    */
 
     if (arrayAllLocation.empty()) {
-        arrayAllLocation.push_back(LOCATION_DEFAULT);
+        arrayAllLocation.push_back(m_dbMgr.db().GetDefaultNoteLocation());
     }
 
     doLocationSanityCheck(arrayAllLocation);
@@ -2154,6 +2332,8 @@ void CWizCategoryView::initGroups()
     {
         const WIZBIZDATA& biz = *it;
         CWizCategoryViewBizGroupRootItem* pBizGroupItem = new CWizCategoryViewBizGroupRootItem(m_app, biz);
+        setBizRootItemExtraButton(pBizGroupItem, biz);
+
         addTopLevelItem(pBizGroupItem);
         pBizGroupItem->setExpanded(true);
         arrayGroupsItem.push_back(pBizGroupItem);
@@ -2253,6 +2433,9 @@ void CWizCategoryView::initGroup(CWizDatabase& db, bool& itemCreeated)
     //
     CWizCategoryViewGroupRootItem* pGroupItem = new CWizCategoryViewGroupRootItem(m_app, group);
     pRoot->addChild(pGroupItem);
+
+    //
+    setGroupRootItemExtraButton(pGroupItem, group);
 
     initGroup(db, pGroupItem, "");
 

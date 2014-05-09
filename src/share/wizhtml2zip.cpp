@@ -2,10 +2,13 @@
 
 #include "html/wizhtmlcollector.h"
 
+#include "../share/wizzip.h"
+
 #include "wizmisc.h"
 #include "utils/pathresolve.h"
+#include <QDir>
 
-#include "../share/wizzip.h"
+
 
 
 bool WizHtml2Zip(const QString& strUrl, const QString& strHtml, \
@@ -54,6 +57,44 @@ bool WizHtml2Zip(const QString& strHtml, const CWizStdStringArray& arrayResource
     {
         CString strFileName = *it;
         CString strNameInZip = "index_files/" + WizExtractFileName(strFileName);
+        if (!zip.compressFile(strFileName, strNameInZip))
+        {
+            failed++;
+        }
+    }
+
+    return zip.close();
+}
+
+
+bool WizFolder2Zip(const QString &strFolder, const QString &strMetaText,    \
+                   const QString &strZipFileName, const QString &indexFile /*= "index.html"*/, \
+                   const QString &strResourceFolder /*= "index_files"*/)
+{
+    CWizZipFile zip;
+    if (!zip.open(strZipFileName))
+        return false;
+
+    CString strIndexFileName = strFolder + indexFile;
+
+    CString strMetaFileName = Utils::PathResolve::tempPath() + WizIntToStr(GetTickCount()) + ".xml";
+    if (!::WizSaveUnicodeTextToUtf8File(strMetaFileName, strMetaText))
+        return false;
+
+    if (!zip.compressFile(strIndexFileName, "index.html"))
+        return false;
+
+    int failed = 0;
+
+    if (!zip.compressFile(strMetaFileName, "meta.xml"))
+        failed++;
+
+    QDir dir(strFolder + strResourceFolder);
+    QStringList strResourceList = dir.entryList(QDir::Files, QDir::NoSort);
+    for (QStringList::const_iterator it = strResourceList.begin(); it != strResourceList.end(); it++)
+    {
+        QString strFileName =dir.path() +"/" + *it;
+        QString strNameInZip = "index_files/" + WizExtractFileName(strFileName);
         if (!zip.compressFile(strFileName, strNameInZip))
         {
             failed++;

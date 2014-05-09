@@ -94,10 +94,14 @@ QString MarkdownPlugin::cachePath()
 {
     QString strCachePath = qgetenv("XDG_CACHE_HOME");
     if (strCachePath.isEmpty()) {
-#ifdef Q_OS_LINUX
-        strCachePath = qgetenv("HOME") + "/.cache/wiznote/";
-#else
+#ifdef Q_OS_MAC
+    #ifdef BUILD4APPSTORE
+        strCachePath = QDir::homePath() + "/Library/Caches/";
+    #else
         strCachePath = qgetenv("HOME") + "/.wiznote/cache/";
+    #endif
+#else
+        strCachePath = qgetenv("HOME") + "/.cache/wiznote/";
 #endif
     } else {
         strCachePath += "/wiznote/";
@@ -117,7 +121,7 @@ bool MarkdownPlugin::copyRes2Cache()
     QStringList lsRes;
     lsRes << ":/res/markdown.js" << ":/res/inject.js"
           << ":/res/github2.css" << ":/res/jquery.min.js"
-          << ":/res/marked.js" << ":/res/highlight.pack.js";
+          << ":/res/marked.min.js" << ":/res/highlight.pack.js";
 
     for (int i = 0; i < lsRes.size(); i++) {
         QString strInter = lsRes.at(i);

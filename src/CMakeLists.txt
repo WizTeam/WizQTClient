@@ -2,7 +2,6 @@ project(wiznote)
 
 add_subdirectory(plugins)
 
-
 set(wiznote_SOURCES_MAC
     mac/wizSearchWidget.mm
     mac/wizmachelper.mm
@@ -135,6 +134,7 @@ set(wiznote_SOURCES
     messagelistview.cpp
     thumbcache.cpp
     messagecompleter.cpp
+    widgets/wizImageButton.cpp
 )
 
 set(wiznote_HEADERS
@@ -255,6 +255,7 @@ set(wiznote_HEADERS
     thumbcache.h
     thumbcache_p.h
     messagecompleter.h
+    widgets/wizImageButton.h
 )
 
 set(wiznote_FORMS
@@ -263,7 +264,6 @@ set(wiznote_FORMS
     ui/wizpreferencedialog.ui
     ui/wizproxydialog.ui
     ui/wizcreateaccountdialog.ui
-    ui/wizupdaterprogressdialog.ui
     ui/wizupgradenotifydialog.ui
     ui/wizusercipherform.ui
     ui/wiznoteinfoform.ui
@@ -276,6 +276,8 @@ set(wiznote_TRANSLATIONS
     ${CMAKE_SOURCE_DIR}/i18n/wiznote_zh_CN.ts
     ${CMAKE_SOURCE_DIR}/i18n/wiznote_zh_TW.ts
 )
+
+
 
 set(wiznote_RCS
     ${CMAKE_SOURCE_DIR}/resources/wiznote.qrc
@@ -335,6 +337,12 @@ if(UNIX)
             add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
                 COMMAND ${qt_binary_dir}/macdeployqt ${WIZNOTE_ROOT_DIR}
             )
+        elseif(APPSTORE_BUILD)
+            # resovle library dependency if build type is APPSTORE_BUILD even under debug model
+            add_dependencies(wiznote coreplugin_plugin helloworld_plugin)
+            add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+                COMMAND ${qt_binary_dir}/macdeployqt ${WIZNOTE_ROOT_DIR}
+            )
         endif()
 
     elseif(NOT APPLE)
@@ -389,3 +397,74 @@ target_link_libraries(${PROJECT_NAME}
     coreplugin
     ${CMAKE_DL_LIBS}
 )
+
+# apple appstore
+if(APPLE)
+    if(APPSTORE_BUILD)
+        set(APPCERT "3rd Party Mac Developer Application: Wei Shijun")
+        set(MACOSX_BUNDLE_ENTITLEPLIST ${CMAKE_SOURCE_DIR}/build/osx/WizNote-Entitlements.plist)
+        #add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+         #   COMMAND dsymutil ${WIZNOTE_ROOT_DIR}/Contents/MacOS/wiznote -o wiznote.app.dSYM)
+
+        if(NOT WIZNOTE_USE_QT5)
+            set(WIZFRAMEWORK
+                ${WIZNOTE_CONTENTS_DIR}/Frameworks/QtCore.framework/Versions/4/QtCore
+                ${WIZNOTE_CONTENTS_DIR}/Frameworks/QtGui.framework/Versions/4/QtGui
+                ${WIZNOTE_CONTENTS_DIR}/Frameworks/QtNetwork.framework/Versions/4/QtNetwork
+                ${WIZNOTE_CONTENTS_DIR}/Frameworks/QtWebKit.framework/Versions/4/QtWebKit
+                ${WIZNOTE_CONTENTS_DIR}/Frameworks/QtXml.framework/Versions/4/QtXml
+                ${WIZNOTE_CONTENTS_DIR}/Frameworks/QtXmlPatterns.framework/Versions/4/QtXmlPatterns
+                ${WIZNOTE_CONTENTS_DIR}/PlugIns/codecs/libqcncodecs.dylib
+                ${WIZNOTE_CONTENTS_DIR}/PlugIns/codecs/libqjpcodecs.dylib
+                ${WIZNOTE_CONTENTS_DIR}/PlugIns/codecs/libqkrcodecs.dylib
+                ${WIZNOTE_CONTENTS_DIR}/PlugIns/codecs/libqtwcodecs.dylib
+                )
+
+        elseif(NOT WIZNOTE_USE_QT5)
+            set(WIZFRAMEWORK
+                ${WIZNOTE_CONTENTS_DIR}/Frameworks/QtCore.framework/Versions/5/QtCore
+                ${WIZNOTE_CONTENTS_DIR}/Frameworks/QtGui.framework/Versions/5/QtGui
+                ${WIZNOTE_CONTENTS_DIR}/Frameworks/QtNetwork.framework/Versions/5/QtNetwork
+                ${WIZNOTE_CONTENTS_DIR}/Frameworks/QtWebKit.framework/Versions/5/QtWebKit
+                ${WIZNOTE_CONTENTS_DIR}/Frameworks/QtXml.framework/Versions/5/QtXml
+                ${WIZNOTE_CONTENTS_DIR}/Frameworks/QtXmlPatterns.framework/Versions/5/QtXmlPatterns
+                )
+        endif(NOT WIZNOTE_USE_QT5)
+
+            set(WIZPLUGINS
+                ${WIZNOTE_CONTENTS_DIR}/PlugIns/accessible/libqtaccessiblewidgets.dylib
+                ${WIZNOTE_CONTENTS_DIR}/PlugIns/bearer/libqcorewlanbearer.dylib
+                ${WIZNOTE_CONTENTS_DIR}/PlugIns/bearer/libqgenericbearer.dylib
+                ${WIZNOTE_CONTENTS_DIR}/PlugIns/imageformats/libqgif.dylib
+                ${WIZNOTE_CONTENTS_DIR}/PlugIns/imageformats/libqico.dylib
+                ${WIZNOTE_CONTENTS_DIR}/PlugIns/imageformats/libqjpeg.dylib
+                ${WIZNOTE_CONTENTS_DIR}/PlugIns/imageformats/libqmng.dylib
+                ${WIZNOTE_CONTENTS_DIR}/PlugIns/imageformats/libqtga.dylib
+                ${WIZNOTE_CONTENTS_DIR}/PlugIns/imageformats/libqtiff.dylib
+                ${WIZNOTE_CONTENTS_DIR}/PlugIns/libCore.dylib
+                ${WIZNOTE_CONTENTS_DIR}/PlugIns/libHelloWorld.dylib
+                ${WIZNOTE_CONTENTS_DIR}/PlugIns/libMarkDown.dylib
+                ${WIZNOTE_CONTENTS_DIR}/PlugIns/libaggregation.dylib
+                ${WIZNOTE_CONTENTS_DIR}/PlugIns/libextensionsystem.dylib)
+
+            add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+                COMMAND chmod -R 777 ${WIZNOTE_CONTENTS_DIR}/Frameworks/ )
+            add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+                COMMAND chmod -R 777 ${WIZNOTE_CONTENTS_DIR}/PlugIns/ )
+
+
+
+
+        MESSAGE(STATUS "CODESIGNFOR FRAMEWORK")
+        add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+            COMMAND codesign -f -s ${APPCERT}  ${WIZFRAMEWORK})
+
+        MESSAGE(STATUS "CODESIGNFOR PLUGINS")
+        add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+            COMMAND codesign -f -s ${APPCERT}  ${WIZPLUGINS})
+
+        add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+           COMMAND codesign -f -s ${APPCERT} -v --entitlements ${MACOSX_BUNDLE_ENTITLEPLIST}  ${WIZNOTE_ROOT_DIR})
+
+    endif(APPSTORE_BUILD)
+endif(APPLE)

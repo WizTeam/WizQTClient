@@ -5,6 +5,7 @@
 
 #define WIZKM_XMLRPC_ERROR_TRAFFIC_LIMIT		304
 #define WIZKM_XMLRPC_ERROR_STORAGE_LIMIT		305
+#define WIZKM_XMLRPC_ERROR_BIZ_SERVICE_EXPR		380
 
 class CWizKMXmlRpcServerBase : public CWizXmlRpcServerBase
 {
@@ -95,10 +96,10 @@ struct CWizKMBaseParam: public CWizXmlRpcStructValue
     {
         ChangeApiVersion(apiVersion);
         //
-#ifdef WINCE
-        AddString(_T("client_type"), _T("WM"));
+#ifdef Q_OS_MAC
+        AddString(_T("client_type"), _T("mac"));
 #else
-        AddString(_T("client_type"), _T("WIN"));
+        AddString(_T("client_type"), _T("linux"));
 #endif
         AddString(_T("client_version"), _T("2.0"));
     }
@@ -145,6 +146,7 @@ struct WIZOBJECTVERSION
 
 class CWizKMDatabaseServer: public CWizKMXmlRpcServerBase
 {
+    Q_OBJECT
 public:
     CWizKMDatabaseServer(const WIZUSERINFOBASE& kbInfo, QObject* parent = 0);
     virtual ~CWizKMDatabaseServer();
@@ -195,6 +197,9 @@ public:
 
 public:
     virtual int GetCountPerPage();
+
+signals:
+    void downloadProgress(int totalSize, int loadedSize);
 
 protected:
     BOOL document_getData2(const QString& strDocumentGUID, UINT nParts, WIZDOCUMENTDATAEX& ret);

@@ -13,6 +13,7 @@ struct WIZACTION;
 
 #define WIZACTION_GLOBAL_SYNC               "actionSync"
 #define WIZACTION_GLOBAL_NEW_DOCUMENT       "actionNewNote"
+#define WIZACTION_GLOBAL_SAVE_AS_PDF        "actionSaveAsPDF"
 #define WIZACTION_GLOBAL_TOGGLE_CATEGORY    "actionViewToggleCategory"
 #define WIZACTION_GLOBAL_TOGGLE_FULLSCREEN  "actionViewToggleFullscreen"
 
@@ -44,6 +45,7 @@ struct WIZACTION;
 #define WIZACTION_FORMAT_INSERT_TIME        "actionFormatInsertTime"
 #define WIZACTION_FORMAT_REMOVE_FORMAT      "actionFormatRemoveFormat"
 #define WIZACTION_FORMAT_VIEW_SOURCE        "actionEditorViewSource"
+#define WIZACTION_FORMAT_INSERT_CHECKLIST    "actionFormatInsertCheckList"
 
 
 class CWizActions

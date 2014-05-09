@@ -36,6 +36,8 @@ public:
     CWizDocumentWebViewLoaderThread(CWizDatabaseManager& dbMgr);
 
     void load(const WIZDOCUMENTDATA& doc);
+    //
+    void stop();
 
 protected:
     virtual void run();
@@ -43,43 +45,51 @@ protected:
     void setCurrentDoc(QString kbGuid, QString docGuid);
     void PeekCurrentDocGUID(QString& kbGUID, QString& docGUID);
 Q_SIGNALS:
-    void loaded(const QString strGUID, const QString strFileName);
+    void loaded(const QString kbGUID, const QString strGUID, const QString strFileName);
 private:
     CWizDatabaseManager& m_dbMgr;
     QString m_strCurrentKbGUID;
     QString m_strCurrentDocGUID;
     QMutex m_mutex;
     QWaitCondition m_waitForData;
-
+    bool m_stop;
 };
 
-class CWizDocumentWebViewWorkerPool : public QObject
+class CWizDocumentWebViewSaverThread : public QThread
 {
     Q_OBJECT
-
 public:
-    CWizDocumentWebViewWorkerPool(CWizExplorerApp& app, QObject* parent);
+    CWizDocumentWebViewSaverThread(CWizDatabaseManager& dbMgr);
 
-    //void load(const WIZDOCUMENTDATA& doc);
     void save(const WIZDOCUMENTDATA& doc, const QString& strHtml,
               const QString& strHtmlFile, int nFlags);
 
-public Q_SLOTS:
-    void on_timer_timeout();
+    //
+    void waitAndStop();
 
+private:
+    struct SAVEDATA
+    {
+        WIZDOCUMENTDATA doc;
+        QString html;
+        QString htmlFile;
+        int flags;
+    };
+    //
+    std::vector<SAVEDATA> m_arrayData;
+protected:
+    virtual void run();
+    //
+    void stop();
+    void PeekData(SAVEDATA& data);
 Q_SIGNALS:
-    void loaded(const QString strGUID, const QString& strFileName);
-    void saved(const QString strGUID, bool ok);
-
+    void saved(const QString kbGUID, const QString strGUID, bool ok);
 private:
     CWizDatabaseManager& m_dbMgr;
-    QTimer m_timer;
-    QList<CWizDocumentWebViewWorker*> m_workers;
-
-private:
-    //bool isDocInLoadingQueue(const WIZDOCUMENTDATA& doc);
+    QMutex m_mutex;
+    QWaitCondition m_waitForData;
+    bool m_stop;
 };
-
 
 class CWizDocumentWebViewPage: public QWebPage
 {
@@ -121,6 +131,8 @@ public:
     Q_INVOKABLE QString currentNoteHead();
     Q_INVOKABLE bool currentIsEditing();
 
+    //only update Html in JS editor, wouldn't refresh WebView display
+    void updateNoteHtml();
     //const WIZDOCUMENTDATA& document() { return m_data; }
 
     // initialize editor style before render, only invoke once.
@@ -130,6 +142,7 @@ public:
     /* editor related */
     void editorResetFont();
     void editorFocus();
+    void setEditorEnable(bool enalbe);
 
     // -1: command invalid
     // 0: available
@@ -148,6 +161,13 @@ public:
     bool editorCommandExecuteFontSize(const QString& strSize);
     bool editorCommandExecuteInsertHtml(const QString& strHtml, bool bNotSerialize);
 
+    //
+    void saveAsPDF(const QString& fileName);
+
+    //
+    Q_INVOKABLE bool isContentsChanged() { return m_bContentsChanged; }
+    Q_INVOKABLE void setContentsChanged(bool b) { m_bContentsChanged = b; }
+
 private:
     void initEditor();
     void viewDocumentInEditor(bool editing);
@@ -155,6 +175,12 @@ private:
 
     bool isInternalUrl(const QUrl& url);
     void viewDocumentByUrl(const QUrl& url);
+
+    void splitHtmlToHeadAndBody(const QString& strHtml, QString& strHead, QString& strBody);
+
+    //
+    void saveEditingViewDocument(const WIZDOCUMENTDATA& data, bool force);
+    void saveReadingViewDocument(const WIZDOCUMENTDATA& data, bool force);
 
 protected:
     virtual void keyPressEvent(QKeyEvent* event);
@@ -187,10 +213,12 @@ private:
     QString m_strCurrentNoteHead;
     QString m_strCurrentNoteHtml;
     bool m_bCurrentEditing;
+    //
+    bool m_bContentsChanged;
 
-    CWizDocumentWebViewWorkerPool* m_workerPool;
     CWizDocumentTransitionView* m_transitionView;
     CWizDocumentWebViewLoaderThread* m_docLoadThread;
+    CWizDocumentWebViewSaverThread* m_docSaverThread;
 
     QPointer<CWizEditorInsertLinkForm> m_editorInsertLinkForm;
     QPointer<CWizEditorInsertTableForm> m_editorInsertTableForm;
@@ -210,8 +238,8 @@ public Q_SLOTS:
 
     void onTimerAutoSaveTimout();
 
-    void onDocumentReady(const QString strGUID, const QString strFileName);
-    void onDocumentSaved(const QString& strGUID, bool ok);
+    void onDocumentReady(const QString kbGUID, const QString strGUID, const QString strFileName);
+    void onDocumentSaved(const QString kbGUID, const QString strGUID, bool ok);
 
     void on_editorCommandExecuteLinkInsert_accepted();
     void on_editorCommandExecuteTableInsert_accepted();
@@ -271,7 +299,12 @@ public Q_SLOTS:
     bool editorCommandExecuteRemoveFormat();
     bool editorCommandExecuteFormatMatch();
     bool editorCommandExecuteInsertHorizontal();
+    bool editorCommandExecuteInsertCheckList();
+    bool editorCommandExecuteInsertImage();
     bool editorCommandExecuteViewSource();
+
+    // js func
+    void initCheckListEnvironment();
 
 Q_SIGNALS:
     // signals for notify command reflect status, triggered when selection, focus, editing mode changed
@@ -284,6 +317,5 @@ Q_SIGNALS:
 
     void requestShowContextMenu(const QPoint& pos);
 };
-
 
 #endif // WIZDOCUMENTWEBVIEW_H

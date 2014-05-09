@@ -32,6 +32,7 @@ class CWizCategoryBaseView : public Core::ITreeView
 
 public:
     CWizCategoryBaseView(CWizExplorerApp& app, QWidget *parent = 0);
+    ~CWizCategoryBaseView();
 
     QString selectedItemKbGUID();
     void getDocuments(CWizDocumentDataArray& arrayDocument);
@@ -59,6 +60,7 @@ public:
 
 protected:
     virtual void mousePressEvent(QMouseEvent* event);
+    virtual void mouseMoveEvent(QMouseEvent* event);
     virtual void startDrag(Qt::DropActions supportedActions);
     virtual void dragEnterEvent(QDragEnterEvent* event);
     virtual void dragMoveEvent(QDragMoveEvent* event);
@@ -79,6 +81,9 @@ private:
     QPoint m_hitPos;
     bool m_bDragHovered;
     QPoint m_dragHoveredPos;
+    CWizDocumentDataArray m_dragDocArray;
+    QTimer* m_dragHoveredTimer;
+    CWizCategoryViewItemBase* m_dragHoveredItem;
 
 #ifdef WIZNOTE_CUSTOM_SCROLLBAR
     CWizScrollBar* m_vScroll;
@@ -105,6 +110,8 @@ protected Q_SLOTS:
     virtual void on_group_renamed(const QString& strKbGUID) { Q_UNUSED(strKbGUID); }
     virtual void on_group_permissionChanged(const QString& strKbGUID) { Q_UNUSED(strKbGUID); }
     virtual void on_group_bizChanged(const QString& strKbGUID) { Q_UNUSED(strKbGUID); }
+
+    void on_dragHovered_timeOut();
 };
 
 
@@ -249,17 +256,16 @@ public:
 
     void updateGroupTagDocumentCount(const QString &strKbGUID);
 
-    void createDocument(WIZDOCUMENTDATA& data);
-    //
-    void showWebDialogWithToken(const QString& windowTitle, const QString& url);
+    bool createDocument(WIZDOCUMENTDATA& data);
     //
     void createGroup();
     void viewPersonalGroupInfo(const QString& groupGUID);
     void viewBizGroupInfo(const QString& groupGUID, const QString& bizGUID);
     void managePersonalGroup(const QString& groupGUID);
-    void manageBizGroup(const QString& groupGUID);
+    void manageBizGroup(const QString& groupGUID, const QString& bizGUID);
+    void promptGroupStorageLimitMessage(const QString& groupGUID, const QString& bizGUID);
     void viewBizInfo(const QString& bizGUID);
-    void manageBiz(const QString& bizGUID);
+    void manageBiz(const QString& bizGUID, bool bUpgrade);
 
 
 private:
@@ -359,6 +365,8 @@ public Q_SLOTS:
     void on_itemSelectionChanged();
     void on_itemClicked(QTreeWidgetItem *item, int column);
 
+    void updateGroupsData();
+
 Q_SIGNALS:
     void newDocument();
     void documentsHint(const QString& strHint);
@@ -371,8 +379,13 @@ private:
     void updateChildFolderDocumentCount(CWizCategoryViewItemBase* pItem,
                                        const std::map<CString, int>& mapDocumentCount, int& allCount);
 
-    int getChildTagDocumentCount(CWizCategoryViewItemBase* pItem,
-                                    const std::map<CString, int>& mapDocumentCount);
+    void updateChildTagDocumentCount(CWizCategoryViewItemBase* pItem,
+                                    const std::map<CString, int>& mapDocumentCount, int& allCount);
+
+    void setBizRootItemExtraButton(CWizCategoryViewItemBase* pItem, \
+                                     const WIZBIZDATA& bizData);
+    void setGroupRootItemExtraButton(CWizCategoryViewItemBase* pItem, \
+                                     const WIZGROUPDATA& gData);
 };
 
 

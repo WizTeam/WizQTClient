@@ -72,7 +72,7 @@ void CWizFolderView::initFolders()
     }
 
     if (arrayAllLocation.empty()) {
-        arrayAllLocation.push_back(LOCATION_DEFAULT);
+        arrayAllLocation.push_back(m_dbMgr.db().GetDefaultNoteLocation());
     }
 
     initFolders(pAllFoldersItem, "", arrayAllLocation);

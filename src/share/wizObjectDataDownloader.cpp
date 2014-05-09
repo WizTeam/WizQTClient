@@ -24,152 +24,79 @@ CWizObjectDataDownloaderHost::CWizObjectDataDownloaderHost(CWizDatabaseManager& 
 void CWizObjectDataDownloaderHost::download(const WIZOBJECTDATA& data)
 {
     Q_ASSERT(!data.strObjectGUID.isEmpty());
-
-    if (!m_dbMgr.isOpened(data.strKbGUID)) {
-        qDebug() << "\n[downloader host] object from unknown kb, "
-                 << "maybe you have been kicked out, or your kb info is out of date, please sync and try again"
-                 << "object: " << data.strDisplayName;
-
-        return;
-    }
-
-    if (m_mapObject.contains(data.strObjectGUID)
-            || m_mapDownloading.contains(data.strObjectGUID)) {
+    //
+    if (m_mapObject.contains(data.strObjectGUID))
+    {
         qDebug() << "\n[downloader host] object already in the pool: "
                  << data.strDisplayName;
 
         return;
     }
-
+    //
     m_mapObject[data.strObjectGUID] = data;
+    //
+    CWizDownloadObjectRunnable* downloader = new CWizDownloadObjectRunnable(m_dbMgr, data);
+    //
+    connect(downloader, SIGNAL(downloadDone(QString,bool)), this, SLOT(on_downloadDone(QString,bool)));
+    connect(downloader, SIGNAL(downloadProgress(QString,int,int)), this, SLOT(on_downloadProgress(QString,int,int)));
 
-    qDebug() << "\n[downloader host] scheduled download object: "
-             << data.strDisplayName << " total: "
-             << m_mapObject.size() + m_mapDownloading.size()
-             << " thread: " << QThread::currentThreadId();
-
-    downloadObject();
+    QThreadPool::globalInstance()->start(downloader);
 }
-
-void CWizObjectDataDownloaderHost::downloadObject()
+void CWizObjectDataDownloaderHost::on_downloadDone(QString objectGUID, bool bSucceed)
 {
-    if (m_mapDownloading.size() >= WIZ_OBJECTDATA_DOWNLOADER_MAX) {
-        qDebug() << "\n[downloader host] maxinum downloader arrived, wait...";
-        return;
-    }
-
-    if (!m_mapObject.size()) {
-        qDebug() << "\n[downloader host] download pool is clean...";
-        return;
-    }
-
-    QMap<QString, WIZOBJECTDATA>::iterator it = m_mapObject.begin();
-
-    CWizObjectDataDownloader* downloader = new CWizObjectDataDownloader(m_dbMgr, it.value());
-    connect(downloader, SIGNAL(finished()), SLOT(on_downloader_finished()));
-    downloader->start();
-
-    m_mapDownloading[it.key()] = it.value();
-    m_mapObject.erase(it);
-}
-
-void CWizObjectDataDownloaderHost::on_downloader_finished()
-{
-    CWizObjectDataDownloader* downloader = qobject_cast<CWizObjectDataDownloader*>(sender());
-    WIZOBJECTDATA data = downloader->data();
-    bool bSucceed = downloader->succeed();
-
-    m_mapDownloading.remove(data.strObjectGUID);
-
-    qDebug() << "[downloader host] download object finished"
-             << data.strDisplayName << " left: "
-             << m_mapObject.size() + m_mapDownloading.size();
-
+    WIZOBJECTDATA data = m_mapObject[objectGUID];
+    //
+    m_mapObject.remove(objectGUID);
+    //
     Q_EMIT downloadDone(data, bSucceed);
-
-    downloadObject();
-
-    downloader->deleteLater();
 }
 
-
-/* ------------------------ CWizObjectDataDownloader ------------------------ */
-CWizObjectDataDownloader::CWizObjectDataDownloader(CWizDatabaseManager& dbMgr,
-                                                   const WIZOBJECTDATA& data)
-    : m_dbMgr(dbMgr)
-    , m_data(data)
-    , m_bSucceed(false)
+void CWizObjectDataDownloaderHost::on_downloadProgress(QString objectGUID, int totalSize, int loadedSize)
 {
+    Q_EMIT downloadProgress(totalSize, loadedSize);
 }
 
-void CWizObjectDataDownloader::run()
-{
-    qDebug() << "[downloader host] start download object: "
-             << m_data.strDisplayName << " thread: " << QThread::currentThreadId();
-
-    CWizObjectDataDownloadWorker* download = new CWizObjectDataDownloadWorker(m_dbMgr, m_data);
-    //CWizObjectDataDownload* download = new CWizObjectDataDownload(m_dbMgr, m_data);
-    connect(download, SIGNAL(downloaded(bool)), SLOT(on_downloaded(bool)));
-    download->startDownload();
-
-    exec();
-}
-
-void CWizObjectDataDownloader::on_downloaded(bool bSucceed)
-{
-    qDebug() << "[downloader host] object: "
-             << m_data.strDisplayName << " result: " << (bSucceed ? "ok" : "failed");
-
-    m_bSucceed = bSucceed;
-
-    quit();
-}
-
-using namespace WizService;
-
-/* ------------------------- CWizObjectDataDownload ------------------------- */
-CWizObjectDataDownloadWorker::CWizObjectDataDownloadWorker(CWizDatabaseManager& dbMgr,
-                                                           const WIZOBJECTDATA& data)
+CWizDownloadObjectRunnable::CWizDownloadObjectRunnable(CWizDatabaseManager& dbMgr, const WIZOBJECTDATA& data)
     : m_dbMgr(dbMgr)
     , m_data(data)
 {
 }
 
-void CWizObjectDataDownloadWorker::startDownload()
+void CWizDownloadObjectRunnable::run()
 {
-    connect(Token::instance(), SIGNAL(tokenAcquired(QString)),
-            SLOT(onTokenAcquired(QString)), Qt::QueuedConnection);
-    Token::instance()->requestToken();
+    bool ret = download();
+    //
+    Q_EMIT downloadDone(m_data.strObjectGUID, ret);
 }
-
-void CWizObjectDataDownloadWorker::onTokenAcquired(const QString& strToken)
+bool CWizDownloadObjectRunnable::download()
 {
-    Token::instance()->disconnect(this);
-
-    if (strToken.isEmpty()) {
-        Q_EMIT downloaded(false);
-        return;
+    QString token = WizService::Token::token();
+    if (token.isEmpty()) {
+        return false;
     }
 
     WIZUSERINFOBASE info;
-    info.strToken = strToken;
+    info.strToken = token;
     info.strKbGUID = m_data.strKbGUID;
-    info.strDatabaseServer = ApiEntry::kUrlFromGuid(strToken, m_data.strKbGUID);
+    info.strDatabaseServer = WizService::ApiEntry::kUrlFromGuid(token, m_data.strKbGUID);
 
     CWizKMDatabaseServer ksServer(info);
+    connect(&ksServer, SIGNAL(downloadProgress(int, int)), SLOT(on_downloadProgress(int,int)));
 
     // FIXME: should we query object before download data?
     if (!ksServer.data_download(m_data.strObjectGUID,
                                 WIZOBJECTDATA::ObjectTypeToTypeString(m_data.eObjectType),
                                 m_data.arrayData, m_data.strDisplayName)) {
-        Q_EMIT downloaded(false);
-        return;
+        return false;
     }
 
     m_dbMgr.db(m_data.strKbGUID).UpdateObjectData(m_data.strObjectGUID,
                                                   WIZOBJECTDATA::ObjectTypeToTypeString(m_data.eObjectType),
                                                   m_data.arrayData);
 
-    Q_EMIT downloaded(true);
+    return true;
 }
-
+void CWizDownloadObjectRunnable::on_downloadProgress(int totalSize, int loadedSize)
+{
+    emit downloadProgress(m_data.strObjectGUID, totalSize, loadedSize);
+}

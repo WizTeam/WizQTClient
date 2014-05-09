@@ -22,6 +22,7 @@
 #include "share/wizmisc.h"
 #include "share/wizDatabase.h"
 #include "share/wizsettings.h"
+#include "utils/stylehelper.h"
 
 #include "sync/token.h"
 #include "sync/apientry.h"
@@ -43,6 +44,15 @@ TitleBar::TitleBar(QWidget *parent)
     , m_attachments(NULL)
 {
     m_editTitle->setCompleter(new WizService::MessageCompleter(m_editTitle));
+    int nTitleHeight = Utils::StyleHelper::titleEditorHeight();
+    m_editTitle->setFixedHeight(nTitleHeight);
+    m_editTitle->setAlignment(Qt::AlignVCenter);
+    m_editTitle->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+
+    int nEditToolBarHeight = Utils::StyleHelper::editToolBarHeight();
+    m_editorBar->setFixedHeight(nEditToolBarHeight);
+    m_editorBar->layout()->setAlignment(Qt::AlignVCenter);
+    m_infoBar->setFixedHeight(nEditToolBarHeight);
 
     // FIXME
     QString strTheme = "default";
@@ -53,6 +63,7 @@ TitleBar::TitleBar(QWidget *parent)
     setLayout(layout);
 
     m_editBtn = new CellButton(CellButton::Left, this);
+    m_editBtn->setFixedHeight(nTitleHeight);
     QString shortcut = ::WizGetShortcut("EditNote", "Alt+1");
     m_editBtn->setShortcut(QKeySequence::fromString(shortcut));
     m_editBtn->setNormalIcon(::WizLoadSkinIcon(strTheme, "document_lock"), tr("Switch to Editing View"));
@@ -61,12 +72,14 @@ TitleBar::TitleBar(QWidget *parent)
     connect(m_editBtn, SIGNAL(clicked()), SLOT(onEditButtonClicked()));
 
     m_tagBtn = new CellButton(CellButton::Center, this);
+    m_tagBtn->setFixedHeight(nTitleHeight);
     QString tagsShortcut = ::WizGetShortcut("EditNoteTags", "Alt+2");
     m_tagBtn->setShortcut(QKeySequence::fromString(tagsShortcut));
     m_tagBtn->setNormalIcon(::WizLoadSkinIcon(strTheme, "document_tag"), tr("View and add tags"));
     connect(m_tagBtn, SIGNAL(clicked()), SLOT(onTagButtonClicked()));
 
     m_attachBtn = new CellButton(CellButton::Center, this);
+    m_attachBtn->setFixedHeight(nTitleHeight);
     QString attachmentShortcut = ::WizGetShortcut("EditNoteAttachments", "Alt+3");
     m_attachBtn->setShortcut(QKeySequence::fromString(attachmentShortcut));
     m_attachBtn->setNormalIcon(::WizLoadSkinIcon(strTheme, "document_attachment"), tr("Add attachments"));
@@ -74,6 +87,7 @@ TitleBar::TitleBar(QWidget *parent)
     connect(m_attachBtn, SIGNAL(clicked()), SLOT(onAttachButtonClicked()));
 
     m_infoBtn = new CellButton(CellButton::Center, this);
+    m_infoBtn->setFixedHeight(nTitleHeight);
     QString infoShortcut = ::WizGetShortcut("EditNoteInfo", "Alt+4");
     m_infoBtn->setShortcut(QKeySequence::fromString(infoShortcut));
     m_infoBtn->setNormalIcon(::WizLoadSkinIcon(strTheme, "document_info"), tr("View and modify note's info"));
@@ -81,6 +95,7 @@ TitleBar::TitleBar(QWidget *parent)
 
     // comments
     m_commentsBtn = new CellButton(CellButton::Right, this);
+    m_commentsBtn->setFixedHeight(nTitleHeight);
     m_commentsBtn->setNormalIcon(::WizLoadSkinIcon(strTheme, "comments"), tr("Add comments"));
     m_commentsBtn->setBadgeIcon(::WizLoadSkinIcon(strTheme, "comments_exist"), tr("View and add comments"));
     connect(m_commentsBtn, SIGNAL(clicked()), SLOT(onCommentsButtonClicked()));
@@ -88,44 +103,48 @@ TitleBar::TitleBar(QWidget *parent)
             SLOT(onViewNoteLoaded(Core::INoteView*,const WIZDOCUMENTDATA&,bool)));
 
     QWidget* line1 = new QWidget(this);
-    line1->setFixedHeight(12);
-    line1->setStyleSheet("border-top-width:1;border-top-style:solid;border-top-color:#d9dcdd");
+    line1->setFixedHeight(1);
+    line1->setStyleSheet("border-top-width:1;border-top-style:solid;border-top-color:#DFDFD7;");
 
-    QWidget* line2 = new QWidget(this);
-    line2->setFixedHeight(1);
-    line2->setFixedWidth(10);
-    line2->setStyleSheet("border-bottom-width:1;border-bottom-style:solid;border-bottom-color:#d9dcdd");
 
-    QVBoxLayout* layoutInfo1 = new QVBoxLayout();
-    layoutInfo1->setContentsMargins(0, 0, 0, 0);
-    layoutInfo1->setSpacing(0);
-    layoutInfo1->addWidget(m_infoBar);
-    layoutInfo1->addWidget(m_editorBar);
-    layoutInfo1->addWidget(line1);
-    m_editorBar->hide();
+    QWidget* line3 = new QWidget(this);
+    line3->setFixedHeight(1);
+    line3->setStyleSheet("border-top-width:1;border-top-style:solid;border-top-color:#d9dcdd");
 
     QHBoxLayout* layoutInfo2 = new QHBoxLayout();
     layoutInfo2->setContentsMargins(0, 0, 0, 0);
     layoutInfo2->setSpacing(0);
+    layoutInfo2->addWidget(m_editTitle);
     layoutInfo2->addWidget(m_editBtn);
     layoutInfo2->addWidget(m_tagBtn);
     layoutInfo2->addWidget(m_attachBtn);
     layoutInfo2->addWidget(m_infoBtn);
     layoutInfo2->addWidget(m_commentsBtn);
-    layoutInfo2->addWidget(line2);
 
-    QVBoxLayout* layoutInfo3 = new QVBoxLayout();
-    layoutInfo3->addStretch();
-    layoutInfo3->addLayout(layoutInfo2);
 
-    QHBoxLayout* layoutInfo4 = new QHBoxLayout();
-    layoutInfo4->setContentsMargins(0, 0, 0, 0);
-    layoutInfo4->setSpacing(0);
-    layoutInfo4->addLayout(layoutInfo1);
-    layoutInfo4->addLayout(layoutInfo3);
 
-    layout->addWidget(m_editTitle);
-    layout->addLayout(layoutInfo4);
+    QVBoxLayout* layoutInfo1 = new QVBoxLayout();
+    layoutInfo1->setContentsMargins(0, 0, 0, 0);
+    layoutInfo1->setSpacing(0);
+    layoutInfo1->addLayout(layoutInfo2);
+    layoutInfo1->addWidget(line1);
+    layoutInfo1->addWidget(m_infoBar);
+    layoutInfo1->addWidget(m_editorBar);
+    layoutInfo1->addWidget(line3);
+    m_editorBar->hide();
+
+//    QVBoxLayout* layoutInfo3 = new QVBoxLayout();
+//    layoutInfo3->addStretch();
+//    layoutInfo3->addLayout(layoutInfo2);
+
+//    QHBoxLayout* layoutInfo4 = new QHBoxLayout();
+//    layoutInfo4->setContentsMargins(0, 0, 0, 0);
+//    layoutInfo4->setSpacing(0);
+//    layoutInfo4->addLayout(layoutInfo1);
+//    layoutInfo4->addLayout(layoutInfo3);
+
+    layout->addLayout(layoutInfo1);
+    //layout->addLayout(layoutInfo4);
     layout->addWidget(m_notifyBar);
     layout->addStretch();
 }
@@ -170,14 +189,24 @@ void TitleBar::setEditor(CWizDocumentWebView* editor)
 
 void TitleBar::onEditorFocusIn()
 {
-    m_infoBar->hide();
-    m_editorBar->show();
+    showEditorBar();
 }
 
 void TitleBar::onEditorFocusOut()
 {
+    showInfoBar();
+}
+
+void TitleBar::showInfoBar()
+{
     m_editorBar->hide();
     m_infoBar->show();
+}
+
+void TitleBar::showEditorBar()
+{
+    m_infoBar->hide();
+    m_editorBar->show();
 }
 
 void TitleBar::onEditorChanged()
@@ -269,8 +298,9 @@ void TitleBar::onInfoButtonClicked()
 
 bool isNetworkAccessible()
 {
-    QNetworkConfigurationManager man;
-    return man.isOnline();
+    return true;
+    //QNetworkConfigurationManager man;
+    //return man.isOnline();
 }
 
 #define COMMENT_FRAME_WIDTH 300

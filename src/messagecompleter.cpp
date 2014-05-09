@@ -25,38 +25,14 @@ namespace WizService {
 
 class MessageCompleterModel : public QAbstractListModel
 {
+public:
     struct UserItem {
         QString strUserId;
         QString strAlias;
         QString strPinyin;
     };
 
-public:
-    MessageCompleterModel(const CWizBizUserDataArray& arrayUser, QObject* parent = 0)
-        : QAbstractListModel(parent)
-    {
-        CWizBizUserDataArray::const_iterator it = arrayUser.begin();
-        for (; it != arrayUser.end(); it++) {
-            const WIZBIZUSER& user = *it;
-
-            wchar_t name[user.alias.size()];
-            user.alias.toWCharArray(name);
-            QString py;
-            WizToolsChinese2PinYin(name, WIZ_C2P_POLYPHONE, py); // FIXME
-
-            if (py.isEmpty()) {
-                py = user.alias; // not chinese
-            } else {
-                py = py.split("\n").at(0);
-                py = py.replace(",", "");
-            }
-
-            m_users.insert(0, UserItem());
-            m_users[0].strUserId = user.userId;
-            m_users[0].strAlias = user.alias;
-            m_users[0].strPinyin = py;
-        }
-    }
+    MessageCompleterModel(const CWizBizUserDataArray& arrayUser, QObject* parent = 0);
 
     virtual int rowCount(const QModelIndex& parent = QModelIndex()) const
     {
@@ -89,6 +65,60 @@ private:
     QList<UserItem> m_users;
 };
 
+bool caseInsensitiveLessThan(const MessageCompleterModel::UserItem& item1,const MessageCompleterModel::UserItem& item2)
+{
+    return item1.strPinyin.toLower() < item2.strPinyin.toLower();
+}
+
+MessageCompleterModel::MessageCompleterModel(const CWizBizUserDataArray& arrayUser, QObject* parent)
+    : QAbstractListModel(parent)
+{
+    CWizBizUserDataArray::const_iterator it = arrayUser.begin();
+    for (; it != arrayUser.end(); it++) {
+        const WIZBIZUSER& user = *it;
+
+        wchar_t name[user.alias.size()];
+        user.alias.toWCharArray(name);
+        //
+        QString part1 = user.alias;
+
+        QString part2;
+        WizToolsChinese2PinYin(name, WIZ_C2P_POLYPHONE, part2); // FIXME
+        if (!part2.isEmpty())
+        {
+            part2 = part2.replace(",", "");
+        }
+        //
+#if QT_VERSION >= 0x050200
+        QString part3;
+        WizToolsChinese2PinYin(name, WIZ_C2P_FIRST_LETTER_ONLY | WIZ_C2P_POLYPHONE, part3);
+        if (!part3.isEmpty())
+        {
+            part3 = part3.replace(",", "");
+        }
+#endif
+        //
+#if QT_VERSION >= 0x050200
+        QString matchText = part1 + "\n" + part2 + "\n" + part3;
+#else
+        QString matchText;
+        if (part2.isEmpty())
+        {
+            matchText = part1;
+        }
+        else
+        {
+            matchText = part2;
+        }
+#endif
+
+        m_users.insert(0, UserItem());
+        m_users[0].strUserId = user.userId;
+        m_users[0].strAlias = user.alias;
+        m_users[0].strPinyin = matchText;
+    }
+    qSort(m_users.begin(), m_users.end(), caseInsensitiveLessThan);
+}
 
 class MessageCompleterPopupDelegate: public QItemDelegate
 {
@@ -144,6 +174,9 @@ MessageCompleter::MessageCompleter(QWidget *parent)
 
     setCompletionColumn(0);
     setCompletionRole(Qt::EditRole);
+#if QT_VERSION >= 0x050200
+    setFilterMode(Qt::MatchContains);
+#endif
 
     connect(Core::ICore::instance(), SIGNAL(viewNoteLoaded(Core::INoteView*,const WIZDOCUMENTDATA&,bool)),
             SLOT(onNoteLoaded(Core::INoteView*,const WIZDOCUMENTDATA&,bool)));

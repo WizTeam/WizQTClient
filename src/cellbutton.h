@@ -33,8 +33,10 @@ public:
     void setNormalIcon(const QIcon& icon, const QString& strTips);
     void setCheckedIcon(const QIcon& icon, const QString& strTips);
     void setBadgeIcon(const QIcon& icon, const QString& strTips);
-    void setState(int state);
     int state() const { return m_state; }
+
+public slots:
+    void setState(int state);
 
 private:
     Position m_pos;
@@ -46,7 +48,7 @@ private:
     QString m_strTipsChecked;
     QString m_strTipsBagde;
 
-    QIcon m_backgroundIcon;
+    //QIcon m_backgroundIcon;
 
 protected:
     virtual void paintEvent(QPaintEvent* event);

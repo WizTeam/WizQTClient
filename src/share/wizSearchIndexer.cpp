@@ -123,7 +123,7 @@ bool CWizSearchIndexer::buildFTSIndexByDatabase(CWizDatabase& db)
     }
 
     if (nErrors >= 3) {
-        TOLOG(tr("[WARNING] total %1 documents failed to build").arg(nErrors));
+        TOLOG(tr("[WARNING] total %1 notes failed to build").arg(nErrors));
         return false;
     }
 
@@ -178,9 +178,9 @@ bool CWizSearchIndexer::_updateDocumentImpl(void *pHandle,
 
     // decompress
     QString strDataFile;
-    if (!db.DocumentToTempHtmlFile(doc, strDataFile)) {
+    if (!db.DocumentToTempHtmlFile(doc, strDataFile, "sindex.html")) {
         TOLOG("Can't decompress document while update FTS index: " + doc.strTitle);
-        Q_ASSERT(0);
+        //Q_ASSERT(0);
         return false;
     }
 

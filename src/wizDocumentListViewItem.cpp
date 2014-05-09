@@ -10,6 +10,7 @@
 #include "wizDocumentListView.h"
 #include "share/wizDatabaseManager.h"
 #include "share/wizDatabase.h"
+#include "share/wizsettings.h"
 #include "wizPopupButton.h"
 
 #include "thumbcache.h"
@@ -42,8 +43,6 @@ CWizDocumentListViewItem::CWizDocumentListViewItem(CWizExplorerApp& app,
 
 void CWizDocumentListViewItem::resetAvatar(const QString& strFileName)
 {
-    m_data.imgAuthorAvatar.load(strFileName);
-
     Q_EMIT thumbnailReloaded();
 }
 
@@ -61,6 +60,16 @@ bool CWizDocumentListViewItem::isAvatarNeedUpdate(const QString& strFileName)
         return true;
     }
 
+    return false;
+}
+
+bool CWizDocumentListViewItem::isContainsAttachment() const
+{
+    WIZDOCUMENTDATA docData;
+    if (m_app.databaseManager().db(m_data.doc.strKbGUID).DocumentFromGUID(m_data.doc.strGUID, docData))
+    {
+        return docData.nAttachmentCount > 0;
+    }
     return false;
 }
 
@@ -217,56 +226,47 @@ void CWizDocumentListViewItem::on_thumbnailReloaded()
 void CWizDocumentListViewItem::draw(QPainter* p, const QStyleOptionViewItemV4* vopt, int nViewType) const
 {
     int nItemType = itemType();
-    //QString strKey = cacheKey();
-    QPixmap pm;
-
-    //if (!QPixmapCache::find(strKey, &pm)) {
-        pm = draw_impl(vopt, nItemType, nViewType);
-    //    Q_ASSERT(!pm.isNull());
-    //    if (!QPixmapCache::insert(strKey, pm)) {
-    //        qDebug() << "Failed insert thumbnail to QPixmapCache while drawing document list";
-    //    }
-    //}
-
-    p->save();
-    p->setClipRect(vopt->rect);
-    p->drawPixmap(vopt->rect, pm);
-    p->restore();
+    draw_impl(p, vopt, nItemType, nViewType);
+    drawSyncStatus(p, vopt, nViewType);
 }
 
-QPixmap CWizDocumentListViewItem::draw_impl(const QStyleOptionViewItemV4* vopt, int nItemType, int nViewType) const
+void CWizDocumentListViewItem::draw_impl(QPainter* p, const QStyleOptionViewItemV4* vopt, int nItemType, int nViewType) const
 {
     if (nItemType == CWizDocumentListViewItem::TypePrivateDocument)
     {
         switch (nViewType) {
         case CWizDocumentListView::TypeThumbnail:
-            return drawPrivateSummaryView_impl(vopt);
+            drawPrivateSummaryView_impl(p, vopt);
+            return;
         case CWizDocumentListView::TypeTwoLine:
-            return drawPrivateTwoLineView_impl(vopt);
+            drawPrivateTwoLineView_impl(p, vopt);
+            return;
         case CWizDocumentListView::TypeOneLine:
-            return drawOneLineView_impl(vopt);
+            drawOneLineView_impl(p, vopt);
+            return;
         default:
             Q_ASSERT(0);
-            break;
+            return;
         }
     }
     else if (nItemType == CWizDocumentListViewItem::TypeGroupDocument)
     {
         switch (nViewType) {
         case CWizDocumentListView::TypeThumbnail:
-            return drawGroupSummaryView_impl(vopt);
+            drawGroupSummaryView_impl(p, vopt);
+            return;
         case CWizDocumentListView::TypeTwoLine:
-            return drawGroupTwoLineView_impl(vopt);
+            drawGroupTwoLineView_impl(p, vopt);
+            return;
         case CWizDocumentListView::TypeOneLine:
-            return drawOneLineView_impl(vopt);
+            drawOneLineView_impl(p, vopt);
+            return;
         default:
             Q_ASSERT(0);
-            break;
+            return;
         }
     }
-
     Q_ASSERT(0);
-    return QPixmap();
 }
 
 void CWizDocumentListViewItem::setNeedUpdate() const
@@ -292,7 +292,7 @@ QString CWizDocumentListViewItem::cacheKey() const
     return "Core::ListItem::" + m_data.doc.strGUID + "::" + view->viewType() + "::" + stat;
 }
 
-QPixmap CWizDocumentListViewItem::drawPrivateSummaryView_impl(const QStyleOptionViewItemV4* vopt) const
+void CWizDocumentListViewItem::drawPrivateSummaryView_impl(QPainter* p, const QStyleOptionViewItemV4* vopt) const
 {
     bool bSelected = vopt->state & QStyle::State_Selected;
     bool bFocused = listWidget()->hasFocus();
@@ -300,23 +300,20 @@ QPixmap CWizDocumentListViewItem::drawPrivateSummaryView_impl(const QStyleOption
     WIZABSTRACT thumb;
     ThumbCache::instance()->find(m_data.doc.strKbGUID, m_data.doc.strGUID, thumb);
 
-    QPainter p;
-    QPixmap pm(Utils::StyleHelper::pixmapFromDevice(vopt->rect.size()));
-    QRect rcd = Utils::StyleHelper::initListViewItemPainter(&p, &pm, vopt->rect, bFocused, bSelected);
+    QRect rcd = Utils::StyleHelper::initListViewItemPainter(p, vopt->rect, bFocused, bSelected);
 
     if (!thumb.image.isNull()) {
         QPixmap pmt = QPixmap::fromImage(thumb.image);
-        QRect rcp = Utils::StyleHelper::drawThumbnailPixmap(&p, rcd, pmt);
+        QRect rcp = Utils::StyleHelper::drawThumbnailPixmap(p, rcd, pmt);
         rcd.setRight(rcp.left());
     }
 
     int nType = m_data.doc.nProtected ? Utils::StyleHelper::BadgeEncryted : Utils::StyleHelper::BadgeNormal;
-    Utils::StyleHelper::drawListViewItemThumb(&p, rcd, nType, m_data.doc.strTitle, m_data.strInfo, thumb.text, bFocused, bSelected);
-
-    return pm;
+    bool bContainsAttach = isContainsAttachment();
+    Utils::StyleHelper::drawListViewItemThumb(p, rcd, nType, m_data.doc.strTitle, m_data.strInfo, thumb.text, bFocused, bSelected, bContainsAttach);
 }
 
-QPixmap CWizDocumentListViewItem::drawGroupSummaryView_impl(const QStyleOptionViewItemV4* vopt) const
+void CWizDocumentListViewItem::drawGroupSummaryView_impl(QPainter* p, const QStyleOptionViewItemV4* vopt) const
 {
     bool bSelected = vopt->state & QStyle::State_Selected;
     bool bFocused = listWidget()->hasFocus();
@@ -324,67 +321,87 @@ QPixmap CWizDocumentListViewItem::drawGroupSummaryView_impl(const QStyleOptionVi
     WIZABSTRACT thumb;
     ThumbCache::instance()->find(m_data.doc.strKbGUID, m_data.doc.strGUID, thumb);
 
-    QPainter p;
-    QPixmap pm(Utils::StyleHelper::pixmapFromDevice(vopt->rect.size()));
-    QRect rcd = Utils::StyleHelper::initListViewItemPainter(&p, &pm, vopt->rect, bFocused, bSelected);
+    QRect rcd = Utils::StyleHelper::initListViewItemPainter(p, vopt->rect, bFocused, bSelected);
 
     QPixmap pmAvatar;
     WizService::AvatarHost::avatar(m_data.strAuthorId, &pmAvatar);
-    QRect rcAvatar = Utils::StyleHelper::drawAvatar(&p, rcd, pmAvatar);
-    rcd.setLeft(rcAvatar.right());
+    QRect rcAvatar = Utils::StyleHelper::drawAvatar(p, rcd, pmAvatar);
+    int nAvatarRightMargin = 4;
+    rcd.setLeft(rcAvatar.right() + nAvatarRightMargin);
 
     int nType = m_data.doc.nProtected ? Utils::StyleHelper::BadgeEncryted : Utils::StyleHelper::BadgeNormal;
-    Utils::StyleHelper::drawListViewItemThumb(&p, rcd, nType, m_data.doc.strTitle, m_data.strInfo, thumb.text, bFocused, bSelected);
-
-    return pm;
+    bool bContainsAttach = isContainsAttachment();
+    Utils::StyleHelper::drawListViewItemThumb(p, rcd, nType, m_data.doc.strTitle, m_data.strInfo, thumb.text, bFocused, bSelected, bContainsAttach);
 }
 
-QPixmap CWizDocumentListViewItem::drawPrivateTwoLineView_impl(const QStyleOptionViewItemV4* vopt) const
+void CWizDocumentListViewItem::drawPrivateTwoLineView_impl(QPainter* p, const QStyleOptionViewItemV4* vopt) const
 {
     bool bSelected = vopt->state & QStyle::State_Selected;
     bool bFocused = listWidget()->hasFocus();
 
-    QPainter p;
-    QPixmap pm(Utils::StyleHelper::pixmapFromDevice(vopt->rect.size()));
-    QRect rcd = Utils::StyleHelper::initListViewItemPainter(&p, &pm, vopt->rect, bFocused, bSelected);
+    QRect rcd = Utils::StyleHelper::initListViewItemPainter(p, vopt->rect, bFocused, bSelected);
 
     int nType = m_data.doc.nProtected ? Utils::StyleHelper::BadgeEncryted : Utils::StyleHelper::BadgeNormal;
-    Utils::StyleHelper::drawListViewItemThumb(&p, rcd, nType, m_data.doc.strTitle, m_data.strInfo, NULL, bFocused, bSelected);
-
-    return pm;
+    bool bContainsAttach = isContainsAttachment();
+    Utils::StyleHelper::drawListViewItemThumb(p, rcd, nType, m_data.doc.strTitle, m_data.strInfo, NULL, bFocused, bSelected, bContainsAttach);
 }
 
-QPixmap CWizDocumentListViewItem::drawGroupTwoLineView_impl(const QStyleOptionViewItemV4* vopt) const
+void CWizDocumentListViewItem::drawGroupTwoLineView_impl(QPainter* p, const QStyleOptionViewItemV4* vopt) const
 {
     bool bSelected = vopt->state & QStyle::State_Selected;
     bool bFocused = listWidget()->hasFocus();
 
-    QPainter p;
-    QPixmap pm(Utils::StyleHelper::pixmapFromDevice(vopt->rect.size()));
-    QRect rcd = Utils::StyleHelper::initListViewItemPainter(&p, &pm, vopt->rect, bFocused, bSelected);
+    QRect rcd = Utils::StyleHelper::initListViewItemPainter(p, vopt->rect, bFocused, bSelected);
 
     QPixmap pmAvatar;
     WizService::AvatarHost::avatar(m_data.strAuthorId, &pmAvatar);
-    QRect rcAvatar = Utils::StyleHelper::drawAvatar(&p, rcd, pmAvatar);
-    rcd.setLeft(rcAvatar.right());
+    QRect rcAvatar = Utils::StyleHelper::drawAvatar(p, rcd, pmAvatar);
+    int nAvatarRightMargin = 4;
+    rcd.setLeft(rcAvatar.right() + nAvatarRightMargin);
 
     int nType = m_data.doc.nProtected ? Utils::StyleHelper::BadgeEncryted : Utils::StyleHelper::BadgeNormal;
-    Utils::StyleHelper::drawListViewItemThumb(&p, rcd, nType, m_data.doc.strTitle, m_data.strInfo, NULL, bFocused, bSelected);
-
-    return pm;
+    bool bContainsAttach = isContainsAttachment();
+    Utils::StyleHelper::drawListViewItemThumb(p, rcd, nType, m_data.doc.strTitle, m_data.strInfo, NULL, bFocused, bSelected, bContainsAttach);
 }
 
-QPixmap CWizDocumentListViewItem::drawOneLineView_impl(const  QStyleOptionViewItemV4* vopt) const
+void CWizDocumentListViewItem::drawOneLineView_impl(QPainter* p, const  QStyleOptionViewItemV4* vopt) const
 {
     bool bSelected = vopt->state & QStyle::State_Selected;
     bool bFocused = listWidget()->hasFocus();
 
-    QPainter p;
-    QPixmap pm(Utils::StyleHelper::pixmapFromDevice(vopt->rect.size()));
-    QRect rcd = Utils::StyleHelper::initListViewItemPainter(&p, &pm, vopt->rect, bFocused, bSelected);
+    QRect rcd = Utils::StyleHelper::initListViewItemPainter(p, vopt->rect, bFocused, bSelected);
 
     int nType = m_data.doc.nProtected ? Utils::StyleHelper::BadgeEncryted : Utils::StyleHelper::BadgeNormal;
-    Utils::StyleHelper::drawListViewItemThumb(&p, rcd, nType, m_data.doc.strTitle, NULL, NULL, bFocused, bSelected);
+    bool bContainsAttach = isContainsAttachment();
+    Utils::StyleHelper::drawListViewItemThumb(p, rcd, nType, m_data.doc.strTitle, NULL, NULL, bFocused, bSelected, bContainsAttach);
+}
 
-    return pm;
+void CWizDocumentListViewItem::drawSyncStatus(QPainter* p, const QStyleOptionViewItemV4* vopt, int nViewType) const
+{
+    Q_UNUSED(nViewType);
+
+    QString strIconPath;
+    CWizDatabase& db = m_app.databaseManager().db(m_data.doc.strKbGUID);
+    if (db.IsDocumentModified(m_data.doc.strGUID))
+    {
+        strIconPath = ::WizGetSkinResourcePath(m_app.userSettings().skin()) + "uploading.bmp";
+    }
+    else if (!db.IsDocumentDownloaded(m_data.doc.strGUID))
+    {
+        strIconPath = ::WizGetSkinResourcePath(m_app.userSettings().skin()) + "downloading.bmp";
+    }
+    else
+        return;
+
+    p->save();
+    int nMargin = -1;
+    QPixmap fullPic(strIconPath);
+    QPixmap pix = fullPic.copy(0, 0, fullPic.height(), fullPic.height());
+    pix.setMask(pix.createMaskFromColor(Qt::black, Qt::MaskInColor));
+    QRect rcSync(vopt->rect.right() - pix.width() - nMargin, vopt->rect.bottom() - pix.height() - nMargin,
+                 pix.width(), pix.height());
+    p->drawPixmap(rcSync, pix);
+    p->restore();
+
+    return;
 }

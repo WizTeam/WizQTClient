@@ -5,6 +5,7 @@
 #include <deque>
 
 #include "share/wizpopupwidget.h"
+#include "share/wizobject.h"
 
 class QLineEdit;
 class QListWidget;
@@ -12,7 +13,6 @@ class QListWidgetItem;
 
 class CWizDatabaseManager;
 
-struct WIZDOCUMENTDATAEX;
 typedef std::deque<WIZDOCUMENTDATAEX> CWizDocumentDataArray;
 
 class CWizTagListWidget : public CWizPopupWidget

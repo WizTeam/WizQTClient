@@ -5,7 +5,6 @@
 #include <QRect>
 #include <QTransform>
 #include <QPainter>
-#include <QSettings>
 #include <QVector>
 #include <QTextLayout>
 #include <QDebug>
@@ -15,12 +14,15 @@
 
 #include "pathresolve.h"
 #include "../share/wizmisc.h"
+#include "../share/wizsettings.h"
 
 #ifdef Q_OS_MAC
 #include "mac/wizmachelper.h"
 #endif
 
 namespace Utils {
+
+CWizSettings* StyleHelper::m_settings = 0;
 
 void StyleHelper::initPainterByDevice(QPainter* p)
 {
@@ -84,19 +86,29 @@ QIcon StyleHelper::loadIcon(const QString& strName)
     return icon;
 }
 
+int StyleHelper::treeViewItemHeight()
+{
+    return 31;
+}
+
 QColor StyleHelper::treeViewBackground()
 {
-    QSettings st(PathResolve::themePath(themeName()) + "skin.ini");
-    return QColor(st.value("Category/Background", "#808080").toString());
+    if (!m_settings) {
+        m_settings = new CWizSettings(PathResolve::themePath(themeName()) + "skin.ini");
+    }
+    return QColor(m_settings->value("Category/Background", "#000000").toString());
 }
 
 QColor StyleHelper::treeViewItemBackground(int stat)
 {
-    QSettings st(PathResolve::themePath(themeName()) + "skin.ini");
+    if (!m_settings) {
+        m_settings = new CWizSettings(PathResolve::themePath(themeName()) + "skin.ini");
+    }
+
     if (stat == Selected) {
-        return QColor(st.value("Category/ItemSelectedNoFocus", "#26292b").toString());
+        return QColor(m_settings->value("Category/ItemSelectedNoFocus", "#D3E4ED").toString());
     } else if (stat == Active) {
-        return QColor(st.value("Category/ItemSelected", "#0073c5").toString());
+        return QColor(m_settings->value("Category/ItemSelected", "#3498DB").toString());
     }
 
     Q_ASSERT(0);
@@ -105,40 +117,74 @@ QColor StyleHelper::treeViewItemBackground(int stat)
 
 QColor StyleHelper::treeViewItemCategoryBackground()
 {
-    QSettings st(PathResolve::themePath(themeName()) + "skin.ini");
-    QColor co(st.value("Category/ItemCategory", "#ffffff").toString());
+    if (!m_settings) {
+        m_settings = new CWizSettings(PathResolve::themePath(themeName()) + "skin.ini");
+    }
+    QColor co(m_settings->value("Category/ItemCategory", "#ffffff").toString());
     co.setAlpha(15);
     return co;
 }
 
 QColor StyleHelper::treeViewItemCategoryText()
 {
-    QSettings st(PathResolve::themePath(themeName()) + "skin.ini");
-    return QColor(st.value("Category/ItemCategoryText", "#697882").toString());
+    if (!m_settings) {
+        m_settings = new CWizSettings(PathResolve::themePath(themeName()) + "skin.ini");
+    }
+    return QColor(m_settings->value("Category/ItemCategoryText", "#777775").toString());
 }
 QColor StyleHelper::treeViewItemLinkText()
 {
-    QSettings st(PathResolve::themePath(themeName()) + "skin.ini");
-    return QColor(st.value("Category/ItemLinkText", "#a0aaaf").toString());
+    if (!m_settings) {
+        m_settings = new CWizSettings(PathResolve::themePath(themeName()) + "skin.ini");
+    }
+    return QColor(m_settings->value("Category/ItemLinkText", "#a0aaaf").toString());
+}
+
+QColor StyleHelper::treeViewItemBottomLine()
+{
+    if (!m_settings) {
+        m_settings = new CWizSettings(PathResolve::themePath(themeName()) + "skin.ini");
+    }
+    return QColor(m_settings->value("Category/ItemBottomLine", "#DFDFD7").toString());
+}
+
+QColor StyleHelper::treeViewItemMessageBackground()
+{
+    if (!m_settings) {
+        m_settings = new CWizSettings(PathResolve::themePath(themeName()) + "skin.ini");
+    }
+    return QColor(m_settings->value("Category/ItemMessageBackground", "#3498DB").toString());
+}
+
+QColor StyleHelper::treeViewItemMessageText()
+{
+    if (!m_settings) {
+        m_settings = new CWizSettings(PathResolve::themePath(themeName()) + "skin.ini");
+    }
+    return QColor(m_settings->value("Category/ItemMessageText", "#FFFFFF").toString());
 }
 
 QColor StyleHelper::treeViewItemText(bool bSelected)
 {
-    QSettings st(PathResolve::themePath(themeName()) + "skin.ini");
+    if (!m_settings) {
+        m_settings = new CWizSettings(PathResolve::themePath(themeName()) + "skin.ini");
+    }
     if (bSelected) {
-        return QColor(st.value("Category/TextSelected", "#ffffff").toString());
+        return QColor(m_settings->value("Category/TextSelected", "#ffffff").toString());
     } else {
-        return QColor(st.value("Category/Text", "#a0aaaf").toString());
+        return QColor(m_settings->value("Category/Text", "#777775").toString());
     }
 }
 
 QColor StyleHelper::treeViewItemTextExtend(bool bSelected)
 {
-    QSettings st(PathResolve::themePath(themeName()) + "skin.ini");
+    if (!m_settings) {
+        m_settings = new CWizSettings(PathResolve::themePath(themeName()) + "skin.ini");
+    }
     if (bSelected) {
-        return QColor(st.value("Category/TextExtendSelected", "#e6e6e6").toString());
+        return QColor(m_settings->value("Category/TextExtendSelected", "#e6e6e6").toString());
     } else {
-        return QColor(st.value("Category/TextExtend", "#969696").toString());
+        return QColor(m_settings->value("Category/TextExtend", "#969696").toString());
     }
 }
 
@@ -153,8 +199,6 @@ void StyleHelper::drawTreeViewItemBackground(QPainter* p, const QRect& rc, bool 
         p->fillRect(rcd, bg1);
     } else {
         p->fillRect(rcd, bg2);
-        rcd.setWidth(5); // FIXME
-        p->fillRect(rcd, bg1);
     }
     p->restore();
 }
@@ -196,6 +240,14 @@ void StyleHelper::drawTreeViewBadge(QPainter* p, const QRect& rc, const QString&
     p->restore();
 }
 
+int StyleHelper::listViewSortControlWidgetHeight()
+{
+    if (!m_settings) {
+        m_settings = new CWizSettings(PathResolve::themePath(themeName()) + "skin.ini");
+    }
+    return m_settings->value("Documents/SortControlWidgetHeight", 30).toInt();
+}
+
 int StyleHelper::listViewItemHeight(int nType)
 {
     QFont f;
@@ -215,23 +267,29 @@ int StyleHelper::listViewItemHeight(int nType)
 
 QColor StyleHelper::listViewBackground()
 {
-    QSettings st(PathResolve::themePath(themeName()) + "skin.ini");
-    return QColor(st.value("Documents/Background", "#ffffff").toString());
+    if (!m_settings) {
+        m_settings = new CWizSettings(PathResolve::themePath(themeName()) + "skin.ini");
+    }
+    return QColor(m_settings->value("Documents/Background", "#F9F9F8").toString());
 }
 
 QColor StyleHelper::listViewItemSeperator()
 {
-    QSettings st(PathResolve::themePath(themeName()) + "skin.ini");
-    return QColor(st.value("Documents/Line", "#d9dcdd").toString());
+    if (!m_settings) {
+        m_settings = new CWizSettings(PathResolve::themePath(themeName()) + "skin.ini");
+    }
+    return QColor(m_settings->value("Documents/Line", "#DADAD9").toString());
 }
 
 QColor StyleHelper::listViewItemBackground(int stat)
 {
-    QSettings st(PathResolve::themePath(themeName()) + "skin.ini");
+    if (!m_settings) {
+        m_settings = new CWizSettings(PathResolve::themePath(themeName()) + "skin.ini");
+    }
     if (stat == Normal) {
-        return QColor(st.value("Documents/ItemLoseFocusBackground", "#e1e1e1").toString());
+        return QColor(m_settings->value("Documents/ItemLoseFocusBackground", "#D3E4ED").toString());
     } else if (stat == Active) {
-        return QColor(st.value("Documents/ItemFocusBackground", "#0c8eec").toString());
+        return QColor(m_settings->value("Documents/ItemFocusBackground", "#3498DB").toString());
     }
 
     Q_ASSERT(0);
@@ -240,43 +298,75 @@ QColor StyleHelper::listViewItemBackground(int stat)
 
 QColor StyleHelper::listViewItemTitle(bool bSelected, bool bFocused)
 {
-    QSettings st(PathResolve::themePath(themeName()) + "skin.ini");
+    if (!m_settings) {
+        m_settings = new CWizSettings(PathResolve::themePath(themeName()) + "skin.ini");
+    }
     if (bSelected) {
         if (bFocused) {
-            return QColor(st.value("Documents/TitleFocus", "#ffffff").toString());
+            return QColor(m_settings->value("Documents/TitleFocus", "#ffffff").toString());
         } else {
-            return QColor(st.value("Documents/TitleLoseFocus", "#6a6a6a").toString());
+            return QColor(m_settings->value("Documents/TitleLoseFocus", "#6a6a6a").toString());
         }
     } else {
-        return QColor(st.value("Documents/Title", "#464646").toString());
+        return QColor(m_settings->value("Documents/Title", "#464646").toString());
     }
 }
 
 QColor StyleHelper::listViewItemLead(bool bSelected, bool bFocused)
 {
-    QSettings st(PathResolve::themePath(themeName()) + "skin.ini");
+    if (!m_settings) {
+        m_settings = new CWizSettings(PathResolve::themePath(themeName()) + "skin.ini");
+    }
     if (bSelected) {
         if (bFocused) {
-            return QColor(st.value("Documents/DateFocus", "#ffffff").toString());
+            return QColor(m_settings->value("Documents/DateFocus", "#ffffff").toString());
         } else {
-            return QColor(st.value("Documents/DateLoseFocus", "#6a6a6a").toString());
+            return QColor(m_settings->value("Documents/DateLoseFocus", "#6a6a6a").toString());
         }
     } else {
-        return QColor(st.value("Documents/Date", "#0000ff").toString());
+        return QColor(m_settings->value("Documents/Date", "#3498DB").toString());
     }
 }
 
 QColor StyleHelper::listViewItemSummary(bool bSelected, bool bFocused)
 {
-    QSettings st(PathResolve::themePath(themeName()) + "skin.ini");
+    if (!m_settings) {
+        m_settings = new CWizSettings(PathResolve::themePath(themeName()) + "skin.ini");
+    }
     if (bSelected) {
         if (bFocused) {
-            return QColor(st.value("Documents/SummaryFocus", "#ffffff").toString());
+            return QColor(m_settings->value("Documents/SummaryFocus", "#ffffff").toString());
         } else {
-            return QColor(st.value("Documents/SummaryLoseFocus", "#6a6a6a").toString());
+            return QColor(m_settings->value("Documents/SummaryLoseFocus", "#6a6a6a").toString());
         }
     } else {
-        return QColor(st.value("Documents/Summary", "#8c8c8c").toString());
+        return QColor(m_settings->value("Documents/Summary", "#8c8c8c").toString());
+    }
+}
+
+QColor StyleHelper::listViewMultiLineFirstLine(bool bSelected)
+{
+    if (!m_settings) {
+        m_settings = new CWizSettings(PathResolve::themePath(themeName()) + "skin.ini");
+    }
+
+    if (bSelected) {
+        return QColor(m_settings->value("MultiLineList/FirstSelected", "#000000").toString());
+    } else {
+        return QColor(m_settings->value("MultiLineList/First", "#000000").toString());
+    }
+}
+
+QColor StyleHelper::listViewMultiLineOtherLine(bool bSelected)
+{
+    if (!m_settings) {
+        m_settings = new CWizSettings(PathResolve::themePath(themeName()) + "skin.ini");
+    }
+
+    if (bSelected) {
+        return QColor(m_settings->value("MultiLineList/OtherSelected", "#666666").toString());
+    } else {
+        return QColor(m_settings->value("MultiLineList/Other", "#666666").toString());
     }
 }
 
@@ -306,7 +396,7 @@ void StyleHelper::drawListViewItemBackground(QPainter* p, const QRect& rc, bool 
 void StyleHelper::drawListViewItemSeperator(QPainter* p, const QRect& rc)
 {
     QRect rcLine = rc;
-    rcLine.adjust(5, 0, -5, 0);
+    //rcLine.adjust(1, 0, -1, 0);
     p->save();
     p->setPen(listViewItemSeperator());
     p->drawLine(rcLine.bottomLeft(), rcLine.bottomRight());
@@ -462,6 +552,22 @@ QRect StyleHelper::drawBadgeIcon(QPainter* p, const QRect& rc, int height, int t
     return rcb;
 }
 
+QRect StyleHelper::drawAttachIcon(QPainter* p, const QRect& rc, bool bFocus, bool bSelect)
+{
+    QIcon attachIcon(loadIcon("document_containsattach"));
+    QSize iconSize = rc.size();
+    int nLeftMargin = 2;
+    QRect rcb = rc.adjusted(nLeftMargin, margin(), 0, 0);
+    rcb.setSize(iconSize);
+    if (bSelect && bFocus) {
+        attachIcon.paint(p, rcb, Qt::AlignTop, QIcon::Active, QIcon::On);
+    } else {
+        attachIcon.paint(p, rcb, Qt::AlignTop, QIcon::Normal, QIcon::Off);
+    }
+
+    return rcb;
+}
+
 int StyleHelper::lineSpacing()
 {
     return 5;
@@ -555,14 +661,20 @@ int StyleHelper::fontExtend(QFont& f)
     return QFontMetrics(f).height();
 }
 
-QRect StyleHelper::initListViewItemPainter(QPainter* p, QPixmap* pm, const QRect& lrc, bool bFocused, bool bSelected)
+int StyleHelper::titleEditorHeight()
 {
-    QRect rc(0, 0, lrc.width(), lrc.height());
+    return 30;
+}
 
-    pm->fill(Utils::StyleHelper::listViewBackground());
+int StyleHelper::editToolBarHeight()
+{
+    return 30;
+}
 
-    p->begin(pm);
-    Utils::StyleHelper::initPainterByDevice(p);
+QRect StyleHelper::initListViewItemPainter(QPainter* p, const QRect& lrc, bool bFocused, bool bSelected)
+{
+    QRect rc = lrc;
+
     Utils::StyleHelper::drawListViewItemSeperator(p, rc);
     Utils::StyleHelper::drawListViewItemBackground(p, rc, bFocused, bSelected);
 
@@ -572,7 +684,7 @@ QRect StyleHelper::initListViewItemPainter(QPainter* p, QPixmap* pm, const QRect
 
 void StyleHelper::drawListViewItemThumb(QPainter* p, const QRect& rc, int nBadgeType,
                                         const QString& title, const QString& lead, const QString& abs,
-                                        bool bFocused, bool bSelected)
+                                        bool bFocused, bool bSelected, bool bContainsAttach)
 {
     QRect rcd(rc);
 
@@ -582,11 +694,19 @@ void StyleHelper::drawListViewItemThumb(QPainter* p, const QRect& rc, int nBadge
     if (!title.isEmpty()) {
         QRect rcTitle = Utils::StyleHelper::drawBadgeIcon(p, rcd, nFontHeight, nBadgeType, bFocused, bSelected);
 
-        rcTitle.setCoords(rcTitle.right(), rcTitle.y(), rcd.right(), rcd.bottom());
+        int nSpace4AttachIcon = 20;
+        rcTitle.setCoords(rcTitle.right(), rcTitle.y(), rcd.right() - nSpace4AttachIcon, rcd.bottom());
         QString strTitle(title);
         QColor colorTitle = Utils::StyleHelper::listViewItemTitle(bSelected, bFocused);
-        rcTitle = Utils::StyleHelper::drawText(p, rcTitle, strTitle, 1, Qt::AlignVCenter, colorTitle, fontTitle);
-        rcd.adjust(0, rcTitle.height() + margin(), 0, 0);
+        QRect rcAttach = Utils::StyleHelper::drawText(p, rcTitle, strTitle, 1, Qt::AlignVCenter, colorTitle, fontTitle);
+
+        if (bContainsAttach) {
+            rcAttach.setCoords(rcAttach.right(), rcd.top(), rcd.right(), rcTitle.bottom());
+            rcAttach.setHeight(nFontHeight);
+            Utils::StyleHelper::drawAttachIcon(p, rcAttach, bFocused, bSelected);
+        }
+
+        rcd.adjust(0, rcAttach.height() + margin(), 0, 0);
     }
 
     QFont fontThumb;

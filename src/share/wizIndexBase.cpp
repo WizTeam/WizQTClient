@@ -3,6 +3,7 @@
 #include <QDebug>
 
 #include "utils/logger.h"
+#include "utils/pathresolve.h"
 
 
 CWizIndexBase::CWizIndexBase(void)
@@ -57,7 +58,7 @@ bool CWizIndexBase::CheckTable(const QString& strTableName)
         return true;
 
     // create table if not exist
-    CString strFileName = WizPathAddBackslash2(WizGetResourcesPath() + "sql") + strTableName.toLower() + ".sql";
+    CString strFileName = WizPathAddBackslash2(Utils::PathResolve::resourcesPath() + "sql") + strTableName.toLower() + ".sql";
     CString strSQL;
     if (!WizLoadUnicodeTextFromFile(strFileName, strSQL))
         return false;
@@ -951,8 +952,8 @@ bool CWizIndexBase::CreateDocumentEx(const WIZDOCUMENTDATA& dataNew)
     }
 
     if (data.strLocation.isEmpty()) {
-        TOLOG1("Document Location is empty: %1, Try to relocation to the /My Notes/", data.strTitle);
-        data.strLocation = "/My Notes/";
+        data.strLocation = GetDefaultNoteLocation();
+        TOLOG2("Document Location is empty: %1, Try to relocation to the %2", data.strTitle, data.strLocation);
     }
 
     CString strFormat = FormatInsertSQLFormat(TABLE_NAME_WIZ_DOCUMENT, FIELD_LIST_WIZ_DOCUMENT, PARAM_LIST_WIZ_DOCUMENT);
@@ -1028,7 +1029,7 @@ bool CWizIndexBase::ModifyDocumentInfoEx(const WIZDOCUMENTDATA& dataCur)
         if (!dataOld.strLocation.isEmpty()) {
             data.strLocation = dataOld.strLocation;
         } else {
-            data.strLocation = "/My Notes/";
+            data.strLocation = GetDefaultNoteLocation();
         }
 
         TOLOG2("Document Location is empty: %1, Try to relocation to the %2", data.strTitle, data.strLocation);

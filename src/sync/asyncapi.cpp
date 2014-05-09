@@ -21,6 +21,7 @@ using namespace WizService;
 
 AsyncApi::AsyncApi(QObject *parent) : QObject(parent)
 {
+    m_networkManager = new QNetworkAccessManager(this);
     qRegisterMetaType<WIZUSERINFO>("WIZUSERINFO");
 }
 
@@ -113,19 +114,27 @@ bool AsyncApi::registerAccount_impl(const QString& strUserId,
     return ret;
 }
 
+
+//
+//使用QtConcurrent的时候,如果线程没有返回,例如网络阻塞等,会导致应用程序无法退出
+//因此使用异步api处理
+//QtConcurrent::run(this, &AsyncApi::getCommentsCount_impl, strUrl);
+//
+//
+
 void AsyncApi::getCommentsCount(const QString& strUrl)
 {
-    QtConcurrent::run(this, &AsyncApi::getCommentsCount_impl, strUrl);
+    QNetworkReply* reply = m_networkManager->get(QNetworkRequest(strUrl));
+
+    connect(reply, SIGNAL(finished()), this, SLOT(on_comments_finished()));
 }
 
-void AsyncApi::getCommentsCount_impl(const QString& strUrl)
+void AsyncApi::on_comments_finished()
 {
-    QNetworkAccessManager net;
-    QNetworkReply* reply = net.get(QNetworkRequest(strUrl));
-
-    QEventLoop loop;
-    connect(reply, SIGNAL(finished()), &loop, SLOT(quit()));
-    loop.exec();
+    QNetworkReply* reply = dynamic_cast<QNetworkReply*>(sender());
+    if (!reply)
+        return;
+    //
 
     int nTotalComments = 0;
 
@@ -163,6 +172,7 @@ void AsyncApi::getCommentsCount_impl(const QString& strUrl)
     nTotalComments = d.FindMember("comment_count")->value.GetInt();
     Q_EMIT getCommentsCountFinished(nTotalComments);
 }
+
 
 void AsyncApi::setMessageStatus(const QString& ids, bool bRead)
 {

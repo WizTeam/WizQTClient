@@ -6,9 +6,5 @@
 
 QStyle* WizGetStyle(const QString& skinName);
 
-class QColor;
-QColor WizGetCategoryBackroundColor(const QString& skinName);
-QColor WizGetDocumentsBackroundColor(const QString& skinName);
-QColor WizGetClientBackgroundColor(const QString& skinName);
 
 #endif // WIZNOTESTYLE_H

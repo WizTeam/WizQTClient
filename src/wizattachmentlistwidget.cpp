@@ -148,6 +148,37 @@ QPixmap CWizAttachmentListView::itemImage(const QModelIndex& index) const
     return QPixmap();
 }
 
+bool CWizAttachmentListView::itemExtraImage(const QModelIndex& index, const QRect& itemBound, QRect& rcImage, QPixmap& extraPix) const
+{
+    if (const CWizAttachmentListViewItem* item = attachmentItemFromIndex(index))
+    {
+        QString strIcoPath;
+        CWizDatabase& db = m_dbMgr.db(item->attachment().strKbGUID);
+        MainWindow* mainWindow = qobject_cast<MainWindow *>(Core::ICore::mainWindow());
+        if (!db.IsAttachmentDownloaded(item->attachment().strGUID))
+        {
+            strIcoPath = ::WizGetSkinResourcePath(mainWindow->userSettings().skin()) + "downloading.bmp";
+        }
+        else if (db.IsAttachmentModified(item->attachment().strGUID))
+        {
+            strIcoPath = ::WizGetSkinResourcePath(mainWindow->userSettings().skin()) + "uploading.bmp";
+        }
+        else
+            return false;
+
+        QPixmap fullPix(strIcoPath);
+        extraPix = fullPix.copy(0, 0, fullPix.height(), fullPix.height());
+        extraPix.setMask(extraPix.createMaskFromColor(Qt::black, Qt::MaskInColor));
+        int nMargin = -1;
+        rcImage.setLeft(itemBound.right() - extraPix.width() - nMargin);
+        rcImage.setTop(itemBound.bottom() - extraPix.height() - nMargin);
+        rcImage.setSize(extraPix.size());
+
+        return true;
+    }
+
+    return false;
+}
 
 void CWizAttachmentListView::resetAttachments()
 {
@@ -180,14 +211,26 @@ void CWizAttachmentListView::addAttachments()
                              tr("Add attachments"),
                              tr("/home"),
                              tr("All files(*.*)"));
+    //
+    CWizDatabase& db = m_dbMgr.db(m_document.strKbGUID);
 
+    bool ok = false;
     foreach (QString fileName, files)
     {
         WIZDOCUMENTATTACHMENTDATA data;
         data.strKbGUID = m_document.strKbGUID; // needed by under layer
-        m_dbMgr.db(m_document.strKbGUID).AddAttachment(m_document, fileName, data);
+        if (db.AddAttachment(m_document, fileName, data))
+        {
+            ok = true;
+        }
         addItem(new CWizAttachmentListViewItem(data));
     }
+    //
+    if (ok)
+    {
+        MainWindow::quickSyncKb(db.IsGroup() ? db.kbGUID() : "");
+    }
+
 }
 
 void CWizAttachmentListView::openAttachment(CWizAttachmentListViewItem* item)

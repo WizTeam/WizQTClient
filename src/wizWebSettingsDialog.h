@@ -28,7 +28,6 @@ protected:
     QMovie* m_movie;
     QLabel* m_labelError;
     QWebView* m_web;
-    QPushButton* m_btnOk;
 
 private Q_SLOTS:
     void on_web_loaded(bool ok);

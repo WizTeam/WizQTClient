@@ -79,7 +79,7 @@ void CWizNoteInfoForm::setDocument(const WIZDOCUMENTDATA& data)
         }
 
         ui->labelTags->clear();
-        ui->editAuthor->setText(data.strOwner);
+        ui->editAuthor->setText(data.strAuthor);
     }
 
     // common fields

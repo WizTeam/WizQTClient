@@ -33,10 +33,10 @@ void drawCombo(QComboBox* cm, QStyleOptionComboBox& opt)
         //painter.drawRect(rectSub);
         rectSub.adjust(6, 0, -12, 0);
 
-        subOpt.rect = rectSub.adjusted(0, 1, 0, -rectSub.height()/2);
-        drawComboPrimitive(&painter, QStyle::PE_IndicatorArrowUp, subOpt);
+//        subOpt.rect = rectSub.adjusted(0, 1, 0, -rectSub.height()/2);
+//        drawComboPrimitive(&painter, QStyle::PE_IndicatorArrowUp, subOpt);
 
-        subOpt.rect = rectSub.adjusted(0, rectSub.height()/2 + 5, 0, -rectSub.height()/2);
+        subOpt.rect = rectSub.adjusted(0, rectSub.height()/2 - 3, 0, -rectSub.height()/2 + 3);
         drawComboPrimitive(&painter, QStyle::PE_IndicatorArrowDown, subOpt);
     }
 
@@ -335,6 +335,10 @@ EditorToolBar::EditorToolBar(QWidget *parent)
     m_btnUnderLine->setIcon(::WizLoadSkinIcon(skin, "actionFormatUnderLine"));
     connect(m_btnUnderLine, SIGNAL(clicked()), SLOT(on_btnUnderLine_clicked()));
 
+    m_btnStrikeThrough = new CWizToolButton(this);
+    m_btnStrikeThrough->setIcon(::WizLoadSkinIcon(skin, "actionFormatStrikeThrough"));
+    connect(m_btnStrikeThrough, SIGNAL(clicked()), SLOT(on_btnStrikeThrough_clicked()));
+
     m_btnJustifyLeft = new CWizToolButton(this);
     m_btnJustifyLeft->setIcon(::WizLoadSkinIcon(skin, "actionFormatJustifyLeft"));
     connect(m_btnJustifyLeft, SIGNAL(clicked()), SLOT(on_btnJustifyLeft_clicked()));
@@ -365,9 +369,19 @@ EditorToolBar::EditorToolBar(QWidget *parent)
     m_btnHorizontal->setIcon(::WizLoadSkinIcon(skin, "actionFormatInsertHorizontal"));
     connect(m_btnHorizontal, SIGNAL(clicked()), SLOT(on_btnHorizontal_clicked()));
 
+    m_btnCheckList = new CWizToolButton(this);
+    m_btnCheckList->setCheckable(false);
+    m_btnCheckList->setIcon(::WizLoadSkinIcon(skin, "actionFormatInsertCheckList"));
+    connect(m_btnCheckList, SIGNAL(clicked()), SLOT(on_btnCheckList_clicked()));
+
+    m_btnImage = new CWizToolButton(this);
+    m_btnImage->setCheckable(false);
+    m_btnImage->setIcon(::WizLoadSkinIcon(skin, "actionFormatInsertImage"));
+    connect(m_btnImage, SIGNAL(clicked()), SLOT(on_btnImage_clicked()));
+
     QHBoxLayout* layout = new QHBoxLayout();
     layout->setContentsMargins(3, 0, 3, 0);
-    layout->setAlignment(Qt::AlignBottom);
+    layout->setAlignment(Qt::AlignVCenter);
     layout->setSpacing(2);
     setLayout(layout);
 
@@ -381,6 +395,7 @@ EditorToolBar::EditorToolBar(QWidget *parent)
     layout->addWidget(m_btnBold);
     layout->addWidget(m_btnItalic);
     layout->addWidget(m_btnUnderLine);
+    layout->addWidget(m_btnStrikeThrough);
     layout->addSpacing(12);
     layout->addWidget(m_btnJustifyLeft);
     layout->addWidget(m_btnJustifyCenter);
@@ -391,6 +406,8 @@ EditorToolBar::EditorToolBar(QWidget *parent)
     layout->addSpacing(12);
     layout->addWidget(m_btnTable);
     layout->addWidget(m_btnHorizontal);
+    layout->addWidget(m_btnCheckList);
+    layout->addWidget(m_btnImage);
     layout->addStretch();
 }
 
@@ -467,6 +484,19 @@ void EditorToolBar::resetToolbar()
     } else if (state == 1) {
         m_btnUnderLine->setEnabled(true);
         m_btnUnderLine->setChecked(true);
+    } else {
+        Q_ASSERT(0);
+    }
+
+    state = m_editor->editorCommandQueryCommandState("strikethrough");
+    if (state == -1) {
+        m_btnStrikeThrough->setEnabled(false);
+    } else if (state == 0) {
+        m_btnStrikeThrough->setEnabled(true);
+        m_btnStrikeThrough->setChecked(false);
+    } else if (state == 1) {
+        m_btnStrikeThrough->setEnabled(true);
+        m_btnStrikeThrough->setChecked(true);
     } else {
         Q_ASSERT(0);
     }
@@ -920,6 +950,13 @@ void EditorToolBar::on_btnUnderLine_clicked()
     }
 }
 
+void EditorToolBar::on_btnStrikeThrough_clicked()
+{
+    if (m_editor) {
+        m_editor->editorCommandExecuteStrikeThrough();
+    }
+}
+
 void EditorToolBar::on_btnJustifyLeft_clicked()
 {
     if (m_editor) {
@@ -966,5 +1003,19 @@ void EditorToolBar::on_btnHorizontal_clicked()
 {
     if (m_editor) {
         m_editor->editorCommandExecuteInsertHorizontal();
+    }
+}
+
+void EditorToolBar::on_btnCheckList_clicked()
+{
+    if (m_editor) {
+        m_editor->editorCommandExecuteInsertCheckList();
+    }
+}
+
+void EditorToolBar::on_btnImage_clicked()
+{
+    if (m_editor) {
+        m_editor->editorCommandExecuteInsertImage();
     }
 }

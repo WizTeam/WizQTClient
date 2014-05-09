@@ -74,6 +74,10 @@ public Q_SLOTS:
     void onEditorChanged();
     void onEditorFocusIn();
     void onEditorFocusOut();
+
+private:
+    void showInfoBar();
+    void showEditorBar();
 };
 
 } //namesapce Internal

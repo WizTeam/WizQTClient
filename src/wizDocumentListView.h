@@ -156,6 +156,7 @@ public Q_SLOTS:
     void on_userAvatar_loaded(const QString& strUserGUID);
     void onThumbCacheLoaded(const QString& strKbGUID, const QString& strGUID);
 
+    void on_action_documentHistory();
 
 //#ifndef Q_OS_MAC
     // used for smoothly scroll

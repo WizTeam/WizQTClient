@@ -42,14 +42,14 @@ CWizUserInfoWidget::CWizUserInfoWidget(CWizExplorerApp& app, QWidget *parent)
     // setup menu
     m_menuMain = new QMenu(this);
 
-    QAction* actionAccountInfo = new QAction(tr("View account info"), m_menuMain);
+    QAction* actionAccountInfo = new QAction(tr("View account info..."), m_menuMain);
     connect(actionAccountInfo, SIGNAL(triggered()), SLOT(on_action_accountInfo_triggered()));
     actionAccountInfo->setVisible(false);
 
-    QAction* actionAccountSetup = new QAction(tr("Account settings"), m_menuMain);
+    QAction* actionAccountSetup = new QAction(tr("Account settings..."), m_menuMain);
     connect(actionAccountSetup, SIGNAL(triggered()), SLOT(on_action_accountSetup_triggered()));
 
-    QAction* actionChangeAvatar = new QAction(tr("Change avatar"), m_menuMain);
+    QAction* actionChangeAvatar = new QAction(tr("Change avatar..."), m_menuMain);
     connect(actionChangeAvatar, SIGNAL(triggered()), SLOT(on_action_changeAvatar_triggered()));
 
     m_menuMain->addAction(actionAccountInfo);
@@ -97,7 +97,7 @@ void CWizUserInfoWidget::on_userAvatar_loaded(const QString& strGUID)
     if (strGUID != m_db.GetUserId())
         return;
 
-    update();
+    updateUI();
 }
 
 void CWizUserInfoWidget::on_action_accountInfo_triggered()
@@ -142,7 +142,6 @@ void CWizUserInfoWidget::on_action_changeAvatar_uploaded(bool ok)
 
     if (ok) {
         AvatarHost::load(m_db.GetUserId(), true);
-        //downloadAvatar();
     } else {
         QMessageBox::warning(this, tr("Upload Avatar"), uploader->lastErrorMessage());
     }
@@ -165,32 +164,6 @@ void CWizUserInfoWidget::updateUI()
     WIZUSERINFOWIDGETBASE::updateUI();
 }
 
-
-
-QPixmap corpAvatar(const QPixmap& org)
-{
-    if (org.isNull())
-        return org;
-    //
-    QSize sz = org.size();
-    //
-    int width = sz.width();
-    int height = sz.height();
-    if (width == height)
-        return org;
-    //
-    if (width > height)
-    {
-        int xOffset = (width - height) / 2;
-        return org.copy(xOffset, 0, height, height);
-    }
-    else
-    {
-        int yOffset = (height - width) / 2;
-        return org.copy(0, yOffset, width, width);
-    }
-}
-
 QPixmap CWizUserInfoWidget::getCircleAvatar(int width, int height)
 {
     if (width <= 0 || height <= 0)
@@ -208,26 +181,7 @@ QPixmap CWizUserInfoWidget::getCircleAvatar(int width, int height)
     if (org.isNull())
         return org;
     //
-    org = corpAvatar(org);
-    //
-    int largeWidth = width * 8;
-    int largeHeight = height * 8;
-    //
-    QPixmap orgResized = org.scaled(QSize(largeWidth, largeHeight), Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
-    //
-    QPixmap largePixmap(QSize(largeWidth, largeHeight));
-    largePixmap.fill(QColor(Qt::transparent));
-    //
-    QPainter painter(&largePixmap);
-    //
-    painter.setRenderHint(QPainter::HighQualityAntialiasing, true);
-    QPainterPath path;
-    path.addEllipse(0, 0, largeWidth, largeHeight);
-    painter.setClipPath(path);
-    painter.drawPixmap(0, 0, orgResized);
-    //
-    m_circleAvatar = largePixmap.scaled(QSize(width, height), Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
-    //
+    m_circleAvatar = AvatarHost::circleImage(org, width, height);
     return m_circleAvatar;
 }
 

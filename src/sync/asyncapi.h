@@ -5,6 +5,7 @@
 
 class QString;
 struct WIZUSERINFO;
+class QNetworkAccessManager;
 
 namespace WizService {
 
@@ -29,13 +30,16 @@ public:
 private:
     int m_nErrorCode;
     QString m_strErrorMessage;
+    QNetworkAccessManager* m_networkManager;
 
     bool login_impl(const QString& strUserId, const QString& strPasswd);
     bool getToken_impl(const QString& strUserId, const QString& strPasswd);
     bool keepAlive_impl(const QString& strToken, const QString &strKbGUID);
     bool registerAccount_impl(const QString& strUserId, const QString& strPasswd, const QString& strInviteCode);
-    void getCommentsCount_impl(const QString& strUrl);
     void setMessageStatus_impl(const QString& ids, bool bRead);
+
+public slots:
+    void on_comments_finished();
 
 Q_SIGNALS:
     void loginFinished(const WIZUSERINFO& info);

@@ -15,6 +15,7 @@ CWizDatabaseManager* CWizDatabaseManager::instance()
 
 CWizDatabaseManager::CWizDatabaseManager(const QString& strUserId)
     : m_strUserId(strUserId)
+    , m_mutex(QMutex::Recursive)
 {
     Q_ASSERT(!m_instance);
 
@@ -108,8 +109,8 @@ bool CWizDatabaseManager::isOpened(const QString& strKbGUID)
 }
 CWizDatabase& CWizDatabaseManager::addDb(const QString& strKbGUID, const WIZDATABASEINFO& info)
 {
-    QMutexLocker locker(&m_mutex);
-    Q_UNUSED(locker);
+//    QMutexLocker locker(&m_mutex);
+//    Q_UNUSED(locker);
     //
     Q_ASSERT(m_dbPrivate);
 

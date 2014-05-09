@@ -5,8 +5,10 @@
 #include <QMainWindow>
 #include <QSize>
 #include <QDebug>
-#include <qmacfunctions.h>
 
+#if QT_VERSION >= 0x050200
+#include <qmacfunctions.h>
+#endif
 //#ifndef QT_MAC_USE_COCOA
 //float qt_mac_get_scalefactor(QWidget *window)
 //{
@@ -120,7 +122,11 @@ NSImage* WizToNSImage(const QPixmap &pixmap)
         qDebug() << "WizToNSImage failed: pixmap is null";
         return nil;
     }
+#if QT_VERSION >= 0x050200
     CGImageRef iref = QtMac::toCGImageRef(pixmap);
+#else
+    CGImageRef iref = pixmap.toMacCGImageRef();
+#endif
     NSSize sz = NSMakeSize(pixmap.width(), pixmap.height());
     NSImage *image = [[NSImage alloc] initWithCGImage:iref size:sz];
     return image;
@@ -162,7 +168,6 @@ NSString* WizGenGUID()
     //
     return [str lowercaseString];
 }
-
 
 CWizChangeCocoaImplementation::CWizChangeCocoaImplementation(Class baseClass, SEL originalSel,
      Class proxyClass, SEL replacementSel, SEL backupSel, bool apply)
