@@ -2370,12 +2370,16 @@ bool CWizDatabase::UpdateDocumentData(WIZDOCUMENTDATA& data,
                                       int nFlags,
                                       bool notifyDataModify /*= true*/)
 {
+    m_mtxTempFile.lock();
     QString strProcessedHtml(strHtml);
     QString strResourcePath = GetResoucePathFromFile(strURL);
+    qDebug() << "[UpdateDocumentData] : ResourcePath : " << strResourcePath;
     if (!strResourcePath.isEmpty()) {
         QUrl urlResource = QUrl::fromLocalFile(strResourcePath);
+        qDebug() << "[UpdateDocumentData] : urlResource : " << urlResource.toString();
         strProcessedHtml.replace(urlResource.toString(), "index_files/");
     }
+    m_mtxTempFile.unlock();
 
     CWizDocument doc(*this, data);
     CString strMetaText = doc.GetMetaText();

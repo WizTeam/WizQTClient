@@ -13,5 +13,7 @@ package_output_path="$HOME"
 rm -rf ../WizQTClient-Release-QT5/* && \
 cd ../WizQTClient-Release-QT5 && \
 cmake -DWIZNOTE_USE_QT5=YES -DCMAKE_BUILD_TYPE=Release -UPDATE_TRANSLATIONS=YES -DAPPSTORE_BUILD=YES -DCMAKE_PREFIX_PATH=~/Qt5.2.1/5.2.1/clang_64/lib/cmake ../WizQTClient && \
-make -j5
+make -j5 && \
+productbuild --component wiznote.app /Applications --sign "3rd Party Mac Developer Installer: Wei Shijun" wiznote.pkg
+
 

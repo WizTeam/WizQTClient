@@ -13,8 +13,8 @@
 #include "widgets/wizScrollBar.h"
 #include "wizmainwindow.h"
 #include "wizProgressDialog.h"
-#include "share/wizdrawtexthelper.h"
 #include "wiznotestyle.h"
+#include "share/wizdrawtexthelper.h"
 #include "share/wizsettings.h"
 #include "share/wizDatabaseManager.h"
 #include "wizFolderSelector.h"
@@ -22,8 +22,8 @@
 #include "wizWebSettingsDialog.h"
 #include "sync/wizkmxmlrpc.h"
 #include "sync/apientry.h"
-
 #include "sync/token.h"
+#include "utils/stylehelper.h"
 
 using namespace WizService;
 
@@ -101,7 +101,7 @@ CWizCategoryBaseView::CWizCategoryBaseView(CWizExplorerApp& app, QWidget* parent
 
     // style
     setStyle(::WizGetStyle(m_app.userSettings().skin()));
-    QColor colorBg = WizGetCategoryBackroundColor(m_app.userSettings().skin());
+    QColor colorBg = Utils::StyleHelper::treeViewBackground();
     QPalette pal = palette();
     pal.setBrush(QPalette::Base, colorBg);
     setPalette(pal);

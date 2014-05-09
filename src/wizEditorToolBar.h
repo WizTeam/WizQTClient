@@ -42,6 +42,7 @@ private:
     CWizToolButton* m_btnBold;
     CWizToolButton* m_btnItalic;
     CWizToolButton* m_btnUnderLine;
+    CWizToolButton* m_btnStrikeThrough;
     CWizToolButton* m_btnJustifyLeft;
     CWizToolButton* m_btnJustifyCenter;
     CWizToolButton* m_btnJustifyRight;
@@ -75,6 +76,7 @@ protected Q_SLOTS:
     void on_btnBold_clicked();
     void on_btnItalic_clicked();
     void on_btnUnderLine_clicked();
+    void on_btnStrikeThrough_clicked();
     void on_btnJustifyLeft_clicked();
     void on_btnJustifyCenter_clicked();
     void on_btnJustifyRight_clicked();

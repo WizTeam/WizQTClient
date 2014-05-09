@@ -180,7 +180,7 @@ bool CWizSearchIndexer::_updateDocumentImpl(void *pHandle,
     QString strDataFile;
     if (!db.DocumentToTempHtmlFile(doc, strDataFile, "sindex.html")) {
         TOLOG("Can't decompress document while update FTS index: " + doc.strTitle);
-        Q_ASSERT(0);
+        //Q_ASSERT(0);
         return false;
     }
 

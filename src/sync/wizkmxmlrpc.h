@@ -96,10 +96,10 @@ struct CWizKMBaseParam: public CWizXmlRpcStructValue
     {
         ChangeApiVersion(apiVersion);
         //
-#ifdef WINCE
-        AddString(_T("client_type"), _T("WM"));
+#ifdef Q_OS_MAC
+        AddString(_T("client_type"), _T("mac"));
 #else
-        AddString(_T("client_type"), _T("WIN"));
+        AddString(_T("client_type"), _T("linux"));
 #endif
         AddString(_T("client_version"), _T("2.0"));
     }

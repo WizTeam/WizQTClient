@@ -429,7 +429,8 @@ void CWizDocumentView::on_download_finished(const WIZOBJECTDATA &data, bool bSuc
 
 void CWizDocumentView::on_document_data_modified(const WIZDOCUMENTDATA& data)
 {
-    if (note().strGUID != data.strGUID)
+    //verify m_noteLoaded before reload
+    if (note().strGUID != data.strGUID || !m_noteLoaded)
         return;
 
     reloadNote();

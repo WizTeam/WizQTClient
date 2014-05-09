@@ -142,6 +142,7 @@ public:
     /* editor related */
     void editorResetFont();
     void editorFocus();
+    void setEditorEnable(bool enalbe);
 
     // -1: command invalid
     // 0: available
@@ -166,6 +167,7 @@ public:
     //
     Q_INVOKABLE bool isContentsChanged() { return m_bContentsChanged; }
     Q_INVOKABLE void setContentsChanged(bool b) { m_bContentsChanged = b; }
+
 private:
     void initEditor();
     void viewDocumentInEditor(bool editing);

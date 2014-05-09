@@ -69,7 +69,7 @@ CWizDocumentListView::CWizDocumentListView(CWizExplorerApp& app, QWidget *parent
     setStyle(::WizGetStyle(strSkinName));
 
     QPalette pal = palette();
-    pal.setColor(QPalette::Base, WizGetDocumentsBackroundColor(strSkinName));
+    pal.setColor(QPalette::Base, Utils::StyleHelper::listViewBackground());
     setPalette(pal);
 
     setCursor(QCursor(Qt::ArrowCursor));
