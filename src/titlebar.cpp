@@ -122,7 +122,6 @@ TitleBar::TitleBar(QWidget *parent)
     layoutInfo2->addWidget(m_commentsBtn);
 
 
-
     QVBoxLayout* layoutInfo1 = new QVBoxLayout();
     layoutInfo1->setContentsMargins(0, 0, 0, 0);
     layoutInfo1->setSpacing(0);
