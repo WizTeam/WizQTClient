@@ -1557,7 +1557,8 @@ void CWizCategoryView::on_itemClicked(QTreeWidgetItem *item, int column)
             }
             else
             {
-                QMessageBox::information(0, tr("Info"), tr("You are not a Biz administrator, can't manage this Biz."));
+                QMessageBox::information(0, tr("Info"), tr("Your enterprise services has expired, could not manage members. "
+                                                           "Please purchase services or apply for an extension."));
             }
         }
     }    

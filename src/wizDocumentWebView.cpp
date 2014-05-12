@@ -721,6 +721,9 @@ void CWizDocumentWebView::splitHtmlToHeadAndBody(const QString& strHtml, QString
 
 void CWizDocumentWebView::saveEditingViewDocument(const WIZDOCUMENTDATA &data, bool force)
 {
+    //FIXME: remove me, just for find a image losses bug.
+    Q_ASSERT(!data.strGUID.isEmpty());
+
     if (!force && !isContentsChanged())
         return;
 
@@ -733,6 +736,14 @@ void CWizDocumentWebView::saveEditingViewDocument(const WIZDOCUMENTDATA &data, b
     //
 
     QString strFileName = m_mapFile.value(data.strGUID);
+    if (strFileName.isEmpty()) {
+        QList<QString> docGUIDS = m_mapFile.keys();
+        TOLOG1("SaveDocument : %1", data.strGUID);
+        foreach (QString key, docGUIDS) {
+            TOLOG2("SaveDocument : %1 FileName : %2", key, m_mapFile.value(key));
+        }
+    }
+    //Q_ASSERT(!strFileName.isEmpty());
     QString strHead = page()->mainFrame()->evaluateJavaScript("editor.document.head.innerHTML;").toString();
     m_strCurrentNoteHead = strHead;
     QRegExp regHead("<link[^>]*" + m_strDefaultCssFilePath + "[^>]*>", Qt::CaseInsensitive);
@@ -748,6 +759,7 @@ void CWizDocumentWebView::saveEditingViewDocument(const WIZDOCUMENTDATA &data, b
     //QString strPlainTxt = page()->mainFrame()->evaluateJavaScript("editor.getPlainTxt();").toString();
     strHtml = "<html><head>" + strHead + "</head><body>" + strHtml + "</body></html>";
 
+    qDebug() << "[save document] : FileName : " << strFileName;
     m_docSaverThread->save(data, strHtml, strFileName, 0);
 }
 
