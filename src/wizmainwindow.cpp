@@ -10,6 +10,7 @@
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QFileDialog>
+#include <QPushButton>
 
 #ifdef Q_OS_MAC
 #include <Carbon/Carbon.h>
