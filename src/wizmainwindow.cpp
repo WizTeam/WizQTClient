@@ -75,7 +75,11 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     , m_settings(new CWizUserSettings(dbMgr.db()))
     , m_sync(new CWizKMSyncThread(dbMgr.db(), this))
     , m_searchIndexer(new CWizSearchIndexer(m_dbMgr))
+    #ifndef BUILD4APPSTORE
     , m_upgrade(new CWizUpgrade())
+    #else
+    , m_upgrade(0)
+    #endif
     //, m_certManager(new CWizCertManager(*this))
     , m_objectDownloaderHost(new CWizObjectDataDownloaderHost(dbMgr, this))
     //, m_avatarDownloaderHost(new CWizUserAvatarDownloaderHost(dbMgr.db().GetAvatarPath(), this))
@@ -135,6 +139,7 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     client()->hide();
 
     // upgrade check
+#ifndef BUILD4APPSTORE
     QThread *thread = new QThread(this);
     m_upgrade->moveToThread(thread);
     connect(m_upgrade, SIGNAL(checkFinished(bool)), SLOT(on_checkUpgrade_finished(bool)));
@@ -142,6 +147,7 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     if (userSettings().autoCheckUpdate()) {
         checkWizUpdate();
     }
+#endif
 
 #ifdef Q_OS_MAC
     setupFullScreenMode(this);
@@ -1582,7 +1588,9 @@ void MainWindow::locateDocument(const WIZDOCUMENTDATA& data)
 
 void MainWindow::checkWizUpdate()
 {
+#ifndef BUILD4APPSTORE
     m_upgrade->startCheck();
+#endif
 }
 
 #ifndef Q_OS_MAC
