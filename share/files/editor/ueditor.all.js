@@ -50,7 +50,7 @@ var browser = UE.browser = function(){
          * }
          * ```
          */
-        ie		:  /(msie\s|trident.*rv:)([\w.]+)/.test(agent),
+        ie      :  /(msie\s|trident.*rv:)([\w.]+)/.test(agent),
 
         /**
          * @property {boolean} opera 检测当前浏览器是否为Opera
@@ -61,7 +61,7 @@ var browser = UE.browser = function(){
          * }
          * ```
          */
-        opera	: ( !!opera && opera.version ),
+        opera   : ( !!opera && opera.version ),
 
         /**
          * @property {boolean} webkit 检测当前浏览器是否是webkit内核的浏览器
@@ -72,7 +72,7 @@ var browser = UE.browser = function(){
          * }
          * ```
          */
-        webkit	: ( agent.indexOf( ' applewebkit/' ) > -1 ),
+        webkit  : ( agent.indexOf( ' applewebkit/' ) > -1 ),
 
         /**
          * @property {boolean} mac 检测当前浏览器是否是运行在mac平台下
@@ -83,7 +83,7 @@ var browser = UE.browser = function(){
          * }
          * ```
          */
-        mac	: ( agent.indexOf( 'macintosh' ) > -1 ),
+        mac : ( agent.indexOf( 'macintosh' ) > -1 ),
 
         /**
          * @property {boolean} quirks 检测当前浏览器是否处于“怪异模式”下
@@ -218,7 +218,7 @@ var browser = UE.browser = function(){
      * ```
      */
     if(/(\d+\.\d)?(?:\.\d)?\s+safari\/?(\d+\.\d+)?/i.test(agent) && !/chrome/i.test(agent)){
-    	browser.safari = + (RegExp['\x241'] || RegExp['\x242']);
+        browser.safari = + (RegExp['\x241'] || RegExp['\x242']);
     }
 
 
@@ -7889,7 +7889,7 @@ UE.ajax = function() {
          * } );
          * ```
          */
-		request:function(url, ajaxOptions) {
+        request:function(url, ajaxOptions) {
             var ajaxRequest = creatAjaxRequest(),
                 //是否超时
                 timeIsOut = false,
@@ -7905,18 +7905,18 @@ UE.ajax = function() {
                     }
                 };
 
-			if (typeof url === "object") {
-				ajaxOptions = url;
-				url = ajaxOptions.url;
-			}
-			if (!ajaxRequest || !url) return;
-			var ajaxOpts = ajaxOptions ? utils.extend(defaultAjaxOptions,ajaxOptions) : defaultAjaxOptions;
+            if (typeof url === "object") {
+                ajaxOptions = url;
+                url = ajaxOptions.url;
+            }
+            if (!ajaxRequest || !url) return;
+            var ajaxOpts = ajaxOptions ? utils.extend(defaultAjaxOptions,ajaxOptions) : defaultAjaxOptions;
 
-			var submitStr = json2str(ajaxOpts);  // { name:"Jim",city:"Beijing" } --> "name=Jim&city=Beijing"
-			//如果用户直接通过data参数传递json对象过来，则也要将此json对象转化为字符串
-			if (!utils.isEmptyObject(ajaxOpts.data)){
+            var submitStr = json2str(ajaxOpts);  // { name:"Jim",city:"Beijing" } --> "name=Jim&city=Beijing"
+            //如果用户直接通过data参数传递json对象过来，则也要将此json对象转化为字符串
+            if (!utils.isEmptyObject(ajaxOpts.data)){
                 submitStr += (submitStr? "&":"") + json2str(ajaxOpts.data);
-			}
+            }
             //超时检测
             var timerID = setTimeout(function() {
                 if (ajaxRequest.readyState != 4) {
@@ -7926,26 +7926,26 @@ UE.ajax = function() {
                 }
             }, ajaxOpts.timeout);
 
-			var method = ajaxOpts.method.toUpperCase();
+            var method = ajaxOpts.method.toUpperCase();
             var str = url + (url.indexOf("?")==-1?"?":"&") + (method=="POST"?"":submitStr+ "&noCache=" + +new Date);
-			ajaxRequest.open(method, str, ajaxOpts.async);
-			ajaxRequest.onreadystatechange = function() {
-				if (ajaxRequest.readyState == 4) {
-					if (!timeIsOut && ajaxRequest.status == 200) {
-						ajaxOpts.onsuccess(ajaxRequest);
-					} else {
-						ajaxOpts.onerror(ajaxRequest);
-					}
-				}
-			};
-			if (method == "POST") {
-				ajaxRequest.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-				ajaxRequest.send(submitStr);
-			} else {
-				ajaxRequest.send(null);
-			}
-		}
-	};
+            ajaxRequest.open(method, str, ajaxOpts.async);
+            ajaxRequest.onreadystatechange = function() {
+                if (ajaxRequest.readyState == 4) {
+                    if (!timeIsOut && ajaxRequest.status == 200) {
+                        ajaxOpts.onsuccess(ajaxRequest);
+                    } else {
+                        ajaxOpts.onerror(ajaxRequest);
+                    }
+                }
+            };
+            if (method == "POST") {
+                ajaxRequest.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+                ajaxRequest.send(submitStr);
+            } else {
+                ajaxRequest.send(null);
+            }
+        }
+    };
 
 
 }();
@@ -13218,9 +13218,10 @@ UE.plugin.register('wordimage',function(){
                         width:attrs.width,
                         height:attrs.height,
                         alt:attrs.alt,
-                        word_img: attrs.src,
-                        src:src,
-                        'style':'background:url(' + ( flag ? opt.themePath + opt.theme + '/images/word.gif' : opt.langPath + opt.lang + '/images/localimage.png') + ') no-repeat center center;border:1px solid #ddd'
+                        //word_img: attrs.src,
+                        //src:src,
+                        src : attrs.src
+                        //'style':'background:url(' + ( flag ? opt.themePath + opt.theme + '/images/word.gif' : opt.langPath + opt.lang + '/images/localimage.png') + ') no-repeat center center;border:1px solid #ddd'
                     })
                 }
             })
@@ -13512,11 +13513,11 @@ UE.plugins['undo'] = function () {
         })
     });
     //快捷键
-    me.addshortcutkey({
-        "Undo":"ctrl+90", //undo
-        "Redo":"ctrl+89" //redo
+    //me.addshortcutkey({
+    //    "Undo":"ctrl+90", //undo
+    //    "Redo":"ctrl+89" //redo
 
-    });
+    //});
     var isCollapsed = true;
     me.addListener('keydown', function (type, evt) {
 
@@ -16396,7 +16397,7 @@ UE.plugins['autofloat'] = function() {
         docStyle.backgroundImage = 'url("about:blank")';
         docStyle.backgroundAttachment = 'fixed';
     }
-    var	bakCssText,
+    var bakCssText,
         placeHolder = document.createElement('div'),
         toolbarBox,orgTop,
         getPosition,
@@ -21508,11 +21509,11 @@ UE.plugins['basestyle'] = function(){
         },
         me = this;
     //添加快捷键
-    me.addshortcutkey({
-        "Bold" : "ctrl+66",//^B
-        "Italic" : "ctrl+73", //^I
-        "Underline" : "ctrl+85"//^U
-    });
+    //me.addshortcutkey({
+    //    "Bold" : "ctrl+66",//^B
+    //    "Italic" : "ctrl+73", //^I
+    //    "Underline" : "ctrl+85"//^U
+    //});
     me.addInputRule(function(root){
         utils.each(root.getNodesByTagName('b i'),function(node){
             switch (node.tagName){
