@@ -41,7 +41,7 @@ if(APPLE)
 endif(APPLE)
 
 if(APPLE)
-    set(WIZNOTE_ROOT_DIR ${CMAKE_BINARY_DIR}/wiznote.app)
+    set(WIZNOTE_ROOT_DIR ${CMAKE_BINARY_DIR}/WizNote.app)
     set(WIZNOTE_CONTENTS_DIR ${WIZNOTE_ROOT_DIR}/Contents)
     set(WIZNOTE_PLUGIN_DIR ${WIZNOTE_ROOT_DIR}/Contents/PlugIns)
     set(WIZNOTE_RESOURCE_DIR ${WIZNOTE_ROOT_DIR}/Contents/Resources)

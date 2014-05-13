@@ -1,4 +1,4 @@
-project(wiznote)
+project(WizNote)
 
 add_subdirectory(plugins)
 
@@ -300,8 +300,8 @@ if(UNIX)
         # refer to: https://bugreports.qt-project.org/browse/QTBUG-18662
         file(GLOB _qt5_QM ${qt_translations_dir}/qt_*.qm)
 
-        add_executable(wiznote MACOSX_BUNDLE ${wiznote_SOURCES} ${wiznote_HEADERS} ${wiznote_SOURCES_MAC} ${wiznote_HEADERS_MAC} ${wiznote_FORM_HEADERS} ${wiznote_QM} ${_qt5_QM} ${wiznote_RC} ${wiznote_LOGO})
-        set_target_properties(wiznote PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+        add_executable(WizNote MACOSX_BUNDLE ${wiznote_SOURCES} ${wiznote_HEADERS} ${wiznote_SOURCES_MAC} ${wiznote_HEADERS_MAC} ${wiznote_FORM_HEADERS} ${wiznote_QM} ${_qt5_QM} ${wiznote_RC} ${wiznote_LOGO})
+        set_target_properties(WizNote PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
         set_target_properties(${PROJECT_NAME} PROPERTIES AUTOMOC_MOC_OPTIONS "-DQ_OS_MAC")
 
         # this should be issue of cmake, refer: http://public.kitware.com/Bug/bug_revision_view_page.php?rev_id=958
@@ -339,14 +339,14 @@ if(UNIX)
             )
         elseif(APPSTORE_BUILD)
             # resovle library dependency if build type is APPSTORE_BUILD even under debug model
-            add_dependencies(wiznote coreplugin_plugin helloworld_plugin)
+            add_dependencies(WizNote coreplugin_plugin helloworld_plugin)
             add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
                 COMMAND ${qt_binary_dir}/macdeployqt ${WIZNOTE_ROOT_DIR}
             )
         endif()
 
     elseif(NOT APPLE)
-        add_executable(wiznote ${wiznote_SOURCES} ${wiznote_HEADERS} ${wiznote_FORM_HEADERS} ${wiznote_QM} ${wiznote_RC})
+        add_executable(WizNote ${wiznote_SOURCES} ${wiznote_HEADERS} ${wiznote_FORM_HEADERS} ${wiznote_QM} ${wiznote_RC})
         set_target_properties(${PROJECT_NAME} PROPERTIES AUTOMOC_MOC_OPTIONS "-DQ_OS_LINUX")
 
         install(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION bin)
@@ -370,8 +370,8 @@ if(UNIX)
     endif()
 endif()
 
-qt_use_modules(wiznote)
-qt_suppress_warnings(wiznote)
+qt_use_modules(WizNote)
+qt_suppress_warnings(WizNote)
 
 include_directories(
     ${plugins_SOURCE_DIR}
