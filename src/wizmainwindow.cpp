@@ -11,6 +11,7 @@
 #include <QLabel>
 #include <QFileDialog>
 #include <QPushButton>
+#include <QHostInfo>
 
 #ifdef Q_OS_MAC
 #include <Carbon/Carbon.h>
@@ -1182,6 +1183,12 @@ void MainWindow::on_actionFeedback_triggered()
 
     if (strUrl.isEmpty())
         return;
+
+    //FIXME: special handle for support.html, shuold append displayName in url.
+    CWizDatabase& personDb = m_dbMgr.db();
+    QString strUserName = "Unkown";
+    personDb.GetUserDisplayName(strUserName);
+    strUrl.replace(QHostInfo::localHostName(), strUserName);
 
     QDesktopServices::openUrl(strUrl);
 }

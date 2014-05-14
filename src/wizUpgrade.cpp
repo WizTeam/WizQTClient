@@ -2,9 +2,8 @@
 
 #include "share/wizmisc.h"
 #include "utils/logger.h"
+#include "sync/apientry.h"
 
-#define strWhatsNewUrl "http://blog.wiz.cn/wiznotechangelog"
-#define strUpgradeHostUrl "http://download.wiz.cn"
 
 #if defined(Q_OS_MAC)
 #define strUpgradeUrl "http://download.wiz.cn/download?product=wiznote&client=macos"
@@ -45,7 +44,7 @@ void CWizUpgrade::beginCheck()
 
 QString CWizUpgrade::getWhatsNewUrl()
 {
-    return strWhatsNewUrl;
+    return WizService::ApiEntry::changeLogUrl();
 }
 
 void CWizUpgrade::check()
