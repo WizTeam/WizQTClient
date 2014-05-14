@@ -49,10 +49,13 @@ using namespace Core::Internal;
  * can't be notified.
  * here, we just delegate this action to editor itself.
  */
+
+/*  QWebKit and Editor both have it's own undo stack. Undo method all processed by editor.
 class EditorUndoCommand : public QUndoCommand
 {
 public:
-    EditorUndoCommand(QWebPage* page) : m_page(page) {}
+    EditorUndoCommand(QWebPage* page, const QString & text = "Unknown") :QUndoCommand(text),
+        m_page(page) {}
 
     virtual void undo()
     {
@@ -67,6 +70,7 @@ public:
 private:
     QWebPage* m_page;
 };
+*/
 
 void CWizDocumentWebViewPage::triggerAction(QWebPage::WebAction typeAction, bool checked)
 {
@@ -608,7 +612,7 @@ void CWizDocumentWebView::onEditorContentChanged()
 {
     setContentsChanged(true);
     //
-    //Q_EMIT statusChanged();
+    Q_EMIT statusChanged();
 }
 
 void CWizDocumentWebView::onEditorSelectionChanged()
@@ -736,14 +740,6 @@ void CWizDocumentWebView::saveEditingViewDocument(const WIZDOCUMENTDATA &data, b
     //
 
     QString strFileName = m_mapFile.value(data.strGUID);
-    if (strFileName.isEmpty()) {
-        QList<QString> docGUIDS = m_mapFile.keys();
-        TOLOG1("SaveDocument : %1", data.strGUID);
-        foreach (QString key, docGUIDS) {
-            TOLOG2("SaveDocument : %1 FileName : %2", key, m_mapFile.value(key));
-        }
-    }
-    //Q_ASSERT(!strFileName.isEmpty());
     QString strHead = page()->mainFrame()->evaluateJavaScript("editor.document.head.innerHTML;").toString();
     m_strCurrentNoteHead = strHead;
     QRegExp regHead("<link[^>]*" + m_strDefaultCssFilePath + "[^>]*>", Qt::CaseInsensitive);
@@ -759,7 +755,6 @@ void CWizDocumentWebView::saveEditingViewDocument(const WIZDOCUMENTDATA &data, b
     //QString strPlainTxt = page()->mainFrame()->evaluateJavaScript("editor.getPlainTxt();").toString();
     strHtml = "<html><head>" + strHead + "</head><body>" + strHtml + "</body></html>";
 
-    qDebug() << "[save document] : FileName : " << strFileName;
     m_docSaverThread->save(data, strHtml, strFileName, 0);
 }
 
@@ -1007,11 +1002,10 @@ bool CWizDocumentWebView::editorCommandExecuteCommand(const QString& strCommand,
 
     bool ret = page()->mainFrame()->evaluateJavaScript(strExec).toBool();
 
-    EditorUndoCommand * cmd = new EditorUndoCommand(page());
-    page()->undoStack()->push(cmd);
-
     //
     setContentsChanged(true);
+    // notify mainwindow to update action status
+    emit statusChanged();
 
     return ret;
 }
@@ -1203,11 +1197,16 @@ bool CWizDocumentWebView::editorCommandExecuteInsertHorizontal()
 
 bool CWizDocumentWebView::editorCommandExecuteInsertCheckList()
 {
+    // before insert first checklist, should manual notify editor to save current sence for undo.
+    page()->mainFrame()->evaluateJavaScript("editor.execCommand('saveScene');");
+
     QString strExec = "WizTodo.insertOneTodo();";
     bool ret = page()->mainFrame()->evaluateJavaScript(strExec).toBool();
 
-    EditorUndoCommand * cmd = new EditorUndoCommand(page());
-    page()->undoStack()->push(cmd);
+    // after insert first checklist, should manual notify editor to save current sence for undo.
+    page()->mainFrame()->evaluateJavaScript("editor.execCommand('saveScene');");
+
+    emit statusChanged();
 
     return ret;
 }
@@ -1360,6 +1359,18 @@ void CWizDocumentWebView::saveAsPDF(const QString& fileName)
         //
         frame->print(&printer);
     }
+}
+
+void CWizDocumentWebView::undo()
+{
+    page()->mainFrame()->evaluateJavaScript("editor.execCommand('undo')");
+    emit statusChanged();
+}
+
+void CWizDocumentWebView::redo()
+{
+    page()->mainFrame()->evaluateJavaScript("editor.execCommand('redo')");
+    emit statusChanged();
 }
 
 

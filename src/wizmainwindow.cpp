@@ -387,13 +387,14 @@ void MainWindow::on_editor_statusChanged()
         return;
     }
 
-    if (!editor->page()->undoStack()->canUndo()) {
+    //if (!editor->page()->undoStack()->canUndo()) {
+    if (editor->editorCommandQueryCommandState("undo") == -1) {
         m_actions->actionFromName(WIZACTION_EDITOR_UNDO)->setEnabled(false);
     } else {
         m_actions->actionFromName(WIZACTION_EDITOR_UNDO)->setEnabled(true);
     }
 
-    if (!editor->page()->undoStack()->canRedo()) {
+    if (editor->editorCommandQueryCommandState("redo") == -1) {
         m_actions->actionFromName(WIZACTION_EDITOR_REDO)->setEnabled(false);
     } else {
         m_actions->actionFromName(WIZACTION_EDITOR_REDO)->setEnabled(true);
@@ -977,12 +978,14 @@ void MainWindow::on_actionNewNote_triggered()
 
 void MainWindow::on_actionEditingUndo_triggered()
 {
-    m_doc->web()->page()->undoStack()->undo();
+    //m_doc->web()->page()->undoStack()->undo();
+    m_doc->web()->undo();
 }
 
 void MainWindow::on_actionEditingRedo_triggered()
 {
-    m_doc->web()->page()->undoStack()->redo();
+    //m_doc->web()->page()->undoStack()->redo();
+    m_doc->web()->redo();
 }
 
 void MainWindow::on_actionEditingCut_triggered()

@@ -13494,6 +13494,13 @@ UE.plugins['undo'] = function () {
         notNeedUndo:1
     };
 
+    // add func for checkList
+    me.commands['savescene'] = {
+        execCommand:function (cmdName) {
+            this.undoManger.save();
+        }
+    }
+
     var keys = {
             //  /*Backspace*/ 8:1, /*Delete*/ 46:1,
             /*Shift*/ 16:1, /*Ctrl*/ 17:1, /*Alt*/ 18:1,

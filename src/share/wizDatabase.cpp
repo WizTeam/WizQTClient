@@ -2372,12 +2372,9 @@ bool CWizDatabase::UpdateDocumentData(WIZDOCUMENTDATA& data,
 {
     m_mtxTempFile.lock();
     QString strProcessedHtml(strHtml);
-    qDebug() << "[UpdateDocumentData] : URL : " << strURL;
     QString strResourcePath = GetResoucePathFromFile(strURL);
-    qDebug() << "[UpdateDocumentData] : ResourcePath : " << strResourcePath;
     if (!strResourcePath.isEmpty()) {
         QUrl urlResource = QUrl::fromLocalFile(strResourcePath);
-        qDebug() << "[UpdateDocumentData] : urlResource : " << urlResource.toString();
         strProcessedHtml.replace(urlResource.toString(), "index_files/");
     }
     m_mtxTempFile.unlock();

@@ -106,7 +106,6 @@ Q_SIGNALS:
     void actionTriggered(QWebPage::WebAction act);
 };
 
-
 class CWizDocumentWebView : public QWebView
 {
     Q_OBJECT
@@ -167,6 +166,10 @@ public:
     //
     Q_INVOKABLE bool isContentsChanged() { return m_bContentsChanged; }
     Q_INVOKABLE void setContentsChanged(bool b) { m_bContentsChanged = b; }
+
+    //use undo func provied by editor
+    void undo();
+    void redo();
 
 private:
     void initEditor();
