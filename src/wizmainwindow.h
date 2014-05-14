@@ -3,6 +3,7 @@
 
 #include <QtGlobal>
 #include <QMainWindow>
+#include <QPushButton>
 
 #include "wizdef.h"
 #include "share/wizuihelper.h"
