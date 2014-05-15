@@ -241,12 +241,13 @@ void CWizDocumentWebView::keyPressEvent(QKeyEvent* event)
         //set contentchanged
         setContentsChanged(true);
         emit statusChanged();
+        return;
     }
 #if QT_VERSION < 0x050000
     else if (event->key() == Qt::Key_Z)
     {
         //Ctrl+Shift+Z,  shortcut for redo can't catch by actions in QT4
-        Qt::KeyboardModifiers keyMod = QApplication::keyboardModifiers ();
+        Qt::KeyboardModifiers keyMod = QApplication::keyboardModifiers();
         bool isSHIFT = keyMod.testFlag(Qt::ShiftModifier);
         bool isCTRL = keyMod.testFlag(Qt::ControlModifier);
         if (isCTRL && isSHIFT) {
@@ -257,13 +258,32 @@ void CWizDocumentWebView::keyPressEvent(QKeyEvent* event)
             return;
         }
     }
+
 #endif
+
+//    int keyValue = event->key();
+//    QString keyText = event->text();
+//    qDebug() << keyValue << " text : " << keyText;
 
 #ifdef Q_OS_LINUX
     setUpdatesEnabled(false);
     QWebView::keyPressEvent(event);
     setUpdatesEnabled(true);
 #else
+    //special handled for qt4,case capslock doesn't work
+#if QT_VERSION < 0x050000
+//    if (65 <= keyValue && 90 >= keyValue)
+//    {
+//        if (event->key() & Qt::Key_CapsLock)
+//        {
+//            qDebug() << "capslock pressed";
+//            QKeyEvent newKeyEvent(event->type(), keyValue, event->modifiers(),
+//                                  keyText.toUpper(), event->isAutoRepeat(), event->count());
+//            QWebView::keyPressEvent(&newKeyEvent);
+//            return;
+//        }
+//    }
+#endif
     QWebView::keyPressEvent(event);
 #endif
 
