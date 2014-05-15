@@ -236,6 +236,28 @@ void CWizDocumentWebView::keyPressEvent(QKeyEvent* event)
         saveDocument(view()->note(), false);
         return;
     }
+    else if (event->key() == Qt::Key_Tab)
+    {
+        //set contentchanged
+        setContentsChanged(true);
+        emit statusChanged();
+    }
+#if QT_VERSION < 0x050000
+    else if (event->key() == Qt::Key_Z)
+    {
+        //Ctrl+Shift+Z,  shortcut for redo can't catch by actions in QT4
+        Qt::KeyboardModifiers keyMod = QApplication::keyboardModifiers ();
+        bool isSHIFT = keyMod.testFlag(Qt::ShiftModifier);
+        bool isCTRL = keyMod.testFlag(Qt::ControlModifier);
+        if (isCTRL && isSHIFT) {
+            redo();
+            return;
+        } else if (isCTRL && !isSHIFT) {
+            undo();
+            return;
+        }
+    }
+#endif
 
 #ifdef Q_OS_LINUX
     setUpdatesEnabled(false);
