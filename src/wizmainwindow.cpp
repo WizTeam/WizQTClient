@@ -979,18 +979,12 @@ void MainWindow::on_actionNewNote_triggered()
 
 void MainWindow::on_actionEditingUndo_triggered()
 {
-    //undo handled in webView under QT4
-#if QT_VERSION >= 0x050000
     m_doc->web()->undo();
-#endif
 }
 
 void MainWindow::on_actionEditingRedo_triggered()
 {
-    //undo handled in webView under QT4
-#if QT_VERSION >= 0x050000
     m_doc->web()->redo();
-#endif
 }
 
 void MainWindow::on_actionEditingCut_triggered()
