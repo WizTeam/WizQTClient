@@ -166,7 +166,7 @@ CWizDocumentView* TitleBar::noteView()
 
 void TitleBar::setLocked(bool bReadOnly, int nReason, bool bIsGroup)
 {
-    m_notifyBar->showNotify(nReason);
+    m_notifyBar->showPermissionNotify(nReason);
     m_editTitle->setReadOnly(bReadOnly);
     m_editBtn->setEnabled(!bReadOnly);
     m_tagBtn->setEnabled(!bIsGroup ? true : false);

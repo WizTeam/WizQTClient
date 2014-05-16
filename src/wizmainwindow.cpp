@@ -222,19 +222,37 @@ void MainWindow::closeEvent(QCloseEvent* event)
 {
     event->accept();
     qApp->quit();
-/*
-#ifdef Q_OS_MAC
-    // Qt issue: use hide() directly lead window can't be shown when click dock icon
-    // call native API instead and ignore issue event.
-    ProcessSerialNumber pn;
-    GetFrontProcess(&pn);
-    ShowHideProcess(&pn,false);
-    event->ignore();
-#else
-    event->accept();
-    qApp->quit();
-#endif
-*/
+
+
+    //hide mainwindow but not quit
+//    if (event->spontaneous())
+//    {
+//        QStringList args;
+//        args << "-e";
+//        args << "tell application \"System Events\"";
+//        args << "-e";
+//        args << "set visible of process \""+QFileInfo(QApplication::applicationFilePath()).baseName()+"\" to false";
+//        args << "-e";
+//        args << "end tell";
+//        QProcess::execute("osascript", args);
+//        event->ignore();
+//        return;
+//    }
+
+
+
+//#ifdef Q_OS_MAC
+//    // Qt issue: use hide() directly lead window can't be shown when click dock icon
+//    // call native API instead and ignore issue event.
+//    ProcessSerialNumber pn;
+//    GetFrontProcess(&pn);
+//    ShowHideProcess(&pn,false);
+//    event->ignore();
+//#else
+//    event->accept();
+//    qApp->quit();
+//#endif
+
 }
 
 void MainWindow::on_actionExit_triggered()

@@ -671,6 +671,11 @@ int StyleHelper::editToolBarHeight()
     return 30;
 }
 
+int StyleHelper::notifyBarHeight()
+{
+    return 32;
+}
+
 QRect StyleHelper::initListViewItemPainter(QPainter* p, const QRect& lrc, bool bFocused, bool bSelected)
 {
     QRect rc = lrc;
