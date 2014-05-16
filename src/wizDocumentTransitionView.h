@@ -20,8 +20,12 @@ public:
     explicit CWizDocumentTransitionView(QWidget *parent = 0);
     void showAsMode(TransitionMode mode);
 
+public slots:
+    void onDownloadProgressChanged(int ntotal, int nloaded);
+
 private:
     QLabel* m_labelHint;
+    int m_mode;
 };
 
 #endif // WIZDOCUMENTTRANSITIONVIEW_H
