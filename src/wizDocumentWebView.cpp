@@ -72,6 +72,11 @@ private:
 };
 */
 
+QString getImageHtmlLabelByFile(const QString& strImageFile)
+{
+    return QString("<img class=\"WizNormalImg\" border=\"0\" src=\"file://%1\" />").arg(strImageFile);
+}
+
 void CWizDocumentWebViewPage::triggerAction(QWebPage::WebAction typeAction, bool checked)
 {
     if (typeAction == QWebPage::Back || typeAction == QWebPage::Forward) {
@@ -107,7 +112,7 @@ void CWizDocumentWebViewPage::on_editorCommandPaste_triggered()
         }
 
         QMimeData* data = new QMimeData();
-        QString strHtml = QString("<img border=\"0\" src=\"file://%1\" />").arg(strFileName);
+        QString strHtml = getImageHtmlLabelByFile(strFileName);
         data->setHtml(strHtml);
         clip->setMimeData(data);
     }
@@ -119,8 +124,6 @@ void CWizDocumentWebViewPage::javaScriptConsoleMessage(const QString& message, i
 
     qDebug() << "[Console]line: " << lineNumber << ", " << message;
 }
-
-
 
 CWizDocumentWebView::CWizDocumentWebView(CWizExplorerApp& app, QWidget* parent)
     : QWebView(parent)
@@ -408,7 +411,7 @@ bool CWizDocumentWebView::image2Html(const QString& strImageFile, QString& strHt
         return false;
     }
 
-    strHtml = QString("<img class=\"WizNormalImg\" border=\"0\" src=\"file://%1\" />").arg(strDestFile);
+    strHtml = getImageHtmlLabelByFile(strDestFile);
     return true;
 }
 
@@ -1262,7 +1265,7 @@ bool CWizDocumentWebView::editorCommandExecuteInsertImage()
 //    QPixmap pix(strImgFile);
 //    return editorCommandExecuteCommand("insertImage", QString("{src:'%1', class:\"WizNormalImg\", width:%2, height:%3}")
 //                                       .arg(strImgFile).arg(pix.width()).arg(pix.height()));
-    QString strHtml = QString("<img class=\"WizNormalImg\" border=\"0\" src=\"%1\">").arg(strImgFile);
+    QString strHtml = getImageHtmlLabelByFile(strImgFile);
     return editorCommandExecuteInsertHtml(strHtml, true);
 }
 

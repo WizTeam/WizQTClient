@@ -24,11 +24,10 @@ CWizPreferenceWindow::CWizPreferenceWindow(CWizExplorerApp& app, QWidget* parent
     ui->labelProxySettings->hide();
 
     // hide language choice and upgrade for appstore
+#ifdef BUILD4APPSTORE
     QWidget* commWidget = ui->tabWidget->widget(0);
     ui->tabWidget->removeTab(0);
     commWidget->deleteLater();
-#ifdef BUILD4APPSTORE
-    ui->groupBoxLang->setVisible(false);
 #endif
 
     // general tab
