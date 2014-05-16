@@ -2736,6 +2736,8 @@ CWizCategoryViewFolderItem* CWizCategoryView::findFolder(const QString& strLocat
     QStringList::const_iterator it;
     for (it = sl.begin(); it != sl.end(); it++) {
         QString strLocationName = *it;
+        if (strLocationName.isEmpty())
+            return NULL;
         Q_ASSERT(!strLocationName.isEmpty());
         strCurrentLocation = strCurrentLocation + strLocationName + "/";
 
