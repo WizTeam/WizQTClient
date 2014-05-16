@@ -320,14 +320,19 @@
 <context>
     <name>CWizDocumentTransitionView</name>
     <message>
-        <location filename="../src/wizDocumentTransitionView.cpp" line="22"/>
+        <location filename="../src/wizDocumentTransitionView.cpp" line="25"/>
         <source>Downloading note from cloud server...</source>
         <translation>正在从云服务器下载笔记，稍等片刻...</translation>
     </message>
     <message>
-        <location filename="../src/wizDocumentTransitionView.cpp" line="24"/>
+        <location filename="../src/wizDocumentTransitionView.cpp" line="27"/>
         <source>Error occured while loading note.</source>
         <translation>笔记加载失败。</translation>
+    </message>
+    <message>
+        <location filename="../src/wizDocumentTransitionView.cpp" line="38"/>
+        <source>Downloading note from cloud server( %1 %)...</source>
+        <translation>正在从云服务器下载笔记，稍等片刻( %1 %)...</translation>
     </message>
 </context>
 <context>
@@ -1021,66 +1026,74 @@
 <context>
     <name>Core::Internal::MainWindow</name>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="137"/>
+        <location filename="../src/wizmainwindow.cpp" line="140"/>
         <source>WizNote</source>
         <translation>为知笔记</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="650"/>
+        <location filename="../src/wizmainwindow.cpp" line="671"/>
         <source>Search</source>
         <translation>搜索</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="796"/>
+        <location filename="../src/wizmainwindow.cpp" line="817"/>
         <source>1 note</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="802"/>
-        <location filename="../src/wizmainwindow.cpp" line="806"/>
+        <location filename="../src/wizmainwindow.cpp" line="823"/>
+        <location filename="../src/wizmainwindow.cpp" line="827"/>
         <source>%1 notes</source>
         <translation>%1 条笔记</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="883"/>
+        <location filename="../src/wizmainwindow.cpp" line="904"/>
         <source>Info</source>
         <translation>提示</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="883"/>
-        <location filename="../src/wizmainwindow.cpp" line="934"/>
+        <location filename="../src/wizmainwindow.cpp" line="904"/>
+        <location filename="../src/wizmainwindow.cpp" line="955"/>
         <source>Connection is not available, please check your network connection.</source>
         <translation>网络连接不可用,请检查网络连接.</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="923"/>
+        <location filename="../src/wizmainwindow.cpp" line="944"/>
         <source>sorry, sync failed. please input your password and try again.</source>
         <translation>抱歉，同步失败了。请输入您的密码再试一次。</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="936"/>
+        <location filename="../src/wizmainwindow.cpp" line="957"/>
         <source>Don&apos;t show this again</source>
         <translation>不再提示</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="1245"/>
+        <location filename="../src/wizmainwindow.cpp" line="1260"/>
         <source>PDF Files (*.pdf)</source>
         <translation>PDF 文件 (*.pdf)</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="1471"/>
+        <location filename="../src/wizmainwindow.cpp" line="1486"/>
         <source>Can&apos;t find note %1 , may be it has been deleted.</source>
         <translation type="unfinished">找不到笔记 %1 , 该篇笔记可能已被删除。</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="1215"/>
+        <location filename="../src/wizmainwindow.cpp" line="1230"/>
         <source>Rebuild full text search index</source>
         <translation>重建搜索索引</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="1218"/>
+        <location filename="../src/wizmainwindow.cpp" line="1233"/>
         <source>Rebuild full text search is quit slow if you have quite a few notes or attachments, you do not have to use this function while search should work as expected.</source>
         <translation>重建全文搜索索引会非常慢。只有在您的搜索出现异常的时候才需要用这个功能。</translation>
+    </message>
+</context>
+<context>
+    <name>Core::Internal::NotifyBar</name>
+    <message>
+        <location filename="../src/notifybar.cpp" line="66"/>
+        <source>This note is editing by %1 .</source>
+        <translation>该篇笔记正由 %1 进行编辑</translation>
     </message>
 </context>
 <context>
@@ -1946,17 +1959,17 @@
         <translation>个人笔记</translation>
     </message>
     <message>
-        <location filename="../src/notifybar.cpp" line="28"/>
+        <location filename="../src/notifybar.cpp" line="47"/>
         <source>The note is locked and read only, press unlock button if you need edit.</source>
         <translation>笔记已锁定为只读, 如需修改请点击解锁按钮。</translation>
     </message>
     <message>
-        <location filename="../src/notifybar.cpp" line="32"/>
+        <location filename="../src/notifybar.cpp" line="51"/>
         <source>This note is deleted, You can edit after move to other folders.</source>
         <translation>这个笔记已被删除, 请移动到其他文件夹之后再进行修改。</translation>
     </message>
     <message>
-        <location filename="../src/notifybar.cpp" line="36"/>
+        <location filename="../src/notifybar.cpp" line="55"/>
         <source>Your permission is not enough to edit this note.</source>
         <translation>你的权限不够, 无法修改这个笔记。</translation>
     </message>
