@@ -715,7 +715,7 @@ void CWizDocumentWebView::viewDocumentByUrl(const QUrl& url)
     if (indx == -1) {
         return;
     }
-
+    //
     QString strOpenType = strUrl.mid(4, indx - 4).toLower();
 
     QString strFragment = strUrl.mid(indx + 1);

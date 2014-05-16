@@ -174,9 +174,21 @@ bool MainWindow::eventFilter(QObject* watched, QEvent* event)
         } else {
             return false;
         }
-    } else {
-        return QMainWindow::eventFilter(watched, event);
     }
+    else if (event->type() == QEvent::FileOpen)
+    {
+        if (QFileOpenEvent* fileEvent = dynamic_cast<QFileOpenEvent*>(event))
+        {
+            if (!fileEvent->url().isEmpty())
+            {
+                //m_lastUrl = fileEvent->url().toString();
+                //emit urlOpened(m_lastUrl);
+                return true;
+            }
+        }
+    }
+    //
+    return QMainWindow::eventFilter(watched, event);
 }
 
 void MainWindow::on_application_aboutToQuit()
