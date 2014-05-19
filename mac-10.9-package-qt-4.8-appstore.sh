@@ -15,7 +15,7 @@ rm -rf ../WizQTClient-Release-QT4/* && \
 cd ../WizQTClient-Release-QT4 && \
 cmake -DWIZNOTE_USE_QT5=NO -DCMAKE_BUILD_TYPE=Release -UPDATE_TRANSLATIONS=YES -DAPPSTORE_BUILD=YES -DQT_QMAKE_EXECUTABLE=/usr/local/Trolltech/Qt-4.8.6/bin/qmake ../WizQTClient && \
 make -j3 && \
-productbuild --component wiznote.app /Applications --sign "3rd Party Mac Developer Installer: Wei Shijun" wiznote.pkg
+productbuild --component WizNote.app /Applications --sign "3rd Party Mac Developer Installer: Wei Shijun" wiznote.pkg
 
 
 

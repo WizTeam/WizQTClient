@@ -24,7 +24,6 @@ class CWizObjectDataDownloaderHost;
 class QStackedWidget;
 class QWebFrame;
 
-
 namespace Core {
 namespace Internal {
 class TitleBar;

@@ -4,12 +4,14 @@
 #include <QWidget>
 
 class QLabel;
+class wizImageButton;
 
 namespace Core {
 namespace Internal {
 
 class NotifyBar : public QWidget
 {
+    Q_OBJECT
 public:
     enum NotifyType
     {
@@ -19,10 +21,18 @@ public:
     };
 
     explicit NotifyBar(QWidget *parent);
-    void showNotify(int type);
+    void showPermissionNotify(int type);
+    void showEditingNotify(const QString& editor);
+
+public slots:
+    void on_closeButton_Clicked();
 
 private:
     QLabel* m_labelNotify;
+    wizImageButton* m_buttonClose;
+
+    void setStyleForPermission();
+    void setStyleForEditing();
 };
 
 } // namespace Internal

@@ -10,6 +10,8 @@
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QFileDialog>
+#include <QPushButton>
+#include <QHostInfo>
 
 #ifdef Q_OS_MAC
 #include <Carbon/Carbon.h>
@@ -75,7 +77,11 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     , m_settings(new CWizUserSettings(dbMgr.db()))
     , m_sync(new CWizKMSyncThread(dbMgr.db(), this))
     , m_searchIndexer(new CWizSearchIndexer(m_dbMgr))
+    #ifndef BUILD4APPSTORE
     , m_upgrade(new CWizUpgrade())
+    #else
+    , m_upgrade(0)
+    #endif
     //, m_certManager(new CWizCertManager(*this))
     , m_objectDownloaderHost(new CWizObjectDataDownloaderHost(dbMgr, this))
     //, m_avatarDownloaderHost(new CWizUserAvatarDownloaderHost(dbMgr.db().GetAvatarPath(), this))
@@ -109,6 +115,9 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
 
     //CWizCloudPool::instance()->init(&m_dbMgr);
 
+    connect(m_objectDownloaderHost, SIGNAL(downloadProgress(int,int)),
+            m_transitionView, SLOT(onDownloadProgressChanged(int,int)));
+
     // search and full text search
     QThread *threadFTS = new QThread(this);
     m_searchIndexer->moveToThread(threadFTS);
@@ -135,6 +144,7 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     client()->hide();
 
     // upgrade check
+#ifndef BUILD4APPSTORE
     QThread *thread = new QThread(this);
     m_upgrade->moveToThread(thread);
     connect(m_upgrade, SIGNAL(checkFinished(bool)), SLOT(on_checkUpgrade_finished(bool)));
@@ -142,6 +152,7 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     if (userSettings().autoCheckUpdate()) {
         checkWizUpdate();
     }
+#endif
 
 #ifdef Q_OS_MAC
     setupFullScreenMode(this);
@@ -214,19 +225,37 @@ void MainWindow::closeEvent(QCloseEvent* event)
 {
     event->accept();
     qApp->quit();
-/*
-#ifdef Q_OS_MAC
-    // Qt issue: use hide() directly lead window can't be shown when click dock icon
-    // call native API instead and ignore issue event.
-    ProcessSerialNumber pn;
-    GetFrontProcess(&pn);
-    ShowHideProcess(&pn,false);
-    event->ignore();
-#else
-    event->accept();
-    qApp->quit();
-#endif
-*/
+
+
+    //hide mainwindow but not quit
+//    if (event->spontaneous())
+//    {
+//        QStringList args;
+//        args << "-e";
+//        args << "tell application \"System Events\"";
+//        args << "-e";
+//        args << "set visible of process \""+QFileInfo(QApplication::applicationFilePath()).baseName()+"\" to false";
+//        args << "-e";
+//        args << "end tell";
+//        QProcess::execute("osascript", args);
+//        event->ignore();
+//        return;
+//    }
+
+
+
+//#ifdef Q_OS_MAC
+//    // Qt issue: use hide() directly lead window can't be shown when click dock icon
+//    // call native API instead and ignore issue event.
+//    ProcessSerialNumber pn;
+//    GetFrontProcess(&pn);
+//    ShowHideProcess(&pn,false);
+//    event->ignore();
+//#else
+//    event->accept();
+//    qApp->quit();
+//#endif
+
 }
 
 void MainWindow::on_actionExit_triggered()
@@ -380,13 +409,14 @@ void MainWindow::on_editor_statusChanged()
         return;
     }
 
-    if (!editor->page()->undoStack()->canUndo()) {
+    //if (!editor->page()->undoStack()->canUndo()) {
+    if (editor->editorCommandQueryCommandState("undo") == -1) {
         m_actions->actionFromName(WIZACTION_EDITOR_UNDO)->setEnabled(false);
     } else {
         m_actions->actionFromName(WIZACTION_EDITOR_UNDO)->setEnabled(true);
     }
 
-    if (!editor->page()->undoStack()->canRedo()) {
+    if (editor->editorCommandQueryCommandState("redo") == -1) {
         m_actions->actionFromName(WIZACTION_EDITOR_REDO)->setEnabled(false);
     } else {
         m_actions->actionFromName(WIZACTION_EDITOR_REDO)->setEnabled(true);
@@ -970,16 +1000,17 @@ void MainWindow::on_actionNewNote_triggered()
 
 void MainWindow::on_actionEditingUndo_triggered()
 {
-    m_doc->web()->page()->undoStack()->undo();
+    m_doc->web()->undo();
 }
 
 void MainWindow::on_actionEditingRedo_triggered()
 {
-    m_doc->web()->page()->undoStack()->redo();
+    m_doc->web()->redo();
 }
 
 void MainWindow::on_actionEditingCut_triggered()
 {
+    qDebug() << "actionEditingCut called";
     m_doc->web()->triggerPageAction(QWebPage::Cut);
 }
 
@@ -1172,6 +1203,12 @@ void MainWindow::on_actionFeedback_triggered()
 
     if (strUrl.isEmpty())
         return;
+
+    //FIXME: special handle for support.html, shuold append displayName in url.
+    CWizDatabase& personDb = m_dbMgr.db();
+    QString strUserName = "Unkown";
+    personDb.GetUserDisplayName(strUserName);
+    strUrl.replace(QHostInfo::localHostName(), strUserName);
 
     QDesktopServices::openUrl(strUrl);
 }
@@ -1582,7 +1619,9 @@ void MainWindow::locateDocument(const WIZDOCUMENTDATA& data)
 
 void MainWindow::checkWizUpdate()
 {
+#ifndef BUILD4APPSTORE
     m_upgrade->startCheck();
+#endif
 }
 
 #ifndef Q_OS_MAC

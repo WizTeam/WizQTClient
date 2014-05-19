@@ -23,9 +23,11 @@ CWizPreferenceWindow::CWizPreferenceWindow(CWizExplorerApp& app, QWidget* parent
     // FIXME: proxy settings will back soon!!!
     ui->labelProxySettings->hide();
 
-    // hide language choice for appstore
+    // hide language choice and upgrade for appstore
 #ifdef BUILD4APPSTORE
-    ui->groupBoxLang->setVisible(false);
+    QWidget* commWidget = ui->tabWidget->widget(0);
+    ui->tabWidget->removeTab(0);
+    commWidget->deleteLater();
 #endif
 
     // general tab

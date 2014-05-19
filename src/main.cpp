@@ -298,7 +298,10 @@ int mainCore(int argc, char *argv[])
         QProcess::startDetached(argv[0], QStringList());
 #else
         QString strAppFile = QApplication::applicationDirPath().remove("/Contents/MacOS");
-        QProcess::startDetached("/usr/bin/open", QStringList() <<strAppFile);
+        if (!QProcess::startDetached("/usr/bin/open -W "+strAppFile))
+        {
+            QMessageBox::information(0, "Info", "open " + strAppFile + " failed");
+        }
 #endif
     }
 

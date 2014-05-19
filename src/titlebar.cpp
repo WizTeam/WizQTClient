@@ -122,7 +122,6 @@ TitleBar::TitleBar(QWidget *parent)
     layoutInfo2->addWidget(m_commentsBtn);
 
 
-
     QVBoxLayout* layoutInfo1 = new QVBoxLayout();
     layoutInfo1->setContentsMargins(0, 0, 0, 0);
     layoutInfo1->setSpacing(0);
@@ -136,6 +135,7 @@ TitleBar::TitleBar(QWidget *parent)
 //    QVBoxLayout* layoutInfo3 = new QVBoxLayout();
 //    layoutInfo3->addStretch();
 //    layoutInfo3->addLayout(layoutInfo2);
+
 
 //    QHBoxLayout* layoutInfo4 = new QHBoxLayout();
 //    layoutInfo4->setContentsMargins(0, 0, 0, 0);
@@ -166,7 +166,7 @@ CWizDocumentView* TitleBar::noteView()
 
 void TitleBar::setLocked(bool bReadOnly, int nReason, bool bIsGroup)
 {
-    m_notifyBar->showNotify(nReason);
+    m_notifyBar->showPermissionNotify(nReason);
     m_editTitle->setReadOnly(bReadOnly);
     m_editBtn->setEnabled(!bReadOnly);
     m_tagBtn->setEnabled(!bIsGroup ? true : false);

@@ -13,6 +13,7 @@ class wizImageButton : public QPushButton
 public:
     explicit wizImageButton(QWidget* parent = 0);
 
+    void setIcon(const QIcon& icon);
     void setIconNormal(const QString& icoFile);
     void setIconHot(const QString& icoFile);
     void setIconDown(const QString& icoFile);
@@ -33,10 +34,10 @@ protected slots:
     void	mouseReleaseEvent(QMouseEvent* event);
 
 private:
-    QString m_normalIcon;
-    QString m_hotIcon;
-    QString m_downIcon;
-    QString m_currentIcon;
+    QPixmap m_normalIcon;
+    QPixmap m_hotIcon;
+    QPixmap m_downIcon;
+    QPixmap m_currentIcon;
 
     bool m_lockNormalStatus;
 };
