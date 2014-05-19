@@ -49,10 +49,13 @@ using namespace Core::Internal;
  * can't be notified.
  * here, we just delegate this action to editor itself.
  */
+
+/*  QWebKit and Editor both have it's own undo stack. Undo method all processed by editor.
 class EditorUndoCommand : public QUndoCommand
 {
 public:
-    EditorUndoCommand(QWebPage* page) : m_page(page) {}
+    EditorUndoCommand(QWebPage* page, const QString & text = "Unknown") :QUndoCommand(text),
+        m_page(page) {}
 
     virtual void undo()
     {
@@ -67,6 +70,12 @@ public:
 private:
     QWebPage* m_page;
 };
+*/
+
+QString getImageHtmlLabelByFile(const QString& strImageFile)
+{
+    return QString("<img class=\"WizNormalImg\" border=\"0\" src=\"file://%1\" />").arg(strImageFile);
+}
 
 void CWizDocumentWebViewPage::triggerAction(QWebPage::WebAction typeAction, bool checked)
 {
@@ -103,7 +112,7 @@ void CWizDocumentWebViewPage::on_editorCommandPaste_triggered()
         }
 
         QMimeData* data = new QMimeData();
-        QString strHtml = QString("<img border=\"0\" src=\"file://%1\" />").arg(strFileName);
+        QString strHtml = getImageHtmlLabelByFile(strFileName);
         data->setHtml(strHtml);
         clip->setMimeData(data);
     }
@@ -115,8 +124,6 @@ void CWizDocumentWebViewPage::javaScriptConsoleMessage(const QString& message, i
 
     qDebug() << "[Console]line: " << lineNumber << ", " << message;
 }
-
-
 
 CWizDocumentWebView::CWizDocumentWebView(CWizExplorerApp& app, QWidget* parent)
     : QWebView(parent)
@@ -232,12 +239,54 @@ void CWizDocumentWebView::keyPressEvent(QKeyEvent* event)
         saveDocument(view()->note(), false);
         return;
     }
+    else if (event->key() == Qt::Key_Tab)
+    {
+        //set contentchanged
+        setContentsChanged(true);
+        emit statusChanged();
+        return;
+    }
+#if QT_VERSION < 0x050000
+    else if (event->key() == Qt::Key_Z)
+    {
+        //Ctrl+Shift+Z,  shortcut for redo can't catch by actions in QT4
+        Qt::KeyboardModifiers keyMod = QApplication::keyboardModifiers();
+        bool isSHIFT = keyMod.testFlag(Qt::ShiftModifier);
+        bool isCTRL = keyMod.testFlag(Qt::ControlModifier);
+        if (isCTRL && isSHIFT) {
+            redo();
+            return;
+        } else if (isCTRL && !isSHIFT) {
+            undo();
+            return;
+        }
+    }
+
+#endif
+
+//    int keyValue = event->key();
+//    QString keyText = event->text();
+//    qDebug() << keyValue << " text : " << keyText;
 
 #ifdef Q_OS_LINUX
     setUpdatesEnabled(false);
     QWebView::keyPressEvent(event);
     setUpdatesEnabled(true);
 #else
+    //special handled for qt4,case capslock doesn't work
+#if QT_VERSION < 0x050000
+//    if (65 <= keyValue && 90 >= keyValue)
+//    {
+//        if (event->key() & Qt::Key_CapsLock)
+//        {
+//            qDebug() << "capslock pressed";
+//            QKeyEvent newKeyEvent(event->type(), keyValue, event->modifiers(),
+//                                  keyText.toUpper(), event->isAutoRepeat(), event->count());
+//            QWebView::keyPressEvent(&newKeyEvent);
+//            return;
+//        }
+//    }
+#endif
     QWebView::keyPressEvent(event);
 #endif
 
@@ -362,7 +411,7 @@ bool CWizDocumentWebView::image2Html(const QString& strImageFile, QString& strHt
         return false;
     }
 
-    strHtml = QString("<img class=\"WizNormalImg\" border=\"0\" src=\"file://%1\" />").arg(strDestFile);
+    strHtml = getImageHtmlLabelByFile(strDestFile);
     return true;
 }
 
@@ -608,7 +657,7 @@ void CWizDocumentWebView::onEditorContentChanged()
 {
     setContentsChanged(true);
     //
-    //Q_EMIT statusChanged();
+    Q_EMIT statusChanged();
 }
 
 void CWizDocumentWebView::onEditorSelectionChanged()
@@ -721,6 +770,9 @@ void CWizDocumentWebView::splitHtmlToHeadAndBody(const QString& strHtml, QString
 
 void CWizDocumentWebView::saveEditingViewDocument(const WIZDOCUMENTDATA &data, bool force)
 {
+    //FIXME: remove me, just for find a image losses bug.
+    Q_ASSERT(!data.strGUID.isEmpty());
+
     if (!force && !isContentsChanged())
         return;
 
@@ -995,11 +1047,10 @@ bool CWizDocumentWebView::editorCommandExecuteCommand(const QString& strCommand,
 
     bool ret = page()->mainFrame()->evaluateJavaScript(strExec).toBool();
 
-    EditorUndoCommand * cmd = new EditorUndoCommand(page());
-    page()->undoStack()->push(cmd);
-
     //
     setContentsChanged(true);
+    // notify mainwindow to update action status
+    emit statusChanged();
 
     return ret;
 }
@@ -1191,11 +1242,16 @@ bool CWizDocumentWebView::editorCommandExecuteInsertHorizontal()
 
 bool CWizDocumentWebView::editorCommandExecuteInsertCheckList()
 {
+    // before insert first checklist, should manual notify editor to save current sence for undo.
+    page()->mainFrame()->evaluateJavaScript("editor.execCommand('saveScene');");
+
     QString strExec = "WizTodo.insertOneTodo();";
     bool ret = page()->mainFrame()->evaluateJavaScript(strExec).toBool();
 
-    EditorUndoCommand * cmd = new EditorUndoCommand(page());
-    page()->undoStack()->push(cmd);
+    // after insert first checklist, should manual notify editor to save current sence for undo.
+    page()->mainFrame()->evaluateJavaScript("editor.execCommand('saveScene');");
+
+    emit statusChanged();
 
     return ret;
 }
@@ -1209,7 +1265,7 @@ bool CWizDocumentWebView::editorCommandExecuteInsertImage()
 //    QPixmap pix(strImgFile);
 //    return editorCommandExecuteCommand("insertImage", QString("{src:'%1', class:\"WizNormalImg\", width:%2, height:%3}")
 //                                       .arg(strImgFile).arg(pix.width()).arg(pix.height()));
-    QString strHtml = QString("<img class=\"WizNormalImg\" border=\"0\" src=\"%1\">").arg(strImgFile);
+    QString strHtml = getImageHtmlLabelByFile(strImgFile);
     return editorCommandExecuteInsertHtml(strHtml, true);
 }
 
@@ -1348,6 +1404,18 @@ void CWizDocumentWebView::saveAsPDF(const QString& fileName)
         //
         frame->print(&printer);
     }
+}
+
+void CWizDocumentWebView::undo()
+{
+    page()->mainFrame()->evaluateJavaScript("editor.execCommand('undo')");
+    emit statusChanged();
+}
+
+void CWizDocumentWebView::redo()
+{
+    page()->mainFrame()->evaluateJavaScript("editor.execCommand('redo')");
+    emit statusChanged();
 }
 
 

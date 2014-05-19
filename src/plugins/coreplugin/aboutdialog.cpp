@@ -10,7 +10,7 @@
 
 #include <QTextStream>
 //#include <utils/misc.h>
-#include "wizdef.h"
+#include "../../wizdef.h"
 
 using namespace Core;
 using namespace Core::Internal;

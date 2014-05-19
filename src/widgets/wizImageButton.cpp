@@ -9,19 +9,28 @@ wizImageButton::wizImageButton(QWidget* parent) :
     m_lockNormalStatus = false;
 }
 
+void wizImageButton::setIcon(const QIcon& icon)
+{
+    m_normalIcon = icon.pixmap(size(), QIcon::Normal, QIcon::Off);
+    m_hotIcon = icon.pixmap(size(), QIcon::Active, QIcon::On);
+    m_downIcon = icon.pixmap(size(), QIcon::Active, QIcon::Off);
+
+    m_currentIcon = m_normalIcon;
+}
+
 void wizImageButton::setIconNormal(const QString& icoFile)
 {
-    m_normalIcon = icoFile;
+    m_normalIcon = QPixmap(icoFile);
 }
 
 void wizImageButton::setIconHot(const QString& icoFile)
 {
-    m_hotIcon = icoFile;
+    m_hotIcon = QPixmap(icoFile);
 }
 
 void wizImageButton::setIconDown(const QString& icoFile)
 {
-    m_downIcon = icoFile;
+    m_downIcon = QPixmap(icoFile);
 }
 
 void wizImageButton::setLockNormalStatus(bool lock)
@@ -57,8 +66,7 @@ void wizImageButton::paintEvent(QPaintEvent* event)
 
     p.setRenderHint(QPainter::Antialiasing);
     QRect arcRect(opt.rect.topLeft(), QSize(opt.rect.height(), opt.rect.height()));
-    QPixmap pxIco(m_currentIcon);
-    p.drawPixmap(arcRect, pxIco);
+    p.drawPixmap(arcRect, m_currentIcon);
 }
 
 void wizImageButton::mousePressEvent(QMouseEvent* event)

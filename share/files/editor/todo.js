@@ -1,9 +1,9 @@
-
+﻿
 function initDefaultCss(document, destNode) {
 	var WIZ_TODO_STYLE_ID = 'wiz_todo_style_id';
 	var WIZ_STYLE = 'wiz_style';
 	var WIZ_LINK_VERSION = 'wiz_link_version';
-	var WIZ_TODO_STYLE_VERSION = "01.00.04";
+	var WIZ_TODO_STYLE_VERSION = "01.00.06";
 
 	var style = document.getElementById(WIZ_TODO_STYLE_ID);
 	if (style && !!style.getAttribute && style.getAttribute(WIZ_LINK_VERSION) >= WIZ_TODO_STYLE_VERSION)
@@ -13,7 +13,7 @@ function initDefaultCss(document, destNode) {
 		style.parentElement.removeChild(style);
 	}
 	//
-	var strStyle = '.wiz-todo, .wiz-todo-img {width: 16px; height: 16px; cursor: default; padding: 0 10px 0 2px; vertical-align: -10%;-webkit-user-select: none;} .wiz-todo-label { display: inline-block; padding-top: 4px; padding-bottom: 4px; line-height: 1;} .wiz-todo-label-checked { text-decoration: line-through; color: #666;} .wiz-todo-label-unchecked {text-decoration: initial;} .wiz-todo-completed-info {padding-left: 44px; display: inline-block; } .wiz-todo-avatar { width:20px; height: 20px; vertical-align: -20%; margin-right:10px; border-radius: 2px;} .wiz-todo-account, .wiz-todo-dt { color: #666; }';
+	var strStyle = '.wiz-todo, .wiz-todo-img {width: 16px; height: 16px; cursor: default; padding: 0 10px 0 2px; vertical-align: -10%;-webkit-user-select: none;} .wiz-todo-label { display: inline-block; padding-top: 8px; padding-bottom: 8px; line-height: 1;} .wiz-todo-label-checked { /*text-decoration: line-through;*/ color: #666;} .wiz-todo-label-unchecked {text-decoration: initial;} .wiz-todo-completed-info {padding-left: 44px; display: inline-block; } .wiz-todo-avatar { width:20px; height: 20px; vertical-align: -20%; margin-right:10px; border-radius: 2px;} .wiz-todo-account, .wiz-todo-dt { color: #666; }';
 	//
 	var objStyle = document.createElement('style');
 	objStyle.type = 'text/css';
@@ -27,11 +27,10 @@ function initDefaultCss(document, destNode) {
 
 function WizTodoWindowsHelper(external) {
 
-	this.wizApp = external;
-	this.wizDoc = this.wizApp.Window.CurrentDocument;
-	this.personalDB = this.wizApp.PersonalDatabase;
-	this.database = this.wizDoc.Database;
-	this.commonUI = this.wizApp.CreateWizObject('WizKMControls.WizCommonUI');
+	if (external) {
+		this.wizEditor = external;
+	}
+
 	this.getUserAlias = getUserAlias;
 	this.getUserAvatarFileName = getUserAvatarFileName;
 	this.isPersonalDocument = isPersonalDocument;
@@ -39,68 +38,43 @@ function WizTodoWindowsHelper(external) {
 	this.setDocumentModified = setDocumentModified;
 	this.getCheckedImageFileName = getCheckedImageFileName;
 	this.getUnCheckedImageFileName = getUnCheckedImageFileName;
+	this.setDocumentType = setDocumentType;
 	this.initCss = initCss;
 	this.canEdit = canEdit;
-	this.setDocumentType = setDocumentType;
 
 	function getUserAlias() {
-		if (!this.personalDB || !this.database)
-			return "";
-		//
-		var kbguid = this.database.KbGUID;
-		if (!kbguid)
-			return "";
-		//
-		return this.personalDB.GetUserAlias(kbguid);
+		return this.wizEditor.UserAlias;
 	}
 
 	function getUserAvatarFileName(size) {
-		if (!this.database)
-			return "";
-		if (!this.database.GetAvatarFileName)
-			return "";
-		//
-		var fileName = this.database.GetAvatarFileName();
-		//
-		var pos = fileName.lastIndexOf('\\');
-		var filePath = fileName.substr(0, pos);
-		var fileTitle = fileName.substr(pos + 1, fileName.lastIndexOf('.') - pos - 1);
-		var ext = fileName.substr(fileName.lastIndexOf('.') + 1);
-		//
-		var cacheFileName = filePath + "\\" + fileTitle + size + "." + ext;
-		if (this.commonUI.PathFileExists(cacheFileName))
-			return cacheFileName;
-		//		
-		if (!this.commonUI || !this.commonUI.ResizeImage)
-			return fileName;
-		var newFileName = this.commonUI.ResizeImage(fileName, size);
-		//
-		if (!this.commonUI.PathFileExists(newFileName))
-			return fileName;
-		//
-		this.commonUI.CopyFile(newFileName, cacheFileName);
-		//
-		return cacheFileName;
+		return this.wizEditor.GetUserAvatarFileName(size);
 	}
 
 	function isPersonalDocument() {
-		return this.database.KbGUID == "";
+
+		try {
+			return this.wizEditor.WizDocument.IsPersonalDocument();
+		}
+		catch (e) {
+			return false;
+		}
 	}
 
 	function getLocalDateTime(dt) {
-		return this.commonUI.ToLocalDateString(dt, true) + ' ' + this.commonUI.ToLocalTimeString2(dt, true);
+		var nosec = true;
+		return this.wizEditor.GetLocalDateString(dt, true) + ' ' + this.wizEditor.GetLocalTimeString(dt, nosec);
 	}
 
 	function setDocumentModified() {
-		window.WizChromeBrowser.OnDomModified();
+		this.wizEditor.SetContentModified(true);
 	}
 
 	function getCheckedImageFileName() {
-		return this.wizApp.AppPath + "WizTools\\htmleditor\\checked.png";
+		return this.wizEditor.AppPath + "WizTools\\htmleditor\\checked.png";
 	}
 
 	function getUnCheckedImageFileName() {
-		return this.wizApp.AppPath + "WizTools\\htmleditor\\unchecked.png";
+		return this.wizEditor.AppPath + "WizTools\\htmleditor\\unchecked.png";
 	}
 
 	function canEdit() {
@@ -112,7 +86,17 @@ function WizTodoWindowsHelper(external) {
 	}
 
 	function setDocumentType(type) {
-		this.wizDoc.Type = type;
+		/*
+		var oldType = this.wizDoc.Type;
+		if (oldType) {
+			if (-1 == oldType.indexOf(type)) {
+				this.wizDoc.Type = oldType + ';' + type;
+			}
+		}
+		else {
+			this.wizDoc.Type = type;
+		}*/
+		this.wizEditor.WizDocument.Type = type;
 	}
 }
 
@@ -176,7 +160,7 @@ function WizTodoQtHelper() {
 			style.parentElement.removeChild(style);
 		}
 		//
-		var strStyle = '.wiz-todo, .wiz-todo-img {width: 16px; height: 16px; cursor: default; padding: 0 10px 0 2px; vertical-align: -10%;-webkit-user-select: none;} .wiz-todo-label { display: inline-block; padding-top: 4px; padding-bottom: 4px; line-height: 1;} .wiz-todo-label-checked { text-decoration: line-through; color: #666;} .wiz-todo-label-unchecked {text-decoration: initial;} .wiz-todo-completed-info {padding-left: 44px; display: inline-block; } .wiz-todo-avatar { width:20px; height: 20px; vertical-align: -20%; margin-right:10px; border-radius: 2px;} .wiz-todo-account, .wiz-todo-dt { color: #666; }';
+		var strStyle = '.wiz-todo, .wiz-todo-img {width: 16px; height: 16px; cursor: default; padding: 0 10px 0 2px; vertical-align: -10%;-webkit-user-select: none;} .wiz-todo-label { display: inline-block; padding-top: 4px; padding-bottom: 4px; line-height: 1;} .wiz-todo-label-checked { /*text-decoration: line-through;*/ color: #666;} .wiz-todo-label-unchecked {text-decoration: initial;} .wiz-todo-completed-info {padding-left: 44px; display: inline-block; } .wiz-todo-avatar { width:20px; height: 20px; vertical-align: -20%; margin-right:10px; border-radius: 2px;} .wiz-todo-account, .wiz-todo-dt { color: #666; }';
 		//
 		var objStyle = document.createElement('style');
 		objStyle.type = 'text/css';
@@ -205,6 +189,8 @@ function WizTodoAndroidHelper() {
 	this.getUnCheckedImageFileName = getUnCheckedImageFileName;
 	this.initCss = initCss;
 	this.canEdit = canEdit;
+	this.setDocumentType = setDocumentType;
+	this.canInsert = canInsert;
 
 	function getUserAlias() {
 		return window.WizNote.getUserAlias();
@@ -241,7 +227,113 @@ function WizTodoAndroidHelper() {
 	function initCss(document) {
 		initDefaultCss(document, document.head);
 	}
+
+	function setDocumentType(type) {
+		window.WizNote.setDocumentType(type);
+	}
+
+	function canInsert(caninsert) {
+		window.WizNote.canInsert(caninsert);
+	}
 }
+
+function WizTodoIphoneHelper() {
+
+	this.getUserAlias = getUserAlias;
+	this.getUserAvatarFileName = getUserAvatarFileName;
+	this.isPersonalDocument = isPersonalDocument;
+	this.getLocalDateTime = getLocalDateTime;
+	this.setDocumentModified = setDocumentModified;
+	this.getCheckedImageFileName = getCheckedImageFileName;
+	this.getUnCheckedImageFileName = getUnCheckedImageFileName;
+	this.initCss = initCss;
+	this.canEdit = canEdit;
+	this.setDocumentType = setDocumentType;
+	this.setUserAlias = setUserAlias;
+	this.setUserAvatarFileName = setUserAvatarFileName;
+	this.setCheckedImageFileName = setCheckedImageFileName;
+	this.setUnCheckedImageFileName = setUnCheckedImageFileName;
+	this.onAddTodoCompletedInfo = onAddTodoCompletedInfo;
+	this.setIsPersonalDocument = setIsPersonalDocument;
+	this.canInsert = canInsert;
+    
+	this.userAlias = null;
+	this.avatarFileName = null;
+	this.checkedFileName = null;
+	this.unCheckedFileName = null;
+	this.personalDocument = undefined;
+    
+	function setUserAlias(alias) {
+		this.userAlias = alias;
+	}
+
+	function setUserAvatarFileName(avatarFileName) {
+		this.avatarFileName = avatarFileName;
+	}
+
+	function setCheckedImageFileName(fileName) {
+		this.checkedFileName = fileName;
+	}
+
+	function setUnCheckedImageFileName(fileName) {
+		this.unCheckedFileName = fileName;
+	}
+
+	function setIsPersonalDocument(isPersonalDocument) {
+		this.personalDocument = isPersonalDocument;
+	}
+
+	function getUserAlias() {
+		return this.userAlias;
+	}
+    
+	function getUserAvatarFileName(size) {
+        return this.avatarFileName;
+	}
+    
+	function isPersonalDocument() {
+		return this.personalDocument === 'true';
+	}
+    
+	function getLocalDateTime(dt) {
+        return "";
+	}
+    
+	function setDocumentModified() {
+        window.location.href = "wiztodolist://setDocumentModified";
+	}
+    
+	function getCheckedImageFileName() {
+		return this.checkedFileName;
+	}
+    
+	function getUnCheckedImageFileName() {
+		return this.unCheckedFileName;
+	}
+    
+	function canEdit() {
+		return true;
+	}
+    
+	function initCss(document) {
+		initDefaultCss(document, document.body);
+	}
+
+	function setDocumentType(type) {
+        window.location.href = "wiztodolist://setDocumentType" + "&*/"+ type;
+	}
+
+	function onAddTodoCompletedInfo(isChecked, id, dt, callBack) {
+		window.location.href = "wiztodolist://onAddTodoCompletedInfo" + "&*/"+ isChecked +"&*/"+ id +"&*/"+ dt +"&*/"+ callBack;		
+	}
+    
+	function canInsert(caninsert) {
+		if (caninsert)
+			return;
+		window.location.href = "wiztodolist://canInsert" + "&*/"+ caninsert;
+	}
+}
+
 
 var WizTodo = (function () {
 
@@ -251,6 +343,7 @@ var WizTodo = (function () {
 	var WIZ_HTML_TODO_AVATAR_SIZE = 40;
 	var WIZ_DOC_TODO_TYPE = "tasklist";
 	var editorDocument = null;
+	var client = "";
 	var todoHelper = null;
 
 	var curTouchTarget = null;
@@ -265,13 +358,25 @@ var WizTodo = (function () {
 			case 'qt':
 				return new WizTodoQtHelper();
 			case 'iphone':
-				break;
+				return new WizTodoIphoneHelper();
 			case 'web':
 				break;
 			case 'android':
 				return new WizTodoAndroidHelper();
 				break;
 		}
+	}
+
+	function isIphone() {
+		return 'iphone' === client;
+	}
+
+	function isIpad() {
+		return 'ipad' === client;
+	}
+
+	function isAndroid() {
+		return 'android' === client;
 	}
 
 	function getElementDisply(ele) {
@@ -548,7 +653,7 @@ var WizTodo = (function () {
 		return !!g_canInsertWizTodo;
 	}
 
-	function addCompletedInfo(label, isChecked, todoId) {
+	function addCompletedInfo(label, isChecked, todoId, localDateTime) {
 		if (!label)
 			return;
 		//
@@ -559,14 +664,13 @@ var WizTodo = (function () {
 						"</span>" + 
 						"<span class='wiz-todo-dt'>%4.</span>";
 			//
-			var dt = todoHelper.getLocalDateTime(new Date());
 			var userName = todoHelper.getUserAlias();
 			var avatar = todoHelper.getUserAvatarFileName(WIZ_HTML_TODO_AVATAR_SIZE);
 			//
 			html = html.replace('%1', avatar);
 			html = html.replace('%2', WIZ_HTML_CLASS_CANNOT_DRAG + ' ' + 'wiz-todo-avatar');
 			html = html.replace('%3', userName);
-			html = html.replace('%4', dt);
+			html = html.replace('%4', localDateTime);
 			//
 			var info = editorDocument.createElement('span');
 			info.className = WIZ_HTML_TODO_COMPLETED_INFO;
@@ -685,7 +789,14 @@ var WizTodo = (function () {
 		label.setAttribute('class', classValue);
 		//
 		if (!todoHelper.isPersonalDocument()) {
-			addCompletedInfo(label, !isChecked, todoEle.id);
+
+			if (isIpad() || isIphone()) {
+				todoHelper.onAddTodoCompletedInfo(!isChecked, todoEle.id, new Date(), 'addTodoCompletedInfo');
+			}
+			else {
+				var dt = todoHelper.getLocalDateTime(new Date());
+				addCompletedInfo(label, !isChecked, todoEle.id, dt);
+			}
 		}
 		//
 		var nextSib = label.nextSibling;
@@ -699,11 +810,15 @@ var WizTodo = (function () {
 			//
 			label.appendChild(tmpNext);
 		}
-		todoHelper.setDocumentModified();
 		//
-		// if (curWizDoc && curWizDoc.CanEdit) {
-		// 	external.ExecuteCommand('editdocument');
-		// }
+		if (todoHelper.isPersonalDocument()) {
+			todoHelper.setDocumentModified();	
+		}
+		else {
+			if (!isIpad() && !isIphone()) {
+				todoHelper.setDocumentModified();
+			}
+		}
 	}
 	
 	function isEmptyLabel(label) {
@@ -859,11 +974,15 @@ var WizTodo = (function () {
 			return p;
 		if (p && p.id && p.id == 'content-view-body')
 			return p;
+		if (p && p.tagName.toLowerCase() == 'td')
+			return p;
+		if (p && p.tagName.toLowerCase() == 'th')
+			return p;
 		//
 		return null;
 	}
 
-	function isMainEditable(ele) {
+	function isShouldWrapBlockElement(ele) {
 		if (!ele)
 			return false;
 		if (ele && ele.tagName.toString().toLowerCase() == 'body')
@@ -871,8 +990,12 @@ var WizTodo = (function () {
 		// editable div of android 
 		if (ele && ele.id && ele.id == 'content-view-body')
 			return true;
+		if (ele && ele.tagName.toString().toLowerCase() == 'td')
+			return true;
+		if (ele && ele.tagName.toString().toLowerCase() == 'th')
+			return true;
 		//
-		return true;
+		return false;
 	}
 
 	function wrapMainEditableInlineChildren(editableNode) {
@@ -1014,6 +1137,8 @@ var WizTodo = (function () {
 	function insertOneTodo() {
 
 		// deleteEmptyLabel();
+		if (!canInsert())
+			return;
 		//
 		var strHTML = "<label class='wiz-todo-label wiz-todo-label-unchecked'>" + 
 						"<img id='%1' class='wiz-todo-img wiz-img-cannot-drag' src='%2' state='unchecked'><span class='wiz-todo-tail'></span>" + 
@@ -1026,7 +1151,7 @@ var WizTodo = (function () {
 		removeNestLabel(label);
 		//
 		var p = getSelectionBlockParent();
-		if (isMainEditable(p)) {
+		if (isShouldWrapBlockElement(p)) {
 			wrapMainEditableInlineChildren(p);
 		}
 		//
@@ -1037,6 +1162,7 @@ var WizTodo = (function () {
 		setCaret(label);
 		//
 		todoHelper.setDocumentType(WIZ_DOC_TODO_TYPE);
+		todoHelper.setDocumentModified();
 		//
 		return label;
 	}
@@ -1245,6 +1371,8 @@ var WizTodo = (function () {
 			ele.parentElement && ele.parentElement.removeChild(ele);
 			return null;
 		}
+		//
+		return ele;
 	}
 
 	function getFirstLabel(ele) {
@@ -1343,6 +1471,8 @@ var WizTodo = (function () {
 			return;
 		//
 		if (13 != e.keyCode) // Return key
+			return;
+		if (e.shiftKey)
 			return;
 		//
 		initEnterKeyState();
@@ -1466,6 +1596,14 @@ var WizTodo = (function () {
 				if (br) {
 					br.parentElement.removeChild(br);
 				}
+				//
+				if (label.getBoundingClientRect().top + label.clientHeight > document.documentElement.clientHeight
+					|| label.getBoundingClientRect().top + label.clientHeight < 0) {
+					var labelX = label.getBoundingClientRect().left + document.body.scrollLeft;
+					var labelY = document.body.scrollTop + label.clientHeight;
+					//
+					window.scrollTo(labelX, labelY);
+				}
 			}
 		}
 	}
@@ -1502,7 +1640,12 @@ var WizTodo = (function () {
 				setCaret(node);
 			}
 			else {
-				setCaret(p);
+				if (node) {
+					setCaret(node);
+				}
+				else {
+					setCaret(p);
+				}
 			}
 		}
 	}
@@ -1531,7 +1674,9 @@ var WizTodo = (function () {
 		//
 		curTouchTarget = null;
 		//
-		onDocumentClick(e);
+		if (isIphone() || isIpad()) {
+			onDocumentClick(e);
+		}
 	}
 
 	function registerEvent() {
@@ -1548,13 +1693,16 @@ var WizTodo = (function () {
 		editorDocument.addEventListener('touchend', onTouchEnd);
 	}
 
-	function init(wizClient) {
+	function init(wizClient) { 
+
 		var ueditor = null;
 		if (wizClient == 'qt') {
 			ueditor = document.getElementById('ueditor_0');
 		}
 		//
 		editorDocument = ueditor ? ueditor.contentDocument : document;
+		//
+		client = wizClient;
 		//
 		todoHelper = getTodoHelper(wizClient);
 		//
@@ -1563,8 +1711,76 @@ var WizTodo = (function () {
 		todoHelper.initCss(editorDocument);
 	}
 
+	function setUserAlias(alias) {
+		if (todoHelper.setUserAlias) {
+			todoHelper.setUserAlias(alias);
+		}
+	}
+
+	function setUserAvatarFileName(avatarFileName) {
+		if (todoHelper.setUserAvatarFileName) {
+			todoHelper.setUserAvatarFileName(avatarFileName);
+		}
+	}
+
+	function setCheckedImageFileName(fileName) {
+		if (todoHelper.setCheckedImageFileName) {
+			todoHelper.setCheckedImageFileName(fileName);
+		}
+	}
+
+	function setUnCheckedImageFileName(fileName) {
+		if (todoHelper.setUnCheckedImageFileName) {
+			todoHelper.setUnCheckedImageFileName(fileName);
+		}
+	}
+
+	function setIsPersonalDocument(isPersonalDocument) {
+		if (todoHelper.setIsPersonalDocument) {
+			todoHelper.setIsPersonalDocument(isPersonalDocument);
+		}
+	}
+
+	function addTodoCompletedInfo(isChecked, id, localDateTime) {
+		var todoImg = editorDocument.getElementById(id);
+		var label = getParentTodoLabelElement(todoImg);
+		//
+		addCompletedInfo(label, isChecked === 'true', id, localDateTime);
+	}
+
+	function _canInsert() {
+
+		var sel = editorDocument.getSelection();
+		if (!sel || sel.rangeCount < 1)
+			return false;
+		//
+		var rng = sel.getRangeAt(0);
+		if (!rng || !rng.collapsed) 
+			return false;
+		//
+		return true;
+	}
+
+	function canInsert() {
+
+		var caninsert = _canInsert();
+		//
+		if (todoHelper.canInsert) {
+			todoHelper.canInsert(caninsert);
+		}
+		//
+		return caninsert;
+	}
+
 	return {
 		init: init,
-		insertOneTodo: insertOneTodo
+		insertOneTodo: insertOneTodo,
+		canInsert: canInsert,
+		setUserAlias: setUserAlias,
+		setUserAvatarFileName: setUserAvatarFileName,
+		setCheckedImageFileName: setCheckedImageFileName,
+		setUnCheckedImageFileName: setUnCheckedImageFileName,
+		setIsPersonalDocument: setIsPersonalDocument, 
+		addTodoCompletedInfo: addTodoCompletedInfo,
 	}
 })();

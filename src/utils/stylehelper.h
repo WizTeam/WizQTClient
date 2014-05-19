@@ -101,6 +101,9 @@ public:
     static int titleEditorHeight();
     static int editToolBarHeight();
 
+    //
+    static int notifyBarHeight();
+
 private:
     static CWizSettings* m_settings;
 };

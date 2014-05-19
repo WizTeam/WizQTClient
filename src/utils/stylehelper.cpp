@@ -324,7 +324,7 @@ QColor StyleHelper::listViewItemLead(bool bSelected, bool bFocused)
             return QColor(m_settings->value("Documents/DateLoseFocus", "#6a6a6a").toString());
         }
     } else {
-        return QColor(m_settings->value("Documents/Date", "#3498DB").toString());
+        return QColor(m_settings->value("Documents/Date", "#3CA2E0").toString());
     }
 }
 
@@ -669,6 +669,11 @@ int StyleHelper::titleEditorHeight()
 int StyleHelper::editToolBarHeight()
 {
     return 30;
+}
+
+int StyleHelper::notifyBarHeight()
+{
+    return 32;
 }
 
 QRect StyleHelper::initListViewItemPainter(QPainter* p, const QRect& lrc, bool bFocused, bool bSelected)

@@ -209,7 +209,7 @@ void CWizAttachmentListView::addAttachments()
     QStringList files = QFileDialog::getOpenFileNames(
                              this,
                              tr("Add attachments"),
-                             tr("/home"),
+                             QDir::home().absolutePath(),
                              tr("All files(*.*)"));
     //
     CWizDatabase& db = m_dbMgr.db(m_document.strKbGUID);
