@@ -392,3 +392,9 @@ void TitleBar::onGetCommentsCountFinished(int nCount)
         m_commentsBtn->setState(CellButton::Normal);
     }
 }
+
+
+void Core::Internal::TitleBar::showDocumentEditingStatus(const QString& strEditor)
+{
+    m_notifyBar->showEditingNotify(strEditor);
+}

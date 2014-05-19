@@ -21,6 +21,7 @@
 #include "share/wizsettings.h"
 #include "share/wizuihelper.h"
 #include "wizusercipherform.h"
+#include "wizDocumentEditStatus.h"
 
 #include "titlebar.h"
 
@@ -200,6 +201,12 @@ void CWizDocumentView::initStat(const WIZDOCUMENTDATA& data, bool bEditing)
 
     bool bGroup = m_dbMgr.db(data.strKbGUID).IsGroup();
     m_title->setLocked(m_bLocked, nLockReason, bGroup);
+    if (bGroup && nLockReason == -1)
+    {
+        wizDocumentEditStatusCheckThread* editStatusChecker = new wizDocumentEditStatusCheckThread();
+        connect(editStatusChecker, SIGNAL(checkFinished(QString,QStringList)), SLOT(on_checkEditStatus_finished(QString,QStringList)));
+        editStatusChecker->checkEditStatus(data.strKbGUID, data.strGUID);
+    }
 }
 
 void CWizDocumentView::viewNote(const WIZDOCUMENTDATA& data, bool forceEdit)
@@ -434,4 +441,19 @@ void CWizDocumentView::on_document_data_modified(const WIZDOCUMENTDATA& data)
         return;
 
     reloadNote();
+}
+
+
+void Core::CWizDocumentView::on_checkEditStatus_finished(QString strGUID, QStringList editors)
+{
+    wizDocumentEditStatusCheckThread* checker = qobject_cast<wizDocumentEditStatusCheckThread *>(sender());
+    Q_ASSERT(checker);
+    connect(checker, SIGNAL(finished()), checker, SLOT(deleteLater()));
+    checker->quit();
+
+    if (strGUID == m_note.strGUID && !editors.isEmpty())
+    {
+        QString strEditor = editors.join(" , ");
+        m_title->showDocumentEditingStatus(strEditor);
+    }
 }

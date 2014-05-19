@@ -135,6 +135,7 @@ set(wiznote_SOURCES
     thumbcache.cpp
     messagecompleter.cpp
     widgets/wizImageButton.cpp
+    wizDocumentEditStatus.cpp
 )
 
 set(wiznote_HEADERS
@@ -256,6 +257,7 @@ set(wiznote_HEADERS
     thumbcache_p.h
     messagecompleter.h
     widgets/wizImageButton.h
+    wizDocumentEditStatus.h
 )
 
 set(wiznote_FORMS

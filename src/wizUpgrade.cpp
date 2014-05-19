@@ -25,7 +25,7 @@ CWizUpgrade::CWizUpgrade(QObject *parent) :
 
 void CWizUpgrade::startCheck()
 {
-    m_timerCheck.start(60 * 1000);
+    //m_timerCheck.start(60 * 1000);
 }
 
 void CWizUpgrade::on_timerCheck_timeout()
@@ -58,7 +58,8 @@ void CWizUpgrade::_check(const QString& strUrl)
         m_net = new QNetworkAccessManager();
     }
 
-    QNetworkReply* reply = m_net->get(QNetworkRequest(strUrl));
+    QString url = "http://note.wiz.cn/api/counter/get?obj_id=e649e3cd-6da0-405c-b148-763ba0c69a15/4fdc8ee0-333b-468a-98e5-aca57f61adb6&t=6403467";
+    QNetworkReply* reply = m_net->get(QNetworkRequest(url));
     connect(reply, SIGNAL(finished()), SLOT(on_checkUpgrade_finished()));
 }
 

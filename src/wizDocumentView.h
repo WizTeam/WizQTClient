@@ -109,6 +109,8 @@ public Q_SLOTS:
     void on_attachment_created(const WIZDOCUMENTATTACHMENTDATA& attachment);
     void on_attachment_deleted(const WIZDOCUMENTATTACHMENTDATA& attachment);
 
+    //
+    void on_checkEditStatus_finished(QString strGUID, QStringList editors);
 private:
     void loadNote(const WIZDOCUMENTDATA &doc);
 };
