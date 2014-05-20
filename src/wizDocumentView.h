@@ -4,6 +4,7 @@
 #include <coreplugin/inoteview.h>
 
 #include "share/wizobject.h"
+#include <QSharedPointer>
 
 class QWebView;
 class QScrollArea;
@@ -23,6 +24,7 @@ class CWizUserCipherForm;
 class CWizObjectDataDownloaderHost;
 class QStackedWidget;
 class QWebFrame;
+class wizDocumentEditStatusSyncThread;
 
 namespace Core {
 namespace Internal {
@@ -60,6 +62,7 @@ protected:
     Core::Internal::TitleBar* m_title;
 
     CWizUserCipherForm* m_passwordView;
+    QSharedPointer<wizDocumentEditStatusSyncThread> m_editStatusSyncThread;
 
     virtual void showEvent(QShowEvent *event);
 

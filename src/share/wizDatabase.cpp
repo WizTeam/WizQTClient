@@ -1986,6 +1986,26 @@ bool CWizDatabase::GetUserDisplayName(QString &strDisplayName)
     return true;
 }
 
+QString CWizDatabase::getUserAlias()
+{
+    CWizDatabase* personDb = dynamic_cast<CWizDatabase*>(GetPersonalDatabase());
+    if (!personDb)
+        return QString();
+
+    QString strUserGUID = personDb->GetUserGUID();
+    WIZBIZUSER bizUser;
+    personDb->userFromGUID(info().bizGUID, strUserGUID, bizUser);
+    if (!bizUser.alias.isEmpty()) {
+        return bizUser.alias;
+    } else {
+        QString strUserName;
+        personDb->GetUserDisplayName(strUserName);
+        return strUserName;
+    }
+
+    return QString();
+}
+
 QString CWizDatabase::GetEncryptedPassword()
 {
     return GetMetaDef(g_strAccountSection, "Password");

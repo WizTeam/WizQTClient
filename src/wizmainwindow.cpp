@@ -576,19 +576,7 @@ QString MainWindow::getUserAvatarFilePath(int size) const
 QString MainWindow::getUserAlias() const
 {
     QString strKbGUID = m_doc->note().strKbGUID;
-    CWizDatabase& personDb = m_dbMgr.db();
-    QString strUserGUID = personDb.GetUserGUID();
-    WIZBIZUSER bizUser;
-    personDb.userFromGUID(strKbGUID, strUserGUID, bizUser);
-    if (!bizUser.alias.isEmpty()) {
-        return bizUser.alias;
-    } else {
-        QString strUserName;
-        personDb.GetUserDisplayName(strUserName);
-        return strUserName;
-    }
-
-    return QString();
+    return m_dbMgr.db(strKbGUID).getUserAlias();
 }
 
 QString MainWindow::getFormatedDateTime() const

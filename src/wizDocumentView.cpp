@@ -40,6 +40,7 @@ CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
     , m_bLocked(false)
     , m_bEditingMode(false)
     , m_noteLoaded(false)
+    , m_editStatusSyncThread(new wizDocumentEditStatusSyncThread())
 {
     m_title->setEditor(m_web);
 
@@ -215,6 +216,8 @@ void CWizDocumentView::viewNote(const WIZDOCUMENTDATA& data, bool forceEdit)
 
     m_web->saveDocument(m_note, false);
 
+    m_editStatusSyncThread->addDoneDocument(m_note.strKbGUID, m_note.strGUID);
+
     m_noteLoaded = false;
     m_note = data;
     initStat(data, forceEdit);
@@ -305,6 +308,13 @@ void CWizDocumentView::setEditNote(bool bEdit)
 
     m_title->setEditingDocument(bEdit);
     m_web->setEditingDocument(bEdit);
+
+    if (m_bEditingMode) {
+        QString strUserAlias = m_dbMgr.db(m_note.strKbGUID).getUserAlias();
+        m_editStatusSyncThread->addEditingDocument(strUserAlias, m_note.strKbGUID, m_note.strGUID);
+    } else {
+        m_editStatusSyncThread->addDoneDocument(m_note.strKbGUID, m_note.strGUID);
+    }
 }
 
 void CWizDocumentView::setViewMode(int mode)
@@ -379,6 +389,12 @@ void CWizDocumentView::loadNote(const WIZDOCUMENTDATA& doc)
     m_note = doc;
     //
     m_noteLoaded = true;
+
+    if (m_bEditingMode)
+    {
+        QString strUserAlias = m_dbMgr.db(m_note.strKbGUID).getUserAlias();
+        m_editStatusSyncThread->addEditingDocument(strUserAlias, m_note.strKbGUID, m_note.strGUID);
+    }
 }
 
 void CWizDocumentView::on_document_modified(const WIZDOCUMENTDATA& documentOld, const WIZDOCUMENTDATA& documentNew)
@@ -450,6 +466,10 @@ void Core::CWizDocumentView::on_checkEditStatus_finished(QString strGUID, QStrin
     Q_ASSERT(checker);
     connect(checker, SIGNAL(finished()), checker, SLOT(deleteLater()));
     checker->quit();
+
+    //
+    QString strCurrentUser = m_dbMgr.db(m_note.strKbGUID).getUserAlias();
+    editors.removeAll(strCurrentUser);
 
     if (strGUID == m_note.strGUID && !editors.isEmpty())
     {

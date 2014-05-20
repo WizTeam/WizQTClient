@@ -37,6 +37,125 @@ wizDocumentEditStatusSyncThread::wizDocumentEditStatusSyncThread(QObject* parent
 {
 }
 
+void wizDocumentEditStatusSyncThread::addEditingDocument(const QString& strUserAlias, const QString& strKbGUID, const QString& strGUID)
+{
+    if (strGUID.isEmpty() || strUserAlias.isEmpty() || strKbGUID.isEmpty())
+        return;
+
+    QString strObjID = strKbGUID + "/" + strGUID;
+
+    m_mutext.lock();
+    m_editingList.insert(strObjID, strUserAlias);
+    m_mutext.unlock();
+
+    if (!isRunning())
+        start();
+
+    emit sendEditStatusRequest();
+}
+
+void wizDocumentEditStatusSyncThread::addDoneDocument(const QString& strKbGUID, const QString& strGUID)
+{
+    if (strGUID.isEmpty() || strKbGUID.isEmpty())
+        return;
+
+    QString strObjID = strKbGUID + "/" + strGUID;
+
+    m_mutext.lock();
+    if (m_editingList.contains(strObjID))
+    {
+        m_doneList.insert(strObjID, m_editingList.value(strObjID));
+        m_editingList.remove(strObjID);
+    }
+    m_mutext.unlock();
+
+    if (!isRunning())
+        start();
+
+    emit sendEditStatusRequest();
+}
+
+void wizDocumentEditStatusSyncThread::run()
+{
+    while (true)
+    {
+        sendEditingMessage();
+        sendDoneMessage();
+
+        QEventLoop eventLoop;
+        connect(this, SIGNAL(sendEditStatusRequest()), &eventLoop, SLOT(quit()));
+        QTimer::singleShot(30 * 1000, &eventLoop, SLOT(quit()));
+        eventLoop.exec();
+    }
+}
+
+void wizDocumentEditStatusSyncThread::sendEditingMessage()
+{
+    m_mutext.lock();
+    QMap<QString, QString> editingList = m_editingList;
+    m_mutext.unlock();
+
+    while(!editingList.isEmpty())
+    {
+        QString strGUID = editingList.begin().key();
+        QString strUserID = editingList.value(strGUID);
+        editingList.remove(strGUID);
+
+        sendEditingMessage(strUserID, strGUID);
+    }
+}
+
+void wizDocumentEditStatusSyncThread::sendEditingMessage(const QString& strUserAlias, const QString& strObjID)
+{
+    QString strUrl = ::WizFormatString4(_T("%1/add?obj_id=%2&user_id=%3&t=%4"),
+                                        WizKMGetDocumentEditStatusURL(),
+                                        strObjID,
+                                        strUserAlias,
+                                        ::WizIntToStr(GetTickCount()));
+
+    if (!m_netManager)
+    {
+        m_netManager = new QNetworkAccessManager();
+    }
+    m_netManager->get(QNetworkRequest(strUrl));
+
+    qDebug() << "sendEditingMessage called " <<strObjID;
+}
+
+void wizDocumentEditStatusSyncThread::sendDoneMessage()
+{
+    m_mutext.lock();
+    QMap<QString, QString> doneList = m_doneList;
+    // send done message just once
+    m_doneList.clear();
+    m_mutext.unlock();
+
+    while(!doneList.isEmpty())
+    {
+        QString strGUID = doneList.begin().key();
+        QString strUserID = doneList.value(strGUID);
+        doneList.remove(strGUID);
+
+        sendDoneMessage(strUserID, strGUID);
+    }
+}
+
+void wizDocumentEditStatusSyncThread::sendDoneMessage(const QString& strUserAlias, const QString& strObjID)
+{
+    QString strUrl = WizFormatString4(_T("%1/delete?obj_id=%2&user_id=%3&t=%4"),
+                                      WizKMGetDocumentEditStatusURL(),
+                                      strObjID,
+                                      strUserAlias,
+                                      ::WizIntToStr(GetTickCount()));
+
+    if (!m_netManager)
+    {
+        m_netManager = new QNetworkAccessManager();
+    }
+    m_netManager->get(QNetworkRequest(strUrl));
+    qDebug() << "sendDoneMessage called " <<strObjID;
+}
+
 
 wizDocumentEditStatusCheckThread::wizDocumentEditStatusCheckThread(QObject* parent) : QThread(parent)
 {

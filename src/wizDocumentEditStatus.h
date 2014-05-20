@@ -3,18 +3,38 @@
 
 #include <QThread>
 #include <QMutex>
-#include <QWaitCondition>
 #include <QWeakPointer>
+#include <QMap>
+#include <QPointer>
 
+class QNetworkAccessManager;
 
 class wizDocumentEditStatusSyncThread : public QThread
 {
+    Q_OBJECT
 public:
     wizDocumentEditStatusSyncThread(QObject* parent = 0);
+    void addEditingDocument(const QString& strUserAlias,const QString& strKbGUID ,const QString& strGUID);
+    void addDoneDocument(const QString& strKbGUID, const QString& strGUID);
+
+signals:
+    void sendEditStatusRequest();
+
+protected:
+    void run();
 
 private:
-    QList<QString> m_editingList;
-    QList<QString> m_doneList;
+    //
+    void sendEditingMessage();
+    void sendEditingMessage(const QString& strUserAlias, const QString& strObjID);
+    void sendDoneMessage();
+    void sendDoneMessage(const QString& strUserAlias, const QString& strObjID);
+private:
+    //key : ObjID, value : UserID
+    QMap<QString, QString> m_editingList;
+    QMap<QString, QString> m_doneList;
+    QMutex m_mutext;
+    QPointer<QNetworkAccessManager> m_netManager;
 };
 
 class wizDocumentEditStatusCheckThread : public QThread

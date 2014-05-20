@@ -289,6 +289,7 @@ public:
 
     QString getUserId() const { return m_strUserId; }
     //QString getPassword() const { return m_strPassword; }
+    QString getUserAlias();
 
     QString GetEncryptedPassword();
     bool GetPassword(CString& strPassword);
