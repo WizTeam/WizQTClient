@@ -8,6 +8,9 @@
 #include <QSettings>
 #include <QInputDialog>
 #include <QMessageBox>
+#include <QMimeData>
+#include <QApplication>
+#include <QClipboard>
 
 #include <extensionsystem/pluginmanager.h>
 
@@ -806,6 +809,11 @@ void CWizDatabase::CloseGroupDatabase(IWizSyncableDatabase* pDatabase)
 }
 
 IWizSyncableDatabase* CWizDatabase::GetPersonalDatabase()
+{
+    return getPersonalDatabase();
+}
+
+CWizDatabase *CWizDatabase::getPersonalDatabase()
 {
     CWizDatabase* db = &CWizDatabaseManager::instance()->db();
     return db;
@@ -2975,6 +2983,72 @@ bool CWizDatabase::loadUserCert()
 
     m_ziwReader->setRSAKeys(strN.toUtf8(), stre.toUtf8(), strEncryptedd.toUtf8(), strHint);
     return true;
+}
+
+void CWizDatabase::CopyDocumentLink(const WIZDOCUMENTDATA& document)
+{
+    QString strLink = DocumentToWizKMURL(document);
+    QString strTitle = document.strTitle;
+    strTitle.replace(_T("<"), _T("&lt;"));
+    strTitle.replace(_T(">"), _T("&gt;"));
+    strTitle.replace(_T("&"), _T("&amp;"));
+    //
+    CString strHTML = WizFormatString2(_T("<a href=\"%1\">%2</a>"), strLink, strTitle);
+
+    QClipboard* clip = QApplication::clipboard();
+
+    QMimeData* data = new QMimeData();
+    data->setHtml(strHTML);
+    data->setText(strLink);
+    clip->setMimeData(data);
+}
+
+QString CWizDatabase::DocumentToWizKMURL(const WIZDOCUMENTDATA& document)
+{
+    CWizDatabase* dbPrivate = getPersonalDatabase();
+    //
+    if (document.strKbGUID.isEmpty())
+    {
+        return WizFormatString3(_T("wiz://open_document?guid=%1&kbguid=%2&private_kbguid=%3"), document.strGUID, document.strKbGUID, dbPrivate->kbGUID());
+    }
+    else
+    {
+        return WizFormatString2(_T("wiz://open_document?guid=%1&kbguid=%2"), document.strGUID, document.strKbGUID);
+    }
+    return QString();
+}
+
+bool CWizDatabase::IsWizKMURL(const QString& strURL)
+{
+    return strURL.left(6) == "wiz://";
+}
+
+bool CWizDatabase::IsWizKMURLOpenDocument(const QString& strURL)
+{
+    if (IsWizKMURL(strURL))
+    {
+        return strURL.contains("open_document");
+    }
+    return false;
+}
+
+QString CWizDatabase::GetParamFromWizKMURL(const QString& strURL, const QString& strParamName)
+{
+    int nindex = strURL.indexOf('?');
+    if (nindex == -1)
+        return QString();
+
+    QString strParams = strURL;
+    strParams.remove(0, nindex + 1);
+    QStringList paramList = strParams.split('&');
+    QString strParaFlag = strParamName + "=";
+    foreach (QString strParam, paramList) {
+        if (strParam.contains(strParaFlag)) {
+            return strParam.remove(strParaFlag);
+        }
+    }
+
+    return QString();
 }
 
 bool CWizDatabase::DocumentToTempHtmlFile(const WIZDOCUMENTDATA& document,

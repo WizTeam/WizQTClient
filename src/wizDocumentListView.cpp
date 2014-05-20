@@ -32,6 +32,7 @@ using namespace Core::Internal;
 #define WIZACTION_LIST_MOVE_DOCUMENT QObject::tr("Move Note...")
 #define WIZACTION_LIST_COPY_DOCUMENT QObject::tr("Copy Note")
 #define WIZACTION_LIST_DOCUMENT_HISTORY QObject::tr("Note History...")
+#define WIZACTION_LIST_COPY_DOCUMENT_LINK QObject::tr("Copy Document Link")
 
 
 CWizDocumentListView::CWizDocumentListView(CWizExplorerApp& app, QWidget *parent /*= 0*/)
@@ -145,6 +146,8 @@ CWizDocumentListView::CWizDocumentListView(CWizExplorerApp& app, QWidget *parent
     actionMoveDoc->setShortcutContext(Qt::WidgetWithChildrenShortcut);
     //actionCopyDoc->setShortcutContext(Qt::WidgetWithChildrenShortcut);
 
+    m_menuDocument->addAction(WIZACTION_LIST_COPY_DOCUMENT_LINK, this,
+                              SLOT(on_action_copyDocumentLink()));
     m_menuDocument->addAction(WIZACTION_LIST_DOCUMENT_HISTORY, this,
                               SLOT(on_action_documentHistory()));
 
@@ -906,6 +909,17 @@ void CWizDocumentListView::on_action_copyDocument_confirmed(int result)
 
     if (result == QDialog::Accepted) {
         qDebug() << "user select: " << strSelectedFolder;
+    }
+}
+
+void CWizDocumentListView::on_action_copyDocumentLink()
+{
+    QList<QListWidgetItem*> items = selectedItems();
+    CWizDocumentListViewItem* item = dynamic_cast<CWizDocumentListViewItem*>(items.last());
+    if (item)
+    {
+        const WIZDOCUMENTDATA& document = item->document();
+        m_dbMgr.db().CopyDocumentLink(document);
     }
 }
 

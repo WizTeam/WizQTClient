@@ -1290,6 +1290,12 @@ void MainWindow::on_search_doSearch(const QString& keywords)
         return;
     }
 
+    //
+    if (m_dbMgr.db().IsWizKMURLOpenDocument(keywords)) {
+        viewDocumentByWizKMURL(keywords);
+        return;
+    }
+
     if (m_searcher) {
         m_searcher->disconnect(this);
         m_searcher->abort();
@@ -1789,6 +1795,21 @@ void MainWindow::setActionsEnableForNewNote()
     m_actions->actionFromName(WIZACTION_FORMAT_REMOVE_FORMAT)->setEnabled(true);
     m_actions->actionFromName(WIZACTION_FORMAT_VIEW_SOURCE)->setEnabled(true);
 }
+
+void MainWindow::viewDocumentByWizKMURL(const QString &strKMURL)
+{
+    CWizDatabase& db = m_dbMgr.db();
+    QString strKbGUID = db.GetParamFromWizKMURL(strKMURL, "kbguid");
+    QString strGUID = db.GetParamFromWizKMURL(strKMURL, "guid");
+
+    WIZDOCUMENTDATA document;
+    if (m_dbMgr.db(strKbGUID).DocumentFromGUID(strGUID, document))
+    {
+        viewDocument(document, true);
+//        m_category->setCurrentItem();
+    }
+}
+
 void MainWindow::quickSyncKb(const QString& kbGuid)
 {
     CWizKMSyncThread::quickSyncKb(kbGuid);

@@ -38,16 +38,22 @@
 	<true/>
 	<key>NSHighResolutionCapable</key>
 	<true/>
-        <key>CFBundleURLTypes</key>
-        <array>
-            <dict>
-                <key>CFBundleURLName</key>
-                <string>WizNote url scheme</string>
-                <key>CFBundleURLSchemes</key>
-                <array>
-                    <string>wiz</string>
-                </array>
-            </dict>
-        </array>
+	<key>CFBundleLocalizations</key>
+	<array>
+		<string>en</string>
+		<string>zh_CN</string>
+		<string>zh_TW</string>
+	</array>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>WizNote url scheme</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>wiz</string>
+			</array>
+		</dict>
+	</array>
 </dict>
 </plist>
