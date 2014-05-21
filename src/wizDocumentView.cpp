@@ -462,11 +462,7 @@ void CWizDocumentView::on_document_data_modified(const WIZDOCUMENTDATA& data)
 
 void Core::CWizDocumentView::on_checkEditStatus_finished(QString strGUID, QStringList editors)
 {
-    wizDocumentEditStatusCheckThread* checker = qobject_cast<wizDocumentEditStatusCheckThread *>(sender());
-    Q_ASSERT(checker);
-    connect(checker, SIGNAL(finished()), checker, SLOT(deleteLater()));
-    checker->quit();
-
+    qDebug() << "wizDocumentEditStatusCheckThread download down";
     //
     QString strCurrentUser = m_dbMgr.db(m_note.strKbGUID).getUserAlias();
     editors.removeAll(strCurrentUser);
@@ -476,4 +472,11 @@ void Core::CWizDocumentView::on_checkEditStatus_finished(QString strGUID, QStrin
         QString strEditor = editors.join(" , ");
         m_title->showDocumentEditingStatus(strEditor);
     }
+
+    // delete check trhead
+    wizDocumentEditStatusCheckThread* checker = qobject_cast<wizDocumentEditStatusCheckThread *>(sender());
+    Q_ASSERT(checker);
+    connect(checker, SIGNAL(finished()), checker, SLOT(deleteLater()));
+    checker->quit();
+
 }

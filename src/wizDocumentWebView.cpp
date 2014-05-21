@@ -402,7 +402,8 @@ void CWizDocumentWebView::tryResetTitle()
 
 bool CWizDocumentWebView::image2Html(const QString& strImageFile, QString& strHtml)
 {
-    QString strDestFile =Utils::PathResolve::tempPath() + WizGenGUIDLowerCaseLetterOnly() + ".png";
+    QFileInfo info(strImageFile);
+    QString strDestFile =Utils::PathResolve::tempPath() + WizGenGUIDLowerCaseLetterOnly() + "." + info.suffix();
 
     qDebug() << "[Editor] copy to: " << strDestFile;
 
@@ -718,7 +719,7 @@ void CWizDocumentWebView::viewDocumentByUrl(const QUrl& url)
     if (indx == -1) {
         return;
     }
-
+    //
     QString strOpenType = strUrl.mid(4, indx - 4).toLower();
 
     QString strFragment = strUrl.mid(indx + 1);
@@ -1265,8 +1266,11 @@ bool CWizDocumentWebView::editorCommandExecuteInsertImage()
 //    QPixmap pix(strImgFile);
 //    return editorCommandExecuteCommand("insertImage", QString("{src:'%1', class:\"WizNormalImg\", width:%2, height:%3}")
 //                                       .arg(strImgFile).arg(pix.width()).arg(pix.height()));
-    QString strHtml = getImageHtmlLabelByFile(strImgFile);
-    return editorCommandExecuteInsertHtml(strHtml, true);
+    QString strHtml;// = //getImageHtmlLabelByFile(strImgFile);
+    if (image2Html(strImgFile, strHtml)) {
+        return editorCommandExecuteInsertHtml(strHtml, true);
+    }
+    return false;
 }
 
 bool CWizDocumentWebView::editorCommandExecuteInsertDate()

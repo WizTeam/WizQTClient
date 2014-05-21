@@ -16,6 +16,7 @@ public:
     wizDocumentEditStatusSyncThread(QObject* parent = 0);
     void addEditingDocument(const QString& strUserAlias,const QString& strKbGUID ,const QString& strGUID);
     void addDoneDocument(const QString& strKbGUID, const QString& strGUID);
+    void setAllDocumentDone();
 
 signals:
     void sendEditStatusRequest();

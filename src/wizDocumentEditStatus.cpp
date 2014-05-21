@@ -75,6 +75,23 @@ void wizDocumentEditStatusSyncThread::addDoneDocument(const QString& strKbGUID, 
     emit sendEditStatusRequest();
 }
 
+void wizDocumentEditStatusSyncThread::setAllDocumentDone()
+{
+    m_mutext.lock();
+    QMap<QString, QString>::iterator i;
+    for (i = m_editingList.begin(); i != m_editingList.end(); i++)
+    {
+        m_doneList.insert(i.key(), i.value());
+    }
+    m_editingList.clear();
+    m_mutext.unlock();
+
+    if (!isRunning())
+        start();
+
+    emit sendEditStatusRequest();
+}
+
 void wizDocumentEditStatusSyncThread::run()
 {
     while (true)
@@ -172,6 +189,7 @@ void wizDocumentEditStatusCheckThread::checkEditStatus(const QString& strKbGUID,
 
 void wizDocumentEditStatusCheckThread::downloadData(const QString& strUrl)
 {
+    qDebug() << "wizDocumentEditStatusCheckThread start download data";
     QNetworkAccessManager net;
     QNetworkReply* reply = net.get(QNetworkRequest(strUrl));
 
@@ -198,8 +216,11 @@ void wizDocumentEditStatusCheckThread::downloadData(const QString& strUrl)
             strList.append(encoder->toUnicode(u.GetString(), u.GetStringLength()));
         }
         emit checkFinished(m_strGUID, strList);
+        reply->deleteLater();
+        return;
     }
     Q_EMIT checkFinished(QString(), QStringList());
+    reply->deleteLater();
 }
 
 void wizDocumentEditStatusCheckThread::run()
