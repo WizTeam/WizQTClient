@@ -2,7 +2,12 @@
 #include "sync/apientry.h"
 #include "share/wizmisc.h"
 #include "rapidjson/document.h"
-#include <QtNetWork>
+#include <QNetworkAccessManager>
+#include <QNetworkReply>
+#include <QEventLoop>
+#include <QTimer>
+#include <QTextCodec>
+
 #include <QDebug>
 
 
