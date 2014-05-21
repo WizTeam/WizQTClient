@@ -39,7 +39,7 @@ class CWizHtmlCollector : public IWizHtmlReaderEvents
 public:
     CWizHtmlCollector();
 
-    bool Collect(const QString &strUrl, QString &strHtml, bool mainPage = false);
+    bool Collect(const QString &strUrl, QString &strHtml, bool mainPage, const QString& strTempPath);
     bool Html2Zip(const QString& strExtResourcePath, const QString& strMetaText, \
                   const QString& strZipFileName);
 
@@ -54,6 +54,7 @@ private:
     bool m_bMainPage;
     QUrl m_url;
     CWizStdStringArray m_ret;
+    QString m_strTempPath;
 
     void ProcessTagValue(CWizHtmlTag *pTag, const QString& strAttributeName,
                          WIZHTMLFILEDATA::HtmlFileType eType);

@@ -101,6 +101,41 @@ void CWizHtmlCollector::Comment(const CString &rComment, DWORD dwAppData, bool &
 
     m_ret.push_back(rComment);
 }
+static bool IsRegFileName(const QString& name)
+{
+    if (name.isEmpty())
+        return false;
+    //
+    for (int i = 0; i < name.length(); i++)
+    {
+        QChar ch = name[i];
+        if (ch >= 'a' && ch <= 'z')
+            continue;
+        if (ch >= 'A' && ch <= 'Z')
+            continue;
+        //
+        if (ch == '.')
+            continue;
+        if (ch == '_')
+            continue;
+        if (ch == '-')
+            continue;
+        //
+        if (ch >= '0' && ch <= '9')
+            continue;
+        //
+        if (ch == '@')
+            continue;
+        if (ch == '(' || ch == ')')
+            continue;
+        if (ch == '{' || ch == '}')
+            continue;
+        //
+        return false;
+    }
+    //
+    return true;
+}
 
 void CWizHtmlCollector::ProcessTagValue(CWizHtmlTag *pTag,
                                         const QString& strAttributeName,
@@ -125,7 +160,17 @@ void CWizHtmlCollector::ProcessTagValue(CWizHtmlTag *pTag,
 
         if (strFileName.isEmpty())
             return;
-
+        //
+        QString strName = WizExtractFileName(strFileName);
+        if (!IsRegFileName(strName))
+        {
+            QString strNewFileName = m_strTempPath + ::WizGenGUIDLowerCaseLetterOnly() + WizExtractFileExt(strFileName);
+            if (WizCopyFile(strFileName, strNewFileName, FALSE))
+            {
+                strFileName = strNewFileName;
+            }
+        }
+        //
         m_files.Add(url.toString(), strFileName, eType, false);
     }
 
@@ -143,10 +188,13 @@ QString CWizHtmlCollector::ToResourceFileName(const QString& strFileName)
 
 bool CWizHtmlCollector::Collect(const QString& strUrl, \
                                 QString& strHtml, \
-                                bool mainPage /*= false*/)
+                                bool mainPage,
+                                const QString& strTempPath)
 {
     m_ret.clear();
     m_bMainPage = mainPage;
+    m_strTempPath = strTempPath;
+    //
     if (PathFileExists(strUrl))
     {
         m_url = QUrl::fromLocalFile(strUrl);
