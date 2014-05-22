@@ -3,9 +3,9 @@
 #include "share/wizmisc.h"
 #include "rapidjson/document.h"
 
-#include <QtNetwork>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
+#include <QEventLoop>
 #include <QTextCodec>
 
 #include <QDebug>
