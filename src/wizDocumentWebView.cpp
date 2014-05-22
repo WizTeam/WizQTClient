@@ -720,7 +720,7 @@ void CWizDocumentWebView::viewDocumentByUrl(const QUrl& url)
         return;
     }
     //
-    QString strOpenType = strUrl.mid(4, indx - 4).toLower();
+    QString strOpenType = strUrl.mid(6, indx - 6).toLower();
 
     QString strFragment = strUrl.mid(indx + 1);
     QMap<QString, QString> mapArgs;

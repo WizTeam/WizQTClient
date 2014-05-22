@@ -25,7 +25,7 @@ CWizUpgrade::CWizUpgrade(QObject *parent) :
 
 void CWizUpgrade::startCheck()
 {
-    //m_timerCheck.start(60 * 1000);
+    m_timerCheck.start(60 * 1000);
 }
 
 void CWizUpgrade::on_timerCheck_timeout()
