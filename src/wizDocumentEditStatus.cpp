@@ -2,7 +2,7 @@
 #include "sync/apientry.h"
 #include "share/wizmisc.h"
 #include "rapidjson/document.h"
-#include <QtNetWork>
+#include <QtNetwork>
 #include <QDebug>
 
 
@@ -35,6 +35,11 @@ QString WizKMGetDocumentEditStatusURL()
 
 wizDocumentEditStatusSyncThread::wizDocumentEditStatusSyncThread(QObject* parent) : QThread(parent)
 {
+    connect(&m_timer, SIGNAL(timeout()), SLOT(start()));
+}
+
+wizDocumentEditStatusSyncThread::~wizDocumentEditStatusSyncThread()
+{
 }
 
 void wizDocumentEditStatusSyncThread::addEditingDocument(const QString& strUserAlias, const QString& strKbGUID, const QString& strGUID)
@@ -45,13 +50,12 @@ void wizDocumentEditStatusSyncThread::addEditingDocument(const QString& strUserA
     QString strObjID = strKbGUID + "/" + strGUID;
 
     m_mutext.lock();
-    m_editingList.insert(strObjID, strUserAlias);
+    m_editingObj.strObjID = strObjID;
+    m_editingObj.strUserName = strUserAlias;
     m_mutext.unlock();
 
     if (!isRunning())
         start();
-
-    emit sendEditStatusRequest();
 }
 
 void wizDocumentEditStatusSyncThread::addDoneDocument(const QString& strKbGUID, const QString& strGUID)
@@ -62,63 +66,74 @@ void wizDocumentEditStatusSyncThread::addDoneDocument(const QString& strKbGUID, 
     QString strObjID = strKbGUID + "/" + strGUID;
 
     m_mutext.lock();
-    if (m_editingList.contains(strObjID))
+    //
+    if (m_editingObj.strObjID == strObjID)
     {
-        m_doneList.insert(strObjID, m_editingList.value(strObjID));
-        m_editingList.remove(strObjID);
+        m_doneObj.strObjID = strObjID;
+        m_doneObj.strUserName = m_editingObj.strUserName;
+        m_editingObj.clear();
     }
     m_mutext.unlock();
 
     if (!isRunning())
         start();
-
-    emit sendEditStatusRequest();
 }
 
 void wizDocumentEditStatusSyncThread::setAllDocumentDone()
 {
     m_mutext.lock();
-    QMap<QString, QString>::iterator i;
-    for (i = m_editingList.begin(); i != m_editingList.end(); i++)
-    {
-        m_doneList.insert(i.key(), i.value());
-    }
-    m_editingList.clear();
+    m_doneObj = m_editingObj;
+    m_editingObj.clear();
     m_mutext.unlock();
 
     if (!isRunning())
         start();
+}
 
-    emit sendEditStatusRequest();
+void wizDocumentEditStatusSyncThread::stop()
+{
+    m_timer.stop();
 }
 
 void wizDocumentEditStatusSyncThread::run()
 {
-    while (true)
-    {
-        sendEditingMessage();
-        sendDoneMessage();
+    sendEditingMessage();
+    sendDoneMessage();
 
-        QEventLoop eventLoop;
-        connect(this, SIGNAL(sendEditStatusRequest()), &eventLoop, SLOT(quit()));
-        QTimer::singleShot(30 * 1000, &eventLoop, SLOT(quit()));
-        eventLoop.exec();
+    m_mutext.lock();
+    if (!m_editingObj.strObjID.isEmpty())
+    {
+        m_timer.start(30 * 1000);
     }
+    else
+    {
+        m_timer.stop();
+    }
+    m_mutext.unlock();
+}
+
+void wizDocumentEditStatusSyncThread::sendAllDoneMessage()
+{
+    m_mutext.lock();
+    if (!m_editingObj.strObjID.isEmpty())
+    {
+        m_doneObj = m_editingObj;
+        m_editingObj.clear();
+    }
+    m_mutext.unlock();
+
+    sendDoneMessage();
 }
 
 void wizDocumentEditStatusSyncThread::sendEditingMessage()
 {
     m_mutext.lock();
-    QMap<QString, QString> editingList = m_editingList;
+    EditStatusObj editingObj = m_editingObj;
     m_mutext.unlock();
 
-    while(!editingList.isEmpty())
+    if (!editingObj.strObjID.isEmpty() && !editingObj.strUserName.isEmpty())
     {
-        QString strGUID = editingList.begin().key();
-        QString strUserID = editingList.value(strGUID);
-        editingList.remove(strGUID);
-
-        sendEditingMessage(strUserID, strGUID);
+        sendEditingMessage(editingObj.strUserName, editingObj.strObjID);
     }
 }
 
@@ -142,18 +157,14 @@ void wizDocumentEditStatusSyncThread::sendEditingMessage(const QString& strUserA
 void wizDocumentEditStatusSyncThread::sendDoneMessage()
 {
     m_mutext.lock();
-    QMap<QString, QString> doneList = m_doneList;
+    EditStatusObj doneObj = m_doneObj;
     // send done message just once
-    m_doneList.clear();
+    m_doneObj.clear();
     m_mutext.unlock();
 
-    while(!doneList.isEmpty())
+    if (!doneObj.strObjID.isEmpty() && !doneObj.strUserName.isEmpty())
     {
-        QString strGUID = doneList.begin().key();
-        QString strUserID = doneList.value(strGUID);
-        doneList.remove(strGUID);
-
-        sendDoneMessage(strUserID, strGUID);
+        sendDoneMessage(doneObj.strUserName, doneObj.strObjID);
     }
 }
 
@@ -189,7 +200,6 @@ void wizDocumentEditStatusCheckThread::checkEditStatus(const QString& strKbGUID,
 
 void wizDocumentEditStatusCheckThread::downloadData(const QString& strUrl)
 {
-    qDebug() << "wizDocumentEditStatusCheckThread start download data";
     QNetworkAccessManager net;
     QNetworkReply* reply = net.get(QNetworkRequest(strUrl));
 

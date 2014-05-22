@@ -112,10 +112,13 @@ CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
 
     connect(Core::ICore::instance(), SIGNAL(closeNoteRequested(Core::INoteView*)),
             SLOT(onCloseNoteRequested(Core::INoteView*)));
+
+    connect(m_web, SIGNAL(focusIn()), SLOT(on_webView_focus_changed()));
 }
 
 CWizDocumentView::~CWizDocumentView()
 {
+    m_editStatusSyncThread->stop();
     m_web->saveDocument(m_note, false);
 }
 
@@ -390,7 +393,7 @@ void CWizDocumentView::loadNote(const WIZDOCUMENTDATA& doc)
     //
     m_noteLoaded = true;
 
-    if (m_bEditingMode)
+    if (m_bEditingMode && m_web->hasFocus())
     {
         QString strUserAlias = m_dbMgr.db(m_note.strKbGUID).getUserAlias();
         m_editStatusSyncThread->addEditingDocument(strUserAlias, m_note.strKbGUID, m_note.strGUID);
@@ -462,7 +465,6 @@ void CWizDocumentView::on_document_data_modified(const WIZDOCUMENTDATA& data)
 
 void Core::CWizDocumentView::on_checkEditStatus_finished(QString strGUID, QStringList editors)
 {
-    qDebug() << "wizDocumentEditStatusCheckThread download down";
     //
     QString strCurrentUser = m_dbMgr.db(m_note.strKbGUID).getUserAlias();
     editors.removeAll(strCurrentUser);
@@ -480,3 +482,13 @@ void Core::CWizDocumentView::on_checkEditStatus_finished(QString strGUID, QStrin
     checker->quit();
 
 }
+
+void CWizDocumentView::on_webView_focus_changed()
+{
+    if (m_web->hasFocus())
+    {
+        QString strUserAlias = m_dbMgr.db(m_note.strKbGUID).getUserAlias();
+        m_editStatusSyncThread->addEditingDocument(strUserAlias, m_note.strKbGUID, m_note.strGUID);
+    }
+}
+

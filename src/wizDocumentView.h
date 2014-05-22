@@ -114,6 +114,8 @@ public Q_SLOTS:
 
     //
     void on_checkEditStatus_finished(QString strGUID, QStringList editors);
+    void on_webView_focus_changed();
+
 private:
     void loadNote(const WIZDOCUMENTDATA &doc);
 };
