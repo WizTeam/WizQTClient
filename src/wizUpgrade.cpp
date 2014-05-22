@@ -58,8 +58,7 @@ void CWizUpgrade::_check(const QString& strUrl)
         m_net = new QNetworkAccessManager();
     }
 
-    QString url = "http://note.wiz.cn/api/counter/get?obj_id=e649e3cd-6da0-405c-b148-763ba0c69a15/4fdc8ee0-333b-468a-98e5-aca57f61adb6&t=6403467";
-    QNetworkReply* reply = m_net->get(QNetworkRequest(url));
+    QNetworkReply* reply = m_net->get(QNetworkRequest(strUrl));
     connect(reply, SIGNAL(finished()), SLOT(on_checkUpgrade_finished()));
 }
 
