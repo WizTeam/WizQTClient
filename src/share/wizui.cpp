@@ -98,6 +98,23 @@ void CWizSkin9GridImage::Draw(QPainter* p, QRect rc, int nAlpha) const
         }
     }
 }
+void CWizSkin9GridImage::DrawBorder(QPainter* p, QRect rc) const
+{
+    QRect arrayDest[9];
+    //
+    SplitRect(rc, m_arrayImageGrid[0].bottomRight(), arrayDest, 9);
+    //
+    for (int i = 0; i < 9; i++)
+    {
+        if (i == 4)
+            continue;
+        //
+        const QRect& rcSrc = m_arrayImageGrid[i];
+        const QRect& rcDest = arrayDest[i];
+        //
+        p->drawImage(rcDest, m_img, rcSrc);
+    }
+}
 
 
 

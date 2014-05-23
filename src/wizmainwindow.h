@@ -16,6 +16,9 @@
 #include "wizusercipherform.h"
 //#include "wizdownloadobjectdatadialog.h"
 #include "wizDocumentView.h"
+#ifndef Q_OS_MAC
+#include "share/wizshadowwindow.h"
+#endif
 
 class QToolBar;
 class QLabel;
@@ -58,10 +61,20 @@ class CWizDocumentView;
 namespace Internal {
 
 class MainWindow
+#ifdef Q_OS_MAC
     : public QMainWindow
+#else
+    : public CWizShadowWindow<QMainWindow>
+#endif
     , public CWizExplorerApp
 {
     Q_OBJECT
+
+#ifdef Q_OS_MAC
+    typedef QMainWindow  _baseClass;
+#else
+    typedef CWizShadowWindow<QMainWindow> _baseClass;
+#endif
 
 public:
     explicit MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent = 0);

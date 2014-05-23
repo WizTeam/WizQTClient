@@ -70,7 +70,7 @@ using namespace Core::Internal;
 using namespace WizService::Internal;
 
 MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
-    : QMainWindow(parent)
+    : _baseClass(parent)
     , m_core(new ICore(this))
     , m_dbMgr(dbMgr)
     , m_progress(new CWizProgressDialog(this))
@@ -93,9 +93,9 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     #ifdef Q_OS_MAC
     , m_toolBar(new CWizMacToolBar(this))
     #else
-    , m_toolBar(new QToolBar("Main", this))
+    , m_toolBar(new QToolBar("Main", mainWidget()))
     #endif
-    , m_menuBar(new QMenuBar(this))
+    , m_menuBar(new QMenuBar(mainWidget()))
     , m_actions(new CWizActions(*this, this))
     , m_category(new CWizCategoryView(*this, this))
     , m_documents(new CWizDocumentListView(*this, this))
@@ -188,7 +188,7 @@ bool MainWindow::eventFilter(QObject* watched, QEvent* event)
         }
     }
     //
-    return QMainWindow::eventFilter(watched, event);
+    return _baseClass::eventFilter(watched, event);
 }
 
 void MainWindow::on_application_aboutToQuit()
@@ -672,7 +672,8 @@ void MainWindow::initToolBar()
     //
     m_search = m_toolBar->getSearchWidget();
 #else
-    addToolBar(m_toolBar);
+    //addToolBar(m_toolBar);
+    mainLayout()->addWidget(m_toolBar);
 
     m_toolBar->setIconSize(QSize(24, 24));
     m_toolBar->setContextMenuPolicy(Qt::PreventContextMenu);
@@ -712,8 +713,16 @@ void MainWindow::initToolBar()
 
 void MainWindow::initClient()
 {
+#ifdef Q_OS_MAC
     QWidget* client = new QWidget(this);
     setCentralWidget(client);
+#else
+    QWidget* main = mainWidget();
+    setCentralWidget(main);
+    //
+    QWidget* client = new QWidget(main);
+    mainLayout()->addWidget(client);
+#endif
 
     client->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
 
