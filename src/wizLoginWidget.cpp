@@ -140,7 +140,7 @@ CWizLoginWidget::CWizLoginWidget(const QString &strDefaultUserId, const QString 
     pix.fill(Qt::transparent);
     paletteBG.setBrush(QPalette::Window, QBrush(pix));
     setPalette(paletteBG);
-#elif Q_OS_LINUX
+#elif defined(Q_OS_LINUX)
     QBitmap bmp(352, 503);
     bmp.fill();
     QPainter p(&bmp);
@@ -332,7 +332,7 @@ void CWizLoginWidget::paintEvent(QPaintEvent *)
     float borderRadius;
 #ifdef Q_OS_MAC
     borderRadius = 3.5;
-#elif Q_OS_LINUX
+#elif defined(Q_OS_LINUX)
     borderRadius = 5.0;
 #endif
 
