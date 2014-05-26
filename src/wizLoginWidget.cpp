@@ -10,6 +10,7 @@
 #include "sync/token.h"
 #include <extensionsystem/pluginmanager.h>
 #include <QPainter>
+#include <QPainterPath>
 #include <QMouseEvent>
 #include <QMenu>
 #include <QFocusEvent>
@@ -133,12 +134,21 @@ CWizLoginWidget::CWizLoginWidget(const QString &strDefaultUserId, const QString 
 
 
     setFixedSize(352, 503);
+#ifdef Q_OS_MAC
     QPalette paletteBG(palette());
-    QPixmap pix(::WizGetSkinResourceFileName(Utils::StyleHelper::themeName(), "loginBackground"));
-//    setMask(QBitmap(pix.mask()));
+    QPixmap pix(3, 2);
+    pix.fill(Qt::transparent);
     paletteBG.setBrush(QPalette::Window, QBrush(pix));
     setPalette(paletteBG);
-
+#elif Q_OS_LINUX
+    QBitmap bmp(352, 503);
+    bmp.fill();
+    QPainter p(&bmp);
+    p.setPen(Qt::NoPen);
+    p.setBrush(Qt::black);
+    p.drawRoundedRect(bmp.rect(),3,3);
+    setMask(bmp);
+#endif
 
     setElementStyles();
 
@@ -315,6 +325,33 @@ void CWizLoginWidget::mouseMoveEvent(QMouseEvent *event)
 void CWizLoginWidget::mouseReleaseEvent(QMouseEvent */*event*/)
 {
     m_mousePoint = QPoint(0, 0);
+}
+
+void CWizLoginWidget::paintEvent(QPaintEvent *)
+{
+    float borderRadius;
+#ifdef Q_OS_MAC
+    borderRadius = 3.5;
+#elif Q_OS_LINUX
+    borderRadius = 5.0;
+#endif
+
+    QPainter pt(this);
+    pt.setPen(Qt::NoPen);
+    pt.setRenderHint(QPainter::Antialiasing, true);
+    QPainterPath pathTop;
+    pathTop.setFillRule( Qt::WindingFill );
+    pathTop.addRoundedRect(QRect(0, 0, 352, 146), borderRadius, borderRadius);
+    pathTop.addRect(QRect(0, 140, 352, 6)); //
+    pt.setBrush(QColor("#43a6e8"));
+    pt.drawPath(pathTop.simplified() );
+
+    QPainterPath pathBottom;
+    pathBottom.setFillRule(Qt::WindingFill);
+    pathBottom.addRoundedRect(QRect(0, 146, 352, 357), borderRadius, borderRadius);
+    pathBottom.addRect(QRect(0, 146, 352, 10));
+    pt.setBrush(QColor("#e9e9e9"));
+    pt.drawPath(pathBottom.simplified());
 }
 
 
