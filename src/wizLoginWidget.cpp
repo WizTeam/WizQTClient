@@ -100,32 +100,25 @@ void LoginButton::setElementStyle()
                   .arg(strBtnNormal).arg(strBtnHover).arg(strBtnDown));
 }
 
-void LoginButton::on_password_changed(const QString &strText)
+void LoginButton::setEnabled(bool bEnable)
 {
     QString strThemeName = Utils::StyleHelper::themeName();
-    QString strBtnHover = ::WizGetSkinResourceFileName(strThemeName, "loginOKButton_hover");
-    QString strBtnDown = ::WizGetSkinResourceFileName(strThemeName, "loginOKButton_down");
-    if (strText.isEmpty())
+    if (!bEnable)
     {
         QString strBtnNormal = ::WizGetSkinResourceFileName(strThemeName, "loginOKButton_normal");
-        setStyleSheet(QString("QPushButton{ border-image:url(%1); border: 1px solid white; font:12px}"
-                            "QPushButton:hover{ border-image:url(%2); border: 1px solid white;}"
-                              "QPushButton:pressed { border-image:url(%3); font:12px}")
-                      .arg(strBtnNormal).arg(strBtnHover).arg(strBtnDown));
+        setStyleSheet(QString("QPushButton{ border-image:url(%1); border: 1px solid white; font:12px; color: black;}").arg(strBtnNormal));
     }
     else
     {
         QString strBtnActive = ::WizGetSkinResourceFileName(strThemeName, "loginOKButton_active");
-        setStyleSheet(QString("QPushButton{ border-image:url(%1); border: 1px solid white; font:12px}"
+        QString strBtnHover = ::WizGetSkinResourceFileName(strThemeName, "loginOKButton_hover");
+        QString strBtnDown = ::WizGetSkinResourceFileName(strThemeName, "loginOKButton_down");
+        setStyleSheet(QString("QPushButton{ border-image:url(%1); border: 1px solid white; font:12px; color: white;}"
                             "QPushButton:hover{ border-image:url(%2); border: 1px solid white;}"
                               "QPushButton:pressed { border-image:url(%3); font:12px}")
                       .arg(strBtnActive).arg(strBtnHover).arg(strBtnDown));
     }
-}
-
-LoginTipWidget::LoginTipWidget(QWidget *parent) : QWidget(parent)
-{
-
+    QPushButton::setEnabled(bEnable);
 }
 
 CWizLoginWidget::CWizLoginWidget(const QString &strDefaultUserId, const QString &strLocale, QWidget *parent) :
@@ -151,13 +144,12 @@ CWizLoginWidget::CWizLoginWidget(const QString &strDefaultUserId, const QString 
 
     connect(m_menu, SIGNAL(triggered(QAction*)), SLOT(userListMenuClicked(QAction*)));
 
-    connect(ui->lineEdit_newPassword, SIGNAL(textChanged(QString)), SLOT(inputDataChanged()));
-    connect(ui->lineEdit_newUserName, SIGNAL(textChanged(QString)), SLOT(inputDataChanged()));
-    connect(ui->lineEdit_password, SIGNAL(textChanged(QString)), SLOT(inputDataChanged()));
-    connect(ui->lineEdit_repaetPassword, SIGNAL(textChanged(QString)), SLOT(inputDataChanged()));
-    connect(ui->lineEdit_userName, SIGNAL(textChanged(QString)), SLOT(inputDataChanged()));
+    connect(ui->lineEdit_newPassword, SIGNAL(textChanged(QString)), SLOT(onSignUpInputDataChanged()));
+    connect(ui->lineEdit_newUserName, SIGNAL(textChanged(QString)), SLOT(onSignUpInputDataChanged()));
+    connect(ui->lineEdit_repaetPassword, SIGNAL(textChanged(QString)), SLOT(onSignUpInputDataChanged()));
+    connect(ui->lineEdit_password, SIGNAL(textChanged(QString)), SLOT(onLoginInputChanged()));
+    connect(ui->lineEdit_userName, SIGNAL(textChanged(QString)), SLOT(onLoginInputChanged()));
     connect(ui->lineEdit_userName, SIGNAL(showMenuRequest(QPoint)), SLOT(showUserListMenu(QPoint)));
-    connect(ui->lineEdit_password, SIGNAL(textChanged(QString)), ui->btn_login, SLOT(on_password_changed(QString)));
 
     setUsers(strDefaultUserId);
 }
@@ -355,8 +347,9 @@ void CWizLoginWidget::setElementStyles()
     ui->lineEdit_newPassword->setElementStyle(strLineEditMidPassword, QLineEdit::Password, tr("Please enter password"));
     ui->lineEdit_repaetPassword->setElementStyle(strLineEditBottomPassword, QLineEdit::Password, tr("Please enter password again"));
     //
-    ui->btn_singin->setElementStyle();
     ui->btn_login->setElementStyle();
+    ui->btn_singin->setElementStyle();
+    ui->btn_singin->setEnabled(false);
     //
     QString strSeparator = ::WizGetSkinResourceFileName(strThemeName, "loginSeparator");
     ui->label_separator2->setStyleSheet(QString("QLabel {border: none;background-image: url(%1);"
@@ -506,6 +499,13 @@ void CWizLoginWidget::on_btn_singin_clicked()
     }
 }
 
+void CWizLoginWidget::onLoginInputChanged()
+{
+    ui->label_passwordError->clear();
+    bool bInputFinished =  !ui->lineEdit_userName->text().isEmpty() && !ui->lineEdit_password->text().isEmpty();
+    ui->btn_login->setEnabled(bInputFinished);
+}
+
 void CWizLoginWidget::onTokenAcquired(const QString &strToken)
 {
     Token::instance()->disconnect(this);
@@ -542,9 +542,12 @@ void CWizLoginWidget::onTokenAcquired(const QString &strToken)
         QDialog::accept();
 }
 
-void CWizLoginWidget::inputDataChanged()
+void CWizLoginWidget::onSignUpInputDataChanged()
 {
     ui->label_passwordError->clear();
+    bool bInputFinished = !ui->lineEdit_newUserName->text().isEmpty() && !ui->lineEdit_newPassword->text().isEmpty()
+            && !ui->lineEdit_repaetPassword->text().isEmpty();
+    ui->btn_singin->setEnabled(bInputFinished);
 }
 
 void CWizLoginWidget::userListMenuClicked(QAction *action)

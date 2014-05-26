@@ -47,7 +47,7 @@ public:
     void setElementStyle();
 
 public slots:
-    void on_password_changed(const QString& strText);
+    void setEnabled(bool bEnable);
 };
 
 
@@ -94,7 +94,8 @@ private slots:
     void on_btn_singin_clicked();
 
 
-    void inputDataChanged();
+    void onLoginInputChanged();
+    void onSignUpInputDataChanged();
     void userListMenuClicked(QAction* action);
     void showUserListMenu(QPoint point);
 
