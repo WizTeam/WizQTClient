@@ -378,7 +378,7 @@ void CWizLoginWidget::setElementStyles()
     ui->label_passwordError->setStyleSheet(QString("QLabel {border: none; padding-left: 25px; color: red;}"));
 
     m_menu->setFixedWidth(302);
-    m_menu->setStyleSheet("QMenu {background-color: white; border-style: solid; border-color: #43A6E8; border-width: 1px; font: 16px; color: #5F5F5F; menu-scrollable: 1;}"
+    m_menu->setStyleSheet("QMenu {background-color: #ffffff; border-style: solid; border-color: #43A6E8; border-width: 1px; font: 16px; color: #5F5F5F; menu-scrollable: 1;}"
                           "QMenu::item {padding: 10px 0px 10px 40px; }"
                           "QMenu::item:selected {background-color: #E7F5FF; }"
                           "QMenu::item:default {background-color: #E7F5FF; }");
