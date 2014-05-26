@@ -14,6 +14,7 @@
 #include <extensionsystem/pluginmanager.h>
 #include "wizmainwindow.h"
 #include "wizLoginDialog.h"
+#include "wizLoginWidget.h"
 #include "share/wizsettings.h"
 #include "share/wizwin32helper.h"
 #include "share/wizDatabaseManager.h"
@@ -157,6 +158,8 @@ int mainCore(int argc, char *argv[])
     icon.addPixmap(QPixmap(":/logo_256.png"));
     QApplication::setWindowIcon(icon);
 
+
+
 #ifdef Q_OS_MAC
     // enable switch between qt widget and alien widget(cocoa)
     // refer to: https://bugreports.qt-project.org/browse/QTBUG-11401
@@ -237,8 +240,12 @@ int mainCore(int argc, char *argv[])
         bFallback = false;
     }
 
+    QSettings* settings = new QSettings(Utils::PathResolve::userSettingsFile(strUserId), QSettings::IniFormat);
+    PluginManager::setSettings(settings);
+
+
     // manually login
-    CWizLoginDialog loginDialog(strUserId, strLocale);
+    CWizLoginWidget loginDialog(strUserId, strLocale);
     if (bFallback) {
         if (QDialog::Accepted != loginDialog.exec())
             return 0;
@@ -247,8 +254,6 @@ int mainCore(int argc, char *argv[])
         strPassword = loginDialog.password();
     }
 
-    QSettings* settings = new QSettings(Utils::PathResolve::userSettingsFile(strUserId), QSettings::IniFormat);
-    PluginManager::setSettings(settings);
     //
     //
     // reset locale for current user.
@@ -307,6 +312,7 @@ int mainCore(int argc, char *argv[])
 
 
     return ret;
+
 }
 
 int main(int argc, char *argv[])
