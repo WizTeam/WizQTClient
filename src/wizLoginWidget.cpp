@@ -27,8 +27,8 @@ LoginLineEdit::LoginLineEdit(QWidget *parent) : QLineEdit(parent)
 
 void LoginLineEdit::setElementStyle(const QString &strBgFile, EchoMode mode, const QString &strPlaceHoldTxt)
 {
-    setStyleSheet(QString("QLineEdit{ border-image:url(%1); border: 1px solid white; "
-                                                     "font:16px; color:#2F2F2F; selection-background-color: #8ECAF1;}").arg(strBgFile));
+    setStyleSheet(QString("QLineEdit{ border-image:url(%1);font:16px; color:#2F2F2F; "
+                          "selection-background-color: #8ECAF1;}").arg(strBgFile));
     setTextMargins(40, 0, 0, 0);
     setAttribute(Qt::WA_MacShowFocusRect, false);
     setEchoMode(mode);
@@ -94,9 +94,9 @@ void LoginButton::setElementStyle()
     QString strBtnNormal = ::WizGetSkinResourceFileName(strThemeName, "loginOKButton_normal");
     QString strBtnHover = ::WizGetSkinResourceFileName(strThemeName, "loginOKButton_hover");
     QString strBtnDown = ::WizGetSkinResourceFileName(strThemeName, "loginOKButton_down");
-    setStyleSheet(QString("QPushButton{ border-image:url(%1); border: 1px solid white; font:12px}"
-                        "QPushButton:hover{ border-image:url(%2); border: 1px solid white;}"
-                          "QPushButton:pressed { border-image:url(%3); font:12px}")
+    setStyleSheet(QString("QPushButton{ background-image:url(%1); border: none; font:12px}"
+                        "QPushButton:hover{ background-image:url(%2); }"
+                          "QPushButton:pressed { background-image:url(%3); font:12px}")
                   .arg(strBtnNormal).arg(strBtnHover).arg(strBtnDown));
 }
 
@@ -106,16 +106,16 @@ void LoginButton::setEnabled(bool bEnable)
     if (!bEnable)
     {
         QString strBtnNormal = ::WizGetSkinResourceFileName(strThemeName, "loginOKButton_normal");
-        setStyleSheet(QString("QPushButton{ border-image:url(%1); border: 1px solid white; font:12px; color: black;}").arg(strBtnNormal));
+        setStyleSheet(QString("QPushButton{ background-image:url(%1); border: none; font:12px; color: black;}").arg(strBtnNormal));
     }
     else
     {
         QString strBtnActive = ::WizGetSkinResourceFileName(strThemeName, "loginOKButton_active");
         QString strBtnHover = ::WizGetSkinResourceFileName(strThemeName, "loginOKButton_hover");
         QString strBtnDown = ::WizGetSkinResourceFileName(strThemeName, "loginOKButton_down");
-        setStyleSheet(QString("QPushButton{ border-image:url(%1); border: 1px solid white; font:12px; color: white;}"
-                            "QPushButton:hover{ border-image:url(%2); border: 1px solid white;}"
-                              "QPushButton:pressed { border-image:url(%3); font:12px}")
+        setStyleSheet(QString("QPushButton{ background-image:url(%1); border: none; font:12px; color: white;}"
+                            "QPushButton:hover{ background-image:url(%2); }"
+                              "QPushButton:pressed { background-image:url(%3); font:12px}")
                       .arg(strBtnActive).arg(strBtnHover).arg(strBtnDown));
     }
     QPushButton::setEnabled(bEnable);
@@ -135,7 +135,7 @@ CWizLoginWidget::CWizLoginWidget(const QString &strDefaultUserId, const QString 
     setFixedSize(352, 503);
     QPalette paletteBG(palette());
     QPixmap pix(::WizGetSkinResourceFileName(Utils::StyleHelper::themeName(), "loginBackground"));
-    setMask(QBitmap(pix.mask()));
+//    setMask(QBitmap(pix.mask()));
     paletteBG.setBrush(QPalette::Window, QBrush(pix));
     setPalette(paletteBG);
 
