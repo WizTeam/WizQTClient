@@ -41,11 +41,11 @@ void LoginLineEdit::setErrorStatus(bool bErrorStatus)
     {
         QString strThemeName = Utils::StyleHelper::themeName();
         QString strError = ::WizGetSkinResourceFileName(strThemeName, "loginErrorInput");
-        m_extraStatus = QPixmap(strError);
+        m_extraIcon = QPixmap(strError);
     }
     else
     {
-        m_extraStatus = QPixmap();
+        m_extraIcon = QPixmap();
     }
 }
 
@@ -60,26 +60,26 @@ void LoginLineEdit::paintEvent(QPaintEvent *event)
 {
     QLineEdit::paintEvent(event);
 
-    if (!m_extraStatus.isNull())
+    if (!m_extraIcon.isNull())
     {
-        QStyleOptionFrameV3 option;
-        initStyleOption(&option);
-
         QPainter painter(this);
-        QRect rect(option.rect.right() - m_extraStatus.width() - 5, option.rect.top() + (option.rect.height() - m_extraStatus.height()) / 2,
-                   m_extraStatus.width(), m_extraStatus.height());
-        painter.drawPixmap(rect, m_extraStatus);
+        QRect rect = getExtraIconBorder();
+        painter.drawPixmap(rect, m_extraIcon);
     }
 }
 
-void LoginLineEdit::mousePressEvent(QMouseEvent *event)
+QRect LoginLineEdit::getExtraIconBorder()
 {
-}
+    if (m_extraIcon.isNull())
+        return QRect();
 
-void LoginLineEdit::focusInEvent(QFocusEvent* event)
-{
-    emit editorFocusIn();
-    QLineEdit::focusInEvent(event);
+    QStyleOptionFrameV3 option;
+    initStyleOption(&option);
+
+    QRect rect(option.rect.right() - m_extraIcon.width() - 5, option.rect.top() + (option.rect.height() - m_extraIcon.height()) / 2,
+               m_extraIcon.width(), m_extraIcon.height());
+
+    return rect;
 }
 
 LoginButton::LoginButton(QWidget *parent) : QPushButton(parent)
@@ -452,35 +452,21 @@ void CWizLoginWidget::on_btn_fogetpass_clicked()
 
 LoginMenuLineEdit::LoginMenuLineEdit(QWidget *parent) : LoginLineEdit(parent)
 {
-
+    m_extraIcon = QPixmap(::WizGetSkinResourceFileName(Utils::StyleHelper::themeName(), "loginLineEditorDownArrow"));
 }
 
-
-void LoginMenuLineEdit::paintEvent(QPaintEvent *event)
+void LoginMenuLineEdit::on_containt_changed(const QString &strText)
 {
-    QLineEdit::paintEvent(event);
-
-    QStyleOptionFrameV3 option;
-    initStyleOption(&option);
-
-    QPainter painter(this);
-    QPixmap downArrow(::WizGetSkinResourceFileName(Utils::StyleHelper::themeName(), "loginLineEditorDownArrow"));
-    QRect rect(option.rect.right() - downArrow.width() - 5, option.rect.top() + (option.rect.height() - downArrow.height()) / 2,
-               downArrow.width(), downArrow.height());
-    painter.drawPixmap(rect, downArrow);
+    Q_UNUSED(strText);
 }
+
 
 void LoginMenuLineEdit::mousePressEvent(QMouseEvent *event)
 {
-    QStyleOptionFrameV3 option;
-    initStyleOption(&option);
-    QPixmap downArrow(::WizGetSkinResourceFileName(Utils::StyleHelper::themeName(), "loginLineEditorDownArrow"));
-    QRect rect(option.rect.right() - downArrow.width() - 5, option.rect.top() + (option.rect.height() - downArrow.height()) / 2,
-               downArrow.width(), downArrow.height());
-
+    QRect rect = getExtraIconBorder();
     if (rect.contains(event->pos()))
     {
-        emit showMenuRequest(mapToGlobal(QPoint(0, option.rect.height())));
+        emit showMenuRequest(mapToGlobal(QPoint(0, height())));
     }
 }
 

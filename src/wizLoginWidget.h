@@ -13,18 +13,14 @@ public:
     void setElementStyle(const QString& strBgFile, QLineEdit::EchoMode mode = QLineEdit::Normal, const QString& strPlaceHoldTxt = "");
     void setErrorStatus(bool bErrorStatus);
 public slots:
-    void on_containt_changed(const QString& strText);
-
-signals:
-    void editorFocusIn();
+    virtual void on_containt_changed(const QString& strText);
 
 protected:
     void paintEvent(QPaintEvent *event);
-    void mousePressEvent(QMouseEvent* event);
-    void focusInEvent(QFocusEvent *);
 
-private:
-    QPixmap m_extraStatus;
+    QRect getExtraIconBorder();
+protected:
+    QPixmap m_extraIcon;
 };
 
 class LoginMenuLineEdit : public LoginLineEdit
@@ -33,13 +29,14 @@ class LoginMenuLineEdit : public LoginLineEdit
 public:
     LoginMenuLineEdit(QWidget* parent = 0);
 
+public slots:
+    void on_containt_changed(const QString& strText);
+
 signals:
     void showMenuRequest(QPoint point);
 
 protected:
-    void paintEvent(QPaintEvent *event);
     void mousePressEvent(QMouseEvent* event);
-
 };
 
 class LoginButton : public QPushButton
@@ -53,12 +50,9 @@ public slots:
     void on_password_changed(const QString& strText);
 };
 
-class LoginTipWidget : public QWidget
-{
-    Q_OBJECT
-public:
-    LoginTipWidget(QWidget *parent = 0);
-};
+
+
+
 
 namespace Ui {
 class wizLoginWidget;
