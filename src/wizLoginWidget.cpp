@@ -194,6 +194,11 @@ void CWizLoginWidget::setUsers(const QString &strDefault)
 
     // set default user as default login entry.
     setUser(strDefault);
+    QAction* action = findActionInMenu(strDefault);
+    if (action)
+    {
+        m_menu->setDefaultAction(action);
+    }
 }
 
 void CWizLoginWidget::setUser(const QString &strUserId)
@@ -375,7 +380,8 @@ void CWizLoginWidget::setElementStyles()
     m_menu->setFixedWidth(302);
     m_menu->setStyleSheet("QMenu {background-color: white; border-style: solid; border-color: #43A6E8; border-width: 1px; font: 16px; color: #5F5F5F; menu-scrollable: 1;}"
                           "QMenu::item {padding: 10px 0px 10px 40px; }"
-                          "QMenu::item:selected {background-color: #E7F5FF; }");
+                          "QMenu::item:selected {background-color: #E7F5FF; }"
+                          "QMenu::item:default {background-color: #E7F5FF; }");
 }
 
 bool CWizLoginWidget::checkSingMessage()
@@ -407,6 +413,17 @@ bool CWizLoginWidget::checkSingMessage()
     }
 
     return true;
+}
+
+QAction *CWizLoginWidget::findActionInMenu(const QString &strActName)
+{
+    QList<QAction*> actionList = m_menu->actions();
+    for (int i = 0; i < actionList.count(); i++)
+    {
+        if (actionList.at(i)->text() == strActName)
+            return actionList.at(i);
+    }
+    return 0;
 }
 
 
@@ -554,6 +571,7 @@ void CWizLoginWidget::userListMenuClicked(QAction *action)
 {
     if (action)
     {
+        m_menu->setDefaultAction(action);
         setUser(action->text());
     }
 }

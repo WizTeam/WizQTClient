@@ -110,6 +110,7 @@ private slots:
 private:
     void setElementStyles();
     bool checkSingMessage();
+    QAction* findActionInMenu(const QString& strActName);
 private:
     Ui::wizLoginWidget *ui;
     QPoint m_mousePoint;
