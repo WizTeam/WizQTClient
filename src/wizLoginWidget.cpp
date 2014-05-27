@@ -132,6 +132,7 @@ CWizLoginWidget::CWizLoginWidget(const QString &strDefaultUserId, const QString 
     , m_menu(new QMenu(this))
 {
 #ifdef Q_OS_MAC
+    setWindowFlags(Qt::CustomizeWindowHint);
     ui->setupUi(this);
 #else
     QWidget* uiWidget = new QWidget(clientWidget());

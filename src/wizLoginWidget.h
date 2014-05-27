@@ -4,7 +4,10 @@
 #include <QDialog>
 #include <QLineEdit>
 #include <QPushButton>
+
+#ifndef Q_OS_MAC
 #include "share/wizshadowwindow.h"
+#endif
 
 class LoginLineEdit : public QLineEdit
 {
