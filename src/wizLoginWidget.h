@@ -10,6 +10,7 @@
 #endif
 
 class QLabel;
+class CWizSkin9GridImage;
 
 class CWizIconLineEditContainer : public QWidget
 {

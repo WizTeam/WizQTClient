@@ -46,6 +46,7 @@ CWizIconLineEditContainer::CWizIconLineEditContainer(QWidget* parent)
     m_dropdownIcon = new QLabel(this);
     //
     m_layout->setSpacing(8);
+    m_layout->setContentsMargins(0, 0, 0, 0);
     //
     m_layout->addWidget(m_leftIcon);
     m_layout->addWidget(m_edit);
@@ -224,12 +225,12 @@ CWizLoginWidget::CWizLoginWidget(const QString &strDefaultUserId, const QString 
 #ifdef Q_OS_MAC
     setWindowFlags(Qt::CustomizeWindowHint);
     ui->setupUi(this);
-    setContentsMargins(10, 10, 10, 10);
-    setFixedSize(352, 503);
-    QPalette plt(palette());
-    QPixmap pix(::WizGetSkinResourceFileName(Utils::StyleHelper::themeName(), "loginBackground"));
-    plt.setBrush(QPalette::Window, QBrush(pix));
-    setPalette(plt);
+    //setContentsMargins(10, 10, 10, 10);
+//    setFixedSize(352, 503);
+//    QPalette plt(palette());
+//    QPixmap pix(::WizGetSkinResourceFileName(Utils::StyleHelper::themeName(), "loginBackground"));
+//    plt.setBrush(QPalette::Window, QBrush(pix));
+//    setPalette(plt);
 #else
     QWidget* uiWidget = new QWidget(clientWidget());
     clientLayout()->addWidget(uiWidget);
