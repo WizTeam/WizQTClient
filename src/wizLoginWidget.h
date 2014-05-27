@@ -9,6 +9,29 @@
 #include "share/wizshadowwindow.h"
 #endif
 
+class QLabel;
+
+class CWizIconLineEditContainer : public QWidget
+{
+    Q_OBJECT
+public:
+    CWizIconLineEditContainer(QWidget* parent);
+private:
+    CWizSkin9GridImage* m_background;
+    QLayout* m_layout;
+    QLineEdit* m_edit;
+    QLabel* m_leftIcon;
+    QLabel* m_dropdownIcon;
+public:
+    void setBackgroundImage(QString fileName, QPoint pt);
+    void setLeftIcon(QString fileName);
+    void setDropdownIcon(QString fileName);
+    //
+    QLineEdit* edit() const { return m_edit; }
+protected:
+    virtual void paintEvent(QPaintEvent *event);
+};
+
 class LoginLineEdit : public QLineEdit
 {
     Q_OBJECT

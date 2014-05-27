@@ -18,8 +18,64 @@
 #include <QDesktopServices>
 #include <QUrl>
 #include <QDebug>
+#include <QHBoxLayout>
+
+#include "share/wizui.h"
 
 using namespace WizService;
+
+
+
+
+CWizIconLineEditContainer::CWizIconLineEditContainer(QWidget* parent)
+    : QWidget(parent)
+    , m_background(NULL)
+    , m_layout(NULL)
+    , m_edit(NULL)
+    , m_leftIcon(NULL)
+    , m_dropdownIcon(NULL)
+{
+    m_layout = new QHBoxLayout(this);
+    m_edit = new QLineEdit(this);
+    m_leftIcon = new QLabel(this);
+    m_dropdownIcon = new QLabel(this);
+    //
+    m_layout->setSpacing(8);
+    //
+    m_layout->addWidget(m_leftIcon);
+    m_layout->addWidget(m_edit);
+    m_layout->addWidget(m_dropdownIcon);
+}
+void CWizIconLineEditContainer::setBackgroundImage(QString fileName, QPoint pt)
+{
+    m_background = new CWizSkin9GridImage();
+    m_background->SetImage(fileName, pt);
+}
+
+void CWizIconLineEditContainer::setLeftIcon(QString fileName)
+{
+    m_leftIcon->setPixmap(QPixmap(fileName));
+}
+void CWizIconLineEditContainer::setDropdownIcon(QString fileName)
+{
+    m_dropdownIcon->setPixmap(QPixmap(fileName));
+}
+
+void CWizIconLineEditContainer::paintEvent(QPaintEvent *event)
+{
+    if (m_background && m_background->Valid())
+    {
+        QPainter paint(this);
+        m_background->Draw(&paint, rect(), 0);
+    }
+    else
+    {
+        QWidget::paintEvent(event);
+    }
+}
+
+
+
 
 LoginLineEdit::LoginLineEdit(QWidget *parent) : QLineEdit(parent)
 {
@@ -151,6 +207,10 @@ CWizLoginWidget::CWizLoginWidget(const QString &strDefaultUserId, const QString 
     //
     QWidget* title = titleBar();
     title->setPalette(QPalette(QColor::fromRgb(0, 0, 255)));
+    //
+    CWizIconLineEditContainer* newEdit = new CWizIconLineEditContainer(uiWidget);
+    newEdit->setBackgroundImage(WizGetSkinResourceFileName(Utils::StyleHelper::themeName(), "loginTopLineEditor"), QPoint(8, 8));
+    ui->verticalLayout->addWidget(newEdit);
 #endif
 
     setElementStyles();
