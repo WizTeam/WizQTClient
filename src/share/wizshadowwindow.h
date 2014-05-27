@@ -23,39 +23,64 @@ public:
         : Base(parent)
         , m_oldHitCode(wizClient)
         , m_mousePressed(false)
-        , m_mainWidget(NULL)
-        , m_mainLayout(NULL)
+        , m_rootWidget(NULL)
+        , m_shadowWidget(NULL)
+        , m_clientWidget(NULL)
+        , m_clientLayout(NULL)
     {
         Base* pT = this;
-        pT->setContentsMargins(10, 10, 10, 10);
-        pT->setGeometry(100, 100, 400, 300);
         //
         pT->setAttribute(Qt::WA_TranslucentBackground); //enable MainWindow to be transparent
-        //
         pT->setWindowFlags(Qt::FramelessWindowHint);
+        pT->setContentsMargins(0, 0, 0, 0);
         //
-        m_mainWidget = new QWidget(this);
-        m_mainWidget->setAutoFillBackground(true);
+        QLayout* windowLayout = new QBoxLayout(QBoxLayout::TopToBottom);
+        pT->setLayout(windowLayout);
+        windowLayout->setContentsMargins(0, 0, 0, 0);
+        windowLayout->setSpacing(0);
+        //
+        m_rootWidget = new QWidget(this);
+        m_rootWidget->setContentsMargins(10, 10, 10, 10);
+        windowLayout->addWidget(m_rootWidget);
+        //
+        QLayout* rootLayout = new QBoxLayout(QBoxLayout::TopToBottom);
+        m_rootWidget->setLayout(rootLayout);
+        rootLayout->setContentsMargins(0, 0, 0, 0);
+        rootLayout->setSpacing(0);
 
+        m_shadowWidget = new QWidget(m_rootWidget);
+        rootLayout->addWidget(m_shadowWidget);
+        //
+        QLayout* shadowLayout = new QBoxLayout(QBoxLayout::TopToBottom);
+        shadowLayout->setContentsMargins(0, 0, 0, 0);
+        shadowLayout->setSpacing(0);
+        m_shadowWidget->setLayout(shadowLayout);
+        m_shadowWidget->setAutoFillBackground(true);
         CWizShadowEffect* effect = new CWizShadowEffect();
-        m_mainWidget->setGraphicsEffect(effect);
-        m_mainWidget->setCursor(QCursor(Qt::ArrowCursor));
+        m_shadowWidget->setGraphicsEffect(effect);
+        m_shadowWidget->setCursor(QCursor(Qt::ArrowCursor));
         //
-        m_mainLayout = new QBoxLayout(QBoxLayout::TopToBottom);
-        m_mainWidget->setLayout(m_mainLayout);
-        //
-        m_mainLayout->setSpacing(0);
-        m_mainLayout->setContentsMargins(0, 0, 0, 0);
-        //
-        m_titleBar = new CWizTitleBar(m_mainWidget, this);
+        m_titleBar = new CWizTitleBar(m_shadowWidget, this);
         m_titleBar->setFixedHeight(40);
-        m_mainLayout->addWidget(m_titleBar);
+        shadowLayout->addWidget(m_titleBar);
+        //
+        m_clientWidget = new QWidget(m_shadowWidget);
+        shadowLayout->addWidget(m_clientWidget);
+
+        //
+        m_clientLayout = new QBoxLayout(QBoxLayout::TopToBottom);
+        m_clientWidget->setLayout(m_clientLayout);
+        //
+        m_clientLayout->setSpacing(0);
+        m_clientLayout->setContentsMargins(0, 0, 0, 0);
+        //
         //
         pT->setMouseTracking(true);
     }
 public:
-    QWidget *mainWidget() const { return m_mainWidget; }
-    QLayout* mainLayout() const { return m_mainLayout; }
+    QWidget* rootWidget() const { return m_rootWidget; }
+    QWidget *clientWidget() const { return m_clientWidget; }
+    QLayout* clientLayout() const { return m_clientLayout; }
 protected:
     enum WizWindowHitTestResult {wizTopLeft, wizTop, wizTopRight, wizLeft, wizClient, wizRight, wizBottomLeft, wizBottom, wizBottomRight};
 private:
@@ -63,22 +88,24 @@ private:
     QPoint m_oldPressPos;
     QRect m_oldGeometry;
     bool m_mousePressed;
-    QWidget* m_mainWidget;
-    QLayout* m_mainLayout;
+    QWidget* m_rootWidget;
+    QWidget* m_shadowWidget;
+    QWidget* m_clientWidget;
+    QLayout* m_clientLayout;
     CWizTitleBar* m_titleBar;
 protected:
     virtual WizWindowHitTestResult hitTest(const QPoint& posOfWindow)
     {
         Base* pT = this;
         QPoint globalPos = pT->mapToGlobal(posOfWindow);
-        QPoint pos = m_mainWidget->mapFromGlobal(globalPos);
+        QPoint pos = m_shadowWidget->mapFromGlobal(globalPos);
         if (pos.x() < 0)
         {
             if (pos.y() < 0)
             {
                 return wizTopLeft;
             }
-            else if (pos.y() >= m_mainWidget->height())
+            else if (pos.y() >= m_shadowWidget->height())
             {
                 return wizBottomLeft;
             }
@@ -87,13 +114,13 @@ protected:
                 return wizLeft;
             }
         }
-        else if (pos.x() > m_mainWidget->width())
+        else if (pos.x() > m_shadowWidget->width())
         {
             if (pos.y() < 0)
             {
                 return wizTopRight;
             }
-            else if (pos.y() >= m_mainWidget->height())
+            else if (pos.y() >= m_shadowWidget->height())
             {
                 return wizBottomRight;
             }
@@ -106,7 +133,7 @@ protected:
         {
             return wizTop;
         }
-        else if (pos.y() > m_mainWidget->height())
+        else if (pos.y() > m_shadowWidget->height())
         {
             return wizBottom;
         }

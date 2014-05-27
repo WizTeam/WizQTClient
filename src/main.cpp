@@ -245,8 +245,8 @@ int mainCore(int argc, char *argv[])
 
 
     // manually login
-    CWizLoginWidget loginDialog(strUserId, strLocale);
     if (bFallback) {
+        CWizLoginWidget loginDialog(strUserId, strLocale);
         if (QDialog::Accepted != loginDialog.exec())
             return 0;
 

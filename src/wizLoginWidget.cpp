@@ -127,13 +127,11 @@ CWizLoginWidget::CWizLoginWidget(const QString &strDefaultUserId, const QString 
     , ui(new Ui::wizLoginWidget)
     , m_menu(new QMenu(this))
 {
-    ui->setupUi(mainWidget());
+    QWidget* uiWidget = new QWidget(clientWidget());
+    clientLayout()->addWidget(uiWidget);
+    ui->setupUi(uiWidget);
+    //
 
-    setWindowFlags(Qt::CustomizeWindowHint);
-    setAutoFillBackground(true);
-
-
-    setFixedSize(352, 503);
 #ifdef Q_OS_MAC
     QPalette paletteBG(palette());
     QPixmap pix(3, 2);
@@ -141,6 +139,7 @@ CWizLoginWidget::CWizLoginWidget(const QString &strDefaultUserId, const QString 
     paletteBG.setBrush(QPalette::Window, QBrush(pix));
     setPalette(paletteBG);
 #elif defined(Q_OS_LINUX)
+    /*
     QBitmap bmp(352, 503);
     bmp.fill();
     QPainter p(&bmp);
@@ -148,6 +147,7 @@ CWizLoginWidget::CWizLoginWidget(const QString &strDefaultUserId, const QString 
     p.setBrush(Qt::black);
     p.drawRoundedRect(bmp.rect(),3,3);
     setMask(bmp);
+    */
 #endif
 
     setElementStyles();
@@ -160,6 +160,8 @@ CWizLoginWidget::CWizLoginWidget(const QString &strDefaultUserId, const QString 
     connect(ui->lineEdit_password, SIGNAL(textChanged(QString)), SLOT(onLoginInputChanged()));
     connect(ui->lineEdit_userName, SIGNAL(textChanged(QString)), SLOT(onLoginInputChanged()));
     connect(ui->lineEdit_userName, SIGNAL(showMenuRequest(QPoint)), SLOT(showUserListMenu(QPoint)));
+    //
+    connect(ui->btn_login, SIGNAL(clicked()), SLOT(on_btn_login_clicked()));
 
     setUsers(strDefaultUserId);
 }
@@ -308,6 +310,7 @@ void CWizLoginWidget::enableSignInControls(bool bEnable)
     ui->btn_changeToLogin->setEnabled(bEnable);
 }
 
+/*
 void CWizLoginWidget::mousePressEvent(QMouseEvent *event)
 {
     m_mousePoint = event->globalPos();
@@ -322,11 +325,12 @@ void CWizLoginWidget::mouseMoveEvent(QMouseEvent *event)
     }
 }
 
-void CWizLoginWidget::mouseReleaseEvent(QMouseEvent */*event*/)
+void CWizLoginWidget::mouseReleaseEvent(QMouseEvent *)
 {
     m_mousePoint = QPoint(0, 0);
 }
-
+*/
+/*
 void CWizLoginWidget::paintEvent(QPaintEvent *)
 {
     float borderRadius;
@@ -353,6 +357,7 @@ void CWizLoginWidget::paintEvent(QPaintEvent *)
     pt.setBrush(QColor("#e9e9e9"));
     pt.drawPath(pathBottom.simplified());
 }
+*/
 
 
 

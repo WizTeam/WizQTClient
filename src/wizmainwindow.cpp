@@ -91,11 +91,12 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     , m_optionsAction(NULL)
     #endif
     #ifdef Q_OS_MAC
+    , m_menuBar(new QMenuBar(this))
     , m_toolBar(new CWizMacToolBar(this))
     #else
-    , m_toolBar(new QToolBar("Main", mainWidget()))
+    , m_toolBar(new QToolBar("Main", clientWidget()))
+    , m_menuBar(new QMenuBar(clientWidget()))
     #endif
-    , m_menuBar(new QMenuBar(mainWidget()))
     , m_actions(new CWizActions(*this, this))
     , m_category(new CWizCategoryView(*this, this))
     , m_documents(new CWizDocumentListView(*this, this))
@@ -109,6 +110,10 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     , m_bLogoutRestart(false)
     , m_bUpdatingSelection(false)
 {
+#ifndef Q_OS_MAC
+    clientLayout()->addWidget(m_toolBar);
+#endif
+    //
     connect(qApp, SIGNAL(aboutToQuit()), SLOT(on_application_aboutToQuit()));
     connect(qApp, SIGNAL(lastWindowClosed()), qApp, SLOT(quit())); // Qt bug: Qt5 bug
     qApp->installEventFilter(this);
@@ -673,7 +678,7 @@ void MainWindow::initToolBar()
     m_search = m_toolBar->getSearchWidget();
 #else
     //addToolBar(m_toolBar);
-    mainLayout()->addWidget(m_toolBar);
+    clientLayout()->addWidget(m_toolBar);
 
     m_toolBar->setIconSize(QSize(24, 24));
     m_toolBar->setContextMenuPolicy(Qt::PreventContextMenu);
@@ -717,11 +722,12 @@ void MainWindow::initClient()
     QWidget* client = new QWidget(this);
     setCentralWidget(client);
 #else
-    QWidget* main = mainWidget();
-    setCentralWidget(main);
+    setCentralWidget(rootWidget());
+    //
+    QWidget* main = clientWidget();
     //
     QWidget* client = new QWidget(main);
-    mainLayout()->addWidget(client);
+    clientLayout()->addWidget(client);
 #endif
 
     client->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);

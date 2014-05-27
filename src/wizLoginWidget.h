@@ -81,10 +81,10 @@ public:
     void enableSignInControls(bool bEnable);
 
 protected:
-    void mousePressEvent(QMouseEvent* event);
-    void mouseMoveEvent(QMouseEvent* event);
-    void mouseReleaseEvent(QMouseEvent* event);
-    void paintEvent(QPaintEvent* );
+    //void mousePressEvent(QMouseEvent* event);
+    //void mouseMoveEvent(QMouseEvent* event);
+    //void mouseReleaseEvent(QMouseEvent* event);
+    //void paintEvent(QPaintEvent* );
 
 private slots:
     void on_btn_close_clicked();
