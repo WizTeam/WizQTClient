@@ -30,36 +30,6 @@ public:
     {
         Base* pT = this;
         //
-        /*
-        class ShadowWidget : public QWidget
-        {
-        public:
-            ShadowWidget(QWidget* parent)
-                : QWidget(parent)
-            {
-            }
-
-        protected:
-            virtual void paintEvent(QPaintEvent * event)
-            {
-                QPainter painter(this);
-                painter.save();
-                //
-                QRect rc = rect();
-                //
-                QPainterPath rounded_rect;
-                rounded_rect.addRoundRect(0, 0, rc.width() + 1, rc.height() + 1, 1, 1);
-                painter.setClipPath(rounded_rect);
-                QRegion maskregion = painter.clipRegion();
-                setMask(maskregion);
-                painter.restore();
-                //
-                //QWidget:paintEvent(event);
-            }
-        };
-        */
-
-        //
         pT->setAttribute(Qt::WA_TranslucentBackground); //enable MainWindow to be transparent
         pT->setWindowFlags(Qt::FramelessWindowHint);
         pT->setContentsMargins(0, 0, 0, 0);
@@ -90,7 +60,7 @@ public:
         m_shadowWidget->setGraphicsEffect(effect);
         m_shadowWidget->setCursor(QCursor(Qt::ArrowCursor));
         //
-        m_titleBar = new CWizTitleBar(m_shadowWidget, this);
+        m_titleBar = new CWizTitleBar(m_shadowWidget, this, m_rootWidget);
         m_titleBar->setFixedHeight(40);
         shadowLayout->addWidget(m_titleBar);
         //

@@ -9,9 +9,10 @@ class CWizTitleBar : public QWidget
 {
     Q_OBJECT
 public:
-    CWizTitleBar(QWidget *parent, QWidget* window);
+    CWizTitleBar(QWidget *parent, QWidget* window, QWidget* shadowContainerWidget);
 private:
     QWidget* m_window;
+    QWidget* m_shadowContainerWidget;
     QMargins m_oldContentsMargin;
 public slots:
     void showSmall();
@@ -19,6 +20,7 @@ public slots:
 protected:
     void mousePressEvent(QMouseEvent *me);
     void mouseMoveEvent(QMouseEvent *me);
+    void mouseDoubleClickEvent ( QMouseEvent * event );
 private:
     QToolButton *minimize;
     QToolButton *maximize;

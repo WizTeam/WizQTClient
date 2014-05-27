@@ -9,9 +9,10 @@
 
 
 
-CWizTitleBar::CWizTitleBar(QWidget *parent, QWidget* window)
+CWizTitleBar::CWizTitleBar(QWidget *parent, QWidget* window, QWidget* shadowContainerWidget)
     : QWidget(parent)
     , m_window(window)
+    , m_shadowContainerWidget(shadowContainerWidget)
     , m_oldContentsMargin(10, 10, 10, 10)
 {
     // 不继承父组件的背景色
@@ -57,6 +58,7 @@ CWizTitleBar::CWizTitleBar(QWidget *parent, QWidget* window)
     connect(close, SIGNAL( clicked() ), m_window, SLOT(close() ) );
     connect(minimize, SIGNAL( clicked() ), this, SLOT(showSmall() ) );
     connect(maximize, SIGNAL( clicked() ), this, SLOT(showMaxRestore() ) );
+    //
 }
 
 void CWizTitleBar::showSmall()
@@ -68,15 +70,15 @@ void CWizTitleBar::showMaxRestore()
 {
     if (maxNormal) {
         //
-        m_window->setContentsMargins(m_oldContentsMargin);
+        m_shadowContainerWidget->setContentsMargins(m_oldContentsMargin);
         m_window->showNormal();
         maxNormal = !maxNormal;
         maximize->setIcon(maxPix);
         //
     } else {
         //
-        m_oldContentsMargin = m_window->contentsMargins();
-        m_window->setContentsMargins(0, 0, 0, 0);
+        m_oldContentsMargin = m_shadowContainerWidget->contentsMargins();
+        m_shadowContainerWidget->setContentsMargins(0, 0, 0, 0);
         m_window->showMaximized();
         maxNormal = !maxNormal;
         maximize->setIcon(restorePix);
@@ -93,4 +95,12 @@ void CWizTitleBar::mouseMoveEvent(QMouseEvent *me)
     if (maxNormal)
         return;
     m_window->move(me->globalPos() - clickPos);
+}
+
+void CWizTitleBar::mouseDoubleClickEvent ( QMouseEvent * event )
+{
+    if (event->button() == Qt::LeftButton)
+    {
+        showMaxRestore();
+    }
 }
