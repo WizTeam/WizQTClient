@@ -22,6 +22,7 @@
 #include <QLabel>
 
 #include "share/wizui.h"
+#include "wiznotestyle.h"
 
 using namespace WizService;
 
@@ -84,6 +85,7 @@ void CWizIconLineEditContainer::paintEvent(QPaintEvent *event)
     }
 }
 
+
 void CWizIconLineEditContainer::mousePressEvent(QMouseEvent *event)
 {
     if (m_dropdownIcon->geometry().contains(m_dropdownIcon->mapFromGlobal(event->pos())))
@@ -93,6 +95,20 @@ void CWizIconLineEditContainer::mousePressEvent(QMouseEvent *event)
 }
 
 
+CWizImageButton::CWizImageButton(QWidget *parent)
+    :QPushButton(parent)
+{
+}
+
+void CWizImageButton::setButtonStyle(const QString& normalBackgroundFileName, const QString& hotBackgroundFileName,
+                                     const QString& downBackgroundFileName, const QString& disabledBackgroundFileName,
+                                     const QColor& normalTextColor, const QColor& activeTextColor, const QColor& disableTextColor)
+{
+    QStyle* style = WizGetImageButtonStyle(normalBackgroundFileName, hotBackgroundFileName,
+                                           downBackgroundFileName, disabledBackgroundFileName, normalTextColor,
+                                           activeTextColor, disableTextColor);
+    setStyle(style);
+}
 
 
 LoginLineEdit::LoginLineEdit(QWidget *parent) : QLineEdit(parent)
@@ -226,34 +242,47 @@ CWizLoginWidget::CWizLoginWidget(const QString &strDefaultUserId, const QString 
     QWidget* title = titleBar();
     title->setPalette(QPalette(QColor::fromRgb(0, 0, 255)));
     //
-    CWizIconLineEditContainer* m_lineEditUsername = new CWizIconLineEditContainer(uiWidget);
-    m_lineEditUsername->setBackgroundImage(WizGetSkinResourceFileName(Utils::StyleHelper::themeName(), "loginTopLineEditor"), QPoint(8, 8));
-    m_lineEditUsername->setRightIcon(WizGetSkinResourceFileName(Utils::StyleHelper::themeName(), "loginLineEditorDownArrow"));
-    ui->verticalLayout->addWidget(m_lineEditUsername);
-
-    CWizIconLineEditContainer* m_lineEditPassword = new CWizIconLineEditContainer(uiWidget);
-    m_lineEditPassword->setBackgroundImage(WizGetSkinResourceFileName(Utils::StyleHelper::themeName(), "loginBottomLineEditor"), QPoint(8, 8));
-    m_lineEditPassword->edit()->setEchoMode(QLineEdit::Password);
-    ui->verticalLayout->addWidget(m_lineEditPassword);
 #endif
+
+    ui->wgt_usercontainer->setBackgroundImage(WizGetSkinResourceFileName(Utils::StyleHelper::themeName(), "loginTopLineEditor"), QPoint(8, 8));
+    ui->wgt_usercontainer->setLeftIcon(WizGetSkinResourceFileName(Utils::StyleHelper::themeName(), "loginIconPerson"));
+    ui->wgt_usercontainer->setRightIcon(WizGetSkinResourceFileName(Utils::StyleHelper::themeName(), "loginLineEditorDownArrow"));
+    m_lineEditUserName = ui->wgt_usercontainer->edit();
+
+    ui->wgt_passwordcontainer->setBackgroundImage(WizGetSkinResourceFileName(Utils::StyleHelper::themeName(), "loginBottomLineEditor"), QPoint(8, 8));
+    ui->wgt_passwordcontainer->setLeftIcon(WizGetSkinResourceFileName(Utils::StyleHelper::themeName(), "loginIconKey"));
+    ui->wgt_passwordcontainer->edit()->setEchoMode(QLineEdit::Password);
+    m_lineEditPassword = ui->wgt_passwordcontainer->edit();
+    //
+
+    QString strThemeName = Utils::StyleHelper::themeName();
+    QString strBtnNormal = ::WizGetSkinResourceFileName(strThemeName, "loginOKButton_active");
+    QString strBtnHover = ::WizGetSkinResourceFileName(strThemeName, "loginOKButton_hover");
+    QString strBtnDown = ::WizGetSkinResourceFileName(strThemeName, "loginOKButton_down");
+    QString strBtnDisable = ::WizGetSkinResourceFileName(strThemeName, "loginOKButton_normal");
+    //
+    m_buttonLogin = ui->btn_login;
+    m_buttonLogin->setButtonStyle(strBtnNormal, strBtnHover, strBtnDown, strBtnDisable, QColor("#ffffff"),
+                              QColor("#ffffff"), QColor("b1b1b1"));
+    m_buttonLogin->setText("Login");
+    m_buttonLogin->setContentsMargins(10, 20, 10, 20);
 
     setElementStyles();
 
-    ui->lineEdit_userName->setVisible(false);
-    ui->lineEdit_password->setVisible(false);
+
 
     connect(m_menu, SIGNAL(triggered(QAction*)), SLOT(userListMenuClicked(QAction*)));
 
     connect(ui->lineEdit_newPassword, SIGNAL(textChanged(QString)), SLOT(onSignUpInputDataChanged()));
     connect(ui->lineEdit_newUserName, SIGNAL(textChanged(QString)), SLOT(onSignUpInputDataChanged()));
     connect(ui->lineEdit_repaetPassword, SIGNAL(textChanged(QString)), SLOT(onSignUpInputDataChanged()));
-    connect(ui->lineEdit_password, SIGNAL(textChanged(QString)), SLOT(onLoginInputChanged()));
-    connect(ui->lineEdit_userName, SIGNAL(textChanged(QString)), SLOT(onLoginInputChanged()));
-    connect(ui->lineEdit_userName, SIGNAL(showMenuRequest(QPoint)), SLOT(showUserListMenu(QPoint)));
+    connect(m_lineEditPassword, SIGNAL(textChanged(QString)), SLOT(onLoginInputChanged()));
+    connect(m_lineEditUserName, SIGNAL(textChanged(QString)), SLOT(onLoginInputChanged()));
+    //connect(ui->lineEdit_userName, SIGNAL(showMenuRequest(QPoint)), SLOT(showUserListMenu(QPoint)));
     //
 
 #ifndef Q_OS_MAC
-    connect(ui->btn_login, SIGNAL(clicked()), SLOT(on_btn_login_clicked()));
+    connect(m_buttonLogin, SIGNAL(clicked()), SLOT(on_btn_login_clicked()));
 #endif
 
     setUsers(strDefaultUserId);
@@ -266,12 +295,12 @@ CWizLoginWidget::~CWizLoginWidget()
 
 QString CWizLoginWidget::userId() const
 {
-    return ui->lineEdit_userName->text();
+    return m_lineEditUserName->text();
 }
 
 QString CWizLoginWidget::password() const
 {
-    return ui->lineEdit_password->text();
+    return m_lineEditPassword->text();
 }
 
 void CWizLoginWidget::setUsers(const QString &strDefault)
@@ -311,12 +340,12 @@ void CWizLoginWidget::setUser(const QString &strUserId)
     CWizUserSettings userSettings(strUserId);
     QString strPassword = userSettings.password();
 
-    ui->lineEdit_userName->setText(strUserId);
+    m_lineEditUserName->setText(strUserId);
     if (strPassword.isEmpty()) {
-        ui->lineEdit_password->clear();
+        m_lineEditPassword->clear();
         ui->cbx_remberPassword->setCheckState(Qt::Unchecked);
     } else {
-        ui->lineEdit_password->setText(strPassword);
+        m_lineEditPassword->setText(strPassword);
         ui->cbx_remberPassword->setCheckState(Qt::Checked);
     }
 }
@@ -386,11 +415,11 @@ bool CWizLoginWidget::updateUserProfile(bool bLogined)
 
 void CWizLoginWidget::enableLoginControls(bool bEnable)
 {
-    ui->lineEdit_userName->setEnabled(bEnable);
-    ui->lineEdit_password->setEnabled(bEnable);
+    m_lineEditUserName->setEnabled(bEnable);
+    m_lineEditPassword->setEnabled(bEnable);
     ui->cbx_autologin->setEnabled(bEnable);
     ui->cbx_remberPassword->setEnabled(bEnable);
-    ui->btn_login->setEnabled(bEnable);
+    m_buttonLogin->setEnabled(bEnable);
     ui->btn_changeToSignin->setEnabled(bEnable);
 }
 
@@ -452,13 +481,11 @@ void CWizLoginWidget::setElementStyles()
     QString strLineEditName = ::WizGetSkinResourceFileName(strThemeName, "loginTopLineEditor");
     QString strLineEditMidPassword = ::WizGetSkinResourceFileName(strThemeName, "loginMidLineEditor");
     QString strLineEditBottomPassword = ::WizGetSkinResourceFileName(strThemeName, "loginBottomLineEditor");
-    ui->lineEdit_userName->setElementStyle(strLineEditName, QLineEdit::Normal, "example@mail.com");
-    ui->lineEdit_password->setElementStyle(strLineEditBottomPassword, QLineEdit::Password, tr("password"));
     ui->lineEdit_newUserName->setElementStyle(strLineEditName, QLineEdit::Normal, "Please enter email as your account");
     ui->lineEdit_newPassword->setElementStyle(strLineEditMidPassword, QLineEdit::Password, tr("Please enter password"));
     ui->lineEdit_repaetPassword->setElementStyle(strLineEditBottomPassword, QLineEdit::Password, tr("Please enter password again"));
     //
-    ui->btn_login->setElementStyle();
+    //ui->btn_login->setElementStyle();
     ui->btn_singin->setElementStyle();
     ui->btn_singin->setEnabled(false);
     //
@@ -629,7 +656,7 @@ void CWizLoginWidget::on_btn_singin_clicked()
 void CWizLoginWidget::onLoginInputChanged()
 {
     ui->label_passwordError->clear();
-    bool bInputFinished =  !ui->lineEdit_userName->text().isEmpty() && !ui->lineEdit_password->text().isEmpty();
+    bool bInputFinished =  !m_lineEditUserName->text().isEmpty() && !m_lineEditPassword->text().isEmpty();
     ui->btn_login->setEnabled(bInputFinished);
 }
 
@@ -698,8 +725,8 @@ void CWizLoginWidget::onRegisterAccountFinished(bool bFinish)
     if (bFinish) {
         ui->stackedWidget->setCurrentIndex(0);
         enableLoginControls(false);
-        ui->lineEdit_userName->setText(ui->lineEdit_newUserName->text());
-        ui->lineEdit_password->setText(ui->lineEdit_newPassword->text());
+        m_lineEditUserName->setText(ui->lineEdit_newUserName->text());
+        m_lineEditPassword->setText(ui->lineEdit_newPassword->text());
         doAccountVerify();
     } else {
         ui->label_passwordError->setText(api->lastErrorMessage());
@@ -723,5 +750,5 @@ void CWizLoginWidget::on_cbx_autologin_toggled(bool checked)
 void CWizLoginWidget::on_lineEdit_userName_textEdited(const QString &arg1)
 {
     Q_UNUSED(arg1);
-    ui->lineEdit_password->setText("");
+    m_lineEditPassword->setText("");
 }

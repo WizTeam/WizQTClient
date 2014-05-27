@@ -38,6 +38,17 @@ protected:
     virtual void mousePressEvent(QMouseEvent* event);
 };
 
+class CWizImageButton : public QPushButton
+{
+public:
+    CWizImageButton(QWidget* parent);
+public:
+    void setButtonStyle(const QString& normalBackgroundFileName, const QString& hotBackgroundFileName,
+                        const QString& downBackgroundFileName, const QString& disabledBackgroundFileName,
+                        const QColor& normalTextColor, const QColor& activeTextColor, const QColor& disableTextColor);
+
+};
+
 class LoginLineEdit : public QLineEdit
 {
     Q_OBJECT
@@ -155,6 +166,10 @@ private:
 private:
     Ui::wizLoginWidget *ui;
     QMenu* m_menu;
+
+    QLineEdit* m_lineEditUserName;
+    QLineEdit* m_lineEditPassword;
+    CWizImageButton* m_buttonLogin;
 };
 
 #endif // WIZLOGINWIDGET_H
