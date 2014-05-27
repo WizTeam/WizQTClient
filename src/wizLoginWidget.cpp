@@ -19,6 +19,7 @@
 #include <QUrl>
 #include <QDebug>
 #include <QHBoxLayout>
+#include <QLabel>
 
 #include "share/wizui.h"
 
@@ -37,6 +38,9 @@ CWizIconLineEditContainer::CWizIconLineEditContainer(QWidget* parent)
 {
     m_layout = new QHBoxLayout(this);
     m_edit = new QLineEdit(this);
+    m_edit->setAttribute(Qt::WA_MacShowFocusRect, false);
+    m_edit->setStyleSheet(QString("QLineEdit{ border:none; color:#2F2F2F; "
+                          "selection-background-color: #8ECAF1;}"));
     m_leftIcon = new QLabel(this);
     m_dropdownIcon = new QLabel(this);
     //
@@ -45,6 +49,7 @@ CWizIconLineEditContainer::CWizIconLineEditContainer(QWidget* parent)
     m_layout->addWidget(m_leftIcon);
     m_layout->addWidget(m_edit);
     m_layout->addWidget(m_dropdownIcon);
+
 }
 void CWizIconLineEditContainer::setBackgroundImage(QString fileName, QPoint pt)
 {
@@ -56,9 +61,14 @@ void CWizIconLineEditContainer::setLeftIcon(QString fileName)
 {
     m_leftIcon->setPixmap(QPixmap(fileName));
 }
-void CWizIconLineEditContainer::setDropdownIcon(QString fileName)
+void CWizIconLineEditContainer::setRightIcon(QString fileName)
 {
     m_dropdownIcon->setPixmap(QPixmap(fileName));
+}
+
+void CWizIconLineEditContainer::setPlaceholderText(const QString &strText)
+{
+    m_edit->setPlaceholderText(strText);
 }
 
 void CWizIconLineEditContainer::paintEvent(QPaintEvent *event)
@@ -71,6 +81,14 @@ void CWizIconLineEditContainer::paintEvent(QPaintEvent *event)
     else
     {
         QWidget::paintEvent(event);
+    }
+}
+
+void CWizIconLineEditContainer::mousePressEvent(QMouseEvent *event)
+{
+    if (m_dropdownIcon->geometry().contains(m_dropdownIcon->mapFromGlobal(event->pos())))
+    {
+        emit rightIconClicked();
     }
 }
 
@@ -208,12 +226,21 @@ CWizLoginWidget::CWizLoginWidget(const QString &strDefaultUserId, const QString 
     QWidget* title = titleBar();
     title->setPalette(QPalette(QColor::fromRgb(0, 0, 255)));
     //
-    CWizIconLineEditContainer* newEdit = new CWizIconLineEditContainer(uiWidget);
-    newEdit->setBackgroundImage(WizGetSkinResourceFileName(Utils::StyleHelper::themeName(), "loginTopLineEditor"), QPoint(8, 8));
-    ui->verticalLayout->addWidget(newEdit);
+    CWizIconLineEditContainer* m_lineEditUsername = new CWizIconLineEditContainer(uiWidget);
+    m_lineEditUsername->setBackgroundImage(WizGetSkinResourceFileName(Utils::StyleHelper::themeName(), "loginTopLineEditor"), QPoint(8, 8));
+    m_lineEditUsername->setRightIcon(WizGetSkinResourceFileName(Utils::StyleHelper::themeName(), "loginLineEditorDownArrow"));
+    ui->verticalLayout->addWidget(m_lineEditUsername);
+
+    CWizIconLineEditContainer* m_lineEditPassword = new CWizIconLineEditContainer(uiWidget);
+    m_lineEditPassword->setBackgroundImage(WizGetSkinResourceFileName(Utils::StyleHelper::themeName(), "loginBottomLineEditor"), QPoint(8, 8));
+    m_lineEditPassword->edit()->setEchoMode(QLineEdit::Password);
+    ui->verticalLayout->addWidget(m_lineEditPassword);
 #endif
 
     setElementStyles();
+
+    ui->lineEdit_userName->setVisible(false);
+    ui->lineEdit_password->setVisible(false);
 
     connect(m_menu, SIGNAL(triggered(QAction*)), SLOT(userListMenuClicked(QAction*)));
 

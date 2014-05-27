@@ -25,11 +25,17 @@ private:
 public:
     void setBackgroundImage(QString fileName, QPoint pt);
     void setLeftIcon(QString fileName);
-    void setDropdownIcon(QString fileName);
+    void setRightIcon(QString fileName);
+    void setPlaceholderText(const QString& strText);
     //
     QLineEdit* edit() const { return m_edit; }
+
+signals:
+    void rightIconClicked();
+
 protected:
     virtual void paintEvent(QPaintEvent *event);
+    virtual void mousePressEvent(QMouseEvent* event);
 };
 
 class LoginLineEdit : public QLineEdit
