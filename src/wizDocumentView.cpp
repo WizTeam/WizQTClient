@@ -303,19 +303,25 @@ void CWizDocumentView::reviewCurrentNote()
 
 void CWizDocumentView::setEditNote(bool bEdit)
 {
-    if (m_bLocked) {
+    if (m_bLocked)
         return;
-    }
 
     m_bEditingMode = bEdit;
 
     m_title->setEditingDocument(bEdit);
     m_web->setEditingDocument(bEdit);
 
-    if (m_bEditingMode) {
-        QString strUserAlias = m_dbMgr.db(m_note.strKbGUID).getUserAlias();
-        m_editStatusSyncThread->addEditingDocument(strUserAlias, m_note.strKbGUID, m_note.strGUID);
-    } else {
+    if (m_bEditingMode)
+    {
+        CWizDatabase& db = m_dbMgr.db(m_note.strKbGUID);
+        if (db.IsGroup())
+        {
+            QString strUserAlias = db.getUserAlias();
+            m_editStatusSyncThread->addEditingDocument(strUserAlias, m_note.strKbGUID, m_note.strGUID);
+        }
+    }
+    else
+    {
         m_editStatusSyncThread->addDoneDocument(m_note.strKbGUID, m_note.strGUID);
     }
 }
@@ -395,8 +401,12 @@ void CWizDocumentView::loadNote(const WIZDOCUMENTDATA& doc)
 
     if (m_bEditingMode && m_web->hasFocus())
     {
-        QString strUserAlias = m_dbMgr.db(m_note.strKbGUID).getUserAlias();
-        m_editStatusSyncThread->addEditingDocument(strUserAlias, m_note.strKbGUID, m_note.strGUID);
+        CWizDatabase& db = m_dbMgr.db(m_note.strKbGUID);
+        if (db.IsGroup())
+        {
+            QString strUserAlias = db.getUserAlias();
+            m_editStatusSyncThread->addEditingDocument(strUserAlias, m_note.strKbGUID, m_note.strGUID);
+        }
     }
 }
 
@@ -487,8 +497,12 @@ void CWizDocumentView::on_webView_focus_changed()
 {
     if (m_web->hasFocus())
     {
-        QString strUserAlias = m_dbMgr.db(m_note.strKbGUID).getUserAlias();
-        m_editStatusSyncThread->addEditingDocument(strUserAlias, m_note.strKbGUID, m_note.strGUID);
+        CWizDatabase& db = m_dbMgr.db(m_note.strKbGUID);
+        if (db.IsGroup())
+        {
+            QString strUserAlias = db.getUserAlias();
+            m_editStatusSyncThread->addEditingDocument(strUserAlias, m_note.strKbGUID, m_note.strGUID);
+        }
     }
 }
 
