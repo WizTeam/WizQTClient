@@ -32,6 +32,14 @@ protected:
     virtual void paintEvent(QPaintEvent *event);
 };
 
+class CWizImageButton : public QPushButton
+{
+public:
+    CWizImageButton(QWidget* parent);
+public:
+    void setImage(const QString& normalBackgroundFileName, const QString& hotBackgroundFileName, const QString& downBackgroundFileName, const QString& disabledBackgroundFileName);
+};
+
 class LoginLineEdit : public QLineEdit
 {
     Q_OBJECT

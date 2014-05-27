@@ -21,6 +21,7 @@
 #include <QHBoxLayout>
 
 #include "share/wizui.h"
+#include "wiznotestyle.h"
 
 using namespace WizService;
 
@@ -74,6 +75,15 @@ void CWizIconLineEditContainer::paintEvent(QPaintEvent *event)
     }
 }
 
+CWizImageButton::CWizImageButton(QWidget *parent)
+    :QPushButton(parent)
+{
+}
+void CWizImageButton::setImage(const QString& normalBackgroundFileName, const QString& hotBackgroundFileName, const QString& downBackgroundFileName, const QString& disabledBackgroundFileName)
+{
+    QStyle* style = WizGetImageButtonStyle(normalBackgroundFileName, hotBackgroundFileName, downBackgroundFileName, disabledBackgroundFileName);
+    setStyle(style);
+}
 
 
 
@@ -211,6 +221,17 @@ CWizLoginWidget::CWizLoginWidget(const QString &strDefaultUserId, const QString 
     CWizIconLineEditContainer* newEdit = new CWizIconLineEditContainer(uiWidget);
     newEdit->setBackgroundImage(WizGetSkinResourceFileName(Utils::StyleHelper::themeName(), "loginTopLineEditor"), QPoint(8, 8));
     ui->verticalLayout->addWidget(newEdit);
+    //
+
+    QString strThemeName = Utils::StyleHelper::themeName();
+    QString strBtnNormal = ::WizGetSkinResourceFileName(strThemeName, "loginOKButton_normal");
+    QString strBtnHover = ::WizGetSkinResourceFileName(strThemeName, "loginOKButton_hover");
+    QString strBtnDown = ::WizGetSkinResourceFileName(strThemeName, "loginOKButton_down");
+    //
+    CWizImageButton* newButton = new CWizImageButton(uiWidget);
+    newButton->setImage(strBtnNormal, strBtnHover, strBtnDown, strBtnHover);
+    ui->verticalLayout->addWidget(newButton);
+    newButton->setText("11111");
 #endif
 
     setElementStyles();

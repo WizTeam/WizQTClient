@@ -74,26 +74,29 @@ const int IMAGE_WIDTH = 80;
 
 CWizNoteStyle::CWizNoteStyle(const QString& strSkinName)
 {
-    QString strSkinPath = ::WizGetSkinResourcePath(strSkinName);
+    if (!strSkinName.isEmpty())
+    {
+        QString strSkinPath = ::WizGetSkinResourcePath(strSkinName);
 
-    m_expandedImage.load(strSkinPath + "branch_expanded.png");
-    m_collapsedImage.load(strSkinPath + "branch_collapsed.png");
-    m_expandedImageSelected.load(strSkinPath + "branch_expandedSelected.png");
-    m_collapsedImageSelected.load(strSkinPath + "branch_collapsedSelected.png");
-    m_imgDocumentUnread.load(strSkinPath + "read_btn_unread.png");
-    m_imgDefaultAvatar.load(strSkinPath + "avatar_default.png");
+        m_expandedImage.load(strSkinPath + "branch_expanded.png");
+        m_collapsedImage.load(strSkinPath + "branch_collapsed.png");
+        m_expandedImageSelected.load(strSkinPath + "branch_expandedSelected.png");
+        m_collapsedImageSelected.load(strSkinPath + "branch_collapsedSelected.png");
+        m_imgDocumentUnread.load(strSkinPath + "read_btn_unread.png");
+        m_imgDefaultAvatar.load(strSkinPath + "avatar_default.png");
 
-    //m_iconDocumentsBadge = ::WizLoadSkinIcon(strSkinName, "document_badge");
-    //m_iconDocumentsBadgeEncrypted = ::WizLoadSkinIcon(strSkinName, "document_badge_encrypted");
+        //m_iconDocumentsBadge = ::WizLoadSkinIcon(strSkinName, "document_badge");
+        //m_iconDocumentsBadgeEncrypted = ::WizLoadSkinIcon(strSkinName, "document_badge_encrypted");
 
-    m_multiLineListSelectedItemBackground.SetImage(strSkinPath + "multilinelist_selected_background.png", QPoint(4, 4));
-    m_multiLineListSelectedItemBackgroundHot.SetImage(strSkinPath + "multilinelist_selected_background_hot.png", QPoint(4, 4));
-    m_imagePushButton.SetImage(strSkinPath + "imagepushbutton.png", QPoint(4, 4));
-    m_imagePushButtonHot.SetImage(strSkinPath + "imagepushbutton_hot.png", QPoint(4, 4));
-    m_imagePushButtonPressed.SetImage(strSkinPath + "imagepushbutton_pressed.png", QPoint(4, 4));
-    m_imagePushButtonDisabled.SetImage(strSkinPath + "imagepushbutton_disabled.png", QPoint(4, 4));
-    m_imagePushButtonLabel.SetImage(strSkinPath + "imagepushbutton_label.png", QPoint(8, 8));
-    m_imagePushButtonLabelRed.SetImage(strSkinPath + "imagepushbutton_label_red.png", QPoint(8, 8));
+        m_multiLineListSelectedItemBackground.SetImage(strSkinPath + "multilinelist_selected_background.png", QPoint(4, 4));
+        m_multiLineListSelectedItemBackgroundHot.SetImage(strSkinPath + "multilinelist_selected_background_hot.png", QPoint(4, 4));
+        m_imagePushButton.SetImage(strSkinPath + "imagepushbutton.png", QPoint(4, 4));
+        m_imagePushButtonHot.SetImage(strSkinPath + "imagepushbutton_hot.png", QPoint(4, 4));
+        m_imagePushButtonPressed.SetImage(strSkinPath + "imagepushbutton_pressed.png", QPoint(4, 4));
+        m_imagePushButtonDisabled.SetImage(strSkinPath + "imagepushbutton_disabled.png", QPoint(4, 4));
+        m_imagePushButtonLabel.SetImage(strSkinPath + "imagepushbutton_label.png", QPoint(8, 8));
+        m_imagePushButtonLabelRed.SetImage(strSkinPath + "imagepushbutton_label_red.png", QPoint(8, 8));
+    }
 
 #ifdef Q_OS_MAC
     m_fontImagePushButtonLabel = QFont("Arial Black", 9);
@@ -487,3 +490,60 @@ QStyle* WizGetStyle(const QString& skinName)
 {
     return CWizNoteStyle::noteStyle(skinName);
 }
+
+class CWizImageButtonStyle : public CWizNoteBaseStyle
+{
+public:
+    CWizImageButtonStyle(const QString& normalBackgroundFileName, const QString& hotBackgroundFileName, const QString& downBackgroundFileName, const QString& disabledBackgroundFileName)
+    {
+        m_imagePushButton.SetImage(normalBackgroundFileName, QPoint(4, 4));
+        m_imagePushButtonHot.SetImage(hotBackgroundFileName, QPoint(4, 4));
+        m_imagePushButtonPressed.SetImage(downBackgroundFileName, QPoint(4, 4));
+        m_imagePushButtonDisabled.SetImage(disabledBackgroundFileName, QPoint(4, 4));
+    }
+private:
+    CWizSkin9GridImage m_imagePushButton;
+    CWizSkin9GridImage m_imagePushButtonHot;
+    CWizSkin9GridImage m_imagePushButtonPressed;
+    CWizSkin9GridImage m_imagePushButtonDisabled;
+protected:
+    virtual void drawControl(ControlElement element, const QStyleOption *option, QPainter *painter, const QWidget *widget) const
+    {
+        switch (element)
+        {
+        case CE_PushButton:
+            {
+                const QStyleOptionButton* vopt = qstyleoption_cast<const QStyleOptionButton *>(option);
+                ATLASSERT(vopt);
+                //
+                if (!vopt->state.testFlag(QStyle::State_Enabled))
+                {
+                    m_imagePushButtonDisabled.Draw(painter, vopt->rect, 0);
+                }
+                else if (!vopt->state.testFlag(QStyle::State_Raised))
+                {
+                    m_imagePushButtonPressed.Draw(painter, vopt->rect, 0);
+                }
+                else if (vopt->state.testFlag(QStyle::State_MouseOver))
+                {
+                    m_imagePushButtonHot.Draw(painter, vopt->rect, 0);
+                }
+                else
+                {
+                    m_imagePushButton.Draw(painter, vopt->rect, 0);
+                }
+                //
+                painter->drawText(vopt->rect, vopt->text);
+            }
+            break;
+        }
+    }
+
+};
+
+QStyle* WizGetImageButtonStyle(const QString& normalBackgroundFileName, const QString& hotBackgroundFileName, const QString& downBackgroundFileName, const QString& disabledBackgroundFileName)
+{
+    CWizImageButtonStyle* style = new CWizImageButtonStyle(normalBackgroundFileName, hotBackgroundFileName, downBackgroundFileName, disabledBackgroundFileName);
+    return style;
+}
+

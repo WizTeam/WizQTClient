@@ -6,5 +6,7 @@
 
 QStyle* WizGetStyle(const QString& skinName);
 
+QStyle* WizGetImageButtonStyle(const QString& normalBackgroundFileName, const QString& hotBackgroundFileName, const QString& downBackgroundFileName, const QString& disabledBackgroundFileName);
+
 
 #endif // WIZNOTESTYLE_H
