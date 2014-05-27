@@ -59,7 +59,12 @@ namespace Ui {
 class wizLoginWidget;
 }
 
-class CWizLoginWidget : public CWizShadowWindow<QDialog>
+class CWizLoginWidget
+#ifdef Q_OS_MAC
+        : public QDialog
+#else
+        : public CWizShadowWindow<QDialog>
+#endif
 {
     Q_OBJECT
 
@@ -80,12 +85,14 @@ public:
     void enableLoginControls(bool bEnable);
     void enableSignInControls(bool bEnable);
 
+#ifdef Q_OS_MAC
+private:
+    QPoint m_mousePoint;
 protected:
-    //void mousePressEvent(QMouseEvent* event);
-    //void mouseMoveEvent(QMouseEvent* event);
-    //void mouseReleaseEvent(QMouseEvent* event);
-    //void paintEvent(QPaintEvent* );
-
+    void mousePressEvent(QMouseEvent* event);
+    void mouseMoveEvent(QMouseEvent* event);
+    void mouseReleaseEvent(QMouseEvent* event);
+#endif
 private slots:
     void on_btn_close_clicked();
     void on_btn_changeToSignin_clicked();
@@ -115,8 +122,6 @@ private:
     QAction* findActionInMenu(const QString& strActName);
 private:
     Ui::wizLoginWidget *ui;
-    QPoint m_mousePoint;
-
     QMenu* m_menu;
 };
 

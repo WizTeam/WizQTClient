@@ -16,12 +16,10 @@ CWizTitleBar::CWizTitleBar(QWidget *parent, QWidget* window)
 {
     // 不继承父组件的背景色
     setAutoFillBackground(true);
-    // 使用 Highlight 作为背景色
-    //setBackgroundRole(QPalette::Highlight);
 
     minimize = new QToolButton(this);
     maximize = new QToolButton(this);
-    close= new QToolButton(this);
+    close = new QToolButton(this);
 
     // 设置按钮图像的样式
     QPixmap pix = style()->standardPixmap(QStyle::SP_TitleBarCloseButton);
@@ -40,7 +38,7 @@ CWizTitleBar::CWizTitleBar(QWidget *parent, QWidget* window)
     maximize->setMinimumHeight(20);
 
     QLabel *label = new QLabel(this);
-    label->setText("Window Title");
+    label->setText("");
     m_window->setWindowTitle("Window Title");
 
     QHBoxLayout *hbox = new QHBoxLayout(this);

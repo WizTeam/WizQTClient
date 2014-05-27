@@ -122,32 +122,28 @@ void LoginButton::setEnabled(bool bEnable)
     QPushButton::setEnabled(bEnable);
 }
 
-CWizLoginWidget::CWizLoginWidget(const QString &strDefaultUserId, const QString &strLocale, QWidget *parent) :
-    CWizShadowWindow(parent)
+CWizLoginWidget::CWizLoginWidget(const QString &strDefaultUserId, const QString &strLocale, QWidget *parent)
+#ifdef Q_OS_MAC
+    : QDialog(parent)
+#else
+    : CWizShadowWindow(parent)
+#endif
     , ui(new Ui::wizLoginWidget)
     , m_menu(new QMenu(this))
 {
+#ifdef Q_OS_MAC
+    ui->setupUi(this);
+#else
     QWidget* uiWidget = new QWidget(clientWidget());
     clientLayout()->addWidget(uiWidget);
     ui->setupUi(uiWidget);
     //
-
-#ifdef Q_OS_MAC
-    QPalette paletteBG(palette());
-    QPixmap pix(3, 2);
-    pix.fill(Qt::transparent);
-    paletteBG.setBrush(QPalette::Window, QBrush(pix));
-    setPalette(paletteBG);
-#elif defined(Q_OS_LINUX)
-    /*
-    QBitmap bmp(352, 503);
-    bmp.fill();
-    QPainter p(&bmp);
-    p.setPen(Qt::NoPen);
-    p.setBrush(Qt::black);
-    p.drawRoundedRect(bmp.rect(),3,3);
-    setMask(bmp);
-    */
+    ui->widget_titleBar->setVisible(false);
+    //
+    ui->layout_titleBar->removeWidget(ui->widget_titleBar);
+    //
+    QWidget* title = titleBar();
+    title->setPalette(QPalette(QColor::fromRgb(0, 0, 255)));
 #endif
 
     setElementStyles();
@@ -161,7 +157,10 @@ CWizLoginWidget::CWizLoginWidget(const QString &strDefaultUserId, const QString 
     connect(ui->lineEdit_userName, SIGNAL(textChanged(QString)), SLOT(onLoginInputChanged()));
     connect(ui->lineEdit_userName, SIGNAL(showMenuRequest(QPoint)), SLOT(showUserListMenu(QPoint)));
     //
+
+#ifndef Q_OS_MAC
     connect(ui->btn_login, SIGNAL(clicked()), SLOT(on_btn_login_clicked()));
+#endif
 
     setUsers(strDefaultUserId);
 }
@@ -310,7 +309,7 @@ void CWizLoginWidget::enableSignInControls(bool bEnable)
     ui->btn_changeToLogin->setEnabled(bEnable);
 }
 
-/*
+#ifdef Q_OS_MAC
 void CWizLoginWidget::mousePressEvent(QMouseEvent *event)
 {
     m_mousePoint = event->globalPos();
@@ -329,36 +328,7 @@ void CWizLoginWidget::mouseReleaseEvent(QMouseEvent *)
 {
     m_mousePoint = QPoint(0, 0);
 }
-*/
-/*
-void CWizLoginWidget::paintEvent(QPaintEvent *)
-{
-    float borderRadius;
-#ifdef Q_OS_MAC
-    borderRadius = 3.5;
-#elif defined(Q_OS_LINUX)
-    borderRadius = 5.0;
 #endif
-
-    QPainter pt(this);
-    pt.setPen(Qt::NoPen);
-    pt.setRenderHint(QPainter::Antialiasing, true);
-    QPainterPath pathTop;
-    pathTop.setFillRule( Qt::WindingFill );
-    pathTop.addRoundedRect(QRect(0, 0, 352, 146), borderRadius, borderRadius);
-    pathTop.addRect(QRect(0, 140, 352, 6)); //
-    pt.setBrush(QColor("#43a6e8"));
-    pt.drawPath(pathTop.simplified() );
-
-    QPainterPath pathBottom;
-    pathBottom.setFillRule(Qt::WindingFill);
-    pathBottom.addRoundedRect(QRect(0, 146, 352, 357), borderRadius, borderRadius);
-    pathBottom.addRect(QRect(0, 146, 352, 10));
-    pt.setBrush(QColor("#e9e9e9"));
-    pt.drawPath(pathBottom.simplified());
-}
-*/
-
 
 
 void CWizLoginWidget::on_btn_close_clicked()
@@ -373,7 +343,7 @@ void CWizLoginWidget::setElementStyles()
     QString strThemeName = Utils::StyleHelper::themeName();
     QString strlogo = ::WizGetSkinResourceFileName(strThemeName, "loginLogoCn");
     ui->label_logo->setStyleSheet(QString("QLabel {border: none;background-image: url(%1);"
-                                        "background-position: center; background-repeat: no-repeat}").arg(strlogo));
+                                        "background-position: center; background-repeat: no-repeat; background-color:#0000ff}").arg(strlogo));
     //
     QString strBtnCloseNormal = ::WizGetSkinResourceFileName(strThemeName, "loginCloseButton_normal");
     QString strBtnCloseHot = ::WizGetSkinResourceFileName(strThemeName, "loginCloseButton_hot");

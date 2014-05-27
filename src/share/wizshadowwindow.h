@@ -30,6 +30,36 @@ public:
     {
         Base* pT = this;
         //
+        /*
+        class ShadowWidget : public QWidget
+        {
+        public:
+            ShadowWidget(QWidget* parent)
+                : QWidget(parent)
+            {
+            }
+
+        protected:
+            virtual void paintEvent(QPaintEvent * event)
+            {
+                QPainter painter(this);
+                painter.save();
+                //
+                QRect rc = rect();
+                //
+                QPainterPath rounded_rect;
+                rounded_rect.addRoundRect(0, 0, rc.width() + 1, rc.height() + 1, 1, 1);
+                painter.setClipPath(rounded_rect);
+                QRegion maskregion = painter.clipRegion();
+                setMask(maskregion);
+                painter.restore();
+                //
+                //QWidget:paintEvent(event);
+            }
+        };
+        */
+
+        //
         pT->setAttribute(Qt::WA_TranslucentBackground); //enable MainWindow to be transparent
         pT->setWindowFlags(Qt::FramelessWindowHint);
         pT->setContentsMargins(0, 0, 0, 0);
@@ -81,6 +111,7 @@ public:
     QWidget* rootWidget() const { return m_rootWidget; }
     QWidget *clientWidget() const { return m_clientWidget; }
     QLayout* clientLayout() const { return m_clientLayout; }
+    QWidget* titleBar() const { return m_titleBar; }
 protected:
     enum WizWindowHitTestResult {wizTopLeft, wizTop, wizTopRight, wizLeft, wizClient, wizRight, wizBottomLeft, wizBottom, wizBottomRight};
 private:
@@ -252,6 +283,7 @@ protected:
         //
         Base::mouseReleaseEvent(event);
     }
+    //
 
 };
 

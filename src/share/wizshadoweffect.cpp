@@ -11,7 +11,7 @@ CWizShadowEffect::CWizShadowEffect()
     : m_shadowSize(10)
     , m_shadow(new CWizSkin9GridImage())
 {
-    m_shadow->SetImage("/home/weishijun/shadow.png", QPoint(m_shadowSize, m_shadowSize));
+    m_shadow->SetImage("/home/weishijun/shadow.png", QPoint(m_shadowSize + 5, m_shadowSize + 5));
 }
 
 void CWizShadowEffect::draw(QPainter *painter)
@@ -32,7 +32,7 @@ void CWizShadowEffect::draw(QPainter *painter)
     QSize sz = pixmap.size();
     painter->drawPixmap(offset.x(), offset.y(), pixmap);
     //
-    QRect rcBound(offset.x(), offset.y(), sz.width(), sz.height());
+    QRect rcBound(offset.x() - 1, offset.y() - 1, sz.width() + 1, sz.height() + 1);
     m_shadow->DrawBorder(painter, rcBound);
     //
     painter->setWorldTransform(restoreTransform);
@@ -42,6 +42,6 @@ void CWizShadowEffect::draw(QPainter *painter)
 QRectF CWizShadowEffect::boundingRectFor(const QRectF &rect) const
 {
     QRectF rc = rect;
-    rc.adjust(-m_shadowSize, -m_shadowSize, m_shadowSize, m_shadowSize);
+    rc.adjust(-m_shadowSize, -m_shadowSize, m_shadowSize + 1, m_shadowSize + 1);
     return rc;
 }
