@@ -491,6 +491,10 @@ void LoginMenuLineEdit::mousePressEvent(QMouseEvent *event)
     {
         emit showMenuRequest(mapToGlobal(QPoint(0, height())));
     }
+    else
+    {
+        LoginLineEdit::mousePressEvent(event);
+    }
 }
 
 void CWizLoginWidget::on_btn_login_clicked()
