@@ -11,7 +11,7 @@ CWizShadowEffect::CWizShadowEffect()
     : m_shadowSize(10)
     , m_shadow(new CWizSkin9GridImage())
 {
-    m_shadow->SetImage("/home/weishijun/shadow.png", QPoint(m_shadowSize, m_shadowSize));
+    m_shadow->SetImage("/home/lxn/shadow.png", QPoint(m_shadowSize, m_shadowSize));
 }
 
 void CWizShadowEffect::draw(QPainter *painter)

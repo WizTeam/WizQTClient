@@ -4,6 +4,7 @@
 #include <QDialog>
 #include <QLineEdit>
 #include <QPushButton>
+#include "share/wizshadowwindow.h"
 
 class LoginLineEdit : public QLineEdit
 {
@@ -58,7 +59,7 @@ namespace Ui {
 class wizLoginWidget;
 }
 
-class CWizLoginWidget : public QDialog
+class CWizLoginWidget : public CWizShadowWindow<QDialog>
 {
     Q_OBJECT
 

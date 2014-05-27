@@ -123,11 +123,11 @@ void LoginButton::setEnabled(bool bEnable)
 }
 
 CWizLoginWidget::CWizLoginWidget(const QString &strDefaultUserId, const QString &strLocale, QWidget *parent) :
-    QDialog(parent)
+    CWizShadowWindow(parent)
     , ui(new Ui::wizLoginWidget)
     , m_menu(new QMenu(this))
 {
-    ui->setupUi(this);
+    ui->setupUi(mainWidget());
 
     setWindowFlags(Qt::CustomizeWindowHint);
     setAutoFillBackground(true);
