@@ -134,6 +134,12 @@ CWizLoginWidget::CWizLoginWidget(const QString &strDefaultUserId, const QString 
 #ifdef Q_OS_MAC
     setWindowFlags(Qt::CustomizeWindowHint);
     ui->setupUi(this);
+    setContentsMargins(10, 10, 10, 10);
+    setFixedSize(352, 503);
+    QPalette plt(palette());
+    QPixmap pix(::WizGetSkinResourceFileName(Utils::StyleHelper::themeName(), "loginBackground"));
+    plt.setBrush(QPalette::Window, QBrush(pix));
+    setPalette(plt);
 #else
     QWidget* uiWidget = new QWidget(clientWidget());
     clientLayout()->addWidget(uiWidget);
@@ -344,7 +350,7 @@ void CWizLoginWidget::setElementStyles()
     QString strThemeName = Utils::StyleHelper::themeName();
     QString strlogo = ::WizGetSkinResourceFileName(strThemeName, "loginLogoCn");
     ui->label_logo->setStyleSheet(QString("QLabel {border: none;background-image: url(%1);"
-                                        "background-position: center; background-repeat: no-repeat; background-color:#0000ff}").arg(strlogo));
+                                        "background-position: center; background-repeat: no-repeat; background-color:#43A6E8}").arg(strlogo));
     //
     QString strBtnCloseNormal = ::WizGetSkinResourceFileName(strThemeName, "loginCloseButton_normal");
     QString strBtnCloseHot = ::WizGetSkinResourceFileName(strThemeName, "loginCloseButton_hot");
