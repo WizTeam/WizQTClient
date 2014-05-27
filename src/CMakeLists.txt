@@ -78,6 +78,8 @@ set(wiznote_SOURCES
     widgets/wizSegmentedButton.cpp
     utils/stylehelper.cpp
     utils/pathresolve.cpp
+    share/wiztitlebar.cpp
+    share/wizshadoweffect.cpp
 
     #coreplugin.cpp
     wizCategoryView.cpp
@@ -198,6 +200,9 @@ set(wiznote_HEADERS
     sync/avatar_p.h
     utils/stylehelper.h
     utils/pathresolve.h
+    share/wiztitlebar.h
+    share/wizshadowwindow.h
+    share/wizshadoweffect.h
 
     wizdef.h
     wizactions.h

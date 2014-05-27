@@ -19,6 +19,7 @@ public:
     BOOL SetImage(const CString& strImageFileName, QPoint ptTopLeft);
     //
     void Draw(QPainter* p, QRect rc, int nAlpha) const;
+    void DrawBorder(QPainter* p, QRect rc) const;
     BOOL Valid() const;
     //
     QSize actualSize() const { return m_img.size(); }
