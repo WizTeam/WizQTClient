@@ -74,7 +74,7 @@ CWizLoginDialog::CWizLoginDialog(const QString &strDefaultUserId, const QString 
     connect(m_lineEditPassword, SIGNAL(textChanged(QString)), SLOT(onLoginInputChanged()));
     connect(m_lineEditUserName, SIGNAL(textChanged(QString)), SLOT(onLoginInputChanged()));
     connect(ui->wgt_usercontainer, SIGNAL(rightIconClicked()), SLOT(showUserListMenu()));
-    connect(m_lineEditUserName, SIGNAL(textEdited(QString)), SLOT(on_userNameEdited(QString)));
+    connect(m_lineEditUserName, SIGNAL(textEdited(QString)), SLOT(onUserNameEdited(QString)));
     //
 
 #ifndef Q_OS_MAC
@@ -567,7 +567,7 @@ void CWizLoginDialog::on_cbx_autologin_toggled(bool checked)
         ui->cbx_remberPassword->setChecked(true);
 }
 
-void CWizLoginDialog::on_userNameEdited(const QString& arg1)
+void CWizLoginDialog::onUserNameEdited(const QString& arg1)
 {
     Q_UNUSED(arg1);
     m_lineEditPassword->setText("");
