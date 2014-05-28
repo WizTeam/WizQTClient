@@ -13,6 +13,7 @@
 #include <QMouseEvent>
 #include <QMenu>
 #include <QBitmap>
+#include <QToolButton>
 #include <QDesktopServices>
 #include <QUrl>
 #include <QDebug>
@@ -54,6 +55,7 @@ CWizLoginDialog::CWizLoginDialog(const QString &strDefaultUserId, const QString 
     QWidget* title = titleBar();
     title->setPalette(QPalette(QColor::fromRgb(0x43, 0xA6, 0xE8)));
     //
+
 #endif
     m_lineEditUserName = ui->wgt_usercontainer->edit();
     m_lineEditPassword = ui->wgt_passwordcontainer->edit();
@@ -276,6 +278,7 @@ void CWizLoginDialog::setElementStyles()
                                         "background-position: center; background-repeat: no-repeat; background-color:#43A6E8}").arg(strlogo));
     ui->label_placehold->setStyleSheet(QString("QLabel {border: none;background-color:#43A6E8}"));
     //
+#ifdef Q_OS_MAC
     QString strBtnCloseNormal = ::WizGetSkinResourceFileName(strThemeName, "loginCloseButton_normal");
     QString strBtnCloseHot = ::WizGetSkinResourceFileName(strThemeName, "loginCloseButton_hot");
     ui->btn_close->setStyleSheet(QString("QToolButton{ border-image:url(%1); height: 13px; width: 13px;}"
@@ -285,6 +288,23 @@ void CWizLoginDialog::setElementStyles()
     QString strGrayButton = ::WizGetSkinResourceFileName(strThemeName, "loginGrayButton");
     ui->btn_min->setStyleSheet(QString("QToolButton{ border-image:url(%1); height: 13px; width: 13px;}").arg(strGrayButton));
     ui->btn_max->setStyleSheet(QString("QToolButton{ border-image:url(%1); height: 13px; width: 13px;}").arg(strGrayButton));
+#else
+    CWizTitleBar* m_titleBar = qobject_cast<CWizTitleBar*>(titleBar());
+    if (m_titleBar)
+    {
+        QString strBtnCloseNormal = ::WizGetSkinResourceFileName(strThemeName, "toolButtonLinuxClose_normal");
+        QString strBtnCloseHover = ::WizGetSkinResourceFileName(strThemeName, "toolButtonLinuxClose_hover");
+        QString strBtnCloseDown = ::WizGetSkinResourceFileName(strThemeName, "toolButtonLinuxClose_down");
+        m_titleBar->minButton()->setVisible(false);
+        m_titleBar->maxButton()->setVisible(false);
+        m_titleBar->closeButton()->setIcon(QIcon());
+        m_titleBar->closeButton()->setStyleSheet(QString("QToolButton{ border-image:url(%1); height: 16px; width: 16px;}"
+                                                         "QToolButton:hover{ border-image:url(%2); height: 16px; width: 16px;}"
+                                                         "QToolButton:pressed{ border-image:url(%3); height: 16px; width: 16px;}")
+                                                 .arg(strBtnCloseNormal).arg(strBtnCloseHover).arg(strBtnCloseDown));
+    }
+#endif
+
     //
     ui->cbx_autologin->setStyleSheet(QString("QCheckBox{background:none;border:none;}"
                                              "QCheckBox:focus{background:none;border:none;}"
