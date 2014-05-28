@@ -13,7 +13,6 @@
 
 #include <extensionsystem/pluginmanager.h>
 #include "wizmainwindow.h"
-#include "wizLoginDialog.h"
 #include "wizLoginWidget.h"
 #include "share/wizsettings.h"
 #include "share/wizwin32helper.h"
@@ -246,7 +245,7 @@ int mainCore(int argc, char *argv[])
 
     // manually login
     if (bFallback) {
-        CWizLoginWidget loginDialog(strUserId, strLocale);
+        CWizLoginDialog loginDialog(strUserId, strLocale);
         if (QDialog::Accepted != loginDialog.exec())
             return 0;
 

@@ -11,91 +11,7 @@
 
 class QLabel;
 class CWizSkin9GridImage;
-
-class CWizIconLineEditContainer : public QWidget
-{
-    Q_OBJECT
-public:
-    CWizIconLineEditContainer(QWidget* parent);
-private:
-    CWizSkin9GridImage* m_background;
-    QLayout* m_layout;
-    QLineEdit* m_edit;
-    QLabel* m_leftIcon;
-    QLabel* m_dropdownIcon;
-public:
-    void setBackgroundImage(QString fileName, QPoint pt);
-    void setLeftIcon(QString fileName);
-    void setRightIcon(QString fileName);
-    void setPlaceholderText(const QString& strText);
-    //
-    QLineEdit* edit() const { return m_edit; }
-
-signals:
-    void rightIconClicked();
-
-protected:
-    virtual void paintEvent(QPaintEvent *event);
-    virtual void mousePressEvent(QMouseEvent* event);
-};
-
-class CWizImageButton : public QPushButton
-{
-public:
-    CWizImageButton(QWidget* parent);
-public:
-    void setButtonStyle(const QString& normalBackgroundFileName, const QString& hotBackgroundFileName,
-                        const QString& downBackgroundFileName, const QString& disabledBackgroundFileName,
-                        const QColor& normalTextColor, const QColor& activeTextColor, const QColor& disableTextColor);
-
-};
-
-class LoginLineEdit : public QLineEdit
-{
-    Q_OBJECT
-public:
-    LoginLineEdit(QWidget *parent = 0);
-    void setElementStyle(const QString& strBgFile, QLineEdit::EchoMode mode = QLineEdit::Normal, const QString& strPlaceHoldTxt = "");
-    void setErrorStatus(bool bErrorStatus);
-public slots:
-    virtual void on_containt_changed(const QString& strText);
-
-protected:
-    void paintEvent(QPaintEvent *event);
-
-    QRect getExtraIconBorder();
-protected:
-    QPixmap m_extraIcon;
-};
-
-class LoginMenuLineEdit : public LoginLineEdit
-{
-    Q_OBJECT
-public:
-    LoginMenuLineEdit(QWidget* parent = 0);
-
-public slots:
-    void on_containt_changed(const QString& strText);
-
-signals:
-    void showMenuRequest(QPoint point);
-
-protected:
-    void mousePressEvent(QMouseEvent* event);
-};
-
-class LoginButton : public QPushButton
-{
-    Q_OBJECT
-public:
-    LoginButton(QWidget *parent = 0);
-    void setElementStyle();
-
-public slots:
-    void setEnabled(bool bEnable);
-};
-
-
+class CWizImageButton;
 
 
 
@@ -103,7 +19,7 @@ namespace Ui {
 class wizLoginWidget;
 }
 
-class CWizLoginWidget
+class CWizLoginDialog
 #ifdef Q_OS_MAC
         : public QDialog
 #else
@@ -113,8 +29,8 @@ class CWizLoginWidget
     Q_OBJECT
 
 public:
-    explicit CWizLoginWidget(const QString& strDefaultUserId, const QString& strLocale, QWidget *parent = 0);
-    ~CWizLoginWidget();
+    explicit CWizLoginDialog(const QString& strDefaultUserId, const QString& strLocale, QWidget *parent = 0);
+    ~CWizLoginDialog();
 
     QString userId() const;
     QString password() const;
@@ -150,20 +66,21 @@ private slots:
     void onLoginInputChanged();
     void onSignUpInputDataChanged();
     void userListMenuClicked(QAction* action);
-    void showUserListMenu(QPoint point);
+    void showUserListMenu();
 
     void onTokenAcquired(const QString& strToken);
     void onRegisterAccountFinished(bool bFinish);
-    void on_cbx_remberPassword_toggled(bool checked);
 
+    void on_cbx_remberPassword_toggled(bool checked);
     void on_cbx_autologin_toggled(bool checked);
 
-    void on_lineEdit_userName_textEdited(const QString &arg1);
+    void on_userNameEdited(const QString& arg1);
 
 private:
     void setElementStyles();
     bool checkSingMessage();
     QAction* findActionInMenu(const QString& strActName);
+
 private:
     Ui::wizLoginWidget *ui;
     QMenu* m_menu;
@@ -171,6 +88,10 @@ private:
     QLineEdit* m_lineEditUserName;
     QLineEdit* m_lineEditPassword;
     CWizImageButton* m_buttonLogin;
+    QLineEdit* m_lineEditNewUserName;
+    QLineEdit* m_lineEditNewPassword;
+    QLineEdit* m_lineEditRepeatPassword;
+    CWizImageButton* m_buttonSignIn;
 };
 
 #endif // WIZLOGINWIDGET_H

@@ -3,9 +3,11 @@
 
 #include "wizqthelper.h"
 #include <QImage>
-
+#include <QPushButton>
 
 class QPainter;
+class QLineEdit;
+class QLabel;
 
 class CWizSkin9GridImage
 {
@@ -23,6 +25,49 @@ public:
     BOOL Valid() const;
     //
     QSize actualSize() const { return m_img.size(); }
+};
+
+
+class CWizIconLineEditContainer : public QWidget
+{
+    Q_OBJECT
+public:
+    CWizIconLineEditContainer(QWidget* parent);
+private:
+    CWizSkin9GridImage* m_background;
+    QLayout* m_layout;
+    QLineEdit* m_edit;
+    QLabel* m_leftIcon;
+    QLabel* m_rightIcon;
+public:
+    void setBackgroundImage(QString fileName, QPoint pt);
+    void setLeftIcon(QString fileName);
+    void setRightIcon(QString fileName);
+    void setPlaceholderText(const QString& strText);
+    void setAutoClearRightIcon(bool bAutoClean);
+    //
+    QLineEdit* edit() const { return m_edit; }
+
+signals:
+    void rightIconClicked();
+
+protected:
+    virtual void paintEvent(QPaintEvent *event);
+    virtual void mousePressEvent(QMouseEvent* event);
+
+private slots:
+    void cleanRightIcon();
+};
+
+class CWizImageButton : public QPushButton
+{
+public:
+    CWizImageButton(QWidget* parent);
+public:
+    void setButtonStyle(const QString& normalBackgroundFileName, const QString& hotBackgroundFileName,
+                        const QString& downBackgroundFileName, const QString& disabledBackgroundFileName,
+                        const QColor& normalTextColor, const QColor& activeTextColor, const QColor& disableTextColor);
+
 };
 
 
