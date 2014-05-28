@@ -9,6 +9,7 @@
 #include <QMouseEvent>
 #include <QDebug>
 #include <QBoxLayout>
+#include <QTimer>
 #include "wiztitlebar.h"
 #include "wizshadoweffect.h"
 
@@ -16,7 +17,8 @@
 
 
 template <class Base>
-class CWizShadowWindow : public Base
+class CWizShadowWindow
+        : public Base
 {
 public:
     explicit CWizShadowWindow(QWidget *parent = 0)
@@ -62,7 +64,6 @@ public:
         m_shadowWidget->setCursor(QCursor(Qt::ArrowCursor));
         //
         m_titleBar = new CWizTitleBar(m_shadowWidget, this, m_rootWidget);
-        m_titleBar->setFixedHeight(40);
         shadowLayout->addWidget(m_titleBar);
         //
         m_clientWidget = new QWidget(m_shadowWidget);
@@ -82,7 +83,7 @@ public:
     QWidget* rootWidget() const { return m_rootWidget; }
     QWidget *clientWidget() const { return m_clientWidget; }
     QLayout* clientLayout() const { return m_clientLayout; }
-    QWidget* titleBar() const { return m_titleBar; }
+    CWizTitleBar* titleBar() const { return m_titleBar; }
     bool canResize() const { return m_canResize; }
     void setCanResize(bool b) { m_canResize = b; m_titleBar->setCanResize(b); }
     void setTitleText(QString title) { m_titleBar->setText(title); }
@@ -262,7 +263,10 @@ protected:
         Base::mouseReleaseEvent(event);
     }
     //
-
+    virtual void layoutTitleBar()
+    {
+        m_titleBar->layoutTitleBar();
+    }
 };
 
 #endif // WIZSHADOWWINDOW_H

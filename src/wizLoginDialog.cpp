@@ -39,6 +39,8 @@ CWizLoginDialog::CWizLoginDialog(const QString &strDefaultUserId, const QString 
     setWindowFlags(Qt::CustomizeWindowHint);
     ui->setupUi(this);
 #else
+    layoutTitleBar();
+    //
     setCanResize(false);
     //
     QWidget* uiWidget = new QWidget(clientWidget());

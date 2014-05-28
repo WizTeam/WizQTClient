@@ -43,6 +43,16 @@ CWizTitleBar::CWizTitleBar(QWidget *parent, QWidget* window, QWidget* shadowCont
     m_titleLabel->setText("");
     m_window->setWindowTitle("");
 
+    m_maxNormal = false;
+
+    connect(m_close, SIGNAL( clicked() ), m_window, SLOT(close() ) );
+    connect(m_minimize, SIGNAL( clicked() ), this, SLOT(showSmall() ) );
+    connect(m_maximize, SIGNAL( clicked() ), this, SLOT(showMaxRestore() ) );
+    //
+    setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+}
+void CWizTitleBar::layoutTitleBar()
+{
     QHBoxLayout *hbox = new QHBoxLayout(this);
 
     hbox->addWidget(m_titleLabel);
@@ -52,14 +62,6 @@ CWizTitleBar::CWizTitleBar(QWidget *parent, QWidget* window, QWidget* shadowCont
 
     hbox->insertStretch(1, 500);
     hbox->setSpacing(0);
-    setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
-
-    m_maxNormal = false;
-
-    connect(m_close, SIGNAL( clicked() ), m_window, SLOT(close() ) );
-    connect(m_minimize, SIGNAL( clicked() ), this, SLOT(showSmall() ) );
-    connect(m_maximize, SIGNAL( clicked() ), this, SLOT(showMaxRestore() ) );
-    //
 }
 
 void CWizTitleBar::showSmall()

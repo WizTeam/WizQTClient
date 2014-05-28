@@ -160,6 +160,10 @@ private:
     void initMenuBar();
     void initToolBar();
     void initClient();
+    //
+#ifndef Q_OS_MAC
+    virtual void layoutTitleBar();
+#endif
 
     QWidget* createListView();
 
