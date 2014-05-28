@@ -354,8 +354,6 @@ void CWizLoginDialog::setElementStyles()
                               QColor("#ffffff"), QColor("b1b1b1"));
     m_buttonLogin->setText("Login");
     m_buttonLogin->setEnabled(false);
-//    m_buttonLogin->setContentsMargins(10, 10, 10, 10);
-//    m_buttonLogin->setStyleSheet("QPushButton{margin:30px;}");
 
     m_buttonSignIn->setButtonStyle(strBtnNormal, strBtnHover, strBtnDown, strBtnDisable, QColor("#ffffff"),
                                    QColor("#ffffff"), QColor("b1b1b1"));
@@ -366,22 +364,22 @@ void CWizLoginDialog::setElementStyles()
     ui->label_separator2->setStyleSheet(QString("QLabel {border: none;background-image: url(%1);"
                                                "background-position: center; background-repeat: no-repeat}").arg(strSeparator));
    //
-    ui->label_noaccount->setStyleSheet(QString("QLabel {border: none; font: 15px; color: #5f5f5f;}"));
+    ui->label_noaccount->setStyleSheet(QString("QLabel {border: none; color: #5f5f5f;}"));
 #ifdef Q_OS_MAC
     ui->btn_changeToSignin->setStyleSheet(QString("QPushButton { border: 1px; background: none; "
-                                                 "color: #43a6e8; font: 15px; padding-left: 10px; padding-bottom: 3px}"));
+                                                 "color: #43a6e8;  padding-left: 10px; padding-bottom: 3px}"));
     ui->btn_changeToLogin->setStyleSheet(QString("QPushButton { border: 1px; background: none; "
-                                                 "color: #43a6e8; font: 15px; padding-left: 10px; padding-bottom: 3px}"));
+                                                 "color: #43a6e8;  padding-left: 10px; padding-bottom: 3px}"));
 #else
     ui->btn_changeToSignin->setStyleSheet(QString("QPushButton { border: 1px; background: none; "
-                                                 "color: #43a6e8; font: 15px; padding-left: 10px; padding-bottom: 0px}"));
+                                                 "color: #43a6e8;  padding-left: 10px; padding-bottom: 0px}"));
     ui->btn_changeToLogin->setStyleSheet(QString("QPushButton { border: 1px; background: none; "
-                                                 "color: #43a6e8; font: 15px; padding-left: 10px; padding-bottom: 0px}"));
+                                                 "color: #43a6e8; padding-left: 10px; padding-bottom: 0px}"));
 #endif
     ui->btn_homepage->setStyleSheet(QString("QPushButton { border: none; background: none; "
-                                                 "color: #b1b1b1; font: 13px; padding-right: 15px; padding-bottom: 5px}"));
+                                                 "color: #b1b1b1; padding-right: 15px; padding-bottom: 5px}"));
     ui->btn_fogetpass->setStyleSheet(QString("QPushButton { border: none; background: none; "
-                                                 "color: #b1b1b1; font: 13px; padding-left: 15px; padding-bottom: 5px}"));
+                                                 "color: #b1b1b1; padding-left: 15px; padding-bottom: 5px}"));
 
     QString strLineSeparator = ::WizGetSkinResourceFileName(strThemeName, "loginLineSeparator");
     ui->label_separator3->setStyleSheet(QString("QLabel {border: none;background-image: url(%1);"
@@ -392,7 +390,7 @@ void CWizLoginDialog::setElementStyles()
     ui->label_passwordError->setStyleSheet(QString("QLabel {border: none; padding-left: 25px; color: red;}"));
 
     m_menu->setFixedWidth(ui->wgt_usercontainer->width());
-    m_menu->setStyleSheet("QMenu {background-color: #ffffff; border-style: solid; border-color: #43A6E8; border-width: 1px; font: 16px; color: #5F5F5F; menu-scrollable: 1;}"
+    m_menu->setStyleSheet("QMenu {background-color: #ffffff; border-style: solid; border-color: #43A6E8; border-width: 1px; color: #5F5F5F; menu-scrollable: 1;}"
                           "QMenu::item {padding: 10px 0px 10px 40px; }"
                           "QMenu::item:selected {background-color: #E7F5FF; }"
                           "QMenu::item:default {background-color: #E7F5FF; }");
