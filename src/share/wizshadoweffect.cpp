@@ -1,7 +1,8 @@
 #include "wizshadoweffect.h"
 
 #include "wizui.h"
-
+#include "utils/stylehelper.h"
+#include "wizmisc.h"
 #include <QPainter>
 #include <QPaintEngine>
 
@@ -11,7 +12,8 @@ CWizShadowEffect::CWizShadowEffect()
     : m_shadowSize(10)
     , m_shadow(new CWizSkin9GridImage())
 {
-    m_shadow->SetImage("/home/weishijun/shadow.png", QPoint(m_shadowSize + 5, m_shadowSize + 5));
+    QString strShadow = ::WizGetSkinResourceFileName(Utils::StyleHelper::themeName(), "shadow");
+    m_shadow->SetImage(strShadow, QPoint(m_shadowSize + 5, m_shadowSize + 5));
 }
 
 void CWizShadowEffect::draw(QPainter *painter)

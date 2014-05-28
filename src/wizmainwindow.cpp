@@ -95,7 +95,7 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     , m_toolBar(new CWizMacToolBar(this))
     #else
     , m_toolBar(new QToolBar("Main", titleBar()))
-    , m_menuBar(new QMenuBar(clientWidget()))
+    , m_menu(new QMenu(clientWidget()))
     #endif
     , m_actions(new CWizActions(*this, this))
     , m_category(new CWizCategoryView(*this, this))
@@ -138,7 +138,11 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
 
     // GUI
     initActions();
+#ifdef Q_OS_MAC
     initMenuBar();
+#else
+    initMenuList();
+#endif
     initToolBar();
     initClient();
 
@@ -383,11 +387,13 @@ void MainWindow::initActions()
     on_editor_statusChanged();
 }
 
+#ifdef Q_OS_MAC
 void MainWindow::initMenuBar()
 {
     setMenuBar(m_menuBar);
     m_actions->buildMenuBar(m_menuBar, Utils::PathResolve::resourcesPath() + "files/mainmenu.ini");
 }
+#endif
 
 void MainWindow::on_editor_statusChanged()
 {
@@ -662,23 +668,58 @@ void MainWindow::layoutTitleBar()
     CWizTitleBar* title = titleBar();
     title->titleLabel()->setVisible(false);
     //
-    QLayout* layout = new QHBoxLayout();
     //
-    title->setLayout(layout);
+    QLayout* layout = new QVBoxLayout();
+    layout->setSpacing(0);
+    layout->setContentsMargins(0, 0, 0, 0);
     //
-    layout->addWidget(m_toolBar);
+    QLayout* layoutTitle = new QHBoxLayout();
+    layoutTitle->setContentsMargins(0, 0, 0, 0);
+    //
+    QLayout* layoutTitleBar = new QHBoxLayout();
+    layoutTitleBar->setContentsMargins(10, 10, 10, 10);
+    layoutTitleBar->addWidget(m_toolBar);
+    layoutTitle->addItem(layoutTitleBar);
     //
     QVBoxLayout* layoutRight = new QVBoxLayout();
-    layout->addItem(layoutRight);
+    layoutTitle->addItem(layoutRight);
     //
     QLayout* layoutBox = new QHBoxLayout();
     layoutRight->addItem(layoutBox);
     //
+    m_menuButton = new QToolButton(this);
+    connect(m_menuButton, SIGNAL(clicked()), SLOT(on_menuButtonClicked()));
+    layoutBox->addWidget(m_menuButton);
     layoutBox->addWidget(title->minButton());
     layoutBox->addWidget(title->maxButton());
     layoutBox->addWidget(title->closeButton());
+
+    QString themeName = Utils::StyleHelper::themeName();
+    QString strButtonMenu = ::WizGetSkinResourceFileName(themeName, "linuxwindowmenu");
+    QString strButtonBgWhiteHover = ::WizGetSkinResourceFileName(themeName, "linuxwindowbuttonbgwhite_hover");
+    QString strButtonBgWhiteSelected = ::WizGetSkinResourceFileName(themeName, "linuxwindowbuttonbgwhite_selected");
+
+    m_menuButton->setStyleSheet(QString("QToolButton{ border-image:url(%1);width:25px;height:21px;}"
+                                   "QToolButton:hover{border-image:url(%2); background-image:url(%3);}"
+                                   "QToolButton::pressed{border-image:url(%4); background-image:url(%5);}")
+                           .arg(strButtonMenu).arg(strButtonMenu).arg(strButtonBgWhiteHover)
+                           .arg(strButtonMenu).arg(strButtonBgWhiteSelected));
+    m_menuButton->setFixedSize(25, 21);
     //
     layoutRight->addStretch();
+    //
+    QLabel* label = new QLabel(this);
+    label->setFixedHeight(1);
+    label->setStyleSheet(QString("QLabel{background-color:#aeaeae; border: none;}"));
+
+    layout->addItem(layoutTitle);
+    layout->addWidget(label);
+    title->setLayout(layout);
+}
+
+void MainWindow::initMenuList()
+{
+    m_actions->buildMenu(m_menu, Utils::PathResolve::resourcesPath() + "files/mainmenu.ini");
 }
 
 #endif
@@ -717,12 +758,19 @@ void MainWindow::initToolBar()
     CWizUserInfoWidget* info = new CWizUserInfoWidget(*this, m_toolBar);
     m_toolBar->addWidget(info);
 
-    m_toolBar->addWidget(new CWizFixedSpacer(QSize(60, 1), m_toolBar));
+    m_toolBar->addWidget(new CWizFixedSpacer(QSize(20, 1), m_toolBar));
 
     CWizButton* buttonSync = new CWizButton(m_toolBar);
     buttonSync->setAction(m_actions->actionFromName(WIZACTION_GLOBAL_SYNC));
     m_toolBar->addWidget(buttonSync);
 
+    m_toolBar->addWidget(new CWizFixedSpacer(QSize(20, 1), m_toolBar));
+
+    m_search = new CWizSearchWidget(this);
+
+    m_toolBar->addWidget(m_search);
+
+    m_toolBar->layout()->setAlignment(m_search, Qt::AlignBottom);
     m_toolBar->addWidget(new CWizFixedSpacer(QSize(20, 1), m_toolBar));
 
     CWizButton* buttonNew = new CWizButton(m_toolBar);
@@ -731,12 +779,6 @@ void MainWindow::initToolBar()
 
     m_toolBar->addWidget(new CWizSpacer(m_toolBar));
 
-    m_search = new CWizSearchWidget(this);
-
-    m_toolBar->addWidget(m_search);
-
-    m_toolBar->layout()->setAlignment(m_search, Qt::AlignBottom);
-    m_toolBar->addWidget(new CWizFixedSpacer(QSize(20, 1), m_toolBar));
     //
 #endif
     //
@@ -1416,6 +1458,12 @@ void MainWindow::on_client_splitterMoved(int pos, int index)
 
         adjustToolBarSpacerToPos(1, pt.x());
     }
+}
+
+void MainWindow::on_menuButtonClicked()
+{
+    QPoint pressedPoint = m_menuButton->geometry().bottomLeft();
+    m_menu->popup(mapToGlobal(pressedPoint));
 }
 
 #endif

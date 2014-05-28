@@ -31,9 +31,11 @@ public:
 
 public Q_SLOTS:
     void on_search_textChanged(const QString& strText);
+    void setWidthHint(int nWidth);
 
 private:
     QLineEdit* m_editSearch;
+    int m_widthHint;
 
 Q_SIGNALS:
     void doSearch(const QString& keywords);

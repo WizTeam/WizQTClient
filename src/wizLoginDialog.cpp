@@ -304,6 +304,7 @@ void CWizLoginDialog::setElementStyles()
                                                          "QToolButton:hover{ border-image:url(%2); height: 16px; width: 16px;}"
                                                          "QToolButton:pressed{ border-image:url(%3); height: 16px; width: 16px;}")
                                                  .arg(strBtnCloseNormal).arg(strBtnCloseHover).arg(strBtnCloseDown));
+        m_titleBar->closeButton()->setFixedSize(16, 16);
     }
 #endif
 

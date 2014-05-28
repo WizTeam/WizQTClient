@@ -113,11 +113,13 @@ private:
 
 #ifdef Q_OS_MAC
     CWizMacToolBar* m_toolBar;
+    QMenuBar* m_menuBar;
 #else
     QToolBar* m_toolBar;
+    QMenu* m_menu;
+    QToolButton* m_menuButton;
 #endif
 
-    QMenuBar* m_menuBar;
 
 #ifndef Q_OS_MAC
     QLabel* m_labelNotice;
@@ -157,12 +159,15 @@ private:
 
 private:
     void initActions();
-    void initMenuBar();
+
     void initToolBar();
     void initClient();
     //
 #ifndef Q_OS_MAC
     virtual void layoutTitleBar();
+    void initMenuList();
+#else
+    void initMenuBar();
 #endif
 
     QWidget* createListView();
@@ -292,6 +297,7 @@ public Q_SLOTS:
 #ifndef Q_OS_MAC
     void on_actionPopupMainMenu_triggered();
     void on_client_splitterMoved(int pos, int index);
+    void on_menuButtonClicked();
 #endif
 
     void on_application_aboutToQuit();
