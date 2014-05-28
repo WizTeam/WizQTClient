@@ -46,7 +46,7 @@ CWizIconLineEditContainer::CWizIconLineEditContainer(QWidget* parent)
     m_dropdownIcon = new QLabel(this);
     //
     m_layout->setSpacing(8);
-    m_layout->setContentsMargins(0, 0, 0, 0);
+    m_layout->setContentsMargins(8, 8, 8, 8);
     //
     m_layout->addWidget(m_leftIcon);
     m_layout->addWidget(m_edit);
@@ -241,7 +241,7 @@ CWizLoginWidget::CWizLoginWidget(const QString &strDefaultUserId, const QString 
     ui->layout_titleBar->removeWidget(ui->widget_titleBar);
     //
     QWidget* title = titleBar();
-    title->setPalette(QPalette(QColor::fromRgb(0, 0, 255)));
+    title->setPalette(QPalette(QColor::fromRgb(0x43, 0xA6, 0xE8)));
     //
 #endif
 
