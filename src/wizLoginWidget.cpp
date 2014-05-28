@@ -272,6 +272,7 @@ void CWizLoginDialog::setElementStyles()
     QString strlogo = ::WizGetSkinResourceFileName(strThemeName, "loginLogoCn");
     ui->label_logo->setStyleSheet(QString("QLabel {border: none;background-image: url(%1);"
                                         "background-position: center; background-repeat: no-repeat; background-color:#43A6E8}").arg(strlogo));
+    ui->label_placehold->setStyleSheet(QString("QLabel {border: none;background-color:#43A6E8}"));
     //
     QString strBtnCloseNormal = ::WizGetSkinResourceFileName(strThemeName, "loginCloseButton_normal");
     QString strBtnCloseHot = ::WizGetSkinResourceFileName(strThemeName, "loginCloseButton_hot");

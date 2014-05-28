@@ -115,11 +115,24 @@
      <property name="minimumSize">
       <size>
        <width>0</width>
-       <height>110</height>
+       <height>90</height>
       </size>
      </property>
      <property name="styleSheet">
       <string notr="true"/>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QLabel" name="label_placehold">
+     <property name="minimumSize">
+      <size>
+       <width>0</width>
+       <height>20</height>
+      </size>
      </property>
      <property name="text">
       <string/>
