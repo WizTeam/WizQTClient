@@ -19,6 +19,7 @@ public slots:
     void showSmall();
     void showMaxRestore();
     //
+public:
     QToolButton* maxButton() const { return m_maximize; }
     QToolButton* minButton() const { return m_minimize; }
     QToolButton* closeButton() const { return m_close; }
@@ -30,9 +31,11 @@ public slots:
     void setText(QString title);
     QString text() const;
 protected:
-    void mousePressEvent(QMouseEvent *me);
-    void mouseMoveEvent(QMouseEvent *me);
-    void mouseDoubleClickEvent ( QMouseEvent * event );
+    virtual void mousePressEvent(QMouseEvent *me);
+    virtual void mouseMoveEvent(QMouseEvent *me);
+    virtual void mouseDoubleClickEvent ( QMouseEvent * event );
+public:
+    virtual void layoutTitleBar();
 private:
     QToolButton *m_minimize;
     QToolButton *m_maximize;

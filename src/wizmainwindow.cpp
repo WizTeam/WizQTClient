@@ -94,7 +94,7 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     , m_menuBar(new QMenuBar(this))
     , m_toolBar(new CWizMacToolBar(this))
     #else
-    , m_toolBar(new QToolBar("Main", clientWidget()))
+    , m_toolBar(new QToolBar("Main", titleBar()))
     , m_menuBar(new QMenuBar(clientWidget()))
     #endif
     , m_actions(new CWizActions(*this, this))
@@ -656,6 +656,33 @@ void MainWindow::setCurrentDocumentType(const QString &strType)
     db.ModifyDocumentInfoEx(docData);
 }
 
+#ifndef Q_OS_MAC
+void MainWindow::layoutTitleBar()
+{
+    CWizTitleBar* title = titleBar();
+    title->titleLabel()->setVisible(false);
+    //
+    QLayout* layout = new QHBoxLayout();
+    //
+    title->setLayout(layout);
+    //
+    layout->addWidget(m_toolBar);
+    //
+    QVBoxLayout* layoutRight = new QVBoxLayout();
+    layout->addItem(layoutRight);
+    //
+    QLayout* layoutBox = new QHBoxLayout();
+    layoutRight->addItem(layoutBox);
+    //
+    layoutBox->addWidget(title->minButton());
+    layoutBox->addWidget(title->maxButton());
+    layoutBox->addWidget(title->closeButton());
+    //
+    layoutRight->addStretch();
+}
+
+#endif
+
 void MainWindow::initToolBar()
 {
 #ifdef Q_OS_MAC
@@ -677,9 +704,8 @@ void MainWindow::initToolBar()
     //
     m_search = m_toolBar->getSearchWidget();
 #else
-    //addToolBar(m_toolBar);
-    clientLayout()->addWidget(m_toolBar);
-
+    layoutTitleBar();
+    //
     m_toolBar->setIconSize(QSize(24, 24));
     m_toolBar->setContextMenuPolicy(Qt::PreventContextMenu);
     m_toolBar->setMovable(false);
@@ -711,6 +737,7 @@ void MainWindow::initToolBar()
 
     m_toolBar->layout()->setAlignment(m_search, Qt::AlignBottom);
     m_toolBar->addWidget(new CWizFixedSpacer(QSize(20, 1), m_toolBar));
+    //
 #endif
     //
     connect(m_search, SIGNAL(doSearch(const QString&)), SLOT(on_search_doSearch(const QString&)));
