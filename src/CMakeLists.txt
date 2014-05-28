@@ -137,7 +137,7 @@ set(wiznote_SOURCES
     messagecompleter.cpp
     widgets/wizImageButton.cpp
     wizDocumentEditStatus.cpp
-    wizLoginWidget.cpp
+    wizLoginDialog.cpp
 )
 
 set(wiznote_HEADERS
@@ -262,7 +262,7 @@ set(wiznote_HEADERS
     messagecompleter.h
     widgets/wizImageButton.h
     wizDocumentEditStatus.h
-    wizLoginWidget.h
+    wizLoginDialog.h
 )
 
 set(wiznote_FORMS
@@ -277,7 +277,7 @@ set(wiznote_FORMS
     ui/wizEditorInsertLinkForm.ui
     ui/wizEditorInsertTableForm.ui
     ui/wizProgressDialog.ui
-    ui/wizLoginWidget.ui
+    ui/wizLoginDialog.ui
 )
 
 set(wiznote_TRANSLATIONS
