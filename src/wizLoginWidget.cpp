@@ -44,6 +44,8 @@ CWizLoginDialog::CWizLoginDialog(const QString &strDefaultUserId, const QString 
     QWidget* uiWidget = new QWidget(clientWidget());
     clientLayout()->addWidget(uiWidget);
     ui->setupUi(uiWidget);
+    QRect rcUI = uiWidget->geometry();
+    setMinimumSize(rcUI.width() + 20, rcUI.height() + 20);
     //
     ui->widget_titleBar->setVisible(false);
     //
