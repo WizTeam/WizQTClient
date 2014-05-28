@@ -74,7 +74,7 @@ private slots:
     void on_cbx_remberPassword_toggled(bool checked);
     void on_cbx_autologin_toggled(bool checked);
 
-    void on_userNameEdited(const QString& arg1);
+    void onUserNameEdited(const QString& arg1);
 
 private:
     void setElementStyles();

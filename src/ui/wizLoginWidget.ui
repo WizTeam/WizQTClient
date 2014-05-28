@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>380</width>
-    <height>503</height>
+    <width>353</width>
+    <height>530</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -663,6 +663,19 @@
    <container>1</container>
   </customwidget>
  </customwidgets>
+ <tabstops>
+  <tabstop>btn_close</tabstop>
+  <tabstop>cbx_remberPassword</tabstop>
+  <tabstop>cbx_autologin</tabstop>
+  <tabstop>btn_login</tabstop>
+  <tabstop>btn_singin</tabstop>
+  <tabstop>btn_changeToSignin</tabstop>
+  <tabstop>btn_changeToLogin</tabstop>
+  <tabstop>btn_thridpart</tabstop>
+  <tabstop>btn_fogetpass</tabstop>
+  <tabstop>btn_max</tabstop>
+  <tabstop>btn_min</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>
