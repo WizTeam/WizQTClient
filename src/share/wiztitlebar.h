@@ -4,6 +4,7 @@
 #include <QWidget>
 
 class QToolButton;
+class QLabel;
 
 class CWizTitleBar : public QWidget
 {
@@ -17,18 +18,31 @@ private:
 public slots:
     void showSmall();
     void showMaxRestore();
+    //
+    QToolButton* maxButton() const { return m_maximize; }
+    QToolButton* minButton() const { return m_minimize; }
+    QToolButton* closeButton() const { return m_close; }
+    QLabel* titleLabel() const { return m_titleLabel; }
+    //
+    void setCanResize(bool b);
+    bool canResize() const { return m_canResize; }
+    //
+    void setText(QString title);
+    QString text() const;
 protected:
     void mousePressEvent(QMouseEvent *me);
     void mouseMoveEvent(QMouseEvent *me);
     void mouseDoubleClickEvent ( QMouseEvent * event );
 private:
-    QToolButton *minimize;
-    QToolButton *maximize;
-    QToolButton *close;
-    QPixmap restorePix, maxPix;
-    bool maxNormal;
-    QPoint startPos;
-    QPoint clickPos;
+    QToolButton *m_minimize;
+    QToolButton *m_maximize;
+    QToolButton *m_close;
+    QLabel* m_titleLabel;
+    QPixmap m_restorePix, m_maxPix;
+    bool m_maxNormal;
+    QPoint m_startPos;
+    QPoint m_clickPos;
+    bool m_canResize;
 };
 
 

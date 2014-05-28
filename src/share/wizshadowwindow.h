@@ -27,6 +27,7 @@ public:
         , m_shadowWidget(NULL)
         , m_clientWidget(NULL)
         , m_clientLayout(NULL)
+        , m_canResize(true)
     {
         Base* pT = this;
         //
@@ -82,6 +83,9 @@ public:
     QWidget *clientWidget() const { return m_clientWidget; }
     QLayout* clientLayout() const { return m_clientLayout; }
     QWidget* titleBar() const { return m_titleBar; }
+    bool canResize() const { return m_canResize; }
+    void setCanResize(bool b) { m_canResize = b; m_titleBar->setCanResize(b); }
+    void setTitleText(QString title) { m_titleBar->setText(title); }
 protected:
     enum WizWindowHitTestResult {wizTopLeft, wizTop, wizTopRight, wizLeft, wizClient, wizRight, wizBottomLeft, wizBottom, wizBottomRight};
 private:
@@ -94,9 +98,13 @@ private:
     QWidget* m_clientWidget;
     QLayout* m_clientLayout;
     CWizTitleBar* m_titleBar;
+    bool m_canResize;
 protected:
     virtual WizWindowHitTestResult hitTest(const QPoint& posOfWindow)
     {
+        if (!m_canResize)
+            return wizClient;
+        //
         Base* pT = this;
         QPoint globalPos = pT->mapToGlobal(posOfWindow);
         QPoint pos = m_shadowWidget->mapFromGlobal(globalPos);

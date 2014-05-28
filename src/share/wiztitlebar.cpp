@@ -14,50 +14,51 @@ CWizTitleBar::CWizTitleBar(QWidget *parent, QWidget* window, QWidget* shadowCont
     , m_window(window)
     , m_shadowContainerWidget(shadowContainerWidget)
     , m_oldContentsMargin(10, 10, 10, 10)
+    , m_canResize(true)
 {
     // 不继承父组件的背景色
     setAutoFillBackground(true);
 
-    minimize = new QToolButton(this);
-    maximize = new QToolButton(this);
-    close = new QToolButton(this);
+    m_minimize = new QToolButton(this);
+    m_maximize = new QToolButton(this);
+    m_close = new QToolButton(this);
 
     // 设置按钮图像的样式
     QPixmap pix = style()->standardPixmap(QStyle::SP_TitleBarCloseButton);
-    close->setIcon(pix);
+    m_close->setIcon(pix);
 
-    maxPix = style()->standardPixmap(QStyle::SP_TitleBarMaxButton);
-    maximize->setIcon(maxPix);
+    m_maxPix = style()->standardPixmap(QStyle::SP_TitleBarMaxButton);
+    m_maximize->setIcon(m_maxPix);
 
     pix = style()->standardPixmap(QStyle::SP_TitleBarMinButton);
-    minimize->setIcon(pix);
+    m_minimize->setIcon(pix);
 
-    restorePix = style()->standardPixmap(QStyle::SP_TitleBarNormalButton);
+    m_restorePix = style()->standardPixmap(QStyle::SP_TitleBarNormalButton);
 
-    minimize->setMinimumHeight(20);
-    close->setMinimumHeight(20);
-    maximize->setMinimumHeight(20);
+    m_minimize->setMinimumHeight(20);
+    m_close->setMinimumHeight(20);
+    m_maximize->setMinimumHeight(20);
 
-    QLabel *label = new QLabel(this);
-    label->setText("");
-    m_window->setWindowTitle("Window Title");
+    m_titleLabel = new QLabel(this);
+    m_titleLabel->setText("");
+    m_window->setWindowTitle("");
 
     QHBoxLayout *hbox = new QHBoxLayout(this);
 
-    hbox->addWidget(label);
-    hbox->addWidget(minimize);
-    hbox->addWidget(maximize);
-    hbox->addWidget(close);
+    hbox->addWidget(m_titleLabel);
+    hbox->addWidget(m_minimize);
+    hbox->addWidget(m_maximize);
+    hbox->addWidget(m_close);
 
     hbox->insertStretch(1, 500);
     hbox->setSpacing(0);
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
 
-    maxNormal = false;
+    m_maxNormal = false;
 
-    connect(close, SIGNAL( clicked() ), m_window, SLOT(close() ) );
-    connect(minimize, SIGNAL( clicked() ), this, SLOT(showSmall() ) );
-    connect(maximize, SIGNAL( clicked() ), this, SLOT(showMaxRestore() ) );
+    connect(m_close, SIGNAL( clicked() ), m_window, SLOT(close() ) );
+    connect(m_minimize, SIGNAL( clicked() ), this, SLOT(showSmall() ) );
+    connect(m_maximize, SIGNAL( clicked() ), this, SLOT(showMaxRestore() ) );
     //
 }
 
@@ -68,33 +69,36 @@ void CWizTitleBar::showSmall()
 
 void CWizTitleBar::showMaxRestore()
 {
-    if (maxNormal) {
+    if (!m_canResize)
+        return;
+    //
+    if (m_maxNormal) {
         //
         m_shadowContainerWidget->setContentsMargins(m_oldContentsMargin);
         m_window->showNormal();
-        maxNormal = !maxNormal;
-        maximize->setIcon(maxPix);
+        m_maxNormal = !m_maxNormal;
+        m_maximize->setIcon(m_maxPix);
         //
     } else {
         //
         m_oldContentsMargin = m_shadowContainerWidget->contentsMargins();
         m_shadowContainerWidget->setContentsMargins(0, 0, 0, 0);
         m_window->showMaximized();
-        maxNormal = !maxNormal;
-        maximize->setIcon(restorePix);
+        m_maxNormal = !m_maxNormal;
+        m_maximize->setIcon(m_restorePix);
     }
 }
 
 void CWizTitleBar::mousePressEvent(QMouseEvent *me)
 {
-    startPos = me->globalPos();
-    clickPos = mapTo(m_window, me->pos());
+    m_startPos = me->globalPos();
+    m_clickPos = mapTo(m_window, me->pos());
 }
 void CWizTitleBar::mouseMoveEvent(QMouseEvent *me)
 {
-    if (maxNormal)
+    if (m_maxNormal)
         return;
-    m_window->move(me->globalPos() - clickPos);
+    m_window->move(me->globalPos() - m_clickPos);
 }
 
 void CWizTitleBar::mouseDoubleClickEvent ( QMouseEvent * event )
@@ -103,4 +107,20 @@ void CWizTitleBar::mouseDoubleClickEvent ( QMouseEvent * event )
     {
         showMaxRestore();
     }
+}
+void CWizTitleBar::setCanResize(bool b)
+{
+    m_canResize = b;
+    //
+    m_maximize->setEnabled(b);
+    m_minimize->setEnabled(b);
+}
+void CWizTitleBar::setText(QString title)
+{
+    m_titleLabel->setText(title);
+}
+
+QString CWizTitleBar::text() const
+{
+    return m_titleLabel->text();
 }
