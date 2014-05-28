@@ -79,6 +79,13 @@ CWizLoginDialog::CWizLoginDialog(const QString &strDefaultUserId, const QString 
 
 #ifndef Q_OS_MAC
     connect(m_buttonLogin, SIGNAL(clicked()), SLOT(on_btn_login_clicked()));
+    connect(ui->btn_changeToLogin, SIGNAL(clicked()), SLOT(on_btn_changeToLogin_clicked()));
+    connect(ui->btn_changeToSignin, SIGNAL(clicked()), SLOT(on_btn_changeToSignin_clicked()));
+    connect(ui->btn_fogetpass, SIGNAL(clicked()), SLOT(on_btn_fogetpass_clicked()));
+    connect(ui->btn_singin, SIGNAL(clicked()), SLOT(on_btn_singin_clicked()));
+    connect(ui->btn_thridpart, SIGNAL(clicked()), SLOT(on_btn_thridpart_clicked()));
+    connect(ui->cbx_autologin, SIGNAL(toggled(bool)), SLOT(on_cbx_autologin_toggled(bool)));
+    connect(ui->cbx_remberPassword, SIGNAL(toggled(bool)), SLOT(on_cbx_remberPassword_toggled(bool)));
 #endif
 
     setUsers(strDefaultUserId);
@@ -402,6 +409,7 @@ void CWizLoginDialog::on_btn_changeToSignin_clicked()
     ui->label_noaccount->setText(tr("Already got account,"));
     ui->label_passwordError->clear();
     ui->stackedWidget->setCurrentIndex(1);
+    ui->wgt_newUser->setFocus();
 }
 
 void CWizLoginDialog::on_btn_changeToLogin_clicked()
@@ -411,6 +419,7 @@ void CWizLoginDialog::on_btn_changeToLogin_clicked()
     ui->label_noaccount->setText(tr("No account,"));
     ui->label_passwordError->clear();
     ui->stackedWidget->setCurrentIndex(0);
+    ui->wgt_usercontainer->setFocus();
 }
 
 void CWizLoginDialog::on_btn_thridpart_clicked()
