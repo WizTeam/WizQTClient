@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>353</width>
-    <height>530</height>
+    <height>503</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -128,12 +128,6 @@
    </item>
    <item>
     <widget class="QStackedWidget" name="stackedWidget">
-     <property name="minimumSize">
-      <size>
-       <width>0</width>
-       <height>200</height>
-      </size>
-     </property>
      <property name="currentIndex">
       <number>0</number>
      </property>
@@ -166,7 +160,7 @@
            </property>
            <property name="sizeHint" stdset="0">
             <size>
-             <width>43</width>
+             <width>10</width>
              <height>20</height>
             </size>
            </property>
@@ -282,7 +276,7 @@
              <property name="sizeHint" stdset="0">
               <size>
                <width>20</width>
-               <height>13</height>
+               <height>5</height>
               </size>
              </property>
             </spacer>
@@ -325,7 +319,7 @@
            </property>
            <property name="sizeHint" stdset="0">
             <size>
-             <width>42</width>
+             <width>10</width>
              <height>20</height>
             </size>
            </property>
@@ -420,7 +414,7 @@
              <property name="sizeHint" stdset="0">
               <size>
                <width>301</width>
-               <height>25</height>
+               <height>5</height>
               </size>
              </property>
             </spacer>
