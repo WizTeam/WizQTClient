@@ -12,6 +12,28 @@ class CWizDatabaseManager;
 class CWizAttachmentListViewItem;
 class CWizButton;
 class CWizObjectDataDownloaderHost;
+class CWizAttachmentListView;
+
+class CWizAttachmentListViewItem : public QObject, public QListWidgetItem
+{
+    Q_OBJECT
+public:
+    CWizAttachmentListViewItem(const WIZDOCUMENTATTACHMENTDATA& att);
+    const WIZDOCUMENTATTACHMENTDATA& attachment() const { return m_attachment; }
+
+    QString detailText(const CWizAttachmentListView* view) const;
+
+    bool isDownloading() const { return m_isDownloading; }
+    void setIsDownloading(bool isDownloading){ m_isDownloading = isDownloading; }
+
+public slots:
+    void downloadFinished(const WIZOBJECTDATA& data, bool bSucceed);
+
+private:
+    WIZDOCUMENTATTACHMENTDATA m_attachment;
+    bool m_isDownloading;
+};
+
 
 class CWizAttachmentListView : public CWizMultiLineListWidget
 {
@@ -30,6 +52,7 @@ private:
 
     void resetAttachments();
     void resetPermission();
+    void startDownLoad(CWizAttachmentListViewItem* item);
 
 public:
     QAction* findAction(const QString& strName);
@@ -56,6 +79,7 @@ public Q_SLOTS:
     void on_action_openAttachment();
     void on_action_deleteAttachment();
     void on_list_itemDoubleClicked(QListWidgetItem* item);
+    void on_download_finished(const WIZOBJECTDATA& obj, bool bSucess);
 };
 
 

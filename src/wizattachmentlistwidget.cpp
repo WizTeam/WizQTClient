@@ -24,26 +24,6 @@
 using namespace Core::Internal;
 
 
-class CWizAttachmentListViewItem : public QListWidgetItem
-{
-public:
-    CWizAttachmentListViewItem(const WIZDOCUMENTATTACHMENTDATA& att) : m_attachment(att) {}
-    const WIZDOCUMENTATTACHMENTDATA& attachment() const { return m_attachment; }
-
-    QString detailText(const CWizAttachmentListView* view) const
-    {
-        QString strKbGUID = m_attachment.strKbGUID;
-        CString strFileName = view->m_dbMgr.db(strKbGUID).GetAttachmentFileName(m_attachment.strGUID);
-        qint64 size = ::WizGetFileSize(strFileName);
-        CString strSize = 0 == size ? CString(QObject::tr("Un-downloaded")) : WizFormatInt(size);
-        CString strType = view->m_iconProvider.type(m_attachment.strName);
-        return strSize + "  " + strType;
-    }
-
-private:
-    WIZDOCUMENTATTACHMENTDATA m_attachment;
-};
-
 #define WIZACTION_ATTACHMENT_ADD    QObject::tr("Add...")
 #define WIZACTION_ATTACHMENT_SAVEAS QObject::tr("Save as...")
 #define WIZACTION_ATTACHMENT_OPEN   QObject::tr("Open...")
@@ -76,8 +56,8 @@ CWizAttachmentListView::CWizAttachmentListView(QWidget* parent)
 
     MainWindow* mainWindow = qobject_cast<MainWindow *>(Core::ICore::mainWindow());
     m_downloaderHost = mainWindow->downloaderHost();
-    //connect(m_downloaderHost, SIGNAL(downloadDone(const WIZOBJECTDATA&, bool)),
-    //        SLOT(on_download_finished(const WIZOBJECTDATA&, bool)));
+    connect(m_downloaderHost, SIGNAL(downloadDone(const WIZOBJECTDATA&, bool)),
+            SLOT(on_download_finished(const WIZOBJECTDATA&, bool)));
 
     // setup context menu
     m_menu = new QMenu(this);
@@ -246,7 +226,7 @@ void CWizAttachmentListView::openAttachment(CWizAttachmentListViewItem* item)
     bool bExists = PathFileExists(db.GetAttachmentFileName(attachment.strGUID));
     if (!bIsLocal || !bExists) {
         //m_downloadDialog->downloadData(attachment);
-        m_downloaderHost->download(attachment);
+        startDownLoad(item);
         return;
     }
 
@@ -293,6 +273,16 @@ void CWizAttachmentListView::resetPermission()
     }
 }
 
+void CWizAttachmentListView::startDownLoad(CWizAttachmentListViewItem* item)
+{
+    m_downloaderHost->download(item->attachment());
+    connect(m_downloaderHost, SIGNAL(downloadDone(WIZOBJECTDATA,bool)), item,
+            SLOT(downloadFinished(WIZOBJECTDATA,bool)));
+    item->setIsDownloading(true);
+
+    update();
+}
+
 void CWizAttachmentListView::on_action_addAttachment()
 {
     addAttachments();
@@ -317,7 +307,7 @@ void CWizAttachmentListView::on_action_saveAttachmentAs()
             bool bExists = PathFileExists(db.GetAttachmentFileName(item->attachment().strGUID));
             if (!bIsLocal || !bExists) {
                 //m_downloadDialog->downloadData(item->attachment());
-                m_downloaderHost->download(item->attachment());
+                startDownLoad(item);
                 return;
             }
 
@@ -342,7 +332,7 @@ void CWizAttachmentListView::on_action_saveAttachmentAs()
                 bool bExists = PathFileExists(db.GetAttachmentFileName(item->attachment().strGUID));
                 if (!bIsLocal || !bExists) {
                     //m_downloadDialog->downloadData(item->attachment());
-                    m_downloaderHost->download(item->attachment());
+                    startDownLoad(item);
                     continue;
                 }
 
@@ -391,6 +381,12 @@ void CWizAttachmentListView::on_list_itemDoubleClicked(QListWidgetItem* it)
     }
 }
 
+void CWizAttachmentListView::on_download_finished(const WIZOBJECTDATA& obj, bool bSucess)
+{
+    update();
+}
+
+
 
 /* ----------------------- CWizAttachmentListWidget ----------------------- */
 CWizAttachmentListWidget::CWizAttachmentListWidget(QWidget* parent)
@@ -437,4 +433,40 @@ void CWizAttachmentListWidget::setDocument(const WIZDOCUMENTDATA& doc)
 void CWizAttachmentListWidget::on_addAttachment_clicked()
 {
     m_list->addAttachments();
+}
+
+
+
+CWizAttachmentListViewItem::CWizAttachmentListViewItem(const WIZDOCUMENTATTACHMENTDATA& att) : m_attachment(att)
+  , m_isDownloading(false)
+{
+}
+
+QString CWizAttachmentListViewItem::detailText(const CWizAttachmentListView* view) const
+{
+    if (!m_isDownloading)
+    {
+        QString strKbGUID = m_attachment.strKbGUID;
+        CString strFileName = view->m_dbMgr.db(strKbGUID).GetAttachmentFileName(m_attachment.strGUID);
+        qint64 size = ::WizGetFileSize(strFileName);
+        CString strSize = 0 == size ? CString(QObject::tr("Un-downloaded")) : WizFormatInt(size);
+        CString strType = view->m_iconProvider.type(m_attachment.strName);
+        return strSize + "  " + strType;
+    }
+    return QString(QObject::tr("Downloading..."));
+}
+
+void CWizAttachmentListViewItem::downloadFinished(const WIZOBJECTDATA& data, bool bSucceed)
+{
+    if (data.strObjectGUID == m_attachment.strGUID)
+    {
+        m_isDownloading = false;
+        CWizObjectDataDownloaderHost* downloader =
+                qobject_cast<CWizObjectDataDownloaderHost*>(sender());
+        if (downloader)
+        {
+            disconnect(downloader, SIGNAL(downloadDone(WIZOBJECTDATA,bool)), this,
+                       SLOT(downloadFinished(WIZOBJECTDATA,bool)));
+        }
+    }
 }
