@@ -173,6 +173,7 @@ void CWizDocumentListView::resizeEvent(QResizeEvent* event)
     setItemsNeedUpdate();
     QListWidget::resizeEvent(event);
 
+    emit sizeChanged();
 }
 
 void CWizDocumentListView::setDocuments(const CWizDocumentDataArray& arrayDocument)

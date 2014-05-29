@@ -118,6 +118,7 @@ private:
     QToolBar* m_toolBar;
     QMenu* m_menu;
     QToolButton* m_menuButton;
+    CWizFixedSpacer* m_toolBarSearchSpacer;
 #endif
 
 
@@ -268,6 +269,7 @@ public Q_SLOTS:
     void on_documents_viewTypeChanged(int type);
     void on_documents_sortingTypeChanged(int type);
     //void on_document_contentChanged();
+    void on_documents_viewWidthChanged();
 
     void on_search_doSearch(const QString& keywords);
     void on_options_settingsChanged(WizOptionsType type);

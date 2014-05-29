@@ -112,6 +112,7 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
 {
 #ifndef Q_OS_MAC
     clientLayout()->addWidget(m_toolBar);
+    connect(m_documents, SIGNAL(sizeChanged()), SLOT(on_documents_viewWidthChanged()));
 #endif
     //
     connect(qApp, SIGNAL(aboutToQuit()), SLOT(on_application_aboutToQuit()));
@@ -764,7 +765,8 @@ void MainWindow::initToolBar()
     buttonSync->setAction(m_actions->actionFromName(WIZACTION_GLOBAL_SYNC));
     m_toolBar->addWidget(buttonSync);
 
-    m_toolBar->addWidget(new CWizFixedSpacer(QSize(20, 1), m_toolBar));
+    m_toolBarSearchSpacer = new CWizFixedSpacer(QSize(20, 1), m_toolBar);
+    m_toolBar->addWidget(m_toolBarSearchSpacer);
 
     m_search = new CWizSearchWidget(this);
 
@@ -934,6 +936,36 @@ void MainWindow::on_documents_viewTypeChanged(int type)
 void MainWindow::on_documents_sortingTypeChanged(int type)
 {
     m_documents->resetItemsSortingType(type);
+}
+
+void MainWindow::on_documents_viewWidthChanged()
+{
+    //calculate searchbar width
+    int nToolBarLeftSpace = 200;
+    int ncategoryWidth = m_category->width();
+    int nToolBarRightSpace = width() - nToolBarLeftSpace - m_toolBarSearchSpacer->width() - m_search->width() - 30;
+    if (ncategoryWidth > nToolBarLeftSpace && nToolBarRightSpace > 400)
+    {
+        m_toolBarSearchSpacer->adjustWidth(ncategoryWidth - nToolBarLeftSpace);
+    }
+    else if (ncategoryWidth - nToolBarLeftSpace < m_toolBarSearchSpacer->width())
+    {
+        m_toolBarSearchSpacer->adjustWidth(ncategoryWidth - nToolBarLeftSpace);
+    }
+    else if (ncategoryWidth < nToolBarLeftSpace && m_toolBarSearchSpacer->width() > 20)
+    {
+        m_toolBarSearchSpacer->adjustWidth(20);
+    }
+    //
+    int nDocViewWidth = m_doc->width();
+    if (nDocViewWidth < nToolBarRightSpace && nToolBarRightSpace > 400)
+    {
+        m_search->setWidthHint(m_search->width() + nToolBarRightSpace - nDocViewWidth);
+    }
+    else if (m_search->width() > 300 && nDocViewWidth > nToolBarRightSpace)
+    {
+        m_search->setWidthHint(m_search->width() - nDocViewWidth + nToolBarRightSpace);
+    }
 }
 
 //void MainWindow::on_document_contentChanged()

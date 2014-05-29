@@ -57,6 +57,7 @@ QSize CWizSearchWidget::sizeHint() const
 void CWizSearchWidget::setWidthHint(int nWidth)
 {
     m_widthHint = nWidth;
+    setFixedWidth(m_widthHint);
 }
 
 void CWizSearchWidget::on_search_textChanged(const QString& strText)
