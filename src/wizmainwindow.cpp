@@ -1457,8 +1457,14 @@ void MainWindow::on_client_splitterMoved(int pos, int index)
 
 void MainWindow::on_menuButtonClicked()
 {
-    QPoint pressedPoint = m_menuButton->geometry().bottomLeft();
-    m_menu->popup(mapToGlobal(pressedPoint));
+    QWidget* wgt = qobject_cast<QWidget*>(sender());
+    if (wgt)
+    {
+        QPoint popupPoint = clientWidget()->mapToGlobal(QPoint(wgt->pos().x(),
+                                                                 wgt->pos().y() + wgt->height()));
+        popupPoint.setY(popupPoint.y() - titleBar()->height());
+        m_menu->popup(popupPoint);
+    }
 }
 
 #endif
