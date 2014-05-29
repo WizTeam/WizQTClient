@@ -26,8 +26,8 @@ CWizWebSettingsDialog::CWizWebSettingsDialog(QString url, QSize sz, QWidget *par
 
     m_web = new QWebView(this);
     connect(m_web, SIGNAL(loadFinished(bool)), SLOT(on_web_loaded(bool)));
-    Core::Internal::MainWindow* mainWindow = qobject_cast<Core::Internal::MainWindow *>(Core::ICore::mainWindow());
-    m_web->page()->mainFrame()->addToJavaScriptWindowObject("WizExplorerApp", mainWindow->object());
+    connect(m_web->page()->mainFrame(), SIGNAL(javaScriptWindowObjectCleared()),
+            SLOT(onEditorPopulateJavaScriptWindowObject()));
 
     m_movie = new QMovie(this);
     m_movie->setFileName(":/loading.gif");
@@ -59,7 +59,7 @@ void CWizWebSettingsDialog::load()
     m_labelProgress->setVisible(true);
 
     m_movie->start();
-    m_web->load(m_url);
+    m_web->page()->mainFrame()->load(m_url);
 }
 
 void CWizWebSettingsDialog::showEvent(QShowEvent* event)
@@ -77,8 +77,13 @@ void CWizWebSettingsDialog::on_web_loaded(bool ok)
         m_labelProgress->setVisible(false);
         m_web->setVisible(true);
 
-        QVariant result = m_web->page()->mainFrame()->evaluateJavaScript("WizExplorerApp.OpenURLInDefaultBrowser('http://www.baidu.com/')");
     }
+}
+
+void CWizWebSettingsDialog::onEditorPopulateJavaScriptWindowObject()
+{
+    Core::Internal::MainWindow* mainWindow = qobject_cast<Core::Internal::MainWindow *>(Core::ICore::mainWindow());
+    m_web->page()->mainFrame()->addToJavaScriptWindowObject("WizExplorerApp", mainWindow->object());
 }
 
 void CWizWebSettingsDialog::showError()
@@ -115,5 +120,5 @@ void CWizWebSettingsWithTokenDialog::on_token_acquired(const QString& token)
     //
     QUrl u = QUrl::fromEncoded(url.toUtf8());
     //
-    m_web->load(u);
+    m_web->page()->mainFrame()->load(u);
 }

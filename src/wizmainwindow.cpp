@@ -678,6 +678,9 @@ void MainWindow::SetDialogResult(int nResult)
     if (nResult > 0)
     {
         //
+        const WIZDOCUMENTDATA& doc = m_doc->note();
+        m_dbMgr.db(doc.strKbGUID).SetObjectDataDownloaded(doc.strGUID, _T("document"), false);
+        m_doc->viewNote(doc, false);
     }
 }
 
