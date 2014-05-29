@@ -96,6 +96,7 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     #else
     , m_toolBar(new QToolBar("Main", titleBar()))
     , m_menu(new QMenu(clientWidget()))
+    , m_spacerBeforeSearch(NULL)
     #endif
     , m_actions(new CWizActions(*this, this))
     , m_category(new CWizCategoryView(*this, this))
@@ -942,6 +943,7 @@ void MainWindow::on_documents_sortingTypeChanged(int type)
 {
     m_documents->resetItemsSortingType(type);
 }
+
 
 //void MainWindow::on_document_contentChanged()
 //{

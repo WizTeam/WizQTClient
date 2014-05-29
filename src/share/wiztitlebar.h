@@ -41,7 +41,7 @@ private:
     QToolButton *m_maximize;
     QToolButton *m_close;
     QLabel* m_titleLabel;
-    QPixmap m_restorePix, m_maxPix;
+    QString m_restoreStyleSheet, m_maxSheet;
     bool m_maxNormal;
     QPoint m_startPos;
     QPoint m_clickPos;

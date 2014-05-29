@@ -172,7 +172,6 @@ void CWizDocumentListView::resizeEvent(QResizeEvent* event)
     //QPixmapCache::clear();
     setItemsNeedUpdate();
     QListWidget::resizeEvent(event);
-
 }
 
 void CWizDocumentListView::setDocuments(const CWizDocumentDataArray& arrayDocument)
