@@ -942,27 +942,30 @@ void MainWindow::on_documents_viewWidthChanged()
 {
     //calculate searchbar width
     int nToolBarLeftSpace = 200;
+    int nSearchSpacerMinWidth = 20;
+    int nToolBarRightSpaceMinWidth = 400;
+    int nSearchBarMinWidth = 300;
     int ncategoryWidth = m_category->width();
     int nToolBarRightSpace = width() - nToolBarLeftSpace - m_toolBarSearchSpacer->width() - m_search->width() - 30;
-    if (ncategoryWidth > nToolBarLeftSpace && nToolBarRightSpace > 400)
+    if (ncategoryWidth > nToolBarLeftSpace && nToolBarRightSpace > nToolBarRightSpaceMinWidth)
     {
         m_toolBarSearchSpacer->adjustWidth(ncategoryWidth - nToolBarLeftSpace);
     }
-    else if (ncategoryWidth - nToolBarLeftSpace < m_toolBarSearchSpacer->width())
+    else if (ncategoryWidth - nToolBarLeftSpace < m_toolBarSearchSpacer->width() && m_toolBarSearchSpacer->width() > nSearchSpacerMinWidth)
     {
         m_toolBarSearchSpacer->adjustWidth(ncategoryWidth - nToolBarLeftSpace);
     }
-    else if (ncategoryWidth < nToolBarLeftSpace && m_toolBarSearchSpacer->width() > 20)
+    else if (ncategoryWidth < nToolBarLeftSpace && m_toolBarSearchSpacer->width() > nSearchSpacerMinWidth)
     {
-        m_toolBarSearchSpacer->adjustWidth(20);
+        m_toolBarSearchSpacer->adjustWidth(nSearchSpacerMinWidth);
     }
     //
     int nDocViewWidth = m_doc->width();
-    if (nDocViewWidth < nToolBarRightSpace && nToolBarRightSpace > 400)
+    if (nDocViewWidth < nToolBarRightSpace && nToolBarRightSpace > nToolBarRightSpaceMinWidth)
     {
         m_search->setWidthHint(m_search->width() + nToolBarRightSpace - nDocViewWidth);
     }
-    else if (m_search->width() > 300 && nDocViewWidth > nToolBarRightSpace)
+    else if (m_search->width() > nSearchBarMinWidth && nDocViewWidth > nToolBarRightSpace)
     {
         m_search->setWidthHint(m_search->width() - nDocViewWidth + nToolBarRightSpace);
     }
