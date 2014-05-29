@@ -290,6 +290,8 @@ public Q_SLOTS:
     void saveHtmlToCurrentNote(const QString& strHtml, const QString& strResource);
     bool hasEditPermissionOnCurrentNote() const;
     void setCurrentDocumentType(const QString& strType);
+    void OpenURLInDefaultBrowser(const QString& strURL);
+    void SetDialogResult(int nResult);
 
 #ifndef Q_OS_MAC
     void on_actionPopupMainMenu_triggered();

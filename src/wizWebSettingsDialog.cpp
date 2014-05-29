@@ -1,11 +1,15 @@
 #include "wizWebSettingsDialog.h"
 #include "sync/token.h"
+#include "wizmainwindow.h"
+#include "coreplugin/icore.h"
 
 #include <QWebView>
 #include <QMovie>
 #include <QVBoxLayout>
 #include <QLabel>
 #include <QPushButton>
+#include <QWebFrame>
+#include <QApplication>
 
 using namespace WizService;
 
@@ -22,6 +26,8 @@ CWizWebSettingsDialog::CWizWebSettingsDialog(QString url, QSize sz, QWidget *par
 
     m_web = new QWebView(this);
     connect(m_web, SIGNAL(loadFinished(bool)), SLOT(on_web_loaded(bool)));
+    Core::Internal::MainWindow* mainWindow = qobject_cast<Core::Internal::MainWindow *>(Core::ICore::mainWindow());
+    m_web->page()->mainFrame()->addToJavaScriptWindowObject("WizExplorerApp", mainWindow->object());
 
     m_movie = new QMovie(this);
     m_movie->setFileName(":/loading.gif");
@@ -70,6 +76,8 @@ void CWizWebSettingsDialog::on_web_loaded(bool ok)
         m_movie->stop();
         m_labelProgress->setVisible(false);
         m_web->setVisible(true);
+
+        QVariant result = m_web->page()->mainFrame()->evaluateJavaScript("WizExplorerApp.OpenURLInDefaultBrowser('http://www.baidu.com/')");
     }
 }
 

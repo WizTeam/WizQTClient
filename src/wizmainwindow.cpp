@@ -664,6 +664,23 @@ void MainWindow::setCurrentDocumentType(const QString &strType)
     db.ModifyDocumentInfoEx(docData);
 }
 
+void MainWindow::OpenURLInDefaultBrowser(const QString& strURL)
+{
+    bool result = QDesktopServices::openUrl(QUrl(strURL));
+    if (!result)
+    {
+        qDebug() << "failed to open " << strURL;
+    }
+}
+
+void MainWindow::SetDialogResult(int nResult)
+{
+    if (nResult > 0)
+    {
+        //
+    }
+}
+
 #ifndef Q_OS_MAC
 void MainWindow::layoutTitleBar()
 {
