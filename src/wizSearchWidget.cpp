@@ -30,7 +30,7 @@ CWizSearchWidget::CWizSearchWidget(QWidget* parent /* = 0 */)
     setLayout(layout);
     layout->setSpacing(0);
     layout->setContentsMargins(0, 0, 0, 0);
-    layout->addWidget(iconLabel);
+    //layout->addWidget(iconLabel);
     layout->addWidget(m_editSearch);
     layout->setStretch(1, 1);
 

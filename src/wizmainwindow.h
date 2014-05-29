@@ -150,6 +150,7 @@ private:
 
     CWizSearchIndexer* m_searchIndexer;
     QPointer<CWizSearchWidget> m_search;
+    CWizFixedSpacer* m_spacerBeforeSearch;
 
     bool m_bRestart;
     bool m_bLogoutRestart;
@@ -192,10 +193,6 @@ public:
     void locateDocument(const WIZDOCUMENTDATA& data);
     //
     static void quickSyncKb(const QString& kbGuid);
-#ifndef Q_OS_MAC
-    CWizFixedSpacer* findFixedSpacer(int index);
-    void adjustToolBarSpacerToPos(int index, int pos);
-#endif
 
     void checkWizUpdate();
 
@@ -298,6 +295,7 @@ public Q_SLOTS:
     void on_actionPopupMainMenu_triggered();
     void on_client_splitterMoved(int pos, int index);
     void on_menuButtonClicked();
+    void adjustToolBarLayout();
 #endif
 
     void on_application_aboutToQuit();

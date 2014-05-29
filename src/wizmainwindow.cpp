@@ -170,6 +170,7 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     WizService::NoteComments::init();
     //
     m_sync->start(QThread::IdlePriority);
+    //
 }
 
 bool MainWindow::eventFilter(QObject* watched, QEvent* event)
@@ -764,7 +765,8 @@ void MainWindow::initToolBar()
     buttonSync->setAction(m_actions->actionFromName(WIZACTION_GLOBAL_SYNC));
     m_toolBar->addWidget(buttonSync);
 
-    m_toolBar->addWidget(new CWizFixedSpacer(QSize(20, 1), m_toolBar));
+    m_spacerBeforeSearch = new CWizFixedSpacer(QSize(20, 1), m_toolBar);
+    m_toolBar->addWidget(m_spacerBeforeSearch);
 
     m_search = new CWizSearchWidget(this);
 
@@ -841,6 +843,11 @@ void MainWindow::initClient()
     m_splitter->setStretchFactor(2, 1);
 
     m_msgList->hide();
+    //
+#ifndef Q_OS_MAC
+    connect(m_splitter, SIGNAL(splitterMoved(int, int)), SLOT(on_client_splitterMoved(int, int)));
+#endif
+
 }
 
 QWidget* MainWindow::createListView()
@@ -974,6 +981,10 @@ void MainWindow::init()
     connect(m_msgList, SIGNAL(itemSelectionChanged()), SLOT(on_message_itemSelectionChanged()));
     connect(m_documents, SIGNAL(itemSelectionChanged()), SLOT(on_documents_itemSelectionChanged()));
     connect(m_documents, SIGNAL(lastDocumentDeleted()), SLOT(on_documents_lastDocumentDeleted()));
+
+#ifndef Q_OS_MAC
+    QTimer::singleShot(100, this, SLOT(adjustToolBarLayout()));
+#endif
 }
 
 void MainWindow::on_actionAutoSync_triggered()
@@ -1439,25 +1450,7 @@ void MainWindow::on_actionPopupMainMenu_triggered()
 
 void MainWindow::on_client_splitterMoved(int pos, int index)
 {
-    if (0 == index)
-    {
-    }
-    else if (1 == index)
-    {
-        QPoint pt(pos, 0);
-        //
-        pt = m_splitter->mapToGlobal(pt);
-        //
-        adjustToolBarSpacerToPos(0, pt.x());
-    }
-    else if (2 == index)
-    {
-        QPoint pt(pos, 0);
-
-        pt = m_splitter->mapToGlobal(pt);
-
-        adjustToolBarSpacerToPos(1, pt.x());
-    }
+    adjustToolBarLayout();
 }
 
 void MainWindow::on_menuButtonClicked()
@@ -1721,50 +1714,29 @@ void MainWindow::checkWizUpdate()
 }
 
 #ifndef Q_OS_MAC
-CWizFixedSpacer* MainWindow::findFixedSpacer(int index)
+
+
+void MainWindow::adjustToolBarLayout()
 {
     if (!m_toolBar)
-        return NULL;
+        return;
     //
-    int i = 0;
+    QWidget* list = m_documents->isVisible() ? (QWidget*)m_documents : (QWidget*)m_msgList;
     //
-    QList<QAction*> actions = m_toolBar->actions();
-    foreach (QAction* action, actions)
+    QPoint ptSearch = list->mapToGlobal(QPoint(0, 0));
+    QPoint ptSpacerBeforeSearch = m_spacerBeforeSearch->mapToGlobal(QPoint(0, 0));
+    //
+    int spacerWidth = ptSearch.x() - ptSpacerBeforeSearch.x();
+    if (spacerWidth < 0)
+        return;
+    //
+    m_spacerBeforeSearch->adjustWidth(spacerWidth);
+    //
+    int searchWidth = list->size().width();
+    if (searchWidth > 100)
     {
-        QWidget* widget = m_toolBar->widgetForAction(action);
-        if (!widget)
-            continue;
-        //
-        if (CWizFixedSpacer* spacer = dynamic_cast<CWizFixedSpacer*>(widget))
-        {
-            if (index == i)
-                return spacer;
-            //
-            i++;
-        }
+        m_search->setFixedWidth(searchWidth);
     }
-    //
-    return NULL;
-}
-
-
-void MainWindow::adjustToolBarSpacerToPos(int index, int pos)
-{
-    if (!m_toolBar)
-        return;
-    //
-    CWizFixedSpacer* spacer = findFixedSpacer(index);
-    if (!spacer)
-        return;
-    //
-    QPoint pt = spacer->mapToGlobal(QPoint(0, 0));
-    //
-    if (pt.x() > pos)
-        return;
-    //
-    int width = pos - pt.x();
-    //
-    spacer->adjustWidth(width);
 }
 
 #endif
