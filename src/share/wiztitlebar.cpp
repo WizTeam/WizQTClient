@@ -71,8 +71,6 @@ CWizTitleBar::CWizTitleBar(QWidget *parent, QWidget* window, QWidget* shadowCont
     m_titleLabel->setText("");
     m_window->setWindowTitle("");
 
-    m_maxNormal = false;
-
     connect(m_close, SIGNAL( clicked() ), m_window, SLOT(close() ) );
     connect(m_minimize, SIGNAL( clicked() ), this, SLOT(showSmall() ) );
     connect(m_maximize, SIGNAL( clicked() ), this, SLOT(showMaxRestore() ) );
@@ -92,6 +90,20 @@ void CWizTitleBar::layoutTitleBar()
     hbox->setSpacing(0);
 }
 
+void CWizTitleBar::windowStateChanged()
+{
+    if (Qt::WindowMaximized == m_window->windowState())
+    {
+        m_shadowContainerWidget->setContentsMargins(0, 0, 0, 0);
+        m_maximize->setStyleSheet(m_restoreStyleSheet);
+    }
+    else
+    {
+        m_shadowContainerWidget->setContentsMargins(m_oldContentsMargin);
+        m_maximize->setStyleSheet(m_maxSheet);
+    }
+}
+
 void CWizTitleBar::showSmall()
 {
     m_window->showMinimized();
@@ -102,20 +114,16 @@ void CWizTitleBar::showMaxRestore()
     if (!m_canResize)
         return;
     //
-    if (m_maxNormal) {
+    if (Qt::WindowMaximized == m_window->windowState()) {
         //
         m_shadowContainerWidget->setContentsMargins(m_oldContentsMargin);
         m_window->showNormal();
-        m_maxNormal = !m_maxNormal;
-        m_maximize->setStyleSheet(m_maxSheet);
         //
     } else {
         //
         m_oldContentsMargin = m_shadowContainerWidget->contentsMargins();
         m_shadowContainerWidget->setContentsMargins(0, 0, 0, 0);
         m_window->showMaximized();
-        m_maxNormal = !m_maxNormal;
-        m_maximize->setStyleSheet(m_restoreStyleSheet);
     }
 }
 
@@ -126,7 +134,7 @@ void CWizTitleBar::mousePressEvent(QMouseEvent *me)
 }
 void CWizTitleBar::mouseMoveEvent(QMouseEvent *me)
 {
-    if (m_maxNormal)
+    if (Qt::WindowMaximized == m_window->windowState())
         return;
     m_window->move(me->globalPos() - m_clickPos);
 }

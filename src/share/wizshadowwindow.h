@@ -262,6 +262,16 @@ protected:
         //
         Base::mouseReleaseEvent(event);
     }
+    virtual void changeEvent ( QEvent * event )
+    {
+        if (event->type() == QEvent::WindowStateChange)
+        {
+            m_titleBar->windowStateChanged();
+        }
+        //
+        Base::changeEvent(event);
+    }
+
     //
     virtual void layoutTitleBar()
     {

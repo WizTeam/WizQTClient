@@ -36,13 +36,13 @@ protected:
     virtual void mouseDoubleClickEvent ( QMouseEvent * event );
 public:
     virtual void layoutTitleBar();
+    virtual void windowStateChanged();
 private:
     QToolButton *m_minimize;
     QToolButton *m_maximize;
     QToolButton *m_close;
     QLabel* m_titleLabel;
     QString m_restoreStyleSheet, m_maxSheet;
-    bool m_maxNormal;
     QPoint m_startPos;
     QPoint m_clickPos;
     bool m_canResize;
