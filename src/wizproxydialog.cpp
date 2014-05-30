@@ -19,6 +19,7 @@ ProxyDialog::ProxyDialog(QWidget *parent) :
     ui->editPort->setText(WizIntToStr(settings.GetProxyPort()));
     ui->editUserName->setText(settings.GetProxyUserName());
     ui->editPassword->setText(settings.GetProxyPassword());
+    ui->editPassword->setEchoMode(QLineEdit::Password);
 
     bool proxyStatus = settings.GetProxyStatus();
     ui->checkProxyStatus->setChecked(proxyStatus);
