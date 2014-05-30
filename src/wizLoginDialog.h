@@ -57,7 +57,7 @@ private slots:
     void on_btn_close_clicked();
     void on_btn_changeToSignin_clicked();
     void on_btn_changeToLogin_clicked();
-    void on_btn_homepage_clicked();
+    void on_btn_proxysetting_clicked();
     void on_btn_fogetpass_clicked();
     void on_btn_login_clicked();
     void on_btn_singin_clicked();
@@ -77,7 +77,7 @@ private slots:
     void onUserNameEdited(const QString& arg1);
 
 private:
-    void setElementStyles();
+    void applyElementStyles();
     bool checkSingMessage();
     QAction* findActionInMenu(const QString& strActName);
 
