@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>353</width>
+    <width>354</width>
     <height>503</height>
    </rect>
   </property>
@@ -563,6 +563,9 @@
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
+       <property name="cursor">
+        <cursorShape>PointingHandCursor</cursorShape>
+       </property>
        <property name="text">
         <string>click to sign up</string>
        </property>
@@ -575,6 +578,9 @@
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
+       </property>
+       <property name="cursor">
+        <cursorShape>PointingHandCursor</cursorShape>
        </property>
        <property name="text">
         <string>click to login</string>
@@ -628,6 +634,9 @@
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
+       <property name="cursor">
+        <cursorShape>PointingHandCursor</cursorShape>
+       </property>
        <property name="text">
         <string>Proxy settings</string>
        </property>
@@ -647,6 +656,9 @@
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
+       </property>
+       <property name="cursor">
+        <cursorShape>PointingHandCursor</cursorShape>
        </property>
        <property name="text">
         <string>Reset password?</string>

@@ -6,20 +6,14 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>318</width>
-    <height>278</height>
+    <width>306</width>
+    <height>252</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Proxy settings</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
-   <property name="spacing">
-    <number>10</number>
-   </property>
-   <property name="bottomMargin">
-    <number>12</number>
-   </property>
    <item>
     <widget class="QCheckBox" name="checkProxyStatus">
      <property name="text">
@@ -29,25 +23,16 @@
    </item>
    <item>
     <layout class="QGridLayout" name="gridLayout">
-     <property name="leftMargin">
-      <number>10</number>
+     <property name="horizontalSpacing">
+      <number>30</number>
      </property>
-     <property name="topMargin">
-      <number>10</number>
-     </property>
-     <property name="rightMargin">
-      <number>10</number>
-     </property>
-     <property name="bottomMargin">
-      <number>20</number>
-     </property>
-     <property name="spacing">
-      <number>10</number>
-     </property>
-     <item row="1" column="0" colspan="2">
+     <item row="0" column="1">
+      <widget class="QLineEdit" name="editAddress"/>
+     </item>
+     <item row="1" column="0">
       <widget class="QLabel" name="label_2">
        <property name="sizePolicy">
-        <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+        <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
@@ -60,39 +45,13 @@
        </property>
       </widget>
      </item>
-     <item row="1" column="5">
-      <spacer name="horizontalSpacer_2">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>40</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-     <item row="1" column="3" colspan="2">
+     <item row="1" column="1">
       <widget class="QLineEdit" name="editPort"/>
      </item>
-     <item row="0" column="5">
-      <spacer name="horizontalSpacer">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>40</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-     <item row="0" column="0" colspan="2">
+     <item row="0" column="0">
       <widget class="QLabel" name="label">
        <property name="sizePolicy">
-        <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+        <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
@@ -104,35 +63,6 @@
         <cstring>editAddress</cstring>
        </property>
       </widget>
-     </item>
-     <item row="0" column="3" colspan="2">
-      <widget class="QLineEdit" name="editAddress"/>
-     </item>
-     <item row="0" column="2">
-      <spacer name="horizontalSpacer_5">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>10</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-     <item row="1" column="2">
-      <spacer name="horizontalSpacer_6">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>10</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
      </item>
     </layout>
    </item>
@@ -148,25 +78,24 @@
       <string>Authentication (If required)</string>
      </property>
      <layout class="QVBoxLayout" name="verticalLayout_2">
+      <property name="leftMargin">
+       <number>0</number>
+      </property>
+      <property name="rightMargin">
+       <number>0</number>
+      </property>
       <item>
        <layout class="QGridLayout" name="gridLayout_2">
-        <item row="0" column="3">
-         <spacer name="horizontalSpacer_3">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>40</width>
-            <height>20</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-        <item row="1" column="2">
+        <property name="rightMargin">
+         <number>0</number>
+        </property>
+        <property name="horizontalSpacing">
+         <number>25</number>
+        </property>
+        <item row="1" column="1">
          <widget class="QLineEdit" name="editPassword"/>
         </item>
-        <item row="0" column="2">
+        <item row="0" column="1">
          <widget class="QLineEdit" name="editUserName"/>
         </item>
         <item row="1" column="0">
@@ -179,19 +108,6 @@
           </property>
          </widget>
         </item>
-        <item row="1" column="3">
-         <spacer name="horizontalSpacer_4">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>40</width>
-            <height>20</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
         <item row="0" column="0">
          <widget class="QLabel" name="label_3">
           <property name="text">
@@ -201,32 +117,6 @@
            <cstring>editUserName</cstring>
           </property>
          </widget>
-        </item>
-        <item row="0" column="1">
-         <spacer name="horizontalSpacer_7">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>10</width>
-            <height>20</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-        <item row="1" column="1">
-         <spacer name="horizontalSpacer_8">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>10</width>
-            <height>20</height>
-           </size>
-          </property>
-         </spacer>
         </item>
        </layout>
       </item>
