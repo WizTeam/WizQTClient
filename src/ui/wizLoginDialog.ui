@@ -629,7 +629,7 @@
         </sizepolicy>
        </property>
        <property name="text">
-        <string>Proxy setting</string>
+        <string>Proxy settings</string>
        </property>
       </widget>
      </item>

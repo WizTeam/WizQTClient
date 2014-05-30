@@ -23,7 +23,7 @@
    <item>
     <widget class="QCheckBox" name="checkProxyStatus">
      <property name="text">
-      <string>Disable Proxy</string>
+      <string>Enable Proxy</string>
      </property>
     </widget>
    </item>

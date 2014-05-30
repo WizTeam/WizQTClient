@@ -507,7 +507,7 @@ void CWizLoginDialog::on_btn_singin_clicked()
         AsyncApi* api = new AsyncApi(this);
         connect(api, SIGNAL(registerAccountFinished(bool)), SLOT(onRegisterAccountFinished(bool)));
         api->registerAccount(m_lineEditNewUserName->text(), m_lineEditNewPassword->text(), strCode);
-        enableLoginControls(false);
+        enableSignInControls(false);
     }
 }
 
@@ -583,7 +583,7 @@ void CWizLoginDialog::onRegisterAccountFinished(bool bFinish)
     AsyncApi* api = dynamic_cast<AsyncApi*>(sender());
     enableSignInControls(true);
     if (bFinish) {
-        enableLoginControls(false);
+        enableSignInControls(false);
         m_lineEditUserName->setText(m_lineEditNewUserName->text());
         m_lineEditPassword->setText(m_lineEditNewPassword->text());
         ui->cbx_remberPassword->setChecked(false);
