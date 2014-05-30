@@ -53,7 +53,7 @@ void CWizObjectDataDownloaderHost::on_downloadDone(QString objectGUID, bool bSuc
 
 void CWizObjectDataDownloaderHost::on_downloadProgress(QString objectGUID, int totalSize, int loadedSize)
 {
-    Q_EMIT downloadProgress(totalSize, loadedSize);
+    Q_EMIT downloadProgress(objectGUID, totalSize, loadedSize);
 }
 
 CWizDownloadObjectRunnable::CWizDownloadObjectRunnable(CWizDatabaseManager& dbMgr, const WIZOBJECTDATA& data)

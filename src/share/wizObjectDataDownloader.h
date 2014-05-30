@@ -32,7 +32,7 @@ private Q_SLOTS:
 
 Q_SIGNALS:
     void downloadDone(const WIZOBJECTDATA& data, bool bSucceed);
-    void downloadProgress(int totalSize, int loadedSize);
+    void downloadProgress(QString objectGUID, int totalSize, int loadedSize);
 };
 
 

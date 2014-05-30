@@ -21,7 +21,7 @@ public:
     void showAsMode(TransitionMode mode);
 
 public slots:
-    void onDownloadProgressChanged(int ntotal, int nloaded);
+    void onDownloadProgressChanged(QString strObjGUID, int ntotal, int nloaded);
 
 private:
     QLabel* m_labelHint;

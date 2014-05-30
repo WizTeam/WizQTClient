@@ -17,9 +17,10 @@ public:
 
     void setActionString(const QString& strAction);
     void setNotifyString(const QString& strNotify);
+    void setProgress(int nMax, int nCurrent);
 
 public slots:
-    void setProgress(int nMax, int nCurrent);
+    void setProgress(QString strObjGUID, int nMax, int nCurrent);
     
 private:
     Ui::CWizProgressDialog *ui;

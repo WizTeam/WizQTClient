@@ -30,7 +30,7 @@ void CWizDocumentTransitionView::showAsMode(TransitionMode mode)
     show();
 }
 
-void CWizDocumentTransitionView::onDownloadProgressChanged(int ntotal, int nloaded)
+void CWizDocumentTransitionView::onDownloadProgressChanged(QString strObjGUID, int ntotal, int nloaded)
 {
     if (isVisible() && m_mode == Downloading)
     {

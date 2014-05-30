@@ -3250,7 +3250,7 @@ bool CWizDatabase::makeSureDocumentExist(const WIZDOCUMENTDATA& doc, CWizObjectD
         dlg.setActionString(QObject::tr("Download Note %1 ").arg(doc.strTitle));
         dlg.setNotifyString(QObject::tr("Downloading,please wait..."));
         dlg.setProgress(100,0);
-        connect(downloaderHost, SIGNAL(downloadProgress(int,int)), &dlg, SLOT(setProgress(int,int)));
+        connect(downloaderHost, SIGNAL(downloadProgress(QString,int,int)), &dlg, SLOT(setProgress(QString,int,int)));
         connect(downloaderHost, SIGNAL(downloadDone(WIZOBJECTDATA,bool)), &dlg, SLOT(accept()));
 
         downloaderHost->download(doc);
@@ -3277,7 +3277,7 @@ bool CWizDatabase::makeSureAttachmentExist(const WIZDOCUMENTATTACHMENTDATAEX &at
         dlg.setActionString(QObject::tr("Download Attachment %1 ").arg(attachData.strName));
         dlg.setNotifyString(QObject::tr("Downloading, please wait..."));
         dlg.setProgress(100, 0);
-        connect(downloaderHost, SIGNAL(downloadProgress(int, int)), &dlg, SLOT(setProgress(int, int)));
+        connect(downloaderHost, SIGNAL(downloadProgress(QString,int, int)), &dlg, SLOT(setProgress(QString,int, int)));
         connect(downloaderHost, SIGNAL(downloadDone(WIZOBJECTDATA, bool)), &dlg, SLOT(accept()));
 
         downloaderHost->download(attachData);

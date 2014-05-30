@@ -121,8 +121,8 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
 
     //CWizCloudPool::instance()->init(&m_dbMgr);
 
-    connect(m_objectDownloaderHost, SIGNAL(downloadProgress(int,int)),
-            m_transitionView, SLOT(onDownloadProgressChanged(int,int)));
+    connect(m_objectDownloaderHost, SIGNAL(downloadProgress(QString, int,int)),
+            m_transitionView, SLOT(onDownloadProgressChanged(QString, int,int)));
 
     // search and full text search
     QThread *threadFTS = new QThread(this);
