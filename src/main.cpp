@@ -215,15 +215,7 @@ int mainCore(int argc, char *argv[])
     }
 #endif
 
-    // check update if needed
-    //CWizUpdaterDialog updater;
-    //if (updater.checkNeedUpdate()) {
-    //    updater.show();
-    //    updater.doUpdate();
-    //    int ret = a.exec();
-    //    QProcess::startDetached(argv[0], QStringList());
-    //    return ret;
-    //}
+
 
     // figure out auto login or manually login
     bool bFallback = true;
@@ -241,6 +233,19 @@ int mainCore(int argc, char *argv[])
 
     QSettings* settings = new QSettings(Utils::PathResolve::userSettingsFile(strUserId), QSettings::IniFormat);
     PluginManager::setSettings(settings);
+
+    //set network proxy
+    CWizSettings wizSettings(Utils::PathResolve::globalSettingsFile());
+    if (wizSettings.GetProxyStatus())
+    {
+        QNetworkProxy proxy;
+        proxy.setType(QNetworkProxy::HttpProxy);
+        proxy.setHostName(wizSettings.GetProxyHost());
+        proxy.setPort(wizSettings.GetProxyPort());
+        proxy.setUser(wizSettings.GetProxyUserName());
+        proxy.setPassword(wizSettings.GetProxyPassword());
+        QNetworkProxy::setApplicationProxy(proxy);
+    }
 
 
     // manually login

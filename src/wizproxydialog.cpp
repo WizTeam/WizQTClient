@@ -6,6 +6,8 @@
 
 #include "utils/pathresolve.h"
 
+#include <QNetworkProxy>
+
 ProxyDialog::ProxyDialog(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::ProxyDialog)
@@ -46,6 +48,24 @@ void ProxyDialog::enableControl(bool b)
     ui->editPassword->setDisabled(b);
 }
 
+void ProxyDialog::setApplicationProxy()
+{
+    if (ui->checkProxyStatus->checkState() != Qt::Checked)
+    {
+        QNetworkProxy proxy;
+        proxy.setType(QNetworkProxy::HttpProxy);
+        proxy.setHostName(ui->editAddress->text());
+        proxy.setPort(ui->editPort->text().toInt());
+        proxy.setUser(ui->editUserName->text());
+        proxy.setPassword(ui->editPassword->text());
+        QNetworkProxy::setApplicationProxy(proxy);
+    }
+    else
+    {
+        QNetworkProxy::setApplicationProxy(QNetworkProxy::NoProxy);
+    }
+}
+
 void ProxyDialog::accept()
 {
     CWizSettings settings(Utils::PathResolve::globalSettingsFile());
@@ -54,6 +74,8 @@ void ProxyDialog::accept()
     settings.SetProxyUserName(ui->editUserName->text());
     settings.SetProxyPassword(ui->editPassword->text());
     settings.SetProxyStatus(!ui->checkProxyStatus->isChecked());
+
+    setApplicationProxy();
 
     QDialog::accept();
 }

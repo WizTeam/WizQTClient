@@ -24,7 +24,7 @@ private:
     Ui::ProxyDialog *ui;
 
     void enableControl(bool b);
-
+    void setApplicationProxy();
 };
 
 #endif // WIZPROXYDIALOG_H
