@@ -29,43 +29,43 @@ CWizTitleBar::CWizTitleBar(QWidget *parent, QWidget* window, QWidget* shadowCont
     QString themeName = Utils::StyleHelper::themeName();
     QString strButtonClose = ::WizGetSkinResourceFileName(themeName, "linuxwindowclose");
     QString strButtonCloseOn = ::WizGetSkinResourceFileName(themeName, "linuxwindowclose_on");
+    QString strButtonCloseSelected = ::WizGetSkinResourceFileName(themeName, "linuxwindowclose_selected");
     QString strButtonMin = ::WizGetSkinResourceFileName(themeName, "linuxwindowmin");
+    QString strButtonMinOn = ::WizGetSkinResourceFileName(themeName, "linuxwindowmin_on");
+    QString strButtonMinSelected = ::WizGetSkinResourceFileName(themeName, "linuxwindowmin_selected");
     QString strButtonMax = ::WizGetSkinResourceFileName(themeName, "linuxwindowmax");
+    QString strButtonMaxOn = ::WizGetSkinResourceFileName(themeName, "linuxwindowmax_on");
+    QString strButtonMaxSelected = ::WizGetSkinResourceFileName(themeName, "linuxwindowmax_selected");
     QString strButtonRestore = ::WizGetSkinResourceFileName(themeName, "linuxwindowrestore");
-    QString strButtonBgWhiteHover = ::WizGetSkinResourceFileName(themeName, "linuxwindowbuttonbgwhite_hover");
-    QString strButtonBgWhiteSelected = ::WizGetSkinResourceFileName(themeName, "linuxwindowbuttonbgwhite_selected");
-    QString strButtonBgRedHover = ::WizGetSkinResourceFileName(themeName, "linuxwindowbuttonbgred_hover");
-    QString strButtonBgRedSelected = ::WizGetSkinResourceFileName(themeName, "linuxwindowbuttonbgred_selected");
-
-    m_close->setStyleSheet(QString("QToolButton{ border-image:url(%1); width:25px; height:21px;}"
-                                   "QToolButton:hover{border-image:url(%2); background-image:url(%3);}"
-                                   "QToolButton::pressed{border-image:url(%4); background-image:url(%5);}")
-                           .arg(strButtonClose).arg(strButtonCloseOn).arg(strButtonBgRedHover)
-                           .arg(strButtonCloseOn).arg(strButtonBgRedSelected));
+    QString strButtonRestoreOn = ::WizGetSkinResourceFileName(themeName, "linuxwindowrestore_on");
+    QString strButtonRestoreSelected = ::WizGetSkinResourceFileName(themeName, "linuxwindowrestore_Selected");
 
 
-    m_minimize->setStyleSheet(QString("QToolButton{ border-image:url(%1); width:25px; height:21px;}"
-                                   "QToolButton:hover{border-image:url(%2); background-image:url(%3);}"
-                                   "QToolButton::pressed{border-image:url(%4); background-image:url(%5);}")
-                           .arg(strButtonMin).arg(strButtonMin).arg(strButtonBgWhiteHover)
-                           .arg(strButtonMin).arg(strButtonBgWhiteSelected));
+    m_close->setStyleSheet(QString("QToolButton{ border-image:url(%1);background:none;}"
+                                   "QToolButton:hover{border-image:url(%2); background:none;}"
+                                   "QToolButton::pressed{border-image:url(%3); background:none;}")
+                           .arg(strButtonClose).arg(strButtonCloseOn).arg(strButtonCloseSelected));
 
-    m_maxSheet = QString("QToolButton{ border-image:url(%1); width:25px; height:21px;}"
-                         "QToolButton:hover{border-image:url(%2); background-image:url(%3);}"
-                         "QToolButton::pressed{border-image:url(%4); background-image:url(%5);}")
-                 .arg(strButtonMax).arg(strButtonMax).arg(strButtonBgWhiteHover)
-                 .arg(strButtonMax).arg(strButtonBgWhiteSelected);
+
+    m_minimize->setStyleSheet(QString("QToolButton{ border-image:url(%1); background:none;}"
+                                   "QToolButton:hover{border-image:url(%2); background:none;}"
+                                   "QToolButton::pressed{border-image:url(%3); background:none;}")
+                           .arg(strButtonMin).arg(strButtonMinOn).arg(strButtonMinSelected));
+
+    m_maxSheet = QString("QToolButton{ border-image:url(%1); background:none;}"
+                         "QToolButton:hover{border-image:url(%2); background:none;}"
+                         "QToolButton::pressed{border-image:url(%3); background:none;}")
+                 .arg(strButtonMax).arg(strButtonMaxOn).arg(strButtonMaxSelected);
     m_maximize->setStyleSheet(m_maxSheet);
 
-    m_restoreStyleSheet = QString("QToolButton{ border-image:url(%1); width:25px; height:21px;}"
-                           "QToolButton:hover{border-image:url(%2); background-image:url(%3);}"
-                           "QToolButton::pressed{border-image:url(%4); background-image:url(%5);}")
-                   .arg(strButtonRestore).arg(strButtonRestore).arg(strButtonBgWhiteHover)
-                   .arg(strButtonRestore).arg(strButtonBgWhiteSelected);
+    m_restoreStyleSheet = QString("QToolButton{ border-image:url(%1); background:none;}"
+                           "QToolButton:hover{border-image:url(%2); background:none;}"
+                           "QToolButton::pressed{border-image:url(%3); background:none;}")
+                   .arg(strButtonRestore).arg(strButtonRestoreOn).arg(strButtonRestoreSelected);
 
-    m_close->setFixedSize(25, 21);
-    m_minimize->setFixedSize(25, 21);
-    m_maximize->setFixedSize(25, 21);
+    m_close->setFixedSize(16, 16);
+    m_minimize->setFixedSize(16, 16);
+    m_maximize->setFixedSize(16, 16);
 
     m_titleLabel = new QLabel(this);
     m_titleLabel->setText("");
