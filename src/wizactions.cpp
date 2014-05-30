@@ -324,5 +324,6 @@ void CWizActions::buildMenu(QMenu* menu, const QString& strFileName)
 
     menu->addSeparator();
     menu->addAction(actionOptions);
+    menu->addSeparator();
     menu->addAction(actionQuit);
 }

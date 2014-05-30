@@ -295,9 +295,9 @@ void CWizLoginDialog::applyElementStyles()
     CWizTitleBar* m_titleBar = qobject_cast<CWizTitleBar*>(titleBar());
     if (m_titleBar)
     {
-        QString strBtnCloseNormal = ::WizGetSkinResourceFileName(strThemeName, "toolButtonLinuxClose_normal");
-        QString strBtnCloseHover = ::WizGetSkinResourceFileName(strThemeName, "toolButtonLinuxClose_hover");
-        QString strBtnCloseDown = ::WizGetSkinResourceFileName(strThemeName, "toolButtonLinuxClose_down");
+        QString strBtnCloseNormal = ::WizGetSkinResourceFileName(strThemeName, "linuxlogindialoclose");
+        QString strBtnCloseHover = ::WizGetSkinResourceFileName(strThemeName, "linuxwindowclose_on");
+        QString strBtnCloseDown = ::WizGetSkinResourceFileName(strThemeName, "linuxwindowclose_selected");
         m_titleBar->minButton()->setVisible(false);
         m_titleBar->maxButton()->setVisible(false);
         m_titleBar->closeButton()->setIcon(QIcon());
