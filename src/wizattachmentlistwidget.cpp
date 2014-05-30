@@ -6,6 +6,7 @@
 #include <QMenu>
 #include <QMessageBox>
 #include <QLabel>
+#include <QDebug>
 
 #include <coreplugin/icore.h>
 
@@ -56,8 +57,6 @@ CWizAttachmentListView::CWizAttachmentListView(QWidget* parent)
 
     MainWindow* mainWindow = qobject_cast<MainWindow *>(Core::ICore::mainWindow());
     m_downloaderHost = mainWindow->downloaderHost();
-    connect(m_downloaderHost, SIGNAL(downloadDone(const WIZOBJECTDATA&, bool)),
-            SLOT(on_download_finished(const WIZOBJECTDATA&, bool)));
 
     // setup context menu
     m_menu = new QMenu(this);
@@ -169,7 +168,7 @@ void CWizAttachmentListView::resetAttachments()
 
     CWizDocumentAttachmentDataArray::const_iterator it;
     for (it = arrayAttachment.begin(); it != arrayAttachment.end(); it++) {
-        addItem(new CWizAttachmentListViewItem(*it));
+        addItem(newAttachmentItem(*it));
     }
 }
 
@@ -203,7 +202,7 @@ void CWizAttachmentListView::addAttachments()
         {
             ok = true;
         }
-        addItem(new CWizAttachmentListViewItem(data));
+        addItem(newAttachmentItem(data));
     }
     //
     if (ok)
@@ -268,6 +267,16 @@ void CWizAttachmentListView::resetPermission()
         findAction(WIZACTION_ATTACHMENT_SAVEAS)->setEnabled(false);
         findAction(WIZACTION_ATTACHMENT_DELETE)->setEnabled(false);
     } else {
+        foreach (QListWidgetItem* item, selectedItems()) {
+            CWizAttachmentListViewItem* attachItem = dynamic_cast<CWizAttachmentListViewItem*>(item);
+            if (attachItem && (attachItem->isDownloading() || attachItem->isUploading())) {
+                findAction(WIZACTION_ATTACHMENT_OPEN)->setEnabled(false);
+                findAction(WIZACTION_ATTACHMENT_SAVEAS)->setEnabled(false);
+                findAction(WIZACTION_ATTACHMENT_DELETE)->setEnabled(false);
+
+                return;
+            }
+        }
         findAction(WIZACTION_ATTACHMENT_OPEN)->setEnabled(true);
         findAction(WIZACTION_ATTACHMENT_SAVEAS)->setEnabled(true);
     }
@@ -276,11 +285,21 @@ void CWizAttachmentListView::resetPermission()
 void CWizAttachmentListView::startDownLoad(CWizAttachmentListViewItem* item)
 {
     m_downloaderHost->download(item->attachment());
-    connect(m_downloaderHost, SIGNAL(downloadDone(WIZOBJECTDATA,bool)), item,
-            SLOT(downloadFinished(WIZOBJECTDATA,bool)));
     item->setIsDownloading(true);
 
     update();
+}
+
+CWizAttachmentListViewItem* CWizAttachmentListView::newAttachmentItem(const WIZDOCUMENTATTACHMENTDATA& att)
+{
+    CWizAttachmentListViewItem* newItem = new CWizAttachmentListViewItem(att);
+    connect(newItem, SIGNAL(updateRequet()), SLOT(update()));
+    connect(m_downloaderHost, SIGNAL(downloadDone(WIZOBJECTDATA,bool)), newItem,
+            SLOT(on_downloadFinished(WIZOBJECTDATA,bool)));
+    connect(m_downloaderHost, SIGNAL(downloadProgress(QString,int,int)), newItem,
+            SLOT(on_downloadProgress(QString,int,int)));
+
+    return newItem;
 }
 
 void CWizAttachmentListView::on_action_addAttachment()
@@ -381,11 +400,6 @@ void CWizAttachmentListView::on_list_itemDoubleClicked(QListWidgetItem* it)
     }
 }
 
-void CWizAttachmentListView::on_download_finished(const WIZOBJECTDATA& obj, bool bSucess)
-{
-    update();
-}
-
 
 
 /* ----------------------- CWizAttachmentListWidget ----------------------- */
@@ -420,13 +434,17 @@ CWizAttachmentListWidget::CWizAttachmentListWidget(QWidget* parent)
 
 void CWizAttachmentListWidget::setDocument(const WIZDOCUMENTDATA& doc)
 {
-    m_list->setDocument(doc);;
+    if (m_currentDocument != doc.strGUID)
+    {
+        m_list->setDocument(doc);
+        m_currentDocument = doc.strGUID;
 
-    // reset permission
-    if (CWizDatabaseManager::instance()->db(doc.strKbGUID).CanEditDocument(doc)) {
-        m_btnAddAttachment->setEnabled(true);
-    } else {
-        m_btnAddAttachment->setEnabled(false);
+        // reset permission
+        if (CWizDatabaseManager::instance()->db(doc.strKbGUID).CanEditDocument(doc)) {
+            m_btnAddAttachment->setEnabled(true);
+        } else {
+            m_btnAddAttachment->setEnabled(false);
+        }
     }
 }
 
@@ -438,13 +456,14 @@ void CWizAttachmentListWidget::on_addAttachment_clicked()
 
 
 CWizAttachmentListViewItem::CWizAttachmentListViewItem(const WIZDOCUMENTATTACHMENTDATA& att) : m_attachment(att)
-  , m_isDownloading(false)
+  , m_loadState(Unkonwn)
+  , m_loadProgress(0)
 {
 }
 
 QString CWizAttachmentListViewItem::detailText(const CWizAttachmentListView* view) const
 {
-    if (!m_isDownloading)
+    if (Unkonwn == m_loadState || Downloaded == m_loadState)
     {
         QString strKbGUID = m_attachment.strKbGUID;
         CString strFileName = view->m_dbMgr.db(strKbGUID).GetAttachmentFileName(m_attachment.strGUID);
@@ -453,20 +472,57 @@ QString CWizAttachmentListViewItem::detailText(const CWizAttachmentListView* vie
         CString strType = view->m_iconProvider.type(m_attachment.strName);
         return strSize + "  " + strType;
     }
-    return QString(QObject::tr("Downloading..."));
+    else if (Downloading == m_loadState)
+    {
+        return QString(QObject::tr("Downloading (%1 %) ...").arg(m_loadProgress));
+    }
+    else if (Uploading == m_loadState)
+    {
+        return QString(tr("Uploading (%1 %) ...").arg(m_loadProgress));
+    }
+    return QString(tr("Unknow State"));
 }
 
-void CWizAttachmentListViewItem::downloadFinished(const WIZOBJECTDATA& data, bool bSucceed)
+bool CWizAttachmentListViewItem::isDownloading() const
+{
+    return Downloading == m_loadState;
+}
+
+void CWizAttachmentListViewItem::setIsDownloading(bool isDownloading)
+{
+    m_loadState = isDownloading ? Downloading : Downloaded;
+}
+
+bool CWizAttachmentListViewItem::isUploading() const
+{
+    return Uploading == m_loadState;
+}
+
+void CWizAttachmentListViewItem::setIsUploading(bool isUploading)
+{
+    m_loadState = isUploading ? Uploading : Downloaded;
+}
+
+int CWizAttachmentListViewItem::loadProgress() const
+{
+    return m_loadProgress;
+}
+
+void CWizAttachmentListViewItem::on_downloadFinished(const WIZOBJECTDATA& data, bool bSucceed)
 {
     if (data.strObjectGUID == m_attachment.strGUID)
     {
-        m_isDownloading = false;
-        CWizObjectDataDownloaderHost* downloader =
-                qobject_cast<CWizObjectDataDownloaderHost*>(sender());
-        if (downloader)
-        {
-            disconnect(downloader, SIGNAL(downloadDone(WIZOBJECTDATA,bool)), this,
-                       SLOT(downloadFinished(WIZOBJECTDATA,bool)));
-        }
+        m_loadState = Downloaded;
+        emit updateRequet();
+    }
+}
+
+void CWizAttachmentListViewItem::on_downloadProgress(QString objectGUID, int totalSize, int loadedSize)
+{
+    if (objectGUID == m_attachment.strGUID)
+    {
+        m_loadProgress = ((float)loadedSize / (totalSize +1)) * 100;
+        m_loadState == Downloading ? 0 : m_loadState = Downloading;
+        emit updateRequet();
     }
 }

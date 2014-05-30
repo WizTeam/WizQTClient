@@ -707,6 +707,7 @@ void MainWindow::layoutTitleBar()
     layoutTitle->addItem(layoutRight);
     //
     QLayout* layoutBox = new QHBoxLayout();
+    layoutBox->setContentsMargins(0, 6, 6, 0);
     layoutRight->addItem(layoutBox);
     //
     m_menuButton = new QToolButton(this);
@@ -718,15 +719,14 @@ void MainWindow::layoutTitleBar()
 
     QString themeName = Utils::StyleHelper::themeName();
     QString strButtonMenu = ::WizGetSkinResourceFileName(themeName, "linuxwindowmenu");
-    QString strButtonBgWhiteHover = ::WizGetSkinResourceFileName(themeName, "linuxwindowbuttonbgwhite_hover");
-    QString strButtonBgWhiteSelected = ::WizGetSkinResourceFileName(themeName, "linuxwindowbuttonbgwhite_selected");
+    QString strButtonMenuOn = ::WizGetSkinResourceFileName(themeName, "linuxwindowmenu_on");
+    QString strButtonMenuSelected = ::WizGetSkinResourceFileName(themeName, "linuxwindowmenu_selected");
 
-    m_menuButton->setStyleSheet(QString("QToolButton{ border-image:url(%1);width:25px;height:21px;}"
-                                   "QToolButton:hover{border-image:url(%2); background-image:url(%3);}"
-                                   "QToolButton::pressed{border-image:url(%4); background-image:url(%5);}")
-                           .arg(strButtonMenu).arg(strButtonMenu).arg(strButtonBgWhiteHover)
-                           .arg(strButtonMenu).arg(strButtonBgWhiteSelected));
-    m_menuButton->setFixedSize(25, 21);
+    m_menuButton->setStyleSheet(QString("QToolButton{ border-image:url(%1);}"
+                                   "QToolButton:hover{border-image:url(%2); background:none;}"
+                                   "QToolButton::pressed{border-image:url(%3); background:none;}")
+                           .arg(strButtonMenu).arg(strButtonMenuOn).arg(strButtonMenuSelected));
+    m_menuButton->setFixedSize(16, 16);
     //
     layoutRight->addStretch();
     //

@@ -8,6 +8,7 @@
 #include "sync/wizkmxmlrpc.h"
 #include "sync/asyncapi.h"
 #include "sync/token.h"
+#include "wizproxydialog.h"
 #include <extensionsystem/pluginmanager.h>
 #include <QPainter>
 #include <QMouseEvent>
@@ -71,7 +72,7 @@ CWizLoginDialog::CWizLoginDialog(const QString &strDefaultUserId, const QString 
     ui->wgt_newPassword->setAutoClearRightIcon(true);
     ui->wgt_passwordRepeat->setAutoClearRightIcon(true);
 
-    setElementStyles();
+    applyElementStyles();
 
 
     connect(m_menu, SIGNAL(triggered(QAction*)), SLOT(userListMenuClicked(QAction*)));
@@ -91,7 +92,7 @@ CWizLoginDialog::CWizLoginDialog(const QString &strDefaultUserId, const QString 
     connect(ui->btn_changeToSignin, SIGNAL(clicked()), SLOT(on_btn_changeToSignin_clicked()));
     connect(ui->btn_fogetpass, SIGNAL(clicked()), SLOT(on_btn_fogetpass_clicked()));
     connect(ui->btn_singin, SIGNAL(clicked()), SLOT(on_btn_singin_clicked()));
-    connect(ui->btn_homepage, SIGNAL(clicked()), SLOT(on_btn_homepage_clicked()));
+    connect(ui->btn_proxysetting, SIGNAL(clicked()), SLOT(on_btn_proxysetting_clicked()));
     connect(ui->cbx_autologin, SIGNAL(toggled(bool)), SLOT(on_cbx_autologin_toggled(bool)));
     connect(ui->cbx_remberPassword, SIGNAL(toggled(bool)), SLOT(on_cbx_remberPassword_toggled(bool)));
 #endif
@@ -270,7 +271,7 @@ void CWizLoginDialog::on_btn_close_clicked()
     qApp->quit();
 }
 
-void CWizLoginDialog::setElementStyles()
+void CWizLoginDialog::applyElementStyles()
 {
     ui->stackedWidget->setCurrentIndex(0);
 
@@ -377,7 +378,7 @@ void CWizLoginDialog::setElementStyles()
     ui->btn_changeToLogin->setStyleSheet(QString("QPushButton { border: 1px; background: none; "
                                                  "color: #43a6e8; padding-left: 10px; padding-bottom: 0px}"));
 #endif
-    ui->btn_homepage->setStyleSheet(QString("QPushButton { border: none; background: none; "
+    ui->btn_proxysetting->setStyleSheet(QString("QPushButton { border: none; background: none; "
                                                  "color: #b1b1b1; padding-right: 15px; padding-bottom: 5px}"));
     ui->btn_fogetpass->setStyleSheet(QString("QPushButton { border: none; background: none; "
                                                  "color: #b1b1b1; padding-left: 15px; padding-bottom: 5px}"));
@@ -461,10 +462,10 @@ void CWizLoginDialog::on_btn_changeToLogin_clicked()
     ui->wgt_usercontainer->setFocus();
 }
 
-void CWizLoginDialog::on_btn_homepage_clicked()
+void CWizLoginDialog::on_btn_proxysetting_clicked()
 {
-    QString strUrl = WizService::ApiEntry::standardCommandUrl("home");
-    QDesktopServices::openUrl(QUrl(strUrl));
+    ProxyDialog dlg;
+    dlg.exec();
 }
 
 void CWizLoginDialog::on_btn_fogetpass_clicked()
@@ -582,10 +583,10 @@ void CWizLoginDialog::onRegisterAccountFinished(bool bFinish)
     AsyncApi* api = dynamic_cast<AsyncApi*>(sender());
     enableSignInControls(true);
     if (bFinish) {
-        ui->stackedWidget->setCurrentIndex(0);
         enableLoginControls(false);
         m_lineEditUserName->setText(m_lineEditNewUserName->text());
         m_lineEditPassword->setText(m_lineEditNewPassword->text());
+        ui->cbx_remberPassword->setChecked(false);
         doAccountVerify();
     } else {
         ui->label_passwordError->setText(api->lastErrorMessage());

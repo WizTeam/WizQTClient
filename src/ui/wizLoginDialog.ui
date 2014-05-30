@@ -621,7 +621,7 @@
       </spacer>
      </item>
      <item>
-      <widget class="QPushButton" name="btn_homepage">
+      <widget class="QPushButton" name="btn_proxysetting">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
          <horstretch>0</horstretch>
@@ -629,7 +629,7 @@
         </sizepolicy>
        </property>
        <property name="text">
-        <string>Homepage</string>
+        <string>Proxy setting</string>
        </property>
       </widget>
      </item>
@@ -691,7 +691,7 @@
   <tabstop>btn_singin</tabstop>
   <tabstop>btn_changeToSignin</tabstop>
   <tabstop>btn_changeToLogin</tabstop>
-  <tabstop>btn_homepage</tabstop>
+  <tabstop>btn_proxysetting</tabstop>
   <tabstop>btn_fogetpass</tabstop>
   <tabstop>btn_max</tabstop>
   <tabstop>btn_min</tabstop>

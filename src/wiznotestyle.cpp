@@ -6,6 +6,7 @@
 #include "wizCategoryView.h"
 #include "wizDocumentListView.h"
 #include "wizDocumentListViewItem.h"
+#include "wizattachmentlistwidget.h"
 #include "share/wizdrawtexthelper.h"
 #include "share/wizqthelper.h"
 #include "share/wizsettings.h"
@@ -59,6 +60,7 @@ private:
 protected:
     virtual void drawCategoryViewItem(const QStyleOptionViewItemV4 *option, QPainter *painter, const CWizCategoryBaseView *widget) const;
     virtual void drawMultiLineListWidgetItem(const QStyleOptionViewItemV4 *option, QPainter *painter, const CWizMultiLineListWidget *widget) const;
+    virtual void drawMultiLineItemBackground(const QStyleOptionViewItemV4* vopt, QPainter* pt, const CWizMultiLineListWidget* view) const;
     void drawcenterImage(QPainter* p, const QImage& image, const QRect& rc) const;
 
 public:
@@ -210,10 +212,7 @@ void CWizNoteStyle::drawMultiLineListWidgetItem(const QStyleOptionViewItemV4 *vo
     //QRect textRect = subElementRect(SE_ItemViewItemText, vopt, view);
 
     // draw the background
-    if (vopt->state.testFlag(State_Selected))
-    {
-        m_multiLineListSelectedItemBackground.Draw(p, vopt->rect, 0);
-    }
+    drawMultiLineItemBackground(vopt, p, view);
 
     if (!img.isNull() && img.width() > 0 && img.height() > 0)
     {
@@ -323,6 +322,31 @@ void CWizNoteStyle::drawMultiLineListWidgetItem(const QStyleOptionViewItemV4 *vo
     }
 
     p->restore();
+}
+
+void CWizNoteStyle::drawMultiLineItemBackground(const QStyleOptionViewItemV4* vopt, QPainter* pt, const CWizMultiLineListWidget* view) const
+{
+    if (const CWizAttachmentListView *attachView = dynamic_cast<const CWizAttachmentListView *>(view))
+    {
+        const CWizAttachmentListViewItem* item = attachView->attachmentItemFromIndex(vopt->index);
+        if (item && (item->isDownloading() || item->isUploading()))
+        {
+            pt->save();
+            pt->setPen(Qt::NoPen);
+            pt->setBrush(QColor("#43E16C"));
+            QRect rect = vopt->rect;
+            rect.setWidth(rect.width() * item->loadProgress() / 100);
+            pt->drawRect(rect);
+            pt->restore();
+
+            return;
+        }
+    }
+
+    if (vopt->state.testFlag(State_Selected))
+    {
+        m_multiLineListSelectedItemBackground.Draw(pt, vopt->rect, 0);
+    }
 }
 
 void CWizNoteStyle::drawControl(ControlElement element, const QStyleOption *option, QPainter *painter, const QWidget *widget) const
