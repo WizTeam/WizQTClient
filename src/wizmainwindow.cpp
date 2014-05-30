@@ -708,6 +708,7 @@ void MainWindow::layoutTitleBar()
     //
     QLayout* layoutBox = new QHBoxLayout();
     layoutBox->setContentsMargins(0, 6, 6, 0);
+    layoutBox->setSpacing(6);
     layoutRight->addItem(layoutBox);
     //
     m_menuButton = new QToolButton(this);
