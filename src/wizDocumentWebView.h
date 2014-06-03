@@ -161,7 +161,7 @@ public:
 
     //
     void saveAsPDF(const QString& fileName);
-
+    bool findIMGElementAt(QPoint point, QString& strSrc);
     //
     Q_INVOKABLE bool isContentsChanged() { return m_bContentsChanged; }
     Q_INVOKABLE void setContentsChanged(bool b) { m_bContentsChanged = b; }

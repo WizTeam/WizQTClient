@@ -53,6 +53,8 @@ private:
     CWizToolButton* m_btnCheckList;
     CWizToolButton* m_btnImage;
 
+    QString m_strImageSrc;
+
     WizEditorContextMenuItem* contextMenuData();
     void buildMenu();
     int buildMenu(QMenu* pMenu, int indx);
@@ -86,6 +88,9 @@ protected Q_SLOTS:
     void on_btnHorizontal_clicked();
     void on_btnCheckList_clicked();
     void on_btnImage_clicked();
+    void on_editor_saveImageAs_triggered();
+    void on_editor_copyImage_triggered();
+    void on_editor_copyImageLink_triggered();
 
     void on_delegate_requestShowContextMenu(const QPoint& pos);
     void on_delegate_selectionChanged();

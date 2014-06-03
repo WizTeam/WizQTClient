@@ -162,3 +162,16 @@ function WizGetLinkUrl() {
     return url ? url: '';
 }
 
+function WizGetImgElementByPoint(posX, posY) {
+    console.log('findElement at ' + posX + posY);
+    var element = editor.document.elementFromPoint(posX, posY);
+    console.log(element);
+    console.log(element.tagName);
+    if (element && element.tagName == 'IMG') {
+        console.log(element.src);
+        console.log(element.getAttribute('IMG'));
+        return element.src;
+    } 
+
+    return '';
+}

@@ -141,7 +141,6 @@ QString ApiEntryPrivate::avatarDownloadUrl(const QString& strUserGUID)
 {
     QString strRawUrl(requestUrl(WIZNOTE_API_COMMAND_AVATAR, m_strAvatarDownloadUrl));
 
-    // http://as.wiz.cn/wizas/a/users/avatar/{userGuid}
     strRawUrl.replace(QRegExp("\\{.*\\}"), strUserGUID);
     strRawUrl += "?default=false"; // Do not download server default avatar
     return strRawUrl;

@@ -74,7 +74,7 @@ private:
 
 QString getImageHtmlLabelByFile(const QString& strImageFile)
 {
-    return QString("<img class=\"WizNormalImg\" border=\"0\" src=\"file://%1\" />").arg(strImageFile);
+    return QString("<img border=\"0\" src=\"file://%1\" />").arg(strImageFile);
 }
 
 void CWizDocumentWebViewPage::triggerAction(QWebPage::WebAction typeAction, bool checked)
@@ -97,10 +97,11 @@ void CWizDocumentWebViewPage::on_editorCommandPaste_triggered()
     QClipboard* clip = QApplication::clipboard();
     Q_ASSERT(clip);
 
-    //const QMimeData* mime = clip->mimeData();
-    //qDebug() << mime->formats();
-    //qDebug() << mime->data("text/html");
-    //qDebug() << mime->hasImage();
+//    const QMimeData* mime = clip->mimeData();
+//    QStringList formats = mime->formats();
+//    for(int i = 0; i < formats.size(); ++ i) {
+//        qDebug() << "Mime Format: " << formats.at(i) << " Mime data: " << mime->data(formats.at(i));
+//    }
 
     if (!clip->image().isNull()) {
         // save clipboard image to $TMPDIR
@@ -1279,7 +1280,7 @@ bool CWizDocumentWebView::editorCommandExecuteInsertImage()
         return false;
 
 //    QPixmap pix(strImgFile);
-//    return editorCommandExecuteCommand("insertImage", QString("{src:'%1', class:\"WizNormalImg\", width:%2, height:%3}")
+//    return editorCommandExecuteCommand("insertImage", QString("{src:'%1', width:%2, height:%3}")
 //                                       .arg(strImgFile).arg(pix.width()).arg(pix.height()));
     QString strHtml;// = //getImageHtmlLabelByFile(strImgFile);
     if (image2Html(strImgFile, strHtml)) {
@@ -1423,6 +1424,21 @@ void CWizDocumentWebView::saveAsPDF(const QString& fileName)
         //
         frame->print(&printer);
     }
+}
+
+bool CWizDocumentWebView::findIMGElementAt(QPoint point, QString& strSrc)
+{
+    QPoint elemPos = mapFromGlobal(point);
+    QString strImgSrc = page()->mainFrame()->evaluateJavaScript(QString("WizGetImgElementByPoint(%1, %2)").
+                                                                arg(elemPos.x()).arg(elemPos.y())).toString();
+
+    qDebug() << "find image  : " << QString("at(%1, %2)").arg(elemPos.x()).arg(elemPos.y()) << strImgSrc;
+
+    if (strImgSrc.isEmpty())
+        return false;
+
+    strSrc = strImgSrc;
+    return true;
 }
 
 void CWizDocumentWebView::undo()

@@ -593,6 +593,10 @@ struct WizEditorContextMenuItem
 #define WIZEDITOR_ACTION_COPY           QObject::tr("Copy")
 #define WIZEDITOR_ACTION_PASTE          QObject::tr("Paste")
 
+#define WIZEDITOR_ACTION_SAVEIMGAS          QObject::tr("Save Image as...")
+#define WIZEDITOR_ACTION_COPYIMG          QObject::tr("Copy Image")
+#define WIZEDITOR_ACTION_COPYIMGLINK          QObject::tr("Copy Image Link")
+
 #define WIZEDITOR_ACTION_LINK_INSERT    QObject::tr("Insert Link")
 #define WIZEDITOR_ACTION_LINK_EDIT      QObject::tr("Edit Link")
 #define WIZEDITOR_ACTION_LINK_REMOVE    QObject::tr("Remove Link")
@@ -646,6 +650,11 @@ WizEditorContextMenuItem* EditorToolBar::contextMenuData()
         {WIZEDITOR_ACTION_CUT,                      "",                 "on_editor_cut_triggered"},
         {WIZEDITOR_ACTION_COPY,                     "",                 "on_editor_copy_triggered"},
         {WIZEDITOR_ACTION_PASTE,                    "",                 "on_editor_paste_triggered"},
+        {"-", "-", "-"},
+
+        {WIZEDITOR_ACTION_SAVEIMGAS,                      "",                 "on_editor_saveImageAs_triggered"},
+        {WIZEDITOR_ACTION_COPYIMG,                     "",                 "on_editor_copyImage_triggered"},
+        {WIZEDITOR_ACTION_COPYIMGLINK,                    "",                 "on_editor_copyImageLink_triggered"},
         {"-", "-", "-"},
 
         {QObject::tr("Link"),                       "+",                "+"},
@@ -723,6 +732,20 @@ void EditorToolBar::on_delegate_requestShowContextMenu(const QPoint& pos)
         return;
 
     buildMenu();
+
+    m_strImageSrc.clear();
+    if (m_editor->findIMGElementAt(pos, m_strImageSrc))
+    {
+        actionFromName(WIZEDITOR_ACTION_SAVEIMGAS)->setVisible(true);
+        actionFromName(WIZEDITOR_ACTION_COPYIMG)->setVisible(true);
+        actionFromName(WIZEDITOR_ACTION_COPYIMGLINK)->setVisible(true);
+    }
+    else
+    {
+        actionFromName(WIZEDITOR_ACTION_SAVEIMGAS)->setVisible(false);
+        actionFromName(WIZEDITOR_ACTION_COPYIMG)->setVisible(false);
+        actionFromName(WIZEDITOR_ACTION_COPYIMGLINK)->setVisible(false);
+    }
 
     if (m_editor->selectedText().isEmpty()) {
         actionFromName(WIZEDITOR_ACTION_GOOGLE)->setEnabled(false);
@@ -1018,4 +1041,19 @@ void EditorToolBar::on_btnImage_clicked()
     if (m_editor) {
         m_editor->editorCommandExecuteInsertImage();
     }
+}
+
+void EditorToolBar::on_editor_saveImageAs_triggered()
+{
+
+}
+
+void EditorToolBar::on_editor_copyImage_triggered()
+{
+
+}
+
+void EditorToolBar::on_editor_copyImageLink_triggered()
+{
+
 }
