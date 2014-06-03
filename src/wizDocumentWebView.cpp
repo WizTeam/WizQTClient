@@ -304,6 +304,8 @@ void CWizDocumentWebView::focusInEvent(QFocusEvent *event)
     }
 
     QWebView::focusInEvent(event);
+
+    resetSearchKeywordHighlight();
 }
 
 void CWizDocumentWebView::focusOutEvent(QFocusEvent *event)
@@ -608,6 +610,8 @@ void CWizDocumentWebView::initEditor()
             SLOT(onEditorContentChanged()));
 
     page()->mainFrame()->setHtml(strHtml, url);
+
+    resetSearchKeywordHighlight();
 }
 
 void CWizDocumentWebView::initCheckListEnvironment()
@@ -884,6 +888,23 @@ void CWizDocumentWebView::updateNoteHtml()
     }
 }
 
+void CWizDocumentWebView::resetSearchKeywordHighlight()
+{
+    MainWindow* window = qobject_cast<MainWindow *>(m_app.mainWindow());
+    QString strKeyWords = window->searchKeywords();
+    if (!strKeyWords.isEmpty() && (!m_bCurrentEditing || !hasFocus()))
+    {
+        if (findText(strKeyWords, QWebPage::HighlightAllOccurrences))
+            qDebug() << "[Search] find keywords : " << window->searchKeywords();
+        else
+            qDebug() << "[Search] can't find keywords : " << page()->mainFrame()->toPlainText();
+    }
+    else
+    {
+        findText("", QWebPage::HighlightAllOccurrences);
+    }
+}
+
 void CWizDocumentWebView::viewDocumentInEditor(bool editing)
 {
     Q_ASSERT(m_bEditorInited);
@@ -942,13 +963,7 @@ void CWizDocumentWebView::viewDocumentInEditor(bool editing)
     page()->undoStack()->clear();
     m_timerAutoSave.start();
 
-//    if (editing) {                //shouldn't focus the editor,otherwise the titleBar will twinkle.
-//        setFocus(Qt::MouseFocusReason);
-//        editorFocus();
-//    }
-
-    //update();
-
+    resetSearchKeywordHighlight();
 }
 
 void CWizDocumentWebView::onNoteLoadFinished()

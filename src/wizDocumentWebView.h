@@ -132,7 +132,7 @@ public:
 
     //only update Html in JS editor, wouldn't refresh WebView display
     void updateNoteHtml();
-    //const WIZDOCUMENTDATA& document() { return m_data; }
+    void resetSearchKeywordHighlight();
 
     // initialize editor style before render, only invoke once.
     bool resetDefaultCss();

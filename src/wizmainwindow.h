@@ -92,6 +92,8 @@ public:
 
     bool isLogout() const { return m_bLogoutRestart; }
 
+    QString searchKeywords() const { return m_strSearchKeywords; }
+
 protected:
     virtual bool eventFilter(QObject* watched, QEvent* event);
     virtual void resizeEvent(QResizeEvent* event);

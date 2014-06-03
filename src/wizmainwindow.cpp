@@ -1369,6 +1369,7 @@ void MainWindow::on_actionResetSearch_triggered()
     m_search->clear();
     m_search->focus();
     m_category->restoreSelection();
+    m_doc->web()->resetSearchKeywordHighlight();
 }
 
 void MainWindow::on_actionSaveAsPDF_triggered()
@@ -1391,6 +1392,7 @@ void MainWindow::on_actionSaveAsPDF_triggered()
 
 void MainWindow::on_search_doSearch(const QString& keywords)
 {
+    m_strSearchKeywords = keywords;
     if (keywords.isEmpty()) {
         on_actionResetSearch_triggered();
         return;
@@ -1418,7 +1420,6 @@ void MainWindow::on_search_doSearch(const QString& keywords)
         connect(m_searchTimer, SIGNAL(timeout()), SLOT(on_search_timeout()));
     }
 
-    m_strSearchKeywords = keywords;
     m_searchTimer->start();
 }
 
@@ -1446,6 +1447,7 @@ void MainWindow::on_searchProcess(const QString& strKeywords, const CWizDocument
 
     if (bEnd) {
         m_searchThread.exit();
+        m_doc->web()->resetSearchKeywordHighlight();
     }
 
     if (strKeywords != m_strSearchKeywords) {
