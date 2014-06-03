@@ -932,7 +932,7 @@ void CWizDocumentWebView::viewDocumentInEditor(bool editing)
     MainWindow* window = qobject_cast<MainWindow *>(m_app.mainWindow());
     if (!ret) {
         window->showClient(false);
-        window->transitionView()->showAsMode(CWizDocumentTransitionView::ErrorOccured);
+        window->transitionView()->showAsMode(strGUID, CWizDocumentTransitionView::ErrorOccured);
         return;
     }
 

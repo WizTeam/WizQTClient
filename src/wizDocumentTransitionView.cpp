@@ -6,6 +6,7 @@
 CWizDocumentTransitionView::CWizDocumentTransitionView(QWidget *parent) :
     QWidget(parent)
   , m_mode(-1)
+  , m_objGUID(QString())
 {
     m_labelHint = new QLabel(this);
 
@@ -18,7 +19,7 @@ CWizDocumentTransitionView::CWizDocumentTransitionView(QWidget *parent) :
 
 }
 
-void CWizDocumentTransitionView::showAsMode(TransitionMode mode)
+void CWizDocumentTransitionView::showAsMode(const QString& strObjGUID, TransitionMode mode)
 {
     m_mode = mode;
     if (m_mode == Downloading) {
@@ -27,12 +28,14 @@ void CWizDocumentTransitionView::showAsMode(TransitionMode mode)
         m_labelHint->setText(tr("Error occured while loading note."));
     }
 
+    m_objGUID = strObjGUID;
+
     show();
 }
 
 void CWizDocumentTransitionView::onDownloadProgressChanged(QString strObjGUID, int ntotal, int nloaded)
 {
-    if (isVisible() && m_mode == Downloading)
+    if (isVisible() && strObjGUID == m_objGUID && m_mode == Downloading)
     {
         int nPercent = nloaded * 100 / (ntotal + 1);
         m_labelHint->setText(QString(tr("Downloading note from cloud server( %1 %)...").arg(nPercent)));

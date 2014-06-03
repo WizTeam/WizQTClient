@@ -238,7 +238,7 @@ void CWizDocumentView::viewNote(const WIZDOCUMENTDATA& data, bool forceEdit)
 
         window->downloaderHost()->download(data);
         window->showClient(false);
-        window->transitionView()->showAsMode(CWizDocumentTransitionView::Downloading);
+        window->transitionView()->showAsMode(data.strGUID, CWizDocumentTransitionView::Downloading);
 
         return;
     }
@@ -276,7 +276,7 @@ void CWizDocumentView::reviewCurrentNote()
         MainWindow* window = qobject_cast<MainWindow *>(m_app.mainWindow());
         window->downloaderHost()->download(m_note);
         window->showClient(false);
-        window->transitionView()->showAsMode(CWizDocumentTransitionView::Downloading);
+        window->transitionView()->showAsMode(m_note.strGUID, CWizDocumentTransitionView::Downloading);
 
         return;
     }
