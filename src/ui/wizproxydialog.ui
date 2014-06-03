@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>306</width>
-    <height>252</height>
+    <width>310</width>
+    <height>257</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -23,6 +23,9 @@
    </item>
    <item>
     <layout class="QGridLayout" name="gridLayout">
+     <property name="bottomMargin">
+      <number>15</number>
+     </property>
      <property name="horizontalSpacing">
       <number>30</number>
      </property>
@@ -79,10 +82,10 @@
      </property>
      <layout class="QVBoxLayout" name="verticalLayout_2">
       <property name="leftMargin">
-       <number>0</number>
+       <number>5</number>
       </property>
       <property name="rightMargin">
-       <number>0</number>
+       <number>5</number>
       </property>
       <item>
        <layout class="QGridLayout" name="gridLayout_2">
