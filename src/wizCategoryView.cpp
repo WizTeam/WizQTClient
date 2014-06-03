@@ -178,6 +178,9 @@ void CWizCategoryBaseView::mousePressEvent(QMouseEvent* event)
 
 void CWizCategoryBaseView::mouseMoveEvent(QMouseEvent* event)
 {
+    if (DraggingState == state())
+        return;
+
     QPoint msPos = event->pos();
     CWizCategoryViewItemBase* pItem =  itemAt(msPos);
     if (!pItem)
