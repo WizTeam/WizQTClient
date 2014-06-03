@@ -611,7 +611,6 @@ void CWizDocumentWebView::initEditor()
 
     page()->mainFrame()->setHtml(strHtml, url);
 
-    resetSearchKeywordHighlight();
 }
 
 void CWizDocumentWebView::initCheckListEnvironment()
@@ -895,9 +894,9 @@ void CWizDocumentWebView::resetSearchKeywordHighlight()
     if (!strKeyWords.isEmpty() && (!m_bCurrentEditing || !hasFocus()))
     {
         if (findText(strKeyWords, QWebPage::HighlightAllOccurrences))
-            qDebug() << "[Search] find keywords : " << window->searchKeywords();
+            qDebug() << "[Search] find keywords : " << strKeyWords;
         else
-            qDebug() << "[Search] can't find keywords : " << page()->mainFrame()->toPlainText();
+            qDebug() << "[Search] can't find keywords : " << strKeyWords;
     }
     else
     {
@@ -963,7 +962,8 @@ void CWizDocumentWebView::viewDocumentInEditor(bool editing)
     page()->undoStack()->clear();
     m_timerAutoSave.start();
 
-    resetSearchKeywordHighlight();
+    //Waiting for the editor initialization complete if it's the first time to load a document.
+    QTimer::singleShot(100, this, SLOT(resetSearchKeywordHighlight()));
 }
 
 void CWizDocumentWebView::onNoteLoadFinished()

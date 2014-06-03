@@ -132,7 +132,6 @@ public:
 
     //only update Html in JS editor, wouldn't refresh WebView display
     void updateNoteHtml();
-    void resetSearchKeywordHighlight();
 
     // initialize editor style before render, only invoke once.
     bool resetDefaultCss();
@@ -246,6 +245,8 @@ public Q_SLOTS:
 
     void on_editorCommandExecuteLinkInsert_accepted();
     void on_editorCommandExecuteTableInsert_accepted();
+
+    void resetSearchKeywordHighlight();
 
     /* editor API */
 
