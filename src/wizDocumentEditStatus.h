@@ -12,12 +12,12 @@ class QNetworkAccessManager;
 
 
 
-class wizDocumentEditStatusSyncThread : public QThread
+class CWizDocumentEditStatusSyncThread : public QThread
 {
     Q_OBJECT
 public:
-    wizDocumentEditStatusSyncThread(QObject* parent = 0);
-    ~wizDocumentEditStatusSyncThread();
+    CWizDocumentEditStatusSyncThread(QObject* parent = 0);
+    ~CWizDocumentEditStatusSyncThread();
     //
     void stopEditingDocument();
     void setCurrentEditingDocument(const QString& strUserAlias,const QString& strKbGUID ,const QString& strGUID);
@@ -50,11 +50,11 @@ private:
     QPointer<QNetworkAccessManager> m_netManager;
 };
 
-class wizDocumentEditStatusCheckThread : public QThread
+class CWizDocumentEditStatusCheckThread : public QThread
 {
     Q_OBJECT
 public:
-    wizDocumentEditStatusCheckThread(QObject* parent = 0);
+    CWizDocumentEditStatusCheckThread(QObject* parent = 0);
     void checkEditStatus(const QString& strKbGUID,const QString& strGUID);
     void downloadData(const QString& strUrl);
 

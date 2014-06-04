@@ -24,7 +24,7 @@ class CWizUserCipherForm;
 class CWizObjectDataDownloaderHost;
 class QStackedWidget;
 class QWebFrame;
-class wizDocumentEditStatusSyncThread;
+class CWizDocumentEditStatusSyncThread;
 
 namespace Core {
 namespace Internal {
@@ -62,7 +62,7 @@ protected:
     Core::Internal::TitleBar* m_title;
 
     CWizUserCipherForm* m_passwordView;
-    QSharedPointer<wizDocumentEditStatusSyncThread> m_editStatusSyncThread;
+    QSharedPointer<CWizDocumentEditStatusSyncThread> m_editStatusSyncThread;
 
     virtual void showEvent(QShowEvent *event);
 

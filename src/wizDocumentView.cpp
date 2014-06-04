@@ -40,7 +40,7 @@ CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
     , m_bLocked(false)
     , m_bEditingMode(false)
     , m_noteLoaded(false)
-    , m_editStatusSyncThread(new wizDocumentEditStatusSyncThread())
+    , m_editStatusSyncThread(new CWizDocumentEditStatusSyncThread())
 {
     m_title->setEditor(m_web);
 
@@ -207,7 +207,7 @@ void CWizDocumentView::initStat(const WIZDOCUMENTDATA& data, bool bEditing)
     m_title->setLocked(m_bLocked, nLockReason, bGroup);
     if (bGroup && nLockReason == -1)
     {
-        wizDocumentEditStatusCheckThread* editStatusChecker = new wizDocumentEditStatusCheckThread();
+        CWizDocumentEditStatusCheckThread* editStatusChecker = new CWizDocumentEditStatusCheckThread();
         connect(editStatusChecker, SIGNAL(checkFinished(QString,QStringList)), SLOT(on_checkEditStatus_finished(QString,QStringList)));
         editStatusChecker->checkEditStatus(data.strKbGUID, data.strGUID);
     }
@@ -486,7 +486,7 @@ void Core::CWizDocumentView::on_checkEditStatus_finished(QString strGUID, QStrin
     }
 
     // delete check trhead
-    wizDocumentEditStatusCheckThread* checker = qobject_cast<wizDocumentEditStatusCheckThread *>(sender());
+    CWizDocumentEditStatusCheckThread* checker = qobject_cast<CWizDocumentEditStatusCheckThread *>(sender());
     Q_ASSERT(checker);
     connect(checker, SIGNAL(finished()), checker, SLOT(deleteLater()));
     checker->quit();
