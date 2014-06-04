@@ -19,6 +19,8 @@
 #include "share/wizsettings.h"
 #include "wizDocumentWebView.h"
 #include "wizactions.h"
+#include "utils/logger.h"
+#include "share/wizObjectDataDownloader.h"
 
 using namespace Core::Internal;
 
@@ -777,7 +779,41 @@ void EditorToolBar::on_delegate_requestShowContextMenu(const QPoint& pos)
 
 void EditorToolBar::on_delegate_selectionChanged()
 {
-   resetToolbar();
+    resetToolbar();
+}
+
+void EditorToolBar::saveImage(QString strFileName)
+{
+    QFileInfo info(strFileName);
+    QPixmap pix(info.filePath());
+    if (pix.isNull())
+    {
+        TOLOG(_T("[Save] : image is null"));
+        return;
+    }
+
+    QString strFilePath = QFileDialog::getSaveFileName(this, tr("Save File"),
+                                                       QDir::homePath(), tr("Image Files (*.%1)").arg(info.suffix()));
+    if (strFilePath.isEmpty())
+        return;
+
+    bool ret = pix.save(strFilePath, info.suffix().toAscii());
+    TOLOG2(_T("[Save] : save image to %1, result : %2"), strFilePath,
+           ret ? "OK" : "Failed");    //pix formart should use ascii or capital letter.
+}
+
+void EditorToolBar::copyImage(QString strFileName)
+{
+    QFileInfo info(strFileName);
+    QPixmap pix(info.filePath());
+    if (pix.isNull())
+    {
+        TOLOG(_T("[Copy] : image is null"));
+        return;
+    }
+
+    QClipboard* clip = QApplication::clipboard();
+    clip->setPixmap(pix);
 }
 
 QAction* EditorToolBar::actionFromName(const QString& strName)
@@ -1058,18 +1094,17 @@ void EditorToolBar::on_editor_saveImageAs_triggered()
     {
         m_strImageSrc.remove(0, 7);
     }
-    QFileInfo info(m_strImageSrc);
-    QPixmap pix(info.filePath());
-    if (pix.isNull())
+    else if (m_strImageSrc.left(7) == "http://")
     {
-        qDebug() << "[Save] : image is null";
+        QFileInfo info(m_strImageSrc);
+        QString fileName = WizGenGUIDLowerCaseLetterOnly() + "." + info.suffix();
+        CWizFileDownloader* downloader = new CWizFileDownloader(m_strImageSrc, fileName);
+        connect(downloader, SIGNAL(downloadDone(QString,bool)), SLOT(saveImage(QString)));
+        downloader->startDownload();
         return;
     }
 
-    QString strFilePath = QFileDialog::getSaveFileName(this, tr("Save File"), QDir::homePath(), tr("Image Files (*.%1)").arg(info.suffix()));
-    qDebug() << "[Save] : save image to " << strFilePath << " result : " <<
-                pix.save(strFilePath, info.suffix().toAscii());
-
+    saveImage(m_strImageSrc);
 }
 
 void EditorToolBar::on_editor_copyImage_triggered()
@@ -1080,16 +1115,16 @@ void EditorToolBar::on_editor_copyImage_triggered()
     {
         m_strImageSrc.remove(0, 7);
     }
-    QFileInfo info(m_strImageSrc);
-    QPixmap pix(info.filePath());
-    if (pix.isNull())
+    else if (m_strImageSrc.left(7) == "http://")
     {
-        qDebug() << "[Copy] : image is null";
+        QFileInfo info(m_strImageSrc);
+        QString fileName = WizGenGUIDLowerCaseLetterOnly() + "." + info.suffix();
+        CWizFileDownloader* downloader = new CWizFileDownloader(m_strImageSrc, fileName);
+        connect(downloader, SIGNAL(downloadDone(QString,bool)), SLOT(copyImage(QString)));
+        downloader->startDownload();
         return;
     }
-
-    QClipboard* clip = QApplication::clipboard();
-    clip->setPixmap(pix);
+    copyImage(m_strImageSrc);
 }
 
 void EditorToolBar::on_editor_copyImageLink_triggered()

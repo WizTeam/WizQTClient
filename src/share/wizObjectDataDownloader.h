@@ -57,5 +57,24 @@ Q_SIGNALS:
     void downloadProgress(QString objectGuid, int totalSize, int loadedSize);
 };
 
+class CWizFileDownloader
+        : public QObject
+        , public QRunnable
+{
+    Q_OBJECT
+public:
+    CWizFileDownloader(const QString& strUrl, const QString& strFileName = "", const QString& strPath = "");
+    virtual void run();
+    void startDownload();
+
+signals:
+    void downloadDone(QString strFileName, bool bSucceed);
+
+private:
+    QString m_strUrl;
+    QString m_strFileName;
+
+    bool download();
+};
 
 #endif // WIZOBJECTDATADOWNLOADER_H

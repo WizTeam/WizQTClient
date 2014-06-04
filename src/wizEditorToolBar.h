@@ -94,6 +94,9 @@ protected Q_SLOTS:
 
     void on_delegate_requestShowContextMenu(const QPoint& pos);
     void on_delegate_selectionChanged();
+
+    void saveImage(QString strFileName);
+    void copyImage(QString strFileName);
 };
 
 
