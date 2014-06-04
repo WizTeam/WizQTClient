@@ -1432,8 +1432,6 @@ bool CWizDocumentWebView::findIMGElementAt(QPoint point, QString& strSrc)
     QString strImgSrc = page()->mainFrame()->evaluateJavaScript(QString("WizGetImgElementByPoint(%1, %2)").
                                                                 arg(ptPos.x()).arg(ptPos.y())).toString();
 
-    qDebug() << "find image  : " << QString("at(%1, %2)").arg(ptPos.x()).arg(ptPos.y()) << strImgSrc;
-
     if (strImgSrc.isEmpty())
         return false;
 

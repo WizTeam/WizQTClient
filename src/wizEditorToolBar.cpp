@@ -9,6 +9,9 @@
 #include <QMenu>
 #include <QFileDialog>
 #include <QImageWriter>
+#include <QClipboard>
+#include <QApplication>
+#include <QMimeData>
 #include <QDebug>
 
 #include "share/wizmisc.h"
@@ -1051,32 +1054,49 @@ void EditorToolBar::on_editor_saveImageAs_triggered()
 
     if (m_strImageSrc.isEmpty())
         return;
+    if (m_strImageSrc.left(7) == "file://")
+    {
+        m_strImageSrc.remove(0, 7);
+    }
     QFileInfo info(m_strImageSrc);
     QPixmap pix(info.filePath());
-    QString strFilePath = QFileDialog::getSaveFileName(this, tr("Save File"), QDir::homePath(), tr("Image Files (*.%1)").arg(info.suffix()));
-    qDebug() << "save file as : " << strFilePath;
-    QFile file(strFilePath);
-    file.remove();
-    qDebug() << "img is NULL " << pix.isNull();
-    //qDebug() << "save file as " << pix.save(QString("./bild.png"), "PNG");
-
-    QImageWriter writer(strFilePath);
-    if(!writer.write(pix.toImage()))
+    if (pix.isNull())
     {
-        qDebug() << writer.errorString();
+        qDebug() << "[Save] : image is null";
+        return;
     }
-    /*
-    file.open(QIODevice::Truncate | QIODevice::WriteOnly);
-    file.write(text.toUtf8());
-    file.close();*/
+
+    QString strFilePath = QFileDialog::getSaveFileName(this, tr("Save File"), QDir::homePath(), tr("Image Files (*.%1)").arg(info.suffix()));
+    qDebug() << "[Save] : save image to " << strFilePath << " result : " <<
+                pix.save(strFilePath, info.suffix().toAscii());
+
 }
 
 void EditorToolBar::on_editor_copyImage_triggered()
 {
+    if (m_strImageSrc.isEmpty())
+        return;
+    if (m_strImageSrc.left(7) == "file://")
+    {
+        m_strImageSrc.remove(0, 7);
+    }
+    QFileInfo info(m_strImageSrc);
+    QPixmap pix(info.filePath());
+    if (pix.isNull())
+    {
+        qDebug() << "[Copy] : image is null";
+        return;
+    }
 
+    QClipboard* clip = QApplication::clipboard();
+    clip->setPixmap(pix);
 }
 
 void EditorToolBar::on_editor_copyImageLink_triggered()
 {
+    if (m_strImageSrc.isEmpty())
+        return;
 
+    QClipboard* clip = QApplication::clipboard();
+    clip->setText(m_strImageSrc);
 }
