@@ -7,6 +7,9 @@
 #include <QDesktopServices>
 #include <QAction>
 #include <QMenu>
+#include <QFileDialog>
+#include <QImageWriter>
+#include <QDebug>
 
 #include "share/wizmisc.h"
 #include "wizdef.h"
@@ -1046,6 +1049,26 @@ void EditorToolBar::on_btnImage_clicked()
 void EditorToolBar::on_editor_saveImageAs_triggered()
 {
 
+    if (m_strImageSrc.isEmpty())
+        return;
+    QFileInfo info(m_strImageSrc);
+    QPixmap pix(info.filePath());
+    QString strFilePath = QFileDialog::getSaveFileName(this, tr("Save File"), QDir::homePath(), tr("Image Files (*.%1)").arg(info.suffix()));
+    qDebug() << "save file as : " << strFilePath;
+    QFile file(strFilePath);
+    file.remove();
+    qDebug() << "img is NULL " << pix.isNull();
+    //qDebug() << "save file as " << pix.save(QString("./bild.png"), "PNG");
+
+    QImageWriter writer(strFilePath);
+    if(!writer.write(pix.toImage()))
+    {
+        qDebug() << writer.errorString();
+    }
+    /*
+    file.open(QIODevice::Truncate | QIODevice::WriteOnly);
+    file.write(text.toUtf8());
+    file.close();*/
 }
 
 void EditorToolBar::on_editor_copyImage_triggered()

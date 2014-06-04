@@ -1428,11 +1428,11 @@ void CWizDocumentWebView::saveAsPDF(const QString& fileName)
 
 bool CWizDocumentWebView::findIMGElementAt(QPoint point, QString& strSrc)
 {
-    QPoint elemPos = mapFromGlobal(point);
+    QPoint ptPos = mapFromGlobal(point);
     QString strImgSrc = page()->mainFrame()->evaluateJavaScript(QString("WizGetImgElementByPoint(%1, %2)").
-                                                                arg(elemPos.x()).arg(elemPos.y())).toString();
+                                                                arg(ptPos.x()).arg(ptPos.y())).toString();
 
-    qDebug() << "find image  : " << QString("at(%1, %2)").arg(elemPos.x()).arg(elemPos.y()) << strImgSrc;
+    qDebug() << "find image  : " << QString("at(%1, %2)").arg(ptPos.x()).arg(ptPos.y()) << strImgSrc;
 
     if (strImgSrc.isEmpty())
         return false;
