@@ -829,6 +829,65 @@ QAction* EditorToolBar::actionFromName(const QString& strName)
     return NULL;
 }
 
+bool EditorToolBar::processImageSrc(bool bUseForCopy, bool& bNeedSubsequent)
+{
+    if (m_strImageSrc.isEmpty())
+    {
+        bNeedSubsequent = true;
+        return true;
+    }
+
+    if (m_strImageSrc.left(7) == "file://")
+    {
+        m_strImageSrc.remove(0, 7);
+        bNeedSubsequent = true;
+        return true;
+    }
+    else if (m_strImageSrc.left(7) == "http://")
+    {
+        QFileInfo info(m_strImageSrc);
+        QString fileName = WizGenGUIDLowerCaseLetterOnly() + "." + info.suffix();
+        CWizFileDownloader* downloader = new CWizFileDownloader(m_strImageSrc, fileName);
+        if (bUseForCopy)
+        {
+            connect(downloader, SIGNAL(downloadDone(QString,bool)), SLOT(copyImage(QString)));
+        }
+        else
+        {
+            connect(downloader, SIGNAL(downloadDone(QString,bool)), SLOT(saveImage(QString)));
+        }
+        downloader->startDownload();
+        bNeedSubsequent = false;
+    }
+    else if (m_strImageSrc.left(11) == "data:image/")
+    {
+        /*   don not support base64 image at now
+        m_strImageSrc.remove(0, 11);
+        QString strType = m_strImageSrc.remove(0, m_strImageSrc.indexOf(';'));
+        m_strImageSrc.remove(0, m_strImageSrc.indexOf(',') + 1);
+        QByteArray baData;
+        if (!WizBase64Decode(m_strImageSrc, baData))
+            return;
+
+        QPixmap pix;
+        pix.loadFromData(baData, strType.toAscii());
+        qDebug() << "[Save] pixmap is null " << pix.isNull();
+        QString strFilePath = QFileDialog::getSaveFileName(this, tr("Save File"),
+                                                           QDir::homePath(), tr("Image Files (*.%1)").arg(strType));
+        if (strFilePath.isEmpty())
+            return;
+
+        bool ret = pix.save(strFilePath, strType.toAscii());
+        TOLOG2(_T("[Save] : save image to %1, result : %2"), strFilePath,
+               ret ? "OK" : "Failed");    //pix formart should use ascii or capital letter.
+        */
+        bNeedSubsequent = false;
+        return false;
+    }
+
+    return true;
+}
+
 void EditorToolBar::buildMenu()
 {
     if (!m_menuContext) {
@@ -1087,44 +1146,20 @@ void EditorToolBar::on_btnImage_clicked()
 
 void EditorToolBar::on_editor_saveImageAs_triggered()
 {
-
-    if (m_strImageSrc.isEmpty())
-        return;
-    if (m_strImageSrc.left(7) == "file://")
+    bool bNeedSubsequent = false;
+    if (processImageSrc(false, bNeedSubsequent) && bNeedSubsequent)
     {
-        m_strImageSrc.remove(0, 7);
+        saveImage(m_strImageSrc);
     }
-    else if (m_strImageSrc.left(7) == "http://")
-    {
-        QFileInfo info(m_strImageSrc);
-        QString fileName = WizGenGUIDLowerCaseLetterOnly() + "." + info.suffix();
-        CWizFileDownloader* downloader = new CWizFileDownloader(m_strImageSrc, fileName);
-        connect(downloader, SIGNAL(downloadDone(QString,bool)), SLOT(saveImage(QString)));
-        downloader->startDownload();
-        return;
-    }
-
-    saveImage(m_strImageSrc);
 }
 
 void EditorToolBar::on_editor_copyImage_triggered()
 {
-    if (m_strImageSrc.isEmpty())
-        return;
-    if (m_strImageSrc.left(7) == "file://")
+    bool bNeedSubsequent = false;
+    if (processImageSrc(true, bNeedSubsequent) && bNeedSubsequent)
     {
-        m_strImageSrc.remove(0, 7);
+        copyImage(m_strImageSrc);
     }
-    else if (m_strImageSrc.left(7) == "http://")
-    {
-        QFileInfo info(m_strImageSrc);
-        QString fileName = WizGenGUIDLowerCaseLetterOnly() + "." + info.suffix();
-        CWizFileDownloader* downloader = new CWizFileDownloader(m_strImageSrc, fileName);
-        connect(downloader, SIGNAL(downloadDone(QString,bool)), SLOT(copyImage(QString)));
-        downloader->startDownload();
-        return;
-    }
-    copyImage(m_strImageSrc);
 }
 
 void EditorToolBar::on_editor_copyImageLink_triggered()

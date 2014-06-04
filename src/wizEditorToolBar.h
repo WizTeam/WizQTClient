@@ -64,6 +64,8 @@ private:
 
     QAction* actionFromName(const QString& strName);
 
+    bool processImageSrc(bool bUseForCopy, bool& bNeedSubsequent);
+
 protected Q_SLOTS:
     void on_editor_google_triggered();
     void on_editor_cut_triggered();
