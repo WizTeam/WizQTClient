@@ -309,14 +309,11 @@ void MainWindow::on_checkUpgrade_finished(bool bUpgradeAvaliable)
     QString strUrl = m_upgrade->getWhatsNewUrl();
     CWizUpgradeNotifyDialog notifyDialog(strUrl, this);
     if (QDialog::Accepted == notifyDialog.exec()) {
+        QString url = WizService::ApiEntry::standardCommandUrl("link");
 #if defined(Q_OS_MAC)
-        QString url = WizService::ApiEntry::standardCommandUrl("link");
         url += "&name=wiznote-mac";
-        //QUrl url("http://www.wiz.cn/wiznote-mac.html");
 #elif defined(Q_OS_LINUX)
-        QString url = WizService::ApiEntry::standardCommandUrl("link");
         url += "&name=wiznote-linux";
-        //QUrl url("http://www.wiz.cn/wiznote-linux.html");
 #else
         Q_ASSERT(0);
 #endif
