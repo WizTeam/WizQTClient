@@ -654,7 +654,7 @@ bool MainWindow::hasEditPermissionOnCurrentNote() const
 {
     WIZDOCUMENTDATA docData = m_doc->note();
     CWizDatabase& db = m_dbMgr.db(docData.strKbGUID);
-    return db.CanEditDocument(docData);
+    return db.CanEditDocument(docData) && !CWizDatabase::IsInDeletedItems(docData.strLocation);
 }
 
 void MainWindow::setCurrentDocumentType(const QString &strType)
