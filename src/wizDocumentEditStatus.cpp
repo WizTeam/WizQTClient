@@ -38,57 +38,46 @@ QString WizKMGetDocumentEditStatusURL()
     return strUrl;
 }
 
-wizDocumentEditStatusSyncThread::wizDocumentEditStatusSyncThread(QObject* parent) : QThread(parent)
+wizDocumentEditStatusSyncThread::wizDocumentEditStatusSyncThread(QObject* parent)
+    : QThread(parent)
+    , m_mutext(QMutex::Recursive)
+    , m_stop(false)
+    , m_sendNow(false)
 {
-    connect(&m_timer, SIGNAL(timeout()), SLOT(start()));
 }
 
 wizDocumentEditStatusSyncThread::~wizDocumentEditStatusSyncThread()
 {
 }
 
-void wizDocumentEditStatusSyncThread::addEditingDocument(const QString& strUserAlias, const QString& strKbGUID, const QString& strGUID)
+void wizDocumentEditStatusSyncThread::stopEditingDocument()
 {
-    if (strGUID.isEmpty() || strUserAlias.isEmpty() || strKbGUID.isEmpty())
-        return;
-
-    QString strObjID = strKbGUID + "/" + strGUID;
-
-    m_mutext.lock();
-    m_editingObj.strObjID = strObjID;
-    m_editingObj.strUserName = strUserAlias;
-    m_mutext.unlock();
-
-    if (!isRunning())
-        start();
+    setCurrentEditingDocument("", "", "");
 }
 
-void wizDocumentEditStatusSyncThread::addDoneDocument(const QString& strKbGUID, const QString& strGUID)
+void wizDocumentEditStatusSyncThread::setCurrentEditingDocument(const QString& strUserAlias, const QString& strKbGUID, const QString& strGUID)
 {
-    if (strGUID.isEmpty() || strKbGUID.isEmpty())
-        return;
-
-    QString strObjID = strKbGUID + "/" + strGUID;
+    QString strObjID = "";
+    if (!strKbGUID.isEmpty())
+    {
+        strObjID = strKbGUID + "/" + strGUID;
+    }
 
     m_mutext.lock();
     //
-    if (m_editingObj.strObjID == strObjID)
+    if (m_editingObj.strObjID != strObjID)
     {
-        m_doneObj.strObjID = strObjID;
-        m_doneObj.strUserName = m_editingObj.strUserName;
-        m_editingObj.clear();
+        if (!m_editingObj.strObjID.isEmpty())
+        {
+            m_oldObj = m_editingObj;
+        }
+        //
+        m_editingObj.strObjID = strObjID;
+        m_editingObj.strUserName = strUserAlias;
+        //
+        m_sendNow = true;
     }
-    m_mutext.unlock();
-
-    if (!isRunning())
-        start();
-}
-
-void wizDocumentEditStatusSyncThread::setAllDocumentDone()
-{
-    m_mutext.lock();
-    m_doneObj = m_editingObj;
-    m_editingObj.clear();
+    //
     m_mutext.unlock();
 
     if (!isRunning())
@@ -97,38 +86,36 @@ void wizDocumentEditStatusSyncThread::setAllDocumentDone()
 
 void wizDocumentEditStatusSyncThread::stop()
 {
-    m_timer.stop();
+    m_stop = true;
+    //
+    stopEditingDocument();
 }
 
 void wizDocumentEditStatusSyncThread::run()
 {
-    sendEditingMessage();
-    sendDoneMessage();
-
-    m_mutext.lock();
-    if (!m_editingObj.strObjID.isEmpty())
+    int idleCounter = 0;
+    while (1)
     {
-        m_timer.start(30 * 1000);
+        if (idleCounter >= 30 || m_sendNow || m_stop)
+        {
+            sendEditingMessage();
+            sendDoneMessage();
+            //
+            idleCounter = 0;
+            m_sendNow = false;
+            //
+            if (m_stop)
+                return;
+        }
+        else
+        {
+            idleCounter++;
+            msleep(1000);
+        }
     }
-    else
-    {
-        m_timer.stop();
-    }
-    m_mutext.unlock();
 }
 
-void wizDocumentEditStatusSyncThread::sendAllDoneMessage()
-{
-    m_mutext.lock();
-    if (!m_editingObj.strObjID.isEmpty())
-    {
-        m_doneObj = m_editingObj;
-        m_editingObj.clear();
-    }
-    m_mutext.unlock();
 
-    sendDoneMessage();
-}
 
 void wizDocumentEditStatusSyncThread::sendEditingMessage()
 {
@@ -162,9 +149,9 @@ void wizDocumentEditStatusSyncThread::sendEditingMessage(const QString& strUserA
 void wizDocumentEditStatusSyncThread::sendDoneMessage()
 {
     m_mutext.lock();
-    EditStatusObj doneObj = m_doneObj;
+    EditStatusObj doneObj = m_oldObj;
     // send done message just once
-    m_doneObj.clear();
+    m_oldObj.clear();
     m_mutext.unlock();
 
     if (!doneObj.strObjID.isEmpty() && !doneObj.strUserName.isEmpty())

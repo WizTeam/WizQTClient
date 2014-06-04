@@ -18,41 +18,36 @@ class wizDocumentEditStatusSyncThread : public QThread
 public:
     wizDocumentEditStatusSyncThread(QObject* parent = 0);
     ~wizDocumentEditStatusSyncThread();
-    void addEditingDocument(const QString& strUserAlias,const QString& strKbGUID ,const QString& strGUID);
-    void addDoneDocument(const QString& strKbGUID, const QString& strGUID);
-    void setAllDocumentDone();
+    //
+    void stopEditingDocument();
+    void setCurrentEditingDocument(const QString& strUserAlias,const QString& strKbGUID ,const QString& strGUID);
     void stop();
-
-signals:
-    //void sendEditStatusRequest();
-
 protected:
     void run();
-
 private:
-    //
-    void sendAllDoneMessage();
     void sendEditingMessage();
-    void sendEditingMessage(const QString& strUserAlias, const QString& strObjID);
     void sendDoneMessage();
+    void sendEditingMessage(const QString& strUserAlias, const QString& strObjID);
     void sendDoneMessage(const QString& strUserAlias, const QString& strObjID);
 private:
     struct EditStatusObj{
-    //key : ObjID, value : UserID
         QString strObjID;
         QString strUserName;
-
+        //
         void clear(){
             strObjID.clear();
             strUserName.clear();
         }
     };
+    //
+    bool m_stop;
+    bool m_sendNow;
 
     EditStatusObj m_editingObj;
-    EditStatusObj m_doneObj;
+    EditStatusObj m_oldObj;
+
     QMutex m_mutext;
     QPointer<QNetworkAccessManager> m_netManager;
-    QTimer m_timer;
 };
 
 class wizDocumentEditStatusCheckThread : public QThread
