@@ -65,6 +65,7 @@ private:
     QAction* actionFromName(const QString& strName);
 
     bool processImageSrc(bool bUseForCopy, bool& bNeedSubsequent);
+    bool processBase64Image(bool bUseForCopy);
 
 protected Q_SLOTS:
     void on_editor_google_triggered();
