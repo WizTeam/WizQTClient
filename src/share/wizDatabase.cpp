@@ -2002,7 +2002,7 @@ QString CWizDatabase::getUserAlias()
 
     QString strUserGUID = personDb->GetUserGUID();
     WIZBIZUSER bizUser;
-    personDb->userFromGUID(info().bizGUID, strUserGUID, bizUser);
+    personDb->userFromGUID(kbGUID(), strUserGUID, bizUser);
     if (!bizUser.alias.isEmpty()) {
         return bizUser.alias;
     } else {
