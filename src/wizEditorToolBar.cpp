@@ -837,6 +837,7 @@ bool EditorToolBar::processImageSrc(bool bUseForCopy, bool& bNeedSubsequent)
         return true;
     }
 
+    //
     if (m_strImageSrc.left(7) == "file://")
     {
         m_strImageSrc.remove(0, 7);
@@ -859,30 +860,44 @@ bool EditorToolBar::processImageSrc(bool bUseForCopy, bool& bNeedSubsequent)
         downloader->startDownload();
         bNeedSubsequent = false;
     }
-    else if (m_strImageSrc.left(11) == "data:image/")
+    else if (m_strImageSrc.left(12) == "data:image/.")
     {
-        /*   don not support base64 image at now
-        m_strImageSrc.remove(0, 11);
-        QString strType = m_strImageSrc.remove(0, m_strImageSrc.indexOf(';'));
-        m_strImageSrc.remove(0, m_strImageSrc.indexOf(',') + 1);
-        QByteArray baData;
-        if (!WizBase64Decode(m_strImageSrc, baData))
-            return;
+        if (!processBase64Image(bUseForCopy))
+            return false;
+        bNeedSubsequent = false;
+    }
 
-        QPixmap pix;
-        pix.loadFromData(baData, strType.toAscii());
-        qDebug() << "[Save] pixmap is null " << pix.isNull();
+    return true;
+}
+
+bool EditorToolBar::processBase64Image(bool bUseForCopy)
+{
+    m_strImageSrc.remove(0, 12);
+    QString strType = m_strImageSrc.left(m_strImageSrc.indexOf(';'));
+    m_strImageSrc.remove(0, m_strImageSrc.indexOf(',') + 1);
+    //
+    QByteArray baData;
+    if (!WizBase64Decode(m_strImageSrc, baData))
+        return false;
+
+    //
+    QPixmap pix;
+    pix.loadFromData(baData, strType.toAscii());
+    if (!bUseForCopy)
+    {
         QString strFilePath = QFileDialog::getSaveFileName(this, tr("Save File"),
                                                            QDir::homePath(), tr("Image Files (*.%1)").arg(strType));
         if (strFilePath.isEmpty())
-            return;
+            return false;
 
         bool ret = pix.save(strFilePath, strType.toAscii());
         TOLOG2(_T("[Save] : save image to %1, result : %2"), strFilePath,
                ret ? "OK" : "Failed");    //pix formart should use ascii or capital letter.
-        */
-        bNeedSubsequent = false;
-        return false;
+    }
+    else
+    {
+        QClipboard* clip = QApplication::clipboard();
+        clip->setPixmap(pix);
     }
 
     return true;
