@@ -354,12 +354,12 @@ void CWizLoginDialog::applyElementStyles()
     //
     m_buttonLogin->setButtonStyle(strBtnNormal, strBtnHover, strBtnDown, strBtnDisable, QColor("#ffffff"),
                               QColor("#ffffff"), QColor("b1b1b1"));
-    m_buttonLogin->setText("Login");
+    m_buttonLogin->setText(tr("Login"));
     m_buttonLogin->setEnabled(false);
 
     m_buttonSignIn->setButtonStyle(strBtnNormal, strBtnHover, strBtnDown, strBtnDisable, QColor("#ffffff"),
                                    QColor("#ffffff"), QColor("b1b1b1"));
-    m_buttonSignIn->setText("Sign Up");
+    m_buttonSignIn->setText(tr("Create Account"));
     m_buttonSignIn->setEnabled(false);
     //
     QString strSeparator = ::WizGetSkinResourceFileName(strThemeName, "loginSeparator");

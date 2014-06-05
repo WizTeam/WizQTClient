@@ -661,7 +661,7 @@
         <cursorShape>PointingHandCursor</cursorShape>
        </property>
        <property name="text">
-        <string>Reset password?</string>
+        <string>Reset password</string>
        </property>
       </widget>
      </item>
