@@ -17,7 +17,6 @@ class CWizDocumentEditStatusSyncThread : public QThread
     Q_OBJECT
 public:
     CWizDocumentEditStatusSyncThread(QObject* parent = 0);
-    ~CWizDocumentEditStatusSyncThread();
     //
     void stopEditingDocument();
     void setCurrentEditingDocument(const QString& strUserAlias,const QString& strKbGUID ,const QString& strGUID);

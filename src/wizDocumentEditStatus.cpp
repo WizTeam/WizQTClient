@@ -46,10 +46,6 @@ CWizDocumentEditStatusSyncThread::CWizDocumentEditStatusSyncThread(QObject* pare
 {
 }
 
-CWizDocumentEditStatusSyncThread::~CWizDocumentEditStatusSyncThread()
-{
-}
-
 void CWizDocumentEditStatusSyncThread::stopEditingDocument()
 {
     setCurrentEditingDocument("", "", "");
@@ -86,6 +82,10 @@ void CWizDocumentEditStatusSyncThread::setCurrentEditingDocument(const QString& 
 
 void CWizDocumentEditStatusSyncThread::stop()
 {
+    //If thread wasn't running, no need to stop. Otherwise will start running ,and cause crash at destructor of program.
+    if (!isRunning())
+        return;
+
     m_stop = true;
     //
     stopEditingDocument();

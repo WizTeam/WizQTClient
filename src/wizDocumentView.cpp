@@ -36,6 +36,7 @@ CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
     , m_web(new CWizDocumentWebView(app, this))
     , m_comments(new QWebView(this))
     , m_title(new TitleBar(this))
+    , m_passwordView(new CWizUserCipherForm(app, this))
     , m_viewMode(app.userSettings().noteViewMode())
     , m_bLocked(false)
     , m_bEditingMode(false)
@@ -53,8 +54,6 @@ CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
 
     m_tab = new QStackedWidget(this);
     //
-    MainWindow* mainWindow = qobject_cast<MainWindow *>(m_app.mainWindow());
-    m_passwordView = new CWizUserCipherForm(m_app, this);
     m_passwordView->setGeometry(this->geometry());
     connect(m_passwordView, SIGNAL(cipherCheckRequest()), SLOT(onCipherCheckRequest()));
     //
@@ -88,6 +87,7 @@ CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
     setLayout(layoutMain);
     layoutMain->addWidget(m_tab);
 
+    MainWindow* mainWindow = qobject_cast<MainWindow *>(m_app.mainWindow());
     m_downloaderHost = mainWindow->downloaderHost();
     connect(m_downloaderHost, SIGNAL(downloadDone(const WIZOBJECTDATA&, bool)),
             SLOT(on_download_finished(const WIZOBJECTDATA&, bool)));

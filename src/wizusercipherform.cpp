@@ -39,7 +39,7 @@ CWizUserCipherForm::CWizUserCipherForm(CWizExplorerApp& app, QWidget *parent)
     ui->buttonOk->setStatusNormal();
     ui->buttonOk->setLockNormalStatus(true);
 
-    m_animation = new QPropertyAnimation(ui->editUserCipher, "pos");
+    m_animation = new QPropertyAnimation(ui->editUserCipher, "pos", this);
 
     connect(ui->editUserCipher, SIGNAL(returnPressed()), SLOT(onButtonOK_clicked()));
     connect(ui->editUserCipher, SIGNAL(textChanged(const QString&)),
@@ -47,15 +47,6 @@ CWizUserCipherForm::CWizUserCipherForm(CWizExplorerApp& app, QWidget *parent)
     connect(ui->buttonOk, SIGNAL(clicked()), SLOT(onButtonOK_clicked()));
     connect(ui->checkSave, SIGNAL(stateChanged(int)), SLOT(onCheckSave_stateChanged(int)));
 
-}
-
-CWizUserCipherForm::~CWizUserCipherForm()
-{
-    delete ui;
-
-    if (NULL != m_animation){
-        delete m_animation;
-    }
 }
 
 QSize CWizUserCipherForm::sizeHint()

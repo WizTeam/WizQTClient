@@ -112,7 +112,7 @@ bool CWizSearchIndexer::buildFTSIndexByDatabase(CWizDatabase& db)
 
         const WIZDOCUMENTDATAEX& doc = arrayDocuments.at(i);
 
-        TOLOG(tr("Update search index (%1/%2): %3").arg(i).arg(nTotal).arg(doc.strTitle));
+        TOLOG(tr("Update search index (%1/%2): %3").arg(i + 1).arg(nTotal).arg(doc.strTitle));
         if (!updateDocument(doc)) {
             TOLOG(tr("[WARNING] failed to update: %1").arg(doc.strTitle));
             nErrors++;
