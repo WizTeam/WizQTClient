@@ -15,15 +15,18 @@ typedef std::deque<WIZDOCUMENTDATAEX> CWizDocumentDataArray;
 
 /* --------------------------- CWizSearchIndexer --------------------------- */
 class CWizSearchIndexer
-        : public QObject
+        : public QThread
         , public IWizCluceneSearch
 {
     Q_OBJECT
 
 public:
     explicit CWizSearchIndexer(CWizDatabaseManager& dbMgr, QObject *parent = 0);
-    void abort();
+    void waitForDone();
     void rebuild();
+
+protected:
+    virtual void run();
 
 private:
     bool buildFTSIndex();
@@ -38,14 +41,16 @@ private:
     bool clearAllFTSData();
     void clearFlags(CWizDatabase& db);
 
+    void stop();
+
 private:
     CWizDatabaseManager& m_dbMgr;
     QString m_strIndexPath; // working path
     QTimer m_timerFTS;  // working interval
-    bool m_bAbort;
+    bool m_stop;
+    bool m_buldNow;
 
 private Q_SLOTS:
-    void on_timerFTS_timeout();
     void on_document_deleted(const WIZDOCUMENTDATA& doc);
     void on_attachment_deleted(const WIZDOCUMENTATTACHMENTDATA& attach);
 };

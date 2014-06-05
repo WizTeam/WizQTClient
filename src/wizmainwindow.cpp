@@ -76,7 +76,7 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     , m_progress(new CWizProgressDialog(this))
     , m_settings(new CWizUserSettings(dbMgr.db()))
     , m_sync(new CWizKMSyncThread(dbMgr.db(), this))
-    , m_searchIndexer(new CWizSearchIndexer(m_dbMgr))
+    , m_searchIndexer(new CWizSearchIndexer(m_dbMgr, this))
     #ifndef BUILD4APPSTORE
     , m_upgrade(new CWizUpgrade())
     #else
@@ -125,9 +125,7 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
             m_transitionView, SLOT(onDownloadProgressChanged(QString, int,int)));
 
     // search and full text search
-    QThread *threadFTS = new QThread(this);
-    m_searchIndexer->moveToThread(threadFTS);
-    threadFTS->start(QThread::IdlePriority);
+    m_searchIndexer->start(QThread::IdlePriority);
 
     // syncing thread
     connect(m_sync, SIGNAL(processLog(const QString&)), SLOT(on_syncProcessLog(const QString&)));
@@ -215,7 +213,7 @@ void MainWindow::cleanOnQuit()
     //
     m_sync->waitForDone();
     //
-    m_searchIndexer->abort();
+    m_searchIndexer->waitForDone();
     //
     m_doc->waitForDone();
     //

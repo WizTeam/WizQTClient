@@ -151,4 +151,6 @@ bool CWizFileDownloader::download()
          return false;
      file.write(byData);
      file.close();
+
+     return true;
 }

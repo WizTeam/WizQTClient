@@ -8,21 +8,19 @@
 #include <unistd.h>
 
 #include "wizdef.h"
+#include "wizmisc.h"
 #include "html/wizhtmlcollector.h"
 #include "wizDatabase.h"
 #include "utils/logger.h"
 
 
 CWizSearchIndexer::CWizSearchIndexer(CWizDatabaseManager& dbMgr, QObject *parent)
-    : QObject(parent)
+    : QThread(parent)
     , m_dbMgr(dbMgr)
-    , m_bAbort(false)
+    , m_stop(false)
+    , m_buldNow(false)
 {
     qRegisterMetaType<WIZDOCUMENTDATAEX>("WIZDOCUMENTDATAEX");
-
-    m_timerFTS.setInterval(60*1000); // default 60 seconds for every build loop
-    connect(&m_timerFTS, SIGNAL(timeout()), SLOT(on_timerFTS_timeout()));
-    m_timerFTS.start();
 
     m_strIndexPath = m_dbMgr.db().GetAccountPath() + "fts_index";
 
@@ -39,21 +37,37 @@ void CWizSearchIndexer::rebuild() {
     }
 }
 
-void CWizSearchIndexer::abort()
+void CWizSearchIndexer::run()
 {
-    m_bAbort = true;
+    int idleCounter = 0;
+    while (1)
+    {
+        if (idleCounter >= 30 || m_buldNow || m_stop)
+        {
+            if (m_stop)
+                return;
+
+            buildFTSIndex();
+
+        }
+        else
+        {
+            idleCounter++;
+            msleep(1000);
+        }
+    }
 }
 
-void CWizSearchIndexer::on_timerFTS_timeout()
+void CWizSearchIndexer::waitForDone()
 {
-    buildFTSIndex();
+    stop();
+
+    WizWaitForThread(this);
 }
 
 bool CWizSearchIndexer::buildFTSIndex()
 {
-    m_timerFTS.stop();
-
-    m_bAbort = false;
+    m_stop = false;
     int nErrors = 0;
 
     // build private first
@@ -64,7 +78,7 @@ bool CWizSearchIndexer::buildFTSIndex()
     // build group db
     int total = m_dbMgr.count();
     for (int i = 0; i < total; i++) {
-        if (m_bAbort)
+        if (m_stop)
             break;
 
         if (!buildFTSIndexByDatabase(m_dbMgr.at(i))) {
@@ -76,8 +90,6 @@ bool CWizSearchIndexer::buildFTSIndex()
         TOLOG(tr("Build FTS index meet error, we'll rebuild it when restart"));
         return false;
     }
-
-    m_timerFTS.start();
 
     return true;
 }
@@ -106,7 +118,7 @@ bool CWizSearchIndexer::buildFTSIndexByDatabase(CWizDatabase& db)
     int nErrors = 0;
     int nTotal = arrayDocuments.size();
     for (int i = 0; i < nTotal; i++) {
-        if (m_bAbort) {
+        if (m_stop) {
             break;
         }
 
@@ -226,7 +238,8 @@ bool CWizSearchIndexer::deleteDocument(const WIZDOCUMENTDATAEX& doc)
 bool CWizSearchIndexer::rebuildFTSIndex()
 {
     if (clearAllFTSData()) {
-        return buildFTSIndex();
+        m_buldNow = true;
+        return true;
     }
 
     return false;
@@ -241,6 +254,11 @@ void CWizSearchIndexer::clearFlags(CWizDatabase& db)
     if (!db.setAllDocumentsSearchIndexed(false)) {
         TOLOG1("FATAL: Can't reset document index flag: %1", db.name());
     }
+}
+
+void CWizSearchIndexer::stop()
+{
+    m_stop = true;
 }
 
 bool CWizSearchIndexer::clearAllFTSData()

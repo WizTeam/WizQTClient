@@ -114,7 +114,6 @@ AvatarHostPrivate::AvatarHostPrivate(AvatarHost* avatarHost)
             SLOT(on_downloaded(QString, bool)));
 
     m_thread = new QThread(this);
-    m_thread->setPriority(QThread::IdlePriority);
     connect(m_thread, SIGNAL(started()), SLOT(on_thread_started()));
 
     m_downloader->moveToThread(m_thread);
@@ -268,7 +267,7 @@ QPixmap AvatarHostPrivate::loadOrg(const QString& strUserGUID, bool bForce)
     if (isNeedUpdate(strUserGUID) || bForce) {
         if (!m_listUser.contains(strUserGUID) && strUserGUID != m_strUserCurrent) {
             m_listUser.append(strUserGUID);
-            m_thread->start();
+            m_thread->start(QThread::IdlePriority);
         }
 
         return QPixmap();
@@ -281,7 +280,7 @@ void AvatarHostPrivate::load(const QString& strUserGUID, bool bForce)
     if (isNeedUpdate(strUserGUID) || bForce) {
         if (!m_listUser.contains(strUserGUID) && strUserGUID != m_strUserCurrent) {
             m_listUser.append(strUserGUID);
-            m_thread->start();
+            m_thread->start(QThread::IdlePriority);
         }
 
         return;
