@@ -190,7 +190,7 @@ CWizSortingPopupButton::CWizSortingPopupButton(CWizExplorerApp& app, QWidget *pa
 
 QSize CWizSortingPopupButton::sizeHint () const
 {
-    return QSize(fontMetrics().width(text()) + 30, fontMetrics().height() + 10);
+    return QSize(fontMetrics().width(text()) + 30, fontMetrics().height() + 12);
 }
 
 void CWizSortingPopupButton::on_action_triggered()

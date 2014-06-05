@@ -900,18 +900,19 @@ QWidget* MainWindow::createListView()
     layoutActions->addStretch(0);
 
     m_labelDocumentsHint = new QLabel(this);
-    m_labelDocumentsHint->setMargin(5);
+    //m_labelDocumentsHint->setMargin(5);
     layoutActions->addWidget(m_labelDocumentsHint);
     connect(m_category, SIGNAL(documentsHint(const QString&)), SLOT(on_documents_hintChanged(const QString&)));
 
     m_labelDocumentsCount = new QLabel("", this);
-    m_labelDocumentsCount->setMargin(5);
+    //m_labelDocumentsCount->setMargin(5);
     layoutActions->addWidget(m_labelDocumentsCount);
     connect(m_documents, SIGNAL(documentCountChanged()), SLOT(on_documents_documentCountChanged()));
 
 #ifdef Q_OS_LINUX
-    m_labelDocumentsHint->setStyleSheet("color: #787878"); //font: 12px;
-    m_labelDocumentsCount->setStyleSheet("color: #787878"); //font: 12px;
+    //sortBtn->setStyleSheet("padding-top:10px;");
+    m_labelDocumentsHint->setStyleSheet("color: #787878;padding-bottom:1px;"); //font: 12px;
+    m_labelDocumentsCount->setStyleSheet("color: #787878;padding-bottom:1px;"); //font: 12px;
 #else
     m_labelDocumentsHint->setStyleSheet("font: 12px;color: #787878");
     m_labelDocumentsCount->setStyleSheet("font: 12px;color: #787878");
