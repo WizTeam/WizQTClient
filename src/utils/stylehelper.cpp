@@ -620,6 +620,7 @@ QPolygon StyleHelper::bubbleFromSize(const QSize& sz, int nAngle, bool bAlignLef
 
 int StyleHelper::fontHead(QFont& f)
 {
+#ifndef Q_OS_LINUX
     QSettings* st = ExtensionSystem::PluginManager::settings();
     QString strFont = st->value("Theme/FontFamily").toString();
     if (strFont.isEmpty()) {
@@ -629,7 +630,7 @@ int StyleHelper::fontHead(QFont& f)
     f.setFamily(strFont);
     //f.setPixelSize(13);
     f.setBold(true);
-
+#endif
     return QFontMetrics(f).height();
 }
 
