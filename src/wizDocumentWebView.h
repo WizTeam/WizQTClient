@@ -38,6 +38,8 @@ public:
     void load(const WIZDOCUMENTDATA& doc);
     //
     void stop();
+    //
+    void waitForDone();
 
 protected:
     virtual void run();
@@ -65,7 +67,7 @@ public:
               const QString& strHtmlFile, int nFlags);
 
     //
-    void waitAndStop();
+    void waitForDone();
 
 private:
     struct SAVEDATA
@@ -115,6 +117,8 @@ public:
     ~CWizDocumentWebView();
     Core::CWizDocumentView* view();
     QWebFrame* noteFrame();
+    //
+    void waitForDone();
 
     // view and save
     void viewDocument(const WIZDOCUMENTDATA& doc, bool editing);

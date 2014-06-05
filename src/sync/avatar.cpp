@@ -18,6 +18,8 @@
 #include "../utils/pathresolve.h"
 #include "../utils/stylehelper.h"
 
+#include "../share/wizmisc.h"
+
 using namespace WizService;
 using namespace WizService::Internal;
 
@@ -221,6 +223,18 @@ QString AvatarHostPrivate::defaultKey() const
     return "WizService::Avatar::Default";
 }
 
+void AvatarHostPrivate::waitForDone()
+{
+
+    if (m_thread && m_thread->isFinished())
+    {
+        m_thread->disconnect();
+        m_thread->quit();
+        //
+        ::WizWaitForThread(m_thread);
+    }
+}
+
 bool AvatarHostPrivate::avatar(const QString& strUserId, QPixmap* pixmap)
 {
     if (QPixmapCache::find(keyFromGuid(strUserId), pixmap)) {
@@ -373,6 +387,11 @@ QString AvatarHost::defaultKey()
 bool AvatarHost::customSizeAvatar(const QString& strUserGUID, int width, int height, QString& strFileName)
 {
     return d->customSizeAvatar(strUserGUID, width, height, strFileName);
+}
+
+void AvatarHost::waitForDone()
+{
+    d->waitForDone();
 }
 
 QPixmap AvatarHost::corpImage(const QPixmap& org)

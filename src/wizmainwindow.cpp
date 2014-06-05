@@ -207,41 +207,20 @@ void MainWindow::on_application_aboutToQuit()
     cleanOnQuit();
 }
 
-class SleepThread : public QThread
-{
- public :
-     static void sleep(long iSleepTime)
-     {
-          QThread::sleep(iSleepTime);
-     }
-     static void msleep(long iSleepTime)
-     {
-          QThread::msleep(iSleepTime);
-     }
-};
 
 void MainWindow::cleanOnQuit()
 {
     m_category->saveState();
     saveStatus();
-
-    // FIXME : if document not valid will lead crash
-    //m_doc->web()->saveDocument(false);
-
-    m_sync->stopSync();
+    //
+    m_sync->waitForDone();
+    //
     m_searchIndexer->abort();
-
-    if (m_sync
-            && m_sync->isRunning())
-    {
-        while (1)
-        {
-            if (m_sync->isFinished())
-                break;
-            SleepThread::msleep(100);
-            QApplication::processEvents();
-        }
-    }
+    //
+    m_doc->waitForDone();
+    //
+    QThreadPool::globalInstance()->waitForDone();
+    WizService::AvatarHost::waitForDone();
 }
 
 void MainWindow::closeEvent(QCloseEvent* event)

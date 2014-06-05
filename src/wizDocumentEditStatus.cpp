@@ -91,6 +91,13 @@ void CWizDocumentEditStatusSyncThread::stop()
     stopEditingDocument();
 }
 
+void CWizDocumentEditStatusSyncThread::waitForDone()
+{
+    stop();
+    //
+    WizWaitForThread(this);
+}
+
 void CWizDocumentEditStatusSyncThread::run()
 {
     int idleCounter = 0;
@@ -141,9 +148,13 @@ void CWizDocumentEditStatusSyncThread::sendEditingMessage(const QString& strUser
     {
         m_netManager = new QNetworkAccessManager();
     }
-    m_netManager->get(QNetworkRequest(strUrl));
+    QNetworkReply* reply = m_netManager->get(QNetworkRequest(strUrl));
 
     qDebug() << "sendEditingMessage called " <<strObjID;
+
+    QEventLoop loop;
+    connect(reply, SIGNAL(finished()), &loop, SLOT(quit()));
+    loop.exec();
 }
 
 void CWizDocumentEditStatusSyncThread::sendDoneMessage()
@@ -172,13 +183,27 @@ void CWizDocumentEditStatusSyncThread::sendDoneMessage(const QString& strUserAli
     {
         m_netManager = new QNetworkAccessManager();
     }
-    m_netManager->get(QNetworkRequest(strUrl));
+    QNetworkReply* reply = m_netManager->get(QNetworkRequest(strUrl));
     qDebug() << "sendDoneMessage called " <<strObjID;
+
+    QEventLoop loop;
+    connect(reply, SIGNAL(finished()), &loop, SLOT(quit()));
+    loop.exec();
 }
 
 
-CWizDocumentEditStatusCheckThread::CWizDocumentEditStatusCheckThread(QObject* parent) : QThread(parent)
+CWizDocumentEditStatusCheckThread::CWizDocumentEditStatusCheckThread(QObject* parent)
+    : QThread(parent)
+    , m_stop(false)
+    , m_mutexWait(QMutex::NonRecursive)
 {
+}
+
+void CWizDocumentEditStatusCheckThread::waitForDone()
+{
+    stop();
+    //
+    WizWaitForThread(this);
 }
 
 void CWizDocumentEditStatusCheckThread::checkEditStatus(const QString& strKbGUID, const QString& strGUID)
@@ -227,19 +252,38 @@ void CWizDocumentEditStatusCheckThread::downloadData(const QString& strUrl)
 
 void CWizDocumentEditStatusCheckThread::run()
 {
-    QString strRequestUrl = WizFormatString4(_T("%1/get?obj_id=%2/%3&t=%4"),
-                                             WizKMGetDocumentEditStatusURL(),
-                                             m_strKbGUID,
-                                             m_strGUID,
-                                             ::WizIntToStr(GetTickCount()));
+    QString kbGUID;
+    QString guid;
+    //
+    while (!m_stop)
+    {
+        //////
+        {
+            QMutexLocker lock(&m_mutexWait);
+            m_wait.wait(&m_mutexWait);
+            if (m_stop)
+                return;
+            kbGUID = m_strKbGUID;
+            guid = m_strGUID;
+        }
+        //
+        //
+        QString strRequestUrl = WizFormatString4(_T("%1/get?obj_id=%2/%3&t=%4"),
+                                                 WizKMGetDocumentEditStatusURL(),
+                                                 kbGUID,
+                                                 guid,
+                                                 ::WizIntToStr(GetTickCount()));
 
-    downloadData(strRequestUrl);
-
+        downloadData(strRequestUrl);
+    }
 }
 
 
 void CWizDocumentEditStatusCheckThread::setDocmentGUID(const QString& strKbGUID, const QString& strGUID)
 {
+    m_mutexWait.lock();
     m_strKbGUID = strKbGUID;
     m_strGUID = strGUID;
+    m_wait.wakeAll();
+    m_mutexWait.unlock();
 }

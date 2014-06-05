@@ -573,6 +573,8 @@ protected:
                 painter->drawText(vopt->rect,Qt::AlignCenter, vopt->text);
             }
             break;
+        default:
+            break;
         }
     }
 

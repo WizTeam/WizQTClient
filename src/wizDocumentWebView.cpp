@@ -176,17 +176,15 @@ CWizDocumentWebView::CWizDocumentWebView(CWizExplorerApp& app, QWidget* parent)
 
 CWizDocumentWebView::~CWizDocumentWebView()
 {
+
+}
+void CWizDocumentWebView::waitForDone()
+{
     if (m_docLoadThread) {
-        m_docLoadThread->stop();
-        m_docLoadThread->quit();
-        m_docLoadThread->deleteLater();
-        m_docLoadThread = NULL;
+        m_docLoadThread->waitForDone();
     }
     if (m_docSaverThread) {
-        m_docSaverThread->waitAndStop();
-        m_docSaverThread->quit();
-        m_docSaverThread->deleteLater();
-        m_docSaverThread = NULL;
+        m_docSaverThread->waitForDone();
     }
 }
 
@@ -1475,6 +1473,12 @@ void CWizDocumentWebViewLoaderThread::stop()
     //
     m_waitForData.wakeAll();
 }
+void CWizDocumentWebViewLoaderThread::waitForDone()
+{
+    stop();
+    //
+    WizWaitForThread(this);
+}
 
 void CWizDocumentWebViewLoaderThread::run()
 {
@@ -1564,18 +1568,11 @@ void CWizDocumentWebViewSaverThread::save(const WIZDOCUMENTDATA& doc, const QStr
         start();
     }
 }
-void CWizDocumentWebViewSaverThread::waitAndStop()
+void CWizDocumentWebViewSaverThread::waitForDone()
 {
-    while (1)
-    {
-        if (!isRunning())
-            return;
-        //
-        stop();
-        //
-        msleep(100);
-        QApplication::processEvents();
-    }
+    stop();
+    //
+    WizWaitForThread(this);
 }
 
 void CWizDocumentWebViewSaverThread::stop()

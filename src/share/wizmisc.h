@@ -179,4 +179,7 @@ public:
     ~CWaitCursor();
 };
 
+class QThread;
+void WizWaitForThread(QThread* pThread);
+
 #endif // WIZMISC_H

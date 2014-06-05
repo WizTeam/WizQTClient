@@ -42,6 +42,7 @@ CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
     , m_bEditingMode(false)
     , m_noteLoaded(false)
     , m_editStatusSyncThread(new CWizDocumentEditStatusSyncThread())
+    , m_editStatusCheckThread(new CWizDocumentEditStatusCheckThread())
 {
     m_title->setEditor(m_web);
 
@@ -114,12 +115,24 @@ CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
             SLOT(onCloseNoteRequested(Core::INoteView*)));
 
     connect(m_web, SIGNAL(focusIn()), SLOT(on_webView_focus_changed()));
+    //
+    m_editStatusSyncThread->start(QThread::IdlePriority);
+    m_editStatusCheckThread->start(QThread::IdlePriority);
+
 }
 
 CWizDocumentView::~CWizDocumentView()
 {
-    m_editStatusSyncThread->stop();
+}
+
+void CWizDocumentView::waitForDone()
+{
     m_web->saveDocument(m_note, false);
+    //
+    m_web->waitForDone();
+    //
+    m_editStatusSyncThread->waitForDone();
+    m_editStatusCheckThread->waitForDone();
 }
 
 QWidget* CWizDocumentView::client() const
@@ -207,9 +220,7 @@ void CWizDocumentView::initStat(const WIZDOCUMENTDATA& data, bool bEditing)
     m_title->setLocked(m_bLocked, nLockReason, bGroup);
     if (bGroup && nLockReason == -1)
     {
-        CWizDocumentEditStatusCheckThread* editStatusChecker = new CWizDocumentEditStatusCheckThread();
-        connect(editStatusChecker, SIGNAL(checkFinished(QString,QStringList)), SLOT(on_checkEditStatus_finished(QString,QStringList)));
-        editStatusChecker->checkEditStatus(data.strKbGUID, data.strGUID);
+        m_editStatusCheckThread->checkEditStatus(data.strKbGUID, data.strGUID);
     }
 }
 

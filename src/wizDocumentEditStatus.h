@@ -6,7 +6,7 @@
 #include <QWeakPointer>
 #include <QMap>
 #include <QPointer>
-#include <QTimer>
+#include <QWaitCondition>
 
 class QNetworkAccessManager;
 
@@ -21,6 +21,8 @@ public:
     void stopEditingDocument();
     void setCurrentEditingDocument(const QString& strUserAlias,const QString& strKbGUID ,const QString& strGUID);
     void stop();
+    //
+    void waitForDone();
 protected:
     void run();
 private:
@@ -56,6 +58,10 @@ public:
     CWizDocumentEditStatusCheckThread(QObject* parent = 0);
     void checkEditStatus(const QString& strKbGUID,const QString& strGUID);
     void downloadData(const QString& strUrl);
+    //
+    void stop() { m_stop = true; m_wait.wakeAll(); }
+    //
+    void waitForDone();
 
 signals:
     void checkFinished(QString strGUID,QStringList editors);
@@ -69,6 +75,9 @@ private:
 private:
     QString m_strKbGUID;
     QString m_strGUID;
+    bool m_stop;
+    QMutex m_mutexWait;
+    QWaitCondition m_wait;
 };
 
 #endif // WIZDOCUMENTEDITSTATUS_H

@@ -10,6 +10,7 @@
 #include <QBitmap>
 #include <QPixmap>
 #include <QPainter>
+#include <QThread>
 
 #include <QtCore>
 //#include <QtNetwork>
@@ -2090,4 +2091,29 @@ bool WizIsOffline()
 {
     QNetworkConfigurationManager mgr;
     return !mgr.isOnline();
+}
+
+class SleepThread : public QThread
+{
+ public :
+     static void sleep(long iSleepTime)
+     {
+          QThread::sleep(iSleepTime);
+     }
+     static void msleep(long iSleepTime)
+     {
+          QThread::msleep(iSleepTime);
+     }
+};
+
+void WizWaitForThread(QThread* pThread)
+{
+    pThread->disconnect();
+    //
+    while (pThread->isRunning())
+    {
+        SleepThread::msleep(100);
+        QApplication::processEvents();
+    }
+
 }
