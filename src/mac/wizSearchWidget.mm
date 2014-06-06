@@ -38,7 +38,7 @@
 - (void)setSearchWidget:(CWizSearchWidget*)widget;
 - (BOOL)performKeyEquivalent:(NSEvent *)theEvent;
 - (BOOL)becomeFirstResponder;
-- (void)textDidEndEditing:(NSNotification *)aNotification;
+//- (void)textDidEndEditing:(NSNotification *)aNotification;
 @end
 
 @implementation WizSearchField
@@ -111,13 +111,13 @@
 
     return YES;
 }
-- (void)textDidEndEditing:(NSNotification *)aNotification
-{
-    NSUInteger textMove = [aNotification.userInfo[@"NSTextMovement"] unsignedIntegerValue];
-    if (textMove == NSReturnTextMovement) {
-        m_pSearchWidget->on_search_textChanged(WizToQString([self stringValue]));
-    }
-}
+//- (void)textDidEndEditing:(NSNotification *)aNotification
+//{
+//    NSUInteger textMove = [aNotification.userInfo[@"NSTextMovement"] unsignedIntegerValue];
+//    if (textMove == NSReturnTextMovement) {
+//        m_pSearchWidget->on_search_textChanged(WizToQString([self stringValue]));
+//    }
+//}
 @end
 
 CWizSearchWidget::CWizSearchWidget(QWidget* parent /* = 0 */)
