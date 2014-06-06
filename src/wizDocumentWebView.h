@@ -250,7 +250,8 @@ public Q_SLOTS:
     void on_editorCommandExecuteLinkInsert_accepted();
     void on_editorCommandExecuteTableInsert_accepted();
 
-    void resetSearchKeywordHighlight();
+    void applySearchKeywordHighlight();
+    void clearSearchKeywordHighlight();
 
     /* editor API */
 

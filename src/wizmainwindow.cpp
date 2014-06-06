@@ -77,6 +77,7 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     , m_settings(new CWizUserSettings(dbMgr.db()))
     , m_sync(new CWizKMSyncThread(dbMgr.db(), this))
     , m_searchIndexer(new CWizSearchIndexer(m_dbMgr, this))
+    , m_searcher(new CWizSearcher(m_dbMgr, this))
     #ifndef BUILD4APPSTORE
     , m_upgrade(new CWizUpgrade())
     #else
@@ -131,6 +132,9 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     connect(m_sync, SIGNAL(processLog(const QString&)), SLOT(on_syncProcessLog(const QString&)));
     connect(m_sync, SIGNAL(syncStarted(bool)), SLOT(on_syncStarted(bool)));
     connect(m_sync, SIGNAL(syncFinished(int, QString)), SLOT(on_syncDone(int, QString)));
+
+    connect(m_searcher, SIGNAL(searchProcess(const QString&, const CWizDocumentDataArray&, bool)),
+        SLOT(on_searchProcess(const QString&, const CWizDocumentDataArray&, bool)));
 
     // misc settings
     //m_avatarDownloaderHost->setDefault(::WizGetSkinResourcePath(userSettings().skin()) + "avatar_default.png");
@@ -214,6 +218,7 @@ void MainWindow::cleanOnQuit()
     m_sync->waitForDone();
     //
     m_searchIndexer->waitForDone();
+    m_searcher->waitForDone();
     //
     m_doc->waitForDone();
     //
@@ -1348,13 +1353,13 @@ void MainWindow::on_actionSearch_triggered()
 void MainWindow::on_actionResetSearch_triggered()
 {
     if (m_searcher) {
-        m_searcher->abort();
+        m_searcher->stop();
     }
 
     m_search->clear();
     m_search->focus();
     m_category->restoreSelection();
-    m_doc->web()->resetSearchKeywordHighlight();
+    m_doc->web()->applySearchKeywordHighlight();
 }
 
 void MainWindow::on_actionSaveAsPDF_triggered()
@@ -1389,14 +1394,12 @@ void MainWindow::on_search_doSearch(const QString& keywords)
         return;
     }
 
-    if (m_searcher) {
-        m_searcher->disconnect(this);
-        m_searcher->abort();
-        m_searchThread.quit();
-    }
-
     m_category->saveSelection();
     m_documents->clear();
+
+    if (m_searcher->isSearching()) {
+        m_searcher->stop();
+    }
 
     if (!m_searchTimer) {
         m_searchTimer = new QTimer(this);
@@ -1410,18 +1413,11 @@ void MainWindow::on_search_doSearch(const QString& keywords)
 
 void MainWindow::on_search_timeout()
 {
-    if (m_searcher) {
+    if (m_searcher->isSearching()) {
+        m_searcher->stop();
         m_searchTimer->start();
         return;
     }
-
-    m_searcher = new CWizSearcher(m_dbMgr);
-    connect(m_searcher, SIGNAL(searchProcess(const QString&, const CWizDocumentDataArray&, bool)),
-        SLOT(on_searchProcess(const QString&, const CWizDocumentDataArray&, bool)));
-
-    m_searcher->moveToThread(&m_searchThread);
-    connect(&m_searchThread, SIGNAL(finished()), m_searcher, SLOT(deleteLater()));
-    m_searchThread.start();
 
     m_searcher->search(m_strSearchKeywords, 10000);
 }
@@ -1431,8 +1427,8 @@ void MainWindow::on_searchProcess(const QString& strKeywords, const CWizDocument
     //Q_ASSERT(m_searcher);
 
     if (bEnd) {
-        m_searchThread.exit();
-        m_doc->web()->resetSearchKeywordHighlight();
+        m_doc->web()->clearSearchKeywordHighlight(); //need clear hightlight first
+        m_doc->web()->applySearchKeywordHighlight();
     }
 
     if (strKeywords != m_strSearchKeywords) {

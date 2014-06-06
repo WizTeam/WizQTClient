@@ -145,7 +145,6 @@ private:
     CWizDocumentViewHistory* m_history;
     QPointer<CWizAnimateAction> m_animateSync;
 
-    QThread m_searchThread;
     QPointer<QTimer> m_searchTimer;
     QPointer<CWizSearcher> m_searcher;
     QString m_strSearchKeywords;
