@@ -22,6 +22,7 @@
 
 class QToolBar;
 class QLabel;
+class QSystemTrayIcon;
 
 class CWizProgressDialog;
 class CWizDocumentListView;
@@ -112,6 +113,8 @@ private:
 
     CWizObjectDataDownloaderHost* m_objectDownloaderHost;
     //CWizUserAvatarDownloaderHost* m_avatarDownloaderHost;
+    //
+    QSystemTrayIcon* m_tray;
 
 #ifdef Q_OS_MAC
     CWizMacToolBar* m_toolBar;

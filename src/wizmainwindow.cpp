@@ -12,6 +12,7 @@
 #include <QFileDialog>
 #include <QPushButton>
 #include <QHostInfo>
+#include <QSystemTrayIcon>
 
 #ifdef Q_OS_MAC
 #include <Carbon/Carbon.h>
@@ -110,6 +111,7 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     , m_bRestart(false)
     , m_bLogoutRestart(false)
     , m_bUpdatingSelection(false)
+    , m_tray(new QSystemTrayIcon(QApplication::windowIcon(), this))
 {
 #ifndef Q_OS_MAC
     clientLayout()->addWidget(m_toolBar);
@@ -170,6 +172,7 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     //
     m_sync->start(QThread::IdlePriority);
     //
+    m_tray->show();
 }
 
 bool MainWindow::eventFilter(QObject* watched, QEvent* event)
