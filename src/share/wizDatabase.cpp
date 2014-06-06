@@ -2477,6 +2477,9 @@ bool CWizDatabase::IsAttachmentDownloaded(const CString& strGUID)
 
 bool CWizDatabase::GetAllObjectsNeedToBeDownloaded(CWizObjectDataArray& arrayData, int nTimeLine)
 {
+    if (nTimeLine == -1)
+        return true;
+    //
     CWizDocumentDataArray arrayDocument;
     CWizDocumentAttachmentDataArray arrayAttachment;
     GetNeedToBeDownloadedDocuments(arrayDocument);
