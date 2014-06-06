@@ -62,7 +62,10 @@ void CWizPopupButton::paintEvent(QPaintEvent* event)
         rectText.setLeft(rectText.left() + nMargin);
         rectText.setRight(rectText.right() - nArrawWidth - nMargin * 2);
         QString str = fontMetrics().elidedText(opt.text, Qt::ElideRight, rectText.width());
-        p.drawText(rectText, Qt::AlignCenter, str);
+        QFont font;
+        font.setPixelSize(fontMetrics().height());
+        p.setFont(font);
+        p.drawText(rectText, Qt::AlignVCenter | Qt::AlignLeft, str);
         return;
     }
 }
@@ -190,7 +193,11 @@ CWizSortingPopupButton::CWizSortingPopupButton(CWizExplorerApp& app, QWidget *pa
 
 QSize CWizSortingPopupButton::sizeHint () const
 {
-    return QSize(fontMetrics().width(text()) + 30, fontMetrics().height() + 12);
+#ifdef Q_OS_MAC
+    return QSize(fontMetrics().width(text()) + 45, fontMetrics().height() + 16);
+#else
+    return QSize(fontMetrics().width(text()) + 45, fontMetrics().height() + 12);
+#endif
 }
 
 void CWizSortingPopupButton::on_action_triggered()

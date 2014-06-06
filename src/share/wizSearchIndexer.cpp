@@ -42,7 +42,7 @@ void CWizSearchIndexer::run()
     int idleCounter = 0;
     while (1)
     {
-        if (idleCounter >= 30 || m_buldNow || m_stop)
+        if (idleCounter >= 60 || m_buldNow || m_stop)
         {
             if (m_stop)
                 return;
