@@ -340,7 +340,7 @@ void WizGetTranslatedLocales(QStringList& locales)
 {
     locales.append("zh_CN");
     locales.append("zh_TW");
-    locales.append("en_US");
+    locales.append(WizGetDefaultTranslatedLocal());
 }
 
 QString WizGetTranslatedLocaleDisplayName(int index)
@@ -2116,4 +2116,10 @@ void WizWaitForThread(QThread* pThread)
         QApplication::processEvents();
     }
 
+}
+
+
+QString WizGetDefaultTranslatedLocal()
+{
+    return "en_US";
 }

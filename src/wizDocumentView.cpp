@@ -41,8 +41,8 @@ CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
     , m_bLocked(false)
     , m_bEditingMode(false)
     , m_noteLoaded(false)
-    , m_editStatusSyncThread(new CWizDocumentEditStatusSyncThread())
-    , m_editStatusCheckThread(new CWizDocumentEditStatusCheckThread())
+    , m_editStatusSyncThread(new CWizDocumentEditStatusSyncThread(this))
+    , m_editStatusCheckThread(new CWizDocumentEditStatusCheckThread(this))
 {
     m_title->setEditor(m_web);
 
@@ -115,6 +115,9 @@ CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
             SLOT(onCloseNoteRequested(Core::INoteView*)));
 
     connect(m_web, SIGNAL(focusIn()), SLOT(on_webView_focus_changed()));
+
+    connect(m_editStatusCheckThread, SIGNAL(checkFinished(QString,QStringList)),
+            SLOT(on_checkEditStatus_finished(QString,QStringList)));
     //
     m_editStatusSyncThread->start(QThread::IdlePriority);
     m_editStatusCheckThread->start(QThread::IdlePriority);
@@ -495,13 +498,6 @@ void Core::CWizDocumentView::on_checkEditStatus_finished(QString strGUID, QStrin
         QString strEditor = editors.join(" , ");
         m_title->showDocumentEditingStatus(strEditor);
     }
-
-    // delete check trhead
-    CWizDocumentEditStatusCheckThread* checker = qobject_cast<CWizDocumentEditStatusCheckThread *>(sender());
-    Q_ASSERT(checker);
-    connect(checker, SIGNAL(finished()), checker, SLOT(deleteLater()));
-    checker->quit();
-
 }
 
 void CWizDocumentView::on_webView_focus_changed()

@@ -209,10 +209,6 @@ void CWizDocumentEditStatusCheckThread::waitForDone()
 void CWizDocumentEditStatusCheckThread::checkEditStatus(const QString& strKbGUID, const QString& strGUID)
 {
     setDocmentGUID(strKbGUID, strGUID);
-    if (!isRunning())
-    {
-        start(HighPriority);
-    }
 }
 
 void CWizDocumentEditStatusCheckThread::downloadData(const QString& strUrl)
