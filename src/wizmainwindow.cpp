@@ -127,6 +127,7 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
 
     // search and full text search
     m_searchIndexer->start(QThread::IdlePriority);
+    m_searcher->start(QThread::HighPriority);
 
     // syncing thread
     connect(m_sync, SIGNAL(processLog(const QString&)), SLOT(on_syncProcessLog(const QString&)));
@@ -1350,7 +1351,7 @@ void MainWindow::on_actionSearch_triggered()
 void MainWindow::on_actionResetSearch_triggered()
 {
     if (m_searcher) {
-        m_searcher->stop();
+        m_searcher->stopSearching();
     }
 
     m_search->clear();
@@ -1394,9 +1395,7 @@ void MainWindow::on_search_doSearch(const QString& keywords)
     m_category->saveSelection();
     m_documents->clear();
 
-    if (m_searcher->isSearching()) {
-        m_searcher->stop();
-    }
+    m_searcher->stopSearching();
 
     if (!m_searchTimer) {
         m_searchTimer = new QTimer(this);
@@ -1411,7 +1410,7 @@ void MainWindow::on_search_doSearch(const QString& keywords)
 void MainWindow::on_search_timeout()
 {
     if (m_searcher->isSearching()) {
-        m_searcher->stop();
+        m_searcher->stopSearching();
         m_searchTimer->start();
         return;
     }

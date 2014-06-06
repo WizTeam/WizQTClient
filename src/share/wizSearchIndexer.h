@@ -5,6 +5,7 @@
 #include <QMap>
 #include <QThread>
 #include  <deque>
+#include <QWaitCondition>
 
 #include "wizClucene.h"
 #include "wizDatabaseManager.h"
@@ -67,7 +68,7 @@ public:
     explicit CWizSearcher(CWizDatabaseManager& dbMgr, QObject *parent = 0);
     void search(const QString& strKeywords, int nMaxSize = -1);
     bool isSearching();
-    void stop();
+    void stopSearching();
     void waitForDone();
 
 protected:
@@ -82,8 +83,12 @@ private:
     QString m_strkeywords;
     int m_nMaxResult;
 
-    QTimer m_timer;
     bool m_stop;
+    bool m_stopSearching;
+    bool m_isSearching;
+    QMutex m_mutexWait;
+    QWaitCondition m_wait;
+
 
     // guid-document map, search faster
     QMap<QString, WIZDOCUMENTDATAEX> m_mapDocumentSearched;
@@ -94,8 +99,7 @@ private:
     Q_INVOKABLE void searchKeyword(const QString& strKeywords);
     void searchDatabase(const QString& strKeywords);
 
-public Q_SLOTS:
-
+    void stop();
 
 Q_SIGNALS:
     void searchProcess(const QString& strKeywords, const CWizDocumentDataArray& arrayDocument, bool bEnd);
