@@ -77,7 +77,7 @@ private slots:
     void onUserNameEdited(const QString& arg1);
 
 private:
-    void applyElementStyles();
+    void applyElementStyles(const QString& strLocal);
     bool checkSingMessage();
     QAction* findActionInMenu(const QString& strActName);
 
