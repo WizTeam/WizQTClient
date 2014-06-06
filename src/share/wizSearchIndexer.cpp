@@ -47,6 +47,8 @@ void CWizSearchIndexer::run()
             if (m_stop)
                 return;
 
+            idleCounter = 0;
+            //
             buildFTSIndex();
 
         }
