@@ -390,6 +390,7 @@ void CWizLoginDialog::applyElementStyles()
 
     ui->btn_changeToLogin->setVisible(false);
     ui->label_passwordError->setStyleSheet(QString("QLabel {border: none; padding-left: 25px; color: red;}"));
+    ui->label_passwordError->setText("");
 
     m_menu->setFixedWidth(ui->wgt_usercontainer->width());
     m_menu->setStyleSheet("QMenu {background-color: #ffffff; border-style: solid; border-color: #43A6E8; border-width: 1px; color: #5F5F5F; menu-scrollable: 1;}"
