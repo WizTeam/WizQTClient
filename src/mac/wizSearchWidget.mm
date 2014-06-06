@@ -117,6 +117,8 @@
     if (textMove == NSReturnTextMovement) {
         m_pSearchWidget->on_search_textChanged(WizToQString([self stringValue]));
     }
+    //
+    [super textDidEndEditing:aNotification];
 }
 @end
 
