@@ -113,7 +113,8 @@
 }
 - (void)textDidEndEditing:(NSNotification *)aNotification
 {
-    NSUInteger textMove = [aNotification.userInfo[@"NSTextMovement"] unsignedIntegerValue];
+    NSDictionary* dict = [aNotification userInfo];
+    NSUInteger textMove = [[dict objectForKey: @"NSTextMovement"] unsignedIntegerValue];
     if (textMove == NSReturnTextMovement) {
         m_pSearchWidget->on_search_textChanged(WizToQString([self stringValue]));
     }
