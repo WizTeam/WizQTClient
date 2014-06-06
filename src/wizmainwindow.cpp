@@ -1350,10 +1350,6 @@ void MainWindow::on_actionSearch_triggered()
 
 void MainWindow::on_actionResetSearch_triggered()
 {
-    if (m_searcher) {
-        m_searcher->stopSearching();
-    }
-
     m_search->clear();
     m_search->focus();
     m_category->restoreSelection();
@@ -1394,34 +1390,16 @@ void MainWindow::on_search_doSearch(const QString& keywords)
 
     m_category->saveSelection();
     m_documents->clear();
-
-    m_searcher->stopSearching();
-
-    if (!m_searchTimer) {
-        m_searchTimer = new QTimer(this);
-        m_searchTimer->setSingleShot(true);
-        m_searchTimer->setInterval(300);
-        connect(m_searchTimer, SIGNAL(timeout()), SLOT(on_search_timeout()));
-    }
-
-    m_searchTimer->start();
+    //
+    m_noteList->show();
+    m_msgList->hide();
+    //
+    m_searcher->search(keywords, 500);
 }
 
-void MainWindow::on_search_timeout()
-{
-    if (m_searcher->isSearching()) {
-        m_searcher->stopSearching();
-        m_searchTimer->start();
-        return;
-    }
-
-    m_searcher->search(m_strSearchKeywords, 10000);
-}
 
 void MainWindow::on_searchProcess(const QString& strKeywords, const CWizDocumentDataArray& arrayDocument, bool bEnd)
 {
-    //Q_ASSERT(m_searcher);
-
     if (bEnd) {
         m_doc->web()->clearSearchKeywordHighlight(); //need clear hightlight first
         m_doc->web()->applySearchKeywordHighlight();
@@ -1519,22 +1497,6 @@ void MainWindow::on_category_itemSelectionChanged()
         pItem->getMessages(m_dbMgr.db(), arrayMsg);
         m_msgList->setMessages(arrayMsg);
         return;
-
-        // FIXME: use id instead of name.
-        //QString strName = category->currentItem()->text(0);
-        //if (strName == CATEGORY_MESSAGES_ALL ||
-        //        strName == CATEGORY_MESSAGES_SEND_TO_ME ||
-        //        strName == CATEGORY_MESSAGES_MODIFY ||
-        //        strName == CATEGORY_MESSAGES_COMMENTS ||
-        //        strName == CATEGORY_MESSAGES_SEND_FROM_ME) {
-        //    m_msgList->show();
-        //    m_noteList->hide();
-
-        //    CWizMessageDataArray arrayMsg;
-        //    m_dbMgr.db().getLastestMessages(arrayMsg);
-        //    m_msgList->setMessages(arrayMsg);
-
-        //    return;
     }
     else
     {

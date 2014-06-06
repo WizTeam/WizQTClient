@@ -34,8 +34,8 @@ CWizSearchWidget::CWizSearchWidget(QWidget* parent /* = 0 */)
     layout->addWidget(m_editSearch);
     layout->setStretch(1, 1);
 
-    connect(m_editSearch, SIGNAL(textChanged(const QString&)), \
-            SLOT(on_search_textChanged(const QString&)));
+    connect(m_editSearch, SIGNAL(returnPressed()), \
+            SLOT(on_search_returnPressed()));
 }
 
 void CWizSearchWidget::clear()
@@ -59,9 +59,9 @@ void CWizSearchWidget::setWidthHint(int nWidth)
     m_widthHint = nWidth;
 }
 
-void CWizSearchWidget::on_search_textChanged(const QString& strText)
+void CWizSearchWidget::on_search_returnPressed()
 {
-    Q_EMIT doSearch(strText);
+    Q_EMIT doSearch(m_editSearch->text());
 }
 
 #endif // Q_OS_MAC

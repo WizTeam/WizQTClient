@@ -299,9 +299,7 @@ CWizSearcher::CWizSearcher(CWizDatabaseManager& dbMgr, QObject *parent)
     : QThread(parent)
     , m_dbMgr(dbMgr)
     , m_mutexWait(QMutex::NonRecursive)
-    , m_isSearching(false)
     , m_stop(false)
-    , m_stopSearching(false)
 {
     m_strIndexPath = m_dbMgr.db().GetAccountPath() + "fts_index";
     qRegisterMetaType<CWizDocumentDataArray>("CWizDocumentDataArray");
@@ -317,20 +315,9 @@ void CWizSearcher::search(const QString &strKeywords, int nMaxSize /* = -1 */)
 
 }
 
-bool CWizSearcher::isSearching()
-{
-    return m_isSearching;
-}
-
-void CWizSearcher::stopSearching()
-{
-    m_stopSearching = true;
-}
-
 void CWizSearcher::stop()
 {
     m_stop = true;
-    m_stopSearching = true;
     m_wait.wakeAll();
 }
 
@@ -345,7 +332,6 @@ void CWizSearcher::doSearch()
 {
     m_mapDocumentSearched.clear();
     m_nResults = 0;
-    m_stopSearching = false;
 
     if (!QMetaObject::invokeMethod(this, "searchKeyword",
                                    Q_ARG(const QString&, m_strkeywords))) {
@@ -364,12 +350,12 @@ void CWizSearcher::searchKeyword(const QString& strKeywords)
 
     searchDatabase(strKeywords);
 
-    if (m_nMaxResult <= m_nResults)
-        return;
-
-    // NOTE: make sure convert keyword to lower case
-    searchDocument(m_strIndexPath.toStdWString().c_str(),
-                   strKeywords.toLower().toStdWString().c_str());
+    if (m_nResults < m_nMaxResult)
+    {
+        // NOTE: make sure convert keyword to lower case
+        searchDocument(m_strIndexPath.toStdWString().c_str(),
+                       strKeywords.toLower().toStdWString().c_str());
+    }
 
     int nMilliseconds = counter.elapsed();
     qDebug() << "[Search]search times: " << nMilliseconds;
@@ -378,8 +364,6 @@ void CWizSearcher::searchKeyword(const QString& strKeywords)
                 (m_mapDocumentSearched.size() / SEARCH_PAGE_MAX) + 1: (m_mapDocumentSearched.size() / SEARCH_PAGE_MAX);
     int nPos = 0;
     for (int i = 0; i < nTimes; i++) {
-        if (m_stopSearching)
-            break;
 
         CWizDocumentDataArray arrayDocument;
         QMap<QString, WIZDOCUMENTDATAEX>::const_iterator it;
@@ -403,41 +387,15 @@ void CWizSearcher::searchKeyword(const QString& strKeywords)
 
     CWizDocumentDataArray arrayDocument;
     Q_EMIT searchProcess(strKeywords, arrayDocument, true);
-
-    //QMap<QString, WIZDOCUMENTDATAEX>::const_iterator i;
-    //for (i = m_mapDocumentSearched.begin(); i != m_mapDocumentSearched.end(); i++) {
-    //    if (isAborted()) {
-    //        break;
-    //    }
-
-    //    arrayDocument.push_back(i.value());
-
-    //    //Q_EMIT documentFind(i.value());
-
-    //    // emit signal too fast may hang up gui.
-    //    // this method is proteced on Qt4, public on Qt5
-    //    //QThread::currentThread()->msleep(3);
-    //    //QTime dieTime = QTime::currentTime().addMSecs(5);
-    //    //while (QTime::currentTime() < dieTime) {
-    //    //    QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
-    //    //}
-    //}
-
-    //Q_EMIT searchEnd(arrayDocument);
 }
 
 void CWizSearcher::searchDatabase(const QString& strKeywords)
 {
-    if (m_stopSearching)
-        return;
-
     CWizDocumentDataArray arrayDocument;
     m_dbMgr.db().SearchDocumentByTitle(strKeywords, NULL, true, 5000, arrayDocument);
 
     CWizDocumentDataArray::const_iterator it;
     for (it = arrayDocument.begin(); it != arrayDocument.end(); it++) {
-        if (m_stopSearching)
-            return;
 
         const WIZDOCUMENTDATAEX& doc = *it;
         m_mapDocumentSearched[doc.strGUID] = doc;
@@ -448,15 +406,9 @@ void CWizSearcher::searchDatabase(const QString& strKeywords)
 
     int nCount = m_dbMgr.count();
     for (int i = 0; i < nCount; i++) {
-        if (m_stopSearching)
-            return;
-
         m_dbMgr.at(i).SearchDocumentByTitle(strKeywords, NULL, true, 5000, arrayDocument);
 
         for (it = arrayDocument.begin(); it != arrayDocument.end(); it++) {
-            if (m_stopSearching)
-                return;
-
             const WIZDOCUMENTDATAEX& doc = *it;
             m_mapDocumentSearched[doc.strGUID] = doc;
             m_nResults++;
@@ -473,9 +425,6 @@ bool CWizSearcher::onSearchProcess(const wchar_t* lpszKbGUID,
                                    const wchar_t* lpszURL)
 {
     Q_UNUSED(lpszURL);
-
-    if (m_stopSearching)
-        return true;
 
     if (m_nMaxResult != -1 && m_nMaxResult <= m_nResults) {
         qDebug() << "\nSearch result is bigger than limits: " << m_nMaxResult;
@@ -532,9 +481,7 @@ void CWizSearcher::run()
         //
         //
         if (!strKeyWord.isEmpty()) {
-            m_isSearching = true;
             doSearch();
-            m_isSearching = false;
         }
     }
 }

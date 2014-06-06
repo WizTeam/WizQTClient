@@ -67,8 +67,6 @@ class CWizSearcher
 public:
     explicit CWizSearcher(CWizDatabaseManager& dbMgr, QObject *parent = 0);
     void search(const QString& strKeywords, int nMaxSize = -1);
-    bool isSearching();
-    void stopSearching();
     void waitForDone();
 
 protected:
@@ -84,8 +82,6 @@ private:
     int m_nMaxResult;
 
     bool m_stop;
-    bool m_stopSearching;
-    bool m_isSearching;
     QMutex m_mutexWait;
     QWaitCondition m_wait;
 

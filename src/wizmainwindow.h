@@ -145,7 +145,6 @@ private:
     CWizDocumentViewHistory* m_history;
     QPointer<CWizAnimateAction> m_animateSync;
 
-    QPointer<QTimer> m_searchTimer;
     QPointer<CWizSearcher> m_searcher;
     QString m_strSearchKeywords;
 
@@ -251,7 +250,6 @@ public Q_SLOTS:
     void on_actionEditorViewSource_triggered();
     void on_actionFormatInsertCheckList_triggered();
 
-    void on_search_timeout();
     void on_searchProcess(const QString &strKeywords, const CWizDocumentDataArray& arrayDocument, bool bEnd);
 
     void on_actionGoBack_triggered();
