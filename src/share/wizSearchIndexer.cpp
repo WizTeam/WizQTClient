@@ -133,7 +133,7 @@ bool CWizSearchIndexer::buildFTSIndexByDatabase(CWizDatabase& db)
         }
 
         // release CPU
-        usleep(100);
+        msleep(100);
     }
 
     if (nErrors >= 3) {
