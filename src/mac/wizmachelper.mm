@@ -246,3 +246,14 @@ bool wizMacIsCurrentApplicationVisible()
     return YES != app.hidden;
 }
 
+void WizMacNSUncaughtExceptionHandler(NSException *exception)
+{
+    NSString* msg = [exception reason];
+    QString err = WizToQString(msg);
+    qDebug() << err;
+}
+
+void wizMacInitUncaughtExceptionHandler()
+{
+    NSSetUncaughtExceptionHandler(WizMacNSUncaughtExceptionHandler);
+}

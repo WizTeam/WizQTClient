@@ -19,6 +19,8 @@ void wizMacHideCurrentApplication();
 void wizMacShowCurrentApplication();
 bool wizMacIsCurrentApplicationVisible();
 
+void wizMacInitUncaughtExceptionHandler();
+
 #endif // Q_OS_MAC
 
 #endif // COCOAHELP_H
