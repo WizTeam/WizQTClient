@@ -233,15 +233,10 @@ void MainWindow::cleanOnQuit()
 
 void MainWindow::closeEvent(QCloseEvent* event)
 {
-//    event->accept();
-//    qApp->quit();
-
 #ifdef Q_OS_MAC
     if (event->spontaneous())
     {
-        ProcessSerialNumber pn;
-        MacGetCurrentProcess(&pn);
-        ShowHideProcess(&pn,false);
+        wizMacHideCurrentApplication();
         event->ignore();
         return;
     }
@@ -254,36 +249,6 @@ void MainWindow::closeEvent(QCloseEvent* event)
         return;
     }
 #endif
-
-    //hide mainwindow but not quit
-//    if (event->spontaneous())
-//    {
-//        QStringList args;
-//        args << "-e";
-//        args << "tell application \"System Events\"";
-//        args << "-e";
-//        args << "set visible of process \""+QFileInfo(QApplication::applicationFilePath()).baseName()+"\" to false";
-//        args << "-e";
-//        args << "end tell";
-//        QProcess::execute("osascript", args);
-//        event->ignore();
-//        return;
-//    }
-
-
-
-//#ifdef Q_OS_MAC
-//    // Qt issue: use hide() directly lead window can't be shown when click dock icon
-//    // call native API instead and ignore issue event.
-//    ProcessSerialNumber pn;
-//    GetFrontProcess(&pn);
-//    ShowHideProcess(&pn,false);
-//    event->ignore();
-//#else
-//    event->accept();
-//    qApp->quit();
-//#endif
-
 }
 
 void MainWindow::on_actionExit_triggered()
@@ -338,18 +303,23 @@ void MainWindow::on_trayIcon_newDocument_clicked()
 void MainWindow::shiftVisableStatus()
 {
 #ifdef Q_OS_MAC
-    ProcessSerialNumber pn;
-    MacGetCurrentProcess(&pn);
-    bool appVisible = IsProcessVisible(&pn);
+    bool appVisible = wizMacIsCurrentApplicationVisible();
     //
     if (appVisible && QApplication::activeWindow() != this)
     {
         raise();
         return;
     }
-
     //
-    ShowHideProcess(&pn,!appVisible);
+    if (appVisible)
+    {
+        wizMacHideCurrentApplication();
+    }
+    else
+    {
+        wizMacShowCurrentApplication();
+    }
+    //
     if (!appVisible)
     {
         raise();
