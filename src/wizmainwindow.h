@@ -3,6 +3,7 @@
 
 #include <QtGlobal>
 #include <QMainWindow>
+#include <QPushButton>
 
 #include "wizdef.h"
 #include "share/wizuihelper.h"
@@ -15,6 +16,9 @@
 #include "wizusercipherform.h"
 //#include "wizdownloadobjectdatadialog.h"
 #include "wizDocumentView.h"
+#ifndef Q_OS_MAC
+#include "share/wizshadowwindow.h"
+#endif
 
 class QToolBar;
 class QLabel;
@@ -57,10 +61,20 @@ class CWizDocumentView;
 namespace Internal {
 
 class MainWindow
+#ifdef Q_OS_MAC
     : public QMainWindow
+#else
+    : public CWizShadowWindow<QMainWindow>
+#endif
     , public CWizExplorerApp
 {
     Q_OBJECT
+
+#ifdef Q_OS_MAC
+    typedef QMainWindow  _baseClass;
+#else
+    typedef CWizShadowWindow<QMainWindow> _baseClass;
+#endif
 
 public:
     explicit MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent = 0);
@@ -77,6 +91,8 @@ public:
     Q_PROPERTY(bool restart READ isRestart WRITE setRestart)
 
     bool isLogout() const { return m_bLogoutRestart; }
+
+    QString searchKeywords() const { return m_strSearchKeywords; }
 
 protected:
     virtual bool eventFilter(QObject* watched, QEvent* event);
@@ -99,11 +115,13 @@ private:
 
 #ifdef Q_OS_MAC
     CWizMacToolBar* m_toolBar;
+    QMenuBar* m_menuBar;
 #else
     QToolBar* m_toolBar;
+    QMenu* m_menu;
+    QToolButton* m_menuButton;
 #endif
 
-    QMenuBar* m_menuBar;
 
 #ifndef Q_OS_MAC
     QLabel* m_labelNotice;
@@ -127,13 +145,12 @@ private:
     CWizDocumentViewHistory* m_history;
     QPointer<CWizAnimateAction> m_animateSync;
 
-    QThread m_searchThread;
-    QPointer<QTimer> m_searchTimer;
     QPointer<CWizSearcher> m_searcher;
     QString m_strSearchKeywords;
 
     CWizSearchIndexer* m_searchIndexer;
     QPointer<CWizSearchWidget> m_search;
+    CWizFixedSpacer* m_spacerBeforeSearch;
 
     bool m_bRestart;
     bool m_bLogoutRestart;
@@ -143,9 +160,16 @@ private:
 
 private:
     void initActions();
-    void initMenuBar();
+
     void initToolBar();
     void initClient();
+    //
+#ifndef Q_OS_MAC
+    virtual void layoutTitleBar();
+    void initMenuList();
+#else
+    void initMenuBar();
+#endif
 
     QWidget* createListView();
 
@@ -169,10 +193,6 @@ public:
     void locateDocument(const WIZDOCUMENTDATA& data);
     //
     static void quickSyncKb(const QString& kbGuid);
-#ifndef Q_OS_MAC
-    CWizFixedSpacer* findFixedSpacer(int index);
-    void adjustToolBarSpacerToPos(int index, int pos);
-#endif
 
     void checkWizUpdate();
 
@@ -230,7 +250,6 @@ public Q_SLOTS:
     void on_actionEditorViewSource_triggered();
     void on_actionFormatInsertCheckList_triggered();
 
-    void on_search_timeout();
     void on_searchProcess(const QString &strKeywords, const CWizDocumentDataArray& arrayDocument, bool bEnd);
 
     void on_actionGoBack_triggered();
@@ -270,10 +289,14 @@ public Q_SLOTS:
     void saveHtmlToCurrentNote(const QString& strHtml, const QString& strResource);
     bool hasEditPermissionOnCurrentNote() const;
     void setCurrentDocumentType(const QString& strType);
+    void OpenURLInDefaultBrowser(const QString& strURL);
+    void SetDialogResult(int nResult);
 
 #ifndef Q_OS_MAC
     void on_actionPopupMainMenu_triggered();
     void on_client_splitterMoved(int pos, int index);
+    void on_menuButtonClicked();
+    void adjustToolBarLayout();
 #endif
 
     void on_application_aboutToQuit();
@@ -314,6 +337,8 @@ private:
 
     //FIXME：新建笔记时,为了将光标移到编辑器中,需要将Editor的模式设置为disable,此处需要将actions设置为可用
     void setActionsEnableForNewNote();
+
+    void viewDocumentByWizKMURL(const QString& strKMURL);
 };
 
 } // namespace Internal

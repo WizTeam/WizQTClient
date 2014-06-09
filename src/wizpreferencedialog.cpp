@@ -6,6 +6,7 @@
 
 #include "share/wizDatabaseManager.h"
 #include "wizmainwindow.h"
+#include "wizproxydialog.h"
 
 
 CWizPreferenceWindow::CWizPreferenceWindow(CWizExplorerApp& app, QWidget* parent)
@@ -21,7 +22,7 @@ CWizPreferenceWindow::CWizPreferenceWindow(CWizExplorerApp& app, QWidget* parent
     connect(ui->btnClose, SIGNAL(clicked()), SLOT(accept()));
 
     // FIXME: proxy settings will back soon!!!
-    ui->labelProxySettings->hide();
+//    ui->labelProxySettings->hide();
 
     // hide language choice and upgrade for appstore
 #ifdef BUILD4APPSTORE
@@ -134,7 +135,7 @@ CWizPreferenceWindow::CWizPreferenceWindow(CWizExplorerApp& app, QWidget* parent
     connect(ui->comboSyncMethod, SIGNAL(activated(int)), SLOT(on_comboSyncMethod_activated(int)));
     connect(ui->comboSyncGroupMethod, SIGNAL(activated(int)), SLOT(on_comboSyncGroupMethod_activated(int)));
 
-    QString proxySettings = WizFormatString1("<a href=\"proxy_settings\">%1</a>", tr("Proxy settings"));
+    QString proxySettings = WizFormatString1("<a href=\"proxy_settings\" style=\"color:#3CA2E0;\">%1</a>", tr("Proxy settings"));
     ui->labelProxySettings->setText(proxySettings);
     connect(ui->labelProxySettings, SIGNAL(linkActivated(const QString&)),
             SLOT(labelProxy_linkActivated(const QString&)));
@@ -261,10 +262,10 @@ void CWizPreferenceWindow::labelProxy_linkActivated(const QString& link)
 {
     Q_UNUSED(link);
 
-    //ProxyDialog dlg(this);
-    //if (QDialog::Accepted != dlg.exec()) {
-    //    Q_EMIT settingsChanged(wizoptionsSync);
-    //}
+    ProxyDialog dlg(this);
+    if (QDialog::Accepted != dlg.exec()) {
+        Q_EMIT settingsChanged(wizoptionsSync);
+    }
 }
 
 void CWizPreferenceWindow::onButtonFontSelect_clicked()

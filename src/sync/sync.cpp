@@ -1331,6 +1331,9 @@ bool CWizKMSync::DownloadObjectData()
         return FALSE;
     }
     //
+    if (arrayObject.empty())
+        return TRUE;
+    //
     std::sort(arrayObject.begin(), arrayObject.end(), WizCompareObjectByTypeAndTime);
     //
     //

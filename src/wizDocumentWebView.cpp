@@ -74,7 +74,7 @@ private:
 
 QString getImageHtmlLabelByFile(const QString& strImageFile)
 {
-    return QString("<img class=\"WizNormalImg\" border=\"0\" src=\"file://%1\" />").arg(strImageFile);
+    return QString("<img border=\"0\" src=\"file://%1\" />").arg(strImageFile);
 }
 
 void CWizDocumentWebViewPage::triggerAction(QWebPage::WebAction typeAction, bool checked)
@@ -97,10 +97,11 @@ void CWizDocumentWebViewPage::on_editorCommandPaste_triggered()
     QClipboard* clip = QApplication::clipboard();
     Q_ASSERT(clip);
 
-    //const QMimeData* mime = clip->mimeData();
-    //qDebug() << mime->formats();
-    //qDebug() << mime->data("text/html");
-    //qDebug() << mime->hasImage();
+//    const QMimeData* mime = clip->mimeData();
+//    QStringList formats = mime->formats();
+//    for(int i = 0; i < formats.size(); ++ i) {
+//        qDebug() << "Mime Format: " << formats.at(i) << " Mime data: " << mime->data(formats.at(i));
+//    }
 
     if (!clip->image().isNull()) {
         // save clipboard image to $TMPDIR
@@ -175,17 +176,15 @@ CWizDocumentWebView::CWizDocumentWebView(CWizExplorerApp& app, QWidget* parent)
 
 CWizDocumentWebView::~CWizDocumentWebView()
 {
+
+}
+void CWizDocumentWebView::waitForDone()
+{
     if (m_docLoadThread) {
-        m_docLoadThread->stop();
-        m_docLoadThread->quit();
-        m_docLoadThread->deleteLater();
-        m_docLoadThread = NULL;
+        m_docLoadThread->waitForDone();
     }
     if (m_docSaverThread) {
-        m_docSaverThread->waitAndStop();
-        m_docSaverThread->quit();
-        m_docSaverThread->deleteLater();
-        m_docSaverThread = NULL;
+        m_docSaverThread->waitForDone();
     }
 }
 
@@ -304,6 +303,8 @@ void CWizDocumentWebView::focusInEvent(QFocusEvent *event)
     }
 
     QWebView::focusInEvent(event);
+
+    applySearchKeywordHighlight();
 }
 
 void CWizDocumentWebView::focusOutEvent(QFocusEvent *event)
@@ -402,7 +403,8 @@ void CWizDocumentWebView::tryResetTitle()
 
 bool CWizDocumentWebView::image2Html(const QString& strImageFile, QString& strHtml)
 {
-    QString strDestFile =Utils::PathResolve::tempPath() + WizGenGUIDLowerCaseLetterOnly() + ".png";
+    QFileInfo info(strImageFile);
+    QString strDestFile =Utils::PathResolve::tempPath() + WizGenGUIDLowerCaseLetterOnly() + "." + info.suffix();
 
     qDebug() << "[Editor] copy to: " << strDestFile;
 
@@ -607,6 +609,7 @@ void CWizDocumentWebView::initEditor()
             SLOT(onEditorContentChanged()));
 
     page()->mainFrame()->setHtml(strHtml, url);
+
 }
 
 void CWizDocumentWebView::initCheckListEnvironment()
@@ -718,8 +721,8 @@ void CWizDocumentWebView::viewDocumentByUrl(const QUrl& url)
     if (indx == -1) {
         return;
     }
-
-    QString strOpenType = strUrl.mid(4, indx - 4).toLower();
+    //
+    QString strOpenType = strUrl.mid(6, indx - 6).toLower();
 
     QString strFragment = strUrl.mid(indx + 1);
     QMap<QString, QString> mapArgs;
@@ -883,6 +886,28 @@ void CWizDocumentWebView::updateNoteHtml()
     }
 }
 
+void CWizDocumentWebView::applySearchKeywordHighlight()
+{
+    MainWindow* window = qobject_cast<MainWindow *>(m_app.mainWindow());
+    QString strKeyWords = window->searchKeywords();
+    if (!strKeyWords.isEmpty() && (!m_bCurrentEditing || !hasFocus()))
+    {
+        if (findText(strKeyWords, QWebPage::HighlightAllOccurrences))
+            qDebug() << "[Search] find keywords : " << strKeyWords;
+        else
+            qDebug() << "[Search] can't find keywords : " << strKeyWords;
+    }
+    else
+    {
+        findText("", QWebPage::HighlightAllOccurrences);
+    }
+}
+
+void CWizDocumentWebView::clearSearchKeywordHighlight()
+{
+    findText("", QWebPage::HighlightAllOccurrences);
+}
+
 void CWizDocumentWebView::viewDocumentInEditor(bool editing)
 {
     Q_ASSERT(m_bEditorInited);
@@ -931,7 +956,7 @@ void CWizDocumentWebView::viewDocumentInEditor(bool editing)
     MainWindow* window = qobject_cast<MainWindow *>(m_app.mainWindow());
     if (!ret) {
         window->showClient(false);
-        window->transitionView()->showAsMode(CWizDocumentTransitionView::ErrorOccured);
+        window->transitionView()->showAsMode(strGUID, CWizDocumentTransitionView::ErrorOccured);
         return;
     }
 
@@ -941,13 +966,8 @@ void CWizDocumentWebView::viewDocumentInEditor(bool editing)
     page()->undoStack()->clear();
     m_timerAutoSave.start();
 
-//    if (editing) {                //shouldn't focus the editor,otherwise the titleBar will twinkle.
-//        setFocus(Qt::MouseFocusReason);
-//        editorFocus();
-//    }
-
-    //update();
-
+    //Waiting for the editor initialization complete if it's the first time to load a document.
+    QTimer::singleShot(100, this, SLOT(applySearchKeywordHighlight()));
 }
 
 void CWizDocumentWebView::onNoteLoadFinished()
@@ -1263,10 +1283,13 @@ bool CWizDocumentWebView::editorCommandExecuteInsertImage()
         return false;
 
 //    QPixmap pix(strImgFile);
-//    return editorCommandExecuteCommand("insertImage", QString("{src:'%1', class:\"WizNormalImg\", width:%2, height:%3}")
+//    return editorCommandExecuteCommand("insertImage", QString("{src:'%1', width:%2, height:%3}")
 //                                       .arg(strImgFile).arg(pix.width()).arg(pix.height()));
-    QString strHtml = getImageHtmlLabelByFile(strImgFile);
-    return editorCommandExecuteInsertHtml(strHtml, true);
+    QString strHtml;// = //getImageHtmlLabelByFile(strImgFile);
+    if (image2Html(strImgFile, strHtml)) {
+        return editorCommandExecuteInsertHtml(strHtml, true);
+    }
+    return false;
 }
 
 bool CWizDocumentWebView::editorCommandExecuteInsertDate()
@@ -1406,6 +1429,19 @@ void CWizDocumentWebView::saveAsPDF(const QString& fileName)
     }
 }
 
+bool CWizDocumentWebView::findIMGElementAt(QPoint point, QString& strSrc)
+{
+    QPoint ptPos = mapFromGlobal(point);
+    QString strImgSrc = page()->mainFrame()->evaluateJavaScript(QString("WizGetImgElementByPoint(%1, %2)").
+                                                                arg(ptPos.x()).arg(ptPos.y())).toString();
+
+    if (strImgSrc.isEmpty())
+        return false;
+
+    strSrc = strImgSrc;
+    return true;
+}
+
 void CWizDocumentWebView::undo()
 {
     page()->mainFrame()->evaluateJavaScript("editor.execCommand('undo')");
@@ -1441,6 +1477,12 @@ void CWizDocumentWebViewLoaderThread::stop()
     m_stop = true;
     //
     m_waitForData.wakeAll();
+}
+void CWizDocumentWebViewLoaderThread::waitForDone()
+{
+    stop();
+    //
+    WizWaitForThread(this);
 }
 
 void CWizDocumentWebViewLoaderThread::run()
@@ -1531,18 +1573,11 @@ void CWizDocumentWebViewSaverThread::save(const WIZDOCUMENTDATA& doc, const QStr
         start();
     }
 }
-void CWizDocumentWebViewSaverThread::waitAndStop()
+void CWizDocumentWebViewSaverThread::waitForDone()
 {
-    while (1)
-    {
-        if (!isRunning())
-            return;
-        //
-        stop();
-        //
-        msleep(100);
-        QApplication::processEvents();
-    }
+    stop();
+    //
+    WizWaitForThread(this);
 }
 
 void CWizDocumentWebViewSaverThread::stop()

@@ -4,6 +4,7 @@
 #include <coreplugin/inoteview.h>
 
 #include "share/wizobject.h"
+#include <QSharedPointer>
 
 class QWebView;
 class QScrollArea;
@@ -23,6 +24,8 @@ class CWizUserCipherForm;
 class CWizObjectDataDownloaderHost;
 class QStackedWidget;
 class QWebFrame;
+class CWizDocumentEditStatusSyncThread;
+class CWizDocumentEditStatusCheckThread;
 
 namespace Core {
 namespace Internal {
@@ -42,6 +45,8 @@ public:
     QWidget* client() const;
     CWizDocumentWebView* web() const { return m_web; }
     QWebView* commentView() const { return m_comments; }
+    //
+    void waitForDone();
 
 protected:
     CWizExplorerApp& m_app;
@@ -60,6 +65,8 @@ protected:
     Core::Internal::TitleBar* m_title;
 
     CWizUserCipherForm* m_passwordView;
+    CWizDocumentEditStatusSyncThread* m_editStatusSyncThread;
+    CWizDocumentEditStatusCheckThread* m_editStatusCheckThread;
 
     virtual void showEvent(QShowEvent *event);
 
@@ -108,6 +115,10 @@ public Q_SLOTS:
 
     void on_attachment_created(const WIZDOCUMENTATTACHMENTDATA& attachment);
     void on_attachment_deleted(const WIZDOCUMENTATTACHMENTDATA& attachment);
+
+    //
+    void on_checkEditStatus_finished(QString strGUID, QStringList editors);
+    void on_webView_focus_changed();
 
 private:
     void loadNote(const WIZDOCUMENTDATA &doc);

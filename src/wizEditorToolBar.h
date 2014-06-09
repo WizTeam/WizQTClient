@@ -53,6 +53,8 @@ private:
     CWizToolButton* m_btnCheckList;
     CWizToolButton* m_btnImage;
 
+    QString m_strImageSrc;
+
     WizEditorContextMenuItem* contextMenuData();
     void buildMenu();
     int buildMenu(QMenu* pMenu, int indx);
@@ -61,6 +63,9 @@ private:
     void resetToolbar();
 
     QAction* actionFromName(const QString& strName);
+
+    bool processImageSrc(bool bUseForCopy, bool& bNeedSubsequent);
+    bool processBase64Image(bool bUseForCopy);
 
 protected Q_SLOTS:
     void on_editor_google_triggered();
@@ -86,9 +91,15 @@ protected Q_SLOTS:
     void on_btnHorizontal_clicked();
     void on_btnCheckList_clicked();
     void on_btnImage_clicked();
+    void on_editor_saveImageAs_triggered();
+    void on_editor_copyImage_triggered();
+    void on_editor_copyImageLink_triggered();
 
     void on_delegate_requestShowContextMenu(const QPoint& pos);
     void on_delegate_selectionChanged();
+
+    void saveImage(QString strFileName);
+    void copyImage(QString strFileName);
 };
 
 

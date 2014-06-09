@@ -10,6 +10,7 @@
 #include <QBitmap>
 #include <QPixmap>
 #include <QPainter>
+#include <QThread>
 
 #include <QtCore>
 //#include <QtNetwork>
@@ -339,7 +340,7 @@ void WizGetTranslatedLocales(QStringList& locales)
 {
     locales.append("zh_CN");
     locales.append("zh_TW");
-    locales.append("en_US");
+    locales.append(WizGetDefaultTranslatedLocal());
 }
 
 QString WizGetTranslatedLocaleDisplayName(int index)
@@ -2090,4 +2091,35 @@ bool WizIsOffline()
 {
     QNetworkConfigurationManager mgr;
     return !mgr.isOnline();
+}
+
+class SleepThread : public QThread
+{
+ public :
+     static void sleep(long iSleepTime)
+     {
+          QThread::sleep(iSleepTime);
+     }
+     static void msleep(long iSleepTime)
+     {
+          QThread::msleep(iSleepTime);
+     }
+};
+
+void WizWaitForThread(QThread* pThread)
+{
+    pThread->disconnect();
+    //
+    while (pThread->isRunning())
+    {
+        SleepThread::msleep(100);
+        QApplication::processEvents();
+    }
+
+}
+
+
+QString WizGetDefaultTranslatedLocal()
+{
+    return "en_US";
 }

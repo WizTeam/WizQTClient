@@ -37,11 +37,14 @@ public:
     QString selectedItemKbGUID();
     void getDocuments(CWizDocumentDataArray& arrayDocument);
     bool acceptDocument(const WIZDOCUMENTDATA& document);
+    void setCurrentIndex(const WIZDOCUMENTDATA& document);
+
 
     void saveSelection();
     void restoreSelection();
 
     CWizCategoryViewItemBase* itemAt(const QPoint& p) const;
+    CWizCategoryViewItemBase* itemFromKbGUID(const QString& strKbGUID) const;
 
     template <class T> T* currentCategoryItem() const
     {

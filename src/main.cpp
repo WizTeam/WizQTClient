@@ -157,6 +157,8 @@ int mainCore(int argc, char *argv[])
     icon.addPixmap(QPixmap(":/logo_256.png"));
     QApplication::setWindowIcon(icon);
 
+
+
 #ifdef Q_OS_MAC
     // enable switch between qt widget and alien widget(cocoa)
     // refer to: https://bugreports.qt-project.org/browse/QTBUG-11401
@@ -213,15 +215,7 @@ int mainCore(int argc, char *argv[])
     }
 #endif
 
-    // check update if needed
-    //CWizUpdaterDialog updater;
-    //if (updater.checkNeedUpdate()) {
-    //    updater.show();
-    //    updater.doUpdate();
-    //    int ret = a.exec();
-    //    QProcess::startDetached(argv[0], QStringList());
-    //    return ret;
-    //}
+
 
     // figure out auto login or manually login
     bool bFallback = true;
@@ -237,9 +231,26 @@ int mainCore(int argc, char *argv[])
         bFallback = false;
     }
 
+    QSettings* settings = new QSettings(Utils::PathResolve::userSettingsFile(strUserId), QSettings::IniFormat);
+    PluginManager::setSettings(settings);
+
+    //set network proxy
+    CWizSettings wizSettings(Utils::PathResolve::globalSettingsFile());
+    if (wizSettings.GetProxyStatus())
+    {
+        QNetworkProxy proxy;
+        proxy.setType(QNetworkProxy::HttpProxy);
+        proxy.setHostName(wizSettings.GetProxyHost());
+        proxy.setPort(wizSettings.GetProxyPort());
+        proxy.setUser(wizSettings.GetProxyUserName());
+        proxy.setPassword(wizSettings.GetProxyPassword());
+        QNetworkProxy::setApplicationProxy(proxy);
+    }
+
+
     // manually login
-    CWizLoginDialog loginDialog(strUserId, strLocale);
     if (bFallback) {
+        CWizLoginDialog loginDialog(strUserId, strLocale);
         if (QDialog::Accepted != loginDialog.exec())
             return 0;
 
@@ -247,8 +258,6 @@ int mainCore(int argc, char *argv[])
         strPassword = loginDialog.password();
     }
 
-    QSettings* settings = new QSettings(Utils::PathResolve::userSettingsFile(strUserId), QSettings::IniFormat);
-    PluginManager::setSettings(settings);
     //
     //
     // reset locale for current user.
@@ -307,6 +316,7 @@ int mainCore(int argc, char *argv[])
 
 
     return ret;
+
 }
 
 int main(int argc, char *argv[])

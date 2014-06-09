@@ -289,6 +289,9 @@ public:
 
     QString getUserId() const { return m_strUserId; }
     //QString getPassword() const { return m_strPassword; }
+    QString getUserAlias();
+    CWizDatabase* getPersonalDatabase();
+
 
     QString GetEncryptedPassword();
     bool GetPassword(CString& strPassword);
@@ -407,6 +410,13 @@ public:
     void setUserCipher(const QString& cipher) { m_ziwReader->setUserCipher(cipher); }
     QString userCipherHint() { return m_ziwReader->userCipherHint(); }
     void setSaveUserCipher(bool b) { m_ziwReader->setSaveUserCipher(b); }
+
+    //
+    void CopyDocumentLink(const WIZDOCUMENTDATA& document);
+    QString DocumentToWizKMURL(const WIZDOCUMENTDATA& document);
+    bool IsWizKMURL(const QString& strURL);
+    bool IsWizKMURLOpenDocument(const QString& strURL);
+    QString GetParamFromWizKMURL(const QString& strURL, const QString& strParamName);
 
 public:
     Q_INVOKABLE QObject* GetDeletedItemsFolder();

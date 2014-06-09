@@ -357,7 +357,7 @@ QString CWizUserSettings::locale()
         return strLocale;
     }
 
-    return "en_US";
+    return WizGetDefaultTranslatedLocal();
 }
 
 void CWizUserSettings::setLocale(const QString& strLocale)

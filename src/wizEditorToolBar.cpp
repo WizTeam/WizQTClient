@@ -7,12 +7,20 @@
 #include <QDesktopServices>
 #include <QAction>
 #include <QMenu>
+#include <QFileDialog>
+#include <QImageWriter>
+#include <QClipboard>
+#include <QApplication>
+#include <QMimeData>
+#include <QDebug>
 
 #include "share/wizmisc.h"
 #include "wizdef.h"
 #include "share/wizsettings.h"
 #include "wizDocumentWebView.h"
 #include "wizactions.h"
+#include "utils/logger.h"
+#include "share/wizObjectDataDownloader.h"
 
 using namespace Core::Internal;
 
@@ -593,6 +601,10 @@ struct WizEditorContextMenuItem
 #define WIZEDITOR_ACTION_COPY           QObject::tr("Copy")
 #define WIZEDITOR_ACTION_PASTE          QObject::tr("Paste")
 
+#define WIZEDITOR_ACTION_SAVEIMGAS          QObject::tr("Save Image as...")
+#define WIZEDITOR_ACTION_COPYIMG          QObject::tr("Copy Image")
+#define WIZEDITOR_ACTION_COPYIMGLINK          QObject::tr("Copy Image Link")
+
 #define WIZEDITOR_ACTION_LINK_INSERT    QObject::tr("Insert Link")
 #define WIZEDITOR_ACTION_LINK_EDIT      QObject::tr("Edit Link")
 #define WIZEDITOR_ACTION_LINK_REMOVE    QObject::tr("Remove Link")
@@ -646,6 +658,11 @@ WizEditorContextMenuItem* EditorToolBar::contextMenuData()
         {WIZEDITOR_ACTION_CUT,                      "",                 "on_editor_cut_triggered"},
         {WIZEDITOR_ACTION_COPY,                     "",                 "on_editor_copy_triggered"},
         {WIZEDITOR_ACTION_PASTE,                    "",                 "on_editor_paste_triggered"},
+        {"-", "-", "-"},
+
+        {WIZEDITOR_ACTION_SAVEIMGAS,                      "",                 "on_editor_saveImageAs_triggered"},
+        {WIZEDITOR_ACTION_COPYIMG,                     "",                 "on_editor_copyImage_triggered"},
+        {WIZEDITOR_ACTION_COPYIMGLINK,                    "",                 "on_editor_copyImageLink_triggered"},
         {"-", "-", "-"},
 
         {QObject::tr("Link"),                       "+",                "+"},
@@ -724,6 +741,20 @@ void EditorToolBar::on_delegate_requestShowContextMenu(const QPoint& pos)
 
     buildMenu();
 
+    m_strImageSrc.clear();
+    if (m_editor->findIMGElementAt(pos, m_strImageSrc))
+    {
+        actionFromName(WIZEDITOR_ACTION_SAVEIMGAS)->setVisible(true);
+        actionFromName(WIZEDITOR_ACTION_COPYIMG)->setVisible(true);
+        actionFromName(WIZEDITOR_ACTION_COPYIMGLINK)->setVisible(true);
+    }
+    else
+    {
+        actionFromName(WIZEDITOR_ACTION_SAVEIMGAS)->setVisible(false);
+        actionFromName(WIZEDITOR_ACTION_COPYIMG)->setVisible(false);
+        actionFromName(WIZEDITOR_ACTION_COPYIMGLINK)->setVisible(false);
+    }
+
     if (m_editor->selectedText().isEmpty()) {
         actionFromName(WIZEDITOR_ACTION_GOOGLE)->setEnabled(false);
     } else {
@@ -748,7 +779,41 @@ void EditorToolBar::on_delegate_requestShowContextMenu(const QPoint& pos)
 
 void EditorToolBar::on_delegate_selectionChanged()
 {
-   resetToolbar();
+    resetToolbar();
+}
+
+void EditorToolBar::saveImage(QString strFileName)
+{
+    QFileInfo info(strFileName);
+    QPixmap pix(info.filePath());
+    if (pix.isNull())
+    {
+        TOLOG(_T("[Save] : image is null"));
+        return;
+    }
+
+    QString strFilePath = QFileDialog::getSaveFileName(this, tr("Save as..."),
+                                                       QDir::homePath(), tr("Image Files (*.%1)").arg(info.suffix()));
+    if (strFilePath.isEmpty())
+        return;
+
+    bool ret = pix.save(strFilePath, info.suffix().toAscii());
+    TOLOG2(_T("[Save] : save image to %1, result : %2"), strFilePath,
+           ret ? "OK" : "Failed");    //pix formart should use ascii or capital letter.
+}
+
+void EditorToolBar::copyImage(QString strFileName)
+{
+    QFileInfo info(strFileName);
+    QPixmap pix(info.filePath());
+    if (pix.isNull())
+    {
+        TOLOG(_T("[Copy] : image is null"));
+        return;
+    }
+
+    QClipboard* clip = QApplication::clipboard();
+    clip->setPixmap(pix);
 }
 
 QAction* EditorToolBar::actionFromName(const QString& strName)
@@ -762,6 +827,80 @@ QAction* EditorToolBar::actionFromName(const QString& strName)
 
     Q_ASSERT(0);
     return NULL;
+}
+
+bool EditorToolBar::processImageSrc(bool bUseForCopy, bool& bNeedSubsequent)
+{
+    if (m_strImageSrc.isEmpty())
+    {
+        bNeedSubsequent = true;
+        return true;
+    }
+
+    //
+    if (m_strImageSrc.left(7) == "file://")
+    {
+        m_strImageSrc.remove(0, 7);
+        bNeedSubsequent = true;
+        return true;
+    }
+    else if (m_strImageSrc.left(7) == "http://")
+    {
+        QFileInfo info(m_strImageSrc);
+        QString fileName = WizGenGUIDLowerCaseLetterOnly() + "." + info.suffix();
+        CWizFileDownloader* downloader = new CWizFileDownloader(m_strImageSrc, fileName);
+        if (bUseForCopy)
+        {
+            connect(downloader, SIGNAL(downloadDone(QString,bool)), SLOT(copyImage(QString)));
+        }
+        else
+        {
+            connect(downloader, SIGNAL(downloadDone(QString,bool)), SLOT(saveImage(QString)));
+        }
+        downloader->startDownload();
+        bNeedSubsequent = false;
+    }
+    else if (m_strImageSrc.left(12) == "data:image/.")
+    {
+        if (!processBase64Image(bUseForCopy))
+            return false;
+        bNeedSubsequent = false;
+    }
+
+    return true;
+}
+
+bool EditorToolBar::processBase64Image(bool bUseForCopy)
+{
+    m_strImageSrc.remove(0, 12);
+    QString strType = m_strImageSrc.left(m_strImageSrc.indexOf(';'));
+    m_strImageSrc.remove(0, m_strImageSrc.indexOf(',') + 1);
+    //
+    QByteArray baData;
+    if (!WizBase64Decode(m_strImageSrc, baData))
+        return false;
+
+    //
+    QPixmap pix;
+    pix.loadFromData(baData, strType.toAscii());
+    if (!bUseForCopy)
+    {
+        QString strFilePath = QFileDialog::getSaveFileName(this, tr("Save as..."),
+                                                           QDir::homePath(), tr("Image Files (*.%1)").arg(strType));
+        if (strFilePath.isEmpty())
+            return false;
+
+        bool ret = pix.save(strFilePath, strType.toAscii());
+        TOLOG2(_T("[Save] : save image to %1, result : %2"), strFilePath,
+               ret ? "OK" : "Failed");    //pix formart should use ascii or capital letter.
+    }
+    else
+    {
+        QClipboard* clip = QApplication::clipboard();
+        clip->setPixmap(pix);
+    }
+
+    return true;
 }
 
 void EditorToolBar::buildMenu()
@@ -1018,4 +1157,31 @@ void EditorToolBar::on_btnImage_clicked()
     if (m_editor) {
         m_editor->editorCommandExecuteInsertImage();
     }
+}
+
+void EditorToolBar::on_editor_saveImageAs_triggered()
+{
+    bool bNeedSubsequent = false;
+    if (processImageSrc(false, bNeedSubsequent) && bNeedSubsequent)
+    {
+        saveImage(m_strImageSrc);
+    }
+}
+
+void EditorToolBar::on_editor_copyImage_triggered()
+{
+    bool bNeedSubsequent = false;
+    if (processImageSrc(true, bNeedSubsequent) && bNeedSubsequent)
+    {
+        copyImage(m_strImageSrc);
+    }
+}
+
+void EditorToolBar::on_editor_copyImageLink_triggered()
+{
+    if (m_strImageSrc.isEmpty())
+        return;
+
+    QClipboard* clip = QApplication::clipboard();
+    clip->setText(m_strImageSrc);
 }

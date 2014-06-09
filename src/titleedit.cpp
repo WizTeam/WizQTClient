@@ -19,7 +19,9 @@ TitleEdit::TitleEdit(QWidget *parent)
     , c(NULL)
     , m_separator('@')
 {
-    setStyleSheet("font-size: 12px;");
+    //FIXME: just for alignment with documentlistwidget
+    setStyleSheet("padding-bottom:1px;");
+
     setContentsMargins(5, 0, 0, 0);
     setAlignment(Qt::AlignLeft | Qt::AlignBottom);
     setAttribute(Qt::WA_MacShowFocusRect, false);

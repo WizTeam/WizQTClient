@@ -35,6 +35,8 @@ Q_SIGNALS:
 
 public:
 
+    static void waitForDone();
+
     static QPixmap corpImage(const QPixmap& org);
     static QPixmap circleImage(const QPixmap& org, int width, int height);
 };

@@ -18,14 +18,15 @@ public:
     };
 
     explicit CWizDocumentTransitionView(QWidget *parent = 0);
-    void showAsMode(TransitionMode mode);
+    void showAsMode(const QString& strObjGUID,TransitionMode mode);
 
 public slots:
-    void onDownloadProgressChanged(int ntotal, int nloaded);
+    void onDownloadProgressChanged(QString strObjGUID, int ntotal, int nloaded);
 
 private:
     QLabel* m_labelHint;
     int m_mode;
+    QString m_objGUID;
 };
 
 #endif // WIZDOCUMENTTRANSITIONVIEW_H
