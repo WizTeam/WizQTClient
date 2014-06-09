@@ -31,6 +31,7 @@ protected:
 
 private Q_SLOTS:
     void on_web_loaded(bool ok);
+    void onEditorPopulateJavaScriptWindowObject();
 };
 
 

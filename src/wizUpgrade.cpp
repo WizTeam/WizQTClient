@@ -6,13 +6,13 @@
 
 
 #if defined(Q_OS_MAC)
-#define strUpgradeUrl "http://download.wiz.cn/download?product=wiznote&client=macos"
+#define strUpgradeUrlParam "/download?product=wiznote&client=macos"
 #elif defined(Q_OS_LINUX)
 
 #if defined(_M_X64) || defined(__amd64)
-#define strUpgradeUrl "http://download.wiz.cn/download?product=wiznote&client=linux-x64"
+#define strUpgradeUrlParam "/download?product=wiznote&client=linux-x64"
 #else
-#define strUpgradeUrl "http://download.wiz.cn/download?product=wiznote&client=linux-x86"
+#define strUpgradeUrlParam "/download?product=wiznote&client=linux-x86"
 #endif // __amd64
 
 #endif // Q_OS_MAC
@@ -49,15 +49,34 @@ QString CWizUpgrade::getWhatsNewUrl()
 
 void CWizUpgrade::check()
 {
-    _check(strUpgradeUrl);
-}
+    QString strApiUrl = WizService::ApiEntry::standardCommandUrl("download_server");
 
-void CWizUpgrade::_check(const QString& strUrl)
-{
     if (!m_net) {
         m_net = new QNetworkAccessManager();
     }
 
+    QNetworkReply* reply = m_net->get(QNetworkRequest(strApiUrl));
+    connect(reply, SIGNAL(finished()), SLOT(on_getCheckUrl_finished()));
+}
+
+void CWizUpgrade::on_getCheckUrl_finished()
+{
+    QNetworkReply* reply = qobject_cast<QNetworkReply *>(sender());
+
+    if (reply->error()) {
+        Q_EMIT checkFinished(false);
+        reply->deleteLater();
+        return;
+    }
+
+    QString strCheckUrl(reply->readAll());
+    strCheckUrl += strUpgradeUrlParam;
+
+    _check(strCheckUrl);
+}
+
+void CWizUpgrade::_check(const QString& strUrl)
+{
     QNetworkReply* reply = m_net->get(QNetworkRequest(strUrl));
     connect(reply, SIGNAL(finished()), SLOT(on_checkUpgrade_finished()));
 }

@@ -1,58 +1,97 @@
-#ifndef WIZLOGINDIALOG_H
-#define WIZLOGINDIALOG_H
+#ifndef WIZLOGINWIDGET_H
+#define WIZLOGINWIDGET_H
 
 #include <QDialog>
+#include <QLineEdit>
+#include <QPushButton>
 
-#include "share/wizsettings.h"
+#ifndef Q_OS_MAC
+#include "share/wizshadowwindow.h"
+#endif
 
 class QLabel;
-class QComboBox;
-class QLineEdit;
-class QCheckBox;
-//class CWizAvatarWidget;
+class CWizSkin9GridImage;
+class CWizImageButton;
 
 
-class CWizLoginDialog : public QDialog
+
+namespace Ui {
+class wizLoginWidget;
+}
+
+class CWizLoginDialog
+#ifdef Q_OS_MAC
+        : public QDialog
+#else
+        : public CWizShadowWindow<QDialog>
+#endif
 {
     Q_OBJECT
 
 public:
-    explicit CWizLoginDialog(const QString& strDefaultUserId, const QString& strLocale, QWidget* parent = 0);
+    explicit CWizLoginDialog(const QString& strDefaultUserId, const QString& strLocale, QWidget *parent = 0);
+    ~CWizLoginDialog();
 
     QString userId() const;
     QString password() const;
 
-private:
-    QComboBox* m_comboUsers;
-    QLineEdit* m_editPassword;
-    QCheckBox* m_checkSavePassword;
-    QCheckBox* m_checkAutoLogin;
-    QPushButton* m_btnLogin;
-    //CWizAvatarWidget* m_avatar;
-
-    //void resetAvatar(const QString& strUserId);
-
     void setUsers(const QString& strDefault);
-    void setUser(const QString& userId);
+    void setUser(const QString& strUserId);
 
     void doAccountVerify();
     void doOnlineVerify();
     bool updateGlobalProfile();
     bool updateUserProfile(bool bLogined);
-    void enableControls(bool bEnable);
+    void enableLoginControls(bool bEnable);
+    void enableSignInControls(bool bEnable);
 
-public Q_SLOTS:
-    virtual void accept();
+#ifdef Q_OS_MAC
+private:
+    QPoint m_mousePoint;
+protected:
+    void mousePressEvent(QMouseEvent* event);
+    void mouseMoveEvent(QMouseEvent* event);
+    void mouseReleaseEvent(QMouseEvent* event);
+#endif
+private slots:
+    void on_btn_close_clicked();
+    void on_btn_changeToSignin_clicked();
+    void on_btn_changeToLogin_clicked();
+    void on_btn_proxysetting_clicked();
+    void on_btn_fogetpass_clicked();
+    void on_btn_login_clicked();
+    void on_btn_singin_clicked();
+
+
+    void onLoginInputChanged();
+    void onSignUpInputDataChanged();
+    void userListMenuClicked(QAction* action);
+    void showUserListMenu();
 
     void onTokenAcquired(const QString& strToken);
+    void onRegisterAccountFinished(bool bFinish);
 
-    void on_labelRegister_linkActivated(const QString&);
-    void on_labelForgot_linkActivated(const QString&);
-    void on_labelNetwork_linkActivated(const QString& link);
+    void on_cbx_remberPassword_toggled(bool checked);
+    void on_cbx_autologin_toggled(bool checked);
 
-    void on_comboUsers_indexChanged(const QString& strUserId);
-    void on_comboUsers_editTextChanged(const QString& strText);
-    void on_checkAutoLogin_stateChanged(int state);
+    void onUserNameEdited(const QString& arg1);
+
+private:
+    void applyElementStyles(const QString& strLocal);
+    bool checkSingMessage();
+    QAction* findActionInMenu(const QString& strActName);
+
+private:
+    Ui::wizLoginWidget *ui;
+    QMenu* m_menu;
+
+    QLineEdit* m_lineEditUserName;
+    QLineEdit* m_lineEditPassword;
+    CWizImageButton* m_buttonLogin;
+    QLineEdit* m_lineEditNewUserName;
+    QLineEdit* m_lineEditNewPassword;
+    QLineEdit* m_lineEditRepeatPassword;
+    CWizImageButton* m_buttonSignIn;
 };
 
-#endif // WIZLOGINDIALOG_H
+#endif // WIZLOGINWIDGET_H

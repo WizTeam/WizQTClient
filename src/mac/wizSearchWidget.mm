@@ -25,18 +25,27 @@
 }
 - (IBAction)onEditing:(id)sender
 {
-    QString text = WizToQString([sender stringValue]);
-    m_pTarget->on_search_textChanged(text);
+    //QString text = WizToQString([sender stringValue]);
+    //m_pTarget->on_search_textChanged(text);
 }
 @end
 
 // WizSearchField
 @interface WizSearchField: NSSearchField
+{
+    CWizSearchWidget* m_pSearchWidget;
+}
+- (void)setSearchWidget:(CWizSearchWidget*)widget;
 - (BOOL)performKeyEquivalent:(NSEvent *)theEvent;
 - (BOOL)becomeFirstResponder;
+- (void)textDidEndEditing:(NSNotification *)aNotification;
 @end
 
 @implementation WizSearchField
+- (void)setSearchWidget:(CWizSearchWidget*)widget
+{
+    m_pSearchWidget = widget;
+}
 -(BOOL)performKeyEquivalent:(NSEvent *)theEvent
 {
     if (([theEvent type] == NSKeyDown) && ([theEvent modifierFlags] & NSCommandKeyMask))
@@ -102,6 +111,16 @@
 
     return YES;
 }
+- (void)textDidEndEditing:(NSNotification *)aNotification
+{
+    NSDictionary* dict = [aNotification userInfo];
+    NSUInteger textMove = [[dict objectForKey: @"NSTextMovement"] unsignedIntegerValue];
+    if (textMove == NSReturnTextMovement) {
+        m_pSearchWidget->on_search_textChanged(WizToQString([self stringValue]));
+    }
+    //
+    [super textDidEndEditing:aNotification];
+}
 @end
 
 CWizSearchWidget::CWizSearchWidget(QWidget* parent /* = 0 */)
@@ -113,6 +132,7 @@ CWizSearchWidget::CWizSearchWidget(QWidget* parent /* = 0 */)
 
     // Create the NSSearchField, set it on the QCocoaViewContainer.
     WizSearchField* pSearchField = [[WizSearchField alloc] init];
+    [pSearchField setSearchWidget: this];
     [pSearchField setAutoresizesSubviews: YES];
     [pSearchField setAutoresizingMask: NSViewHeightSizable | NSViewWidthSizable];
     setCocoaView(pSearchField);

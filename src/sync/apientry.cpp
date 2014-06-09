@@ -51,7 +51,7 @@
 #define WIZNOTE_API_COMMAND_SUPPORT        "support"
 #define WIZNOTE_API_COMMAND_COMMENT         "comment"
 #define WIZNOTE_API_COMMAND_COMMENT_COUNT   "comment_count"
-#define WIZNOTE_API_COMMAND_CHANGELOG        "mac_changelog"
+#define WIZNOTE_API_COMMAND_CHANGELOG        "changelog"
 #define WIZNOTE_API_COMMAND_UPGRADE        "updatev2"
 
 //#ifdef _M_X64
@@ -141,7 +141,6 @@ QString ApiEntryPrivate::avatarDownloadUrl(const QString& strUserGUID)
 {
     QString strRawUrl(requestUrl(WIZNOTE_API_COMMAND_AVATAR, m_strAvatarDownloadUrl));
 
-    // http://as.wiz.cn/wizas/a/users/avatar/{userGuid}
     strRawUrl.replace(QRegExp("\\{.*\\}"), strUserGUID);
     strRawUrl += "?default=false"; // Do not download server default avatar
     return strRawUrl;

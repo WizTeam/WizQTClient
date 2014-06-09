@@ -8,6 +8,9 @@
 #include <QSettings>
 #include <QInputDialog>
 #include <QMessageBox>
+#include <QMimeData>
+#include <QApplication>
+#include <QClipboard>
 
 #include <extensionsystem/pluginmanager.h>
 
@@ -806,6 +809,11 @@ void CWizDatabase::CloseGroupDatabase(IWizSyncableDatabase* pDatabase)
 }
 
 IWizSyncableDatabase* CWizDatabase::GetPersonalDatabase()
+{
+    return getPersonalDatabase();
+}
+
+CWizDatabase *CWizDatabase::getPersonalDatabase()
 {
     CWizDatabase* db = &CWizDatabaseManager::instance()->db();
     return db;
@@ -1986,6 +1994,26 @@ bool CWizDatabase::GetUserDisplayName(QString &strDisplayName)
     return true;
 }
 
+QString CWizDatabase::getUserAlias()
+{
+    CWizDatabase* personDb = dynamic_cast<CWizDatabase*>(GetPersonalDatabase());
+    if (!personDb)
+        return QString();
+
+    QString strUserGUID = personDb->GetUserGUID();
+    WIZBIZUSER bizUser;
+    personDb->userFromGUID(kbGUID(), strUserGUID, bizUser);
+    if (!bizUser.alias.isEmpty()) {
+        return bizUser.alias;
+    } else {
+        QString strUserName;
+        personDb->GetUserDisplayName(strUserName);
+        return strUserName;
+    }
+
+    return QString();
+}
+
 QString CWizDatabase::GetEncryptedPassword()
 {
     return GetMetaDef(g_strAccountSection, "Password");
@@ -2449,6 +2477,9 @@ bool CWizDatabase::IsAttachmentDownloaded(const CString& strGUID)
 
 bool CWizDatabase::GetAllObjectsNeedToBeDownloaded(CWizObjectDataArray& arrayData, int nTimeLine)
 {
+    if (nTimeLine == -1)
+        return true;
+    //
     CWizDocumentDataArray arrayDocument;
     CWizDocumentAttachmentDataArray arrayAttachment;
     GetNeedToBeDownloadedDocuments(arrayDocument);
@@ -2977,6 +3008,72 @@ bool CWizDatabase::loadUserCert()
     return true;
 }
 
+void CWizDatabase::CopyDocumentLink(const WIZDOCUMENTDATA& document)
+{
+    QString strLink = DocumentToWizKMURL(document);
+    QString strTitle = document.strTitle;
+    strTitle.replace(_T("<"), _T("&lt;"));
+    strTitle.replace(_T(">"), _T("&gt;"));
+    strTitle.replace(_T("&"), _T("&amp;"));
+    //
+    CString strHTML = WizFormatString2(_T("<a href=\"%1\">%2</a>"), strLink, strTitle);
+
+    QClipboard* clip = QApplication::clipboard();
+
+    QMimeData* data = new QMimeData();
+    data->setHtml(strHTML);
+    data->setText(strLink);
+    clip->setMimeData(data);
+}
+
+QString CWizDatabase::DocumentToWizKMURL(const WIZDOCUMENTDATA& document)
+{
+    CWizDatabase* dbPrivate = getPersonalDatabase();
+    //
+    if (document.strKbGUID.isEmpty())
+    {
+        return WizFormatString3(_T("wiz://open_document?guid=%1&kbguid=%2&private_kbguid=%3"), document.strGUID, document.strKbGUID, dbPrivate->kbGUID());
+    }
+    else
+    {
+        return WizFormatString2(_T("wiz://open_document?guid=%1&kbguid=%2"), document.strGUID, document.strKbGUID);
+    }
+    return QString();
+}
+
+bool CWizDatabase::IsWizKMURL(const QString& strURL)
+{
+    return strURL.left(6) == "wiz://";
+}
+
+bool CWizDatabase::IsWizKMURLOpenDocument(const QString& strURL)
+{
+    if (IsWizKMURL(strURL))
+    {
+        return strURL.contains("open_document");
+    }
+    return false;
+}
+
+QString CWizDatabase::GetParamFromWizKMURL(const QString& strURL, const QString& strParamName)
+{
+    int nindex = strURL.indexOf('?');
+    if (nindex == -1)
+        return QString();
+
+    QString strParams = strURL;
+    strParams.remove(0, nindex + 1);
+    QStringList paramList = strParams.split('&');
+    QString strParaFlag = strParamName + "=";
+    foreach (QString strParam, paramList) {
+        if (strParam.contains(strParaFlag)) {
+            return strParam.remove(strParaFlag);
+        }
+    }
+
+    return QString();
+}
+
 bool CWizDatabase::DocumentToTempHtmlFile(const WIZDOCUMENTDATA& document,
                                           QString& strTempHtmlFileName, const QString& strTargetFileNameWithoutPath)
 {    
@@ -3156,7 +3253,7 @@ bool CWizDatabase::makeSureDocumentExist(const WIZDOCUMENTDATA& doc, CWizObjectD
         dlg.setActionString(QObject::tr("Download Note %1 ").arg(doc.strTitle));
         dlg.setNotifyString(QObject::tr("Downloading,please wait..."));
         dlg.setProgress(100,0);
-        connect(downloaderHost, SIGNAL(downloadProgress(int,int)), &dlg, SLOT(setProgress(int,int)));
+        connect(downloaderHost, SIGNAL(downloadProgress(QString,int,int)), &dlg, SLOT(setProgress(QString,int,int)));
         connect(downloaderHost, SIGNAL(downloadDone(WIZOBJECTDATA,bool)), &dlg, SLOT(accept()));
 
         downloaderHost->download(doc);
@@ -3183,7 +3280,7 @@ bool CWizDatabase::makeSureAttachmentExist(const WIZDOCUMENTATTACHMENTDATAEX &at
         dlg.setActionString(QObject::tr("Download Attachment %1 ").arg(attachData.strName));
         dlg.setNotifyString(QObject::tr("Downloading, please wait..."));
         dlg.setProgress(100, 0);
-        connect(downloaderHost, SIGNAL(downloadProgress(int, int)), &dlg, SLOT(setProgress(int, int)));
+        connect(downloaderHost, SIGNAL(downloadProgress(QString,int, int)), &dlg, SLOT(setProgress(QString,int, int)));
         connect(downloaderHost, SIGNAL(downloadDone(WIZOBJECTDATA, bool)), &dlg, SLOT(accept()));
 
         downloaderHost->download(attachData);

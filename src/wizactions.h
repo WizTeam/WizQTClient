@@ -70,6 +70,7 @@ public:
     QMenu* toMenu(QWidget* parent, CWizSettings& settings, const QString& strSection);
     void buildMenu(QMenu* pMenu, CWizSettings& settings, const QString& strSection);
     void buildMenuBar(QMenuBar* menuBar, const QString& strFileName);
+    void buildMenu(QMenu* menu, const QString& strFileName);
 };
 
 #endif // WIZACTIONS_H

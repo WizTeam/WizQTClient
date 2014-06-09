@@ -16021,7 +16021,7 @@ UE.plugins['fiximgclick'] = (function () {
                 var range = me.selection.getRange(),
                     img = range.getClosedNode();
 
-                if (img && img.tagName == 'IMG' && img.className.indexOf("WizNormalImg")!=-1 && me.body.contentEditable!="false") {
+                if (img && img.tagName == 'IMG' && img.className.indexOf("wiz-img-cannot-drag")==-1 && me.body.contentEditable!="false") {
                     if (!imageScale) {
                         imageScale = new Scale();
                         imageScale.init(me);

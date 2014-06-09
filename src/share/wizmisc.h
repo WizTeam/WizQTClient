@@ -58,6 +58,7 @@ BOOL WizStringSimpleSplit(const CString& str, char ch, CString& strLeft, CString
 CString WizDateToLocalString(const COleDateTime& t);
 
 void WizGetTranslatedLocales(QStringList& locales);
+QString WizGetDefaultTranslatedLocal();
 QString WizGetTranslatedLocaleDisplayName(int index);
 
 bool WizIsPredefinedLocation(const QString& strLocation);
@@ -178,5 +179,8 @@ public:
     CWaitCursor();
     ~CWaitCursor();
 };
+
+class QThread;
+void WizWaitForThread(QThread* pThread);
 
 #endif // WIZMISC_H

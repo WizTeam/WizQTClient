@@ -29,7 +29,7 @@ Different distributions or platforms
 
 ### Mac OSX
 
-[Download](http://www.wiz.cn/wiznote-maclinux.html) from our homepage is the only way currently. We'll push to App Store soon!
+[Download](http://www.wiz.cn/wiznote-maclinux.html) from our homepage or install from [AppStore](https://itunes.apple.com/cn/app/wiznote/id863771545?l=zh&ls=1&mt=12).
 
 ### Ubuntu
 

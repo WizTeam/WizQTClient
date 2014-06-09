@@ -78,6 +78,8 @@ set(wiznote_SOURCES
     widgets/wizSegmentedButton.cpp
     utils/stylehelper.cpp
     utils/pathresolve.cpp
+    share/wiztitlebar.cpp
+    share/wizshadoweffect.cpp
 
     #coreplugin.cpp
     wizCategoryView.cpp
@@ -94,7 +96,6 @@ set(wiznote_SOURCES
     wiztaglistwidget.cpp
     wizconsoledialog.cpp
     wizpreferencedialog.cpp
-    wizLoginDialog.cpp
     wizproxydialog.cpp
     wizcreateaccountdialog.cpp
     wizmainwindow.cpp
@@ -135,6 +136,8 @@ set(wiznote_SOURCES
     thumbcache.cpp
     messagecompleter.cpp
     widgets/wizImageButton.cpp
+    wizDocumentEditStatus.cpp
+    wizLoginDialog.cpp
 )
 
 set(wiznote_HEADERS
@@ -196,6 +199,9 @@ set(wiznote_HEADERS
     sync/avatar_p.h
     utils/stylehelper.h
     utils/pathresolve.h
+    share/wiztitlebar.h
+    share/wizshadowwindow.h
+    share/wizshadoweffect.h
 
     wizdef.h
     wizactions.h
@@ -211,7 +217,6 @@ set(wiznote_HEADERS
     wiztaglistwidget.h
     wizconsoledialog.h
     wizpreferencedialog.h
-    wizLoginDialog.h
     wizproxydialog.h
     wizcreateaccountdialog.h
     wizmainwindow.h
@@ -256,6 +261,8 @@ set(wiznote_HEADERS
     thumbcache_p.h
     messagecompleter.h
     widgets/wizImageButton.h
+    wizDocumentEditStatus.h
+    wizLoginDialog.h
 )
 
 set(wiznote_FORMS
@@ -270,6 +277,7 @@ set(wiznote_FORMS
     ui/wizEditorInsertLinkForm.ui
     ui/wizEditorInsertTableForm.ui
     ui/wizProgressDialog.ui
+    ui/wizLoginDialog.ui
 )
 
 set(wiznote_TRANSLATIONS

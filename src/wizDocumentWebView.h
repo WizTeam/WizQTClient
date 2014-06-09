@@ -38,6 +38,8 @@ public:
     void load(const WIZDOCUMENTDATA& doc);
     //
     void stop();
+    //
+    void waitForDone();
 
 protected:
     virtual void run();
@@ -65,7 +67,7 @@ public:
               const QString& strHtmlFile, int nFlags);
 
     //
-    void waitAndStop();
+    void waitForDone();
 
 private:
     struct SAVEDATA
@@ -115,6 +117,8 @@ public:
     ~CWizDocumentWebView();
     Core::CWizDocumentView* view();
     QWebFrame* noteFrame();
+    //
+    void waitForDone();
 
     // view and save
     void viewDocument(const WIZDOCUMENTDATA& doc, bool editing);
@@ -132,7 +136,6 @@ public:
 
     //only update Html in JS editor, wouldn't refresh WebView display
     void updateNoteHtml();
-    //const WIZDOCUMENTDATA& document() { return m_data; }
 
     // initialize editor style before render, only invoke once.
     bool resetDefaultCss();
@@ -162,7 +165,7 @@ public:
 
     //
     void saveAsPDF(const QString& fileName);
-
+    bool findIMGElementAt(QPoint point, QString& strSrc);
     //
     Q_INVOKABLE bool isContentsChanged() { return m_bContentsChanged; }
     Q_INVOKABLE void setContentsChanged(bool b) { m_bContentsChanged = b; }
@@ -246,6 +249,9 @@ public Q_SLOTS:
 
     void on_editorCommandExecuteLinkInsert_accepted();
     void on_editorCommandExecuteTableInsert_accepted();
+
+    void applySearchKeywordHighlight();
+    void clearSearchKeywordHighlight();
 
     /* editor API */
 

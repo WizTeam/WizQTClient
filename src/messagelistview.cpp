@@ -91,7 +91,7 @@ public:
             p->save();
             if (!m_data.nReadStatus) {
 #ifdef Q_OS_MAC
-                p->setBrush(QBrush("#f5f5f5"));
+                p->setBrush(QBrush("#CBEBFA"));
 #else
                 p->setBrush(QBrush("#dcdcdc"));
 #endif

@@ -55,7 +55,7 @@ bool CWizZiwReader::loadZiwHeader(const QString& strFileName, WIZZIWHEADER& head
     }
 
     if (header.nVersion != 1) {
-        TOLOG("Unknow encrypt version");
+        TOLOG1("Unknow encrypt version: %1", WizIntToStr(header.nVersion));
         return false;
     }
 

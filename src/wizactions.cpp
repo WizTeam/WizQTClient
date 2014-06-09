@@ -227,7 +227,8 @@ void CWizActions::buildMenu(QMenu* pMenu, CWizSettings& settings, const QString&
 
         // no fullscreen mode menu
 #ifndef Q_OS_MAC
-        if (strAction == WIZACTION_GLOBAL_TOGGLE_FULLSCREEN) {
+        if (strAction == WIZACTION_GLOBAL_TOGGLE_FULLSCREEN|| strAction == "actionExit"
+                || strAction == "actionPreference") {
             index++;
             continue;
         }
@@ -283,4 +284,46 @@ void CWizActions::buildMenuBar(QMenuBar* menuBar, const QString& strFileName)
 
         index++;
     }
+}
+
+void CWizActions::buildMenu(QMenu* menu, const QString& strFileName)
+{
+    CWizSettings settings(strFileName);
+
+    int index = 0;
+    while (true)
+    {
+        QString strKey = WizIntToStr(index);
+        QString strAction = settings.GetString("MainMenu", strKey);
+
+        if (strAction.isEmpty())
+            break;
+
+        if (strAction.startsWith("-"))
+        {
+            continue;
+        }
+        else if (strAction.startsWith("+"))
+        {
+            strAction.remove(0, 1);
+            QString strLocalText = QObject::tr(strAction.toUtf8());
+            QMenu* pMenu = menu->addMenu(strLocalText);
+
+            buildMenu(pMenu, settings, strAction);
+        }
+        else
+        {
+            menu->addAction(actionFromName(strAction));
+        }
+
+        index++;
+    }
+
+    QAction * actionQuit = actionFromName("actionExit");
+    QAction* actionOptions = actionFromName("actionPreference");
+
+    menu->addSeparator();
+    menu->addAction(actionOptions);
+    menu->addSeparator();
+    menu->addAction(actionQuit);
 }

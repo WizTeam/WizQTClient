@@ -19,8 +19,11 @@ bool WizHtml2Zip(const QString& strUrl, const QString& strHtml, \
 
     CWizHtmlCollector collector;
 
+    //
+    QString strTempPath = Utils::PathResolve::tempPath();
+    //
     QString strMainHtml(strHtml);
-    if (!collector.Collect(strUrl, strMainHtml, true)) {
+    if (!collector.Collect(strUrl, strMainHtml, true, strTempPath)) {
         return false;
     }
 

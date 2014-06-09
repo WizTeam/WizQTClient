@@ -3,9 +3,12 @@
 #include <QPainter>
 #include <QWidget>
 #include <QBoxLayout>
+#include <QLabel>
+#include <QLineEdit>
+#include <QMouseEvent>
 
 #include "wizsettings.h"
-
+#include "wiznotestyle.h"
 
 BOOL CWizSkin9GridImage::Clear()
 {
@@ -98,6 +101,126 @@ void CWizSkin9GridImage::Draw(QPainter* p, QRect rc, int nAlpha) const
         }
     }
 }
+void CWizSkin9GridImage::DrawBorder(QPainter* p, QRect rc) const
+{
+    QRect arrayDest[9];
+    //
+    SplitRect(rc, m_arrayImageGrid[0].bottomRight(), arrayDest, 9);
+    //
+    for (int i = 0; i < 9; i++)
+    {
+        if (i == 4)
+            continue;
+        //
+        const QRect& rcSrc = m_arrayImageGrid[i];
+        const QRect& rcDest = arrayDest[i];
+        //
+        p->drawImage(rcDest, m_img, rcSrc);
+    }
+}
+
+
+
+
+CWizIconLineEditContainer::CWizIconLineEditContainer(QWidget* parent)
+    : QWidget(parent)
+    , m_background(NULL)
+    , m_layout(NULL)
+    , m_edit(NULL)
+    , m_leftIcon(NULL)
+    , m_rightIcon(NULL)
+{
+    m_layout = new QHBoxLayout(this);
+    m_edit = new QLineEdit(this);
+    m_edit->setAttribute(Qt::WA_MacShowFocusRect, false);
+    m_edit->setStyleSheet(QString("QLineEdit{ border:none; color:#2F2F2F; "
+                          "selection-background-color: #8ECAF1;}"));
+    m_leftIcon = new QLabel(this);
+    m_rightIcon = new QLabel(this);
+    //
+    m_layout->setSpacing(12);
+    m_layout->setContentsMargins(10, 10, 10,10);
+    //
+    m_layout->addWidget(m_leftIcon);
+    m_layout->addWidget(m_edit);
+    m_layout->addWidget(m_rightIcon);
+
+}
+void CWizIconLineEditContainer::setBackgroundImage(QString fileName, QPoint pt)
+{
+    m_background = new CWizSkin9GridImage();
+    m_background->SetImage(fileName, pt);
+}
+
+void CWizIconLineEditContainer::setLeftIcon(QString fileName)
+{
+    m_leftIcon->setPixmap(QPixmap(fileName));
+}
+void CWizIconLineEditContainer::setRightIcon(QString fileName)
+{
+    m_rightIcon->setPixmap(QPixmap(fileName));
+}
+
+void CWizIconLineEditContainer::setPlaceholderText(const QString &strText)
+{
+    m_edit->setPlaceholderText(strText);
+}
+
+void CWizIconLineEditContainer::setAutoClearRightIcon(bool bAutoClean)
+{
+    if (bAutoClean)
+    {
+        connect(m_edit, SIGNAL(textEdited(QString)), SLOT(cleanRightIcon()));
+    }
+    else
+    {
+        disconnect(m_edit, SIGNAL(textEdited(QString)), this, SLOT(cleanRightIcon()));
+    }
+}
+
+void CWizIconLineEditContainer::paintEvent(QPaintEvent *event)
+{
+    if (m_background && m_background->Valid())
+    {
+        QPainter paint(this);
+        m_background->Draw(&paint, rect(), 0);
+    }
+    else
+    {
+        QWidget::paintEvent(event);
+    }
+}
+
+
+void CWizIconLineEditContainer::mousePressEvent(QMouseEvent *event)
+{
+    if (m_rightIcon->geometry().contains(event->pos()))
+    {
+        emit rightIconClicked();
+    }
+}
+
+void CWizIconLineEditContainer::cleanRightIcon()
+{
+    m_rightIcon->setPixmap(QPixmap());
+}
+
+
+CWizImageButton::CWizImageButton(QWidget *parent)
+    :QPushButton(parent)
+{
+}
+
+void CWizImageButton::setButtonStyle(const QString& normalBackgroundFileName, const QString& hotBackgroundFileName,
+                                     const QString& downBackgroundFileName, const QString& disabledBackgroundFileName,
+                                     const QColor& normalTextColor, const QColor& activeTextColor, const QColor& disableTextColor)
+{
+    QStyle* style = WizGetImageButtonStyle(normalBackgroundFileName, hotBackgroundFileName,
+                                           downBackgroundFileName, disabledBackgroundFileName, normalTextColor,
+                                           activeTextColor, disableTextColor);
+    setStyle(style);
+}
+
 
 
 

@@ -56,6 +56,8 @@ public:
     bool isLoaded(const QString& strUserId);
     QString keyFromGuid(const QString& strUserGUID) const;
     QString defaultKey() const;
+    //
+    void waitForDone();
 
 private:
     QThread* m_thread;

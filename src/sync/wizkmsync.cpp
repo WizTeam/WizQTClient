@@ -1,6 +1,7 @@
 #include "wizkmsync.h"
 
 #include <QDebug>
+#include <QApplication>
 
 #include "apientry.h"
 #include "token.h"
@@ -102,7 +103,9 @@ void CWizKMSyncThread::run()
     while (1)
     {
         if (m_pEvents->IsStop())
+        {
             return;
+        }
         //
         if (doSync())
         {
@@ -160,6 +163,13 @@ bool CWizKMSyncThread::clearCurrentToken()
 {
     Token::clearToken();
     return true;
+}
+
+void CWizKMSyncThread::waitForDone()
+{
+    stopSync();
+    //
+    ::WizWaitForThread(this);
 }
 
 bool CWizKMSyncThread::needSyncAll()

@@ -8,6 +8,7 @@
 
 CWizSearchWidget::CWizSearchWidget(QWidget* parent /* = 0 */)
     : QWidget(parent)
+    , m_widthHint(360)
 {
     QSizePolicy sizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     setSizePolicy(sizePolicy);
@@ -20,7 +21,7 @@ CWizSearchWidget::CWizSearchWidget(QWidget* parent /* = 0 */)
 
     m_editSearch = new QLineEdit(this);
     m_editSearch->setTextMargins(5, 0, 0, 0);
-    m_editSearch->setStyleSheet("QLineEdit{border:1px solid gray; border-radius:10px;}");
+    m_editSearch->setStyleSheet("QLineEdit{border:1px solid #aeaeae; border-radius:10px;}");
 
     // avoid focus rect on OSX, this should be a bug of qt style sheet
     m_editSearch->setAttribute(Qt::WA_MacShowFocusRect, 0);
@@ -29,12 +30,12 @@ CWizSearchWidget::CWizSearchWidget(QWidget* parent /* = 0 */)
     setLayout(layout);
     layout->setSpacing(0);
     layout->setContentsMargins(0, 0, 0, 0);
-    layout->addWidget(iconLabel);
+    //layout->addWidget(iconLabel);
     layout->addWidget(m_editSearch);
     layout->setStretch(1, 1);
 
-    connect(m_editSearch, SIGNAL(textChanged(const QString&)), \
-            SLOT(on_search_textChanged(const QString&)));
+    connect(m_editSearch, SIGNAL(returnPressed()), \
+            SLOT(on_search_returnPressed()));
 }
 
 void CWizSearchWidget::clear()
@@ -50,12 +51,17 @@ void CWizSearchWidget::focus()
 
 QSize CWizSearchWidget::sizeHint() const
 {
-    return QSize(400, height());
+    return QSize(m_widthHint, height());
 }
 
-void CWizSearchWidget::on_search_textChanged(const QString& strText)
+void CWizSearchWidget::setWidthHint(int nWidth)
 {
-    Q_EMIT doSearch(strText);
+    m_widthHint = nWidth;
+}
+
+void CWizSearchWidget::on_search_returnPressed()
+{
+    Q_EMIT doSearch(m_editSearch->text());
 }
 
 #endif // Q_OS_MAC

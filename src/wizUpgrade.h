@@ -26,6 +26,7 @@ private:
 
 public Q_SLOTS:
     void check();
+    void on_getCheckUrl_finished();
     void on_checkUpgrade_finished();
     void on_timerCheck_timeout();
 

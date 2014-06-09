@@ -2,7 +2,6 @@
 #define WIZUSERCIPHERFORM_H
 
 #include <QWidget>
-
 #include "wizdef.h"
 
 namespace Ui {
@@ -16,7 +15,6 @@ class CWizUserCipherForm : public QWidget
     
 public:
     explicit CWizUserCipherForm(CWizExplorerApp& app, QWidget *parent);
-    ~CWizUserCipherForm();
 
     void setHint(const QString& strHint);
 

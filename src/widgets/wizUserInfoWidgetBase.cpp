@@ -82,7 +82,9 @@ void CWizUserInfoWidgetBase::mousePressEvent(QMouseEvent* event)
 {
     // show menu at proper position
     if (hitButton(event->pos())) {
-        QPoint pos(event->pos().x(), sizeHint().height());
+        //QPoint pos(event->pos().x(), sizeHint().height());
+        // FIXME
+        QPoint pos(32 + 4, 32 - fontMetrics().height() / 2);
         menu()->popup(mapToGlobal(pos), defaultAction());
     }
 }

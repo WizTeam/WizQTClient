@@ -152,6 +152,8 @@ public Q_SLOTS:
     void on_action_copyDocument();
     void on_action_copyDocument_confirmed(int result);
 
+    void on_action_copyDocumentLink();
+
     void on_document_abstractLoaded(const WIZABSTRACT& abs);
     void on_userAvatar_loaded(const QString& strUserGUID);
     void onThumbCacheLoaded(const QString& strKbGUID, const QString& strGUID);

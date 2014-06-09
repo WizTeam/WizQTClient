@@ -178,6 +178,9 @@ void CWizCategoryBaseView::mousePressEvent(QMouseEvent* event)
 
 void CWizCategoryBaseView::mouseMoveEvent(QMouseEvent* event)
 {
+    if (DraggingState == state())
+        return;
+
     QPoint msPos = event->pos();
     CWizCategoryViewItemBase* pItem =  itemAt(msPos);
     if (!pItem)
@@ -393,6 +396,13 @@ bool CWizCategoryBaseView::acceptDocument(const WIZDOCUMENTDATA& document)
     return pItem->accept(m_dbMgr.db(document.strKbGUID), document);
 }
 
+void CWizCategoryBaseView::setCurrentIndex(const WIZDOCUMENTDATA& document)
+{
+    CWizCategoryViewItemBase* pItem = itemFromKbGUID(document.strKbGUID);
+//    document.strLocation;
+//    document.
+}
+
 void CWizCategoryBaseView::saveSelection()
 {
     m_selectedItem = currentItem();
@@ -414,6 +424,20 @@ void CWizCategoryBaseView::restoreSelection()
 CWizCategoryViewItemBase* CWizCategoryBaseView::itemAt(const QPoint& p) const
 {
     return dynamic_cast<CWizCategoryViewItemBase*>(QTreeWidget::itemAt(p));
+}
+
+CWizCategoryViewItemBase* CWizCategoryBaseView::itemFromKbGUID(const QString &strKbGUID) const
+{
+//    if (strKbGUID.isEmpty())
+        return 0;
+
+//    QList<QTreeWidgetItem*> itemList = items;
+//    foreach (QTreeWidgetItem* widgetItem, itemList) {
+//        CWizCategoryViewItemBase * item = dynamic_cast<CWizCategoryViewItemBase *>(widgetItem);
+//        if (item->kbGUID() == strKbGUID) {
+//            return item;
+//        }
+//    }
 }
 
 

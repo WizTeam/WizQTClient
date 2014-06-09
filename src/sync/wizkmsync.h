@@ -40,6 +40,8 @@ public:
     //
     void addQuickSyncKb(const QString& kbGuid);
     bool clearCurrentToken();
+    //
+    void waitForDone();
 
 public:
     static void quickSyncKb(const QString& kbGuid); //thread safe

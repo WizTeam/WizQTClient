@@ -6,6 +6,8 @@
 
 #include "utils/pathresolve.h"
 
+#include <QNetworkProxy>
+
 ProxyDialog::ProxyDialog(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::ProxyDialog)
@@ -17,13 +19,12 @@ ProxyDialog::ProxyDialog(QWidget *parent) :
     ui->editPort->setText(WizIntToStr(settings.GetProxyPort()));
     ui->editUserName->setText(settings.GetProxyUserName());
     ui->editPassword->setText(settings.GetProxyPassword());
+    ui->editPassword->setEchoMode(QLineEdit::Password);
 
     bool proxyStatus = settings.GetProxyStatus();
-    if (!proxyStatus) {
-        ui->checkProxyStatus->setChecked(true);
-    }
+    ui->checkProxyStatus->setChecked(proxyStatus);
 
-    enableControl(!proxyStatus);
+    enableControl(proxyStatus);
 
     connect(ui->checkProxyStatus, SIGNAL(stateChanged(int)), SLOT(proxyStatusChanged(int)));
 }
@@ -35,15 +36,33 @@ ProxyDialog::~ProxyDialog()
 
 void ProxyDialog::proxyStatusChanged(int state)
 {
-    enableControl(state);
+    enableControl(Qt::Checked == state);
 }
 
 void ProxyDialog::enableControl(bool b)
 {
-    ui->editAddress->setDisabled(b);
-    ui->editPort->setDisabled(b);
-    ui->editUserName->setDisabled(b);
-    ui->editPassword->setDisabled(b);
+    ui->editAddress->setEnabled(b);
+    ui->editPort->setEnabled(b);
+    ui->editUserName->setEnabled(b);
+    ui->editPassword->setEnabled(b);
+}
+
+void ProxyDialog::setApplicationProxy()
+{
+    if (ui->checkProxyStatus->checkState() == Qt::Checked)
+    {
+        QNetworkProxy proxy;
+        proxy.setType(QNetworkProxy::HttpProxy);
+        proxy.setHostName(ui->editAddress->text());
+        proxy.setPort(ui->editPort->text().toInt());
+        proxy.setUser(ui->editUserName->text());
+        proxy.setPassword(ui->editPassword->text());
+        QNetworkProxy::setApplicationProxy(proxy);
+    }
+    else
+    {
+        QNetworkProxy::setApplicationProxy(QNetworkProxy::NoProxy);
+    }
 }
 
 void ProxyDialog::accept()
@@ -53,7 +72,9 @@ void ProxyDialog::accept()
     settings.SetProxyPort(ui->editPort->text().toInt());
     settings.SetProxyUserName(ui->editUserName->text());
     settings.SetProxyPassword(ui->editPassword->text());
-    settings.SetProxyStatus(!ui->checkProxyStatus->isChecked());
+    settings.SetProxyStatus(ui->checkProxyStatus->isChecked());
+
+    setApplicationProxy();
 
     QDialog::accept();
 }

@@ -18,6 +18,8 @@
 #include "../utils/pathresolve.h"
 #include "../utils/stylehelper.h"
 
+#include "../share/wizmisc.h"
+
 using namespace WizService;
 using namespace WizService::Internal;
 
@@ -112,7 +114,6 @@ AvatarHostPrivate::AvatarHostPrivate(AvatarHost* avatarHost)
             SLOT(on_downloaded(QString, bool)));
 
     m_thread = new QThread(this);
-    m_thread->setPriority(QThread::IdlePriority);
     connect(m_thread, SIGNAL(started()), SLOT(on_thread_started()));
 
     m_downloader->moveToThread(m_thread);
@@ -221,6 +222,18 @@ QString AvatarHostPrivate::defaultKey() const
     return "WizService::Avatar::Default";
 }
 
+void AvatarHostPrivate::waitForDone()
+{
+
+    if (m_thread && m_thread->isFinished())
+    {
+        m_thread->disconnect();
+        m_thread->quit();
+        //
+        ::WizWaitForThread(m_thread);
+    }
+}
+
 bool AvatarHostPrivate::avatar(const QString& strUserId, QPixmap* pixmap)
 {
     if (QPixmapCache::find(keyFromGuid(strUserId), pixmap)) {
@@ -254,7 +267,7 @@ QPixmap AvatarHostPrivate::loadOrg(const QString& strUserGUID, bool bForce)
     if (isNeedUpdate(strUserGUID) || bForce) {
         if (!m_listUser.contains(strUserGUID) && strUserGUID != m_strUserCurrent) {
             m_listUser.append(strUserGUID);
-            m_thread->start();
+            m_thread->start(QThread::IdlePriority);
         }
 
         return QPixmap();
@@ -267,7 +280,7 @@ void AvatarHostPrivate::load(const QString& strUserGUID, bool bForce)
     if (isNeedUpdate(strUserGUID) || bForce) {
         if (!m_listUser.contains(strUserGUID) && strUserGUID != m_strUserCurrent) {
             m_listUser.append(strUserGUID);
-            m_thread->start();
+            m_thread->start(QThread::IdlePriority);
         }
 
         return;
@@ -373,6 +386,11 @@ QString AvatarHost::defaultKey()
 bool AvatarHost::customSizeAvatar(const QString& strUserGUID, int width, int height, QString& strFileName)
 {
     return d->customSizeAvatar(strUserGUID, width, height, strFileName);
+}
+
+void AvatarHost::waitForDone()
+{
+    d->waitForDone();
 }
 
 QPixmap AvatarHost::corpImage(const QPixmap& org)

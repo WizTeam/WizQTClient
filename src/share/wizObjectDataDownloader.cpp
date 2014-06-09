@@ -1,6 +1,9 @@
 #include "wizObjectDataDownloader.h"
 
 #include <QDebug>
+#include <QEventLoop>
+#include <QNetworkAccessManager>
+#include "utils/pathresolve.h"
 
 #include "wizDatabaseManager.h"
 #include "wizDatabase.h"
@@ -8,6 +11,7 @@
 
 #include "../sync/token.h"
 #include "../sync/apientry.h"
+#include "wizmisc.h"
 
 // to avoid to much load for remote serser
 #define WIZ_OBJECTDATA_DOWNLOADER_MAX 1
@@ -53,7 +57,7 @@ void CWizObjectDataDownloaderHost::on_downloadDone(QString objectGUID, bool bSuc
 
 void CWizObjectDataDownloaderHost::on_downloadProgress(QString objectGUID, int totalSize, int loadedSize)
 {
-    Q_EMIT downloadProgress(totalSize, loadedSize);
+    Q_EMIT downloadProgress(objectGUID, totalSize, loadedSize);
 }
 
 CWizDownloadObjectRunnable::CWizDownloadObjectRunnable(CWizDatabaseManager& dbMgr, const WIZOBJECTDATA& data)
@@ -99,4 +103,54 @@ bool CWizDownloadObjectRunnable::download()
 void CWizDownloadObjectRunnable::on_downloadProgress(int totalSize, int loadedSize)
 {
     emit downloadProgress(m_data.strObjectGUID, totalSize, loadedSize);
+}
+
+
+CWizFileDownloader::CWizFileDownloader(const QString& strUrl, const QString& strFileName, const QString& strPath)
+    : m_strUrl(strUrl)
+    , m_strFileName(strFileName)
+{
+    if (m_strFileName.isEmpty())
+    {
+        m_strFileName = WizGenGUIDLowerCaseLetterOnly();
+    }
+
+    if (strPath.isEmpty())
+    {
+        m_strFileName = Utils::PathResolve::tempPath() + m_strFileName;
+    }
+    else
+    {
+        m_strFileName = strPath + m_strFileName;
+    }
+}
+
+void CWizFileDownloader::run()
+{
+    bool ret = download();
+    emit downloadDone(m_strFileName, ret);
+}
+
+void CWizFileDownloader::startDownload()
+{
+    QThreadPool::globalInstance()->start(this);
+}
+
+bool CWizFileDownloader::download()
+{
+     QNetworkAccessManager m_WebCtrl;
+     QNetworkRequest request(m_strUrl);
+     QEventLoop loop;
+     loop.connect(&m_WebCtrl, SIGNAL(finished(QNetworkReply*)), SLOT(quit()));
+     QNetworkReply* reply = m_WebCtrl.get(request);
+     loop.exec();
+
+     QByteArray byData = reply->readAll();
+     QFile file(m_strFileName);
+     if (!file.open(QIODevice::WriteOnly | QIODevice::Truncate))
+         return false;
+     file.write(byData);
+     file.close();
+
+     return true;
 }
