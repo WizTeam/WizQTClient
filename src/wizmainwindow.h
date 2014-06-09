@@ -310,6 +310,10 @@ public Q_SLOTS:
     void on_upgradeThread_finished();
 #endif
 
+    void on_trayIcon_newDocument_clicked();
+    //
+    void shiftVisableStatus();
+
 public:
     // WizExplorerApp pointer
     virtual QWidget* mainWindow() { return this; }
@@ -342,6 +346,9 @@ private:
     void setActionsEnableForNewNote();
 
     void viewDocumentByWizKMURL(const QString& strKMURL);
+
+    //
+    void initTrayIcon(QSystemTrayIcon* trayIcon);
 };
 
 } // namespace Internal

@@ -177,6 +177,7 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     //
     m_sync->start(QThread::IdlePriority);
     //
+    initTrayIcon(m_tray);
     m_tray->show();
 }
 
@@ -232,9 +233,21 @@ void MainWindow::cleanOnQuit()
 
 void MainWindow::closeEvent(QCloseEvent* event)
 {
-    event->accept();
-    qApp->quit();
+//    event->accept();
+//    qApp->quit();
 
+#ifdef Q_OS_MAC
+    if (event->spontaneous())
+    {
+        ProcessSerialNumber pn;
+        MacGetCurrentProcess(&pn);
+        ShowHideProcess(&pn,false);
+        event->ignore();
+        return;
+    }
+#else
+    hide();
+#endif
 
     //hide mainwindow but not quit
 //    if (event->spontaneous())
@@ -305,6 +318,44 @@ void MainWindow::on_checkUpgrade_finished(bool bUpgradeAvaliable)
 #endif
         QDesktopServices::openUrl(QUrl(url));
     }
+}
+
+void MainWindow::on_trayIcon_newDocument_clicked()
+{
+    setVisible(true);
+    QApplication::setActiveWindow(this);
+    raise();
+
+    on_actionNewNote_triggered();
+}
+
+void MainWindow::shiftVisableStatus()
+{
+#ifdef Q_OS_MAC
+    ProcessSerialNumber pn;
+    MacGetCurrentProcess(&pn);
+    bool appVisible = IsProcessVisible(&pn);
+    //
+    if (appVisible && QApplication::activeWindow() != this)
+    {
+        raise();
+        return;
+    }
+
+    //
+    ShowHideProcess(&pn,!appVisible);
+    if (!appVisible)
+    {
+        raise();
+    }
+#else
+    setVisible(!isVisible());
+    if (isVisible())
+    {
+        raise();
+    }
+#endif
+
 }
 
 #ifdef WIZ_OBOSOLETE
@@ -1830,6 +1881,37 @@ void MainWindow::viewDocumentByWizKMURL(const QString &strKMURL)
     {
         viewDocument(document, true);
 //        m_category->setCurrentItem();
+    }
+}
+
+void MainWindow::initTrayIcon(QSystemTrayIcon* trayIcon)
+{
+    Q_ASSERT(trayIcon);
+    QMenu* menu = new QMenu(this);
+    QAction* actionShow = menu->addAction(tr("Show/Hide MainWindow"));
+    connect(actionShow, SIGNAL(triggered()), SLOT(shiftVisableStatus()));
+
+    QAction* actionNewNote = menu->addAction(tr("New Note"));
+    connect(actionNewNote, SIGNAL(triggered()), SLOT(on_trayIcon_newDocument_clicked()));
+
+    //
+    menu->addSeparator();
+    QAction* actionLogout = menu->addAction(tr("Logout"));
+    connect(actionLogout, SIGNAL(triggered()), SLOT(on_actionLogout_triggered()));
+    QAction* actionExit = menu->addAction(tr("Exit"));
+    connect(actionExit, SIGNAL(triggered()), SLOT(on_actionExit_triggered()));
+
+    trayIcon->setContextMenu(menu);
+
+    //
+    QString normal = WizGetSkinResourceFileName(userSettings().skin(), "trayIcon");
+    QString selected = WizGetSkinResourceFileName(userSettings().skin(), "trayIcon_selected");
+    QIcon icon;
+    icon.addFile(normal, QSize(), QIcon::Normal, QIcon::Off);
+    icon.addFile(selected, QSize(), QIcon::Selected, QIcon::Off);
+    if (!icon.isNull())
+    {
+        trayIcon->setIcon(icon);
     }
 }
 
