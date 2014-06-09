@@ -72,7 +72,7 @@ CWizLoginDialog::CWizLoginDialog(const QString &strDefaultUserId, const QString 
     ui->wgt_newPassword->setAutoClearRightIcon(true);
     ui->wgt_passwordRepeat->setAutoClearRightIcon(true);
 
-    applyElementStyles();
+    applyElementStyles(strLocale);
 
 
     connect(m_menu, SIGNAL(triggered(QAction*)), SLOT(userListMenuClicked(QAction*)));
@@ -271,15 +271,23 @@ void CWizLoginDialog::on_btn_close_clicked()
     qApp->quit();
 }
 
-void CWizLoginDialog::applyElementStyles()
+void CWizLoginDialog::applyElementStyles(const QString &strLocal)
 {
     ui->stackedWidget->setCurrentIndex(0);
 
     QString strThemeName = Utils::StyleHelper::themeName();
-    QString strlogo = ::WizGetSkinResourceFileName(strThemeName, "loginLogoCn");
+
+    QString strlogo;
+    // setup locale for welcome dialog
+    if (strLocal != WizGetDefaultTranslatedLocal()) {
+        strlogo= ::WizGetSkinResourceFileName(strThemeName, "loginLogoCn");
+    } else {
+        strlogo= ::WizGetSkinResourceFileName(strThemeName, "loginLogoUS");
+    }
     ui->label_logo->setStyleSheet(QString("QLabel {border: none;background-image: url(%1);"
                                         "background-position: center; background-repeat: no-repeat; background-color:#43A6E8}").arg(strlogo));
     ui->label_placehold->setStyleSheet(QString("QLabel {border: none;background-color:#43A6E8}"));
+
     //
 #ifdef Q_OS_MAC
     QString strBtnCloseNormal = ::WizGetSkinResourceFileName(strThemeName, "loginCloseButton_normal");
@@ -387,9 +395,10 @@ void CWizLoginDialog::applyElementStyles()
     ui->label_separator3->setStyleSheet(QString("QLabel {border: none;background-image: url(%1);"
                                                 "background-position: center; background-repeat: no-repeat}").arg(strLineSeparator));
 
-
+    //
     ui->btn_changeToLogin->setVisible(false);
     ui->label_passwordError->setStyleSheet(QString("QLabel {border: none; padding-left: 25px; color: red;}"));
+    ui->label_passwordError->setText("");
 
     m_menu->setFixedWidth(ui->wgt_usercontainer->width());
     m_menu->setStyleSheet("QMenu {background-color: #ffffff; border-style: solid; border-color: #43A6E8; border-width: 1px; color: #5F5F5F; menu-scrollable: 1;}"
@@ -456,7 +465,7 @@ void CWizLoginDialog::on_btn_changeToLogin_clicked()
 {
     ui->btn_changeToLogin->setVisible(false);
     ui->btn_changeToSignin->setVisible(true);
-    ui->label_noaccount->setText(tr("No account,"));
+    ui->label_noaccount->setText(tr("No account yet,"));
     ui->label_passwordError->clear();
     ui->stackedWidget->setCurrentIndex(0);
     ui->wgt_usercontainer->setFocus();

@@ -78,6 +78,7 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     , m_settings(new CWizUserSettings(dbMgr.db()))
     , m_sync(new CWizKMSyncThread(dbMgr.db(), this))
     , m_searchIndexer(new CWizSearchIndexer(m_dbMgr, this))
+    , m_searcher(new CWizSearcher(m_dbMgr, this))
     #ifndef BUILD4APPSTORE
     , m_upgrade(new CWizUpgrade())
     #else
@@ -128,11 +129,15 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
 
     // search and full text search
     m_searchIndexer->start(QThread::IdlePriority);
+    m_searcher->start(QThread::HighPriority);
 
     // syncing thread
     connect(m_sync, SIGNAL(processLog(const QString&)), SLOT(on_syncProcessLog(const QString&)));
     connect(m_sync, SIGNAL(syncStarted(bool)), SLOT(on_syncStarted(bool)));
     connect(m_sync, SIGNAL(syncFinished(int, QString)), SLOT(on_syncDone(int, QString)));
+
+    connect(m_searcher, SIGNAL(searchProcess(const QString&, const CWizDocumentDataArray&, bool)),
+        SLOT(on_searchProcess(const QString&, const CWizDocumentDataArray&, bool)));
 
     // misc settings
     //m_avatarDownloaderHost->setDefault(::WizGetSkinResourcePath(userSettings().skin()) + "avatar_default.png");
@@ -217,6 +222,7 @@ void MainWindow::cleanOnQuit()
     m_sync->waitForDone();
     //
     m_searchIndexer->waitForDone();
+    m_searcher->waitForDone();
     //
     m_doc->waitForDone();
     //
@@ -880,23 +886,20 @@ QWidget* MainWindow::createListView()
     layoutActions->addStretch(0);
 
     m_labelDocumentsHint = new QLabel(this);
-    //m_labelDocumentsHint->setMargin(5);
+    m_labelDocumentsHint->setMargin(5);
     layoutActions->addWidget(m_labelDocumentsHint);
     connect(m_category, SIGNAL(documentsHint(const QString&)), SLOT(on_documents_hintChanged(const QString&)));
 
     m_labelDocumentsCount = new QLabel("", this);
-    //m_labelDocumentsCount->setMargin(5);
+    m_labelDocumentsCount->setMargin(5);
     layoutActions->addWidget(m_labelDocumentsCount);
     connect(m_documents, SIGNAL(documentCountChanged()), SLOT(on_documents_documentCountChanged()));
 
-#ifdef Q_OS_LINUX
+
     //sortBtn->setStyleSheet("padding-top:10px;");
     m_labelDocumentsHint->setStyleSheet("color: #787878;padding-bottom:1px;"); //font: 12px;
     m_labelDocumentsCount->setStyleSheet("color: #787878;padding-bottom:1px;"); //font: 12px;
-#else
-    m_labelDocumentsHint->setStyleSheet("font: 12px;color: #787878");
-    m_labelDocumentsCount->setStyleSheet("font: 12px;color: #787878");
-#endif
+
 
     QWidget* line2 = new QWidget(this);
     line2->setFixedHeight(1);
@@ -1350,14 +1353,10 @@ void MainWindow::on_actionSearch_triggered()
 
 void MainWindow::on_actionResetSearch_triggered()
 {
-    if (m_searcher) {
-        m_searcher->abort();
-    }
-
     m_search->clear();
     m_search->focus();
     m_category->restoreSelection();
-    m_doc->web()->resetSearchKeywordHighlight();
+    m_doc->web()->applySearchKeywordHighlight();
 }
 
 void MainWindow::on_actionSaveAsPDF_triggered()
@@ -1392,50 +1391,21 @@ void MainWindow::on_search_doSearch(const QString& keywords)
         return;
     }
 
-    if (m_searcher) {
-        m_searcher->disconnect(this);
-        m_searcher->abort();
-        m_searchThread.quit();
-    }
-
     m_category->saveSelection();
     m_documents->clear();
-
-    if (!m_searchTimer) {
-        m_searchTimer = new QTimer(this);
-        m_searchTimer->setSingleShot(true);
-        m_searchTimer->setInterval(300);
-        connect(m_searchTimer, SIGNAL(timeout()), SLOT(on_search_timeout()));
-    }
-
-    m_searchTimer->start();
+    //
+    m_noteList->show();
+    m_msgList->hide();
+    //
+    m_searcher->search(keywords, 500);
 }
 
-void MainWindow::on_search_timeout()
-{
-    if (m_searcher) {
-        m_searchTimer->start();
-        return;
-    }
-
-    m_searcher = new CWizSearcher(m_dbMgr);
-    connect(m_searcher, SIGNAL(searchProcess(const QString&, const CWizDocumentDataArray&, bool)),
-        SLOT(on_searchProcess(const QString&, const CWizDocumentDataArray&, bool)));
-
-    m_searcher->moveToThread(&m_searchThread);
-    connect(&m_searchThread, SIGNAL(finished()), m_searcher, SLOT(deleteLater()));
-    m_searchThread.start();
-
-    m_searcher->search(m_strSearchKeywords, 10000);
-}
 
 void MainWindow::on_searchProcess(const QString& strKeywords, const CWizDocumentDataArray& arrayDocument, bool bEnd)
 {
-    //Q_ASSERT(m_searcher);
-
     if (bEnd) {
-        m_searchThread.exit();
-        m_doc->web()->resetSearchKeywordHighlight();
+        m_doc->web()->clearSearchKeywordHighlight(); //need clear hightlight first
+        m_doc->web()->applySearchKeywordHighlight();
     }
 
     if (strKeywords != m_strSearchKeywords) {
@@ -1530,22 +1500,6 @@ void MainWindow::on_category_itemSelectionChanged()
         pItem->getMessages(m_dbMgr.db(), arrayMsg);
         m_msgList->setMessages(arrayMsg);
         return;
-
-        // FIXME: use id instead of name.
-        //QString strName = category->currentItem()->text(0);
-        //if (strName == CATEGORY_MESSAGES_ALL ||
-        //        strName == CATEGORY_MESSAGES_SEND_TO_ME ||
-        //        strName == CATEGORY_MESSAGES_MODIFY ||
-        //        strName == CATEGORY_MESSAGES_COMMENTS ||
-        //        strName == CATEGORY_MESSAGES_SEND_FROM_ME) {
-        //    m_msgList->show();
-        //    m_noteList->hide();
-
-        //    CWizMessageDataArray arrayMsg;
-        //    m_dbMgr.db().getLastestMessages(arrayMsg);
-        //    m_msgList->setMessages(arrayMsg);
-
-        //    return;
     }
     else
     {

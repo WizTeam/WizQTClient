@@ -30,7 +30,7 @@ public:
     virtual QSize sizeHint() const;
 
 public Q_SLOTS:
-    void on_search_textChanged(const QString& strText);
+    void on_search_returnPressed();
     void setWidthHint(int nWidth);
 
 private:

@@ -304,7 +304,7 @@ void CWizDocumentWebView::focusInEvent(QFocusEvent *event)
 
     QWebView::focusInEvent(event);
 
-    resetSearchKeywordHighlight();
+    applySearchKeywordHighlight();
 }
 
 void CWizDocumentWebView::focusOutEvent(QFocusEvent *event)
@@ -886,7 +886,7 @@ void CWizDocumentWebView::updateNoteHtml()
     }
 }
 
-void CWizDocumentWebView::resetSearchKeywordHighlight()
+void CWizDocumentWebView::applySearchKeywordHighlight()
 {
     MainWindow* window = qobject_cast<MainWindow *>(m_app.mainWindow());
     QString strKeyWords = window->searchKeywords();
@@ -901,6 +901,11 @@ void CWizDocumentWebView::resetSearchKeywordHighlight()
     {
         findText("", QWebPage::HighlightAllOccurrences);
     }
+}
+
+void CWizDocumentWebView::clearSearchKeywordHighlight()
+{
+    findText("", QWebPage::HighlightAllOccurrences);
 }
 
 void CWizDocumentWebView::viewDocumentInEditor(bool editing)
@@ -962,7 +967,7 @@ void CWizDocumentWebView::viewDocumentInEditor(bool editing)
     m_timerAutoSave.start();
 
     //Waiting for the editor initialization complete if it's the first time to load a document.
-    QTimer::singleShot(100, this, SLOT(resetSearchKeywordHighlight()));
+    QTimer::singleShot(100, this, SLOT(applySearchKeywordHighlight()));
 }
 
 void CWizDocumentWebView::onNoteLoadFinished()

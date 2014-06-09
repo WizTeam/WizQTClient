@@ -620,31 +620,36 @@ QPolygon StyleHelper::bubbleFromSize(const QSize& sz, int nAngle, bool bAlignLef
 
 int StyleHelper::fontHead(QFont& f)
 {
-#ifndef Q_OS_LINUX
-    QSettings* st = ExtensionSystem::PluginManager::settings();
-    QString strFont = st->value("Theme/FontFamily").toString();
-    if (strFont.isEmpty()) {
-        st->setValue("Theme/FontFamily", f.family());
-    }
 
-    f.setFamily(strFont);
-    //f.setPixelSize(13);
-    f.setBold(true);
+#ifdef Q_OS_MAC
+//    QSettings* st = ExtensionSystem::PluginManager::settings();
+//    QString strFont = st->value("Theme/FontFamily").toString();
+//    if (strFont.isEmpty()) {
+//        st->setValue("Theme/FontFamily", f.family());
+//    }
+
+    //f.setFamily(strFont);
+    //FIXME: should not use fix font size. but different widget has different default font size.
+    f.setPixelSize(13);
+    //f.setBold(true);
 #endif
+
     return QFontMetrics(f).height();
 }
 
 int StyleHelper::fontNormal(QFont& f)
 {
-    QSettings* st = ExtensionSystem::PluginManager::settings();
-    QString strFont = st->value("Theme/FontFamily").toString();
-    if (strFont.isEmpty()) {
-        st->setValue("Theme/FontFamily", f.family());
-    }
+#ifdef Q_OS_MAC
+//    QSettings* st = ExtensionSystem::PluginManager::settings();
+//    QString strFont = st->value("Theme/FontFamily").toString();
+//    if (strFont.isEmpty()) {
+//        st->setValue("Theme/FontFamily", f.family());
+//    }
 
-    f.setFamily(strFont);
-    //f.setPixelSize(12);
-
+//    f.setFamily(strFont);
+    //FIXME: should not use fix font size. but different widget has different default font size.
+    f.setPixelSize(13);
+#endif
     return QFontMetrics(f).height();
 }
 
@@ -694,7 +699,7 @@ void StyleHelper::drawListViewItemThumb(QPainter* p, const QRect& rc, int nBadge
 {
     QRect rcd(rc);
 
-    QFont fontTitle;
+    QFont fontTitle = p->font();
     int nFontHeight = Utils::StyleHelper::fontHead(fontTitle);
 
     if (!title.isEmpty()) {
