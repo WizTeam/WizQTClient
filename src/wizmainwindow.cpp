@@ -318,12 +318,10 @@ void MainWindow::shiftVisableStatus()
     else
     {
         wizMacShowCurrentApplication();
-    }
-    //
-    if (!appVisible)
-    {
         raise();
     }
+    //
+
 #else
 //    setVisible(!isVisible());
 //    if (isVisible())
