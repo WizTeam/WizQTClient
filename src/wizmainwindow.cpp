@@ -246,7 +246,13 @@ void MainWindow::closeEvent(QCloseEvent* event)
         return;
     }
 #else
-    hide();
+    if (!event->spontaneous())
+    {
+        //setVisible(false);
+        setWindowState(Qt::WindowMinimized);
+        event->ignore();
+        return;
+    }
 #endif
 
     //hide mainwindow but not quit
@@ -349,10 +355,26 @@ void MainWindow::shiftVisableStatus()
         raise();
     }
 #else
-    setVisible(!isVisible());
-    if (isVisible())
+//    setVisible(!isVisible());
+//    if (isVisible())
+//    {
+//        raise();
+//    }
+    if (Qt::WindowMinimized & windowState())
     {
+        setWindowState(Qt::WindowActive);
         raise();
+        showNormal();
+    }
+    else if (!isActiveWindow())
+    {
+        setWindowState(Qt::WindowActive);
+        raise();
+        showNormal();
+    }
+    else
+    {
+        setWindowState(Qt::WindowMinimized);
     }
 #endif
 
@@ -1904,6 +1926,7 @@ void MainWindow::initTrayIcon(QSystemTrayIcon* trayIcon)
     trayIcon->setContextMenu(menu);
 
     //
+#ifdef Q_OS_MAC
     QString normal = WizGetSkinResourceFileName(userSettings().skin(), "trayIcon");
     QString selected = WizGetSkinResourceFileName(userSettings().skin(), "trayIcon_selected");
     QIcon icon;
@@ -1913,6 +1936,7 @@ void MainWindow::initTrayIcon(QSystemTrayIcon* trayIcon)
     {
         trayIcon->setIcon(icon);
     }
+#endif
 }
 
 void MainWindow::quickSyncKb(const QString& kbGuid)
