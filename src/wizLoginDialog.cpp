@@ -395,7 +395,7 @@ void CWizLoginDialog::applyElementStyles(const QString &strLocal)
     ui->label_separator3->setStyleSheet(QString("QLabel {border: none;background-image: url(%1);"
                                                 "background-position: center; background-repeat: no-repeat}").arg(strLineSeparator));
 
-
+    //
     ui->btn_changeToLogin->setVisible(false);
     ui->label_passwordError->setStyleSheet(QString("QLabel {border: none; padding-left: 25px; color: red;}"));
     ui->label_passwordError->setText("");
