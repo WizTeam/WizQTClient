@@ -267,7 +267,8 @@ void MainWindow::showEvent(QShowEvent* event)
 
     //
 #ifdef Q_OS_MAC
-    m_toolBar->showInWindow(this);
+    //m_toolBar->showInWindow(this);
+    m_toolBar->setToolBarVisible(true);
 #endif
 }
 

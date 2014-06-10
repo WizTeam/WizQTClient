@@ -62,6 +62,7 @@ public:
     void setSizeMode(SizeMode sizeMode);
 
     void showInWindow(QWidget *window);
+    void setToolBarVisible(bool bVisible);
 
     // Add actions to the Toolbar
     void addAction(QAction* action);
