@@ -374,7 +374,7 @@ if(UNIX)
             add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
                 COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/share/wiznote/locales/
                 COMMAND ${CMAKE_COMMAND} -E copy ${_file} ${CMAKE_BINARY_DIR}/share/wiznote/locales/)
-            endforeach()
+        endforeach()
     endif()
 endif()
 
@@ -403,6 +403,8 @@ target_link_libraries(${PROJECT_NAME}
     extensionsystem
     aggregation
     coreplugin
+    helloworld
+    markdown
     ${CMAKE_DL_LIBS}
 )
 
