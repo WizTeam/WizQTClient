@@ -797,7 +797,7 @@ void EditorToolBar::saveImage(QString strFileName)
     if (strFilePath.isEmpty())
         return;
 
-    bool ret = pix.save(strFilePath, info.suffix().toAscii());
+    bool ret = pix.save(strFilePath, info.suffix().toUtf8());
     TOLOG2(_T("[Save] : save image to %1, result : %2"), strFilePath,
            ret ? "OK" : "Failed");    //pix formart should use ascii or capital letter.
 }
@@ -882,7 +882,7 @@ bool EditorToolBar::processBase64Image(bool bUseForCopy)
 
     //
     QPixmap pix;
-    pix.loadFromData(baData, strType.toAscii());
+    pix.loadFromData(baData, strType.toUtf8());
     if (!bUseForCopy)
     {
         QString strFilePath = QFileDialog::getSaveFileName(this, tr("Save as..."),
@@ -890,7 +890,7 @@ bool EditorToolBar::processBase64Image(bool bUseForCopy)
         if (strFilePath.isEmpty())
             return false;
 
-        bool ret = pix.save(strFilePath, strType.toAscii());
+        bool ret = pix.save(strFilePath, strType.toUtf8());
         TOLOG2(_T("[Save] : save image to %1, result : %2"), strFilePath,
                ret ? "OK" : "Failed");    //pix formart should use ascii or capital letter.
     }
