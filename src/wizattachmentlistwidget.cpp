@@ -217,28 +217,19 @@ void CWizAttachmentListView::openAttachment(CWizAttachmentListViewItem* item)
     if (!item)
         return;
 
-    CString strTempPath = Utils::PathResolve::tempPath();
     const WIZDOCUMENTATTACHMENTDATA& attachment = item->attachment();
 
     CWizDatabase& db = m_dbMgr.db(attachment.strKbGUID);
     bool bIsLocal = db.IsObjectDataDownloaded(attachment.strGUID, "attachment");
-    bool bExists = PathFileExists(db.GetAttachmentFileName(attachment.strGUID));
+    QString strFileName = db.GetAttachmentFileName(item->attachment().strGUID);
+    bool bExists = PathFileExists(strFileName);
     if (!bIsLocal || !bExists) {
         //m_downloadDialog->downloadData(attachment);
         startDownLoad(item);
         return;
     }
 
-    CString strTempFileName = strTempPath + item->attachment().strName;
-    ::WizGetNextFileName(strTempFileName);
-
-    if (!::WizCopyFile(db.GetAttachmentFileName(item->attachment().strGUID), strTempFileName, FALSE))
-    {
-        QMessageBox::critical(this, qApp->applicationName(), tr("Can not save attachment to %1").arg(strTempFileName));
-        return;
-    }
-
-    QDesktopServices::openUrl(QUrl::fromLocalFile(strTempFileName));
+    QDesktopServices::openUrl(QUrl::fromLocalFile(strFileName));
 }
 
 void CWizAttachmentListView::contextMenuEvent(QContextMenuEvent * e)

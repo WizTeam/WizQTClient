@@ -279,7 +279,7 @@ public:
     QString GetDocumentsDataPath() const;
     QString GetAttachmentsDataPath() const;
     QString GetDocumentFileName(const QString& strGUID) const;
-    QString GetAttachmentFileName(const QString& strGUID) const;
+    QString GetAttachmentFileName(const QString& strGUID);
     QString GetAvatarPath() const;
     QString GetDefaultNoteLocation() const;
 
@@ -424,6 +424,10 @@ public:
 
     //using CWizIndexBase::DocumentFromGUID;
     //Q_INVOKABLE QObject* DocumentFromGUID(const QString& strGUID);
+
+public slots:
+    void onAttachmentModified(const QString strKbGUID, const QString& strGUID, const QString& strFileName,
+                              const QString& strMD5, const QDateTime& dtLastModified);
 
 Q_SIGNALS:
     void userInfoChanged();

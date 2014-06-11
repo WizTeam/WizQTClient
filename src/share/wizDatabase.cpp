@@ -1944,9 +1944,23 @@ QString CWizDatabase::GetDocumentFileName(const QString& strGUID) const
     return GetDocumentsDataPath() + "{" + strGUID + "}";
 }
 
-QString CWizDatabase::GetAttachmentFileName(const QString& strGUID) const
+QString CWizDatabase::GetAttachmentFileName(const QString& strGUID)
 {
-    return GetAttachmentsDataPath() + "{" + strGUID + "}";
+    WIZDOCUMENTATTACHMENTDATA attach;
+    AttachmentFromGUID(strGUID, attach);
+    //
+    QString strOldFileName = GetAttachmentsDataPath() + "{" + strGUID + "}";
+    QString strNewFileName = strOldFileName + attach.strName;
+
+    // Compatible with the old version
+    if (QFile::exists(strOldFileName))
+    {
+        if (!QFile::rename(strOldFileName, strNewFileName))
+        {
+            TOLOG2("[Attach] rename file failed from %1 to %2 ", strOldFileName, strNewFileName);
+        }
+    }
+    return  strNewFileName;
 }
 
 QString CWizDatabase::GetAvatarPath() const
@@ -3206,6 +3220,21 @@ QObject* CWizDatabase::GetFolderByLocation(const QString& strLocation, bool crea
     Q_UNUSED(create);
 
     return new CWizFolder(*this, strLocation);
+}
+
+void CWizDatabase::onAttachmentModified(const QString strKbGUID, const QString& strGUID,
+                                        const QString& strFileName, const QString& strMD5, const QDateTime& dtLastModified)
+{
+    Q_UNUSED(strFileName);
+
+    CWizDatabase& db = CWizDatabaseManager::instance()->db(strKbGUID);
+    WIZDOCUMENTATTACHMENTDATA attach;
+    if (db.AttachmentFromGUID(strGUID, attach))
+    {
+        attach.strDataMD5 = strMD5;
+        attach.tDataModified = dtLastModified;
+        db.ModifyAttachmentInfo(attach);
+    }
 }
 
 bool CWizDatabase::tryAccessDocument(const WIZDOCUMENTDATA &doc)
