@@ -70,7 +70,7 @@ void MarkdownPlugin::render(QWebFrame* frame)
 {
     Q_ASSERT(frame);
 
-    QFile f(":/res/markdown.js");
+    QFile f(":/res/WizNote-Markdown.js");
     if (!f.open(QIODevice::ReadOnly)) {
         qDebug() << "[Markdown]Failed to get render execute code";
         return;
@@ -119,7 +119,7 @@ bool MarkdownPlugin::copyRes2Cache()
     cacheDir.mkpath(strPath);
 
     QStringList lsRes;
-    lsRes << ":/res/markdown.js" << ":/res/inject.js"
+    lsRes << ":/res/WizNote-Markdown.js" << ":/res/wiznote-markdown-inject.js"
           << ":/res/github2.css" << ":/res/jquery.min.js"
           << ":/res/marked.min.js" << ":/res/highlight.pack.js";
 
