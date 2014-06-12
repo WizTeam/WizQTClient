@@ -3235,11 +3235,11 @@ void CWizDatabase::onAttachmentModified(const QString strKbGUID, const QString& 
         {
             attach.strDataMD5 = strMD5;
             attach.nVersion = -1;
-            TOLOG("[Modifide] attachment data modified");
+            TOLOG("[Edit] attachment data modified");
         }
         attach.tDataModified = dtLastModified;
         attach.tInfoModified = WizGetCurrentTime();
-        attach.strInfoMD5 = CalDocumentAttachmentInfoMD5(data);
+        attach.strInfoMD5 = CalDocumentAttachmentInfoMD5(attach);
 
         ModifyAttachmentInfoEx(attach);
     }
