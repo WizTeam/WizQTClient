@@ -2421,6 +2421,9 @@ bool CWizDatabase::UpdateDocumentData(WIZDOCUMENTDATA& data,
     }
     m_mtxTempFile.unlock();
 
+    //
+    ClearUnusedImages(strHtml, strResourcePath);
+
     CWizDocument doc(*this, data);
     CString strMetaText = doc.GetMetaText();
 
@@ -2445,6 +2448,23 @@ bool CWizDatabase::UpdateDocumentData(WIZDOCUMENTDATA& data,
     SetObjectDataDownloaded(data.strGUID, "document", true);
 
     return UpdateDocumentDataMD5(data, strZipFileName, notifyDataModify);
+}
+
+void CWizDatabase::ClearUnusedImages(const QString& strHtml, const QString& strFilePath)
+{
+    CWizStdStringArray arrayImageFileName;
+    ::WizEnumFiles(strFilePath, "*.jpg;*.png;*.bmp;*.gif", arrayImageFileName, 0);
+    if (!arrayImageFileName.empty())
+    {
+        CWizStdStringArray::const_iterator it;
+        for (it = arrayImageFileName.begin(); it != arrayImageFileName.end(); it++)
+        {
+            if (!strHtml.contains(*it))
+            {
+                QFile::remove(*it);
+            }
+        }
+    }
 }
 
 bool CWizDatabase::UpdateDocumentDataMD5(WIZDOCUMENTDATA& data, const CString& strZipFileName, bool notifyDataModify /*= true*/)
@@ -2940,7 +2960,6 @@ bool CWizDatabase::UpdateDocumentAbstract(const QString& strDocumentGUID)
             Q_EMIT updateError("Failed to load image file: " + strImageFileName);
         }
     }
-
 
     bool ret = UpdatePadAbstract(abstract);
     if (!ret) {

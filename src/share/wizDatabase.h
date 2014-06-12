@@ -333,7 +333,7 @@ public:
 
     bool UpdateDocumentData(WIZDOCUMENTDATA& data, const QString& strHtml,
                             const QString& strURL, int nFlags, bool notifyDataModify = true);
-
+    void ClearUnusedImages(const QString& strHtml, const QString& strFilePath);
     bool UpdateDocumentAbstract(const QString& strDocumentGUID);
 
     virtual bool UpdateDocumentDataMD5(WIZDOCUMENTDATA& data, const CString& strZipFileName, bool notifyDataModify = true);
