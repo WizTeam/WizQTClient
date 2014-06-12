@@ -3231,9 +3231,17 @@ void CWizDatabase::onAttachmentModified(const QString strKbGUID, const QString& 
     WIZDOCUMENTATTACHMENTDATA attach;
     if (db.AttachmentFromGUID(strGUID, attach))
     {
-        attach.strDataMD5 = strMD5;
+        if (strMD5 != attach.strDataMD5)
+        {
+            attach.strDataMD5 = strMD5;
+            attach.nVersion = -1;
+            TOLOG("[Modifide] attachment data modified");
+        }
         attach.tDataModified = dtLastModified;
-        db.ModifyAttachmentInfo(attach);
+        attach.tInfoModified = WizGetCurrentTime();
+        attach.strInfoMD5 = CalDocumentAttachmentInfoMD5(data);
+
+        ModifyAttachmentInfoEx(attach);
     }
 }
 
