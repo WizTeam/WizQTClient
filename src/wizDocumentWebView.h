@@ -196,6 +196,7 @@ protected:
     virtual void contextMenuEvent(QContextMenuEvent* event);
     virtual void dragEnterEvent(QDragEnterEvent* event);
     virtual void dropEvent(QDropEvent* event);
+    virtual void wheelEvent(QWheelEvent* ev);
 
 private:
     bool image2Html(const QString& strImageFile, QString& strHtml);
