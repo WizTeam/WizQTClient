@@ -11,7 +11,7 @@
 #include <coreplugin/icore.h>
 
 #include "share/wizDatabaseManager.h"
-
+#include "share/wizFileMonitor.h"
 #include "wiznotestyle.h"
 #include "share/wizmisc.h"
 #include "share/wizuihelper.h"
@@ -230,6 +230,13 @@ void CWizAttachmentListView::openAttachment(CWizAttachmentListViewItem* item)
     }
 
     QDesktopServices::openUrl(QUrl::fromLocalFile(strFileName));
+
+    CWizFileMonitor& monitor = CWizFileMonitor::instance();
+    connect(&monitor, SIGNAL(fileModified(QString,QString,QString,QString,QDateTime)),
+            &m_dbMgr.db(), SLOT(onAttachmentModified(QString,QString,QString,QString,QDateTime)), Qt::UniqueConnection);
+
+    monitor.addFile(attachment.strKbGUID, attachment.strGUID, strFileName,
+                    attachment.strDataMD5, attachment.tDataModified);
 }
 
 void CWizAttachmentListView::contextMenuEvent(QContextMenuEvent * e)

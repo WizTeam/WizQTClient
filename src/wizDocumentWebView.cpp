@@ -1643,29 +1643,6 @@ void CWizDocumentWebViewSaverThread::run()
         bool ok = db.UpdateDocumentData(doc, data.html, data.htmlFile, data.flags, notify);
 
         //
-//        if (doc.nAttachmentCount > 0)
-//        {
-//            CWizDocumentAttachmentDataArray arrayAttachment;
-//            db.GetDocumentAttachments(data.doc.strGUID, arrayAttachment);
-
-//            CWizDocumentAttachmentDataArray::const_iterator it;
-//            for (it = arrayAttachment.begin(); it != arrayAttachment.end(); it++) {
-//                WIZDOCUMENTATTACHMENTDATAEX attach = *it;
-//                QString strFileName = db.GetAttachmentFileName(attach.strGUID);
-//                QFileInfo info(strFileName);
-//                if (info.lastModified() > attach.tDataModified)
-//                {
-//                    attach.strDataMD5 = WizMd5FileString(strFileName);
-//                    attach.tDataModified = info.lastModified();
-//                    attach.nVersion = -1;
-//                    if (db.ModifyAttachmentInfo(attach))
-//                    {
-//                        qDebug() << "Updating attachment failed : " << attach.strName;
-//                    }
-//                }
-//            }
-//        }
-        //
         if (ok)
         {
             qDebug() << "Save note done: " << doc.strTitle;

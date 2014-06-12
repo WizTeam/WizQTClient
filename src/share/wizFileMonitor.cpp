@@ -2,6 +2,7 @@
 #include "wizmisc.h"
 #include "../utils/logger.h"
 #include <QFileInfo>
+#include <QDebug>
 
 CWizFileMonitor::CWizFileMonitor(QObject *parent) :
     QThread(parent)
@@ -12,6 +13,7 @@ CWizFileMonitor::CWizFileMonitor(QObject *parent) :
 CWizFileMonitor::~CWizFileMonitor()
 {
     stop();
+    WizWaitForThread(this);
 }
 
 CWizFileMonitor&CWizFileMonitor::instance()
@@ -23,7 +25,12 @@ CWizFileMonitor&CWizFileMonitor::instance()
 void CWizFileMonitor::addFile(const QString strKbGUID, const QString& strGUID,
                               const QString& strFileName, const QString& strMD5, const QDateTime& dtLastModified)
 {
-    Q_ASSERT(strFileName.isEmpty());
+    Q_ASSERT(!strFileName.isEmpty());
+
+    foreach (FMData fmData, m_fileList) {
+        if (fmData.strFileName == strFileName)
+            return;
+    }
 
     FMData fileData;
     fileData.strKbGUID = strKbGUID;
@@ -57,9 +64,13 @@ void CWizFileMonitor::run()
 
 void CWizFileMonitor::checkFiles()
 {
-    foreach (FMData fileData, m_fileList) {
+    QList<FMData>::iterator fmIter;
+    for (fmIter = m_fileList.begin(); fmIter != m_fileList.end(); fmIter++)
+    {
         if (m_stop)
             break;
+
+        FMData& fileData = *fmIter;
 
         QFileInfo info(fileData.strFileName);
         if (info.lastModified() > fileData.dtLastModified)
@@ -74,6 +85,8 @@ void CWizFileMonitor::checkFiles()
                 fileData.strMD5 = strMD5;
             }
 
+            fileData.dtLastModified = info.lastModified();
+            //
             emit fileModified(fileData.strKbGUID, fileData.strGUID, fileData.strFileName,
                               fileData.strMD5, fileData.dtLastModified);
         }
