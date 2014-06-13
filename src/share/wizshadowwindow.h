@@ -13,9 +13,6 @@
 #include "wiztitlebar.h"
 #include "wizshadoweffect.h"
 
-
-
-
 template <class Base>
 class CWizShadowWindow
         : public Base
@@ -42,7 +39,7 @@ public:
         windowLayout->setContentsMargins(0, 0, 0, 0);
         windowLayout->setSpacing(0);
         //
-        m_rootWidget = new QWidget(this);
+        m_rootWidget = new CWizShadowWidget(this);
         m_rootWidget->setContentsMargins(10, 10, 10, 10);
         windowLayout->addWidget(m_rootWidget);
         //
@@ -59,8 +56,9 @@ public:
         shadowLayout->setSpacing(0);
         m_shadowWidget->setLayout(shadowLayout);
         m_shadowWidget->setAutoFillBackground(true);
-        CWizShadowEffect* effect = new CWizShadowEffect();
-        m_shadowWidget->setGraphicsEffect(effect);
+        //don't use QGraphicsEffect
+        //CWizShadowEffect* effect = new CWizShadowEffect();
+        //m_shadowWidget->setGraphicsEffect(effect);
         m_shadowWidget->setCursor(QCursor(Qt::ArrowCursor));
         //
         m_titleBar = new CWizTitleBar(m_shadowWidget, this, m_rootWidget);
