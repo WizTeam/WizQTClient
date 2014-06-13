@@ -32,7 +32,7 @@ public:
     explicit TitleBar(QWidget *parent);
     CWizDocumentView* noteView();
     void setLocked(bool bReadOnly, int nReason, bool bIsGroup);
-    void showDocumentEditingStatus(const QString& strEditor);
+    void setDocumentEditingStatus(const QString& strEditor = "");
     void setEditor(CWizDocumentWebView* editor);
 
     void setNote(const WIZDOCUMENTDATA& data, bool editing, bool locked);
