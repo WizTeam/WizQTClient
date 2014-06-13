@@ -1,1 +1,1 @@
-./bin/wiznote
+./bin/WizNote
