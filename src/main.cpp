@@ -305,6 +305,7 @@ int mainCore(int argc, char *argv[])
 
     int ret = a.exec();
     if (w.isLogout()) {
+        userSettings.setPassword("");
 #ifndef BUILD4APPSTORE
         QProcess::startDetached(argv[0], QStringList());
 #else
