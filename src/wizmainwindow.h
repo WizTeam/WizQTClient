@@ -199,6 +199,9 @@ public:
 
     void checkWizUpdate();
 
+    //
+    void viewDocumentByWizKMURL(const QString& strKMURL);
+
 public Q_SLOTS:
     void on_actionExit_triggered();
     void on_actionConsole_triggered();
@@ -344,8 +347,6 @@ private:
 
     //FIXME：新建笔记时,为了将光标移到编辑器中,需要将Editor的模式设置为disable,此处需要将actions设置为可用
     void setActionsEnableForNewNote();
-
-    void viewDocumentByWizKMURL(const QString& strKMURL);
 
     //
     void initTrayIcon(QSystemTrayIcon* trayIcon);

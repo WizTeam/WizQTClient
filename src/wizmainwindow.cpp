@@ -1873,8 +1873,11 @@ void MainWindow::viewDocumentByWizKMURL(const QString &strKMURL)
     WIZDOCUMENTDATA document;
     if (m_dbMgr.db(strKbGUID).DocumentFromGUID(strGUID, document))
     {
+        //m_category->setCurrentItem();
+        m_documents->blockSignals(true);
+        m_documents->setCurrentItem(0);
+        m_documents->blockSignals(false);
         viewDocument(document, true);
-//        m_category->setCurrentItem();
     }
 }
 

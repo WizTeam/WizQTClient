@@ -716,42 +716,10 @@ void CWizDocumentWebView::viewDocumentByUrl(const QUrl& url)
         return;
     }
 
-    int indx = strUrl.indexOf('?');
-    if (indx == -1) {
-        return;
-    }
-    //
-    QString strOpenType = strUrl.mid(6, indx - 6).toLower();
-
-    QString strFragment = strUrl.mid(indx + 1);
-    QMap<QString, QString> mapArgs;
-    if (!WizStringList2Map(strFragment.split('&'), mapArgs)) {
-        return;
-    }
-
-    QString strGUID, strKbGUID;
-    if (strOpenType == "open_document") {
-        QMap<QString, QString>::const_iterator it = mapArgs.find("guid");
-        if (it != mapArgs.end()) {
-            strGUID = it.value();
-        }
-
-        QMap<QString, QString>::const_iterator it2 = mapArgs.find("kbguid");
-        if (it2 != mapArgs.end()) {
-            strKbGUID = it2.value();
-        }
-
-        if (strGUID.isEmpty()) {
-            return;
-        }
-
-        WIZDOCUMENTDATA doc;
-        if (!m_dbMgr.db(strKbGUID).DocumentFromGUID(strGUID, doc)) {
-            qDebug() << "Can't find user document, it maybe deleted!";
-            return;
-        }
-
-        ICore::instance()->emitViewNoteRequested(view(), doc);
+    CWizDatabase& db = m_dbMgr.db();
+    if (db.IsWizKMURLOpenDocument(strUrl)) {
+        MainWindow* mainWindow = qobject_cast<MainWindow *>(m_app.mainWindow());
+        mainWindow->viewDocumentByWizKMURL(strUrl);
     }
 }
 
