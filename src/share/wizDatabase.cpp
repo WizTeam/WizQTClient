@@ -2422,7 +2422,7 @@ bool CWizDatabase::UpdateDocumentData(WIZDOCUMENTDATA& data,
     m_mtxTempFile.unlock();
 
     //
-    ClearUnusedImages(strHtml, strResourcePath);
+    //ClearUnusedImages(strHtml, strResourcePath);
 
     CWizDocument doc(*this, data);
     CString strMetaText = doc.GetMetaText();

@@ -1,6 +1,8 @@
 #include "wizhtmlcollector.h"
 #include "../share/wizhtml2zip.h"
-
+#include "../share/wizObjectDataDownloader.h"
+#include <QEventLoop>
+#include <QFile>
 #include <QDebug>
 
 bool CWizHtmlFileMap::Lookup(const QString& strUrl, QString& strFileName)
@@ -56,7 +58,9 @@ void CWizHtmlCollector::StartTag(CWizHtmlTag *pTag, DWORD dwAppData, bool &bAbor
     }
     else if (strName == "img")
     {
-        ProcessTagValue(pTag, "src", WIZHTMLFILEDATA::typeResource);
+        //ProcessTagValue(pTag, "src", WIZHTMLFILEDATA::typeResource);
+        ProcessImgTagValue(pTag, "src", WIZHTMLFILEDATA::typeResource);
+        qDebug() << "image tag after processed : " << pTag->getTag();
     }
     else if (strName == "link")
     {
@@ -175,6 +179,42 @@ void CWizHtmlCollector::ProcessTagValue(CWizHtmlTag *pTag,
     }
 
     pTag->setValueToName(strAttributeName, ToResourceFileName(strFileName));
+}
+
+void CWizHtmlCollector::ProcessImgTagValue(CWizHtmlTag* pTag, const QString& strAttributeName, WIZHTMLFILEDATA::HtmlFileType eType)
+{
+    QString strValue = pTag->getValueFromName(strAttributeName);
+    if (strValue.isEmpty())
+        return;
+
+    QUrl url(strValue);
+    if (!url.isLocalFile() && strValue.left(7) == "http://")
+    {
+        //
+        QString strFileName = ::WizGenGUIDLowerCaseLetterOnly()
+                + strValue.right(strValue.length() - strValue.lastIndexOf('.'));
+        CWizFileDownloader* downloader = new CWizFileDownloader(strValue, strFileName, m_strTempPath);
+        QEventLoop loop;
+        loop.connect(downloader, SIGNAL(downloadDone(QString,bool)), &loop, SLOT(quit()));
+        downloader->startDownload();
+        loop.exec();
+        //
+        //qDebug() << "image style : " << pTag->getValueFromName("style");
+        QString strFile = m_strTempPath + strFileName;
+        if (QFile::exists(strFile))
+        {
+            pTag->setValueToName(strAttributeName, strFile);
+            QString strAfterValue = pTag->getValueFromName(strAttributeName);
+            //qDebug() << "after collect src : " << strAfterValue;
+            QString strAbsFile = "file://" + strFile;
+            m_files.Add(strAbsFile, strFile, eType, false);
+            pTag->setValueToName(strAttributeName, ToResourceFileName(strFile));
+            return;
+        }
+    }
+
+    ProcessTagValue(pTag, strAttributeName, eType);
+
 }
 
 QString CWizHtmlCollector::ToResourceFileName(const QString& strFileName)
