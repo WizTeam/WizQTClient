@@ -32,7 +32,7 @@ CWizLoginDialog::CWizLoginDialog(const QString &strDefaultUserId, const QString 
 #ifdef Q_OS_MAC
     : QDialog(parent)
 #else
-    : CWizShadowWindow(parent)
+    : CWizShadowWindow<QDialog>(parent)
 #endif
     , ui(new Ui::wizLoginWidget)
     , m_menu(new QMenu(this))
