@@ -398,7 +398,10 @@ public:
     bool DocumentToTempHtmlFile(const WIZDOCUMENTDATA& document, \
                                 QString& strTempHtmlFileName, \
                                 const QString& strTargetFileNameWithoutPath = "index.html");
+    bool DocumentToHtmlFile(const WIZDOCUMENTDATA& document, \
+                                const QString& strPath, const QString& strHtmlFileName = "index.html");
     bool extractZiwFileToTempFolder(const WIZDOCUMENTDATA& document, QString& strTempFolder);
+    bool extractZiwFileToFolder(const WIZDOCUMENTDATA& document, const QString& strFolder);
     bool encryptTempFolderToZiwFile(WIZDOCUMENTDATA& document, const QString& strTempFoler, \
                                     const QString& strIndexFile, const QStringList& strResourceList);
 

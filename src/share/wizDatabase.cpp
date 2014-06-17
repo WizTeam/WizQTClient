@@ -2421,9 +2421,6 @@ bool CWizDatabase::UpdateDocumentData(WIZDOCUMENTDATA& data,
     }
     m_mtxTempFile.unlock();
 
-    //
-    //ClearUnusedImages(strHtml, strResourcePath);
-
     CWizDocument doc(*this, data);
     CString strMetaText = doc.GetMetaText();
 
@@ -2903,12 +2900,15 @@ bool CWizDatabase::UpdateDocumentAbstract(const QString& strDocumentGUID)
         return false;
     }
 
-    CString strHtmlFileName;
-    if (!DocumentToTempHtmlFile(data, strHtmlFileName, "uindex.html")) {
+    QString strTempFolder = Utils::PathResolve::tempPath() + data.strGUID + "-update/";
+    // delete folder to clear unused images.
+    ::WizDeleteAllFilesInFolder(strTempFolder);
+    if (!DocumentToHtmlFile(data, strTempFolder, "uindex.html")) {
         qDebug() << "[updateDocumentAbstract]decompress to temp failed, guid: "
                  << strDocumentGUID;
         return false;
     }
+    CString strHtmlFileName = strTempFolder + "uindex.html";
 
     CString strHtmlTempPath = WizExtractFilePath(strHtmlFileName);
 
@@ -3109,21 +3109,37 @@ QString CWizDatabase::GetParamFromWizKMURL(const QString& strURL, const QString&
 
 bool CWizDatabase::DocumentToTempHtmlFile(const WIZDOCUMENTDATA& document,
                                           QString& strTempHtmlFileName, const QString& strTargetFileNameWithoutPath)
-{    
-    QString strTempPath;
-    if (!extractZiwFileToTempFolder(document, strTempPath))
+{
+    QString strTempFolder = Utils::PathResolve::tempPath() + document.strGUID + "/";
+    ::WizEnsurePathExists(strTempFolder);
+
+    if (!DocumentToHtmlFile(document, strTempFolder, strTargetFileNameWithoutPath))
         return false;
 
-    strTempHtmlFileName = strTempPath + "index.html";
+    strTempHtmlFileName = strTempFolder + strTargetFileNameWithoutPath;
+
+    return PathFileExists(strTempHtmlFileName);
+}
+
+bool CWizDatabase::DocumentToHtmlFile(const WIZDOCUMENTDATA& document,
+                                          const QString& strPath,
+                                          const QString& strHtmlFileName)
+{
+    ::WizEnsurePathExists(strPath);
+
+    if (!extractZiwFileToFolder(document, strPath))
+        return false;
+
+    QString strTempHtmlFileName = strPath + "index.html";
 
     m_mtxTempFile.lock();
     QString strText;
     ::WizLoadUnicodeTextFromFile(strTempHtmlFileName, strText);
 
-    QUrl url = QUrl::fromLocalFile(strTempPath + "index_files/");
+    QUrl url = QUrl::fromLocalFile(strPath + "index_files/");
     strText.replace("index_files/", url.toString());
 
-    strTempHtmlFileName = strTempPath + strTargetFileNameWithoutPath;
+    strTempHtmlFileName = strPath + strHtmlFileName;
     WizSaveUnicodeTextToUtf8File(strTempHtmlFileName, strText);
     m_mtxTempFile.unlock();
 
@@ -3132,13 +3148,19 @@ bool CWizDatabase::DocumentToTempHtmlFile(const WIZDOCUMENTDATA& document,
 
 bool CWizDatabase::extractZiwFileToTempFolder(const WIZDOCUMENTDATA& document, QString& strTempFolder)
 {
+    strTempFolder = Utils::PathResolve::tempPath() + document.strGUID + "/";
+    ::WizEnsurePathExists(strTempFolder);
+
+    return extractZiwFileToFolder(document, strTempFolder);
+}
+
+bool CWizDatabase::extractZiwFileToFolder(const WIZDOCUMENTDATA& document,
+                                              const QString& strFolder)
+{
     CString strZipFileName = GetDocumentFileName(document.strGUID);
     if (!PathFileExists(strZipFileName)) {
         return false;
     }
-
-    strTempFolder = Utils::PathResolve::tempPath() + document.strGUID + "/";
-    ::WizEnsurePathExists(strTempFolder);
 
     if (document.nProtected) {
         if (userCipher().isEmpty()) {
@@ -3159,7 +3181,7 @@ bool CWizDatabase::extractZiwFileToTempFolder(const WIZDOCUMENTDATA& document, Q
         }
     }
 
-    return CWizUnzipFile::extractZip(strZipFileName, strTempFolder);
+    return CWizUnzipFile::extractZip(strZipFileName, strFolder);
 }
 
 bool CWizDatabase::encryptTempFolderToZiwFile(WIZDOCUMENTDATA &document, const QString &strTempFoler, \
