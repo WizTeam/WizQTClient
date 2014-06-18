@@ -60,7 +60,6 @@ void CWizHtmlCollector::StartTag(CWizHtmlTag *pTag, DWORD dwAppData, bool &bAbor
     {
         //ProcessTagValue(pTag, "src", WIZHTMLFILEDATA::typeResource);
         ProcessImgTagValue(pTag, "src", WIZHTMLFILEDATA::typeResource);
-        qDebug() << "image tag after processed : " << pTag->getTag();
     }
     else if (strName == "link")
     {
@@ -199,13 +198,10 @@ void CWizHtmlCollector::ProcessImgTagValue(CWizHtmlTag* pTag, const QString& str
         downloader->startDownload();
         loop.exec();
         //
-        //qDebug() << "image style : " << pTag->getValueFromName("style");
+
         QString strFile = m_strTempPath + strFileName;
         if (QFile::exists(strFile))
         {
-            pTag->setValueToName(strAttributeName, strFile);
-            QString strAfterValue = pTag->getValueFromName(strAttributeName);
-            //qDebug() << "after collect src : " << strAfterValue;
             QString strAbsFile = "file://" + strFile;
             m_files.Add(strAbsFile, strFile, eType, false);
             pTag->setValueToName(strAttributeName, ToResourceFileName(strFile));
@@ -214,7 +210,6 @@ void CWizHtmlCollector::ProcessImgTagValue(CWizHtmlTag* pTag, const QString& str
     }
 
     ProcessTagValue(pTag, strAttributeName, eType);
-
 }
 
 QString CWizHtmlCollector::ToResourceFileName(const QString& strFileName)
