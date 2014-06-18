@@ -226,9 +226,14 @@ int CWizDocumentListView::addDocument(const WIZDOCUMENTDATA& doc, bool sort)
 
 bool CWizDocumentListView::acceptDocument(const WIZDOCUMENTDATA& document)
 {
+    /*
     bool categoryAccpet = m_app.category().acceptDocument(document);
     bool kbGUIDSame = (m_app.category().selectedItemKbGUID() == document.strKbGUID);
-    return categoryAccpet && kbGUIDSame;
+
+    return categoryAccpet; && kbGUIDSame;*/
+
+    // there is no need to check if kbguid is same. especially when category item is  biz root.
+    return m_app.category().acceptDocument(document);
 }
 
 void CWizDocumentListView::addAndSelectDocument(const WIZDOCUMENTDATA& document)
