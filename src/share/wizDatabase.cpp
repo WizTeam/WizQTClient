@@ -3282,7 +3282,7 @@ void CWizDatabase::onAttachmentModified(const QString strKbGUID, const QString& 
         attach.tInfoModified = WizGetCurrentTime();
         attach.strInfoMD5 = CalDocumentAttachmentInfoMD5(attach);
 
-        ModifyAttachmentInfoEx(attach);
+        db.ModifyAttachmentInfoEx(attach);
     }
 }
 
