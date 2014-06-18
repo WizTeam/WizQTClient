@@ -677,9 +677,20 @@ void CWizDocumentWebView::onEditorSelectionChanged()
 
 void CWizDocumentWebView::onEditorLinkClicked(const QUrl& url)
 {
-    if (isInternalUrl(url)) {
+    if (isInternalUrl(url))
+    {
         viewDocumentByUrl(url);
         return;
+    }
+    else
+    {
+        QString strUrl = url.toString();
+        if (strUrl.left(12) == "http://file/")
+        {
+            strUrl.replace(0, 12, "file:/");
+            QDesktopServices::openUrl(strUrl);
+            return;
+        }
     }
 
     QDesktopServices::openUrl(url);
