@@ -417,8 +417,6 @@ public:
     //
     void CopyDocumentLink(const WIZDOCUMENTDATA& document);
     QString DocumentToWizKMURL(const WIZDOCUMENTDATA& document);
-    bool IsWizKMURL(const QString& strURL);
-    bool IsWizKMURLOpenDocument(const QString& strURL);
     QString GetParamFromWizKMURL(const QString& strURL, const QString& strParamName);
 
 public:

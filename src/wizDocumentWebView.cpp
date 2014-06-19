@@ -727,11 +727,8 @@ void CWizDocumentWebView::viewDocumentByUrl(const QUrl& url)
         return;
     }
 
-    CWizDatabase& db = m_dbMgr.db();
-    if (db.IsWizKMURLOpenDocument(strUrl)) {
-        MainWindow* mainWindow = qobject_cast<MainWindow *>(m_app.mainWindow());
-        mainWindow->viewDocumentByWizKMURL(strUrl);
-    }
+    MainWindow* mainWindow = qobject_cast<MainWindow *>(m_app.mainWindow());
+    mainWindow->viewDocumentByWizKMURL(strUrl);
 }
 
 void CWizDocumentWebView::splitHtmlToHeadAndBody(const QString& strHtml, QString& strHead, QString& strBody)
