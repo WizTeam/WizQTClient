@@ -402,7 +402,7 @@ void CWizLoginDialog::applyElementStyles(const QString &strLocal)
 
     m_menu->setFixedWidth(ui->wgt_usercontainer->width());
     m_menu->setStyleSheet("QMenu {background-color: #ffffff; border-style: solid; border-color: #43A6E8; border-width: 1px; color: #5F5F5F; menu-scrollable: 1;}"
-                          "QMenu::item {padding: 10px 0px 10px 40px; }"
+                          "QMenu::item {padding: 10px 0px 10px 40px; background-color: #ffffff;}"
                           "QMenu::item:selected {background-color: #E7F5FF; }"
                           "QMenu::item:default {background-color: #E7F5FF; }");
 }
