@@ -3,6 +3,7 @@
 #include "../share/wizObjectDataDownloader.h"
 #include <QEventLoop>
 #include <QFile>
+#include <QTimer>
 #include <QDebug>
 
 bool CWizHtmlFileMap::Lookup(const QString& strUrl, QString& strFileName)
@@ -187,21 +188,26 @@ void CWizHtmlCollector::ProcessImgTagValue(CWizHtmlTag* pTag, const QString& str
         return;
 
     QUrl url(strValue);
-    if (!url.isLocalFile() && strValue.left(7) == "http://")
+    QString strShme = url.scheme().toLower();
+    if (strShme == "http" || strShme == "https" || strShme == "ftp")
     {
         //
+        qDebug() << "[Save] Start to download image : " << strValue;
         QString strFileName = ::WizGenGUIDLowerCaseLetterOnly()
                 + strValue.right(strValue.length() - strValue.lastIndexOf('.'));
         CWizFileDownloader* downloader = new CWizFileDownloader(strValue, strFileName, m_strTempPath);
         QEventLoop loop;
         loop.connect(downloader, SIGNAL(downloadDone(QString,bool)), &loop, SLOT(quit()));
         downloader->startDownload();
+        //  just wait for 15 seconds
+        QTimer::singleShot(15 * 1000, &loop, SLOT(quit()));
         loop.exec();
         //
 
         QString strFile = m_strTempPath + strFileName;
         if (QFile::exists(strFile))
         {
+            qDebug() <<"[Save] change to local image : " << strFile;
             QString strAbsFile = "file://" + strFile;
             m_files.Add(strAbsFile, strFile, eType, false);
             pTag->setValueToName(strAttributeName, ToResourceFileName(strFile));

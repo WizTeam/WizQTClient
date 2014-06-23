@@ -1,18 +1,14 @@
-﻿;(function() {
-    var WizMD_pluginPath = "${CACHE_PATH}";
-    var WizMD_inited = -1;
+﻿;(function() {     var WizMD_pluginPath = "${CACHE_PATH}";     var
+WizMD_inited = -1;
+    
+    var isMarkdown;
+    var isMarkdownAndMathJax;
 
     function WizIsMarkdown(doc) {
         try {
             var title = doc.title;
 
-            if (-1 != title.indexOf(".md ")) {
-                return true;
-            }
-            if (title.lastIndexOf(".md") == -1) {
-                return false;
-            }
-            if (title.lastIndexOf(".md") == title.length - 3) {
+            if (-1 != title.indexOf(".md")) {
                 return true;
             }
             return false;
@@ -21,13 +17,19 @@
             return false;
         }
     }
+    function WizIsMarkdownAndMathJax(doc) {
+        var text = doc.body.innerText.replace(/\n/g,'\\n').replace(/\r\n?/g, "\n").replace(/```(.*\n)+?```/gm,'');
+        var SPLIT = /(\$\$?)[^$\n]+\1/;
+        return SPLIT.test(text);
+    }
 
     //---------------------------------------------------------------
     //eventsHtmlDocumentComplete.add(OnMarkdownHtmlDocumentComplete);
 
 
     function OnMarkdownHtmlDocumentComplete(doc) {
-        if (WizIsMarkdown(doc)) {
+        isMarkdown = WizIsMarkdown(doc);
+        if (isMarkdown) {
             WizInitMarkdown(doc);
             WizMD_inited = 1;
         }
@@ -80,15 +82,25 @@
     */
 
     function WizInitMarkdown(doc) {
-        WizMDAppendScriptInnerHtml(doc, 'HEAD', "text/x-mathjax-config", "MathJax.Hub.Config({showProcessingMessages: false,tex2jax: { inlineMath: [['$','$'],['\\\\(','\\\\)']] },TeX: { equationNumbers: {autoNumber: 'AMS'} }});");
-        var mathjaxScript = WizMDAppendScriptSrc(doc, 'HEAD', "text/javascript", "http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML", true);
-
-        WizMDAppendScriptSrc(doc, 'HEAD', "text/javascript", "marked.min.js");
-        WizMDAppendScriptSrc(doc, 'HEAD', "text/javascript", "highlight.pack.js");
-        WizMDAppendScriptSrc(doc, 'HEAD', "text/javascript", "jquery.min.js");
-        WizMDAppendCssSrc(doc, "GitHub2.css");
-        mathjaxScript.onload = function() {
-            WizMDAppendScriptSrc(doc, 'HEAD', "text/javascript", "wiznote-markdown-inject.js");
+        WizMDAppendScriptInnerHtml(doc, 'HEAD', "text/javascript", "MathJax=null");
+        WizMDAppendScriptSrc(doc, 'HEAD', "text/javascript", "markdown\\marked.min.js");
+        WizMDAppendScriptSrc(doc, 'HEAD', "text/javascript", "google-code-prettify\\prettify.js");
+        var jqueryScript = WizMDAppendScriptSrc(doc, 'HEAD', "text/javascript", "markdown\\jquery.min.js");
+        WizMDAppendCssSrc(doc, "markdown\\GitHub2.css");
+        jqueryScript.onload = function() {
+            var isMathJax = WizIsMarkdownAndMathJax(doc);
+            if (isMathJax) {
+                //WizMDAppendScriptInnerHtml(doc, 'HEAD', "text/x-mathjax-config", "MathJax.Hub.Config({showProcessingMessages: false,tex2jax: { inlineMath: [['$','$'],['\\\\(','\\\\)']] },TeX: { equationNumbers: {autoNumber: 'AMS'} }});");
+                WizMDAppendScriptInnerHtml(doc, 'HEAD', "text/x-mathjax-config", "MathJax.Hub.Config({showProcessingMessages: false, tex2jax: { inlineMath: [['$','$'],['\\\\(','\\\\)']] },TeX: { equationNumbers: {autoNumber: 'AMS'} }});");
+                
+                
+                var MathJaxScript = WizMDAppendScriptSrc(doc, 'HEAD', "text/javascript", "http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_SVG", true);
+                MathJaxScript.onload = function() {
+                    WizMDAppendScriptSrc(doc, 'HEAD', "text/javascript", "wiznote-markdown-inject.js");
+                };
+            } else {
+                WizMDAppendScriptSrc(doc, 'HEAD', "text/javascript", "wiznote-markdown-inject.js");
+            }
         };
     }
     WizInitMarkdown(document);

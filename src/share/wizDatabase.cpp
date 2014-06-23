@@ -3074,20 +3074,6 @@ QString CWizDatabase::DocumentToWizKMURL(const WIZDOCUMENTDATA& document)
     return QString();
 }
 
-bool CWizDatabase::IsWizKMURL(const QString& strURL)
-{
-    return strURL.left(6) == "wiz://";
-}
-
-bool CWizDatabase::IsWizKMURLOpenDocument(const QString& strURL)
-{
-    if (IsWizKMURL(strURL))
-    {
-        return strURL.contains("open_document");
-    }
-    return false;
-}
-
 QString CWizDatabase::GetParamFromWizKMURL(const QString& strURL, const QString& strParamName)
 {
     int nindex = strURL.indexOf('?');
@@ -3282,7 +3268,7 @@ void CWizDatabase::onAttachmentModified(const QString strKbGUID, const QString& 
         attach.tInfoModified = WizGetCurrentTime();
         attach.strInfoMD5 = CalDocumentAttachmentInfoMD5(attach);
 
-        ModifyAttachmentInfoEx(attach);
+        db.ModifyAttachmentInfoEx(attach);
     }
 }
 

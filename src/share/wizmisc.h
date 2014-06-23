@@ -159,6 +159,9 @@ void showWebDialogWithToken(const QString& windowTitle, const QString& url, QWid
 
 bool WizIsOffline();
 
+bool WizIsKMURL(const QString& strURL);
+bool WizIsKMURLOpenDocument(const QString& strURL);
+
 class CWizBufferAlloc
 {
 public:

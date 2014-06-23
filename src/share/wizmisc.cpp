@@ -2123,3 +2123,19 @@ QString WizGetDefaultTranslatedLocal()
 {
     return "en_US";
 }
+
+
+bool WizIsKMURL(const QString& strURL)
+{
+    return strURL.left(6) == "wiz://";
+}
+
+
+bool WizIsKMURLOpenDocument(const QString& strURL)
+{
+    if (WizIsKMURL(strURL))
+    {
+        return strURL.contains("open_document");
+    }
+    return false;
+}

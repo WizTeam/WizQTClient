@@ -186,25 +186,33 @@ bool MainWindow::eventFilter(QObject* watched, QEvent* event)
     // Qt issue: issue? User quit for mac dock send close event to qApp?
     // I was throught close event only send to widget.
     if (watched == qApp) {
-        if (event->type() == QEvent::Close) {
+        if (event->type() == QEvent::Close)
+        {
             qApp->quit();
             return true;
-        } else {
+
+        }
+        else if (event->type() == QEvent::FileOpen)
+        {
+            if (QFileOpenEvent* fileEvent = dynamic_cast<QFileOpenEvent*>(event))
+            {
+                if (!fileEvent->url().isEmpty())
+                {
+                    QString strUrl = fileEvent->url().toString();
+                    if (WizIsKMURL(strUrl))
+                    {
+                        viewDocumentByWizKMURL(strUrl);
+                        return true;
+                    }
+                }
+            }
+        }
+        else
+        {
             return false;
         }
     }
-    else if (event->type() == QEvent::FileOpen)
-    {
-        if (QFileOpenEvent* fileEvent = dynamic_cast<QFileOpenEvent*>(event))
-        {
-            if (!fileEvent->url().isEmpty())
-            {
-                //m_lastUrl = fileEvent->url().toString();
-                //emit urlOpened(m_lastUrl);
-                return true;
-            }
-        }
-    }
+
     //
     return _baseClass::eventFilter(watched, event);
 }
@@ -1431,7 +1439,7 @@ void MainWindow::on_search_doSearch(const QString& keywords)
     }
 
     //
-    if (m_dbMgr.db().IsWizKMURLOpenDocument(keywords)) {
+    if (WizIsKMURL(keywords)) {
         viewDocumentByWizKMURL(keywords);
         return;
     }
@@ -1867,6 +1875,9 @@ void MainWindow::setActionsEnableForNewNote()
 void MainWindow::viewDocumentByWizKMURL(const QString &strKMURL)
 {
     CWizDatabase& db = m_dbMgr.db();
+    if (!WizIsKMURLOpenDocument(strKMURL))
+        return;
+
     QString strKbGUID = db.GetParamFromWizKMURL(strKMURL, "kbguid");
     QString strGUID = db.GetParamFromWizKMURL(strKMURL, "guid");
 
