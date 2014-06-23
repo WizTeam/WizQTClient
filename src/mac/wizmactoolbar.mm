@@ -124,6 +124,11 @@ void CWizMacToolBar::showInWindow(QWidget *window)
     QTimer::singleShot(100, this, SLOT(showInTargetWindow()));
 }
 
+void CWizMacToolBar::setToolBarVisible(bool bVisible)
+{
+    [d->toolbar setVisible: bVisible];
+}
+
 // internal invokable, show the Toolbar in m_targetWindow
 void CWizMacToolBar::showInTargetWindow()
 {

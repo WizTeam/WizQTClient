@@ -70,7 +70,7 @@ void MarkdownPlugin::render(QWebFrame* frame)
 {
     Q_ASSERT(frame);
 
-    QFile f(":/res/markdown.js");
+    QFile f(":/res/WizNote-Markdown.js");
     if (!f.open(QIODevice::ReadOnly)) {
         qDebug() << "[Markdown]Failed to get render execute code";
         return;
@@ -118,10 +118,49 @@ bool MarkdownPlugin::copyRes2Cache()
     QDir cacheDir(strPath);
     cacheDir.mkpath(strPath);
 
+
     QStringList lsRes;
-    lsRes << ":/res/markdown.js" << ":/res/inject.js"
-          << ":/res/github2.css" << ":/res/jquery.min.js"
-          << ":/res/marked.min.js" << ":/res/highlight.pack.js";
+    lsRes << ":/res/WizNote-Markdown.js" << ":/res/wiznote-markdown-inject.js";
+
+    QString strMarkdownPath = strPath + "markdown/";
+    cacheDir.mkpath(strMarkdownPath);
+    QString strGoogleCodePath = strPath + "google-code-prettify/";
+    cacheDir.mkpath(strGoogleCodePath);
+
+    lsRes <<":/res/google-code-prettify/lang-yaml.js"
+            <<":/res/google-code-prettify/lang-xq.js"
+            <<":/res/google-code-prettify/lang-wiki.js"
+            <<":/res/google-code-prettify/lang-vhdl.js"
+            <<":/res/google-code-prettify/lang-vb.js"
+            <<":/res/google-code-prettify/lang-tex.js"
+            <<":/res/google-code-prettify/lang-tcl.js"
+            <<":/res/google-code-prettify/lang-sql.js"
+            <<":/res/google-code-prettify/lang-scala.js"
+            <<":/res/google-code-prettify/lang-rd.js"
+            <<":/res/google-code-prettify/lang-r.js"
+            <<":/res/google-code-prettify/lang-proto.js"
+            <<":/res/google-code-prettify/lang-pascal.js"
+            <<":/res/google-code-prettify/lang-n.js"
+            <<":/res/google-code-prettify/lang-mumps.js"
+            <<":/res/google-code-prettify/lang-ml.js"
+            <<":/res/google-code-prettify/lang-matlab.js"
+            <<":/res/google-code-prettify/lang-lua.js"
+            <<":/res/google-code-prettify/lang-llvm.js"
+            <<":/res/google-code-prettify/lang-lisp.js"
+            <<":/res/google-code-prettify/lang-hs.js"
+            <<":/res/google-code-prettify/lang-go.js"
+            <<":/res/google-code-prettify/lang-erlang.js"
+            <<":/res/google-code-prettify/lang-dart.js"
+            <<":/res/google-code-prettify/lang-css.js"
+            <<":/res/google-code-prettify/lang-clj.js"
+            <<":/res/google-code-prettify/lang-basic.js"
+            <<":/res/google-code-prettify/lang-apollo.js"
+            <<":/res/google-code-prettify/run_prettify.js"
+            <<":/res/google-code-prettify/prettify.js"
+            <<":/res/google-code-prettify/prettify.css"
+            <<":/res/markdown/github2.css"
+            <<":/res/markdown/marked.min.js"
+            <<":/res/markdown/jquery.min.js";
 
     for (int i = 0; i < lsRes.size(); i++) {
         QString strInter = lsRes.at(i);
@@ -142,6 +181,7 @@ bool MarkdownPlugin::copyRes2Cache()
         f.close();
         f2.close();
     }
+
 
     return true;
 }

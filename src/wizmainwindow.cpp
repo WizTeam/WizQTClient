@@ -12,6 +12,7 @@
 #include <QFileDialog>
 #include <QPushButton>
 #include <QHostInfo>
+#include <QSystemTrayIcon>
 
 #ifdef Q_OS_MAC
 #include <Carbon/Carbon.h>
@@ -111,6 +112,7 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     , m_bRestart(false)
     , m_bLogoutRestart(false)
     , m_bUpdatingSelection(false)
+    , m_tray(new QSystemTrayIcon(QApplication::windowIcon(), this))
 {
 #ifndef Q_OS_MAC
     clientLayout()->addWidget(m_toolBar);
@@ -175,6 +177,8 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     //
     m_sync->start(QThread::IdlePriority);
     //
+    initTrayIcon(m_tray);
+    m_tray->show();
 }
 
 bool MainWindow::eventFilter(QObject* watched, QEvent* event)
@@ -182,25 +186,33 @@ bool MainWindow::eventFilter(QObject* watched, QEvent* event)
     // Qt issue: issue? User quit for mac dock send close event to qApp?
     // I was throught close event only send to widget.
     if (watched == qApp) {
-        if (event->type() == QEvent::Close) {
+        if (event->type() == QEvent::Close)
+        {
             qApp->quit();
             return true;
-        } else {
+
+        }
+        else if (event->type() == QEvent::FileOpen)
+        {
+            if (QFileOpenEvent* fileEvent = dynamic_cast<QFileOpenEvent*>(event))
+            {
+                if (!fileEvent->url().isEmpty())
+                {
+                    QString strUrl = fileEvent->url().toString();
+                    if (WizIsKMURL(strUrl))
+                    {
+                        viewDocumentByWizKMURL(strUrl);
+                        return true;
+                    }
+                }
+            }
+        }
+        else
+        {
             return false;
         }
     }
-    else if (event->type() == QEvent::FileOpen)
-    {
-        if (QFileOpenEvent* fileEvent = dynamic_cast<QFileOpenEvent*>(event))
-        {
-            if (!fileEvent->url().isEmpty())
-            {
-                //m_lastUrl = fileEvent->url().toString();
-                //emit urlOpened(m_lastUrl);
-                return true;
-            }
-        }
-    }
+
     //
     return _baseClass::eventFilter(watched, event);
 }
@@ -229,39 +241,22 @@ void MainWindow::cleanOnQuit()
 
 void MainWindow::closeEvent(QCloseEvent* event)
 {
-    event->accept();
-    qApp->quit();
-
-
-    //hide mainwindow but not quit
-//    if (event->spontaneous())
-//    {
-//        QStringList args;
-//        args << "-e";
-//        args << "tell application \"System Events\"";
-//        args << "-e";
-//        args << "set visible of process \""+QFileInfo(QApplication::applicationFilePath()).baseName()+"\" to false";
-//        args << "-e";
-//        args << "end tell";
-//        QProcess::execute("osascript", args);
-//        event->ignore();
-//        return;
-//    }
-
-
-
-//#ifdef Q_OS_MAC
-//    // Qt issue: use hide() directly lead window can't be shown when click dock icon
-//    // call native API instead and ignore issue event.
-//    ProcessSerialNumber pn;
-//    GetFrontProcess(&pn);
-//    ShowHideProcess(&pn,false);
-//    event->ignore();
-//#else
-//    event->accept();
-//    qApp->quit();
-//#endif
-
+#ifdef Q_OS_MAC
+    if (event->spontaneous())
+    {
+        wizMacHideCurrentApplication();
+        event->ignore();
+        return;
+    }
+#else
+    if (!event->spontaneous())
+    {
+        //setVisible(false);
+        setWindowState(Qt::WindowMinimized);
+        event->ignore();
+        return;
+    }
+#endif
 }
 
 void MainWindow::on_actionExit_triggered()
@@ -280,7 +275,8 @@ void MainWindow::showEvent(QShowEvent* event)
 
     //
 #ifdef Q_OS_MAC
-    m_toolBar->showInWindow(this);
+    //m_toolBar->showInWindow(this);
+    m_toolBar->setToolBarVisible(true);
 #endif
 }
 
@@ -302,6 +298,63 @@ void MainWindow::on_checkUpgrade_finished(bool bUpgradeAvaliable)
 #endif
         QDesktopServices::openUrl(QUrl(url));
     }
+}
+
+void MainWindow::on_trayIcon_newDocument_clicked()
+{
+    setVisible(true);
+    QApplication::setActiveWindow(this);
+    raise();
+
+    on_actionNewNote_triggered();
+}
+
+void MainWindow::shiftVisableStatus()
+{
+#ifdef Q_OS_MAC
+    bool appVisible = wizMacIsCurrentApplicationVisible();
+    //
+    if (appVisible && QApplication::activeWindow() != this)
+    {
+        raise();
+        return;
+    }
+    //
+    if (appVisible)
+    {
+        wizMacHideCurrentApplication();
+    }
+    else
+    {
+        wizMacShowCurrentApplication();
+        raise();
+    }
+    //
+
+#else
+//    setVisible(!isVisible());
+//    if (isVisible())
+//    {
+//        raise();
+//    }
+    if (Qt::WindowMinimized & windowState())
+    {
+        setWindowState(Qt::WindowActive);
+        raise();
+        showNormal();
+    }
+    else if (!isActiveWindow())
+    {
+        setWindowState(Qt::WindowActive);
+        raise();
+        showNormal();
+    }
+    else
+    {
+        setWindowState(Qt::WindowMinimized);
+    }
+#endif
+
 }
 
 #ifdef WIZ_OBOSOLETE
@@ -1386,7 +1439,7 @@ void MainWindow::on_search_doSearch(const QString& keywords)
     }
 
     //
-    if (m_dbMgr.db().IsWizKMURLOpenDocument(keywords)) {
+    if (WizIsKMURL(keywords)) {
         viewDocumentByWizKMURL(keywords);
         return;
     }
@@ -1822,15 +1875,54 @@ void MainWindow::setActionsEnableForNewNote()
 void MainWindow::viewDocumentByWizKMURL(const QString &strKMURL)
 {
     CWizDatabase& db = m_dbMgr.db();
+    if (!WizIsKMURLOpenDocument(strKMURL))
+        return;
+
     QString strKbGUID = db.GetParamFromWizKMURL(strKMURL, "kbguid");
     QString strGUID = db.GetParamFromWizKMURL(strKMURL, "guid");
 
     WIZDOCUMENTDATA document;
     if (m_dbMgr.db(strKbGUID).DocumentFromGUID(strGUID, document))
     {
+        //m_category->setCurrentItem();
+        m_documents->blockSignals(true);
+        m_documents->setCurrentItem(0);
+        m_documents->blockSignals(false);
         viewDocument(document, true);
-//        m_category->setCurrentItem();
     }
+}
+
+void MainWindow::initTrayIcon(QSystemTrayIcon* trayIcon)
+{
+    Q_ASSERT(trayIcon);
+    QMenu* menu = new QMenu(this);
+    QAction* actionShow = menu->addAction(tr("Show/Hide MainWindow"));
+    connect(actionShow, SIGNAL(triggered()), SLOT(shiftVisableStatus()));
+
+    QAction* actionNewNote = menu->addAction(tr("New Note"));
+    connect(actionNewNote, SIGNAL(triggered()), SLOT(on_trayIcon_newDocument_clicked()));
+
+    //
+    menu->addSeparator();
+    QAction* actionLogout = menu->addAction(tr("Logout"));
+    connect(actionLogout, SIGNAL(triggered()), SLOT(on_actionLogout_triggered()));
+    QAction* actionExit = menu->addAction(tr("Exit"));
+    connect(actionExit, SIGNAL(triggered()), SLOT(on_actionExit_triggered()));
+
+    trayIcon->setContextMenu(menu);
+
+    //
+#ifdef Q_OS_MAC
+    QString normal = WizGetSkinResourceFileName(userSettings().skin(), "trayIcon");
+    QString selected = WizGetSkinResourceFileName(userSettings().skin(), "trayIcon_selected");
+    QIcon icon;
+    icon.addFile(normal, QSize(), QIcon::Normal, QIcon::Off);
+    icon.addFile(selected, QSize(), QIcon::Selected, QIcon::Off);
+    if (!icon.isNull())
+    {
+        trayIcon->setIcon(icon);
+    }
+#endif
 }
 
 void MainWindow::quickSyncKb(const QString& kbGuid)

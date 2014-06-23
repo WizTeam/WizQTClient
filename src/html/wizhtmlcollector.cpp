@@ -1,6 +1,9 @@
 #include "wizhtmlcollector.h"
 #include "../share/wizhtml2zip.h"
-
+#include "../share/wizObjectDataDownloader.h"
+#include <QEventLoop>
+#include <QFile>
+#include <QTimer>
 #include <QDebug>
 
 bool CWizHtmlFileMap::Lookup(const QString& strUrl, QString& strFileName)
@@ -56,7 +59,8 @@ void CWizHtmlCollector::StartTag(CWizHtmlTag *pTag, DWORD dwAppData, bool &bAbor
     }
     else if (strName == "img")
     {
-        ProcessTagValue(pTag, "src", WIZHTMLFILEDATA::typeResource);
+        //ProcessTagValue(pTag, "src", WIZHTMLFILEDATA::typeResource);
+        ProcessImgTagValue(pTag, "src", WIZHTMLFILEDATA::typeResource);
     }
     else if (strName == "link")
     {
@@ -177,6 +181,43 @@ void CWizHtmlCollector::ProcessTagValue(CWizHtmlTag *pTag,
     pTag->setValueToName(strAttributeName, ToResourceFileName(strFileName));
 }
 
+void CWizHtmlCollector::ProcessImgTagValue(CWizHtmlTag* pTag, const QString& strAttributeName, WIZHTMLFILEDATA::HtmlFileType eType)
+{
+    QString strValue = pTag->getValueFromName(strAttributeName);
+    if (strValue.isEmpty())
+        return;
+
+    QUrl url(strValue);
+    QString strShme = url.scheme().toLower();
+    if (strShme == "http" || strShme == "https" || strShme == "ftp")
+    {
+        //
+        qDebug() << "[Save] Start to download image : " << strValue;
+        QString strFileName = ::WizGenGUIDLowerCaseLetterOnly()
+                + strValue.right(strValue.length() - strValue.lastIndexOf('.'));
+        CWizFileDownloader* downloader = new CWizFileDownloader(strValue, strFileName, m_strTempPath);
+        QEventLoop loop;
+        loop.connect(downloader, SIGNAL(downloadDone(QString,bool)), &loop, SLOT(quit()));
+        downloader->startDownload();
+        //  just wait for 15 seconds
+        QTimer::singleShot(15 * 1000, &loop, SLOT(quit()));
+        loop.exec();
+        //
+
+        QString strFile = m_strTempPath + strFileName;
+        if (QFile::exists(strFile))
+        {
+            qDebug() <<"[Save] change to local image : " << strFile;
+            QString strAbsFile = "file://" + strFile;
+            m_files.Add(strAbsFile, strFile, eType, false);
+            pTag->setValueToName(strAttributeName, ToResourceFileName(strFile));
+            return;
+        }
+    }
+
+    ProcessTagValue(pTag, strAttributeName, eType);
+}
+
 QString CWizHtmlCollector::ToResourceFileName(const QString& strFileName)
 {
     if (m_bMainPage) {
@@ -233,17 +274,17 @@ bool CWizHtmlCollector::Html2Zip(const QString& strExtResourcePath, \
         files.insert(it->strFileName);
     }
 
-    CWizStdStringArray arrayExtResource;
-    if (!strExtResourcePath.isEmpty())
-    {
-        ::WizEnumFiles(strExtResourcePath, "*.*", arrayExtResource, 0);
-        for (CWizStdStringArray::const_iterator it = arrayExtResource.begin();
-            it != arrayExtResource.end();
-            it++)
-        {
-            files.insert(*it);
-        }
-    }
+//    CWizStdStringArray arrayExtResource;
+//    if (!strExtResourcePath.isEmpty())
+//    {
+//        ::WizEnumFiles(strExtResourcePath, "*.*", arrayExtResource, 0);
+//        for (CWizStdStringArray::const_iterator it = arrayExtResource.begin();
+//            it != arrayExtResource.end();
+//            it++)
+//        {
+//            files.insert(*it);
+//        }
+//    }
 
     CString strRet;
     ::WizStringArrayToText(m_ret, strRet, "");

@@ -22,6 +22,7 @@
 
 class QToolBar;
 class QLabel;
+class QSystemTrayIcon;
 
 class CWizProgressDialog;
 class CWizDocumentListView;
@@ -112,6 +113,8 @@ private:
 
     CWizObjectDataDownloaderHost* m_objectDownloaderHost;
     //CWizUserAvatarDownloaderHost* m_avatarDownloaderHost;
+    //
+    QSystemTrayIcon* m_tray;
 
 #ifdef Q_OS_MAC
     CWizMacToolBar* m_toolBar;
@@ -195,6 +198,9 @@ public:
     static void quickSyncKb(const QString& kbGuid);
 
     void checkWizUpdate();
+
+    //
+    void viewDocumentByWizKMURL(const QString& strKMURL);
 
 public Q_SLOTS:
     void on_actionExit_triggered();
@@ -307,6 +313,10 @@ public Q_SLOTS:
     void on_upgradeThread_finished();
 #endif
 
+    void on_trayIcon_newDocument_clicked();
+    //
+    void shiftVisableStatus();
+
 public:
     // WizExplorerApp pointer
     virtual QWidget* mainWindow() { return this; }
@@ -338,7 +348,8 @@ private:
     //FIXME：新建笔记时,为了将光标移到编辑器中,需要将Editor的模式设置为disable,此处需要将actions设置为可用
     void setActionsEnableForNewNote();
 
-    void viewDocumentByWizKMURL(const QString& strKMURL);
+    //
+    void initTrayIcon(QSystemTrayIcon* trayIcon);
 };
 
 } // namespace Internal

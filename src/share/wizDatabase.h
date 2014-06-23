@@ -279,7 +279,7 @@ public:
     QString GetDocumentsDataPath() const;
     QString GetAttachmentsDataPath() const;
     QString GetDocumentFileName(const QString& strGUID) const;
-    QString GetAttachmentFileName(const QString& strGUID) const;
+    QString GetAttachmentFileName(const QString& strGUID);
     QString GetAvatarPath() const;
     QString GetDefaultNoteLocation() const;
 
@@ -333,7 +333,7 @@ public:
 
     bool UpdateDocumentData(WIZDOCUMENTDATA& data, const QString& strHtml,
                             const QString& strURL, int nFlags, bool notifyDataModify = true);
-
+    void ClearUnusedImages(const QString& strHtml, const QString& strFilePath);
     bool UpdateDocumentAbstract(const QString& strDocumentGUID);
 
     virtual bool UpdateDocumentDataMD5(WIZDOCUMENTDATA& data, const CString& strZipFileName, bool notifyDataModify = true);
@@ -398,7 +398,10 @@ public:
     bool DocumentToTempHtmlFile(const WIZDOCUMENTDATA& document, \
                                 QString& strTempHtmlFileName, \
                                 const QString& strTargetFileNameWithoutPath = "index.html");
+    bool DocumentToHtmlFile(const WIZDOCUMENTDATA& document, \
+                                const QString& strPath, const QString& strHtmlFileName = "index.html");
     bool extractZiwFileToTempFolder(const WIZDOCUMENTDATA& document, QString& strTempFolder);
+    bool extractZiwFileToFolder(const WIZDOCUMENTDATA& document, const QString& strFolder);
     bool encryptTempFolderToZiwFile(WIZDOCUMENTDATA& document, const QString& strTempFoler, \
                                     const QString& strIndexFile, const QStringList& strResourceList);
 
@@ -414,8 +417,6 @@ public:
     //
     void CopyDocumentLink(const WIZDOCUMENTDATA& document);
     QString DocumentToWizKMURL(const WIZDOCUMENTDATA& document);
-    bool IsWizKMURL(const QString& strURL);
-    bool IsWizKMURLOpenDocument(const QString& strURL);
     QString GetParamFromWizKMURL(const QString& strURL, const QString& strParamName);
 
 public:
@@ -424,6 +425,10 @@ public:
 
     //using CWizIndexBase::DocumentFromGUID;
     //Q_INVOKABLE QObject* DocumentFromGUID(const QString& strGUID);
+
+public slots:
+    void onAttachmentModified(const QString strKbGUID, const QString& strGUID, const QString& strFileName,
+                              const QString& strMD5, const QDateTime& dtLastModified);
 
 Q_SIGNALS:
     void userInfoChanged();

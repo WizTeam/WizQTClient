@@ -18,6 +18,10 @@
 #include "share/wizwin32helper.h"
 #include "share/wizDatabaseManager.h"
 
+#ifdef Q_OS_MAC
+#include "mac/wizmachelper.h"
+#endif
+
 #include "utils/pathresolve.h"
 #include "utils/logger.h"
 #include "sync/token.h"
@@ -160,9 +164,7 @@ int mainCore(int argc, char *argv[])
 
 
 #ifdef Q_OS_MAC
-    // enable switch between qt widget and alien widget(cocoa)
-    // refer to: https://bugreports.qt-project.org/browse/QTBUG-11401
-    //a.setAttribute(Qt::AA_NativeWindows);
+    wizMacInitUncaughtExceptionHandler();
 #endif
 
 
@@ -303,6 +305,7 @@ int mainCore(int argc, char *argv[])
 
     int ret = a.exec();
     if (w.isLogout()) {
+        userSettings.setPassword("");
 #ifndef BUILD4APPSTORE
         QProcess::startDetached(argv[0], QStringList());
 #else

@@ -617,12 +617,15 @@ bool CWizIndex::ModifyDocumentInfo(WIZDOCUMENTDATA& data, bool bReset /* = true 
         TOLOG("Failed to modify document: title is empty!");
         return false;
 	}
+    //
 
     if (bReset) {
         data.tInfoModified = WizGetCurrentTime();
         data.strInfoMD5 = CalDocumentInfoMD5(data);
         data.tModified = WizGetCurrentTime();
         data.nVersion = -1;
+        //
+        qDebug() << "Reset document info & version, guid: " << data.strGUID << ", title: " << data.strTitle;
     }
 
 	return ModifyDocumentInfoEx(data);
@@ -2357,14 +2360,17 @@ qint64 CWizIndex::GetObjectLocalVersion(const QString& strGUID, const QString& s
 
 bool CWizIndex::ModifyObjectVersion(const CString& strGUID, const CString& strType, qint64 nVersion)
 {
-    qDebug() << "modifi object version, type: " << strType << " guid: " << strGUID;
+    if (-1 == nVersion)
+    {
+        qDebug() << "modify object version (-1), type: " << strType << " guid: " << strGUID;
+    }
 
 	CString strTableName;
 	CString strKeyFieldName;
 
     if (!GetObjectTableInfo(strType, strTableName, strKeyFieldName))
         return false;
-
+    //
     CString strSQL = WizFormatString4("update %1 set WIZ_VERSION=%2 where %3=%4",
 		strTableName,
 		WizInt64ToStr(nVersion),
@@ -3364,6 +3370,11 @@ bool CWizIndex::GetLocationDocumentCount(CString strLocation, bool bIncludeSubFo
 
 bool CWizIndex::SetDocumentVersion(const CString& strDocumentGUID, qint64 nVersion)
 {
+    if (nVersion == -1)
+    {
+        qDebug() << "modify document version (-1), guid: " << strDocumentGUID;
+    }
+    //
 	CString strSQL = WizFormatString2(_T("update WIZ_DOCUMENT set WIZ_VERSION=%1 where DOCUMENT_GUID=%2"),
 		WizInt64ToStr(nVersion),
         STR2SQL(strDocumentGUID));

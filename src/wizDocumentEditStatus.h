@@ -63,6 +63,9 @@ public:
     //
     void waitForDone();
 
+public slots:
+    void needRecheck();
+
 signals:
     void checkFinished(QString strGUID,QStringList editors);
 
@@ -78,6 +81,7 @@ private:
     bool m_stop;
     QMutex m_mutexWait;
     QWaitCondition m_wait;
+    bool m_needRecheck;
 };
 
 #endif // WIZDOCUMENTEDITSTATUS_H

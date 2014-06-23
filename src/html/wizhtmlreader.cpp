@@ -168,7 +168,7 @@ public:
                 if (radix == 16)
                     lpszBegin = ::wiz_strinc(lpszBegin);
 
-                unsigned long	ulNum = ::wiz_strtoul(lpszBegin, NULL, radix);
+                unsigned long	ulNum = ::wiz_strtoul(lpszBegin, ';', radix);
                 chSubst = (unsigned short)ulNum;
                 lpszEnd = ::wiz_strinc(lpszEnd);
                 return (lpszEnd - lpszEntity);

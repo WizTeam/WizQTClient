@@ -138,6 +138,7 @@ set(wiznote_SOURCES
     widgets/wizImageButton.cpp
     wizDocumentEditStatus.cpp
     wizLoginDialog.cpp
+    share/wizFileMonitor.cpp
 )
 
 set(wiznote_HEADERS
@@ -263,6 +264,7 @@ set(wiznote_HEADERS
     widgets/wizImageButton.h
     wizDocumentEditStatus.h
     wizLoginDialog.h
+    share/wizFileMonitor.h
 )
 
 set(wiznote_FORMS

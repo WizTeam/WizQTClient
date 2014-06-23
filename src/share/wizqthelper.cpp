@@ -387,3 +387,12 @@ int wiz_strnicmp(const unsigned short* first, const char* last, size_t count )
 
     return((int)(QChar(*first).toLower().unicode() - QChar(*last).toLower().unicode()));
 }
+
+
+long wiz_strtoul(const unsigned short* nptr, QChar endchar, int base)
+{
+    //
+    CString ctr(nptr);
+    ctr = ctr.left(ctr.indexOf(QChar(endchar)));
+    return ctr.toLong(NULL, base);
+}

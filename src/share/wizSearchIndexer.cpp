@@ -12,6 +12,7 @@
 #include "html/wizhtmlcollector.h"
 #include "wizDatabase.h"
 #include "utils/logger.h"
+#include "utils/pathresolve.h"
 
 
 CWizSearchIndexer::CWizSearchIndexer(CWizDatabaseManager& dbMgr, QObject *parent)
@@ -191,12 +192,13 @@ bool CWizSearchIndexer::_updateDocumentImpl(void *pHandle,
     CWizDatabase& db = m_dbMgr.db(doc.strKbGUID);
 
     // decompress
-    QString strDataFile;
-    if (!db.DocumentToTempHtmlFile(doc, strDataFile, "sindex.html")) {
+    QString strTempFolder = Utils::PathResolve::tempPath() + doc.strGUID + "-update/";
+    if (!db.DocumentToHtmlFile(doc, strTempFolder, "sindex.html")) {
         TOLOG("Can't decompress document while update FTS index: " + doc.strTitle);
         //Q_ASSERT(0);
         return false;
     }
+    QString strDataFile = strTempFolder + "sindex.html";
 
     // get plain text content
     QString strHtmlData;
