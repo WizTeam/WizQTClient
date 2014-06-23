@@ -1,10 +1,13 @@
 #include "wizSearchWidget.h"
 
-#ifdef Q_OS_MAC
-#include "mac/wizSearchWidget_mm.h"
-#else
+//#ifdef Q_OS_MAC
+//#include "mac/wizSearchWidget_mm.h"
+//#else
 #include "share/wizsettings.h"
 #include "wizdef.h"
+#include "utils/stylehelper.h"
+
+#include <QGraphicsDropShadowEffect>
 
 CWizSearchWidget::CWizSearchWidget(QWidget* parent /* = 0 */)
     : QWidget(parent)
@@ -14,14 +17,16 @@ CWizSearchWidget::CWizSearchWidget(QWidget* parent /* = 0 */)
     setSizePolicy(sizePolicy);
     setContentsMargins(1, 1, 1, 1);
 
-    //QIcon icon = ::WizLoadSkinIcon(app.userSettings().skin(), palette().window().color(), "search");
-    QLabel* iconLabel = new QLabel(this);
-    //iconLabel->setPixmap(icon.pixmap(16, 16));
-    iconLabel->setStyleSheet("QLabel{border-width:0;border-style:outset}");
+    //QIcon icon = ::Utils::StyleHelper::loadIcon("mactoolbarsearch");
+//    QLabel* iconLabel = new QLabel(this);
+//    iconLabel->setPixmap(icon.pixmap(16, 16));
+//    iconLabel->setStyleSheet("QLabel{border-width:0;border-style:outset}");
 
     m_editSearch = new QLineEdit(this);
-    m_editSearch->setTextMargins(5, 0, 0, 0);
-    m_editSearch->setStyleSheet("QLineEdit{border:1px solid #aeaeae; border-radius:10px;}");
+    m_editSearch->setTextMargins(15, 2, 0, 2);
+
+    //QString strSearchIcon = WizGetSkinResourceFileName(Utils::StyleHelper::themeName(), "mactoolbarsearch");
+    m_editSearch->setStyleSheet("QLineEdit{border:1px solid #6699cb; border-radius:10px;}");
 
     // avoid focus rect on OSX, this should be a bug of qt style sheet
     m_editSearch->setAttribute(Qt::WA_MacShowFocusRect, 0);
@@ -33,6 +38,12 @@ CWizSearchWidget::CWizSearchWidget(QWidget* parent /* = 0 */)
     //layout->addWidget(iconLabel);
     layout->addWidget(m_editSearch);
     layout->setStretch(1, 1);
+
+    QGraphicsDropShadowEffect* effect = new QGraphicsDropShadowEffect(this);
+    effect->setColor(QColor("#6699cb"));
+    effect->setBlurRadius(5);
+    effect->setOffset(0, 0);
+    setGraphicsEffect(effect);
 
     connect(m_editSearch, SIGNAL(returnPressed()), \
             SLOT(on_search_returnPressed()));
@@ -64,5 +75,5 @@ void CWizSearchWidget::on_search_returnPressed()
     Q_EMIT doSearch(m_editSearch->text());
 }
 
-#endif // Q_OS_MAC
+//#endif // Q_OS_MAC
 

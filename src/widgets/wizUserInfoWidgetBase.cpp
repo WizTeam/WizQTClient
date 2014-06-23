@@ -1,6 +1,6 @@
 #include "wizUserInfoWidgetBase.h"
 
-#ifndef Q_OS_MAC
+//#ifndef Q_OS_MAC
 
 #include <QMenu>
 #include <QFileDialog>
@@ -105,5 +105,5 @@ void CWizUserInfoWidgetBase::updateUI()
     update();
 }
 
-#endif //Q_OS_MAC
+//#endif //Q_OS_MAC
 

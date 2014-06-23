@@ -3,6 +3,8 @@
 #include <QWidget>
 #include <QApplication>
 
+#ifdef USECOCOA
+
 #import <Cocoa/Cocoa.h>
 
 #include "wizmachelper_mm.h"
@@ -185,3 +187,5 @@ void CWizSearchWidget::on_search_textChanged(const QString& strText)
 {
     emit doSearch(strText);
 }
+
+#endif

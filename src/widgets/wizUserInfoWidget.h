@@ -2,13 +2,13 @@
 #define WIZUSERINFOWIDGET_H
 
 
-#ifdef Q_OS_MAC
-#include "mac/wizUserInfoWidgetBaseMac_mm.h"
-#define WIZUSERINFOWIDGETBASE CWizUserInfoWidgetBaseMac
-#else
+//#ifdef Q_OS_MAC
+//#include "mac/wizUserInfoWidgetBaseMac_mm.h"
+//#define WIZUSERINFOWIDGETBASE CWizUserInfoWidgetBaseMac
+//#else
 #include "widgets/wizUserInfoWidgetBase.h"
 #define WIZUSERINFOWIDGETBASE CWizUserInfoWidgetBase
-#endif
+//#endif
 
 class CWizExplorerApp;
 class CWizDatabase;

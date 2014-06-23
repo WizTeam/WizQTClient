@@ -117,7 +117,8 @@ private:
     QSystemTrayIcon* m_tray;
 
 #ifdef Q_OS_MAC
-    CWizMacToolBar* m_toolBar;
+    //CWizMacToolBar* m_toolBar;
+    QToolBar* m_toolBar;
     QMenuBar* m_menuBar;
 #else
     QToolBar* m_toolBar;
@@ -153,7 +154,7 @@ private:
 
     CWizSearchIndexer* m_searchIndexer;
     QPointer<CWizSearchWidget> m_search;
-    CWizFixedSpacer* m_spacerBeforeSearch;
+    CWizSpacer* m_spacerBeforeSearch;
 
     bool m_bRestart;
     bool m_bLogoutRestart;
