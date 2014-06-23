@@ -15583,6 +15583,9 @@ UE.plugins['keystrokes'] = function() {
         var keyCode = evt.keyCode || evt.which,
             rng = me.selection.getRange();
 
+        if (editor.body.contentEditable == 'false')
+        return;    
+
         //处理全选的情况
         if(!rng.collapsed && !(evt.ctrlKey || evt.shiftKey || evt.altKey || evt.metaKey) && (keyCode >= 65 && keyCode <=90
             || keyCode >= 48 && keyCode <= 57 ||

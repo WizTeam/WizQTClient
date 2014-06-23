@@ -496,7 +496,11 @@ void Core::CWizDocumentView::on_checkEditStatus_finished(QString strGUID, QStrin
     if (strGUID == m_note.strGUID && !editors.isEmpty())
     {
         QString strEditor = editors.join(" , ");
-        m_title->showDocumentEditingStatus(strEditor);
+        m_title->setDocumentEditingStatus(strEditor);
+    }
+    else
+    {
+        m_title->setDocumentEditingStatus("");
     }
 }
 

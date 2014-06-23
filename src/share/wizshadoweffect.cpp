@@ -23,7 +23,7 @@ void CWizShadowEffect::draw(QPainter *painter)
         mode = NoPad;
 
     // Draw pixmap in device coordinates to avoid pixmap scaling.
-    QPoint offset;
+    QPoint offset(0, 0);
     const QPixmap pixmap = sourcePixmap(Qt::DeviceCoordinates, &offset, mode);
     if (pixmap.isNull())
         return;
@@ -46,4 +46,19 @@ QRectF CWizShadowEffect::boundingRectFor(const QRectF &rect) const
     QRectF rc = rect;
     rc.adjust(-m_shadowSize, -m_shadowSize, m_shadowSize + 1, m_shadowSize + 1);
     return rc;
+}
+
+
+CWizShadowWidget::CWizShadowWidget(QWidget* parent)
+    : QWidget(parent)
+    , m_shadow(new CWizSkin9GridImage())
+{
+    QString strShadow = ::WizGetSkinResourceFileName(Utils::StyleHelper::themeName(), "shadow");
+    m_shadow->SetImage(strShadow, QPoint(12, 12));
+}
+
+void CWizShadowWidget::paintEvent(QPaintEvent *)
+{
+    QPainter painter(this);
+    m_shadow->DrawBorder(&painter, rect());
 }

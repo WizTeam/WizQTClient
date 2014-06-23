@@ -58,6 +58,8 @@ private:
 
     void ProcessTagValue(CWizHtmlTag *pTag, const QString& strAttributeName,
                          WIZHTMLFILEDATA::HtmlFileType eType);
+    void ProcessImgTagValue(CWizHtmlTag *pTag, const QString& strAttributeName,
+                         WIZHTMLFILEDATA::HtmlFileType eType);
     QString ToResourceFileName(const QString &strFileName);
 };
 

@@ -62,9 +62,16 @@ void NotifyBar::showPermissionNotify(int type)
 
 void NotifyBar::showEditingNotify(const QString &editor)
 {
-    setStyleForEditing();
-    m_labelNotify->setText(QString(tr("This note is editing by %1 .")).arg(editor));
-    show();
+    if (!editor.isEmpty())
+    {
+        setStyleForEditing();
+        m_labelNotify->setText(QString(tr("This note is editing by %1 .")).arg(editor));
+        show();
+    }
+    else
+    {
+        hide();
+    }
 }
 
 void NotifyBar::on_closeButton_Clicked()

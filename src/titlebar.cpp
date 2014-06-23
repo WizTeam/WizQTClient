@@ -394,7 +394,7 @@ void TitleBar::onGetCommentsCountFinished(int nCount)
 }
 
 
-void Core::Internal::TitleBar::showDocumentEditingStatus(const QString& strEditor)
+void Core::Internal::TitleBar::setDocumentEditingStatus(const QString& strEditor)
 {
     m_notifyBar->showEditingNotify(strEditor);
 }

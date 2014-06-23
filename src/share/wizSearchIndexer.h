@@ -47,7 +47,6 @@ private:
 private:
     CWizDatabaseManager& m_dbMgr;
     QString m_strIndexPath; // working path
-    QTimer m_timerFTS;  // working interval
     bool m_stop;
     bool m_buldNow;
 

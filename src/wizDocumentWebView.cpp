@@ -294,7 +294,6 @@ void CWizDocumentWebView::keyPressEvent(QKeyEvent* event)
     }
 }
 
-
 void CWizDocumentWebView::focusInEvent(QFocusEvent *event)
 {
     if (m_bEditingMode) {
@@ -678,9 +677,20 @@ void CWizDocumentWebView::onEditorSelectionChanged()
 
 void CWizDocumentWebView::onEditorLinkClicked(const QUrl& url)
 {
-    if (isInternalUrl(url)) {
+    if (isInternalUrl(url))
+    {
         viewDocumentByUrl(url);
         return;
+    }
+    else
+    {
+        QString strUrl = url.toString();
+        if (strUrl.left(12) == "http://file/")
+        {
+            strUrl.replace(0, 12, "file:/");
+            QDesktopServices::openUrl(strUrl);
+            return;
+        }
     }
 
     QDesktopServices::openUrl(url);
@@ -717,43 +727,8 @@ void CWizDocumentWebView::viewDocumentByUrl(const QUrl& url)
         return;
     }
 
-    int indx = strUrl.indexOf('?');
-    if (indx == -1) {
-        return;
-    }
-    //
-    QString strOpenType = strUrl.mid(6, indx - 6).toLower();
-
-    QString strFragment = strUrl.mid(indx + 1);
-    QMap<QString, QString> mapArgs;
-    if (!WizStringList2Map(strFragment.split('&'), mapArgs)) {
-        return;
-    }
-
-    QString strGUID, strKbGUID;
-    if (strOpenType == "open_document") {
-        QMap<QString, QString>::const_iterator it = mapArgs.find("guid");
-        if (it != mapArgs.end()) {
-            strGUID = it.value();
-        }
-
-        QMap<QString, QString>::const_iterator it2 = mapArgs.find("kbguid");
-        if (it2 != mapArgs.end()) {
-            strKbGUID = it2.value();
-        }
-
-        if (strGUID.isEmpty()) {
-            return;
-        }
-
-        WIZDOCUMENTDATA doc;
-        if (!m_dbMgr.db(strKbGUID).DocumentFromGUID(strGUID, doc)) {
-            qDebug() << "Can't find user document, it maybe deleted!";
-            return;
-        }
-
-        ICore::instance()->emitViewNoteRequested(view(), doc);
-    }
+    MainWindow* mainWindow = qobject_cast<MainWindow *>(m_app.mainWindow());
+    mainWindow->viewDocumentByWizKMURL(strUrl);
 }
 
 void CWizDocumentWebView::splitHtmlToHeadAndBody(const QString& strHtml, QString& strHead, QString& strBody)
@@ -1642,6 +1617,7 @@ void CWizDocumentWebViewSaverThread::run()
 
         bool notify = false;    //don't notify
         bool ok = db.UpdateDocumentData(doc, data.html, data.htmlFile, data.flags, notify);
+
         //
         if (ok)
         {

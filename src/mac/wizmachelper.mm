@@ -227,3 +227,33 @@ void CWizChangeCocoaImplementation::changeBack(Class baseClass, SEL originalSel,
 #endif
     }
 }
+
+void wizMacHideCurrentApplication()
+{
+    NSRunningApplication *app = [NSRunningApplication currentApplication];
+    [app hide];
+}
+
+void wizMacShowCurrentApplication()
+{
+    NSRunningApplication *app = [NSRunningApplication currentApplication];
+    [app unhide];
+}
+
+bool wizMacIsCurrentApplicationVisible()
+{
+    NSRunningApplication *app = [NSRunningApplication currentApplication];
+    return YES != app.hidden;
+}
+
+void WizMacNSUncaughtExceptionHandler(NSException *exception)
+{
+    NSString* msg = [exception reason];
+    QString err = WizToQString(msg);
+    qDebug() << err;
+}
+
+void wizMacInitUncaughtExceptionHandler()
+{
+    NSSetUncaughtExceptionHandler(WizMacNSUncaughtExceptionHandler);
+}

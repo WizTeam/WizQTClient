@@ -2,6 +2,7 @@
 #define WIZSHADOWEFFECT_H
 
 #include <QGraphicsEffect>
+#include <QWidget>
 
 class CWizSkin9GridImage;
 
@@ -16,6 +17,17 @@ protected:
     virtual void draw(QPainter *painter);
 public:
     virtual QRectF boundingRectFor(const QRectF &rect) const;
+};
+
+
+class CWizShadowWidget : public QWidget
+{
+public:
+    CWizShadowWidget(QWidget* parent);
+private:
+    CWizSkin9GridImage* m_shadow;
+protected:
+    virtual void paintEvent(QPaintEvent *);
 };
 
 #endif // WIZSHADOWEFFECT_H

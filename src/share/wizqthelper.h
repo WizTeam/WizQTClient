@@ -31,7 +31,7 @@ typedef long long __int64;
 
 typedef unsigned char   BYTE;
 typedef unsigned short  WORD;
-typedef unsigned long   DWORD;
+typedef unsigned int   DWORD;
 typedef unsigned int    UINT;
 typedef long HRESULT;
 
@@ -159,6 +159,7 @@ int wiz_isxdigit(int c);
 int wiz_isxdigit(QChar c);
 size_t wiz_strlen(const unsigned short* str);
 long wiz_strtoul( const unsigned short *nptr, unsigned short **endptr, int base );
+long wiz_strtoul( const unsigned short *nptr, QChar endchar, int base );
 int wiz_atoi(const unsigned short *nptr);
 int wiz_isspace(int c);
 int wiz_isalnum(int c);

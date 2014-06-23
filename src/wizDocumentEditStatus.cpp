@@ -196,6 +196,7 @@ CWizDocumentEditStatusCheckThread::CWizDocumentEditStatusCheckThread(QObject* pa
     : QThread(parent)
     , m_stop(false)
     , m_mutexWait(QMutex::NonRecursive)
+    , m_needRecheck(false)
 {
 }
 
@@ -204,6 +205,11 @@ void CWizDocumentEditStatusCheckThread::waitForDone()
     stop();
     //
     WizWaitForThread(this);
+}
+
+void CWizDocumentEditStatusCheckThread::needRecheck()
+{
+    m_needRecheck = true;
 }
 
 void CWizDocumentEditStatusCheckThread::checkEditStatus(const QString& strKbGUID, const QString& strGUID)
@@ -238,7 +244,18 @@ void CWizDocumentEditStatusCheckThread::downloadData(const QString& strUrl)
             const rapidjson::Value& u = d[i];
             strList.append(encoder->toUnicode(u.GetString(), u.GetStringLength()));
         }
-        emit checkFinished(m_strGUID, strList);
+        //
+        {
+            QMutexLocker lock(&m_mutexWait);
+            if (strUrl.indexOf(m_strGUID) != -1)
+            {
+                emit checkFinished(m_strGUID, strList);
+            }
+            else
+            {
+                needRecheck();
+            }
+        }
         reply->deleteLater();
         return;
     }
@@ -256,12 +273,21 @@ void CWizDocumentEditStatusCheckThread::run()
         //////
         {
             QMutexLocker lock(&m_mutexWait);
-            m_wait.wait(&m_mutexWait);
+            if (!m_needRecheck)
+            {
+                m_wait.wait(&m_mutexWait);
+            }
+            else
+            {
+                m_needRecheck = false;
+            }
+            //
             if (m_stop)
                 return;
             kbGUID = m_strKbGUID;
             guid = m_strGUID;
         }
+
         //
         //
         QString strRequestUrl = WizFormatString4(_T("%1/get?obj_id=%2/%3&t=%4"),

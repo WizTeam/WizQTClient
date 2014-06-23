@@ -1944,9 +1944,23 @@ QString CWizDatabase::GetDocumentFileName(const QString& strGUID) const
     return GetDocumentsDataPath() + "{" + strGUID + "}";
 }
 
-QString CWizDatabase::GetAttachmentFileName(const QString& strGUID) const
+QString CWizDatabase::GetAttachmentFileName(const QString& strGUID)
 {
-    return GetAttachmentsDataPath() + "{" + strGUID + "}";
+    WIZDOCUMENTATTACHMENTDATA attach;
+    AttachmentFromGUID(strGUID, attach);
+    //
+    QString strOldFileName = GetAttachmentsDataPath() + "{" + strGUID + "}";
+    QString strNewFileName = strOldFileName + attach.strName;
+
+    // Compatible with the old version
+    if (QFile::exists(strOldFileName))
+    {
+        if (!QFile::rename(strOldFileName, strNewFileName))
+        {
+            TOLOG2("[Attach] rename file failed from %1 to %2 ", strOldFileName, strNewFileName);
+        }
+    }
+    return  strNewFileName;
 }
 
 QString CWizDatabase::GetAvatarPath() const
@@ -2433,6 +2447,23 @@ bool CWizDatabase::UpdateDocumentData(WIZDOCUMENTDATA& data,
     return UpdateDocumentDataMD5(data, strZipFileName, notifyDataModify);
 }
 
+void CWizDatabase::ClearUnusedImages(const QString& strHtml, const QString& strFilePath)
+{
+    CWizStdStringArray arrayImageFileName;
+    ::WizEnumFiles(strFilePath, "*.jpg;*.png;*.bmp;*.gif", arrayImageFileName, 0);
+    if (!arrayImageFileName.empty())
+    {
+        CWizStdStringArray::const_iterator it;
+        for (it = arrayImageFileName.begin(); it != arrayImageFileName.end(); it++)
+        {
+            if (!strHtml.contains(*it))
+            {
+                QFile::remove(*it);
+            }
+        }
+    }
+}
+
 bool CWizDatabase::UpdateDocumentDataMD5(WIZDOCUMENTDATA& data, const CString& strZipFileName, bool notifyDataModify /*= true*/)
 {
     bool bRet = CWizIndex::UpdateDocumentDataMD5(data, strZipFileName, notifyDataModify);
@@ -2869,12 +2900,15 @@ bool CWizDatabase::UpdateDocumentAbstract(const QString& strDocumentGUID)
         return false;
     }
 
-    CString strHtmlFileName;
-    if (!DocumentToTempHtmlFile(data, strHtmlFileName, "uindex.html")) {
+    QString strTempFolder = Utils::PathResolve::tempPath() + data.strGUID + "-update/";
+    // delete folder to clear unused images.
+    ::WizDeleteAllFilesInFolder(strTempFolder);
+    if (!DocumentToHtmlFile(data, strTempFolder, "uindex.html")) {
         qDebug() << "[updateDocumentAbstract]decompress to temp failed, guid: "
                  << strDocumentGUID;
         return false;
     }
+    CString strHtmlFileName = strTempFolder + "uindex.html";
 
     CString strHtmlTempPath = WizExtractFilePath(strHtmlFileName);
 
@@ -2926,7 +2960,6 @@ bool CWizDatabase::UpdateDocumentAbstract(const QString& strDocumentGUID)
             Q_EMIT updateError("Failed to load image file: " + strImageFileName);
         }
     }
-
 
     bool ret = UpdatePadAbstract(abstract);
     if (!ret) {
@@ -3041,20 +3074,6 @@ QString CWizDatabase::DocumentToWizKMURL(const WIZDOCUMENTDATA& document)
     return QString();
 }
 
-bool CWizDatabase::IsWizKMURL(const QString& strURL)
-{
-    return strURL.left(6) == "wiz://";
-}
-
-bool CWizDatabase::IsWizKMURLOpenDocument(const QString& strURL)
-{
-    if (IsWizKMURL(strURL))
-    {
-        return strURL.contains("open_document");
-    }
-    return false;
-}
-
 QString CWizDatabase::GetParamFromWizKMURL(const QString& strURL, const QString& strParamName)
 {
     int nindex = strURL.indexOf('?');
@@ -3076,21 +3095,37 @@ QString CWizDatabase::GetParamFromWizKMURL(const QString& strURL, const QString&
 
 bool CWizDatabase::DocumentToTempHtmlFile(const WIZDOCUMENTDATA& document,
                                           QString& strTempHtmlFileName, const QString& strTargetFileNameWithoutPath)
-{    
-    QString strTempPath;
-    if (!extractZiwFileToTempFolder(document, strTempPath))
+{
+    QString strTempFolder = Utils::PathResolve::tempPath() + document.strGUID + "/";
+    ::WizEnsurePathExists(strTempFolder);
+
+    if (!DocumentToHtmlFile(document, strTempFolder, strTargetFileNameWithoutPath))
         return false;
 
-    strTempHtmlFileName = strTempPath + "index.html";
+    strTempHtmlFileName = strTempFolder + strTargetFileNameWithoutPath;
+
+    return PathFileExists(strTempHtmlFileName);
+}
+
+bool CWizDatabase::DocumentToHtmlFile(const WIZDOCUMENTDATA& document,
+                                          const QString& strPath,
+                                          const QString& strHtmlFileName)
+{
+    ::WizEnsurePathExists(strPath);
+
+    if (!extractZiwFileToFolder(document, strPath))
+        return false;
+
+    QString strTempHtmlFileName = strPath + "index.html";
 
     m_mtxTempFile.lock();
     QString strText;
     ::WizLoadUnicodeTextFromFile(strTempHtmlFileName, strText);
 
-    QUrl url = QUrl::fromLocalFile(strTempPath + "index_files/");
+    QUrl url = QUrl::fromLocalFile(strPath + "index_files/");
     strText.replace("index_files/", url.toString());
 
-    strTempHtmlFileName = strTempPath + strTargetFileNameWithoutPath;
+    strTempHtmlFileName = strPath + strHtmlFileName;
     WizSaveUnicodeTextToUtf8File(strTempHtmlFileName, strText);
     m_mtxTempFile.unlock();
 
@@ -3099,13 +3134,19 @@ bool CWizDatabase::DocumentToTempHtmlFile(const WIZDOCUMENTDATA& document,
 
 bool CWizDatabase::extractZiwFileToTempFolder(const WIZDOCUMENTDATA& document, QString& strTempFolder)
 {
+    strTempFolder = Utils::PathResolve::tempPath() + document.strGUID + "/";
+    ::WizEnsurePathExists(strTempFolder);
+
+    return extractZiwFileToFolder(document, strTempFolder);
+}
+
+bool CWizDatabase::extractZiwFileToFolder(const WIZDOCUMENTDATA& document,
+                                              const QString& strFolder)
+{
     CString strZipFileName = GetDocumentFileName(document.strGUID);
     if (!PathFileExists(strZipFileName)) {
         return false;
     }
-
-    strTempFolder = Utils::PathResolve::tempPath() + document.strGUID + "/";
-    ::WizEnsurePathExists(strTempFolder);
 
     if (document.nProtected) {
         if (userCipher().isEmpty()) {
@@ -3126,7 +3167,7 @@ bool CWizDatabase::extractZiwFileToTempFolder(const WIZDOCUMENTDATA& document, Q
         }
     }
 
-    return CWizUnzipFile::extractZip(strZipFileName, strTempFolder);
+    return CWizUnzipFile::extractZip(strZipFileName, strFolder);
 }
 
 bool CWizDatabase::encryptTempFolderToZiwFile(WIZDOCUMENTDATA &document, const QString &strTempFoler, \
@@ -3206,6 +3247,29 @@ QObject* CWizDatabase::GetFolderByLocation(const QString& strLocation, bool crea
     Q_UNUSED(create);
 
     return new CWizFolder(*this, strLocation);
+}
+
+void CWizDatabase::onAttachmentModified(const QString strKbGUID, const QString& strGUID,
+                                        const QString& strFileName, const QString& strMD5, const QDateTime& dtLastModified)
+{
+    Q_UNUSED(strFileName);
+
+    CWizDatabase& db = CWizDatabaseManager::instance()->db(strKbGUID);
+    WIZDOCUMENTATTACHMENTDATA attach;
+    if (db.AttachmentFromGUID(strGUID, attach))
+    {
+        if (strMD5 != attach.strDataMD5)
+        {
+            attach.strDataMD5 = strMD5;
+            attach.nVersion = -1;
+            TOLOG("[Edit] attachment data modified");
+        }
+        attach.tDataModified = dtLastModified;
+        attach.tInfoModified = WizGetCurrentTime();
+        attach.strInfoMD5 = CalDocumentAttachmentInfoMD5(attach);
+
+        db.ModifyAttachmentInfoEx(attach);
+    }
 }
 
 bool CWizDatabase::tryAccessDocument(const WIZDOCUMENTDATA &doc)
