@@ -86,7 +86,7 @@ WizMD_inited = -1;
         WizMDAppendScriptSrc(doc, 'HEAD', "text/javascript", "markdown\\marked.min.js");
         WizMDAppendScriptSrc(doc, 'HEAD', "text/javascript", "google-code-prettify\\prettify.js");
         var jqueryScript = WizMDAppendScriptSrc(doc, 'HEAD', "text/javascript", "markdown\\jquery.min.js");
-        WizMDAppendCssSrc(doc, "markdown\\GitHub2.css");
+        WizMDAppendCssSrc(doc, "markdown\\github2.css");
         jqueryScript.onload = function() {
             var isMathJax = WizIsMarkdownAndMathJax(doc);
             if (isMathJax) {
