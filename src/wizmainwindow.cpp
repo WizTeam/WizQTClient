@@ -290,9 +290,9 @@ void MainWindow::on_checkUpgrade_finished(bool bUpgradeAvaliable)
     if (QDialog::Accepted == notifyDialog.exec()) {
         QString url = WizService::ApiEntry::standardCommandUrl("link");
 #if defined(Q_OS_MAC)
-        url += "&name=wiznote-mac";
+        url += "&name=wiznote-mac.html";
 #elif defined(Q_OS_LINUX)
-        url += "&name=wiznote-linux";
+        url += "&name=wiznote-linux.html";
 #else
         Q_ASSERT(0);
 #endif
