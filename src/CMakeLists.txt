@@ -430,6 +430,8 @@ if(APPLE)
                 ${WIZNOTE_CONTENTS_DIR}/PlugIns/codecs/libqjpcodecs.dylib
                 ${WIZNOTE_CONTENTS_DIR}/PlugIns/codecs/libqkrcodecs.dylib
                 ${WIZNOTE_CONTENTS_DIR}/PlugIns/codecs/libqtwcodecs.dylib
+                ${WIZNOTE_CONTENTS_DIR}/PlugIns/bearer/libqcorewlanbearer.dylib
+                ${WIZNOTE_CONTENTS_DIR}/PlugIns/bearer/libqgenericbearer.dylib
                 )
 
         elseif(NOT WIZNOTE_USE_QT5)
@@ -439,14 +441,12 @@ if(APPLE)
                 ${WIZNOTE_CONTENTS_DIR}/Frameworks/QtNetwork.framework/Versions/5/QtNetwork
                 ${WIZNOTE_CONTENTS_DIR}/Frameworks/QtWebKit.framework/Versions/5/QtWebKit
                 ${WIZNOTE_CONTENTS_DIR}/Frameworks/QtXml.framework/Versions/5/QtXml
-                ${WIZNOTE_CONTENTS_DIR}/Frameworks/QtXmlPatterns.framework/Versions/5/QtXmlPatterns
+                #${WIZNOTE_CONTENTS_DIR}/Frameworks/QtXmlPatterns.framework/Versions/5/QtXmlPatterns
                 )
         endif(NOT WIZNOTE_USE_QT5)
 
             set(WIZPLUGINS
                 ${WIZNOTE_CONTENTS_DIR}/PlugIns/accessible/libqtaccessiblewidgets.dylib
-                ${WIZNOTE_CONTENTS_DIR}/PlugIns/bearer/libqcorewlanbearer.dylib
-                ${WIZNOTE_CONTENTS_DIR}/PlugIns/bearer/libqgenericbearer.dylib
                 ${WIZNOTE_CONTENTS_DIR}/PlugIns/imageformats/libqgif.dylib
                 ${WIZNOTE_CONTENTS_DIR}/PlugIns/imageformats/libqico.dylib
                 ${WIZNOTE_CONTENTS_DIR}/PlugIns/imageformats/libqjpeg.dylib
@@ -471,12 +471,12 @@ if(APPLE)
         add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
             COMMAND codesign -f -s ${APPCERT}  ${WIZFRAMEWORK})
 
-        MESSAGE(STATUS "CODESIGNFOR PLUGINS")
-        add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-            COMMAND codesign -f -s ${APPCERT}  ${WIZPLUGINS})
+ #       MESSAGE(STATUS "CODESIGNFOR PLUGINS")
+  #      add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+   #         COMMAND codesign -f -s ${APPCERT}  ${WIZPLUGINS})
 
-        add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-           COMMAND codesign -f -s ${APPCERT} -v --entitlements ${MACOSX_BUNDLE_ENTITLEPLIST}  ${WIZNOTE_ROOT_DIR})
+ #       add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+ #          COMMAND codesign -f -s ${APPCERT} -v --entitlements ${MACOSX_BUNDLE_ENTITLEPLIST}  ${WIZNOTE_ROOT_DIR})
 
     endif(APPSTORE_BUILD)
 endif(APPLE)

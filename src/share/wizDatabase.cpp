@@ -1487,6 +1487,51 @@ bool CWizDatabase::UpdateMessages(const CWizMessageDataArray& arrayMsg)
 
 bool CWizDatabase::SetUserBizInfo(const CWizBizDataArray& arrayBiz)
 {
+    class CBizUserAvatar
+    {
+    public:
+        static __int64 GetProcessedAvatarVersion(QString strBizGUID, CWizDatabase& db)
+        {
+            return _ttoi64(db.meta(_T("Sync"), CString(_T("AvatarChangesVer_")) + strBizGUID));
+        }
+        //
+        static void SetProcessedAvatarVersion(QString strBizGUID, CWizDatabase& db, __int64 v)
+        {
+            db.SetMeta(_T("Sync"), CString(_T("AvatarChangesVer_")) + strBizGUID, WizInt64ToStr(v));
+        }
+        //
+        static void ProcessBizAvatarVersion(QString strBizGUID, CWizDatabase& db, const std::map<QString, QString>& mapAvatars)
+        {
+            if (mapAvatars.empty())
+                return;
+            //
+            CString strAvatarPath = Utils::PathResolve::avatarPath();
+            //
+            __int64 oldVer = GetProcessedAvatarVersion(strBizGUID, db);
+            __int64 newVer = oldVer;
+            //
+            for (std::map<QString, QString>::const_iterator it = mapAvatars.begin();
+                 it != mapAvatars.end();
+                 it++)
+            {
+                __int64 v = ::_ttoi64(it->first);
+                if (v > oldVer)
+                {
+                    newVer = std::max<__int64>(v, newVer);
+                    //
+                    TOLOG1("[Sync] User avatar changed : ", it->second);
+                    DeleteFile(strAvatarPath + it->second + _T(".png"));
+                }
+            }
+            //
+            if (newVer > oldVer)
+            {
+                SetProcessedAvatarVersion(strBizGUID, db, newVer);
+            }
+        }
+    };
+
+
     SetMeta("Bizs", "Count", QString::number(arrayBiz.size()));
     //
     for (int i = 0; i < arrayBiz.size(); i++)
@@ -1499,6 +1544,8 @@ bool CWizDatabase::SetUserBizInfo(const CWizBizDataArray& arrayBiz)
         SetMeta(bizSection, "Level", QString::number(biz.bizLevel));
         QString BizIsDue = biz.bizIsDue ? "1" : "0";
         SetMeta(bizSection, "IsDue", BizIsDue);
+        //
+        CBizUserAvatar::ProcessBizAvatarVersion(biz.bizGUID, *this, biz.mapAvatarChanges);
     }
     //
     return true;
