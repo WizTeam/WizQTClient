@@ -235,8 +235,10 @@ void CWizAttachmentListView::openAttachment(CWizAttachmentListViewItem* item)
     connect(&monitor, SIGNAL(fileModified(QString,QString,QString,QString,QDateTime)),
             &m_dbMgr.db(), SLOT(onAttachmentModified(QString,QString,QString,QString,QDateTime)), Qt::UniqueConnection);
 
+    /*需要使用文件的修改日期,从服务器上下载下的文件修改日期必定大于数据库中日期.*/
+    QFileInfo info(strFileName);
     monitor.addFile(attachment.strKbGUID, attachment.strGUID, strFileName,
-                    attachment.strDataMD5, attachment.tDataModified);
+                    attachment.strDataMD5, info.lastModified());
 }
 
 void CWizAttachmentListView::contextMenuEvent(QContextMenuEvent * e)
