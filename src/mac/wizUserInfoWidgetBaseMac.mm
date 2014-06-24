@@ -1,6 +1,7 @@
 #include "wizUserInfoWidgetBaseMac_mm.h"
 #include "wizmachelper_mm.h"
 
+#ifdef USECOCOATOOLBAR
 #include <QWidget>
 #include <QMenu>
 
@@ -306,3 +307,5 @@ void CWizUserInfoWidgetBaseMac::updateUI()
     //
     [view setNeedsDisplay: YES];
 }
+
+#endif

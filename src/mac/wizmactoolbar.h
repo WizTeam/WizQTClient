@@ -1,94 +1,94 @@
-//#ifndef CWizMacToolBar_H
-//#define CWizMacToolBar_H
+#ifndef CWizMacToolBar_H
+#define CWizMacToolBar_H
 
-//#include <QtGlobal>
+#ifdef USECOCOATOOLBAR
+#include <QtGlobal>
 
-//#ifdef Q_OS_MAC
-//#include <QtCore/QObject>
-//#include <QtCore/QString>
-//#include <QtCore/QUrl>
-//#include <QAction>
-//#include <QtDeclarative/QDeclarativeListProperty>
-//#include <QtDeclarative/QDeclarativeParserStatus>
-
-
-//class CWizMacToolBarPrivate;
-//class CWizMacToolBarItem;
-//class CWizSearchWidget;
-//class QMacCocoaViewContainer;
-
-//class CWizMacToolBar
-//    : public QWidget
-//{
-//    Q_OBJECT
-//public:
-//    CWizMacToolBar(QWidget *parent = 0);
-//    ~CWizMacToolBar();
-//public:
-//    enum DisplayMode
-//    {
-//        DefaultDisplay,
-//        IconAndLabelDisplay,
-//        IconOnlyDisplay,
-//        LabelOnlyDisplay
-//    };
-
-//    enum SizeMode {
-//       DefaultSize,
-//       RegularSize,
-//       SmallSize
-//    };
-
-//    enum StandardItem
-//    {
-//        NoItem,
-//        Separator,
-//        Space,
-//        FlexibleSpace,
-//        ShowColors,
-//        ShowFonts,
-//        CustomizeToolbar,
-//        PrintItem
-//    };
+#include <QtCore/QObject>
+#include <QtCore/QString>
+#include <QtCore/QUrl>
+#include <QAction>
+#include <QtDeclarative/QDeclarativeListProperty>
+#include <QtDeclarative/QDeclarativeParserStatus>
 
 
-//    void classBegin();
-//    void componentComplete();
+class CWizMacToolBarPrivate;
+class CWizMacToolBarItem;
+class CWizSearchWidget;
+class QMacCocoaViewContainer;
 
-//    DisplayMode displayMode() const;
-//    void setDisplayMode(DisplayMode displayMode);
+class CWizMacToolBar
+    : public QWidget
+{
+    Q_OBJECT
+public:
+    CWizMacToolBar(QWidget *parent = 0);
+    ~CWizMacToolBar();
+public:
+    enum DisplayMode
+    {
+        DefaultDisplay,
+        IconAndLabelDisplay,
+        IconOnlyDisplay,
+        LabelOnlyDisplay
+    };
 
-//    SizeMode sizeMode() const;
-//    void setSizeMode(SizeMode sizeMode);
+    enum SizeMode {
+       DefaultSize,
+       RegularSize,
+       SmallSize
+    };
 
-//    void showInWindow(QWidget *window);
-//    void setToolBarVisible(bool bVisible);
+    enum StandardItem
+    {
+        NoItem,
+        Separator,
+        Space,
+        FlexibleSpace,
+        ShowColors,
+        ShowFonts,
+        CustomizeToolbar,
+        PrintItem
+    };
 
-//    // Add actions to the Toolbar
-//    void addAction(QAction* action);
-//    void addStandardItem(StandardItem standardItem);
-//    void addSearch(const QString& label, const QString& tooltip);
-//    void addWidget(QMacCocoaViewContainer* widget, const QString& label, const QString& tooltip);
 
-//    void onSearchEndEditing(const QString& str);
-//    //
-//    CWizSearchWidget* getSearchWidget();
+    void classBegin();
+    void componentComplete();
 
-//private:
-//    void showInWindowImpl(QWidget *window);
-//protected slots:
-//    void showInTargetWindow();
+    DisplayMode displayMode() const;
+    void setDisplayMode(DisplayMode displayMode);
 
-//Q_SIGNALS:
-//    void doSearch(const QString& str);
+    SizeMode sizeMode() const;
+    void setSizeMode(SizeMode sizeMode);
 
-//private:
-//    bool m_showText;
-//    QList<CWizMacToolBarItem *> m_items;
-//    CWizMacToolBarPrivate *d;
-//};
+    void showInWindow(QWidget *window);
+    void setToolBarVisible(bool bVisible);
 
-//#endif
+    // Add actions to the Toolbar
+    void addAction(QAction* action);
+    void addStandardItem(StandardItem standardItem);
+    void addSearch(const QString& label, const QString& tooltip);
+    void addWidget(QMacCocoaViewContainer* widget, const QString& label, const QString& tooltip);
 
-//#endif
+    void onSearchEndEditing(const QString& str);
+    //
+    CWizSearchWidget* getSearchWidget();
+
+private:
+    void showInWindowImpl(QWidget *window);
+protected slots:
+    void showInTargetWindow();
+
+Q_SIGNALS:
+    void doSearch(const QString& str);
+
+private:
+    bool m_showText;
+    QList<CWizMacToolBarItem *> m_items;
+    CWizMacToolBarPrivate *d;
+};
+
+#endif
+
+#endif
 

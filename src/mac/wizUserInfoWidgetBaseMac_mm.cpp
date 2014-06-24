@@ -1,7 +1,11 @@
 #include "wizUserInfoWidgetBaseMac_mm.h"
+#ifdef USECOCOATOOLBAR
+
 #include <QPainter>
 #include "sync/avataruploader.h"
 #include "sync/avatar.h"
+
+
 
 using namespace WizService;
 using namespace WizService::Internal;
@@ -17,3 +21,4 @@ void CWizUserInfoWidgetBaseMac::setText(QString val)
     calTextSize();
 }
 
+#endif

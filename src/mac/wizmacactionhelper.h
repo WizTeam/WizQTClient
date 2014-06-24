@@ -2,7 +2,7 @@
 #define WIZMACACTIONHELPER_H
 
 
-#ifdef USECocoa
+#ifdef USECOCOATOOLBAR
 
 #include <QObject>
 

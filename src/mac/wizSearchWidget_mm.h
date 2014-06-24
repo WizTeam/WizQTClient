@@ -3,7 +3,7 @@
 
 #include <QMacCocoaViewContainer>
 
-#ifdef USECOCOA
+#ifdef USECOCOATOOLBAR
 
 class CWizSearchWidget : public QMacCocoaViewContainer
 {

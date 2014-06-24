@@ -18,6 +18,23 @@
 
 class CWizExplorerApp;
 
+class CWizSearchEdit : public QLineEdit
+{
+    Q_OBJECT
+public:
+    CWizSearchEdit(QWidget* parent = 0);
+
+protected:
+    void paintEvent(QPaintEvent* event);
+    void mousePressEvent(QMouseEvent* event);
+    void focusInEvent(QFocusEvent* event);
+    void focusOutEvent(QFocusEvent* event);
+
+private:
+    QPixmap m_searchIcon;
+    QPixmap m_deleteIcon;
+};
+
 class CWizSearchWidget : public QWidget
 {
     Q_OBJECT
@@ -34,7 +51,7 @@ public Q_SLOTS:
     void setWidthHint(int nWidth);
 
 private:
-    QLineEdit* m_editSearch;
+    CWizSearchEdit* m_editSearch;
     int m_widthHint;
 
 Q_SIGNALS:

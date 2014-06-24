@@ -98,7 +98,6 @@ public:
 protected:
     virtual bool eventFilter(QObject* watched, QEvent* event);
     virtual void resizeEvent(QResizeEvent* event);
-    virtual void showEvent(QShowEvent* event);
     virtual void closeEvent(QCloseEvent* event);
 
 private:
@@ -117,7 +116,6 @@ private:
     QSystemTrayIcon* m_tray;
 
 #ifdef Q_OS_MAC
-    //CWizMacToolBar* m_toolBar;
     QToolBar* m_toolBar;
     QMenuBar* m_menuBar;
 #else

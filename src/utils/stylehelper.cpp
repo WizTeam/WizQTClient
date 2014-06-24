@@ -59,11 +59,17 @@ QString StyleHelper::themeName()
     return strTheme;
 }
 
+QString StyleHelper::skinResourceFileName(const QString& strName)
+{
+    return ::WizGetSkinResourceFileName(themeName(), strName);
+}
+
 QIcon StyleHelper::loadIcon(const QString& strName)
 {
-    QString strIconNormal = ::WizGetSkinResourceFileName(themeName(), strName);
-    QString strIconActive1 = ::WizGetSkinResourceFileName(themeName(), strName+ "_on");
-    QString strIconActive2 = ::WizGetSkinResourceFileName(themeName(), strName+ "_selected");
+    QString strThemeName = themeName();
+    QString strIconNormal = ::WizGetSkinResourceFileName(strThemeName, strName);
+    QString strIconActive1 = ::WizGetSkinResourceFileName(strThemeName, strName+ "_on");
+    QString strIconActive2 = ::WizGetSkinResourceFileName(strThemeName, strName+ "_selected");
 
     if (!QFile::exists(strIconNormal)) {
         qDebug() << "load icon failed, filePath:" << strIconNormal;

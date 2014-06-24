@@ -3,7 +3,7 @@
 #include <QWidget>
 #include <QApplication>
 
-#ifdef USECOCOA
+#ifdef USECOCOATOOLBAR
 
 #import <Cocoa/Cocoa.h>
 
