@@ -52,10 +52,14 @@ CWizUserInfoWidget::CWizUserInfoWidget(CWizExplorerApp& app, QWidget *parent)
     QAction* actionChangeAvatar = new QAction(tr("Change avatar..."), m_menuMain);
     connect(actionChangeAvatar, SIGNAL(triggered()), SLOT(on_action_changeAvatar_triggered()));
 
+    QAction* actionLogout = new QAction(tr("Logout..."), m_menuMain);
+    connect(actionLogout, SIGNAL(triggered()), SLOT(on_action_logout_triggered()));
+
     m_menuMain->addAction(actionAccountInfo);
     m_menuMain->addAction(actionAccountSetup);
-    m_menuMain->addSeparator();
     m_menuMain->addAction(actionChangeAvatar);
+    m_menuMain->addSeparator();
+    m_menuMain->addAction(actionLogout);
     //
     setMenu(m_menuMain);
 }
@@ -147,6 +151,12 @@ void CWizUserInfoWidget::on_action_changeAvatar_uploaded(bool ok)
     }
 
     uploader->deleteLater();
+}
+
+void CWizUserInfoWidget::on_action_logout_triggered()
+{
+    MainWindow* window = dynamic_cast<MainWindow*>(m_app.mainWindow());
+    window->on_actionLogout_triggered();
 }
 
 void CWizUserInfoWidget::on_userInfo_changed()
