@@ -128,6 +128,8 @@ struct IWizSyncableDatabase
     virtual bool setMeta(const QString& strSection, const QString& strKey, const QString& strValue) = 0;
     virtual QString meta(const QString& strSection, const QString& strKey) = 0;
     virtual void setBizGroupUsers(const QString& strkbGUID, const QString& strJson) = 0;
+
+    virtual bool getAllNotesOwners(CWizStdStringArray &arrayOwners) = 0;
 };
 
 

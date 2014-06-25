@@ -1623,7 +1623,7 @@ bool WizIsDayFirstSync(IWizSyncableDatabase* pDatabase)
     return lastSyncTime.daysTo(COleDateTime::currentDateTime()) > 0;
 }
 
-void WizDownloadUserAvatars(IWizKMSyncEvents* pEvents, IWizSyncableDatabase* pDatabase, bool bBackground)
+void WizDownloadBizUserAvatars(IWizKMSyncEvents* pEvents, IWizSyncableDatabase* pDatabase, bool bBackground)
 {
     pEvents->OnStatus("Downloading user image");
     //
@@ -1643,6 +1643,13 @@ void WizDownloadUserAvatars(IWizKMSyncEvents* pEvents, IWizSyncableDatabase* pDa
     }
 }
 //
+bool WizIsNeedSyncGroupAvatar(const WIZGROUPDATA& group, IWizSyncableDatabase* pDatabase)
+{
+    //only sync personal group
+    if (group.IsBiz())
+        return false;
+
+}
 
 QString downloadFromUrl(const QString& strUrl)
 {
@@ -1679,12 +1686,23 @@ void syncGroupUsers(CWizKMAccountsServer& server, const CWizGroupDataArray& arra
          it++)
     {
         const WIZGROUPDATA& g = *it;
-        if (!g.bizGUID.isEmpty()) {
+        if (!g.bizGUID.isEmpty())
+        {
             QString strUrl = WizService::ApiEntry::groupUsersUrl(server.GetToken(), g.bizGUID, g.strGroupGUID);
             QString strJsonRaw = downloadFromUrl(strUrl);
 
             if (!strJsonRaw.isEmpty())
                 pDatabase->setBizGroupUsers(g.strGroupGUID, strJsonRaw);
+        }
+        else
+        {
+            CWizStdStringArray arrayUsers;
+            pDatabase->getAllNotesOwners(arrayUsers);
+            for (CWizStdStringArray::const_iterator it = arrayUsers.begin();
+                 it != arrayUsers.end(); it ++)
+            {
+                WizService::AvatarHost::deleteAvatar(*it);
+            }
         }
 
         if (pEvents->IsStop())
@@ -1736,7 +1754,7 @@ bool WizSyncDatabase(const WIZUSERINFO& info, IWizKMSyncEvents* pEvents,
         {
             pDatabase->OnDownloadBizs(arrayBiz);
             //
-            WizDownloadUserAvatars(pEvents, pDatabase, bBackground);
+            WizDownloadBizUserAvatars(pEvents, pDatabase, bBackground);
         }
         else
         {

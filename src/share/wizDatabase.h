@@ -263,6 +263,9 @@ public:
                               const QString& strJsonRaw,
                               CWizBizUserDataArray& arrayUser);
 
+    //
+    virtual bool getAllNotesOwners(CWizStdStringArray &arrayOwners);
+
 public:
     bool Open(const QString& strUserId, const QString& strKbGUID = NULL);
     bool LoadDatabaseInfo();

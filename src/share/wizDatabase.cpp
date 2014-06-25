@@ -1455,6 +1455,11 @@ bool CWizDatabase::loadBizUsersFromJson(const QString& strBizGUID,
     return true;
 }
 
+bool CWizDatabase::getAllNotesOwners(CWizStdStringArray& arrayOwners)
+{
+    return GetAllDocumentsOwners(arrayOwners);
+}
+
 
 
 /* ---------------------------------------------------------------------- */
