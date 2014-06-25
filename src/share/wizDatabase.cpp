@@ -2944,7 +2944,25 @@ bool CWizDatabase::UpdateDocumentAbstract(const QString& strDocumentGUID)
     }
 
     if (data.nProtected) {
-        return false;
+        //check if note abstract is empty
+        WIZABSTRACT abstract;
+        PadAbstractFromGUID(data.strGUID, abstract);
+        if (abstract.image.isNull() && abstract.text.IsEmpty())
+        {
+            return false;
+        }
+        else
+        {
+            WIZABSTRACT emptyAbstract;
+            emptyAbstract.guid = data.strGUID;
+            bool ret = UpdatePadAbstract(emptyAbstract);
+            if (!ret) {
+                Q_EMIT updateError("Failed to update note abstract!");
+            }
+            Q_EMIT documentAbstractModified(data);
+
+            return ret;
+        }
     }
 
     QString strTempFolder = Utils::PathResolve::tempPath() + data.strGUID + "-update/";
