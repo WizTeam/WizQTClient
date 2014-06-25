@@ -740,6 +740,7 @@ WIZBIZDATA::WIZBIZDATA(const WIZBIZDATA& data)
     , bizUserRole(data.bizUserRole)
     , bizLevel(data.bizLevel)
     , bizIsDue(data.bizIsDue)
+    , mapAvatarChanges(data.mapAvatarChanges)
 {
 }
 

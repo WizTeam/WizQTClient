@@ -4,6 +4,7 @@
 #include <QString>
 
 #include "apientry.h"
+#include "avatar.h"
 #include "rapidjson/document.h"
 
 #include  "../share/wizSyncableDatabase.h"
@@ -1616,123 +1617,30 @@ bool WizDownloadMessages(IWizKMSyncEvents* pEvents, CWizKMAccountsServer& server
     return TRUE;
 }
 
+bool WizIsDayFirstSync(IWizSyncableDatabase* pDatabase)
+{
+    COleDateTime lastSyncTime = pDatabase->GetLastSyncTime();
+    return lastSyncTime.daysTo(COleDateTime::currentDateTime()) > 0;
+}
+
 void WizDownloadUserAvatars(IWizKMSyncEvents* pEvents, IWizSyncableDatabase* pDatabase, bool bBackground)
 {
-    //
-    /*
-    ////每天一次，或者用户手工同步////
-    */
-    //TODO: modify this code
-    /*
-    if (!::WizDayOnce(WIZKM_REG_KEY_ROOT, _T("DownloadUserAvatars")))
-    {
-        if (bBackground)
-            return;
-    }
-    */
-    //
-    //TODO: getavatar url
-    //QString strURLAvatar = ::WizKMWebSiteGetReturn(_T("avatar"));
-    CString strURLAvatar = "";
-    strURLAvatar.Trim();
-    //
-    if (0 != strURLAvatar.Find(_T("http"))
-        || strURLAvatar.GetLength() > 1024)
-    {
-        return;
-    }
-    //
-    if (pEvents->IsStop())
-        return;
-    //
     pEvents->OnStatus("Downloading user image");
-    //
-    CWizStdStringArray arrayPersonalGroupUser;
-    //
-    /*
-    ////普通群组头像不需要主动下载，额可以在阅读的时候下载////
-    //db.GetAllGroupUserIds(arrayPersonalGroupUser);		////
-    */
     //
     CWizStdStringArray arrayBizGroupUser;
     pDatabase->GetAllBizUserIds(arrayBizGroupUser);
-    //
-    QString strCurrentUserID = pDatabase->GetUserId();
-    //
-    CWizStdStringArray arrayAllUserID;
-    arrayAllUserID.push_back(strCurrentUserID);
-    arrayAllUserID.insert(arrayAllUserID.begin(), arrayPersonalGroupUser.begin(), arrayPersonalGroupUser.end());
-    arrayAllUserID.insert(arrayAllUserID.begin(), arrayBizGroupUser.begin(), arrayBizGroupUser.end());
-    //
-    std::set<QString> downloaded;
-    //
-    COleDateTime tNow = ::WizGetCurrentTime();
-    //
-    /*
-    QString strSettingsFileName = ::WizKMGetAvatarsPath() + _T("settings.ini");
-    CWizIniFileEx settings;
-    settings.LoadFromFile(strSettingsFileName);
-
-    for (CWizStdStringArray::const_iterator it = arrayAllUserID.begin();
-        it != arrayAllUserID.end();
+    for (CWizStdStringArray::const_iterator it = arrayBizGroupUser.begin();
+        it != arrayBizGroupUser.end();
         it++)
     {
-        QString strUserId = *it;
-        //
-        if (downloaded.find(strUserId) != downloaded.end())
-            continue;
-        //
+        if (!WizService::AvatarHost::isFileExists(*it))
+        {
+            WizService::AvatarHost::load(*it, false);
+        }
+
         if (pEvents->IsStop())
-            break;
-        //
-        downloaded.insert(strUserId);
-        //
-        QString strURL(strURLAvatar);
-        strURL.Replace(_T("{userGuid}"), strUserId);
-        //
-        QString strFileName = ::WizKMGetAvatarsPath() + strUserId + _T(".png");
-        //
-        if (strUserId != strCurrentUserID)
-        {
-            if (PathFileExists(strFileName))
-            {
-                COleDateTimeSpan ts = tNow - WizGetFileModifiedTime(strFileName);
-                if (ts.GetDays() <= 7)
-                    continue;
-                //////不需要更新////
-            }
-            else
-            {
-                QString strKey = strUserId;
-                const QString& strUserImageSection = _T("UserImage");
-                QString strTime = settings.GetStringDef(strUserImageSection, strKey);
-                if (!strTime.isEmpty())
-                {
-                    COleDateTimeSpan ts = tNow - ::WizStringToDateTime(strTime);
-                    if (ts.GetDays() <= 7)
-                        continue;
-                }
-                //
-                settings.SetString(strUserImageSection, strKey, ::WizDateTimeToString(tNow));
-            }
-        }
-        //
-        QString strLeft;
-        QString strRight;
-        ::WizStringSimpleSplit(strUserId, '@', strLeft, strRight);
-        pEvents->OnStatus(strLeft);
-        //
-        if (SUCCEEDED(URLDownloadToFile(NULL, strURL, strFileName, 0, NULL)))
-        {
-            if (strUserId == strCurrentUserID)
-            {
-                pEvents->OnSyncStep(wizsyncstepUserAvatarDownloaded, 0);
-            }
-        }
+            return;
     }
-    //
-    settings.SaveToUnicodeFile(strSettingsFileName);
-    */
 }
 //
 
@@ -1820,16 +1728,21 @@ bool WizSyncDatabase(const WIZUSERINFO& info, IWizKMSyncEvents* pEvents,
     /*
     ////获得群组信息////
     */
-    //
-    CWizBizDataArray arrayBiz;
-    if (server.GetBizList(arrayBiz))
+    //only check biz list at first sync of day, or sync by manual
+    if (!bBackground || WizIsDayFirstSync(pDatabase))
     {
-        pDatabase->OnDownloadBizs(arrayBiz);
-    }
-    else
-    {
-        pEvents->SetLastErrorCode(server.GetLastErrorCode());
-        return false;
+        CWizBizDataArray arrayBiz;
+        if (server.GetBizList(arrayBiz))
+        {
+            pDatabase->OnDownloadBizs(arrayBiz);
+            //
+            WizDownloadUserAvatars(pEvents, pDatabase, bBackground);
+        }
+        else
+        {
+            pEvents->SetLastErrorCode(server.GetLastErrorCode());
+            return false;
+        }
     }
 
     //
@@ -1921,8 +1834,6 @@ bool WizSyncDatabase(const WIZUSERINFO& info, IWizKMSyncEvents* pEvents,
         pDatabase->CloseGroupDatabase(pGroupDatabase);
     }
     //
-    //
-    WizDownloadUserAvatars(pEvents, pDatabase, bBackground);
     //
     pEvents->OnStatus(_TR("-------Downloading notes--------------"));
     //

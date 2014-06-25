@@ -21,6 +21,7 @@
 
 #include "utils/pathresolve.h"
 #include "utils/logger.h"
+#include "sync/avatar.h"
 #include "wizObjectDataDownloader.h"
 #include "wizProgressDialog.h"
 #include "wizusercipherform.h"
@@ -1505,8 +1506,6 @@ bool CWizDatabase::SetUserBizInfo(const CWizBizDataArray& arrayBiz)
             if (mapAvatars.empty())
                 return;
             //
-            CString strAvatarPath = Utils::PathResolve::avatarPath();
-            //
             __int64 oldVer = GetProcessedAvatarVersion(strBizGUID, db);
             __int64 newVer = oldVer;
             //
@@ -1519,8 +1518,9 @@ bool CWizDatabase::SetUserBizInfo(const CWizBizDataArray& arrayBiz)
                 {
                     newVer = std::max<__int64>(v, newVer);
                     //
-                    TOLOG1("[Sync] User avatar changed : ", it->second);
-                    DeleteFile(strAvatarPath + it->second + _T(".png"));
+                    TOLOG1("[Sync] User avatar changed : %1", it->second);
+                    //DeleteFile(strAvatarPath + it->second + _T(".png"));
+                    WizService::AvatarHost::deleteAvatar(it->second);
                 }
             }
             //
