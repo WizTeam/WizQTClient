@@ -287,13 +287,13 @@ void CWizAttachmentListView::startDownLoad(CWizAttachmentListViewItem* item)
     m_downloaderHost->download(item->attachment());
     item->setIsDownloading(true);
 
-    update();
+    forceRepaint();
 }
 
 CWizAttachmentListViewItem* CWizAttachmentListView::newAttachmentItem(const WIZDOCUMENTATTACHMENTDATA& att)
 {
     CWizAttachmentListViewItem* newItem = new CWizAttachmentListViewItem(att);
-    connect(newItem, SIGNAL(updateRequet()), SLOT(update()));
+    connect(newItem, SIGNAL(updateRequet()), SLOT(forceRepaint()));
     connect(m_downloaderHost, SIGNAL(downloadDone(WIZOBJECTDATA,bool)), newItem,
             SLOT(on_downloadFinished(WIZOBJECTDATA,bool)));
     connect(m_downloaderHost, SIGNAL(downloadProgress(QString,int,int)), newItem,
@@ -392,12 +392,22 @@ void CWizAttachmentListView::on_action_deleteAttachment()
 
     resetAttachments();
 }
+
 void CWizAttachmentListView::on_list_itemDoubleClicked(QListWidgetItem* it)
 {
     if (CWizAttachmentListViewItem* item = dynamic_cast<CWizAttachmentListViewItem*>(it))
     {
         openAttachment(item);
     }
+}
+
+void CWizAttachmentListView::forceRepaint()
+{
+#if QT_VERSION < 0x050000
+    update();
+#else
+    viewport()->repaint();
+#endif
 }
 
 
