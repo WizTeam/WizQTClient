@@ -1643,12 +1643,25 @@ void WizDownloadBizUserAvatars(IWizKMSyncEvents* pEvents, IWizSyncableDatabase* 
     }
 }
 //
-bool WizIsNeedSyncGroupAvatar(const WIZGROUPDATA& group, IWizSyncableDatabase* pDatabase)
+bool WizSyncPersonalGroupAvatar(IWizSyncableDatabase* pPersonalGroupDatabase)
 {
-    //only sync personal group
-    if (group.IsBiz())
-        return false;
+    QString strt = pPersonalGroupDatabase->meta(_T("SYNC_INFO"), _T("SyncPersonalGroupAvatar"));
+    if (!strt.isEmpty())
+    {
+        if (QDateTime::fromString(strt).daysTo(QDateTime::currentDateTime()) > 7)
+        {
+            _TR("Remove all user avatar.");
+            CWizStdStringArray arrayUsers;
+            pPersonalGroupDatabase->getAllNotesOwners(arrayUsers);
+            for (CWizStdStringArray::const_iterator it = arrayUsers.begin();
+                 it != arrayUsers.end(); it ++)
+            {
+                WizService::AvatarHost::deleteAvatar(*it);
+            }
+        }
+    }
 
+    return pPersonalGroupDatabase->setMeta(_T("SYNC_INFO"), _T("SyncPersonalGroupAvatar"), QDateTime::currentDateTime().toString());
 }
 
 QString downloadFromUrl(const QString& strUrl)
@@ -1693,16 +1706,6 @@ void syncGroupUsers(CWizKMAccountsServer& server, const CWizGroupDataArray& arra
 
             if (!strJsonRaw.isEmpty())
                 pDatabase->setBizGroupUsers(g.strGroupGUID, strJsonRaw);
-        }
-        else
-        {
-            CWizStdStringArray arrayUsers;
-            pDatabase->getAllNotesOwners(arrayUsers);
-            for (CWizStdStringArray::const_iterator it = arrayUsers.begin();
-                 it != arrayUsers.end(); it ++)
-            {
-                WizService::AvatarHost::deleteAvatar(*it);
-            }
         }
 
         if (pEvents->IsStop())
@@ -1842,6 +1845,12 @@ bool WizSyncDatabase(const WIZUSERINFO& info, IWizKMSyncEvents* pEvents,
         {
             pGroupDatabase->SaveLastSyncTime();
             pEvents->OnStatus(WizFormatString1(_TR("Sync group %1 done"), group.strGroupName));
+
+            // sync personal group avatar.  biz group avatar has been processed when get biz info
+            if (!group.IsBiz())
+            {
+                WizSyncPersonalGroupAvatar(pGroupDatabase);
+            }
         }
         else
         {
