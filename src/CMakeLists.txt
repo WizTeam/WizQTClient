@@ -419,7 +419,7 @@ if(APPLE)
          #   COMMAND dsymutil ${WIZNOTE_ROOT_DIR}/Contents/MacOS/wiznote -o wiznote.app.dSYM)
 
         if(NOT WIZNOTE_USE_QT5)
-            set(WIZFRAMEWORK
+            set(VERSION_CONNECT_LIBRARY
                 ${WIZNOTE_CONTENTS_DIR}/Frameworks/QtCore.framework/Versions/4/QtCore
                 ${WIZNOTE_CONTENTS_DIR}/Frameworks/QtGui.framework/Versions/4/QtGui
                 ${WIZNOTE_CONTENTS_DIR}/Frameworks/QtNetwork.framework/Versions/4/QtNetwork
@@ -433,19 +433,38 @@ if(APPLE)
                 ${WIZNOTE_CONTENTS_DIR}/PlugIns/bearer/libqcorewlanbearer.dylib
                 ${WIZNOTE_CONTENTS_DIR}/PlugIns/bearer/libqgenericbearer.dylib
                 )
-
-        elseif(NOT WIZNOTE_USE_QT5)
-            set(WIZFRAMEWORK
+        elseif(WIZNOTE_USE_QT5)
+            set(VERSION_CONNECT_LIBRARY
+                ${WIZNOTE_CONTENTS_DIR}/Frameworks/QtConcurrent.framework/Versions/5/QtConcurrent
                 ${WIZNOTE_CONTENTS_DIR}/Frameworks/QtCore.framework/Versions/5/QtCore
                 ${WIZNOTE_CONTENTS_DIR}/Frameworks/QtGui.framework/Versions/5/QtGui
+                ${WIZNOTE_CONTENTS_DIR}/Frameworks/QtMacExtras.framework/Versions/5/QtMacExtras
                 ${WIZNOTE_CONTENTS_DIR}/Frameworks/QtNetwork.framework/Versions/5/QtNetwork
+                ${WIZNOTE_CONTENTS_DIR}/Frameworks/QtOpenGL.framework/Versions/5/QtOpenGL
+                ${WIZNOTE_CONTENTS_DIR}/Frameworks/QtPositioning.framework/Versions/5/QtPositioning
+                ${WIZNOTE_CONTENTS_DIR}/Frameworks/QtPrintSupport.framework/Versions/5/QtPrintSupport
+                ${WIZNOTE_CONTENTS_DIR}/Frameworks/QtQml.framework/Versions/5/QtQml
+                ${WIZNOTE_CONTENTS_DIR}/Frameworks/QtQuick.framework/Versions/5/QtQuick
+                ${WIZNOTE_CONTENTS_DIR}/Frameworks/QtSensors.framework/Versions/5/QtSensors
+                ${WIZNOTE_CONTENTS_DIR}/Frameworks/QtSql.framework/Versions/5/QtSql
                 ${WIZNOTE_CONTENTS_DIR}/Frameworks/QtWebKit.framework/Versions/5/QtWebKit
+                ${WIZNOTE_CONTENTS_DIR}/Frameworks/QtWebKitWidgets.framework/Versions/5/QtWebKitWidgets
+                ${WIZNOTE_CONTENTS_DIR}/Frameworks/QtWidgets.framework/Versions/5/QtWidgets
                 ${WIZNOTE_CONTENTS_DIR}/Frameworks/QtXml.framework/Versions/5/QtXml
-                #${WIZNOTE_CONTENTS_DIR}/Frameworks/QtXmlPatterns.framework/Versions/5/QtXmlPatterns
+                ${WIZNOTE_CONTENTS_DIR}/PlugIns/accessible/libqtaccessiblequick.dylib
+                ${WIZNOTE_CONTENTS_DIR}/PlugIns/imageformats/libqdds.dylib
+                ${WIZNOTE_CONTENTS_DIR}/PlugIns/imageformats/libqicns.dylib
+                ${WIZNOTE_CONTENTS_DIR}/PlugIns/imageformats/libqjp2.dylib
+                ${WIZNOTE_CONTENTS_DIR}/PlugIns/imageformats/libqwbmp.dylib
+                ${WIZNOTE_CONTENTS_DIR}/PlugIns/imageformats/libqwebp.dylib
+                ${WIZNOTE_CONTENTS_DIR}/PlugIns/platforms/libqcocoa.dylib
+                ${WIZNOTE_CONTENTS_DIR}/PlugIns/printsupport/libcocoaprintersupport.dylib
+                ${WIZNOTE_CONTENTS_DIR}/PlugIns/sqldrivers/libqsqlite.dylib
+                ${WIZNOTE_CONTENTS_DIR}/PlugIns/sqldrivers/libqsqlpsql.dylib
                 )
-        endif(NOT WIZNOTE_USE_QT5)
+        endif()
 
-            set(WIZPLUGINS
+            set(COMMON_LIBRARY
                 ${WIZNOTE_CONTENTS_DIR}/PlugIns/accessible/libqtaccessiblewidgets.dylib
                 ${WIZNOTE_CONTENTS_DIR}/PlugIns/imageformats/libqgif.dylib
                 ${WIZNOTE_CONTENTS_DIR}/PlugIns/imageformats/libqico.dylib
@@ -467,13 +486,13 @@ if(APPLE)
 
 
 
-        MESSAGE(STATUS "CODESIGNFOR FRAMEWORK")
+        MESSAGE(STATUS "CODESIGNFOR VERSION_CONNECT_LIBRARY")
         add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-            COMMAND codesign -f -s ${APPCERT}  ${WIZFRAMEWORK})
+            COMMAND codesign -f -s ${APPCERT}  ${VERSION_CONNECT_LIBRARY})
 
-        MESSAGE(STATUS "CODESIGNFOR PLUGINS")
+        MESSAGE(STATUS "CODESIGNFOR COMMON_LIBRARY")
         add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-            COMMAND codesign -f -s ${APPCERT}  ${WIZPLUGINS})
+            COMMAND codesign -f -s ${APPCERT}  ${COMMON_LIBRARY})
 
         add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
           COMMAND codesign -f -s ${APPCERT} -v --entitlements ${MACOSX_BUNDLE_ENTITLEPLIST}  ${WIZNOTE_ROOT_DIR} --deep)
