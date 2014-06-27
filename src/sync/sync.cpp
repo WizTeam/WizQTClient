@@ -1756,8 +1756,6 @@ bool WizSyncDatabase(const WIZUSERINFO& info, IWizKMSyncEvents* pEvents,
         if (server.GetBizList(arrayBiz))
         {
             pDatabase->OnDownloadBizs(arrayBiz);
-            //
-            WizDownloadBizUserAvatars(pEvents, pDatabase, bBackground);
         }
         else
         {

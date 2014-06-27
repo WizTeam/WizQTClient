@@ -1,6 +1,7 @@
 ;(function() {
     var IsMathJax = WizIsMathJax();
     var inline = "$"; 
+
     var SPLIT = /(\$\$?|\\(?:begin|end)\{[a-z]*\*?\}|\\[\\{}$]|[{}]|(?:\n\s*)+|@@\d+@@)/i;
 
     var text;
@@ -10,7 +11,14 @@
     function WizIsMathJax() {
         return typeof MathJax !== 'undefined';
     }
-
+    function htmlUnEncode( input ) {
+        return String(input)
+            .replace(/\&amp;/g,'&')
+            .replace(/\&gt;/g, '>')
+            .replace(/\&lt;/g,'<')
+            .replace(/\&quot;/g, '"')
+            .replace(/\&&#39;/g, "'");
+    }
     function init() {
         if (jQuery) {
             document.body.setAttribute("wiz_markdown_inited", "true");
@@ -63,7 +71,7 @@
             pedantic: false,
             sanitize: false,
             smartLists: true,
-            smartypants: false,
+            smartypants: false
         });
         return htmlStr;
     }
@@ -77,12 +85,13 @@
             $(this).replaceWith($('<div>' + this.innerHTML + '</div>'));
         });
     }
-
     function ParseContent(objHtmDoc) {
         try {
-            $(objHtmDoc).find('img').each(function(index, img) {
-                var src = $(img).attr('src');
-                $(img).after('<span>![' + src + '](' + src + ')</span>');
+            $(objHtmDoc).find('img').each(function(index) {
+                var span = $("<span></span>");
+                span[0].innerText = htmlUnEncode($(this)[0].outerHTML);
+                span.insertAfter($(this));
+                $(this).remove();
             });
         } catch (e) {
             console.log(e);
@@ -99,13 +108,24 @@
         } catch (e) {
             console.log(e);
         }
+        try {
+            $(objHtmDoc).find('label.wiz-todo-label').each(function(index) {
+                // 防止innerText后产生换行符
+                var div = $("<span></span>");
+                var parent = $(this).parent();
+                div[0].innerText = htmlUnEncode(parent[0].outerHTML);
+                div.insertAfter(parent);
+                parent.remove();
+            });
+        } catch(e) {
+            console.log(e);
+        }
         replaceCodeP2Div();
-        text = removeMath(body.innerText);
+        var text = removeMath(body.innerText);
         text = ParseMD2HTML(text);
         text = replaceMath(text);
         body.innerHTML = text;
         prettyPrint();
-
         if (IsMathJax) {
             MathJax.Hub.Queue(
                 ["Typeset", MathJax.Hub, document.body],
