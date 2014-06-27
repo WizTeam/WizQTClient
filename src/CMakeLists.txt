@@ -471,12 +471,12 @@ if(APPLE)
         add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
             COMMAND codesign -f -s ${APPCERT}  ${WIZFRAMEWORK})
 
- #       MESSAGE(STATUS "CODESIGNFOR PLUGINS")
-  #      add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-   #         COMMAND codesign -f -s ${APPCERT}  ${WIZPLUGINS})
+        MESSAGE(STATUS "CODESIGNFOR PLUGINS")
+        add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+            COMMAND codesign -f -s ${APPCERT}  ${WIZPLUGINS})
 
- #       add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
- #          COMMAND codesign -f -s ${APPCERT} -v --entitlements ${MACOSX_BUNDLE_ENTITLEPLIST}  ${WIZNOTE_ROOT_DIR})
+        add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+          COMMAND codesign -f -s ${APPCERT} -v --entitlements ${MACOSX_BUNDLE_ENTITLEPLIST}  ${WIZNOTE_ROOT_DIR} --deep)
 
     endif(APPSTORE_BUILD)
 endif(APPLE)
