@@ -69,6 +69,7 @@ private:
 
 protected Q_SLOTS:
     void on_editor_google_triggered();
+    void on_editor_baidu_triggered();
     void on_editor_cut_triggered();
     void on_editor_copy_triggered();
     void on_editor_paste_triggered();

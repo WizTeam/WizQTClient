@@ -1098,7 +1098,7 @@
     <message>
         <location filename="../src/wizmainwindow.cpp" line="973"/>
         <source>1 note</source>
-        <translation>1條筆記</translation>
+        <translation type="unfinished">1 條筆記</translation>
     </message>
     <message>
         <location filename="../src/wizmainwindow.cpp" line="979"/>
