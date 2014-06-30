@@ -2529,8 +2529,8 @@ bool CWizDatabase::DeleteAttachment(const WIZDOCUMENTATTACHMENTDATA& data,
                                     bool bLog,
                                     bool bReset /* = true */)
 {
-    bool bRet = CWizIndex::DeleteAttachment(data, bLog, bReset);
     CString strFileName = GetAttachmentFileName(data.strGUID);
+    bool bRet = CWizIndex::DeleteAttachment(data, bLog, bReset);
     if (PathFileExists(strFileName)) {
         ::WizDeleteFile(strFileName);
     }
@@ -2876,9 +2876,9 @@ bool CWizDatabase::LoadAttachmentData(const CString& strDocumentGUID, QByteArray
     return !arrayData.isEmpty();
 }
 
-bool CWizDatabase::LoadCompressedAttachmentData(const QString& strDocumentGUID, QByteArray& arrayData)
+bool CWizDatabase::LoadCompressedAttachmentData(const QString& strGUID, QByteArray& arrayData)
 {
-    CString strFileName = GetAttachmentFileName(strDocumentGUID);
+    CString strFileName = GetAttachmentFileName(strGUID);
     if (!PathFileExists(strFileName))
     {
         return false;
@@ -2891,7 +2891,9 @@ bool CWizDatabase::LoadCompressedAttachmentData(const QString& strDocumentGUID, 
         return false;
     }
 
-    if (!zip.compressFile(strFileName, "data"))
+    WIZDOCUMENTATTACHMENTDATA attach;
+    AttachmentFromGUID(strGUID, attach);
+    if (!zip.compressFile(strFileName, attach.strName))
     {
         Q_EMIT updateError("Failed to compress file: " + strFileName);
         return false;
@@ -2908,7 +2910,7 @@ bool CWizDatabase::LoadCompressedAttachmentData(const QString& strDocumentGUID, 
     return !arrayData.isEmpty();
 }
 
-bool CWizDatabase::SaveCompressedAttachmentData(const CString& strDocumentGUID, const QByteArray& arrayData)
+bool CWizDatabase::SaveCompressedAttachmentData(const CString& strGUID, const QByteArray& arrayData)
 {
     CString strTempZipFileName = Utils::PathResolve::tempPath() + WizIntToStr(GetTickCount()) + ".tmp";
     if (!WizSaveDataToFile(strTempZipFileName, arrayData))
@@ -2923,7 +2925,7 @@ bool CWizDatabase::SaveCompressedAttachmentData(const CString& strDocumentGUID, 
         return false;
     }
 
-    CString strFileName = GetAttachmentFileName(strDocumentGUID);
+    CString strFileName = GetAttachmentFileName(strGUID);
     if (!zip.extractFile(0, strFileName))
     {
         Q_EMIT updateError("Failed to extract attachment file: " + strFileName);

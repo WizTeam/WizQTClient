@@ -362,9 +362,9 @@ public:
     bool WriteDataToDocument(const QString& strDocumentGUID, const QByteArray &arrayData);
     bool LoadAttachmentData(const CString& strDocumentGUID,
                             QByteArray& arrayData);
-    bool LoadCompressedAttachmentData(const QString& strDocumentGUID,
+    bool LoadCompressedAttachmentData(const QString& strGUID,
                                       QByteArray& arrayData);
-    bool SaveCompressedAttachmentData(const CString& strDocumentGUID,
+    bool SaveCompressedAttachmentData(const CString& strGUID,
                                       const QByteArray& arrayData);
 
     static CString GetRootLocation(const CString& strLocation);
