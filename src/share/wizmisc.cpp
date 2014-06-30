@@ -1916,7 +1916,7 @@ void WizDeleteFile(const CString& strFileName)
 
 
 
-#define WIZ_INVALID_CHAR_OF_FILE_NAME		"/\"?:*|<>\r\n\t,%\'"
+#define WIZ_INVALID_CHAR_OF_FILE_NAME		"/\"?:*|<>\r\n\t,%\'\\"
 
 BOOL WizIsValidFileNameNoPath(const CString& strFileName)
 {
