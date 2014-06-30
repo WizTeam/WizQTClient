@@ -251,8 +251,8 @@ void MainWindow::closeEvent(QCloseEvent* event)
 #else
     if (!event->spontaneous())
     {
-        //setVisible(false);
-        setWindowState(Qt::WindowMinimized);
+        setVisible(false);
+        //setWindowState(Qt::WindowMinimized);
         event->ignore();
         return;
     }

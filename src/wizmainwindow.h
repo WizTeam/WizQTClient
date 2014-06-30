@@ -152,7 +152,11 @@ private:
 
     CWizSearchIndexer* m_searchIndexer;
     QPointer<CWizSearchWidget> m_search;
+#ifdef Q_OS_LINUX
+    CWizFixedSpacer* m_spacerBeforeSearch;
+#else
     CWizSpacer* m_spacerBeforeSearch;
+#endif
 
     bool m_bRestart;
     bool m_bLogoutRestart;
