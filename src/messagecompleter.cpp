@@ -117,6 +117,10 @@ MessageCompleterModel::MessageCompleterModel(const CWizBizUserDataArray& arrayUs
         m_users[0].strAlias = user.alias;
         m_users[0].strPinyin = matchText;
     }
+    m_users.insert(0, UserItem());
+    m_users[0].strUserId = QString();
+    m_users[0].strAlias = tr("all");
+    m_users[0].strPinyin = "all";
     qSort(m_users.begin(), m_users.end(), caseInsensitiveLessThan);
 }
 
