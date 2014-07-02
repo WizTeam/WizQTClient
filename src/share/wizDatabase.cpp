@@ -1075,8 +1075,7 @@ QString CWizDatabase::GetLocalValue(const QString& key)
     }
     else if (strKey == "folders_pos")
     {
-        return "";
-        //return GetFoldersPos();
+        return GetFoldersPos();
     }
     else if (strKey == "group_tag_oem")
     {
@@ -1254,6 +1253,11 @@ void CWizDatabase::SetFoldersPos(const QString& foldersPos, qint64 nVersion)
     CWizStdStringArray arrPos;
     ::WizSplitTextToArray(str, ',', arrPos);
 
+    QSettings* setting = ExtensionSystem::PluginManager::settings();
+    setting->beginGroup("FolderPosition");
+    setting->remove("");
+    setting->endGroup();
+
     CWizStdStringArray::const_iterator it;
     for (it= arrPos.begin(); it != arrPos.end(); it++) {
         CString strLine = *it;
@@ -1269,7 +1273,6 @@ void CWizDatabase::SetFoldersPos(const QString& foldersPos, qint64 nVersion)
         if (0 == nPos)
             continue;
 
-        QSettings* setting = ExtensionSystem::PluginManager::settings();
         int nPosOld = setting->value("FolderPosition/" + strLocation).toInt();
         if (nPosOld != nPos) {
             setting->setValue("FolderPosition/" + strLocation, nPos);
@@ -1301,6 +1304,11 @@ QString CWizDatabase::GetFolders()
     ::WizStringArrayToText(arrayFolder, str, "*");
 
     return str;
+}
+
+QString CWizDatabase::GetFoldersPos()
+{
+    return QString();
 }
 
 void CWizDatabase::SetFolders(const QString& strFolders, qint64 nVersion, bool bSaveVersion)
@@ -3074,6 +3082,8 @@ CString CWizDatabase::GetLocationDisplayName(const CString& strLocation)
             if (strLocation == "/My Notes/") {
                 return tr("My Notes");
             } else if (strLocation == "/My Journals/") {
+                return tr("My Journals");
+            } else if (strLocation == "/My Contacts/") {
                 return tr("My Journals");
             } else if (strLocation == "/My Events/") {
                 return tr("My Events");
