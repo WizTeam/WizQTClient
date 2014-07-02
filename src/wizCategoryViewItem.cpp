@@ -576,6 +576,11 @@ QTreeWidgetItem* CWizCategoryViewFolderItem::clone() const
     return new CWizCategoryViewFolderItem(m_app, m_strName, m_strKbGUID);
 }
 
+QString CWizCategoryViewFolderItem::id() const
+{
+    return ::WizMd5StringNoSpaceJava(QString(m_strName + m_strKbGUID).toUtf8());
+}
+
 void CWizCategoryViewFolderItem::getDocuments(CWizDatabase& db, CWizDocumentDataArray& arrayDocument)
 {
     db.GetDocumentsByLocation(m_strName, arrayDocument);
@@ -1223,6 +1228,11 @@ void CWizCategoryViewGroupItem::drop(const WIZDOCUMENTDATA& data, bool forceCopy
         QString strNewDocGUID;
         sourceDb.CopyDocumentTo(data.strGUID, myDb, strLocation, m_tag, strNewDocGUID, window->downloaderHost());
     }
+}
+
+QString CWizCategoryViewGroupItem::id() const
+{
+    return ::WizMd5StringNoSpaceJava(QString(text(0) + m_tag.strGUID).toUtf8());
 }
 
 void CWizCategoryViewGroupItem::reload(CWizDatabase& db)
