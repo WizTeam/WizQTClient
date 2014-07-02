@@ -992,11 +992,13 @@ void CWizCategoryView::on_action_user_newFolder_confirmed(int result)
 
     if (currentCategoryItem<CWizCategoryViewAllFoldersItem>()) {
         strLocation = "/" + strFolderName + "/";
+        //moveFolderPostionBeforeTrash(strLocation);
     } else if (CWizCategoryViewFolderItem* p = currentCategoryItem<CWizCategoryViewFolderItem>()) {
         strLocation = p->location() + strFolderName + "/";
     }
 
     addAndSelectFolder(strLocation);
+    sortFolders();
     m_dbMgr.db().AddExtraFolder(strLocation);
     m_dbMgr.db().SetLocalValueVersion("folders", -1);
 }
@@ -2128,6 +2130,24 @@ void CWizCategoryView::setGroupRootItemExtraButton(CWizCategoryViewItemBase* pIt
     }
 }
 
+void CWizCategoryView::moveFolderPostionBeforeTrash(const QString& strLocation)
+{
+    const QString strFolderPostion = "FolderPosition/";
+    QSettings* setting = ExtensionSystem::PluginManager::settings();
+    int nValue = setting->value(strFolderPostion + "/Deleted Items/").toInt();
+    setting->setValue(strFolderPostion + strLocation, nValue);
+    //
+    QStringList strFolderList = setting->allKeys();
+    foreach (QString strFolder, strFolderList)
+    {
+        if (strFolder.startsWith(strFolderPostion + "Deleted Items"))
+        {
+            nValue = setting->value(strFolder).toInt();
+            setting->setValue(strFolder, nValue + 1);
+        }
+    }
+}
+
 void CWizCategoryView::initGeneral()
 {
     //CWizCategoryViewCategoryItem* pCategoryItem = new CWizCategoryViewCategoryItem(m_app, CATEGORY_GENERAL);
@@ -2160,14 +2180,24 @@ void CWizCategoryView::sortFolders()
     if (!pFolderRoot)
         return;
 
-    pFolderRoot->sortChildren(0, Qt::AscendingOrder);
-
-    for (int i = 1; i < pFolderRoot->childCount(); i++)
+    for (int i = 0; i < pFolderRoot->childCount(); i++)
     {
         CWizCategoryViewFolderItem* pFolder = dynamic_cast<CWizCategoryViewFolderItem*>(pFolderRoot->child(i));
         if (!pFolder)
             return;
 
+        qDebug() << "before sort : " << i << "  " << pFolder->data(0, Qt::DisplayRole) << " " << pFolder->name();
+    }
+
+    pFolderRoot->sortChildren(0, Qt::AscendingOrder);
+
+    for (int i = 0; i < pFolderRoot->childCount(); i++)
+    {
+        CWizCategoryViewFolderItem* pFolder = dynamic_cast<CWizCategoryViewFolderItem*>(pFolderRoot->child(i));
+        if (!pFolder)
+            return;
+
+        qDebug() << "after sort : " << i << "  " << pFolder->data(0, Qt::DisplayRole) << " " << pFolder->name();
         sortFolders(pFolder);
     }
 }
@@ -2752,7 +2782,7 @@ CWizCategoryViewTrashItem* CWizCategoryView::findTrash(const QString& strKbGUID 
 
 void CWizCategoryView::addAndSelectFolder(const CString& strLocation)
 {
-    if (QTreeWidgetItem* pItem = addFolder(strLocation, true)) {
+    if (QTreeWidgetItem* pItem = addFolder(strLocation, false)) {
         setCurrentItem(pItem);
     }
 }
