@@ -140,19 +140,19 @@ void installOnLinux()
 
 int mainCore(int argc, char *argv[])
 {
+    QApplication a(argc, argv);
     //
 #if QT_VERSION < 0x050000
     qInstallMsgHandler(Utils::Logger::messageHandler);
 #else
     qInstallMessageHandler(Utils::Logger::messageHandler);
+    QApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
 #endif
 
-    QApplication a(argc, argv);
 
     QApplication::setApplicationName(QObject::tr("WizNote"));
     QApplication::setOrganizationName(QObject::tr("cn.wiz.wiznoteformac"));
 
-    QApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
 
     QIcon icon;
     icon.addPixmap(QPixmap(":/logo_16.png"));
