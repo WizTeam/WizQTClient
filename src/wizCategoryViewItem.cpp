@@ -658,6 +658,10 @@ bool CWizCategoryViewFolderItem::operator < (const QTreeWidgetItem &other) const
     {
         return nThis < nOther;
     }
+    else if (getSortOrder() != pOther->getSortOrder())
+    {
+        return getSortOrder() < pOther->getSortOrder();
+    }
     //
     QString strThis = text(0).toLower();
     QString strOther = pOther->text(0).toLower();
