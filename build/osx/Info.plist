@@ -44,6 +44,8 @@
 		<string>zh_CN</string>
 		<string>zh_TW</string>
 	</array>
+	<key>NSPrincipalClass</key>
+	<string>NSApplication</string>
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>

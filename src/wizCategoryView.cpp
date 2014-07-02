@@ -2180,15 +2180,6 @@ void CWizCategoryView::sortFolders()
     if (!pFolderRoot)
         return;
 
-//    for (int i = 0; i < pFolderRoot->childCount(); i++)
-//    {
-//        CWizCategoryViewFolderItem* pFolder = dynamic_cast<CWizCategoryViewFolderItem*>(pFolderRoot->child(i));
-//        if (!pFolder)
-//            return;
-
-//      //  qDebug() << "before sort : " << i << "  " << pFolder->data(0, Qt::DisplayRole) << " " << pFolder->name();
-//    }
-
     pFolderRoot->sortChildren(0, Qt::AscendingOrder);
 
     for (int i = 0; i < pFolderRoot->childCount(); i++)
@@ -2197,7 +2188,6 @@ void CWizCategoryView::sortFolders()
         if (!pFolder)
             return;
 
-  //      qDebug() << "after sort : " << i << "  " << pFolder->data(0, Qt::DisplayRole) << " " << pFolder->name();
         sortFolders(pFolder);
     }
 }

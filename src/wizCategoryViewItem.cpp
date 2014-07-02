@@ -654,9 +654,16 @@ bool CWizCategoryViewFolderItem::operator < (const QTreeWidgetItem &other) const
         nThis = setting->value("FolderPosition/" + location()).toInt();
     }
     //
-    if (nThis > 0 && nOther > 0 && nThis != nOther)
+    if (nThis != nOther)
     {
-        return nThis < nOther;
+        if (nThis > 0 && nOther > 0)
+        {
+            return nThis < nOther;
+        }
+        else
+        {
+            return nThis > 0;
+        }
     }
     else if (getSortOrder() != pOther->getSortOrder())
     {

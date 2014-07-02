@@ -152,6 +152,8 @@ int mainCore(int argc, char *argv[])
     QApplication::setApplicationName(QObject::tr("WizNote"));
     QApplication::setOrganizationName(QObject::tr("cn.wiz.wiznoteformac"));
 
+    QApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
+
     QIcon icon;
     icon.addPixmap(QPixmap(":/logo_16.png"));
     icon.addPixmap(QPixmap(":/logo_32.png"));
