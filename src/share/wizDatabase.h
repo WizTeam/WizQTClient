@@ -255,6 +255,7 @@ public:
     void SetObjectSyncTimeLine(int nDays);
     int GetObjectSyncTimeline();
     QString GetFolders();
+    QString GetFoldersPos();
     void SetFoldersPos(const QString& foldersPos, qint64 nVersion);
     void SetFolders(const QString& strFolders, qint64 nVersion, bool bSaveVersion);
 

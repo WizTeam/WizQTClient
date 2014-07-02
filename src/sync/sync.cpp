@@ -383,6 +383,9 @@ bool CWizKMSync::DownloadValue(const QString& strKey)
         return FALSE;
     }
     //
+    DEBUG_TOLOG(WizFormatString1(_T("Download key: %1"), strKey));
+    DEBUG_TOLOG(strServerValue);
+    //
     m_pDatabase->SetLocalValue(strKey, strServerValue, nServerVersion, FALSE);
     //
     m_mapOldKeyValues[strKey] = WIZKEYVALUEDATA(strServerValue, nServerVersion);

@@ -648,8 +648,31 @@ bool CWizCategoryViewFolderItem::operator < (const QTreeWidgetItem &other) const
         nOther = setting->value("FolderPosition/" + pOther->location()).toInt();
         nThis = setting->value("FolderPosition/" + location()).toInt();
     }
-
-    return nThis < nOther;
+    //
+    if (nThis > 0 && nOther > 0 && nThis != nOther)
+    {
+        return nThis < nOther;
+    }
+    //
+    QString strThis = text(0).toLower();
+    QString strOther = pOther->text(0).toLower();
+    //
+    static bool isSimpChinese = IsSimpChinese();
+    if (isSimpChinese)
+    {
+        if (QTextCodec* pCodec = QTextCodec::codecForName("GBK"))
+        {
+            QByteArray arrThis = pCodec->fromUnicode(strThis);
+            QByteArray arrOther = pCodec->fromUnicode(strOther);
+            //
+            std::string strThisA(arrThis.data(), arrThis.size());
+            std::string strOtherA(arrOther.data(), arrOther.size());
+            //
+            return strThisA.compare(strOtherA.c_str()) < 0;
+        }
+    }
+    //
+    return strThis.compare(strOther) < 0;
 }
 
 
