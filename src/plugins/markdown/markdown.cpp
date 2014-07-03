@@ -118,7 +118,6 @@ bool MarkdownPlugin::copyRes2Cache()
     QDir cacheDir(strPath);
     cacheDir.mkpath(strPath);
 
-
     QStringList lsRes;
     lsRes << ":/res/WizNote-Markdown.js" << ":/res/wiznote-markdown-inject.js";
 
