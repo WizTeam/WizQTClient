@@ -39,6 +39,8 @@ CWizSearchWidget::CWizSearchWidget(QWidget* parent /* = 0 */)
 
     connect(m_editSearch, SIGNAL(returnPressed()), \
             SLOT(on_search_returnPressed()));
+    connect(m_editSearch, SIGNAL(textChanged(QString)), \
+            SLOT(on_searchTextChanged(QString)), Qt::QueuedConnection);
 }
 
 void CWizSearchWidget::clear()
@@ -67,7 +69,13 @@ void CWizSearchWidget::on_search_returnPressed()
     Q_EMIT doSearch(m_editSearch->text());
 }
 
-
+void CWizSearchWidget::on_searchTextChanged(QString str)
+{
+    if (str.isEmpty())
+    {
+        Q_EMIT doSearch("");
+    }
+}
 
 CWizSearchEdit::CWizSearchEdit(QWidget* parent) : QLineEdit(parent)
 {

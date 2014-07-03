@@ -48,6 +48,7 @@ public:
 
 public Q_SLOTS:
     void on_search_returnPressed();
+    void on_searchTextChanged(QString str);
     void setWidthHint(int nWidth);
 
 private:
