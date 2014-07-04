@@ -1060,14 +1060,14 @@ void MainWindow::on_actionAutoSync_triggered()
 
 void MainWindow::on_actionSync_triggered()
 {
-    if (::WizIsOffline())
-    {
-        QMessageBox::information(this, tr("Info"), tr("Connection is not available, please check your network connection."));
-    }
-    else
-    {
+//    if (::WizIsOffline())
+//    {
+//        QMessageBox::information(this, tr("Info"), tr("Connection is not available, please check your network connection."));
+//    }
+//    else
+//    {
         syncAllData();
-    }
+//    }
 }
 
 void MainWindow::on_syncLogined()
