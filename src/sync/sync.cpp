@@ -10,6 +10,7 @@
 #include  "../share/wizSyncableDatabase.h"
 
 #define IDS_BIZ_SERVICE_EXPR    "Your {p} business service has expired."
+#define IDS_BIZ_NOTE_COUNT_LIMIT     "Your Biz Group notes count limit exceeded!"
 
 void GetSyncProgressRange(WizKMSyncProgress progress, int& start, int& count)
 {
@@ -822,6 +823,16 @@ bool UploadDocument(const WIZKBINFO& kbInfo, int size, int start, int total, int
                 //
                 //pEvents->SetStop(TRUE);
                 pEvents->OnBizServiceExpr(pDatabase);
+                return FALSE;
+            }
+            else if (server.GetLastErrorCode() == WIZKM_XMLRPC_ERROR_BIZ_NOTE_COUNT_LIMIT)
+            {
+                CString strMessage = WizFormatString0(IDS_BIZ_NOTE_COUNT_LIMIT);
+                //
+                QString strBizGUID;
+                pDatabase->GetBizGUID(local.strKbGUID, strBizGUID);
+                pDatabase->OnBizNoteCountLimit(strBizGUID, strMessage);
+                //
                 return FALSE;
             }
         }

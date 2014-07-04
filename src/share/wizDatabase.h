@@ -240,9 +240,11 @@ public:
     virtual void OnTrafficLimit(const QString& strErrorMessage);
     virtual void OnStorageLimit(const QString& strErrorMessage);
     virtual void OnBizServiceExpr(const QString& strBizGUID, const QString& strErrorMessage);
+    virtual void OnBizNoteCountLimit(const QString& strBizGUID, const QString& strErrorMessage);
     virtual bool IsTrafficLimit();
     virtual bool IsStorageLimit();
     virtual bool IsBizServiceExpr(const QString& strBizGUID);
+    virtual bool IsBizNoteCountLimit(const QString& strBizGUID);
     virtual bool GetStorageLimitMessage(QString& strErrorMessage);
 
     virtual bool setMeta(const QString& strSection, const QString& strKey, const QString& strValue);

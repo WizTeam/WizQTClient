@@ -32,6 +32,7 @@
 #define WIZKMSYNC_EXIT_TRAFFIC_LIMIT		304
 #define WIZKMSYNC_EXIT_STORAGE_LIMIT		305
 #define WIZKMSYNC_EXIT_BIZ_SERVICE_EXPR		380
+#define WIZKMSYNC_EXIT_BIZ_NOTE_COUNT_LIMIT		3032
 
 #define WIZKMSYNC_EXIT_INFO     "WIZKMSYNC_EXIT_INFO"
 
@@ -1166,15 +1167,32 @@ void CWizDatabase::OnBizServiceExpr(const QString& strBizGUID, const QString& st
     if (strBizGUID.isEmpty())
         return;
 
-    IWizSyncableDatabase* db = GetPersonalDatabase();
+    CWizDatabase* db = getPersonalDatabase();
     if (!db)
         return;
 
     QString strMetaSection;
-    if (!GetBizMetaName(strBizGUID, strMetaSection))
+    if (!db->GetBizMetaName(strBizGUID, strMetaSection))
         return;
     //
     db->setMeta(strMetaSection, _T("LastSyncErrorCode"), QString::number(WIZKMSYNC_EXIT_BIZ_SERVICE_EXPR));
+    db->setMeta(strMetaSection, _T("LastSyncErrorMessage"), strErrorMessage);
+}
+
+void CWizDatabase::OnBizNoteCountLimit(const QString& strBizGUID, const QString& strErrorMessage)
+{
+    if (strBizGUID.isEmpty())
+        return;
+
+    CWizDatabase* db = getPersonalDatabase();
+    if (!db)
+        return;
+
+    QString strMetaSection;
+    if (!db->GetBizMetaName(strBizGUID, strMetaSection))
+        return;
+    //
+    db->setMeta(strMetaSection, _T("LastSyncErrorCode"), QString::number(WIZKMSYNC_EXIT_BIZ_NOTE_COUNT_LIMIT));
     db->setMeta(strMetaSection, _T("LastSyncErrorMessage"), strErrorMessage);
 }
 
@@ -1194,17 +1212,32 @@ bool CWizDatabase::IsStorageLimit()
 
 bool CWizDatabase::IsBizServiceExpr(const QString& strBizGUID)
 {
-    IWizSyncableDatabase* db = GetPersonalDatabase();
+    CWizDatabase* db = getPersonalDatabase();
     if (!db)
         return false;
 
     QString strMetaSection;
-    if (!GetBizMetaName(strBizGUID, strMetaSection))
+    if (!db->GetBizMetaName(strBizGUID, strMetaSection))
         return false;
 
     QString strLastError = db->meta(strMetaSection, _T("LastSyncErrorCode"));
 
     return strLastError.toInt() == WIZKMSYNC_EXIT_BIZ_SERVICE_EXPR;
+}
+
+bool CWizDatabase::IsBizNoteCountLimit(const QString& strBizGUID)
+{
+    CWizDatabase* db = getPersonalDatabase();
+    if (!db)
+        return false;
+
+    QString strMetaSection;
+    if (!db->GetBizMetaName(strBizGUID, strMetaSection))
+        return false;
+
+    QString strLastError = db->meta(strMetaSection, _T("LastSyncErrorCode"));
+
+    return strLastError.toInt() == WIZKMSYNC_EXIT_BIZ_NOTE_COUNT_LIMIT;
 }
 
 bool CWizDatabase::GetStorageLimitMessage(QString &strErrorMessage)
@@ -1655,8 +1688,8 @@ bool CWizDatabase::GetBizGUID(const QString &strGroupGUID, QString &strBizGUID)
     if (!db)
         return false;
 
-    QString groupSection = strGroupGUID+"_BIZGUID";
-    strBizGUID = meta("GROUPS", groupSection);
+    QString groupSection = strGroupGUID.toUpper() + "_BIZGUID";
+    strBizGUID = db->meta("GROUPS", groupSection);
 
     return true;
 }
