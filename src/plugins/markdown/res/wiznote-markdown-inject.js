@@ -136,15 +136,25 @@
         try {
             $(objHtmDoc).find('label.wiz-todo-label').each(function(index) {
                 // 防止innerText后产生换行符
-                var div = $("<span></span>");
+                var span = $("<span></span>");
                 var parent = $(this).parent();
-                div[0].innerText = htmlUnEncode(parent[0].outerHTML);
-                div.insertAfter(parent);
+                span[0].innerText = htmlUnEncode(parent[0].outerHTML);
+                span.insertAfter(parent);
                 parent.remove();
             });
         } catch(e) {
             console.log(e);
         }
+        // try {
+        //     $(objHtmDoc).find('ol').each(function(index, link) {
+        //         var div = $("<div></div>");
+        //         div[0].innerText = htmlUnEncode($(this)[0].outerHTML);
+        //         div.insertAfter($(this));
+        //         $(this).remove();
+        //     });
+        // } catch (e) {
+        //     console.log(e);
+        // }
         replaceCodeP2Div();
         var text = removeMath(body.innerText);
         text = ParseMD2HTML(text);
@@ -198,7 +208,7 @@
                 // Look for math start delimiters and when
                 // found, set up the end delimiter.
                 //
-                if (block === "$$") {
+                if (block === inline || block === "$$") {
                     start = i;
                     end = block;
                     braces = 0;

@@ -86,6 +86,7 @@ protected Q_SLOTS:
     void on_btnJustifyLeft_clicked();
     void on_btnJustifyCenter_clicked();
     void on_btnJustifyRight_clicked();
+    void on_btnSearchReplace_clicked();
     void on_btnUnorderedList_clicked();
     void on_btnOrderedList_clicked();
     void on_btnTable_clicked();
