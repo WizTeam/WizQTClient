@@ -123,6 +123,9 @@ bool CWizKMSync::SyncCore()
         return FALSE;
     }
     //
+    if (m_pEvents->IsStop())
+        return FALSE;
+    //
     m_pEvents->OnStatus(_TR("Query deleted objects list"));
     if (!DownloadDeletedList(versionServer.nDeletedGUIDVersion))
     {
@@ -194,6 +197,9 @@ bool CWizKMSync::SyncCore()
     m_pEvents->OnStatus(_TR("Sync settings"));
     DownloadKeys();
     //
+    if (m_pEvents->IsStop())
+        return FALSE;
+    //
     m_pEvents->OnStatus(_TR("Download tags"));
     if (!DownloadTagList(versionServer.nTagVersion))
     {
@@ -221,6 +227,8 @@ bool CWizKMSync::SyncCore()
         return FALSE;
     }
     //
+    if (m_pEvents->IsStop())
+        return FALSE;
     //
     /*
     // 重新更新服务器的数据，因为如果pc客户端文件夹被移动后，
