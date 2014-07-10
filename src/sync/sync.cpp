@@ -1771,6 +1771,13 @@ bool WizSyncDatabase(const WIZUSERINFO& info, IWizKMSyncEvents* pEvents,
     /*
     ////获得群组信息////
     */
+    //
+    CWizGroupDataArray arrayGroup;
+    if (server.GetGroupList(arrayGroup))
+    {
+        pDatabase->OnDownloadGroups(arrayGroup);
+    }
+
     //only check biz list at first sync of day, or sync by manual
     if (!bBackground || WizIsDayFirstSync(pDatabase))
     {
@@ -1784,14 +1791,10 @@ bool WizSyncDatabase(const WIZUSERINFO& info, IWizKMSyncEvents* pEvents,
             pEvents->SetLastErrorCode(server.GetLastErrorCode());
             return false;
         }
+
+        syncGroupUsers(server, arrayGroup, pEvents, pDatabase, bBackground);
     }
 
-    //
-    CWizGroupDataArray arrayGroup;
-    if (server.GetGroupList(arrayGroup))
-    {
-        pDatabase->OnDownloadGroups(arrayGroup);
-    }
     //
     int groupCount = int(arrayGroup.size());
     pEvents->SetDatabaseCount(groupCount + 1);
@@ -1801,8 +1804,6 @@ bool WizSyncDatabase(const WIZUSERINFO& info, IWizKMSyncEvents* pEvents,
     */
     pEvents->OnStatus(_TR("Downloading settings"));
     DownloadAccountKeys(server, pDatabase);
-
-    syncGroupUsers(server, arrayGroup, pEvents, pDatabase, bBackground);
 
     /*
     ////下载消息////
