@@ -196,9 +196,9 @@ bool CWizDocumentListViewItem::operator <(const QListWidgetItem &other) const
     case CWizSortingPopupButton::SortingUpdateTime:
         return pOther->m_data.doc.tModified < m_data.doc.tModified;
     case CWizSortingPopupButton::SortingTitle:
-        return pOther->m_data.doc.strTitle < m_data.doc.strTitle;
+        return pOther->m_data.doc.strTitle.localeAwareCompare(m_data.doc.strTitle) > 0;
     case CWizSortingPopupButton::SortingLocation:
-        return pOther->m_data.strInfo < m_data.strInfo;
+        return pOther->m_data.strInfo.localeAwareCompare(m_data.strInfo) > 0;
     case CWizSortingPopupButton::SortingTag:
         return pOther->m_strTags < m_strTags;
     case CWizSortingPopupButton::SortingSize:
