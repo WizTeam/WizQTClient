@@ -116,13 +116,13 @@ void CWizDocumentWebViewPage::on_editorCommandPaste_triggered()
             textParase.setHtml(strHtml);
             strHtml = textParase.toHtml();
 
-            //TODO: use QRegExp to cap html
-            QWebPage page;
-            page.mainFrame()->setHtml(strHtml);
-            QWebElement elemBody(page.mainFrame()->documentElement().findFirst("body"));
-            if (!elemBody.isNull())
+            QRegExp regBodyContant("<body[^>]*>[\\s\\S]*</body>");
+            int index = regBodyContant.indexIn(strHtml);
+            if (index > -1)
             {
-                QString strBody = elemBody.toOuterXml();
+                QString strBody = regBodyContant.cap(0);
+                if (strBody.isEmpty())
+                    return;
 
                 QRegExp regBody = QRegExp("</?body[^>]*>", Qt::CaseInsensitive);
                 strBody.replace(regBody, "");
