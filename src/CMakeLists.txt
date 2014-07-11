@@ -341,6 +341,13 @@ if(UNIX)
         add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
             COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/share/ ${WIZNOTE_RESOURCE_DIR})
 
+        if(CMAKE_BUILD_TYPE STREQUAL "Release")
+            # resovle library dependency if build type is release
+            add_dependencies(WizNote coreplugin_plugin helloworld_plugin)
+
+
+        endif()
+
     elseif(NOT APPLE)
         add_executable(WizNote ${wiznote_SOURCES} ${wiznote_HEADERS} ${wiznote_FORM_HEADERS} ${wiznote_QM} ${wiznote_RC})
         set_target_properties(${PROJECT_NAME} PROPERTIES AUTOMOC_MOC_OPTIONS "-DQ_OS_LINUX")
