@@ -140,6 +140,13 @@ void installOnLinux()
 
 int mainCore(int argc, char *argv[])
 {
+    //QApplication a(argc, argv);
+    QDir dir(argv[0]);  // e.g. appdir/Contents/MacOS/appname
+    dir.cdUp();//assert(dir.cdUp());
+    dir.cdUp();assert(dir.cdUp());
+    dir.cd("PlugIns");assert(dir.cd("PlugIns"));  // e.g. appdir/Contents/PlugIns
+    QCoreApplication::setLibraryPaths(QStringList(dir.absolutePath()));
+    printf("after change, libraryPaths=(%s)\n", QCoreApplication::libraryPaths().join(",").toUtf8().data());
     QApplication a(argc, argv);
     //
 #if QT_VERSION < 0x050000

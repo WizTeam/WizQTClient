@@ -36,7 +36,7 @@ for L in $QTLIBS ; do
   # remove all unnecessary header files:
   rm -f $MYAPP.app/Contents/Frameworks/$L.framework/Headers
   rm -R -f $MYAPP.app/Contents/Frameworks/$L.framework/Versions/5/Headers
-  rm $MYAPP.app/Contents/Frameworks/$L.framework/Versions/5/$L_debug
+  rm $MYAPP.app/Contents/Frameworks/$L.framework/Versions/5/${L}_debug
 done
 for P in $PLUGINS ; do
   mkdir $MYAPP.app/Contents/PlugIns/$P
