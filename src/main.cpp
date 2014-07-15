@@ -140,24 +140,23 @@ void installOnLinux()
 
 int mainCore(int argc, char *argv[])
 {
-#ifdef Q_OS_MAC && QT_VERSION > 0x050000
-    //QApplication a(argc, argv);
+#if QT_VERSION > 0x050000
+#ifdef Q_OS_MAC
     QDir dir(argv[0]);  // e.g. appdir/Contents/MacOS/appname
-    dir.cdUp();//assert(dir.cdUp());
-    dir.cdUp();//assert(dir.cdUp());
-    dir.cd("PlugIns");//assert(dir.cd("PlugIns"));  // e.g. appdir/Contents/PlugIns
+    dir.cdUp();
+    dir.cdUp();
+    dir.cd("PlugIns");
     QCoreApplication::setLibraryPaths(QStringList(dir.absolutePath()));
     printf("after change, libraryPaths=(%s)\n", QCoreApplication::libraryPaths().join(",").toUtf8().data());
 #endif
     QApplication a(argc, argv);
-    //
-#if QT_VERSION < 0x050000
-    qInstallMsgHandler(Utils::Logger::messageHandler);
-#else
     qInstallMessageHandler(Utils::Logger::messageHandler);
     QApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
-#endif
 
+#else
+    QApplication a(argc, argv);
+    qInstallMsgHandler(Utils::Logger::messageHandler);
+#endif
 
     QApplication::setApplicationName(QObject::tr("WizNote"));
     QApplication::setOrganizationName(QObject::tr("cn.wiz.wiznoteformac"));
