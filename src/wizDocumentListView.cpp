@@ -18,6 +18,7 @@
 #include "utils/pathresolve.h"
 #include "sync/apientry.h"
 #include "wizWebSettingsDialog.h"
+#include "wizPopupButton.h"
 
 #include "sync/avatar.h"
 #include "thumbcache.h"
@@ -47,6 +48,11 @@ CWizDocumentListView::CWizDocumentListView(CWizExplorerApp& app, QWidget *parent
 
     m_nViewType = (ViewType)app.userSettings().get("VIEW_TYPE").toInt();
     m_nSortingType = app.userSettings().get("SORT_TYPE").toInt();
+    if (qAbs(m_nSortingType) < CWizSortingPopupButton::SortingCreateTime ||
+            qAbs(m_nSortingType) > CWizSortingPopupButton::SortingSize)
+    {
+        m_nSortingType = CWizSortingPopupButton::SortingCreateTime;
+    }
 
     connect(this, SIGNAL(itemSelectionChanged()), SLOT(on_itemSelectionChanged()));
 

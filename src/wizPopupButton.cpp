@@ -187,10 +187,34 @@ CWizSortingPopupButton::CWizSortingPopupButton(CWizExplorerApp& app, QWidget *pa
     createAction(tr("Sorting by tag"), SortingTag, menu, group);
     createAction(tr("Sorting by size"), SortingSize, menu, group);
 
+    menu->addSeparator();
+    QActionGroup* orderGroup = new QActionGroup(this);
+    createAction(tr("AscendingOrder"), AscendingOrder, menu, orderGroup);
+    createAction(tr("DescendingOrder"), DescendingOrder, menu, orderGroup);
+
     setMenu(menu);
 
     int type = m_app.userSettings().get("SORT_TYPE").toInt();
-    setActionChecked(menu, type);
+    if (type > 0 && type < AscendingOrder)
+    {
+        setActionChecked(menu, DescendingOrder);
+        setActionChecked(menu, type);
+        m_isAscendingOrder = false;
+    }
+    else if (type < 0 && type > -AscendingOrder)
+    {
+        setActionChecked(menu, AscendingOrder);
+        setActionChecked(menu, -type);
+        m_isAscendingOrder = true;
+    }
+    else
+    {
+        setActionChecked(menu, DescendingOrder);
+        m_isAscendingOrder = false;
+        type = SortingCreateTime;
+        setActionChecked(menu, type);
+        m_app.userSettings().set("SORT_TYPE", QString::number(type));
+    }
 }
 
 QSize CWizSortingPopupButton::sizeHint () const
@@ -207,9 +231,19 @@ void CWizSortingPopupButton::on_action_triggered()
     QAction* action = qobject_cast<QAction*>(sender());
 
     action->setChecked(true);
-    setText(action->text());
 
     int type = action->data().toInt();
+    if (AscendingOrder == type || DescendingOrder == type)
+    {
+        m_isAscendingOrder = (AscendingOrder == type);
+        int curType = m_app.userSettings().get("SORT_TYPE").toInt();
+        type = qAbs(curType) * (m_isAscendingOrder ? -1 : 1);
+    }
+    else
+    {
+        type = type * (m_isAscendingOrder ? -1 : 1);
+        setText(action->text());
+    }
     m_app.userSettings().set("SORT_TYPE", QString::number(type));
 
     Q_EMIT sortingTypeChanged(type);
