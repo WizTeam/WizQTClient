@@ -36,7 +36,7 @@ for L in $QTLIBS ; do
   # remove all unnecessary header files:
   rm -f $MYAPP.app/Contents/Frameworks/$L.framework/Headers
   rm -R -f $MYAPP.app/Contents/Frameworks/$L.framework/Versions/5/Headers
-  rm $MYAPP.app/Contents/Frameworks/$L.framework/Versions/5/${L}_debug
+  #rm $MYAPP.app/Contents/Frameworks/$L.framework/Versions/5/${L}_debug
 done
 for P in $PLUGINS ; do
   mkdir $MYAPP.app/Contents/PlugIns/$P
@@ -48,7 +48,6 @@ done
 
 # copy own application libs if necessary to /Contents/PlugIns/myapp/
 DISTPLUGINS=`cd $MYAPP.app/Contents/PlugIns; ls -1 */*.dylib` # extract all our *.dylib libs
-DISTPLUGINS2=`ls *.dylib`
  
 for I in $QTLIBS ; do 
   install_name_tool -id "@executable_path/../Frameworks/$I.framework/Versions/5/$I"\
@@ -72,15 +71,6 @@ for P in $DISTPLUGINS ; do # change ID for all *.dylib libs
       $MYAPP.app/Contents/PlugIns/$P
   done
 done
-
-for P in $DISTPLUGINS2 ; do # change ID for all *.dylib libs
-  install_name_tool -id "@executable_path/../PlugIns/$I" "$MYAPP.app/Contents/PlugIns/$P"
-  for L in $QTLIBS ; do # change any reference to Qt in our *.dylib libs
-    install_name_tool -change $L.framework/Versions/5/$L\
-      @executable_path/../Frameworks/$L.framework/Versions/5/$L\
-      $MYAPP.app/Contents/PlugIns/$P
-  done
-done
  
 for L in $ICULIBS ; do 
   install_name_tool -id "@executable_path/../PlugIns/icu/$L.dylib"\
@@ -93,3 +83,41 @@ for L in $ICULIBS ; do
 done
 # we do the same for additional own libs in /Contents/PlugIns/myapp
 
+
+DISTPLUGINS2=`cd $MYAPP.app/Contents/PlugIns; ls *.dylib`
+
+for P in $DISTPLUGINS2 ; do # change ID for all *.dylib libs
+  install_name_tool -id "@executable_path/../PlugIns/$I" "$MYAPP.app/Contents/PlugIns/$P"
+  for L in $QTLIBS ; do # change any reference to Qt in our *.dylib libs
+    install_name_tool -change $L.framework/Versions/5/$L\
+      @executable_path/../Frameworks/$L.framework/Versions/5/$L\
+      $MYAPP.app/Contents/PlugIns/$P
+  done
+done
+
+
+
+install_name_tool -change libicui18n.53.dylib @executable_path/../PlugIns/icu/libicui18n.53.dylib WizNote.app/Contents/Frameworks/QtWebKit.framework/Versions/5/QtWebKit
+install_name_tool -change libicuuc.53.dylib @executable_path/../PlugIns/icu/libicuuc.53.dylib WizNote.app/Contents/Frameworks/QtWebKit.framework/Versions/5/QtWebKit
+install_name_tool -change libicudata.53.dylib @executable_path/../PlugIns/icu/libicudata.53.dylib WizNote.app/Contents/Frameworks/QtWebKit.framework/Versions/5/QtWebKit
+
+cp -R -p ../WizQTClient/build/osx/WizNote-Entitlements.plist WizNote-Entitlements.plist
+
+APPLCERT="3rd Party Mac Developer Application: Wei Shijun"
+INSTCERT="3rd Party Mac Developer Installer: Wei Shijun"
+ 
+for I in $QTLIBS ; do # signing the Qt frameworks
+  codesign -f -s "$APPLCERT" \
+    $MYAPP.app/Contents/Frameworks/$I.framework/Versions/5/$I
+done
+for I in $DISTPLUGINS ; do # signing all *.dylib libs
+  codesign -f -s "$APPLCERT" \
+    $MYAPP.app/Contents/PlugIns/$I
+done
+
+codesign -f -s "$APPLCERT" -v --entitlements \
+  WizNote-Entitlements.plist \
+  "$MYAPP.app" --deep
+
+productbuild --component "$MYAPP.app" /Applications \
+  --sign "$INSTCERT" "$MYAPP.pkg"
