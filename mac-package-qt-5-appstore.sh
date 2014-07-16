@@ -22,10 +22,10 @@ DEST="$MYAPP.app" # Our final App directory
 ICUDIR="/usr/local/icu53.1"
 ICULIBS="libicui18n.53 libicudata.53 libicuuc.53"
 QTDIR="/usr/local/qt/5.3.1"
-QTLIBS="QtCore QtNetwork QtSql QtGui QtSvg QtScript QtOpenGL QtWidgets QtWebKit QtWebKitWidgets \
-  QtPrintSupport QtXml QtPositioning QtSensors QtConcurrent QtMacExtras QtMultimediaWidgets QtMultimedia" # QtQml QtQuick
-PLUGINS="sqldrivers imageformats iconengines platforms printsupport accessible \
-  position" # playlistformats sensors sensorgestures bearer audio
+QTLIBS="QtCore QtNetwork QtSql QtGui QtOpenGL QtWidgets QtWebKit QtWebKitWidgets \
+  QtPrintSupport QtXml QtPositioning QtSensors QtConcurrent QtMacExtras QtMultimediaWidgets QtMultimedia" # QtQml QtQuick QtSvg QtScript
+PLUGINS="sqldrivers imageformats  platforms printsupport accessible \
+  position" # playlistformats sensors sensorgestures bearer audio iconengines
  
 # make clean & create pathes 
 mkdir -p $DEST/Contents/Frameworks $DEST/Contents/PlugIns/icu $DEST/Contents/SharedSupport
@@ -42,6 +42,10 @@ for P in $PLUGINS ; do
   mkdir $MYAPP.app/Contents/PlugIns/$P
   cp -R -p $QTDIR/plugins/$P/*.dylib $MYAPP.app/Contents/PlugIns/$P/
 done
+
+rm -R -f $MYAPP.app/Contents/PlugIns/platforms/libqminimal.dylib
+rm -R -f $MYAPP.app/Contents/PlugIns/platforms/libqoffscreen.dylib
+
 for I in $ICULIBS ; do
     cp -p $ICUDIR/lib/$I.dylib $MYAPP.app/Contents/PlugIns/icu/
 done
@@ -100,6 +104,8 @@ done
 install_name_tool -change libicui18n.53.dylib @executable_path/../PlugIns/icu/libicui18n.53.dylib WizNote.app/Contents/Frameworks/QtWebKit.framework/Versions/5/QtWebKit
 install_name_tool -change libicuuc.53.dylib @executable_path/../PlugIns/icu/libicuuc.53.dylib WizNote.app/Contents/Frameworks/QtWebKit.framework/Versions/5/QtWebKit
 install_name_tool -change libicudata.53.dylib @executable_path/../PlugIns/icu/libicudata.53.dylib WizNote.app/Contents/Frameworks/QtWebKit.framework/Versions/5/QtWebKit
+install_name_tool -change $QTDIR/lib/QtCore.framework/Versions/5/QtCore @executable_path/../Frameworks/QtCore.framework/Versions/5/QtCore WizNote.app/Contents/Frameworks/QtXml.framework/Versions/5/QtXml
+
 
 cp -R -p ../WizQTClient/build/osx/WizNote-Entitlements.plist WizNote-Entitlements.plist
 

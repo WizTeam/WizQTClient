@@ -82,7 +82,7 @@ static inline QStringList getPluginPaths()
 
 const char* g_lpszDesktopFileName = "\
 [Desktop Entry]\n\
-Exec=%1wiznote\n\
+Exec=%1WizNote\n\
 Icon=wiznote\n\
 Type=Application\n\
 Terminal=false\n\
@@ -142,12 +142,12 @@ int mainCore(int argc, char *argv[])
 {
 #if QT_VERSION > 0x050000
 #ifdef Q_OS_MAC
-//    QDir dir(argv[0]);  // e.g. appdir/Contents/MacOS/appname
-//    dir.cdUp();
-//    dir.cdUp();
-//    dir.cd("PlugIns");
-//    QCoreApplication::setLibraryPaths(QStringList(dir.absolutePath()));
-//    printf("after change, libraryPaths=(%s)\n", QCoreApplication::libraryPaths().join(",").toUtf8().data());
+   QDir dir(argv[0]);  // e.g. appdir/Contents/MacOS/appname
+   dir.cdUp();
+   dir.cdUp();
+   dir.cd("PlugIns");
+   QCoreApplication::setLibraryPaths(QStringList(dir.absolutePath()));
+   printf("after change, libraryPaths=(%s)\n", QCoreApplication::libraryPaths().join(",").toUtf8().data());
 #endif
     QApplication a(argc, argv);
     qInstallMessageHandler(Utils::Logger::messageHandler);

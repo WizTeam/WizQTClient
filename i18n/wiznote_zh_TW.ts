@@ -320,12 +320,12 @@
 <context>
     <name>CWizDocumentListView</name>
     <message>
-        <location filename="../src/wizDocumentListView.cpp" line="707"/>
+        <location filename="../src/wizDocumentListView.cpp" line="713"/>
         <source>Note History</source>
         <translation>筆記版本歷史</translation>
     </message>
     <message>
-        <location filename="../src/wizDocumentListView.cpp" line="882"/>
+        <location filename="../src/wizDocumentListView.cpp" line="888"/>
         <source>Move Note: %1 to %2</source>
         <translation>移動筆記: %1 到 %2</translation>
     </message>
@@ -351,12 +351,12 @@
 <context>
     <name>CWizDocumentWebView</name>
     <message>
-        <location filename="../src/wizDocumentWebView.cpp" line="1256"/>
+        <location filename="../src/wizDocumentWebView.cpp" line="1289"/>
         <source>Image File</source>
         <translation>圖片文件</translation>
     </message>
     <message>
-        <location filename="../src/wizDocumentWebView.cpp" line="1256"/>
+        <location filename="../src/wizDocumentWebView.cpp" line="1289"/>
         <source>Images (*.png *.bmp *.gif *.jpg)</source>
         <translation>圖片 (*.png *.bmp *.gif *.jpg)</translation>
     </message>
@@ -883,6 +883,16 @@
         <source>Sorting by size</source>
         <translation>按大小排序</translation>
     </message>
+    <message>
+        <location filename="../src/wizPopupButton.cpp" line="192"/>
+        <source>AscendingOrder</source>
+        <translation>升序排列</translation>
+    </message>
+    <message>
+        <location filename="../src/wizPopupButton.cpp" line="193"/>
+        <source>DescendingOrder</source>
+        <translation>降序排列</translation>
+    </message>
 </context>
 <context>
     <name>CWizTagListWidget</name>
@@ -1111,16 +1121,6 @@
         <location filename="../src/wizmainwindow.cpp" line="983"/>
         <source>%1 notes</source>
         <translation>%1 條筆記</translation>
-    </message>
-    <message>
-        <location filename="../src/wizmainwindow.cpp" line="1065"/>
-        <source>Info</source>
-        <translation>提示</translation>
-    </message>
-    <message>
-        <location filename="../src/wizmainwindow.cpp" line="1065"/>
-        <source>Connection is not available, please check your network connection.</source>
-        <translation>網絡連接不可用,請檢查網絡連接.</translation>
     </message>
     <message>
         <location filename="../src/wizmainwindow.cpp" line="1105"/>
@@ -1623,17 +1623,17 @@
     <message>
         <location filename="../src/main.cpp" line="102"/>
         <location filename="../src/main.cpp" line="103"/>
-        <location filename="../src/main.cpp" line="153"/>
+        <location filename="../src/main.cpp" line="161"/>
         <source>WizNote</source>
         <translation>爲知筆記</translation>
     </message>
     <message>
-        <location filename="../src/main.cpp" line="154"/>
+        <location filename="../src/main.cpp" line="162"/>
         <source>cn.wiz.wiznoteformac</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/main.cpp" line="283"/>
+        <location filename="../src/main.cpp" line="291"/>
         <source>Can not open database</source>
         <translation>無法開啟資料庫</translation>
     </message>
@@ -1685,7 +1685,7 @@
     <message>
         <location filename="../src/wizCategoryView.cpp" line="50"/>
         <location filename="../src/wizCategoryView.cpp" line="53"/>
-        <location filename="../src/wizDocumentListView.cpp" line="30"/>
+        <location filename="../src/wizDocumentListView.cpp" line="31"/>
         <location filename="../src/wizactions.cpp" line="72"/>
         <location filename="../src/wizattachmentlistwidget.cpp" line="31"/>
         <source>Delete</source>
@@ -1825,27 +1825,27 @@
         <translation>退出羣組</translation>
     </message>
     <message>
-        <location filename="../src/wizDocumentListView.cpp" line="31"/>
+        <location filename="../src/wizDocumentListView.cpp" line="32"/>
         <source>Tags...</source>
         <translation>標籤...</translation>
     </message>
     <message>
-        <location filename="../src/wizDocumentListView.cpp" line="32"/>
+        <location filename="../src/wizDocumentListView.cpp" line="33"/>
         <source>Move Note...</source>
         <translation>移動筆記...</translation>
     </message>
     <message>
-        <location filename="../src/wizDocumentListView.cpp" line="34"/>
+        <location filename="../src/wizDocumentListView.cpp" line="35"/>
         <source>Note History...</source>
         <translation>版本歷史...</translation>
     </message>
     <message>
-        <location filename="../src/wizDocumentListView.cpp" line="35"/>
+        <location filename="../src/wizDocumentListView.cpp" line="36"/>
         <source>Copy Document Link</source>
         <translation>複製筆記鏈接</translation>
     </message>
     <message>
-        <location filename="../src/wizDocumentListView.cpp" line="33"/>
+        <location filename="../src/wizDocumentListView.cpp" line="34"/>
         <source>Copy Note</source>
         <translation>複製筆記</translation>
     </message>
@@ -2033,8 +2033,8 @@
         <translation>段落方向</translation>
     </message>
     <message>
-        <location filename="../src/wizDocumentListViewItem.cpp" line="145"/>
-        <location filename="../src/wizDocumentListViewItem.cpp" line="174"/>
+        <location filename="../src/wizDocumentListViewItem.cpp" line="151"/>
+        <location filename="../src/wizDocumentListViewItem.cpp" line="186"/>
         <source>Unknown</source>
         <translation>未知</translation>
     </message>
@@ -2269,7 +2269,7 @@
 <context>
     <name>WizService::MessageCompleterModel</name>
     <message>
-        <location filename="../src/messagecompleter.cpp" line="122"/>
+        <location filename="../src/messagecompleter.cpp" line="124"/>
         <source>all</source>
         <translation type="unfinished"></translation>
     </message>
