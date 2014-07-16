@@ -647,6 +647,11 @@ bool CWizCategoryViewFolderItem::operator < (const QTreeWidgetItem &other) const
         return false;
     }
 
+    if (getSortOrder() != pOther->getSortOrder())
+    {
+        return getSortOrder() < pOther->getSortOrder();
+    }
+
     int nThis = 0, nOther = 0;
     if (!pOther->location().isEmpty()) {
         QSettings* setting = ExtensionSystem::PluginManager::settings();
@@ -665,10 +670,7 @@ bool CWizCategoryViewFolderItem::operator < (const QTreeWidgetItem &other) const
             return nThis > 0;
         }
     }
-    else if (getSortOrder() != pOther->getSortOrder())
-    {
-        return getSortOrder() < pOther->getSortOrder();
-    }
+
     //
     QString strThis = text(0).toLower();
     QString strOther = pOther->text(0).toLower();
