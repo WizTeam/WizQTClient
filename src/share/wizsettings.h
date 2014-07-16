@@ -99,6 +99,9 @@ public:
     bool autoCheckUpdate() const;
     void setAutoCheckUpdate(bool bAutoCheckUpdate);
 
+    bool showSystemTrayIcon() const;
+    void setShowSystemTrayIcon(bool bShowTrayIcon);
+
     QString locale();
     void setLocale(const QString& strLocale);
 

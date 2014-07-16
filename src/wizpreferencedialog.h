@@ -57,6 +57,7 @@ public Q_SLOTS:
 
 private slots:
     void on_checkBox_stateChanged(int arg1);
+    void on_checkBoxTrayIcon_toggled(bool checked);
 };
 
 

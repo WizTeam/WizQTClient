@@ -112,7 +112,7 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     , m_bRestart(false)
     , m_bLogoutRestart(false)
     , m_bUpdatingSelection(false)
-    , m_tray(new QSystemTrayIcon(QApplication::windowIcon(), this))
+    , m_tray(NULL)
 {
 #ifndef Q_OS_MAC
     clientLayout()->addWidget(m_toolBar);
@@ -177,8 +177,7 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     //
     m_sync->start(QThread::IdlePriority);
     //
-    initTrayIcon(m_tray);
-    m_tray->show();
+    setSystemTrayIconVisible(userSettings().showSystemTrayIcon());
 }
 
 bool MainWindow::eventFilter(QObject* watched, QEvent* event)
@@ -289,6 +288,36 @@ void MainWindow::on_checkUpgrade_finished(bool bUpgradeAvaliable)
     }
 }
 
+void MainWindow::setSystemTrayIconVisible(bool bVisible)
+{
+    //FIXME: There is a bug. Must delete trayicon at hide, otherwise will crash when show it again.
+    if (bVisible)
+    {
+        //
+        if (m_tray)
+        {
+            if (m_tray->isVisible())
+                return;
+
+            delete m_tray;
+        }
+
+        //
+        m_tray = new QSystemTrayIcon(QApplication::windowIcon(), this);
+        initTrayIcon(m_tray);
+        m_tray->show();
+    }
+    else
+    {
+        if (m_tray)
+        {
+            m_tray->hide();
+            delete m_tray;
+            m_tray = 0;
+        }
+    }
+}
+
 void MainWindow::on_trayIcon_newDocument_clicked()
 {
     setVisible(true);
@@ -296,6 +325,12 @@ void MainWindow::on_trayIcon_newDocument_clicked()
     raise();
 
     on_actionNewNote_triggered();
+}
+
+void MainWindow::on_hideTrayIcon_clicked()
+{
+    setSystemTrayIconVisible(false);
+    userSettings().setShowSystemTrayIcon(false);
 }
 
 void MainWindow::shiftVisableStatus()
@@ -1216,6 +1251,7 @@ void MainWindow::on_actionViewToggleFullscreen_triggered()
 {
 #ifdef Q_OS_MAC
     toggleFullScreenMode(this);
+    //showFullScreen();
     m_actions->toggleActionText(WIZACTION_GLOBAL_TOGGLE_FULLSCREEN);
 #endif // Q_OS_MAC
 }
@@ -1901,6 +1937,10 @@ void MainWindow::initTrayIcon(QSystemTrayIcon* trayIcon)
     QAction* actionNewNote = menu->addAction(tr("New Note"));
     connect(actionNewNote, SIGNAL(triggered()), SLOT(on_trayIcon_newDocument_clicked()));
 
+    //
+    menu->addSeparator();
+    QAction* actionHideTrayIcon = menu->addAction(tr("Hide TrayIcon"));
+    connect(actionHideTrayIcon, SIGNAL(triggered()), SLOT(on_hideTrayIcon_clicked()));
     //
     menu->addSeparator();
     QAction* actionLogout = menu->addAction(tr("Logout"));

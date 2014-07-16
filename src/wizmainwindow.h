@@ -201,7 +201,7 @@ public:
     static void quickSyncKb(const QString& kbGuid);
 
     void checkWizUpdate();
-
+    void setSystemTrayIconVisible(bool bVisible);
     //
     void viewDocumentByWizKMURL(const QString& strKMURL);
 
@@ -317,6 +317,7 @@ public Q_SLOTS:
 #endif
 
     void on_trayIcon_newDocument_clicked();
+    void on_hideTrayIcon_clicked();
     //
     void shiftVisableStatus();
 
