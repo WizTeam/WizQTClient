@@ -121,6 +121,7 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     connect(qApp, SIGNAL(aboutToQuit()), SLOT(on_application_aboutToQuit()));
     connect(qApp, SIGNAL(lastWindowClosed()), qApp, SLOT(quit())); // Qt bug: Qt5 bug
     qApp->installEventFilter(this);
+    installEventFilter(this);
 
     //CWizCloudPool::instance()->init(&m_dbMgr);
 
@@ -211,6 +212,26 @@ bool MainWindow::eventFilter(QObject* watched, QEvent* event)
             return false;
         }
     }
+#ifdef Q_OS_MAC
+    else if (watched == this)
+    {
+        if (event->type() == QEvent::WindowStateChange)
+        {
+            if (QWindowStateChangeEvent* stateEvent = dynamic_cast<QWindowStateChangeEvent*>(event))
+            {
+                if (stateEvent->oldState() == Qt::WindowFullScreen)
+                {
+                    m_toolBar->show();
+                    m_splitter->widget(0)->show();
+                    m_splitter->widget(1)->show();
+                }
+                else if (windowState() == Qt::WindowFullScreen)
+                {
+                }
+            }
+        }
+    }
+#endif
 
     //
     return _baseClass::eventFilter(watched, event);
@@ -1244,15 +1265,27 @@ void MainWindow::on_actionViewToggleCategory_triggered()
         category->show();
     }
 
-    m_actions->toggleActionText(WIZACTION_GLOBAL_TOGGLE_CATEGORY);
+    QWidget* doclist = m_splitter->widget(1);
+    if (doclist->isVisible()) {
+        doclist->hide();
+    } else {
+        doclist->show();
+    }
+
+    //m_actions->toggleActionText(WIZACTION_GLOBAL_TOGGLE_CATEGORY);
 }
 
 void MainWindow::on_actionViewToggleFullscreen_triggered()
 {
 #ifdef Q_OS_MAC
-    toggleFullScreenMode(this);
-    //showFullScreen();
-    m_actions->toggleActionText(WIZACTION_GLOBAL_TOGGLE_FULLSCREEN);
+    //toggleFullScreenMode(this);
+    setWindowState(windowState() ^ Qt::WindowFullScreen);
+    if (windowState() == Qt::WindowFullScreen)
+    {
+        m_toolBar->hide();
+        m_splitter->widget(0)->hide();
+        m_splitter->widget(1)->hide();
+    }
 #endif // Q_OS_MAC
 }
 
