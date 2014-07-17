@@ -4,11 +4,13 @@
 #include <QString>
 
 #include "apientry.h"
+#include "avatar.h"
 #include "rapidjson/document.h"
 
 #include  "../share/wizSyncableDatabase.h"
 
 #define IDS_BIZ_SERVICE_EXPR    "Your {p} business service has expired."
+#define IDS_BIZ_NOTE_COUNT_LIMIT     "Your Biz Group notes count limit exceeded!"
 
 void GetSyncProgressRange(WizKMSyncProgress progress, int& start, int& count)
 {
@@ -121,6 +123,9 @@ bool CWizKMSync::SyncCore()
         return FALSE;
     }
     //
+    if (m_pEvents->IsStop())
+        return FALSE;
+    //
     m_pEvents->OnStatus(_TR("Query deleted objects list"));
     if (!DownloadDeletedList(versionServer.nDeletedGUIDVersion))
     {
@@ -192,6 +197,9 @@ bool CWizKMSync::SyncCore()
     m_pEvents->OnStatus(_TR("Sync settings"));
     DownloadKeys();
     //
+    if (m_pEvents->IsStop())
+        return FALSE;
+    //
     m_pEvents->OnStatus(_TR("Download tags"));
     if (!DownloadTagList(versionServer.nTagVersion))
     {
@@ -219,6 +227,8 @@ bool CWizKMSync::SyncCore()
         return FALSE;
     }
     //
+    if (m_pEvents->IsStop())
+        return FALSE;
     //
     /*
     // 重新更新服务器的数据，因为如果pc客户端文件夹被移动后，
@@ -381,6 +391,9 @@ bool CWizKMSync::DownloadValue(const QString& strKey)
     {
         return FALSE;
     }
+    //
+    DEBUG_TOLOG(WizFormatString1(_T("Download key: %1"), strKey));
+    DEBUG_TOLOG(strServerValue);
     //
     m_pDatabase->SetLocalValue(strKey, strServerValue, nServerVersion, FALSE);
     //
@@ -818,6 +831,16 @@ bool UploadDocument(const WIZKBINFO& kbInfo, int size, int start, int total, int
                 //
                 //pEvents->SetStop(TRUE);
                 pEvents->OnBizServiceExpr(pDatabase);
+                return FALSE;
+            }
+            else if (server.GetLastErrorCode() == WIZKM_XMLRPC_ERROR_BIZ_NOTE_COUNT_LIMIT)
+            {
+                CString strMessage = WizFormatString0(IDS_BIZ_NOTE_COUNT_LIMIT);
+                //
+                QString strBizGUID;
+                pDatabase->GetBizGUID(local.strKbGUID, strBizGUID);
+                pDatabase->OnBizNoteCountLimit(strBizGUID, strMessage);
+                //
                 return FALSE;
             }
         }
@@ -1616,125 +1639,52 @@ bool WizDownloadMessages(IWizKMSyncEvents* pEvents, CWizKMAccountsServer& server
     return TRUE;
 }
 
-void WizDownloadUserAvatars(IWizKMSyncEvents* pEvents, IWizSyncableDatabase* pDatabase, bool bBackground)
+bool WizIsDayFirstSync(IWizSyncableDatabase* pDatabase)
 {
-    //
-    /*
-    ////每天一次，或者用户手工同步////
-    */
-    //TODO: modify this code
-    /*
-    if (!::WizDayOnce(WIZKM_REG_KEY_ROOT, _T("DownloadUserAvatars")))
-    {
-        if (bBackground)
-            return;
-    }
-    */
-    //
-    //TODO: getavatar url
-    //QString strURLAvatar = ::WizKMWebSiteGetReturn(_T("avatar"));
-    CString strURLAvatar = "";
-    strURLAvatar.Trim();
-    //
-    if (0 != strURLAvatar.Find(_T("http"))
-        || strURLAvatar.GetLength() > 1024)
-    {
-        return;
-    }
-    //
-    if (pEvents->IsStop())
-        return;
-    //
+    COleDateTime lastSyncTime = pDatabase->GetLastSyncTime();
+    return lastSyncTime.daysTo(COleDateTime::currentDateTime()) > 0;
+}
+
+void WizDownloadBizUserAvatars(IWizKMSyncEvents* pEvents, IWizSyncableDatabase* pDatabase, bool bBackground)
+{
     pEvents->OnStatus("Downloading user image");
-    //
-    CWizStdStringArray arrayPersonalGroupUser;
-    //
-    /*
-    ////普通群组头像不需要主动下载，额可以在阅读的时候下载////
-    //db.GetAllGroupUserIds(arrayPersonalGroupUser);		////
-    */
     //
     CWizStdStringArray arrayBizGroupUser;
     pDatabase->GetAllBizUserIds(arrayBizGroupUser);
-    //
-    QString strCurrentUserID = pDatabase->GetUserId();
-    //
-    CWizStdStringArray arrayAllUserID;
-    arrayAllUserID.push_back(strCurrentUserID);
-    arrayAllUserID.insert(arrayAllUserID.begin(), arrayPersonalGroupUser.begin(), arrayPersonalGroupUser.end());
-    arrayAllUserID.insert(arrayAllUserID.begin(), arrayBizGroupUser.begin(), arrayBizGroupUser.end());
-    //
-    std::set<QString> downloaded;
-    //
-    COleDateTime tNow = ::WizGetCurrentTime();
-    //
-    /*
-    QString strSettingsFileName = ::WizKMGetAvatarsPath() + _T("settings.ini");
-    CWizIniFileEx settings;
-    settings.LoadFromFile(strSettingsFileName);
-
-    for (CWizStdStringArray::const_iterator it = arrayAllUserID.begin();
-        it != arrayAllUserID.end();
+    for (CWizStdStringArray::const_iterator it = arrayBizGroupUser.begin();
+        it != arrayBizGroupUser.end();
         it++)
     {
-        QString strUserId = *it;
-        //
-        if (downloaded.find(strUserId) != downloaded.end())
-            continue;
-        //
-        if (pEvents->IsStop())
-            break;
-        //
-        downloaded.insert(strUserId);
-        //
-        QString strURL(strURLAvatar);
-        strURL.Replace(_T("{userGuid}"), strUserId);
-        //
-        QString strFileName = ::WizKMGetAvatarsPath() + strUserId + _T(".png");
-        //
-        if (strUserId != strCurrentUserID)
+        if (!WizService::AvatarHost::isFileExists(*it))
         {
-            if (PathFileExists(strFileName))
-            {
-                COleDateTimeSpan ts = tNow - WizGetFileModifiedTime(strFileName);
-                if (ts.GetDays() <= 7)
-                    continue;
-                //////不需要更新////
-            }
-            else
-            {
-                QString strKey = strUserId;
-                const QString& strUserImageSection = _T("UserImage");
-                QString strTime = settings.GetStringDef(strUserImageSection, strKey);
-                if (!strTime.isEmpty())
-                {
-                    COleDateTimeSpan ts = tNow - ::WizStringToDateTime(strTime);
-                    if (ts.GetDays() <= 7)
-                        continue;
-                }
-                //
-                settings.SetString(strUserImageSection, strKey, ::WizDateTimeToString(tNow));
-            }
+            WizService::AvatarHost::load(*it, false);
         }
-        //
-        QString strLeft;
-        QString strRight;
-        ::WizStringSimpleSplit(strUserId, '@', strLeft, strRight);
-        pEvents->OnStatus(strLeft);
-        //
-        if (SUCCEEDED(URLDownloadToFile(NULL, strURL, strFileName, 0, NULL)))
+
+        if (pEvents->IsStop())
+            return;
+    }
+}
+//
+bool WizSyncPersonalGroupAvatar(IWizSyncableDatabase* pPersonalGroupDatabase)
+{
+    QString strt = pPersonalGroupDatabase->meta(_T("SYNC_INFO"), _T("SyncPersonalGroupAvatar"));
+    if (!strt.isEmpty())
+    {
+        if (QDateTime::fromString(strt).daysTo(QDateTime::currentDateTime()) > 7)
         {
-            if (strUserId == strCurrentUserID)
+            _TR("Remove all user avatar.");
+            CWizStdStringArray arrayUsers;
+            pPersonalGroupDatabase->getAllNotesOwners(arrayUsers);
+            for (CWizStdStringArray::const_iterator it = arrayUsers.begin();
+                 it != arrayUsers.end(); it ++)
             {
-                pEvents->OnSyncStep(wizsyncstepUserAvatarDownloaded, 0);
+                WizService::AvatarHost::deleteAvatar(*it);
             }
         }
     }
-    //
-    settings.SaveToUnicodeFile(strSettingsFileName);
-    */
+
+    return pPersonalGroupDatabase->setMeta(_T("SYNC_INFO"), _T("SyncPersonalGroupAvatar"), QDateTime::currentDateTime().toString());
 }
-//
 
 QString downloadFromUrl(const QString& strUrl)
 {
@@ -1771,7 +1721,8 @@ void syncGroupUsers(CWizKMAccountsServer& server, const CWizGroupDataArray& arra
          it++)
     {
         const WIZGROUPDATA& g = *it;
-        if (!g.bizGUID.isEmpty()) {
+        if (!g.bizGUID.isEmpty())
+        {
             QString strUrl = WizService::ApiEntry::groupUsersUrl(server.GetToken(), g.bizGUID, g.strGroupGUID);
             QString strJsonRaw = downloadFromUrl(strUrl);
 
@@ -1821,23 +1772,29 @@ bool WizSyncDatabase(const WIZUSERINFO& info, IWizKMSyncEvents* pEvents,
     ////获得群组信息////
     */
     //
-    CWizBizDataArray arrayBiz;
-    if (server.GetBizList(arrayBiz))
-    {
-        pDatabase->OnDownloadBizs(arrayBiz);
-    }
-    else
-    {
-        pEvents->SetLastErrorCode(server.GetLastErrorCode());
-        return false;
-    }
-
-    //
     CWizGroupDataArray arrayGroup;
     if (server.GetGroupList(arrayGroup))
     {
         pDatabase->OnDownloadGroups(arrayGroup);
     }
+
+    //only check biz list at first sync of day, or sync by manual
+    if (!bBackground || WizIsDayFirstSync(pDatabase))
+    {
+        CWizBizDataArray arrayBiz;
+        if (server.GetBizList(arrayBiz))
+        {
+            pDatabase->OnDownloadBizs(arrayBiz);
+        }
+        else
+        {
+            pEvents->SetLastErrorCode(server.GetLastErrorCode());
+            return false;
+        }
+
+        syncGroupUsers(server, arrayGroup, pEvents, pDatabase, bBackground);
+    }
+
     //
     int groupCount = int(arrayGroup.size());
     pEvents->SetDatabaseCount(groupCount + 1);
@@ -1847,8 +1804,6 @@ bool WizSyncDatabase(const WIZUSERINFO& info, IWizKMSyncEvents* pEvents,
     */
     pEvents->OnStatus(_TR("Downloading settings"));
     DownloadAccountKeys(server, pDatabase);
-
-    syncGroupUsers(server, arrayGroup, pEvents, pDatabase, bBackground);
 
     /*
     ////下载消息////
@@ -1911,6 +1866,12 @@ bool WizSyncDatabase(const WIZUSERINFO& info, IWizKMSyncEvents* pEvents,
         {
             pGroupDatabase->SaveLastSyncTime();
             pEvents->OnStatus(WizFormatString1(_TR("Sync group %1 done"), group.strGroupName));
+
+            // sync personal group avatar.  biz group avatar has been processed when get biz info
+            if (!group.IsBiz())
+            {
+                WizSyncPersonalGroupAvatar(pGroupDatabase);
+            }
         }
         else
         {
@@ -1921,8 +1882,6 @@ bool WizSyncDatabase(const WIZUSERINFO& info, IWizKMSyncEvents* pEvents,
         pDatabase->CloseGroupDatabase(pGroupDatabase);
     }
     //
-    //
-    WizDownloadUserAvatars(pEvents, pDatabase, bBackground);
     //
     pEvents->OnStatus(_TR("-------Downloading notes--------------"));
     //

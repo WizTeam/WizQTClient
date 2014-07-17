@@ -3,6 +3,7 @@
 
 #include <QMetaType>
 #include <QImage>
+#include <QMap>
 #include "wizqthelper.h"
 
 const UINT WIZ_USERGROUP_ADMIN = 0;
@@ -625,6 +626,7 @@ struct WIZBIZDATA
     int bizUserRole;
     int bizLevel;
     bool bizIsDue;
+    std::map<QString, QString> mapAvatarChanges;
 };
 
 

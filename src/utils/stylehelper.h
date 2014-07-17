@@ -40,7 +40,9 @@ public:
     static int margin();
     static int thumbnailHeight();
 
+
     static QString themeName();
+    static QString skinResourceFileName(const QString& strName);
     static QIcon loadIcon(const QString& strName);
 
     static int treeViewItemHeight();

@@ -48,14 +48,16 @@ class AvatarHostPrivate: public QObject
 
 public:
     explicit AvatarHostPrivate(AvatarHost* avatarHost);
-    void load(const QString& strUserGUID, bool bForce);
-    bool avatar(const QString& strUserId, QPixmap* pixmap);
-    QPixmap orgAvatar(const QString& strUserId);
-    bool customSizeAvatar(const QString& strUserGUID, int width, int height, QString& strFilePath);
+    void load(const QString& strUserID, bool bForce);
+    bool avatar(const QString& strUserID, QPixmap* pixmap);
+    QPixmap orgAvatar(const QString& strUserID);
+    bool customSizeAvatar(const QString& strUserID, int width, int height, QString& strFilePath);
 
-    bool isLoaded(const QString& strUserId);
-    QString keyFromGuid(const QString& strUserGUID) const;
+    bool isLoaded(const QString& strUserID);
+    bool isFileExists(const QString& strUserID);
+    QString keyFromUserID(const QString& strUserID) const;
     QString defaultKey() const;
+    bool deleteAvatar(const QString& strUserID);
     //
     void waitForDone();
 
@@ -66,13 +68,13 @@ private:
     QStringList m_listUser; // download pool
     QString m_strUserCurrent;
 
-    bool isNeedUpdate(const QString& strUserGUID);
-    void loadCache(const QString& strUserGUID);
+    bool isNeedUpdate(const QString& strUserID);
+    void loadCache(const QString& strUserID);
     void loadCacheDefault();
     void loadCacheFromFile(const QString &key, const QString& strFilePath);
     //
-    QPixmap loadOrg(const QString& strUserGUID, bool bForce);
-    QPixmap loadOrg(const QString& strUserGUID);
+    QPixmap loadOrg(const QString& strUserID, bool bForce);
+    QPixmap loadOrg(const QString& strUserID);
 
     void download_impl();
 
@@ -80,7 +82,7 @@ private:
 
 private Q_SLOTS:
     void on_thread_started();
-    void on_downloaded(QString strUserGUID, bool bSucceed);
+    void on_downloaded(QString strUserID, bool bSucceed);
 };
 
 

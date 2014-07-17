@@ -24,13 +24,6 @@ CWizPreferenceWindow::CWizPreferenceWindow(CWizExplorerApp& app, QWidget* parent
     // FIXME: proxy settings will back soon!!!
 //    ui->labelProxySettings->hide();
 
-    // hide language choice and upgrade for appstore
-#ifdef BUILD4APPSTORE
-    QWidget* commWidget = ui->tabWidget->widget(0);
-    ui->tabWidget->removeTab(0);
-    commWidget->deleteLater();
-#endif
-
     // general tab
     ::WizGetTranslatedLocales(m_locales);
     ui->comboLang->blockSignals(true);
@@ -49,6 +42,17 @@ CWizPreferenceWindow::CWizPreferenceWindow(CWizExplorerApp& app, QWidget* parent
     Qt::CheckState checkState = userSettings().autoCheckUpdate() ? Qt::Checked : Qt::Unchecked;
     ui->checkBox->setCheckState(checkState);
     ui->checkBox->blockSignals(false);
+
+    ui->checkBoxTrayIcon->blockSignals(true);
+    checkState = userSettings().showSystemTrayIcon() ? Qt::Checked : Qt::Unchecked;
+    ui->checkBoxTrayIcon->setCheckState(checkState);
+    ui->checkBoxTrayIcon->blockSignals(false);
+
+#ifdef BUILD4APPSTORE
+    // hide language choice and upgrade for appstore
+    ui->comboLang->setVisible(false);
+    ui->checkBox->setVisible(false);
+#endif
 
     // reading tab
     switch (userSettings().noteViewMode())
@@ -325,4 +329,11 @@ void CWizPreferenceWindow::on_checkBox_stateChanged(int arg1)
         Core::Internal::MainWindow* mainWindow = qobject_cast<Core::Internal::MainWindow*>(m_app.mainWindow());
         mainWindow->checkWizUpdate();
     }
+}
+
+void CWizPreferenceWindow::on_checkBoxTrayIcon_toggled(bool checked)
+{
+    m_app.userSettings().setShowSystemTrayIcon(checked);
+    Core::Internal::MainWindow* mainWindow = qobject_cast<Core::Internal::MainWindow*>(m_app.mainWindow());
+    mainWindow->setSystemTrayIconVisible(checked);
 }

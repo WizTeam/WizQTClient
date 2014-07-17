@@ -19,6 +19,7 @@ if(APPLE)
     SET(CMAKE_INSTALL_RPATH "@loader_path/..;@executable_path/..")
 else(APPLE)
     set(CMAKE_INSTALL_RPATH "$ORIGIN;$ORIGIN/..;$ORIGIN/../lib/wiznote/plugins")
+    set (openssl-linked on)
 endif(APPLE)
 
 if(NOT CMAKE_BUILD_TYPE)

@@ -95,6 +95,8 @@ public Q_SLOTS:
     void on_action_openAttachment();
     void on_action_deleteAttachment();
     void on_list_itemDoubleClicked(QListWidgetItem* item);
+    //
+    void forceRepaint();
 };
 
 

@@ -1,7 +1,7 @@
 #ifndef WIZUSERINFOWIDGETBASE_H
 #define WIZUSERINFOWIDGETBASE_H
 
-#ifndef Q_OS_MAC
+//#ifndef Q_OS_MAC
 
 #include <QToolButton>
 
@@ -30,6 +30,6 @@ protected:
     virtual bool hitButton(const QPoint& pos) const;
 };
 
-#endif //Q_OS_MAC
+//#endif //Q_OS_MAC
 
 #endif // WIZUSERINFOWIDGETBASE_H

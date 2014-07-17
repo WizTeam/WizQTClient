@@ -1,9 +1,9 @@
 #ifndef CWizMacToolBar_H
 #define CWizMacToolBar_H
 
+#ifdef USECOCOATOOLBAR
 #include <QtGlobal>
 
-#ifdef Q_OS_MAC
 #include <QtCore/QObject>
 #include <QtCore/QString>
 #include <QtCore/QUrl>

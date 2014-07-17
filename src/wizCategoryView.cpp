@@ -992,11 +992,13 @@ void CWizCategoryView::on_action_user_newFolder_confirmed(int result)
 
     if (currentCategoryItem<CWizCategoryViewAllFoldersItem>()) {
         strLocation = "/" + strFolderName + "/";
+        //moveFolderPostionBeforeTrash(strLocation);
     } else if (CWizCategoryViewFolderItem* p = currentCategoryItem<CWizCategoryViewFolderItem>()) {
         strLocation = p->location() + strFolderName + "/";
     }
 
     addAndSelectFolder(strLocation);
+    sortFolders();
     m_dbMgr.db().AddExtraFolder(strLocation);
     m_dbMgr.db().SetLocalValueVersion("folders", -1);
 }
@@ -2100,7 +2102,8 @@ void CWizCategoryView::setBizRootItemExtraButton(CWizCategoryViewItemBase* pItem
 {
     if (pItem)
     {
-        if (bizData.bizIsDue || m_dbMgr.db().IsBizServiceExpr(bizData.bizGUID))
+        CWizDatabase& db = m_dbMgr.db();
+        if (bizData.bizIsDue || db.IsBizServiceExpr(bizData.bizGUID) || db.IsBizNoteCountLimit(bizData.bizGUID))
         {
             QString strIconPath = ::WizGetSkinResourcePath(m_app.userSettings().skin()) + "bizDue.png";
             pItem->setExtraButtonIcon(strIconPath);
@@ -2124,6 +2127,24 @@ void CWizCategoryView::setGroupRootItemExtraButton(CWizCategoryViewItemBase* pIt
         else
         {
             pItem->setExtraButtonIcon("");
+        }
+    }
+}
+
+void CWizCategoryView::moveFolderPostionBeforeTrash(const QString& strLocation)
+{
+    const QString strFolderPostion = "FolderPosition/";
+    QSettings* setting = ExtensionSystem::PluginManager::settings();
+    int nValue = setting->value(strFolderPostion + "/Deleted Items/").toInt();
+    setting->setValue(strFolderPostion + strLocation, nValue);
+    //
+    QStringList strFolderList = setting->allKeys();
+    foreach (QString strFolder, strFolderList)
+    {
+        if (strFolder.startsWith(strFolderPostion + "Deleted Items"))
+        {
+            nValue = setting->value(strFolder).toInt();
+            setting->setValue(strFolder, nValue + 1);
         }
     }
 }
@@ -2162,7 +2183,7 @@ void CWizCategoryView::sortFolders()
 
     pFolderRoot->sortChildren(0, Qt::AscendingOrder);
 
-    for (int i = 1; i < pFolderRoot->childCount(); i++)
+    for (int i = 0; i < pFolderRoot->childCount(); i++)
     {
         CWizCategoryViewFolderItem* pFolder = dynamic_cast<CWizCategoryViewFolderItem*>(pFolderRoot->child(i));
         if (!pFolder)
@@ -2752,7 +2773,7 @@ CWizCategoryViewTrashItem* CWizCategoryView::findTrash(const QString& strKbGUID 
 
 void CWizCategoryView::addAndSelectFolder(const CString& strLocation)
 {
-    if (QTreeWidgetItem* pItem = addFolder(strLocation, true)) {
+    if (QTreeWidgetItem* pItem = addFolder(strLocation, false)) {
         setCurrentItem(pItem);
     }
 }
@@ -3313,11 +3334,13 @@ CWizFolder* CWizCategoryView::SelectedFolder()
 void CWizCategoryView::loadState()
 {
     QSettings* settings = ExtensionSystem::PluginManager::settings();
+    settings->beginGroup(TREEVIEW_STATE);
     m_strSelectedId = selectedId(settings);
 
     for (int i = 0 ; i < topLevelItemCount(); i++) {
         loadChildState(topLevelItem(i), settings);
     }
+    settings->endGroup();
 }
 
 void CWizCategoryView::loadChildState(QTreeWidgetItem* pItem, QSettings* settings)
@@ -3346,9 +3369,8 @@ void CWizCategoryView::loadItemState(QTreeWidgetItem* pi, QSettings* settings)
     Q_ASSERT(pItem);
 
     QString strId = pItem->id();
-    settings->beginGroup(TREEVIEW_STATE);
+
     bool bExpand = settings->value(strId).toBool();
-    settings->endGroup();
 
     if (bExpand)
         expandItem(pItem);
@@ -3358,9 +3380,7 @@ void CWizCategoryView::loadItemState(QTreeWidgetItem* pi, QSettings* settings)
 
 QString CWizCategoryView::selectedId(QSettings* settings)
 {
-    settings->beginGroup(TREEVIEW_STATE);
     QString strItem = settings->value(TREEVIEW_SELECTED_ITEM).toString();
-    settings->endGroup();
 
     return strItem;
 }
@@ -3368,11 +3388,14 @@ QString CWizCategoryView::selectedId(QSettings* settings)
 void CWizCategoryView::saveState()
 {
     QSettings* settings = ExtensionSystem::PluginManager::settings();
+    settings->beginGroup(TREEVIEW_STATE);
+    settings->remove("");
     for (int i = 0 ; i < topLevelItemCount(); i++) {
         saveChildState(topLevelItem(i), settings);
     }
 
     saveSelected(settings);
+    settings->endGroup();
 
     settings->sync();
 }
@@ -3397,9 +3420,7 @@ void CWizCategoryView::saveItemState(QTreeWidgetItem* pi, QSettings *settings)
    QString strId = pItem->id();
    bool bExpand = pItem->isExpanded() ? true : false;
 
-   settings->beginGroup(TREEVIEW_STATE);
    settings->setValue(strId, bExpand);
-   settings->endGroup();
 }
 
 void CWizCategoryView::saveSelected(QSettings* settings)
@@ -3415,7 +3436,5 @@ void CWizCategoryView::saveSelected(QSettings* settings)
     if (!pItem)
         return;
 
-    settings->beginGroup(TREEVIEW_STATE);
     settings->setValue(TREEVIEW_SELECTED_ITEM, pItem->id());
-    settings->endGroup();
 }

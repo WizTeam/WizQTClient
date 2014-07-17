@@ -20,8 +20,8 @@
 #include "mac/wizmactoolbar.h"
 #include "mac/wizSearchWidget_mm.h"
 #else
-#include "wizSearchWidget.h"
 #endif
+#include "wizSearchWidget.h"
 
 #include <extensionsystem/pluginmanager.h>
 #include <coreplugin/icore.h>
@@ -94,7 +94,7 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     #endif
     #ifdef Q_OS_MAC
     , m_menuBar(new QMenuBar(this))
-    , m_toolBar(new CWizMacToolBar(this))
+    , m_toolBar(new QToolBar(this))
     #else
     , m_toolBar(new QToolBar("Main", titleBar()))
     , m_menu(new QMenu(clientWidget()))
@@ -112,7 +112,7 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     , m_bRestart(false)
     , m_bLogoutRestart(false)
     , m_bUpdatingSelection(false)
-    , m_tray(new QSystemTrayIcon(QApplication::windowIcon(), this))
+    , m_tray(NULL)
 {
 #ifndef Q_OS_MAC
     clientLayout()->addWidget(m_toolBar);
@@ -121,6 +121,7 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     connect(qApp, SIGNAL(aboutToQuit()), SLOT(on_application_aboutToQuit()));
     connect(qApp, SIGNAL(lastWindowClosed()), qApp, SLOT(quit())); // Qt bug: Qt5 bug
     qApp->installEventFilter(this);
+    installEventFilter(this);
 
     //CWizCloudPool::instance()->init(&m_dbMgr);
 
@@ -177,8 +178,7 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     //
     m_sync->start(QThread::IdlePriority);
     //
-    initTrayIcon(m_tray);
-    m_tray->show();
+    setSystemTrayIconVisible(userSettings().showSystemTrayIcon());
 }
 
 bool MainWindow::eventFilter(QObject* watched, QEvent* event)
@@ -212,6 +212,26 @@ bool MainWindow::eventFilter(QObject* watched, QEvent* event)
             return false;
         }
     }
+#ifdef Q_OS_MAC
+    else if (watched == this)
+    {
+        if (event->type() == QEvent::WindowStateChange)
+        {
+            if (QWindowStateChangeEvent* stateEvent = dynamic_cast<QWindowStateChangeEvent*>(event))
+            {
+                if (stateEvent->oldState() == Qt::WindowFullScreen)
+                {
+                    m_toolBar->show();
+                    m_splitter->widget(0)->show();
+                    m_splitter->widget(1)->show();
+                }
+                else if (windowState() == Qt::WindowFullScreen)
+                {
+                }
+            }
+        }
+    }
+#endif
 
     //
     return _baseClass::eventFilter(watched, event);
@@ -251,8 +271,8 @@ void MainWindow::closeEvent(QCloseEvent* event)
 #else
     if (!event->spontaneous())
     {
-        //setVisible(false);
-        setWindowState(Qt::WindowMinimized);
+        setVisible(false);
+        //setWindowState(Qt::WindowMinimized);
         event->ignore();
         return;
     }
@@ -267,17 +287,6 @@ void MainWindow::on_actionExit_triggered()
 void MainWindow::resizeEvent(QResizeEvent *event)
 {
     Q_UNUSED(event);
-}
-
-void MainWindow::showEvent(QShowEvent* event)
-{
-    Q_UNUSED(event);
-
-    //
-#ifdef Q_OS_MAC
-    //m_toolBar->showInWindow(this);
-    m_toolBar->setToolBarVisible(true);
-#endif
 }
 
 void MainWindow::on_checkUpgrade_finished(bool bUpgradeAvaliable)
@@ -300,6 +309,36 @@ void MainWindow::on_checkUpgrade_finished(bool bUpgradeAvaliable)
     }
 }
 
+void MainWindow::setSystemTrayIconVisible(bool bVisible)
+{
+    //FIXME: There is a bug. Must delete trayicon at hide, otherwise will crash when show it again.
+    if (bVisible)
+    {
+        //
+        if (m_tray)
+        {
+            if (m_tray->isVisible())
+                return;
+
+            delete m_tray;
+        }
+
+        //
+        m_tray = new QSystemTrayIcon(QApplication::windowIcon(), this);
+        initTrayIcon(m_tray);
+        m_tray->show();
+    }
+    else
+    {
+        if (m_tray)
+        {
+            m_tray->hide();
+            delete m_tray;
+            m_tray = 0;
+        }
+    }
+}
+
 void MainWindow::on_trayIcon_newDocument_clicked()
 {
     setVisible(true);
@@ -307,6 +346,12 @@ void MainWindow::on_trayIcon_newDocument_clicked()
     raise();
 
     on_actionNewNote_triggered();
+}
+
+void MainWindow::on_hideTrayIcon_clicked()
+{
+    setSystemTrayIconVisible(false);
+    userSettings().setShowSystemTrayIcon(false);
 }
 
 void MainWindow::shiftVisableStatus()
@@ -791,22 +836,32 @@ void MainWindow::initToolBar()
 {
 #ifdef Q_OS_MAC
     setUnifiedTitleAndToolBarOnMac(true);
-#endif
+    addToolBar(m_toolBar);
+    m_toolBar->setAllowedAreas(Qt::TopToolBarArea);
+    m_toolBar->setMovable(false);
 
-#ifdef Q_OS_MAC
-    m_toolBar->showInWindow(this);
+    m_toolBar->addWidget(new CWizFixedSpacer(QSize(10, 1), m_toolBar));
 
     CWizUserInfoWidget* info = new CWizUserInfoWidget(*this, m_toolBar);
-    m_toolBar->addWidget(info, "", "");
+    m_toolBar->addWidget(info);
 
-    m_toolBar->addStandardItem(CWizMacToolBar::Space);
+
+    m_toolBar->addWidget(new CWizFixedSpacer(QSize(20, 1), m_toolBar));
+
     m_toolBar->addAction(m_actions->actionFromName(WIZACTION_GLOBAL_SYNC));
-    //m_toolBar->addStandardItem(CWizMacToolBar::Space);
     m_toolBar->addAction(m_actions->actionFromName(WIZACTION_GLOBAL_NEW_DOCUMENT));
-    m_toolBar->addStandardItem(CWizMacToolBar::FlexibleSpace);
-    m_toolBar->addSearch(tr("Search"), "");
-    //
-    m_search = m_toolBar->getSearchWidget();
+
+    m_toolBar->addWidget(new CWizSpacer(m_toolBar));
+
+    m_spacerBeforeSearch = new CWizSpacer(m_toolBar);
+    m_toolBar->addWidget(m_spacerBeforeSearch);
+
+    m_search = new CWizSearchWidget(this);
+    m_search->setWidthHint(280);
+    m_toolBar->addWidget(m_search);
+
+    m_toolBar->addWidget(new CWizFixedSpacer(QSize(20, 1), m_toolBar));
+
 #else
     layoutTitleBar();
     //
@@ -1061,14 +1116,14 @@ void MainWindow::on_actionAutoSync_triggered()
 
 void MainWindow::on_actionSync_triggered()
 {
-    if (::WizIsOffline())
-    {
-        QMessageBox::information(this, tr("Info"), tr("Connection is not available, please check your network connection."));
-    }
-    else
-    {
+//    if (::WizIsOffline())
+//    {
+//        QMessageBox::information(this, tr("Info"), tr("Connection is not available, please check your network connection."));
+//    }
+//    else
+//    {
         syncAllData();
-    }
+//    }
 }
 
 void MainWindow::on_syncLogined()
@@ -1109,18 +1164,18 @@ void MainWindow::on_syncDone(int nErrorCode, const QString& strErrorMsg)
 
         m_userVerifyDialog->exec();
     } else if (QNetworkReply::ProtocolUnknownError == nErrorCode) {
-        //network avaliable, show message once
-        static bool showMessageAgain = true;
-        if (showMessageAgain) {
-            QMessageBox messageBox(this);
-            messageBox.setIcon(QMessageBox::Information);
-            messageBox.setText(tr("Connection is not available, please check your network connection."));
-            QAbstractButton *btnDontShowAgain =
-                    messageBox.addButton(tr("Don't show this again"), QMessageBox::ActionRole);
-            messageBox.addButton(QMessageBox::Ok);
-            messageBox.exec();
-            showMessageAgain = messageBox.clickedButton() != btnDontShowAgain;
-        }
+//        //network avaliable, show message once
+//        static bool showMessageAgain = true;
+//        if (showMessageAgain) {
+//            QMessageBox messageBox(this);
+//            messageBox.setIcon(QMessageBox::Information);
+//            messageBox.setText(tr("Connection is not available, please check your network connection."));
+//            QAbstractButton *btnDontShowAgain =
+//                    messageBox.addButton(tr("Don't show this again"), QMessageBox::ActionRole);
+//            messageBox.addButton(QMessageBox::Ok);
+//            messageBox.exec();
+//            showMessageAgain = messageBox.clickedButton() != btnDontShowAgain;
+//        }
     }
 
     m_documents->viewport()->update();
@@ -1210,14 +1265,27 @@ void MainWindow::on_actionViewToggleCategory_triggered()
         category->show();
     }
 
-    m_actions->toggleActionText(WIZACTION_GLOBAL_TOGGLE_CATEGORY);
+    QWidget* doclist = m_splitter->widget(1);
+    if (doclist->isVisible()) {
+        doclist->hide();
+    } else {
+        doclist->show();
+    }
+
+    //m_actions->toggleActionText(WIZACTION_GLOBAL_TOGGLE_CATEGORY);
 }
 
 void MainWindow::on_actionViewToggleFullscreen_triggered()
 {
 #ifdef Q_OS_MAC
-    toggleFullScreenMode(this);
-    m_actions->toggleActionText(WIZACTION_GLOBAL_TOGGLE_FULLSCREEN);
+    //toggleFullScreenMode(this);
+    setWindowState(windowState() ^ Qt::WindowFullScreen);
+    if (windowState() == Qt::WindowFullScreen)
+    {
+        m_toolBar->hide();
+        m_splitter->widget(0)->hide();
+        m_splitter->widget(1)->hide();
+    }
 #endif // Q_OS_MAC
 }
 
@@ -1902,6 +1970,10 @@ void MainWindow::initTrayIcon(QSystemTrayIcon* trayIcon)
     QAction* actionNewNote = menu->addAction(tr("New Note"));
     connect(actionNewNote, SIGNAL(triggered()), SLOT(on_trayIcon_newDocument_clicked()));
 
+    //
+    menu->addSeparator();
+    QAction* actionHideTrayIcon = menu->addAction(tr("Hide TrayIcon"));
+    connect(actionHideTrayIcon, SIGNAL(triggered()), SLOT(on_hideTrayIcon_clicked()));
     //
     menu->addSeparator();
     QAction* actionLogout = menu->addAction(tr("Logout"));

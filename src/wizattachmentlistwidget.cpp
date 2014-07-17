@@ -235,8 +235,10 @@ void CWizAttachmentListView::openAttachment(CWizAttachmentListViewItem* item)
     connect(&monitor, SIGNAL(fileModified(QString,QString,QString,QString,QDateTime)),
             &m_dbMgr.db(), SLOT(onAttachmentModified(QString,QString,QString,QString,QDateTime)), Qt::UniqueConnection);
 
+    /*需要使用文件的修改日期,从服务器上下载下的文件修改日期必定大于数据库中日期.*/
+    QFileInfo info(strFileName);
     monitor.addFile(attachment.strKbGUID, attachment.strGUID, strFileName,
-                    attachment.strDataMD5, attachment.tDataModified);
+                    attachment.strDataMD5, info.lastModified());
 }
 
 void CWizAttachmentListView::contextMenuEvent(QContextMenuEvent * e)
@@ -285,13 +287,13 @@ void CWizAttachmentListView::startDownLoad(CWizAttachmentListViewItem* item)
     m_downloaderHost->download(item->attachment());
     item->setIsDownloading(true);
 
-    update();
+    forceRepaint();
 }
 
 CWizAttachmentListViewItem* CWizAttachmentListView::newAttachmentItem(const WIZDOCUMENTATTACHMENTDATA& att)
 {
     CWizAttachmentListViewItem* newItem = new CWizAttachmentListViewItem(att);
-    connect(newItem, SIGNAL(updateRequet()), SLOT(update()));
+    connect(newItem, SIGNAL(updateRequet()), SLOT(forceRepaint()));
     connect(m_downloaderHost, SIGNAL(downloadDone(WIZOBJECTDATA,bool)), newItem,
             SLOT(on_downloadFinished(WIZOBJECTDATA,bool)));
     connect(m_downloaderHost, SIGNAL(downloadProgress(QString,int,int)), newItem,
@@ -390,12 +392,22 @@ void CWizAttachmentListView::on_action_deleteAttachment()
 
     resetAttachments();
 }
+
 void CWizAttachmentListView::on_list_itemDoubleClicked(QListWidgetItem* it)
 {
     if (CWizAttachmentListViewItem* item = dynamic_cast<CWizAttachmentListViewItem*>(it))
     {
         openAttachment(item);
     }
+}
+
+void CWizAttachmentListView::forceRepaint()
+{
+#if QT_VERSION < 0x050000
+    update();
+#else
+    viewport()->repaint();
+#endif
 }
 
 

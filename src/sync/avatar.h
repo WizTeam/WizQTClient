@@ -20,16 +20,18 @@ public:
     ~AvatarHost();
 
     static AvatarHost* instance();
-    static void load(const QString& strUserGUID, bool bForce = false);
-    static bool isLoaded(const QString& strUserId);
-    static bool avatar(const QString& strUserId, QPixmap* pixmap);
-    static QPixmap orgAvatar(const QString& strUserId);
-    static QString keyFromGuid(const QString& strUserGUID);
+    static void load(const QString& strUserID, bool bForce = false);
+    static bool isLoaded(const QString& strUserID);
+    static bool isFileExists(const QString& strUserID);
+    static bool avatar(const QString& strUserID, QPixmap* pixmap);
+    static bool deleteAvatar(const QString& strUserID);
+    static QPixmap orgAvatar(const QString& strUserID);
+    static QString keyFromUserID(const QString& strUserID);
     static QString defaultKey();
-    static bool customSizeAvatar(const QString& strUserGUID, int width, int height, QString& strFileName);
+    static bool customSizeAvatar(const QString& strUserID, int width, int height, QString& strFileName);
 
 Q_SIGNALS:
-    void loaded(const QString& strUserGUID);
+    void loaded(const QString& strUserID);
 
     friend class Internal::AvatarHostPrivate;
 

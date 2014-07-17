@@ -3,6 +3,8 @@
 
 #include <QMacCocoaViewContainer>
 
+#ifdef USECOCOATOOLBAR
+
 class CWizSearchWidget : public QMacCocoaViewContainer
 {
     Q_OBJECT
@@ -20,5 +22,7 @@ public Q_SLOTS:
 Q_SIGNALS:
     void doSearch(const QString& keywords);
 };
+
+#endif
 
 #endif // WIZSEARCHWIDGET_MM_H
