@@ -291,6 +291,21 @@ void CWizUserSettings::setAutoCheckUpdate(bool bAutoCheckUpdate)
     set("AutoCheckUpdate", bAutoCheckUpdate ? "1" : "0");
 }
 
+bool CWizUserSettings::showSystemTrayIcon() const
+{
+    QString strShowTrayIcon = get("ShowSystemTrayIcon");
+    if (!strShowTrayIcon.isEmpty()) {
+        return strShowTrayIcon.toInt() ? true : false;
+    }
+
+    return true;
+}
+
+void CWizUserSettings::setShowSystemTrayIcon(bool bShowTrayIcon)
+{
+    set("ShowSystemTrayIcon", bShowTrayIcon ? "1" : "0");
+}
+
 QString CWizUserSettings::skin()
 {
     // just return because no skin selection from v1.4

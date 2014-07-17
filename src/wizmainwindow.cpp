@@ -112,7 +112,7 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     , m_bRestart(false)
     , m_bLogoutRestart(false)
     , m_bUpdatingSelection(false)
-    , m_tray(new QSystemTrayIcon(QApplication::windowIcon(), this))
+    , m_tray(NULL)
 {
 #ifndef Q_OS_MAC
     clientLayout()->addWidget(m_toolBar);
@@ -121,6 +121,7 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     connect(qApp, SIGNAL(aboutToQuit()), SLOT(on_application_aboutToQuit()));
     connect(qApp, SIGNAL(lastWindowClosed()), qApp, SLOT(quit())); // Qt bug: Qt5 bug
     qApp->installEventFilter(this);
+    installEventFilter(this);
 
     //CWizCloudPool::instance()->init(&m_dbMgr);
 
@@ -177,8 +178,7 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     //
     m_sync->start(QThread::IdlePriority);
     //
-    initTrayIcon(m_tray);
-    m_tray->show();
+    setSystemTrayIconVisible(userSettings().showSystemTrayIcon());
 }
 
 bool MainWindow::eventFilter(QObject* watched, QEvent* event)
@@ -212,6 +212,26 @@ bool MainWindow::eventFilter(QObject* watched, QEvent* event)
             return false;
         }
     }
+#ifdef Q_OS_MAC
+    else if (watched == this)
+    {
+        if (event->type() == QEvent::WindowStateChange)
+        {
+            if (QWindowStateChangeEvent* stateEvent = dynamic_cast<QWindowStateChangeEvent*>(event))
+            {
+                if (stateEvent->oldState() == Qt::WindowFullScreen)
+                {
+                    m_toolBar->show();
+                    m_splitter->widget(0)->show();
+                    m_splitter->widget(1)->show();
+                }
+                else if (windowState() == Qt::WindowFullScreen)
+                {
+                }
+            }
+        }
+    }
+#endif
 
     //
     return _baseClass::eventFilter(watched, event);
@@ -289,6 +309,36 @@ void MainWindow::on_checkUpgrade_finished(bool bUpgradeAvaliable)
     }
 }
 
+void MainWindow::setSystemTrayIconVisible(bool bVisible)
+{
+    //FIXME: There is a bug. Must delete trayicon at hide, otherwise will crash when show it again.
+    if (bVisible)
+    {
+        //
+        if (m_tray)
+        {
+            if (m_tray->isVisible())
+                return;
+
+            delete m_tray;
+        }
+
+        //
+        m_tray = new QSystemTrayIcon(QApplication::windowIcon(), this);
+        initTrayIcon(m_tray);
+        m_tray->show();
+    }
+    else
+    {
+        if (m_tray)
+        {
+            m_tray->hide();
+            delete m_tray;
+            m_tray = 0;
+        }
+    }
+}
+
 void MainWindow::on_trayIcon_newDocument_clicked()
 {
     setVisible(true);
@@ -296,6 +346,12 @@ void MainWindow::on_trayIcon_newDocument_clicked()
     raise();
 
     on_actionNewNote_triggered();
+}
+
+void MainWindow::on_hideTrayIcon_clicked()
+{
+    setSystemTrayIconVisible(false);
+    userSettings().setShowSystemTrayIcon(false);
 }
 
 void MainWindow::shiftVisableStatus()
@@ -1209,14 +1265,27 @@ void MainWindow::on_actionViewToggleCategory_triggered()
         category->show();
     }
 
-    m_actions->toggleActionText(WIZACTION_GLOBAL_TOGGLE_CATEGORY);
+    QWidget* doclist = m_splitter->widget(1);
+    if (doclist->isVisible()) {
+        doclist->hide();
+    } else {
+        doclist->show();
+    }
+
+    //m_actions->toggleActionText(WIZACTION_GLOBAL_TOGGLE_CATEGORY);
 }
 
 void MainWindow::on_actionViewToggleFullscreen_triggered()
 {
 #ifdef Q_OS_MAC
-    toggleFullScreenMode(this);
-    m_actions->toggleActionText(WIZACTION_GLOBAL_TOGGLE_FULLSCREEN);
+    //toggleFullScreenMode(this);
+    setWindowState(windowState() ^ Qt::WindowFullScreen);
+    if (windowState() == Qt::WindowFullScreen)
+    {
+        m_toolBar->hide();
+        m_splitter->widget(0)->hide();
+        m_splitter->widget(1)->hide();
+    }
 #endif // Q_OS_MAC
 }
 
@@ -1901,6 +1970,10 @@ void MainWindow::initTrayIcon(QSystemTrayIcon* trayIcon)
     QAction* actionNewNote = menu->addAction(tr("New Note"));
     connect(actionNewNote, SIGNAL(triggered()), SLOT(on_trayIcon_newDocument_clicked()));
 
+    //
+    menu->addSeparator();
+    QAction* actionHideTrayIcon = menu->addAction(tr("Hide TrayIcon"));
+    connect(actionHideTrayIcon, SIGNAL(triggered()), SLOT(on_hideTrayIcon_clicked()));
     //
     menu->addSeparator();
     QAction* actionLogout = menu->addAction(tr("Logout"));
