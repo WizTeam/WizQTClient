@@ -141,7 +141,7 @@ void installOnLinux()
 int mainCore(int argc, char *argv[])
 {
 #if QT_VERSION > 0x050000
-#ifdef Q_OS_MAC
+#ifdef BUILD4APPSTORE
    QDir dir(argv[0]);  // e.g. appdir/Contents/MacOS/appname
    dir.cdUp();
    dir.cdUp();
