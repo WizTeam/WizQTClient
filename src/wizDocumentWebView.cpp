@@ -11,6 +11,8 @@
 #include <QAction>
 #include <QPrinter>
 #include <QFileDialog>
+#include <QTextEdit>
+#include <QMultiMap>
 
 #include <QApplication>
 #include <QWebPage>
@@ -97,11 +99,42 @@ void CWizDocumentWebViewPage::on_editorCommandPaste_triggered()
     QClipboard* clip = QApplication::clipboard();
     Q_ASSERT(clip);
 
-//    const QMimeData* mime = clip->mimeData();
+    const QMimeData* mime = clip->mimeData();
 //    QStringList formats = mime->formats();
 //    for(int i = 0; i < formats.size(); ++ i) {
 //        qDebug() << "Mime Format: " << formats.at(i) << " Mime data: " << mime->data(formats.at(i));
 //    }
+
+    if (mime->hasHtml())
+    {
+        QString strHtml = mime->html();
+        QRegExp regHead("</?head[^>]*>", Qt::CaseInsensitive);
+        if (strHtml.contains(regHead))
+        {
+            // convert mass html to rtf, then convert rft to html
+            QTextDocument textParase;
+            textParase.setHtml(strHtml);
+            strHtml = textParase.toHtml();
+
+            QRegExp regBodyContant("<body[^>]*>[\\s\\S]*</body>");
+            int index = regBodyContant.indexIn(strHtml);
+            if (index > -1)
+            {
+                QString strBody = regBodyContant.cap(0);
+                if (strBody.isEmpty())
+                    return;
+
+                QRegExp regBody = QRegExp("</?body[^>]*>", Qt::CaseInsensitive);
+                strBody.replace(regBody, "");
+                strHtml = strBody;
+
+                QMimeData* data = new QMimeData();
+                data->setHtml(strHtml);
+                clip->setMimeData(data);
+                return;
+            }
+        }
+    }
 
     if (!clip->image().isNull()) {
         // save clipboard image to $TMPDIR

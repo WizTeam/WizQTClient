@@ -1,3 +1,5 @@
+#ifdef USECOCOATOOLBAR
+
 #include <QDebug>
 #include <QPixmap>
 #include <QMacCocoaViewContainer>
@@ -523,3 +525,5 @@ NSMutableArray *itemIdentifiers(const QList<CWizMacToolBarItem *> *items, bool c
 
 
 @end
+
+#endif

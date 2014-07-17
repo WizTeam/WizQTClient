@@ -37,6 +37,8 @@
  **
  ****************************************************************************/
 
+#ifdef USECOCOATOOLBAR
+
 #include <QApplication>
 #include <QtCore>
 #include <QAction>
@@ -176,3 +178,5 @@ CWizSearchWidget* CWizMacToolBar::getSearchWidget()
 {
     return [d->delegate getSearchWidget];
 }
+
+#endif

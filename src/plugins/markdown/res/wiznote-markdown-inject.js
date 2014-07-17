@@ -1,20 +1,53 @@
 ;(function() {
-    var IsMathJax = WizIsMathJax();
+    var doc = document;
+    var text; 
+    var body = doc.getElementsByTagName('BODY').item(0);
+
+    var math = [];
     var inline = "$"; 
     var SPLIT = /(\$\$?|\\(?:begin|end)\{[a-z]*\*?\}|\\[\\{}$]|[{}]|(?:\n\s*)+|@@\d+@@)/i;
 
-    var text;
-    var math = [];
-    var body = document.getElementsByTagName('BODY').item(0);
-
+    var isMathJax = WizIsMathJax();
+    
     function WizIsMathJax() {
-        return typeof MathJax !== 'undefined';
+        var text = doc.body.innerText.replace(/\n/g,'\\n').replace(/\r\n?/g, "\n").replace(/```(.*\n)+?```/gm,'');
+        var SPLIT = /(\$\$?)[^$\n]+\1/;
+        return SPLIT.test(text);
     }
 
+    function wizInsertElem(doc, part, elem_type, callback) {
+        var oPart = doc.getElementsByTagName(part).item(0);
+        var oElem = doc.createElement(elem_type);
+        callback(oElem);
+        oPart.insertBefore(oElem, null);
+        return oElem;
+    }
+    function wizAppendScriptSrc(doc, part, script_type, str) {
+        return wizInsertElem(doc, part, "script", function(oScript) {
+            oScript.type = script_type;
+            oScript.src = str;
+        }
+      );
+    }
+    function wizAppendScriptInnerHtml(doc, part, script_type, innerHtmlStr) {
+        wizInsertElem(doc, part, "script", function(oScript) {
+            oScript.type = script_type;
+            oScript.innerHTML = innerHtmlStr;
+        }
+      );
+    }
+
+    function htmlUnEncode( input ) {
+        return String(input)
+            .replace(/\&amp;/g,'&')
+            .replace(/\&gt;/g, '>')
+            .replace(/\&lt;/g,'<')
+            .replace(/\&quot;/g, '"')
+            .replace(/\&&#39;/g, "'");
+    }
     function init() {
         if (jQuery) {
             document.body.setAttribute("wiz_markdown_inited", "true");
-            g_markdownInited = true;
             ParseContent(document);
         } else {
             setTimeout(init(), 100);
@@ -63,7 +96,7 @@
             pedantic: false,
             sanitize: false,
             smartLists: true,
-            smartypants: false,
+            smartypants: false
         });
         return htmlStr;
     }
@@ -77,12 +110,13 @@
             $(this).replaceWith($('<div>' + this.innerHTML + '</div>'));
         });
     }
-
     function ParseContent(objHtmDoc) {
         try {
-            $(objHtmDoc).find('img').each(function(index, img) {
-                var src = $(img).attr('src');
-                $(img).after('<span>![' + src + '](' + src + ')</span>');
+            $(objHtmDoc).find('img').each(function(index) {
+                var span = $("<span></span>");
+                span[0].innerText = htmlUnEncode($(this)[0].outerHTML);
+                span.insertAfter($(this));
+                $(this).remove();
             });
         } catch (e) {
             console.log(e);
@@ -99,18 +133,42 @@
         } catch (e) {
             console.log(e);
         }
+        try {
+            $(objHtmDoc).find('label.wiz-todo-label').each(function(index) {
+                // 防止innerText后产生换行符
+                var span = $("<span></span>");
+                var parent = $(this).parent();
+                span[0].innerText = htmlUnEncode(parent[0].outerHTML);
+                span.insertAfter(parent);
+                parent.remove();
+            });
+        } catch(e) {
+            console.log(e);
+        }
+        // try {
+        //     $(objHtmDoc).find('ol').each(function(index, link) {
+        //         var div = $("<div></div>");
+        //         div[0].innerText = htmlUnEncode($(this)[0].outerHTML);
+        //         div.insertAfter($(this));
+        //         $(this).remove();
+        //     });
+        // } catch (e) {
+        //     console.log(e);
+        // }
         replaceCodeP2Div();
-        text = removeMath(body.innerText);
+        var text = removeMath(body.innerText);
         text = ParseMD2HTML(text);
         text = replaceMath(text);
         body.innerHTML = text;
         prettyPrint();
-
-        if (IsMathJax) {
-            MathJax.Hub.Queue(
-                ["Typeset", MathJax.Hub, document.body],
-                ["resetEquationNumbers", MathJax.InputJax.TeX]
-            );
+        if (isMathJax) {
+            wizAppendScriptInnerHtml(doc, 'HEAD', "text/x-mathjax-config", "MathJax.Hub.Config({showProcessingMessages: false,tex2jax: { inlineMath: [['$','$'],['\\\\(','\\\\)']] },TeX: { equationNumbers: {autoNumber: 'AMS'} }});");
+            var MathJaxScript = wizAppendScriptSrc(doc, 'HEAD', "text/javascript", "http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML");
+            MathJaxScript.onload = function() {
+                MathJax.Hub.Queue(
+                    ["Typeset", MathJax.Hub, document.body]
+                );
+            };
         }
     }
 
@@ -150,7 +208,7 @@
                 // Look for math start delimiters and when
                 // found, set up the end delimiter.
                 //
-                if (block === "$$") {
+                if (block === inline || block === "$$") {
                     start = i;
                     end = block;
                     braces = 0;
@@ -166,5 +224,5 @@
         }
         return blocks.join("");
     }
-    init(IsMathJax);
+    init();
 })();

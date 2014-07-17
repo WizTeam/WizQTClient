@@ -576,6 +576,11 @@ QTreeWidgetItem* CWizCategoryViewFolderItem::clone() const
     return new CWizCategoryViewFolderItem(m_app, m_strName, m_strKbGUID);
 }
 
+QString CWizCategoryViewFolderItem::id() const
+{
+    return ::WizMd5StringNoSpaceJava(QString(m_strName + m_strKbGUID).toUtf8());
+}
+
 void CWizCategoryViewFolderItem::getDocuments(CWizDatabase& db, CWizDocumentDataArray& arrayDocument)
 {
     db.GetDocumentsByLocation(m_strName, arrayDocument);
@@ -642,14 +647,50 @@ bool CWizCategoryViewFolderItem::operator < (const QTreeWidgetItem &other) const
         return false;
     }
 
+    if (getSortOrder() != pOther->getSortOrder())
+    {
+        return getSortOrder() < pOther->getSortOrder();
+    }
+
     int nThis = 0, nOther = 0;
     if (!pOther->location().isEmpty()) {
         QSettings* setting = ExtensionSystem::PluginManager::settings();
         nOther = setting->value("FolderPosition/" + pOther->location()).toInt();
         nThis = setting->value("FolderPosition/" + location()).toInt();
     }
+    //
+    if (nThis != nOther)
+    {
+        if (nThis > 0 && nOther > 0)
+        {
+            return nThis < nOther;
+        }
+        else
+        {
+            return nThis > 0;
+        }
+    }
 
-    return nThis < nOther;
+    //
+    QString strThis = text(0).toLower();
+    QString strOther = pOther->text(0).toLower();
+    //
+    static bool isSimpChinese = IsSimpChinese();
+    if (isSimpChinese)
+    {
+        if (QTextCodec* pCodec = QTextCodec::codecForName("GBK"))
+        {
+            QByteArray arrThis = pCodec->fromUnicode(strThis);
+            QByteArray arrOther = pCodec->fromUnicode(strOther);
+            //
+            std::string strThisA(arrThis.data(), arrThis.size());
+            std::string strOtherA(arrOther.data(), arrOther.size());
+            //
+            return strThisA.compare(strOtherA.c_str()) < 0;
+        }
+    }
+    //
+    return strThis.compare(strOther) < 0;
 }
 
 
@@ -1200,6 +1241,11 @@ void CWizCategoryViewGroupItem::drop(const WIZDOCUMENTDATA& data, bool forceCopy
         QString strNewDocGUID;
         sourceDb.CopyDocumentTo(data.strGUID, myDb, strLocation, m_tag, strNewDocGUID, window->downloaderHost());
     }
+}
+
+QString CWizCategoryViewGroupItem::id() const
+{
+    return ::WizMd5StringNoSpaceJava(QString(text(0) + m_tag.strGUID).toUtf8());
 }
 
 void CWizCategoryViewGroupItem::reload(CWizDatabase& db)

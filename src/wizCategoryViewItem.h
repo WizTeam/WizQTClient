@@ -31,7 +31,7 @@ public:
     const QString& kbGUID() const { return m_strKbGUID; }
     const QString& name() const { return m_strName; }
 
-    QString id() const;
+    virtual QString id() const;
 
     void setDocumentsCount(int nCurrent, int nTotal);
 
@@ -162,6 +162,8 @@ public:
     virtual bool operator < (const QTreeWidgetItem &other) const;
 
     virtual QTreeWidgetItem* clone() const;
+
+    virtual QString id() const;
 
     QString location() const { return m_strName; }
     QString name() const;
@@ -334,6 +336,8 @@ public:
     virtual bool accept(CWizDatabase& db, const WIZDOCUMENTDATA& data);
     virtual bool acceptDrop(const WIZDOCUMENTDATA& data) const;
     virtual void drop(const WIZDOCUMENTDATA& data, bool forceCopy = false);
+
+    virtual QString id() const;
 
     void reload(CWizDatabase& db);
 

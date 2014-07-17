@@ -596,6 +596,7 @@ struct WizEditorContextMenuItem
 };
 
 #define WIZEDITOR_ACTION_GOOGLE         QObject::tr("Use \"Google\" search")
+#define WIZEDITOR_ACTION_BAIDU           QObject::tr("Use \"Baidu\" search")
 
 #define WIZEDITOR_ACTION_CUT            QObject::tr("Cut")
 #define WIZEDITOR_ACTION_COPY           QObject::tr("Copy")
@@ -653,6 +654,7 @@ WizEditorContextMenuItem* EditorToolBar::contextMenuData()
     static WizEditorContextMenuItem arrayData[] =
     {
         {WIZEDITOR_ACTION_GOOGLE,                   "",                 "on_editor_google_triggered"},
+        {WIZEDITOR_ACTION_BAIDU,                   "",                 "on_editor_baidu_triggered"},
         {"-", "-", "-"},
 
         {WIZEDITOR_ACTION_CUT,                      "",                 "on_editor_cut_triggered"},
@@ -759,6 +761,12 @@ void EditorToolBar::on_delegate_requestShowContextMenu(const QPoint& pos)
         actionFromName(WIZEDITOR_ACTION_GOOGLE)->setEnabled(false);
     } else {
         actionFromName(WIZEDITOR_ACTION_GOOGLE)->setEnabled(true);
+    }
+
+    if (m_editor->selectedText().isEmpty()) {
+        actionFromName(WIZEDITOR_ACTION_BAIDU)->setEnabled(false);
+    } else {
+        actionFromName(WIZEDITOR_ACTION_BAIDU)->setEnabled(true);
     }
 
     if (m_editor->isEditing()){
@@ -1010,6 +1018,12 @@ void EditorToolBar::on_editor_google_triggered()
     QDesktopServices::openUrl(url);
 }
 
+void EditorToolBar::on_editor_baidu_triggered()
+{
+    QUrl url("http://www.baidu.com/s?wd=" + m_editor->page()->selectedText());
+    QDesktopServices::openUrl(url);
+}
+
 void EditorToolBar::on_editor_cut_triggered()
 {
     m_editor->triggerPageAction(QWebPage::Cut);
@@ -1111,6 +1125,13 @@ void EditorToolBar::on_btnJustifyCenter_clicked()
 }
 
 void EditorToolBar::on_btnJustifyRight_clicked()
+{
+    if (m_editor) {
+        m_editor->editorCommandExecuteJustifyRight();
+    }
+}
+
+void EditorToolBar::on_btnSearchReplace_clicked()
 {
     if (m_editor) {
         m_editor->editorCommandExecuteJustifyRight();

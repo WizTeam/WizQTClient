@@ -3333,6 +3333,14 @@ int CWizIndex::GetTrashDocumentCount()
     return nTotal;
 }
 
+bool CWizIndex::GetAllDocumentsOwners(CWizStdStringArray& arrayOwners)
+{
+    CString strSQL;
+    strSQL.Format(_T("select distinct DOCUMENT_OWNER from WIZ_DOCUMENT"));
+
+    return SQLToStringArray(strSQL, 0, arrayOwners);
+}
+
 
 #ifndef WIZ_NO_OBSOLETE
 bool CWizIndex::GetLocationDocumentCount(CString strLocation, bool bIncludeSubFolders, int& nDocumentCount)

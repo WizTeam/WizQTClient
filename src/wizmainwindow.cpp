@@ -20,8 +20,8 @@
 #include "mac/wizmactoolbar.h"
 #include "mac/wizSearchWidget_mm.h"
 #else
-#include "wizSearchWidget.h"
 #endif
+#include "wizSearchWidget.h"
 
 #include <extensionsystem/pluginmanager.h>
 #include <coreplugin/icore.h>
@@ -94,7 +94,7 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     #endif
     #ifdef Q_OS_MAC
     , m_menuBar(new QMenuBar(this))
-    , m_toolBar(new CWizMacToolBar(this))
+    , m_toolBar(new QToolBar(this))
     #else
     , m_toolBar(new QToolBar("Main", titleBar()))
     , m_menu(new QMenu(clientWidget()))
@@ -251,8 +251,8 @@ void MainWindow::closeEvent(QCloseEvent* event)
 #else
     if (!event->spontaneous())
     {
-        //setVisible(false);
-        setWindowState(Qt::WindowMinimized);
+        setVisible(false);
+        //setWindowState(Qt::WindowMinimized);
         event->ignore();
         return;
     }
@@ -269,17 +269,6 @@ void MainWindow::resizeEvent(QResizeEvent *event)
     Q_UNUSED(event);
 }
 
-void MainWindow::showEvent(QShowEvent* event)
-{
-    Q_UNUSED(event);
-
-    //
-#ifdef Q_OS_MAC
-    //m_toolBar->showInWindow(this);
-    m_toolBar->setToolBarVisible(true);
-#endif
-}
-
 void MainWindow::on_checkUpgrade_finished(bool bUpgradeAvaliable)
 {
     if (!bUpgradeAvaliable)
@@ -290,9 +279,9 @@ void MainWindow::on_checkUpgrade_finished(bool bUpgradeAvaliable)
     if (QDialog::Accepted == notifyDialog.exec()) {
         QString url = WizService::ApiEntry::standardCommandUrl("link");
 #if defined(Q_OS_MAC)
-        url += "&name=wiznote-mac";
+        url += "&name=wiznote-mac.html";
 #elif defined(Q_OS_LINUX)
-        url += "&name=wiznote-linux";
+        url += "&name=wiznote-linux.html";
 #else
         Q_ASSERT(0);
 #endif
@@ -791,22 +780,32 @@ void MainWindow::initToolBar()
 {
 #ifdef Q_OS_MAC
     setUnifiedTitleAndToolBarOnMac(true);
-#endif
+    addToolBar(m_toolBar);
+    m_toolBar->setAllowedAreas(Qt::TopToolBarArea);
+    m_toolBar->setMovable(false);
 
-#ifdef Q_OS_MAC
-    m_toolBar->showInWindow(this);
+    m_toolBar->addWidget(new CWizFixedSpacer(QSize(10, 1), m_toolBar));
 
     CWizUserInfoWidget* info = new CWizUserInfoWidget(*this, m_toolBar);
-    m_toolBar->addWidget(info, "", "");
+    m_toolBar->addWidget(info);
 
-    m_toolBar->addStandardItem(CWizMacToolBar::Space);
+
+    m_toolBar->addWidget(new CWizFixedSpacer(QSize(20, 1), m_toolBar));
+
     m_toolBar->addAction(m_actions->actionFromName(WIZACTION_GLOBAL_SYNC));
-    //m_toolBar->addStandardItem(CWizMacToolBar::Space);
     m_toolBar->addAction(m_actions->actionFromName(WIZACTION_GLOBAL_NEW_DOCUMENT));
-    m_toolBar->addStandardItem(CWizMacToolBar::FlexibleSpace);
-    m_toolBar->addSearch(tr("Search"), "");
-    //
-    m_search = m_toolBar->getSearchWidget();
+
+    m_toolBar->addWidget(new CWizSpacer(m_toolBar));
+
+    m_spacerBeforeSearch = new CWizSpacer(m_toolBar);
+    m_toolBar->addWidget(m_spacerBeforeSearch);
+
+    m_search = new CWizSearchWidget(this);
+    m_search->setWidthHint(280);
+    m_toolBar->addWidget(m_search);
+
+    m_toolBar->addWidget(new CWizFixedSpacer(QSize(20, 1), m_toolBar));
+
 #else
     layoutTitleBar();
     //
@@ -1061,14 +1060,14 @@ void MainWindow::on_actionAutoSync_triggered()
 
 void MainWindow::on_actionSync_triggered()
 {
-    if (::WizIsOffline())
-    {
-        QMessageBox::information(this, tr("Info"), tr("Connection is not available, please check your network connection."));
-    }
-    else
-    {
+//    if (::WizIsOffline())
+//    {
+//        QMessageBox::information(this, tr("Info"), tr("Connection is not available, please check your network connection."));
+//    }
+//    else
+//    {
         syncAllData();
-    }
+//    }
 }
 
 void MainWindow::on_syncLogined()
@@ -1109,18 +1108,18 @@ void MainWindow::on_syncDone(int nErrorCode, const QString& strErrorMsg)
 
         m_userVerifyDialog->exec();
     } else if (QNetworkReply::ProtocolUnknownError == nErrorCode) {
-        //network avaliable, show message once
-        static bool showMessageAgain = true;
-        if (showMessageAgain) {
-            QMessageBox messageBox(this);
-            messageBox.setIcon(QMessageBox::Information);
-            messageBox.setText(tr("Connection is not available, please check your network connection."));
-            QAbstractButton *btnDontShowAgain =
-                    messageBox.addButton(tr("Don't show this again"), QMessageBox::ActionRole);
-            messageBox.addButton(QMessageBox::Ok);
-            messageBox.exec();
-            showMessageAgain = messageBox.clickedButton() != btnDontShowAgain;
-        }
+//        //network avaliable, show message once
+//        static bool showMessageAgain = true;
+//        if (showMessageAgain) {
+//            QMessageBox messageBox(this);
+//            messageBox.setIcon(QMessageBox::Information);
+//            messageBox.setText(tr("Connection is not available, please check your network connection."));
+//            QAbstractButton *btnDontShowAgain =
+//                    messageBox.addButton(tr("Don't show this again"), QMessageBox::ActionRole);
+//            messageBox.addButton(QMessageBox::Ok);
+//            messageBox.exec();
+//            showMessageAgain = messageBox.clickedButton() != btnDontShowAgain;
+//        }
     }
 
     m_documents->viewport()->update();

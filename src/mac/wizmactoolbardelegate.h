@@ -1,9 +1,9 @@
 #ifndef WIZMACTOOLBARDELEGATE_H
 #define WIZMACTOOLBARDELEGATE_H
 
-#include <QtGlobal>
+#ifdef USECOCOATOOLBAR
 
-#ifdef Q_OS_MAC
+#include <QtGlobal>
 
 #import <AppKit/AppKit.h>
 #include <QtCore/QString>

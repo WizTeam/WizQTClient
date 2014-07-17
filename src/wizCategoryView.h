@@ -389,6 +389,8 @@ private:
                                      const WIZBIZDATA& bizData);
     void setGroupRootItemExtraButton(CWizCategoryViewItemBase* pItem, \
                                      const WIZGROUPDATA& gData);
+
+    void moveFolderPostionBeforeTrash(const QString& strLocation);
 };
 
 

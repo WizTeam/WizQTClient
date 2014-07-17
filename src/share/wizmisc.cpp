@@ -366,6 +366,8 @@ bool WizIsPredefinedLocation(const QString& strLocation)
         return true;
     } else if (strLocation == "/My Journals/") {
         return true;
+    } else if (strLocation == "/My Contacts/") {
+        return true;
     } else if (strLocation == "/My Events/") {
         return true;
     } else if (strLocation == "/My Sticky Notes/") {
@@ -398,6 +400,10 @@ QString WizLocation2Display(const QString& strLocation)
     else if (strLocation.startsWith("/My Journals/"))
     {
         strLoc.replace("/My Journals/", QObject::tr("/My Journals/"));
+    }
+    else if (strLocation.startsWith("/My Contacts/"))
+    {
+        strLoc.replace("/My Contacts/", QObject::tr("/My Contacts/"));
     }
     else if (strLocation.startsWith("/My Events/"))
     {
@@ -1916,7 +1922,7 @@ void WizDeleteFile(const CString& strFileName)
 
 
 
-#define WIZ_INVALID_CHAR_OF_FILE_NAME		"/\"?:*|<>\r\n\t,%\'"
+#define WIZ_INVALID_CHAR_OF_FILE_NAME		"/\"?:*|<>\r\n\t,%\'\\"
 
 BOOL WizIsValidFileNameNoPath(const CString& strFileName)
 {

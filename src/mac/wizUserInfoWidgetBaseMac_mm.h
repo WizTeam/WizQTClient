@@ -2,6 +2,8 @@
 #define WIZUSERINFOWIDGETBASEMAC_H
 
 
+#ifdef USECOCOATOOLBAR
+
 #include <QMacCocoaViewContainer>
 #include <QIcon>
 
@@ -48,5 +50,6 @@ public:
 };
 
 
+#endif
 
 #endif // WIZUSERINFOWIDGETBASEMAC_H

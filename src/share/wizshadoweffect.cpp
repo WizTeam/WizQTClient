@@ -12,7 +12,7 @@ CWizShadowEffect::CWizShadowEffect()
     : m_shadowSize(10)
     , m_shadow(new CWizSkin9GridImage())
 {
-    QString strShadow = ::WizGetSkinResourceFileName(Utils::StyleHelper::themeName(), "shadow");
+    QString strShadow = Utils::StyleHelper::skinResourceFileName("shadow");
     m_shadow->SetImage(strShadow, QPoint(m_shadowSize + 5, m_shadowSize + 5));
 }
 
@@ -53,7 +53,7 @@ CWizShadowWidget::CWizShadowWidget(QWidget* parent)
     : QWidget(parent)
     , m_shadow(new CWizSkin9GridImage())
 {
-    QString strShadow = ::WizGetSkinResourceFileName(Utils::StyleHelper::themeName(), "shadow");
+    QString strShadow = Utils::StyleHelper::skinResourceFileName("shadow");
     m_shadow->SetImage(strShadow, QPoint(12, 12));
 }
 

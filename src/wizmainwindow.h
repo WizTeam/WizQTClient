@@ -98,7 +98,6 @@ public:
 protected:
     virtual bool eventFilter(QObject* watched, QEvent* event);
     virtual void resizeEvent(QResizeEvent* event);
-    virtual void showEvent(QShowEvent* event);
     virtual void closeEvent(QCloseEvent* event);
 
 private:
@@ -117,7 +116,7 @@ private:
     QSystemTrayIcon* m_tray;
 
 #ifdef Q_OS_MAC
-    CWizMacToolBar* m_toolBar;
+    QToolBar* m_toolBar;
     QMenuBar* m_menuBar;
 #else
     QToolBar* m_toolBar;
@@ -153,7 +152,11 @@ private:
 
     CWizSearchIndexer* m_searchIndexer;
     QPointer<CWizSearchWidget> m_search;
+#ifdef Q_OS_LINUX
     CWizFixedSpacer* m_spacerBeforeSearch;
+#else
+    CWizSpacer* m_spacerBeforeSearch;
+#endif
 
     bool m_bRestart;
     bool m_bLogoutRestart;

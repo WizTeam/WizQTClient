@@ -240,9 +240,11 @@ public:
     virtual void OnTrafficLimit(const QString& strErrorMessage);
     virtual void OnStorageLimit(const QString& strErrorMessage);
     virtual void OnBizServiceExpr(const QString& strBizGUID, const QString& strErrorMessage);
+    virtual void OnBizNoteCountLimit(const QString& strBizGUID, const QString& strErrorMessage);
     virtual bool IsTrafficLimit();
     virtual bool IsStorageLimit();
     virtual bool IsBizServiceExpr(const QString& strBizGUID);
+    virtual bool IsBizNoteCountLimit(const QString& strBizGUID);
     virtual bool GetStorageLimitMessage(QString& strErrorMessage);
 
     virtual bool setMeta(const QString& strSection, const QString& strKey, const QString& strValue);
@@ -255,6 +257,7 @@ public:
     void SetObjectSyncTimeLine(int nDays);
     int GetObjectSyncTimeline();
     QString GetFolders();
+    QString GetFoldersPos();
     void SetFoldersPos(const QString& foldersPos, qint64 nVersion);
     void SetFolders(const QString& strFolders, qint64 nVersion, bool bSaveVersion);
 
@@ -262,6 +265,9 @@ public:
     bool loadBizUsersFromJson(const QString &strBizGUID,
                               const QString& strJsonRaw,
                               CWizBizUserDataArray& arrayUser);
+
+    //
+    virtual bool getAllNotesOwners(CWizStdStringArray &arrayOwners);
 
 public:
     bool Open(const QString& strUserId, const QString& strKbGUID = NULL);
@@ -359,9 +365,9 @@ public:
     bool WriteDataToDocument(const QString& strDocumentGUID, const QByteArray &arrayData);
     bool LoadAttachmentData(const CString& strDocumentGUID,
                             QByteArray& arrayData);
-    bool LoadCompressedAttachmentData(const QString& strDocumentGUID,
+    bool LoadCompressedAttachmentData(const QString& strGUID,
                                       QByteArray& arrayData);
-    bool SaveCompressedAttachmentData(const CString& strDocumentGUID,
+    bool SaveCompressedAttachmentData(const CString& strGUID,
                                       const QByteArray& arrayData);
 
     static CString GetRootLocation(const CString& strLocation);

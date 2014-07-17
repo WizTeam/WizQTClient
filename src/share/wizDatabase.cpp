@@ -21,6 +21,7 @@
 
 #include "utils/pathresolve.h"
 #include "utils/logger.h"
+#include "sync/avatar.h"
 #include "wizObjectDataDownloader.h"
 #include "wizProgressDialog.h"
 #include "wizusercipherform.h"
@@ -31,6 +32,7 @@
 #define WIZKMSYNC_EXIT_TRAFFIC_LIMIT		304
 #define WIZKMSYNC_EXIT_STORAGE_LIMIT		305
 #define WIZKMSYNC_EXIT_BIZ_SERVICE_EXPR		380
+#define WIZKMSYNC_EXIT_BIZ_NOTE_COUNT_LIMIT		3032
 
 #define WIZKMSYNC_EXIT_INFO     "WIZKMSYNC_EXIT_INFO"
 
@@ -1074,8 +1076,7 @@ QString CWizDatabase::GetLocalValue(const QString& key)
     }
     else if (strKey == "folders_pos")
     {
-        return "";
-        //return GetFoldersPos();
+        return GetFoldersPos();
     }
     else if (strKey == "group_tag_oem")
     {
@@ -1166,15 +1167,32 @@ void CWizDatabase::OnBizServiceExpr(const QString& strBizGUID, const QString& st
     if (strBizGUID.isEmpty())
         return;
 
-    IWizSyncableDatabase* db = GetPersonalDatabase();
+    CWizDatabase* db = getPersonalDatabase();
     if (!db)
         return;
 
     QString strMetaSection;
-    if (!GetBizMetaName(strBizGUID, strMetaSection))
+    if (!db->GetBizMetaName(strBizGUID, strMetaSection))
         return;
     //
     db->setMeta(strMetaSection, _T("LastSyncErrorCode"), QString::number(WIZKMSYNC_EXIT_BIZ_SERVICE_EXPR));
+    db->setMeta(strMetaSection, _T("LastSyncErrorMessage"), strErrorMessage);
+}
+
+void CWizDatabase::OnBizNoteCountLimit(const QString& strBizGUID, const QString& strErrorMessage)
+{
+    if (strBizGUID.isEmpty())
+        return;
+
+    CWizDatabase* db = getPersonalDatabase();
+    if (!db)
+        return;
+
+    QString strMetaSection;
+    if (!db->GetBizMetaName(strBizGUID, strMetaSection))
+        return;
+    //
+    db->setMeta(strMetaSection, _T("LastSyncErrorCode"), QString::number(WIZKMSYNC_EXIT_BIZ_NOTE_COUNT_LIMIT));
     db->setMeta(strMetaSection, _T("LastSyncErrorMessage"), strErrorMessage);
 }
 
@@ -1194,17 +1212,32 @@ bool CWizDatabase::IsStorageLimit()
 
 bool CWizDatabase::IsBizServiceExpr(const QString& strBizGUID)
 {
-    IWizSyncableDatabase* db = GetPersonalDatabase();
+    CWizDatabase* db = getPersonalDatabase();
     if (!db)
         return false;
 
     QString strMetaSection;
-    if (!GetBizMetaName(strBizGUID, strMetaSection))
+    if (!db->GetBizMetaName(strBizGUID, strMetaSection))
         return false;
 
     QString strLastError = db->meta(strMetaSection, _T("LastSyncErrorCode"));
 
     return strLastError.toInt() == WIZKMSYNC_EXIT_BIZ_SERVICE_EXPR;
+}
+
+bool CWizDatabase::IsBizNoteCountLimit(const QString& strBizGUID)
+{
+    CWizDatabase* db = getPersonalDatabase();
+    if (!db)
+        return false;
+
+    QString strMetaSection;
+    if (!db->GetBizMetaName(strBizGUID, strMetaSection))
+        return false;
+
+    QString strLastError = db->meta(strMetaSection, _T("LastSyncErrorCode"));
+
+    return strLastError.toInt() == WIZKMSYNC_EXIT_BIZ_NOTE_COUNT_LIMIT;
 }
 
 bool CWizDatabase::GetStorageLimitMessage(QString &strErrorMessage)
@@ -1253,6 +1286,11 @@ void CWizDatabase::SetFoldersPos(const QString& foldersPos, qint64 nVersion)
     CWizStdStringArray arrPos;
     ::WizSplitTextToArray(str, ',', arrPos);
 
+    QSettings* setting = ExtensionSystem::PluginManager::settings();
+    setting->beginGroup("FolderPosition");
+    setting->remove("");
+    setting->endGroup();
+
     CWizStdStringArray::const_iterator it;
     for (it= arrPos.begin(); it != arrPos.end(); it++) {
         CString strLine = *it;
@@ -1268,7 +1306,6 @@ void CWizDatabase::SetFoldersPos(const QString& foldersPos, qint64 nVersion)
         if (0 == nPos)
             continue;
 
-        QSettings* setting = ExtensionSystem::PluginManager::settings();
         int nPosOld = setting->value("FolderPosition/" + strLocation).toInt();
         if (nPosOld != nPos) {
             setting->setValue("FolderPosition/" + strLocation, nPos);
@@ -1300,6 +1337,11 @@ QString CWizDatabase::GetFolders()
     ::WizStringArrayToText(arrayFolder, str, "*");
 
     return str;
+}
+
+QString CWizDatabase::GetFoldersPos()
+{
+    return QString();
 }
 
 void CWizDatabase::SetFolders(const QString& strFolders, qint64 nVersion, bool bSaveVersion)
@@ -1454,6 +1496,11 @@ bool CWizDatabase::loadBizUsersFromJson(const QString& strBizGUID,
     return true;
 }
 
+bool CWizDatabase::getAllNotesOwners(CWizStdStringArray& arrayOwners)
+{
+    return GetAllDocumentsOwners(arrayOwners);
+}
+
 
 
 /* ---------------------------------------------------------------------- */
@@ -1487,6 +1534,50 @@ bool CWizDatabase::UpdateMessages(const CWizMessageDataArray& arrayMsg)
 
 bool CWizDatabase::SetUserBizInfo(const CWizBizDataArray& arrayBiz)
 {
+    class CBizUserAvatar
+    {
+    public:
+        static __int64 GetProcessedAvatarVersion(QString strBizGUID, CWizDatabase& db)
+        {
+            return _ttoi64(db.meta(_T("Sync"), CString(_T("AvatarChangesVer_")) + strBizGUID));
+        }
+        //
+        static void SetProcessedAvatarVersion(QString strBizGUID, CWizDatabase& db, __int64 v)
+        {
+            db.SetMeta(_T("Sync"), CString(_T("AvatarChangesVer_")) + strBizGUID, WizInt64ToStr(v));
+        }
+        //
+        static void ProcessBizAvatarVersion(QString strBizGUID, CWizDatabase& db, const std::map<QString, QString>& mapAvatars)
+        {
+            if (mapAvatars.empty())
+                return;
+            //
+            __int64 oldVer = GetProcessedAvatarVersion(strBizGUID, db);
+            __int64 newVer = oldVer;
+            //
+            for (std::map<QString, QString>::const_iterator it = mapAvatars.begin();
+                 it != mapAvatars.end();
+                 it++)
+            {
+                __int64 v = ::_ttoi64(it->first);
+                if (v > oldVer)
+                {
+                    newVer = std::max<__int64>(v, newVer);
+                    //
+                    TOLOG1("[Sync] User avatar changed : %1", it->second);
+                    //DeleteFile(strAvatarPath + it->second + _T(".png"));
+                    WizService::AvatarHost::deleteAvatar(it->second);
+                }
+            }
+            //
+            if (newVer > oldVer)
+            {
+                SetProcessedAvatarVersion(strBizGUID, db, newVer);
+            }
+        }
+    };
+
+
     SetMeta("Bizs", "Count", QString::number(arrayBiz.size()));
     //
     for (int i = 0; i < arrayBiz.size(); i++)
@@ -1499,6 +1590,8 @@ bool CWizDatabase::SetUserBizInfo(const CWizBizDataArray& arrayBiz)
         SetMeta(bizSection, "Level", QString::number(biz.bizLevel));
         QString BizIsDue = biz.bizIsDue ? "1" : "0";
         SetMeta(bizSection, "IsDue", BizIsDue);
+        //
+        CBizUserAvatar::ProcessBizAvatarVersion(biz.bizGUID, *this, biz.mapAvatarChanges);
     }
     //
     return true;
@@ -1595,8 +1688,8 @@ bool CWizDatabase::GetBizGUID(const QString &strGroupGUID, QString &strBizGUID)
     if (!db)
         return false;
 
-    QString groupSection = strGroupGUID+"_BIZGUID";
-    strBizGUID = meta("GROUPS", groupSection);
+    QString groupSection = strGroupGUID.toUpper() + "_BIZGUID";
+    strBizGUID = db->meta("GROUPS", groupSection);
 
     return true;
 }
@@ -2477,8 +2570,8 @@ bool CWizDatabase::DeleteAttachment(const WIZDOCUMENTATTACHMENTDATA& data,
                                     bool bLog,
                                     bool bReset /* = true */)
 {
-    bool bRet = CWizIndex::DeleteAttachment(data, bLog, bReset);
     CString strFileName = GetAttachmentFileName(data.strGUID);
+    bool bRet = CWizIndex::DeleteAttachment(data, bLog, bReset);
     if (PathFileExists(strFileName)) {
         ::WizDeleteFile(strFileName);
     }
@@ -2824,9 +2917,9 @@ bool CWizDatabase::LoadAttachmentData(const CString& strDocumentGUID, QByteArray
     return !arrayData.isEmpty();
 }
 
-bool CWizDatabase::LoadCompressedAttachmentData(const QString& strDocumentGUID, QByteArray& arrayData)
+bool CWizDatabase::LoadCompressedAttachmentData(const QString& strGUID, QByteArray& arrayData)
 {
-    CString strFileName = GetAttachmentFileName(strDocumentGUID);
+    CString strFileName = GetAttachmentFileName(strGUID);
     if (!PathFileExists(strFileName))
     {
         return false;
@@ -2839,7 +2932,9 @@ bool CWizDatabase::LoadCompressedAttachmentData(const QString& strDocumentGUID, 
         return false;
     }
 
-    if (!zip.compressFile(strFileName, "data"))
+    WIZDOCUMENTATTACHMENTDATA attach;
+    AttachmentFromGUID(strGUID, attach);
+    if (!zip.compressFile(strFileName, attach.strName))
     {
         Q_EMIT updateError("Failed to compress file: " + strFileName);
         return false;
@@ -2856,7 +2951,7 @@ bool CWizDatabase::LoadCompressedAttachmentData(const QString& strDocumentGUID, 
     return !arrayData.isEmpty();
 }
 
-bool CWizDatabase::SaveCompressedAttachmentData(const CString& strDocumentGUID, const QByteArray& arrayData)
+bool CWizDatabase::SaveCompressedAttachmentData(const CString& strGUID, const QByteArray& arrayData)
 {
     CString strTempZipFileName = Utils::PathResolve::tempPath() + WizIntToStr(GetTickCount()) + ".tmp";
     if (!WizSaveDataToFile(strTempZipFileName, arrayData))
@@ -2871,7 +2966,7 @@ bool CWizDatabase::SaveCompressedAttachmentData(const CString& strDocumentGUID, 
         return false;
     }
 
-    CString strFileName = GetAttachmentFileName(strDocumentGUID);
+    CString strFileName = GetAttachmentFileName(strGUID);
     if (!zip.extractFile(0, strFileName))
     {
         Q_EMIT updateError("Failed to extract attachment file: " + strFileName);
@@ -2897,7 +2992,25 @@ bool CWizDatabase::UpdateDocumentAbstract(const QString& strDocumentGUID)
     }
 
     if (data.nProtected) {
-        return false;
+        //check if note abstract is empty
+        WIZABSTRACT abstract;
+        PadAbstractFromGUID(data.strGUID, abstract);
+        if (abstract.image.isNull() && abstract.text.IsEmpty())
+        {
+            return false;
+        }
+        else
+        {
+            WIZABSTRACT emptyAbstract;
+            emptyAbstract.guid = data.strGUID;
+            bool ret = UpdatePadAbstract(emptyAbstract);
+            if (!ret) {
+                Q_EMIT updateError("Failed to update note abstract!");
+            }
+            Q_EMIT documentAbstractModified(data);
+
+            return ret;
+        }
     }
 
     QString strTempFolder = Utils::PathResolve::tempPath() + data.strGUID + "-update/";
@@ -3002,6 +3115,8 @@ CString CWizDatabase::GetLocationDisplayName(const CString& strLocation)
             if (strLocation == "/My Notes/") {
                 return tr("My Notes");
             } else if (strLocation == "/My Journals/") {
+                return tr("My Journals");
+            } else if (strLocation == "/My Contacts/") {
                 return tr("My Journals");
             } else if (strLocation == "/My Events/") {
                 return tr("My Events");

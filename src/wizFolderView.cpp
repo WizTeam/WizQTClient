@@ -18,7 +18,7 @@ CWizFolderView::CWizFolderView(CWizExplorerApp& app, QWidget *parent)
     header()->hide();
     setAnimated(true);
     setAttribute(Qt::WA_MacShowFocusRect, false);
-    setStyle(::WizGetStyle(m_app.userSettings().skin()));
+    //setStyle(::WizGetStyle(m_app.userSettings().skin()));
 
     setVerticalScrollMode(QAbstractItemView::ScrollPerItem);
 
@@ -29,7 +29,7 @@ CWizFolderView::CWizFolderView(CWizExplorerApp& app, QWidget *parent)
     m_vScroll->syncWith(verticalScrollBar());
 #endif
 
-    initFolders();
+    //initFolders();
 }
 
 void CWizFolderView::resizeEvent(QResizeEvent* event)
@@ -45,6 +45,7 @@ void CWizFolderView::resizeEvent(QResizeEvent* event)
 
 void CWizFolderView::showEvent(QShowEvent *event)
 {
+    QTreeWidget::showEvent(event);
     clear();
     initFolders();
 }

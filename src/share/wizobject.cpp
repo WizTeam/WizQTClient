@@ -740,6 +740,7 @@ WIZBIZDATA::WIZBIZDATA(const WIZBIZDATA& data)
     , bizUserRole(data.bizUserRole)
     , bizLevel(data.bizLevel)
     , bizIsDue(data.bizIsDue)
+    , mapAvatarChanges(data.mapAvatarChanges)
 {
 }
 
@@ -750,6 +751,12 @@ bool WIZBIZDATA::LoadFromXmlRpc(CWizXmlRpcStructValue& data)
     data.GetInt(_T("user_group"), bizUserRole);
     data.GetInt(_T("biz_level"), bizLevel);
     data.GetBool(_T("is_due"), bizIsDue);
+
+    CWizXmlRpcStructValue* structData = data.GetStruct(_T("avatar_changes"));
+    if (structData)
+    {
+        structData->ToStringMap(mapAvatarChanges);
+    }
 
     return !bizGUID.isEmpty()
             && !bizName.isEmpty();

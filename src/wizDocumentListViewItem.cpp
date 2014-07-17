@@ -126,21 +126,27 @@ void CWizDocumentListViewItem::setSortingType(int type)
     if (m_data.nType == TypeGroupDocument) {
         switch (m_nSortingType) {
         case CWizSortingPopupButton::SortingCreateTime:
+        case -CWizSortingPopupButton::SortingCreateTime:
             m_data.strInfo = m_data.doc.tCreated.toHumanFriendlyString();
             break;
         case CWizSortingPopupButton::SortingUpdateTime:
+        case -CWizSortingPopupButton::SortingUpdateTime:
             m_data.strInfo = m_data.doc.tModified.toHumanFriendlyString();
             break;
         case CWizSortingPopupButton::SortingTitle:
+        case -CWizSortingPopupButton::SortingTitle:
             m_data.strInfo = m_data.doc.tModified.toHumanFriendlyString();
             break;
         case CWizSortingPopupButton::SortingTag:
+        case -CWizSortingPopupButton::SortingTag:
             m_data.strInfo = tagTree();
             break;
         case CWizSortingPopupButton::SortingLocation:
+        case -CWizSortingPopupButton::SortingLocation:
             m_data.strInfo = tagTree();
             break;
         case CWizSortingPopupButton::SortingSize:
+        case -CWizSortingPopupButton::SortingSize:
             if (!fi.exists()) {
                 m_data.strInfo = QObject::tr("Unknown");
             } else {
@@ -155,21 +161,27 @@ void CWizDocumentListViewItem::setSortingType(int type)
     } else if (m_data.nType == TypePrivateDocument) {
         switch (m_nSortingType) {
         case CWizSortingPopupButton::SortingCreateTime:
+        case -CWizSortingPopupButton::SortingCreateTime:
             m_data.strInfo = m_data.doc.tCreated.toHumanFriendlyString() + " " + tags();
             break;
         case CWizSortingPopupButton::SortingUpdateTime:
+        case -CWizSortingPopupButton::SortingUpdateTime:
             m_data.strInfo = m_data.doc.tModified.toHumanFriendlyString() + " " + tags();
             break;
         case CWizSortingPopupButton::SortingTitle:
+        case -CWizSortingPopupButton::SortingTitle:
             m_data.strInfo = m_data.doc.tModified.toHumanFriendlyString() + " " + tags();
             break;
         case CWizSortingPopupButton::SortingTag:
+        case -CWizSortingPopupButton::SortingTag:
             m_data.strInfo = m_data.doc.tModified.toHumanFriendlyString() + " " + tags();
             break;
         case CWizSortingPopupButton::SortingLocation:
+        case -CWizSortingPopupButton::SortingLocation:
             m_data.strInfo = ::WizLocation2Display(m_data.doc.strLocation);
             break;
         case CWizSortingPopupButton::SortingSize:
+        case -CWizSortingPopupButton::SortingSize:
             if (!fi.exists()) {
                 m_data.strInfo = QObject::tr("Unknown") + " " + tags();
             } else {
@@ -193,16 +205,28 @@ bool CWizDocumentListViewItem::operator <(const QListWidgetItem &other) const
     case CWizSortingPopupButton::SortingCreateTime:
         // default compare use create time
         return pOther->m_data.doc.tCreated < m_data.doc.tCreated;
+    case -CWizSortingPopupButton::SortingCreateTime:
+        return pOther->m_data.doc.tCreated > m_data.doc.tCreated;
     case CWizSortingPopupButton::SortingUpdateTime:
         return pOther->m_data.doc.tModified < m_data.doc.tModified;
+    case -CWizSortingPopupButton::SortingUpdateTime:
+        return pOther->m_data.doc.tModified > m_data.doc.tModified;
     case CWizSortingPopupButton::SortingTitle:
-        return pOther->m_data.doc.strTitle < m_data.doc.strTitle;
+        return pOther->m_data.doc.strTitle.localeAwareCompare(m_data.doc.strTitle) < 0;
+    case -CWizSortingPopupButton::SortingTitle:
+        return pOther->m_data.doc.strTitle.localeAwareCompare(m_data.doc.strTitle) > 0;
     case CWizSortingPopupButton::SortingLocation:
-        return pOther->m_data.strInfo < m_data.strInfo;
+        return pOther->m_data.strInfo.localeAwareCompare(m_data.strInfo) < 0;
+    case -CWizSortingPopupButton::SortingLocation:
+        return pOther->m_data.strInfo.localeAwareCompare(m_data.strInfo) > 0;
     case CWizSortingPopupButton::SortingTag:
         return pOther->m_strTags < m_strTags;
+    case -CWizSortingPopupButton::SortingTag:
+        return pOther->m_strTags > m_strTags;
     case CWizSortingPopupButton::SortingSize:
         return pOther->m_nSize < m_nSize;
+    case -CWizSortingPopupButton::SortingSize:
+        return pOther->m_nSize > m_nSize;
     default:
         Q_ASSERT(0);
     }

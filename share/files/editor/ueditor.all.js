@@ -14346,16 +14346,17 @@ UE.plugins['list'] = function () {
             var rng = me.selection.getRange(),
                 parent = domUtils.findParent(rng.startContainer,function(node){return domUtils.isBlockElm(node)},true),
                 li = domUtils.findParentByTagName(rng.startContainer,'li',true);
-            if(parent && parent.tagName != 'PRE' && !li){
-                var html = parent.innerHTML.replace(new RegExp(domUtils.fillChar, 'g'),'');
-                if(/^\s*1\s*\.[^\d]/.test(html)){
-                    parent.innerHTML = html.replace(/^\s*1\s*\./,'');
-                    rng.setStartAtLast(parent).collapse(true).select();
-                    me.__hasEnterExecCommand = true;
-                    me.execCommand('insertorderedlist');
-                    me.__hasEnterExecCommand = false;
-                }
-            }
+            //取消将数字列表自动转换为有序列表的功能
+            // if(parent && parent.tagName != 'PRE' && !li){
+            //     var html = parent.innerHTML.replace(new RegExp(domUtils.fillChar, 'g'),'');
+            //     if(/^\s*1\s*\.[^\d]/.test(html)){
+            //         parent.innerHTML = html.replace(/^\s*1\s*\./,'');
+            //         rng.setStartAtLast(parent).collapse(true).select();
+            //         me.__hasEnterExecCommand = true;
+            //         me.execCommand('insertorderedlist');
+            //         me.__hasEnterExecCommand = false;
+            //     }
+            // }
             var range = me.selection.getRange(),
                 start = findList(range.startContainer,function (node) {
                     return node.tagName == 'TABLE';

@@ -71,6 +71,8 @@ function setEditorHtml(html, bEditing)
     bEditing ? editor.setEnabled() : editor.setDisabled();
 
     window.UE.utils.domReady(function() {
+        //special process to remove css style added by phone
+        WizSpecialProcessForPhoneCss();
         WizEditor.initCheckListEnvironment();
         editor.window.scrollTo(0, 0);
     });
@@ -85,6 +87,10 @@ function setEditing(bEditing) {
     //}
 
     editor.document.body.innerHTML = wiz_html;
+
+    //special process to remove css style added by phone
+    WizSpecialProcessForPhoneCss();
+
     editor.fireEvent('aftersetcontent');
     editor.fireEvent('contentchange');
 
@@ -169,4 +175,21 @@ function WizGetImgElementByPoint(posX, posY) {
     } 
 
     return '';
+}
+
+//special process to remove css style added by phone.   *** should remove before 2014-10-08
+function WizSpecialProcessForPhoneCss() {
+    
+    var cssElem = editor.document.getElementById("wiz_phone_default_css");
+    if (cssElem)
+    {
+        if (editor.document.head.contains(cssElem))
+        {
+            editor.document.head.removeChild(cssElem);
+        }
+        else if (editor.document.body.contains(cssElem))
+        {
+            editor.document.body.removeChild(cssElem);
+        }
+    }
 }

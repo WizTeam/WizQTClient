@@ -136,6 +136,7 @@ bool CWizXmlRpcServerBase::xmlRpcCall(const QString& strMethodName, CWizXmlRpcRe
     if (CWizXmlRpcFaultValue* pFault = dynamic_cast<CWizXmlRpcFaultValue *>(pRet)) {
         m_nLastErrorCode = pFault->GetFaultCode();
         m_strLastErrorMessage = pFault->GetFaultString();
+        TOLOG2(_T("XmlRpcCall failed : %1, %2"), QString::number(m_nLastErrorCode), m_strLastErrorMessage);
         return false;
     }
     //
