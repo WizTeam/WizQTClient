@@ -1127,14 +1127,15 @@ void EditorToolBar::on_btnJustifyCenter_clicked()
 void EditorToolBar::on_btnJustifyRight_clicked()
 {
     if (m_editor) {
-        m_editor->editorCommandExecuteJustifyRight();
+        //m_editor->editorCommandExecuteJustifyRight();
+        m_editor->editorCommandExecuteSearchReplace();
     }
 }
 
 void EditorToolBar::on_btnSearchReplace_clicked()
 {
     if (m_editor) {
-        m_editor->editorCommandExecuteJustifyRight();
+        m_editor->editorCommandExecuteSearchReplace();
     }
 }
 

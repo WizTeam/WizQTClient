@@ -139,6 +139,7 @@ set(wiznote_SOURCES
     wizDocumentEditStatus.cpp
     wizLoginDialog.cpp
     share/wizFileMonitor.cpp
+    wizSearchReplaceWidget.cpp
 )
 
 set(wiznote_HEADERS
@@ -265,6 +266,7 @@ set(wiznote_HEADERS
     wizDocumentEditStatus.h
     wizLoginDialog.h
     share/wizFileMonitor.h
+    wizSearchReplaceWidget.h
 )
 
 set(wiznote_FORMS
@@ -280,6 +282,7 @@ set(wiznote_FORMS
     ui/wizEditorInsertTableForm.ui
     ui/wizProgressDialog.ui
     ui/wizLoginDialog.ui
+    ui/wizSearchReplaceWidget.ui
 )
 
 set(wiznote_TRANSLATIONS

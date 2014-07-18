@@ -31,6 +31,7 @@
 #include "wizDocumentTransitionView.h"
 #include "share/wizDatabaseManager.h"
 #include "wizDocumentView.h"
+#include "wizSearchReplaceWidget.h"
 
 #include "utils/pathresolve.h"
 #include "utils/logger.h"
@@ -1136,6 +1137,44 @@ void CWizDocumentWebView::on_editorCommandExecuteLinkInsert_accepted()
 bool CWizDocumentWebView::editorCommandExecuteLinkRemove()
 {
     return editorCommandExecuteCommand("unlink");
+}
+
+bool CWizDocumentWebView::editorCommandExecuteSearchReplace()
+{
+    CWizSearchReplaceWidget *wgt = new CWizSearchReplaceWidget();
+    wgt->setAttribute(Qt::WA_DeleteOnClose);
+    wgt->setWindowFlags(Qt::WindowStaysOnTopHint);
+    wgt->show();
+
+    return true;
+}
+
+void CWizDocumentWebView::findPre(QString strTxt, bool bCasesensitive)
+{
+    findText(strTxt, QWebPage::FindBackward | QWebPage::HighlightAllOccurrences |
+             (bCasesensitive ? QWebPage::FindCaseSensitively : 0));
+}
+
+void CWizDocumentWebView::findNext(QString strTxt, bool bCasesensitive)
+{
+    findText(strTxt, QWebPage::HighlightAllOccurrences |
+             (bCasesensitive ? QWebPage::FindCaseSensitively : 0));
+}
+
+void CWizDocumentWebView::replaceCurrent(QString strSource, QString strTarget)
+{
+    QString strExec = "WizTodo.insertOneTodo();";
+    bool ret = page()->mainFrame()->evaluateJavaScript(strExec).toBool();
+}
+
+void CWizDocumentWebView::replaceAndFindNext(QString strSource, QString strTarget, bool bCasesensitive)
+{
+
+}
+
+void CWizDocumentWebView::replaceAll(QString strSource, QString strTarget, bool bCasesensitive)
+{
+
 }
 
 bool CWizDocumentWebView::editorCommandExecuteFontFamily(const QString& strFamily)
