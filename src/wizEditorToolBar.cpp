@@ -389,7 +389,7 @@ EditorToolBar::EditorToolBar(QWidget *parent)
 
     m_btnSearchReplace = new CWizToolButton(this);
     m_btnSearchReplace->setCheckable(false);
-    m_btnSearchReplace->setIcon(::WizLoadSkinIcon(skin, "actionFormatInsertImage"));
+    m_btnSearchReplace->setIcon(::WizLoadSkinIcon(skin, "actionFormatSearchReplace"));
     connect(m_btnSearchReplace, SIGNAL(clicked()), SLOT(on_btnSearchReplace_clicked()));
 
     QHBoxLayout* layout = new QHBoxLayout();

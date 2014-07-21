@@ -1480,6 +1480,11 @@ void MainWindow::on_actionResetSearch_triggered()
     m_doc->web()->applySearchKeywordHighlight();
 }
 
+void MainWindow::on_actionSearchReplace_triggered()
+{
+    m_doc->web()->editorCommandExecuteSearchReplace();
+}
+
 void MainWindow::on_actionSaveAsPDF_triggered()
 {
     if (CWizDocumentWebView* web = m_doc->web())

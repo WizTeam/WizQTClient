@@ -219,6 +219,7 @@ public Q_SLOTS:
     void on_actionSupport_triggered();
     void on_actionSearch_triggered();
     void on_actionResetSearch_triggered();
+    void on_actionSearchReplace_triggered();
     void on_actionSaveAsPDF_triggered();
 
     // menu editing
