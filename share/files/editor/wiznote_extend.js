@@ -208,7 +208,7 @@ function WizReplaceText(findtxt, replacetxt, caseSensitive) {
         casesensitive:caseSensitive,
         replaceStr:replacetxt
     };
-    frCommond(obj);
+    return frCommond(obj);
 }
 
 //全部替换
@@ -226,9 +226,7 @@ function WizRepalceAll(findtxt, replacetxt, caseSensitive) {
         all:true
     };
     var num = frCommond(obj);
-    if (num) {
-        console.log("repalce" + num + "place");
-    }
+    return num;
 }
 
 //执行

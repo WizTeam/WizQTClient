@@ -1144,37 +1144,69 @@ bool CWizDocumentWebView::editorCommandExecuteSearchReplace()
     CWizSearchReplaceWidget *wgt = new CWizSearchReplaceWidget();
     wgt->setAttribute(Qt::WA_DeleteOnClose);
     wgt->setWindowFlags(Qt::WindowStaysOnTopHint);
+    connect(wgt, SIGNAL(findPre(QString,bool)), SLOT(findPre(QString,bool)));
+    connect(wgt, SIGNAL(findNext(QString,bool)), SLOT(findNext(QString,bool)));
+    connect(wgt, SIGNAL(replaceCurrent(QString,QString)), SLOT(replaceCurrent(QString,QString)));
+    connect(wgt, SIGNAL(replaceAndFindNext(QString,QString,bool)), SLOT(replaceAndFindNext(QString,QString,bool)));
+    connect(wgt, SIGNAL(replaceAll(QString,QString,bool)), SLOT(replaceAll(QString,QString,bool)));
     wgt->show();
 
     return true;
 }
 
+static QString strOldSearchText = "";
+static bool strOldCase = false;
 void CWizDocumentWebView::findPre(QString strTxt, bool bCasesensitive)
 {
-    findText(strTxt, QWebPage::FindBackward | QWebPage::HighlightAllOccurrences |
-             (bCasesensitive ? QWebPage::FindCaseSensitively : 0));
+    //FIXME:  there is a problem here, HighlightAllOccurrences can not be used togethor with find one.
+    if (strOldSearchText != strTxt || strOldCase != bCasesensitive)
+    {
+        // clear highlight
+        findText("", QWebPage::HighlightAllOccurrences);
+        strOldSearchText = strTxt;
+        strOldCase = bCasesensitive;
+    }
+    findText(strTxt, (bCasesensitive ? QWebPage::FindCaseSensitively | QWebPage::HighlightAllOccurrences
+                                     : QWebPage::HighlightAllOccurrences));
+    findText(strTxt, (bCasesensitive ? QWebPage::FindBackward  | QWebPage::FindCaseSensitively | QWebPage::FindWrapsAroundDocument
+                                     : QWebPage::FindBackward | QWebPage::FindWrapsAroundDocument));
 }
 
 void CWizDocumentWebView::findNext(QString strTxt, bool bCasesensitive)
 {
-    findText(strTxt, QWebPage::HighlightAllOccurrences |
-             (bCasesensitive ? QWebPage::FindCaseSensitively : 0));
+    if (strOldSearchText != strTxt || strOldCase != bCasesensitive)
+    {
+        findText("", QWebPage::HighlightAllOccurrences);
+        strOldSearchText = strTxt;
+        strOldCase = bCasesensitive;
+    }
+    findText(strTxt, (bCasesensitive ? QWebPage::FindCaseSensitively | QWebPage::HighlightAllOccurrences
+                                     : QWebPage::HighlightAllOccurrences));
+    findText(strTxt, (bCasesensitive ? QWebPage::FindCaseSensitively | QWebPage::FindWrapsAroundDocument
+                                     : QWebPage::FindWrapsAroundDocument));
 }
 
 void CWizDocumentWebView::replaceCurrent(QString strSource, QString strTarget)
 {
-    QString strExec = "WizTodo.insertOneTodo();";
-    bool ret = page()->mainFrame()->evaluateJavaScript(strExec).toBool();
+    QString strExec = QString("WizReplaceText('%1', '%2', true)").arg(strSource).arg(strTarget);
+    page()->mainFrame()->evaluateJavaScript(strExec);
 }
 
 void CWizDocumentWebView::replaceAndFindNext(QString strSource, QString strTarget, bool bCasesensitive)
 {
-
+    QString strExec = QString("WizReplaceText('%1', '%2', %3)").arg(strSource).arg(strTarget).arg(bCasesensitive);
+    if (!page()->mainFrame()->evaluateJavaScript(strExec).toBool())
+    {
+        TOLOG1("[Console] Javascript error : %1", strExec);
+        return;
+    }
+    findNext(strSource, bCasesensitive);
 }
 
 void CWizDocumentWebView::replaceAll(QString strSource, QString strTarget, bool bCasesensitive)
 {
-
+    QString strExec = QString("WizRepalceAll('%1', '%2', %3)").arg(strSource).arg(strTarget).arg(bCasesensitive);
+    page()->mainFrame()->evaluateJavaScript(strExec);
 }
 
 bool CWizDocumentWebView::editorCommandExecuteFontFamily(const QString& strFamily)

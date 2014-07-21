@@ -387,6 +387,11 @@ EditorToolBar::EditorToolBar(QWidget *parent)
     m_btnImage->setIcon(::WizLoadSkinIcon(skin, "actionFormatInsertImage"));
     connect(m_btnImage, SIGNAL(clicked()), SLOT(on_btnImage_clicked()));
 
+    m_btnSearchReplace = new CWizToolButton(this);
+    m_btnSearchReplace->setCheckable(false);
+    m_btnSearchReplace->setIcon(::WizLoadSkinIcon(skin, "actionFormatInsertImage"));
+    connect(m_btnSearchReplace, SIGNAL(clicked()), SLOT(on_btnSearchReplace_clicked()));
+
     QHBoxLayout* layout = new QHBoxLayout();
     layout->setContentsMargins(3, 0, 3, 0);
     layout->setAlignment(Qt::AlignVCenter);
@@ -416,6 +421,8 @@ EditorToolBar::EditorToolBar(QWidget *parent)
     layout->addWidget(m_btnHorizontal);
     layout->addWidget(m_btnCheckList);
     layout->addWidget(m_btnImage);
+    layout->addSpacing(12);
+    layout->addWidget(m_btnSearchReplace);
     layout->addStretch();
 }
 
@@ -1127,8 +1134,7 @@ void EditorToolBar::on_btnJustifyCenter_clicked()
 void EditorToolBar::on_btnJustifyRight_clicked()
 {
     if (m_editor) {
-        //m_editor->editorCommandExecuteJustifyRight();
-        m_editor->editorCommandExecuteSearchReplace();
+        m_editor->editorCommandExecuteJustifyRight();
     }
 }
 
