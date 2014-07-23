@@ -688,12 +688,21 @@ int StyleHelper::notifyBarHeight()
     return 32;
 }
 
-QRect StyleHelper::initListViewItemPainter(QPainter* p, const QRect& lrc, bool bFocused, bool bSelected)
+QRect StyleHelper::initListViewItemPainter(QPainter* p, const QRect& lrc, bool bFocused, bool bSelected, bool bSpecialFocused)
 {
     QRect rc = lrc;
 
     Utils::StyleHelper::drawListViewItemSeperator(p, rc);
     Utils::StyleHelper::drawListViewItemBackground(p, rc, bFocused, bSelected);
+
+    if (bSpecialFocused)
+    {
+        p->save();
+        p->setPen(Qt::blue);
+        p->setBrush(Qt::NoBrush);
+        p->drawRect(rc);
+        p->restore();
+    }
 
     int nMargin = Utils::StyleHelper::margin();
     return rc.adjusted(nMargin, nMargin, -nMargin, -nMargin);

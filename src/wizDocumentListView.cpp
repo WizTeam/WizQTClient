@@ -275,6 +275,7 @@ void CWizDocumentListView::getSelectedDocuments(CWizDocumentDataArray& arrayDocu
     }
 }
 
+/*
 void CWizDocumentListView::contextMenuEvent(QContextMenuEvent * e)
 {
     CWizDocumentListViewItem* pItem = dynamic_cast<CWizDocumentListViewItem*>(itemAt(e->pos()));
@@ -288,6 +289,7 @@ void CWizDocumentListView::contextMenuEvent(QContextMenuEvent * e)
     m_menuDocument->popup(e->globalPos());
     //}
 }
+*/
 
 void CWizDocumentListView::resetPermission()
 {
@@ -388,9 +390,19 @@ void CWizDocumentListView::mousePressEvent(QMouseEvent* event)
     if (event->button() == Qt::LeftButton) {
         m_dragStartPosition.setX(event->pos().x());
         m_dragStartPosition.setY(event->pos().y());
+        QListWidget::mousePressEvent(event);
+    } else if (event->button() == Qt::RightButton) {
+        CWizDocumentListViewItem* pItem = dynamic_cast<CWizDocumentListViewItem*>(itemAt(event->pos()));
+
+        if (!pItem)
+            return;
+
+        //pItem->sets
+        //pItem->setFlags();
+        m_menuDocument->popup(event->globalPos());
     }
 
-    QListWidget::mousePressEvent(event);
+
 }
 
 void CWizDocumentListView::mouseMoveEvent(QMouseEvent* event)
