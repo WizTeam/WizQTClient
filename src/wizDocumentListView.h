@@ -124,7 +124,6 @@ public:
 
 public Q_SLOTS:
     void on_itemSelectionChanged();
-    void on_itemDoubleClicked(QListWidgetItem * item);
 
     void on_tag_created(const WIZTAGDATA& tag);
     void on_tag_modified(const WIZTAGDATA& tagOld, const WIZTAGDATA& tagNew);

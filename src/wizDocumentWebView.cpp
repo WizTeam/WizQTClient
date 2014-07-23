@@ -515,6 +515,8 @@ void CWizDocumentWebView::onDocumentSaved(const QString kbGUID, const QString st
         TOLOG("Save document failed");
     }
     //
+    view()->sendDocumentSavedSignal(strGUID);
+    //
     MainWindow* mainWindow = qobject_cast<MainWindow*>(m_app.mainWindow());
     mainWindow->quickSyncKb(kbGUID);
 }

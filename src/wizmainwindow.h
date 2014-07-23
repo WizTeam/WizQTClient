@@ -205,6 +205,9 @@ public:
     //
     void viewDocumentByWizKMURL(const QString& strKMURL);
 
+signals:
+    void documentSaved(const QString& strGUID, CWizDocumentView* viewer);
+
 public Q_SLOTS:
     void on_actionExit_triggered();
     void on_actionConsole_triggered();
@@ -267,6 +270,7 @@ public Q_SLOTS:
 
     void on_category_itemSelectionChanged();
     void on_documents_itemSelectionChanged();
+    void on_documents_itemDoubleClicked(QListWidgetItem * item);
     void on_message_itemSelectionChanged();
     void on_documents_documentCountChanged();
     void on_documents_lastDocumentDeleted();
@@ -355,6 +359,8 @@ private:
 
     //
     void initTrayIcon(QSystemTrayIcon* trayIcon);
+    //
+    void viewDocumentInFloatWidget(const WIZDOCUMENTDATA& data);
 };
 
 } // namespace Internal

@@ -140,6 +140,9 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     connect(m_searcher, SIGNAL(searchProcess(const QString&, const CWizDocumentDataArray&, bool)),
         SLOT(on_searchProcess(const QString&, const CWizDocumentDataArray&, bool)));
 
+    connect(m_doc, SIGNAL(documentSaved(QString,CWizDocumentView*)), SIGNAL(documentSaved(QString,CWizDocumentView*)));
+    connect(this, SIGNAL(documentSaved(QString,CWizDocumentView*)), m_doc, SLOT(on_document_data_saved(QString,CWizDocumentView*)));
+
     // misc settings
     //m_avatarDownloaderHost->setDefault(::WizGetSkinResourcePath(userSettings().skin()) + "avatar_default.png");
 
@@ -1101,6 +1104,7 @@ void MainWindow::init()
 
     connect(m_msgList, SIGNAL(itemSelectionChanged()), SLOT(on_message_itemSelectionChanged()));
     connect(m_documents, SIGNAL(itemSelectionChanged()), SLOT(on_documents_itemSelectionChanged()));
+    connect(m_documents, SIGNAL(itemDoubleClicked(QListWidgetItem*)), SLOT(on_documents_itemDoubleClicked(QListWidgetItem*)));
     connect(m_documents, SIGNAL(lastDocumentDeleted()), SLOT(on_documents_lastDocumentDeleted()));
 
 #ifndef Q_OS_MAC
@@ -1661,6 +1665,19 @@ void MainWindow::on_documents_itemSelectionChanged()
     }
 }
 
+void MainWindow::on_documents_itemDoubleClicked(QListWidgetItem* item)
+{
+    CWizDocumentListViewItem* pItem = dynamic_cast<CWizDocumentListViewItem*>(item);
+    if (pItem)
+    {
+        WIZDOCUMENTDATA doc = pItem->document();
+        if (m_dbMgr.db(doc.strKbGUID).IsDocumentDownloaded(doc.strGUID))
+        {
+            viewDocumentInFloatWidget(doc);
+        }
+    }
+}
+
 void MainWindow::on_message_itemSelectionChanged()
 {
     QList<WIZMESSAGEDATA> listMsg;
@@ -1999,6 +2016,19 @@ void MainWindow::initTrayIcon(QSystemTrayIcon* trayIcon)
         trayIcon->setIcon(icon);
     }
 #endif
+}
+
+void MainWindow::viewDocumentInFloatWidget(const WIZDOCUMENTDATA& data)
+{
+    WizFloatDocumentViewer* wgt = new WizFloatDocumentViewer(*this);
+    CWizDocumentView* docView = wgt->docView();
+    connect(docView, SIGNAL(documentSaved(QString,CWizDocumentView*)), SIGNAL(documentSaved(QString,CWizDocumentView*)));
+    connect(this, SIGNAL(documentSaved(QString,CWizDocumentView*)), docView, SLOT(on_document_data_saved(QString,CWizDocumentView*)));
+
+
+    wgt->show();
+    docView->viewNote(data, false);
+    docView->setEditNote(false);
 }
 
 void MainWindow::quickSyncKb(const QString& kbGuid)
