@@ -219,14 +219,13 @@ bool MainWindow::eventFilter(QObject* watched, QEvent* event)
         {
             if (QWindowStateChangeEvent* stateEvent = dynamic_cast<QWindowStateChangeEvent*>(event))
             {
-                if (stateEvent->oldState() == Qt::WindowFullScreen)
+                // 使用程序右上角按钮将窗口最大化时，需要修改按钮名称
+                static int state = -1;
+                int oldState = stateEvent->oldState();
+                if (state != oldState && (oldState == Qt::WindowFullScreen || windowState() == Qt::WindowFullScreen))
                 {
-                    m_toolBar->show();
-                    m_splitter->widget(0)->show();
-                    m_splitter->widget(1)->show();
-                }
-                else if (windowState() == Qt::WindowFullScreen)
-                {
+                    state = oldState;
+                    m_actions->toggleActionText(WIZACTION_GLOBAL_TOGGLE_FULLSCREEN);
                 }
             }
         }
@@ -1272,7 +1271,7 @@ void MainWindow::on_actionViewToggleCategory_triggered()
         doclist->show();
     }
 
-    //m_actions->toggleActionText(WIZACTION_GLOBAL_TOGGLE_CATEGORY);
+    m_actions->toggleActionText(WIZACTION_GLOBAL_TOGGLE_CATEGORY);
 }
 
 void MainWindow::on_actionViewToggleFullscreen_triggered()
@@ -1280,12 +1279,12 @@ void MainWindow::on_actionViewToggleFullscreen_triggered()
 #ifdef Q_OS_MAC
     //toggleFullScreenMode(this);
     setWindowState(windowState() ^ Qt::WindowFullScreen);
-    if (windowState() == Qt::WindowFullScreen)
-    {
-        m_toolBar->hide();
-        m_splitter->widget(0)->hide();
-        m_splitter->widget(1)->hide();
-    }
+//    if (windowState() == Qt::WindowFullScreen)
+//    {
+//        m_toolBar->hide();
+//        m_splitter->widget(0)->hide();
+//        m_splitter->widget(1)->hide();
+//    }
 #endif // Q_OS_MAC
 }
 

@@ -593,6 +593,14 @@ void CWizDocumentListView::on_itemSelectionChanged()
     resetPermission();
 }
 
+void CWizDocumentListView::on_itemDoubleClicked(QListWidgetItem* item)
+{
+    CWizDocumentListViewItem* pItem = dynamic_cast<CWizDocumentListViewItem*>(item);
+    if (pItem)
+    {
+    }
+}
+
 void CWizDocumentListView::on_tag_created(const WIZTAGDATA& tag)
 {
     Q_UNUSED(tag);
