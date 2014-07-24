@@ -76,7 +76,7 @@ private:
 
     QPoint m_dragStartPosition;
 
-    QList<CWizDocumentListViewItem*> m_specialFocusItems;
+    QList<CWizDocumentListViewItem*> m_rightButtonFocusedItems;
 
 //#ifndef Q_OS_MAC
     // used for smoothly scroll

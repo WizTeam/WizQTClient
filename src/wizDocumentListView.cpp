@@ -302,7 +302,7 @@ void CWizDocumentListView::resetPermission()
 {
     CWizDocumentDataArray arrayDocument;
     //QList<QListWidgetItem*> items = selectedItems();
-    foreach (CWizDocumentListViewItem* item, m_specialFocusItems) {
+    foreach (CWizDocumentListViewItem* item, m_rightButtonFocusedItems) {
         arrayDocument.push_back(item->document());
     }
 
@@ -332,7 +332,7 @@ void CWizDocumentListView::resetPermission()
     }
 
     // disable note history if selection is not only one
-    if (m_specialFocusItems.count() != 1) {
+    if (m_rightButtonFocusedItems.count() != 1) {
         findAction(WIZACTION_LIST_DOCUMENT_HISTORY)->setEnabled(false);
     } else {
         findAction(WIZACTION_LIST_DOCUMENT_HISTORY)->setEnabled(true);
@@ -397,7 +397,7 @@ void CWizDocumentListView::mousePressEvent(QMouseEvent* event)
         m_dragStartPosition.setY(event->pos().y());
         QListWidget::mousePressEvent(event);
     } else if (event->button() == Qt::RightButton) {
-        m_specialFocusItems.clear();
+        m_rightButtonFocusedItems.clear();
         //
         CWizDocumentListViewItem* pItem = dynamic_cast<CWizDocumentListViewItem*>(itemAt(event->pos()));
         if (!pItem)
@@ -410,7 +410,7 @@ void CWizDocumentListView::mousePressEvent(QMouseEvent* event)
             {
                 if (pItem = dynamic_cast<CWizDocumentListViewItem*>(lsItem))
                 {
-                    m_specialFocusItems.append(pItem);
+                    m_rightButtonFocusedItems.append(pItem);
                     pItem->setSpecialFocused(true);
                 }
 
@@ -418,7 +418,7 @@ void CWizDocumentListView::mousePressEvent(QMouseEvent* event)
         }
         else
         {
-            m_specialFocusItems.append(pItem);
+            m_rightButtonFocusedItems.append(pItem);
             pItem->setSpecialFocused(true);
         }
         //
@@ -732,10 +732,10 @@ void CWizDocumentListView::onThumbCacheLoaded(const QString& strKbGUID, const QS
 
 void CWizDocumentListView::on_action_documentHistory()
 {
-    if (m_specialFocusItems.count() != 1)
+    if (m_rightButtonFocusedItems.count() != 1)
         return;
 
-   CWizDocumentListViewItem* item = m_specialFocusItems.first();
+   CWizDocumentListViewItem* item = m_rightButtonFocusedItems.first();
    if (!item)
        return;
 
@@ -813,12 +813,12 @@ void CWizDocumentListView::on_action_selectTags()
         m_tagList = new CWizTagListWidget(this);
     }
 
-    if (m_specialFocusItems.isEmpty())
+    if (m_rightButtonFocusedItems.isEmpty())
         return;
 
     CWizDocumentDataArray arrayDocument;
-    for (int i = 0; i < m_specialFocusItems.size(); i++) {
-        CWizDocumentListViewItem* pItem = m_specialFocusItems.at(i);
+    for (int i = 0; i < m_rightButtonFocusedItems.size(); i++) {
+        CWizDocumentListViewItem* pItem = m_rightButtonFocusedItems.at(i);
         arrayDocument.push_back(pItem->document());
     }
 
@@ -828,12 +828,12 @@ void CWizDocumentListView::on_action_selectTags()
 
 void CWizDocumentListView::on_action_deleteDocument()
 {
-    if (m_specialFocusItems.isEmpty())
+    if (m_rightButtonFocusedItems.isEmpty())
         return;
     //
     blockSignals(true);
     int index = -1;
-    foreach (CWizDocumentListViewItem* item, m_specialFocusItems) {
+    foreach (CWizDocumentListViewItem* item, m_rightButtonFocusedItems) {
         if (item->type() == CWizDocumentListViewItem::TypeMessage) {
             continue;
         }
@@ -886,7 +886,7 @@ void CWizDocumentListView::on_action_moveDocument_confirmed(int result)
 
     // collect documents
     CWizDocumentDataArray arrayDocument;
-    foreach (CWizDocumentListViewItem* item, m_specialFocusItems) {
+    foreach (CWizDocumentListViewItem* item, m_rightButtonFocusedItems) {
         arrayDocument.push_back(item->document());
     }
 
@@ -952,11 +952,11 @@ void CWizDocumentListView::on_action_copyDocument_confirmed(int result)
 
 void CWizDocumentListView::on_action_copyDocumentLink()
 {
-    if (m_specialFocusItems.isEmpty())
+    if (m_rightButtonFocusedItems.isEmpty())
         return;
     //
     QList<WIZDOCUMENTDATA> documents;
-    foreach(CWizDocumentListViewItem* item, m_specialFocusItems)
+    foreach(CWizDocumentListViewItem* item, m_rightButtonFocusedItems)
     {
         const WIZDOCUMENTDATA& document = item->document();
         documents.append(document);
@@ -967,7 +967,7 @@ void CWizDocumentListView::on_action_copyDocumentLink()
 void CWizDocumentListView::on_action_showDocumentInFloatWindow()
 {
     MainWindow* mainWindow = qobject_cast<MainWindow*>(m_app.mainWindow());
-    foreach(CWizDocumentListViewItem* item, m_specialFocusItems)
+    foreach(CWizDocumentListViewItem* item, m_rightButtonFocusedItems)
     {
         const WIZDOCUMENTDATA& document = item->document();
         mainWindow->viewDocumentInFloatWidget(document);
@@ -976,7 +976,7 @@ void CWizDocumentListView::on_action_showDocumentInFloatWindow()
 
 void CWizDocumentListView::on_menu_aboutToHide()
 {
-    foreach(CWizDocumentListViewItem* item, m_specialFocusItems)
+    foreach(CWizDocumentListViewItem* item, m_rightButtonFocusedItems)
     {
         item->setSpecialFocused(false);
     }
@@ -985,7 +985,7 @@ void CWizDocumentListView::on_menu_aboutToHide()
 
 void CWizDocumentListView::on_action_encryptDocument()
 {
-    foreach(CWizDocumentListViewItem* item, m_specialFocusItems)
+    foreach(CWizDocumentListViewItem* item, m_rightButtonFocusedItems)
     {
         CWizDocument doc(m_dbMgr.db(), item->document());
         doc.encryptDocument();

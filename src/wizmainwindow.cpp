@@ -2025,7 +2025,8 @@ void MainWindow::viewDocumentInFloatWidget(const WIZDOCUMENTDATA& data)
     connect(docView, SIGNAL(documentSaved(QString,CWizDocumentView*)), SIGNAL(documentSaved(QString,CWizDocumentView*)));
     connect(this, SIGNAL(documentSaved(QString,CWizDocumentView*)), docView, SLOT(on_document_data_saved(QString,CWizDocumentView*)));
 
-
+    wgt->setGeometry((width() - m_doc->width())  / 2, (height() - wgt->height()) / 2,
+                     m_doc->width(), wgt->height());
     wgt->show();
     docView->viewNote(data, false);
     docView->setEditNote(false);
