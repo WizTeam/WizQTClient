@@ -134,13 +134,22 @@ CWizDocumentListView::CWizDocumentListView(CWizExplorerApp& app, QWidget *parent
     m_menuDocument->addAction(WIZACTION_LIST_TAGS, this,
                               SLOT(on_action_selectTags()));
     m_menuDocument->addSeparator();
+
+    m_menuDocument->addAction(tr("Open in float window"), this,
+                              SLOT(on_action_showDocumentInFloatWindow()));
+    m_menuDocument->addAction(WIZACTION_LIST_COPY_DOCUMENT_LINK, this,
+                              SLOT(on_action_copyDocumentLink()));
+    m_menuDocument->addAction(WIZACTION_LIST_DOCUMENT_HISTORY, this,
+                              SLOT(on_action_documentHistory()));
+
+    m_menuDocument->addSeparator();
+
     QAction* actionDeleteDoc = m_menuDocument->addAction(WIZACTION_LIST_DELETE,
                                                          this, SLOT(on_action_deleteDocument()), QKeySequence::Delete);
     QAction* actionMoveDoc = m_menuDocument->addAction(WIZACTION_LIST_MOVE_DOCUMENT,
                                                        this, SLOT(on_action_moveDocument()), QKeySequence("Ctrl+Shift+M"));
     QAction* actionCopyDoc = m_menuDocument->addAction(WIZACTION_LIST_COPY_DOCUMENT,
                                                        this, SLOT(on_action_copyDocument()), QKeySequence("Ctrl+Shift+C"));
-
     // not implement, hide currently.
     actionCopyDoc->setVisible(false);
 
@@ -152,14 +161,12 @@ CWizDocumentListView::CWizDocumentListView(CWizExplorerApp& app, QWidget *parent
     actionMoveDoc->setShortcutContext(Qt::WidgetWithChildrenShortcut);
     //actionCopyDoc->setShortcutContext(Qt::WidgetWithChildrenShortcut);
 
-    m_menuDocument->addAction(WIZACTION_LIST_COPY_DOCUMENT_LINK, this,
-                              SLOT(on_action_copyDocumentLink()));
-    m_menuDocument->addAction(WIZACTION_LIST_DOCUMENT_HISTORY, this,
-                              SLOT(on_action_documentHistory()));
+
 
     //m_actionEncryptDocument = new QAction(tr("Encrypt Document"), m_menu);
     //connect(m_actionEncryptDocument, SIGNAL(triggered()), SLOT(on_action_encryptDocument()));
     //m_menu->addAction(m_actionEncryptDocument);
+    connect(m_menuDocument, SIGNAL(aboutToHide()), SLOT(on_menu_aboutToHide()));
 }
 
 CWizDocumentListView::~CWizDocumentListView()
@@ -294,11 +301,9 @@ void CWizDocumentListView::contextMenuEvent(QContextMenuEvent * e)
 void CWizDocumentListView::resetPermission()
 {
     CWizDocumentDataArray arrayDocument;
-    QList<QListWidgetItem*> items = selectedItems();
-    foreach (QListWidgetItem* it, items) {
-        if (CWizDocumentListViewItem* item = dynamic_cast<CWizDocumentListViewItem*>(it)) {
-            arrayDocument.push_back(item->document());
-        }
+    //QList<QListWidgetItem*> items = selectedItems();
+    foreach (CWizDocumentListViewItem* item, m_specialFocusItems) {
+        arrayDocument.push_back(item->document());
     }
 
     bool bGroup = isDocumentsWithGroupDocument(arrayDocument);
@@ -327,7 +332,7 @@ void CWizDocumentListView::resetPermission()
     }
 
     // disable note history if selection is not only one
-    if (items.count() != 1) {
+    if (m_specialFocusItems.count() != 1) {
         findAction(WIZACTION_LIST_DOCUMENT_HISTORY)->setEnabled(false);
     } else {
         findAction(WIZACTION_LIST_DOCUMENT_HISTORY)->setEnabled(true);
@@ -392,17 +397,34 @@ void CWizDocumentListView::mousePressEvent(QMouseEvent* event)
         m_dragStartPosition.setY(event->pos().y());
         QListWidget::mousePressEvent(event);
     } else if (event->button() == Qt::RightButton) {
+        m_specialFocusItems.clear();
+        //
         CWizDocumentListViewItem* pItem = dynamic_cast<CWizDocumentListViewItem*>(itemAt(event->pos()));
-
         if (!pItem)
             return;
 
-        //pItem->sets
-        //pItem->setFlags();
+        // if selectdItems contains clicked item use all selectedItems as special focused item.
+        if (selectedItems().contains(pItem))
+        {
+            foreach (QListWidgetItem* lsItem, selectedItems())
+            {
+                if (pItem = dynamic_cast<CWizDocumentListViewItem*>(lsItem))
+                {
+                    m_specialFocusItems.append(pItem);
+                    pItem->setSpecialFocused(true);
+                }
+
+            }
+        }
+        else
+        {
+            m_specialFocusItems.append(pItem);
+            pItem->setSpecialFocused(true);
+        }
+        //
+        resetPermission();
         m_menuDocument->popup(event->globalPos());
     }
-
-
 }
 
 void CWizDocumentListView::mouseMoveEvent(QMouseEvent* event)
@@ -602,7 +624,7 @@ void CWizDocumentListView::resetItemsSortingType(int type)
 
 void CWizDocumentListView::on_itemSelectionChanged()
 {
-    resetPermission();
+    //resetPermission();
 }
 
 void CWizDocumentListView::on_tag_created(const WIZTAGDATA& tag)
@@ -710,11 +732,10 @@ void CWizDocumentListView::onThumbCacheLoaded(const QString& strKbGUID, const QS
 
 void CWizDocumentListView::on_action_documentHistory()
 {
-    QList<QListWidgetItem*> items = selectedItems();
-    if (items.count() != 1)
+    if (m_specialFocusItems.count() != 1)
         return;
 
-   CWizDocumentListViewItem* item = dynamic_cast<CWizDocumentListViewItem*>(items.first());
+   CWizDocumentListViewItem* item = m_specialFocusItems.first();
    if (!item)
        return;
 
@@ -792,13 +813,12 @@ void CWizDocumentListView::on_action_selectTags()
         m_tagList = new CWizTagListWidget(this);
     }
 
-    QList<QListWidgetItem*> items = selectedItems();
-    if (items.isEmpty())
+    if (m_specialFocusItems.isEmpty())
         return;
 
     CWizDocumentDataArray arrayDocument;
-    for (int i = 0; i < items.size(); i++) {
-        CWizDocumentListViewItem* pItem = dynamic_cast<CWizDocumentListViewItem*>(items.at(i));
+    for (int i = 0; i < m_specialFocusItems.size(); i++) {
+        CWizDocumentListViewItem* pItem = m_specialFocusItems.at(i);
         arrayDocument.push_back(pItem->document());
     }
 
@@ -808,20 +828,19 @@ void CWizDocumentListView::on_action_selectTags()
 
 void CWizDocumentListView::on_action_deleteDocument()
 {
-    QList<QListWidgetItem*> items = selectedItems();
-
+    if (m_specialFocusItems.isEmpty())
+        return;
+    //
     blockSignals(true);
     int index = -1;
-    foreach (QListWidgetItem* it, items) {
-        if (CWizDocumentListViewItem* item = dynamic_cast<CWizDocumentListViewItem*>(it)) {
-            if (item->type() == CWizDocumentListViewItem::TypeMessage) {
-                continue;
-            }
-
-            index = indexFromItem(item).row();
-            CWizDocument doc(m_dbMgr.db(item->document().strKbGUID), item->document());
-            doc.Delete();
+    foreach (CWizDocumentListViewItem* item, m_specialFocusItems) {
+        if (item->type() == CWizDocumentListViewItem::TypeMessage) {
+            continue;
         }
+
+        index = indexFromItem(item).row();
+        CWizDocument doc(m_dbMgr.db(item->document().strKbGUID), item->document());
+        doc.Delete();
     }
     blockSignals(false);
 
@@ -867,11 +886,8 @@ void CWizDocumentListView::on_action_moveDocument_confirmed(int result)
 
     // collect documents
     CWizDocumentDataArray arrayDocument;
-    QList<QListWidgetItem*> items = selectedItems();
-    foreach (QListWidgetItem* it, items) {
-        if (CWizDocumentListViewItem* item = dynamic_cast<CWizDocumentListViewItem*>(it)) {
-            arrayDocument.push_back(item->document());
-        }
+    foreach (CWizDocumentListViewItem* item, m_specialFocusItems) {
+        arrayDocument.push_back(item->document());
     }
 
     // only move user private documents
@@ -936,24 +952,43 @@ void CWizDocumentListView::on_action_copyDocument_confirmed(int result)
 
 void CWizDocumentListView::on_action_copyDocumentLink()
 {
-    QList<QListWidgetItem*> items = selectedItems();
-    CWizDocumentListViewItem* item = dynamic_cast<CWizDocumentListViewItem*>(items.last());
-    if (item)
+    if (m_specialFocusItems.isEmpty())
+        return;
+    //
+    QList<WIZDOCUMENTDATA> documents;
+    foreach(CWizDocumentListViewItem* item, m_specialFocusItems)
     {
         const WIZDOCUMENTDATA& document = item->document();
-        m_dbMgr.db().CopyDocumentLink(document);
+        documents.append(document);
     }
+    m_dbMgr.db().CopyDocumentsLink(documents);
+}
+
+void CWizDocumentListView::on_action_showDocumentInFloatWindow()
+{
+    MainWindow* mainWindow = qobject_cast<MainWindow*>(m_app.mainWindow());
+    foreach(CWizDocumentListViewItem* item, m_specialFocusItems)
+    {
+        const WIZDOCUMENTDATA& document = item->document();
+        mainWindow->viewDocumentInFloatWidget(document);
+    }
+}
+
+void CWizDocumentListView::on_menu_aboutToHide()
+{
+    foreach(CWizDocumentListViewItem* item, m_specialFocusItems)
+    {
+        item->setSpecialFocused(false);
+    }
+    viewport()->update();
 }
 
 void CWizDocumentListView::on_action_encryptDocument()
 {
-    QList<QListWidgetItem*> items = selectedItems();
-
-    foreach (QListWidgetItem* it, items) {
-        if (CWizDocumentListViewItem* item = dynamic_cast<CWizDocumentListViewItem*>(it)) {
-            CWizDocument doc(m_dbMgr.db(), item->document());
-            doc.encryptDocument();
-        }
+    foreach(CWizDocumentListViewItem* item, m_specialFocusItems)
+    {
+        CWizDocument doc(m_dbMgr.db(), item->document());
+        doc.encryptDocument();
     }
 }
 

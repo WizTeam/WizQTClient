@@ -71,11 +71,12 @@ private:
     int m_nSortingType;
 
     QMenu* m_menuDocument;
-    //QMenu* m_menuMessage;
     QAction* m_actionEncryptDocument;
     CWizTagListWidget* m_tagList;
 
     QPoint m_dragStartPosition;
+
+    QList<CWizDocumentListViewItem*> m_specialFocusItems;
 
 //#ifndef Q_OS_MAC
     // used for smoothly scroll
@@ -152,13 +153,16 @@ public Q_SLOTS:
     void on_action_copyDocument();
     void on_action_copyDocument_confirmed(int result);
 
+    void on_action_showDocumentInFloatWindow();
     void on_action_copyDocumentLink();
+    void on_action_documentHistory();
+
+    void on_menu_aboutToHide();
 
     void on_document_abstractLoaded(const WIZABSTRACT& abs);
     void on_userAvatar_loaded(const QString& strUserGUID);
     void onThumbCacheLoaded(const QString& strKbGUID, const QString& strGUID);
 
-    void on_action_documentHistory();
 
 //#ifndef Q_OS_MAC
     // used for smoothly scroll

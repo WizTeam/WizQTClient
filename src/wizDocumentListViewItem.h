@@ -61,6 +61,9 @@ public:
     void setNeedUpdate() const;
     QString cacheKey() const;
 
+    bool isSpecialFocus() const;
+    void setSpecialFocused(bool isSpecialFocus);
+
 private:
     void draw_impl(QPainter* p, const QStyleOptionViewItemV4* vopt, int nItemType, int nViewType) const;
     void drawPrivateSummaryView_impl(QPainter* p, const QStyleOptionViewItemV4* vopt) const;
@@ -82,6 +85,8 @@ private:
 
     bool isAvatarNeedUpdate(const QString& strFileName);
     bool isContainsAttachment() const;
+
+    bool m_bSpecialFocus;
 
 private Q_SLOTS:
     void on_thumbnailReloaded();

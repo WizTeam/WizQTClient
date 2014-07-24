@@ -26,6 +26,7 @@ CWizDocumentListViewItem::CWizDocumentListViewItem(CWizExplorerApp& app,
     , m_app(app)
     , m_nSortingType(0)
     , m_nSize(0)
+    , m_bSpecialFocus(false)
 {
     Q_ASSERT(!data.doc.strKbGUID.isEmpty());
     Q_ASSERT(!data.doc.strGUID.isEmpty());
@@ -72,6 +73,16 @@ bool CWizDocumentListViewItem::isContainsAttachment() const
     }
     return false;
 }
+bool CWizDocumentListViewItem::isSpecialFocus() const
+{
+    return m_bSpecialFocus;
+}
+
+void CWizDocumentListViewItem::setSpecialFocused(bool bSpecialFocus)
+{
+    m_bSpecialFocus = bSpecialFocus;
+}
+
 
 void CWizDocumentListViewItem::resetAbstract(const WIZABSTRACT& abs)
 {
@@ -324,7 +335,7 @@ void CWizDocumentListViewItem::drawPrivateSummaryView_impl(QPainter* p, const QS
     WIZABSTRACT thumb;
     ThumbCache::instance()->find(m_data.doc.strKbGUID, m_data.doc.strGUID, thumb);
 
-    QRect rcd = Utils::StyleHelper::initListViewItemPainter(p, vopt->rect, bFocused, bSelected);
+    QRect rcd = Utils::StyleHelper::initListViewItemPainter(p, vopt->rect, bFocused, bSelected, m_bSpecialFocus);
 
     if (!thumb.image.isNull()) {
         QPixmap pmt = QPixmap::fromImage(thumb.image);

@@ -198,6 +198,8 @@ public:
     void viewDocument(const WIZDOCUMENTDATA& data, bool addToHistory);
     void locateDocument(const WIZDOCUMENTDATA& data);
     //
+    void viewDocumentInFloatWidget(const WIZDOCUMENTDATA& data);
+    //
     static void quickSyncKb(const QString& kbGuid);
 
     void checkWizUpdate();
@@ -359,8 +361,6 @@ private:
 
     //
     void initTrayIcon(QSystemTrayIcon* trayIcon);
-    //
-    void viewDocumentInFloatWidget(const WIZDOCUMENTDATA& data);
 };
 
 } // namespace Internal
