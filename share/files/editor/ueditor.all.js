@@ -11765,9 +11765,9 @@ UE.plugins['selectall'] = function(){
 
 
     //快捷键
-    me.addshortcutkey({
-         "selectAll" : "ctrl+65"
-    });
+    // me.addshortcutkey({
+    //      "selectAll" : "ctrl+65"
+    // });
 };
 
 /**

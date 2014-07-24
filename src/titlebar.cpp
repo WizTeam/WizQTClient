@@ -132,17 +132,6 @@ TitleBar::TitleBar(QWidget *parent)
     layoutInfo1->addWidget(line3);
     m_editorBar->hide();
 
-//    QVBoxLayout* layoutInfo3 = new QVBoxLayout();
-//    layoutInfo3->addStretch();
-//    layoutInfo3->addLayout(layoutInfo2);
-
-
-//    QHBoxLayout* layoutInfo4 = new QHBoxLayout();
-//    layoutInfo4->setContentsMargins(0, 0, 0, 0);
-//    layoutInfo4->setSpacing(0);
-//    layoutInfo4->addLayout(layoutInfo1);
-//    layoutInfo4->addLayout(layoutInfo3);
-
     layout->addLayout(layoutInfo1);
     //layout->addLayout(layoutInfo4);
     layout->addWidget(m_notifyBar);
