@@ -50,7 +50,7 @@ CWizPreferenceWindow::CWizPreferenceWindow(CWizExplorerApp& app, QWidget* parent
 
 #ifdef BUILD4APPSTORE
     // hide language choice and upgrade for appstore
-    ui->comboLang->setVisible(false);
+    ui->comboLang->setEditable(false);
     ui->checkBox->setVisible(false);
 #endif
 
