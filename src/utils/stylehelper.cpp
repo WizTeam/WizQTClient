@@ -693,15 +693,14 @@ QRect StyleHelper::initListViewItemPainter(QPainter* p, const QRect& lrc, bool b
     QRect rc = lrc;
 
     Utils::StyleHelper::drawListViewItemSeperator(p, rc);
-    Utils::StyleHelper::drawListViewItemBackground(p, rc, bFocused, bSelected);
 
-    if (bSpecialFocused)
+    if (!bSelected && bSpecialFocused)
     {
-        p->save();
-        p->setPen(Qt::blue);
-        p->setBrush(Qt::NoBrush);
-        p->drawRect(rc);
-        p->restore();
+        Utils::StyleHelper::drawListViewItemBackground(p, rc, false, true);
+    }
+    else
+    {
+        Utils::StyleHelper::drawListViewItemBackground(p, rc, bFocused, bSelected);
     }
 
     int nMargin = Utils::StyleHelper::margin();
