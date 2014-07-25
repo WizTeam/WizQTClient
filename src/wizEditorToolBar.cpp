@@ -321,75 +321,92 @@ EditorToolBar::EditorToolBar(QWidget *parent)
 
     m_btnFormatMatch = new CWizToolButton(this);
     m_btnFormatMatch->setIcon(::WizLoadSkinIcon(skin, "actionFormatMatch"));
+    m_btnFormatMatch->setToolTip(tr("FormatMatch"));
     connect(m_btnFormatMatch, SIGNAL(clicked()), SLOT(on_btnFormatMatch_clicked()));
 
     m_btnForeColor = new CWizToolButtonColor(this);
     m_btnForeColor->setIcon(::WizLoadSkinIcon(skin, "actionFormatForeColor"));
+    m_btnForeColor->setToolTip(tr("ForeColor"));
     connect(m_btnForeColor, SIGNAL(clicked()), SLOT(on_BtnForeColor_clicked()));
 
     m_btnBackColor = new CWizToolButtonColor(this);
     m_btnBackColor->setIcon(::WizLoadSkinIcon(skin, "actionFormatBackColor"));
+    m_btnBackColor->setToolTip(tr("BackColor"));
     connect(m_btnBackColor, SIGNAL(clicked()), SLOT(on_BtnBackColor_clicked()));
 
     m_btnBold = new CWizToolButton(this);
     m_btnBold->setIcon(::WizLoadSkinIcon(skin, "actionFormatBold"));
+    m_btnBold->setToolTip(tr("Bold"));
     connect(m_btnBold, SIGNAL(clicked()), SLOT(on_btnBold_clicked()));
 
     m_btnItalic = new CWizToolButton(this);
     m_btnItalic->setIcon(::WizLoadSkinIcon(skin, "actionFormatItalic"));
+    m_btnItalic->setToolTip(tr("Italic"));
     connect(m_btnItalic, SIGNAL(clicked()), SLOT(on_btnItalic_clicked()));
 
     m_btnUnderLine = new CWizToolButton(this);
     m_btnUnderLine->setIcon(::WizLoadSkinIcon(skin, "actionFormatUnderLine"));
+    m_btnUnderLine->setToolTip(tr("UnderLine"));
     connect(m_btnUnderLine, SIGNAL(clicked()), SLOT(on_btnUnderLine_clicked()));
 
     m_btnStrikeThrough = new CWizToolButton(this);
     m_btnStrikeThrough->setIcon(::WizLoadSkinIcon(skin, "actionFormatStrikeThrough"));
+    m_btnStrikeThrough->setToolTip(tr("StrikeThrough"));
     connect(m_btnStrikeThrough, SIGNAL(clicked()), SLOT(on_btnStrikeThrough_clicked()));
 
     m_btnJustifyLeft = new CWizToolButton(this);
     m_btnJustifyLeft->setIcon(::WizLoadSkinIcon(skin, "actionFormatJustifyLeft"));
+    m_btnJustifyLeft->setToolTip(tr("JustifyLeft"));
     connect(m_btnJustifyLeft, SIGNAL(clicked()), SLOT(on_btnJustifyLeft_clicked()));
 
     m_btnJustifyCenter = new CWizToolButton(this);
     m_btnJustifyCenter->setIcon(::WizLoadSkinIcon(skin, "actionFormatJustifyCenter"));
+    m_btnJustifyCenter->setToolTip(tr("JustifyCenter"));
     connect(m_btnJustifyCenter, SIGNAL(clicked()), SLOT(on_btnJustifyCenter_clicked()));
 
     m_btnJustifyRight = new CWizToolButton(this);
     m_btnJustifyRight->setIcon(::WizLoadSkinIcon(skin, "actionFormatJustifyRight"));
+    m_btnJustifyRight->setToolTip(tr("JustifyRight"));
     connect(m_btnJustifyRight, SIGNAL(clicked()), SLOT(on_btnJustifyRight_clicked()));
 
     m_btnUnorderedList = new CWizToolButton(this);
     m_btnUnorderedList->setIcon(::WizLoadSkinIcon(skin, "actionFormatInsertUnorderedList"));
+    m_btnUnorderedList->setToolTip(tr("UnorderedList"));
     connect(m_btnUnorderedList, SIGNAL(clicked()), SLOT(on_btnUnorderedList_clicked()));
 
     m_btnOrderedList = new CWizToolButton(this);
     m_btnOrderedList->setIcon(::WizLoadSkinIcon(skin, "actionFormatInsertOrderedList"));
+    m_btnOrderedList->setToolTip(tr("OrderedList"));
     connect(m_btnOrderedList, SIGNAL(clicked()), SLOT(on_btnOrderedList_clicked()));
 
     m_btnTable = new CWizToolButton(this);
     m_btnTable->setCheckable(false);
     m_btnTable->setIcon(::WizLoadSkinIcon(skin, "actionFormatInsertTable"));
+    m_btnTable->setToolTip(tr("InsertTable"));
     connect(m_btnTable, SIGNAL(clicked()), SLOT(on_btnTable_clicked()));
 
     m_btnHorizontal = new CWizToolButton(this);
     m_btnHorizontal->setCheckable(false);
     m_btnHorizontal->setIcon(::WizLoadSkinIcon(skin, "actionFormatInsertHorizontal"));
+    m_btnHorizontal->setToolTip(tr("InsertHorizontal"));
     connect(m_btnHorizontal, SIGNAL(clicked()), SLOT(on_btnHorizontal_clicked()));
 
     m_btnCheckList = new CWizToolButton(this);
     m_btnCheckList->setCheckable(false);
     m_btnCheckList->setIcon(::WizLoadSkinIcon(skin, "actionFormatInsertCheckList"));
+    m_btnCheckList->setToolTip(tr("InsertCheckList"));
     connect(m_btnCheckList, SIGNAL(clicked()), SLOT(on_btnCheckList_clicked()));
 
-    m_btnImage = new CWizToolButton(this);
-    m_btnImage->setCheckable(false);
-    m_btnImage->setIcon(::WizLoadSkinIcon(skin, "actionFormatInsertImage"));
-    connect(m_btnImage, SIGNAL(clicked()), SLOT(on_btnImage_clicked()));
+    m_btnInsertImage = new CWizToolButton(this);
+    m_btnInsertImage->setCheckable(false);
+    m_btnInsertImage->setIcon(::WizLoadSkinIcon(skin, "actionFormatInsertImage"));
+    m_btnInsertImage->setToolTip(tr("InsertImage"));
+    connect(m_btnInsertImage, SIGNAL(clicked()), SLOT(on_btnImage_clicked()));
 
     m_btnSearchReplace = new CWizToolButton(this);
     m_btnSearchReplace->setCheckable(false);
     m_btnSearchReplace->setIcon(::WizLoadSkinIcon(skin, "actionFormatSearchReplace"));
+    m_btnSearchReplace->setToolTip(tr("Find & Replace"));
     connect(m_btnSearchReplace, SIGNAL(clicked()), SLOT(on_btnSearchReplace_clicked()));
 
     QHBoxLayout* layout = new QHBoxLayout();
@@ -420,7 +437,7 @@ EditorToolBar::EditorToolBar(QWidget *parent)
     layout->addWidget(m_btnTable);
     layout->addWidget(m_btnHorizontal);
     layout->addWidget(m_btnCheckList);
-    layout->addWidget(m_btnImage);
+    layout->addWidget(m_btnInsertImage);
     layout->addSpacing(12);
     layout->addWidget(m_btnSearchReplace);
     layout->addStretch();

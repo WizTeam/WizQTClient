@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Search&amp;Replace</string>
+   <string>Find &amp; Replace</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
@@ -32,7 +32,7 @@
      <item row="0" column="0">
       <widget class="QLabel" name="label">
        <property name="text">
-        <string>Search:</string>
+        <string>Find:</string>
        </property>
       </widget>
      </item>

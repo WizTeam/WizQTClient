@@ -135,7 +135,7 @@ CWizDocumentListView::CWizDocumentListView(CWizExplorerApp& app, QWidget *parent
                               SLOT(on_action_selectTags()));
     m_menuDocument->addSeparator();
 
-    m_menuDocument->addAction(tr("Open in float window"), this,
+    m_menuDocument->addAction(tr("Open in new Window"), this,
                               SLOT(on_action_showDocumentInFloatWindow()));
     m_menuDocument->addAction(WIZACTION_LIST_COPY_DOCUMENT_LINK, this,
                               SLOT(on_action_copyDocumentLink()));
