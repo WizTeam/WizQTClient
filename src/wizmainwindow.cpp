@@ -2028,8 +2028,8 @@ void MainWindow::viewDocumentInFloatWidget(const WIZDOCUMENTDATA& data)
     wgt->setGeometry((width() - m_doc->width())  / 2, (height() - wgt->height()) / 2,
                      m_doc->width(), wgt->height());
     wgt->show();
+    //
     docView->viewNote(data, false);
-    docView->setEditNote(false);
 }
 
 void MainWindow::quickSyncKb(const QString& kbGuid)
