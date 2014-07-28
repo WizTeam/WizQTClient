@@ -851,13 +851,13 @@ void CWizDocumentListView::on_action_deleteDocument()
         index = nItemCount - 1;
     }
 
-    if(-1 < index)
+    if (count() == 0)
     {
-        setItemSelected(documentItemAt(index), true);
+        emit lastDocumentDeleted();
     }
     else
     {
-        emit lastDocumentDeleted();
+        setItemSelected(documentItemAt(index), true);
     }
 }
 
