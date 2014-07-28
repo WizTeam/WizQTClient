@@ -347,9 +347,11 @@ if(UNIX)
         if(CMAKE_BUILD_TYPE STREQUAL "Release")
             # resovle library dependency if build type is release
             add_dependencies(WizNote coreplugin_plugin helloworld_plugin)
-            #add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-             #   COMMAND ${qt_binary_dir}/macdeployqt ${WIZNOTE_ROOT_DIR})
+        endif()
 
+        if(NOT APPSTORE_BUILD)
+            add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+                COMMAND ${qt_binary_dir}/macdeployqt ${WIZNOTE_ROOT_DIR})
         endif()
 
     elseif(NOT APPLE)
