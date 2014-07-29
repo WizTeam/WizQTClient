@@ -112,12 +112,8 @@ void CWizUserInfoWidget::on_action_accountInfo_triggered()
 void CWizUserInfoWidget::on_action_accountSetup_triggered()
 {
     QString strUrl = WizService::ApiEntry::accountInfoUrl(WIZ_TOKEN_IN_URL_REPLACE_PART);
-    CWizWebSettingsDialog* pDlg = new CWizWebSettingsWithTokenDialog(strUrl, QSize(800, 400), window());
-
-    pDlg->exec();
-    delete pDlg;
+    showWebDialogWithToken(tr("Account Setup"), strUrl, window());
 }
-
 
 void CWizUserInfoWidget::on_action_changeAvatar_triggered()
 {
