@@ -855,7 +855,7 @@ void CWizDocumentListView::on_action_deleteDocument()
     {
         emit lastDocumentDeleted();
     }
-    else
+    else if (selectedItems().isEmpty())
     {
         setItemSelected(documentItemAt(index), true);
     }
