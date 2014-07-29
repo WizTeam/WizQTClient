@@ -1,3 +1,36 @@
+##2.1.11(2014-7-28)
+
+Bugfixes:
+
+  - Fix problem that the markdown rendering fonts do not match with the custom font. 
+  - Fix problem that the team list do not refresh after create new team. 
+
+Features:
+
+  - Add the function of view the notes in a separate window (double click on the notes in notes list view). 
+  - Change right-click menu mode of notes list, right-click on no longer change selected notes. 
+  - Add find and replace function to find and replace text in the single notes. 
+  - Add the option to hide the tray icon. 
+  - Add some tips of editor buttons.
+
+
+##2.1.10(2014-7-4)
+
+Bugfixes:
+
+  - [Mac]Fix problem that CapsLock key do not work. 
+  - [Mac]Fix format leakage problems when paste web html or code. 
+  - [Mac]Enterprise group user avatar cache update in time. 
+  - [Mac]Fix problem that toolbar shakes when resume mainwindow from minimum. 
+  - Optimize the Markdown support for MathJax, accelerates the rendering speed. 
+  - Fix problem that Markdonw plugin was not compatible with Checklist. 
+  - Fix category folder state save problem. 
+
+Features:
+
+  - Document List could use ascending and descending sort order.
+
+
 ##2.1.9(2014-6-23)
 
 Bugfixes:

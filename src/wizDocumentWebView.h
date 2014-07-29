@@ -268,6 +268,14 @@ public Q_SLOTS:
     bool editorCommandExecuteLinkInsert();
     bool editorCommandExecuteLinkRemove();
 
+    // search and repalce
+    bool editorCommandExecuteSearchReplace();
+    void findPre(QString strTxt, bool bCasesensitive);
+    void findNext(QString strTxt, bool bCasesensitive);
+    void replaceCurrent(QString strSource, QString strTarget);
+    void replaceAndFindNext(QString strSource, QString strTarget, bool bCasesensitive);
+    void replaceAll(QString strSource, QString strTarget, bool bCasesensitive);
+
     // format
     bool editorCommandExecuteIndent();
     bool editorCommandExecuteOutdent();

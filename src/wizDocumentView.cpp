@@ -361,6 +361,11 @@ void CWizDocumentView::settingsChanged()
     setViewMode(m_userSettings.noteViewMode());
 }
 
+void CWizDocumentView::sendDocumentSavedSignal(const QString& strGUID)
+{
+    emit documentSaved(strGUID, this);
+}
+
 void CWizDocumentView::resetTitle(const QString& strTitle)
 {
     m_title->resetTitle(strTitle);
@@ -486,6 +491,15 @@ void CWizDocumentView::on_document_data_modified(const WIZDOCUMENTDATA& data)
     reloadNote();
 }
 
+void CWizDocumentView::on_document_data_saved(const QString& strGUID,
+                                              CWizDocumentView* viewer)
+{
+    if (viewer != this && strGUID == note().strGUID)
+    {
+        reloadNote();
+    }
+}
+
 
 void Core::CWizDocumentView::on_checkEditStatus_finished(QString strGUID, QStringList editors)
 {
@@ -515,5 +529,23 @@ void CWizDocumentView::on_webView_focus_changed()
             m_editStatusSyncThread->setCurrentEditingDocument(strUserAlias, m_note.strKbGUID, m_note.strGUID);
         }
     }
+}
+
+
+WizFloatDocumentViewer::WizFloatDocumentViewer(CWizExplorerApp& app, QWidget* parent) : QWidget(parent)
+{
+        setAttribute(Qt::WA_DeleteOnClose);
+        setContentsMargins(0, 0, 0, 0);
+        setPalette(QPalette(Qt::white));
+        QVBoxLayout* layout = new QVBoxLayout(this);
+        layout->setContentsMargins(0, 0, 0, 0);
+        m_docView = new CWizDocumentView(app, this);
+        layout->addWidget(m_docView);
+        setLayout(layout);
+}
+
+WizFloatDocumentViewer::~WizFloatDocumentViewer()
+{
+    m_docView->waitForDone();
 }
 

@@ -392,7 +392,7 @@ bool AvatarHost::isLoaded(const QString& strUserID)
 
 bool AvatarHost::isFileExists(const QString& strUserID)
 {
-    d->isFileExists(strUserID);
+    return d->isFileExists(strUserID);
 }
 
 // For user want to retrive avatar from global pixmap cache

@@ -422,6 +422,7 @@ public:
 
     //
     void CopyDocumentLink(const WIZDOCUMENTDATA& document);
+    void CopyDocumentsLink(const QList<WIZDOCUMENTDATA>& documents);
     QString DocumentToWizKMURL(const WIZDOCUMENTDATA& document);
     QString GetParamFromWizKMURL(const QString& strURL, const QString& strParamName);
 
@@ -460,6 +461,7 @@ private:
                                 QString& strFileName);
 
     bool GetBizMetaName(const QString& strBizGUID, QString& strMetaName);
+
 };
 
 

@@ -51,7 +51,8 @@ private:
     CWizToolButton* m_btnTable;
     CWizToolButton* m_btnHorizontal;
     CWizToolButton* m_btnCheckList;
-    CWizToolButton* m_btnImage;
+    CWizToolButton* m_btnInsertImage;
+    CWizToolButton* m_btnSearchReplace;
 
     QString m_strImageSrc;
 
