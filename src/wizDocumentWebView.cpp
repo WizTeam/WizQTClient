@@ -306,6 +306,13 @@ void CWizDocumentWebView::keyPressEvent(QKeyEvent* event)
     QWebView::keyPressEvent(event);
     setUpdatesEnabled(true);
 #else
+
+    if (event->key() == Qt::Key_Backspace && event->modifiers() == Qt::ControlModifier)
+    {
+        editorCommandExecuteRemoveStartOfLine();
+        return;
+    }
+
     //special handled for qt4,case capslock doesn't work
 #if QT_VERSION < 0x050000
 //    if (65 <= keyValue && 90 >= keyValue)
@@ -1397,6 +1404,15 @@ bool CWizDocumentWebView::editorCommandExecuteViewSource()
 {
     return editorCommandExecuteCommand("source");
 }
+
+#ifdef Q_OS_MAC
+bool CWizDocumentWebView::editorCommandExecuteRemoveStartOfLine()
+{
+    triggerPageAction(QWebPage::SelectStartOfLine);
+    QKeyEvent delKeyPress(QEvent::KeyPress, Qt::Key_Delete, Qt::NoModifier, QString());
+    return QApplication::sendEvent(this, &delKeyPress);
+}
+#endif
 
 bool CWizDocumentWebView::editorCommandExecuteTableDelete()
 {

@@ -320,6 +320,10 @@ public Q_SLOTS:
     bool editorCommandExecuteInsertImage();
     bool editorCommandExecuteViewSource();
 
+#ifdef Q_OS_MAC
+    bool editorCommandExecuteRemoveStartOfLine();
+#endif
+
     // js func
     void initCheckListEnvironment();
 
