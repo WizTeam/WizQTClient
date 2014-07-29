@@ -140,6 +140,7 @@ set(wiznote_SOURCES
     wizLoginDialog.cpp
     share/wizFileMonitor.cpp
     wizSearchReplaceWidget.cpp
+    widgets/WizCodeEditorDialog.cpp
 )
 
 set(wiznote_HEADERS
@@ -267,6 +268,7 @@ set(wiznote_HEADERS
     wizLoginDialog.h
     share/wizFileMonitor.h
     wizSearchReplaceWidget.h
+    widgets/WizCodeEditorDialog.h
 )
 
 set(wiznote_FORMS
