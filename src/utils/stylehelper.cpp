@@ -688,12 +688,20 @@ int StyleHelper::notifyBarHeight()
     return 32;
 }
 
-QRect StyleHelper::initListViewItemPainter(QPainter* p, const QRect& lrc, bool bFocused, bool bSelected)
+QRect StyleHelper::initListViewItemPainter(QPainter* p, const QRect& lrc, bool bFocused, bool bSelected, bool bSpecialFocused)
 {
     QRect rc = lrc;
 
     Utils::StyleHelper::drawListViewItemSeperator(p, rc);
-    Utils::StyleHelper::drawListViewItemBackground(p, rc, bFocused, bSelected);
+
+    if (!bSelected && bSpecialFocused)
+    {
+        Utils::StyleHelper::drawListViewItemBackground(p, rc, false, true);
+    }
+    else
+    {
+        Utils::StyleHelper::drawListViewItemBackground(p, rc, bFocused, bSelected);
+    }
 
     int nMargin = Utils::StyleHelper::margin();
     return rc.adjusted(nMargin, nMargin, -nMargin, -nMargin);

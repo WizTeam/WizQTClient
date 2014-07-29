@@ -73,7 +73,8 @@ public:
     static QColor listViewMultiLineFirstLine(bool bSelected);
     static QColor listViewMultiLineOtherLine(bool bSelected);
 
-    static QRect initListViewItemPainter(QPainter* p, const QRect& lrc, bool bFocused, bool bSelected);
+    static QRect initListViewItemPainter(QPainter* p, const QRect& lrc, bool bFocused,
+                                         bool bSelected, bool bSpecialFocused = false);
     static void drawListViewItemThumb(QPainter* p, const QRect& rc, int nBadgeType,
                                       const QString& title, const QString& lead, const QString& abs,
                                       bool bFocused, bool bSelected, bool bContainsAttach);

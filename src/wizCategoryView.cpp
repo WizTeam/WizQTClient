@@ -1609,6 +1609,11 @@ void CWizCategoryView::updateGroupsData()
     {
         const WIZBIZDATA& biz = *it;
         CWizCategoryViewItemBase* pBizGroupItem = findBizGroupsRootItem(biz, false);
+        if (!pBizGroupItem)
+        {
+            //
+            initBiz(biz);
+        }
         setBizRootItemExtraButton(pBizGroupItem, biz);
     }
     //
@@ -2439,6 +2444,32 @@ void CWizCategoryView::initGroups()
     resetCreateGroupLink();
 }
 
+void CWizCategoryView::initBiz(const WIZBIZDATA& biz)
+{
+    CWizCategoryViewBizGroupRootItem* pBizGroupItem = new CWizCategoryViewBizGroupRootItem(m_app, biz);
+    setBizRootItemExtraButton(pBizGroupItem, biz);
+    addTopLevelItem(pBizGroupItem);
+
+    CWizGroupDataArray arrayGroup;
+    m_dbMgr.db().GetUserGroupInfo(arrayGroup);
+
+    //
+    int nTotal = arrayGroup.size();
+    for (int i = 0; i < nTotal; i++)
+    {
+        if (arrayGroup.at(i).bizGUID == biz.bizGUID)
+        {
+            initGroup(m_dbMgr.db(arrayGroup.at(i).strGroupGUID));
+            updateGroupFolderDocumentCount(arrayGroup.at(i).strGroupGUID);
+        }
+    }
+    //
+    pBizGroupItem->setExpanded(true);
+    pBizGroupItem->sortChildren(0, Qt::AscendingOrder);
+    //
+    resetCreateGroupLink();
+}
+
 void CWizCategoryView::resetCreateGroupLink()
 {
     bool hasGroup = false;
@@ -2562,6 +2593,7 @@ CWizCategoryViewItemBase* CWizCategoryView::findBizGroupsRootItem(const WIZBIZDA
         if (pItem->biz().bizGUID == biz.bizGUID)
             return pItem;
     }
+
     if (!bCreate)
         return NULL;
     //

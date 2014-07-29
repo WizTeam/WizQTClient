@@ -61,6 +61,7 @@ WIZACTION* CWizActions::actionsData()
         {"actionResetSearch",               QObject::tr("Reset search"), "", "Ctrl+R"},
         {"actionFeedback",                  QObject::tr("User feedback..."), "", ""},
         {"actionSupport",                  QObject::tr("User support..."), "", ""},
+        {"actionSearchReplace",                  QObject::tr("Find Replace..."), "", "Ctrl+F"},
 
         // editing
         {WIZACTION_EDITOR_UNDO,             QObject::tr("Undo"), "", "Ctrl+Z"},
@@ -73,8 +74,8 @@ WIZACTION* CWizActions::actionsData()
         {WIZACTION_EDITOR_SELECT_ALL,       QObject::tr("Select all"), "", "Ctrl+A"},
 
         // view
-        {WIZACTION_GLOBAL_TOGGLE_CATEGORY,      QObject::tr("Hide / Show category view"), "", "Ctrl+Alt+s"},
-        {WIZACTION_GLOBAL_TOGGLE_FULLSCREEN,    QObject::tr("Enter / Leave Fullscreen"), "", "Ctrl+Meta+f"},
+        {WIZACTION_GLOBAL_TOGGLE_CATEGORY,      QObject::tr("Hide category view"), QObject::tr("Show category view"), "Ctrl+Alt+s"},
+        {WIZACTION_GLOBAL_TOGGLE_FULLSCREEN,    QObject::tr("Enter Fullscreen"), QObject::tr("Leave Fullscreen"), "Ctrl+Meta+f"},
 
         // format
         {WIZACTION_FORMAT_JUSTIFYLEFT,          QObject::tr("Justify left"), "", "Ctrl+["},

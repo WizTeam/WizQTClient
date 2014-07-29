@@ -194,6 +194,7 @@ private:
     void initTags(QTreeWidgetItem* pParent, const QString& strParentTagGUID);
     void initStyles();
     void initGroups();
+    void initBiz(const WIZBIZDATA& biz);
     void initGroup(CWizDatabase& db);
     void initGroup(CWizDatabase& db, bool& itemCreeated);
     void initGroup(CWizDatabase& db, QTreeWidgetItem* pParent,

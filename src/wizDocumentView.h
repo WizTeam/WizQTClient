@@ -95,10 +95,14 @@ public:
     void setViewMode(int mode);
     void setModified(bool modified);
     void settingsChanged();
+    void sendDocumentSavedSignal(const QString& strGUID);
     void resetTitle(const QString& strTitle);
     void promptMessage(const QString& strMsg);
 
     QWebFrame* noteFrame();
+
+signals:
+    void documentSaved(const QString& strGUID, CWizDocumentView* viewer);
 
 public Q_SLOTS:
     void onViewNoteRequested(Core::INoteView* view, const WIZDOCUMENTDATA& doc);
@@ -112,6 +116,7 @@ public Q_SLOTS:
     void on_document_modified(const WIZDOCUMENTDATA& documentOld,
                               const WIZDOCUMENTDATA& documentNew);
     void on_document_data_modified(const WIZDOCUMENTDATA& data);
+    void on_document_data_saved(const QString& strGUID, CWizDocumentView* viewer);
 
     void on_attachment_created(const WIZDOCUMENTATTACHMENTDATA& attachment);
     void on_attachment_deleted(const WIZDOCUMENTATTACHMENTDATA& attachment);
@@ -122,6 +127,23 @@ public Q_SLOTS:
 
 private:
     void loadNote(const WIZDOCUMENTDATA &doc);
+};
+
+class WizFloatDocumentViewer : public QWidget
+{
+    Q_OBJECT
+public:
+    WizFloatDocumentViewer(CWizExplorerApp& app, QWidget* parent = 0);
+
+    CWizDocumentView* docView()
+    {
+        return m_docView;
+    }
+
+    ~WizFloatDocumentViewer();
+
+private:
+    CWizDocumentView* m_docView;
 };
 
 } // namespace Core

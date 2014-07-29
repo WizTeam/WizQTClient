@@ -193,3 +193,43 @@ function WizSpecialProcessForPhoneCss() {
         }
     }
 }
+
+
+function WizReplaceText(findtxt, replacetxt, caseSensitive) {
+    if (!findtxt) {
+        return false;
+    }
+    if (findtxt == replacetxt || (!caseSensitive && findtxt.toLowerCase() == replacetxt.toLowerCase())) {
+        return false;
+    }
+    obj = {
+        searchStr:findtxt,
+        dir:1,
+        casesensitive:caseSensitive,
+        replaceStr:replacetxt
+    };
+    return frCommond(obj);
+}
+
+//全部替换
+function WizRepalceAll(findtxt, replacetxt, caseSensitive) {
+    if (!findtxt) {
+        return false;
+    }
+    if (findtxt == replacetxt || (!caseSensitive && findtxt.toLowerCase() == replacetxt.toLowerCase())) {
+        return false;
+    }
+    obj = {
+        searchStr:findtxt,
+        casesensitive:caseSensitive,
+        replaceStr:replacetxt,
+        all:true
+    };
+    var num = frCommond(obj);
+    return num;
+}
+
+//执行
+var frCommond = function (obj) {
+    return editor.execCommand("searchreplace", obj);
+};

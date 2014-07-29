@@ -197,4 +197,7 @@ void CWizTagListWidget::on_tagsEdit_returnPressed()
 
     CWizDocumentDataArray arrayDocument(m_arrayDocuments);
     setDocuments(arrayDocument);    //refresh tags
+
+    //
+    m_tagsEdit->clear();
 }

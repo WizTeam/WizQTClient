@@ -198,12 +198,17 @@ public:
     void viewDocument(const WIZDOCUMENTDATA& data, bool addToHistory);
     void locateDocument(const WIZDOCUMENTDATA& data);
     //
+    void viewDocumentInFloatWidget(const WIZDOCUMENTDATA& data);
+    //
     static void quickSyncKb(const QString& kbGuid);
 
     void checkWizUpdate();
     void setSystemTrayIconVisible(bool bVisible);
     //
     void viewDocumentByWizKMURL(const QString& strKMURL);
+
+signals:
+    void documentSaved(const QString& strGUID, CWizDocumentView* viewer);
 
 public Q_SLOTS:
     void on_actionExit_triggered();
@@ -219,6 +224,7 @@ public Q_SLOTS:
     void on_actionSupport_triggered();
     void on_actionSearch_triggered();
     void on_actionResetSearch_triggered();
+    void on_actionSearchReplace_triggered();
     void on_actionSaveAsPDF_triggered();
 
     // menu editing
@@ -266,6 +272,7 @@ public Q_SLOTS:
 
     void on_category_itemSelectionChanged();
     void on_documents_itemSelectionChanged();
+    void on_documents_itemDoubleClicked(QListWidgetItem * item);
     void on_message_itemSelectionChanged();
     void on_documents_documentCountChanged();
     void on_documents_lastDocumentDeleted();

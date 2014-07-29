@@ -139,6 +139,7 @@ set(wiznote_SOURCES
     wizDocumentEditStatus.cpp
     wizLoginDialog.cpp
     share/wizFileMonitor.cpp
+    wizSearchReplaceWidget.cpp
 )
 
 set(wiznote_HEADERS
@@ -265,6 +266,7 @@ set(wiznote_HEADERS
     wizDocumentEditStatus.h
     wizLoginDialog.h
     share/wizFileMonitor.h
+    wizSearchReplaceWidget.h
 )
 
 set(wiznote_FORMS
@@ -280,6 +282,7 @@ set(wiznote_FORMS
     ui/wizEditorInsertTableForm.ui
     ui/wizProgressDialog.ui
     ui/wizLoginDialog.ui
+    ui/wizSearchReplaceWidget.ui
 )
 
 set(wiznote_TRANSLATIONS
@@ -344,9 +347,11 @@ if(UNIX)
         if(CMAKE_BUILD_TYPE STREQUAL "Release")
             # resovle library dependency if build type is release
             add_dependencies(WizNote coreplugin_plugin helloworld_plugin)
-            #add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-             #   COMMAND ${qt_binary_dir}/macdeployqt ${WIZNOTE_ROOT_DIR})
+        endif()
 
+        if(NOT APPSTORE_BUILD)
+            add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+                COMMAND ${qt_binary_dir}/macdeployqt ${WIZNOTE_ROOT_DIR})
         endif()
 
     elseif(NOT APPLE)

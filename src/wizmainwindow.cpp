@@ -140,6 +140,9 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     connect(m_searcher, SIGNAL(searchProcess(const QString&, const CWizDocumentDataArray&, bool)),
         SLOT(on_searchProcess(const QString&, const CWizDocumentDataArray&, bool)));
 
+    connect(m_doc, SIGNAL(documentSaved(QString,CWizDocumentView*)), SIGNAL(documentSaved(QString,CWizDocumentView*)));
+    connect(this, SIGNAL(documentSaved(QString,CWizDocumentView*)), m_doc, SLOT(on_document_data_saved(QString,CWizDocumentView*)));
+
     // misc settings
     //m_avatarDownloaderHost->setDefault(::WizGetSkinResourcePath(userSettings().skin()) + "avatar_default.png");
 
@@ -219,14 +222,13 @@ bool MainWindow::eventFilter(QObject* watched, QEvent* event)
         {
             if (QWindowStateChangeEvent* stateEvent = dynamic_cast<QWindowStateChangeEvent*>(event))
             {
-                if (stateEvent->oldState() == Qt::WindowFullScreen)
+                // 使用程序右上角按钮将窗口最大化时，需要修改按钮名称
+                static int state = -1;
+                int oldState = stateEvent->oldState();
+                if (state != oldState && (oldState == Qt::WindowFullScreen || windowState() == Qt::WindowFullScreen))
                 {
-                    m_toolBar->show();
-                    m_splitter->widget(0)->show();
-                    m_splitter->widget(1)->show();
-                }
-                else if (windowState() == Qt::WindowFullScreen)
-                {
+                    state = oldState;
+                    m_actions->toggleActionText(WIZACTION_GLOBAL_TOGGLE_FULLSCREEN);
                 }
             }
         }
@@ -1102,6 +1104,7 @@ void MainWindow::init()
 
     connect(m_msgList, SIGNAL(itemSelectionChanged()), SLOT(on_message_itemSelectionChanged()));
     connect(m_documents, SIGNAL(itemSelectionChanged()), SLOT(on_documents_itemSelectionChanged()));
+    connect(m_documents, SIGNAL(itemDoubleClicked(QListWidgetItem*)), SLOT(on_documents_itemDoubleClicked(QListWidgetItem*)));
     connect(m_documents, SIGNAL(lastDocumentDeleted()), SLOT(on_documents_lastDocumentDeleted()));
 
 #ifndef Q_OS_MAC
@@ -1272,7 +1275,7 @@ void MainWindow::on_actionViewToggleCategory_triggered()
         doclist->show();
     }
 
-    //m_actions->toggleActionText(WIZACTION_GLOBAL_TOGGLE_CATEGORY);
+    m_actions->toggleActionText(WIZACTION_GLOBAL_TOGGLE_CATEGORY);
 }
 
 void MainWindow::on_actionViewToggleFullscreen_triggered()
@@ -1280,12 +1283,12 @@ void MainWindow::on_actionViewToggleFullscreen_triggered()
 #ifdef Q_OS_MAC
     //toggleFullScreenMode(this);
     setWindowState(windowState() ^ Qt::WindowFullScreen);
-    if (windowState() == Qt::WindowFullScreen)
-    {
-        m_toolBar->hide();
-        m_splitter->widget(0)->hide();
-        m_splitter->widget(1)->hide();
-    }
+//    if (windowState() == Qt::WindowFullScreen)
+//    {
+//        m_toolBar->hide();
+//        m_splitter->widget(0)->hide();
+//        m_splitter->widget(1)->hide();
+//    }
 #endif // Q_OS_MAC
 }
 
@@ -1480,6 +1483,11 @@ void MainWindow::on_actionResetSearch_triggered()
     m_doc->web()->applySearchKeywordHighlight();
 }
 
+void MainWindow::on_actionSearchReplace_triggered()
+{
+    m_doc->web()->editorCommandExecuteSearchReplace();
+}
+
 void MainWindow::on_actionSaveAsPDF_triggered()
 {
     if (CWizDocumentWebView* web = m_doc->web())
@@ -1653,6 +1661,19 @@ void MainWindow::on_documents_itemSelectionChanged()
     if (arrayDocument.size() == 1) {
         if (!m_bUpdatingSelection) {
             viewDocument(arrayDocument[0], true);
+        }
+    }
+}
+
+void MainWindow::on_documents_itemDoubleClicked(QListWidgetItem* item)
+{
+    CWizDocumentListViewItem* pItem = dynamic_cast<CWizDocumentListViewItem*>(item);
+    if (pItem)
+    {
+        WIZDOCUMENTDATA doc = pItem->document();
+        if (m_dbMgr.db(doc.strKbGUID).IsDocumentDownloaded(doc.strGUID))
+        {
+            viewDocumentInFloatWidget(doc);
         }
     }
 }
@@ -1995,6 +2016,20 @@ void MainWindow::initTrayIcon(QSystemTrayIcon* trayIcon)
         trayIcon->setIcon(icon);
     }
 #endif
+}
+
+void MainWindow::viewDocumentInFloatWidget(const WIZDOCUMENTDATA& data)
+{
+    WizFloatDocumentViewer* wgt = new WizFloatDocumentViewer(*this);
+    CWizDocumentView* docView = wgt->docView();
+    connect(docView, SIGNAL(documentSaved(QString,CWizDocumentView*)), SIGNAL(documentSaved(QString,CWizDocumentView*)));
+    connect(this, SIGNAL(documentSaved(QString,CWizDocumentView*)), docView, SLOT(on_document_data_saved(QString,CWizDocumentView*)));
+
+    wgt->setGeometry((width() - m_doc->width())  / 2, (height() - wgt->height()) / 2,
+                     m_doc->width(), wgt->height());
+    wgt->show();
+    //
+    docView->viewNote(data, false);
 }
 
 void MainWindow::quickSyncKb(const QString& kbGuid)
