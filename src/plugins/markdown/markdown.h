@@ -34,6 +34,7 @@ private:
 
 private Q_SLOTS:
     void onViewNoteLoaded(Core::INoteView* view, const WIZDOCUMENTDATA& doc, bool bOk);
+    void onFrameRenderRequested(QWebFrame* frame);
 };
 
 } // namespace Internal

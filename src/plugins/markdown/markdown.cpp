@@ -38,6 +38,8 @@ void MarkdownPlugin::extensionsInitialized()
 {
     connect(Core::ICore::instance(), SIGNAL(viewNoteLoaded(Core::INoteView*,WIZDOCUMENTDATA,bool)),
             SLOT(onViewNoteLoaded(Core::INoteView*,WIZDOCUMENTDATA,bool)));
+    connect(Core::ICore::instance(), SIGNAL(frameRenderRequested(QWebFrame*)),
+            SLOT(onFrameRenderRequested(QWebFrame*)));
 }
 
 void MarkdownPlugin::onViewNoteLoaded(INoteView* view, const WIZDOCUMENTDATA& doc, bool bOk)
@@ -47,6 +49,14 @@ void MarkdownPlugin::onViewNoteLoaded(INoteView* view, const WIZDOCUMENTDATA& do
 
     if (canRender(view, doc))
         render(view->noteFrame());
+}
+
+void MarkdownPlugin::onFrameRenderRequested(QWebFrame* frame)
+{
+    if (frame)
+    {
+        render(frame);
+    }
 }
 
 bool MarkdownPlugin::canRender(INoteView* view, const WIZDOCUMENTDATA& doc)

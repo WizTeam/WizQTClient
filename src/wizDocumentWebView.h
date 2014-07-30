@@ -253,6 +253,8 @@ public Q_SLOTS:
     void applySearchKeywordHighlight();
     void clearSearchKeywordHighlight();
 
+    void on_insertCodeHtml_requset(QString strHtml);
+
     /* editor API */
 
     // font

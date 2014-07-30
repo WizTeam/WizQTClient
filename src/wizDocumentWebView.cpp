@@ -32,6 +32,7 @@
 #include "share/wizDatabaseManager.h"
 #include "wizDocumentView.h"
 #include "wizSearchReplaceWidget.h"
+#include "widgets/WizCodeEditorDialog.h"
 
 #include "utils/pathresolve.h"
 #include "utils/logger.h"
@@ -812,6 +813,8 @@ void CWizDocumentWebView::saveEditingViewDocument(const WIZDOCUMENTDATA &data, b
     strHead.replace(regHead, "");
 
     QString strHtml = page()->mainFrame()->evaluateJavaScript("editor.getContent();").toString();
+    QString strNewHtml = page()->mainFrame()->evaluateJavaScript("editor.document.body.innerHTML;").toString();
+    QString strNewHtml2 = page()->mainFrame()->evaluateJavaScript("editor.document.toString();").toString();
     //
     m_strCurrentNoteHtml = strHtml;
     //
@@ -924,6 +927,36 @@ void CWizDocumentWebView::applySearchKeywordHighlight()
 void CWizDocumentWebView::clearSearchKeywordHighlight()
 {
     findText("", QWebPage::HighlightAllOccurrences);
+}
+
+void CWizDocumentWebView::on_insertCodeHtml_requset(QString strHtml)
+{
+    qDebug() << "orign html : " << strHtml;
+//    QRegExp regHead("</?head[^>]*>", Qt::CaseInsensitive);
+//    if (strHtml.contains(regHead))
+//    {
+//        // convert mass html to rtf, then convert rft to html
+//        QTextDocument textParase;
+//        textParase.setHtml(strHtml);
+//        strHtml = textParase.toHtml();
+//        qDebug() << "after parse : " << strHtml;
+
+//        QRegExp regBodyContant("<body[^>]*>[\\s\\S]*</body>");
+//        int index = regBodyContant.indexIn(strHtml);
+//        if (index > -1)
+//        {
+//            QString strBody = regBodyContant.cap(0);
+//            if (strBody.isEmpty())
+//                return;
+
+//            QRegExp regBody = QRegExp("</?body[^>]*>", Qt::CaseInsensitive);
+//            strBody.replace(regBody, "");
+//            strHtml = strBody;
+
+            editorCommandExecuteInsertHtml(strHtml, true);
+//        }
+//    }
+
 }
 
 void CWizDocumentWebView::viewDocumentInEditor(bool editing)
@@ -1151,8 +1184,6 @@ bool CWizDocumentWebView::editorCommandExecuteLinkRemove()
 bool CWizDocumentWebView::editorCommandExecuteSearchReplace()
 {
     CWizSearchReplaceWidget *wgt = new CWizSearchReplaceWidget();
-    wgt->setAttribute(Qt::WA_DeleteOnClose);
-    wgt->setWindowFlags(Qt::WindowStaysOnTopHint);
     connect(wgt, SIGNAL(findPre(QString,bool)), SLOT(findPre(QString,bool)));
     connect(wgt, SIGNAL(findNext(QString,bool)), SLOT(findNext(QString,bool)));
     connect(wgt, SIGNAL(replaceCurrent(QString,QString)), SLOT(replaceCurrent(QString,QString)));
@@ -1291,7 +1322,10 @@ bool CWizDocumentWebView::editorCommandExecuteStrikeThrough()
 
 bool CWizDocumentWebView::editorCommandExecuteJustifyLeft()
 {
-    return editorCommandExecuteCommand("justify", "'left'");
+    WizCodeEditorDialog *dialog = new WizCodeEditorDialog();
+    connect(dialog, SIGNAL(insertHtmlRequest(QString)), SLOT(on_insertCodeHtml_requset(QString)));
+    dialog->show();
+    //return editorCommandExecuteCommand("justify", "'left'");
 }
 
 bool CWizDocumentWebView::editorCommandExecuteJustifyRight()
