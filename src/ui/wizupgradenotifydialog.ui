@@ -6,60 +6,73 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
-    <height>300</height>
+    <width>464</width>
+    <height>312</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Find new version</string>
   </property>
-  <widget class="QWebView" name="webView">
-   <property name="geometry">
-    <rect>
-     <x>0</x>
-     <y>0</y>
-     <width>401</width>
-     <height>261</height>
-    </rect>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <property name="leftMargin">
+    <number>5</number>
    </property>
-   <property name="url">
-    <url>
-     <string>about:blank</string>
-    </url>
+   <property name="topMargin">
+    <number>5</number>
    </property>
-  </widget>
-  <widget class="QPushButton" name="buttonNow">
-   <property name="geometry">
-    <rect>
-     <x>240</x>
-     <y>270</y>
-     <width>151</width>
-     <height>27</height>
-    </rect>
+   <property name="rightMargin">
+    <number>5</number>
    </property>
-   <property name="text">
-    <string>Upgrade now</string>
+   <property name="bottomMargin">
+    <number>5</number>
    </property>
-  </widget>
-  <widget class="QPushButton" name="buttonWait">
-   <property name="geometry">
-    <rect>
-     <x>10</x>
-     <y>270</y>
-     <width>101</width>
-     <height>27</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Next time</string>
-   </property>
-  </widget>
+   <item>
+    <widget class="QWebView" name="webView">
+     <property name="url">
+      <url>
+       <string>about:blank</string>
+      </url>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <item>
+      <widget class="QPushButton" name="buttonWait">
+       <property name="text">
+        <string>Next time</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QPushButton" name="buttonNow">
+       <property name="text">
+        <string>Upgrade now</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+  </layout>
  </widget>
  <customwidgets>
   <customwidget>
    <class>QWebView</class>
    <extends>QWidget</extends>
-   <header>QtWebKit/QWebView</header>
+   <header>QtWebKitWidgets/QWebView</header>
   </customwidget>
  </customwidgets>
  <resources/>
