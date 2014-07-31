@@ -1,5 +1,6 @@
 #include "WizCodeEditorDialog.h"
 #include "wizdef.h"
+#include "utils/pathresolve.h"
 
 #include <QVBoxLayout>
 #include <QHBoxLayout>
@@ -14,6 +15,8 @@
 #include <QTimer>
 #include <QAction>
 #include <QMenu>
+#include <QFile>
+#include <QDir>
 
 #include <extensionsystem/pluginmanager.h>
 #include <extensionsystem/pluginspec.h>
@@ -67,7 +70,7 @@ WizCodeEditorDialog::WizCodeEditorDialog(QWidget *parent) :
     btnOK->setText(tr("OK"));
     QPushButton *btnCancle = new QPushButton(this);
     btnCancle->setText(tr("Cancle"));
-    QHBoxLayout *layoutButton = new QHBoxLayout(this);
+    QHBoxLayout *layoutButton = new QHBoxLayout();
     layoutButton->addStretch();
     layoutButton->addWidget(btnOK);
     layoutButton->addWidget(btnCancle);
@@ -94,13 +97,16 @@ void WizCodeEditorDialog::renderCodeToHtml()
     m_codeBrowser->setUpdatesEnabled(false);
     frame->setHtml(QString("<p>``` %1</p>%2<p>```</p>").arg(m_codeType->currentText()).
                    arg(codeText));
-    Core::ICore::instance()->emitFrameRenderRequested(frame);
+    Core::ICore::instance()->emitFrameRenderRequested(frame, true);
+
 
     // wait for code render finished
     QEventLoop loop;
     QTimer::singleShot(500, &loop, SLOT(quit()));
     loop.exec();
     m_codeBrowser->setUpdatesEnabled(true);
+
+    inlineCSS(frame);
 }
 
 void WizCodeEditorDialog::onButtonOKClicked()
@@ -129,6 +135,31 @@ void WizCodeEditorDialog::initCodeTypeCombox()
         m_codeType->addItem(str);
     }
     m_codeType->setCurrentText("c");
+}
+
+void WizCodeEditorDialog::inlineCSS(QWebFrame* frame)
+{
+    if (frame)
+    {
+//        QString strCachePath = Utils::PathResolve::cachePath();
+//        if (!QFile::exists(strCachePath + "plugins/inlinecss/jquery.inlineStyler.min.js"))
+//        {
+//            QDir dir(strCachePath + "plugins/inlinecss/");
+//            dir.mkpath(strCachePath + "plugins/inlinecss/");
+//            QStringList strList;
+//            strList << ""
+//            QFile::copy()
+//        }
+
+        QString strHtml = frame->toHtml();
+        QRegExp regHeadContant("<head[^>]*>[\\s\\S]*</head>");
+        QString strNewHead = QString("<head><link rel=\"stylesheet\" href=\"file:///Users/lxn/.wiznote/cache/plugins/markdown/markdown/github2.css\">"
+                                     "<script src=\"file:///Users/lxn/.wiznote/cache/plugins/markdown/markdown/jquery.min.js\"></script>"
+                                     "<script src=\"file:///Users/lxn/Wiz/WizQTClient/share/files/editor/third-party/jquery.inlineStyler.min.js\"></script>"
+                                     "<script src=\"file:///Users/lxn/Wiz/WizQTClient/share/files/editor/third-party/csstoinline.js\"></script></head>");
+        strHtml.replace(regHeadContant, strNewHead);
+        frame->setHtml(strHtml);
+    }
 }
 
 

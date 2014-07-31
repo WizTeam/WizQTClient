@@ -36,5 +36,7 @@
         <file>res/markdown/github2.css</file>
         <file>res/markdown/marked.min.js</file>
         <file>res/markdown/jquery.min.js</file>
+        <file>res/inlinecss/jquery.inlineStyler.min.js</file>
+        <file>res/inlinecss/csstoinline.js</file>
     </qresource>
 </RCC>

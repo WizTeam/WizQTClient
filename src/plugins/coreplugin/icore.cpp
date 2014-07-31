@@ -46,9 +46,9 @@ void ICore::emitCloseNoteRequested(INoteView *view)
     Q_EMIT m_instance->closeNoteRequested(view);
 }
 
-void ICore::emitFrameRenderRequested(QWebFrame* frame)
+void ICore::emitFrameRenderRequested(QWebFrame* frame, bool bUseInlineCss)
 {
-    Q_EMIT m_instance->frameRenderRequested(frame);
+    Q_EMIT m_instance->frameRenderRequested(frame, bUseInlineCss);
 }
 
 

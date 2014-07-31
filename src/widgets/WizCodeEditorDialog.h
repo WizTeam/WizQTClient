@@ -41,6 +41,7 @@ public slots:
 
 private:
     void initCodeTypeCombox();
+    void inlineCSS(QWebFrame *frame);
 
 private:
     QComboBox *m_codeType;

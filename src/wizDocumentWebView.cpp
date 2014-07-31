@@ -813,8 +813,6 @@ void CWizDocumentWebView::saveEditingViewDocument(const WIZDOCUMENTDATA &data, b
     strHead.replace(regHead, "");
 
     QString strHtml = page()->mainFrame()->evaluateJavaScript("editor.getContent();").toString();
-    QString strNewHtml = page()->mainFrame()->evaluateJavaScript("editor.document.body.innerHTML;").toString();
-    QString strNewHtml2 = page()->mainFrame()->evaluateJavaScript("editor.document.toString();").toString();
     //
     m_strCurrentNoteHtml = strHtml;
     //
@@ -931,31 +929,26 @@ void CWizDocumentWebView::clearSearchKeywordHighlight()
 
 void CWizDocumentWebView::on_insertCodeHtml_requset(QString strHtml)
 {
-    qDebug() << "orign html : " << strHtml;
-//    QRegExp regHead("</?head[^>]*>", Qt::CaseInsensitive);
-//    if (strHtml.contains(regHead))
-//    {
-//        // convert mass html to rtf, then convert rft to html
-//        QTextDocument textParase;
-//        textParase.setHtml(strHtml);
-//        strHtml = textParase.toHtml();
-//        qDebug() << "after parse : " << strHtml;
 
-//        QRegExp regBodyContant("<body[^>]*>[\\s\\S]*</body>");
-//        int index = regBodyContant.indexIn(strHtml);
-//        if (index > -1)
-//        {
-//            QString strBody = regBodyContant.cap(0);
-//            if (strBody.isEmpty())
-//                return;
+    QRegExp regHead("</?head[^>]*>", Qt::CaseInsensitive);
+    if (strHtml.contains(regHead))
+    {
+        QRegExp regBodyContant("<body[^>]*>[\\s\\S]*</body>");
+        int index = regBodyContant.indexIn(strHtml);
+        if (index > -1)
+        {
+            QString strBody = regBodyContant.cap(0);
+            if (strBody.isEmpty())
+                return;
 
-//            QRegExp regBody = QRegExp("</?body[^>]*>", Qt::CaseInsensitive);
-//            strBody.replace(regBody, "");
-//            strHtml = strBody;
+            QRegExp regBody = QRegExp("</?body[^>]*>", Qt::CaseInsensitive);
+            strBody.replace(regBody, "");
+            strHtml = strBody;
 
+            qDebug() << "after document parse : " << strHtml;
             editorCommandExecuteInsertHtml(strHtml, true);
-//        }
-//    }
+        }
+    }
 
 }
 

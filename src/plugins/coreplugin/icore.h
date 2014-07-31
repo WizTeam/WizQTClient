@@ -32,14 +32,14 @@ public:
     static void emitViewNoteLoaded(INoteView* view, const WIZDOCUMENTDATA& doc, bool bOk);
     static void emitCloseNoteRequested(INoteView* view);
 
-    static void emitFrameRenderRequested(QWebFrame *frame);
+    static void emitFrameRenderRequested(QWebFrame *frame, bool bUseInlineCss);
 
 Q_SIGNALS:
     void viewNoteRequested(Core::INoteView* view, const WIZDOCUMENTDATA& doc);
     void viewNoteLoaded(Core::INoteView* view, const WIZDOCUMENTDATA& doc, bool bOk);
     void closeNoteRequested(Core::INoteView* view);
 
-    void frameRenderRequested(QWebFrame *frame);
+    void frameRenderRequested(QWebFrame *frame, bool bUseInlineCss);
 };
 
 } // namespace Core
