@@ -30,7 +30,7 @@ class WizCodeEditorDialog : public QDialog
     Q_OBJECT
 public:
     explicit WizCodeEditorDialog(QWidget *parent = 0);
-
+    void setCode(const QString& strCode);
 signals:
     void insertHtmlRequest(QString strHtml);
 
@@ -41,7 +41,6 @@ public slots:
 
 private:
     void initCodeTypeCombox();
-    void inlineCSS(QWebFrame *frame);
 
 private:
     QComboBox *m_codeType;

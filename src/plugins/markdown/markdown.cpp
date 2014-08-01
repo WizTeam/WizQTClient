@@ -7,6 +7,8 @@
 #include <QFile>
 #include <QTextStream>
 #include <QWebFrame>
+#include <QEventLoop>
+#include <QTimer>
 
 #include <coreplugin/icore.h>
 
@@ -58,6 +60,11 @@ void MarkdownPlugin::onFrameRenderRequested(QWebFrame* frame, bool bUseInlineCss
         render(frame);
         if (bUseInlineCss)
         {
+            // wait for code render finished
+            QEventLoop loop;
+            QTimer::singleShot(500, &loop, SLOT(quit()));
+            loop.exec();
+
             changeCssToInline(frame);
         }
     }
@@ -68,13 +75,15 @@ bool MarkdownPlugin::canRender(INoteView* view, const WIZDOCUMENTDATA& doc)
     if (view->isEditing())
         return false;
 
-    if (doc.strTitle.indexOf(".md") == -1)
+    if (doc.strTitle.indexOf(".md") == -1 && doc.strTitle.indexOf(".mj") == -1)
         return false;
 
-    if (doc.strTitle.indexOf(".md ") != -1)
+    int nPointPos = doc.strTitle.length() - 3;
+    if (doc.strTitle.lastIndexOf(".md") == nPointPos || doc.strTitle.lastIndexOf(".mj") == nPointPos)
         return true;
 
-    if (doc.strTitle.lastIndexOf(".md") == doc.strTitle.length() - 3)
+    if (doc.strTitle.indexOf(".md ") != -1 || doc.strTitle.indexOf(".md@") != -1 ||
+            doc.strTitle.indexOf(".mj ") != -1|| doc.strTitle.indexOf(".mj@") != -1)
         return true;
 
     return false;
@@ -110,10 +119,10 @@ void MarkdownPlugin::changeCssToInline(QWebFrame* frame)
         QString strHtml = frame->toHtml();
         QRegExp regHeadContant("<head[^>]*>[\\s\\S]*</head>");
         QString strPath = cachePath() + "plugins/markdown/";
-        QString strNewHead = QString("<head><link rel=\"stylesheet\" href=\"" + strPath + "markdown/github2.css\">"
-                                     "<script src=\"" + strPath +"markdown/jquery.min.js\"></script>"
-                                     "<script src=\"" + strPath + "inlinecss/jquery.inlineStyler.min.js\"></script>"
-                                     "<script src=\"" + strPath + "inlinecss/csstoinline.js\"></script></head>");
+        QString strNewHead = QString("<head><link rel=\"stylesheet\" href=\"file://" + strPath + "markdown/github2.css\">"
+                                     "<script src=\"file://" + strPath +"markdown/jquery.min.js\"></script>"
+                                     "<script src=\"file://" + strPath + "inlinecss/jquery.inlineStyler.min.js\"></script>"
+                                     "<script src=\"file://" + strPath + "inlinecss/csstoinline.js\"></script></head>");
         strHtml.replace(regHeadContant, strNewHead);
         frame->setHtml(strHtml);
     }

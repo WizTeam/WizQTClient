@@ -947,6 +947,9 @@ void CWizDocumentWebView::on_insertCodeHtml_requset(QString strHtml)
 
             qDebug() << "after document parse : " << strHtml;
             editorCommandExecuteInsertHtml(strHtml, true);
+
+            //FiXME:插入代码时li的属性会丢失，此处需要特殊处理，在head中增加li的属性
+            page()->mainFrame()->evaluateJavaScript("WizAddCssForCodeLi();");
         }
     }
 
@@ -1315,9 +1318,7 @@ bool CWizDocumentWebView::editorCommandExecuteStrikeThrough()
 
 bool CWizDocumentWebView::editorCommandExecuteJustifyLeft()
 {
-    WizCodeEditorDialog *dialog = new WizCodeEditorDialog();
-    connect(dialog, SIGNAL(insertHtmlRequest(QString)), SLOT(on_insertCodeHtml_requset(QString)));
-    dialog->show();
+    return editorCommandExecuteInsertCode();
     //return editorCommandExecuteCommand("justify", "'left'");
 }
 
@@ -1430,6 +1431,17 @@ bool CWizDocumentWebView::editorCommandExecuteFormatMatch()
 bool CWizDocumentWebView::editorCommandExecuteViewSource()
 {
     return editorCommandExecuteCommand("source");
+}
+
+bool CWizDocumentWebView::editorCommandExecuteInsertCode()
+{
+    QString strSelectHtml = page()->selectedHtml();
+    WizCodeEditorDialog *dialog = new WizCodeEditorDialog();
+    connect(dialog, SIGNAL(insertHtmlRequest(QString)), SLOT(on_insertCodeHtml_requset(QString)));
+    dialog->show();
+    dialog->setCode(strSelectHtml);
+
+    return true;
 }
 
 #ifdef Q_OS_MAC

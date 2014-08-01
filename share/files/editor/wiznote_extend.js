@@ -233,3 +233,28 @@ function WizRepalceAll(findtxt, replacetxt, caseSensitive) {
 var frCommond = function (obj) {
     return editor.execCommand("searchreplace", obj);
 };
+
+//插入code的代码时，li的属性会丢失。需要在head中增加li的属性
+function WizAddCssForCodeLi() {
+    var WIZ_INLINE_CODE_ID = 'wiz_inline_code_id';
+    var WIZ_LINK_VERSION = 'wiz_link_version';
+    var WIZ_TODO_STYLE_VERSION = "01.00.00";
+
+    var style = document.getElementById(WIZ_INLINE_CODE_ID);
+    if (style && !!style.getAttribute && style.getAttribute(WIZ_LINK_VERSION) >= WIZ_TODO_STYLE_VERSION)
+        return;
+    //
+    if (style && style.parentElement) { 
+        style.parentElement.removeChild(style);
+    }
+    //
+    var strStyle = 'ol.linenums li {color: #BEBEC5;line-height: 18px;padding-left: 12px; }';
+    //
+    var objStyle = document.createElement('style');
+    objStyle.type = 'text/css';
+    objStyle.textContent = strStyle;
+    objStyle.id = WIZ_INLINE_CODE_ID;
+    objStyle.setAttribute(WIZ_LINK_VERSION, WIZ_TODO_STYLE_VERSION);
+    //
+    editor.document.head.appendChild(objStyle);
+}

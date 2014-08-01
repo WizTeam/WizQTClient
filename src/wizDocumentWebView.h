@@ -321,6 +321,7 @@ public Q_SLOTS:
     bool editorCommandExecuteInsertCheckList();
     bool editorCommandExecuteInsertImage();
     bool editorCommandExecuteViewSource();
+    bool editorCommandExecuteInsertCode();
 
 #ifdef Q_OS_MAC
     bool editorCommandExecuteRemoveStartOfLine();
