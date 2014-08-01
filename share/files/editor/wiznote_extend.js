@@ -258,3 +258,15 @@ function WizAddCssForCodeLi() {
     //
     editor.document.head.appendChild(objStyle);
 }
+
+//在原有代码块的基础上插入新代码时，删除之前的标志
+function WizInsertCodeHtml(html) {
+    // var parentElem = editor.document.getSelection();
+    // if (parentElem && parentElem.type == "pre")
+    // {
+    //     document.removeChild(parentElem);
+    // }
+
+
+    editor.execCommand('insertHtml', html, true);
+}

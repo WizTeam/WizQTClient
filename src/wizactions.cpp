@@ -96,6 +96,7 @@ WIZACTION* CWizActions::actionsData()
         {WIZACTION_FORMAT_INSERT_DATE,          QObject::tr("Insert date"), "", "Shift+Ctrl+D"},
         {WIZACTION_FORMAT_INSERT_TIME,          QObject::tr("Insert time"), "", "Shift+Ctrl+Alt+D"},
         {WIZACTION_FORMAT_INSERT_CHECKLIST,      QObject::tr("Insert check list"), "", "Ctrl+O"},
+        {WIZACTION_FORMAT_INSERT_CODE,                QObject::tr("Insert Code"), "", ""},
         {WIZACTION_FORMAT_REMOVE_FORMAT,        QObject::tr("Remove format"), "", ""},
         {WIZACTION_FORMAT_VIEW_SOURCE,          QObject::tr("View html source..."), "", ""},
 

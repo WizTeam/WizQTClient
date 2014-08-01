@@ -938,13 +938,12 @@ void CWizDocumentWebView::clearSearchKeywordHighlight()
     findText("", QWebPage::HighlightAllOccurrences);
 }
 
-void CWizDocumentWebView::on_insertCodeHtml_requset(QString strHtml)
+void CWizDocumentWebView::on_insertCodeHtml_requset(QString strOldHtml)
 {
-
+    QString strHtml = strOldHtml;
     if (getBodyContentFromHtml(strHtml, false))
     {
         editorCommandExecuteInsertHtml(strHtml, true);
-
         //FiXME:插入代码时li的属性会丢失，此处需要特殊处理，在head中增加li的属性
         page()->mainFrame()->evaluateJavaScript("WizAddCssForCodeLi();");
     }
@@ -1313,8 +1312,7 @@ bool CWizDocumentWebView::editorCommandExecuteStrikeThrough()
 
 bool CWizDocumentWebView::editorCommandExecuteJustifyLeft()
 {
-    return editorCommandExecuteInsertCode();
-    //return editorCommandExecuteCommand("justify", "'left'");
+    return editorCommandExecuteCommand("justify", "'left'");
 }
 
 bool CWizDocumentWebView::editorCommandExecuteJustifyRight()

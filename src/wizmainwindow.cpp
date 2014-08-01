@@ -512,6 +512,7 @@ void MainWindow::on_editor_statusChanged()
         m_actions->actionFromName(WIZACTION_FORMAT_INSERT_DATE)->setEnabled(false);
         m_actions->actionFromName(WIZACTION_FORMAT_INSERT_TIME)->setEnabled(false);
         m_actions->actionFromName(WIZACTION_FORMAT_INSERT_CHECKLIST)->setEnabled(false);
+        m_actions->actionFromName(WIZACTION_FORMAT_INSERT_CODE)->setEnabled(false);
         m_actions->actionFromName(WIZACTION_FORMAT_REMOVE_FORMAT)->setEnabled(false);
         m_actions->actionFromName(WIZACTION_FORMAT_VIEW_SOURCE)->setEnabled(false);
 
@@ -663,6 +664,12 @@ void MainWindow::on_editor_statusChanged()
         m_actions->actionFromName(WIZACTION_FORMAT_INSERT_CHECKLIST)->setEnabled(false);
     } else {
         m_actions->actionFromName(WIZACTION_FORMAT_INSERT_CHECKLIST)->setEnabled(true);
+    }
+
+    if (-1 ==editor->editorCommandQueryCommandState("insertCode")) {
+        m_actions->actionFromName(WIZACTION_FORMAT_INSERT_CODE)->setEnabled(false);
+    } else {
+        m_actions->actionFromName(WIZACTION_FORMAT_INSERT_CODE)->setEnabled(true);
     }
 }
 
@@ -1397,6 +1404,11 @@ void MainWindow::on_actionFormatInsertCheckList_triggered()
     m_doc->web()->editorCommandExecuteInsertCheckList();
 }
 
+void MainWindow::on_actionFormatInsertCode_triggered()
+{
+    m_doc->web()->editorCommandExecuteInsertCode();
+}
+
 void MainWindow::on_actionConsole_triggered()
 {
     if (!m_console) {
@@ -1957,6 +1969,7 @@ void MainWindow::setActionsEnableForNewNote()
     m_actions->actionFromName(WIZACTION_FORMAT_INSERT_DATE)->setEnabled(true);
     m_actions->actionFromName(WIZACTION_FORMAT_INSERT_TIME)->setEnabled(true);
     m_actions->actionFromName(WIZACTION_FORMAT_INSERT_CHECKLIST)->setEnabled(true);
+    m_actions->actionFromName(WIZACTION_FORMAT_INSERT_CODE)->setEnabled(true);
     m_actions->actionFromName(WIZACTION_FORMAT_REMOVE_FORMAT)->setEnabled(true);
     m_actions->actionFromName(WIZACTION_FORMAT_VIEW_SOURCE)->setEnabled(true);
 }
