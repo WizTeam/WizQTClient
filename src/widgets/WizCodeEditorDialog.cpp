@@ -94,7 +94,6 @@ void WizCodeEditorDialog::setCode(const QString& strCode)
     if (!strCode.isEmpty())
     {
         m_codeEditor->page()->mainFrame()->setHtml(strCode);
-        m_codeEditor->page()->action(QWebPage::RemoveFormat)->trigger();
         renderCodeToHtml();
     }
 }

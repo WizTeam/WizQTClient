@@ -96,6 +96,36 @@ void CWizDocumentWebViewPage::triggerAction(QWebPage::WebAction typeAction, bool
     Q_EMIT actionTriggered(typeAction);
 }
 
+bool getBodyContentFromHtml(QString& strHtml, bool bNeedTextParse)
+{
+    QRegExp regHead("</?head[^>]*>", Qt::CaseInsensitive);
+    if (strHtml.contains(regHead))
+    {
+        if (bNeedTextParse)
+        {
+            // convert mass html to rtf, then convert rft to html
+            QTextDocument textParase;
+            textParase.setHtml(strHtml);
+            strHtml = textParase.toHtml();
+        }
+
+        QRegExp regBodyContant("<body[^>]*>[\\s\\S]*</body>");
+        int index = regBodyContant.indexIn(strHtml);
+        if (index > -1)
+        {
+            QString strBody = regBodyContant.cap(0);
+            if (strBody.isEmpty())
+                return false;
+
+            QRegExp regBody = QRegExp("</?body[^>]*>", Qt::CaseInsensitive);
+            strBody.replace(regBody, "");
+            strHtml = strBody;
+        }
+    }
+
+    return true;
+}
+
 void CWizDocumentWebViewPage::on_editorCommandPaste_triggered()
 {
     QClipboard* clip = QApplication::clipboard();
@@ -110,31 +140,12 @@ void CWizDocumentWebViewPage::on_editorCommandPaste_triggered()
     if (mime->hasHtml())
     {
         QString strHtml = mime->html();
-        QRegExp regHead("</?head[^>]*>", Qt::CaseInsensitive);
-        if (strHtml.contains(regHead))
+        if (getBodyContentFromHtml(strHtml, true))
         {
-            // convert mass html to rtf, then convert rft to html
-            QTextDocument textParase;
-            textParase.setHtml(strHtml);
-            strHtml = textParase.toHtml();
-
-            QRegExp regBodyContant("<body[^>]*>[\\s\\S]*</body>");
-            int index = regBodyContant.indexIn(strHtml);
-            if (index > -1)
-            {
-                QString strBody = regBodyContant.cap(0);
-                if (strBody.isEmpty())
-                    return;
-
-                QRegExp regBody = QRegExp("</?body[^>]*>", Qt::CaseInsensitive);
-                strBody.replace(regBody, "");
-                strHtml = strBody;
-
-                QMimeData* data = new QMimeData();
-                data->setHtml(strHtml);
-                clip->setMimeData(data);
-                return;
-            }
+            QMimeData* data = new QMimeData();
+            data->setHtml(strHtml);
+            clip->setMimeData(data);
+            return;
         }
     }
 
@@ -930,29 +941,13 @@ void CWizDocumentWebView::clearSearchKeywordHighlight()
 void CWizDocumentWebView::on_insertCodeHtml_requset(QString strHtml)
 {
 
-    QRegExp regHead("</?head[^>]*>", Qt::CaseInsensitive);
-    if (strHtml.contains(regHead))
+    if (getBodyContentFromHtml(strHtml, false))
     {
-        QRegExp regBodyContant("<body[^>]*>[\\s\\S]*</body>");
-        int index = regBodyContant.indexIn(strHtml);
-        if (index > -1)
-        {
-            QString strBody = regBodyContant.cap(0);
-            if (strBody.isEmpty())
-                return;
+        editorCommandExecuteInsertHtml(strHtml, true);
 
-            QRegExp regBody = QRegExp("</?body[^>]*>", Qt::CaseInsensitive);
-            strBody.replace(regBody, "");
-            strHtml = strBody;
-
-            qDebug() << "after document parse : " << strHtml;
-            editorCommandExecuteInsertHtml(strHtml, true);
-
-            //FiXME:插入代码时li的属性会丢失，此处需要特殊处理，在head中增加li的属性
-            page()->mainFrame()->evaluateJavaScript("WizAddCssForCodeLi();");
-        }
+        //FiXME:插入代码时li的属性会丢失，此处需要特殊处理，在head中增加li的属性
+        page()->mainFrame()->evaluateJavaScript("WizAddCssForCodeLi();");
     }
-
 }
 
 void CWizDocumentWebView::viewDocumentInEditor(bool editing)
