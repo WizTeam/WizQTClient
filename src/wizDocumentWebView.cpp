@@ -103,10 +103,19 @@ bool getBodyContentFromHtml(QString& strHtml, bool bNeedTextParse)
     {
         if (bNeedTextParse)
         {
-            // convert mass html to rtf, then convert rft to html
-            QTextDocument textParase;
-            textParase.setHtml(strHtml);
-            strHtml = textParase.toHtml();
+            QRegExp regHeadContant("<head[^>]*>[\\s\\S]*</head>");
+            int headIndex = regHeadContant.indexIn(strHtml);
+            if (headIndex > -1)
+            {
+                QString strHead = regHeadContant.cap(0);
+                if (strHead.contains("Cocoa HTML Writer"))
+                {
+                    // convert mass html to rtf, then convert rft to html
+                    QTextDocument textParase;
+                    textParase.setHtml(strHtml);
+                    strHtml = textParase.toHtml();
+                }
+            }
         }
 
         QRegExp regBodyContant("<body[^>]*>[\\s\\S]*</body>");
