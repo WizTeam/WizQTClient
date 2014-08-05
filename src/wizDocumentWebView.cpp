@@ -1370,7 +1370,7 @@ void CWizDocumentWebView::on_editorCommandExecuteTableInsert_accepted()
     if (!nRows && !nCols)
         return;
 
-    editorCommandExecuteCommand("insertTable", QString("{numRows:%1, numCols:%2, border:1}").arg(nRows).arg(nCols));
+    editorCommandExecuteCommand("insertTable", QString("{numRows:%1, numCols:%2, border:1, borderStyle:'1px solid #dddddd;'}").arg(nRows).arg(nCols));
 }
 
 bool CWizDocumentWebView::editorCommandExecuteInsertHorizontal()

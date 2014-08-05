@@ -17933,7 +17933,7 @@ UE.plugins['video'] = function (){
                 for (var r = 0; r < rowsNum; r++) {
                     html.push('<tr>');
                     for (var c = 0; c < colsNum; c++) {
-                        html.push('<td width="' + tdWidth + '"  vAlign="' + opt.tdvalign + '" >' + (browser.ie ? domUtils.fillChar : '<br/>') + '</td>')
+                        html.push('<td width="' + tdWidth + '"  vAlign="' + opt.tdvalign + '" style="border: ' + opt.borderStyle + '">' + (browser.ie ? domUtils.fillChar : '<br/>') + '</td>')
                     }
                     html.push('</tr>')
                 }
