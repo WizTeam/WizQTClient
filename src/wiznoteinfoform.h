@@ -21,8 +21,13 @@ public:
 protected:
     virtual QSize sizeHint() const;
 
+private slots:
+    void on_labelOpenDocument_linkActivated(const QString &link);
+
 private:
     Ui::CWizNoteInfoForm *ui;
+    QString m_docKbGuid;
+    QString m_docGuid;
 };
 
 
