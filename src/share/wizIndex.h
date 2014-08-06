@@ -298,7 +298,7 @@ public:
                           const CString& strDataMD5, WIZDOCUMENTATTACHMENTDATA& data);
 
     bool ModifyAttachmentInfo(WIZDOCUMENTATTACHMENTDATA& data);
-    bool DeleteAttachment(const WIZDOCUMENTATTACHMENTDATA& data, bool bLog, bool bReset);
+    virtual bool DeleteAttachment(const WIZDOCUMENTATTACHMENTDATA& data, bool bLog, bool bReset);
 
     // Raw Query
     int GetDocumentAttachmentCount(const CString& strDocumentGUID);

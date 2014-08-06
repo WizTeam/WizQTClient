@@ -85,7 +85,7 @@ void CWizDocument::PermanentlyDelete()
         CString strFileName = m_db.GetAttachmentFileName(it->strGUID);
         ::WizDeleteFile(strFileName);
 
-        m_db.DeleteAttachment(*it, true);
+        m_db.DeleteAttachment(*it, true, true);
     }
 
     if (!m_db.DeleteDocument(m_data, true)) {
@@ -2496,6 +2496,8 @@ bool CWizDatabase::UpdateAttachments(const CWizDocumentAttachmentDataArray& arra
         SetObjectVersion(WIZDOCUMENTATTACHMENTDATAEX::ObjectName(), nVersion);
     }
 
+    emit attachmentsUpdated();
+
     return !bHasError;
 }
 
@@ -2575,6 +2577,8 @@ bool CWizDatabase::DeleteAttachment(const WIZDOCUMENTATTACHMENTDATA& data,
     if (PathFileExists(strFileName)) {
         ::WizDeleteFile(strFileName);
     }
+
+    emit attachmentsUpdated();
 
     return bRet;
 }
@@ -2825,7 +2829,7 @@ bool CWizDatabase::AddAttachment(const WIZDOCUMENTDATA& document, const CString&
 
     if (!::WizCopyFile(strFileName, GetAttachmentFileName(dataRet.strGUID), false))
     {
-        DeleteAttachment(dataRet, false);
+        DeleteAttachment(dataRet, false, true);
         return false;
     }
 

@@ -65,7 +65,6 @@ private:
     QMenu* m_menu;
     CWizObjectDataDownloaderHost* m_downloaderHost;
 
-    void resetAttachments();
     void resetPermission();
     void startDownLoad(CWizAttachmentListViewItem* item);
     CWizAttachmentListViewItem* newAttachmentItem(const WIZDOCUMENTATTACHMENTDATA& att);
@@ -97,6 +96,8 @@ public Q_SLOTS:
     void on_list_itemDoubleClicked(QListWidgetItem* item);
     //
     void forceRepaint();
+    //
+    void resetAttachments();
 };
 
 
