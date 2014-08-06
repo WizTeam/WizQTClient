@@ -70,6 +70,8 @@ using namespace Core;
 using namespace Core::Internal;
 using namespace WizService::Internal;
 
+static MainWindow* windowInstance = 0;
+
 MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     : _baseClass(parent)
     , m_core(new ICore(this))
@@ -117,6 +119,7 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
 #ifndef Q_OS_MAC
     clientLayout()->addWidget(m_toolBar);
 #endif
+    windowInstance = this;
     //
     connect(qApp, SIGNAL(aboutToQuit()), SLOT(on_application_aboutToQuit()));
     connect(qApp, SIGNAL(lastWindowClosed()), qApp, SLOT(quit())); // Qt bug: Qt5 bug
@@ -259,6 +262,11 @@ void MainWindow::cleanOnQuit()
     //
     QThreadPool::globalInstance()->waitForDone();
     WizService::AvatarHost::waitForDone();
+}
+
+MainWindow*MainWindow::instance()
+{
+    return windowInstance;
 }
 
 void MainWindow::closeEvent(QCloseEvent* event)
@@ -1110,6 +1118,7 @@ void MainWindow::init()
     m_category->init();
 
     connect(m_msgList, SIGNAL(itemSelectionChanged()), SLOT(on_message_itemSelectionChanged()));
+    connect(m_msgList, SIGNAL(loacteDocumetRequest(QString,QString)), SLOT(locateDocument(QString,QString)));
     connect(m_documents, SIGNAL(itemSelectionChanged()), SLOT(on_documents_itemSelectionChanged()));
     connect(m_documents, SIGNAL(itemDoubleClicked(QListWidgetItem*)), SLOT(on_documents_itemDoubleClicked(QListWidgetItem*)));
     connect(m_documents, SIGNAL(lastDocumentDeleted()), SLOT(on_documents_lastDocumentDeleted()));
@@ -1822,7 +1831,10 @@ void MainWindow::locateDocument(const WIZDOCUMENTDATA& data)
     try
     {
         m_bUpdatingSelection = true;
-        m_category->addAndSelectFolder(data.strLocation);
+        //m_category->addAndSelectFolder(data.strLocation);
+        m_
+        m_category->findFolder(data.str);
+        data.strKbGUID
         m_documents->addAndSelectDocument(data);
     }
     catch (...)
@@ -1831,6 +1843,15 @@ void MainWindow::locateDocument(const WIZDOCUMENTDATA& data)
     }
 
     m_bUpdatingSelection = false;
+}
+
+void MainWindow::locateDocument(const QString& strKbGuid, const QString& strGuid)
+{
+    WIZDOCUMENTDATA doc;
+    if (m_dbMgr.db(strKbGuid).DocumentFromGUID(strGuid, doc))
+    {
+        locateDocument(doc);
+    }
 }
 
 void MainWindow::checkWizUpdate()

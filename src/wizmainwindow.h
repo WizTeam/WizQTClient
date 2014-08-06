@@ -95,6 +95,8 @@ public:
 
     QString searchKeywords() const { return m_strSearchKeywords; }
 
+    static MainWindow* instance();
+
 protected:
     virtual bool eventFilter(QObject* watched, QEvent* event);
     virtual void resizeEvent(QResizeEvent* event);
@@ -206,7 +208,6 @@ public:
     void setSystemTrayIconVisible(bool bVisible);
     //
     void viewDocumentByWizKMURL(const QString& strKMURL);
-
 signals:
     void documentSaved(const QString& strGUID, CWizDocumentView* viewer);
 
@@ -293,6 +294,7 @@ public Q_SLOTS:
     void on_syncProcessLog(const QString& strMsg);
 
     void on_options_restartForSettings();
+    void locateDocument(const QString& strKbGuid, const QString& strGuid);
 
     void on_editor_statusChanged();
 

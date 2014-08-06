@@ -251,7 +251,7 @@ bool CWizDocumentListView::acceptDocument(const WIZDOCUMENTDATA& document)
 
 void CWizDocumentListView::addAndSelectDocument(const WIZDOCUMENTDATA& document)
 {
-    Q_ASSERT(acceptDocument(document));
+    //Q_ASSERT(acceptDocument(document));
 
     int index = documentIndexFromGUID(document.strGUID);
     if (-1 == index) {

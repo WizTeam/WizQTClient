@@ -31,9 +31,9 @@ namespace Internal {
 class MessageListViewItem : public QListWidgetItem
 {
 public:
-    explicit MessageListViewItem(const WIZMESSAGEDATA& data)
+    explicit MessageListViewItem(const WIZMESSAGEDATA& data):m_data(data), m_specialFocusd(false)
     {
-        m_data = data;
+
     }
 
     void setData(const WIZMESSAGEDATA& data) { m_data = data; }
@@ -107,13 +107,18 @@ public:
         p->restore();
     }
 
+    bool specialFocusd() const { return m_specialFocusd; }
+    void setSpecialFocused(bool specialFocusd) { m_specialFocusd = specialFocusd; }
+
 private:
     WIZMESSAGEDATA m_data;
+    bool m_specialFocusd;
 };
 
 // Message actions
 #define WIZACTION_LIST_MESSAGE_MARK_READ    QObject::tr("Mark as read")
 #define WIZACTION_LIST_MESSAGE_DELETE       QObject::tr("Delete Message(s)")
+#define WIZACTION_LIST_MESSAGE_LOCATE       QObject::tr("Locate Message")
 
 MessageListView::MessageListView(QWidget *parent)
     : QListWidget(parent)
@@ -161,6 +166,10 @@ MessageListView::MessageListView(QWidget *parent)
                       SLOT(on_action_message_mark_read()));
     m_menu->addAction(WIZACTION_LIST_MESSAGE_DELETE, this,
                       SLOT(on_action_message_delete()));
+    m_menu->addAction(WIZACTION_LIST_MESSAGE_LOCATE, this,
+                      SLOT(on_action_message_locate()));
+
+    connect(m_menu, SIGNAL(aboutToHide()), SLOT(clearRightMenuFocus()));
 
     connect(this, SIGNAL(currentItemChanged(QListWidgetItem*,QListWidgetItem*)),
             SLOT(onCurrentItemChanged(QListWidgetItem*,QListWidgetItem*)));
@@ -248,6 +257,13 @@ int MessageListView::rowFromId(qint64 nId) const
     return -1;
 }
 
+void MessageListView::specialFocusedMessages(QList<WIZMESSAGEDATA>& arrayMsg)
+{
+    foreach(MessageListViewItem* item, m_rightButtonFocusedItems) {
+        arrayMsg.push_back(item->data());
+    }
+}
+
 void MessageListView::selectedMessages(QList<WIZMESSAGEDATA>& arrayMsg)
 {
     QList<QListWidgetItem*> items = selectedItems();
@@ -282,9 +298,16 @@ const WIZMESSAGEDATA& MessageListView::messageFromIndex(const QModelIndex& index
 void MessageListView::drawItem(QPainter* p, const QStyleOptionViewItemV4* vopt) const
 {
     Utils::StyleHelper::drawListViewItemSeperator(p, vopt->rect);
-    Utils::StyleHelper::drawListViewItemBackground(p, vopt->rect, hasFocus(), vopt->state & QStyle::State_Selected);
-
-    messageItem(vopt->index)->paint(p, vopt);
+    MessageListViewItem* pItem = messageItem(vopt->index);
+    if (!(vopt->state & QStyle::State_Selected) && pItem->specialFocusd())
+    {
+        Utils::StyleHelper::drawListViewItemBackground(p, vopt->rect, false, true);
+    }
+    else
+    {
+        Utils::StyleHelper::drawListViewItemBackground(p, vopt->rect, hasFocus(), vopt->state & QStyle::State_Selected);
+    }
+    pItem->paint(p, vopt);
 }
 
 void MessageListView::onAvatarLoaded(const QString& strUserId)
@@ -363,7 +386,7 @@ void MessageListView::updateTreeItem()
 void MessageListView::on_action_message_mark_read()
 {
     QList<WIZMESSAGEDATA> arrayMsg;
-    selectedMessages(arrayMsg);
+    specialFocusedMessages(arrayMsg);
 
     CWizMessageDataArray arrayMessage;
     for (int i = 0; i < arrayMsg.size(); i++) {
@@ -378,13 +401,25 @@ void MessageListView::on_action_message_mark_read()
 void MessageListView::on_action_message_delete()
 {
     QList<WIZMESSAGEDATA> arrayMsg;
-    selectedMessages(arrayMsg);
+    specialFocusedMessages(arrayMsg);
 
     for (int i = 0; i < arrayMsg.size(); i++) {
         CWizDatabaseManager::instance()->db().deleteMessageEx(arrayMsg.at(i));
     }
 
     updateTreeItem();
+}
+
+void MessageListView::on_action_message_locate()
+{
+    if (m_rightButtonFocusedItems.isEmpty())
+        return;
+
+    MessageListViewItem* pItem = m_rightButtonFocusedItems.first();
+    if (pItem)
+    {
+        emit loacteDocumetRequest(pItem->data().kbGUID, pItem->data().documentGUID);
+    }
 }
 
 void MessageListView::on_message_created(const WIZMESSAGEDATA& msg)
@@ -422,6 +457,14 @@ void MessageListView::on_message_deleted(const WIZMESSAGEDATA& msg)
     updateTreeItem();
 }
 
+void MessageListView::clearRightMenuFocus()
+{
+    foreach (MessageListViewItem *item, m_rightButtonFocusedItems)
+    {
+        item->setSpecialFocused(false);
+    }
+}
+
 void MessageListView::wheelEvent(QWheelEvent* event)
 {
     int delta = event->delta();
@@ -434,6 +477,43 @@ void MessageListView::wheelEvent(QWheelEvent* event)
                                           event->orientation());
     QListWidget::wheelEvent(newEvent);
 }
+
+void MessageListView::mousePressEvent(QMouseEvent* event)
+{
+    if (event->button() == Qt::LeftButton)
+    {
+        QListWidget::mousePressEvent(event);
+    }
+    else
+    {
+        MessageListViewItem* pItem = dynamic_cast<MessageListViewItem*>(itemAt(event->pos()));
+        if (!pItem)
+            return;
+
+        m_rightButtonFocusedItems.clear();
+        // if selectdItems contains clicked item use all selectedItems as special focused item.
+        if (selectedItems().contains(pItem))
+        {
+            foreach (QListWidgetItem* lsItem, selectedItems())
+            {
+                if (pItem = dynamic_cast<MessageListViewItem*>(lsItem))
+                {
+                    m_rightButtonFocusedItems.append(pItem);
+                    pItem->setSpecialFocused(true);
+                }
+
+            }
+        }
+        else
+        {
+            m_rightButtonFocusedItems.append(pItem);
+            pItem->setSpecialFocused(true);
+        }
+
+        m_menu->popup(event->globalPos());
+    }
+}
+
 
 
 } // namespace Internal
