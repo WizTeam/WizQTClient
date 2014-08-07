@@ -370,14 +370,19 @@ void CWizCategoryViewMessageItem::setUnread(int nCount)
    view->updateItem(this);
 }
 
-QString CWizCategoryViewMessageItem::unreadString() const
+QString unreadNumToString(int unread)
 {
-    if (m_nUnread <= 0)
+    if (unread <= 0)
         return "";
-    else if (m_nUnread > 99)
+    else if (unread > 99)
         return "99+";
     else
-        return QString::number(m_nUnread);
+        return QString::number(unread);
+}
+
+QString CWizCategoryViewMessageItem::unreadString() const
+{
+    return unreadNumToString(m_nUnread);
 }
 
 bool CWizCategoryViewMessageItem::hitTestUnread()
@@ -392,11 +397,6 @@ bool CWizCategoryViewMessageItem::hitTestUnread()
     int x = rcItem.right() - m_ptUnreadOffset.x() - m_szUnreadSize.width();
     int y = rcItem.top() + m_ptUnreadOffset.y();
     QRect rcUnread = QRect(x, y, m_szUnreadSize.width(), m_szUnreadSize.height());
-    //
-    int left = rcUnread.left();
-    int top = rcUnread.top();
-    int right = rcUnread.right();
-    int bottom = rcUnread.bottom();
 
     return rcUnread.contains(pt);
 }
@@ -992,6 +992,7 @@ CWizCategoryViewGroupRootItem::CWizCategoryViewGroupRootItem(CWizExplorerApp& ap
                                                              const WIZGROUPDATA& group)
     : CWizCategoryViewItemBase(app, group.strGroupName, group.strGroupGUID)
     , m_group(group)
+    , m_nUnread(0)
 {
     QIcon icon;
     icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "group_normal"),
@@ -1022,7 +1023,16 @@ void CWizCategoryViewGroupRootItem::showContextMenu(CWizCategoryBaseView* pCtrl,
 
 void CWizCategoryViewGroupRootItem::getDocuments(CWizDatabase& db, CWizDocumentDataArray& arrayDocument)
 {
-    db.getLastestDocuments(arrayDocument);
+    if (hitTestUnread() && m_nUnread)
+    {
+        db.getGroupUnreadDocuments(arrayDocument);
+        db.setGroupDocumentsReaded();
+        setUnread(0);
+    }
+    else
+    {
+        db.getLastestDocuments(arrayDocument);
+    }
 }
 
 bool CWizCategoryViewGroupRootItem::accept(CWizDatabase& db, const WIZDOCUMENTDATA& data)
@@ -1084,6 +1094,47 @@ void CWizCategoryViewGroupRootItem::drop(const WIZDOCUMENTDATA &data, bool force
     }
 }
 
+void CWizCategoryViewGroupRootItem::draw(QPainter* p, const QStyleOptionViewItemV4* vopt) const
+{
+    if (!m_nUnread)
+        return;
+    //
+    QString text = unreadString();
+    if (text.isEmpty())
+        return;
+
+    p->save();
+
+    QFont f;
+    Utils::StyleHelper::fontExtend(f);
+    p->setFont(f);
+    //
+    int x = vopt->rect.right() - m_ptUnreadOffset.x() - m_szUnreadSize.width();
+    int y = vopt->rect.top() + m_ptUnreadOffset.y();
+    QRect rcb = QRect(x, y, m_szUnreadSize.width(), m_szUnreadSize.height());
+
+    p->setRenderHint(QPainter::Antialiasing);
+
+    if (vopt->state.testFlag(QStyle::State_Selected) && vopt->state.testFlag(QStyle::State_HasFocus))
+    {
+        p->setPen(Utils::StyleHelper::treeViewItemMessageText());
+        p->setBrush(Utils::StyleHelper::treeViewItemMessageText());
+        p->drawRoundedRect(rcb, rcb.height() / 2, rcb.height() / 2);
+        p->setPen(Utils::StyleHelper::treeViewItemMessageBackground());
+        p->drawText(rcb, Qt::AlignCenter, text);
+    }
+    else
+    {
+        p->setPen(Utils::StyleHelper::treeViewItemMessageBackground());
+        p->setBrush(Utils::StyleHelper::treeViewItemMessageBackground());
+        p->drawRoundedRect(rcb, rcb.height() / 2, rcb.height() / 2);
+        p->setPen(Utils::StyleHelper::treeViewItemMessageText());
+        p->drawText(rcb, Qt::AlignCenter, text);
+    }
+    //
+    p->restore();
+}
+
 void CWizCategoryViewGroupRootItem::reload(CWizDatabase& db)
 {
     m_strName = db.name();
@@ -1117,6 +1168,69 @@ bool CWizCategoryViewGroupRootItem::isBizGroup() const
 QString CWizCategoryViewGroupRootItem::bizGUID() const
 {
     return m_group.bizGUID;
+}
+
+void CWizCategoryViewGroupRootItem::setUnread(int nCount)
+{
+    m_nUnread = nCount;
+    CWizCategoryBaseView* view = dynamic_cast<CWizCategoryBaseView*>(treeWidget());
+    //
+    if (m_nUnread > 0)
+    {
+        QFont f;
+        Utils::StyleHelper::fontExtend(f);
+        QPainter p;
+        p.setFont(f);
+        //
+        QSize szText = p.fontMetrics().size(0, unreadString());
+        int textWidth = szText.width();
+        int textHeight = szText.height();
+        //
+        //int nMargin = textHeight / 4;
+        //
+        int nWidth = textWidth;
+        int nHeight = textHeight + 2;
+        if (nWidth < nHeight)
+            nWidth = nHeight;
+        //
+
+        Q_ASSERT(view);
+
+        // use parent height, group root could be unvisible
+        QRect rcIemBorder = view->visualItemRect(this->parent());
+        QRect rcExtButton = getExtraButtonRect(rcIemBorder, true);
+        //
+        int nTop = rcIemBorder.y() + (rcIemBorder.height() - nHeight) / 2;
+        int nLeft = rcExtButton.right() - nWidth;
+        QRect rcb(nLeft, nTop, nWidth, nHeight);
+
+        m_ptUnreadOffset.setX(rcIemBorder.right() - rcb.right());
+        m_ptUnreadOffset.setY(rcb.top() - rcIemBorder.top());
+        m_szUnreadSize = rcb.size();
+    }
+
+    view->updateItem(this);
+}
+
+QString CWizCategoryViewGroupRootItem::unreadString() const
+{
+    return unreadNumToString(m_nUnread);
+}
+
+bool CWizCategoryViewGroupRootItem::hitTestUnread()
+{
+    CWizCategoryBaseView* view = dynamic_cast<CWizCategoryBaseView*>(treeWidget());
+    Q_ASSERT(view);
+
+    QRect rcItem = view->visualItemRect(this);
+    //
+    QPoint pt = view->hitPoint();
+    //
+    int x = rcItem.right() - m_ptUnreadOffset.x() - m_szUnreadSize.width();
+    int y = rcItem.top() + m_ptUnreadOffset.y();
+    QRect rcUnread = QRect(x, y, m_szUnreadSize.width(), m_szUnreadSize.height());
+
+    return rcUnread.contains(pt);
 }
 
 /* --------------------- CWizCategoryViewGroupNoTagItem --------------------- */

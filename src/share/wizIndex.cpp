@@ -815,6 +815,54 @@ void CWizIndex::InitDocumentShareFlags(CWizDocumentDataArray& arrayDocument,
     }
 }
 
+bool CWizIndex::getGroupUnreadDocuments(CWizDocumentDataArray& arrayDocument)
+{
+
+    CString strExt;
+    strExt.Format("where DOCUMENT_READ_COUNT=0 and DOCUMENT_LOCATION not like '/Deleted Items/%'");
+    QString strSQL = FormatCanonicSQL(TABLE_NAME_WIZ_DOCUMENT,
+                                      FIELD_LIST_WIZ_DOCUMENT,
+                                      strExt);
+
+    return SQLToDocumentDataArray(strSQL, arrayDocument);
+}
+
+int CWizIndex::getGroupUnreadDocumentCount()
+{
+    CString strSQL;
+    strSQL.Format("select count(*) from WIZ_DOCUMENT where DOCUMENT_READ_COUNT=0");
+
+    CppSQLite3Query query = m_db.execQuery(strSQL);
+
+    if (!query.eof()) {
+        int nCount = query.getIntField(0);
+        return nCount;
+    }
+
+    return 0;
+}
+
+void CWizIndex::setGroupDocumentsReaded()
+{
+    CString strSQL = WizFormatString0("update WIZ_DOCUMENT set DOCUMENT_READ_COUNT=1 where DOCUMENT_READ_COUNT=0");
+    ExecSQL(strSQL);
+}
+
+CString CWizIndex::KbGUIDToSQL()
+{
+    CString strKbGUIDSQL;
+    if (kbGUID().isEmpty())
+    {
+        strKbGUIDSQL = _T(" (KB_GUID is null or KB_GUID = '') ");
+    }
+    else
+    {
+        strKbGUIDSQL = WizFormatString1(_T("KB_GUID = '%1'"), kbGUID());
+    }
+    //
+    return strKbGUIDSQL;
+}
+
 bool CWizIndex::ModifyAttachmentInfo(WIZDOCUMENTATTACHMENTDATA& data)
 {
     if (data.strGUID.isEmpty()) {

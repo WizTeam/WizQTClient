@@ -469,8 +469,7 @@ bool CWizDocumentWebView::image2Html(const QString& strImageFile, QString& strHt
 
     qDebug() << "[Editor] copy to: " << strDestFile;
 
-    QImage img(strImageFile);
-    if (!img.save(strDestFile)) {
+    if (!QFile::copy(strImageFile, strDestFile)) {
         return false;
     }
 

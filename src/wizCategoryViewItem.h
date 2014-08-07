@@ -298,7 +298,6 @@ public:
 
 class CWizCategoryViewGroupRootItem : public CWizCategoryViewItemBase
 {
-    WIZGROUPDATA m_group;
 public:
     CWizCategoryViewGroupRootItem(CWizExplorerApp& app,
                                   const WIZGROUPDATA& group);
@@ -308,6 +307,7 @@ public:
     virtual bool accept(CWizDatabase& db, const WIZDOCUMENTDATA& data);
     virtual bool acceptDrop(const WIZDOCUMENTDATA& data) const;
     virtual void drop(const WIZDOCUMENTDATA& data, bool forceCopy = false);
+    virtual void draw(QPainter* p, const QStyleOptionViewItemV4* vopt) const;
     void reload(CWizDatabase& db);
     //
     bool isAdmin(CWizDatabase& db);
@@ -315,6 +315,16 @@ public:
 
     bool isBizGroup() const;
     QString bizGUID() const;
+    //
+    void setUnread(int nCount);
+    QString unreadString() const;
+    bool hitTestUnread();
+
+private:
+    WIZGROUPDATA m_group;
+    int m_nUnread;
+    QPoint m_ptUnreadOffset;
+    QSize m_szUnreadSize;
 };
 
 class CWizCategoryViewGroupNoTagItem : public CWizCategoryViewItemBase

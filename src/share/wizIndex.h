@@ -31,7 +31,7 @@ public:
     bool getLastestMessages(CWizMessageDataArray& arrayMsg, int nMax = 200);
     bool setMessageReadStatus(const WIZMESSAGEDATA& msg, qint32 nRead);
     bool setMessageReadStatus(const CWizMessageDataArray& arrayMsg, qint32 nRead);
-    bool getModifiedMessages(CWizMessageDataArray& arrayMsg);
+    bool getModifiedMessages(CWizMessageDataArray&  arrayMsg);
     bool getUnreadMessages(CWizMessageDataArray& arrayMsg);
     int getUnreadMessageCount();
 
@@ -235,6 +235,11 @@ public:
                                 const std::map<CString, int>& mapDocumentIndex,
                                 const CString& strTagName,
                                 int nShareFlags);
+
+    bool getGroupUnreadDocuments(CWizDocumentDataArray& arrayDocument);
+    int getGroupUnreadDocumentCount();
+    void setGroupDocumentsReaded();
+    CString KbGUIDToSQL();
 
     // Raw Query
     bool GetAllDocumentsTitle(CWizStdStringArray& arrayDocument);

@@ -1657,6 +1657,8 @@ void CWizCategoryView::on_itemClicked(QTreeWidgetItem *item, int column)
         {
             promptGroupStorageLimitMessage(pItem->kbGUID(), pItem->bizGUID());
         }
+
+        emit itemSelectionChanged();
     }
 }
 
@@ -2007,7 +2009,7 @@ void CWizCategoryView::updateGroupFolderDocumentCount_impl(const QString &strKbG
         return;
     }
 
-    CWizCategoryViewItemBase* pGroupRoot = NULL;
+    CWizCategoryViewGroupRootItem* pGroupRoot = NULL;
     pGroupRoot = findGroup(strKbGUID);
 
     if (!pGroupRoot)
@@ -2035,6 +2037,9 @@ void CWizCategoryView::updateGroupFolderDocumentCount_impl(const QString &strKbG
             }
         }
     }
+
+    //unread documents
+    pGroupRoot->setUnread(m_dbMgr.db(strKbGUID).getGroupUnreadDocumentCount());
 
     update();
 }
