@@ -396,11 +396,54 @@ bool CWizCategoryBaseView::acceptDocument(const WIZDOCUMENTDATA& document)
     return pItem->accept(m_dbMgr.db(document.strKbGUID), document);
 }
 
-void CWizCategoryBaseView::setCurrentIndex(const WIZDOCUMENTDATA& document)
+bool CWizCategoryView::setCurrentIndex(const WIZDOCUMENTDATA& document)
 {
-    CWizCategoryViewItemBase* pItem = itemFromKbGUID(document.strKbGUID);
-//    document.strLocation;
-//    document.
+    if (m_dbMgr.db().kbGUID() == document.strKbGUID)
+    {
+        addAndSelectFolder(document.strLocation);
+        return true;
+    }
+    else
+    {
+        QTreeWidgetItem* pItem = itemFromKbGUID(document.strKbGUID);
+        if (pItem)
+        {
+            CWizDatabase& db = m_dbMgr.db(document.strKbGUID);
+            CWizTagDataArray arrayTag;
+            if (!db.GetDocumentTags(document.strGUID, arrayTag)) {
+                return false;
+            } else {
+                if (arrayTag.size() > 1) {
+                    TOLOG1("Group document should only have one tag: %1", document.strTitle);
+                }
+
+                QString tagText;
+                if (arrayTag.size()) {
+                    tagText = db.getTagTreeText(arrayTag[0].strGUID);
+                }
+
+                CString strTempLocation = tagText;
+                strTempLocation.Trim('/');
+                QStringList sl = strTempLocation.split("/");
+                for (int i = 0; i < sl.count(); i ++)
+                {
+                    for (int j = 0; j < pItem->childCount(); j ++)
+                    {
+                        if (pItem->child(j)->text(0) == sl.at(i))
+                        {
+                            pItem = pItem->child(j);
+                            break;
+                        }
+                    }
+                }
+            }
+
+            setCurrentItem(pItem);
+            return true;
+        }
+    }
+
+    return false;
 }
 
 void CWizCategoryBaseView::saveSelection()
@@ -426,18 +469,38 @@ CWizCategoryViewItemBase* CWizCategoryBaseView::itemAt(const QPoint& p) const
     return dynamic_cast<CWizCategoryViewItemBase*>(QTreeWidget::itemAt(p));
 }
 
+bool findItemByKbGUID(QTreeWidgetItem *item, const QString& strKbGUID, CWizCategoryViewItemBase*& target)
+{
+    for( int i = 0; i < item->childCount(); ++i)
+    {
+        CWizCategoryViewItemBase * pItem = dynamic_cast<CWizCategoryViewItemBase *>(item->child(i));
+        if (pItem->kbGUID() == strKbGUID)
+        {
+            target = pItem;
+            return true;
+        }
+
+        if (findItemByKbGUID(item->child(i), strKbGUID, target))
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 CWizCategoryViewItemBase* CWizCategoryBaseView::itemFromKbGUID(const QString &strKbGUID) const
 {
-//    if (strKbGUID.isEmpty())
+    if (strKbGUID.isEmpty())
         return 0;
 
-//    QList<QTreeWidgetItem*> itemList = items;
-//    foreach (QTreeWidgetItem* widgetItem, itemList) {
-//        CWizCategoryViewItemBase * item = dynamic_cast<CWizCategoryViewItemBase *>(widgetItem);
-//        if (item->kbGUID() == strKbGUID) {
-//            return item;
-//        }
-//    }
+    CWizCategoryViewItemBase * item = 0;
+    for (int i = 0; i < topLevelItemCount(); i ++)
+    {
+        findItemByKbGUID(topLevelItem(i), strKbGUID, item);
+    }
+
+    return item;
 }
 
 

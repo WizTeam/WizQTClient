@@ -37,7 +37,6 @@ public:
     QString selectedItemKbGUID();
     void getDocuments(CWizDocumentDataArray& arrayDocument);
     bool acceptDocument(const WIZDOCUMENTDATA& document);
-    void setCurrentIndex(const WIZDOCUMENTDATA& document);
 
 
     void saveSelection();
@@ -213,6 +212,7 @@ public:
     CWizCategoryViewFolderItem* findFolder(const QString& strLocation, bool create, bool sort);
     CWizCategoryViewFolderItem* addFolder(const QString& strLocation, bool sort);
     void addAndSelectFolder(const CString& strLocation);
+    bool setCurrentIndex(const WIZDOCUMENTDATA& document);
 
     void sortFolders();
     void sortFolders(CWizCategoryViewFolderItem* pItem);

@@ -251,7 +251,11 @@ bool CWizDocumentListView::acceptDocument(const WIZDOCUMENTDATA& document)
 
 void CWizDocumentListView::addAndSelectDocument(const WIZDOCUMENTDATA& document)
 {
-    //Q_ASSERT(acceptDocument(document));
+    if (!acceptDocument(document))
+    {
+        TOLOG1("[Locate] documentlist can not accpet document %1 ", document.strTitle);
+        return;
+    }
 
     int index = documentIndexFromGUID(document.strGUID);
     if (-1 == index) {

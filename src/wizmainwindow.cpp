@@ -1831,11 +1831,11 @@ void MainWindow::locateDocument(const WIZDOCUMENTDATA& data)
     try
     {
         m_bUpdatingSelection = true;
-        //m_category->addAndSelectFolder(data.strLocation);
-        m_
-        m_category->findFolder(data.str);
-        data.strKbGUID
-        m_documents->addAndSelectDocument(data);
+        if (m_category->setCurrentIndex(data))
+        {
+            m_documents->addAndSelectDocument(data);
+            viewDocument(data, true);
+        }
     }
     catch (...)
     {
