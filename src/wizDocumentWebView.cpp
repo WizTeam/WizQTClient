@@ -489,20 +489,35 @@ void CWizDocumentWebView::dropEvent(QDropEvent* event)
 
         qDebug() << "[Editor] drop: " << url.toString();
 
-        // only process image currently
-        QImageReader reader(url.toString());
-        if (!reader.canRead())
-            continue;
-
-        QString strHtml;
-        if (image2Html(url.toString(), strHtml)) {
-            editorCommandExecuteInsertHtml(strHtml, true);
-            nAccepted++;
+        //paste image file as images, add attachment for other file
+        QString strFileName = url.toString();
+        QImageReader reader(strFileName);
+        if (reader.canRead())
+        {
+            QString strHtml;
+            if (image2Html(strFileName, strHtml)) {
+                editorCommandExecuteInsertHtml(strHtml, true);
+                nAccepted++;
+            }
+        }
+        else
+        {
+            WIZDOCUMENTDATA doc = view()->note();
+            CWizDatabase& db = m_dbMgr.db(doc.strKbGUID);
+            WIZDOCUMENTATTACHMENTDATA data;
+            data.strKbGUID = doc.strKbGUID; // needed by under layer
+            if (!db.AddAttachment(doc, strFileName, data))
+            {
+                TOLOG1("[drop] add attachment failed %1", strFileName);
+                continue;
+            }
+            nAccepted ++;
         }
     }
 
     if (nAccepted == li.size()) {
         event->accept();
+        saveDocument(view()->note(), false);
     }
 }
 
