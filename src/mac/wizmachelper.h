@@ -21,6 +21,10 @@ bool wizMacIsCurrentApplicationVisible();
 
 void wizMacInitUncaughtExceptionHandler();
 
+void wizMacRegisterSystemService();
+
+
+
 #endif // Q_OS_MAC
 
 #endif // COCOAHELP_H

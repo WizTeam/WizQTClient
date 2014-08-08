@@ -9,6 +9,7 @@ class CWizExplorerApp;
 class QComboBox;
 class QWebView;
 class QMenu;
+class QPlainTextEdit;
 
 class CWizCodeEditorView : public QWebView
 {
@@ -44,7 +45,7 @@ private:
 
 private:
     QComboBox *m_codeType;
-    CWizCodeEditorView *m_codeEditor;
+    QPlainTextEdit *m_codeEditor;
     QWebView *m_codeBrowser;
 };
 

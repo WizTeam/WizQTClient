@@ -208,6 +208,9 @@ public:
     void setSystemTrayIconVisible(bool bVisible);
     //
     void viewDocumentByWizKMURL(const QString& strKMURL);
+    //
+    void createNoteWithAttachments(const QStringList& strAttachList);
+    void createNoteWithText(const QString& strText);
 signals:
     void documentSaved(const QString& strGUID, CWizDocumentView* viewer);
 

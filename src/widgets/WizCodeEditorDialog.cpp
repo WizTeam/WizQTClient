@@ -17,6 +17,7 @@
 #include <QMenu>
 #include <QFile>
 #include <QDir>
+#include <QPlainTextEdit>
 
 #include <extensionsystem/pluginmanager.h>
 #include <extensionsystem/pluginspec.h>
@@ -25,7 +26,7 @@
 WizCodeEditorDialog::WizCodeEditorDialog(QWidget *parent) :
     QDialog(parent)
   , m_codeType(new QComboBox(this))
-  , m_codeEditor(new CWizCodeEditorView(this))
+  , m_codeEditor(new QPlainTextEdit(this))
   , m_codeBrowser(new QWebView(this))
 {
 
@@ -48,7 +49,7 @@ WizCodeEditorDialog::WizCodeEditorDialog(QWidget *parent) :
     horizontalLayout->addItem(horizontalSpacer);
 
     m_codeEditor->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
-    m_codeEditor->page()->setContentEditable(true);
+    //m_codeEditor->page()->setContentEditable(true);
 
     QWidget* wgtPre = new QWidget(this);
     QVBoxLayout *layoutPre = new QVBoxLayout(wgtPre);
@@ -83,7 +84,8 @@ WizCodeEditorDialog::WizCodeEditorDialog(QWidget *parent) :
 
     initCodeTypeCombox();
     //
-    connect(m_codeEditor->page(), SIGNAL(contentsChanged()), SLOT(renderCodeToHtml()));
+    //connect(m_codeEditor->page(), SIGNAL(contentsChanged()), SLOT(renderCodeToHtml()));
+    connect(m_codeEditor, SIGNAL(textChanged()), SLOT(renderCodeToHtml()));
     connect(m_codeType, SIGNAL(currentIndexChanged(int)), SLOT(renderCodeToHtml()));
     connect(btnOK, SIGNAL(clicked()), SLOT(onButtonOKClicked()));
     connect(btnCancle, SIGNAL(clicked()), SLOT(onButtonCancleClicked()));
@@ -93,28 +95,35 @@ void WizCodeEditorDialog::setCode(const QString& strCode)
 {
     if (!strCode.isEmpty())
     {
-        m_codeEditor->page()->mainFrame()->setHtml(strCode);
+        //m_codeEditor->page()->mainFrame()->setHtml(strCode);
+        m_codeEditor->setPlainText(strCode);
         renderCodeToHtml();
     }
 }
 
+
 void WizCodeEditorDialog::renderCodeToHtml()
 {
     QWebFrame *frame = m_codeBrowser->page()->mainFrame();
-    QString codeText = m_codeEditor->page()->mainFrame()->toHtml();
+    QString codeText = m_codeEditor->toPlainText();//->page()->mainFrame()->toHtml();
+    codeText.replace(" ", "åß∂ƒ");
+    codeText.replace("\n", "<br>");
 
     m_codeBrowser->setUpdatesEnabled(false);
     frame->setHtml(QString("<p>``` %1</p>%2<p>```</p>").arg(m_codeType->currentText()).
                    arg(codeText));
     Core::ICore::instance()->emitFrameRenderRequested(frame, true);
-
     m_codeBrowser->setUpdatesEnabled(true);
+    codeText = frame->toHtml();
+    codeText.replace("åß∂ƒ", "&nbsp;");
+    frame->setHtml(codeText);
 }
 
 void WizCodeEditorDialog::onButtonOKClicked()
 {
     QString strHtml = m_codeBrowser->page()->mainFrame()->toHtml();
     strHtml.replace("\\n", "\\\\n");
+    strHtml.replace("\'", "\\\'");
     insertHtmlRequest(strHtml);
     close();
 }

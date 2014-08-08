@@ -2015,6 +2015,31 @@ void MainWindow::viewDocumentByWizKMURL(const QString &strKMURL)
     }
 }
 
+void MainWindow::createNoteWithAttachments(const QStringList& strAttachList)
+{
+    on_actionNewNote_triggered();
+
+    CWizDatabase& db = m_dbMgr.db(m_documentForEditing.strKbGUID);
+    foreach (QString StrFileName, strAttachList) {
+        WIZDOCUMENTATTACHMENTDATA attach;
+        if (!db.AddAttachment(m_documentForEditing, StrFileName, attach))
+        {
+            TOLOG1("[Service] add attch failed :  1%", StrFileName);
+        }
+    }
+}
+
+void MainWindow::createNoteWithText(const QString& strText)
+{
+    on_actionNewNote_triggered();
+
+    QEventLoop loop;
+    connect(m_doc->web(), SIGNAL(viewDocumentFinished()), &loop, SLOT(quit()));
+    loop.exec();
+
+    m_doc->web()->setContentText(strText);
+}
+
 void MainWindow::initTrayIcon(QSystemTrayIcon* trayIcon)
 {
     Q_ASSERT(trayIcon);

@@ -2823,6 +2823,9 @@ bool CWizDatabase::CreateDocumentAndInit(const WIZDOCUMENTDATA& sourceDoc, const
 
 bool CWizDatabase::AddAttachment(const WIZDOCUMENTDATA& document, const CString& strFileName, WIZDOCUMENTATTACHMENTDATA& dataRet)
 {
+    dataRet.strKbGUID = document.strKbGUID;
+    dataRet.strDocumentGUID = document.strGUID;
+
     CString strMD5 = ::WizMd5FileString(strFileName);
     if (!CreateAttachment(document.strGUID, WizExtractFileName(strFileName), strFileName, "", strMD5, dataRet))
         return false;

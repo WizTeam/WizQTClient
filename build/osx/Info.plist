@@ -57,5 +57,31 @@
 			</array>
 		</dict>
 	</array>
+	<key>NSServices</key>
+	<array>
+		<dict>
+			<key>NSMenuItem</key>
+			<dict>
+				<key>default</key>
+				<string>WIZApplicationServiceMenuItemTitle</string>
+			</dict>
+			<key>NSMessage</key>
+			<string>serviceCreateNote</string>
+			<key>NSPortName</key>
+			<string>WizNote</string>
+			<key>NSRequiredContext</key>
+			<dict/>
+			<key>NSSendTypes</key>
+			<array>
+				<string>NSFilenamesPboardType</string>
+				<string>NSURLPboardType</string>
+				<string>NSRTFDPboardType</string>
+				<string>NSRTFPboardType</string>
+				<string>NSStringPboardType</string>
+			</array>
+			<key>NSTimeout</key>
+			<string>120000</string>
+		</dict>
+	</array>
 </dict>
 </plist>
