@@ -329,9 +329,6 @@ void CWizCategoryViewSectionItem::draw(QPainter* p, const QStyleOptionViewItemV4
 
 
 /* -------------------- CWizCategoryViewMessageRootItem -------------------- */
-QPoint CWizCategoryViewMessageItem::m_ptUnreadOffset;   //avoid const error
-QSize CWizCategoryViewMessageItem::m_szUnreadSize;
-
 CWizCategoryViewMessageItem::CWizCategoryViewMessageItem(CWizExplorerApp& app,
                                                                  const QString& strName, int nFilterType)
     : CWizCategoryViewItemBase(app, strName)
@@ -365,9 +362,40 @@ void CWizCategoryViewMessageItem::setUnread(int nCount)
     Utils::Notify::setDockBadge(nCount);
 #endif
 
+   m_nUnread = nCount;
    CWizCategoryBaseView* view = dynamic_cast<CWizCategoryBaseView*>(treeWidget());
    Q_ASSERT(view);
+   //
+   if (m_nUnread > 0)
+   {
+       QFont f;
+       Utils::StyleHelper::fontExtend(f);
+       QPainter p;
+       p.setFont(f);
+       //
+       QSize szText = p.fontMetrics().size(0, unreadString());
+       int textWidth = szText.width();
+       int textHeight = szText.height();
+       //
+       //int nMargin = textHeight / 4;
+       //
+       int nWidth = textWidth;
+       int nHeight = textHeight + 2;
+       if (nWidth < nHeight)
+           nWidth = nHeight;
+       //
+       QRect rcIemBorder = view->visualItemRect(this);
+       QRect rcExtButton = getExtraButtonRect(rcIemBorder, true);
+       //
+       int nTop = rcIemBorder.y() + (rcIemBorder.height() - nHeight) / 2;
+       int nLeft = rcExtButton.right() - nWidth;
+       QRect rcb(nLeft, nTop, nWidth, nHeight);
+
+       m_szUnreadSize = rcb.size();
+   }
+
    view->updateItem(this);
+
 }
 
 QString unreadNumToString(int unread)
@@ -391,14 +419,15 @@ bool CWizCategoryViewMessageItem::hitTestUnread()
     Q_ASSERT(view);
 
     QRect rcItem = view->visualItemRect(this);
-    //
     QPoint pt = view->hitPoint();
     //
-    int x = rcItem.right() - m_ptUnreadOffset.x() - m_szUnreadSize.width();
-    int y = rcItem.top() + m_ptUnreadOffset.y();
-    QRect rcUnread = QRect(x, y, m_szUnreadSize.width(), m_szUnreadSize.height());
+    int nMargin = 4;
+    QRect rcRect = getExtraButtonRect(rcItem, true);
+    QRect rcb = QRect(rcRect.right() - m_szUnreadSize.width() + 1, rcRect.y() + (rcRect.height() - m_szUnreadSize.height())/2,
+                      m_szUnreadSize.width(), m_szUnreadSize.height());
+    rcb.adjust(-nMargin, -nMargin, nMargin, nMargin);
 
-    return rcUnread.contains(pt);
+    return rcb.contains(pt);
 }
 
 QString CWizCategoryViewMessageItem::getSectionName()
@@ -421,22 +450,9 @@ void CWizCategoryViewMessageItem::draw(QPainter* p, const QStyleOptionViewItemV4
     Utils::StyleHelper::fontExtend(f);
     p->setFont(f);
     //
-    QSize szText = p->fontMetrics().size(0, text);
-    int textWidth = szText.width();
-    int textHeight = szText.height();
-    //
-    int nMargin = textHeight / 3;
-    //
-    int nWidth = textWidth + 2 * nMargin;
-    int nHeight = textHeight + 2 * nMargin;
-    if (nWidth < nHeight)
-        nWidth = nHeight;
-    //
-    QRect rcExtButton = getExtraButtonRect(vopt->rect, true);
-    //
-    int nTop = vopt->rect.y() + (vopt->rect.height() - nHeight) / 2;
-    int nLeft = rcExtButton.right() - nWidth - 2;
-    QRect rcb(nLeft, nTop, nWidth, nHeight);
+    QRect rcRect = getExtraButtonRect(vopt->rect, true);
+    QRect rcb = QRect(rcRect.right() - m_szUnreadSize.width() + 1, rcRect.y() + (rcRect.height() - m_szUnreadSize.height())/2,
+                      m_szUnreadSize.width(), m_szUnreadSize.height());
 
     p->setRenderHint(QPainter::Antialiasing);
 
@@ -459,11 +475,6 @@ void CWizCategoryViewMessageItem::draw(QPainter* p, const QStyleOptionViewItemV4
     //
 
     p->restore();
-    //
-    m_ptUnreadOffset.setX(vopt->rect.right() - rcb.right());
-    m_ptUnreadOffset.setY(rcb.top() - vopt->rect.top());
-    //
-    m_szUnreadSize = rcb.size();
 }
 
 /* -------------------- CWizCategoryViewShortcutRootItem -------------------- */
@@ -1109,11 +1120,12 @@ void CWizCategoryViewGroupRootItem::draw(QPainter* p, const QStyleOptionViewItem
     Utils::StyleHelper::fontExtend(f);
     p->setFont(f);
     //
-    int x = vopt->rect.right() - m_ptUnreadOffset.x() - m_szUnreadSize.width();
-    int y = vopt->rect.top() + m_ptUnreadOffset.y();
-    QRect rcb = QRect(x, y, m_szUnreadSize.width(), m_szUnreadSize.height());
-
     p->setRenderHint(QPainter::Antialiasing);
+
+    QRect rcRect = getExtraButtonRect(vopt->rect, true);
+    QRect rcb = QRect(rcRect.right() - m_szUnreadSize.width() + 1, rcRect.y() + (rcRect.height() - m_szUnreadSize.height())/2,
+                      m_szUnreadSize.width(), m_szUnreadSize.height());
+
 
     if (vopt->state.testFlag(QStyle::State_Selected) && vopt->state.testFlag(QStyle::State_HasFocus))
     {
@@ -1204,8 +1216,6 @@ void CWizCategoryViewGroupRootItem::setUnread(int nCount)
         int nLeft = rcExtButton.right() - nWidth;
         QRect rcb(nLeft, nTop, nWidth, nHeight);
 
-        m_ptUnreadOffset.setX(rcIemBorder.right() - rcb.right());
-        m_ptUnreadOffset.setY(rcb.top() - rcIemBorder.top());
         m_szUnreadSize = rcb.size();
     }
 
@@ -1223,14 +1233,15 @@ bool CWizCategoryViewGroupRootItem::hitTestUnread()
     Q_ASSERT(view);
 
     QRect rcItem = view->visualItemRect(this);
-    //
     QPoint pt = view->hitPoint();
     //
-    int x = rcItem.right() - m_ptUnreadOffset.x() - m_szUnreadSize.width();
-    int y = rcItem.top() + m_ptUnreadOffset.y();
-    QRect rcUnread = QRect(x, y, m_szUnreadSize.width(), m_szUnreadSize.height());
+    int nMargin = 4;
+    QRect rcRect = getExtraButtonRect(rcItem, true);
+    QRect rcb = QRect(rcRect.right() - m_szUnreadSize.width() + 1, rcRect.y() + (rcRect.height() - m_szUnreadSize.height())/2,
+                      m_szUnreadSize.width(), m_szUnreadSize.height());
+    rcb.adjust(-nMargin, -nMargin, nMargin, nMargin);
 
-    return rcUnread.contains(pt);
+    return rcb.contains(pt);
 }
 
 /* --------------------- CWizCategoryViewGroupNoTagItem --------------------- */

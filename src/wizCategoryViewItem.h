@@ -108,8 +108,7 @@ public:
 private:
     int m_nFilter;
     int m_nUnread;
-    static QPoint m_ptUnreadOffset;
-    static QSize m_szUnreadSize;
+    QSize m_szUnreadSize;
 };
 
 class CWizCategoryViewShortcutRootItem : public CWizCategoryViewItemBase
@@ -323,7 +322,6 @@ public:
 private:
     WIZGROUPDATA m_group;
     int m_nUnread;
-    QPoint m_ptUnreadOffset;
     QSize m_szUnreadSize;
 };
 
