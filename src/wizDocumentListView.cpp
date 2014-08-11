@@ -412,7 +412,8 @@ void CWizDocumentListView::mousePressEvent(QMouseEvent* event)
         {
             foreach (QListWidgetItem* lsItem, selectedItems())
             {
-                if (pItem = dynamic_cast<CWizDocumentListViewItem*>(lsItem))
+                pItem = dynamic_cast<CWizDocumentListViewItem*>(lsItem);
+                if (pItem)
                 {
                     m_rightButtonFocusedItems.append(pItem);
                     pItem->setSpecialFocused(true);
@@ -439,6 +440,35 @@ void CWizDocumentListView::mouseMoveEvent(QMouseEvent* event)
     }
 
     QListWidget::mouseMoveEvent(event);
+}
+
+void CWizDocumentListView::mouseReleaseEvent(QMouseEvent* event)
+{
+    //
+    int nMargin = 2;
+    QRect rect = QRect(event->pos().x() - nMargin, event->pos().y() - nMargin,
+                       2 * nMargin, 2 * nMargin);
+    if (rect.contains(m_dragStartPosition))
+    {
+        QListWidgetItem *pressedItem = itemAt(event->pos());
+        if (pressedItem)
+        {
+            if (event->modifiers() == Qt::ControlModifier || event->modifiers() == Qt::ShiftModifier)
+            {
+            }
+            else
+            {
+                QList<QListWidgetItem*> Items =  selectedItems();
+                foreach (QListWidgetItem *selectedItem, Items) {
+                    selectedItem->setSelected(false);
+                }
+            }
+            pressedItem->setSelected(true);
+            emit documentsSelectionChanged();
+        }
+    }
+
+    QListWidget::mouseReleaseEvent(event);
 }
 
 QPixmap WizGetDocumentDragBadget(int nCount)

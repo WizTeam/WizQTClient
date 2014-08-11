@@ -196,6 +196,7 @@ protected:
     virtual void focusOutEvent(QFocusEvent* event);
     virtual void contextMenuEvent(QContextMenuEvent* event);
     virtual void dragEnterEvent(QDragEnterEvent* event);
+    virtual void dragMoveEvent(QDragEnterEvent* event);
     virtual void dropEvent(QDropEvent* event);
 
 private:

@@ -54,6 +54,7 @@ protected:
     //virtual void contextMenuEvent(QContextMenuEvent* event);
     virtual void mousePressEvent(QMouseEvent* event);
     virtual void mouseMoveEvent(QMouseEvent* event);
+    virtual void mouseReleaseEvent(QMouseEvent* event);
 
     virtual void startDrag(Qt::DropActions supportedActions);
     virtual void dragEnterEvent(QDragEnterEvent *event);
@@ -176,6 +177,7 @@ public Q_SLOTS:
 Q_SIGNALS:
     void documentCountChanged();
     void lastDocumentDeleted();
+    void documentsSelectionChanged();
 };
 
 

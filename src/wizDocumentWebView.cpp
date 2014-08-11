@@ -390,8 +390,12 @@ void CWizDocumentWebView::contextMenuEvent(QContextMenuEvent *event)
 
 void CWizDocumentWebView::dragEnterEvent(QDragEnterEvent *event)
 {
+    qDebug() << "dragEnterEvent  1";
+
     if (!isEditing())
         return;
+
+    qDebug() << "dragEnterEvent  2";
 
     int nAccepted = 0;
     if (event->mimeData()->hasUrls()) {
@@ -406,8 +410,34 @@ void CWizDocumentWebView::dragEnterEvent(QDragEnterEvent *event)
 
         if (nAccepted == li.size()) {
             event->acceptProposedAction();
+            qDebug() << "dragEnterEvent  8";
         }
+    } else if (event->mimeData()->hasFormat(WIZNOTE_MIMEFORMAT_DOCUMENTS)) {
+        qDebug() << "dragEnterEvent  3";
+        if (!event->mimeData()->data(WIZNOTE_MIMEFORMAT_DOCUMENTS).isEmpty()) {
+            qDebug() << "dragEnterEvent  4" << event->mimeData()->data(WIZNOTE_MIMEFORMAT_DOCUMENTS);
+            setFocus();
+            event->acceptProposedAction();
+            QEventLoop loop;
+            QTimer::singleShot(300, &loop, SLOT(quit()));
+            loop.exec();
+        }
+        qDebug() << "dragEnterEvent  5";
     }
+    qDebug() << "dragEnterEvent  6";
+}
+
+void CWizDocumentWebView::dragMoveEvent(QDragEnterEvent* event)
+{
+    if (event->mimeData()->hasFormat(WIZNOTE_MIMEFORMAT_DOCUMENTS)) {
+            qDebug() << "dragMoveEvent  3";
+            if (!event->mimeData()->data(WIZNOTE_MIMEFORMAT_DOCUMENTS).isEmpty()) {
+                qDebug() << "dragMoveEvent  4";
+                setFocus();
+                event->acceptProposedAction();
+            }
+            qDebug() << "dragMoveEvent  5";
+        }
 }
 
 void CWizDocumentWebView::onActionTriggered(QWebPage::WebAction act)
@@ -479,45 +509,63 @@ bool CWizDocumentWebView::image2Html(const QString& strImageFile, QString& strHt
 
 void CWizDocumentWebView::dropEvent(QDropEvent* event)
 {
+    qDebug() << "dropEvent  1";
     int nAccepted = 0;
-    QList<QUrl> li = event->mimeData()->urls();
-    QList<QUrl>::const_iterator it;
-    for (it = li.begin(); it != li.end(); it++) {
-        QUrl url = *it;
-        url.setScheme(0);
+    const QMimeData* mimeData = event->mimeData();
+    if (mimeData->hasUrls())
+    {
+        qDebug() << "dropEvent  2";
+        QList<QUrl> li = mimeData->urls();
+        QList<QUrl>::const_iterator it;
+        for (it = li.begin(); it != li.end(); it++) {
+            QUrl url = *it;
+            url.setScheme(0);
 
-        qDebug() << "[Editor] drop: " << url.toString();
+            qDebug() << "[Editor] drop: " << url.toString();
 
-        //paste image file as images, add attachment for other file
-        QString strFileName = url.toString();
-        QImageReader reader(strFileName);
-        if (reader.canRead())
-        {
-            QString strHtml;
-            if (image2Html(strFileName, strHtml)) {
-                editorCommandExecuteInsertHtml(strHtml, true);
-                nAccepted++;
-            }
-        }
-        else
-        {
-            WIZDOCUMENTDATA doc = view()->note();
-            CWizDatabase& db = m_dbMgr.db(doc.strKbGUID);
-            WIZDOCUMENTATTACHMENTDATA data;
-            data.strKbGUID = doc.strKbGUID; // needed by under layer
-            if (!db.AddAttachment(doc, strFileName, data))
+            //paste image file as images, add attachment for other file
+            QString strFileName = url.toString();
+            QImageReader reader(strFileName);
+            if (reader.canRead())
             {
-                TOLOG1("[drop] add attachment failed %1", strFileName);
-                continue;
+                QString strHtml;
+                if (image2Html(strFileName, strHtml)) {
+                    editorCommandExecuteInsertHtml(strHtml, true);
+                    nAccepted++;
+                }
             }
-            nAccepted ++;
+            else
+            {
+                WIZDOCUMENTDATA doc = view()->note();
+                CWizDatabase& db = m_dbMgr.db(doc.strKbGUID);
+                WIZDOCUMENTATTACHMENTDATA data;
+                data.strKbGUID = doc.strKbGUID; // needed by under layer
+                if (!db.AddAttachment(doc, strFileName, data))
+                {
+                    TOLOG1("[drop] add attachment failed %1", strFileName);
+                    continue;
+                }
+                nAccepted ++;
+            }
         }
     }
+    else if (mimeData->hasFormat(WIZNOTE_MIMEFORMAT_DOCUMENTS))
+    {
+        qDebug() << "dropEvent  3";
+        QString strData(mimeData->data(WIZNOTE_MIMEFORMAT_DOCUMENTS));
+        qDebug() << strData;
+        if (!strData.isEmpty())
+            nAccepted ++;
+        qDebug() << "dropEvent  4";
+    }
 
-    if (nAccepted == li.size()) {
+    qDebug() << "dropEvent  5";
+    if (nAccepted > 0) {
         event->accept();
+        qDebug() << "dropEvent  6";
         saveDocument(view()->note(), false);
     }
+    qDebug() << "dropEvent  71";
 }
 
 CWizDocumentView* CWizDocumentWebView::view()
