@@ -1266,6 +1266,9 @@ void CWizCategoryViewGroupNoTagItem::getDocuments(CWizDatabase& db,
 
 bool CWizCategoryViewGroupNoTagItem::accept(CWizDatabase& db, const WIZDOCUMENTDATA& data)
 {
+    if (kbGUID() != data.strKbGUID)
+        return false;
+
     if (db.IsInDeletedItems(data.strLocation))
         return false;
 

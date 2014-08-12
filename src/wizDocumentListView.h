@@ -87,6 +87,8 @@ private:
     int m_vscrollCurrent;
 //#endif // Q_OS_MAC
 
+    bool m_itemSelectionChanged;
+
     QPointer<QPropertyAnimation> m_scrollAnimation;
 
     QAction* findAction(const QString& strName);

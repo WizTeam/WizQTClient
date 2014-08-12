@@ -425,6 +425,8 @@ public:
     void CopyDocumentsLink(const QList<WIZDOCUMENTDATA>& documents);
     QString DocumentToWizKMURL(const WIZDOCUMENTDATA& document);
     QString GetParamFromWizKMURL(const QString& strURL, const QString& strParamName);
+    void DocumentToHtmlLink(const WIZDOCUMENTDATA& document, QString& strHtml, QString& strLink);
+    void DocumentsToHtmlLink(const QList<WIZDOCUMENTDATA>& documents, QString& strHtml, QString &strLink);
 
 public:
     Q_INVOKABLE QObject* GetDeletedItemsFolder();

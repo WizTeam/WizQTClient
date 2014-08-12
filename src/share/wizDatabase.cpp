@@ -3163,23 +3163,10 @@ bool CWizDatabase::loadUserCert()
     return true;
 }
 
-//
-void documentToHtmlLink(CWizDatabase& db, const WIZDOCUMENTDATA& document,
-                        QString& strHtml, QString& strLink)
-{
-    strLink = db.DocumentToWizKMURL(document);
-    QString strTitle = document.strTitle;
-    strTitle.replace(_T("<"), _T("&lt;"));
-    strTitle.replace(_T(">"), _T("&gt;"));
-    strTitle.replace(_T("&"), _T("&amp;"));
-    //
-    strHtml = WizFormatString2(_T("<a href=\"%1\">%2</a>"), strLink, strTitle);
-}
-
 void CWizDatabase::CopyDocumentLink(const WIZDOCUMENTDATA& document)
 {
     QString strHtml, strLink;
-    documentToHtmlLink(*this, document, strHtml, strLink);
+    DocumentToHtmlLink(document, strHtml, strLink);
     //
     QClipboard* clip = QApplication::clipboard();
 
@@ -3192,13 +3179,7 @@ void CWizDatabase::CopyDocumentLink(const WIZDOCUMENTDATA& document)
 void CWizDatabase::CopyDocumentsLink(const QList<WIZDOCUMENTDATA>& documents)
 {
     QString strHtml, strLink;
-    for (int i = 0; i < documents.count(); i++)
-    {
-        QString strOneHtml, strOneLink;
-        documentToHtmlLink(*this, documents.at(i), strOneHtml, strOneLink);
-        strHtml += strOneHtml + "<br>";
-        strLink += strOneLink + "\n";
-    }
+    DocumentsToHtmlLink(documents, strHtml, strLink);
 
     QMimeData* data = new QMimeData();
     data->setHtml(strHtml);
@@ -3239,6 +3220,28 @@ QString CWizDatabase::GetParamFromWizKMURL(const QString& strURL, const QString&
     }
 
     return QString();
+}
+
+void CWizDatabase::DocumentToHtmlLink(const WIZDOCUMENTDATA& document, QString& strHtml, QString& strLink)
+{
+    strLink = DocumentToWizKMURL(document);
+    QString strTitle = document.strTitle;
+    strTitle.replace(_T("<"), _T("&lt;"));
+    strTitle.replace(_T(">"), _T("&gt;"));
+    strTitle.replace(_T("&"), _T("&amp;"));
+    //
+    strHtml = WizFormatString2(_T("<a href=\"%1\">%2</a>"), strLink, strTitle);
+}
+
+void CWizDatabase::DocumentsToHtmlLink(const QList<WIZDOCUMENTDATA>& documents, QString& strHtml, QString& strLink)
+{
+    for (int i = 0; i < documents.count(); i++)
+    {
+        QString strOneHtml, strOneLink;
+        DocumentToHtmlLink(documents.at(i), strOneHtml, strOneLink);
+        strHtml += strOneHtml + "<br>";
+        strLink += strOneLink + "\n";
+    }
 }
 
 bool CWizDatabase::DocumentToTempHtmlFile(const WIZDOCUMENTDATA& document,

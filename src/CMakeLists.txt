@@ -355,8 +355,8 @@ if(UNIX)
         endif()
 
         if(NOT APPSTORE_BUILD)
-            add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-                COMMAND ${qt_binary_dir}/macdeployqt ${WIZNOTE_ROOT_DIR})
+       #     add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+       #         COMMAND ${qt_binary_dir}/macdeployqt ${WIZNOTE_ROOT_DIR})
         endif()
 
     elseif(NOT APPLE)

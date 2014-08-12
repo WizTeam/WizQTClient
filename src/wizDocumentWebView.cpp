@@ -390,12 +390,8 @@ void CWizDocumentWebView::contextMenuEvent(QContextMenuEvent *event)
 
 void CWizDocumentWebView::dragEnterEvent(QDragEnterEvent *event)
 {
-    qDebug() << "dragEnterEvent  1";
-
     if (!isEditing())
         return;
-
-    qDebug() << "dragEnterEvent  2";
 
     int nAccepted = 0;
     if (event->mimeData()->hasUrls()) {
@@ -410,34 +406,23 @@ void CWizDocumentWebView::dragEnterEvent(QDragEnterEvent *event)
 
         if (nAccepted == li.size()) {
             event->acceptProposedAction();
-            qDebug() << "dragEnterEvent  8";
         }
     } else if (event->mimeData()->hasFormat(WIZNOTE_MIMEFORMAT_DOCUMENTS)) {
-        qDebug() << "dragEnterEvent  3";
         if (!event->mimeData()->data(WIZNOTE_MIMEFORMAT_DOCUMENTS).isEmpty()) {
-            qDebug() << "dragEnterEvent  4" << event->mimeData()->data(WIZNOTE_MIMEFORMAT_DOCUMENTS);
             setFocus();
             event->acceptProposedAction();
-            QEventLoop loop;
-            QTimer::singleShot(300, &loop, SLOT(quit()));
-            loop.exec();
         }
-        qDebug() << "dragEnterEvent  5";
     }
-    qDebug() << "dragEnterEvent  6";
 }
 
-void CWizDocumentWebView::dragMoveEvent(QDragEnterEvent* event)
+void CWizDocumentWebView::dragMoveEvent(QDragMoveEvent* event)
 {
     if (event->mimeData()->hasFormat(WIZNOTE_MIMEFORMAT_DOCUMENTS)) {
-            qDebug() << "dragMoveEvent  3";
             if (!event->mimeData()->data(WIZNOTE_MIMEFORMAT_DOCUMENTS).isEmpty()) {
-                qDebug() << "dragMoveEvent  4";
                 setFocus();
                 event->acceptProposedAction();
             }
-            qDebug() << "dragMoveEvent  5";
-        }
+    }
 }
 
 void CWizDocumentWebView::onActionTriggered(QWebPage::WebAction act)
@@ -509,19 +494,15 @@ bool CWizDocumentWebView::image2Html(const QString& strImageFile, QString& strHt
 
 void CWizDocumentWebView::dropEvent(QDropEvent* event)
 {
-    qDebug() << "dropEvent  1";
     int nAccepted = 0;
     const QMimeData* mimeData = event->mimeData();
     if (mimeData->hasUrls())
     {
-        qDebug() << "dropEvent  2";
         QList<QUrl> li = mimeData->urls();
         QList<QUrl>::const_iterator it;
         for (it = li.begin(); it != li.end(); it++) {
             QUrl url = *it;
             url.setScheme(0);
-
-            qDebug() << "[Editor] drop: " << url.toString();
 
             //paste image file as images, add attachment for other file
             QString strFileName = url.toString();
@@ -551,21 +532,36 @@ void CWizDocumentWebView::dropEvent(QDropEvent* event)
     }
     else if (mimeData->hasFormat(WIZNOTE_MIMEFORMAT_DOCUMENTS))
     {
-        qDebug() << "dropEvent  3";
         QString strData(mimeData->data(WIZNOTE_MIMEFORMAT_DOCUMENTS));
-        qDebug() << strData;
         if (!strData.isEmpty())
+        {
+            QString strLinkHtml;
+            QStringList doclist = strData.split(';');
+            foreach (QString doc, doclist) {
+                QStringList docIds = doc.split(':');
+                if (docIds.count() == 2)
+                {
+                    WIZDOCUMENTDATA document;
+                    CWizDatabase& db = m_dbMgr.db(docIds.first());
+                    if (db.DocumentFromGUID(docIds.last(), document))
+                    {
+                        QString strHtml, strLink;
+                        db.DocumentToHtmlLink(document, strHtml, strLink);
+                        strLinkHtml += "<p>" + strHtml + "</p>";
+                    }
+                }
+            }
+
+            editorCommandExecuteInsertHtml(strLinkHtml, false);
+
             nAccepted ++;
-        qDebug() << "dropEvent  4";
+        }
     }
 
-    qDebug() << "dropEvent  5";
     if (nAccepted > 0) {
         event->accept();
-        qDebug() << "dropEvent  6";
         saveDocument(view()->note(), false);
     }
-    qDebug() << "dropEvent  71";
 }
 
 CWizDocumentView* CWizDocumentWebView::view()
@@ -1303,12 +1299,14 @@ void CWizDocumentWebView::replaceAndFindNext(QString strSource, QString strTarge
         return;
     }
     findNext(strSource, bCasesensitive);
+    setContentsChanged(true);
 }
 
 void CWizDocumentWebView::replaceAll(QString strSource, QString strTarget, bool bCasesensitive)
 {
     QString strExec = QString("WizRepalceAll('%1', '%2', %3)").arg(strSource).arg(strTarget).arg(bCasesensitive);
     page()->mainFrame()->evaluateJavaScript(strExec);
+    setContentsChanged(true);
 }
 
 bool CWizDocumentWebView::editorCommandExecuteFontFamily(const QString& strFamily)

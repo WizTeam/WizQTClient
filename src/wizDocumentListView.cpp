@@ -41,6 +41,7 @@ CWizDocumentListView::CWizDocumentListView(CWizExplorerApp& app, QWidget *parent
     , m_app(app)
     , m_dbMgr(app.databaseManager())
     , m_tagList(NULL)
+    , m_itemSelectionChanged(false)
 {
     setFrameStyle(QFrame::NoFrame);
     setAttribute(Qt::WA_MacShowFocusRect, false);
@@ -445,27 +446,10 @@ void CWizDocumentListView::mouseMoveEvent(QMouseEvent* event)
 void CWizDocumentListView::mouseReleaseEvent(QMouseEvent* event)
 {
     //
-    int nMargin = 2;
-    QRect rect = QRect(event->pos().x() - nMargin, event->pos().y() - nMargin,
-                       2 * nMargin, 2 * nMargin);
-    if (rect.contains(m_dragStartPosition))
+    if (m_itemSelectionChanged)
     {
-        QListWidgetItem *pressedItem = itemAt(event->pos());
-        if (pressedItem)
-        {
-            if (event->modifiers() == Qt::ControlModifier || event->modifiers() == Qt::ShiftModifier)
-            {
-            }
-            else
-            {
-                QList<QListWidgetItem*> Items =  selectedItems();
-                foreach (QListWidgetItem *selectedItem, Items) {
-                    selectedItem->setSelected(false);
-                }
-            }
-            pressedItem->setSelected(true);
-            emit documentsSelectionChanged();
-        }
+        emit documentsSelectionChanged();
+        m_itemSelectionChanged = false;
     }
 
     QListWidget::mouseReleaseEvent(event);
@@ -659,6 +643,7 @@ void CWizDocumentListView::resetItemsSortingType(int type)
 void CWizDocumentListView::on_itemSelectionChanged()
 {
     //resetPermission();
+    m_itemSelectionChanged = true;
 }
 
 void CWizDocumentListView::on_tag_created(const WIZTAGDATA& tag)
