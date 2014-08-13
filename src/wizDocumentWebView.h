@@ -169,7 +169,6 @@ public:
     //
     Q_INVOKABLE bool isContentsChanged() { return m_bContentsChanged; }
     Q_INVOKABLE void setContentsChanged(bool b) { m_bContentsChanged = b; }
-    void setContentText(const QString& strText);
 
     //use undo func provied by editor
     void undo();

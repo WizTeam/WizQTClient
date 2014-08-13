@@ -261,6 +261,7 @@ public:
     void updateGroupTagDocumentCount(const QString &strKbGUID);
 
     bool createDocument(WIZDOCUMENTDATA& data);
+    bool createDocument(WIZDOCUMENTDATA& data, const QString& strHtml, const QString& strTitle = "New note");
     //
     void createGroup();
     void viewPersonalGroupInfo(const QString& groupGUID);

@@ -1647,31 +1647,6 @@ bool CWizDocumentWebView::findIMGElementAt(QPoint point, QString& strSrc)
     return true;
 }
 
-void CWizDocumentWebView::setContentText(const QString& strText)
-{
-    QString copyText = strText;
-    copyText.replace(" ", "åßç∂");
-    QTextDocument document(copyText);
-    QString strHtml = document.toHtml();
-
-    QRegExp regBodyContant("<body[^>]*>[\\s\\S]*</body>");
-    int index = regBodyContant.indexIn(strHtml);
-    if (index > -1)
-    {
-        strHtml = regBodyContant.cap(0);
-
-        QRegExp regBody = QRegExp("</?body[^>]*>", Qt::CaseInsensitive);
-        strHtml.replace(regBody, "");
-    }
-
-    strHtml.replace("åßç∂", "&nbsp;");
-    m_strCurrentNoteHtml = strHtml;
-    QString strExec = QString("viewCurrentNote();");
-    page()->mainFrame()->evaluateJavaScript(strExec);
-
-    setContentsChanged(true);
-}
-
 void CWizDocumentWebView::undo()
 {
     page()->mainFrame()->evaluateJavaScript("editor.execCommand('undo')");

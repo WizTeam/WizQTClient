@@ -897,7 +897,7 @@ void CWizCategoryView::showGroupContextMenu(QPoint pos)
     m_menuGroup->popup(pos);
 }
 
-bool CWizCategoryView::createDocument(WIZDOCUMENTDATA& data)
+bool CWizCategoryView::createDocument(WIZDOCUMENTDATA& data, const QString& strHtml, const QString& strTitle)
 {
     bool bFallback = true;
 
@@ -974,8 +974,18 @@ bool CWizCategoryView::createDocument(WIZDOCUMENTDATA& data)
         return false;
     }
 
+    QString strBody = strHtml;
+    QRegExp regBodyContant("<body[^>]*>[\\s\\S]*</body>");
+    int index = regBodyContant.indexIn(strBody);
+    if (index > -1)
+    {
+        strBody = regBodyContant.cap(0);
 
-    if (!m_dbMgr.db(strKbGUID).CreateDocumentAndInit("<p><br/></p>", "", 0, tr("New note"), "newnote", strLocation, "", data))
+        QRegExp regBody = QRegExp("</?body[^>]*>", Qt::CaseInsensitive);
+        strBody.replace(regBody, "");
+    }
+
+    if (!m_dbMgr.db(strKbGUID).CreateDocumentAndInit(strBody, "", 0, strTitle, "newnote", strLocation, "", data))
     {
         TOLOG("Failed to new document!");
         return false;
@@ -2062,6 +2072,11 @@ void CWizCategoryView::updatePrivateTagDocumentCount()
 void CWizCategoryView::updateGroupTagDocumentCount(const QString& strKbGUID)
 {
     Q_UNUSED (strKbGUID)
+}
+
+bool CWizCategoryView::createDocument(WIZDOCUMENTDATA& data)
+{
+    createDocument(data, "<p></br></br>");
 }
 
 void CWizCategoryView::on_updatePrivateTagDocumentCount_timeout()

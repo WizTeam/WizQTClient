@@ -2037,13 +2037,20 @@ void MainWindow::createNoteWithAttachments(const QStringList& strAttachList)
 
 void MainWindow::createNoteWithText(const QString& strText)
 {
-    on_actionNewNote_triggered();
-
-    QEventLoop loop;
-    connect(m_doc->web(), SIGNAL(viewDocumentFinished()), &loop, SLOT(quit()));
-    loop.exec();
-
-    m_doc->web()->setContentText(strText);
+    QString strHtml = strText;
+    QString strTitle = strHtml.left(strHtml.indexOf("\n"));
+    strTitle.length() > 200 ? (strTitle = strTitle.left(200)) : 0;
+    strHtml = "<div>" + strHtml + "</div>";
+    strHtml.replace("\n", "</br>");
+    WIZDOCUMENTDATA data;
+    if (!m_category->createDocument(data, strHtml, strTitle))
+    {
+        return;
+    }
+    m_documentForEditing = data;
+    m_documents->addAndSelectDocument(data);
+    m_doc->web()->setFocus(Qt::MouseFocusReason);
+    setActionsEnableForNewNote();
 }
 
 void MainWindow::initTrayIcon(QSystemTrayIcon* trayIcon)
