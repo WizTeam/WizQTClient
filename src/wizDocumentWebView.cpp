@@ -293,6 +293,12 @@ void CWizDocumentWebView::keyPressEvent(QKeyEvent* event)
         saveDocument(view()->note(), false);
         return;
     }
+    else if (event->key() == Qt::Key_A && event->modifiers() == Qt::ControlModifier && !isEditing())
+    {
+        //阅读模式下selectall无法触发，强制触发阅读模式下的selectall。
+        emit selectAllKeyPressed();
+        return;
+    }
     else if (event->key() == Qt::Key_Tab)
     {
         //set contentchanged
@@ -794,7 +800,7 @@ void CWizDocumentWebView::onEditorSelectionChanged()
     }
 #endif // Q_OS_MAC
 
-//    Q_EMIT statusChanged();
+    Q_EMIT statusChanged();
 }
 
 void CWizDocumentWebView::onEditorLinkClicked(const QUrl& url)

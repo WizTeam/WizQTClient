@@ -335,7 +335,7 @@ public Q_SLOTS:
 Q_SIGNALS:
     // signals for notify command reflect status, triggered when selection, focus, editing mode changed
     void statusChanged();
-
+    void selectAllKeyPressed();
     // signals used request reset info toolbar and editor toolbar
     void focusIn();
     void focusOut();

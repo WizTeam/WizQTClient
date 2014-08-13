@@ -144,6 +144,7 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
         SLOT(on_searchProcess(const QString&, const CWizDocumentDataArray&, bool)));
 
     connect(m_doc, SIGNAL(documentSaved(QString,CWizDocumentView*)), SIGNAL(documentSaved(QString,CWizDocumentView*)));
+    connect(m_doc->web(), SIGNAL(selectAllKeyPressed()), SLOT(on_actionEditingSelectAll_triggered()));
     connect(this, SIGNAL(documentSaved(QString,CWizDocumentView*)), m_doc, SLOT(on_document_data_saved(QString,CWizDocumentView*)));
 
     // misc settings
@@ -493,7 +494,7 @@ void MainWindow::on_editor_statusChanged()
 {
     CWizDocumentWebView* editor = m_doc->web();
 
-    if (!editor->isInited() || !editor->isEditing() || !editor->hasFocus()) {
+    if (!editor->isInited() || !editor->hasFocus()) {
         m_actions->actionFromName(WIZACTION_EDITOR_UNDO)->setEnabled(false);
         m_actions->actionFromName(WIZACTION_EDITOR_REDO)->setEnabled(false);
         m_actions->actionFromName(WIZACTION_EDITOR_CUT)->setEnabled(false);
@@ -1246,7 +1247,6 @@ void MainWindow::on_actionEditingRedo_triggered()
 
 void MainWindow::on_actionEditingCut_triggered()
 {
-    qDebug() << "actionEditingCut called";
     m_doc->web()->triggerPageAction(QWebPage::Cut);
 }
 
