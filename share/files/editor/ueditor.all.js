@@ -13716,7 +13716,7 @@ UE.plugins['paste'] = function () {
                 UE.filterNode(root, me.options.filterRules);
             }
             //执行默认的处理
-            me.filterInputRule(root);
+            //me.filterInputRule(root);
             //针对chrome的处理
             if (browser.webkit) {
                 var br = root.lastChild();
