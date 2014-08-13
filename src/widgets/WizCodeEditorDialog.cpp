@@ -136,7 +136,7 @@ void WizCodeEditorDialog::onButtonCancleClicked()
 void WizCodeEditorDialog::initCodeTypeCombox()
 {
     QStringList strList;
-    strList << "c" << "cpp" << "java" << "js" << "perl" << "sh" << "py" << "Basic" << "CSS" << "Go" << "xml" << "html" << "Lua" << "Pascal" << "SQL" << "Visual Basic"
+    strList << "c" << "cpp" << "java" << "js" << "perl" << "sh" << "py" << "Basic" << "CSS" << "Go" << "Lua" << "Pascal" << "SQL" << "Visual Basic"
                "htm" << "cc" << "bsh" << "cs" << "csh" << "cyc" << "cv" << "m" << "mxml" <<
                "pl" << "pm" << "rb" << "xhtml" << "xsl" << "Apollo" <<  "Clojure" << "Dart" << "Erlang" <<
                "Haskell" << "Lisp" << "Scheme" << "Llvm" << "Matlab" <<  "Mumps" << "Nemerle" <<
