@@ -2039,9 +2039,17 @@ void MainWindow::createNoteWithText(const QString& strText)
 {
     QString strHtml = strText;
     QString strTitle = strHtml.left(strHtml.indexOf("\n"));
-    strTitle.length() > 200 ? (strTitle = strTitle.left(200)) : 0;
+    if (strTitle.isEmpty())
+    {
+        strTitle = "New note";
+    }
+    else if (strTitle.length() > 200)
+    {
+        strTitle = strTitle.left(200);
+    }
     strHtml = "<div>" + strHtml + "</div>";
-    strHtml.replace("\n", "</br>");
+    strHtml.replace(" ", "&nbsp;");
+    strHtml.replace("\n", "<br />");
     WIZDOCUMENTDATA data;
     if (!m_category->createDocument(data, strHtml, strTitle))
     {

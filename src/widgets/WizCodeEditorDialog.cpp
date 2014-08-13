@@ -106,8 +106,9 @@ void WizCodeEditorDialog::renderCodeToHtml()
 {
     QWebFrame *frame = m_codeBrowser->page()->mainFrame();
     QString codeText = m_codeEditor->toPlainText();//->page()->mainFrame()->toHtml();
+    codeText = codeText.toHtmlEscaped();
     codeText.replace(" ", "åß∂ƒ");
-    codeText.replace("\n", "<br>");
+    codeText.replace("\n", "<br />");
 
     m_codeBrowser->setUpdatesEnabled(false);
     frame->setHtml(QString("<p>``` %1</p>%2<p>```</p>").arg(m_codeType->currentText()).
@@ -137,7 +138,7 @@ void WizCodeEditorDialog::initCodeTypeCombox()
 {
     QStringList strList;
     strList << "c" << "cpp" << "java" << "js" << "perl" << "sh" << "py" << "Basic" << "CSS" << "Go" << "Lua" << "Pascal" << "SQL" << "Visual Basic"
-               "htm" << "cc" << "bsh" << "cs" << "csh" << "cyc" << "cv" << "m" << "mxml" <<
+               "htm" << "cc" << "bsh" << "cs" << "csh" << "cyc" << "cv" << "m" << "mxml" << "html" << "xml"
                "pl" << "pm" << "rb" << "xhtml" << "xsl" << "Apollo" <<  "Clojure" << "Dart" << "Erlang" <<
                "Haskell" << "Lisp" << "Scheme" << "Llvm" << "Matlab" <<  "Mumps" << "Nemerle" <<
                "Protocol buffers" << "R, S" << "RD" << "Scala" << "TCL" << "Latek" << "CHDL" << "Wiki" << "XQ" << "YAML";

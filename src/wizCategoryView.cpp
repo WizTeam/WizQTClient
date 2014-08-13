@@ -974,17 +974,7 @@ bool CWizCategoryView::createDocument(WIZDOCUMENTDATA& data, const QString& strH
         return false;
     }
 
-    QString strBody = strHtml;
-    QRegExp regBodyContant("<body[^>]*>[\\s\\S]*</body>");
-    int index = regBodyContant.indexIn(strBody);
-    if (index > -1)
-    {
-        strBody = regBodyContant.cap(0);
-
-        QRegExp regBody = QRegExp("</?body[^>]*>", Qt::CaseInsensitive);
-        strBody.replace(regBody, "");
-    }
-
+    QString strBody = WizGetHtmlBodyContent(strHtml);
     if (!m_dbMgr.db(strKbGUID).CreateDocumentAndInit(strBody, "", 0, strTitle, "newnote", strLocation, "", data))
     {
         TOLOG("Failed to new document!");
@@ -2076,7 +2066,7 @@ void CWizCategoryView::updateGroupTagDocumentCount(const QString& strKbGUID)
 
 bool CWizCategoryView::createDocument(WIZDOCUMENTDATA& data)
 {
-    createDocument(data, "<p></br></br>");
+    return createDocument(data, "<p><br/></p>");
 }
 
 void CWizCategoryView::on_updatePrivateTagDocumentCount_timeout()

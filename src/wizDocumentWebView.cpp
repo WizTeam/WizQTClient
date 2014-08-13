@@ -118,18 +118,7 @@ bool getBodyContentFromHtml(QString& strHtml, bool bNeedTextParse)
             }
         }
 
-        QRegExp regBodyContant("<body[^>]*>[\\s\\S]*</body>");
-        int index = regBodyContant.indexIn(strHtml);
-        if (index > -1)
-        {
-            QString strBody = regBodyContant.cap(0);
-            if (strBody.isEmpty())
-                return false;
-
-            QRegExp regBody = QRegExp("</?body[^>]*>", Qt::CaseInsensitive);
-            strBody.replace(regBody, "");
-            strHtml = strBody;
-        }
+        strHtml = WizGetHtmlBodyContent(strHtml);
     }
 
     return true;
