@@ -38,7 +38,8 @@ WIZACTION* CWizActions::actionsData()
         {"actionList", QObject::tr("List")},
         {"actionTable", QObject::tr("Table")},
         {"actionLink", QObject::tr("Link")},
-        {"actionStyle", QObject::tr("Style")}
+        {"actionStyle", QObject::tr("Style")},
+        {"actionInsert", QObject::tr("Insert")}
     };
 
     Q_UNUSED(arrayRoot);
@@ -102,6 +103,7 @@ WIZACTION* CWizActions::actionsData()
         {WIZACTION_FORMAT_INSERT_CHECKLIST,      QObject::tr("Insert check list"), "", "Ctrl+O"},
         {WIZACTION_FORMAT_INSERT_CODE,                QObject::tr("Insert Code"), "", ""},
         {WIZACTION_FORMAT_REMOVE_FORMAT,        QObject::tr("Remove format"), "", ""},
+        {WIZACTION_FORMAT_PLAINTEXT,        QObject::tr("Convert to plain text"), "", ""},
         {WIZACTION_FORMAT_VIEW_SOURCE,          QObject::tr("View html source..."), "", ""},
 
         {"", "", "", ""}

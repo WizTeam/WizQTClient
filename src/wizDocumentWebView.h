@@ -317,6 +317,7 @@ public Q_SLOTS:
     bool editorCommandExecuteInsertDate();
     bool editorCommandExecuteInsertTime();
     bool editorCommandExecuteRemoveFormat();
+    bool editorCommandExecutePlainText();
     bool editorCommandExecuteFormatMatch();
     bool editorCommandExecuteInsertHorizontal();
     bool editorCommandExecuteInsertCheckList();

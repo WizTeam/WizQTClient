@@ -523,6 +523,7 @@ void MainWindow::on_editor_statusChanged()
         m_actions->actionFromName(WIZACTION_FORMAT_INSERT_CHECKLIST)->setEnabled(false);
         m_actions->actionFromName(WIZACTION_FORMAT_INSERT_CODE)->setEnabled(false);
         m_actions->actionFromName(WIZACTION_FORMAT_REMOVE_FORMAT)->setEnabled(false);
+        m_actions->actionFromName(WIZACTION_FORMAT_PLAINTEXT)->setEnabled(false);
         m_actions->actionFromName(WIZACTION_FORMAT_VIEW_SOURCE)->setEnabled(false);
 
         return;
@@ -661,6 +662,12 @@ void MainWindow::on_editor_statusChanged()
         m_actions->actionFromName(WIZACTION_FORMAT_REMOVE_FORMAT)->setEnabled(false);
     } else {
         m_actions->actionFromName(WIZACTION_FORMAT_REMOVE_FORMAT)->setEnabled(true);
+    }
+
+    if (-1 ==editor->editorCommandQueryCommandState("plaintext")) {
+        m_actions->actionFromName(WIZACTION_FORMAT_PLAINTEXT)->setEnabled(false);
+    } else {
+        m_actions->actionFromName(WIZACTION_FORMAT_PLAINTEXT)->setEnabled(true);
     }
 
     if (-1 ==editor->editorCommandQueryCommandState("source")) {
@@ -1403,6 +1410,11 @@ void MainWindow::on_actionFormatRemoveFormat_triggered()
     m_doc->web()->editorCommandExecuteRemoveFormat();
 }
 
+void MainWindow::on_actionFormatPlainText_triggered()
+{
+    m_doc->web()->editorCommandExecutePlainText();
+}
+
 void MainWindow::on_actionEditorViewSource_triggered()
 {
     m_doc->web()->editorCommandExecuteViewSource();
@@ -1998,6 +2010,7 @@ void MainWindow::setActionsEnableForNewNote()
     m_actions->actionFromName(WIZACTION_FORMAT_INSERT_CHECKLIST)->setEnabled(true);
     m_actions->actionFromName(WIZACTION_FORMAT_INSERT_CODE)->setEnabled(true);
     m_actions->actionFromName(WIZACTION_FORMAT_REMOVE_FORMAT)->setEnabled(true);
+    m_actions->actionFromName(WIZACTION_FORMAT_PLAINTEXT)->setEnabled(true);
     m_actions->actionFromName(WIZACTION_FORMAT_VIEW_SOURCE)->setEnabled(true);
 }
 
@@ -2037,7 +2050,7 @@ void MainWindow::createNoteWithAttachments(const QStringList& strAttachList)
 
 void MainWindow::createNoteWithText(const QString& strText)
 {
-    QString strHtml = strText;
+    QString strHtml = strText.toHtmlEscaped();
     QString strTitle = strHtml.left(strHtml.indexOf("\n"));
     if (strTitle.isEmpty())
     {

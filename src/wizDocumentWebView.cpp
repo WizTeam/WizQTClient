@@ -1481,6 +1481,21 @@ bool CWizDocumentWebView::editorCommandExecuteRemoveFormat()
     return editorCommandExecuteCommand("removeFormat");
 }
 
+bool CWizDocumentWebView::editorCommandExecutePlainText()
+{
+    QString strText = page()->mainFrame()->evaluateJavaScript("editor.getPlainTxt()").toString();
+    QRegExp exp("<[^>]*>");
+    strText.replace(exp, "");
+    strText = "<div>" + strText.toHtmlEscaped() + "</div>";
+    strText.replace(" ", "&nbsp;");
+    strText.replace("\n", "<br />");
+
+    setContentsChanged(true);
+    m_strCurrentNoteHtml = strText;
+    QString strExec = QString("viewCurrentNote();");
+    return page()->mainFrame()->evaluateJavaScript(strExec).toBool();
+}
+
 bool CWizDocumentWebView::editorCommandExecuteFormatMatch()
 {
     return editorCommandExecuteCommand("formatMatch");

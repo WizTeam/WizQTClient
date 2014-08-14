@@ -101,7 +101,6 @@ void WizCodeEditorDialog::setCode(const QString& strCode)
     }
 }
 
-
 void WizCodeEditorDialog::renderCodeToHtml()
 {
     QWebFrame *frame = m_codeBrowser->page()->mainFrame();

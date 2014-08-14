@@ -266,6 +266,7 @@ public Q_SLOTS:
     void on_actionFormatInsertDate_triggered();
     void on_actionFormatInsertTime_triggered();
     void on_actionFormatRemoveFormat_triggered();
+    void on_actionFormatPlainText_triggered();
     void on_actionEditorViewSource_triggered();
     void on_actionFormatInsertCheckList_triggered();
     void on_actionFormatInsertCode_triggered();
