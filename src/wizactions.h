@@ -48,6 +48,7 @@ struct WIZACTION;
 #define WIZACTION_FORMAT_VIEW_SOURCE        "actionEditorViewSource"
 #define WIZACTION_FORMAT_INSERT_CHECKLIST    "actionFormatInsertCheckList"
 #define WIZACTION_FORMAT_INSERT_CODE            "actionFormatInsertCode"
+#define WIZACTION_FORMAT_INSERT_IMAGE            "actionFormatInsertImage"
 
 class CWizActions
 {
