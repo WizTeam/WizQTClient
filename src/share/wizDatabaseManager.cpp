@@ -282,6 +282,9 @@ void CWizDatabaseManager::initSignals(CWizDatabase* db)
     connect(db, SIGNAL(documentAbstractModified(const WIZDOCUMENTDATA&)),
             SIGNAL(documentAbstractModified(const WIZDOCUMENTDATA&)));
 
+    connect(db,SIGNAL(groupDocumentUnreadCountModified(QString)),
+            SIGNAL(groupDocumentUnreadCountModified(QString)));
+
     connect(db, SIGNAL(attachmentCreated(const WIZDOCUMENTATTACHMENTDATA&)),
             SIGNAL(attachmentCreated(const WIZDOCUMENTATTACHMENTDATA&)));
     connect(db, SIGNAL(attachmentModified(const WIZDOCUMENTATTACHMENTDATA&, const WIZDOCUMENTATTACHMENTDATA&)),

@@ -496,7 +496,8 @@ void MessageListView::mousePressEvent(QMouseEvent* event)
         {
             foreach (QListWidgetItem* lsItem, selectedItems())
             {
-                if (pItem = dynamic_cast<MessageListViewItem*>(lsItem))
+                pItem = dynamic_cast<MessageListViewItem*>(lsItem);
+                if (pItem)
                 {
                     m_rightButtonFocusedItems.append(pItem);
                     pItem->setSpecialFocused(true);

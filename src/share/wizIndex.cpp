@@ -674,16 +674,22 @@ bool CWizIndex::ModifyDocumentDateAccessed(WIZDOCUMENTDATA& data)
 
 bool CWizIndex::ModifyDocumentReadCount(const WIZDOCUMENTDATA& data)
 {
+    WIZDOCUMENTDATA dataOld;
+    DocumentFromGUID(data.strGUID, dataOld);
+
 	CString strSQL;
 	strSQL.Format(_T("update WIZ_DOCUMENT set DOCUMENT_READ_COUNT=%d where DOCUMENT_GUID=%s"),
 		data.nReadCount,
         STR2SQL(data.strGUID).utf16()
         );
 
-	if (!ExecSQL(strSQL))
-        return false;
+    bool ret = ExecSQL(strSQL);
 
-    return true;
+    WIZDOCUMENTDATA dataNew;
+    DocumentFromGUID(data.strGUID, dataNew);
+
+    emit documentModified(dataOld, dataNew);
+    return ret;
 }
 
 bool CWizIndex::DeleteDocument(const WIZDOCUMENTDATA& data, bool bLog)
@@ -846,6 +852,7 @@ void CWizIndex::setGroupDocumentsReaded()
 {
     CString strSQL = WizFormatString0("update WIZ_DOCUMENT set DOCUMENT_READ_COUNT=1 where DOCUMENT_READ_COUNT=0");
     ExecSQL(strSQL);
+    emit groupDocumentUnreadCountModified(kbGUID());
 }
 
 CString CWizIndex::KbGUIDToSQL()

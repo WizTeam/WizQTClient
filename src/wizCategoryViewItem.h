@@ -231,7 +231,6 @@ public:
 
 class CWizCategoryViewBizGroupRootItem : public CWizCategoryViewGroupsRootItem
 {
-    WIZBIZDATA m_biz;
 public:
     CWizCategoryViewBizGroupRootItem(CWizExplorerApp& app,
                                      const WIZBIZDATA& biz);
@@ -239,11 +238,27 @@ public:
     virtual void showContextMenu(CWizCategoryBaseView* pCtrl, QPoint pos);
     //
     const WIZBIZDATA biz() const { return m_biz; }
-    virtual int getSortOrder() const { return 30; }
+    virtual int getSortOrder() const { return 30; }    
+    //
+    virtual void getDocuments(CWizDatabase& db, CWizDocumentDataArray& arrayDocument);
+    virtual void draw(QPainter* p, const QStyleOptionViewItemV4* vopt) const;
+    //
+    bool isExtraButtonUseable();
+    bool isUnreadButtonUseable() const;
+    void updateUnreadCount();
+    QString unreadString() const;
+    bool hitTestUnread();
     //
     bool isOwner();
     bool isAdmin();
     bool isHr();
+
+
+private:
+    WIZBIZDATA m_biz;
+    int m_unReadCount;
+    QSize m_szUnreadSize;
+    bool m_extraButtonUseable;
 };
 class CWizCategoryViewOwnGroupRootItem : public CWizCategoryViewGroupsRootItem
 {
@@ -315,7 +330,8 @@ public:
     bool isBizGroup() const;
     QString bizGUID() const;
     //
-    void setUnread(int nCount);
+    void setUnreadCount(int nCount);
+    int getUnreadCount();
     QString unreadString() const;
     bool hitTestUnread();
 

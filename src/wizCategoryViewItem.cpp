@@ -921,6 +921,8 @@ CWizCategoryViewBizGroupRootItem::CWizCategoryViewBizGroupRootItem(CWizExplorerA
                                                                    const WIZBIZDATA& biz)
     : CWizCategoryViewGroupsRootItem(app, biz.bizName)
     , m_biz(biz)
+    , m_unReadCount(0)
+    , m_extraButtonUseable(false)
 {
     QIcon icon;
     icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "group_biz_normal"),
@@ -943,6 +945,165 @@ void CWizCategoryViewBizGroupRootItem::showContextMenu(CWizCategoryBaseView *pCt
             view->showAdminBizGroupRootContextMenu(pos, false);
         }
     }
+}
+
+void CWizCategoryViewBizGroupRootItem::getDocuments(CWizDatabase& db, CWizDocumentDataArray& arrayDocument)
+{
+    if (isUnreadButtonUseable() && hitTestUnread())
+    {
+        for (int i = 0; i < childCount(); i++)
+        {
+            CWizCategoryViewGroupRootItem* pGroup = dynamic_cast<CWizCategoryViewGroupRootItem*>(child(i));
+            Q_ASSERT(pGroup);
+            if (!pGroup)
+                return;
+
+            CWizDatabase& db = CWizDatabaseManager::instance()->db(pGroup->kbGUID());
+
+            CWizDocumentDataArray arrayDoc;
+            if (db.getGroupUnreadDocuments(arrayDoc))
+            {
+                db.setGroupDocumentsReaded();
+                arrayDocument.insert(arrayDocument.begin(), arrayDoc.begin(), arrayDoc.end());
+                pGroup->setUnreadCount(0);
+            }
+        }
+        updateUnreadCount();
+        m_extraButtonUseable = false;
+    }
+    else
+    {
+        CWizCategoryViewGroupsRootItem::getDocuments(db, arrayDocument);
+    }
+}
+
+void CWizCategoryViewBizGroupRootItem::draw(QPainter* p, const QStyleOptionViewItemV4* vopt) const
+{
+    if (isUnreadButtonUseable())
+    {
+        //
+        QString text = unreadString();
+        if (text.isEmpty())
+            return;
+
+        p->save();
+
+        QFont f;
+        Utils::StyleHelper::fontExtend(f);
+        p->setFont(f);
+        //
+        p->setRenderHint(QPainter::Antialiasing);
+
+        QRect rcRect = getExtraButtonRect(vopt->rect, true);
+        QRect rcb = QRect(rcRect.right() - m_szUnreadSize.width() + 1, rcRect.y() + (rcRect.height() - m_szUnreadSize.height())/2,
+                          m_szUnreadSize.width(), m_szUnreadSize.height());
+
+
+        if (vopt->state.testFlag(QStyle::State_Selected) && vopt->state.testFlag(QStyle::State_HasFocus))
+        {
+            p->setPen(Utils::StyleHelper::treeViewItemMessageText());
+            p->setBrush(Utils::StyleHelper::treeViewItemMessageText());
+            p->drawRoundedRect(rcb, rcb.height() / 2, rcb.height() / 2);
+            p->setPen(Utils::StyleHelper::treeViewItemMessageBackground());
+            p->drawText(rcb, Qt::AlignCenter, text);
+        }
+        else
+        {
+            p->setPen(Utils::StyleHelper::treeViewItemMessageBackground());
+            p->setBrush(Utils::StyleHelper::treeViewItemMessageBackground());
+            p->drawRoundedRect(rcb, rcb.height() / 2, rcb.height() / 2);
+            p->setPen(Utils::StyleHelper::treeViewItemMessageText());
+            p->drawText(rcb, Qt::AlignCenter, text);
+        }
+        //
+        p->restore();
+    }
+    else
+    {
+        CWizCategoryViewGroupsRootItem::draw(p, vopt);
+    }
+}
+
+bool CWizCategoryViewBizGroupRootItem::isExtraButtonUseable()
+{
+    return m_extraButtonUseable;
+}
+
+bool CWizCategoryViewBizGroupRootItem::isUnreadButtonUseable() const
+{
+    return (!isExpanded() && m_unReadCount > 0);
+}
+
+void CWizCategoryViewBizGroupRootItem::updateUnreadCount()
+{
+    m_unReadCount = 0;
+    int nChildCount = childCount();
+    for (int i = 0; i < nChildCount; i++)
+    {
+        CWizCategoryViewGroupRootItem* childItem = dynamic_cast<CWizCategoryViewGroupRootItem*>(child(i));
+        if (childItem)
+        {
+            m_unReadCount += childItem->getUnreadCount();
+        }
+    }
+
+    CWizCategoryBaseView* view = dynamic_cast<CWizCategoryBaseView*>(treeWidget());
+    if (m_unReadCount > 0)
+    {
+        //
+        QFont f;
+        Utils::StyleHelper::fontExtend(f);
+        QPainter p;
+        p.setFont(f);
+        //
+        QSize szText = p.fontMetrics().size(0, unreadString());
+        int textWidth = szText.width();
+        int textHeight = szText.height();
+        //
+        //int nMargin = textHeight / 4;
+        //
+        int nWidth = textWidth;
+        int nHeight = textHeight + 2;
+        if (nWidth < nHeight)
+            nWidth = nHeight;
+        //
+        Q_ASSERT(view);
+
+        // use parent height, group root could be unvisible
+        QRect rcIemBorder = view->visualItemRect(this);
+        QRect rcExtButton = getExtraButtonRect(rcIemBorder, true);
+        //
+        int nTop = rcIemBorder.y() + (rcIemBorder.height() - nHeight) / 2;
+        int nLeft = rcExtButton.right() - nWidth;
+        QRect rcb(nLeft, nTop, nWidth, nHeight);
+
+        m_szUnreadSize = rcb.size();
+    }
+
+    view->updateItem(this);
+    m_extraButtonUseable = (m_unReadCount == 0);
+}
+
+QString CWizCategoryViewBizGroupRootItem::unreadString() const
+{
+    return unreadNumToString(m_unReadCount);
+}
+
+bool CWizCategoryViewBizGroupRootItem::hitTestUnread()
+{
+    CWizCategoryBaseView* view = dynamic_cast<CWizCategoryBaseView*>(treeWidget());
+    Q_ASSERT(view);
+
+    QRect rcItem = view->visualItemRect(this);
+    QPoint pt = view->hitPoint();
+    //
+    int nMargin = 4;
+    QRect rcRect = getExtraButtonRect(rcItem, true);
+    QRect rcb = QRect(rcRect.right() - m_szUnreadSize.width() + 1, rcRect.y() + (rcRect.height() - m_szUnreadSize.height())/2,
+                      m_szUnreadSize.width(), m_szUnreadSize.height());
+    rcb.adjust(-nMargin, -nMargin, nMargin, nMargin);
+
+    return rcb.contains(pt);
 }
 
 bool CWizCategoryViewBizGroupRootItem::isOwner()
@@ -1038,7 +1199,7 @@ void CWizCategoryViewGroupRootItem::getDocuments(CWizDatabase& db, CWizDocumentD
     {
         db.getGroupUnreadDocuments(arrayDocument);
         db.setGroupDocumentsReaded();
-        setUnread(0);
+        setUnreadCount(0);
     }
     else
     {
@@ -1182,7 +1343,7 @@ QString CWizCategoryViewGroupRootItem::bizGUID() const
     return m_group.bizGUID;
 }
 
-void CWizCategoryViewGroupRootItem::setUnread(int nCount)
+void CWizCategoryViewGroupRootItem::setUnreadCount(int nCount)
 {
     m_nUnread = nCount;
     CWizCategoryBaseView* view = dynamic_cast<CWizCategoryBaseView*>(treeWidget());
@@ -1220,6 +1381,11 @@ void CWizCategoryViewGroupRootItem::setUnread(int nCount)
     }
 
     view->updateItem(this);
+}
+
+int CWizCategoryViewGroupRootItem::getUnreadCount()
+{
+    return m_nUnread;
 }
 
 QString CWizCategoryViewGroupRootItem::unreadString() const

@@ -64,6 +64,8 @@ public:
     bool isSpecialFocus() const;
     void setSpecialFocused(bool isSpecialFocus);
 
+    void updateDocumentUnreadCount();
+
 private:
     void draw_impl(QPainter* p, const QStyleOptionViewItemV4* vopt, int nItemType, int nViewType) const;
     void drawPrivateSummaryView_impl(QPainter* p, const QStyleOptionViewItemV4* vopt) const;
@@ -72,6 +74,8 @@ private:
     void drawGroupTwoLineView_impl(QPainter* p, const QStyleOptionViewItemV4* vopt) const;
     void drawOneLineView_impl(QPainter* p, const  QStyleOptionViewItemV4* vopt) const;
     void drawSyncStatus(QPainter* p, const QStyleOptionViewItemV4* vopt, int nViewType) const;
+
+    QRect drawItemBackground(QPainter* p, const QRect& rect, bool selected, bool focused) const;
 
 private:
     CWizExplorerApp& m_app;
@@ -86,7 +90,8 @@ private:
     bool isAvatarNeedUpdate(const QString& strFileName);
     bool isContainsAttachment() const;
 
-    bool m_bSpecialFocus;
+    bool m_specialFocused;
+    bool m_documentUnread;
 
 private Q_SLOTS:
     void on_thumbnailReloaded();

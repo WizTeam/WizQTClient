@@ -99,6 +99,8 @@ protected Q_SLOTS:
     virtual void on_document_deleted(const WIZDOCUMENTDATA& doc) { Q_UNUSED(doc); }
     virtual void on_document_tag_modified(const WIZDOCUMENTDATA& doc) { Q_UNUSED(doc); }
 
+    virtual void on_groupDocuments_unreadCount_modified(const QString& strKbGUID) {Q_UNUSED(strKbGUID);}
+
     virtual void on_folder_created(const QString& strLocation) { Q_UNUSED(strLocation); }
     virtual void on_folder_deleted(const QString& strLocation) { Q_UNUSED(strLocation); }
     virtual void on_folder_positionChanged() {}
@@ -261,7 +263,7 @@ public:
     void updateGroupTagDocumentCount(const QString &strKbGUID);
 
     bool createDocument(WIZDOCUMENTDATA& data);
-    bool createDocument(WIZDOCUMENTDATA& data, const QString& strHtml, const QString& strTitle = "New note");
+    bool createDocument(WIZDOCUMENTDATA& data, const QString& strHtml, const QString& strTitle);
     //
     void createGroup();
     void viewPersonalGroupInfo(const QString& groupGUID);
@@ -316,6 +318,7 @@ protected Q_SLOTS:
     virtual void on_group_renamed(const QString& strKbGUID);
     virtual void on_group_permissionChanged(const QString& strKbGUID);
     virtual void on_group_bizChanged(const QString& strKbGUID);
+    virtual void on_groupDocuments_unreadCount_modified(const QString& strKbGUID);
 
 public Q_SLOTS:
     void on_action_newDocument();

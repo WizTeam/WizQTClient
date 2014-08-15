@@ -122,6 +122,9 @@ CWizCategoryBaseView::CWizCategoryBaseView(CWizExplorerApp& app, QWidget* parent
     connect(&m_dbMgr, SIGNAL(documentTagModified(const WIZDOCUMENTDATA&)),
             SLOT(on_document_tag_modified(const WIZDOCUMENTDATA&)));
 
+    connect(&m_dbMgr, SIGNAL(groupDocumentUnreadCountModified(QString)),
+            SLOT(on_groupDocuments_unreadCount_modified(QString)));
+
     connect(&m_dbMgr, SIGNAL(folderCreated(const QString&)),
             SLOT(on_folder_created(const QString&)));
 
@@ -598,8 +601,8 @@ CWizCategoryView::CWizCategoryView(CWizExplorerApp& app, QWidget* parent)
 
     initMenus();
 
-    connect(this, SIGNAL(itemSelectionChanged()), SLOT(on_itemSelectionChanged()));
     connect(this, SIGNAL(itemClicked(QTreeWidgetItem*, int)), SLOT(on_itemClicked(QTreeWidgetItem *, int)));
+    connect(this, SIGNAL(itemSelectionChanged()), SLOT(on_itemSelectionChanged()));
 
     ExtensionSystem::PluginManager::addObject(this);
 }
@@ -1638,7 +1641,11 @@ void CWizCategoryView::on_itemClicked(QTreeWidgetItem *item, int column)
     }
     else if (CWizCategoryViewBizGroupRootItem* pItem = dynamic_cast<CWizCategoryViewBizGroupRootItem*>(item))
     {
-        if (pItem->extraButtonClickTest())
+        if (pItem->isUnreadButtonUseable() && pItem->isSelected())
+        {
+            emit itemSelectionChanged();
+        }
+        else if (pItem->isExtraButtonUseable() && pItem->extraButtonClickTest())
         {
             if (pItem->isHr())
             {
@@ -2039,7 +2046,16 @@ void CWizCategoryView::updateGroupFolderDocumentCount_impl(const QString &strKbG
     }
 
     //unread documents
-    pGroupRoot->setUnread(m_dbMgr.db(strKbGUID).getGroupUnreadDocumentCount());
+    pGroupRoot->setUnreadCount(m_dbMgr.db(strKbGUID).getGroupUnreadDocumentCount());
+
+    if (pGroupRoot->isBizGroup())
+    {
+        CWizCategoryViewBizGroupRootItem *bizRootItem = dynamic_cast<CWizCategoryViewBizGroupRootItem *>(pGroupRoot->parent());
+        if (bizRootItem)
+        {
+            bizRootItem->updateUnreadCount();
+        }
+    }
 
     update();
 }
@@ -2066,7 +2082,7 @@ void CWizCategoryView::updateGroupTagDocumentCount(const QString& strKbGUID)
 
 bool CWizCategoryView::createDocument(WIZDOCUMENTDATA& data)
 {
-    return createDocument(data, "<p><br/></p>");
+    return createDocument(data, "<p><br/></p>", tr("New note"));
 }
 
 void CWizCategoryView::on_updatePrivateTagDocumentCount_timeout()
@@ -3417,6 +3433,11 @@ void CWizCategoryView::on_group_permissionChanged(const QString& strKbGUID)
 
 void CWizCategoryView::on_group_bizChanged(const QString& strKbGUID)
 {
+}
+
+void CWizCategoryView::on_groupDocuments_unreadCount_modified(const QString& strKbGUID)
+{
+    updateGroupFolderDocumentCount(strKbGUID);
 }
 
 CWizFolder* CWizCategoryView::SelectedFolder()
