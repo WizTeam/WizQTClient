@@ -1706,15 +1706,11 @@ void MainWindow::on_documents_itemSelectionChanged()
     CWizDocumentDataArray arrayDocument;
     m_documents->getSelectedDocuments(arrayDocument);
 
-    qDebug() << "document list item count before view " << m_documents->count();
-
     if (arrayDocument.size() == 1) {
         if (!m_bUpdatingSelection) {
             viewDocument(arrayDocument[0], true);
         }
     }
-
-    qDebug() << "document list item count after view " << m_documents->count();
 }
 
 void MainWindow::on_documents_itemDoubleClicked(QListWidgetItem* item)

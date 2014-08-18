@@ -2251,7 +2251,7 @@ void CWizCategoryView::initGeneral()
     CWizCategoryViewMessageItem* pMsg = new CWizCategoryViewMessageItem(m_app, CATEGORY_MESSAGES_ALL, CWizCategoryViewMessageItem::All);
     addTopLevelItem(pMsg);
 
-    pMsg->setUnread(m_dbMgr.db().getUnreadMessageCount());
+    pMsg->setUnreadCount(m_dbMgr.db().getUnreadMessageCount());
 
     //QList<QTreeWidgetItem*> pList;
     //pList.append(new CWizCategoryViewMessageItem(m_app, CATEGORY_MESSAGES_SEND_TO_ME, CWizCategoryViewMessageItem::SendToMe));

@@ -379,7 +379,7 @@ void MessageListView::updateTreeItem()
         Q_ASSERT(pItem);
 
         int nUnread = CWizDatabaseManager::instance()->db().getUnreadMessageCount();
-        pItem->setUnread(nUnread);
+        pItem->setUnreadCount(nUnread);
     }
 }
 
