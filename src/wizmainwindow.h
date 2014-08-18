@@ -368,6 +368,9 @@ private:
 
     //
     void initTrayIcon(QSystemTrayIcon* trayIcon);
+    //
+    void startSearchStatus();
+    void cancleSearchStatus();
 };
 
 } // namespace Internal

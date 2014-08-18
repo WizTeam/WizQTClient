@@ -1234,6 +1234,7 @@ void MainWindow::on_syncProcessLog(const QString& strMsg)
 
 void MainWindow::on_actionNewNote_triggered()
 {
+    cancleSearchStatus();
     WIZDOCUMENTDATA data;
     if (!m_category->createDocument(data))
     {
@@ -1517,6 +1518,7 @@ void MainWindow::on_actionSearch_triggered()
 
 void MainWindow::on_actionResetSearch_triggered()
 {
+    cancleSearchStatus();
     m_search->clear();
     m_search->focus();
     m_category->restoreSelection();
@@ -1553,7 +1555,6 @@ void MainWindow::on_search_doSearch(const QString& keywords)
         on_actionResetSearch_triggered();
         return;
     }
-
     //
     if (WizIsKMURL(keywords)) {
         viewDocumentByWizKMURL(keywords);
@@ -1567,6 +1568,7 @@ void MainWindow::on_search_doSearch(const QString& keywords)
     m_msgList->hide();
     //
     m_searcher->search(keywords, 500);
+    startSearchStatus();
 }
 
 
@@ -1646,7 +1648,7 @@ void MainWindow::on_category_itemSelectionChanged()
     CWizCategoryBaseView* category = qobject_cast<CWizCategoryBaseView *>(sender());
     if (!category)
         return;
-
+    cancleSearchStatus();
     /*
      * 在点击MessageItem的时候,为了重新刷新当前消息,强制发送了itemSelectionChanged消息
      * 因此需要在这个地方避免重复刷新两次消息列表
@@ -1704,11 +1706,15 @@ void MainWindow::on_documents_itemSelectionChanged()
     CWizDocumentDataArray arrayDocument;
     m_documents->getSelectedDocuments(arrayDocument);
 
+    qDebug() << "document list item count before view " << m_documents->count();
+
     if (arrayDocument.size() == 1) {
         if (!m_bUpdatingSelection) {
             viewDocument(arrayDocument[0], true);
         }
     }
+
+    qDebug() << "document list item count after view " << m_documents->count();
 }
 
 void MainWindow::on_documents_itemDoubleClicked(QListWidgetItem* item)
@@ -2117,6 +2123,21 @@ void MainWindow::initTrayIcon(QSystemTrayIcon* trayIcon)
         trayIcon->setIcon(icon);
     }
 #endif
+}
+
+void MainWindow::startSearchStatus()
+{
+    m_documents->setAcceptAllItems(true);
+}
+
+void MainWindow::cancleSearchStatus()
+{
+    m_documents->setAcceptAllItems(false);
+    if (m_category->selectedItems().count() > 0)
+    {
+        m_category->setFocus();
+        m_category->setCurrentItem(m_category->selectedItems().first());
+    }
 }
 
 void MainWindow::viewDocumentInFloatWidget(const WIZDOCUMENTDATA& data)

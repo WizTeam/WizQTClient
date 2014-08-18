@@ -42,6 +42,7 @@ CWizDocumentListView::CWizDocumentListView(CWizExplorerApp& app, QWidget *parent
     , m_dbMgr(app.databaseManager())
     , m_tagList(NULL)
     , m_itemSelectionChanged(false)
+    , m_accpetAllItems(false)
 {
     setFrameStyle(QFrame::NoFrame);
     setAttribute(Qt::WA_MacShowFocusRect, false);
@@ -247,6 +248,10 @@ bool CWizDocumentListView::acceptDocument(const WIZDOCUMENTDATA& document)
     return categoryAccpet; && kbGUIDSame;*/
 
     // there is no need to check if kbguid is same. especially when category item is  biz root.
+
+    if (m_accpetAllItems)
+        return true;
+
     return m_app.category().acceptDocument(document);
 }
 
@@ -398,11 +403,14 @@ bool CWizDocumentListView::isDocumentsAllCanDelete(const CWizDocumentDataArray& 
 
 void CWizDocumentListView::mousePressEvent(QMouseEvent* event)
 {
-    if (event->button() == Qt::LeftButton) {
+    if (event->button() == Qt::LeftButton)
+    {
         m_dragStartPosition.setX(event->pos().x());
         m_dragStartPosition.setY(event->pos().y());
         QListWidget::mousePressEvent(event);
-    } else if (event->button() == Qt::RightButton) {
+    }
+    else if (event->button() == Qt::RightButton)
+    {
         m_rightButtonFocusedItems.clear();
         //
         CWizDocumentListViewItem* pItem = dynamic_cast<CWizDocumentListViewItem*>(itemAt(event->pos()));
@@ -1184,6 +1192,11 @@ void CWizDocumentListView::drawItem(QPainter* p, const QStyleOptionViewItemV4* v
     CWizDocumentListViewItem* pItem = documentItemFromIndex(vopt->index);
     if (pItem)
         pItem->draw(p, vopt, viewType());
+}
+
+void CWizDocumentListView::setAcceptAllItems(bool bAccept)
+{
+    m_accpetAllItems = bAccept;
 }
 
 void CWizDocumentListView::setItemsNeedUpdate(const QString& strKbGUID, const QString& strGUID)

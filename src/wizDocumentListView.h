@@ -49,6 +49,8 @@ public:
     void setItemsNeedUpdate(const QString& strKbGUID = 0, const QString& strGUID = 0);
     void drawItem(QPainter*p, const QStyleOptionViewItemV4* vopt) const;
 
+    void setAcceptAllItems(bool bAccept);
+
 protected:
     virtual void resizeEvent(QResizeEvent* event);
     //virtual void contextMenuEvent(QContextMenuEvent* event);
@@ -88,6 +90,7 @@ private:
 //#endif // Q_OS_MAC
 
     bool m_itemSelectionChanged;
+    bool m_accpetAllItems;
 
     QPointer<QPropertyAnimation> m_scrollAnimation;
 
