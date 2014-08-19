@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE TS>
-<TS version="2.1" language="zh_CN">
+<TS version="2.0" language="zh_CN">
 <context>
     <name>CWizAttachmentListView</name>
     <message>
@@ -215,7 +215,7 @@
     <message>
         <location filename="../src/ui/wizconsoledialog.ui" line="20"/>
         <source>Console</source>
-        <translation type="unfinished">消息控制台</translation>
+        <translation>消息控制台</translation>
     </message>
     <message>
         <location filename="../src/ui/wizconsoledialog.ui" line="78"/>
@@ -320,17 +320,17 @@
 <context>
     <name>CWizDocumentListView</name>
     <message>
-        <location filename="../src/wizDocumentListView.cpp" line="139"/>
+        <location filename="../src/wizDocumentListView.cpp" line="140"/>
         <source>Open in new Window</source>
         <translation>在新窗口中打开</translation>
     </message>
     <message>
-        <location filename="../src/wizDocumentListView.cpp" line="766"/>
+        <location filename="../src/wizDocumentListView.cpp" line="774"/>
         <source>Note History</source>
         <translation>笔记版本历史</translation>
     </message>
     <message>
-        <location filename="../src/wizDocumentListView.cpp" line="936"/>
+        <location filename="../src/wizDocumentListView.cpp" line="944"/>
         <source>Move Note: %1 to %2</source>
         <translation>移动笔记： %1到%2</translation>
     </message>
@@ -1105,7 +1105,7 @@
     <message>
         <location filename="../src/widgets/wizUserInfoWidget.cpp" line="55"/>
         <source>Logout...</source>
-        <translation type="unfinished">注销...</translation>
+        <translation>注销...</translation>
     </message>
     <message>
         <location filename="../src/widgets/wizUserInfoWidget.cpp" line="115"/>
@@ -1281,47 +1281,47 @@
         <translation>抱歉，同步失败了。请输入您的密码再试一次。</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="1535"/>
+        <location filename="../src/wizmainwindow.cpp" line="1537"/>
         <source>PDF Files (*.pdf)</source>
         <translation>PDF 文件 (*.pdf)</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="1736"/>
+        <location filename="../src/wizmainwindow.cpp" line="1738"/>
         <source>Can&apos;t find note %1 , may be it has been deleted.</source>
         <translation>找不到笔记 %1 , 该篇笔记可能已被删除。</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="2089"/>
+        <location filename="../src/wizmainwindow.cpp" line="2091"/>
         <source>Show/Hide MainWindow</source>
         <translation>显示/隐藏主窗口</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="2092"/>
+        <location filename="../src/wizmainwindow.cpp" line="2094"/>
         <source>New Note</source>
         <translation>新建笔记</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="2097"/>
+        <location filename="../src/wizmainwindow.cpp" line="2099"/>
         <source>Hide TrayIcon</source>
         <translation>隐藏托盘图标</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="2101"/>
+        <location filename="../src/wizmainwindow.cpp" line="2103"/>
         <source>Logout</source>
         <translation>注销</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="2103"/>
+        <location filename="../src/wizmainwindow.cpp" line="2105"/>
         <source>Exit</source>
         <translation>退出</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="1503"/>
+        <location filename="../src/wizmainwindow.cpp" line="1504"/>
         <source>Rebuild full text search index</source>
         <translation>重建搜索索引</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="1506"/>
+        <location filename="../src/wizmainwindow.cpp" line="1507"/>
         <source>Rebuild full text search is quit slow if you have quite a few notes or attachments, you do not have to use this function while search should work as expected.</source>
         <translation>重建全文搜索索引会非常慢。只有在您的搜索出现异常的时候才需要用这个功能。</translation>
     </message>
@@ -1418,6 +1418,11 @@
         <location filename="../src/titlebar.cpp" line="100"/>
         <source>View and add comments</source>
         <translation>浏览并添加评论</translation>
+    </message>
+    <message>
+        <location filename="../src/titlebar.cpp" line="319"/>
+        <source>Network service not available!</source>
+        <translation>网络连接不可用！</translation>
     </message>
 </context>
 <context>
