@@ -24,6 +24,7 @@
 #include "sync/apientry.h"
 #include "sync/token.h"
 #include "utils/stylehelper.h"
+#include "wizFileReader.h"
 
 using namespace WizService;
 
@@ -121,6 +122,9 @@ CWizCategoryBaseView::CWizCategoryBaseView(CWizExplorerApp& app, QWidget* parent
 
     connect(&m_dbMgr, SIGNAL(documentTagModified(const WIZDOCUMENTDATA&)),
             SLOT(on_document_tag_modified(const WIZDOCUMENTDATA&)));
+
+    connect(&m_dbMgr, SIGNAL(groupDocumentUnreadCountModified(QString)),
+            SLOT(on_groupDocuments_unreadCount_modified(QString)));
 
     connect(&m_dbMgr, SIGNAL(folderCreated(const QString&)),
             SLOT(on_folder_created(const QString&)));
@@ -263,14 +267,17 @@ void CWizCategoryBaseView::dragEnterEvent(QDragEnterEvent *event)
 
     if (event->mimeData()->hasFormat(WIZNOTE_MIMEFORMAT_DOCUMENTS)) {
         event->acceptProposedAction();
+    } else if (event->mimeData()->hasUrls()) {
+        event->acceptProposedAction();
     }
+
 }
 
 void CWizCategoryBaseView::dragMoveEvent(QDragMoveEvent *event)
 {
     m_dragHoveredPos = event->pos();
 
-    if (!event->mimeData()->hasFormat(WIZNOTE_MIMEFORMAT_DOCUMENTS))
+    if (!event->mimeData()->hasFormat(WIZNOTE_MIMEFORMAT_DOCUMENTS) && !event->mimeData()->hasUrls())
         return;
 
     CWizCategoryViewItemBase* pItem = itemAt(event->pos());
@@ -329,26 +336,31 @@ void CWizCategoryBaseView::dropEvent(QDropEvent * event)
     m_dragDocArray.clear();
 
 
-    if (!event->mimeData()->hasFormat(WIZNOTE_MIMEFORMAT_DOCUMENTS))
-        return;
+    if (event->mimeData()->hasFormat(WIZNOTE_MIMEFORMAT_DOCUMENTS)) {
+        CWizDocumentDataArray arrayDocument;
+        mime2Note(event->mimeData()->data(WIZNOTE_MIMEFORMAT_DOCUMENTS), arrayDocument);
 
-    CWizDocumentDataArray arrayDocument;
-    mime2Note(event->mimeData()->data(WIZNOTE_MIMEFORMAT_DOCUMENTS), arrayDocument);
+        if (!arrayDocument.size())
+            return;
 
-    if (!arrayDocument.size())
-        return;
+        CWizCategoryViewItemBase* pItem = itemAt(event->pos());
+        if (!pItem)
+            return;
 
-    CWizCategoryViewItemBase* pItem = itemAt(event->pos());
-    if (!pItem)
-        return;
+        bool forceCopy = (QApplication::keyboardModifiers() == Qt::ControlModifier);
 
-    bool forceCopy = (QApplication::keyboardModifiers() == Qt::ControlModifier);
-
-    for (CWizDocumentDataArray::const_iterator it = arrayDocument.begin();
-         it != arrayDocument.end();
-         it++)
-    {
-        pItem->drop(*it, forceCopy);
+        for (CWizDocumentDataArray::const_iterator it = arrayDocument.begin();
+             it != arrayDocument.end();
+             it++)
+        {
+            pItem->drop(*it, forceCopy);
+        }
+    } else if (event->mimeData()->hasUrls()) {
+        QList<QUrl> urls = event->mimeData()->urls();
+        QStringList strFileList;// = get urls from QList<QUrl> urls;
+        CWizFileReader *fileReader = new CWizFileReader();
+        connect(fileReader, SIGNAL(fileLoaded(QString)), SLOT(createDocumentByHtml(QString)));
+        fileReader->loadFiles(strFileList);
     }
 
     viewport()->repaint();
@@ -396,11 +408,54 @@ bool CWizCategoryBaseView::acceptDocument(const WIZDOCUMENTDATA& document)
     return pItem->accept(m_dbMgr.db(document.strKbGUID), document);
 }
 
-void CWizCategoryBaseView::setCurrentIndex(const WIZDOCUMENTDATA& document)
+bool CWizCategoryView::setCurrentIndex(const WIZDOCUMENTDATA& document)
 {
-    CWizCategoryViewItemBase* pItem = itemFromKbGUID(document.strKbGUID);
-//    document.strLocation;
-//    document.
+    if (m_dbMgr.db().kbGUID() == document.strKbGUID)
+    {
+        addAndSelectFolder(document.strLocation);
+        return true;
+    }
+    else
+    {
+        QTreeWidgetItem* pItem = itemFromKbGUID(document.strKbGUID);
+        if (pItem)
+        {
+            CWizDatabase& db = m_dbMgr.db(document.strKbGUID);
+            CWizTagDataArray arrayTag;
+            if (!db.GetDocumentTags(document.strGUID, arrayTag)) {
+                return false;
+            } else {
+                if (arrayTag.size() > 1) {
+                    TOLOG1("Group document should only have one tag: %1", document.strTitle);
+                }
+
+                QString tagText;
+                if (arrayTag.size()) {
+                    tagText = db.getTagTreeText(arrayTag[0].strGUID);
+                }
+
+                CString strTempLocation = tagText;
+                strTempLocation.Trim('/');
+                QStringList sl = strTempLocation.split("/");
+                for (int i = 0; i < sl.count(); i ++)
+                {
+                    for (int j = 0; j < pItem->childCount(); j ++)
+                    {
+                        if (pItem->child(j)->text(0) == sl.at(i))
+                        {
+                            pItem = pItem->child(j);
+                            break;
+                        }
+                    }
+                }
+            }
+
+            setCurrentItem(pItem);
+            return true;
+        }
+    }
+
+    return false;
 }
 
 void CWizCategoryBaseView::saveSelection()
@@ -426,18 +481,38 @@ CWizCategoryViewItemBase* CWizCategoryBaseView::itemAt(const QPoint& p) const
     return dynamic_cast<CWizCategoryViewItemBase*>(QTreeWidget::itemAt(p));
 }
 
+bool findItemByKbGUID(QTreeWidgetItem *item, const QString& strKbGUID, CWizCategoryViewItemBase*& target)
+{
+    for( int i = 0; i < item->childCount(); ++i)
+    {
+        CWizCategoryViewItemBase * pItem = dynamic_cast<CWizCategoryViewItemBase *>(item->child(i));
+        if (pItem->kbGUID() == strKbGUID)
+        {
+            target = pItem;
+            return true;
+        }
+
+        if (findItemByKbGUID(item->child(i), strKbGUID, target))
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 CWizCategoryViewItemBase* CWizCategoryBaseView::itemFromKbGUID(const QString &strKbGUID) const
 {
-//    if (strKbGUID.isEmpty())
+    if (strKbGUID.isEmpty())
         return 0;
 
-//    QList<QTreeWidgetItem*> itemList = items;
-//    foreach (QTreeWidgetItem* widgetItem, itemList) {
-//        CWizCategoryViewItemBase * item = dynamic_cast<CWizCategoryViewItemBase *>(widgetItem);
-//        if (item->kbGUID() == strKbGUID) {
-//            return item;
-//        }
-//    }
+    CWizCategoryViewItemBase * item = 0;
+    for (int i = 0; i < topLevelItemCount(); i ++)
+    {
+        findItemByKbGUID(topLevelItem(i), strKbGUID, item);
+    }
+
+    return item;
 }
 
 
@@ -524,6 +599,12 @@ void CWizCategoryBaseView::drawItem(QPainter* p, const QStyleOptionViewItemV4 *v
         pItem->draw(p, vopt);
 }
 
+void CWizCategoryBaseView::createDocumentByHtml(const QString& strHtml)
+{
+    // do nothing
+    // create document in CWizCategoryView
+}
+
 
 
 /* ------------------------------ CWizCategoryView ------------------------------ */
@@ -535,8 +616,8 @@ CWizCategoryView::CWizCategoryView(CWizExplorerApp& app, QWidget* parent)
 
     initMenus();
 
-    connect(this, SIGNAL(itemSelectionChanged()), SLOT(on_itemSelectionChanged()));
     connect(this, SIGNAL(itemClicked(QTreeWidgetItem*, int)), SLOT(on_itemClicked(QTreeWidgetItem *, int)));
+    connect(this, SIGNAL(itemSelectionChanged()), SLOT(on_itemSelectionChanged()));
 
     ExtensionSystem::PluginManager::addObject(this);
 }
@@ -834,7 +915,7 @@ void CWizCategoryView::showGroupContextMenu(QPoint pos)
     m_menuGroup->popup(pos);
 }
 
-bool CWizCategoryView::createDocument(WIZDOCUMENTDATA& data)
+bool CWizCategoryView::createDocument(WIZDOCUMENTDATA& data, const QString& strHtml, const QString& strTitle)
 {
     bool bFallback = true;
 
@@ -911,8 +992,8 @@ bool CWizCategoryView::createDocument(WIZDOCUMENTDATA& data)
         return false;
     }
 
-
-    if (!m_dbMgr.db(strKbGUID).CreateDocumentAndInit("<p><br/></p>", "", 0, tr("New note"), "newnote", strLocation, "", data))
+    QString strBody = WizGetHtmlBodyContent(strHtml);
+    if (!m_dbMgr.db(strKbGUID).CreateDocumentAndInit(strBody, "", 0, strTitle, "newnote", strLocation, "", data))
     {
         TOLOG("Failed to new document!");
         return false;
@@ -1575,7 +1656,11 @@ void CWizCategoryView::on_itemClicked(QTreeWidgetItem *item, int column)
     }
     else if (CWizCategoryViewBizGroupRootItem* pItem = dynamic_cast<CWizCategoryViewBizGroupRootItem*>(item))
     {
-        if (pItem->extraButtonClickTest())
+        if (pItem->isUnreadButtonUseable() && pItem->isSelected())
+        {
+            emit itemSelectionChanged();
+        }
+        else if (pItem->isExtraButtonUseable() && pItem->extraButtonClickTest())
         {
             if (pItem->isHr())
             {
@@ -1594,6 +1679,8 @@ void CWizCategoryView::on_itemClicked(QTreeWidgetItem *item, int column)
         {
             promptGroupStorageLimitMessage(pItem->kbGUID(), pItem->bizGUID());
         }
+
+        emit itemSelectionChanged();
     }
 }
 
@@ -1944,7 +2031,7 @@ void CWizCategoryView::updateGroupFolderDocumentCount_impl(const QString &strKbG
         return;
     }
 
-    CWizCategoryViewItemBase* pGroupRoot = NULL;
+    CWizCategoryViewGroupRootItem* pGroupRoot = NULL;
     pGroupRoot = findGroup(strKbGUID);
 
     if (!pGroupRoot)
@@ -1973,6 +2060,18 @@ void CWizCategoryView::updateGroupFolderDocumentCount_impl(const QString &strKbG
         }
     }
 
+    //unread documents
+    pGroupRoot->setUnreadCount(m_dbMgr.db(strKbGUID).getGroupUnreadDocumentCount());
+
+    if (pGroupRoot->isBizGroup())
+    {
+        CWizCategoryViewBizGroupRootItem *bizRootItem = dynamic_cast<CWizCategoryViewBizGroupRootItem *>(pGroupRoot->parent());
+        if (bizRootItem)
+        {
+            bizRootItem->updateUnreadCount();
+        }
+    }
+
     update();
 }
 
@@ -1994,6 +2093,11 @@ void CWizCategoryView::updatePrivateTagDocumentCount()
 void CWizCategoryView::updateGroupTagDocumentCount(const QString& strKbGUID)
 {
     Q_UNUSED (strKbGUID)
+}
+
+bool CWizCategoryView::createDocument(WIZDOCUMENTDATA& data)
+{
+    return createDocument(data, "<p><br/></p>", tr("New note"));
 }
 
 void CWizCategoryView::on_updatePrivateTagDocumentCount_timeout()
@@ -3344,6 +3448,18 @@ void CWizCategoryView::on_group_permissionChanged(const QString& strKbGUID)
 
 void CWizCategoryView::on_group_bizChanged(const QString& strKbGUID)
 {
+}
+
+void CWizCategoryView::on_groupDocuments_unreadCount_modified(const QString& strKbGUID)
+{
+    updateGroupFolderDocumentCount(strKbGUID);
+}
+
+void CWizCategoryView::createDocumentByHtml(const QString& strHtml)
+{
+    WIZDOCUMENTDATA data;
+    QString strTitle; //= getTitleFromHtml(strHtml);
+    createDocument(data, strHtml, strTitle);
 }
 
 CWizFolder* CWizCategoryView::SelectedFolder()

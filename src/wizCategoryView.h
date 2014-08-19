@@ -37,7 +37,6 @@ public:
     QString selectedItemKbGUID();
     void getDocuments(CWizDocumentDataArray& arrayDocument);
     bool acceptDocument(const WIZDOCUMENTDATA& document);
-    void setCurrentIndex(const WIZDOCUMENTDATA& document);
 
 
     void saveSelection();
@@ -100,6 +99,8 @@ protected Q_SLOTS:
     virtual void on_document_deleted(const WIZDOCUMENTDATA& doc) { Q_UNUSED(doc); }
     virtual void on_document_tag_modified(const WIZDOCUMENTDATA& doc) { Q_UNUSED(doc); }
 
+    virtual void on_groupDocuments_unreadCount_modified(const QString& strKbGUID) {Q_UNUSED(strKbGUID);}
+
     virtual void on_folder_created(const QString& strLocation) { Q_UNUSED(strLocation); }
     virtual void on_folder_deleted(const QString& strLocation) { Q_UNUSED(strLocation); }
     virtual void on_folder_positionChanged() {}
@@ -113,6 +114,8 @@ protected Q_SLOTS:
     virtual void on_group_renamed(const QString& strKbGUID) { Q_UNUSED(strKbGUID); }
     virtual void on_group_permissionChanged(const QString& strKbGUID) { Q_UNUSED(strKbGUID); }
     virtual void on_group_bizChanged(const QString& strKbGUID) { Q_UNUSED(strKbGUID); }
+
+    virtual void createDocumentByHtml(const QString& strHtml);
 
     void on_dragHovered_timeOut();
 };
@@ -213,6 +216,7 @@ public:
     CWizCategoryViewFolderItem* findFolder(const QString& strLocation, bool create, bool sort);
     CWizCategoryViewFolderItem* addFolder(const QString& strLocation, bool sort);
     void addAndSelectFolder(const CString& strLocation);
+    bool setCurrentIndex(const WIZDOCUMENTDATA& document);
 
     void sortFolders();
     void sortFolders(CWizCategoryViewFolderItem* pItem);
@@ -261,6 +265,7 @@ public:
     void updateGroupTagDocumentCount(const QString &strKbGUID);
 
     bool createDocument(WIZDOCUMENTDATA& data);
+    bool createDocument(WIZDOCUMENTDATA& data, const QString& strHtml, const QString& strTitle);
     //
     void createGroup();
     void viewPersonalGroupInfo(const QString& groupGUID);
@@ -315,6 +320,9 @@ protected Q_SLOTS:
     virtual void on_group_renamed(const QString& strKbGUID);
     virtual void on_group_permissionChanged(const QString& strKbGUID);
     virtual void on_group_bizChanged(const QString& strKbGUID);
+    virtual void on_groupDocuments_unreadCount_modified(const QString& strKbGUID);
+
+    virtual void createDocumentByHtml(const QString& strHtml);
 
 public Q_SLOTS:
     void on_action_newDocument();
