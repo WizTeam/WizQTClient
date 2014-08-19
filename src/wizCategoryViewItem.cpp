@@ -1051,11 +1051,10 @@ void CWizCategoryViewBizGroupRootItem::updateUnreadCount()
     {
         //
         QFont f;
-        Utils::StyleHelper::fontExtend(f);
-        QPainter p;
-        p.setFont(f);
+        Utils::StyleHelper::fontNormal(f);
+        QFontMetrics fm(f);
         //
-        QSize szText = p.fontMetrics().size(0, unreadString());
+        QSize szText = fm.size(0, unreadString());
         int textWidth = szText.width();
         int textHeight = szText.height();
         //
