@@ -1438,6 +1438,11 @@ void MainWindow::on_actionFormatInsertCode_triggered()
     m_doc->web()->editorCommandExecuteInsertCode();
 }
 
+void MainWindow::on_actionFormatInsertImage_triggered()
+{
+    m_doc->web()->editorCommandExecuteInsertImage();
+}
+
 void MainWindow::on_actionConsole_triggered()
 {
     if (!m_console) {

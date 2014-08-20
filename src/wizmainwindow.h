@@ -270,6 +270,7 @@ public Q_SLOTS:
     void on_actionEditorViewSource_triggered();
     void on_actionFormatInsertCheckList_triggered();
     void on_actionFormatInsertCode_triggered();
+    void on_actionFormatInsertImage_triggered();
 
     void on_searchProcess(const QString &strKeywords, const CWizDocumentDataArray& arrayDocument, bool bEnd);
 
