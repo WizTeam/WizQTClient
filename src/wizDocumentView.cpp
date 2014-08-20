@@ -244,9 +244,6 @@ void CWizDocumentView::viewNote(const WIZDOCUMENTDATA& data, bool forceEdit)
 
     // download document if not exist
     CWizDatabase& db = m_dbMgr.db(data.strKbGUID);
-    WIZDOCUMENTDATA docData = data;
-    docData.nReadCount ++;
-    db.ModifyDocumentReadCount(docData);
     QString strDocumentFileName = db.GetDocumentFileName(data.strGUID);
     if (!db.IsObjectDataDownloaded(data.strGUID, "document") || \
             !PathFileExists(strDocumentFileName)) {
@@ -274,6 +271,9 @@ void CWizDocumentView::viewNote(const WIZDOCUMENTDATA& data, bool forceEdit)
     }
 
     loadNote(data);
+    WIZDOCUMENTDATA docData = data;
+    docData.nReadCount ++;
+    db.ModifyDocumentReadCount(docData);
 }
 
 void CWizDocumentView::reviewCurrentNote()

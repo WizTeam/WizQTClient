@@ -2060,7 +2060,11 @@ void MainWindow::createNoteWithAttachments(const QStringList& strAttachList)
 
 void MainWindow::createNoteWithText(const QString& strText)
 {
+#if QT_VERSION > 0x050000
     QString strHtml = strText.toHtmlEscaped();
+#else
+    QString strHtml = strText;
+#endif
     QString strTitle = strHtml.left(strHtml.indexOf("\n"));
     if (strTitle.isEmpty())
     {

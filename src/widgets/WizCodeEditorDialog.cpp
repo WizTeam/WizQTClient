@@ -105,7 +105,9 @@ void WizCodeEditorDialog::renderCodeToHtml()
 {
     QWebFrame *frame = m_codeBrowser->page()->mainFrame();
     QString codeText = m_codeEditor->toPlainText();//->page()->mainFrame()->toHtml();
+#if QT_VERSION > 0x050000
     codeText = codeText.toHtmlEscaped();
+#endif
     codeText.replace(" ", "åß∂ƒ");
     codeText.replace("\n", "<br />");
 
@@ -141,11 +143,16 @@ void WizCodeEditorDialog::initCodeTypeCombox()
                "pl" << "pm" << "rb" << "xhtml" << "xsl" << "Apollo" <<  "Clojure" << "Dart" << "Erlang" <<
                "Haskell" << "Lisp" << "Scheme" << "Llvm" << "Matlab" <<  "Mumps" << "Nemerle" <<
                "Protocol buffers" << "R, S" << "RD" << "Scala" << "TCL" << "Latek" << "CHDL" << "Wiki" << "XQ" << "YAML";
-    strList.sort(Qt::CaseInsensitive);
+    strList.sort();
     foreach (QString str, strList) {
         m_codeType->addItem(str);
     }
-    m_codeType->setCurrentText("c");
+#if QT_VERSION < 0x050000
+    int index = m_codeType->findText("c");
+    m_codeType->setCurrentIndex(index);
+#else
+    m_codeType->setCurrentIndex();
+#endif
 }
 
 

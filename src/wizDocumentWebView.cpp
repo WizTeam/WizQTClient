@@ -1486,7 +1486,11 @@ bool CWizDocumentWebView::editorCommandExecutePlainText()
     QString strText = page()->mainFrame()->evaluateJavaScript("editor.getPlainTxt()").toString();
     QRegExp exp("<[^>]*>");
     strText.replace(exp, "");
+#if QT_VERSION > 0x050000
     strText = "<div>" + strText.toHtmlEscaped() + "</div>";
+#else
+    strText = "<div>" + strText + "</div>";
+#endif
     strText.replace(" ", "&nbsp;");
     strText.replace("\n", "<br />");
 
