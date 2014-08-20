@@ -151,7 +151,7 @@ void WizCodeEditorDialog::initCodeTypeCombox()
     int index = m_codeType->findText("c");
     m_codeType->setCurrentIndex(index);
 #else
-    m_codeType->setCurrentIndex();
+    m_codeType->setCurrentText("c");
 #endif
 }
 
