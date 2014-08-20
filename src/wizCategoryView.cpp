@@ -1011,6 +1011,17 @@ bool CWizCategoryView::createDocument(WIZDOCUMENTDATA& data, const QString& strH
     //
     return true;
 }
+QString CWizCategoryView::WizGetHtmlBodyContent(QString strHtml)
+{
+    QRegExp regex("<body.*>([\\s\\S]*)</body>", Qt::CaseInsensitive);
+    QString strBody;
+    if (regex.indexIn(strHtml) != -1) {
+        strBody = regex.cap(1);
+    } else {
+        strBody = strHtml;
+    }
+    return strBody;
+}
 
 void CWizCategoryView::on_action_newDocument()
 {
@@ -1656,22 +1667,22 @@ void CWizCategoryView::on_itemClicked(QTreeWidgetItem *item, int column)
     }
     else if (CWizCategoryViewBizGroupRootItem* pItem = dynamic_cast<CWizCategoryViewBizGroupRootItem*>(item))
     {
-        if (pItem->isUnreadButtonUseable() && pItem->isSelected())
-        {
-            emit itemSelectionChanged();
-        }
-        else if (pItem->isExtraButtonUseable() && pItem->extraButtonClickTest())
-        {
-            if (pItem->isHr())
-            {
-                manageBiz(pItem->biz().bizGUID, true);
-            }
-            else
-            {
-                QMessageBox::information(0, tr("Info"), tr("Your enterprise services has expired, could not manage members. "
-                                                           "Please purchase services or apply for an extension."));
-            }
-        }
+//        if (pItem->isUnreadButtonUseable() && pItem->isSelected())
+//        {
+//            emit itemSelectionChanged();
+//        }
+//        else if (pItem->isExtraButtonUseable() && pItem->extraButtonClickTest())
+//        {
+//            if (pItem->isHr())
+//            {
+//                manageBiz(pItem->biz().bizGUID, true);
+//            }
+//            else
+//            {
+//                QMessageBox::information(0, tr("Info"), tr("Your enterprise services has expired, could not manage members. "
+//                                                           "Please purchase services or apply for an extension."));
+//            }
+//        }
     }    
     else if (CWizCategoryViewGroupRootItem* pItem = dynamic_cast<CWizCategoryViewGroupRootItem*>(item))
     {
@@ -2061,16 +2072,16 @@ void CWizCategoryView::updateGroupFolderDocumentCount_impl(const QString &strKbG
     }
 
     //unread documents
-    pGroupRoot->setUnreadCount(m_dbMgr.db(strKbGUID).getGroupUnreadDocumentCount());
+//    pGroupRoot->setUnreadCount(m_dbMgr.db(strKbGUID).getGroupUnreadDocumentCount());
 
-    if (pGroupRoot->isBizGroup())
-    {
-        CWizCategoryViewBizGroupRootItem *bizRootItem = dynamic_cast<CWizCategoryViewBizGroupRootItem *>(pGroupRoot->parent());
-        if (bizRootItem)
-        {
-            bizRootItem->updateUnreadCount();
-        }
-    }
+//    if (pGroupRoot->isBizGroup())
+//    {
+//        CWizCategoryViewBizGroupRootItem *bizRootItem = dynamic_cast<CWizCategoryViewBizGroupRootItem *>(pGroupRoot->parent());
+//        if (bizRootItem)
+//        {
+//            bizRootItem->updateUnreadCount();
+//        }
+//    }
 
     update();
 }

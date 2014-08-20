@@ -205,6 +205,8 @@ private:
     //
     void resetCreateGroupLink();
 
+    QString WizGetHtmlBodyContent(QString strHtml);
+
 
     //
     void resetSections();
