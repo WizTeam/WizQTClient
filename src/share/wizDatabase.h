@@ -345,7 +345,7 @@ public:
     virtual bool UpdateDocumentDataMD5(WIZDOCUMENTDATA& data, const CString& strZipFileName, bool notifyDataModify = true);
 
     bool DeleteTagWithChildren(const WIZTAGDATA& data, bool bLog);
-    bool DeleteAttachment(const WIZDOCUMENTATTACHMENTDATA& data, bool bLog, bool bReset = true);
+    bool DeleteAttachment(const WIZDOCUMENTATTACHMENTDATA& data, bool bLog, bool bReset);
 
     bool IsDocumentModified(const CString& strGUID);
     bool IsAttachmentModified(const CString& strGUID);
@@ -425,6 +425,8 @@ public:
     void CopyDocumentsLink(const QList<WIZDOCUMENTDATA>& documents);
     QString DocumentToWizKMURL(const WIZDOCUMENTDATA& document);
     QString GetParamFromWizKMURL(const QString& strURL, const QString& strParamName);
+    void DocumentToHtmlLink(const WIZDOCUMENTDATA& document, QString& strHtml, QString& strLink);
+    void DocumentsToHtmlLink(const QList<WIZDOCUMENTDATA>& documents, QString& strHtml, QString &strLink);
 
 public:
     Q_INVOKABLE QObject* GetDeletedItemsFolder();
@@ -447,7 +449,7 @@ Q_SIGNALS:
     void databaseBizChanged(const QString& strKbGUID);
     void updateError(const QString& msg);
     void processLog(const QString& msg);
-
+    void attachmentsUpdated();
     void folderPositionChanged();
 
 private:

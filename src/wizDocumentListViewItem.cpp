@@ -26,7 +26,8 @@ CWizDocumentListViewItem::CWizDocumentListViewItem(CWizExplorerApp& app,
     , m_app(app)
     , m_nSortingType(0)
     , m_nSize(0)
-    , m_bSpecialFocus(false)
+    , m_documentUnread(false)
+    , m_specialFocused(false)
 {
     Q_ASSERT(!data.doc.strKbGUID.isEmpty());
     Q_ASSERT(!data.doc.strGUID.isEmpty());
@@ -38,6 +39,8 @@ CWizDocumentListViewItem::CWizDocumentListViewItem(CWizExplorerApp& app,
     m_data.strAuthorId = data.strAuthorId;
 
     setText(data.doc.strTitle);
+
+    updateDocumentUnreadCount();
 
     connect(this, SIGNAL(thumbnailReloaded()), SLOT(on_thumbnailReloaded()));
 }
@@ -75,14 +78,21 @@ bool CWizDocumentListViewItem::isContainsAttachment() const
 }
 bool CWizDocumentListViewItem::isSpecialFocus() const
 {
-    return m_bSpecialFocus;
+    return m_specialFocused;
 }
 
 void CWizDocumentListViewItem::setSpecialFocused(bool bSpecialFocus)
 {
-    m_bSpecialFocus = bSpecialFocus;
+    m_specialFocused = bSpecialFocus;
 }
 
+void CWizDocumentListViewItem::updateDocumentUnreadCount()
+{
+    if (m_data.doc.strKbGUID != CWizDatabaseManager::instance()->db().kbGUID())
+    {
+        m_documentUnread = (m_data.doc.nReadCount == 0);
+    }
+}
 
 void CWizDocumentListViewItem::resetAbstract(const WIZABSTRACT& abs)
 {
@@ -123,6 +133,7 @@ void CWizDocumentListViewItem::reload(CWizDatabase& db)
 
     db.DocumentFromGUID(m_data.doc.strGUID, m_data.doc);
     setText(m_data.doc.strTitle);
+    updateDocumentUnreadCount();
 
     Q_EMIT thumbnailReloaded();
 }
@@ -212,30 +223,31 @@ bool CWizDocumentListViewItem::operator <(const QListWidgetItem &other) const
     const CWizDocumentListViewItem* pOther = dynamic_cast<const CWizDocumentListViewItem*>(&other);
     Q_ASSERT(pOther && m_nSortingType == pOther->m_nSortingType);
 
+
     switch (m_nSortingType) {
     case CWizSortingPopupButton::SortingCreateTime:
         // default compare use create time
-        return pOther->m_data.doc.tCreated < m_data.doc.tCreated;
+        return pOther->m_data.doc.tCreated <= m_data.doc.tCreated;
     case -CWizSortingPopupButton::SortingCreateTime:
         return pOther->m_data.doc.tCreated > m_data.doc.tCreated;
     case CWizSortingPopupButton::SortingUpdateTime:
-        return pOther->m_data.doc.tModified < m_data.doc.tModified;
+        return pOther->m_data.doc.tModified <= m_data.doc.tModified;
     case -CWizSortingPopupButton::SortingUpdateTime:
         return pOther->m_data.doc.tModified > m_data.doc.tModified;
     case CWizSortingPopupButton::SortingTitle:
-        return pOther->m_data.doc.strTitle.localeAwareCompare(m_data.doc.strTitle) < 0;
+        return pOther->m_data.doc.strTitle.localeAwareCompare(m_data.doc.strTitle) <= 0;
     case -CWizSortingPopupButton::SortingTitle:
         return pOther->m_data.doc.strTitle.localeAwareCompare(m_data.doc.strTitle) > 0;
     case CWizSortingPopupButton::SortingLocation:
-        return pOther->m_data.strInfo.localeAwareCompare(m_data.strInfo) < 0;
+        return pOther->m_data.strInfo.localeAwareCompare(m_data.strInfo) <= 0;
     case -CWizSortingPopupButton::SortingLocation:
         return pOther->m_data.strInfo.localeAwareCompare(m_data.strInfo) > 0;
     case CWizSortingPopupButton::SortingTag:
-        return pOther->m_strTags < m_strTags;
+        return pOther->m_strTags <= m_strTags;
     case -CWizSortingPopupButton::SortingTag:
         return pOther->m_strTags > m_strTags;
     case CWizSortingPopupButton::SortingSize:
-        return pOther->m_nSize < m_nSize;
+        return pOther->m_nSize <= m_nSize;
     case -CWizSortingPopupButton::SortingSize:
         return pOther->m_nSize > m_nSize;
     default:
@@ -335,7 +347,7 @@ void CWizDocumentListViewItem::drawPrivateSummaryView_impl(QPainter* p, const QS
     WIZABSTRACT thumb;
     ThumbCache::instance()->find(m_data.doc.strKbGUID, m_data.doc.strGUID, thumb);
 
-    QRect rcd = Utils::StyleHelper::initListViewItemPainter(p, vopt->rect, bFocused, bSelected, m_bSpecialFocus);
+    QRect rcd = drawItemBackground(p, vopt->rect, bSelected, bFocused);
 
     if (!thumb.image.isNull()) {
         QPixmap pmt = QPixmap::fromImage(thumb.image);
@@ -356,7 +368,7 @@ void CWizDocumentListViewItem::drawGroupSummaryView_impl(QPainter* p, const QSty
     WIZABSTRACT thumb;
     ThumbCache::instance()->find(m_data.doc.strKbGUID, m_data.doc.strGUID, thumb);
 
-    QRect rcd = Utils::StyleHelper::initListViewItemPainter(p, vopt->rect, bFocused, bSelected, m_bSpecialFocus);
+    QRect rcd = drawItemBackground(p, vopt->rect, bSelected, bFocused);
 
     QPixmap pmAvatar;
     WizService::AvatarHost::avatar(m_data.strAuthorId, &pmAvatar);
@@ -374,7 +386,7 @@ void CWizDocumentListViewItem::drawPrivateTwoLineView_impl(QPainter* p, const QS
     bool bSelected = vopt->state & QStyle::State_Selected;
     bool bFocused = listWidget()->hasFocus();
 
-    QRect rcd = Utils::StyleHelper::initListViewItemPainter(p, vopt->rect, bFocused, bSelected, m_bSpecialFocus);
+    QRect rcd = drawItemBackground(p, vopt->rect, bSelected, bFocused);
 
     int nType = m_data.doc.nProtected ? Utils::StyleHelper::BadgeEncryted : Utils::StyleHelper::BadgeNormal;
     bool bContainsAttach = isContainsAttachment();
@@ -386,7 +398,7 @@ void CWizDocumentListViewItem::drawGroupTwoLineView_impl(QPainter* p, const QSty
     bool bSelected = vopt->state & QStyle::State_Selected;
     bool bFocused = listWidget()->hasFocus();
 
-    QRect rcd = Utils::StyleHelper::initListViewItemPainter(p, vopt->rect, bFocused, bSelected, m_bSpecialFocus);
+    QRect rcd = drawItemBackground(p, vopt->rect, bSelected, bFocused);
 
     QPixmap pmAvatar;
     WizService::AvatarHost::avatar(m_data.strAuthorId, &pmAvatar);
@@ -404,7 +416,7 @@ void CWizDocumentListViewItem::drawOneLineView_impl(QPainter* p, const  QStyleOp
     bool bSelected = vopt->state & QStyle::State_Selected;
     bool bFocused = listWidget()->hasFocus();
 
-    QRect rcd = Utils::StyleHelper::initListViewItemPainter(p, vopt->rect, bFocused, bSelected, m_bSpecialFocus);
+    QRect rcd = drawItemBackground(p, vopt->rect, bSelected, bFocused);
 
     int nType = m_data.doc.nProtected ? Utils::StyleHelper::BadgeEncryted : Utils::StyleHelper::BadgeNormal;
     bool bContainsAttach = isContainsAttachment();
@@ -439,4 +451,22 @@ void CWizDocumentListViewItem::drawSyncStatus(QPainter* p, const QStyleOptionVie
     p->restore();
 
     return;
+}
+
+QRect CWizDocumentListViewItem::drawItemBackground(QPainter* p, const QRect& rect, bool selected, bool focused) const
+{
+    if (selected && focused)
+    {
+        return Utils::StyleHelper::initListViewItemPainter(p, rect,Utils::StyleHelper::ListBGTypeActive);
+    }
+    else if ((selected && !focused) || m_specialFocused)
+    {
+        return Utils::StyleHelper::initListViewItemPainter(p, rect,  Utils::StyleHelper::ListBGTypeHalfActive);
+    }
+    else if (m_documentUnread)
+    {
+        return Utils::StyleHelper::initListViewItemPainter(p, rect, Utils::StyleHelper::ListBGTypeUnread);
+    }
+
+    return Utils::StyleHelper::initListViewItemPainter(p, rect, Utils::StyleHelper::ListBGTypeNone);
 }

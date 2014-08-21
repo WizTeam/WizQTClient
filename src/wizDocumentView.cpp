@@ -271,6 +271,9 @@ void CWizDocumentView::viewNote(const WIZDOCUMENTDATA& data, bool forceEdit)
     }
 
     loadNote(data);
+    WIZDOCUMENTDATA docData = data;
+    docData.nReadCount ++;
+    db.ModifyDocumentReadCount(docData);
 }
 
 void CWizDocumentView::reviewCurrentNote()

@@ -6,6 +6,9 @@ CWizSearchReplaceWidget::CWizSearchReplaceWidget(QWidget *parent) :
     ui(new Ui::CWizSearchReplaceWidget)
 {
     ui->setupUi(this);
+
+    setAttribute(Qt::WA_DeleteOnClose);
+    setWindowFlags(Qt::WindowStaysOnTopHint);
 }
 
 CWizSearchReplaceWidget::~CWizSearchReplaceWidget()

@@ -97,7 +97,7 @@ public:
     { Q_UNUSED(db); Q_UNUSED(arrayDocument); }
 
     void getMessages(CWizDatabase& db, CWizMessageDataArray& arrayMsg);
-    void setUnread(int nCount);
+    void setUnreadCount(int nCount);
     QString unreadString() const;
     bool hitTestUnread();
 
@@ -108,8 +108,7 @@ public:
 private:
     int m_nFilter;
     int m_nUnread;
-    static QPoint m_ptUnreadOffset;
-    static QSize m_szUnreadSize;
+    QSize m_szUnreadSize;
 };
 
 class CWizCategoryViewShortcutRootItem : public CWizCategoryViewItemBase
@@ -232,7 +231,6 @@ public:
 
 class CWizCategoryViewBizGroupRootItem : public CWizCategoryViewGroupsRootItem
 {
-    WIZBIZDATA m_biz;
 public:
     CWizCategoryViewBizGroupRootItem(CWizExplorerApp& app,
                                      const WIZBIZDATA& biz);
@@ -240,11 +238,27 @@ public:
     virtual void showContextMenu(CWizCategoryBaseView* pCtrl, QPoint pos);
     //
     const WIZBIZDATA biz() const { return m_biz; }
-    virtual int getSortOrder() const { return 30; }
+    virtual int getSortOrder() const { return 30; }    
+    //
+    virtual void getDocuments(CWizDatabase& db, CWizDocumentDataArray& arrayDocument);
+    virtual void draw(QPainter* p, const QStyleOptionViewItemV4* vopt) const;
+    //
+    bool isExtraButtonUseable();
+    bool isUnreadButtonUseable() const;
+    void updateUnreadCount();
+    QString unreadString() const;
+    bool hitTestUnread();
     //
     bool isOwner();
     bool isAdmin();
     bool isHr();
+
+
+private:
+    WIZBIZDATA m_biz;
+    int m_unReadCount;
+    QSize m_szUnreadSize;
+    bool m_extraButtonUseable;
 };
 class CWizCategoryViewOwnGroupRootItem : public CWizCategoryViewGroupsRootItem
 {
@@ -298,7 +312,6 @@ public:
 
 class CWizCategoryViewGroupRootItem : public CWizCategoryViewItemBase
 {
-    WIZGROUPDATA m_group;
 public:
     CWizCategoryViewGroupRootItem(CWizExplorerApp& app,
                                   const WIZGROUPDATA& group);
@@ -308,6 +321,7 @@ public:
     virtual bool accept(CWizDatabase& db, const WIZDOCUMENTDATA& data);
     virtual bool acceptDrop(const WIZDOCUMENTDATA& data) const;
     virtual void drop(const WIZDOCUMENTDATA& data, bool forceCopy = false);
+    virtual void draw(QPainter* p, const QStyleOptionViewItemV4* vopt) const;
     void reload(CWizDatabase& db);
     //
     bool isAdmin(CWizDatabase& db);
@@ -315,6 +329,16 @@ public:
 
     bool isBizGroup() const;
     QString bizGUID() const;
+    //
+    void setUnreadCount(int nCount);
+    int getUnreadCount();
+    QString unreadString() const;
+    bool hitTestUnread();
+
+private:
+    WIZGROUPDATA m_group;
+    int m_nUnread;
+    QSize m_szUnreadSize;
 };
 
 class CWizCategoryViewGroupNoTagItem : public CWizCategoryViewItemBase

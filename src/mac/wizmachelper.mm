@@ -1,10 +1,13 @@
 #include "wizmachelper.h"
 #include "wizmachelper_mm.h"
 
+#include "wizmainwindow.h"
+
 #include <QLocale>
 #include <QMainWindow>
 #include <QSize>
 #include <QDebug>
+#include <QXmlStreamReader>
 
 #if QT_VERSION >= 0x050200
 #include <qmacfunctions.h>
@@ -16,6 +19,16 @@
 //    return HIGetScaleFactor();
 //}
 //#endif
+
+
+@interface CreateNoteService : NSObject
+
+- (void) serviceCreateNote:(NSPasteboard *)pboard
+                  userData:(NSString *)userData
+                     error:(NSString **)error;
+
+@end
+
 
 //#ifdef QT_MAC_USE_COCOA
 float qt_mac_get_scalefactor(QWidget *window)
@@ -257,3 +270,85 @@ void wizMacInitUncaughtExceptionHandler()
 {
     NSSetUncaughtExceptionHandler(WizMacNSUncaughtExceptionHandler);
 }
+
+
+
+void wizMacRegisterSystemService()
+{
+    CreateNoteService *noteService = [[CreateNoteService alloc] init];
+    [NSApp setServicesProvider:noteService];
+}
+
+@implementation CreateNoteService
+
+- (void)serviceCreateNote:(NSPasteboard *)pboard
+                 userData:(NSString *)userData
+                    error:(NSString **)error
+{
+    // Test for strings on the pasteboard.
+    NSArray *classes = [NSArray arrayWithObject:[NSString class]];
+    NSDictionary *options = [NSDictionary dictionary];
+
+    if (![pboard canReadObjectForClasses:classes options:options]) {
+        *error = NSLocalizedString(@"Error: couldn't encrypt text.",
+                                   @"pboard couldn't give string.");
+        return;
+    }
+
+    for (NSString *type in [pboard types])
+    {
+        //NSLog(@"types %@", type);
+        qDebug() << "avaliable pboard type : " << WizToQString(type);
+    }
+
+    // Get string.
+    NSString *pFileNamesString = [pboard stringForType:NSFilenamesPboardType];
+    QString strXml = WizToQString(pFileNamesString);
+    if (!strXml.isEmpty())
+    {
+        QStringList strFileList;
+        QXmlStreamReader xmlReader(strXml);
+        while (xmlReader.readNextStartElement())
+        {
+            if (xmlReader.name() == "string")
+            {
+                QString strFile = xmlReader.readElementText();
+                strFileList.append(strFile);
+            }
+        }
+
+        if (strFileList.count() > 0)
+        {
+            Core::Internal::MainWindow *window = Core::Internal::MainWindow::instance();
+            if (window)
+            {
+                window->createNoteWithAttachments(strFileList);
+            }
+        }
+    }
+    else
+    {
+        NSString *pString = [pboard stringForType:NSStringPboardType];
+        QString strText = WizToQString(pString);
+        if (!strText.isEmpty())
+        {
+            qDebug() << "[service] : text string finded : " << strText;
+            Core::Internal::MainWindow *window = Core::Internal::MainWindow::instance();
+            if (window)
+            {
+                window->createNoteWithText(strText);
+            }
+        }
+        else
+        {
+            qDebug() << "[Service] : nothing usefull in pasteboard finded.";
+        }
+    }
+
+    // Write the encrypted string onto the pasteboard.
+    [pboard clearContents];
+
+
+}
+
+@end

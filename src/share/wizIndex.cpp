@@ -674,16 +674,22 @@ bool CWizIndex::ModifyDocumentDateAccessed(WIZDOCUMENTDATA& data)
 
 bool CWizIndex::ModifyDocumentReadCount(const WIZDOCUMENTDATA& data)
 {
+    WIZDOCUMENTDATA dataOld;
+    DocumentFromGUID(data.strGUID, dataOld);
+
 	CString strSQL;
 	strSQL.Format(_T("update WIZ_DOCUMENT set DOCUMENT_READ_COUNT=%d where DOCUMENT_GUID=%s"),
 		data.nReadCount,
         STR2SQL(data.strGUID).utf16()
         );
 
-	if (!ExecSQL(strSQL))
-        return false;
+    bool ret = ExecSQL(strSQL);
 
-    return true;
+    WIZDOCUMENTDATA dataNew;
+    DocumentFromGUID(data.strGUID, dataNew);
+
+    emit documentModified(dataOld, dataNew);
+    return ret;
 }
 
 bool CWizIndex::DeleteDocument(const WIZDOCUMENTDATA& data, bool bLog)
@@ -813,6 +819,55 @@ void CWizIndex::InitDocumentShareFlags(CWizDocumentDataArray& arrayDocument,
 
         queryTag.nextRow();
     }
+}
+
+bool CWizIndex::getGroupUnreadDocuments(CWizDocumentDataArray& arrayDocument)
+{
+
+    CString strExt;
+    strExt.Format("where DOCUMENT_READ_COUNT=0 and DOCUMENT_LOCATION not like '/Deleted Items/%'");
+    QString strSQL = FormatCanonicSQL(TABLE_NAME_WIZ_DOCUMENT,
+                                      FIELD_LIST_WIZ_DOCUMENT,
+                                      strExt);
+
+    return SQLToDocumentDataArray(strSQL, arrayDocument);
+}
+
+int CWizIndex::getGroupUnreadDocumentCount()
+{
+    CString strSQL;
+    strSQL.Format("select count(*) from WIZ_DOCUMENT where DOCUMENT_READ_COUNT=0");
+
+    CppSQLite3Query query = m_db.execQuery(strSQL);
+
+    if (!query.eof()) {
+        int nCount = query.getIntField(0);
+        return nCount;
+    }
+
+    return 0;
+}
+
+void CWizIndex::setGroupDocumentsReaded()
+{
+    CString strSQL = WizFormatString0("update WIZ_DOCUMENT set DOCUMENT_READ_COUNT=1 where DOCUMENT_READ_COUNT=0");
+    ExecSQL(strSQL);
+    emit groupDocumentUnreadCountModified(kbGUID());
+}
+
+CString CWizIndex::KbGUIDToSQL()
+{
+    CString strKbGUIDSQL;
+    if (kbGUID().isEmpty())
+    {
+        strKbGUIDSQL = _T(" (KB_GUID is null or KB_GUID = '') ");
+    }
+    else
+    {
+        strKbGUIDSQL = WizFormatString1(_T("KB_GUID = '%1'"), kbGUID());
+    }
+    //
+    return strKbGUIDSQL;
 }
 
 bool CWizIndex::ModifyAttachmentInfo(WIZDOCUMENTATTACHMENTDATA& data)

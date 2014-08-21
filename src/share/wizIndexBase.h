@@ -234,6 +234,8 @@ Q_SIGNALS:
     void documentAbstractModified(const WIZDOCUMENTDATA& document);
     void documentTagModified(const WIZDOCUMENTDATA& document);
 
+    void groupDocumentUnreadCountModified(const QString& strKbGUID);
+
     void attachmentCreated(const WIZDOCUMENTATTACHMENTDATA& attachment);
     void attachmentModified(const WIZDOCUMENTATTACHMENTDATA& attachmentOld,
                             const WIZDOCUMENTATTACHMENTDATA& attachmentNew);

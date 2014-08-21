@@ -390,21 +390,54 @@ QIcon StyleHelper::listViewBadge(int type)
 
 void StyleHelper::drawListViewItemBackground(QPainter* p, const QRect& rc, bool bFocus, bool bSelect)
 {
+    QRect rcBg = rc;
+    rcBg.setHeight(rcBg.height() - 1);
     if (bSelect) {
         if (bFocus) {
-            p->fillRect(rc, listViewItemBackground(Active));
+            p->fillRect(rcBg, listViewItemBackground(Active));
         } else {
-            p->fillRect(rc, listViewItemBackground(Normal));
+            p->fillRect(rcBg, listViewItemBackground(Normal));
         }
     }
 }
 
-void StyleHelper::drawListViewItemSeperator(QPainter* p, const QRect& rc)
+void StyleHelper::drawListViewItemBackground(QPainter* p, const QRect& rc, StyleHelper::ListViewBGType bgType)
+{
+    QRect rcBg = rc;
+    switch (bgType) {
+    case ListBGTypeNone:
+        //p->fillRect(rcBg, listViewItemBackground(Normal));
+        break;
+    case ListBGTypeActive:
+        p->fillRect(rcBg, listViewItemBackground(Active));
+        break;
+    case ListBGTypeHalfActive:
+        p->fillRect(rcBg, listViewItemBackground(Normal));
+        break;
+    case ListBGTypeUnread:
+        p->fillRect(rcBg, QColor("#edf0ec"));
+        break;
+    default:
+        break;
+    }
+
+}
+
+void StyleHelper::drawListViewItemSeperator(QPainter* p, const QRect& rc, ListViewBGType bgType)
 {
     QRect rcLine = rc;
-    //rcLine.adjust(1, 0, -1, 0);
     p->save();
-    p->setPen(listViewItemSeperator());
+
+    switch (bgType) {
+    case ListBGTypeActive:
+    case ListBGTypeHalfActive:
+        p->setPen(QColor("#d2d8d6"));
+    case ListBGTypeUnread:
+    case ListBGTypeNone:
+    default:
+        p->setPen(listViewItemSeperator());
+        break;
+    }
     p->drawLine(rcLine.bottomLeft(), rcLine.bottomRight());
     p->restore();
 }
@@ -447,6 +480,17 @@ int StyleHelper::drawSingleLineText(QPainter* p, const QRect& rc, QString& str, 
     //
     return out.right();
 }
+
+void StyleHelper::drawListViewItemSeperator(QPainter* p, const QRect& rc)
+{
+    QRect rcLine = rc;
+    //rcLine.adjust(1, 0, -1, 0);
+    p->save();
+    p->setPen(listViewItemSeperator());
+    p->drawLine(rcLine.bottomLeft(), rcLine.bottomRight());
+    p->restore();
+}
+
 QRect StyleHelper::drawText(QPainter* p, const QRect& rc, QString& str, int nLines,
                           int nFlags, const QColor& color, const QFont& font, bool bElided)
 {
@@ -688,20 +732,13 @@ int StyleHelper::notifyBarHeight()
     return 32;
 }
 
-QRect StyleHelper::initListViewItemPainter(QPainter* p, const QRect& lrc, bool bFocused, bool bSelected, bool bSpecialFocused)
+QRect StyleHelper::initListViewItemPainter(QPainter* p, const QRect& lrc, ListViewBGType bgType)
 {
     QRect rc = lrc;
 
-    Utils::StyleHelper::drawListViewItemSeperator(p, rc);
+    Utils::StyleHelper::drawListViewItemBackground(p, rc, bgType);
 
-    if (!bSelected && bSpecialFocused)
-    {
-        Utils::StyleHelper::drawListViewItemBackground(p, rc, false, true);
-    }
-    else
-    {
-        Utils::StyleHelper::drawListViewItemBackground(p, rc, bFocused, bSelected);
-    }
+    Utils::StyleHelper::drawListViewItemSeperator(p, rc, bgType);
 
     int nMargin = Utils::StyleHelper::margin();
     return rc.adjusted(nMargin, nMargin, -nMargin, -nMargin);

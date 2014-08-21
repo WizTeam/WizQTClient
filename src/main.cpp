@@ -175,6 +175,7 @@ int mainCore(int argc, char *argv[])
 
 #ifdef Q_OS_MAC
     wizMacInitUncaughtExceptionHandler();
+    wizMacRegisterSystemService();
 #endif
 
 

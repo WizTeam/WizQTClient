@@ -31,7 +31,7 @@ public:
     bool getLastestMessages(CWizMessageDataArray& arrayMsg, int nMax = 200);
     bool setMessageReadStatus(const WIZMESSAGEDATA& msg, qint32 nRead);
     bool setMessageReadStatus(const CWizMessageDataArray& arrayMsg, qint32 nRead);
-    bool getModifiedMessages(CWizMessageDataArray& arrayMsg);
+    bool getModifiedMessages(CWizMessageDataArray&  arrayMsg);
     bool getUnreadMessages(CWizMessageDataArray& arrayMsg);
     int getUnreadMessageCount();
 
@@ -236,6 +236,11 @@ public:
                                 const CString& strTagName,
                                 int nShareFlags);
 
+    bool getGroupUnreadDocuments(CWizDocumentDataArray& arrayDocument);
+    int getGroupUnreadDocumentCount();
+    void setGroupDocumentsReaded();
+    CString KbGUIDToSQL();
+
     // Raw Query
     bool GetAllDocumentsTitle(CWizStdStringArray& arrayDocument);
 
@@ -298,7 +303,7 @@ public:
                           const CString& strDataMD5, WIZDOCUMENTATTACHMENTDATA& data);
 
     bool ModifyAttachmentInfo(WIZDOCUMENTATTACHMENTDATA& data);
-    bool DeleteAttachment(const WIZDOCUMENTATTACHMENTDATA& data, bool bLog, bool bReset);
+    virtual bool DeleteAttachment(const WIZDOCUMENTATTACHMENTDATA& data, bool bLog, bool bReset);
 
     // Raw Query
     int GetDocumentAttachmentCount(const CString& strDocumentGUID);

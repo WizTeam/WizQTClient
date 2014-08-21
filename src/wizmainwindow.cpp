@@ -70,6 +70,8 @@ using namespace Core;
 using namespace Core::Internal;
 using namespace WizService::Internal;
 
+static MainWindow* windowInstance = 0;
+
 MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     : _baseClass(parent)
     , m_core(new ICore(this))
@@ -117,6 +119,7 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
 #ifndef Q_OS_MAC
     clientLayout()->addWidget(m_toolBar);
 #endif
+    windowInstance = this;
     //
     connect(qApp, SIGNAL(aboutToQuit()), SLOT(on_application_aboutToQuit()));
     connect(qApp, SIGNAL(lastWindowClosed()), qApp, SLOT(quit())); // Qt bug: Qt5 bug
@@ -141,6 +144,7 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
         SLOT(on_searchProcess(const QString&, const CWizDocumentDataArray&, bool)));
 
     connect(m_doc, SIGNAL(documentSaved(QString,CWizDocumentView*)), SIGNAL(documentSaved(QString,CWizDocumentView*)));
+    connect(m_doc->web(), SIGNAL(selectAllKeyPressed()), SLOT(on_actionEditingSelectAll_triggered()));
     connect(this, SIGNAL(documentSaved(QString,CWizDocumentView*)), m_doc, SLOT(on_document_data_saved(QString,CWizDocumentView*)));
 
     // misc settings
@@ -259,6 +263,11 @@ void MainWindow::cleanOnQuit()
     //
     QThreadPool::globalInstance()->waitForDone();
     WizService::AvatarHost::waitForDone();
+}
+
+MainWindow*MainWindow::instance()
+{
+    return windowInstance;
 }
 
 void MainWindow::closeEvent(QCloseEvent* event)
@@ -485,7 +494,7 @@ void MainWindow::on_editor_statusChanged()
 {
     CWizDocumentWebView* editor = m_doc->web();
 
-    if (!editor->isInited() || !editor->isEditing() || !editor->hasFocus()) {
+    if (!editor->isInited() || !editor->hasFocus()) {
         m_actions->actionFromName(WIZACTION_EDITOR_UNDO)->setEnabled(false);
         m_actions->actionFromName(WIZACTION_EDITOR_REDO)->setEnabled(false);
         m_actions->actionFromName(WIZACTION_EDITOR_CUT)->setEnabled(false);
@@ -512,7 +521,10 @@ void MainWindow::on_editor_statusChanged()
         m_actions->actionFromName(WIZACTION_FORMAT_INSERT_DATE)->setEnabled(false);
         m_actions->actionFromName(WIZACTION_FORMAT_INSERT_TIME)->setEnabled(false);
         m_actions->actionFromName(WIZACTION_FORMAT_INSERT_CHECKLIST)->setEnabled(false);
+        m_actions->actionFromName(WIZACTION_FORMAT_INSERT_CODE)->setEnabled(false);
+        m_actions->actionFromName(WIZACTION_FORMAT_INSERT_IMAGE)->setEnabled(false);
         m_actions->actionFromName(WIZACTION_FORMAT_REMOVE_FORMAT)->setEnabled(false);
+        m_actions->actionFromName(WIZACTION_FORMAT_PLAINTEXT)->setEnabled(false);
         m_actions->actionFromName(WIZACTION_FORMAT_VIEW_SOURCE)->setEnabled(false);
 
         return;
@@ -653,6 +665,12 @@ void MainWindow::on_editor_statusChanged()
         m_actions->actionFromName(WIZACTION_FORMAT_REMOVE_FORMAT)->setEnabled(true);
     }
 
+    if (-1 ==editor->editorCommandQueryCommandState("plaintext")) {
+        m_actions->actionFromName(WIZACTION_FORMAT_PLAINTEXT)->setEnabled(false);
+    } else {
+        m_actions->actionFromName(WIZACTION_FORMAT_PLAINTEXT)->setEnabled(true);
+    }
+
     if (-1 ==editor->editorCommandQueryCommandState("source")) {
         m_actions->actionFromName(WIZACTION_FORMAT_VIEW_SOURCE)->setEnabled(false);
     } else {
@@ -663,6 +681,18 @@ void MainWindow::on_editor_statusChanged()
         m_actions->actionFromName(WIZACTION_FORMAT_INSERT_CHECKLIST)->setEnabled(false);
     } else {
         m_actions->actionFromName(WIZACTION_FORMAT_INSERT_CHECKLIST)->setEnabled(true);
+    }
+
+    if (-1 ==editor->editorCommandQueryCommandState("insertCode")) {
+        m_actions->actionFromName(WIZACTION_FORMAT_INSERT_CODE)->setEnabled(false);
+    } else {
+        m_actions->actionFromName(WIZACTION_FORMAT_INSERT_CODE)->setEnabled(true);
+    }
+
+    if (-1 ==editor->editorCommandQueryCommandState("insertImage")) {
+        m_actions->actionFromName(WIZACTION_FORMAT_INSERT_IMAGE)->setEnabled(false);
+    } else {
+        m_actions->actionFromName(WIZACTION_FORMAT_INSERT_IMAGE)->setEnabled(true);
     }
 }
 
@@ -1103,7 +1133,8 @@ void MainWindow::init()
     m_category->init();
 
     connect(m_msgList, SIGNAL(itemSelectionChanged()), SLOT(on_message_itemSelectionChanged()));
-    connect(m_documents, SIGNAL(itemSelectionChanged()), SLOT(on_documents_itemSelectionChanged()));
+    connect(m_msgList, SIGNAL(loacteDocumetRequest(QString,QString)), SLOT(locateDocument(QString,QString)));
+    connect(m_documents, SIGNAL(documentsSelectionChanged()), SLOT(on_documents_itemSelectionChanged()));
     connect(m_documents, SIGNAL(itemDoubleClicked(QListWidgetItem*)), SLOT(on_documents_itemDoubleClicked(QListWidgetItem*)));
     connect(m_documents, SIGNAL(lastDocumentDeleted()), SLOT(on_documents_lastDocumentDeleted()));
 
@@ -1203,6 +1234,7 @@ void MainWindow::on_syncProcessLog(const QString& strMsg)
 
 void MainWindow::on_actionNewNote_triggered()
 {
+    cancleSearchStatus();
     WIZDOCUMENTDATA data;
     if (!m_category->createDocument(data))
     {
@@ -1230,7 +1262,6 @@ void MainWindow::on_actionEditingRedo_triggered()
 
 void MainWindow::on_actionEditingCut_triggered()
 {
-    qDebug() << "actionEditingCut called";
     m_doc->web()->triggerPageAction(QWebPage::Cut);
 }
 
@@ -1387,6 +1418,11 @@ void MainWindow::on_actionFormatRemoveFormat_triggered()
     m_doc->web()->editorCommandExecuteRemoveFormat();
 }
 
+void MainWindow::on_actionFormatPlainText_triggered()
+{
+    m_doc->web()->editorCommandExecutePlainText();
+}
+
 void MainWindow::on_actionEditorViewSource_triggered()
 {
     m_doc->web()->editorCommandExecuteViewSource();
@@ -1395,6 +1431,16 @@ void MainWindow::on_actionEditorViewSource_triggered()
 void MainWindow::on_actionFormatInsertCheckList_triggered()
 {
     m_doc->web()->editorCommandExecuteInsertCheckList();
+}
+
+void MainWindow::on_actionFormatInsertCode_triggered()
+{
+    m_doc->web()->editorCommandExecuteInsertCode();
+}
+
+void MainWindow::on_actionFormatInsertImage_triggered()
+{
+    m_doc->web()->editorCommandExecuteInsertImage();
 }
 
 void MainWindow::on_actionConsole_triggered()
@@ -1477,6 +1523,7 @@ void MainWindow::on_actionSearch_triggered()
 
 void MainWindow::on_actionResetSearch_triggered()
 {
+    cancleSearchStatus();
     m_search->clear();
     m_search->focus();
     m_category->restoreSelection();
@@ -1513,7 +1560,6 @@ void MainWindow::on_search_doSearch(const QString& keywords)
         on_actionResetSearch_triggered();
         return;
     }
-
     //
     if (WizIsKMURL(keywords)) {
         viewDocumentByWizKMURL(keywords);
@@ -1527,6 +1573,7 @@ void MainWindow::on_search_doSearch(const QString& keywords)
     m_msgList->hide();
     //
     m_searcher->search(keywords, 500);
+    startSearchStatus();
 }
 
 
@@ -1606,6 +1653,22 @@ void MainWindow::on_category_itemSelectionChanged()
     CWizCategoryBaseView* category = qobject_cast<CWizCategoryBaseView *>(sender());
     if (!category)
         return;
+    cancleSearchStatus();
+    /*
+     * 在点击MessageItem的时候,为了重新刷新当前消息,强制发送了itemSelectionChanged消息
+     * 因此需要在这个地方避免重复刷新两次消息列表
+     */
+    static QTime lastTime(0, 0, 0);
+    QTreeWidgetItem *currentItem = category->currentItem();
+    static QTreeWidgetItem *oldItem = currentItem;
+    QTime last = lastTime;
+    QTime now = QTime::currentTime();
+    lastTime = now;
+    if (last.msecsTo(now) < 300 && oldItem == currentItem) {
+        return;
+    } else {
+        oldItem = currentItem;
+    }
 
     CWizCategoryViewMessageItem* pItem = category->currentCategoryItem<CWizCategoryViewMessageItem>();
     if (pItem) {
@@ -1614,16 +1677,6 @@ void MainWindow::on_category_itemSelectionChanged()
             m_msgList->show();
             m_noteList->hide();
         }
-        /*
-         * 在点击MessageItem的时候,为了重新刷新当前消息,强制发送了itemSelectionChanged消息
-         * 因此需要在这个地方避免重复刷新两次消息列表
-         */
-        static QTime lastTime(0, 0, 0);
-        QTime last = lastTime;
-        QTime now = QTime::currentTime();
-        lastTime = now;
-        if (last.msecsTo(now) < 300)
-            return;
 
         CWizMessageDataArray arrayMsg;
         pItem->getMessages(m_dbMgr.db(), arrayMsg);
@@ -1810,8 +1863,11 @@ void MainWindow::locateDocument(const WIZDOCUMENTDATA& data)
     try
     {
         m_bUpdatingSelection = true;
-        m_category->addAndSelectFolder(data.strLocation);
-        m_documents->addAndSelectDocument(data);
+        if (m_category->setCurrentIndex(data))
+        {
+            m_documents->addAndSelectDocument(data);
+            viewDocument(data, true);
+        }
     }
     catch (...)
     {
@@ -1819,6 +1875,15 @@ void MainWindow::locateDocument(const WIZDOCUMENTDATA& data)
     }
 
     m_bUpdatingSelection = false;
+}
+
+void MainWindow::locateDocument(const QString& strKbGuid, const QString& strGuid)
+{
+    WIZDOCUMENTDATA doc;
+    if (m_dbMgr.db(strKbGuid).DocumentFromGUID(strGuid, doc))
+    {
+        locateDocument(doc);
+    }
 }
 
 void MainWindow::checkWizUpdate()
@@ -1957,7 +2022,10 @@ void MainWindow::setActionsEnableForNewNote()
     m_actions->actionFromName(WIZACTION_FORMAT_INSERT_DATE)->setEnabled(true);
     m_actions->actionFromName(WIZACTION_FORMAT_INSERT_TIME)->setEnabled(true);
     m_actions->actionFromName(WIZACTION_FORMAT_INSERT_CHECKLIST)->setEnabled(true);
+    m_actions->actionFromName(WIZACTION_FORMAT_INSERT_CODE)->setEnabled(true);
+    m_actions->actionFromName(WIZACTION_FORMAT_INSERT_IMAGE)->setEnabled(true);
     m_actions->actionFromName(WIZACTION_FORMAT_REMOVE_FORMAT)->setEnabled(true);
+    m_actions->actionFromName(WIZACTION_FORMAT_PLAINTEXT)->setEnabled(true);
     m_actions->actionFromName(WIZACTION_FORMAT_VIEW_SOURCE)->setEnabled(true);
 }
 
@@ -1979,6 +2047,50 @@ void MainWindow::viewDocumentByWizKMURL(const QString &strKMURL)
         m_documents->blockSignals(false);
         viewDocument(document, true);
     }
+}
+
+void MainWindow::createNoteWithAttachments(const QStringList& strAttachList)
+{
+    on_actionNewNote_triggered();
+
+    CWizDatabase& db = m_dbMgr.db(m_documentForEditing.strKbGUID);
+    foreach (QString StrFileName, strAttachList) {
+        WIZDOCUMENTATTACHMENTDATA attach;
+        if (!db.AddAttachment(m_documentForEditing, StrFileName, attach))
+        {
+            TOLOG1("[Service] add attch failed :  1%", StrFileName);
+        }
+    }
+}
+
+void MainWindow::createNoteWithText(const QString& strText)
+{
+#if QT_VERSION > 0x050000
+    QString strHtml = strText.toHtmlEscaped();
+#else
+    QString strHtml = strText;
+#endif
+    QString strTitle = strHtml.left(strHtml.indexOf("\n"));
+    if (strTitle.isEmpty())
+    {
+        strTitle = "New note";
+    }
+    else if (strTitle.length() > 200)
+    {
+        strTitle = strTitle.left(200);
+    }
+    strHtml = "<div>" + strHtml + "</div>";
+    strHtml.replace(" ", "&nbsp;");
+    strHtml.replace("\n", "<br />");
+    WIZDOCUMENTDATA data;
+    if (!m_category->createDocument(data, strHtml, strTitle))
+    {
+        return;
+    }
+    m_documentForEditing = data;
+    m_documents->addAndSelectDocument(data);
+    m_doc->web()->setFocus(Qt::MouseFocusReason);
+    setActionsEnableForNewNote();
 }
 
 void MainWindow::initTrayIcon(QSystemTrayIcon* trayIcon)
@@ -2016,6 +2128,21 @@ void MainWindow::initTrayIcon(QSystemTrayIcon* trayIcon)
         trayIcon->setIcon(icon);
     }
 #endif
+}
+
+void MainWindow::startSearchStatus()
+{
+    m_documents->setAcceptAllItems(true);
+}
+
+void MainWindow::cancleSearchStatus()
+{
+    m_documents->setAcceptAllItems(false);
+    if (m_category->selectedItems().count() > 0)
+    {
+        m_category->setFocus();
+        m_category->setCurrentItem(m_category->selectedItems().first());
+    }
 }
 
 void MainWindow::viewDocumentInFloatWidget(const WIZDOCUMENTDATA& data)

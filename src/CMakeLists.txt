@@ -140,6 +140,7 @@ set(wiznote_SOURCES
     wizLoginDialog.cpp
     share/wizFileMonitor.cpp
     wizSearchReplaceWidget.cpp
+    widgets/WizCodeEditorDialog.cpp
 )
 
 set(wiznote_HEADERS
@@ -267,6 +268,7 @@ set(wiznote_HEADERS
     wizLoginDialog.h
     share/wizFileMonitor.h
     wizSearchReplaceWidget.h
+    widgets/WizCodeEditorDialog.h
 )
 
 set(wiznote_FORMS
@@ -343,6 +345,9 @@ if(UNIX)
         #set(wiznote_BUNDLE_CONTENTS ${CMAKE_BINARY_DIR}/bundle/${PROJECT_NAME}.app/Contents)
         add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
             COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/share/ ${WIZNOTE_RESOURCE_DIR})
+        add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/build/osx/localize/ ${WIZNOTE_RESOURCE_DIR})
+
 
         if(CMAKE_BUILD_TYPE STREQUAL "Release")
             # resovle library dependency if build type is release

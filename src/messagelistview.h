@@ -37,6 +37,7 @@ public:
     void addMessages(const CWizMessageDataArray& arrayMsg);
     void addMessage(const WIZMESSAGEDATA& msg, bool sort);
     void selectedMessages(QList<WIZMESSAGEDATA>& arrayMsg);
+    void specialFocusedMessages(QList<WIZMESSAGEDATA>& arrayMsg);
 
     int rowFromId(qint64 nId) const;
     MessageListViewItem* messageItem(int row) const;
@@ -49,6 +50,7 @@ protected:
     virtual void resizeEvent(QResizeEvent* event);
     virtual void contextMenuEvent(QContextMenuEvent* event);
     virtual void wheelEvent(QWheelEvent* event);
+    virtual void mousePressEvent(QMouseEvent* event);
 
 private:
     QMenu* m_menu;
@@ -57,6 +59,7 @@ private:
 #endif
 
     MessageListViewItem* m_pCurrentItem;
+    QList<MessageListViewItem*> m_rightButtonFocusedItems;
     QTimer m_timerRead;
     QList<qint64> m_lsIds;
     QTimer m_timerTriggerSync;
@@ -66,6 +69,7 @@ private:
 
 Q_SIGNALS:
     void sizeChanged(int nCount);
+    void loacteDocumetRequest(const QString strKbGuid, const QString strGuid);
 
 private Q_SLOTS:
     void onCurrentItemChanged(QListWidgetItem* current, QListWidgetItem* previous);
@@ -76,11 +80,14 @@ private Q_SLOTS:
 
     void on_action_message_mark_read();
     void on_action_message_delete();
+    void on_action_message_locate();
 
     void on_message_created(const WIZMESSAGEDATA& msg);
     void on_message_modified(const WIZMESSAGEDATA& oldMsg,
                              const WIZMESSAGEDATA& newMsg);
     void on_message_deleted(const WIZMESSAGEDATA& msg);
+
+    void clearRightMenuFocus();
 };
 
 } // namespace Internal
