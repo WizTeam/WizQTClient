@@ -1,12 +1,11 @@
 #include "wizFileReader.h"
-#include <QStringList>
 #include <QFile>
 #include <QFileInfo>
 #include <QTextStream>
-
 CWizFileReader::CWizFileReader(QObject *parent) :
     QThread(parent)
 {
+    //m_files = new QStringList();
 }
 
 void CWizFileReader::loadFiles(QStringList strFiles)
@@ -23,14 +22,15 @@ QString CWizFileReader::loadTextFileToHtml(QString strFileName)
     // QTextStream
     QFile file(strFileName);
     if(!file.open(QIODevice::ReadOnly|QIODevice::Text))
-        return;
+        return "";
     QTextStream in(&file);
     return in.readAll();
 }
 
 QString CWizFileReader::loadImageFileToHtml(QString strFileName)
 {
-    // image to html
+    return QString("<img border=\"0\" src=\"file://%1\" />").arg(strFileName);
+
 }
 
 void CWizFileReader::run()
@@ -42,14 +42,14 @@ void CWizFileReader::run()
         QFileInfo fi(strFile);
         QString strHtml;
         QStringList textExtList,imageExtList;
-        textExtList<<"txt"<<"md"<<"markdown"<<"html"<<"htm";
+        textExtList<<"txt"<<"md"<<"markdown"<<"html"<<"htm"<<"cpp"<<"h";
         imageExtList<<"jpg"<<"png"<<"gif"<<"tiff"<<"jpeg"<<"bmp"<<"svg";
 
-        if (textExtList.contains(&fi.suffix(),Qt::CaseInsensitive))
+        if (textExtList.contains(fi.suffix(),Qt::CaseInsensitive))
         {
-            strHtml = loadTextFileToHtml(strFile)
+            strHtml = loadTextFileToHtml(strFile);
         }
-        else if (imageExtList.contains(&fi.suffix(),Qt::CaseInsensitive))
+        else if (imageExtList.contains(fi.suffix(),Qt::CaseInsensitive))
         {
             strHtml = loadImageFileToHtml(strFile);
         }
@@ -59,6 +59,7 @@ void CWizFileReader::run()
             emit fileLoaded(strHtml);
         }
 
-        emit loadProgress(i + 1, nTotal);
+        emit loadProgress(nTotal, i + 1);
     }
+    m_files.clear();
 }

@@ -250,6 +250,7 @@ void mime2Note(const QByteArray& bMime, CWizDocumentDataArray& arrayDocument)
     QStringList lsNotes = strMime.split(";");
     for (int i = 0; i < lsNotes.size(); i++) {
         QStringList lsMeta = lsNotes[i].split(":");
+        //qDebug()<<lsMeta;
         Q_ASSERT(lsMeta.size() == 2);
 
         CWizDatabase& db = CWizDatabaseManager::instance()->db(lsMeta[0]);
@@ -277,40 +278,45 @@ void CWizCategoryBaseView::dragMoveEvent(QDragMoveEvent *event)
 {
     m_dragHoveredPos = event->pos();
 
-    if (!event->mimeData()->hasFormat(WIZNOTE_MIMEFORMAT_DOCUMENTS) && !event->mimeData()->hasUrls())
-        return;
-
-    CWizCategoryViewItemBase* pItem = itemAt(event->pos());
-    if (!pItem)
-        return;
-
-    if (m_dragHoveredItem != pItem) {
-        m_dragHoveredTimer->stop();
-        m_dragHoveredItem = pItem;
-        m_dragHoveredTimer->start(1000);
-    }
-
-    m_dragDocArray.clear();
-    mime2Note(event->mimeData()->data(WIZNOTE_MIMEFORMAT_DOCUMENTS), m_dragDocArray);
-
-    if (!m_dragDocArray.size())
-        return;
-
-    int nAccept = 0;
-    for (CWizDocumentDataArray::const_iterator it = m_dragDocArray.begin();
-         it != m_dragDocArray.end();
-         it++)
+    if (event->mimeData()->hasFormat(WIZNOTE_MIMEFORMAT_DOCUMENTS) )
     {
-        if (pItem->acceptDrop(*it)) {
-            nAccept++;
+        CWizCategoryViewItemBase* pItem = itemAt(event->pos());
+        if (!pItem)
+            return;
+
+        if (m_dragHoveredItem != pItem) {
+            m_dragHoveredTimer->stop();
+            m_dragHoveredItem = pItem;
+            m_dragHoveredTimer->start(1000);
         }
+
+        m_dragDocArray.clear();
+        mime2Note(event->mimeData()->data(WIZNOTE_MIMEFORMAT_DOCUMENTS), m_dragDocArray);
+
+        if (!m_dragDocArray.size())
+            return;
+
+        int nAccept = 0;
+        for (CWizDocumentDataArray::const_iterator it = m_dragDocArray.begin();
+             it != m_dragDocArray.end();
+             it++)
+        {
+            if (pItem->acceptDrop(*it)) {
+                nAccept++;
+            }
+        }
+
+        if (nAccept == m_dragDocArray.size()) {
+            event->acceptProposedAction();
+        }
+        else
+            event->ignore();
+
+    }else if(event->mimeData()->hasUrls())
+    {
+        event->acceptProposedAction();
     }
 
-    if (nAccept == m_dragDocArray.size()) {
-        event->acceptProposedAction();     
-    }
-    else
-        event->ignore();
 
     viewport()->repaint();
 }
@@ -357,10 +363,19 @@ void CWizCategoryBaseView::dropEvent(QDropEvent * event)
         }
     } else if (event->mimeData()->hasUrls()) {
         QList<QUrl> urls = event->mimeData()->urls();
-        QStringList strFileList;// = get urls from QList<QUrl> urls;
+        QStringList strFileList;
+        foreach (QUrl url, urls) {
+            strFileList.append(url.path());
+        }
         CWizFileReader *fileReader = new CWizFileReader();
         connect(fileReader, SIGNAL(fileLoaded(QString)), SLOT(createDocumentByHtml(QString)));
+        MainWindow *mainWindow = dynamic_cast<MainWindow*>(m_app.mainWindow());
+        CWizProgressDialog progressDialog;// = mainWindow->progressDialog();
+        //
+        progressDialog.setProgress(100,0);
+        connect(fileReader, SIGNAL(loadProgress(int,int)), &progressDialog, SLOT(setProgress(int,int)));
         fileReader->loadFiles(strFileList);
+        progressDialog.exec();
     }
 
     viewport()->repaint();
@@ -603,6 +618,7 @@ void CWizCategoryBaseView::createDocumentByHtml(const QString& strHtml)
 {
     // do nothing
     // create document in CWizCategoryView
+
 }
 
 
@@ -3469,7 +3485,7 @@ void CWizCategoryView::on_groupDocuments_unreadCount_modified(const QString& str
 void CWizCategoryView::createDocumentByHtml(const QString& strHtml)
 {
     WIZDOCUMENTDATA data;
-    QString strTitle; //= getTitleFromHtml(strHtml);
+    QString strTitle = "title"; //= getTitleFromHtml(strHtml);
     createDocument(data, strHtml, strTitle);
 }
 

@@ -2,6 +2,7 @@
 #define WIZFILEREADER_H
 
 #include <QThread>
+#include <QStringList>
 
 class CWizFileReader : public QThread
 {
@@ -16,7 +17,7 @@ public:
 
 signals:
     void fileLoaded(QString strHtml);
-    void loadProgress(int loaded, int total);
+    void loadProgress(int total,int loaded);
 
 public slots:
 

@@ -29,6 +29,7 @@ void CWizProgressDialog::setProgress(int nMax, int nCurrent)
 {
     ui->progressBar->setMaximum(nMax);
     ui->progressBar->setValue(nCurrent);
+    update();
 }
 
 void CWizProgressDialog::setProgress(QString strObjGUID, int nMax, int nCurrent)

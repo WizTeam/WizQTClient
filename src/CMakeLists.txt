@@ -119,6 +119,7 @@ set(wiznote_SOURCES
     wizButton.cpp
     wizEditorToolBar.cpp
     wizEditorInsertTableForm.cpp
+    wizFileReader.cpp
     wizFolderSelector.cpp
     wizProgressDialog.cpp
     wizFolderView.cpp
@@ -248,6 +249,7 @@ set(wiznote_HEADERS
     wizDocumentTransitionView.h
     wizButton.h
     wizEditorInsertTableForm.h
+    wizFileReader.h
     wizFolderSelector.h
     wizProgressDialog.h
     wizFolderView.h
