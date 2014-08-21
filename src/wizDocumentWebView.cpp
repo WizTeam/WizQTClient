@@ -489,8 +489,14 @@ bool CWizDocumentWebView::image2Html(const QString& strImageFile, QString& strHt
 
 void CWizDocumentWebView::dropEvent(QDropEvent* event)
 {
-    int nAccepted = 0;
     const QMimeData* mimeData = event->mimeData();
+
+    QStringList typeList = mimeData->formats();
+    foreach (QString strType, typeList) {
+        qDebug() << "Type : " << strType << " Data : " << mimeData->data(strType);
+    }
+
+    int nAccepted = 0;
     if (mimeData->hasUrls())
     {
         QList<QUrl> li = mimeData->urls();
