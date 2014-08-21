@@ -7,6 +7,7 @@
 #include "share/wizDatabaseManager.h"
 #include "share/wizDatabase.h"
 #include "utils/logger.h"
+#include "wizmainwindow.h"
 
 CWizNoteInfoForm::CWizNoteInfoForm(QWidget *parent)
     : CWizPopupWidget(parent)
@@ -15,20 +16,15 @@ CWizNoteInfoForm::CWizNoteInfoForm(QWidget *parent)
     ui->setupUi(this);
     setContentsMargins(0, 20, 0, 0);
 
-    QPalette pal;// = ui->widget->palette();
-#ifdef Q_OS_LINUX
-    pal.setBrush(QPalette::Base, QBrush("#D7D7D7"));
-#elif defined(Q_OS_MAC)
-    pal.setBrush(QPalette::Base, QBrush("#F7F7F7"));
-#endif
-    ui->frame->setPalette(pal);
-
     ui->editTitle->setReadOnly(true);
     ui->editCreateTime->setReadOnly(true);
     ui->editUpdateTime->setReadOnly(true);
     ui->editURL->setReadOnly(true);
     ui->editAuthor->setReadOnly(true);
     ui->checkEncrypted->setEnabled(false);
+
+    QString openDocument = WizFormatString1("<a href=\"locate\" style=\"color:#3CA2E0;\">%1</a>", tr("Locate"));
+    ui->labelOpenDocument->setText(openDocument);
 }
 
 CWizNoteInfoForm::~CWizNoteInfoForm()
@@ -44,6 +40,8 @@ QSize CWizNoteInfoForm::sizeHint() const
 void CWizNoteInfoForm::setDocument(const WIZDOCUMENTDATA& data)
 {
     Q_ASSERT(!data.strKbGUID.isEmpty());
+    m_docKbGuid = data.strKbGUID;
+    m_docGuid = data.strGUID;
 
     CWizDatabase& db = CWizDatabaseManager::instance()->db(data.strKbGUID);
     QString doc = db.GetDocumentFileName(data.strGUID);
@@ -89,4 +87,16 @@ void CWizNoteInfoForm::setDocument(const WIZDOCUMENTDATA& data)
     ui->labelOpenURL->setText(WizFormatString2("<a href=\"%1\">%2</a>", data.strURL, tr("Open")));
     ui->labelSize->setText(sz);
     ui->checkEncrypted->setChecked(data.nProtected ? true : false);
+}
+
+void CWizNoteInfoForm::on_labelOpenDocument_linkActivated(const QString &link)
+{
+    Q_UNUSED(link);
+
+    Core::Internal::MainWindow *mainWindow = Core::Internal::MainWindow::instance();
+    if (mainWindow)
+    {
+        mainWindow->locateDocument(m_docKbGuid, m_docGuid);
+        hide();
+    }
 }

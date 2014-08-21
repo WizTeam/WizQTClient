@@ -304,16 +304,22 @@ void TitleBar::onCommentsButtonClicked()
     }
 
     if (isNetworkAccessible()) {
-        comments->load(m_commentsUrl);
-        QSplitter* splitter = qobject_cast<QSplitter*>(comments->parentWidget());
-        Q_ASSERT(splitter);
-        QList<int> li = splitter->sizes();
-        Q_ASSERT(li.size() == 2);
-        QList<int> lin;
-        lin.push_back(li.value(0) - COMMENT_FRAME_WIDTH);
-        lin.push_back(li.value(1) + COMMENT_FRAME_WIDTH);
-        splitter->setSizes(lin);
-        comments->show();
+        if (!m_commentsUrl.isEmpty()) {
+            comments->load(m_commentsUrl);
+            QSplitter* splitter = qobject_cast<QSplitter*>(comments->parentWidget());
+            Q_ASSERT(splitter);
+            QList<int> li = splitter->sizes();
+            Q_ASSERT(li.size() == 2);
+            QList<int> lin;
+            lin.push_back(li.value(0) - COMMENT_FRAME_WIDTH);
+            lin.push_back(li.value(1) + COMMENT_FRAME_WIDTH);
+            splitter->setSizes(lin);
+            comments->show();
+        } else {
+            comments->setHtml(tr("Network service not available!"));
+            comments->show();
+        }
+
     } else {
         m_commentsBtn->setEnabled(false);
     }
@@ -359,6 +365,7 @@ void TitleBar::onTokenAcquired(const QString& strToken)
     m_commentsUrl =  WizService::ApiEntry::commentUrl(strToken, strKbGUID, strGUID);
 
     if (comments->isVisible()) {
+        comments->load(QUrl());
         comments->load(m_commentsUrl);
     }
 

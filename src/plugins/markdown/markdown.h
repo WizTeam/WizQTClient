@@ -30,10 +30,12 @@ private:
     bool copyRes2Cache();
     bool canRender(Core::INoteView* view, const WIZDOCUMENTDATA& data);
     void render(QWebFrame* frame);
+    void changeCssToInline(QWebFrame* frame);
 
 
 private Q_SLOTS:
     void onViewNoteLoaded(Core::INoteView* view, const WIZDOCUMENTDATA& doc, bool bOk);
+    void onFrameRenderRequested(QWebFrame* frame, bool bUseInlineCss);
 };
 
 } // namespace Internal

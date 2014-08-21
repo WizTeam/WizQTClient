@@ -85,7 +85,7 @@ void CWizDocument::PermanentlyDelete()
         CString strFileName = m_db.GetAttachmentFileName(it->strGUID);
         ::WizDeleteFile(strFileName);
 
-        m_db.DeleteAttachment(*it, true);
+        m_db.DeleteAttachment(*it, true, true);
     }
 
     if (!m_db.DeleteDocument(m_data, true)) {
@@ -2496,6 +2496,8 @@ bool CWizDatabase::UpdateAttachments(const CWizDocumentAttachmentDataArray& arra
         SetObjectVersion(WIZDOCUMENTATTACHMENTDATAEX::ObjectName(), nVersion);
     }
 
+    emit attachmentsUpdated();
+
     return !bHasError;
 }
 
@@ -2575,6 +2577,8 @@ bool CWizDatabase::DeleteAttachment(const WIZDOCUMENTATTACHMENTDATA& data,
     if (PathFileExists(strFileName)) {
         ::WizDeleteFile(strFileName);
     }
+
+    emit attachmentsUpdated();
 
     return bRet;
 }
@@ -2819,13 +2823,16 @@ bool CWizDatabase::CreateDocumentAndInit(const WIZDOCUMENTDATA& sourceDoc, const
 
 bool CWizDatabase::AddAttachment(const WIZDOCUMENTDATA& document, const CString& strFileName, WIZDOCUMENTATTACHMENTDATA& dataRet)
 {
+    dataRet.strKbGUID = document.strKbGUID;
+    dataRet.strDocumentGUID = document.strGUID;
+
     CString strMD5 = ::WizMd5FileString(strFileName);
     if (!CreateAttachment(document.strGUID, WizExtractFileName(strFileName), strFileName, "", strMD5, dataRet))
         return false;
 
     if (!::WizCopyFile(strFileName, GetAttachmentFileName(dataRet.strGUID), false))
     {
-        DeleteAttachment(dataRet, false);
+        DeleteAttachment(dataRet, false, true);
         return false;
     }
 
@@ -3156,23 +3163,10 @@ bool CWizDatabase::loadUserCert()
     return true;
 }
 
-//
-void documentToHtmlLink(CWizDatabase& db, const WIZDOCUMENTDATA& document,
-                        QString& strHtml, QString& strLink)
-{
-    strLink = db.DocumentToWizKMURL(document);
-    QString strTitle = document.strTitle;
-    strTitle.replace(_T("<"), _T("&lt;"));
-    strTitle.replace(_T(">"), _T("&gt;"));
-    strTitle.replace(_T("&"), _T("&amp;"));
-    //
-    strHtml = WizFormatString2(_T("<a href=\"%1\">%2</a>"), strLink, strTitle);
-}
-
 void CWizDatabase::CopyDocumentLink(const WIZDOCUMENTDATA& document)
 {
     QString strHtml, strLink;
-    documentToHtmlLink(*this, document, strHtml, strLink);
+    DocumentToHtmlLink(document, strHtml, strLink);
     //
     QClipboard* clip = QApplication::clipboard();
 
@@ -3185,13 +3179,7 @@ void CWizDatabase::CopyDocumentLink(const WIZDOCUMENTDATA& document)
 void CWizDatabase::CopyDocumentsLink(const QList<WIZDOCUMENTDATA>& documents)
 {
     QString strHtml, strLink;
-    for (int i = 0; i < documents.count(); i++)
-    {
-        QString strOneHtml, strOneLink;
-        documentToHtmlLink(*this, documents.at(i), strOneHtml, strOneLink);
-        strHtml += strOneHtml + "<br>";
-        strLink += strOneLink + "\n";
-    }
+    DocumentsToHtmlLink(documents, strHtml, strLink);
 
     QMimeData* data = new QMimeData();
     data->setHtml(strHtml);
@@ -3232,6 +3220,28 @@ QString CWizDatabase::GetParamFromWizKMURL(const QString& strURL, const QString&
     }
 
     return QString();
+}
+
+void CWizDatabase::DocumentToHtmlLink(const WIZDOCUMENTDATA& document, QString& strHtml, QString& strLink)
+{
+    strLink = DocumentToWizKMURL(document);
+    QString strTitle = document.strTitle;
+    strTitle.replace(_T("<"), _T("&lt;"));
+    strTitle.replace(_T(">"), _T("&gt;"));
+    strTitle.replace(_T("&"), _T("&amp;"));
+    //
+    strHtml = WizFormatString2(_T("<a href=\"%1\">%2</a>"), strLink, strTitle);
+}
+
+void CWizDatabase::DocumentsToHtmlLink(const QList<WIZDOCUMENTDATA>& documents, QString& strHtml, QString& strLink)
+{
+    for (int i = 0; i < documents.count(); i++)
+    {
+        QString strOneHtml, strOneLink;
+        DocumentToHtmlLink(documents.at(i), strOneHtml, strOneLink);
+        strHtml += strOneHtml + "<br>";
+        strLink += strOneLink + "\n";
+    }
 }
 
 bool CWizDatabase::DocumentToTempHtmlFile(const WIZDOCUMENTDATA& document,

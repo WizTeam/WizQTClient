@@ -95,6 +95,8 @@ public:
 
     QString searchKeywords() const { return m_strSearchKeywords; }
 
+    static MainWindow* instance();
+
 protected:
     virtual bool eventFilter(QObject* watched, QEvent* event);
     virtual void resizeEvent(QResizeEvent* event);
@@ -206,7 +208,9 @@ public:
     void setSystemTrayIconVisible(bool bVisible);
     //
     void viewDocumentByWizKMURL(const QString& strKMURL);
-
+    //
+    void createNoteWithAttachments(const QStringList& strAttachList);
+    void createNoteWithText(const QString& strText);
 signals:
     void documentSaved(const QString& strGUID, CWizDocumentView* viewer);
 
@@ -262,8 +266,11 @@ public Q_SLOTS:
     void on_actionFormatInsertDate_triggered();
     void on_actionFormatInsertTime_triggered();
     void on_actionFormatRemoveFormat_triggered();
+    void on_actionFormatPlainText_triggered();
     void on_actionEditorViewSource_triggered();
     void on_actionFormatInsertCheckList_triggered();
+    void on_actionFormatInsertCode_triggered();
+    void on_actionFormatInsertImage_triggered();
 
     void on_searchProcess(const QString &strKeywords, const CWizDocumentDataArray& arrayDocument, bool bEnd);
 
@@ -292,6 +299,7 @@ public Q_SLOTS:
     void on_syncProcessLog(const QString& strMsg);
 
     void on_options_restartForSettings();
+    void locateDocument(const QString& strKbGuid, const QString& strGuid);
 
     void on_editor_statusChanged();
 
@@ -361,6 +369,9 @@ private:
 
     //
     void initTrayIcon(QSystemTrayIcon* trayIcon);
+    //
+    void startSearchStatus();
+    void cancleSearchStatus();
 };
 
 } // namespace Internal

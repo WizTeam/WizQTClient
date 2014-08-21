@@ -7,6 +7,8 @@
 #include <QFile>
 #include <QTextStream>
 #include <QWebFrame>
+#include <QEventLoop>
+#include <QTimer>
 
 #include <coreplugin/icore.h>
 
@@ -38,6 +40,8 @@ void MarkdownPlugin::extensionsInitialized()
 {
     connect(Core::ICore::instance(), SIGNAL(viewNoteLoaded(Core::INoteView*,WIZDOCUMENTDATA,bool)),
             SLOT(onViewNoteLoaded(Core::INoteView*,WIZDOCUMENTDATA,bool)));
+    connect(Core::ICore::instance(), SIGNAL(frameRenderRequested(QWebFrame*, bool)),
+            SLOT(onFrameRenderRequested(QWebFrame*, bool)));
 }
 
 void MarkdownPlugin::onViewNoteLoaded(INoteView* view, const WIZDOCUMENTDATA& doc, bool bOk)
@@ -49,18 +53,37 @@ void MarkdownPlugin::onViewNoteLoaded(INoteView* view, const WIZDOCUMENTDATA& do
         render(view->noteFrame());
 }
 
+void MarkdownPlugin::onFrameRenderRequested(QWebFrame* frame, bool bUseInlineCss)
+{
+    if (frame)
+    {
+        render(frame);
+        if (bUseInlineCss)
+        {
+            // wait for code render finished
+            QEventLoop loop;
+            QTimer::singleShot(500, &loop, SLOT(quit()));
+            loop.exec();
+
+            changeCssToInline(frame);
+        }
+    }
+}
+
 bool MarkdownPlugin::canRender(INoteView* view, const WIZDOCUMENTDATA& doc)
 {
     if (view->isEditing())
         return false;
 
-    if (doc.strTitle.indexOf(".md") == -1)
+    if (doc.strTitle.indexOf(".md") == -1 && doc.strTitle.indexOf(".mj") == -1)
         return false;
 
-    if (doc.strTitle.indexOf(".md ") != -1)
+    int nPointPos = doc.strTitle.length() - 3;
+    if (doc.strTitle.lastIndexOf(".md") == nPointPos || doc.strTitle.lastIndexOf(".mj") == nPointPos)
         return true;
 
-    if (doc.strTitle.lastIndexOf(".md") == doc.strTitle.length() - 3)
+    if (doc.strTitle.indexOf(".md ") != -1 || doc.strTitle.indexOf(".md@") != -1 ||
+            doc.strTitle.indexOf(".mj ") != -1|| doc.strTitle.indexOf(".mj@") != -1)
         return true;
 
     return false;
@@ -87,6 +110,22 @@ void MarkdownPlugin::render(QWebFrame* frame)
     strExec.replace("${CACHE_PATH}", strPath);
 
     frame->evaluateJavaScript(strExec);
+}
+
+void MarkdownPlugin::changeCssToInline(QWebFrame* frame)
+{
+    if (frame)
+    {
+        QString strHtml = frame->toHtml();
+        QRegExp regHeadContant("<head[^>]*>[\\s\\S]*</head>");
+        QString strPath = cachePath() + "plugins/markdown/";
+        QString strNewHead = QString("<head><link rel=\"stylesheet\" href=\"file://" + strPath + "markdown/github2.css\">"
+                                     "<script src=\"file://" + strPath +"markdown/jquery.min.js\"></script>"
+                                     "<script src=\"file://" + strPath + "inlinecss/jquery.inlineStyler.min.js\"></script>"
+                                     "<script src=\"file://" + strPath + "inlinecss/csstoinline.js\"></script></head>");
+        strHtml.replace(regHeadContant, strNewHead);
+        frame->setHtml(strHtml);
+    }
 }
 
 // FIXME: about to remove
@@ -125,6 +164,8 @@ bool MarkdownPlugin::copyRes2Cache()
     cacheDir.mkpath(strMarkdownPath);
     QString strGoogleCodePath = strPath + "google-code-prettify/";
     cacheDir.mkpath(strGoogleCodePath);
+    QString strInlineCssPath = strPath + "inlinecss/";
+    cacheDir.mkpath(strInlineCssPath);
 
     lsRes <<":/res/google-code-prettify/lang-yaml.js"
             <<":/res/google-code-prettify/lang-xq.js"
@@ -159,7 +200,9 @@ bool MarkdownPlugin::copyRes2Cache()
             <<":/res/google-code-prettify/prettify.css"
             <<":/res/markdown/github2.css"
             <<":/res/markdown/marked.min.js"
-            <<":/res/markdown/jquery.min.js";
+            <<":/res/markdown/jquery.min.js"
+            <<":/res/inlinecss/jquery.inlineStyler.min.js"
+            <<":/res/inlinecss/csstoinline.js";
 
     for (int i = 0; i < lsRes.size(); i++) {
         QString strInter = lsRes.at(i);

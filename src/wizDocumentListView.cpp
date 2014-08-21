@@ -41,6 +41,8 @@ CWizDocumentListView::CWizDocumentListView(CWizExplorerApp& app, QWidget *parent
     , m_app(app)
     , m_dbMgr(app.databaseManager())
     , m_tagList(NULL)
+    , m_itemSelectionChanged(false)
+    , m_accpetAllItems(false)
 {
     setFrameStyle(QFrame::NoFrame);
     setAttribute(Qt::WA_MacShowFocusRect, false);
@@ -246,12 +248,20 @@ bool CWizDocumentListView::acceptDocument(const WIZDOCUMENTDATA& document)
     return categoryAccpet; && kbGUIDSame;*/
 
     // there is no need to check if kbguid is same. especially when category item is  biz root.
+
+    if (m_accpetAllItems)
+        return true;
+
     return m_app.category().acceptDocument(document);
 }
 
 void CWizDocumentListView::addAndSelectDocument(const WIZDOCUMENTDATA& document)
 {
-    Q_ASSERT(acceptDocument(document));
+    if (!acceptDocument(document))
+    {
+        TOLOG1("[Locate] documentlist can not accpet document %1 ", document.strTitle);
+        return;
+    }
 
     int index = documentIndexFromGUID(document.strGUID);
     if (-1 == index) {
@@ -262,6 +272,7 @@ void CWizDocumentListView::addAndSelectDocument(const WIZDOCUMENTDATA& document)
         return;
 
     setCurrentItem(item(index), QItemSelectionModel::ClearAndSelect);
+    emit documentsSelectionChanged();
     sortItems();
 }
 
@@ -392,11 +403,14 @@ bool CWizDocumentListView::isDocumentsAllCanDelete(const CWizDocumentDataArray& 
 
 void CWizDocumentListView::mousePressEvent(QMouseEvent* event)
 {
-    if (event->button() == Qt::LeftButton) {
+    if (event->button() == Qt::LeftButton)
+    {
         m_dragStartPosition.setX(event->pos().x());
         m_dragStartPosition.setY(event->pos().y());
         QListWidget::mousePressEvent(event);
-    } else if (event->button() == Qt::RightButton) {
+    }
+    else if (event->button() == Qt::RightButton)
+    {
         m_rightButtonFocusedItems.clear();
         //
         CWizDocumentListViewItem* pItem = dynamic_cast<CWizDocumentListViewItem*>(itemAt(event->pos()));
@@ -408,7 +422,8 @@ void CWizDocumentListView::mousePressEvent(QMouseEvent* event)
         {
             foreach (QListWidgetItem* lsItem, selectedItems())
             {
-                if (pItem = dynamic_cast<CWizDocumentListViewItem*>(lsItem))
+                pItem = dynamic_cast<CWizDocumentListViewItem*>(lsItem);
+                if (pItem)
                 {
                     m_rightButtonFocusedItems.append(pItem);
                     pItem->setSpecialFocused(true);
@@ -435,6 +450,18 @@ void CWizDocumentListView::mouseMoveEvent(QMouseEvent* event)
     }
 
     QListWidget::mouseMoveEvent(event);
+}
+
+void CWizDocumentListView::mouseReleaseEvent(QMouseEvent* event)
+{
+    //
+    if (m_itemSelectionChanged)
+    {
+        emit documentsSelectionChanged();
+        m_itemSelectionChanged = false;
+    }
+
+    QListWidget::mouseReleaseEvent(event);
 }
 
 QPixmap WizGetDocumentDragBadget(int nCount)
@@ -625,6 +652,7 @@ void CWizDocumentListView::resetItemsSortingType(int type)
 void CWizDocumentListView::on_itemSelectionChanged()
 {
     //resetPermission();
+    m_itemSelectionChanged = true;
 }
 
 void CWizDocumentListView::on_tag_created(const WIZTAGDATA& tag)
@@ -1164,6 +1192,11 @@ void CWizDocumentListView::drawItem(QPainter* p, const QStyleOptionViewItemV4* v
     CWizDocumentListViewItem* pItem = documentItemFromIndex(vopt->index);
     if (pItem)
         pItem->draw(p, vopt, viewType());
+}
+
+void CWizDocumentListView::setAcceptAllItems(bool bAccept)
+{
+    m_accpetAllItems = bAccept;
 }
 
 void CWizDocumentListView::setItemsNeedUpdate(const QString& strKbGUID, const QString& strGUID)

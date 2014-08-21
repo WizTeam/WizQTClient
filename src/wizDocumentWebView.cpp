@@ -32,6 +32,7 @@
 #include "share/wizDatabaseManager.h"
 #include "wizDocumentView.h"
 #include "wizSearchReplaceWidget.h"
+#include "widgets/WizCodeEditorDialog.h"
 
 #include "utils/pathresolve.h"
 #include "utils/logger.h"
@@ -95,6 +96,34 @@ void CWizDocumentWebViewPage::triggerAction(QWebPage::WebAction typeAction, bool
     Q_EMIT actionTriggered(typeAction);
 }
 
+bool getBodyContentFromHtml(QString& strHtml, bool bNeedTextParse)
+{
+    QRegExp regHead("</?head[^>]*>", Qt::CaseInsensitive);
+    if (strHtml.contains(regHead))
+    {
+        if (bNeedTextParse)
+        {
+            QRegExp regHeadContant("<head[^>]*>[\\s\\S]*</head>");
+            int headIndex = regHeadContant.indexIn(strHtml);
+            if (headIndex > -1)
+            {
+                QString strHead = regHeadContant.cap(0);
+                if (strHead.contains("Cocoa HTML Writer"))
+                {
+                    // convert mass html to rtf, then convert rft to html
+                    QTextDocument textParase;
+                    textParase.setHtml(strHtml);
+                    strHtml = textParase.toHtml();
+                }
+            }
+        }
+
+        strHtml = WizGetHtmlBodyContent(strHtml);
+    }
+
+    return true;
+}
+
 void CWizDocumentWebViewPage::on_editorCommandPaste_triggered()
 {
     QClipboard* clip = QApplication::clipboard();
@@ -109,31 +138,12 @@ void CWizDocumentWebViewPage::on_editorCommandPaste_triggered()
     if (mime->hasHtml())
     {
         QString strHtml = mime->html();
-        QRegExp regHead("</?head[^>]*>", Qt::CaseInsensitive);
-        if (strHtml.contains(regHead))
+        if (getBodyContentFromHtml(strHtml, true))
         {
-            // convert mass html to rtf, then convert rft to html
-            QTextDocument textParase;
-            textParase.setHtml(strHtml);
-            strHtml = textParase.toHtml();
-
-            QRegExp regBodyContant("<body[^>]*>[\\s\\S]*</body>");
-            int index = regBodyContant.indexIn(strHtml);
-            if (index > -1)
-            {
-                QString strBody = regBodyContant.cap(0);
-                if (strBody.isEmpty())
-                    return;
-
-                QRegExp regBody = QRegExp("</?body[^>]*>", Qt::CaseInsensitive);
-                strBody.replace(regBody, "");
-                strHtml = strBody;
-
-                QMimeData* data = new QMimeData();
-                data->setHtml(strHtml);
-                clip->setMimeData(data);
-                return;
-            }
+            QMimeData* data = new QMimeData();
+            data->setHtml(strHtml);
+            clip->setMimeData(data);
+            return;
         }
     }
 
@@ -272,6 +282,12 @@ void CWizDocumentWebView::keyPressEvent(QKeyEvent* event)
         saveDocument(view()->note(), false);
         return;
     }
+    else if (event->key() == Qt::Key_A && event->modifiers() == Qt::ControlModifier && !isEditing())
+    {
+        //阅读模式下selectall无法触发，强制触发阅读模式下的selectall。
+        emit selectAllKeyPressed();
+        return;
+    }
     else if (event->key() == Qt::Key_Tab)
     {
         //set contentchanged
@@ -306,6 +322,13 @@ void CWizDocumentWebView::keyPressEvent(QKeyEvent* event)
     QWebView::keyPressEvent(event);
     setUpdatesEnabled(true);
 #else
+
+    if (event->key() == Qt::Key_Backspace && event->modifiers() == Qt::ControlModifier)
+    {
+        editorCommandExecuteRemoveStartOfLine();
+        return;
+    }
+
     //special handled for qt4,case capslock doesn't work
 #if QT_VERSION < 0x050000
 //    if (65 <= keyValue && 90 >= keyValue)
@@ -379,6 +402,21 @@ void CWizDocumentWebView::dragEnterEvent(QDragEnterEvent *event)
         if (nAccepted == li.size()) {
             event->acceptProposedAction();
         }
+    } else if (event->mimeData()->hasFormat(WIZNOTE_MIMEFORMAT_DOCUMENTS)) {
+        if (!event->mimeData()->data(WIZNOTE_MIMEFORMAT_DOCUMENTS).isEmpty()) {
+            setFocus();
+            event->acceptProposedAction();
+        }
+    }
+}
+
+void CWizDocumentWebView::dragMoveEvent(QDragMoveEvent* event)
+{
+    if (event->mimeData()->hasFormat(WIZNOTE_MIMEFORMAT_DOCUMENTS)) {
+            if (!event->mimeData()->data(WIZNOTE_MIMEFORMAT_DOCUMENTS).isEmpty()) {
+                setFocus();
+                event->acceptProposedAction();
+            }
     }
 }
 
@@ -441,8 +479,7 @@ bool CWizDocumentWebView::image2Html(const QString& strImageFile, QString& strHt
 
     qDebug() << "[Editor] copy to: " << strDestFile;
 
-    QImage img(strImageFile);
-    if (!img.save(strDestFile)) {
+    if (!QFile::copy(strImageFile, strDestFile)) {
         return false;
     }
 
@@ -453,28 +490,72 @@ bool CWizDocumentWebView::image2Html(const QString& strImageFile, QString& strHt
 void CWizDocumentWebView::dropEvent(QDropEvent* event)
 {
     int nAccepted = 0;
-    QList<QUrl> li = event->mimeData()->urls();
-    QList<QUrl>::const_iterator it;
-    for (it = li.begin(); it != li.end(); it++) {
-        QUrl url = *it;
-        url.setScheme(0);
+    const QMimeData* mimeData = event->mimeData();
+    if (mimeData->hasUrls())
+    {
+        QList<QUrl> li = mimeData->urls();
+        QList<QUrl>::const_iterator it;
+        for (it = li.begin(); it != li.end(); it++) {
+            QUrl url = *it;
+            url.setScheme(0);
 
-        qDebug() << "[Editor] drop: " << url.toString();
+            //paste image file as images, add attachment for other file
+            QString strFileName = url.toString();
+            QImageReader reader(strFileName);
+            if (reader.canRead())
+            {
+                QString strHtml;
+                if (image2Html(strFileName, strHtml)) {
+                    editorCommandExecuteInsertHtml(strHtml, true);
+                    nAccepted++;
+                }
+            }
+            else
+            {
+                WIZDOCUMENTDATA doc = view()->note();
+                CWizDatabase& db = m_dbMgr.db(doc.strKbGUID);
+                WIZDOCUMENTATTACHMENTDATA data;
+                data.strKbGUID = doc.strKbGUID; // needed by under layer
+                if (!db.AddAttachment(doc, strFileName, data))
+                {
+                    TOLOG1("[drop] add attachment failed %1", strFileName);
+                    continue;
+                }
+                nAccepted ++;
+            }
+        }
+    }
+    else if (mimeData->hasFormat(WIZNOTE_MIMEFORMAT_DOCUMENTS))
+    {
+        QString strData(mimeData->data(WIZNOTE_MIMEFORMAT_DOCUMENTS));
+        if (!strData.isEmpty())
+        {
+            QString strLinkHtml;
+            QStringList doclist = strData.split(';');
+            foreach (QString doc, doclist) {
+                QStringList docIds = doc.split(':');
+                if (docIds.count() == 2)
+                {
+                    WIZDOCUMENTDATA document;
+                    CWizDatabase& db = m_dbMgr.db(docIds.first());
+                    if (db.DocumentFromGUID(docIds.last(), document))
+                    {
+                        QString strHtml, strLink;
+                        db.DocumentToHtmlLink(document, strHtml, strLink);
+                        strLinkHtml += "<p>" + strHtml + "</p>";
+                    }
+                }
+            }
 
-        // only process image currently
-        QImageReader reader(url.toString());
-        if (!reader.canRead())
-            continue;
+            editorCommandExecuteInsertHtml(strLinkHtml, false);
 
-        QString strHtml;
-        if (image2Html(url.toString(), strHtml)) {
-            editorCommandExecuteInsertHtml(strHtml, true);
-            nAccepted++;
+            nAccepted ++;
         }
     }
 
-    if (nAccepted == li.size()) {
+    if (nAccepted > 0) {
         event->accept();
+        saveDocument(view()->note(), false);
     }
 }
 
@@ -708,7 +789,7 @@ void CWizDocumentWebView::onEditorSelectionChanged()
     }
 #endif // Q_OS_MAC
 
-//    Q_EMIT statusChanged();
+    Q_EMIT statusChanged();
 }
 
 void CWizDocumentWebView::onEditorLinkClicked(const QUrl& url)
@@ -919,6 +1000,17 @@ void CWizDocumentWebView::clearSearchKeywordHighlight()
     findText("", QWebPage::HighlightAllOccurrences);
 }
 
+void CWizDocumentWebView::on_insertCodeHtml_requset(QString strOldHtml)
+{
+    QString strHtml = strOldHtml;
+    if (getBodyContentFromHtml(strHtml, false))
+    {
+        editorCommandExecuteInsertHtml(strHtml, true);
+        //FiXME:插入代码时li的属性会丢失，此处需要特殊处理，在head中增加li的属性
+        page()->mainFrame()->evaluateJavaScript("WizAddCssForCodeLi();");
+    }
+}
+
 void CWizDocumentWebView::viewDocumentInEditor(bool editing)
 {
     Q_ASSERT(m_bEditorInited);
@@ -979,6 +1071,7 @@ void CWizDocumentWebView::viewDocumentInEditor(bool editing)
 
     //Waiting for the editor initialization complete if it's the first time to load a document.
     QTimer::singleShot(100, this, SLOT(applySearchKeywordHighlight()));
+    emit viewDocumentFinished();
 }
 
 void CWizDocumentWebView::onNoteLoadFinished()
@@ -1144,8 +1237,6 @@ bool CWizDocumentWebView::editorCommandExecuteLinkRemove()
 bool CWizDocumentWebView::editorCommandExecuteSearchReplace()
 {
     CWizSearchReplaceWidget *wgt = new CWizSearchReplaceWidget();
-    wgt->setAttribute(Qt::WA_DeleteOnClose);
-    wgt->setWindowFlags(Qt::WindowStaysOnTopHint);
     connect(wgt, SIGNAL(findPre(QString,bool)), SLOT(findPre(QString,bool)));
     connect(wgt, SIGNAL(findNext(QString,bool)), SLOT(findNext(QString,bool)));
     connect(wgt, SIGNAL(replaceCurrent(QString,QString)), SLOT(replaceCurrent(QString,QString)));
@@ -1203,12 +1294,14 @@ void CWizDocumentWebView::replaceAndFindNext(QString strSource, QString strTarge
         return;
     }
     findNext(strSource, bCasesensitive);
+    setContentsChanged(true);
 }
 
 void CWizDocumentWebView::replaceAll(QString strSource, QString strTarget, bool bCasesensitive)
 {
     QString strExec = QString("WizRepalceAll('%1', '%2', %3)").arg(strSource).arg(strTarget).arg(bCasesensitive);
     page()->mainFrame()->evaluateJavaScript(strExec);
+    setContentsChanged(true);
 }
 
 bool CWizDocumentWebView::editorCommandExecuteFontFamily(const QString& strFamily)
@@ -1333,7 +1426,7 @@ void CWizDocumentWebView::on_editorCommandExecuteTableInsert_accepted()
     if (!nRows && !nCols)
         return;
 
-    editorCommandExecuteCommand("insertTable", QString("{numRows:%1, numCols:%2, border:1}").arg(nRows).arg(nCols));
+    editorCommandExecuteCommand("insertTable", QString("{numRows:%1, numCols:%2, border:1, borderStyle:'1px solid #dddddd;'}").arg(nRows).arg(nCols));
 }
 
 bool CWizDocumentWebView::editorCommandExecuteInsertHorizontal()
@@ -1388,6 +1481,25 @@ bool CWizDocumentWebView::editorCommandExecuteRemoveFormat()
     return editorCommandExecuteCommand("removeFormat");
 }
 
+bool CWizDocumentWebView::editorCommandExecutePlainText()
+{
+    QString strText = page()->mainFrame()->evaluateJavaScript("editor.getPlainTxt()").toString();
+    QRegExp exp("<[^>]*>");
+    strText.replace(exp, "");
+#if QT_VERSION > 0x050000
+    strText = "<div>" + strText.toHtmlEscaped() + "</div>";
+#else
+    strText = "<div>" + strText + "</div>";
+#endif
+    strText.replace(" ", "&nbsp;");
+    strText.replace("\n", "<br />");
+
+    setContentsChanged(true);
+    m_strCurrentNoteHtml = strText;
+    QString strExec = QString("viewCurrentNote();");
+    return page()->mainFrame()->evaluateJavaScript(strExec).toBool();
+}
+
 bool CWizDocumentWebView::editorCommandExecuteFormatMatch()
 {
     return editorCommandExecuteCommand("formatMatch");
@@ -1397,6 +1509,26 @@ bool CWizDocumentWebView::editorCommandExecuteViewSource()
 {
     return editorCommandExecuteCommand("source");
 }
+
+bool CWizDocumentWebView::editorCommandExecuteInsertCode()
+{
+    QString strSelectHtml = page()->selectedText();
+    WizCodeEditorDialog *dialog = new WizCodeEditorDialog();
+    connect(dialog, SIGNAL(insertHtmlRequest(QString)), SLOT(on_insertCodeHtml_requset(QString)));
+    dialog->show();
+    dialog->setCode(strSelectHtml);
+
+    return true;
+}
+
+#ifdef Q_OS_MAC
+bool CWizDocumentWebView::editorCommandExecuteRemoveStartOfLine()
+{
+    triggerPageAction(QWebPage::SelectStartOfLine);
+    QKeyEvent delKeyPress(QEvent::KeyPress, Qt::Key_Delete, Qt::NoModifier, QString());
+    return QApplication::sendEvent(this, &delKeyPress);
+}
+#endif
 
 bool CWizDocumentWebView::editorCommandExecuteTableDelete()
 {

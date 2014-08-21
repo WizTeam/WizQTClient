@@ -140,6 +140,7 @@ void WizLoadSkinIcon3(QIcon& icon, const QString& strSkinName, const QString& st
                       QIcon::Mode mode, QIcon::State state, const QColor& blendColor);
 QIcon WizLoadSkinIcon3(const QString& strIconName, QIcon::Mode mode);
 
+QString WizGetHtmlBodyContent(const QString& strHtml);
 void WizHtml2Text(const QString& strHtml, QString& strText);
 void WizDeleteFolder(const CString& strPath);
 void WizDeleteFile(const CString& strFileName);

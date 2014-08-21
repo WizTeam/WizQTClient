@@ -2145,3 +2145,20 @@ bool WizIsKMURLOpenDocument(const QString& strURL)
     }
     return false;
 }
+
+
+QString WizGetHtmlBodyContent(const QString& strHtml)
+{
+    QString strBody = strHtml;
+    QRegExp regBodyContant("<body[^>]*>[\\s\\S]*</body>");
+    int index = regBodyContant.indexIn(strBody);
+    if (index > -1)
+    {
+        strBody = regBodyContant.cap(0);
+
+        QRegExp regBody = QRegExp("</?body[^>]*>", Qt::CaseInsensitive);
+        strBody.replace(regBody, "");
+    }
+
+    return strBody;
+}

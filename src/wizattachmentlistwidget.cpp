@@ -175,7 +175,10 @@ void CWizAttachmentListView::resetAttachments()
 
 void CWizAttachmentListView::setDocument(const WIZDOCUMENTDATA& document)
 {
+    disconnect(this, SLOT(resetAttachments()));
     m_document = document;
+    connect(&(m_dbMgr.db(m_document.strKbGUID)), SIGNAL(attachmentsUpdated())
+            , SLOT(resetAttachments()));
     resetAttachments();
 }
 
@@ -386,7 +389,7 @@ void CWizAttachmentListView::on_action_deleteAttachment()
         if (CWizAttachmentListViewItem* item = dynamic_cast<CWizAttachmentListViewItem*>(it))
         {
             CWizDatabase& db = m_dbMgr.db(item->attachment().strKbGUID);
-            db.DeleteAttachment(item->attachment(), true);
+            db.DeleteAttachment(item->attachment(), true, true);
         }
     }
 

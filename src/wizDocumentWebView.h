@@ -195,6 +195,7 @@ protected:
     virtual void focusOutEvent(QFocusEvent* event);
     virtual void contextMenuEvent(QContextMenuEvent* event);
     virtual void dragEnterEvent(QDragEnterEvent* event);
+    virtual void dragMoveEvent(QDragMoveEvent* event);
     virtual void dropEvent(QDropEvent* event);
 
 private:
@@ -252,6 +253,8 @@ public Q_SLOTS:
 
     void applySearchKeywordHighlight();
     void clearSearchKeywordHighlight();
+
+    void on_insertCodeHtml_requset(QString strOldHtml);
 
     /* editor API */
 
@@ -314,11 +317,17 @@ public Q_SLOTS:
     bool editorCommandExecuteInsertDate();
     bool editorCommandExecuteInsertTime();
     bool editorCommandExecuteRemoveFormat();
+    bool editorCommandExecutePlainText();
     bool editorCommandExecuteFormatMatch();
     bool editorCommandExecuteInsertHorizontal();
     bool editorCommandExecuteInsertCheckList();
     bool editorCommandExecuteInsertImage();
     bool editorCommandExecuteViewSource();
+    bool editorCommandExecuteInsertCode();
+
+#ifdef Q_OS_MAC
+    bool editorCommandExecuteRemoveStartOfLine();
+#endif
 
     // js func
     void initCheckListEnvironment();
@@ -326,13 +335,16 @@ public Q_SLOTS:
 Q_SIGNALS:
     // signals for notify command reflect status, triggered when selection, focus, editing mode changed
     void statusChanged();
-
+    void selectAllKeyPressed();
     // signals used request reset info toolbar and editor toolbar
     void focusIn();
     void focusOut();
     //
 
     void requestShowContextMenu(const QPoint& pos);
+
+    //
+    void viewDocumentFinished();
 };
 
 #endif // WIZDOCUMENTWEBVIEW_H

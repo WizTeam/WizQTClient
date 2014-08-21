@@ -13716,7 +13716,7 @@ UE.plugins['paste'] = function () {
                 UE.filterNode(root, me.options.filterRules);
             }
             //执行默认的处理
-            me.filterInputRule(root);
+            //me.filterInputRule(root);
             //针对chrome的处理
             if (browser.webkit) {
                 var br = root.lastChild();
@@ -17933,7 +17933,7 @@ UE.plugins['video'] = function (){
                 for (var r = 0; r < rowsNum; r++) {
                     html.push('<tr>');
                     for (var c = 0; c < colsNum; c++) {
-                        html.push('<td width="' + tdWidth + '"  vAlign="' + opt.tdvalign + '" >' + (browser.ie ? domUtils.fillChar : '<br/>') + '</td>')
+                        html.push('<td width="' + tdWidth + '"  vAlign="' + opt.tdvalign + '" style="border: ' + opt.borderStyle + '">' + (browser.ie ? domUtils.fillChar : '<br/>') + '</td>')
                     }
                     html.push('</tr>')
                 }

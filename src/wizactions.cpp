@@ -38,7 +38,8 @@ WIZACTION* CWizActions::actionsData()
         {"actionList", QObject::tr("List")},
         {"actionTable", QObject::tr("Table")},
         {"actionLink", QObject::tr("Link")},
-        {"actionStyle", QObject::tr("Style")}
+        {"actionStyle", QObject::tr("Style")},
+        {"actionInsert", QObject::tr("Insert")}
     };
 
     Q_UNUSED(arrayRoot);
@@ -47,7 +48,7 @@ WIZACTION* CWizActions::actionsData()
     {
         {"actionPreference",                QObject::tr("Preference..."), "", ""},
         {"actionAbout",                     QObject::tr("About WizNote..."), "", ""},
-        {"actionExit",                      QObject::tr("Exit"), "", ""},
+        {"actionExit",                      QObject::tr("Exit"), "", "Ctrl+Q"},
         {"actionLogout",                    QObject::tr("Logout..."), "", ""},
         {WIZACTION_GLOBAL_SYNC,             QObject::tr("Sync"), "", ""},
         {WIZACTION_GLOBAL_NEW_DOCUMENT,     QObject::tr("New Note"), "", "Ctrl+N"},
@@ -65,7 +66,11 @@ WIZACTION* CWizActions::actionsData()
 
         // editing
         {WIZACTION_EDITOR_UNDO,             QObject::tr("Undo"), "", "Ctrl+Z"},
+    #ifdef Q_OS_MAC
         {WIZACTION_EDITOR_REDO,             QObject::tr("Redo"), "", "Shift+Ctrl+Z"},
+    #else
+        {WIZACTION_EDITOR_REDO,             QObject::tr("Redo"), "", "Ctrl+Y"},
+    #endif
         {WIZACTION_EDITOR_CUT,              QObject::tr("Cut"), "", "Ctrl+X"},
         {WIZACTION_EDITOR_COPY,             QObject::tr("Copy"), "", "Ctrl+C"},
         {WIZACTION_EDITOR_PASTE,            QObject::tr("Paste"), "", "Ctrl+V"},
@@ -96,7 +101,10 @@ WIZACTION* CWizActions::actionsData()
         {WIZACTION_FORMAT_INSERT_DATE,          QObject::tr("Insert date"), "", "Shift+Ctrl+D"},
         {WIZACTION_FORMAT_INSERT_TIME,          QObject::tr("Insert time"), "", "Shift+Ctrl+Alt+D"},
         {WIZACTION_FORMAT_INSERT_CHECKLIST,      QObject::tr("Insert check list"), "", "Ctrl+O"},
+        {WIZACTION_FORMAT_INSERT_CODE,                QObject::tr("Insert Code"), "", "Shift+Ctrl+C"},
+        {WIZACTION_FORMAT_INSERT_IMAGE,                QObject::tr("Insert Image"), "", "Shift+Ctrl+I"},
         {WIZACTION_FORMAT_REMOVE_FORMAT,        QObject::tr("Remove format"), "", ""},
+        {WIZACTION_FORMAT_PLAINTEXT,        QObject::tr("Convert to plain text"), "", ""},
         {WIZACTION_FORMAT_VIEW_SOURCE,          QObject::tr("View html source..."), "", ""},
 
         {"", "", "", ""}

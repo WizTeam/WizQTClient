@@ -49,11 +49,14 @@ public:
     void setItemsNeedUpdate(const QString& strKbGUID = 0, const QString& strGUID = 0);
     void drawItem(QPainter*p, const QStyleOptionViewItemV4* vopt) const;
 
+    void setAcceptAllItems(bool bAccept);
+
 protected:
     virtual void resizeEvent(QResizeEvent* event);
     //virtual void contextMenuEvent(QContextMenuEvent* event);
     virtual void mousePressEvent(QMouseEvent* event);
     virtual void mouseMoveEvent(QMouseEvent* event);
+    virtual void mouseReleaseEvent(QMouseEvent* event);
 
     virtual void startDrag(Qt::DropActions supportedActions);
     virtual void dragEnterEvent(QDragEnterEvent *event);
@@ -85,6 +88,9 @@ private:
     int m_vscrollDelta;
     int m_vscrollCurrent;
 //#endif // Q_OS_MAC
+
+    bool m_itemSelectionChanged;
+    bool m_accpetAllItems;
 
     QPointer<QPropertyAnimation> m_scrollAnimation;
 
@@ -176,6 +182,7 @@ public Q_SLOTS:
 Q_SIGNALS:
     void documentCountChanged();
     void lastDocumentDeleted();
+    void documentsSelectionChanged();
 };
 
 
