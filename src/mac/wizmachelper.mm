@@ -298,20 +298,6 @@ void convertYosemiteFileListToNormalList(QStringList& fileList)
                  userData:(NSString *)userData
                     error:(NSString **)error
 {
-    qDebug() << "serviceCreateNote called";
-
-    // Test for strings on the pasteboard.
-    NSArray *classes = [NSArray arrayWithObject:[NSString class]];
-    NSDictionary *options = [NSDictionary dictionary];
-
-    if (![pboard canReadObjectForClasses:classes options:options]) {
-        *error = NSLocalizedString(@"Error: couldn't encrypt text.",
-                                   @"pboard couldn't give string.");
-        return;
-    }
-
-    qDebug() << "serviceCreateNote can read object from class";
-
     for (NSString *type in [pboard types])
     {
         //NSLog(@"types %@", type);
