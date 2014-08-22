@@ -7,7 +7,7 @@
 #include <QFile>
 #include <QTextStream>
 #include <QWebFrame>
-#include <QEventLoop>
+#include <QCoreApplication>
 #include <QTimer>
 
 #include <coreplugin/icore.h>
@@ -61,9 +61,7 @@ void MarkdownPlugin::onFrameRenderRequested(QWebFrame* frame, bool bUseInlineCss
         if (bUseInlineCss)
         {
             // wait for code render finished
-            QEventLoop loop;
-            QTimer::singleShot(500, &loop, SLOT(quit()));
-            loop.exec();
+            QCoreApplication::processEvents(QEventLoop::AllEvents, 500);
 
             changeCssToInline(frame);
         }

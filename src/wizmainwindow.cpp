@@ -383,6 +383,8 @@ void MainWindow::shiftVisableStatus()
     else
     {
         wizMacShowCurrentApplication();
+        // wait for process finished
+        QCoreApplication::processEvents(QEventLoop::AllEvents, 200);
         raise();
     }
     //
