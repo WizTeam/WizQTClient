@@ -37,6 +37,8 @@
 #include "utils/pathresolve.h"
 #include "utils/logger.h"
 
+#include "mac/wizmachelper.h"
+
 using namespace Core;
 using namespace Core::Internal;
 
@@ -507,6 +509,12 @@ void CWizDocumentWebView::dropEvent(QDropEvent* event)
 
             //paste image file as images, add attachment for other file
             QString strFileName = url.toString();
+#ifdef Q_OS_MAC
+            if (wizIsYosemiteFilePath(strFileName))
+            {
+                strFileName = wizConvertYosemiteFilePathToNormalPath(strFileName);
+            }
+#endif
             QImageReader reader(strFileName);
             if (reader.canRead())
             {

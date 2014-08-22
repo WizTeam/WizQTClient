@@ -997,6 +997,28 @@ bool CWizCategoryView::createDocument(WIZDOCUMENTDATA& data, const QString& strH
     return true;
 }
 
+bool CWizCategoryView::createDocumentByAttachments(WIZDOCUMENTDATA& data, const QStringList& attachList)
+{
+    if (attachList.isEmpty())
+        return false;
+
+    QString strFileName = attachList.first().right(attachList.first().length() - attachList.first().lastIndexOf("/") - 1);
+    QString strTitle = strFileName.left(strFileName.indexOf("."));
+    if (!createDocument(data, "<p><br/></p>", strTitle))
+        return false;
+
+    CWizDatabase& db = m_dbMgr.db(data.strKbGUID);
+    foreach (QString StrFileName, attachList) {
+        WIZDOCUMENTATTACHMENTDATA attach;
+        if (!db.AddAttachment(data, StrFileName, attach))
+        {
+            TOLOG1("[Service] add attch failed :  1%", StrFileName);
+        }
+    }
+
+    return true;
+}
+
 void CWizCategoryView::on_action_newDocument()
 {
     if (currentCategoryItem<CWizCategoryViewFolderItem>()

@@ -1234,7 +1234,7 @@ void MainWindow::on_syncProcessLog(const QString& strMsg)
 
 void MainWindow::on_actionNewNote_triggered()
 {
-    cancleSearchStatus();
+    initVariableBeforCreateNote();
     WIZDOCUMENTDATA data;
     if (!m_category->createDocument(data))
     {
@@ -1244,10 +1244,7 @@ void MainWindow::on_actionNewNote_triggered()
     //FIXME:这个地方存在Bug,只能在Editor为disable的情况下才能设置焦点.
     m_doc->web()->setEditorEnable(false);
 
-    m_documentForEditing = data;
-    m_documents->addAndSelectDocument(data);
-    m_doc->web()->setFocus(Qt::MouseFocusReason);
-    setActionsEnableForNewNote();
+    setFocusForNewNote(data);
 }
 
 void MainWindow::on_actionEditingUndo_triggered()
@@ -2029,6 +2026,14 @@ void MainWindow::setActionsEnableForNewNote()
     m_actions->actionFromName(WIZACTION_FORMAT_VIEW_SOURCE)->setEnabled(true);
 }
 
+void MainWindow::setFocusForNewNote(WIZDOCUMENTDATA doc)
+{
+    m_documentForEditing = doc;
+    m_documents->addAndSelectDocument(doc);
+    m_doc->web()->setFocus(Qt::MouseFocusReason);
+    setActionsEnableForNewNote();
+}
+
 void MainWindow::viewDocumentByWizKMURL(const QString &strKMURL)
 {
     CWizDatabase& db = m_dbMgr.db();
@@ -2051,20 +2056,17 @@ void MainWindow::viewDocumentByWizKMURL(const QString &strKMURL)
 
 void MainWindow::createNoteWithAttachments(const QStringList& strAttachList)
 {
-    on_actionNewNote_triggered();
+    initVariableBeforCreateNote();
+    WIZDOCUMENTDATA data;
+    if (!m_category->createDocumentByAttachments(data, strAttachList))
+        return;
 
-    CWizDatabase& db = m_dbMgr.db(m_documentForEditing.strKbGUID);
-    foreach (QString StrFileName, strAttachList) {
-        WIZDOCUMENTATTACHMENTDATA attach;
-        if (!db.AddAttachment(m_documentForEditing, StrFileName, attach))
-        {
-            TOLOG1("[Service] add attch failed :  1%", StrFileName);
-        }
-    }
+    setFocusForNewNote(data);
 }
 
 void MainWindow::createNoteWithText(const QString& strText)
 {
+    initVariableBeforCreateNote();
 #if QT_VERSION > 0x050000
     QString strHtml = strText.toHtmlEscaped();
 #else
@@ -2087,10 +2089,7 @@ void MainWindow::createNoteWithText(const QString& strText)
     {
         return;
     }
-    m_documentForEditing = data;
-    m_documents->addAndSelectDocument(data);
-    m_doc->web()->setFocus(Qt::MouseFocusReason);
-    setActionsEnableForNewNote();
+    setFocusForNewNote(data);
 }
 
 void MainWindow::initTrayIcon(QSystemTrayIcon* trayIcon)
@@ -2143,6 +2142,11 @@ void MainWindow::cancleSearchStatus()
         m_category->setFocus();
         m_category->setCurrentItem(m_category->selectedItems().first());
     }
+}
+
+void MainWindow::initVariableBeforCreateNote()
+{
+    cancleSearchStatus();
 }
 
 void MainWindow::viewDocumentInFloatWidget(const WIZDOCUMENTDATA& data)

@@ -264,6 +264,7 @@ public:
 
     bool createDocument(WIZDOCUMENTDATA& data);
     bool createDocument(WIZDOCUMENTDATA& data, const QString& strHtml, const QString& strTitle);
+    bool createDocumentByAttachments(WIZDOCUMENTDATA& data, const QStringList& attachList);
     //
     void createGroup();
     void viewPersonalGroupInfo(const QString& groupGUID);
