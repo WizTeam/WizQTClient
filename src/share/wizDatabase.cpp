@@ -765,6 +765,50 @@ bool CWizDatabase::GetBizMetaName(const QString &strBizGUID, QString &strMetaNam
     return false;
 }
 
+bool CWizDatabase::initZiwReaderForEncryption(const QString& strUserCipher)
+{
+    if (!m_ziwReader->isRSAKeysAvailable())
+    {
+        CWizDatabase* persionDB = getPersonalDatabase();
+        if (!persionDB->checkUserCertExists() || !persionDB->loadUserCert())
+        {
+            QMessageBox::information(0, "Info", "No password cert founded. Please create password" \
+                                     " cert from windows client first.");
+            return false;
+        }
+    }
+
+    if (!m_ziwReader->isZiwCipherAvailable())
+    {
+        if (m_ziwReader->userCipher().isEmpty())
+        {
+            QString userCipher = strUserCipher;
+            if (userCipher.isEmpty())
+            {
+                userCipher = QInputDialog::getText(0, "Password", "Please input document password to encrypt.",
+                                                           QLineEdit::Password);
+
+                if (userCipher.isEmpty())
+                    return false;
+            }
+            m_ziwReader->setUserCipher(userCipher);
+        }
+
+        m_ziwReader->createZiwHeader();
+        bool initResult = m_ziwReader->initZiwCipher();
+        m_ziwReader->setUserCipher(QString());
+
+        //
+        if (!initResult)
+        {
+            QMessageBox::warning(0, "Info", "User password check failed!");
+            return false;
+        }
+    }
+
+    return true;
+}
+
 bool CWizDatabase::OnDownloadGroups(const CWizGroupDataArray& arrayGroup)
 {
     bool ret = SetUserGroupInfo(arrayGroup);
@@ -2821,6 +2865,19 @@ bool CWizDatabase::CreateDocumentAndInit(const WIZDOCUMENTDATA& sourceDoc, const
     return bRet;
 }
 
+bool CWizDatabase::CreateDocumentByTemplate(const QString& templateZiwFile, const QString& strLocation,
+                                            const WIZTAGDATA& tag, WIZDOCUMENTDATA& newDoc)
+{
+    QByteArray ba;
+    if (!LoadFileData(templateZiwFile, ba))
+        return false;
+
+    QString strTitle = WizExtractFileTitle(templateZiwFile);
+    newDoc.strTitle = strTitle;
+
+    return CreateDocumentAndInit(newDoc, ba, strLocation, tag, newDoc);
+}
+
 bool CWizDatabase::AddAttachment(const WIZDOCUMENTDATA& document, const CString& strFileName, WIZDOCUMENTATTACHMENTDATA& dataRet)
 {
     dataRet.strKbGUID = document.strKbGUID;
@@ -2887,12 +2944,17 @@ bool CWizDatabase::LoadDocumentData(const QString& strDocumentGUID, QByteArray& 
         }
     }
 
+    return LoadFileData(strFileName, arrayData);
+}
+
+bool CWizDatabase::LoadFileData(const QString& strFileName, QByteArray& arrayData)
+{
     QFile file(strFileName);
     if (!file.open(QFile::ReadOnly))
         return false;
 
     arrayData = file.readAll();
-
+    file.close();
     return !arrayData.isEmpty();
 }
 
@@ -3264,7 +3326,7 @@ bool CWizDatabase::DocumentToHtmlFile(const WIZDOCUMENTDATA& document,
 {
     ::WizEnsurePathExists(strPath);
 
-    if (!extractZiwFileToFolder(document, strPath))
+    if (!ExtractZiwFileToFolder(document, strPath))
         return false;
 
     QString strTempHtmlFileName = strPath + "index.html";
@@ -3283,15 +3345,7 @@ bool CWizDatabase::DocumentToHtmlFile(const WIZDOCUMENTDATA& document,
     return PathFileExists(strTempHtmlFileName);
 }
 
-bool CWizDatabase::extractZiwFileToTempFolder(const WIZDOCUMENTDATA& document, QString& strTempFolder)
-{
-    strTempFolder = Utils::PathResolve::tempPath() + document.strGUID + "/";
-    ::WizEnsurePathExists(strTempFolder);
-
-    return extractZiwFileToFolder(document, strTempFolder);
-}
-
-bool CWizDatabase::extractZiwFileToFolder(const WIZDOCUMENTDATA& document,
+bool CWizDatabase::ExtractZiwFileToFolder(const WIZDOCUMENTDATA& document,
                                               const QString& strFolder)
 {
     CString strZipFileName = GetDocumentFileName(document.strGUID);
@@ -3321,47 +3375,65 @@ bool CWizDatabase::extractZiwFileToFolder(const WIZDOCUMENTDATA& document,
     return CWizUnzipFile::extractZip(strZipFileName, strFolder);
 }
 
-bool CWizDatabase::encryptTempFolderToZiwFile(WIZDOCUMENTDATA &document, const QString &strTempFoler, \
-                                              const QString &strIndexFile, const QStringList &strResourceList)
+bool CWizDatabase::EncryptDocument(WIZDOCUMENTDATA& document)
 {
+    if (document.nProtected || document.strKbGUID != kbGUID())
+        return false;
+
+    //
+    QString strFolder = Utils::PathResolve::tempDocumentFolder(document.strGUID);
+    if (!ExtractZiwFileToFolder(document, strFolder))
+    {
+        TOLOG("extract ziw file failed!");
+        return false;
+    }
+
+    //
+    if (!initZiwReaderForEncryption())
+        return false;
+
+    //
+    document.nProtected = 1;
+    QString strFileName = GetDocumentFileName(document.strGUID);
+    if (CompressFolderToZiwFile(document, strFolder, strFileName))
+    {
+        emit documentDataModified(document);
+        return true;
+    }
+
+    return false;
+}
+
+bool CWizDatabase::CompressFolderToZiwFile(WIZDOCUMENTDATA &document, \
+                                           const QString& strFileFoler)
+{
+    QString strFileName = GetDocumentFileName(document.strGUID);
+    return CompressFolderToZiwFile(document, strFileFoler, strFileName);
+}
+
+bool CWizDatabase::CompressFolderToZiwFile(WIZDOCUMENTDATA& document, const QString& strFileFoler,
+                                          const QString& strZiwFileName)
+{
+    QFile::remove(strZiwFileName);
+
     CWizDocument doc(*this, document);
-    CString strMetaText = doc.GetMetaText();
-    QString strZipFileName = GetDocumentFileName(doc.GUID());
-    QFile::remove(strZipFileName);
+    QString strMetaText = doc.GetMetaText();
 
-    //copy index file
-    QString strFolderIndex = strTempFoler + "index.html";
-    if (strIndexFile != strFolderIndex)
-    {
-        QFile::remove(strFolderIndex);
-        QFile::copy(strIndexFile, strFolderIndex);
-    }
-
-    //copy resources to temp folder
-    QString strResourcePath = strTempFoler + "index_files/";
-    for (int i = 0; i < strResourceList.count(); i++)
-    {
-        QFileInfo fInfo(strResourceList.at(i));
-        if (fInfo.exists())
-        {
-            QFile::copy(strResourceList.at(i), strResourcePath + fInfo.fileName());
-        }
-    }
-
+    //
     if (!document.nProtected)
     {
-        bool bZip = ::WizFolder2Zip(strTempFoler, strMetaText, strZipFileName);
+        bool bZip = ::WizFolder2Zip(strFileFoler, strMetaText, strZiwFileName);
         if (!bZip)
             return false;
     }
     else
     {
         CString strTempFile = Utils::PathResolve::tempPath() + document.strGUID + "-decrypted";
-        bool bZip = ::WizFolder2Zip(strTempFoler, strMetaText, strZipFileName);
+        bool bZip = ::WizFolder2Zip(strFileFoler, strMetaText, strTempFile);
         if (!bZip)
             return false;
 
-        if (!m_ziwReader->encryptDataToTempFile(strTempFile, strZipFileName))
+        if (!m_ziwReader->encryptDataToTempFile(strTempFile, strZiwFileName))
             return false;
     }
 
@@ -3370,7 +3442,37 @@ bool CWizDatabase::encryptTempFolderToZiwFile(WIZDOCUMENTDATA &document, const Q
     /*不需要将笔记modified信息通知关联内容.此前页面显示已是最新,不需要relaod.如果relaod较大笔记
     可能会造成页面闪烁*/
     bool notify = false;
-    return UpdateDocumentDataMD5(document, strZipFileName, notify);
+    return UpdateDocumentDataMD5(document, strZiwFileName, notify);
+}
+
+bool CWizDatabase::CancelDocumentEncryption(WIZDOCUMENTDATA& document, const QString& strUserCipher)
+{
+    if (!document.nProtected || kbGUID() != document.strKbGUID)
+        return false;
+
+    //
+    if (!initZiwReaderForEncryption(strUserCipher))
+        return false;
+
+    m_ziwReader->setUserCipher(strUserCipher);
+    //
+    QString strFolder = Utils::PathResolve::tempDocumentFolder(document.strGUID);
+    if (!ExtractZiwFileToFolder(document, strFolder))
+    {
+        TOLOG("extract ziw file failed!");
+        return false;
+    }
+
+    //
+    document.nProtected = 0;
+    QString strFileName = GetDocumentFileName(document.strGUID);
+    if (CompressFolderToZiwFile(document, strFolder, strFileName))
+    {
+        emit documentDataModified(document);
+        return true;
+    }
+
+    return false;
 }
 
 bool CWizDatabase::IsFileAccessible(const WIZDOCUMENTDATA& document)
@@ -3391,6 +3493,20 @@ bool CWizDatabase::IsFileAccessible(const WIZDOCUMENTDATA& document)
     }
 
     return true;
+}
+
+bool CWizDatabase::checkUserCertExists()
+{
+    QString strN, stre, strEncryptedd, strHint;
+    if (GetUserCert(strN, stre, strEncryptedd, strHint))
+    {
+        if ((!strN.isEmpty()) && (!stre.isEmpty()) && (!strEncryptedd.isEmpty()))
+        {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 QObject* CWizDatabase::GetFolderByLocation(const QString& strLocation, bool create)

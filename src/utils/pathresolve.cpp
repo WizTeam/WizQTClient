@@ -128,6 +128,14 @@ QString PathResolve::tempPath()
     return path;
 }
 
+QString PathResolve::tempDocumentFolder(const QString& strGuid)
+{
+    QString strTempFolder = tempPath() + strGuid + "/";
+    ensurePathExists(strTempFolder);
+
+    return strTempFolder;
+}
+
 QString PathResolve::upgradePath()
 {
     QString strPath = dataStorePath() + "/update/";

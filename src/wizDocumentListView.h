@@ -152,6 +152,7 @@ public Q_SLOTS:
     void on_action_selectTags();
     void on_action_deleteDocument();
     void on_action_encryptDocument();
+    void on_action_cancelEncryption();
 
     void on_action_moveDocument();
     void on_action_moveDocument_confirmed(int result);
@@ -183,6 +184,11 @@ Q_SIGNALS:
     void documentCountChanged();
     void lastDocumentDeleted();
     void documentsSelectionChanged();
+
+
+private:
+    int numOfEncryptedDocuments(const CWizDocumentDataArray& docArray);
+    void setEncryptDocumentActionEnable(bool enable);
 };
 
 

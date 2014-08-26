@@ -736,8 +736,8 @@ bool MainWindow::isPersonalDocument() const
 QString MainWindow::getCurrentNoteHtml() const
 {
     CWizDatabase& db = m_dbMgr.db(m_doc->note().strKbGUID);
-    QString strFolder;
-    if (db.extractZiwFileToTempFolder(m_doc->note(), strFolder))
+    QString strFolder = Utils::PathResolve::tempDocumentFolder(m_doc->note().strGUID);
+    if (db.ExtractZiwFileToFolder(m_doc->note(), strFolder))
     {
         QString strHtmlFile = strFolder + "index.html";
         QString strHtml;
@@ -748,19 +748,45 @@ QString MainWindow::getCurrentNoteHtml() const
     return QString();
 }
 
+
+void copyFileToFolder(const QString& strFileFoler, const QString& strIndexFile, \
+                         const QStringList& strResourceList)
+{
+    //copy index file
+    QString strFolderIndex = strFileFoler + "index.html";
+    if (strIndexFile != strFolderIndex)
+    {
+        QFile::remove(strFolderIndex);
+        QFile::copy(strIndexFile, strFolderIndex);
+    }
+
+    //copy resources to temp folder
+    QString strResourcePath = strFileFoler + "index_files/";
+    for (int i = 0; i < strResourceList.count(); i++)
+    {
+        if (QFile::exists(strResourceList.at(i)))
+        {
+            QFile::copy(strResourceList.at(i), strResourcePath + WizExtractFileName(strResourceList.at(i)));
+        }
+    }
+}
+
 void MainWindow::saveHtmlToCurrentNote(const QString &strHtml, const QString& strResource)
 {
+    if (strHtml.isEmpty())
+        return;
+
     WIZDOCUMENTDATA docData = m_doc->note();
     CWizDatabase& db = m_dbMgr.db(docData.strKbGUID);
-    QString strFolder;
-    if (db.extractZiwFileToTempFolder(m_doc->note(), strFolder))
-    {
-        QString strHtmlFile = strFolder + "index.html";
-        ::WizSaveUnicodeTextToUtf8File(strHtmlFile, strHtml);
-        QStringList strResourceList = strResource.split('*');
-        db.encryptTempFolderToZiwFile(docData, strFolder, strHtmlFile, strResourceList);
-        quickSyncKb(docData.strKbGUID);
-    }
+    QString strFolder = Utils::PathResolve::tempDocumentFolder(docData.strGUID);
+    //
+    QString strHtmlFile = strFolder + "index.html";
+    ::WizSaveUnicodeTextToUtf8File(strHtmlFile, strHtml);
+    QStringList strResourceList = strResource.split('*');
+    copyFileToFolder(strFolder, strHtmlFile, strResourceList);
+
+    db.CompressFolderToZiwFile(docData, strFolder);
+    quickSyncKb(docData.strKbGUID);
 
     m_doc->web()->updateNoteHtml();
 }

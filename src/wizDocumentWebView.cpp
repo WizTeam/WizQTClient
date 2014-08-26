@@ -493,11 +493,6 @@ void CWizDocumentWebView::dropEvent(QDropEvent* event)
 {
     const QMimeData* mimeData = event->mimeData();
 
-    QStringList typeList = mimeData->formats();
-    foreach (QString strType, typeList) {
-        qDebug() << "Type : " << strType << " Data : " << mimeData->data(strType);
-    }
-
     int nAccepted = 0;
     if (mimeData->hasUrls())
     {

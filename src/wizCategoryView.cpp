@@ -1002,8 +1002,7 @@ bool CWizCategoryView::createDocumentByAttachments(WIZDOCUMENTDATA& data, const 
     if (attachList.isEmpty())
         return false;
 
-    QString strFileName = attachList.first().right(attachList.first().length() - attachList.first().lastIndexOf("/") - 1);
-    QString strTitle = strFileName.left(strFileName.indexOf("."));
+    QString strTitle = WizExtractFileName(attachList.first());
     if (!createDocument(data, "<p><br/></p>", strTitle))
         return false;
 

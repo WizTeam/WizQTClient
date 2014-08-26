@@ -17,6 +17,7 @@ public:
     static QString cachePath();
     static QString avatarPath();
     static QString tempPath();
+    static QString tempDocumentFolder(const QString& strGuid);
     static QString upgradePath();
     static QString logFile();
     static QString globalSettingsFile();
