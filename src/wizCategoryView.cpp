@@ -977,8 +977,10 @@ bool CWizCategoryView::createDocument(WIZDOCUMENTDATA& data, const QString& strH
         return false;
     }
 
-    QString strBody = WizGetHtmlBodyContent(strHtml);
-    if (!m_dbMgr.db(strKbGUID).CreateDocumentAndInit(strBody, "", 0, strTitle, "newnote", strLocation, "", data))
+    //QString strBody = WizGetHtmlBodyContent(strHtml);
+    //if (!m_dbMgr.db(strKbGUID).CreateDocumentAndInit(strBody, "", 0, strTitle, "newnote", strLocation, "", data))
+    QString strZiwFile = "/Users/lxn/Wiz/WizQTClient/share/template/generic_black.ziw";
+    if (!m_dbMgr.db(strKbGUID).CreateDocumentByTemplate(strZiwFile, strLocation, tag, data))
     {
         TOLOG("Failed to new document!");
         return false;

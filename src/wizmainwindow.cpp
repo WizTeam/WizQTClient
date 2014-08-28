@@ -13,6 +13,9 @@
 #include <QPushButton>
 #include <QHostInfo>
 #include <QSystemTrayIcon>
+#include <QPrintDialog>
+#include <QPrinter>
+#include <QWebFrame>
 
 #ifdef Q_OS_MAC
 #include <Carbon/Carbon.h>
@@ -61,10 +64,9 @@
 #include "sync/avatar.h"
 
 #include "wizUserVerifyDialog.h"
-
 #include "plugindialog.h"
-
 #include "notecomments.h"
+#include "wizLANFileReceiver.h"
 
 using namespace Core;
 using namespace Core::Internal;
@@ -186,6 +188,9 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     m_sync->start(QThread::IdlePriority);
     //
     setSystemTrayIconVisible(userSettings().showSystemTrayIcon());
+
+    CWizLANFileReceiver *receiver = new CWizLANFileReceiver(this);
+    receiver->initSocket();
 }
 
 bool MainWindow::eventFilter(QObject* watched, QEvent* event)
@@ -1569,6 +1574,22 @@ void MainWindow::on_actionSaveAsPDF_triggered()
         {
             web->saveAsPDF(fileName);
         }
+    }
+}
+
+void MainWindow::on_actionPrint_triggered()
+{
+    QPrinter *printer = new QPrinter(QPrinter::HighResolution);
+    qDebug() << "printer avaliable : " << printer->isValid();
+    printer->setOutputFormat(QPrinter::NativeFormat);
+    printer->setOutputFileName("abc.pdf");
+    QPrintDialog *printDialog = new QPrintDialog(printer,this);
+    printDialog->setWindowTitle(tr("Print Dialog"));
+    if (printDialog->exec() == QDialog::Accepted)
+    {
+        QTextDocument textdocument;
+        textdocument.setHtml(m_doc->web()->page()->mainFrame()->toHtml());
+        textdocument.print(printer);
     }
 }
 

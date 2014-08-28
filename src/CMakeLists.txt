@@ -142,6 +142,7 @@ set(wiznote_SOURCES
     wizSearchReplaceWidget.cpp
     widgets/WizCodeEditorDialog.cpp
     wizDocTemplateDialog.cpp
+    wizLANFileReceiver.cpp
 )
 
 set(wiznote_HEADERS
@@ -271,6 +272,7 @@ set(wiznote_HEADERS
     wizSearchReplaceWidget.h
     widgets/WizCodeEditorDialog.h
     wizDocTemplateDialog.h
+    wizLANFileReceiver.h
 )
 
 set(wiznote_FORMS
