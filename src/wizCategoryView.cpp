@@ -6,6 +6,7 @@
 #include <QMessageBox>
 #include <QApplication>
 #include <QTimer>
+#include <QFileDialog>
 
 #include <extensionsystem/pluginmanager.h>
 
@@ -45,6 +46,7 @@ using namespace Core::Internal;
 
 // for context menu text
 #define CATEGORY_ACTION_DOCUMENT_NEW    QObject::tr("New note")
+#define CATEGORY_ACTION_DOCUMENT_LOAD   QObject::tr("Load note")
 #define CATEGORY_ACTION_FOLDER_NEW      QObject::tr("New folder...")
 #define CATEGORY_ACTION_FOLDER_MOVE     QObject::tr("Move to...")
 #define CATEGORY_ACTION_FOLDER_RENAME   QObject::tr("Rename...")
@@ -367,21 +369,27 @@ void CWizCategoryBaseView::dropEvent(QDropEvent * event)
         foreach (QUrl url, urls) {
             strFileList.append(url.path());
         }
-        CWizFileReader *fileReader = new CWizFileReader();
-        connect(fileReader, SIGNAL(fileLoaded(QString)), SLOT(createDocumentByHtml(QString)));
-        MainWindow *mainWindow = dynamic_cast<MainWindow*>(m_app.mainWindow());
-        CWizProgressDialog progressDialog;// = mainWindow->progressDialog();
         //
-        progressDialog.setProgress(100,0);
-        connect(fileReader, SIGNAL(loadProgress(int,int)), &progressDialog, SLOT(setProgress(int,int)));
-        fileReader->loadFiles(strFileList);
-        progressDialog.exec();
+        loadDocument(strFileList);
     }
 
     viewport()->repaint();
     event->accept();
 }
-
+void CWizCategoryBaseView::loadDocument(QStringList &strFileList)
+{
+    CWizFileReader *fileReader = new CWizFileReader();
+    connect(fileReader, SIGNAL(fileLoaded(QString)), SLOT(createDocumentByHtml(QString)));
+    fileReader->loadFiles(strFileList);
+    MainWindow *mainWindow = dynamic_cast<MainWindow*>(m_app.mainWindow());
+    CWizProgressDialog *progressDialog  = mainWindow->progressDialog();
+    progressDialog->setProgress(100,0);
+    progressDialog->setActionString(tr("%1 files to load.").arg(strFileList.count()));
+    progressDialog->setNotifyString(tr("loading..."));
+    connect(fileReader, SIGNAL(loadProgress(int,int)), progressDialog, SLOT(setProgress(int,int)));
+    progressDialog->show();
+    progressDialog->close();
+}
 
 QString CWizCategoryBaseView::selectedItemKbGUID()
 {
@@ -652,6 +660,13 @@ void CWizCategoryView::initMenus()
     addAction(actionNewDoc);
     connect(actionNewDoc, SIGNAL(triggered()), SLOT(on_action_newDocument()));
 
+    QAction* actionLoadDoc = new QAction("ActionLoadDocument",this);
+    actionLoadDoc->setShortcutContext(Qt::WidgetShortcut);
+    actionLoadDoc->setShortcut(QKeySequence("Ctrl+Shift+L"));
+    actionLoadDoc->setData(ActionLoadDocument);
+    addAction(actionLoadDoc);
+    connect(actionLoadDoc,SIGNAL(triggered()),SLOT(on_action_loadDocument()));
+
     QAction* actionNewItem = new QAction("ActionNewItem", this);
     actionNewItem->setShortcutContext(Qt::WidgetShortcut);
     actionNewItem->setShortcut(QKeySequence("Ctrl+Shift+N"));
@@ -693,6 +708,9 @@ void CWizCategoryView::initMenus()
     addAction(actionTrash);
     connect(actionTrash, SIGNAL(triggered()), SLOT(on_action_emptyTrash()));
 
+    //
+
+
 //    QAction* actionQuitGroup = new QAction("QuitGroup", this);
 //    actionQuitGroup->setShortcutContext(Qt::WidgetShortcut);
 //    actionQuitGroup->setData(ActionQuitGroup);
@@ -722,6 +740,7 @@ void CWizCategoryView::initMenus()
     // folder menu
     m_menuFolder = new QMenu(this);
     m_menuFolder->addAction(actionNewDoc);
+    m_menuFolder->addAction(actionLoadDoc);
     m_menuFolder->addAction(actionNewItem);
     m_menuFolder->addSeparator();
     m_menuFolder->addAction(actionMoveItem);
@@ -800,6 +819,11 @@ void CWizCategoryView::resetMenu(CategoryMenuType type)
         case ActionNewDocument:
             if (type == FolderItem || type == GroupRootItem || type == GroupItem) {
                 act->setText(CATEGORY_ACTION_DOCUMENT_NEW);
+            }
+            break;
+        case ActionLoadDocument:
+            if(type==FolderItem || type == GroupRootItem || type == GroupItem) {
+                act->setText(CATEGORY_ACTION_DOCUMENT_LOAD);
             }
             break;
         case ActionNewItem:
@@ -1048,6 +1072,17 @@ void CWizCategoryView::on_action_newDocument()
         // delegate create action to mainwindow
         Q_EMIT newDocument();
     }
+}
+
+void CWizCategoryView::on_action_loadDocument()
+{
+    QStringList files = QFileDialog::getOpenFileNames(
+    this,
+    "Select one or more files to open",
+    "/home",
+    "Text files(*.txt *.md *.cpp *.h);;Images (*.png *.xpm *.jpg)");
+    loadDocument(files);
+
 }
 
 void CWizCategoryView::on_action_newItem()

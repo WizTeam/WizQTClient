@@ -2,6 +2,7 @@
 #include <QFile>
 #include <QFileInfo>
 #include <QTextStream>
+
 CWizFileReader::CWizFileReader(QObject *parent) :
     QThread(parent)
 {
@@ -24,7 +25,10 @@ QString CWizFileReader::loadTextFileToHtml(QString strFileName)
     if(!file.open(QIODevice::ReadOnly|QIODevice::Text))
         return "";
     QTextStream in(&file);
-    return in.readAll();
+    QString ret = in.readAll();
+    file.close();
+    ret.replace("\n","<br>");
+    return ret;
 }
 
 QString CWizFileReader::loadImageFileToHtml(QString strFileName)

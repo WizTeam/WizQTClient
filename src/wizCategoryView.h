@@ -38,6 +38,7 @@ public:
     void getDocuments(CWizDocumentDataArray& arrayDocument);
     bool acceptDocument(const WIZDOCUMENTDATA& document);
 
+    void loadDocument(QStringList& strFileList);
 
     void saveSelection();
     void restoreSelection();
@@ -145,6 +146,7 @@ public:
     enum CategoryActions
     {
         ActionNewDocument,
+        ActionLoadDocument,
         ActionNewItem,
         ActionMoveItem,
         ActionRenameItem,
@@ -279,6 +281,7 @@ public:
     void manageBiz(const QString& bizGUID, bool bUpgrade);
 
 
+
 private:
     QPointer<QMenu> m_menuFolderRoot;
     QPointer<QMenu> m_menuFolder;
@@ -328,6 +331,7 @@ protected Q_SLOTS:
 
 public Q_SLOTS:
     void on_action_newDocument();
+    void on_action_loadDocument();
 
     void on_action_newItem();
     void on_action_user_newFolder();
