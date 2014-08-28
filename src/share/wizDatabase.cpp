@@ -772,8 +772,8 @@ bool CWizDatabase::initZiwReaderForEncryption(const QString& strUserCipher)
         CWizDatabase* persionDB = getPersonalDatabase();
         if (!persionDB->checkUserCertExists() || !persionDB->loadUserCert())
         {
-            QMessageBox::information(0, "Info", "No password cert founded. Please create password" \
-                                     " cert from windows client first.");
+            QMessageBox::information(0, tr("Info"), tr("No password cert founded. Please create password" \
+                                     " cert from windows client first."));
             return false;
         }
     }
@@ -785,7 +785,7 @@ bool CWizDatabase::initZiwReaderForEncryption(const QString& strUserCipher)
             QString userCipher = strUserCipher;
             if (userCipher.isEmpty())
             {
-                userCipher = QInputDialog::getText(0, "Password", "Please input document password to encrypt.",
+                userCipher = QInputDialog::getText(0, tr("Password"), tr("Please input document password to encrypt."),
                                                            QLineEdit::Password);
 
                 if (userCipher.isEmpty())

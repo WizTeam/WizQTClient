@@ -304,6 +304,8 @@ public Q_SLOTS:
 
     void on_editor_statusChanged();
 
+    void createDocumentByTemplate(const QString& strFile);
+
     //js environment func
     QString getSkinResourcePath() const;
     QString getUserAvatarFilePath(int size) const;

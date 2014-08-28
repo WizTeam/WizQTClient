@@ -40,13 +40,21 @@
         <number>0</number>
        </property>
        <item>
-        <widget class="QTreeView" name="treeView_tempList">
+        <widget class="QTreeWidget" name="treeWidget">
          <property name="minimumSize">
           <size>
            <width>200</width>
            <height>0</height>
           </size>
          </property>
+         <attribute name="headerVisible">
+          <bool>false</bool>
+         </attribute>
+         <column>
+          <property name="text">
+           <string notr="true">1</string>
+          </property>
+         </column>
         </widget>
        </item>
        <item>
@@ -149,7 +157,6 @@
   <tabstop>btn_downloadNew</tabstop>
   <tabstop>btn_useLocal</tabstop>
   <tabstop>btn_cancle</tabstop>
-  <tabstop>treeView_tempList</tabstop>
   <tabstop>webView_preview</tabstop>
   <tabstop>webView_download</tabstop>
  </tabstops>

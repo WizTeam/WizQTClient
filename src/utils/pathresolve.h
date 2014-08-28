@@ -12,6 +12,8 @@ public:
     static QString resourcesPath();
     static QString themePath(const QString& strThemeName);
     static QString skinResourcesPath(const QString& strSkinName);
+    static QString builtinTemplatePath();
+    static QString downloadedTemplatePath();
     static QString pluginsPath();
     static QString dataStorePath();
     static QString cachePath();

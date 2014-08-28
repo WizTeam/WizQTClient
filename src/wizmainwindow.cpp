@@ -67,6 +67,7 @@
 #include "plugindialog.h"
 #include "notecomments.h"
 #include "wizLANFileReceiver.h"
+#include "wizDocTemplateDialog.h"
 
 using namespace Core;
 using namespace Core::Internal;
@@ -189,8 +190,7 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     //
     setSystemTrayIconVisible(userSettings().showSystemTrayIcon());
 
-    CWizLANFileReceiver *receiver = new CWizLANFileReceiver(this);
-    receiver->initSocket();
+
 }
 
 bool MainWindow::eventFilter(QObject* watched, QEvent* event)
@@ -701,6 +701,21 @@ void MainWindow::on_editor_statusChanged()
     } else {
         m_actions->actionFromName(WIZACTION_FORMAT_INSERT_IMAGE)->setEnabled(true);
     }
+}
+
+void MainWindow::createDocumentByTemplate(const QString& strFile)
+{
+    initVariableBeforCreateNote();
+    WIZDOCUMENTDATA data;
+    if (!m_category->createDocumentByTemplate(data, strFile))
+    {
+        return;
+    }
+
+    //FIXME:这个地方存在Bug,只能在Editor为disable的情况下才能设置焦点.
+    m_doc->web()->setEditorEnable(false);
+
+    setFocusForNewNote(data);
 }
 
 QString MainWindow::getSkinResourcePath() const
@@ -1267,6 +1282,10 @@ void MainWindow::on_syncProcessLog(const QString& strMsg)
 
 void MainWindow::on_actionNewNote_triggered()
 {
+    //通过模板创建笔记
+//    CWizDocTemplateDialog dlg;
+//    connect(&dlg, SIGNAL(documentTemplateSelected(QString)), SLOT(createDocumentByTemplate(QString)));
+//    dlg.exec();
     initVariableBeforCreateNote();
     WIZDOCUMENTDATA data;
     if (!m_category->createDocument(data))

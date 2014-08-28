@@ -490,6 +490,18 @@ void CWizDocumentListView::mouseReleaseEvent(QMouseEvent* event)
     QListWidget::mouseReleaseEvent(event);
 }
 
+void CWizDocumentListView::keyReleaseEvent(QKeyEvent* event)
+{
+    //
+    if (m_itemSelectionChanged)
+    {
+        emit documentsSelectionChanged();
+        m_itemSelectionChanged = false;
+    }
+
+    QListWidget::keyReleaseEvent(event);
+}
+
 QPixmap WizGetDocumentDragBadget(int nCount)
 {
     QString strFileName = Utils::PathResolve::resourcesPath() + "skins/document_drag.png";

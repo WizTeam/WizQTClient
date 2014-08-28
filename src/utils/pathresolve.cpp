@@ -47,6 +47,16 @@ QString PathResolve::skinResourcesPath(const QString &strSkinName)
     return resourcesPath() + "skins/" + strSkinName + "/";
 }
 
+QString PathResolve::builtinTemplatePath()
+{
+    return resourcesPath() + "templates/";
+}
+
+QString PathResolve::downloadedTemplatePath()
+{
+    return cachePath() + "templates/";
+}
+
 QString PathResolve::dataStorePath()
 {
     QString strPath;

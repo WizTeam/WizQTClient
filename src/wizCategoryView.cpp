@@ -902,99 +902,26 @@ void CWizCategoryView::showGroupContextMenu(QPoint pos)
 
 bool CWizCategoryView::createDocument(WIZDOCUMENTDATA& data, const QString& strHtml, const QString& strTitle)
 {
-    bool bFallback = true;
-
     QString strKbGUID = m_dbMgr.db().kbGUID();
     QString strLocation = m_dbMgr.db().GetDefaultNoteLocation();
     WIZTAGDATA tag;
 
-    // trash first, because it's inherited
-    if (CWizCategoryViewTrashItem* pItem = currentCategoryItem<CWizCategoryViewTrashItem>())
+    if (getAvailableNewNoteTagAndLocation(tag, strLocation))
     {
-        // only handle group trash
-        if (pItem->kbGUID() != m_dbMgr.db().kbGUID()) {
-            CWizCategoryViewGroupRootItem* pRItem =
-                    dynamic_cast<CWizCategoryViewGroupRootItem*>(pItem->parent());
+        QString strBody = WizGetHtmlBodyContent(strHtml);
+        if (!m_dbMgr.db(strKbGUID).CreateDocumentAndInit(strBody, "", 0, strTitle, "newnote", strLocation, "", data))
+        {
+            TOLOG("Failed to new document!");
+            return false;
+        }
 
-            Q_ASSERT(pRItem);
-
-            strKbGUID = pRItem->kbGUID();
-            bFallback = false;
-
-            //set noTag item as current item.
-            selectedItems().clear();
-            for (int i = 0; i < pRItem->childCount(); i++) {
-                CWizCategoryViewGroupNoTagItem* pNoTag =
-                        dynamic_cast<CWizCategoryViewGroupNoTagItem*>(pRItem->child(i));
-                if (0 != pNoTag) {
-                    setCurrentItem(pNoTag);
-                    break;
-                }
-            }
+        if (!tag.strGUID.IsEmpty()) {
+            CWizDocument doc(m_dbMgr.db(strKbGUID), data);
+            doc.AddTag(tag);
         }
     }
-    else if (CWizCategoryViewFolderItem* pItem = currentCategoryItem<CWizCategoryViewFolderItem>())
-    {
-        // only handle individual folders except trash
-        if (!CWizDatabase::IsInDeletedItems(pItem->location())) {
-            strLocation = pItem->location();
-            bFallback = false;
-        }
-    }
-    else if (CWizCategoryViewTagItem* pItem = currentCategoryItem<CWizCategoryViewTagItem>())
-    {
-        tag = pItem->tag();
-        bFallback = false;
-    }
-    else if (CWizCategoryViewGroupRootItem* pItem = currentCategoryItem<CWizCategoryViewGroupRootItem>())
-    {
-        strKbGUID = pItem->kbGUID();
-        strLocation = m_dbMgr.db(strKbGUID).GetDefaultNoteLocation();
-        bFallback = false;
-    }
-    else if (CWizCategoryViewGroupNoTagItem* pItem = currentCategoryItem<CWizCategoryViewGroupNoTagItem>())
-    {
-        strKbGUID = pItem->kbGUID();
-        strLocation = m_dbMgr.db(strKbGUID).GetDefaultNoteLocation();
-        bFallback = false;
-    }
-    else if (CWizCategoryViewGroupItem* pItem = currentCategoryItem<CWizCategoryViewGroupItem>())
-    {
-        strKbGUID = pItem->kbGUID();
-        tag = pItem->tag();
-        strLocation = m_dbMgr.db(strKbGUID).GetDefaultNoteLocation();
-        bFallback = false;
-    }
 
-    if (bFallback) {
-        addAndSelectFolder(strLocation);
-    }
-    //
-    CWizDatabase& db = m_dbMgr.db(strKbGUID);
-    if (db.IsGroup()
-            && !db.IsGroupAuthor())
-    {
-        return false;
-    }
-
-    //QString strBody = WizGetHtmlBodyContent(strHtml);
-    //if (!m_dbMgr.db(strKbGUID).CreateDocumentAndInit(strBody, "", 0, strTitle, "newnote", strLocation, "", data))
-    QString strZiwFile = "/Users/lxn/Wiz/WizQTClient/share/template/generic_black.ziw";
-    if (!m_dbMgr.db(strKbGUID).CreateDocumentByTemplate(strZiwFile, strLocation, tag, data))
-    {
-        TOLOG("Failed to new document!");
-        return false;
-    }
-
-    if (!tag.strGUID.IsEmpty()) {
-        CWizDocument doc(m_dbMgr.db(strKbGUID), data);
-        doc.AddTag(tag);
-    }
-
-    /*FIXME:
-     *创建笔记后快速同步笔记到服务器,防止用户新建笔记后使用评论功能时因服务器无该篇笔记导致问题.*/
-    MainWindow* mainWindow = qobject_cast<MainWindow*>(m_app.mainWindow());
-    mainWindow->quickSyncKb(data.strKbGUID);
+    quickSyncNewDocument(data.strKbGUID);
     //
     return true;
 }
@@ -1017,6 +944,31 @@ bool CWizCategoryView::createDocumentByAttachments(WIZDOCUMENTDATA& data, const 
         }
     }
 
+    return true;
+}
+
+bool CWizCategoryView::createDocumentByTemplate(WIZDOCUMENTDATA& data, const QString& strZiw)
+{
+    QString strKbGUID = m_dbMgr.db().kbGUID();
+    QString strLocation = m_dbMgr.db().GetDefaultNoteLocation();
+    WIZTAGDATA tag;
+
+    if (getAvailableNewNoteTagAndLocation(tag, strLocation))
+    {
+        if (!m_dbMgr.db(strKbGUID).CreateDocumentByTemplate(strZiw, strLocation, tag, data))
+        {
+            TOLOG("Failed to new document!");
+            return false;
+        }
+
+        if (!tag.strGUID.IsEmpty()) {
+            CWizDocument doc(m_dbMgr.db(strKbGUID), data);
+            doc.AddTag(tag);
+        }
+    }
+
+    quickSyncNewDocument(data.strKbGUID);
+    //
     return true;
 }
 
@@ -2264,6 +2216,90 @@ void CWizCategoryView::moveFolderPostionBeforeTrash(const QString& strLocation)
             setting->setValue(strFolder, nValue + 1);
         }
     }
+}
+
+bool CWizCategoryView::getAvailableNewNoteTagAndLocation(WIZTAGDATA& tag, QString& strLocation)
+{
+    bool bFallback = true;
+    QString strKbGUID = m_dbMgr.db().kbGUID();
+    // trash first, because it's inherited
+    if (CWizCategoryViewTrashItem* pItem = currentCategoryItem<CWizCategoryViewTrashItem>())
+    {
+        // only handle group trash
+        if (pItem->kbGUID() != m_dbMgr.db().kbGUID()) {
+            CWizCategoryViewGroupRootItem* pRItem =
+                    dynamic_cast<CWizCategoryViewGroupRootItem*>(pItem->parent());
+
+            Q_ASSERT(pRItem);
+
+            strKbGUID = pRItem->kbGUID();
+            bFallback = false;
+
+            //set noTag item as current item.
+            selectedItems().clear();
+            for (int i = 0; i < pRItem->childCount(); i++) {
+                CWizCategoryViewGroupNoTagItem* pNoTag =
+                        dynamic_cast<CWizCategoryViewGroupNoTagItem*>(pRItem->child(i));
+                if (0 != pNoTag) {
+                    setCurrentItem(pNoTag);
+                    break;
+                }
+            }
+        }
+    }
+    else if (CWizCategoryViewFolderItem* pItem = currentCategoryItem<CWizCategoryViewFolderItem>())
+    {
+        // only handle individual folders except trash
+        if (!CWizDatabase::IsInDeletedItems(pItem->location())) {
+            strLocation = pItem->location();
+            bFallback = false;
+        }
+    }
+    else if (CWizCategoryViewTagItem* pItem = currentCategoryItem<CWizCategoryViewTagItem>())
+    {
+        tag = pItem->tag();
+        bFallback = false;
+    }
+    else if (CWizCategoryViewGroupRootItem* pItem = currentCategoryItem<CWizCategoryViewGroupRootItem>())
+    {
+        strKbGUID = pItem->kbGUID();
+        strLocation = m_dbMgr.db(strKbGUID).GetDefaultNoteLocation();
+        bFallback = false;
+    }
+    else if (CWizCategoryViewGroupNoTagItem* pItem = currentCategoryItem<CWizCategoryViewGroupNoTagItem>())
+    {
+        strKbGUID = pItem->kbGUID();
+        strLocation = m_dbMgr.db(strKbGUID).GetDefaultNoteLocation();
+        bFallback = false;
+    }
+    else if (CWizCategoryViewGroupItem* pItem = currentCategoryItem<CWizCategoryViewGroupItem>())
+    {
+        strKbGUID = pItem->kbGUID();
+        tag = pItem->tag();
+        strLocation = m_dbMgr.db(strKbGUID).GetDefaultNoteLocation();
+        bFallback = false;
+    }
+
+    if (bFallback) {
+        addAndSelectFolder(strLocation);
+    }
+    //
+    CWizDatabase& db = m_dbMgr.db(strKbGUID);
+    if (db.IsGroup()
+            && !db.IsGroupAuthor())
+    {
+        return false;
+    }
+
+    return true;
+}
+
+void CWizCategoryView::quickSyncNewDocument(const QString& strKbGUID)
+{
+    /*FIXME:
+     *创建笔记后快速同步笔记到服务器,防止用户新建笔记后使用评论功能时因服务器无该篇笔记导致问题.*/
+    MainWindow* mainWindow = qobject_cast<MainWindow*>(m_app.mainWindow());
+    mainWindow->quickSyncKb(strKbGUID);
 }
 
 void CWizCategoryView::initGeneral()
