@@ -17,6 +17,7 @@ public:
 
 signals:
     void fileLoaded(QString strHtml);
+    void loadFinished();
     void loadProgress(int total,int loaded);
 
 public slots:

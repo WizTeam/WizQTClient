@@ -141,6 +141,7 @@ public:
     void saveChildState(QTreeWidgetItem* pi, QSettings* settings);
     void saveItemState(QTreeWidgetItem* pi, QSettings* settings);
     void saveSelected(QSettings* settings);
+    QString getTitleFromHtml(const QString &strHtml);
 
     // action user data
     enum CategoryActions

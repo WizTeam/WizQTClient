@@ -387,8 +387,8 @@ void CWizCategoryBaseView::loadDocument(QStringList &strFileList)
     progressDialog->setActionString(tr("%1 files to load.").arg(strFileList.count()));
     progressDialog->setNotifyString(tr("loading..."));
     connect(fileReader, SIGNAL(loadProgress(int,int)), progressDialog, SLOT(setProgress(int,int)));
-    progressDialog->show();
-    progressDialog->close();
+    connect(fileReader,SIGNAL(loadFinished()),progressDialog,SLOT(close()));
+    progressDialog->exec();
 }
 
 QString CWizCategoryBaseView::selectedItemKbGUID()
@@ -3520,7 +3520,7 @@ void CWizCategoryView::on_groupDocuments_unreadCount_modified(const QString& str
 void CWizCategoryView::createDocumentByHtml(const QString& strHtml)
 {
     WIZDOCUMENTDATA data;
-    QString strTitle = "title"; //= getTitleFromHtml(strHtml);
+    QString strTitle = getTitleFromHtml(strHtml);
     createDocument(data, strHtml, strTitle);
 }
 
@@ -3647,4 +3647,22 @@ void CWizCategoryView::saveSelected(QSettings* settings)
         return;
 
     settings->setValue(TREEVIEW_SELECTED_ITEM, pItem->id());
+}
+
+QString CWizCategoryView::getTitleFromHtml(const QString &strHtml)
+{
+    QString strTitle = strHtml.left(10);
+    if(strTitle.contains("<br>"))
+    {
+        int idx = strTitle.indexOf("<br>");
+        strTitle = strTitle.left(idx);
+    }
+    if(strHtml.startsWith("<img border="))
+    {
+        strTitle = QObject::tr("image");
+    } else if(strHtml.startsWith("#include"))
+    {
+        strTitle = QObject::tr("src code");
+    }
+    return strTitle;
 }

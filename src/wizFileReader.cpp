@@ -28,6 +28,7 @@ QString CWizFileReader::loadTextFileToHtml(QString strFileName)
     QString ret = in.readAll();
     file.close();
     ret.replace("\n","<br>");
+    ret.replace(" ","&nbsp");
     return ret;
 }
 
@@ -65,5 +66,6 @@ void CWizFileReader::run()
 
         emit loadProgress(nTotal, i + 1);
     }
+    emit loadFinished();
     m_files.clear();
 }
