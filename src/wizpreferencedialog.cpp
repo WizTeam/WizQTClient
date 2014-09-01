@@ -48,6 +48,11 @@ CWizPreferenceWindow::CWizPreferenceWindow(CWizExplorerApp& app, QWidget* parent
     ui->checkBoxTrayIcon->setCheckState(checkState);
     ui->checkBoxTrayIcon->blockSignals(false);
 
+    ui->checkBoxMobileFile->blockSignals(true);
+    checkState = userSettings().receiveMobileFile() ? Qt::Checked : Qt::Unchecked;
+    ui->checkBoxMobileFile->setCheckState(checkState);
+    ui->checkBoxMobileFile->blockSignals(false);
+
 #ifdef BUILD4APPSTORE
     // hide language choice and upgrade for appstore
     ui->comboLang->setEnabled(false);
@@ -336,4 +341,11 @@ void CWizPreferenceWindow::on_checkBoxTrayIcon_toggled(bool checked)
     m_app.userSettings().setShowSystemTrayIcon(checked);
     Core::Internal::MainWindow* mainWindow = qobject_cast<Core::Internal::MainWindow*>(m_app.mainWindow());
     mainWindow->setSystemTrayIconVisible(checked);
+}
+
+void CWizPreferenceWindow::on_checkBoxMobileFile_toggled(bool checked)
+{
+    m_app.userSettings().setReceiveMobileFile(checked);
+    Core::Internal::MainWindow* mainWindow = qobject_cast<Core::Internal::MainWindow*>(m_app.mainWindow());
+    mainWindow->setMobileFileReceiverEnable(checked);
 }

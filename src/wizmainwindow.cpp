@@ -66,7 +66,7 @@
 #include "wizUserVerifyDialog.h"
 #include "plugindialog.h"
 #include "notecomments.h"
-#include "wizLANFileReceiver.h"
+#include "wizMobileFileReceiver.h"
 #include "wizDocTemplateDialog.h"
 
 using namespace Core;
@@ -118,6 +118,7 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     , m_bLogoutRestart(false)
     , m_bUpdatingSelection(false)
     , m_tray(NULL)
+    , m_mobileFileReceiver(0)
 {
 #ifndef Q_OS_MAC
     clientLayout()->addWidget(m_toolBar);
@@ -190,7 +191,7 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     //
     setSystemTrayIconVisible(userSettings().showSystemTrayIcon());
 
-
+    setMobileFileReceiverEnable(userSettings().receiveMobileFile());
 }
 
 bool MainWindow::eventFilter(QObject* watched, QEvent* event)
@@ -716,6 +717,56 @@ void MainWindow::createDocumentByTemplate(const QString& strFile)
     m_doc->web()->setEditorEnable(false);
 
     setFocusForNewNote(data);
+}
+
+void MainWindow::on_mobileFileRecived(const QString& strFile)
+{
+    QMessageBox msgBox;
+    msgBox.setWindowTitle(tr("Info"));
+    msgBox.setText(tr("Mobile file received : ") + strFile);
+    QAbstractButton *ignoreButton = msgBox.addButton(tr("Do nothing"), QMessageBox::ActionRole);
+    QAbstractButton *delButton = msgBox.addButton(tr("Delete file"), QMessageBox::ActionRole);
+    QAbstractButton *newNoteButton = msgBox.addButton(tr("Create new note whith the file"), QMessageBox::ActionRole);
+    QAbstractButton *insertButton = msgBox.addButton(tr("Insert into current note"), QMessageBox::ActionRole);
+
+    QImageReader imageReader(strFile);
+    bool isImageFile = imageReader.canRead();
+
+    msgBox.exec();
+    Q_UNUSED(ignoreButton);
+    if (msgBox.clickedButton() == delButton)
+    {
+        QFile::remove(strFile);
+    }
+    else if (msgBox.clickedButton() == newNoteButton)
+    {
+        if (isImageFile)
+        {
+            createNoteWithImage(strFile);
+        }
+        else
+        {
+            createNoteWithAttachments(QStringList(strFile));
+        }
+    }
+    else if (msgBox.clickedButton() == insertButton && m_doc->web()->isEditing())
+    {
+        if (isImageFile)
+        {
+            QString strHtml;
+            if (WizImage2Html(strFile, strHtml))
+            {
+                m_doc->web()->editorCommandExecuteInsertHtml(strHtml, false);
+            }
+        }
+        else
+        {
+            const WIZDOCUMENTDATA& doc = m_doc->note();
+            CWizDatabase& db = m_dbMgr.db(doc.strKbGUID);
+            WIZDOCUMENTATTACHMENTDATA attach;
+            db.AddAttachment(doc, strFile, attach);
+        }
+    }
 }
 
 QString MainWindow::getSkinResourcePath() const
@@ -2160,6 +2211,29 @@ void MainWindow::createNoteWithText(const QString& strText)
     setFocusForNewNote(data);
 }
 
+void MainWindow::createNoteWithImage(const QString& strImageFile)
+{
+    initVariableBeforCreateNote();
+
+    QString strTitle = WizExtractFileTitle(strImageFile);
+    if (strTitle.isEmpty())
+    {
+        strTitle = "New note";
+    }
+
+    QString strHtml;
+    bool bUseCopyFile = true;
+    if (WizImage2Html(strImageFile, strHtml, bUseCopyFile))
+    {
+        WIZDOCUMENTDATA data;
+        if (!m_category->createDocument(data, strHtml, strTitle))
+        {
+            return;
+        }
+        setFocusForNewNote(data);
+    }
+}
+
 void MainWindow::initTrayIcon(QSystemTrayIcon* trayIcon)
 {
     Q_ASSERT(trayIcon);
@@ -2197,6 +2271,25 @@ void MainWindow::initTrayIcon(QSystemTrayIcon* trayIcon)
 #endif
 }
 
+void MainWindow::setMobileFileReceiverEnable(bool bEnable)
+{
+    if (bEnable)
+    {
+        if (!m_mobileFileReceiver)
+        {
+            m_mobileFileReceiver = new CWizMobileFileReceiver(this);
+            connect(m_mobileFileReceiver, SIGNAL(fileReceived(QString)),
+                    SLOT(on_mobileFileRecived(QString)));
+            m_mobileFileReceiver->initSocket();
+        }
+    }
+    else
+    {
+        delete m_mobileFileReceiver;
+        m_mobileFileReceiver = 0;
+    }
+}
+
 void MainWindow::startSearchStatus()
 {
     m_documents->setAcceptAllItems(true);
@@ -2226,6 +2319,7 @@ void MainWindow::viewDocumentInFloatWidget(const WIZDOCUMENTDATA& data)
 
     wgt->setGeometry((width() - m_doc->width())  / 2, (height() - wgt->height()) / 2,
                      m_doc->width(), wgt->height());
+    wgt->setWindowTitle(data.strTitle);
     wgt->show();
     //
     docView->viewNote(data, false);

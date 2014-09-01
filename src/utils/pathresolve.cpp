@@ -52,7 +52,7 @@ QString PathResolve::builtinTemplatePath()
     return resourcesPath() + "templates/";
 }
 
-QString PathResolve::downloadedTemplatePath()
+QString PathResolve::downloadedTemplatesPath()
 {
     return cachePath() + "templates/";
 }

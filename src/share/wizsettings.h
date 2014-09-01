@@ -102,6 +102,9 @@ public:
     bool showSystemTrayIcon() const;
     void setShowSystemTrayIcon(bool bShowTrayIcon);
 
+    bool receiveMobileFile() const;
+    void setReceiveMobileFile(bool bReceiveFile);
+
     QString locale();
     void setLocale(const QString& strLocale);
 

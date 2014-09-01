@@ -199,9 +199,6 @@ protected:
     virtual void dropEvent(QDropEvent* event);
 
 private:
-    bool image2Html(const QString& strImageFile, QString& strHtml);
-
-private:
     CWizExplorerApp& m_app;
     CWizDatabaseManager& m_dbMgr;
     QMap<QString, QString> m_mapFile;

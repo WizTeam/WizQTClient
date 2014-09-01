@@ -10,6 +10,9 @@
 #include <QTextStream>
 #include <QDir>
 #include <QMessageBox>
+#include <QDesktopServices>
+#include <QFileDialog>
+
 
 CWizTemplateFileItem* convertToTempalteFileItem(QTreeWidgetItem *item)
 {
@@ -21,7 +24,6 @@ CWizDocTemplateDialog::CWizDocTemplateDialog(QWidget *parent) :
     ui(new Ui::CWizDocTemplateDialog)
 {
     ui->setupUi(this);
-    ui->btn_useLocal->setVisible(false);
 
     initTemplateFileTreeWidget();
 
@@ -36,34 +38,11 @@ CWizDocTemplateDialog::~CWizDocTemplateDialog()
 
 void CWizDocTemplateDialog::on_btn_downloadNew_clicked()
 {
-    shiftStackIndex(StackIndex_downloadNew);
+    QString strUrl = WizService::ApiEntry::standardCommandUrl("gettemplate");
+    QDesktopServices::openUrl(strUrl);
 }
 
-void CWizDocTemplateDialog::on_btn_useLocal_clicked()
-{
-    shiftStackIndex(StackIndex_useLocal);
-}
 
-void CWizDocTemplateDialog::shiftStackIndex(CWizDocTemplateDialog::StackIndex index)
-{
-    switch (index) {
-    case StackIndex_downloadNew:
-    {
-        ui->btn_downloadNew->setVisible(false);
-        ui->btn_useLocal->setVisible(true);
-        ui->stackedWidget->setCurrentIndex(1);
-        //http://api.wiz.cn/?p=wiz&l=2052&v=4.2.167.1&c=gettemplate&a=&random=26381078&cn=MACHINE&plat=x86&skin=blue
-        QString strUrl = WizService::ApiEntry::standardCommandUrl("gettemplate");
-        ui->webView_download->load(strUrl);
-    }
-        break;
-    case StackIndex_useLocal:
-        ui->btn_downloadNew->setVisible(true);
-        ui->btn_useLocal->setVisible(false);
-        ui->stackedWidget->setCurrentIndex(0);
-        break;
-    }
-}
 
 void CWizDocTemplateDialog::initTemplateFileTreeWidget()
 {
@@ -101,7 +80,7 @@ void CWizDocTemplateDialog::initBuiltinTemplateItems()
 
 void CWizDocTemplateDialog::initDownloadedTemplateItems()
 {
-    QDir dir(Utils::PathResolve::downloadedTemplatePath());
+    QDir dir(Utils::PathResolve::downloadedTemplatesPath());
     QStringList tList = dir.entryList();
 
     if (tList.count() > 0)
@@ -141,6 +120,20 @@ QString CWizDocTemplateDialog::previewFileName()
     }
 
     return "index.html";
+}
+
+bool CWizDocTemplateDialog::importTemplateFile(const QString& strFileName)
+{
+    if (QFile::exists(strFileName))
+    {
+        QString strTempFolder = Utils::PathResolve::tempPath() + WizExtractFileTitle(strFileName);
+        if (CWizUnzipFile::extractZip(strFileName, strTempFolder))
+        {
+//            QString strDestPath = Utils::PathResolve::downloadedTemplatePath();
+//            QFile::copy()
+        }
+    }
+    return false;
 }
 
 void CWizDocTemplateDialog::on_btn_ok_clicked()
@@ -188,4 +181,12 @@ QString CWizTemplateFileItem::filePath() const
 void CWizDocTemplateDialog::on_btn_cancle_clicked()
 {
     reject();
+}
+
+void CWizDocTemplateDialog::on_pushButton_clicked()
+{
+    QStringList fileList = QFileDialog::getOpenFileNames(0, tr("Select one or more template files"), QDir::homePath(), "Wiz Template (*.wiztemplate)");
+    foreach (QString strFile, fileList) {
+        importTemplateFile(strFile);
+    }
 }

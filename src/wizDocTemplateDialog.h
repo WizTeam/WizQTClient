@@ -37,24 +37,20 @@ public slots:
 private slots:
     void on_btn_downloadNew_clicked();
 
-    void on_btn_useLocal_clicked();
-
     void on_btn_ok_clicked();
 
     void on_btn_cancle_clicked();
 
-private:
-    enum StackIndex {
-        StackIndex_downloadNew,
-        StackIndex_useLocal
-    };
+    void on_pushButton_clicked();
 
-    void shiftStackIndex(StackIndex index);
+private:
     //
     void initTemplateFileTreeWidget();
     void initBuiltinTemplateItems();
     void initDownloadedTemplateItems();
     QString previewFileName();
+    //
+    bool importTemplateFile(const QString& strFileName);
 
 private:
     Ui::CWizDocTemplateDialog *ui;

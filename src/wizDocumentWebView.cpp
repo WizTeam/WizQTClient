@@ -78,10 +78,6 @@ private:
 };
 */
 
-QString getImageHtmlLabelByFile(const QString& strImageFile)
-{
-    return QString("<img border=\"0\" src=\"file://%1\" />").arg(strImageFile);
-}
 
 void CWizDocumentWebViewPage::triggerAction(QWebPage::WebAction typeAction, bool checked)
 {
@@ -159,7 +155,8 @@ void CWizDocumentWebViewPage::on_editorCommandPaste_triggered()
         }
 
         QMimeData* data = new QMimeData();
-        QString strHtml = getImageHtmlLabelByFile(strFileName);
+        QString strHtml;// = getImageHtmlLabelByFile(strFileName);
+        if (WizImage2Html(strFileName, strHtml))
         data->setHtml(strHtml);
         clip->setMimeData(data);
     }
@@ -474,21 +471,6 @@ void CWizDocumentWebView::tryResetTitle()
     m_bNewNoteTitleInited = true;
 }
 
-bool CWizDocumentWebView::image2Html(const QString& strImageFile, QString& strHtml)
-{
-    QFileInfo info(strImageFile);
-    QString strDestFile =Utils::PathResolve::tempPath() + WizGenGUIDLowerCaseLetterOnly() + "." + info.suffix();
-
-    qDebug() << "[Editor] copy to: " << strDestFile;
-
-    if (!QFile::copy(strImageFile, strDestFile)) {
-        return false;
-    }
-
-    strHtml = getImageHtmlLabelByFile(strDestFile);
-    return true;
-}
-
 void CWizDocumentWebView::dropEvent(QDropEvent* event)
 {
     const QMimeData* mimeData = event->mimeData();
@@ -514,7 +496,8 @@ void CWizDocumentWebView::dropEvent(QDropEvent* event)
             if (reader.canRead())
             {
                 QString strHtml;
-                if (image2Html(strFileName, strHtml)) {
+                bool bUseCopyFile = true;
+                if (WizImage2Html(strFileName, strHtml, bUseCopyFile)) {
                     editorCommandExecuteInsertHtml(strHtml, true);
                     nAccepted++;
                 }
@@ -1465,11 +1448,9 @@ bool CWizDocumentWebView::editorCommandExecuteInsertImage()
     if (strImgFile.isEmpty())
         return false;
 
-//    QPixmap pix(strImgFile);
-//    return editorCommandExecuteCommand("insertImage", QString("{src:'%1', width:%2, height:%3}")
-//                                       .arg(strImgFile).arg(pix.width()).arg(pix.height()));
-    QString strHtml;// = //getImageHtmlLabelByFile(strImgFile);
-    if (image2Html(strImgFile, strHtml)) {
+    QString strHtml;
+    bool bUseCopyFile = true;
+    if (WizImage2Html(strImgFile, strHtml, bUseCopyFile)) {
         return editorCommandExecuteInsertHtml(strHtml, true);
     }
     return false;

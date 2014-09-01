@@ -49,6 +49,8 @@ class CWizMacToolBar;
 
 class CWizDocumentWebView;
 
+class CWizMobileFileReceiver;
+
 namespace WizService {
 namespace Internal {
 class MessageListView;
@@ -160,6 +162,8 @@ private:
     CWizSpacer* m_spacerBeforeSearch;
 #endif
 
+    CWizMobileFileReceiver *m_mobileFileReceiver;
+
     bool m_bRestart;
     bool m_bLogoutRestart;
     bool m_bUpdatingSelection;
@@ -206,11 +210,13 @@ public:
 
     void checkWizUpdate();
     void setSystemTrayIconVisible(bool bVisible);
+    void setMobileFileReceiverEnable(bool bEnable);
     //
     void viewDocumentByWizKMURL(const QString& strKMURL);
     //
     void createNoteWithAttachments(const QStringList& strAttachList);
     void createNoteWithText(const QString& strText);
+    void createNoteWithImage(const QString& strImageFile);
 signals:
     void documentSaved(const QString& strGUID, CWizDocumentView* viewer);
 
@@ -305,6 +311,8 @@ public Q_SLOTS:
     void on_editor_statusChanged();
 
     void createDocumentByTemplate(const QString& strFile);
+
+    void on_mobileFileRecived(const QString& strFile);
 
     //js environment func
     QString getSkinResourcePath() const;

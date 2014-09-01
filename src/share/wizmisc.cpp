@@ -1901,6 +1901,31 @@ void WizHtml2Text(const QString& strHtml, QString& strText)
     return;
 }
 
+QString getImageHtmlLabelByFile(const QString& strImageFile)
+{
+    return QString("<img border=\"0\" src=\"file://%1\" />").arg(strImageFile);
+}
+
+bool WizImage2Html(const QString& strImageFile, QString& strHtml, bool bUseCopyFile)
+{
+    QString strDestFile = strImageFile;
+    if (bUseCopyFile)
+    {
+        QFileInfo info(strImageFile);
+        strDestFile =Utils::PathResolve::tempPath() + WizGenGUIDLowerCaseLetterOnly() + "." + info.suffix();
+
+        qDebug() << "[Editor] copy to: " << strDestFile;
+
+        if (!QFile::copy(strImageFile, strDestFile)) {
+            return false;
+        }
+    }
+
+    strHtml = getImageHtmlLabelByFile(strDestFile);
+    return true;
+}
+
+
 void WizDeleteFolder(const CString& strPath)
 {
     QDir dir(strPath);
