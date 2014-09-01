@@ -3,6 +3,8 @@
 #include <QFileInfo>
 #include <QTextStream>
 
+#include "share/wizmisc.h"
+
 CWizFileReader::CWizFileReader(QObject *parent) :
     QThread(parent)
 {
@@ -27,6 +29,7 @@ QString CWizFileReader::loadTextFileToHtml(QString strFileName)
     QTextStream in(&file);
     QString ret = in.readAll();
     file.close();
+    ret = ret.toHtmlEscaped();
     ret.replace("\n","<br>");
     ret.replace(" ","&nbsp");
     return ret;
@@ -61,7 +64,8 @@ void CWizFileReader::run()
 
         if (!strHtml.isEmpty())
         {
-            emit fileLoaded(strHtml);
+            QString strTitle = WizExtractFileName(strFile);
+            emit fileLoaded(strHtml, strTitle);
         }
 
         emit loadProgress(nTotal, i + 1);

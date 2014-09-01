@@ -379,8 +379,7 @@ void CWizCategoryBaseView::dropEvent(QDropEvent * event)
 void CWizCategoryBaseView::loadDocument(QStringList &strFileList)
 {
     CWizFileReader *fileReader = new CWizFileReader();
-    connect(fileReader, SIGNAL(fileLoaded(QString)), SLOT(createDocumentByHtml(QString)));
-    fileReader->loadFiles(strFileList);
+    connect(fileReader, SIGNAL(fileLoaded(QString, QString)), SLOT(createDocumentByHtml(QString, QString)));
     MainWindow *mainWindow = dynamic_cast<MainWindow*>(m_app.mainWindow());
     CWizProgressDialog *progressDialog  = mainWindow->progressDialog();
     progressDialog->setProgress(100,0);
@@ -388,6 +387,7 @@ void CWizCategoryBaseView::loadDocument(QStringList &strFileList)
     progressDialog->setNotifyString(tr("loading..."));
     connect(fileReader, SIGNAL(loadProgress(int,int)), progressDialog, SLOT(setProgress(int,int)));
     connect(fileReader,SIGNAL(loadFinished()),progressDialog,SLOT(close()));
+    fileReader->loadFiles(strFileList);
     progressDialog->exec();
 }
 
@@ -622,7 +622,7 @@ void CWizCategoryBaseView::drawItem(QPainter* p, const QStyleOptionViewItemV4 *v
         pItem->draw(p, vopt);
 }
 
-void CWizCategoryBaseView::createDocumentByHtml(const QString& strHtml)
+void CWizCategoryBaseView::createDocumentByHtml(const QString& /*strHtml*/, const QString& /*strTitle*/)
 {
     // do nothing
     // create document in CWizCategoryView
@@ -3517,10 +3517,10 @@ void CWizCategoryView::on_groupDocuments_unreadCount_modified(const QString& str
     updateGroupFolderDocumentCount(strKbGUID);
 }
 
-void CWizCategoryView::createDocumentByHtml(const QString& strHtml)
+void CWizCategoryView::createDocumentByHtml(const QString& strHtml, const QString& strTitle)
 {
     WIZDOCUMENTDATA data;
-    QString strTitle = getTitleFromHtml(strHtml);
+    //QString strTitle = getTitleFromHtml(strHtml);
     createDocument(data, strHtml, strTitle);
 }
 

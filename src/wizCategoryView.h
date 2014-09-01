@@ -116,7 +116,7 @@ protected Q_SLOTS:
     virtual void on_group_permissionChanged(const QString& strKbGUID) { Q_UNUSED(strKbGUID); }
     virtual void on_group_bizChanged(const QString& strKbGUID) { Q_UNUSED(strKbGUID); }
 
-    virtual void createDocumentByHtml(const QString& strHtml);
+    virtual void createDocumentByHtml(const QString& strHtml, const QString& strTitle);
 
     void on_dragHovered_timeOut();
 };
@@ -328,7 +328,7 @@ protected Q_SLOTS:
     virtual void on_group_bizChanged(const QString& strKbGUID);
     virtual void on_groupDocuments_unreadCount_modified(const QString& strKbGUID);
 
-    virtual void createDocumentByHtml(const QString& strHtml);
+    virtual void createDocumentByHtml(const QString& strHtml, const QString& strTitle);
 
 public Q_SLOTS:
     void on_action_newDocument();

@@ -16,7 +16,7 @@ public:
     QString loadImageFileToHtml(QString strFileName);
 
 signals:
-    void fileLoaded(QString strHtml);
+    void fileLoaded(QString strHtml, QString strTitle);
     void loadFinished();
     void loadProgress(int total,int loaded);
 
