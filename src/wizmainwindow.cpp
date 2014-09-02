@@ -721,6 +721,8 @@ void MainWindow::createDocumentByTemplate(const QString& strFile)
 
 void MainWindow::on_mobileFileRecived(const QString& strFile)
 {
+    //目前只支持在有编辑状态的笔记时插入图片，其他时候删除掉接受到的图片
+    /*
     QMessageBox msgBox;
     msgBox.setWindowTitle(tr("Info"));
     msgBox.setText(tr("Mobile file received : ") + strFile);
@@ -733,7 +735,7 @@ void MainWindow::on_mobileFileRecived(const QString& strFile)
     bool isImageFile = imageReader.canRead();
 
     msgBox.exec();
-    Q_UNUSED(ignoreButton);
+   // Q_UNUSED(ignoreButton);
     if (msgBox.clickedButton() == delButton)
     {
         QFile::remove(strFile);
@@ -766,6 +768,32 @@ void MainWindow::on_mobileFileRecived(const QString& strFile)
             WIZDOCUMENTATTACHMENTDATA attach;
             db.AddAttachment(doc, strFile, attach);
         }
+    }
+    */
+    if (m_doc->web()->isEditing())
+    {
+        QImageReader imageReader(strFile);
+        bool isImageFile = imageReader.canRead();
+
+        if (isImageFile)
+        {
+            QString strHtml;
+            if (WizImage2Html(strFile, strHtml))
+            {
+                m_doc->web()->editorCommandExecuteInsertHtml(strHtml, false);
+            }
+        }
+        else
+        {
+            const WIZDOCUMENTDATA& doc = m_doc->note();
+            CWizDatabase& db = m_dbMgr.db(doc.strKbGUID);
+            WIZDOCUMENTATTACHMENTDATA attach;
+            db.AddAttachment(doc, strFile, attach);
+        }
+    }
+    else
+    {
+        QFile::remove(strFile);
     }
 }
 
@@ -1333,10 +1361,6 @@ void MainWindow::on_syncProcessLog(const QString& strMsg)
 
 void MainWindow::on_actionNewNote_triggered()
 {
-    //通过模板创建笔记
-//    CWizDocTemplateDialog dlg;
-//    connect(&dlg, SIGNAL(documentTemplateSelected(QString)), SLOT(createDocumentByTemplate(QString)));
-//    dlg.exec();
     initVariableBeforCreateNote();
     WIZDOCUMENTDATA data;
     if (!m_category->createDocument(data))
@@ -1348,6 +1372,14 @@ void MainWindow::on_actionNewNote_triggered()
     m_doc->web()->setEditorEnable(false);
 
     setFocusForNewNote(data);
+}
+
+void MainWindow::on_actionNewNoteByTemplate_triggered()
+{
+    //通过模板创建笔记
+    CWizDocTemplateDialog dlg;
+    connect(&dlg, SIGNAL(documentTemplateSelected(QString)), SLOT(createDocumentByTemplate(QString)));
+    dlg.exec();
 }
 
 void MainWindow::on_actionEditingUndo_triggered()

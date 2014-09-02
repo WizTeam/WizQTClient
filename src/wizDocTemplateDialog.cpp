@@ -3,6 +3,7 @@
 #include "utils/pathresolve.h"
 #include "share/wizmisc.h"
 #include "share/wizzip.h"
+#include "share/wizsettings.h"
 #include "wizmainwindow.h"
 #include "sync/apientry.h"
 
@@ -27,8 +28,8 @@ CWizDocTemplateDialog::CWizDocTemplateDialog(QWidget *parent) :
 
     initTemplateFileTreeWidget();
 
-    connect(ui->treeWidget, SIGNAL(itemDoubleClicked(QTreeWidgetItem*,int)),
-            SLOT(itemDoubleClicked(QTreeWidgetItem*,int)));
+    connect(ui->treeWidget, SIGNAL(itemClicked(QTreeWidgetItem*,int)),
+            SLOT(itemClicked(QTreeWidgetItem*,int)));
 }
 
 CWizDocTemplateDialog::~CWizDocTemplateDialog()
@@ -46,56 +47,64 @@ void CWizDocTemplateDialog::on_btn_downloadNew_clicked()
 
 void CWizDocTemplateDialog::initTemplateFileTreeWidget()
 {
-    initBuiltinTemplateItems();
-    initDownloadedTemplateItems();
+    QString strFoler = Utils::PathResolve::builtinTemplatePath();
+    initFolderTemplateItems(strFoler);
+    strFoler = Utils::PathResolve::downloadedTemplatesPath();
+    initFolderTemplateItems(strFoler);
 
     ui->treeWidget->expandAll();
 }
 
-void CWizDocTemplateDialog::initBuiltinTemplateItems()
+void CWizDocTemplateDialog::initFolderTemplateItems(const QString& strFoler)
 {
-    QString strBuiltinPath = Utils::PathResolve::builtinTemplatePath();
-    QFile file(strBuiltinPath + "template.ini");
-    if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
-        return;
+    CWizSettings settings(strFoler + "template.ini");
 
-    QTextStream in(&file);
-    QTreeWidgetItem *topLevelItem = 0;
-    while (!in.atEnd()) {
-        QString line = in.readLine();
-        if (line.left(1) == "+")
+    QDir dir(strFoler);
+    QStringList dirList = dir.entryList(QDir::AllDirs | QDir::NoDotAndDotDot);
+
+    foreach (QString strDir, dirList)
+    {
+        QString folderName = strDir;
+        strDir = strFoler + strDir + "/";
+        folderName += languangeCode();
+        QTreeWidgetItem *topLevelItem = new QTreeWidgetItem(ui->treeWidget);
+        QString strLocalTitle;
+        if (getLocalization(settings, folderName, strLocalTitle))
         {
-            topLevelItem = new QTreeWidgetItem(ui->treeWidget);
-            topLevelItem->setText(0, line.right(line.length() - 1));
-            ui->treeWidget->addTopLevelItem(topLevelItem);
+            folderName = strLocalTitle;
         }
-        else if (line.left(1) == "-")
+        else
         {
-            QString strFileName = strBuiltinPath + line.right(line.length() -1);
-            CWizTemplateFileItem *item = new CWizTemplateFileItem(strFileName, topLevelItem);
-            topLevelItem->addChild(item);
+            folderName.remove(languangeCode());
         }
+        topLevelItem->setText(0, folderName);
+        ui->treeWidget->addTopLevelItem(topLevelItem);
+        initFolderItems(topLevelItem, strDir, settings);
     }
 }
 
-void CWizDocTemplateDialog::initDownloadedTemplateItems()
+QString CWizDocTemplateDialog::languangeCode() const
 {
-    QDir dir(Utils::PathResolve::downloadedTemplatesPath());
-    QStringList tList = dir.entryList();
-
-    if (tList.count() > 0)
+    Core::Internal::MainWindow *window = Core::Internal::MainWindow::instance();
+    if (window)
     {
-        QTreeWidgetItem *topLevelItem = new QTreeWidgetItem(ui->treeWidget);
-        topLevelItem->setText(0, tr("Downloaded"));
-        ui->treeWidget->addTopLevelItem(topLevelItem);
-
-        foreach (QString strName, tList)
+        //FIXME: hardcode
+        QString userLocal = window->userSettings().locale();
+        if (userLocal == WizGetDefaultTranslatedLocal())
         {
-            QString strFileName = dir.path() + strName;
-            CWizTemplateFileItem *item = new CWizTemplateFileItem(strFileName, topLevelItem);
-            topLevelItem->addChild(item);
+            return "";
+        }
+        else if (userLocal == "zh_CN")
+        {
+            return "_2052";
+        }
+        else if (userLocal == "zh_TW")
+        {
+            return "_1028";
         }
     }
+
+    return "";
 }
 
 QString CWizDocTemplateDialog::previewFileName()
@@ -122,6 +131,45 @@ QString CWizDocTemplateDialog::previewFileName()
     return "index.html";
 }
 
+void CWizDocTemplateDialog::initFolderItems(QTreeWidgetItem* parentItem,
+                                            const QString& strDir, CWizSettings& settings)
+{
+    QDir dir(strDir);
+    QStringList files = dir.entryList();
+    foreach (QString ziwFile, files)
+    {
+        if (ziwFile.right(3) == "ziw")
+        {
+            QString strTitle = ziwFile;
+            strTitle = WizExtractFileTitle(strTitle);
+            strTitle += languangeCode();
+            QString strLocalTitle;
+            if (getLocalization(settings, strTitle, strLocalTitle))
+            {
+                strTitle = strLocalTitle;
+            }
+            else
+            {
+                strTitle =WizExtractFileTitle(ziwFile);
+            }
+
+            ziwFile = strDir + ziwFile;
+            CWizTemplateFileItem *item = new CWizTemplateFileItem(ziwFile, parentItem);
+            item->setText(0, strTitle);
+            parentItem->addChild(item);
+        }
+    }
+}
+
+bool CWizDocTemplateDialog::getLocalization(CWizSettings& settings, const QString& strKey, QString& strValue)
+{
+    strValue = settings.GetString("Strings", strKey);
+    if (strValue.isEmpty())
+        return false;
+
+    return true;
+}
+
 bool CWizDocTemplateDialog::importTemplateFile(const QString& strFileName)
 {
     if (QFile::exists(strFileName))
@@ -129,11 +177,63 @@ bool CWizDocTemplateDialog::importTemplateFile(const QString& strFileName)
         QString strTempFolder = Utils::PathResolve::tempPath() + WizExtractFileTitle(strFileName);
         if (CWizUnzipFile::extractZip(strFileName, strTempFolder))
         {
-//            QString strDestPath = Utils::PathResolve::downloadedTemplatePath();
-//            QFile::copy()
+            QString strDestPath = Utils::PathResolve::downloadedTemplatesPath();
+            QDir dir(strTempFolder);
+            QStringList folderList = dir.entryList(QDir::AllDirs | QDir::NoDotAndDotDot);
+            if (folderList.count() != 1)
+            {
+                return false;
+            }
+            strDestPath = strDestPath + folderList.first();
+            WizEnsurePathExists(strDestPath);
+            dir = QDir(strTempFolder + "/" + folderList.first());
+            QString strfileName = dir.entryList(QDir::Files | QDir::NoDotAndDotDot).first();
+            if (!QFile::copy(dir.path() + "/" + strfileName, strDestPath + "/" + strfileName))
+            {
+                return false;
+            }
+
+            //
+            QString strSettingFile = Utils::PathResolve::downloadedTemplatesPath() + "template.ini";
+            if (!QFile::exists(strSettingFile))
+            {
+                createSettingsFile(strSettingFile);
+            }
+            CWizSettings settings(strSettingFile);
+            QString newSettingsFile = strTempFolder + "/" + "template.ini";
+            CWizSettings newSettings(newSettingsFile);
+            QString strTitle = WizExtractFileTitle(strfileName);
+            QStringList suffixList;
+            suffixList << "" <<  "_2052" << "_1028";
+            foreach (QString strSuffix, suffixList)
+            {
+                QString strVaule = newSettings.GetString("common", strTitle + strSuffix);
+                if (!strVaule.isEmpty())
+                {
+                    settings.SetString("Strings", strTitle + strSuffix, strVaule);
+                }
+            }
+            resetTempalteTree();
         }
     }
     return false;
+}
+
+void CWizDocTemplateDialog::resetTempalteTree()
+{
+    ui->treeWidget->clear();
+    initTemplateFileTreeWidget();
+}
+
+void CWizDocTemplateDialog::createSettingsFile(const QString& strFileName)
+{
+    QFile file(strFileName);
+    if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
+        return;
+
+    QTextStream out(&file);
+    out << "[Strings]" << "\n";
+    file.close();
 }
 
 void CWizDocTemplateDialog::on_btn_ok_clicked()
@@ -145,7 +245,7 @@ void CWizDocTemplateDialog::on_btn_ok_clicked()
     accept();
 }
 
-void CWizDocTemplateDialog::itemDoubleClicked(QTreeWidgetItem *item, int)
+void CWizDocTemplateDialog::itemClicked(QTreeWidgetItem *item, int)
 {
     CWizTemplateFileItem * pItem = convertToTempalteFileItem(item);
     if (pItem)
@@ -183,7 +283,7 @@ void CWizDocTemplateDialog::on_btn_cancle_clicked()
     reject();
 }
 
-void CWizDocTemplateDialog::on_pushButton_clicked()
+void CWizDocTemplateDialog::on_pushButton_import_clicked()
 {
     QStringList fileList = QFileDialog::getOpenFileNames(0, tr("Select one or more template files"), QDir::homePath(), "Wiz Template (*.wiztemplate)");
     foreach (QString strFile, fileList) {

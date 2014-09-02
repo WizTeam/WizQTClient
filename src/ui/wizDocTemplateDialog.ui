@@ -60,7 +60,7 @@
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
-      <widget class="QPushButton" name="pushButton">
+      <widget class="QPushButton" name="pushButton_import">
        <property name="text">
         <string>Import Templates</string>
        </property>
@@ -116,7 +116,7 @@
   <tabstop>btn_cancle</tabstop>
   <tabstop>treeWidget</tabstop>
   <tabstop>webView_preview</tabstop>
-  <tabstop>pushButton</tabstop>
+  <tabstop>pushButton_import</tabstop>
   <tabstop>btn_downloadNew</tabstop>
  </tabstops>
  <resources/>

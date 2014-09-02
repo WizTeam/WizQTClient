@@ -302,21 +302,25 @@ CWizHtmlToPlainText::CWizHtmlToPlainText()
 
 bool CWizHtmlToPlainText::toText(const QString& strHtmlAll, QString& strPlainText)
 {
-    m_strText.clear();
+    WizHtml2Text(strHtmlAll,strPlainText);
+    strPlainText.replace("\n", " ");
 
-    // remove head or title if exists
-    QString strHtml = strHtmlAll;
-    strHtml.replace(QRegExp("<head>.*</head>", Qt::CaseInsensitive), "");
-    strHtml.replace(QRegExp("<title>.*</title>", Qt::CaseInsensitive), "");
+    //CWizHtmlReader 的解析方法存在残留标签的问题，需要修正
+//    m_strText.clear();
 
-    CWizHtmlReader reader;
-    reader.setEventHandler(this);
-    reader.setBoolOption(CWizHtmlReader::resolveEntities, true);
+//    // remove head or title if exists
+//    QString strHtml = strHtmlAll;
+//    strHtml.replace(QRegExp("<head>.*</head>", Qt::CaseInsensitive), "");
+//    strHtml.replace(QRegExp("<title>.*</title>", Qt::CaseInsensitive), "");
 
-    reader.Read(strHtml);
+//    CWizHtmlReader reader;
+//    reader.setEventHandler(this);
+//    reader.setBoolOption(CWizHtmlReader::resolveEntities, true);
 
-    m_strText.replace('\0', ' '); // otherwise sqlite statement will be failed!
-    strPlainText = m_strText.simplified();
+//    reader.Read(strHtml);
+
+//    m_strText.replace('\0', ' '); // otherwise sqlite statement will be failed!
+//    strPlainText = m_strText.simplified();
     return true;
 }
 

@@ -3,10 +3,13 @@
 
 #include <QDialog>
 #include <QTreeWidgetItem>
+#include <QMap>
 
 namespace Ui {
 class CWizDocTemplateDialog;
 }
+
+class CWizSettings;
 
 class CWizTemplateFileItem : public QTreeWidgetItem
 {
@@ -32,7 +35,7 @@ signals:
     void documentTemplateSelected(QString strFile);
 
 public slots:
-    void itemDoubleClicked(QTreeWidgetItem*item, int);
+    void itemClicked(QTreeWidgetItem*item, int);
 
 private slots:
     void on_btn_downloadNew_clicked();
@@ -41,16 +44,24 @@ private slots:
 
     void on_btn_cancle_clicked();
 
-    void on_pushButton_clicked();
+    void on_pushButton_import_clicked();
 
 private:
     //
     void initTemplateFileTreeWidget();
-    void initBuiltinTemplateItems();
-    void initDownloadedTemplateItems();
+    QString languangeCode() const;
     QString previewFileName();
+    void initFolderTemplateItems(const QString& strFoler);
+    void initFolderItems(QTreeWidgetItem *parentItem, const QString& strDir,
+                         CWizSettings& settings);
+
+    bool getLocalization(CWizSettings& settings, const QString& strKey, QString& strValue);
     //
     bool importTemplateFile(const QString& strFileName);
+    //
+    void resetTempalteTree();
+
+    void createSettingsFile(const QString& strFileName);
 
 private:
     Ui::CWizDocTemplateDialog *ui;
