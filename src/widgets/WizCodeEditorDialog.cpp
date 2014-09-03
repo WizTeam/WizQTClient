@@ -73,8 +73,8 @@ WizCodeEditorDialog::WizCodeEditorDialog(QWidget *parent) :
     btnCancle->setText(tr("Cancle"));
     QHBoxLayout *layoutButton = new QHBoxLayout();
     layoutButton->addStretch();
-    layoutButton->addWidget(btnOK);
     layoutButton->addWidget(btnCancle);
+    layoutButton->addWidget(btnOK);
 
 
     verticalLayout->addLayout(horizontalLayout);

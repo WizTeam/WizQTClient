@@ -1,6 +1,7 @@
 #include "wizactions.h"
 #include <QAction>
 #include <QMenuBar>
+#include <QKeySequence>
 #include "share/wizmisc.h"
 #include "share/wizsettings.h"
 #include "share/wizanimateaction.h"

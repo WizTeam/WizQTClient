@@ -295,6 +295,7 @@ void CWizDocumentWebView::keyPressEvent(QKeyEvent* event)
         return;
     }
 #if QT_VERSION < 0x050000
+    #ifdef Q_OS_MAC
     else if (event->key() == Qt::Key_Z)
     {
         //Ctrl+Shift+Z,  shortcut for redo can't catch by actions in QT4
@@ -309,6 +310,20 @@ void CWizDocumentWebView::keyPressEvent(QKeyEvent* event)
             return;
         }
     }
+    #else
+    else if (event->key() == Qt::Key_Y)
+    {
+        //Ctrl+Shift+Z,  shortcut for redo can't catch by actions in QT4
+        Qt::KeyboardModifiers keyMod = QApplication::keyboardModifiers();
+        bool isSHIFT = keyMod.testFlag(Qt::ShiftModifier);
+        bool isCTRL = keyMod.testFlag(Qt::ControlModifier);
+        if (isCTRL && !isSHIFT)
+        {
+            redo();
+            return;
+        }
+    }
+    #endif
 
 #endif
 
