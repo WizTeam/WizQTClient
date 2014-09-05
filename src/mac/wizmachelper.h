@@ -23,6 +23,8 @@ void wizMacInitUncaughtExceptionHandler();
 
 void wizMacRegisterSystemService();
 
+void wizMacPrint(const QString& strFileName, int pageWidth, int pageHeight);
+
 //path for yosemite
 bool wizIsYosemiteFilePath(const QString& strPath);
 QString wizConvertYosemiteFilePathToNormalPath(const QString& strYosePath);

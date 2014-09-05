@@ -58,11 +58,9 @@ void CWizMobileFileReceiver::readUdpPendingData()
                 qDebug() << sender << " port : " << senderPort;
                 m_tcpSocket->connectToHost(sender, 19586, QTcpSocket::ReadOnly);
                 m_tcpSocket->waitForConnected(60000);
-                qDebug() << m_tcpSocket->state();
 
                 m_tcpSocket->waitForReadyRead(60000);
                 QByteArray *tcpData = new QByteArray();
-                qDebug() << m_tcpSocket->state();
                 while (m_tcpSocket->bytesAvailable())
                 {
                     tcpData->append(m_tcpSocket->readAll());
@@ -87,7 +85,6 @@ void CWizMobileFileReceiver::readTcpPendingData()
                  strData = new QByteArray();
             }
             strData->append(m_tcpSocket->readLine(3096));
-            qDebug() << "tcp date read : " << *strData;
 
             if (strData->right(1) == "\n")
             {
@@ -121,12 +118,10 @@ void CWizMobileFileReceiver::getInfoFromUdpData(const QByteArray& udpData, QStri
 
 void CWizMobileXmlProcesser::processXML(const QByteArray& datagram)
 {
-    qDebug() << datagram;
     QXmlStreamReader xml(datagram);
     while (!xml.atEnd() && !xml.hasError())
     {
         QXmlStreamReader::TokenType token = xml.readNext();
-        qDebug() << "current string : " << xml.text().toString();
         if(token == QXmlStreamReader::StartDocument)
         {
             continue;
@@ -285,6 +280,8 @@ bool CWizMobileXmlProcesser::combineSegmentToFile(const QString& strGuid, QStrin
             QString strWizPath = QDir::homePath()  + "/Downloads/WizNote/";
             WizEnsurePathExists(strWizPath);
             strFile = strWizPath + fileData.name;
+            if (image.byteCount() != fileData.length)
+                return false;
             return image.save(strFile);
         }
     }
@@ -303,7 +300,7 @@ bool CWizMobileFileReceiver::isUdpSendToCurrentUser(const QString& userID)
     if (dbMgr)
     {
         CWizDatabase& db = dbMgr->db();
-        return db.GetUserId() == userID;
+        return db.GetUserGUID() == userID;
     }
 
     return false;

@@ -22,6 +22,10 @@
 //#endif
 
 
+#import <WebKit/WebKit.h>
+#import <Quartz/Quartz.h>
+
+
 @interface CreateNoteService : NSObject
 
 - (void) serviceCreateNote:(NSPasteboard *)pboard
@@ -376,4 +380,87 @@ QString wizConvertYosemiteFilePathToNormalPath(const QString& strYosePath)
     NSString *fileIdURL = WizToNSString(strFilePath);
     NSString *goodURL = [[[NSURL URLWithString:fileIdURL] filePathURL] path];
     return WizToQString(goodURL);
+}
+
+
+void wizMacPrint(const QString& strFileName, int pageWidth, int pageHeight)
+{
+    NSString *strfileUrl = WizToNSString(strFileName);  //[dir stringByAppendingPathComponent:@"Temp_Print.html"];
+
+    WebView *webView = [[WebView alloc] init];
+   // [webView autorelease];
+    //NSString *dir = @"/Users/lxn/Desktop/";
+
+    //NSString *htmlString = @"<b>Hi!</b>";
+    //[[htmlString dataUsingEncoding:NSUTF8StringEncoding] writeToFile:fileUrl atomically:YES];
+
+    [[webView mainFrame] loadRequest:[NSURLRequest requestWithURL:[NSURL fileURLWithPath:strfileUrl]]];
+    [webView setFrame:NSMakeRect(0, 0, 0, 0)];
+//    NSPrintInfo *printInfo = [[NSPrintInfo alloc] init];
+//    NSPrintOperation *po = [NSPrintOperation printOperationWithView:webView printInfo:printInfo];
+
+//    [printInfo release];
+//    [po runOperation];
+
+
+    NSPrintInfo *printInfo = [NSPrintInfo sharedPrintInfo];
+    [printInfo setTopMargin:0.0];
+    [printInfo setBottomMargin:0.0];
+    [printInfo setLeftMargin:0.0];
+    [printInfo setRightMargin:0.0];
+    [printInfo setHorizontalPagination:NSFitPagination];
+    [printInfo setVerticalPagination:NSFitPagination];
+
+    // This is your chance to modify printInfo if you need to change
+    // the page orientation, margins, etc
+    [printInfo setOrientation:NSPaperOrientationLandscape];
+
+    NSPrintOperation *printOperation = [webView.mainFrame.frameView printOperationWithPrintInfo:printInfo];
+
+    NSWindow *wnd = [[NSWindow alloc] init];
+ //   [wnd setContentSize:webView.mainFrame.frameView.size];
+    [wnd setContentView:webView.mainFrame.frameView];
+
+    // Open the print dialog
+    [printOperation runOperation];
+
+
+    [printInfo release];
+    [webView release];
+    [wnd release];
+    [printOperation release];
+
+
+/*
+    // Create the print settings.
+    NSURL *fileUrl = [NSURL fileURLWithPath:strfileUrl];
+    PDFDocument *pdfDocument = [[PDFDocument alloc] initWithURL:fileUrl];
+
+    PDFPage *firstPage = [pdfDocument pageAtIndex:0];
+    NSRect bounds = [firstPage boundsForBox:kPDFDisplayBoxMediaBox];
+    NSSize pixelSize = bounds.size;
+    NSSize documentSize;
+
+    documentSize.width = pixelSize.width;
+    documentSize.height = pixelSize.height;
+    PDFView *PDFDocumentView = [[PDFView alloc] initWithFrame:NSMakeRect(0, 0, documentSize.width, documentSize.height)];
+
+    [PDFDocumentView setDisplayMode:kPDFDisplaySinglePage];
+    [PDFDocumentView setDisplayBox:kPDFDisplayBoxMediaBox];
+    [PDFDocumentView setAutoScales:NO];
+    [PDFDocumentView setDocument:pdfDocument];
+    [PDFDocumentView setBackgroundColor:[NSColor redColor]];
+
+    NSPrintInfo *printInfo = [[NSPrintInfo alloc] init];
+
+    NSWindow *wnd = [[NSWindow alloc] init];
+    [wnd setContentSize:PDFDocumentView.frame.size];
+    [wnd setContentView:PDFDocumentView];
+
+    [PDFDocumentView printWithInfo:printInfo autoRotate:NO];
+    [printInfo release];
+    [PDFDocumentView release];
+    [wnd release];
+*/
+
 }
