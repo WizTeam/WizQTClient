@@ -1671,22 +1671,22 @@ void MainWindow::on_actionSearchReplace_triggered()
 
 void MainWindow::on_actionSaveAsPDF_triggered()
 {
-    QString strFileName = Utils::PathResolve::tempDocumentFolder(m_doc->note().strGUID) + "index.html";
-    wizMacPrint(strFileName, m_doc->web()->width(), m_doc->web()->height());
+//    QString strFileName = Utils::PathResolve::tempDocumentFolder(m_doc->note().strGUID) + "index.html";
+//    wizMacPrint(strFileName, m_doc->web()->width(), m_doc->web()->height());
 
-//    if (CWizDocumentWebView* web = m_doc->web())
-//    {
-//        QString	fileName = QFileDialog::getSaveFileName (this, QString(), QDir::homePath(), tr("PDF Files (*.pdf)"));
-//        if (!fileName.isEmpty())
-//        {
-//            web->saveAsPDF(fileName);
+    if (CWizDocumentWebView* web = m_doc->web())
+    {
+        QString	fileName = QFileDialog::getSaveFileName (this, QString(), QDir::homePath(), tr("PDF Files (*.pdf)"));
+        if (!fileName.isEmpty())
+        {
+            web->saveAsPDF(fileName);
 
 
 
 //            wizMacPrint(fileName, 200, 200);
 
-//        }
-//    }
+        }
+    }
 }
 
 void MainWindow::on_actionPrint_triggered()
