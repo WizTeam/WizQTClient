@@ -97,12 +97,12 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     , m_labelNotice(NULL)
     , m_optionsAction(NULL)
     #endif
-    #ifdef Q_OS_MAC
     , m_menuBar(new QMenuBar(this))
+    #ifdef Q_OS_MAC
     , m_toolBar(new QToolBar(this))
     #else
     , m_toolBar(new QToolBar("Main", titleBar()))
-    , m_menu(new QMenu(clientWidget()))
+    , m_menu(new QMenu(this))
     , m_spacerBeforeSearch(NULL)
     #endif
     , m_actions(new CWizActions(*this, this))
@@ -128,7 +128,9 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     connect(qApp, SIGNAL(aboutToQuit()), SLOT(on_application_aboutToQuit()));
     connect(qApp, SIGNAL(lastWindowClosed()), qApp, SLOT(quit())); // Qt bug: Qt5 bug
     qApp->installEventFilter(this);
+#ifdef Q_OS_MAC
     installEventFilter(this);
+#endif
 
     //CWizCloudPool::instance()->init(&m_dbMgr);
 
@@ -156,8 +158,8 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
 
     // GUI
     initActions();
-#ifdef Q_OS_MAC
     initMenuBar();
+#ifdef Q_OS_MAC
 #else
     initMenuList();
 #endif
@@ -490,13 +492,13 @@ void MainWindow::initActions()
     on_editor_statusChanged();
 }
 
-#ifdef Q_OS_MAC
+//#ifdef Q_OS_MAC
 void MainWindow::initMenuBar()
 {
     setMenuBar(m_menuBar);
     m_actions->buildMenuBar(m_menuBar, Utils::PathResolve::resourcesPath() + "files/mainmenu.ini");
 }
-#endif
+//#endif
 
 void MainWindow::on_editor_statusChanged()
 {
