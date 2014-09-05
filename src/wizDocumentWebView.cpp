@@ -79,6 +79,12 @@ private:
 */
 
 
+CWizDocumentWebViewPage::CWizDocumentWebViewPage(QObject *parent) : QWebPage(parent)
+{
+    action(QWebPage::Undo)->setShortcut(QKeySequence());
+    action(QWebPage::Redo)->setShortcut(QKeySequence());
+}
+
 void CWizDocumentWebViewPage::triggerAction(QWebPage::WebAction typeAction, bool checked)
 {
     if (typeAction == QWebPage::Back || typeAction == QWebPage::Forward) {
@@ -307,19 +313,6 @@ void CWizDocumentWebView::keyPressEvent(QKeyEvent* event)
             return;
         } else if (isCTRL && !isSHIFT) {
             undo();
-            return;
-        }
-    }
-    #else
-    else if (event->key() == Qt::Key_Y)
-    {
-        //Ctrl+Shift+Z,  shortcut for redo can't catch by actions in QT4
-        Qt::KeyboardModifiers keyMod = QApplication::keyboardModifiers();
-        bool isSHIFT = keyMod.testFlag(Qt::ShiftModifier);
-        bool isCTRL = keyMod.testFlag(Qt::ControlModifier);
-        if (isCTRL && !isSHIFT)
-        {
-            redo();
             return;
         }
     }

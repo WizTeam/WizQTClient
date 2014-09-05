@@ -98,7 +98,7 @@ class CWizDocumentWebViewPage: public QWebPage
     Q_OBJECT
 
 public:
-    explicit CWizDocumentWebViewPage(QObject* parent = 0) : QWebPage(parent) {}
+    explicit CWizDocumentWebViewPage(QObject* parent = 0);
     virtual void triggerAction(QWebPage::WebAction typeAction, bool checked = false);
     virtual void javaScriptConsoleMessage(const QString& message, int lineNumber, const QString& sourceID);
 

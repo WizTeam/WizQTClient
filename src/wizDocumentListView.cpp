@@ -490,6 +490,7 @@ void CWizDocumentListView::mouseReleaseEvent(QMouseEvent* event)
     QListWidget::mouseReleaseEvent(event);
 }
 
+
 void CWizDocumentListView::keyReleaseEvent(QKeyEvent* event)
 {
     //
