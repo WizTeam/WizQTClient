@@ -120,8 +120,9 @@ private:
     QSystemTrayIcon* m_tray;
 
     QToolBar* m_toolBar;
+#ifdef Q_OS_MAC
     QMenuBar* m_menuBar;
-#ifndef Q_OS_MAC
+#else
     QMenu* m_menu;
     QToolButton* m_menuButton;
 #endif
@@ -178,8 +179,8 @@ private:
     virtual void layoutTitleBar();
     void initMenuList();
 #else
-#endif
     void initMenuBar();
+#endif
 
     QWidget* createListView();
 

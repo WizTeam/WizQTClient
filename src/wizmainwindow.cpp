@@ -97,8 +97,8 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     , m_labelNotice(NULL)
     , m_optionsAction(NULL)
     #endif
-    , m_menuBar(new QMenuBar(this))
     #ifdef Q_OS_MAC
+    , m_menuBar(new QMenuBar(this))
     , m_toolBar(new QToolBar(this))
     #else
     , m_toolBar(new QToolBar("Main", titleBar()))
@@ -158,8 +158,8 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
 
     // GUI
     initActions();
-    initMenuBar();
 #ifdef Q_OS_MAC
+    initMenuBar();
 #else
     initMenuList();
 #endif
@@ -492,13 +492,13 @@ void MainWindow::initActions()
     on_editor_statusChanged();
 }
 
-//#ifdef Q_OS_MAC
+#ifdef Q_OS_MAC
 void MainWindow::initMenuBar()
 {
     setMenuBar(m_menuBar);
     m_actions->buildMenuBar(m_menuBar, Utils::PathResolve::resourcesPath() + "files/mainmenu.ini");
 }
-//#endif
+#endif
 
 void MainWindow::on_editor_statusChanged()
 {

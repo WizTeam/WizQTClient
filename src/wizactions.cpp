@@ -1,7 +1,7 @@
 #include "wizactions.h"
-#include <QAction>
 #include <QMenuBar>
 #include <QKeySequence>
+#include <QShortcut>
 #include "share/wizmisc.h"
 #include "share/wizsettings.h"
 #include "share/wizanimateaction.h"
@@ -115,21 +115,23 @@ WIZACTION* CWizActions::actionsData()
     return arrayActions;
 }
 
-QAction* CWizActions::addAction(WIZACTION& action)
+CWizShortcutAction *CWizActions::addAction(WIZACTION& action)
 {   
     QString strText = action.strText;
     QString strIconName = action.strName;
     QString strShortcut = action.strShortcut;
     QString strSlot = "1on_" + action.strName + "_triggered()";
 
-    QAction* pAction = new QAction(strText, m_parent);
+    CWizShortcutAction* pAction = new CWizShortcutAction(strText, m_parent);
 
     if (!strIconName.isEmpty()) {
         pAction->setIcon(::WizLoadSkinIcon(m_app.userSettings().skin(), strIconName));
     }
 
+    QShortcut *shortcut = 0;
     if (!strShortcut.isEmpty()) {
         pAction->setShortcut(QKeySequence::fromString(strShortcut));
+        shortcut = new QShortcut(QKeySequence::fromString(strShortcut), m_app.mainWindow());
     }
 
     if (action.strName == "actionAbout")
@@ -145,6 +147,11 @@ QAction* CWizActions::addAction(WIZACTION& action)
     pAction->setShortcutContext(Qt::ApplicationShortcut);
 
     m_actions[action.strName] = pAction;
+    if (shortcut)
+    {
+        QObject::connect(shortcut, SIGNAL(activated()), m_parent, strSlot.toUtf8());
+        pAction->setShortcut(shortcut);
+    }
     QObject::connect(pAction, "2triggered()", m_parent, strSlot.toUtf8());
 
     return pAction;
@@ -165,9 +172,9 @@ void CWizActions::init()
     }
 }
 
-QAction* CWizActions::actionFromName(const QString& strActionName)
+CWizShortcutAction *CWizActions::actionFromName(const QString& strActionName)
 {
-    QAction* pAction = m_actions[strActionName];
+    CWizShortcutAction* pAction = m_actions[strActionName];
     if (pAction) {
         return pAction;
     }
@@ -337,4 +344,23 @@ void CWizActions::buildMenu(QMenu* menu, const QString& strFileName)
     menu->addAction(actionOptions);
     menu->addSeparator();
     menu->addAction(actionQuit);
+}
+
+
+void CWizShortcutAction::setShortcut(QShortcut *shortcut)
+{
+    m_shortcut = shortcut;
+}
+
+void CWizShortcutAction::setShortcut(const QKeySequence &shortcut)
+{
+    QAction::setShortcut(shortcut);
+}
+
+void CWizShortcutAction::setEnabled(bool enable)
+{
+    if (m_shortcut)
+    {
+        m_shortcut->setEnabled(enable);
+    }
 }
