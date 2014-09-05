@@ -62,6 +62,14 @@ enum WizOptionsType
     wizoptionsFont
 };
 
+enum WizPositionType
+{
+    wizPositionTop,
+    wizPositionBottom,
+    wizPositionLeft,
+    wizPositionRight
+};
+
 const QString USER_SETTINGS_SECTION = "QT_WIZNOTE";
 
 class CWizUserSettings
@@ -104,6 +112,12 @@ public:
 
     bool receiveMobileFile() const;
     void setReceiveMobileFile(bool bReceiveFile);
+
+    QString printMarginValue(WizPositionType posType);
+    void setPrintMarginValue(WizPositionType posType, const QString& strValue);
+
+    QString printMarginUnit();
+    void setPrintMarginUnit(const QString& strUnit);
 
     QString locale();
     void setLocale(const QString& strLocale);

@@ -13,6 +13,7 @@
 #include <QFileDialog>
 #include <QTextEdit>
 #include <QMultiMap>
+#include <QPrintDialog>
 
 #include <QApplication>
 #include <QWebPage>
@@ -1637,6 +1638,22 @@ void CWizDocumentWebView::saveAsPDF(const QString& fileName)
         printer.setOutputFileName(fileName);
         //
         frame->print(&printer);
+    }
+}
+
+void CWizDocumentWebView::printDocument()
+{
+    if (QWebFrame* frame = noteFrame())
+    {
+        QPrinter printer(QPrinter::HighResolution);
+        printer.setPageMargins(25, 25, 25, 25, QPrinter::Millimeter);
+        printer.setOutputFormat(QPrinter::NativeFormat);
+        QPrintDialog dlg(&printer,0);
+        dlg.setWindowTitle(QObject::tr("Print Document"));
+        if(dlg.exec() == QDialog::Accepted)
+        {
+            frame->print(&printer);
+        }
     }
 }
 

@@ -55,6 +55,7 @@ WIZACTION* CWizActions::actionsData()
         {WIZACTION_GLOBAL_NEW_DOCUMENT,     QObject::tr("New Note"), "", "Ctrl+N"},
         {WIZACTION_GLOBAL_NEW_DOCUMENT_BY_TEMPLATE,     QObject::tr("New Note by template"), "", ""},
         {WIZACTION_GLOBAL_SAVE_AS_PDF,      QObject::tr("Save as PDF..."), "", ""},
+        {WIZACTION_GLOBAL_PRINT,      QObject::tr("Save as PDF..."), "", "Ctrl+P"},
         //{WIZACTION_GLOBAL_VIEW_MESSAGES,    QObject::tr("View messages"), "", ""},
         {"actionGoBack",                    QObject::tr("Back"), "", ""},
         {"actionGoForward",                 QObject::tr("Forward"), "", ""},
@@ -77,7 +78,7 @@ WIZACTION* CWizActions::actionsData()
         {WIZACTION_EDITOR_SELECT_ALL,       QObject::tr("Select all"), "", "Ctrl+A"},
 
         // view
-        {WIZACTION_GLOBAL_TOGGLE_CATEGORY,      QObject::tr("Hide category view"), QObject::tr("Show category view"), "Alt+Ctrl+H"},
+        {WIZACTION_GLOBAL_TOGGLE_CATEGORY,      QObject::tr("Hide category view"), QObject::tr("Show category view"), "Alt+Ctrl+S"},
         {WIZACTION_GLOBAL_TOGGLE_FULLSCREEN,    QObject::tr("Enter Fullscreen"), QObject::tr("Leave Fullscreen"), "Ctrl+Meta+f"},
 
         // format

@@ -321,6 +321,36 @@ void CWizUserSettings::setReceiveMobileFile(bool bReceiveFile)
     set("RecevieMobileFile", bReceiveFile ? "1" : "0");
 }
 
+QString CWizUserSettings::printMarginValue(WizPositionType posType)
+{
+    QString strMarginValue = get("PrintMarginValue_" + QString::number(posType));
+    if (!strMarginValue.isEmpty()) {
+        return QString::number(5.0);
+    }
+
+    return strMarginValue;
+}
+
+void CWizUserSettings::setPrintMarginValue(WizPositionType posType, const QString& strValue)
+{
+    set("PrintMarginValue_" + QString::number(posType), strValue);
+}
+
+QString CWizUserSettings::printMarginUnit()
+{
+    QString strMarginType = get("PrintMarginType");
+    if (!strMarginType.isEmpty()) {
+        return "Millimeter";
+    }
+
+    return strMarginType;
+}
+
+void CWizUserSettings::setPrintMarginUnit(const QString& strUnit)
+{
+    set("PrintMarginType", strUnit);
+}
+
 QString CWizUserSettings::skin()
 {
     // just return because no skin selection from v1.4

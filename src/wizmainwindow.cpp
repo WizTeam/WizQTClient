@@ -1671,38 +1671,19 @@ void MainWindow::on_actionSearchReplace_triggered()
 
 void MainWindow::on_actionSaveAsPDF_triggered()
 {
-//    QString strFileName = Utils::PathResolve::tempDocumentFolder(m_doc->note().strGUID) + "index.html";
-//    wizMacPrint(strFileName, m_doc->web()->width(), m_doc->web()->height());
-
     if (CWizDocumentWebView* web = m_doc->web())
     {
         QString	fileName = QFileDialog::getSaveFileName (this, QString(), QDir::homePath(), tr("PDF Files (*.pdf)"));
         if (!fileName.isEmpty())
         {
             web->saveAsPDF(fileName);
-
-
-
-//            wizMacPrint(fileName, 200, 200);
-
         }
     }
 }
 
 void MainWindow::on_actionPrint_triggered()
 {
-    QPrinter *printer = new QPrinter(QPrinter::HighResolution);
-    qDebug() << "printer avaliable : " << printer->isValid();
-    printer->setOutputFormat(QPrinter::NativeFormat);
-    printer->setOutputFileName("abc.pdf");
-    QPrintDialog *printDialog = new QPrintDialog(printer,this);
-    printDialog->setWindowTitle(tr("Print Dialog"));
-    if (printDialog->exec() == QDialog::Accepted)
-    {
-        QTextDocument textdocument;
-        textdocument.setHtml(m_doc->web()->page()->mainFrame()->toHtml());
-        textdocument.print(printer);
-    }
+    m_doc->web()->printDocument();
 }
 
 //void MainWindow::on_searchDocumentFind(const WIZDOCUMENTDATAEX& doc)

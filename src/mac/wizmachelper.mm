@@ -404,31 +404,33 @@ void wizMacPrint(const QString& strFileName, int pageWidth, int pageHeight)
 
 
     NSPrintInfo *printInfo = [NSPrintInfo sharedPrintInfo];
-    [printInfo setTopMargin:0.0];
-    [printInfo setBottomMargin:0.0];
-    [printInfo setLeftMargin:0.0];
-    [printInfo setRightMargin:0.0];
-    [printInfo setHorizontalPagination:NSFitPagination];
-    [printInfo setVerticalPagination:NSFitPagination];
+    [printInfo setHorizontallyCentered:YES];
+    [printInfo setTopMargin:50.0];
+    [printInfo setBottomMargin:-100.0];
+    [printInfo setLeftMargin:10.0];
+    [printInfo setRightMargin:10.0];
+    [printInfo setHorizontalPagination:NSClipPagination];
+    [printInfo setVerticalPagination:NSClipPagination];
+
 
     // This is your chance to modify printInfo if you need to change
     // the page orientation, margins, etc
-    [printInfo setOrientation:NSPaperOrientationLandscape];
+    [printInfo setOrientation:NSPortraitOrientation];
 
     NSPrintOperation *printOperation = [webView.mainFrame.frameView printOperationWithPrintInfo:printInfo];
 
     NSWindow *wnd = [[NSWindow alloc] init];
  //   [wnd setContentSize:webView.mainFrame.frameView.size];
-    [wnd setContentView:webView.mainFrame.frameView];
+    [wnd setContentView:webView];
 
     // Open the print dialog
     [printOperation runOperation];
 
+//    [webView.mainFrame.frameView printWithInfo:printInfo autoRotate:NO];
 
-    [printInfo release];
+
     [webView release];
     [wnd release];
-    [printOperation release];
 
 
 /*

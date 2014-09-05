@@ -349,3 +349,28 @@ void CWizPreferenceWindow::on_checkBoxMobileFile_toggled(bool checked)
     Core::Internal::MainWindow* mainWindow = qobject_cast<Core::Internal::MainWindow*>(m_app.mainWindow());
     mainWindow->setMobileFileReceiverEnable(checked);
 }
+
+void CWizPreferenceWindow::on_comboBox_unit_currentIndexChanged(int index)
+{
+
+}
+
+void CWizPreferenceWindow::on_spinBox_top_valueChanged(const QString &arg1)
+{
+
+}
+
+void CWizPreferenceWindow::on_spinBox_bottom_valueChanged(const QString &arg1)
+{
+
+}
+
+void CWizPreferenceWindow::on_spinBox_left_valueChanged(const QString &arg1)
+{
+
+}
+
+void CWizPreferenceWindow::on_spinBox_right_valueChanged(const QString &arg1)
+{
+
+}
