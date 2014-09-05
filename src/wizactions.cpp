@@ -68,11 +68,7 @@ WIZACTION* CWizActions::actionsData()
 
         // editing
         {WIZACTION_EDITOR_UNDO,             QObject::tr("Undo"), "", "Ctrl+Z"},
-    #ifdef Q_OS_MAC
         {WIZACTION_EDITOR_REDO,             QObject::tr("Redo"), "", "Shift+Ctrl+Z"},
-    #else
-        {WIZACTION_EDITOR_REDO,             QObject::tr("Redo"), "", "Ctrl+Y"},
-    #endif
         {WIZACTION_EDITOR_CUT,              QObject::tr("Cut"), "", "Ctrl+X"},
         {WIZACTION_EDITOR_COPY,             QObject::tr("Copy"), "", "Ctrl+C"},
         {WIZACTION_EDITOR_PASTE,            QObject::tr("Paste"), "", "Ctrl+V"},
