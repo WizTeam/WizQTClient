@@ -136,7 +136,7 @@ void CWizMobileXmlProcesser::processXML(const QByteArray& datagram)
         }
     }
     if (xml.hasError()) {
-        QMessageBox::information(NULL, QString("parseXML"), xml.errorString());
+        qDebug() << "process xml failed : " << xml.errorString();
     }
     xml.clear();
 }
@@ -194,7 +194,6 @@ void CWizMobileXmlProcesser::processFileParam(QXmlStreamReader& xml)
         {
             qDebug() << "combine sucessed : " << strFileName;
             emit fileReceived(strFileName);
-            //QMessageBox::information(0, tr("Info"), tr("file recive succesed! ") + strFileName);
             m_dataMap.remove(guid);
         }
         else
@@ -280,8 +279,6 @@ bool CWizMobileXmlProcesser::combineSegmentToFile(const QString& strGuid, QStrin
             QString strWizPath = QDir::homePath()  + "/Downloads/WizNote/";
             WizEnsurePathExists(strWizPath);
             strFile = strWizPath + fileData.name;
-            if (image.byteCount() != fileData.length)
-                return false;
             return image.save(strFile);
         }
     }
