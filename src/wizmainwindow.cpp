@@ -271,6 +271,11 @@ void MainWindow::cleanOnQuit()
     //
     QThreadPool::globalInstance()->waitForDone();
     WizService::AvatarHost::waitForDone();
+
+    if (m_mobileFileReceiver)
+    {
+        m_mobileFileReceiver->waitForDone();
+    }
 }
 
 MainWindow*MainWindow::instance()
@@ -2308,8 +2313,12 @@ void MainWindow::setMobileFileReceiverEnable(bool bEnable)
     }
     else
     {
-        delete m_mobileFileReceiver;
-        m_mobileFileReceiver = 0;
+        if (m_mobileFileReceiver)
+        {
+            m_mobileFileReceiver->waitForDone();
+            delete m_mobileFileReceiver;
+            m_mobileFileReceiver = 0;
+        }
     }
 }
 

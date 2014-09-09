@@ -31,22 +31,19 @@ class QUdpSocket;
 class QTcpSocket;
 class QXmlStreamReader;
 
-class CWizMobileXmlProcesser : public QThread
+class CWizMobileXmlProcesser : public QObject
 {
     Q_OBJECT
 public:
     explicit CWizMobileXmlProcesser(QObject *parent = 0);
 
     void addNewSegment(QByteArray *ba);
-    void waitForDone();
 
-    void stop();
+    bool hasUnprocessedData();
+    void processData();
 
 signals:
     void fileReceived(QString strFileName);
-
-protected:
-    void run();
 
 private:
     QByteArray * peekData();
@@ -60,13 +57,12 @@ private:
 
 private:
     //QList<UdpSegment> m_segmentList;
-    bool m_stop;
     QMutex m_mutex;
     QList<QByteArray *> m_segmentList;
     QMap<QString, MobileFileData> m_dataMap;
 };
 
-class CWizMobileFileReceiver : public QObject
+class CWizMobileFileReceiver : public QThread
 {
     Q_OBJECT
 public:
@@ -75,12 +71,18 @@ public:
 
     void initSocket();
 
+    void waitForDone();
+    void stop();
+
 signals:
     void fileReceived(QString strFileName);
 
 public slots:
     void readUdpPendingData();
     void readTcpPendingData();
+
+protected:
+    void run();
 
 private:
     void getInfoFromUdpData(const QByteArray& udpData, QString& userID);
@@ -93,6 +95,7 @@ private:
     QUdpSocket *m_udpSocket;
     QTcpSocket *m_tcpSocket;
     CWizMobileXmlProcesser *m_xmlProcesser;
+    bool m_stop;
 };
 
 #endif // WIZMOBILEFILERECEIVER_H
