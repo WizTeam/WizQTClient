@@ -15,10 +15,10 @@
 CWizMobileFileReceiver::CWizMobileFileReceiver(QObject *parent) :
     QThread(parent)
   , m_udpSocket(0)
-  , m_tcpSocket(0)
   , m_xmlProcesser(new CWizMobileXmlProcesser(parent))
   , m_stop(false)
 {
+    m_tcpContainer = new CWizMobileTcpContainer(m_xmlProcesser, parent);
     connect(m_xmlProcesser, SIGNAL(fileReceived(QString)), SIGNAL(fileReceived(QString)));
 }
 
@@ -30,10 +30,9 @@ void CWizMobileFileReceiver::initSocket()
 {
     m_udpSocket = new QUdpSocket(this);
     m_udpSocket->bind(QHostAddress::Any, 18695);
-    m_tcpSocket = new QTcpSocket(this);
+
 
     connect(m_udpSocket, SIGNAL(readyRead()),this ,SLOT(readUdpPendingData()), Qt::DirectConnection);
-    qDebug() << "connect tcp : " << connect(m_tcpSocket, SIGNAL(readyRead()), this, SLOT(readTcpPendingData()), Qt::DirectConnection);
 }
 
 void CWizMobileFileReceiver::waitForDone()
@@ -50,77 +49,28 @@ void CWizMobileFileReceiver::stop()
 
 void CWizMobileFileReceiver::readUdpPendingData()
 {
-    while (m_udpSocket->hasPendingDatagrams()) {
+    while (m_udpSocket->hasPendingDatagrams())
+    {
         QByteArray datagram;
         qint64 size = m_udpSocket->pendingDatagramSize();
         datagram.resize(size);
-        QHostAddress sender;
+        QHostAddress host;
         quint16 senderPort;
 
         m_udpSocket->readDatagram(datagram.data(), datagram.size(),
-                                  &sender, &senderPort);
+                                  &host, &senderPort);
 
-        //parse udp data. connect server is tcp is free
-        if (m_tcpSocket->state() == QAbstractSocket::UnconnectedState)
+        //parse udp data. connect server if tcp is free
+        if (m_tcpContainer->tcpState() == QAbstractSocket::UnconnectedState)
         {
             QString userID;//
             getInfoFromUdpData(datagram, userID);
             if (isUdpSendToCurrentUser(userID))
             {
-                qDebug() << sender << " port : " << senderPort;
-                m_tcpSocket->connectToHost(sender, 19586, QTcpSocket::ReadOnly);
-                m_tcpSocket->waitForConnected(60000);
-
-                m_tcpSocket->waitForReadyRead(60000);
-                QByteArray *tcpData = new QByteArray();
-                while (m_tcpSocket->bytesAvailable())
-                {
-                    tcpData->append(m_tcpSocket->readAll());
-                }
-                m_xmlProcesser->addNewSegment(tcpData);
-                m_tcpSocket->disconnectFromHost();
-
+                m_tcpContainer->connectToHost(host, 19586);
             }
         }
     }
-}
-
-void CWizMobileFileReceiver::readTcpPendingData()
-{
-    static QByteArray *strData = 0;
-    while (m_tcpSocket->waitForReadyRead())
-    {
-        while (m_tcpSocket->bytesAvailable())
-        {
-            if (strData == 0)
-            {
-                 strData = new QByteArray();
-            }
-            strData->append(m_tcpSocket->readLine(3096));
-
-            if (strData->right(1) == "\n")
-            {
-                strData->remove(strData->length() - 1, 1);
-            }
-            if (strData->right(17) == "<!--WizDataEnd-->")
-            {
-                m_xmlProcesser->addNewSegment(strData);
-                strData = 0;
-                continue;
-            }
-            if (strData->right(3) == "bye")
-            {
-                m_tcpSocket->disconnectFromHost();
-                delete strData;
-                strData = 0;
-                qDebug() << "tcp disconnectFromHost";
-                return;
-            }
-        }
-    }
-    if (strData)
-        delete strData;
-    strData = 0;
 }
 
 void CWizMobileFileReceiver::getInfoFromUdpData(const QByteArray& udpData, QString& userID)
@@ -394,4 +344,63 @@ void CWizMobileXmlProcesser::run()
             sleep(1);
         }
     }
+}
+
+
+CWizMobileTcpContainer::CWizMobileTcpContainer(CWizMobileXmlProcesser* xmlProcesser, QObject* parent)
+    : QThread(parent)
+    , m_xmlProcesser(xmlProcesser)
+    , m_tcpSocket(new QTcpSocket(this))
+{
+    connect(m_tcpSocket, SIGNAL(readyRead()), this, SLOT(readTcpPendingData()), Qt::DirectConnection);
+}
+
+QAbstractSocket::SocketState CWizMobileTcpContainer::tcpState()
+{
+    return m_tcpSocket->state();
+}
+
+void CWizMobileTcpContainer::connectToHost(const QHostAddress& address, quint16 port)
+{
+    m_tcpSocket->connectToHost(address, port, QTcpSocket::ReadOnly);
+    m_tcpSocket->waitForConnected(60000);
+    m_tcpSocket->waitForReadyRead(60000);
+}
+
+void CWizMobileTcpContainer::readTcpPendingData()
+{
+    static QByteArray *strData = 0;
+    while (m_tcpSocket->waitForReadyRead())
+    {
+        while (m_tcpSocket->bytesAvailable())
+        {
+            if (strData == 0)
+            {
+                strData = new QByteArray();
+            }
+            strData->append(m_tcpSocket->readLine(3096));
+
+            if (strData->right(1) == "\n")
+            {
+                strData->remove(strData->length() - 1, 1);
+            }
+            if (strData->right(17) == "<!--WizDataEnd-->")
+            {
+                m_xmlProcesser->addNewSegment(strData);
+                strData = 0;
+                continue;
+            }
+            if (strData->right(3) == "bye")
+            {
+                m_tcpSocket->disconnectFromHost();
+                delete strData;
+                strData = 0;
+                qDebug() << "tcp disconnectFromHost";
+                return;
+            }
+        }
+    }
+    if (strData)
+        delete strData;
+    strData = 0;
 }

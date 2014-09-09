@@ -6,6 +6,7 @@
 #include <QMap>
 #include <QThread>
 #include <QMutex>
+#include <QTcpSocket>
 
 struct UdpSegment
 {
@@ -68,6 +69,24 @@ private:
     bool m_stop;
 };
 
+
+class CWizMobileTcpContainer : public QThread
+{
+    Q_OBJECT
+public:
+    explicit CWizMobileTcpContainer(CWizMobileXmlProcesser *xmlProcesser, QObject *parent = 0);
+
+    QAbstractSocket::SocketState tcpState();
+    void connectToHost(const QHostAddress &address, quint16 port);
+
+public slots:
+    void readTcpPendingData();
+
+private:
+    CWizMobileXmlProcesser *m_xmlProcesser;
+    QTcpSocket *m_tcpSocket;
+};
+
 class CWizMobileFileReceiver : public QThread
 {
     Q_OBJECT
@@ -85,19 +104,17 @@ signals:
 
 public slots:
     void readUdpPendingData();
-    void readTcpPendingData();
 
 private:
     void getInfoFromUdpData(const QByteArray& udpData, QString& userID);
-    void createTcpConnection(const QString& serverIP, int port);
 
     //
     void addDataToProcesser(QByteArray *ba);
     bool isUdpSendToCurrentUser(const QString& userID);
 private:
     QUdpSocket *m_udpSocket;
-    QTcpSocket *m_tcpSocket;
     CWizMobileXmlProcesser *m_xmlProcesser;
+    CWizMobileTcpContainer *m_tcpContainer;
     bool m_stop;
 };
 

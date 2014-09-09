@@ -22,10 +22,6 @@
 //#endif
 
 
-#import <WebKit/WebKit.h>
-#import <Quartz/Quartz.h>
-
-
 @interface CreateNoteService : NSObject
 
 - (void) serviceCreateNote:(NSPasteboard *)pboard
@@ -383,57 +379,3 @@ QString wizConvertYosemiteFilePathToNormalPath(const QString& strYosePath)
 }
 
 
-void wizMacPrint(const QString& strFileName, int pageWidth, int pageHeight)
-{
-    /*
-    NSString *strfileUrl = WizToNSString(strFileName);  //[dir stringByAppendingPathComponent:@"Temp_Print.html"];
-
-    WebView *webView = [[WebView alloc] init];
-   // [webView autorelease];
-    //NSString *dir = @"/Users/lxn/Desktop/";
-
-    //NSString *htmlString = @"<b>Hi!</b>";
-    //[[htmlString dataUsingEncoding:NSUTF8StringEncoding] writeToFile:fileUrl atomically:YES];
-
-    [[webView mainFrame] loadRequest:[NSURLRequest requestWithURL:[NSURL fileURLWithPath:strfileUrl]]];
-    [webView setFrame:NSMakeRect(0, 0, 0, 0)];
-//    NSPrintInfo *printInfo = [[NSPrintInfo alloc] init];
-//    NSPrintOperation *po = [NSPrintOperation printOperationWithView:webView printInfo:printInfo];
-
-//    [printInfo release];
-//    [po runOperation];
-
-
-    NSPrintInfo *printInfo = [NSPrintInfo sharedPrintInfo];
-    [printInfo setHorizontallyCentered:YES];
-    [printInfo setTopMargin:50.0];
-    [printInfo setBottomMargin:-100.0];
-    [printInfo setLeftMargin:10.0];
-    [printInfo setRightMargin:10.0];
-    [printInfo setHorizontalPagination:NSClipPagination];
-    [printInfo setVerticalPagination:NSClipPagination];
-
-
-    // This is your chance to modify printInfo if you need to change
-    // the page orientation, margins, etc
-    [printInfo setOrientation:NSPortraitOrientation];
-
-    NSPrintOperation *printOperation = [webView.mainFrame.frameView printOperationWithPrintInfo:printInfo];
-
-    NSWindow *wnd = [[NSWindow alloc] init];
- //   [wnd setContentSize:webView.mainFrame.frameView.size];
-    [wnd setContentView:webView];
-
-    // Open the print dialog
-    [printOperation runOperation];
-
-//    [webView.mainFrame.frameView printWithInfo:printInfo autoRotate:NO];
-
-
-    [webView release];
-    [wnd release];
-
-
-*/
-
-}
