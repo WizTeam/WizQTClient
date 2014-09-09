@@ -156,6 +156,13 @@ CWizPreferenceWindow::CWizPreferenceWindow(CWizExplorerApp& app, QWidget* parent
     ui->editFont->setText(strFont);
 
     connect(ui->buttonFontSelect, SIGNAL(clicked()), SLOT(onButtonFontSelect_clicked()));
+
+    //
+    ui->comboBox_unit->setCurrentIndex(m_app.userSettings().printMarginUnit());
+    ui->spinBox_bottom->setValue(m_app.userSettings().printMarginValue(wizPositionBottom));
+    ui->spinBox_left->setValue(m_app.userSettings().printMarginValue(wizPositionLeft));
+    ui->spinBox_right->setValue(m_app.userSettings().printMarginValue(wizPositionRight));
+    ui->spinBox_top->setValue(m_app.userSettings().printMarginValue(wizPositionTop));
 }
 
 void CWizPreferenceWindow::on_radioAuto_clicked(bool chcked)
@@ -352,25 +359,26 @@ void CWizPreferenceWindow::on_checkBoxMobileFile_toggled(bool checked)
 
 void CWizPreferenceWindow::on_comboBox_unit_currentIndexChanged(int index)
 {
-
+    m_app.userSettings().setPrintMarginUnit(index);
 }
 
-void CWizPreferenceWindow::on_spinBox_top_valueChanged(const QString &arg1)
+void CWizPreferenceWindow::on_spinBox_top_valueChanged(double arg1)
 {
-
+    m_app.userSettings().setPrintMarginValue(wizPositionTop, arg1);
 }
 
-void CWizPreferenceWindow::on_spinBox_bottom_valueChanged(const QString &arg1)
+void CWizPreferenceWindow::on_spinBox_bottom_valueChanged(double arg1)
 {
-
+    m_app.userSettings().setPrintMarginValue(wizPositionBottom, arg1);
 }
 
-void CWizPreferenceWindow::on_spinBox_left_valueChanged(const QString &arg1)
+void CWizPreferenceWindow::on_spinBox_left_valueChanged(double arg1)
 {
-
+    m_app.userSettings().setPrintMarginValue(wizPositionLeft, arg1);
 }
 
-void CWizPreferenceWindow::on_spinBox_right_valueChanged(const QString &arg1)
+void CWizPreferenceWindow::on_spinBox_right_valueChanged(double arg1)
 {
-
+    m_app.userSettings().setPrintMarginValue(wizPositionRight, arg1);
 }
+

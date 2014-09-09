@@ -1634,6 +1634,12 @@ void CWizDocumentWebView::saveAsPDF(const QString& fileName)
         }
         //
         QPrinter printer;
+        QPrinter::Unit marginUnit =  (QPrinter::Unit)m_app.userSettings().printMarginUnit();
+        double marginTop = m_app.userSettings().printMarginValue(wizPositionTop);
+        double marginBottom = m_app.userSettings().printMarginValue(wizPositionBottom);
+        double marginLeft = m_app.userSettings().printMarginValue(wizPositionLeft);
+        double marginRight = m_app.userSettings().printMarginValue(wizPositionRight);
+        printer.setPageMargins(marginLeft, marginTop, marginRight, marginBottom, marginUnit);
         printer.setOutputFormat(QPrinter::PdfFormat);
         printer.setOutputFileName(fileName);
         //
@@ -1646,7 +1652,12 @@ void CWizDocumentWebView::printDocument()
     if (QWebFrame* frame = noteFrame())
     {
         QPrinter printer(QPrinter::HighResolution);
-        printer.setPageMargins(25, 25, 25, 25, QPrinter::Millimeter);
+        QPrinter::Unit marginUnit =  (QPrinter::Unit)m_app.userSettings().printMarginUnit();
+        double marginTop = m_app.userSettings().printMarginValue(wizPositionTop);
+        double marginBottom = m_app.userSettings().printMarginValue(wizPositionBottom);
+        double marginLeft = m_app.userSettings().printMarginValue(wizPositionLeft);
+        double marginRight = m_app.userSettings().printMarginValue(wizPositionRight);
+        printer.setPageMargins(marginLeft, marginTop, marginRight, marginBottom, marginUnit);
         printer.setOutputFormat(QPrinter::NativeFormat);
         QPrintDialog dlg(&printer,0);
         dlg.setWindowTitle(QObject::tr("Print Document"));

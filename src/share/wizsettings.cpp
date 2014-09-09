@@ -321,34 +321,34 @@ void CWizUserSettings::setReceiveMobileFile(bool bReceiveFile)
     set("RecevieMobileFile", bReceiveFile ? "1" : "0");
 }
 
-QString CWizUserSettings::printMarginValue(WizPositionType posType)
+double CWizUserSettings::printMarginValue(WizPositionType posType)
 {
     QString strMarginValue = get("PrintMarginValue_" + QString::number(posType));
-    if (!strMarginValue.isEmpty()) {
-        return QString::number(5.0);
+    if (strMarginValue.isEmpty()) {
+        return 5.0;
     }
 
-    return strMarginValue;
+    return strMarginValue.toDouble();
 }
 
-void CWizUserSettings::setPrintMarginValue(WizPositionType posType, const QString& strValue)
+void CWizUserSettings::setPrintMarginValue(WizPositionType posType, double dValue)
 {
-    set("PrintMarginValue_" + QString::number(posType), strValue);
+    set("PrintMarginValue_" + QString::number(posType), QString::number(dValue));
 }
 
-QString CWizUserSettings::printMarginUnit()
+int CWizUserSettings::printMarginUnit()
 {
     QString strMarginType = get("PrintMarginType");
-    if (!strMarginType.isEmpty()) {
-        return "Millimeter";
+    if (strMarginType.isEmpty()) {
+        return 0;
     }
 
-    return strMarginType;
+    return strMarginType.toInt();
 }
 
-void CWizUserSettings::setPrintMarginUnit(const QString& strUnit)
+void CWizUserSettings::setPrintMarginUnit(int nUnit)
 {
-    set("PrintMarginType", strUnit);
+    set("PrintMarginType", QString::number(nUnit));
 }
 
 QString CWizUserSettings::skin()

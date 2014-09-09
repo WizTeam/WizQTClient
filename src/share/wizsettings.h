@@ -113,11 +113,11 @@ public:
     bool receiveMobileFile() const;
     void setReceiveMobileFile(bool bReceiveFile);
 
-    QString printMarginValue(WizPositionType posType);
-    void setPrintMarginValue(WizPositionType posType, const QString& strValue);
+    double printMarginValue(WizPositionType posType);
+    void setPrintMarginValue(WizPositionType posType, double dValue);
 
-    QString printMarginUnit();
-    void setPrintMarginUnit(const QString& strUnit);
+    int printMarginUnit();
+    void setPrintMarginUnit(int nUnit);
 
     QString locale();
     void setLocale(const QString& strLocale);

@@ -60,10 +60,10 @@ private slots:
     void on_checkBoxTrayIcon_toggled(bool checked);
     void on_checkBoxMobileFile_toggled(bool checked);
     void on_comboBox_unit_currentIndexChanged(int index);
-    void on_spinBox_top_valueChanged(const QString &arg1);
-    void on_spinBox_bottom_valueChanged(const QString &arg1);
-    void on_spinBox_left_valueChanged(const QString &arg1);
-    void on_spinBox_right_valueChanged(const QString &arg1);
+    void on_spinBox_top_valueChanged(double arg1);
+    void on_spinBox_bottom_valueChanged(double arg1);
+    void on_spinBox_left_valueChanged(double arg1);
+    void on_spinBox_right_valueChanged(double arg1);
 };
 
 
