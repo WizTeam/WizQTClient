@@ -16,7 +16,7 @@ CWizMobileFileReceiver::CWizMobileFileReceiver(QObject *parent) :
     QThread(parent)
   , m_udpSocket(0)
   , m_tcpSocket(0)
-  , m_xmlProcesser(new CWizMobileXmlProcesser(this))
+  , m_xmlProcesser(new CWizMobileXmlProcesser(parent))
   , m_stop(false)
 {
     connect(m_xmlProcesser, SIGNAL(fileReceived(QString)), SIGNAL(fileReceived(QString)));
@@ -34,14 +34,11 @@ void CWizMobileFileReceiver::initSocket()
 
     connect(m_udpSocket, SIGNAL(readyRead()),this ,SLOT(readUdpPendingData()), Qt::DirectConnection);
     qDebug() << "connect tcp : " << connect(m_tcpSocket, SIGNAL(readyRead()), this, SLOT(readTcpPendingData()), Qt::DirectConnection);
-    if (!isRunning())
-    {
-        start();
-    }
 }
 
 void CWizMobileFileReceiver::waitForDone()
 {
+    m_xmlProcesser->waitForDone();
     stop();
     WizWaitForThread(this);
 }
@@ -124,21 +121,6 @@ void CWizMobileFileReceiver::readTcpPendingData()
     if (strData)
         delete strData;
     strData = 0;
-}
-
-void CWizMobileFileReceiver::run()
-{
-    while (!m_stop)
-    {
-        if (m_xmlProcesser->hasUnprocessedData())
-        {
-            m_xmlProcesser->processData();
-        }
-        else
-        {
-            sleep(1);
-        }
-    }
 }
 
 void CWizMobileFileReceiver::getInfoFromUdpData(const QByteArray& udpData, QString& userID)
@@ -335,7 +317,8 @@ bool CWizMobileFileReceiver::isUdpSendToCurrentUser(const QString& userID)
 
 
 
-CWizMobileXmlProcesser::CWizMobileXmlProcesser(QObject* parent) : QObject(parent)
+CWizMobileXmlProcesser::CWizMobileXmlProcesser(QObject* parent) : QThread(parent)
+  , m_stop(false)
 {
 
 }
@@ -347,6 +330,11 @@ void CWizMobileXmlProcesser::addNewSegment(QByteArray* ba)
     m_mutex.lock();
     m_segmentList.append(ba);
     m_mutex.unlock();
+
+    if (!isRunning())
+    {
+        start();
+    }
 }
 
 bool CWizMobileXmlProcesser::hasUnprocessedData()
@@ -368,6 +356,17 @@ void CWizMobileXmlProcesser::processData()
     }
 }
 
+void CWizMobileXmlProcesser::waitForDone()
+{
+    stop();
+    WizWaitForThread(this);
+}
+
+void CWizMobileXmlProcesser::stop()
+{
+    m_stop = true;
+}
+
 
 QByteArray *CWizMobileXmlProcesser::peekData()
 {
@@ -382,4 +381,17 @@ QByteArray *CWizMobileXmlProcesser::peekData()
     return ba;
 }
 
-
+void CWizMobileXmlProcesser::run()
+{
+    while (!m_stop)
+    {
+        if (hasUnprocessedData())
+        {
+            processData();
+        }
+        else
+        {
+            sleep(1);
+        }
+    }
+}
