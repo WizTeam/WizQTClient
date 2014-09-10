@@ -785,7 +785,7 @@ bool CWizDatabase::initZiwReaderForEncryption(const QString& strUserCipher)
             QString userCipher = strUserCipher;
             if (userCipher.isEmpty())
             {
-                userCipher = QInputDialog::getText(0, tr("Password"), tr("Please input document password to encrypt."),
+                userCipher = QInputDialog::getText(0, tr("Password"), tr("Please input document password to encrypt"),
                                                            QLineEdit::Password);
 
                 if (userCipher.isEmpty())
@@ -3114,22 +3114,28 @@ bool CWizDatabase::UpdateDocumentAbstract(const QString& strDocumentGUID)
     ::WizEnumFiles(strResourcePath, "*.jpg;*.png;*.bmp;*.gif", arrayImageFileName, 0);
     if (!arrayImageFileName.empty())
     {
-        CString strImageFileName = arrayImageFileName[0];
+        CString strImageFileName;
 
         qint64 m = 0;
         CWizStdStringArray::const_iterator it;
-        for (it = arrayImageFileName.begin() + 1; it != arrayImageFileName.end(); it++) {
+        for (it = arrayImageFileName.begin(); it != arrayImageFileName.end(); it++) {
             CString strFileName = *it;
             qint64 size = ::WizGetFileSize(strFileName);
             if (size > m)
             {
+                //此处是特殊处理，解析Html的时候存在问题，目前暂不删除冗余图片。
+                //缩略图需要判断当前图片确实被使用
+                QString strName = WizExtractFileName(strFileName);
+                if (!strHtml.contains(strName))
+                    continue;
+
                 strImageFileName = strFileName;
                 m = size;
             }
         }
 
         QImage img;
-        if (img.load(strImageFileName))
+        if (!strImageFileName.IsEmpty() && img.load(strImageFileName))
         {
             //DEBUG_TOLOG2("Abstract image size: %1 X %2", WizIntToStr(img.width()), WizIntToStr(img.height()));
             if (img.width() > 32 && img.height() > 32)

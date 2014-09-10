@@ -3,7 +3,6 @@
 #include <QTcpSocket>
 #include <QXmlStreamReader>
 #include <QImage>
-#include <QMessageBox>
 #include <QDebug>
 #include <QDir>
 #include <QEventLoop>
@@ -391,10 +390,6 @@ void CWizMobileTcpContainer::connectToHost(const QString& address, quint16 port)
         start();
     }
 
-//    QHostAddress host(address);
-//    m_tcpSocket->connectToHost(host, port, QTcpSocket::ReadOnly);
-//    m_tcpSocket->waitForConnected(60000);
-//    m_tcpSocket->waitForReadyRead(60000);
 }
 
 void CWizMobileTcpContainer::readTcpPendingData()

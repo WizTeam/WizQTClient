@@ -261,10 +261,6 @@ bool CWizHtmlCollector::Html2Zip(const QString& strExtResourcePath, \
                                  const QString& strMetaText, \
                                  const QString& strZipFileName)
 {
-    //CString strMainHtml(strHtml);
-    //if (!Collect(strUrl, strMainHtml, true))
-    //    return false;
-
     std::deque<WIZHTMLFILEDATA> arrayResource;
     m_files.GetAll(arrayResource);
 
@@ -274,17 +270,18 @@ bool CWizHtmlCollector::Html2Zip(const QString& strExtResourcePath, \
         files.insert(it->strFileName);
     }
 
-//    CWizStdStringArray arrayExtResource;
-//    if (!strExtResourcePath.isEmpty())
-//    {
-//        ::WizEnumFiles(strExtResourcePath, "*.*", arrayExtResource, 0);
-//        for (CWizStdStringArray::const_iterator it = arrayExtResource.begin();
-//            it != arrayExtResource.end();
-//            it++)
-//        {
-//            files.insert(*it);
-//        }
-//    }
+
+    CWizStdStringArray arrayExtResource;
+    if (!strExtResourcePath.isEmpty())
+    {
+        ::WizEnumFiles(strExtResourcePath, "*.*", arrayExtResource, 0);
+        for (CWizStdStringArray::const_iterator it = arrayExtResource.begin();
+            it != arrayExtResource.end();
+            it++)
+        {
+            files.insert(*it);
+        }
+    }
 
     CString strRet;
     ::WizStringArrayToText(m_ret, strRet, "");
