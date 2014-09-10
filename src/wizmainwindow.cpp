@@ -102,7 +102,7 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     , m_toolBar(new QToolBar(this))
     #else
     , m_toolBar(new QToolBar("Main", titleBar()))
-    , m_menu(new QMenu(this))
+    , m_menu(new QMenu(clientWidget()))
     , m_spacerBeforeSearch(NULL)
     #endif
     , m_actions(new CWizActions(*this, this))
@@ -2308,7 +2308,7 @@ void MainWindow::setMobileFileReceiverEnable(bool bEnable)
             m_mobileFileReceiver = new CWizMobileFileReceiver(this);
             connect(m_mobileFileReceiver, SIGNAL(fileReceived(QString)),
                     SLOT(on_mobileFileRecived(QString)));
-            m_mobileFileReceiver->initSocket();
+            m_mobileFileReceiver->start();
         }
     }
     else

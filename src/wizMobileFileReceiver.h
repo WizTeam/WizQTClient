@@ -75,16 +75,23 @@ class CWizMobileTcpContainer : public QThread
     Q_OBJECT
 public:
     explicit CWizMobileTcpContainer(CWizMobileXmlProcesser *xmlProcesser, QObject *parent = 0);
+    ~CWizMobileTcpContainer();
 
     QAbstractSocket::SocketState tcpState();
-    void connectToHost(const QHostAddress &address, quint16 port);
 
 public slots:
     void readTcpPendingData();
+    void connectToHost(const QString& address, quint16 port);
+
+protected:
+    void run();
 
 private:
     CWizMobileXmlProcesser *m_xmlProcesser;
     QTcpSocket *m_tcpSocket;
+    QString m_strHost;
+
+    void initTcpSocket();
 };
 
 class CWizMobileFileReceiver : public QThread
@@ -97,13 +104,16 @@ public:
     void initSocket();
 
     void waitForDone();
-    void stop();
 
 signals:
     void fileReceived(QString strFileName);
+    void connectToHost(QString address, quint16 port);
 
 public slots:
     void readUdpPendingData();
+
+protected:
+    void run();
 
 private:
     void getInfoFromUdpData(const QByteArray& udpData, QString& userID);
@@ -115,7 +125,6 @@ private:
     QUdpSocket *m_udpSocket;
     CWizMobileXmlProcesser *m_xmlProcesser;
     CWizMobileTcpContainer *m_tcpContainer;
-    bool m_stop;
 };
 
 #endif // WIZMOBILEFILERECEIVER_H
