@@ -87,9 +87,9 @@
       </spacer>
      </item>
      <item>
-      <widget class="QPushButton" name="btn_cancle">
+      <widget class="QPushButton" name="btn_cancel">
        <property name="text">
-        <string>Cancle</string>
+        <string>Cancel</string>
        </property>
       </widget>
      </item>
@@ -113,7 +113,7 @@
  </customwidgets>
  <tabstops>
   <tabstop>btn_ok</tabstop>
-  <tabstop>btn_cancle</tabstop>
+  <tabstop>btn_cancel</tabstop>
   <tabstop>treeWidget</tabstop>
   <tabstop>webView_preview</tabstop>
   <tabstop>pushButton_import</tabstop>

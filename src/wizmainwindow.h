@@ -382,7 +382,7 @@ private:
     void initTrayIcon(QSystemTrayIcon* trayIcon);
     //
     void startSearchStatus();
-    void cancleSearchStatus();
+    void cancelSearchStatus();
 
     //
     void initVariableBeforCreateNote();

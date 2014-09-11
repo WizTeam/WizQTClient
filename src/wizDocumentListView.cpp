@@ -3,7 +3,6 @@
 #include <QPixmapCache>
 #include <QApplication>
 #include <QMenu>
-#include <QInputDialog>
 
 #include "share/wizDatabaseManager.h"
 #include "wizCategoryView.h"
@@ -20,6 +19,7 @@
 #include "sync/apientry.h"
 #include "wizWebSettingsDialog.h"
 #include "wizPopupButton.h"
+#include "wizLineInputDialog.h"
 
 #include "sync/avatar.h"
 #include "thumbcache.h"
@@ -930,7 +930,7 @@ void CWizDocumentListView::on_action_deleteDocument()
 
 void CWizDocumentListView::on_action_moveDocument()
 {
-    CWizFolderSelector* selector = new CWizFolderSelector("Move notes", m_app, this);
+    CWizFolderSelector* selector = new CWizFolderSelector(tr("Move notes"), m_app, this);
     selector->setAcceptRoot(false);
 
     connect(selector, SIGNAL(finished(int)), SLOT(on_action_moveDocument_confirmed(int)));
@@ -994,7 +994,7 @@ void CWizDocumentListView::on_action_moveDocument_confirmed(int result)
 
 void CWizDocumentListView::on_action_copyDocument()
 {
-    CWizFolderSelector* selector = new CWizFolderSelector("Copy documents", m_app, this);
+    CWizFolderSelector* selector = new CWizFolderSelector(tr("Copy documents"), m_app, this);
     selector->setCopyStyle();
     selector->setAcceptRoot(false);
 
@@ -1062,8 +1062,13 @@ void CWizDocumentListView::on_action_encryptDocument()
 
 void CWizDocumentListView::on_action_cancelEncryption()
 {
-    QString strUserCipher = QInputDialog::getText(0, "Password", "Please input document password to encrypt.",
-                                                  QLineEdit::Password);
+    QString strUserCipher;
+    CWizLineInputDialog dlg(tr("Password"), tr("Please input document password to cancel encrypt."),
+                            "", 0, QLineEdit::Password);
+    if (dlg.exec() == QDialog::Rejected)
+        return;
+
+    strUserCipher = dlg.input();
     if (strUserCipher.isEmpty())
         return;
 

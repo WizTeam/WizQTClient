@@ -6,7 +6,6 @@
 #include <QTextCodec>
 #include <algorithm>
 #include <QSettings>
-#include <QInputDialog>
 #include <QMessageBox>
 #include <QMimeData>
 #include <QApplication>
@@ -26,6 +25,7 @@
 #include "wizProgressDialog.h"
 #include "wizusercipherform.h"
 #include "wizDatabaseManager.h"
+#include "wizLineInputDialog.h"
 
 #define WIZNOTE_THUMB_VERSION "3"
 
@@ -785,8 +785,12 @@ bool CWizDatabase::initZiwReaderForEncryption(const QString& strUserCipher)
             QString userCipher = strUserCipher;
             if (userCipher.isEmpty())
             {
-                userCipher = QInputDialog::getText(0, tr("Password"), tr("Please input document password to encrypt"),
-                                                           QLineEdit::Password);
+                CWizLineInputDialog dlg(tr("Password"), tr("Please input document password to encrypt")
+                                        , "", 0, QLineEdit::Password);
+                if (dlg.exec() == QDialog::Rejected)
+                    return false;
+
+                userCipher = dlg.input();
 
                 if (userCipher.isEmpty())
                     return false;
@@ -3553,16 +3557,13 @@ bool CWizDatabase::tryAccessDocument(const WIZDOCUMENTDATA &doc)
                 return false;
 
             QString strPassWord;
-            QInputDialog passwordDlg;
-            passwordDlg.setWindowTitle(tr("Doucment  %1  Password").arg(doc.strTitle));
-            passwordDlg.setLabelText(tr("Password :"));
-            passwordDlg.setTextEchoMode(QLineEdit::Password);
-            passwordDlg.setFixedSize(350, passwordDlg.height());
+            CWizLineInputDialog dlg(tr("Doucment  %1  Password").arg(doc.strTitle),
+                                    tr("Password :"), "", 0, QLineEdit::Password);
 
-            if (passwordDlg.exec() != QDialog::Accepted)
+            if (dlg.exec() == QDialog::Rejected)
                 return false;
 
-            strPassWord = passwordDlg.textValue();
+            strPassWord = dlg.input();
             setUserCipher(strPassWord);
         }
 

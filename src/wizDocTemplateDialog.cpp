@@ -278,7 +278,7 @@ QString CWizTemplateFileItem::filePath() const
     return m_filePath;
 }
 
-void CWizDocTemplateDialog::on_btn_cancle_clicked()
+void CWizDocTemplateDialog::on_btn_cancel_clicked()
 {
     reject();
 }

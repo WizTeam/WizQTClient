@@ -42,7 +42,7 @@ private slots:
 
     void on_btn_ok_clicked();
 
-    void on_btn_cancle_clicked();
+    void on_btn_cancel_clicked();
 
     void on_pushButton_import_clicked();
 

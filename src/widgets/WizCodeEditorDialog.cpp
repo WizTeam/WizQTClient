@@ -69,11 +69,11 @@ WizCodeEditorDialog::WizCodeEditorDialog(QWidget *parent) :
 
     QPushButton *btnOK = new QPushButton(this);
     btnOK->setText(tr("OK"));
-    QPushButton *btnCancle = new QPushButton(this);
-    btnCancle->setText(tr("Cancle"));
+    QPushButton *btnCancel = new QPushButton(this);
+    btnCancel->setText(tr("Cancel"));
     QHBoxLayout *layoutButton = new QHBoxLayout();
     layoutButton->addStretch();
-    layoutButton->addWidget(btnCancle);
+    layoutButton->addWidget(btnCancel);
     layoutButton->addWidget(btnOK);
 
 
@@ -88,7 +88,7 @@ WizCodeEditorDialog::WizCodeEditorDialog(QWidget *parent) :
     connect(m_codeEditor, SIGNAL(textChanged()), SLOT(renderCodeToHtml()));
     connect(m_codeType, SIGNAL(currentIndexChanged(int)), SLOT(renderCodeToHtml()));
     connect(btnOK, SIGNAL(clicked()), SLOT(onButtonOKClicked()));
-    connect(btnCancle, SIGNAL(clicked()), SLOT(onButtonCancleClicked()));
+    connect(btnCancel, SIGNAL(clicked()), SLOT(onButtonCancelClicked()));
 }
 
 void WizCodeEditorDialog::setCode(const QString& strCode)
@@ -132,7 +132,7 @@ void WizCodeEditorDialog::onButtonOKClicked()
     close();
 }
 
-void WizCodeEditorDialog::onButtonCancleClicked()
+void WizCodeEditorDialog::onButtonCancelClicked()
 {
     close();
 }

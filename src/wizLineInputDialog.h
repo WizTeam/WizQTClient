@@ -2,6 +2,7 @@
 #define WIZLINEINPUTDIALOG_H
 
 #include <QDialog>
+#include <QLineEdit>
 
 namespace Ui {
     class CWizLineInputDialog;
@@ -15,7 +16,8 @@ public:
     explicit CWizLineInputDialog(const QString& strTitle,
                                  const QString& strHint,
                                  const QString& strDefault = "",
-                                 QWidget *parent = 0);
+                                 QWidget *parent = 0,
+                                 QLineEdit::EchoMode echo = QLineEdit::Normal);
     ~CWizLineInputDialog();
 
 public:

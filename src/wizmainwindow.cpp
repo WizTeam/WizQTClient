@@ -1668,7 +1668,7 @@ void MainWindow::on_actionSearch_triggered()
 
 void MainWindow::on_actionResetSearch_triggered()
 {
-    cancleSearchStatus();
+    cancelSearchStatus();
     m_search->clear();
     m_search->focus();
     m_category->restoreSelection();
@@ -1803,7 +1803,7 @@ void MainWindow::on_category_itemSelectionChanged()
     CWizCategoryBaseView* category = qobject_cast<CWizCategoryBaseView *>(sender());
     if (!category)
         return;
-    cancleSearchStatus();
+    cancelSearchStatus();
     /*
      * 在点击MessageItem的时候,为了重新刷新当前消息,强制发送了itemSelectionChanged消息
      * 因此需要在这个地方避免重复刷新两次消息列表
@@ -2333,7 +2333,7 @@ void MainWindow::startSearchStatus()
     m_documents->setAcceptAllItems(true);
 }
 
-void MainWindow::cancleSearchStatus()
+void MainWindow::cancelSearchStatus()
 {
     m_documents->setAcceptAllItems(false);
     if (m_category->selectedItems().count() > 0)
@@ -2345,7 +2345,7 @@ void MainWindow::cancleSearchStatus()
 
 void MainWindow::initVariableBeforCreateNote()
 {
-    cancleSearchStatus();
+    cancelSearchStatus();
 }
 
 void MainWindow::viewDocumentInFloatWidget(const WIZDOCUMENTDATA& data)
