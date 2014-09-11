@@ -2158,7 +2158,7 @@ QString WizGetDefaultTranslatedLocal()
 
 bool WizIsKMURL(const QString& strURL)
 {
-    return strURL.left(6) == "wiz://";
+    return strURL.left(5) == "wiz:/";
 }
 
 

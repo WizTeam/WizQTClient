@@ -3123,7 +3123,7 @@ bool CWizDatabase::UpdateDocumentAbstract(const QString& strDocumentGUID)
             qint64 size = ::WizGetFileSize(strFileName);
             if (size > m)
             {
-                //此处是特殊处理，解析Html的时候存在问题，目前暂不删除冗余图片。
+                //FIXME:此处是特殊处理，解析Html的CSS时候存在问题，目前暂不删除冗余图片。
                 //缩略图需要判断当前图片确实被使用
                 QString strName = WizExtractFileName(strFileName);
                 if (!strHtml.contains(strName))
@@ -3260,9 +3260,9 @@ QString CWizDatabase::DocumentToWizKMURL(const WIZDOCUMENTDATA& document)
 {
     CWizDatabase* dbPrivate = getPersonalDatabase();
     //
-    if (document.strKbGUID.isEmpty())
+    if (document.strKbGUID == dbPrivate->kbGUID())
     {
-        return WizFormatString3(_T("wiz://open_document?guid=%1&kbguid=%2&private_kbguid=%3"), document.strGUID, document.strKbGUID, dbPrivate->kbGUID());
+        return WizFormatString3(_T("wiz://open_document?guid=%1&kbguid=%2&private_kbguid=%3"), document.strGUID, "", dbPrivate->kbGUID());
     }
     else
     {

@@ -214,6 +214,12 @@ bool MainWindow::eventFilter(QObject* watched, QEvent* event)
                 if (!fileEvent->url().isEmpty())
                 {
                     QString strUrl = fileEvent->url().toString();
+                    if (strUrl.left(5) == "file:")
+                    {
+                        strUrl.remove(0, 5);
+                        strUrl.replace("open_document%3F", "open_document?");
+                    }
+
                     if (WizIsKMURL(strUrl))
                     {
                         viewDocumentByWizKMURL(strUrl);
