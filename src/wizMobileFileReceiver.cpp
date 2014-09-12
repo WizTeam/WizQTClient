@@ -30,7 +30,7 @@ CWizMobileFileReceiver::~CWizMobileFileReceiver()
 }
 
 void CWizMobileFileReceiver::initSocket()
-{
+{   
     m_udpSocket = new QUdpSocket();
     m_udpSocket->bind(QHostAddress::Any, 18695);
 
@@ -39,6 +39,8 @@ void CWizMobileFileReceiver::initSocket()
     connect(m_udpSocket, SIGNAL(readyRead()),this ,SLOT(readUdpPendingData()), Qt::DirectConnection);
     connect(this, SIGNAL(connectToHost(QString, quint16)), m_tcpContainer,
             SLOT(connectToHost(QString, quint16)));
+
+    qDebug() << "Mobile file receiver ready.";
 }
 
 void CWizMobileFileReceiver::waitForDone()
@@ -46,6 +48,7 @@ void CWizMobileFileReceiver::waitForDone()
     m_xmlProcesser->waitForDone();
     exit();
     WizWaitForThread(this);
+    qDebug() << "Mobile file receiver stoped.";
 }
 
 void CWizMobileFileReceiver::readUdpPendingData()
@@ -258,6 +261,20 @@ bool CWizMobileXmlProcesser::combineSegmentToFile(const QString& strGuid, QStrin
     return false;
 }
 
+void CWizMobileXmlProcesser::deleteAllSegments()
+{
+    m_mutex.lock();
+
+    while (m_segmentList.count() > 0)
+    {
+        QByteArray *ba = m_segmentList.first();
+        m_segmentList.removeFirst();
+        delete ba;
+    }
+
+    m_mutex.unlock();
+}
+
 void CWizMobileFileReceiver::addDataToProcesser(QByteArray* ba)
 {
     m_xmlProcesser->addNewSegment(ba);
@@ -319,6 +336,7 @@ void CWizMobileXmlProcesser::processData()
 void CWizMobileXmlProcesser::waitForDone()
 {
     stop();
+    deleteAllSegments();
     WizWaitForThread(this);
 }
 
@@ -366,6 +384,7 @@ CWizMobileTcpContainer::CWizMobileTcpContainer(CWizMobileXmlProcesser* xmlProces
 
 CWizMobileTcpContainer::~CWizMobileTcpContainer()
 {
+    exit();
     if (m_tcpSocket)
     {
         delete m_tcpSocket;

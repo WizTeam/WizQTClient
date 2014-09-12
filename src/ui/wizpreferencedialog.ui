@@ -100,13 +100,6 @@
         </widget>
        </item>
        <item>
-        <widget class="QCheckBox" name="checkBoxMobileFile">
-         <property name="text">
-          <string>Receive file send from MobilePhone by local network</string>
-         </property>
-        </widget>
-       </item>
-       <item>
         <spacer name="verticalSpacer">
          <property name="orientation">
           <enum>Qt::Vertical</enum>

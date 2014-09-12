@@ -62,6 +62,7 @@ private:
     bool isSegmentCompleted(const QString& strGuid);
     bool combineSegmentToFile(const QString& strGuid, QString& strFile);
 
+    void deleteAllSegments();
 private:
     QMutex m_mutex;
     QList<QByteArray *> m_segmentList;

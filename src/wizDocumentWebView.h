@@ -159,6 +159,8 @@ public:
     // UEditor still miss link discover api
     bool editorCommandQueryLink();
 
+    bool editorCommandQueryMobileFileReceiverState();
+
     bool editorCommandExecuteFontFamily(const QString& strFamily);
     bool editorCommandExecuteFontSize(const QString& strSize);
     bool editorCommandExecuteInsertHtml(const QString& strHtml, bool bNotSerialize);
@@ -322,6 +324,7 @@ public Q_SLOTS:
     bool editorCommandExecuteInsertImage();
     bool editorCommandExecuteViewSource();
     bool editorCommandExecuteInsertCode();
+    bool editorCommandExecuteMobileImage(bool bReceiveImage);
 
 #ifdef Q_OS_MAC
     bool editorCommandExecuteRemoveStartOfLine();

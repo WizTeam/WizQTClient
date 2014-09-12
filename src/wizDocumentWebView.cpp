@@ -14,6 +14,8 @@
 #include <QTextEdit>
 #include <QMultiMap>
 #include <QPrintDialog>
+#include <QPrinterInfo>
+#include <QMessageBox>
 
 #include <QApplication>
 #include <QWebPage>
@@ -1189,6 +1191,11 @@ bool CWizDocumentWebView::editorCommandQueryLink()
     return true;
 }
 
+bool CWizDocumentWebView::editorCommandQueryMobileFileReceiverState()
+{
+    return m_app.userSettings().receiveMobileFile();
+}
+
 bool CWizDocumentWebView::editorCommandExecuteInsertHtml(const QString& strHtml, bool bNotSerialize)
 {
     QString s = bNotSerialize ? "true" : "false";
@@ -1520,6 +1527,14 @@ bool CWizDocumentWebView::editorCommandExecuteInsertCode()
     return true;
 }
 
+bool CWizDocumentWebView::editorCommandExecuteMobileImage(bool bReceiveImage)
+{
+    m_app.userSettings().setReceiveMobileFile(bReceiveImage);
+    MainWindow* mainWindow = qobject_cast<MainWindow *>(m_app.mainWindow());
+    mainWindow->setMobileFileReceiverEnable(bReceiveImage);
+    return true;
+}
+
 #ifdef Q_OS_MAC
 bool CWizDocumentWebView::editorCommandExecuteRemoveStartOfLine()
 {
@@ -1661,6 +1676,15 @@ void CWizDocumentWebView::printDocument()
         printer.setOutputFormat(QPrinter::NativeFormat);
         QPrintDialog dlg(&printer,0);
         dlg.setWindowTitle(QObject::tr("Print Document"));
+
+        QPrinterInfo info(printer);
+        qDebug() << "Printer name : " << info.printerName();
+        if (info.printerName().isEmpty())
+        {
+            QMessageBox::information(0, tr("Inof"), tr("No available printer founded!"));
+            return;
+        }
+
         if(dlg.exec() == QDialog::Accepted)
         {
             frame->print(&printer);

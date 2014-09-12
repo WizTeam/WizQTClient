@@ -403,6 +403,11 @@ EditorToolBar::EditorToolBar(QWidget *parent)
     m_btnInsertImage->setToolTip(tr("InsertImage"));
     connect(m_btnInsertImage, SIGNAL(clicked()), SLOT(on_btnImage_clicked()));
 
+    m_btnMobileImage = new CWizToolButton(this);
+    m_btnMobileImage->setIcon(::WizLoadSkinIcon(skin, "actionMobileImage"));
+    m_btnMobileImage->setToolTip(tr("Receive mobile image"));
+    connect(m_btnMobileImage, SIGNAL(clicked()), SLOT(on_btnMobileImage_clicked()));
+
     m_btnSearchReplace = new CWizToolButton(this);
     m_btnSearchReplace->setCheckable(false);
     m_btnSearchReplace->setIcon(::WizLoadSkinIcon(skin, "actionFormatSearchReplace"));
@@ -440,6 +445,7 @@ EditorToolBar::EditorToolBar(QWidget *parent)
     layout->addWidget(m_btnInsertImage);
     layout->addSpacing(12);
     layout->addWidget(m_btnSearchReplace);
+    layout->addWidget(m_btnMobileImage);
     layout->addStretch();
 }
 
@@ -610,6 +616,9 @@ void EditorToolBar::resetToolbar()
     } else {
         Q_ASSERT(0);
     }
+
+    bool bReceiveImage = m_editor->editorCommandQueryMobileFileReceiverState();
+    m_btnMobileImage->setChecked(bReceiveImage);
 }
 
 struct WizEditorContextMenuItem
@@ -1201,6 +1210,15 @@ void EditorToolBar::on_btnImage_clicked()
 {
     if (m_editor) {
         m_editor->editorCommandExecuteInsertImage();
+    }
+}
+
+void EditorToolBar::on_btnMobileImage_clicked()
+{
+    bool bReceiveImage = m_btnMobileImage->isChecked();
+    if (m_editor)
+    {
+        m_editor->editorCommandExecuteMobileImage(bReceiveImage);
     }
 }
 
