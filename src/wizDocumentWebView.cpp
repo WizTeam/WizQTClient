@@ -22,6 +22,7 @@
 #include <QWebFrame>
 #include <QWebElement>
 #include <QUndoStack>
+#include <QDesktopServices>
 
 #include <coreplugin/icore.h>
 
@@ -197,6 +198,11 @@ CWizDocumentWebView::CWizDocumentWebView(CWizExplorerApp& app, QWidget* parent)
 #endif
 
     connect(page, SIGNAL(actionTriggered(QWebPage::WebAction)), SLOT(onActionTriggered(QWebPage::WebAction)));
+
+    QNetworkDiskCache *diskCache = new QNetworkDiskCache(this);
+    QString location = Utils::PathResolve::tempPath();
+    diskCache->setCacheDirectory(location);
+    page->networkAccessManager()->setCache(diskCache);
 
     // minimum page size hint
     setMinimumSize(400, 250);
@@ -1716,6 +1722,11 @@ void CWizDocumentWebView::redo()
 {
     page()->mainFrame()->evaluateJavaScript("editor.execCommand('redo')");
     emit statusChanged();
+}
+
+QNetworkDiskCache*CWizDocumentWebView::networkCache()
+{
+    return dynamic_cast<QNetworkDiskCache *>(page()->networkAccessManager()->cache());
 }
 
 

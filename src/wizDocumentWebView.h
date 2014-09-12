@@ -21,6 +21,7 @@ class CWizEditorInsertTableForm;
 class CWizDocumentWebView;
 class CWizDocumentTransitionView;
 class CWizDocumentWebViewWorker;
+class QNetworkDiskCache;
 
 struct WIZODUCMENTDATA;
 
@@ -176,6 +177,9 @@ public:
     //use undo func provied by editor
     void undo();
     void redo();
+
+    //
+    QNetworkDiskCache* networkCache();
 
 private:
     void initEditor();

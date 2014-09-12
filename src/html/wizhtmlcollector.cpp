@@ -1,10 +1,12 @@
 #include "wizhtmlcollector.h"
 #include "../share/wizhtml2zip.h"
 #include "../share/wizObjectDataDownloader.h"
+#include "wizmainwindow.h"
 #include <QEventLoop>
 #include <QFile>
 #include <QTimer>
 #include <QDebug>
+#include <QNetworkCacheMetaData>
 
 bool CWizHtmlFileMap::Lookup(const QString& strUrl, QString& strFileName)
 {
@@ -191,17 +193,15 @@ void CWizHtmlCollector::ProcessImgTagValue(CWizHtmlTag* pTag, const QString& str
     QString strShme = url.scheme().toLower();
     if (strShme == "http" || strShme == "https" || strShme == "ftp")
     {
-        //
-        qDebug() << "[Save] Start to download image : " << strValue;
-        QString strFileName = ::WizGenGUIDLowerCaseLetterOnly()
-                + strValue.right(strValue.length() - strValue.lastIndexOf('.'));
-        CWizFileDownloader* downloader = new CWizFileDownloader(strValue, strFileName, m_strTempPath);
-        QEventLoop loop;
-        loop.connect(downloader, SIGNAL(downloadDone(QString,bool)), &loop, SLOT(quit()));
-        downloader->startDownload();
-        //  just wait for 15 seconds
-        QTimer::singleShot(15 * 1000, &loop, SLOT(quit()));
-        loop.exec();
+        QString strFileName;
+        if (loadImageFromCache(url, strFileName))
+        {
+            qDebug() << "find image in cache : " << strValue;
+        }
+        else
+        {
+            downloadImage(strValue, strFileName);
+        }
         //
 
         QString strFile = m_strTempPath + strFileName;
@@ -225,6 +225,56 @@ QString CWizHtmlCollector::ToResourceFileName(const QString& strFileName)
     } else {
         return WizExtractFileName(strFileName);
     }
+}
+
+bool CWizHtmlCollector::loadImageFromCache(const QUrl& url, QString& strFileName)
+{
+    Core::Internal::MainWindow *mainWindow = Core::Internal::MainWindow::instance();
+    QNetworkDiskCache *cache = mainWindow->webViewNetworkCache();
+    if (cache)
+    {
+        QNetworkCacheMetaData cacheMeta = cache->metaData(url);
+        if (!cacheMeta.isValid())
+            return false;
+
+        QString strImageType;
+        QNetworkCacheMetaData::RawHeaderList headList = cacheMeta.rawHeaders();
+        foreach (QNetworkCacheMetaData::RawHeader header, headList)
+        {
+            if (header.first == "Content-Type")
+            {
+                strImageType = header.second;
+                break;
+            }
+        }
+
+        QIODevice *device = mainWindow->webViewNetworkCache()->data(url);
+        if (device && strImageType.contains("image/"))
+        {
+            strImageType.remove("image/");
+            QImage image;
+            strFileName = ::WizGenGUIDLowerCaseLetterOnly() + "." + strImageType;
+            image.load(device, strImageType.toUpper().toUtf8());
+            return image.save(m_strTempPath + strFileName);
+        }
+    }
+    return false;
+}
+
+bool CWizHtmlCollector::downloadImage(const QString& strUrl, QString& strFileName)
+{
+    strFileName = ::WizGenGUIDLowerCaseLetterOnly()
+            + strUrl.right(strUrl.length() - strUrl.lastIndexOf('.'));
+    qDebug() << "[Save] Start to download image : " << strUrl;
+    CWizFileDownloader* downloader = new CWizFileDownloader(strUrl, strFileName, m_strTempPath);
+    QEventLoop loop;
+    loop.connect(downloader, SIGNAL(downloadDone(QString,bool)), &loop, SLOT(quit()));
+    //  just wait for 15 seconds
+    QTimer::singleShot(15 * 1000, &loop, SLOT(quit()));
+    downloader->startDownload();
+    loop.exec();
+
+    return true;
 }
 
 bool CWizHtmlCollector::Collect(const QString& strUrl, \

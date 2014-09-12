@@ -99,6 +99,8 @@ public:
 
     static MainWindow* instance();
 
+    QNetworkDiskCache* webViewNetworkCache();
+
 protected:
     virtual bool eventFilter(QObject* watched, QEvent* event);
     virtual void resizeEvent(QResizeEvent* event);

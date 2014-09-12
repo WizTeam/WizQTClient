@@ -289,6 +289,11 @@ MainWindow*MainWindow::instance()
     return windowInstance;
 }
 
+QNetworkDiskCache*MainWindow::webViewNetworkCache()
+{
+    return m_doc->web()->networkCache();
+}
+
 void MainWindow::closeEvent(QCloseEvent* event)
 {
 #ifdef Q_OS_MAC
