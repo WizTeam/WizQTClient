@@ -313,7 +313,7 @@ bool CWizUserSettings::receiveMobileFile() const
         return strReceiveMobileFile.toInt() ? true : false;
     }
 
-    return true;
+    return false;
 }
 
 void CWizUserSettings::setReceiveMobileFile(bool bReceiveFile)
