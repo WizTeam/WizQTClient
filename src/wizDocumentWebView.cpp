@@ -1674,17 +1674,18 @@ void CWizDocumentWebView::printDocument()
         double marginRight = m_app.userSettings().printMarginValue(wizPositionRight);
         printer.setPageMargins(marginLeft, marginTop, marginRight, marginBottom, marginUnit);
         printer.setOutputFormat(QPrinter::NativeFormat);
-        QPrintDialog dlg(&printer,0);
-        dlg.setWindowTitle(QObject::tr("Print Document"));
 
+#ifdef Q_OS_MAC
         QPrinterInfo info(printer);
-        qDebug() << "Printer name : " << info.printerName();
         if (info.printerName().isEmpty())
         {
             QMessageBox::information(0, tr("Inof"), tr("No available printer founded!"));
             return;
         }
+#endif
 
+        QPrintDialog dlg(&printer,0);
+        dlg.setWindowTitle(QObject::tr("Print Document"));
         if(dlg.exec() == QDialog::Accepted)
         {
             frame->print(&printer);
