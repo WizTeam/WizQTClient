@@ -10,6 +10,7 @@
 #include "share/wizmisc.h"
 #include "share/wizDatabaseManager.h"
 #include "share/wizDatabase.h"
+#include "utils/pathresolve.h"
 
 
 CWizMobileFileReceiver::CWizMobileFileReceiver(QObject *parent) :
@@ -251,8 +252,7 @@ bool CWizMobileXmlProcesser::combineSegmentToFile(const QString& strGuid, QStrin
         QImage image;
         if (image.loadFromData(data))
         {
-            QString strWizPath = QDir::homePath()  + "/Downloads/WizNote/";
-            WizEnsurePathExists(strWizPath);
+            QString strWizPath = Utils::PathResolve::tempPath();
             strFile = strWizPath + fileData.name;
             return image.save(strFile);
         }
