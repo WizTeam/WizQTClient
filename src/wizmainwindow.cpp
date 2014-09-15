@@ -799,6 +799,7 @@ void MainWindow::on_mobileFileRecived(const QString& strFile)
             if (WizImage2Html(strFile, strHtml))
             {
                 m_doc->web()->editorCommandExecuteInsertHtml(strHtml, false);
+                m_doc->web()->editorCommandExecuteInsertHtml("<br />", false);
             }
         }
         else
@@ -1697,9 +1698,35 @@ void MainWindow::on_actionSaveAsPDF_triggered()
     }
 }
 
+void MainWindow::on_actionSaveAsHtml_triggered()
+{
+    if (CWizDocumentWebView* web = m_doc->web())
+    {
+        QString strPath = QFileDialog::getExistingDirectory(0, tr("Open Directory"),
+                                                           QDir::homePath(),
+                                                            QFileDialog::ShowDirsOnly
+                                                            | QFileDialog::DontResolveSymlinks);
+        if (!strPath.isEmpty())
+        {
+            web->saveAsHtml(strPath + "/");
+        }
+    }
+}
+
 void MainWindow::on_actionPrint_triggered()
 {
     m_doc->web()->printDocument();
+}
+
+void MainWindow::on_actionPrintMargin_triggered()
+{
+//    CWizPreferenceWindow preference(*this, this);
+//    preference.showPrintMarginPage();
+//    connect(&preference, SIGNAL(settingsChanged(WizOptionsType)), SLOT(on_options_settingsChanged(WizOptionsType)));
+//    connect(&preference, SIGNAL(restartForSettings()), SLOT(on_options_restartForSettings()));
+//    preference.exec();
+
+    showUserGuidImage();
 }
 
 //void MainWindow::on_searchDocumentFind(const WIZDOCUMENTDATAEX& doc)
@@ -2273,6 +2300,57 @@ void MainWindow::createNoteWithImage(const QString& strImageFile)
     }
 }
 
+void MainWindow::showUserGuidImage()
+{
+    QString strThemeName = Utils::StyleHelper::themeName();
+    QString strImageFile = ::WizGetSkinResourceFileName(strThemeName, "userGuidImage");
+
+    QImage image(strImageFile);
+    if (image.isNull())
+        return;
+
+    QDialog dlg;
+    dlg.setFixedSize(image.size());
+    dlg.setWindowFlags(Qt::FramelessWindowHint);
+    dlg.setStyleSheet(QString("QDialog {border: none;background-image: url(%1);"
+                               "background-position: center; background-repeat: no-repeat; "
+                               "background-color:#43A6E8}").arg(strImageFile));
+
+    QToolButton *btnClose = new QToolButton(&dlg);
+    QString strBtnCloseNormal = ::WizGetSkinResourceFileName(strThemeName, "loginCloseButton_normal");
+    QString strBtnCloseHot = ::WizGetSkinResourceFileName(strThemeName, "loginCloseButton_hot");
+    btnClose->setStyleSheet(QString("QToolButton{ border-image:url(%1); height: 13px; width: 13px;}"
+                                         "QToolButton:hover{ border-image:url(%2);}"
+                                           "QToolButton:pressed { border-image:url(%3);}")
+                                 .arg(strBtnCloseNormal).arg(strBtnCloseHot).arg(strBtnCloseHot));
+
+    QPushButton *btnMore = new QPushButton(tr("Click to get more >"), &dlg);
+    btnMore->setStyleSheet(QString("QPushButton { border: none; background: none; "
+                                   "color: #43a6e8; font: 16px; padding-right: 15px; padding-bottom: 5px}"));
+
+    QHBoxLayout *layoutTop = new QHBoxLayout();
+    layoutTop->setContentsMargins(0, 0, 0, 0);
+    layoutTop->addWidget(btnClose, 10, Qt::AlignLeft);
+
+    QHBoxLayout *layoutBottom = new QHBoxLayout();
+    layoutBottom->setContentsMargins(0, 0, 20, 20);
+    layoutBottom->addWidget(btnMore, 20, Qt::AlignRight);
+
+    QVBoxLayout *layout = new QVBoxLayout(&dlg);
+    layout->setContentsMargins(5, 5, 15, 15);
+    layout->addLayout(layoutTop);
+    QSpacerItem *verSpacer = new QSpacerItem(40, 20, QSizePolicy::Minimum, QSizePolicy::Expanding);
+    layout->addSpacerItem(verSpacer);
+    layout->addLayout(layoutBottom);
+
+    connect(btnClose, SIGNAL(clicked()), &dlg, SLOT(close()));
+    connect(btnMore, SIGNAL(clicked()), &dlg, SLOT(accept()));
+    if (dlg.exec() == QDialog::Accepted)
+    {
+        QDesktopServices::openUrl(QUrl("http://www.baidu.com"));
+    }
+}
+
 void MainWindow::initTrayIcon(QSystemTrayIcon* trayIcon)
 {
     Q_ASSERT(trayIcon);
@@ -2351,6 +2429,11 @@ void MainWindow::cancelSearchStatus()
 void MainWindow::initVariableBeforCreateNote()
 {
     cancelSearchStatus();
+}
+
+bool MainWindow::checkUserGuidState()
+{
+    return false;
 }
 
 void MainWindow::viewDocumentInFloatWidget(const WIZDOCUMENTDATA& data)

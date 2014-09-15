@@ -218,6 +218,8 @@ public:
     void createNoteWithAttachments(const QStringList& strAttachList);
     void createNoteWithText(const QString& strText);
     void createNoteWithImage(const QString& strImageFile);
+
+
 signals:
     void documentSaved(const QString& strGUID, CWizDocumentView* viewer);
 
@@ -238,7 +240,9 @@ public Q_SLOTS:
     void on_actionResetSearch_triggered();
     void on_actionSearchReplace_triggered();
     void on_actionSaveAsPDF_triggered();
+    void on_actionSaveAsHtml_triggered();
     void on_actionPrint_triggered();
+    void on_actionPrintMargin_triggered();
 
     // menu editing
     void on_actionEditingUndo_triggered();
@@ -388,6 +392,10 @@ private:
 
     //
     void initVariableBeforCreateNote();
+
+    //
+    bool checkUserGuidState();
+    void showUserGuidImage();
 };
 
 } // namespace Internal

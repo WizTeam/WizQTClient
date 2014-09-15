@@ -1645,13 +1645,13 @@ bool CWizDocumentWebView::editorCommandExecuteTableAverageCols()
     return editorCommandExecuteCommand("averagedistributecol");
 }
 
-void CWizDocumentWebView::saveAsPDF(const QString& fileName)
+void CWizDocumentWebView::saveAsPDF(const QString& strFileName)
 {
     if (QWebFrame* frame = noteFrame())
     {
-        if (::PathFileExists(fileName))
+        if (::PathFileExists(strFileName))
         {
-            ::DeleteFile(fileName);
+            ::DeleteFile(strFileName);
         }
         //
         QPrinter printer;
@@ -1662,10 +1662,17 @@ void CWizDocumentWebView::saveAsPDF(const QString& fileName)
         double marginRight = m_app.userSettings().printMarginValue(wizPositionRight);
         printer.setPageMargins(marginLeft, marginTop, marginRight, marginBottom, marginUnit);
         printer.setOutputFormat(QPrinter::PdfFormat);
-        printer.setOutputFileName(fileName);
+        printer.setOutputFileName(strFileName);
         //
         frame->print(&printer);
     }
+}
+
+void CWizDocumentWebView::saveAsHtml(const QString& strDirPath)
+{
+    const WIZDOCUMENTDATA& doc = view()->note();
+    CWizDatabase& db = m_dbMgr.db(doc.strKbGUID);
+    db.ExportToHtmlFile(doc, strDirPath);
 }
 
 void CWizDocumentWebView::printDocument()

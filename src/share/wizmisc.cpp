@@ -1192,18 +1192,7 @@ bool WizSaveUnicodeTextToUtf16File(const CString& strFileName, const CString& st
 
 bool WizSaveUnicodeTextToUtf8File(const QString& strFileName, const QString& strText)
 {
-    QFile file(strFileName);
-    if (!file.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate))
-        return false;
-
-    QTextStream stream(&file);
-    stream.setCodec("UTF-8");
-    stream.setGenerateByteOrderMark(true);
-    stream << strText;
-    stream.flush();
-    file.close();
-
-    return true;
+    return WizSaveUnicodeTextToUtf8File(strFileName, strText.toUtf8());
 }
 
 bool WizSaveUnicodeTextToUtf8File(const QString& strFileName, const QByteArray& strText)
@@ -2186,4 +2175,39 @@ QString WizGetHtmlBodyContent(const QString& strHtml)
     }
 
     return strBody;
+}
+
+
+bool WizCopyFolder(const QString& strSrcDir, const QString& strDestDir, bool bCoverFileIfExist)
+{
+    QDir sourceDir(strSrcDir);
+    QDir targetDir(strDestDir);
+    if(!targetDir.exists())
+    {
+        if(!targetDir.mkdir(targetDir.absolutePath()))
+            return false;
+    }
+
+    QFileInfoList fileInfoList = sourceDir.entryInfoList(QDir::AllEntries | QDir::NoDotAndDotDot);
+    foreach(QFileInfo fileInfo, fileInfoList)
+    {
+        if(fileInfo.isDir())
+        {
+            if(!WizCopyFolder(fileInfo.filePath(),
+                              targetDir.filePath(fileInfo.fileName()),
+                              bCoverFileIfExist))
+                return false;
+        }
+        else
+        {
+            if(bCoverFileIfExist && targetDir.exists(fileInfo.fileName()))
+            {
+                targetDir.remove(fileInfo.fileName());
+            }
+
+            if(!QFile::copy(fileInfo.filePath(), targetDir.filePath(fileInfo.fileName())))
+                return false;
+        }
+    }
+    return true;
 }

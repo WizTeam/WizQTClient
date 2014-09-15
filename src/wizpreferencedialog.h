@@ -24,6 +24,7 @@ public:
     CWizPreferenceWindow(CWizExplorerApp& app, QWidget* parent);
     CWizUserSettings& userSettings() const { return m_app.userSettings(); }
 
+    void showPrintMarginPage();
 private:
     Ui::CWizPreferenceWindow *ui;
     CWizExplorerApp& m_app;

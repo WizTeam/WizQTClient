@@ -167,7 +167,8 @@ public:
     bool editorCommandExecuteInsertHtml(const QString& strHtml, bool bNotSerialize);
 
     //
-    void saveAsPDF(const QString& fileName);
+    void saveAsPDF(const QString& strFileName);
+    void saveAsHtml(const QString& strDirPath);
     void printDocument();
     bool findIMGElementAt(QPoint point, QString& strSrc);
     //

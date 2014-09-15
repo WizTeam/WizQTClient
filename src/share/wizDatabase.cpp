@@ -3317,17 +3317,17 @@ void CWizDatabase::DocumentsToHtmlLink(const QList<WIZDOCUMENTDATA>& documents, 
 }
 
 bool CWizDatabase::DocumentToTempHtmlFile(const WIZDOCUMENTDATA& document,
-                                          QString& strTempHtmlFileName, const QString& strTargetFileNameWithoutPath)
+                                          QString& strFullPathFileName, const QString& strTargetFileName)
 {
     QString strTempFolder = Utils::PathResolve::tempPath() + document.strGUID + "/";
     ::WizEnsurePathExists(strTempFolder);
 
-    if (!DocumentToHtmlFile(document, strTempFolder, strTargetFileNameWithoutPath))
+    if (!DocumentToHtmlFile(document, strTempFolder, strTargetFileName))
         return false;
 
-    strTempHtmlFileName = strTempFolder + strTargetFileNameWithoutPath;
+    strFullPathFileName = strTempFolder + strTargetFileName;
 
-    return PathFileExists(strTempHtmlFileName);
+    return PathFileExists(strFullPathFileName);
 }
 
 bool CWizDatabase::DocumentToHtmlFile(const WIZDOCUMENTDATA& document,
@@ -3353,6 +3353,31 @@ bool CWizDatabase::DocumentToHtmlFile(const WIZDOCUMENTDATA& document,
     m_mtxTempFile.unlock();
 
     return PathFileExists(strTempHtmlFileName);
+}
+
+bool CWizDatabase::ExportToHtmlFile(const WIZDOCUMENTDATA& document, const QString& strPath)
+{
+    QString strTempPath = Utils::PathResolve::tempPath() + WizGenGUIDLowerCaseLetterOnly() + "/";
+    if (!ExtractZiwFileToFolder(document, strTempPath))
+        return false;
+
+    QString strText;
+    QString strTempHtmlFileName = strTempPath + "index.html";
+    if (!WizLoadUnicodeTextFromFile(strTempHtmlFileName, strText))
+        return false;
+
+    QString strResFolder = document.strTitle.toHtmlEscaped() + "_files/";
+    strText.replace("index_files/", strResFolder);
+
+    QString strIndexFile = strPath + document.strTitle + ".html";
+    if (!WizSaveUnicodeTextToUtf8File(strIndexFile, strText))
+        return false;
+
+    bool bCoverIfExists = true;
+    if (!WizCopyFolder(strTempPath + "index_files/", strPath + strResFolder, bCoverIfExists))
+        return false;
+
+    return true;
 }
 
 bool CWizDatabase::ExtractZiwFileToFolder(const WIZDOCUMENTDATA& document,

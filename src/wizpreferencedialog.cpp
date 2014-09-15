@@ -160,6 +160,11 @@ CWizPreferenceWindow::CWizPreferenceWindow(CWizExplorerApp& app, QWidget* parent
     ui->spinBox_top->setValue(m_app.userSettings().printMarginValue(wizPositionTop));
 }
 
+void CWizPreferenceWindow::showPrintMarginPage()
+{
+    ui->tabWidget->setCurrentWidget(ui->tabPrint);
+}
+
 void CWizPreferenceWindow::on_radioAuto_clicked(bool chcked)
 {
     if (!chcked)

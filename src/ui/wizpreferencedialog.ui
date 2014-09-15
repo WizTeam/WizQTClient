@@ -411,7 +411,7 @@
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="tab">
+     <widget class="QWidget" name="tabPrint">
       <attribute name="title">
        <string>Print</string>
       </attribute>

@@ -89,6 +89,7 @@ void WizEnumFolders(const QString& strPath, CWizStdStringArray& arrayFolders, UI
 QString WizFolderNameByPath(const QString& strPath);
 
 BOOL WizCopyFile(const CString& strSrcFileName, const CString& strDestFileName, BOOL bFailIfExists);
+bool WizCopyFolder(const QString& strSrcDir, const QString& strDestDir, bool bCoverFileIfExist);
 void WizGetNextFileName(CString& strFileName);
 
 QString WizEncryptPassword(const QString& strPassword);
