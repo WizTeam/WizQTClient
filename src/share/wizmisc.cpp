@@ -1892,7 +1892,7 @@ void WizHtml2Text(const QString& strHtml, QString& strText)
 
 QString getImageHtmlLabelByFile(const QString& strImageFile)
 {
-    return QString("<img border=\"0\" src=\"file://%1\" />").arg(strImageFile);
+    return QString("<div><img border=\"0\" src=\"file://%1\" /></div>").arg(strImageFile);
 }
 
 bool WizImage2Html(const QString& strImageFile, QString& strHtml, bool bUseCopyFile)

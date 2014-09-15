@@ -799,7 +799,6 @@ void MainWindow::on_mobileFileRecived(const QString& strFile)
             if (WizImage2Html(strFile, strHtml))
             {
                 m_doc->web()->editorCommandExecuteInsertHtml(strHtml, false);
-                m_doc->web()->editorCommandExecuteInsertHtml("<br />", false);
             }
         }
         else

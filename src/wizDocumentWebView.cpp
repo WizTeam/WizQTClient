@@ -1466,16 +1466,19 @@ bool CWizDocumentWebView::editorCommandExecuteInsertCheckList()
 
 bool CWizDocumentWebView::editorCommandExecuteInsertImage()
 {
-    QString strImgFile = QFileDialog::getOpenFileName(0, tr("Image File"), QDir::homePath(), tr("Images (*.png *.bmp *.gif *.jpg)"));
-    if (strImgFile.isEmpty())
+    QStringList strImgFileList = QFileDialog::getOpenFileNames(0, tr("Image File"), QDir::homePath(), tr("Images (*.png *.bmp *.gif *.jpg)"));
+    if (strImgFileList.isEmpty())
         return false;
 
-    QString strHtml;
-    bool bUseCopyFile = true;
-    if (WizImage2Html(strImgFile, strHtml, bUseCopyFile)) {
-        return editorCommandExecuteInsertHtml(strHtml, true);
+    foreach (QString strImgFile, strImgFileList)
+    {
+        QString strHtml;
+        bool bUseCopyFile = true;
+        if (WizImage2Html(strImgFile, strHtml, bUseCopyFile)) {
+            editorCommandExecuteInsertHtml(strHtml, true);
+        }
     }
-    return false;
+    return true;
 }
 
 bool CWizDocumentWebView::editorCommandExecuteInsertDate()
