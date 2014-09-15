@@ -194,6 +194,12 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     setSystemTrayIconVisible(userSettings().showSystemTrayIcon());
 
     setMobileFileReceiverEnable(userSettings().receiveMobileFile());
+
+    if (needShowUserGuide())
+    {
+        m_settings->setUserGuideVersion(WIZ_CLIENT_VERSION);
+        QTimer::singleShot(3000, this, SLOT(showUserGuideImage()));
+    }
 }
 
 bool MainWindow::eventFilter(QObject* watched, QEvent* event)
@@ -1725,7 +1731,7 @@ void MainWindow::on_actionPrintMargin_triggered()
 //    connect(&preference, SIGNAL(restartForSettings()), SLOT(on_options_restartForSettings()));
 //    preference.exec();
 
-    showUserGuidImage();
+    showUserGuideImage();
 }
 
 //void MainWindow::on_searchDocumentFind(const WIZDOCUMENTDATAEX& doc)
@@ -2299,7 +2305,7 @@ void MainWindow::createNoteWithImage(const QString& strImageFile)
     }
 }
 
-void MainWindow::showUserGuidImage()
+void MainWindow::showUserGuideImage()
 {
     QString strThemeName = Utils::StyleHelper::themeName();
     QString strImageFile = ::WizGetSkinResourceFileName(strThemeName, "userGuidImage");
@@ -2346,7 +2352,7 @@ void MainWindow::showUserGuidImage()
     connect(btnMore, SIGNAL(clicked()), &dlg, SLOT(accept()));
     if (dlg.exec() == QDialog::Accepted)
     {
-        QDesktopServices::openUrl(QUrl("http://www.baidu.com"));
+        QDesktopServices::openUrl(QUrl("http://www.wiz.cn"));
     }
 }
 
@@ -2430,9 +2436,13 @@ void MainWindow::initVariableBeforCreateNote()
     cancelSearchStatus();
 }
 
-bool MainWindow::checkUserGuidState()
+bool MainWindow::needShowUserGuide()
 {
-    return false;
+    QString strUserGuideVserion = m_settings->userGuideVersion();
+    if (strUserGuideVserion.isEmpty())
+        return true;
+
+    return strUserGuideVserion.compare(WIZ_CLIENT_VERSION) < 0;
 }
 
 void MainWindow::viewDocumentInFloatWidget(const WIZDOCUMENTDATA& data)

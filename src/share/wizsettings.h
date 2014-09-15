@@ -119,6 +119,9 @@ public:
     int printMarginUnit();
     void setPrintMarginUnit(int nUnit);
 
+    QString userGuideVersion();
+    void setUserGuideVersion(const QString& strUserGuideVersion);
+
     QString locale();
     void setLocale(const QString& strLocale);
 

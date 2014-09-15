@@ -351,6 +351,17 @@ void CWizUserSettings::setPrintMarginUnit(int nUnit)
     set("PrintMarginType", QString::number(nUnit));
 }
 
+QString CWizUserSettings::userGuideVersion()
+{
+    QString strGuideVersion = get("UserGuideVersion");
+    return strGuideVersion;
+}
+
+void CWizUserSettings::setUserGuideVersion(const QString& strUserGuideVersion)
+{
+    set("UserGuideVersion", strUserGuideVersion);
+}
+
 QString CWizUserSettings::skin()
 {
     // just return because no skin selection from v1.4

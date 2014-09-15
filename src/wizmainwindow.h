@@ -353,6 +353,8 @@ public Q_SLOTS:
     //
     void shiftVisableStatus();
 
+    //
+    void showUserGuideImage();
 public:
     // WizExplorerApp pointer
     virtual QWidget* mainWindow() { return this; }
@@ -394,8 +396,7 @@ private:
     void initVariableBeforCreateNote();
 
     //
-    bool checkUserGuidState();
-    void showUserGuidImage();
+    bool needShowUserGuide();
 };
 
 } // namespace Internal
