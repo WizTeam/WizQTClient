@@ -1219,6 +1219,9 @@ void EditorToolBar::on_btnMobileImage_clicked()
     if (m_editor)
     {
         m_editor->editorCommandExecuteMobileImage(bReceiveImage);
+        //need update button status after show dialog
+        m_btnMobileImage->setChecked(bReceiveImage);
+        update();
     }
 }
 

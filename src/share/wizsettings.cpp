@@ -362,6 +362,21 @@ void CWizUserSettings::setUserGuideVersion(const QString& strUserGuideVersion)
     set("UserGuideVersion", strUserGuideVersion);
 }
 
+bool CWizUserSettings::needShowMobileFileReceiverUserGuide()
+{
+    QString strShowGuide = get("ShowMobileFileReceiverUserGuide");
+    if (!strShowGuide.isEmpty()) {
+        return strShowGuide.toInt() ? true : false;
+    }
+
+    return true;
+}
+
+void CWizUserSettings::setNeedShowMobileFileReceiverUserGuide(bool bNeedShow)
+{
+    set("ShowMobileFileReceiverUserGuide", bNeedShow ? "1" : "0");
+}
+
 QString CWizUserSettings::skin()
 {
     // just return because no skin selection from v1.4

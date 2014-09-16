@@ -122,6 +122,9 @@ public:
     QString userGuideVersion();
     void setUserGuideVersion(const QString& strUserGuideVersion);
 
+    bool needShowMobileFileReceiverUserGuide();
+    void setNeedShowMobileFileReceiverUserGuide(bool bNeedShow);
+
     QString locale();
     void setLocale(const QString& strLocale);
 

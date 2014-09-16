@@ -16,6 +16,7 @@
 #include <QPrintDialog>
 #include <QPrinter>
 #include <QWebFrame>
+#include <QCheckBox>
 
 #ifdef Q_OS_MAC
 #include <Carbon/Carbon.h>
@@ -1725,13 +1726,11 @@ void MainWindow::on_actionPrint_triggered()
 
 void MainWindow::on_actionPrintMargin_triggered()
 {
-//    CWizPreferenceWindow preference(*this, this);
-//    preference.showPrintMarginPage();
-//    connect(&preference, SIGNAL(settingsChanged(WizOptionsType)), SLOT(on_options_settingsChanged(WizOptionsType)));
-//    connect(&preference, SIGNAL(restartForSettings()), SLOT(on_options_restartForSettings()));
-//    preference.exec();
-
-    showUserGuideImage();
+    CWizPreferenceWindow preference(*this, this);
+    preference.showPrintMarginPage();
+    connect(&preference, SIGNAL(settingsChanged(WizOptionsType)), SLOT(on_options_settingsChanged(WizOptionsType)));
+    connect(&preference, SIGNAL(restartForSettings()), SLOT(on_options_restartForSettings()));
+    preference.exec();
 }
 
 //void MainWindow::on_searchDocumentFind(const WIZDOCUMENTDATAEX& doc)
@@ -2307,8 +2306,22 @@ void MainWindow::createNoteWithImage(const QString& strImageFile)
 
 void MainWindow::showUserGuideImage()
 {
+    showMobileFileReceiverUserGuide();
+}
+
+void MainWindow::showMobileFileReceiverUserGuide(bool bShowHideOption)
+{
     QString strThemeName = Utils::StyleHelper::themeName();
-    QString strImageFile = ::WizGetSkinResourceFileName(strThemeName, "userGuidImage");
+    QString strFileName;
+    if (m_settings->locale() == WizGetDefaultTranslatedLocal())
+    {
+        strFileName = "userGuidImageUS";
+    }
+    else
+    {
+        strFileName = "userGuidImageCN";
+    }
+    QString strImageFile = ::WizGetSkinResourceFileName(strThemeName, strFileName);
 
     QImage image(strImageFile);
     if (image.isNull())
@@ -2329,20 +2342,26 @@ void MainWindow::showUserGuideImage()
                                            "QToolButton:pressed { border-image:url(%3);}")
                                  .arg(strBtnCloseNormal).arg(strBtnCloseHot).arg(strBtnCloseHot));
 
-    QPushButton *btnMore = new QPushButton(tr("Click to get more >"), &dlg);
+    QPushButton *btnMore = new QPushButton(tr("More ..."), &dlg);
     btnMore->setStyleSheet(QString("QPushButton { border: none; background: none; "
-                                   "color: #43a6e8; font: 16px; padding-right: 15px; padding-bottom: 5px}"));
+                                   "color: #43a6e8; font: 18px; padding-right: 15px; padding-bottom: 5px}"));
+
+    QCheckBox *checkBox = new QCheckBox(tr("Don't show me this again"), &dlg);
+    checkBox->setStyleSheet(QString("QCheckBox { border: none; background: none; "
+                                    "color: #43a6e8; font: 18px; padding-right: 15px; padding-bottom: 5px}"));
 
     QHBoxLayout *layoutTop = new QHBoxLayout();
     layoutTop->setContentsMargins(0, 0, 0, 0);
     layoutTop->addWidget(btnClose, 10, Qt::AlignLeft);
 
     QHBoxLayout *layoutBottom = new QHBoxLayout();
-    layoutBottom->setContentsMargins(0, 0, 20, 20);
+    layoutBottom->setContentsMargins(20, 20, 20, 20);
+    layoutBottom->addWidget(checkBox, 20, Qt::AlignLeft);
     layoutBottom->addWidget(btnMore, 20, Qt::AlignRight);
+    checkBox->setVisible(bShowHideOption);
 
     QVBoxLayout *layout = new QVBoxLayout(&dlg);
-    layout->setContentsMargins(5, 5, 15, 15);
+    layout->setContentsMargins(5, 5, 15, 20);
     layout->addLayout(layoutTop);
     QSpacerItem *verSpacer = new QSpacerItem(40, 20, QSizePolicy::Minimum, QSizePolicy::Expanding);
     layout->addSpacerItem(verSpacer);
@@ -2353,6 +2372,10 @@ void MainWindow::showUserGuideImage()
     if (dlg.exec() == QDialog::Accepted)
     {
         QDesktopServices::openUrl(QUrl("http://www.wiz.cn"));
+    }
+    if (checkBox->isChecked())
+    {
+        m_settings->setNeedShowMobileFileReceiverUserGuide(false);
     }
 }
 
