@@ -1192,7 +1192,18 @@ bool WizSaveUnicodeTextToUtf16File(const CString& strFileName, const CString& st
 
 bool WizSaveUnicodeTextToUtf8File(const QString& strFileName, const QString& strText)
 {
-    return WizSaveUnicodeTextToUtf8File(strFileName, strText.toUtf8());
+    QFile file(strFileName);
+    if (!file.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate))
+        return false;
+
+    QTextStream stream(&file);
+    stream.setCodec("UTF-8");
+    stream.setGenerateByteOrderMark(true);
+    stream << strText;
+    stream.flush();
+    file.close();
+
+    return true;
 }
 
 bool WizSaveUnicodeTextToUtf8File(const QString& strFileName, const QByteArray& strText)
