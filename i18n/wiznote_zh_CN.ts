@@ -1678,27 +1678,47 @@
         <translation>使用代理</translation>
     </message>
     <message>
-        <location filename="../src/ui/wizproxydialog.ui" line="44"/>
+        <location filename="../src/ui/wizproxydialog.ui" line="32"/>
+        <source>Proxy Type:</source>
+        <translation>代理类型：</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/wizproxydialog.ui" line="46"/>
+        <source>NoProxy</source>
+        <translation>无代理</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/wizproxydialog.ui" line="51"/>
+        <source>HttpProxy</source>
+        <translation>Http代理</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/wizproxydialog.ui" line="56"/>
+        <source>Socks5Proxy</source>
+        <translation>Socks5代理</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/wizproxydialog.ui" line="89"/>
         <source>Port: </source>
         <translation>端口号:</translation>
     </message>
     <message>
-        <location filename="../src/ui/wizproxydialog.ui" line="63"/>
+        <location filename="../src/ui/wizproxydialog.ui" line="70"/>
         <source>Address:</source>
         <translation>地址:</translation>
     </message>
     <message>
-        <location filename="../src/ui/wizproxydialog.ui" line="81"/>
+        <location filename="../src/ui/wizproxydialog.ui" line="110"/>
         <source>Authentication (If required)</source>
         <translation>身份验证 (如果需要)</translation>
     </message>
     <message>
-        <location filename="../src/ui/wizproxydialog.ui" line="117"/>
+        <location filename="../src/ui/wizproxydialog.ui" line="146"/>
         <source>User Name:</source>
         <translation>用户名:</translation>
     </message>
     <message>
-        <location filename="../src/ui/wizproxydialog.ui" line="107"/>
+        <location filename="../src/ui/wizproxydialog.ui" line="136"/>
         <source>Password:</source>
         <translation>密码:</translation>
     </message>

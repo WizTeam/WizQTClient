@@ -92,6 +92,20 @@ void CWizSettings::SetProxyHost(const QString& val)
     SetString("Sync", "ProxyHost", val);
 }
 
+WizProxyType CWizSettings::GetProxyType()
+{
+    int port = GetInt("Sync", "ProxyType", -1);
+    if (port < 0)
+        port = WizProxy_HttpProxy;
+
+    return (WizProxyType)port;
+}
+
+void CWizSettings::SetProxyType(WizProxyType type)
+{
+    SetInt("Sync", "ProxyType", type);
+}
+
 int CWizSettings::GetProxyPort()
 {
     int port = GetInt("Sync", "ProxyPort", 0);

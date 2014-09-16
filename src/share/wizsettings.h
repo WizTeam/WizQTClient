@@ -8,6 +8,13 @@
 
 #include "wizDatabase.h"
 
+enum WizProxyType
+{
+    WizProxy_NoProxy,
+    WizProxy_HttpProxy,
+    WizProxy_Socks5Proxy,
+};
+
 class CWizSettings : public QSettings
 {
 public:
@@ -33,6 +40,8 @@ public:
     // proxy settings
     QString GetProxyHost();
     void SetProxyHost(const QString& val);
+    WizProxyType GetProxyType();
+    void SetProxyType(WizProxyType type);
     int GetProxyPort();
     void SetProxyPort(int val);
     QString GetProxyUserName();

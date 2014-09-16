@@ -2,6 +2,7 @@
 #define WIZPROXYDIALOG_H
 
 #include <QDialog>
+#include <QNetworkProxy>
 
 namespace Ui {
     class ProxyDialog;
@@ -20,11 +21,13 @@ public Q_SLOTS:
 
     void proxyStatusChanged(int state);
 
+
 private:
     Ui::ProxyDialog *ui;
 
     void enableControl(bool b);
     void setApplicationProxy();
+    QNetworkProxy::ProxyType getProxyType();
 };
 
 #endif // WIZPROXYDIALOG_H

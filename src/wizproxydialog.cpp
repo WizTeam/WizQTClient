@@ -20,6 +20,7 @@ ProxyDialog::ProxyDialog(QWidget *parent) :
     ui->editUserName->setText(settings.GetProxyUserName());
     ui->editPassword->setText(settings.GetProxyPassword());
     ui->editPassword->setEchoMode(QLineEdit::Password);
+    ui->comboBox->setCurrentIndex((int)settings.GetProxyType());
 
     bool proxyStatus = settings.GetProxyStatus();
     ui->checkProxyStatus->setChecked(proxyStatus);
@@ -45,6 +46,7 @@ void ProxyDialog::enableControl(bool b)
     ui->editPort->setEnabled(b);
     ui->editUserName->setEnabled(b);
     ui->editPassword->setEnabled(b);
+    ui->comboBox->setEnabled(b);
 }
 
 void ProxyDialog::setApplicationProxy()
@@ -52,7 +54,7 @@ void ProxyDialog::setApplicationProxy()
     if (ui->checkProxyStatus->checkState() == Qt::Checked)
     {
         QNetworkProxy proxy;
-        proxy.setType(QNetworkProxy::HttpProxy);
+        proxy.setType(getProxyType());
         proxy.setHostName(ui->editAddress->text());
         proxy.setPort(ui->editPort->text().toInt());
         proxy.setUser(ui->editUserName->text());
@@ -65,9 +67,24 @@ void ProxyDialog::setApplicationProxy()
     }
 }
 
+QNetworkProxy::ProxyType ProxyDialog::getProxyType()
+{
+    if (ui->comboBox->currentIndex() == WizProxy_HttpProxy)
+    {
+        return QNetworkProxy::HttpProxy;
+    }
+    else if (ui->comboBox->currentIndex() == WizProxy_Socks5Proxy)
+    {
+        return QNetworkProxy::Socks5Proxy;
+    }
+
+    return QNetworkProxy::NoProxy;
+}
+
 void ProxyDialog::accept()
 {
     CWizSettings settings(Utils::PathResolve::globalSettingsFile());
+    settings.SetProxyType((WizProxyType)ui->comboBox->currentIndex());
     settings.SetProxyHost(ui->editAddress->text());
     settings.SetProxyPort(ui->editPort->text().toInt());
     settings.SetProxyUserName(ui->editUserName->text());
@@ -78,3 +95,4 @@ void ProxyDialog::accept()
 
     QDialog::accept();
 }
+
