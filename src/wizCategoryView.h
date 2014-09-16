@@ -399,7 +399,8 @@ private:
 
     void moveFolderPostionBeforeTrash(const QString& strLocation);
 
-    bool getAvailableNewNoteTagAndLocation(WIZTAGDATA& strTag, QString& strLocation);
+    bool getAvailableNewNoteTagAndLocation(QString& strKbGUID,WIZTAGDATA& strTag,
+                                           QString& strLocation);
 
     void quickSyncNewDocument(const QString& strKbGUID);
 };

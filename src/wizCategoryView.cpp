@@ -906,7 +906,7 @@ bool CWizCategoryView::createDocument(WIZDOCUMENTDATA& data, const QString& strH
     QString strLocation = m_dbMgr.db().GetDefaultNoteLocation();
     WIZTAGDATA tag;
 
-    if (getAvailableNewNoteTagAndLocation(tag, strLocation))
+    if (getAvailableNewNoteTagAndLocation(strKbGUID, tag, strLocation))
     {
         QString strBody = WizGetHtmlBodyContent(strHtml);
         if (!m_dbMgr.db(strKbGUID).CreateDocumentAndInit(strBody, "", 0, strTitle, "newnote", strLocation, "", data))
@@ -953,7 +953,7 @@ bool CWizCategoryView::createDocumentByTemplate(WIZDOCUMENTDATA& data, const QSt
     QString strLocation = m_dbMgr.db().GetDefaultNoteLocation();
     WIZTAGDATA tag;
 
-    if (getAvailableNewNoteTagAndLocation(tag, strLocation))
+    if (getAvailableNewNoteTagAndLocation(strKbGUID, tag, strLocation))
     {
         if (!m_dbMgr.db(strKbGUID).CreateDocumentByTemplate(strZiw, strLocation, tag, data))
         {
@@ -2218,10 +2218,9 @@ void CWizCategoryView::moveFolderPostionBeforeTrash(const QString& strLocation)
     }
 }
 
-bool CWizCategoryView::getAvailableNewNoteTagAndLocation(WIZTAGDATA& tag, QString& strLocation)
+bool CWizCategoryView::getAvailableNewNoteTagAndLocation(QString& strKbGUID, WIZTAGDATA& tag, QString& strLocation)
 {
     bool bFallback = true;
-    QString strKbGUID = m_dbMgr.db().kbGUID();
     // trash first, because it's inherited
     if (CWizCategoryViewTrashItem* pItem = currentCategoryItem<CWizCategoryViewTrashItem>())
     {
