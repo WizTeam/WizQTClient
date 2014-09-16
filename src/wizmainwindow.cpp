@@ -2371,7 +2371,9 @@ void MainWindow::showMobileFileReceiverUserGuide(bool bShowHideOption)
     connect(btnMore, SIGNAL(clicked()), &dlg, SLOT(accept()));
     if (dlg.exec() == QDialog::Accepted)
     {
-        QDesktopServices::openUrl(QUrl("http://www.wiz.cn"));
+        QString strUrl = WizService::ApiEntry::standardCommandUrl("link");
+        strUrl += "&name=wiz-imagetocomputer.html";
+        QDesktopServices::openUrl(QUrl(strUrl));
     }
     if (checkBox->isChecked())
     {
