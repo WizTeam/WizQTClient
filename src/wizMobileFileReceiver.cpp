@@ -459,8 +459,8 @@ void CWizMobileTcpContainer::run()
 
     QHostAddress host(m_strHost);
     m_tcpSocket->connectToHost(host, 19586, QTcpSocket::ReadOnly);
-    m_tcpSocket->waitForConnected(60000);
-    m_tcpSocket->waitForReadyRead(60000);
+    m_tcpSocket->waitForConnected(30000);
+    m_tcpSocket->waitForReadyRead(30000);
 
     QEventLoop loop;
     loop.exec();
