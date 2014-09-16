@@ -1043,7 +1043,8 @@ void CWizDocumentWebView::viewDocumentInEditor(bool editing)
     m_strCurrentNoteHtml.clear();
     splitHtmlToHeadAndBody(strHtml, m_strCurrentNoteHead, m_strCurrentNoteHtml);
 
-    m_strCurrentNoteHead += "<link rel=\"stylesheet\" type=\"text/css\" href=\"" + m_strDefaultCssFilePath + "\">";
+    m_strCurrentNoteHead = "<link rel=\"stylesheet\" type=\"text/css\" href=\"" +
+            m_strDefaultCssFilePath + "\">" + m_strCurrentNoteHead;
 
     m_strCurrentNoteGUID = strGUID;
     m_bCurrentEditing = editing;
@@ -1671,6 +1672,7 @@ void CWizDocumentWebView::saveAsPDF(const QString& strFileName)
         double marginRight = m_app.userSettings().printMarginValue(wizPositionRight);
         printer.setPageMargins(marginLeft, marginTop, marginRight, marginBottom, marginUnit);
         printer.setOutputFormat(QPrinter::PdfFormat);
+        printer.setColorMode(QPrinter::Color);
         printer.setOutputFileName(strFileName);
         //
         frame->print(&printer);
