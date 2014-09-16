@@ -1541,8 +1541,7 @@ bool CWizDocumentWebView::editorCommandExecuteMobileImage(bool bReceiveImage)
     MainWindow* mainWindow = qobject_cast<MainWindow *>(m_app.mainWindow());
     if (bReceiveImage && m_app.userSettings().needShowMobileFileReceiverUserGuide())
     {
-        bool bShowHideOption  = true;
-        mainWindow->showMobileFileReceiverUserGuide(bShowHideOption);
+        mainWindow->showMobileFileReceiverUserGuide();
     }
 
     m_app.userSettings().setReceiveMobileFile(bReceiveImage);

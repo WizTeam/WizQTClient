@@ -2306,12 +2306,6 @@ void MainWindow::createNoteWithImage(const QString& strImageFile)
 
 void MainWindow::showUserGuideImage()
 {
-    showMobileFileReceiverUserGuide();
-}
-
-void MainWindow::showMobileFileReceiverUserGuide(bool bShowHideOption)
-{
-    QString strThemeName = Utils::StyleHelper::themeName();
     QString strFileName;
     if (m_settings->locale() == WizGetDefaultTranslatedLocal())
     {
@@ -2321,64 +2315,23 @@ void MainWindow::showMobileFileReceiverUserGuide(bool bShowHideOption)
     {
         strFileName = "userGuidImageCN";
     }
-    QString strImageFile = ::WizGetSkinResourceFileName(strThemeName, strFileName);
+    bool bShowHideOption = false;
+    showMobileFileUserGuideDialog(strFileName, bShowHideOption);
+}
 
-    QImage image(strImageFile);
-    if (image.isNull())
-        return;
-
-    QDialog dlg;
-    dlg.setFixedSize(image.size());
-    dlg.setWindowFlags(Qt::FramelessWindowHint);
-    dlg.setStyleSheet(QString("QDialog {border: none;background-image: url(%1);"
-                               "background-position: center; background-repeat: no-repeat; "
-                               "background-color:#43A6E8}").arg(strImageFile));
-
-    QToolButton *btnClose = new QToolButton(&dlg);
-    QString strBtnCloseNormal = ::WizGetSkinResourceFileName(strThemeName, "loginCloseButton_normal");
-    QString strBtnCloseHot = ::WizGetSkinResourceFileName(strThemeName, "loginCloseButton_hot");
-    btnClose->setStyleSheet(QString("QToolButton{ border-image:url(%1); height: 13px; width: 13px;}"
-                                         "QToolButton:hover{ border-image:url(%2);}"
-                                           "QToolButton:pressed { border-image:url(%3);}")
-                                 .arg(strBtnCloseNormal).arg(strBtnCloseHot).arg(strBtnCloseHot));
-
-    QPushButton *btnMore = new QPushButton(tr("More ..."), &dlg);
-    btnMore->setStyleSheet(QString("QPushButton { border: none; background: none; "
-                                   "color: #43a6e8; font: 18px; padding-right: 15px; padding-bottom: 5px}"));
-
-    QCheckBox *checkBox = new QCheckBox(tr("Don't show me this again"), &dlg);
-    checkBox->setStyleSheet(QString("QCheckBox { border: none; background: none; "
-                                    "color: #43a6e8; font: 18px; padding-right: 15px; padding-bottom: 5px}"));
-
-    QHBoxLayout *layoutTop = new QHBoxLayout();
-    layoutTop->setContentsMargins(0, 0, 0, 0);
-    layoutTop->addWidget(btnClose, 10, Qt::AlignLeft);
-
-    QHBoxLayout *layoutBottom = new QHBoxLayout();
-    layoutBottom->setContentsMargins(20, 20, 20, 20);
-    layoutBottom->addWidget(checkBox, 20, Qt::AlignLeft);
-    layoutBottom->addWidget(btnMore, 20, Qt::AlignRight);
-    checkBox->setVisible(bShowHideOption);
-
-    QVBoxLayout *layout = new QVBoxLayout(&dlg);
-    layout->setContentsMargins(5, 5, 15, 20);
-    layout->addLayout(layoutTop);
-    QSpacerItem *verSpacer = new QSpacerItem(40, 20, QSizePolicy::Minimum, QSizePolicy::Expanding);
-    layout->addSpacerItem(verSpacer);
-    layout->addLayout(layoutBottom);
-
-    connect(btnClose, SIGNAL(clicked()), &dlg, SLOT(close()));
-    connect(btnMore, SIGNAL(clicked()), &dlg, SLOT(accept()));
-    if (dlg.exec() == QDialog::Accepted)
+void MainWindow::showMobileFileReceiverUserGuide()
+{
+    QString strFileName;
+    if (m_settings->locale() == WizGetDefaultTranslatedLocal())
     {
-        QString strUrl = WizService::ApiEntry::standardCommandUrl("link");
-        strUrl += "&name=wiz-imagetocomputer.html";
-        QDesktopServices::openUrl(QUrl(strUrl));
+        strFileName = "mobileFileUserGuidImageUS";
     }
-    if (checkBox->isChecked())
+    else
     {
-        m_settings->setNeedShowMobileFileReceiverUserGuide(false);
+        strFileName = "mobileFileUserGuidImageCN";
     }
+    bool bShowHideOption = true;
+    showMobileFileUserGuideDialog(strFileName, bShowHideOption);
 }
 
 void MainWindow::initTrayIcon(QSystemTrayIcon* trayIcon)
@@ -2468,6 +2421,72 @@ bool MainWindow::needShowUserGuide()
         return true;
 
     return strUserGuideVserion.compare(WIZ_CLIENT_VERSION) < 0;
+}
+
+bool MainWindow::showMobileFileUserGuideDialog(const QString& strBgImage,
+                                               bool bShowHideOption)
+{
+    QString strThemeName = Utils::StyleHelper::themeName();
+    QString strImageFile = ::WizGetSkinResourceFileName(strThemeName, strBgImage);
+
+    QImage image(strImageFile);
+    if (image.isNull())
+        return false;
+
+    QDialog dlg;
+    dlg.setFixedSize(image.size());
+    dlg.setWindowFlags(Qt::FramelessWindowHint);
+    dlg.setStyleSheet(QString("QDialog {border: none;background-image: url(%1);"
+                              "background-position: center; background-repeat: no-repeat; "
+                              "background-color:#43A6E8}").arg(strImageFile));
+
+    QToolButton *btnClose = new QToolButton(&dlg);
+    QString strBtnCloseNormal = ::WizGetSkinResourceFileName(strThemeName, "loginCloseButton_normal");
+    QString strBtnCloseHot = ::WizGetSkinResourceFileName(strThemeName, "loginCloseButton_hot");
+    btnClose->setStyleSheet(QString("QToolButton{ border-image:url(%1); height: 13px; width: 13px;}"
+                                    "QToolButton:hover{ border-image:url(%2);}"
+                                    "QToolButton:pressed { border-image:url(%3);}")
+                            .arg(strBtnCloseNormal).arg(strBtnCloseHot).arg(strBtnCloseHot));
+
+    QPushButton *btnMore = new QPushButton(tr("More ..."), &dlg);
+    btnMore->setStyleSheet(QString("QPushButton { border: none; background: none; "
+                                   "color: #43a6e8; font: 18px; padding-right: 15px; padding-bottom: 5px}"));
+
+    QCheckBox *checkBox = new QCheckBox(tr("Don't show me this again"), &dlg);
+    checkBox->setStyleSheet(QString("QCheckBox { border: none; background: none; "
+                                    "color: #43a6e8; font: 18px; padding-right: 15px; padding-bottom: 5px}"));
+
+    QHBoxLayout *layoutTop = new QHBoxLayout();
+    layoutTop->setContentsMargins(0, 0, 0, 0);
+    layoutTop->addWidget(btnClose, 10, Qt::AlignLeft);
+
+    QHBoxLayout *layoutBottom = new QHBoxLayout();
+    layoutBottom->setContentsMargins(20, 20, 20, 20);
+    layoutBottom->addWidget(checkBox, 20, Qt::AlignLeft);
+    layoutBottom->addWidget(btnMore, 20, Qt::AlignRight);
+    checkBox->setVisible(bShowHideOption);
+
+    QVBoxLayout *layout = new QVBoxLayout(&dlg);
+    layout->setContentsMargins(5, 5, 15, 20);
+    layout->addLayout(layoutTop);
+    QSpacerItem *verSpacer = new QSpacerItem(40, 20, QSizePolicy::Minimum, QSizePolicy::Expanding);
+    layout->addSpacerItem(verSpacer);
+    layout->addLayout(layoutBottom);
+
+    connect(btnClose, SIGNAL(clicked()), &dlg, SLOT(close()));
+    connect(btnMore, SIGNAL(clicked()), &dlg, SLOT(accept()));
+    if (dlg.exec() == QDialog::Accepted)
+    {
+        QString strUrl = WizService::ApiEntry::standardCommandUrl("link");
+        strUrl += "&name=wiz-imagetocomputer.html";
+        QDesktopServices::openUrl(QUrl(strUrl));
+    }
+    if (checkBox->isChecked())
+    {
+        m_settings->setNeedShowMobileFileReceiverUserGuide(false);
+    }
+
+    return true;
 }
 
 void MainWindow::viewDocumentInFloatWidget(const WIZDOCUMENTDATA& data)

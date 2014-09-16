@@ -355,7 +355,7 @@ public Q_SLOTS:
 
     //
     void showUserGuideImage();
-    void showMobileFileReceiverUserGuide(bool bShowHideOption = false);
+    void showMobileFileReceiverUserGuide();
 public:
     // WizExplorerApp pointer
     virtual QWidget* mainWindow() { return this; }
@@ -398,6 +398,7 @@ private:
 
     //
     bool needShowUserGuide();
+    bool showMobileFileUserGuideDialog(const QString& strBgImg, bool bShowHideOption);
 };
 
 } // namespace Internal
