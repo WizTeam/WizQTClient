@@ -2461,7 +2461,7 @@ bool MainWindow::showMobileFileUserGuideDialog(const QString& strBgImage,
     layoutTop->addWidget(btnClose, 10, Qt::AlignLeft);
 
     QHBoxLayout *layoutBottom = new QHBoxLayout();
-    layoutBottom->setContentsMargins(20, 20, 20, 20);
+    layoutBottom->setContentsMargins(25, 20, 20, 20);
     layoutBottom->addWidget(checkBox, 20, Qt::AlignLeft);
     layoutBottom->addWidget(btnMore, 20, Qt::AlignRight);
     checkBox->setVisible(bShowHideOption);
