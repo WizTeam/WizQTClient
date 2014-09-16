@@ -165,7 +165,7 @@
         <translation>新建筆記</translation>
     </message>
     <message>
-        <location filename="../src/wizCategoryView.cpp" line="2648"/>
+        <location filename="../src/wizCategoryView.cpp" line="2647"/>
         <source>Create new group...</source>
         <translation>創建羣組...</translation>
     </message>
@@ -302,18 +302,18 @@
         <translation>已完成</translation>
     </message>
     <message>
-        <location filename="../src/share/wizDatabase.cpp" line="3585"/>
+        <location filename="../src/share/wizDatabase.cpp" line="3589"/>
         <source>Doucment  %1  Password</source>
         <translation>筆記 %1 密碼</translation>
     </message>
     <message>
-        <location filename="../src/share/wizDatabase.cpp" line="3586"/>
+        <location filename="../src/share/wizDatabase.cpp" line="3590"/>
         <source>Password :</source>
         <translation>密碼：</translation>
     </message>
     <message>
         <location filename="../src/share/wizDatabase.cpp" line="775"/>
-        <location filename="../src/share/wizDatabase.cpp" line="3596"/>
+        <location filename="../src/share/wizDatabase.cpp" line="3600"/>
         <source>Info</source>
         <translation>提示</translation>
     </message>
@@ -328,7 +328,7 @@
         <translation>密碼</translation>
     </message>
     <message>
-        <location filename="../src/share/wizDatabase.cpp" line="3596"/>
+        <location filename="../src/share/wizDatabase.cpp" line="3600"/>
         <source>password error!</source>
         <translation>密碼錯誤！</translation>
     </message>
@@ -440,24 +440,24 @@
 <context>
     <name>CWizDocumentWebView</name>
     <message>
-        <location filename="../src/wizDocumentWebView.cpp" line="1469"/>
+        <location filename="../src/wizDocumentWebView.cpp" line="1470"/>
         <source>Image File</source>
         <translation>圖片文件</translation>
     </message>
     <message>
-        <location filename="../src/wizDocumentWebView.cpp" line="1469"/>
+        <location filename="../src/wizDocumentWebView.cpp" line="1470"/>
         <source>Images (*.png *.bmp *.gif *.jpg)</source>
         <translation>圖片 (*.png *.bmp *.gif *.jpg)</translation>
     </message>
     <message>
-        <location filename="../src/wizDocumentWebView.cpp" line="1705"/>
+        <location filename="../src/wizDocumentWebView.cpp" line="1706"/>
         <source>Inof</source>
         <translation>提示</translation>
     </message>
     <message>
-        <location filename="../src/wizDocumentWebView.cpp" line="1705"/>
-        <source>No available printer founded!</source>
-        <translation>未發現可用打印機！</translation>
+        <location filename="../src/wizDocumentWebView.cpp" line="1706"/>
+        <source>No available printer founded! Please add printer to system printer list.</source>
+        <translation>未發現可用打印機！請在系統打印機列表中添加打印機。</translation>
     </message>
 </context>
 <context>
@@ -1483,37 +1483,37 @@
         <translation>找不到筆記 %1 , 該篇筆記可能已被刪除。</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="2345"/>
+        <location filename="../src/wizmainwindow.cpp" line="2451"/>
         <source>More ...</source>
         <translation>瞭解更多...</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="2349"/>
+        <location filename="../src/wizmainwindow.cpp" line="2455"/>
         <source>Don&apos;t show me this again</source>
-        <translation type="unfinished">不再提示</translation>
+        <translation>不再提示</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="2386"/>
+        <location filename="../src/wizmainwindow.cpp" line="2341"/>
         <source>Show/Hide MainWindow</source>
         <translation>顯示/隱藏主窗口</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="2389"/>
+        <location filename="../src/wizmainwindow.cpp" line="2344"/>
         <source>New Note</source>
         <translation>新建筆記</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="2394"/>
+        <location filename="../src/wizmainwindow.cpp" line="2349"/>
         <source>Hide TrayIcon</source>
         <translation>隱藏托盤圖標</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="2398"/>
+        <location filename="../src/wizmainwindow.cpp" line="2353"/>
         <source>Logout</source>
         <translation>註銷</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="2400"/>
+        <location filename="../src/wizmainwindow.cpp" line="2355"/>
         <source>Exit</source>
         <translation>退出</translation>
     </message>
@@ -2671,27 +2671,27 @@
         <translation>$分享給朋友的筆記</translation>
     </message>
     <message>
-        <location filename="../src/share/wizDatabase.cpp" line="3616"/>
+        <location filename="../src/share/wizDatabase.cpp" line="3620"/>
         <source>Download Note %1 </source>
         <translation>下載筆記 %1</translation>
     </message>
     <message>
-        <location filename="../src/share/wizDatabase.cpp" line="3617"/>
+        <location filename="../src/share/wizDatabase.cpp" line="3621"/>
         <source>Downloading,please wait...</source>
         <translation>正在下載，請稍等...</translation>
     </message>
     <message>
-        <location filename="../src/share/wizDatabase.cpp" line="3643"/>
+        <location filename="../src/share/wizDatabase.cpp" line="3647"/>
         <source>Download Attachment %1 </source>
         <translation>下載附件 %1</translation>
     </message>
     <message>
-        <location filename="../src/share/wizDatabase.cpp" line="3644"/>
+        <location filename="../src/share/wizDatabase.cpp" line="3648"/>
         <source>Downloading, please wait...</source>
         <translation>正在下載，請稍等...</translation>
     </message>
     <message>
-        <location filename="../src/wizDocumentWebView.cpp" line="1711"/>
+        <location filename="../src/wizDocumentWebView.cpp" line="1713"/>
         <source>Print Document</source>
         <translation>打印文檔</translation>
     </message>

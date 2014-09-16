@@ -1703,7 +1703,8 @@ void CWizDocumentWebView::printDocument()
         QPrinterInfo info(printer);
         if (info.printerName().isEmpty())
         {
-            QMessageBox::information(0, tr("Inof"), tr("No available printer founded!"));
+            QMessageBox::information(0, tr("Inof"), tr("No available printer founded! Please add"
+                                                       " printer to system printer list."));
             return;
         }
 #endif
