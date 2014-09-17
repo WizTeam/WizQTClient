@@ -332,8 +332,12 @@ void CWizDocumentListView::resetPermission()
     // if group documents or deleted documents selected
     if (bGroup || bDeleted) {
         findAction(WIZACTION_LIST_TAGS)->setEnabled(false);
+        findAction(WIZACTION_LIST_ENCRYPT_DOCUMENT)->setEnabled(false);
+        findAction(WIZACTION_LIST_CANCEL_ENCRYPTION)->setEnabled(false);
     } else {
         findAction(WIZACTION_LIST_TAGS)->setEnabled(true);
+        findAction(WIZACTION_LIST_ENCRYPT_DOCUMENT)->setEnabled(true);
+        findAction(WIZACTION_LIST_CANCEL_ENCRYPTION)->setEnabled(true);
     }
 
     // deleted user private documents
