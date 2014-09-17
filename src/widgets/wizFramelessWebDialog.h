@@ -12,12 +12,12 @@ public:
     explicit CWizFramelessWebDialog(const QString& strUrl, QWidget *parent = 0);
 
 signals:
-    void doNotShowDialologAgain();
+    void doNotShowThisAgain(bool bAgain);
 
 
 public slots:
-    virtual void OnExecuteCommand(const QString& strFunction, QVariant param1, QVariant param2,
-                                  QVariant param3, QVariant param4, QVariant* pvRet);
+    void Execute(const QString& strFunction, QVariant param1, QVariant param2,
+                                  QVariant param3, QVariant param4);
     void onJavaScriptWindowObjectCleared();
 
 private:

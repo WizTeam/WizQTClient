@@ -2307,8 +2307,10 @@ void MainWindow::createNoteWithImage(const QString& strImageFile)
 
 void MainWindow::showNewFeatureGuide()
 {
-    QString strUrl = WizService::ApiEntry::standardCommandUrl("link");
-    strUrl += "&name=wiz-imagetocomputer.html";
+//    QString strUrl = WizService::ApiEntry::standardCommandUrl("link");
+//    strUrl += "&name=newfeaturetips.html";
+
+    QString strUrl = "file:///Users/lxn/Downloads/test.html";
 
     CWizFramelessWebDialog dlg(strUrl);
     dlg.exec();
@@ -2316,18 +2318,19 @@ void MainWindow::showNewFeatureGuide()
 
 void MainWindow::showMobileFileReceiverUserGuide()
 {
-    QString strUrl = WizService::ApiEntry::standardCommandUrl("link");
-    strUrl += "&name=wiz-imagetocomputer.html";
+//    QString strUrl = WizService::ApiEntry::standardCommandUrl("link");
+//    strUrl += "&name=guidemap-sendimage.html";
 
+    QString strUrl = "file:///Users/lxn/Downloads/test.html";
     CWizFramelessWebDialog dlg(strUrl);
-    connect(&dlg, SIGNAL(doNotShowDialologAgain()),
-            SLOT(doNotShowMobileFileReceiverUserGuideAgain()));
+    connect(&dlg, SIGNAL(doNotShowThisAgain(bool)),
+            SLOT(setDoNotShowMobileFileReceiverUserGuideAgain(bool)));
     dlg.exec();
 }
 
-void MainWindow::doNotShowMobileFileReceiverUserGuideAgain()
+void MainWindow::setDoNotShowMobileFileReceiverUserGuideAgain(bool bNotAgain)
 {
-    m_settings->setNeedShowMobileFileReceiverUserGuide(false);
+    m_settings->setNeedShowMobileFileReceiverUserGuide(!bNotAgain);
 }
 
 void MainWindow::initTrayIcon(QSystemTrayIcon* trayIcon)

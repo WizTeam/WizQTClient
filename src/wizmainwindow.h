@@ -356,7 +356,7 @@ public Q_SLOTS:
     //
     void showNewFeatureGuide();
     void showMobileFileReceiverUserGuide();
-    void doNotShowMobileFileReceiverUserGuideAgain();
+    void setDoNotShowMobileFileReceiverUserGuideAgain(bool bNotAgain);
 public:
     // WizExplorerApp pointer
     virtual QWidget* mainWindow() { return this; }
