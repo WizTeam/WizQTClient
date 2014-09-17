@@ -259,12 +259,14 @@ void CWizDocumentWebView::inputMethodEvent(QInputMethodEvent* event)
 #endif
 
 #ifdef Q_OS_MAC
-    int nLength = 0;
+    ///暂时注释代码，移动输入光标会导致极高的CPU占用率，导致输入卡顿。
+
+    //int nLength = 0;
     int nOffset = 0;
     for (int i = 0; i < event->attributes().size(); i++) {
         const QInputMethodEvent::Attribute& a = event->attributes().at(i);
         if (a.type == QInputMethodEvent::Cursor) {
-            nLength = a.length;
+            //nLength = a.length;
             nOffset = a.start;
             break;
         }
@@ -278,6 +280,9 @@ void CWizDocumentWebView::inputMethodEvent(QInputMethodEvent* event)
     for (int i = 0; i < nOffset; i++) {
         page()->triggerAction(QWebPage::MoveToNextChar);
     }
+
+    /// 此处不计算移动的字符数，直接移动到下一个文字的开始处。在英文之前输入中文时存在问题。
+//    page()->triggerAction(QWebPage::MoveToNextWord);
 #endif // Q_OS_MAC
 }
 

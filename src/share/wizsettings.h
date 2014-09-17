@@ -128,8 +128,8 @@ public:
     int printMarginUnit();
     void setPrintMarginUnit(int nUnit);
 
-    QString userGuideVersion();
-    void setUserGuideVersion(const QString& strUserGuideVersion);
+    QString newFeatureGuideVersion();
+    void setNewFeatureGuideVersion(const QString& strGuideVersion);
 
     bool needShowMobileFileReceiverUserGuide();
     void setNeedShowMobileFileReceiverUserGuide(bool bNeedShow);

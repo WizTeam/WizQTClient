@@ -365,15 +365,15 @@ void CWizUserSettings::setPrintMarginUnit(int nUnit)
     set("PrintMarginType", QString::number(nUnit));
 }
 
-QString CWizUserSettings::userGuideVersion()
+QString CWizUserSettings::newFeatureGuideVersion()
 {
-    QString strGuideVersion = get("UserGuideVersion");
+    QString strGuideVersion = get("NewFeatureGuideVersion");
     return strGuideVersion;
 }
 
-void CWizUserSettings::setUserGuideVersion(const QString& strUserGuideVersion)
+void CWizUserSettings::setNewFeatureGuideVersion(const QString& strGuideVersion)
 {
-    set("UserGuideVersion", strUserGuideVersion);
+    set("NewFeatureGuideVersion", strGuideVersion);
 }
 
 bool CWizUserSettings::needShowMobileFileReceiverUserGuide()

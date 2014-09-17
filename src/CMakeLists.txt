@@ -143,6 +143,7 @@ set(wiznote_SOURCES
     widgets/WizCodeEditorDialog.cpp
     wizDocTemplateDialog.cpp
     wizMobileFileReceiver.cpp
+    widgets/wizFramelessWebDialog.cpp
 )
 
 set(wiznote_HEADERS
@@ -273,6 +274,7 @@ set(wiznote_HEADERS
     widgets/WizCodeEditorDialog.h
     wizDocTemplateDialog.h
     wizMobileFileReceiver.h
+    widgets/wizFramelessWebDialog.h
 )
 
 set(wiznote_FORMS
