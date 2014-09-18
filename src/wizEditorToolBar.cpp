@@ -420,6 +420,10 @@ EditorToolBar::EditorToolBar(QWidget *parent)
     layout->setSpacing(2);
     setLayout(layout);
 
+    layout->addSpacing(6);
+    layout->addWidget(m_btnMobileImage);
+    layout->addWidget(m_btnCheckList);
+    layout->addSpacing(6);
     layout->addWidget(m_comboFontFamily);
     layout->addSpacing(6);
     layout->addWidget(m_comboFontSize);
@@ -441,11 +445,9 @@ EditorToolBar::EditorToolBar(QWidget *parent)
     layout->addSpacing(12);
     layout->addWidget(m_btnTable);
     layout->addWidget(m_btnHorizontal);
-    layout->addWidget(m_btnCheckList);
     layout->addWidget(m_btnInsertImage);
     layout->addSpacing(12);
     layout->addWidget(m_btnSearchReplace);
-    layout->addWidget(m_btnMobileImage);
     layout->addStretch();
 }
 
