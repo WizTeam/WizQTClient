@@ -87,7 +87,7 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     , m_searchIndexer(new CWizSearchIndexer(m_dbMgr, this))
     , m_searcher(new CWizSearcher(m_dbMgr, this))
     #ifndef BUILD4APPSTORE
-    , m_upgrade(new CWizUpgrade())
+    , m_upgrade(new CWizUpgrade(this))
     #else
     , m_upgrade(0)
     #endif
@@ -176,10 +176,7 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
 
     // upgrade check
 #ifndef BUILD4APPSTORE
-    QThread *thread = new QThread(this);
-    m_upgrade->moveToThread(thread);
     connect(m_upgrade, SIGNAL(checkFinished(bool)), SLOT(on_checkUpgrade_finished(bool)));
-    thread->start(QThread::IdlePriority);
     if (userSettings().autoCheckUpdate()) {
         checkWizUpdate();
     }
