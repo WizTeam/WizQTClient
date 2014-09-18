@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE TS>
-<TS version="2.0" language="zh_CN">
+<TS version="2.1" language="zh_CN">
 <context>
     <name>CWizAttachmentListView</name>
     <message>
@@ -389,32 +389,32 @@
         <translation>在新窗口中打開</translation>
     </message>
     <message>
-        <location filename="../src/wizDocumentListView.cpp" line="813"/>
+        <location filename="../src/wizDocumentListView.cpp" line="817"/>
         <source>Note History</source>
         <translation>筆記版本歷史</translation>
     </message>
     <message>
-        <location filename="../src/wizDocumentListView.cpp" line="933"/>
+        <location filename="../src/wizDocumentListView.cpp" line="937"/>
         <source>Move notes</source>
         <translation>移動筆記</translation>
     </message>
     <message>
-        <location filename="../src/wizDocumentListView.cpp" line="983"/>
+        <location filename="../src/wizDocumentListView.cpp" line="987"/>
         <source>Move Note: %1 to %2</source>
         <translation>移動筆記: %1 到 %2</translation>
     </message>
     <message>
-        <location filename="../src/wizDocumentListView.cpp" line="997"/>
+        <location filename="../src/wizDocumentListView.cpp" line="1001"/>
         <source>Copy documents</source>
         <translation>複製筆記</translation>
     </message>
     <message>
-        <location filename="../src/wizDocumentListView.cpp" line="1066"/>
+        <location filename="../src/wizDocumentListView.cpp" line="1070"/>
         <source>Password</source>
         <translation>密碼</translation>
     </message>
     <message>
-        <location filename="../src/wizDocumentListView.cpp" line="1066"/>
+        <location filename="../src/wizDocumentListView.cpp" line="1070"/>
         <source>Please input document password to cancel encrypt.</source>
         <translation>請輸入筆記密碼.</translation>
     </message>
@@ -440,22 +440,22 @@
 <context>
     <name>CWizDocumentWebView</name>
     <message>
-        <location filename="../src/wizDocumentWebView.cpp" line="1470"/>
+        <location filename="../src/wizDocumentWebView.cpp" line="1475"/>
         <source>Image File</source>
         <translation>圖片文件</translation>
     </message>
     <message>
-        <location filename="../src/wizDocumentWebView.cpp" line="1470"/>
+        <location filename="../src/wizDocumentWebView.cpp" line="1475"/>
         <source>Images (*.png *.bmp *.gif *.jpg)</source>
         <translation>圖片 (*.png *.bmp *.gif *.jpg)</translation>
     </message>
     <message>
-        <location filename="../src/wizDocumentWebView.cpp" line="1706"/>
+        <location filename="../src/wizDocumentWebView.cpp" line="1711"/>
         <source>Inof</source>
         <translation>提示</translation>
     </message>
     <message>
-        <location filename="../src/wizDocumentWebView.cpp" line="1706"/>
+        <location filename="../src/wizDocumentWebView.cpp" line="1711"/>
         <source>No available printer founded! Please add printer to system printer list.</source>
         <translation>未發現可用打印機！請在系統打印機列表中添加打印機。</translation>
     </message>
@@ -878,8 +878,8 @@
     </message>
     <message>
         <location filename="../src/ui/wizpreferencedialog.ui" line="422"/>
-        <source>Margins</source>
-        <translation>邊距</translation>
+        <source>Page margins</source>
+        <translation>頁邊距</translation>
     </message>
     <message>
         <location filename="../src/ui/wizpreferencedialog.ui" line="428"/>
@@ -1447,83 +1447,73 @@
 <context>
     <name>Core::Internal::MainWindow</name>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="170"/>
+        <location filename="../src/wizmainwindow.cpp" line="171"/>
         <source>WizNote</source>
         <translation>爲知筆記</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="1213"/>
+        <location filename="../src/wizmainwindow.cpp" line="1214"/>
         <source>1 note</source>
         <translation>1 條筆記</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="1219"/>
-        <location filename="../src/wizmainwindow.cpp" line="1223"/>
+        <location filename="../src/wizmainwindow.cpp" line="1220"/>
+        <location filename="../src/wizmainwindow.cpp" line="1224"/>
         <source>%1 notes</source>
         <translation>%1 條筆記</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="1347"/>
+        <location filename="../src/wizmainwindow.cpp" line="1348"/>
         <source>sorry, sync failed. please input your password and try again.</source>
         <translation>抱歉，同步失敗了。請輸入您的密碼再試一次。</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="1699"/>
+        <location filename="../src/wizmainwindow.cpp" line="1700"/>
         <source>PDF Files (*.pdf)</source>
         <translation>PDF 檔案 (*.pdf)</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="1711"/>
+        <location filename="../src/wizmainwindow.cpp" line="1712"/>
         <source>Open Directory</source>
         <translation>選擇文件夾</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="1929"/>
+        <location filename="../src/wizmainwindow.cpp" line="1930"/>
         <source>Can&apos;t find note %1 , may be it has been deleted.</source>
         <translation>找不到筆記 %1 , 該篇筆記可能已被刪除。</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="2451"/>
-        <source>More ...</source>
-        <translation>瞭解更多...</translation>
-    </message>
-    <message>
-        <location filename="../src/wizmainwindow.cpp" line="2455"/>
-        <source>Don&apos;t show me this again</source>
-        <translation>不再提示</translation>
-    </message>
-    <message>
-        <location filename="../src/wizmainwindow.cpp" line="2341"/>
+        <location filename="../src/wizmainwindow.cpp" line="2338"/>
         <source>Show/Hide MainWindow</source>
         <translation>顯示/隱藏主窗口</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="2344"/>
+        <location filename="../src/wizmainwindow.cpp" line="2341"/>
         <source>New Note</source>
         <translation>新建筆記</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="2349"/>
+        <location filename="../src/wizmainwindow.cpp" line="2346"/>
         <source>Hide TrayIcon</source>
         <translation>隱藏托盤圖標</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="2353"/>
+        <location filename="../src/wizmainwindow.cpp" line="2350"/>
         <source>Logout</source>
         <translation>註銷</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="2355"/>
+        <location filename="../src/wizmainwindow.cpp" line="2352"/>
         <source>Exit</source>
         <translation>退出</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="1666"/>
+        <location filename="../src/wizmainwindow.cpp" line="1667"/>
         <source>Rebuild full text search index</source>
         <translation>重建搜尋索引</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="1669"/>
+        <location filename="../src/wizmainwindow.cpp" line="1670"/>
         <source>Rebuild full text search is quit slow if you have quite a few notes or attachments, you do not have to use this function while search should work as expected.</source>
         <translation>重建全文搜索索引會非常慢。只有在您的搜索出現異常的時候才需要使用這個功能。</translation>
     </message>
@@ -2711,7 +2701,7 @@
         <translation>正在下載，請稍等...</translation>
     </message>
     <message>
-        <location filename="../src/wizDocumentWebView.cpp" line="1713"/>
+        <location filename="../src/wizDocumentWebView.cpp" line="1718"/>
         <source>Print Document</source>
         <translation>打印文檔</translation>
     </message>
