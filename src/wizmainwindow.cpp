@@ -2241,6 +2241,7 @@ void MainWindow::viewDocumentByWizKMURL(const QString &strKMURL)
         m_documents->setCurrentItem(0);
         m_documents->blockSignals(false);
         viewDocument(document, true);
+        locateDocument(document);
     }
 }
 
@@ -2307,10 +2308,8 @@ void MainWindow::createNoteWithImage(const QString& strImageFile)
 
 void MainWindow::showNewFeatureGuide()
 {
-//    QString strUrl = WizService::ApiEntry::standardCommandUrl("link");
-//    strUrl += "&name=newfeaturetips.html";
-
-    QString strUrl = "file:///Users/lxn/Downloads/test.html";
+    QString strUrl = WizService::ApiEntry::standardCommandUrl("link");
+    strUrl += "&name=newfeaturetips.html";
 
     CWizFramelessWebDialog dlg(strUrl);
     dlg.exec();
@@ -2318,10 +2317,9 @@ void MainWindow::showNewFeatureGuide()
 
 void MainWindow::showMobileFileReceiverUserGuide()
 {
-//    QString strUrl = WizService::ApiEntry::standardCommandUrl("link");
-//    strUrl += "&name=guidemap-sendimage.html";
+    QString strUrl = WizService::ApiEntry::standardCommandUrl("link");
+    strUrl += "&name=guidemap_sendimage.html";
 
-    QString strUrl = "file:///Users/lxn/Downloads/test.html";
     CWizFramelessWebDialog dlg(strUrl);
     connect(&dlg, SIGNAL(doNotShowThisAgain(bool)),
             SLOT(setDoNotShowMobileFileReceiverUserGuideAgain(bool)));
