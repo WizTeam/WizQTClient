@@ -1214,6 +1214,26 @@ bool CWizDocumentWebView::editorCommandExecuteInsertHtml(const QString& strHtml,
     return editorCommandExecuteCommand("insertHtml", "'" + strHtml + "'", s);
 }
 
+void CWizDocumentWebView::on_editorCommandPastePlainText_triggered()
+{
+    QClipboard* clip = QApplication::clipboard();
+    Q_ASSERT(clip);
+
+    const QMimeData* mime = clip->mimeData();
+    if (mime->hasHtml())
+    {
+        QString strText = mime->text();
+        if (strText.isEmpty())
+            WizHtml2Text(mime->html(), strText);
+        QMimeData* data = new QMimeData();
+        data->removeFormat("text/html");
+        data->setText(strText);
+        clip->setMimeData(data);
+    }
+
+    triggerPageAction(QWebPage::Paste);
+}
+
 bool CWizDocumentWebView::editorCommandExecuteIndent()
 {
     return editorCommandExecuteCommand("indent");

@@ -1432,7 +1432,7 @@ void MainWindow::on_actionEditingPaste_triggered()
 
 void MainWindow::on_actionEditingPastePlain_triggered()
 {
-    qDebug() << "paste plain...";
+    m_doc->web()->on_editorCommandPastePlainText_triggered();
 }
 
 void MainWindow::on_actionEditingDelete_triggered()

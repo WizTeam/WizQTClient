@@ -72,7 +72,6 @@ void CWizMobileFileReceiver::readUdpPendingData()
             if (m_tcpContainer->tcpState() == QAbstractSocket::UnconnectedState)
             {
                 m_tcpContainer->connectToHost(host.toString(), 19586);
-                //emit connectToHost(host.toString(), 19586);
             }
         }
     }

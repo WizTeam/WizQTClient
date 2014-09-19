@@ -39,17 +39,20 @@ install from [PPA](https://launchpad.net/~wiznote-team/+archive/ppa) is much mor
 
 Also, App Store is not so far!
 
-### Arch-Linux
 
-install from offical repo:
+### Fedora 19/20/21/rawhide
 
-    $ pacman -S wiznote
+  $ sudo yum install dnf-plugins-core
+  $ sudo dnf copr enable mosquito/myrepo
+  $ sudo yum install wiz-note
 
+Thanks for mosquito's contribution,[more soft.](https://copr.fedoraproject.org/coprs/mosquito/myrepo/)
 
-### Fedora
+### RHEL/CentOS 7
 
-Wow, we have not adopted to this distro yet. volunteers is strongly encouraged!
-
+  $ sudo yum-config-manager --add-repo=https://copr.fedoraproject.org/coprs/mosquito/myrepo/repo/epel-7/mosquito-myrepo-epel-7.repo 
+  $ sudo yum install epel-release 
+  $ sudo yum install wiz-note
 
 ### others
 
