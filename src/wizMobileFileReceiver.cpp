@@ -5,7 +5,6 @@
 #include <QImage>
 #include <QDebug>
 #include <QDir>
-#include <QEventLoop>
 
 #include "share/wizmisc.h"
 #include "share/wizDatabaseManager.h"
@@ -82,8 +81,7 @@ void CWizMobileFileReceiver::readUdpPendingData()
 void CWizMobileFileReceiver::run()
 {
     initSocket();
-    QEventLoop loop;
-    loop.exec();
+    exec();
 }
 
 
@@ -462,8 +460,7 @@ void CWizMobileTcpContainer::run()
     m_tcpSocket->waitForConnected(30000);
     m_tcpSocket->waitForReadyRead(30000);
 
-    QEventLoop loop;
-    loop.exec();
+    exec();
 }
 
 void CWizMobileTcpContainer::initTcpSocket()

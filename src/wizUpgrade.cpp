@@ -4,8 +4,6 @@
 #include "utils/logger.h"
 #include "sync/apientry.h"
 
-#include <QEventLoop>
-
 #if defined(Q_OS_MAC)
 #define strUpgradeUrlParam "/download?product=wiznote&client=macos"
 #elif defined(Q_OS_LINUX)
@@ -43,8 +41,7 @@ void CWizUpgrade::on_timerCheck_timeout()
 
 void CWizUpgrade::run()
 {
-    QEventLoop loop;
-    loop.exec();
+    exec();
 }
 
 void CWizUpgrade::beginCheck()

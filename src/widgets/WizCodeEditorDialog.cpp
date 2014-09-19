@@ -11,7 +11,6 @@
 #include <QWebPage>
 #include <QWebFrame>
 #include <QWebView>
-#include <QEventLoop>
 #include <QTimer>
 #include <QAction>
 #include <QMenu>
