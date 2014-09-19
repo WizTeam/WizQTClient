@@ -16,6 +16,7 @@ CWizFramelessWebDialog::CWizFramelessWebDialog(const QString& strUrl, QWidget *p
     m_frame->load(QUrl(strUrl));
     connect(m_frame, SIGNAL(javaScriptWindowObjectCleared()),
             SLOT(onJavaScriptWindowObjectCleared()));
+    view->setContextMenuPolicy(Qt::NoContextMenu);
 
     QVBoxLayout *layout = new QVBoxLayout(this);
     layout->setContentsMargins(0, 0, 0, 0);
