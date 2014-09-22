@@ -204,6 +204,7 @@ public:
     void resetPermission(const QString& strKbGUID, const QString& strDocumentOwner);
     void viewDocument(const WIZDOCUMENTDATA& data, bool addToHistory);
     void locateDocument(const WIZDOCUMENTDATA& data);
+    void locateDocument(const QString& strKbGuid, const QString& strGuid);
     //
     void viewDocumentInFloatWidget(const WIZDOCUMENTDATA& data);
     //
@@ -312,7 +313,6 @@ public Q_SLOTS:
     void on_syncProcessLog(const QString& strMsg);
 
     void on_options_restartForSettings();
-    void locateDocument(const QString& strKbGuid, const QString& strGuid);
 
     void on_editor_statusChanged();
 

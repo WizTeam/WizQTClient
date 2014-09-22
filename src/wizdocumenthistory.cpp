@@ -35,7 +35,7 @@ bool CWizDocumentViewHistory::canBack() const
 }
 bool CWizDocumentViewHistory::canForward() const
 {
-    return m_nIndex < int(m_arrayHistory.size()) - 2;
+    return m_nIndex < int(m_arrayHistory.size()) - 1;
 }
 WIZDOCUMENTDATA CWizDocumentViewHistory::back()
 {
@@ -62,8 +62,8 @@ WIZDOCUMENTDATA CWizDocumentViewHistory::forward()
     //
     m_nIndex++;
     //
-    ATLASSERT(m_nIndex >= 0 && m_nIndex < int(m_arrayHistory.size()) - 1);
-    if (m_nIndex >= 0 && m_nIndex < int(m_arrayHistory.size()) - 1)
+    ATLASSERT(m_nIndex >= 0 && m_nIndex <= int(m_arrayHistory.size()) - 1);
+    if (m_nIndex >= 0 && m_nIndex <= int(m_arrayHistory.size()) - 1)
     {
         return m_arrayHistory[m_nIndex];
     }

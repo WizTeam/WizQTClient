@@ -2037,9 +2037,9 @@ void MainWindow::viewDocument(const WIZDOCUMENTDATA& data, bool addToHistory)
     //if (!m_doc->viewDocument(data, forceEdit))
     //    return;
 
-    //if (addToHistory) {
-    //    m_history->addHistory(data);
-    //}
+    if (addToHistory) {
+        m_history->addHistory(data);
+    }
 
     //m_actions->actionFromName("actionGoBack")->setEnabled(m_history->canBack());
     //m_actions->actionFromName("actionGoForward")->setEnabled(m_history->canForward());
@@ -2053,7 +2053,6 @@ void MainWindow::locateDocument(const WIZDOCUMENTDATA& data)
         if (m_category->setCurrentIndex(data))
         {
             m_documents->addAndSelectDocument(data);
-            viewDocument(data, true);
         }
     }
     catch (...)
