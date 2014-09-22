@@ -908,6 +908,8 @@ void MainWindow::saveHtmlToCurrentNote(const QString &strHtml, const QString& st
     copyFileToFolder(strFolder, strHtmlFile, strResourceList);
 
     db.CompressFolderToZiwFile(docData, strFolder);
+    bool bNotify = false;
+    db.UpdateDocumentDataMD5(docData, db.GetDocumentFileName(docData.strGUID), bNotify);
     quickSyncKb(docData.strKbGUID);
 
     m_doc->web()->updateNoteHtml();
