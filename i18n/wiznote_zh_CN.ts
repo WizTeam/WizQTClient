@@ -1594,7 +1594,7 @@
     <message>
         <location filename="../src/titlebar.cpp" line="93"/>
         <source>View and recover note&apos;s history</source>
-        <translation>浏览并恢复版本历史</translation>
+        <translation>浏览并恢复历史版本</translation>
     </message>
     <message>
         <location filename="../src/titlebar.cpp" line="100"/>
