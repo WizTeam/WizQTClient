@@ -810,11 +810,8 @@ void CWizDocumentListView::on_action_documentHistory()
    if (!item)
        return;
 
-    CString strExt = WizFormatString2(_T("obj_guid=%1&kb_guid=%2&obj_type=document"),
-                                      item->document().strGUID, item->document().strKbGUID);
-    QString strUrl = WizService::ApiEntry::standardCommandUrl("document_history", WIZ_TOKEN_IN_URL_REPLACE_PART, strExt);
-
-    showWebDialogWithToken(tr("Note History"), strUrl, window());
+   const WIZDOCUMENTDATA& doc = item->document();
+   showDocumentHistory(doc, window());
 }
 
 //void CWizDocumentListView::on_message_created(const WIZMESSAGEDATA& data)
