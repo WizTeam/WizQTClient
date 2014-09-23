@@ -17,6 +17,7 @@
 #include "share/wizsettings.h"
 #include "share/wizwin32helper.h"
 #include "share/wizDatabaseManager.h"
+#include "share/wizSingleApplication.h"
 
 #ifdef Q_OS_MAC
 #include "mac/wizmachelper.h"
@@ -149,9 +150,10 @@ int mainCore(int argc, char *argv[])
    QCoreApplication::setLibraryPaths(QStringList(dir.absolutePath()));
    printf("after change, libraryPaths=(%s)\n", QCoreApplication::libraryPaths().join(",").toUtf8().data());
 #endif
-    QApplication a(argc, argv);
-    qInstallMessageHandler(Utils::Logger::messageHandler);
-    QApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
+    //QApplication a(argc, argv);
+   CWizSingleApplication a(argc, argv, "Special Message for WizNote SingleApplication");
+   qInstallMessageHandler(Utils::Logger::messageHandler);
+   QApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
 
 #else
     QApplication a(argc, argv);
@@ -307,6 +309,8 @@ int mainCore(int argc, char *argv[])
 
 
     MainWindow w(dbMgr);
+    QObject::connect(&a, SIGNAL(messageAvailable(QString)), &w,
+                     SLOT(on_application_messageAvailable(QString)));
 
     //settings->setValue("Users/DefaultUser", strUserId);
     PluginManager::loadPlugins();

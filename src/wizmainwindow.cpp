@@ -2072,6 +2072,11 @@ void MainWindow::locateDocument(const QString& strKbGuid, const QString& strGuid
     }
 }
 
+void MainWindow::on_application_messageAvailable(const QString& strMsg)
+{
+    qDebug() << "application message received : " << strMsg;
+}
+
 void MainWindow::checkWizUpdate()
 {
 #ifndef BUILD4APPSTORE

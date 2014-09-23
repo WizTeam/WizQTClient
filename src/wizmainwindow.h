@@ -203,8 +203,6 @@ public:
 
     void resetPermission(const QString& strKbGUID, const QString& strDocumentOwner);
     void viewDocument(const WIZDOCUMENTDATA& data, bool addToHistory);
-    void locateDocument(const WIZDOCUMENTDATA& data);
-    void locateDocument(const QString& strKbGuid, const QString& strGuid);
     //
     void viewDocumentInFloatWidget(const WIZDOCUMENTDATA& data);
     //
@@ -357,6 +355,13 @@ public Q_SLOTS:
     void showNewFeatureGuide();
     void showMobileFileReceiverUserGuide();
     void setDoNotShowMobileFileReceiverUserGuideAgain(bool bNotAgain);
+
+    //
+    void locateDocument(const WIZDOCUMENTDATA& data);
+    void locateDocument(const QString& strKbGuid, const QString& strGuid);
+
+    //
+    void on_application_messageAvailable(const QString& strMsg);
 public:
     // WizExplorerApp pointer
     virtual QWidget* mainWindow() { return this; }

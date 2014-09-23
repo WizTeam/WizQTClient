@@ -144,6 +144,9 @@ set(wiznote_SOURCES
     wizDocTemplateDialog.cpp
     wizMobileFileReceiver.cpp
     widgets/wizFramelessWebDialog.cpp
+    share/wizLockedFile.cpp
+    share/wizLocalPeer.cpp
+    share/wizSingleApplication.cpp
 )
 
 set(wiznote_HEADERS
@@ -275,6 +278,9 @@ set(wiznote_HEADERS
     wizDocTemplateDialog.h
     wizMobileFileReceiver.h
     widgets/wizFramelessWebDialog.h
+    share/wizLockedFile.h
+    share/wizLocalPeer.h
+    share/wizSingleApplication.h
 )
 
 set(wiznote_FORMS

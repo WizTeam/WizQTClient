@@ -56,6 +56,7 @@ void TitleEdit::inputMethodEvent(QInputMethodEvent* event)
 
 void TitleEdit::keyPressEvent(QKeyEvent* e)
 {
+    qDebug() << "TitleEdit::keyPressEvent ";
     if (c && c->popup()->isVisible()) {
         // The following keys are forwarded by the completer to the widget
        switch (e->key()) {
