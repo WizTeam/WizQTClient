@@ -52,7 +52,7 @@ install from offical repo:
     $ sudo dnf copr enable mosquito/myrepo
     $ sudo yum install wiz-note
 
-Thanks for mosquito's contribution,[more Fedora soft.](https://copr.fedoraproject.org/coprs/mosquito/myrepo/)
+Thanks for mosquito's contribution, [more Fedora/CentOS soft.](https://copr.fedoraproject.org/coprs/mosquito/myrepo/)
 
 
 ### RHEL/CentOS 7
