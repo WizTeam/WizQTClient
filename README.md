@@ -48,18 +48,18 @@ install from offical repo:
 
 ### Fedora 19/20/21/rawhide
 
-$ sudo yum install dnf-plugins-core
-$ sudo dnf copr enable mosquito/myrepo
-$ sudo yum install wiz-note
+    $ sudo yum install dnf-plugins-core
+    $ sudo dnf copr enable mosquito/myrepo
+    $ sudo yum install wiz-note
 
 Thanks for mosquito's contribution,[more Fedora soft.](https://copr.fedoraproject.org/coprs/mosquito/myrepo/)
 
 
 ### RHEL/CentOS 7
 
-$ sudo yum-config-manager --add-repo=https://copr.fedoraproject.org/coprs/mosquito/myrepo/repo/epel-7/mosquito-myrepo-epel-7.repo 
-$ sudo yum install epel-release 
-$ sudo yum install wiz-note
+    $ sudo yum-config-manager --add-repo=https://copr.fedoraproject.org/coprs/mosquito/myrepo/repo/epel-7/mosquito-myrepo-epel-7.repo 
+    $ sudo yum install epel-release 
+    $ sudo yum install wiz-note
 
 
 ### others
