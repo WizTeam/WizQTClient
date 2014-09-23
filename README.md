@@ -39,12 +39,6 @@ install from [PPA](https://launchpad.net/~wiznote-team/+archive/ppa) is much mor
 
 Also, App Store is not so far!
 
-### Arch-Linux
-
-install from offical repo:
-
-    $ pacman -S wiznote
-
 
 ### Fedora 19/20/21/rawhide
 
