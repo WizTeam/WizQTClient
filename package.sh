@@ -10,7 +10,7 @@ package_output_path="$HOME"
 # compile
 rm -rf ../WizQTClient-Release-QT5/* && \
 cd ../WizQTClient-Release-QT5 && \
-cmake -DWIZNOTE_USE_QT5=YES -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=~/Qt5.2.1/5.2.1/clang_64/lib/cmake ../WizQTClient && \
+cmake -DWIZNOTE_USE_QT5=YES -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=~/Qt5.3.2/5.3/clang_64/lib/cmake ../WizQTClient && \
 make -j5 && \
 cd ../WizQTClient
 
