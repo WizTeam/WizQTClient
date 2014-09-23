@@ -20,6 +20,9 @@
 #include "share/wizshadowwindow.h"
 #endif
 
+
+#define WIZ_SINGLE_APPLICATION "WIZ_SINGLE_APPLICATION"
+
 class QToolBar;
 class QLabel;
 class QSystemTrayIcon;
@@ -339,6 +342,7 @@ public Q_SLOTS:
 #endif
 
     void on_application_aboutToQuit();
+    void on_application_messageAvailable(const QString& strMsg);
 
     void on_checkUpgrade_finished(bool bUpgradeAvaliable);
 
@@ -360,8 +364,6 @@ public Q_SLOTS:
     void locateDocument(const WIZDOCUMENTDATA& data);
     void locateDocument(const QString& strKbGuid, const QString& strGuid);
 
-    //
-    void on_application_messageAvailable(const QString& strMsg);
 public:
     // WizExplorerApp pointer
     virtual QWidget* mainWindow() { return this; }

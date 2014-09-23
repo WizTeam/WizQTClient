@@ -2075,6 +2075,10 @@ void MainWindow::locateDocument(const QString& strKbGuid, const QString& strGuid
 void MainWindow::on_application_messageAvailable(const QString& strMsg)
 {
     qDebug() << "application message received : " << strMsg;
+    if (strMsg == WIZ_SINGLE_APPLICATION)
+    {
+        shiftVisableStatus();
+    }
 }
 
 void MainWindow::checkWizUpdate()

@@ -195,7 +195,7 @@ void CWizSingleApplication::receiveMessage()
     QLocalSocket *localSocket = localServer->nextPendingConnection();
     if (!localSocket->waitForReadyRead(timeout))
     {
-        qDebug(localSocket->errorString().toLatin1());
+        qDebug() << localSocket->errorString();
         return;
     }
     QByteArray byteArray = localSocket->readAll();
@@ -219,13 +219,13 @@ bool CWizSingleApplication::sendMessage(const QString &message)
     localSocket.connectToServer(_uniqueKey, QIODevice::WriteOnly);
     if (!localSocket.waitForConnected(timeout))
     {
-        qDebug(localSocket.errorString().toLatin1());
+        qDebug() <<localSocket.errorString();
         return false;
     }
     localSocket.write(message.toUtf8());
     if (!localSocket.waitForBytesWritten(timeout))
     {
-        qDebug(localSocket.errorString().toLatin1());
+        qDebug() <<localSocket.errorString();
         return false;
     }
     localSocket.disconnectFromServer();

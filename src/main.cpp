@@ -141,7 +141,6 @@ void installOnLinux()
 
 int mainCore(int argc, char *argv[])
 {
-#if QT_VERSION > 0x050000
 #ifdef BUILD4APPSTORE
    QDir dir(argv[0]);  // e.g. appdir/Contents/MacOS/appname
    dir.cdUp();
@@ -150,13 +149,26 @@ int mainCore(int argc, char *argv[])
    QCoreApplication::setLibraryPaths(QStringList(dir.absolutePath()));
    printf("after change, libraryPaths=(%s)\n", QCoreApplication::libraryPaths().join(",").toUtf8().data());
 #endif
-    //QApplication a(argc, argv);
-   CWizSingleApplication a(argc, argv, "Special Message for WizNote SingleApplication");
+
+
+#ifdef Q_OS_LINUX
+   // create single application for linux
+    CWizSingleApplication a(argc, argv, "Special Message for WizNote SingleApplication");
+    if (a.isRunning())
+    {
+        a.sendMessage(WIZ_SINGLE_APPLICATION);
+        return 0;
+    }
+#else
+    QApplication a(argc, argv);
+#endif
+
+
+#if QT_VERSION > 0x050000
    qInstallMessageHandler(Utils::Logger::messageHandler);
    QApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
 
 #else
-    QApplication a(argc, argv);
     qInstallMsgHandler(Utils::Logger::messageHandler);
 #endif
 
@@ -309,8 +321,10 @@ int mainCore(int argc, char *argv[])
 
 
     MainWindow w(dbMgr);
+#ifdef Q_OS_LINUX
     QObject::connect(&a, SIGNAL(messageAvailable(QString)), &w,
                      SLOT(on_application_messageAvailable(QString)));
+#endif
 
     //settings->setValue("Users/DefaultUser", strUserId);
     PluginManager::loadPlugins();
