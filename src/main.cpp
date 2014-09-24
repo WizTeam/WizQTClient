@@ -243,7 +243,6 @@ int mainCore(int argc, char *argv[])
 #endif
 
 
-
     // figure out auto login or manually login
     bool bFallback = true;
 
