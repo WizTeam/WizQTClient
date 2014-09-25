@@ -18,7 +18,6 @@ CWizFramelessWebDialog::CWizFramelessWebDialog(QWidget *parent) :
             SLOT(onJavaScriptWindowObjectCleared()));
     view->setContextMenuPolicy(Qt::NoContextMenu);
     connect(m_frame, SIGNAL(loadFinished(bool)), SLOT(onPageLoadFinished(bool)));
-    //connect(view, SIGNAL(loadFinished(bool)), SLOT(onPageLoadFinished(bool)));
 
     QVBoxLayout *layout = new QVBoxLayout(this);
     layout->setContentsMargins(0, 0, 0, 0);
@@ -70,6 +69,8 @@ void CWizFramelessWebDialog::onPageLoadFinished(bool ok)
             killTimer(nTimerID);
             m_timerIDList.removeFirst();
         }
+        //avoid QDialog::exec: Recursive call
+        disconnect(m_frame, SIGNAL(loadFinished(bool)), this, SLOT(onPageLoadFinished(bool)));
         exec();
     }
     else
