@@ -2319,8 +2319,8 @@ void MainWindow::showNewFeatureGuide()
     QString strUrl = WizService::ApiEntry::standardCommandUrl("link");
     strUrl += "&name=newfeaturetips.html";
 
-    CWizFramelessWebDialog dlg(strUrl);
-    dlg.exec();
+    CWizFramelessWebDialog *dlg = new CWizFramelessWebDialog();
+    dlg->loadAndShow(strUrl);
 }
 
 void MainWindow::showMobileFileReceiverUserGuide()
@@ -2328,10 +2328,10 @@ void MainWindow::showMobileFileReceiverUserGuide()
     QString strUrl = WizService::ApiEntry::standardCommandUrl("link");
     strUrl += "&name=guidemap_sendimage.html";
 
-    CWizFramelessWebDialog dlg(strUrl);
-    connect(&dlg, SIGNAL(doNotShowThisAgain(bool)),
+    CWizFramelessWebDialog *dlg = new CWizFramelessWebDialog();
+    connect(dlg, SIGNAL(doNotShowThisAgain(bool)),
             SLOT(setDoNotShowMobileFileReceiverUserGuideAgain(bool)));
-    dlg.exec();
+    dlg->loadAndShow(strUrl);
 }
 
 void MainWindow::setDoNotShowMobileFileReceiverUserGuideAgain(bool bNotAgain)

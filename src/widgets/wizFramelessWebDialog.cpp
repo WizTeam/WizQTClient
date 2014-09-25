@@ -5,22 +5,35 @@
 #include <QVBoxLayout>
 #include <QDesktopServices>
 
-CWizFramelessWebDialog::CWizFramelessWebDialog(const QString& strUrl, QWidget *parent) :
+CWizFramelessWebDialog::CWizFramelessWebDialog(QWidget *parent) :
     QDialog(parent)
 {
     setFixedSize(800, 600);
     setWindowFlags(Qt::FramelessWindowHint);
+    setAttribute(Qt::WA_DeleteOnClose);
 
     QWebView *view = new QWebView(this);
     m_frame = view->page()->mainFrame();
-    m_frame->load(QUrl(strUrl));
     connect(m_frame, SIGNAL(javaScriptWindowObjectCleared()),
             SLOT(onJavaScriptWindowObjectCleared()));
     view->setContextMenuPolicy(Qt::NoContextMenu);
+    connect(m_frame, SIGNAL(loadFinished(bool)), SLOT(onPageLoadFinished(bool)));
+    //connect(view, SIGNAL(loadFinished(bool)), SLOT(onPageLoadFinished(bool)));
 
     QVBoxLayout *layout = new QVBoxLayout(this);
     layout->setContentsMargins(0, 0, 0, 0);
     layout->addWidget(view);
+}
+
+void CWizFramelessWebDialog::loadAndShow(const QString& strUrl)
+{
+    m_url = strUrl;
+    m_frame->load(QUrl(m_url));
+}
+
+void CWizFramelessWebDialog::timerEvent(QTimerEvent* /*event*/)
+{
+    deleteLater();
 }
 
 void CWizFramelessWebDialog::Execute(const QString& strFunction, QVariant param1,
@@ -45,6 +58,26 @@ void CWizFramelessWebDialog::Execute(const QString& strFunction, QVariant param1
 void CWizFramelessWebDialog::onJavaScriptWindowObjectCleared()
 {
     m_frame->addToJavaScriptWindowObject("customObject", this);
+}
+
+void CWizFramelessWebDialog::onPageLoadFinished(bool ok)
+{
+    if (ok)
+    {
+        while (!m_timerIDList.isEmpty())
+        {
+            int nTimerID = m_timerIDList.first();
+            killTimer(nTimerID);
+            m_timerIDList.removeFirst();
+        }
+        exec();
+    }
+    else
+    {
+        // start timer to delete my self
+        int nTimerID = startTimer(2 * 60 * 1000);
+        m_timerIDList.append(nTimerID);
+    }
 }
 
 
