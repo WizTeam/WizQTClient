@@ -117,6 +117,13 @@ for I in $QTLIBS ; do # signing the Qt frameworks
     $MYAPP.app/Contents/Frameworks/$I.framework/Versions/5/$I
 done
 for I in $DISTPLUGINS ; do # signing all *.dylib libs
+  echo "code sign : "   $I;
+  codesign -f -s "$APPLCERT" \
+    $MYAPP.app/Contents/PlugIns/$I
+done
+
+for I in $DISTPLUGINS2 ; do # signing all *.dylib libs
+  echo "code sign : "   $I;
   codesign -f -s "$APPLCERT" \
     $MYAPP.app/Contents/PlugIns/$I
 done
