@@ -1,30 +1,35 @@
-#include <QtGlobal>
-#include <QApplication>
-#include <QMessageBox>
-#include <QIcon>
-#include <QDir>
-#include <QPixmapCache>
-#include <QTranslator>
-#include <QProcess>
-#include <QSettings>
-#include <QDesktopServices>
+//#include <QtGlobal>
+//#include <QApplication>
+//#include <QMessageBox>
+//#include <QIcon>
+//#include <QDir>
+//#include <QPixmapCache>
+//#include <QTranslator>
+//#include <QProcess>
+//#include <QSettings>
+//#include <QDesktopServices>
 
-#include <sys/stat.h>
+//#include <sys/stat.h>
 
-#include <extensionsystem/pluginmanager.h>
+//#include <extensionsystem/pluginmanager.h>
 #include "wizmainwindow.h"
-#include "wizLoginDialog.h"
-#include "share/wizsettings.h"
-#include "share/wizwin32helper.h"
-#include "share/wizDatabaseManager.h"
+#include <QApplication>
+//#include "wizLoginDialog.h"
+//#include "share/wizsettings.h"
+//#include "share/wizwin32helper.h"
+//#include "share/wizDatabaseManager.h"
 
-#include "utils/pathresolve.h"
-#include "utils/logger.h"
-#include "sync/token.h"
-#include "sync/apientry.h"
-#include "sync/avatar.h"
-#include "thumbcache.h"
+//#include "utils/pathresolve.h"
+//#include "utils/logger.h"
+//#include "sync/token.h"
+//#include "sync/apientry.h"
+//#include "sync/avatar.h"
+//#include "thumbcache.h"
 
+
+
+
+/*
 using namespace ExtensionSystem;
 using namespace Core::Internal;
 
@@ -134,17 +139,20 @@ void installOnLinux()
     chmod(desktopFileName.toUtf8(), ACCESSPERMS);
 }
 
+*/
 int mainCore(int argc, char *argv[])
 {
+
     //
-#if QT_VERSION < 0x050000
-    qInstallMsgHandler(Utils::Logger::messageHandler);
-#else
-    qInstallMessageHandler(Utils::Logger::messageHandler);
-#endif
+//#if QT_VERSION < 0x050000
+//    qInstallMsgHandler(Utils::Logger::messageHandler);
+//#else
+//    qInstallMessageHandler(Utils::Logger::messageHandler);
+//#endif
+
 
     QApplication a(argc, argv);
-
+/*
     QApplication::setApplicationName(QObject::tr("WizNote"));
     QApplication::setOrganizationName(QObject::tr("cn.wiz.wiznoteformac"));
 
@@ -282,25 +290,29 @@ int mainCore(int argc, char *argv[])
     // FIXME: move to core plugin initialize
     Core::ThumbCache cache;
 
+    */
 
 
-    MainWindow w(dbMgr);
+//    MainWindow w(dbMgr);
 
-    //settings->setValue("Users/DefaultUser", strUserId);
-    PluginManager::loadPlugins();
+//    //settings->setValue("Users/DefaultUser", strUserId);
+//    PluginManager::loadPlugins();
 
+//    w.show();
+//    w.init();
+
+    MyMainWindow w;
     w.show();
-    w.init();
 
     int ret = a.exec();
-    if (w.isLogout()) {
-#ifndef BUILD4APPSTORE
-        QProcess::startDetached(argv[0], QStringList());
-#else
-        QString strAppFile = QApplication::applicationDirPath().remove("/Contents/MacOS");
-        QProcess::startDetached("/usr/bin/open", QStringList() <<strAppFile);
-#endif
-    }
+//    if (w.isLogout()) {
+//#ifndef BUILD4APPSTORE
+//        QProcess::startDetached(argv[0], QStringList());
+//#else
+//        QString strAppFile = QApplication::applicationDirPath().remove("/Contents/MacOS");
+//        QProcess::startDetached("/usr/bin/open", QStringList() <<strAppFile);
+//#endif
+//    }
 
 
     return ret;
@@ -311,8 +323,8 @@ int main(int argc, char *argv[])
     int ret = mainCore(argc, argv);
 
     // clean up
-    QString strTempPath = Utils::PathResolve::tempPath();
-    ::WizDeleteAllFilesInFolder(strTempPath);
+//    QString strTempPath = Utils::PathResolve::tempPath();
+//    ::WizDeleteAllFilesInFolder(strTempPath);
 
     return ret;
 }

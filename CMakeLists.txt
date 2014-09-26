@@ -7,7 +7,7 @@
 if (APPLE)
     cmake_minimum_required(VERSION 2.8.12)
 else(APPLE)
-    cmake_minimum_required(VERSION 2.8.4)
+    cmake_minimum_required(VERSION 2.8.11)
 endif(APPLE)
 
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
@@ -21,39 +21,39 @@ else(APPLE)
     set(CMAKE_INSTALL_RPATH "$ORIGIN;$ORIGIN/..;$ORIGIN/../lib/wiznote/plugins")
 endif(APPLE)
 
-if(NOT CMAKE_BUILD_TYPE)
-    set(CMAKE_BUILD_TYPE Release CACHE STRING
-      "Choose the type of build, options are: None Debug Release RelWithDebInfo MinSizeRel."
-      FORCE)
-endif()
+#if(NOT CMAKE_BUILD_TYPE)
+#    set(CMAKE_BUILD_TYPE Release CACHE STRING
+#      "Choose the type of build, options are: None Debug Release RelWithDebInfo MinSizeRel."
+#      FORCE)
+#endif()
 
-if(NOT WIZNOTE_USE_QT5)
-    set(WIZNOTE_USE_QT5 OFF CACHE BOOL
-        "Build WizNote use Qt5, default is off.")
-endif(NOT WIZNOTE_USE_QT5)
+#if(NOT WIZNOTE_USE_QT5)
+#    set(WIZNOTE_USE_QT5 OFF CACHE BOOL
+#        "Build WizNote use Qt5, default is off.")
+#endif(NOT WIZNOTE_USE_QT5)
 
-if(APPLE)
-    if(APPSTORE_BUILD)
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -gdwarf-2")
-        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -gdwarf-2")
-        add_definitions(-DBUILD4APPSTORE=TRUE)
-    endif(APPSTORE_BUILD)
-endif(APPLE)
+#if(APPLE)
+#    if(APPSTORE_BUILD)
+#        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -gdwarf-2")
+#        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -gdwarf-2")
+#        add_definitions(-DBUILD4APPSTORE=TRUE)
+#    endif(APPSTORE_BUILD)
+#endif(APPLE)
 
-if(APPLE)
-    set(WIZNOTE_ROOT_DIR ${CMAKE_BINARY_DIR}/wiznote.app)
-    set(WIZNOTE_CONTENTS_DIR ${WIZNOTE_ROOT_DIR}/Contents)
-    set(WIZNOTE_PLUGIN_DIR ${WIZNOTE_ROOT_DIR}/Contents/PlugIns)
-    set(WIZNOTE_RESOURCE_DIR ${WIZNOTE_ROOT_DIR}/Contents/Resources)
-else(APPLE)
-    set(WIZNOTE_ROOT_DIR ${CMAKE_BINARY_DIR})
-    set(WIZNOTE_PLUGIN_DIR ${WIZNOTE_ROOT_DIR}/lib/wiznote/plugins)
-    set(WIZNOTE_RESOURCE_DIR ${WIZNOTE_ROOT_DIR}/share)
-endif(APPLE)
+#if(APPLE)
+#    set(WIZNOTE_ROOT_DIR ${CMAKE_BINARY_DIR}/wiznote.app)
+#    set(WIZNOTE_CONTENTS_DIR ${WIZNOTE_ROOT_DIR}/Contents)
+#    set(WIZNOTE_PLUGIN_DIR ${WIZNOTE_ROOT_DIR}/Contents/PlugIns)
+#    set(WIZNOTE_RESOURCE_DIR ${WIZNOTE_ROOT_DIR}/Contents/Resources)
+#else(APPLE)
+#    set(WIZNOTE_ROOT_DIR ${CMAKE_BINARY_DIR})
+#    set(WIZNOTE_PLUGIN_DIR ${WIZNOTE_ROOT_DIR}/lib/wiznote/plugins)
+#    set(WIZNOTE_RESOURCE_DIR ${WIZNOTE_ROOT_DIR}/share)
+#endif(APPLE)
 
 # must output to "lib" to make macdeployqt work correctly
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${WIZNOTE_PLUGIN_DIR})
+#set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${WIZNOTE_PLUGIN_DIR})
 
 
-add_subdirectory(lib)
+#add_subdirectory(lib)
 add_subdirectory(src)

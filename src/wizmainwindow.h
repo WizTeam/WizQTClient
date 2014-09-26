@@ -1,6 +1,29 @@
 #ifndef WIZMAINWINDOW_H
 #define WIZMAINWINDOW_H
 
+
+
+
+#include <QMainWindow>
+
+
+class MyMainWindow : public QMainWindow
+{
+    Q_OBJECT
+public:
+    MyMainWindow(QWidget *parent = 0);
+    ~MyMainWindow();
+
+protected:
+    void wheelEvent(QWheelEvent* event);
+
+
+    virtual void resizeEvent(QResizeEvent* event);
+
+};
+
+
+/*
 #include <QtGlobal>
 #include <QMainWindow>
 
@@ -44,6 +67,10 @@ class CWizMacToolBar;
 
 class CWizDocumentWebView;
 
+
+
+
+
 namespace WizService {
 namespace Internal {
 class MessageListView;
@@ -83,6 +110,7 @@ protected:
     virtual void resizeEvent(QResizeEvent* event);
     virtual void showEvent(QShowEvent* event);
     virtual void closeEvent(QCloseEvent* event);
+    virtual void wheelEvent(QWheelEvent* evnet);
 
 private:
     ICore* m_core;
@@ -319,4 +347,6 @@ private:
 } // namespace Internal
 } // namespace Core
 
+
+*/
 #endif // WIZMAINWINDOW_H
