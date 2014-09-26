@@ -171,7 +171,9 @@ CWizSingleApplication::CWizSingleApplication(int &argc, char *argv[], const QStr
 {
     sharedMemory.setKey(_uniqueKey);
     if (sharedMemory.attach())
+    {
         _isRunning = true;
+    }
     else
     {
         _isRunning = false;

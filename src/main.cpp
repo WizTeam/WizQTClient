@@ -153,7 +153,7 @@ int mainCore(int argc, char *argv[])
 
 #ifdef Q_OS_LINUX
    // create single application for linux
-    CWizSingleApplication a(argc, argv, "Special Message for WizNote SingleApplication");
+    CWizSingleApplication a(argc, argv, "Special-Message-for-WizNote-SingleApplication");
     if (a.isRunning())
     {
         a.sendMessage(WIZ_SINGLE_APPLICATION);
