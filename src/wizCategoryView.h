@@ -38,6 +38,7 @@ public:
     void getDocuments(CWizDocumentDataArray& arrayDocument);
     bool acceptDocument(const WIZDOCUMENTDATA& document);
 
+    void loadDocument(QStringList& strFileList);
 
     void saveSelection();
     void restoreSelection();
@@ -115,6 +116,8 @@ protected Q_SLOTS:
     virtual void on_group_permissionChanged(const QString& strKbGUID) { Q_UNUSED(strKbGUID); }
     virtual void on_group_bizChanged(const QString& strKbGUID) { Q_UNUSED(strKbGUID); }
 
+    virtual void createDocumentByHtml(const QString& strHtml, const QString& strTitle);
+
     void on_dragHovered_timeOut();
 };
 
@@ -143,6 +146,8 @@ public:
     enum CategoryActions
     {
         ActionNewDocument,
+        ActionLoadDocument,
+        ActionImportFile,
         ActionNewItem,
         ActionMoveItem,
         ActionRenameItem,
@@ -202,6 +207,8 @@ private:
                    const QString& strParentTagGUID);
     //
     void resetCreateGroupLink();
+
+    QString WizGetHtmlBodyContent(QString strHtml);
 
 
     //
@@ -264,8 +271,10 @@ public:
 
     bool createDocument(WIZDOCUMENTDATA& data);
     bool createDocument(WIZDOCUMENTDATA& data, const QString& strHtml, const QString& strTitle);
+
     bool createDocumentByAttachments(WIZDOCUMENTDATA& data, const QStringList& attachList);
     bool createDocumentByTemplate(WIZDOCUMENTDATA& data, const QString& strZiw);
+
     //
     void createGroup();
     void viewPersonalGroupInfo(const QString& groupGUID);
@@ -275,6 +284,7 @@ public:
     void promptGroupStorageLimitMessage(const QString& groupGUID, const QString& bizGUID);
     void viewBizInfo(const QString& bizGUID);
     void manageBiz(const QString& bizGUID, bool bUpgrade);
+
 
 
 private:
@@ -322,8 +332,13 @@ protected Q_SLOTS:
     virtual void on_group_bizChanged(const QString& strKbGUID);
     virtual void on_groupDocuments_unreadCount_modified(const QString& strKbGUID);
 
+    virtual void createDocumentByHtml(const QString& strHtml, const QString& strTitle);
+
+
 public Q_SLOTS:
     void on_action_newDocument();
+    void on_action_loadDocument();
+    void on_action_importFile();
 
     void on_action_newItem();
     void on_action_user_newFolder();

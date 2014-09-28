@@ -6,6 +6,7 @@
 #include <QMessageBox>
 #include <QApplication>
 #include <QTimer>
+#include <QFileDialog>
 
 #include <extensionsystem/pluginmanager.h>
 
@@ -24,6 +25,7 @@
 #include "sync/apientry.h"
 #include "sync/token.h"
 #include "utils/stylehelper.h"
+#include "wizFileReader.h"
 
 using namespace WizService;
 
@@ -44,6 +46,8 @@ using namespace Core::Internal;
 
 // for context menu text
 #define CATEGORY_ACTION_DOCUMENT_NEW    QObject::tr("New note")
+#define CATEGORY_ACTION_DOCUMENT_LOAD   QObject::tr("Load note")
+#define CATEGORY_ACTION_IMPORT_FILE   QObject::tr("Import file")
 #define CATEGORY_ACTION_FOLDER_NEW      QObject::tr("New folder...")
 #define CATEGORY_ACTION_FOLDER_MOVE     QObject::tr("Move to...")
 #define CATEGORY_ACTION_FOLDER_RENAME   QObject::tr("Rename...")
@@ -249,6 +253,7 @@ void mime2Note(const QByteArray& bMime, CWizDocumentDataArray& arrayDocument)
     QStringList lsNotes = strMime.split(";");
     for (int i = 0; i < lsNotes.size(); i++) {
         QStringList lsMeta = lsNotes[i].split(":");
+        //qDebug()<<lsMeta;
         Q_ASSERT(lsMeta.size() == 2);
 
         CWizDatabase& db = CWizDatabaseManager::instance()->db(lsMeta[0]);
@@ -266,47 +271,55 @@ void CWizCategoryBaseView::dragEnterEvent(QDragEnterEvent *event)
 
     if (event->mimeData()->hasFormat(WIZNOTE_MIMEFORMAT_DOCUMENTS)) {
         event->acceptProposedAction();
+    } else if (event->mimeData()->hasUrls()) {
+        event->acceptProposedAction();
     }
+
 }
 
 void CWizCategoryBaseView::dragMoveEvent(QDragMoveEvent *event)
 {
     m_dragHoveredPos = event->pos();
 
-    if (!event->mimeData()->hasFormat(WIZNOTE_MIMEFORMAT_DOCUMENTS))
-        return;
-
-    CWizCategoryViewItemBase* pItem = itemAt(event->pos());
-    if (!pItem)
-        return;
-
-    if (m_dragHoveredItem != pItem) {
-        m_dragHoveredTimer->stop();
-        m_dragHoveredItem = pItem;
-        m_dragHoveredTimer->start(1000);
-    }
-
-    m_dragDocArray.clear();
-    mime2Note(event->mimeData()->data(WIZNOTE_MIMEFORMAT_DOCUMENTS), m_dragDocArray);
-
-    if (!m_dragDocArray.size())
-        return;
-
-    int nAccept = 0;
-    for (CWizDocumentDataArray::const_iterator it = m_dragDocArray.begin();
-         it != m_dragDocArray.end();
-         it++)
+    if (event->mimeData()->hasFormat(WIZNOTE_MIMEFORMAT_DOCUMENTS) )
     {
-        if (pItem->acceptDrop(*it)) {
-            nAccept++;
+        CWizCategoryViewItemBase* pItem = itemAt(event->pos());
+        if (!pItem)
+            return;
+
+        if (m_dragHoveredItem != pItem) {
+            m_dragHoveredTimer->stop();
+            m_dragHoveredItem = pItem;
+            m_dragHoveredTimer->start(1000);
         }
+
+        m_dragDocArray.clear();
+        mime2Note(event->mimeData()->data(WIZNOTE_MIMEFORMAT_DOCUMENTS), m_dragDocArray);
+
+        if (!m_dragDocArray.size())
+            return;
+
+        int nAccept = 0;
+        for (CWizDocumentDataArray::const_iterator it = m_dragDocArray.begin();
+             it != m_dragDocArray.end();
+             it++)
+        {
+            if (pItem->acceptDrop(*it)) {
+                nAccept++;
+            }
+        }
+
+        if (nAccept == m_dragDocArray.size()) {
+            event->acceptProposedAction();
+        }
+        else
+            event->ignore();
+
+    }else if(event->mimeData()->hasUrls())
+    {
+        event->acceptProposedAction();
     }
 
-    if (nAccept == m_dragDocArray.size()) {
-        event->acceptProposedAction();     
-    }
-    else
-        event->ignore();
 
     viewport()->repaint();
 }
@@ -332,32 +345,52 @@ void CWizCategoryBaseView::dropEvent(QDropEvent * event)
     m_dragDocArray.clear();
 
 
-    if (!event->mimeData()->hasFormat(WIZNOTE_MIMEFORMAT_DOCUMENTS))
-        return;
+    if (event->mimeData()->hasFormat(WIZNOTE_MIMEFORMAT_DOCUMENTS)) {
+        CWizDocumentDataArray arrayDocument;
+        mime2Note(event->mimeData()->data(WIZNOTE_MIMEFORMAT_DOCUMENTS), arrayDocument);
 
-    CWizDocumentDataArray arrayDocument;
-    mime2Note(event->mimeData()->data(WIZNOTE_MIMEFORMAT_DOCUMENTS), arrayDocument);
+        if (!arrayDocument.size())
+            return;
 
-    if (!arrayDocument.size())
-        return;
+        CWizCategoryViewItemBase* pItem = itemAt(event->pos());
+        if (!pItem)
+            return;
 
-    CWizCategoryViewItemBase* pItem = itemAt(event->pos());
-    if (!pItem)
-        return;
+        bool forceCopy = (QApplication::keyboardModifiers() == Qt::ControlModifier);
 
-    bool forceCopy = (QApplication::keyboardModifiers() == Qt::ControlModifier);
-
-    for (CWizDocumentDataArray::const_iterator it = arrayDocument.begin();
-         it != arrayDocument.end();
-         it++)
-    {
-        pItem->drop(*it, forceCopy);
+        for (CWizDocumentDataArray::const_iterator it = arrayDocument.begin();
+             it != arrayDocument.end();
+             it++)
+        {
+            pItem->drop(*it, forceCopy);
+        }
+    } else if (event->mimeData()->hasUrls()) {
+        QList<QUrl> urls = event->mimeData()->urls();
+        QStringList strFileList;
+        foreach (QUrl url, urls) {
+            strFileList.append(url.path());
+        }
+        //
+        loadDocument(strFileList);
     }
 
     viewport()->repaint();
     event->accept();
 }
-
+void CWizCategoryBaseView::loadDocument(QStringList &strFileList)
+{
+    CWizFileReader *fileReader = new CWizFileReader();
+    connect(fileReader, SIGNAL(fileLoaded(QString, QString)), SLOT(createDocumentByHtml(QString, QString)));
+    MainWindow *mainWindow = dynamic_cast<MainWindow*>(m_app.mainWindow());
+    CWizProgressDialog *progressDialog  = mainWindow->progressDialog();
+    progressDialog->setProgress(100,0);
+    progressDialog->setActionString(tr("%1 files to load.").arg(strFileList.count()));
+    progressDialog->setNotifyString(tr("loading..."));
+    connect(fileReader, SIGNAL(loadProgress(int,int)), progressDialog, SLOT(setProgress(int,int)));
+    connect(fileReader,SIGNAL(loadFinished()),progressDialog,SLOT(close()));
+    fileReader->loadFiles(strFileList);
+    progressDialog->exec();
+}
 
 QString CWizCategoryBaseView::selectedItemKbGUID()
 {
@@ -590,6 +623,13 @@ void CWizCategoryBaseView::drawItem(QPainter* p, const QStyleOptionViewItemV4 *v
         pItem->draw(p, vopt);
 }
 
+void CWizCategoryBaseView::createDocumentByHtml(const QString& /*strHtml*/, const QString& /*strTitle*/)
+{
+    // do nothing
+    // create document in CWizCategoryView
+
+}
+
 
 
 /* ------------------------------ CWizCategoryView ------------------------------ */
@@ -620,6 +660,20 @@ void CWizCategoryView::initMenus()
     actionNewDoc->setData(ActionNewDocument);
     addAction(actionNewDoc);
     connect(actionNewDoc, SIGNAL(triggered()), SLOT(on_action_newDocument()));
+
+//    QAction* actionLoadDoc = new QAction("ActionLoadDocument",this);
+//    actionLoadDoc->setShortcutContext(Qt::WidgetShortcut);
+//    actionLoadDoc->setShortcut(QKeySequence("Ctrl+Shift+L"));
+//    actionLoadDoc->setData(ActionLoadDocument);
+//    addAction(actionLoadDoc);
+//    connect(actionLoadDoc,SIGNAL(triggered()),SLOT(on_action_loadDocument()));
+
+    QAction* actionImportFile = new QAction("ActionImportFile",this);
+    actionImportFile->setShortcutContext(Qt::WidgetShortcut);
+    actionImportFile->setShortcut(QKeySequence("Ctrl+Shift+I"));
+    actionImportFile->setData(ActionImportFile);
+    addAction(actionImportFile);
+    connect(actionImportFile,SIGNAL(triggered()),SLOT(on_action_importFile()));
 
     QAction* actionNewItem = new QAction("ActionNewItem", this);
     actionNewItem->setShortcutContext(Qt::WidgetShortcut);
@@ -662,6 +716,9 @@ void CWizCategoryView::initMenus()
     addAction(actionTrash);
     connect(actionTrash, SIGNAL(triggered()), SLOT(on_action_emptyTrash()));
 
+    //
+
+
 //    QAction* actionQuitGroup = new QAction("QuitGroup", this);
 //    actionQuitGroup->setShortcutContext(Qt::WidgetShortcut);
 //    actionQuitGroup->setData(ActionQuitGroup);
@@ -691,6 +748,7 @@ void CWizCategoryView::initMenus()
     // folder menu
     m_menuFolder = new QMenu(this);
     m_menuFolder->addAction(actionNewDoc);
+    m_menuFolder->addAction(actionImportFile);
     m_menuFolder->addAction(actionNewItem);
     m_menuFolder->addSeparator();
     m_menuFolder->addAction(actionMoveItem);
@@ -769,6 +827,16 @@ void CWizCategoryView::resetMenu(CategoryMenuType type)
         case ActionNewDocument:
             if (type == FolderItem || type == GroupRootItem || type == GroupItem) {
                 act->setText(CATEGORY_ACTION_DOCUMENT_NEW);
+            }
+            break;
+        case ActionLoadDocument:
+            if(type==FolderItem || type == GroupRootItem || type == GroupItem) {
+                act->setText(CATEGORY_ACTION_DOCUMENT_LOAD);
+            }
+            break;
+        case ActionImportFile:
+            if(type==FolderItem || type == GroupRootItem || type == GroupItem) {
+                act->setText(CATEGORY_ACTION_IMPORT_FILE);
             }
             break;
         case ActionNewItem:
@@ -971,6 +1039,17 @@ bool CWizCategoryView::createDocumentByTemplate(WIZDOCUMENTDATA& data, const QSt
     //
     return true;
 }
+QString CWizCategoryView::WizGetHtmlBodyContent(QString strHtml)
+{
+    QRegExp regex("<body.*>([\\s\\S]*)</body>", Qt::CaseInsensitive);
+    QString strBody;
+    if (regex.indexIn(strHtml) != -1) {
+        strBody = regex.cap(1);
+    } else {
+        strBody = strHtml;
+    }
+    return strBody;
+}
 
 void CWizCategoryView::on_action_newDocument()
 {
@@ -981,6 +1060,21 @@ void CWizCategoryView::on_action_newDocument()
         // delegate create action to mainwindow
         Q_EMIT newDocument();
     }
+}
+
+void CWizCategoryView::on_action_loadDocument()
+{
+    //TODO:
+}
+
+void CWizCategoryView::on_action_importFile()
+{
+    QStringList files = QFileDialog::getOpenFileNames(
+    this,
+    tr("Select one or more files to open"),
+    "/home",
+    "Text files(*.txt *.md *.cpp *.h *rtf);;Images (*.png *.xpm *.jpg)");
+    loadDocument(files);
 }
 
 void CWizCategoryView::on_action_newItem()
@@ -2031,6 +2125,7 @@ void CWizCategoryView::updateGroupFolderDocumentCount_impl(const QString &strKbG
             bizRootItem->updateUnreadCount();
         }
     }
+
 
     update();
 }
@@ -3487,16 +3582,31 @@ void CWizCategoryView::on_group_permissionChanged(const QString& strKbGUID)
     } else {
         findAction(ActionNewDocument)->setEnabled(true);
     }
+
+    if (nPerm >= WIZ_USERGROUP_READER) {
+        findAction(ActionImportFile)->setEnabled(false);
+    } else {
+        findAction(ActionImportFile)->setEnabled(true);
+    }
 }
 
 void CWizCategoryView::on_group_bizChanged(const QString& strKbGUID)
 {
+    //TODO:
 }
 
 void CWizCategoryView::on_groupDocuments_unreadCount_modified(const QString& strKbGUID)
 {
     updateGroupFolderDocumentCount(strKbGUID);
 }
+
+
+void CWizCategoryView::createDocumentByHtml(const QString& strHtml, const QString& strTitle)
+{
+    WIZDOCUMENTDATA data;
+    createDocument(data, strHtml, strTitle);
+}
+
 
 CWizFolder* CWizCategoryView::SelectedFolder()
 {
