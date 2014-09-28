@@ -56,17 +56,17 @@ void CreateAccountDialog::accept()
 
     enableControls(false);
 
-#if defined Q_OS_MAC
-    QString strCode = "129ce11c";
-#elif defined Q_OS_LINUX
-    QString strCode = "7abd8f4a";
-#else
-    QString strCode = "8480c6d7";
-#endif
+//#if defined Q_OS_MAC
+//    QString strCode = "129ce11c";
+//#elif defined Q_OS_LINUX
+//    QString strCode = "7abd8f4a";
+//#else
+//    QString strCode = "8480c6d7";
+//#endif
 
     AsyncApi* api = new AsyncApi(this);
     connect(api, SIGNAL(registerAccountFinished(bool)), SLOT(onRegisterAccountFinished(bool)));
-    api->registerAccount(userId(), password(), strCode);
+    api->registerAccount(userId(), password(), "");
 }
 
 void CreateAccountDialog::onRegisterAccountFinished(bool bOk)

@@ -13,7 +13,7 @@ endif(APPLE)
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
 # rpath resolve.
-set(CMAKE_BUILD_WITH_INSTALL_RPATH YES)
+#set(CMAKE_BUILD_WITH_INSTALL_RPATH YES)     // would cause wheelEvent problem on centos/fedora when compiled with qt5
 if(APPLE)
     set(CMAKE_INSTALL_NAME_DIR "@rpath/PlugIns")
     SET(CMAKE_INSTALL_RPATH "@loader_path/..;@executable_path/..")

@@ -61,6 +61,10 @@ private:
     void ProcessImgTagValue(CWizHtmlTag *pTag, const QString& strAttributeName,
                          WIZHTMLFILEDATA::HtmlFileType eType);
     QString ToResourceFileName(const QString &strFileName);
+
+    //
+    bool loadImageFromCache(const QUrl& url, QString& strFileName);
+    bool downloadImage(const QString& strUrl, QString& strFileName);
 };
 
 class CWizHtmlToPlainText : public IWizHtmlReaderEvents

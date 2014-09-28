@@ -24,6 +24,10 @@ void wizMacInitUncaughtExceptionHandler();
 void wizMacRegisterSystemService();
 
 
+//path for yosemite
+bool wizIsYosemiteFilePath(const QString& strPath);
+QString wizConvertYosemiteFilePathToNormalPath(const QString& strYosePath);
+
 
 #endif // Q_OS_MAC
 

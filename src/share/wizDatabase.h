@@ -362,6 +362,7 @@ public:
     //if "forceLoadData == false", try to decrypt encrypted file before load doc data.
     bool LoadDocumentData(const QString& strDocumentGUID, QByteArray& arrayData,
                           bool forceLoadData = true);
+    bool LoadFileData(const QString& strFileName, QByteArray& arrayData);
     bool WriteDataToDocument(const QString& strDocumentGUID, const QByteArray &arrayData);
     bool LoadAttachmentData(const CString& strDocumentGUID,
                             QByteArray& arrayData);
@@ -396,24 +397,36 @@ public:
                                const WIZTAGDATA& tag, \
                                WIZDOCUMENTDATA& newDoc);
 
+    bool CreateDocumentByTemplate(const QString& templateZiwFile, \
+                                  const QString& strLocation, \
+                                  const WIZTAGDATA& tag, \
+                                  WIZDOCUMENTDATA& newDoc);
+
     bool AddAttachment(const WIZDOCUMENTDATA& document, \
                        const CString& strFileName, \
                        WIZDOCUMENTATTACHMENTDATA& dataRet);
 
 
     bool DocumentToTempHtmlFile(const WIZDOCUMENTDATA& document, \
-                                QString& strTempHtmlFileName, \
-                                const QString& strTargetFileNameWithoutPath = "index.html");
+                                QString& strFullPathFileName, \
+                                const QString& strTargetFileName = "index.html");
     bool DocumentToHtmlFile(const WIZDOCUMENTDATA& document, \
-                                const QString& strPath, const QString& strHtmlFileName = "index.html");
-    bool extractZiwFileToTempFolder(const WIZDOCUMENTDATA& document, QString& strTempFolder);
-    bool extractZiwFileToFolder(const WIZDOCUMENTDATA& document, const QString& strFolder);
-    bool encryptTempFolderToZiwFile(WIZDOCUMENTDATA& document, const QString& strTempFoler, \
-                                    const QString& strIndexFile, const QStringList& strResourceList);
+                            const QString& strPath, \
+                            const QString& strHtmlFileName = "index.html");
+    bool ExportToHtmlFile(const WIZDOCUMENTDATA& document, \
+                            const QString& strPath);
+
+    bool ExtractZiwFileToFolder(const WIZDOCUMENTDATA& document, const QString& strFolder);
+    bool EncryptDocument(WIZDOCUMENTDATA& document);
+    bool CompressFolderToZiwFile(WIZDOCUMENTDATA& document, const QString& strFileFoler);
+    bool CompressFolderToZiwFile(WIZDOCUMENTDATA& document, \
+                                const QString& strFileFoler, const QString& strZiwFileName);
+    bool CancelDocumentEncryption(WIZDOCUMENTDATA& document, const QString& strUserCipher);
 
     bool IsFileAccessible(const WIZDOCUMENTDATA& document);
 
     // CWizZiwReader passthrough methods
+    bool checkUserCertExists();
     bool loadUserCert();
     const QString& userCipher() const { return m_ziwReader->userCipher(); }
     void setUserCipher(const QString& cipher) { m_ziwReader->setUserCipher(cipher); }
@@ -464,6 +477,8 @@ private:
 
     bool GetBizMetaName(const QString& strBizGUID, QString& strMetaName);
 
+    //
+    bool initZiwReaderForEncryption(const QString& strUserCipher = "");
 };
 
 

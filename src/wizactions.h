@@ -3,6 +3,7 @@
 
 #include "wizdef.h"
 #include "share/wizqthelper.h"
+#include <QAction>
 
 class QAction;
 class QMenuBar;
@@ -10,10 +11,15 @@ class QMenu;
 class CWizSettings;
 class CWizAnimateAction;
 struct WIZACTION;
+class QShortcut;
 
 #define WIZACTION_GLOBAL_SYNC               "actionSync"
 #define WIZACTION_GLOBAL_NEW_DOCUMENT       "actionNewNote"
+#define WIZACTION_GLOBAL_NEW_DOCUMENT_BY_TEMPLATE       "actionNewNoteByTemplate"
 #define WIZACTION_GLOBAL_SAVE_AS_PDF        "actionSaveAsPDF"
+#define WIZACTION_GLOBAL_SAVE_AS_HTML        "actionSaveAsHtml"
+#define WIZACTION_GLOBAL_PRINT        "actionPrint"
+#define WIZACTION_GLOBAL_PRINT_MARGIN        "actionPrintMargin"
 #define WIZACTION_GLOBAL_TOGGLE_CATEGORY    "actionViewToggleCategory"
 #define WIZACTION_GLOBAL_TOGGLE_FULLSCREEN  "actionViewToggleFullscreen"
 
@@ -50,6 +56,25 @@ struct WIZACTION;
 #define WIZACTION_FORMAT_INSERT_CODE            "actionFormatInsertCode"
 #define WIZACTION_FORMAT_INSERT_IMAGE            "actionFormatInsertImage"
 
+/**
+//NOTE：因为Linux版本没有menubar，qaction在隐藏后快捷键无法触发，此处创建一个shortcut并与app的槽函数绑定
+//作为程序的全局快捷键，禁用qaction时同时禁用shortcut
+**/
+class CWizShortcutAction : public QAction
+{
+public:
+    explicit CWizShortcutAction(QObject* parent) : QAction(parent), m_shortcut(0){}
+    CWizShortcutAction(const QString &text, QObject* parent) : QAction(text, parent), m_shortcut(0){}
+    CWizShortcutAction(const QIcon &icon, const QString &text, QObject* parent) : QAction(icon, text, parent), m_shortcut(0){}
+
+    void setShortcut(QShortcut* shortcut);
+    void setShortcut(const QKeySequence &shortcut);
+    void setEnabled(bool enable);
+private:
+    QShortcut* m_shortcut;
+};
+
+
 class CWizActions
 {
 public:
@@ -59,15 +84,16 @@ private:
     QObject* m_parent;
     CWizExplorerApp& m_app;
 
-    std::map<QString, QAction*> m_actions;
+    std::map<QString, CWizShortcutAction*> m_actions;
     WIZACTION* actionsData();
-    QAction* addAction(WIZACTION& action);
+    CWizShortcutAction* addAction(WIZACTION& action);
 
 public:
     void init();
-    QAction* actionFromName(const QString& strActionName);
+    CWizShortcutAction* actionFromName(const QString& strActionName);
     void toggleActionText(const QString& strActionName);
     CWizAnimateAction* animateActionFromName(const QString& strActionName);
+
 
     QMenu* toMenu(QWidget* parent, CWizSettings& settings, const QString& strSection);
     void buildMenu(QMenu* pMenu, CWizSettings& settings, const QString& strSection);

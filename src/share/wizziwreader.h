@@ -59,6 +59,12 @@ public:
     //call setUserCipher and setRSAKeys before use this
     bool isFileAccessible(const QString& encryptedFile);
 
+    //
+    bool isRSAKeysAvailable();
+    bool isZiwCipherAvailable();
+    bool initZiwCipher();
+    bool createZiwHeader();
+
 private:
     QString m_strFileName;
     WIZZIWHEADER m_header;
@@ -89,6 +95,7 @@ private:
 
     void debugPrintHeader();
 
+    bool initZiwHeader(WIZZIWHEADER& header, const QString& strZiwCipher);
 };
 
 #endif // WIZZIWREADER_H

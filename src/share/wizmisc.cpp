@@ -18,6 +18,7 @@
 #include "utils/logger.h"
 #include "utils/pathresolve.h"
 #include "mac/wizmachelper.h"
+#include "sync/apientry.h"
 
 
 #ifndef MAX_PATH
@@ -1901,6 +1902,31 @@ void WizHtml2Text(const QString& strHtml, QString& strText)
     return;
 }
 
+QString getImageHtmlLabelByFile(const QString& strImageFile)
+{
+    return QString("<div><img border=\"0\" src=\"file://%1\" /></div>").arg(strImageFile);
+}
+
+bool WizImage2Html(const QString& strImageFile, QString& strHtml, bool bUseCopyFile)
+{
+    QString strDestFile = strImageFile;
+    if (bUseCopyFile)
+    {
+        QFileInfo info(strImageFile);
+        strDestFile =Utils::PathResolve::tempPath() + WizGenGUIDLowerCaseLetterOnly() + "." + info.suffix();
+
+        qDebug() << "[Editor] copy to: " << strDestFile;
+
+        if (!QFile::copy(strImageFile, strDestFile)) {
+            return false;
+        }
+    }
+
+    strHtml = getImageHtmlLabelByFile(strDestFile);
+    return true;
+}
+
+
 void WizDeleteFolder(const CString& strPath)
 {
     QDir dir(strPath);
@@ -2133,7 +2159,7 @@ QString WizGetDefaultTranslatedLocal()
 
 bool WizIsKMURL(const QString& strURL)
 {
-    return strURL.left(6) == "wiz://";
+    return strURL.left(5) == "wiz:/";
 }
 
 
@@ -2161,4 +2187,48 @@ QString WizGetHtmlBodyContent(const QString& strHtml)
     }
 
     return strBody;
+}
+
+
+bool WizCopyFolder(const QString& strSrcDir, const QString& strDestDir, bool bCoverFileIfExist)
+{
+    QDir sourceDir(strSrcDir);
+    QDir targetDir(strDestDir);
+    if(!targetDir.exists())
+    {
+        if(!targetDir.mkdir(targetDir.absolutePath()))
+            return false;
+    }
+
+    QFileInfoList fileInfoList = sourceDir.entryInfoList(QDir::AllEntries | QDir::NoDotAndDotDot);
+    foreach(QFileInfo fileInfo, fileInfoList)
+    {
+        if(fileInfo.isDir())
+        {
+            if(!WizCopyFolder(fileInfo.filePath(),
+                              targetDir.filePath(fileInfo.fileName()),
+                              bCoverFileIfExist))
+                return false;
+        }
+        else
+        {
+            if(bCoverFileIfExist && targetDir.exists(fileInfo.fileName()))
+            {
+                targetDir.remove(fileInfo.fileName());
+            }
+
+            if(!QFile::copy(fileInfo.filePath(), targetDir.filePath(fileInfo.fileName())))
+                return false;
+        }
+    }
+    return true;
+}
+
+
+void showDocumentHistory(const WIZDOCUMENTDATA& doc, QWidget* parent)
+{
+    CString strExt = WizFormatString2(_T("obj_guid=%1&kb_guid=%2&obj_type=document"),
+                                      doc.strGUID, doc.strKbGUID);
+     QString strUrl = WizService::ApiEntry::standardCommandUrl("document_history", WIZ_TOKEN_IN_URL_REPLACE_PART, strExt);
+     showWebDialogWithToken(QObject::tr("Note History"), strUrl, parent);
 }

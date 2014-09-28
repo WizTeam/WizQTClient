@@ -19,6 +19,7 @@
 #include "sync/apientry.h"
 #include "wizWebSettingsDialog.h"
 #include "wizPopupButton.h"
+#include "wizLineInputDialog.h"
 
 #include "sync/avatar.h"
 #include "thumbcache.h"
@@ -34,6 +35,8 @@ using namespace Core::Internal;
 #define WIZACTION_LIST_COPY_DOCUMENT QObject::tr("Copy Note")
 #define WIZACTION_LIST_DOCUMENT_HISTORY QObject::tr("Note History...")
 #define WIZACTION_LIST_COPY_DOCUMENT_LINK QObject::tr("Copy Document Link")
+#define WIZACTION_LIST_ENCRYPT_DOCUMENT QObject::tr("Encrypt document")
+#define WIZACTION_LIST_CANCEL_ENCRYPTION  QObject::tr("Cancel Document Encryption")
 
 
 CWizDocumentListView::CWizDocumentListView(CWizExplorerApp& app, QWidget *parent /*= 0*/)
@@ -159,6 +162,11 @@ CWizDocumentListView::CWizDocumentListView(CWizExplorerApp& app, QWidget *parent
     addAction(actionDeleteDoc);
     addAction(actionMoveDoc);
     addAction(actionCopyDoc);
+    m_menuDocument->addAction(WIZACTION_LIST_ENCRYPT_DOCUMENT, this,
+                              SLOT(on_action_encryptDocument()));
+    m_menuDocument->addAction(WIZACTION_LIST_CANCEL_ENCRYPTION, this,
+                              SLOT(on_action_cancelEncryption()));
+
     actionDeleteDoc->setShortcutContext(Qt::WidgetWithChildrenShortcut);
     actionMoveDoc->setShortcutContext(Qt::WidgetWithChildrenShortcut);
     //actionCopyDoc->setShortcutContext(Qt::WidgetWithChildrenShortcut);
@@ -324,8 +332,12 @@ void CWizDocumentListView::resetPermission()
     // if group documents or deleted documents selected
     if (bGroup || bDeleted) {
         findAction(WIZACTION_LIST_TAGS)->setEnabled(false);
+        findAction(WIZACTION_LIST_ENCRYPT_DOCUMENT)->setEnabled(false);
+        findAction(WIZACTION_LIST_CANCEL_ENCRYPTION)->setEnabled(false);
     } else {
         findAction(WIZACTION_LIST_TAGS)->setEnabled(true);
+        findAction(WIZACTION_LIST_ENCRYPT_DOCUMENT)->setEnabled(true);
+        findAction(WIZACTION_LIST_CANCEL_ENCRYPTION)->setEnabled(true);
     }
 
     // deleted user private documents
@@ -343,11 +355,29 @@ void CWizDocumentListView::resetPermission()
     }
 
     // disable note history if selection is not only one
-    if (m_rightButtonFocusedItems.count() != 1) {
+    if (m_rightButtonFocusedItems.count() != 1)
+    {
         findAction(WIZACTION_LIST_DOCUMENT_HISTORY)->setEnabled(false);
-    } else {
-        findAction(WIZACTION_LIST_DOCUMENT_HISTORY)->setEnabled(true);
+        //
+        int num = numOfEncryptedDocuments(arrayDocument);
+        if (num == arrayDocument.size())
+        {
+            setEncryptDocumentActionEnable(false);
+        }
+        else
+        {
+            setEncryptDocumentActionEnable(true);
+        }
     }
+    else
+    {
+        findAction(WIZACTION_LIST_DOCUMENT_HISTORY)->setEnabled(true);
+        WIZDOCUMENTDATA document = (*arrayDocument.begin());
+        bool encryptEnable = !document.nProtected;
+        setEncryptDocumentActionEnable(encryptEnable);
+    }
+
+
 }
 
 QAction* CWizDocumentListView::findAction(const QString& strName)
@@ -462,6 +492,19 @@ void CWizDocumentListView::mouseReleaseEvent(QMouseEvent* event)
     }
 
     QListWidget::mouseReleaseEvent(event);
+}
+
+
+void CWizDocumentListView::keyReleaseEvent(QKeyEvent* event)
+{
+    //
+    if (m_itemSelectionChanged)
+    {
+        emit documentsSelectionChanged();
+        m_itemSelectionChanged = false;
+    }
+
+    QListWidget::keyReleaseEvent(event);
 }
 
 QPixmap WizGetDocumentDragBadget(int nCount)
@@ -767,11 +810,8 @@ void CWizDocumentListView::on_action_documentHistory()
    if (!item)
        return;
 
-    CString strExt = WizFormatString2(_T("obj_guid=%1&kb_guid=%2&obj_type=document"),
-                                      item->document().strGUID, item->document().strKbGUID);
-    QString strUrl = WizService::ApiEntry::standardCommandUrl("document_history", WIZ_TOKEN_IN_URL_REPLACE_PART, strExt);
-
-    showWebDialogWithToken(tr("Note History"), strUrl, window());
+   const WIZDOCUMENTDATA& doc = item->document();
+   showDocumentHistory(doc, window());
 }
 
 //void CWizDocumentListView::on_message_created(const WIZMESSAGEDATA& data)
@@ -891,7 +931,7 @@ void CWizDocumentListView::on_action_deleteDocument()
 
 void CWizDocumentListView::on_action_moveDocument()
 {
-    CWizFolderSelector* selector = new CWizFolderSelector("Move notes", m_app, this);
+    CWizFolderSelector* selector = new CWizFolderSelector(tr("Move notes"), m_app, this);
     selector->setAcceptRoot(false);
 
     connect(selector, SIGNAL(finished(int)), SLOT(on_action_moveDocument_confirmed(int)));
@@ -955,7 +995,7 @@ void CWizDocumentListView::on_action_moveDocument_confirmed(int result)
 
 void CWizDocumentListView::on_action_copyDocument()
 {
-    CWizFolderSelector* selector = new CWizFolderSelector("Copy documents", m_app, this);
+    CWizFolderSelector* selector = new CWizFolderSelector(tr("Copy documents"), m_app, this);
     selector->setCopyStyle();
     selector->setAcceptRoot(false);
 
@@ -1015,8 +1055,34 @@ void CWizDocumentListView::on_action_encryptDocument()
 {
     foreach(CWizDocumentListViewItem* item, m_rightButtonFocusedItems)
     {
-        CWizDocument doc(m_dbMgr.db(), item->document());
-        doc.encryptDocument();
+        WIZDOCUMENTDATA doc = item->document();
+        CWizDatabase& db = m_dbMgr.db(doc.strKbGUID);
+        db.EncryptDocument(doc);
+    }
+}
+
+void CWizDocumentListView::on_action_cancelEncryption()
+{
+    QString strUserCipher;
+    CWizLineInputDialog dlg(tr("Password"), tr("Please input document password to cancel encrypt."),
+                            "", 0, QLineEdit::Password);
+    if (dlg.exec() == QDialog::Rejected)
+        return;
+
+    strUserCipher = dlg.input();
+    if (strUserCipher.isEmpty())
+        return;
+
+    //
+    foreach(CWizDocumentListViewItem* item, m_rightButtonFocusedItems)
+    {
+        WIZDOCUMENTDATA doc = item->document();
+        if (doc.nProtected)
+        {
+            CWizDatabase& db = m_dbMgr.db(doc.strKbGUID);
+            if (!db.CancelDocumentEncryption(doc, strUserCipher))
+                return;
+        }
     }
 }
 
@@ -1154,6 +1220,28 @@ void CWizDocumentListView::on_vscrollAnimation_finished()
     //reset
     //m_vscrollDelta = 0;
     //m_vscrollCurrent = 0;
+}
+
+int CWizDocumentListView::numOfEncryptedDocuments(const CWizDocumentDataArray& docArray)
+{
+    int sum = 0;
+    CWizDocumentDataArray::const_iterator it;
+    for (it = docArray.begin(); it != docArray.end(); it++)
+    {
+        WIZDOCUMENTDATA document = *it;
+        if (document.nProtected)
+        {
+            sum++;
+        }
+    }
+
+    return sum;
+}
+
+void CWizDocumentListView::setEncryptDocumentActionEnable(bool enable)
+{
+    findAction(WIZACTION_LIST_ENCRYPT_DOCUMENT)->setVisible(enable);
+    findAction(WIZACTION_LIST_CANCEL_ENCRYPTION)->setVisible(!enable);
 }
 
 void CWizDocumentListView::on_vscroll_update()

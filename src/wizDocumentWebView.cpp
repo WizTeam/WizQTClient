@@ -13,12 +13,16 @@
 #include <QFileDialog>
 #include <QTextEdit>
 #include <QMultiMap>
+#include <QPrintDialog>
+#include <QPrinterInfo>
+#include <QMessageBox>
 
 #include <QApplication>
 #include <QWebPage>
 #include <QWebFrame>
 #include <QWebElement>
 #include <QUndoStack>
+#include <QDesktopServices>
 
 #include <coreplugin/icore.h>
 
@@ -36,6 +40,8 @@
 
 #include "utils/pathresolve.h"
 #include "utils/logger.h"
+
+#include "mac/wizmachelper.h"
 
 using namespace Core;
 using namespace Core::Internal;
@@ -76,9 +82,11 @@ private:
 };
 */
 
-QString getImageHtmlLabelByFile(const QString& strImageFile)
+
+CWizDocumentWebViewPage::CWizDocumentWebViewPage(QObject *parent) : QWebPage(parent)
 {
-    return QString("<img border=\"0\" src=\"file://%1\" />").arg(strImageFile);
+    action(QWebPage::Undo)->setShortcut(QKeySequence());
+    action(QWebPage::Redo)->setShortcut(QKeySequence());
 }
 
 void CWizDocumentWebViewPage::triggerAction(QWebPage::WebAction typeAction, bool checked)
@@ -157,7 +165,8 @@ void CWizDocumentWebViewPage::on_editorCommandPaste_triggered()
         }
 
         QMimeData* data = new QMimeData();
-        QString strHtml = getImageHtmlLabelByFile(strFileName);
+        QString strHtml;// = getImageHtmlLabelByFile(strFileName);
+        if (WizImage2Html(strFileName, strHtml))
         data->setHtml(strHtml);
         clip->setMimeData(data);
     }
@@ -189,6 +198,11 @@ CWizDocumentWebView::CWizDocumentWebView(CWizExplorerApp& app, QWidget* parent)
 #endif
 
     connect(page, SIGNAL(actionTriggered(QWebPage::WebAction)), SLOT(onActionTriggered(QWebPage::WebAction)));
+
+    QNetworkDiskCache *diskCache = new QNetworkDiskCache(this);
+    QString location = Utils::PathResolve::tempPath();
+    diskCache->setCacheDirectory(location);
+    page->networkAccessManager()->setCache(diskCache);
 
     // minimum page size hint
     setMinimumSize(400, 250);
@@ -245,12 +259,14 @@ void CWizDocumentWebView::inputMethodEvent(QInputMethodEvent* event)
 #endif
 
 #ifdef Q_OS_MAC
-    int nLength = 0;
+    ///暂时注释代码，移动输入光标会导致极高的CPU占用率，导致输入卡顿。
+
+    //int nLength = 0;
     int nOffset = 0;
     for (int i = 0; i < event->attributes().size(); i++) {
         const QInputMethodEvent::Attribute& a = event->attributes().at(i);
         if (a.type == QInputMethodEvent::Cursor) {
-            nLength = a.length;
+            //nLength = a.length;
             nOffset = a.start;
             break;
         }
@@ -264,6 +280,9 @@ void CWizDocumentWebView::inputMethodEvent(QInputMethodEvent* event)
     for (int i = 0; i < nOffset; i++) {
         page()->triggerAction(QWebPage::MoveToNextChar);
     }
+
+    /// 此处不计算移动的字符数，直接移动到下一个文字的开始处。在英文之前输入中文时存在问题。
+//    page()->triggerAction(QWebPage::MoveToNextWord);
 #endif // Q_OS_MAC
 }
 
@@ -296,6 +315,7 @@ void CWizDocumentWebView::keyPressEvent(QKeyEvent* event)
         return;
     }
 #if QT_VERSION < 0x050000
+    #ifdef Q_OS_MAC
     else if (event->key() == Qt::Key_Z)
     {
         //Ctrl+Shift+Z,  shortcut for redo can't catch by actions in QT4
@@ -310,6 +330,7 @@ void CWizDocumentWebView::keyPressEvent(QKeyEvent* event)
             return;
         }
     }
+    #endif
 
 #endif
 
@@ -472,25 +493,11 @@ void CWizDocumentWebView::tryResetTitle()
     m_bNewNoteTitleInited = true;
 }
 
-bool CWizDocumentWebView::image2Html(const QString& strImageFile, QString& strHtml)
-{
-    QFileInfo info(strImageFile);
-    QString strDestFile =Utils::PathResolve::tempPath() + WizGenGUIDLowerCaseLetterOnly() + "." + info.suffix();
-
-    qDebug() << "[Editor] copy to: " << strDestFile;
-
-    if (!QFile::copy(strImageFile, strDestFile)) {
-        return false;
-    }
-
-    strHtml = getImageHtmlLabelByFile(strDestFile);
-    return true;
-}
-
 void CWizDocumentWebView::dropEvent(QDropEvent* event)
 {
-    int nAccepted = 0;
     const QMimeData* mimeData = event->mimeData();
+
+    int nAccepted = 0;
     if (mimeData->hasUrls())
     {
         QList<QUrl> li = mimeData->urls();
@@ -501,11 +508,18 @@ void CWizDocumentWebView::dropEvent(QDropEvent* event)
 
             //paste image file as images, add attachment for other file
             QString strFileName = url.toString();
+#ifdef Q_OS_MAC
+            if (wizIsYosemiteFilePath(strFileName))
+            {
+                strFileName = wizConvertYosemiteFilePathToNormalPath(strFileName);
+            }
+#endif
             QImageReader reader(strFileName);
             if (reader.canRead())
             {
                 QString strHtml;
-                if (image2Html(strFileName, strHtml)) {
+                bool bUseCopyFile = true;
+                if (WizImage2Html(strFileName, strHtml, bUseCopyFile)) {
                     editorCommandExecuteInsertHtml(strHtml, true);
                     nAccepted++;
                 }
@@ -1034,7 +1048,8 @@ void CWizDocumentWebView::viewDocumentInEditor(bool editing)
     m_strCurrentNoteHtml.clear();
     splitHtmlToHeadAndBody(strHtml, m_strCurrentNoteHead, m_strCurrentNoteHtml);
 
-    m_strCurrentNoteHead += "<link rel=\"stylesheet\" type=\"text/css\" href=\"" + m_strDefaultCssFilePath + "\">";
+    m_strCurrentNoteHead = "<link rel=\"stylesheet\" type=\"text/css\" href=\"" +
+            m_strDefaultCssFilePath + "\">" + m_strCurrentNoteHead;
 
     m_strCurrentNoteGUID = strGUID;
     m_bCurrentEditing = editing;
@@ -1188,10 +1203,35 @@ bool CWizDocumentWebView::editorCommandQueryLink()
     return true;
 }
 
+bool CWizDocumentWebView::editorCommandQueryMobileFileReceiverState()
+{
+    return m_app.userSettings().receiveMobileFile();
+}
+
 bool CWizDocumentWebView::editorCommandExecuteInsertHtml(const QString& strHtml, bool bNotSerialize)
 {
     QString s = bNotSerialize ? "true" : "false";
     return editorCommandExecuteCommand("insertHtml", "'" + strHtml + "'", s);
+}
+
+void CWizDocumentWebView::on_editorCommandPastePlainText_triggered()
+{
+    QClipboard* clip = QApplication::clipboard();
+    Q_ASSERT(clip);
+
+    const QMimeData* mime = clip->mimeData();
+    if (mime->hasHtml())
+    {
+        QString strText = mime->text();
+        if (strText.isEmpty())
+            WizHtml2Text(mime->html(), strText);
+        QMimeData* data = new QMimeData();
+        data->removeFormat("text/html");
+        data->setText(strText);
+        clip->setMimeData(data);
+    }
+
+    triggerPageAction(QWebPage::Paste);
 }
 
 bool CWizDocumentWebView::editorCommandExecuteIndent()
@@ -1452,18 +1492,19 @@ bool CWizDocumentWebView::editorCommandExecuteInsertCheckList()
 
 bool CWizDocumentWebView::editorCommandExecuteInsertImage()
 {
-    QString strImgFile = QFileDialog::getOpenFileName(0, tr("Image File"), QDir::homePath(), tr("Images (*.png *.bmp *.gif *.jpg)"));
-    if (strImgFile.isEmpty())
+    QStringList strImgFileList = QFileDialog::getOpenFileNames(0, tr("Image File"), QDir::homePath(), tr("Images (*.png *.bmp *.gif *.jpg)"));
+    if (strImgFileList.isEmpty())
         return false;
 
-//    QPixmap pix(strImgFile);
-//    return editorCommandExecuteCommand("insertImage", QString("{src:'%1', width:%2, height:%3}")
-//                                       .arg(strImgFile).arg(pix.width()).arg(pix.height()));
-    QString strHtml;// = //getImageHtmlLabelByFile(strImgFile);
-    if (image2Html(strImgFile, strHtml)) {
-        return editorCommandExecuteInsertHtml(strHtml, true);
+    foreach (QString strImgFile, strImgFileList)
+    {
+        QString strHtml;
+        bool bUseCopyFile = true;
+        if (WizImage2Html(strImgFile, strHtml, bUseCopyFile)) {
+            editorCommandExecuteInsertHtml(strHtml, true);
+        }
     }
-    return false;
+    return true;
 }
 
 bool CWizDocumentWebView::editorCommandExecuteInsertDate()
@@ -1517,6 +1558,20 @@ bool CWizDocumentWebView::editorCommandExecuteInsertCode()
     connect(dialog, SIGNAL(insertHtmlRequest(QString)), SLOT(on_insertCodeHtml_requset(QString)));
     dialog->show();
     dialog->setCode(strSelectHtml);
+
+    return true;
+}
+
+bool CWizDocumentWebView::editorCommandExecuteMobileImage(bool bReceiveImage)
+{
+    MainWindow* mainWindow = qobject_cast<MainWindow *>(m_app.mainWindow());
+    if (bReceiveImage && m_app.userSettings().needShowMobileFileReceiverUserGuide())
+    {
+        mainWindow->showMobileFileReceiverUserGuide();
+    }
+
+    m_app.userSettings().setReceiveMobileFile(bReceiveImage);
+    mainWindow->setMobileFileReceiverEnable(bReceiveImage);
 
     return true;
 }
@@ -1625,20 +1680,66 @@ bool CWizDocumentWebView::editorCommandExecuteTableAverageCols()
     return editorCommandExecuteCommand("averagedistributecol");
 }
 
-void CWizDocumentWebView::saveAsPDF(const QString& fileName)
+void CWizDocumentWebView::saveAsPDF(const QString& strFileName)
 {
     if (QWebFrame* frame = noteFrame())
     {
-        if (::PathFileExists(fileName))
+        if (::PathFileExists(strFileName))
         {
-            ::DeleteFile(fileName);
+            ::DeleteFile(strFileName);
         }
         //
         QPrinter printer;
+        QPrinter::Unit marginUnit =  (QPrinter::Unit)m_app.userSettings().printMarginUnit();
+        double marginTop = m_app.userSettings().printMarginValue(wizPositionTop);
+        double marginBottom = m_app.userSettings().printMarginValue(wizPositionBottom);
+        double marginLeft = m_app.userSettings().printMarginValue(wizPositionLeft);
+        double marginRight = m_app.userSettings().printMarginValue(wizPositionRight);
+        printer.setPageMargins(marginLeft, marginTop, marginRight, marginBottom, marginUnit);
         printer.setOutputFormat(QPrinter::PdfFormat);
-        printer.setOutputFileName(fileName);
+        printer.setColorMode(QPrinter::Color);
+        printer.setOutputFileName(strFileName);
         //
         frame->print(&printer);
+    }
+}
+
+void CWizDocumentWebView::saveAsHtml(const QString& strDirPath)
+{
+    const WIZDOCUMENTDATA& doc = view()->note();
+    CWizDatabase& db = m_dbMgr.db(doc.strKbGUID);
+    db.ExportToHtmlFile(doc, strDirPath);
+}
+
+void CWizDocumentWebView::printDocument()
+{
+    if (QWebFrame* frame = noteFrame())
+    {
+        QPrinter printer(QPrinter::HighResolution);
+        QPrinter::Unit marginUnit =  (QPrinter::Unit)m_app.userSettings().printMarginUnit();
+        double marginTop = m_app.userSettings().printMarginValue(wizPositionTop);
+        double marginBottom = m_app.userSettings().printMarginValue(wizPositionBottom);
+        double marginLeft = m_app.userSettings().printMarginValue(wizPositionLeft);
+        double marginRight = m_app.userSettings().printMarginValue(wizPositionRight);
+        printer.setPageMargins(marginLeft, marginTop, marginRight, marginBottom, marginUnit);
+        printer.setOutputFormat(QPrinter::NativeFormat);
+
+#ifdef Q_OS_MAC
+        QPrinterInfo info(printer);
+        if (info.printerName().isEmpty())
+        {
+            QMessageBox::information(0, tr("Inof"), tr("No available printer founded! Please add"
+                                                       " printer to system printer list."));
+            return;
+        }
+#endif
+
+        QPrintDialog dlg(&printer,0);
+        dlg.setWindowTitle(QObject::tr("Print Document"));
+        if(dlg.exec() == QDialog::Accepted)
+        {
+            frame->print(&printer);
+        }
     }
 }
 
@@ -1665,6 +1766,11 @@ void CWizDocumentWebView::redo()
 {
     page()->mainFrame()->evaluateJavaScript("editor.execCommand('redo')");
     emit statusChanged();
+}
+
+QNetworkDiskCache*CWizDocumentWebView::networkCache()
+{
+    return dynamic_cast<QNetworkDiskCache *>(page()->networkAccessManager()->cache());
 }
 
 

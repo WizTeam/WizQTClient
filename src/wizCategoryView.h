@@ -264,6 +264,8 @@ public:
 
     bool createDocument(WIZDOCUMENTDATA& data);
     bool createDocument(WIZDOCUMENTDATA& data, const QString& strHtml, const QString& strTitle);
+    bool createDocumentByAttachments(WIZDOCUMENTDATA& data, const QStringList& attachList);
+    bool createDocumentByTemplate(WIZDOCUMENTDATA& data, const QString& strZiw);
     //
     void createGroup();
     void viewPersonalGroupInfo(const QString& groupGUID);
@@ -396,6 +398,11 @@ private:
                                      const WIZGROUPDATA& gData);
 
     void moveFolderPostionBeforeTrash(const QString& strLocation);
+
+    bool getAvailableNewNoteTagAndLocation(QString& strKbGUID,WIZTAGDATA& strTag,
+                                           QString& strLocation);
+
+    void quickSyncNewDocument(const QString& strKbGUID);
 };
 
 

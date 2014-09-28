@@ -137,6 +137,12 @@ bool AvatarHostPrivate::isFileExists(const QString& strUserID)
 
 bool AvatarHostPrivate::isNeedUpdate(const QString& strUserID)
 {
+    static bool updateOnce = true;
+    if (updateOnce == true)
+    {
+        updateOnce = false;
+        return true;
+    }
     QString strFilePath = Utils::PathResolve::avatarPath() + strUserID + ".png";
     if (!QFile::exists(strFilePath)) {
         return true;
@@ -291,6 +297,12 @@ QPixmap AvatarHostPrivate::loadOrg(const QString& strUserID, bool bForce)
 
 void AvatarHostPrivate::load(const QString& strUserID, bool bForce)
 {
+    QPixmap pm;
+    if (!QPixmapCache::find(keyFromUserID(strUserID), pm)) {
+        loadCache(strUserID);
+        Q_EMIT q->loaded(strUserID);
+    }
+
     if (isNeedUpdate(strUserID) || bForce) {
         if (!m_listUser.contains(strUserID) && strUserID != m_strUserCurrent) {
             m_listUser.append(strUserID);
@@ -300,11 +312,6 @@ void AvatarHostPrivate::load(const QString& strUserID, bool bForce)
         return;
     }
 
-    QPixmap pm;
-    if (!QPixmapCache::find(keyFromUserID(strUserID), pm)) {
-        loadCache(strUserID);
-        Q_EMIT q->loaded(strUserID);
-    }
 }
 
 void AvatarHostPrivate::download_impl()

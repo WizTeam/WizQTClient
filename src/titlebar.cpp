@@ -86,9 +86,16 @@ TitleBar::TitleBar(QWidget *parent)
     m_attachBtn->setBadgeIcon(::WizLoadSkinIcon(strTheme, "document_attachment_exist"), tr("View and add attachments"));
     connect(m_attachBtn, SIGNAL(clicked()), SLOT(onAttachButtonClicked()));
 
+    m_historyBtn = new CellButton(CellButton::Center, this);
+    m_historyBtn->setFixedHeight(nTitleHeight);
+    QString historyShortcut = ::WizGetShortcut("EditNoteHistory", "Alt+4");
+    m_historyBtn->setShortcut(QKeySequence::fromString(historyShortcut));
+    m_historyBtn->setNormalIcon(::WizLoadSkinIcon(strTheme, "document_history"), tr("View and recover note's history"));
+    connect(m_historyBtn, SIGNAL(clicked()), SLOT(onHistoryButtonClicked()));
+
     m_infoBtn = new CellButton(CellButton::Center, this);
     m_infoBtn->setFixedHeight(nTitleHeight);
-    QString infoShortcut = ::WizGetShortcut("EditNoteInfo", "Alt+4");
+    QString infoShortcut = ::WizGetShortcut("EditNoteInfo", "Alt+5");
     m_infoBtn->setShortcut(QKeySequence::fromString(infoShortcut));
     m_infoBtn->setNormalIcon(::WizLoadSkinIcon(strTheme, "document_info"), tr("View and modify note's info"));
     connect(m_infoBtn, SIGNAL(clicked()), SLOT(onInfoButtonClicked()));
@@ -118,6 +125,7 @@ TitleBar::TitleBar(QWidget *parent)
     layoutInfo2->addWidget(m_editBtn);
     layoutInfo2->addWidget(m_tagBtn);
     layoutInfo2->addWidget(m_attachBtn);
+    layoutInfo2->addWidget(m_historyBtn);
     layoutInfo2->addWidget(m_infoBtn);
     layoutInfo2->addWidget(m_commentsBtn);
 
@@ -270,6 +278,13 @@ void TitleBar::onAttachButtonClicked()
     QRect rc = m_attachBtn->rect();
     QPoint pt = m_attachBtn->mapToGlobal(QPoint(rc.width()/2, rc.height()));
     m_attachments->showAtPoint(pt);
+}
+
+void TitleBar::onHistoryButtonClicked()
+{
+    const WIZDOCUMENTDATA& doc = noteView()->note();
+
+    showDocumentHistory(doc, noteView());
 }
 
 

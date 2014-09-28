@@ -47,6 +47,16 @@ QString PathResolve::skinResourcesPath(const QString &strSkinName)
     return resourcesPath() + "skins/" + strSkinName + "/";
 }
 
+QString PathResolve::builtinTemplatePath()
+{
+    return resourcesPath() + "templates/";
+}
+
+QString PathResolve::downloadedTemplatesPath()
+{
+    return cachePath() + "templates/";
+}
+
 QString PathResolve::dataStorePath()
 {
     QString strPath;
@@ -126,6 +136,14 @@ QString PathResolve::tempPath()
 
     ensurePathExists(path);
     return path;
+}
+
+QString PathResolve::tempDocumentFolder(const QString& strGuid)
+{
+    QString strTempFolder = tempPath() + strGuid + "/";
+    ensurePathExists(strTempFolder);
+
+    return strTempFolder;
 }
 
 QString PathResolve::upgradePath()

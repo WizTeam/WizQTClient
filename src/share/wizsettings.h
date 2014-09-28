@@ -8,6 +8,13 @@
 
 #include "wizDatabase.h"
 
+enum WizProxyType
+{
+    WizProxy_NoProxy,
+    WizProxy_HttpProxy,
+    WizProxy_Socks5Proxy,
+};
+
 class CWizSettings : public QSettings
 {
 public:
@@ -33,6 +40,8 @@ public:
     // proxy settings
     QString GetProxyHost();
     void SetProxyHost(const QString& val);
+    WizProxyType GetProxyType();
+    void SetProxyType(WizProxyType type);
     int GetProxyPort();
     void SetProxyPort(int val);
     QString GetProxyUserName();
@@ -60,6 +69,14 @@ enum WizOptionsType
     wizoptionsSync,
     wizoptionsSkin,
     wizoptionsFont
+};
+
+enum WizPositionType
+{
+    wizPositionTop,
+    wizPositionBottom,
+    wizPositionLeft,
+    wizPositionRight
 };
 
 const QString USER_SETTINGS_SECTION = "QT_WIZNOTE";
@@ -101,6 +118,21 @@ public:
 
     bool showSystemTrayIcon() const;
     void setShowSystemTrayIcon(bool bShowTrayIcon);
+
+    bool receiveMobileFile() const;
+    void setReceiveMobileFile(bool bReceiveFile);
+
+    double printMarginValue(WizPositionType posType);
+    void setPrintMarginValue(WizPositionType posType, double dValue);
+
+    int printMarginUnit();
+    void setPrintMarginUnit(int nUnit);
+
+    QString newFeatureGuideVersion();
+    void setNewFeatureGuideVersion(const QString& strGuideVersion);
+
+    bool needShowMobileFileReceiverUserGuide();
+    void setNeedShowMobileFileReceiverUserGuide(bool bNeedShow);
 
     QString locale();
     void setLocale(const QString& strLocale);

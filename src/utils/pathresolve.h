@@ -12,11 +12,14 @@ public:
     static QString resourcesPath();
     static QString themePath(const QString& strThemeName);
     static QString skinResourcesPath(const QString& strSkinName);
+    static QString builtinTemplatePath();
+    static QString downloadedTemplatesPath();
     static QString pluginsPath();
     static QString dataStorePath();
     static QString cachePath();
     static QString avatarPath();
     static QString tempPath();
+    static QString tempDocumentFolder(const QString& strGuid);
     static QString upgradePath();
     static QString logFile();
     static QString globalSettingsFile();

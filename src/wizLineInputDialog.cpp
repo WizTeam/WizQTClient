@@ -1,10 +1,11 @@
 #include "wizLineInputDialog.h"
 #include "ui_wizLineInputDialog.h"
+#include <QPushButton>
 
 CWizLineInputDialog::CWizLineInputDialog(const QString& strTitle,
                                          const QString& strHint,
                                          const QString& strDefault /* = "" */,
-                                         QWidget *parent /* = 0 */)
+                                         QWidget *parent /* = 0 */, QLineEdit::EchoMode echo)
     : QDialog(parent)
     , ui(new Ui::CWizLineInputDialog)
 {
@@ -16,7 +17,12 @@ CWizLineInputDialog::CWizLineInputDialog(const QString& strTitle,
 
     ui->editInput->setText(strDefault);
     ui->editInput->selectAll();
+    ui->editInput->setEchoMode(echo);
     m_strDefault = strDefault;
+
+    ui->buttonBox->button(QDialogButtonBox::Ok)->setText(tr("OK"));
+    ui->buttonBox->button(QDialogButtonBox::Cancel)->setText(tr("Cancel"));
+
 }
 
 CWizLineInputDialog::~CWizLineInputDialog()
@@ -32,6 +38,7 @@ QString CWizLineInputDialog::input()
     if (strText == m_strDefault) {
         return "";
     }
+
 
     return strText;
 }

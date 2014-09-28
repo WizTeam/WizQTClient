@@ -53,6 +53,7 @@ private:
     CWizToolButton* m_btnCheckList;
     CWizToolButton* m_btnInsertImage;
     CWizToolButton* m_btnSearchReplace;
+    CWizToolButton* m_btnMobileImage;
 
     QString m_strImageSrc;
 
@@ -94,6 +95,7 @@ protected Q_SLOTS:
     void on_btnHorizontal_clicked();
     void on_btnCheckList_clicked();
     void on_btnImage_clicked();
+    void on_btnMobileImage_clicked();
     void on_editor_saveImageAs_triggered();
     void on_editor_copyImage_triggered();
     void on_editor_copyImageLink_triggered();

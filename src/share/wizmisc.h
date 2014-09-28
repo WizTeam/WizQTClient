@@ -89,6 +89,7 @@ void WizEnumFolders(const QString& strPath, CWizStdStringArray& arrayFolders, UI
 QString WizFolderNameByPath(const QString& strPath);
 
 BOOL WizCopyFile(const CString& strSrcFileName, const CString& strDestFileName, BOOL bFailIfExists);
+bool WizCopyFolder(const QString& strSrcDir, const QString& strDestDir, bool bCoverFileIfExist);
 void WizGetNextFileName(CString& strFileName);
 
 QString WizEncryptPassword(const QString& strPassword);
@@ -146,6 +147,8 @@ void WizDeleteFolder(const CString& strPath);
 void WizDeleteFile(const CString& strFileName);
 BOOL WizDeleteAllFilesInFolder(const CString& strPath);
 
+bool WizImage2Html(const QString& strImageFile, QString& strHtml, bool bUseCopyFile = false);
+
 BOOL WizIsValidFileNameNoPath(const CString& strFileName);
 void WizMakeValidFileNameNoPath(CString& strFileName);
 void WizMakeValidFileNameNoPathLimitLength(CString& strFileName, int nMaxTitleLength);
@@ -157,6 +160,7 @@ bool WizLoadDataFromFile(const QString& strFileName, QByteArray& arrayData);
 
 //web dialog
 void showWebDialogWithToken(const QString& windowTitle, const QString& url, QWidget* parent = 0);
+void showDocumentHistory(const WIZDOCUMENTDATA& doc, QWidget* parent = 0);
 
 bool WizIsOffline();
 

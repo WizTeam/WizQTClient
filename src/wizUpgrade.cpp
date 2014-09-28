@@ -4,7 +4,6 @@
 #include "utils/logger.h"
 #include "sync/apientry.h"
 
-
 #if defined(Q_OS_MAC)
 #define strUpgradeUrlParam "/download?product=wiznote&client=macos"
 #elif defined(Q_OS_LINUX)
@@ -18,19 +17,31 @@
 #endif // Q_OS_MAC
 
 CWizUpgrade::CWizUpgrade(QObject *parent) :
-    QObject(parent)
+    QThread(parent)
 {
     connect(&m_timerCheck, SIGNAL(timeout()), SLOT(on_timerCheck_timeout()));
 }
 
+CWizUpgrade::~CWizUpgrade()
+{
+    quit();
+}
+
 void CWizUpgrade::startCheck()
 {
-    m_timerCheck.start(60 * 1000);
+    m_timerCheck.start(10 * 1000);
+    if (isRunning())
+        start();
 }
 
 void CWizUpgrade::on_timerCheck_timeout()
 {
     beginCheck();
+}
+
+void CWizUpgrade::run()
+{
+    exec();
 }
 
 void CWizUpgrade::beginCheck()
@@ -128,6 +139,7 @@ void CWizUpgrade::on_checkUpgrade_finished()
     }
 
     reply->deleteLater();
+    quit();
 }
 
 QUrl CWizUpgrade::redirectUrl(QUrl const &possible_redirect_url, \

@@ -21,6 +21,7 @@ class CWizEditorInsertTableForm;
 class CWizDocumentWebView;
 class CWizDocumentTransitionView;
 class CWizDocumentWebViewWorker;
+class QNetworkDiskCache;
 
 struct WIZODUCMENTDATA;
 
@@ -98,7 +99,7 @@ class CWizDocumentWebViewPage: public QWebPage
     Q_OBJECT
 
 public:
-    explicit CWizDocumentWebViewPage(QObject* parent = 0) : QWebPage(parent) {}
+    explicit CWizDocumentWebViewPage(QObject* parent = 0);
     virtual void triggerAction(QWebPage::WebAction typeAction, bool checked = false);
     virtual void javaScriptConsoleMessage(const QString& message, int lineNumber, const QString& sourceID);
 
@@ -159,12 +160,17 @@ public:
     // UEditor still miss link discover api
     bool editorCommandQueryLink();
 
+    bool editorCommandQueryMobileFileReceiverState();
+
     bool editorCommandExecuteFontFamily(const QString& strFamily);
     bool editorCommandExecuteFontSize(const QString& strSize);
     bool editorCommandExecuteInsertHtml(const QString& strHtml, bool bNotSerialize);
 
+    void on_editorCommandPastePlainText_triggered();
     //
-    void saveAsPDF(const QString& fileName);
+    void saveAsPDF(const QString& strFileName);
+    void saveAsHtml(const QString& strDirPath);
+    void printDocument();
     bool findIMGElementAt(QPoint point, QString& strSrc);
     //
     Q_INVOKABLE bool isContentsChanged() { return m_bContentsChanged; }
@@ -173,6 +179,9 @@ public:
     //use undo func provied by editor
     void undo();
     void redo();
+
+    //
+    QNetworkDiskCache* networkCache();
 
 private:
     void initEditor();
@@ -197,9 +206,6 @@ protected:
     virtual void dragEnterEvent(QDragEnterEvent* event);
     virtual void dragMoveEvent(QDragMoveEvent* event);
     virtual void dropEvent(QDropEvent* event);
-
-private:
-    bool image2Html(const QString& strImageFile, QString& strHtml);
 
 private:
     CWizExplorerApp& m_app;
@@ -324,6 +330,7 @@ public Q_SLOTS:
     bool editorCommandExecuteInsertImage();
     bool editorCommandExecuteViewSource();
     bool editorCommandExecuteInsertCode();
+    bool editorCommandExecuteMobileImage(bool bReceiveImage);
 
 #ifdef Q_OS_MAC
     bool editorCommandExecuteRemoveStartOfLine();

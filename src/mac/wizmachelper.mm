@@ -8,6 +8,7 @@
 #include <QSize>
 #include <QDebug>
 #include <QXmlStreamReader>
+#include <QStringList>
 
 #if QT_VERSION >= 0x050200
 #include <qmacfunctions.h>
@@ -279,22 +280,24 @@ void wizMacRegisterSystemService()
     [NSApp setServicesProvider:noteService];
 }
 
+void convertYosemiteFileListToNormalList(QStringList& fileList)
+{
+    int nCount = fileList.count();
+    for (int i = 0;i < nCount; i++)
+    {
+        if (wizIsYosemiteFilePath(fileList.at(i)))
+        {
+            fileList[i] = wizConvertYosemiteFilePathToNormalPath(fileList.at(i));
+        }
+    }
+}
+
 @implementation CreateNoteService
 
 - (void)serviceCreateNote:(NSPasteboard *)pboard
                  userData:(NSString *)userData
                     error:(NSString **)error
 {
-    // Test for strings on the pasteboard.
-    NSArray *classes = [NSArray arrayWithObject:[NSString class]];
-    NSDictionary *options = [NSDictionary dictionary];
-
-    if (![pboard canReadObjectForClasses:classes options:options]) {
-        *error = NSLocalizedString(@"Error: couldn't encrypt text.",
-                                   @"pboard couldn't give string.");
-        return;
-    }
-
     for (NSString *type in [pboard types])
     {
         //NSLog(@"types %@", type);
@@ -322,6 +325,10 @@ void wizMacRegisterSystemService()
             Core::Internal::MainWindow *window = Core::Internal::MainWindow::instance();
             if (window)
             {
+                convertYosemiteFileListToNormalList(strFileList);
+                foreach (QString strFile, strFileList) {
+                    qDebug() << "create document with : " << strFile;
+                }
                 window->createNoteWithAttachments(strFileList);
             }
         }
@@ -352,3 +359,23 @@ void wizMacRegisterSystemService()
 }
 
 @end
+
+
+bool wizIsYosemiteFilePath(const QString& strPath)
+{
+    return strPath.indexOf("file:///.file/id") == 0 || strPath.indexOf("///.file/id") == 0;
+}
+
+QString wizConvertYosemiteFilePathToNormalPath(const QString& strYosePath)
+{
+    QString strFilePath = strYosePath;
+    if (strFilePath.left(3) == "///")
+    {
+        strFilePath = "file:" + strFilePath;
+    }
+    NSString *fileIdURL = WizToNSString(strFilePath);
+    NSString *goodURL = [[[NSURL URLWithString:fileIdURL] filePathURL] path];
+    return WizToQString(goodURL);
+}
+
+
