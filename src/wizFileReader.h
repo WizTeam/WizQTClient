@@ -14,6 +14,7 @@ public:
 
     QString loadTextFileToHtml(QString strFileName);
     QString loadImageFileToHtml(QString strFileName);
+    QString loadRtfFileToHtml(QString strFileName);
 
 signals:
     void fileLoaded(QString strHtml, QString strTitle);

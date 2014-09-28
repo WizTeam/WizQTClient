@@ -4,6 +4,7 @@
 #include <QTextStream>
 
 #include "share/wizmisc.h"
+#include "share/wizRtfReader.h"
 
 CWizFileReader::CWizFileReader(QObject *parent) :
     QThread(parent)
@@ -41,6 +42,15 @@ QString CWizFileReader::loadImageFileToHtml(QString strFileName)
 
 }
 
+QString CWizFileReader::loadRtfFileToHtml(QString strFileName)
+{
+    QString strHtml;
+    if (CWizRtfReader::load(strFileName, strHtml))
+        return strHtml;
+
+    return "";
+}
+
 void CWizFileReader::run()
 {
     int nTotal = m_files.count();
@@ -49,9 +59,10 @@ void CWizFileReader::run()
         QString strFile = m_files.at(i);
         QFileInfo fi(strFile);
         QString strHtml;
-        QStringList textExtList,imageExtList;
-        textExtList<<"txt"<<"md"<<"markdown"<<"html"<<"htm"<<"cpp"<<"h"<<"rtf"<<"";
-        imageExtList<<"jpg"<<"png"<<"gif"<<"tiff"<<"jpeg"<<"bmp"<<"svg";
+        QStringList textExtList, imageExtList, rtfExtList;
+        textExtList << "txt" << "md" << "markdown" << "html" << "htm" << "cpp" << "h";
+        imageExtList << "jpg" << "png" << "gif" << "tiff" << "jpeg" << "bmp" << "svg";
+        rtfExtList << "rtf";
 
         if (textExtList.contains(fi.suffix(),Qt::CaseInsensitive))
         {
@@ -60,6 +71,10 @@ void CWizFileReader::run()
         else if (imageExtList.contains(fi.suffix(),Qt::CaseInsensitive))
         {
             strHtml = loadImageFileToHtml(strFile);
+        }
+        else if (rtfExtList.contains(fi.suffix(), Qt::CaseInsensitive))
+        {
+            strHtml = loadRtfFileToHtml(strFile);
         }
 
         if (!strHtml.isEmpty())
