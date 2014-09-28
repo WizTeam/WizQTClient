@@ -1660,6 +1660,17 @@ void MainWindow::on_actionSupport_triggered()
     QDesktopServices::openUrl(strUrl);
 }
 
+void MainWindow::on_actionManual_triggered()
+{
+    QString strUrl = WizService::ApiEntry::standardCommandUrl("link");
+
+    if (strUrl.isEmpty())
+        return;
+
+    strUrl += "&site=www&name=manual/mac/index.html";
+    QDesktopServices::openUrl(strUrl);
+}
+
 void MainWindow::on_actionRebuildFTS_triggered()
 {
     QMessageBox msg;

@@ -67,6 +67,7 @@ WIZACTION* CWizActions::actionsData()
         {"actionResetSearch",               QObject::tr("Reset search"), "", "Ctrl+R"},
         {"actionFeedback",                  QObject::tr("User feedback..."), "", ""},
         {"actionSupport",                  QObject::tr("User support..."), "", ""},
+        {"actionManual",                  QObject::tr("User manual..."), "", ""},
         {"actionSearchReplace",                  QObject::tr("Find Replace..."), "", "Ctrl+F"},
 
         // editing
