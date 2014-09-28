@@ -27,12 +27,12 @@ WIZACTION* CWizActions::actionsData()
     static WIZACTION arrayRoot[] =
     {
         // root
-        {"actionFile", QObject::tr("&File")},
-        {"actionEdit", QObject::tr("&Edit")},
-        {"actionView", QObject::tr("&View")},
-        {"actionFormat", QObject::tr("For&mat")},
-        {"actionTools", QObject::tr("&Tools")},
-        {"actionHelp", QObject::tr("&Help")},
+        {"actionFile", QObject::tr("File")},
+        {"actionEdit", QObject::tr("Edit")},
+        {"actionView", QObject::tr("View")},
+        {"actionFormat", QObject::tr("Format")},
+        {"actionTools", QObject::tr("Tools")},
+        {"actionHelp", QObject::tr("Help")},
 
         // sub
         {"actionText", QObject::tr("Text")},
