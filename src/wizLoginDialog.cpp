@@ -505,17 +505,17 @@ void CWizLoginDialog::on_btn_singin_clicked()
     if (checkSingMessage())
     {
 
-    #if defined Q_OS_MAC
-        QString strCode = "129ce11c";
-    #elif defined Q_OS_LINUX
-        QString strCode = "7abd8f4a";
-    #else
-        QString strCode = "8480c6d7";
-    #endif
+//    #if defined Q_OS_MAC
+//        QString strCode = "129ce11c";
+//    #elif defined Q_OS_LINUX
+//        QString strCode = "7abd8f4a";
+//    #else
+//        QString strCode = "8480c6d7";
+//    #endif
 
         AsyncApi* api = new AsyncApi(this);
         connect(api, SIGNAL(registerAccountFinished(bool)), SLOT(onRegisterAccountFinished(bool)));
-        api->registerAccount(m_lineEditNewUserName->text(), m_lineEditNewPassword->text(), strCode);
+        api->registerAccount(m_lineEditNewUserName->text(), m_lineEditNewPassword->text(), "");
         enableSignInControls(false);
     }
 }

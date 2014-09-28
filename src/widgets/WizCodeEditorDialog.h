@@ -38,7 +38,7 @@ signals:
 public slots:
     void renderCodeToHtml();
     void onButtonOKClicked();
-    void onButtonCancleClicked();
+    void onButtonCancelClicked();
 
 private:
     void initCodeTypeCombox();

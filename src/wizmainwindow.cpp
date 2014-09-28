@@ -13,6 +13,10 @@
 #include <QPushButton>
 #include <QHostInfo>
 #include <QSystemTrayIcon>
+#include <QPrintDialog>
+#include <QPrinter>
+#include <QWebFrame>
+#include <QCheckBox>
 
 #ifdef Q_OS_MAC
 #include <Carbon/Carbon.h>
@@ -42,6 +46,7 @@
 #include "share/wizObjectDataDownloader.h"
 #include "utils/pathresolve.h"
 #include "utils/stylehelper.h"
+#include "widgets/wizFramelessWebDialog.h"
 
 #include "wiznotestyle.h"
 #include "wizdocumenthistory.h"
@@ -61,10 +66,10 @@
 #include "sync/avatar.h"
 
 #include "wizUserVerifyDialog.h"
-
 #include "plugindialog.h"
-
 #include "notecomments.h"
+#include "wizMobileFileReceiver.h"
+#include "wizDocTemplateDialog.h"
 
 using namespace Core;
 using namespace Core::Internal;
@@ -82,7 +87,7 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     , m_searchIndexer(new CWizSearchIndexer(m_dbMgr, this))
     , m_searcher(new CWizSearcher(m_dbMgr, this))
     #ifndef BUILD4APPSTORE
-    , m_upgrade(new CWizUpgrade())
+    , m_upgrade(new CWizUpgrade(this))
     #else
     , m_upgrade(0)
     #endif
@@ -115,6 +120,7 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     , m_bLogoutRestart(false)
     , m_bUpdatingSelection(false)
     , m_tray(NULL)
+    , m_mobileFileReceiver(0)
 {
 #ifndef Q_OS_MAC
     clientLayout()->addWidget(m_toolBar);
@@ -124,7 +130,9 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     connect(qApp, SIGNAL(aboutToQuit()), SLOT(on_application_aboutToQuit()));
     connect(qApp, SIGNAL(lastWindowClosed()), qApp, SLOT(quit())); // Qt bug: Qt5 bug
     qApp->installEventFilter(this);
+#ifdef Q_OS_MAC
     installEventFilter(this);
+#endif
 
     //CWizCloudPool::instance()->init(&m_dbMgr);
 
@@ -168,10 +176,7 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
 
     // upgrade check
 #ifndef BUILD4APPSTORE
-    QThread *thread = new QThread(this);
-    m_upgrade->moveToThread(thread);
     connect(m_upgrade, SIGNAL(checkFinished(bool)), SLOT(on_checkUpgrade_finished(bool)));
-    thread->start(QThread::IdlePriority);
     if (userSettings().autoCheckUpdate()) {
         checkWizUpdate();
     }
@@ -186,6 +191,14 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     m_sync->start(QThread::IdlePriority);
     //
     setSystemTrayIconVisible(userSettings().showSystemTrayIcon());
+
+    setMobileFileReceiverEnable(userSettings().receiveMobileFile());
+
+    if (needShowNewFeatureGuide())
+    {
+        m_settings->setNewFeatureGuideVersion(WIZ_CLIENT_VERSION);
+        QTimer::singleShot(3000, this, SLOT(showNewFeatureGuide()));
+    }
 }
 
 bool MainWindow::eventFilter(QObject* watched, QEvent* event)
@@ -206,6 +219,12 @@ bool MainWindow::eventFilter(QObject* watched, QEvent* event)
                 if (!fileEvent->url().isEmpty())
                 {
                     QString strUrl = fileEvent->url().toString();
+                    if (strUrl.left(5) == "file:")
+                    {
+                        strUrl.remove(0, 5);
+                        strUrl.replace("open_document%3F", "open_document?");
+                    }
+
                     if (WizIsKMURL(strUrl))
                     {
                         viewDocumentByWizKMURL(strUrl);
@@ -263,11 +282,21 @@ void MainWindow::cleanOnQuit()
     //
     QThreadPool::globalInstance()->waitForDone();
     WizService::AvatarHost::waitForDone();
+
+    if (m_mobileFileReceiver)
+    {
+        m_mobileFileReceiver->waitForDone();
+    }
 }
 
 MainWindow*MainWindow::instance()
 {
     return windowInstance;
+}
+
+QNetworkDiskCache*MainWindow::webViewNetworkCache()
+{
+    return m_doc->web()->networkCache();
 }
 
 void MainWindow::closeEvent(QCloseEvent* event)
@@ -383,6 +412,8 @@ void MainWindow::shiftVisableStatus()
     else
     {
         wizMacShowCurrentApplication();
+        // wait for process finished
+        QCoreApplication::processEvents(QEventLoop::AllEvents, 200);
         raise();
     }
     //
@@ -696,6 +727,99 @@ void MainWindow::on_editor_statusChanged()
     }
 }
 
+void MainWindow::createDocumentByTemplate(const QString& strFile)
+{
+    initVariableBeforCreateNote();
+    WIZDOCUMENTDATA data;
+    if (!m_category->createDocumentByTemplate(data, strFile))
+    {
+        return;
+    }
+
+    //FIXME:这个地方存在Bug,只能在Editor为disable的情况下才能设置焦点.
+    m_doc->web()->setEditorEnable(false);
+
+    setFocusForNewNote(data);
+}
+
+void MainWindow::on_mobileFileRecived(const QString& strFile)
+{
+    //目前只支持在有编辑状态的笔记时插入图片，其他时候删除掉接受到的图片
+    /*
+    QMessageBox msgBox;
+    msgBox.setWindowTitle(tr("Info"));
+    msgBox.setText(tr("Mobile file received : ") + strFile);
+    QAbstractButton *ignoreButton = msgBox.addButton(tr("Do nothing"), QMessageBox::ActionRole);
+    QAbstractButton *delButton = msgBox.addButton(tr("Delete file"), QMessageBox::ActionRole);
+    QAbstractButton *newNoteButton = msgBox.addButton(tr("Create new note whith the file"), QMessageBox::ActionRole);
+    QAbstractButton *insertButton = msgBox.addButton(tr("Insert into current note"), QMessageBox::ActionRole);
+
+    QImageReader imageReader(strFile);
+    bool isImageFile = imageReader.canRead();
+
+    msgBox.exec();
+   // Q_UNUSED(ignoreButton);
+    if (msgBox.clickedButton() == delButton)
+    {
+        QFile::remove(strFile);
+    }
+    else if (msgBox.clickedButton() == newNoteButton)
+    {
+        if (isImageFile)
+        {
+            createNoteWithImage(strFile);
+        }
+        else
+        {
+            createNoteWithAttachments(QStringList(strFile));
+        }
+    }
+    else if (msgBox.clickedButton() == insertButton && m_doc->web()->isEditing())
+    {
+        if (isImageFile)
+        {
+            QString strHtml;
+            if (WizImage2Html(strFile, strHtml))
+            {
+                m_doc->web()->editorCommandExecuteInsertHtml(strHtml, false);
+            }
+        }
+        else
+        {
+            const WIZDOCUMENTDATA& doc = m_doc->note();
+            CWizDatabase& db = m_dbMgr.db(doc.strKbGUID);
+            WIZDOCUMENTATTACHMENTDATA attach;
+            db.AddAttachment(doc, strFile, attach);
+        }
+    }
+    */
+    if (m_doc->web()->isEditing())
+    {
+        QImageReader imageReader(strFile);
+        bool isImageFile = imageReader.canRead();
+
+        if (isImageFile)
+        {
+            QString strHtml;
+            if (WizImage2Html(strFile, strHtml))
+            {
+                m_doc->web()->editorCommandExecuteInsertHtml(strHtml, false);
+            }
+        }
+        else
+        {
+            const WIZDOCUMENTDATA& doc = m_doc->note();
+            CWizDatabase& db = m_dbMgr.db(doc.strKbGUID);
+            WIZDOCUMENTATTACHMENTDATA attach;
+            db.AddAttachment(doc, strFile, attach);
+        }
+    }
+    else
+    {
+        QFile::remove(strFile);
+    }
+}
+
 QString MainWindow::getSkinResourcePath() const
 {
     return ::WizGetSkinResourcePath(m_settings->skin());
@@ -734,8 +858,8 @@ bool MainWindow::isPersonalDocument() const
 QString MainWindow::getCurrentNoteHtml() const
 {
     CWizDatabase& db = m_dbMgr.db(m_doc->note().strKbGUID);
-    QString strFolder;
-    if (db.extractZiwFileToTempFolder(m_doc->note(), strFolder))
+    QString strFolder = Utils::PathResolve::tempDocumentFolder(m_doc->note().strGUID);
+    if (db.ExtractZiwFileToFolder(m_doc->note(), strFolder))
     {
         QString strHtmlFile = strFolder + "index.html";
         QString strHtml;
@@ -746,19 +870,48 @@ QString MainWindow::getCurrentNoteHtml() const
     return QString();
 }
 
+
+void copyFileToFolder(const QString& strFileFoler, const QString& strIndexFile, \
+                         const QStringList& strResourceList)
+{
+    //copy index file
+    QString strFolderIndex = strFileFoler + "index.html";
+    if (strIndexFile != strFolderIndex)
+    {
+        QFile::remove(strFolderIndex);
+        QFile::copy(strIndexFile, strFolderIndex);
+    }
+
+    //copy resources to temp folder
+    QString strResourcePath = strFileFoler + "index_files/";
+    for (int i = 0; i < strResourceList.count(); i++)
+    {
+        if (QFile::exists(strResourceList.at(i)))
+        {
+            QFile::copy(strResourceList.at(i), strResourcePath + WizExtractFileName(strResourceList.at(i)));
+        }
+    }
+}
+
 void MainWindow::saveHtmlToCurrentNote(const QString &strHtml, const QString& strResource)
 {
+    if (strHtml.isEmpty())
+        return;
+
     WIZDOCUMENTDATA docData = m_doc->note();
     CWizDatabase& db = m_dbMgr.db(docData.strKbGUID);
-    QString strFolder;
-    if (db.extractZiwFileToTempFolder(m_doc->note(), strFolder))
-    {
-        QString strHtmlFile = strFolder + "index.html";
-        ::WizSaveUnicodeTextToUtf8File(strHtmlFile, strHtml);
-        QStringList strResourceList = strResource.split('*');
-        db.encryptTempFolderToZiwFile(docData, strFolder, strHtmlFile, strResourceList);
-        quickSyncKb(docData.strKbGUID);
-    }
+    QString strFolder = Utils::PathResolve::tempDocumentFolder(docData.strGUID);
+    //
+    QString strHtmlFile = strFolder + "index.html";
+    ::WizSaveUnicodeTextToUtf8File(strHtmlFile, strHtml);
+    QStringList strResourceList = strResource.split('*');
+    copyFileToFolder(strFolder, strHtmlFile, strResourceList);
+
+    db.CompressFolderToZiwFile(docData, strFolder);
+    bool bNotify = false;
+    QString strZiwFile = db.GetDocumentFileName(docData.strGUID);
+    db.UpdateDocumentDataMD5(docData, strZiwFile, bNotify);
+    quickSyncKb(docData.strKbGUID);
 
     m_doc->web()->updateNoteHtml();
 }
@@ -1234,7 +1387,7 @@ void MainWindow::on_syncProcessLog(const QString& strMsg)
 
 void MainWindow::on_actionNewNote_triggered()
 {
-    cancleSearchStatus();
+    initVariableBeforCreateNote();
     WIZDOCUMENTDATA data;
     if (!m_category->createDocument(data))
     {
@@ -1244,10 +1397,15 @@ void MainWindow::on_actionNewNote_triggered()
     //FIXME:这个地方存在Bug,只能在Editor为disable的情况下才能设置焦点.
     m_doc->web()->setEditorEnable(false);
 
-    m_documentForEditing = data;
-    m_documents->addAndSelectDocument(data);
-    m_doc->web()->setFocus(Qt::MouseFocusReason);
-    setActionsEnableForNewNote();
+    setFocusForNewNote(data);
+}
+
+void MainWindow::on_actionNewNoteByTemplate_triggered()
+{
+    //通过模板创建笔记
+    CWizDocTemplateDialog dlg;
+    connect(&dlg, SIGNAL(documentTemplateSelected(QString)), SLOT(createDocumentByTemplate(QString)));
+    dlg.exec();
 }
 
 void MainWindow::on_actionEditingUndo_triggered()
@@ -1277,7 +1435,7 @@ void MainWindow::on_actionEditingPaste_triggered()
 
 void MainWindow::on_actionEditingPastePlain_triggered()
 {
-    qDebug() << "paste plain...";
+    m_doc->web()->on_editorCommandPastePlainText_triggered();
 }
 
 void MainWindow::on_actionEditingDelete_triggered()
@@ -1523,7 +1681,7 @@ void MainWindow::on_actionSearch_triggered()
 
 void MainWindow::on_actionResetSearch_triggered()
 {
-    cancleSearchStatus();
+    cancelSearchStatus();
     m_search->clear();
     m_search->focus();
     m_category->restoreSelection();
@@ -1545,6 +1703,35 @@ void MainWindow::on_actionSaveAsPDF_triggered()
             web->saveAsPDF(fileName);
         }
     }
+}
+
+void MainWindow::on_actionSaveAsHtml_triggered()
+{
+    if (CWizDocumentWebView* web = m_doc->web())
+    {
+        QString strPath = QFileDialog::getExistingDirectory(0, tr("Open Directory"),
+                                                           QDir::homePath(),
+                                                            QFileDialog::ShowDirsOnly
+                                                            | QFileDialog::DontResolveSymlinks);
+        if (!strPath.isEmpty())
+        {
+            web->saveAsHtml(strPath + "/");
+        }
+    }
+}
+
+void MainWindow::on_actionPrint_triggered()
+{
+    m_doc->web()->printDocument();
+}
+
+void MainWindow::on_actionPrintMargin_triggered()
+{
+    CWizPreferenceWindow preference(*this, this);
+    preference.showPrintMarginPage();
+    connect(&preference, SIGNAL(settingsChanged(WizOptionsType)), SLOT(on_options_settingsChanged(WizOptionsType)));
+    connect(&preference, SIGNAL(restartForSettings()), SLOT(on_options_restartForSettings()));
+    preference.exec();
 }
 
 //void MainWindow::on_searchDocumentFind(const WIZDOCUMENTDATAEX& doc)
@@ -1653,7 +1840,7 @@ void MainWindow::on_category_itemSelectionChanged()
     CWizCategoryBaseView* category = qobject_cast<CWizCategoryBaseView *>(sender());
     if (!category)
         return;
-    cancleSearchStatus();
+    cancelSearchStatus();
     /*
      * 在点击MessageItem的时候,为了重新刷新当前消息,强制发送了itemSelectionChanged消息
      * 因此需要在这个地方避免重复刷新两次消息列表
@@ -1850,9 +2037,9 @@ void MainWindow::viewDocument(const WIZDOCUMENTDATA& data, bool addToHistory)
     //if (!m_doc->viewDocument(data, forceEdit))
     //    return;
 
-    //if (addToHistory) {
-    //    m_history->addHistory(data);
-    //}
+    if (addToHistory) {
+        m_history->addHistory(data);
+    }
 
     //m_actions->actionFromName("actionGoBack")->setEnabled(m_history->canBack());
     //m_actions->actionFromName("actionGoForward")->setEnabled(m_history->canForward());
@@ -1866,7 +2053,6 @@ void MainWindow::locateDocument(const WIZDOCUMENTDATA& data)
         if (m_category->setCurrentIndex(data))
         {
             m_documents->addAndSelectDocument(data);
-            viewDocument(data, true);
         }
     }
     catch (...)
@@ -1883,6 +2069,15 @@ void MainWindow::locateDocument(const QString& strKbGuid, const QString& strGuid
     if (m_dbMgr.db(strKbGuid).DocumentFromGUID(strGuid, doc))
     {
         locateDocument(doc);
+    }
+}
+
+void MainWindow::on_application_messageAvailable(const QString& strMsg)
+{
+    qDebug() << "application message received : " << strMsg;
+    if (strMsg == WIZ_SINGLE_APPLICATION)
+    {
+        shiftVisableStatus();
     }
 }
 
@@ -2029,6 +2224,14 @@ void MainWindow::setActionsEnableForNewNote()
     m_actions->actionFromName(WIZACTION_FORMAT_VIEW_SOURCE)->setEnabled(true);
 }
 
+void MainWindow::setFocusForNewNote(WIZDOCUMENTDATA doc)
+{
+    m_documentForEditing = doc;
+    m_documents->addAndSelectDocument(doc);
+    m_doc->web()->setFocus(Qt::MouseFocusReason);
+    setActionsEnableForNewNote();
+}
+
 void MainWindow::viewDocumentByWizKMURL(const QString &strKMURL)
 {
     CWizDatabase& db = m_dbMgr.db();
@@ -2046,25 +2249,23 @@ void MainWindow::viewDocumentByWizKMURL(const QString &strKMURL)
         m_documents->setCurrentItem(0);
         m_documents->blockSignals(false);
         viewDocument(document, true);
+        locateDocument(document);
     }
 }
 
 void MainWindow::createNoteWithAttachments(const QStringList& strAttachList)
 {
-    on_actionNewNote_triggered();
+    initVariableBeforCreateNote();
+    WIZDOCUMENTDATA data;
+    if (!m_category->createDocumentByAttachments(data, strAttachList))
+        return;
 
-    CWizDatabase& db = m_dbMgr.db(m_documentForEditing.strKbGUID);
-    foreach (QString StrFileName, strAttachList) {
-        WIZDOCUMENTATTACHMENTDATA attach;
-        if (!db.AddAttachment(m_documentForEditing, StrFileName, attach))
-        {
-            TOLOG1("[Service] add attch failed :  1%", StrFileName);
-        }
-    }
+    setFocusForNewNote(data);
 }
 
 void MainWindow::createNoteWithText(const QString& strText)
 {
+    initVariableBeforCreateNote();
 #if QT_VERSION > 0x050000
     QString strHtml = strText.toHtmlEscaped();
 #else
@@ -2087,10 +2288,55 @@ void MainWindow::createNoteWithText(const QString& strText)
     {
         return;
     }
-    m_documentForEditing = data;
-    m_documents->addAndSelectDocument(data);
-    m_doc->web()->setFocus(Qt::MouseFocusReason);
-    setActionsEnableForNewNote();
+    setFocusForNewNote(data);
+}
+
+void MainWindow::createNoteWithImage(const QString& strImageFile)
+{
+    initVariableBeforCreateNote();
+
+    QString strTitle = WizExtractFileTitle(strImageFile);
+    if (strTitle.isEmpty())
+    {
+        strTitle = "New note";
+    }
+
+    QString strHtml;
+    bool bUseCopyFile = true;
+    if (WizImage2Html(strImageFile, strHtml, bUseCopyFile))
+    {
+        WIZDOCUMENTDATA data;
+        if (!m_category->createDocument(data, strHtml, strTitle))
+        {
+            return;
+        }
+        setFocusForNewNote(data);
+    }
+}
+
+void MainWindow::showNewFeatureGuide()
+{
+    QString strUrl = WizService::ApiEntry::standardCommandUrl("link");
+    strUrl += "&name=newfeaturetips.html";
+
+    CWizFramelessWebDialog *dlg = new CWizFramelessWebDialog();
+    dlg->loadAndShow(strUrl);
+}
+
+void MainWindow::showMobileFileReceiverUserGuide()
+{
+    QString strUrl = WizService::ApiEntry::standardCommandUrl("link");
+    strUrl += "&name=guidemap_sendimage.html";
+
+    CWizFramelessWebDialog *dlg = new CWizFramelessWebDialog();
+    connect(dlg, SIGNAL(doNotShowThisAgain(bool)),
+            SLOT(setDoNotShowMobileFileReceiverUserGuideAgain(bool)));
+    dlg->loadAndShow(strUrl);
+}
+
+void MainWindow::setDoNotShowMobileFileReceiverUserGuideAgain(bool bNotAgain)
+{
+    m_settings->setNeedShowMobileFileReceiverUserGuide(!bNotAgain);
 }
 
 void MainWindow::initTrayIcon(QSystemTrayIcon* trayIcon)
@@ -2130,12 +2376,35 @@ void MainWindow::initTrayIcon(QSystemTrayIcon* trayIcon)
 #endif
 }
 
+void MainWindow::setMobileFileReceiverEnable(bool bEnable)
+{
+    if (bEnable)
+    {
+        if (!m_mobileFileReceiver)
+        {
+            m_mobileFileReceiver = new CWizMobileFileReceiver(this);
+            connect(m_mobileFileReceiver, SIGNAL(fileReceived(QString)),
+                    SLOT(on_mobileFileRecived(QString)));
+            m_mobileFileReceiver->start();
+        }
+    }
+    else
+    {
+        if (m_mobileFileReceiver)
+        {
+            m_mobileFileReceiver->waitForDone();
+            delete m_mobileFileReceiver;
+            m_mobileFileReceiver = 0;
+        }
+    }
+}
+
 void MainWindow::startSearchStatus()
 {
     m_documents->setAcceptAllItems(true);
 }
 
-void MainWindow::cancleSearchStatus()
+void MainWindow::cancelSearchStatus()
 {
     m_documents->setAcceptAllItems(false);
     if (m_category->selectedItems().count() > 0)
@@ -2143,6 +2412,20 @@ void MainWindow::cancleSearchStatus()
         m_category->setFocus();
         m_category->setCurrentItem(m_category->selectedItems().first());
     }
+}
+
+void MainWindow::initVariableBeforCreateNote()
+{
+    cancelSearchStatus();
+}
+
+bool MainWindow::needShowNewFeatureGuide()
+{
+    QString strGuideVserion = m_settings->newFeatureGuideVersion();
+    if (strGuideVserion.isEmpty())
+        return true;
+
+    return strGuideVserion.compare(WIZ_NEW_FEATURE_GUIDE_VERSION) < 0;
 }
 
 void MainWindow::viewDocumentInFloatWidget(const WIZDOCUMENTDATA& data)
@@ -2154,6 +2437,7 @@ void MainWindow::viewDocumentInFloatWidget(const WIZDOCUMENTDATA& data)
 
     wgt->setGeometry((width() - m_doc->width())  / 2, (height() - wgt->height()) / 2,
                      m_doc->width(), wgt->height());
+    wgt->setWindowTitle(data.strTitle);
     wgt->show();
     //
     docView->viewNote(data, false);

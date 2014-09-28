@@ -10,6 +10,7 @@
 #include "share/wizDatabase.h"
 #include "wizDocumentView.h"
 #include "wizmainwindow.h"
+#include "wizDocumentWebView.h"
 
 using namespace Core;
 using namespace Core::Internal;
@@ -41,9 +42,9 @@ void TitleEdit::inputMethodEvent(QInputMethodEvent* event)
     // FIXME: This should be a QT bug
     // when use input method, input as normal is fine, but input as selection text
     // will lose blink cursor, we should reset cursor position first!!!
-    if (hasSelectedText()) {
-        del();
-    }
+//    if (hasSelectedText()) {
+//        del();
+//    }
 
     QLineEdit::inputMethodEvent(event);
 
@@ -55,6 +56,7 @@ void TitleEdit::inputMethodEvent(QInputMethodEvent* event)
 
 void TitleEdit::keyPressEvent(QKeyEvent* e)
 {
+    qDebug() << "TitleEdit::keyPressEvent ";
     if (c && c->popup()->isVisible()) {
         // The following keys are forwarded by the completer to the widget
        switch (e->key()) {
@@ -104,6 +106,14 @@ void TitleEdit::keyPressEvent(QKeyEvent* e)
     cr.setWidth(c->popup()->sizeHintForColumn(0)
                 + c->popup()->verticalScrollBar()->sizeHint().width() + 20); // bigger
     c->complete(cr); // popup it up!
+}
+
+
+
+
+void TitleEdit::contextMenuEvent(QContextMenuEvent* e)
+{
+    //do nothing.
 }
 
 void TitleEdit::updateCompleterPopupItems(const QString& completionPrefix)
@@ -215,6 +225,6 @@ void TitleEdit::onTitleEditingFinished()
 void TitleEdit::onTitleReturnPressed()
 {
     noteView()->setEditorFocus();
-    //m_web->setFocus(Qt::MouseFocusReason);
-    //m_web->editorFocus();
+    noteView()->web()->setFocus(Qt::MouseFocusReason);
+    noteView()->web()->editorFocus();
 }

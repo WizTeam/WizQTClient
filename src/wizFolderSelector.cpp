@@ -3,6 +3,7 @@
 #include <QVBoxLayout>
 #include <QDialogButtonBox>
 #include <QCheckBox>
+#include <QPushButton>
 
 #include "wizFolderView.h"
 
@@ -23,6 +24,8 @@ CWizFolderSelector::CWizFolderSelector(const QString& strTitle, CWizExplorerApp&
     layout->addWidget(m_folderView);
 
     QDialogButtonBox* buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
+    buttonBox->button(QDialogButtonBox::Ok)->setText(tr("OK"));
+    buttonBox->button(QDialogButtonBox::Cancel)->setText(tr("Cancel"));
     connect(buttonBox, SIGNAL(accepted()), SLOT(on_accept()));
     connect(buttonBox, SIGNAL(rejected()), SLOT(reject()));
     layout->addWidget(buttonBox);

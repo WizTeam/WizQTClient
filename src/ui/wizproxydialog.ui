@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>310</width>
-    <height>257</height>
+    <width>350</width>
+    <height>299</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -24,15 +24,60 @@
    <item>
     <layout class="QGridLayout" name="gridLayout">
      <property name="bottomMargin">
-      <number>15</number>
+      <number>10</number>
      </property>
-     <property name="horizontalSpacing">
-      <number>30</number>
-     </property>
+     <item row="0" column="0">
+      <widget class="QLabel" name="label_5">
+       <property name="text">
+        <string>Proxy Type:</string>
+       </property>
+      </widget>
+     </item>
      <item row="0" column="1">
-      <widget class="QLineEdit" name="editAddress"/>
+      <widget class="QComboBox" name="comboBox">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <item>
+        <property name="text">
+         <string>NoProxy</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>HttpProxy</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Socks5Proxy</string>
+        </property>
+       </item>
+      </widget>
      </item>
      <item row="1" column="0">
+      <widget class="QLabel" name="label">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="text">
+        <string>Address:</string>
+       </property>
+       <property name="buddy">
+        <cstring>editAddress</cstring>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="1">
+      <widget class="QLineEdit" name="editAddress"/>
+     </item>
+     <item row="2" column="0">
       <widget class="QLabel" name="label_2">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
@@ -48,24 +93,8 @@
        </property>
       </widget>
      </item>
-     <item row="1" column="1">
+     <item row="2" column="1">
       <widget class="QLineEdit" name="editPort"/>
-     </item>
-     <item row="0" column="0">
-      <widget class="QLabel" name="label">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="text">
-        <string>Address:</string>
-       </property>
-       <property name="buddy">
-        <cstring>editAddress</cstring>
-       </property>
-      </widget>
      </item>
     </layout>
    </item>

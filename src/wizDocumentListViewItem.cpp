@@ -226,14 +226,26 @@ bool CWizDocumentListViewItem::operator <(const QListWidgetItem &other) const
 
     switch (m_nSortingType) {
     case CWizSortingPopupButton::SortingCreateTime:
-        // default compare use create time
-        return pOther->m_data.doc.tCreated < m_data.doc.tCreated;
+        // default compare use create time     //There is a bug in Qt sort. if two items have same time, use title to sort.
+        if (pOther->m_data.doc.tCreated == m_data.doc.tCreated)
+            return pOther->m_data.doc.strTitle.localeAwareCompare(m_data.doc.strTitle) < 0;
+        else
+            return pOther->m_data.doc.tCreated < m_data.doc.tCreated;
     case -CWizSortingPopupButton::SortingCreateTime:
-        return pOther->m_data.doc.tCreated > m_data.doc.tCreated;
+        if (pOther->m_data.doc.tCreated == m_data.doc.tCreated)
+            return pOther->m_data.doc.strTitle.localeAwareCompare(m_data.doc.strTitle) > 0;
+        else
+            return pOther->m_data.doc.tCreated > m_data.doc.tCreated;
     case CWizSortingPopupButton::SortingUpdateTime:
-        return pOther->m_data.doc.tModified < m_data.doc.tModified;
+        if (pOther->m_data.doc.tModified == m_data.doc.tModified)
+            return pOther->m_data.doc.strTitle.localeAwareCompare(m_data.doc.strTitle) < 0;
+        else
+            return pOther->m_data.doc.tModified < m_data.doc.tModified;
     case -CWizSortingPopupButton::SortingUpdateTime:
-        return pOther->m_data.doc.tModified > m_data.doc.tModified;
+        if (pOther->m_data.doc.tModified == m_data.doc.tModified)
+            return pOther->m_data.doc.strTitle.localeAwareCompare(m_data.doc.strTitle) > 0;
+        else
+            return pOther->m_data.doc.tModified > m_data.doc.tModified;
     case CWizSortingPopupButton::SortingTitle:
         return pOther->m_data.doc.strTitle.localeAwareCompare(m_data.doc.strTitle) < 0;
     case -CWizSortingPopupButton::SortingTitle:

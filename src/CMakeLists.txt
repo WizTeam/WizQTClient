@@ -141,6 +141,12 @@ set(wiznote_SOURCES
     share/wizFileMonitor.cpp
     wizSearchReplaceWidget.cpp
     widgets/WizCodeEditorDialog.cpp
+    wizDocTemplateDialog.cpp
+    wizMobileFileReceiver.cpp
+    widgets/wizFramelessWebDialog.cpp
+    share/wizLockedFile.cpp
+    share/wizLocalPeer.cpp
+    share/wizSingleApplication.cpp
 )
 
 set(wiznote_HEADERS
@@ -269,6 +275,12 @@ set(wiznote_HEADERS
     share/wizFileMonitor.h
     wizSearchReplaceWidget.h
     widgets/WizCodeEditorDialog.h
+    wizDocTemplateDialog.h
+    wizMobileFileReceiver.h
+    widgets/wizFramelessWebDialog.h
+    share/wizLockedFile.h
+    share/wizLocalPeer.h
+    share/wizSingleApplication.h
 )
 
 set(wiznote_FORMS
@@ -285,6 +297,7 @@ set(wiznote_FORMS
     ui/wizProgressDialog.ui
     ui/wizLoginDialog.ui
     ui/wizSearchReplaceWidget.ui
+    ui/wizDocTemplateDialog.ui
 )
 
 set(wiznote_TRANSLATIONS

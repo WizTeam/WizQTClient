@@ -11,7 +11,6 @@
 #include <QWebPage>
 #include <QWebFrame>
 #include <QWebView>
-#include <QEventLoop>
 #include <QTimer>
 #include <QAction>
 #include <QMenu>
@@ -69,12 +68,12 @@ WizCodeEditorDialog::WizCodeEditorDialog(QWidget *parent) :
 
     QPushButton *btnOK = new QPushButton(this);
     btnOK->setText(tr("OK"));
-    QPushButton *btnCancle = new QPushButton(this);
-    btnCancle->setText(tr("Cancle"));
+    QPushButton *btnCancel = new QPushButton(this);
+    btnCancel->setText(tr("Cancel"));
     QHBoxLayout *layoutButton = new QHBoxLayout();
     layoutButton->addStretch();
+    layoutButton->addWidget(btnCancel);
     layoutButton->addWidget(btnOK);
-    layoutButton->addWidget(btnCancle);
 
 
     verticalLayout->addLayout(horizontalLayout);
@@ -88,7 +87,7 @@ WizCodeEditorDialog::WizCodeEditorDialog(QWidget *parent) :
     connect(m_codeEditor, SIGNAL(textChanged()), SLOT(renderCodeToHtml()));
     connect(m_codeType, SIGNAL(currentIndexChanged(int)), SLOT(renderCodeToHtml()));
     connect(btnOK, SIGNAL(clicked()), SLOT(onButtonOKClicked()));
-    connect(btnCancle, SIGNAL(clicked()), SLOT(onButtonCancleClicked()));
+    connect(btnCancel, SIGNAL(clicked()), SLOT(onButtonCancelClicked()));
 }
 
 void WizCodeEditorDialog::setCode(const QString& strCode)
@@ -108,6 +107,7 @@ void WizCodeEditorDialog::renderCodeToHtml()
 #if QT_VERSION > 0x050000
     codeText = codeText.toHtmlEscaped();
 #endif
+    // 需要将纯文本中的空格转换为Html中的空格。直接将文本中的空格写入Html中，会被忽略。
     codeText.replace(" ", "åß∂ƒ");
     codeText.replace("\n", "<br />");
 
@@ -124,13 +124,14 @@ void WizCodeEditorDialog::renderCodeToHtml()
 void WizCodeEditorDialog::onButtonOKClicked()
 {
     QString strHtml = m_codeBrowser->page()->mainFrame()->toHtml();
+    //插入Html时，处理特殊字符。
     strHtml.replace("\\n", "\\\\n");
     strHtml.replace("\'", "\\\'");
     insertHtmlRequest(strHtml);
     close();
 }
 
-void WizCodeEditorDialog::onButtonCancleClicked()
+void WizCodeEditorDialog::onButtonCancelClicked()
 {
     close();
 }

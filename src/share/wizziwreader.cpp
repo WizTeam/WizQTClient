@@ -107,6 +107,33 @@ bool CWizZiwReader::isFileAccessible(const QString& encryptedFile)
         return false;
     }
 
+    if (!isZiwCipherAvailable() && !initZiwCipher())
+        return false;
+
+    QByteArray encryptedData, rawData;
+    if (!loadZiwData(encryptedFile, encryptedData)) {
+       return false;
+    }
+
+    if (!WizAESDecryptToString((const unsigned char *)(m_strZiwCipher.toUtf8().constData()), encryptedData, rawData)) {
+        return false;
+    }
+
+    return true;
+}
+
+bool CWizZiwReader::isRSAKeysAvailable()
+{
+    return !m_N.isEmpty() && !m_e.isEmpty() && !m_d.isEmpty();
+}
+
+bool CWizZiwReader::isZiwCipherAvailable()
+{
+   return (!m_d.isEmpty() && !m_strZiwCipher.isEmpty());
+}
+
+bool CWizZiwReader::initZiwCipher()
+{
     if (!decryptRSAdPart(m_d)) {
         return false;
     }
@@ -116,16 +143,13 @@ bool CWizZiwReader::isFileAccessible(const QString& encryptedFile)
         return false;
     }
 
-    QByteArray encryptedData, rawData;
-    if (!loadZiwData(encryptedFile, encryptedData)) {
-       return false;
-    }
-
-    if (!WizAESDecryptToString((const unsigned char *)(ziwCipher.constData()), encryptedData, rawData)) {
-        return false;
-    }
-
     return true;
+}
+
+bool CWizZiwReader::createZiwHeader()
+{
+    QString strZiwCipher = WizGenGUIDLowerCaseLetterOnly() + WizGenGUIDLowerCaseLetterOnly();
+    return initZiwHeader(m_header, strZiwCipher);
 }
 
 void CWizZiwReader::setRSAKeys(const QByteArray& strN, \
@@ -257,23 +281,8 @@ bool CWizZiwReader::encryptDataToTempFile(const QString& sourceFileName, \
         return false;
     }
 
-    // encrypt ziw cipher
-    QByteArray encryptedZiwCipher;
-    if (!encryptZiwCipher(strZiwCipher.toUtf8(), encryptedZiwCipher)) {
-        return false;
-    }
-
-    // compose file
-    // FIXME: hard coded here.
     WIZZIWHEADER header;
-    memset(&header, 0, sizeof(header));
-    header.szSign[0] = 'Z';
-    header.szSign[1] = 'I';
-    header.szSign[2] = 'W';
-    header.szSign[3] = 'R';
-    header.nVersion = 1;
-    header.nKeyLength = WIZZIWFILE_KEY_LENGTH;
-    memcpy(header.szEncryptedKey, encryptedZiwCipher.constData(), sizeof(header.szEncryptedKey));
+    initZiwHeader(header, strZiwCipher);
 
     QFile destFile(destFileName);
     if (!destFile.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
@@ -308,21 +317,15 @@ bool CWizZiwReader::decryptDataToTempFile(const QString& tempFileName)
         return false;
     }
 
-    if (!decryptRSAdPart(m_d)) {
+    if (!isZiwCipherAvailable() && !initZiwCipher())
         return false;
-    }
-
-    QByteArray ziwCipher;
-    if(!decryptZiwCipher(ziwCipher)) {
-        return false;
-    }
 
     QByteArray encryptedData, rawData;
     if (!loadZiwData(m_strFileName, encryptedData)) {
        return false;
     }
 
-    if (!WizAESDecryptToString((const unsigned char *)(ziwCipher.constData()), encryptedData, rawData)) {
+    if (!WizAESDecryptToString((const unsigned char *)(m_strZiwCipher.toUtf8().constData()), encryptedData, rawData)) {
         return false;
     }
 
@@ -355,4 +358,27 @@ void CWizZiwReader::debugPrintHeader()
     TOLOG("---------");
 
     //TOLOG(QString::fromStdString(base64_encode(m_header.szReserved, sizeof(m_header.szReserved))));
+}
+
+bool CWizZiwReader::initZiwHeader(WIZZIWHEADER& header, const QString& strZiwCipher)
+{
+    // encrypt ziw cipher
+    QByteArray encryptedZiwCipher;
+    if (!encryptZiwCipher(strZiwCipher.toUtf8(), encryptedZiwCipher)) {
+        return false;
+    }
+
+    // compose file
+    // FIXME: hard coded here.
+
+    memset(&header, 0, sizeof(header));
+    header.szSign[0] = 'Z';
+    header.szSign[1] = 'I';
+    header.szSign[2] = 'W';
+    header.szSign[3] = 'R';
+    header.nVersion = 1;
+    header.nKeyLength = WIZZIWFILE_KEY_LENGTH;
+    memcpy(header.szEncryptedKey, encryptedZiwCipher.constData(), sizeof(header.szEncryptedKey));
+
+    return true;
 }

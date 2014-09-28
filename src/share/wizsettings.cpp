@@ -92,6 +92,20 @@ void CWizSettings::SetProxyHost(const QString& val)
     SetString("Sync", "ProxyHost", val);
 }
 
+WizProxyType CWizSettings::GetProxyType()
+{
+    int port = GetInt("Sync", "ProxyType", -1);
+    if (port < 0)
+        port = WizProxy_HttpProxy;
+
+    return (WizProxyType)port;
+}
+
+void CWizSettings::SetProxyType(WizProxyType type)
+{
+    SetInt("Sync", "ProxyType", type);
+}
+
 int CWizSettings::GetProxyPort()
 {
     int port = GetInt("Sync", "ProxyPort", 0);
@@ -304,6 +318,77 @@ bool CWizUserSettings::showSystemTrayIcon() const
 void CWizUserSettings::setShowSystemTrayIcon(bool bShowTrayIcon)
 {
     set("ShowSystemTrayIcon", bShowTrayIcon ? "1" : "0");
+}
+
+bool CWizUserSettings::receiveMobileFile() const
+{
+    QString strReceiveMobileFile = get("RecevieMobileFile");
+    if (!strReceiveMobileFile.isEmpty()) {
+        return strReceiveMobileFile.toInt() ? true : false;
+    }
+
+    return false;
+}
+
+void CWizUserSettings::setReceiveMobileFile(bool bReceiveFile)
+{
+    set("RecevieMobileFile", bReceiveFile ? "1" : "0");
+}
+
+double CWizUserSettings::printMarginValue(WizPositionType posType)
+{
+    QString strMarginValue = get("PrintMarginValue_" + QString::number(posType));
+    if (strMarginValue.isEmpty()) {
+        return 5.0;
+    }
+
+    return strMarginValue.toDouble();
+}
+
+void CWizUserSettings::setPrintMarginValue(WizPositionType posType, double dValue)
+{
+    set("PrintMarginValue_" + QString::number(posType), QString::number(dValue));
+}
+
+int CWizUserSettings::printMarginUnit()
+{
+    QString strMarginType = get("PrintMarginType");
+    if (strMarginType.isEmpty()) {
+        return 0;
+    }
+
+    return strMarginType.toInt();
+}
+
+void CWizUserSettings::setPrintMarginUnit(int nUnit)
+{
+    set("PrintMarginType", QString::number(nUnit));
+}
+
+QString CWizUserSettings::newFeatureGuideVersion()
+{
+    QString strGuideVersion = get("NewFeatureGuideVersion");
+    return strGuideVersion;
+}
+
+void CWizUserSettings::setNewFeatureGuideVersion(const QString& strGuideVersion)
+{
+    set("NewFeatureGuideVersion", strGuideVersion);
+}
+
+bool CWizUserSettings::needShowMobileFileReceiverUserGuide()
+{
+    QString strShowGuide = get("ShowMobileFileReceiverUserGuide");
+    if (!strShowGuide.isEmpty()) {
+        return strShowGuide.toInt() ? true : false;
+    }
+
+    return true;
+}
+
+void CWizUserSettings::setNeedShowMobileFileReceiverUserGuide(bool bNeedShow)
+{
+    set("ShowMobileFileReceiverUserGuide", bNeedShow ? "1" : "0");
 }
 
 QString CWizUserSettings::skin()

@@ -20,6 +20,9 @@
 #include "share/wizshadowwindow.h"
 #endif
 
+
+#define WIZ_SINGLE_APPLICATION "WIZ_SINGLE_APPLICATION"
+
 class QToolBar;
 class QLabel;
 class QSystemTrayIcon;
@@ -48,6 +51,8 @@ class CWizUserVerifyDialog;
 class CWizMacToolBar;
 
 class CWizDocumentWebView;
+
+class CWizMobileFileReceiver;
 
 namespace WizService {
 namespace Internal {
@@ -97,6 +102,8 @@ public:
 
     static MainWindow* instance();
 
+    QNetworkDiskCache* webViewNetworkCache();
+
 protected:
     virtual bool eventFilter(QObject* watched, QEvent* event);
     virtual void resizeEvent(QResizeEvent* event);
@@ -117,11 +124,10 @@ private:
     //
     QSystemTrayIcon* m_tray;
 
-#ifdef Q_OS_MAC
     QToolBar* m_toolBar;
+#ifdef Q_OS_MAC
     QMenuBar* m_menuBar;
 #else
-    QToolBar* m_toolBar;
     QMenu* m_menu;
     QToolButton* m_menuButton;
 #endif
@@ -159,6 +165,8 @@ private:
 #else
     CWizSpacer* m_spacerBeforeSearch;
 #endif
+
+    CWizMobileFileReceiver *m_mobileFileReceiver;
 
     bool m_bRestart;
     bool m_bLogoutRestart;
@@ -198,7 +206,6 @@ public:
 
     void resetPermission(const QString& strKbGUID, const QString& strDocumentOwner);
     void viewDocument(const WIZDOCUMENTDATA& data, bool addToHistory);
-    void locateDocument(const WIZDOCUMENTDATA& data);
     //
     void viewDocumentInFloatWidget(const WIZDOCUMENTDATA& data);
     //
@@ -206,11 +213,15 @@ public:
 
     void checkWizUpdate();
     void setSystemTrayIconVisible(bool bVisible);
+    void setMobileFileReceiverEnable(bool bEnable);
     //
     void viewDocumentByWizKMURL(const QString& strKMURL);
     //
     void createNoteWithAttachments(const QStringList& strAttachList);
     void createNoteWithText(const QString& strText);
+    void createNoteWithImage(const QString& strImageFile);
+
+
 signals:
     void documentSaved(const QString& strGUID, CWizDocumentView* viewer);
 
@@ -220,6 +231,7 @@ public Q_SLOTS:
     void on_actionAutoSync_triggered();
     void on_actionSync_triggered();
     void on_actionNewNote_triggered();
+    void on_actionNewNoteByTemplate_triggered();
     void on_actionLogout_triggered();
     void on_actionAbout_triggered();
     void on_actionPreference_triggered();
@@ -230,6 +242,9 @@ public Q_SLOTS:
     void on_actionResetSearch_triggered();
     void on_actionSearchReplace_triggered();
     void on_actionSaveAsPDF_triggered();
+    void on_actionSaveAsHtml_triggered();
+    void on_actionPrint_triggered();
+    void on_actionPrintMargin_triggered();
 
     // menu editing
     void on_actionEditingUndo_triggered();
@@ -299,9 +314,12 @@ public Q_SLOTS:
     void on_syncProcessLog(const QString& strMsg);
 
     void on_options_restartForSettings();
-    void locateDocument(const QString& strKbGuid, const QString& strGuid);
 
     void on_editor_statusChanged();
+
+    void createDocumentByTemplate(const QString& strFile);
+
+    void on_mobileFileRecived(const QString& strFile);
 
     //js environment func
     QString getSkinResourcePath() const;
@@ -324,6 +342,7 @@ public Q_SLOTS:
 #endif
 
     void on_application_aboutToQuit();
+    void on_application_messageAvailable(const QString& strMsg);
 
     void on_checkUpgrade_finished(bool bUpgradeAvaliable);
 
@@ -335,6 +354,15 @@ public Q_SLOTS:
     void on_hideTrayIcon_clicked();
     //
     void shiftVisableStatus();
+
+    //
+    void showNewFeatureGuide();
+    void showMobileFileReceiverUserGuide();
+    void setDoNotShowMobileFileReceiverUserGuideAgain(bool bNotAgain);
+
+    //
+    void locateDocument(const WIZDOCUMENTDATA& data);
+    void locateDocument(const QString& strKbGuid, const QString& strGuid);
 
 public:
     // WizExplorerApp pointer
@@ -366,12 +394,18 @@ private:
 
     //FIXME：新建笔记时,为了将光标移到编辑器中,需要将Editor的模式设置为disable,此处需要将actions设置为可用
     void setActionsEnableForNewNote();
-
+    void setFocusForNewNote(WIZDOCUMENTDATA doc);
     //
     void initTrayIcon(QSystemTrayIcon* trayIcon);
     //
     void startSearchStatus();
-    void cancleSearchStatus();
+    void cancelSearchStatus();
+
+    //
+    void initVariableBeforCreateNote();
+
+    //
+    bool needShowNewFeatureGuide();
 };
 
 } // namespace Internal

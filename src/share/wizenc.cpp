@@ -5,6 +5,7 @@
 
 #include <QBuffer>
 #include <QFile>
+#include <QDebug>
 
 #include "wizmd5.h"
 #include "wizmisc.h"

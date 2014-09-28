@@ -75,6 +75,7 @@ CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
     m_splitter->addWidget(m_web);
     m_splitter->addWidget(m_comments);
     m_comments->page()->mainFrame()->setScrollBarPolicy(Qt::Horizontal, Qt::ScrollBarAlwaysOff);
+    m_comments->setAcceptDrops(false);
     m_comments->hide();
 
     layoutDoc->addWidget(m_title);
