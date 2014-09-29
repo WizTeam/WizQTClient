@@ -17,6 +17,8 @@
 #include <QFile>
 #include <QDir>
 #include <QPlainTextEdit>
+#include <QEvent>
+#include <QDebug>
 
 #include <extensionsystem/pluginmanager.h>
 #include <extensionsystem/pluginspec.h>
@@ -31,6 +33,7 @@ WizCodeEditorDialog::WizCodeEditorDialog(QWidget *parent) :
 
     setAttribute(Qt::WA_DeleteOnClose);
     setWindowFlags(Qt::WindowStaysOnTopHint);
+    setWindowState(windowState() & ~Qt::WindowFullScreen);
     resize(650, 550);
     //
     QVBoxLayout *verticalLayout = new QVBoxLayout(this);
@@ -134,6 +137,15 @@ void WizCodeEditorDialog::onButtonOKClicked()
 void WizCodeEditorDialog::onButtonCancelClicked()
 {
     close();
+}
+
+void WizCodeEditorDialog::changeEvent(QEvent* event)
+{
+    if (event->type() == QEvent::WindowStateChange)
+    {
+        setWindowState(windowState() & ~Qt::WindowFullScreen);
+        qDebug() << "is full screen : " << isFullScreen();
+    }
 }
 
 void WizCodeEditorDialog::initCodeTypeCombox()

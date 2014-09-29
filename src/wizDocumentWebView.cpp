@@ -1557,6 +1557,7 @@ bool CWizDocumentWebView::editorCommandExecuteInsertCode()
     WizCodeEditorDialog *dialog = new WizCodeEditorDialog();
     connect(dialog, SIGNAL(insertHtmlRequest(QString)), SLOT(on_insertCodeHtml_requset(QString)));
     dialog->show();
+    dialog->setWindowState(dialog->windowState() & ~Qt::WindowFullScreen);
     dialog->setCode(strSelectHtml);
 
     return true;

@@ -290,8 +290,8 @@ public Q_SLOTS:
 
     void on_searchProcess(const QString &strKeywords, const CWizDocumentDataArray& arrayDocument, bool bEnd);
 
-    void on_actionGoBack_triggered();
-    void on_actionGoForward_triggered();
+    void on_actionBack_triggered();
+    void on_actionForward_triggered();
 
     void on_category_itemSelectionChanged();
     void on_documents_itemSelectionChanged();

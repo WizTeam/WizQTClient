@@ -40,6 +40,9 @@ public slots:
     void onButtonOKClicked();
     void onButtonCancelClicked();
 
+protected:
+    void changeEvent(QEvent * event);
+
 private:
     void initCodeTypeCombox();
 

@@ -1038,6 +1038,10 @@ void MainWindow::initToolBar()
 
     m_toolBar->addWidget(new CWizSpacer(m_toolBar));
 
+    m_toolBar->addAction(m_actions->actionFromName(WIZACTION_GLOBAL_BACK));
+    m_toolBar->addAction(m_actions->actionFromName(WIZACTION_GLOBAL_FORWARD));
+
+
     m_spacerBeforeSearch = new CWizSpacer(m_toolBar);
     m_toolBar->addWidget(m_spacerBeforeSearch);
 
@@ -1824,7 +1828,7 @@ void MainWindow::on_menuButtonClicked()
 
 #endif
 
-void MainWindow::on_actionGoBack_triggered()
+void MainWindow::on_actionBack_triggered()
 {
     if (!m_history->canBack())
         return;
@@ -1834,7 +1838,7 @@ void MainWindow::on_actionGoBack_triggered()
     locateDocument(data);
 }
 
-void MainWindow::on_actionGoForward_triggered()
+void MainWindow::on_actionForward_triggered()
 {
     if (!m_history->canForward())
     return;
