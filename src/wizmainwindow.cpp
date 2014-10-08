@@ -270,7 +270,8 @@ void MainWindow::on_application_aboutToQuit()
 
 void MainWindow::cleanOnQuit()
 {
-    m_category->saveState();
+    m_category->saveExpandState();
+    m_category->saveShortcutState();
     saveStatus();
     //
     m_sync->waitForDone();
@@ -1834,18 +1835,34 @@ void MainWindow::on_actionBack_triggered()
         return;
 
     WIZDOCUMENTDATA data = m_history->back();
-    viewDocument(data, false);
-    locateDocument(data);
+    CWizDatabase &db = m_dbMgr.db(data.strKbGUID);
+    if (db.DocumentFromGUID(data.strGUID, data))
+    {
+        viewDocument(data, false);
+        locateDocument(data);
+    }
+    else
+    {
+        on_actionBack_triggered();
+    }
 }
 
 void MainWindow::on_actionForward_triggered()
 {
     if (!m_history->canForward())
-    return;
+        return;
 
     WIZDOCUMENTDATA data = m_history->forward();
-    viewDocument(data, false);
-    locateDocument(data);
+    CWizDatabase &db = m_dbMgr.db(data.strKbGUID);
+    if (db.DocumentFromGUID(data.strGUID, data))
+    {
+        viewDocument(data, false);
+        locateDocument(data);
+    }
+    else
+    {
+        on_actionForward_triggered();
+    }
 }
 
 void MainWindow::on_category_itemSelectionChanged()
@@ -1887,23 +1904,40 @@ void MainWindow::on_category_itemSelectionChanged()
     }
     else
     {
-        if (!m_noteList->isVisible())
+        CWizCategoryViewShortcutItem *pShortcut = category->currentCategoryItem<CWizCategoryViewShortcutItem>();
+        if (pShortcut)
         {
-            m_noteList->show();
-            m_msgList->hide();
+            CWizDatabase &db = m_dbMgr.db(pShortcut->kbGUID());
+            WIZDOCUMENTDATA doc;
+            if (db.DocumentFromGUID(pShortcut->guid(), doc))
+            {
+                viewDocument(doc, true);
+                locateDocument(doc);
+                category->blockSignals(true);
+                category->setCurrentItem(pShortcut);
+                category->blockSignals(false);
+            }
         }
-        QString kbGUID = category->selectedItemKbGUID();
-        if (!kbGUID.isEmpty())
+        else
         {
-            resetPermission(kbGUID, "");
-        }
+            if (!m_noteList->isVisible())
+            {
+                m_noteList->show();
+                m_msgList->hide();
+            }
+            QString kbGUID = category->selectedItemKbGUID();
+            if (!kbGUID.isEmpty())
+            {
+                resetPermission(kbGUID, "");
+            }
 
-        category->getDocuments(arrayDocument);
-        m_documents->setDocuments(arrayDocument);
+            category->getDocuments(arrayDocument);
+            m_documents->setDocuments(arrayDocument);
 
-        if (arrayDocument.empty())
-        {
-            on_documents_itemSelectionChanged();
+            if (arrayDocument.empty())
+            {
+                on_documents_itemSelectionChanged();
+            }
         }
     }
 }

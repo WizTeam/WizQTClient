@@ -144,7 +144,6 @@ void WizCodeEditorDialog::changeEvent(QEvent* event)
     if (event->type() == QEvent::WindowStateChange)
     {
         setWindowState(windowState() & ~Qt::WindowFullScreen);
-        qDebug() << "is full screen : " << isFullScreen();
     }
 }
 

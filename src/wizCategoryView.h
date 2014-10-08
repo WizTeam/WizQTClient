@@ -131,16 +131,11 @@ public:
     virtual ~CWizCategoryView();
     void init();
 
-    QString m_strSelectedId;
-    QString selectedId(QSettings* settings);
+    void loadShortcutState();
+    void saveShortcutState();
+    void loadExpandState();
+    void saveExpandState();
 
-    void loadState();
-    void loadChildState(QTreeWidgetItem* pi, QSettings* settings);
-    void loadItemState(QTreeWidgetItem* pi, QSettings* settings);
-    void saveState();
-    void saveChildState(QTreeWidgetItem* pi, QSettings* settings);
-    void saveItemState(QTreeWidgetItem* pi, QSettings* settings);
-    void saveSelected(QSettings* settings);
 
     // action user data
     enum CategoryActions
@@ -168,7 +163,8 @@ public:
         GroupItem,
         TrashItem,
         BizGroupRootItem,
-        OwnGroupRootItem
+        OwnGroupRootItem,
+        ShortcutItem
     };
 
     void initMenus();
@@ -190,6 +186,7 @@ public:
     void showAdminBizGroupRootContextMenu(QPoint pos, bool usable = true);
     void showGroupContextMenu(QPoint pos);
     void showTrashContextMenu(QPoint pos);
+    void showShortcutContextMenu(QPoint pos);
 
 private:
     void initGeneral();
@@ -215,6 +212,15 @@ private:
     void resetSections();
 
     void doLocationSanityCheck(CWizStdStringArray& arrayLocation);
+
+    QString selectedId(QSettings* settings);
+    void saveSelected(QSettings* settings);
+
+    void loadChildState(QTreeWidgetItem* pi, QSettings* settings);
+    void loadItemState(QTreeWidgetItem* pi, QSettings* settings);
+    void saveChildState(QTreeWidgetItem* pi, QSettings* settings);
+    void saveItemState(QTreeWidgetItem* pi, QSettings* settings);
+
 
 public:
     // folders
@@ -288,6 +294,7 @@ public:
 
 
 private:
+    QPointer<QMenu> m_menuShortcut;
     QPointer<QMenu> m_menuFolderRoot;
     QPointer<QMenu> m_menuFolder;
     QPointer<QMenu> m_menuTagRoot;
@@ -304,6 +311,8 @@ private:
     QMap<QString, QTimer*> m_mapTimerUpdateGroupCount;
 
     QString m_strRequestedGroupKbGUID;
+
+    QString m_strSelectedId;
 
 private Q_SLOTS:
     void on_updatePrivateFolderDocumentCount_timeout();
@@ -384,6 +393,7 @@ public Q_SLOTS:
     void on_action_manageGroup();
     void on_action_manageBiz();
 
+    void on_action_removeShortcut();
 
     void on_action_emptyTrash();
 

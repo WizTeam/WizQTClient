@@ -490,6 +490,60 @@ CWizCategoryViewShortcutRootItem::CWizCategoryViewShortcutRootItem(CWizExplorerA
     setText(0, strName);
 }
 
+void CWizCategoryViewShortcutRootItem::getDocuments(CWizDatabase& /*db*/, CWizDocumentDataArray& arrayDocument)
+{
+    for (int i = 0; i < childCount(); i++)
+    {
+        CWizCategoryViewShortcutItem *pItem = dynamic_cast<CWizCategoryViewShortcutItem*>(child(i));
+        if (pItem)
+        {
+            CWizDatabase &db = m_app.databaseManager().db(pItem->kbGUID());
+            WIZDOCUMENTDATA doc;
+            if (db.DocumentFromGUID(pItem->guid(), doc))
+            {
+                arrayDocument.push_back(doc);
+            }
+        }
+    }
+}
+
+bool CWizCategoryViewShortcutRootItem::accept(CWizDatabase& /*db*/, const WIZDOCUMENTDATA& data)
+{
+    for (int i = 0; i < childCount(); i++)
+    {
+        CWizCategoryViewShortcutItem *pItem = dynamic_cast<CWizCategoryViewShortcutItem*>(child(i));
+        if (pItem)
+        {
+            if (pItem->guid() == data.strGUID)
+                return true;
+        }
+    }
+    return false;
+}
+
+void CWizCategoryViewShortcutRootItem::drop(const WIZDOCUMENTDATA& data, bool /*forceCopy*/)
+{
+    for (int i = 0; i < childCount(); i++)
+    {
+        CWizCategoryViewShortcutItem *pItem = dynamic_cast<CWizCategoryViewShortcutItem*>(child(i));
+        if (pItem)
+        {
+            if (pItem->guid() == data.strGUID)
+                return;
+        }
+    }
+
+    CWizCategoryViewShortcutItem *pItem = new CWizCategoryViewShortcutItem(m_app,
+                                                                           data.strTitle, data.strKbGUID, data.strGUID);
+    addChild(pItem);
+    sortChildren(0, Qt::AscendingOrder);
+}
+
+QString CWizCategoryViewShortcutRootItem::getSectionName()
+{
+    return WIZ_CATEGORY_SECTION_GENERAL;
+}
+
 
 /* -------------------- CWizCategoryViewSearchRootItem -------------------- */
 CWizCategoryViewSearchRootItem::CWizCategoryViewSearchRootItem(CWizExplorerApp& app,
@@ -1616,3 +1670,25 @@ bool CWizCategoryViewTrashItem::acceptDrop(const WIZDOCUMENTDATA &data) const
 
 //    setText(0, strText);
 //}
+
+
+CWizCategoryViewShortcutItem::CWizCategoryViewShortcutItem(CWizExplorerApp& app,
+                                                           const QString& strName, const QString& strKbGuid, const QString& strGuid)
+    : CWizCategoryViewItemBase(app, strName, strKbGuid)
+    , m_strGuid(strGuid)
+{
+    QIcon icon;
+    icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "document_badge"),
+                 QSize(16, 16), QIcon::Normal);
+    icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "document_badge_selected"),
+                 QSize(16, 16), QIcon::Selected);
+    setIcon(0, icon);
+    setText(0, strName);
+}
+
+void CWizCategoryViewShortcutItem::showContextMenu(CWizCategoryBaseView* pCtrl, QPoint pos)
+{
+    if (CWizCategoryView* view = dynamic_cast<CWizCategoryView *>(pCtrl)) {
+        view->showShortcutContextMenu(pos);
+    }
+}

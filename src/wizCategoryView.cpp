@@ -62,9 +62,14 @@ using namespace Core::Internal;
 #define CATEGORY_ACTION_MANAGE_GROUP     QObject::tr("Manage group...")
 #define CATEGORY_ACTION_MANAGE_BIZ     QObject::tr("Manage team...")
 #define CATEGORY_ACTION_QUIT_GROUP     QObject::tr("Quit group")
+#define CATEGORY_ACTION_REMOVE_SHORTCUT     QObject::tr("Remove shortcut")
 
 
 #define LINK_COMMAND_ID_CREATE_GROUP        100
+
+#define TREEVIEW_STATE "TreeState"
+#define TREEVIEW_SELECTED_ITEM "SelectedItemID"
+#define SHORTCUT_STATE "ShortcutState"
 
 
 /* ------------------------------ CWizCategoryBaseView ------------------------------ */
@@ -737,6 +742,17 @@ void CWizCategoryView::initMenus()
     addAction(actionManageBiz);
     connect(actionManageBiz, SIGNAL(triggered()), SLOT(on_action_manageBiz()));
 
+    QAction* actionRemoveShortcut = new QAction("RemoveShortcut", this);
+    actionRemoveShortcut->setText(CATEGORY_ACTION_REMOVE_SHORTCUT);
+    actionRemoveShortcut->setShortcutContext(Qt::WidgetShortcut);
+    addAction(actionRemoveShortcut);
+    connect(actionRemoveShortcut, SIGNAL(triggered()), SLOT(on_action_removeShortcut()));
+
+    // shortcut menu
+    m_menuShortcut = new QMenu(this);
+    m_menuShortcut->addAction(actionRemoveShortcut);
+
+
     // trash menu
     m_menuTrash = new QMenu(this);
     m_menuTrash->addAction(actionTrash);
@@ -900,6 +916,12 @@ void CWizCategoryView::showTrashContextMenu(QPoint pos)
 {
     resetMenu(TrashItem);
     m_menuTrash->popup(pos);
+}
+
+void CWizCategoryView::showShortcutContextMenu(QPoint pos)
+{
+    resetMenu(ShortcutItem);
+    m_menuShortcut->popup(pos);
 }
 
 void CWizCategoryView::showFolderRootContextMenu(QPoint pos)
@@ -1647,6 +1669,14 @@ void CWizCategoryView::on_action_manageBiz()
     }
 }
 
+void CWizCategoryView::on_action_removeShortcut()
+{
+    CWizCategoryViewShortcutItem* p = currentCategoryItem<CWizCategoryViewShortcutItem>();
+    if (p && p->parent()) {
+        p->parent()->removeChild(p);
+    }
+}
+
 void CWizCategoryView::on_action_emptyTrash()
 {
     // FIXME: show progress
@@ -1877,7 +1907,7 @@ void CWizCategoryView::init()
     //
     resetSections();
 
-    loadState();
+    loadExpandState();
 }
 
 void CWizCategoryView::resetSections()
@@ -2413,9 +2443,7 @@ void CWizCategoryView::initGeneral()
     //pList.append(new CWizCategoryViewMessageItem(m_app, CATEGORY_MESSAGES_SEND_FROM_ME, CWizCategoryViewMessageItem::SendFromMe));
     //pMsg->addChildren(pList);
 
-    //CWizCategoryViewShortcutRootItem* pShortcutRoot = new CWizCategoryViewShortcutRootItem(m_app, CATEGORY_SHORTCUTS);
-    //addTopLevelItem(pShortcutRoot);
-    //pShortcutRoot->setHidden(true);
+    loadShortcutState();
 
     //CWizCategoryViewSearchRootItem* pSearchRoot = new CWizCategoryViewSearchRootItem(m_app, CATEGORY_SEARCH);
     //addTopLevelItem(pSearchRoot);
@@ -2586,6 +2614,86 @@ void CWizCategoryView::doLocationSanityCheck(CWizStdStringArray& arrayLocation)
     //     it++) {
     //    qDebug() << *it;
     //}
+}
+
+
+void CWizCategoryView::loadShortcutState()
+{
+    QSettings* settings = ExtensionSystem::PluginManager::settings();
+    settings->beginGroup(SHORTCUT_STATE);
+
+    CWizCategoryViewShortcutRootItem* pShortcutRoot = 0;
+    for (int i = 0 ; i < topLevelItemCount(); i++)
+    {
+        pShortcutRoot = dynamic_cast<CWizCategoryViewShortcutRootItem*>(topLevelItem(i));
+        if (pShortcutRoot)
+            break;
+    }
+
+    if (!pShortcutRoot)
+    {
+        pShortcutRoot = new CWizCategoryViewShortcutRootItem(m_app, CATEGORY_SHORTCUTS);
+        addTopLevelItem(pShortcutRoot);
+    }
+
+    QStringList allKeys = settings->allKeys();
+    foreach (QString strGuid, allKeys)
+    {
+        QString strKbGuid = settings->value(strGuid).toString();
+        CWizDatabase &db = m_dbMgr.db(strKbGuid);
+        WIZDOCUMENTDATA doc;
+        if (db.DocumentFromGUID(strGuid, doc))
+        {
+            CWizCategoryViewShortcutItem *pShortcutItem =
+                    new CWizCategoryViewShortcutItem(m_app, doc.strTitle, doc.strKbGUID, doc.strGUID);
+            pShortcutRoot->addChild(pShortcutItem);
+        }
+    }
+
+    settings->endGroup();
+    pShortcutRoot->sortChildren(0, Qt::AscendingOrder);
+}
+
+void CWizCategoryView::saveShortcutState()
+{
+    QSettings* settings = ExtensionSystem::PluginManager::settings();
+    settings->beginGroup(SHORTCUT_STATE);
+    settings->remove("");
+
+    CWizCategoryViewShortcutRootItem *pShortcutRoot = 0;
+    for (int i = 0 ; i < topLevelItemCount(); i++)
+    {
+        pShortcutRoot = dynamic_cast<CWizCategoryViewShortcutRootItem*>(topLevelItem(i));
+        if (pShortcutRoot)
+            break;
+    }
+
+    if (pShortcutRoot && pShortcutRoot->childCount() > 0)
+    {
+        for (int i = 0; i < pShortcutRoot->childCount(); i++)
+        {
+            CWizCategoryViewShortcutItem *pItem = dynamic_cast<CWizCategoryViewShortcutItem*>(pShortcutRoot->child(i));
+            if (pItem)
+            {
+                settings->setValue(pItem->guid(), pItem->kbGUID());
+            }
+        }
+    }
+
+    settings->endGroup();
+    settings->sync();
+}
+
+void CWizCategoryView::loadExpandState()
+{
+    QSettings* settings = ExtensionSystem::PluginManager::settings();
+    settings->beginGroup(TREEVIEW_STATE);
+    m_strSelectedId = selectedId(settings);
+
+    for (int i = 0 ; i < topLevelItemCount(); i++) {
+        loadChildState(topLevelItem(i), settings);
+    }
+    settings->endGroup();
 }
 
 void CWizCategoryView::initTags()
@@ -3621,22 +3729,6 @@ CWizFolder* CWizCategoryView::SelectedFolder()
     return new CWizFolder(m_dbMgr.db(), pItem->location());
 }
 
-
-#define TREEVIEW_STATE "TreeState"
-#define TREEVIEW_SELECTED_ITEM "SelectedItemID"
-
-void CWizCategoryView::loadState()
-{
-    QSettings* settings = ExtensionSystem::PluginManager::settings();
-    settings->beginGroup(TREEVIEW_STATE);
-    m_strSelectedId = selectedId(settings);
-
-    for (int i = 0 ; i < topLevelItemCount(); i++) {
-        loadChildState(topLevelItem(i), settings);
-    }
-    settings->endGroup();
-}
-
 void CWizCategoryView::loadChildState(QTreeWidgetItem* pItem, QSettings* settings)
 {
     loadItemState(pItem, settings);
@@ -3672,14 +3764,7 @@ void CWizCategoryView::loadItemState(QTreeWidgetItem* pi, QSettings* settings)
         collapseItem(pItem);
 }
 
-QString CWizCategoryView::selectedId(QSettings* settings)
-{
-    QString strItem = settings->value(TREEVIEW_SELECTED_ITEM).toString();
-
-    return strItem;
-}
-
-void CWizCategoryView::saveState()
+void CWizCategoryView::saveExpandState()
 {
     QSettings* settings = ExtensionSystem::PluginManager::settings();
     settings->beginGroup(TREEVIEW_STATE);
@@ -3692,6 +3777,13 @@ void CWizCategoryView::saveState()
     settings->endGroup();
 
     settings->sync();
+}
+
+QString CWizCategoryView::selectedId(QSettings* settings)
+{
+    QString strItem = settings->value(TREEVIEW_SELECTED_ITEM).toString();
+
+    return strItem;
 }
 
 void CWizCategoryView::saveChildState(QTreeWidgetItem* pItem, QSettings* settings)

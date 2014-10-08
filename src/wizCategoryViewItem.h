@@ -120,8 +120,31 @@ public:
     { Q_UNUSED(pCtrl); Q_UNUSED(pos); }
 
     virtual void getDocuments(CWizDatabase& db,
+                              CWizDocumentDataArray& arrayDocument);
+
+    virtual bool accept(CWizDatabase& db, const WIZDOCUMENTDATA& data);
+    virtual void drop(const WIZDOCUMENTDATA& data, bool forceCopy = false);
+    virtual bool acceptDrop(const WIZDOCUMENTDATA& /*data*/) const {return true;}
+
+    virtual QString getSectionName();
+    virtual int getSortOrder() const { return 11; }
+};
+
+class CWizCategoryViewShortcutItem : public CWizCategoryViewItemBase
+{
+public:
+    CWizCategoryViewShortcutItem(CWizExplorerApp& app, const QString& strName,
+                                 const QString& strKbGuid, const QString& strGuid);
+
+    virtual void showContextMenu(CWizCategoryBaseView* pCtrl, QPoint pos);
+    virtual void getDocuments(CWizDatabase& db,
                               CWizDocumentDataArray& arrayDocument)
     { Q_UNUSED(db); Q_UNUSED(arrayDocument); }
+
+    QString guid() {return m_strGuid;}
+
+private:
+    QString m_strGuid;
 };
 
 class CWizCategoryViewSearchRootItem : public CWizCategoryViewItemBase
