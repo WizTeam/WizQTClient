@@ -533,8 +533,9 @@ void CWizCategoryViewShortcutRootItem::drop(const WIZDOCUMENTDATA& data, bool /*
         }
     }
 
+    bool isEncrypted = data.nProtected == 1;
     CWizCategoryViewShortcutItem *pItem = new CWizCategoryViewShortcutItem(m_app,
-                                                                           data.strTitle, data.strKbGUID, data.strGUID);
+                                                                           data.strTitle, data.strKbGUID, data.strGUID, isEncrypted);
     addChild(pItem);
     sortChildren(0, Qt::AscendingOrder);
 }
@@ -1673,15 +1674,26 @@ bool CWizCategoryViewTrashItem::acceptDrop(const WIZDOCUMENTDATA &data) const
 
 
 CWizCategoryViewShortcutItem::CWizCategoryViewShortcutItem(CWizExplorerApp& app,
-                                                           const QString& strName, const QString& strKbGuid, const QString& strGuid)
+                                                           const QString& strName, const QString& strKbGuid,
+                                                           const QString& strGuid, bool bEncrypted)
     : CWizCategoryViewItemBase(app, strName, strKbGuid)
     , m_strGuid(strGuid)
 {
     QIcon icon;
-    icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "document_badge"),
-                 QSize(16, 16), QIcon::Normal);
-    icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "document_badge_selected"),
-                 QSize(16, 16), QIcon::Selected);
+    if (bEncrypted)
+    {
+        icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "document_badge_encrypted"),
+                     QSize(16, 16), QIcon::Normal);
+        icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "document_badge_encrypted_selected"),
+                     QSize(16, 16), QIcon::Selected);
+    }
+    else
+    {
+        icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "document_badge"),
+                     QSize(16, 16), QIcon::Normal);
+        icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "document_badge_selected"),
+                     QSize(16, 16), QIcon::Selected);
+    }
     setIcon(0, icon);
     setText(0, strName);
 }

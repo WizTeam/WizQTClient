@@ -62,7 +62,7 @@ using namespace Core::Internal;
 #define CATEGORY_ACTION_MANAGE_GROUP     QObject::tr("Manage group...")
 #define CATEGORY_ACTION_MANAGE_BIZ     QObject::tr("Manage team...")
 #define CATEGORY_ACTION_QUIT_GROUP     QObject::tr("Quit group")
-#define CATEGORY_ACTION_REMOVE_SHORTCUT     QObject::tr("Remove shortcut")
+#define CATEGORY_ACTION_REMOVE_SHORTCUT     QObject::tr("Remove from shortcuts")
 
 
 #define LINK_COMMAND_ID_CREATE_GROUP        100
@@ -2644,8 +2644,9 @@ void CWizCategoryView::loadShortcutState()
         WIZDOCUMENTDATA doc;
         if (db.DocumentFromGUID(strGuid, doc))
         {
+            bool isEncrypted = doc.nProtected == 1;
             CWizCategoryViewShortcutItem *pShortcutItem =
-                    new CWizCategoryViewShortcutItem(m_app, doc.strTitle, doc.strKbGUID, doc.strGUID);
+                    new CWizCategoryViewShortcutItem(m_app, doc.strTitle, doc.strKbGUID, doc.strGUID, isEncrypted);
             pShortcutRoot->addChild(pShortcutItem);
         }
     }

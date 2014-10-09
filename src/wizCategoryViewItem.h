@@ -134,7 +134,7 @@ class CWizCategoryViewShortcutItem : public CWizCategoryViewItemBase
 {
 public:
     CWizCategoryViewShortcutItem(CWizExplorerApp& app, const QString& strName,
-                                 const QString& strKbGuid, const QString& strGuid);
+                                 const QString& strKbGuid, const QString& strGuid, bool bEncrypted = false);
 
     virtual void showContextMenu(CWizCategoryBaseView* pCtrl, QPoint pos);
     virtual void getDocuments(CWizDatabase& db,

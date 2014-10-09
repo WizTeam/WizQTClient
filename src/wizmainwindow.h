@@ -147,6 +147,7 @@ private:
     CWizDocumentView* m_doc;
     CWizDocumentTransitionView* m_transitionView;
     QPointer<CWizSplitter> m_splitter;
+    QPointer<QWidget> m_docListWidget;
     QPointer<CWizOptionsWidget> m_options;
 
     QLabel* m_labelDocumentsHint;

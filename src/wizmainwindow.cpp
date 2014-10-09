@@ -1136,14 +1136,14 @@ void MainWindow::initClient()
 
     m_splitter->addWidget(m_category);
 
-    QWidget* wlist = new QWidget(this);
+    m_docListWidget = new QWidget(this);
     QHBoxLayout* layoutList = new QHBoxLayout();
     layoutList->setContentsMargins(0, 0, 0, 0);
     layoutList->setSpacing(0);
     layoutList->addWidget(createListView());
     layoutList->addWidget(m_msgList);
-    wlist->setLayout(layoutList);
-    m_splitter->addWidget(wlist);
+    m_docListWidget->setLayout(layoutList);
+    m_splitter->addWidget(m_docListWidget);
     m_splitter->addWidget(documentPanel);
     m_splitter->setStretchFactor(0, 0);
     m_splitter->setStretchFactor(1, 0);
@@ -1893,6 +1893,7 @@ void MainWindow::on_category_itemSelectionChanged()
     if (pItem) {
         if (!m_msgList->isVisible())
         {
+            m_docListWidget->show();
             m_msgList->show();
             m_noteList->hide();
         }
@@ -1912,16 +1913,14 @@ void MainWindow::on_category_itemSelectionChanged()
             if (db.DocumentFromGUID(pShortcut->guid(), doc))
             {
                 viewDocument(doc, true);
-                locateDocument(doc);
-                category->blockSignals(true);
-                category->setCurrentItem(pShortcut);
-                category->blockSignals(false);
+                m_docListWidget->hide();
             }
         }
         else
         {
             if (!m_noteList->isVisible())
             {
+                m_docListWidget->show();
                 m_noteList->show();
                 m_msgList->hide();
             }
