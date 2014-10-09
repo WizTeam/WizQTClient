@@ -408,6 +408,9 @@ private:
 
     //
     bool needShowNewFeatureGuide();
+
+    //
+    void resortDocListAfterViewDocument(const WIZDOCUMENTDATA& doc);
 };
 
 } // namespace Internal

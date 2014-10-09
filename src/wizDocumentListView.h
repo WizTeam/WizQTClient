@@ -43,11 +43,13 @@ public:
 
     int sortingType() const { return m_nSortingType; }
     void resetItemsSortingType(int type);
+    bool isSortedByAccessDate();
 
     //CWizThumbIndexCache* thumbCache() const { return m_thumbCache; }
 
     void setItemsNeedUpdate(const QString& strKbGUID = 0, const QString& strGUID = 0);
     void drawItem(QPainter*p, const QStyleOptionViewItemV4* vopt) const;
+    void reloadItem(const QString& strKbGUID, const QString& strGUID);
 
     void setAcceptAllItems(bool bAccept);
 

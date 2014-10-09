@@ -692,6 +692,12 @@ void CWizDocumentListView::resetItemsSortingType(int type)
     sortItems();
 }
 
+bool CWizDocumentListView::isSortedByAccessDate()
+{
+    return m_nSortingType == CWizSortingPopupButton::SortingAccessTime ||
+            m_nSortingType == -CWizSortingPopupButton::SortingAccessTime;
+}
+
 void CWizDocumentListView::on_itemSelectionChanged()
 {
     //resetPermission();
@@ -1280,6 +1286,21 @@ void CWizDocumentListView::drawItem(QPainter* p, const QStyleOptionViewItemV4* v
     CWizDocumentListViewItem* pItem = documentItemFromIndex(vopt->index);
     if (pItem)
         pItem->draw(p, vopt, viewType());
+}
+
+void CWizDocumentListView::reloadItem(const QString& strKbGUID, const QString& strGUID)
+{
+    int index = documentIndexFromGUID(strGUID);
+    if (-1 == index)
+        return;
+
+    CWizDocumentListViewItem* pItem = documentItemAt(index);
+    if (pItem)
+    {
+        pItem->reload(m_dbMgr.db(strKbGUID));
+        //m_dbMgr.db(strKbGUID).UpdateDocumentAbstract(strGUID);
+        update(indexFromItem(pItem));
+    }
 }
 
 void CWizDocumentListView::setAcceptAllItems(bool bAccept)

@@ -275,6 +275,8 @@ void CWizDocumentView::viewNote(const WIZDOCUMENTDATA& data, bool forceEdit)
     WIZDOCUMENTDATA docData = data;
     docData.nReadCount ++;
     db.ModifyDocumentReadCount(docData);
+    docData.tAccessed = WizGetCurrentTime();
+    db.ModifyDocumentDateAccessed(docData);
 }
 
 void CWizDocumentView::reviewCurrentNote()

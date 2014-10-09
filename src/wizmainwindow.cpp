@@ -1462,11 +1462,10 @@ void MainWindow::on_actionViewToggleCategory_triggered()
         category->show();
     }
 
-    QWidget* doclist = m_splitter->widget(1);
-    if (doclist->isVisible()) {
-        doclist->hide();
+    if (m_docListWidget->isVisible()) {
+        m_docListWidget->hide();
     } else {
-        doclist->show();
+        m_docListWidget->show();
     }
 
     m_actions->toggleActionText(WIZACTION_GLOBAL_TOGGLE_CATEGORY);
@@ -1946,9 +1945,12 @@ void MainWindow::on_documents_itemSelectionChanged()
     CWizDocumentDataArray arrayDocument;
     m_documents->getSelectedDocuments(arrayDocument);
 
-    if (arrayDocument.size() == 1) {
-        if (!m_bUpdatingSelection) {
+    if (arrayDocument.size() == 1)
+    {
+        if (!m_bUpdatingSelection)
+        {
             viewDocument(arrayDocument[0], true);
+            resortDocListAfterViewDocument(arrayDocument[0]);
         }
     }
 }
@@ -1962,6 +1964,7 @@ void MainWindow::on_documents_itemDoubleClicked(QListWidgetItem* item)
         if (m_dbMgr.db(doc.strKbGUID).IsDocumentDownloaded(doc.strGUID))
         {
             viewDocumentInFloatWidget(doc);
+            resortDocListAfterViewDocument(doc);
         }
     }
 }
@@ -2474,6 +2477,15 @@ bool MainWindow::needShowNewFeatureGuide()
         return true;
 
     return strGuideVserion.compare(WIZ_NEW_FEATURE_GUIDE_VERSION) < 0;
+}
+
+void MainWindow::resortDocListAfterViewDocument(const WIZDOCUMENTDATA& doc)
+{
+    if (m_documents->isSortedByAccessDate())
+    {
+        m_documents->reloadItem(doc.strKbGUID, doc.strGUID);
+        m_documents->sortItems();
+    }
 }
 
 void MainWindow::viewDocumentInFloatWidget(const WIZDOCUMENTDATA& data)

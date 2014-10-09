@@ -142,7 +142,9 @@ void CWizDocumentListViewItem::setSortingType(int type)
 {
     m_nSortingType = type;
 
-    QString strFileName = m_app.databaseManager().db(m_data.doc.strKbGUID).GetDocumentFileName(m_data.doc.strGUID);
+    CWizDatabase& db = m_app.databaseManager().db(m_data.doc.strKbGUID);
+    db.DocumentFromGUID(m_data.doc.strGUID, m_data.doc);
+    QString strFileName = db.GetDocumentFileName(m_data.doc.strGUID);
     QFileInfo fi(strFileName);
 
     if (m_data.nType == TypeGroupDocument) {
@@ -154,6 +156,10 @@ void CWizDocumentListViewItem::setSortingType(int type)
         case CWizSortingPopupButton::SortingUpdateTime:
         case -CWizSortingPopupButton::SortingUpdateTime:
             m_data.strInfo = m_data.doc.tModified.toHumanFriendlyString();
+            break;
+        case CWizSortingPopupButton::SortingAccessTime:
+        case -CWizSortingPopupButton::SortingAccessTime:
+            m_data.strInfo = m_data.doc.tAccessed.toHumanFriendlyString();
             break;
         case CWizSortingPopupButton::SortingTitle:
         case -CWizSortingPopupButton::SortingTitle:
@@ -189,6 +195,10 @@ void CWizDocumentListViewItem::setSortingType(int type)
         case CWizSortingPopupButton::SortingUpdateTime:
         case -CWizSortingPopupButton::SortingUpdateTime:
             m_data.strInfo = m_data.doc.tModified.toHumanFriendlyString() + " " + tags();
+            break;
+        case CWizSortingPopupButton::SortingAccessTime:
+        case -CWizSortingPopupButton::SortingAccessTime:
+            m_data.strInfo = m_data.doc.tAccessed.toHumanFriendlyString() + " " + tags();
             break;
         case CWizSortingPopupButton::SortingTitle:
         case -CWizSortingPopupButton::SortingTitle:
@@ -246,6 +256,16 @@ bool CWizDocumentListViewItem::operator <(const QListWidgetItem &other) const
             return pOther->m_data.doc.strTitle.localeAwareCompare(m_data.doc.strTitle) > 0;
         else
             return pOther->m_data.doc.tModified > m_data.doc.tModified;
+    case CWizSortingPopupButton::SortingAccessTime:
+        if (pOther->m_data.doc.tAccessed == m_data.doc.tAccessed)
+            return pOther->m_data.doc.strTitle.localeAwareCompare(m_data.doc.strTitle) < 0;
+        else
+            return pOther->m_data.doc.tAccessed < m_data.doc.tAccessed;
+    case -CWizSortingPopupButton::SortingAccessTime:
+        if (pOther->m_data.doc.tAccessed == m_data.doc.tAccessed)
+            return pOther->m_data.doc.strTitle.localeAwareCompare(m_data.doc.strTitle) > 0;
+        else
+            return pOther->m_data.doc.tAccessed > m_data.doc.tAccessed;
     case CWizSortingPopupButton::SortingTitle:
         return pOther->m_data.doc.strTitle.localeAwareCompare(m_data.doc.strTitle) < 0;
     case -CWizSortingPopupButton::SortingTitle:

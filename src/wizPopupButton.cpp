@@ -181,6 +181,7 @@ CWizSortingPopupButton::CWizSortingPopupButton(CWizExplorerApp& app, QWidget *pa
 
     createAction(tr("Sorting by created time"), SortingCreateTime, menu, group);
     createAction(tr("Sorting by updated time"), SortingUpdateTime, menu, group);
+    createAction(tr("Sorting by access time"), SortingAccessTime, menu, group);
     menu->addSeparator();
     createAction(tr("Sorting by title"), SortingTitle, menu, group);
     createAction(tr("Sorting by location"), SortingLocation, menu, group);
