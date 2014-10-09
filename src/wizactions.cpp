@@ -130,11 +130,7 @@ CWizShortcutAction *CWizActions::addAction(WIZACTION& action)
         pAction->setIcon(::WizLoadSkinIcon(m_app.userSettings().skin(), strIconName));
     }
 
-    QShortcut *shortcut = 0;
-    if (!strShortcut.isEmpty()) {
-        pAction->setShortcut(QKeySequence::fromString(strShortcut));
-        shortcut = new QShortcut(QKeySequence::fromString(strShortcut), m_app.mainWindow());
-    }
+    pAction->setShortcut(QKeySequence::fromString(strShortcut));
 
     if (action.strName == "actionAbout")
         pAction->setMenuRole(QAction::AboutRole);
@@ -149,11 +145,14 @@ CWizShortcutAction *CWizActions::addAction(WIZACTION& action)
     pAction->setShortcutContext(Qt::ApplicationShortcut);
 
     m_actions[action.strName] = pAction;
-    if (shortcut)
-    {
+#ifdef Q_OS_LINUX
+    if (!strShortcut.isEmpty()) {
+        QShortcut *shortcut  = new QShortcut(QKeySequence::fromString(strShortcut), m_app.mainWindow());
         QObject::connect(shortcut, SIGNAL(activated()), m_parent, strSlot.toUtf8());
         pAction->setShortcut(shortcut);
     }
+#endif
+
     QObject::connect(pAction, "2triggered()", m_parent, strSlot.toUtf8());
 
     return pAction;
@@ -361,6 +360,7 @@ void CWizShortcutAction::setShortcut(const QKeySequence &shortcut)
 
 void CWizShortcutAction::setEnabled(bool enable)
 {
+    QAction::setEnabled(enable);
     if (m_shortcut)
     {
         m_shortcut->setEnabled(enable);
