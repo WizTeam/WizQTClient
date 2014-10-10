@@ -1866,8 +1866,6 @@ void MainWindow::on_actionForward_triggered()
 
 void MainWindow::on_category_itemSelectionChanged()
 {
-    CWizDocumentDataArray arrayDocument;
-
     CWizCategoryBaseView* category = qobject_cast<CWizCategoryBaseView *>(sender());
     if (!category)
         return;
@@ -1889,53 +1887,20 @@ void MainWindow::on_category_itemSelectionChanged()
     }
 
     CWizCategoryViewMessageItem* pItem = category->currentCategoryItem<CWizCategoryViewMessageItem>();
-    if (pItem) {
-        if (!m_msgList->isVisible())
-        {
-            m_docListWidget->show();
-            m_msgList->show();
-            m_noteList->hide();
-        }
-
-        CWizMessageDataArray arrayMsg;
-        pItem->getMessages(m_dbMgr.db(), arrayMsg);
-        m_msgList->setMessages(arrayMsg);
-        return;
+    if (pItem)
+    {
+        showMessageList(pItem);
     }
     else
     {
         CWizCategoryViewShortcutItem *pShortcut = category->currentCategoryItem<CWizCategoryViewShortcutItem>();
         if (pShortcut)
         {
-            CWizDatabase &db = m_dbMgr.db(pShortcut->kbGUID());
-            WIZDOCUMENTDATA doc;
-            if (db.DocumentFromGUID(pShortcut->guid(), doc))
-            {
-                viewDocument(doc, true);
-                m_docListWidget->hide();
-            }
+            viewDocumentByShortcut(pShortcut);
         }
         else
         {
-            if (!m_noteList->isVisible())
-            {
-                m_docListWidget->show();
-                m_noteList->show();
-                m_msgList->hide();
-            }
-            QString kbGUID = category->selectedItemKbGUID();
-            if (!kbGUID.isEmpty())
-            {
-                resetPermission(kbGUID, "");
-            }
-
-            category->getDocuments(arrayDocument);
-            m_documents->setDocuments(arrayDocument);
-
-            if (arrayDocument.empty())
-            {
-                on_documents_itemSelectionChanged();
-            }
+            showDocmentList(category);
         }
     }
 }
@@ -2485,6 +2450,55 @@ void MainWindow::resortDocListAfterViewDocument(const WIZDOCUMENTDATA& doc)
     {
         m_documents->reloadItem(doc.strKbGUID, doc.strGUID);
         m_documents->sortItems();
+    }
+}
+
+void MainWindow::showDocmentList(CWizCategoryBaseView* category)
+{
+    if (!m_noteList->isVisible())
+    {
+        m_docListWidget->show();
+        m_noteList->show();
+        m_msgList->hide();
+    }
+    QString kbGUID = category->selectedItemKbGUID();
+    if (!kbGUID.isEmpty())
+    {
+        resetPermission(kbGUID, "");
+    }
+
+    CWizDocumentDataArray arrayDocument;
+    category->getDocuments(arrayDocument);
+    m_documents->setDocuments(arrayDocument);
+
+    if (arrayDocument.empty())
+    {
+        on_documents_itemSelectionChanged();
+    }
+}
+
+void MainWindow::showMessageList(CWizCategoryViewMessageItem* pItem)
+{
+    if (!m_msgList->isVisible())
+    {
+        m_docListWidget->show();
+        m_msgList->show();
+        m_noteList->hide();
+    }
+
+    CWizMessageDataArray arrayMsg;
+    pItem->getMessages(m_dbMgr.db(), arrayMsg);
+    m_msgList->setMessages(arrayMsg);
+}
+
+void MainWindow::viewDocumentByShortcut(CWizCategoryViewShortcutItem* pShortcut)
+{
+    CWizDatabase &db = m_dbMgr.db(pShortcut->kbGUID());
+    WIZDOCUMENTDATA doc;
+    if (db.DocumentFromGUID(pShortcut->guid(), doc))
+    {
+        viewDocument(doc, true);
+        m_docListWidget->hide();
     }
 }
 

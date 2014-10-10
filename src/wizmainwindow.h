@@ -411,6 +411,11 @@ private:
 
     //
     void resortDocListAfterViewDocument(const WIZDOCUMENTDATA& doc);
+
+    //
+    void showDocmentList(CWizCategoryBaseView* category);
+    void showMessageList(CWizCategoryViewMessageItem* pItem);
+    void viewDocumentByShortcut(CWizCategoryViewShortcutItem *pShortcut);
 };
 
 } // namespace Internal
