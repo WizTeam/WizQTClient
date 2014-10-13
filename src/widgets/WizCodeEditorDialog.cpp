@@ -109,6 +109,9 @@ void WizCodeEditorDialog::renderCodeToHtml()
     QString codeText = m_codeEditor->toPlainText();//->page()->mainFrame()->toHtml();
 #if QT_VERSION > 0x050000
     codeText = codeText.toHtmlEscaped();
+#else
+    codeText.replace("<", "&lt;");
+    codeText.replace(">", "&gt;");
 #endif
     // 需要将纯文本中的空格转换为Html中的空格。直接将文本中的空格写入Html中，会被忽略。
     codeText.replace(" ", "åß∂ƒ");

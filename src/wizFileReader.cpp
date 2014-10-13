@@ -32,6 +32,9 @@ QString CWizFileReader::loadTextFileToHtml(QString strFileName)
     file.close();
 #if QT_VERSION > 0x050000
     ret = ret.toHtmlEscaped();
+#else
+    ret.replace("<", "&lt;");
+    ret.replace(">", "&gt;");
 #endif
     ret.replace("\n","<br>");
     ret.replace(" ","&nbsp");
@@ -41,7 +44,6 @@ QString CWizFileReader::loadTextFileToHtml(QString strFileName)
 QString CWizFileReader::loadImageFileToHtml(QString strFileName)
 {
     return QString("<img border=\"0\" src=\"file://%1\" />").arg(strFileName);
-
 }
 
 QString CWizFileReader::loadRtfFileToHtml(QString strFileName)
