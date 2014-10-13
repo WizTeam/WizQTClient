@@ -54,6 +54,14 @@ CWizPreferenceWindow::CWizPreferenceWindow(CWizExplorerApp& app, QWidget* parent
     ui->checkBox->setVisible(false);
 #endif
 
+#ifndef Q_OS_LINUX
+  ui->checkBoxSystemStyle->setVisible(false);
+#endif
+  checkState = userSettings().useSystemBasedStyle() ? Qt::Checked : Qt::Unchecked;
+  ui->checkBoxSystemStyle->blockSignals(true);
+  ui->checkBoxSystemStyle->setCheckState(checkState);
+  ui->checkBoxSystemStyle->blockSignals(false);
+
     // reading tab
     switch (userSettings().noteViewMode())
     {
@@ -375,3 +383,8 @@ void CWizPreferenceWindow::on_spinBox_right_valueChanged(double arg1)
     m_app.userSettings().setPrintMarginValue(wizPositionRight, arg1);
 }
 
+
+void CWizPreferenceWindow::on_checkBoxSystemStyle_toggled(bool checked)
+{
+    m_app.userSettings().setUseSystemBasedStyle(checked);
+}

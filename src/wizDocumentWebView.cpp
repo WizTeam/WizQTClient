@@ -776,7 +776,6 @@ QWebFrame* CWizDocumentWebView::noteFrame()
             return frames.at(i);
     }
 
-    Q_ASSERT(0);
     return 0;
 }
 

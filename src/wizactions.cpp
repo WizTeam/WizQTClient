@@ -52,8 +52,6 @@ WIZACTION* CWizActions::actionsData()
         {"actionExit",                      QObject::tr("Exit"), "", "Ctrl+Q"},
         {"actionLogout",                    QObject::tr("Logout..."), "", ""},
         {WIZACTION_GLOBAL_SYNC,             QObject::tr("Sync"), "", ""},
-        {WIZACTION_GLOBAL_FORWARD,             QObject::tr("Forward"), "", ""},
-        {WIZACTION_GLOBAL_BACK,             QObject::tr("Back"), "", ""},
         {WIZACTION_GLOBAL_NEW_DOCUMENT,     QObject::tr("New Note"), "", "Ctrl+N"},
         {WIZACTION_GLOBAL_NEW_DOCUMENT_BY_TEMPLATE,     QObject::tr("New Note by template..."), "", ""},
         {WIZACTION_GLOBAL_SAVE_AS_PDF,      QObject::tr("Save as PDF..."), "", ""},
@@ -117,7 +115,7 @@ WIZACTION* CWizActions::actionsData()
     return arrayActions;
 }
 
-CWizShortcutAction *CWizActions::addAction(WIZACTION& action)
+CWizShortcutAction *CWizActions::addAction(WIZACTION& action, bool bUseExtraShortcut)
 {   
     QString strText = action.strText;
     QString strIconName = action.strName;
@@ -145,20 +143,19 @@ CWizShortcutAction *CWizActions::addAction(WIZACTION& action)
     pAction->setShortcutContext(Qt::ApplicationShortcut);
 
     m_actions[action.strName] = pAction;
-#ifdef Q_OS_LINUX
-    if (!strShortcut.isEmpty()) {
+
+    if (bUseExtraShortcut && !strShortcut.isEmpty()) {
         QShortcut *shortcut  = new QShortcut(QKeySequence::fromString(strShortcut), m_app.mainWindow());
         QObject::connect(shortcut, SIGNAL(activated()), m_parent, strSlot.toUtf8());
         pAction->setShortcut(shortcut);
     }
-#endif
 
     QObject::connect(pAction, "2triggered()", m_parent, strSlot.toUtf8());
 
     return pAction;
 }
 
-void CWizActions::init()
+void CWizActions::init(bool bUseExtraShortcut)
 {
     int index = 0;
     WIZACTION* arrayData = actionsData();
@@ -168,7 +165,7 @@ void CWizActions::init()
         if (action.strName.isEmpty())
             break;
 
-        addAction(action);
+        addAction(action, bUseExtraShortcut);
         index++;
     }
 }
@@ -182,7 +179,7 @@ CWizShortcutAction *CWizActions::actionFromName(const QString& strActionName)
 
     WIZACTION data = {strActionName, strActionName};
 
-    return addAction(data);
+    return addAction(data, false);
 }
 
 void CWizActions::toggleActionText(const QString& strActionName)
@@ -228,12 +225,12 @@ QMenu* CWizActions::toMenu(QWidget* parent, CWizSettings& settings, const QStrin
     QString strLocalText = QObject::tr(strSection.toUtf8());
 
     pMenu->setTitle(strLocalText);
-    buildMenu(pMenu, settings, strSection);
+    buildMenu(pMenu, settings, strSection, false);
 
     return pMenu;
 }
 
-void CWizActions::buildMenu(QMenu* pMenu, CWizSettings& settings, const QString& strSection)
+void CWizActions::buildMenu(QMenu* pMenu, CWizSettings& settings, const QString& strSection, bool bMenuBar)
 {
     int index = 0;
     while (true)
@@ -246,12 +243,16 @@ void CWizActions::buildMenu(QMenu* pMenu, CWizSettings& settings, const QString&
 
         // no fullscreen mode menu
 #ifndef Q_OS_MAC
-        if (strAction == WIZACTION_GLOBAL_TOGGLE_FULLSCREEN|| strAction == "actionExit"
-                || strAction == "actionPreference") {
+        if (strAction == WIZACTION_GLOBAL_TOGGLE_FULLSCREEN) {
             index++;
             continue;
         }
 #endif
+
+        if (!bMenuBar && (strAction == "actionPreference" || strAction == "actionExit")) {
+            index++;
+            continue;
+        }
 
         if (strAction.startsWith("-"))
         {
@@ -294,7 +295,7 @@ void CWizActions::buildMenuBar(QMenuBar* menuBar, const QString& strFileName)
             QString strLocalText = QObject::tr(strAction.toUtf8());
             QMenu* pMenu = menuBar->addMenu(strLocalText);
 
-            buildMenu(pMenu, settings, strAction);
+            buildMenu(pMenu, settings, strAction, true);
         }
         else
         {
@@ -328,7 +329,7 @@ void CWizActions::buildMenu(QMenu* menu, const QString& strFileName)
             QString strLocalText = QObject::tr(strAction.toUtf8());
             QMenu* pMenu = menu->addMenu(strLocalText);
 
-            buildMenu(pMenu, settings, strAction);
+            buildMenu(pMenu, settings, strAction, false);
         }
         else
         {

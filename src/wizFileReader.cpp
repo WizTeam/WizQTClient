@@ -30,7 +30,9 @@ QString CWizFileReader::loadTextFileToHtml(QString strFileName)
     QTextStream in(&file);
     QString ret = in.readAll();
     file.close();
+#if QT_VERSION > 0x050000
     ret = ret.toHtmlEscaped();
+#endif
     ret.replace("\n","<br>");
     ret.replace(" ","&nbsp");
     return ret;

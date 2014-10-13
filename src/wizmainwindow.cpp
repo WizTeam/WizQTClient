@@ -99,8 +99,8 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     , m_labelNotice(NULL)
     , m_optionsAction(NULL)
     #endif
+    , m_menuBar(0)
     #ifdef Q_OS_MAC
-    , m_menuBar(new QMenuBar(this))
     , m_toolBar(new QToolBar(this))
     #else
     , m_toolBar(new QToolBar("Main", titleBar()))
@@ -124,6 +124,8 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
 {
 #ifndef Q_OS_MAC
     clientLayout()->addWidget(m_toolBar);
+    bool bUseSystemBasedStyle = m_settings->useSystemBasedStyle();
+    setWindowStyleForLinux(bUseSystemBasedStyle);
 #endif
     windowInstance = this;
     //
@@ -163,7 +165,11 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
 #ifdef Q_OS_MAC
     initMenuBar();
 #else
-    initMenuList();
+    if (bUseSystemBasedStyle) {
+        initMenuBar();
+    } else {
+        initMenuList();
+    }
 #endif
     initToolBar();
     initClient();
@@ -184,7 +190,7 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
 
 #ifdef Q_OS_MAC
     setupFullScreenMode(this);
-#endif // Q_OS_MAC
+#endif
 
     WizService::NoteComments::init();
     //
@@ -318,6 +324,38 @@ void MainWindow::closeEvent(QCloseEvent* event)
         return;
     }
 #endif
+}
+
+void MainWindow::mousePressEvent(QMouseEvent* event)
+{
+    if (m_settings->useSystemBasedStyle())
+        QMainWindow::mousePressEvent(event);
+    else
+        _baseClass::mousePressEvent(event);
+}
+
+void MainWindow::mouseMoveEvent(QMouseEvent* event)
+{
+    if (m_settings->useSystemBasedStyle())
+        QMainWindow::mouseMoveEvent(event);
+    else
+        _baseClass::mouseMoveEvent(event);
+}
+
+void MainWindow::mouseReleaseEvent(QMouseEvent* event)
+{
+    if (m_settings->useSystemBasedStyle())
+        QMainWindow::mouseReleaseEvent(event);
+    else
+        _baseClass::mouseReleaseEvent(event);
+}
+
+void MainWindow::changeEvent(QEvent* event)
+{
+    if (m_settings->useSystemBasedStyle())
+        QMainWindow::changeEvent(event);
+    else
+        _baseClass::changeEvent(event);
 }
 
 void MainWindow::on_actionExit_triggered()
@@ -503,7 +541,12 @@ void MainWindow::restoreStatus()
 
 void MainWindow::initActions()
 {
+#ifdef Q_OS_LINUX
+    bool bUseExtraShortcut = !m_settings->useSystemBasedStyle();
+    m_actions->init(bUseExtraShortcut);
+#else
     m_actions->init();
+#endif
     m_animateSync->setAction(m_actions->actionFromName(WIZACTION_GLOBAL_SYNC));
     m_animateSync->setIcons("sync");
 
@@ -514,13 +557,14 @@ void MainWindow::initActions()
     on_editor_statusChanged();
 }
 
-#ifdef Q_OS_MAC
+
 void MainWindow::initMenuBar()
 {
+    m_menuBar = new QMenuBar(this);
     setMenuBar(m_menuBar);
     m_actions->buildMenuBar(m_menuBar, Utils::PathResolve::resourcesPath() + "files/mainmenu.ini");
 }
-#endif
+
 
 void MainWindow::on_editor_statusChanged()
 {
@@ -999,6 +1043,8 @@ void MainWindow::layoutTitleBar()
                                    "QToolButton::pressed{border-image:url(%3); background:none;}")
                            .arg(strButtonMenu).arg(strButtonMenuOn).arg(strButtonMenuSelected));
     m_menuButton->setFixedSize(16, 16);
+    if (m_settings->useSystemBasedStyle())
+        m_menuButton->setVisible(false);
     //
     layoutRight->addStretch();
     //
@@ -1804,7 +1850,7 @@ void MainWindow::on_actionPopupMainMenu_triggered()
     CWizSettings settings(Utils::PathResolve::resourcesPath() + "files/mainmenu.ini");
 
     QMenu* pMenu = new QMenu(this);
-    m_actions->buildMenu(pMenu, settings, pAction->objectName());
+    m_actions->buildMenu(pMenu, settings, pAction->objectName(), false);
 
     pMenu->popup(pt);
 }
@@ -1828,7 +1874,7 @@ void MainWindow::on_menuButtonClicked()
 
 #endif
 
-void MainWindow::on_actionBack_triggered()
+void MainWindow::on_actionGoBack_triggered()
 {
     if (!m_history->canBack())
         return;
@@ -1842,11 +1888,11 @@ void MainWindow::on_actionBack_triggered()
     }
     else
     {
-        on_actionBack_triggered();
+        on_actionGoBack_triggered();
     }
 }
 
-void MainWindow::on_actionForward_triggered()
+void MainWindow::on_actionGoForward_triggered()
 {
     if (!m_history->canForward())
         return;
@@ -1860,7 +1906,7 @@ void MainWindow::on_actionForward_triggered()
     }
     else
     {
-        on_actionForward_triggered();
+        on_actionGoForward_triggered();
     }
 }
 
@@ -2391,6 +2437,24 @@ void MainWindow::initTrayIcon(QSystemTrayIcon* trayIcon)
     }
 #endif
 }
+
+#ifdef Q_OS_LINUX
+void MainWindow::setWindowStyleForLinux(bool bUseSystemStyle)
+{
+    if (bUseSystemStyle)
+    {
+        setAttribute(Qt::WA_TranslucentBackground, false); //enable MainWindow to be transparent
+        {
+        QMainWindow window;
+        setWindowFlags(window.windowFlags());
+        }
+        rootWidget()->setContentsMargins(0, 0, 0, 0);
+        titleBar()->maxButton()->setVisible(false);
+        titleBar()->minButton()->setVisible(false);
+        titleBar()->closeButton()->setVisible(false);
+    }
+}
+#endif
 
 void MainWindow::setMobileFileReceiverEnable(bool bEnable)
 {

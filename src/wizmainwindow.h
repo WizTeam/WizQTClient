@@ -108,7 +108,10 @@ protected:
     virtual bool eventFilter(QObject* watched, QEvent* event);
     virtual void resizeEvent(QResizeEvent* event);
     virtual void closeEvent(QCloseEvent* event);
-
+    virtual void mousePressEvent(QMouseEvent* event);
+    virtual void mouseMoveEvent(QMouseEvent* event);
+    virtual void mouseReleaseEvent(QMouseEvent* event);
+    virtual void changeEvent(QEvent *event);
 private:
     ICore* m_core;
     CWizDatabaseManager& m_dbMgr;
@@ -125,9 +128,8 @@ private:
     QSystemTrayIcon* m_tray;
 
     QToolBar* m_toolBar;
-#ifdef Q_OS_MAC
     QMenuBar* m_menuBar;
-#else
+#ifdef Q_OS_LINUX
     QMenu* m_menu;
     QToolButton* m_menuButton;
 #endif
@@ -184,9 +186,8 @@ private:
 #ifndef Q_OS_MAC
     virtual void layoutTitleBar();
     void initMenuList();
-#else
-    void initMenuBar();
 #endif
+    void initMenuBar();
 
     QWidget* createListView();
 
@@ -291,8 +292,8 @@ public Q_SLOTS:
 
     void on_searchProcess(const QString &strKeywords, const CWizDocumentDataArray& arrayDocument, bool bEnd);
 
-    void on_actionBack_triggered();
-    void on_actionForward_triggered();
+    void on_actionGoBack_triggered();
+    void on_actionGoForward_triggered();
 
     void on_category_itemSelectionChanged();
     void on_documents_itemSelectionChanged();
@@ -399,6 +400,10 @@ private:
     void setFocusForNewNote(WIZDOCUMENTDATA doc);
     //
     void initTrayIcon(QSystemTrayIcon* trayIcon);
+
+#ifdef Q_OS_LINUX
+    void setWindowStyleForLinux(bool bUseSystemStyle);
+#endif
     //
     void startSearchStatus();
     void cancelSearchStatus();

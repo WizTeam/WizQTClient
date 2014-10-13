@@ -2,7 +2,7 @@
 #include <QFile>
 #include <QTextCodec>
 #include <QDebug>
-#include <QByteArrayData>
+//#include <QByteArrayData>
 
 CWizRtfReader::CWizRtfReader()
 {

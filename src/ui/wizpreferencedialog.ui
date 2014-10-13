@@ -35,7 +35,7 @@
    <item>
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
-      <number>1</number>
+      <number>0</number>
      </property>
      <property name="usesScrollButtons">
       <bool>false</bool>
@@ -96,6 +96,13 @@
         <widget class="QCheckBox" name="checkBoxTrayIcon">
          <property name="text">
           <string>Show system tray icon</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="checkBoxSystemStyle">
+         <property name="text">
+          <string>Use system based style</string>
          </property>
         </widget>
        </item>
