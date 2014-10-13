@@ -68,7 +68,7 @@ WIZACTION* CWizActions::actionsData()
         {"actionFeedback",                  QObject::tr("User feedback..."), "", ""},
         {"actionSupport",                  QObject::tr("User support..."), "", ""},
         {"actionManual",                  QObject::tr("User manual..."), "", ""},
-        {"actionSearchReplace",                  QObject::tr("Find Replace..."), "", "Ctrl+F"},
+        {"actionSearchReplace",                  QObject::tr("Find and replace..."), "", "Ctrl+F"},
 
         // editing
         {WIZACTION_EDITOR_UNDO,             QObject::tr("Undo"), "", "Ctrl+Z"},
@@ -82,7 +82,7 @@ WIZACTION* CWizActions::actionsData()
 
         // view
         {WIZACTION_GLOBAL_TOGGLE_CATEGORY,      QObject::tr("Hide category view"), QObject::tr("Show category view"), "Alt+Ctrl+S"},
-        {WIZACTION_GLOBAL_TOGGLE_FULLSCREEN,    QObject::tr("Enter Fullscreen"), QObject::tr("Leave Fullscreen"), "Ctrl+Meta+f"},
+        {WIZACTION_GLOBAL_TOGGLE_FULLSCREEN,    QObject::tr("Enter fullscreen"), QObject::tr("Leave fullscreen"), "Ctrl+Meta+f"},
 
         // format
         {WIZACTION_FORMAT_JUSTIFYLEFT,          QObject::tr("Justify left"), "", "Ctrl+["},
@@ -103,8 +103,8 @@ WIZACTION* CWizActions::actionsData()
         {WIZACTION_FORMAT_INSERT_DATE,          QObject::tr("Insert date"), "", "Shift+Ctrl+D"},
         {WIZACTION_FORMAT_INSERT_TIME,          QObject::tr("Insert time"), "", "Shift+Ctrl+Alt+D"},
         {WIZACTION_FORMAT_INSERT_CHECKLIST,      QObject::tr("Insert check list"), "", "Ctrl+O"},
-        {WIZACTION_FORMAT_INSERT_CODE,                QObject::tr("Insert Code"), "", "Shift+Ctrl+C"},
-        {WIZACTION_FORMAT_INSERT_IMAGE,                QObject::tr("Insert Image"), "", "Shift+Ctrl+I"},
+        {WIZACTION_FORMAT_INSERT_CODE,                QObject::tr("Insert code"), "", "Shift+Ctrl+C"},
+        {WIZACTION_FORMAT_INSERT_IMAGE,                QObject::tr("Insert image"), "", "Shift+Ctrl+I"},
         {WIZACTION_FORMAT_REMOVE_FORMAT,        QObject::tr("Remove format"), "", ""},
         {WIZACTION_FORMAT_PLAINTEXT,        QObject::tr("Convert to plain text"), "", ""},
         {WIZACTION_FORMAT_VIEW_SOURCE,          QObject::tr("View html source..."), "", ""},
