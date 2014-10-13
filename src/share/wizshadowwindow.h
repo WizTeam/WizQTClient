@@ -31,7 +31,7 @@ public:
         Base* pT = this;
         //
         pT->setAttribute(Qt::WA_TranslucentBackground); //enable MainWindow to be transparent
-        pT->setWindowFlags(Qt::X11BypassWindowManagerHint|Qt::FramelessWindowHint);
+        pT->setWindowFlags(Qt::FramelessWindowHint);
         pT->setContentsMargins(0, 0, 0, 0);
         //
         QLayout* windowLayout = new QBoxLayout(QBoxLayout::TopToBottom);
