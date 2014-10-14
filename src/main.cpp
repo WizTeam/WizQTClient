@@ -224,11 +224,6 @@ int mainCore(int argc, char *argv[])
     QString strLocale = userSettings.locale();
     QLocale::setDefault(strLocale);
 
-    if (userSettings.useSystemBasedStyle())
-    {
-#define USE_SYSTEM_STYLE
-    }
-
     QTranslator translatorWizNote;
     QString strLocaleFile = Utils::PathResolve::localeFileName(strLocale);
     translatorWizNote.load(strLocaleFile);

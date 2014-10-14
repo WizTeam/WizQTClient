@@ -252,7 +252,7 @@ void CWizAttachmentListView::contextMenuEvent(QContextMenuEvent * e)
 
 void CWizAttachmentListView::resetPermission()
 {
-    QString strUserId = m_dbMgr.db().getUserId();
+    QString strUserId = m_dbMgr.db().GetUserId();
     int nPerm = m_dbMgr.db(m_document.strKbGUID).permission();
 
     if (nPerm <= WIZ_USERGROUP_EDITOR

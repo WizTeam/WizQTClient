@@ -2149,9 +2149,9 @@ bool CWizDatabase::GetUserDisplayName(QString &strDisplayName)
     return true;
 }
 
-QString CWizDatabase::getUserAlias()
+QString CWizDatabase::GetUserAlias()
 {
-    CWizDatabase* personDb = dynamic_cast<CWizDatabase*>(GetPersonalDatabase());
+    CWizDatabase* personDb = getPersonalDatabase();
     if (!personDb)
         return QString();
 
@@ -2808,7 +2808,7 @@ bool CWizDatabase::CreateDocumentAndInit(const CString& strHtml, \
         BeginUpdate();
 
         data.strKbGUID = kbGUID();
-        data.strOwner = getUserId();
+        data.strOwner = GetUserId();
         bRet = CreateDocument(strTitle, strName, strLocation, strHtmlUrl, data);
         if (bRet)
         {
@@ -2836,7 +2836,7 @@ bool CWizDatabase::CreateDocumentAndInit(const WIZDOCUMENTDATA& sourceDoc, const
         BeginUpdate();
 
         newDoc.strKbGUID = kbGUID();
-        newDoc.strOwner = getUserId();
+        newDoc.strOwner = GetUserId();
         bRet = CreateDocument(sourceDoc.strTitle, sourceDoc.strName, strLocation, "", sourceDoc.strAuthor,
                               sourceDoc.strKeywords, sourceDoc.strType, GetUserId(), sourceDoc.strFileType,
                               sourceDoc.strStyleGUID, 0, 0, 0, newDoc);

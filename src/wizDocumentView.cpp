@@ -334,7 +334,7 @@ void CWizDocumentView::setEditNote(bool bEdit)
         CWizDatabase& db = m_dbMgr.db(m_note.strKbGUID);
         if (db.IsGroup())
         {
-            QString strUserAlias = db.getUserAlias();
+            QString strUserAlias = db.GetUserAlias();
             m_editStatusSyncThread->setCurrentEditingDocument(strUserAlias, m_note.strKbGUID, m_note.strGUID);
         }
     }
@@ -429,7 +429,7 @@ void CWizDocumentView::loadNote(const WIZDOCUMENTDATA& doc)
         CWizDatabase& db = m_dbMgr.db(m_note.strKbGUID);
         if (db.IsGroup())
         {
-            QString strUserAlias = db.getUserAlias();
+            QString strUserAlias = db.GetUserAlias();
             m_editStatusSyncThread->setCurrentEditingDocument(strUserAlias, m_note.strKbGUID, m_note.strGUID);
         }
     }
@@ -510,7 +510,7 @@ void CWizDocumentView::on_document_data_saved(const QString& strGUID,
 void Core::CWizDocumentView::on_checkEditStatus_finished(QString strGUID, QStringList editors)
 {
     //
-    QString strCurrentUser = m_dbMgr.db(m_note.strKbGUID).getUserAlias();
+    QString strCurrentUser = m_dbMgr.db(m_note.strKbGUID).GetUserAlias();
     editors.removeAll(strCurrentUser);
 
     if (strGUID == m_note.strGUID && !editors.isEmpty())
@@ -531,7 +531,7 @@ void CWizDocumentView::on_webView_focus_changed()
         CWizDatabase& db = m_dbMgr.db(m_note.strKbGUID);
         if (db.IsGroup())
         {
-            QString strUserAlias = db.getUserAlias();
+            QString strUserAlias = db.GetUserAlias();
             m_editStatusSyncThread->setCurrentEditingDocument(strUserAlias, m_note.strKbGUID, m_note.strGUID);
         }
     }

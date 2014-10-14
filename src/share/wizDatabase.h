@@ -293,9 +293,8 @@ public:
     bool SetUserName(const QString& strUserName);
     bool GetUserDisplayName(QString& strDisplayName);
 
-    QString getUserId() const { return m_strUserId; }
     //QString getPassword() const { return m_strPassword; }
-    QString getUserAlias();
+    QString GetUserAlias();
     CWizDatabase* getPersonalDatabase();
 
 

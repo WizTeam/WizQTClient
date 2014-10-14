@@ -64,6 +64,7 @@
 #include "sync/apientry.h"
 #include "sync/wizkmsync.h"
 #include "sync/avatar.h"
+#include "sync/token.h"
 
 #include "wizUserVerifyDialog.h"
 #include "plugindialog.h"
@@ -386,6 +387,34 @@ void MainWindow::on_checkUpgrade_finished(bool bUpgradeAvaliable)
 #endif
         QDesktopServices::openUrl(QUrl(url));
     }
+}
+
+void MainWindow::on_TokenAcquired(const QString& strToken)
+{
+    WizService::Token::instance()->disconnect(this);
+
+    if (strToken.isEmpty())
+    {
+        int nErrorCode = WizService::Token::lastErrorCode();
+        // network unavailable
+        if (QNetworkReply::ProtocolUnknownError == nErrorCode)
+        {
+            QMessageBox::critical(this, tr("Info"), tr("Connection is not available, please check your network connection."));
+        }
+        else if (errorTokenInvalid == nErrorCode)
+        {
+            //try to relogin wiz server, but failed. may be password error
+            m_settings->setPassword("");
+            if (!m_userVerifyDialog)
+            {
+                m_userVerifyDialog = new CWizUserVerifyDialog(m_dbMgr.db().GetUserId(), tr("sorry, sync failed. please input your password and try again."), this);
+                connect(m_userVerifyDialog, SIGNAL(accepted()), SLOT(on_syncDone_userVerified()));
+            }
+
+            m_userVerifyDialog->exec();
+        }
+    }
+
 }
 
 void MainWindow::setSystemTrayIconVisible(bool bVisible)
@@ -884,7 +913,7 @@ QString MainWindow::getUserAvatarFilePath(int size) const
 QString MainWindow::getUserAlias() const
 {
     QString strKbGUID = m_doc->note().strKbGUID;
-    return m_dbMgr.db(strKbGUID).getUserAlias();
+    return m_dbMgr.db(strKbGUID).GetUserAlias();
 }
 
 QString MainWindow::getFormatedDateTime() const
@@ -1085,8 +1114,8 @@ void MainWindow::initToolBar()
 
     m_toolBar->addWidget(new CWizSpacer(m_toolBar));
 
-    m_toolBar->addAction(m_actions->actionFromName(WIZACTION_GLOBAL_BACK));
-    m_toolBar->addAction(m_actions->actionFromName(WIZACTION_GLOBAL_FORWARD));
+    m_toolBar->addAction(m_actions->actionFromName(WIZACTION_GLOBAL_GOBACK));
+    m_toolBar->addAction(m_actions->actionFromName(WIZACTION_GLOBAL_GOFORWARD));
 
 
     m_spacerBeforeSearch = new CWizSpacer(m_toolBar);
@@ -1392,16 +1421,14 @@ void MainWindow::on_syncDone(int nErrorCode, const QString& strErrorMsg)
 
     m_animateSync->stopPlay();
 
-    // password changed
-    if (errorTokenInvalid == nErrorCode) {
-        m_settings->setPassword("");
-        if (!m_userVerifyDialog) {
-            m_userVerifyDialog = new CWizUserVerifyDialog(m_dbMgr.db().GetUserId(), tr("sorry, sync failed. please input your password and try again."), this);
-            connect(m_userVerifyDialog, SIGNAL(accepted()), SLOT(on_syncDone_userVerified()));
-        }
-
-        m_userVerifyDialog->exec();
-    } else if (QNetworkReply::ProtocolUnknownError == nErrorCode) {
+    //
+    if (errorTokenInvalid == nErrorCode)
+    {
+        reconnectServer();
+        return;
+    }
+    else if (QNetworkReply::ProtocolUnknownError == nErrorCode)
+    {
 //        //network avaliable, show message once
 //        static bool showMessageAgain = true;
 //        if (showMessageAgain) {
@@ -2257,6 +2284,18 @@ void MainWindow::syncAllData()
 {
     m_sync->startSyncAll(false);
     m_animateSync->startPlay();
+}
+
+void MainWindow::reconnectServer()
+{
+    CWizDatabase& db = m_dbMgr.db();
+    WizService::Token::setUserId(db.GetUserId());
+    WizService::Token::setPasswd(m_settings->password());
+
+    m_sync->clearCurrentToken();
+    connect(WizService::Token::instance(), SIGNAL(tokenAcquired(QString)),
+            SLOT(on_TokenAcquired(QString)), Qt::QueuedConnection);
+    WizService::Token::requestToken();
 }
 
 void MainWindow::setActionsEnableForNewNote()
