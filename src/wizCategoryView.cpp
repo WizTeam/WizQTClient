@@ -3156,7 +3156,7 @@ CWizCategoryViewTrashItem* CWizCategoryView::findTrash(const QString& strKbGUID 
 
 void CWizCategoryView::addAndSelectFolder(const CString& strLocation)
 {
-    if (QTreeWidgetItem* pItem = addFolder(strLocation, false)) {
+    if (QTreeWidgetItem* pItem = addFolder(strLocation, true)) {
         setCurrentItem(pItem);
     }
 }
