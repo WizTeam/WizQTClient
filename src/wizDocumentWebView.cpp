@@ -23,6 +23,7 @@
 #include <QWebElement>
 #include <QUndoStack>
 #include <QDesktopServices>
+#include <QMacPasteboardMime>
 
 #include <coreplugin/icore.h>
 
