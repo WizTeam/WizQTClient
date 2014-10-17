@@ -2120,6 +2120,18 @@ QString CWizDatabase::GetDefaultNoteLocation() const
         return "/"+m_strUserId+"/";
 }
 
+QString CWizDatabase::GetDocumentOwnerAlias(const WIZDOCUMENTDATA& doc)
+{
+    CWizDatabase* personDb = getPersonalDatabase();
+    if (!personDb)
+        return QString();
+
+    QString strUserID = doc.strOwner;
+    WIZBIZUSER bizUser;
+    personDb->userFromID(doc.strKbGUID, strUserID, bizUser);
+    return bizUser.alias;
+}
+
 bool CWizDatabase::GetUserName(QString& strUserName)
 {
     strUserName = GetMetaDef(g_strAccountSection, "UserName");

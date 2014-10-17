@@ -145,41 +145,43 @@ void CWizDocumentListViewItem::setSortingType(int type)
     CWizDatabase& db = m_app.databaseManager().db(m_data.doc.strKbGUID);
     db.DocumentFromGUID(m_data.doc.strGUID, m_data.doc);
     QString strFileName = db.GetDocumentFileName(m_data.doc.strGUID);
+    QString strAuthor = db.GetDocumentOwnerAlias(m_data.doc);
+    strAuthor += strAuthor.isEmpty() ? "" : " ";
     QFileInfo fi(strFileName);
 
     if (m_data.nType == TypeGroupDocument) {
         switch (m_nSortingType) {
         case CWizSortingPopupButton::SortingCreateTime:
         case -CWizSortingPopupButton::SortingCreateTime:
-            m_data.strInfo = m_data.doc.tCreated.toHumanFriendlyString();
+            m_data.strInfo = strAuthor + m_data.doc.tCreated.toHumanFriendlyString();
             break;
         case CWizSortingPopupButton::SortingUpdateTime:
         case -CWizSortingPopupButton::SortingUpdateTime:
-            m_data.strInfo = m_data.doc.tModified.toHumanFriendlyString();
+            m_data.strInfo = strAuthor + m_data.doc.tModified.toHumanFriendlyString();
             break;
         case CWizSortingPopupButton::SortingAccessTime:
         case -CWizSortingPopupButton::SortingAccessTime:
-            m_data.strInfo = m_data.doc.tAccessed.toHumanFriendlyString();
+            m_data.strInfo = strAuthor + m_data.doc.tAccessed.toHumanFriendlyString();
             break;
         case CWizSortingPopupButton::SortingTitle:
         case -CWizSortingPopupButton::SortingTitle:
-            m_data.strInfo = m_data.doc.tModified.toHumanFriendlyString();
+            m_data.strInfo = strAuthor + m_data.doc.tModified.toHumanFriendlyString();
             break;
         case CWizSortingPopupButton::SortingTag:
         case -CWizSortingPopupButton::SortingTag:
-            m_data.strInfo = tagTree();
+            m_data.strInfo = strAuthor + tagTree();
             break;
         case CWizSortingPopupButton::SortingLocation:
         case -CWizSortingPopupButton::SortingLocation:
-            m_data.strInfo = tagTree();
+            m_data.strInfo = strAuthor + tagTree();
             break;
         case CWizSortingPopupButton::SortingSize:
         case -CWizSortingPopupButton::SortingSize:
             if (!fi.exists()) {
-                m_data.strInfo = QObject::tr("Unknown");
+                m_data.strInfo = strAuthor + QObject::tr("Unknown");
             } else {
                 m_nSize = fi.size();
-                m_data.strInfo = ::WizGetFileSizeHumanReadalbe(strFileName);
+                m_data.strInfo = strAuthor + ::WizGetFileSizeHumanReadalbe(strFileName);
             }
             break;
         default:

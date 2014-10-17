@@ -1553,3 +1553,25 @@ bool CWizIndexBase::users(const QString& strKbGUID, CWizBizUserDataArray& arrayU
 
     return true;
 }
+
+bool CWizIndexBase::userFromID(const QString& strKbGUID, const QString& userID, WIZBIZUSER& user)
+{
+    CString strWhere = "BIZ_GUID=%1 AND USER_ID=%2";
+    strWhere = strWhere.arg(STR2SQL(strKbGUID)).arg(STR2SQL(userID));
+
+    CString strSQL = FormatQuerySQL(TABLE_NAME_WIZ_USER,
+                                    FIELD_LIST_WIZ_USER,
+                                    strWhere);
+
+    CWizBizUserDataArray arrayUser;
+    if (!SQLToBizUserDataArray(strSQL, arrayUser)) {
+        TOLOG("[userFromGUID] failed to get user by user guid");
+        return false;
+    }
+
+    if (arrayUser.empty())
+        return false;
+
+    user = arrayUser[0];
+    return true;
+}

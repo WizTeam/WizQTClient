@@ -80,6 +80,9 @@ public:
                       const QString& userGUID,
                       WIZBIZUSER& user);
     bool users(const QString& strKbGUID, CWizBizUserDataArray& arrayUser);
+    bool userFromID(const QString& strKbGUID,
+                    const QString& userID,
+                    WIZBIZUSER& user);
 
 protected:
     CppSQLite3DB m_db;
