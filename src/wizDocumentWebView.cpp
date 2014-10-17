@@ -38,6 +38,7 @@
 #include "wizDocumentView.h"
 #include "wizSearchReplaceWidget.h"
 #include "widgets/WizCodeEditorDialog.h"
+#include "widgets/wizScreenShotWidget.h"
 
 #include "utils/pathresolve.h"
 #include "utils/logger.h"
@@ -757,6 +758,24 @@ void CWizDocumentWebView::initCheckListEnvironment()
     }
 }
 
+void CWizDocumentWebView::setWindowVisibleOnScreenShot(bool bVisible)
+{
+    MainWindow* mainWindow = qobject_cast<MainWindow *>(m_app.mainWindow());
+    if (mainWindow)
+    {
+        mainWindow->setVisible(bVisible);
+    }
+}
+
+bool CWizDocumentWebView::insertImage(const QString& strFileName, bool bCopyFile)
+{
+    QString strHtml;
+    if (WizImage2Html(strFileName, strHtml, bCopyFile)) {
+        return editorCommandExecuteInsertHtml(strHtml, true);
+    }
+    return false;
+}
+
 void CWizDocumentWebView::onEditorLoadFinished(bool ok)
 {
     if (!ok) {
@@ -1473,6 +1492,30 @@ void CWizDocumentWebView::on_editorCommandExecuteTableInsert_accepted()
     editorCommandExecuteCommand("insertTable", QString("{numRows:%1, numCols:%2, border:1, borderStyle:'1px solid #dddddd;'}").arg(nRows).arg(nCols));
 }
 
+void CWizDocumentWebView::on_editorCommandExecuteScreenShot_imageAccepted(const QPixmap& pix)
+{
+    if (pix.isNull())
+        return;
+
+    QString strTempPath = Utils::PathResolve::tempPath();
+    CString strFileName = strTempPath + WizIntToStr(GetTickCount()) + ".png";
+    if (!pix.save(strFileName)) {
+        TOLOG("ERROR: Can't save clipboard image to file");
+        return;
+    }
+
+    insertImage(strFileName, false);
+}
+
+void CWizDocumentWebView::on_editorCommandExecuteScreenShot_finished()
+{
+    QObject *ssSender = qobject_cast<QObject*>(sender());
+    if (ssSender)
+        delete ssSender;
+
+    setWindowVisibleOnScreenShot(false);
+}
+
 bool CWizDocumentWebView::editorCommandExecuteInsertHorizontal()
 {
     return editorCommandExecuteCommand("horizontal");
@@ -1502,11 +1545,8 @@ bool CWizDocumentWebView::editorCommandExecuteInsertImage()
 
     foreach (QString strImgFile, strImgFileList)
     {
-        QString strHtml;
         bool bUseCopyFile = true;
-        if (WizImage2Html(strImgFile, strHtml, bUseCopyFile)) {
-            editorCommandExecuteInsertHtml(strHtml, true);
-        }
+        insertImage(strImgFile, bUseCopyFile);
     }
     return true;
 }
@@ -1578,6 +1618,19 @@ bool CWizDocumentWebView::editorCommandExecuteMobileImage(bool bReceiveImage)
     m_app.userSettings().setReceiveMobileFile(bReceiveImage);
     mainWindow->setMobileFileReceiverEnable(bReceiveImage);
 
+    return true;
+}
+
+bool CWizDocumentWebView::editorCommandExecuteScreenShot()
+{
+    CWizScreenShotHelper* helper = new CWizScreenShotHelper();
+
+    connect(helper, SIGNAL(screenShotCaptured(QPixmap)),
+            SLOT(on_editorCommandExecuteScreenShot_imageAccepted(QPixmap)));
+    connect(helper, SIGNAL(shotScreenQuit()), SLOT(on_editorCommandExecuteScreenShot_finished()));
+
+    setWindowVisibleOnScreenShot(false);
+    helper->startScreenShot();
     return true;
 }
 

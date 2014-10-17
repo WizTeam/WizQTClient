@@ -257,6 +257,9 @@ public Q_SLOTS:
     void on_editorCommandExecuteLinkInsert_accepted();
     void on_editorCommandExecuteTableInsert_accepted();
 
+    void on_editorCommandExecuteScreenShot_imageAccepted(const QPixmap& pix);
+    void on_editorCommandExecuteScreenShot_finished();
+
     void applySearchKeywordHighlight();
     void clearSearchKeywordHighlight();
 
@@ -331,6 +334,7 @@ public Q_SLOTS:
     bool editorCommandExecuteViewSource();
     bool editorCommandExecuteInsertCode();
     bool editorCommandExecuteMobileImage(bool bReceiveImage);
+    bool editorCommandExecuteScreenShot();
 
 #ifdef Q_OS_MAC
     bool editorCommandExecuteRemoveStartOfLine();
@@ -352,6 +356,10 @@ Q_SIGNALS:
 
     //
     void viewDocumentFinished();
+
+private:
+    void setWindowVisibleOnScreenShot(bool bVisible);
+    bool insertImage(const QString& strFileName, bool bCopyFile);
 };
 
 #endif // WIZDOCUMENTWEBVIEW_H

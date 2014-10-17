@@ -1204,7 +1204,8 @@ void EditorToolBar::on_btnHorizontal_clicked()
 void EditorToolBar::on_btnCheckList_clicked()
 {
     if (m_editor) {
-        m_editor->editorCommandExecuteInsertCheckList();
+        //m_editor->editorCommandExecuteInsertCheckList();
+        m_editor->editorCommandExecuteScreenShot();
     }
 }
 

@@ -149,6 +149,7 @@ set(wiznote_SOURCES
     share/wizLocalPeer.cpp
     share/wizSingleApplication.cpp
     share/wizRtfReader.cpp
+    widgets/wizScreenShotWidget.cpp
 )
 
 set(wiznote_HEADERS
@@ -285,6 +286,7 @@ set(wiznote_HEADERS
     share/wizLocalPeer.h
     share/wizSingleApplication.h
     share/wizRtfReader.h
+    widgets/wizScreenShotWidget.h
 )
 
 set(wiznote_FORMS
