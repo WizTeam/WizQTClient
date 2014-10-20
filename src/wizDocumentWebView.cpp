@@ -1634,14 +1634,8 @@ bool CWizDocumentWebView::editorCommandExecuteScreenShot()
             SLOT(on_editorCommandExecuteScreenShot_imageAccepted(QPixmap)));
     connect(helper, SIGNAL(shotScreenQuit()), SLOT(on_editorCommandExecuteScreenShot_finished()));
 
-//    MainWindow* mainWindow = qobject_cast<MainWindow *>(m_app.mainWindow());
-//    if (mainWindow)
-//    {
-//        mainWindow->showScreenShotWidget();
-//    }
-
     setWindowVisibleOnScreenShot(false);
-    helper->startScreenShot();
+    QTimer::singleShot(300, helper, SLOT(startScreenShot()));
     return true;
 }
 

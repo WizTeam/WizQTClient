@@ -5,13 +5,12 @@
 #include <QTimer>
 
 CWizScreenShotWidget::CWizScreenShotWidget(QWidget* parent) :
-    isSave(false)
-  , QWidget(parent)
+  QWidget(parent)
 {
-    tipWidth = 300; //温馨提示框的宽度
-    tipHeight = 100; //温馨提示框的高度
-    infoWidth = 100; //坐标信息框的宽度
-    infoHeight = 50; //坐标信息框的高度
+    tipWidth = 300;
+    tipHeight = 100;
+    infoWidth = 100;
+    infoHeight = 50;
 
     initCWizScreenShotWidget();
 }
@@ -42,25 +41,7 @@ void CWizScreenShotWidget::quit()
 void CWizScreenShotWidget::savePixmap()
 {
     hideWidget();
-//    mainPixmap = shotPixmap;
-//    isSave = true;
-//    emit setNewPixmap(shotPixmap);
     emit finishPixmap(shotPixmap);
-}
-
-bool CWizScreenShotWidget::getIsSave()
-{
-    return isSave;
-}
-
-void CWizScreenShotWidget::setIsSave(bool is)
-{
-    isSave = is;
-}
-
-QPixmap CWizScreenShotWidget::getMainPixmap()
-{
-    return this->mainPixmap;
 }
 
 void CWizScreenShotWidget::loadBackgroundPixmap(const QPixmap &bgPixmap)
@@ -86,7 +67,7 @@ QPixmap CWizScreenShotWidget::getFullScreenPixmap()
 {
     initCWizScreenShotWidget();
     QPixmap result = QPixmap();
-    result = QPixmap::grabWindow(QApplication::desktop()->winId()); //抓取当前屏幕的图片
+    result = QPixmap::grabWindow(QApplication::desktop()->winId());
 
     return result;
 }
@@ -94,12 +75,12 @@ QPixmap CWizScreenShotWidget::getFullScreenPixmap()
 void CWizScreenShotWidget::paintEvent(QPaintEvent *event)
 {
     QColor shadowColor;
-    shadowColor= QColor(0, 0, 0, 100); //阴影颜色设置
-    painter.begin(this); //进行重绘
+    shadowColor= QColor(0, 0, 0, 100);
+    painter.begin(this);
 
-    painter.setPen(QPen(Qt::blue, 2, Qt::SolidLine, Qt::FlatCap));//设置画笔
-    painter.drawPixmap(screenx, screeny, loadPixmap); //将背景图片画到窗体上
-    painter.fillRect(screenx, screeny, screenwidth, screenheight, shadowColor); //画影罩效果
+    painter.setPen(QPen(Qt::blue, 2, Qt::SolidLine, Qt::FlatCap));
+    painter.drawPixmap(screenx, screeny, loadPixmap);
+    painter.fillRect(screenx, screeny, screenwidth, screenheight, shadowColor);
 
     switch (currentShotState)
     {
@@ -108,12 +89,12 @@ void CWizScreenShotWidget::paintEvent(QPaintEvent *event)
         break;
     case beginShot:
     case finishShot:
-        selectedRect = getRect(beginPoint,endPoint); //获取选区
+        selectedRect = getRect(beginPoint,endPoint); // get selected range
         drawSelectedPixmap();
         break;
     case beginMoveShot:
     case finishMoveShot:
-        selectedRect = getMoveAllSelectedRect(); //获取选区
+        selectedRect = getMoveAllSelectedRect();  // get selected range
         drawSelectedPixmap();
         break;
     case beginControl:
@@ -124,12 +105,12 @@ void CWizScreenShotWidget::paintEvent(QPaintEvent *event)
     default:
         break;
     }
-    drawXYWHInfo(); //打印坐标信息
-    painter.end();  //重绘结束
+    drawXYWHInfo(); //draw point info
+    painter.end();
 
     if (currentShotState == finishMoveShot || currentShotState == finishControl)
     {
-        updateBeginEndPointValue(selectedRect); //当移动完选区后,更新beginPoint,endPoint,为下一次移动做准备工作
+        updateBeginEndPointValue(selectedRect); //prepare for next move
     }
 
 }
@@ -145,24 +126,22 @@ void CWizScreenShotWidget::keyPressEvent(QKeyEvent *event)
 
 void CWizScreenShotWidget::mousePressEvent(QMouseEvent *event)
 {
-    //当开始进行拖动选择区域时,确定开始选取的beginPoint坐标
     if (event->button() == Qt::LeftButton && currentShotState == initShot)
     {
-        currentShotState = beginShot; //设置当前状态为beginShot状态
+        currentShotState = beginShot;
         beginPoint = event->pos();
     }
 
-    //移动选区改变选区的所在位置
     if (event->button() == Qt::LeftButton && isInSelectedRect(event->pos()) &&
             getMoveControlState(event->pos()) == moveControl0)
     {
-        currentShotState = beginMoveShot; //启用开始移动选取选项,beginMoveShot状态
+        currentShotState = beginMoveShot;
         moveBeginPoint = event->pos();
     }
-    //移动控制点改变选区大小
+
     if (event->button() == Qt::LeftButton && getMoveControlState(event->pos()) != moveControl0)
     {
-        currentShotState = beginControl; //开始移动控制点
+        currentShotState = beginControl;
         controlValue = getMoveControlState(event->pos());
         moveBeginPoint = event->pos();
     }
@@ -170,7 +149,6 @@ void CWizScreenShotWidget::mousePressEvent(QMouseEvent *event)
 
 void CWizScreenShotWidget::mouseReleaseEvent(QMouseEvent *event)
 {
-    //当结束拖动选择区域时,确定结束选取的endPoint坐标
     if (event->button() == Qt::LeftButton && currentShotState == beginShot)
     {
         currentShotState = finishShot;
@@ -178,7 +156,6 @@ void CWizScreenShotWidget::mouseReleaseEvent(QMouseEvent *event)
         update();
     }
 
-    //当结束移动选区改变选区的所在位置时，确定结束选取的moveEndPoint坐标
     if (event->button() == Qt::LeftButton && currentShotState == beginMoveShot)
     {
         currentShotState = finishMoveShot;
@@ -186,7 +163,6 @@ void CWizScreenShotWidget::mouseReleaseEvent(QMouseEvent *event)
         update();
     }
 
-    //当前状态为beginControl状态时，设置状态为finishControl并确定moveEndPoint的坐标
     if (event->button() == Qt::LeftButton && currentShotState == beginControl)
     {
         currentShotState = finishControl;
@@ -197,21 +173,19 @@ void CWizScreenShotWidget::mouseReleaseEvent(QMouseEvent *event)
 
 void CWizScreenShotWidget::mouseMoveEvent(QMouseEvent *event)
 {
-    //当拖动时，动态的更新所选择的区域
     if (currentShotState == beginShot)
     {
         endPoint = event->pos();
         update();
     }
 
-    //当确定选区后，对选区进行移动操作
     if (currentShotState == beginMoveShot || currentShotState == beginControl)
     {
         moveEndPoint = event->pos();
         update();
     }
 
-    updateMouseShape(event->pos()); //修改鼠标的形状
+    updateMouseShape(event->pos());
     setMouseTracking(true);
 }
 
@@ -246,14 +220,14 @@ void CWizScreenShotWidget::initCWizScreenShotWidget()
     moveBeginPoint = QPoint(0, 0);
     moveEndPoint = QPoint(0, 0);
 
-    tlRect = QRect(0, 0, 0, 0); //左上点
-    trRect = QRect(0, 0, 0, 0); //上右点
-    blRect = QRect(0, 0, 0, 0); //左下点
-    brRect = QRect(0, 0, 0, 0); //右下点
-    tcRect = QRect(0, 0, 0, 0); //上中点
-    bcRect = QRect(0, 0, 0, 0); //下中点
-    lcRect = QRect(0, 0, 0, 0); //左中点
-    rcRect = QRect(0, 0, 0, 0); //右中点
+    tlRect = QRect(0, 0, 0, 0);
+    trRect = QRect(0, 0, 0, 0);
+    blRect = QRect(0, 0, 0, 0);
+    brRect = QRect(0, 0, 0, 0);
+    tcRect = QRect(0, 0, 0, 0);
+    bcRect = QRect(0, 0, 0, 0);
+    lcRect = QRect(0, 0, 0, 0);
+    rcRect = QRect(0, 0, 0, 0);
 
     setCursor(Qt::CrossCursor);
     update();
@@ -276,7 +250,7 @@ bool CWizScreenShotWidget::isInSelectedRect(const QPoint &point)
 void CWizScreenShotWidget::cancelSelectedRect()
 {
     initCWizScreenShotWidget();
-    update(); //进行重绘，将选取区域去掉
+    update();
 }
 
 void CWizScreenShotWidget::contextMenuEvent(QContextMenuEvent *event)
@@ -312,7 +286,7 @@ void CWizScreenShotWidget::drawTipsText()
     QString strTipsText = QString(tr("Tips \n mouse dragging screenshots; area right in the screenshots saved; \n screenshots area right outside cancellation; ESC to exit;"));
 
     painter.fillRect(rect, color);
-    painter.setPen(QPen(Qt::white));//设置画笔的颜色为白色
+    painter.setPen(QPen(Qt::white));
     painter.drawText(rect, Qt::AlignCenter, strTipsText);
 
 }
@@ -376,11 +350,11 @@ void CWizScreenShotWidget::checkMoveEndPoint()
 void CWizScreenShotWidget::draw8ControlPoint(const QRect &rect)
 {
     int x, y;
-    QColor color= QColor(0, 0, 255); //画点的颜色设置
-    QPoint tlPoint = rect.topLeft(); //左上点
-    QPoint trPoint = rect.topRight(); //右上点
-    QPoint blPoint = rect.bottomLeft(); //左下点
-    QPoint brPoint = rect.bottomRight(); //右下点
+    QColor color= QColor(0, 0, 255);
+    QPoint tlPoint = rect.topLeft();
+    QPoint trPoint = rect.topRight();
+    QPoint blPoint = rect.bottomLeft();
+    QPoint brPoint = rect.bottomRight();
 
     x = (tlPoint.x() + trPoint.x()) / 2;
     y = tlPoint.y();
@@ -398,14 +372,14 @@ void CWizScreenShotWidget::draw8ControlPoint(const QRect &rect)
     y = (trPoint.y() + brPoint.y()) / 2;
     QPoint rcPoint = QPoint(x, y);
 
-    tlRect = QRect(tlPoint.x() - 2, tlPoint.y() - 2, 6, 6); //左上点
-    trRect = QRect(trPoint.x() - 2, trPoint.y() - 2, 6, 6); //右上点
-    blRect = QRect(blPoint.x() - 2, blPoint.y() - 2, 6, 6); //左下点
-    brRect = QRect(brPoint.x() - 2, brPoint.y() - 2, 6, 6); //右下点
-    tcRect = QRect(tcPoint.x() - 2, tcPoint.y() - 2, 6, 6); //上中点
-    bcRect = QRect(bcPoint.x() - 2, bcPoint.y() - 2, 6, 6); //下中点
-    lcRect = QRect(lcPoint.x() - 2, lcPoint.y() - 2, 6, 6);//左中点
-    rcRect = QRect(rcPoint.x() - 2, rcPoint.y() - 2, 6, 6); //右中点
+    tlRect = QRect(tlPoint.x() - 2, tlPoint.y() - 2, 6, 6);
+    trRect = QRect(trPoint.x() - 2, trPoint.y() - 2, 6, 6);
+    blRect = QRect(blPoint.x() - 2, blPoint.y() - 2, 6, 6);
+    brRect = QRect(brPoint.x() - 2, brPoint.y() - 2, 6, 6);
+    tcRect = QRect(tcPoint.x() - 2, tcPoint.y() - 2, 6, 6);
+    bcRect = QRect(bcPoint.x() - 2, bcPoint.y() - 2, 6, 6);
+    lcRect = QRect(lcPoint.x() - 2, lcPoint.y() - 2, 6, 6);
+    rcRect = QRect(rcPoint.x() - 2, rcPoint.y() - 2, 6, 6);
 
     painter.fillRect(tlRect, color);
     painter.fillRect(trRect, color);
@@ -437,7 +411,7 @@ void CWizScreenShotWidget::updateMouseShape(const QPoint &point)
             updateMoveControlMouseShape(getMoveControlState(point));
         break;
     case beginControl:
-        updateMoveControlMouseShape(controlValue); //调用函数对移动8个控制点进行鼠标状态的改变
+        updateMoveControlMouseShape(controlValue);
         break;
     default:
         setCursor(Qt::ArrowCursor);
@@ -522,7 +496,7 @@ QRect CWizScreenShotWidget::getMoveAllSelectedRect(void)
     QRect result;
     QPoint tmpBeginPoint, tmpEndPoint;
     int moveX, moveY;
-    checkMoveEndPoint(); //对移动选区进行判断，当移动的选区超出边界，则停止移动
+    checkMoveEndPoint();
     moveX = moveEndPoint.x() - moveBeginPoint.x();
     moveY = moveEndPoint.y() - moveBeginPoint.y();
     tmpBeginPoint.setX(beginPoint.x() + moveX);
@@ -597,13 +571,13 @@ int CWizScreenShotWidget::getMinValue(int num1, int num2)
 
 void CWizScreenShotWidget::drawSelectedPixmap(void)
 {
-    painter.drawRect(selectedRect); //画选中的矩形框
-    shotPixmap = loadPixmap.copy(selectedRect);  //更新选区的Pixmap
+    painter.drawRect(selectedRect);
+    shotPixmap = loadPixmap.copy(selectedRect);
     if (selectedRect.width() > 0 && selectedRect.height())
     {
-        painter.drawPixmap(selectedRect.topLeft(), shotPixmap); //画选中区域的图片
+        painter.drawPixmap(selectedRect.topLeft(), shotPixmap);
     }
-    draw8ControlPoint(selectedRect); //画出选区的8个控制点
+    draw8ControlPoint(selectedRect);
 }
 
 void CWizScreenShotWidget::drawXYWHInfo(void)
@@ -626,7 +600,7 @@ void CWizScreenShotWidget::drawXYWHInfo(void)
         strTipsText = QString(tr("Coordinate information \n x:% 1 y:% 2 \n w:% 3 h:% 4")).arg(selectedRect.x(), 4).arg(selectedRect.y(), 4)
                 .arg(selectedRect.width(),4).arg(selectedRect.height(), 4);
         painter.fillRect(rect, color);
-        painter.setPen(QPen(Qt::black));//设置画笔的颜色为黑色
+        painter.setPen(QPen(Qt::black));
         painter.drawText(rect, Qt::AlignLeft|Qt::AlignVCenter, strTipsText);
         break;
     default:
