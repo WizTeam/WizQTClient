@@ -261,6 +261,7 @@ void CWizDocumentWebView::inputMethodEvent(QInputMethodEvent* event)
 #endif
 
 #ifdef Q_OS_MAC
+    /*
     ///暂时注释代码，移动输入光标会导致极高的CPU占用率，导致输入卡顿。
 
     //int nLength = 0;
@@ -282,9 +283,7 @@ void CWizDocumentWebView::inputMethodEvent(QInputMethodEvent* event)
     for (int i = 0; i < nOffset; i++) {
         page()->triggerAction(QWebPage::MoveToNextChar);
     }
-
-    /// 此处不计算移动的字符数，直接移动到下一个文字的开始处。在英文之前输入中文时存在问题。
-//    page()->triggerAction(QWebPage::MoveToNextWord);
+    */
 #endif // Q_OS_MAC
 }
 
@@ -763,7 +762,7 @@ void CWizDocumentWebView::setWindowVisibleOnScreenShot(bool bVisible)
     MainWindow* mainWindow = qobject_cast<MainWindow *>(m_app.mainWindow());
     if (mainWindow)
     {
-        mainWindow->setVisible(bVisible);
+        bVisible ? mainWindow->show() : mainWindow->hide();
     }
 }
 
@@ -1492,8 +1491,14 @@ void CWizDocumentWebView::on_editorCommandExecuteTableInsert_accepted()
     editorCommandExecuteCommand("insertTable", QString("{numRows:%1, numCols:%2, border:1, borderStyle:'1px solid #dddddd;'}").arg(nRows).arg(nCols));
 }
 
-void CWizDocumentWebView::on_editorCommandExecuteScreenShot_imageAccepted(const QPixmap& pix)
+void CWizDocumentWebView::on_editorCommandExecuteScreenShot_imageAccepted(QPixmap pix)
 {
+    QObject *ssSender = qobject_cast<QObject*>(sender());
+    if (ssSender)
+        delete ssSender;
+
+    setWindowVisibleOnScreenShot(true);
+
     if (pix.isNull())
         return;
 
@@ -1513,7 +1518,7 @@ void CWizDocumentWebView::on_editorCommandExecuteScreenShot_finished()
     if (ssSender)
         delete ssSender;
 
-    setWindowVisibleOnScreenShot(false);
+    setWindowVisibleOnScreenShot(true);
 }
 
 bool CWizDocumentWebView::editorCommandExecuteInsertHorizontal()
@@ -1628,6 +1633,12 @@ bool CWizDocumentWebView::editorCommandExecuteScreenShot()
     connect(helper, SIGNAL(screenShotCaptured(QPixmap)),
             SLOT(on_editorCommandExecuteScreenShot_imageAccepted(QPixmap)));
     connect(helper, SIGNAL(shotScreenQuit()), SLOT(on_editorCommandExecuteScreenShot_finished()));
+
+//    MainWindow* mainWindow = qobject_cast<MainWindow *>(m_app.mainWindow());
+//    if (mainWindow)
+//    {
+//        mainWindow->showScreenShotWidget();
+//    }
 
     setWindowVisibleOnScreenShot(false);
     helper->startScreenShot();

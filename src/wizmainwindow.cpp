@@ -47,6 +47,7 @@
 #include "utils/pathresolve.h"
 #include "utils/stylehelper.h"
 #include "widgets/wizFramelessWebDialog.h"
+#include "widgets/wizScreenShotWidget.h"
 
 #include "wiznotestyle.h"
 #include "wizdocumenthistory.h"

@@ -223,7 +223,6 @@ public:
     void createNoteWithText(const QString& strText);
     void createNoteWithImage(const QString& strImageFile);
 
-
 signals:
     void documentSaved(const QString& strGUID, CWizDocumentView* viewer);
 

@@ -257,9 +257,6 @@ public Q_SLOTS:
     void on_editorCommandExecuteLinkInsert_accepted();
     void on_editorCommandExecuteTableInsert_accepted();
 
-    void on_editorCommandExecuteScreenShot_imageAccepted(const QPixmap& pix);
-    void on_editorCommandExecuteScreenShot_finished();
-
     void applySearchKeywordHighlight();
     void clearSearchKeywordHighlight();
 
@@ -335,6 +332,8 @@ public Q_SLOTS:
     bool editorCommandExecuteInsertCode();
     bool editorCommandExecuteMobileImage(bool bReceiveImage);
     bool editorCommandExecuteScreenShot();
+    void on_editorCommandExecuteScreenShot_imageAccepted(QPixmap pix);
+    void on_editorCommandExecuteScreenShot_finished();
 
 #ifdef Q_OS_MAC
     bool editorCommandExecuteRemoveStartOfLine();

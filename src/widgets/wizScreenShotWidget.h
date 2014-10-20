@@ -14,7 +14,7 @@ class CWizScreenShotWidget : public QWidget
 {
     Q_OBJECT
 public:
-    CWizScreenShotWidget();
+    CWizScreenShotWidget(QWidget* parent = 0);
 
     void active();
 
@@ -34,12 +34,12 @@ public:
 public slots:
     void loadBackgroundPixmap(const QPixmap &bgPixmap);//加载背景Pixmap槽函数
     void loadBackgroundPixmap(const QPixmap &bgPixmap, int x, int y, int width, int height); //加载背景pixmap槽函数，设置x,y,width,height
-    void cancelSelectedRect(); //取消选择区域
-    void savePixmap(); //保存所截图片的方法
-    void quit();//退出截屏模式的方法
+    void cancelSelectedRect();
+    void savePixmap();
+    void quit();
 
 signals:
-    void finishPixmap(const QPixmap &finishPixmap); //完成切图后的图片,发送信号给连接者
+    void finishPixmap(QPixmap finishPixmap); //完成切图后的图片,发送信号给连接者
     void setNewPixmap(QPixmap pixmap); //保存图片后，发送信号给主窗口设置新的图片
     void shotScreenQuit();//退出截屏模式后，发送信号给主窗口
 
@@ -103,6 +103,8 @@ private:
     void mouseMoveEvent(QMouseEvent *event);
     void mouseDoubleClickEvent(QMouseEvent *event);
     void contextMenuEvent(QContextMenuEvent *event);
+
+    void hideWidget();
 };
 
 
@@ -115,13 +117,9 @@ public:
 
     void startScreenShot();
 
-public slots:
-    void on_screenShotCaptured(const QPixmap& pix);
-    void on_screenShotQuit();
-
 signals:
     void shotScreenQuit();
-    void screenShotCaptured(const QPixmap& pix);
+    void screenShotCaptured(QPixmap pix);
 
 private:
     CWizScreenShotWidget *m_widget;

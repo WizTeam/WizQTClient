@@ -2,8 +2,11 @@
 #include <QMenu>
 #include <QApplication>
 #include <QDesktopWidget>
+#include <QTimer>
 
-CWizScreenShotWidget::CWizScreenShotWidget() : isSave(false)
+CWizScreenShotWidget::CWizScreenShotWidget(QWidget* parent) :
+    isSave(false)
+  , QWidget(parent)
 {
     tipWidth = 300; //温馨提示框的宽度
     tipHeight = 100; //温馨提示框的高度
@@ -32,16 +35,17 @@ void CWizScreenShotWidget::initSelectedMenu()
 
 void CWizScreenShotWidget::quit()
 {
-    hide();
+    hideWidget();
     emit shotScreenQuit();
 }
 
 void CWizScreenShotWidget::savePixmap()
 {
-    hide();
-    mainPixmap = shotPixmap;
-    isSave = true;
-    emit setNewPixmap(shotPixmap);
+    hideWidget();
+//    mainPixmap = shotPixmap;
+//    isSave = true;
+//    emit setNewPixmap(shotPixmap);
+    emit finishPixmap(shotPixmap);
 }
 
 bool CWizScreenShotWidget::getIsSave()
@@ -135,7 +139,7 @@ void CWizScreenShotWidget::keyPressEvent(QKeyEvent *event)
     if (event->key() == Qt::Key_Escape)
     {
         initCWizScreenShotWidget();
-        hide();
+        hideWidget();
     }
 }
 
@@ -215,8 +219,10 @@ void CWizScreenShotWidget::mouseDoubleClickEvent(QMouseEvent *event)
 {
     if (currentShotState == finishShot || currentShotState == finishMoveShot || currentShotState == finishControl)
     {
-        emit finishPixmap(shotPixmap); //当完成时发送finishPixmap信号
-        hide();
+        QRect rcSelect = getMoveControlSelectedRect();
+        hideWidget();
+        if (rcSelect.contains(event->pos()))
+            emit finishPixmap(shotPixmap);
     }
 }
 
@@ -288,6 +294,12 @@ void CWizScreenShotWidget::contextMenuEvent(QContextMenuEvent *event)
     }
 
     contextMenu->exec(event->pos());
+}
+
+void CWizScreenShotWidget::hideWidget()
+{
+    setWindowState(Qt::WindowMinimized);
+    hide();
 }
 
 void CWizScreenShotWidget::drawTipsText()
@@ -575,7 +587,7 @@ QRect CWizScreenShotWidget::getMoveControlSelectedRect(void)
         break;
     }
 
-    return QRect(x, y, w, h); //获取选区
+    return QRect(x, y, w, h);
 }
 
 int CWizScreenShotWidget::getMinValue(int num1, int num2)
@@ -623,10 +635,11 @@ void CWizScreenShotWidget::drawXYWHInfo(void)
 }
 
 
-CWizScreenShotHelper::CWizScreenShotHelper() :
-    m_widget(new CWizScreenShotWidget)
+CWizScreenShotHelper::CWizScreenShotHelper()
 {
-    connect(m_widget, SIGNAL(finishPixmap(QPixmap)), SLOT(on_screenShotCaptured(QPixmap)));
+    m_widget = new CWizScreenShotWidget();
+    connect(m_widget, SIGNAL(finishPixmap(QPixmap)), SIGNAL(screenShotCaptured(QPixmap)));
+    connect(m_widget, SIGNAL(shotScreenQuit()), SIGNAL(shotScreenQuit()));
 }
 
 CWizScreenShotHelper::~CWizScreenShotHelper()
@@ -639,16 +652,7 @@ void CWizScreenShotHelper::startScreenShot()
 {
     QPixmap pixmap = m_widget->getFullScreenPixmap();
     m_widget->loadBackgroundPixmap(pixmap);
-    m_widget->active();
     m_widget->show();
+    m_widget->active();
 }
 
-void CWizScreenShotHelper::on_screenShotCaptured(const QPixmap& pix)
-{
-
-}
-
-void CWizScreenShotHelper::on_screenShotQuit()
-{
-
-}
