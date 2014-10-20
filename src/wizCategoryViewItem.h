@@ -128,6 +128,21 @@ public:
 
     virtual QString getSectionName();
     virtual int getSortOrder() const { return 11; }
+
+    void addPlaceHoldItem();
+    bool isContainsPlaceHoldItem();
+    void removePlaceHoldItem();
+};
+
+class CWizCategoryViewShortcutPlaceHoldItem : public CWizCategoryViewItemBase
+{
+public:
+    CWizCategoryViewShortcutPlaceHoldItem(CWizExplorerApp& app, const QString& strName);
+
+    virtual void showContextMenu(CWizCategoryBaseView* pCtrl, QPoint pos) {}
+    virtual void getDocuments(CWizDatabase& db,
+                              CWizDocumentDataArray& arrayDocument)
+    { Q_UNUSED(db); Q_UNUSED(arrayDocument); }
 };
 
 class CWizCategoryViewShortcutItem : public CWizCategoryViewItemBase

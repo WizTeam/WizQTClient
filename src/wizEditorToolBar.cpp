@@ -414,6 +414,12 @@ EditorToolBar::EditorToolBar(QWidget *parent)
     m_btnSearchReplace->setToolTip(tr("Find & Replace"));
     connect(m_btnSearchReplace, SIGNAL(clicked()), SLOT(on_btnSearchReplace_clicked()));
 
+    m_btnScreenShot = new CWizToolButton(this);
+    m_btnScreenShot->setCheckable(false);
+    m_btnScreenShot->setIcon(::WizLoadSkinIcon(skin, "actionFormatSearchReplace"));
+    m_btnScreenShot->setToolTip(tr("Screen shot"));
+    connect(m_btnScreenShot, SIGNAL(clicked()), SLOT(on_btnScreenShot_clicked()));
+
     QHBoxLayout* layout = new QHBoxLayout();
     layout->setContentsMargins(3, 0, 3, 0);
     layout->setAlignment(Qt::AlignVCenter);
@@ -446,6 +452,7 @@ EditorToolBar::EditorToolBar(QWidget *parent)
     layout->addWidget(m_btnTable);
     layout->addWidget(m_btnHorizontal);
     layout->addWidget(m_btnInsertImage);
+    layout->addWidget(m_btnScreenShot);
     layout->addSpacing(12);
     layout->addWidget(m_btnSearchReplace);
     layout->addStretch();
@@ -1204,8 +1211,7 @@ void EditorToolBar::on_btnHorizontal_clicked()
 void EditorToolBar::on_btnCheckList_clicked()
 {
     if (m_editor) {
-        //m_editor->editorCommandExecuteInsertCheckList();
-        m_editor->editorCommandExecuteScreenShot();
+        m_editor->editorCommandExecuteInsertCheckList();
     }
 }
 
@@ -1225,6 +1231,13 @@ void EditorToolBar::on_btnMobileImage_clicked()
         //need update button status after show dialog
         m_btnMobileImage->setChecked(bReceiveImage);
         update();
+    }
+}
+
+void EditorToolBar::on_btnScreenShot_clicked()
+{
+    if (m_editor) {
+        m_editor->editorCommandExecuteScreenShot();
     }
 }
 

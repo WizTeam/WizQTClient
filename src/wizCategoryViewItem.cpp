@@ -35,6 +35,8 @@
 #define WIZ_CATEGORY_SECTION_PERSONAL QObject::tr("Personal Notes")
 #define WIZ_CATEGORY_SECTION_GROUPS QObject::tr("Team & Groups")
 
+#define WIZ_CATEGORY_SHOTCUT_PLACEHOLD QObject::tr("Drag doucment form document list")
+
 
 using namespace Core;
 
@@ -533,6 +535,9 @@ void CWizCategoryViewShortcutRootItem::drop(const WIZDOCUMENTDATA& data, bool /*
         }
     }
 
+    if (isContainsPlaceHoldItem())
+        removePlaceHoldItem();
+
     bool isEncrypted = data.nProtected == 1;
     CWizCategoryViewShortcutItem *pItem = new CWizCategoryViewShortcutItem(m_app,
                                                                            data.strTitle, data.strKbGUID, data.strGUID, isEncrypted);
@@ -543,6 +548,31 @@ void CWizCategoryViewShortcutRootItem::drop(const WIZDOCUMENTDATA& data, bool /*
 QString CWizCategoryViewShortcutRootItem::getSectionName()
 {
     return WIZ_CATEGORY_SECTION_GENERAL;
+}
+
+void CWizCategoryViewShortcutRootItem::addPlaceHoldItem()
+{
+    CWizCategoryViewShortcutPlaceHoldItem *item = new
+            CWizCategoryViewShortcutPlaceHoldItem(m_app, WIZ_CATEGORY_SHOTCUT_PLACEHOLD);
+    item->setText(0, WIZ_CATEGORY_SHOTCUT_PLACEHOLD);
+    addChild(item);
+}
+
+bool CWizCategoryViewShortcutRootItem::isContainsPlaceHoldItem()
+{
+    if (childCount() < 1)
+        return false;
+
+    QTreeWidgetItem *item = child(0);
+    return item->text(0) == WIZ_CATEGORY_SHOTCUT_PLACEHOLD;
+}
+
+void CWizCategoryViewShortcutRootItem::removePlaceHoldItem()
+{
+    if (isContainsPlaceHoldItem())
+    {
+        removeChild(child(0));
+    }
 }
 
 
@@ -1703,4 +1733,12 @@ void CWizCategoryViewShortcutItem::showContextMenu(CWizCategoryBaseView* pCtrl, 
     if (CWizCategoryView* view = dynamic_cast<CWizCategoryView *>(pCtrl)) {
         view->showShortcutContextMenu(pos);
     }
+}
+
+
+CWizCategoryViewShortcutPlaceHoldItem::CWizCategoryViewShortcutPlaceHoldItem(
+        CWizExplorerApp& app, const QString& strName)
+    : CWizCategoryViewItemBase(app, strName)
+{
+
 }

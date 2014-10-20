@@ -1672,8 +1672,14 @@ void CWizCategoryView::on_action_manageBiz()
 void CWizCategoryView::on_action_removeShortcut()
 {
     CWizCategoryViewShortcutItem* p = currentCategoryItem<CWizCategoryViewShortcutItem>();
-    if (p && p->parent()) {
-        p->parent()->removeChild(p);
+    CWizCategoryViewShortcutRootItem *pRoot = dynamic_cast<CWizCategoryViewShortcutRootItem *>(p->parent());
+    if (p && pRoot)
+    {
+        pRoot->removeChild(p);
+        if (pRoot->childCount() == 0)
+        {
+            pRoot->addPlaceHoldItem();
+        }
     }
 }
 
@@ -2652,6 +2658,12 @@ void CWizCategoryView::loadShortcutState()
     }
 
     settings->endGroup();
+
+    if (pShortcutRoot->childCount() == 0)
+    {
+        pShortcutRoot->addPlaceHoldItem();
+    }
+
     pShortcutRoot->sortChildren(0, Qt::AscendingOrder);
 }
 
@@ -3736,7 +3748,9 @@ void CWizCategoryView::loadChildState(QTreeWidgetItem* pItem, QSettings* setting
 
     if (!m_strSelectedId.isEmpty()) {
         CWizCategoryViewItemBase* pi = dynamic_cast<CWizCategoryViewItemBase*>(pItem);
-        Q_ASSERT(pi);
+        if (!pi)
+            return;
+
         if (pi->id() == m_strSelectedId) {
             setCurrentItem(pItem);
         }
@@ -3753,7 +3767,8 @@ void CWizCategoryView::loadItemState(QTreeWidgetItem* pi, QSettings* settings)
         return;
 
     CWizCategoryViewItemBase* pItem = dynamic_cast<CWizCategoryViewItemBase*>(pi);
-    Q_ASSERT(pItem);
+    if (!pItem)
+        return;
 
     QString strId = pItem->id();
 
