@@ -16,6 +16,7 @@ class CWizKMSyncEvents : public QObject , public IWizKMSyncEvents
     virtual HRESULT OnText(WizKMSyncProgressStatusType type, const QString& strStatus);
     virtual void SetDatabaseCount(int count);
     virtual void SetCurrentDatabase(int index);
+    virtual void ClearError(IWizSyncableDatabase* pDatabase);
     virtual void OnTrafficLimit(IWizSyncableDatabase* pDatabase);
     virtual void OnStorageLimit(IWizSyncableDatabase* pDatabase);
     virtual void OnBizServiceExpr(IWizSyncableDatabase* pDatabase);

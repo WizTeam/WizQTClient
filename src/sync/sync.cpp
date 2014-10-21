@@ -89,6 +89,7 @@ bool CWizKMSync::Sync()
 bool CWizKMSync::SyncCore()
 {
     m_pDatabase->ClearError();
+    m_pEvents->ClearError(m_pDatabase);
     m_mapOldKeyValues.clear();
     m_pEvents->OnSyncProgress(::GetSyncStartProgress(syncDatabaseLogin));
     m_pEvents->OnStatus(_TR("Connect to server"));

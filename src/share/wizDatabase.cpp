@@ -1195,7 +1195,8 @@ void CWizDatabase::GetAllBizUserIds(CWizStdStringArray& arrayText)
 
 void CWizDatabase::ClearError()
 {
-    // FIXME
+    setMeta(WIZKMSYNC_EXIT_INFO, _T("LastSyncErrorCode"), QString::number(0));
+    setMeta(WIZKMSYNC_EXIT_INFO, _T("LastSyncErrorMessage"), "");
 }
 
 void CWizDatabase::OnTrafficLimit(const QString& strErrorMessage)

@@ -162,6 +162,7 @@ public:
     virtual int GetLastErrorCode() const { return m_nLastError; }
     virtual void SetDatabaseCount(int count) {}
     virtual void SetCurrentDatabase(int index) {}
+    virtual void ClearError(IWizSyncableDatabase* pDatabase) {}
     virtual void OnTrafficLimit(IWizSyncableDatabase* pDatabase) {}
     virtual void OnStorageLimit(IWizSyncableDatabase* pDatabase) {}
     virtual void OnBizServiceExpr(IWizSyncableDatabase* pDatabase) {}
