@@ -57,6 +57,7 @@ class QShortcut;
 #define WIZACTION_FORMAT_INSERT_CHECKLIST    "actionFormatInsertCheckList"
 #define WIZACTION_FORMAT_INSERT_CODE            "actionFormatInsertCode"
 #define WIZACTION_FORMAT_INSERT_IMAGE            "actionFormatInsertImage"
+#define WIZACTION_FORMAT_SCREEN_SHOT            "actionFormatScreenShot"
 
 /**
 //NOTE：因为Linux版本没有menubar，qaction在隐藏后快捷键无法触发，此处创建一个shortcut并与app的槽函数绑定

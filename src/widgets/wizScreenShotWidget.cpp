@@ -3,6 +3,7 @@
 #include <QApplication>
 #include <QDesktopWidget>
 #include <QTimer>
+#include <QScreen>
 
 CWizScreenShotWidget::CWizScreenShotWidget(QWidget* parent) :
   QWidget(parent)
@@ -17,7 +18,8 @@ CWizScreenShotWidget::CWizScreenShotWidget(QWidget* parent) :
 
 void CWizScreenShotWidget::active()
 {
-    setWindowState(Qt::WindowActive|Qt::WindowFullScreen);
+    //setWindowState(Qt::WindowActive|Qt::WindowFullScreen);
+    showFullScreen();
 }
 
 void CWizScreenShotWidget::initSelectedMenu()
@@ -67,7 +69,8 @@ QPixmap CWizScreenShotWidget::getFullScreenPixmap()
 {
     initCWizScreenShotWidget();
     QPixmap result = QPixmap();
-    result = QPixmap::grabWindow(QApplication::desktop()->winId());
+    QScreen *screen = QGuiApplication::primaryScreen();
+    result = screen->grabWindow(0); //QPixmap::grabWindow(QApplication::desktop()->winId());
 
     return result;
 }
@@ -272,7 +275,7 @@ void CWizScreenShotWidget::contextMenuEvent(QContextMenuEvent *event)
 
 void CWizScreenShotWidget::hideWidget()
 {
-    setWindowState(Qt::WindowMinimized);
+    //setWindowState(Qt::WindowMinimized);
     hide();
 }
 
@@ -597,7 +600,7 @@ void CWizScreenShotWidget::drawXYWHInfo(void)
         x = selectedRect.x() + 5;
         y = selectedRect.y() > infoHeight ? selectedRect.y() - infoHeight:selectedRect.y();
         rect = QRect(x,y,infoWidth,infoHeight);
-        strTipsText = QString(tr("Coordinate information \n x:% 1 y:% 2 \n w:% 3 h:% 4")).arg(selectedRect.x(), 4).arg(selectedRect.y(), 4)
+        strTipsText = QString(tr("Coordinate information \n x: %1 y: %2 \n w: %3 h: %4")).arg(selectedRect.x(), 4).arg(selectedRect.y(), 4)
                 .arg(selectedRect.width(),4).arg(selectedRect.height(), 4);
         painter.fillRect(rect, color);
         painter.setPen(QPen(Qt::black));

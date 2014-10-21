@@ -108,6 +108,7 @@ WIZACTION* CWizActions::actionsData()
         {WIZACTION_FORMAT_REMOVE_FORMAT,        QObject::tr("Remove format"), "", ""},
         {WIZACTION_FORMAT_PLAINTEXT,        QObject::tr("Convert to plain text"), "", ""},
         {WIZACTION_FORMAT_VIEW_SOURCE,          QObject::tr("View html source..."), "", ""},
+        {WIZACTION_FORMAT_SCREEN_SHOT,          QObject::tr("Screen shot..."), "", ""},
 
         {"", "", "", ""}
     };

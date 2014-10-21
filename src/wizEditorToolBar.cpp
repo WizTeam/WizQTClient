@@ -414,11 +414,15 @@ EditorToolBar::EditorToolBar(QWidget *parent)
     m_btnSearchReplace->setToolTip(tr("Find & Replace"));
     connect(m_btnSearchReplace, SIGNAL(clicked()), SLOT(on_btnSearchReplace_clicked()));
 
+#ifndef Q_OS_MAC
     m_btnScreenShot = new CWizToolButton(this);
     m_btnScreenShot->setCheckable(false);
-    m_btnScreenShot->setIcon(::WizLoadSkinIcon(skin, "actionFormatSearchReplace"));
+    m_btnScreenShot->setIcon(::WizLoadSkinIcon(skin, "actionFormatScreenShot"));
     m_btnScreenShot->setToolTip(tr("Screen shot"));
     connect(m_btnScreenShot, SIGNAL(clicked()), SLOT(on_btnScreenShot_clicked()));
+#else
+    m_btnScreenShot = 0;
+#endif
 
     QHBoxLayout* layout = new QHBoxLayout();
     layout->setContentsMargins(3, 0, 3, 0);
@@ -452,7 +456,9 @@ EditorToolBar::EditorToolBar(QWidget *parent)
     layout->addWidget(m_btnTable);
     layout->addWidget(m_btnHorizontal);
     layout->addWidget(m_btnInsertImage);
+#ifndef Q_OS_MAC
     layout->addWidget(m_btnScreenShot);
+#endif
     layout->addSpacing(12);
     layout->addWidget(m_btnSearchReplace);
     layout->addStretch();
