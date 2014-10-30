@@ -1296,7 +1296,7 @@ bool CWizDocumentWebView::editorCommandExecuteLinkRemove()
     return editorCommandExecuteCommand("unlink");
 }
 
-bool CWizDocumentWebView::editorCommandExecuteSearchReplace()
+bool CWizDocumentWebView::editorCommandExecuteFindReplace()
 {
     CWizSearchReplaceWidget *wgt = new CWizSearchReplaceWidget();
     connect(wgt, SIGNAL(findPre(QString,bool)), SLOT(findPre(QString,bool)));

@@ -278,7 +278,7 @@ public Q_SLOTS:
     bool editorCommandExecuteLinkRemove();
 
     // search and repalce
-    bool editorCommandExecuteSearchReplace();
+    bool editorCommandExecuteFindReplace();
     void findPre(QString strTxt, bool bCasesensitive);
     void findNext(QString strTxt, bool bCasesensitive);
     void replaceCurrent(QString strSource, QString strTarget);

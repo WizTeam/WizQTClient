@@ -33,6 +33,7 @@ class QShortcut;
 #define WIZACTION_EDITOR_PASTE_PLAIN        "actionEditingPastePlain"
 #define WIZACTION_EDITOR_DELETE             "actionEditingDelete"
 #define WIZACTION_EDITOR_SELECT_ALL         "actionEditingSelectAll"
+#define WIZACTION_EDITOR_FIND_REPLACE         "actionFindReplace"
 
 #define WIZACTION_FORMAT_BOLD               "actionFormatBold"
 #define WIZACTION_FORMAT_ITALIC             "actionFormatItalic"

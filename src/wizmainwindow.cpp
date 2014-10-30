@@ -595,7 +595,6 @@ void MainWindow::initMenuBar()
     m_actions->buildMenuBar(m_menuBar, Utils::PathResolve::resourcesPath() + "files/mainmenu.ini");
 }
 
-
 void MainWindow::on_editor_statusChanged()
 {
     CWizDocumentWebView* editor = m_doc->web();
@@ -608,6 +607,8 @@ void MainWindow::on_editor_statusChanged()
         m_actions->actionFromName(WIZACTION_EDITOR_PASTE)->setEnabled(false);
         m_actions->actionFromName(WIZACTION_EDITOR_PASTE_PLAIN)->setEnabled(false);
         m_actions->actionFromName(WIZACTION_EDITOR_DELETE)->setEnabled(false);
+        m_actions->actionFromName(WIZACTION_EDITOR_FIND_REPLACE)->setEnabled(false);
+        m_actions->actionFromName(WIZACTION_EDITOR_SELECT_ALL)->setEnabled(false);
 
         m_actions->actionFromName(WIZACTION_FORMAT_BOLD)->setEnabled(false);
         m_actions->actionFromName(WIZACTION_FORMAT_ITALIC)->setEnabled(false);
@@ -1679,6 +1680,11 @@ void MainWindow::on_actionFormatInsertImage_triggered()
     m_doc->web()->editorCommandExecuteInsertImage();
 }
 
+void MainWindow::on_actionFormatScreenShot_triggered()
+{
+    m_doc->web()->editorCommandExecuteScreenShot();
+}
+
 void MainWindow::on_actionConsole_triggered()
 {
     if (!m_console) {
@@ -1777,9 +1783,9 @@ void MainWindow::on_actionResetSearch_triggered()
     m_doc->web()->applySearchKeywordHighlight();
 }
 
-void MainWindow::on_actionSearchReplace_triggered()
+void MainWindow::on_actionFindReplace_triggered()
 {
-    m_doc->web()->editorCommandExecuteSearchReplace();
+    m_doc->web()->editorCommandExecuteFindReplace();
 }
 
 void MainWindow::on_actionSaveAsPDF_triggered()

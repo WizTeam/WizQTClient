@@ -1182,7 +1182,7 @@ void EditorToolBar::on_btnJustifyRight_clicked()
 void EditorToolBar::on_btnSearchReplace_clicked()
 {
     if (m_editor) {
-        m_editor->editorCommandExecuteSearchReplace();
+        m_editor->editorCommandExecuteFindReplace();
     }
 }
 

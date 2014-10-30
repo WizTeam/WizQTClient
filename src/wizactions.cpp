@@ -68,7 +68,7 @@ WIZACTION* CWizActions::actionsData()
         {"actionFeedback",                  QObject::tr("User feedback..."), "", ""},
         {"actionSupport",                  QObject::tr("User support..."), "", ""},
         {"actionManual",                  QObject::tr("User manual..."), "", ""},
-        {"actionSearchReplace",                  QObject::tr("Find and replace..."), "", "Ctrl+F"},
+        {WIZACTION_EDITOR_FIND_REPLACE,                  QObject::tr("Find and replace..."), "", "Ctrl+F"},
 
         // editing
         {WIZACTION_EDITOR_UNDO,             QObject::tr("Undo"), "", "Ctrl+Z"},

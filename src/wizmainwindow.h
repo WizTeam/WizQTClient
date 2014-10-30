@@ -242,7 +242,7 @@ public Q_SLOTS:
     void on_actionManual_triggered();
     void on_actionSearch_triggered();
     void on_actionResetSearch_triggered();
-    void on_actionSearchReplace_triggered();
+    void on_actionFindReplace_triggered();
     void on_actionSaveAsPDF_triggered();
     void on_actionSaveAsHtml_triggered();
     void on_actionPrint_triggered();
@@ -288,6 +288,7 @@ public Q_SLOTS:
     void on_actionFormatInsertCheckList_triggered();
     void on_actionFormatInsertCode_triggered();
     void on_actionFormatInsertImage_triggered();
+    void on_actionFormatScreenShot_triggered();
 
     void on_searchProcess(const QString &strKeywords, const CWizDocumentDataArray& arrayDocument, bool bEnd);
 
