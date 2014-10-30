@@ -345,10 +345,18 @@ void CWizDocumentWebView::keyPressEvent(QKeyEvent* event)
     setUpdatesEnabled(true);
 #else
 
-    if (event->key() == Qt::Key_Backspace && event->modifiers() == Qt::ControlModifier)
+    if (event->key() == Qt::Key_Backspace)
     {
-        editorCommandExecuteRemoveStartOfLine();
-        return;
+        if (event->modifiers() == Qt::ControlModifier)
+        {
+            editorCommandExecuteRemoveStartOfLine();
+            return;
+        }
+        else
+        {
+            //FIXME: would not trigger content change event, when delete row and image by backspace
+            setContentsChanged(true);
+        }
     }
 
     //special handled for qt4,case capslock doesn't work
