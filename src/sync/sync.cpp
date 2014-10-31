@@ -88,8 +88,6 @@ bool CWizKMSync::Sync()
 
 bool CWizKMSync::SyncCore()
 {
-    m_pDatabase->ClearError();
-    m_pEvents->ClearError(m_pDatabase);
     m_mapOldKeyValues.clear();
     m_pEvents->OnSyncProgress(::GetSyncStartProgress(syncDatabaseLogin));
     m_pEvents->OnStatus(_TR("Connect to server"));
@@ -1797,6 +1795,8 @@ bool WizSyncDatabase(const WIZUSERINFO& info, IWizKMSyncEvents* pEvents,
     //only check biz list at first sync of day, or sync by manual
     if (!bBackground || WizIsDayFirstSync(pDatabase))
     {
+        pDatabase->ClearLastSyncError();
+        pEvents->ClearLastSyncError(pDatabase);
         CWizBizDataArray arrayBiz;
         if (server.GetBizList(arrayBiz))
         {

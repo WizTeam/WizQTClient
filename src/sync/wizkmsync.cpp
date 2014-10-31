@@ -37,7 +37,7 @@ void CWizKMSyncEvents::SetCurrentDatabase(int index)
     qDebug() << "[Sync]SetCurrentDatabase index = " << index;
 }
 
-void CWizKMSyncEvents::ClearError(IWizSyncableDatabase* pDatabase)
+void CWizKMSyncEvents::ClearLastSyncError(IWizSyncableDatabase* pDatabase)
 {
     // FIXME
     Q_UNUSED(pDatabase);

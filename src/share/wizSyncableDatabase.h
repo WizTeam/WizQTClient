@@ -116,7 +116,7 @@ struct IWizSyncableDatabase
     //virtual CComPtr<IWizDocument> GetDocumentByGUID(const QString& strDocumentGUID) = 0;
     virtual bool OnDownloadMessages(const CWizUserMessageDataArray& arrayMessage) = 0;
 
-    virtual void ClearError() = 0;
+    virtual void ClearLastSyncError() = 0;
     virtual void OnTrafficLimit(const QString& strErrorMessage) = 0;
     virtual void OnStorageLimit(const QString& strErrorMessage) = 0;
     virtual void OnBizServiceExpr(const QString& strBizGUID, const QString& strErrorMessage) = 0;
@@ -162,7 +162,7 @@ public:
     virtual int GetLastErrorCode() const { return m_nLastError; }
     virtual void SetDatabaseCount(int count) {}
     virtual void SetCurrentDatabase(int index) {}
-    virtual void ClearError(IWizSyncableDatabase* pDatabase) {}
+    virtual void ClearLastSyncError(IWizSyncableDatabase* pDatabase) {}
     virtual void OnTrafficLimit(IWizSyncableDatabase* pDatabase) {}
     virtual void OnStorageLimit(IWizSyncableDatabase* pDatabase) {}
     virtual void OnBizServiceExpr(IWizSyncableDatabase* pDatabase) {}

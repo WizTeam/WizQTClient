@@ -236,7 +236,7 @@ public:
 
     virtual void GetAllBizUserIds(CWizStdStringArray& arrayText);
 
-    virtual void ClearError();
+    virtual void ClearLastSyncError();
     virtual void OnTrafficLimit(const QString& strErrorMessage);
     virtual void OnStorageLimit(const QString& strErrorMessage);
     virtual void OnBizServiceExpr(const QString& strBizGUID, const QString& strErrorMessage);

@@ -29,6 +29,7 @@
 
 #define WIZNOTE_THUMB_VERSION "3"
 
+#define WIZKMSYNC_EXIT_OK		0
 #define WIZKMSYNC_EXIT_TRAFFIC_LIMIT		304
 #define WIZKMSYNC_EXIT_STORAGE_LIMIT		305
 #define WIZKMSYNC_EXIT_BIZ_SERVICE_EXPR		380
@@ -1193,10 +1194,23 @@ void CWizDatabase::GetAllBizUserIds(CWizStdStringArray& arrayText)
     }
 }
 
-void CWizDatabase::ClearError()
+void CWizDatabase::ClearLastSyncError()
 {
-    setMeta(WIZKMSYNC_EXIT_INFO, _T("LastSyncErrorCode"), QString::number(0));
+    // last sync error only contains in personal database
+    if (getPersonalDatabase() != this)
+        return;
+
+    setMeta(WIZKMSYNC_EXIT_INFO, _T("LastSyncErrorCode"), QString::number(WIZKMSYNC_EXIT_OK));
     setMeta(WIZKMSYNC_EXIT_INFO, _T("LastSyncErrorMessage"), "");
+
+    //
+    int bizCount = GetMetaDef("Bizs", "Count").toInt();
+    for (int i = 0; i < bizCount; i++)
+    {
+        QString bizSection = "Biz_" + QString::number(i);
+        setMeta(bizSection, _T("LastSyncErrorCode"), QString::number(WIZKMSYNC_EXIT_OK));
+        setMeta(bizSection, _T("LastSyncErrorMessage"), "");
+    }
 }
 
 void CWizDatabase::OnTrafficLimit(const QString& strErrorMessage)
