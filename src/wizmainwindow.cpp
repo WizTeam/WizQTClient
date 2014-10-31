@@ -1099,6 +1099,7 @@ void MainWindow::initToolBar()
 {
 #ifdef Q_OS_MAC
     setUnifiedTitleAndToolBarOnMac(true);
+    setContextMenuPolicy(Qt::NoContextMenu);
     addToolBar(m_toolBar);
     m_toolBar->setAllowedAreas(Qt::TopToolBarArea);
     m_toolBar->setMovable(false);

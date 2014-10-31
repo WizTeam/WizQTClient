@@ -27,6 +27,8 @@ public:
     explicit EditorToolBar(QWidget *parent);
     void setDelegate(CWizDocumentWebView* editor);
 
+    bool hasFocus();
+
 protected:
     QSize sizeHint() const;
 

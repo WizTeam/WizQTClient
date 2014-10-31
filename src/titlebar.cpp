@@ -192,7 +192,8 @@ void TitleBar::onEditorFocusIn()
 
 void TitleBar::onEditorFocusOut()
 {
-    showInfoBar();
+    if (!m_editorBar->hasFocus())
+        showInfoBar();
 }
 
 void TitleBar::showInfoBar()

@@ -218,6 +218,7 @@ class CWizToolComboBox : public QComboBox
 public:
     CWizToolComboBox(QWidget* parent = 0)
         : QComboBox(parent)
+        , m_isPopup(false)
     {
         setFocusPolicy(Qt::NoFocus);
         setSizeAdjustPolicy(QComboBox::AdjustToMinimumContentsLength);
@@ -235,6 +236,20 @@ public:
     }
 
     QString text() const { return m_strText; }
+
+    bool isPopuping() const { return m_isPopup; }
+
+    void	showPopup()
+    {
+        m_isPopup = true;
+        QComboBox::showPopup();
+    }
+
+    void hidePopup()
+    {
+        m_isPopup = false;
+        QComboBox::hidePopup();
+    }
 
 protected:
     virtual void paintEvent(QPaintEvent *event)
@@ -255,12 +270,15 @@ protected:
 
 private:
     QString m_strText;
+    bool m_isPopup;
 };
 
 class CWizToolComboBoxFont : public QFontComboBox
 {
 public:
-    CWizToolComboBoxFont(QWidget* parent = 0) : QFontComboBox(parent)
+    CWizToolComboBoxFont(QWidget* parent = 0)
+        : QFontComboBox(parent)
+        , m_isPopup(false)
     {
         setFocusPolicy(Qt::NoFocus);
         setSizeAdjustPolicy(QComboBox::AdjustToMinimumContentsLength);
@@ -279,6 +297,20 @@ public:
     }
 
     QString text() const { return m_strText; }
+
+    bool isPopuping() const { return m_isPopup; }
+
+    void	showPopup()
+    {
+        m_isPopup = true;
+        QFontComboBox::showPopup();
+    }
+
+    void hidePopup()
+    {
+        m_isPopup = false;
+        QFontComboBox::hidePopup();
+    }
 
 protected:
     virtual void paintEvent(QPaintEvent *event)
@@ -299,6 +331,7 @@ protected:
 
 private:
     QString m_strText;
+    bool m_isPopup;
 };
 
 
@@ -957,6 +990,11 @@ bool EditorToolBar::processBase64Image(bool bUseForCopy)
     }
 
     return true;
+}
+
+bool EditorToolBar::hasFocus()
+{
+    return QWidget::hasFocus() || m_comboFontFamily->isPopuping() || m_comboFontSize->isPopuping();
 }
 
 void EditorToolBar::buildMenu()
