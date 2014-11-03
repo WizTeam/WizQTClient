@@ -1159,8 +1159,8 @@ void MainWindow::initToolBar()
     buttonNew->setAction(m_actions->actionFromName(WIZACTION_GLOBAL_NEW_DOCUMENT));
     m_toolBar->addWidget(buttonNew);
 
-    m_toolBar->addAction(m_actions->actionFromName(WIZACTION_GLOBAL_SYNC));
-    m_toolBar->addAction(m_actions->actionFromName(WIZACTION_GLOBAL_NEW_DOCUMENT));
+    m_toolBar->addAction(m_actions->actionFromName(WIZACTION_GLOBAL_GOBACK));
+    m_toolBar->addAction(m_actions->actionFromName(WIZACTION_GLOBAL_GOFORWARD));
     updateHistoryButtonStatus();
 
     m_toolBar->addWidget(new CWizSpacer(m_toolBar));
@@ -2187,15 +2187,19 @@ void MainWindow::adjustToolBarLayout()
     QWidget* list = m_documents->isVisible() ? (QWidget*)m_documents : (QWidget*)m_msgList;
     //
     QPoint ptSearch = list->mapToGlobal(QPoint(0, 0));
-    QPoint ptSpacerBeforeSearch = m_spacerBeforeSearch->mapToGlobal(QPoint(0, 0));
+    QPoint ptSpacerBeforeSearch = m_spacerForToolButtonAdjust->mapToGlobal(QPoint(0, 0));
     //
     int spacerWidth = ptSearch.x() - ptSpacerBeforeSearch.x();
+    int searchWidth = list->size().width();
     if (spacerWidth > 0)
     {
-        m_spacerBeforeSearch->adjustWidth(spacerWidth);
+        m_spacerForToolButtonAdjust->adjustWidth(spacerWidth);
+    }
+    else
+    {
+        searchWidth += spacerWidth;
     }
     //
-    int searchWidth = list->size().width();
     if (searchWidth > 100)
     {
         m_search->setFixedWidth(searchWidth);
