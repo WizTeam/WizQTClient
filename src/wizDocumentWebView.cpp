@@ -140,10 +140,10 @@ void CWizDocumentWebViewPage::on_editorCommandPaste_triggered()
     Q_ASSERT(clip);
 
     const QMimeData* mime = clip->mimeData();
-    QStringList formats = mime->formats();
-    for(int i = 0; i < formats.size(); ++ i) {
-        qDebug() << "Mime Format: " << formats.at(i) << " Mime data: " << mime->data(formats.at(i));
-    }
+//    QStringList formats = mime->formats();
+//    for(int i = 0; i < formats.size(); ++ i) {
+//        qDebug() << "Mime Format: " << formats.at(i) << " Mime data: " << mime->data(formats.at(i));
+//    }
 
     if (mime->hasHtml())
     {
@@ -1247,9 +1247,9 @@ void CWizDocumentWebView::on_editorCommandPastePlainText_triggered()
 
     const QMimeData* mime = clip->mimeData();
     QStringList formats = mime->formats();
-    for(int i = 0; i < formats.size(); ++ i) {
-        qDebug() << "Mime Format: " << formats.at(i) << " Mime data: " << mime->data(formats.at(i));
-    }
+//    for(int i = 0; i < formats.size(); ++ i) {
+//        qDebug() << "Mime Format: " << formats.at(i) << " Mime data: " << mime->data(formats.at(i));
+//    }
     if (mime->hasHtml())
     {
         QString strText = mime->text();
@@ -1643,7 +1643,7 @@ bool CWizDocumentWebView::editorCommandExecuteScreenShot()
     connect(helper, SIGNAL(shotScreenQuit()), SLOT(on_editorCommandExecuteScreenShot_finished()));
 
     setWindowVisibleOnScreenShot(false);
-    QTimer::singleShot(300, helper, SLOT(startScreenShot()));
+    QTimer::singleShot(200, helper, SLOT(startScreenShot()));
     return true;
 }
 

@@ -387,4 +387,6 @@ void CWizPreferenceWindow::on_spinBox_right_valueChanged(double arg1)
 void CWizPreferenceWindow::on_checkBoxSystemStyle_toggled(bool checked)
 {
     m_app.userSettings().setUseSystemBasedStyle(checked);
+
+    QMessageBox::information(m_app.mainWindow(), tr("Info"), tr("Application style will be changed after restart WizNote."), QMessageBox::Ok);
 }

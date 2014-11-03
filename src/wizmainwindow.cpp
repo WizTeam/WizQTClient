@@ -318,13 +318,8 @@ void MainWindow::closeEvent(QCloseEvent* event)
         return;
     }
 #else
-    if (!event->spontaneous())
-    {
-        setVisible(false);
-        //setWindowState(Qt::WindowMinimized);
-        event->ignore();
-        return;
-    }
+    setVisible(false);
+    event->ignore();
 #endif
 }
 
