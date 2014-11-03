@@ -812,9 +812,6 @@ void MainWindow::createDocumentByTemplate(const QString& strFile)
         return;
     }
 
-    //FIXME:这个地方存在Bug,只能在Editor为disable的情况下才能设置焦点.
-    m_doc->web()->setEditorEnable(false);
-
     setFocusForNewNote(data);
 }
 
@@ -1475,10 +1472,8 @@ void MainWindow::on_actionNewNote_triggered()
         return;
     }
 
-    //FIXME:这个地方存在Bug,只能在Editor为disable的情况下才能设置焦点.
-    m_doc->web()->setEditorEnable(false);
-
     setFocusForNewNote(data);
+    m_doc->web()->setEditorEnable(true);
 }
 
 void MainWindow::on_actionNewNoteByTemplate_triggered()
