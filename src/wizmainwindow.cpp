@@ -360,6 +360,15 @@ void MainWindow::on_actionExit_triggered()
     qApp->exit();
 }
 
+void MainWindow::on_actionClose_triggered()
+{
+#ifdef Q_OS_MAC
+    wizMacHideCurrentApplication();
+#else
+    setVisible(false);
+#endif
+}
+
 void MainWindow::resizeEvent(QResizeEvent *event)
 {
     Q_UNUSED(event);
