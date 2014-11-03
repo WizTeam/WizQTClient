@@ -163,11 +163,7 @@ private:
 
     CWizSearchIndexer* m_searchIndexer;
     QPointer<CWizSearchWidget> m_search;
-#ifdef Q_OS_LINUX
-    CWizFixedSpacer* m_spacerBeforeSearch;
-#else
-    CWizSpacer* m_spacerBeforeSearch;
-#endif
+    CWizFixedSpacer* m_spacerForToolButtonAdjust;
 
     CWizMobileFileReceiver *m_mobileFileReceiver;
 
@@ -341,10 +337,10 @@ public Q_SLOTS:
 
 #ifndef Q_OS_MAC
     void on_actionPopupMainMenu_triggered();
-    void on_client_splitterMoved(int pos, int index);
     void on_menuButtonClicked();
-    void adjustToolBarLayout();
 #endif
+    void adjustToolBarLayout();
+    void on_client_splitterMoved(int pos, int index);
 
     void on_application_aboutToQuit();
     void on_application_messageAvailable(const QString& strMsg);
@@ -424,6 +420,9 @@ private:
     void showDocmentList(CWizCategoryBaseView* category);
     void showMessageList(CWizCategoryViewMessageItem* pItem);
     void viewDocumentByShortcut(CWizCategoryViewShortcutItem *pShortcut);
+
+    //
+    void updateHistoryButtonStatus();
 };
 
 } // namespace Internal

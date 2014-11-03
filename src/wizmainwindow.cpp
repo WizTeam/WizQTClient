@@ -107,7 +107,7 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     #else
     , m_toolBar(new QToolBar("Main", titleBar()))
     , m_menu(new QMenu(clientWidget()))
-    , m_spacerBeforeSearch(NULL)
+    , m_spacerForToolButtonAdjust(NULL)
     #endif
     , m_actions(new CWizActions(*this, this))
     , m_category(new CWizCategoryView(*this, this))
@@ -363,6 +363,7 @@ void MainWindow::on_actionExit_triggered()
 void MainWindow::resizeEvent(QResizeEvent *event)
 {
     Q_UNUSED(event);
+    updateHistoryButtonStatus();
 }
 
 void MainWindow::on_checkUpgrade_finished(bool bUpgradeAvaliable)
@@ -1107,14 +1108,16 @@ void MainWindow::initToolBar()
     m_toolBar->addAction(m_actions->actionFromName(WIZACTION_GLOBAL_SYNC));
     m_toolBar->addAction(m_actions->actionFromName(WIZACTION_GLOBAL_NEW_DOCUMENT));
 
-    m_toolBar->addWidget(new CWizSpacer(m_toolBar));
+    //m_toolBar->addWidget(new CWizSpacer(m_toolBar));
+    m_spacerForToolButtonAdjust = new CWizFixedSpacer(QSize(20, 1), m_toolBar);
+    m_toolBar->addWidget(m_spacerForToolButtonAdjust);
 
     m_toolBar->addAction(m_actions->actionFromName(WIZACTION_GLOBAL_GOBACK));
     m_toolBar->addAction(m_actions->actionFromName(WIZACTION_GLOBAL_GOFORWARD));
+    updateHistoryButtonStatus();
 
 
-    m_spacerBeforeSearch = new CWizSpacer(m_toolBar);
-    m_toolBar->addWidget(m_spacerBeforeSearch);
+    m_toolBar->addWidget(new CWizSpacer(m_toolBar));
 
     m_search = new CWizSearchWidget(this);
     m_search->setWidthHint(280);
@@ -1142,8 +1145,8 @@ void MainWindow::initToolBar()
     buttonSync->setAction(m_actions->actionFromName(WIZACTION_GLOBAL_SYNC));
     m_toolBar->addWidget(buttonSync);
 
-    m_spacerBeforeSearch = new CWizFixedSpacer(QSize(20, 1), m_toolBar);
-    m_toolBar->addWidget(m_spacerBeforeSearch);
+    m_spacerForToolButtonAdjust = new CWizFixedSpacer(QSize(20, 1), m_toolBar);
+    m_toolBar->addWidget(m_spacerForToolButtonAdjust);
 
     m_search = new CWizSearchWidget(this);
 
@@ -1155,6 +1158,10 @@ void MainWindow::initToolBar()
     CWizButton* buttonNew = new CWizButton(m_toolBar);
     buttonNew->setAction(m_actions->actionFromName(WIZACTION_GLOBAL_NEW_DOCUMENT));
     m_toolBar->addWidget(buttonNew);
+
+    m_toolBar->addAction(m_actions->actionFromName(WIZACTION_GLOBAL_SYNC));
+    m_toolBar->addAction(m_actions->actionFromName(WIZACTION_GLOBAL_NEW_DOCUMENT));
+    updateHistoryButtonStatus();
 
     m_toolBar->addWidget(new CWizSpacer(m_toolBar));
 
@@ -1221,10 +1228,7 @@ void MainWindow::initClient()
 
     m_msgList->hide();
     //
-#ifndef Q_OS_MAC
     connect(m_splitter, SIGNAL(splitterMoved(int, int)), SLOT(on_client_splitterMoved(int, int)));
-#endif
-
 }
 
 QWidget* MainWindow::createListView()
@@ -1366,9 +1370,7 @@ void MainWindow::init()
     connect(m_documents, SIGNAL(itemDoubleClicked(QListWidgetItem*)), SLOT(on_documents_itemDoubleClicked(QListWidgetItem*)));
     connect(m_documents, SIGNAL(lastDocumentDeleted()), SLOT(on_documents_lastDocumentDeleted()));
 
-#ifndef Q_OS_MAC
     QTimer::singleShot(100, this, SLOT(adjustToolBarLayout()));
-#endif
 }
 
 void MainWindow::on_actionAutoSync_triggered()
@@ -1880,11 +1882,6 @@ void MainWindow::on_actionPopupMainMenu_triggered()
     pMenu->popup(pt);
 }
 
-void MainWindow::on_client_splitterMoved(int pos, int index)
-{
-    adjustToolBarLayout();
-}
-
 void MainWindow::on_menuButtonClicked()
 {
     QWidget* wgt = qobject_cast<QWidget*>(sender());
@@ -1898,6 +1895,11 @@ void MainWindow::on_menuButtonClicked()
 }
 
 #endif
+
+void MainWindow::on_client_splitterMoved(int pos, int index)
+{
+    adjustToolBarLayout();
+}
 
 void MainWindow::on_actionGoBack_triggered()
 {
@@ -1915,6 +1917,8 @@ void MainWindow::on_actionGoBack_triggered()
     {
         on_actionGoBack_triggered();
     }
+
+    updateHistoryButtonStatus();
 }
 
 void MainWindow::on_actionGoForward_triggered()
@@ -1933,6 +1937,8 @@ void MainWindow::on_actionGoForward_triggered()
     {
         on_actionGoForward_triggered();
     }
+
+    updateHistoryButtonStatus();
 }
 
 void MainWindow::on_category_itemSelectionChanged()
@@ -1989,6 +1995,8 @@ void MainWindow::on_documents_itemSelectionChanged()
             resortDocListAfterViewDocument(arrayDocument[0]);
         }
     }
+
+    updateHistoryButtonStatus();
 }
 
 void MainWindow::on_documents_itemDoubleClicked(QListWidgetItem* item)
@@ -2121,15 +2129,9 @@ void MainWindow::viewDocument(const WIZDOCUMENTDATA& data, bool addToHistory)
 
     ICore::emitViewNoteRequested(m_doc, data);
 
-    //if (!m_doc->viewDocument(data, forceEdit))
-    //    return;
-
     if (addToHistory) {
         m_history->addHistory(data);
     }
-
-    //m_actions->actionFromName("actionGoBack")->setEnabled(m_history->canBack());
-    //m_actions->actionFromName("actionGoForward")->setEnabled(m_history->canForward());
 }
 
 void MainWindow::locateDocument(const WIZDOCUMENTDATA& data)
@@ -2175,11 +2177,10 @@ void MainWindow::checkWizUpdate()
 #endif
 }
 
-#ifndef Q_OS_MAC
-
 
 void MainWindow::adjustToolBarLayout()
 {
+#ifdef Q_OS_LINUX
     if (!m_toolBar)
         return;
     //
@@ -2189,19 +2190,34 @@ void MainWindow::adjustToolBarLayout()
     QPoint ptSpacerBeforeSearch = m_spacerBeforeSearch->mapToGlobal(QPoint(0, 0));
     //
     int spacerWidth = ptSearch.x() - ptSpacerBeforeSearch.x();
-    if (spacerWidth < 0)
-        return;
-    //
-    m_spacerBeforeSearch->adjustWidth(spacerWidth);
+    if (spacerWidth > 0)
+    {
+        m_spacerBeforeSearch->adjustWidth(spacerWidth);
+    }
     //
     int searchWidth = list->size().width();
     if (searchWidth > 100)
     {
         m_search->setFixedWidth(searchWidth);
     }
+#else
+    if (!m_toolBar)
+        return;
+    //
+    QWidget* list = m_documents->isVisible() ? (QWidget*)m_documents : (QWidget*)m_msgList;
+    //
+    QPoint ptSearch = list->mapToGlobal(QPoint(0, 0));
+    QPoint ptSpacerBeforeSearch = m_spacerForToolButtonAdjust->mapToGlobal(QPoint(0, 0));
+    //
+    int spacerWidth = ptSearch.x() - ptSpacerBeforeSearch.x();
+    spacerWidth += list->size().width();
+    if (spacerWidth < 0)
+        return;
+    //
+    m_spacerForToolButtonAdjust->adjustWidth(spacerWidth);
+#endif
 }
 
-#endif
 
 //QObject* MainWindow::CategoryCtrl()
 //{
@@ -2601,6 +2617,14 @@ void MainWindow::viewDocumentByShortcut(CWizCategoryViewShortcutItem* pShortcut)
         viewDocument(doc, true);
         m_docListWidget->hide();
     }
+}
+
+void MainWindow::updateHistoryButtonStatus()
+{
+    bool canGoBack = m_history->canBack();
+    m_actions->actionFromName(WIZACTION_GLOBAL_GOBACK)->setEnabled(canGoBack);
+    bool canGoForward = m_history->canForward();
+    m_actions->actionFromName(WIZACTION_GLOBAL_GOFORWARD)->setEnabled(canGoForward);
 }
 
 void MainWindow::viewDocumentInFloatWidget(const WIZDOCUMENTDATA& data)
