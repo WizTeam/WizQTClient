@@ -629,10 +629,16 @@ void CWizDocumentWebView::viewDocument(const WIZDOCUMENTDATA& doc, bool editing)
 {
     // set data
     m_bEditingMode = editing;
-    m_bNewNote = doc.tCreated.secsTo(QDateTime::currentDateTime()) == 0 ? true : false;
+    m_bNewNote = doc.tCreated.secsTo(QDateTime::currentDateTime()) <= 1 ? true : false;
     m_bNewNoteTitleInited = m_bNewNote ? false : true;
     //
     setContentsChanged(false);
+
+    if (m_bNewNote)
+    {
+        setEditorEnable(true);
+        setFocus();
+    }
 
     // ask extract and load
     m_docLoadThread->load(doc);

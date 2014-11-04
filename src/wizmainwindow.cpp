@@ -2325,39 +2325,13 @@ void MainWindow::reconnectServer()
     WizService::Token::requestToken();
 }
 
-void MainWindow::setActionsEnableForNewNote()
-{
-    m_actions->actionFromName(WIZACTION_FORMAT_BOLD)->setEnabled(true);
-    m_actions->actionFromName(WIZACTION_FORMAT_ITALIC)->setEnabled(true);
-    m_actions->actionFromName(WIZACTION_FORMAT_UNDERLINE)->setEnabled(true);
-    m_actions->actionFromName(WIZACTION_FORMAT_STRIKETHROUGH)->setEnabled(true);
-    m_actions->actionFromName(WIZACTION_FORMAT_UNORDEREDLIST)->setEnabled(true);
-    m_actions->actionFromName(WIZACTION_FORMAT_ORDEREDLIST)->setEnabled(true);
-    m_actions->actionFromName(WIZACTION_FORMAT_JUSTIFYLEFT)->setEnabled(true);
-    m_actions->actionFromName(WIZACTION_FORMAT_JUSTIFYRIGHT)->setEnabled(true);
-    m_actions->actionFromName(WIZACTION_FORMAT_JUSTIFYCENTER)->setEnabled(true);
-    m_actions->actionFromName(WIZACTION_FORMAT_JUSTIFYJUSTIFY)->setEnabled(true);
-    m_actions->actionFromName(WIZACTION_FORMAT_INDENT)->setEnabled(true);
-    m_actions->actionFromName(WIZACTION_FORMAT_OUTDENT)->setEnabled(true);
-    m_actions->actionFromName(WIZACTION_FORMAT_INSERT_TABLE)->setEnabled(true);
-    m_actions->actionFromName(WIZACTION_FORMAT_INSERT_LINK)->setEnabled(true);
-    m_actions->actionFromName(WIZACTION_FORMAT_INSERT_HORIZONTAL)->setEnabled(true);
-    m_actions->actionFromName(WIZACTION_FORMAT_INSERT_DATE)->setEnabled(true);
-    m_actions->actionFromName(WIZACTION_FORMAT_INSERT_TIME)->setEnabled(true);
-    m_actions->actionFromName(WIZACTION_FORMAT_INSERT_CHECKLIST)->setEnabled(true);
-    m_actions->actionFromName(WIZACTION_FORMAT_INSERT_CODE)->setEnabled(true);
-    m_actions->actionFromName(WIZACTION_FORMAT_INSERT_IMAGE)->setEnabled(true);
-    m_actions->actionFromName(WIZACTION_FORMAT_REMOVE_FORMAT)->setEnabled(true);
-    m_actions->actionFromName(WIZACTION_FORMAT_PLAINTEXT)->setEnabled(true);
-    m_actions->actionFromName(WIZACTION_FORMAT_VIEW_SOURCE)->setEnabled(true);
-}
-
 void MainWindow::setFocusForNewNote(WIZDOCUMENTDATA doc)
 {
     m_documentForEditing = doc;
     m_documents->addAndSelectDocument(doc);
+    m_documents->clearFocus();
+    m_doc->setFocus(Qt::MouseFocusReason);
     m_doc->web()->setFocus(Qt::MouseFocusReason);
-    setActionsEnableForNewNote();
 }
 
 void MainWindow::viewDocumentByWizKMURL(const QString &strKMURL)

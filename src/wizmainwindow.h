@@ -395,8 +395,6 @@ private:
     void syncAllData();
     void reconnectServer();
 
-    //FIXME：新建笔记时,为了将光标移到编辑器中,需要将Editor的模式设置为disable,此处需要将actions设置为可用
-    void setActionsEnableForNewNote();
     void setFocusForNewNote(WIZDOCUMENTDATA doc);
     //
     void initTrayIcon(QSystemTrayIcon* trayIcon);

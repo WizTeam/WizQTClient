@@ -932,6 +932,7 @@ void CWizDocumentListView::on_action_deleteDocument()
     else if (selectedItems().isEmpty())
     {
         setItemSelected(documentItemAt(index), true);
+        emit documentsSelectionChanged();
     }
 }
 
