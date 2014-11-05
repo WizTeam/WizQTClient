@@ -159,11 +159,10 @@ bool AvatarHostPrivate::isNeedUpdate(const QString& strUserID)
     return false;
 }
 
-void AvatarHostPrivate::loadCache(const QString& strUserID)
+bool AvatarHostPrivate::loadCache(const QString& strUserID)
 {
     QString strFilePath = Utils::PathResolve::avatarPath() + strUserID + ".png";
-    //qDebug() << "[AvatarHost]load avatar: " << strFilePath;
-    loadCacheFromFile(keyFromUserID(strUserID), strFilePath);
+    return loadCacheFromFile(keyFromUserID(strUserID), strFilePath);
 }
 
 
@@ -198,13 +197,13 @@ void AvatarHostPrivate::loadCacheDefault()
     loadCacheFromFile(defaultKey(), Utils::PathResolve::skinResourcesPath("default") + "avatar_default.png");
 }
 
-void AvatarHostPrivate::loadCacheFromFile(const QString& key, const QString& strFilePath)
+bool AvatarHostPrivate::loadCacheFromFile(const QString& key, const QString& strFilePath)
 {
     QPixmap pixmap(strFilePath);
 
     if(pixmap.isNull()) {
         qDebug() << "[AvatarHost]failed to load cache: " << strFilePath;
-        return;
+        return false;
     }
 
     //
@@ -212,16 +211,16 @@ void AvatarHostPrivate::loadCacheFromFile(const QString& key, const QString& str
     pixmap = AvatarHost::circleImage(pixmap, sz.width(), sz.height());
     //
     if (pixmap.isNull())
-        return;
+        return false;
 
     Q_ASSERT(!pixmap.isNull());
 
     if (!QPixmapCache::insert(key, pixmap)) {
         qDebug() << "[AvatarHost]failed to insert cache: " << strFilePath;
-        return;
+        return false;
     }
 
-    //qDebug() << "[AvatarHost]loaded: " << key;
+    return true;
 }
 
 QString AvatarHostPrivate::keyFromUserID(const QString& strUserID) const
@@ -299,8 +298,17 @@ void AvatarHostPrivate::load(const QString& strUserID, bool bForce)
 {
     QPixmap pm;
     if (!QPixmapCache::find(keyFromUserID(strUserID), pm)) {
-        loadCache(strUserID);
-        Q_EMIT q->loaded(strUserID);
+        if (loadCache(strUserID))
+        {
+            Q_EMIT q->loaded(strUserID);
+        }
+        else
+        {
+            // load from local file failed, force download from server
+            bForce = true;
+            m_listUser.removeOne("strUserID");
+            m_strUserCurrent.clear();
+        }
     }
 
     if (isNeedUpdate(strUserID) || bForce) {
