@@ -104,10 +104,12 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     , m_menuBar(0)
     #ifdef Q_OS_MAC
     , m_toolBar(new QToolBar(this))
+    , m_useSystemBasedStyle(true)
     #else
     , m_toolBar(new QToolBar("Main", titleBar()))
     , m_menu(new QMenu(clientWidget()))
     , m_spacerForToolButtonAdjust(NULL)
+    , m_useSystemBasedStyle(m_settings->useSystemBasedStyle())
     #endif
     , m_actions(new CWizActions(*this, this))
     , m_category(new CWizCategoryView(*this, this))
@@ -126,8 +128,7 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
 {
 #ifndef Q_OS_MAC
     clientLayout()->addWidget(m_toolBar);
-    bool bUseSystemBasedStyle = m_settings->useSystemBasedStyle();
-    setWindowStyleForLinux(bUseSystemBasedStyle);
+    setWindowStyleForLinux(m_useSystemBasedStyle);
 #endif
     windowInstance = this;
     //
@@ -167,7 +168,7 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
 #ifdef Q_OS_MAC
     initMenuBar();
 #else
-    if (bUseSystemBasedStyle) {
+    if (m_useSystemBasedStyle) {
         initMenuBar();
     } else {
         initMenuList();
@@ -325,7 +326,7 @@ void MainWindow::closeEvent(QCloseEvent* event)
 
 void MainWindow::mousePressEvent(QMouseEvent* event)
 {
-    if (m_settings->useSystemBasedStyle())
+    if (m_useSystemBasedStyle)
         QMainWindow::mousePressEvent(event);
     else
         _baseClass::mousePressEvent(event);
@@ -333,7 +334,7 @@ void MainWindow::mousePressEvent(QMouseEvent* event)
 
 void MainWindow::mouseMoveEvent(QMouseEvent* event)
 {
-    if (m_settings->useSystemBasedStyle())
+    if (m_useSystemBasedStyle)
         QMainWindow::mouseMoveEvent(event);
     else
         _baseClass::mouseMoveEvent(event);
@@ -341,7 +342,7 @@ void MainWindow::mouseMoveEvent(QMouseEvent* event)
 
 void MainWindow::mouseReleaseEvent(QMouseEvent* event)
 {
-    if (m_settings->useSystemBasedStyle())
+    if (m_useSystemBasedStyle)
         QMainWindow::mouseReleaseEvent(event);
     else
         _baseClass::mouseReleaseEvent(event);
@@ -349,7 +350,7 @@ void MainWindow::mouseReleaseEvent(QMouseEvent* event)
 
 void MainWindow::changeEvent(QEvent* event)
 {
-    if (m_settings->useSystemBasedStyle())
+    if (m_useSystemBasedStyle)
         QMainWindow::changeEvent(event);
     else
         _baseClass::changeEvent(event);
@@ -577,8 +578,7 @@ void MainWindow::restoreStatus()
 void MainWindow::initActions()
 {
 #ifdef Q_OS_LINUX
-    bool bUseExtraShortcut = !m_settings->useSystemBasedStyle();
-    m_actions->init(bUseExtraShortcut);
+    m_actions->init(m_useSystemBasedStyle);
 #else
     m_actions->init();
 #endif

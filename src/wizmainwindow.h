@@ -131,8 +131,9 @@ private:
     QMenuBar* m_menuBar;
 #ifdef Q_OS_LINUX
     QMenu* m_menu;
-    QToolButton* m_menuButton;
+    QToolButton* m_menuButton;    
 #endif
+    bool m_useSystemBasedStyle;
 
 
 #ifndef Q_OS_MAC
