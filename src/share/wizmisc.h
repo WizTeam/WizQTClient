@@ -164,8 +164,16 @@ void showDocumentHistory(const WIZDOCUMENTDATA& doc, QWidget* parent = 0);
 
 bool WizIsOffline();
 
-bool WizIsKMURL(const QString& strURL);
+enum WizKMUrlType
+{
+    WizUrl_Invalid,
+    WizUrl_Document,
+    WizUrl_Attachment
+};
+
+bool IsWizKMURL(const QString& strURL);
 bool WizIsKMURLOpenDocument(const QString& strURL);
+WizKMUrlType GetWizUrlType(const QString& strURL);
 
 class CWizBufferAlloc
 {

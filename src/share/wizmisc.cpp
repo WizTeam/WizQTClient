@@ -2157,7 +2157,7 @@ QString WizGetDefaultTranslatedLocal()
 }
 
 
-bool WizIsKMURL(const QString& strURL)
+bool IsWizKMURL(const QString& strURL)
 {
     return strURL.left(5) == "wiz:/";
 }
@@ -2165,7 +2165,7 @@ bool WizIsKMURL(const QString& strURL)
 
 bool WizIsKMURLOpenDocument(const QString& strURL)
 {
-    if (WizIsKMURL(strURL))
+    if (IsWizKMURL(strURL))
     {
         return strURL.contains("open_document");
     }
@@ -2231,4 +2231,17 @@ void showDocumentHistory(const WIZDOCUMENTDATA& doc, QWidget* parent)
                                       doc.strGUID, doc.strKbGUID);
      QString strUrl = WizService::ApiEntry::standardCommandUrl("document_history", WIZ_TOKEN_IN_URL_REPLACE_PART, strExt);
      showWebDialogWithToken(QObject::tr("Note History"), strUrl, parent);
+}
+
+
+WizKMUrlType GetWizUrlType(const QString& strURL)
+{
+    if (IsWizKMURL(strURL))
+    {
+        if (strURL.contains("open_document"))
+            return WizUrl_Document;
+        else if (strURL.contains("open_attachment"))
+            return WizUrl_Attachment;
+    }
+    return WizUrl_Invalid;
 }

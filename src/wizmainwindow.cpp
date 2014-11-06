@@ -234,7 +234,7 @@ bool MainWindow::eventFilter(QObject* watched, QEvent* event)
                         strUrl.replace("open_document%3F", "open_document?");
                     }
 
-                    if (WizIsKMURL(strUrl))
+                    if (IsWizKMURL(strUrl))
                     {
                         viewDocumentByWizKMURL(strUrl);
                         return true;
@@ -1845,7 +1845,7 @@ void MainWindow::on_search_doSearch(const QString& keywords)
         return;
     }
     //
-    if (WizIsKMURL(keywords)) {
+    if (IsWizKMURL(keywords)) {
         viewDocumentByWizKMURL(keywords);
         return;
     }
@@ -2336,10 +2336,10 @@ void MainWindow::setFocusForNewNote(WIZDOCUMENTDATA doc)
 
 void MainWindow::viewDocumentByWizKMURL(const QString &strKMURL)
 {
-    CWizDatabase& db = m_dbMgr.db();
-    if (!WizIsKMURLOpenDocument(strKMURL))
+    if (GetWizUrlType(strKMURL) != WizUrl_Document)
         return;
 
+    CWizDatabase& db = m_dbMgr.db();
     QString strKbGUID = db.GetParamFromWizKMURL(strKMURL, "kbguid");
     QString strGUID = db.GetParamFromWizKMURL(strKMURL, "guid");
 
@@ -2353,6 +2353,32 @@ void MainWindow::viewDocumentByWizKMURL(const QString &strKMURL)
         viewDocument(document, true);
         locateDocument(document);
     }
+}
+
+void MainWindow::viewAttachmentByWizKMURL(const QString& strKMURL)
+{
+
+    if (GetWizUrlType(strKMURL) != WizUrl_Attachment)
+        return;
+    //TODO:
+/*
+    CWizDatabase& db = m_dbMgr.db();
+    QString strGUID = db.GetParamFromWizKMURL(strKMURL, "guid");
+
+    const WIZDOCUMENTDATA& document = m_doc->note();
+
+    WIZDOCUMENTDATA document;
+
+    WIZDOCUMENTATTACHMENTDATA attachment;
+    if (m_dbMgr.db(document.strKbGUID).AttachmentFromGUID(strGUID, attachment))
+    {
+        if (attachment.strDocumentGUID == document.strGUID)
+        {
+
+        }
+    }
+
+*/
 }
 
 void MainWindow::createNoteWithAttachments(const QStringList& strAttachList)

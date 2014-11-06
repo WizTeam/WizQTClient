@@ -87,6 +87,11 @@ private:
 };
 */
 
+enum WizLinkType {
+    WizLink_Doucment,
+    WizLink_Attachment
+};
+
 
 CWizDocumentWebViewPage::CWizDocumentWebViewPage(QObject *parent) : QWebPage(parent)
 {
@@ -864,9 +869,7 @@ void CWizDocumentWebView::onEditorLinkClicked(const QUrl& url)
 
 bool CWizDocumentWebView::isInternalUrl(const QUrl& url)
 {
-    if (url.scheme().toLower() == "wiz")
-        return true;
-    return false;
+    return url.scheme().toLower() == "wiz";
 }
 
 bool WizStringList2Map(const QStringList& list, QMap<QString, QString>& map)
@@ -888,11 +891,10 @@ bool WizStringList2Map(const QStringList& list, QMap<QString, QString>& map)
 
 void CWizDocumentWebView::viewDocumentByUrl(const QUrl& url)
 {
-    QString strUrl = url.toString();
-    if (!strUrl.startsWith("wiz:", Qt::CaseInsensitive)) {
+    if (!url.isValid())
         return;
-    }
 
+    QString strUrl = url.toString();
     MainWindow* mainWindow = qobject_cast<MainWindow *>(m_app.mainWindow());
     mainWindow->viewDocumentByWizKMURL(strUrl);
 }
