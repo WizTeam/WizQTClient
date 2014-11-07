@@ -2,7 +2,6 @@
 
 #include <QVBoxLayout>
 #include <QUrl>
-#include <QDebug>
 #include <QNetworkConfigurationManager>
 #include <QSplitter>
 #include <QList>
@@ -181,6 +180,8 @@ void TitleBar::setEditor(CWizDocumentWebView* editor)
 
     //connect(editor->page(), SIGNAL(selectionChanged()), SLOT(onEditorChanged()));
     connect(editor->page(), SIGNAL(contentsChanged()), SLOT(onEditorChanged()));
+
+    connect(m_editTitle, SIGNAL(titleEdited(QString)), editor, SLOT(onTitleEdited(QString)));
 
     m_editor = editor;
 }

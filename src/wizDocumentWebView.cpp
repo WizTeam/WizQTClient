@@ -609,6 +609,18 @@ void CWizDocumentWebView::onTimerAutoSaveTimout()
     saveDocument(view()->note(), false);
 }
 
+void CWizDocumentWebView::onTitleEdited(QString strTitle)
+{
+    WIZDOCUMENTDATA document = view()->note();
+    document.strTitle = strTitle;
+    // Only sync when contents unchanged. If contents changed would sync after document saved.
+    if (!isContentsChanged())
+    {
+        MainWindow* mainWindow = qobject_cast<MainWindow*>(m_app.mainWindow());
+        mainWindow->quickSyncKb(document.strKbGUID);
+    }
+}
+
 void CWizDocumentWebView::onDocumentReady(const QString kbGUID, const QString strGUID, const QString strFileName)
 {
     m_mapFile.insert(strGUID, strFileName);
@@ -1146,7 +1158,11 @@ void CWizDocumentWebView::setEditingDocument(bool editing)
         Q_EMIT focusIn();
     }
 
-    const WIZDOCUMENTDATA& docData = view()->note();
+    WIZDOCUMENTDATA docData;
+    CWizDatabase& db = m_dbMgr.db(view()->note().strKbGUID);
+    if (!db.DocumentFromGUID(view()->note().strGUID, docData))
+        return;
+
     saveDocument(docData, false);
 
     m_bEditingMode = editing;

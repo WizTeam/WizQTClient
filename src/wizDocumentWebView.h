@@ -251,6 +251,8 @@ public Q_SLOTS:
 
     void onTimerAutoSaveTimout();
 
+    void onTitleEdited(QString strTitle);
+
     void onDocumentReady(const QString kbGUID, const QString strGUID, const QString strFileName);
     void onDocumentSaved(const QString kbGUID, const QString strGUID, bool ok);
 

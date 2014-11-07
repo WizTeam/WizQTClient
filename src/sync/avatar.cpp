@@ -225,6 +225,9 @@ bool AvatarHostPrivate::loadCacheFromFile(const QString& key, const QString& str
 
 QString AvatarHostPrivate::keyFromUserID(const QString& strUserID) const
 {
+    if (strUserID.isEmpty())
+        return defaultKey();
+
     return "WizService::Avatar::" + strUserID;
 }
 
@@ -259,7 +262,9 @@ bool AvatarHostPrivate::avatar(const QString& strUserID, QPixmap* pixmap)
         return true;
     }
 
-    load(strUserID, false);
+    if (!strUserID.isEmpty()) {
+        load(strUserID, false);
+    }
 
     if (QPixmapCache::find(defaultKey(), pixmap)) {
         return true;
