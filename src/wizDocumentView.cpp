@@ -74,6 +74,7 @@ CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
     m_splitter = new CWizSplitter(this);
     m_splitter->addWidget(m_web);
     m_splitter->addWidget(m_comments);
+    m_comments->page()->setLinkDelegationPolicy(QWebPage::DelegateAllLinks);
     m_comments->page()->mainFrame()->setScrollBarPolicy(Qt::Horizontal, Qt::ScrollBarAlwaysOff);
     m_comments->setAcceptDrops(false);
     m_comments->hide();
@@ -119,6 +120,10 @@ CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
 
     connect(m_editStatusCheckThread, SIGNAL(checkFinished(QString,QStringList)),
             SLOT(on_checkEditStatus_finished(QString,QStringList)));
+
+    // open comments link by document webview
+    connect(m_comments->page(), SIGNAL(linkClicked(const QUrl&)), m_web,
+            SLOT(onEditorLinkClicked(const QUrl&)));
     //
     m_editStatusSyncThread->start(QThread::IdlePriority);
     m_editStatusCheckThread->start(QThread::IdlePriority);
