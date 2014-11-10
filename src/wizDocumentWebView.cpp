@@ -148,10 +148,10 @@ void CWizDocumentWebViewPage::on_editorCommandPaste_triggered()
     Q_ASSERT(clip);
 
     const QMimeData* mime = clip->mimeData();
-//    QStringList formats = mime->formats();
-//    for(int i = 0; i < formats.size(); ++ i) {
-//        qDebug() << "Mime Format: " << formats.at(i) << " Mime data: " << mime->data(formats.at(i));
-//    }
+    QStringList formats = mime->formats();
+    for(int i = 0; i < formats.size(); ++ i) {
+        qDebug() << "Mime Format: " << formats.at(i) << " Mime data: " << mime->data(formats.at(i));
+    }
 
     if (mime->hasHtml())
     {
