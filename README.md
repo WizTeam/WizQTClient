@@ -46,6 +46,7 @@ Also, App Store is not so far!
     $ sudo dnf copr enable mosquito/myrepo 
     $ sudo yum localinstall http://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm http://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm
     $ sudo yum install wiznote      # Stable version  
+    Or
     $ sudo yum install wiznote-beta      # Development version
 
 Thanks for mosquito's contribution, [more Fedora/CentOS soft.](https://copr.fedoraproject.org/coprs/mosquito/myrepo/)
@@ -57,6 +58,7 @@ Thanks for mosquito's contribution, [more Fedora/CentOS soft.](https://copr.fedo
     $ sudo yum install epel-release 
     $ sudo yum localinstall http://li.nux.ro/download/nux/dextop/el$(rpm -E %rhel)/x86_64/nux-dextop-release-0-2.el$(rpm -E %rhel).nux.noarch.rpm http://download1.rpmfusion.org/nonfree/el/updates/$(rpm -E %rhel)/x86_64/rpmfusion-nonfree-release-$(rpm -E %rhel)-1.noarch.rpm http://download1.rpmfusion.org/free/el/updates/$(rpm -E %rhel)/x86_64/rpmfusion-free-release-$(rpm -E %rhel)-1.noarch.rpm 
     $ sudo yum install wiznote      # Stable version  
+    Or
     $ sudo yum install wiznote-beta      # Development version
 
 
