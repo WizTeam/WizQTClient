@@ -26,7 +26,7 @@
 using namespace WizService;
 
 
-
+#define WIZ_ERROR_REGISTRATION_COUNT  332
 
 CWizLoginDialog::CWizLoginDialog(const QString &strDefaultUserId, const QString &strLocale, QWidget *parent)
 #ifdef Q_OS_MAC
@@ -599,6 +599,9 @@ void CWizLoginDialog::onRegisterAccountFinished(bool bFinish)
         doAccountVerify();
     } else {
         ui->label_passwordError->setText(api->lastErrorMessage());
+        if (WIZ_ERROR_REGISTRATION_COUNT == api->lastErrorCode()) {
+
+        }
     }
 
     api->deleteLater();

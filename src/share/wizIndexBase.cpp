@@ -1400,6 +1400,46 @@ bool CWizIndexBase::DocumentFromGUID(const CString& strDocumentGUID, WIZDOCUMENT
     return true;
 }
 
+bool CWizIndexBase::DocumentWithExFieldsFromGUID(const CString& strDocumentGUID, WIZDOCUMENTDATA& data)
+{
+    if (DocumentFromGUID(strDocumentGUID, data))
+    {
+        CString strParamSQL = WizFormatString1(_T("select DOCUMENT_GUID, PARAM_NAME, PARAM_VALUE from WIZ_DOCUMENT_PARAM where (PARAM_NAME='DOCUMENT_FLAGS' or PARAM_NAME='RATE' or PARAM_NAME='SYSTEM_TAGS') and DOCUMENT_GUID = '%1'"), strDocumentGUID);
+
+        CppSQLite3Query queryParam = m_db.execQuery(strParamSQL);
+        while (!queryParam.eof())
+        {
+            CString strGUID = queryParam.getStringField(0);
+            CString strParamName = queryParam.getStringField(1);
+
+            if (strGUID == data.strGUID)
+            {
+                if (strParamName == _T(TABLE_KEY_WIZ_DOCUMENT_PARAM_FLAGS))
+                {
+                    int nFlags = queryParam.getIntField(2);
+                    data.nFlags = nFlags;
+                }
+                else if (strParamName == _T("RATE"))
+                {
+                    int nRate = queryParam.getIntField(2);
+                    data.nRate = nRate;
+                }
+                else if (strParamName == _T("SYSTEM_TAGS"))
+                {
+                    CString strSystemTags = queryParam.getStringField(2);
+                    data.strSystemTags = strSystemTags;
+                }
+            }
+
+            queryParam.nextRow();
+        }
+
+        return true;
+    }
+
+    return false;
+}
+
 bool CWizIndexBase::GetAttachments(CWizDocumentAttachmentDataArray& arrayAttachment)
 {
     CString strSQL = FormatQuerySQL(TABLE_NAME_WIZ_DOCUMENT_ATTACHMENT, FIELD_LIST_WIZ_DOCUMENT_ATTACHMENT);

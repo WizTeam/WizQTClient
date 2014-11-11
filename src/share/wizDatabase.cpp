@@ -526,6 +526,12 @@ bool CWizDatabase::DocumentFromGUID(const QString& strGUID,
     return CWizIndex::DocumentFromGUID(strGUID, dataExists);
 }
 
+bool CWizDatabase::DocumentWithExFieldsFromGUID(const CString& strGUID,
+                                                WIZDOCUMENTDATA& dataExists)
+{
+    return CWizIndex::DocumentWithExFieldsFromGUID(strGUID, dataExists);
+}
+
 bool CWizDatabase::IsObjectDataDownloaded(const QString& strGUID,
                                           const QString& strType)
 {
@@ -2574,6 +2580,11 @@ bool CWizDatabase::UpdateAttachments(const CWizDocumentAttachmentDataArray& arra
     emit attachmentsUpdated();
 
     return !bHasError;
+}
+
+bool CWizDatabase::SetDocumentFlags(WIZDOCUMENTDATA& data, const QString& strFlags, bool bUpdateParamMd5)
+{
+    return SetDocumentParam(data, TABLE_KEY_WIZ_DOCUMENT_PARAM_FLAGS,strFlags, bUpdateParamMd5);
 }
 
 bool CWizDatabase::UpdateDocumentData(WIZDOCUMENTDATA& data,

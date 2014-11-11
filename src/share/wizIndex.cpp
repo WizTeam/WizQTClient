@@ -744,7 +744,7 @@ void CWizIndex::InitDocumentExFields(CWizDocumentDataArray& arrayDocument,
                 Q_ASSERT(strGUID == data.strGUID);
                 if (strGUID == data.strGUID)
                 {
-                    if (strParamName == _T("DOCUMENT_FLAGS"))
+                    if (strParamName == _T(TABLE_KEY_WIZ_DOCUMENT_PARAM_FLAGS))
                     {
                         int nFlags = queryParam.getIntField(2);
                         data.nFlags = nFlags;

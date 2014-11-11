@@ -135,6 +135,8 @@ public:
 
     virtual bool DocumentFromGUID(const QString& strGUID,
                                   WIZDOCUMENTDATA& dataExists);
+    virtual bool DocumentWithExFieldsFromGUID(const CString& strGUID,
+                                              WIZDOCUMENTDATA& dataExists);
 
     // download
     virtual bool OnDownloadDeletedList(const CWizDeletedGUIDDataArray& arrayData);
@@ -336,6 +338,7 @@ public:
     bool UpdateDocuments(const std::deque<WIZDOCUMENTDATAEX>& arrayDocument);
     bool UpdateAttachment(const WIZDOCUMENTATTACHMENTDATAEX& data);
     bool UpdateAttachments(const CWizDocumentAttachmentDataArray& arrayAttachment);
+    bool SetDocumentFlags(WIZDOCUMENTDATA& data, const QString& strFlags, bool bUpdateParamMd5);
 
     bool UpdateDocumentData(WIZDOCUMENTDATA& data, const QString& strHtml,
                             const QString& strURL, int nFlags, bool notifyDataModify = true);

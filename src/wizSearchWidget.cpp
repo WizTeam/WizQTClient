@@ -71,10 +71,10 @@ void CWizSearchWidget::on_search_returnPressed()
 
 void CWizSearchWidget::on_searchTextChanged(QString str)
 {
-    if (str.isEmpty())
-    {
-        Q_EMIT doSearch("");
-    }
+//    if (str.isEmpty())
+//    {
+//        Q_EMIT doSearch("");
+//    }
 }
 
 CWizSearchEdit::CWizSearchEdit(QWidget* parent) : QLineEdit(parent)

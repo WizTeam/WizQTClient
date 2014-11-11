@@ -76,6 +76,13 @@ bool CWizDocumentListViewItem::isContainsAttachment() const
     }
     return false;
 }
+
+int CWizDocumentListViewItem::badgeType() const
+{
+    int nType = m_data.doc.nProtected ? Utils::StyleHelper::BadgeEncryted : Utils::StyleHelper::BadgeNormal;
+    nType = m_data.doc.nFlags & wizDocumentAlwaysOnTop ? Utils::StyleHelper::BadgeAlwaysOnTop : nType;
+    return nType;
+}
 bool CWizDocumentListViewItem::isSpecialFocus() const
 {
     return m_specialFocused;
@@ -131,7 +138,7 @@ void CWizDocumentListViewItem::reload(CWizDatabase& db)
     m_data.thumb = WIZABSTRACT();
     setSortingType(m_nSortingType); // reset info
 
-    db.DocumentFromGUID(m_data.doc.strGUID, m_data.doc);
+    db.DocumentWithExFieldsFromGUID(m_data.doc.strGUID, m_data.doc);
     setText(m_data.doc.strTitle);
     updateDocumentUnreadCount();
 
@@ -234,6 +241,21 @@ bool CWizDocumentListViewItem::operator <(const QListWidgetItem &other) const
 {
     const CWizDocumentListViewItem* pOther = dynamic_cast<const CWizDocumentListViewItem*>(&other);
     Q_ASSERT(pOther && m_nSortingType == pOther->m_nSortingType);
+
+    if (pOther->m_data.doc.nFlags & wizDocumentAlwaysOnTop || m_data.doc.nFlags & wizDocumentAlwaysOnTop)
+    {
+        if (pOther->m_data.doc.nFlags & wizDocumentAlwaysOnTop && m_data.doc.nFlags & wizDocumentAlwaysOnTop)
+        {
+        }
+        else
+        {
+               bool bTop = m_data.doc.nFlags & wizDocumentAlwaysOnTop;
+               if (m_nSortingType > 0)
+                    return bTop;
+               else
+                   return !bTop;
+        }
+    }
 
 
     switch (m_nSortingType) {
@@ -389,7 +411,7 @@ void CWizDocumentListViewItem::drawPrivateSummaryView_impl(QPainter* p, const QS
         rcd.setRight(rcp.left());
     }
 
-    int nType = m_data.doc.nProtected ? Utils::StyleHelper::BadgeEncryted : Utils::StyleHelper::BadgeNormal;
+    int nType = badgeType();
     bool bContainsAttach = isContainsAttachment();
     Utils::StyleHelper::drawListViewItemThumb(p, rcd, nType, m_data.doc.strTitle, m_data.strInfo, thumb.text, bFocused, bSelected, bContainsAttach);
 }
@@ -410,7 +432,7 @@ void CWizDocumentListViewItem::drawGroupSummaryView_impl(QPainter* p, const QSty
     int nAvatarRightMargin = 4;
     rcd.setLeft(rcAvatar.right() + nAvatarRightMargin);
 
-    int nType = m_data.doc.nProtected ? Utils::StyleHelper::BadgeEncryted : Utils::StyleHelper::BadgeNormal;
+    int nType = badgeType();
     bool bContainsAttach = isContainsAttachment();
     Utils::StyleHelper::drawListViewItemThumb(p, rcd, nType, m_data.doc.strTitle, m_data.strInfo, thumb.text, bFocused, bSelected, bContainsAttach);
 }
@@ -422,7 +444,7 @@ void CWizDocumentListViewItem::drawPrivateTwoLineView_impl(QPainter* p, const QS
 
     QRect rcd = drawItemBackground(p, vopt->rect, bSelected, bFocused);
 
-    int nType = m_data.doc.nProtected ? Utils::StyleHelper::BadgeEncryted : Utils::StyleHelper::BadgeNormal;
+    int nType = badgeType();
     bool bContainsAttach = isContainsAttachment();
     Utils::StyleHelper::drawListViewItemThumb(p, rcd, nType, m_data.doc.strTitle, m_data.strInfo, NULL, bFocused, bSelected, bContainsAttach);
 }
@@ -440,7 +462,7 @@ void CWizDocumentListViewItem::drawGroupTwoLineView_impl(QPainter* p, const QSty
     int nAvatarRightMargin = 4;
     rcd.setLeft(rcAvatar.right() + nAvatarRightMargin);
 
-    int nType = m_data.doc.nProtected ? Utils::StyleHelper::BadgeEncryted : Utils::StyleHelper::BadgeNormal;
+    int nType = badgeType();
     bool bContainsAttach = isContainsAttachment();
     Utils::StyleHelper::drawListViewItemThumb(p, rcd, nType, m_data.doc.strTitle, m_data.strInfo, NULL, bFocused, bSelected, bContainsAttach);
 }
@@ -452,7 +474,7 @@ void CWizDocumentListViewItem::drawOneLineView_impl(QPainter* p, const  QStyleOp
 
     QRect rcd = drawItemBackground(p, vopt->rect, bSelected, bFocused);
 
-    int nType = m_data.doc.nProtected ? Utils::StyleHelper::BadgeEncryted : Utils::StyleHelper::BadgeNormal;
+    int nType = badgeType();
     bool bContainsAttach = isContainsAttachment();
     Utils::StyleHelper::drawListViewItemThumb(p, rcd, nType, m_data.doc.strTitle, NULL, NULL, bFocused, bSelected, bContainsAttach);
 }
