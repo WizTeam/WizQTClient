@@ -60,7 +60,7 @@ private slots:
     void on_btn_proxysetting_clicked();
     void on_btn_fogetpass_clicked();
     void on_btn_login_clicked();
-    void on_btn_singin_clicked();
+    void on_btn_singUp_clicked();
 
 
     void onLoginInputChanged();
@@ -80,6 +80,7 @@ private:
     void applyElementStyles(const QString& strLocal);
     bool checkSingMessage();
     QAction* findActionInMenu(const QString& strActName);
+    bool doVerificationCodeCheck(QString& strCaptchaID, QString& strCaptcha);
 
 private:
     Ui::wizLoginWidget *ui;
@@ -91,7 +92,7 @@ private:
     QLineEdit* m_lineEditNewUserName;
     QLineEdit* m_lineEditNewPassword;
     QLineEdit* m_lineEditRepeatPassword;
-    CWizImageButton* m_buttonSignIn;
+    CWizImageButton* m_buttonSignUp;
 };
 
 #endif // WIZLOGINWIDGET_H

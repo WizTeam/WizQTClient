@@ -150,6 +150,7 @@ set(wiznote_SOURCES
     share/wizSingleApplication.cpp
     share/wizRtfReader.cpp
     widgets/wizScreenShotWidget.cpp
+    widgets/wizVerificationCodeDialog.cpp
 )
 
 set(wiznote_HEADERS
@@ -287,6 +288,7 @@ set(wiznote_HEADERS
     share/wizSingleApplication.h
     share/wizRtfReader.h
     widgets/wizScreenShotWidget.h
+    widgets/wizVerificationCodeDialog.h
 )
 
 set(wiznote_FORMS
@@ -304,6 +306,7 @@ set(wiznote_FORMS
     ui/wizLoginDialog.ui
     ui/wizSearchReplaceWidget.ui
     ui/wizDocTemplateDialog.ui
+    ui/wizVerificationCodeDialog.ui
 )
 
 set(wiznote_TRANSLATIONS

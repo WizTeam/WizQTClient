@@ -1,44 +1,83 @@
 #include "wizVerificationCodeDialog.h"
-#include <QHBoxLayout>
-#include <QVBoxLayout>
-#include <QImage>
-#include <QFile>
+#include "ui_wizVerificationCodeDialog.h"
+#include "share/wizmisc.h"
+#include "utils/pathresolve.h"
+#include <QIcon>
+#include <QPixmap>
+#include <QEventLoop>
+#include <QDebug>
+#include <QMessageBox>
+#include <QNetworkReply>
+#include <QNetworkRequest>
+#include <QNetworkAccessManager>
 
 CWizVerificationCodeDialog::CWizVerificationCodeDialog(QWidget *parent) :
-    QDialog(parent)
+    QDialog(parent),
+    ui(new Ui::CWizVerificationCodeDialog)
 {
-
+    ui->setupUi(this);
+    ui->btn_image->setToolTip(tr("Click to refresh verification code"));
 }
 
-void CWizVerificationCodeDialog::showVerificationImage(const QString& strUrl)
+CWizVerificationCodeDialog::~CWizVerificationCodeDialog()
 {
-    //download image
+    delete ui;
 }
 
-void CWizVerificationCodeDialog::showVerificationImage(const QImage& image)
+int CWizVerificationCodeDialog::verificationRequest(const QString& strUrl)
 {
-    showImage(image);
+    m_strUrl = strUrl;
+    qDebug() << "try to download from url : " << m_strUrl;
+    QPixmap pix;
+    downloadImage(pix);
+
+    QIcon icon(pix);
+    qDebug() << "pix to icon : " << icon.isNull();
+    ui->btn_image->setFixedSize(pix.size());
+    ui->btn_image->setMinimumSize(pix.size());
+    ui->btn_image->setIcon(icon);
+
+    return exec();
 }
 
-void CWizVerificationCodeDialog::on_OKButton_clicked()
+QString CWizVerificationCodeDialog::getVerificationCode() const
 {
-    accept();
-
-    QString strCode;
-    emit verificationCodeInputed(strCode);
+    return ui->lineEdit->text();
 }
 
-void CWizVerificationCodeDialog::on_image_downloaded(const QString& strFile)
+void CWizVerificationCodeDialog::downloadImage(QPixmap& pix)
 {
-    if (QFile::exists(strFile))
+    QNetworkAccessManager m_WebCtrl;
+    QNetworkRequest request(m_strUrl);
+    QEventLoop loop;
+    loop.connect(&m_WebCtrl, SIGNAL(finished(QNetworkReply*)), SLOT(quit()));
+    QNetworkReply* reply = m_WebCtrl.get(request);
+    loop.exec();
+
+    QByteArray byData = reply->readAll();
+    qDebug() << "load image from : " << m_strUrl << " image empty : " << byData.isEmpty() << " reply error : " << reply->error();;
+    qDebug() << "imaged data : " << byData;
+    pix.loadFromData(byData);
+    qDebug() << "pix load from data , pix empty : " << pix.isNull();
+}
+
+void CWizVerificationCodeDialog::on_btn_image_clicked()
+{
+    QPixmap pix;
+    downloadImage(pix);
+    QIcon icon(pix);
+    ui->btn_image->setIcon(icon);
+    if (pix.isNull())
     {
-        QImage image(strFile);
-        showImage(image);
+        QMessageBox::information(this, tr("Inof"), tr("Too many request, please wait for one minute."));
+        reject();
     }
 }
 
-void CWizVerificationCodeDialog::showImage(const QImage& image)
+void CWizVerificationCodeDialog::on_btn_OK_clicked()
 {
+    QString strCode = ui->lineEdit->text();
+    accept();
 
-    exec();
+    emit verificationCodeInputed(strCode);
 }
