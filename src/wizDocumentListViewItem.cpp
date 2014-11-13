@@ -250,10 +250,11 @@ bool CWizDocumentListViewItem::operator <(const QListWidgetItem &other) const
         else
         {
                bool bTop = m_data.doc.nFlags & wizDocumentAlwaysOnTop;
-               if (m_nSortingType > 0)
-                    return bTop;
-               else
-                   return !bTop;
+               return bTop;
+//               if (m_nSortingType > 0)
+//                    return bTop;
+//               else
+//                   return !bTop;
         }
     }
 
