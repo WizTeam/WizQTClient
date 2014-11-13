@@ -26,6 +26,8 @@ private slots:
 
     void on_btn_OK_clicked();
 
+    void inputFinished();
+
 private:
     void downloadImage(QPixmap& pix);
 

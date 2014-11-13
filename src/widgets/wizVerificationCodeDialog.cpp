@@ -5,7 +5,6 @@
 #include <QIcon>
 #include <QPixmap>
 #include <QEventLoop>
-#include <QDebug>
 #include <QMessageBox>
 #include <QNetworkReply>
 #include <QNetworkRequest>
@@ -17,6 +16,7 @@ CWizVerificationCodeDialog::CWizVerificationCodeDialog(QWidget *parent) :
 {
     ui->setupUi(this);
     ui->btn_image->setToolTip(tr("Click to refresh verification code"));
+    connect(ui->lineEdit, SIGNAL(returnPressed()), SLOT(inputFinished()));
 }
 
 CWizVerificationCodeDialog::~CWizVerificationCodeDialog()
@@ -27,12 +27,10 @@ CWizVerificationCodeDialog::~CWizVerificationCodeDialog()
 int CWizVerificationCodeDialog::verificationRequest(const QString& strUrl)
 {
     m_strUrl = strUrl;
-    qDebug() << "try to download from url : " << m_strUrl;
     QPixmap pix;
     downloadImage(pix);
 
     QIcon icon(pix);
-    qDebug() << "pix to icon : " << icon.isNull();
     ui->btn_image->setFixedSize(pix.size());
     ui->btn_image->setMinimumSize(pix.size());
     ui->btn_image->setIcon(icon);
@@ -55,10 +53,7 @@ void CWizVerificationCodeDialog::downloadImage(QPixmap& pix)
     loop.exec();
 
     QByteArray byData = reply->readAll();
-    qDebug() << "load image from : " << m_strUrl << " image empty : " << byData.isEmpty() << " reply error : " << reply->error();;
-    qDebug() << "imaged data : " << byData;
     pix.loadFromData(byData);
-    qDebug() << "pix load from data , pix empty : " << pix.isNull();
 }
 
 void CWizVerificationCodeDialog::on_btn_image_clicked()
@@ -80,4 +75,9 @@ void CWizVerificationCodeDialog::on_btn_OK_clicked()
     accept();
 
     emit verificationCodeInputed(strCode);
+}
+
+void CWizVerificationCodeDialog::inputFinished()
+{
+    on_btn_OK_clicked();
 }
