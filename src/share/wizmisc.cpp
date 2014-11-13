@@ -2245,3 +2245,10 @@ WizKMUrlType GetWizUrlType(const QString& strURL)
     }
     return WizUrl_Invalid;
 }
+
+#define WIZ_SEARCH_SPLIT_CHAR  ' '
+
+QChar getWizSearchSplitChar()
+{
+    return WIZ_SEARCH_SPLIT_CHAR;
+}

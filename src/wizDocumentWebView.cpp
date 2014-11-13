@@ -1047,10 +1047,14 @@ void CWizDocumentWebView::applySearchKeywordHighlight()
     QString strKeyWords = window->searchKeywords();
     if (!strKeyWords.isEmpty() && (!m_bCurrentEditing || !hasFocus()))
     {
-        if (findText(strKeyWords, QWebPage::HighlightAllOccurrences))
-            qDebug() << "[Search] find keywords : " << strKeyWords;
-        else
-            qDebug() << "[Search] can't find keywords : " << strKeyWords;
+        QStringList keyList = strKeyWords.split(getWizSearchSplitChar());
+        foreach (QString strText, keyList)
+        {
+            if (findText(strText, QWebPage::HighlightAllOccurrences))
+                qDebug() << "[Search] find keywords : " << strText;
+            else
+                qDebug() << "[Search] can't find keywords : " << strText;
+        }
     }
     else
     {

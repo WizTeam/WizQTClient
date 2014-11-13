@@ -49,6 +49,8 @@ void WizStringArrayRemoveMultiElement(CWizStdStringArray& arrayText);
 void WizStringArrayRemoveMultiElementNoCase(CWizStdStringArray& arrayText);
 
 
+QChar getWizSearchSplitChar();
+
 CString WizStringArrayGetValue(const CWizStdStringArray& arrayText, const CString& valueName);
 void WizCommandLineToStringArray(const CString& commandLine, CWizStdStringArray& arrayLine);
 CString WizGetCommandLineValue(const CString& strCommandLine, const CString& strKey);
