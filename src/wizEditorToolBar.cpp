@@ -143,7 +143,9 @@ protected:
         if (opt.state & QStyle::State_On)
             state = QIcon::On;
 
-        opt.icon.paint(&p, opt.rect, Qt::AlignCenter, mode, state);
+        QSize size = iconSize();
+        QRect rcIcon((opt.rect.width() - size.width()) / 2, (opt.rect.height() - size.height()) / 2, size.width(), size.height());
+        opt.icon.paint(&p, rcIcon, Qt::AlignCenter, mode, state);
     }
 
     virtual void leaveEvent(QEvent* event) {
@@ -175,6 +177,7 @@ public:
     CWizToolButtonColor(QWidget* parent = 0) : CWizToolButton(parent)
     {
         setCheckable(false);
+        setIconSize(QSize(16, 16));
     }
 
     void setColor(const QColor& color)
@@ -203,7 +206,9 @@ protected:
         if (opt.state & QStyle::State_On)
             state = QIcon::On;
 
-        opt.icon.paint(&p, opt.rect, Qt::AlignCenter, mode, state);
+        QSize size = iconSize();
+        QRect rcIcon((opt.rect.width() - size.width()) / 2, (opt.rect.height() - size.height()) / 2, size.width(), size.height());
+        opt.icon.paint(&p, rcIcon, Qt::AlignCenter, mode, state);
 
         QRect rectColor(opt.rect.x() + 4, opt.iconSize.height() + 1, opt.iconSize.width() - 4, 4);
         p.fillRect(QRect(rectColor), m_color);

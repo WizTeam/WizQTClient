@@ -642,6 +642,9 @@ void MainWindow::on_editor_statusChanged()
         return;
     }
 
+    m_actions->actionFromName(WIZACTION_EDITOR_FIND_REPLACE)->setEnabled(true);
+    m_actions->actionFromName(WIZACTION_EDITOR_SELECT_ALL)->setEnabled(true);
+
     //if (!editor->page()->undoStack()->canUndo()) {
     if (editor->editorCommandQueryCommandState("undo") == -1) {
         m_actions->actionFromName(WIZACTION_EDITOR_UNDO)->setEnabled(false);
