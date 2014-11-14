@@ -302,7 +302,8 @@ QPixmap AvatarHostPrivate::loadOrg(const QString& strUserID, bool bForce)
 void AvatarHostPrivate::load(const QString& strUserID, bool bForce)
 {
     QPixmap pm;
-    if (!QPixmapCache::find(keyFromUserID(strUserID), pm)) {
+    if (!QPixmapCache::find(keyFromUserID(strUserID), pm))
+    {
         if (loadCache(strUserID))
         {
             Q_EMIT q->loaded(strUserID);
@@ -316,8 +317,10 @@ void AvatarHostPrivate::load(const QString& strUserID, bool bForce)
         }
     }
 
-    if (isNeedUpdate(strUserID) || bForce) {
-        if (!m_listUser.contains(strUserID) && strUserID != m_strUserCurrent) {
+    if (isNeedUpdate(strUserID) || bForce)
+    {
+        if (!m_listUser.contains(strUserID) && strUserID != m_strUserCurrent)
+        {
             m_listUser.append(strUserID);
             m_thread->start(QThread::IdlePriority);
         }

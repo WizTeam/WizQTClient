@@ -93,7 +93,7 @@ CWizLoginDialog::CWizLoginDialog(const QString &strDefaultUserId, const QString 
     connect(ui->btn_changeToLogin, SIGNAL(clicked()), SLOT(on_btn_changeToLogin_clicked()));
     connect(ui->btn_changeToSignin, SIGNAL(clicked()), SLOT(on_btn_changeToSignin_clicked()));
     connect(ui->btn_fogetpass, SIGNAL(clicked()), SLOT(on_btn_fogetpass_clicked()));
-    connect(ui->btn_singin, SIGNAL(clicked()), SLOT(on_btn_singUp_clicked()));
+    connect(ui->btn_singUp, SIGNAL(clicked()), SLOT(on_btn_singUp_clicked()));
     connect(ui->btn_proxysetting, SIGNAL(clicked()), SLOT(on_btn_proxysetting_clicked()));
     connect(ui->cbx_autologin, SIGNAL(toggled(bool)), SLOT(on_cbx_autologin_toggled(bool)));
     connect(ui->cbx_remberPassword, SIGNAL(toggled(bool)), SLOT(on_cbx_remberPassword_toggled(bool)));

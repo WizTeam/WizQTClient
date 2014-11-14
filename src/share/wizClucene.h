@@ -2,6 +2,7 @@
 #define WIZCLUCENE_H
 
 #include <QtGlobal>
+#include <string>
 
 // interface
 class IWizCluceneSearch
