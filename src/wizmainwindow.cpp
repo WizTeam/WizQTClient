@@ -615,6 +615,10 @@ void MainWindow::on_editor_statusChanged()
         m_actions->actionFromName(WIZACTION_EDITOR_FIND_REPLACE)->setEnabled(false);
         m_actions->actionFromName(WIZACTION_EDITOR_SELECT_ALL)->setEnabled(false);
 
+        m_actions->actionFromName(WIZACTION_GLOBAL_SAVE_AS_PDF)->setEnabled(false);
+        m_actions->actionFromName(WIZACTION_GLOBAL_SAVE_AS_HTML)->setEnabled(false);
+        m_actions->actionFromName(WIZACTION_GLOBAL_PRINT)->setEnabled(false);
+
         m_actions->actionFromName(WIZACTION_FORMAT_BOLD)->setEnabled(false);
         m_actions->actionFromName(WIZACTION_FORMAT_ITALIC)->setEnabled(false);
         m_actions->actionFromName(WIZACTION_FORMAT_UNDERLINE)->setEnabled(false);
@@ -644,6 +648,10 @@ void MainWindow::on_editor_statusChanged()
 
     m_actions->actionFromName(WIZACTION_EDITOR_FIND_REPLACE)->setEnabled(true);
     m_actions->actionFromName(WIZACTION_EDITOR_SELECT_ALL)->setEnabled(true);
+
+    m_actions->actionFromName(WIZACTION_GLOBAL_SAVE_AS_PDF)->setEnabled(true);
+    m_actions->actionFromName(WIZACTION_GLOBAL_SAVE_AS_HTML)->setEnabled(true);
+    m_actions->actionFromName(WIZACTION_GLOBAL_PRINT)->setEnabled(true);
 
     //if (!editor->page()->undoStack()->canUndo()) {
     if (editor->editorCommandQueryCommandState("undo") == -1) {
