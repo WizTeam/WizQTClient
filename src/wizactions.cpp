@@ -26,6 +26,14 @@ WIZACTION* CWizActions::actionsData()
     // useless, just for translation
     static WIZACTION arrayRoot[] =
     {
+    #ifdef Q_OS_LINUX
+        {"actionFile", QObject::tr("&File")},
+        {"actionEdit", QObject::tr("&Edit")},
+        {"actionView", QObject::tr("&View")},
+        {"actionFormat", QObject::tr("For&mat")},
+        {"actionTools", QObject::tr("&Tools")},
+        {"actionHelp", QObject::tr("&Help")},
+    #else
         // root
         {"actionFile", QObject::tr("File")},
         {"actionEdit", QObject::tr("Edit")},
@@ -33,6 +41,7 @@ WIZACTION* CWizActions::actionsData()
         {"actionFormat", QObject::tr("Format")},
         {"actionTools", QObject::tr("Tools")},
         {"actionHelp", QObject::tr("Help")},
+    #endif
 
         // sub
         {"actionText", QObject::tr("Text")},
