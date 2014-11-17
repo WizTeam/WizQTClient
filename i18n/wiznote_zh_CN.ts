@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE TS>
-<TS version="2.1" language="zh_CN">
+<TS version="2.0" language="zh_CN">
 <context>
     <name>CWizAttachmentListView</name>
     <message>
@@ -2058,32 +2058,32 @@ w: %3  h: %4</translation>
     <message>
         <location filename="../src/wizactions.cpp" line="31"/>
         <source>&amp;File</source>
-        <translation type="unfinished">文件(F)</translation>
+        <translation type="unfinished">文件(&amp;F)</translation>
     </message>
     <message>
         <location filename="../src/wizactions.cpp" line="32"/>
         <source>&amp;Edit</source>
-        <translation type="unfinished">&amp;编辑</translation>
+        <translation type="unfinished">编辑（&amp;E）</translation>
     </message>
     <message>
         <location filename="../src/wizactions.cpp" line="33"/>
         <source>&amp;View</source>
-        <translation type="unfinished">查&amp;看</translation>
+        <translation type="unfinished">查看(&amp;V)</translation>
     </message>
     <message>
         <location filename="../src/wizactions.cpp" line="34"/>
         <source>For&amp;mat</source>
-        <translation type="unfinished">&amp;格式</translation>
+        <translation type="unfinished">格式(&amp;M)</translation>
     </message>
     <message>
         <location filename="../src/wizactions.cpp" line="35"/>
         <source>&amp;Tools</source>
-        <translation type="unfinished">&amp;工具</translation>
+        <translation type="unfinished">工具(&amp;T)</translation>
     </message>
     <message>
         <location filename="../src/wizactions.cpp" line="36"/>
         <source>&amp;Help</source>
-        <translation type="unfinished">&amp;帮助</translation>
+        <translation type="unfinished">帮助(&amp;H)</translation>
     </message>
     <message>
         <location filename="../src/wizactions.cpp" line="40"/>
