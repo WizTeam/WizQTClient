@@ -2,6 +2,7 @@
 
 #include <QProxyStyle>
 #include <QPainter>
+#include <QApplication>
 
 #include "wizCategoryView.h"
 #include "wizDocumentListView.h"
@@ -42,7 +43,6 @@ private:
     QImage m_collapsedImage;
     QImage m_expandedImageSelected;
     QImage m_collapsedImageSelected;
-    QImage m_imgDocumentUnread;
     QImage m_imgDefaultAvatar;
 
     CWizSkin9GridImage m_multiLineListSelectedItemBackground;
@@ -81,11 +81,15 @@ CWizNoteStyle::CWizNoteStyle(const QString& strSkinName)
     {
         QString strSkinPath = ::WizGetSkinResourcePath(strSkinName);
 
-        m_expandedImage.load(strSkinPath + "branch_expanded.png");
-        m_collapsedImage.load(strSkinPath + "branch_collapsed.png");
-        m_expandedImageSelected.load(strSkinPath + "branch_expandedSelected.png");
-        m_collapsedImageSelected.load(strSkinPath + "branch_collapsedSelected.png");
-        m_imgDocumentUnread.load(strSkinPath + "read_btn_unread.png");
+        bool bHightPix = qApp->devicePixelRatio() >= 2;
+        QString strIconName = bHightPix ? "branch_expanded@2x.png" : "branch_expanded.png";
+        m_expandedImage.load(strSkinPath + strIconName);
+        strIconName = bHightPix ? "branch_collapsed@2x.png" : "branch_collapsed.png";
+        m_collapsedImage.load(strSkinPath + strIconName);
+        strIconName = bHightPix ? "branch_expandedSelected@2x.png" : "branch_expandedSelected.png";
+        m_expandedImageSelected.load(strSkinPath + strIconName);
+        strIconName = bHightPix ? "branch_collapsedSelected@2x.png" : "branch_collapsedSelected.png";
+        m_collapsedImageSelected.load(strSkinPath + strIconName);
         m_imgDefaultAvatar.load(strSkinPath + "avatar_default.png");
 
         //m_iconDocumentsBadge = ::WizLoadSkinIcon(strSkinName, "document_badge");
@@ -496,8 +500,9 @@ int	CWizNoteStyle::pixelMetric(PixelMetric metric, const QStyleOption* option, c
 
 void CWizNoteStyle::drawcenterImage(QPainter* p, const QImage& image, const QRect& rc) const
 {
-    int width = image.width();
-    int height = image.height();
+    bool bHighPix = qApp->devicePixelRatio() >= 2;
+    int width = bHighPix ? image.width() / 2 : image.width();
+    int height = bHighPix ? image.height() / 2 : image.height();
 
     int x = rc.left() + (rc.width() - width) / 2;
     int y = rc.top() + (rc.height() - height) / 2;

@@ -1,11 +1,12 @@
 #include "wizCategoryViewItem.h"
 
-#include <QDebug>
+#include <QApplication>
 #include <QTextCodec>
 #include <QPainter>
 #include <cstring>
 #include <QFile>
 #include <QStyle>
+#include <QDebug>
 
 #include <extensionsystem/pluginmanager.h>
 #include "utils/pinyin.h"
@@ -23,6 +24,7 @@
 #include "share/wizsettings.h"
 #include "wiznotestyle.h"
 #include "share/wizDatabaseManager.h"
+#include "share/wizmisc.h"
 
 #define PREDEFINED_TRASH            QObject::tr("Trash")
 #define PREDEFINED_UNCLASSIFIED     QObject::tr("Unclassified")
@@ -143,6 +145,23 @@ void CWizCategoryViewItemBase::setDocumentsCount(int nCurrent, int nTotal)
     }
 }
 
+void CWizCategoryViewItemBase::setExtraButtonIcon(const QString& file)
+{
+    if (qApp->devicePixelRatio() >= 2)
+    {
+        int nIndex = file.lastIndexOf('.');
+        QString strFile = file.left(nIndex) + "@2x" + file.right(file.length() - nIndex);
+        qDebug() << "StrFileName";
+        if (QFile::exists(strFile))
+        {
+            m_extraButtonIcon = QPixmap(strFile);
+            return;
+        }
+    }
+
+    m_extraButtonIcon = QPixmap(file);
+}
+
 bool CWizCategoryViewItemBase::getExtraButtonIcon(QPixmap &ret) const
 {
     ret = m_extraButtonIcon;
@@ -153,9 +172,13 @@ QRect CWizCategoryViewItemBase::getExtraButtonRect(const QRect &rcItemBorder, bo
 {
     int nMargin = 4;
     QSize szBtn(16, 16);
-    if (!m_extraButtonIcon.isNull()) {
+    if (!m_extraButtonIcon.isNull())
+    {
         szBtn = m_extraButtonIcon.size();
-    } else if (!ignoreIconExist){
+        scaleIconSizeForRetina(szBtn);
+    }
+    else if (!ignoreIconExist)
+    {
         return QRect(0, 0, 0, 0);
     }
     int nWidth = szBtn.width() + 2 * nMargin;
@@ -307,6 +330,7 @@ QRect CWizCategoryViewSectionItem::getExtraButtonRect(const QRect &itemBorder, b
     QSize szBtn(16, 16);
     if (!m_extraButtonIcon.isNull()) {
         szBtn = m_extraButtonIcon.size();
+        scaleIconSizeForRetina(szBtn);
     } else if (!ignoreIconExist){
         return QRect(0, 0, 0, 0);
     }

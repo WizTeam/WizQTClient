@@ -2252,3 +2252,13 @@ QChar getWizSearchSplitChar()
 {
     return WIZ_SEARCH_SPLIT_CHAR;
 }
+
+
+void scaleIconSizeForRetina(QSize& size)
+{
+    if (qApp->devicePixelRatio() >= 2)
+    {
+        size.scale(size.width() / 2, size.height() / 2, Qt::IgnoreAspectRatio);
+    }
+}
+

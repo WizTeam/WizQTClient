@@ -27,8 +27,6 @@ public:
 protected:
     void paintEvent(QPaintEvent* event);
     void mousePressEvent(QMouseEvent* event);
-    void focusInEvent(QFocusEvent* event);
-    void focusOutEvent(QFocusEvent* event);
 
 private:
     QPixmap m_searchIcon;

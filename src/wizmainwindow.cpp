@@ -1136,7 +1136,6 @@ void MainWindow::initToolBar()
     m_toolBar->addAction(m_actions->actionFromName(WIZACTION_GLOBAL_GOFORWARD));
     updateHistoryButtonStatus();
 
-
     m_toolBar->addWidget(new CWizSpacer(m_toolBar));
 
     m_search = new CWizSearchWidget(this);
