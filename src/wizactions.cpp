@@ -303,9 +303,16 @@ void CWizActions::buildMenuBar(QMenuBar* menuBar, const QString& strFileName)
         else if (strAction.startsWith("+"))
         {
             strAction.remove(0, 1);
-            QString strLocalText = QObject::tr(strAction.toUtf8());
-            QMenu* pMenu = menuBar->addMenu(strLocalText);
 
+            // there is no shortcut for menubar on macosx
+#ifdef Q_OS_MAC
+            QString strLocalText = strAction;
+            strLocalText = QObject::tr(strLocalText.remove('&').toUtf8());
+#else
+            QString strLocalText = QObject::tr(strAction.toUtf8());
+#endif
+
+            QMenu* pMenu = menuBar->addMenu(strLocalText);
             buildMenu(pMenu, settings, strAction, true);
         }
         else
