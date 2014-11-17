@@ -293,8 +293,6 @@ QPixmap AvatarHostPrivate::loadOrg(const QString& strUserID, bool bForce)
             m_listUser.append(strUserID);
             m_thread->start(QThread::IdlePriority);
         }
-
-        return QPixmap();
     }
     return loadOrg(strUserID);
 }
@@ -355,7 +353,8 @@ void AvatarHostPrivate::on_thread_started()
 
 void AvatarHostPrivate::on_downloaded(QString strUserID, bool bSucceed)
 {
-    if (bSucceed) {
+    if (bSucceed)
+    {
         m_strUserCurrent.clear(); // Clear current otherwise download twice will be failed
         loadCache(strUserID);
         Q_EMIT q->loaded(strUserID);
