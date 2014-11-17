@@ -275,11 +275,13 @@ void TitleBar::onAttachButtonClicked()
         m_attachments = new CWizAttachmentListWidget(topLevelWidget());
     }
 
-    m_attachments->setDocument(noteView()->note());
 
-    QRect rc = m_attachBtn->rect();
-    QPoint pt = m_attachBtn->mapToGlobal(QPoint(rc.width()/2, rc.height()));
-    m_attachments->showAtPoint(pt);
+    if (m_attachments->setDocument(noteView()->note()))
+    {
+        QRect rc = m_attachBtn->rect();
+        QPoint pt = m_attachBtn->mapToGlobal(QPoint(rc.width()/2, rc.height()));
+        m_attachments->showAtPoint(pt);
+    }
 }
 
 void TitleBar::onHistoryButtonClicked()

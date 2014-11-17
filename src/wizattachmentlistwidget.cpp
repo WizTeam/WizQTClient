@@ -7,6 +7,7 @@
 #include <QMessageBox>
 #include <QLabel>
 #include <QDebug>
+#include <QEventLoop>
 
 #include <coreplugin/icore.h>
 
@@ -228,8 +229,8 @@ void CWizAttachmentListView::openAttachment(CWizAttachmentListViewItem* item)
     bool bExists = PathFileExists(strFileName);
     if (!bIsLocal || !bExists) {
         //m_downloadDialog->downloadData(attachment);
-        startDownLoad(item);
-        return;
+        startDownload(item);
+        waitForDownload();
     }
 
     QDesktopServices::openUrl(QUrl::fromLocalFile(strFileName));
@@ -285,7 +286,7 @@ void CWizAttachmentListView::resetPermission()
     }
 }
 
-void CWizAttachmentListView::startDownLoad(CWizAttachmentListViewItem* item)
+void CWizAttachmentListView::startDownload(CWizAttachmentListViewItem* item)
 {
     m_downloaderHost->download(item->attachment());
     item->setIsDownloading(true);
@@ -305,6 +306,14 @@ CWizAttachmentListViewItem* CWizAttachmentListView::newAttachmentItem(const WIZD
     return newItem;
 }
 
+void CWizAttachmentListView::waitForDownload()
+{
+    QEventLoop loop;
+    connect(m_downloaderHost, SIGNAL(downloadDone(WIZOBJECTDATA,bool)), &loop,
+            SLOT(quit()));
+    loop.exec();
+}
+
 void CWizAttachmentListView::on_action_addAttachment()
 {
     addAttachments();
@@ -320,18 +329,18 @@ void CWizAttachmentListView::on_action_saveAttachmentAs()
     {
         if (CWizAttachmentListViewItem* item = dynamic_cast<CWizAttachmentListViewItem*>(items[0]))
         {
-            QString strFileName = QFileDialog::getSaveFileName(this, QString(), item->attachment().strName);
-            if (strFileName.isEmpty())
-                return;
-
             CWizDatabase& db = m_dbMgr.db(item->attachment().strKbGUID);
             bool bIsLocal = db.IsObjectDataDownloaded(item->attachment().strGUID, "attachment");
             bool bExists = PathFileExists(db.GetAttachmentFileName(item->attachment().strGUID));
             if (!bIsLocal || !bExists) {
                 //m_downloadDialog->downloadData(item->attachment());
-                startDownLoad(item);
-                return;
+                startDownload(item);
+                waitForDownload();
             }
+
+            QString strFileName = QFileDialog::getSaveFileName(this, QString(), item->attachment().strName);
+            if (strFileName.isEmpty())
+                return;
 
             if (!::WizCopyFile(db.GetAttachmentFileName(item->attachment().strGUID), strFileName, FALSE))
             {
@@ -354,8 +363,8 @@ void CWizAttachmentListView::on_action_saveAttachmentAs()
                 bool bExists = PathFileExists(db.GetAttachmentFileName(item->attachment().strGUID));
                 if (!bIsLocal || !bExists) {
                     //m_downloadDialog->downloadData(item->attachment());
-                    startDownLoad(item);
-                    continue;
+                    startDownload(item);
+                    waitForDownload();
                 }
 
                 CString strFileName = strDir + item->attachment().strName;
@@ -369,6 +378,8 @@ void CWizAttachmentListView::on_action_saveAttachmentAs()
             }
         }
     }
+
+    emit closeRequest();
 }
 
 void CWizAttachmentListView::on_action_openAttachment()
@@ -380,6 +391,8 @@ void CWizAttachmentListView::on_action_openAttachment()
             openAttachment(item);
         }
     }
+
+    emit closeRequest();
 }
 
 void CWizAttachmentListView::on_action_deleteAttachment()
@@ -443,27 +456,36 @@ CWizAttachmentListWidget::CWizAttachmentListWidget(QWidget* parent)
 
     layoutMain->addLayout(layoutHeader);
     layoutMain->addWidget(m_list);
+    connect(m_list, SIGNAL(closeRequest()), SLOT(on_attachList_closeRequest()));
 }
 
-void CWizAttachmentListWidget::setDocument(const WIZDOCUMENTDATA& doc)
-{
-    if (m_currentDocument != doc.strGUID)
-    {
-        m_list->setDocument(doc);
-        m_currentDocument = doc.strGUID;
+bool CWizAttachmentListWidget::setDocument(const WIZDOCUMENTDATA& doc)
+{    
+    CWizDatabase& db = CWizDatabaseManager::instance()->db(doc.strKbGUID);
+    WIZDOCUMENTDATA document;
+    if (!db.DocumentFromGUID(doc.strGUID, document))
+        return false;
 
-        // reset permission
-        if (CWizDatabaseManager::instance()->db(doc.strKbGUID).CanEditDocument(doc)) {
-            m_btnAddAttachment->setEnabled(true);
-        } else {
-            m_btnAddAttachment->setEnabled(false);
-        }
+    m_list->setDocument(document);
+
+    // reset permission
+    if (db.CanEditDocument(document)) {
+        m_btnAddAttachment->setEnabled(true);
+    } else {
+        m_btnAddAttachment->setEnabled(false);
     }
+
+    return true;
 }
 
 void CWizAttachmentListWidget::on_addAttachment_clicked()
 {
     m_list->addAttachments();
+}
+
+void CWizAttachmentListWidget::on_attachList_closeRequest()
+{
+    close();
 }
 
 
