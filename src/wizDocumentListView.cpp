@@ -722,6 +722,16 @@ void CWizDocumentListView::on_itemSelectionChanged()
 {
     //resetPermission();
     m_itemSelectionChanged = true;
+
+    m_rightButtonFocusedItems.clear();
+    foreach (QListWidgetItem* lsItem, selectedItems())
+    {
+        CWizDocumentListViewItem* pItem = dynamic_cast<CWizDocumentListViewItem*>(lsItem);
+        if (pItem)
+        {
+            m_rightButtonFocusedItems.append(pItem);
+        }
+    }
 }
 
 void CWizDocumentListView::on_tag_created(const WIZTAGDATA& tag)
