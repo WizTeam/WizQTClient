@@ -673,12 +673,12 @@ void CWizCategoryView::initMenus()
 //    addAction(actionLoadDoc);
 //    connect(actionLoadDoc,SIGNAL(triggered()),SLOT(on_action_loadDocument()));
 
-//    QAction* actionImportFile = new QAction("ActionImportFile",this);
-//    actionImportFile->setShortcutContext(Qt::WidgetShortcut);
-//    actionImportFile->setShortcut(QKeySequence("Ctrl+Shift+I"));
-//    actionImportFile->setData(ActionImportFile);
-//    addAction(actionImportFile);
-//    connect(actionImportFile,SIGNAL(triggered()),SLOT(on_action_importFile()));
+    QAction* actionImportFile = new QAction("ActionImportFile",this);
+    actionImportFile->setShortcutContext(Qt::WidgetShortcut);
+    actionImportFile->setShortcut(QKeySequence("Ctrl+Shift+I"));
+    actionImportFile->setData(ActionImportFile);
+    addAction(actionImportFile);
+    connect(actionImportFile,SIGNAL(triggered()),SLOT(on_action_importFile()));
 
     QAction* actionNewItem = new QAction("ActionNewItem", this);
     actionNewItem->setShortcutContext(Qt::WidgetShortcut);
