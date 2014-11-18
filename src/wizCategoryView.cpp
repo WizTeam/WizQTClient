@@ -673,12 +673,12 @@ void CWizCategoryView::initMenus()
 //    addAction(actionLoadDoc);
 //    connect(actionLoadDoc,SIGNAL(triggered()),SLOT(on_action_loadDocument()));
 
-    QAction* actionImportFile = new QAction("ActionImportFile",this);
-    actionImportFile->setShortcutContext(Qt::WidgetShortcut);
-    actionImportFile->setShortcut(QKeySequence("Ctrl+Shift+I"));
-    actionImportFile->setData(ActionImportFile);
-    addAction(actionImportFile);
-    connect(actionImportFile,SIGNAL(triggered()),SLOT(on_action_importFile()));
+//    QAction* actionImportFile = new QAction("ActionImportFile",this);
+//    actionImportFile->setShortcutContext(Qt::WidgetShortcut);
+//    actionImportFile->setShortcut(QKeySequence("Ctrl+Shift+I"));
+//    actionImportFile->setData(ActionImportFile);
+//    addAction(actionImportFile);
+//    connect(actionImportFile,SIGNAL(triggered()),SLOT(on_action_importFile()));
 
     QAction* actionNewItem = new QAction("ActionNewItem", this);
     actionNewItem->setShortcutContext(Qt::WidgetShortcut);
@@ -764,7 +764,7 @@ void CWizCategoryView::initMenus()
     // folder menu
     m_menuFolder = new QMenu(this);
     m_menuFolder->addAction(actionNewDoc);
-    m_menuFolder->addAction(actionImportFile);
+//    m_menuFolder->addAction(actionImportFile);
     m_menuFolder->addAction(actionNewItem);
     m_menuFolder->addSeparator();
     m_menuFolder->addAction(actionMoveItem);
