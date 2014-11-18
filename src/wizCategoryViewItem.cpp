@@ -151,7 +151,6 @@ void CWizCategoryViewItemBase::setExtraButtonIcon(const QString& file)
     {
         int nIndex = file.lastIndexOf('.');
         QString strFile = file.left(nIndex) + "@2x" + file.right(file.length() - nIndex);
-        qDebug() << "StrFileName";
         if (QFile::exists(strFile))
         {
             m_extraButtonIcon = QPixmap(strFile);

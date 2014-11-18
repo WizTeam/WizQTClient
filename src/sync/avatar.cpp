@@ -309,8 +309,7 @@ void AvatarHostPrivate::load(const QString& strUserID, bool bForce)
         else
         {
             // load from local file failed, force download from server
-            bForce = true;
-            m_listUser.removeOne("strUserID");
+            m_listUser.removeOne(strUserID);
             m_strUserCurrent.clear();
         }
     }

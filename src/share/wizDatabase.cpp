@@ -1863,9 +1863,12 @@ bool CWizDatabase::GetUserGroupInfo(CWizGroupDataArray& arrayGroup)
 
         group.strGroupGUID = GetMetaDef(g_strGroupSection, QString::number(i));
         //
-        GetGroupData(group.strGroupGUID, group);
-        //
-        arrayGroup.push_back(group);
+        if (!group.strGroupGUID.isEmpty())
+        {
+            GetGroupData(group.strGroupGUID, group);
+            //
+            arrayGroup.push_back(group);
+        }
     }
 
     return true;

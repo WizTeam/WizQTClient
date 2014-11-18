@@ -29,7 +29,7 @@ private slots:
     void inputFinished();
 
 private:
-    void downloadImage(QPixmap& pix);
+    bool downloadImage(QPixmap& pix);
 
     Ui::CWizVerificationCodeDialog *ui;
     QString m_strUrl;
