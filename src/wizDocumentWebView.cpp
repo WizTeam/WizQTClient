@@ -1343,7 +1343,10 @@ bool CWizDocumentWebView::editorCommandExecuteFindReplace()
     connect(wgt, SIGNAL(replaceCurrent(QString,QString)), SLOT(replaceCurrent(QString,QString)));
     connect(wgt, SIGNAL(replaceAndFindNext(QString,QString,bool)), SLOT(replaceAndFindNext(QString,QString,bool)));
     connect(wgt, SIGNAL(replaceAll(QString,QString,bool)), SLOT(replaceAll(QString,QString,bool)));
-    wgt->show();
+
+    QRect rect = geometry();
+    rect.moveTo(mapToGlobal(pos()));
+    wgt->showInEditor(rect);
 
     return true;
 }

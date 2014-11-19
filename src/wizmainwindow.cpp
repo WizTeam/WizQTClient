@@ -578,7 +578,7 @@ void MainWindow::restoreStatus()
 void MainWindow::initActions()
 {
 #ifdef Q_OS_LINUX
-    m_actions->init(m_useSystemBasedStyle);
+    m_actions->init(!m_useSystemBasedStyle);
 #else
     m_actions->init();
 #endif
@@ -1178,8 +1178,14 @@ void MainWindow::initToolBar()
     buttonNew->setAction(m_actions->actionFromName(WIZACTION_GLOBAL_NEW_DOCUMENT));
     m_toolBar->addWidget(buttonNew);
 
-    m_toolBar->addAction(m_actions->actionFromName(WIZACTION_GLOBAL_GOBACK));
-    m_toolBar->addAction(m_actions->actionFromName(WIZACTION_GLOBAL_GOFORWARD));
+    CWizButton* buttonBack = new CWizButton(m_toolBar);
+    buttonBack->setAction(m_actions->actionFromName(WIZACTION_GLOBAL_GOBACK));
+    m_toolBar->addWidget(buttonBack);
+
+    CWizButton* buttonForward = new CWizButton(m_toolBar);
+    buttonForward->setAction(m_actions->actionFromName(WIZACTION_GLOBAL_GOFORWARD));
+    m_toolBar->addWidget(buttonForward);
+
     updateHistoryButtonStatus();
 
     m_toolBar->addWidget(new CWizSpacer(m_toolBar));

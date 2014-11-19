@@ -17,6 +17,16 @@ CWizSearchReplaceWidget::~CWizSearchReplaceWidget()
     delete ui;
 }
 
+void CWizSearchReplaceWidget::showInEditor(const QRect& rcEditor)
+{
+    QPoint pos;
+    pos.setX(rcEditor.x() + (rcEditor.width() - width()) / 2);
+    pos.setY(rcEditor.y() + (rcEditor.height() - height()) / 2);
+    setGeometry(QRect(pos, size()));
+
+    show();
+}
+
 void CWizSearchReplaceWidget::on_btn_pre_clicked()
 {
     emit findPre(ui->lineEdit_source->text(), ui->checkBox_casesenitive->checkState() == Qt::Checked);

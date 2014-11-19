@@ -457,7 +457,7 @@ bool CWizLoginDialog::doVerificationCodeCheck(QString& strCaptchaID, QString& st
     strCaptchaID += WizGenGUIDLowerCaseLetterOnly().Right(6);
     QString strUrl = WizService::ApiEntry::captchaUrl(strCaptchaID);
 
-    CWizVerificationCodeDialog dlg;
+    CWizVerificationCodeDialog dlg(this);
     if (dlg.verificationRequest(strUrl) == QDialog::Accepted)
     {
         strCaptcha = dlg.getVerificationCode();
@@ -494,15 +494,8 @@ void CWizLoginDialog::on_btn_proxysetting_clicked()
 
 void CWizLoginDialog::on_btn_fogetpass_clicked()
 {
-//    QString strUrl = WizService::ApiEntry::standardCommandUrl("forgot_password");
-//    QDesktopServices::openUrl(QUrl(strUrl));
-
-    QString strCaptchaID = QString::number(QDateTime::currentMSecsSinceEpoch()).right(8);
-    strCaptchaID += WizGenGUIDLowerCaseLetterOnly().Right(6);
-    QString strUrl = WizService::ApiEntry::captchaUrl(strCaptchaID);
-
-    CWizVerificationCodeDialog dlg;
-    dlg.verificationRequest(strUrl);
+    QString strUrl = WizService::ApiEntry::standardCommandUrl("forgot_password");
+    QDesktopServices::openUrl(QUrl(strUrl));
 }
 
 void CWizLoginDialog::on_btn_login_clicked()

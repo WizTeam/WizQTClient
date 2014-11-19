@@ -16,6 +16,7 @@ public:
     explicit CWizSearchReplaceWidget(QWidget *parent = 0);
     ~CWizSearchReplaceWidget();
 
+    void showInEditor(const QRect& rcEditor);
 signals:
     void findPre(QString strTxt, bool bCasesensitive);
     void findNext(QString strTxt, bool bCasesensitive);

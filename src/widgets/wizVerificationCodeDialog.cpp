@@ -59,7 +59,7 @@ bool CWizVerificationCodeDialog::downloadImage(QPixmap& pix)
     pix.loadFromData(byData);
     if (pix.isNull() && !byData.isEmpty())
     {
-        QMessageBox::information(this, tr("Inof"), tr("Too many request, please wait for one minute."));
+        QMessageBox::information(this->parentWidget(), tr("Inof"), tr("Too many request, please wait for one minute."));
         return false;
     }
     return true;
