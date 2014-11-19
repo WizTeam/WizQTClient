@@ -1079,8 +1079,10 @@
         <location filename="../src/widgets/wizScreenShotWidget.cpp" line="293"/>
         <source>Tips 
  mouse dragging screenshots; area right in the screenshots saved; 
- screenshots area right outside cancellation; ESC to exit;</source>
-        <translation>提示 \n 鼠標拖拽選取；雙擊選取保存 \n 選區外右鍵取消 ESC鍵退出;</translation>
+ screenshots area right outside cancellation; ESC to exit.</source>
+        <translation type="unfinished">提示
+拖拽鼠標選取截圖區域；雙擊選區保存；
+選區外右鍵取消選取；ECS鍵退出截圖。</translation>
     </message>
     <message>
         <location filename="../src/widgets/wizScreenShotWidget.cpp" line="607"/>
