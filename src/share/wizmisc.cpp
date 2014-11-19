@@ -2256,9 +2256,20 @@ QChar getWizSearchSplitChar()
 
 void scaleIconSizeForRetina(QSize& size)
 {
+#ifdef Q_OS_MAC
     if (qApp->devicePixelRatio() >= 2)
     {
         size.scale(size.width() / 2, size.height() / 2, Qt::IgnoreAspectRatio);
     }
+#endif
 }
 
+
+
+bool WizIsHighPixel()
+{
+#ifdef Q_OS_MAC
+    return qApp->devicePixelRatio() >= 2;
+#endif
+    return false;
+}

@@ -1,6 +1,5 @@
 #include "wizCategoryViewItem.h"
 
-#include <QApplication>
 #include <QTextCodec>
 #include <QPainter>
 #include <cstring>
@@ -147,7 +146,7 @@ void CWizCategoryViewItemBase::setDocumentsCount(int nCurrent, int nTotal)
 
 void CWizCategoryViewItemBase::setExtraButtonIcon(const QString& file)
 {
-    if (qApp->devicePixelRatio() >= 2)
+    if (WizIsHighPixel())
     {
         int nIndex = file.lastIndexOf('.');
         QString strFile = file.left(nIndex) + "@2x" + file.right(file.length() - nIndex);

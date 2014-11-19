@@ -11,7 +11,6 @@
 #include <QPainter>
 #include <QPixmap>
 #include <QMouseEvent>
-#include <QApplication>
 
 CWizSearchWidget::CWizSearchWidget(QWidget* parent /* = 0 */)
     : QWidget(parent)
@@ -81,11 +80,11 @@ void CWizSearchWidget::on_searchTextChanged(QString str)
 
 CWizSearchEdit::CWizSearchEdit(QWidget* parent) : QLineEdit(parent)
 {
-    bool bHighPix = qApp->devicePixelRatio() >= 2;
-    QString strSearch = bHighPix ? "mactoolbarsearch@2x" : "mactoolbarsearch";
+    bool bHighPixel = WizIsHighPixel();
+    QString strSearch = bHighPixel ? "mactoolbarsearch@2x" : "mactoolbarsearch";
     QString strSearchIcon = Utils::StyleHelper::skinResourceFileName(strSearch);
     m_searchIcon = QPixmap(strSearchIcon);
-    QString strDelete = bHighPix ? "mactoolbardelete@2x" : "mactoolbardelete";
+    QString strDelete = bHighPixel ? "mactoolbardelete@2x" : "mactoolbardelete";
     QString strDeleteIcon = Utils::StyleHelper::skinResourceFileName(strDelete);
     m_deleteIcon = QPixmap(strDeleteIcon);
 }

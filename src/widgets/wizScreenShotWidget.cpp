@@ -8,9 +8,9 @@
 CWizScreenShotWidget::CWizScreenShotWidget(QWidget* parent) :
   QWidget(parent)
 {
-    tipWidth = 300;
+    tipWidth = 500;
     tipHeight = 100;
-    infoWidth = 100;
+    infoWidth = 120;
     infoHeight = 50;
 
     initCWizScreenShotWidget();

@@ -81,14 +81,14 @@ CWizNoteStyle::CWizNoteStyle(const QString& strSkinName)
     {
         QString strSkinPath = ::WizGetSkinResourcePath(strSkinName);
 
-        bool bHightPix = qApp->devicePixelRatio() >= 2;
-        QString strIconName = bHightPix ? "branch_expanded@2x.png" : "branch_expanded.png";
+        bool bHightPixel = WizIsHighPixel();
+        QString strIconName = bHightPixel ? "branch_expanded@2x.png" : "branch_expanded.png";
         m_expandedImage.load(strSkinPath + strIconName);
-        strIconName = bHightPix ? "branch_collapsed@2x.png" : "branch_collapsed.png";
+        strIconName = bHightPixel ? "branch_collapsed@2x.png" : "branch_collapsed.png";
         m_collapsedImage.load(strSkinPath + strIconName);
-        strIconName = bHightPix ? "branch_expandedSelected@2x.png" : "branch_expandedSelected.png";
+        strIconName = bHightPixel ? "branch_expandedSelected@2x.png" : "branch_expandedSelected.png";
         m_expandedImageSelected.load(strSkinPath + strIconName);
-        strIconName = bHightPix ? "branch_collapsedSelected@2x.png" : "branch_collapsedSelected.png";
+        strIconName = bHightPixel ? "branch_collapsedSelected@2x.png" : "branch_collapsedSelected.png";
         m_collapsedImageSelected.load(strSkinPath + strIconName);
         m_imgDefaultAvatar.load(strSkinPath + "avatar_default.png");
 
@@ -500,9 +500,9 @@ int	CWizNoteStyle::pixelMetric(PixelMetric metric, const QStyleOption* option, c
 
 void CWizNoteStyle::drawcenterImage(QPainter* p, const QImage& image, const QRect& rc) const
 {
-    bool bHighPix = qApp->devicePixelRatio() >= 2;
-    int width = bHighPix ? image.width() / 2 : image.width();
-    int height = bHighPix ? image.height() / 2 : image.height();
+    bool bHighPixel = WizIsHighPixel();
+    int width = bHighPixel ? image.width() / 2 : image.width();
+    int height = bHighPixel ? image.height() / 2 : image.height();
 
     int x = rc.left() + (rc.width() - width) / 2;
     int y = rc.top() + (rc.height() - height) / 2;

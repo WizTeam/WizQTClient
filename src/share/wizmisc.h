@@ -167,6 +167,7 @@ void showWebDialogWithToken(const QString& windowTitle, const QString& url, QWid
 void showDocumentHistory(const WIZDOCUMENTDATA& doc, QWidget* parent = 0);
 
 bool WizIsOffline();
+bool WizIsHighPixel();
 
 enum WizKMUrlType
 {
