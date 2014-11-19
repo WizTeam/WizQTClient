@@ -290,7 +290,7 @@ void CWizScreenShotWidget::drawTipsText()
 
     QColor color = QColor(100, 100, 100, 200);
     QRect rect = QRect(x, y, tipWidth, tipHeight);
-    QString strTipsText = QString(tr("Tips \n mouse dragging screenshots; area right in the screenshots saved; \n screenshots area right outside cancellation; ESC to exit;"));
+    QString strTipsText = QString(tr("Tips \n mouse dragging screenshots; area right in the screenshots saved; \n screenshots area right outside cancellation; ESC to exit."));
 
     painter.fillRect(rect, color);
     painter.setPen(QPen(Qt::white));
