@@ -308,6 +308,10 @@ void AvatarHostPrivate::load(const QString& strUserID, bool bForce)
         }
         else
         {
+            QString defaultFilePath = Utils::PathResolve::skinResourcesPath("default") + "avatar_default.png";
+            loadCacheFromFile(keyFromUserID(strUserID), defaultFilePath);
+            Q_EMIT q->loaded(strUserID);
+
             // load from local file failed, force download from server
             m_listUser.removeOne(strUserID);
             m_strUserCurrent.clear();

@@ -72,6 +72,7 @@ void CWizVerificationCodeDialog::on_btn_image_clicked()
     {
         QIcon icon(pix);
         ui->btn_image->setIcon(icon);
+        update();
     }
     else
     {
