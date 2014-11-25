@@ -9,7 +9,7 @@ package_output_path="$HOME"
 
 # compile
 mkdir ../WizQTClient-Release-QT5
-rm -rf ../WizQTClient-Release-QT5/WizNote.app && \
+rm -rf ../WizQTClient-Release-QT5/* && \
 cd ../WizQTClient-Release-QT5 && \
 cmake -DWIZNOTE_USE_QT5=YES -DCMAKE_BUILD_TYPE=Release -UPDATE_TRANSLATIONS=YES -DAPPSTORE_BUILD=YES -DCMAKE_PREFIX_PATH=~/usr/local/qt/5.3.2/lib/cmake ../WizQTClient && \
 make -j5 
@@ -38,18 +38,20 @@ for L in $QTLIBS ; do
   # remove all unnecessary header files:
   rm -f $MYAPP.app/Contents/Frameworks/$L.framework/Headers
   rm -R -f $MYAPP.app/Contents/Frameworks/$L.framework/Versions/5/Headers
-  rm -R -f $MYAPP.app/Contents/Frameworks/$L.framework/Versions/Current
-  rm $MYAPP.app/Contents/Frameworks/$L.framework/Versions/5/${L}_debug
+  #rm -R -f $MYAPP.app/Contents/Frameworks/$L.framework/Versions/Current
+  # rm $MYAPP.app/Contents/Frameworks/$L.framework/Versions/5/${L}_debug
   rm $MYAPP.app/Contents/Frameworks/$L.framework/${L}
   rm $MYAPP.app/Contents/Frameworks/$L.framework/${L}.prl
-  rm $MYAPP.app/Contents/Frameworks/$L.framework/${L}_debug
-  rm $MYAPP.app/Contents/Frameworks/$L.framework/${L}_debug.prl
-  cd $MYAPP.app/Contents/Frameworks/$L.framework/Versions
-  ln -s 5/ Current
-  cd ..
-  ln -s Versions/Current/$L $L
-  ln -s Versions/Current/Resources/ Resources
-  cd $BUILDDIR
+  # rm $MYAPP.app/Contents/Frameworks/$L.framework/${L}_debug
+  # rm $MYAPP.app/Contents/Frameworks/$L.framework/${L}_debug.prl
+  # cd $MYAPP.app/Contents/Frameworks/$L.framework/Versions
+  #ln -s 5/ Current
+  # cd ..
+  # cd $MYAPP.app/Contents/Frameworks/$L.framework
+  # ln -s Versions/5/$L $L
+  # ln -s Versions/5/Resources/ Resources
+  # cd $BUILDDIR
+  #rm $MYAPP.app/Contents/Frameworks/$L.framework/Versions/Current/.
 done
 for P in $PLUGINS ; do
   mkdir $MYAPP.app/Contents/PlugIns/$P
@@ -82,13 +84,13 @@ done
  
 for P in $DISTPLUGINS ; do # change ID for all *.dylib libs
 
-  # remove debug file
-  result=$(echo $P | grep "_debug")
-  if [ "$result" != "" ];
-  then
-    rm $MYAPP.app/Contents/PlugIns/$P;
-    continue;
-  fi
+  # # remove debug file
+  # result=$(echo $P | grep "_debug")
+  # if [ "$result" != "" ];
+  # then
+  #   rm $MYAPP.app/Contents/PlugIns/$P;
+  #   continue;
+  # fi
 
   install_name_tool -id "@executable_path/../PlugIns/$I" "$MYAPP.app/Contents/PlugIns/$P"
   for L in $QTLIBS ; do # change any reference to Qt in our *.dylib libs
@@ -153,10 +155,10 @@ cp -R -p ../WizQTClient/build/osx/WizNote-Entitlements.plist WizNote-Entitlement
 APPLCERT="3rd Party Mac Developer Application: Wei Shijun"
 INSTCERT="3rd Party Mac Developer Installer: Wei Shijun"
  
-# for I in $QTLIBS ; do # signing the Qt frameworks
-#   codesign --force --verify --deep --verbose --sign "$APPLCERT" \
-#     $MYAPP.app/Contents/Frameworks/$I.framework/Versions/5
-# done
+for I in $QTLIBS ; do # signing the Qt frameworks
+  codesign --force --verify --deep --verbose --sign "$APPLCERT" \
+    $MYAPP.app/Contents/Frameworks/$I.framework/Versions/5
+done
 for I in $DISTPLUGINS ; do # signing all *.dylib libs
   echo "code sign : "   $I;
   codesign --force --verify --deep --verbose --sign "$APPLCERT" \
@@ -175,7 +177,7 @@ for I in $DISTPLUGINS3 ; do # signing all *.dylib libs
     $MYAPP.app/Contents/PlugIns/$I
 done
 
-codesign --deep --force --verify --verbose --sign "$APPLCERT" --entitlements \
+codesign --verbose=2 --sign "$APPLCERT" --entitlements \
   WizNote-Entitlements.plist  "$MYAPP.app"
 
 productbuild --component "$MYAPP.app" /Applications \
