@@ -419,7 +419,6 @@ bool CWizDocumentListView::isDocumentsWithDeleted(const CWizDocumentDataArray& a
 bool CWizDocumentListView::isDocumentsAlwaysOnTop(const CWizDocumentDataArray& arrayDocument)
 {
     foreach (const WIZDOCUMENTDATAEX& doc, arrayDocument) {
-        qDebug() << "document flags : " << doc.nFlags << " checked state : " << (doc.nFlags & wizDocumentAlwaysOnTop);
         if (doc.nFlags & wizDocumentAlwaysOnTop) {
             return true;
         }
