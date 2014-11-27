@@ -3326,25 +3326,6 @@ QString CWizDatabase::DocumentToWizKMURL(const WIZDOCUMENTDATA& document)
     return QString();
 }
 
-QString CWizDatabase::GetParamFromWizKMURL(const QString& strURL, const QString& strParamName)
-{
-    int nindex = strURL.indexOf('?');
-    if (nindex == -1)
-        return QString();
-
-    QString strParams = strURL;
-    strParams.remove(0, nindex + 1);
-    QStringList paramList = strParams.split('&');
-    QString strParaFlag = strParamName + "=";
-    foreach (QString strParam, paramList) {
-        if (strParam.contains(strParaFlag)) {
-            return strParam.remove(strParaFlag);
-        }
-    }
-
-    return QString();
-}
-
 void CWizDatabase::DocumentToHtmlLink(const WIZDOCUMENTDATA& document, QString& strHtml, QString& strLink)
 {
     strLink = DocumentToWizKMURL(document);

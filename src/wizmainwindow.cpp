@@ -1862,7 +1862,9 @@ void MainWindow::on_search_doSearch(const QString& keywords)
     }
     //
     if (IsWizKMURL(keywords)) {
-        viewDocumentByWizKMURL(keywords);
+        QString strUrl = keywords;
+        strUrl.remove("\n");
+        viewDocumentByWizKMURL(strUrl);
         return;
     }
 
@@ -2355,12 +2357,12 @@ void MainWindow::viewDocumentByWizKMURL(const QString &strKMURL)
     if (GetWizUrlType(strKMURL) != WizUrl_Document)
         return;
 
-    CWizDatabase& db = m_dbMgr.db();
-    QString strKbGUID = db.GetParamFromWizKMURL(strKMURL, "kbguid");
-    QString strGUID = db.GetParamFromWizKMURL(strKMURL, "guid");
+    QString strKbGUID = GetParamFromWizKMURL(strKMURL, "kbguid");
+    QString strGUID = GetParamFromWizKMURL(strKMURL, "guid");
+    CWizDatabase& db = m_dbMgr.db(strKbGUID);
 
     WIZDOCUMENTDATA document;
-    if (m_dbMgr.db(strKbGUID).DocumentFromGUID(strGUID, document))
+    if (db.DocumentFromGUID(strGUID, document))
     {
         //m_category->setCurrentItem();
         m_documents->blockSignals(true);
@@ -2368,6 +2370,8 @@ void MainWindow::viewDocumentByWizKMURL(const QString &strKMURL)
         m_documents->blockSignals(false);
         viewDocument(document, true);
         locateDocument(document);
+        activateWindow();
+        raise();
     }
 }
 
