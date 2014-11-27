@@ -8,7 +8,6 @@
 #include <QProcess>
 #include <QSettings>
 #include <QDesktopServices>
-#include <QDebug>
 
 #include <sys/stat.h>
 
@@ -226,9 +225,6 @@ int mainCore(int argc, char *argv[])
 
     const QStringList specPaths = getPluginSpecPaths();
     const QStringList pluginPaths = getPluginPaths();
-    foreach (QString str, pluginPaths) {
-        qDebug() << "plugin paths : " << str;
-    }
     PluginManager::setPluginPaths(specPaths, pluginPaths);
 
     // use 3 times(30M) of Qt default usage

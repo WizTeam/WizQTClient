@@ -1,19 +1,19 @@
 #ifndef WIZSEARCHREPLACEWIDGET_H
 #define WIZSEARCHREPLACEWIDGET_H
 
-#include <QWidget>
+#include <QDialog>
 
 namespace Ui {
 class CWizSearchReplaceWidget;
 }
 
 class CWizDocumentWebView;
-class CWizSearchReplaceWidget : public QWidget
+class CWizSearchReplaceWidget : public QDialog
 {
     Q_OBJECT
 
 public:
-    explicit CWizSearchReplaceWidget(QWidget *parent = 0);
+    explicit CWizSearchReplaceWidget(QDialog *parent = 0);
     ~CWizSearchReplaceWidget();
 
     void showInEditor(const QRect& rcEditor);

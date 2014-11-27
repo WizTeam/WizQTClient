@@ -1,8 +1,8 @@
 #include "wizSearchReplaceWidget.h"
 #include "ui_wizSearchReplaceWidget.h"
 
-CWizSearchReplaceWidget::CWizSearchReplaceWidget(QWidget *parent) :
-    QWidget(parent),
+CWizSearchReplaceWidget::CWizSearchReplaceWidget(QDialog* parent) :
+    QDialog(parent),
     ui(new Ui::CWizSearchReplaceWidget)
 {
     ui->setupUi(this);
@@ -25,6 +25,7 @@ void CWizSearchReplaceWidget::showInEditor(const QRect& rcEditor)
 
     show();
     setWindowState(windowState() & ~Qt::WindowFullScreen | Qt::WindowActive);
+    setFixedSize(size());
     activateWindow();
     raise();
 }
