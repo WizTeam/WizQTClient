@@ -14,6 +14,11 @@ cmake -DWIZNOTE_USE_QT5=YES -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=~/usr
 make -j5 && \
 cd ../WizQTClient
 
+APPLCERT="Developer ID Application: Wei Shijun"
+INSTCERT="3rd Party Mac Developer Installer: Wei Shijun"
+
+codesign --verbose=2 --sign "$APPLCERT"  ../WizQTClient-Release-QT5/WizNote.app
+
 setFile -a V ${package_home}/wiznote-disk-cover.jpg
 
 current_date=`date "+%Y-%m-%d"`

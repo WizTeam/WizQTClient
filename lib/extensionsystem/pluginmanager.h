@@ -97,7 +97,7 @@ public:
     static QList<PluginSpec *> loadQueue();
     static void loadPlugins();
     static QStringList pluginPaths();
-    static void setPluginPaths(const QStringList &paths);
+    static void setPluginPaths(const QStringList &specPaths, const QStringList& libraryPaths);
     static QList<PluginSpec *> plugins();
     static QHash<QString, PluginCollection *> pluginCollections();
     static void setFileExtension(const QString &extension);
