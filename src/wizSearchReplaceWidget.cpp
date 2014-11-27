@@ -7,8 +7,7 @@ CWizSearchReplaceWidget::CWizSearchReplaceWidget(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    setAttribute(Qt::WA_DeleteOnClose);
-    setWindowFlags(Qt::WindowStaysOnTopHint);
+    //setWindowFlags(Qt::WindowStaysOnTopHint);  //could cause window fullscreen on mac
 }
 
 CWizSearchReplaceWidget::~CWizSearchReplaceWidget()
@@ -25,6 +24,15 @@ void CWizSearchReplaceWidget::showInEditor(const QRect& rcEditor)
     setGeometry(QRect(pos, size()));
 
     show();
+    setWindowState(windowState() & ~Qt::WindowFullScreen | Qt::WindowActive);
+    activateWindow();
+    raise();
+}
+
+void CWizSearchReplaceWidget::closeEvent(QCloseEvent* event)
+{
+    clearAllText();
+    QWidget::closeEvent(event);
 }
 
 void CWizSearchReplaceWidget::on_btn_pre_clicked()
@@ -52,4 +60,10 @@ void CWizSearchReplaceWidget::on_btn_replaceAll_clicked()
 void CWizSearchReplaceWidget::on_lineEdit_source_returnPressed()
 {
     emit findNext(ui->lineEdit_source->text(), ui->checkBox_casesenitive->checkState() == Qt::Checked);
+}
+
+void CWizSearchReplaceWidget::clearAllText()
+{
+    ui->lineEdit_repalce->clear();
+    ui->lineEdit_source->clear();
 }

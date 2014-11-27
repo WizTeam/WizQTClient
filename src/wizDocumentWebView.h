@@ -22,6 +22,7 @@ class CWizDocumentWebView;
 class CWizDocumentTransitionView;
 class CWizDocumentWebViewWorker;
 class QNetworkDiskCache;
+class CWizSearchReplaceWidget;
 
 struct WIZODUCMENTDATA;
 
@@ -236,6 +237,8 @@ private:
     QPointer<CWizEditorInsertLinkForm> m_editorInsertLinkForm;
     QPointer<CWizEditorInsertTableForm> m_editorInsertTableForm;
     QPointer<QColorDialog> m_colorDialog;
+
+    CWizSearchReplaceWidget* m_searchReplaceWidget;
 
 public:
     Q_INVOKABLE void onNoteLoadFinished(); // editor callback

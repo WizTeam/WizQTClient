@@ -199,6 +199,7 @@ CWizDocumentWebView::CWizDocumentWebView(CWizExplorerApp& app, QWidget* parent)
     , m_noteFrame(0)
     , m_bCurrentEditing(false)
     , m_bContentsChanged(false)
+    , m_searchReplaceWidget(0)
 {
     CWizDocumentWebViewPage* page = new CWizDocumentWebViewPage(this);
     setPage(page);
@@ -1337,16 +1338,19 @@ bool CWizDocumentWebView::editorCommandExecuteLinkRemove()
 
 bool CWizDocumentWebView::editorCommandExecuteFindReplace()
 {
-    CWizSearchReplaceWidget *wgt = new CWizSearchReplaceWidget();
-    connect(wgt, SIGNAL(findPre(QString,bool)), SLOT(findPre(QString,bool)));
-    connect(wgt, SIGNAL(findNext(QString,bool)), SLOT(findNext(QString,bool)));
-    connect(wgt, SIGNAL(replaceCurrent(QString,QString)), SLOT(replaceCurrent(QString,QString)));
-    connect(wgt, SIGNAL(replaceAndFindNext(QString,QString,bool)), SLOT(replaceAndFindNext(QString,QString,bool)));
-    connect(wgt, SIGNAL(replaceAll(QString,QString,bool)), SLOT(replaceAll(QString,QString,bool)));
+    if (!m_searchReplaceWidget)
+    {
+        m_searchReplaceWidget = new CWizSearchReplaceWidget();
+    }
+    connect(m_searchReplaceWidget, SIGNAL(findPre(QString,bool)), SLOT(findPre(QString,bool)));
+    connect(m_searchReplaceWidget, SIGNAL(findNext(QString,bool)), SLOT(findNext(QString,bool)));
+    connect(m_searchReplaceWidget, SIGNAL(replaceCurrent(QString,QString)), SLOT(replaceCurrent(QString,QString)));
+    connect(m_searchReplaceWidget, SIGNAL(replaceAndFindNext(QString,QString,bool)), SLOT(replaceAndFindNext(QString,QString,bool)));
+    connect(m_searchReplaceWidget, SIGNAL(replaceAll(QString,QString,bool)), SLOT(replaceAll(QString,QString,bool)));
 
     QRect rect = geometry();
     rect.moveTo(mapToGlobal(pos()));
-    wgt->showInEditor(rect);
+    m_searchReplaceWidget->showInEditor(rect);
 
     return true;
 }

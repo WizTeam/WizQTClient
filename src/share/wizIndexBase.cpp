@@ -1392,7 +1392,7 @@ bool CWizIndexBase::DocumentFromGUID(const CString& strDocumentGUID, WIZDOCUMENT
     }
 
     if (arrayDocument.empty()) {
-        //TOLOG(_T("Failed to get document by guid, result is empty"));
+        TOLOG(_T("Failed to get document by guid, result is empty"));
         return false;
     }
 
