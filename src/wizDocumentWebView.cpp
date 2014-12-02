@@ -859,6 +859,11 @@ void CWizDocumentWebView::onEditorSelectionChanged()
     Q_EMIT statusChanged();
 }
 
+void CWizDocumentWebView::clearEditorHeight()
+{
+    page()->mainFrame()->evaluateJavaScript("editor.document.body.style.height='';");
+}
+
 void CWizDocumentWebView::onEditorLinkClicked(const QUrl& url)
 {
     if (isInternalUrl(url))
@@ -1146,6 +1151,13 @@ void CWizDocumentWebView::viewDocumentInEditor(bool editing)
 void CWizDocumentWebView::onNoteLoadFinished()
 {
     ICore::instance()->emitViewNoteLoaded(view(), view()->note(), true);
+
+    static bool init = true;
+    if (init)
+    {
+        QTimer::singleShot(100, this, SLOT(clearEditorHeight()));
+        init = false;
+    }
 }
 
 void CWizDocumentWebView::setEditingDocument(bool editing)
