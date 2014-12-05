@@ -44,7 +44,6 @@ public:
     bool CreateAccount(const QString& strUserName, const QString& strPassword, const QString& InviteCode, const QString& strCaptchaID, const QString& strCaptcha);
     void SetAutoLogout(bool b) { m_bAutoLogout = b; }
     bool ShareSNS(const QString& strToken, const QString& strSNS, const QString& strComment, const QString& strURL, const QString& strDocumentGUID);
-    bool ShareGroup(const QString& strToken, const QString& strDocumentGUIDs, const QString& strGroups);
     bool GetGroupList(CWizGroupDataArray& arrayGroup);
     bool GetBizList(CWizBizDataArray& arrayBiz);
     bool CreateTempGroup(const QString& strEmails, const QString& strAccessControl, const QString& strSubject, const QString& strEmailText, WIZGROUPDATA& group);
@@ -79,7 +78,6 @@ private:
     bool accounts_getCert(const QString& strUserName, const QString& strPassword, QString& strN, QString& stre, QString& strd, QString& strHint);
     bool accounts_setCert(const QString& strUserName, const QString& strPassword, const QString& strN, const QString& stre, const QString& strd, const QString& strHint);
     bool document_shareSNS(const QString& strToken, const QString& strSNS, const QString& strComment, const QString& strURL, const QString& strDocumentGUID);
-    bool document_shareGroup(const QString& strToken, const QString& strDocumentGUIDs, const QString& strGroups);
 
     bool accounts_getGroupList(CWizGroupDataArray& arrayGroup);
     bool accounts_getBizList(CWizBizDataArray& arrayBiz);

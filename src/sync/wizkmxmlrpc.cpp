@@ -174,10 +174,6 @@ BOOL CWizKMAccountsServer::ShareSNS(const QString& strToken, const QString& strS
 {
     return document_shareSNS(strToken, strSNS, strComment, strURL, strDocumentGUID);
 }
-BOOL CWizKMAccountsServer::ShareGroup(const QString& strToken, const QString& strDocumentGUIDs, const QString& strGroups)
-{
-    return document_shareGroup(strToken, strDocumentGUIDs, strGroups);
-}
 
 BOOL CWizKMAccountsServer::GetGroupList(CWizGroupDataArray& arrayGroup)
 {
@@ -457,23 +453,6 @@ BOOL CWizKMAccountsServer::document_shareSNS(const QString& strToken, const QStr
     //
     return TRUE;
 }
-
-BOOL CWizKMAccountsServer::document_shareGroup(const QString& strToken, const QString& strDocumentGUIDs, const QString& strGroups)
-{
-    CWizKMTokenOnlyParam param(strToken, GetKbGUID());
-    param.AddString(_T("document_guids"), strDocumentGUIDs);
-    param.AddString(_T("groups"), strGroups);
-    //
-    CWizXmlRpcResult callRet;
-    if (!Call(_T("document.shareGroup"), callRet, &param))
-    {
-        TOLOG(_T("share note to groups failed!"));
-        return FALSE;
-    }
-    //
-    return TRUE;
-}
-
 
 
 BOOL CWizKMAccountsServer::accounts_getGroupList(CWizGroupDataArray& arrayGroup)
