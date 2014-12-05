@@ -422,9 +422,9 @@ void CWizSearcher::searchDatabase(const QString& strKeywords)
     qDebug() << QString("[Search]Find %1 results in database").arg(m_mapDocumentSearched.size());
 }
 
-bool CWizSearcher::onSearchProcess(const wchar_t* lpszKbGUID,
-                                   const wchar_t* lpszDocumentID,
-                                   const wchar_t* lpszURL)
+bool CWizSearcher::onSearchProcess(const std::string& lpszKbGUID,
+                                   const std::string& lpszDocumentID,
+                                   const std::string& lpszURL)
 {
     Q_UNUSED(lpszURL);
 
@@ -433,8 +433,8 @@ bool CWizSearcher::onSearchProcess(const wchar_t* lpszKbGUID,
         return true;
     }
 
-    QString strKbGUID = QString::fromStdWString(lpszKbGUID);
-    QString strGUID = QString::fromStdWString(lpszDocumentID);
+    QString strKbGUID = QString::fromStdString(lpszKbGUID);
+    QString strGUID = QString::fromStdString(lpszDocumentID);
 
     // not searched before
     if (m_mapDocumentSearched.contains(strGUID)) {

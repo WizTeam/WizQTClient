@@ -58,6 +58,7 @@ public:
     enum SortingType {
         SortingCreateTime = 1,
         SortingUpdateTime,
+        SortingAccessTime,
         SortingTitle,
         SortingLocation,
         SortingTag,

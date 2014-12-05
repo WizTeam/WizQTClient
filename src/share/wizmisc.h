@@ -49,6 +49,8 @@ void WizStringArrayRemoveMultiElement(CWizStdStringArray& arrayText);
 void WizStringArrayRemoveMultiElementNoCase(CWizStdStringArray& arrayText);
 
 
+QChar getWizSearchSplitChar();
+
 CString WizStringArrayGetValue(const CWizStdStringArray& arrayText, const CString& valueName);
 void WizCommandLineToStringArray(const CString& commandLine, CWizStdStringArray& arrayLine);
 CString WizGetCommandLineValue(const CString& strCommandLine, const CString& strKey);
@@ -141,6 +143,8 @@ void WizLoadSkinIcon3(QIcon& icon, const QString& strSkinName, const QString& st
                       QIcon::Mode mode, QIcon::State state, const QColor& blendColor);
 QIcon WizLoadSkinIcon3(const QString& strIconName, QIcon::Mode mode);
 
+void scaleIconSizeForRetina(QSize& size);
+
 QString WizGetHtmlBodyContent(const QString& strHtml);
 void WizHtml2Text(const QString& strHtml, QString& strText);
 void WizDeleteFolder(const CString& strPath);
@@ -163,9 +167,19 @@ void showWebDialogWithToken(const QString& windowTitle, const QString& url, QWid
 void showDocumentHistory(const WIZDOCUMENTDATA& doc, QWidget* parent = 0);
 
 bool WizIsOffline();
+bool WizIsHighPixel();
 
-bool WizIsKMURL(const QString& strURL);
+enum WizKMUrlType
+{
+    WizUrl_Invalid,
+    WizUrl_Document,
+    WizUrl_Attachment
+};
+
+bool IsWizKMURL(const QString& strURL);
 bool WizIsKMURLOpenDocument(const QString& strURL);
+WizKMUrlType GetWizUrlType(const QString& strURL);
+QString GetParamFromWizKMURL(const QString& strURL, const QString& strParamName);
 
 class CWizBufferAlloc
 {

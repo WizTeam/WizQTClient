@@ -91,20 +91,18 @@ bool AsyncApi::keepAlive_impl(const QString& strToken, const QString& strKbGUID)
     return ret;
 }
 
-void AsyncApi::registerAccount(const QString& strUserId,
-                               const QString& strPasswd,
-                               const QString& strInviteCode)
+void AsyncApi::registerAccount(const QString& strUserId, const QString& strPasswd,
+                               const QString& strInviteCode, const QString& strCaptchaID, const QString& strCaptcha)
 {
-    QtConcurrent::run(this, &AsyncApi::registerAccount_impl, strUserId, strPasswd, strInviteCode);
+    QtConcurrent::run(this, &AsyncApi::registerAccount_impl, strUserId, strPasswd, strInviteCode, strCaptchaID, strCaptcha);
 }
 
-bool AsyncApi::registerAccount_impl(const QString& strUserId,
-                                    const QString& strPasswd,
-                                    const QString& strInviteCode)
+bool AsyncApi::registerAccount_impl(const QString& strUserId, const QString& strPasswd,
+                                    const QString& strInviteCode, const QString& strCaptchaID, const QString& strCaptcha)
 {
     CWizKMAccountsServer aServer(ApiEntry::syncUrl());
 
-    bool ret = aServer.CreateAccount(strUserId, strPasswd, strInviteCode);
+    bool ret = aServer.CreateAccount(strUserId, strPasswd, strInviteCode, strCaptchaID, strCaptcha);
     if (!ret) {
         m_nErrorCode = aServer.GetLastErrorCode();
         m_strErrorMessage = aServer.GetLastErrorMessage();

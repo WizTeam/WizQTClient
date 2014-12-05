@@ -56,7 +56,6 @@ void TitleEdit::inputMethodEvent(QInputMethodEvent* event)
 
 void TitleEdit::keyPressEvent(QKeyEvent* e)
 {
-    qDebug() << "TitleEdit::keyPressEvent ";
     if (c && c->popup()->isVisible()) {
         // The following keys are forwarded by the completer to the widget
        switch (e->key()) {
@@ -178,6 +177,10 @@ void TitleEdit::setReadOnly(bool b)
 
     // Qt-bug: Must always set this flag after setReadOnly
     setAttribute(Qt::WA_MacShowFocusRect, false);
+
+    // Focre to update document title right now
+    if (b)
+        onTitleEditingFinished();
 }
 
 void TitleEdit::setCompleter(QCompleter* completer)
@@ -205,7 +208,8 @@ void TitleEdit::onInsertCompletion(const QModelIndex& index)
     QString strOrigin = text();
     QString strExtra = c->completionModel()->data(index, Qt::DisplayRole).toString();
     int nDel = textUnderCursor().size();
-    setText(strOrigin.left(strOrigin.size() - nDel) + strExtra + " ");
+    QString strNew = strOrigin.left(strOrigin.size() - nDel) + strExtra + " ";
+    setText(strNew);
 }
 
 void TitleEdit::onTitleEditingFinished()
@@ -217,7 +221,8 @@ void TitleEdit::onTitleEditingFinished()
         if (strNewTitle != data.strTitle) {
             data.strTitle = strNewTitle;
             db.ModifyDocumentInfo(data);
-            MainWindow::quickSyncKb(data.strKbGUID);
+
+            emit titleEdited(strNewTitle);
         }
     }
 }

@@ -4,6 +4,7 @@
 #include <QPainter>
 #include <QStyleOptionToolButton>
 #include <QSettings>
+#include <QSize>
 #include <QDebug>
 
 #include <extensionsystem/pluginmanager.h>
@@ -103,10 +104,12 @@ void CellButton::paintEvent(QPaintEvent *event)
     }
     //m_backgroundIcon.paint(&p, opt.rect, Qt::AlignCenter, QIcon::Normal, state);
 
+    QSize size = iconSize();
+    QRect rcIcon((opt.rect.width() - size.width()) / 2, (opt.rect.height() - size.height()) / 2, size.width(), size.height());
     if (opt.icon.isNull()) {
-        m_iconNomal.paint(&p, opt.rect, Qt::AlignCenter, mode, state);
+        m_iconNomal.paint(&p, rcIcon, Qt::AlignCenter, mode, state);
     } else {
-        opt.icon.paint(&p, opt.rect, Qt::AlignCenter, mode, state);
+        opt.icon.paint(&p, rcIcon, Qt::AlignCenter, mode, state);
     }
 }
 

@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>354</width>
+    <width>379</width>
     <height>503</height>
    </rect>
   </property>
@@ -451,7 +451,7 @@
               <number>0</number>
              </property>
              <item>
-              <widget class="CWizImageButton" name="btn_singin">
+              <widget class="CWizImageButton" name="btn_singUp">
                <property name="sizePolicy">
                 <sizepolicy hsizetype="Minimum" vsizetype="Maximum">
                  <horstretch>0</horstretch>
@@ -700,7 +700,7 @@
   <tabstop>cbx_remberPassword</tabstop>
   <tabstop>cbx_autologin</tabstop>
   <tabstop>btn_login</tabstop>
-  <tabstop>btn_singin</tabstop>
+  <tabstop>btn_singUp</tabstop>
   <tabstop>btn_changeToSignin</tabstop>
   <tabstop>btn_changeToLogin</tabstop>
   <tabstop>btn_proxysetting</tabstop>

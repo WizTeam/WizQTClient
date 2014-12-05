@@ -108,7 +108,10 @@ protected:
     virtual bool eventFilter(QObject* watched, QEvent* event);
     virtual void resizeEvent(QResizeEvent* event);
     virtual void closeEvent(QCloseEvent* event);
-
+    virtual void mousePressEvent(QMouseEvent* event);
+    virtual void mouseMoveEvent(QMouseEvent* event);
+    virtual void mouseReleaseEvent(QMouseEvent* event);
+    virtual void changeEvent(QEvent *event);
 private:
     ICore* m_core;
     CWizDatabaseManager& m_dbMgr;
@@ -125,12 +128,12 @@ private:
     QSystemTrayIcon* m_tray;
 
     QToolBar* m_toolBar;
-#ifdef Q_OS_MAC
     QMenuBar* m_menuBar;
-#else
+#ifdef Q_OS_LINUX
     QMenu* m_menu;
-    QToolButton* m_menuButton;
+    QToolButton* m_menuButton;    
 #endif
+    bool m_useSystemBasedStyle;
 
 
 #ifndef Q_OS_MAC
@@ -147,6 +150,7 @@ private:
     CWizDocumentView* m_doc;
     CWizDocumentTransitionView* m_transitionView;
     QPointer<CWizSplitter> m_splitter;
+    QPointer<QWidget> m_docListWidget;
     QPointer<CWizOptionsWidget> m_options;
 
     QLabel* m_labelDocumentsHint;
@@ -160,11 +164,7 @@ private:
 
     CWizSearchIndexer* m_searchIndexer;
     QPointer<CWizSearchWidget> m_search;
-#ifdef Q_OS_LINUX
-    CWizFixedSpacer* m_spacerBeforeSearch;
-#else
-    CWizSpacer* m_spacerBeforeSearch;
-#endif
+    CWizFixedSpacer* m_spacerForToolButtonAdjust;
 
     CWizMobileFileReceiver *m_mobileFileReceiver;
 
@@ -183,9 +183,8 @@ private:
 #ifndef Q_OS_MAC
     virtual void layoutTitleBar();
     void initMenuList();
-#else
-    void initMenuBar();
 #endif
+    void initMenuBar();
 
     QWidget* createListView();
 
@@ -216,17 +215,18 @@ public:
     void setMobileFileReceiverEnable(bool bEnable);
     //
     void viewDocumentByWizKMURL(const QString& strKMURL);
+    void viewAttachmentByWizKMURL(const QString& strKMURL);
     //
     void createNoteWithAttachments(const QStringList& strAttachList);
     void createNoteWithText(const QString& strText);
     void createNoteWithImage(const QString& strImageFile);
-
 
 signals:
     void documentSaved(const QString& strGUID, CWizDocumentView* viewer);
 
 public Q_SLOTS:
     void on_actionExit_triggered();
+    void on_actionClose_triggered();
     void on_actionConsole_triggered();
     void on_actionAutoSync_triggered();
     void on_actionSync_triggered();
@@ -238,9 +238,10 @@ public Q_SLOTS:
     void on_actionRebuildFTS_triggered();
     void on_actionFeedback_triggered();
     void on_actionSupport_triggered();
+    void on_actionManual_triggered();
     void on_actionSearch_triggered();
     void on_actionResetSearch_triggered();
-    void on_actionSearchReplace_triggered();
+    void on_actionFindReplace_triggered();
     void on_actionSaveAsPDF_triggered();
     void on_actionSaveAsHtml_triggered();
     void on_actionPrint_triggered();
@@ -286,6 +287,7 @@ public Q_SLOTS:
     void on_actionFormatInsertCheckList_triggered();
     void on_actionFormatInsertCode_triggered();
     void on_actionFormatInsertImage_triggered();
+    void on_actionFormatScreenShot_triggered();
 
     void on_searchProcess(const QString &strKeywords, const CWizDocumentDataArray& arrayDocument, bool bEnd);
 
@@ -313,6 +315,8 @@ public Q_SLOTS:
 
     void on_syncProcessLog(const QString& strMsg);
 
+    void on_TokenAcquired(const QString& strToken);
+
     void on_options_restartForSettings();
 
     void on_editor_statusChanged();
@@ -336,10 +340,10 @@ public Q_SLOTS:
 
 #ifndef Q_OS_MAC
     void on_actionPopupMainMenu_triggered();
-    void on_client_splitterMoved(int pos, int index);
     void on_menuButtonClicked();
-    void adjustToolBarLayout();
 #endif
+    void adjustToolBarLayout();
+    void on_client_splitterMoved(int pos, int index);
 
     void on_application_aboutToQuit();
     void on_application_messageAvailable(const QString& strMsg);
@@ -391,12 +395,15 @@ public:
 
 private:
     void syncAllData();
+    void reconnectServer();
 
-    //FIXME：新建笔记时,为了将光标移到编辑器中,需要将Editor的模式设置为disable,此处需要将actions设置为可用
-    void setActionsEnableForNewNote();
     void setFocusForNewNote(WIZDOCUMENTDATA doc);
     //
     void initTrayIcon(QSystemTrayIcon* trayIcon);
+
+#ifdef Q_OS_LINUX
+    void setWindowStyleForLinux(bool bUseSystemStyle);
+#endif
     //
     void startSearchStatus();
     void cancelSearchStatus();
@@ -406,6 +413,17 @@ private:
 
     //
     bool needShowNewFeatureGuide();
+
+    //
+    void resortDocListAfterViewDocument(const WIZDOCUMENTDATA& doc);
+
+    //
+    void showDocmentList(CWizCategoryBaseView* category);
+    void showMessageList(CWizCategoryViewMessageItem* pItem);
+    void viewDocumentByShortcut(CWizCategoryViewShortcutItem *pShortcut);
+
+    //
+    void updateHistoryButtonStatus();
 };
 
 } // namespace Internal

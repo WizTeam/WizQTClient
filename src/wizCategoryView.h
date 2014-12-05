@@ -38,6 +38,7 @@ public:
     void getDocuments(CWizDocumentDataArray& arrayDocument);
     bool acceptDocument(const WIZDOCUMENTDATA& document);
 
+    void loadDocument(QStringList& strFileList);
 
     void saveSelection();
     void restoreSelection();
@@ -115,6 +116,8 @@ protected Q_SLOTS:
     virtual void on_group_permissionChanged(const QString& strKbGUID) { Q_UNUSED(strKbGUID); }
     virtual void on_group_bizChanged(const QString& strKbGUID) { Q_UNUSED(strKbGUID); }
 
+    virtual void createDocumentByHtml(const QString& strHtml, const QString& strTitle);
+
     void on_dragHovered_timeOut();
 };
 
@@ -128,21 +131,18 @@ public:
     virtual ~CWizCategoryView();
     void init();
 
-    QString m_strSelectedId;
-    QString selectedId(QSettings* settings);
+    void loadShortcutState();
+    void saveShortcutState();
+    void loadExpandState();
+    void saveExpandState();
 
-    void loadState();
-    void loadChildState(QTreeWidgetItem* pi, QSettings* settings);
-    void loadItemState(QTreeWidgetItem* pi, QSettings* settings);
-    void saveState();
-    void saveChildState(QTreeWidgetItem* pi, QSettings* settings);
-    void saveItemState(QTreeWidgetItem* pi, QSettings* settings);
-    void saveSelected(QSettings* settings);
 
     // action user data
     enum CategoryActions
     {
         ActionNewDocument,
+        ActionLoadDocument,
+        ActionImportFile,
         ActionNewItem,
         ActionMoveItem,
         ActionRenameItem,
@@ -163,7 +163,8 @@ public:
         GroupItem,
         TrashItem,
         BizGroupRootItem,
-        OwnGroupRootItem
+        OwnGroupRootItem,
+        ShortcutItem
     };
 
     void initMenus();
@@ -185,6 +186,7 @@ public:
     void showAdminBizGroupRootContextMenu(QPoint pos, bool usable = true);
     void showGroupContextMenu(QPoint pos);
     void showTrashContextMenu(QPoint pos);
+    void showShortcutContextMenu(QPoint pos);
 
 private:
     void initGeneral();
@@ -203,11 +205,22 @@ private:
     //
     void resetCreateGroupLink();
 
+    QString WizGetHtmlBodyContent(QString strHtml);
+
 
     //
     void resetSections();
 
     void doLocationSanityCheck(CWizStdStringArray& arrayLocation);
+
+    QString selectedId(QSettings* settings);
+    void saveSelected(QSettings* settings);
+
+    void loadChildState(QTreeWidgetItem* pi, QSettings* settings);
+    void loadItemState(QTreeWidgetItem* pi, QSettings* settings);
+    void saveChildState(QTreeWidgetItem* pi, QSettings* settings);
+    void saveItemState(QTreeWidgetItem* pi, QSettings* settings);
+
 
 public:
     // folders
@@ -264,8 +277,10 @@ public:
 
     bool createDocument(WIZDOCUMENTDATA& data);
     bool createDocument(WIZDOCUMENTDATA& data, const QString& strHtml, const QString& strTitle);
+
     bool createDocumentByAttachments(WIZDOCUMENTDATA& data, const QStringList& attachList);
     bool createDocumentByTemplate(WIZDOCUMENTDATA& data, const QString& strZiw);
+
     //
     void createGroup();
     void viewPersonalGroupInfo(const QString& groupGUID);
@@ -277,7 +292,9 @@ public:
     void manageBiz(const QString& bizGUID, bool bUpgrade);
 
 
+
 private:
+    QPointer<QMenu> m_menuShortcut;
     QPointer<QMenu> m_menuFolderRoot;
     QPointer<QMenu> m_menuFolder;
     QPointer<QMenu> m_menuTagRoot;
@@ -294,6 +311,8 @@ private:
     QMap<QString, QTimer*> m_mapTimerUpdateGroupCount;
 
     QString m_strRequestedGroupKbGUID;
+
+    QString m_strSelectedId;
 
 private Q_SLOTS:
     void on_updatePrivateFolderDocumentCount_timeout();
@@ -322,8 +341,13 @@ protected Q_SLOTS:
     virtual void on_group_bizChanged(const QString& strKbGUID);
     virtual void on_groupDocuments_unreadCount_modified(const QString& strKbGUID);
 
+    virtual void createDocumentByHtml(const QString& strHtml, const QString& strTitle);
+
+
 public Q_SLOTS:
     void on_action_newDocument();
+    void on_action_loadDocument();
+    void on_action_importFile();
 
     void on_action_newItem();
     void on_action_user_newFolder();
@@ -369,6 +393,7 @@ public Q_SLOTS:
     void on_action_manageGroup();
     void on_action_manageBiz();
 
+    void on_action_removeShortcut();
 
     void on_action_emptyTrash();
 

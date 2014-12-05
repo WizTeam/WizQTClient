@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>CWizSearchReplaceWidget</class>
- <widget class="QWidget" name="CWizSearchReplaceWidget">
+ <widget class="QDialog" name="CWizSearchReplaceWidget">
   <property name="geometry">
    <rect>
     <x>0</x>

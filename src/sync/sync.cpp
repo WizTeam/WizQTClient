@@ -88,7 +88,6 @@ bool CWizKMSync::Sync()
 
 bool CWizKMSync::SyncCore()
 {
-    m_pDatabase->ClearError();
     m_mapOldKeyValues.clear();
     m_pEvents->OnSyncProgress(::GetSyncStartProgress(syncDatabaseLogin));
     m_pEvents->OnStatus(_TR("Connect to server"));
@@ -1109,9 +1108,15 @@ template <class TData, bool _document>
 bool UploadList(const WIZKBINFO& kbInfo, IWizKMSyncEvents* pEvents, IWizSyncableDatabase* pDatabase, CWizKMDatabaseServer& server, const QString& strObjectType, WizKMSyncProgress progress)
 {
     if (pDatabase->IsTrafficLimit())
+    {
+        pEvents->OnStatus(_TR("Traffic limit"));
         return FALSE;
+    }
     if (pDatabase->IsStorageLimit())
+    {
+        pEvents->OnStatus(_TR("Storage limit"));
         return FALSE;
+    }
     //
     typedef std::deque<TData> TArray;
     TArray arrayData;
@@ -1135,7 +1140,10 @@ bool UploadList(const WIZKBINFO& kbInfo, IWizKMSyncEvents* pEvents, IWizSyncable
     while (!arrayData.empty())
     {
         if (pEvents->IsStop())
+        {
+            pEvents->OnStatus(_TR("Stopped"));
             return FALSE;
+        }
         //
         TData dataTemp = arrayData.back();
         arrayData.pop_back();
@@ -1178,8 +1186,14 @@ bool UploadList(const WIZKBINFO& kbInfo, IWizKMSyncEvents* pEvents, IWizSyncable
                     pEvents->OnUploadDocument(local.strGUID, FALSE);
                 }
                 //
+                BOOL bUploaded = TRUE;
                 if (!UploadObject<TData>(kbInfo, size, start, total, index, mapDataOnServer, local, pEvents, pDatabase, server, strObjectType, progress))
                 {
+                    bUploaded = FALSE;
+                    //
+                    pEvents->OnStatus("Can't upload object, ErrorCode: " + WizIntToStr(server.GetLastErrorCode()));
+                    pEvents->OnStatus(server.GetLastErrorMessage());
+                    //
                     switch (server.GetLastErrorCode())
                     {
                     case WIZKM_XMLRPC_ERROR_TRAFFIC_LIMIT:
@@ -1189,7 +1203,7 @@ bool UploadList(const WIZKBINFO& kbInfo, IWizKMSyncEvents* pEvents, IWizSyncable
                     }
                 }
                 //
-                if (_document)	//
+                if (_document && bUploaded)	//
                 {
                     pEvents->OnUploadDocument(local.strGUID, TRUE);
                 }
@@ -1781,6 +1795,8 @@ bool WizSyncDatabase(const WIZUSERINFO& info, IWizKMSyncEvents* pEvents,
     //only check biz list at first sync of day, or sync by manual
     if (!bBackground || WizIsDayFirstSync(pDatabase))
     {
+        pDatabase->ClearLastSyncError();
+        pEvents->ClearLastSyncError(pDatabase);
         CWizBizDataArray arrayBiz;
         if (server.GetBizList(arrayBiz))
         {

@@ -1,5 +1,10 @@
 #include "wizClucene.h"
 
+#include "wizmisc.h"
+#ifdef _T
+#undef _T
+#endif
+
 #include "CLucene.h"
 #include "CLucene/analysis/standard/StandardTokenizer.h"
 #include "CLucene/queryParser/MultiFieldQueryParser.h"
@@ -10,6 +15,7 @@
 #include <fstream>
 #include <cassert>
 
+#include <QStringList>
 #include <QDebug>
 
 /*
@@ -615,7 +621,6 @@ bool IWizCluceneSearch::searchDocument(const wchar_t* lpszIndexPath,
     std::wstring strIndexPath(lpszIndexPath);
     WizPathRemoveBackslash(strIndexPath);
     std::string strIndexPathA = WizW2A(strIndexPath);
-    std::wstring strKeywords(lpszKeywords);
 
     const wchar_t* arrAnalyzer[] = {
         L"cjk",
@@ -625,21 +630,34 @@ bool IWizCluceneSearch::searchDocument(const wchar_t* lpszIndexPath,
 
     //const wchar_t* fields[] = {L"title", L"contents", NULL};
 
-    std::set<std::string> setGUIDs;
+    std::map<std::string, std::string> mapGUIDOdd;
+    std::map<std::string, std::string> mapGUIDEven;
+    QStringList listKey = QString::fromWCharArray(lpszKeywords).split(getWizSearchSplitChar());
+    if (listKey.isEmpty())
+        return false;
 
     try {
         lucene::search::IndexSearcher searcher(strIndexPathA.c_str());
 
-		for (int i = 0; ; i++)
-		{
-			if (!arrAnalyzer[i])
-                break;
+        for (int keyIndex = 0; keyIndex < listKey.count(); keyIndex++)
+        {
+            std::wstring strKeywords = listKey.at(keyIndex).toStdWString();
 
-            //for (int j = 0; ; j++) {
-            //    if (!fields[j]) break;
+            std::map<std::string, std::string>& mapGUIDOld = keyIndex % 2 == 0 ? mapGUIDOdd : mapGUIDEven;
+            std::map<std::string, std::string>& mapGUIDCur = keyIndex % 2 == 0 ? mapGUIDEven : mapGUIDOdd;
+
+            for (int i = 0; ; i++)
+            {
+                if (!arrAnalyzer[i])
+                    break;
+
+                //for (int j = 0; ; j++) {
+                //    if (!fields[j]) break;
 
                 LanguageBasedAnalyzer analyzer(arrAnalyzer[i]);
                 lucene::search::Query* query = lucene::queryParser::QueryParser::parse(strKeywords.c_str(), L"contents", &analyzer);
+
+                qDebug() << "Search document contents";
 
                 if (!query) {
                     continue;
@@ -651,8 +669,8 @@ bool IWizCluceneSearch::searchDocument(const wchar_t* lpszIndexPath,
                     continue;
                 }
 
-                for (size_t i = 0;i < hits->length(); i++ ) {
-                    lucene::document::Document* doc = &hits->doc(i);
+                for (size_t j = 0;j < hits->length(); j++ ) {
+                    lucene::document::Document* doc = &hits->doc(j);
                     const TCHAR* kbid = doc->get(_T("kbguid"));
                     const TCHAR* docid = doc->get(_T("documentid"));
                     if (!docid) {
@@ -661,15 +679,37 @@ bool IWizCluceneSearch::searchDocument(const wchar_t* lpszIndexPath,
 
                     if (docid) {
                         std::string strDocumentGUID = ::WizW2A(docid);
-                        if (setGUIDs.find(strDocumentGUID) == setGUIDs.end()) {
-                            setGUIDs.insert(strDocumentGUID);
-                            onSearchProcess(kbid, docid, _T(""));
+                        std::string strDocumentKBGUID = ::WizW2A(kbid);
+                        if (mapGUIDCur.find(strDocumentGUID) == mapGUIDCur.end()) {
+                            if (keyIndex > 0 && mapGUIDOld.find(strDocumentGUID) != mapGUIDOld.end())
+                            {
+                                mapGUIDCur[strDocumentGUID] = strDocumentKBGUID;
+                                qDebug() << "Document finded  guid: " << QString(strDocumentGUID.data());
+                            }
+                            else if (keyIndex == 0)
+                            {
+                                mapGUIDCur[strDocumentGUID] = strDocumentKBGUID;
+                                qDebug() << "Document finded  guid: " << QString(strDocumentGUID.data());
+                            }
+
                         }
                     }
                 }
 
                 _CLDELETE(query);
-            //}
+                //}
+            }
+            mapGUIDOld.clear();
+        }
+
+        std::map<std::string, std::string>& mapGUIDCur =
+                (listKey.count() % 2 == 0) ?  mapGUIDOdd : mapGUIDEven;
+        std::map<std::string, std::string>::iterator iterator;
+        for (iterator = mapGUIDCur.begin(); iterator != mapGUIDCur.end(); iterator++)
+        {
+            std::string strDocumentGUID = iterator->first;
+            std::string strDocumentKBGUID = iterator->second;
+            onSearchProcess(strDocumentKBGUID, strDocumentGUID, "");
         }
 
         searcher.close();

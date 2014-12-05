@@ -10,6 +10,7 @@
 #include "sync/token.h"
 #include "wizproxydialog.h"
 #include <extensionsystem/pluginmanager.h>
+#include "widgets/wizVerificationCodeDialog.h"
 #include <QPainter>
 #include <QMouseEvent>
 #include <QMenu>
@@ -18,6 +19,7 @@
 #include <QDesktopServices>
 #include <QUrl>
 #include <QDebug>
+#include <QDateTime>
 
 
 #include "share/wizui.h"
@@ -26,7 +28,7 @@
 using namespace WizService;
 
 
-
+#define WIZ_ERROR_REGISTRATION_COUNT  366
 
 CWizLoginDialog::CWizLoginDialog(const QString &strDefaultUserId, const QString &strLocale, QWidget *parent)
 #ifdef Q_OS_MAC
@@ -66,7 +68,7 @@ CWizLoginDialog::CWizLoginDialog(const QString &strDefaultUserId, const QString 
     m_lineEditNewUserName = ui->wgt_newUser->edit();
     m_lineEditNewPassword = ui->wgt_newPassword->edit();
     m_lineEditRepeatPassword = ui->wgt_passwordRepeat->edit();
-    m_buttonSignIn = ui->btn_singin;
+    m_buttonSignUp = ui->btn_singUp;
 
     ui->wgt_newUser->setAutoClearRightIcon(true);
     ui->wgt_newPassword->setAutoClearRightIcon(true);
@@ -80,6 +82,7 @@ CWizLoginDialog::CWizLoginDialog(const QString &strDefaultUserId, const QString 
     connect(m_lineEditNewPassword, SIGNAL(textChanged(QString)), SLOT(onSignUpInputDataChanged()));
     connect(m_lineEditNewUserName, SIGNAL(textChanged(QString)), SLOT(onSignUpInputDataChanged()));
     connect(m_lineEditRepeatPassword, SIGNAL(textChanged(QString)), SLOT(onSignUpInputDataChanged()));
+    connect(m_lineEditRepeatPassword, SIGNAL(returnPressed()), SLOT(on_btn_singUp_clicked()));
     connect(m_lineEditPassword, SIGNAL(textChanged(QString)), SLOT(onLoginInputChanged()));
     connect(m_lineEditUserName, SIGNAL(textChanged(QString)), SLOT(onLoginInputChanged()));
     connect(ui->wgt_usercontainer, SIGNAL(rightIconClicked()), SLOT(showUserListMenu()));
@@ -91,7 +94,7 @@ CWizLoginDialog::CWizLoginDialog(const QString &strDefaultUserId, const QString 
     connect(ui->btn_changeToLogin, SIGNAL(clicked()), SLOT(on_btn_changeToLogin_clicked()));
     connect(ui->btn_changeToSignin, SIGNAL(clicked()), SLOT(on_btn_changeToSignin_clicked()));
     connect(ui->btn_fogetpass, SIGNAL(clicked()), SLOT(on_btn_fogetpass_clicked()));
-    connect(ui->btn_singin, SIGNAL(clicked()), SLOT(on_btn_singin_clicked()));
+    connect(ui->btn_singUp, SIGNAL(clicked()), SLOT(on_btn_singUp_clicked()));
     connect(ui->btn_proxysetting, SIGNAL(clicked()), SLOT(on_btn_proxysetting_clicked()));
     connect(ui->cbx_autologin, SIGNAL(toggled(bool)), SLOT(on_cbx_autologin_toggled(bool)));
     connect(ui->cbx_remberPassword, SIGNAL(toggled(bool)), SLOT(on_cbx_remberPassword_toggled(bool)));
@@ -240,7 +243,7 @@ void CWizLoginDialog::enableSignInControls(bool bEnable)
     m_lineEditNewUserName->setEnabled(bEnable);
     m_lineEditNewPassword->setEnabled(bEnable);
     m_lineEditRepeatPassword->setEnabled(bEnable);
-    ui->btn_singin->setEnabled(bEnable);
+    ui->btn_singUp->setEnabled(bEnable);
     ui->btn_changeToLogin->setEnabled(bEnable);
 }
 
@@ -365,10 +368,10 @@ void CWizLoginDialog::applyElementStyles(const QString &strLocal)
     m_buttonLogin->setText(tr("Login"));
     m_buttonLogin->setEnabled(false);
 
-    m_buttonSignIn->setButtonStyle(strBtnNormal, strBtnHover, strBtnDown, strBtnDisable, QColor("#ffffff"),
+    m_buttonSignUp->setButtonStyle(strBtnNormal, strBtnHover, strBtnDown, strBtnDisable, QColor("#ffffff"),
                                    QColor("#ffffff"), QColor("b1b1b1"));
-    m_buttonSignIn->setText(tr("Create Account"));
-    m_buttonSignIn->setEnabled(false);
+    m_buttonSignUp->setText(tr("Create Account"));
+    m_buttonSignUp->setEnabled(false);
     //
     QString strSeparator = ::WizGetSkinResourceFileName(strThemeName, "loginSeparator");
     ui->label_separator2->setStyleSheet(QString("QLabel {border: none;background-image: url(%1);"
@@ -448,8 +451,20 @@ QAction *CWizLoginDialog::findActionInMenu(const QString &strActName)
     return 0;
 }
 
+bool CWizLoginDialog::doVerificationCodeCheck(QString& strCaptchaID, QString& strCaptcha)
+{
+    strCaptchaID = QString::number(QDateTime::currentMSecsSinceEpoch()).right(8);
+    strCaptchaID += WizGenGUIDLowerCaseLetterOnly().Right(6);
+    QString strUrl = WizService::ApiEntry::captchaUrl(strCaptchaID);
 
-
+    CWizVerificationCodeDialog dlg(this);
+    if (dlg.verificationRequest(strUrl) == QDialog::Accepted)
+    {
+        strCaptcha = dlg.getVerificationCode();
+        return true;
+    }
+    return false;
+}
 
 void CWizLoginDialog::on_btn_changeToSignin_clicked()
 {
@@ -483,7 +498,6 @@ void CWizLoginDialog::on_btn_fogetpass_clicked()
     QDesktopServices::openUrl(QUrl(strUrl));
 }
 
-
 void CWizLoginDialog::on_btn_login_clicked()
 {
     if (userId().isEmpty()) {
@@ -500,7 +514,7 @@ void CWizLoginDialog::on_btn_login_clicked()
     doAccountVerify();
 }
 
-void CWizLoginDialog::on_btn_singin_clicked()
+void CWizLoginDialog::on_btn_singUp_clicked()
 {
     if (checkSingMessage())
     {
@@ -568,7 +582,7 @@ void CWizLoginDialog::onSignUpInputDataChanged()
     ui->label_passwordError->clear();
     bool bInputFinished = !m_lineEditNewUserName->text().isEmpty() && !m_lineEditNewPassword->text().isEmpty()
             && !m_lineEditRepeatPassword->text().isEmpty();
-    ui->btn_singin->setEnabled(bInputFinished);
+    ui->btn_singUp->setEnabled(bInputFinished);
 }
 
 void CWizLoginDialog::userListMenuClicked(QAction *action)
@@ -599,6 +613,16 @@ void CWizLoginDialog::onRegisterAccountFinished(bool bFinish)
         doAccountVerify();
     } else {
         ui->label_passwordError->setText(api->lastErrorMessage());
+        if (WIZ_ERROR_REGISTRATION_COUNT == api->lastErrorCode()) {
+            QString strCaptchaID, strCaptcha;
+            if (doVerificationCodeCheck(strCaptchaID, strCaptcha))
+            {
+                AsyncApi* api = new AsyncApi(this);
+                connect(api, SIGNAL(registerAccountFinished(bool)), SLOT(onRegisterAccountFinished(bool)));
+                api->registerAccount(m_lineEditNewUserName->text(), m_lineEditNewPassword->text(), "", strCaptchaID, strCaptcha);
+                enableSignInControls(false);
+            }
+        }
     }
 
     api->deleteLater();

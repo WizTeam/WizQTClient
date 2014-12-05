@@ -376,9 +376,9 @@ QStringList PluginManager::pluginPaths()
     \sa pluginPaths()
     \sa loadPlugins()
 */
-void PluginManager::setPluginPaths(const QStringList &paths)
+void PluginManager::setPluginPaths(const QStringList &specPaths, const QStringList& libraryPaths)
 {
-    d->setPluginPaths(paths);
+    d->setPluginPaths(specPaths, libraryPaths);
 }
 
 /*!
@@ -1055,6 +1055,13 @@ void PluginManagerPrivate::asyncShutdownFinished()
         shutdownEventLoop->exit();
 }
 
+void PluginManagerPrivate::setPluginLibraryPath(const QString& path)
+{
+    foreach (PluginSpec *spec, pluginSpecs) {
+        spec->d->setLibraryPath(path);
+    }
+}
+
 /*!
     \internal
 */
@@ -1181,11 +1188,16 @@ void PluginManagerPrivate::loadPlugin(PluginSpec *spec, PluginSpec::State destSt
 /*!
     \internal
 */
-void PluginManagerPrivate::setPluginPaths(const QStringList &paths)
+void PluginManagerPrivate::setPluginPaths(const QStringList &specPaths, const QStringList& libraryPaths)
 {
-    pluginPaths = paths;
+    pluginPaths = specPaths;
     readSettings();
     readPluginPaths();
+#ifdef Q_OS_MAC
+    //library path was set same location value with spec files in readPluginPaths(),
+    //on mac these file was not contains in same folder, need reset library path
+    setPluginLibraryPath(libraryPaths.first());
+#endif
 }
 
 /*!

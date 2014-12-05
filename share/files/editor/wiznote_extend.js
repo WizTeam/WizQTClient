@@ -270,3 +270,8 @@ function WizInsertCodeHtml(html) {
 
     editor.execCommand('insertHtml', html, true);
 }
+
+
+function WizClearEditorHeight() {
+    editor.document.body.style.height='';
+}

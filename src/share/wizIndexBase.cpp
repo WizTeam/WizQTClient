@@ -1392,12 +1392,52 @@ bool CWizIndexBase::DocumentFromGUID(const CString& strDocumentGUID, WIZDOCUMENT
     }
 
     if (arrayDocument.empty()) {
-        //TOLOG(_T("Failed to get document by guid, result is empty"));
+        TOLOG(_T("Failed to get document by guid, result is empty"));
         return false;
     }
 
     data = arrayDocument[0];
     return true;
+}
+
+bool CWizIndexBase::DocumentWithExFieldsFromGUID(const CString& strDocumentGUID, WIZDOCUMENTDATA& data)
+{
+    if (DocumentFromGUID(strDocumentGUID, data))
+    {
+        CString strParamSQL = WizFormatString1(_T("select DOCUMENT_GUID, PARAM_NAME, PARAM_VALUE from WIZ_DOCUMENT_PARAM where (PARAM_NAME='DOCUMENT_FLAGS' or PARAM_NAME='RATE' or PARAM_NAME='SYSTEM_TAGS') and DOCUMENT_GUID = '%1'"), strDocumentGUID);
+
+        CppSQLite3Query queryParam = m_db.execQuery(strParamSQL);
+        while (!queryParam.eof())
+        {
+            CString strGUID = queryParam.getStringField(0);
+            CString strParamName = queryParam.getStringField(1);
+
+            if (strGUID == data.strGUID)
+            {
+                if (strParamName == _T(TABLE_KEY_WIZ_DOCUMENT_PARAM_FLAGS))
+                {
+                    int nFlags = queryParam.getIntField(2);
+                    data.nFlags = nFlags;
+                }
+                else if (strParamName == _T("RATE"))
+                {
+                    int nRate = queryParam.getIntField(2);
+                    data.nRate = nRate;
+                }
+                else if (strParamName == _T("SYSTEM_TAGS"))
+                {
+                    CString strSystemTags = queryParam.getStringField(2);
+                    data.strSystemTags = strSystemTags;
+                }
+            }
+
+            queryParam.nextRow();
+        }
+
+        return true;
+    }
+
+    return false;
 }
 
 bool CWizIndexBase::GetAttachments(CWizDocumentAttachmentDataArray& arrayAttachment)
@@ -1551,5 +1591,27 @@ bool CWizIndexBase::users(const QString& strKbGUID, CWizBizUserDataArray& arrayU
     //    return false;
     //}
 
+    return true;
+}
+
+bool CWizIndexBase::userFromID(const QString& strKbGUID, const QString& userID, WIZBIZUSER& user)
+{
+    CString strWhere = "BIZ_GUID=%1 AND USER_ID=%2";
+    strWhere = strWhere.arg(STR2SQL(strKbGUID)).arg(STR2SQL(userID));
+
+    CString strSQL = FormatQuerySQL(TABLE_NAME_WIZ_USER,
+                                    FIELD_LIST_WIZ_USER,
+                                    strWhere);
+
+    CWizBizUserDataArray arrayUser;
+    if (!SQLToBizUserDataArray(strSQL, arrayUser)) {
+        TOLOG("[userFromGUID] failed to get user by user guid");
+        return false;
+    }
+
+    if (arrayUser.empty())
+        return false;
+
+    user = arrayUser[0];
     return true;
 }

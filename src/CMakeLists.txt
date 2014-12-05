@@ -119,6 +119,7 @@ set(wiznote_SOURCES
     wizButton.cpp
     wizEditorToolBar.cpp
     wizEditorInsertTableForm.cpp
+    wizFileReader.cpp
     wizFolderSelector.cpp
     wizProgressDialog.cpp
     wizFolderView.cpp
@@ -147,6 +148,9 @@ set(wiznote_SOURCES
     share/wizLockedFile.cpp
     share/wizLocalPeer.cpp
     share/wizSingleApplication.cpp
+    share/wizRtfReader.cpp
+    widgets/wizScreenShotWidget.cpp
+    widgets/wizVerificationCodeDialog.cpp
 )
 
 set(wiznote_HEADERS
@@ -255,6 +259,7 @@ set(wiznote_HEADERS
     wizDocumentTransitionView.h
     wizButton.h
     wizEditorInsertTableForm.h
+    wizFileReader.h
     wizFolderSelector.h
     wizProgressDialog.h
     wizFolderView.h
@@ -281,6 +286,9 @@ set(wiznote_HEADERS
     share/wizLockedFile.h
     share/wizLocalPeer.h
     share/wizSingleApplication.h
+    share/wizRtfReader.h
+    widgets/wizScreenShotWidget.h
+    widgets/wizVerificationCodeDialog.h
 )
 
 set(wiznote_FORMS
@@ -298,6 +306,7 @@ set(wiznote_FORMS
     ui/wizLoginDialog.ui
     ui/wizSearchReplaceWidget.ui
     ui/wizDocTemplateDialog.ui
+    ui/wizVerificationCodeDialog.ui
 )
 
 set(wiznote_TRANSLATIONS

@@ -143,7 +143,9 @@ protected:
         if (opt.state & QStyle::State_On)
             state = QIcon::On;
 
-        opt.icon.paint(&p, opt.rect, Qt::AlignCenter, mode, state);
+        QSize size = iconSize();
+        QRect rcIcon((opt.rect.width() - size.width()) / 2, (opt.rect.height() - size.height()) / 2, size.width(), size.height());
+        opt.icon.paint(&p, rcIcon, Qt::AlignCenter, mode, state);
     }
 
     virtual void leaveEvent(QEvent* event) {
@@ -175,6 +177,7 @@ public:
     CWizToolButtonColor(QWidget* parent = 0) : CWizToolButton(parent)
     {
         setCheckable(false);
+        setIconSize(QSize(16, 16));
     }
 
     void setColor(const QColor& color)
@@ -203,7 +206,9 @@ protected:
         if (opt.state & QStyle::State_On)
             state = QIcon::On;
 
-        opt.icon.paint(&p, opt.rect, Qt::AlignCenter, mode, state);
+        QSize size = iconSize();
+        QRect rcIcon((opt.rect.width() - size.width()) / 2, (opt.rect.height() - size.height()) / 2, size.width(), size.height());
+        opt.icon.paint(&p, rcIcon, Qt::AlignCenter, mode, state);
 
         QRect rectColor(opt.rect.x() + 4, opt.iconSize.height() + 1, opt.iconSize.width() - 4, 4);
         p.fillRect(QRect(rectColor), m_color);
@@ -218,6 +223,7 @@ class CWizToolComboBox : public QComboBox
 public:
     CWizToolComboBox(QWidget* parent = 0)
         : QComboBox(parent)
+        , m_isPopup(false)
     {
         setFocusPolicy(Qt::NoFocus);
         setSizeAdjustPolicy(QComboBox::AdjustToMinimumContentsLength);
@@ -235,6 +241,20 @@ public:
     }
 
     QString text() const { return m_strText; }
+
+    bool isPopuping() const { return m_isPopup; }
+
+    void	showPopup()
+    {
+        m_isPopup = true;
+        QComboBox::showPopup();
+    }
+
+    void hidePopup()
+    {
+        m_isPopup = false;
+        QComboBox::hidePopup();
+    }
 
 protected:
     virtual void paintEvent(QPaintEvent *event)
@@ -255,12 +275,15 @@ protected:
 
 private:
     QString m_strText;
+    bool m_isPopup;
 };
 
 class CWizToolComboBoxFont : public QFontComboBox
 {
 public:
-    CWizToolComboBoxFont(QWidget* parent = 0) : QFontComboBox(parent)
+    CWizToolComboBoxFont(QWidget* parent = 0)
+        : QFontComboBox(parent)
+        , m_isPopup(false)
     {
         setFocusPolicy(Qt::NoFocus);
         setSizeAdjustPolicy(QComboBox::AdjustToMinimumContentsLength);
@@ -279,6 +302,20 @@ public:
     }
 
     QString text() const { return m_strText; }
+
+    bool isPopuping() const { return m_isPopup; }
+
+    void	showPopup()
+    {
+        m_isPopup = true;
+        QFontComboBox::showPopup();
+    }
+
+    void hidePopup()
+    {
+        m_isPopup = false;
+        QFontComboBox::hidePopup();
+    }
 
 protected:
     virtual void paintEvent(QPaintEvent *event)
@@ -299,6 +336,7 @@ protected:
 
 private:
     QString m_strText;
+    bool m_isPopup;
 };
 
 
@@ -414,6 +452,16 @@ EditorToolBar::EditorToolBar(QWidget *parent)
     m_btnSearchReplace->setToolTip(tr("Find & Replace"));
     connect(m_btnSearchReplace, SIGNAL(clicked()), SLOT(on_btnSearchReplace_clicked()));
 
+#ifndef Q_OS_MAC
+    m_btnScreenShot = new CWizToolButton(this);
+    m_btnScreenShot->setCheckable(false);
+    m_btnScreenShot->setIcon(::WizLoadSkinIcon(skin, "actionFormatScreenShot"));
+    m_btnScreenShot->setToolTip(tr("Screen shot"));
+    connect(m_btnScreenShot, SIGNAL(clicked()), SLOT(on_btnScreenShot_clicked()));
+#else
+    m_btnScreenShot = 0;
+#endif
+
     QHBoxLayout* layout = new QHBoxLayout();
     layout->setContentsMargins(3, 0, 3, 0);
     layout->setAlignment(Qt::AlignVCenter);
@@ -446,6 +494,9 @@ EditorToolBar::EditorToolBar(QWidget *parent)
     layout->addWidget(m_btnTable);
     layout->addWidget(m_btnHorizontal);
     layout->addWidget(m_btnInsertImage);
+#ifndef Q_OS_MAC
+    layout->addWidget(m_btnScreenShot);
+#endif
     layout->addSpacing(12);
     layout->addWidget(m_btnSearchReplace);
     layout->addStretch();
@@ -946,6 +997,11 @@ bool EditorToolBar::processBase64Image(bool bUseForCopy)
     return true;
 }
 
+bool EditorToolBar::hasFocus()
+{
+    return QWidget::hasFocus() || m_comboFontFamily->isPopuping() || m_comboFontSize->isPopuping();
+}
+
 void EditorToolBar::buildMenu()
 {
     if (!m_menuContext) {
@@ -1169,7 +1225,7 @@ void EditorToolBar::on_btnJustifyRight_clicked()
 void EditorToolBar::on_btnSearchReplace_clicked()
 {
     if (m_editor) {
-        m_editor->editorCommandExecuteSearchReplace();
+        m_editor->editorCommandExecuteFindReplace();
     }
 }
 
@@ -1224,6 +1280,13 @@ void EditorToolBar::on_btnMobileImage_clicked()
         //need update button status after show dialog
         m_btnMobileImage->setChecked(bReceiveImage);
         update();
+    }
+}
+
+void EditorToolBar::on_btnScreenShot_clicked()
+{
+    if (m_editor) {
+        m_editor->editorCommandExecuteScreenShot();
     }
 }
 

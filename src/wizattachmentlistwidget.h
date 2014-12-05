@@ -58,16 +58,18 @@ public:
     CWizAttachmentListView(QWidget* parent);
     const WIZDOCUMENTDATA& document() const { return m_document; }
 
-private:
-    CWizDatabaseManager& m_dbMgr;
-    WIZDOCUMENTDATA m_document;
-    CWizFileIconProvider m_iconProvider;
-    QMenu* m_menu;
-    CWizObjectDataDownloaderHost* m_downloaderHost;
 
-    void resetPermission();
-    void startDownLoad(CWizAttachmentListViewItem* item);
-    CWizAttachmentListViewItem* newAttachmentItem(const WIZDOCUMENTATTACHMENTDATA& att);
+public Q_SLOTS:
+    void on_action_addAttachment();
+    void on_action_saveAttachmentAs();
+    void on_action_openAttachment();
+    void on_action_deleteAttachment();
+    void on_list_itemDoubleClicked(QListWidgetItem* item);
+    //
+    void forceRepaint();
+    //
+    void resetAttachments();
+
 
 public:
     QAction* findAction(const QString& strName);
@@ -75,6 +77,9 @@ public:
     const CWizAttachmentListViewItem* attachmentItemFromIndex(const QModelIndex& index) const;
     void addAttachments();
     void openAttachment(CWizAttachmentListViewItem* item);
+
+signals:
+    void closeRequest();
 
 protected:
     virtual int wrapTextLineIndex() const;
@@ -88,16 +93,17 @@ protected:
 
     friend class CWizAttachmentListViewItem;
 
-public Q_SLOTS:
-    void on_action_addAttachment();
-    void on_action_saveAttachmentAs();
-    void on_action_openAttachment();
-    void on_action_deleteAttachment();
-    void on_list_itemDoubleClicked(QListWidgetItem* item);
-    //
-    void forceRepaint();
-    //
-    void resetAttachments();
+private:
+    CWizDatabaseManager& m_dbMgr;
+    WIZDOCUMENTDATA m_document;
+    CWizFileIconProvider m_iconProvider;
+    QMenu* m_menu;
+    CWizObjectDataDownloaderHost* m_downloaderHost;
+
+    void resetPermission();
+    void startDownload(CWizAttachmentListViewItem* item);
+    CWizAttachmentListViewItem* newAttachmentItem(const WIZDOCUMENTATTACHMENTDATA& att);
+    void waitForDownload();
 };
 
 
@@ -107,16 +113,16 @@ class CWizAttachmentListWidget : public CWizPopupWidget
 
 public:
     CWizAttachmentListWidget(QWidget* parent);
-    void setDocument(const WIZDOCUMENTDATA& document);
+    bool setDocument(const WIZDOCUMENTDATA& document);
 
 private:
     CWizAttachmentListView* m_list;
     CWizButton* m_btnAddAttachment;
     //CWizImagePushButton* m_btnAddAttachment;
-    QString m_currentDocument;
 
 public Q_SLOTS:
     void on_addAttachment_clicked();
+    void on_attachList_closeRequest();
 };
 
 #endif // WIZATTACHMENTLISTWIDGET_H

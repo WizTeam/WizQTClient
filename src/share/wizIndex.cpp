@@ -5,6 +5,7 @@
 #include <algorithm>
 #include "wizkmcore.h"
 #include "utils/logger.h"
+#include "wizmisc.h"
 
 
 CWizIndex::CWizIndex(void)
@@ -744,7 +745,7 @@ void CWizIndex::InitDocumentExFields(CWizDocumentDataArray& arrayDocument,
                 Q_ASSERT(strGUID == data.strGUID);
                 if (strGUID == data.strGUID)
                 {
-                    if (strParamName == _T("DOCUMENT_FLAGS"))
+                    if (strParamName == _T(TABLE_KEY_WIZ_DOCUMENT_PARAM_FLAGS))
                     {
                         int nFlags = queryParam.getIntField(2);
                         data.nFlags = nFlags;
@@ -2510,7 +2511,14 @@ bool CWizIndex::SearchDocumentByTitle(const QString& strTitle,
                                       int nMaxCount,
                                       CWizDocumentDataArray& arrayDocument)
 {
-    CString strWhere = WizFormatString1(" DOCUMENT_TITLE like '%%1%'", strTitle);
+    QStringList listTitle = strTitle.split(getWizSearchSplitChar());
+    if (listTitle.isEmpty())
+        return false;
+
+    CString strWhere = WizFormatString1(" DOCUMENT_TITLE like '%%1%'", listTitle.first());
+    for (int i = 1; i < listTitle.count(); i++) {
+        strWhere += WizFormatString1(" AND DOCUMENT_TITLE like '%%1%'", listTitle.at(i));
+    }
 
     if (!strLocation.isEmpty()) {
         CString strWhereLocation;

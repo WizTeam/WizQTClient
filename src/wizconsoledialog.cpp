@@ -149,7 +149,7 @@ void CWizConsoleDialog::onBtnCopyToClipboardClicked()
 #elif defined(Q_OS_LINUX)
     // FIXME: add distribution, release number, etc..
 #endif
-    strOutput += QString("Username: %1\n").arg(m_app.databaseManager().db().getUserId());
+    strOutput += QString("Username: %1\n").arg(m_app.databaseManager().db().GetUserId());
     strOutput += QString("Time: %1 %2\n").arg(QDate::currentDate().toString(Qt::ISODate)).arg(QTime::currentTime().toString(Qt::ISODate));
     strOutput += "\n";
     strOutput += strText;
