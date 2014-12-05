@@ -24,6 +24,9 @@ public:
     void setCompleter(QCompleter* completer);
     QCompleter* completer() const { return c; }
 
+signals:
+    void titleEdited(QString strTitle);
+
 protected:
     QSize sizeHint() const;
     virtual void inputMethodEvent(QInputMethodEvent* event);

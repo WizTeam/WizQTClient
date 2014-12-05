@@ -40,6 +40,7 @@
 #endif
 
 // command list
+#define WIZNOTE_API_COMMAND_AS_SERVER       "as"
 #define WIZNOTE_API_COMMAND_SYNC_HTTP       "sync_http"
 #define WIZNOTE_API_COMMAND_SYNC_HTTPS      "sync_https"
 #define WIZNOTE_API_COMMAND_MESSAGE_VERSION "message_version"
@@ -69,6 +70,12 @@ ApiEntryPrivate::ApiEntryPrivate()
 
 ApiEntryPrivate::~ApiEntryPrivate()
 {
+}
+
+QString ApiEntryPrivate::asServerUrl()
+{
+    QString strAsUrl;
+    return requestUrl(WIZNOTE_API_COMMAND_AS_SERVER, strAsUrl);
 }
 
 
@@ -377,6 +384,16 @@ QString ApiEntry::createGroupUrl(const QString& strToken)
         d = new ApiEntryPrivate();
     return d->createGroupUrl(strToken);
 }
+
+QString ApiEntry::captchaUrl(const QString& strCaptchaID, int nWidth, int nHeight)
+{
+    if (!d)
+        d = new ApiEntryPrivate();
+    QString strUrl = d->asServerUrl();
+    strUrl += QString("/a/captcha/%1?width=%2&height=%3").arg(strCaptchaID).arg(nWidth).arg(nHeight);
+    return strUrl;
+}
+
 QString ApiEntry::standardCommandUrl(const QString& strCommand)
 {
     if (!d)

@@ -69,7 +69,7 @@ public:
     void waitForDone();
 
 protected:
-    virtual bool onSearchProcess(const wchar_t* lpszKbGUID, const wchar_t* lpszDocumentID, const wchar_t* lpszURL);
+    virtual bool onSearchProcess(const std::string& lpszKbGUID, const std::string& lpszDocumentID, const std::string& lpszURL);
     virtual bool onSearchEnd();
 
     virtual void run();

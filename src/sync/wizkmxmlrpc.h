@@ -41,7 +41,7 @@ public:
     bool GetToken(const QString& strUserName, const QString& strPassword, QString& strToken);
     bool GetCert(const QString& strUserName, const QString& strPassword, QString& strN, QString& stre, QString& strd, QString& strHint);
     bool SetCert(const QString& strUserName, const QString& strPassword, const QString& strN, const QString& stre, const QString& strd, const QString& strHint);
-    bool CreateAccount(const QString& strUserName, const QString& strPassword, const QString& InviteCode);
+    bool CreateAccount(const QString& strUserName, const QString& strPassword, const QString& InviteCode, const QString& strCaptchaID, const QString& strCaptcha);
     void SetAutoLogout(bool b) { m_bAutoLogout = b; }
     bool ShareSNS(const QString& strToken, const QString& strSNS, const QString& strComment, const QString& strURL, const QString& strDocumentGUID);
     bool ShareGroup(const QString& strToken, const QString& strDocumentGUIDs, const QString& strGroups);
@@ -72,7 +72,7 @@ private:
     bool accounts_clientLogin(const QString& strUserName, const QString& strPassword, const QString& strType, WIZUSERINFO& ret);
     bool accounts_clientLogout(const QString& strToken);
     bool accounts_keepAlive(const QString& strToken);
-    bool accounts_createAccount(const QString& strUserName, const QString& strPassword, const QString& strInviteCode);
+    bool accounts_createAccount(const QString& strUserName, const QString& strPassword, const QString& strInviteCode, const QString& strCaptchaID, const QString& strCaptcha);
     bool accounts_changePassword(const QString& strUserName, const QString& strOldPassword, const QString& strNewPassword);
     bool accounts_changeUserId(const QString& strUserName, const QString& strPassword, const QString& strNewUserId);
     bool accounts_getToken(const QString& strUserName, const QString& strPassword, QString& strToken);

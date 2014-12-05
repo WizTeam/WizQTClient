@@ -33,10 +33,12 @@ using namespace Core::Internal;
 #define WIZACTION_LIST_TAGS     QObject::tr("Tags...")
 #define WIZACTION_LIST_MOVE_DOCUMENT QObject::tr("Move Note...")
 #define WIZACTION_LIST_COPY_DOCUMENT QObject::tr("Copy Note")
-#define WIZACTION_LIST_DOCUMENT_HISTORY QObject::tr("Note History...")
-#define WIZACTION_LIST_COPY_DOCUMENT_LINK QObject::tr("Copy Document Link")
+#define WIZACTION_LIST_DOCUMENT_HISTORY QObject::tr("Version history...")
+#define WIZACTION_LIST_COPY_DOCUMENT_LINK QObject::tr("Copy document link")
 #define WIZACTION_LIST_ENCRYPT_DOCUMENT QObject::tr("Encrypt document")
-#define WIZACTION_LIST_CANCEL_ENCRYPTION  QObject::tr("Cancel Document Encryption")
+#define WIZACTION_LIST_CANCEL_ENCRYPTION  QObject::tr("Cancel document encryption")
+#define WIZACTION_LIST_ALWAYS_ON_TOP  QObject::tr("Always on top")
+//#define WIZACTION_LIST_CANCEL_ON_TOP  QObject::tr("Cancel always on top")
 
 
 CWizDocumentListView::CWizDocumentListView(CWizExplorerApp& app, QWidget *parent /*= 0*/)
@@ -146,6 +148,13 @@ CWizDocumentListView::CWizDocumentListView(CWizExplorerApp& app, QWidget *parent
                               SLOT(on_action_copyDocumentLink()));
     m_menuDocument->addAction(WIZACTION_LIST_DOCUMENT_HISTORY, this,
                               SLOT(on_action_documentHistory()));
+
+    m_menuDocument->addSeparator();
+    QAction* actionOnTop = m_menuDocument->addAction(WIZACTION_LIST_ALWAYS_ON_TOP,
+                                                         this, SLOT(on_action_alwaysOnTop()));
+    actionOnTop->setCheckable(true);
+    addAction(actionOnTop);
+
 
     m_menuDocument->addSeparator();
 
@@ -327,7 +336,8 @@ void CWizDocumentListView::resetPermission()
 
     bool bGroup = isDocumentsWithGroupDocument(arrayDocument);
     bool bDeleted = isDocumentsWithDeleted(arrayDocument);
-    bool bCanDelete = isDocumentsAllCanDelete(arrayDocument);
+    bool bCanEdit = isDocumentsAllCanDelete(arrayDocument);
+    bool bAlwaysOnTop = isDocumentsAlwaysOnTop(arrayDocument);
 
     // if group documents or deleted documents selected
     if (bGroup || bDeleted) {
@@ -341,18 +351,16 @@ void CWizDocumentListView::resetPermission()
     }
 
     // deleted user private documents
-    if (!bGroup) {
-        findAction(WIZACTION_LIST_MOVE_DOCUMENT)->setEnabled(true);
-    } else {
-        findAction(WIZACTION_LIST_MOVE_DOCUMENT)->setEnabled(false);
-    }
+    findAction(WIZACTION_LIST_MOVE_DOCUMENT)->setEnabled(!bGroup);
 
     // disable delete if permission is not enough
-    if (!bCanDelete) {
-        findAction(WIZACTION_LIST_DELETE)->setEnabled(false);
-    } else {
-        findAction(WIZACTION_LIST_DELETE)->setEnabled(true);
-    }
+    findAction(WIZACTION_LIST_DELETE)->setEnabled(bCanEdit);
+
+    findAction(WIZACTION_LIST_ALWAYS_ON_TOP)->setCheckable(true);
+    findAction(WIZACTION_LIST_ALWAYS_ON_TOP)->setEnabled(bCanEdit);
+    findAction(WIZACTION_LIST_ALWAYS_ON_TOP)->setChecked(bAlwaysOnTop);
+
+
 
     // disable note history if selection is not only one
     if (m_rightButtonFocusedItems.count() != 1)
@@ -403,6 +411,17 @@ bool CWizDocumentListView::isDocumentsWithDeleted(const CWizDocumentDataArray& a
        if (doc.strLocation.startsWith(LOCATION_DELETED_ITEMS)) {
            return true;
        }
+    }
+
+    return false;
+}
+
+bool CWizDocumentListView::isDocumentsAlwaysOnTop(const CWizDocumentDataArray& arrayDocument)
+{
+    foreach (const WIZDOCUMENTDATAEX& doc, arrayDocument) {
+        if (doc.nFlags & wizDocumentAlwaysOnTop) {
+            return true;
+        }
     }
 
     return false;
@@ -692,10 +711,26 @@ void CWizDocumentListView::resetItemsSortingType(int type)
     sortItems();
 }
 
+bool CWizDocumentListView::isSortedByAccessDate()
+{
+    return m_nSortingType == CWizSortingPopupButton::SortingAccessTime ||
+            m_nSortingType == -CWizSortingPopupButton::SortingAccessTime;
+}
+
 void CWizDocumentListView::on_itemSelectionChanged()
 {
     //resetPermission();
     m_itemSelectionChanged = true;
+
+    m_rightButtonFocusedItems.clear();
+    foreach (QListWidgetItem* lsItem, selectedItems())
+    {
+        CWizDocumentListViewItem* pItem = dynamic_cast<CWizDocumentListViewItem*>(lsItem);
+        if (pItem)
+        {
+            m_rightButtonFocusedItems.append(pItem);
+        }
+    }
 }
 
 void CWizDocumentListView::on_tag_created(const WIZTAGDATA& tag)
@@ -926,6 +961,7 @@ void CWizDocumentListView::on_action_deleteDocument()
     else if (selectedItems().isEmpty())
     {
         setItemSelected(documentItemAt(index), true);
+        emit documentsSelectionChanged();
     }
 }
 
@@ -1084,6 +1120,32 @@ void CWizDocumentListView::on_action_cancelEncryption()
                 return;
         }
     }
+}
+
+void CWizDocumentListView::on_action_alwaysOnTop()
+{
+    QAction *actionAlwaysOnTop = findAction(WIZACTION_LIST_ALWAYS_ON_TOP);
+    actionAlwaysOnTop->setChecked(actionAlwaysOnTop->isChecked());
+    bool bAlwaysOnTop = actionAlwaysOnTop->isChecked();
+
+    foreach(CWizDocumentListViewItem* item, m_rightButtonFocusedItems)
+    {
+        CWizDatabase& db = m_dbMgr.db(item->document().strKbGUID);
+        WIZDOCUMENTDATA doc;
+        db.DocumentFromGUID(item->document().strGUID, doc);
+        if (bAlwaysOnTop)
+        {
+            doc.nFlags |= wizDocumentAlwaysOnTop;
+        }
+        else
+        {
+            doc.nFlags &= ~wizDocumentAlwaysOnTop;
+        }
+        db.SetDocumentFlags(doc, QString::number(doc.nFlags), true);
+        item->reload(db);
+    }
+
+    sortItems();
 }
 
 
@@ -1280,6 +1342,21 @@ void CWizDocumentListView::drawItem(QPainter* p, const QStyleOptionViewItemV4* v
     CWizDocumentListViewItem* pItem = documentItemFromIndex(vopt->index);
     if (pItem)
         pItem->draw(p, vopt, viewType());
+}
+
+void CWizDocumentListView::reloadItem(const QString& strKbGUID, const QString& strGUID)
+{
+    int index = documentIndexFromGUID(strGUID);
+    if (-1 == index)
+        return;
+
+    CWizDocumentListViewItem* pItem = documentItemAt(index);
+    if (pItem)
+    {
+        pItem->reload(m_dbMgr.db(strKbGUID));
+        //m_dbMgr.db(strKbGUID).UpdateDocumentAbstract(strGUID);
+        update(indexFromItem(pItem));
+    }
 }
 
 void CWizDocumentListView::setAcceptAllItems(bool bAccept)

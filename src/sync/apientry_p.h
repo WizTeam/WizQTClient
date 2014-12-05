@@ -16,6 +16,7 @@ public:
     ~ApiEntryPrivate();
 
     QString syncUrl();
+    QString asServerUrl();
     QString messageVersionUrl();
     QString avatarDownloadUrl(const QString& strUserGUID);
     QString avatarUploadUrl();

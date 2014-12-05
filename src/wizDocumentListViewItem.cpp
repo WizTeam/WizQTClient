@@ -76,6 +76,13 @@ bool CWizDocumentListViewItem::isContainsAttachment() const
     }
     return false;
 }
+
+int CWizDocumentListViewItem::badgeType() const
+{
+    int nType = m_data.doc.nProtected ? Utils::StyleHelper::BadgeEncryted : Utils::StyleHelper::BadgeNormal;
+    nType = m_data.doc.nFlags & wizDocumentAlwaysOnTop ? Utils::StyleHelper::BadgeAlwaysOnTop : nType;
+    return nType;
+}
 bool CWizDocumentListViewItem::isSpecialFocus() const
 {
     return m_specialFocused;
@@ -131,7 +138,7 @@ void CWizDocumentListViewItem::reload(CWizDatabase& db)
     m_data.thumb = WIZABSTRACT();
     setSortingType(m_nSortingType); // reset info
 
-    db.DocumentFromGUID(m_data.doc.strGUID, m_data.doc);
+    db.DocumentWithExFieldsFromGUID(m_data.doc.strGUID, m_data.doc);
     setText(m_data.doc.strTitle);
     updateDocumentUnreadCount();
 
@@ -142,38 +149,46 @@ void CWizDocumentListViewItem::setSortingType(int type)
 {
     m_nSortingType = type;
 
-    QString strFileName = m_app.databaseManager().db(m_data.doc.strKbGUID).GetDocumentFileName(m_data.doc.strGUID);
+    CWizDatabase& db = m_app.databaseManager().db(m_data.doc.strKbGUID);
+    db.DocumentFromGUID(m_data.doc.strGUID, m_data.doc);
+    QString strFileName = db.GetDocumentFileName(m_data.doc.strGUID);
+    QString strAuthor = db.GetDocumentOwnerAlias(m_data.doc);
+    strAuthor += strAuthor.isEmpty() ? "" : " ";
     QFileInfo fi(strFileName);
 
     if (m_data.nType == TypeGroupDocument) {
         switch (m_nSortingType) {
         case CWizSortingPopupButton::SortingCreateTime:
         case -CWizSortingPopupButton::SortingCreateTime:
-            m_data.strInfo = m_data.doc.tCreated.toHumanFriendlyString();
+            m_data.strInfo = strAuthor + m_data.doc.tCreated.toHumanFriendlyString();
             break;
         case CWizSortingPopupButton::SortingUpdateTime:
         case -CWizSortingPopupButton::SortingUpdateTime:
-            m_data.strInfo = m_data.doc.tModified.toHumanFriendlyString();
+            m_data.strInfo = strAuthor + m_data.doc.tModified.toHumanFriendlyString();
+            break;
+        case CWizSortingPopupButton::SortingAccessTime:
+        case -CWizSortingPopupButton::SortingAccessTime:
+            m_data.strInfo = strAuthor + m_data.doc.tAccessed.toHumanFriendlyString();
             break;
         case CWizSortingPopupButton::SortingTitle:
         case -CWizSortingPopupButton::SortingTitle:
-            m_data.strInfo = m_data.doc.tModified.toHumanFriendlyString();
+            m_data.strInfo = strAuthor + m_data.doc.tModified.toHumanFriendlyString();
             break;
         case CWizSortingPopupButton::SortingTag:
         case -CWizSortingPopupButton::SortingTag:
-            m_data.strInfo = tagTree();
+            m_data.strInfo = strAuthor + tagTree();
             break;
         case CWizSortingPopupButton::SortingLocation:
         case -CWizSortingPopupButton::SortingLocation:
-            m_data.strInfo = tagTree();
+            m_data.strInfo = strAuthor + tagTree();
             break;
         case CWizSortingPopupButton::SortingSize:
         case -CWizSortingPopupButton::SortingSize:
             if (!fi.exists()) {
-                m_data.strInfo = QObject::tr("Unknown");
+                m_data.strInfo = strAuthor + QObject::tr("Unknown");
             } else {
                 m_nSize = fi.size();
-                m_data.strInfo = ::WizGetFileSizeHumanReadalbe(strFileName);
+                m_data.strInfo = strAuthor + ::WizGetFileSizeHumanReadalbe(strFileName);
             }
             break;
         default:
@@ -189,6 +204,10 @@ void CWizDocumentListViewItem::setSortingType(int type)
         case CWizSortingPopupButton::SortingUpdateTime:
         case -CWizSortingPopupButton::SortingUpdateTime:
             m_data.strInfo = m_data.doc.tModified.toHumanFriendlyString() + " " + tags();
+            break;
+        case CWizSortingPopupButton::SortingAccessTime:
+        case -CWizSortingPopupButton::SortingAccessTime:
+            m_data.strInfo = m_data.doc.tAccessed.toHumanFriendlyString() + " " + tags();
             break;
         case CWizSortingPopupButton::SortingTitle:
         case -CWizSortingPopupButton::SortingTitle:
@@ -223,6 +242,22 @@ bool CWizDocumentListViewItem::operator <(const QListWidgetItem &other) const
     const CWizDocumentListViewItem* pOther = dynamic_cast<const CWizDocumentListViewItem*>(&other);
     Q_ASSERT(pOther && m_nSortingType == pOther->m_nSortingType);
 
+    if (pOther->m_data.doc.nFlags & wizDocumentAlwaysOnTop || m_data.doc.nFlags & wizDocumentAlwaysOnTop)
+    {
+        if (pOther->m_data.doc.nFlags & wizDocumentAlwaysOnTop && m_data.doc.nFlags & wizDocumentAlwaysOnTop)
+        {
+        }
+        else
+        {
+               bool bTop = m_data.doc.nFlags & wizDocumentAlwaysOnTop;
+               return bTop;
+//               if (m_nSortingType > 0)
+//                    return bTop;
+//               else
+//                   return !bTop;
+        }
+    }
+
 
     switch (m_nSortingType) {
     case CWizSortingPopupButton::SortingCreateTime:
@@ -246,6 +281,16 @@ bool CWizDocumentListViewItem::operator <(const QListWidgetItem &other) const
             return pOther->m_data.doc.strTitle.localeAwareCompare(m_data.doc.strTitle) > 0;
         else
             return pOther->m_data.doc.tModified > m_data.doc.tModified;
+    case CWizSortingPopupButton::SortingAccessTime:
+        if (pOther->m_data.doc.tAccessed == m_data.doc.tAccessed)
+            return pOther->m_data.doc.strTitle.localeAwareCompare(m_data.doc.strTitle) < 0;
+        else
+            return pOther->m_data.doc.tAccessed < m_data.doc.tAccessed;
+    case -CWizSortingPopupButton::SortingAccessTime:
+        if (pOther->m_data.doc.tAccessed == m_data.doc.tAccessed)
+            return pOther->m_data.doc.strTitle.localeAwareCompare(m_data.doc.strTitle) > 0;
+        else
+            return pOther->m_data.doc.tAccessed > m_data.doc.tAccessed;
     case CWizSortingPopupButton::SortingTitle:
         return pOther->m_data.doc.strTitle.localeAwareCompare(m_data.doc.strTitle) < 0;
     case -CWizSortingPopupButton::SortingTitle:
@@ -367,7 +412,7 @@ void CWizDocumentListViewItem::drawPrivateSummaryView_impl(QPainter* p, const QS
         rcd.setRight(rcp.left());
     }
 
-    int nType = m_data.doc.nProtected ? Utils::StyleHelper::BadgeEncryted : Utils::StyleHelper::BadgeNormal;
+    int nType = badgeType();
     bool bContainsAttach = isContainsAttachment();
     Utils::StyleHelper::drawListViewItemThumb(p, rcd, nType, m_data.doc.strTitle, m_data.strInfo, thumb.text, bFocused, bSelected, bContainsAttach);
 }
@@ -388,7 +433,7 @@ void CWizDocumentListViewItem::drawGroupSummaryView_impl(QPainter* p, const QSty
     int nAvatarRightMargin = 4;
     rcd.setLeft(rcAvatar.right() + nAvatarRightMargin);
 
-    int nType = m_data.doc.nProtected ? Utils::StyleHelper::BadgeEncryted : Utils::StyleHelper::BadgeNormal;
+    int nType = badgeType();
     bool bContainsAttach = isContainsAttachment();
     Utils::StyleHelper::drawListViewItemThumb(p, rcd, nType, m_data.doc.strTitle, m_data.strInfo, thumb.text, bFocused, bSelected, bContainsAttach);
 }
@@ -400,7 +445,7 @@ void CWizDocumentListViewItem::drawPrivateTwoLineView_impl(QPainter* p, const QS
 
     QRect rcd = drawItemBackground(p, vopt->rect, bSelected, bFocused);
 
-    int nType = m_data.doc.nProtected ? Utils::StyleHelper::BadgeEncryted : Utils::StyleHelper::BadgeNormal;
+    int nType = badgeType();
     bool bContainsAttach = isContainsAttachment();
     Utils::StyleHelper::drawListViewItemThumb(p, rcd, nType, m_data.doc.strTitle, m_data.strInfo, NULL, bFocused, bSelected, bContainsAttach);
 }
@@ -418,7 +463,7 @@ void CWizDocumentListViewItem::drawGroupTwoLineView_impl(QPainter* p, const QSty
     int nAvatarRightMargin = 4;
     rcd.setLeft(rcAvatar.right() + nAvatarRightMargin);
 
-    int nType = m_data.doc.nProtected ? Utils::StyleHelper::BadgeEncryted : Utils::StyleHelper::BadgeNormal;
+    int nType = badgeType();
     bool bContainsAttach = isContainsAttachment();
     Utils::StyleHelper::drawListViewItemThumb(p, rcd, nType, m_data.doc.strTitle, m_data.strInfo, NULL, bFocused, bSelected, bContainsAttach);
 }
@@ -430,7 +475,7 @@ void CWizDocumentListViewItem::drawOneLineView_impl(QPainter* p, const  QStyleOp
 
     QRect rcd = drawItemBackground(p, vopt->rect, bSelected, bFocused);
 
-    int nType = m_data.doc.nProtected ? Utils::StyleHelper::BadgeEncryted : Utils::StyleHelper::BadgeNormal;
+    int nType = badgeType();
     bool bContainsAttach = isContainsAttachment();
     Utils::StyleHelper::drawListViewItemThumb(p, rcd, nType, m_data.doc.strTitle, NULL, NULL, bFocused, bSelected, bContainsAttach);
 }

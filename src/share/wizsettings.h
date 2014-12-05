@@ -119,6 +119,9 @@ public:
     bool showSystemTrayIcon() const;
     void setShowSystemTrayIcon(bool bShowTrayIcon);
 
+    bool useSystemBasedStyle() const;
+    void setUseSystemBasedStyle(bool bSystemStyle);
+
     bool receiveMobileFile() const;
     void setReceiveMobileFile(bool bReceiveFile);
 

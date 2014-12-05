@@ -1,11 +1,11 @@
 #include "wizCategoryViewItem.h"
 
-#include <QDebug>
 #include <QTextCodec>
 #include <QPainter>
 #include <cstring>
 #include <QFile>
 #include <QStyle>
+#include <QDebug>
 
 #include <extensionsystem/pluginmanager.h>
 #include "utils/pinyin.h"
@@ -23,6 +23,7 @@
 #include "share/wizsettings.h"
 #include "wiznotestyle.h"
 #include "share/wizDatabaseManager.h"
+#include "share/wizmisc.h"
 
 #define PREDEFINED_TRASH            QObject::tr("Trash")
 #define PREDEFINED_UNCLASSIFIED     QObject::tr("Unclassified")
@@ -34,6 +35,8 @@
 #define WIZ_CATEGORY_SECTION_GENERAL QObject::tr("General")
 #define WIZ_CATEGORY_SECTION_PERSONAL QObject::tr("Personal Notes")
 #define WIZ_CATEGORY_SECTION_GROUPS QObject::tr("Team & Groups")
+
+#define WIZ_CATEGORY_SHOTCUT_PLACEHOLD QObject::tr("Drag doucment form document list")
 
 
 using namespace Core;
@@ -141,6 +144,22 @@ void CWizCategoryViewItemBase::setDocumentsCount(int nCurrent, int nTotal)
     }
 }
 
+void CWizCategoryViewItemBase::setExtraButtonIcon(const QString& file)
+{
+    if (WizIsHighPixel())
+    {
+        int nIndex = file.lastIndexOf('.');
+        QString strFile = file.left(nIndex) + "@2x" + file.right(file.length() - nIndex);
+        if (QFile::exists(strFile))
+        {
+            m_extraButtonIcon = QPixmap(strFile);
+            return;
+        }
+    }
+
+    m_extraButtonIcon = QPixmap(file);
+}
+
 bool CWizCategoryViewItemBase::getExtraButtonIcon(QPixmap &ret) const
 {
     ret = m_extraButtonIcon;
@@ -151,9 +170,13 @@ QRect CWizCategoryViewItemBase::getExtraButtonRect(const QRect &rcItemBorder, bo
 {
     int nMargin = 4;
     QSize szBtn(16, 16);
-    if (!m_extraButtonIcon.isNull()) {
+    if (!m_extraButtonIcon.isNull())
+    {
         szBtn = m_extraButtonIcon.size();
-    } else if (!ignoreIconExist){
+        scaleIconSizeForRetina(szBtn);
+    }
+    else if (!ignoreIconExist)
+    {
         return QRect(0, 0, 0, 0);
     }
     int nWidth = szBtn.width() + 2 * nMargin;
@@ -305,6 +328,7 @@ QRect CWizCategoryViewSectionItem::getExtraButtonRect(const QRect &itemBorder, b
     QSize szBtn(16, 16);
     if (!m_extraButtonIcon.isNull()) {
         szBtn = m_extraButtonIcon.size();
+        scaleIconSizeForRetina(szBtn);
     } else if (!ignoreIconExist){
         return QRect(0, 0, 0, 0);
     }
@@ -490,6 +514,89 @@ CWizCategoryViewShortcutRootItem::CWizCategoryViewShortcutRootItem(CWizExplorerA
     setText(0, strName);
 }
 
+void CWizCategoryViewShortcutRootItem::getDocuments(CWizDatabase& /*db*/, CWizDocumentDataArray& arrayDocument)
+{
+    for (int i = 0; i < childCount(); i++)
+    {
+        CWizCategoryViewShortcutItem *pItem = dynamic_cast<CWizCategoryViewShortcutItem*>(child(i));
+        if (pItem)
+        {
+            CWizDatabase &db = m_app.databaseManager().db(pItem->kbGUID());
+            WIZDOCUMENTDATA doc;
+            if (db.DocumentFromGUID(pItem->guid(), doc))
+            {
+                arrayDocument.push_back(doc);
+            }
+        }
+    }
+}
+
+bool CWizCategoryViewShortcutRootItem::accept(CWizDatabase& /*db*/, const WIZDOCUMENTDATA& data)
+{
+    for (int i = 0; i < childCount(); i++)
+    {
+        CWizCategoryViewShortcutItem *pItem = dynamic_cast<CWizCategoryViewShortcutItem*>(child(i));
+        if (pItem)
+        {
+            if (pItem->guid() == data.strGUID)
+                return true;
+        }
+    }
+    return false;
+}
+
+void CWizCategoryViewShortcutRootItem::drop(const WIZDOCUMENTDATA& data, bool /*forceCopy*/)
+{
+    for (int i = 0; i < childCount(); i++)
+    {
+        CWizCategoryViewShortcutItem *pItem = dynamic_cast<CWizCategoryViewShortcutItem*>(child(i));
+        if (pItem)
+        {
+            if (pItem->guid() == data.strGUID)
+                return;
+        }
+    }
+
+    if (isContainsPlaceHoldItem())
+        removePlaceHoldItem();
+
+    bool isEncrypted = data.nProtected == 1;
+    CWizCategoryViewShortcutItem *pItem = new CWizCategoryViewShortcutItem(m_app,
+                                                                           data.strTitle, data.strKbGUID, data.strGUID, isEncrypted);
+    addChild(pItem);
+    sortChildren(0, Qt::AscendingOrder);
+}
+
+QString CWizCategoryViewShortcutRootItem::getSectionName()
+{
+    return WIZ_CATEGORY_SECTION_GENERAL;
+}
+
+void CWizCategoryViewShortcutRootItem::addPlaceHoldItem()
+{
+    CWizCategoryViewShortcutPlaceHoldItem *item = new
+            CWizCategoryViewShortcutPlaceHoldItem(m_app, WIZ_CATEGORY_SHOTCUT_PLACEHOLD);
+    item->setText(0, WIZ_CATEGORY_SHOTCUT_PLACEHOLD);
+    addChild(item);
+}
+
+bool CWizCategoryViewShortcutRootItem::isContainsPlaceHoldItem()
+{
+    if (childCount() < 1)
+        return false;
+
+    QTreeWidgetItem *item = child(0);
+    return item->text(0) == WIZ_CATEGORY_SHOTCUT_PLACEHOLD;
+}
+
+void CWizCategoryViewShortcutRootItem::removePlaceHoldItem()
+{
+    if (isContainsPlaceHoldItem())
+    {
+        removeChild(child(0));
+    }
+}
+
 
 /* -------------------- CWizCategoryViewSearchRootItem -------------------- */
 CWizCategoryViewSearchRootItem::CWizCategoryViewSearchRootItem(CWizExplorerApp& app,
@@ -662,24 +769,25 @@ bool CWizCategoryViewFolderItem::operator < (const QTreeWidgetItem &other) const
         return getSortOrder() < pOther->getSortOrder();
     }
 
-    int nThis = 0, nOther = 0;
-    if (!pOther->location().isEmpty()) {
-        QSettings* setting = ExtensionSystem::PluginManager::settings();
-        nOther = setting->value("FolderPosition/" + pOther->location()).toInt();
-        nThis = setting->value("FolderPosition/" + location()).toInt();
-    }
-    //
-    if (nThis != nOther)
-    {
-        if (nThis > 0 && nOther > 0)
-        {
-            return nThis < nOther;
-        }
-        else
-        {
-            return nThis > 0;
-        }
-    }
+    // do not use sort data from windows for now.
+//    int nThis = 0, nOther = 0;
+//    if (!pOther->location().isEmpty()) {
+//        QSettings* setting = ExtensionSystem::PluginManager::settings();
+//        nOther = setting->value("FolderPosition/" + pOther->location()).toInt();
+//        nThis = setting->value("FolderPosition/" + location()).toInt();
+//    }
+//    //
+//    if (nThis != nOther)
+//    {
+//        if (nThis > 0 && nOther > 0)
+//        {
+//            return nThis < nOther;
+//        }
+//        else
+//        {
+//            return nThis > 0;
+//        }
+//    }
 
     //
     QString strThis = text(0).toLower();
@@ -1616,3 +1724,44 @@ bool CWizCategoryViewTrashItem::acceptDrop(const WIZDOCUMENTDATA &data) const
 
 //    setText(0, strText);
 //}
+
+
+CWizCategoryViewShortcutItem::CWizCategoryViewShortcutItem(CWizExplorerApp& app,
+                                                           const QString& strName, const QString& strKbGuid,
+                                                           const QString& strGuid, bool bEncrypted)
+    : CWizCategoryViewItemBase(app, strName, strKbGuid)
+    , m_strGuid(strGuid)
+{
+    QIcon icon;
+    if (bEncrypted)
+    {
+        icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "document_badge_encrypted"),
+                     QSize(16, 16), QIcon::Normal);
+        icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "document_badge_encrypted_selected"),
+                     QSize(16, 16), QIcon::Selected);
+    }
+    else
+    {
+        icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "document_badge"),
+                     QSize(16, 16), QIcon::Normal);
+        icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "document_badge_selected"),
+                     QSize(16, 16), QIcon::Selected);
+    }
+    setIcon(0, icon);
+    setText(0, strName);
+}
+
+void CWizCategoryViewShortcutItem::showContextMenu(CWizCategoryBaseView* pCtrl, QPoint pos)
+{
+    if (CWizCategoryView* view = dynamic_cast<CWizCategoryView *>(pCtrl)) {
+        view->showShortcutContextMenu(pos);
+    }
+}
+
+
+CWizCategoryViewShortcutPlaceHoldItem::CWizCategoryViewShortcutPlaceHoldItem(
+        CWizExplorerApp& app, const QString& strName)
+    : CWizCategoryViewItemBase(app, strName)
+{
+
+}

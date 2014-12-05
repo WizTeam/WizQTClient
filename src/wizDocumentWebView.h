@@ -22,6 +22,7 @@ class CWizDocumentWebView;
 class CWizDocumentTransitionView;
 class CWizDocumentWebViewWorker;
 class QNetworkDiskCache;
+class CWizSearchReplaceWidget;
 
 struct WIZODUCMENTDATA;
 
@@ -237,6 +238,8 @@ private:
     QPointer<CWizEditorInsertTableForm> m_editorInsertTableForm;
     QPointer<QColorDialog> m_colorDialog;
 
+    CWizSearchReplaceWidget* m_searchReplaceWidget;
+
 public:
     Q_INVOKABLE void onNoteLoadFinished(); // editor callback
 
@@ -248,8 +251,11 @@ public Q_SLOTS:
     void onEditorLinkClicked(const QUrl& url);
     void onEditorContentChanged();
     void onEditorSelectionChanged();
+    void clearEditorHeight();
 
     void onTimerAutoSaveTimout();
+
+    void onTitleEdited(QString strTitle);
 
     void onDocumentReady(const QString kbGUID, const QString strGUID, const QString strFileName);
     void onDocumentSaved(const QString kbGUID, const QString strGUID, bool ok);
@@ -278,7 +284,7 @@ public Q_SLOTS:
     bool editorCommandExecuteLinkRemove();
 
     // search and repalce
-    bool editorCommandExecuteSearchReplace();
+    bool editorCommandExecuteFindReplace();
     void findPre(QString strTxt, bool bCasesensitive);
     void findNext(QString strTxt, bool bCasesensitive);
     void replaceCurrent(QString strSource, QString strTarget);
@@ -331,6 +337,9 @@ public Q_SLOTS:
     bool editorCommandExecuteViewSource();
     bool editorCommandExecuteInsertCode();
     bool editorCommandExecuteMobileImage(bool bReceiveImage);
+    bool editorCommandExecuteScreenShot();
+    void on_editorCommandExecuteScreenShot_imageAccepted(QPixmap pix);
+    void on_editorCommandExecuteScreenShot_finished();
 
 #ifdef Q_OS_MAC
     bool editorCommandExecuteRemoveStartOfLine();
@@ -352,6 +361,10 @@ Q_SIGNALS:
 
     //
     void viewDocumentFinished();
+
+private:
+    void setWindowVisibleOnScreenShot(bool bVisible);
+    bool insertImage(const QString& strFileName, bool bCopyFile);
 };
 
 #endif // WIZDOCUMENTWEBVIEW_H

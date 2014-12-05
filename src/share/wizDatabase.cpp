@@ -29,6 +29,7 @@
 
 #define WIZNOTE_THUMB_VERSION "3"
 
+#define WIZKMSYNC_EXIT_OK		0
 #define WIZKMSYNC_EXIT_TRAFFIC_LIMIT		304
 #define WIZKMSYNC_EXIT_STORAGE_LIMIT		305
 #define WIZKMSYNC_EXIT_BIZ_SERVICE_EXPR		380
@@ -523,6 +524,12 @@ bool CWizDatabase::DocumentFromGUID(const QString& strGUID,
                                     WIZDOCUMENTDATA& dataExists)
 {
     return CWizIndex::DocumentFromGUID(strGUID, dataExists);
+}
+
+bool CWizDatabase::DocumentWithExFieldsFromGUID(const CString& strGUID,
+                                                WIZDOCUMENTDATA& dataExists)
+{
+    return CWizIndex::DocumentWithExFieldsFromGUID(strGUID, dataExists);
 }
 
 bool CWizDatabase::IsObjectDataDownloaded(const QString& strGUID,
@@ -1193,9 +1200,23 @@ void CWizDatabase::GetAllBizUserIds(CWizStdStringArray& arrayText)
     }
 }
 
-void CWizDatabase::ClearError()
+void CWizDatabase::ClearLastSyncError()
 {
-    // FIXME
+    // last sync error only contains in personal database
+    if (getPersonalDatabase() != this)
+        return;
+
+    setMeta(WIZKMSYNC_EXIT_INFO, _T("LastSyncErrorCode"), QString::number(WIZKMSYNC_EXIT_OK));
+    setMeta(WIZKMSYNC_EXIT_INFO, _T("LastSyncErrorMessage"), "");
+
+    //
+    int bizCount = GetMetaDef("Bizs", "Count").toInt();
+    for (int i = 0; i < bizCount; i++)
+    {
+        QString bizSection = "Biz_" + QString::number(i);
+        setMeta(bizSection, _T("LastSyncErrorCode"), QString::number(WIZKMSYNC_EXIT_OK));
+        setMeta(bizSection, _T("LastSyncErrorMessage"), "");
+    }
 }
 
 void CWizDatabase::OnTrafficLimit(const QString& strErrorMessage)
@@ -1842,9 +1863,12 @@ bool CWizDatabase::GetUserGroupInfo(CWizGroupDataArray& arrayGroup)
 
         group.strGroupGUID = GetMetaDef(g_strGroupSection, QString::number(i));
         //
-        GetGroupData(group.strGroupGUID, group);
-        //
-        arrayGroup.push_back(group);
+        if (!group.strGroupGUID.isEmpty())
+        {
+            GetGroupData(group.strGroupGUID, group);
+            //
+            arrayGroup.push_back(group);
+        }
     }
 
     return true;
@@ -2120,6 +2144,18 @@ QString CWizDatabase::GetDefaultNoteLocation() const
         return "/"+m_strUserId+"/";
 }
 
+QString CWizDatabase::GetDocumentOwnerAlias(const WIZDOCUMENTDATA& doc)
+{
+    CWizDatabase* personDb = getPersonalDatabase();
+    if (!personDb)
+        return QString();
+
+    QString strUserID = doc.strOwner;
+    WIZBIZUSER bizUser;
+    personDb->userFromID(doc.strKbGUID, strUserID, bizUser);
+    return bizUser.alias;
+}
+
 bool CWizDatabase::GetUserName(QString& strUserName)
 {
     strUserName = GetMetaDef(g_strAccountSection, "UserName");
@@ -2149,9 +2185,9 @@ bool CWizDatabase::GetUserDisplayName(QString &strDisplayName)
     return true;
 }
 
-QString CWizDatabase::getUserAlias()
+QString CWizDatabase::GetUserAlias()
 {
-    CWizDatabase* personDb = dynamic_cast<CWizDatabase*>(GetPersonalDatabase());
+    CWizDatabase* personDb = getPersonalDatabase();
     if (!personDb)
         return QString();
 
@@ -2549,6 +2585,11 @@ bool CWizDatabase::UpdateAttachments(const CWizDocumentAttachmentDataArray& arra
     return !bHasError;
 }
 
+bool CWizDatabase::SetDocumentFlags(WIZDOCUMENTDATA& data, const QString& strFlags, bool bUpdateParamMd5)
+{
+    return SetDocumentParam(data, TABLE_KEY_WIZ_DOCUMENT_PARAM_FLAGS,strFlags, bUpdateParamMd5);
+}
+
 bool CWizDatabase::UpdateDocumentData(WIZDOCUMENTDATA& data,
                                       const QString& strHtml,
                                       const QString& strURL,
@@ -2808,7 +2849,7 @@ bool CWizDatabase::CreateDocumentAndInit(const CString& strHtml, \
         BeginUpdate();
 
         data.strKbGUID = kbGUID();
-        data.strOwner = getUserId();
+        data.strOwner = GetUserId();
         bRet = CreateDocument(strTitle, strName, strLocation, strHtmlUrl, data);
         if (bRet)
         {
@@ -2836,7 +2877,7 @@ bool CWizDatabase::CreateDocumentAndInit(const WIZDOCUMENTDATA& sourceDoc, const
         BeginUpdate();
 
         newDoc.strKbGUID = kbGUID();
-        newDoc.strOwner = getUserId();
+        newDoc.strOwner = GetUserId();
         bRet = CreateDocument(sourceDoc.strTitle, sourceDoc.strName, strLocation, "", sourceDoc.strAuthor,
                               sourceDoc.strKeywords, sourceDoc.strType, GetUserId(), sourceDoc.strFileType,
                               sourceDoc.strStyleGUID, 0, 0, 0, newDoc);
@@ -3167,20 +3208,30 @@ bool CWizDatabase::UpdateDocumentAbstract(const QString& strDocumentGUID)
 
 CString CWizDatabase::GetRootLocation(const CString& strLocation)
 {
-    int index = strLocation.indexOf('/', 1);
+    //FIXME:容错处理，如果路径的结尾不是 '/'，则增加该结尾符号
+    QString strLoc = strLocation;
+    if (strLoc.right(1) != "/")
+        strLoc.append('/');
+
+    int index = strLoc.indexOf('/', 1);
     if (index == -1)
         return CString();
 
-    return strLocation.left(index + 1);
+    return strLoc.left(index + 1);
 }
 
 CString CWizDatabase::GetLocationName(const CString& strLocation)
 {
-    int index = strLocation.lastIndexOf('/', strLocation.length() - 2);
+    //FIXME:容错处理，如果路径的结尾不是 '/'，则增加该结尾符号
+    QString strLoc = strLocation;
+    if (strLoc.right(1) != "/")
+        strLoc.append('/');
+
+    int index = strLoc.lastIndexOf('/', strLocation.length() - 2);
     if (index == -1)
         return CString();
 
-    CString str = strLocation.right(strLocation.length() - index - 1);
+    CString str = strLoc.right(strLocation.length() - index - 1);
 
     str.Trim('/');
 
@@ -3272,25 +3323,6 @@ QString CWizDatabase::DocumentToWizKMURL(const WIZDOCUMENTDATA& document)
     {
         return WizFormatString2(_T("wiz://open_document?guid=%1&kbguid=%2"), document.strGUID, document.strKbGUID);
     }
-    return QString();
-}
-
-QString CWizDatabase::GetParamFromWizKMURL(const QString& strURL, const QString& strParamName)
-{
-    int nindex = strURL.indexOf('?');
-    if (nindex == -1)
-        return QString();
-
-    QString strParams = strURL;
-    strParams.remove(0, nindex + 1);
-    QStringList paramList = strParams.split('&');
-    QString strParaFlag = strParamName + "=";
-    foreach (QString strParam, paramList) {
-        if (strParam.contains(strParaFlag)) {
-            return strParam.remove(strParaFlag);
-        }
-    }
-
     return QString();
 }
 

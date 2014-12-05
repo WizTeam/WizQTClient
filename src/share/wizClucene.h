@@ -2,6 +2,7 @@
 #define WIZCLUCENE_H
 
 #include <QtGlobal>
+#include <string>
 
 // interface
 class IWizCluceneSearch
@@ -18,9 +19,9 @@ protected:
     bool deleteDocument(const wchar_t* lpszIndexPath, const wchar_t* lpszDocumentID);
     bool searchDocument(const wchar_t* lpszIndexPath, const wchar_t* lpszKeywords);
 
-    virtual bool onSearchProcess(const wchar_t* lpszKbGUID,
-                                 const wchar_t* lpszDocumentID,
-                                 const wchar_t* lpszURL)
+    virtual bool onSearchProcess(const std::string& lpszKbGUID,
+                                 const std::string& lpszDocumentID,
+                                 const std::string& lpszURL)
     { Q_UNUSED(lpszKbGUID); Q_UNUSED(lpszDocumentID); Q_UNUSED(lpszURL); return true;}
 
     virtual bool onSearchEnd() {return true;}

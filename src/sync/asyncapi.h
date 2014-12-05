@@ -20,7 +20,8 @@ public:
     void login(const QString& strUserId, const QString& strPasswd);
     void getToken(const QString& strUserId, const QString& strPasswd);
     void keepAlive(const QString& strToken, const QString& strKbGUID);
-    void registerAccount(const QString& strUserId, const QString& strPasswd, const QString& strInviteCode);
+    void registerAccount(const QString& strUserId, const QString& strPasswd, const QString& strInviteCode,
+                         const QString& strCaptchaID = "", const QString& strCaptcha = "");
     void getCommentsCount(const QString& strUrl);
     void setMessageStatus(const QString& ids, bool bRead);
 
@@ -35,7 +36,7 @@ private:
     bool login_impl(const QString& strUserId, const QString& strPasswd);
     bool getToken_impl(const QString& strUserId, const QString& strPasswd);
     bool keepAlive_impl(const QString& strToken, const QString &strKbGUID);
-    bool registerAccount_impl(const QString& strUserId, const QString& strPasswd, const QString& strInviteCode);
+    bool registerAccount_impl(const QString& strUserId, const QString& strPasswd, const QString& strInviteCode, const QString& strCaptchaID, const QString& strCaptcha);
     void setMessageStatus_impl(const QString& ids, bool bRead);
 
 public slots:

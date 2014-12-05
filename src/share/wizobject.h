@@ -339,6 +339,10 @@ struct WIZDOCUMENTDATABASE : public WIZOBJECTBASE
     int nObjectPart;
 };
 
+enum WizDocumentFlags
+{
+    wizDocumentAlwaysOnTop	= 0x1
+};
 
 struct WIZDOCUMENTDATA : public WIZDOCUMENTDATABASE
 {

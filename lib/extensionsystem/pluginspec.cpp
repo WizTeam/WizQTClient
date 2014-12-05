@@ -547,6 +547,11 @@ bool PluginSpecPrivate::read(const QString &fileName)
     return true;
 }
 
+void PluginSpecPrivate::setLibraryPath(const QString& path)
+{
+    location = path;
+}
+
 void PluginSpec::setEnabled(bool value)
 {
     d->enabledInSettings = value;

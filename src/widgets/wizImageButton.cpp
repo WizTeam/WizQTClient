@@ -65,8 +65,7 @@ void wizImageButton::paintEvent(QPaintEvent* event)
     initStyleOption(&opt);
 
     p.setRenderHint(QPainter::Antialiasing);
-    QRect arcRect(opt.rect.topLeft(), QSize(opt.rect.height(), opt.rect.height()));
-    p.drawPixmap(arcRect, m_currentIcon);
+    p.drawPixmap(opt.rect, m_currentIcon);
 }
 
 void wizImageButton::mousePressEvent(QMouseEvent* event)

@@ -26,13 +26,22 @@ WIZACTION* CWizActions::actionsData()
     // useless, just for translation
     static WIZACTION arrayRoot[] =
     {
-        // root
+    #ifdef Q_OS_LINUX
         {"actionFile", QObject::tr("&File")},
         {"actionEdit", QObject::tr("&Edit")},
         {"actionView", QObject::tr("&View")},
         {"actionFormat", QObject::tr("For&mat")},
         {"actionTools", QObject::tr("&Tools")},
         {"actionHelp", QObject::tr("&Help")},
+    #else
+        // root
+        {"actionFile", QObject::tr("File")},
+        {"actionEdit", QObject::tr("Edit")},
+        {"actionView", QObject::tr("View")},
+        {"actionFormat", QObject::tr("Format")},
+        {"actionTools", QObject::tr("Tools")},
+        {"actionHelp", QObject::tr("Help")},
+    #endif
 
         // sub
         {"actionText", QObject::tr("Text")},
@@ -50,6 +59,7 @@ WIZACTION* CWizActions::actionsData()
         {"actionPreference",                QObject::tr("Preference..."), "", ""},
         {"actionAbout",                     QObject::tr("About WizNote..."), "", ""},
         {"actionExit",                      QObject::tr("Exit"), "", "Ctrl+Q"},
+        {"actionClose",                      QObject::tr("Close"), "", "Ctrl+W"},
         {"actionLogout",                    QObject::tr("Logout..."), "", ""},
         {WIZACTION_GLOBAL_SYNC,             QObject::tr("Sync"), "", ""},
         {WIZACTION_GLOBAL_NEW_DOCUMENT,     QObject::tr("New Note"), "", "Ctrl+N"},
@@ -59,15 +69,16 @@ WIZACTION* CWizActions::actionsData()
         {WIZACTION_GLOBAL_PRINT,      QObject::tr("Print..."), "", "Ctrl+P"},
         {WIZACTION_GLOBAL_PRINT_MARGIN,      QObject::tr("Print page margins..."), "", ""},
         //{WIZACTION_GLOBAL_VIEW_MESSAGES,    QObject::tr("View messages"), "", ""},
-        {"actionGoBack",                    QObject::tr("Back"), "", ""},
-        {"actionGoForward",                 QObject::tr("Forward"), "", ""},
+        {WIZACTION_GLOBAL_GOBACK,                    QObject::tr("Back"), "", ""},
+        {WIZACTION_GLOBAL_GOFORWARD,                 QObject::tr("Forward"), "", ""},
         {"actionConsole",                   QObject::tr("Console..."), "", ""},
         {"actionRebuildFTS",                QObject::tr("Rebuild full text search index"), "", ""},
         {"actionSearch",                    QObject::tr("Search note"), "", "Alt+Ctrl+F"},
         {"actionResetSearch",               QObject::tr("Reset search"), "", "Ctrl+R"},
         {"actionFeedback",                  QObject::tr("User feedback..."), "", ""},
         {"actionSupport",                  QObject::tr("User support..."), "", ""},
-        {"actionSearchReplace",                  QObject::tr("Find Replace..."), "", "Ctrl+F"},
+        {"actionManual",                  QObject::tr("User manual..."), "", ""},
+        {WIZACTION_EDITOR_FIND_REPLACE,                  QObject::tr("Find and replace..."), "", "Ctrl+F"},
 
         // editing
         {WIZACTION_EDITOR_UNDO,             QObject::tr("Undo"), "", "Ctrl+Z"},
@@ -81,7 +92,7 @@ WIZACTION* CWizActions::actionsData()
 
         // view
         {WIZACTION_GLOBAL_TOGGLE_CATEGORY,      QObject::tr("Hide category view"), QObject::tr("Show category view"), "Alt+Ctrl+S"},
-        {WIZACTION_GLOBAL_TOGGLE_FULLSCREEN,    QObject::tr("Enter Fullscreen"), QObject::tr("Leave Fullscreen"), "Ctrl+Meta+f"},
+        {WIZACTION_GLOBAL_TOGGLE_FULLSCREEN,    QObject::tr("Enter fullscreen"), QObject::tr("Leave fullscreen"), "Ctrl+Meta+f"},
 
         // format
         {WIZACTION_FORMAT_JUSTIFYLEFT,          QObject::tr("Justify left"), "", "Ctrl+["},
@@ -102,11 +113,12 @@ WIZACTION* CWizActions::actionsData()
         {WIZACTION_FORMAT_INSERT_DATE,          QObject::tr("Insert date"), "", "Shift+Ctrl+D"},
         {WIZACTION_FORMAT_INSERT_TIME,          QObject::tr("Insert time"), "", "Shift+Ctrl+Alt+D"},
         {WIZACTION_FORMAT_INSERT_CHECKLIST,      QObject::tr("Insert check list"), "", "Ctrl+O"},
-        {WIZACTION_FORMAT_INSERT_CODE,                QObject::tr("Insert Code"), "", "Shift+Ctrl+C"},
-        {WIZACTION_FORMAT_INSERT_IMAGE,                QObject::tr("Insert Image"), "", "Shift+Ctrl+I"},
+        {WIZACTION_FORMAT_INSERT_CODE,                QObject::tr("Insert code"), "", "Shift+Ctrl+C"},
+        {WIZACTION_FORMAT_INSERT_IMAGE,                QObject::tr("Insert image"), "", "Shift+Ctrl+I"},
         {WIZACTION_FORMAT_REMOVE_FORMAT,        QObject::tr("Remove format"), "", ""},
         {WIZACTION_FORMAT_PLAINTEXT,        QObject::tr("Convert to plain text"), "", ""},
         {WIZACTION_FORMAT_VIEW_SOURCE,          QObject::tr("View html source..."), "", ""},
+        {WIZACTION_FORMAT_SCREEN_SHOT,          QObject::tr("Screen shot..."), "", ""},
 
         {"", "", "", ""}
     };
@@ -114,7 +126,7 @@ WIZACTION* CWizActions::actionsData()
     return arrayActions;
 }
 
-CWizShortcutAction *CWizActions::addAction(WIZACTION& action)
+CWizShortcutAction *CWizActions::addAction(WIZACTION& action, bool bUseExtraShortcut)
 {   
     QString strText = action.strText;
     QString strIconName = action.strName;
@@ -127,11 +139,7 @@ CWizShortcutAction *CWizActions::addAction(WIZACTION& action)
         pAction->setIcon(::WizLoadSkinIcon(m_app.userSettings().skin(), strIconName));
     }
 
-    QShortcut *shortcut = 0;
-    if (!strShortcut.isEmpty()) {
-        pAction->setShortcut(QKeySequence::fromString(strShortcut));
-        shortcut = new QShortcut(QKeySequence::fromString(strShortcut), m_app.mainWindow());
-    }
+    pAction->setShortcut(QKeySequence::fromString(strShortcut));
 
     if (action.strName == "actionAbout")
         pAction->setMenuRole(QAction::AboutRole);
@@ -146,17 +154,19 @@ CWizShortcutAction *CWizActions::addAction(WIZACTION& action)
     pAction->setShortcutContext(Qt::ApplicationShortcut);
 
     m_actions[action.strName] = pAction;
-    if (shortcut)
-    {
+
+    if (bUseExtraShortcut && !strShortcut.isEmpty()) {
+        QShortcut *shortcut  = new QShortcut(QKeySequence::fromString(strShortcut), m_app.mainWindow());
         QObject::connect(shortcut, SIGNAL(activated()), m_parent, strSlot.toUtf8());
         pAction->setShortcut(shortcut);
     }
+
     QObject::connect(pAction, "2triggered()", m_parent, strSlot.toUtf8());
 
     return pAction;
 }
 
-void CWizActions::init()
+void CWizActions::init(bool bUseExtraShortcut)
 {
     int index = 0;
     WIZACTION* arrayData = actionsData();
@@ -166,7 +176,7 @@ void CWizActions::init()
         if (action.strName.isEmpty())
             break;
 
-        addAction(action);
+        addAction(action, bUseExtraShortcut);
         index++;
     }
 }
@@ -180,7 +190,7 @@ CWizShortcutAction *CWizActions::actionFromName(const QString& strActionName)
 
     WIZACTION data = {strActionName, strActionName};
 
-    return addAction(data);
+    return addAction(data, false);
 }
 
 void CWizActions::toggleActionText(const QString& strActionName)
@@ -226,12 +236,12 @@ QMenu* CWizActions::toMenu(QWidget* parent, CWizSettings& settings, const QStrin
     QString strLocalText = QObject::tr(strSection.toUtf8());
 
     pMenu->setTitle(strLocalText);
-    buildMenu(pMenu, settings, strSection);
+    buildMenu(pMenu, settings, strSection, false);
 
     return pMenu;
 }
 
-void CWizActions::buildMenu(QMenu* pMenu, CWizSettings& settings, const QString& strSection)
+void CWizActions::buildMenu(QMenu* pMenu, CWizSettings& settings, const QString& strSection, bool bMenuBar)
 {
     int index = 0;
     while (true)
@@ -244,12 +254,16 @@ void CWizActions::buildMenu(QMenu* pMenu, CWizSettings& settings, const QString&
 
         // no fullscreen mode menu
 #ifndef Q_OS_MAC
-        if (strAction == WIZACTION_GLOBAL_TOGGLE_FULLSCREEN|| strAction == "actionExit"
-                || strAction == "actionPreference") {
+        if (strAction == WIZACTION_GLOBAL_TOGGLE_FULLSCREEN) {
             index++;
             continue;
         }
 #endif
+
+        if (!bMenuBar && (strAction == "actionPreference" || strAction == "actionExit")) {
+            index++;
+            continue;
+        }
 
         if (strAction.startsWith("-"))
         {
@@ -289,10 +303,17 @@ void CWizActions::buildMenuBar(QMenuBar* menuBar, const QString& strFileName)
         else if (strAction.startsWith("+"))
         {
             strAction.remove(0, 1);
-            QString strLocalText = QObject::tr(strAction.toUtf8());
-            QMenu* pMenu = menuBar->addMenu(strLocalText);
 
-            buildMenu(pMenu, settings, strAction);
+            // there is no shortcut for menubar on macosx
+#ifdef Q_OS_MAC
+            QString strLocalText = strAction;
+            strLocalText = QObject::tr(strLocalText.remove('&').toUtf8());
+#else
+            QString strLocalText = QObject::tr(strAction.toUtf8());
+#endif
+
+            QMenu* pMenu = menuBar->addMenu(strLocalText);
+            buildMenu(pMenu, settings, strAction, true);
         }
         else
         {
@@ -326,7 +347,7 @@ void CWizActions::buildMenu(QMenu* menu, const QString& strFileName)
             QString strLocalText = QObject::tr(strAction.toUtf8());
             QMenu* pMenu = menu->addMenu(strLocalText);
 
-            buildMenu(pMenu, settings, strAction);
+            buildMenu(pMenu, settings, strAction, false);
         }
         else
         {
@@ -358,6 +379,7 @@ void CWizShortcutAction::setShortcut(const QKeySequence &shortcut)
 
 void CWizShortcutAction::setEnabled(bool enable)
 {
+    QAction::setEnabled(enable);
     if (m_shortcut)
     {
         m_shortcut->setEnabled(enable);

@@ -127,9 +127,9 @@ BOOL CWizKMAccountsServer::ChangeUserId(const QString& strUserName, const QStrin
     return accounts_changeUserId(strUserName, strPassword, strNewUserId);
 }
 
-BOOL CWizKMAccountsServer::CreateAccount(const QString& strUserName, const QString& strPassword, const QString& strInviteCode)
+BOOL CWizKMAccountsServer::CreateAccount(const QString& strUserName, const QString& strPassword, const QString& strInviteCode, const QString& strCaptchaID, const QString& strCaptcha)
 {
-    return accounts_createAccount(strUserName, strPassword, strInviteCode);
+    return accounts_createAccount(strUserName, strPassword, strInviteCode, strCaptchaID, strCaptcha);
 }
 
 BOOL CWizKMAccountsServer::GetToken(const QString& strUserName, const QString& strPassword, QString& strToken)
@@ -297,7 +297,8 @@ BOOL CWizKMAccountsServer::accounts_clientLogin(const QString& strUserName, cons
     return TRUE;
 }
 
-BOOL CWizKMAccountsServer::accounts_createAccount(const QString& strUserName, const QString& strPassword, const QString& strInviteCode)
+BOOL CWizKMAccountsServer::accounts_createAccount(const QString& strUserName, const QString& strPassword,
+                                                  const QString& strInviteCode, const QString& strCaptchaID, const QString& strCaptcha)
 {
     CWizKMBaseParam param;
 
@@ -305,6 +306,11 @@ BOOL CWizKMAccountsServer::accounts_createAccount(const QString& strUserName, co
     param.AddString(_T("password"), MakeXmlRpcPassword(strPassword));
     param.AddString(_T("invite_code"), strInviteCode);
     param.AddString(_T("product_name"), "WizNoteQT");
+    if (!strCaptchaID.isEmpty())
+    {
+        param.AddString(_T("captcha_id"), strCaptchaID);
+        param.AddString(_T("captcha"), strCaptcha);
+    }
     //
     CWizXmlRpcResult ret;
     if (!Call(_T("accounts.createAccount"), ret, &param))

@@ -43,11 +43,13 @@ public:
 
     int sortingType() const { return m_nSortingType; }
     void resetItemsSortingType(int type);
+    bool isSortedByAccessDate();
 
     //CWizThumbIndexCache* thumbCache() const { return m_thumbCache; }
 
     void setItemsNeedUpdate(const QString& strKbGUID = 0, const QString& strGUID = 0);
     void drawItem(QPainter*p, const QStyleOptionViewItemV4* vopt) const;
+    void reloadItem(const QString& strKbGUID, const QString& strGUID);
 
     void setAcceptAllItems(bool bAccept);
 
@@ -75,7 +77,6 @@ private:
     int m_nSortingType;
 
     QMenu* m_menuDocument;
-    QAction* m_actionEncryptDocument;
     CWizTagListWidget* m_tagList;
 
     QPoint m_dragStartPosition;
@@ -103,6 +104,7 @@ private:
     bool isDocumentsAllCanDelete(const CWizDocumentDataArray& arrayDocument);
     bool isDocumentsWithGroupDocument(const CWizDocumentDataArray& arrayDocument);
     bool isDocumentsWithDeleted(const CWizDocumentDataArray& arrayDocument);
+    bool isDocumentsAlwaysOnTop(const CWizDocumentDataArray &arrayDocument);
 
 public:
     void setDocuments(const CWizDocumentDataArray& arrayDocument);
@@ -154,6 +156,7 @@ public Q_SLOTS:
     void on_action_deleteDocument();
     void on_action_encryptDocument();
     void on_action_cancelEncryption();
+    void on_action_alwaysOnTop();
 
     void on_action_moveDocument();
     void on_action_moveDocument_confirmed(int result);

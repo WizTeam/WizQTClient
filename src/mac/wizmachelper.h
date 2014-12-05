@@ -2,6 +2,7 @@
 #define COCOAHELP_H
 
 #include <QtGlobal>
+#include <QRect>
 
 #ifdef Q_OS_MAC
 
@@ -22,6 +23,8 @@ bool wizMacIsCurrentApplicationVisible();
 void wizMacInitUncaughtExceptionHandler();
 
 void wizMacRegisterSystemService();
+
+void wizHIDictionaryWindowShow(const QString& strText, QRect rcText);
 
 
 //path for yosemite

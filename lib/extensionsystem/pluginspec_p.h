@@ -53,6 +53,7 @@ public:
     PluginSpecPrivate(PluginSpec *spec);
 
     bool read(const QString &fileName);
+    void setLibraryPath(const QString &path);
     bool provides(const QString &pluginName, const QString &version) const;
     bool resolveDependencies(const QList<PluginSpec *> &specs);
     bool loadLibrary();

@@ -66,6 +66,12 @@ public:
 
     void updateDocumentUnreadCount();
 
+Q_SIGNALS:
+    void thumbnailReloaded();
+
+private Q_SLOTS:
+    void on_thumbnailReloaded();
+
 private:
     void draw_impl(QPainter* p, const QStyleOptionViewItemV4* vopt, int nItemType, int nViewType) const;
     void drawPrivateSummaryView_impl(QPainter* p, const QStyleOptionViewItemV4* vopt) const;
@@ -77,6 +83,13 @@ private:
 
     QRect drawItemBackground(QPainter* p, const QRect& rect, bool selected, bool focused) const;
 
+    bool isAvatarNeedUpdate(const QString& strFileName);
+    bool isContainsAttachment() const;
+
+    int badgeType() const;
+
+    //bool adjust(const QListWidgetItem &other) const;
+
 private:
     CWizExplorerApp& m_app;
     WizDocumentListViewItemData m_data;
@@ -87,17 +100,10 @@ private:
     const QString& tags();
     const QString& tagTree();
 
-    bool isAvatarNeedUpdate(const QString& strFileName);
-    bool isContainsAttachment() const;
 
     bool m_specialFocused;
     bool m_documentUnread;
 
-private Q_SLOTS:
-    void on_thumbnailReloaded();
-
-Q_SIGNALS:
-    void thumbnailReloaded();
 };
 
 #endif // WIZDOCUMENTLISTVIEWITEM_H

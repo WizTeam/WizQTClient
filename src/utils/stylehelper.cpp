@@ -378,13 +378,20 @@ QColor StyleHelper::listViewMultiLineOtherLine(bool bSelected)
 
 QIcon StyleHelper::listViewBadge(int type)
 {
-    if (type == BadgeNormal) {
+    switch (type) {
+    case BadgeNormal:
         return loadIcon("document_badge");
-    } else if (type == BadgeEncryted){
+        break;
+    case BadgeEncryted:
         return loadIcon("document_badge_encrypted");
+        break;
+    case BadgeAlwaysOnTop:
+        return loadIcon("document_badge_onTop");
+        break;
+    default:
+        break;
     }
 
-    Q_ASSERT(0);
     return QIcon();
 }
 

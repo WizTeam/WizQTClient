@@ -24,7 +24,8 @@ public:
 
     enum BadgeType {
         BadgeNormal,
-        BadgeEncryted
+        BadgeEncryted,
+        BadgeAlwaysOnTop
     };
 
     enum ListViewType {

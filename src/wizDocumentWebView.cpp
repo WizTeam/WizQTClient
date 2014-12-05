@@ -24,6 +24,10 @@
 #include <QUndoStack>
 #include <QDesktopServices>
 
+#ifdef Q_OS_MAC
+#include <QMacPasteboardMime>
+#endif
+
 #include <coreplugin/icore.h>
 
 #include "wizdef.h"
@@ -37,6 +41,7 @@
 #include "wizDocumentView.h"
 #include "wizSearchReplaceWidget.h"
 #include "widgets/WizCodeEditorDialog.h"
+#include "widgets/wizScreenShotWidget.h"
 
 #include "utils/pathresolve.h"
 #include "utils/logger.h"
@@ -81,6 +86,11 @@ private:
     QWebPage* m_page;
 };
 */
+
+enum WizLinkType {
+    WizLink_Doucment,
+    WizLink_Attachment
+};
 
 
 CWizDocumentWebViewPage::CWizDocumentWebViewPage(QObject *parent) : QWebPage(parent)
@@ -138,10 +148,10 @@ void CWizDocumentWebViewPage::on_editorCommandPaste_triggered()
     Q_ASSERT(clip);
 
     const QMimeData* mime = clip->mimeData();
-//    QStringList formats = mime->formats();
-//    for(int i = 0; i < formats.size(); ++ i) {
-//        qDebug() << "Mime Format: " << formats.at(i) << " Mime data: " << mime->data(formats.at(i));
-//    }
+    QStringList formats = mime->formats();
+    for(int i = 0; i < formats.size(); ++ i) {
+        qDebug() << "Mime Format: " << formats.at(i) << " Mime data: " << mime->data(formats.at(i));
+    }
 
     if (mime->hasHtml())
     {
@@ -189,6 +199,7 @@ CWizDocumentWebView::CWizDocumentWebView(CWizExplorerApp& app, QWidget* parent)
     , m_noteFrame(0)
     , m_bCurrentEditing(false)
     , m_bContentsChanged(false)
+    , m_searchReplaceWidget(0)
 {
     CWizDocumentWebViewPage* page = new CWizDocumentWebViewPage(this);
     setPage(page);
@@ -259,6 +270,7 @@ void CWizDocumentWebView::inputMethodEvent(QInputMethodEvent* event)
 #endif
 
 #ifdef Q_OS_MAC
+    /*
     ///暂时注释代码，移动输入光标会导致极高的CPU占用率，导致输入卡顿。
 
     //int nLength = 0;
@@ -280,9 +292,7 @@ void CWizDocumentWebView::inputMethodEvent(QInputMethodEvent* event)
     for (int i = 0; i < nOffset; i++) {
         page()->triggerAction(QWebPage::MoveToNextChar);
     }
-
-    /// 此处不计算移动的字符数，直接移动到下一个文字的开始处。在英文之前输入中文时存在问题。
-//    page()->triggerAction(QWebPage::MoveToNextWord);
+    */
 #endif // Q_OS_MAC
 }
 
@@ -344,10 +354,18 @@ void CWizDocumentWebView::keyPressEvent(QKeyEvent* event)
     setUpdatesEnabled(true);
 #else
 
-    if (event->key() == Qt::Key_Backspace && event->modifiers() == Qt::ControlModifier)
+    if (event->key() == Qt::Key_Backspace)
     {
-        editorCommandExecuteRemoveStartOfLine();
-        return;
+        if (event->modifiers() == Qt::ControlModifier)
+        {
+            editorCommandExecuteRemoveStartOfLine();
+            return;
+        }
+        else
+        {
+            //FIXME: would not trigger content change event, when delete row and image by backspace
+            setContentsChanged(true);
+        }
     }
 
     //special handled for qt4,case capslock doesn't work
@@ -592,6 +610,18 @@ void CWizDocumentWebView::onTimerAutoSaveTimout()
     saveDocument(view()->note(), false);
 }
 
+void CWizDocumentWebView::onTitleEdited(QString strTitle)
+{
+    WIZDOCUMENTDATA document = view()->note();
+    document.strTitle = strTitle;
+    // Only sync when contents unchanged. If contents changed would sync after document saved.
+    if (!isContentsChanged())
+    {
+        MainWindow* mainWindow = qobject_cast<MainWindow*>(m_app.mainWindow());
+        mainWindow->quickSyncKb(document.strKbGUID);
+    }
+}
+
 void CWizDocumentWebView::onDocumentReady(const QString kbGUID, const QString strGUID, const QString strFileName)
 {
     m_mapFile.insert(strGUID, strFileName);
@@ -620,10 +650,16 @@ void CWizDocumentWebView::viewDocument(const WIZDOCUMENTDATA& doc, bool editing)
 {
     // set data
     m_bEditingMode = editing;
-    m_bNewNote = doc.tCreated.secsTo(QDateTime::currentDateTime()) == 0 ? true : false;
+    m_bNewNote = doc.tCreated.secsTo(QDateTime::currentDateTime()) <= 1 ? true : false;
     m_bNewNoteTitleInited = m_bNewNote ? false : true;
     //
     setContentsChanged(false);
+
+    if (m_bNewNote)
+    {
+        setEditorEnable(true);
+        setFocus();
+    }
 
     // ask extract and load
     m_docLoadThread->load(doc);
@@ -664,7 +700,7 @@ bool CWizDocumentWebView::resetDefaultCss()
     strCss.replace("/*default-font-family*/", QString("font-family:%1;").arg(strFont));
     strCss.replace("/*default-font-size*/", QString("font-size:%1px;").arg(nSize));
 
-    QString strPath = Utils::PathResolve::cachePath() + "editor/"+m_dbMgr.db().getUserId()+"/";
+    QString strPath = Utils::PathResolve::cachePath() + "editor/"+m_dbMgr.db().GetUserId()+"/";
     Utils::PathResolve::ensurePathExists(strPath);
 
     m_strDefaultCssFilePath = strPath + "default.css";
@@ -756,6 +792,24 @@ void CWizDocumentWebView::initCheckListEnvironment()
     }
 }
 
+void CWizDocumentWebView::setWindowVisibleOnScreenShot(bool bVisible)
+{
+    MainWindow* mainWindow = qobject_cast<MainWindow *>(m_app.mainWindow());
+    if (mainWindow)
+    {
+        bVisible ? mainWindow->show() : mainWindow->hide();
+    }
+}
+
+bool CWizDocumentWebView::insertImage(const QString& strFileName, bool bCopyFile)
+{
+    QString strHtml;
+    if (WizImage2Html(strFileName, strHtml, bCopyFile)) {
+        return editorCommandExecuteInsertHtml(strHtml, true);
+    }
+    return false;
+}
+
 void CWizDocumentWebView::onEditorLoadFinished(bool ok)
 {
     if (!ok) {
@@ -776,7 +830,6 @@ QWebFrame* CWizDocumentWebView::noteFrame()
             return frames.at(i);
     }
 
-    Q_ASSERT(0);
     return 0;
 }
 
@@ -806,6 +859,11 @@ void CWizDocumentWebView::onEditorSelectionChanged()
     Q_EMIT statusChanged();
 }
 
+void CWizDocumentWebView::clearEditorHeight()
+{
+    page()->mainFrame()->evaluateJavaScript("editor.document.body.style.height='';");
+}
+
 void CWizDocumentWebView::onEditorLinkClicked(const QUrl& url)
 {
     if (isInternalUrl(url))
@@ -829,9 +887,7 @@ void CWizDocumentWebView::onEditorLinkClicked(const QUrl& url)
 
 bool CWizDocumentWebView::isInternalUrl(const QUrl& url)
 {
-    if (url.scheme().toLower() == "wiz")
-        return true;
-    return false;
+    return url.scheme().toLower() == "wiz";
 }
 
 bool WizStringList2Map(const QStringList& list, QMap<QString, QString>& map)
@@ -853,11 +909,10 @@ bool WizStringList2Map(const QStringList& list, QMap<QString, QString>& map)
 
 void CWizDocumentWebView::viewDocumentByUrl(const QUrl& url)
 {
-    QString strUrl = url.toString();
-    if (!strUrl.startsWith("wiz:", Qt::CaseInsensitive)) {
+    if (!url.isValid())
         return;
-    }
 
+    QString strUrl = url.toString();
     MainWindow* mainWindow = qobject_cast<MainWindow *>(m_app.mainWindow());
     mainWindow->viewDocumentByWizKMURL(strUrl);
 }
@@ -998,10 +1053,14 @@ void CWizDocumentWebView::applySearchKeywordHighlight()
     QString strKeyWords = window->searchKeywords();
     if (!strKeyWords.isEmpty() && (!m_bCurrentEditing || !hasFocus()))
     {
-        if (findText(strKeyWords, QWebPage::HighlightAllOccurrences))
-            qDebug() << "[Search] find keywords : " << strKeyWords;
-        else
-            qDebug() << "[Search] can't find keywords : " << strKeyWords;
+        QStringList keyList = strKeyWords.split(getWizSearchSplitChar());
+        foreach (QString strText, keyList)
+        {
+            if (findText(strText, QWebPage::HighlightAllOccurrences))
+                qDebug() << "[Search] find keywords : " << strText;
+            else
+                qDebug() << "[Search] can't find keywords : " << strText;
+        }
     }
     else
     {
@@ -1048,8 +1107,8 @@ void CWizDocumentWebView::viewDocumentInEditor(bool editing)
     m_strCurrentNoteHtml.clear();
     splitHtmlToHeadAndBody(strHtml, m_strCurrentNoteHead, m_strCurrentNoteHtml);
 
-    m_strCurrentNoteHead = "<link rel=\"stylesheet\" type=\"text/css\" href=\"" +
-            m_strDefaultCssFilePath + "\">" + m_strCurrentNoteHead;
+    m_strCurrentNoteHead = m_strCurrentNoteHead + "<link rel=\"stylesheet\" type=\"text/css\" href=\"" +
+            m_strDefaultCssFilePath + "\">";
 
     m_strCurrentNoteGUID = strGUID;
     m_bCurrentEditing = editing;
@@ -1092,6 +1151,13 @@ void CWizDocumentWebView::viewDocumentInEditor(bool editing)
 void CWizDocumentWebView::onNoteLoadFinished()
 {
     ICore::instance()->emitViewNoteLoaded(view(), view()->note(), true);
+
+    static bool init = true;
+    if (init)
+    {
+        QTimer::singleShot(100, this, SLOT(clearEditorHeight()));
+        init = false;
+    }
 }
 
 void CWizDocumentWebView::setEditingDocument(bool editing)
@@ -1109,7 +1175,11 @@ void CWizDocumentWebView::setEditingDocument(bool editing)
         Q_EMIT focusIn();
     }
 
-    const WIZDOCUMENTDATA& docData = view()->note();
+    WIZDOCUMENTDATA docData;
+    CWizDatabase& db = m_dbMgr.db(view()->note().strKbGUID);
+    if (!db.DocumentFromGUID(view()->note().strGUID, docData))
+        return;
+
     saveDocument(docData, false);
 
     m_bEditingMode = editing;
@@ -1220,6 +1290,10 @@ void CWizDocumentWebView::on_editorCommandPastePlainText_triggered()
     Q_ASSERT(clip);
 
     const QMimeData* mime = clip->mimeData();
+    QStringList formats = mime->formats();
+//    for(int i = 0; i < formats.size(); ++ i) {
+//        qDebug() << "Mime Format: " << formats.at(i) << " Mime data: " << mime->data(formats.at(i));
+//    }
     if (mime->hasHtml())
     {
         QString strText = mime->text();
@@ -1274,15 +1348,21 @@ bool CWizDocumentWebView::editorCommandExecuteLinkRemove()
     return editorCommandExecuteCommand("unlink");
 }
 
-bool CWizDocumentWebView::editorCommandExecuteSearchReplace()
+bool CWizDocumentWebView::editorCommandExecuteFindReplace()
 {
-    CWizSearchReplaceWidget *wgt = new CWizSearchReplaceWidget();
-    connect(wgt, SIGNAL(findPre(QString,bool)), SLOT(findPre(QString,bool)));
-    connect(wgt, SIGNAL(findNext(QString,bool)), SLOT(findNext(QString,bool)));
-    connect(wgt, SIGNAL(replaceCurrent(QString,QString)), SLOT(replaceCurrent(QString,QString)));
-    connect(wgt, SIGNAL(replaceAndFindNext(QString,QString,bool)), SLOT(replaceAndFindNext(QString,QString,bool)));
-    connect(wgt, SIGNAL(replaceAll(QString,QString,bool)), SLOT(replaceAll(QString,QString,bool)));
-    wgt->show();
+    if (!m_searchReplaceWidget)
+    {
+        m_searchReplaceWidget = new CWizSearchReplaceWidget();
+    }
+    connect(m_searchReplaceWidget, SIGNAL(findPre(QString,bool)), SLOT(findPre(QString,bool)));
+    connect(m_searchReplaceWidget, SIGNAL(findNext(QString,bool)), SLOT(findNext(QString,bool)));
+    connect(m_searchReplaceWidget, SIGNAL(replaceCurrent(QString,QString)), SLOT(replaceCurrent(QString,QString)));
+    connect(m_searchReplaceWidget, SIGNAL(replaceAndFindNext(QString,QString,bool)), SLOT(replaceAndFindNext(QString,QString,bool)));
+    connect(m_searchReplaceWidget, SIGNAL(replaceAll(QString,QString,bool)), SLOT(replaceAll(QString,QString,bool)));
+
+    QRect rect = geometry();
+    rect.moveTo(mapToGlobal(pos()));
+    m_searchReplaceWidget->showInEditor(rect);
 
     return true;
 }
@@ -1469,6 +1549,36 @@ void CWizDocumentWebView::on_editorCommandExecuteTableInsert_accepted()
     editorCommandExecuteCommand("insertTable", QString("{numRows:%1, numCols:%2, border:1, borderStyle:'1px solid #dddddd;'}").arg(nRows).arg(nCols));
 }
 
+void CWizDocumentWebView::on_editorCommandExecuteScreenShot_imageAccepted(QPixmap pix)
+{
+    QObject *ssSender = qobject_cast<QObject*>(sender());
+    if (ssSender)
+        delete ssSender;
+
+    setWindowVisibleOnScreenShot(true);
+
+    if (pix.isNull())
+        return;
+
+    QString strTempPath = Utils::PathResolve::tempPath();
+    CString strFileName = strTempPath + WizIntToStr(GetTickCount()) + ".png";
+    if (!pix.save(strFileName)) {
+        TOLOG("ERROR: Can't save clipboard image to file");
+        return;
+    }
+
+    insertImage(strFileName, false);
+}
+
+void CWizDocumentWebView::on_editorCommandExecuteScreenShot_finished()
+{
+    QObject *ssSender = qobject_cast<QObject*>(sender());
+    if (ssSender)
+        delete ssSender;
+
+    setWindowVisibleOnScreenShot(true);
+}
+
 bool CWizDocumentWebView::editorCommandExecuteInsertHorizontal()
 {
     return editorCommandExecuteCommand("horizontal");
@@ -1498,11 +1608,8 @@ bool CWizDocumentWebView::editorCommandExecuteInsertImage()
 
     foreach (QString strImgFile, strImgFileList)
     {
-        QString strHtml;
         bool bUseCopyFile = true;
-        if (WizImage2Html(strImgFile, strHtml, bUseCopyFile)) {
-            editorCommandExecuteInsertHtml(strHtml, true);
-        }
+        insertImage(strImgFile, bUseCopyFile);
     }
     return true;
 }
@@ -1557,6 +1664,7 @@ bool CWizDocumentWebView::editorCommandExecuteInsertCode()
     WizCodeEditorDialog *dialog = new WizCodeEditorDialog();
     connect(dialog, SIGNAL(insertHtmlRequest(QString)), SLOT(on_insertCodeHtml_requset(QString)));
     dialog->show();
+    dialog->setWindowState(dialog->windowState() & ~Qt::WindowFullScreen | Qt::WindowActive);
     dialog->setCode(strSelectHtml);
 
     return true;
@@ -1573,6 +1681,19 @@ bool CWizDocumentWebView::editorCommandExecuteMobileImage(bool bReceiveImage)
     m_app.userSettings().setReceiveMobileFile(bReceiveImage);
     mainWindow->setMobileFileReceiverEnable(bReceiveImage);
 
+    return true;
+}
+
+bool CWizDocumentWebView::editorCommandExecuteScreenShot()
+{
+    CWizScreenShotHelper* helper = new CWizScreenShotHelper();
+
+    connect(helper, SIGNAL(screenShotCaptured(QPixmap)),
+            SLOT(on_editorCommandExecuteScreenShot_imageAccepted(QPixmap)));
+    connect(helper, SIGNAL(shotScreenQuit()), SLOT(on_editorCommandExecuteScreenShot_finished()));
+
+    setWindowVisibleOnScreenShot(false);
+    QTimer::singleShot(200, helper, SLOT(startScreenShot()));
     return true;
 }
 

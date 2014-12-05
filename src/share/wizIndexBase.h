@@ -61,6 +61,7 @@ public:
     bool GetAllDocuments(CWizDocumentDataArray& arrayDocument);
     bool GetDocumentsBySQLWhere(const CString& strSQLWhere, CWizDocumentDataArray& arrayDocument);
     bool DocumentFromGUID(const CString& strDocumentGUID, WIZDOCUMENTDATA& data);
+    bool DocumentWithExFieldsFromGUID(const CString& strDocumentGUID, WIZDOCUMENTDATA& data);
 
     bool GetAllDocumentsSize(int& count, bool bIncludeTrash = false);
 
@@ -80,6 +81,9 @@ public:
                       const QString& userGUID,
                       WIZBIZUSER& user);
     bool users(const QString& strKbGUID, CWizBizUserDataArray& arrayUser);
+    bool userFromID(const QString& strKbGUID,
+                    const QString& userID,
+                    WIZBIZUSER& user);
 
 protected:
     CppSQLite3DB m_db;
@@ -431,6 +435,7 @@ ATTACHMENT_DATA_MD5=%s, WIZ_VERSION=%s"
 #define FIELD_LIST_WIZ_DOCUMENT_PARAM   "DOCUMENT_GUID, PARAM_NAME, PARAM_VALUE"
 #define PARAM_LIST_WIZ_DOCUMENT_PARAM   "%s, %s, %s"
 #define FIELD_LIST_WIZ_DOCUMENT_PARAM_MODIFY    "PARAM_VALUE=%s"
+#define TABLE_KEY_WIZ_DOCUMENT_PARAM_FLAGS  "DOCUMENT_FLAGS"
 
 enum FieldIndex_WizDocumentParam
 {

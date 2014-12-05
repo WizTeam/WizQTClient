@@ -320,6 +320,21 @@ void CWizUserSettings::setShowSystemTrayIcon(bool bShowTrayIcon)
     set("ShowSystemTrayIcon", bShowTrayIcon ? "1" : "0");
 }
 
+bool CWizUserSettings::useSystemBasedStyle() const
+{
+    QString strUseSystemStyle = get("UseSystemBasedStyle");
+    if (!strUseSystemStyle.isEmpty()) {
+        return strUseSystemStyle.toInt() ? true : false;
+    }
+
+    return false;
+}
+
+void CWizUserSettings::setUseSystemBasedStyle(bool bSystemStyle)
+{
+    set("UseSystemBasedStyle", bSystemStyle ? "1" : "0");
+}
+
 bool CWizUserSettings::receiveMobileFile() const
 {
     QString strReceiveMobileFile = get("RecevieMobileFile");

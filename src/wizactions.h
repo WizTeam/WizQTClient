@@ -16,6 +16,8 @@ class QShortcut;
 #define WIZACTION_GLOBAL_SYNC               "actionSync"
 #define WIZACTION_GLOBAL_NEW_DOCUMENT       "actionNewNote"
 #define WIZACTION_GLOBAL_NEW_DOCUMENT_BY_TEMPLATE       "actionNewNoteByTemplate"
+#define WIZACTION_GLOBAL_GOFORWARD  "actionGoForward"
+#define WIZACTION_GLOBAL_GOBACK  "actionGoBack"
 #define WIZACTION_GLOBAL_SAVE_AS_PDF        "actionSaveAsPDF"
 #define WIZACTION_GLOBAL_SAVE_AS_HTML        "actionSaveAsHtml"
 #define WIZACTION_GLOBAL_PRINT        "actionPrint"
@@ -31,6 +33,7 @@ class QShortcut;
 #define WIZACTION_EDITOR_PASTE_PLAIN        "actionEditingPastePlain"
 #define WIZACTION_EDITOR_DELETE             "actionEditingDelete"
 #define WIZACTION_EDITOR_SELECT_ALL         "actionEditingSelectAll"
+#define WIZACTION_EDITOR_FIND_REPLACE         "actionFindReplace"
 
 #define WIZACTION_FORMAT_BOLD               "actionFormatBold"
 #define WIZACTION_FORMAT_ITALIC             "actionFormatItalic"
@@ -55,6 +58,7 @@ class QShortcut;
 #define WIZACTION_FORMAT_INSERT_CHECKLIST    "actionFormatInsertCheckList"
 #define WIZACTION_FORMAT_INSERT_CODE            "actionFormatInsertCode"
 #define WIZACTION_FORMAT_INSERT_IMAGE            "actionFormatInsertImage"
+#define WIZACTION_FORMAT_SCREEN_SHOT            "actionFormatScreenShot"
 
 /**
 //NOTE：因为Linux版本没有menubar，qaction在隐藏后快捷键无法触发，此处创建一个shortcut并与app的槽函数绑定
@@ -86,17 +90,17 @@ private:
 
     std::map<QString, CWizShortcutAction*> m_actions;
     WIZACTION* actionsData();
-    CWizShortcutAction* addAction(WIZACTION& action);
+    CWizShortcutAction* addAction(WIZACTION& action, bool bUseExtraShortcut);
 
 public:
-    void init();
+    void init(bool bUseExtraShortcut = false);
     CWizShortcutAction* actionFromName(const QString& strActionName);
     void toggleActionText(const QString& strActionName);
     CWizAnimateAction* animateActionFromName(const QString& strActionName);
 
 
     QMenu* toMenu(QWidget* parent, CWizSettings& settings, const QString& strSection);
-    void buildMenu(QMenu* pMenu, CWizSettings& settings, const QString& strSection);
+    void buildMenu(QMenu* pMenu, CWizSettings& settings, const QString& strSection, bool bMenuBar);
     void buildMenuBar(QMenuBar* menuBar, const QString& strFileName);
     void buildMenu(QMenu* menu, const QString& strFileName);
 };

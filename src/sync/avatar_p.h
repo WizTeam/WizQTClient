@@ -69,9 +69,9 @@ private:
     QString m_strUserCurrent;
 
     bool isNeedUpdate(const QString& strUserID);
-    void loadCache(const QString& strUserID);
+    bool loadCache(const QString& strUserID);
     void loadCacheDefault();
-    void loadCacheFromFile(const QString &key, const QString& strFilePath);
+    bool loadCacheFromFile(const QString &key, const QString& strFilePath);
     //
     QPixmap loadOrg(const QString& strUserID, bool bForce);
     QPixmap loadOrg(const QString& strUserID);

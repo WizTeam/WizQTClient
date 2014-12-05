@@ -5,6 +5,7 @@
 #include "wizdef.h"
 #include "share/wizsettings.h"
 #include "wizDocumentListView.h"
+#include <QApplication>
 
 CWizPopupButton::CWizPopupButton(CWizExplorerApp& app, QWidget *parent)
     : QToolButton(parent)
@@ -21,7 +22,7 @@ void CWizPopupButton::paintEvent(QPaintEvent* event)
     Q_UNUSED(event);
 
     // FIXME
-    int nArrawWidth = 6;
+    int nArrawWidth = 10;
     int nMargin = 8;
 
     QStyleOptionToolButton opt;
@@ -40,6 +41,7 @@ void CWizPopupButton::paintEvent(QPaintEvent* event)
     if (!m_iconArraw.isNull()) {
         QRect rectArrow = opt.rect;
         rectArrow.setLeft(rectArrow.right() - nArrawWidth - nMargin);
+        rectArrow.setWidth(nArrawWidth);
         m_iconArraw.paint(&p, rectArrow, Qt::AlignVCenter, QIcon::Normal);
     }
 
@@ -181,6 +183,7 @@ CWizSortingPopupButton::CWizSortingPopupButton(CWizExplorerApp& app, QWidget *pa
 
     createAction(tr("Sorting by created time"), SortingCreateTime, menu, group);
     createAction(tr("Sorting by updated time"), SortingUpdateTime, menu, group);
+    createAction(tr("Sorting by access time"), SortingAccessTime, menu, group);
     menu->addSeparator();
     createAction(tr("Sorting by title"), SortingTitle, menu, group);
     createAction(tr("Sorting by location"), SortingLocation, menu, group);

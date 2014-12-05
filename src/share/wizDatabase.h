@@ -135,6 +135,8 @@ public:
 
     virtual bool DocumentFromGUID(const QString& strGUID,
                                   WIZDOCUMENTDATA& dataExists);
+    virtual bool DocumentWithExFieldsFromGUID(const CString& strGUID,
+                                              WIZDOCUMENTDATA& dataExists);
 
     // download
     virtual bool OnDownloadDeletedList(const CWizDeletedGUIDDataArray& arrayData);
@@ -236,7 +238,7 @@ public:
 
     virtual void GetAllBizUserIds(CWizStdStringArray& arrayText);
 
-    virtual void ClearError();
+    virtual void ClearLastSyncError();
     virtual void OnTrafficLimit(const QString& strErrorMessage);
     virtual void OnStorageLimit(const QString& strErrorMessage);
     virtual void OnBizServiceExpr(const QString& strBizGUID, const QString& strErrorMessage);
@@ -288,14 +290,14 @@ public:
     QString GetAttachmentFileName(const QString& strGUID);
     QString GetAvatarPath() const;
     QString GetDefaultNoteLocation() const;
+    QString GetDocumentOwnerAlias(const WIZDOCUMENTDATA& doc);
 
     bool GetUserName(QString& strUserName);
     bool SetUserName(const QString& strUserName);
     bool GetUserDisplayName(QString& strDisplayName);
 
-    QString getUserId() const { return m_strUserId; }
     //QString getPassword() const { return m_strPassword; }
-    QString getUserAlias();
+    QString GetUserAlias();
     CWizDatabase* getPersonalDatabase();
 
 
@@ -336,6 +338,7 @@ public:
     bool UpdateDocuments(const std::deque<WIZDOCUMENTDATAEX>& arrayDocument);
     bool UpdateAttachment(const WIZDOCUMENTATTACHMENTDATAEX& data);
     bool UpdateAttachments(const CWizDocumentAttachmentDataArray& arrayAttachment);
+    bool SetDocumentFlags(WIZDOCUMENTDATA& data, const QString& strFlags, bool bUpdateParamMd5);
 
     bool UpdateDocumentData(WIZDOCUMENTDATA& data, const QString& strHtml,
                             const QString& strURL, int nFlags, bool notifyDataModify = true);
@@ -437,7 +440,6 @@ public:
     void CopyDocumentLink(const WIZDOCUMENTDATA& document);
     void CopyDocumentsLink(const QList<WIZDOCUMENTDATA>& documents);
     QString DocumentToWizKMURL(const WIZDOCUMENTDATA& document);
-    QString GetParamFromWizKMURL(const QString& strURL, const QString& strParamName);
     void DocumentToHtmlLink(const WIZDOCUMENTDATA& document, QString& strHtml, QString& strLink);
     void DocumentsToHtmlLink(const QList<WIZDOCUMENTDATA>& documents, QString& strHtml, QString &strLink);
 

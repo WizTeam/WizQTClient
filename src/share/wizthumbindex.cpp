@@ -209,7 +209,7 @@ bool CThumbIndex::UpdateAbstract(const WIZABSTRACT &abstractNew, const CString& 
 
         if (img.isNull())
         {
-            TOLOG(_T("Faile to scale image to abstract"));
+            TOLOG(_T("Failed to scale image to abstract"));
             return false;
         }
         //
@@ -217,7 +217,7 @@ bool CThumbIndex::UpdateAbstract(const WIZABSTRACT &abstractNew, const CString& 
         buffer.open(QIODevice::WriteOnly);
         if (!img.save(&buffer, "JPG"))
         {
-            TOLOG(_T("Faile to save abstract image data to buffer"));
+            TOLOG(_T("Failed to save abstract image data to buffer"));
             return false;
         }
         buffer.close();

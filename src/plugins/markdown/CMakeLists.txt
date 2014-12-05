@@ -36,7 +36,7 @@ include_directories(
 target_link_libraries(markdown extensionsystem coreplugin)
 
 add_custom_command(TARGET markdown POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/MarkDown.pluginspec ${WIZNOTE_PLUGIN_DIR})
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/MarkDown.pluginspec ${WIZNOTE_PLUGINSPEC_DIR})
 
 install(FILES ${markdown_SPEC} DESTINATION lib/wiznote/plugins)
 install(TARGETS markdown DESTINATION lib/wiznote/plugins)

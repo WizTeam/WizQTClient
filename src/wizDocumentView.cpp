@@ -74,6 +74,7 @@ CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
     m_splitter = new CWizSplitter(this);
     m_splitter->addWidget(m_web);
     m_splitter->addWidget(m_comments);
+    m_comments->page()->setLinkDelegationPolicy(QWebPage::DelegateAllLinks);
     m_comments->page()->mainFrame()->setScrollBarPolicy(Qt::Horizontal, Qt::ScrollBarAlwaysOff);
     m_comments->setAcceptDrops(false);
     m_comments->hide();
@@ -119,6 +120,10 @@ CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
 
     connect(m_editStatusCheckThread, SIGNAL(checkFinished(QString,QStringList)),
             SLOT(on_checkEditStatus_finished(QString,QStringList)));
+
+    // open comments link by document webview
+    connect(m_comments->page(), SIGNAL(linkClicked(const QUrl&)), m_web,
+            SLOT(onEditorLinkClicked(const QUrl&)));
     //
     m_editStatusSyncThread->start(QThread::IdlePriority);
     m_editStatusCheckThread->start(QThread::IdlePriority);
@@ -275,6 +280,8 @@ void CWizDocumentView::viewNote(const WIZDOCUMENTDATA& data, bool forceEdit)
     WIZDOCUMENTDATA docData = data;
     docData.nReadCount ++;
     db.ModifyDocumentReadCount(docData);
+    docData.tAccessed = WizGetCurrentTime();
+    db.ModifyDocumentDateAccessed(docData);
 }
 
 void CWizDocumentView::reviewCurrentNote()
@@ -332,7 +339,7 @@ void CWizDocumentView::setEditNote(bool bEdit)
         CWizDatabase& db = m_dbMgr.db(m_note.strKbGUID);
         if (db.IsGroup())
         {
-            QString strUserAlias = db.getUserAlias();
+            QString strUserAlias = db.GetUserAlias();
             m_editStatusSyncThread->setCurrentEditingDocument(strUserAlias, m_note.strKbGUID, m_note.strGUID);
         }
     }
@@ -427,7 +434,7 @@ void CWizDocumentView::loadNote(const WIZDOCUMENTDATA& doc)
         CWizDatabase& db = m_dbMgr.db(m_note.strKbGUID);
         if (db.IsGroup())
         {
-            QString strUserAlias = db.getUserAlias();
+            QString strUserAlias = db.GetUserAlias();
             m_editStatusSyncThread->setCurrentEditingDocument(strUserAlias, m_note.strKbGUID, m_note.strGUID);
         }
     }
@@ -508,7 +515,7 @@ void CWizDocumentView::on_document_data_saved(const QString& strGUID,
 void Core::CWizDocumentView::on_checkEditStatus_finished(QString strGUID, QStringList editors)
 {
     //
-    QString strCurrentUser = m_dbMgr.db(m_note.strKbGUID).getUserAlias();
+    QString strCurrentUser = m_dbMgr.db(m_note.strKbGUID).GetUserAlias();
     editors.removeAll(strCurrentUser);
 
     if (strGUID == m_note.strGUID && !editors.isEmpty())
@@ -529,7 +536,7 @@ void CWizDocumentView::on_webView_focus_changed()
         CWizDatabase& db = m_dbMgr.db(m_note.strKbGUID);
         if (db.IsGroup())
         {
-            QString strUserAlias = db.getUserAlias();
+            QString strUserAlias = db.GetUserAlias();
             m_editStatusSyncThread->setCurrentEditingDocument(strUserAlias, m_note.strKbGUID, m_note.strGUID);
         }
     }

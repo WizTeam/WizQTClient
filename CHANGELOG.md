@@ -1,3 +1,64 @@
+## 2.1.14(2014-11-19)
+
+Bugfixes:
+
+- Fixed shortcuts scope problem of editor, no longer affect the operation of other widgets.
+- Normal token failure no longer ask for password.
+- [Mac]When the program at full-screen model, insert code widget no longer show in full-screen model.
+
+Features:
+
+- [Mac]Adaptation for Retina screen.
+- [Linux]Add option to use system window style.
+- [Linux]Add function of screenshot.
+- Notes browsing history.
+- Increase the common notes list, you can set notes shortcuts now.
+- Notes List sorted by access time.
+- Set notes always on the top.
+- Added support for multi-keyword search, use blank space to split keywords.
+- Add creator information of notes to the document list.
+- Too much registration will called for a verification code.
+
+##2.1.13(2014-9-30)
+
+Bugfixes:
+
+- [Linux]Only start one instance of application, active the running application when users try to run the exec again.
+- [Mac]Fix the dragging to add attachments problem on Yosemite system.
+- When jumping from notes link, locate note in document list.
+
+Features:
+
+- Add the feature of notes encryption.
+- Add the feature of receiving images from phone.
+- Add the feature of creating notes through template.
+- Add the feature of printing.
+- Add the feature of exporting to Html documents.
+- Optimize the mode of caching network images.
+- Add support to Socks5 type proxy server.
+- Add the feature of pasting as plain text.
+
+
+##2.1.12(2014-9-8)
+
+Bugfixes:
+
+  - Repair format lost problem when paste multilevel list .
+  - After syncing data, refresh the list of attachments.
+
+Features:
+
+  - Add the function of insert code.
+  - Add the right-click menu sent to function for WizNote.
+  - Biz group would display the number of unread notes.
+  - Add the function of locating note position.
+  - Drag and drop the image file to the editor, can add files as attachments to the notes.
+  - Drag the notes to the editor, you can add notes link.
+  - Add function of converting html to plain text.
+  - Adjust the editor shortcuts.
+
+
+
 ##2.1.11(2014-7-28)
 
 Bugfixes:

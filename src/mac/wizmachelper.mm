@@ -378,4 +378,13 @@ QString wizConvertYosemiteFilePathToNormalPath(const QString& strYosePath)
     return WizToQString(goodURL);
 }
 
+//HIDictionaryWindowShow ( DCSDictionaryRef dictionary, CFTypeRef textString,
+//                         CFRange selectionRange, CTFontRef textFont, CGPoint textOrigin, Boolean verticalText, const CGAffineTransform *viewTransform );
+
+
+void wizHIDictionaryWindowShow(const QString& strText, QRect rcText)
+{
+//    CFStringRef cfString = (CFStringRef)WizToNSString(strText);
+//    [HIDictionaryWindowShow dictionary:NULL textString:cfString selectionRange:];
+}
 
