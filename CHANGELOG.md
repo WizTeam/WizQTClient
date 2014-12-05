@@ -1,3 +1,24 @@
+## 2.1.14(2014-11-19)
+
+Bugfixes:
+
+- Fixed shortcuts scope problem of editor, no longer affect the operation of other widgets.
+- Normal token failure no longer ask for password.
+- [Mac]When the program at full-screen model, insert code widget no longer show in full-screen model.
+
+Features:
+
+- [Mac]Adaptation for Retina screen.
+- [Linux]Add option to use system window style.
+- [Linux]Add function of screenshot.
+- Notes browsing history.
+- Increase the common notes list, you can set notes shortcuts now.
+- Notes List sorted by access time.
+- Set notes always on the top.
+- Added support for multi-keyword search, use blank space to split keywords.
+- Add creator information of notes to the document list.
+- Too much registration will called for a verification code.
+
 ##2.1.13(2014-9-30)
 
 Bugfixes:
