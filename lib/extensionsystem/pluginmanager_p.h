@@ -68,7 +68,7 @@ public:
     // Plugin operations
     void loadPlugins();
     void shutdown();
-    void setPluginPaths(const QStringList &paths);
+    void setPluginPaths(const QStringList &specPaths, const QStringList &libraryPaths);
     QList<PluginSpec *> loadQueue();
     void loadPlugin(PluginSpec *spec, PluginSpec::State destState);
     void resolveDependencies();
@@ -140,6 +140,7 @@ private:
     PluginCollection *defaultCollection;
     PluginManager *q;
 
+    void setPluginLibraryPath(const QString &path);
     void readPluginPaths();
     bool loadQueue(PluginSpec *spec,
             QList<PluginSpec *> &queue,

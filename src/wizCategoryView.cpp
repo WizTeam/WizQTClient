@@ -2555,6 +2555,9 @@ void CWizCategoryView::initFolders(QTreeWidgetItem* pParent, \
     for (it = arrayLocation.begin(); it != arrayLocation.end(); it++) {
         CString strLocation = *it;
 
+        if (strLocation.isEmpty())
+            continue;
+
         if (m_dbMgr.db().IsInDeletedItems(strLocation))
             continue;
 

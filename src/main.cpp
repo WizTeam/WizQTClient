@@ -74,6 +74,21 @@ static inline QStringList getPluginPaths()
     return rc;
 }
 
+static inline QStringList getPluginSpecPaths()
+{
+#ifdef Q_OS_MAC
+    QStringList rc;
+    // Figure out root:  Up one from 'bin'
+    QDir rootDir = QApplication::applicationDirPath();
+    rootDir.cdUp();
+    const QString rootDirPath = rootDir.canonicalPath();
+    QString pluginSpecPath = rootDirPath;
+    pluginSpecPath += QLatin1String("/Resources/plugIns");
+    rc.push_back(pluginSpecPath);
+    return rc;
+#endif
+    return getPluginPaths();
+}
 
 #ifdef Q_OS_MAC
 #  define SHARE_PATH "/../Resources"
@@ -208,8 +223,9 @@ int mainCore(int argc, char *argv[])
     PluginManager::setFileExtension(QLatin1String("pluginspec"));
     PluginManager::setGlobalSettings(globalSettings);
 
+    const QStringList specPaths = getPluginSpecPaths();
     const QStringList pluginPaths = getPluginPaths();
-    PluginManager::setPluginPaths(pluginPaths);
+    PluginManager::setPluginPaths(specPaths, pluginPaths);
 
     // use 3 times(30M) of Qt default usage
     int nCacheSize = globalSettings->value("Common/Cache", 10240*3).toInt();

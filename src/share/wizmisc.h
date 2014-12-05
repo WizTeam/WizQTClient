@@ -179,6 +179,7 @@ enum WizKMUrlType
 bool IsWizKMURL(const QString& strURL);
 bool WizIsKMURLOpenDocument(const QString& strURL);
 WizKMUrlType GetWizUrlType(const QString& strURL);
+QString GetParamFromWizKMURL(const QString& strURL, const QString& strParamName);
 
 class CWizBufferAlloc
 {

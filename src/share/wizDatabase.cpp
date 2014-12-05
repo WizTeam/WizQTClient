@@ -3208,20 +3208,30 @@ bool CWizDatabase::UpdateDocumentAbstract(const QString& strDocumentGUID)
 
 CString CWizDatabase::GetRootLocation(const CString& strLocation)
 {
-    int index = strLocation.indexOf('/', 1);
+    //FIXME:容错处理，如果路径的结尾不是 '/'，则增加该结尾符号
+    QString strLoc = strLocation;
+    if (strLoc.right(1) != "/")
+        strLoc.append('/');
+
+    int index = strLoc.indexOf('/', 1);
     if (index == -1)
         return CString();
 
-    return strLocation.left(index + 1);
+    return strLoc.left(index + 1);
 }
 
 CString CWizDatabase::GetLocationName(const CString& strLocation)
 {
-    int index = strLocation.lastIndexOf('/', strLocation.length() - 2);
+    //FIXME:容错处理，如果路径的结尾不是 '/'，则增加该结尾符号
+    QString strLoc = strLocation;
+    if (strLoc.right(1) != "/")
+        strLoc.append('/');
+
+    int index = strLoc.lastIndexOf('/', strLocation.length() - 2);
     if (index == -1)
         return CString();
 
-    CString str = strLocation.right(strLocation.length() - index - 1);
+    CString str = strLoc.right(strLocation.length() - index - 1);
 
     str.Trim('/');
 
@@ -3313,25 +3323,6 @@ QString CWizDatabase::DocumentToWizKMURL(const WIZDOCUMENTDATA& document)
     {
         return WizFormatString2(_T("wiz://open_document?guid=%1&kbguid=%2"), document.strGUID, document.strKbGUID);
     }
-    return QString();
-}
-
-QString CWizDatabase::GetParamFromWizKMURL(const QString& strURL, const QString& strParamName)
-{
-    int nindex = strURL.indexOf('?');
-    if (nindex == -1)
-        return QString();
-
-    QString strParams = strURL;
-    strParams.remove(0, nindex + 1);
-    QStringList paramList = strParams.split('&');
-    QString strParaFlag = strParamName + "=";
-    foreach (QString strParam, paramList) {
-        if (strParam.contains(strParaFlag)) {
-            return strParam.remove(strParaFlag);
-        }
-    }
-
     return QString();
 }
 

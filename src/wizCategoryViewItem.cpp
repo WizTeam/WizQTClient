@@ -769,24 +769,25 @@ bool CWizCategoryViewFolderItem::operator < (const QTreeWidgetItem &other) const
         return getSortOrder() < pOther->getSortOrder();
     }
 
-    int nThis = 0, nOther = 0;
-    if (!pOther->location().isEmpty()) {
-        QSettings* setting = ExtensionSystem::PluginManager::settings();
-        nOther = setting->value("FolderPosition/" + pOther->location()).toInt();
-        nThis = setting->value("FolderPosition/" + location()).toInt();
-    }
-    //
-    if (nThis != nOther)
-    {
-        if (nThis > 0 && nOther > 0)
-        {
-            return nThis < nOther;
-        }
-        else
-        {
-            return nThis > 0;
-        }
-    }
+    // do not use sort data from windows for now.
+//    int nThis = 0, nOther = 0;
+//    if (!pOther->location().isEmpty()) {
+//        QSettings* setting = ExtensionSystem::PluginManager::settings();
+//        nOther = setting->value("FolderPosition/" + pOther->location()).toInt();
+//        nThis = setting->value("FolderPosition/" + location()).toInt();
+//    }
+//    //
+//    if (nThis != nOther)
+//    {
+//        if (nThis > 0 && nOther > 0)
+//        {
+//            return nThis < nOther;
+//        }
+//        else
+//        {
+//            return nThis > 0;
+//        }
+//    }
 
     //
     QString strThis = text(0).toLower();
