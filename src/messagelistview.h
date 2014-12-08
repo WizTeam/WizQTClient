@@ -46,6 +46,9 @@ public:
 
     void drawItem(QPainter* p, const QStyleOptionViewItemV4* vopt) const;
 
+public slots:
+    void markAllMessagesReaded();
+
 protected:
     virtual void resizeEvent(QResizeEvent* event);
     virtual void contextMenuEvent(QContextMenuEvent* event);

@@ -114,7 +114,7 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     , m_actions(new CWizActions(*this, this))
     , m_category(new CWizCategoryView(*this, this))
     , m_documents(new CWizDocumentListView(*this, this))
-    , m_noteList(NULL)
+    , m_noteListWidget(NULL)
     , m_msgList(new MessageListView(this))
     , m_documentSelection(new CWizDocumentSelectionView(*this, this))
     , m_doc(new CWizDocumentView(*this, this))
@@ -1238,32 +1238,32 @@ void MainWindow::initClient()
 
     m_splitter->addWidget(m_category);
 
-    m_docListWidget = new QWidget(this);
+    m_docListContainer = new QWidget(this);
     QHBoxLayout* layoutList = new QHBoxLayout();
     layoutList->setContentsMargins(0, 0, 0, 0);
     layoutList->setSpacing(0);
-    layoutList->addWidget(createListView());
-    layoutList->addWidget(m_msgList);
-    m_docListWidget->setLayout(layoutList);
-    m_splitter->addWidget(m_docListWidget);
+    layoutList->addWidget(createNoteListView());
+    layoutList->addWidget(createMessageListView());
+    m_docListContainer->setLayout(layoutList);
+    m_splitter->addWidget(m_docListContainer);
     m_splitter->addWidget(documentPanel);
     m_splitter->setStretchFactor(0, 0);
     m_splitter->setStretchFactor(1, 0);
     m_splitter->setStretchFactor(2, 1);
 
-    m_msgList->hide();
+    m_msgListWidget->hide();
     //
     connect(m_splitter, SIGNAL(splitterMoved(int, int)), SLOT(on_client_splitterMoved(int, int)));
 }
 
-QWidget* MainWindow::createListView()
+QWidget* MainWindow::createNoteListView()
 {
-    m_noteList = new QWidget(this);
-    m_noteList->setMinimumWidth(100);
+    m_noteListWidget = new QWidget(this);
+    m_noteListWidget->setMinimumWidth(100);
     QVBoxLayout* layoutList = new QVBoxLayout();
     layoutList->setContentsMargins(0, 0, 0, 0);
     layoutList->setSpacing(0);
-    m_noteList->setLayout(layoutList);
+    m_noteListWidget->setLayout(layoutList);
 
     QHBoxLayout* layoutActions = new QHBoxLayout();
     layoutActions->setContentsMargins(0, 0, 0, 0);
@@ -1306,7 +1306,52 @@ QWidget* MainWindow::createListView()
     layoutList->addWidget(line2);
     layoutList->addWidget(m_documents);
 
-    return m_noteList;
+    return m_noteListWidget;
+}
+
+QWidget*MainWindow::createMessageListView()
+{
+    m_msgListWidget = new QWidget(this);
+    m_msgListWidget->setMinimumWidth(100);
+    QVBoxLayout* layoutList = new QVBoxLayout();
+    layoutList->setContentsMargins(0, 0, 0, 0);
+    layoutList->setSpacing(0);
+    m_msgListWidget->setLayout(layoutList);
+
+    m_msgListUnreadBar = new QWidget(this);
+    QHBoxLayout* layoutActions = new QHBoxLayout();
+    layoutActions->setContentsMargins(0, 0, 0, 0);
+    layoutActions->setSpacing(0);
+    m_msgListUnreadBar->setLayout(layoutActions);
+
+    CWizImageButton* allBtn = new CWizImageButton(this);
+    allBtn->setFixedHeight(Utils::StyleHelper::listViewSortControlWidgetHeight());
+    layoutActions->addWidget(allBtn);
+    QWidget* line = new QWidget(this);
+    line->setFixedWidth(1);
+    line->setStyleSheet("border-left-width:1;border-left-style:solid;border-left-color:#DADAD9");
+    layoutActions->addWidget(line);
+
+    QLabel* labelHint = new QLabel(this);
+    labelHint->setText(tr("Unread Messages"));
+    labelHint->setAlignment(Qt::AlignCenter);
+    labelHint->setStyleSheet("color: #787878;padding-bottom:1px;"); //font: 12px;
+    layoutActions->addWidget(labelHint);
+
+    CWizImageButton* readBtn = new CWizImageButton(this);
+    readBtn->setFixedHeight(Utils::StyleHelper::listViewSortControlWidgetHeight());
+    layoutActions->addWidget(readBtn);
+
+    QWidget* line2 = new QWidget(this);
+    line2->setFixedHeight(1);
+    line2->setStyleSheet("border-top-width:1;border-top-style:solid;border-top-color:#DADAD9");
+
+    layoutList->addWidget(m_msgListUnreadBar);
+    layoutList->addWidget(line2);
+    layoutList->addWidget(m_msgList);
+    m_msgList->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
+
+    return m_msgListWidget;
 }
 
 void MainWindow::on_documents_documentCountChanged()
@@ -1555,10 +1600,10 @@ void MainWindow::on_actionViewToggleCategory_triggered()
         category->show();
     }
 
-    if (m_docListWidget->isVisible()) {
-        m_docListWidget->hide();
+    if (m_docListContainer->isVisible()) {
+        m_docListContainer->hide();
     } else {
-        m_docListWidget->show();
+        m_docListContainer->show();
     }
 
     m_actions->toggleActionText(WIZACTION_GLOBAL_TOGGLE_CATEGORY);
@@ -1871,8 +1916,8 @@ void MainWindow::on_search_doSearch(const QString& keywords)
     m_category->saveSelection();
     m_documents->clear();
     //
-    m_noteList->show();
-    m_msgList->hide();
+    m_noteListWidget->show();
+    m_msgListWidget->hide();
     //
     m_searcher->search(keywords, 500);
     startSearchStatus();
@@ -2605,11 +2650,11 @@ void MainWindow::resortDocListAfterViewDocument(const WIZDOCUMENTDATA& doc)
 
 void MainWindow::showDocmentList(CWizCategoryBaseView* category)
 {
-    if (!m_noteList->isVisible())
+    if (!m_noteListWidget->isVisible())
     {
-        m_docListWidget->show();
-        m_noteList->show();
-        m_msgList->hide();
+        m_docListContainer->show();
+        m_noteListWidget->show();
+        m_msgListWidget->hide();
     }
     QString kbGUID = category->selectedItemKbGUID();
     if (!kbGUID.isEmpty())
@@ -2629,16 +2674,19 @@ void MainWindow::showDocmentList(CWizCategoryBaseView* category)
 
 void MainWindow::showMessageList(CWizCategoryViewMessageItem* pItem)
 {
-    if (!m_msgList->isVisible())
+    if (!m_msgListWidget->isVisible())
     {
-        m_docListWidget->show();
-        m_msgList->show();
-        m_noteList->hide();
+        m_docListContainer->show();
+        m_msgListWidget->show();
+        m_noteListWidget->hide();
     }
 
     CWizMessageDataArray arrayMsg;
     pItem->getMessages(m_dbMgr.db(), arrayMsg);
     m_msgList->setMessages(arrayMsg);
+
+    bool showUnreadBar = pItem->hitTestUnread();
+    m_msgListUnreadBar->setVisible(showUnreadBar);
 }
 
 void MainWindow::viewDocumentByShortcut(CWizCategoryViewShortcutItem* pShortcut)
@@ -2648,7 +2696,7 @@ void MainWindow::viewDocumentByShortcut(CWizCategoryViewShortcutItem* pShortcut)
     if (db.DocumentFromGUID(pShortcut->guid(), doc))
     {
         viewDocument(doc, true);
-        m_docListWidget->hide();
+        m_docListContainer->hide();
     }
 }
 

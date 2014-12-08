@@ -145,12 +145,14 @@ private:
     QPointer<CWizCategoryView> m_category;
     CWizDocumentListView* m_documents;
     WizService::Internal::MessageListView* m_msgList;
-    QWidget* m_noteList;
+    QWidget* m_noteListWidget;
+    QWidget* m_msgListWidget;
+    QWidget* m_msgListUnreadBar;
     CWizDocumentSelectionView* m_documentSelection;
     CWizDocumentView* m_doc;
     CWizDocumentTransitionView* m_transitionView;
     QPointer<CWizSplitter> m_splitter;
-    QPointer<QWidget> m_docListWidget;
+    QPointer<QWidget> m_docListContainer;
     QPointer<CWizOptionsWidget> m_options;
 
     QLabel* m_labelDocumentsHint;
@@ -186,8 +188,8 @@ private:
 #endif
     void initMenuBar();
 
-    QWidget* createListView();
-
+    QWidget* createNoteListView();
+    QWidget* createMessageListView();
 
 public:
     // CWizDocument passthrough methods

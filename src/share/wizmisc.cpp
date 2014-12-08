@@ -2109,9 +2109,13 @@ CWaitCursor::~CWaitCursor()
 
 
 
-void showWebDialogWithToken(const QString& windowTitle, const QString& url, QWidget* parent)
+void showWebDialogWithToken(const QString& windowTitle, const QString& url, QWidget* parent, bool dialogResizable)
 {
     CWizWebSettingsDialog* pDlg = new CWizWebSettingsWithTokenDialog(url, QSize(800, 480), parent);
+    if (dialogResizable)
+    {
+        pDlg->setMaximumSize(QSize(QWIDGETSIZE_MAX, QWIDGETSIZE_MAX));
+    }
     pDlg->setWindowTitle(windowTitle);
     pDlg->exec();
     //
@@ -2230,7 +2234,7 @@ void showDocumentHistory(const WIZDOCUMENTDATA& doc, QWidget* parent)
     CString strExt = WizFormatString2(_T("obj_guid=%1&kb_guid=%2&obj_type=document"),
                                       doc.strGUID, doc.strKbGUID);
      QString strUrl = WizService::ApiEntry::standardCommandUrl("document_history", WIZ_TOKEN_IN_URL_REPLACE_PART, strExt);
-     showWebDialogWithToken(QObject::tr("Note History"), strUrl, parent);
+     showWebDialogWithToken(QObject::tr("Note History"), strUrl, parent, true);
 }
 
 
