@@ -33,6 +33,32 @@ function WizDoc(wizDoc) {
 	}
 }
 
+function WizInitReadCss(document, destNode) {
+	var WIZ_TODO_STYLE_ID = 'wiz_todo_style_id';
+	var WIZ_STYLE = 'wiz_style';
+	var WIZ_LINK_VERSION = 'wiz_link_version';
+	var WIZ_TODO_STYLE_VERSION = "01.01.00";// must above todo edit css version
+
+	var style = document.getElementById(WIZ_TODO_STYLE_ID);
+	if (style && !!style.getAttribute && style.getAttribute(WIZ_LINK_VERSION) >= WIZ_TODO_STYLE_VERSION)
+		return;
+	//
+	if (style && style.parentElement) { 
+		style.parentElement.removeChild(style);
+	}
+	//
+	var strStyle = '.wiz-todo, .wiz-todo-img {width: 16px; height: 16px; cursor: default; padding: 0 10px 0 2px; vertical-align: -7%;-webkit-user-select: none;} .wiz-todo-label { line-height: 2.5;} .wiz-todo-label-checked { /*text-decoration: line-through;*/ color: #666;} .wiz-todo-label-unchecked {text-decoration: initial;} .wiz-todo-completed-info {padding-left: 44px; display: inline-block; } .wiz-todo-avatar { width:20px; height: 20px; vertical-align: -20%; margin-right:10px; border-radius: 2px;} .wiz-todo-account, .wiz-todo-dt { color: #666; }';
+	//
+	var objStyle = document.createElement('style');
+	objStyle.type = 'text/css';
+	objStyle.textContent = strStyle;
+	objStyle.id = WIZ_TODO_STYLE_ID;
+	// objStyle.setAttribute(WIZ_STYLE, 'unsave');
+	objStyle.setAttribute(WIZ_LINK_VERSION, WIZ_TODO_STYLE_VERSION);
+	//
+	destNode.appendChild(objStyle);
+}
+
 function WizTodoReadCheckedWindows (wizApp) {
 
 	if (wizApp) {
@@ -43,6 +69,7 @@ function WizTodoReadCheckedWindows (wizApp) {
 		this.commonUI = wizApp.CreateWizObject('WizKMControls.WizCommonUI');
 	}
 
+	this.initCss = initCss;
 	this.getDocHtml = getDocHtml;
 	this.setDocHtml = setDocHtml;
 	this.canEdit = canEdit;
@@ -55,6 +82,9 @@ function WizTodoReadCheckedWindows (wizApp) {
 	this.getWizDocument = getWizDocument;
 	this.getAvatarName = getAvatarName;
 	
+	function initCss() {
+		WizInitReadCss(document, document.head);
+	}
 
 	function getDocHtml() {
 		return this.doc.getHtml();
@@ -159,6 +189,7 @@ function WizTodoReadCheckedWindows (wizApp) {
 
 function WizTodoReadCheckedQt () {
 
+	this.initCss = initCss;
     this.getDocHtml = getDocHtml;
     this.setDocHtml = setDocHtml;
     this.canEdit = canEdit;
@@ -169,6 +200,9 @@ function WizTodoReadCheckedQt () {
     this.getUserAvatarFileName = getUserAvatarFileName;
     this.getLocalDateTime = getLocalDateTime;
     this.getAvatarName = getAvatarName;
+
+    function initCss() {
+    }
 
     function getDocHtml() {
         return objApp.getCurrentNoteHtml();
@@ -225,6 +259,8 @@ function WizTodoReadCheckedQt () {
 }
 
 function WizTodoReadCheckedAndroid () {
+
+	this.initCss = initCss;
 	this.getDocHtml = getDocHtml;
 	this.setDocHtml = setDocHtml;
 	this.canEdit = canEdit;
@@ -237,6 +273,9 @@ function WizTodoReadCheckedAndroid () {
 	this.onDocumentClose = onDocumentClose;
 	this.onTodoImageClicked = onTodoImageClicked;
 	this.getAvatarName = getAvatarName;	
+
+	function initCss() {
+	}
 
 	function getDocHtml() {
 		return window.WizNote.getDocHtml();
@@ -300,6 +339,7 @@ function WizTodoReadCheckedAndroid () {
 
 function WizTodoReadCheckedIphone() {
 	
+	this.initCss = initCss;
 	this.getUserAlias = getUserAlias;
 	this.getUserAvatarFileName = getUserAvatarFileName;
 	this.isPersonalDocument = isPersonalDocument;
@@ -327,6 +367,9 @@ function WizTodoReadCheckedIphone() {
 	this.canedit = null;
 	this.originalHtml = "";
     
+	function initCss() {
+	}
+
 	function setUserAlias(alias) {
 		this.userAlias = alias;
 	}
@@ -799,6 +842,7 @@ var WizTodoReadChecked = (function () {
 		//
 		editorDocument = ueditor ? ueditor.contentDocument : document;
 		helper = getHelper(wizClient);
+		helper.initCss();
 		//
 		registerEvent();
 	}
@@ -971,12 +1015,15 @@ var WizTodoReadChecked = (function () {
 			var userAvatar = helper.getUserAvatarFileName(WIZ_HTML_TODO_AVATAR_SIZE);
 			var avatarName = helper.getAvatarName(userAvatar);
 			//
-			var userAvatar2 = userAvatar.replace(/\\/g, '\\\\');
-			var reg = new RegExp(userAvatar2, 'ig');
-			//
-			html = html.replace(reg, "index_files/" + avatarName);
-			//
-			resources += "*" + userAvatar;
+			if (userAvatar && avatarName) {
+				
+				var userAvatar2 = userAvatar.replace(/\\/g, '\\\\');
+				var reg = new RegExp(userAvatar2, 'ig');
+				//
+				html = html.replace(reg, "index_files/" + avatarName);
+				//
+				resources += "*" + userAvatar;
+			}
 		}
         //
         modifiedTodos = {};
