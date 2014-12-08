@@ -26,6 +26,9 @@ void wizMacRegisterSystemService();
 
 void wizHIDictionaryWindowShow(const QString& strText, QRect rcText);
 
+QString wizSystemClipboardData();
+
+QString wizRrtConveter();
 
 //path for yosemite
 bool wizIsYosemiteFilePath(const QString& strPath);

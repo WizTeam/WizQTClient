@@ -151,6 +151,10 @@ set(wiznote_SOURCES
     share/wizRtfReader.cpp
     widgets/wizScreenShotWidget.cpp
     widgets/wizVerificationCodeDialog.cpp
+    share/rtf2html/fmt_opts.cpp
+    share/rtf2html/rtf_keyword.cpp
+    share/rtf2html/rtf_table.cpp
+    share/rtf2html/rtf2html.cpp
 )
 
 set(wiznote_HEADERS
@@ -289,6 +293,13 @@ set(wiznote_HEADERS
     share/wizRtfReader.h
     widgets/wizScreenShotWidget.h
     widgets/wizVerificationCodeDialog.h
+    share/rtf2html/common.h
+    share/rtf2html/config.h
+    share/rtf2html/dbg_iter.h
+    share/rtf2html/fmt_opts.h
+    share/rtf2html/rtf_keyword.h
+    share/rtf2html/rtf_table.h
+    share/rtf2html/rtf_tools.h
 )
 
 set(wiznote_FORMS

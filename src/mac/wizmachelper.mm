@@ -3,6 +3,8 @@
 
 #include "wizmainwindow.h"
 
+#include "share/wizRtfReader.h"
+
 #include <QLocale>
 #include <QMainWindow>
 #include <QSize>
@@ -359,6 +361,74 @@ void convertYosemiteFileListToNormalList(QStringList& fileList)
 }
 
 @end
+
+QString wizRtfConveter(NSData *rtfData)
+{
+    // Read RTF into to NSAttributedString, then convert the string to HTML
+    NSAttributedString *string = [[NSAttributedString alloc] initWithData:rtfData
+                                                                          options:[NSDictionary dictionaryWithObject:NSRTFTextDocumentType forKey:NSDocumentTypeDocumentAttribute]
+                                                                          documentAttributes:nil
+                                                                          error:nil];
+    NSError *error;
+    NSRange range = NSMakeRange(0, [string length]);
+    NSDictionary *dict = [NSDictionary dictionaryWithObject:NSHTMLTextDocumentType forKey:NSDocumentTypeDocumentAttribute];
+    NSData *htmlData = [string dataFromRange:range documentAttributes:dict error:&error];
+    return QByteArray::fromNSData(htmlData);
+}
+
+QString wizSystemClipboardData()
+{
+    NSPasteboard *pasteboard = [NSPasteboard generalPasteboard];
+
+    NSArray *typeArray = [pasteboard types];
+    for (int i = 0; i < [typeArray count]; i++) {
+        NSString *type = [typeArray objectAtIndex:i];
+        NSString *string = [pasteboard stringForType:type];
+        QString strType = WizToQString(type);
+        QString str = WizToQString(string);
+//        qDebug() << "Data type   :  " << strType  << "  Data  : " << str;
+    }
+
+    if ([[pasteboard types] containsObject:NSRTFPboardType]) {
+        NSData *htmlData = [pasteboard dataForType:NSRTFPboardType];
+        if (htmlData) {
+            QString strHtml = wizRtfConveter(htmlData);
+            qDebug() << "html data after convert from rtf" << strHtml;
+
+            NSString *htmlString = [[[NSString alloc] initWithData:htmlData encoding:NSUTF8StringEncoding] autorelease];
+//            NSString *htmlString = [pasteboard  stringForType:NSHTMLPboardType];
+            if (htmlString) {
+                QString str = WizToQString(htmlString);
+                QString strHtml;
+                qDebug() << "data before convert :  " << str;
+                CWizRtfReader::rtf2hmlt(str, strHtml);
+                qDebug() << "after convert data from rtf to html   :  " << strHtml;
+//                QFile file("/Users/lxn/text.rtf");
+//                if (file.open(QIODevice::WriteOnly | QIODevice::Text))
+//                {
+//                    QTextStream out(&file);
+//                    out << str;
+//                    file.close();
+//                }
+//                return str;
+            }
+
+            return strHtml;
+        }
+    }
+
+    NSArray *classArray = [NSArray arrayWithObject:[NSString class]];
+    NSDictionary *options = [NSDictionary dictionary];
+
+    BOOL ok = [pasteboard canReadObjectForClasses:classArray options:options];
+    if (ok) {
+        NSArray *objectsToPaste = [pasteboard readObjectsForClasses:classArray options:options];
+        NSString *string = [objectsToPaste objectAtIndex:0];
+        QString str = WizToQString(string);
+        return str;
+    }
+    return "";
+}
 
 
 bool wizIsYosemiteFilePath(const QString& strPath)

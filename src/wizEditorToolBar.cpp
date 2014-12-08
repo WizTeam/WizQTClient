@@ -462,6 +462,12 @@ EditorToolBar::EditorToolBar(QWidget *parent)
     m_btnScreenShot = 0;
 #endif
 
+    m_btnViewSource = new CWizToolButton(this);
+    m_btnViewSource->setCheckable(false);
+    m_btnViewSource->setIcon(::WizLoadSkinIcon(skin, "actionFormatScreenShot"));
+    m_btnViewSource->setToolTip(tr("View source"));
+    connect(m_btnViewSource, SIGNAL(clicked()), SLOT(on_btnViewSource_clicked()));
+
     QHBoxLayout* layout = new QHBoxLayout();
     layout->setContentsMargins(3, 0, 3, 0);
     layout->setAlignment(Qt::AlignVCenter);
@@ -499,6 +505,7 @@ EditorToolBar::EditorToolBar(QWidget *parent)
 #endif
     layout->addSpacing(12);
     layout->addWidget(m_btnSearchReplace);
+    layout->addWidget(m_btnViewSource);
     layout->addStretch();
 }
 
@@ -1287,6 +1294,13 @@ void EditorToolBar::on_btnScreenShot_clicked()
 {
     if (m_editor) {
         m_editor->editorCommandExecuteScreenShot();
+    }
+}
+
+void EditorToolBar::on_btnViewSource_clicked()
+{
+    if (m_editor) {
+        m_editor->editorCommandExecuteViewSource();
     }
 }
 
