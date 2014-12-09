@@ -32,7 +32,8 @@ protected:
 private:
     bool buildFTSIndex();
     bool buildFTSIndexByDatabase(CWizDatabase& db);
-    void filterDocuments(CWizDatabase& db, CWizDocumentDataArray& arrayDocument);
+    void filterDocuments(CWizDatabase& db, CWizDocumentDataArray& arrayDocument,
+                         bool searchEncryptedDoc);
     bool updateDocument(const WIZDOCUMENTDATAEX& doc);
     bool deleteDocument(const WIZDOCUMENTDATAEX& doc);
 

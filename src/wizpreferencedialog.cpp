@@ -166,6 +166,11 @@ CWizPreferenceWindow::CWizPreferenceWindow(CWizExplorerApp& app, QWidget* parent
     ui->spinBox_left->setValue(m_app.userSettings().printMarginValue(wizPositionLeft));
     ui->spinBox_right->setValue(m_app.userSettings().printMarginValue(wizPositionRight));
     ui->spinBox_top->setValue(m_app.userSettings().printMarginValue(wizPositionTop));
+
+    bool searchEncryptedNote = m_app.userSettings().searchEncryptedNote();
+    ui->checkBoxSearchEncryNote->setChecked(searchEncryptedNote);
+    ui->lineEditNotePassword->setEnabled(searchEncryptedNote);
+    ui->lineEditNotePassword->setText(m_app.userSettings().encryptedNotePassword());
 }
 
 void CWizPreferenceWindow::showPrintMarginPage()
@@ -389,4 +394,22 @@ void CWizPreferenceWindow::on_checkBoxSystemStyle_toggled(bool checked)
     m_app.userSettings().setUseSystemBasedStyle(checked);
 
     QMessageBox::information(m_app.mainWindow(), tr("Info"), tr("Application style will be changed after restart WizNote."), QMessageBox::Ok);
+}
+
+void CWizPreferenceWindow::on_checkBoxSearchEncryNote_toggled(bool checked)
+{
+    m_app.userSettings().setSearchEncryptedNote(checked);
+    if (!checked)
+    {
+        ui->lineEditNotePassword->blockSignals(true);
+        ui->lineEditNotePassword->clear();
+        ui->lineEditNotePassword->blockSignals(false);
+        m_app.userSettings().setEncryptedNotePassword("");
+    }
+    ui->lineEditNotePassword->setEnabled(checked);
+}
+
+void CWizPreferenceWindow::on_lineEditNotePassword_editingFinished()
+{
+    m_app.userSettings().setEncryptedNotePassword(ui->lineEditNotePassword->text());
 }

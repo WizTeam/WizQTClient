@@ -406,6 +406,33 @@ void CWizUserSettings::setNeedShowMobileFileReceiverUserGuide(bool bNeedShow)
     set("ShowMobileFileReceiverUserGuide", bNeedShow ? "1" : "0");
 }
 
+bool CWizUserSettings::searchEncryptedNote()
+{
+    QString strShowGuide = get("SearchEncryptedNote");
+    if (!strShowGuide.isEmpty()) {
+        return strShowGuide.toInt() ? true : false;
+    }
+
+    return false;
+}
+
+void CWizUserSettings::setSearchEncryptedNote(bool bSearchEncryNote)
+{
+    set("SearchEncryptedNote", bSearchEncryNote ? "1" : "0");
+}
+
+QString CWizUserSettings::encryptedNotePassword()
+{
+    QString strPassword = get("EncryptedNotePassword");
+    return ::WizDecryptPassword(strPassword);
+}
+
+void CWizUserSettings::setEncryptedNotePassword(const QString& strPassword)
+{
+    QString strEncryptPass = ::WizEncryptPassword(strPassword);
+    set("EncryptedNotePassword", strEncryptPass);
+}
+
 QString CWizUserSettings::skin()
 {
     // just return because no skin selection from v1.4

@@ -137,6 +137,13 @@ public:
     bool needShowMobileFileReceiverUserGuide();
     void setNeedShowMobileFileReceiverUserGuide(bool bNeedShow);
 
+    bool searchEncryptedNote();
+    void setSearchEncryptedNote(bool bSearchEncryNote);
+
+    QString encryptedNotePassword();
+    void setEncryptedNotePassword(const QString& strPassword);
+
+
     QString locale();
     void setLocale(const QString& strLocale);
 
