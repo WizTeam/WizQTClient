@@ -433,6 +433,20 @@ void CWizUserSettings::setEncryptedNotePassword(const QString& strPassword)
     set("EncryptedNotePassword", strEncryptPass);
 }
 
+QString CWizUserSettings::editorBackgroundColor()
+{
+    QString strColor = get("EditorBackgroundColor");
+    if (strColor.isEmpty())
+        return "#FFFFFF";
+
+    return strColor;
+}
+
+void CWizUserSettings::setEditorBackgroundColor(const QString& strColor)
+{
+    set("EditorBackgroundColor", strColor);
+}
+
 QString CWizUserSettings::skin()
 {
     // just return because no skin selection from v1.4

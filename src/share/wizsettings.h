@@ -143,6 +143,8 @@ public:
     QString encryptedNotePassword();
     void setEncryptedNotePassword(const QString& strPassword);
 
+    QString editorBackgroundColor();
+    void setEditorBackgroundColor(const QString& strColor);
 
     QString locale();
     void setLocale(const QString& strLocale);

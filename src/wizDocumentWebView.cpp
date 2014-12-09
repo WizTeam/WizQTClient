@@ -710,6 +710,8 @@ bool CWizDocumentWebView::resetDefaultCss()
 
     strCss.replace("/*default-font-family*/", QString("font-family:%1;").arg(strFont));
     strCss.replace("/*default-font-size*/", QString("font-size:%1px;").arg(nSize));
+    strCss.replace("/*default-background-color*/", QString("background-color:%1;").arg(
+                   m_app.userSettings().editorBackgroundColor()));
 
     QString strPath = Utils::PathResolve::cachePath() + "editor/"+m_dbMgr.db().GetUserId()+"/";
     Utils::PathResolve::ensurePathExists(strPath);

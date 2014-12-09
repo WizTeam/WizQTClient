@@ -3,6 +3,7 @@
 
 #include <QMessageBox>
 #include <QFontDialog>
+#include <QColorDialog>
 
 #include "share/wizDatabaseManager.h"
 #include "wizmainwindow.h"
@@ -171,6 +172,10 @@ CWizPreferenceWindow::CWizPreferenceWindow(CWizExplorerApp& app, QWidget* parent
     ui->checkBoxSearchEncryNote->setChecked(searchEncryptedNote);
     ui->lineEditNotePassword->setEnabled(searchEncryptedNote);
     ui->lineEditNotePassword->setText(m_app.userSettings().encryptedNotePassword());
+
+    QString strColor = m_app.userSettings().editorBackgroundColor();
+    ui->pushButtonBackgroundColor->setStyleSheet(QString("QPushButton "
+                                                         "{ border: 1px; background: %1;} ").arg(strColor));
 }
 
 void CWizPreferenceWindow::showPrintMarginPage()
@@ -412,4 +417,28 @@ void CWizPreferenceWindow::on_checkBoxSearchEncryNote_toggled(bool checked)
 void CWizPreferenceWindow::on_lineEditNotePassword_editingFinished()
 {
     m_app.userSettings().setEncryptedNotePassword(ui->lineEditNotePassword->text());
+}
+
+void CWizPreferenceWindow::on_pushButtonBackgroundColor_clicked()
+{
+    QColorDialog dlg;
+    dlg.setCurrentColor(m_app.userSettings().editorBackgroundColor());
+    if (dlg.exec() == QDialog::Accepted)
+    {
+        QString strColor = dlg.currentColor().name();
+        updateEditorBackgroundColor(strColor);
+    }
+}
+
+void CWizPreferenceWindow::on_pushButtonClearBackground_clicked()
+{
+    updateEditorBackgroundColor("#FFFFFF");
+}
+
+void CWizPreferenceWindow::updateEditorBackgroundColor(const QString& strColorName)
+{
+    ui->pushButtonBackgroundColor->setStyleSheet(QString("QPushButton "
+                                                         "{ border: 1px; background: %1;} ").arg(strColorName));
+    m_app.userSettings().setEditorBackgroundColor(strColorName);
+    Q_EMIT settingsChanged(wizoptionsFont);
 }
