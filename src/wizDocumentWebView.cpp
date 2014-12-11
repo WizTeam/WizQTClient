@@ -166,15 +166,15 @@ void CWizDocumentWebViewPage::on_editorCommandPaste_triggered()
 //        }
 //    }
 
-    QString strText = wizSystemClipboardData();
-    qDebug() << "clipboard data from cocoa : " << strText;
-    if (!strText.isEmpty())
-    {
-        QMimeData* data = new QMimeData();
-        data->removeFormat("text/html");
-        data->setHtml(strText);
-        clip->setMimeData(data);
-    }
+//    QString strText = wizSystemClipboardData();
+//    qDebug() << "clipboard data from cocoa : " << strText;
+//    if (!strText.isEmpty())
+//    {
+//        QMimeData* data = new QMimeData();
+//        data->removeFormat("text/html");
+//        data->setHtml(strText);
+//        clip->setMimeData(data);
+//    }
 
     if (!clip->image().isNull()) {
         // save clipboard image to $TMPDIR

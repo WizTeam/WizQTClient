@@ -2510,7 +2510,7 @@ void MainWindow::createNoteWithImage(const QString& strImageFile)
 void MainWindow::showNewFeatureGuide()
 {
     QString strUrl = WizService::ApiEntry::standardCommandUrl("link");
-    strUrl += "&name=newfeaturetips.html";
+    strUrl += "&name=newfeature-mac";
 
     CWizFramelessWebDialog *dlg = new CWizFramelessWebDialog();
     dlg->loadAndShow(strUrl);

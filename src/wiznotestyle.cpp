@@ -124,12 +124,14 @@ void CWizNoteStyle::drawCategoryViewItem(const QStyleOptionViewItemV4 *vopt,
 {
     if (view->isDragHovered() && view->validateDropDestination(view->dragHoveredPos())) {
         QRect rect = view->visualItemRect(view->itemAt(view->dragHoveredPos()));
+        p->setRenderHint(QPainter::Antialiasing, true);
         QPen pen;
         pen.setStyle(Qt::SolidLine);
-        pen.setCapStyle(Qt::RoundCap);
+//        pen.setCapStyle(Qt::RoundCap);
         pen.setColor(QColor("#3498DB"));
         pen.setWidth(1);
         p->setPen(pen);
+        p->setBrush(Qt::NoBrush);
         rect.setWidth(rect.width() - 2);
         p->drawRect(rect);
     }
@@ -441,6 +443,31 @@ void CWizNoteStyle::drawPrimitive(PrimitiveElement pe, const QStyleOption *opt, 
                 return;
             }
         }
+        break;
+    case PE_IndicatorItemViewItemDrop:
+    {
+        if (const CWizCategoryBaseView *view = dynamic_cast<const CWizCategoryBaseView *>(w))
+        {
+            Q_UNUSED(view);
+            p->setRenderHint(QPainter::Antialiasing, true);
+
+            QPen pen;
+            pen.setStyle(Qt::SolidLine);
+//            pen.setCapStyle(Qt::RoundCap);
+            pen.setColor(QColor("#3498DB"));
+            pen.setWidth(1);
+            p->setPen(pen);
+            p->setBrush(Qt::NoBrush);
+            if(opt->rect.height() == 0)
+            {
+                p->drawEllipse(opt->rect.topLeft(), 3, 3);
+                p->drawLine(QPoint(opt->rect.topLeft().x()+3, opt->rect.topLeft().y()), opt->rect.topRight());
+            } else {
+                p->drawRect(opt->rect);
+            }
+            return;
+        }
+    }
         break;
     case PE_PanelItemViewRow:
         {

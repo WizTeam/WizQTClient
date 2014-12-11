@@ -82,6 +82,7 @@ CWizCategoryBaseView::CWizCategoryBaseView(CWizExplorerApp& app, QWidget* parent
     , m_selectedItem(NULL)
     , m_dragHoveredTimer(new QTimer())
     , m_dragHoveredItem(0)
+    , m_dragItem(NULL)
 {
     // basic features
     header()->hide();
@@ -92,6 +93,10 @@ CWizCategoryBaseView::CWizCategoryBaseView(CWizExplorerApp& app, QWidget* parent
     setAutoFillBackground(true);
     setTextElideMode(Qt::ElideMiddle);
     setIndentation(12);
+    setDragEnabled(true);
+    viewport()->setAcceptDrops(true);
+    setDropIndicatorShown(true);
+    setDragDropMode(QAbstractItemView::InternalMove);
 
     // scrollbar
     setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
@@ -190,8 +195,8 @@ void CWizCategoryBaseView::mousePressEvent(QMouseEvent* event)
 
 void CWizCategoryBaseView::mouseMoveEvent(QMouseEvent* event)
 {
-    if (DraggingState == state())
-        return;
+//    if (DraggingState == state())
+//        return;
 
     QPoint msPos = event->pos();
     CWizCategoryViewItemBase* pItem =  itemAt(msPos);
@@ -240,16 +245,19 @@ void CWizCategoryBaseView::startDrag(Qt::DropActions supportedActions)
 {
     Q_UNUSED(supportedActions);
 
-    QPoint pt = mapFromGlobal(QCursor::pos());
-
-    if (CWizCategoryViewTagItem* item = dynamic_cast<CWizCategoryViewTagItem*>(itemAt(pt)))
+    m_dragItem = currentCategoryItem<CWizCategoryViewItemBase>();
+    Q_ASSERT(m_dragItem);
+    if (!m_dragItem->dragAble())
     {
-        QDrag* drag = new QDrag(this);
-        QMimeData* mimeData = new QMimeData();
-        mimeData->setData(WIZNOTE_MIMEFORMAT_TAGS, item->tag().strGUID.toUtf8());
-        drag->setMimeData(mimeData);
-        drag->exec(Qt::CopyAction);
+        m_dragItem = 0;
+        return;
     }
+
+    resetRootItemsDropEnabled(m_dragItem);
+    QTreeWidget::startDrag(supportedActions);
+    setCurrentItem(m_dragItem);
+    m_dragItem = 0;
+
 }
 
 void mime2Note(const QByteArray& bMime, CWizDocumentDataArray& arrayDocument)
@@ -278,6 +286,8 @@ void CWizCategoryBaseView::dragEnterEvent(QDragEnterEvent *event)
         event->acceptProposedAction();
     } else if (event->mimeData()->hasUrls()) {
         event->acceptProposedAction();
+    } else{
+        QTreeWidget::dragEnterEvent(event);
     }
 
 }
@@ -324,7 +334,19 @@ void CWizCategoryBaseView::dragMoveEvent(QDragMoveEvent *event)
     {
         event->acceptProposedAction();
     }
-
+    else if (m_dragItem)
+    {
+        if (CWizCategoryViewItemBase* pItem = itemAt(event->pos()))
+        {
+            if (pItem->acceptDrop(m_dragItem))
+                pItem->setFlags(pItem->flags() | Qt::ItemIsDropEnabled);
+            else
+                pItem->setFlags(pItem->flags() & ~Qt::ItemIsDropEnabled);
+            qDebug() << "drag hover event ";
+            event->acceptProposedAction();
+            QTreeWidget::dragMoveEvent(event);
+        }
+    }
 
     viewport()->repaint();
 }
@@ -378,10 +400,26 @@ void CWizCategoryBaseView::dropEvent(QDropEvent * event)
         //
         loadDocument(strFileList);
     }
+    else
+    {
+        QModelIndex droppedIndex = indexAt(event->pos());
+        if( !droppedIndex.isValid() )
+          return;
+
+        const QMimeData* mimeData = event->mimeData();
+        QStringList formats = mimeData->formats();
+        foreach (QString str, formats) {
+            qDebug() << "drag clipboard type : " << str << "  value :  " << mimeData->data(str);
+        }
+
+        QTreeWidget::dropEvent(event);
+        return;
+    }
 
     viewport()->repaint();
     event->accept();
 }
+
 void CWizCategoryBaseView::loadDocument(QStringList &strFileList)
 {
     CWizFileReader *fileReader = new CWizFileReader();
@@ -594,6 +632,21 @@ QModelIndex CWizCategoryBaseView::moveCursor(CursorAction cursorAction, Qt::Keyb
     }
 
     return index;
+}
+
+void CWizCategoryBaseView::resetRootItemsDropEnabled(CWizCategoryViewItemBase* pItem)
+{
+
+    int topCount = topLevelItemCount();
+    for (int i = 0; i < topCount; i++)
+    {
+        CWizCategoryViewItemBase* pi = dynamic_cast<CWizCategoryViewItemBase*>(pItem);
+        if (pi->acceptDrop(pItem))
+            pi->setFlags(pi->flags() | Qt::ItemIsDropEnabled);
+        else
+            pi->setFlags(pi->flags() & ~Qt::ItemIsDropEnabled);
+    }
+    update();
 }
 
 void CWizCategoryBaseView::on_dragHovered_timeOut()
@@ -1914,6 +1967,14 @@ void CWizCategoryView::init()
     resetSections();
 
     loadExpandState();
+
+
+    setSelectionMode(QAbstractItemView::SingleSelection);
+    setDragEnabled(true);
+    invisibleRootItem()->setFlags(invisibleRootItem()->flags() & ~Qt::ItemIsDropEnabled);
+    viewport()->setAcceptDrops(true);
+    setDropIndicatorShown(true);
+    setDragDropMode(QAbstractItemView::InternalMove);
 }
 
 void CWizCategoryView::resetSections()
@@ -2722,7 +2783,6 @@ void CWizCategoryView::initTags()
     pAllTagsItem->setExpanded(true);
     pAllTagsItem->sortChildren(0, Qt::AscendingOrder);
 
-//    updatePrivateFolderDocumentCount();
     updatePrivateTagDocumentCount();
 }
 

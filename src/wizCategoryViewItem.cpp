@@ -651,6 +651,12 @@ bool CWizCategoryViewAllFoldersItem::accept(CWizDatabase& db, const WIZDOCUMENTD
     return false;
 }
 
+bool CWizCategoryViewAllFoldersItem::acceptDrop(const CWizCategoryViewItemBase* pItem) const
+{
+    const CWizCategoryViewFolderItem* item = dynamic_cast<const CWizCategoryViewFolderItem*>(pItem);
+    return NULL != item;
+}
+
 QString CWizCategoryViewAllFoldersItem::getSectionName()
 {
     return WIZ_CATEGORY_SECTION_PERSONAL;
@@ -718,6 +724,12 @@ bool CWizCategoryViewFolderItem::acceptDrop(const WIZDOCUMENTDATA& data) const
     Q_UNUSED(data);
 
     return true;
+}
+
+bool CWizCategoryViewFolderItem::acceptDrop(const CWizCategoryViewItemBase* pItem) const
+{
+    const CWizCategoryViewFolderItem* item = dynamic_cast<const CWizCategoryViewFolderItem*>(pItem);
+    return NULL != item;
 }
 
 void CWizCategoryViewFolderItem::drop(const WIZDOCUMENTDATA& data, bool forceCopy)
@@ -854,6 +866,12 @@ bool CWizCategoryViewAllTagsItem::accept(CWizDatabase& db, const WIZDOCUMENTDATA
     return false;
 }
 
+bool CWizCategoryViewAllTagsItem::acceptDrop(const CWizCategoryViewItemBase* pItem) const
+{
+    const CWizCategoryViewTagItem* item = dynamic_cast<const CWizCategoryViewTagItem*>(pItem);
+    return NULL != item;
+}
+
 QString CWizCategoryViewAllTagsItem::getSectionName()
 {
     return WIZ_CATEGORY_SECTION_PERSONAL;
@@ -905,6 +923,12 @@ bool CWizCategoryViewTagItem::acceptDrop(const WIZDOCUMENTDATA& data) const
     }
 
     return false;
+}
+
+bool CWizCategoryViewTagItem::acceptDrop(const CWizCategoryViewItemBase* pItem) const
+{
+    const CWizCategoryViewTagItem* item = dynamic_cast<const CWizCategoryViewTagItem*>(pItem);
+    return NULL != item;
 }
 
 void CWizCategoryViewTagItem::drop(const WIZDOCUMENTDATA& data, bool forceCopy)
@@ -1016,6 +1040,12 @@ bool CWizCategoryViewGroupsRootItem::accept(CWizDatabase& db, const WIZDOCUMENTD
     }
 
     return false;
+}
+
+bool CWizCategoryViewGroupsRootItem::acceptDrop(const CWizCategoryViewItemBase* pItem) const
+{
+    const CWizCategoryViewGroupItem* item = dynamic_cast<const CWizCategoryViewGroupItem*>(pItem);
+    return NULL != item;
 }
 QString CWizCategoryViewGroupsRootItem::getSectionName()
 {
@@ -1333,6 +1363,12 @@ bool CWizCategoryViewGroupRootItem::acceptDrop(const WIZDOCUMENTDATA &data) cons
         return true;
 
     return false;
+}
+
+bool CWizCategoryViewGroupRootItem::acceptDrop(const CWizCategoryViewItemBase* pItem) const
+{
+    const CWizCategoryViewGroupItem* item = dynamic_cast<const CWizCategoryViewGroupItem*>(pItem);
+    return NULL != item;
 }
 
 void CWizCategoryViewGroupRootItem::drop(const WIZDOCUMENTDATA &data, bool forceCopy)
@@ -1694,6 +1730,11 @@ bool CWizCategoryViewTrashItem::acceptDrop(const WIZDOCUMENTDATA &data) const
         return false;
 
     return true;
+}
+
+bool CWizCategoryViewTrashItem::acceptDrop(const CWizCategoryViewItemBase* pItem) const
+{
+    return false;
 }
 
 

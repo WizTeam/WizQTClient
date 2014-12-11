@@ -75,6 +75,8 @@ protected:
 
     virtual QModelIndex moveCursor(CursorAction cursorAction, Qt::KeyboardModifiers modifiers);
 
+    virtual void resetRootItemsDropEnabled(CWizCategoryViewItemBase* pItem);
+
 protected:
     CWizExplorerApp& m_app;
     CWizDatabaseManager& m_dbMgr;
@@ -87,6 +89,8 @@ private:
     CWizDocumentDataArray m_dragDocArray;
     QTimer* m_dragHoveredTimer;
     CWizCategoryViewItemBase* m_dragHoveredItem;
+
+    CWizCategoryViewItemBase* m_dragItem;
 
 #ifdef WIZNOTE_CUSTOM_SCROLLBAR
     CWizScrollBar* m_vScroll;
