@@ -662,6 +662,23 @@ QString CWizCategoryViewAllFoldersItem::getSectionName()
     return WIZ_CATEGORY_SECTION_PERSONAL;
 }
 
+QString CWizCategoryViewAllFoldersItem::getAllFoldersPosition() const
+{
+    QString str = "{";
+    int nStartPos = 1;
+    for (int i = 0; i < childCount(); i++)
+    {
+        CWizCategoryViewFolderItem* childItem = dynamic_cast<CWizCategoryViewFolderItem* >(child(i));
+        Q_ASSERT(childItem);
+        str += childItem->getAllFoldersPosition(nStartPos);
+
+        if (i < childCount() - 1)
+            str += ",\n";
+    }
+    str += "}";
+    return str;
+}
+
 
 void CWizCategoryViewAllFoldersItem::showContextMenu(CWizCategoryBaseView* pCtrl, QPoint pos)
 {
@@ -769,6 +786,22 @@ QString CWizCategoryViewFolderItem::name() const
     return CWizDatabase::GetLocationName(m_strName);
 }
 
+QString CWizCategoryViewFolderItem::getAllFoldersPosition(int& nStartPos) const
+{
+    QString str = "\"" + m_strName + "\": " + QString::number(nStartPos);
+    nStartPos ++;
+
+    for (int i = 0; i < childCount(); i++)
+    {
+        CWizCategoryViewFolderItem* childItem = dynamic_cast<CWizCategoryViewFolderItem* >(child(i));
+        Q_ASSERT(childItem);
+        str += ", \n";
+        str += childItem->getAllFoldersPosition(nStartPos);
+    }
+
+    return str;
+}
+
 bool CWizCategoryViewFolderItem::operator < (const QTreeWidgetItem &other) const
 {
     const CWizCategoryViewFolderItem* pOther = dynamic_cast<const CWizCategoryViewFolderItem*>(&other);
@@ -776,30 +809,38 @@ bool CWizCategoryViewFolderItem::operator < (const QTreeWidgetItem &other) const
         return false;
     }
 
+    qDebug() << "compare item  ， this  : " << text(0) << "  other  :   " << pOther->text(0);
+
     if (getSortOrder() != pOther->getSortOrder())
     {
-        return getSortOrder() < pOther->getSortOrder();
+        bool result  = getSortOrder() < pOther->getSortOrder();
+        qDebug() << " compare result by sort order  :  lower  " << result;
+        return result;
     }
 
-    // do not use sort data from windows for now.
-//    int nThis = 0, nOther = 0;
-//    if (!pOther->location().isEmpty()) {
-//        QSettings* setting = ExtensionSystem::PluginManager::settings();
-//        nOther = setting->value("FolderPosition/" + pOther->location()).toInt();
-//        nThis = setting->value("FolderPosition/" + location()).toInt();
-//    }
-//    //
-//    if (nThis != nOther)
-//    {
-//        if (nThis > 0 && nOther > 0)
-//        {
-//            return nThis < nOther;
-//        }
+    // sort by folder pos
+    int nThis = 0, nOther = 0;
+    if (!pOther->location().isEmpty()) {
+        QSettings* setting = ExtensionSystem::PluginManager::settings();
+        nOther = setting->value("FolderPosition/" + pOther->location()).toInt();
+        nThis = setting->value("FolderPosition/" + location()).toInt();
+    }
+    //
+    if (nThis != nOther)
+    {
+        if (nThis > 0 && nOther > 0)
+        {
+            bool result  =  nThis < nOther;
+            qDebug() << " compare result  by pos  :  lower  " << result;
+            return result;
+        }
 //        else
 //        {
-//            return nThis > 0;
+//            bool result  =  nThis > 0;
+//            qDebug() << " compare result  by pos   :  bigger than 0  " << result;
+//            return result;
 //        }
-//    }
+    }
 
     //
     QString strThis = text(0).toLower();
@@ -816,11 +857,15 @@ bool CWizCategoryViewFolderItem::operator < (const QTreeWidgetItem &other) const
             std::string strThisA(arrThis.data(), arrThis.size());
             std::string strOtherA(arrOther.data(), arrOther.size());
             //
-            return strThisA.compare(strOtherA.c_str()) < 0;
+            bool result = strThisA.compare(strOtherA.c_str()) < 0;
+            qDebug() << " compare result  by simpchinese :  lower  " << result;
+            return result;
         }
     }
     //
-    return strThis.compare(strOther) < 0;
+    bool result =  strThis.compare(strOther) < 0;
+    qDebug() << " compare result by text  :  lower  " << result;
+    return result;
 }
 
 
@@ -960,6 +1005,11 @@ void CWizCategoryViewTagItem::reload(CWizDatabase& db)
 {
     db.TagFromGUID(m_tag.strGUID, m_tag);
     setText(0, m_tag.strName);
+}
+
+void CWizCategoryViewTagItem::setTagPosition(int nPos)
+{
+    m_tag.nPostion = nPos;
 }
 
 
@@ -1687,6 +1737,11 @@ void CWizCategoryViewGroupItem::reload(CWizDatabase& db)
 {
     db.TagFromGUID(m_tag.strGUID, m_tag);
     setText(0, m_tag.strName);
+}
+
+void CWizCategoryViewGroupItem::setTagPosition(int nPos)
+{
+    m_tag.nPostion = nPos;
 }
 
 /* ------------------------------ CWizCategoryViewTrashItem ------------------------------ */

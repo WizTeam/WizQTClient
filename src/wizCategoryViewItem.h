@@ -185,6 +185,7 @@ public:
     virtual bool acceptDrop(const CWizCategoryViewItemBase* pItem) const;
     virtual QString getSectionName();
     virtual int getSortOrder() const { return 20; }
+    QString getAllFoldersPosition() const;
 };
 
 class CWizCategoryViewFolderItem : public CWizCategoryViewItemBase
@@ -207,6 +208,8 @@ public:
 
     QString location() const { return m_strName; }
     QString name() const;
+
+    QString getAllFoldersPosition(int& nStartPos) const;
 
 private:
     QRect m_rcUnread;
@@ -239,6 +242,7 @@ public:
     virtual QTreeWidgetItem *clone() const;
 
     void reload(CWizDatabase& db);
+    void setTagPosition(int nPos);
     const WIZTAGDATA& tag() const { return m_tag; }
 
 private:
@@ -411,7 +415,7 @@ public:
     virtual QString id() const;
 
     void reload(CWizDatabase& db);
-
+    void setTagPosition(int nPos);
     const WIZTAGDATA& tag() const { return m_tag; }
 
     virtual int getSortOrder() const { return 11; }

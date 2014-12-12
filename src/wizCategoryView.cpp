@@ -342,7 +342,7 @@ void CWizCategoryBaseView::dragMoveEvent(QDragMoveEvent *event)
                 pItem->setFlags(pItem->flags() | Qt::ItemIsDropEnabled);
             else
                 pItem->setFlags(pItem->flags() & ~Qt::ItemIsDropEnabled);
-            qDebug() << "drag hover event ";
+
             event->acceptProposedAction();
             QTreeWidget::dragMoveEvent(event);
         }
@@ -406,13 +406,12 @@ void CWizCategoryBaseView::dropEvent(QDropEvent * event)
         if( !droppedIndex.isValid() )
           return;
 
-        const QMimeData* mimeData = event->mimeData();
-        QStringList formats = mimeData->formats();
-        foreach (QString str, formats) {
-            qDebug() << "drag clipboard type : " << str << "  value :  " << mimeData->data(str);
-        }
-
         QTreeWidget::dropEvent(event);
+        if (m_dragItem)
+        {
+            on_itemPosition_changed(m_dragItem);
+        }
+        viewport()->repaint();
         return;
     }
 
@@ -636,7 +635,6 @@ QModelIndex CWizCategoryBaseView::moveCursor(CursorAction cursorAction, Qt::Keyb
 
 void CWizCategoryBaseView::resetRootItemsDropEnabled(CWizCategoryViewItemBase* pItem)
 {
-
     int topCount = topLevelItemCount();
     for (int i = 0; i < topCount; i++)
     {
@@ -2493,6 +2491,33 @@ void CWizCategoryView::quickSyncNewDocument(const QString& strKbGUID)
     mainWindow->quickSyncKb(strKbGUID);
 }
 
+void CWizCategoryView::updateGroupFolderPosition(CWizDatabase& db)
+{
+    CWizCategoryViewItemBase* pItem = findAllFolderItem();
+    Q_ASSERT(pItem);
+
+    QString strForderList;
+    for (int i = 0; i < pItem->childCount(); i++)
+    {
+
+    }
+}
+
+void CWizCategoryView::updatePersonalFolderPosition(CWizDatabase& db)
+{
+    CWizCategoryViewAllFoldersItem* pItem = dynamic_cast<CWizCategoryViewAllFoldersItem* >(findAllFolderItem());
+    if (pItem)
+    {
+        QString str = pItem->getAllFoldersPosition();
+        qDebug() << "all folder item position  :  " << str;
+    }
+}
+
+void CWizCategoryView::updatePersonalTagPosition(CWizDatabase& db)
+{
+
+}
+
 void CWizCategoryView::initGeneral()
 {
     //CWizCategoryViewCategoryItem* pCategoryItem = new CWizCategoryViewCategoryItem(m_app, CATEGORY_GENERAL);
@@ -3782,6 +3807,26 @@ void CWizCategoryView::on_group_bizChanged(const QString& strKbGUID)
 void CWizCategoryView::on_groupDocuments_unreadCount_modified(const QString& strKbGUID)
 {
     updateGroupFolderDocumentCount(strKbGUID);
+}
+
+void CWizCategoryView::on_itemPosition_changed(const CWizCategoryViewItemBase* pItem)
+{
+    CWizDatabase& db = m_dbMgr.db(pItem->kbGUID());
+    if (db.IsGroup())
+    {
+        updateGroupFolderPosition(db);
+    }
+    else
+    {
+        if (const CWizCategoryViewFolderItem* item = dynamic_cast<const CWizCategoryViewFolderItem*>(pItem))
+        {
+            updatePersonalFolderPosition(db);
+        }
+        else if (const CWizCategoryViewTagItem* tagItem = dynamic_cast<const CWizCategoryViewTagItem*>(pItem))
+        {
+            updatePersonalTagPosition(db);
+        }
+    }
 }
 
 

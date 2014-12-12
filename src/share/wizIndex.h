@@ -331,6 +331,9 @@ public:
     bool TitleExists(const CString& strLocation, CString strTitle);
     bool GetNextTitle(const QString& strLocation, QString& strTitle);
 
+    virtual QString getTableStructureVersion();
+    virtual bool setTableStructureVersion(const QString& strVersion);
+
     /* Metas related operations */
     bool GetMetasByName(const QString& lpszMetaName,
                         CWizMetaDataArray& arrayMeta);

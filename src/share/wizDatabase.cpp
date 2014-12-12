@@ -1339,6 +1339,7 @@ void CWizDatabase::setBizGroupUsers(const QString& strkbGUID, const QString& str
 
 void CWizDatabase::SetFoldersPos(const QString& foldersPos, qint64 nVersion)
 {
+    qDebug() << "foldersPos " << foldersPos << "  current version" << nVersion;
     SetLocalValueVersion("folders_pos", nVersion);
 
     bool bPositionChanged = false;
@@ -1367,11 +1368,11 @@ void CWizDatabase::SetFoldersPos(const QString& foldersPos, qint64 nVersion)
         CString strPos;
         if (!::WizStringSimpleSplit(strLine, ':', strLocation, strPos))
             continue;
-
         strLocation.Trim();
         strLocation.Trim('\"');
 
         int nPos = _ttoi(strPos);
+        qDebug() << " after split  location, location :  " << strLocation << "  current Pos  : " << strPos  << "  pos :  " << nPos;
         if (0 == nPos)
             continue;
 

@@ -240,6 +240,7 @@ QString WIZOBJECTDATA::ObjectTypeToTypeString(WizObjectType eType)
 
 WIZTAGDATA::WIZTAGDATA()
     : nVersion(-1)
+    , nPostion(0)
 {
 }
 
@@ -252,6 +253,7 @@ WIZTAGDATA::WIZTAGDATA(const WIZTAGDATA& data)
     strDescription = data.strDescription;
     tModified = data.tModified;
     nVersion = data.nVersion;
+    nPostion = data.nPostion;
 }
 
 BOOL WIZTAGDATA::EqualForSync(const WIZTAGDATA& data) const
@@ -265,11 +267,12 @@ BOOL WIZTAGDATA::EqualForSync(const WIZTAGDATA& data) const
 BOOL WIZTAGDATA::LoadFromXmlRpc(CWizXmlRpcStructValue& data)
 {
     return data.GetStr(_T("tag_guid"), strGUID)
-        && data.GetStr(_T("tag_group_guid"), strParentGUID)
-        && data.GetStr(_T("tag_name"), strName)
-        && data.GetStr(_T("tag_description"), strDescription)
-        && data.GetTime(_T("dt_info_modified"), tModified)
-        && data.GetInt64(_T("version"), nVersion);
+            && data.GetStr(_T("tag_group_guid"), strParentGUID)
+            && data.GetStr(_T("tag_name"), strName)
+            && data.GetStr(_T("tag_description"), strDescription)
+            && data.GetTime(_T("dt_info_modified"), tModified)
+            && data.GetInt64(_T("version"), nVersion)
+            && data.GetInt64(_T("tag_pos"), nPostion);
 }
 
 BOOL WIZTAGDATA::SaveToXmlRpc(CWizXmlRpcStructValue& data) const
@@ -279,7 +282,8 @@ BOOL WIZTAGDATA::SaveToXmlRpc(CWizXmlRpcStructValue& data) const
     data.AddString(_T("tag_name"), strName);
     data.AddString(_T("tag_description"), strDescription);
     data.AddTime(_T("dt_info_modified"), tModified);
-    data.AddInt64(_T("version"), nVersion);;
+    data.AddInt64(_T("version"), nVersion);
+    data.AddInt64(_T("tag_pos"), nPostion);
 
     return TRUE;
 }

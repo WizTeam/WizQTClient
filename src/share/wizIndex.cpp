@@ -285,6 +285,7 @@ bool CWizIndex::CreateTag(const CString& strParentTagGUID,
     data.strDescription = strDescription;
 	data.tModified = WizGetCurrentTime();
     data.nVersion = -1;
+    data.nPostion = 0;
 
 	return CreateTagEx(data);
 }
@@ -452,6 +453,17 @@ bool CWizIndex::GetNextTitle(const QString& strLocation, QString& strTitle)
 
     return true;
 }
+
+QString CWizIndex::getTableStructureVersion()
+{
+    return GetMetaDef("TableStructure", "Version");
+}
+
+bool CWizIndex::setTableStructureVersion(const QString& strVersion)
+{
+    return SetMeta("TableStructure", "Version", strVersion);
+}
+
 
 CString CWizIndex::CalDocumentInfoMD5(const WIZDOCUMENTDATA& data)
 {

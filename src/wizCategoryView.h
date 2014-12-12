@@ -82,19 +82,6 @@ protected:
     CWizDatabaseManager& m_dbMgr;
     QTreeWidgetItem* m_selectedItem;
 
-private:
-    QPoint m_hitPos;
-    bool m_bDragHovered;
-    QPoint m_dragHoveredPos;
-    CWizDocumentDataArray m_dragDocArray;
-    QTimer* m_dragHoveredTimer;
-    CWizCategoryViewItemBase* m_dragHoveredItem;
-
-    CWizCategoryViewItemBase* m_dragItem;
-
-#ifdef WIZNOTE_CUSTOM_SCROLLBAR
-    CWizScrollBar* m_vScroll;
-#endif
 
 protected Q_SLOTS:
     virtual void on_document_created(const WIZDOCUMENTDATA& doc) { Q_UNUSED(doc); }
@@ -120,9 +107,25 @@ protected Q_SLOTS:
     virtual void on_group_permissionChanged(const QString& strKbGUID) { Q_UNUSED(strKbGUID); }
     virtual void on_group_bizChanged(const QString& strKbGUID) { Q_UNUSED(strKbGUID); }
 
+    virtual void on_itemPosition_changed(const CWizCategoryViewItemBase* pItem) { Q_UNUSED(pItem); }
+
     virtual void createDocumentByHtml(const QString& strHtml, const QString& strTitle);
 
     void on_dragHovered_timeOut();
+
+private:
+    QPoint m_hitPos;
+    bool m_bDragHovered;
+    QPoint m_dragHoveredPos;
+    CWizDocumentDataArray m_dragDocArray;
+    QTimer* m_dragHoveredTimer;
+    CWizCategoryViewItemBase* m_dragHoveredItem;
+
+    CWizCategoryViewItemBase* m_dragItem;
+
+#ifdef WIZNOTE_CUSTOM_SCROLLBAR
+    CWizScrollBar* m_vScroll;
+#endif
 };
 
 
@@ -191,39 +194,6 @@ public:
     void showGroupContextMenu(QPoint pos);
     void showTrashContextMenu(QPoint pos);
     void showShortcutContextMenu(QPoint pos);
-
-private:
-    void initGeneral();
-    void initFolders();
-    void initFolders(QTreeWidgetItem* pParent, const QString& strParentLocation, \
-                     const CWizStdStringArray& arrayAllLocation);//, const QMap<QString, int> &mfpos);
-    void initTags();
-    void initTags(QTreeWidgetItem* pParent, const QString& strParentTagGUID);
-    void initStyles();
-    void initGroups();
-    void initBiz(const WIZBIZDATA& biz);
-    void initGroup(CWizDatabase& db);
-    void initGroup(CWizDatabase& db, bool& itemCreeated);
-    void initGroup(CWizDatabase& db, QTreeWidgetItem* pParent,
-                   const QString& strParentTagGUID);
-    //
-    void resetCreateGroupLink();
-
-    QString WizGetHtmlBodyContent(QString strHtml);
-
-
-    //
-    void resetSections();
-
-    void doLocationSanityCheck(CWizStdStringArray& arrayLocation);
-
-    QString selectedId(QSettings* settings);
-    void saveSelected(QSettings* settings);
-
-    void loadChildState(QTreeWidgetItem* pi, QSettings* settings);
-    void loadItemState(QTreeWidgetItem* pi, QSettings* settings);
-    void saveChildState(QTreeWidgetItem* pi, QSettings* settings);
-    void saveItemState(QTreeWidgetItem* pi, QSettings* settings);
 
 
 public:
@@ -296,32 +266,12 @@ public:
     void manageBiz(const QString& bizGUID, bool bUpgrade);
 
 
+signals:
+    void newDocument();
+    void documentsHint(const QString& strHint);
 
-private:
-    QPointer<QMenu> m_menuShortcut;
-    QPointer<QMenu> m_menuFolderRoot;
-    QPointer<QMenu> m_menuFolder;
-    QPointer<QMenu> m_menuTagRoot;
-    QPointer<QMenu> m_menuTag;
-    QPointer<QMenu> m_menuNormalGroupRoot;
-    QPointer<QMenu> m_menuAdminGroupRoot;
-    QPointer<QMenu> m_menuOwnerGroupRoot;
-    QPointer<QMenu> m_menuNormalBizGroupRoot;
-    QPointer<QMenu> m_menuAdminBizGroupRoot;
-    QPointer<QMenu> m_menuGroup;
-    QPointer<QMenu> m_menuTrash;
-    QPointer<QTimer> m_timerUpdateFolderCount;
-    QPointer<QTimer> m_timerUpdateTagCount;
-    QMap<QString, QTimer*> m_mapTimerUpdateGroupCount;
+    void categoryItemPositionChanged(const QString& strKbGUID);
 
-    QString m_strRequestedGroupKbGUID;
-
-    QString m_strSelectedId;
-
-private Q_SLOTS:
-    void on_updatePrivateFolderDocumentCount_timeout();
-    void on_updatePrivateTagDocumentCount_timeout();
-    void on_updateGroupFolderDocumentCount_mapped_timeout(const QString& strKbGUID);
 
 protected Q_SLOTS:
     virtual void on_document_created(const WIZDOCUMENTDATA& doc);
@@ -344,6 +294,8 @@ protected Q_SLOTS:
     virtual void on_group_permissionChanged(const QString& strKbGUID);
     virtual void on_group_bizChanged(const QString& strKbGUID);
     virtual void on_groupDocuments_unreadCount_modified(const QString& strKbGUID);
+
+    virtual void on_itemPosition_changed(const CWizCategoryViewItemBase* pItem);
 
     virtual void createDocumentByHtml(const QString& strHtml, const QString& strTitle);
 
@@ -406,13 +358,15 @@ public Q_SLOTS:
 
     void updateGroupsData();
 
-Q_SIGNALS:
-    void newDocument();
-    void documentsHint(const QString& strHint);
-
 public:
     // Public API:
     Q_INVOKABLE CWizFolder* SelectedFolder();
+
+private Q_SLOTS:
+    void on_updatePrivateFolderDocumentCount_timeout();
+    void on_updatePrivateTagDocumentCount_timeout();
+    void on_updateGroupFolderDocumentCount_mapped_timeout(const QString& strKbGUID);
+
 
 private:
     void updateChildFolderDocumentCount(CWizCategoryViewItemBase* pItem,
@@ -432,6 +386,66 @@ private:
                                            QString& strLocation);
 
     void quickSyncNewDocument(const QString& strKbGUID);
+
+    void updatePersonalFolderPosition(CWizDatabase& db);
+    void updatePersonalTagPosition(CWizDatabase& db);
+    void updateGroupFolderPosition(CWizDatabase& db);
+
+private:
+    void initGeneral();
+    void initFolders();
+    void initFolders(QTreeWidgetItem* pParent, const QString& strParentLocation, \
+                     const CWizStdStringArray& arrayAllLocation);//, const QMap<QString, int> &mfpos);
+    void initTags();
+    void initTags(QTreeWidgetItem* pParent, const QString& strParentTagGUID);
+    void initStyles();
+    void initGroups();
+    void initBiz(const WIZBIZDATA& biz);
+    void initGroup(CWizDatabase& db);
+    void initGroup(CWizDatabase& db, bool& itemCreeated);
+    void initGroup(CWizDatabase& db, QTreeWidgetItem* pParent,
+                   const QString& strParentTagGUID);
+    //
+    void resetCreateGroupLink();
+
+    QString WizGetHtmlBodyContent(QString strHtml);
+
+
+    //
+    void resetSections();
+
+    void doLocationSanityCheck(CWizStdStringArray& arrayLocation);
+
+    QString selectedId(QSettings* settings);
+    void saveSelected(QSettings* settings);
+
+    void loadChildState(QTreeWidgetItem* pi, QSettings* settings);
+    void loadItemState(QTreeWidgetItem* pi, QSettings* settings);
+    void saveChildState(QTreeWidgetItem* pi, QSettings* settings);
+    void saveItemState(QTreeWidgetItem* pi, QSettings* settings);
+
+
+private:
+    QPointer<QMenu> m_menuShortcut;
+    QPointer<QMenu> m_menuFolderRoot;
+    QPointer<QMenu> m_menuFolder;
+    QPointer<QMenu> m_menuTagRoot;
+    QPointer<QMenu> m_menuTag;
+    QPointer<QMenu> m_menuNormalGroupRoot;
+    QPointer<QMenu> m_menuAdminGroupRoot;
+    QPointer<QMenu> m_menuOwnerGroupRoot;
+    QPointer<QMenu> m_menuNormalBizGroupRoot;
+    QPointer<QMenu> m_menuAdminBizGroupRoot;
+    QPointer<QMenu> m_menuGroup;
+    QPointer<QMenu> m_menuTrash;
+    QPointer<QTimer> m_timerUpdateFolderCount;
+    QPointer<QTimer> m_timerUpdateTagCount;
+    QMap<QString, QTimer*> m_mapTimerUpdateGroupCount;
+
+    QString m_strRequestedGroupKbGUID;
+
+    QString m_strSelectedId;
+
 };
 
 
