@@ -185,7 +185,6 @@ public:
     virtual bool acceptDrop(const CWizCategoryViewItemBase* pItem) const;
     virtual QString getSectionName();
     virtual int getSortOrder() const { return 20; }
-    QString getAllFoldersPosition() const;
 };
 
 class CWizCategoryViewFolderItem : public CWizCategoryViewItemBase
@@ -208,8 +207,6 @@ public:
 
     QString location() const { return m_strName; }
     QString name() const;
-
-    QString getAllFoldersPosition(int& nStartPos) const;
 
 private:
     QRect m_rcUnread;
@@ -413,6 +410,8 @@ public:
     virtual void drop(const WIZDOCUMENTDATA& data, bool forceCopy = false);
 
     virtual QString id() const;
+
+    virtual bool operator<(const QTreeWidgetItem &other) const;
 
     void reload(CWizDatabase& db);
     void setTagPosition(int nPos);

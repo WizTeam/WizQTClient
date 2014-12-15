@@ -90,6 +90,7 @@ Q_SIGNALS:
     void folderCreated(const QString& strLocation);
     void folderDeleted(const QString& strLocation);
     void folderPositionChanged();
+    void tagsPositionChanged(const QString& strKbGUID);
 
 };
 

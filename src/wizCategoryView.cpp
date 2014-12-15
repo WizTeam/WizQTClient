@@ -148,6 +148,9 @@ CWizCategoryBaseView::CWizCategoryBaseView(CWizExplorerApp& app, QWidget* parent
     connect(&m_dbMgr, SIGNAL(folderPositionChanged()),
             SLOT(on_folder_positionChanged()));
 
+    connect(&m_dbMgr, SIGNAL(tagsPositionChanged(const QString&)),
+            SLOT(on_tags_positionChanged(const QString&)));
+
     connect(&m_dbMgr, SIGNAL(tagCreated(const WIZTAGDATA&)),
             SLOT(on_tag_created(const WIZTAGDATA&)));
 
@@ -2493,24 +2496,30 @@ void CWizCategoryView::quickSyncNewDocument(const QString& strKbGUID)
 
 void CWizCategoryView::updateGroupFolderPosition(CWizDatabase& db)
 {
-    CWizCategoryViewItemBase* pItem = findAllFolderItem();
-    Q_ASSERT(pItem);
+    saveGroupTagsPosition(db.kbGUID());
 
-    QString strForderList;
-    for (int i = 0; i < pItem->childCount(); i++)
-    {
-
-    }
+    emit categoryItemPositionChanged(db.kbGUID());
 }
 
 void CWizCategoryView::updatePersonalFolderPosition(CWizDatabase& db)
 {
     CWizCategoryViewAllFoldersItem* pItem = dynamic_cast<CWizCategoryViewAllFoldersItem* >(findAllFolderItem());
-    if (pItem)
+    if (!pItem)
+        return;
+
+    QString str = getAllFoldersPosition();
+    qDebug() << "all folder item position  :  " << str;
+
+
+    // the last item of folder root should be trash
+    CWizCategoryViewTrashItem* trashItem = findTrash(db.kbGUID());
+    if (trashItem && pItem->indexOfChild(trashItem) != pItem->childCount() - 1)
     {
-        QString str = pItem->getAllFoldersPosition();
-        qDebug() << "all folder item position  :  " << str;
+        pItem->takeChild(pItem->indexOfChild(trashItem));
+        pItem->insertChild(pItem->childCount(), trashItem);
     }
+
+    emit categoryItemPositionChanged(db.kbGUID());
 }
 
 void CWizCategoryView::updatePersonalTagPosition(CWizDatabase& db)
@@ -2575,6 +2584,127 @@ void CWizCategoryView::sortFolders(CWizCategoryViewFolderItem* pItem)
 
         sortFolders(pFolder);
     }
+}
+
+void CWizCategoryView::sortGroupTags(const QString& strKbGUID, bool bReloadData)
+{
+    CWizCategoryViewGroupRootItem* groupRoot =
+            dynamic_cast<CWizCategoryViewGroupRootItem*>(itemFromKbGUID(strKbGUID));
+    if (!groupRoot)
+        return;
+
+    for (int i = 0; i < groupRoot->childCount(); i++)
+    {
+        CWizCategoryViewGroupItem* pItem = dynamic_cast<CWizCategoryViewGroupItem*>(groupRoot->child(i));
+        sortGroupTags(pItem, bReloadData);
+    }
+
+    groupRoot->sortChildren(0, Qt::AscendingOrder);
+}
+
+void CWizCategoryView::sortGroupTags(CWizCategoryViewGroupItem* pItem, bool bReloadData)
+{
+    if (!pItem)
+        return;
+
+    if (bReloadData)
+    {
+        CWizDatabase& db = m_dbMgr.db(pItem->kbGUID());
+        pItem->reload(db);
+    }
+
+    for (int i = 0; i < pItem->childCount(); i++)
+    {
+        CWizCategoryViewGroupItem* childItem = dynamic_cast<CWizCategoryViewGroupItem*>(pItem->child(i));
+        sortGroupTags(childItem, bReloadData);
+    }
+
+    pItem->sortChildren(0, Qt::AscendingOrder);
+}
+
+void CWizCategoryView::saveGroupTagsPosition(const QString& strKbGUID)
+{
+    CWizCategoryViewGroupRootItem* rootItem =
+            dynamic_cast<CWizCategoryViewGroupRootItem*>(itemFromKbGUID(strKbGUID));
+    if (!rootItem)
+        return;
+
+    CWizDatabase& db = m_dbMgr.db(strKbGUID);
+    db.blockSignals(true);
+    for (int i = 0; i < rootItem->childCount(); i++)
+    {
+        CWizCategoryViewGroupItem* childItem = dynamic_cast<CWizCategoryViewGroupItem* >(rootItem->child(i));
+        if (childItem)
+        {
+            childItem->setTagPosition(rootItem->indexOfChild(childItem));
+            qDebug() << "after change tag position : " << childItem->tag().strName << "   "  << i << "  current pos  :  " << childItem->tag().nPostion;
+            saveGroupTagsPosition(db, childItem);
+        }
+    }
+
+    db.blockSignals(false);
+    db.SetLocalValueVersion("group_tag_pos", -1);
+}
+
+void CWizCategoryView::saveGroupTagsPosition(CWizDatabase& db, CWizCategoryViewGroupItem* pItem)
+{
+    if (!pItem)
+        return;
+
+    WIZTAGDATA tag = pItem->tag();
+    db.ModifyTag(tag);
+
+    for (int i = 0; i < pItem->childCount(); i++)
+    {
+        CWizCategoryViewGroupItem* childItem = dynamic_cast<CWizCategoryViewGroupItem* >(pItem->child(i));
+        if (childItem)
+        {
+            childItem->setTagPosition(i);
+            qDebug() << "after change tag position : " << childItem->tag().strName << "   " << i << "  current pos  :  " << childItem->tag().nPostion;
+            saveGroupTagsPosition(db, childItem);
+        }
+    }
+}
+
+QString CWizCategoryView::getAllFoldersPosition()
+{
+    CWizCategoryViewAllFoldersItem* pItem =
+            dynamic_cast<CWizCategoryViewAllFoldersItem*>(findAllFolderItem());
+    if (!pItem)
+        return QString();
+
+    QString str = "{";
+    int nStartPos = 1;
+    for (int i = 0; i < pItem->childCount(); i++)
+    {
+        CWizCategoryViewFolderItem* childItem = dynamic_cast<CWizCategoryViewFolderItem* >(pItem->child(i));
+        Q_ASSERT(childItem);
+        str += getAllFoldersPosition(childItem, nStartPos);
+
+        if (i < pItem->childCount() - 1)
+            str += ",\n";
+    }
+    str += "}";
+    return str;
+}
+
+QString CWizCategoryView::getAllFoldersPosition(CWizCategoryViewFolderItem* pItem, int nStartPos)
+{
+    if (!pItem)
+        return QString();
+
+    QString str = "\"" + pItem->name() + "\": " + QString::number(nStartPos);
+    nStartPos ++;
+
+    for (int i = 0; i < pItem->childCount(); i++)
+    {
+        CWizCategoryViewFolderItem* childItem = dynamic_cast<CWizCategoryViewFolderItem* >(pItem->child(i));
+        Q_ASSERT(childItem);
+        str += ", \n";
+        str += getAllFoldersPosition(childItem, nStartPos);
+    }
+
+    return str;
 }
 
 void CWizCategoryView::initFolders()
@@ -3694,6 +3824,12 @@ void CWizCategoryView::on_tag_deleted(const WIZTAGDATA& tag)
         removeGroupFolder(tag);
         updateGroupFolderDocumentCount(tag.strKbGUID);
     }
+}
+
+void CWizCategoryView::on_tags_positionChanged(const QString& strKbGUID)
+{
+    bool reloadData = true;
+    sortGroupTags(strKbGUID, reloadData);
 }
 
 void CWizCategoryView::on_group_opened(const QString& strKbGUID)

@@ -100,6 +100,7 @@ protected Q_SLOTS:
     virtual void on_tag_created(const WIZTAGDATA& tag) { Q_UNUSED(tag); }
     virtual void on_tag_modified(const WIZTAGDATA& tagOld, const WIZTAGDATA& tagNew) { Q_UNUSED(tagOld); Q_UNUSED(tagNew); }
     virtual void on_tag_deleted(const WIZTAGDATA& tag) { Q_UNUSED(tag); }
+    virtual void on_tags_positionChanged(const QString& strKbGUID) { Q_UNUSED(strKbGUID); }
 
     virtual void on_group_opened(const QString& strKbGUID) { Q_UNUSED(strKbGUID); }
     virtual void on_group_closed(const QString& strKbGUID) { Q_UNUSED(strKbGUID); }
@@ -206,6 +207,15 @@ public:
     void sortFolders();
     void sortFolders(CWizCategoryViewFolderItem* pItem);
 
+    void sortGroupTags(const QString& strKbGUID, bool bReloadData = false);
+    void sortGroupTags(CWizCategoryViewGroupItem* pItem, bool bReloadData);
+
+    void saveGroupTagsPosition(const QString& strKbGUID);
+    void saveGroupTagsPosition(CWizDatabase& db, CWizCategoryViewGroupItem* pItem);
+
+    QString getAllFoldersPosition();
+    QString getAllFoldersPosition(CWizCategoryViewFolderItem* pItem, int nStartPos);
+
     // tags
     CWizCategoryViewTagItem* findTag(const WIZTAGDATA& tag, bool create, bool sort);
     CWizCategoryViewTagItem* addTagWithChildren(const WIZTAGDATA& tag);
@@ -287,6 +297,7 @@ protected Q_SLOTS:
     virtual void on_tag_created(const WIZTAGDATA& tag);
     virtual void on_tag_modified(const WIZTAGDATA& tagOld, const WIZTAGDATA& tagNew);
     virtual void on_tag_deleted(const WIZTAGDATA& tag);
+    virtual void on_tags_positionChanged(const QString& strKbGUID);
 
     virtual void on_group_opened(const QString& strKbGUID);
     virtual void on_group_closed(const QString& strKbGUID);

@@ -296,6 +296,8 @@ void CWizDatabaseManager::initSignals(CWizDatabase* db)
             SIGNAL(folderCreated(const QString&)));
     connect(db, SIGNAL(folderDeleted(const QString&)),
             SIGNAL(folderDeleted(const QString&)));
+    connect(db, SIGNAL(tagsPositionChanged(const QString&)),
+            SIGNAL(tagsPositionChanged(const QString&)));
     connect(db, SIGNAL(folderPositionChanged()),
             SIGNAL(folderPositionChanged()));
 }

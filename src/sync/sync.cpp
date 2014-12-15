@@ -371,7 +371,7 @@ bool CWizKMSync::DownloadValue(const QString& strKey)
         return FALSE;
     //
     __int64 nServerVersion = 0;
-    if (strKey != "folders_pos")
+    if (strKey != "group_tag_pos")
     {
     if (!m_server.GetValueVersion(strKey, nServerVersion))
     {

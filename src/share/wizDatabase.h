@@ -260,8 +260,10 @@ public:
     int GetObjectSyncTimeline();
     QString GetFolders();
     QString GetFoldersPos();
+    QString GetGroupTagsPos();
     void SetFoldersPos(const QString& foldersPos, qint64 nVersion);
     void SetFolders(const QString& strFolders, qint64 nVersion, bool bSaveVersion);
+    void SetGroupTagsPos(const QString& tagsPos, qint64 nVersion);
 
     void SetBizUsers(const QString &strBizGUID, const QString& strUsers);
     bool loadBizUsersFromJson(const QString &strBizGUID,
@@ -466,6 +468,7 @@ Q_SIGNALS:
     void processLog(const QString& msg);
     void attachmentsUpdated();
     void folderPositionChanged();
+    void tagsPositionChanged(const QString& strKbGUID);
 
 private:
     //should make sure sourceDoc already exist before use this.

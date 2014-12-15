@@ -271,8 +271,7 @@ BOOL WIZTAGDATA::LoadFromXmlRpc(CWizXmlRpcStructValue& data)
             && data.GetStr(_T("tag_name"), strName)
             && data.GetStr(_T("tag_description"), strDescription)
             && data.GetTime(_T("dt_info_modified"), tModified)
-            && data.GetInt64(_T("version"), nVersion)
-            && data.GetInt64(_T("tag_pos"), nPostion);
+            && data.GetInt64(_T("version"), nVersion);
 }
 
 BOOL WIZTAGDATA::SaveToXmlRpc(CWizXmlRpcStructValue& data) const
@@ -283,7 +282,6 @@ BOOL WIZTAGDATA::SaveToXmlRpc(CWizXmlRpcStructValue& data) const
     data.AddString(_T("tag_description"), strDescription);
     data.AddTime(_T("dt_info_modified"), tModified);
     data.AddInt64(_T("version"), nVersion);
-    data.AddInt64(_T("tag_pos"), nPostion);
 
     return TRUE;
 }

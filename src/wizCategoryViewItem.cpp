@@ -662,23 +662,6 @@ QString CWizCategoryViewAllFoldersItem::getSectionName()
     return WIZ_CATEGORY_SECTION_PERSONAL;
 }
 
-QString CWizCategoryViewAllFoldersItem::getAllFoldersPosition() const
-{
-    QString str = "{";
-    int nStartPos = 1;
-    for (int i = 0; i < childCount(); i++)
-    {
-        CWizCategoryViewFolderItem* childItem = dynamic_cast<CWizCategoryViewFolderItem* >(child(i));
-        Q_ASSERT(childItem);
-        str += childItem->getAllFoldersPosition(nStartPos);
-
-        if (i < childCount() - 1)
-            str += ",\n";
-    }
-    str += "}";
-    return str;
-}
-
 
 void CWizCategoryViewAllFoldersItem::showContextMenu(CWizCategoryBaseView* pCtrl, QPoint pos)
 {
@@ -784,22 +767,6 @@ void CWizCategoryViewFolderItem::showContextMenu(CWizCategoryBaseView* pCtrl, QP
 QString CWizCategoryViewFolderItem::name() const
 {
     return CWizDatabase::GetLocationName(m_strName);
-}
-
-QString CWizCategoryViewFolderItem::getAllFoldersPosition(int& nStartPos) const
-{
-    QString str = "\"" + m_strName + "\": " + QString::number(nStartPos);
-    nStartPos ++;
-
-    for (int i = 0; i < childCount(); i++)
-    {
-        CWizCategoryViewFolderItem* childItem = dynamic_cast<CWizCategoryViewFolderItem* >(child(i));
-        Q_ASSERT(childItem);
-        str += ", \n";
-        str += childItem->getAllFoldersPosition(nStartPos);
-    }
-
-    return str;
 }
 
 bool CWizCategoryViewFolderItem::operator < (const QTreeWidgetItem &other) const
@@ -1005,6 +972,7 @@ void CWizCategoryViewTagItem::reload(CWizDatabase& db)
 {
     db.TagFromGUID(m_tag.strGUID, m_tag);
     setText(0, m_tag.strName);
+    m_strName = m_tag.strName;
 }
 
 void CWizCategoryViewTagItem::setTagPosition(int nPos)
@@ -1733,10 +1701,22 @@ QString CWizCategoryViewGroupItem::id() const
     return ::WizMd5StringNoSpaceJava(QString(text(0) + m_tag.strGUID).toUtf8());
 }
 
+bool CWizCategoryViewGroupItem::operator<(const QTreeWidgetItem& other) const
+{
+    const CWizCategoryViewGroupItem* pOther = dynamic_cast<const CWizCategoryViewGroupItem*>(&other);
+    if (pOther)
+    {
+        return m_tag.nPostion < pOther->m_tag.nPostion;
+    }
+
+    return CWizCategoryViewItemBase::operator <(other);
+}
+
 void CWizCategoryViewGroupItem::reload(CWizDatabase& db)
 {
     db.TagFromGUID(m_tag.strGUID, m_tag);
     setText(0, m_tag.strName);
+    m_strName = m_tag.strName;
 }
 
 void CWizCategoryViewGroupItem::setTagPosition(int nPos)

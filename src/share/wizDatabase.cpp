@@ -1076,6 +1076,7 @@ void CWizDatabase::GetKBKeys(CWizStdStringArray& arrayKey)
     {
         arrayKey.push_back("group_tag_oem");
         arrayKey.push_back("group_tag_config_oem");
+        arrayKey.push_back("group_tag_pos");
     }
     else
     {
@@ -1133,6 +1134,10 @@ QString CWizDatabase::GetLocalValue(const QString& key)
     {
         return GetFoldersPos();
     }
+    else if (strKey == "group_tag_pos")
+    {
+        return GetGroupTagsPos();
+    }
     else if (strKey == "group_tag_oem")
     {
         Q_ASSERT(false);
@@ -1170,6 +1175,10 @@ void CWizDatabase::SetLocalValue(const QString& key, const QString& value,
     else if (strKey == "folders_pos")
     {
         SetFoldersPos(value, nServerVersion);
+    }
+    else if (strKey == "group_tag_pos")
+    {
+        SetGroupTagsPos(value, nServerVersion);
     }
     else if (strKey == "group_tag_oem")
     {
@@ -1414,6 +1423,26 @@ QString CWizDatabase::GetFoldersPos()
     return QString();
 }
 
+QString CWizDatabase::GetGroupTagsPos()
+{
+    CWizTagDataArray arrayTag;
+    GetAllTags(arrayTag);
+    if (arrayTag.size() == 0)
+        return QString();
+
+    QString strTagPos;
+    for (CWizTagDataArray::const_iterator it = arrayTag.begin();
+         it != arrayTag.end();
+         it++)
+    {
+        WIZTAGDATA tag = *it;
+        strTagPos.append(tag.strGUID + ":" + QString::number(tag.nPostion) + "*");
+    }
+    strTagPos.remove(strTagPos.length() - 1, 1);
+    qDebug() << "get group tags pos :  " << strTagPos;
+    return strTagPos;
+}
+
 void CWizDatabase::SetFolders(const QString& strFolders, qint64 nVersion, bool bSaveVersion)
 {
     if (strFolders.isEmpty())
@@ -1481,6 +1510,47 @@ void CWizDatabase::SetFolders(const QString& strFolders, qint64 nVersion, bool b
     if (bSaveVersion)
     {
         SetLocalValueVersion("folders", nVersion);
+    }
+}
+
+void CWizDatabase::SetGroupTagsPos(const QString& tagsPos, qint64 nVersion)
+{
+    qDebug() << "tagsPos " << tagsPos << "  current version" << nVersion;
+    SetLocalValueVersion("group_tag_pos", nVersion);
+
+    bool bPositionChanged = false;
+
+    CString str(tagsPos);
+    str.Trim();
+    if (str.IsEmpty())
+        return;
+
+    CWizStdStringArray arrPos;
+    ::WizSplitTextToArray(str, '*', arrPos);
+
+    CWizStdStringArray::const_iterator it;
+    for (it= arrPos.begin(); it != arrPos.end(); it++) {
+        CString strLine = *it;
+        QStringList posList =  strLine.split(':');
+        if (posList.count() != 2) {
+            qDebug() << "Process tags pos error : " << strLine;
+            continue;
+        }
+
+        QString strGUID = posList.first();
+        int nPos = posList.last().toInt();
+        WIZTAGDATA tagData;
+        if (TagFromGUID(strGUID, tagData)) {
+            if (tagData.nPostion != nPos) {
+                tagData.nPostion = nPos;
+                ModifyTag(tagData);
+                bPositionChanged = true;
+            }
+        }
+    }
+
+    if (bPositionChanged) {
+        Q_EMIT tagsPositionChanged(kbGUID());
     }
 }
 

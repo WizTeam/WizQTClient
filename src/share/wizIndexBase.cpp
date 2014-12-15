@@ -31,10 +31,12 @@ bool CWizIndexBase::Open(const CString& strFileName)
 
     try {
         m_db.open(strFileName);
-        int nVersion = getTableStructureVersion().toInt();
-        if (nVersion < QString(WIZ_TABLE_STRUCTURE_VERSION).toInt())
-        {
-            updateTableStructure(nVersion);
+        // upgrade table structure if table structure have been changed
+        if (m_db.tableExists(TABLE_NAME_WIZ_META)) {
+            int nVersion = getTableStructureVersion().toInt();
+            if (nVersion < QString(WIZ_TABLE_STRUCTURE_VERSION).toInt()) {
+                updateTableStructure(nVersion);
+            }
         }
     } catch (const CppSQLite3Exception& e) {
         return LogSQLException(e, _T("open database"));
@@ -44,6 +46,7 @@ bool CWizIndexBase::Open(const CString& strFileName)
         if (!CheckTable(g_arrayTableName[i]))
             return false;
     }
+    setTableStructureVersion(WIZ_TABLE_STRUCTURE_VERSION);
 
     return true;
 }
@@ -70,7 +73,6 @@ bool CWizIndexBase::CheckTable(const QString& strTableName)
         return false;
 
     bool result = ExecSQL(strSQL);
-    setTableStructureVersion(WIZ_TABLE_STRUCTURE_VERSION);
     return result;
 }
 
