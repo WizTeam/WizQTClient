@@ -176,6 +176,9 @@ CWizPreferenceWindow::CWizPreferenceWindow(CWizExplorerApp& app, QWidget* parent
     QString strColor = m_app.userSettings().editorBackgroundColor();
     ui->pushButtonBackgroundColor->setStyleSheet(QString("QPushButton "
                                                          "{ border: 1px; background: %1;} ").arg(strColor));
+
+    bool manuallySortFolders = m_app.userSettings().isManualSortingEnabled();
+    ui->checkBoxManuallySort->setChecked(manuallySortFolders);
 }
 
 void CWizPreferenceWindow::showPrintMarginPage()
@@ -441,4 +444,10 @@ void CWizPreferenceWindow::updateEditorBackgroundColor(const QString& strColorNa
                                                          "{ border: 1px; background: %1;} ").arg(strColorName));
     m_app.userSettings().setEditorBackgroundColor(strColorName);
     Q_EMIT settingsChanged(wizoptionsFont);
+}
+
+void CWizPreferenceWindow::on_checkBoxManuallySort_toggled(bool checked)
+{
+    m_app.userSettings().setManualSortingEnable(checked);
+    emit settingsChanged(wizoptionsFolders);
 }

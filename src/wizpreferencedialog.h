@@ -60,6 +60,8 @@ private slots:
     void on_pushButtonBackgroundColor_clicked();
     void on_pushButtonClearBackground_clicked();
 
+    void on_checkBoxManuallySort_toggled(bool checked);
+
 private:
     Ui::CWizPreferenceWindow *ui;
     CWizExplorerApp& m_app;

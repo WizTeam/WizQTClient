@@ -68,7 +68,8 @@ enum WizOptionsType
     wizoptionsNoteView,
     wizoptionsSync,
     wizoptionsSkin,
-    wizoptionsFont
+    wizoptionsFont,
+    wizoptionsFolders
 };
 
 enum WizPositionType
@@ -145,6 +146,9 @@ public:
 
     QString editorBackgroundColor();
     void setEditorBackgroundColor(const QString& strColor);
+
+    bool isManualSortingEnabled();
+    void setManualSortingEnable(bool bEnable);
 
     QString locale();
     void setLocale(const QString& strLocale);

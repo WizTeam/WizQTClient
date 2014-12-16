@@ -447,6 +447,21 @@ void CWizUserSettings::setEditorBackgroundColor(const QString& strColor)
     set("EditorBackgroundColor", strColor);
 }
 
+bool CWizUserSettings::isManualSortingEnabled()
+{
+    QString strManualSortingEnable = get("ManualSortingEnable");
+    if (!strManualSortingEnable.isEmpty()) {
+        return strManualSortingEnable.toInt() ? true : false;
+    }
+
+    return true;
+}
+
+void CWizUserSettings::setManualSortingEnable(bool bEnable)
+{
+    set("ManualSortingEnable", bEnable ? "1" : "0");
+}
+
 QString CWizUserSettings::skin()
 {
     // just return because no skin selection from v1.4

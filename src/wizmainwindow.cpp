@@ -2109,6 +2109,8 @@ void MainWindow::on_options_settingsChanged(WizOptionsType type)
 
     } else if (wizoptionsFont == type) {
         m_doc->web()->editorResetFont();
+    } else if (wizoptionsFolders == type) {
+        m_category->sortItems(0, Qt::AscendingOrder);
     }
 }
 
