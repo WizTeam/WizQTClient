@@ -486,24 +486,26 @@ void CWizDocumentListViewItem::drawSyncStatus(QPainter* p, const QStyleOptionVie
 
     QString strIconPath;
     CWizDatabase& db = m_app.databaseManager().db(m_data.doc.strKbGUID);
+    bool isRetina = qApp->devicePixelRatio() >= 2;
+    strIconPath = ::WizGetSkinResourcePath(m_app.userSettings().skin());
     if (db.IsDocumentModified(m_data.doc.strGUID))
     {
-        strIconPath = ::WizGetSkinResourcePath(m_app.userSettings().skin()) + "uploading.bmp";
+        strIconPath += isRetina ? "uploading@2x.png" : "uploading.png";
     }
     else if (!db.IsDocumentDownloaded(m_data.doc.strGUID))
     {
-        strIconPath = ::WizGetSkinResourcePath(m_app.userSettings().skin()) + "downloading.bmp";
+        strIconPath += isRetina ? "downloading@2x.png" : "downloading.png";
     }
     else
         return;
 
     p->save();
     int nMargin = -1;
-    QPixmap fullPic(strIconPath);
-    QPixmap pix = fullPic.copy(0, 0, fullPic.height(), fullPic.height());
-    pix.setMask(pix.createMaskFromColor(Qt::black, Qt::MaskInColor));
-    QRect rcSync(vopt->rect.right() - pix.width() - nMargin, vopt->rect.bottom() - pix.height() - nMargin,
-                 pix.width(), pix.height());
+    QPixmap pix(strIconPath);
+    QSize szPix = pix.size();
+    scaleIconSizeForRetina(szPix);
+    QRect rcSync(vopt->rect.right() - szPix.width() - nMargin, vopt->rect.bottom() - szPix.height() - nMargin,
+                 szPix.width(), szPix.height());
     p->drawPixmap(rcSync, pix);
     p->restore();
 

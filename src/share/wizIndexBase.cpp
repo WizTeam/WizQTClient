@@ -155,7 +155,7 @@ bool CWizIndexBase::updateTableStructure(int oldVersion)
     qDebug() << "old table version : " << oldVersion;
     if (oldVersion < 1)
     {
-        Exec("ALTER TABLE 'WIZ_TAG' ADD 'WIZ_POS' int64; ");
+        Exec("ALTER TABLE 'WIZ_TAG' ADD 'TAG_POS' int64; ");
     }
     setTableStructureVersion(WIZ_TABLE_STRUCTURE_VERSION);
     return true;

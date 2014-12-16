@@ -132,27 +132,29 @@ bool CWizAttachmentListView::itemExtraImage(const QModelIndex& index, const QRec
 {
     if (const CWizAttachmentListViewItem* item = attachmentItemFromIndex(index))
     {
-        QString strIcoPath;
+        QString strIconPath;
         CWizDatabase& db = m_dbMgr.db(item->attachment().strKbGUID);
         MainWindow* mainWindow = qobject_cast<MainWindow *>(Core::ICore::mainWindow());
+        bool isRetina = qApp->devicePixelRatio() >= 2;
+        strIconPath = ::WizGetSkinResourcePath(mainWindow->userSettings().skin());
         if (!db.IsAttachmentDownloaded(item->attachment().strGUID))
         {
-            strIcoPath = ::WizGetSkinResourcePath(mainWindow->userSettings().skin()) + "downloading.bmp";
+            strIconPath += isRetina ? "downloading@2x.png" : "downloading.png";
         }
         else if (db.IsAttachmentModified(item->attachment().strGUID))
         {
-            strIcoPath = ::WizGetSkinResourcePath(mainWindow->userSettings().skin()) + "uploading.bmp";
+            strIconPath += isRetina ? "uploading@2x.png" : "uploading.png";
         }
         else
             return false;
 
-        QPixmap fullPix(strIcoPath);
-        extraPix = fullPix.copy(0, 0, fullPix.height(), fullPix.height());
-        extraPix.setMask(extraPix.createMaskFromColor(Qt::black, Qt::MaskInColor));
+        extraPix = QPixmap(strIconPath);
+        QSize szImage = extraPix.size();
+        scaleIconSizeForRetina(szImage);
         int nMargin = -1;
-        rcImage.setLeft(itemBound.right() - extraPix.width() - nMargin);
-        rcImage.setTop(itemBound.bottom() - extraPix.height() - nMargin);
-        rcImage.setSize(extraPix.size());
+        rcImage.setLeft(itemBound.right() - szImage.width() - nMargin);
+        rcImage.setTop(itemBound.bottom() - szImage.height() - nMargin);
+        rcImage.setSize(szImage);
 
         return true;
     }
