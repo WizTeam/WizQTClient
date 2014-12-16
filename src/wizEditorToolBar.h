@@ -58,6 +58,7 @@ private:
     CWizToolButton* m_btnMobileImage;
     CWizToolButton* m_btnScreenShot;
     CWizToolButton* m_btnViewSource;
+    CWizToolButton* m_btnInsertCode;
 
     QString m_strImageSrc;
 
@@ -102,6 +103,7 @@ protected Q_SLOTS:
     void on_btnMobileImage_clicked();
     void on_btnScreenShot_clicked();
     void on_btnViewSource_clicked();
+    void on_btnInsertCode_clicked();
     void on_editor_saveImageAs_triggered();
     void on_editor_copyImage_triggered();
     void on_editor_copyImageLink_triggered();
