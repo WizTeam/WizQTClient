@@ -264,6 +264,8 @@ public Q_SLOTS:
     void on_actionViewToggleCategory_triggered();
     void on_actionViewToggleFullscreen_triggered();
 
+    void on_actionMarkAllMessageRead_triggered();
+
     // menu format
     void on_actionFormatJustifyLeft_triggered();
     void on_actionFormatJustifyRight_triggered();

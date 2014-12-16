@@ -48,6 +48,7 @@
 #include "utils/stylehelper.h"
 #include "widgets/wizFramelessWebDialog.h"
 #include "widgets/wizScreenShotWidget.h"
+#include "widgets/wizImageButton.h"
 
 #include "wiznotestyle.h"
 #include "wizdocumenthistory.h"
@@ -1324,22 +1325,23 @@ QWidget*MainWindow::createMessageListView()
     layoutActions->setSpacing(0);
     m_msgListUnreadBar->setLayout(layoutActions);
 
-    CWizImageButton* allBtn = new CWizImageButton(this);
-    allBtn->setFixedHeight(Utils::StyleHelper::listViewSortControlWidgetHeight());
-    layoutActions->addWidget(allBtn);
-    QWidget* line = new QWidget(this);
-    line->setFixedWidth(1);
-    line->setStyleSheet("border-left-width:1;border-left-style:solid;border-left-color:#DADAD9");
-    layoutActions->addWidget(line);
+
+    int nMargin = 15;
+    QSize szMarkMessageBtn(16, 16);
+    layoutActions->setContentsMargins(szMarkMessageBtn.width() + nMargin, 0, nMargin, 0);
 
     QLabel* labelHint = new QLabel(this);
     labelHint->setText(tr("Unread Messages"));
     labelHint->setAlignment(Qt::AlignCenter);
-    labelHint->setStyleSheet("color: #787878;padding-bottom:1px;"); //font: 12px;
+    labelHint->setStyleSheet("color: #787878;padding-bottom:1px;");
     layoutActions->addWidget(labelHint);
 
-    CWizImageButton* readBtn = new CWizImageButton(this);
-    readBtn->setFixedHeight(Utils::StyleHelper::listViewSortControlWidgetHeight());
+    wizImageButton* readBtn = new wizImageButton(this);
+    QIcon btnIcon = ::WizLoadSkinIcon(userSettings().skin(), "actionMarkMessagesRead");
+    readBtn->setIcon(btnIcon);
+    readBtn->setFixedSize(szMarkMessageBtn);
+    readBtn->setToolTip(tr("Mark all messages read"));
+    connect(readBtn, SIGNAL(clicked()), SLOT(on_actionMarkAllMessageRead_triggered()));
     layoutActions->addWidget(readBtn);
 
     QWidget* line2 = new QWidget(this);
@@ -1397,36 +1399,6 @@ void MainWindow::on_documents_sortingTypeChanged(int type)
 {
     m_documents->resetItemsSortingType(type);
 }
-
-
-//void MainWindow::on_document_contentChanged()
-//{
-//    m_doc->setModified(m_doc->web()->page()->isModified());
-//}
-
-
-//void MainWindow::resetNotice()
-//{
-//#ifdef Q_OS_MAC
-//#else
-//    if (!m_labelNotice)
-//        return;
-//    //
-//    m_labelNotice->setText("");
-//    //
-//    QString notice;
-//    if (!::WizGetNotice(notice)
-//        || notice.isEmpty())
-//        return;
-//    //
-//    CString strTitle = ::WizGetCommandLineValue(notice, "Title");
-//    CString strLink = ::WizGetCommandLineValue(notice, "Link");
-//    //
-//    CString strText = CString("<a href=\"%1\">%2</a>").arg(strLink, strTitle);
-//    //
-//    m_labelNotice->setText(strText);
-//#endif
-//}
 
 void MainWindow::init()
 {
@@ -1621,6 +1593,11 @@ void MainWindow::on_actionViewToggleFullscreen_triggered()
 //        m_splitter->widget(1)->hide();
 //    }
 #endif // Q_OS_MAC
+}
+
+void MainWindow::on_actionMarkAllMessageRead_triggered()
+{
+    m_msgList->markAllMessagesReaded();
 }
 
 void MainWindow::on_actionFormatJustifyLeft_triggered()
