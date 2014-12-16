@@ -776,37 +776,31 @@ bool CWizCategoryViewFolderItem::operator < (const QTreeWidgetItem &other) const
         return false;
     }
 
-    qDebug() << "compare item  ， this  : " << text(0) << "  other  :   " << pOther->text(0);
 
     if (getSortOrder() != pOther->getSortOrder())
     {
         bool result  = getSortOrder() < pOther->getSortOrder();
-        qDebug() << " compare result by sort order  :  lower  " << result;
         return result;
     }
 
     // sort by folder pos
-    int nThis = 0, nOther = 0;
-    if (!pOther->location().isEmpty()) {
-        QSettings* setting = ExtensionSystem::PluginManager::settings();
-        nOther = setting->value("FolderPosition/" + pOther->location()).toInt();
-        nThis = setting->value("FolderPosition/" + location()).toInt();
-    }
-    //
-    if (nThis != nOther)
+    if (m_app.userSettings().isManualSortingEnabled())
     {
-        if (nThis > 0 && nOther > 0)
-        {
-            bool result  =  nThis < nOther;
-            qDebug() << " compare result  by pos  :  lower  " << result;
-            return result;
+        int nThis = 0, nOther = 0;
+        if (!pOther->location().isEmpty()) {
+            QSettings* setting = ExtensionSystem::PluginManager::settings();
+            nOther = setting->value("FolderPosition/" + pOther->location()).toInt();
+            nThis = setting->value("FolderPosition/" + location()).toInt();
         }
-//        else
-//        {
-//            bool result  =  nThis > 0;
-//            qDebug() << " compare result  by pos   :  bigger than 0  " << result;
-//            return result;
-//        }
+
+        if (nThis != nOther)
+        {
+            if (nThis > 0 && nOther > 0)
+            {
+                bool result  =  nThis < nOther;
+                return result;
+            }
+        }
     }
 
     //
@@ -825,13 +819,11 @@ bool CWizCategoryViewFolderItem::operator < (const QTreeWidgetItem &other) const
             std::string strOtherA(arrOther.data(), arrOther.size());
             //
             bool result = strThisA.compare(strOtherA.c_str()) < 0;
-            qDebug() << " compare result  by simpchinese :  lower  " << result;
             return result;
         }
     }
     //
     bool result =  strThis.compare(strOther) < 0;
-    qDebug() << " compare result by text  :  lower  " << result;
     return result;
 }
 
@@ -935,12 +927,6 @@ bool CWizCategoryViewTagItem::acceptDrop(const WIZDOCUMENTDATA& data) const
     }
 
     return false;
-}
-
-bool CWizCategoryViewTagItem::acceptDrop(const CWizCategoryViewItemBase* pItem) const
-{
-    const CWizCategoryViewTagItem* item = dynamic_cast<const CWizCategoryViewTagItem*>(pItem);
-    return NULL != item;
 }
 
 void CWizCategoryViewTagItem::drop(const WIZDOCUMENTDATA& data, bool forceCopy)
@@ -1703,10 +1689,13 @@ QString CWizCategoryViewGroupItem::id() const
 
 bool CWizCategoryViewGroupItem::operator<(const QTreeWidgetItem& other) const
 {
-    const CWizCategoryViewGroupItem* pOther = dynamic_cast<const CWizCategoryViewGroupItem*>(&other);
-    if (pOther)
+    if (m_app.userSettings().isManualSortingEnabled())
     {
-        return m_tag.nPostion < pOther->m_tag.nPostion;
+        const CWizCategoryViewGroupItem* pOther = dynamic_cast<const CWizCategoryViewGroupItem*>(&other);
+        if (pOther)
+        {
+            return m_tag.nPostion < pOther->m_tag.nPostion;
+        }
     }
 
     return CWizCategoryViewItemBase::operator <(other);

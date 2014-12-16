@@ -270,6 +270,9 @@ public:
                               const QString& strJsonRaw,
                               CWizBizUserDataArray& arrayUser);
 
+    void SetFoldersPosModified();
+    void SetGroupTagsPosModified();
+
     //
     virtual bool getAllNotesOwners(CWizStdStringArray &arrayOwners);
 

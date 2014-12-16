@@ -232,8 +232,6 @@ public:
     virtual void getDocuments(CWizDatabase& db, CWizDocumentDataArray& arrayDocument);
     virtual bool accept(CWizDatabase& db, const WIZDOCUMENTDATA& data);
     virtual bool acceptDrop(const WIZDOCUMENTDATA& data) const;
-    virtual bool acceptDrop(const CWizCategoryViewItemBase* pItem) const;
-    virtual bool dragAble() const { return true; }
     virtual void drop(const WIZDOCUMENTDATA& data, bool forceCopy = false);
 
     virtual QTreeWidgetItem *clone() const;

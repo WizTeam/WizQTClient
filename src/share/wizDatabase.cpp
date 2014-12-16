@@ -1350,6 +1350,7 @@ void CWizDatabase::SetFoldersPos(const QString& foldersPos, qint64 nVersion)
 {
     qDebug() << "foldersPos " << foldersPos << "  current version" << nVersion;
     SetLocalValueVersion("folders_pos", nVersion);
+    SetMeta("SYNC_INFO", "FOLDERS_POS", foldersPos);
 
     bool bPositionChanged = false;
 
@@ -1420,7 +1421,7 @@ QString CWizDatabase::GetFolders()
 
 QString CWizDatabase::GetFoldersPos()
 {
-    return QString();
+    return meta("SYNC_INFO", "FOLDERS_POS");
 }
 
 QString CWizDatabase::GetGroupTagsPos()
@@ -1634,6 +1635,16 @@ bool CWizDatabase::loadBizUsersFromJson(const QString& strBizGUID,
     delete encoder;
 
     return true;
+}
+
+void CWizDatabase::SetFoldersPosModified()
+{
+    SetLocalValueVersion("folders_pos", -1);
+}
+
+void CWizDatabase::SetGroupTagsPosModified()
+{
+    SetLocalValueVersion("group_tag_pos", -1);
 }
 
 bool CWizDatabase::getAllNotesOwners(CWizStdStringArray& arrayOwners)

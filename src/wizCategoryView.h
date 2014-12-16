@@ -214,7 +214,7 @@ public:
     void saveGroupTagsPosition(CWizDatabase& db, CWizCategoryViewGroupItem* pItem);
 
     QString getAllFoldersPosition();
-    QString getAllFoldersPosition(CWizCategoryViewFolderItem* pItem, int nStartPos);
+    QString getAllFoldersPosition(CWizCategoryViewFolderItem* pItem, int& nStartPos);
 
     // tags
     CWizCategoryViewTagItem* findTag(const WIZTAGDATA& tag, bool create, bool sort);

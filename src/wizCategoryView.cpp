@@ -248,18 +248,21 @@ void CWizCategoryBaseView::startDrag(Qt::DropActions supportedActions)
 {
     Q_UNUSED(supportedActions);
 
-    m_dragItem = currentCategoryItem<CWizCategoryViewItemBase>();
-    Q_ASSERT(m_dragItem);
-    if (!m_dragItem->dragAble())
+    if (m_app.userSettings().isManualSortingEnabled())
     {
-        m_dragItem = 0;
-        return;
-    }
+        m_dragItem = currentCategoryItem<CWizCategoryViewItemBase>();
+        Q_ASSERT(m_dragItem);
+        if (!m_dragItem->dragAble())
+        {
+            m_dragItem = 0;
+            return;
+        }
 
-    resetRootItemsDropEnabled(m_dragItem);
-    QTreeWidget::startDrag(supportedActions);
-    setCurrentItem(m_dragItem);
-    m_dragItem = 0;
+        resetRootItemsDropEnabled(m_dragItem);
+        QTreeWidget::startDrag(supportedActions);
+        setCurrentItem(m_dragItem);
+        m_dragItem = 0;
+    }
 
 }
 
@@ -2497,6 +2500,7 @@ void CWizCategoryView::quickSyncNewDocument(const QString& strKbGUID)
 void CWizCategoryView::updateGroupFolderPosition(CWizDatabase& db)
 {
     saveGroupTagsPosition(db.kbGUID());
+    db.SetGroupTagsPosModified();
 
     emit categoryItemPositionChanged(db.kbGUID());
 }
@@ -2507,10 +2511,6 @@ void CWizCategoryView::updatePersonalFolderPosition(CWizDatabase& db)
     if (!pItem)
         return;
 
-    QString str = getAllFoldersPosition();
-    qDebug() << "all folder item position  :  " << str;
-
-
     // the last item of folder root should be trash
     CWizCategoryViewTrashItem* trashItem = findTrash(db.kbGUID());
     if (trashItem && pItem->indexOfChild(trashItem) != pItem->childCount() - 1)
@@ -2518,6 +2518,11 @@ void CWizCategoryView::updatePersonalFolderPosition(CWizDatabase& db)
         pItem->takeChild(pItem->indexOfChild(trashItem));
         pItem->insertChild(pItem->childCount(), trashItem);
     }
+
+    QString str = getAllFoldersPosition();
+    qDebug() << "all folder item position  :  " << str;
+    db.SetFoldersPos(str, -1);
+    db.SetFoldersPosModified();
 
     emit categoryItemPositionChanged(db.kbGUID());
 }
@@ -2643,7 +2648,6 @@ void CWizCategoryView::saveGroupTagsPosition(const QString& strKbGUID)
     }
 
     db.blockSignals(false);
-    db.SetLocalValueVersion("group_tag_pos", -1);
 }
 
 void CWizCategoryView::saveGroupTagsPosition(CWizDatabase& db, CWizCategoryViewGroupItem* pItem)
@@ -2688,7 +2692,7 @@ QString CWizCategoryView::getAllFoldersPosition()
     return str;
 }
 
-QString CWizCategoryView::getAllFoldersPosition(CWizCategoryViewFolderItem* pItem, int nStartPos)
+QString CWizCategoryView::getAllFoldersPosition(CWizCategoryViewFolderItem* pItem, int& nStartPos)
 {
     if (!pItem)
         return QString();
