@@ -2,6 +2,10 @@
 #include "sync/apientry.h"
 #include "share/wizmisc.h"
 #include "rapidjson/document.h"
+#include "share/wizDatabase.h"
+#include "share/wizDatabaseManager.h"
+#include "sync/token.h"
+#include "sync/wizkmxmlrpc.h"
 
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
@@ -192,7 +196,7 @@ void CWizDocumentEditStatusSyncThread::sendDoneMessage(const QString& strUserAli
 }
 
 
-CWizDocumentEditStatusCheckThread::CWizDocumentEditStatusCheckThread(QObject* parent)
+CWizDocumentStatusCheckThread::CWizDocumentStatusCheckThread(QObject* parent)
     : QThread(parent)
     , m_stop(false)
     , m_mutexWait(QMutex::NonRecursive)
@@ -200,24 +204,24 @@ CWizDocumentEditStatusCheckThread::CWizDocumentEditStatusCheckThread(QObject* pa
 {
 }
 
-void CWizDocumentEditStatusCheckThread::waitForDone()
+void CWizDocumentStatusCheckThread::waitForDone()
 {
     stop();
     //
     WizWaitForThread(this);
 }
 
-void CWizDocumentEditStatusCheckThread::needRecheck()
+void CWizDocumentStatusCheckThread::needRecheck()
 {
     m_needRecheck = true;
 }
 
-void CWizDocumentEditStatusCheckThread::checkEditStatus(const QString& strKbGUID, const QString& strGUID)
+void CWizDocumentStatusCheckThread::checkEditStatus(const QString& strKbGUID, const QString& strGUID)
 {
     setDocmentGUID(strKbGUID, strGUID);
 }
 
-void CWizDocumentEditStatusCheckThread::downloadData(const QString& strUrl)
+void CWizDocumentStatusCheckThread::downloadData(const QString& strUrl)
 {
     QNetworkAccessManager net;
     QNetworkReply* reply = net.get(QNetworkRequest(strUrl));
@@ -263,7 +267,7 @@ void CWizDocumentEditStatusCheckThread::downloadData(const QString& strUrl)
     reply->deleteLater();
 }
 
-void CWizDocumentEditStatusCheckThread::run()
+void CWizDocumentStatusCheckThread::run()
 {
     QString kbGUID;
     QString guid;
@@ -290,22 +294,77 @@ void CWizDocumentEditStatusCheckThread::run()
 
         //
         //
-        QString strRequestUrl = WizFormatString4(_T("%1/get?obj_id=%2/%3&t=%4"),
-                                                 WizKMGetDocumentEditStatusURL(),
-                                                 kbGUID,
-                                                 guid,
-                                                 ::WizIntToStr(GetTickCount()));
+        int lastVersion;
+        bool changed = checkDocumentChangedOnServer(kbGUID, guid, lastVersion);
+        emit checkDocumentChangedFinished(guid, changed, lastVersion);
 
-        downloadData(strRequestUrl);
+        checkDocumentEditStatus(kbGUID, guid);
     }
 }
 
 
-void CWizDocumentEditStatusCheckThread::setDocmentGUID(const QString& strKbGUID, const QString& strGUID)
+void CWizDocumentStatusCheckThread::setDocmentGUID(const QString& strKbGUID, const QString& strGUID)
 {
     m_mutexWait.lock();
     m_strKbGUID = strKbGUID;
     m_strGUID = strGUID;
     m_wait.wakeAll();
     m_mutexWait.unlock();
+}
+
+bool CWizDocumentStatusCheckThread::checkDocumentChangedOnServer(const QString& strKbGUID, const QString& strGUID, int& versionOnServer)
+{
+    CWizDatabase& db = CWizDatabaseManager::instance()->db(strKbGUID);
+    WIZDOCUMENTDATA doc;
+    if (!db.DocumentFromGUID(strGUID, doc))
+        return false;
+
+    if (doc.nVersion == -1)
+        return false;
+
+    WIZUSERINFO userInfo = WizService::Token::info();
+    if (db.IsGroup())
+    {
+        WIZGROUPDATA group;
+        if (!CWizDatabaseManager::instance()->db().GetGroupData(strKbGUID, group))
+            return false;
+        userInfo.strKbGUID = group.strGroupGUID;
+        userInfo.strDatabaseServer = group.strDatabaseServer;
+        if (userInfo.strDatabaseServer.isEmpty())
+        {
+            userInfo.strDatabaseServer = WizService::ApiEntry::kUrlFromGuid(userInfo.strToken, userInfo.strKbGUID);
+        }
+    }
+    CWizKMDatabaseServer server(userInfo, NULL);
+    WIZOBJECTVERSION versionServer;
+    if (!server.wiz_getVersion(versionServer))
+        return false;
+
+    if (versionServer.nDocumentVersion <= db.GetObjectVersion("document"))
+        return false;
+
+    //emit syncDatabaseRequest(strKbGUID);
+
+    int nPart = 0;
+    nPart |= WIZKM_XMKRPC_DOCUMENT_PART_INFO;
+    WIZDOCUMENTDATAEX docOnServer;
+    if (!server.document_getData(strGUID, nPart, docOnServer))
+        return false;
+
+    qDebug() << "compare document version , server  :  " << docOnServer.nVersion << " doc in local  :  " << doc.nVersion;
+
+    versionOnServer = docOnServer.nVersion;
+    return docOnServer.nVersion > doc.nVersion;
+}
+
+bool CWizDocumentStatusCheckThread::checkDocumentEditStatus(const QString& strKbGUID, const QString& strGUID)
+{
+    QString strRequestUrl = WizFormatString4(_T("%1/get?obj_id=%2/%3&t=%4"),
+                                             WizKMGetDocumentEditStatusURL(),
+                                             strKbGUID,
+                                             strGUID,
+                                             ::WizIntToStr(GetTickCount()));
+
+    downloadData(strRequestUrl);
+    return true;
 }

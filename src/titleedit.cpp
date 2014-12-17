@@ -179,8 +179,8 @@ void TitleEdit::setReadOnly(bool b)
     setAttribute(Qt::WA_MacShowFocusRect, false);
 
     // Focre to update document title right now
-    if (b)
-        onTitleEditingFinished();
+//    if (b)
+//        onTitleEditingFinished();
 }
 
 void TitleEdit::setCompleter(QCompleter* completer)

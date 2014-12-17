@@ -51,11 +51,11 @@ private:
     QPointer<QNetworkAccessManager> m_netManager;
 };
 
-class CWizDocumentEditStatusCheckThread : public QThread
+class CWizDocumentStatusCheckThread : public QThread
 {
     Q_OBJECT
 public:
-    CWizDocumentEditStatusCheckThread(QObject* parent = 0);
+    CWizDocumentStatusCheckThread(QObject* parent = 0);
     void checkEditStatus(const QString& strKbGUID,const QString& strGUID);
     void downloadData(const QString& strUrl);
     //
@@ -68,12 +68,17 @@ public slots:
 
 signals:
     void checkFinished(QString strGUID,QStringList editors);
+    void checkDocumentChangedFinished(const QString& strGUID, bool bChanged, int lastVersion);
+    void syncDatabaseRequest(const QString& strKbGUID);
 
 protected:
     virtual void run();
 
 private:
     void setDocmentGUID(const QString& strKbGUID,const QString& strGUID);
+
+    bool checkDocumentChangedOnServer(const QString& strKbGUID, const QString& strGUID, int& versionOnServer);
+    bool checkDocumentEditStatus(const QString& strKbGUID, const QString& strGUID);
 
 private:
     QString m_strKbGUID;

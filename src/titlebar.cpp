@@ -237,6 +237,12 @@ void TitleBar::setEditingDocument(bool editing)
     m_editBtn->setState(editing ? CellButton::Checked : CellButton::Normal);
 }
 
+void TitleBar::setEditButtonState(bool enable, bool editing)
+{
+    m_editBtn->setEnabled(enable);
+    setEditingDocument(editing);
+}
+
 void TitleBar::updateEditButton(bool editing)
 {
     if (m_editor->isModified()) {

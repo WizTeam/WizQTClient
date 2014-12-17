@@ -25,7 +25,7 @@ class CWizObjectDataDownloaderHost;
 class QStackedWidget;
 class QWebFrame;
 class CWizDocumentEditStatusSyncThread;
-class CWizDocumentEditStatusCheckThread;
+class CWizDocumentStatusCheckThread;
 
 namespace Core {
 namespace Internal {
@@ -66,7 +66,7 @@ protected:
 
     CWizUserCipherForm* m_passwordView;
     CWizDocumentEditStatusSyncThread* m_editStatusSyncThread;
-    CWizDocumentEditStatusCheckThread* m_editStatusCheckThread;
+    CWizDocumentStatusCheckThread* m_editStatusCheckThread;
 
     virtual void showEvent(QShowEvent *event);
 
@@ -123,6 +123,8 @@ public Q_SLOTS:
 
     //
     void on_checkEditStatus_finished(QString strGUID, QStringList editors);
+    void on_checkDocumentChanged_finished(const QString& strGUID, bool changed, int versionOnServer);
+    void on_syncDatabase_request(const QString& strKbGUID);
     void on_webView_focus_changed();
 
 private:

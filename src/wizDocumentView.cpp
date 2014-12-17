@@ -22,6 +22,10 @@
 #include "share/wizuihelper.h"
 #include "wizusercipherform.h"
 #include "wizDocumentEditStatus.h"
+#include "notifybar.h"
+#include "sync/token.h"
+#include "sync/apientry.h"
+#include "sync/wizkmxmlrpc.h"
 
 #include "titlebar.h"
 
@@ -42,7 +46,7 @@ CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
     , m_bEditingMode(false)
     , m_noteLoaded(false)
     , m_editStatusSyncThread(new CWizDocumentEditStatusSyncThread(this))
-    , m_editStatusCheckThread(new CWizDocumentEditStatusCheckThread(this))
+    , m_editStatusCheckThread(new CWizDocumentStatusCheckThread(this))
 {
     m_title->setEditor(m_web);
 
@@ -120,6 +124,8 @@ CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
 
     connect(m_editStatusCheckThread, SIGNAL(checkFinished(QString,QStringList)),
             SLOT(on_checkEditStatus_finished(QString,QStringList)));
+    connect(m_editStatusCheckThread, SIGNAL(checkDocumentChangedFinished(QString,bool,int)),
+            SLOT(on_checkDocumentChanged_finished(QString,bool,int)));
 
     // open comments link by document webview
     connect(m_comments->page(), SIGNAL(linkClicked(const QUrl&)), m_web,
@@ -209,13 +215,14 @@ void CWizDocumentView::initStat(const WIZDOCUMENTDATA& data, bool bEditing)
     m_bLocked = false;
     int nLockReason = -1;
 
-    if (CWizDatabase::IsInDeletedItems(data.strLocation)) {
-        nLockReason = 1;
+    if (m_dbMgr.db(data.strKbGUID).IsGroup()) {
+        nLockReason = NotifyBar::LockForGruop;
         m_bLocked = true;
-    }
-
-    if (!m_dbMgr.db(data.strKbGUID).CanEditDocument(data)) {
-        nLockReason = 2;
+    } else if (!m_dbMgr.db(data.strKbGUID).CanEditDocument(data)) {
+        nLockReason = NotifyBar::PermissionLack;
+        m_bLocked = true;
+    } else if (CWizDatabase::IsInDeletedItems(data.strLocation)) {
+        nLockReason = NotifyBar::Deleted;
         m_bLocked = true;
     }
 
@@ -227,7 +234,7 @@ void CWizDocumentView::initStat(const WIZDOCUMENTDATA& data, bool bEditing)
 
     bool bGroup = m_dbMgr.db(data.strKbGUID).IsGroup();
     m_title->setLocked(m_bLocked, nLockReason, bGroup);
-    if (bGroup && nLockReason == -1)
+    if (NotifyBar::LockForGruop == nLockReason)
     {
         m_editStatusCheckThread->checkEditStatus(data.strKbGUID, data.strGUID);
     }
@@ -527,6 +534,61 @@ void Core::CWizDocumentView::on_checkEditStatus_finished(QString strGUID, QStrin
     {
         m_title->setDocumentEditingStatus("");
     }
+}
+
+void CWizDocumentView::on_checkDocumentChanged_finished(const QString& strGUID, bool changed, int versionOnServer)
+{
+    if (strGUID == m_note.strGUID)
+    {
+        if (changed)
+        {
+            CWizDatabase& db = m_dbMgr.db(m_note.strKbGUID);
+            m_note.nVersion = versionOnServer;
+            db.ModifyDocumentInfoEx(m_note);
+
+            // downlaod document data
+            QString strDocumentFileName = db.GetDocumentFileName(m_note.strGUID);
+            QFile::remove(strDocumentFileName);
+
+            MainWindow* window = qobject_cast<MainWindow *>(m_app.mainWindow());
+            window->downloaderHost()->download(m_note);
+            window->showClient(false);
+            window->transitionView()->showAsMode(m_note.strGUID, CWizDocumentTransitionView::Downloading);
+
+            return;
+        }
+        else
+        {
+            m_bLocked = false;
+            int nLockReason = -1;
+            m_bEditingMode = false;
+
+            const WIZDOCUMENTDATA& doc = note();
+            if (!m_dbMgr.db(doc.strKbGUID).CanEditDocument(doc)) {
+                nLockReason = NotifyBar::PermissionLack;
+                m_bLocked = true;
+            } else if (CWizDatabase::IsInDeletedItems(doc.strLocation)) {
+                nLockReason = NotifyBar::Deleted;
+                m_bLocked = true;
+            }
+
+            if (m_bLocked)
+            {
+                bool bGroup = m_dbMgr.db(doc.strKbGUID).IsGroup();
+                m_title->setLocked(m_bLocked, nLockReason, bGroup);
+            }
+            else
+            {
+                m_title->setEditButtonState(true, false);
+            }
+        }
+    }
+}
+
+void CWizDocumentView::on_syncDatabase_request(const QString& strKbGUID)
+{
+    MainWindow* mainWindow = qobject_cast<MainWindow *>(m_app.mainWindow());
+    mainWindow->quickSyncKb(strKbGUID);
 }
 
 void CWizDocumentView::on_webView_focus_changed()

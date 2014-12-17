@@ -43,16 +43,20 @@ void NotifyBar::showPermissionNotify(int type)
     setStyleForPermission();
 
     switch (type) {
-    case NotifyBar::Locked:
+    case Locked:
         m_labelNotify->setText(QObject::tr("The note is locked and read only, press unlock button if you need edit."));
         show();
         break;
-    case NotifyBar::Deleted:
+    case Deleted:
         m_labelNotify->setText(QObject::tr("This note is deleted, You can edit after move to other folders."));
         show();
         break;
-    case NotifyBar::PermissionLack:
+    case PermissionLack:
         m_labelNotify->setText(QObject::tr("Your permission is not enough to edit this note."));
+        show();
+        break;
+    case LockForGruop:
+        m_labelNotify->setText(QObject::tr("Checking for the version of note, please wait for a second..."));
         show();
         break;
     default:

@@ -38,6 +38,7 @@ public:
     void setNote(const WIZDOCUMENTDATA& data, bool editing, bool locked);
     void updateInfo(const WIZDOCUMENTDATA& doc);
     void setEditingDocument(bool editing);
+    void setEditButtonState(bool enable, bool editing);
     void updateEditButton(bool bEditing);
     void resetTitle(const QString& strTitle);
 

@@ -17,7 +17,8 @@ public:
     {
         Locked,
         Deleted,
-        PermissionLack
+        PermissionLack,
+        LockForGruop
     };
 
     explicit NotifyBar(QWidget *parent);
