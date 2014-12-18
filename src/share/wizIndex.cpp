@@ -1174,6 +1174,12 @@ bool CWizIndex::SetDocumentTags(WIZDOCUMENTDATA& data,
                                 const CWizStdStringArray& arrayTagGUID,
                                 bool bReset /* = true */)
 {
+    CWizStdStringArray arrayTagOld;
+    if (GetDocumentTags(data.strGUID, arrayTagOld)) {
+        if (WizKMStringArrayIsEqual<CString>(arrayTagOld, arrayTagGUID))
+            return true;
+    }
+
     if (!DeleteDocumentTags(data, bReset)) {
         TOLOG("Failed to delete document tags");
         return false;
@@ -1336,8 +1342,8 @@ CString CWizIndex::GetDocumentTagGUIDsString(const CString& strDocumentGUID)
 bool CWizIndex::SetDocumentTags(WIZDOCUMENTDATA& data, const CWizTagDataArray& arrayTag)
 {
 	CWizTagDataArray arrayTagOld;
-    if (GetDocumentTags(data.strGUID, arrayTagOld)) {
-		if (WizKMDataArrayIsEqual<WIZTAGDATA>(arrayTagOld, arrayTag))
+    if (GetDocumentTags(data.strGUID, arrayTagOld)) {        
+        if (WizKMObjectArrayIsEqual<WIZTAGDATA>(arrayTagOld, arrayTag))
             return true;
 	}
 

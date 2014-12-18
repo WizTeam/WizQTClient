@@ -533,6 +533,10 @@ void Core::CWizDocumentView::on_checkEditStatus_finished(QString strGUID, QStrin
     else
     {
         m_title->setDocumentEditingStatus("");
+        if (strGUID == m_note.strGUID)
+        {
+            m_title->setEditButtonState(true, false);
+        }
     }
 }
 
@@ -576,10 +580,6 @@ void CWizDocumentView::on_checkDocumentChanged_finished(const QString& strGUID, 
             {
                 bool bGroup = m_dbMgr.db(doc.strKbGUID).IsGroup();
                 m_title->setLocked(m_bLocked, nLockReason, bGroup);
-            }
-            else
-            {
-                m_title->setEditButtonState(true, false);
             }
         }
     }

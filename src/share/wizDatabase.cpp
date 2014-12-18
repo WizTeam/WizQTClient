@@ -1348,7 +1348,6 @@ void CWizDatabase::setBizGroupUsers(const QString& strkbGUID, const QString& str
 
 void CWizDatabase::SetFoldersPos(const QString& foldersPos, qint64 nVersion)
 {
-    qDebug() << "foldersPos " << foldersPos << "  current version" << nVersion;
     SetLocalValueVersion("folders_pos", nVersion);
     SetMeta("SYNC_INFO", "FOLDERS_POS", foldersPos);
 
@@ -1516,7 +1515,6 @@ void CWizDatabase::SetFolders(const QString& strFolders, qint64 nVersion, bool b
 
 void CWizDatabase::SetGroupTagsPos(const QString& tagsPos, qint64 nVersion)
 {
-    qDebug() << "tagsPos " << tagsPos << "  current version" << nVersion;
     SetLocalValueVersion("group_tag_pos", nVersion);
 
     bool bPositionChanged = false;

@@ -56,6 +56,7 @@ void NotifyBar::showPermissionNotify(int type)
         show();
         break;
     case LockForGruop:
+        setStyleForEditing();
         m_labelNotify->setText(QObject::tr("Checking for the version of note, please wait for a second..."));
         show();
         break;
