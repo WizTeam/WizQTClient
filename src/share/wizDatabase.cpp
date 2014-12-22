@@ -393,8 +393,6 @@ qint64 CWizDatabase::GetObjectVersion(const QString& strObjectName)
 bool CWizDatabase::SetObjectVersion(const QString& strObjectName,
                                     qint64 nVersion)
 {
-    qDebug() << "set object: " << strObjectName << " version: " << nVersion;
-
     return SetMetaInt64("SYNC_INFO", strObjectName, nVersion);
 }
 
@@ -1381,7 +1379,6 @@ void CWizDatabase::SetFoldersPos(const QString& foldersPos, qint64 nVersion)
         strLocation.Trim('\"');
 
         int nPos = _ttoi(strPos);
-        qDebug() << " after split  location, location :  " << strLocation << "  current Pos  : " << strPos  << "  pos :  " << nPos;
         if (0 == nPos)
             continue;
 
@@ -1439,7 +1436,6 @@ QString CWizDatabase::GetGroupTagsPos()
         strTagPos.append(tag.strGUID + ":" + QString::number(tag.nPostion) + "*");
     }
     strTagPos.remove(strTagPos.length() - 1, 1);
-    qDebug() << "get group tags pos :  " << strTagPos;
     return strTagPos;
 }
 

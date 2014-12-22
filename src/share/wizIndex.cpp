@@ -1099,8 +1099,6 @@ bool CWizIndex::DeleteDocumentParamEx(const CString& strDocumentGUID, CString st
 
 bool CWizIndex::DeleteDeletedGUID(const CString& strGUID)
 {
-    qDebug() << "delete deleted, guid: " << strGUID;
-
 	CString strFormat = FormatDeleteSQLFormat(TABLE_NAME_WIZ_DELETED_GUID, _T("DELETED_GUID"));
 
 	CString strSQL;

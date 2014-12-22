@@ -141,7 +141,6 @@ bool CWizIndexBase::Repair(const QString& strDestFileName)
 
 bool CWizIndexBase::setTableStructureVersion(const QString& /*strVersion*/)
 {
-    qDebug() << "CWizIndexBase::setTableStructureVersion called";
     return true;
 }
 
