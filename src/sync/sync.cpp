@@ -371,8 +371,6 @@ bool CWizKMSync::DownloadValue(const QString& strKey)
         return FALSE;
     //
     __int64 nServerVersion = 0;
-    if (strKey != "group_tag_pos")
-    {
     if (!m_server.GetValueVersion(strKey, nServerVersion))
     {
         TOLOG1(_T("Can't get value version: %1"), strKey);
@@ -385,7 +383,6 @@ bool CWizKMSync::DownloadValue(const QString& strKey)
     __int64 nLocalVersion = m_pDatabase->GetLocalValueVersion(strKey);
     if (nServerVersion <= nLocalVersion)
         return TRUE;
-    }
     //
     //
     QString strServerValue;

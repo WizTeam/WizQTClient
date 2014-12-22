@@ -62,6 +62,13 @@ CWizLoginDialog::CWizLoginDialog(const QString &strDefaultUserId, const QString 
     //
 
 #endif
+    QPainterPath path;
+    QRectF rect = geometry();
+    path.addRoundRect(rect, 5, 2);
+    QPolygon polygon= path.toFillPolygon().toPolygon();
+    QRegion region(polygon);
+    setMask(region);
+
     m_lineEditUserName = ui->wgt_usercontainer->edit();
     m_lineEditPassword = ui->wgt_passwordcontainer->edit();
     m_buttonLogin = ui->btn_login;

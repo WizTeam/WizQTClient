@@ -340,14 +340,14 @@
           <item>
            <widget class="QRadioButton" name="radioAlwaysEditing">
             <property name="text">
-             <string>Always open note in Editing-View</string>
+             <string>Always open in Editing-View(Only psersonal note)</string>
             </property>
            </widget>
           </item>
           <item>
            <widget class="QRadioButton" name="radioAlwaysReading">
             <property name="text">
-             <string>Always open note in Reading-View</string>
+             <string>Always open in Reading-View</string>
             </property>
            </widget>
           </item>
