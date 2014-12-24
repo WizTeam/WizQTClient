@@ -105,8 +105,10 @@ public:
     QString get(const QString& section, const QString& strKey) const;
     void set(const QString& section, const QString& strKey, const QString& strValue);
 
-    QString user() const { return m_strUserId; }
+    QString user() const;
     void setUser(const QString& strUser);
+
+    QString myWizMail() const;
 
     QString password() const;
     void setPassword(const QString& strPassword = "");

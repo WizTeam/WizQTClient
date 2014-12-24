@@ -54,6 +54,7 @@
 #define WIZNOTE_API_COMMAND_COMMENT_COUNT   "comment_count"
 #define WIZNOTE_API_COMMAND_CHANGELOG        "changelog"
 #define WIZNOTE_API_COMMAND_UPGRADE        "updatev2"
+#define WIZNOTE_API_COMMAND_MAIL_SHARE        "mail_share"
 
 //#ifdef _M_X64
 //    QString strPlatform = "x64";
@@ -213,6 +214,16 @@ QString ApiEntryPrivate::upgradeUrl()
     return urlFromCommand(WIZNOTE_API_COMMAND_UPGRADE);
 }
 
+QString ApiEntryPrivate::mailShareUrl()
+{
+//    QString strKsHost = syncUrl();
+
+    QString strMailShare;
+    requestUrl(WIZNOTE_API_COMMAND_MAIL_SHARE, strMailShare);
+//    strMailShare.replace("{ks_host}", strKsHost);
+    return strMailShare;
+}
+
 QString ApiEntryPrivate::accountInfoUrl(const QString& strToken)
 {
     QString strExt = QString("token=%1").arg(strToken);
@@ -326,6 +337,13 @@ QString ApiEntry::avatarUploadUrl()
     if (!d)
         d = new ApiEntryPrivate();
     return d->avatarUploadUrl();
+}
+
+QString ApiEntry::mailShare()
+{
+    if (!d)
+        d = new ApiEntryPrivate();
+    return d->mailShareUrl();
 }
 
 QString ApiEntry::commentUrl(const QString& strToken, const QString& strKbGUID,const QString& strGUID)

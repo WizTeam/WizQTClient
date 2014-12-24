@@ -178,6 +178,11 @@ void CWizUserSettings::setUser(const QString& strUser)
     }
 }
 
+QString CWizUserSettings::myWizMail() const
+{
+    return get("ACCOUNT", "MYWIZMAIL");
+}
+
 QString CWizUserSettings::get(const QString& section, const QString& strKey) const
 {
     if (!m_strUserId.isEmpty()) {
@@ -208,6 +213,14 @@ void CWizUserSettings::set(const QString& section, const QString& strKey, const 
         m_db->SetMeta(section, strKey, strValue);
         return;
     }
+}
+
+QString CWizUserSettings::user() const
+{
+    if (m_strUserId.isEmpty())
+        return m_db->GetUserId();
+
+    return m_strUserId;
 }
 
 QString CWizUserSettings::get(const QString& strKey) const

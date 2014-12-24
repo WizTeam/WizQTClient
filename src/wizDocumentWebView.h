@@ -172,6 +172,7 @@ public:
     void saveAsPDF(const QString& strFileName);
     void saveAsHtml(const QString& strDirPath);
     void printDocument();
+    bool shareNoteByEmail();
     bool findIMGElementAt(QPoint point, QString& strSrc);
     //
     Q_INVOKABLE bool isContentsChanged() { return m_bContentsChanged; }
@@ -365,6 +366,7 @@ Q_SIGNALS:
 private:
     void setWindowVisibleOnScreenShot(bool bVisible);
     bool insertImage(const QString& strFileName, bool bCopyFile);
+
 };
 
 #endif // WIZDOCUMENTWEBVIEW_H

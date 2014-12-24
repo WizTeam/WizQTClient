@@ -155,6 +155,7 @@ set(wiznote_SOURCES
     share/rtf2html/rtf_keyword.cpp
     share/rtf2html/rtf_table.cpp
     share/rtf2html/rtf2html.cpp
+    widgets/wizEmailShareDialog.cpp
 )
 
 set(wiznote_HEADERS
@@ -300,6 +301,7 @@ set(wiznote_HEADERS
     share/rtf2html/rtf_keyword.h
     share/rtf2html/rtf_table.h
     share/rtf2html/rtf_tools.h
+    widgets/wizEmailShareDialog.h
 )
 
 set(wiznote_FORMS
@@ -318,6 +320,7 @@ set(wiznote_FORMS
     ui/wizSearchReplaceWidget.ui
     ui/wizDocTemplateDialog.ui
     ui/wizVerificationCodeDialog.ui
+    ui/wizEmailShareDialog.ui
 )
 
 set(wiznote_TRANSLATIONS

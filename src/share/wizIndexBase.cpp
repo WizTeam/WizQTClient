@@ -151,9 +151,9 @@ QString CWizIndexBase::getTableStructureVersion()
 
 bool CWizIndexBase::updateTableStructure(int oldVersion)
 {
-    qDebug() << "old table version : " << oldVersion;
     if (oldVersion < 1)
     {
+        qDebug() << "table structure version : " << oldVersion << "  update to version 1";
         Exec("ALTER TABLE 'WIZ_TAG' ADD 'TAG_POS' int64; ");
     }
     setTableStructureVersion(WIZ_TABLE_STRUCTURE_VERSION);
@@ -1426,7 +1426,7 @@ bool CWizIndexBase::DocumentFromGUID(const CString& strDocumentGUID, WIZDOCUMENT
     }
 
     if (arrayDocument.empty()) {
-        TOLOG(_T("Failed to get document by guid, result is empty"));
+        //TOLOG(_T("Failed to get document by guid, result is empty"));
         return false;
     }
 

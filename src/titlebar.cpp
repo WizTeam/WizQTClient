@@ -77,9 +77,16 @@ TitleBar::TitleBar(QWidget *parent)
     m_tagBtn->setNormalIcon(::WizLoadSkinIcon(strTheme, "document_tag"), tr("View and add tags"));
     connect(m_tagBtn, SIGNAL(clicked()), SLOT(onTagButtonClicked()));
 
+    m_emailBtn = new CellButton(CellButton::Center, this);
+    m_emailBtn->setFixedHeight(nTitleHeight);
+    QString emailShortcut = ::WizGetShortcut("EditNoteEmail", "Alt+3");
+    m_emailBtn->setShortcut(QKeySequence::fromString(emailShortcut));
+    m_emailBtn->setNormalIcon(::WizLoadSkinIcon(strTheme, "document_email"), tr("Share document by email"));
+    connect(m_emailBtn, SIGNAL(clicked()), SLOT(onTagButtonClicked()));
+
     m_attachBtn = new CellButton(CellButton::Center, this);
     m_attachBtn->setFixedHeight(nTitleHeight);
-    QString attachmentShortcut = ::WizGetShortcut("EditNoteAttachments", "Alt+3");
+    QString attachmentShortcut = ::WizGetShortcut("EditNoteAttachments", "Alt+4");
     m_attachBtn->setShortcut(QKeySequence::fromString(attachmentShortcut));
     m_attachBtn->setNormalIcon(::WizLoadSkinIcon(strTheme, "document_attachment"), tr("Add attachments"));
     m_attachBtn->setBadgeIcon(::WizLoadSkinIcon(strTheme, "document_attachment_exist"), tr("View and add attachments"));
@@ -87,14 +94,14 @@ TitleBar::TitleBar(QWidget *parent)
 
     m_historyBtn = new CellButton(CellButton::Center, this);
     m_historyBtn->setFixedHeight(nTitleHeight);
-    QString historyShortcut = ::WizGetShortcut("EditNoteHistory", "Alt+4");
+    QString historyShortcut = ::WizGetShortcut("EditNoteHistory", "Alt+5");
     m_historyBtn->setShortcut(QKeySequence::fromString(historyShortcut));
     m_historyBtn->setNormalIcon(::WizLoadSkinIcon(strTheme, "document_history"), tr("View and recover note's history"));
     connect(m_historyBtn, SIGNAL(clicked()), SLOT(onHistoryButtonClicked()));
 
     m_infoBtn = new CellButton(CellButton::Center, this);
     m_infoBtn->setFixedHeight(nTitleHeight);
-    QString infoShortcut = ::WizGetShortcut("EditNoteInfo", "Alt+5");
+    QString infoShortcut = ::WizGetShortcut("EditNoteInfo", "Alt+6");
     m_infoBtn->setShortcut(QKeySequence::fromString(infoShortcut));
     m_infoBtn->setNormalIcon(::WizLoadSkinIcon(strTheme, "document_info"), tr("View and modify note's info"));
     connect(m_infoBtn, SIGNAL(clicked()), SLOT(onInfoButtonClicked()));
@@ -273,6 +280,11 @@ void TitleBar::onTagButtonClicked()
     QRect rc = m_tagBtn->rect();
     QPoint pt = m_tagBtn->mapToGlobal(QPoint(rc.width()/2, rc.height()));
     m_tags->showAtPoint(pt);
+}
+
+void TitleBar::onEmailButtonClicked()
+{
+    m_editor->shareNoteByEmail();
 }
 
 void TitleBar::onAttachButtonClicked()

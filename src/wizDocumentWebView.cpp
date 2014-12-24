@@ -42,6 +42,7 @@
 #include "wizSearchReplaceWidget.h"
 #include "widgets/WizCodeEditorDialog.h"
 #include "widgets/wizScreenShotWidget.h"
+#include "widgets/wizEmailShareDialog.h"
 
 #include "utils/pathresolve.h"
 #include "utils/logger.h"
@@ -144,7 +145,6 @@ bool getBodyContentFromHtml(QString& strHtml, bool bNeedTextParse)
 
 void CWizDocumentWebViewPage::on_editorCommandPaste_triggered()
 {
-    qDebug() << "webview page pasted called";
     QClipboard* clip = QApplication::clipboard();
     Q_ASSERT(clip);
 
@@ -823,6 +823,16 @@ bool CWizDocumentWebView::insertImage(const QString& strFileName, bool bCopyFile
     return false;
 }
 
+bool CWizDocumentWebView::shareNoteByEmail()
+{
+    CWizEmailShareDialog dlg(m_app);
+    dlg.setNote(view()->note());
+
+    dlg.exec();
+
+    return true;
+}
+
 void CWizDocumentWebView::onEditorLoadFinished(bool ok)
 {
     if (!ok) {
@@ -1299,7 +1309,6 @@ bool CWizDocumentWebView::editorCommandExecuteInsertHtml(const QString& strHtml,
 
 void CWizDocumentWebView::on_editorCommandPastePlainText_triggered()
 {
-    qDebug() << "webview pasted called";
     QClipboard* clip = QApplication::clipboard();
     Q_ASSERT(clip);
 
@@ -1320,7 +1329,7 @@ void CWizDocumentWebView::on_editorCommandPastePlainText_triggered()
 //    }
 
     QString strText = wizSystemClipboardData();
-    qDebug() << "clipboard data from cocoa : " << strText;
+    //qDebug() << "clipboard data from cocoa : " << strText;
     if (!strText.isEmpty())
     {
         QMimeData* data = new QMimeData();
@@ -1501,7 +1510,8 @@ void CWizDocumentWebView::on_editorCommandExecuteForeColor_accepted(const QColor
 
 bool CWizDocumentWebView::editorCommandExecuteBold()
 {
-    return editorCommandExecuteCommand("bold");
+    return shareNoteByEmail();
+   // return editorCommandExecuteCommand("bold");
 }
 
 bool CWizDocumentWebView::editorCommandExecuteItalic()
@@ -2075,7 +2085,6 @@ void CWizDocumentWebViewSaverThread::PeekData(SAVEDATA& data)
         //
         break;
     }
-
 }
 
 void CWizDocumentWebViewSaverThread::run()
