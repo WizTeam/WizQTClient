@@ -167,6 +167,7 @@ public:
     bool editorCommandExecuteFontSize(const QString& strSize);
     bool editorCommandExecuteInsertHtml(const QString& strHtml, bool bNotSerialize);
 
+    void setPastePlainTextEnable(bool bEnable);
     void on_editorCommandPastePlainText_triggered();
     //
     void saveAsPDF(const QString& strFileName);

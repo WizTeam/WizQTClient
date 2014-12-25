@@ -176,6 +176,8 @@ void CWizDocumentWebViewPage::on_editorCommandPaste_triggered()
 //        clip->setMimeData(data);
 //    }
 
+
+
     if (!clip->image().isNull()) {
         // save clipboard image to $TMPDIR
         QString strTempPath = Utils::PathResolve::tempPath();
@@ -1307,38 +1309,13 @@ bool CWizDocumentWebView::editorCommandExecuteInsertHtml(const QString& strHtml,
     return editorCommandExecuteCommand("insertHtml", "'" + strHtml + "'", s);
 }
 
-void CWizDocumentWebView::on_editorCommandPastePlainText_triggered()
+void CWizDocumentWebView::setPastePlainTextEnable(bool bEnable)
 {
-    QClipboard* clip = QApplication::clipboard();
-    Q_ASSERT(clip);
-
-//    const QMimeData* mime = clip->mimeData();
-//    QStringList formats = mime->formats();
-//    for(int i = 0; i < formats.size(); ++ i) {
-//        qDebug() << "Mime Format: " << formats.at(i) << " Mime data: " << mime->data(formats.at(i));
-//    }
-//    if (mime->hasHtml())
-//    {
-//        QString strText = mime->text();
-//        if (strText.isEmpty())
-//            WizHtml2Text(mime->html(), strText);
-//        QMimeData* data = new QMimeData();
-//        data->removeFormat("text/html");
-//        data->setText(strText);
-//        clip->setMimeData(data);
-//    }
-
-    QString strText = wizSystemClipboardData();
-    //qDebug() << "clipboard data from cocoa : " << strText;
-    if (!strText.isEmpty())
+    int nState = editorCommandQueryCommandState("pasteplain");
+    if ((!bEnable && nState == 1) || (bEnable && nState != 1))
     {
-        QMimeData* data = new QMimeData();
-        data->removeFormat("text/html");
-        data->setText(strText);
-        clip->setMimeData(data);
+        editorCommandExecuteCommand("pasteplain");
     }
-
-    triggerPageAction(QWebPage::Paste);
 }
 
 bool CWizDocumentWebView::editorCommandExecuteIndent()
@@ -1510,8 +1487,7 @@ void CWizDocumentWebView::on_editorCommandExecuteForeColor_accepted(const QColor
 
 bool CWizDocumentWebView::editorCommandExecuteBold()
 {
-    return shareNoteByEmail();
-   // return editorCommandExecuteCommand("bold");
+    return editorCommandExecuteCommand("bold");
 }
 
 bool CWizDocumentWebView::editorCommandExecuteItalic()

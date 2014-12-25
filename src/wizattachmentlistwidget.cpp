@@ -416,6 +416,7 @@ void CWizAttachmentListView::on_list_itemDoubleClicked(QListWidgetItem* it)
     if (CWizAttachmentListViewItem* item = dynamic_cast<CWizAttachmentListViewItem*>(it))
     {
         openAttachment(item);
+        emit closeRequest();
     }
 }
 
