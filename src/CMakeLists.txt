@@ -365,10 +365,11 @@ if(UNIX)
         cmake_policy(SET CMP0016 OLD)
         find_library(_CARBON_LIBRARY Carbon)
         find_library(_COCOA_LIBRARY Cocoa)
+        find_library(_WEBKIT_LIBRARY WebKit)
 
         # please set env: MACOSX_DEPLOYMENT_TARGET = 10.8 to ~/.bash_profile if you need NSUserNotification support.
         message("use cocoa library: ${_COCOA_LIBRARY}")
-        target_link_libraries(${PROJECT_NAME} ${_CARBON_LIBRARY} ${_COCOA_LIBRARY})
+        target_link_libraries(${PROJECT_NAME} ${_CARBON_LIBRARY} ${_COCOA_LIBRARY} ${_WEBKIT_LIBRARY})
 
         # setup plist info and logo
         set_target_properties(${PROJECT_NAME} PROPERTIES MACOSX_BUNDLE_INFO_PLIST "${CMAKE_SOURCE_DIR}/build/osx/Info.plist")

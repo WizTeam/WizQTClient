@@ -8,9 +8,15 @@
 #include <QLocale>
 #include <QMainWindow>
 #include <QSize>
-#include <QDebug>
 #include <QXmlStreamReader>
 #include <QStringList>
+#include <QWebPage>
+#include <QWebElement>
+#include <QWebElementCollection>
+#include <QWebFrame>
+#include <QDebug>
+
+#import <WebKit/WebKit.h>
 
 #if QT_VERSION >= 0x050200
 #include <qmacfunctions.h>
@@ -373,7 +379,42 @@ QString wizRtfConveter(NSData *rtfData)
     NSRange range = NSMakeRange(0, [string length]);
     NSDictionary *dict = [NSDictionary dictionaryWithObject:NSHTMLTextDocumentType forKey:NSDocumentTypeDocumentAttribute];
     NSData *htmlData = [string dataFromRange:range documentAttributes:dict error:&error];
-    return QByteArray::fromNSData(htmlData);
+    NSString *htmlString = [[NSString alloc] initWithData:htmlData encoding:NSUTF8StringEncoding];
+    return WizToQString(htmlString);
+}
+
+bool processWebImageUrl(QString& strHtml, const QString& strUrl)
+{
+    QWebPage page;
+    QWebFrame* frame = page.mainFrame();
+    QUrl webUrl(strUrl);
+    frame->setHtml(strHtml, webUrl);
+    QWebElement document = frame->documentElement();
+    QWebElementCollection collection = document.findAll("img");
+    foreach (QWebElement paraElement, collection) {
+        QString strSrc = paraElement.attribute("src");
+        QUrl elemUrl(strSrc);
+//        qDebug() << "origin image src :  "  << strSrc;
+        if (strSrc.left(2) == "//" && elemUrl.scheme().isEmpty())
+        {
+            elemUrl.setScheme(webUrl.scheme());
+        }
+        else if (strSrc.left(1) == "/" && elemUrl.scheme().isEmpty())
+        {
+            elemUrl.setScheme(webUrl.scheme());
+            elemUrl.setHost(webUrl.host());
+        }
+        paraElement.setAttribute("src", elemUrl.toString());
+//        strSrc = paraElement.attribute("src");
+//        qDebug() << "after change scheme image src :  "  << strSrc;
+    }
+    strHtml = document.toInnerXml();
+
+//    qDebug() << "after process document inner xml : " << document.toInnerXml();
+//    qDebug() << "after process document outer xml : " << document.toOuterXml();
+//    qDebug() << "after process frame html : " << frame->toHtml();
+
+    return true;
 }
 
 QString wizSystemClipboardData()
@@ -381,13 +422,48 @@ QString wizSystemClipboardData()
     NSPasteboard *pasteboard = [NSPasteboard generalPasteboard];
 
     NSArray *typeArray = [pasteboard types];
+    NSString *type = @"com.apple.webarchive";
+    if ([typeArray containsObject:type])
+    {
+        NSData* data = [pasteboard dataForType:type];
+        WebArchive *archive = [[WebArchive alloc] initWithData:data];
+        WebResource *resource = archive.mainResource;
+        NSString *string = [[NSString alloc] initWithData:resource.data encoding:NSUTF8StringEncoding];
+//        NSLog(@"webresource url %@", [[resource URL] absoluteString]);
+//        NSLog(@"%@", string);
+        [archive release];
+
+        QString strHtml = WizToQString(string);
+        NSString* url = [[resource URL] absoluteString];
+        QString strUrl = WizToQString(url);
+        processWebImageUrl(strHtml, strUrl);
+        return strHtml;
+    }
+
+    return "";
+
+/*
+//    NSArray *typeArray = [pasteboard types];
     for (int i = 0; i < [typeArray count]; i++) {
         NSString *type = [typeArray objectAtIndex:i];
         NSString *string = [pasteboard stringForType:type];
         QString strType = WizToQString(type);
         QString str = WizToQString(string);
-//        qDebug() << "Data type   :  " << strType  << "  Data  : " << str;
+        qDebug() << "Data type   :  " << strType  << "  Data  : " << str;
+
+        if ([type isEqual:@"com.apple.webarchive"])
+        {
+            NSData* data = [pasteboard dataForType:type];
+            WebArchive *archive = [[WebArchive alloc] initWithData:data];
+            WebResource *resource = archive.mainResource;
+            NSString *string = [[NSString alloc] initWithData:resource.data encoding:NSUTF8StringEncoding];
+            NSLog(@"%@", string);
+            [archive release];
+        }
+
     }
+
+
 
     if ([[pasteboard types] containsObject:NSRTFPboardType]) {
         NSData *htmlData = [pasteboard dataForType:NSRTFPboardType];
@@ -428,6 +504,7 @@ QString wizSystemClipboardData()
         return str;
     }
     return "";
+    */
 }
 
 

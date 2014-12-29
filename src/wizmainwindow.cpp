@@ -1553,7 +1553,6 @@ void MainWindow::on_actionEditingPastePlain_triggered()
 {
     m_doc->web()->setPastePlainTextEnable(true);
     m_doc->web()->triggerPageAction(QWebPage::Paste);
-    //m_doc->web()->on_editorCommandPastePlainText_triggered();
 }
 
 void MainWindow::on_actionEditingDelete_triggered()

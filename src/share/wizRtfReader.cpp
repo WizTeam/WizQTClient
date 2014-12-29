@@ -220,6 +220,9 @@ bool CWizRtfReader::rtf2hmlt(const QString& strRtf, QString& strHtml)
     rtf2html(ch, strResult);
     strHtml = QString::fromStdString(strResult);
 
+    qDebug() << "rtf 2 html utf8 " << strHtml.toUtf8();
+    qDebug() << "rtf 2 html Latin1 " << strHtml.toLatin1();
+
     return true;
 }
 

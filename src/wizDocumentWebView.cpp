@@ -148,35 +148,32 @@ void CWizDocumentWebViewPage::on_editorCommandPaste_triggered()
     QClipboard* clip = QApplication::clipboard();
     Q_ASSERT(clip);
 
-//    const QMimeData* mime = clip->mimeData();
+    const QMimeData* mime = clip->mimeData();
 //    QStringList formats = mime->formats();
 //    for(int i = 0; i < formats.size(); ++ i) {
 //        qDebug() << "Mime Format: " << formats.at(i) << " Mime data: " << mime->data(formats.at(i));
 //    }
 
-//    if (mime->hasHtml())
-//    {
-//        QString strHtml = mime->html();
-//        if (getBodyContentFromHtml(strHtml, true))
-//        {
-//            QMimeData* data = new QMimeData();
-//            data->setHtml(strHtml);
-//            clip->setMimeData(data);
-//            return;
-//        }
-//    }
 
-//    QString strText = wizSystemClipboardData();
-//    qDebug() << "clipboard data from cocoa : " << strText;
-//    if (!strText.isEmpty())
-//    {
-//        QMimeData* data = new QMimeData();
-//        data->removeFormat("text/html");
-//        data->setHtml(strText);
-//        clip->setMimeData(data);
-//    }
-
-
+    QString strText = wizSystemClipboardData();
+    if (!strText.isEmpty())
+    {
+        QMimeData* data = new QMimeData();
+        data->removeFormat("text/html");
+        data->setHtml(strText);
+        clip->setMimeData(data);
+    }
+    else if (mime->hasHtml())   // special process for xcode
+    {
+        QString strHtml = mime->html();
+        if (getBodyContentFromHtml(strHtml, true))
+        {
+            QMimeData* data = new QMimeData();
+            data->setHtml(strHtml);
+            clip->setMimeData(data);
+            return;
+        }
+    }
 
     if (!clip->image().isNull()) {
         // save clipboard image to $TMPDIR
