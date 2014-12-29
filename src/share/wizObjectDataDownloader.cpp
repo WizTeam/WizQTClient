@@ -139,11 +139,20 @@ void CWizFileDownloader::startDownload()
 bool CWizFileDownloader::download()
 {
      QNetworkAccessManager m_WebCtrl;
-     QNetworkRequest request(m_strUrl);
-     QEventLoop loop;
-     loop.connect(&m_WebCtrl, SIGNAL(finished(QNetworkReply*)), SLOT(quit()));
-     QNetworkReply* reply = m_WebCtrl.get(request);
-     loop.exec();
+     QNetworkReply* reply;
+     do
+     {
+         QNetworkRequest request(m_strUrl);
+         QEventLoop loop;
+         loop.connect(&m_WebCtrl, SIGNAL(finished(QNetworkReply*)), SLOT(quit()));
+         reply = m_WebCtrl.get(request);
+         loop.exec();
+
+         QUrl redirectUrl = reply->attribute(QNetworkRequest::RedirectionTargetAttribute).toUrl();
+         m_strUrl = redirectUrl.toString();
+     }
+     while (reply->attribute(QNetworkRequest::HttpStatusCodeAttribute) == 301);
+
 
      QByteArray byData = reply->readAll();
      QFile file(m_strFileName);
