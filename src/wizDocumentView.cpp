@@ -540,6 +540,16 @@ void Core::CWizDocumentView::on_checkEditStatus_finished(QString strGUID, QStrin
     }
 }
 
+void CWizDocumentView::on_checkEditStatus_timeout(QString strGUID)
+{
+    if (strGUID == m_note.strGUID)
+    {
+        m_title->setEditButtonState(true, false);
+        m_title->setMessageTips(tr("Check edit status time out."));
+    }
+
+}
+
 void CWizDocumentView::on_checkDocumentChanged_finished(const QString& strGUID, bool changed, int versionOnServer)
 {
     if (strGUID == m_note.strGUID)

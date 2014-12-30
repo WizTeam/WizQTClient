@@ -201,7 +201,10 @@ CWizDocumentStatusCheckThread::CWizDocumentStatusCheckThread(QObject* parent)
     , m_stop(false)
     , m_mutexWait(QMutex::NonRecursive)
     , m_needRecheck(false)
+    , m_jumpToNext(false)
+    , m_timer(new QTimer(parent))
 {
+    connect(m_timer, SIGNAL(timeout()), SLOT(onTimeOut()));
 }
 
 void CWizDocumentStatusCheckThread::waitForDone()
@@ -214,6 +217,14 @@ void CWizDocumentStatusCheckThread::waitForDone()
 void CWizDocumentStatusCheckThread::needRecheck()
 {
     m_needRecheck = true;
+}
+
+void CWizDocumentStatusCheckThread::onTimeOut()
+{
+    m_timer->stop();
+
+    m_jumpToNext = true;
+    emit checkTimeOut(m_strCurGUID);
 }
 
 void CWizDocumentStatusCheckThread::checkEditStatus(const QString& strKbGUID, const QString& strGUID)
@@ -269,8 +280,6 @@ void CWizDocumentStatusCheckThread::downloadData(const QString& strUrl)
 
 void CWizDocumentStatusCheckThread::run()
 {
-    QString kbGUID;
-    QString guid;
     //
     while (!m_stop)
     {
@@ -284,21 +293,29 @@ void CWizDocumentStatusCheckThread::run()
             else
             {
                 m_needRecheck = false;
+                m_jumpToNext = false;
             }
             //
             if (m_stop)
                 return;
-            kbGUID = m_strKbGUID;
-            guid = m_strGUID;
+            m_strCurKbGUID = m_strKbGUID;
+            m_strCurGUID = m_strGUID;
         }
 
         //
+
+        m_timer->start(5000);
+
         //
         int lastVersion;
-        bool changed = checkDocumentChangedOnServer(kbGUID, guid, lastVersion);
-        emit checkDocumentChangedFinished(guid, changed, lastVersion);
+        bool changed = checkDocumentChangedOnServer(m_strCurKbGUID, m_strCurGUID, lastVersion);
+        emit checkDocumentChangedFinished(m_strCurGUID, changed, lastVersion);
 
-        checkDocumentEditStatus(kbGUID, guid);
+        if (m_jumpToNext)
+            continue;
+
+        checkDocumentEditStatus(m_strCurKbGUID, m_strCurGUID);
+        m_timer->stop();
     }
 }
 
@@ -309,6 +326,7 @@ void CWizDocumentStatusCheckThread::setDocmentGUID(const QString& strKbGUID, con
     m_strKbGUID = strKbGUID;
     m_strGUID = strGUID;
     m_wait.wakeAll();
+    m_jumpToNext = true;
     m_mutexWait.unlock();
 }
 

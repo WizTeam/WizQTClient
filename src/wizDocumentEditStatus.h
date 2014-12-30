@@ -3,6 +3,7 @@
 
 #include <QThread>
 #include <QMutex>
+#include <QTimer>
 #include <QWeakPointer>
 #include <QMap>
 #include <QPointer>
@@ -65,8 +66,10 @@ public:
 
 public slots:
     void needRecheck();
+    void onTimeOut();
 
 signals:
+    void checkTimeOut(QString strGUID);
     void checkFinished(QString strGUID,QStringList editors);
     void checkDocumentChangedFinished(const QString& strGUID, bool bChanged, int lastVersion);
     void syncDatabaseRequest(const QString& strKbGUID);
@@ -87,6 +90,11 @@ private:
     QMutex m_mutexWait;
     QWaitCondition m_wait;
     bool m_needRecheck;
+    bool m_jumpToNext;
+
+    QTimer* m_timer;
+    QString m_strCurGUID;
+    QString m_strCurKbGUID;
 };
 
 #endif // WIZDOCUMENTEDITSTATUS_H
