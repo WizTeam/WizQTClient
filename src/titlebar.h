@@ -33,6 +33,7 @@ public:
     CWizDocumentView* noteView();
     void setLocked(bool bReadOnly, int nReason, bool bIsGroup);
     void setDocumentEditingStatus(const QString& strEditor = "");
+    void setMessageTips(const QString& strInfo);
     void setEditor(CWizDocumentWebView* editor);
 
     void setNote(const WIZDOCUMENTDATA& data, bool editing, bool locked);

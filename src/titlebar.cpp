@@ -432,3 +432,8 @@ void Core::Internal::TitleBar::setDocumentEditingStatus(const QString& strEditor
 {
     m_notifyBar->showEditingNotify(strEditor);
 }
+
+void TitleBar::setMessageTips(const QString& strInfo)
+{
+    m_notifyBar->showMessageTips(strInfo);
+}

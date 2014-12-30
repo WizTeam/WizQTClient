@@ -1152,7 +1152,7 @@ void CWizCategoryView::on_action_importFile()
     this,
     tr("Select one or more files to open"),
     "/home",
-    "Text files(*.txt *.md *.cpp *.h *rtf);;Images (*.png *.xpm *.jpg)");
+    "All files(*.*);;Text files(*.txt *.md *.cpp *.h *.rtf *.doc *.docx);;Images (*.png *.xpm *.jpg)");
     loadDocument(files);
 }
 

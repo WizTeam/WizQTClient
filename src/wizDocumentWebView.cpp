@@ -115,34 +115,6 @@ void CWizDocumentWebViewPage::triggerAction(QWebPage::WebAction typeAction, bool
     Q_EMIT actionTriggered(typeAction);
 }
 
-bool getBodyContentFromHtml(QString& strHtml, bool bNeedTextParse)
-{
-    QRegExp regHead("</?head[^>]*>", Qt::CaseInsensitive);
-    if (strHtml.contains(regHead))
-    {
-        if (bNeedTextParse)
-        {
-            QRegExp regHeadContant("<head[^>]*>[\\s\\S]*</head>");
-            int headIndex = regHeadContant.indexIn(strHtml);
-            if (headIndex > -1)
-            {
-                QString strHead = regHeadContant.cap(0);
-                if (strHead.contains("Cocoa HTML Writer"))
-                {
-                    // convert mass html to rtf, then convert rft to html
-                    QTextDocument textParase;
-                    textParase.setHtml(strHtml);
-                    strHtml = textParase.toHtml();
-                }
-            }
-        }
-
-        strHtml = WizGetHtmlBodyContent(strHtml);
-    }
-
-    return true;
-}
-
 void CWizDocumentWebViewPage::on_editorCommandPaste_triggered()
 {
     QClipboard* clip = QApplication::clipboard();
@@ -166,7 +138,7 @@ void CWizDocumentWebViewPage::on_editorCommandPaste_triggered()
     else if (mime->hasHtml())   // special process for xcode
     {
         QString strHtml = mime->html();
-        if (getBodyContentFromHtml(strHtml, true))
+        if (WizGetBodyContentFromHtml(strHtml, true))
         {
             QMimeData* data = new QMimeData();
             data->setHtml(strHtml);
@@ -1098,7 +1070,7 @@ void CWizDocumentWebView::clearSearchKeywordHighlight()
 void CWizDocumentWebView::on_insertCodeHtml_requset(QString strOldHtml)
 {
     QString strHtml = strOldHtml;
-    if (getBodyContentFromHtml(strHtml, false))
+    if (WizGetBodyContentFromHtml(strHtml, false))
     {
         editorCommandExecuteInsertHtml(strHtml, true);
         //FiXME:插入代码时li的属性会丢失，此处需要特殊处理，在head中增加li的属性

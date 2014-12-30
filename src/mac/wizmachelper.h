@@ -6,6 +6,20 @@
 
 #ifdef Q_OS_MAC
 
+
+enum documentType {
+    RTFTextDocumentType,                            //Rich text format document.
+    RTFDTextDocumentType,                         //Rich text format with attachments document.
+    MacSimpleTextDocumentType,            //Macintosh SimpleText document.
+    HTMLTextDocumentType,                         //Hypertext Markup Language (HTML) document.
+    DocFormatTextDocumentType,                 //Microsoft Word document.
+    WordMLTextDocumentType,                     //Microsoft Word XML (WordML schema) document.
+    WebArchiveTextDocumentType,               //Web Kit WebArchive document.
+    OfficeOpenXMLTextDocumentType,         //ECMA Office Open XML text document format.
+    OpenDocumentTextDocumentType,         //OASIS Open Document text document format.
+
+};
+
 class QMainWindow;
 class QWidget;
 
@@ -28,7 +42,7 @@ void wizHIDictionaryWindowShow(const QString& strText, QRect rcText);
 
 QString wizSystemClipboardData();
 
-QString wizRrtConveter();
+bool documentToHtml(const QString& strFile, documentType type, QString& strHtml);
 
 //path for yosemite
 bool wizIsYosemiteFilePath(const QString& strPath);

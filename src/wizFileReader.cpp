@@ -5,6 +5,7 @@
 
 #include "share/wizmisc.h"
 #include "share/wizRtfReader.h"
+#include "mac/wizmachelper.h"
 
 CWizFileReader::CWizFileReader(QObject *parent) :
     QThread(parent)
@@ -63,23 +64,46 @@ void CWizFileReader::run()
         QString strFile = m_files.at(i);
         QFileInfo fi(strFile);
         QString strHtml;
-        QStringList textExtList, imageExtList, rtfExtList;
+        QStringList textExtList, imageExtList, rtfExtList, docExtList;
         textExtList << "txt" << "md" << "markdown" << "html" << "htm" << "cpp" << "h";
         imageExtList << "jpg" << "png" << "gif" << "tiff" << "jpeg" << "bmp" << "svg";
         rtfExtList << "rtf";
+        docExtList << "doc" << "docx";
 
-        if (textExtList.contains(fi.suffix(),Qt::CaseInsensitive))
+#ifdef Q_OS_MAC
+        QStringList webExtList;
+        webExtList << "webarchive";
+#endif
+
+        QString docType = fi.suffix();
+        if (textExtList.contains(docType,Qt::CaseInsensitive))
         {
             strHtml = loadTextFileToHtml(strFile);
         }
-        else if (imageExtList.contains(fi.suffix(),Qt::CaseInsensitive))
+        else if (imageExtList.contains(docType,Qt::CaseInsensitive))
         {
             strHtml = loadImageFileToHtml(strFile);
         }
-        else if (rtfExtList.contains(fi.suffix(), Qt::CaseInsensitive))
+#ifdef Q_OS_MAC
+        else if (rtfExtList.contains(docType, Qt::CaseInsensitive))
         {
-            strHtml = loadRtfFileToHtml(strFile);
+            if (!documentToHtml(strFile, RTFTextDocumentType, strHtml))
+                continue;
+            WizGetBodyContentFromHtml(strHtml, true);
         }
+        else if (docExtList.contains(docType))
+        {
+            if (!documentToHtml(strFile, DocFormatTextDocumentType, strHtml))
+                continue;
+            WizGetBodyContentFromHtml(strHtml, true);
+        }
+        else if (webExtList.contains(docType))
+        {
+            if (!documentToHtml(strFile, WebArchiveTextDocumentType, strHtml))
+                continue;
+            WizGetBodyContentFromHtml(strHtml, true);
+        }
+#endif
 
         if (!strHtml.isEmpty())
         {

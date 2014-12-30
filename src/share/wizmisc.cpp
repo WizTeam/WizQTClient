@@ -2193,6 +2193,34 @@ QString WizGetHtmlBodyContent(const QString& strHtml)
     return strBody;
 }
 
+bool WizGetBodyContentFromHtml(QString& strHtml, bool bNeedTextParse)
+{
+    QRegExp regHead("</?head[^>]*>", Qt::CaseInsensitive);
+    if (strHtml.contains(regHead))
+    {
+        if (bNeedTextParse)
+        {
+            QRegExp regHeadContant("<head[^>]*>[\\s\\S]*</head>");
+            int headIndex = regHeadContant.indexIn(strHtml);
+            if (headIndex > -1)
+            {
+                QString strHead = regHeadContant.cap(0);
+                if (strHead.contains("Cocoa HTML Writer"))
+                {
+                    // convert mass html to rtf, then convert rft to html
+                    QTextDocument textParase;
+                    textParase.setHtml(strHtml);
+                    strHtml = textParase.toHtml();
+                }
+            }
+        }
+
+        strHtml = WizGetHtmlBodyContent(strHtml);
+    }
+
+    return true;
+}
+
 
 bool WizCopyFolder(const QString& strSrcDir, const QString& strDestDir, bool bCoverFileIfExist)
 {

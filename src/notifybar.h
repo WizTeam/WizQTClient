@@ -24,6 +24,7 @@ public:
     explicit NotifyBar(QWidget *parent);
     void showPermissionNotify(int type);
     void showEditingNotify(const QString& editor);
+    void showMessageTips(const QString& info);
 
 public slots:
     void on_closeButton_Clicked();

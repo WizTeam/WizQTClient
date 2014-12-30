@@ -4,6 +4,7 @@
 #include "wizmainwindow.h"
 
 #include "share/wizRtfReader.h"
+#include "utils/pathresolve.h"
 
 #include <QLocale>
 #include <QMainWindow>
@@ -14,6 +15,7 @@
 #include <QWebElement>
 #include <QWebElementCollection>
 #include <QWebFrame>
+#include <QEventLoop>
 #include <QDebug>
 
 #import <WebKit/WebKit.h>
@@ -368,20 +370,6 @@ void convertYosemiteFileListToNormalList(QStringList& fileList)
 
 @end
 
-QString wizRtfConveter(NSData *rtfData)
-{
-    // Read RTF into to NSAttributedString, then convert the string to HTML
-    NSAttributedString *string = [[NSAttributedString alloc] initWithData:rtfData
-                                                                          options:[NSDictionary dictionaryWithObject:NSRTFTextDocumentType forKey:NSDocumentTypeDocumentAttribute]
-                                                                          documentAttributes:nil
-                                                                          error:nil];
-    NSError *error;
-    NSRange range = NSMakeRange(0, [string length]);
-    NSDictionary *dict = [NSDictionary dictionaryWithObject:NSHTMLTextDocumentType forKey:NSDocumentTypeDocumentAttribute];
-    NSData *htmlData = [string dataFromRange:range documentAttributes:dict error:&error];
-    NSString *htmlString = [[NSString alloc] initWithData:htmlData encoding:NSUTF8StringEncoding];
-    return WizToQString(htmlString);
-}
 
 bool processWebImageUrl(QString& strHtml, const QString& strUrl)
 {
@@ -405,17 +393,39 @@ bool processWebImageUrl(QString& strHtml, const QString& strUrl)
             elemUrl.setHost(webUrl.host());
         }
         paraElement.setAttribute("src", elemUrl.toString());
-//        strSrc = paraElement.attribute("src");
+//        strSrc = paraElement.attribute("src");te
 //        qDebug() << "after change scheme image src :  "  << strSrc;
     }
     strHtml = document.toInnerXml();
 
-//    qDebug() << "after process document inner xml : " << document.toInnerXml();
-//    qDebug() << "after process document outer xml : " << document.toOuterXml();
-//    qDebug() << "after process frame html : " << frame->toHtml();
+    return true;
+}
+
+bool processWebarchiveImageUrl(QString& strHtml, const QString& strFolderPath)
+{
+    QWebPage page;
+    QWebFrame* frame = page.mainFrame();
+    frame->setHtml(strHtml);
+    QWebElement document = frame->documentElement();
+    QWebElementCollection collection = document.findAll("img");
+    foreach (QWebElement paraElement, collection) {
+        QString strSrc = paraElement.attribute("src");
+        qDebug() << "origin image src :  "  << strSrc;
+        if (strSrc.left(8) == "file:///")
+        {
+            strSrc.remove(0, 8);
+            strSrc = strFolderPath + strSrc;
+        }
+        paraElement.setAttribute("src", strSrc);
+        strSrc = paraElement.attribute("src");
+        qDebug() << "after change scheme image src :  "  << strSrc;
+    }
+    strHtml = document.toInnerXml();
 
     return true;
 }
+
+
 
 QString wizSystemClipboardData()
 {
@@ -426,11 +436,12 @@ QString wizSystemClipboardData()
     if ([typeArray containsObject:type])
     {
         NSData* data = [pasteboard dataForType:type];
+
         WebArchive *archive = [[WebArchive alloc] initWithData:data];
         WebResource *resource = archive.mainResource;
         NSString *string = [[NSString alloc] initWithData:resource.data encoding:NSUTF8StringEncoding];
-//        NSLog(@"webresource url %@", [[resource URL] absoluteString]);
-//        NSLog(@"%@", string);
+    //        NSLog(@"webresource url %@", [[resource URL] absoluteString]);
+    //        NSLog(@"%@", string);
         [archive release];
 
         QString strHtml = WizToQString(string);
@@ -441,70 +452,6 @@ QString wizSystemClipboardData()
     }
 
     return "";
-
-/*
-//    NSArray *typeArray = [pasteboard types];
-    for (int i = 0; i < [typeArray count]; i++) {
-        NSString *type = [typeArray objectAtIndex:i];
-        NSString *string = [pasteboard stringForType:type];
-        QString strType = WizToQString(type);
-        QString str = WizToQString(string);
-        qDebug() << "Data type   :  " << strType  << "  Data  : " << str;
-
-        if ([type isEqual:@"com.apple.webarchive"])
-        {
-            NSData* data = [pasteboard dataForType:type];
-            WebArchive *archive = [[WebArchive alloc] initWithData:data];
-            WebResource *resource = archive.mainResource;
-            NSString *string = [[NSString alloc] initWithData:resource.data encoding:NSUTF8StringEncoding];
-            NSLog(@"%@", string);
-            [archive release];
-        }
-
-    }
-
-
-
-    if ([[pasteboard types] containsObject:NSRTFPboardType]) {
-        NSData *htmlData = [pasteboard dataForType:NSRTFPboardType];
-        if (htmlData) {
-            QString strHtml = wizRtfConveter(htmlData);
-            qDebug() << "html data after convert from rtf" << strHtml;
-
-            NSString *htmlString = [[[NSString alloc] initWithData:htmlData encoding:NSUTF8StringEncoding] autorelease];
-//            NSString *htmlString = [pasteboard  stringForType:NSHTMLPboardType];
-            if (htmlString) {
-                QString str = WizToQString(htmlString);
-                QString strHtml;
-                qDebug() << "data before convert :  " << str;
-                CWizRtfReader::rtf2hmlt(str, strHtml);
-                qDebug() << "after convert data from rtf to html   :  " << strHtml;
-//                QFile file("/Users/lxn/text.rtf");
-//                if (file.open(QIODevice::WriteOnly | QIODevice::Text))
-//                {
-//                    QTextStream out(&file);
-//                    out << str;
-//                    file.close();
-//                }
-//                return str;
-            }
-
-            return strHtml;
-        }
-    }
-
-    NSArray *classArray = [NSArray arrayWithObject:[NSString class]];
-    NSDictionary *options = [NSDictionary dictionary];
-
-    BOOL ok = [pasteboard canReadObjectForClasses:classArray options:options];
-    if (ok) {
-        NSArray *objectsToPaste = [pasteboard readObjectsForClasses:classArray options:options];
-        NSString *string = [objectsToPaste objectAtIndex:0];
-        QString str = WizToQString(string);
-        return str;
-    }
-    return "";
-    */
 }
 
 
@@ -525,9 +472,6 @@ QString wizConvertYosemiteFilePathToNormalPath(const QString& strYosePath)
     return WizToQString(goodURL);
 }
 
-//HIDictionaryWindowShow ( DCSDictionaryRef dictionary, CFTypeRef textString,
-//                         CFRange selectionRange, CTFontRef textFont, CGPoint textOrigin, Boolean verticalText, const CGAffineTransform *viewTransform );
-
 
 void wizHIDictionaryWindowShow(const QString& strText, QRect rcText)
 {
@@ -535,3 +479,159 @@ void wizHIDictionaryWindowShow(const QString& strText, QRect rcText)
 //    [HIDictionaryWindowShow dictionary:NULL textString:cfString selectionRange:];
 }
 
+NSString* getDoucmentType(documentType type)
+{
+   // NSString* temp = @"NULL";
+    switch (type) {
+    case RTFTextDocumentType:
+        return @"NSRTFTextDocumentType";
+        break;
+    case RTFDTextDocumentType:
+        return @"NSRTFDTextDocumentType";
+        break;
+    case MacSimpleTextDocumentType:
+        return @"NSMacSimpleTextDocumentType";
+        break;
+    case HTMLTextDocumentType:
+        return @"NSHTMLTextDocumentType";
+        break;
+    case DocFormatTextDocumentType:
+        return @"NSDocFormatTextDocumentType";
+        break;
+    case WordMLTextDocumentType:
+        return @"NSWordMLTextDocumentType";
+        break;
+    case WebArchiveTextDocumentType:
+        return @"NSWebArchiveTextDocumentType";
+        break;
+    case OfficeOpenXMLTextDocumentType:
+        return @"NSOfficeOpenXMLTextDocumentType";
+        break;
+    case OpenDocumentTextDocumentType:
+        return @"NSOpenDocumentTextDocumentType";
+        break;
+    default:
+        return @"NSPlainTextDocumentType";
+        break;
+    }
+
+    return @"NULL";
+}
+
+QString wizAttributedStringToHtml(NSAttributedString *string)
+{
+    NSError *error;
+    NSRange range = NSMakeRange(0, [string length]);
+    NSDictionary *dict = [NSDictionary dictionaryWithObject:NSHTMLTextDocumentType forKey:NSDocumentTypeDocumentAttribute];
+    NSData *htmlData = [string dataFromRange:range documentAttributes:dict error:&error];
+    NSString *htmlString = [[NSString alloc] initWithData:htmlData encoding:NSUTF8StringEncoding];
+    return WizToQString(htmlString);
+}
+
+QString wizDataToHtml(NSData *data, NSString* dataType)
+{
+    // Read RTF into to NSAttributedString, then convert the string to HTML
+    NSAttributedString *string = [[NSAttributedString alloc] initWithData:data
+                                                                          options:[NSDictionary dictionaryWithObject:dataType forKey:NSDocumentTypeDocumentAttribute]
+                                                                          documentAttributes:nil
+                                                                          error:nil];
+
+    return wizAttributedStringToHtml(string);
+}
+
+QString wizUrlToHtml(NSString* url)
+{
+    NSAttributedString *string = [[NSAttributedString alloc] initWithPath:url
+                                                                               documentAttributes:nil];
+
+    return wizAttributedStringToHtml(string);
+}
+
+
+
+QString wizRtfToHtml(NSData *data)
+{
+    NSAttributedString *string = [[NSAttributedString alloc] initWithRTF:data
+                                                                               documentAttributes:nil];
+    return wizAttributedStringToHtml(string);
+}
+
+QString wizDocToHtml(NSData *data)
+{
+    NSAttributedString *string = [[NSAttributedString alloc] initWithDocFormat:data
+                                                                               documentAttributes:nil];
+    return wizAttributedStringToHtml(string);
+}
+
+
+QString wizWebarchiveToHtml(NSString *filePath)
+{
+    QString webFile = WizToQString(filePath);
+    if (QFile::exists(webFile))
+    {
+        QFileInfo info(webFile);
+        QString strFolder = Utils::PathResolve::tempPath() + WizGenGUIDLowerCaseLetterOnly() + "/";
+        QString newFile = strFolder + info.fileName();
+        QDir dir;
+        dir.mkdir(strFolder);
+        QFile::copy(webFile, newFile);
+
+        // convert webarchive to html
+        QProcess process;
+        QEventLoop loop;
+        QObject::connect(&process, SIGNAL(finished(int)), &loop, SLOT(quit()));
+        process.start(QString("textutil -convert html %1").arg(newFile));
+        loop.exec();
+        newFile = strFolder + info.baseName() + ".html";
+
+        qDebug() << "convert html file finished";
+
+        QByteArray ba;
+        WizLoadDataFromFile(newFile, ba);
+        QString strHtml(ba);
+
+
+        if (!strHtml.isEmpty())
+        {
+            processWebarchiveImageUrl(strHtml, strFolder);
+
+            return strHtml;
+        }
+    }
+    return "";
+}
+
+bool documentToHtml(const QString& strFile, documentType type, QString& strHtml)
+{
+    qDebug() << "start to load file to html, fileName : " << strFile;
+
+    NSString* filePath = WizToNSString(strFile);
+
+    if([[NSFileManager defaultManager] fileExistsAtPath:filePath])
+    {
+       NSData *data = [[NSFileManager defaultManager] contentsAtPath:filePath];
+       //NSLog(@"document data loaded : %@", data);
+       switch (type) {
+       case DocFormatTextDocumentType:
+       case RTFTextDocumentType:
+           strHtml = wizUrlToHtml(filePath);
+           break;
+       case WebArchiveTextDocumentType:
+           strHtml = wizWebarchiveToHtml(filePath);
+           break;
+       default:
+           NSString* docType = getDoucmentType(type);
+           strHtml = wizDataToHtml(data, docType);
+           break;
+       }
+       qDebug() << "after convert to html  : " << strHtml;
+       return true;
+    }
+    else
+    {
+       NSLog(@"File not exits");
+       return false;
+    }
+
+    return true;
+}

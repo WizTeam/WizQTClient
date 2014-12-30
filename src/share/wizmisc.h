@@ -146,6 +146,7 @@ QIcon WizLoadSkinIcon3(const QString& strIconName, QIcon::Mode mode);
 void scaleIconSizeForRetina(QSize& size);
 
 QString WizGetHtmlBodyContent(const QString& strHtml);
+bool WizGetBodyContentFromHtml(QString& strHtml, bool bNeedTextParse);
 void WizHtml2Text(const QString& strHtml, QString& strText);
 void WizDeleteFolder(const CString& strPath);
 void WizDeleteFile(const CString& strFileName);

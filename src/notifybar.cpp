@@ -69,8 +69,21 @@ void NotifyBar::showEditingNotify(const QString &editor)
 {
     if (!editor.isEmpty())
     {
+        QString info = QString(tr("This note is editing by %1 .")).arg(editor);
+        showMessageTips(info);
+    }
+    else
+    {
+        hide();
+    }
+}
+
+void NotifyBar::showMessageTips(const QString& info)
+{
+    if (!info.isEmpty())
+    {
         setStyleForEditing();
-        m_labelNotify->setText(QString(tr("This note is editing by %1 .")).arg(editor));
+        m_labelNotify->setText(info);
         show();
     }
     else
