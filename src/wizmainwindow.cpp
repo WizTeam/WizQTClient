@@ -150,6 +150,7 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     m_searcher->start(QThread::HighPriority);
 
     // syncing thread
+    m_sync->setFullSyncInterval(userSettings().syncInterval());
     connect(m_sync, SIGNAL(processLog(const QString&)), SLOT(on_syncProcessLog(const QString&)));
     connect(m_sync, SIGNAL(syncStarted(bool)), SLOT(on_syncStarted(bool)));
     connect(m_sync, SIGNAL(syncFinished(int, QString)), SLOT(on_syncDone(int, QString)));
@@ -2085,7 +2086,7 @@ void MainWindow::on_options_settingsChanged(WizOptionsType type)
     if (wizoptionsNoteView == type) {
         m_doc->settingsChanged();
     } else if (wizoptionsSync == type) {
-
+        m_sync->setFullSyncInterval(userSettings().syncInterval());
     } else if (wizoptionsFont == type) {
         m_doc->web()->editorResetFont();
     } else if (wizoptionsFolders == type) {
