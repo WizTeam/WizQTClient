@@ -301,6 +301,11 @@ void MainWindow::cleanOnQuit()
     }
 }
 
+void MainWindow::rebuildFTS()
+{
+    m_searchIndexer->rebuild();
+}
+
 MainWindow*MainWindow::instance()
 {
     return windowInstance;
@@ -1818,8 +1823,9 @@ void MainWindow::on_actionRebuildFTS_triggered()
     msg.addButton(QMessageBox::Cancel);
     msg.setText(tr("Rebuild full text search is quit slow if you have quite a few notes or attachments, you do not have to use this function while search should work as expected."));
 
-    if (QMessageBox::Ok == msg.exec()) {
-        m_searchIndexer->rebuild();
+    if (QMessageBox::Ok == msg.exec())
+    {
+        rebuildFTS();
     }
 }
 

@@ -99,6 +99,7 @@ public:
     bool isLogout() const { return m_bLogoutRestart; }
 
     QString searchKeywords() const { return m_strSearchKeywords; }
+    void rebuildFTS();
 
     static MainWindow* instance();
 

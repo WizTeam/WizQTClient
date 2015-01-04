@@ -139,16 +139,6 @@ bool CWizIndexBase::Repair(const QString& strDestFileName)
     return CppSQLite3DB::repair(m_strFileName, strDestFileName) ? true : false;
 }
 
-bool CWizIndexBase::setTableStructureVersion(const QString& /*strVersion*/)
-{
-    return true;
-}
-
-QString CWizIndexBase::getTableStructureVersion()
-{
-    return "";
-}
-
 bool CWizIndexBase::updateTableStructure(int oldVersion)
 {
     if (oldVersion < 1)

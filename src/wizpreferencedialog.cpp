@@ -175,7 +175,10 @@ CWizPreferenceWindow::CWizPreferenceWindow(CWizExplorerApp& app, QWidget* parent
 
     QString strColor = m_app.userSettings().editorBackgroundColor();
     ui->pushButtonBackgroundColor->setStyleSheet(QString("QPushButton "
-                                                         "{ border: 1px; background: %1;} ").arg(strColor));
+                                                         "{ border: 1px; background: %1; height:20px;  border-radius:5px } ").arg(strColor));
+    ui->pushButtonClearBackground->setStyleSheet(QString("QPushButton { background: #3fa1fd;"
+                                                         "color:#ffffff; width:56px; height:20px; border-radius:5px } "
+                                                         "QPushButton:pressed{ background: #076dc6;"));
 
     bool manuallySortFolders = m_app.userSettings().isManualSortingEnabled();
     ui->checkBoxManuallySort->setChecked(manuallySortFolders);
@@ -413,6 +416,21 @@ void CWizPreferenceWindow::on_checkBoxSearchEncryNote_toggled(bool checked)
         ui->lineEditNotePassword->clear();
         ui->lineEditNotePassword->blockSignals(false);
         m_app.userSettings().setEncryptedNotePassword("");
+
+        QMessageBox msg;
+        msg.setIcon(QMessageBox::Information);
+        msg.setWindowTitle(tr("Cancel search encrypted note"));
+        msg.addButton(QMessageBox::Ok);
+        msg.addButton(QMessageBox::Cancel);
+        msg.setText(tr("Cancel search encrypted note need to rebuild full text search, this would be quite slow if you have quite a few notes or attachments. "
+                       "Do you want to rebuild full text search?"));
+
+        if (QMessageBox::Ok == msg.exec())
+        {
+            Core::Internal::MainWindow* mainWindow = qobject_cast<Core::Internal::MainWindow*>(m_app.mainWindow());
+            Q_ASSERT(mainWindow);
+            mainWindow->rebuildFTS();
+        }
     }
     ui->lineEditNotePassword->setEnabled(checked);
 }
@@ -441,7 +459,7 @@ void CWizPreferenceWindow::on_pushButtonClearBackground_clicked()
 void CWizPreferenceWindow::updateEditorBackgroundColor(const QString& strColorName)
 {
     ui->pushButtonBackgroundColor->setStyleSheet(QString("QPushButton "
-                                                         "{ border: 1px; background: %1;} ").arg(strColorName));
+                                                         "{ border: 1px; background: %1; height:20px;  border-radius:5px } ").arg(strColorName));
     m_app.userSettings().setEditorBackgroundColor(strColorName);
     Q_EMIT settingsChanged(wizoptionsFont);
 }

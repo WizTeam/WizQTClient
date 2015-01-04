@@ -36,8 +36,8 @@ public:
     QString GetDatabasePath() const { return m_strFileName; }
     virtual QString GetDefaultNoteLocation() const { return LOCATION_DEFAULT; }
 
-    virtual bool setTableStructureVersion(const QString& strVersion);
-    virtual QString getTableStructureVersion();
+    virtual bool setTableStructureVersion(const QString& strVersion) = 0;
+    virtual QString getTableStructureVersion() = 0;
     bool updateTableStructure(int oldVersion);
 
     /* Raw query*/
