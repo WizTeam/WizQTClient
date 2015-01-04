@@ -655,6 +655,17 @@ bool CWizDatabase::OnUploadObject(const QString& strGUID,
     }
 }
 
+bool CWizDatabase::ModifyDocumentsVersion(CWizDocumentDataArray& arrayData)
+{
+    CWizDocumentDataArray::const_iterator it;
+    for (it = arrayData.begin(); it != arrayData.end(); it++) {
+        WIZDOCUMENTDATA data(*it);
+        SetDocumentVersion(data.strGUID, data.nVersion);
+    }
+
+    return true;
+}
+
 bool CWizDatabase::CopyDocumentTo(const QString &strGUID, CWizDatabase &targetDB, const QString &strTargetLocation,
                                   const WIZTAGDATA &targetTag, QString &strResultGUID, CWizObjectDataDownloaderHost *downloaderHost)
 {

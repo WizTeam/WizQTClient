@@ -172,6 +172,9 @@ public:
     virtual bool OnUploadObject(const QString& strGUID,
                                 const QString& strObjectType);
 
+    // modify
+    virtual bool ModifyDocumentsVersion(CWizDocumentDataArray& arrayData);
+
     //copy Document
     //create new doc and copy data, set the new doc time as the source doc.
     virtual bool CopyDocumentTo(const QString& strGUID, CWizDatabase& targetDB,

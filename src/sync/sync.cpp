@@ -417,16 +417,11 @@ bool GetModifiedObjectList(IWizSyncableDatabase* pDatabase, std::deque<WIZDELETE
     return pDatabase->GetModifiedDeletedList(arrayData);
 }
 
-
-
-
 template <class TData>
 bool GetModifiedObjectList(IWizSyncableDatabase* pDatabase, std::deque<WIZTAGDATA>& arrayData)
 {
     return pDatabase->GetModifiedTagList(arrayData);
 }
-
-
 
 template <class TData>
 bool GetModifiedObjectList(IWizSyncableDatabase* pDatabase, std::deque<WIZSTYLEDATA>& arrayData)
@@ -434,15 +429,11 @@ bool GetModifiedObjectList(IWizSyncableDatabase* pDatabase, std::deque<WIZSTYLED
     return pDatabase->GetModifiedStyleList(arrayData);
 }
 
-
-
 template <class TData>
 bool GetModifiedObjectList(IWizSyncableDatabase* pDatabase, std::deque<WIZDOCUMENTDATAEX>& arrayData)
 {
     return pDatabase->GetModifiedDocumentList(arrayData);
 }
-
-
 
 template <class TData>
 bool GetModifiedObjectList(IWizSyncableDatabase* pDatabase, std::deque<WIZDOCUMENTATTACHMENTDATAEX>& arrayData)
@@ -450,6 +441,19 @@ bool GetModifiedObjectList(IWizSyncableDatabase* pDatabase, std::deque<WIZDOCUME
     return pDatabase->GetModifiedAttachmentList(arrayData);
 }
 
+
+template <class TData>
+bool ModifiedObjectsVersion(IWizSyncableDatabase* pDatabase, std::deque<TData>& arrayData)
+{
+    ATLASSERT(FALSE);
+    return FALSE;
+}
+
+template <class TData>
+bool ModifiedObjectsVersion(IWizSyncableDatabase* pDatabase, std::deque<WIZDOCUMENTDATAEX>& arrayData)
+{
+    return pDatabase->ModifyDocumentsVersion(arrayData);
+}
 
 template <class TData>
 bool UploadSimpleList(const QString& strObjectType, IWizKMSyncEvents* pEvents, IWizSyncableDatabase* pDatabase, CWizKMDatabaseServer& server, WizKMSyncProgress progress)
@@ -1207,6 +1211,18 @@ bool UploadList(const WIZKBINFO& kbInfo, IWizKMSyncEvents* pEvents, IWizSyncable
                 {
                     pEvents->OnUploadDocument(local.strGUID, TRUE);
                 }
+            }
+
+            // update document version to server vision
+            if (_document)
+            {
+                if (!server.downloadList<TData>(arraySubGUID, arrayDataOnServer))
+                {
+                    pEvents->OnError(_TR("Cannot download object list!"));
+                    return FALSE;
+                }
+
+                ModifiedObjectsVersion<TData>(pDatabase, arrayDataOnServer);
             }
         }
     }
