@@ -57,6 +57,7 @@ class CWizDocumentStatusCheckThread : public QThread
     Q_OBJECT
 public:
     CWizDocumentStatusCheckThread(QObject* parent = 0);
+    ~CWizDocumentStatusCheckThread();
     void checkEditStatus(const QString& strKbGUID,const QString& strGUID);
     void downloadData(const QString& strUrl);
     //
@@ -90,7 +91,6 @@ private:
     QMutex m_mutexWait;
     QWaitCondition m_wait;
     bool m_needRecheck;
-    bool m_jumpToNext;
 
     QTimer* m_timer;
     QString m_strCurGUID;

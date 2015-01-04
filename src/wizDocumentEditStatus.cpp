@@ -201,10 +201,15 @@ CWizDocumentStatusCheckThread::CWizDocumentStatusCheckThread(QObject* parent)
     , m_stop(false)
     , m_mutexWait(QMutex::NonRecursive)
     , m_needRecheck(false)
-    , m_jumpToNext(false)
-    , m_timer(new QTimer(parent))
+    , m_timer(0)
 {
-    connect(m_timer, SIGNAL(timeout()), SLOT(onTimeOut()));
+
+}
+
+CWizDocumentStatusCheckThread::~CWizDocumentStatusCheckThread()
+{
+    if (m_timer)
+        delete m_timer;
 }
 
 void CWizDocumentStatusCheckThread::waitForDone()
@@ -223,7 +228,6 @@ void CWizDocumentStatusCheckThread::onTimeOut()
 {
     m_timer->stop();
 
-    m_jumpToNext = true;
     emit checkTimeOut(m_strCurGUID);
 }
 
@@ -293,26 +297,27 @@ void CWizDocumentStatusCheckThread::run()
             else
             {
                 m_needRecheck = false;
-                m_jumpToNext = false;
             }
             //
             if (m_stop)
                 return;
+
             m_strCurKbGUID = m_strKbGUID;
             m_strCurGUID = m_strGUID;
         }
 
         //
+        if (!m_timer)
+        {
+            m_timer = new QTimer();
+            connect(m_timer, SIGNAL(timeout()), SLOT(onTimeOut()));
+        }
 
         m_timer->start(5000);
-
         //
         int lastVersion;
         bool changed = checkDocumentChangedOnServer(m_strCurKbGUID, m_strCurGUID, lastVersion);
         emit checkDocumentChangedFinished(m_strCurGUID, changed, lastVersion);
-
-        if (m_jumpToNext)
-            continue;
 
         checkDocumentEditStatus(m_strCurKbGUID, m_strCurGUID);
         m_timer->stop();
@@ -326,7 +331,6 @@ void CWizDocumentStatusCheckThread::setDocmentGUID(const QString& strKbGUID, con
     m_strKbGUID = strKbGUID;
     m_strGUID = strGUID;
     m_wait.wakeAll();
-    m_jumpToNext = true;
     m_mutexWait.unlock();
 }
 
