@@ -1045,6 +1045,17 @@ void MainWindow::SetDialogResult(int nResult)
     }
 }
 
+bool MainWindow::checkListClickable()
+{
+    if (m_doc->checkListClickable())
+    {
+        emit clickingTodoCallBack(false, false);
+        m_doc->setStatusToEditingByCheckList();
+        return true;
+    }
+    return false;
+}
+
 #ifndef Q_OS_MAC
 void MainWindow::layoutTitleBar()
 {

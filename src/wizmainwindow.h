@@ -226,6 +226,9 @@ public:
 signals:
     void documentSaved(const QString& strGUID, CWizDocumentView* viewer);
 
+    // signal connect to checklist in javascript
+    void clickingTodoCallBack(bool cancel, bool needCallAgain);
+
 public Q_SLOTS:
     void on_actionExit_triggered();
     void on_actionClose_triggered();
@@ -341,6 +344,8 @@ public Q_SLOTS:
     void setCurrentDocumentType(const QString& strType);
     void OpenURLInDefaultBrowser(const QString& strURL);
     void SetDialogResult(int nResult);
+    bool checkListClickable();
+
 
 #ifndef Q_OS_MAC
     void on_actionPopupMainMenu_triggered();

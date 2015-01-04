@@ -148,6 +148,8 @@ public:
     void editorFocus();
     void setEditorEnable(bool enalbe);
 
+    bool evaluateJavaScript(const QString& js);
+
     // -1: command invalid
     // 0: available
     // 1: executed before
@@ -187,6 +189,7 @@ public:
 
 private:
     void initEditor();
+    void resetEditorParams();
     void viewDocumentInEditor(bool editing);
     void tryResetTitle();
 

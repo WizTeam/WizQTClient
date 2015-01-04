@@ -32,6 +32,8 @@
 using namespace Core;
 using namespace Core::Internal;
 
+static bool documentEditingByOtherUsers = false;
+
 CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
     : INoteView(parent)
     , m_app(app)
@@ -126,6 +128,8 @@ CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
             SLOT(on_checkEditStatus_finished(QString,QStringList)));
     connect(m_editStatusCheckThread, SIGNAL(checkDocumentChangedFinished(QString,bool,int)),
             SLOT(on_checkDocumentChanged_finished(QString,bool,int)));
+    connect(m_editStatusCheckThread, SIGNAL(checkTimeOut(QString)),
+            SLOT(on_checkEditStatus_timeout(QString)));
 
     // open comments link by document webview
     connect(m_comments->page(), SIGNAL(linkClicked(const QUrl&)), m_web,
@@ -343,12 +347,7 @@ void CWizDocumentView::setEditNote(bool bEdit)
 
     if (m_bEditingMode)
     {
-        CWizDatabase& db = m_dbMgr.db(m_note.strKbGUID);
-        if (db.IsGroup())
-        {
-            QString strUserAlias = db.GetUserAlias();
-            m_editStatusSyncThread->setCurrentEditingDocument(strUserAlias, m_note.strKbGUID, m_note.strGUID);
-        }
+        sendDocumentEditingStatus();
     }
     else
     {
@@ -397,6 +396,22 @@ void CWizDocumentView::promptMessage(const QString &strMsg)
     m_msgLabel->setText(strMsg);
 }
 
+bool CWizDocumentView::checkListClickable()
+{
+    QEventLoop loop;
+    connect(this, SIGNAL(documentEditStatusCheckFinished()), &loop, SLOT(quit()));
+    m_editStatusCheckThread->checkEditStatus(m_note.strKbGUID, m_note.strGUID);
+    loop.exec();
+
+    return !documentEditingByOtherUsers;
+}
+
+void CWizDocumentView::setStatusToEditingByCheckList()
+{
+    m_title->setMessageTips(tr("You have modify the document, keep modify status until close this document..."));
+    sendDocumentEditingStatus();
+}
+
 void CWizDocumentView::setEditorFocus()
 {
     m_web->setFocus(Qt::MouseFocusReason);
@@ -438,12 +453,17 @@ void CWizDocumentView::loadNote(const WIZDOCUMENTDATA& doc)
     //
     if (m_bEditingMode && m_web->hasFocus())
     {
-        CWizDatabase& db = m_dbMgr.db(m_note.strKbGUID);
-        if (db.IsGroup())
-        {
-            QString strUserAlias = db.GetUserAlias();
-            m_editStatusSyncThread->setCurrentEditingDocument(strUserAlias, m_note.strKbGUID, m_note.strGUID);
-        }
+        sendDocumentEditingStatus();
+    }
+}
+
+void CWizDocumentView::sendDocumentEditingStatus()
+{
+    CWizDatabase& db = m_dbMgr.db(m_note.strKbGUID);
+    if (db.IsGroup())
+    {
+        QString strUserAlias = db.GetUserAlias();
+        m_editStatusSyncThread->setCurrentEditingDocument(strUserAlias, m_note.strKbGUID, m_note.strGUID);
     }
 }
 
@@ -529,6 +549,7 @@ void Core::CWizDocumentView::on_checkEditStatus_finished(QString strGUID, QStrin
     {
         QString strEditor = editors.join(" , ");
         m_title->setDocumentEditingStatus(strEditor);
+        documentEditingByOtherUsers = true;
     }
     else
     {
@@ -537,7 +558,10 @@ void Core::CWizDocumentView::on_checkEditStatus_finished(QString strGUID, QStrin
         {
             m_title->setEditButtonState(true, false);
         }
+        documentEditingByOtherUsers = false;
     }
+
+    emit documentEditStatusCheckFinished();
 }
 
 void CWizDocumentView::on_checkEditStatus_timeout(QString strGUID)
@@ -605,12 +629,7 @@ void CWizDocumentView::on_webView_focus_changed()
 {
     if (m_web->hasFocus())
     {
-        CWizDatabase& db = m_dbMgr.db(m_note.strKbGUID);
-        if (db.IsGroup())
-        {
-            QString strUserAlias = db.GetUserAlias();
-            m_editStatusSyncThread->setCurrentEditingDocument(strUserAlias, m_note.strKbGUID, m_note.strGUID);
-        }
+        sendDocumentEditingStatus();
     }
 }
 

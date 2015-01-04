@@ -98,11 +98,14 @@ public:
     void sendDocumentSavedSignal(const QString& strGUID);
     void resetTitle(const QString& strTitle);
     void promptMessage(const QString& strMsg);
+    bool checkListClickable();
+    void setStatusToEditingByCheckList();
 
     QWebFrame* noteFrame();
 
 signals:
     void documentSaved(const QString& strGUID, CWizDocumentView* viewer);
+    void documentEditStatusCheckFinished();
 
 public Q_SLOTS:
     void onViewNoteRequested(Core::INoteView* view, const WIZDOCUMENTDATA& doc);
@@ -130,6 +133,7 @@ public Q_SLOTS:
 
 private:
     void loadNote(const WIZDOCUMENTDATA &doc);
+    void sendDocumentEditingStatus();
 };
 
 class WizFloatDocumentViewer : public QWidget
