@@ -1973,7 +1973,7 @@ bool CWizIndex::GetDocumentsByLocation(const CString& strLocation,
                                        CWizDocumentDataArray& arrayDocument,
                                        bool bIncludeSubFolders /* = false */)
 {
-	CString strWhere;
+    CString strWhere;
     if (bIncludeSubFolders) {
         strWhere.Format(_T("DOCUMENT_LOCATION like %s"),
                         STR2SQL(strLocation + _T("%")).utf16());
@@ -3947,4 +3947,34 @@ void CWizIndex::DeleteExtraFolder(const QString& strLocation)
     }
 
     SetExtraFolder(arrayLocation);
+}
+
+bool CWizIndex::UpdateLocation(const QString& strOldLocation, const QString& strNewLocation)
+{
+    QString sql = QString("update %1 set DOCUMENT_LOCATION='%2' where "
+                          "DOCUMENT_LOCATION='%3'").arg(TABLE_NAME_WIZ_DOCUMENT)
+                          .arg(strNewLocation).arg(strOldLocation);
+    bool result = ExecSQL(sql);
+
+
+    CWizStdStringArray arrayExtra;
+    GetExtraFolder(arrayExtra);
+    CWizStdStringArray newArray;
+    //
+    for (CWizStdStringArray::const_iterator it = arrayExtra.begin();
+         it != arrayExtra.end();
+         it++)
+    {
+        if (*it == strOldLocation)
+        {
+            newArray.push_back(strNewLocation);
+        }
+        else
+        {
+            newArray.push_back(*it);
+        }
+    }
+    SetExtraFolder(newArray);
+
+    return result;
 }

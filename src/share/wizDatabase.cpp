@@ -1400,6 +1400,8 @@ void CWizDatabase::SetFoldersPos(const QString& foldersPos, qint64 nVersion)
         }
     }
 
+    setting->sync();
+
     if (bPositionChanged) {
         Q_EMIT folderPositionChanged();
     }

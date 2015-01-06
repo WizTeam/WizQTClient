@@ -206,6 +206,7 @@ public:
     virtual QString id() const;
 
     QString location() const { return m_strName; }
+    void setLocation(const QString& strLocation);
     QString name() const;
 
 private:

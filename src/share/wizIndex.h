@@ -176,6 +176,8 @@ public:
     void AddExtraFolder(const QString& strLocation);
     void DeleteExtraFolder(const QString& strLocation);
 
+    bool UpdateLocation(const QString& strOldLocation, const QString& strNewLocation);
+
     bool IsLocationEmpty(const CString& strLocation);
     bool GetAllLocations(CWizStdStringArray& arrayLocation);
     bool GetAllChildLocations(const CString& strLocation, CWizStdStringArray& arrayLocation);

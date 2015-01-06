@@ -821,7 +821,7 @@ void CWizCategoryView::initMenus()
     // folder menu
     m_menuFolder = new QMenu(this);
     m_menuFolder->addAction(actionNewDoc);
-//    m_menuFolder->addAction(actionImportFile);
+    m_menuFolder->addAction(actionImportFile);
     m_menuFolder->addAction(actionNewItem);
     m_menuFolder->addSeparator();
     m_menuFolder->addAction(actionMoveItem);
@@ -2505,7 +2505,8 @@ void CWizCategoryView::updateGroupFolderPosition(CWizDatabase& db)
     emit categoryItemPositionChanged(db.kbGUID());
 }
 
-void CWizCategoryView::updatePersonalFolderPosition(CWizDatabase& db)
+void CWizCategoryView::updatePersonalFolderLocation(CWizDatabase& db, \
+                                                    const QString& strOldLocation, const QString& strNewLocation)
 {
     CWizCategoryViewAllFoldersItem* pItem = dynamic_cast<CWizCategoryViewAllFoldersItem* >(findAllFolderItem());
     if (!pItem)
@@ -2519,8 +2520,12 @@ void CWizCategoryView::updatePersonalFolderPosition(CWizDatabase& db)
         pItem->insertChild(pItem->childCount(), trashItem);
     }
 
+    if (strOldLocation != strNewLocation)
+    {
+        db.UpdateLocation(strOldLocation, strNewLocation);
+    }
+
     QString str = getAllFoldersPosition();
-    qDebug() << "all folder item position  :  " << str;
     db.SetFoldersPos(str, -1);
     db.SetFoldersPosModified();
 
@@ -2529,7 +2534,7 @@ void CWizCategoryView::updatePersonalFolderPosition(CWizDatabase& db)
 
 void CWizCategoryView::updatePersonalTagPosition(CWizDatabase& db)
 {
-
+    Q_UNUSED(db);
 }
 
 void CWizCategoryView::initGeneral()
@@ -2642,7 +2647,6 @@ void CWizCategoryView::saveGroupTagsPosition(const QString& strKbGUID)
         if (childItem)
         {
             childItem->setTagPosition(rootItem->indexOfChild(childItem));
-            qDebug() << "after change tag position : " << childItem->tag().strName << "   "  << i << "  current pos  :  " << childItem->tag().nPostion;
             saveGroupTagsPosition(db, childItem);
         }
     }
@@ -2664,7 +2668,6 @@ void CWizCategoryView::saveGroupTagsPosition(CWizDatabase& db, CWizCategoryViewG
         if (childItem)
         {
             childItem->setTagPosition(i);
-            qDebug() << "after change tag position : " << childItem->tag().strName << "   " << i << "  current pos  :  " << childItem->tag().nPostion;
             saveGroupTagsPosition(db, childItem);
         }
     }
@@ -3949,7 +3952,7 @@ void CWizCategoryView::on_groupDocuments_unreadCount_modified(const QString& str
     updateGroupFolderDocumentCount(strKbGUID);
 }
 
-void CWizCategoryView::on_itemPosition_changed(const CWizCategoryViewItemBase* pItem)
+void CWizCategoryView::on_itemPosition_changed(CWizCategoryViewItemBase* pItem)
 {
     CWizDatabase& db = m_dbMgr.db(pItem->kbGUID());
     if (db.IsGroup())
@@ -3958,14 +3961,29 @@ void CWizCategoryView::on_itemPosition_changed(const CWizCategoryViewItemBase* p
     }
     else
     {
-        if (const CWizCategoryViewFolderItem* item = dynamic_cast<const CWizCategoryViewFolderItem*>(pItem))
+        if (CWizCategoryViewFolderItem* item = dynamic_cast<CWizCategoryViewFolderItem*>(pItem))
         {
-            updatePersonalFolderPosition(db);
+            CWizCategoryViewItemBase* folderRoot = findAllFolderItem();
+            QString strNewLocation = "/" + item->name() + "/";
+            QTreeWidgetItem* parentItem = item->parent();
+            while (parentItem != folderRoot)
+            {
+                CWizCategoryViewItemBase* parentBase = dynamic_cast<CWizCategoryViewItemBase*>(parentItem);
+                if (!parentBase)
+                    return;
+
+                strNewLocation = parentBase->name() + strNewLocation.remove(0, 1);
+                parentItem = parentBase->parent();
+            }
+
+            QString strOldLocation = item->location();
+            item->setLocation(strNewLocation);
+            updatePersonalFolderLocation(db, strOldLocation, strNewLocation);
         }
-        else if (const CWizCategoryViewTagItem* tagItem = dynamic_cast<const CWizCategoryViewTagItem*>(pItem))
-        {
-            updatePersonalTagPosition(db);
-        }
+//        else if (const CWizCategoryViewTagItem* tagItem = dynamic_cast<const CWizCategoryViewTagItem*>(pItem))
+//        {
+//            updatePersonalTagPosition(db);
+//        }
     }
 }
 

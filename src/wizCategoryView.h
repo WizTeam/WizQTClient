@@ -108,7 +108,7 @@ protected Q_SLOTS:
     virtual void on_group_permissionChanged(const QString& strKbGUID) { Q_UNUSED(strKbGUID); }
     virtual void on_group_bizChanged(const QString& strKbGUID) { Q_UNUSED(strKbGUID); }
 
-    virtual void on_itemPosition_changed(const CWizCategoryViewItemBase* pItem) { Q_UNUSED(pItem); }
+    virtual void on_itemPosition_changed(CWizCategoryViewItemBase* pItem) { Q_UNUSED(pItem); }
 
     virtual void createDocumentByHtml(const QString& strHtml, const QString& strTitle);
 
@@ -306,7 +306,7 @@ protected Q_SLOTS:
     virtual void on_group_bizChanged(const QString& strKbGUID);
     virtual void on_groupDocuments_unreadCount_modified(const QString& strKbGUID);
 
-    virtual void on_itemPosition_changed(const CWizCategoryViewItemBase* pItem);
+    virtual void on_itemPosition_changed(CWizCategoryViewItemBase* pItem);
 
     virtual void createDocumentByHtml(const QString& strHtml, const QString& strTitle);
 
@@ -398,7 +398,8 @@ private:
 
     void quickSyncNewDocument(const QString& strKbGUID);
 
-    void updatePersonalFolderPosition(CWizDatabase& db);
+    void updatePersonalFolderLocation(CWizDatabase& db,const QString& strOldLocation,\
+                                      const QString& strNewLocation);
     void updatePersonalTagPosition(CWizDatabase& db);
     void updateGroupFolderPosition(CWizDatabase& db);
 
