@@ -19,34 +19,33 @@ class CWizDocumentEditStatusSyncThread : public QThread
 public:
     CWizDocumentEditStatusSyncThread(QObject* parent = 0);
     //
-    void stopEditingDocument();
-    void setCurrentEditingDocument(const QString& strUserAlias,const QString& strKbGUID ,const QString& strGUID);
+    void startEditingDocument(const QString& strUserAlias, const QString& strKbGUID, const QString& strGUID);
+    void stopEditingDocument(const QString& strKbGUID ,const QString& strGUID, bool bModified);
+    void documentSaved(const QString& strUserAlias, const QString& strKbGUID ,const QString& strGUID);
+
     void stop();
     //
     void waitForDone();
+
+public slots:
+    void documentUploaded(const QString& strKbGUID ,const QString& strGUID);
+
 protected:
     void run();
 private:
+    QString combineObjID(const QString& strKbGUID, const QString& strGUID);
     void sendEditingMessage();
     void sendDoneMessage();
-    void sendEditingMessage(const QString& strUserAlias, const QString& strObjID);
-    void sendDoneMessage(const QString& strUserAlias, const QString& strObjID);
+    bool sendEditingMessage(const QString& strUserAlias, const QString& strObjID);
+    bool sendDoneMessage(const QString& strUserAlias, const QString& strObjID);
 private:
-    struct EditStatusObj{
-        QString strObjID;
-        QString strUserName;
-        //
-        void clear(){
-            strObjID.clear();
-            strUserName.clear();
-        }
-    };
     //
     bool m_stop;
     bool m_sendNow;
 
-    EditStatusObj m_editingObj;
-    EditStatusObj m_oldObj;
+    QMap<QString, QString> m_editingMap;
+    QMap<QString, QString> m_modifiedMap;
+    QMap<QString, QString> m_doneMap;
 
     QMutex m_mutext;
     QPointer<QNetworkAccessManager> m_netManager;

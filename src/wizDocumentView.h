@@ -95,7 +95,7 @@ public:
     void setViewMode(int mode);
     void setModified(bool modified);
     void settingsChanged();
-    void sendDocumentSavedSignal(const QString& strGUID);
+    void sendDocumentSavedSignal(const QString& strGUID, const QString& strKbGUID);
     void resetTitle(const QString& strTitle);
     void promptMessage(const QString& strMsg);
     bool checkListClickable();
@@ -134,6 +134,7 @@ public Q_SLOTS:
 private:
     void loadNote(const WIZDOCUMENTDATA &doc);
     void sendDocumentEditingStatus();
+    void stopDocumentEditingStatus();
 };
 
 class WizFloatDocumentViewer : public QWidget

@@ -124,6 +124,7 @@ public:
     virtual bool SetObjectLocalServerVersion(const QString& strObjectGUID,
                                              const QString& strObjectType,
                                              qint64 nVersion);
+    virtual void OnObjectUploaded(const QString &strObjectGUID, const QString &strObjectType);
 
     // query
     virtual bool GetModifiedDeletedList(CWizDeletedGUIDDataArray& arrayData);
@@ -475,6 +476,7 @@ Q_SIGNALS:
     void attachmentsUpdated();
     void folderPositionChanged();
     void tagsPositionChanged(const QString& strKbGUID);
+    void documentUploaded(const QString& strKbGUID, const QString& strGUID);
 
 private:
     //should make sure sourceDoc already exist before use this.

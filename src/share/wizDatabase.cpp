@@ -518,6 +518,14 @@ bool CWizDatabase::SetObjectLocalServerVersion(const QString& strObjectGUID,
     return ModifyObjectVersion(strObjectGUID, strObjectType, nVersion);
 }
 
+void CWizDatabase::OnObjectUploaded(const QString& strObjectGUID, const QString& strObjectType)
+{
+    if (strObjectType == "document")
+    {
+        emit documentUploaded(kbGUID(), strObjectGUID);
+    }
+}
+
 bool CWizDatabase::DocumentFromGUID(const QString& strGUID,
                                     WIZDOCUMENTDATA& dataExists)
 {

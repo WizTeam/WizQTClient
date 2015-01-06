@@ -24,6 +24,7 @@ struct IWizSyncableDatabase
     virtual bool SetObjectLocalServerVersion(const QString& strObjectGUID,
                                              const QString& strObjectType,
                                              qint64 nVersion) = 0;
+    virtual void OnObjectUploaded(const QString& strObjectGUID, const QString& strObjectType) = 0;
 
     virtual bool DocumentFromGUID(const QString& strGUID,
                                   WIZDOCUMENTDATA& dataExists) = 0;

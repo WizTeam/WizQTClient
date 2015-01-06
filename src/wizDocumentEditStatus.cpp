@@ -50,38 +50,82 @@ CWizDocumentEditStatusSyncThread::CWizDocumentEditStatusSyncThread(QObject* pare
 {
 }
 
-void CWizDocumentEditStatusSyncThread::stopEditingDocument()
+void CWizDocumentEditStatusSyncThread::startEditingDocument(const QString& strUserAlias, const QString& strKbGUID, const QString& strGUID)
 {
-    setCurrentEditingDocument("", "", "");
-}
-
-void CWizDocumentEditStatusSyncThread::setCurrentEditingDocument(const QString& strUserAlias, const QString& strKbGUID, const QString& strGUID)
-{
-    QString strObjID = "";
-    if (!strKbGUID.isEmpty())
-    {
-        strObjID = strKbGUID + "/" + strGUID;
-    }
+    QString strObjID = combineObjID(strKbGUID, strGUID);
+    if (strObjID.isEmpty())
+        return;
 
     m_mutext.lock();
-    //
-    if (m_editingObj.strObjID != strObjID)
+    if (m_doneMap.contains(strObjID))
     {
-        if (!m_editingObj.strObjID.isEmpty())
-        {
-            m_oldObj = m_editingObj;
-        }
-        //
-        m_editingObj.strObjID = strObjID;
-        m_editingObj.strUserName = strUserAlias;
-        //
-        m_sendNow = true;
+        m_doneMap.remove(strObjID);
     }
-    //
+    m_editingMap.insert(strObjID, strUserAlias);
     m_mutext.unlock();
 
-    if (!isRunning())
-        start();
+    m_sendNow = true;
+}
+
+void CWizDocumentEditStatusSyncThread::stopEditingDocument(const QString& strKbGUID, \
+                                                           const QString& strGUID, bool bModified)
+{
+    QString strObjID = combineObjID(strKbGUID, strGUID);
+    if (strObjID.isEmpty())
+        return;
+
+    m_mutext.lock();
+    if (m_editingMap.contains(strObjID))
+    {
+        if (bModified)
+        {
+            m_modifiedMap.insert(strObjID, m_editingMap.value(strObjID));
+        }
+        else if (!m_modifiedMap.contains(strObjID))
+        {
+            m_doneMap.insert(strObjID, m_editingMap.value(strObjID));
+            m_sendNow = true;
+        }
+        m_editingMap.remove(strObjID);
+    }
+    m_mutext.unlock();
+}
+
+void CWizDocumentEditStatusSyncThread::documentSaved(const QString& strUserAlias, const QString& strKbGUID, const QString& strGUID)
+{
+    qDebug() << "EditStatusSyncThread document saved : kbguid : " << strKbGUID << "  guid : " << strGUID;
+    QString strObjID = combineObjID(strKbGUID, strGUID);
+    if (strObjID.isEmpty())
+        return;
+
+    m_mutext.lock();
+    if (m_doneMap.contains(strObjID))
+    {
+        m_doneMap.remove(strObjID);
+    }
+    m_modifiedMap.insert(strObjID, strUserAlias);
+    m_mutext.unlock();
+}
+
+void CWizDocumentEditStatusSyncThread::documentUploaded(const QString& strKbGUID, const QString& strGUID)
+{
+    qDebug() << "edit status sync thread on document uploaded , kbGuid :  " << strKbGUID << "   strGuid  :  " << strGUID;
+
+    QString strObjID = combineObjID(strKbGUID, strGUID);
+    if (strObjID.isEmpty())
+        return;
+
+    m_mutext.lock();
+    if (m_modifiedMap.contains(strObjID))
+    {
+        if (!m_editingMap.contains(strObjID))
+        {
+            m_doneMap.insert(strObjID, m_modifiedMap.value(strObjID));
+            m_sendNow = true;
+        }
+        m_modifiedMap.remove(strObjID);
+    }
+    m_mutext.unlock();
 }
 
 void CWizDocumentEditStatusSyncThread::stop()
@@ -91,8 +135,6 @@ void CWizDocumentEditStatusSyncThread::stop()
         return;
 
     m_stop = true;
-    //
-    stopEditingDocument();
 }
 
 void CWizDocumentEditStatusSyncThread::waitForDone()
@@ -126,21 +168,38 @@ void CWizDocumentEditStatusSyncThread::run()
     }
 }
 
-
+QString CWizDocumentEditStatusSyncThread::combineObjID(const QString& strKbGUID, const QString& strGUID)
+{
+    QString strObjID = "";
+    if (!strKbGUID.isEmpty())
+    {
+        strObjID = strKbGUID + "/" + strGUID;
+    }
+    return strObjID;
+}
 
 void CWizDocumentEditStatusSyncThread::sendEditingMessage()
 {
     m_mutext.lock();
-    EditStatusObj editingObj = m_editingObj;
+    QMap<QString, QString> editingMap(m_editingMap);
+    QMap<QString, QString>::const_iterator it;
+    for ( it = m_modifiedMap.begin(); it != m_modifiedMap.end(); ++it )
+    {
+        editingMap.insert(it.key(), it.value());
+    }
     m_mutext.unlock();
 
-    if (!editingObj.strObjID.isEmpty() && !editingObj.strUserName.isEmpty())
+    for (it = editingMap.begin(); it != editingMap.end(); ++it)
     {
-        sendEditingMessage(editingObj.strUserName, editingObj.strObjID);
+        qDebug() << "try to send editing message , objId : " << it.key() << "  userAlias : " << it.value();
+        if (!it.key().isEmpty() && !it.value().isEmpty())
+        {
+            sendEditingMessage(it.value(), it.key());
+        }
     }
 }
 
-void CWizDocumentEditStatusSyncThread::sendEditingMessage(const QString& strUserAlias, const QString& strObjID)
+bool CWizDocumentEditStatusSyncThread::sendEditingMessage(const QString& strUserAlias, const QString& strObjID)
 {
     QString strUrl = ::WizFormatString4(_T("%1/add?obj_id=%2&user_id=%3&t=%4"),
                                         WizKMGetDocumentEditStatusURL(),
@@ -159,23 +218,32 @@ void CWizDocumentEditStatusSyncThread::sendEditingMessage(const QString& strUser
     QEventLoop loop;
     connect(reply, SIGNAL(finished()), &loop, SLOT(quit()));
     loop.exec();
+
+    return reply->error() == QNetworkReply::NoError;
 }
 
 void CWizDocumentEditStatusSyncThread::sendDoneMessage()
 {
     m_mutext.lock();
-    EditStatusObj doneObj = m_oldObj;
-    // send done message just once
-    m_oldObj.clear();
+    QMap<QString, QString> doneList(m_doneMap);
     m_mutext.unlock();
 
-    if (!doneObj.strObjID.isEmpty() && !doneObj.strUserName.isEmpty())
+    QMap<QString, QString>::const_iterator it;
+    for ( it = doneList.begin(); it != doneList.end(); ++it )
     {
-        sendDoneMessage(doneObj.strUserName, doneObj.strObjID);
+        if (!it.key().isEmpty() && !it.value().isEmpty())
+        {
+            if (sendDoneMessage(it.value(), it.key()))
+            {
+                m_mutext.lock();
+                m_doneMap.remove(it.key());
+                m_mutext.unlock();
+            }
+        }
     }
 }
 
-void CWizDocumentEditStatusSyncThread::sendDoneMessage(const QString& strUserAlias, const QString& strObjID)
+bool CWizDocumentEditStatusSyncThread::sendDoneMessage(const QString& strUserAlias, const QString& strObjID)
 {
     QString strUrl = WizFormatString4(_T("%1/delete?obj_id=%2&user_id=%3&t=%4"),
                                       WizKMGetDocumentEditStatusURL(),
@@ -193,6 +261,8 @@ void CWizDocumentEditStatusSyncThread::sendDoneMessage(const QString& strUserAli
     QEventLoop loop;
     connect(reply, SIGNAL(finished()), &loop, SLOT(quit()));
     loop.exec();
+
+    return reply->error() == QNetworkReply::NoError;
 }
 
 

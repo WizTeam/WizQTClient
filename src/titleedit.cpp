@@ -217,6 +217,9 @@ void TitleEdit::onTitleEditingFinished()
     WIZDOCUMENTDATA data;
     CWizDatabase& db = CWizDatabaseManager::instance()->db(noteView()->note().strKbGUID);
     if (db.DocumentFromGUID(noteView()->note().strGUID, data)) {
+        if (!db.CanEditDocument(data))
+            return;
+
         QString strNewTitle = text().left(255);
         if (strNewTitle != data.strTitle) {
             data.strTitle = strNewTitle;

@@ -113,6 +113,9 @@ CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
     connect(&m_dbMgr, SIGNAL(attachmentDeleted(const WIZDOCUMENTATTACHMENTDATA&)), \
             SLOT(on_attachment_deleted(const WIZDOCUMENTATTACHMENTDATA&)));
 
+    connect(&m_dbMgr, SIGNAL(documentUploaded(QString,QString)), \
+            m_editStatusSyncThread, SLOT(documentUploaded(QString,QString)));
+
     connect(Core::ICore::instance(), SIGNAL(viewNoteRequested(Core::INoteView*,const WIZDOCUMENTDATA&)),
             SLOT(onViewNoteRequested(Core::INoteView*,const WIZDOCUMENTDATA&)));
 
@@ -351,7 +354,7 @@ void CWizDocumentView::setEditNote(bool bEdit)
     }
     else
     {
-        m_editStatusSyncThread->stopEditingDocument();
+        stopDocumentEditingStatus();
     }
 }
 
@@ -378,8 +381,15 @@ void CWizDocumentView::settingsChanged()
     setViewMode(m_userSettings.noteViewMode());
 }
 
-void CWizDocumentView::sendDocumentSavedSignal(const QString& strGUID)
+void CWizDocumentView::sendDocumentSavedSignal(const QString& strGUID, const QString& strKbGUID)
 {
+    CWizDatabase& db = m_dbMgr.db(m_note.strKbGUID);
+    if (db.IsGroup())
+    {
+        QString strUserAlias = db.GetUserAlias();
+        m_editStatusSyncThread->documentSaved(strUserAlias, strKbGUID, strGUID);
+    }
+
     emit documentSaved(strGUID, this);
 }
 
@@ -448,8 +458,6 @@ void CWizDocumentView::loadNote(const WIZDOCUMENTDATA& doc)
     m_note = doc;
     //
     m_noteLoaded = true;
-
-    m_editStatusSyncThread->stopEditingDocument();
     //
     if (m_bEditingMode && m_web->hasFocus())
     {
@@ -463,7 +471,17 @@ void CWizDocumentView::sendDocumentEditingStatus()
     if (db.IsGroup())
     {
         QString strUserAlias = db.GetUserAlias();
-        m_editStatusSyncThread->setCurrentEditingDocument(strUserAlias, m_note.strKbGUID, m_note.strGUID);
+        m_editStatusSyncThread->startEditingDocument(strUserAlias, m_note.strKbGUID, m_note.strGUID);
+    }
+}
+
+void CWizDocumentView::stopDocumentEditingStatus()
+{
+    WIZDOCUMENTDATA doc = m_note;
+    if (m_dbMgr.db(doc.strKbGUID).DocumentFromGUID(doc.strGUID, doc))
+    {
+        bool bModified = doc.nVersion == -1;
+        m_editStatusSyncThread->stopEditingDocument(doc.strKbGUID, doc.strGUID, bModified);
     }
 }
 
@@ -553,10 +571,9 @@ void Core::CWizDocumentView::on_checkEditStatus_finished(QString strGUID, QStrin
     }
     else
     {
-        m_title->setDocumentEditingStatus("");
         if (strGUID == m_note.strGUID)
-        {
-            m_title->setEditButtonState(true, false);
+        {           
+            m_title->setEditButtonState(!m_bLocked, false);
         }
         documentEditingByOtherUsers = false;
     }
@@ -597,6 +614,7 @@ void CWizDocumentView::on_checkDocumentChanged_finished(const QString& strGUID, 
         }
         else
         {
+            m_title->setMessageTips("");
             m_bLocked = false;
             int nLockReason = -1;
             m_bEditingMode = false;
