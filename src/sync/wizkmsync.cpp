@@ -126,6 +126,9 @@ void CWizKMSyncThread::run()
 
 void CWizKMSyncThread::syncAfterStart()
 {
+    if (m_tLastSyncAll.secsTo(QDateTime::currentDateTime()) < 5)
+        return;
+
     startSyncAll(false);
 }
 
@@ -157,6 +160,7 @@ bool CWizKMSyncThread::doSync()
         qDebug() << "[Sync] syncing all started, thread:" << QThread::currentThreadId();
 
         syncAll();
+        m_bNeedSyncAll = false;
         m_tLastSyncAll = QDateTime::currentDateTime();
         return true;
     }
