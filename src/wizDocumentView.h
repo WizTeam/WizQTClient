@@ -127,7 +127,7 @@ public Q_SLOTS:
     //
     void on_checkEditStatus_finished(QString strGUID, QStringList editors);
     void on_checkEditStatus_timeout(QString strGUID);
-    void on_checkDocumentChanged_finished(const QString& strGUID, bool changed, int versionOnServer);
+    void on_checkDocumentChanged_finished(const QString& strGUID, bool changed);
     void on_syncDatabase_request(const QString& strKbGUID);
     void on_webView_focus_changed();
 

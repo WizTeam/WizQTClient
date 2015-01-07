@@ -413,7 +413,21 @@ bool CWizDatabase::GetModifiedStyleList(CWizStyleDataArray& arrayData)
 
 bool CWizDatabase::GetModifiedDocumentList(CWizDocumentDataArray& arrayData)
 {
-    return GetModifiedDocuments(arrayData);
+    CWizDocumentDataArray docList;
+    if (!GetModifiedDocuments(docList))
+        return false;
+
+    // remove invalid document
+    CWizDocumentDataArray::iterator it;
+    for (it = docList.begin(); it != docList.end(); it++)
+    {
+        WIZDOCUMENTDATA doc = *it;
+        if (CanEditDocument(doc))
+        {
+            arrayData.push_back(doc);
+        }
+    }
+    return true;
 }
 
 bool CWizDatabase::GetModifiedAttachmentList(CWizDocumentAttachmentDataArray& arrayData)
@@ -3752,7 +3766,7 @@ bool CWizDatabase::makeSureDocumentExist(const WIZDOCUMENTDATA& doc, CWizObjectD
         connect(downloaderHost, SIGNAL(downloadProgress(QString,int,int)), &dlg, SLOT(setProgress(QString,int,int)));
         connect(downloaderHost, SIGNAL(downloadDone(WIZOBJECTDATA,bool)), &dlg, SLOT(accept()));
 
-        downloaderHost->download(doc);
+        downloaderHost->downloadData(doc);
 
         dlg.exec();
     }
@@ -3779,7 +3793,7 @@ bool CWizDatabase::makeSureAttachmentExist(const WIZDOCUMENTATTACHMENTDATAEX &at
         connect(downloaderHost, SIGNAL(downloadProgress(QString,int, int)), &dlg, SLOT(setProgress(QString,int, int)));
         connect(downloaderHost, SIGNAL(downloadDone(WIZOBJECTDATA, bool)), &dlg, SLOT(accept()));
 
-        downloaderHost->download(attachData);
+        downloaderHost->downloadData(attachData);
 
         dlg.exec();
     }

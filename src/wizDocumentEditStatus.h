@@ -71,7 +71,7 @@ public slots:
 signals:
     void checkTimeOut(QString strGUID);
     void checkFinished(QString strGUID,QStringList editors);
-    void checkDocumentChangedFinished(const QString& strGUID, bool bChanged, int lastVersion);
+    void checkDocumentChangedFinished(const QString& strGUID, bool bChanged);
     void syncDatabaseRequest(const QString& strKbGUID);
 
 protected:
@@ -80,7 +80,7 @@ protected:
 private:
     void setDocmentGUID(const QString& strKbGUID,const QString& strGUID);
 
-    bool checkDocumentChangedOnServer(const QString& strKbGUID, const QString& strGUID, int& versionOnServer);
+    bool checkDocumentChangedOnServer(const QString& strKbGUID, const QString& strGUID);
     bool checkDocumentEditStatus(const QString& strKbGUID, const QString& strGUID);
 
 private:
@@ -90,6 +90,7 @@ private:
     QMutex m_mutexWait;
     QWaitCondition m_wait;
     bool m_needRecheck;
+    bool m_checkNow;
 
     QTimer* m_timer;
     QString m_strCurGUID;

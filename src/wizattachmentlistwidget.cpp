@@ -235,6 +235,17 @@ void CWizAttachmentListView::openAttachment(CWizAttachmentListViewItem* item)
         waitForDownload();
     }
 
+    QFile file(strFileName);
+    if (file.exists() && !db.CanEditAttachment(attachment) && (file.permissions() & QFileDevice::WriteOwner))
+    {
+        QFile::Permissions permissions = file.permissions();
+        qDebug() << "cannot edit attachment, set doc permission, origin permission " << permissions;
+        permissions = permissions & ~QFileDevice::WriteOwner;
+        qDebug() << "target permission :  " << permissions;
+        file.setPermissions(permissions);
+        qDebug() << "after set document permissions : " << permissions;
+    }
+
     QDesktopServices::openUrl(QUrl::fromLocalFile(strFileName));
 
     CWizFileMonitor& monitor = CWizFileMonitor::instance();
@@ -290,7 +301,7 @@ void CWizAttachmentListView::resetPermission()
 
 void CWizAttachmentListView::startDownload(CWizAttachmentListViewItem* item)
 {
-    m_downloaderHost->download(item->attachment());
+    m_downloaderHost->downloadData(item->attachment());
     item->setIsDownloading(true);
 
     forceRepaint();

@@ -129,8 +129,8 @@ CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
 
     connect(m_editStatusCheckThread, SIGNAL(checkFinished(QString,QStringList)),
             SLOT(on_checkEditStatus_finished(QString,QStringList)));
-    connect(m_editStatusCheckThread, SIGNAL(checkDocumentChangedFinished(QString,bool,int)),
-            SLOT(on_checkDocumentChanged_finished(QString,bool,int)));
+    connect(m_editStatusCheckThread, SIGNAL(checkDocumentChangedFinished(QString,bool)),
+            SLOT(on_checkDocumentChanged_finished(QString,bool)));
     connect(m_editStatusCheckThread, SIGNAL(checkTimeOut(QString)),
             SLOT(on_checkEditStatus_timeout(QString)));
 
@@ -252,6 +252,7 @@ void CWizDocumentView::viewNote(const WIZDOCUMENTDATA& data, bool forceEdit)
     MainWindow* window = qobject_cast<MainWindow *>(m_app.mainWindow());
 
     m_web->saveDocument(m_note, false);
+    stopDocumentEditingStatus();
 
     m_noteLoaded = false;
     m_note = data;
@@ -268,7 +269,7 @@ void CWizDocumentView::viewNote(const WIZDOCUMENTDATA& data, bool forceEdit)
     if (!db.IsObjectDataDownloaded(data.strGUID, "document") || \
             !PathFileExists(strDocumentFileName)) {
 
-        window->downloaderHost()->download(data);
+        window->downloaderHost()->downloadData(data);
         window->showClient(false);
         window->transitionView()->showAsMode(data.strGUID, CWizDocumentTransitionView::Downloading);
 
@@ -311,7 +312,7 @@ void CWizDocumentView::reviewCurrentNote()
     if (!db.IsObjectDataDownloaded(m_note.strGUID, "document") || \
             !PathFileExists(strDocumentFileName)) {
         MainWindow* window = qobject_cast<MainWindow *>(m_app.mainWindow());
-        window->downloaderHost()->download(m_note);
+        window->downloaderHost()->downloadData(m_note);
         window->showClient(false);
         window->transitionView()->showAsMode(m_note.strGUID, CWizDocumentTransitionView::Downloading);
 
@@ -559,6 +560,7 @@ void CWizDocumentView::on_document_data_saved(const QString& strGUID,
 
 void Core::CWizDocumentView::on_checkEditStatus_finished(QString strGUID, QStringList editors)
 {
+    qDebug() << "document view. on check edit status finished : " << editors;
     //
     QString strCurrentUser = m_dbMgr.db(m_note.strKbGUID).GetUserAlias();
     editors.removeAll(strCurrentUser);
@@ -583,30 +585,28 @@ void Core::CWizDocumentView::on_checkEditStatus_finished(QString strGUID, QStrin
 
 void CWizDocumentView::on_checkEditStatus_timeout(QString strGUID)
 {
+    qDebug() << "web view. on check edit status time out";
     if (strGUID == m_note.strGUID)
     {
         m_title->setEditButtonState(true, false);
         m_title->setMessageTips(tr("Check edit status time out."));
     }
-
 }
 
-void CWizDocumentView::on_checkDocumentChanged_finished(const QString& strGUID, bool changed, int versionOnServer)
+void CWizDocumentView::on_checkDocumentChanged_finished(const QString& strGUID, bool changed)
 {
+    qDebug() << "web view. check document changed finished changed";
     if (strGUID == m_note.strGUID)
     {
         if (changed)
         {
-            CWizDatabase& db = m_dbMgr.db(m_note.strKbGUID);
-            m_note.nVersion = versionOnServer;
-            db.ModifyDocumentInfoEx(m_note);
-
             // downlaod document data
+            CWizDatabase& db = m_dbMgr.db(m_note.strKbGUID);
             QString strDocumentFileName = db.GetDocumentFileName(m_note.strGUID);
             QFile::remove(strDocumentFileName);
 
             MainWindow* window = qobject_cast<MainWindow *>(m_app.mainWindow());
-            window->downloaderHost()->download(m_note);
+            window->downloaderHost()->downloadDocument(m_note);
             window->showClient(false);
             window->transitionView()->showAsMode(m_note.strGUID, CWizDocumentTransitionView::Downloading);
 

@@ -70,6 +70,7 @@ void CWizDocumentEditStatusSyncThread::startEditingDocument(const QString& strUs
 void CWizDocumentEditStatusSyncThread::stopEditingDocument(const QString& strKbGUID, \
                                                            const QString& strGUID, bool bModified)
 {
+    qDebug() << "stop editing document , guid " << strGUID << "  modified : " << bModified;
     QString strObjID = combineObjID(strKbGUID, strGUID);
     if (strObjID.isEmpty())
         return;
@@ -272,6 +273,7 @@ CWizDocumentStatusCheckThread::CWizDocumentStatusCheckThread(QObject* parent)
     , m_mutexWait(QMutex::NonRecursive)
     , m_needRecheck(false)
     , m_timer(0)
+    , m_checkNow(false)
 {
 
 }
@@ -296,14 +298,14 @@ void CWizDocumentStatusCheckThread::needRecheck()
 
 void CWizDocumentStatusCheckThread::onTimeOut()
 {
-    m_timer->stop();
-
+    qDebug() << "document check thread time out " << m_strCurGUID;
     emit checkTimeOut(m_strCurGUID);
 }
 
 void CWizDocumentStatusCheckThread::checkEditStatus(const QString& strKbGUID, const QString& strGUID)
 {
     setDocmentGUID(strKbGUID, strGUID);
+    m_checkNow = true;
 }
 
 void CWizDocumentStatusCheckThread::downloadData(const QString& strUrl)
@@ -355,7 +357,8 @@ void CWizDocumentStatusCheckThread::downloadData(const QString& strUrl)
 void CWizDocumentStatusCheckThread::run()
 {
     //
-    while (!m_stop)
+    int idleCounter = 0;
+    while (1)
     {
         //////
         {
@@ -377,20 +380,35 @@ void CWizDocumentStatusCheckThread::run()
         }
 
         //
-        if (!m_timer)
-        {
-            m_timer = new QTimer();
-            connect(m_timer, SIGNAL(timeout()), SLOT(onTimeOut()));
-        }
+//        if (!m_timer)
+//        {
+//            m_timer = new QTimer();
+//            m_timer->setSingleShot(true);
+//            connect(m_timer, SIGNAL(timeout()), SLOT(onTimeOut()));
+//        }
 
-        m_timer->start(5000);
+//        m_timer->start(5000);
+
+        QTimer::singleShot(5000, this, SLOT(onTimeOut()));
         //
-        int lastVersion;
-        bool changed = checkDocumentChangedOnServer(m_strCurKbGUID, m_strCurGUID, lastVersion);
-        emit checkDocumentChangedFinished(m_strCurGUID, changed, lastVersion);
 
-        checkDocumentEditStatus(m_strCurKbGUID, m_strCurGUID);
-        m_timer->stop();
+        if (idleCounter >= 60 || m_checkNow || m_stop)
+        {
+            qDebug() << "start to check document changed on server , guid : " << m_strCurGUID;
+            bool changed = checkDocumentChangedOnServer(m_strCurKbGUID, m_strCurGUID);
+            qDebug() << "check finished, document changed : " << changed;
+            emit checkDocumentChangedFinished(m_strCurGUID, changed);
+
+            qDebug() << "start to check document edit status";
+            checkDocumentEditStatus(m_strCurKbGUID, m_strCurGUID);
+            qDebug() << "check document edit status finished";
+            //        m_timer->stop();
+        }
+        else
+        {
+            sleep(1);
+            idleCounter ++;
+        }
     }
 }
 
@@ -404,7 +422,7 @@ void CWizDocumentStatusCheckThread::setDocmentGUID(const QString& strKbGUID, con
     m_mutexWait.unlock();
 }
 
-bool CWizDocumentStatusCheckThread::checkDocumentChangedOnServer(const QString& strKbGUID, const QString& strGUID, int& versionOnServer)
+bool CWizDocumentStatusCheckThread::checkDocumentChangedOnServer(const QString& strKbGUID, const QString& strGUID)
 {
     CWizDatabase& db = CWizDatabaseManager::instance()->db(strKbGUID);
     WIZDOCUMENTDATA doc;
@@ -412,7 +430,9 @@ bool CWizDocumentStatusCheckThread::checkDocumentChangedOnServer(const QString& 
         return false;
 
     if (doc.nVersion == -1)
-        return false;
+    {
+        return !db.CanEditDocument(doc);
+    }
 
     WIZUSERINFO userInfo = WizService::Token::info();
     if (db.IsGroup())
@@ -435,17 +455,12 @@ bool CWizDocumentStatusCheckThread::checkDocumentChangedOnServer(const QString& 
     if (versionServer.nDocumentVersion <= db.GetObjectVersion("document"))
         return false;
 
-    //emit syncDatabaseRequest(strKbGUID);
-
     int nPart = 0;
     nPart |= WIZKM_XMKRPC_DOCUMENT_PART_INFO;
     WIZDOCUMENTDATAEX docOnServer;
     if (!server.document_getData(strGUID, nPart, docOnServer))
         return false;
 
-    qDebug() << "compare document version , server  :  " << docOnServer.nVersion << " doc in local  :  " << doc.nVersion;
-
-    versionOnServer = docOnServer.nVersion;
     return docOnServer.nVersion > doc.nVersion;
 }
 

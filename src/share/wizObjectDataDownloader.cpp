@@ -25,7 +25,17 @@ CWizObjectDataDownloaderHost::CWizObjectDataDownloaderHost(CWizDatabaseManager& 
 {
 }
 
-void CWizObjectDataDownloaderHost::download(const WIZOBJECTDATA& data)
+void CWizObjectDataDownloaderHost::downloadData(const WIZOBJECTDATA& data)
+{
+    download(data, TypeNomalData);
+}
+
+void CWizObjectDataDownloaderHost::downloadDocument(const WIZOBJECTDATA& data)
+{
+    download(data, TypeDocument);
+}
+
+void CWizObjectDataDownloaderHost::download(const WIZOBJECTDATA& data, DownloadType type)
 {
     Q_ASSERT(!data.strObjectGUID.isEmpty());
     //
@@ -39,7 +49,7 @@ void CWizObjectDataDownloaderHost::download(const WIZOBJECTDATA& data)
     //
     m_mapObject[data.strObjectGUID] = data;
     //
-    CWizDownloadObjectRunnable* downloader = new CWizDownloadObjectRunnable(m_dbMgr, data);
+    CWizDownloadObjectRunnable* downloader = new CWizDownloadObjectRunnable(m_dbMgr, data, type);
     //
     connect(downloader, SIGNAL(downloadDone(QString,bool)), this, SLOT(on_downloadDone(QString,bool)));
     connect(downloader, SIGNAL(downloadProgress(QString,int,int)), this, SLOT(on_downloadProgress(QString,int,int)));
@@ -60,29 +70,35 @@ void CWizObjectDataDownloaderHost::on_downloadProgress(QString objectGUID, int t
     Q_EMIT downloadProgress(objectGUID, totalSize, loadedSize);
 }
 
-CWizDownloadObjectRunnable::CWizDownloadObjectRunnable(CWizDatabaseManager& dbMgr, const WIZOBJECTDATA& data)
+CWizDownloadObjectRunnable::CWizDownloadObjectRunnable(CWizDatabaseManager& dbMgr, const WIZOBJECTDATA& data,
+                                                       DownloadType type)
     : m_dbMgr(dbMgr)
     , m_data(data)
+    , m_type(type)
 {
 }
 
 void CWizDownloadObjectRunnable::run()
 {
-    bool ret = download();
+    bool ret = false;
+    switch (m_type) {
+    case TypeNomalData:
+        ret = downloadNormalData();
+        break;
+    case TypeDocument:
+        ret = downloadDocument();
+        break;
+    default:
+        break;
+    }
     //
     Q_EMIT downloadDone(m_data.strObjectGUID, ret);
 }
-bool CWizDownloadObjectRunnable::download()
+bool CWizDownloadObjectRunnable::downloadNormalData()
 {
-    QString token = WizService::Token::token();
-    if (token.isEmpty()) {
+    WIZUSERINFO info;
+    if (!getUserInfo(info))
         return false;
-    }
-
-    WIZUSERINFOBASE info;
-    info.strToken = token;
-    info.strKbGUID = m_data.strKbGUID;
-    info.strDatabaseServer = WizService::ApiEntry::kUrlFromGuid(token, m_data.strKbGUID);
 
     CWizKMDatabaseServer ksServer(info);
     connect(&ksServer, SIGNAL(downloadProgress(int, int)), SLOT(on_downloadProgress(int,int)));
@@ -94,9 +110,48 @@ bool CWizDownloadObjectRunnable::download()
         return false;
     }
 
+
+
     m_dbMgr.db(m_data.strKbGUID).UpdateObjectData(m_data.strObjectGUID,
                                                   WIZOBJECTDATA::ObjectTypeToTypeString(m_data.eObjectType),
                                                   m_data.arrayData);
+
+    return true;
+}
+
+bool CWizDownloadObjectRunnable::downloadDocument()
+{
+    WIZUSERINFO info;
+    if (!getUserInfo(info))
+        return false;
+
+    CWizKMDatabaseServer ksServer(info);
+    connect(&ksServer, SIGNAL(downloadProgress(int, int)), SLOT(on_downloadProgress(int,int)));
+
+    CWizDatabase& db = m_dbMgr.db(m_data.strKbGUID);
+    WIZDOCUMENTDATAEX document;
+    if (!db.DocumentFromGUID(m_data.strObjectGUID, document))
+        return false;
+
+    int nPart = WIZKM_XMKRPC_DOCUMENT_PART_INFO | WIZKM_XMKRPC_DOCUMENT_PART_DATA;
+    if (!ksServer.document_getData(m_data.strObjectGUID, nPart, document))
+    {
+        return false;
+    }
+
+    return m_dbMgr.db(m_data.strKbGUID).UpdateDocument(document);
+}
+
+bool CWizDownloadObjectRunnable::getUserInfo(WIZUSERINFOBASE& info)
+{
+    QString token = WizService::Token::token();
+    if (token.isEmpty()) {
+        return false;
+    }
+
+    info.strToken = token;
+    info.strKbGUID = m_data.strKbGUID;
+    info.strDatabaseServer = WizService::ApiEntry::kUrlFromGuid(token, m_data.strKbGUID);
 
     return true;
 }

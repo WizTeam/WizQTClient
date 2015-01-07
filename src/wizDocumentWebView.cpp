@@ -732,6 +732,7 @@ void CWizDocumentWebView::setEditorEnable(bool enalbe)
 bool CWizDocumentWebView::evaluateJavaScript(const QString& js)
 {
     page()->mainFrame()->evaluateJavaScript(js);
+    return true;
 }
 
 void CWizDocumentWebView::initEditor()
