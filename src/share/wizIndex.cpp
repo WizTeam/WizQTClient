@@ -697,6 +697,10 @@ bool CWizIndex::ModifyDocumentReadCount(const WIZDOCUMENTDATA& data)
         );
 
     bool ret = ExecSQL(strSQL);
+    WIZDOCUMENTDATA dataNew;
+    DocumentFromGUID(data.strGUID, dataNew);
+
+    emit documentReadCountChanged(dataNew);
     return ret;
 }
 
