@@ -365,7 +365,7 @@ void CWizDocumentStatusCheckThread::run()
             QMutexLocker lock(&m_mutexWait);
             if (!m_needRecheck)
             {
-                m_wait.wait(&m_mutexWait);
+//                m_wait.wait(&m_mutexWait);
             }
             else
             {
@@ -380,29 +380,35 @@ void CWizDocumentStatusCheckThread::run()
         }
 
         //
-//        if (!m_timer)
-//        {
-//            m_timer = new QTimer();
-//            m_timer->setSingleShot(true);
-//            connect(m_timer, SIGNAL(timeout()), SLOT(onTimeOut()));
-//        }
+        if (!m_timer)
+        {
+            m_timer = new QTimer(0);
+            m_timer->setSingleShot(true);
+            m_timer->moveToThread(this);
+            connect(m_timer, SIGNAL(timeout()), SLOT(onTimeOut()));
+        }
 
-//        m_timer->start(5000);
-
-        QTimer::singleShot(5000, this, SLOT(onTimeOut()));
+//        QTimer::singleShot(5000, this, SLOT(onTimeOut()));
         //
 
         if (idleCounter >= 60 || m_checkNow || m_stop)
         {
-            qDebug() << "start to check document changed on server , guid : " << m_strCurGUID;
-            bool changed = checkDocumentChangedOnServer(m_strCurKbGUID, m_strCurGUID);
-            qDebug() << "check finished, document changed : " << changed;
-            emit checkDocumentChangedFinished(m_strCurGUID, changed);
+            m_checkNow = false;
+            idleCounter = 0;
+            if (m_stop)
+                return;
 
-            qDebug() << "start to check document edit status";
-            checkDocumentEditStatus(m_strCurKbGUID, m_strCurGUID);
-            qDebug() << "check document edit status finished";
-            //        m_timer->stop();
+            m_timer->start(5000);
+            qDebug() << "after qtimer started.";
+//            qDebug() << "start to check document changed on server , guid : " << m_strCurGUID;
+//            bool changed = checkDocumentChangedOnServer(m_strCurKbGUID, m_strCurGUID);
+//            qDebug() << "check finished, document changed : " << changed;
+//            emit checkDocumentChangedFinished(m_strCurGUID, changed);
+
+//            qDebug() << "start to check document edit status";
+//            checkDocumentEditStatus(m_strCurKbGUID, m_strCurGUID);
+
+//            m_timer->stop();
         }
         else
         {
@@ -474,4 +480,212 @@ bool CWizDocumentStatusCheckThread::checkDocumentEditStatus(const QString& strKb
 
     downloadData(strRequestUrl);
     return true;
+}
+
+
+CWizDocumentStatusChecker::CWizDocumentStatusChecker(QObject* parent)
+    : m_timeOutTimer(0)
+    , m_loopCheckTimer(0)
+    , m_stop(false)
+{
+
+}
+
+CWizDocumentStatusChecker::~CWizDocumentStatusChecker()
+{
+    if (m_timeOutTimer)
+        delete m_timeOutTimer;
+
+    if (m_loopCheckTimer)
+        delete m_loopCheckTimer;
+}
+
+void CWizDocumentStatusChecker::checkEditStatus(const QString& strKbGUID, const QString& strGUID)
+{
+    qDebug() << "CWizDocumentStatusChecker start to check guid : " << strGUID;
+    setDocmentGUID(strKbGUID, strGUID);
+    m_timeOutTimer->start(5000);
+    m_loopCheckTimer->start(20000);
+    startCheck();
+}
+
+void CWizDocumentStatusChecker::stopCheckStatus(const QString& strKbGUID, const QString& strGUID)
+{
+    m_timeOutTimer->stop();
+    m_loopCheckTimer->stop();
+    m_stop = true;
+
+    m_mutexWait.lock();
+    m_strKbGUID.clear();
+    m_strGUID.clear();
+    m_mutexWait.unlock();
+}
+
+void CWizDocumentStatusChecker::setDocmentGUID(const QString& strKbGUID, const QString& strGUID)
+{
+    m_mutexWait.lock();
+    m_strKbGUID = strKbGUID;
+    m_strGUID = strGUID;
+    m_mutexWait.unlock();
+}
+
+void CWizDocumentStatusChecker::peekDocumentGUID(QString& strKbGUID, QString& strGUID)
+{
+    m_mutexWait.lock();
+    strKbGUID = m_strKbGUID;
+    strGUID = m_strGUID;
+    m_mutexWait.unlock();
+}
+
+void CWizDocumentStatusChecker::onTimeOut()
+{
+    qDebug() << "CWizDocumentStatusChecker time out";
+    m_timeOutTimer->stop();
+    emit checkTimeOut(m_strCurGUID);
+}
+
+void CWizDocumentStatusChecker::recheck()
+{
+    qDebug() << "CWizDocumentStatusChecker  recheck called";
+    startRecheck();
+}
+
+void CWizDocumentStatusChecker::initialise()
+{
+    qDebug() << "CWizDocumentStatusChecker thread id : ";
+    m_timeOutTimer = new QTimer(this);
+    connect(m_timeOutTimer, SIGNAL(timeout()), SLOT(onTimeOut()));
+    m_loopCheckTimer = new QTimer(this);
+    connect(m_loopCheckTimer, SIGNAL(timeout()), SLOT(recheck()));
+}
+
+void CWizDocumentStatusChecker::clearTimers()
+{
+    m_timeOutTimer->stop();
+    m_loopCheckTimer->stop();
+}
+
+void CWizDocumentStatusChecker::startRecheck()
+{
+    qDebug() << "CWizDocumentStatusChecker  start recheck";
+    m_timeOutTimer->start(5000);
+    startCheck();
+}
+
+void CWizDocumentStatusChecker::startCheck()
+{
+    peekDocumentGUID(m_strCurKbGUID, m_strCurGUID);
+    qDebug() << "start to check document changed on server , guid : " << m_strCurGUID;
+    bool changed = checkDocumentChangedOnServer(m_strCurKbGUID, m_strCurGUID);
+    if (m_stop)
+        return;
+    qDebug() << "check finished, document changed : " << changed;
+    emit checkDocumentChangedFinished(m_strCurGUID, changed);
+
+    QEventLoop loop;
+    QTimer::singleShot(6000, &loop, SLOT(quit()));
+    loop.exec();
+
+    if (m_stop)
+        return;
+
+    qDebug() << "start to check document edit status";
+    checkDocumentEditStatus(m_strCurKbGUID, m_strCurGUID);
+    m_timeOutTimer->stop();
+}
+
+bool CWizDocumentStatusChecker::checkDocumentChangedOnServer(const QString& strKbGUID, const QString& strGUID)
+{
+    CWizDatabase& db = CWizDatabaseManager::instance()->db(strKbGUID);
+    WIZDOCUMENTDATA doc;
+    if (!db.DocumentFromGUID(strGUID, doc))
+        return false;
+
+    if (doc.nVersion == -1)
+    {
+        return !db.CanEditDocument(doc);
+    }
+
+    WIZUSERINFO userInfo = WizService::Token::info();
+    if (db.IsGroup())
+    {
+        WIZGROUPDATA group;
+        if (!CWizDatabaseManager::instance()->db().GetGroupData(strKbGUID, group))
+            return false;
+        userInfo.strKbGUID = group.strGroupGUID;
+        userInfo.strDatabaseServer = group.strDatabaseServer;
+        if (userInfo.strDatabaseServer.isEmpty())
+        {
+            userInfo.strDatabaseServer = WizService::ApiEntry::kUrlFromGuid(userInfo.strToken, userInfo.strKbGUID);
+        }
+    }
+    CWizKMDatabaseServer server(userInfo, NULL);
+    WIZOBJECTVERSION versionServer;
+    if (!server.wiz_getVersion(versionServer))
+        return false;
+
+    if (versionServer.nDocumentVersion <= db.GetObjectVersion("document"))
+        return false;
+
+    int nPart = 0;
+    nPart |= WIZKM_XMKRPC_DOCUMENT_PART_INFO;
+    WIZDOCUMENTDATAEX docOnServer;
+    if (!server.document_getData(strGUID, nPart, docOnServer))
+        return false;
+
+    return docOnServer.nVersion > doc.nVersion;
+}
+
+bool CWizDocumentStatusChecker::checkDocumentEditStatus(const QString& strKbGUID, const QString& strGUID)
+{
+    QString strRequestUrl = WizFormatString4(_T("%1/get?obj_id=%2/%3&t=%4"),
+                                             WizKMGetDocumentEditStatusURL(),
+                                             strKbGUID,
+                                             strGUID,
+                                             ::WizIntToStr(GetTickCount()));
+
+    downloadData(strRequestUrl);
+    return true;
+}
+
+void CWizDocumentStatusChecker::downloadData(const QString& strUrl)
+{
+    QNetworkAccessManager net;
+    QNetworkReply* reply = net.get(QNetworkRequest(strUrl));
+
+    QEventLoop loop;
+    loop.connect(reply, SIGNAL(finished()), SLOT(quit()));
+    loop.exec();
+
+    if (reply->error()) {
+        Q_EMIT checkEditStatusFinished(QString(), QStringList());
+        reply->deleteLater();
+        return;
+    }
+
+    rapidjson::Document d;
+    d.Parse<0>(reply->readAll().constData());
+    if (d.IsArray())
+    {
+        QStringList strList;
+        QTextCodec* codec = QTextCodec::codecForName("UTF-8");
+        QTextDecoder* encoder = codec->makeDecoder();
+        for (rapidjson::SizeType i = 0; i < d.Size(); i++)
+        {
+            const rapidjson::Value& u = d[i];
+            strList.append(encoder->toUnicode(u.GetString(), u.GetStringLength()));
+        }
+        //
+        {
+            QMutexLocker lock(&m_mutexWait);
+            if (strUrl.indexOf(m_strGUID) != -1)
+            {
+                emit  checkEditStatusFinished(m_strGUID, strList);
+            }
+        }
+        reply->deleteLater();
+        return;
+    }
+    Q_EMIT checkEditStatusFinished(QString(), QStringList());
+    reply->deleteLater();
 }

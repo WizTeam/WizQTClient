@@ -32,8 +32,7 @@ public:
     explicit TitleBar(QWidget *parent);
     CWizDocumentView* noteView();
     void setLocked(bool bReadOnly, int nReason, bool bIsGroup);
-    void setDocumentEditingStatus(const QString& strEditor = "");
-    void setMessageTips(const QString& strInfo);
+    void showMessageTip(Qt::TextFormat format, const QString& strInfo);
     void setEditor(CWizDocumentWebView* editor);
 
     void setNote(const WIZDOCUMENTDATA& data, bool editing, bool locked);
@@ -42,6 +41,31 @@ public:
     void setEditButtonState(bool enable, bool editing);
     void updateEditButton(bool bEditing);
     void resetTitle(const QString& strTitle);
+
+
+public Q_SLOTS:
+    void onEditButtonClicked();
+    void onTagButtonClicked();
+    void onEmailButtonClicked();
+    void onAttachButtonClicked();
+    void onHistoryButtonClicked();
+    void onInfoButtonClicked();
+
+    void onCommentsButtonClicked();
+    void onViewNoteLoaded(Core::INoteView* view, const WIZDOCUMENTDATA& note, bool bOk);
+    void onTokenAcquired(const QString& strToken);
+    void onGetCommentsCountFinished(int nCount);
+
+    void onEditorChanged();
+    void onEditorFocusIn();
+    void onEditorFocusOut();
+
+signals:
+    void notifyBar_link_clicked(const QString& link);
+
+private:
+    void showInfoBar();
+    void showEditorBar();
 
 private:
     CWizDocumentWebView* m_editor;
@@ -64,27 +88,6 @@ private:
     CWizTagListWidget* m_tags;
     CWizAttachmentListWidget* m_attachments;
     CWizNoteInfoForm* m_info;
-
-public Q_SLOTS:
-    void onEditButtonClicked();
-    void onTagButtonClicked();
-    void onEmailButtonClicked();
-    void onAttachButtonClicked();
-    void onHistoryButtonClicked();
-    void onInfoButtonClicked();
-
-    void onCommentsButtonClicked();
-    void onViewNoteLoaded(Core::INoteView* view, const WIZDOCUMENTDATA& note, bool bOk);
-    void onTokenAcquired(const QString& strToken);
-    void onGetCommentsCountFinished(int nCount);
-
-    void onEditorChanged();
-    void onEditorFocusIn();
-    void onEditorFocusOut();
-
-private:
-    void showInfoBar();
-    void showEditorBar();
 };
 
 } //namesapce Internal

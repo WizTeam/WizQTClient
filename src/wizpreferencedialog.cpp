@@ -176,9 +176,7 @@ CWizPreferenceWindow::CWizPreferenceWindow(CWizExplorerApp& app, QWidget* parent
     QString strColor = m_app.userSettings().editorBackgroundColor();
     ui->pushButtonBackgroundColor->setStyleSheet(QString("QPushButton "
                                                          "{ border: 1px; background: %1; height:20px;  border-radius:5px } ").arg(strColor));
-    ui->pushButtonClearBackground->setStyleSheet(QString("QPushButton { background: #3fa1fd;"
-                                                         "color:#ffffff; width:56px; height:20px; border-radius:5px } "
-                                                         "QPushButton:pressed{ background: #076dc6;"));
+    ui->pushButtonClearBackground->setStyleSheet(QString("QPushButton:pressed{background-color: #000000;"));
 
     bool manuallySortFolders = m_app.userSettings().isManualSortingEnabled();
     ui->checkBoxManuallySort->setChecked(manuallySortFolders);

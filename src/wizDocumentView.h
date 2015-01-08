@@ -26,6 +26,7 @@ class QStackedWidget;
 class QWebFrame;
 class CWizDocumentEditStatusSyncThread;
 class CWizDocumentStatusCheckThread;
+class CWizDocumentStatusChecker;
 
 namespace Core {
 namespace Internal {
@@ -66,7 +67,8 @@ protected:
 
     CWizUserCipherForm* m_passwordView;
     CWizDocumentEditStatusSyncThread* m_editStatusSyncThread;
-    CWizDocumentStatusCheckThread* m_editStatusCheckThread;
+//    CWizDocumentStatusCheckThread* m_editStatusCheckThread;
+    CWizDocumentStatusChecker* m_editStatusChecker;
 
     virtual void showEvent(QShowEvent *event);
 
@@ -76,6 +78,8 @@ private:
     bool m_bEditingMode; // true: editing mode, false: reading mode
     int m_viewMode; // user defined editing mode
     bool m_noteLoaded;
+    //
+    int m_status;  // document edit or version status
 
 public:
     const WIZDOCUMENTDATA& note() const { return m_note; }
@@ -106,6 +110,8 @@ public:
 signals:
     void documentSaved(const QString& strGUID, CWizDocumentView* viewer);
     void documentEditStatusCheckFinished();
+    void checkDocumentEditStatusRequest(const QString& strKbGUID, const QString& strGUID);
+    void stopCheckDocumentEditStatusRequest(const QString& strKbGUID, const QString& strGUID);
 
 public Q_SLOTS:
     void onViewNoteRequested(Core::INoteView* view, const WIZDOCUMENTDATA& doc);
@@ -131,10 +137,14 @@ public Q_SLOTS:
     void on_syncDatabase_request(const QString& strKbGUID);
     void on_webView_focus_changed();
 
+    void on_notifyBar_link_clicked(const QString& link);
+
 private:
     void loadNote(const WIZDOCUMENTDATA &doc);
+    void downloadDocumentFromServer();
     void sendDocumentEditingStatus();
     void stopDocumentEditingStatus();
+    void checkDocumentEditStatus();
 };
 
 class WizFloatDocumentViewer : public QWidget

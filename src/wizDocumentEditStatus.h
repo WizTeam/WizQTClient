@@ -51,6 +51,48 @@ private:
     QPointer<QNetworkAccessManager> m_netManager;
 };
 
+class CWizDocumentStatusChecker : public QObject
+{
+    Q_OBJECT
+public:
+    CWizDocumentStatusChecker(QObject* parent = 0);
+    ~CWizDocumentStatusChecker();
+
+public slots:
+    void onTimeOut();
+    void recheck();
+    void initialise();
+    void clearTimers();
+    void checkEditStatus(const QString& strKbGUID, const QString& strGUID);
+    void stopCheckStatus(const QString& strKbGUID, const QString& strGUID);
+
+signals:
+    void checkTimeOut(QString strGUID);
+    void checkEditStatusFinished(QString strGUID,QStringList editors);
+    void checkDocumentChangedFinished(const QString& strGUID, bool bChanged);
+
+private:
+    void setDocmentGUID(const QString& strKbGUID,const QString& strGUID);
+    void peekDocumentGUID(QString& strKbGUID, QString& strGUID);
+    void startRecheck();
+    void startCheck();
+    bool checkDocumentChangedOnServer(const QString& strKbGUID, const QString& strGUID);
+    bool checkDocumentEditStatus(const QString& strKbGUID, const QString& strGUID);
+    void downloadData(const QString& strUrl);
+
+private:
+    QTimer* m_timeOutTimer;
+    QTimer* m_loopCheckTimer;
+    bool m_stop;
+
+    QString m_strKbGUID;
+    QString m_strGUID;
+    QMutex m_mutexWait;
+
+    QString m_strCurGUID;
+    QString m_strCurKbGUID;
+};
+
 class CWizDocumentStatusCheckThread : public QThread
 {
     Q_OBJECT
@@ -72,7 +114,6 @@ signals:
     void checkTimeOut(QString strGUID);
     void checkFinished(QString strGUID,QStringList editors);
     void checkDocumentChangedFinished(const QString& strGUID, bool bChanged);
-    void syncDatabaseRequest(const QString& strKbGUID);
 
 protected:
     virtual void run();

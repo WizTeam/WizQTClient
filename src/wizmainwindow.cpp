@@ -1058,6 +1058,7 @@ bool MainWindow::checkListClickable()
         m_doc->setStatusToEditingByCheckList();
         return true;
     }
+    emit clickingTodoCallBack(true, true);
     return false;
 }
 

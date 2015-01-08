@@ -151,6 +151,7 @@ TitleBar::TitleBar(QWidget *parent)
     layout->addWidget(m_notifyBar);
     m_notifyBar->hide();
     layout->addStretch();
+    connect(m_notifyBar, SIGNAL(labelLink_clicked(QString)), SIGNAL(notifyBar_link_clicked(QString)));
 }
 
 CWizDocumentView* TitleBar::noteView()
@@ -427,13 +428,7 @@ void TitleBar::onGetCommentsCountFinished(int nCount)
     }
 }
 
-
-void Core::Internal::TitleBar::setDocumentEditingStatus(const QString& strEditor)
+void TitleBar::showMessageTip(Qt::TextFormat format, const QString& strInfo)
 {
-    m_notifyBar->showEditingNotify(strEditor);
-}
-
-void TitleBar::setMessageTips(const QString& strInfo)
-{
-    m_notifyBar->showMessageTips(strInfo);
+    m_notifyBar->showMessageTips(format, strInfo);
 }

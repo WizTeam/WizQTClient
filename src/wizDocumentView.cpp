@@ -32,7 +32,12 @@
 using namespace Core;
 using namespace Core::Internal;
 
-static bool documentEditingByOtherUsers = false;
+
+#define DOCUMENT_PERSONAL           0x0000
+#define DOCUMENT_GROUP                 0x0001
+#define DOCUMENT_OFFLINE               0x0002
+#define DOCUMENT_FISTTIMEVIEW     0x0004
+#define DOCUMENT_EDITBYOTHERS   0x0010
 
 CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
     : INoteView(parent)
@@ -48,7 +53,8 @@ CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
     , m_bEditingMode(false)
     , m_noteLoaded(false)
     , m_editStatusSyncThread(new CWizDocumentEditStatusSyncThread(this))
-    , m_editStatusCheckThread(new CWizDocumentStatusCheckThread(this))
+    //, m_editStatusCheckThread(new CWizDocumentStatusCheckThread(this))
+    , m_status(0)
 {
     m_title->setEditor(m_web);
 
@@ -127,20 +133,39 @@ CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
 
     connect(m_web, SIGNAL(focusIn()), SLOT(on_webView_focus_changed()));
 
-    connect(m_editStatusCheckThread, SIGNAL(checkFinished(QString,QStringList)),
-            SLOT(on_checkEditStatus_finished(QString,QStringList)));
-    connect(m_editStatusCheckThread, SIGNAL(checkDocumentChangedFinished(QString,bool)),
-            SLOT(on_checkDocumentChanged_finished(QString,bool)));
-    connect(m_editStatusCheckThread, SIGNAL(checkTimeOut(QString)),
-            SLOT(on_checkEditStatus_timeout(QString)));
+    connect(m_title, SIGNAL(notifyBar_link_clicked(QString)), SLOT(on_notifyBar_link_clicked(QString)));
+
+//    connect(m_editStatusCheckThread, SIGNAL(checkFinished(QString,QStringList)),
+//            SLOT(on_checkEditStatus_finished(QString,QStringList)));
+//    connect(m_editStatusCheckThread, SIGNAL(checkDocumentChangedFinished(QString,bool)),
+//            SLOT(on_checkDocumentChanged_finished(QString,bool)));
+//    connect(m_editStatusCheckThread, SIGNAL(checkTimeOut(QString)),
+//            SLOT(on_checkEditStatus_timeout(QString)));
 
     // open comments link by document webview
     connect(m_comments->page(), SIGNAL(linkClicked(const QUrl&)), m_web,
             SLOT(onEditorLinkClicked(const QUrl&)));
     //
     m_editStatusSyncThread->start(QThread::IdlePriority);
-    m_editStatusCheckThread->start(QThread::IdlePriority);
+//    m_editStatusCheckThread->start(QThread::IdlePriority);
 
+    m_editStatusChecker = new CWizDocumentStatusChecker();
+    connect(this, SIGNAL(checkDocumentEditStatusRequest(QString,QString)), m_editStatusChecker,
+            SLOT(checkEditStatus(QString,QString)));
+    connect(this, SIGNAL(stopCheckDocumentEditStatusRequest(QString,QString)),
+            m_editStatusChecker, SLOT(stopCheckStatus(QString,QString)));
+    connect(m_editStatusChecker, SIGNAL(checkTimeOut(QString)), \
+            SLOT(on_checkEditStatus_timeout(QString)));
+    connect(m_editStatusChecker, SIGNAL(checkEditStatusFinished(QString,QStringList)), \
+            SLOT(on_checkEditStatus_finished(QString,QStringList)));
+    connect(m_editStatusChecker, SIGNAL(checkDocumentChangedFinished(QString,bool)), \
+            SLOT(on_checkDocumentChanged_finished(QString,bool)));
+
+    QThread* checkThread = new QThread(this);
+    connect(checkThread, SIGNAL(started()), m_editStatusChecker, SLOT(initialise()));
+    connect(checkThread, SIGNAL(finished()), m_editStatusChecker, SLOT(clearTimers()));
+    m_editStatusChecker->moveToThread(checkThread);
+    checkThread->start();
 }
 
 CWizDocumentView::~CWizDocumentView()
@@ -149,12 +174,14 @@ CWizDocumentView::~CWizDocumentView()
 
 void CWizDocumentView::waitForDone()
 {
+    m_editStatusChecker->thread()->quit();
     m_web->saveDocument(m_note, false);
     //
     m_web->waitForDone();
     //
     m_editStatusSyncThread->waitForDone();
-    m_editStatusCheckThread->waitForDone();
+//    m_editStatusCheckThread->waitForDone();
+
 }
 
 QWidget* CWizDocumentView::client() const
@@ -240,10 +267,18 @@ void CWizDocumentView::initStat(const WIZDOCUMENTDATA& data, bool bEditing)
     }
 
     bool bGroup = m_dbMgr.db(data.strKbGUID).IsGroup();
+    m_status = m_status & DOCUMENT_PERSONAL;
+    if (bGroup)
+    {
+        m_status = m_status | DOCUMENT_GROUP | DOCUMENT_FISTTIMEVIEW;
+    }
     m_title->setLocked(m_bLocked, nLockReason, bGroup);
     if (NotifyBar::LockForGruop == nLockReason)
     {
-        m_editStatusCheckThread->checkEditStatus(data.strKbGUID, data.strGUID);
+//        m_editStatusCheckThread->checkEditStatus(data.strKbGUID, data.strGUID);
+
+//        m_editStatusChecker->checkEditStatus(m_note.strKbGUID, m_note.strGUID);
+        checkDocumentEditStatus();
     }
 }
 
@@ -411,15 +446,19 @@ bool CWizDocumentView::checkListClickable()
 {
     QEventLoop loop;
     connect(this, SIGNAL(documentEditStatusCheckFinished()), &loop, SLOT(quit()));
-    m_editStatusCheckThread->checkEditStatus(m_note.strKbGUID, m_note.strGUID);
+    m_title->showMessageTip(Qt::PlainText, tr("Checking whether checklist clickable..."));
+    checkDocumentEditStatus();
     loop.exec();
+    //
+    m_title->showMessageTip(Qt::PlainText, "");
 
-    return !documentEditingByOtherUsers;
+    return !(m_status & DOCUMENT_EDITBYOTHERS);
 }
 
 void CWizDocumentView::setStatusToEditingByCheckList()
 {
-    m_title->setMessageTips(tr("You have modify the document, keep modify status until close this document..."));
+    m_title->showMessageTip(Qt::PlainText, tr("You have occupied this note by clicking checklist !  " \
+             "Switch to other notes to free this note."));
     sendDocumentEditingStatus();
 }
 
@@ -466,6 +505,18 @@ void CWizDocumentView::loadNote(const WIZDOCUMENTDATA& doc)
     }
 }
 
+void CWizDocumentView::downloadDocumentFromServer()
+{
+    CWizDatabase& db = m_dbMgr.db(m_note.strKbGUID);
+    QString strDocumentFileName = db.GetDocumentFileName(m_note.strGUID);
+    QFile::remove(strDocumentFileName);
+
+    MainWindow* window = qobject_cast<MainWindow *>(m_app.mainWindow());
+    window->downloaderHost()->downloadDocument(m_note);
+    window->showClient(false);
+    window->transitionView()->showAsMode(m_note.strGUID, CWizDocumentTransitionView::Downloading);
+}
+
 void CWizDocumentView::sendDocumentEditingStatus()
 {
     CWizDatabase& db = m_dbMgr.db(m_note.strKbGUID);
@@ -484,6 +535,11 @@ void CWizDocumentView::stopDocumentEditingStatus()
         bool bModified = doc.nVersion == -1;
         m_editStatusSyncThread->stopEditingDocument(doc.strKbGUID, doc.strGUID, bModified);
     }
+}
+
+void CWizDocumentView::checkDocumentEditStatus()
+{
+    emit checkDocumentEditStatusRequest(m_note.strKbGUID, m_note.strGUID);
 }
 
 void CWizDocumentView::on_document_modified(const WIZDOCUMENTDATA& documentOld, const WIZDOCUMENTDATA& documentNew)
@@ -568,8 +624,11 @@ void Core::CWizDocumentView::on_checkEditStatus_finished(QString strGUID, QStrin
     if (strGUID == m_note.strGUID && !editors.isEmpty())
     {
         QString strEditor = editors.join(" , ");
-        m_title->setDocumentEditingStatus(strEditor);
-        documentEditingByOtherUsers = true;
+        if (!strEditor.isEmpty())
+        {
+            m_title->showMessageTip(Qt::PlainText, QString(tr("%1 is currently editing this note. Note has been locked.")).arg(strEditor));
+        }
+        m_status = m_status | DOCUMENT_EDITBYOTHERS;
     }
     else
     {
@@ -577,7 +636,7 @@ void Core::CWizDocumentView::on_checkEditStatus_finished(QString strGUID, QStrin
         {           
             m_title->setEditButtonState(!m_bLocked, false);
         }
-        documentEditingByOtherUsers = false;
+        m_status = m_status & ~DOCUMENT_EDITBYOTHERS;
     }
 
     emit documentEditStatusCheckFinished();
@@ -586,10 +645,11 @@ void Core::CWizDocumentView::on_checkEditStatus_finished(QString strGUID, QStrin
 void CWizDocumentView::on_checkEditStatus_timeout(QString strGUID)
 {
     qDebug() << "web view. on check edit status time out";
-    if (strGUID == m_note.strGUID)
+    if (strGUID == m_note.strGUID && !(m_status & DOCUMENT_OFFLINE))
     {
         m_title->setEditButtonState(true, false);
-        m_title->setMessageTips(tr("Check edit status time out."));
+        m_title->showMessageTip(Qt::RichText, tr("The current network in poor condition, you are <b> offline editing mode <b>."));
+        m_status = m_status | DOCUMENT_OFFLINE;
     }
 }
 
@@ -600,21 +660,18 @@ void CWizDocumentView::on_checkDocumentChanged_finished(const QString& strGUID, 
     {
         if (changed)
         {
-            // downlaod document data
-            CWizDatabase& db = m_dbMgr.db(m_note.strKbGUID);
-            QString strDocumentFileName = db.GetDocumentFileName(m_note.strGUID);
-            QFile::remove(strDocumentFileName);
-
-            MainWindow* window = qobject_cast<MainWindow *>(m_app.mainWindow());
-            window->downloaderHost()->downloadDocument(m_note);
-            window->showClient(false);
-            window->transitionView()->showAsMode(m_note.strGUID, CWizDocumentTransitionView::Downloading);
-
-            return;
+            if (m_status & DOCUMENT_FISTTIMEVIEW)
+            {
+                // downlaod document data
+                downloadDocumentFromServer();
+            }
+            else
+            {
+                m_title->showMessageTip(Qt::RichText, QString(tr("New version on server avalible. <a href='%1'>Click to down load new version.<a>")).arg(NOTIFYBAR_LABELLINK_DOWNLOAD));
+            }
         }
         else
         {
-            m_title->setMessageTips("");
             m_bLocked = false;
             int nLockReason = -1;
             m_bEditingMode = false;
@@ -634,6 +691,7 @@ void CWizDocumentView::on_checkDocumentChanged_finished(const QString& strGUID, 
                 m_title->setLocked(m_bLocked, nLockReason, bGroup);
             }
         }
+        m_status = m_status & ~DOCUMENT_FISTTIMEVIEW;
     }
 }
 
@@ -648,6 +706,15 @@ void CWizDocumentView::on_webView_focus_changed()
     if (m_web->hasFocus())
     {
         sendDocumentEditingStatus();
+    }
+}
+
+void CWizDocumentView::on_notifyBar_link_clicked(const QString& link)
+{
+    qDebug() << "notify bar download clicked : " << link;
+    if (link == NOTIFYBAR_LABELLINK_DOWNLOAD)
+    {
+        downloadDocumentFromServer();
     }
 }
 

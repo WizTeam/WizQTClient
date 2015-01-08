@@ -34,6 +34,7 @@ NotifyBar::NotifyBar(QWidget *parent)
     layout->addWidget(m_labelNotify);
     layout->addStretch();
     layout->addWidget(m_buttonClose);
+    connect(m_labelNotify, SIGNAL(linkActivated(QString)), SIGNAL(labelLink_clicked(QString)));
 
     connect(m_buttonClose, SIGNAL(clicked()), SLOT(on_closeButton_Clicked()));
 }
@@ -65,24 +66,12 @@ void NotifyBar::showPermissionNotify(int type)
     }
 }
 
-void NotifyBar::showEditingNotify(const QString &editor)
-{
-    if (!editor.isEmpty())
-    {
-        QString info = QString(tr("This note is editing by %1 .")).arg(editor);
-        showMessageTips(info);
-    }
-    else
-    {
-        hide();
-    }
-}
-
-void NotifyBar::showMessageTips(const QString& info)
+void NotifyBar::showMessageTips(Qt::TextFormat format, const QString& info)
 {
     if (!info.isEmpty())
     {
         setStyleForEditing();
+        m_labelNotify->setTextFormat(format);
         m_labelNotify->setText(info);
         show();
     }

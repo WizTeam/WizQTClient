@@ -6,6 +6,8 @@
 class QLabel;
 class wizImageButton;
 
+#define NOTIFYBAR_LABELLINK_DOWNLOAD  "clicktodownload"
+
 namespace Core {
 namespace Internal {
 
@@ -23,11 +25,13 @@ public:
 
     explicit NotifyBar(QWidget *parent);
     void showPermissionNotify(int type);
-    void showEditingNotify(const QString& editor);
-    void showMessageTips(const QString& info);
+    void showMessageTips(Qt::TextFormat format, const QString& info);
 
 public slots:
     void on_closeButton_Clicked();
+
+signals:
+    void labelLink_clicked(const QString& link);
 
 private:
     QLabel* m_labelNotify;
