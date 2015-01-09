@@ -653,6 +653,39 @@ void CWizCategoryBaseView::resetRootItemsDropEnabled(CWizCategoryViewItemBase* p
     update();
 }
 
+QString CWizCategoryBaseView::getUseableItemName(QTreeWidgetItem* parent, \
+                                                  QTreeWidgetItem* item)
+{
+    QString name = item->text(0);
+    int nRepeat = 0;
+    while (true)
+    {
+        if (nRepeat > 0)
+        {
+            name = item->text(0) + "_" + QString::number(nRepeat);
+        }
+        bool continueLoop = false;
+        for (int i = 0; i < parent->childCount(); i++)
+        {
+            QTreeWidgetItem* brother = parent->child(i);
+            if (brother != item && brother->text(0) == name)
+            {
+                nRepeat ++;
+                continueLoop = true;
+                break;
+            }
+        }
+        if (!continueLoop)
+            break;
+    }
+    return name;
+}
+
+void CWizCategoryBaseView::resetFolderLocation(CWizCategoryViewFolderItem* item, const QString& strNewLocation)
+{
+
+}
+
 void CWizCategoryBaseView::on_dragHovered_timeOut()
 {
     if (m_dragHoveredItem) {
@@ -1152,7 +1185,7 @@ void CWizCategoryView::on_action_importFile()
     this,
     tr("Select one or more files to open"),
     "/home",
-    "All files(*.*);;Text files(*.txt *.md *.cpp *.h *.rtf *.doc *.docx);;Images (*.png *.xpm *.jpg)");
+    "Text files(*.txt *.md *.cpp *.h *.rtf *.doc *.docx);;Images (*.png *.xpm *.jpg);;Webarchive (*.webarchive);;All files(*.*);;");
     loadDocument(files);
 }
 
@@ -2523,6 +2556,7 @@ void CWizCategoryView::updatePersonalFolderLocation(CWizDatabase& db, \
     if (strOldLocation != strNewLocation)
     {
         db.UpdateLocation(strOldLocation, strNewLocation);
+
     }
 
     QString str = getAllFoldersPosition();
@@ -3964,20 +3998,26 @@ void CWizCategoryView::on_itemPosition_changed(CWizCategoryViewItemBase* pItem)
         if (CWizCategoryViewFolderItem* item = dynamic_cast<CWizCategoryViewFolderItem*>(pItem))
         {
             CWizCategoryViewItemBase* folderRoot = findAllFolderItem();
-            QString strNewLocation = "/" + item->name() + "/";
             QTreeWidgetItem* parentItem = item->parent();
+            QString strName = getUseableItemName(parentItem, item);
+            qDebug() << "category view list get useable item name : " << strName;
+            QString strNewLocation = "/" + strName + "/";
+            item->setText(0, strName);
+
             while (parentItem != folderRoot)
             {
                 CWizCategoryViewItemBase* parentBase = dynamic_cast<CWizCategoryViewItemBase*>(parentItem);
                 if (!parentBase)
                     return;
 
+
                 strNewLocation = parentBase->name() + strNewLocation.remove(0, 1);
                 parentItem = parentBase->parent();
             }
 
             QString strOldLocation = item->location();
-            item->setLocation(strNewLocation);
+//            item->setLocation(strNewLocation);
+            resetFolderLocation(item, strNewLocation);
             updatePersonalFolderLocation(db, strOldLocation, strNewLocation);
         }
 //        else if (const CWizCategoryViewTagItem* tagItem = dynamic_cast<const CWizCategoryViewTagItem*>(pItem))

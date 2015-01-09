@@ -1981,7 +1981,8 @@ bool CWizIndex::GetDocumentsByLocation(const CString& strLocation,
                         STR2SQL(strLocation).utf16());
     }
 
-	CString strSQL = FormatQuerySQL(TABLE_NAME_WIZ_DOCUMENT, FIELD_LIST_WIZ_DOCUMENT, strWhere); 
+    CString strSQL = FormatQuerySQL(TABLE_NAME_WIZ_DOCUMENT, FIELD_LIST_WIZ_DOCUMENT, strWhere);
+    qDebug() << "get documents sql : " << strSQL << "\n from database : " << kbGUID();
 	return SQLToDocumentDataArray(strSQL, arrayDocument);
 }
 
@@ -3950,11 +3951,24 @@ void CWizIndex::DeleteExtraFolder(const QString& strLocation)
 
 bool CWizIndex::UpdateLocation(const QString& strOldLocation, const QString& strNewLocation)
 {
-    QString sql = QString("update %1 set DOCUMENT_LOCATION='%2' where "
-                          "DOCUMENT_LOCATION='%3'").arg(TABLE_NAME_WIZ_DOCUMENT)
-                          .arg(strNewLocation).arg(strOldLocation);
-    bool result = ExecSQL(sql);
+//    QString sql = QString("update %1 set DOCUMENT_LOCATION='%2' where "
+//                          "DOCUMENT_LOCATION='%3'").arg(TABLE_NAME_WIZ_DOCUMENT)
+//                          .arg(strNewLocation).arg(strOldLocation);
+//    bool result = ExecSQL(sql);
 
+    CWizDocumentDataArray docArray;
+    if (!GetDocumentsByLocation(strOldLocation, docArray, true))
+        return false;
+
+    //update all include document location
+    for (CWizDocumentDataArray::const_iterator it = docArray.begin();
+         it != docArray.end();
+         it++)
+    {
+        WIZDOCUMENTDATA doc = *it;
+        doc.strLocation.replace(strOldLocation, strNewLocation);
+        ModifyDocumentInfo(doc);
+    }
 
     CWizStdStringArray arrayExtra;
     GetExtraFolder(arrayExtra);
@@ -3964,9 +3978,11 @@ bool CWizIndex::UpdateLocation(const QString& strOldLocation, const QString& str
          it != arrayExtra.end();
          it++)
     {
-        if (*it == strOldLocation)
+        QString strLocation = *it;
+        if (strLocation.contains(strOldLocation))
         {
-            newArray.push_back(strNewLocation);
+            strLocation.replace(strOldLocation, strNewLocation);
+            newArray.push_back(strLocation);
         }
         else
         {
@@ -3975,5 +3991,5 @@ bool CWizIndex::UpdateLocation(const QString& strOldLocation, const QString& str
     }
     SetExtraFolder(newArray);
 
-    return result;
+    return true;
 }

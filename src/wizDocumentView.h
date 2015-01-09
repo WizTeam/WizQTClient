@@ -131,8 +131,9 @@ public Q_SLOTS:
     void on_attachment_deleted(const WIZDOCUMENTATTACHMENTDATA& attachment);
 
     //
-    void on_checkEditStatus_finished(QString strGUID, QStringList editors);
-    void on_checkEditStatus_timeout(QString strGUID);
+    void on_checkEditStatus_finished(const QString& strGUID, bool editable);
+    void on_checkEditStatus_timeout(const QString& strGUID);
+    void on_documentEditingByOthers(QString strGUID, QStringList editors);
     void on_checkDocumentChanged_finished(const QString& strGUID, bool changed);
     void on_syncDatabase_request(const QString& strKbGUID);
     void on_webView_focus_changed();
@@ -145,6 +146,7 @@ private:
     void sendDocumentEditingStatus();
     void stopDocumentEditingStatus();
     void checkDocumentEditStatus();
+    bool checkDocumentEditable();
 };
 
 class WizFloatDocumentViewer : public QWidget

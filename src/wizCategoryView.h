@@ -77,6 +77,10 @@ protected:
 
     virtual void resetRootItemsDropEnabled(CWizCategoryViewItemBase* pItem);
 
+    QString getUseableItemName(QTreeWidgetItem* parent, \
+                                QTreeWidgetItem* item);
+    void resetFolderLocation(CWizCategoryViewFolderItem* item, const QString& strNewLocation);
+
 protected:
     CWizExplorerApp& m_app;
     CWizDatabaseManager& m_dbMgr;

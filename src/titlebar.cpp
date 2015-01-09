@@ -82,7 +82,7 @@ TitleBar::TitleBar(QWidget *parent)
     QString emailShortcut = ::WizGetShortcut("EditNoteEmail", "Alt+3");
     m_emailBtn->setShortcut(QKeySequence::fromString(emailShortcut));
     m_emailBtn->setNormalIcon(::WizLoadSkinIcon(strTheme, "document_email"), tr("Share document by email"));
-    connect(m_emailBtn, SIGNAL(clicked()), SLOT(onTagButtonClicked()));
+    connect(m_emailBtn, SIGNAL(clicked()), SLOT(onEmailButtonClicked()));
 
     m_attachBtn = new CellButton(CellButton::Center, this);
     m_attachBtn->setFixedHeight(nTitleHeight);
@@ -133,6 +133,7 @@ TitleBar::TitleBar(QWidget *parent)
     layoutInfo2->addWidget(m_attachBtn);
     layoutInfo2->addWidget(m_historyBtn);
     layoutInfo2->addWidget(m_infoBtn);
+    layoutInfo2->addWidget(m_emailBtn);
     layoutInfo2->addWidget(m_commentsBtn);
 
 

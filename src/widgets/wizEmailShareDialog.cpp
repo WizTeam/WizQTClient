@@ -49,7 +49,7 @@ CWizEmailShareDialog::CWizEmailShareDialog(CWizExplorerApp& app, QWidget *parent
     m_contactList->setAttribute(Qt::WA_MacShowFocusRect, 0);
     layout->addWidget(m_contactList);
     connect(m_contactList, SIGNAL(itemDoubleClicked(QListWidgetItem*)),
-            SLOT(on_contactsList_itemDoubleClicked(QListWidgetItem*)));
+            SLOT(on_contactsListItemClicked(QListWidgetItem*)));
 }
 
 CWizEmailShareDialog::~CWizEmailShareDialog()
@@ -203,7 +203,7 @@ void CWizEmailShareDialog::on_toolButton_contacts_clicked()
     return;
 }
 
-void CWizEmailShareDialog::on_contactsList_itemDoubleClicked(QListWidgetItem *item)
+void CWizEmailShareDialog::on_contactsListItemClicked(QListWidgetItem *item)
 {
     QString strUserName = item->text();
     QString strTo = ui->lineEdit_to->text();

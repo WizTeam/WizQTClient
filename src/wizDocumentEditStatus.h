@@ -68,8 +68,9 @@ public slots:
 
 signals:
     void checkTimeOut(QString strGUID);
-    void checkEditStatusFinished(QString strGUID,QStringList editors);
+    void documentEditingByOthers(QString strGUID,QStringList editors);
     void checkDocumentChangedFinished(const QString& strGUID, bool bChanged);
+    void checkEditStatusFinished(const QString& strGUID, bool eidtable);
 
 private:
     void setDocmentGUID(const QString& strKbGUID,const QString& strGUID);
@@ -78,7 +79,7 @@ private:
     void startCheck();
     bool checkDocumentChangedOnServer(const QString& strKbGUID, const QString& strGUID);
     bool checkDocumentEditStatus(const QString& strKbGUID, const QString& strGUID);
-    void downloadData(const QString& strUrl);
+    bool checkDocumentEditStatus(const QString& strUrl);
 
 private:
     QTimer* m_timeOutTimer;

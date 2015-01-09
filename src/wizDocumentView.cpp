@@ -154,10 +154,12 @@ CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
             SLOT(checkEditStatus(QString,QString)));
     connect(this, SIGNAL(stopCheckDocumentEditStatusRequest(QString,QString)),
             m_editStatusChecker, SLOT(stopCheckStatus(QString,QString)));
+    connect(m_editStatusChecker, SIGNAL(checkEditStatusFinished(QString,bool)), \
+            SLOT(on_checkEditStatus_finished(QString,bool)));
     connect(m_editStatusChecker, SIGNAL(checkTimeOut(QString)), \
             SLOT(on_checkEditStatus_timeout(QString)));
-    connect(m_editStatusChecker, SIGNAL(checkEditStatusFinished(QString,QStringList)), \
-            SLOT(on_checkEditStatus_finished(QString,QStringList)));
+    connect(m_editStatusChecker, SIGNAL(documentEditingByOthers(QString,QStringList)), \
+            SLOT(on_documentEditingByOthers(QString,QStringList)));
     connect(m_editStatusChecker, SIGNAL(checkDocumentChangedFinished(QString,bool)), \
             SLOT(on_checkDocumentChanged_finished(QString,bool)));
 
@@ -379,6 +381,16 @@ void CWizDocumentView::setEditNote(bool bEdit)
     if (m_bLocked)
         return;
 
+    if (bEdit)
+    {
+        m_title->showMessageTip(Qt::PlainText, tr("Checking whether note is eiditable..."));
+        if (!checkDocumentEditable())
+        {
+            return;
+        }
+    }
+
+
     m_bEditingMode = bEdit;
 
     m_title->setEditingDocument(bEdit);
@@ -444,15 +456,8 @@ void CWizDocumentView::promptMessage(const QString &strMsg)
 
 bool CWizDocumentView::checkListClickable()
 {
-    QEventLoop loop;
-    connect(this, SIGNAL(documentEditStatusCheckFinished()), &loop, SLOT(quit()));
-    m_title->showMessageTip(Qt::PlainText, tr("Checking whether checklist clickable..."));
-    checkDocumentEditStatus();
-    loop.exec();
-    //
-    m_title->showMessageTip(Qt::PlainText, "");
-
-    return !(m_status & DOCUMENT_EDITBYOTHERS);
+    m_title->showMessageTip(Qt::PlainText, tr("Checking whether checklist is clickable..."));
+    return checkDocumentEditable();
 }
 
 void CWizDocumentView::setStatusToEditingByCheckList()
@@ -487,6 +492,22 @@ void CWizDocumentView::on_attachment_deleted(const WIZDOCUMENTATTACHMENTDATA& at
         return;
 
     reload();
+}
+
+void CWizDocumentView::on_checkEditStatus_finished(const QString& strGUID, bool editable)
+{
+    qDebug() << "check eidt status finished , editable  : " << editable;
+    if (strGUID == m_note.strGUID && editable)
+    {
+        CWizDatabase& db = m_dbMgr.db(m_note.strKbGUID);
+        WIZDOCUMENTDATA doc;
+        db.DocumentFromGUID(strGUID, doc);
+        if (db.CanEditDocument(doc))
+        {
+            qDebug() << "document editable , hide message tips.";
+            m_title->showMessageTip(Qt::PlainText, "");
+        }
+    }
 }
 
 void CWizDocumentView::loadNote(const WIZDOCUMENTDATA& doc)
@@ -540,6 +561,19 @@ void CWizDocumentView::stopDocumentEditingStatus()
 void CWizDocumentView::checkDocumentEditStatus()
 {
     emit checkDocumentEditStatusRequest(m_note.strKbGUID, m_note.strGUID);
+}
+
+bool CWizDocumentView::checkDocumentEditable()
+{
+
+
+    QEventLoop loop;
+    connect(this, SIGNAL(documentEditStatusCheckFinished()), &loop, SLOT(quit()));
+    checkDocumentEditStatus();
+    loop.exec();
+    //
+
+    return !(m_status & DOCUMENT_EDITBYOTHERS);
 }
 
 void CWizDocumentView::on_document_modified(const WIZDOCUMENTDATA& documentOld, const WIZDOCUMENTDATA& documentNew)
@@ -614,12 +648,12 @@ void CWizDocumentView::on_document_data_saved(const QString& strGUID,
 }
 
 
-void Core::CWizDocumentView::on_checkEditStatus_finished(QString strGUID, QStringList editors)
+void Core::CWizDocumentView::on_documentEditingByOthers(QString strGUID, QStringList editors)
 {
     qDebug() << "document view. on check edit status finished : " << editors;
     //
-    QString strCurrentUser = m_dbMgr.db(m_note.strKbGUID).GetUserAlias();
-    editors.removeAll(strCurrentUser);
+    //QString strCurrentUser = m_dbMgr.db(m_note.strKbGUID).GetUserAlias();
+    //editors.removeAll(strCurrentUser);
 
     if (strGUID == m_note.strGUID && !editors.isEmpty())
     {
@@ -627,22 +661,23 @@ void Core::CWizDocumentView::on_checkEditStatus_finished(QString strGUID, QStrin
         if (!strEditor.isEmpty())
         {
             m_title->showMessageTip(Qt::PlainText, QString(tr("%1 is currently editing this note. Note has been locked.")).arg(strEditor));
+            m_title->setEditButtonState(false, false);
+            m_status = m_status | DOCUMENT_EDITBYOTHERS;
         }
-        m_status = m_status | DOCUMENT_EDITBYOTHERS;
     }
     else
     {
         if (strGUID == m_note.strGUID)
-        {           
+        {
             m_title->setEditButtonState(!m_bLocked, false);
+            m_status = m_status & ~DOCUMENT_EDITBYOTHERS;
         }
-        m_status = m_status & ~DOCUMENT_EDITBYOTHERS;
     }
 
     emit documentEditStatusCheckFinished();
 }
 
-void CWizDocumentView::on_checkEditStatus_timeout(QString strGUID)
+void CWizDocumentView::on_checkEditStatus_timeout(const QString& strGUID)
 {
     qDebug() << "web view. on check edit status time out";
     if (strGUID == m_note.strGUID && !(m_status & DOCUMENT_OFFLINE))

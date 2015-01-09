@@ -504,8 +504,8 @@ void CWizDocumentStatusChecker::checkEditStatus(const QString& strKbGUID, const 
 {
     qDebug() << "CWizDocumentStatusChecker start to check guid : " << strGUID;
     setDocmentGUID(strKbGUID, strGUID);
-    m_timeOutTimer->start(5000);
-    m_loopCheckTimer->start(20000);
+    m_timeOutTimer->start(5 * 1000);
+    m_loopCheckTimer->start(1 * 20 * 1000);
     startCheck();
 }
 
@@ -582,16 +582,19 @@ void CWizDocumentStatusChecker::startCheck()
     qDebug() << "check finished, document changed : " << changed;
     emit checkDocumentChangedFinished(m_strCurGUID, changed);
 
-    QEventLoop loop;
-    QTimer::singleShot(6000, &loop, SLOT(quit()));
-    loop.exec();
+//    QEventLoop loop;
+//    QTimer::singleShot(6000, &loop, SLOT(quit()));
+//    loop.exec();
 
     if (m_stop)
         return;
 
     qDebug() << "start to check document edit status";
-    checkDocumentEditStatus(m_strCurKbGUID, m_strCurGUID);
+    bool editingByOthers = checkDocumentEditStatus(m_strCurKbGUID, m_strCurGUID);
+    qDebug() << "check document edit status finished, editing by others : " << editingByOthers;
     m_timeOutTimer->stop();
+
+    emit checkEditStatusFinished(m_strCurGUID, !changed && !editingByOthers);
 }
 
 bool CWizDocumentStatusChecker::checkDocumentChangedOnServer(const QString& strKbGUID, const QString& strGUID)
@@ -644,11 +647,10 @@ bool CWizDocumentStatusChecker::checkDocumentEditStatus(const QString& strKbGUID
                                              strGUID,
                                              ::WizIntToStr(GetTickCount()));
 
-    downloadData(strRequestUrl);
-    return true;
+    return checkDocumentEditStatus(strRequestUrl);
 }
 
-void CWizDocumentStatusChecker::downloadData(const QString& strUrl)
+bool CWizDocumentStatusChecker::checkDocumentEditStatus(const QString& strUrl)
 {
     QNetworkAccessManager net;
     QNetworkReply* reply = net.get(QNetworkRequest(strUrl));
@@ -658,9 +660,9 @@ void CWizDocumentStatusChecker::downloadData(const QString& strUrl)
     loop.exec();
 
     if (reply->error()) {
-        Q_EMIT checkEditStatusFinished(QString(), QStringList());
+        Q_EMIT documentEditingByOthers(QString(), QStringList());
         reply->deleteLater();
-        return;
+        return false;
     }
 
     rapidjson::Document d;
@@ -680,12 +682,13 @@ void CWizDocumentStatusChecker::downloadData(const QString& strUrl)
             QMutexLocker lock(&m_mutexWait);
             if (strUrl.indexOf(m_strGUID) != -1)
             {
-                emit  checkEditStatusFinished(m_strGUID, strList);
+                emit  documentEditingByOthers(m_strGUID, strList);
             }
         }
         reply->deleteLater();
-        return;
+        return strList.count() > 0;
     }
-    Q_EMIT checkEditStatusFinished(QString(), QStringList());
+    Q_EMIT documentEditingByOthers(QString(), QStringList());
     reply->deleteLater();
+    return false;
 }

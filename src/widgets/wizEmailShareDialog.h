@@ -26,8 +26,7 @@ private slots:
 
     void on_toolButton_contacts_clicked();
 
-public slots:
-    void on_contactsList_itemDoubleClicked(QListWidgetItem *item);
+    void on_contactsListItemClicked(QListWidgetItem *item);
 
 private:
     QString getExInfo();
