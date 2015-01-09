@@ -235,15 +235,14 @@ void CWizAttachmentListView::openAttachment(CWizAttachmentListViewItem* item)
         waitForDownload();
     }
 
+    // try to set the attachement read-only.
     QFile file(strFileName);
-    if (file.exists() && !db.CanEditAttachment(attachment) && (file.permissions() & QFileDevice::WriteOwner))
+    if (file.exists() && !db.CanEditAttachment(attachment) && (file.permissions() & QFileDevice::WriteUser))
     {
         QFile::Permissions permissions = file.permissions();
-        qDebug() << "cannot edit attachment, set doc permission, origin permission " << permissions;
-        permissions = permissions & ~QFileDevice::WriteOwner;
-        qDebug() << "target permission :  " << permissions;
+        permissions = permissions & ~QFileDevice::WriteOwner & ~QFileDevice::WriteUser
+                & ~QFileDevice::WriteGroup & ~QFileDevice::WriteOther;
         file.setPermissions(permissions);
-        qDebug() << "after set document permissions : " << permissions;
     }
 
     QDesktopServices::openUrl(QUrl::fromLocalFile(strFileName));
@@ -252,7 +251,7 @@ void CWizAttachmentListView::openAttachment(CWizAttachmentListViewItem* item)
     connect(&monitor, SIGNAL(fileModified(QString,QString,QString,QString,QDateTime)),
             &m_dbMgr.db(), SLOT(onAttachmentModified(QString,QString,QString,QString,QDateTime)), Qt::UniqueConnection);
 
-    /*需要使用文件的修改日期,从服务器上下载下的文件修改日期必定大于数据库中日期.*/
+    /*需要使用文件的修改日期来判断文件是否被改动,从服务器上下载下的文件修改日期必定大于数据库中日期.*/
     QFileInfo info(strFileName);
     monitor.addFile(attachment.strKbGUID, attachment.strGUID, strFileName,
                     attachment.strDataMD5, info.lastModified());
