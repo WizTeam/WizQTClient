@@ -5,12 +5,18 @@
 #include "share/wizsettings.h"
 #include "share/wizDatabaseManager.h"
 #include "rapidjson/document.h"
+#include "utils/stylehelper.h"
+#include <QListWidget>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QEventLoop>
 #include <QMessageBox>
 #include <QTextCodec>
+#include <QPixmap>
+#include <QVBoxLayout>
 #include <QDebug>
+
+#define EMAIL_CONTACTS "EMAILCONTACTS"
 
 enum returnCode {
     codeOK = 200,                   //:ok,
@@ -28,8 +34,22 @@ CWizEmailShareDialog::CWizEmailShareDialog(CWizExplorerApp& app, QWidget *parent
     ui(new Ui::CWizEmailShareDialog)
 {
     ui->setupUi(this);
-    ui->toolButton_contracts->setVisible(false);
     ui->checkBox_saveNotes->setVisible(false);
+    QPixmap pix(Utils::StyleHelper::skinResourceFileName("send_email"));
+    QIcon icon(pix);
+    ui->toolButton_send->setIcon(icon);
+    ui->toolButton_send->setIconSize(pix.size());
+    ui->toolButton_contacts->setIcon(QIcon(Utils::StyleHelper::skinResourceFileName("document_badge")));
+    ui->toolButton_contacts->setToolTip(tr("Show frequent contacts list"));
+
+    m_contactDialog = new QDialog(this);
+    m_contactDialog->setWindowTitle(tr("Frequent Contacts List"));
+    QVBoxLayout* layout = new QVBoxLayout(m_contactDialog);
+    m_contactList = new QListWidget(m_contactDialog);
+    m_contactList->setAttribute(Qt::WA_MacShowFocusRect, 0);
+    layout->addWidget(m_contactList);
+    connect(m_contactList, SIGNAL(itemDoubleClicked(QListWidgetItem*)),
+            SLOT(on_contactsList_itemDoubleClicked(QListWidgetItem*)));
 }
 
 CWizEmailShareDialog::~CWizEmailShareDialog()
@@ -43,7 +63,6 @@ void CWizEmailShareDialog::setNote(const WIZDOCUMENTDATA& note)
     ui->lineEdit_subject->setText(m_note.strTitle);
     ui->comboBox_replyTo->insertItem(0, m_app.userSettings().user());
     ui->comboBox_replyTo->insertItem(1, m_app.userSettings().myWizMail());
-    ui->lineEdit_to->setText("anyetiangong@gmail.com");
 }
 
 void CWizEmailShareDialog::on_toolButton_send_clicked()
@@ -72,9 +91,6 @@ void CWizEmailShareDialog::on_toolButton_send_clicked()
     connect(reply, SIGNAL(finished()), &msgBox, SLOT(accept()));
     msgBox.exec();
 
-//    loop.connect(reply, SIGNAL(finished()), SLOT(quit()));
-//    loop.exec();
-
     if (reply->error() != QNetworkReply::NoError) {
         QMessageBox::information(this, tr("Info"), reply->errorString());
         reply->deleteLater();
@@ -88,11 +104,6 @@ void CWizEmailShareDialog::on_toolButton_send_clicked()
     mailShareFinished(nCode, returnMessage);
 
     reply->deleteLater();
-}
-
-void CWizEmailShareDialog::on_toolButton_contracts_clicked()
-{
-
 }
 
 QString CWizEmailShareDialog::getExInfo()
@@ -149,10 +160,57 @@ void CWizEmailShareDialog::processReturnMessage(const QString& returnMessage, in
 
     if (d.FindMember("return_code")) {
         nCode = d.FindMember("return_code")->value.GetInt();
-        if (nCode != 200) {
+        if (nCode == 200) {
+            qDebug() <<"[EmailShar]:send email successed!";
+            saveContacts();
+            return;
+        } else {
             message = QString::fromUtf8(d.FindMember("return_message")->value.GetString());
             qDebug() << message << ", code = " << nCode;
             return;
         }
     }
+}
+
+void CWizEmailShareDialog::saveContacts()
+{
+    QString strText = ui->lineEdit_to->text();
+    QStringList toList = strText.split(QRegExp(",|;"));
+    QString strContact = m_app.userSettings().get(EMAIL_CONTACTS);
+    foreach (QString str, toList)
+    {
+        if (!strContact.contains(str))
+            strContact.append(str + ";");
+    }
+    m_app.userSettings().set(EMAIL_CONTACTS, strContact);
+}
+
+void CWizEmailShareDialog::updateContactList()
+{
+    m_contactList->clear();
+    QString strContact = m_app.userSettings().get(EMAIL_CONTACTS);
+    QStringList contactList = strContact.split(';');
+    foreach(QString str, contactList)
+    {
+        m_contactList->addItem(str);
+    }
+}
+
+void CWizEmailShareDialog::on_toolButton_contacts_clicked()
+{
+    updateContactList();
+    m_contactDialog->exec();
+    return;
+}
+
+void CWizEmailShareDialog::on_contactsList_itemDoubleClicked(QListWidgetItem *item)
+{
+    QString strUserName = item->text();
+    QString strTo = ui->lineEdit_to->text();
+    if (!strTo.isEmpty() && strTo.right(1) != "," && strTo.right(1) != ";")
+    {
+        strTo.append(";");
+    }
+    strTo += strUserName + ";";
+    ui->lineEdit_to->setText(strTo);
 }
