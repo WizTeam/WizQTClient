@@ -576,11 +576,11 @@ void CWizDocumentStatusChecker::startRecheck()
 void CWizDocumentStatusChecker::startCheck()
 {
     peekDocumentGUID(m_strCurKbGUID, m_strCurGUID);
-    qDebug() << "start to check document changed on server , guid : " << m_strCurGUID;
+//    qDebug() << "start to check document changed on server , guid : " << m_strCurGUID;
     bool changed = checkDocumentChangedOnServer(m_strCurKbGUID, m_strCurGUID);
     if (m_stop)
         return;
-    qDebug() << "check finished, document changed : " << changed;
+//    qDebug() << "check finished, document changed : " << changed;
     emit checkDocumentChangedFinished(m_strCurGUID, changed);
 
 //    QEventLoop loop;
@@ -590,9 +590,9 @@ void CWizDocumentStatusChecker::startCheck()
     if (m_stop)
         return;
 
-    qDebug() << "start to check document edit status";
+//    qDebug() << "start to check document edit status";
     bool editingByOthers = checkDocumentEditStatus(m_strCurKbGUID, m_strCurGUID);
-    qDebug() << "check document edit status finished, editing by others : " << editingByOthers;
+//    qDebug() << "check document edit status finished, editing by others : " << editingByOthers;
     m_timeOutTimer->stop();
 
     emit checkEditStatusFinished(m_strCurGUID, !changed && !editingByOthers);

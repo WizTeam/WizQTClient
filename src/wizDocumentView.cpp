@@ -656,7 +656,6 @@ void CWizDocumentView::on_document_data_saved(const QString& strGUID,
 
 void Core::CWizDocumentView::on_documentEditingByOthers(QString strGUID, QStringList editors)
 {
-//    qDebug() << "document view. on check edit status finished : " << editors;
     //
     //QString strCurrentUser = m_dbMgr.db(m_note.strKbGUID).GetUserAlias();
     //editors.removeAll(strCurrentUser);
@@ -699,7 +698,6 @@ void Core::CWizDocumentView::on_documentEditingByOthers(QString strGUID, QString
 
 void CWizDocumentView::on_checkEditStatus_timeout(const QString& strGUID)
 {
-    qDebug() << "web view. on check edit status time out";
     if (strGUID == m_note.strGUID && !(m_status & DOCUMENT_OFFLINE))
     {
         m_title->setEditButtonState(true, false);
@@ -710,7 +708,6 @@ void CWizDocumentView::on_checkEditStatus_timeout(const QString& strGUID)
 
 void CWizDocumentView::on_checkDocumentChanged_finished(const QString& strGUID, bool changed)
 {
-    qDebug() << "web view. check document changed finished changed";
     if (strGUID == m_note.strGUID)
     {
         if (changed)
@@ -766,7 +763,6 @@ void CWizDocumentView::on_webView_focus_changed()
 
 void CWizDocumentView::on_notifyBar_link_clicked(const QString& link)
 {
-    qDebug() << "notify bar download clicked : " << link;
     if (link == NOTIFYBAR_LABELLINK_DOWNLOAD)
     {
         downloadDocumentFromServer();
