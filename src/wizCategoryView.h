@@ -402,9 +402,9 @@ private:
 
     void quickSyncNewDocument(const QString& strKbGUID);
 
-    void updatePersonalFolderLocation(CWizDatabase& db,const QString& strOldLocation,\
+    void updatePrivateFolderLocation(CWizDatabase& db,const QString& strOldLocation,\
                                       const QString& strNewLocation);
-    void updatePersonalTagPosition(CWizDatabase& db);
+    void updatePrivateTagPosition(CWizDatabase& db);
     void updateGroupFolderPosition(CWizDatabase& db);
 
 private:

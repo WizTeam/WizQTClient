@@ -280,7 +280,7 @@ void CWizDocumentView::initStat(const WIZDOCUMENTDATA& data, bool bEditing)
 //        m_editStatusCheckThread->checkEditStatus(data.strKbGUID, data.strGUID);
 
 //        m_editStatusChecker->checkEditStatus(m_note.strKbGUID, m_note.strGUID);
-        checkDocumentEditStatus();
+        startCheckDocumentEditStatus();
     }
 }
 
@@ -388,6 +388,8 @@ void CWizDocumentView::setEditNote(bool bEdit)
         {
             return;
         }
+        // stop check document edit status while enter editing mode
+        stopCheckDocumentEditStatus();
     }
 
 
@@ -403,6 +405,7 @@ void CWizDocumentView::setEditNote(bool bEdit)
     else
     {
         stopDocumentEditingStatus();
+        startCheckDocumentEditStatus();
     }
 }
 
@@ -496,7 +499,7 @@ void CWizDocumentView::on_attachment_deleted(const WIZDOCUMENTATTACHMENTDATA& at
 
 void CWizDocumentView::on_checkEditStatus_finished(const QString& strGUID, bool editable)
 {
-    qDebug() << "check eidt status finished , editable  : " << editable;
+//    qDebug() << "check eidt status finished , editable  : " << editable;
     if (strGUID == m_note.strGUID && editable)
     {
         CWizDatabase& db = m_dbMgr.db(m_note.strKbGUID);
@@ -504,7 +507,7 @@ void CWizDocumentView::on_checkEditStatus_finished(const QString& strGUID, bool 
         db.DocumentFromGUID(strGUID, doc);
         if (db.CanEditDocument(doc))
         {
-            qDebug() << "document editable , hide message tips.";
+//            qDebug() << "document editable , hide message tips.";
             m_title->showMessageTip(Qt::PlainText, "");
         }
     }
@@ -558,18 +561,21 @@ void CWizDocumentView::stopDocumentEditingStatus()
     }
 }
 
-void CWizDocumentView::checkDocumentEditStatus()
+void CWizDocumentView::startCheckDocumentEditStatus()
 {
     emit checkDocumentEditStatusRequest(m_note.strKbGUID, m_note.strGUID);
 }
 
+void CWizDocumentView::stopCheckDocumentEditStatus()
+{
+    emit stopCheckDocumentEditStatusRequest(m_note.strKbGUID, m_note.strGUID);
+}
+
 bool CWizDocumentView::checkDocumentEditable()
 {
-
-
     QEventLoop loop;
     connect(this, SIGNAL(documentEditStatusCheckFinished()), &loop, SLOT(quit()));
-    checkDocumentEditStatus();
+    startCheckDocumentEditStatus();
     loop.exec();
     //
 
@@ -650,7 +656,7 @@ void CWizDocumentView::on_document_data_saved(const QString& strGUID,
 
 void Core::CWizDocumentView::on_documentEditingByOthers(QString strGUID, QStringList editors)
 {
-    qDebug() << "document view. on check edit status finished : " << editors;
+//    qDebug() << "document view. on check edit status finished : " << editors;
     //
     //QString strCurrentUser = m_dbMgr.db(m_note.strKbGUID).GetUserAlias();
     //editors.removeAll(strCurrentUser);
@@ -660,9 +666,23 @@ void Core::CWizDocumentView::on_documentEditingByOthers(QString strGUID, QString
         QString strEditor = editors.join(" , ");
         if (!strEditor.isEmpty())
         {
-            m_title->showMessageTip(Qt::PlainText, QString(tr("%1 is currently editing this note. Note has been locked.")).arg(strEditor));
-            m_title->setEditButtonState(false, false);
-            m_status = m_status | DOCUMENT_EDITBYOTHERS;
+            CWizDatabase& db = m_dbMgr.db(m_note.strKbGUID);
+            QString strUserAlias = db.GetUserAlias();
+            if (editors.count() == 1 && editors.first() == strUserAlias)
+            {
+                qDebug() << "[EditStatus]:editing by myself.";
+                m_title->showMessageTip(Qt::PlainText, "");
+                m_title->setEditButtonState(true, false);
+            }
+            else
+            {
+                m_title->showMessageTip(Qt::PlainText, QString(tr("%1 is currently editing this note. Note has been locked.")).arg(strEditor));
+                m_status = m_status | DOCUMENT_EDITBYOTHERS;
+                if (m_note.nVersion != -1)
+                {
+                    m_title->setEditButtonState(false, false);
+                }
+            }
         }
     }
     else

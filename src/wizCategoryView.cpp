@@ -683,7 +683,16 @@ QString CWizCategoryBaseView::getUseableItemName(QTreeWidgetItem* parent, \
 
 void CWizCategoryBaseView::resetFolderLocation(CWizCategoryViewFolderItem* item, const QString& strNewLocation)
 {
-
+    item->setLocation(strNewLocation);
+    for (int i = 0; i < item->childCount(); i++)
+    {
+        CWizCategoryViewFolderItem* child = dynamic_cast<CWizCategoryViewFolderItem*>(item->child(i));
+        if (child)
+        {
+            QString strChildLocation = strNewLocation + child->text(0) + "/";
+            resetFolderLocation(child, strChildLocation);
+        }
+    }
 }
 
 void CWizCategoryBaseView::on_dragHovered_timeOut()
@@ -2538,7 +2547,7 @@ void CWizCategoryView::updateGroupFolderPosition(CWizDatabase& db)
     emit categoryItemPositionChanged(db.kbGUID());
 }
 
-void CWizCategoryView::updatePersonalFolderLocation(CWizDatabase& db, \
+void CWizCategoryView::updatePrivateFolderLocation(CWizDatabase& db, \
                                                     const QString& strOldLocation, const QString& strNewLocation)
 {
     CWizCategoryViewAllFoldersItem* pItem = dynamic_cast<CWizCategoryViewAllFoldersItem* >(findAllFolderItem());
@@ -2566,7 +2575,7 @@ void CWizCategoryView::updatePersonalFolderLocation(CWizDatabase& db, \
     emit categoryItemPositionChanged(db.kbGUID());
 }
 
-void CWizCategoryView::updatePersonalTagPosition(CWizDatabase& db)
+void CWizCategoryView::updatePrivateTagPosition(CWizDatabase& db)
 {
     Q_UNUSED(db);
 }
@@ -3999,6 +4008,9 @@ void CWizCategoryView::on_itemPosition_changed(CWizCategoryViewItemBase* pItem)
         {
             CWizCategoryViewItemBase* folderRoot = findAllFolderItem();
             QTreeWidgetItem* parentItem = item->parent();
+            if (!parentItem)
+                return;
+
             QString strName = getUseableItemName(parentItem, item);
             qDebug() << "category view list get useable item name : " << strName;
             QString strNewLocation = "/" + strName + "/";
@@ -4018,7 +4030,7 @@ void CWizCategoryView::on_itemPosition_changed(CWizCategoryViewItemBase* pItem)
             QString strOldLocation = item->location();
 //            item->setLocation(strNewLocation);
             resetFolderLocation(item, strNewLocation);
-            updatePersonalFolderLocation(db, strOldLocation, strNewLocation);
+            updatePrivateFolderLocation(db, strOldLocation, strNewLocation);
         }
 //        else if (const CWizCategoryViewTagItem* tagItem = dynamic_cast<const CWizCategoryViewTagItem*>(pItem))
 //        {

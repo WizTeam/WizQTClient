@@ -145,7 +145,8 @@ private:
     void downloadDocumentFromServer();
     void sendDocumentEditingStatus();
     void stopDocumentEditingStatus();
-    void checkDocumentEditStatus();
+    void startCheckDocumentEditStatus();
+    void stopCheckDocumentEditStatus();
     bool checkDocumentEditable();
 };
 

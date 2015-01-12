@@ -192,7 +192,7 @@ void CWizDocumentEditStatusSyncThread::sendEditingMessage()
 
     for (it = editingMap.begin(); it != editingMap.end(); ++it)
     {
-        qDebug() << "try to send editing message , objId : " << it.key() << "  userAlias : " << it.value();
+//        qDebug() << "try to send editing message , objId : " << it.key() << "  userAlias : " << it.value();
         if (!it.key().isEmpty() && !it.value().isEmpty())
         {
             sendEditingMessage(it.value(), it.key());
@@ -214,7 +214,7 @@ bool CWizDocumentEditStatusSyncThread::sendEditingMessage(const QString& strUser
     }
     QNetworkReply* reply = m_netManager->get(QNetworkRequest(strUrl));
 
-    qDebug() << "sendEditingMessage called " <<strObjID;
+//    qDebug() << "sendEditingMessage called " <<strObjID;
 
     QEventLoop loop;
     connect(reply, SIGNAL(finished()), &loop, SLOT(quit()));
@@ -399,7 +399,7 @@ void CWizDocumentStatusCheckThread::run()
                 return;
 
             m_timer->start(5000);
-            qDebug() << "after qtimer started.";
+//            qDebug() << "after qtimer started.";
 //            qDebug() << "start to check document changed on server , guid : " << m_strCurGUID;
 //            bool changed = checkDocumentChangedOnServer(m_strCurKbGUID, m_strCurGUID);
 //            qDebug() << "check finished, document changed : " << changed;
@@ -502,10 +502,11 @@ CWizDocumentStatusChecker::~CWizDocumentStatusChecker()
 
 void CWizDocumentStatusChecker::checkEditStatus(const QString& strKbGUID, const QString& strGUID)
 {
-    qDebug() << "CWizDocumentStatusChecker start to check guid : " << strGUID;
+//    qDebug() << "CWizDocumentStatusChecker start to check guid : " << strGUID;
     setDocmentGUID(strKbGUID, strGUID);
     m_timeOutTimer->start(5 * 1000);
     m_loopCheckTimer->start(1 * 20 * 1000);
+    m_stop = false;
     startCheck();
 }
 
@@ -546,13 +547,13 @@ void CWizDocumentStatusChecker::onTimeOut()
 
 void CWizDocumentStatusChecker::recheck()
 {
-    qDebug() << "CWizDocumentStatusChecker  recheck called";
+//    qDebug() << "CWizDocumentStatusChecker  recheck called";
     startRecheck();
 }
 
 void CWizDocumentStatusChecker::initialise()
 {
-    qDebug() << "CWizDocumentStatusChecker thread id : ";
+//    qDebug() << "CWizDocumentStatusChecker thread id : ";
     m_timeOutTimer = new QTimer(this);
     connect(m_timeOutTimer, SIGNAL(timeout()), SLOT(onTimeOut()));
     m_loopCheckTimer = new QTimer(this);
@@ -567,7 +568,7 @@ void CWizDocumentStatusChecker::clearTimers()
 
 void CWizDocumentStatusChecker::startRecheck()
 {
-    qDebug() << "CWizDocumentStatusChecker  start recheck";
+//    qDebug() << "CWizDocumentStatusChecker  start recheck";
     m_timeOutTimer->start(5000);
     startCheck();
 }
