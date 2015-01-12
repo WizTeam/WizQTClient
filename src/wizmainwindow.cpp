@@ -326,8 +326,11 @@ void MainWindow::closeEvent(QCloseEvent* event)
         return;
     }
 #else
-    setVisible(false);
-    event->ignore();
+    if (m_settings->showSystemTrayIcon())
+    {
+        setVisible(false);
+        event->ignore();
+    }
 #endif
 }
 
@@ -373,7 +376,10 @@ void MainWindow::on_actionClose_triggered()
 #ifdef Q_OS_MAC
     wizMacHideCurrentApplication();
 #else
-    setVisible(false);
+    if (m_settings->showSystemTrayIcon())
+    {
+        setVisible(false);
+    }
 #endif
 }
 
