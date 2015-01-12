@@ -255,7 +255,6 @@ public Q_SLOTS:
     void onEditorLinkClicked(const QUrl& url);
     void onEditorContentChanged();
     void onEditorSelectionChanged();
-    void clearEditorHeight();
 
     void onTimerAutoSaveTimout();
 

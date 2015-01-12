@@ -866,11 +866,6 @@ void CWizDocumentWebView::onEditorSelectionChanged()
     Q_EMIT statusChanged();
 }
 
-void CWizDocumentWebView::clearEditorHeight()
-{
-    page()->mainFrame()->evaluateJavaScript("editor.document.body.style.height='';");
-}
-
 void CWizDocumentWebView::onEditorLinkClicked(const QUrl& url)
 {
     if (isInternalUrl(url))
@@ -1158,13 +1153,6 @@ void CWizDocumentWebView::viewDocumentInEditor(bool editing)
 void CWizDocumentWebView::onNoteLoadFinished()
 {
     ICore::instance()->emitViewNoteLoaded(view(), view()->note(), true);
-
-    static bool init = true;
-    if (init)
-    {
-        QTimer::singleShot(100, this, SLOT(clearEditorHeight()));
-        init = false;
-    }
 }
 
 void CWizDocumentWebView::setEditingDocument(bool editing)
@@ -1653,7 +1641,7 @@ bool CWizDocumentWebView::editorCommandExecuteViewSource()
 bool CWizDocumentWebView::editorCommandExecuteInsertCode()
 {
     QString strSelectHtml = page()->selectedText();
-    WizCodeEditorDialog *dialog = new WizCodeEditorDialog();
+    WizCodeEditorDialog *dialog = new WizCodeEditorDialog(m_app);
     connect(dialog, SIGNAL(insertHtmlRequest(QString)), SLOT(on_insertCodeHtml_requset(QString)));
     dialog->show();
     dialog->setWindowState(dialog->windowState() & ~Qt::WindowFullScreen | Qt::WindowActive);
