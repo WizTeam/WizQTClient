@@ -383,14 +383,31 @@ bool processWebImageUrl(QString& strHtml, const QString& strUrl)
         QString strSrc = paraElement.attribute("src");
         QUrl elemUrl(strSrc);
 //        qDebug() << "origin image src :  "  << strSrc;
-        if (strSrc.left(2) == "//" && elemUrl.scheme().isEmpty())
+        if (elemUrl.scheme().isEmpty())
         {
-            elemUrl.setScheme(webUrl.scheme());
-        }
-        else if (strSrc.left(1) == "/" && elemUrl.scheme().isEmpty())
-        {
-            elemUrl.setScheme(webUrl.scheme());
-            elemUrl.setHost(webUrl.host());
+            if (strSrc.left(2) == "//")
+            {
+                elemUrl.setScheme(webUrl.scheme());
+            }
+            else if (strSrc.left(1) == "/")
+            {
+                elemUrl.setScheme(webUrl.scheme());
+                elemUrl.setHost(webUrl.host());
+            }
+            else if (strSrc.left(3) == "../")
+            {
+                elemUrl.setUrl(webUrl.scheme() + "://"+ webUrl.host() + strSrc.remove(0, 2));
+            }
+            else if (elemUrl.host().isEmpty())
+            {
+                elemUrl.setHost(webUrl.host());
+                elemUrl.setScheme(webUrl.scheme());
+            }
+            else
+            {
+                elemUrl.setScheme(webUrl.scheme());
+            }
+//            qDebug() << "after reset url scheme , url " << elemUrl.toString();
         }
         paraElement.setAttribute("src", elemUrl.toString());
 //        strSrc = paraElement.attribute("src");te
