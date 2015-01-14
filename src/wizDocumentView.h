@@ -109,7 +109,6 @@ public:
 
 signals:
     void documentSaved(const QString& strGUID, CWizDocumentView* viewer);
-    void documentEditStatusCheckFinished();
     void checkDocumentEditStatusRequest(const QString& strKbGUID, const QString& strGUID);
     void stopCheckDocumentEditStatusRequest(const QString& strKbGUID, const QString& strGUID);
 

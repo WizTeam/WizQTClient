@@ -1,5 +1,6 @@
 #include "wizDocumentEditStatus.h"
 #include "sync/apientry.h"
+#include "sync/token.h"
 #include "share/wizmisc.h"
 #include "rapidjson/document.h"
 #include "share/wizDatabase.h"
@@ -70,7 +71,7 @@ void CWizDocumentEditStatusSyncThread::startEditingDocument(const QString& strUs
 void CWizDocumentEditStatusSyncThread::stopEditingDocument(const QString& strKbGUID, \
                                                            const QString& strGUID, bool bModified)
 {
-    qDebug() << "stop editing document , guid " << strGUID << "  modified : " << bModified;
+//    qDebug() << "stop editing document , guid " << strGUID << "  modified : " << bModified;
     QString strObjID = combineObjID(strKbGUID, strGUID);
     if (strObjID.isEmpty())
         return;
@@ -94,7 +95,7 @@ void CWizDocumentEditStatusSyncThread::stopEditingDocument(const QString& strKbG
 
 void CWizDocumentEditStatusSyncThread::documentSaved(const QString& strUserAlias, const QString& strKbGUID, const QString& strGUID)
 {
-    qDebug() << "EditStatusSyncThread document saved : kbguid : " << strKbGUID << "  guid : " << strGUID;
+//    qDebug() << "EditStatusSyncThread document saved : kbguid : " << strKbGUID << "  guid : " << strGUID;
     QString strObjID = combineObjID(strKbGUID, strGUID);
     if (strObjID.isEmpty())
         return;
@@ -110,8 +111,6 @@ void CWizDocumentEditStatusSyncThread::documentSaved(const QString& strUserAlias
 
 void CWizDocumentEditStatusSyncThread::documentUploaded(const QString& strKbGUID, const QString& strGUID)
 {
-    qDebug() << "edit status sync thread on document uploaded , kbGuid :  " << strKbGUID << "   strGuid  :  " << strGUID;
-
     QString strObjID = combineObjID(strKbGUID, strGUID);
     if (strObjID.isEmpty())
         return;
@@ -202,11 +201,12 @@ void CWizDocumentEditStatusSyncThread::sendEditingMessage()
 
 bool CWizDocumentEditStatusSyncThread::sendEditingMessage(const QString& strUserAlias, const QString& strObjID)
 {
-    QString strUrl = ::WizFormatString4(_T("%1/add?obj_id=%2&user_id=%3&t=%4"),
+    QString strUrl = ::WizFormatString5(_T("%1/add?obj_id=%2&user_id=%3&t=%4&token=%5"),
                                         WizKMGetDocumentEditStatusURL(),
                                         strObjID,
                                         strUserAlias,
-                                        ::WizIntToStr(GetTickCount()));
+                                        ::WizIntToStr(GetTickCount()),
+                                        WizService::Token::token());
 
     if (!m_netManager)
     {
@@ -214,7 +214,8 @@ bool CWizDocumentEditStatusSyncThread::sendEditingMessage(const QString& strUser
     }
     QNetworkReply* reply = m_netManager->get(QNetworkRequest(strUrl));
 
-//    qDebug() << "sendEditingMessage called " <<strObjID;
+    //qDebug() << "sendEditingMessage called " <<strUrl;
+    qDebug() << "[EditStatus]:Send editing status : " << strObjID;
 
     QEventLoop loop;
     connect(reply, SIGNAL(finished()), &loop, SLOT(quit()));
@@ -246,18 +247,20 @@ void CWizDocumentEditStatusSyncThread::sendDoneMessage()
 
 bool CWizDocumentEditStatusSyncThread::sendDoneMessage(const QString& strUserAlias, const QString& strObjID)
 {
-    QString strUrl = WizFormatString4(_T("%1/delete?obj_id=%2&user_id=%3&t=%4"),
+    QString strUrl = WizFormatString5(_T("%1/delete?obj_id=%2&user_id=%3&t=%4&token=%5"),
                                       WizKMGetDocumentEditStatusURL(),
                                       strObjID,
                                       strUserAlias,
-                                      ::WizIntToStr(GetTickCount()));
+                                      ::WizIntToStr(GetTickCount()),
+                                      WizService::Token::token());
 
     if (!m_netManager)
     {
         m_netManager = new QNetworkAccessManager();
     }
     QNetworkReply* reply = m_netManager->get(QNetworkRequest(strUrl));
-    qDebug() << "sendDoneMessage called " <<strObjID;
+//    qDebug() << "sendDoneMessage called " <<strUrl;
+    qDebug() << "[EditStatus]:Send done status : " << strObjID;
 
     QEventLoop loop;
     connect(reply, SIGNAL(finished()), &loop, SLOT(quit()));
@@ -505,7 +508,7 @@ void CWizDocumentStatusChecker::checkEditStatus(const QString& strKbGUID, const 
 //    qDebug() << "CWizDocumentStatusChecker start to check guid : " << strGUID;
     setDocmentGUID(strKbGUID, strGUID);
     m_timeOutTimer->start(5 * 1000);
-    m_loopCheckTimer->start(1 * 20 * 1000);
+    m_loopCheckTimer->start(1 * 60 * 1000);
     m_stop = false;
     startCheck();
 }
@@ -576,23 +579,29 @@ void CWizDocumentStatusChecker::startRecheck()
 void CWizDocumentStatusChecker::startCheck()
 {
     peekDocumentGUID(m_strCurKbGUID, m_strCurGUID);
-//    qDebug() << "start to check document changed on server , guid : " << m_strCurGUID;
+
     bool changed = checkDocumentChangedOnServer(m_strCurKbGUID, m_strCurGUID);
     if (m_stop)
+    {
+        emit checkEditStatusFinished(m_strCurGUID, false);
         return;
-//    qDebug() << "check finished, document changed : " << changed;
+    }
     emit checkDocumentChangedFinished(m_strCurGUID, changed);
 
-//    QEventLoop loop;
-//    QTimer::singleShot(6000, &loop, SLOT(quit()));
-//    loop.exec();
-
-    if (m_stop)
+    if (changed)
+    {
+        m_timeOutTimer->stop();
         return;
+    }
 
-//    qDebug() << "start to check document edit status";
     bool editingByOthers = checkDocumentEditStatus(m_strCurKbGUID, m_strCurGUID);
-//    qDebug() << "check document edit status finished, editing by others : " << editingByOthers;
+    if (m_stop)
+    {
+        emit checkEditStatusFinished(m_strCurGUID, false);
+        return;
+    }
+
+
     m_timeOutTimer->stop();
 
     emit checkEditStatusFinished(m_strCurGUID, !changed && !editingByOthers);

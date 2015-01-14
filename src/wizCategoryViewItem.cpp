@@ -711,7 +711,6 @@ void CWizCategoryViewFolderItem::setLocation(const QString& strLocation)
 
 void CWizCategoryViewFolderItem::getDocuments(CWizDatabase& db, CWizDocumentDataArray& arrayDocument)
 {
-    qDebug() << "folder item get documents by location : " << m_strName;
     db.GetDocumentsByLocation(m_strName, arrayDocument);
 }
 

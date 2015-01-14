@@ -566,8 +566,9 @@ function WizTodoReadCheckedAndroid () {
 		else return "";
 	}
 
-	function onClickingTodo(callback) {
-	}
+    function onClickingTodo(callback) {
+        window.WizNote.onClickingTodo(callback);
+    }
 }
 
 function WizTodoReadCheckedIphone() {
@@ -1101,6 +1102,10 @@ var WizTodoReadChecked = (function () {
 		editorDocument.addEventListener('click', onDocumentClick);
 	}
 
+    function unregisterEvent() {
+        editorDocument.removeEventListener('click', onDocumentClick);
+    }
+
 	function init(client) {
 
 		wizClient = client;
@@ -1119,6 +1124,7 @@ var WizTodoReadChecked = (function () {
 
     function clear() {
         needCallHelperClicking = true;
+        unregisterEvent();
     }
 
 	function extractTodoText(id, html) {
@@ -1377,7 +1383,7 @@ var WizTodoReadChecked = (function () {
 		//
 		addCompletedInfo(label, isChecked === 'true', id, localDateTime);
 	}
-
+  
 	function onClickingTodoCallback(cancel, needCallAgain) {
 		needCallHelperClicking = needCallAgain;
 		if (!cancel) {
@@ -1398,7 +1404,7 @@ var WizTodoReadChecked = (function () {
 		setIsPersonalDocument: setIsPersonalDocument,
 		setDocOriginalHtml: setDocOriginalHtml,
 		addTodoCompletedInfo: addTodoCompletedInfo,
-		onClickingTodoCallback: onClickingTodoCallback,
+		onClickingTodoCallback: onClickingTodoCallback
 	}
 
 })();

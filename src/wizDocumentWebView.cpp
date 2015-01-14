@@ -609,7 +609,7 @@ void CWizDocumentWebView::onDocumentReady(const QString kbGUID, const QString st
     m_mapFile.insert(strGUID, strFileName);
 
     if (m_bEditorInited) {
-        resetEditorParams();
+        resetCheckListEnvironment();
         viewDocumentInEditor(m_bEditingMode);
     } else {
         initEditor();
@@ -769,10 +769,13 @@ void CWizDocumentWebView::initEditor()
 
 }
 
-void CWizDocumentWebView::resetEditorParams()
+void CWizDocumentWebView::resetCheckListEnvironment()
 {
-    QString strScript = QString("WizTodoReadChecked.clear();");
-    page()->mainFrame()->evaluateJavaScript(strScript);
+    if (!m_bEditingMode)
+    {
+        QString strScript = QString("WizTodoReadChecked.clear();");
+        page()->mainFrame()->evaluateJavaScript(strScript);
+    }
 }
 
 void CWizDocumentWebView::initCheckListEnvironment()
@@ -1177,6 +1180,7 @@ void CWizDocumentWebView::setEditingDocument(bool editing)
 
     saveDocument(docData, false);
 
+    resetCheckListEnvironment();
     m_bEditingMode = editing;
     //
     QString strScript = QString("setEditing(%1);").arg(editing ? "true" : "false");

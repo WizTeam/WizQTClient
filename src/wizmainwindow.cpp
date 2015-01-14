@@ -1058,10 +1058,17 @@ void MainWindow::SetDialogResult(int nResult)
 
 bool MainWindow::checkListClickable()
 {
-    if (m_doc->checkListClickable())
+    if (!m_dbMgr.db(m_doc->note().strKbGUID).IsGroup())
     {
         emit clickingTodoCallBack(false, false);
+        return true;
+    }
+
+    if (m_doc->checkListClickable())
+    {
+        qDebug() << "check list clickable";
         m_doc->setStatusToEditingByCheckList();
+        emit clickingTodoCallBack(false, false);
         return true;
     }
     emit clickingTodoCallBack(true, true);

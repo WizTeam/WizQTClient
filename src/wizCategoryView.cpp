@@ -863,7 +863,7 @@ void CWizCategoryView::initMenus()
     // folder menu
     m_menuFolder = new QMenu(this);
     m_menuFolder->addAction(actionNewDoc);
-    m_menuFolder->addAction(actionImportFile);
+//    m_menuFolder->addAction(actionImportFile);
     m_menuFolder->addAction(actionNewItem);
     m_menuFolder->addSeparator();
     m_menuFolder->addAction(actionMoveItem);

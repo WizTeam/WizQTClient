@@ -952,7 +952,7 @@ bool CWizIndex::DeleteDocumentsByLocation(const CString& strLocation)
         return false;
 	}
 
-	CWizStdStringArray arrayGUID;
+    CWizStdStringArray arrayGUID;
     if (GetDocumentsGUIDByLocation(strLocation, arrayGUID)) {
         if (!LogDeletedGUIDs(arrayGUID, wizobjectDocument)) {
             TOLOG1(_T("Warning: Failed to log document guids by location: %1"), strLocation);
@@ -964,7 +964,7 @@ bool CWizIndex::DeleteDocumentsByLocation(const CString& strLocation)
         strLocation.utf16()
         );
 
-	return ExecSQL(strSQL);
+    return ExecSQL(strSQL);
 }
 
 bool CWizIndex::UpdateDocumentInfoMD5(WIZDOCUMENTDATA& data)
@@ -1982,7 +1982,6 @@ bool CWizIndex::GetDocumentsByLocation(const CString& strLocation,
     }
 
     CString strSQL = FormatQuerySQL(TABLE_NAME_WIZ_DOCUMENT, FIELD_LIST_WIZ_DOCUMENT, strWhere);
-    qDebug() << "get documents sql : " << strSQL << "\n from database : " << kbGUID();
 	return SQLToDocumentDataArray(strSQL, arrayDocument);
 }
 

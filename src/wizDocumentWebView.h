@@ -189,7 +189,6 @@ public:
 
 private:
     void initEditor();
-    void resetEditorParams();
     void viewDocumentInEditor(bool editing);
     void tryResetTitle();
 
@@ -349,6 +348,7 @@ public Q_SLOTS:
 #endif
 
     // js func
+    void resetCheckListEnvironment();
     void initCheckListEnvironment();
 
 Q_SIGNALS:

@@ -327,7 +327,7 @@
        <item>
         <widget class="QGroupBox" name="groupBoxNoteView">
          <property name="title">
-          <string>Default note view</string>
+          <string>Default note view(Only works for psersonal note)</string>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_8">
           <item>
@@ -340,7 +340,7 @@
           <item>
            <widget class="QRadioButton" name="radioAlwaysEditing">
             <property name="text">
-             <string>Always open in Editing-View(Only psersonal note)</string>
+             <string>Always open in Editing-View</string>
             </property>
            </widget>
           </item>
