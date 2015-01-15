@@ -781,12 +781,12 @@ bool CWizCategoryViewFolderItem::operator < (const QTreeWidgetItem &other) const
         return false;
     }
 
-//    qDebug() << "compare, this : " << name() << " , other : " << pOther->name();
+    qDebug() << "compare, this : " << name() << " , other : " << pOther->name();
 
     if (getSortOrder() != pOther->getSortOrder())
     {
         bool result  = getSortOrder() < pOther->getSortOrder();
-//        qDebug() << "sortoder different : " << result;
+        qDebug() << "sortoder different : " << result;
         return result;
     }
 
@@ -800,14 +800,14 @@ bool CWizCategoryViewFolderItem::operator < (const QTreeWidgetItem &other) const
             nThis = setting->value("FolderPosition/" + location()).toInt();
         }
 
-//        qDebug() << "manual sort enable, this folder pos : " << nThis << "  other sort pos : " << nOther;
+        qDebug() << "manual sort enable, this folder pos : " << nThis << "  other sort pos : " << nOther;
 
         if (nThis != nOther)
         {
             if (nThis > 0 && nOther > 0)
             {
                 bool result  =  nThis < nOther;
-//                qDebug() << "folder position different : " << result;
+                qDebug() << "folder position different : " << result;
                 return result;
             }
         }
@@ -829,13 +829,13 @@ bool CWizCategoryViewFolderItem::operator < (const QTreeWidgetItem &other) const
             std::string strOtherA(arrOther.data(), arrOther.size());
             //
             bool result = strThisA.compare(strOtherA.c_str()) < 0;
-//            qDebug() << "compare by chinese text : " << result;
+            qDebug() << "compare by chinese text : " << result;
             return result;
         }
     }
     //
     bool result =  strThis.compare(strOther) < 0;
-//    qDebug() << "compare by english text : " << result;
+    qDebug() << "compare by english text : " << result;
     return result;
 }
 

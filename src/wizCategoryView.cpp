@@ -4012,7 +4012,6 @@ void CWizCategoryView::on_itemPosition_changed(CWizCategoryViewItemBase* pItem)
                 return;
 
             QString strName = getUseableItemName(parentItem, item);
-            qDebug() << "category view list get useable item name : " << strName;
             QString strNewLocation = "/" + strName + "/";
             item->setText(0, strName);
 
@@ -4028,14 +4027,9 @@ void CWizCategoryView::on_itemPosition_changed(CWizCategoryViewItemBase* pItem)
             }
 
             QString strOldLocation = item->location();
-//            item->setLocation(strNewLocation);
             resetFolderLocation(item, strNewLocation);
             updatePrivateFolderLocation(db, strOldLocation, strNewLocation);
         }
-//        else if (const CWizCategoryViewTagItem* tagItem = dynamic_cast<const CWizCategoryViewTagItem*>(pItem))
-//        {
-//            updatePersonalTagPosition(db);
-//        }
     }
 }
 

@@ -473,6 +473,14 @@ CWizAttachmentListWidget::CWizAttachmentListWidget(QWidget* parent)
     layoutMain->addLayout(layoutHeader);
     layoutMain->addWidget(m_list);
     connect(m_list, SIGNAL(closeRequest()), SLOT(on_attachList_closeRequest()));
+
+    QPalette pal;
+#ifdef Q_OS_LINUX
+    pal.setBrush(QPalette::Base, QBrush("#D7D7D7"));
+#elif defined(Q_OS_MAC)
+    pal.setBrush(QPalette::Base, QBrush("#F7F7F7"));
+#endif
+    m_list->setPalette(pal);
 }
 
 bool CWizAttachmentListWidget::setDocument(const WIZDOCUMENTDATA& doc)

@@ -467,7 +467,11 @@ bool CWizUserSettings::isManualSortingEnabled()
         return strManualSortingEnable.toInt() ? true : false;
     }
 
+#ifdef Q_OS_LINUX
+    return false;
+#else
     return true;
+#endif
 }
 
 void CWizUserSettings::setManualSortingEnable(bool bEnable)
