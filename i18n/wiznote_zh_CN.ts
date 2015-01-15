@@ -1851,61 +1851,61 @@ w: %3  h: %4</translation>
     <name>Core::Internal::TitleBar</name>
     <message>
         <location filename="../src/titlebar.cpp" line="68"/>
-        <source>Switch to Editing View</source>
-        <translation>切换到编辑视图</translation>
+        <source>Switch to Editing View (Alt + 1)</source>
+        <translation>切换到编辑视图 (Alt + 1)</translation>
     </message>
     <message>
         <location filename="../src/titlebar.cpp" line="69"/>
-        <source>Switch to Reading View</source>
-        <translation>切换到阅读视图</translation>
+        <source>Switch to Reading View (Alt + 1)</source>
+        <translation>切换到阅读视图 (Alt + 1)</translation>
     </message>
     <message>
         <location filename="../src/titlebar.cpp" line="70"/>
-        <source>Save and switch to Reading View</source>
-        <translation>保存并切换到阅读视图</translation>
+        <source>Save and switch to Reading View (Alt + 1)</source>
+        <translation>保存并切换到阅读视图 (Alt + 1)</translation>
     </message>
     <message>
         <location filename="../src/titlebar.cpp" line="77"/>
-        <source>View and add tags</source>
-        <translation>浏览并添加标签</translation>
+        <source>View and add tags (Alt + 2)</source>
+        <translation>浏览并添加标签 (Alt + 2)</translation>
     </message>
     <message>
-        <location filename="../src/titlebar.cpp" line="84"/>
-        <source>Share document by email</source>
-        <translation>通过邮件发送笔记</translation>
+        <location filename="../src/titlebar.cpp" line="85"/>
+        <source>Add attachments (Alt + 3)</source>
+        <translation>添加附件 (Alt + 3)</translation>
     </message>
     <message>
-        <location filename="../src/titlebar.cpp" line="91"/>
-        <source>Add attachments</source>
-        <translation>添加附件</translation>
+        <location filename="../src/titlebar.cpp" line="86"/>
+        <source>View and add attachments (Alt + 3)</source>
+        <translation>浏览并添加附件 (Alt + 3)</translation>
     </message>
     <message>
-        <location filename="../src/titlebar.cpp" line="92"/>
-        <source>View and add attachments</source>
-        <translation>浏览并添加附件</translation>
+        <location filename="../src/titlebar.cpp" line="93"/>
+        <source>View and recover note&apos;s history (Alt + 4)</source>
+        <translation>浏览并恢复历史版本 (Alt + 4)</translation>
     </message>
     <message>
-        <location filename="../src/titlebar.cpp" line="99"/>
-        <source>View and recover note&apos;s history</source>
-        <translation>浏览并恢复历史版本</translation>
+        <location filename="../src/titlebar.cpp" line="100"/>
+        <source>View and modify note&apos;s info (Alt + 5)</source>
+        <translation>浏览并修改笔记属性 (Alt + 5)</translation>
     </message>
     <message>
-        <location filename="../src/titlebar.cpp" line="106"/>
-        <source>View and modify note&apos;s info</source>
-        <translation>浏览并修改笔记属性</translation>
+        <location filename="../src/titlebar.cpp" line="107"/>
+        <source>Share document by email (Alt + 6)</source>
+        <translation>通过邮件发送笔记 (Alt + 6)</translation>
     </message>
     <message>
-        <location filename="../src/titlebar.cpp" line="112"/>
-        <source>Add comments</source>
-        <translation>添加评论</translation>
+        <location filename="../src/titlebar.cpp" line="115"/>
+        <source>Add comments (Alt + 7)</source>
+        <translation>添加评论 (Alt + 7)</translation>
     </message>
     <message>
-        <location filename="../src/titlebar.cpp" line="113"/>
-        <source>View and add comments</source>
-        <translation>浏览并添加评论</translation>
+        <location filename="../src/titlebar.cpp" line="116"/>
+        <source>View and add comments (Alt + 7)</source>
+        <translation>查看并添加评论 (Alt + 7)</translation>
     </message>
     <message>
-        <location filename="../src/titlebar.cpp" line="358"/>
+        <location filename="../src/titlebar.cpp" line="361"/>
         <source>Network service not available!</source>
         <translation>网络连接不可用！</translation>
     </message>

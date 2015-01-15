@@ -65,52 +65,55 @@ TitleBar::TitleBar(QWidget *parent)
     m_editBtn->setFixedHeight(nTitleHeight);
     QString shortcut = ::WizGetShortcut("EditNote", "Alt+1");
     m_editBtn->setShortcut(QKeySequence::fromString(shortcut));
-    m_editBtn->setNormalIcon(::WizLoadSkinIcon(strTheme, "document_lock"), tr("Switch to Editing View"));
-    m_editBtn->setCheckedIcon(::WizLoadSkinIcon(strTheme, "document_unlock"), tr("Switch to Reading View"));
-    m_editBtn->setBadgeIcon(::WizLoadSkinIcon(strTheme, "document_unlock_modified"), tr("Save and switch to Reading View"));
+    m_editBtn->setNormalIcon(::WizLoadSkinIcon(strTheme, "document_lock"), tr("Switch to Editing View (Alt + 1)"));
+    m_editBtn->setCheckedIcon(::WizLoadSkinIcon(strTheme, "document_unlock"), tr("Switch to Reading View (Alt + 1)"));
+    m_editBtn->setBadgeIcon(::WizLoadSkinIcon(strTheme, "document_unlock_modified"), tr("Save and switch to Reading View (Alt + 1)"));
     connect(m_editBtn, SIGNAL(clicked()), SLOT(onEditButtonClicked()));
 
     m_tagBtn = new CellButton(CellButton::Center, this);
     m_tagBtn->setFixedHeight(nTitleHeight);
     QString tagsShortcut = ::WizGetShortcut("EditNoteTags", "Alt+2");
     m_tagBtn->setShortcut(QKeySequence::fromString(tagsShortcut));
-    m_tagBtn->setNormalIcon(::WizLoadSkinIcon(strTheme, "document_tag"), tr("View and add tags"));
+    m_tagBtn->setNormalIcon(::WizLoadSkinIcon(strTheme, "document_tag"), tr("View and add tags (Alt + 2)"));
     connect(m_tagBtn, SIGNAL(clicked()), SLOT(onTagButtonClicked()));
 
-    m_emailBtn = new CellButton(CellButton::Center, this);
-    m_emailBtn->setFixedHeight(nTitleHeight);
-    QString emailShortcut = ::WizGetShortcut("EditNoteEmail", "Alt+3");
-    m_emailBtn->setShortcut(QKeySequence::fromString(emailShortcut));
-    m_emailBtn->setNormalIcon(::WizLoadSkinIcon(strTheme, "document_email"), tr("Share document by email"));
-    connect(m_emailBtn, SIGNAL(clicked()), SLOT(onEmailButtonClicked()));
 
     m_attachBtn = new CellButton(CellButton::Center, this);
     m_attachBtn->setFixedHeight(nTitleHeight);
-    QString attachmentShortcut = ::WizGetShortcut("EditNoteAttachments", "Alt+4");
+    QString attachmentShortcut = ::WizGetShortcut("EditNoteAttachments", "Alt+3");
     m_attachBtn->setShortcut(QKeySequence::fromString(attachmentShortcut));
-    m_attachBtn->setNormalIcon(::WizLoadSkinIcon(strTheme, "document_attachment"), tr("Add attachments"));
-    m_attachBtn->setBadgeIcon(::WizLoadSkinIcon(strTheme, "document_attachment_exist"), tr("View and add attachments"));
+    m_attachBtn->setNormalIcon(::WizLoadSkinIcon(strTheme, "document_attachment"), tr("Add attachments (Alt + 3)"));
+    m_attachBtn->setBadgeIcon(::WizLoadSkinIcon(strTheme, "document_attachment_exist"), tr("View and add attachments (Alt + 3)"));
     connect(m_attachBtn, SIGNAL(clicked()), SLOT(onAttachButtonClicked()));
 
     m_historyBtn = new CellButton(CellButton::Center, this);
     m_historyBtn->setFixedHeight(nTitleHeight);
-    QString historyShortcut = ::WizGetShortcut("EditNoteHistory", "Alt+5");
+    QString historyShortcut = ::WizGetShortcut("EditNoteHistory", "Alt+4");
     m_historyBtn->setShortcut(QKeySequence::fromString(historyShortcut));
-    m_historyBtn->setNormalIcon(::WizLoadSkinIcon(strTheme, "document_history"), tr("View and recover note's history"));
+    m_historyBtn->setNormalIcon(::WizLoadSkinIcon(strTheme, "document_history"), tr("View and recover note's history (Alt + 4)"));
     connect(m_historyBtn, SIGNAL(clicked()), SLOT(onHistoryButtonClicked()));
 
     m_infoBtn = new CellButton(CellButton::Center, this);
     m_infoBtn->setFixedHeight(nTitleHeight);
-    QString infoShortcut = ::WizGetShortcut("EditNoteInfo", "Alt+6");
+    QString infoShortcut = ::WizGetShortcut("EditNoteInfo", "Alt+5");
     m_infoBtn->setShortcut(QKeySequence::fromString(infoShortcut));
-    m_infoBtn->setNormalIcon(::WizLoadSkinIcon(strTheme, "document_info"), tr("View and modify note's info"));
+    m_infoBtn->setNormalIcon(::WizLoadSkinIcon(strTheme, "document_info"), tr("View and modify note's info (Alt + 5)"));
     connect(m_infoBtn, SIGNAL(clicked()), SLOT(onInfoButtonClicked()));
+
+    m_emailBtn = new CellButton(CellButton::Center, this);
+    m_emailBtn->setFixedHeight(nTitleHeight);
+    QString emailShortcut = ::WizGetShortcut("EditNoteEmail", "Alt+6");
+    m_emailBtn->setShortcut(QKeySequence::fromString(emailShortcut));
+    m_emailBtn->setNormalIcon(::WizLoadSkinIcon(strTheme, "document_email"), tr("Share document by email (Alt + 6)"));
+    connect(m_emailBtn, SIGNAL(clicked()), SLOT(onEmailButtonClicked()));
 
     // comments
     m_commentsBtn = new CellButton(CellButton::Right, this);
     m_commentsBtn->setFixedHeight(nTitleHeight);
-    m_commentsBtn->setNormalIcon(::WizLoadSkinIcon(strTheme, "comments"), tr("Add comments"));
-    m_commentsBtn->setBadgeIcon(::WizLoadSkinIcon(strTheme, "comments_exist"), tr("View and add comments"));
+    QString commentShortcut = ::WizGetShortcut("ShowComment", "Alt+7");
+    m_commentsBtn->setShortcut(QKeySequence::fromString(commentShortcut));
+    m_commentsBtn->setNormalIcon(::WizLoadSkinIcon(strTheme, "comments"), tr("Add comments (Alt + 7)"));
+    m_commentsBtn->setBadgeIcon(::WizLoadSkinIcon(strTheme, "comments_exist"), tr("View and add comments (Alt + 7)"));
     connect(m_commentsBtn, SIGNAL(clicked()), SLOT(onCommentsButtonClicked()));
     connect(ICore::instance(), SIGNAL(viewNoteLoaded(Core::INoteView*,const WIZDOCUMENTDATA&,bool)),
             SLOT(onViewNoteLoaded(Core::INoteView*,const WIZDOCUMENTDATA&,bool)));
