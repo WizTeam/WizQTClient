@@ -171,7 +171,12 @@ void WizCodeEditorDialog::initCodeTypeCombox()
     QString strLastType = m_app.userSettings().get((LASTUSEDCODETYPE));
     if (!strLastType.isEmpty())
     {
+#if QT_VERSION < 0x050000
+        int index = m_codeType->findText(strLastType);
+        m_codeType->setCurrentIndex(index);
+#else
         m_codeType->setCurrentText(strLastType);
+#endif
         return;
     }
 

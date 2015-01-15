@@ -486,7 +486,7 @@ void CWizDocumentListViewItem::drawSyncStatus(QPainter* p, const QStyleOptionVie
 
     QString strIconPath;
     CWizDatabase& db = m_app.databaseManager().db(m_data.doc.strKbGUID);
-    bool isRetina = qApp->devicePixelRatio() >= 2;
+    bool isRetina = WizIsHighPixel();
     strIconPath = ::WizGetSkinResourcePath(m_app.userSettings().skin());
     if (db.IsDocumentModified(m_data.doc.strGUID))
     {

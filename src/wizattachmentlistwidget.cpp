@@ -1,6 +1,7 @@
 #include "wizattachmentlistwidget.h"
 
 #include <QBoxLayout>
+#include <QFile>
 #include <QFileDialog>
 #include <QDesktopServices>
 #include <QMenu>
@@ -135,7 +136,7 @@ bool CWizAttachmentListView::itemExtraImage(const QModelIndex& index, const QRec
         QString strIconPath;
         CWizDatabase& db = m_dbMgr.db(item->attachment().strKbGUID);
         MainWindow* mainWindow = qobject_cast<MainWindow *>(Core::ICore::mainWindow());
-        bool isRetina = qApp->devicePixelRatio() >= 2;
+        bool isRetina = WizIsHighPixel();
         strIconPath = ::WizGetSkinResourcePath(mainWindow->userSettings().skin());
         if (!db.IsAttachmentDownloaded(item->attachment().strGUID))
         {
@@ -235,6 +236,7 @@ void CWizAttachmentListView::openAttachment(CWizAttachmentListViewItem* item)
         waitForDownload();
     }
 
+#if QT_VERSION > 0x050000
     // try to set the attachement read-only.
     QFile file(strFileName);
     if (file.exists() && !db.CanEditAttachment(attachment) && (file.permissions() & QFileDevice::WriteUser))
@@ -244,6 +246,7 @@ void CWizAttachmentListView::openAttachment(CWizAttachmentListViewItem* item)
                 & ~QFileDevice::WriteGroup & ~QFileDevice::WriteOther;
         file.setPermissions(permissions);
     }
+#endif
 
     QDesktopServices::openUrl(QUrl::fromLocalFile(strFileName));
 

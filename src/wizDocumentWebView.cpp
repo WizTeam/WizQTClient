@@ -126,7 +126,7 @@ void CWizDocumentWebViewPage::on_editorCommandPaste_triggered()
 //        qDebug() << "Mime Format: " << formats.at(i) << " Mime data: " << mime->data(formats.at(i));
 //    }
 
-
+#ifdef Q_OS_MAC
     QString strText = wizSystemClipboardData();
     if (!strText.isEmpty())
     {
@@ -146,6 +146,7 @@ void CWizDocumentWebViewPage::on_editorCommandPaste_triggered()
             return;
         }
     }
+#endif
 
     if (!clip->image().isNull()) {
         // save clipboard image to $TMPDIR
