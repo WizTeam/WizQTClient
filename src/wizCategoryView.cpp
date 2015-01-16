@@ -2743,7 +2743,7 @@ QString CWizCategoryView::getAllFoldersPosition(CWizCategoryViewFolderItem* pIte
     if (!pItem)
         return QString();
 
-    QString str = "\"" + pItem->name() + "\": " + QString::number(nStartPos);
+    QString str = pItem->location() + ": " + QString::number(nStartPos);
     nStartPos ++;
 
     for (int i = 0; i < pItem->childCount(); i++)
