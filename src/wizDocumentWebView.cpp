@@ -228,7 +228,8 @@ CWizDocumentWebView::CWizDocumentWebView(CWizExplorerApp& app, QWidget* parent)
 
 CWizDocumentWebView::~CWizDocumentWebView()
 {
-
+    if (m_searchReplaceWidget)
+        delete m_searchReplaceWidget;
 }
 void CWizDocumentWebView::waitForDone()
 {
