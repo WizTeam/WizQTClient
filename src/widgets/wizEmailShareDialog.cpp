@@ -97,7 +97,7 @@ void CWizEmailShareDialog::on_toolButton_send_clicked()
         return;
     }
 
-    QString strReply = reply->readAll();
+    QString strReply = QString::fromUtf8(reply->readAll());
     int nCode;
     QString returnMessage;
     processReturnMessage(strReply, nCode, returnMessage);

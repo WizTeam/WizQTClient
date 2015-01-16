@@ -2579,6 +2579,13 @@ void MainWindow::initTrayIcon(QSystemTrayIcon* trayIcon)
     {
         trayIcon->setIcon(icon);
     }
+#else
+    QString normal = WizGetSkinResourceFileName(userSettings().skin(), "trayIcon_grey");
+    QIcon icon(normal);
+    if (!icon.isNull())
+    {
+        trayIcon->setIcon(icon);
+    }
 #endif
 }
 
