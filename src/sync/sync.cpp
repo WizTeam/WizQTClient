@@ -880,10 +880,9 @@ bool UploadDocument(const WIZKBINFO& kbInfo, int size, int start, int total, int
         return FALSE;
     }
     //
-    if (updateVersion
-        && !pDatabase->OnUploadObject(local.strGUID, strObjectType))
+    if (!updateVersion)
     {
-        pEvents->OnError(WizFormatString1(_T("Cannot upload local version of document: %1!"), local.strTitle));
+        pEvents->OnError(WizFormatString1(_T("Cannot update local version of document: %1!"), local.strTitle));
         //
         return FALSE;
     }
@@ -1077,10 +1076,9 @@ bool UploadAttachment(const WIZKBINFO& kbInfo, int size, int start, int total, i
         return FALSE;
     }
     //
-    if (updateVersion
-        && !pDatabase->OnUploadObject(local.strGUID, strObjectType))
+    if (updateVersion)
     {
-        pEvents->OnError(WizFormatString1(_T("Cannot upload local version of attachment: %1!"), local.strName));
+        pEvents->OnError(WizFormatString1(_T("Cannot update local version of attachment: %1!"), local.strName));
         //
         return FALSE;
     }
@@ -1213,19 +1211,8 @@ bool UploadList(const WIZKBINFO& kbInfo, IWizKMSyncEvents* pEvents, IWizSyncable
                     pDatabase->OnObjectUploaded(local.strGUID, _T("document"));
                 }
             }
-
-            // update document version to server vision
-            if (_document)
-            {
-                if (!server.downloadList<TData>(arraySubGUID, arrayDataOnServer))
-                {
-                    pEvents->OnError(_TR("Cannot download object list!"));
-                    return FALSE;
-                }
-
-                ModifiedObjectsVersion<TData>(pDatabase, arrayDataOnServer);
-            }
         }
+        arraySubGUID.clear();
     }
     //
     return TRUE;
