@@ -499,7 +499,7 @@ bool CWizKMSync::UploadTagList()
 {
     if (m_bGroup)
     {
-        if (!m_pDatabase->IsGroupEditor())	//need editor
+        if (!m_pDatabase->IsGroupSuper())	//need super
             return TRUE;
     }
     //

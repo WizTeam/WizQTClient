@@ -252,7 +252,7 @@ void CWizCategoryBaseView::startDrag(Qt::DropActions supportedActions)
     {
         m_dragItem = currentCategoryItem<CWizCategoryViewItemBase>();
         Q_ASSERT(m_dragItem);
-        if (!m_dragItem->dragAble())
+        if (!m_dragItem->dragAble() || !m_dbMgr.db(m_dragItem->kbGUID()).IsGroupSuper())
         {
             m_dragItem = 0;
             return;
