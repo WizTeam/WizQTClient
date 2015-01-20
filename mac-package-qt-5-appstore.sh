@@ -11,7 +11,7 @@ package_output_path="$HOME"
 mkdir ../WizQTClient-Release-QT5
 rm -rf ../WizQTClient-Release-QT5/* && \
 cd ../WizQTClient-Release-QT5 && \
-cmake -DWIZNOTE_USE_QT5=YES -DCMAKE_BUILD_TYPE=Release -UPDATE_TRANSLATIONS=YES -DAPPSTORE_BUILD=YES -DCMAKE_PREFIX_PATH=~/usr/local/qt/5.3.2/lib/cmake ../WizQTClient && \
+cmake -DWIZNOTE_USE_QT5=YES -DCMAKE_BUILD_TYPE=Release -UPDATE_TRANSLATIONS=YES -DAPPSTORE_BUILD=YES -DCMAKE_PREFIX_PATH=~/usr/local/qt/5.4.0/lib/cmake ../WizQTClient && \
 make -j5 
 
 MYAPP="WizNote"
@@ -19,10 +19,10 @@ DEST="$MYAPP.app" # Our final App directory
 BUILDDIR=$(pwd);
 ICUDIR="/usr/local/icu54.1"
 ICULIBS="libicui18n.54 libicudata.54 libicuuc.54"
-QTDIR="/usr/local/qt/5.3.2"
+QTDIR="/usr/local/qt/5.4.0"
 QTLIBS="QtCore QtNetwork QtSql QtGui QtOpenGL QtWidgets QtWebKit QtWebKitWidgets \
   QtPrintSupport QtXml QtPositioning QtSensors QtConcurrent QtMacExtras QtMultimediaWidgets QtMultimedia" # QtQml QtQuick QtSvg QtScript
-PLUGINS="sqldrivers imageformats  platforms printsupport accessible \
+PLUGINS="sqldrivers imageformats  platforms printsupport \
   position" # playlistformats sensors sensorgestures bearer audio iconengines
  
 # make clean & create pathes 
