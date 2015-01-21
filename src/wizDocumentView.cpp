@@ -277,9 +277,6 @@ void CWizDocumentView::initStat(const WIZDOCUMENTDATA& data, bool bEditing)
     m_title->setLocked(m_bLocked, nLockReason, bGroup);
     if (NotifyBar::LockForGruop == nLockReason)
     {
-//        m_editStatusCheckThread->checkEditStatus(data.strKbGUID, data.strGUID);
-
-//        m_editStatusChecker->checkEditStatus(m_note.strKbGUID, m_note.strGUID);
         startCheckDocumentEditStatus();
     }
 }

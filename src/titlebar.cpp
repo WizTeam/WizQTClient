@@ -153,7 +153,7 @@ TitleBar::TitleBar(QWidget *parent)
     layout->addLayout(layoutInfo1);
     //layout->addLayout(layoutInfo4);
     layout->addWidget(m_notifyBar);
-    m_notifyBar->hide();
+
     layout->addStretch();
     connect(m_notifyBar, SIGNAL(labelLink_clicked(QString)), SIGNAL(notifyBar_link_clicked(QString)));
 }

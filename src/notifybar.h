@@ -5,6 +5,7 @@
 
 class QLabel;
 class wizImageButton;
+class QPropertyAnimation;
 
 #define NOTIFYBAR_LABELLINK_DOWNLOAD  "clicktodownload"
 
@@ -36,9 +37,13 @@ signals:
 private:
     QLabel* m_labelNotify;
     wizImageButton* m_buttonClose;
+    QPropertyAnimation* m_animation;
 
     void setStyleForPermission();
     void setStyleForEditing();
+
+    void showNotify();
+    void hideNotify(bool bUseAnimation);
 };
 
 } // namespace Internal
