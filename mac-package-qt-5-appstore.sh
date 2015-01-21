@@ -31,10 +31,10 @@ mkdir -p $DEST/Contents/Frameworks $DEST/Contents/PlugIns/icu $DEST/Contents/Sha
 # copy Qt libs, plug-ins and ICU
 for L in $QTLIBS ; do
   cp -R -p $QTDIR/lib/$L.framework $MYAPP.app/Contents/Frameworks
-  mkdir $MYAPP.app/Contents/Frameworks/$L.framework/Versions/5/Resources
-  cp -R -p $MYAPP.app/Contents/Frameworks/$L.framework/Contents/Info.plist \
-    $MYAPP.app/Contents/Frameworks/$L.framework/Versions/5/Resources
-  rm -R -f $MYAPP.app/Contents/Frameworks/$L.framework/Contents
+  # mkdir $MYAPP.app/Contents/Frameworks/$L.framework/Versions/5/Resources
+  # cp -R -p $MYAPP.app/Contents/Frameworks/$L.framework/Contents/Info.plist \
+  #   $MYAPP.app/Contents/Frameworks/$L.framework/Versions/5/Resources
+  # rm -R -f $MYAPP.app/Contents/Frameworks/$L.framework/Contents
   # remove all unnecessary header files:
   rm -f $MYAPP.app/Contents/Frameworks/$L.framework/Headers
   rm -R -f $MYAPP.app/Contents/Frameworks/$L.framework/Versions/5/Headers
@@ -47,10 +47,11 @@ for L in $QTLIBS ; do
   # cd $MYAPP.app/Contents/Frameworks/$L.framework/Versions
   #ln -s 5/ Current
   # cd ..
-  # cd $MYAPP.app/Contents/Frameworks/$L.framework
-  # ln -s Versions/5/$L $L
-  # ln -s Versions/5/Resources/ Resources
-  # cd $BUILDDIR
+  cd $MYAPP.app/Contents/Frameworks/$L.framework
+  rm -f Resources
+  ln -s Versions/Current/$L $L
+  ln -s Versions/Current/Resources/ Resources
+  cd $BUILDDIR
   #rm $MYAPP.app/Contents/Frameworks/$L.framework/Versions/Current/.
 done
 for P in $PLUGINS ; do
@@ -130,7 +131,6 @@ for P in $DISTPLUGINS2 ; do # change ID for all *.dylib libs
 done
 
 
-DISTPLUGINS3=`cd $MYAPP.app/Contents/PlugIns; ls *.pluginspec`;
 
 install_name_tool -change libicui18n.54.dylib @executable_path/../PlugIns/icu/libicui18n.54.dylib WizNote.app/Contents/Frameworks/QtWebKit.framework/Versions/5/QtWebKit
 install_name_tool -change libicuuc.54.dylib @executable_path/../PlugIns/icu/libicuuc.54.dylib WizNote.app/Contents/Frameworks/QtWebKit.framework/Versions/5/QtWebKit
@@ -171,11 +171,6 @@ for I in $DISTPLUGINS2 ; do # signing all *.dylib libs
     $MYAPP.app/Contents/PlugIns/$I
 done
 
-for I in $DISTPLUGINS3 ; do # signing all *.dylib libs
-  echo "code sign : "   $I;
-  codesign --force --verify --deep --verbose --sign "$APPLCERT" \
-    $MYAPP.app/Contents/PlugIns/$I
-done
 
 codesign --verbose=2 --sign "$APPLCERT" --entitlements \
   WizNote-Entitlements.plist  "$MYAPP.app"
