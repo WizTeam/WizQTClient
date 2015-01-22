@@ -36,7 +36,7 @@ using namespace Core::Internal;
 #define DOCUMENT_PERSONAL           0x0000
 #define DOCUMENT_GROUP                 0x0001
 #define DOCUMENT_OFFLINE               0x0002
-#define DOCUMENT_FISTTIMEVIEW     0x0004
+#define DOCUMENT_FIRSTTIMEVIEW     0x0004
 #define DOCUMENT_EDITBYOTHERS   0x0010
 
 CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
@@ -272,7 +272,7 @@ void CWizDocumentView::initStat(const WIZDOCUMENTDATA& data, bool bEditing)
     m_status = m_status & DOCUMENT_PERSONAL;
     if (bGroup)
     {
-        m_status = m_status | DOCUMENT_GROUP | DOCUMENT_FISTTIMEVIEW;
+        m_status = m_status | DOCUMENT_GROUP | DOCUMENT_FIRSTTIMEVIEW;
     }
     m_title->setLocked(m_bLocked, nLockReason, bGroup);
     if (NotifyBar::LockForGruop == nLockReason)
@@ -726,15 +726,15 @@ void CWizDocumentView::on_checkDocumentChanged_finished(const QString& strGUID, 
     {
         if (changed)
         {
-            if (m_status & DOCUMENT_FISTTIMEVIEW)
-            {
-                // downlaod document data
-                downloadDocumentFromServer();
-            }
-            else
-            {
+//            if (m_status & DOCUMENT_FIRSTTIMEVIEW)
+//            {
+//                // downlaod document data when document changed at first time to view document
+//                downloadDocumentFromServer();
+//            }
+//            else
+//            {
                 m_title->showMessageTip(Qt::RichText, QString(tr("New version on server avalible. <a href='%1'>Click to down load new version.<a>")).arg(NOTIFYBAR_LABELLINK_DOWNLOAD));
-            }
+//            }
         }
         else
         {
@@ -757,7 +757,7 @@ void CWizDocumentView::on_checkDocumentChanged_finished(const QString& strGUID, 
                 m_title->setLocked(m_bLocked, nLockReason, bGroup);
             }
         }
-        m_status = m_status & ~DOCUMENT_FISTTIMEVIEW;
+        m_status = m_status & ~DOCUMENT_FIRSTTIMEVIEW;
     }
 }
 

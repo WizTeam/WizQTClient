@@ -3,6 +3,7 @@
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QPropertyAnimation>
+#include <QDebug>
 
 #include "widgets/wizImageButton.h"
 #include "utils/stylehelper.h"
@@ -106,9 +107,14 @@ void NotifyBar::setStyleForEditing()
 
 void NotifyBar::showNotify()
 {
-    m_animation->setDuration(300);
+    if (maximumHeight() > 0)
+        return;
+
+    qDebug() << "show notify bar called ";
+    m_animation->setDuration(800);
     m_animation->setStartValue(0);
     m_animation->setEndValue(Utils::StyleHelper::notifyBarHeight());
+    m_animation->setEasingCurve(QEasingCurve::InExpo);
 
     m_animation->start();
 }
@@ -119,9 +125,10 @@ void NotifyBar::hideNotify(bool bUseAnimation)
     {
         if (bUseAnimation)
         {
-            m_animation->setDuration(300);
+            m_animation->setDuration(400);
             m_animation->setStartValue(Utils::StyleHelper::notifyBarHeight());
             m_animation->setEndValue(0);
+//            m_animation->setEasingCurve(QEasingCurve::InOutQuad);
 
             m_animation->start();
         }
