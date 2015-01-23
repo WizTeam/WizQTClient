@@ -110,7 +110,6 @@ void NotifyBar::showNotify()
     if (maximumHeight() > 0)
         return;
 
-    qDebug() << "show notify bar called ";
     m_animation->setDuration(800);
     m_animation->setStartValue(0);
     m_animation->setEndValue(Utils::StyleHelper::notifyBarHeight());
@@ -121,6 +120,7 @@ void NotifyBar::showNotify()
 
 void NotifyBar::hideNotify(bool bUseAnimation)
 {
+    m_animation->stop();
     if (maximumHeight() > 0)
     {
         if (bUseAnimation)
@@ -131,12 +131,13 @@ void NotifyBar::hideNotify(bool bUseAnimation)
 //            m_animation->setEasingCurve(QEasingCurve::InOutQuad);
 
             m_animation->start();
+            return;
         }
         else
         {
             m_animation->stop();
             setMaximumHeight(0);
+            return;
         }
     }
-
 }
