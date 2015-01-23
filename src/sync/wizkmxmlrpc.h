@@ -167,11 +167,10 @@ public:
     BOOL attachment_getData(const QString& strAttachmentGUID, UINT nParts, WIZDOCUMENTATTACHMENTDATAEX& ret);
     BOOL attachment_postData(WIZDOCUMENTATTACHMENTDATAEX& data, UINT nParts, __int64& nServerVersion);
 
-    BOOL document_downloadList(const CWizStdStringArray& arrayDocumentGUID, std::deque<WIZDOCUMENTDATAEX>& arrayRet);
-    BOOL attachment_downloadList(const CWizStdStringArray& arrayAttachmentGUID, std::deque<WIZDOCUMENTATTACHMENTDATAEX>& arrayRet);
+    BOOL document_downloadSimpleList(const CWizStdStringArray& arrayDocumentGUID, std::deque<WIZDOCUMENTDATAEX>& arrayRet);
+    BOOL attachment_downloadSimpleList(const CWizStdStringArray& arrayAttachmentGUID, std::deque<WIZDOCUMENTATTACHMENTDATAEX>& arrayRet);
 
     BOOL document_downloadFullList(const CWizStdStringArray& arrayDocumentGUID, std::deque<WIZDOCUMENTDATAEX>& arrayRet);
-    BOOL document_downloadFullListEx(const CWizStdStringArray& arrayDocumentGUID, std::deque<WIZDOCUMENTDATAEX>& arrayRet);
 
     BOOL document_getList(int nCountPerPage, __int64 nVersion, std::deque<WIZDOCUMENTDATAEX>& arrayRet);
     BOOL attachment_getList(int nCountPerPage, __int64 nVersion, std::deque<WIZDOCUMENTATTACHMENTDATAEX>& arrayRet);
@@ -215,7 +214,7 @@ protected:
     //
     //
     template <class TData, class TWrapData>
-    BOOL downloadList(const QString& strMethodName, const QString& strGUIDArrayValueName, const CWizStdStringArray& arrayGUID, std::deque<TData>& arrayRet)
+    BOOL downloadListCore(const QString& strMethodName, const QString& strGUIDArrayValueName, const CWizStdStringArray& arrayGUID, std::deque<TData>& arrayRet)
     {
         if (arrayGUID.empty())
             return TRUE;
@@ -231,6 +230,41 @@ protected:
         }
         //
         arrayRet.assign(arrayWrap.begin(), arrayWrap.end());
+        //
+        return TRUE;
+    }
+
+
+    template <class TData, class TWrapData>
+    BOOL downloadList(const QString& strMethodName, const QString& strGUIDArrayValueName, const CWizStdStringArray& arrayGUID, std::deque<TData>& arrayRet)
+    {
+        int nCountPerPage = 30;
+        //
+        CWizStdStringArray::const_iterator it = arrayGUID.begin();
+        //
+        while (1)
+        {
+            CWizStdStringArray subArray;
+            //
+            for (;
+                 it != arrayGUID.end(); )
+            {
+                subArray.push_back(*it);
+                it++;
+                //
+                if (subArray.size() == nCountPerPage)
+                    break;
+            }
+            //
+            std::deque<TData> subRet;
+            if (!downloadListCore<TData, TWrapData>(strMethodName, strGUIDArrayValueName, subArray, subRet))
+                return FALSE;
+            //
+            arrayRet.insert(arrayRet.end(), subRet.begin(), subRet.end());
+            //
+            if (it == arrayGUID.end())
+                break;
+        }
         //
         return TRUE;
     }
@@ -384,19 +418,19 @@ public:
     ////下载列表//////////////
     //
     template <class TData>
-    BOOL downloadList(const CWizStdStringArray& arrayGUID, std::deque<TData>& arrayData)
+    BOOL downloadSimpleList(const CWizStdStringArray& arrayGUID, std::deque<TData>& arrayData)
     {
         return TRUE;
     }
     template <class TData>
-    BOOL downloadList(const CWizStdStringArray& arrayGUID, std::deque<WIZDOCUMENTDATAEX>& arrayData)
+    BOOL downloadSimpleList(const CWizStdStringArray& arrayGUID, std::deque<WIZDOCUMENTDATAEX>& arrayData)
     {
-        return document_downloadList(arrayGUID, arrayData);
+        return document_downloadSimpleList(arrayGUID, arrayData);
     }
     template <class TData>
-    BOOL downloadList(const CWizStdStringArray& arrayGUID, std::deque<WIZDOCUMENTATTACHMENTDATAEX>& arrayData)
+    BOOL downloadSimpleList(const CWizStdStringArray& arrayGUID, std::deque<WIZDOCUMENTATTACHMENTDATAEX>& arrayData)
     {
-        return attachment_downloadList(arrayGUID, arrayData);
+        return attachment_downloadSimpleList(arrayGUID, arrayData);
     }
     //
     template <class TData>
@@ -485,7 +519,7 @@ public:
         arrayDocument.push_back(strDocumentGUID);
         //
         CWizDocumentDataArray arrayData;
-        if (!downloadList<WIZDOCUMENTDATAEX>(arrayDocument, arrayData))
+        if (!downloadSimpleList<WIZDOCUMENTDATAEX>(arrayDocument, arrayData))
         {
             TOLOG(_T("Can't download document info list from server!"));
             return FALSE;
