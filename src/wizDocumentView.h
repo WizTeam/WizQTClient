@@ -27,6 +27,7 @@ class QWebFrame;
 class CWizDocumentEditStatusSyncThread;
 class CWizDocumentStatusCheckThread;
 class CWizDocumentStatusChecker;
+class CWizDocumentWebEngine;
 
 namespace Core {
 namespace Internal {
@@ -61,6 +62,7 @@ protected:
 
     QWidget* m_docView;
     CWizDocumentWebView* m_web;
+    CWizDocumentWebEngine* m_engine;
     QWebView* m_comments;
     CWizSplitter* m_splitter;
     Core::Internal::TitleBar* m_title;
@@ -155,15 +157,16 @@ class WizFloatDocumentViewer : public QWidget
 public:
     WizFloatDocumentViewer(CWizExplorerApp& app, QWidget* parent = 0);
 
-    CWizDocumentView* docView()
-    {
-        return m_docView;
-    }
+//    CWizDocumentView* docView()
+//    {
+//        return m_docView;
+//    }
 
     ~WizFloatDocumentViewer();
 
 private:
-    CWizDocumentView* m_docView;
+    CWizDocumentWebEngine* m_webEngine;
+//    CWizDocumentView* m_docView;
 };
 
 } // namespace Core

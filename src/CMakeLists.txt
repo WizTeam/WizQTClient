@@ -88,6 +88,7 @@ set(wiznote_SOURCES
     wizDocumentListViewItem.cpp
     wizDocumentView.cpp
     wizDocumentWebView.cpp
+    wizDocumentWebEngine.cpp
     wizactions.cpp
     wiznotestyle.cpp
     wizLineInputDialog.cpp
@@ -230,6 +231,7 @@ set(wiznote_HEADERS
     wizDocumentListViewItem.h
     wizDocumentView.h
     wizDocumentWebView.h
+    wizDocumentWebEngine.h
     wizdocumenthistory.h
     wizattachmentlistwidget.h
     wiztaglistwidget.h

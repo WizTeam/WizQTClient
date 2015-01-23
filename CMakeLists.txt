@@ -28,6 +28,8 @@ if(NOT CMAKE_BUILD_TYPE)
       FORCE)
 endif()
 
+SET(CMAKE_CXX_FLAGS "-std=c++0x")
+
 if(NOT WIZNOTE_USE_QT5)
     set(WIZNOTE_USE_QT5 OFF CACHE BOOL
         "Build WizNote use Qt5, default is off.")

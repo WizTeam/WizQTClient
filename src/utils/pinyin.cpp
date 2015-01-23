@@ -46,7 +46,7 @@ class CWizPinYin
 				if (!data.pinyin)
 					break;
 				
-				m_data.insert(std::make_pair<WCHAR, WIZCHINESEWORDPINYINDATA>(data.chWord, data));
+                m_data.insert(std::make_pair(data.chWord, data));
 				//
 				//
 				p++;

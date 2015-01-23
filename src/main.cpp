@@ -8,11 +8,14 @@
 #include <QProcess>
 #include <QSettings>
 #include <QDesktopServices>
+#include <QWebView>
+#include <QWebFrame>
 
 #include <sys/stat.h>
 
 #include <extensionsystem/pluginmanager.h>
 #include "wizmainwindow.h"
+#include "wizDocumentWebEngine.h"
 #include "wizLoginDialog.h"
 #include "share/wizsettings.h"
 #include "share/wizwin32helper.h"
@@ -368,11 +371,27 @@ int mainCore(int argc, char *argv[])
 
 int main(int argc, char *argv[])
 {
-    int ret = mainCore(argc, argv);
+//    int ret = mainCore(argc, argv);
 
-    // clean up
-    QString strTempPath = Utils::PathResolve::tempPath();
-    ::WizDeleteAllFilesInFolder(strTempPath);
+//    // clean up
+//    QString strTempPath = Utils::PathResolve::tempPath();
+//    ::WizDeleteAllFilesInFolder(strTempPath);
+    QApplication app(argc, argv);
 
-    return ret;
+    QWebView webView;
+//    webView.page()->mainFrame()->load(QUrl("http://ueditor.baidu.com/website/onlinedemo.html"));
+    webView.page()->mainFrame()->setHtml("<p>Test</p>");
+    webView.show();
+
+    QWebEngineView engine;
+//    engine.page()->load(QUrl("http://ueditor.baidu.com/website/onlinedemo.html"));
+    engine.page()->setHtml("<p>Test</p>");
+    engine.show();
+
+//    CWizExplorerApp explorer;
+//    CWizDocumentWebEngine webEngine(explorer);
+//    webEngine.show();
+
+    return app.exec();
+//    return ret;
 }

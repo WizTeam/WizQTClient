@@ -11,6 +11,7 @@
 
 #include "wizmainwindow.h"
 #include "wizDocumentTransitionView.h"
+#include "wizDocumentWebEngine.h"
 #include "share/wizObjectDataDownloader.h"
 #include "share/wizDatabaseManager.h"
 #include "widgets/wizScrollBar.h"
@@ -45,6 +46,7 @@ CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
     , m_userSettings(app.userSettings())
     , m_dbMgr(app.databaseManager())
     , m_web(new CWizDocumentWebView(app, this))
+//    , m_engine(new CWizDocumentWebEngine(app, this))
     , m_comments(new QWebView(this))
     , m_title(new TitleBar(this))
     , m_passwordView(new CWizUserCipherForm(app, this))
@@ -84,7 +86,8 @@ CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
     m_tab->setCurrentWidget(m_docView);
 
     m_splitter = new CWizSplitter(this);
-    m_splitter->addWidget(m_web);
+//    m_splitter->addWidget(m_web);
+    m_splitter->addWidget(m_engine);
     m_splitter->addWidget(m_comments);
     m_comments->page()->setLinkDelegationPolicy(QWebPage::DelegateAllLinks);
     m_comments->page()->mainFrame()->setScrollBarPolicy(Qt::Horizontal, Qt::ScrollBarAlwaysOff);
@@ -131,9 +134,9 @@ CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
     connect(Core::ICore::instance(), SIGNAL(closeNoteRequested(Core::INoteView*)),
             SLOT(onCloseNoteRequested(Core::INoteView*)));
 
-    connect(m_web, SIGNAL(focusIn()), SLOT(on_webView_focus_changed()));
+//    connect(m_web, SIGNAL(focusIn()), SLOT(on_webView_focus_changed()));
 
-    connect(m_title, SIGNAL(notifyBar_link_clicked(QString)), SLOT(on_notifyBar_link_clicked(QString)));
+//    connect(m_title, SIGNAL(notifyBar_link_clicked(QString)), SLOT(on_notifyBar_link_clicked(QString)));
 
 //    connect(m_editStatusCheckThread, SIGNAL(checkFinished(QString,QStringList)),
 //            SLOT(on_checkEditStatus_finished(QString,QStringList)));
@@ -283,6 +286,9 @@ void CWizDocumentView::initStat(const WIZDOCUMENTDATA& data, bool bEditing)
 
 void CWizDocumentView::viewNote(const WIZDOCUMENTDATA& data, bool forceEdit)
 {
+    m_engine->viewDocument(data, forceEdit);
+    return;
+
     MainWindow* window = qobject_cast<MainWindow *>(m_app.mainWindow());
 
     m_web->saveDocument(m_note, false);
@@ -791,13 +797,17 @@ WizFloatDocumentViewer::WizFloatDocumentViewer(CWizExplorerApp& app, QWidget* pa
         setPalette(QPalette(Qt::white));
         QVBoxLayout* layout = new QVBoxLayout(this);
         layout->setContentsMargins(0, 0, 0, 0);
-        m_docView = new CWizDocumentView(app, this);
-        layout->addWidget(m_docView);
+//        m_webEngine = new CWizDocumentWebEngine(app, this);
+//        layout->addWidget(m_webEngine);
+//        WIZDOCUMENTDATA doc;
+//        m_webEngine->viewDocument(doc, true);
+//        m_docView = new CWizDocumentView(app, this);
+//        layout->addWidget(m_docView);
         setLayout(layout);
 }
 
 WizFloatDocumentViewer::~WizFloatDocumentViewer()
 {
-    m_docView->waitForDone();
+//    m_docView->waitForDone();
 }
 
