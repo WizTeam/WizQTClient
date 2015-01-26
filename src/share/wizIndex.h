@@ -363,10 +363,10 @@ public:
 	static CString GetLocationArraySQLWhere(const CWizStdStringArray& arrayLocation);
 
     bool ObjectExists(const QString &strGUID, const QString &strType, bool& bExists);
-    bool DeleteObject(const QString &strGUID, const QString &strType, bool bLog);
     bool GetObjectTableInfo(const CString& strType, CString& strTableName, CString& strKeyFieldName);
 
     qint64 GetObjectLocalVersion(const QString &strGUID, const QString &strType);
+    qint64 GetObjectLocalVersionEx(const QString &strGUID, const QString &strType, bool& bObjectExists);
     bool ModifyObjectVersion(const CString& strGUID, const CString& strType, qint64 nVersion);
 
     bool IsObjectDataModified(const CString& strGUID, const CString& strType);

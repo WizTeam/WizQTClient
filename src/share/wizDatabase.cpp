@@ -526,6 +526,11 @@ qint64 CWizDatabase::GetObjectLocalVersion(const QString& strObjectGUID,
     return CWizIndex::GetObjectLocalVersion(strObjectGUID, strObjectType);
 }
 
+qint64 CWizDatabase::GetObjectLocalVersionEx(const QString& strObjectGUID, const QString& strObjectType, bool& bObjectVersion)
+{
+     return CWizIndex::GetObjectLocalVersionEx(strObjectGUID, strObjectType, bObjectVersion);
+}
+
 qint64 CWizDatabase::GetObjectLocalServerVersion(const QString& strObjectGUID,
                                                  const QString& strObjectType)
 {
@@ -2775,6 +2780,70 @@ bool CWizDatabase::UpdateDocumentDataMD5(WIZDOCUMENTDATA& data, const CString& s
 
     return bRet;
 }
+
+bool CWizDatabase::DeleteObject(const QString& strGUID, const QString& strType, bool bLog)
+{
+    if (strGUID.isEmpty() || strType.isEmpty())
+        return false;
+
+    if (!IsGroup())
+    {
+        BOOL objectExists = FALSE;
+        if (-1 == GetObjectLocalVersionEx(strGUID, strType, objectExists))
+        {
+            if (objectExists)
+            {
+                TOLOG2(_T("[%1] object [%2] is modified on local, skip to delete it"), strType, strGUID);
+                return S_FALSE;
+            }
+            else
+            {
+                return S_OK;
+            }
+        }
+    }
+
+
+    if (0 == strType.compare("tag", Qt::CaseInsensitive))
+    {
+        WIZTAGDATA data;
+        if (TagFromGUID(strGUID, data)) {
+            DeleteTag(data, bLog, false);
+        }
+        return true;
+    }
+    else if (0 == strType.compare("style", Qt::CaseInsensitive))
+    {
+        WIZSTYLEDATA data;
+        if (StyleFromGUID(strGUID, data)) {
+            return DeleteStyle(data, bLog, false);
+        }
+        return true;
+    }
+    else if (0 == strType.compare("document", Qt::CaseInsensitive))
+    {
+        WIZDOCUMENTDATA data;
+        if (DocumentFromGUID(strGUID, data)) {
+            return DeleteDocument(data, bLog);
+        }
+        return true;
+    }
+    else if (0 == strType.compare("attachment", Qt::CaseInsensitive))
+    {
+        WIZDOCUMENTATTACHMENTDATA data;
+        if (AttachmentFromGUID(strGUID, data)) {
+            return DeleteAttachment(data, bLog, false);
+        }
+        return true;
+    }
+    else
+    {
+        Q_ASSERT(0);
+        TOLOG1("Unknown object type: %1", strType);
+        return false;
+    }
+}
+
 
 bool CWizDatabase::DeleteAttachment(const WIZDOCUMENTATTACHMENTDATA& data,
                                     bool bLog,

@@ -1293,46 +1293,36 @@ bool CWizKMSync::DownloadFullDocumentList()
             mapDocumentPart[itNeedToBeDownloaded->strGUID] = part;
             arrayDocumentGUID.push_back(itNeedToBeDownloaded->strGUID);
         }
+    }
+    //
+    if (!arrayDocumentGUID.empty())
+    {
+        m_pEvents->OnStatus(_TR(_T("Query notes information")));
         //
-        //
-        if (arrayDocumentGUID.size() >= 30
-            || itNeedToBeDownloaded == (m_arrayDocumentNeedToBeDownloaded.end() - 1))
+        std::deque<WIZDOCUMENTDATAEX> arrayDocument;
+        if (!m_server.document_downloadFullList(arrayDocumentGUID, arrayDocument))
         {
-            if (!arrayDocumentGUID.empty())
+            TOLOG(_T("Can't download note info list!"));
+            return FALSE;
+        }
+        //
+        for (std::deque<WIZDOCUMENTDATAEX>::const_iterator itDocument = arrayDocument.begin();
+             itDocument != arrayDocument.end();
+             itDocument++)
+        {
+            m_pEvents->OnStatus(WizFormatString1(_TR(_T("Update note information: %1")), itDocument->strTitle));
+            //
+            int nDocumentPart = mapDocumentPart[itDocument->strGUID];
+            if (!m_pDatabase->OnDownloadDocument(nDocumentPart, *itDocument))
             {
-                m_pEvents->OnStatus(_TR(_T("Query notes information")));
-                //
-                std::deque<WIZDOCUMENTDATAEX> arrayDocument;
-                if (!m_server.document_downloadFullList(arrayDocumentGUID, arrayDocument))
-                {
-                    TOLOG(_T("Can't download note info list!"));
-                    return FALSE;
-                }
-                //
-                for (std::deque<WIZDOCUMENTDATAEX>::const_iterator itDocument = arrayDocument.begin();
-                    itDocument != arrayDocument.end();
-                    itDocument++)
-                {
-                    m_pEvents->OnStatus(WizFormatString1(_T("Update note information: %1"), itDocument->strTitle));
-                    //
-                    int nDocumentPart = mapDocumentPart[itDocument->strGUID];
-                    if (!m_pDatabase->OnDownloadDocument(nDocumentPart, *itDocument))
-                    {
-                        m_pEvents->OnError(WizFormatString1(_T("Cannot update note information: %1"), itDocument->strTitle));
-                        return FALSE;
-                    }
-                }
+                m_pEvents->OnError(WizFormatString1(_T("Cannot update note information: %1"), itDocument->strTitle));
+                return FALSE;
             }
-            //
-            int index = int(itNeedToBeDownloaded - m_arrayDocumentNeedToBeDownloaded.begin());
-            //
-            double fPos = index / double(total) * size;
-            m_pEvents->OnSyncProgress(start + int(fPos));
-            //
-            arrayDocumentGUID.clear();
-            mapDocumentPart.clear();
         }
     }
+    //
+    double fPos = size;
+    m_pEvents->OnSyncProgress(start + int(fPos));
     //
     return TRUE;
 }

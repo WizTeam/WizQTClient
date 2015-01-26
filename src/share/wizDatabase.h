@@ -121,6 +121,9 @@ public:
 
     virtual qint64 GetObjectLocalVersion(const QString& strObjectGUID,
                                          const QString& strObjectType);
+    virtual qint64 GetObjectLocalVersionEx(const QString& strObjectGUID,
+                                         const QString& strObjectType,
+                                           bool& bObjectVersion);
     virtual bool SetObjectLocalServerVersion(const QString& strObjectGUID,
                                              const QString& strObjectType,
                                              qint64 nVersion);
@@ -356,6 +359,8 @@ public:
 
     virtual bool UpdateDocumentDataMD5(WIZDOCUMENTDATA& data, const CString& strZipFileName, bool notifyDataModify = true);
 
+    // delete
+    bool DeleteObject(const QString &strGUID, const QString &strType, bool bLog);
     bool DeleteTagWithChildren(const WIZTAGDATA& data, bool bLog);
     bool DeleteAttachment(const WIZDOCUMENTATTACHMENTDATA& data, bool bLog, bool bReset);
 
