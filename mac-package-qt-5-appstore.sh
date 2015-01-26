@@ -40,18 +40,18 @@ for L in $QTLIBS ; do
   rm -R -f $MYAPP.app/Contents/Frameworks/$L.framework/Versions/5/Headers
   #rm -R -f $MYAPP.app/Contents/Frameworks/$L.framework/Versions/Current
   # rm $MYAPP.app/Contents/Frameworks/$L.framework/Versions/5/${L}_debug
-  rm $MYAPP.app/Contents/Frameworks/$L.framework/${L}
+  # rm $MYAPP.app/Contents/Frameworks/$L.framework/${L}
   rm $MYAPP.app/Contents/Frameworks/$L.framework/${L}.prl
   # rm $MYAPP.app/Contents/Frameworks/$L.framework/${L}_debug
   # rm $MYAPP.app/Contents/Frameworks/$L.framework/${L}_debug.prl
   # cd $MYAPP.app/Contents/Frameworks/$L.framework/Versions
   #ln -s 5/ Current
   # cd ..
-  cd $MYAPP.app/Contents/Frameworks/$L.framework
-  rm -f Resources
-  ln -s Versions/Current/$L $L
-  ln -s Versions/Current/Resources/ Resources
-  cd $BUILDDIR
+  # cd $MYAPP.app/Contents/Frameworks/$L.framework
+  # rm -f Resources
+  # ln -s Versions/Current/$L $L
+  # ln -s Versions/Current/Resources/ Resources
+  # cd $BUILDDIR
   #rm $MYAPP.app/Contents/Frameworks/$L.framework/Versions/Current/.
 done
 for P in $PLUGINS ; do
