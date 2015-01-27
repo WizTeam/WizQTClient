@@ -488,7 +488,7 @@ bool CWizDocumentStatusCheckThread::checkDocumentEditStatus(const QString& strKb
 
 CWizDocumentStatusChecker::CWizDocumentStatusChecker(QObject* parent)
     : m_timeOutTimer(0)
-    , m_loopCheckTimer(0)
+    //, m_loopCheckTimer(0)
     , m_stop(false)
 {
 
@@ -499,8 +499,8 @@ CWizDocumentStatusChecker::~CWizDocumentStatusChecker()
     if (m_timeOutTimer)
         delete m_timeOutTimer;
 
-    if (m_loopCheckTimer)
-        delete m_loopCheckTimer;
+//    if (m_loopCheckTimer)
+//        delete m_loopCheckTimer;
 }
 
 void CWizDocumentStatusChecker::checkEditStatus(const QString& strKbGUID, const QString& strGUID)
@@ -508,7 +508,7 @@ void CWizDocumentStatusChecker::checkEditStatus(const QString& strKbGUID, const 
 //    qDebug() << "CWizDocumentStatusChecker start to check guid : " << strGUID;
     setDocmentGUID(strKbGUID, strGUID);
     m_timeOutTimer->start(5 * 1000);
-    m_loopCheckTimer->start(1 * 60 * 1000);
+//    m_loopCheckTimer->start(1 * 60 * 1000);
     m_stop = false;
     startCheck();
 }
@@ -516,7 +516,7 @@ void CWizDocumentStatusChecker::checkEditStatus(const QString& strKbGUID, const 
 void CWizDocumentStatusChecker::stopCheckStatus(const QString& strKbGUID, const QString& strGUID)
 {
     m_timeOutTimer->stop();
-    m_loopCheckTimer->stop();
+//    m_loopCheckTimer->stop();
     m_stop = true;
 
     m_mutexWait.lock();
@@ -559,14 +559,14 @@ void CWizDocumentStatusChecker::initialise()
 //    qDebug() << "CWizDocumentStatusChecker thread id : ";
     m_timeOutTimer = new QTimer(this);
     connect(m_timeOutTimer, SIGNAL(timeout()), SLOT(onTimeOut()));
-    m_loopCheckTimer = new QTimer(this);
-    connect(m_loopCheckTimer, SIGNAL(timeout()), SLOT(recheck()));
+//    m_loopCheckTimer = new QTimer(this);
+//    connect(m_loopCheckTimer, SIGNAL(timeout()), SLOT(recheck()));
 }
 
 void CWizDocumentStatusChecker::clearTimers()
 {
     m_timeOutTimer->stop();
-    m_loopCheckTimer->stop();
+//    m_loopCheckTimer->stop();
 }
 
 void CWizDocumentStatusChecker::startRecheck()
