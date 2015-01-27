@@ -164,8 +164,12 @@ public:
 
     ~WizFloatDocumentViewer();
 
+public slots:
+    void on_textInputFinished();
+
 private:
     CWizDocumentWebEngine* m_webEngine;
+    QLineEdit* m_edit;
 //    CWizDocumentView* m_docView;
 };
 

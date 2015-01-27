@@ -16,6 +16,9 @@
 #include <QPrintDialog>
 #include <QPrinterInfo>
 #include <QMessageBox>
+#include <QWebChannel>
+#include <QWebEngineSettings>
+#include <QtWebSockets/QWebSocketServer>
 
 #include <QApplication>
 #include <QUndoStack>
@@ -33,6 +36,8 @@
 #include "wizEditorInsertLinkForm.h"
 #include "wizEditorInsertTableForm.h"
 #include "share/wizObjectDataDownloader.h"
+#include "share/websocketclientwrapper.h"
+#include "share/websockettransport.h"
 #include "wizDocumentTransitionView.h"
 #include "share/wizDatabaseManager.h"
 #include "wizDocumentView.h"
@@ -120,6 +125,28 @@ CWizDocumentWebEngine::CWizDocumentWebEngine(CWizExplorerApp& app, QWidget* pare
     , m_searchReplaceWidget(0)
 {
 
+    WebEnginePage *webPage = new WebEnginePage(this);
+    setPage(webPage);
+
+    // FIXME: should accept drop picture, attachment, link etc.
+    setAcceptDrops(true);
+
+    // refers
+    MainWindow* mainWindow = qobject_cast<MainWindow *>(m_app.mainWindow());
+
+    m_transitionView = mainWindow->transitionView();
+
+    m_docLoadThread = new CWizDocumentWebViewLoaderThread(m_dbMgr);
+    connect(m_docLoadThread, SIGNAL(loaded(const QString&, const QString, const QString)),
+            SLOT(onDocumentReady(const QString&, const QString, const QString)), Qt::QueuedConnection);
+    //
+    m_docSaverThread = new CWizDocumentWebViewSaverThread(m_dbMgr);
+    connect(m_docSaverThread, SIGNAL(saved(const QString, const QString,bool)),
+            SLOT(onDocumentSaved(const QString, const QString,bool)), Qt::QueuedConnection);
+
+    // loading and saving thread
+    m_timerAutoSave.setInterval(5*60*1000); // 5 minutes
+    connect(&m_timerAutoSave, SIGNAL(timeout()), SLOT(onTimerAutoSaveTimout()));
 }
 
 CWizDocumentWebEngine::~CWizDocumentWebEngine()
@@ -137,45 +164,47 @@ void CWizDocumentWebEngine::waitForDone()
     }
 }
 
-void CWizDocumentWebEngine::inputMethodEvent(QInputMethodEvent* event)
-{
-    // On X windows, fcitx flick while preediting, only update while webview end process.
-    // maybe it's a QT-BUG?
-#ifdef Q_OS_LINUX
-    setUpdatesEnabled(false);
-    QWebEngineView::inputMethodEvent(event);
-    setUpdatesEnabled(true);
-#else
-    QWebEngineView::inputMethodEvent(event);
-#endif
 
-#ifdef Q_OS_MAC
-    /*
-    ///暂时注释代码，移动输入光标会导致极高的CPU占用率，导致输入卡顿。
+//void CWizDocumentWebEngine::inputMethodEvent(QInputMethodEvent* event)
+//{
+//    // On X windows, fcitx flick while preediting, only update while webview end process.
+//    // maybe it's a QT-BUG?
+//#ifdef Q_OS_LINUX
+//    setUpdatesEnabled(false);
+//    QWebEngineView::inputMethodEvent(event);
+//    setUpdatesEnabled(true);
+//#else
+//    QWebEngineView::inputMethodEvent(event);
+//#endif
 
-    //int nLength = 0;
-    int nOffset = 0;
-    for (int i = 0; i < event->attributes().size(); i++) {
-        const QInputMethodEvent::Attribute& a = event->attributes().at(i);
-        if (a.type == QInputMethodEvent::Cursor) {
-            //nLength = a.length;
-            nOffset = a.start;
-            break;
-        }
-    }
+//#ifdef Q_OS_MAC
+//    /*
+//    ///暂时注释代码，移动输入光标会导致极高的CPU占用率，导致输入卡顿。
 
-    // Move cursor
-    // because every time input method event triggered, old preedit text will be
-    // deleted and the new one inserted, this action made cursor restore to the
-    // beginning of the input context, move it as far as offset indicated after
-    // default implementation should correct this issue!!!
-    for (int i = 0; i < nOffset; i++) {
-        page()->triggerAction(QWebEnginePage::MoveToNextChar);
-    }
-    */
-#endif // Q_OS_MAC
-}
+//    //int nLength = 0;
+//    int nOffset = 0;
+//    for (int i = 0; i < event->attributes().size(); i++) {
+//        const QInputMethodEvent::Attribute& a = event->attributes().at(i);
+//        if (a.type == QInputMethodEvent::Cursor) {
+//            //nLength = a.length;
+//            nOffset = a.start;
+//            break;
+//        }
+//    }
 
+//    // Move cursor
+//    // because every time input method event triggered, old preedit text will be
+//    // deleted and the new one inserted, this action made cursor restore to the
+//    // beginning of the input context, move it as far as offset indicated after
+//    // default implementation should correct this issue!!!
+//    for (int i = 0; i < nOffset; i++) {
+//        page()->triggerAction(QWebEnginePage::MoveToNextChar);
+//    }
+//    */
+//#endif // Q_OS_MAC
+//}
+
+/*
 void CWizDocumentWebEngine::keyPressEvent(QKeyEvent* event)
 {
 //    // special cases process
@@ -294,13 +323,13 @@ void CWizDocumentWebEngine::focusOutEvent(QFocusEvent *event)
     QWebEngineView::focusOutEvent(event);
 }
 
-void CWizDocumentWebEngine::contextMenuEvent(QContextMenuEvent *event)
-{
-    if (!m_bEditorInited)
-        return;
+//void CWizDocumentWebEngine::contextMenuEvent(QContextMenuEvent *event)
+//{
+//    if (!m_bEditorInited)
+//        return;
 
-    Q_EMIT requestShowContextMenu(mapToGlobal(event->pos()));
-}
+//    Q_EMIT requestShowContextMenu(mapToGlobal(event->pos()));
+//}
 
 void CWizDocumentWebEngine::dragEnterEvent(QDragEnterEvent *event)
 {
@@ -338,6 +367,7 @@ void CWizDocumentWebEngine::dragMoveEvent(QDragMoveEvent* event)
             }
     }
 }
+*/
 
 void CWizDocumentWebEngine::onActionTriggered(QWebEnginePage::WebAction act)
 {
@@ -378,85 +408,85 @@ void CWizDocumentWebEngine::tryResetTitle()
     m_bNewNoteTitleInited = true;
 }
 
-void CWizDocumentWebEngine::dropEvent(QDropEvent* event)
-{
-    const QMimeData* mimeData = event->mimeData();
+//void CWizDocumentWebEngine::dropEvent(QDropEvent* event)
+//{
+//    const QMimeData* mimeData = event->mimeData();
 
-    int nAccepted = 0;
-    if (mimeData->hasUrls())
-    {
-        QList<QUrl> li = mimeData->urls();
-        QList<QUrl>::const_iterator it;
-        for (it = li.begin(); it != li.end(); it++) {
-            QUrl url = *it;
-            url.setScheme(0);
+//    int nAccepted = 0;
+//    if (mimeData->hasUrls())
+//    {
+//        QList<QUrl> li = mimeData->urls();
+//        QList<QUrl>::const_iterator it;
+//        for (it = li.begin(); it != li.end(); it++) {
+//            QUrl url = *it;
+//            url.setScheme(0);
 
-            //paste image file as images, add attachment for other file
-            QString strFileName = url.toString();
-#ifdef Q_OS_MAC
-            if (wizIsYosemiteFilePath(strFileName))
-            {
-                strFileName = wizConvertYosemiteFilePathToNormalPath(strFileName);
-            }
-#endif
-            QImageReader reader(strFileName);
-            if (reader.canRead())
-            {
-                QString strHtml;
-                bool bUseCopyFile = true;
-                if (WizImage2Html(strFileName, strHtml, bUseCopyFile)) {
-                    editorCommandExecuteInsertHtml(strHtml, true);
-                    nAccepted++;
-                }
-            }
-            else
-            {
-                WIZDOCUMENTDATA doc = view()->note();
-                CWizDatabase& db = m_dbMgr.db(doc.strKbGUID);
-                WIZDOCUMENTATTACHMENTDATA data;
-                data.strKbGUID = doc.strKbGUID; // needed by under layer
-                if (!db.AddAttachment(doc, strFileName, data))
-                {
-                    TOLOG1("[drop] add attachment failed %1", strFileName);
-                    continue;
-                }
-                nAccepted ++;
-            }
-        }
-    }
-    else if (mimeData->hasFormat(WIZNOTE_MIMEFORMAT_DOCUMENTS))
-    {
-        QString strData(mimeData->data(WIZNOTE_MIMEFORMAT_DOCUMENTS));
-        if (!strData.isEmpty())
-        {
-            QString strLinkHtml;
-            QStringList doclist = strData.split(';');
-            foreach (QString doc, doclist) {
-                QStringList docIds = doc.split(':');
-                if (docIds.count() == 2)
-                {
-                    WIZDOCUMENTDATA document;
-                    CWizDatabase& db = m_dbMgr.db(docIds.first());
-                    if (db.DocumentFromGUID(docIds.last(), document))
-                    {
-                        QString strHtml, strLink;
-                        db.DocumentToHtmlLink(document, strHtml, strLink);
-                        strLinkHtml += "<p>" + strHtml + "</p>";
-                    }
-                }
-            }
+//            //paste image file as images, add attachment for other file
+//            QString strFileName = url.toString();
+//#ifdef Q_OS_MAC
+//            if (wizIsYosemiteFilePath(strFileName))
+//            {
+//                strFileName = wizConvertYosemiteFilePathToNormalPath(strFileName);
+//            }
+//#endif
+//            QImageReader reader(strFileName);
+//            if (reader.canRead())
+//            {
+//                QString strHtml;
+//                bool bUseCopyFile = true;
+//                if (WizImage2Html(strFileName, strHtml, bUseCopyFile)) {
+//                    editorCommandExecuteInsertHtml(strHtml, true);
+//                    nAccepted++;
+//                }
+//            }
+//            else
+//            {
+//                WIZDOCUMENTDATA doc = view()->note();
+//                CWizDatabase& db = m_dbMgr.db(doc.strKbGUID);
+//                WIZDOCUMENTATTACHMENTDATA data;
+//                data.strKbGUID = doc.strKbGUID; // needed by under layer
+//                if (!db.AddAttachment(doc, strFileName, data))
+//                {
+//                    TOLOG1("[drop] add attachment failed %1", strFileName);
+//                    continue;
+//                }
+//                nAccepted ++;
+//            }
+//        }
+//    }
+//    else if (mimeData->hasFormat(WIZNOTE_MIMEFORMAT_DOCUMENTS))
+//    {
+//        QString strData(mimeData->data(WIZNOTE_MIMEFORMAT_DOCUMENTS));
+//        if (!strData.isEmpty())
+//        {
+//            QString strLinkHtml;
+//            QStringList doclist = strData.split(';');
+//            foreach (QString doc, doclist) {
+//                QStringList docIds = doc.split(':');
+//                if (docIds.count() == 2)
+//                {
+//                    WIZDOCUMENTDATA document;
+//                    CWizDatabase& db = m_dbMgr.db(docIds.first());
+//                    if (db.DocumentFromGUID(docIds.last(), document))
+//                    {
+//                        QString strHtml, strLink;
+//                        db.DocumentToHtmlLink(document, strHtml, strLink);
+//                        strLinkHtml += "<p>" + strHtml + "</p>";
+//                    }
+//                }
+//            }
 
-            editorCommandExecuteInsertHtml(strLinkHtml, false);
+//            editorCommandExecuteInsertHtml(strLinkHtml, false);
 
-            nAccepted ++;
-        }
-    }
+//            nAccepted ++;
+//        }
+//    }
 
-    if (nAccepted > 0) {
-        event->accept();
-        saveDocument(view()->note(), false);
-    }
-}
+//    if (nAccepted > 0) {
+//        event->accept();
+//        saveDocument(view()->note(), false);
+//    }
+//}
 
 CWizDocumentView* CWizDocumentWebEngine::view()
 {
@@ -491,6 +521,8 @@ void CWizDocumentWebEngine::onTitleEdited(QString strTitle)
 
 void CWizDocumentWebEngine::onDocumentReady(const QString kbGUID, const QString strGUID, const QString strFileName)
 {
+
+    qDebug() << "onDocumentReady";
     m_mapFile.insert(strGUID, strFileName);
 
     if (m_bEditorInited) {
@@ -516,11 +548,10 @@ void CWizDocumentWebEngine::onDocumentSaved(const QString kbGUID, const QString 
 
 void CWizDocumentWebEngine::viewDocument(const WIZDOCUMENTDATA& doc, bool editing)
 {
-//    if (!m_bEditorInited)
-//    {
-//        initEditor();
-//    }
-    page()->load(QUrl("http://ueditor.baidu.com/website/onlinedemo.html"));
+    if (!m_bEditorInited)
+    {
+        initEditor();
+    }
     return;
 
     // set data
@@ -629,16 +660,22 @@ bool CWizDocumentWebEngine::evaluateJavaScript(const QString& js)
 
 void CWizDocumentWebEngine::initEditor()
 {
+    qDebug() << "initEditor called";
     if (m_bEditorInited)
         return;
 
     if (!resetDefaultCss())
         return;
 
+
     QString strFileName = Utils::PathResolve::resourcesPath() + "files/editor/index.html";
     QString strHtml;
     ::WizLoadUnicodeTextFromFile(strFileName, strHtml);
     QUrl url = QUrl::fromLocalFile(strFileName);
+
+    page()->settings()->setAttribute(QWebEngineSettings::JavascriptCanAccessClipboard, true);
+    page()->settings()->setAttribute(QWebEngineSettings::LocalContentCanAccessRemoteUrls, true);
+    connect(page(), SIGNAL(loadFinished(bool)), SLOT(onEditorLoadFinished(bool)));
 
 //    page()->setLinkDelegationPolicy(QWebEnginePage::DelegateAllLinks);
 
@@ -648,18 +685,40 @@ void CWizDocumentWebEngine::initEditor()
 //    connect(page()->mainFrame(), SIGNAL(loadFinished(bool)),
 //            SLOT(onEditorLoadFinished(bool)));
 
-    connect(page(), SIGNAL(linkClicked(const QUrl&)),
-            SLOT(onEditorLinkClicked(const QUrl&)));
+//    connect(page(), SIGNAL(linkClicked(const QUrl&)),
+//            SLOT(onEditorLinkClicked(const QUrl&)));
 
-    connect(page(), SIGNAL(selectionChanged()),
-            SLOT(onEditorSelectionChanged()));
+//    connect(page(), SIGNAL(selectionChanged()),
+//            SLOT(onEditorSelectionChanged()));
 
-    connect(page(), SIGNAL(contentsChanged()),
-            SLOT(onEditorContentChanged()));
+//    connect(page(), SIGNAL(contentsChanged()),
+//            SLOT(onEditorContentChanged()));
 
-//    page()->setHtml(strHtml,url);
+    page()->setHtml(strHtml,url);
 //    page()->setHtml("http://ueditor.baidu.com/website/onlinedemo.html");
-    load(QUrl("http://ueditor.baidu.com/website/onlinedemo.html"));
+//    load(url);
+}
+
+void CWizDocumentWebEngine::registerJavaScriptWindowObject()
+{
+    QWebSocketServer *server = new QWebSocketServer(QStringLiteral("Wiz Socket Server"), QWebSocketServer::NonSecureMode, this);
+    if (!server->listen(QHostAddress::LocalHost, 0)) {
+        qFatal("Failed to open web socket server.");
+        return;
+    }
+
+    // wrap WebSocket clients in QWebChannelAbstractTransport objects
+    WebSocketClientWrapper *clientWrapper  = new WebSocketClientWrapper(server, this);
+
+    // setup the dialog and publish it to the QWebChannel
+    QWebChannel *webChannel = new QWebChannel(this);
+    // setup the channel
+    QObject::connect(clientWrapper, &WebSocketClientWrapper::clientConnected,
+                     webChannel, &QWebChannel::connectTo);
+    webChannel->registerObject(QStringLiteral("WizEditor"), this);
+
+    QString strUrl = server->serverUrl().toString();
+    page()->runJavaScript(QString("initializeJSObject('%1');").arg(strUrl));
 }
 
 void CWizDocumentWebEngine::resetCheckListEnvironment()
@@ -683,6 +742,11 @@ void CWizDocumentWebEngine::initCheckListEnvironment()
         QString strScript = QString("WizTodoReadChecked.init('qt');");
         page()->runJavaScript(strScript);
     }
+}
+
+void CWizDocumentWebEngine::speakHelloWorld()
+{
+    qDebug() << "Hello world from web engine";
 }
 
 void CWizDocumentWebEngine::setWindowVisibleOnScreenShot(bool bVisible)
@@ -722,14 +786,16 @@ bool CWizDocumentWebEngine::shareNoteByEmail()
 
 void CWizDocumentWebEngine::onEditorLoadFinished(bool ok)
 {
-    if (!ok) {
-        m_bEditorInited = false;
-        TOLOG("Wow, loading editor failed!");
+
+    if (ok)
+    {
+        registerJavaScriptWindowObject();
+        m_bEditorInited = true;
+//        viewDocumentInEditor(m_bEditingMode);
         return;
     }
 
-    m_bEditorInited = true;
-    viewDocumentInEditor(m_bEditingMode);
+    TOLOG("Wow, loading editor failed!");
 }
 
 //void CWizDocumentWebEngine::onEditorPopulateJavaScriptWindowObject()
@@ -1699,4 +1765,50 @@ void CWizDocumentWebEngine::redo()
 {
     page()->runJavaScript("editor.execCommand('redo')");
     emit statusChanged();
+}
+
+
+WebEnginePage::WebEnginePage(QObject* parent)
+    : QWebEnginePage(parent)
+{
+
+}
+
+WebEnginePage::~WebEnginePage()
+{
+
+}
+
+void WebEnginePage::javaScriptConsoleMessage(QWebEnginePage::JavaScriptConsoleMessageLevel level, const QString& message, int lineNumber, const QString& sourceID)
+{
+    qDebug() << "console at line : " << lineNumber << "  message :  " << message << " source id : " << sourceID.left(15);
+}
+
+void WebEnginePage::triggerAction(QWebEnginePage::WebAction action, bool checked)
+{
+    if (action == QWebEnginePage::Reload)
+    {
+        QString strFileName = "/Users/lxn/editor/index.html";
+        QFile file(strFileName);
+        if (file.open(QIODevice::ReadOnly | QIODevice::Text))
+        {
+            QUrl url = QUrl::fromLocalFile(strFileName);
+            QTextStream stream(&file);
+            QString strText = stream.readAll();
+            file.close();
+
+
+            setHtml(strText, url);
+        }
+        return;
+    }
+    else if (action == QWebEnginePage::Paste)
+    {
+        qDebug() << "paste action triggered";
+    }
+    else if (action == QWebEnginePage::PasteAndMatchStyle)
+    {
+        qDebug() << "paste and match called";
+    }
+    QWebEnginePage::triggerAction(action, checked);
 }

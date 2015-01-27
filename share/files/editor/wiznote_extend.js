@@ -1,16 +1,18 @@
 var
-    editor = null,
+    editor = {},
     m_inited = false,
-    objApp = WizExplorerApp,
     m_currentGUID = "",
-    m_defaultCss = WizEditor.getDefaultCssFilePath(),
+    m_defaultCss = "";
     m_defaultCssVersion = 1,
+    WizEditor = {};
     m_header = "",
     wiz_html = "",
     wiz_head = "";
 
-
 // setup ueditor
+function initialUEditor(wizEditor) {
+    WizEditor = wizEditor
+    console.log("try to init editor by js");
 try {
     var editorOption = {
     toolbars: [],
@@ -48,10 +50,24 @@ try {
     editor.addListener('aftersetcontent', function() {
         updateCss();
         WizEditor.onNoteLoadFinished();
+        console.log("content changed.");
     });
 
 } catch (err) {
     alert(err);
+}
+}
+
+function speakHelloWorld()
+{
+    console.log("speak Hello World");
+}
+
+function functionTest()
+{
+    editor.execCommand('paste');
+    console.log("called from test");
+    editor.execCommand('insertHtml', "inserted text", true);
 }
 
 function setEditorHtml(html, bEditing)
@@ -72,8 +88,6 @@ function setEditorHtml(html, bEditing)
 
     window.UE.utils.domReady(function() {
         //special process to remove css style added by phone
-        WizSpecialProcessForPhoneCss();
-        WizEditor.initCheckListEnvironment();
         editor.window.scrollTo(0, 0);
     });
 }
@@ -89,7 +103,6 @@ function setEditing(bEditing) {
     editor.document.body.innerHTML = wiz_html;
 
     //special process to remove css style added by phone
-    WizSpecialProcessForPhoneCss();
 
     editor.fireEvent('aftersetcontent');
     editor.fireEvent('contentchange');

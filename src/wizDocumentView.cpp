@@ -46,7 +46,7 @@ CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
     , m_userSettings(app.userSettings())
     , m_dbMgr(app.databaseManager())
     , m_web(new CWizDocumentWebView(app, this))
-//    , m_engine(new CWizDocumentWebEngine(app, this))
+    , m_engine(new CWizDocumentWebEngine(app, this))
     , m_comments(new QWebView(this))
     , m_title(new TitleBar(this))
     , m_passwordView(new CWizUserCipherForm(app, this))
@@ -797,10 +797,13 @@ WizFloatDocumentViewer::WizFloatDocumentViewer(CWizExplorerApp& app, QWidget* pa
         setPalette(QPalette(Qt::white));
         QVBoxLayout* layout = new QVBoxLayout(this);
         layout->setContentsMargins(0, 0, 0, 0);
-//        m_webEngine = new CWizDocumentWebEngine(app, this);
-//        layout->addWidget(m_webEngine);
-//        WIZDOCUMENTDATA doc;
-//        m_webEngine->viewDocument(doc, true);
+        m_webEngine = new CWizDocumentWebEngine(app, this);
+        layout->addWidget(m_webEngine);
+        m_edit = new QLineEdit(this);
+        layout->addWidget(m_edit);
+        connect(m_edit, SIGNAL(returnPressed()), SLOT(on_textInputFinished()));
+        WIZDOCUMENTDATA doc;
+        m_webEngine->viewDocument(doc, true);
 //        m_docView = new CWizDocumentView(app, this);
 //        layout->addWidget(m_docView);
         setLayout(layout);
@@ -808,6 +811,13 @@ WizFloatDocumentViewer::WizFloatDocumentViewer(CWizExplorerApp& app, QWidget* pa
 
 WizFloatDocumentViewer::~WizFloatDocumentViewer()
 {
-//    m_docView->waitForDone();
+    //    m_docView->waitForDone();
+}
+
+void WizFloatDocumentViewer::on_textInputFinished()
+{
+    qDebug() << "trun js : " << m_edit->text();
+    m_webEngine->page()->runJavaScript(m_edit->text());
+    m_edit->clear();
 }
 

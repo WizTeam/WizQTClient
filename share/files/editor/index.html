@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html>
 
 <head>
@@ -6,10 +6,49 @@
 
     <title></title>
     <script type="text/javascript" charset="utf-8" src="ueditor.config.js"></script>
-    <script type="text/javascript" charset="utf-8" src="ueditor.all.min.js"></script>
+    <script type="text/javascript" charset="utf-8" src="ueditor.all.js"></script>
+    <script type="text/javascript" charset="utf-8" src="qwebchannel.js"></script>
 </head>
 <body>
     <script type="text/plain" id="editorArea"></script>
+    <script type="text/javascript" charset="utf-8" src="wiznote_extend.js"></script>
+    <script type="text/javascript" charset="utf-8" src="todo.js"></script>
+    <script type="text/javascript" charset="utf-8" src="wiztodo_read_checked.js"></script>
+
+    <script type="text/javascript">
+            //BEGIN SETUP
+            function output(message)
+            {
+                console.log(message);
+            }
+            function initializeJSObject(strUrl)
+            {
+            	output("Connecting to WebSocket server at " + strUrl + ".");
+                var socket = new WebSocket(strUrl);
+                socket.onclose = function()
+                {
+                    console.error("web channel closed");
+                };
+                socket.onerror = function(error)
+                {
+                    console.error("web channel error: " + error);
+                };
+                socket.onopen = function()
+                {
+                    output("WebSocket connected, setting up QWebChannel.");
+                    new QWebChannel(socket, function(channel) {
+                        // make dialog object accessible globally
+                        // window.jsObject = channel.objects.jsObject;
+                        // jsObject.speakHello();
+                        window.WizEditor = channel.objects.WizEditor;
+                        WizEditor.speakHelloWorld();
+                        initialUEditor(WizEditor);
+                        output("Connected to WebChannel, ready to send/receive messages!");
+                    });
+                }
+            }
+            //END SETUP
+        </script>
 </body>
 
 </html>

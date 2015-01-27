@@ -35,6 +35,18 @@ class CWizDocumentWebViewLoaderThread;
 class CWizDocumentWebViewSaverThread;
 
 
+class WebEnginePage : public QWebEnginePage
+{
+    Q_OBJECT
+public:
+    explicit WebEnginePage(QObject *parent = 0);
+    ~WebEnginePage();
+
+protected:
+    virtual void javaScriptConsoleMessage(JavaScriptConsoleMessageLevel level, const QString& message, int lineNumber, const QString& sourceID);
+    virtual void triggerAction(WebAction action, bool checked = false);
+};
+
 class CWizDocumentWebEngine : public QWebEngineView
 {
     Q_OBJECT
@@ -111,6 +123,7 @@ public:
 
 private:
     void initEditor();
+    void registerJavaScriptWindowObject();
     void viewDocumentInEditor(bool editing);
     void tryResetTitle();
 
@@ -124,14 +137,14 @@ private:
     void saveReadingViewDocument(const WIZDOCUMENTDATA& data, bool force);
 
 protected:
-    virtual void keyPressEvent(QKeyEvent* event);
-    virtual void inputMethodEvent(QInputMethodEvent* event);
-    virtual void focusInEvent(QFocusEvent* event);
-    virtual void focusOutEvent(QFocusEvent* event);
-    virtual void contextMenuEvent(QContextMenuEvent* event);
-    virtual void dragEnterEvent(QDragEnterEvent* event);
-    virtual void dragMoveEvent(QDragMoveEvent* event);
-    virtual void dropEvent(QDropEvent* event);
+//    virtual void keyPressEvent(QKeyEvent* event);
+//    virtual void inputMethodEvent(QInputMethodEvent* event);
+//    virtual void focusInEvent(QFocusEvent* event);
+//    virtual void focusOutEvent(QFocusEvent* event);
+////    virtual void contextMenuEvent(QContextMenuEvent* event);
+//    virtual void dragEnterEvent(QDragEnterEvent* event);
+//    virtual void dragMoveEvent(QDragMoveEvent* event);
+//    virtual void dropEvent(QDropEvent* event);
 
 private:
     CWizExplorerApp& m_app;
@@ -270,6 +283,7 @@ public Q_SLOTS:
     // js func
     void resetCheckListEnvironment();
     void initCheckListEnvironment();
+    void speakHelloWorld();
 
 Q_SIGNALS:
     // signals for notify command reflect status, triggered when selection, focus, editing mode changed

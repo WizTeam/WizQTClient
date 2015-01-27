@@ -371,27 +371,30 @@ int mainCore(int argc, char *argv[])
 
 int main(int argc, char *argv[])
 {
-//    int ret = mainCore(argc, argv);
+    int ret = mainCore(argc, argv);
 
-//    // clean up
-//    QString strTempPath = Utils::PathResolve::tempPath();
-//    ::WizDeleteAllFilesInFolder(strTempPath);
-    QApplication app(argc, argv);
+    // clean up
+    QString strTempPath = Utils::PathResolve::tempPath();
+    ::WizDeleteAllFilesInFolder(strTempPath);
 
-    QWebView webView;
-//    webView.page()->mainFrame()->load(QUrl("http://ueditor.baidu.com/website/onlinedemo.html"));
-    webView.page()->mainFrame()->setHtml("<p>Test</p>");
-    webView.show();
+    //    QApplication app(argc, argv);
 
-    QWebEngineView engine;
-//    engine.page()->load(QUrl("http://ueditor.baidu.com/website/onlinedemo.html"));
-    engine.page()->setHtml("<p>Test</p>");
-    engine.show();
+//    QWebView webView;
+////    webView.page()->mainFrame()->load(QUrl("http://ueditor.baidu.com/website/onlinedemo.html"));
+//    webView.page()->mainFrame()->setHtml("<p>Test</p>");
+//    webView.show();
 
-//    CWizExplorerApp explorer;
-//    CWizDocumentWebEngine webEngine(explorer);
-//    webEngine.show();
+//    QWebEngineView engine;
+////    engine.page()->load(QUrl("http://ueditor.baidu.com/website/onlinedemo.html"));
+//    engine.page()->setHtml("<p>Test</p>");
+//    engine.show();
 
-    return app.exec();
-//    return ret;
+////    CWizExplorerApp explorer;
+////    CWizDocumentWebEngine webEngine(explorer);
+////    webEngine.show();
+
+//    return app.exec();
+
+
+    return ret;
 }
