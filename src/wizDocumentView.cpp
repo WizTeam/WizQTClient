@@ -384,7 +384,7 @@ void CWizDocumentView::setEditNote(bool bEdit)
     bool isGroupNote =m_dbMgr.db(m_note.strKbGUID).IsGroup();
     if (bEdit && isGroupNote)
     {
-        m_title->showMessageTip(Qt::PlainText, tr("Checking whether note is eiditable..."));
+        m_title->showMessageTips(Qt::PlainText, tr("Checking whether note is eiditable..."));
         if (!checkDocumentEditable())
         {
             return;
@@ -465,7 +465,7 @@ bool CWizDocumentView::checkListClickable()
     CWizDatabase& db = m_dbMgr.db(m_note.strKbGUID);
     if (db.CanEditDocument(m_note))
     {
-        m_title->showMessageTip(Qt::PlainText, tr("Checking whether checklist is clickable..."));
+        m_title->showMessageTips(Qt::PlainText, tr("Checking whether checklist is clickable..."));
         return checkDocumentEditable();
     }
     return false;
@@ -473,10 +473,10 @@ bool CWizDocumentView::checkListClickable()
 
 void CWizDocumentView::setStatusToEditingByCheckList()
 {
-    m_title->showMessageTip(Qt::PlainText, tr("You have occupied this note by clicking checklist !  " \
-             "Switch to other notes to free this note."));
     stopCheckDocumentEditStatus();
     sendDocumentEditingStatus();
+    m_title->showMessageTips(Qt::PlainText, tr("You have occupied this note by clicking checklist !  " \
+             "Switch to other notes to free this note."));
 }
 
 void CWizDocumentView::setEditorFocus()
@@ -517,7 +517,7 @@ void CWizDocumentView::on_checkEditStatus_finished(const QString& strGUID, bool 
         if (db.CanEditDocument(doc) && !CWizDatabase::IsInDeletedItems(doc.strLocation))
         {
 //            qDebug() << "document editable , hide message tips.";
-            m_title->showMessageTip(Qt::PlainText, "");
+            m_title->hideMessageTips(true);
             m_title->setEditButtonState(true, false);
         }
     }
@@ -680,17 +680,17 @@ void Core::CWizDocumentView::on_documentEditingByOthers(QString strGUID, QString
             if (editors.count() == 1 && editors.first() == strUserAlias)
             {
                 qDebug() << "[EditStatus]:editing by myself.";
-                m_title->showMessageTip(Qt::PlainText, "");
+                m_title->hideMessageTips(true);
                 m_title->setEditButtonState(true, false);
                 m_status = m_status & ~DOCUMENT_EDITBYOTHERS;
             }
             else
             {
-                m_title->showMessageTip(Qt::PlainText, QString(tr("%1 is currently editing this note. Note has been locked.")).arg(strEditor));
+                m_title->showMessageTips(Qt::PlainText, QString(tr("%1 is currently editing this note. Note has been locked.")).arg(strEditor));
                 m_status = m_status | DOCUMENT_EDITBYOTHERS;
                 if (m_note.nVersion == -1)
                 {
-                    m_title->showMessageTip(Qt::PlainText, QString(tr("%1 is currently editing this note.")).arg(strEditor));
+                    m_title->showMessageTips(Qt::PlainText, QString(tr("%1 is currently editing this note.")).arg(strEditor));
                     m_title->setEditButtonState(true, false);
                 }
                 else
@@ -715,7 +715,7 @@ void CWizDocumentView::on_checkEditStatus_timeout(const QString& strGUID)
     if (strGUID == m_note.strGUID && !(m_status & DOCUMENT_OFFLINE))
     {
         m_title->setEditButtonState(true, false);
-        m_title->showMessageTip(Qt::RichText, tr("The current network in poor condition, you are <b> offline editing mode </b>."));
+        m_title->showMessageTips(Qt::RichText, tr("The current network in poor condition, you are <b> offline editing mode </b>."));
         m_status = m_status | DOCUMENT_OFFLINE;
     }
 }
@@ -733,7 +733,7 @@ void CWizDocumentView::on_checkDocumentChanged_finished(const QString& strGUID, 
 //            }
 //            else
 //            {
-                m_title->showMessageTip(Qt::RichText, QString(tr("New version on server avalible. <a href='%1'>Click to down load new version.<a>")).arg(NOTIFYBAR_LABELLINK_DOWNLOAD));
+                m_title->showMessageTips(Qt::RichText, QString(tr("New version on server avalible. <a href='%1'>Click to down load new version.<a>")).arg(NOTIFYBAR_LABELLINK_DOWNLOAD));
 //            }
         }
         else

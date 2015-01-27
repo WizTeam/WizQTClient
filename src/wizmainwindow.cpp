@@ -1066,9 +1066,8 @@ bool MainWindow::checkListClickable()
 
     if (m_doc->checkListClickable())
     {
-        qDebug() << "check list clickable";
-        m_doc->setStatusToEditingByCheckList();
         emit clickingTodoCallBack(false, false);
+        m_doc->setStatusToEditingByCheckList();
         return true;
     }
     emit clickingTodoCallBack(true, true);

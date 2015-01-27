@@ -432,7 +432,12 @@ void TitleBar::onGetCommentsCountFinished(int nCount)
     }
 }
 
-void TitleBar::showMessageTip(Qt::TextFormat format, const QString& strInfo)
+void TitleBar::showMessageTips(Qt::TextFormat format, const QString& strInfo)
 {
     m_notifyBar->showMessageTips(format, strInfo);
+}
+
+void TitleBar::hideMessageTips(bool useAnimation)
+{
+    m_notifyBar->hideMessageTips(useAnimation);
 }
