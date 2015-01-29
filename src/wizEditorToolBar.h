@@ -7,7 +7,7 @@
 
 class QString;
 class QMenu;
-class CWizDocumentWebView;
+class CWizDocumentWebEngine;
 class CWizToolButton;
 class CWizToolButtonColor;
 class CWizToolComboBox;
@@ -25,7 +25,7 @@ class EditorToolBar : public QWidget
 
 public:
     explicit EditorToolBar(QWidget *parent);
-    void setDelegate(CWizDocumentWebView* editor);
+    void setDelegate(CWizDocumentWebEngine* editor);
 
     bool hasFocus();
 
@@ -33,7 +33,7 @@ protected:
     QSize sizeHint() const;
 
 private:
-    CWizDocumentWebView* m_editor;
+    CWizDocumentWebEngine* m_editor;
     QMap<QString, QAction*> m_actions;
     QPointer<QMenu> m_menuContext;
     CWizToolComboBoxFont* m_comboFontFamily;

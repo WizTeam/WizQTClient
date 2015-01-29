@@ -12,50 +12,64 @@ var
 // setup ueditor
 function initialUEditor(wizEditor) {
     WizEditor = wizEditor
+    wizEditor.viewNoteRequest.connect(function (strGUID, bEditing, strHtml, strHead) {
+        viewNote(strGUID, bEditing, strHtml, strHead);
+    });
+    WizEditor.resetDefaultCss.connect(function (strCssPath) {
+        m_defaultCss = strCssPath;
+    });
     console.log("try to init editor by js");
-try {
-    var editorOption = {
-    toolbars: [],
-    //iframeCssUrl: m_defaultCss,
-    //initialStyle: 'body{font-size:13px}',
-    //enterTag: 'div',
-    fullscreen: true,
-    autoHeightEnabled: false,
-    scaleEnabled: false,
-    contextMenu: [],
-    elementPathEnabled: false,
-    wordCount: false,
-    imagePopup: false,
-    maximumWords: 100000000,
-    };
+    try {
+        var editorOption = {
+            toolbars: [],
+            //iframeCssUrl: m_defaultCss,
+            //initialStyle: 'body{font-size:13px}',
+            //enterTag: 'div',
+            fullscreen: true,
+            autoHeightEnabled: false,
+            scaleEnabled: false,
+            contextMenu: [],
+            elementPathEnabled: false,
+            wordCount: false,
+            imagePopup: false,
+            maximumWords: 100000000,
+        };
 
-    editor = new baidu.editor.ui.Editor(editorOption);
-    //objApp.ResetInitialStyle();
-    editor.render('editorArea');
 
-    editor.addListener("sourceModeChanged",function(type,mode){
-    });
 
-    // hide builtin toolbar, from UE dev team.
-    editor.addListener('ready', function () {
-        editor.ui.getDom('toolbarbox').style.display = 'none';
-        editor.ui.getDom('bottombar').style.display = 'none';
-        editor.ui.getDom('scalelayer').style.display = 'none';
-        editor.ui.getDom('elementpath').style.display = "none";
-        editor.ui.getDom('wordcount').style.display = "none";
-        editor.ui._updateFullScreen();
+        editor = new baidu.editor.ui.Editor(editorOption);
+        //objApp.ResetInitialStyle();
+        editor.render('editorArea');
 
-    });
+        editor.addListener("sourceModeChanged",function(type,mode){
+        });
 
-    editor.addListener('aftersetcontent', function() {
-        updateCss();
-        WizEditor.onNoteLoadFinished();
-        console.log("content changed.");
-    });
+        // hide builtin toolbar, from UE dev team.
+        editor.addListener('ready', function () {
+            editor.ui.getDom('toolbarbox').style.display = 'none';
+            editor.ui.getDom('bottombar').style.display = 'none';
+            editor.ui.getDom('scalelayer').style.display = 'none';
+            editor.ui.getDom('elementpath').style.display = "none";
+            editor.ui.getDom('wordcount').style.display = "none";
+            editor.ui._updateFullScreen();
 
-} catch (err) {
-    alert(err);
-}
+            console.log("ueditor get ready");
+            WizEditor.on_ueditorInitFinished();
+        });
+
+        editor.addListener('aftersetcontent', function() {
+            console.log("set content");
+            updateCss();
+            WizEditor.onNoteLoadFinished();
+        });
+
+        editor.addListener('keydown', function() {
+            WizEditor.setContentsChanged(true);
+        });
+
+    } catch (err) {
+        alert(err);
+    }
 }
 
 function speakHelloWorld()
@@ -93,6 +107,9 @@ function setEditorHtml(html, bEditing)
 }
 
 function setEditing(bEditing) {
+
+    console.log("set document editing , head : " + wiz_head + "  \n body : " + wiz_html);
+
     editor.document.head.innerHTML = wiz_head;
     //if (bEditing) {
     //    editor.document.head.innerHTML = wiz_head + m_header; // restore original header
@@ -112,6 +129,10 @@ function setEditing(bEditing) {
 
 function viewNote(strGUID, bEditing, strHtml, strHead)
 {
+    console.log("view note : " + strGUID + "\n" + strHtml)
+    for (var i = 0 ; i < 10000000; i++) {
+        //do noting
+    };
     try {
         m_currentGUID = strGUID;
         wiz_html = strHtml;
@@ -136,27 +157,32 @@ function viewNote(strGUID, bEditing, strHtml, strHead)
 
 function viewCurrentNote()
 {
+    console.log("view currentnote called");
     return viewNote(WizEditor.currentNoteGUID(), WizEditor.currentIsEditing(),
                     WizEditor.currentNoteHtml(), WizEditor.currentNoteHead());
 }
 
-function updateCurrentNoteHtml()
+function updateCurrentNoteHtml(strGUID, strHtml, strHead)
 {
-    if (m_currentGUID == WizEditor.currentNoteGUID())
+    console.log("update current note html , m_currentGUID : " + m_currentGUID + " \n editor note guid : " + strGUID);
+    if (m_currentGUID == strGUID)
     {
-        wiz_html = WizEditor.currentNoteHtml();
-        wiz_head = WizEditor.currentNoteHead();
+        wiz_html = strHtml;
+        wiz_head = strHead;
     }
+    console.log("update current note html finished, html body ; " + wiz_html);
 }
 
 function updateCss()
 {
     var css= editor.document.getElementsByTagName('link');
+    console.log("update Css. get css file : " + css)
     for (var i = 0; i < css.length; i++) {
         if (css[i].rel != 'stylesheet') return;
         if (css[i].type != 'text/css') return;
         if (css[i].href.match(m_defaultCss)) {
             css[i].href = m_defaultCss + "?v=" + m_defaultCssVersion;
+            console.log("after change file location : " + css[i].href);
             m_defaultCssVersion++;
         }
     }

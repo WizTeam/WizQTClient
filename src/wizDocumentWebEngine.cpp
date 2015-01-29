@@ -204,101 +204,14 @@ void CWizDocumentWebEngine::waitForDone()
 //#endif // Q_OS_MAC
 //}
 
-/*
+
 void CWizDocumentWebEngine::keyPressEvent(QKeyEvent* event)
 {
-//    // special cases process
-//    if (event->key() == Qt::Key_Escape)
-//    {
-//        // FIXME: press esc will insert space at cursor if not clear focus
-//        clearFocus();
-//        return;
-//    }
-//    else if (event->key() == Qt::Key_S
-//             && event->modifiers() == Qt::ControlModifier)
-//    {
-//        saveDocument(view()->note(), false);
-//        return;
-//    }
-//    else if (event->key() == Qt::Key_A && event->modifiers() == Qt::ControlModifier && !isEditing())
-//    {
-//        //阅读模式下selectall无法触发，强制触发阅读模式下的selectall。
-//        emit selectAllKeyPressed();
-//        return;
-//    }
-//    else if (event->key() == Qt::Key_Tab)
-//    {
-//        //set contentchanged
-//        setContentsChanged(true);
-//        emit statusChanged();
-//        return;
-//    }
-//#if QT_VERSION < 0x050000
-//    #ifdef Q_OS_MAC
-//    else if (event->key() == Qt::Key_Z)
-//    {
-//        //Ctrl+Shift+Z,  shortcut for redo can't catch by actions in QT4
-//        Qt::KeyboardModifiers keyMod = QApplication::keyboardModifiers();
-//        bool isSHIFT = keyMod.testFlag(Qt::ShiftModifier);
-//        bool isCTRL = keyMod.testFlag(Qt::ControlModifier);
-//        if (isCTRL && isSHIFT) {
-//            redo();
-//            return;
-//        } else if (isCTRL && !isSHIFT) {
-//            undo();
-//            return;
-//        }
-//    }
-//    #endif
-
-//#endif
-
-////    int keyValue = event->key();
-////    QString keyText = event->text();
-////    qDebug() << keyValue << " text : " << keyText;
-
-//#ifdef Q_OS_LINUX
-//    setUpdatesEnabled(false);
-//    QWebEngineView::keyPressEvent(event);
-//    setUpdatesEnabled(true);
-//#else
-
-//    if (event->key() == Qt::Key_Backspace)
-//    {
-//        if (event->modifiers() == Qt::ControlModifier)
-//        {
-//            editorCommandExecuteRemoveStartOfLine();
-//            return;
-//        }
-//        else
-//        {
-//            //FIXME: would not trigger content change event, when delete row and image by backspace
-//            setContentsChanged(true);
-//        }
-//    }
-
-//    //special handled for qt4,case capslock doesn't work
-//#if QT_VERSION < 0x050000
-////    if (65 <= keyValue && 90 >= keyValue)
-////    {
-////        if (event->key() & Qt::Key_CapsLock)
-////        {
-////            qDebug() << "capslock pressed";
-////            QKeyEvent newKeyEvent(event->type(), keyValue, event->modifiers(),
-////                                  keyText.toUpper(), event->isAutoRepeat(), event->count());
-////            QWebEngineView::keyPressEvent(&newKeyEvent);
-////            return;
-////        }
-////    }
-//#endif
-//    QWebEngineView::keyPressEvent(event);
-//#endif
-
-//    if (event->key() == Qt::Key_Enter || event->key() == Qt::Key_Return) {
-//        tryResetTitle();
-//    }
+    qDebug() << "key pressed : " << event;
+    QWebEngineView::keyPressEvent(event);
 }
 
+/*
 void CWizDocumentWebEngine::focusInEvent(QFocusEvent *event)
 {
     if (m_bEditingMode) {
@@ -397,15 +310,16 @@ void CWizDocumentWebEngine::tryResetTitle()
 //    {
 //        docPElement.removeFromDocument();
 //    }
+    page()->runJavaScript("editor.getPlainTxt();", [this](const QVariant& returnValue){
+        QString strTitle = returnValue.toString();
+//        strTitle = str2title(strTitle.left(255));
+        if (strTitle.isEmpty())
+            return;
 
-    QString strTitle = getDataByJavaScriptFromPage<QString>("editor.getPlainTxt();");
-//    strTitle = str2title(strTitle.left(255));
-    if (strTitle.isEmpty())
-        return;
+        view()->resetTitle(strTitle);
+        m_bNewNoteTitleInited = true;
+    });
 
-    view()->resetTitle(strTitle);
-
-    m_bNewNoteTitleInited = true;
 }
 
 //void CWizDocumentWebEngine::dropEvent(QDropEvent* event)
@@ -529,7 +443,7 @@ void CWizDocumentWebEngine::onDocumentReady(const QString kbGUID, const QString 
         resetCheckListEnvironment();
         viewDocumentInEditor(m_bEditingMode);
     } else {
-        initEditor();
+        loadEditor();
     }
 }
 
@@ -548,11 +462,7 @@ void CWizDocumentWebEngine::onDocumentSaved(const QString kbGUID, const QString 
 
 void CWizDocumentWebEngine::viewDocument(const WIZDOCUMENTDATA& doc, bool editing)
 {
-    if (!m_bEditorInited)
-    {
-        initEditor();
-    }
-    return;
+    qDebug() << "view document called, init editor , guid " << doc.strGUID << "  editing mode : " << editing;
 
     // set data
     m_bEditingMode = editing;
@@ -567,6 +477,7 @@ void CWizDocumentWebEngine::viewDocument(const WIZDOCUMENTDATA& doc, bool editin
         setFocus();
     }
 
+    qDebug() << "try to load document , guid : " << doc.strGUID;
     // ask extract and load
     m_docLoadThread->load(doc);
 }
@@ -581,11 +492,6 @@ void CWizDocumentWebEngine::reloadNoteData(const WIZDOCUMENTDATA& data)
 
     // reload may triggered when update from server or locally reflected by modify
     m_docLoadThread->load(data);
-}
-
-QString CWizDocumentWebEngine::getDefaultCssFilePath() const
-{
-    return m_strDefaultCssFilePath;
 }
 
 bool CWizDocumentWebEngine::resetDefaultCss()
@@ -622,6 +528,8 @@ bool CWizDocumentWebEngine::resetDefaultCss()
     f2.write(strCss.toUtf8());
     f2.close();
 
+    emit resetDefaultCss(m_strDefaultCssFilePath);
+
     return true;
 }
 
@@ -652,20 +560,29 @@ void CWizDocumentWebEngine::setEditorEnable(bool enalbe)
     }
 }
 
+void CWizDocumentWebEngine::on_ueditorInitFinished()
+{
+    qDebug() << "on init ueditor finished";
+    if (!resetDefaultCss())
+        return;
+
+    m_bEditorInited = true;
+    viewDocumentInEditor(m_bEditingMode);
+    return;
+}
+
 bool CWizDocumentWebEngine::evaluateJavaScript(const QString& js)
 {
     page()->runJavaScript(js);
     return true;
 }
 
-void CWizDocumentWebEngine::initEditor()
+void CWizDocumentWebEngine::loadEditor()
 {
     qDebug() << "initEditor called";
     if (m_bEditorInited)
         return;
 
-    if (!resetDefaultCss())
-        return;
 
 
     QString strFileName = Utils::PathResolve::resourcesPath() + "files/editor/index.html";
@@ -767,11 +684,47 @@ bool CWizDocumentWebEngine::insertImage(const QString& strFileName, bool bCopyFi
     return false;
 }
 
+class JavaScriptCallback
+{
+public:
+    JavaScriptCallback(QVariant& _expected) : m_result(_expected) { }
+    virtual void operator() (const QVariant& result) {
+        qDebug() << "js call back called";
+        m_result = result;
+    }
+private:
+    QVariant& m_result;
+};
+
 QString CWizDocumentWebEngine::getStringDataByJavaScriptFromPage(const QString& scriptSource)
 {
-   QString result;
-   page()->runJavaScript(scriptSource, [&result](const QVariant& returnValue){ result = returnValue.toString(); });
-   return result;
+//   QVariant result;
+//   JavaScriptCallback jsCallBack(result);
+//    QString *str = new QString();
+//   page()->runJavaScript(scriptSource, [&str](const QVariant& returnValue) {
+//       *str = returnValue.toString();
+//   });
+////   QString str = result.toString();
+//   QString result = *str;
+//   return result;
+
+    return "";
+}
+
+int CWizDocumentWebEngine::getIntDataByJavaScriptFromPage(const QString& scriptSource)
+{
+    return 0;
+//   int result;
+//   page()->runJavaScript(scriptSource, [&result](const QVariant& returnValue){ result = returnValue.toInt(); });
+//   return resuVlt;
+}
+
+bool CWizDocumentWebEngine::getBoolDataByJavaScriptFromPage(const QString& scriptSource)
+{
+    return false;
+//   bool result;
+//   page()->runJavaScript(scriptSource, [&result](const QVariant& returnValue){ result = returnValue.toBool(); });
+//   return result;
 }
 
 bool CWizDocumentWebEngine::shareNoteByEmail()
@@ -786,12 +739,10 @@ bool CWizDocumentWebEngine::shareNoteByEmail()
 
 void CWizDocumentWebEngine::onEditorLoadFinished(bool ok)
 {
-
+    qDebug() << "on editor load finished , ok : " << ok;
     if (ok)
     {
         registerJavaScriptWindowObject();
-        m_bEditorInited = true;
-//        viewDocumentInEditor(m_bEditingMode);
         return;
     }
 
@@ -877,6 +828,7 @@ void CWizDocumentWebEngine::splitHtmlToHeadAndBody(const QString& strHtml, QStri
 
 void CWizDocumentWebEngine::saveEditingViewDocument(const WIZDOCUMENTDATA &data, bool force)
 {
+    qDebug() << "save editing veiw document , guid : " <<  data.strGUID;
     //FIXME: remove me, just for find a image losses bug.
     Q_ASSERT(!data.strGUID.isEmpty());
 
@@ -890,23 +842,38 @@ void CWizDocumentWebEngine::saveEditingViewDocument(const WIZDOCUMENTDATA &data,
     //
     setContentsChanged(false);
     //
+    QEventLoop loop;
+    qDebug() << "create mutex and start to run java script";
+    QEventLoopLocker *eventLocker = new QEventLoopLocker(&loop);
+    page()->runJavaScript("editor.document.head.innerHTML;", [&](const QVariant& headData) {
+        m_strCurrentNoteHead = headData.toString();
+        //
+        page()->runJavaScript("editor.getContent();", [&](const QVariant& bodyData) {
+            m_strCurrentNoteHtml = bodyData.toString();
+            qDebug() <<"get html data from editor , head : " << m_strCurrentNoteHead << " \n body : " << m_strCurrentNoteHtml;
+            //
+            QString strExec = QString("updateCurrentNoteHtml('%1', '%2', '%3');")
+                    .arg(m_strCurrentNoteGUID).arg(m_strCurrentNoteHtml).arg(m_strCurrentNoteHead);
+            page()->runJavaScript(strExec, [&](const QVariant&) {
+                QString strHead = m_strCurrentNoteHead;
+                QRegExp regHead("<link[^>]*" + m_strDefaultCssFilePath + "[^>]*>", Qt::CaseInsensitive);
+                strHead.replace(regHead, "");
+                //
+                QString strHtml = m_strCurrentNoteHtml;
+                strHtml = "<html><head>" + strHead + "</head><body>" + strHtml + "</body></html>";
+                //
+                QString strFileName = m_mapFile.value(data.strKbGUID);
+                m_docSaverThread->save(data, strHtml, strFileName, 0);
+                qDebug() << "get document data finished,  unlock the meutex";
+                delete eventLocker;
+            });
+            // update current html to js variant
+        });
+    });
+    //  save document
 
-    QString strFileName = m_mapFile.value(data.strGUID);
-    QString strHead = getDataByJavaScriptFromPage<QString>("editor.document.head.innerHTML;");
-    m_strCurrentNoteHead = strHead;
-    QRegExp regHead("<link[^>]*" + m_strDefaultCssFilePath + "[^>]*>", Qt::CaseInsensitive);
-    strHead.replace(regHead, "");
-
-    QString strHtml = getDataByJavaScriptFromPage<QString>("editor.getContent();");
-    //
-    m_strCurrentNoteHtml = strHtml;
-    //
-    page()->runJavaScript(("updateCurrentNoteHtml();"));
-
-    //
-    strHtml = "<html><head>" + strHead + "</head><body>" + strHtml + "</body></html>";
-
-    m_docSaverThread->save(data, strHtml, strFileName, 0);
+    loop.exec();
+    qDebug() << "quit save editing view document ";
 }
 
 void CWizDocumentWebEngine::saveReadingViewDocument(const WIZDOCUMENTDATA &data, bool force)
@@ -920,6 +887,7 @@ void CWizDocumentWebEngine::saveReadingViewDocument(const WIZDOCUMENTDATA &data,
 
 QString CWizDocumentWebEngine::currentNoteGUID()
 {
+    qDebug() << "currentNoteGUID called ; " << m_strCurrentNoteGUID;
     return m_strCurrentNoteGUID;
 }
 QString CWizDocumentWebEngine::currentNoteHtml()
@@ -950,7 +918,10 @@ void CWizDocumentWebEngine::updateNoteHtml()
         m_strCurrentNoteHead += "<link rel=\"stylesheet\" type=\"text/css\" href=\"" + m_strDefaultCssFilePath + "\">";
 
         m_strCurrentNoteGUID = doc.strGUID;
-        page()->runJavaScript(("updateCurrentNoteHtml();"));
+        QString strExec = QString("updateCurrentNoteHtml(%1, %2, %3);")
+                .arg(m_strCurrentNoteGUID).arg(m_strCurrentNoteHtml).arg(m_strCurrentNoteHead);
+        page()->runJavaScript(strExec);
+        //        page()->runJavaScript(("updateCurrentNoteHtml();"));
     }
 }
 
@@ -1024,14 +995,19 @@ void CWizDocumentWebEngine::viewDocumentInEditor(bool editing)
             .arg(strHtml)
             .arg(strHead);
             */
-    QString strExec = QString("viewCurrentNote();");
 
-    ret = getDataByJavaScriptFromPage<bool>(strExec);
-    if (!ret) {
-        qDebug() << "[Editor] failed to load note: " << strExec;
-        // hide client and show error
-        return;
-    }
+    qDebug() << "try to view document head : " << m_strCurrentNoteHead << "  \n html : " << m_strCurrentNoteHtml;
+    emit viewNoteRequest(m_strCurrentNoteGUID, m_bCurrentEditing, m_strCurrentNoteHtml, m_strCurrentNoteHead);
+    qDebug() << "after send view note request";
+//    QString strExec = QString("viewCurrentNote();");
+//    QString strExec = QString("viewNote(%1, %2, %3, %4);").arg(m_strCurrentNoteGUID).arg(m_bCurrentEditing).arg(m_strCurrentNoteHtml).arg(m_strCurrentNoteHead);
+
+//    ret = getDataByJavaScriptFromPage<bool>(strExec);
+//    if (!ret) {
+//        qDebug() << "[Editor] failed to load note: " << strExec;
+//        // hide client and show error
+//        return;
+//    }
 
     // show client
     MainWindow* window = qobject_cast<MainWindow *>(m_app.mainWindow());
@@ -1082,20 +1058,21 @@ void CWizDocumentWebEngine::setEditingDocument(bool editing)
     m_bEditingMode = editing;
     //
     QString strScript = QString("setEditing(%1);").arg(editing ? "true" : "false");
-    page()->runJavaScript(strScript);
-    initCheckListEnvironment();
+    page()->runJavaScript(strScript, [&](const QVariant&) {
+        initCheckListEnvironment();
 
-    if (editing) {
-        setFocus(Qt::MouseFocusReason);
-        editorFocus();
-    }
+        if (editing) {
+            setFocus(Qt::MouseFocusReason);
+            editorFocus();
+        }
 
-
-    Q_EMIT statusChanged();
+        Q_EMIT statusChanged();
+    });
 }
 
 void CWizDocumentWebEngine::saveDocument(const WIZDOCUMENTDATA& data, bool force)
 {
+    qDebug() << "web engne save document, guid :  " << data.strGUID << "  editor inited : " << m_bEditorInited << "  noteloaded : " << view()->noteLoaded() << "  editing mode : " << m_bEditingMode;
     if (!m_bEditorInited)
         return;
     //
@@ -1115,13 +1092,13 @@ void CWizDocumentWebEngine::saveDocument(const WIZDOCUMENTDATA& data, bool force
 QString CWizDocumentWebEngine::editorCommandQueryCommandValue(const QString& strCommand)
 {
     QString strExec = "editor.queryCommandValue('" + strCommand +"');";
-    return getDataByJavaScriptFromPage<QString>(strExec);
+    return getStringDataByJavaScriptFromPage(strExec);
 }
 
 int CWizDocumentWebEngine::editorCommandQueryCommandState(const QString& strCommand)
 {
     QString strExec = "editor.queryCommandState('" + strCommand +"');";
-    return getDataByJavaScriptFromPage<int>(strExec);
+    return getIntDataByJavaScriptFromPage(strExec);
 }
 
 /*
@@ -1163,7 +1140,7 @@ bool CWizDocumentWebEngine::editorCommandExecuteCommand(const QString& strComman
 
 bool CWizDocumentWebEngine::editorCommandQueryLink()
 {
-    QString strUrl = getDataByJavaScriptFromPage<QString>("WizGetLinkUrl();");
+    QString strUrl = getStringDataByJavaScriptFromPage("WizGetLinkUrl();");
     if (strUrl.isEmpty())
         return false;
 
@@ -1207,7 +1184,7 @@ bool CWizDocumentWebEngine::editorCommandExecuteLinkInsert()
         connect(m_editorInsertLinkForm, SIGNAL(accepted()), SLOT(on_editorCommandExecuteLinkInsert_accepted()));
     }
 
-    QString strUrl = getDataByJavaScriptFromPage<QString>("WizGetLinkUrl();");
+    QString strUrl = getStringDataByJavaScriptFromPage("WizGetLinkUrl();");
     m_editorInsertLinkForm->setUrl(strUrl);
 
     m_editorInsertLinkForm->exec();
@@ -1286,7 +1263,7 @@ void CWizDocumentWebEngine::replaceCurrent(QString strSource, QString strTarget)
 void CWizDocumentWebEngine::replaceAndFindNext(QString strSource, QString strTarget, bool bCasesensitive)
 {
     QString strExec = QString("WizReplaceText('%1', '%2', %3)").arg(strSource).arg(strTarget).arg(bCasesensitive);
-    if (!getDataByJavaScriptFromPage<bool>(strExec))
+    if (!getBoolDataByJavaScriptFromPage(strExec))
     {
         TOLOG1("[Console] Javascript error : %1", strExec);
         return;
@@ -1468,7 +1445,7 @@ bool CWizDocumentWebEngine::editorCommandExecuteInsertCheckList()
     page()->runJavaScript("editor.execCommand('saveScene');");
 
     QString strExec = "WizTodo.insertOneTodo();";
-    bool ret = getDataByJavaScriptFromPage<bool>(strExec);
+    bool ret = getBoolDataByJavaScriptFromPage(strExec);
 
     // after insert first checklist, should manual notify editor to save current sence for undo.
     page()->runJavaScript("editor.execCommand('saveScene');");
@@ -1509,7 +1486,7 @@ bool CWizDocumentWebEngine::editorCommandExecuteRemoveFormat()
 
 bool CWizDocumentWebEngine::editorCommandExecutePlainText()
 {
-    QString strText = getDataByJavaScriptFromPage<QString>("editor.getPlainTxt()");
+    QString strText = getStringDataByJavaScriptFromPage("editor.getPlainTxt()");
     QRegExp exp("<[^>]*>");
     strText.replace(exp, "");
 #if QT_VERSION > 0x050000
@@ -1522,8 +1499,9 @@ bool CWizDocumentWebEngine::editorCommandExecutePlainText()
 
     setContentsChanged(true);
     m_strCurrentNoteHtml = strText;
-    QString strExec = QString("viewCurrentNote();");
-    return getDataByJavaScriptFromPage<bool>(strExec);
+    emit viewNoteRequest(m_strCurrentNoteGUID, m_bCurrentEditing, m_strCurrentNoteHtml, m_strCurrentNoteHead);
+//    QString strExec = QString("viewCurrentNote();");
+//    return getBoolDataByJavaScriptFromPage(strExec);
 }
 
 bool CWizDocumentWebEngine::editorCommandExecuteFormatMatch()
@@ -1745,7 +1723,7 @@ void CWizDocumentWebEngine::printDocument()
 bool CWizDocumentWebEngine::findIMGElementAt(QPoint point, QString& strSrc)
 {
     QPoint ptPos = mapFromGlobal(point);
-    QString strImgSrc = getDataByJavaScriptFromPage<QString>(QString("WizGetImgElementByPoint(%1, %2)").
+    QString strImgSrc = getStringDataByJavaScriptFromPage(QString("WizGetImgElementByPoint(%1, %2)").
                                                                 arg(ptPos.x()).arg(ptPos.y()));
 
     if (strImgSrc.isEmpty())
@@ -1781,7 +1759,7 @@ WebEnginePage::~WebEnginePage()
 
 void WebEnginePage::javaScriptConsoleMessage(QWebEnginePage::JavaScriptConsoleMessageLevel level, const QString& message, int lineNumber, const QString& sourceID)
 {
-    qDebug() << "console at line : " << lineNumber << "  message :  " << message << " source id : " << sourceID.left(15);
+    qDebug() << "console at line : " << lineNumber << "  message :  " << message << " source id : " << sourceID.left(200);
 }
 
 void WebEnginePage::triggerAction(QWebEnginePage::WebAction action, bool checked)

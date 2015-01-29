@@ -17,7 +17,7 @@
 #include "share/wizmisc.h"
 #include "wizdef.h"
 #include "share/wizsettings.h"
-#include "wizDocumentWebView.h"
+#include "wizDocumentWebEngine.h"
 #include "wizactions.h"
 #include "utils/logger.h"
 #include "share/wizObjectDataDownloader.h"
@@ -823,7 +823,7 @@ WizEditorContextMenuItem* EditorToolBar::contextMenuData()
     return arrayData;
 }
 
-void EditorToolBar::setDelegate(CWizDocumentWebView* editor)
+void EditorToolBar::setDelegate(CWizDocumentWebEngine* editor)
 {
     Q_ASSERT(editor);
 
@@ -877,9 +877,9 @@ void EditorToolBar::on_delegate_requestShowContextMenu(const QPoint& pos)
         actionFromName(WIZEDITOR_ACTION_PASTE)->setEnabled(false);
     }
 
-#ifdef QT_DEBUG
-    m_menuContext->addAction(m_editor->pageAction(QWebPage::InspectElement));
-#endif
+//#ifdef QT_DEBUG
+//    m_menuContext->addAction(m_editor->pageAction(QWebEnginePage::InspectElement));
+//#endif
 
     m_menuContext->popup(pos);
     m_menuContext->update();
@@ -1131,17 +1131,17 @@ void EditorToolBar::on_editor_baidu_triggered()
 
 void EditorToolBar::on_editor_cut_triggered()
 {
-    m_editor->triggerPageAction(QWebPage::Cut);
+    m_editor->triggerPageAction(QWebEnginePage::Cut);
 }
 
 void EditorToolBar::on_editor_copy_triggered()
 {
-    m_editor->triggerPageAction(QWebPage::Copy);
+    m_editor->triggerPageAction(QWebEnginePage::Copy);
 }
 
 void EditorToolBar::on_editor_paste_triggered()
 {
-    m_editor->triggerPageAction(QWebPage::Paste);
+    m_editor->triggerPageAction(QWebEnginePage::Paste);
 }
 
 void EditorToolBar::on_comboFontFamily_indexChanged(const QString& strFamily)

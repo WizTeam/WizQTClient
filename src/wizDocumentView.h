@@ -24,6 +24,7 @@ class CWizUserCipherForm;
 class CWizObjectDataDownloaderHost;
 class QStackedWidget;
 class QWebFrame;
+class QWebEnginePage;
 class CWizDocumentEditStatusSyncThread;
 class CWizDocumentStatusCheckThread;
 class CWizDocumentStatusChecker;
@@ -45,7 +46,7 @@ public:
     virtual QSize sizeHint() const { return QSize(200, 1); }
 
     QWidget* client() const;
-    CWizDocumentWebView* web() const { return m_web; }
+    CWizDocumentWebEngine* web() const { return m_engine; }
     QWebView* commentView() const { return m_comments; }
     //
     void waitForDone();
@@ -61,7 +62,7 @@ protected:
     QLabel* m_msgLabel;
 
     QWidget* m_docView;
-    CWizDocumentWebView* m_web;
+//    CWizDocumentWebView* m_web;
     CWizDocumentWebEngine* m_engine;
     QWebView* m_comments;
     CWizSplitter* m_splitter;
@@ -108,6 +109,7 @@ public:
     void setStatusToEditingByCheckList();
 
     QWebFrame* noteFrame();
+    QWebEnginePage* notePage();
 
 signals:
     void documentSaved(const QString& strGUID, CWizDocumentView* viewer);
@@ -140,6 +142,8 @@ public Q_SLOTS:
     void on_webView_focus_changed();
 
     void on_notifyBar_link_clicked(const QString& link);
+
+    void on_command_request();
 
 private:
     void loadNote(const WIZDOCUMENTDATA &doc);

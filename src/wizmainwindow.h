@@ -196,7 +196,7 @@ public:
     // CWizDocument passthrough methods
     QSize clientSize() const { return m_splitter->widget(2)->size(); }
     QWidget* client() const { return m_doc->client(); }
-    CWizDocumentWebView* web() const { return m_doc->web(); }
+    CWizDocumentWebEngine* web() const { return m_doc->web(); }
     void showClient(bool visible) const { return m_doc->showClient(visible); }
 
     CWizActions* actions() const { return m_actions; }

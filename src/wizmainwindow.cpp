@@ -31,7 +31,7 @@
 #include <coreplugin/icore.h>
 #include <coreplugin/aboutdialog.h>
 
-#include "wizDocumentWebView.h"
+#include "wizDocumentWebEngine.h"
 #include "wizactions.h"
 #include "wizpreferencedialog.h"
 #include "wizupgradenotifydialog.h"
@@ -159,7 +159,7 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
         SLOT(on_searchProcess(const QString&, const CWizDocumentDataArray&, bool)));
 
     connect(m_doc, SIGNAL(documentSaved(QString,CWizDocumentView*)), SIGNAL(documentSaved(QString,CWizDocumentView*)));
-    connect(m_doc->web(), SIGNAL(selectAllKeyPressed()), SLOT(on_actionEditingSelectAll_triggered()));
+//    connect(m_doc->web(), SIGNAL(selectAllKeyPressed()), SLOT(on_actionEditingSelectAll_triggered()));
     connect(this, SIGNAL(documentSaved(QString,CWizDocumentView*)), m_doc, SLOT(on_document_data_saved(QString,CWizDocumentView*)));
 
     // misc settings
@@ -313,7 +313,8 @@ MainWindow*MainWindow::instance()
 
 QNetworkDiskCache*MainWindow::webViewNetworkCache()
 {
-    return m_doc->web()->networkCache();
+    return 0;
+//    return m_doc->web()->networkCache();
 }
 
 void MainWindow::closeEvent(QCloseEvent* event)
@@ -615,7 +616,7 @@ void MainWindow::initMenuBar()
 
 void MainWindow::on_editor_statusChanged()
 {
-    CWizDocumentWebView* editor = m_doc->web();
+    CWizDocumentWebEngine* editor = m_doc->web();
 
     if (!editor->isInited() || !editor->hasFocus()) {
         m_actions->actionFromName(WIZACTION_EDITOR_UNDO)->setEnabled(false);
@@ -685,7 +686,7 @@ void MainWindow::on_editor_statusChanged()
         m_actions->actionFromName(WIZACTION_EDITOR_PASTE_PLAIN)->setEnabled(false);
         m_actions->actionFromName(WIZACTION_EDITOR_DELETE)->setEnabled(false);
 
-        if (!editor->page()->selectedHtml().isEmpty()) {
+        if (!editor->page()->selectedText().isEmpty()) {
             m_actions->actionFromName(WIZACTION_EDITOR_COPY)->setEnabled(true);
         } else {
             m_actions->actionFromName(WIZACTION_EDITOR_COPY)->setEnabled(false);
@@ -694,7 +695,7 @@ void MainWindow::on_editor_statusChanged()
         m_actions->actionFromName(WIZACTION_EDITOR_PASTE)->setEnabled(true);
         m_actions->actionFromName(WIZACTION_EDITOR_PASTE_PLAIN)->setEnabled(true);
 
-        if (!editor->page()->selectedHtml().isEmpty()) {
+        if (!editor->page()->selectedText().isEmpty()) {
             m_actions->actionFromName(WIZACTION_EDITOR_CUT)->setEnabled(true);
             m_actions->actionFromName(WIZACTION_EDITOR_COPY)->setEnabled(true);
             m_actions->actionFromName(WIZACTION_EDITOR_DELETE)->setEnabled(true);
@@ -1566,24 +1567,24 @@ void MainWindow::on_actionEditingRedo_triggered()
 
 void MainWindow::on_actionEditingCut_triggered()
 {
-    m_doc->web()->triggerPageAction(QWebPage::Cut);
+    m_doc->web()->triggerPageAction(QWebEnginePage::Cut);
 }
 
 void MainWindow::on_actionEditingCopy_triggered()
 {
-    m_doc->web()->triggerPageAction(QWebPage::Copy);
+    m_doc->web()->triggerPageAction(QWebEnginePage::Copy);
 }
 
 void MainWindow::on_actionEditingPaste_triggered()
 {
     m_doc->web()->setPastePlainTextEnable(false);
-    m_doc->web()->triggerPageAction(QWebPage::Paste);
+    m_doc->web()->triggerPageAction(QWebEnginePage::Paste);
 }
 
 void MainWindow::on_actionEditingPastePlain_triggered()
 {
     m_doc->web()->setPastePlainTextEnable(true);
-    m_doc->web()->triggerPageAction(QWebPage::Paste);
+    m_doc->web()->triggerPageAction(QWebEnginePage::Paste);
 }
 
 void MainWindow::on_actionEditingDelete_triggered()
@@ -1593,7 +1594,7 @@ void MainWindow::on_actionEditingDelete_triggered()
 
 void MainWindow::on_actionEditingSelectAll_triggered()
 {
-    m_doc->web()->triggerPageAction(QWebPage::SelectAll);
+    m_doc->web()->triggerPageAction(QWebEnginePage::SelectAll);
 }
 
 void MainWindow::on_actionViewToggleCategory_triggered()
@@ -1864,7 +1865,7 @@ void MainWindow::on_actionFindReplace_triggered()
 
 void MainWindow::on_actionSaveAsPDF_triggered()
 {
-    if (CWizDocumentWebView* web = m_doc->web())
+    if (CWizDocumentWebEngine* web = m_doc->web())
     {
         QString	fileName = QFileDialog::getSaveFileName (this, QString(), QDir::homePath(), tr("PDF Files (*.pdf)"));
         if (!fileName.isEmpty())
@@ -1876,7 +1877,7 @@ void MainWindow::on_actionSaveAsPDF_triggered()
 
 void MainWindow::on_actionSaveAsHtml_triggered()
 {
-    if (CWizDocumentWebView* web = m_doc->web())
+    if (CWizDocumentWebEngine* web = m_doc->web())
     {
         QString strPath = QFileDialog::getExistingDirectory(0, tr("Open Directory"),
                                                            QDir::homePath(),

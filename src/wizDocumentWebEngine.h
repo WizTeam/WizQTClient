@@ -66,6 +66,8 @@ public:
     bool isInited() const { return m_bEditorInited; }
     bool isEditing() const { return m_bEditingMode; }
 
+    bool isModified() const { return false;}
+
     Q_INVOKABLE QString currentNoteGUID();
     Q_INVOKABLE QString currentNoteHtml();
     Q_INVOKABLE QString currentNoteHead();
@@ -76,12 +78,13 @@ public:
 
     // initialize editor style before render, only invoke once.
     bool resetDefaultCss();
-    Q_INVOKABLE QString getDefaultCssFilePath() const;
+    Q_SIGNAL void resetDefaultCss(const QString& strPath);
 
     /* editor related */
     void editorResetFont();
     void editorFocus();
     void setEditorEnable(bool enalbe);
+    Q_INVOKABLE void on_ueditorInitFinished();
 
     bool evaluateJavaScript(const QString& js);
 
@@ -122,7 +125,7 @@ public:
     //
 
 private:
-    void initEditor();
+    void loadEditor();
     void registerJavaScriptWindowObject();
     void viewDocumentInEditor(bool editing);
     void tryResetTitle();
@@ -137,7 +140,7 @@ private:
     void saveReadingViewDocument(const WIZDOCUMENTDATA& data, bool force);
 
 protected:
-//    virtual void keyPressEvent(QKeyEvent* event);
+    virtual void keyPressEvent(QKeyEvent* event);
 //    virtual void inputMethodEvent(QInputMethodEvent* event);
 //    virtual void focusInEvent(QFocusEvent* event);
 //    virtual void focusOutEvent(QFocusEvent* event);
@@ -298,20 +301,16 @@ Q_SIGNALS:
 
     //
     void viewDocumentFinished();
+    //
+    void viewNoteRequest(const QString& strGUID, bool editMode, const QString& strHtml, const QString& strHead);
 
 private:
     void setWindowVisibleOnScreenShot(bool bVisible);
     bool insertImage(const QString& strFileName, bool bCopyFile);
 
     QString getStringDataByJavaScriptFromPage(const QString& scriptSource);
-
-    template <typename Type>
-    Type getDataByJavaScriptFromPage(const QString& scriptSource)
-    {
-        Type returnValue;
-        //page()->runJavaScript(scriptSource,[returnValue](const QString& result){ returnValue = <Type>result;});
-        return returnValue;
-    }
+    int getIntDataByJavaScriptFromPage(const QString& scriptSource);
+    bool getBoolDataByJavaScriptFromPage(const QString& scriptSource);
 
 };
 

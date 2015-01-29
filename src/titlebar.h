@@ -10,7 +10,7 @@ struct WIZDOCUMENTDATA;
 class CWizDatabase;
 class CWizTagListWidget;
 class CWizNoteInfoForm;
-class CWizDocumentWebView;
+class CWizDocumentWebEngine;
 class CWizAttachmentListWidget;
 
 namespace Core {
@@ -33,7 +33,7 @@ public:
     CWizDocumentView* noteView();
     void setLocked(bool bReadOnly, int nReason, bool bIsGroup);
     void showMessageTip(Qt::TextFormat format, const QString& strInfo);
-    void setEditor(CWizDocumentWebView* editor);
+    void setEditor(CWizDocumentWebEngine* editor);
 
     void setNote(const WIZDOCUMENTDATA& data, bool editing, bool locked);
     void updateInfo(const WIZDOCUMENTDATA& doc);
@@ -68,7 +68,7 @@ private:
     void showEditorBar();
 
 private:
-    CWizDocumentWebView* m_editor;
+    CWizDocumentWebEngine* m_editor;
 
     TitleEdit* m_editTitle;
     InfoBar* m_infoBar;

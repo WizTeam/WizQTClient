@@ -7,6 +7,7 @@
 #include <QFile>
 #include <QTextStream>
 #include <QWebFrame>
+#include <QWebEnginePage>
 #include <QCoreApplication>
 #include <QTimer>
 
@@ -50,14 +51,14 @@ void MarkdownPlugin::onViewNoteLoaded(INoteView* view, const WIZDOCUMENTDATA& do
         return;
 
     if (canRender(view, doc))
-        render(view->noteFrame());
+        render(view->notePage());
 }
 
 void MarkdownPlugin::onFrameRenderRequested(QWebFrame* frame, bool bUseInlineCss)
 {
     if (frame)
     {
-        render(frame);
+        //render(frame);
         if (bUseInlineCss)
         {
             // wait for code render finished
@@ -87,9 +88,10 @@ bool MarkdownPlugin::canRender(INoteView* view, const WIZDOCUMENTDATA& doc)
     return false;
 }
 
-void MarkdownPlugin::render(QWebFrame* frame)
+void MarkdownPlugin::render(QWebEnginePage* page)
 {
-    Q_ASSERT(frame);
+    Q_ASSERT(page);
+
 
     QFile f(":/res/WizNote-Markdown.js");
     if (!f.open(QIODevice::ReadOnly)) {
@@ -107,7 +109,7 @@ void MarkdownPlugin::render(QWebFrame* frame)
     dir.mkpath(strPath);
     strExec.replace("${CACHE_PATH}", strPath);
 
-    frame->evaluateJavaScript(strExec);
+    page->runJavaScript(strExec);
 }
 
 void MarkdownPlugin::changeCssToInline(QWebFrame* frame)

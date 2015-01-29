@@ -5,6 +5,7 @@
 #include <QNetworkConfigurationManager>
 #include <QSplitter>
 #include <QList>
+#include <QWebView>
 
 #include <coreplugin/icore.h>
 
@@ -16,7 +17,7 @@
 #include "wizDocumentView.h"
 #include "wiztaglistwidget.h"
 #include "wizattachmentlistwidget.h"
-#include "wizDocumentWebView.h"
+#include "wizDocumentWebEngine.h"
 #include "wiznoteinfoform.h"
 #include "share/wizmisc.h"
 #include "share/wizDatabase.h"
@@ -181,7 +182,7 @@ void TitleBar::setLocked(bool bReadOnly, int nReason, bool bIsGroup)
     m_tagBtn->setEnabled(!bIsGroup ? true : false);
 }
 
-void TitleBar::setEditor(CWizDocumentWebView* editor)
+void TitleBar::setEditor(CWizDocumentWebEngine* editor)
 {
     Q_ASSERT(!m_editor);
 

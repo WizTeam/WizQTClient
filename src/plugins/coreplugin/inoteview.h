@@ -3,7 +3,7 @@
 
 #include <QWidget>
 
-class QWebFrame;
+class QWebEnginePage;
 
 namespace Core {
 
@@ -13,7 +13,7 @@ class INoteView : public QWidget
 
 public:
     explicit INoteView(QWidget *parent = 0);
-    virtual QWebFrame* noteFrame() = 0;
+    virtual QWebEnginePage* notePage() = 0;
     virtual bool isEditing() const = 0;
 };
 
