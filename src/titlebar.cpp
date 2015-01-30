@@ -201,11 +201,14 @@ void TitleBar::setEditor(CWizDocumentWebEngine* editor)
 
 void TitleBar::onEditorFocusIn()
 {
+    qDebug() << "title bar :: on editor focus in";
     showEditorBar();
 }
 
 void TitleBar::onEditorFocusOut()
 {
+    qDebug() << "title bar :: on editor focus out";
+    showEditorBar();
     if (!m_editorBar->hasFocus())
         showInfoBar();
 }

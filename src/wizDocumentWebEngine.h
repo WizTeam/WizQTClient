@@ -91,7 +91,13 @@ public:
     // -1: command invalid
     // 0: available
     // 1: executed before
+    QString editorQueryStateCommand(const QString &strCommand);
+    QString editorQueryValueCommand(const QString& strCommand);
+    void editorCommandQueryCommandState(const QString& strCommand,
+                                        const QWebEngineCallback<const QVariant &> &resultCallback);
     int editorCommandQueryCommandState(const QString& strCommand);
+    void editorCommandQueryCommandValue(const QString& strCommand,
+                                        const QWebEngineCallback<const QVariant &> &resultCallback);
     QString editorCommandQueryCommandValue(const QString& strCommand);
     bool editorCommandExecuteCommand(const QString& strCommand,
                                      const QString& arg1 = QString(),
@@ -123,6 +129,8 @@ public:
     void redo();
 
     //
+    Q_INVOKABLE void focusInEditor();
+    Q_INVOKABLE void focusOutEditor();
 
 private:
     void loadEditor();
@@ -140,11 +148,13 @@ private:
     void saveReadingViewDocument(const WIZDOCUMENTDATA& data, bool force);
 
 protected:
-    virtual void keyPressEvent(QKeyEvent* event);
+    virtual void keyPressEvent(QKeyEvent* event) Q_DECL_OVERRIDE;
 //    virtual void inputMethodEvent(QInputMethodEvent* event);
-//    virtual void focusInEvent(QFocusEvent* event);
-//    virtual void focusOutEvent(QFocusEvent* event);
-////    virtual void contextMenuEvent(QContextMenuEvent* event);
+    virtual void focusInEvent(QFocusEvent* event)  Q_DECL_OVERRIDE;
+    virtual void focusOutEvent(QFocusEvent* event) Q_DECL_OVERRIDE;
+
+    virtual bool event(QEvent* event) Q_DECL_OVERRIDE;
+    virtual void contextMenuEvent(QContextMenuEvent* event);
 //    virtual void dragEnterEvent(QDragEnterEvent* event);
 //    virtual void dragMoveEvent(QDragMoveEvent* event);
 //    virtual void dropEvent(QDropEvent* event);
@@ -308,9 +318,7 @@ private:
     void setWindowVisibleOnScreenShot(bool bVisible);
     bool insertImage(const QString& strFileName, bool bCopyFile);
 
-    QString getStringDataByJavaScriptFromPage(const QString& scriptSource);
-    int getIntDataByJavaScriptFromPage(const QString& scriptSource);
-    bool getBoolDataByJavaScriptFromPage(const QString& scriptSource);
+    QVariant synchronousRunJavaScript(const QString& strExec);
 
 };
 

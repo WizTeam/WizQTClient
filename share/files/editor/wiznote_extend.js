@@ -63,6 +63,18 @@ function initialUEditor(wizEditor) {
             WizEditor.onNoteLoadFinished();
         });
 
+        editor.addListener('selectionchange', function () {
+            console.log("selectionchange, select text : " + editor.document.getSelection().toString());
+            WizEditor.onEditorSelectionChanged();
+        });
+
+        // 因为QWebEngineView无法响应foucsInEvent,focusOutEvent或keyPressEvent，所以使用编辑器来触发
+        editor.addListener('focus', function () {
+            WizEditor.focusInEditor();
+        });
+        editor.addListener('blur', function () {
+            WizEditor.focusOutEditor();
+        });
         editor.addListener('keydown', function() {
             WizEditor.setContentsChanged(true);
         });
@@ -190,6 +202,7 @@ function updateCss()
 
 // helper functions
 function WizGetLinkUrl() {
+    console.log('WizGetLinkUrl called');
     try {
         var range = editor.selection.getRange(),
             link = range.collapsed ? editor.queryCommandValue( "link" ) : editor.selection.getStart(),
@@ -204,6 +217,7 @@ function WizGetLinkUrl() {
         return "ERROR";
     }
 
+    console.log("before WizGetLinkUrl  return : " + url);
     return url ? url: '';
 }
 

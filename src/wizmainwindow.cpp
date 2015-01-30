@@ -629,10 +629,6 @@ void MainWindow::on_editor_statusChanged()
         m_actions->actionFromName(WIZACTION_EDITOR_FIND_REPLACE)->setEnabled(false);
         m_actions->actionFromName(WIZACTION_EDITOR_SELECT_ALL)->setEnabled(false);
 
-        m_actions->actionFromName(WIZACTION_GLOBAL_SAVE_AS_PDF)->setEnabled(false);
-        m_actions->actionFromName(WIZACTION_GLOBAL_SAVE_AS_HTML)->setEnabled(false);
-        m_actions->actionFromName(WIZACTION_GLOBAL_PRINT)->setEnabled(false);
-
         m_actions->actionFromName(WIZACTION_FORMAT_BOLD)->setEnabled(false);
         m_actions->actionFromName(WIZACTION_FORMAT_ITALIC)->setEnabled(false);
         m_actions->actionFromName(WIZACTION_FORMAT_UNDERLINE)->setEnabled(false);
@@ -667,18 +663,21 @@ void MainWindow::on_editor_statusChanged()
     m_actions->actionFromName(WIZACTION_GLOBAL_SAVE_AS_HTML)->setEnabled(true);
     m_actions->actionFromName(WIZACTION_GLOBAL_PRINT)->setEnabled(true);
 
-    //if (!editor->page()->undoStack()->canUndo()) {
-    if (editor->editorCommandQueryCommandState("undo") == -1) {
-        m_actions->actionFromName(WIZACTION_EDITOR_UNDO)->setEnabled(false);
-    } else {
-        m_actions->actionFromName(WIZACTION_EDITOR_UNDO)->setEnabled(true);
-    }
+    editor->editorCommandQueryCommandState("undo", [this](const QVariant& returnValue) {
+        if (-1 == returnValue.toInt()) {
+            m_actions->actionFromName(WIZACTION_EDITOR_UNDO)->setEnabled(false);
+        } else {
+            m_actions->actionFromName(WIZACTION_EDITOR_UNDO)->setEnabled(true);
+        }
+    });
 
-    if (editor->editorCommandQueryCommandState("redo") == -1) {
-        m_actions->actionFromName(WIZACTION_EDITOR_REDO)->setEnabled(false);
-    } else {
-        m_actions->actionFromName(WIZACTION_EDITOR_REDO)->setEnabled(true);
-    }
+    editor->editorCommandQueryCommandState("redo", [this](const QVariant& returnValue) {
+        if (-1 == returnValue.toInt()) {
+            m_actions->actionFromName(WIZACTION_EDITOR_REDO)->setEnabled(false);
+        } else {
+            m_actions->actionFromName(WIZACTION_EDITOR_REDO)->setEnabled(true);
+        }
+    });
 
     if (!editor->isEditing()) {
         m_actions->actionFromName(WIZACTION_EDITOR_CUT)->setEnabled(false);
@@ -706,131 +705,172 @@ void MainWindow::on_editor_statusChanged()
         }
     }
 
-    if (-1 == editor->editorCommandQueryCommandState("bold")) {
-        m_actions->actionFromName(WIZACTION_FORMAT_BOLD)->setEnabled(false);
-    } else {
-        m_actions->actionFromName(WIZACTION_FORMAT_BOLD)->setEnabled(true);
-    }
+    editor->editorCommandQueryCommandState("bold", [this](const QVariant& returnValue) {
+        if (-1 == returnValue.toInt()) {
+            m_actions->actionFromName(WIZACTION_FORMAT_BOLD)->setEnabled(false);
+        } else {
+            m_actions->actionFromName(WIZACTION_FORMAT_BOLD)->setEnabled(true);
+        }
+    });
 
-    if (-1 ==editor->editorCommandQueryCommandState("italic")) {
-        m_actions->actionFromName(WIZACTION_FORMAT_ITALIC)->setEnabled(false);
-    } else {
-        m_actions->actionFromName(WIZACTION_FORMAT_ITALIC)->setEnabled(true);
-    }
+    editor->editorCommandQueryCommandState("italic", [this](const QVariant& returnValue) {
+        if (-1 == returnValue.toInt()) {
+            m_actions->actionFromName(WIZACTION_FORMAT_ITALIC)->setEnabled(false);
+        } else {
+            m_actions->actionFromName(WIZACTION_FORMAT_ITALIC)->setEnabled(true);
+        }
+    });
 
-    if (-1 ==editor->editorCommandQueryCommandState("underline")) {
-        m_actions->actionFromName(WIZACTION_FORMAT_UNDERLINE)->setEnabled(false);
-    } else {
-        m_actions->actionFromName(WIZACTION_FORMAT_UNDERLINE)->setEnabled(true);
-    }
+    editor->editorCommandQueryCommandState("underline", [this](const QVariant& returnValue) {
+        if (-1 == returnValue.toInt()) {
+            m_actions->actionFromName(WIZACTION_FORMAT_UNDERLINE)->setEnabled(false);
+        } else {
+            m_actions->actionFromName(WIZACTION_FORMAT_UNDERLINE)->setEnabled(true);
+        }
+    });
 
-    if (-1 ==editor->editorCommandQueryCommandState("strikethrough")) {
-        m_actions->actionFromName(WIZACTION_FORMAT_STRIKETHROUGH)->setEnabled(false);
-    } else {
-        m_actions->actionFromName(WIZACTION_FORMAT_STRIKETHROUGH)->setEnabled(true);
-    }
+    editor->editorCommandQueryCommandState("strikethrough", [this](const QVariant& returnValue) {
+        if (-1 == returnValue.toInt()) {
+            m_actions->actionFromName(WIZACTION_FORMAT_STRIKETHROUGH)->setEnabled(false);
+        } else {
+            m_actions->actionFromName(WIZACTION_FORMAT_STRIKETHROUGH)->setEnabled(true);
+        }
+    });
 
-    if (-1 ==editor->editorCommandQueryCommandState("insertUnorderedList")) {
-        m_actions->actionFromName(WIZACTION_FORMAT_UNORDEREDLIST)->setEnabled(false);
-    } else {
-        m_actions->actionFromName(WIZACTION_FORMAT_UNORDEREDLIST)->setEnabled(true);
-    }
+    editor->editorCommandQueryCommandState("insertUnorderedList", [this](const QVariant& returnValue) {
+        if (-1 == returnValue.toInt()) {
+            m_actions->actionFromName(WIZACTION_FORMAT_UNORDEREDLIST)->setEnabled(false);
+        } else {
+            m_actions->actionFromName(WIZACTION_FORMAT_UNORDEREDLIST)->setEnabled(true);
+        }
+    });
 
-    if (-1 ==editor->editorCommandQueryCommandState("insertOrderedList")) {
-        m_actions->actionFromName(WIZACTION_FORMAT_ORDEREDLIST)->setEnabled(false);
-    } else {
-        m_actions->actionFromName(WIZACTION_FORMAT_ORDEREDLIST)->setEnabled(true);
-    }
+    editor->editorCommandQueryCommandState("insertOrderedList", [this](const QVariant& returnValue) {
+        if (-1 == returnValue.toInt()) {
+            m_actions->actionFromName(WIZACTION_FORMAT_ORDEREDLIST)->setEnabled(false);
+        } else {
+            m_actions->actionFromName(WIZACTION_FORMAT_ORDEREDLIST)->setEnabled(true);
+        }
+    });
 
-    if (-1 ==editor->editorCommandQueryCommandState("justify")) {
-        m_actions->actionFromName(WIZACTION_FORMAT_JUSTIFYLEFT)->setEnabled(false);
-        m_actions->actionFromName(WIZACTION_FORMAT_JUSTIFYRIGHT)->setEnabled(false);
-        m_actions->actionFromName(WIZACTION_FORMAT_JUSTIFYCENTER)->setEnabled(false);
-        m_actions->actionFromName(WIZACTION_FORMAT_JUSTIFYJUSTIFY)->setEnabled(false);
-    } else {
-        m_actions->actionFromName(WIZACTION_FORMAT_JUSTIFYLEFT)->setEnabled(true);
-        m_actions->actionFromName(WIZACTION_FORMAT_JUSTIFYRIGHT)->setEnabled(true);
-        m_actions->actionFromName(WIZACTION_FORMAT_JUSTIFYCENTER)->setEnabled(true);
-        m_actions->actionFromName(WIZACTION_FORMAT_JUSTIFYJUSTIFY)->setEnabled(true);
-    }
+    editor->editorCommandQueryCommandState("justify", [this](const QVariant& returnValue) {
+        if (-1 == returnValue.toInt()) {
+            m_actions->actionFromName(WIZACTION_FORMAT_JUSTIFYLEFT)->setEnabled(false);
+            m_actions->actionFromName(WIZACTION_FORMAT_JUSTIFYRIGHT)->setEnabled(false);
+            m_actions->actionFromName(WIZACTION_FORMAT_JUSTIFYCENTER)->setEnabled(false);
+            m_actions->actionFromName(WIZACTION_FORMAT_JUSTIFYJUSTIFY)->setEnabled(false);
+        } else {
+            m_actions->actionFromName(WIZACTION_FORMAT_JUSTIFYLEFT)->setEnabled(true);
+            m_actions->actionFromName(WIZACTION_FORMAT_JUSTIFYRIGHT)->setEnabled(true);
+            m_actions->actionFromName(WIZACTION_FORMAT_JUSTIFYCENTER)->setEnabled(true);
+            m_actions->actionFromName(WIZACTION_FORMAT_JUSTIFYJUSTIFY)->setEnabled(true);
+        }
+    });
 
-    if (-1 ==editor->editorCommandQueryCommandState("indent")) {
-        m_actions->actionFromName(WIZACTION_FORMAT_INDENT)->setEnabled(false);
-    } else {
-        m_actions->actionFromName(WIZACTION_FORMAT_INDENT)->setEnabled(true);
-    }
+    editor->editorCommandQueryCommandState("indent", [this](const QVariant& returnValue) {
+        if (-1 == returnValue.toInt()) {
+            m_actions->actionFromName(WIZACTION_FORMAT_INDENT)->setEnabled(false);
+        } else {
+            m_actions->actionFromName(WIZACTION_FORMAT_INDENT)->setEnabled(true);
+        }
+    });
 
-    if (-1 ==editor->editorCommandQueryCommandState("outdent")) {
-        m_actions->actionFromName(WIZACTION_FORMAT_OUTDENT)->setEnabled(false);
-    } else {
-        m_actions->actionFromName(WIZACTION_FORMAT_OUTDENT)->setEnabled(true);
-    }
+    editor->editorCommandQueryCommandState("outdent", [this](const QVariant& returnValue) {
+        if (-1 == returnValue.toInt()) {
+            m_actions->actionFromName(WIZACTION_FORMAT_OUTDENT)->setEnabled(false);
+        } else {
+            m_actions->actionFromName(WIZACTION_FORMAT_OUTDENT)->setEnabled(true);
+        }
+    });
 
-    if (-1 ==editor->editorCommandQueryCommandState("inserttable")) {
-        m_actions->actionFromName(WIZACTION_FORMAT_INSERT_TABLE)->setEnabled(false);
-    } else {
-        m_actions->actionFromName(WIZACTION_FORMAT_INSERT_TABLE)->setEnabled(true);
-    }
+    editor->editorCommandQueryCommandState("inserttable", [this](const QVariant& returnValue) {
+        if (-1 == returnValue.toInt()) {
+            m_actions->actionFromName(WIZACTION_FORMAT_INSERT_TABLE)->setEnabled(false);
+        } else {
+            m_actions->actionFromName(WIZACTION_FORMAT_INSERT_TABLE)->setEnabled(true);
+        }
+    });
 
-    if (-1 ==editor->editorCommandQueryCommandState("link")) {
-        m_actions->actionFromName(WIZACTION_FORMAT_INSERT_LINK)->setEnabled(false);
-    } else {
-        m_actions->actionFromName(WIZACTION_FORMAT_INSERT_LINK)->setEnabled(true);
-    }
+    editor->editorCommandQueryCommandState("link", [this](const QVariant& returnValue) {
+        if (-1 == returnValue.toInt()) {
+            m_actions->actionFromName(WIZACTION_FORMAT_INSERT_LINK)->setEnabled(false);
+        } else {
+            m_actions->actionFromName(WIZACTION_FORMAT_INSERT_LINK)->setEnabled(true);
+        }
+    });
 
-    if (-1 ==editor->editorCommandQueryCommandState("horizontal")) {
-        m_actions->actionFromName(WIZACTION_FORMAT_INSERT_HORIZONTAL)->setEnabled(false);
-    } else {
-        m_actions->actionFromName(WIZACTION_FORMAT_INSERT_HORIZONTAL)->setEnabled(true);
-    }
+    editor->editorCommandQueryCommandState("horizontal", [this](const QVariant& returnValue) {
+        if (-1 == returnValue.toInt()) {
+            m_actions->actionFromName(WIZACTION_FORMAT_INSERT_HORIZONTAL)->setEnabled(false);
+        } else {
+            m_actions->actionFromName(WIZACTION_FORMAT_INSERT_HORIZONTAL)->setEnabled(true);
+        }
+    });
 
-    if (-1 ==editor->editorCommandQueryCommandState("date")) {
-        m_actions->actionFromName(WIZACTION_FORMAT_INSERT_DATE)->setEnabled(false);
-    } else {
-        m_actions->actionFromName(WIZACTION_FORMAT_INSERT_DATE)->setEnabled(true);
-    }
+    editor->editorCommandQueryCommandState("date", [this](const QVariant& returnValue) {
+        if (-1 == returnValue.toInt()) {
+            m_actions->actionFromName(WIZACTION_FORMAT_INSERT_DATE)->setEnabled(false);
+        } else {
+            m_actions->actionFromName(WIZACTION_FORMAT_INSERT_DATE)->setEnabled(true);
+        }
+    });
 
-    if (-1 ==editor->editorCommandQueryCommandState("time")) {
-        m_actions->actionFromName(WIZACTION_FORMAT_INSERT_TIME)->setEnabled(false);
-    } else {
-        m_actions->actionFromName(WIZACTION_FORMAT_INSERT_TIME)->setEnabled(true);
-    }
+    editor->editorCommandQueryCommandState("time", [this](const QVariant& returnValue) {
+        if (-1 == returnValue.toInt()) {
+            m_actions->actionFromName(WIZACTION_FORMAT_INSERT_TIME)->setEnabled(false);
+        } else {
+            m_actions->actionFromName(WIZACTION_FORMAT_INSERT_TIME)->setEnabled(true);
+        }
+    });
 
-    if (-1 ==editor->editorCommandQueryCommandState("removeformat")) {
-        m_actions->actionFromName(WIZACTION_FORMAT_REMOVE_FORMAT)->setEnabled(false);
-    } else {
-        m_actions->actionFromName(WIZACTION_FORMAT_REMOVE_FORMAT)->setEnabled(true);
-    }
+    editor->editorCommandQueryCommandState("removeformat", [this](const QVariant& returnValue) {
+        if (-1 == returnValue.toInt()) {
+            m_actions->actionFromName(WIZACTION_FORMAT_REMOVE_FORMAT)->setEnabled(false);
+        } else {
+            m_actions->actionFromName(WIZACTION_FORMAT_REMOVE_FORMAT)->setEnabled(true);
+        }
+    });
 
-    if (-1 ==editor->editorCommandQueryCommandState("plaintext")) {
-        m_actions->actionFromName(WIZACTION_FORMAT_PLAINTEXT)->setEnabled(false);
-    } else {
-        m_actions->actionFromName(WIZACTION_FORMAT_PLAINTEXT)->setEnabled(true);
-    }
+    editor->editorCommandQueryCommandState("plaintext", [this](const QVariant& returnValue) {
+        if (-1 == returnValue.toInt()) {
+            m_actions->actionFromName(WIZACTION_FORMAT_PLAINTEXT)->setEnabled(false);
+        } else {
+            m_actions->actionFromName(WIZACTION_FORMAT_PLAINTEXT)->setEnabled(true);
+        }
+    });
 
-    if (-1 ==editor->editorCommandQueryCommandState("source")) {
-        m_actions->actionFromName(WIZACTION_FORMAT_VIEW_SOURCE)->setEnabled(false);
-    } else {
-        m_actions->actionFromName(WIZACTION_FORMAT_VIEW_SOURCE)->setEnabled(true);
-    }
+    editor->editorCommandQueryCommandState("source", [this](const QVariant& returnValue) {
+        if (-1 == returnValue.toInt()) {
+            m_actions->actionFromName(WIZACTION_FORMAT_VIEW_SOURCE)->setEnabled(false);
+        } else {
+            m_actions->actionFromName(WIZACTION_FORMAT_VIEW_SOURCE)->setEnabled(true);
+        }
+    });
 
-    if (-1 ==editor->editorCommandQueryCommandState("checklist")) {
-        m_actions->actionFromName(WIZACTION_FORMAT_INSERT_CHECKLIST)->setEnabled(false);
-    } else {
-        m_actions->actionFromName(WIZACTION_FORMAT_INSERT_CHECKLIST)->setEnabled(true);
-    }
+    editor->editorCommandQueryCommandState("checklist", [this](const QVariant& returnValue) {
+        if (-1 == returnValue.toInt()) {
+            m_actions->actionFromName(WIZACTION_FORMAT_INSERT_CHECKLIST)->setEnabled(false);
+        } else {
+            m_actions->actionFromName(WIZACTION_FORMAT_INSERT_CHECKLIST)->setEnabled(true);
+        }
+    });
 
-    if (-1 ==editor->editorCommandQueryCommandState("insertCode")) {
-        m_actions->actionFromName(WIZACTION_FORMAT_INSERT_CODE)->setEnabled(false);
-    } else {
-        m_actions->actionFromName(WIZACTION_FORMAT_INSERT_CODE)->setEnabled(true);
-    }
+    editor->editorCommandQueryCommandState("insertCode", [this](const QVariant& returnValue) {
+        if (-1 == returnValue.toInt()) {
+            m_actions->actionFromName(WIZACTION_FORMAT_INSERT_CODE)->setEnabled(false);
+        } else {
+            m_actions->actionFromName(WIZACTION_FORMAT_INSERT_CODE)->setEnabled(true);
+        }
+    });
 
-    if (-1 ==editor->editorCommandQueryCommandState("insertImage")) {
-        m_actions->actionFromName(WIZACTION_FORMAT_INSERT_IMAGE)->setEnabled(false);
-    } else {
-        m_actions->actionFromName(WIZACTION_FORMAT_INSERT_IMAGE)->setEnabled(true);
-    }
+    editor->editorCommandQueryCommandState("insertImage", [this](const QVariant& returnValue) {
+        if (-1 == returnValue.toInt()) {
+            m_actions->actionFromName(WIZACTION_FORMAT_INSERT_IMAGE)->setEnabled(false);
+        } else {
+            m_actions->actionFromName(WIZACTION_FORMAT_INSERT_IMAGE)->setEnabled(true);
+        }
+    });
+
 }
 
 void MainWindow::createDocumentByTemplate(const QString& strFile)
@@ -1154,7 +1194,6 @@ void MainWindow::initToolBar()
 
     CWizUserInfoWidget* info = new CWizUserInfoWidget(*this, m_toolBar);
     m_toolBar->addWidget(info);
-
 
     m_toolBar->addWidget(new CWizFixedSpacer(QSize(20, 1), m_toolBar));
 

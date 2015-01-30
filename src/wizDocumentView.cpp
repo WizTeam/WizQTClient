@@ -302,7 +302,9 @@ void CWizDocumentView::viewNote(const WIZDOCUMENTDATA& data, bool forceEdit)
     MainWindow* window = qobject_cast<MainWindow *>(m_app.mainWindow());
 
 //    m_web->saveDocument(m_note, false);
+    qDebug() << "before save document";
     m_engine->saveDocument(m_note, false);
+    qDebug() << "after save document";
     if (m_dbMgr.db(m_note.strKbGUID).IsGroup())
     {
         stopDocumentEditingStatus();

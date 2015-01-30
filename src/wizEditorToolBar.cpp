@@ -523,100 +523,114 @@ QSize EditorToolBar::sizeHint() const
 
 void EditorToolBar::resetToolbar()
 {
-    if (!m_editor)
-        return;
+    Q_ASSERT(m_editor);
 
-    int state;
-    QString value;
+    m_editor->editorCommandQueryCommandValue("fontFamily", [this](const QVariant& returnValue) {
+        m_comboFontFamily->setText(returnValue.toString());
+    });
 
-    value = m_editor->editorCommandQueryCommandValue("fontFamily");
-    m_comboFontFamily->setText(value);
+    m_editor->editorCommandQueryCommandValue("fontSize", [this](const QVariant& returnValue) {
+        m_comboFontSize->setText(returnValue.toString());
+    });
 
-    value = m_editor->editorCommandQueryCommandValue("fontSize");
-    m_comboFontSize->setText(value);
+    m_editor->editorCommandQueryCommandState("formatMatch", [this](const QVariant& returnValue) {
+        int state = returnValue.toInt();
+        if (state == -1) {
+            m_btnFormatMatch->setEnabled(false);
+        } else if (state == 0) {
+            m_btnFormatMatch->setEnabled(true);
+            m_btnFormatMatch->setChecked(false);
+        } else if (state == 1) {
+            m_btnFormatMatch->setEnabled(true);
+            m_btnFormatMatch->setChecked(true);
+        } else {
+            Q_ASSERT(0);
+        }
+    });
 
-    state = m_editor->editorCommandQueryCommandState("formatMatch");
-    if (state == -1) {
-        m_btnFormatMatch->setEnabled(false);
-    } else if (state == 0) {
-        m_btnFormatMatch->setEnabled(true);
-        m_btnFormatMatch->setChecked(false);
-    } else if (state == 1) {
-        m_btnFormatMatch->setEnabled(true);
-        m_btnFormatMatch->setChecked(true);
-    } else {
-        Q_ASSERT(0);
-    }
+    m_editor->editorCommandQueryCommandValue("foreColor", [this](const QVariant& returnValue) {
+        m_btnForeColor->setColor(QColor(returnValue.toString()));
+    });
 
-    value = m_editor->editorCommandQueryCommandValue("foreColor");
-    m_btnForeColor->setColor(QColor(value));
+    m_editor->editorCommandQueryCommandValue("backColor", [this](const QVariant& returnValue) {
+        m_btnBackColor->setColor(QColor(returnValue.toString()));
+    });
 
-    value = m_editor->editorCommandQueryCommandValue("backColor");
-    m_btnBackColor->setColor(QColor(value));
+    m_editor->editorCommandQueryCommandState("bold", [this](const QVariant& returnValue) {
+        int state = returnValue.toInt();
+        if (state == -1) {
+            m_btnBold->setEnabled(false);
+        } else if (state == 0) {
+            m_btnBold->setEnabled(true);
+            m_btnBold->setChecked(false);
+        } else if (state == 1) {
+            m_btnBold->setEnabled(true);
+            m_btnBold->setChecked(true);
+        } else {
+            Q_ASSERT(0);
+        }
+    });
 
-    state = m_editor->editorCommandQueryCommandState("bold");
-    if (state == -1) {
-        m_btnBold->setEnabled(false);
-    } else if (state == 0) {
-        m_btnBold->setEnabled(true);
-        m_btnBold->setChecked(false);
-    } else if (state == 1) {
-        m_btnBold->setEnabled(true);
-        m_btnBold->setChecked(true);
-    } else {
-        Q_ASSERT(0);
-    }
+    m_editor->editorCommandQueryCommandState("italic", [this](const QVariant& returnValue) {
+        int state = returnValue.toInt();
+        if (state == -1) {
+            m_btnItalic->setEnabled(false);
+        } else if (state == 0) {
+            m_btnItalic->setEnabled(true);
+            m_btnItalic->setChecked(false);
+        } else if (state == 1) {
+            m_btnItalic->setEnabled(true);
+            m_btnItalic->setChecked(true);
+        } else {
+            Q_ASSERT(0);
+        }
+    });
 
-    state = m_editor->editorCommandQueryCommandState("italic");
-    if (state == -1) {
-        m_btnItalic->setEnabled(false);
-    } else if (state == 0) {
-        m_btnItalic->setEnabled(true);
-        m_btnItalic->setChecked(false);
-    } else if (state == 1) {
-        m_btnItalic->setEnabled(true);
-        m_btnItalic->setChecked(true);
-    } else {
-        Q_ASSERT(0);
-    }
+    m_editor->editorCommandQueryCommandState("underline", [this](const QVariant& returnValue) {
+        int state = returnValue.toInt();
+        if (state == -1) {
+            m_btnUnderLine->setEnabled(false);
+        } else if (state == 0) {
+            m_btnUnderLine->setEnabled(true);
+            m_btnUnderLine->setChecked(false);
+        } else if (state == 1) {
+            m_btnUnderLine->setEnabled(true);
+            m_btnUnderLine->setChecked(true);
+        } else {
+            Q_ASSERT(0);
+        }
+    });
 
-    state = m_editor->editorCommandQueryCommandState("underline");
-    if (state == -1) {
-        m_btnUnderLine->setEnabled(false);
-    } else if (state == 0) {
-        m_btnUnderLine->setEnabled(true);
-        m_btnUnderLine->setChecked(false);
-    } else if (state == 1) {
-        m_btnUnderLine->setEnabled(true);
-        m_btnUnderLine->setChecked(true);
-    } else {
-        Q_ASSERT(0);
-    }
+    m_editor->editorCommandQueryCommandState("strikethrough", [this](const QVariant& returnValue) {
+        int state = returnValue.toInt();
+        if (state == -1) {
+            m_btnStrikeThrough->setEnabled(false);
+        } else if (state == 0) {
+            m_btnStrikeThrough->setEnabled(true);
+            m_btnStrikeThrough->setChecked(false);
+        } else if (state == 1) {
+            m_btnStrikeThrough->setEnabled(true);
+            m_btnStrikeThrough->setChecked(true);
+        } else {
+            Q_ASSERT(0);
+        }
+    });
 
-    state = m_editor->editorCommandQueryCommandState("strikethrough");
-    if (state == -1) {
-        m_btnStrikeThrough->setEnabled(false);
-    } else if (state == 0) {
-        m_btnStrikeThrough->setEnabled(true);
-        m_btnStrikeThrough->setChecked(false);
-    } else if (state == 1) {
-        m_btnStrikeThrough->setEnabled(true);
-        m_btnStrikeThrough->setChecked(true);
-    } else {
-        Q_ASSERT(0);
-    }
+    m_editor->editorCommandQueryCommandState("justify", [this](const QVariant& returnValue) {
+        int state = returnValue.toInt();
+        if (state == -1) {
+            m_btnJustifyLeft->setEnabled(false);
+            m_btnJustifyCenter->setEnabled(false);
+            m_btnJustifyRight->setEnabled(false);
+        } else {
+            m_btnJustifyLeft->setEnabled(true);
+            m_btnJustifyCenter->setEnabled(true);
+            m_btnJustifyRight->setEnabled(true);
+        }
+    });
 
-    state = m_editor->editorCommandQueryCommandState("justify");
-    value = m_editor->editorCommandQueryCommandValue("justify");
-    if (state == -1) {
-        m_btnJustifyLeft->setEnabled(false);
-        m_btnJustifyCenter->setEnabled(false);
-        m_btnJustifyRight->setEnabled(false);
-    } else {
-        m_btnJustifyLeft->setEnabled(true);
-        m_btnJustifyCenter->setEnabled(true);
-        m_btnJustifyRight->setEnabled(true);
-
+    m_editor->editorCommandQueryCommandValue("justify", [this](const QVariant& returnValue) {
+        QString value = returnValue.toString();
         if (value == "left") {
             m_btnJustifyLeft->setChecked(true);
             m_btnJustifyCenter->setChecked(false);
@@ -630,59 +644,67 @@ void EditorToolBar::resetToolbar()
             m_btnJustifyCenter->setChecked(false);
             m_btnJustifyRight->setChecked(true);
         }
-    }
+    });
 
-    state = m_editor->editorCommandQueryCommandState("insertOrderedList");
-    if (state == -1) {
-        m_btnOrderedList->setEnabled(false);
-    } else if (state == 0) {
-        m_btnOrderedList->setEnabled(true);
-        m_btnOrderedList->setChecked(false);
-    } else if (state == 1) {
-        m_btnOrderedList->setEnabled(true);
-        m_btnOrderedList->setChecked(true);
-    } else {
-        Q_ASSERT(0);
-    }
+    m_editor->editorCommandQueryCommandState("insertOrderedList", [this](const QVariant& returnValue) {
+        int state = returnValue.toInt();
+        if (state == -1) {
+            m_btnOrderedList->setEnabled(false);
+        } else if (state == 0) {
+            m_btnOrderedList->setEnabled(true);
+            m_btnOrderedList->setChecked(false);
+        } else if (state == 1) {
+            m_btnOrderedList->setEnabled(true);
+            m_btnOrderedList->setChecked(true);
+        } else {
+            Q_ASSERT(0);
+        }
+    });
 
-    state = m_editor->editorCommandQueryCommandState("insertUnorderedList");
-    if (state == -1) {
-        m_btnUnorderedList->setEnabled(false);
-    } else if (state == 0) {
-        m_btnUnorderedList->setEnabled(true);
-        m_btnUnorderedList->setChecked(false);
-    } else if (state == 1) {
-        m_btnUnorderedList->setEnabled(true);
-        m_btnUnorderedList->setChecked(true);
-    } else {
-        Q_ASSERT(0);
-    }
+    m_editor->editorCommandQueryCommandState("insertUnorderedList", [this](const QVariant& returnValue) {
+        int state = returnValue.toInt();
+        if (state == -1) {
+            m_btnUnorderedList->setEnabled(false);
+        } else if (state == 0) {
+            m_btnUnorderedList->setEnabled(true);
+            m_btnUnorderedList->setChecked(false);
+        } else if (state == 1) {
+            m_btnUnorderedList->setEnabled(true);
+            m_btnUnorderedList->setChecked(true);
+        } else {
+            Q_ASSERT(0);
+        }
+    });
 
-    state = m_editor->editorCommandQueryCommandState("insertTable");
-    if (state == -1) {
-        m_btnTable->setEnabled(false);
-    } else if (state == 0) {
-        m_btnTable->setEnabled(true);
-        m_btnTable->setChecked(false);
-    } else if (state == 1) {
-        m_btnTable->setEnabled(true);
-        m_btnTable->setChecked(true);
-    } else {
-        Q_ASSERT(0);
-    }
+    m_editor->editorCommandQueryCommandState("insertTable", [this](const QVariant& returnValue) {
+        int state = returnValue.toInt();
+        if (state == -1) {
+            m_btnTable->setEnabled(false);
+        } else if (state == 0) {
+            m_btnTable->setEnabled(true);
+            m_btnTable->setChecked(false);
+        } else if (state == 1) {
+            m_btnTable->setEnabled(true);
+            m_btnTable->setChecked(true);
+        } else {
+            Q_ASSERT(0);
+        }
+    });
 
-    state = m_editor->editorCommandQueryCommandState("horizontal");
-    if (state == -1) {
-        m_btnHorizontal->setEnabled(false);
-    } else if (state == 0) {
-        m_btnHorizontal->setEnabled(true);
-        m_btnHorizontal->setChecked(false);
-    } else if (state == 1) {
-        m_btnHorizontal->setEnabled(true);
-        m_btnHorizontal->setChecked(true);
-    } else {
-        Q_ASSERT(0);
-    }
+    m_editor->editorCommandQueryCommandState("horizontal", [this](const QVariant& returnValue) {
+        int state = returnValue.toInt();
+        if (state == -1) {
+            m_btnHorizontal->setEnabled(false);
+        } else if (state == 0) {
+            m_btnHorizontal->setEnabled(true);
+            m_btnHorizontal->setChecked(false);
+        } else if (state == 1) {
+            m_btnHorizontal->setEnabled(true);
+            m_btnHorizontal->setChecked(true);
+        } else {
+            Q_ASSERT(0);
+        }
+    });
 
     bool bReceiveImage = m_editor->editorCommandQueryMobileFileReceiverState();
     m_btnMobileImage->setChecked(bReceiveImage);
@@ -841,7 +863,9 @@ void EditorToolBar::on_delegate_requestShowContextMenu(const QPoint& pos)
     if (!m_editor)
         return;
 
+    qDebug() << "on delegate show context menu";
     buildMenu();
+    qDebug() << "after build menu";
 
     m_strImageSrc.clear();
     if (m_editor->findIMGElementAt(pos, m_strImageSrc))
@@ -1040,7 +1064,10 @@ void EditorToolBar::buildMenu()
 
         } else if (item.command != "+") {
             if (!item.command.isEmpty()) {
+                //TODO: 需要考虑是否改为同步查询方式
+                qDebug() << " build menu called , index :  " << index;
                 int value = m_editor->editorCommandQueryCommandState(item.command);
+                qDebug() << " return from javascript function";
                 if (value == -1) {
                     index++;
                     continue;
@@ -1081,17 +1108,20 @@ int EditorToolBar::buildMenu(QMenu* pMenu, int indx)
 
         } else if (item.command != "+" && !item.execute.isEmpty()) {
 
-            // special case
-            if (m_editor->editorCommandQueryLink()
-                    && item.label == WIZEDITOR_ACTION_LINK_INSERT) {
-                continue;
-            } else if (!m_editor->editorCommandQueryLink()
-                       && item.label == WIZEDITOR_ACTION_LINK_EDIT) {
-                continue;
-            }
+//            // special case
+//            if (m_editor->editorCommandQueryLink()
+//                    && item.label == WIZEDITOR_ACTION_LINK_INSERT) {
+//                continue;
+//            } else if (!m_editor->editorCommandQueryLink()
+//                       && item.label == WIZEDITOR_ACTION_LINK_EDIT) {
+//                continue;
+//            }
 
             if (!item.command.isEmpty()) {
+                //TODO: 需要考虑是否修改为同步查询方式
+                qDebug() << " build menu called , index :  " << index << "  current thread : " << thread();
                 int value = m_editor->editorCommandQueryCommandState(item.command);
+                qDebug() << " return from javascript function";
                 if (value == -1) {
                     continue;
                 }
