@@ -19,6 +19,7 @@
 #include <QWebChannel>
 #include <QWebEngineSettings>
 #include <QtWebSockets/QWebSocketServer>
+#include <QSemaphore>
 
 #include <QApplication>
 #include <QUndoStack>
@@ -243,7 +244,6 @@ void CWizDocumentWebEngine::contextMenuEvent(QContextMenuEvent *event)
         return;
 
     qDebug() << "contextMenu event called : " << event  << "\n event pos : " << event->pos();
-
     Q_EMIT requestShowContextMenu(mapToGlobal(event->pos()));
 }
 
@@ -672,9 +672,10 @@ void CWizDocumentWebEngine::initCheckListEnvironment()
     }
 }
 
-void CWizDocumentWebEngine::speakHelloWorld()
+bool CWizDocumentWebEngine::speakHelloWorld()
 {
     qDebug() << "Hello world from web engine";
+    return true;
 }
 
 void CWizDocumentWebEngine::setWindowVisibleOnScreenShot(bool bVisible)
@@ -699,14 +700,11 @@ QVariant CWizDocumentWebEngine::synchronousRunJavaScript(const QString& strExec)
 {
     QVariant returnValue;
     QEventLoop loop;
-//    QEventLoopLocker *loopLocker = new QEventLoopLocker(&loop);
-    qDebug() << "create loop and loop locker before run js : " << strExec << "  called from thread " << thread();
-    page()->runJavaScript(strExec , [&loop](const QVariant& result) {
-//        returnValue = result;
-//        delete loopLocker;
+    qDebug() << "create loop and loop locker before run js : " << strExec;
+    page()->runJavaScript(strExec , [&](const QVariant& result) {
+        returnValue = result;
         loop.quit();
         qDebug() << "javascript result : " << result;
-//        qDebug() << "delete looplocker";
     });
     qDebug() << "before loop exec";
     loop.exec(QEventLoop::ExcludeUserInputEvents);
@@ -721,6 +719,11 @@ bool CWizDocumentWebEngine::shareNoteByEmail()
     dlg.exec();
 
     return true;
+}
+
+QString CWizDocumentWebEngine::getUserAlias()
+{
+    return "CWizDocumentWebEngine::getUserAlias()";
 }
 
 void CWizDocumentWebEngine::onEditorLoadFinished(bool ok)
@@ -817,12 +820,12 @@ void CWizDocumentWebEngine::saveEditingViewDocument(const WIZDOCUMENTDATA &data,
     if (!m_dbMgr.db(data.strKbGUID).CanEditDocument(data)) {
         return;
     }
+
     //
     setContentsChanged(false);
     //
     QEventLoop loop;
     qDebug() << "create mutex and start to run java script";
-    QEventLoopLocker *eventLocker = new QEventLoopLocker(&loop);
     page()->runJavaScript("editor.document.head.innerHTML;", [&](const QVariant& headData) {
         m_strCurrentNoteHead = headData.toString();
         //
@@ -843,14 +846,14 @@ void CWizDocumentWebEngine::saveEditingViewDocument(const WIZDOCUMENTDATA &data,
                 QString strFileName = m_mapFile.value(data.strKbGUID);
                 m_docSaverThread->save(data, strHtml, strFileName, 0);
                 qDebug() << "get document data finished,  unlock the meutex";
-                delete eventLocker;
+                loop.quit();
             });
             // update current html to js variant
         });
     });
     //  save document
 
-    loop.exec();
+    loop.exec(QEventLoop::ExcludeUserInputEvents);
     qDebug() << "quit save editing view document ";
 }
 
@@ -1217,32 +1220,28 @@ bool CWizDocumentWebEngine::editorCommandExecuteFindReplace()
     return true;
 }
 
-static QString strOldSearchText = "";
-static bool strOldCase = false;
 void CWizDocumentWebEngine::findPre(QString strTxt, bool bCasesensitive)
 {
-    //FIXME:  there is a problem here, HighlightAllOccurrences can not be used togethor with find one.
-    if (strOldSearchText != strTxt || strOldCase != bCasesensitive)
+    if (bCasesensitive)
     {
-        // clear highlight
-        findText("");
-        strOldSearchText = strTxt;
-        strOldCase = bCasesensitive;
+        findText(strTxt, QWebEnginePage::FindBackward & QWebEnginePage::FindCaseSensitively);
     }
-
-//    findText(strTxt, (bCasesensitive ? QWebEnginePage::FindCaseSensitively | QWebEnginePage::FindBackward
-//                                     : QWebEnginePage::FindBackward));
+    else
+    {
+        findText(strTxt, QWebEnginePage::FindBackward);
+    }
 }
 
 void CWizDocumentWebEngine::findNext(QString strTxt, bool bCasesensitive)
 {
-    if (strOldSearchText != strTxt || strOldCase != bCasesensitive)
+    if (bCasesensitive)
     {
-        findText("");
-        strOldSearchText = strTxt;
-        strOldCase = bCasesensitive;
+        findText(strTxt, QWebEnginePage::FindCaseSensitively);
     }
-//    findText(strTxt, (bCasesensitive ? QWebEnginePage::FindCaseSensitively : 0));
+    else
+    {
+        findText(strTxt);
+    }
 }
 
 void CWizDocumentWebEngine::replaceCurrent(QString strSource, QString strTarget)

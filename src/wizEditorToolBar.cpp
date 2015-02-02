@@ -852,7 +852,7 @@ void EditorToolBar::setDelegate(CWizDocumentWebEngine* editor)
     m_editor = editor;
 
     connect(m_editor, SIGNAL(requestShowContextMenu(QPoint)),
-            SLOT(on_delegate_requestShowContextMenu(QPoint)));
+            SLOT(on_delegate_requestShowContextMenu(QPoint)), Qt::QueuedConnection);
 
     connect(m_editor, SIGNAL(selectionChanged()),
             SLOT(on_delegate_selectionChanged()));
@@ -1067,7 +1067,7 @@ void EditorToolBar::buildMenu()
                 //TODO: 需要考虑是否改为同步查询方式
                 qDebug() << " build menu called , index :  " << index;
                 int value = m_editor->editorCommandQueryCommandState(item.command);
-                qDebug() << " return from javascript function";
+                qDebug() << " return from javascript function ,  value  :  " << value;
                 if (value == -1) {
                     index++;
                     continue;
@@ -1121,7 +1121,7 @@ int EditorToolBar::buildMenu(QMenu* pMenu, int indx)
                 //TODO: 需要考虑是否修改为同步查询方式
                 qDebug() << " build menu called , index :  " << index << "  current thread : " << thread();
                 int value = m_editor->editorCommandQueryCommandState(item.command);
-                qDebug() << " return from javascript function";
+                qDebug() << " return from javascript function , value : " << value;
                 if (value == -1) {
                     continue;
                 }

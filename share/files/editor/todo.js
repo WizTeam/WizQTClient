@@ -1733,6 +1733,7 @@ var WizTodo = (function () {
 		if (wizClient == 'qt') {
 			ueditor = document.getElementById('ueditor_0');
 		}
+
 		//
 		editorDocument = ueditor ? ueditor.contentDocument : document;
 		//

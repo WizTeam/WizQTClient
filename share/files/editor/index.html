@@ -41,7 +41,8 @@
                         // window.jsObject = channel.objects.jsObject;
                         // jsObject.speakHello();
                         window.WizEditor = channel.objects.WizEditor;
-                        WizEditor.speakHelloWorld();
+                        var result = WizEditor.speakHelloWorld();
+                        console.log("WizEditor speakHello :" + result);
                         initialUEditor(WizEditor);
                         output("Connected to WebChannel, ready to send/receive messages!");
                     });

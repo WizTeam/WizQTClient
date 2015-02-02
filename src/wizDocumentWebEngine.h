@@ -95,17 +95,22 @@ public:
     QString editorQueryValueCommand(const QString& strCommand);
     void editorCommandQueryCommandState(const QString& strCommand,
                                         const QWebEngineCallback<const QVariant &> &resultCallback);
-    int editorCommandQueryCommandState(const QString& strCommand);
     void editorCommandQueryCommandValue(const QString& strCommand,
                                         const QWebEngineCallback<const QVariant &> &resultCallback);
-    QString editorCommandQueryCommandValue(const QString& strCommand);
     bool editorCommandExecuteCommand(const QString& strCommand,
                                      const QString& arg1 = QString(),
                                      const QString& arg2 = QString(),
                                      const QString& arg3 = QString());
 
+    /** these functions could block event loop, cannot be used in event process function
+     */
+    int editorCommandQueryCommandState(const QString& strCommand);
+    QString editorCommandQueryCommandValue(const QString& strCommand);
     // UEditor still miss link discover api
     bool editorCommandQueryLink();
+    bool findIMGElementAt(QPoint point, QString& strSrc);
+
+
 
     bool editorCommandQueryMobileFileReceiverState();
 
@@ -119,10 +124,11 @@ public:
     void saveAsHtml(const QString& strDirPath);
     void printDocument();
     bool shareNoteByEmail();
-    bool findIMGElementAt(QPoint point, QString& strSrc);
     //
-    Q_INVOKABLE bool isContentsChanged() { return m_bContentsChanged; }
+    Q_SCRIPTABLE bool isContentsChanged() { return m_bContentsChanged; }
     Q_INVOKABLE void setContentsChanged(bool b) { m_bContentsChanged = b; }
+
+    Q_INVOKABLE QString getUserAlias();
 
     //use undo func provied by editor
     void undo();
@@ -296,7 +302,7 @@ public Q_SLOTS:
     // js func
     void resetCheckListEnvironment();
     void initCheckListEnvironment();
-    void speakHelloWorld();
+    bool speakHelloWorld();
 
 Q_SIGNALS:
     // signals for notify command reflect status, triggered when selection, focus, editing mode changed
@@ -318,6 +324,8 @@ private:
     void setWindowVisibleOnScreenShot(bool bVisible);
     bool insertImage(const QString& strFileName, bool bCopyFile);
 
+    //NOTE: this fucntion will block thread, it can not used in event process fucntion, such as contextmenuevent.
+    //could cause deadlock
     QVariant synchronousRunJavaScript(const QString& strExec);
 
 };
