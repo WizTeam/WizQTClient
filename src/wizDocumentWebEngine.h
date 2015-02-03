@@ -53,7 +53,7 @@ class CWizDocumentWebEngine : public QWebEngineView
 public:
     CWizDocumentWebEngine(CWizExplorerApp& app, QWidget* parent = 0);
     ~CWizDocumentWebEngine();
-    Core::CWizDocumentView* view();
+    Core::CWizDocumentView* view() const;
     //
     void waitForDone();
 
@@ -125,10 +125,14 @@ public:
     void printDocument();
     bool shareNoteByEmail();
     //
-    Q_SCRIPTABLE bool isContentsChanged() { return m_bContentsChanged; }
+    Q_INVOKABLE bool isContentsChanged() { return m_bContentsChanged; }
     Q_INVOKABLE void setContentsChanged(bool b) { m_bContentsChanged = b; }
 
-    Q_INVOKABLE QString getUserAlias();
+    // functions used in js
+    Q_INVOKABLE void saveHtmlToCurrentNote(const QString& strHtml, const QString& strResource);
+    Q_INVOKABLE void setCurrentDocumentType(const QString& strType);
+    Q_INVOKABLE bool checkListClickable();
+    Q_SIGNAL void clickingTodoCallBack(bool cancel, bool needCallAgain);
 
     //use undo func provied by editor
     void undo();
@@ -168,6 +172,7 @@ protected:
 private:
     CWizExplorerApp& m_app;
     CWizDatabaseManager& m_dbMgr;
+    Core::CWizDocumentView* m_parentView;
     QMap<QString, QString> m_mapFile;
 
     QString m_strDefaultCssFilePath;
@@ -328,6 +333,13 @@ private:
     //could cause deadlock
     QVariant synchronousRunJavaScript(const QString& strExec);
 
+    //
+    QString getSkinResourcePath() const;
+    QString getUserAvatarFile(int size) const;
+    QString getUserAlias() const;
+    bool isPersonalDocument() const;
+    QString getCurrentNoteHtml() const;
+    bool hasEditPermissionOnCurrentNote() const;
 };
 
 #endif // CWIZDOCUMENTWEBENGINE_H

@@ -1,4 +1,4 @@
-﻿
+
 function initDefaultCss(document, destNode) {
 	var WIZ_TODO_STYLE_ID = 'wiz_todo_style_id';
 	var WIZ_STYLE = 'wiz_style';
@@ -111,21 +111,53 @@ function WizTodoQtHelper() {
     this.initCss = initCss;
     this.canEdit = canEdit;
     this.setDocumentType = setDocumentType;
+    this.setUserAlias = setUserAlias;
+	this.setUserAvatarFileName = setUserAvatarFileName;
+	this.setCheckedImageFileName = setCheckedImageFileName;
+	this.setUnCheckedImageFileName = setUnCheckedImageFileName;
+	this.setIsPersonalDocument = setIsPersonalDocument;
+
+
+    this.userAlias = null;
+	this.avatarFileName = null;
+	this.checkedFileName = null;
+	this.unCheckedFileName = null;
+	this.personalDocument = false;
+    
+	function setUserAlias(alias) {
+		this.userAlias = alias;
+	}
+
+	function setUserAvatarFileName(avatarFileName) {
+		this.avatarFileName = avatarFileName;
+	}
+
+	function setCheckedImageFileName(fileName) {
+		this.checkedFileName = fileName;
+	}
+
+	function setUnCheckedImageFileName(fileName) {
+		this.unCheckedFileName = fileName;
+	}
+
+	function setIsPersonalDocument(isPersonalDocument) {
+		this.personalDocument = isPersonalDocument;
+	}
 
     function getUserAlias() {
-        return objApp.getUserAlias();
+        return this.userAlias;
     }
 
     function getUserAvatarFileName(size) {
-        return objApp.getUserAvatarFilePath(size);
+    	return this.avatarFileName;
     }
 
     function isPersonalDocument() {
-        return objApp.isPersonalDocument();
+        return this.personalDocument;
     }
 
     function getLocalDateTime(dt) {
-        return objApp.getFormatedDateTime();
+        return "";
     }
 
     function setDocumentModified() {
@@ -133,25 +165,25 @@ function WizTodoQtHelper() {
     }
 
     function getCheckedImageFileName() {
-        return objApp.getSkinResourcePath() + "checked.png";
+    	return this.checkedFileName;
     }
 
     function getUnCheckedImageFileName() {
-        return objApp.getSkinResourcePath() + "unchecked.png";
+    	return this.unCheckedFileName;
     }
 
     function canEdit() {
         return editor.body.contentEditable == "true";
     }
 
-    function initCss(document) {
-        
+    function initCss(document) {    	        
     	var WIZ_TODO_STYLE_ID = 'wiz_todo_style_id';
 		var WIZ_STYLE = 'wiz_style';
 		var WIZ_LINK_VERSION = 'wiz_link_version';
 		var WIZ_TODO_STYLE_VERSION = "01.00.08";
         
 		var style = document.getElementById(WIZ_TODO_STYLE_ID);
+		console.log("todo init css called from editor document : " + document + " find style : " + style);
 		if (style && !!style.getAttribute && style.getAttribute(WIZ_LINK_VERSION) >= WIZ_TODO_STYLE_VERSION)
 			return;
 		//
@@ -168,11 +200,14 @@ function WizTodoQtHelper() {
 		// objStyle.setAttribute(WIZ_STYLE, 'unsave');
 		objStyle.setAttribute(WIZ_LINK_VERSION, WIZ_TODO_STYLE_VERSION);
 		//
+		console.log("add css style to document head, objStyle  : " + objStyle);
+		console.log("before appendChild ,innerHTML : " + document.head.innerHTML);
 		document.head.appendChild(objStyle);
+		console.log("after appendChild ,innerHTML : " + document.head.innerHTML);
     }  
 
     function setDocumentType(type) {
-        objApp.setCurrentDocumentType(type);
+        WizEditor.setCurrentDocumentType(type);
     } 
 }
 
@@ -355,6 +390,7 @@ var WizTodo = (function () {
 			case 'windows':
 				return new WizTodoWindowsHelper(external);
 			case 'qt':
+				console.log("get qt todo helper called");
 				return new WizTodoQtHelper();
 			case 'iphone':
 				return new WizTodoIphoneHelper();
@@ -1728,6 +1764,9 @@ var WizTodo = (function () {
 	}
 
 	function init(wizClient) { 
+		console.log("init todo called , todoHelper : " + todoHelper);
+		// if (todoHelper != null)
+		// 	return;
 
 		var ueditor = null;
 		if (wizClient == 'qt') {
@@ -1740,10 +1779,15 @@ var WizTodo = (function () {
 		client = wizClient;
 		//
 		todoHelper = getTodoHelper(wizClient);
+		console.log("ueditor document head html : :  " + editorDocument.head.innerHTML);
+		console.log("editor document head html : " + editor.document.head.innerHTML);
 		//
 		registerEvent();
+
+		console.log("after register event , editorDocument :  " + editorDocument);
 		//
 		todoHelper.initCss(editorDocument);
+		console.log("init todo js finished , helper :  " + todoHelper);
 	}
 
 	function setUserAlias(alias) {

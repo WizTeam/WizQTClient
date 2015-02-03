@@ -32,20 +32,21 @@
 #include <coreplugin/icore.h>
 
 #include "wizdef.h"
-#include "share/wizmisc.h"
+#include "wizDocumentView.h"
 #include "wizmainwindow.h"
+#include "share/wizmisc.h"
 #include "wizEditorInsertLinkForm.h"
 #include "wizEditorInsertTableForm.h"
 #include "share/wizObjectDataDownloader.h"
 #include "share/websocketclientwrapper.h"
 #include "share/websockettransport.h"
-#include "wizDocumentTransitionView.h"
 #include "share/wizDatabaseManager.h"
-#include "wizDocumentView.h"
+#include "wizDocumentTransitionView.h"
 #include "wizSearchReplaceWidget.h"
 #include "widgets/WizCodeEditorDialog.h"
 #include "widgets/wizScreenShotWidget.h"
 #include "widgets/wizEmailShareDialog.h"
+#include "sync/avatar.h"
 
 #include "utils/pathresolve.h"
 #include "utils/logger.h"
@@ -125,6 +126,8 @@ CWizDocumentWebEngine::CWizDocumentWebEngine(CWizExplorerApp& app, QWidget* pare
     , m_bContentsChanged(false)
     , m_searchReplaceWidget(0)
 {
+    m_parentView = dynamic_cast<CWizDocumentView*>(parent);
+    Q_ASSERT(m_parentView);
 
     WebEnginePage *webPage = new WebEnginePage(this);
     setPage(webPage);
@@ -406,18 +409,9 @@ void CWizDocumentWebEngine::tryResetTitle()
 //    }
 //}
 
-CWizDocumentView* CWizDocumentWebEngine::view()
+CWizDocumentView* CWizDocumentWebEngine::view() const
 {
-    QWidget* pParent = parentWidget();
-    while(pParent) {
-        if (CWizDocumentView* view = dynamic_cast<CWizDocumentView*>(pParent)) {
-            return view;
-        }
-
-        pParent = pParent->parentWidget();
-    }
-
-    return 0;
+    return m_parentView;
 }
 
 void CWizDocumentWebEngine::onTimerAutoSaveTimout()
@@ -663,12 +657,28 @@ void CWizDocumentWebEngine::initCheckListEnvironment()
     if (m_bEditingMode)
     {
         QString strScript = QString("WizTodo.init('qt');");
-        page()->runJavaScript(strScript);
+        page()->runJavaScript(strScript, [this](const QVariant&) {
+            //FIXME: 目前javascript无法直接取得c++函数的返回值，需要主动写入
+            page()->runJavaScript(QString("WizTodo.setUserAlias('%1');").arg(getUserAlias()));
+            page()->runJavaScript(QString("WizTodo.setUserAvatarFileName('%1');").arg(getUserAvatarFile(24)));
+            page()->runJavaScript(QString("WizTodo.setCheckedImageFileName('%1');").arg(getSkinResourcePath() + "checked.png"));
+            page()->runJavaScript(QString("WizTodo.setUnCheckedImageFileName('%1');").arg(getSkinResourcePath() + "unchecked.png"));
+            page()->runJavaScript(QString("WizTodo.setIsPersonalDocument(%1);").arg(isPersonalDocument()));
+        });
     }
     else
     {
         QString strScript = QString("WizTodoReadChecked.init('qt');");
-        page()->runJavaScript(strScript);
+        page()->runJavaScript(strScript, [this](const QVariant&) {
+            //FIXME: 目前javascript无法直接取得c++函数的返回值，需要主动写入
+            page()->runJavaScript(QString("WizTodoReadChecked.setUserAlias('%1');").arg(getUserAlias()));
+            page()->runJavaScript(QString("WizTodoReadChecked.setUserAvatarFileName('%1');").arg(getUserAvatarFile(24)));
+            page()->runJavaScript(QString("WizTodoReadChecked.setCheckedImageFileName('%1');").arg(getSkinResourcePath() + "checked.png"));
+            page()->runJavaScript(QString("WizTodoReadChecked.setUnCheckedImageFileName('%1');").arg(getSkinResourcePath() + "unchecked.png"));
+            page()->runJavaScript(QString("WizTodoReadChecked.setIsPersonalDocument(%1);").arg(isPersonalDocument()));
+            page()->runJavaScript(QString("WizTodoReadChecked.setCanEdit(%1);").arg(hasEditPermissionOnCurrentNote()));
+            page()->runJavaScript(QString("WizTodoReadChecked.setDocOriginalHtml('%1');").arg(getCurrentNoteHtml()));
+        });
     }
 }
 
@@ -711,6 +721,58 @@ QVariant CWizDocumentWebEngine::synchronousRunJavaScript(const QString& strExec)
     return returnValue;
 }
 
+QString CWizDocumentWebEngine::getSkinResourcePath() const
+{
+    return ::WizGetSkinResourcePath(m_app.userSettings().skin());
+
+}
+
+QString CWizDocumentWebEngine::getUserAvatarFile(int size) const
+{
+    QString strFileName;
+    QString strUserID = m_dbMgr.db().GetUserId();
+    if (WizService::AvatarHost::customSizeAvatar(strUserID, size, size, strFileName))
+        return strFileName;
+
+    return QString();
+}
+
+QString CWizDocumentWebEngine::getUserAlias() const
+{
+    QString strKbGUID = view()->note().strKbGUID;
+    return m_dbMgr.db(strKbGUID).GetUserAlias();
+
+}
+
+bool CWizDocumentWebEngine::isPersonalDocument() const
+{
+    QString strKbGUID = view()->note().strKbGUID;
+    QString dbKbGUID = m_dbMgr.db().kbGUID();
+    return strKbGUID.isEmpty() || (strKbGUID == dbKbGUID);
+}
+
+QString CWizDocumentWebEngine::getCurrentNoteHtml() const
+{
+    CWizDatabase& db = m_dbMgr.db(view()->note().strKbGUID);
+    QString strFolder = Utils::PathResolve::tempDocumentFolder(view()->note().strGUID);
+    if (db.ExtractZiwFileToFolder(view()->note(), strFolder))
+    {
+        QString strHtmlFile = strFolder + "index.html";
+        QString strHtml;
+        ::WizLoadUnicodeTextFromFile(strHtmlFile, strHtml);
+        return strHtml;
+    }
+
+    return QString();
+}
+
+bool CWizDocumentWebEngine::hasEditPermissionOnCurrentNote() const
+{
+    WIZDOCUMENTDATA docData = view()->note();
+    CWizDatabase& db = m_dbMgr.db(docData.strKbGUID);
+    return db.CanEditDocument(docData) && !CWizDatabase::IsInDeletedItems(docData.strLocation);
+}
+
 bool CWizDocumentWebEngine::shareNoteByEmail()
 {
     CWizEmailShareDialog dlg(m_app);
@@ -721,9 +783,77 @@ bool CWizDocumentWebEngine::shareNoteByEmail()
     return true;
 }
 
-QString CWizDocumentWebEngine::getUserAlias()
+void copyFileToFolder(const QString& strFileFoler, const QString& strIndexFile, \
+                         const QStringList& strResourceList)
 {
-    return "CWizDocumentWebEngine::getUserAlias()";
+    //copy index file
+    QString strFolderIndex = strFileFoler + "index.html";
+    if (strIndexFile != strFolderIndex)
+    {
+        QFile::remove(strFolderIndex);
+        QFile::copy(strIndexFile, strFolderIndex);
+    }
+
+    //copy resources to temp folder
+    QString strResourcePath = strFileFoler + "index_files/";
+    for (int i = 0; i < strResourceList.count(); i++)
+    {
+        if (QFile::exists(strResourceList.at(i)))
+        {
+            QFile::copy(strResourceList.at(i), strResourcePath + WizExtractFileName(strResourceList.at(i)));
+        }
+    }
+}
+
+void CWizDocumentWebEngine::saveHtmlToCurrentNote(const QString& strHtml, const QString& strResource)
+{
+    if (strHtml.isEmpty())
+        return;
+
+    WIZDOCUMENTDATA docData = view()->note();
+    CWizDatabase& db = m_dbMgr.db(docData.strKbGUID);
+    QString strFolder = Utils::PathResolve::tempDocumentFolder(docData.strGUID);
+    //
+    QString strHtmlFile = strFolder + "index.html";
+    ::WizSaveUnicodeTextToUtf8File(strHtmlFile, strHtml);
+    QStringList strResourceList = strResource.split('*');
+    copyFileToFolder(strFolder, strHtmlFile, strResourceList);
+
+    db.CompressFolderToZiwFile(docData, strFolder);
+    bool bNotify = false;
+    QString strZiwFile = db.GetDocumentFileName(docData.strGUID);
+    db.UpdateDocumentDataMD5(docData, strZiwFile, bNotify);
+    MainWindow* mainWindow = qobject_cast<MainWindow*>(m_app.mainWindow());
+    mainWindow->quickSyncKb(docData.strKbGUID);
+
+    updateNoteHtml();
+}
+
+void CWizDocumentWebEngine::setCurrentDocumentType(const QString& strType)
+{
+    WIZDOCUMENTDATA docData = view()->note();
+    CWizDatabase& db = m_dbMgr.db(docData.strKbGUID);
+    docData.strType = strType;
+    db.ModifyDocumentInfoEx(docData);
+}
+
+bool CWizDocumentWebEngine::checkListClickable()
+{
+    if (!m_dbMgr.db(view()->note().strKbGUID).IsGroup())
+    {
+        emit clickingTodoCallBack(false, false);
+        return true;
+    }
+
+    if (view()->checkListClickable())
+    {
+        qDebug() << "check list clickable";
+        view()->setStatusToEditingByCheckList();
+        emit clickingTodoCallBack(false, false);
+        return true;
+    }
+    emit clickingTodoCallBack(true, true);
+    return false;
 }
 
 void CWizDocumentWebEngine::onEditorLoadFinished(bool ok)
@@ -737,12 +867,6 @@ void CWizDocumentWebEngine::onEditorLoadFinished(bool ok)
 
     TOLOG("Wow, loading editor failed!");
 }
-
-//void CWizDocumentWebEngine::onEditorPopulateJavaScriptWindowObject()
-//{
-//    page()->addToJavaScriptWindowObject("WizExplorerApp", m_app.object());
-//    page()->mainFrame()->addToJavaScriptWindowObject("WizEditor", this);
-//}
 
 void CWizDocumentWebEngine::onEditorContentChanged()
 {
@@ -957,14 +1081,14 @@ void CWizDocumentWebEngine::viewDocumentInEditor(bool editing)
         return;
     }
 
-    //strHtml = escapeJavascriptString(strHtml);
-
     m_strCurrentNoteHead.clear();
     m_strCurrentNoteHtml.clear();
     splitHtmlToHeadAndBody(strHtml, m_strCurrentNoteHead, m_strCurrentNoteHtml);
 
     m_strCurrentNoteHead = m_strCurrentNoteHead + "<link rel=\"stylesheet\" type=\"text/css\" href=\"" +
             m_strDefaultCssFilePath + "\">";
+
+    qDebug() << "view document in editor , current note head : " << m_strCurrentNoteHead;
 
     m_strCurrentNoteGUID = strGUID;
     m_bCurrentEditing = editing;
@@ -977,35 +1101,30 @@ void CWizDocumentWebEngine::viewDocumentInEditor(bool editing)
             .arg(strHead);
             */
 
-    qDebug() << "try to view document head : " << m_strCurrentNoteHead << "  \n html : " << m_strCurrentNoteHtml;
-    emit viewNoteRequest(m_strCurrentNoteGUID, m_bCurrentEditing, m_strCurrentNoteHtml, m_strCurrentNoteHead);
+//    emit viewNoteRequest(m_strCurrentNoteGUID, m_bCurrentEditing, m_strCurrentNoteHtml, m_strCurrentNoteHead);
     qDebug() << "after send view note request";
 //    QString strExec = QString("viewCurrentNote();");
-//    QString strExec = QString("viewNote(%1, %2, %3, %4);").arg(m_strCurrentNoteGUID).arg(m_bCurrentEditing).arg(m_strCurrentNoteHtml).arg(m_strCurrentNoteHead);
+    QString strExec = QString("viewNote('%1', '%2', '%3', '%4');").arg(m_strCurrentNoteGUID).arg(m_bCurrentEditing).arg(m_strCurrentNoteHtml).arg(m_strCurrentNoteHead);
+    page()->runJavaScript(strExec, [&ret, this](const QVariant& returnValue) {
+        ret = returnValue.toBool();
+        // show client
+        MainWindow* window = qobject_cast<MainWindow *>(m_app.mainWindow());
+        if (!ret) {
+            window->showClient(false);
+            window->transitionView()->showAsMode(m_strCurrentNoteGUID, CWizDocumentTransitionView::ErrorOccured);
+            return;
+        }
 
-//    ret = getDataByJavaScriptFromPage<bool>(strExec);
-//    if (!ret) {
-//        qDebug() << "[Editor] failed to load note: " << strExec;
-//        // hide client and show error
-//        return;
-//    }
+        window->showClient(true);
+        window->transitionView()->hide();
 
-    // show client
-    MainWindow* window = qobject_cast<MainWindow *>(m_app.mainWindow());
-    if (!ret) {
-        window->showClient(false);
-        window->transitionView()->showAsMode(strGUID, CWizDocumentTransitionView::ErrorOccured);
-        return;
-    }
+        m_timerAutoSave.start();
+        initCheckListEnvironment();
 
-    window->showClient(true);
-    window->transitionView()->hide();
-
-    m_timerAutoSave.start();
-
-    //Waiting for the editor initialization complete if it's the first time to load a document.
-    QTimer::singleShot(100, this, SLOT(applySearchKeywordHighlight()));
-    emit viewDocumentFinished();
+        //Waiting for the editor initialization complete if it's the first time to load a document.
+        QTimer::singleShot(100, this, SLOT(applySearchKeywordHighlight()));
+        emit viewDocumentFinished();
+    });
 }
 
 void CWizDocumentWebEngine::onNoteLoadFinished()

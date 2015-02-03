@@ -61,7 +61,6 @@ var QWebChannel = function(transport, initCallback)
 
     this.send = function(data)
     {
-        console.log("webChannel send message : " + data);
         if (typeof(data) !== "string") {
             data = JSON.stringify(data);
         }
@@ -97,7 +96,6 @@ var QWebChannel = function(transport, initCallback)
     this.execId = 0;
     this.exec = function(data, callback)
     {
-        console.log("webChannel  exec called with callback : " + callback);
         if (!callback) {
             // if no callback is given, send directly
             channel.send(data);

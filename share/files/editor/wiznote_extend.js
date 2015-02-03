@@ -64,7 +64,6 @@ function initialUEditor(wizEditor) {
         });
 
         editor.addListener('selectionchange', function () {
-            console.log("selectionchange, select text : " + editor.document.getSelection().toString());
             WizEditor.onEditorSelectionChanged();
         });
 
@@ -120,7 +119,7 @@ function setEditorHtml(html, bEditing)
 
 function setEditing(bEditing) {
 
-    console.log("set document editing , head : " + wiz_head + "  \n body : " + wiz_html);
+    console.log("set document editing : " + bEditing + " head : " + wiz_head);
 
     editor.document.head.innerHTML = wiz_head;
     //if (bEditing) {
@@ -141,10 +140,7 @@ function setEditing(bEditing) {
 
 function viewNote(strGUID, bEditing, strHtml, strHead)
 {
-    console.log("view note : " + strGUID + "\n" + strHtml)
-    for (var i = 0 ; i < 10000000; i++) {
-        //do noting
-    };
+    console.log("view note : " + strGUID + "\n" + strHead)
     try {
         m_currentGUID = strGUID;
         wiz_html = strHtml;
@@ -187,6 +183,7 @@ function updateCurrentNoteHtml(strGUID, strHtml, strHead)
 
 function updateCss()
 {
+    console.log("update csss file in wiz_extend : " + editor.document.head.innerHTML);
     var css= editor.document.getElementsByTagName('link');
     console.log("update Css. get css file : " + css)
     for (var i = 0; i < css.length; i++) {
