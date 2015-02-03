@@ -660,77 +660,82 @@
 <context>
     <name>CWizLoginDialog</name>
     <message>
-        <location filename="../src/wizLoginDialog.cpp" line="351"/>
+        <location filename="../src/wizLoginDialog.cpp" line="356"/>
         <source>Password</source>
         <translation>密码</translation>
     </message>
     <message>
-        <location filename="../src/wizLoginDialog.cpp" line="380"/>
+        <location filename="../src/wizLoginDialog.cpp" line="385"/>
         <source>Create Account</source>
         <translation>创建帐号</translation>
     </message>
     <message>
-        <location filename="../src/wizLoginDialog.cpp" line="490"/>
+        <location filename="../src/wizLoginDialog.cpp" line="495"/>
         <source>No account yet,</source>
         <translation>还没有帐号，</translation>
     </message>
     <message>
-        <location filename="../src/wizLoginDialog.cpp" line="565"/>
+        <location filename="../src/wizLoginDialog.cpp" line="575"/>
         <source>Connection is not available, please check your network connection.</source>
         <translation>网络连接不可用,请检查网络连接.</translation>
     </message>
     <message>
-        <location filename="../src/wizLoginDialog.cpp" line="227"/>
+        <location filename="../src/wizLoginDialog.cpp" line="232"/>
         <source>Can not open database while update user profile</source>
         <translation>更新用户档案时无法打开数据库</translation>
     </message>
     <message>
-        <location filename="../src/wizLoginDialog.cpp" line="355"/>
+        <location filename="../src/wizLoginDialog.cpp" line="86"/>
+        <source>Private deployment</source>
+        <translation type="unfinished">私有部署</translation>
+    </message>
+    <message>
+        <location filename="../src/wizLoginDialog.cpp" line="360"/>
         <source>Please input eamil as your account</source>
         <translation>请输入邮箱作为用户名</translation>
     </message>
     <message>
-        <location filename="../src/wizLoginDialog.cpp" line="359"/>
+        <location filename="../src/wizLoginDialog.cpp" line="364"/>
         <source>Please enter your password</source>
         <translation>请输入密码</translation>
     </message>
     <message>
-        <location filename="../src/wizLoginDialog.cpp" line="364"/>
+        <location filename="../src/wizLoginDialog.cpp" line="369"/>
         <source>Please repeat your password</source>
         <translation>请再次输入密码</translation>
     </message>
     <message>
-        <location filename="../src/wizLoginDialog.cpp" line="375"/>
+        <location filename="../src/wizLoginDialog.cpp" line="380"/>
         <source>Login</source>
         <translation>登录</translation>
     </message>
     <message>
-        <location filename="../src/wizLoginDialog.cpp" line="429"/>
+        <location filename="../src/wizLoginDialog.cpp" line="434"/>
         <source>Invalid email address.</source>
         <translation>无效的邮箱地址.</translation>
     </message>
     <message>
-        <location filename="../src/wizLoginDialog.cpp" line="436"/>
+        <location filename="../src/wizLoginDialog.cpp" line="441"/>
         <source>Password is Empty</source>
         <translation>密码不能为空</translation>
     </message>
     <message>
-        <location filename="../src/wizLoginDialog.cpp" line="443"/>
+        <location filename="../src/wizLoginDialog.cpp" line="448"/>
         <source>Passwords don&apos;t match</source>
         <translation>两次输入的密码不一致</translation>
     </message>
     <message>
-        <location filename="../src/wizLoginDialog.cpp" line="480"/>
+        <location filename="../src/wizLoginDialog.cpp" line="485"/>
         <source>Already got account,</source>
         <translation>已有帐号，</translation>
     </message>
     <message>
-        <location filename="../src/wizLoginDialog.cpp" line="511"/>
+        <location filename="../src/wizLoginDialog.cpp" line="521"/>
         <source>Please enter user id</source>
         <translation>请输入用户名</translation>
     </message>
     <message>
-        <location filename="../src/wizLoginDialog.cpp" line="516"/>
+        <location filename="../src/wizLoginDialog.cpp" line="526"/>
         <source>Please enter user password</source>
         <translation>请输入用户密码</translation>
     </message>
@@ -1172,6 +1177,44 @@
     </message>
 </context>
 <context>
+    <name>CWizPrivateDeployDialog</name>
+    <message>
+        <location filename="../src/ui/wizPrivateDeployDialog.ui" line="14"/>
+        <source>Private deployment settings</source>
+        <translation type="unfinished">私有部署设置</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/wizPrivateDeployDialog.ui" line="20"/>
+        <source>Use custom private deployment settings</source>
+        <translation type="unfinished">使用自定义设置</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/wizPrivateDeployDialog.ui" line="29"/>
+        <source>API server:</source>
+        <translation type="unfinished">API服务器：</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/wizPrivateDeployDialog.ui" line="56"/>
+        <source>Cancel</source>
+        <translation>取消</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/wizPrivateDeployDialog.ui" line="63"/>
+        <source>OK</source>
+        <translation>确定</translation>
+    </message>
+    <message>
+        <location filename="../src/widgets/wizPrivateDeployDialog.cpp" line="50"/>
+        <source>Info</source>
+        <translation>提示</translation>
+    </message>
+    <message>
+        <location filename="../src/widgets/wizPrivateDeployDialog.cpp" line="50"/>
+        <source>Restart WizNote to use the new server.</source>
+        <translation>重启程序使改动内容生效。</translation>
+    </message>
+</context>
+<context>
     <name>CWizProgressDialog</name>
     <message>
         <location filename="../src/ui/wizProgressDialog.ui" line="20"/>
@@ -1575,7 +1618,7 @@ w: %3  h: %4</translation>
         <translation type="unfinished">正在检查清单项是否可点击...</translation>
     </message>
     <message>
-        <location filename="../src/wizDocumentView.cpp" line="476"/>
+        <location filename="../src/wizDocumentView.cpp" line="478"/>
         <source>You have occupied this note by clicking checklist !  Switch to other notes to free this note.</source>
         <translation type="unfinished">您点击了阅读状态的清单项，当前笔记正被您占用！如需解除，请切换到其他笔记。</translation>
     </message>
@@ -1723,13 +1766,13 @@ w: %3  h: %4</translation>
         <translation>为知笔记</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="1396"/>
+        <location filename="../src/wizmainwindow.cpp" line="1395"/>
         <source>1 note</source>
         <translation>1 条笔记</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="1402"/>
-        <location filename="../src/wizmainwindow.cpp" line="1406"/>
+        <location filename="../src/wizmainwindow.cpp" line="1401"/>
+        <location filename="../src/wizmainwindow.cpp" line="1405"/>
         <source>%1 notes</source>
         <translation>%1 条笔记</translation>
     </message>
@@ -1749,62 +1792,62 @@ w: %3  h: %4</translation>
         <translation>网络连接不可用,请检查网络连接.</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="1365"/>
+        <location filename="../src/wizmainwindow.cpp" line="1364"/>
         <source>Unread Messages</source>
         <translation>未读消息</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="1374"/>
+        <location filename="../src/wizmainwindow.cpp" line="1373"/>
         <source>Mark all messages read</source>
         <translation>全部标记为已读</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="1869"/>
+        <location filename="../src/wizmainwindow.cpp" line="1868"/>
         <source>PDF Files (*.pdf)</source>
         <translation>PDF 文件 (*.pdf)</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="1881"/>
+        <location filename="../src/wizmainwindow.cpp" line="1880"/>
         <source>Open Directory</source>
         <translation>选择文件夹</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="2108"/>
+        <location filename="../src/wizmainwindow.cpp" line="2107"/>
         <source>Can&apos;t find note %1 , may be it has been deleted.</source>
         <translation>找不到笔记 %1 , 该篇笔记可能已被删除。</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="2552"/>
+        <location filename="../src/wizmainwindow.cpp" line="2551"/>
         <source>Show/Hide MainWindow</source>
         <translation>显示/隐藏主窗口</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="2555"/>
+        <location filename="../src/wizmainwindow.cpp" line="2554"/>
         <source>New Note</source>
         <translation>新建笔记</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="2560"/>
+        <location filename="../src/wizmainwindow.cpp" line="2559"/>
         <source>Hide TrayIcon</source>
         <translation>隐藏托盘图标</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="2564"/>
+        <location filename="../src/wizmainwindow.cpp" line="2563"/>
         <source>Logout</source>
         <translation>注销</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="2566"/>
+        <location filename="../src/wizmainwindow.cpp" line="2565"/>
         <source>Exit</source>
         <translation>退出</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="1835"/>
+        <location filename="../src/wizmainwindow.cpp" line="1834"/>
         <source>Rebuild full text search index</source>
         <translation>重建搜索索引</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="1838"/>
+        <location filename="../src/wizmainwindow.cpp" line="1837"/>
         <source>Rebuild full text search is quit slow if you have quite a few notes or attachments, you do not have to use this function while search should work as expected.</source>
         <translation>重建全文搜索索引会非常慢。只有在您的搜索出现异常的时候才需要用这个功能。</translation>
     </message>

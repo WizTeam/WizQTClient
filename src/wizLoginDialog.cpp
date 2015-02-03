@@ -24,6 +24,7 @@
 
 #include "share/wizui.h"
 #include "wiznotestyle.h"
+#include "widgets/wizPrivateDeployDialog.h"
 
 using namespace WizService;
 
@@ -80,6 +81,10 @@ CWizLoginDialog::CWizLoginDialog(const QString &strDefaultUserId, const QString 
     ui->wgt_newUser->setAutoClearRightIcon(true);
     ui->wgt_newPassword->setAutoClearRightIcon(true);
     ui->wgt_passwordRepeat->setAutoClearRightIcon(true);
+
+#ifdef PRIVATE_DEPLOYMENT
+    ui->btn_proxysetting->setText(tr("Private deployment"));
+#endif
 
     applyElementStyles(strLocale);
 
@@ -495,8 +500,13 @@ void CWizLoginDialog::on_btn_changeToLogin_clicked()
 
 void CWizLoginDialog::on_btn_proxysetting_clicked()
 {
+#ifdef PRIVATE_DEPLOYMENT
+    CWizPrivateDeployDialog dlg;
+    dlg.exec();
+#else
     ProxyDialog dlg;
     dlg.exec();
+#endif
 }
 
 void CWizLoginDialog::on_btn_fogetpass_clicked()
