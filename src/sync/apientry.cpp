@@ -30,11 +30,7 @@
  * %7: platform, ios|android|web|wp7|x86|x64|linux|macosx
  * %8: debug, true|false, optional
  */
-#ifdef PRIVATE_DEPLOYMENT
-#define WIZNOTE_API_SERVER "http://172.25.0.71/api/"
-#else
-#define WIZNOTE_API_SERVER "http://api.wiz.cn/"
-#endif
+
 #define WIZNOTE_API_PARAM "?p=%1&l=%2&v=%3&c=%4&random=%5&cn=%6&plat=%7&debug=%8"
 
 #define WIZNOTE_API_ARG_PRODUCT "wiz"
@@ -95,11 +91,8 @@ QString ApiEntryPrivate::urlFromCommand(const QString& strCommand)
 
     QString strApiEntry;
 #ifdef PRIVATE_DEPLOYMENT
-    CWizSettings wizSettings(Utils::PathResolve::globalSettingsFile());
-    static bool useCustomSettings = wizSettings.GetBool("PrivateDeploy", "CustomSetting", false);
-    static QString strApiServer = wizSettings.GetString("PrivateDeploy", "ApiServer", WIZNOTE_API_SERVER);
-    if (useCustomSettings)  {
-        strApiEntry = strApiServer + QString(WIZNOTE_API_PARAM);
+    if (isUseCustomPustomDeploy())  {
+        strApiEntry = apiServerUrl() + QString(WIZNOTE_API_PARAM);
     } else {
         strApiEntry = QString(WIZNOTE_API_SERVER) + QString(WIZNOTE_API_PARAM);
     }
@@ -116,8 +109,6 @@ QString ApiEntryPrivate::urlFromCommand(const QString& strCommand)
             .arg(QHostInfo::localHostName())\
             .arg(WIZNOTE_API_ARG_PLATFORM)\
             .arg("false");
-
-    qDebug() << strUrl;
 
     return strUrl;
 }
@@ -141,11 +132,21 @@ QString ApiEntryPrivate::requestUrl(const QString& strUrl)
         return 0;
     }
 
-    QString strRequestedUrl = QString::fromUtf8(reply->readAll().constData());
+    QByteArray ba = reply->readAll();
+    QString strRequestedUrl = QString::fromUtf8(ba.constData());
 
     net->deleteLater();
 
     return strRequestedUrl;
+}
+
+void ApiEntryPrivate::loadPrivateDeploySettings()
+{
+    CWizSettings wizSettings(Utils::PathResolve::globalSettingsFile());
+    m_useCustomSettings = wizSettings.GetBool("PrivateDeploy", "CustomSetting", false);
+    m_strApiServerUrl = wizSettings.GetString("PrivateDeploy", "ApiServer", WIZNOTE_API_SERVER);
+    m_useHttpsConnection = wizSettings.GetBool("PrivateDeploy", "UseHttpsConnection", false);
+    m_useMD5Password = wizSettings.GetBool("PrivateDeploy", "UseMD5Password", false);
 }
 
 QString ApiEntryPrivate::requestUrl(const QString& strCommand, QString& strUrl)
@@ -161,7 +162,10 @@ QString ApiEntryPrivate::requestUrl(const QString& strCommand, QString& strUrl)
 
 QString ApiEntryPrivate::syncUrl()
 {
-    return requestUrl(WIZNOTE_API_COMMAND_SYNC_HTTPS, m_strSyncUrl);
+    if (isUseHttpsConnection())
+        return requestUrl(WIZNOTE_API_COMMAND_SYNC_HTTPS, m_strSyncUrl);
+    else
+        return requestUrl(WIZNOTE_API_COMMAND_SYNC_HTTP, m_strSyncUrl);
 }
 
 QString ApiEntryPrivate::messageVersionUrl()
@@ -212,7 +216,9 @@ QString ApiEntryPrivate::commentCountUrl(const QString& strServer, const QString
 
     // use https
     QUrl url(strUrl);
-    url.setScheme("https");
+    if (isUseHttpsConnection()) {
+        url.setScheme("https");
+    }
 
     return url.toString();
 }
@@ -280,6 +286,40 @@ QString ApiEntryPrivate::standardCommandUrl(const QString& strCommand, const QSt
     QString strExt = QString("token=%1").arg(strToken) + "&" + strExtInfo;
     QString strUrl = urlFromCommand(strCommand);
     return addExtendedInfo(strUrl, strExt);
+}
+
+bool ApiEntryPrivate::isUseCustomPustomDeploy()
+{
+    if (m_strApiServerUrl.isEmpty()) {
+        loadPrivateDeploySettings();
+    }
+    return m_useCustomSettings;
+}
+
+QString ApiEntryPrivate::apiServerUrl()
+{
+    if (m_strApiServerUrl.isEmpty()) {
+        loadPrivateDeploySettings();
+    }
+    return m_strApiServerUrl;
+}
+
+bool ApiEntryPrivate::isUseHttpsConnection()
+{
+    if (m_strApiServerUrl.isEmpty()) {
+        loadPrivateDeploySettings();
+    }
+
+    return isUseCustomPustomDeploy() && m_useHttpsConnection;
+}
+
+bool ApiEntryPrivate::isUseMD5Password()
+{
+    if (m_strApiServerUrl.isEmpty()) {
+        loadPrivateDeploySettings();
+    }
+
+    return isUseCustomPustomDeploy() && m_useMD5Password;
 }
 
 QString ApiEntryPrivate::groupAttributeUrl(const QString& strToken, const QString& strKbGUID)
@@ -476,5 +516,40 @@ QString ApiEntry::kUrlFromGuid(const QString& strToken, const QString& strKbGUID
     if (!d)
         d = new ApiEntryPrivate();
     return d->kUrlFromGuid(strToken, strKbGUID);
+}
+
+bool ApiEntry::isUseCustomPrivateDeploySettings()
+{
+    if (!d)
+        d = new ApiEntryPrivate();
+    return d->isUseCustomPustomDeploy();
+}
+
+QString ApiEntry::apiServerUrl()
+{
+    if (!d)
+        d = new ApiEntryPrivate();
+    return d->apiServerUrl();
+}
+
+bool ApiEntry::isUseHttpsConnection()
+{
+    if (!d)
+        d = new ApiEntryPrivate();
+    return d->isUseHttpsConnection();
+}
+
+bool ApiEntry::isUseMD5Password()
+{
+    if (!d)
+        d = new ApiEntryPrivate();
+    return d->isUseMD5Password();
+}
+
+void ApiEntry::reloadPrivateDeploySettings()
+{
+    if (!d)
+        d = new ApiEntryPrivate();
+    d->loadPrivateDeploySettings();
 }
 

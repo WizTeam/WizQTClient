@@ -1,6 +1,12 @@
 #ifndef WIZSERVICE_WIZAPIENTRY_H
 #define WIZSERVICE_WIZAPIENTRY_H
 
+#ifdef PRIVATE_DEPLOYMENT
+#define WIZNOTE_API_SERVER "http://cmnote-api.cm-inv.com/api/"
+#else
+#define WIZNOTE_API_SERVER "http://api.wiz.cn/"
+#endif
+
 class QString;
 
 namespace WizService {
@@ -33,6 +39,13 @@ public:
 
     static QString kUrlFromGuid(const QString& strToken, const QString& strKbGUID);
 
+
+    static bool isUseCustomPrivateDeploySettings();
+    static QString apiServerUrl();
+    static bool isUseHttpsConnection();
+    static bool isUseMD5Password();
+
+    static void reloadPrivateDeploySettings();
 };
 
 } // namespace WizService

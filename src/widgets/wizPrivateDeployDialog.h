@@ -22,6 +22,8 @@ private slots:
 
     void on_pushButton_ok_clicked();
 
+    void on_label_proxyLink_linkActivated(const QString &link);
+
 private:
     Ui::CWizPrivateDeployDialog *ui;
 };

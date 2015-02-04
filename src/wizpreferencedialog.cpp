@@ -39,10 +39,10 @@ CWizPreferenceWindow::CWizPreferenceWindow(CWizExplorerApp& app, QWidget* parent
     }
     ui->comboLang->blockSignals(false);
 
-    ui->checkBox->blockSignals(true);
+    ui->checkBox_upgradeNotify->blockSignals(true);
     Qt::CheckState checkState = userSettings().autoCheckUpdate() ? Qt::Checked : Qt::Unchecked;
-    ui->checkBox->setCheckState(checkState);
-    ui->checkBox->blockSignals(false);
+    ui->checkBox_upgradeNotify->setCheckState(checkState);
+    ui->checkBox_upgradeNotify->blockSignals(false);
 
     ui->checkBoxTrayIcon->blockSignals(true);
     checkState = userSettings().showSystemTrayIcon() ? Qt::Checked : Qt::Unchecked;
@@ -52,7 +52,11 @@ CWizPreferenceWindow::CWizPreferenceWindow(CWizExplorerApp& app, QWidget* parent
 #ifdef BUILD4APPSTORE
     // hide language choice and upgrade for appstore
     ui->comboLang->setEnabled(false);
-    ui->checkBox->setVisible(false);
+    ui->checkBox_upgradeNotify->setVisible(false);
+#endif
+
+#ifdef PRIVATE_DEPLOYMENT
+    ui->checkBox_upgradeNotify->setVisible(false);
 #endif
 
 #ifndef Q_OS_LINUX
@@ -466,4 +470,15 @@ void CWizPreferenceWindow::on_checkBoxManuallySort_toggled(bool checked)
 {
     m_app.userSettings().setManualSortingEnable(checked);
     emit settingsChanged(wizoptionsFolders);
+}
+
+void CWizPreferenceWindow::on_checkBox_upgradeNotify_toggled(bool checked)
+{
+    bool autoUpgrade = checked;
+    m_app.userSettings().setAutoCheckUpdate(autoUpgrade);
+
+    if (autoUpgrade) {
+        Core::Internal::MainWindow* mainWindow = qobject_cast<Core::Internal::MainWindow*>(m_app.mainWindow());
+        mainWindow->checkWizUpdate();
+    }
 }

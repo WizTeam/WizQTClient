@@ -2257,7 +2257,9 @@ void MainWindow::on_application_messageAvailable(const QString& strMsg)
 void MainWindow::checkWizUpdate()
 {
 #ifndef BUILD4APPSTORE
+#ifndef PRIVATE_DEPLOYMENT
     m_upgrade->startCheck();
+#endif
 #endif
 }
 

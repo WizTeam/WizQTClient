@@ -39,6 +39,13 @@ public:
     QString standardCommandUrl(const QString& strCommand, const QString& strToken);
     QString standardCommandUrl(const QString& strCommand, const QString& strToken, const QString& strExtInfo);
 
+    bool isUseCustomPustomDeploy();
+    QString apiServerUrl();
+    bool isUseHttpsConnection();
+    bool isUseMD5Password();
+    //
+    void loadPrivateDeploySettings();
+
 private:
     QString m_strSyncUrl;
     QString m_strMessageVersionUrl;
@@ -49,10 +56,16 @@ private:
     QString m_strFeedbackUrl;
     QMap<QString, QString> m_mapkUrl;
 
+    bool m_useCustomSettings;
+    QString m_strApiServerUrl;
+    bool m_useHttpsConnection;
+    bool m_useMD5Password;
+
     QString urlFromCommand(const QString& strCommand);
     QString addExtendedInfo(const QString& strUrl, const QString& strExt);
     QString requestUrl(const QString& strCommand, QString& strUrl);
     QString requestUrl(const QString& strUrl);
+
 };
 
 } // namespace Internal

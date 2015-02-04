@@ -660,82 +660,82 @@
 <context>
     <name>CWizLoginDialog</name>
     <message>
-        <location filename="../src/wizLoginDialog.cpp" line="356"/>
+        <location filename="../src/wizLoginDialog.cpp" line="360"/>
         <source>Password</source>
         <translation>密碼</translation>
     </message>
     <message>
-        <location filename="../src/wizLoginDialog.cpp" line="385"/>
+        <location filename="../src/wizLoginDialog.cpp" line="389"/>
         <source>Create Account</source>
         <translation>建立帳號</translation>
     </message>
     <message>
-        <location filename="../src/wizLoginDialog.cpp" line="495"/>
+        <location filename="../src/wizLoginDialog.cpp" line="498"/>
         <source>No account yet,</source>
         <translation>還沒有帳號，</translation>
     </message>
     <message>
-        <location filename="../src/wizLoginDialog.cpp" line="575"/>
+        <location filename="../src/wizLoginDialog.cpp" line="578"/>
         <source>Connection is not available, please check your network connection.</source>
         <translation>網絡連接不可用,請檢查網絡連接.</translation>
     </message>
     <message>
-        <location filename="../src/wizLoginDialog.cpp" line="232"/>
+        <location filename="../src/wizLoginDialog.cpp" line="236"/>
         <source>Can not open database while update user profile</source>
         <translation>更新使用者檔案時無法開啟資料庫</translation>
     </message>
     <message>
-        <location filename="../src/wizLoginDialog.cpp" line="86"/>
-        <source>Private deployment</source>
-        <translation type="unfinished">私有部署</translation>
+        <location filename="../src/wizLoginDialog.cpp" line="90"/>
+        <source>Private deployment settings</source>
+        <translation type="unfinished">私有部署設置</translation>
     </message>
     <message>
-        <location filename="../src/wizLoginDialog.cpp" line="360"/>
+        <location filename="../src/wizLoginDialog.cpp" line="364"/>
         <source>Please input eamil as your account</source>
         <translation>請輸入電子郵件地址作為用戶名</translation>
     </message>
     <message>
-        <location filename="../src/wizLoginDialog.cpp" line="364"/>
+        <location filename="../src/wizLoginDialog.cpp" line="368"/>
         <source>Please enter your password</source>
         <translation>請輸入密碼</translation>
     </message>
     <message>
-        <location filename="../src/wizLoginDialog.cpp" line="369"/>
+        <location filename="../src/wizLoginDialog.cpp" line="373"/>
         <source>Please repeat your password</source>
         <translation>請再次輸入密碼</translation>
     </message>
     <message>
-        <location filename="../src/wizLoginDialog.cpp" line="380"/>
+        <location filename="../src/wizLoginDialog.cpp" line="384"/>
         <source>Login</source>
         <translation>登入</translation>
     </message>
     <message>
-        <location filename="../src/wizLoginDialog.cpp" line="434"/>
+        <location filename="../src/wizLoginDialog.cpp" line="437"/>
         <source>Invalid email address.</source>
         <translation>無效的郵箱地址.</translation>
     </message>
     <message>
-        <location filename="../src/wizLoginDialog.cpp" line="441"/>
+        <location filename="../src/wizLoginDialog.cpp" line="444"/>
         <source>Password is Empty</source>
         <translation>密碼不能為空</translation>
     </message>
     <message>
-        <location filename="../src/wizLoginDialog.cpp" line="448"/>
+        <location filename="../src/wizLoginDialog.cpp" line="451"/>
         <source>Passwords don&apos;t match</source>
         <translation>兩次輸入的密碼不一致</translation>
     </message>
     <message>
-        <location filename="../src/wizLoginDialog.cpp" line="485"/>
+        <location filename="../src/wizLoginDialog.cpp" line="488"/>
         <source>Already got account,</source>
         <translation>已有帳號，</translation>
     </message>
     <message>
-        <location filename="../src/wizLoginDialog.cpp" line="521"/>
+        <location filename="../src/wizLoginDialog.cpp" line="524"/>
         <source>Please enter user id</source>
         <translation>請輸入使用者名稱</translation>
     </message>
     <message>
-        <location filename="../src/wizLoginDialog.cpp" line="526"/>
+        <location filename="../src/wizLoginDialog.cpp" line="529"/>
         <source>Please enter user password</source>
         <translation>請輸入使用者密碼</translation>
     </message>
@@ -1146,32 +1146,32 @@
         <translation>偏好設定</translation>
     </message>
     <message>
-        <location filename="../src/wizpreferencedialog.cpp" line="350"/>
+        <location filename="../src/wizpreferencedialog.cpp" line="354"/>
         <source>Language will be changed after restart WizNote.</source>
         <translation>語言將會在重啓爲知筆記後生效.</translation>
     </message>
     <message>
-        <location filename="../src/wizpreferencedialog.cpp" line="405"/>
+        <location filename="../src/wizpreferencedialog.cpp" line="409"/>
         <source>Info</source>
         <translation>提示</translation>
     </message>
     <message>
-        <location filename="../src/wizpreferencedialog.cpp" line="405"/>
+        <location filename="../src/wizpreferencedialog.cpp" line="409"/>
         <source>Application style will be changed after restart WizNote.</source>
         <translation>窗口樣式將會在重啓爲知筆記後生效.</translation>
     </message>
     <message>
-        <location filename="../src/wizpreferencedialog.cpp" line="420"/>
+        <location filename="../src/wizpreferencedialog.cpp" line="424"/>
         <source>Cancel search encrypted note</source>
         <translation>取消搜索加密筆記</translation>
     </message>
     <message>
-        <location filename="../src/wizpreferencedialog.cpp" line="423"/>
+        <location filename="../src/wizpreferencedialog.cpp" line="427"/>
         <source>Cancel search encrypted note need to rebuild full text search, this would be quite slow if you have quite a few notes or attachments. Do you want to rebuild full text search?</source>
         <translation>取消搜索加密筆記需要重建全文搜索索引，這會花費一些時間。是否重建搜索索引？</translation>
     </message>
     <message>
-        <location filename="../src/wizpreferencedialog.cpp" line="151"/>
+        <location filename="../src/wizpreferencedialog.cpp" line="155"/>
         <source>Proxy settings</source>
         <translation>代理設定</translation>
     </message>
@@ -1184,34 +1184,39 @@
         <translation type="unfinished">私有部署設置</translation>
     </message>
     <message>
-        <location filename="../src/ui/wizPrivateDeployDialog.ui" line="20"/>
+        <location filename="../src/ui/wizPrivateDeployDialog.ui" line="22"/>
         <source>Use custom private deployment settings</source>
         <translation type="unfinished">使用自定義設置</translation>
     </message>
     <message>
-        <location filename="../src/ui/wizPrivateDeployDialog.ui" line="29"/>
+        <location filename="../src/ui/wizPrivateDeployDialog.ui" line="52"/>
         <source>API server:</source>
-        <translation type="unfinished">API服務器：</translation>
+        <translation>API服務器地址：</translation>
     </message>
     <message>
-        <location filename="../src/ui/wizPrivateDeployDialog.ui" line="56"/>
+        <location filename="../src/ui/wizPrivateDeployDialog.ui" line="64"/>
+        <source>Use Https conection</source>
+        <translation>使用Https連接</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/wizPrivateDeployDialog.ui" line="71"/>
+        <source>Use MD5 to encrypt password</source>
+        <translation>使用MD5加密用戶密碼</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/wizPrivateDeployDialog.ui" line="83"/>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;a href=&quot;proxysettings&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;Proxy settings&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;a href=&quot;proxysettings&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;代理設置&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/wizPrivateDeployDialog.ui" line="106"/>
         <source>Cancel</source>
         <translation>取消</translation>
     </message>
     <message>
-        <location filename="../src/ui/wizPrivateDeployDialog.ui" line="63"/>
+        <location filename="../src/ui/wizPrivateDeployDialog.ui" line="113"/>
         <source>OK</source>
         <translation>確定</translation>
-    </message>
-    <message>
-        <location filename="../src/widgets/wizPrivateDeployDialog.cpp" line="50"/>
-        <source>Info</source>
-        <translation>提示</translation>
-    </message>
-    <message>
-        <location filename="../src/widgets/wizPrivateDeployDialog.cpp" line="50"/>
-        <source>Restart WizNote to use the new server.</source>
-        <translation>重啟程序使改動內容生效。</translation>
     </message>
 </context>
 <context>
@@ -1817,27 +1822,27 @@ w: %3  h: %4</translation>
         <translation>找不到筆記 %1 , 該篇筆記可能已被刪除。</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="2551"/>
+        <location filename="../src/wizmainwindow.cpp" line="2553"/>
         <source>Show/Hide MainWindow</source>
         <translation>顯示/隱藏主窗口</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="2554"/>
+        <location filename="../src/wizmainwindow.cpp" line="2556"/>
         <source>New Note</source>
         <translation>新建筆記</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="2559"/>
+        <location filename="../src/wizmainwindow.cpp" line="2561"/>
         <source>Hide TrayIcon</source>
         <translation>隱藏托盤圖標</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="2563"/>
+        <location filename="../src/wizmainwindow.cpp" line="2565"/>
         <source>Logout</source>
         <translation>註銷</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="2565"/>
+        <location filename="../src/wizmainwindow.cpp" line="2567"/>
         <source>Exit</source>
         <translation>退出</translation>
     </message>

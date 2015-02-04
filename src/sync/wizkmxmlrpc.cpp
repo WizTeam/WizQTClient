@@ -1,4 +1,5 @@
 #include "wizkmxmlrpc.h"
+#include "apientry.h"
 
 #define WIZUSERMESSAGE_AT		0
 #define WIZUSERMESSAGE_EDIT		1
@@ -262,10 +263,15 @@ BOOL CWizKMAccountsServer::SetValue(const QString& strKey, const QString& strVal
 
 QString CWizKMAccountsServer::MakeXmlRpcPassword(const QString& strPassword)
 {
-    if (strPassword.startsWith(_T("md5.")))
-        return QString(strPassword);
-    //
-    return QString(_T("md5.")) + ::WizMd5StringNoSpaceJava(strPassword.toUtf8());
+    if (WizService::ApiEntry::isUseMD5Password())
+    {
+        if (strPassword.startsWith(_T("md5.")))
+            return QString(strPassword);
+        //
+        return QString(_T("md5.")) + ::WizMd5StringNoSpaceJava(strPassword.toUtf8());
+    }
+
+    return strPassword;
 }
 
 
@@ -280,7 +286,11 @@ BOOL CWizKMAccountsServer::accounts_clientLogin(const QString& strUserName, cons
     param.AddString(_T("user_id"), strUserName);
     param.AddString(_T("password"), MakeXmlRpcPassword(strPassword));
     param.AddString(_T("program_type"), strType);
-    param.AddString(_T("protocol"), "https");
+    if (WizService::ApiEntry::isUseHttpsConnection()) {
+        param.AddString(_T("protocol"), "https");
+    } else {
+        param.AddString(_T("protocol"), "http");
+    }
     //
     if (!Call(_T("accounts.clientLogin"), ret, &param))
     {
@@ -464,7 +474,11 @@ BOOL CWizKMAccountsServer::accounts_getGroupList(CWizGroupDataArray& arrayGroup)
     }
     //
     param.AddString(_T("kb_type"), _T("group"));
-    param.AddString(_T("protocol"), "https");
+    if (WizService::ApiEntry::isUseHttpsConnection()) {
+        param.AddString(_T("protocol"), "https");
+    } else {
+        param.AddString(_T("protocol"), "http");
+    }
     //
     std::deque<WIZGROUPDATA> arrayWrap;
     if (!Call(_T("accounts.getGroupKbList"), arrayWrap, &param))

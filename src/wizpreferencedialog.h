@@ -62,6 +62,8 @@ private slots:
 
     void on_checkBoxManuallySort_toggled(bool checked);
 
+    void on_checkBox_upgradeNotify_toggled(bool checked);
+
 private:
     Ui::CWizPreferenceWindow *ui;
     CWizExplorerApp& m_app;
