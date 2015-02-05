@@ -300,6 +300,7 @@ function WizTodoReadCheckedWindows (wizApp) {
 	this.getWizDocument = getWizDocument;
 	this.getAvatarName = getAvatarName;
 	this.onClickingTodo = onClickingTodo;
+    	this.onDocumentClose = onDocumentClose;
 	
 	function initCss() {
 		WizInitReadCss(document, document.head);
@@ -406,8 +407,13 @@ function WizTodoReadCheckedWindows (wizApp) {
 	}
 
 	function onClickingTodo(callback) {
-		WizTodoReadChecked[callback](false, false);
+        this.app.ExecuteCommand("OnClickingTodo",
+         "WizTodoReadChecked." + callback + "({cancel}, {needCallAgain});", "readingnote");
 	}
+
+    function onDocumentClose(isModified) {
+        this.app.ExecuteCommand("onDocumentClose", isModified, "readingnote");
+    }
 }
 
 function WizTodoReadCheckedQt () {
@@ -440,6 +446,11 @@ function WizTodoReadCheckedQt () {
     this.personalDocument = false;
     this.canedit = false;
     this.originalHtml = "";
+
+    // WizEditor.setDocOriginalHtml.connect(function (strHtml) {
+    //     this.originalHtml = strHtml;
+    //     console.log("after set original html , html : " + getDocHtml());
+    // });
     
     function initCss() {
     }
@@ -468,8 +479,9 @@ function WizTodoReadCheckedQt () {
         this.canedit = canEdit;
     }
 
-    function setDocOriginalHtml(html) {
-        this.originalHtml = html;
+    function setDocOriginalHtml (strHtml) {
+        console.log("set doc originalHtml called , html : " + strHtml);
+        this.originalHtml = strHtml;
     }
 
     function getDocHtml() {
@@ -585,7 +597,7 @@ function WizTodoReadCheckedAndroid () {
 		return window.WizNote.getUserAvatarFileName(size);
 	}
 
-	function onDocumentClose() {
+	function onDocumentClose(isModified) {
 		window.WizNote.onWizTodoReadCheckedClose();
 	}
 
@@ -771,6 +783,10 @@ var WizTodoReadChecked = (function () {
 	function isIpad() {
 		return 'ipad' === wizClient;
 	}
+
+    function isQt () {
+        return 'qt' == wizClient;
+    }
 
 	function getClassValue(ele) {
 		if (!ele)
@@ -1106,17 +1122,24 @@ var WizTodoReadChecked = (function () {
 		//
 		var id = todoEle.id;
 		//
-		// changeWizDocument(id);
 		if (modifiedTodos[todoEle.id] === undefined) {
 			modifiedTodos[todoEle.id] = {};
 		}
+        //
+        if (modifiedTodos[todoEle.id]['state'] === undefined) {
+            modifiedTodos[todoEle.id]['state'] = isChecked ? "checked" : "unchecked";    
+        }
+        else {
+            modifiedTodos[todoEle.id] = undefined;
+        }
 		//
-		modifiedTodos[todoEle.id]['state'] = isChecked ? "checked" : "unchecked";
-		// modifiedTodos[todoEle.id]['completedInfo'] = isChecked ? completedInfo : "";
 	}
 
 	function onTodoClick(todoEle) {
 
+        if (beingClickedTodoEle != null)
+            return;
+        //
 		if (!needCallHelperClicking) {
 			clickTodo(todoEle);
 		}
@@ -1304,17 +1327,24 @@ var WizTodoReadChecked = (function () {
 	function getObjectLength(obj) {
 	     var count = 0;
 	     for(var i in obj){
-	         count ++;
+	        if(obj[i] !== undefined) {
+                count ++;
+            }
 	     }
 	     return count;		
 	}
 
+    function _isModified() {
+        return getObjectLength(modifiedTodos) >= 1;
+    }
+
 	function saveHtml() {
 		
-		if (getObjectLength(modifiedTodos) < 1)
+		if (!_isModified())
 			return;
 		//
 		var html = helper.getDocHtml();
+        console.log("get save html , original html : " + html);
 		//
 		for (var id in modifiedTodos) {
 			newHtml = changeWizDocument(id, modifiedTodos[id].state, modifiedTodos[id].completedInfo, html);
@@ -1350,7 +1380,7 @@ var WizTodoReadChecked = (function () {
         //
         modifiedTodos = {};
         //
-        if (!isIpad() && !isIphone()) {
+        if (!isIpad() && !isIphone() && !isQt()) {
 			helper.setDocHtml(html, resources);
 		}
 		else {
@@ -1359,13 +1389,18 @@ var WizTodoReadChecked = (function () {
 	}
 
 	function onDocumentClose() {
+        var modified = _isModified();
+        //
+        if (helper.onDocumentClose) {
+            helper.onDocumentClose(modified);
+        }
+        //
+        if (!modified)
+            return "";
+        //
 		var html = saveHtml();
 		//
-		if (helper.onDocumentClose) {
-			helper.onDocumentClose();
-		}
-		//
-		if (isIpad() || isIphone()) {
+		if (isIpad() || isIphone() || isQt()) {
 			return html;
 		}
 	}
@@ -1430,8 +1465,13 @@ var WizTodoReadChecked = (function () {
 		needCallHelperClicking = needCallAgain;
 		if (!cancel) {
 			clickTodo(beingClickedTodoEle);
+            beingClickedTodoEle = null;
 		}
 	}
+
+    function isModified() {
+        return _isModified();
+    }
 
 	return {
 		init: init,
@@ -1446,7 +1486,8 @@ var WizTodoReadChecked = (function () {
 		setIsPersonalDocument: setIsPersonalDocument,
 		setDocOriginalHtml: setDocOriginalHtml,
 		addTodoCompletedInfo: addTodoCompletedInfo,
-		onClickingTodoCallback: onClickingTodoCallback
+		onClickingTodoCallback: onClickingTodoCallback,
+        isModified: isModified
 	}
 
 })();

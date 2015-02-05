@@ -132,6 +132,8 @@ CWizDocumentWebEngine::CWizDocumentWebEngine(CWizExplorerApp& app, QWidget* pare
     WebEnginePage *webPage = new WebEnginePage(this);
     setPage(webPage);
 
+//    connect(webPage, SIGNAL(urlChanged(QUrl)), SLOT(onEditorLinkClicked(QUrl)));
+
     // FIXME: should accept drop picture, attachment, link etc.
     setAcceptDrops(true);
 
@@ -238,6 +240,7 @@ void CWizDocumentWebEngine::focusOutEvent(QFocusEvent *event)
 
 bool CWizDocumentWebEngine::event(QEvent* event)
 {
+    qDebug() << "webengine event called ,  event type : " << event->type();
     return QWebEngineView::event(event);
 }
 
@@ -250,7 +253,6 @@ void CWizDocumentWebEngine::contextMenuEvent(QContextMenuEvent *event)
     Q_EMIT requestShowContextMenu(mapToGlobal(event->pos()));
 }
 
-/*
 void CWizDocumentWebEngine::dragEnterEvent(QDragEnterEvent *event)
 {
     if (!isEditing())
@@ -287,7 +289,6 @@ void CWizDocumentWebEngine::dragMoveEvent(QDragMoveEvent* event)
             }
     }
 }
-*/
 
 void CWizDocumentWebEngine::onActionTriggered(QWebEnginePage::WebAction act)
 {
@@ -329,85 +330,85 @@ void CWizDocumentWebEngine::tryResetTitle()
 
 }
 
-//void CWizDocumentWebEngine::dropEvent(QDropEvent* event)
-//{
-//    const QMimeData* mimeData = event->mimeData();
+void CWizDocumentWebEngine::dropEvent(QDropEvent* event)
+{
+    const QMimeData* mimeData = event->mimeData();
 
-//    int nAccepted = 0;
-//    if (mimeData->hasUrls())
-//    {
-//        QList<QUrl> li = mimeData->urls();
-//        QList<QUrl>::const_iterator it;
-//        for (it = li.begin(); it != li.end(); it++) {
-//            QUrl url = *it;
-//            url.setScheme(0);
+    int nAccepted = 0;
+    if (mimeData->hasUrls())
+    {
+        QList<QUrl> li = mimeData->urls();
+        QList<QUrl>::const_iterator it;
+        for (it = li.begin(); it != li.end(); it++) {
+            QUrl url = *it;
+            url.setScheme(0);
 
-//            //paste image file as images, add attachment for other file
-//            QString strFileName = url.toString();
-//#ifdef Q_OS_MAC
-//            if (wizIsYosemiteFilePath(strFileName))
-//            {
-//                strFileName = wizConvertYosemiteFilePathToNormalPath(strFileName);
-//            }
-//#endif
-//            QImageReader reader(strFileName);
-//            if (reader.canRead())
-//            {
-//                QString strHtml;
-//                bool bUseCopyFile = true;
-//                if (WizImage2Html(strFileName, strHtml, bUseCopyFile)) {
-//                    editorCommandExecuteInsertHtml(strHtml, true);
-//                    nAccepted++;
-//                }
-//            }
-//            else
-//            {
-//                WIZDOCUMENTDATA doc = view()->note();
-//                CWizDatabase& db = m_dbMgr.db(doc.strKbGUID);
-//                WIZDOCUMENTATTACHMENTDATA data;
-//                data.strKbGUID = doc.strKbGUID; // needed by under layer
-//                if (!db.AddAttachment(doc, strFileName, data))
-//                {
-//                    TOLOG1("[drop] add attachment failed %1", strFileName);
-//                    continue;
-//                }
-//                nAccepted ++;
-//            }
-//        }
-//    }
-//    else if (mimeData->hasFormat(WIZNOTE_MIMEFORMAT_DOCUMENTS))
-//    {
-//        QString strData(mimeData->data(WIZNOTE_MIMEFORMAT_DOCUMENTS));
-//        if (!strData.isEmpty())
-//        {
-//            QString strLinkHtml;
-//            QStringList doclist = strData.split(';');
-//            foreach (QString doc, doclist) {
-//                QStringList docIds = doc.split(':');
-//                if (docIds.count() == 2)
-//                {
-//                    WIZDOCUMENTDATA document;
-//                    CWizDatabase& db = m_dbMgr.db(docIds.first());
-//                    if (db.DocumentFromGUID(docIds.last(), document))
-//                    {
-//                        QString strHtml, strLink;
-//                        db.DocumentToHtmlLink(document, strHtml, strLink);
-//                        strLinkHtml += "<p>" + strHtml + "</p>";
-//                    }
-//                }
-//            }
+            //paste image file as images, add attachment for other file
+            QString strFileName = url.toString();
+#ifdef Q_OS_MAC
+            if (wizIsYosemiteFilePath(strFileName))
+            {
+                strFileName = wizConvertYosemiteFilePathToNormalPath(strFileName);
+            }
+#endif
+            QImageReader reader(strFileName);
+            if (reader.canRead())
+            {
+                QString strHtml;
+                bool bUseCopyFile = true;
+                if (WizImage2Html(strFileName, strHtml, bUseCopyFile)) {
+                    editorCommandExecuteInsertHtml(strHtml, true);
+                    nAccepted++;
+                }
+            }
+            else
+            {
+                WIZDOCUMENTDATA doc = view()->note();
+                CWizDatabase& db = m_dbMgr.db(doc.strKbGUID);
+                WIZDOCUMENTATTACHMENTDATA data;
+                data.strKbGUID = doc.strKbGUID; // needed by under layer
+                if (!db.AddAttachment(doc, strFileName, data))
+                {
+                    TOLOG1("[drop] add attachment failed %1", strFileName);
+                    continue;
+                }
+                nAccepted ++;
+            }
+        }
+    }
+    else if (mimeData->hasFormat(WIZNOTE_MIMEFORMAT_DOCUMENTS))
+    {
+        QString strData(mimeData->data(WIZNOTE_MIMEFORMAT_DOCUMENTS));
+        if (!strData.isEmpty())
+        {
+            QString strLinkHtml;
+            QStringList doclist = strData.split(';');
+            foreach (QString doc, doclist) {
+                QStringList docIds = doc.split(':');
+                if (docIds.count() == 2)
+                {
+                    WIZDOCUMENTDATA document;
+                    CWizDatabase& db = m_dbMgr.db(docIds.first());
+                    if (db.DocumentFromGUID(docIds.last(), document))
+                    {
+                        QString strHtml, strLink;
+                        db.DocumentToHtmlLink(document, strHtml, strLink);
+                        strLinkHtml += "<p>" + strHtml + "</p>";
+                    }
+                }
+            }
 
-//            editorCommandExecuteInsertHtml(strLinkHtml, false);
+            editorCommandExecuteInsertHtml(strLinkHtml, false);
 
-//            nAccepted ++;
-//        }
-//    }
+            nAccepted ++;
+        }
+    }
 
-//    if (nAccepted > 0) {
-//        event->accept();
-//        saveDocument(view()->note(), false);
-//    }
-//}
+    if (nAccepted > 0) {
+        event->accept();
+        saveDocument(view()->note(), false);
+    }
+}
 
 CWizDocumentView* CWizDocumentWebEngine::view() const
 {
@@ -552,7 +553,6 @@ void CWizDocumentWebEngine::setEditorEnable(bool enalbe)
     }
     else
     {
-        //    page()->runJavaScript("editor.reset();");
         page()->runJavaScript("editor.setDisabled();");
         clearFocus();
     }
@@ -567,6 +567,27 @@ void CWizDocumentWebEngine::on_ueditorInitFinished()
     m_bEditorInited = true;
     viewDocumentInEditor(m_bEditingMode);
     return;
+}
+
+void CWizDocumentWebEngine::on_viewDocumentFinished(bool ok)
+{
+    // show client
+    MainWindow* window = qobject_cast<MainWindow *>(m_app.mainWindow());
+    if (!ok) {
+        window->showClient(false);
+        window->transitionView()->showAsMode(m_strCurrentNoteGUID, CWizDocumentTransitionView::ErrorOccured);
+        return;
+    }
+
+    window->showClient(true);
+    window->transitionView()->hide();
+
+    m_timerAutoSave.start();
+    initCheckListEnvironment();
+
+    //Waiting for the editor initialization complete if it's the first time to load a document.
+    QTimer::singleShot(100, this, SLOT(applySearchKeywordHighlight()));
+    emit viewDocumentFinished();
 }
 
 bool CWizDocumentWebEngine::evaluateJavaScript(const QString& js)
@@ -677,7 +698,11 @@ void CWizDocumentWebEngine::initCheckListEnvironment()
             page()->runJavaScript(QString("WizTodoReadChecked.setUnCheckedImageFileName('%1');").arg(getSkinResourcePath() + "unchecked.png"));
             page()->runJavaScript(QString("WizTodoReadChecked.setIsPersonalDocument(%1);").arg(isPersonalDocument()));
             page()->runJavaScript(QString("WizTodoReadChecked.setCanEdit(%1);").arg(hasEditPermissionOnCurrentNote()));
-            page()->runJavaScript(QString("WizTodoReadChecked.setDocOriginalHtml('%1');").arg(getCurrentNoteHtml()));
+            QString strHtml = getCurrentNoteHtml();
+            QString base64;
+            WizBase64Encode(strHtml.toUtf8(), base64);
+            page()->runJavaScript(QString("WizTodoReadChecked.setDocOriginalHtml('%1');").arg(base64));
+//            emit setDocOriginalHtml(getCurrentNoteHtml());
         });
     }
 }
@@ -807,6 +832,7 @@ void copyFileToFolder(const QString& strFileFoler, const QString& strIndexFile, 
 
 void CWizDocumentWebEngine::saveHtmlToCurrentNote(const QString& strHtml, const QString& strResource)
 {
+    qDebug() << "save html to current note called : " << strHtml << "   resources  :  " << strResource;
     if (strHtml.isEmpty())
         return;
 
@@ -983,11 +1009,21 @@ void CWizDocumentWebEngine::saveEditingViewDocument(const WIZDOCUMENTDATA &data,
 
 void CWizDocumentWebEngine::saveReadingViewDocument(const WIZDOCUMENTDATA &data, bool force)
 {
-    Q_UNUSED(data);
     Q_UNUSED(force);
 
+    QEventLoop loop;
     QString strScript = QString("WizTodoReadChecked.onDocumentClose();");
-    page()->runJavaScript(strScript);
+    page()->runJavaScript(strScript, [&](const QVariant& returnValue) {
+        QString strHtml = returnValue.toString();
+        if (!strHtml.isEmpty())
+        {
+            qDebug() << "save reading document ,get html : " << strHtml;
+            QString strFileName = m_mapFile.value(data.strKbGUID);
+            m_docSaverThread->save(data, strHtml, strFileName, 0);
+        }
+        loop.quit();
+    });
+    loop.exec(QEventLoop::ExcludeUserInputEvents);
 }
 
 QString CWizDocumentWebEngine::currentNoteGUID()
@@ -1101,30 +1137,31 @@ void CWizDocumentWebEngine::viewDocumentInEditor(bool editing)
             .arg(strHead);
             */
 
-//    emit viewNoteRequest(m_strCurrentNoteGUID, m_bCurrentEditing, m_strCurrentNoteHtml, m_strCurrentNoteHead);
+    emit viewNoteRequest(m_strCurrentNoteGUID, m_bCurrentEditing, m_strCurrentNoteHtml, m_strCurrentNoteHead);
     qDebug() << "after send view note request";
 //    QString strExec = QString("viewCurrentNote();");
-    QString strExec = QString("viewNote('%1', '%2', '%3', '%4');").arg(m_strCurrentNoteGUID).arg(m_bCurrentEditing).arg(m_strCurrentNoteHtml).arg(m_strCurrentNoteHead);
-    page()->runJavaScript(strExec, [&ret, this](const QVariant& returnValue) {
-        ret = returnValue.toBool();
-        // show client
-        MainWindow* window = qobject_cast<MainWindow *>(m_app.mainWindow());
-        if (!ret) {
-            window->showClient(false);
-            window->transitionView()->showAsMode(m_strCurrentNoteGUID, CWizDocumentTransitionView::ErrorOccured);
-            return;
-        }
+//    QString strExec = QString("viewNote('%1', '%2', '%3', '%4');").arg(m_strCurrentNoteGUID).arg(m_bCurrentEditing).arg(m_strCurrentNoteHtml).arg(m_strCurrentNoteHead);
+//    qDebug() << "view note js : " << strExec;
+//    page()->runJavaScript(strExec, [&ret, this](const QVariant& returnValue) {
+//        ret = returnValue.toBool();
+//        // show client
+//        MainWindow* window = qobject_cast<MainWindow *>(m_app.mainWindow());
+//        if (!ret) {
+//            window->showClient(false);
+//            window->transitionView()->showAsMode(m_strCurrentNoteGUID, CWizDocumentTransitionView::ErrorOccured);
+//            return;
+//        }
 
-        window->showClient(true);
-        window->transitionView()->hide();
+//        window->showClient(true);
+//        window->transitionView()->hide();
 
-        m_timerAutoSave.start();
-        initCheckListEnvironment();
+//        m_timerAutoSave.start();
+//        initCheckListEnvironment();
 
-        //Waiting for the editor initialization complete if it's the first time to load a document.
-        QTimer::singleShot(100, this, SLOT(applySearchKeywordHighlight()));
-        emit viewDocumentFinished();
-    });
+//        //Waiting for the editor initialization complete if it's the first time to load a document.
+//        QTimer::singleShot(100, this, SLOT(applySearchKeywordHighlight()));
+//        emit viewDocumentFinished();
+//    });
 }
 
 void CWizDocumentWebEngine::onNoteLoadFinished()
@@ -1878,12 +1915,17 @@ void CWizDocumentWebEngine::focusOutEditor()
 WebEnginePage::WebEnginePage(QObject* parent)
     : QWebEnginePage(parent)
 {
-
+    connect(this, SIGNAL(urlChanged(QUrl)), SLOT(on_urlChanged(QUrl)));
 }
 
 WebEnginePage::~WebEnginePage()
 {
 
+}
+
+void WebEnginePage::on_urlChanged(const QUrl& url)
+{
+    qDebug() << "web page url changed : " << url;
 }
 
 void WebEnginePage::javaScriptConsoleMessage(QWebEnginePage::JavaScriptConsoleMessageLevel level, const QString& message, int lineNumber, const QString& sourceID)
@@ -1918,4 +1960,9 @@ void WebEnginePage::triggerAction(QWebEnginePage::WebAction action, bool checked
         qDebug() << "paste and match called";
     }
     QWebEnginePage::triggerAction(action, checked);
+}
+
+void WebEnginePage::load(const QUrl& url)
+{
+    qDebug() << "web page load called : " << url;
 }

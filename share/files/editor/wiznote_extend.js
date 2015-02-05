@@ -13,11 +13,13 @@ var
 function initialUEditor(wizEditor) {
     WizEditor = wizEditor
     wizEditor.viewNoteRequest.connect(function (strGUID, bEditing, strHtml, strHead) {
-        viewNote(strGUID, bEditing, strHtml, strHead);
+        var result = viewNote(strGUID, bEditing, strHtml, strHead);
+        WizEditor.on_viewDocumentFinished(result);
     });
     WizEditor.resetDefaultCss.connect(function (strCssPath) {
         m_defaultCss = strCssPath;
     });
+
     console.log("try to init editor by js");
     try {
         var editorOption = {
@@ -55,6 +57,24 @@ function initialUEditor(wizEditor) {
 
             console.log("ueditor get ready");
             WizEditor.on_ueditorInitFinished();
+
+            var ueditor = document.getElementById('ueditor_0');
+            $(ueditor.contentDocument.body).delegate('a', 'click', function(e) {
+                var a = $(e.currentTarget),
+                href = a.attr('href') || '';
+                console.log("eidtor link clicked : " + href);
+                if (href && href.indexOf('wiz:') === 0) {
+                    //笔记内链
+                
+                } else if (href && (href.indexOf('mailto:') === 0 || href.indexOf('ftp:') === 0 || href.indexOf('http:') === 0 || href.indexOf('https:') === 0)) {
+                    //弹出浏览器窗口显示....
+
+                }
+
+            e.stopPropagation();
+            e.preventDefault();
+            });
+
         });
 
         editor.addListener('aftersetcontent', function() {

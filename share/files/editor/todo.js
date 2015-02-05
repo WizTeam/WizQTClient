@@ -1779,12 +1779,9 @@ var WizTodo = (function () {
 		client = wizClient;
 		//
 		todoHelper = getTodoHelper(wizClient);
-		console.log("ueditor document head html : :  " + editorDocument.head.innerHTML);
-		console.log("editor document head html : " + editor.document.head.innerHTML);
 		//
 		registerEvent();
 
-		console.log("after register event , editorDocument :  " + editorDocument);
 		//
 		todoHelper.initCss(editorDocument);
 		console.log("init todo js finished , helper :  " + todoHelper);

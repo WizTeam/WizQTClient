@@ -42,9 +42,13 @@ public:
     explicit WebEnginePage(QObject *parent = 0);
     ~WebEnginePage();
 
+public slots:
+    void on_urlChanged(const QUrl& url);
+
 protected:
     virtual void javaScriptConsoleMessage(JavaScriptConsoleMessageLevel level, const QString& message, int lineNumber, const QString& sourceID);
     virtual void triggerAction(WebAction action, bool checked = false);
+    void load(const QUrl &url);
 };
 
 class CWizDocumentWebEngine : public QWebEngineView
@@ -85,6 +89,7 @@ public:
     void editorFocus();
     void setEditorEnable(bool enalbe);
     Q_INVOKABLE void on_ueditorInitFinished();
+    Q_INVOKABLE void on_viewDocumentFinished(bool ok);
 
     bool evaluateJavaScript(const QString& js);
 
@@ -119,6 +124,15 @@ public:
     bool editorCommandExecuteInsertHtml(const QString& strHtml, bool bNotSerialize);
 
     void setPastePlainTextEnable(bool bEnable);
+
+    // functions would called by javascript
+    Q_INVOKABLE void saveHtmlToCurrentNote(const QString& strHtml, const QString& strResource);
+    Q_INVOKABLE void setCurrentDocumentType(const QString& strType);
+    Q_INVOKABLE bool checkListClickable();
+    Q_SIGNAL void clickingTodoCallBack(bool cancel, bool needCallAgain);
+    Q_SIGNAL void setDocOriginalHtml(const QString& strHtml);
+
+
     //
     void saveAsPDF(const QString& strFileName);
     void saveAsHtml(const QString& strDirPath);
@@ -128,11 +142,6 @@ public:
     Q_INVOKABLE bool isContentsChanged() { return m_bContentsChanged; }
     Q_INVOKABLE void setContentsChanged(bool b) { m_bContentsChanged = b; }
 
-    // functions used in js
-    Q_INVOKABLE void saveHtmlToCurrentNote(const QString& strHtml, const QString& strResource);
-    Q_INVOKABLE void setCurrentDocumentType(const QString& strType);
-    Q_INVOKABLE bool checkListClickable();
-    Q_SIGNAL void clickingTodoCallBack(bool cancel, bool needCallAgain);
 
     //use undo func provied by editor
     void undo();
@@ -165,9 +174,9 @@ protected:
 
     virtual bool event(QEvent* event) Q_DECL_OVERRIDE;
     virtual void contextMenuEvent(QContextMenuEvent* event);
-//    virtual void dragEnterEvent(QDragEnterEvent* event);
-//    virtual void dragMoveEvent(QDragMoveEvent* event);
-//    virtual void dropEvent(QDropEvent* event);
+    virtual void dragEnterEvent(QDragEnterEvent* event);
+    virtual void dragMoveEvent(QDragMoveEvent* event);
+    virtual void dropEvent(QDropEvent* event);
 
 private:
     CWizExplorerApp& m_app;

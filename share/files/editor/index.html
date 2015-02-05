@@ -8,8 +8,10 @@
     <script type="text/javascript" charset="utf-8" src="ueditor.config.js"></script>
     <script type="text/javascript" charset="utf-8" src="ueditor.all.js"></script>
     <script type="text/javascript" charset="utf-8" src="qwebchannel.js"></script>
+    <script type="text/javascript" charset="utf-8" src="third-party/jquery-1.10.2.min.js"></script>
 </head>
 <body>
+    <a href="www.wiz.cn">Test</a>
     <script type="text/plain" id="editorArea"></script>
     <script type="text/javascript" charset="utf-8" src="eventproxy.js"></script>
     <script type="text/javascript" charset="utf-8" src="wiznote_extend.js"></script>
@@ -22,6 +24,26 @@
             {
                 console.log(message);
             }
+
+// window.onload = function () {
+//     console.log("try to delegate all links");
+// $(document.body).delegate('a', 'click', function(e) {
+//         var a = $(e.currentTarget),
+//             href = a.attr('href') || '';
+//         console.log("eidtor link clicked : " + href);
+//         if (href && href.indexOf('wiz:') === 0) {
+//             //笔记内链
+                
+//         } else if (href && (href.indexOf('mailto:') === 0 || href.indexOf('ftp:') === 0 || href.indexOf('http:') === 0 || href.indexOf('https:') === 0)) {
+//             //弹出浏览器窗口显示....
+
+//         }
+
+//         e.stopPropagation();
+//         e.preventDefault();
+//     });
+// }
+
             function initializeJSObject(strUrl)
             {
             	output("Connecting to WebSocket server at " + strUrl + ".");
