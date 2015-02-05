@@ -46,7 +46,7 @@ CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
     , m_dbMgr(app.databaseManager())
     , m_web(new CWizDocumentWebView(app, this))
     , m_comments(new QWebView(this))
-    , m_title(new TitleBar(this))
+    , m_title(new TitleBar(app, this))
     , m_passwordView(new CWizUserCipherForm(app, this))
     , m_viewMode(app.userSettings().noteViewMode())
     , m_bLocked(false)
@@ -252,8 +252,10 @@ void CWizDocumentView::initStat(const WIZDOCUMENTDATA& data, bool bEditing)
     int nLockReason = -1;
 
     if (m_dbMgr.db(data.strKbGUID).IsGroup()) {
-        nLockReason = NotifyBar::LockForGruop;
-        m_bLocked = true;
+        if (!bEditing) {
+            nLockReason = NotifyBar::LockForGruop;
+            m_bLocked = true;
+        }
     } else if (!m_dbMgr.db(data.strKbGUID).CanEditDocument(data)) {
         nLockReason = NotifyBar::PermissionLack;
         m_bLocked = true;
@@ -384,7 +386,9 @@ void CWizDocumentView::setEditNote(bool bEdit)
     bool isGroupNote =m_dbMgr.db(m_note.strKbGUID).IsGroup();
     if (bEdit && isGroupNote)
     {
-        m_title->showMessageTips(Qt::PlainText, tr("Checking whether note is eiditable..."));
+        // don not use message tips when check document editable
+//        m_title->showMessageTips(Qt::PlainText, tr("Checking whether note is eiditable..."));
+        m_title->startEditButtonAnimation();
         if (!checkDocumentEditable())
         {
             return;
@@ -465,7 +469,8 @@ bool CWizDocumentView::checkListClickable()
     CWizDatabase& db = m_dbMgr.db(m_note.strKbGUID);
     if (db.CanEditDocument(m_note))
     {
-        m_title->showMessageTips(Qt::PlainText, tr("Checking whether checklist is clickable..."));
+        //m_title->showMessageTips(Qt::PlainText, tr("Checking whether checklist is clickable..."));
+        setCursor(Qt::WaitCursor);
         return checkDocumentEditable();
     }
     return false;
@@ -509,17 +514,21 @@ void CWizDocumentView::on_attachment_deleted(const WIZDOCUMENTATTACHMENTDATA& at
 void CWizDocumentView::on_checkEditStatus_finished(const QString& strGUID, bool editable)
 {
 //    qDebug() << "check eidt status finished , editable  : " << editable;
-    if (strGUID == m_note.strGUID && editable)
+    if (strGUID == m_note.strGUID)
     {
-        CWizDatabase& db = m_dbMgr.db(m_note.strKbGUID);
-        WIZDOCUMENTDATA doc;
-        db.DocumentFromGUID(strGUID, doc);
-        if (db.CanEditDocument(doc) && !CWizDatabase::IsInDeletedItems(doc.strLocation))
+        if (editable)
         {
-//            qDebug() << "document editable , hide message tips.";
-            m_title->hideMessageTips(true);
-            m_title->setEditButtonState(true, false);
+            CWizDatabase& db = m_dbMgr.db(m_note.strKbGUID);
+            WIZDOCUMENTDATA doc;
+            db.DocumentFromGUID(strGUID, doc);
+            if (db.CanEditDocument(doc) && !CWizDatabase::IsInDeletedItems(doc.strLocation))
+            {
+                //            qDebug() << "document editable , hide message tips.";
+                m_title->hideMessageTips(true);
+                m_title->setEditButtonState(true, false);
+            }
         }
+        stopCheckDocumentAnimations();
     }
 }
 
@@ -590,6 +599,15 @@ bool CWizDocumentView::checkDocumentEditable()
     //
 
     return !(m_status & DOCUMENT_EDITBYOTHERS);
+}
+
+void CWizDocumentView::stopCheckDocumentAnimations()
+{
+    if (cursor().shape() != Qt::ArrowCursor)
+    {
+        setCursor(Qt::ArrowCursor);
+    }
+    m_title->stopEditButtonAnimation();
 }
 
 void CWizDocumentView::on_document_modified(const WIZDOCUMENTDATA& documentOld, const WIZDOCUMENTDATA& documentNew)
@@ -712,12 +730,16 @@ void Core::CWizDocumentView::on_documentEditingByOthers(QString strGUID, QString
 
 void CWizDocumentView::on_checkEditStatus_timeout(const QString& strGUID)
 {
-    if (strGUID == m_note.strGUID && !(m_status & DOCUMENT_OFFLINE))
+    if (strGUID == m_note.strGUID)
     {
-        m_title->setEditButtonState(true, false);
-        m_title->showMessageTips(Qt::RichText, tr("The current network in poor condition, you are <b> offline editing mode </b>."));
-        m_status = m_status | DOCUMENT_OFFLINE;
+        if (!(m_status & DOCUMENT_OFFLINE))
+        {
+            m_title->setEditButtonState(true, false);
+            m_title->showMessageTips(Qt::RichText, tr("The current network in poor condition, you are <b> offline editing mode </b>."));
+            m_status = m_status | DOCUMENT_OFFLINE;
+        }
     }
+    stopCheckDocumentAnimations();
 }
 
 void CWizDocumentView::on_checkDocumentChanged_finished(const QString& strGUID, bool changed)

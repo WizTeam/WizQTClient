@@ -10,6 +10,43 @@
 
 class QTimer;
 class QAction;
+class QToolButton;
+
+class CWizAnimateContainerBase : public QObject
+{
+public:
+    CWizAnimateContainerBase(QObject* parent);
+
+    virtual QIcon icon() = 0;
+    virtual void setIcon(const QIcon &icon) = 0;
+    virtual bool setProperty(const char *name, const QVariant &value) = 0;
+};
+
+class CWizAnimateActionContainer : public CWizAnimateContainerBase
+{
+public:
+    explicit CWizAnimateActionContainer(QAction* action, QObject* parent);
+
+    virtual QIcon icon() Q_DECL_OVERRIDE;
+    virtual void setIcon(const QIcon &icon) Q_DECL_OVERRIDE;
+    virtual bool setProperty(const char *name, const QVariant &value) Q_DECL_OVERRIDE;
+
+private:
+    QAction* m_action;
+};
+
+class CWizAnimateButtonContainer : public CWizAnimateContainerBase
+{
+public:
+    explicit CWizAnimateButtonContainer(QToolButton* button, QObject* parent);
+
+    virtual QIcon icon() Q_DECL_OVERRIDE;
+    virtual void setIcon(const QIcon &icon) Q_DECL_OVERRIDE;
+    virtual bool setProperty(const char *name, const QVariant &value) Q_DECL_OVERRIDE;
+
+private:
+    QToolButton* m_button;
+};
 
 class CWizAnimateAction : public QObject
 {
@@ -18,14 +55,16 @@ class CWizAnimateAction : public QObject
 public:
     CWizAnimateAction(CWizExplorerApp& app, QObject* parent);
     void setAction(QAction* action);
-    void setIcons(const QString& strIconBaseName);
+    void setToolButton(QToolButton* button);
+    void setSingleIcons(const QString& strIconBaseName);
+    void setTogetherIcon(const QString& strIconBaseName);
     void startPlay();
     void stopPlay();
     bool isPlaying();
 
 private:
     CWizExplorerApp& m_app;
-    QAction* m_action;
+    CWizAnimateContainerBase* m_target;
     int m_nIconIndex;
     QIcon m_iconDefault;
     QList<QIcon> m_icons;

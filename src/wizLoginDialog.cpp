@@ -352,7 +352,7 @@ void CWizLoginDialog::applyElementStyles(const QString &strLocal)
 
     ui->wgt_newUser->setBackgroundImage(strLoginTopLineEditor, QPoint(8, 8));
     ui->wgt_newUser->setLeftIcon(strIconPerson);
-    m_lineEditNewUserName->setPlaceholderText(tr("Please input eamil as your account"));
+    m_lineEditNewUserName->setPlaceholderText(tr("Please input email as your account"));
 
     ui->wgt_newPassword->setBackgroundImage(strLoginMidLineEditor, QPoint(8, 8));
     ui->wgt_newPassword->setLeftIcon(strIconKey);

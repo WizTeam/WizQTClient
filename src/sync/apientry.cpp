@@ -186,11 +186,13 @@ QString ApiEntryPrivate::commentCountUrl(const QString& strServer, const QString
     strUrl.replace("{kbGuid}", strKbGUID);
     strUrl.replace("{documentGuid}", strGUID);
 
-    // use https
-    QUrl url(strUrl);
-    url.setScheme("https");
+    //WARNING: 不知道问什么强制使用Https请求，暂时注掉
+//    // use https
+//    QUrl url(strUrl);
+//    url.setScheme("https");
+//    return url.toString();
 
-    return url.toString();
+    return strUrl;
 }
 
 QString ApiEntryPrivate::feedbackUrl()

@@ -21,6 +21,7 @@
 #include "share/wizmisc.h"
 #include "share/wizDatabase.h"
 #include "share/wizsettings.h"
+#include "share/wizanimateaction.h"
 #include "utils/stylehelper.h"
 
 #include "sync/token.h"
@@ -31,8 +32,9 @@
 using namespace Core;
 using namespace Core::Internal;
 
-TitleBar::TitleBar(QWidget *parent)
+TitleBar::TitleBar(CWizExplorerApp& app, QWidget *parent)
     : QWidget(parent)
+    , m_app(app)
     , m_editTitle(new TitleEdit(this))
     , m_infoBar(new InfoBar(this))
     , m_notifyBar(new NotifyBar(this))
@@ -41,6 +43,7 @@ TitleBar::TitleBar(QWidget *parent)
     , m_tags(NULL)
     , m_info(NULL)
     , m_attachments(NULL)
+    , m_editButtonAnimation(0)
 {
     m_editTitle->setCompleter(new WizService::MessageCompleter(m_editTitle));
     int nTitleHeight = Utils::StyleHelper::titleEditorHeight();
@@ -267,6 +270,27 @@ void TitleBar::updateEditButton(bool editing)
 void TitleBar::resetTitle(const QString& strTitle)
 {
     m_editTitle->resetTitle(strTitle);
+}
+
+void TitleBar::startEditButtonAnimation()
+{
+    if (!m_editButtonAnimation)
+    {
+        m_editButtonAnimation = new CWizAnimateAction(m_app, this);
+        m_editButtonAnimation->setToolButton(m_editBtn);
+        m_editButtonAnimation->setTogetherIcon("editButtonProcessing");
+    }
+    m_editButtonAnimation->startPlay();
+}
+
+void TitleBar::stopEditButtonAnimation()
+{
+    if (!m_editButtonAnimation)
+        return;
+    if (m_editButtonAnimation->isPlaying())
+    {
+        m_editButtonAnimation->stopPlay();
+    }
 }
 
 void TitleBar::onEditButtonClicked()

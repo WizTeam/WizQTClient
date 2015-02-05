@@ -280,7 +280,7 @@ BOOL CWizKMAccountsServer::accounts_clientLogin(const QString& strUserName, cons
     param.AddString(_T("user_id"), strUserName);
     param.AddString(_T("password"), MakeXmlRpcPassword(strPassword));
     param.AddString(_T("program_type"), strType);
-    param.AddString(_T("protocol"), "https");
+//    param.AddString(_T("protocol"), "https");
     //
     if (!Call(_T("accounts.clientLogin"), ret, &param))
     {
@@ -464,7 +464,7 @@ BOOL CWizKMAccountsServer::accounts_getGroupList(CWizGroupDataArray& arrayGroup)
     }
     //
     param.AddString(_T("kb_type"), _T("group"));
-    param.AddString(_T("protocol"), "https");
+//    param.AddString(_T("protocol"), "https");
     //
     std::deque<WIZGROUPDATA> arrayWrap;
     if (!Call(_T("accounts.getGroupKbList"), arrayWrap, &param))
