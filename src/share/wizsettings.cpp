@@ -82,6 +82,75 @@ void CWizSettings::GetKeys(const QString& strSection, CWizStdStringArray& arrayA
 }
 
 
+QString CWizSettings::GetProxyHost()
+{
+    return GetString("Sync", "ProxyHost");
+}
+
+void CWizSettings::SetProxyHost(const QString& val)
+{
+    SetString("Sync", "ProxyHost", val);
+}
+
+WizProxyType CWizSettings::GetProxyType()
+{
+    int port = GetInt("Sync", "ProxyType", -1);
+    if (port < 0)
+        port = WizProxy_HttpProxy;
+
+    return (WizProxyType)port;
+}
+
+void CWizSettings::SetProxyType(WizProxyType type)
+{
+    SetInt("Sync", "ProxyType", type);
+}
+
+int CWizSettings::GetProxyPort()
+{
+    int port = GetInt("Sync", "ProxyPort", 0);
+    if (port <= 0)
+        port = 80;
+
+    return port;
+}
+
+void CWizSettings::SetProxyPort(int val)
+{
+    SetInt("Sync", "ProxyPort", val);
+}
+
+QString CWizSettings::GetProxyUserName()
+{
+    return GetString("Sync", "ProxyUserName");
+}
+
+void CWizSettings::SetProxyUserName(const QString& val)
+{
+    SetString("Sync", "ProxyUserName", val);
+}
+
+QString CWizSettings::GetProxyPassword()
+{
+    return GetString("Sync", "ProxyPassword");
+}
+
+void CWizSettings::SetProxyPassword(const QString& val)
+{
+    SetString("Sync", "ProxyPassword", val);
+}
+
+bool CWizSettings::GetProxyStatus()
+{
+    return GetBool("Sync", "ProxyStatus", false);
+}
+
+void CWizSettings::SetProxyStatus(bool val)
+{
+    SetBool("Sync", "ProxyStatus", val);
+}
+
+
 CString WizGetShortcut(const CString& strName, const CString& strDef /*= ""*/)
 {
     CWizSettings settings(Utils::PathResolve::globalSettingsFile());

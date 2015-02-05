@@ -278,14 +278,14 @@ int mainCore(int argc, char *argv[])
 
     //set network proxy
     CWizSettings wizSettings(Utils::PathResolve::globalSettingsFile());
-    if (wizSettings.GetBool("Sync", "ProxyStatus", false))
+    if (wizSettings.GetProxyStatus())
     {
         QNetworkProxy proxy;
         proxy.setType(QNetworkProxy::HttpProxy);
-        proxy.setHostName(wizSettings.GetString("Sync", "ProxyHost"));
-        proxy.setPort(wizSettings.GetInt("Sync", "ProxyPort", 0));
-        proxy.setUser(wizSettings.GetString("Sync", "ProxyUserName"));
-        proxy.setPassword(wizSettings.GetString("Sync", "ProxyPassword"));
+        proxy.setHostName(wizSettings.GetProxyHost());
+        proxy.setPort(wizSettings.GetProxyPort());
+        proxy.setUser(wizSettings.GetProxyUserName());
+        proxy.setPassword(wizSettings.GetProxyPassword());
         QNetworkProxy::setApplicationProxy(proxy);
     }
 

@@ -36,6 +36,21 @@ public:
 
     QString GetEncryptedString(const QString& strSection, const QString& strKey, const QString& strDef = "");
     BOOL SetEncryptedString(const QString& strSection, const QString& strKey, const QString& str);
+
+    // proxy settings
+    QString GetProxyHost();
+    void SetProxyHost(const QString& val);
+    WizProxyType GetProxyType();
+    void SetProxyType(WizProxyType type);
+    int GetProxyPort();
+    void SetProxyPort(int val);
+    QString GetProxyUserName();
+    void SetProxyUserName(const QString& val);
+    QString GetProxyPassword();
+    void SetProxyPassword(const QString& val);
+    bool GetProxyStatus();
+    void SetProxyStatus(bool val);
+
 };
 
 

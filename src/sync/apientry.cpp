@@ -17,9 +17,6 @@
 #include "wizkmxmlrpc.h"
 #include "wizdef.h"
 
-#include "utils/pathresolve.h"
-#include "share/wizsettings.h"
-
 /*
  * %1: product, use wiz
  * %2: locale, zh-cn|zh-tw|en-us
@@ -30,12 +27,7 @@
  * %7: platform, ios|android|web|wp7|x86|x64|linux|macosx
  * %8: debug, true|false, optional
  */
-#ifdef PRIVATE_DEPLOYMENT
-#define WIZNOTE_API_SERVER "http://172.25.0.71/api/"
-#else
-#define WIZNOTE_API_SERVER "http://api.wiz.cn/"
-#endif
-#define WIZNOTE_API_PARAM "?p=%1&l=%2&v=%3&c=%4&random=%5&cn=%6&plat=%7&debug=%8"
+#define WIZNOTE_API_ENTRY "http://api.wiz.cn/?p=%1&l=%2&v=%3&c=%4&random=%5&cn=%6&plat=%7&debug=%8"
 
 #define WIZNOTE_API_ARG_PRODUCT "wiz"
 
@@ -93,21 +85,7 @@ QString ApiEntryPrivate::urlFromCommand(const QString& strCommand)
     // random seed
     qsrand((uint)QTime::currentTime().msec());
 
-    QString strApiEntry;
-#ifdef PRIVATE_DEPLOYMENT
-    CWizSettings wizSettings(Utils::PathResolve::globalSettingsFile());
-    static bool useCustomSettings = wizSettings.GetBool("PrivateDeploy", "CustomSetting", false);
-    static QString strApiServer = wizSettings.GetString("PrivateDeploy", "ApiServer", WIZNOTE_API_SERVER);
-    if (useCustomSettings)  {
-        strApiEntry = strApiServer + QString(WIZNOTE_API_PARAM);
-    } else {
-        strApiEntry = QString(WIZNOTE_API_SERVER) + QString(WIZNOTE_API_PARAM);
-    }
-#else
-    strApiEntry = QString(WIZNOTE_API_SERVER) + QString(WIZNOTE_API_PARAM);
-#endif
-
-    QString strUrl = strApiEntry\
+    QString strUrl = QString(WIZNOTE_API_ENTRY)\
             .arg(WIZNOTE_API_ARG_PRODUCT)\
             .arg(QLocale::system().name())\
             .arg(WIZ_CLIENT_VERSION)\
@@ -116,8 +94,6 @@ QString ApiEntryPrivate::urlFromCommand(const QString& strCommand)
             .arg(QHostInfo::localHostName())\
             .arg(WIZNOTE_API_ARG_PLATFORM)\
             .arg("false");
-
-    qDebug() << strUrl;
 
     return strUrl;
 }

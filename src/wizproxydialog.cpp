@@ -15,14 +15,14 @@ ProxyDialog::ProxyDialog(QWidget *parent) :
     ui->setupUi(this);
 
     CWizSettings settings(Utils::PathResolve::globalSettingsFile());
-    ui->editAddress->setText(settings.GetString("Sync", "ProxyHost"));
-    ui->editPort->setText(WizIntToStr(settings.GetInt("Sync", "ProxyPort", 0)));
-    ui->editUserName->setText(settings.GetString("Sync", "ProxyUserName"));
-    ui->editPassword->setText(settings.GetString("Sync", "ProxyPassword"));
+    ui->editAddress->setText(settings.GetProxyHost());
+    ui->editPort->setText(WizIntToStr(settings.GetProxyPort()));
+    ui->editUserName->setText(settings.GetProxyUserName());
+    ui->editPassword->setText(settings.GetProxyPassword());
     ui->editPassword->setEchoMode(QLineEdit::Password);
-    ui->comboBox->setCurrentIndex(settings.GetInt("Sync", "ProxyType", 1));
+    ui->comboBox->setCurrentIndex((int)settings.GetProxyType());
 
-    bool proxyStatus = settings.GetBool("Sync", "ProxyStatus", false);
+    bool proxyStatus = settings.GetProxyStatus();
     ui->checkProxyStatus->setChecked(proxyStatus);
 
     enableControl(proxyStatus);
@@ -84,13 +84,12 @@ QNetworkProxy::ProxyType ProxyDialog::getProxyType()
 void ProxyDialog::accept()
 {
     CWizSettings settings(Utils::PathResolve::globalSettingsFile());
-    WizProxyType type = (WizProxyType)ui->comboBox->currentIndex();
-    settings.SetInt("Sync", "ProxyType", type);
-    settings.SetString("Sync", "ProxyHost", ui->editAddress->text());
-    settings.SetInt("Sync", "ProxyPort", ui->editPort->text().toInt());
-    settings.SetString("Sync", "ProxyUserName", ui->editUserName->text());
-    settings.SetString("Sync", "ProxyPassword", ui->editPassword->text());
-    settings.SetBool("Sync", "ProxyStatus", ui->checkProxyStatus->isChecked());
+    settings.SetProxyType((WizProxyType)ui->comboBox->currentIndex());
+    settings.SetProxyHost(ui->editAddress->text());
+    settings.SetProxyPort(ui->editPort->text().toInt());
+    settings.SetProxyUserName(ui->editUserName->text());
+    settings.SetProxyPassword(ui->editPassword->text());
+    settings.SetProxyStatus(ui->checkProxyStatus->isChecked());
 
     setApplicationProxy();
 
