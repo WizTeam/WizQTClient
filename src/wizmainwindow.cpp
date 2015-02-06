@@ -1780,6 +1780,11 @@ void MainWindow::on_actionAbout_triggered()
     dialog.exec();
 }
 
+void MainWindow::on_actionDeveloper_triggered()
+{
+    m_doc->web()->settings()->globalSettings()->setAttribute(QWebSettings::DeveloperExtrasEnabled, true);
+}
+
 
 void MainWindow::on_actionPreference_triggered()
 {

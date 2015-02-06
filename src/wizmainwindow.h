@@ -240,6 +240,7 @@ public Q_SLOTS:
     void on_actionNewNoteByTemplate_triggered();
     void on_actionLogout_triggered();
     void on_actionAbout_triggered();
+    void on_actionDeveloper_triggered();
     void on_actionPreference_triggered();
     void on_actionRebuildFTS_triggered();
     void on_actionFeedback_triggered();
