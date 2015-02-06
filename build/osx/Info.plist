@@ -11,7 +11,7 @@
 	<key>CFBundleIconFile</key>
 	<string>wiznote.icns</string>
 	<key>CFBundleIdentifier</key>
-	<string>cn.wiz.wiznoteformac</string>
+	<string>cn.wiz.zmt.note</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleShortVersionString</key>
@@ -19,9 +19,9 @@
 	<key>LSApplicationCategoryType</key>
 	<string>public.app-category.productivity</string>
 	<key>CFBundleName</key>
-	<string>WizNote</string>
+	<string>中民投笔记</string>
 	<key>CFBundleDisplayName</key>
-	<string>WizNote</string>
+	<string>中民投笔记</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleSignature</key>

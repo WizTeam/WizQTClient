@@ -90,6 +90,7 @@ CWizLoginDialog::CWizLoginDialog(const QString &strDefaultUserId, const QString 
     ui->btn_proxysetting->setText(tr("Private deployment settings"));
     ui->btn_changeToSignin->setVisible(false);
     ui->btn_fogetpass->setVisible(false);
+    ui->btn_proxysetting->setVisible(false);
 #endif
 
 
@@ -352,7 +353,7 @@ void CWizLoginDialog::applyElementStyles(const QString &strLocal)
     ui->wgt_usercontainer->setBackgroundImage(strLoginTopLineEditor, QPoint(8, 8));
     ui->wgt_usercontainer->setLeftIcon(strIconPerson);
     ui->wgt_usercontainer->setRightIcon(WizGetSkinResourceFileName(strThemeName, "loginLineEditorDownArrow"));
-    m_lineEditUserName->setPlaceholderText("example@mail.com");
+    m_lineEditUserName->setPlaceholderText(tr("Domain account (mailbox prefix)"));
 
     ui->wgt_passwordcontainer->setBackgroundImage(strLoginBottomLineEditor, QPoint(8, 8));
     ui->wgt_passwordcontainer->setLeftIcon(strIconKey);

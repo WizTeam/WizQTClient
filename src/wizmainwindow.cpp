@@ -179,7 +179,7 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     initToolBar();
     initClient();
 
-    setWindowTitle(tr("WizNote"));
+    setWindowTitle(tr("WizNote for ZMT"));
 
     restoreStatus();
 
