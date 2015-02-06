@@ -41,8 +41,6 @@ public:
 
     bool isUseCustomPustomDeploy();
     QString apiServerUrl();
-    bool isUseHttpsConnection();
-    bool isUseMD5Password();
     //
     void loadPrivateDeploySettings();
 
@@ -56,10 +54,8 @@ private:
     QString m_strFeedbackUrl;
     QMap<QString, QString> m_mapkUrl;
 
-    bool m_useCustomSettings;
     QString m_strApiServerUrl;
-    bool m_useHttpsConnection;
-    bool m_useMD5Password;
+    bool m_useCustomSettings;
 
     QString urlFromCommand(const QString& strCommand);
     QString addExtendedInfo(const QString& strUrl, const QString& strExt);

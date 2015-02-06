@@ -34,6 +34,7 @@ if [ -e "$package_home" ]; then
 	hdiutil convert -format UDZO "${package_output_path}/tmp.dmg" -o  "${package_output_path}/wiznote-privatedeploy-${current_date}.dmg" && \
 	rm -f "${package_output_path}/tmp.dmg"
 	rm -rf ./${package_home}/中民投笔记.app
+
 else
 	echo "error:${package_home} not exist"
 fi

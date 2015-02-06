@@ -39,12 +39,6 @@ public:
 
     static QString kUrlFromGuid(const QString& strToken, const QString& strKbGUID);
 
-
-    static bool isUseCustomPrivateDeploySettings();
-    static QString apiServerUrl();
-    static bool isUseHttpsConnection();
-    static bool isUseMD5Password();
-
     static void reloadPrivateDeploySettings();
 };
 

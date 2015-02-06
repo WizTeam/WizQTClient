@@ -16,6 +16,10 @@
 #include "token.h"
 #include "wizkmxmlrpc.h"
 #include "wizdef.h"
+#include "rapidjson/document.h"
+
+#include "utils/pathresolve.h"
+#include "share/wizsettings.h"
 
 #include "utils/pathresolve.h"
 #include "share/wizsettings.h"
@@ -30,7 +34,6 @@
  * %7: platform, ios|android|web|wp7|x86|x64|linux|macosx
  * %8: debug, true|false, optional
  */
-
 #define WIZNOTE_API_PARAM "?p=%1&l=%2&v=%3&c=%4&random=%5&cn=%6&plat=%7&debug=%8"
 
 #define WIZNOTE_API_ARG_PRODUCT "wiz"
@@ -145,8 +148,6 @@ void ApiEntryPrivate::loadPrivateDeploySettings()
     CWizSettings wizSettings(Utils::PathResolve::globalSettingsFile());
     m_useCustomSettings = wizSettings.GetBool("PrivateDeploy", "CustomSetting", false);
     m_strApiServerUrl = wizSettings.GetString("PrivateDeploy", "ApiServer", WIZNOTE_API_SERVER);
-    m_useHttpsConnection = wizSettings.GetBool("PrivateDeploy", "UseHttpsConnection", false);
-    m_useMD5Password = wizSettings.GetBool("PrivateDeploy", "UseMD5Password", false);
 }
 
 QString ApiEntryPrivate::requestUrl(const QString& strCommand, QString& strUrl)
@@ -162,10 +163,8 @@ QString ApiEntryPrivate::requestUrl(const QString& strCommand, QString& strUrl)
 
 QString ApiEntryPrivate::syncUrl()
 {
-    if (isUseHttpsConnection())
-        return requestUrl(WIZNOTE_API_COMMAND_SYNC_HTTPS, m_strSyncUrl);
-    else
-        return requestUrl(WIZNOTE_API_COMMAND_SYNC_HTTP, m_strSyncUrl);
+    requestUrl(WIZNOTE_API_COMMAND_SYNC_HTTPS, m_strSyncUrl);
+    return m_strSyncUrl;
 }
 
 QString ApiEntryPrivate::messageVersionUrl()
@@ -214,13 +213,15 @@ QString ApiEntryPrivate::commentCountUrl(const QString& strServer, const QString
     strUrl.replace("{kbGuid}", strKbGUID);
     strUrl.replace("{documentGuid}", strGUID);
 
-    // use https
-    QUrl url(strUrl);
-    if (isUseHttpsConnection()) {
-        url.setScheme("https");
-    }
+    // 不知道问什么强制使用Https链接，暂时注掉
+//    // use https
+//    QUrl url(strUrl);
+//    if (isUseHttpsConnection()) {
+//        url.setScheme("https");
+//    }
+//    return url.toString();
 
-    return url.toString();
+    return strUrl;
 }
 
 QString ApiEntryPrivate::feedbackUrl()
@@ -302,24 +303,6 @@ QString ApiEntryPrivate::apiServerUrl()
         loadPrivateDeploySettings();
     }
     return m_strApiServerUrl;
-}
-
-bool ApiEntryPrivate::isUseHttpsConnection()
-{
-    if (m_strApiServerUrl.isEmpty()) {
-        loadPrivateDeploySettings();
-    }
-
-    return isUseCustomPustomDeploy() && m_useHttpsConnection;
-}
-
-bool ApiEntryPrivate::isUseMD5Password()
-{
-    if (m_strApiServerUrl.isEmpty()) {
-        loadPrivateDeploySettings();
-    }
-
-    return isUseCustomPustomDeploy() && m_useMD5Password;
 }
 
 QString ApiEntryPrivate::groupAttributeUrl(const QString& strToken, const QString& strKbGUID)
@@ -518,38 +501,9 @@ QString ApiEntry::kUrlFromGuid(const QString& strToken, const QString& strKbGUID
     return d->kUrlFromGuid(strToken, strKbGUID);
 }
 
-bool ApiEntry::isUseCustomPrivateDeploySettings()
-{
-    if (!d)
-        d = new ApiEntryPrivate();
-    return d->isUseCustomPustomDeploy();
-}
-
-QString ApiEntry::apiServerUrl()
-{
-    if (!d)
-        d = new ApiEntryPrivate();
-    return d->apiServerUrl();
-}
-
-bool ApiEntry::isUseHttpsConnection()
-{
-    if (!d)
-        d = new ApiEntryPrivate();
-    return d->isUseHttpsConnection();
-}
-
-bool ApiEntry::isUseMD5Password()
-{
-    if (!d)
-        d = new ApiEntryPrivate();
-    return d->isUseMD5Password();
-}
-
 void ApiEntry::reloadPrivateDeploySettings()
 {
     if (!d)
         d = new ApiEntryPrivate();
-    d->loadPrivateDeploySettings();
+    return d->loadPrivateDeploySettings();
 }
-

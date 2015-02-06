@@ -596,7 +596,7 @@ void MainWindow::initActions()
     m_actions->init();
 #endif
     m_animateSync->setAction(m_actions->actionFromName(WIZACTION_GLOBAL_SYNC));
-    m_animateSync->setIcons("sync");
+    m_animateSync->setSingleIcons("sync");
 
     connect(m_doc->web(), SIGNAL(statusChanged()), SLOT(on_editor_statusChanged()));
     //connect(m_doc->web()->page(), SIGNAL(contentsChanged()), SLOT(on_document_contentChanged()));
@@ -1778,6 +1778,11 @@ void MainWindow::on_actionAbout_triggered()
 {
     AboutDialog dialog(this);
     dialog.exec();
+}
+
+void MainWindow::on_actionDeveloper_triggered()
+{
+    m_doc->web()->settings()->globalSettings()->setAttribute(QWebSettings::DeveloperExtrasEnabled, true);
 }
 
 

@@ -21,6 +21,7 @@
 #include "share/wizmisc.h"
 #include "share/wizDatabase.h"
 #include "share/wizsettings.h"
+#include "share/wizanimateaction.h"
 #include "utils/stylehelper.h"
 
 #include "sync/token.h"
@@ -31,8 +32,9 @@
 using namespace Core;
 using namespace Core::Internal;
 
-TitleBar::TitleBar(QWidget *parent)
+TitleBar::TitleBar(CWizExplorerApp& app, QWidget *parent)
     : QWidget(parent)
+    , m_app(app)
     , m_editTitle(new TitleEdit(this))
     , m_infoBar(new InfoBar(this))
     , m_notifyBar(new NotifyBar(this))
@@ -41,6 +43,7 @@ TitleBar::TitleBar(QWidget *parent)
     , m_tags(NULL)
     , m_info(NULL)
     , m_attachments(NULL)
+    , m_editButtonAnimation(0)
 {
     m_editTitle->setCompleter(new WizService::MessageCompleter(m_editTitle));
     int nTitleHeight = Utils::StyleHelper::titleEditorHeight();
@@ -100,12 +103,14 @@ TitleBar::TitleBar(QWidget *parent)
     m_infoBtn->setNormalIcon(::WizLoadSkinIcon(strTheme, "document_info"), tr("View and modify note's info (Alt + 5)"));
     connect(m_infoBtn, SIGNAL(clicked()), SLOT(onInfoButtonClicked()));
 
+#ifndef PRIVATE_DEPLOYMENT
     m_emailBtn = new CellButton(CellButton::Center, this);
     m_emailBtn->setFixedHeight(nTitleHeight);
     QString emailShortcut = ::WizGetShortcut("EditNoteEmail", "Alt+6");
     m_emailBtn->setShortcut(QKeySequence::fromString(emailShortcut));
     m_emailBtn->setNormalIcon(::WizLoadSkinIcon(strTheme, "document_email"), tr("Share document by email (Alt + 6)"));
     connect(m_emailBtn, SIGNAL(clicked()), SLOT(onEmailButtonClicked()));
+#endif
 
     // comments
     m_commentsBtn = new CellButton(CellButton::Right, this);
@@ -136,7 +141,9 @@ TitleBar::TitleBar(QWidget *parent)
     layoutInfo2->addWidget(m_attachBtn);
     layoutInfo2->addWidget(m_historyBtn);
     layoutInfo2->addWidget(m_infoBtn);
+#ifndef PRIVATE_DEPLOYMENT
     layoutInfo2->addWidget(m_emailBtn);
+#endif
     layoutInfo2->addWidget(m_commentsBtn);
 
 
@@ -267,6 +274,27 @@ void TitleBar::updateEditButton(bool editing)
 void TitleBar::resetTitle(const QString& strTitle)
 {
     m_editTitle->resetTitle(strTitle);
+}
+
+void TitleBar::startEditButtonAnimation()
+{
+    if (!m_editButtonAnimation)
+    {
+        m_editButtonAnimation = new CWizAnimateAction(m_app, this);
+        m_editButtonAnimation->setToolButton(m_editBtn);
+        m_editButtonAnimation->setTogetherIcon("editButtonProcessing");
+    }
+    m_editButtonAnimation->startPlay();
+}
+
+void TitleBar::stopEditButtonAnimation()
+{
+    if (!m_editButtonAnimation)
+        return;
+    if (m_editButtonAnimation->isPlaying())
+    {
+        m_editButtonAnimation->stopPlay();
+    }
 }
 
 void TitleBar::onEditButtonClicked()

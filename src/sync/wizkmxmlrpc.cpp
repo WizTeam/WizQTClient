@@ -1,5 +1,6 @@
 #include "wizkmxmlrpc.h"
 #include "apientry.h"
+#include "share/wizsettings.h"
 
 #define WIZUSERMESSAGE_AT		0
 #define WIZUSERMESSAGE_EDIT		1
@@ -263,13 +264,17 @@ BOOL CWizKMAccountsServer::SetValue(const QString& strKey, const QString& strVal
 
 QString CWizKMAccountsServer::MakeXmlRpcPassword(const QString& strPassword)
 {
-    if (WizService::ApiEntry::isUseMD5Password())
+#ifdef PRIVATE_DEPLOYMENT
+    CWizPrivateDeployemntSetting settings;
+    if (settings.isEncryptPassword())
     {
+        qDebug() << "is use encrypt password";
         if (strPassword.startsWith(_T("md5.")))
             return QString(strPassword);
         //
         return QString(_T("md5.")) + ::WizMd5StringNoSpaceJava(strPassword.toUtf8());
     }
+#endif
 
     return strPassword;
 }
@@ -286,11 +291,11 @@ BOOL CWizKMAccountsServer::accounts_clientLogin(const QString& strUserName, cons
     param.AddString(_T("user_id"), strUserName);
     param.AddString(_T("password"), MakeXmlRpcPassword(strPassword));
     param.AddString(_T("program_type"), strType);
-    if (WizService::ApiEntry::isUseHttpsConnection()) {
-        param.AddString(_T("protocol"), "https");
-    } else {
-        param.AddString(_T("protocol"), "http");
-    }
+//    if (WizService::ApiEntry::isUseHttpsConnection()) {
+//        param.AddString(_T("protocol"), "https");
+//    } else {
+//        param.AddString(_T("protocol"), "http");
+//    }
     //
     if (!Call(_T("accounts.clientLogin"), ret, &param))
     {
@@ -474,11 +479,11 @@ BOOL CWizKMAccountsServer::accounts_getGroupList(CWizGroupDataArray& arrayGroup)
     }
     //
     param.AddString(_T("kb_type"), _T("group"));
-    if (WizService::ApiEntry::isUseHttpsConnection()) {
-        param.AddString(_T("protocol"), "https");
-    } else {
-        param.AddString(_T("protocol"), "http");
-    }
+//    if (WizService::ApiEntry::isUseHttpsConnection()) {
+//        param.AddString(_T("protocol"), "https");
+//    } else {
+//        param.AddString(_T("protocol"), "http");
+//    }
     //
     std::deque<WIZGROUPDATA> arrayWrap;
     if (!Call(_T("accounts.getGroupKbList"), arrayWrap, &param))

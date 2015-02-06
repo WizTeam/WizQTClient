@@ -17,6 +17,7 @@ public:
     bool SetValue(const QString& strMethodPrefix, const QString& strToken, const QString& strKbGUID, const QString& strKey, const QString& strValue, __int64& nRetVersion);
 };
 
+class CWizPrivateDeployemntSetting;
 
 class CWizKMAccountsServer : public CWizKMXmlRpcServerBase
 {

@@ -85,6 +85,7 @@ CWizLoginDialog::CWizLoginDialog(const QString &strDefaultUserId, const QString 
     applyElementStyles(strLocale);
 
 #ifdef PRIVATE_DEPLOYMENT
+    ui->btn_proxysetting->setText(tr("Private deployment"));
     ui->label_noaccount->setVisible(false);
     ui->label_separator3->setVisible(false);
     ui->btn_proxysetting->setText(tr("Private deployment settings"));

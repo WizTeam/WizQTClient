@@ -167,4 +167,29 @@ public:
     void setSyncGroupMethod(int days);
 };
 
+
+class CWizPrivateDeployemntSetting
+{
+public:
+    CWizPrivateDeployemntSetting();
+
+    void loadSettingsFromServer();
+
+    bool isHideShareByEmail();
+    bool isHideFeedback();
+    bool isHideRegister();
+    bool isEncryptPassword();
+    bool isHideForgotPassword();
+    bool isHideEnterpriseServerSettings();
+
+private:
+    bool m_inited;
+    bool m_hideShareByEmail;
+    bool m_hideFeedback;
+    bool m_hideRegister;
+    bool m_encryptPassword;
+    bool m_hideForgotPassword;
+    bool m_hideEnterpriseServerSettings;
+};
+
 #endif // WIZSETTINGS_H

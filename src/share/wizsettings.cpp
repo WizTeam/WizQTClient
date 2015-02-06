@@ -2,6 +2,11 @@
 #include "utils/pathresolve.h"
 
 #include <QLocale>
+#include "sync/apientry.h"
+#include "rapidjson/document.h"
+#include <QNetworkAccessManager>
+#include <QNetworkReply>
+#include <QEventLoop>
 
 CWizSettings::CWizSettings(const QString& strFileName)
     : QSettings(strFileName, QSettings::IniFormat)
@@ -566,4 +571,101 @@ int CWizUserSettings::syncGroupMethod() const
 void CWizUserSettings::setSyncGroupMethod(int days)
 {
     set("SyncGroupMethod", QString::number(days));
+}
+
+
+CWizPrivateDeployemntSetting::CWizPrivateDeployemntSetting()
+    : m_inited(false)
+{
+
+}
+
+void CWizPrivateDeployemntSetting::loadSettingsFromServer()
+{
+    //  load data from server
+    QString strUrl = WizService::ApiEntry::standardCommandUrl("oem");
+
+    QNetworkAccessManager net;
+    QNetworkReply* reply = net.get(QNetworkRequest(strUrl));
+
+    QEventLoop loop;
+    QObject::connect(reply, SIGNAL(finished()), &loop, SLOT(quit()));
+    loop.exec();
+
+    if (reply->error() != QNetworkReply::NoError) {
+        qDebug() << "[Sync] load Eenterprise Server settings failed when try to get data from : " << strUrl;
+        return;
+    }
+
+    QString strReply = QString::fromUtf8(reply->readAll());
+
+    rapidjson::Document d;
+    d.Parse<0>(strReply.toUtf8().constData());
+
+    m_hideShareByEmail = d.FindMember("HideShareByEmail")->value.GetBool();
+    m_hideFeedback = d.FindMember("HideFeedback")->value.GetBool();
+    m_hideRegister = d.FindMember("HideRegister")->value.GetBool();
+    m_encryptPassword = d.FindMember("EncryptPassword")->value.GetBool();
+    m_hideForgotPassword = d.FindMember("HideForgotPassword")->value.GetBool();
+    m_hideEnterpriseServerSettings = d.FindMember("HideEnterpriseServerSettings")->value.GetBool();
+
+    qDebug() << "get Eenterprise Server settings finished : " << strReply << "\n hide share by email : " << m_hideShareByEmail;
+
+    m_inited = true;
+}
+
+bool CWizPrivateDeployemntSetting::isHideShareByEmail()
+{
+    if (!m_inited)
+    {
+        loadSettingsFromServer();
+    }
+
+    return m_hideShareByEmail;
+}
+
+bool CWizPrivateDeployemntSetting::isHideFeedback()
+{
+    if (!m_inited)
+    {
+        loadSettingsFromServer();
+    }
+
+    return m_hideFeedback;
+}
+
+bool CWizPrivateDeployemntSetting::isHideRegister()
+{
+    if (!m_inited)
+    {
+        loadSettingsFromServer();
+    }
+    return m_hideRegister;
+}
+
+bool CWizPrivateDeployemntSetting::isEncryptPassword()
+{
+    if (!m_inited)
+    {
+        loadSettingsFromServer();
+    }
+    return m_encryptPassword;
+}
+
+bool CWizPrivateDeployemntSetting::isHideForgotPassword()
+{
+    if (!m_inited)
+    {
+        loadSettingsFromServer();
+    }
+    return m_hideForgotPassword;
+}
+
+bool CWizPrivateDeployemntSetting::isHideEnterpriseServerSettings()
+{
+    if (!m_inited)
+    {
+        loadSettingsFromServer();
+    }
+    return m_hideEnterpriseServerSettings;
 }
