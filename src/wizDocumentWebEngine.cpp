@@ -240,7 +240,7 @@ void CWizDocumentWebEngine::focusOutEvent(QFocusEvent *event)
 
 bool CWizDocumentWebEngine::event(QEvent* event)
 {
-    qDebug() << "webengine event called ,  event type : " << event->type();
+//    qDebug() << "webengine event called ,  event type : " << event->type();
     return QWebEngineView::event(event);
 }
 
@@ -677,6 +677,7 @@ void CWizDocumentWebEngine::initCheckListEnvironment()
 {
     if (m_bEditingMode)
     {
+        qDebug() << "init checklist in edting mode";
         QString strScript = QString("WizTodo.init('qt');");
         page()->runJavaScript(strScript, [this](const QVariant&) {
             //FIXME: 目前javascript无法直接取得c++函数的返回值，需要主动写入
@@ -1806,29 +1807,37 @@ bool CWizDocumentWebEngine::editorCommandExecuteTableAverageCols()
     return editorCommandExecuteCommand("averagedistributecol");
 }
 
-void CWizDocumentWebEngine::saveAsPDF(const QString& strFileName)
-{
-    //TODO: 阅读模式下保存为渲染之后的样式
-//    if (QWebFrame* frame = noteFrame())
-//    {
-//        if (::PathFileExists(strFileName))
-//        {
-//            ::DeleteFile(strFileName);
-//        }
-//        //
-//        QPrinter printer;
-//        QPrinter::Unit marginUnit =  (QPrinter::Unit)m_app.userSettings().printMarginUnit();
-//        double marginTop = m_app.userSettings().printMarginValue(wizPositionTop);
-//        double marginBottom = m_app.userSettings().printMarginValue(wizPositionBottom);
-//        double marginLeft = m_app.userSettings().printMarginValue(wizPositionLeft);
-//        double marginRight = m_app.userSettings().printMarginValue(wizPositionRight);
-//        printer.setPageMargins(marginLeft, marginTop, marginRight, marginBottom, marginUnit);
-//        printer.setOutputFormat(QPrinter::PdfFormat);
-//        printer.setColorMode(QPrinter::Color);
-//        printer.setOutputFileName(strFileName);
-//        //
-//        frame->print(&printer);
-//    }
+void CWizDocumentWebEngine::saveAsPDF()
+{        //
+    page()->runJavaScript("editor.getAllHtml()", [this](const QVariant& html) {
+        QString strHtml = html.toString();
+        if (strHtml.isEmpty())
+            return;
+
+        QString	fileName = QFileDialog::getSaveFileName (this, QString(), QDir::homePath(), tr("PDF Files (*.pdf)"));
+        if (!fileName.isEmpty())
+        {
+            if (::PathFileExists(fileName))
+            {
+                ::DeleteFile(fileName);
+            }
+
+            QTextDocument textDoc;
+            textDoc.setHtml(strHtml);
+            QPrinter printer;
+            QPrinter::Unit marginUnit =  (QPrinter::Unit)m_app.userSettings().printMarginUnit();
+            double marginTop = m_app.userSettings().printMarginValue(wizPositionTop);
+            double marginBottom = m_app.userSettings().printMarginValue(wizPositionBottom);
+            double marginLeft = m_app.userSettings().printMarginValue(wizPositionLeft);
+            double marginRight = m_app.userSettings().printMarginValue(wizPositionRight);
+            printer.setPageMargins(marginLeft, marginTop, marginRight, marginBottom, marginUnit);
+            printer.setOutputFormat(QPrinter::PdfFormat);
+            printer.setColorMode(QPrinter::Color);
+            printer.setOutputFileName(fileName);
+            //
+            textDoc.print(&printer);
+        }
+    });
 }
 
 void CWizDocumentWebEngine::saveAsHtml(const QString& strDirPath)

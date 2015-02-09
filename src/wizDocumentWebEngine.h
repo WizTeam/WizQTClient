@@ -134,7 +134,7 @@ public:
 
 
     //
-    void saveAsPDF(const QString& strFileName);
+    void saveAsPDF();
     void saveAsHtml(const QString& strDirPath);
     void printDocument();
     bool shareNoteByEmail();

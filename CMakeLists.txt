@@ -50,6 +50,7 @@ if(APPLE)
         set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -gdwarf-2")
         add_definitions(-DBUILD4APPSTORE=TRUE)
     endif(APPSTORE_BUILD)
+    add_definitions(-DUSECOCOATOOLBAR=TRUE)
 endif(APPLE)
 
 if(APPLE)

@@ -6964,6 +6964,7 @@ var fillCharReg = new RegExp(domUtils.fillChar, 'g');
             var me = this, shortcutkeys = this.shortcutkeys;
             me.addListener('keydown', function (type, e) {
                 var keyCode = e.keyCode || e.which;
+                console.log("key pressed : "  + keyCode + " key type : " + type);
                 for (var i in shortcutkeys) {
                     var tmp = shortcutkeys[i].split(',');
                     for (var t = 0, ti; ti = tmp[t++];) {

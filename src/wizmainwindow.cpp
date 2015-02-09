@@ -89,29 +89,33 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     , m_sync(new CWizKMSyncThread(dbMgr.db(), this))
     , m_searchIndexer(new CWizSearchIndexer(m_dbMgr, this))
     , m_searcher(new CWizSearcher(m_dbMgr, this))
-    #ifndef BUILD4APPSTORE
+#ifndef BUILD4APPSTORE
     , m_upgrade(new CWizUpgrade(this))
-    #else
+#else
     , m_upgrade(0)
-    #endif
+#endif
     //, m_certManager(new CWizCertManager(*this))
     , m_objectDownloaderHost(new CWizObjectDataDownloaderHost(dbMgr, this))
     //, m_avatarDownloaderHost(new CWizUserAvatarDownloaderHost(dbMgr.db().GetAvatarPath(), this))
     , m_transitionView(new CWizDocumentTransitionView(this))
-    #ifndef Q_OS_MAC
+#ifndef Q_OS_MAC
     , m_labelNotice(NULL)
     , m_optionsAction(NULL)
-    #endif
+#endif
     , m_menuBar(0)
-    #ifdef Q_OS_MAC
-    , m_toolBar(new QToolBar(this))
-    , m_useSystemBasedStyle(true)
+#ifdef Q_OS_MAC
+    #ifdef USECOCOATOOLBAR
+    , m_toolBar(new CWizMacToolBar(this))
     #else
+    , m_toolBar(new QToolBar(this))
+    #endif
+    , m_useSystemBasedStyle(true)
+#else
     , m_toolBar(new QToolBar("Main", titleBar()))
     , m_menu(new QMenu(clientWidget()))
     , m_spacerForToolButtonAdjust(NULL)
     , m_useSystemBasedStyle(m_settings->useSystemBasedStyle())
-    #endif
+#endif
     , m_actions(new CWizActions(*this, this))
     , m_category(new CWizCategoryView(*this, this))
     , m_documents(new CWizDocumentListView(*this, this))
@@ -366,6 +370,14 @@ void MainWindow::changeEvent(QEvent* event)
     else
         _baseClass::changeEvent(event);
 }
+
+#ifdef USECOCOATOOLBAR
+void MainWindow::showEvent(QShowEvent* event)
+{
+    m_toolBar->showInWindow(this);
+    QMainWindow::showEvent(event);
+}
+#endif
 
 void MainWindow::on_actionExit_triggered()
 {
@@ -1055,6 +1067,24 @@ void MainWindow::initMenuList()
 void MainWindow::initToolBar()
 {
 #ifdef Q_OS_MAC
+    #ifdef USECOCOATOOLBAR
+    m_toolBar->showInWindow(this);
+
+    CWizUserInfoWidget* info = new CWizUserInfoWidget(*this, m_toolBar);
+    m_toolBar->addWidget(info, "", "");
+
+    m_toolBar->addStandardItem(CWizMacToolBar::Space);
+    m_toolBar->addAction(m_actions->actionFromName(WIZACTION_GLOBAL_SYNC));
+    m_toolBar->addAction(m_actions->actionFromName(WIZACTION_GLOBAL_NEW_DOCUMENT));
+    m_spacerForToolButtonAdjust = new CWizMacFixedSpacer(QSize(120, 1), m_toolBar);
+    m_toolBar->addWidget(m_spacerForToolButtonAdjust, "", "");
+    m_toolBar->addAction(m_actions->actionFromName(WIZACTION_GLOBAL_GOBACK));
+    m_toolBar->addAction(m_actions->actionFromName(WIZACTION_GLOBAL_GOFORWARD));
+    m_toolBar->addStandardItem(CWizMacToolBar::FlexibleSpace);
+    m_toolBar->addSearch(tr("Search"), "");
+    //
+    m_search = m_toolBar->getSearchWidget();
+    #else
     setUnifiedTitleAndToolBarOnMac(true);
     setContextMenuPolicy(Qt::NoContextMenu);
     addToolBar(m_toolBar);
@@ -1086,7 +1116,7 @@ void MainWindow::initToolBar()
     m_toolBar->addWidget(m_search);
 
     m_toolBar->addWidget(new CWizFixedSpacer(QSize(20, 1), m_toolBar));
-
+    #endif
 #else
     layoutTitleBar();
     //
@@ -1777,11 +1807,7 @@ void MainWindow::on_actionSaveAsPDF_triggered()
 {
     if (CWizDocumentWebEngine* web = m_doc->web())
     {
-        QString	fileName = QFileDialog::getSaveFileName (this, QString(), QDir::homePath(), tr("PDF Files (*.pdf)"));
-        if (!fileName.isEmpty())
-        {
-            web->saveAsPDF(fileName);
-        }
+        web->saveAsPDF();
     }
 }
 
@@ -2201,6 +2227,7 @@ void MainWindow::adjustToolBarLayout()
         m_search->setFixedWidth(searchWidth);
     }
 #else
+//#ifndef USECOCOATOOLBAR
     if (!m_toolBar)
         return;
     //
@@ -2214,7 +2241,9 @@ void MainWindow::adjustToolBarLayout()
     if (spacerWidth < 0)
         return;
     //
+    qDebug() << "adjust tool bar layout : new width : " << spacerWidth;
     m_spacerForToolButtonAdjust->adjustWidth(spacerWidth);
+//#endif
 #endif
 }
 

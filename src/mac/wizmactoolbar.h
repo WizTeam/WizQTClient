@@ -10,12 +10,24 @@
 #include <QAction>
 #include <QtDeclarative/QDeclarativeListProperty>
 #include <QtDeclarative/QDeclarativeParserStatus>
+#include <QMacCocoaViewContainer>
 
 
 class CWizMacToolBarPrivate;
 class CWizMacToolBarItem;
 class CWizSearchWidget;
-class QMacCocoaViewContainer;
+
+
+class CWizMacFixedSpacer : public QMacCocoaViewContainer
+{
+    QSize m_sz;
+public:
+    CWizMacFixedSpacer(QSize sz, QWidget* parent = 0);
+
+    void adjustWidth(int width);
+
+    QSize sizeHint() const { return m_sz; }
+};
 
 class CWizMacToolBar
     : public QWidget

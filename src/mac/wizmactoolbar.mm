@@ -180,3 +180,18 @@ CWizSearchWidget* CWizMacToolBar::getSearchWidget()
 }
 
 #endif
+
+
+CWizMacFixedSpacer::CWizMacFixedSpacer(QSize sz, QWidget* parent)
+    : QMacCocoaViewContainer(nil, parent)
+    , m_sz(sz)
+{
+    QSizePolicy sizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+    setSizePolicy(sizePolicy);
+}
+
+void CWizMacFixedSpacer::adjustWidth(int width)
+{
+     m_sz.setWidth(width);
+     setFixedWidth(width);
+}

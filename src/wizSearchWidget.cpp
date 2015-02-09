@@ -1,8 +1,8 @@
 #include "wizSearchWidget.h"
 
-//#ifdef Q_OS_MAC
-//#include "mac/wizSearchWidget_mm.h"
-//#else
+#ifdef USECOCOATOOLBAR
+#include "mac/wizSearchWidget_mm.h"
+#else
 #include "share/wizsettings.h"
 #include "wizdef.h"
 #include "utils/stylehelper.h"
@@ -124,3 +124,5 @@ void CWizSearchEdit::mousePressEvent(QMouseEvent* event)
     }
     QLineEdit::mousePressEvent(event);
 }
+
+#endif

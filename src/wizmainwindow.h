@@ -34,6 +34,7 @@ class CWizDocumentTransitionView;
 class CWizActions;
 class CWizDocumentViewHistory;
 class CWizFixedSpacer;
+class CWizMacFixedSpacer;
 class CWizSplitter;
 class CWizAnimateAction;
 class CWizOptionsWidget;
@@ -113,6 +114,11 @@ protected:
     virtual void mouseMoveEvent(QMouseEvent* event);
     virtual void mouseReleaseEvent(QMouseEvent* event);
     virtual void changeEvent(QEvent *event);
+
+#ifdef USECOCOATOOLBAR
+    virtual void showEvent(QShowEvent *event);
+#endif
+
 private:
     ICore* m_core;
     CWizDatabaseManager& m_dbMgr;
@@ -128,7 +134,14 @@ private:
     //
     QSystemTrayIcon* m_tray;
 
+#ifdef USECOCOATOOLBAR
+    CWizMacToolBar* m_toolBar;
+    CWizMacFixedSpacer* m_spacerForToolButtonAdjust;
+#else
     QToolBar* m_toolBar;
+    CWizFixedSpacer* m_spacerForToolButtonAdjust;
+#endif
+
     QMenuBar* m_menuBar;
 #ifdef Q_OS_LINUX
     QMenu* m_menu;
@@ -167,7 +180,6 @@ private:
 
     CWizSearchIndexer* m_searchIndexer;
     QPointer<CWizSearchWidget> m_search;
-    CWizFixedSpacer* m_spacerForToolButtonAdjust;
 
     CWizMobileFileReceiver *m_mobileFileReceiver;
 

@@ -300,7 +300,7 @@ function WizTodoReadCheckedWindows (wizApp) {
 	this.getWizDocument = getWizDocument;
 	this.getAvatarName = getAvatarName;
 	this.onClickingTodo = onClickingTodo;
-    	this.onDocumentClose = onDocumentClose;
+    this.onBeforeSave = onBeforeSave;
 	
 	function initCss() {
 		WizInitReadCss(document, document.head);
@@ -407,12 +407,12 @@ function WizTodoReadCheckedWindows (wizApp) {
 	}
 
 	function onClickingTodo(callback) {
-        this.app.ExecuteCommand("OnClickingTodo",
+        this.app.ExecuteCommand("OnClickingChecklist",
          "WizTodoReadChecked." + callback + "({cancel}, {needCallAgain});", "readingnote");
 	}
 
-    function onDocumentClose(isModified) {
-        this.app.ExecuteCommand("onDocumentClose", isModified, "readingnote");
+    function onBeforeSave(isModified) {
+        // this.app.ExecuteCommand("onBeforeSaveChecklist", isModified, "readingnote");
     }
 }
 
@@ -557,6 +557,7 @@ function WizTodoReadCheckedAndroid () {
 	this.onTodoImageClicked = onTodoImageClicked;
 	this.getAvatarName = getAvatarName;
 	this.onClickingTodo = onClickingTodo;
+    this.onBeforeSave = onBeforeSave;
 
 	function initCss() {
 	}
@@ -623,6 +624,10 @@ function WizTodoReadCheckedAndroid () {
     function onClickingTodo(callback) {
         window.WizNote.onClickingTodo(callback);
     }
+
+    function onBeforeSave(modified) {
+
+    }
 }
 
 function WizTodoReadCheckedIphone() {
@@ -647,6 +652,7 @@ function WizTodoReadCheckedIphone() {
 	this.getAvatarName = getAvatarName;
 	this.onAddTodoCompletedInfo = onAddTodoCompletedInfo;
 	this.onClickingTodo = onClickingTodo;
+    this.onBeforeSave = onBeforeSave;
 
 	this.userAlias = null;
 	this.avatarFileName = null;
@@ -746,6 +752,10 @@ function WizTodoReadCheckedIphone() {
 	function onClickingTodo(callback) {
 		window.location.href="wiztodolist://tryLockDocument/"+"?callback=" + callback;
 	}
+
+    function onBeforeSave(isModified) {
+        
+    }
 }
 var WizTodoReadChecked = (function () {
 
@@ -760,6 +770,8 @@ var WizTodoReadChecked = (function () {
 	var editorDocument = null;
 	var needCallHelperClicking = true;
 	var beingClickedTodoEle = null;
+    var modified = false;
+    var bodyOriginalCursor = undefined;
 
 	function getHelper(wizClient) {
 		switch(wizClient) {
@@ -1130,7 +1142,7 @@ var WizTodoReadChecked = (function () {
             modifiedTodos[todoEle.id]['state'] = isChecked ? "checked" : "unchecked";    
         }
         else {
-            modifiedTodos[todoEle.id] = undefined;
+            delete modifiedTodos[todoEle.id];
         }
 		//
 	}
@@ -1168,7 +1180,9 @@ var WizTodoReadChecked = (function () {
 	}
 
     function unregisterEvent() {
-        editorDocument.removeEventListener('click', onDocumentClick);
+        if (editorDocument) {
+            editorDocument.removeEventListener('click', onDocumentClick);
+        }
     }
 
 	function init(client) {
@@ -1188,8 +1202,17 @@ var WizTodoReadChecked = (function () {
 	}
 
     function clear() {
-        needCallHelperClicking = true;
+
         unregisterEvent();
+        //
+        helper = null;
+        wizClient = null;
+        modifiedTodos = {};
+        editorDocument = null;
+        needCallHelperClicking = true;
+        beingClickedTodoEle = null;
+        modified = false;
+        bodyOriginalCursor = undefined;
     }
 
 	function extractTodoText(id, html) {
@@ -1342,6 +1365,8 @@ var WizTodoReadChecked = (function () {
 		
 		if (!_isModified())
 			return;
+        //
+        modified = true;
 		//
 		var html = helper.getDocHtml();
         console.log("get save html , original html : " + html);
@@ -1391,14 +1416,14 @@ var WizTodoReadChecked = (function () {
 	function onDocumentClose() {
         var modified = _isModified();
         //
-        if (helper.onDocumentClose) {
-            helper.onDocumentClose(modified);
+        if (helper.onBeforeSave) {
+            helper.onBeforeSave(modified);
         }
+        var html = saveHtml();
         //
-        if (!modified)
-            return "";
-        //
-		var html = saveHtml();
+        if (helper.onDocumentClose) {
+            helper.onDocumentClose();
+        }
 		//
 		if (isIpad() || isIphone() || isQt()) {
 			return html;
@@ -1463,14 +1488,48 @@ var WizTodoReadChecked = (function () {
   
 	function onClickingTodoCallback(cancel, needCallAgain) {
 		needCallHelperClicking = needCallAgain;
-		if (!cancel) {
+		if (cancel) {
+            beingClickedTodoEle = null;
+        }
+        else {
 			clickTodo(beingClickedTodoEle);
             beingClickedTodoEle = null;
 		}
 	}
 
     function isModified() {
-        return _isModified();
+        return modified || _isModified();
+    }
+
+    function _setChecklistCursor(cursor) {
+        var labels = editorDocument.getElementsByClassName('wiz-todo-label');
+        for (var i = 0; i < labels.length; i++) {
+            var label  = labels[i];
+            label.style.cursor = cursor;
+            //
+            var imgs = label.getElementsByClassName('wiz-todo-img');
+            for (var j = 0; j < imgs.length; j++) {
+                imgs[j].style.cursor = cursor;
+            }
+        }
+    }
+
+    function setChecklistCursorWait() {
+        _setChecklistCursor("wait");
+        //
+        bodyOriginalCursor = editorDocument.body.style.cursor;
+        editorDocument.body.style.cursor = "wait";
+    }
+
+    function restoreChecklistCursor() {
+        if (undefined === bodyOriginalCursor) {
+            console.log("restoreChecklistCursor, undefined == bodyOriginalCursor.");
+            return;
+        }
+        //
+        _setChecklistCursor("");
+        //
+        editorDocument.body.style.cursor = bodyOriginalCursor;
     }
 
 	return {
@@ -1487,7 +1546,9 @@ var WizTodoReadChecked = (function () {
 		setDocOriginalHtml: setDocOriginalHtml,
 		addTodoCompletedInfo: addTodoCompletedInfo,
 		onClickingTodoCallback: onClickingTodoCallback,
-        isModified: isModified
+        isModified: isModified,
+        setChecklistCursorWait: setChecklistCursorWait,
+        restoreChecklistCursor: restoreChecklistCursor
 	}
 
 })();

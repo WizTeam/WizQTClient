@@ -137,7 +137,7 @@
     {
         int fontHeight = m_widget->textHeight();
         //
-        CGFloat yOffset = (textRect.size.height - fontHeight) / 2.0 + textRect.origin.y - 2;
+        CGFloat yOffset = (textRect.size.height - fontHeight) / 2.0 + textRect.origin.y - 6;
         textRect = CGRectMake(textRect.origin.x, yOffset, textRect.size.width, fontHeight);
         //
         NSNumber* underLine = [[NSNumber alloc] initWithInteger: (m_mouseIn ? 1 :0 )];
@@ -182,14 +182,13 @@
             int y = rect.origin.y + (rect.size.height - imageSize.height) / 2;
             NSPoint pt;
             pt.x = x;
-            pt.y = y - 4;
+            pt.y = y - 6;
             //
             [img drawAtPoint:(NSPoint)pt fromRect:(NSRect)imageRect operation:NSCompositeSourceOver fraction:(CGFloat)1];
             [img release];
         }
     }
 }
-
 
 - (void)mouseUp:(NSEvent *)theEvent
 {

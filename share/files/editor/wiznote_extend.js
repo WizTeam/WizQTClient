@@ -170,9 +170,9 @@ function viewNote(strGUID, bEditing, strHtml, strHead)
             setEditorHtml(wiz_html, bEditing);
         } else {
             editor.ready(function() {
-            m_header = editor.document.head.innerHTML; // save original header
-            setEditorHtml(wiz_html, bEditing);
-            m_inited = true;
+                m_header = editor.document.head.innerHTML; // save original header
+                setEditorHtml(wiz_html, bEditing);
+                m_inited = true;
             });
         }
         
