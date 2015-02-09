@@ -26,11 +26,11 @@ protected:
     QString m_url;
     QLabel* m_labelProgress;
     QMovie* m_movie;
-    QLabel* m_labelError;
     QWebView* m_web;
 
 private Q_SLOTS:
     void on_web_loaded(bool ok);
+    void loadErrorPage();
     void onEditorPopulateJavaScriptWindowObject();
 };
 

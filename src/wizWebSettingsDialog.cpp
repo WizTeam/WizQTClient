@@ -2,6 +2,7 @@
 #include "sync/token.h"
 #include "wizmainwindow.h"
 #include "coreplugin/icore.h"
+#include "utils/pathresolve.h"
 
 #include <QWebView>
 #include <QMovie>
@@ -37,10 +38,6 @@ CWizWebSettingsDialog::CWizWebSettingsDialog(QString url, QSize sz, QWidget *par
     m_labelProgress->setAlignment(Qt::AlignCenter);
     m_labelProgress->setMovie(m_movie);
 
-    m_labelError = new QLabel(tr("wow, seems unable to load what you want..."), this);
-    m_labelError->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    m_labelError->setAlignment(Qt::AlignCenter);
-
     QVBoxLayout* layout = new QVBoxLayout(this);
 //    layout->setAlignment(Qt::AlignCenter);
     layout->setContentsMargins(0, 0, 0, 0);
@@ -48,14 +45,12 @@ CWizWebSettingsDialog::CWizWebSettingsDialog(QString url, QSize sz, QWidget *par
     setLayout(layout);
 
     layout->addWidget(m_labelProgress);
-    layout->addWidget(m_labelError);
     layout->addWidget(m_web);
 }
 
 void CWizWebSettingsDialog::load()
 {
     m_web->setVisible(false);
-    m_labelError->setVisible(false);
     m_labelProgress->setVisible(true);
 
     m_movie->start();
@@ -72,12 +67,26 @@ void CWizWebSettingsDialog::showEvent(QShowEvent* event)
 
 void CWizWebSettingsDialog::on_web_loaded(bool ok)
 {
-    if (ok) {
         m_movie->stop();
         m_labelProgress->setVisible(false);
         m_web->setVisible(true);
 
-    }
+        if (!ok)
+        {
+            loadErrorPage();
+        }
+}
+
+void CWizWebSettingsDialog::loadErrorPage()
+{
+    QString strFileName = Utils::PathResolve::resourcesPath() + "files/errorpage/load_fail.html";
+    QString strHtml;
+    ::WizLoadUnicodeTextFromFile(strFileName, strHtml);
+    strHtml.replace("error_text1", tr("Load Error"));
+    strHtml.replace("error_text2", tr("Network anomalies, check the network, then retry!"));
+    strHtml.replace("error_text3", tr("Load Error"));
+    QUrl url = QUrl::fromLocalFile(strFileName);
+    m_web->setHtml(strHtml, url);
 }
 
 void CWizWebSettingsDialog::onEditorPopulateJavaScriptWindowObject()
@@ -90,14 +99,14 @@ void CWizWebSettingsDialog::showError()
 {
     m_movie->stop();
     m_labelProgress->setVisible(false);
-    m_labelError->setVisible(true);
+    m_web->setVisible(true);
+    loadErrorPage();
 }
 
 
 void CWizWebSettingsWithTokenDialog::load()
 {
     m_web->setVisible(false);
-    m_labelError->setVisible(false);
     m_labelProgress->setVisible(true);
 
     m_movie->start();

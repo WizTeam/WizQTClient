@@ -52,6 +52,7 @@ public Q_SLOTS:
     void onInfoButtonClicked();
 
     void onCommentsButtonClicked();
+    void onCommentPageLoaded(bool ok);
     void onViewNoteLoaded(Core::INoteView* view, const WIZDOCUMENTDATA& note, bool bOk);
     void onTokenAcquired(const QString& strToken);
     void onGetCommentsCountFinished(int nCount);
@@ -66,6 +67,7 @@ signals:
 private:
     void showInfoBar();
     void showEditorBar();
+    void loadErrorPage();
 
 private:
     CWizDocumentWebEngine* m_editor;

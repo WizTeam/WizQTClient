@@ -23,6 +23,7 @@
 #include "share/wizDatabase.h"
 #include "share/wizsettings.h"
 #include "utils/stylehelper.h"
+#include "utils/pathresolve.h"
 
 #include "sync/token.h"
 #include "sync/apientry.h"
@@ -157,6 +158,7 @@ TitleBar::TitleBar(QWidget *parent)
 
     layout->addStretch();
     connect(m_notifyBar, SIGNAL(labelLink_clicked(QString)), SIGNAL(notifyBar_link_clicked(QString)));
+
 }
 
 CWizDocumentView* TitleBar::noteView()
@@ -221,6 +223,19 @@ void TitleBar::showEditorBar()
 {
     m_infoBar->hide();
     m_editorBar->show();
+}
+
+void TitleBar::loadErrorPage()
+{
+    QWebView* comments = noteView()->commentView();
+    QString strFileName = Utils::PathResolve::resourcesPath() + "files/errorpage/load_fail_comments.html";
+    QString strHtml;
+    ::WizLoadUnicodeTextFromFile(strFileName, strHtml);
+    strHtml.replace("error_text1", tr("Load Error"));
+    strHtml.replace("error_text2", tr("Network anomalies, check the network, then retry!"));
+    strHtml.replace("error_text3", tr("Load Error"));
+    QUrl url = QUrl::fromLocalFile(strFileName);
+    comments->setHtml(strHtml, url);
 }
 
 void TitleBar::onEditorChanged()
@@ -360,12 +375,22 @@ void TitleBar::onCommentsButtonClicked()
             splitter->setSizes(lin);
             comments->show();
         } else {
-            comments->setHtml(tr("Network service not available!"));
+            loadErrorPage();
             comments->show();
         }
 
     } else {
         m_commentsBtn->setEnabled(false);
+    }
+}
+
+void TitleBar::onCommentPageLoaded(bool ok)
+{
+    if (!ok)
+    {
+        QWebView* comments = noteView()->commentView();
+        loadErrorPage();
+        comments->show();
     }
 }
 

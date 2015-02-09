@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<script type="text/javascript">
+		function onLoad () {
+			try {
+				if (undefined === external.AppPath) {
+					alert("Failed to get AppPath.");
+					return;
+				}
+			}
+			catch(e) {
+				alert("external is invalid.");
+				return;
+			}
+			//
+			var objApp = external;
+			var img = document.getElementById("error-img");
+			if (img) {
+				img.src = objApp.AppPath + "files\\load_error.png";
+			}
+			//
+			error_text1.innerText = objApp.TranslateString(error_text1.innerText);
+			error_text2.innerText = objApp.TranslateString(error_text2.innerText);
+		}
+		//
+	</script>
+</head>
+<body onload="onLoad();">
+	<div style="width: 450px; height:200px; position:absolute; left:50%; top:50%; margin:-100px 0 0 -150px">
+		<div>
+			<div style="display: inline-block; ">
+				<img id='error-img' src="load_error.png">
+			</div>
+			<div style="display: inline-block; position: absolute; margin: 5px 0 0 28px; font-family: 'Microsoft Yahei', '微软雅黑', 'Helvetica', 'SimHei', 'SimSun'; ">
+				<div><span id="error_text1" style="font-size: 24px; color: #3a3a3a;">Load Error</span></div>
+				<div style="margin-top: 3px;"><span id="error_text2" style="font-size: 14px; color: #bdbdbd;">Network anomalies, check the network, then retry!</span></div>
+			</div>
+		</div>
+	</div>
+</body>
+</html>
