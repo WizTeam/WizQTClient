@@ -273,6 +273,12 @@ public Q_SLOTS:
     void on_actionEditingDelete_triggered();
     void on_actionEditingSelectAll_triggered();
 
+    //move input position
+    void on_actionMoveToPageStart_triggered();
+    void on_actionMoveToPageEnd_triggered();
+    void on_actionMoveToLineStart_triggered();
+    void on_actionMoveToLineEnd_triggered();
+
     // menu view
     void on_actionViewToggleCategory_triggered();
     void on_actionViewToggleFullscreen_triggered();

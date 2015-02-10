@@ -1537,6 +1537,30 @@ void MainWindow::on_actionEditingSelectAll_triggered()
     m_doc->web()->triggerPageAction(QWebEnginePage::SelectAll);
 }
 
+void MainWindow::on_actionMoveToPageStart_triggered()
+{
+    QKeyEvent keyPress(QEvent::KeyPress, Qt::Key_PageUp , Qt::AltModifier, QString());
+    m_doc->web()->sendEventToChildWidgets(&keyPress);
+}
+
+void MainWindow::on_actionMoveToPageEnd_triggered()
+{
+    QKeyEvent keyPress(QEvent::KeyPress, Qt::Key_PageDown , Qt::AltModifier, QString());
+    m_doc->web()->sendEventToChildWidgets(&keyPress);
+}
+
+void MainWindow::on_actionMoveToLineStart_triggered()
+{
+    QKeyEvent keyPress(QEvent::KeyPress, Qt::Key_Home, Qt::NoModifier, QString());
+    m_doc->web()->sendEventToChildWidgets(&keyPress);
+}
+
+void MainWindow::on_actionMoveToLineEnd_triggered()
+{
+    QKeyEvent keyPress(QEvent::KeyPress, Qt::Key_End, Qt::NoModifier, QString());
+    m_doc->web()->sendEventToChildWidgets(&keyPress);
+}
+
 void MainWindow::on_actionViewToggleCategory_triggered()
 {
     QWidget* category = m_splitter->widget(0);
