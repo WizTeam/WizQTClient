@@ -66,6 +66,7 @@ public:
     void setEditingDocument(bool editing);
     void saveDocument(const WIZDOCUMENTDATA& data, bool force);
     void reloadNoteData(const WIZDOCUMENTDATA& data);
+    void closeDocument(const WIZDOCUMENTDATA& data);
 
     bool isInited() const { return m_bEditorInited; }
     bool isEditing() const { return m_bEditingMode; }
@@ -91,7 +92,7 @@ public:
     Q_INVOKABLE void on_ueditorInitFinished();
     Q_INVOKABLE void on_viewDocumentFinished(bool ok);
 
-    bool evaluateJavaScript(const QString& js);
+    Q_INVOKABLE void runJavaScript(const QString& js, const QWebEngineCallback<const QVariant&>& resultCallback);
 
     // -1: command invalid
     // 0: available
@@ -131,7 +132,7 @@ public:
     Q_INVOKABLE bool checkListClickable();
     Q_SIGNAL void clickingTodoCallBack(bool cancel, bool needCallAgain);
     Q_SIGNAL void setDocOriginalHtml(const QString& strHtml);
-
+    Q_INVOKABLE void insertCssForCode();
 
     //
     void saveAsPDF();
@@ -150,6 +151,9 @@ public:
     //
     Q_INVOKABLE void focusInEditor();
     Q_INVOKABLE void focusOutEditor();
+
+    //
+    void sendEventToChildWidgets(QEvent* event);
 
 private:
     void loadEditor();
@@ -173,16 +177,21 @@ protected:
     virtual void focusOutEvent(QFocusEvent* event) Q_DECL_OVERRIDE;
 
     virtual bool event(QEvent* event) Q_DECL_OVERRIDE;
-    virtual void contextMenuEvent(QContextMenuEvent* event);
-    virtual void dragEnterEvent(QDragEnterEvent* event);
-    virtual void dragMoveEvent(QDragMoveEvent* event);
-    virtual void dropEvent(QDropEvent* event);
+    virtual void childEvent(QChildEvent* event) Q_DECL_OVERRIDE;
+    virtual void contextMenuEvent(QContextMenuEvent* event) Q_DECL_OVERRIDE;
+    virtual void dragEnterEvent(QDragEnterEvent* event) Q_DECL_OVERRIDE;
+    virtual void dragMoveEvent(QDragMoveEvent* event) Q_DECL_OVERRIDE;
+    virtual void dropEvent(QDropEvent* event) Q_DECL_OVERRIDE;
 
 private:
     CWizExplorerApp& m_app;
     CWizDatabaseManager& m_dbMgr;
     Core::CWizDocumentView* m_parentView;
     QMap<QString, QString> m_mapFile;
+
+    //NOTE: noraml key events is processed by child widgets, if we want create key events by ourself
+    // we need to send key events to child widgets
+    QList<QObject*> m_childWidgets;
 
     QString m_strDefaultCssFilePath;
 
@@ -234,7 +243,7 @@ public Q_SLOTS:
     void applySearchKeywordHighlight();
     void clearSearchKeywordHighlight();
 
-    void on_insertCodeHtml_requset(QString strOldHtml);
+    void on_insertCodeHtml_requset(QString strCodeHtml);
 
     /* editor API */
 

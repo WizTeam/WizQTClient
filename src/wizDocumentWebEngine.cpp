@@ -214,6 +214,8 @@ void CWizDocumentWebEngine::waitForDone()
 void CWizDocumentWebEngine::keyPressEvent(QKeyEvent* event)
 {
     qDebug() << "key pressed : " << event;
+    sendEventToChildWidgets(event);
+
     QWebEngineView::keyPressEvent(event);
 }
 
@@ -242,6 +244,21 @@ bool CWizDocumentWebEngine::event(QEvent* event)
 {
 //    qDebug() << "webengine event called ,  event type : " << event->type();
     return QWebEngineView::event(event);
+}
+
+void CWizDocumentWebEngine::childEvent(QChildEvent* event)
+{
+    if (event->type() == QEvent::ChildAdded)
+    {
+//        event->child()->installEventFilter(this);
+        m_childWidgets.append(event->child());
+    }
+    else if (event->type() == QEvent::ChildRemoved)
+    {
+        m_childWidgets.removeOne(event->child());
+    }
+
+    QWebEngineView::childEvent(event);
 }
 
 void CWizDocumentWebEngine::contextMenuEvent(QContextMenuEvent *event)
@@ -493,6 +510,15 @@ void CWizDocumentWebEngine::reloadNoteData(const WIZDOCUMENTDATA& data)
     m_docLoadThread->load(data);
 }
 
+void CWizDocumentWebEngine::closeDocument(const WIZDOCUMENTDATA& data)
+{
+    bool isSourceMode = editorCommandQueryCommandState("source");
+    if (isSourceMode)
+    {
+        synchronousRunJavaScript("editor.execCommand('source')");
+    }
+}
+
 bool CWizDocumentWebEngine::resetDefaultCss()
 {
     QFile f(":/default.css");
@@ -590,10 +616,9 @@ void CWizDocumentWebEngine::on_viewDocumentFinished(bool ok)
     emit viewDocumentFinished();
 }
 
-bool CWizDocumentWebEngine::evaluateJavaScript(const QString& js)
+void CWizDocumentWebEngine::runJavaScript(const QString& js, const QWebEngineCallback<const QVariant &> &resultCallback)
 {
-    page()->runJavaScript(js);
-    return true;
+    page()->runJavaScript(js, resultCallback);
 }
 
 void CWizDocumentWebEngine::editorCommandQueryCommandState(const QString& strCommand,
@@ -883,6 +908,13 @@ bool CWizDocumentWebEngine::checkListClickable()
     return false;
 }
 
+void CWizDocumentWebEngine::insertCssForCode()
+{
+    QString strCss = "file://" + Utils::PathResolve::resourcesPath() + "files/wiz_code_highlight.css";
+    page()->runJavaScript(QString("WizAddCssForCode('%1');").arg(strCss));
+//    synchronousRunJavaScript(QString("WizAddCssForCode(%1);").arg(strCss));
+}
+
 void CWizDocumentWebEngine::onEditorLoadFinished(bool ok)
 {
     qDebug() << "on editor load finished , ok : " << ok;
@@ -1090,15 +1122,16 @@ void CWizDocumentWebEngine::clearSearchKeywordHighlight()
     findText("");
 }
 
-void CWizDocumentWebEngine::on_insertCodeHtml_requset(QString strOldHtml)
+void CWizDocumentWebEngine::on_insertCodeHtml_requset(QString strCodeHtml)
 {
-    QString strHtml = strOldHtml;
-    if (WizGetBodyContentFromHtml(strHtml, false))
-    {
-        editorCommandExecuteInsertHtml(strHtml, true);
-        //FiXME:插入代码时li的属性会丢失，此处需要特殊处理，在head中增加li的属性
-        page()->runJavaScript("WizAddCssForCodeLi();");
-    }
+//    QString strHtml = strCodeHtml;
+//    if (WizGetBodyContentFromHtml(strHtml, false))
+//    {
+    insertCssForCode();
+    editorCommandExecuteInsertHtml(strCodeHtml, true);
+//        //FiXME:插入代码时li的属性会丢失，此处需要特殊处理，在head中增加li的属性
+//        page()->runJavaScript("WizAddCssForCodeLi();");
+//    }
 }
 
 void CWizDocumentWebEngine::viewDocumentInEditor(bool editing)
@@ -1667,7 +1700,7 @@ bool CWizDocumentWebEngine::editorCommandExecuteViewSource()
 bool CWizDocumentWebEngine::editorCommandExecuteInsertCode()
 {
     QString strSelectHtml = page()->selectedText();
-    WizCodeEditorDialog *dialog = new WizCodeEditorDialog(m_app);
+    WizCodeEditorDialog *dialog = new WizCodeEditorDialog(m_app, this);
     connect(dialog, SIGNAL(insertHtmlRequest(QString)), SLOT(on_insertCodeHtml_requset(QString)));
     dialog->show();
     dialog->setWindowState(dialog->windowState() & ~Qt::WindowFullScreen | Qt::WindowActive);
@@ -1918,6 +1951,14 @@ void CWizDocumentWebEngine::focusOutEditor()
 {
     Q_EMIT focusOut();
     Q_EMIT statusChanged();
+}
+
+void CWizDocumentWebEngine::sendEventToChildWidgets(QEvent* event)
+{
+    foreach (QObject* obj, m_childWidgets)
+    {
+        QCoreApplication::sendEvent(obj, event);
+    }
 }
 
 

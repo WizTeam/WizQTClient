@@ -3,55 +3,61 @@
 
 #include <QDialog>
 #include <QWebView>
+#include <QWebEngineView>
 #include <QPointer>
 #include "wizdef.h"
+#include "wizDocumentWebEngine.h"
 
 class CWizExplorerApp;
 class QComboBox;
-class QWebView;
 class QMenu;
 class QPlainTextEdit;
+class CWizDocumentWebView;
+class QLineEdit;
+class WizCodeEditorDialog;
 
-class CWizCodeEditorView : public QWebView
+class CWizCodeExternal : public QObject
 {
     Q_OBJECT
 public:
-    CWizCodeEditorView(QWidget *parent = 0) : QWebView(parent){}
+    explicit CWizCodeExternal(WizCodeEditorDialog* editor, QObject* parent = 0);
 
-protected:
-    virtual void contextMenuEvent(QContextMenuEvent* event)
-    {
-        //do nothing
-        Q_UNUSED(event);
-    }
+    Q_INVOKABLE void accept();
+    Q_INVOKABLE void reject();
+    Q_INVOKABLE void insertHtml(const QString& strResult);
+    Q_INVOKABLE QString getLastCodeType();
+    Q_INVOKABLE void saveLastCodeType(const QString& codeType);
 
+private:
+    WizCodeEditorDialog* m_editor;
 };
 
 class WizCodeEditorDialog : public QDialog
 {
     Q_OBJECT
 public:
-    explicit WizCodeEditorDialog(CWizExplorerApp& app, QWidget *parent = 0);
+    explicit WizCodeEditorDialog(CWizExplorerApp& app, QObject *external, QWidget *parent = 0);
     void setCode(const QString& strCode);
+
 signals:
     void insertHtmlRequest(QString strHtml);
 
 public slots:
-    void renderCodeToHtml();
-    void onButtonOKClicked();
-    void onButtonCancelClicked();
+    void insertHtml(const QString& strResultDiv);
 
+    QString getLastCodeType();
+    void saveLastCodeType(const QString& codeType);
+    //
+    void onHtmlLoaded(bool ok);
+    void runJs();
 protected:
     void changeEvent(QEvent * event);
 
 private:
-    void initCodeTypeCombox();
-    void saveLastCodeType();
-private:
-    QComboBox *m_codeType;
-    QPlainTextEdit *m_codeEditor;
-    QWebView *m_codeBrowser;
+    QWebEngineView *m_codeBrowser;
     CWizExplorerApp& m_app;
+    CWizCodeExternal *m_external;
+    QLineEdit* m_edit;
 };
 
 #endif // WIZCODEEDITORDIALOG_H

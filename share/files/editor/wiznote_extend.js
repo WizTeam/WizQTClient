@@ -341,7 +341,55 @@ function WizInsertCodeHtml(html) {
     editor.execCommand('insertHtml', html, true);
 }
 
+function WizAddCssForCode(cssFile) {
+    console.log("WizAddCssForCode called , css file " + cssFile);
+    var doc = editor.document;
+    if (!doc)
+        return;
+    //
+    var oldLink = doc.getElementById('wiz_code_highlight_link');
+    if (oldLink) {
+        console.log("old css link find, try to remove");
+        oldLink.parentNode.removeChild(oldLink);
+    }
+    //
+    var link = doc.createElement('link');
+    if (!link)
+        return;
+    try {
+        link.type = 'text/css';
+        link.rel = 'stylesheet';
+        link.id = 'wiz_code_highlight_link';
+        link.href = cssFile;
+        //
+        if (!doc.head)
+        {
+            doc.insertBefore(doc.createElement('head'), doc.body);
+        }
+        doc.head.appendChild(link);
+    }
+    catch(e) {
+
+    }
+}
+
 
 function WizClearEditorHeight() {
     editor.document.body.style.height='';
 }
+
+
+function WizMoveEnd(){  
+    obj = editor.document.body;
+    obj.focus();  
+    var len = obj.value.length;  
+    if (document.selection) {  
+        var sel = obj.createTextRange();  
+        sel.moveStart('character',len);  
+        sel.collapse();  
+        sel.select();  
+    } else if (typeof obj.selectionStart == 'number' && typeof obj.selectionEnd == 'number') {  
+        obj.selectionStart = obj.selectionEnd = len;  
+    }  
+  
+}   

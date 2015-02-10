@@ -2,37 +2,34 @@
 #include "wizdef.h"
 #include "utils/pathresolve.h"
 #include "share/wizsettings.h"
+#include "wizDocumentWebView.h"
+#include "share/websocketclientwrapper.h"
+#include "share/websockettransport.h"
 
 #include <QVBoxLayout>
 #include <QHBoxLayout>
-#include <QComboBox>
 #include <QPushButton>
-#include <QLabel>
-#include <QSplitter>
-#include <QWebPage>
-#include <QWebFrame>
-#include <QWebView>
-#include <QTimer>
-#include <QAction>
-#include <QMenu>
+#include <QLineEdit>
 #include <QFile>
 #include <QDir>
 #include <QPlainTextEdit>
 #include <QEvent>
+#include <QWebSocketServer>
+#include <QWebChannel>
 #include <QDebug>
 
 #include <extensionsystem/pluginmanager.h>
 #include <extensionsystem/pluginspec.h>
 #include <coreplugin/icore.h>
 
+
 #define LASTUSEDCODETYPE "LASTUSEDCODETYPE"
 
-WizCodeEditorDialog::WizCodeEditorDialog(CWizExplorerApp& app, QWidget *parent) :
+WizCodeEditorDialog::WizCodeEditorDialog(CWizExplorerApp& app, QObject* external, QWidget *parent) :
     QDialog(parent)
   , m_app(app)
-  , m_codeType(new QComboBox(this))
-  , m_codeEditor(new QPlainTextEdit(this))
-  , m_codeBrowser(new QWebView(this))
+  , m_external(new CWizCodeExternal(this, this))
+  , m_codeBrowser(new QWebEngineView(this))
 {
 
     setAttribute(Qt::WA_DeleteOnClose);
@@ -42,109 +39,45 @@ WizCodeEditorDialog::WizCodeEditorDialog(CWizExplorerApp& app, QWidget *parent) 
     //
     QVBoxLayout *verticalLayout = new QVBoxLayout(this);
     verticalLayout->setSpacing(6);
-    verticalLayout->setContentsMargins(11, 11, 11, 11);
+    verticalLayout->setContentsMargins(5, 5, 5, 5);
 
-    QHBoxLayout *horizontalLayout = new QHBoxLayout();
-    horizontalLayout->setSpacing(6);
-    QLabel *labelType = new QLabel(tr("Code Type : "), this);
-    horizontalLayout->addWidget(labelType);
+    WebEnginePage* page = new WebEnginePage(m_codeBrowser);
+    m_codeBrowser->setPage(page);
+    verticalLayout->addWidget(m_codeBrowser);
 
-    horizontalLayout->addWidget(m_codeType);
+    m_edit = new QLineEdit(this);
+    verticalLayout->addWidget(m_edit);
+    connect(m_edit, SIGNAL(returnPressed()), SLOT(runJs()));
 
-    QSpacerItem *horizontalSpacer = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
-    horizontalLayout->addItem(horizontalSpacer);
+    QString strFileName = Utils::PathResolve::resourcesPath() + "files/insert_code.htm";
+    QString strHtml;
+    ::WizLoadUnicodeTextFromFile(strFileName, strHtml);
+    QUrl url = QUrl::fromLocalFile(strFileName);
 
-    m_codeEditor->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
-    //m_codeEditor->page()->setContentEditable(true);
+    connect(m_codeBrowser->page(), SIGNAL(loadFinished(bool)), SLOT(onHtmlLoaded(bool)));
+    m_codeBrowser->page()->setHtml(strHtml, url);
 
-    QWidget* wgtPre = new QWidget(this);
-    QVBoxLayout *layoutPre = new QVBoxLayout(wgtPre);
-    layoutPre->setContentsMargins(0, 0, 0, 0);
-    QLabel *labelPreview = new QLabel(tr("Priview : "), this);
-    verticalLayout->addWidget(labelPreview);
-    m_codeBrowser->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
-    m_codeBrowser->setHtml("");
-    layoutPre->addWidget(labelPreview);
-    layoutPre->addWidget(m_codeBrowser);
-
-    QSplitter *splitter = new QSplitter(this);
-    splitter->setOrientation(Qt::Vertical);
-    splitter->addWidget(m_codeEditor);
-    splitter->addWidget(wgtPre);
-
-
-    QPushButton *btnOK = new QPushButton(this);
-    btnOK->setText(tr("OK"));
-    QPushButton *btnCancel = new QPushButton(this);
-    btnCancel->setText(tr("Cancel"));
-    QHBoxLayout *layoutButton = new QHBoxLayout();
-    layoutButton->addStretch();
-    layoutButton->addWidget(btnCancel);
-    layoutButton->addWidget(btnOK);
-
-
-    verticalLayout->addLayout(horizontalLayout);
-    verticalLayout->addWidget(splitter);
-    verticalLayout->addLayout(layoutButton);
-
-
-    initCodeTypeCombox();
-    //
-    //connect(m_codeEditor->page(), SIGNAL(contentsChanged()), SLOT(renderCodeToHtml()));
-    connect(m_codeEditor, SIGNAL(textChanged()), SLOT(renderCodeToHtml()));
-    connect(m_codeType, SIGNAL(currentIndexChanged(int)), SLOT(renderCodeToHtml()));
-    connect(btnOK, SIGNAL(clicked()), SLOT(onButtonOKClicked()));
-    connect(btnCancel, SIGNAL(clicked()), SLOT(onButtonCancelClicked()));
 }
 
 void WizCodeEditorDialog::setCode(const QString& strCode)
 {
-    if (!strCode.isEmpty())
-    {
-        //m_codeEditor->page()->mainFrame()->setHtml(strCode);
-        m_codeEditor->setPlainText(strCode);
-        renderCodeToHtml();
-    }
+//    if (!strCode.isEmpty())
+//    {
+//        //m_codeEditor->page()->mainFrame()->setHtml(strCode);
+//        m_codeEditor->setPlainText(strCode);
+//        renderCodeToHtml();
+//    }
 }
 
-void WizCodeEditorDialog::renderCodeToHtml()
+void WizCodeEditorDialog::insertHtml(const QString& strResultDiv)
 {
-    QWebFrame *frame = m_codeBrowser->page()->mainFrame();
-    QString codeText = m_codeEditor->toPlainText();//->page()->mainFrame()->toHtml();
-#if QT_VERSION > 0x050000
-    codeText = codeText.toHtmlEscaped();
-#else
-    codeText.replace("<", "&lt;");
-    codeText.replace(">", "&gt;");
-#endif
-    // 需要将纯文本中的空格转换为Html中的空格。直接将文本中的空格写入Html中，会被忽略。
-    codeText.replace(" ", "åß∂ƒ");
-    codeText.replace("\n", "<br />");
-
-    m_codeBrowser->setUpdatesEnabled(false);
-    frame->setHtml(QString("<p>``` %1</p>%2<p>```</p>").arg(m_codeType->currentText()).
-                   arg(codeText));
-    Core::ICore::instance()->emitFrameRenderRequested(frame, true);
-    m_codeBrowser->setUpdatesEnabled(true);
-    codeText = frame->toHtml();
-    codeText.replace("åß∂ƒ", "&nbsp;");
-    frame->setHtml(codeText);
-}
-
-void WizCodeEditorDialog::onButtonOKClicked()
-{
-    QString strHtml = m_codeBrowser->page()->mainFrame()->toHtml();
-    //插入Html时，处理特殊字符。
-    strHtml.replace("\\n", "\\\\n");
-    strHtml.replace("\'", "\\\'");
+    QString strHtml = strResultDiv;
+//    QString strCss = Utils::PathResolve::resourcesPath() + "files/wiz_code_highlight.css";
+//    QString strHtml = QString("<html></html><head><link rel='stylesheet' type='text/css' "
+//                              "href='%1'> </head><body>%2</body>").arg(strCss).arg(strResultDiv);
+    qDebug() << "insert html before : " << strHtml;
+//    page.mainFrame()->setHtml(strHtml);
     insertHtmlRequest(strHtml);
-    saveLastCodeType();
-    close();
-}
-
-void WizCodeEditorDialog::onButtonCancelClicked()
-{
-    close();
 }
 
 void WizCodeEditorDialog::changeEvent(QEvent* event)
@@ -155,45 +88,86 @@ void WizCodeEditorDialog::changeEvent(QEvent* event)
     }
 }
 
-void WizCodeEditorDialog::initCodeTypeCombox()
+QString WizCodeEditorDialog::getLastCodeType()
 {
-    QStringList strList;
-    strList << "c" << "cpp" << "java" << "js" << "perl" << "sh" << "py" << "Basic" << "CSS" << "Go" << "Lua" << "Pascal" << "SQL" << "Visual Basic"
-               "htm" << "cc" << "bsh" << "cs" << "csh" << "cyc" << "cv" << "m" << "mxml" << "html" << "xml"
-               "pl" << "pm" << "rb" << "xhtml" << "xsl" << "Apollo" <<  "Clojure" << "Dart" << "Erlang" <<
-               "Haskell" << "Lisp" << "Scheme" << "Llvm" << "Matlab" <<  "Mumps" << "Nemerle" <<
-               "Protocol buffers" << "R, S" << "RD" << "Scala" << "TCL" << "Latek" << "CHDL" << "Wiki" << "XQ" << "YAML";
-    strList.sort();
-    foreach (QString str, strList) {
-        m_codeType->addItem(str);
-    }
-
     QString strLastType = m_app.userSettings().get((LASTUSEDCODETYPE));
     if (!strLastType.isEmpty())
     {
-#if QT_VERSION < 0x050000
-        int index = m_codeType->findText(strLastType);
-        m_codeType->setCurrentIndex(index);
-#else
-        m_codeType->setCurrentText(strLastType);
-#endif
+        return strLastType.toLower();
+    }
+
+    return "c";
+}
+
+void WizCodeEditorDialog::saveLastCodeType(const QString& codeType)
+{
+    m_app.userSettings().set(LASTUSEDCODETYPE, codeType);
+}
+
+void WizCodeEditorDialog::onHtmlLoaded(bool ok)
+{
+    if (!ok)
+        return;
+
+    QWebSocketServer *server = new QWebSocketServer(QStringLiteral("Wiz Socket Server"), QWebSocketServer::NonSecureMode, this);
+    if (!server->listen(QHostAddress::LocalHost, 0)) {
+        qFatal("Failed to open web socket server.");
         return;
     }
 
-#if QT_VERSION < 0x050000
-    int index = m_codeType->findText("c");
-    m_codeType->setCurrentIndex(index);
-#else
-    m_codeType->setCurrentText("c");
-#endif
+    // wrap WebSocket clients in QWebChannelAbstractTransport objects
+    WebSocketClientWrapper *clientWrapper  = new WebSocketClientWrapper(server, this);
+
+    // setup the dialog and publish it to the QWebChannel
+    QWebChannel *webChannel = new QWebChannel(this);
+    // setup the channel
+    QObject::connect(clientWrapper, &WebSocketClientWrapper::clientConnected,
+                     webChannel, &QWebChannel::connectTo);
+    webChannel->registerObject(QStringLiteral("codeEditor"), m_external);
+
+    QString strUrl = server->serverUrl().toString();
+    qDebug() << "try to init js in code editor by url : " << strUrl;
+    m_codeBrowser->page()->runJavaScript(QString("initializeJSObject('%1');").arg(strUrl));
 }
 
-void WizCodeEditorDialog::saveLastCodeType()
+void WizCodeEditorDialog::runJs()
 {
-    QString strLastCodeType = m_codeType->currentText();
-    m_app.userSettings().set(LASTUSEDCODETYPE, strLastCodeType);
+    QString strHtml = m_edit->text();
+    m_codeBrowser->page()->runJavaScript(strHtml);
 }
 
 
 
 
+
+
+CWizCodeExternal::CWizCodeExternal(WizCodeEditorDialog* editor, QObject* parent)
+    : m_editor(editor)
+{
+
+}
+
+void CWizCodeExternal::accept()
+{
+    m_editor->accept();
+}
+
+void CWizCodeExternal::reject()
+{
+    m_editor->reject();
+}
+
+void CWizCodeExternal::insertHtml(const QString& strResult)
+{
+    m_editor->insertHtml(strResult);
+}
+
+QString CWizCodeExternal::getLastCodeType()
+{
+    m_editor->getLastCodeType();
+}
+
+void CWizCodeExternal::saveLastCodeType(const QString& codeType)
+{
+    m_editor->saveLastCodeType(codeType);
+}

@@ -737,6 +737,11 @@ bool CWizDocumentWebView::evaluateJavaScript(const QString& js)
     return true;
 }
 
+QVariant CWizDocumentWebView::editorDocument()
+{
+    return page()->mainFrame()->evaluateJavaScript("editor.document");
+}
+
 void CWizDocumentWebView::initEditor()
 {
     if (m_bEditorInited)
@@ -1085,9 +1090,36 @@ void CWizDocumentWebView::on_insertCodeHtml_requset(QString strOldHtml)
     QString strHtml = strOldHtml;
     if (WizGetBodyContentFromHtml(strHtml, false))
     {
+        QString strCss = Utils::PathResolve::resourcesPath() + "files/wiz_code_highlight.css";
+        QString strFolder = Utils::PathResolve::tempDocumentFolder(view()->note().strGUID)
+                + "index_files/wiz_code_highlight.css";
+        ::WizEnsurePathExists(strFolder);
+        qDebug() << "copy css file from : " << strCss << "  file exist  : " << QFile::exists(strCss) << "  to : " << strFolder;
+        if (QFile::exists(strCss))
+        {
+            QFile fileCss(strFolder);
+            if (fileCss.exists() && !fileCss.remove())
+            {
+                qDebug() << "remove file failed";
+                return;
+            }
+            qDebug() << "try to copy file";
+            if (!QFile::copy(strCss, strFolder))
+            {
+                qDebug() << "copy file failed";
+                return;
+
+            }
+
+//        QFile fileCss(strCss);
+//        if (!fileCss.copy(strFolder))
+//        {
+//        }
+
         editorCommandExecuteInsertHtml(strHtml, true);
         //FiXME:插入代码时li的属性会丢失，此处需要特殊处理，在head中增加li的属性
-        page()->mainFrame()->evaluateJavaScript("WizAddCssForCodeLi();");
+        page()->mainFrame()->evaluateJavaScript("WizAddCssForCode();");
+        }
     }
 }
 
@@ -1647,7 +1679,7 @@ bool CWizDocumentWebView::editorCommandExecuteViewSource()
 bool CWizDocumentWebView::editorCommandExecuteInsertCode()
 {
     QString strSelectHtml = page()->selectedText();
-    WizCodeEditorDialog *dialog = new WizCodeEditorDialog(m_app);
+    WizCodeEditorDialog *dialog = new WizCodeEditorDialog(m_app, this);
     connect(dialog, SIGNAL(insertHtmlRequest(QString)), SLOT(on_insertCodeHtml_requset(QString)));
     dialog->show();
     dialog->setWindowState(dialog->windowState() & ~Qt::WindowFullScreen | Qt::WindowActive);

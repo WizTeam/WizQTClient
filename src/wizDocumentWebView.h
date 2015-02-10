@@ -150,6 +150,9 @@ public:
 
     bool evaluateJavaScript(const QString& js);
 
+    //get js doucment object
+    Q_INVOKABLE QVariant editorDocument();
+
     // -1: command invalid
     // 0: available
     // 1: executed before
