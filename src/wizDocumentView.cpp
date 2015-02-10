@@ -303,6 +303,8 @@ void CWizDocumentView::viewNote(const WIZDOCUMENTDATA& data, bool forceEdit)
     MainWindow* window = qobject_cast<MainWindow *>(m_app.mainWindow());
 
 //    m_web->saveDocument(m_note, false);
+    qDebug() << "before close document";
+    m_engine->closeDocument(m_note);
     qDebug() << "before save document";
     m_engine->saveDocument(m_note, false);
     qDebug() << "after save document";

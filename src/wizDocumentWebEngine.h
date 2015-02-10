@@ -177,6 +177,7 @@ protected:
     virtual void focusOutEvent(QFocusEvent* event) Q_DECL_OVERRIDE;
 
     virtual bool event(QEvent* event) Q_DECL_OVERRIDE;
+    virtual bool eventFilter(QObject* watched, QEvent* event) Q_DECL_OVERRIDE;
     virtual void childEvent(QChildEvent* event) Q_DECL_OVERRIDE;
     virtual void contextMenuEvent(QContextMenuEvent* event) Q_DECL_OVERRIDE;
     virtual void dragEnterEvent(QDragEnterEvent* event) Q_DECL_OVERRIDE;

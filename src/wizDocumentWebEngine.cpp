@@ -214,9 +214,27 @@ void CWizDocumentWebEngine::waitForDone()
 void CWizDocumentWebEngine::keyPressEvent(QKeyEvent* event)
 {
     qDebug() << "key pressed : " << event;
-    sendEventToChildWidgets(event);
+//    sendEventToChildWidgets(event);
+
+    if (event->key() == Qt::Key_Escape)
+    {
+        // FIXME: press esc will insert space at cursor if not clear focus
+        clearFocus();
+        return;
+    }
+    else if (event->key() == Qt::Key_S
+             && event->modifiers() == Qt::ControlModifier)
+    {
+        saveDocument(view()->note(), false);
+        return;
+    }
 
     QWebEngineView::keyPressEvent(event);
+
+    if (event->key() == Qt::Key_Enter || event->key() == Qt::Key_Return)
+    {
+        tryResetTitle();
+    }
 }
 
 
@@ -232,7 +250,15 @@ void CWizDocumentWebEngine::focusInEvent(QFocusEvent *event)
 void CWizDocumentWebEngine::focusOutEvent(QFocusEvent *event)
 {
     // because qt will clear focus when context menu popup, we need keep focus there.
-    if (event->reason() == Qt::PopupFocusReason) {
+    if (event->reason() == Qt::PopupFocusReason)
+    {
+        event->accept();
+        return;
+    }
+
+    if (m_bEditingMode && view()->hasFocus())
+    {
+        event->accept();
         return;
     }
 
@@ -246,12 +272,49 @@ bool CWizDocumentWebEngine::event(QEvent* event)
     return QWebEngineView::event(event);
 }
 
+bool CWizDocumentWebEngine::eventFilter(QObject* watched, QEvent* event)
+{
+    switch (event->type()) {
+    case QEvent::FocusIn:
+    {
+        QFocusEvent* focusEvent = dynamic_cast<QFocusEvent*>(event);
+        if (focusEvent)
+        {
+            focusInEvent(focusEvent);
+        }
+        break;
+    }
+    case QEvent::FocusOut:
+    {
+        QFocusEvent* focusEvent = dynamic_cast<QFocusEvent*>(event);
+        if (focusEvent)
+        {
+            focusOutEvent(focusEvent);
+        }
+        break;
+    }
+    case QEvent::KeyPress:
+    {
+        QKeyEvent* keyEvent = dynamic_cast<QKeyEvent*>(event);
+        if (keyEvent)
+        {
+            keyPressEvent(keyEvent);
+        }
+        break;
+    }
+    default:
+        break;
+    }
+    return QWebEngineView::eventFilter(watched, event);
+}
+
 void CWizDocumentWebEngine::childEvent(QChildEvent* event)
 {
     if (event->type() == QEvent::ChildAdded)
     {
 //        event->child()->installEventFilter(this);
         m_childWidgets.append(event->child());
+        event->child()->installEventFilter(this);
     }
     else if (event->type() == QEvent::ChildRemoved)
     {

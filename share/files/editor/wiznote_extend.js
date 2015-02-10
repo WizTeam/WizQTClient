@@ -88,15 +88,15 @@ function initialUEditor(wizEditor) {
         });
 
         // 因为QWebEngineView无法响应foucsInEvent,focusOutEvent或keyPressEvent，所以使用编辑器来触发
-        editor.addListener('focus', function () {
-            WizEditor.focusInEditor();
-        });
-        editor.addListener('blur', function () {
-            WizEditor.focusOutEditor();
-        });
-        editor.addListener('keydown', function() {
-            WizEditor.setContentsChanged(true);
-        });
+        // editor.addListener('focus', function () {
+        //     WizEditor.focusInEditor();
+        // });
+        // editor.addListener('blur', function () {
+        //     WizEditor.focusOutEditor();
+        // });
+        // editor.addListener('keydown', function() {
+        //     WizEditor.setContentsChanged(true);
+        // });
 
     } catch (err) {
         alert(err);
