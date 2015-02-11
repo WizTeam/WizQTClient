@@ -565,6 +565,12 @@ void CWizCategoryViewShortcutRootItem::drop(const WIZDOCUMENTDATA& data, bool /*
                                                                            data.strTitle, data.strKbGUID, data.strGUID, isEncrypted);
     addChild(pItem);
     sortChildren(0, Qt::AscendingOrder);
+
+    QTimer::singleShot(200, [this]() {
+        CWizCategoryView* categoryView = dynamic_cast<CWizCategoryView*>(treeWidget());
+        Q_ASSERT(categoryView);
+        categoryView->saveShortcutState();
+    });
 }
 
 QString CWizCategoryViewShortcutRootItem::getSectionName()

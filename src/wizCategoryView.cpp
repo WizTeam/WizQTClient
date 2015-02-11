@@ -71,6 +71,9 @@ using namespace Core::Internal;
 #define TREEVIEW_SELECTED_ITEM "SelectedItemID"
 #define SHORTCUT_STATE "ShortcutState"
 
+#define CATEGORY_SHORTCUT   "CategoryShortcut"
+#define CATEGORY_META   "CategoryMeta"
+
 
 /* ------------------------------ CWizCategoryBaseView ------------------------------ */
 
@@ -1780,6 +1783,7 @@ void CWizCategoryView::on_action_removeShortcut()
             pRoot->addPlaceHoldItem();
         }
     }
+    saveShortcutState();
 }
 
 void CWizCategoryView::on_action_emptyTrash()
@@ -2892,9 +2896,6 @@ void CWizCategoryView::doLocationSanityCheck(CWizStdStringArray& arrayLocation)
 
 void CWizCategoryView::loadShortcutState()
 {
-    QSettings* settings = ExtensionSystem::PluginManager::settings();
-    settings->beginGroup(SHORTCUT_STATE);
-
     CWizCategoryViewShortcutRootItem* pShortcutRoot = 0;
     for (int i = 0 ; i < topLevelItemCount(); i++)
     {
@@ -2909,22 +2910,30 @@ void CWizCategoryView::loadShortcutState()
         addTopLevelItem(pShortcutRoot);
     }
 
-    QStringList allKeys = settings->allKeys();
-    foreach (QString strGuid, allKeys)
+    //
+    QString strData = m_dbMgr.db().meta(CATEGORY_META, CATEGORY_SHORTCUT);
+    if (!strData.isEmpty())
     {
-        QString strKbGuid = settings->value(strGuid).toString();
-        CWizDatabase &db = m_dbMgr.db(strKbGuid);
-        WIZDOCUMENTDATA doc;
-        if (db.DocumentFromGUID(strGuid, doc))
-        {
-            bool isEncrypted = doc.nProtected == 1;
-            CWizCategoryViewShortcutItem *pShortcutItem =
-                    new CWizCategoryViewShortcutItem(m_app, doc.strTitle, doc.strKbGUID, doc.strGUID, isEncrypted);
-            pShortcutRoot->addChild(pShortcutItem);
+        QStringList shortCutList = strData.split(';');
+        foreach (QString shortCut, shortCutList) {
+            QStringList shortDataList = shortCut.split(',');
+            if (shortDataList.count() != 2)
+                continue;
+
+            QString strKbGuid = shortDataList.first();
+            QString strGuid = shortDataList.last();
+            CWizDatabase &db = m_dbMgr.db(strKbGuid);
+            WIZDOCUMENTDATA doc;
+            if (db.DocumentFromGUID(strGuid, doc))
+            {
+                bool isEncrypted = doc.nProtected == 1;
+                CWizCategoryViewShortcutItem *pShortcutItem =
+                        new CWizCategoryViewShortcutItem(m_app, doc.strTitle, doc.strKbGUID, doc.strGUID, isEncrypted);
+                pShortcutRoot->addChild(pShortcutItem);
+            }
+
         }
     }
-
-    settings->endGroup();
 
     if (pShortcutRoot->childCount() == 0)
     {
@@ -2936,9 +2945,6 @@ void CWizCategoryView::loadShortcutState()
 
 void CWizCategoryView::saveShortcutState()
 {
-    QSettings* settings = ExtensionSystem::PluginManager::settings();
-    settings->beginGroup(SHORTCUT_STATE);
-    settings->remove("");
 
     CWizCategoryViewShortcutRootItem *pShortcutRoot = 0;
     for (int i = 0 ; i < topLevelItemCount(); i++)
@@ -2948,6 +2954,8 @@ void CWizCategoryView::saveShortcutState()
             break;
     }
 
+    QString strShortcutData = "";
+
     if (pShortcutRoot && pShortcutRoot->childCount() > 0)
     {
         for (int i = 0; i < pShortcutRoot->childCount(); i++)
@@ -2955,13 +2963,11 @@ void CWizCategoryView::saveShortcutState()
             CWizCategoryViewShortcutItem *pItem = dynamic_cast<CWizCategoryViewShortcutItem*>(pShortcutRoot->child(i));
             if (pItem)
             {
-                settings->setValue(pItem->guid(), pItem->kbGUID());
+                strShortcutData += pItem->kbGUID() + "," + pItem->guid() + ";";
             }
         }
     }
-
-    settings->endGroup();
-    settings->sync();
+    m_dbMgr.db().setMeta(CATEGORY_META, CATEGORY_SHORTCUT, strShortcutData);
 }
 
 void CWizCategoryView::loadExpandState()

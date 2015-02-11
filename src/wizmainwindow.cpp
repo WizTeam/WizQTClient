@@ -286,7 +286,6 @@ void MainWindow::on_application_aboutToQuit()
 void MainWindow::cleanOnQuit()
 {
     m_category->saveExpandState();
-    m_category->saveShortcutState();
     saveStatus();
     //
     m_sync->waitForDone();
