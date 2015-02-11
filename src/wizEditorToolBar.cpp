@@ -706,6 +706,21 @@ void EditorToolBar::resetToolbar()
         }
     });
 
+    m_editor->editorCommandQueryCommandState("source", [this](const QVariant& returnValue) {
+        int state = returnValue.toInt();
+        if (state == -1) {
+            m_btnViewSource->setEnabled(false);
+        } else if (state == 0) {
+            m_btnViewSource->setEnabled(true);
+            m_btnViewSource->setChecked(false);
+        } else if (state == 1) {
+            m_btnViewSource->setEnabled(true);
+            m_btnViewSource->setChecked(true);
+        } else {
+            Q_ASSERT(0);
+        }
+    });
+
     bool bReceiveImage = m_editor->editorCommandQueryMobileFileReceiverState();
     m_btnMobileImage->setChecked(bReceiveImage);
 }
