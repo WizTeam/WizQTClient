@@ -2156,9 +2156,7 @@ void MainWindow::viewDocument(const WIZDOCUMENTDATA& data, bool addToHistory)
 {
     Q_ASSERT(!data.strKbGUID.isEmpty());
 
-    CWizDocument* doc = new CWizDocument(m_dbMgr.db(data.strKbGUID), data);
-
-    if (doc->GUID() == m_doc->note().strGUID)
+    if (data.strGUID == m_doc->note().strGUID)
     {
         m_doc->reviewCurrentNote();
         return;

@@ -183,6 +183,8 @@ CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
 
 CWizDocumentView::~CWizDocumentView()
 {
+    if (m_editStatusChecker)
+        delete m_editStatusChecker;
 }
 
 void CWizDocumentView::waitForDone()

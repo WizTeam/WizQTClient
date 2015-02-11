@@ -33,6 +33,7 @@ class CWizIconLineEditContainer : public QWidget
     Q_OBJECT
 public:
     CWizIconLineEditContainer(QWidget* parent);
+    ~CWizIconLineEditContainer();
 private:
     CWizSkin9GridImage* m_background;
     QLayout* m_layout;

@@ -2258,6 +2258,7 @@ void IndexWriter::applyDeletes(bool flushedNewSegment) {
         )
       }
     )
+            _CLDELETE(reader);
   }
 
   // Clean up bufferedDeleteTerms.

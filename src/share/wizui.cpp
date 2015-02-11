@@ -146,6 +146,12 @@ CWizIconLineEditContainer::CWizIconLineEditContainer(QWidget* parent)
     m_layout->addWidget(m_rightIcon);
 
 }
+
+CWizIconLineEditContainer::~CWizIconLineEditContainer()
+{
+    if (m_background)
+        delete m_background;
+}
 void CWizIconLineEditContainer::setBackgroundImage(QString fileName, QPoint pt)
 {
     m_background = new CWizSkin9GridImage();

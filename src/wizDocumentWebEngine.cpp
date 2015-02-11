@@ -142,11 +142,11 @@ CWizDocumentWebEngine::CWizDocumentWebEngine(CWizExplorerApp& app, QWidget* pare
 
     m_transitionView = mainWindow->transitionView();
 
-    m_docLoadThread = new CWizDocumentWebViewLoaderThread(m_dbMgr);
+    m_docLoadThread = new CWizDocumentWebViewLoaderThread(m_dbMgr, this);
     connect(m_docLoadThread, SIGNAL(loaded(const QString&, const QString, const QString)),
             SLOT(onDocumentReady(const QString&, const QString, const QString)), Qt::QueuedConnection);
     //
-    m_docSaverThread = new CWizDocumentWebViewSaverThread(m_dbMgr);
+    m_docSaverThread = new CWizDocumentWebViewSaverThread(m_dbMgr, this);
     connect(m_docSaverThread, SIGNAL(saved(const QString, const QString,bool)),
             SLOT(onDocumentSaved(const QString, const QString,bool)), Qt::QueuedConnection);
 

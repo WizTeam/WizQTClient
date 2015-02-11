@@ -1894,9 +1894,9 @@ QIcon WizLoadSkinIcon3(const QString& strIconName, QIcon::Mode mode)
 // FIXME: obosolete, use CWizHtmlToPlainText class instead!
 void WizHtml2Text(const QString& strHtml, QString& strText)
 {
-    QTextDocument* doc = new QTextDocument();
-    doc->setHtml(strHtml);
-    strText = doc->toPlainText();
+    QTextDocument doc;
+    doc.setHtml(strHtml);
+    strText = doc.toPlainText();
     QChar ch(0xfffc);
     strText.replace(ch, QChar(' '));
     return;

@@ -35,7 +35,7 @@ class CWizDocumentWebViewLoaderThread : public QThread
 {
     Q_OBJECT
 public:
-    CWizDocumentWebViewLoaderThread(CWizDatabaseManager& dbMgr);
+    CWizDocumentWebViewLoaderThread(CWizDatabaseManager& dbMgr, QObject* parent);
 
     void load(const WIZDOCUMENTDATA& doc);
     //
@@ -63,7 +63,7 @@ class CWizDocumentWebViewSaverThread : public QThread
 {
     Q_OBJECT
 public:
-    CWizDocumentWebViewSaverThread(CWizDatabaseManager& dbMgr);
+    CWizDocumentWebViewSaverThread(CWizDatabaseManager& dbMgr, QObject* parent);
 
     void save(const WIZDOCUMENTDATA& doc, const QString& strHtml,
               const QString& strHtmlFile, int nFlags);

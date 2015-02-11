@@ -213,11 +213,11 @@ CWizDocumentWebView::CWizDocumentWebView(CWizExplorerApp& app, QWidget* parent)
 
     m_transitionView = mainWindow->transitionView();
 
-    m_docLoadThread = new CWizDocumentWebViewLoaderThread(m_dbMgr);
+    m_docLoadThread = new CWizDocumentWebViewLoaderThread(m_dbMgr, this);
     connect(m_docLoadThread, SIGNAL(loaded(const QString&, const QString, const QString)),
             SLOT(onDocumentReady(const QString&, const QString, const QString)), Qt::QueuedConnection);
     //
-    m_docSaverThread = new CWizDocumentWebViewSaverThread(m_dbMgr);
+    m_docSaverThread = new CWizDocumentWebViewSaverThread(m_dbMgr, this);
     connect(m_docSaverThread, SIGNAL(saved(const QString, const QString,bool)),
             SLOT(onDocumentSaved(const QString, const QString,bool)), Qt::QueuedConnection);
 
@@ -1915,8 +1915,9 @@ QNetworkDiskCache*CWizDocumentWebView::networkCache()
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 
-CWizDocumentWebViewLoaderThread::CWizDocumentWebViewLoaderThread(CWizDatabaseManager &dbMgr)
-    : m_dbMgr(dbMgr)
+CWizDocumentWebViewLoaderThread::CWizDocumentWebViewLoaderThread(CWizDatabaseManager &dbMgr, QObject *parent)
+    : QThread(parent)
+    , m_dbMgr(dbMgr)
     , m_stop(false)
 {
 }
@@ -2004,8 +2005,9 @@ void CWizDocumentWebViewLoaderThread::PeekCurrentDocGUID(QString& kbGUID, QStrin
 
 
 
-CWizDocumentWebViewSaverThread::CWizDocumentWebViewSaverThread(CWizDatabaseManager &dbMgr)
-    : m_dbMgr(dbMgr)
+CWizDocumentWebViewSaverThread::CWizDocumentWebViewSaverThread(CWizDatabaseManager &dbMgr, QObject *parent)
+    : QThread(parent)
+    , m_dbMgr(dbMgr)
     , m_stop(false)
 {
 }

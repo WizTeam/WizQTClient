@@ -63,7 +63,7 @@ void CWizUpgrade::check()
     QString strApiUrl = WizService::ApiEntry::standardCommandUrl("download_server");
 
     if (!m_net) {
-        m_net = new QNetworkAccessManager();
+        m_net = new QNetworkAccessManager(this);
     }
 
     QNetworkReply* reply = m_net->get(QNetworkRequest(strApiUrl));
