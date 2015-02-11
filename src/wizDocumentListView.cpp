@@ -225,15 +225,28 @@ void CWizDocumentListView::addDocuments(const CWizDocumentDataArray& arrayDocume
 {
     CWizDocumentDataArray::const_iterator it;
     for (it = arrayDocument.begin(); it != arrayDocument.end(); it++) {
-        addDocument(*it, false);
-
-        //QCoreApplication::processEvents(QEventLoop::AllEvents);
+        addDocument(*it);
     }
 
     sortItems();
+
+    Q_EMIT documentCountChanged();
 }
 
 int CWizDocumentListView::addDocument(const WIZDOCUMENTDATA& doc, bool sort)
+{
+    addDocument(doc);
+
+    if (sort) {
+        sortItems();
+    }
+
+    Q_EMIT documentCountChanged();
+    int nCount = count();
+    return nCount;
+}
+
+void CWizDocumentListView::addDocument(const WIZDOCUMENTDATA& doc)
 {
     WizDocumentListViewItemData data;
     data.doc = doc;
@@ -245,18 +258,12 @@ int CWizDocumentListView::addDocument(const WIZDOCUMENTDATA& doc, bool sort)
         data.strAuthorId = doc.strOwner;
     }
 
+
     CWizDocumentListViewItem* pItem = new CWizDocumentListViewItem(m_app, data);
-    //pItem->setSizeHint(itemSizeFromViewType(m_nViewType));
     pItem->setSizeHint(QSize(sizeHint().width(), Utils::StyleHelper::listViewItemHeight(m_nViewType)));
     pItem->setSortingType(m_nSortingType);
+
     addItem(pItem);
-
-    if (sort) {
-        sortItems();
-    }
-
-    Q_EMIT documentCountChanged();
-    return count();
 }
 
 bool CWizDocumentListView::acceptDocument(const WIZDOCUMENTDATA& document)

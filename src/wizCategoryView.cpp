@@ -1847,7 +1847,6 @@ void CWizCategoryView::on_itemClicked(QTreeWidgetItem *item, int column)
     {
         if (pItem->isUnreadButtonUseable() && pItem->isSelected())
         {
-            emit itemSelectionChanged();
         }
         else if (pItem->isExtraButtonUseable() && pItem->extraButtonClickTest())
         {
@@ -1869,7 +1868,6 @@ void CWizCategoryView::on_itemClicked(QTreeWidgetItem *item, int column)
             promptGroupStorageLimitMessage(pItem->kbGUID(), pItem->bizGUID());
         }
 
-        emit itemSelectionChanged();
     }
 }
 

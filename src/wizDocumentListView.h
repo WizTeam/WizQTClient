@@ -107,9 +107,7 @@ private:
     bool isDocumentsAlwaysOnTop(const CWizDocumentDataArray &arrayDocument);
 
 public:
-    void setDocuments(const CWizDocumentDataArray& arrayDocument);
-    void addDocuments(const CWizDocumentDataArray& arrayDocument);
-    int addDocument(const WIZDOCUMENTDATA& data, bool sort);
+    void setDocuments(const CWizDocumentDataArray& arrayDocument);  
 
     bool acceptDocument(const WIZDOCUMENTDATA& document);
     void addAndSelectDocument(const WIZDOCUMENTDATA& document);
@@ -194,6 +192,10 @@ Q_SIGNALS:
 private:
     int numOfEncryptedDocuments(const CWizDocumentDataArray& docArray);
     void setEncryptDocumentActionEnable(bool enable);
+    //
+    void addDocuments(const CWizDocumentDataArray& arrayDocument);
+    int addDocument(const WIZDOCUMENTDATA& data, bool sort);
+    void addDocument(const WIZDOCUMENTDATA &doc);
 };
 
 

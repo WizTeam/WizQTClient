@@ -1907,7 +1907,7 @@ void MainWindow::on_searchProcess(const QString& strKeywords, const CWizDocument
         return;
     }
 
-    m_documents->addDocuments(arrayDocument);
+    m_documents->setDocuments(arrayDocument);
     on_documents_itemSelectionChanged();
 }
 
