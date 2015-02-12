@@ -449,20 +449,6 @@ void CWizDocumentWebView::onActionTriggered(QWebPage::WebAction act)
         tryResetTitle();
 }
 
-QString str2title(const QString& str)
-{
-    int idx = str.size() - 1;
-    static QString eol("，。？~!#$%^&*()_+{}|:\"<>?,./;'[]\\-=\n\r"); // end of line
-    foreach(QChar c, eol) {
-        int i = str.indexOf(c, 0, Qt::CaseInsensitive);
-        if (i != -1 && i < idx) {
-            idx = i;
-        }
-    }
-
-    return str.left(idx);
-}
-
 void CWizDocumentWebView::tryResetTitle()
 {
     if (m_bNewNoteTitleInited)
@@ -486,7 +472,7 @@ void CWizDocumentWebView::tryResetTitle()
     }
 
     QString strTitle = page()->mainFrame()->evaluateJavaScript("editor.getPlainTxt();").toString();
-    strTitle = str2title(strTitle.left(255));
+    strTitle = WizStr2Title(strTitle.left(255));
     if (strTitle.isEmpty())
         return;
 

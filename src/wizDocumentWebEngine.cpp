@@ -223,10 +223,24 @@ void CWizDocumentWebEngine::keyPressEvent(QKeyEvent* event)
         return;
     }
     else if (event->key() == Qt::Key_S
-             && event->modifiers() == Qt::ControlModifier)
+             && event->modifiers() & Qt::ControlModifier)
     {
         saveDocument(view()->note(), false);
         return;
+    }
+    else if (event->modifiers() & (Qt::ControlModifier | Qt::ShiftModifier))
+    {
+        qDebug() << "event modifier matched : " << (Qt::ControlModifier | Qt::ShiftModifier);
+        if (event->key() == Qt::Key_Left)
+        {
+            QKeyEvent keyPress(QEvent::KeyPress, Qt::Key_Home , Qt::ShiftModifier, QString());
+            sendEventToChildWidgets(&keyPress);
+        }
+        else if (event->key() == Qt::Key_Right)
+        {
+            QKeyEvent keyPress(QEvent::KeyPress, Qt::Key_End , Qt::ShiftModifier, QString());
+            sendEventToChildWidgets(&keyPress);
+        }
     }
 
     QWebEngineView::keyPressEvent(event);
@@ -234,6 +248,11 @@ void CWizDocumentWebEngine::keyPressEvent(QKeyEvent* event)
     if (event->key() == Qt::Key_Enter || event->key() == Qt::Key_Return)
     {
         tryResetTitle();
+        if (event->key() == Qt::Key_Enter)
+        {
+            QKeyEvent keyPress(QEvent::KeyPress, Qt::Key_Return , Qt::ShiftModifier, QString());
+            sendEventToChildWidgets(&keyPress);
+        }
     }
 }
 
@@ -385,29 +404,15 @@ void CWizDocumentWebEngine::tryResetTitle()
     if (view()->note().tCreated.secsTo(view()->note().tModified) != 0)
         return;
 
-
-//    QWebFrame* f = noteFrame();
-//    if (!f)
-//        return;
-
-//    // remove baidu bookmark
-//    QWebElement docPElement = f->documentElement().findFirst("body").findFirst("p");
-//    QWebElement docSpanElement = docPElement.findFirst("span");
-//    QString spanClass = docSpanElement.attribute("id");
-//    if (spanClass.indexOf("baidu_bookmark") != -1)
-//    {
-//        docPElement.removeFromDocument();
-//    }
     page()->runJavaScript("editor.getPlainTxt();", [this](const QVariant& returnValue){
         QString strTitle = returnValue.toString();
-//        strTitle = str2title(strTitle.left(255));
+        strTitle = WizStr2Title(strTitle.left(255));
         if (strTitle.isEmpty())
             return;
 
         view()->resetTitle(strTitle);
         m_bNewNoteTitleInited = true;
     });
-
 }
 
 void CWizDocumentWebEngine::dropEvent(QDropEvent* event)

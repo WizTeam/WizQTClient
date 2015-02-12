@@ -578,7 +578,6 @@ bool IWizCluceneSearch::updateDocument(void* pHandle,
             if (term)
             {
                 pData->writer->deleteDocuments(term);
-                _CLDELETE(term);
             }
         }
 
@@ -587,7 +586,6 @@ bool IWizCluceneSearch::updateDocument(void* pHandle,
             if (term2)
             {
                 pData->writer->deleteDocuments(term2);
-                _CLDELETE(term2);
             }
         }
 
