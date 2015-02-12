@@ -5,6 +5,7 @@
 #include "wizDocumentWebView.h"
 #include "share/websocketclientwrapper.h"
 #include "share/websockettransport.h"
+#include "wizWebEngineInjectObject.h"
 
 #include <QVBoxLayout>
 #include <QHBoxLayout>
@@ -49,7 +50,7 @@ WizCodeEditorDialog::WizCodeEditorDialog(CWizExplorerApp& app, QObject* external
     verticalLayout->addWidget(m_edit);
     connect(m_edit, SIGNAL(returnPressed()), SLOT(runJs()));
 
-    QString strFileName = Utils::PathResolve::resourcesPath() + "files/insert_code.htm";
+    QString strFileName = Utils::PathResolve::resourcesPath() + "files/code/insert_code.htm";
     QString strHtml;
     ::WizLoadUnicodeTextFromFile(strFileName, strHtml);
     QUrl url = QUrl::fromLocalFile(strFileName);
@@ -136,38 +137,3 @@ void WizCodeEditorDialog::runJs()
     m_codeBrowser->page()->runJavaScript(strHtml);
 }
 
-
-
-
-
-
-CWizCodeExternal::CWizCodeExternal(WizCodeEditorDialog* editor, QObject* parent)
-    : m_editor(editor)
-{
-
-}
-
-void CWizCodeExternal::accept()
-{
-    m_editor->accept();
-}
-
-void CWizCodeExternal::reject()
-{
-    m_editor->reject();
-}
-
-void CWizCodeExternal::insertHtml(const QString& strResult)
-{
-    m_editor->insertHtml(strResult);
-}
-
-QString CWizCodeExternal::getLastCodeType()
-{
-    m_editor->getLastCodeType();
-}
-
-void CWizCodeExternal::saveLastCodeType(const QString& codeType)
-{
-    m_editor->saveLastCodeType(codeType);
-}

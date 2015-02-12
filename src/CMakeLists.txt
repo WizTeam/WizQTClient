@@ -159,6 +159,7 @@ set(wiznote_SOURCES
     widgets/wizEmailShareDialog.cpp
     share/websocketclientwrapper.cpp
     share/websockettransport.cpp
+    wizWebEngineInjectObject.cpp
 )
 
 set(wiznote_HEADERS
@@ -308,6 +309,7 @@ set(wiznote_HEADERS
     widgets/wizEmailShareDialog.h
     share/websocketclientwrapper.h
     share/websockettransport.h
+    wizWebEngineInjectObject.h
 )
 
 set(wiznote_FORMS

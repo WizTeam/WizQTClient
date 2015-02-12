@@ -68,6 +68,9 @@ private:
     void showInfoBar();
     void showEditorBar();
     void loadErrorPage();
+    //
+    void initWebChannel();
+    void registerWebChannel();
 
 private:
     CWizDocumentWebEngine* m_editor;
@@ -90,6 +93,8 @@ private:
     CWizTagListWidget* m_tags;
     CWizAttachmentListWidget* m_attachments;
     CWizNoteInfoForm* m_info;
+
+    QString m_strWebchannelUrl;
 };
 
 } //namesapce Internal

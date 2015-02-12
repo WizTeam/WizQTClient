@@ -15,22 +15,8 @@ class QPlainTextEdit;
 class CWizDocumentWebView;
 class QLineEdit;
 class WizCodeEditorDialog;
+class CWizCodeExternal;
 
-class CWizCodeExternal : public QObject
-{
-    Q_OBJECT
-public:
-    explicit CWizCodeExternal(WizCodeEditorDialog* editor, QObject* parent = 0);
-
-    Q_INVOKABLE void accept();
-    Q_INVOKABLE void reject();
-    Q_INVOKABLE void insertHtml(const QString& strResult);
-    Q_INVOKABLE QString getLastCodeType();
-    Q_INVOKABLE void saveLastCodeType(const QString& codeType);
-
-private:
-    WizCodeEditorDialog* m_editor;
-};
 
 class WizCodeEditorDialog : public QDialog
 {

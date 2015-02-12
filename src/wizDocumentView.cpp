@@ -2,6 +2,7 @@
 
 #include <QWebElement>
 #include <QWebFrame>
+#include <QWebEngineSettings>
 #include <QLineEdit>
 #include <QLabel>
 #include <QHBoxLayout>
@@ -47,7 +48,8 @@ CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
     , m_dbMgr(app.databaseManager())
 //    , m_web(new CWizDocumentWebView(app, this))
     , m_engine(new CWizDocumentWebEngine(app, this))
-    , m_comments(new QWebView(this))
+//    , m_comments(new QWebView(this))
+    , m_comments(new QWebEngineView(this))
     , m_title(new TitleBar(this))
     , m_passwordView(new CWizUserCipherForm(app, this))
     , m_viewMode(app.userSettings().noteViewMode())
@@ -90,15 +92,17 @@ CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
 
     m_splitter->addWidget(m_engine);
     m_splitter->addWidget(m_comments);
-    m_comments->page()->setLinkDelegationPolicy(QWebPage::DelegateAllLinks);
-    m_comments->page()->mainFrame()->setScrollBarPolicy(Qt::Horizontal, Qt::ScrollBarAlwaysOff);
+//    m_comments->page()->setLinkDelegationPolicy(QWebPage::DelegateAllLinks);
+//    m_comments->page()->mainFrame()->setScrollBarPolicy(Qt::Horizontal, Qt::ScrollBarAlwaysOff);
+    WebEnginePage* page = new WebEnginePage(m_comments);
+    m_comments->setPage(page);
     m_comments->setAcceptDrops(false);
     m_comments->hide();
+    m_comments->page()->settings()->globalSettings()->setAttribute(QWebEngineSettings::LocalStorageEnabled, true);
     connect(m_comments, SIGNAL(loadFinished(bool)), m_title, SLOT(onCommentPageLoaded(bool)));
 
     layoutDoc->addWidget(m_title);
     layoutDoc->addWidget(m_splitter);
-
     layoutDoc->setStretchFactor(m_title, 0);
     layoutDoc->setStretchFactor(m_splitter, 1);
 
@@ -106,6 +110,7 @@ CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
     QLineEdit *commandLine = new QLineEdit(this);
     layoutDoc->addWidget(commandLine);
     connect(commandLine, SIGNAL(returnPressed()), SLOT(on_command_request()));
+//    m_comments->page()->settings()->globalSettings()->setAttribute(QWebSettings::DeveloperExtrasEnabled, true);
 #endif
 
     QVBoxLayout* layoutMain = new QVBoxLayout(this);

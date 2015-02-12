@@ -25,6 +25,7 @@ class CWizObjectDataDownloaderHost;
 class QStackedWidget;
 class QWebFrame;
 class QWebEnginePage;
+class QWebEngineView;
 class CWizDocumentEditStatusSyncThread;
 class CWizDocumentStatusCheckThread;
 class CWizDocumentStatusChecker;
@@ -47,7 +48,7 @@ public:
 
     QWidget* client() const;
     CWizDocumentWebEngine* web() const { return m_engine; }
-    QWebView* commentView() const { return m_comments; }
+    QWebEngineView* commentView() const { return m_comments; }
     //
     void waitForDone();
 
@@ -64,7 +65,8 @@ protected:
     QWidget* m_docView;
 //    CWizDocumentWebView* m_web;
     CWizDocumentWebEngine* m_engine;
-    QWebView* m_comments;
+//    QWebView* m_comments;
+    QWebEngineView* m_comments;
     CWizSplitter* m_splitter;
     Core::Internal::TitleBar* m_title;
 

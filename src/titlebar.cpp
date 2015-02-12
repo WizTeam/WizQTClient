@@ -5,7 +5,13 @@
 #include <QNetworkConfigurationManager>
 #include <QSplitter>
 #include <QList>
-#include <QWebView>
+#include <QWebEngineView>
+#include <QWebChannel>
+#include <QWebSocketServer>
+
+#include "share/websocketclientwrapper.h"
+#include "share/websockettransport.h"
+#include "wizWebEngineInjectObject.h"
 
 #include <coreplugin/icore.h>
 
@@ -227,7 +233,7 @@ void TitleBar::showEditorBar()
 
 void TitleBar::loadErrorPage()
 {
-    QWebView* comments = noteView()->commentView();
+    QWebEngineView* comments = noteView()->commentView();
     QString strFileName = Utils::PathResolve::resourcesPath() + "files/errorpage/load_fail_comments.html";
     QString strHtml;
     ::WizLoadUnicodeTextFromFile(strFileName, strHtml);
@@ -236,6 +242,52 @@ void TitleBar::loadErrorPage()
     strHtml.replace("error_text3", tr("Load Error"));
     QUrl url = QUrl::fromLocalFile(strFileName);
     comments->setHtml(strHtml, url);
+}
+
+void TitleBar::initWebChannel()
+{
+    QWebSocketServer *server = new QWebSocketServer(QStringLiteral("Wiz Socket Server"), QWebSocketServer::NonSecureMode, this);
+    if (!server->listen(QHostAddress::LocalHost, 0)) {
+        qFatal("Failed to open web socket server.");
+        return;
+    }
+
+    // wrap WebSocket clients in QWebChannelAbstractTransport objects
+    WebSocketClientWrapper *clientWrapper  = new WebSocketClientWrapper(server, this);
+
+    // setup the dialog and publish it to the QWebChannel
+    QWebChannel *webChannel = new QWebChannel(this);
+    // setup the channel
+    QObject::connect(clientWrapper, &WebSocketClientWrapper::clientConnected,
+                     webChannel, &QWebChannel::connectTo);
+    CWizCommentsExternal* exteranl = new CWizCommentsExternal(this);
+    webChannel->registerObject(QStringLiteral("externalObject"), exteranl);
+
+    m_strWebchannelUrl = server->serverUrl().toString();
+}
+
+void TitleBar::registerWebChannel()
+{
+    QString strFile = Utils::PathResolve::resourcesPath() + "files/editor/qwebchannel.js";
+    QFile f(strFile);
+    if (!f.open(QIODevice::ReadOnly))
+    {
+        qDebug() << "[Comments]Failed to get execute code";
+        return;
+    }
+
+    QTextStream ts(&f);
+    QString strExec = ts.readAll();
+    f.close();
+
+    Q_ASSERT(strExec.indexOf("//${INIT_COMMAND}") != -1);
+    if (m_strWebchannelUrl.isEmpty())
+    {
+        initWebChannel();
+    }
+    QString strCommand = QString("initWebChannel('%1')").arg(m_strWebchannelUrl);
+    strExec.replace("//${INIT_COMMAND}", strCommand);
+    noteView()->commentView()->page()->runJavaScript(strExec);
 }
 
 void TitleBar::onEditorChanged()
@@ -356,7 +408,7 @@ bool isNetworkAccessible()
 
 void TitleBar::onCommentsButtonClicked()
 {
-    QWebView* comments = noteView()->commentView();
+    QWebEngineView* comments = noteView()->commentView();
     if (comments->isVisible()) {
         comments->hide();
         return;
@@ -386,11 +438,22 @@ void TitleBar::onCommentsButtonClicked()
 
 void TitleBar::onCommentPageLoaded(bool ok)
 {
+    QWebEngineView* comments = noteView()->commentView();
+    qDebug() << "comments paged loaded : " << ok;
     if (!ok)
     {
-        QWebView* comments = noteView()->commentView();
         loadErrorPage();
         comments->show();
+    }
+    else
+    {
+        comments->page()->runJavaScript("location.protocol",[this](const QVariant& returnValue) {
+            qDebug() << "lcation protocol :  " << returnValue.toString();
+            if ("file:" != returnValue.toString())
+            {
+                registerWebChannel();
+            }
+        });
     }
 }
 
@@ -422,7 +485,7 @@ void TitleBar::onTokenAcquired(const QString& strToken)
 {
     WizService::Token::instance()->disconnect(this);
 
-    QWebView* comments = noteView()->commentView();
+    QWebEngineView* comments = noteView()->commentView();
 
     if (strToken.isEmpty()) {
         comments->hide();
@@ -434,7 +497,7 @@ void TitleBar::onTokenAcquired(const QString& strToken)
     m_commentsUrl =  WizService::ApiEntry::commentUrl(strToken, strKbGUID, strGUID);
 
     if (comments->isVisible()) {
-        comments->load(QUrl());
+//        comments->load(QUrl());
         comments->load(m_commentsUrl);
     }
 
