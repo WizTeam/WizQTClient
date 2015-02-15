@@ -1,6 +1,7 @@
 #include "wizattachmentlistwidget.h"
 
 #include <QBoxLayout>
+#include <QFile>
 #include <QFileDialog>
 #include <QDesktopServices>
 #include <QMenu>
@@ -132,27 +133,29 @@ bool CWizAttachmentListView::itemExtraImage(const QModelIndex& index, const QRec
 {
     if (const CWizAttachmentListViewItem* item = attachmentItemFromIndex(index))
     {
-        QString strIcoPath;
+        QString strIconPath;
         CWizDatabase& db = m_dbMgr.db(item->attachment().strKbGUID);
         MainWindow* mainWindow = qobject_cast<MainWindow *>(Core::ICore::mainWindow());
+        bool isRetina = WizIsHighPixel();
+        strIconPath = ::WizGetSkinResourcePath(mainWindow->userSettings().skin());
         if (!db.IsAttachmentDownloaded(item->attachment().strGUID))
         {
-            strIcoPath = ::WizGetSkinResourcePath(mainWindow->userSettings().skin()) + "downloading.bmp";
+            strIconPath += isRetina ? "downloading@2x.png" : "downloading.png";
         }
         else if (db.IsAttachmentModified(item->attachment().strGUID))
         {
-            strIcoPath = ::WizGetSkinResourcePath(mainWindow->userSettings().skin()) + "uploading.bmp";
+            strIconPath += isRetina ? "uploading@2x.png" : "uploading.png";
         }
         else
             return false;
 
-        QPixmap fullPix(strIcoPath);
-        extraPix = fullPix.copy(0, 0, fullPix.height(), fullPix.height());
-        extraPix.setMask(extraPix.createMaskFromColor(Qt::black, Qt::MaskInColor));
+        extraPix = QPixmap(strIconPath);
+        QSize szImage = extraPix.size();
+        scaleIconSizeForRetina(szImage);
         int nMargin = -1;
-        rcImage.setLeft(itemBound.right() - extraPix.width() - nMargin);
-        rcImage.setTop(itemBound.bottom() - extraPix.height() - nMargin);
-        rcImage.setSize(extraPix.size());
+        rcImage.setLeft(itemBound.right() - szImage.width() - nMargin);
+        rcImage.setTop(itemBound.bottom() - szImage.height() - nMargin);
+        rcImage.setSize(szImage);
 
         return true;
     }
@@ -233,13 +236,25 @@ void CWizAttachmentListView::openAttachment(CWizAttachmentListViewItem* item)
         waitForDownload();
     }
 
+#if QT_VERSION > 0x050000
+    // try to set the attachement read-only.
+    QFile file(strFileName);
+    if (file.exists() && !db.CanEditAttachment(attachment) && (file.permissions() & QFileDevice::WriteUser))
+    {
+        QFile::Permissions permissions = file.permissions();
+        permissions = permissions & ~QFileDevice::WriteOwner & ~QFileDevice::WriteUser
+                & ~QFileDevice::WriteGroup & ~QFileDevice::WriteOther;
+        file.setPermissions(permissions);
+    }
+#endif
+
     QDesktopServices::openUrl(QUrl::fromLocalFile(strFileName));
 
     CWizFileMonitor& monitor = CWizFileMonitor::instance();
     connect(&monitor, SIGNAL(fileModified(QString,QString,QString,QString,QDateTime)),
             &m_dbMgr.db(), SLOT(onAttachmentModified(QString,QString,QString,QString,QDateTime)), Qt::UniqueConnection);
 
-    /*需要使用文件的修改日期,从服务器上下载下的文件修改日期必定大于数据库中日期.*/
+    /*需要使用文件的修改日期来判断文件是否被改动,从服务器上下载下的文件修改日期必定大于数据库中日期.*/
     QFileInfo info(strFileName);
     monitor.addFile(attachment.strKbGUID, attachment.strGUID, strFileName,
                     attachment.strDataMD5, info.lastModified());
@@ -288,7 +303,7 @@ void CWizAttachmentListView::resetPermission()
 
 void CWizAttachmentListView::startDownload(CWizAttachmentListViewItem* item)
 {
-    m_downloaderHost->download(item->attachment());
+    m_downloaderHost->downloadData(item->attachment());
     item->setIsDownloading(true);
 
     forceRepaint();
@@ -414,6 +429,7 @@ void CWizAttachmentListView::on_list_itemDoubleClicked(QListWidgetItem* it)
     if (CWizAttachmentListViewItem* item = dynamic_cast<CWizAttachmentListViewItem*>(it))
     {
         openAttachment(item);
+        emit closeRequest();
     }
 }
 
@@ -457,6 +473,14 @@ CWizAttachmentListWidget::CWizAttachmentListWidget(QWidget* parent)
     layoutMain->addLayout(layoutHeader);
     layoutMain->addWidget(m_list);
     connect(m_list, SIGNAL(closeRequest()), SLOT(on_attachList_closeRequest()));
+
+    QPalette pal;
+#ifdef Q_OS_LINUX
+    pal.setBrush(QPalette::Base, QBrush("#D7D7D7"));
+#elif defined(Q_OS_MAC)
+    pal.setBrush(QPalette::Base, QBrush("#F7F7F7"));
+#endif
+    m_list->setPalette(pal);
 }
 
 bool CWizAttachmentListWidget::setDocument(const WIZDOCUMENTDATA& doc)

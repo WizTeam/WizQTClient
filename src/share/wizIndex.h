@@ -176,6 +176,8 @@ public:
     void AddExtraFolder(const QString& strLocation);
     void DeleteExtraFolder(const QString& strLocation);
 
+    bool UpdateLocation(const QString& strOldLocation, const QString& strNewLocation);
+
     bool IsLocationEmpty(const CString& strLocation);
     bool GetAllLocations(CWizStdStringArray& arrayLocation);
     bool GetAllChildLocations(const CString& strLocation, CWizStdStringArray& arrayLocation);
@@ -331,6 +333,9 @@ public:
     bool TitleExists(const CString& strLocation, CString strTitle);
     bool GetNextTitle(const QString& strLocation, QString& strTitle);
 
+    virtual QString getTableStructureVersion();
+    virtual bool setTableStructureVersion(const QString& strVersion);
+
     /* Metas related operations */
     bool GetMetasByName(const QString& lpszMetaName,
                         CWizMetaDataArray& arrayMeta);
@@ -358,10 +363,10 @@ public:
 	static CString GetLocationArraySQLWhere(const CWizStdStringArray& arrayLocation);
 
     bool ObjectExists(const QString &strGUID, const QString &strType, bool& bExists);
-    bool DeleteObject(const QString &strGUID, const QString &strType, bool bLog);
     bool GetObjectTableInfo(const CString& strType, CString& strTableName, CString& strKeyFieldName);
 
     qint64 GetObjectLocalVersion(const QString &strGUID, const QString &strType);
+    qint64 GetObjectLocalVersionEx(const QString &strGUID, const QString &strType, bool& bObjectExists);
     bool ModifyObjectVersion(const CString& strGUID, const CString& strType, qint64 nVersion);
 
     bool IsObjectDataModified(const CString& strGUID, const CString& strType);

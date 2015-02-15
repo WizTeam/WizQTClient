@@ -651,6 +651,12 @@ bool CWizCategoryViewAllFoldersItem::accept(CWizDatabase& db, const WIZDOCUMENTD
     return false;
 }
 
+bool CWizCategoryViewAllFoldersItem::acceptDrop(const CWizCategoryViewItemBase* pItem) const
+{
+    const CWizCategoryViewFolderItem* item = dynamic_cast<const CWizCategoryViewFolderItem*>(pItem);
+    return NULL != item;
+}
+
 QString CWizCategoryViewAllFoldersItem::getSectionName()
 {
     return WIZ_CATEGORY_SECTION_PERSONAL;
@@ -698,6 +704,11 @@ QString CWizCategoryViewFolderItem::id() const
     return ::WizMd5StringNoSpaceJava(QString(m_strName + m_strKbGUID).toUtf8());
 }
 
+void CWizCategoryViewFolderItem::setLocation(const QString& strLocation)
+{
+    m_strName = strLocation;
+}
+
 void CWizCategoryViewFolderItem::getDocuments(CWizDatabase& db, CWizDocumentDataArray& arrayDocument)
 {
     db.GetDocumentsByLocation(m_strName, arrayDocument);
@@ -718,6 +729,12 @@ bool CWizCategoryViewFolderItem::acceptDrop(const WIZDOCUMENTDATA& data) const
     Q_UNUSED(data);
 
     return true;
+}
+
+bool CWizCategoryViewFolderItem::acceptDrop(const CWizCategoryViewItemBase* pItem) const
+{
+    const CWizCategoryViewFolderItem* item = dynamic_cast<const CWizCategoryViewFolderItem*>(pItem);
+    return NULL != item;
 }
 
 void CWizCategoryViewFolderItem::drop(const WIZDOCUMENTDATA& data, bool forceCopy)
@@ -764,30 +781,38 @@ bool CWizCategoryViewFolderItem::operator < (const QTreeWidgetItem &other) const
         return false;
     }
 
+//    qDebug() << "compare, this : " << name() << " , other : " << pOther->name();
+
     if (getSortOrder() != pOther->getSortOrder())
     {
-        return getSortOrder() < pOther->getSortOrder();
+        bool result  = getSortOrder() < pOther->getSortOrder();
+//        qDebug() << "sortoder different : " << result;
+        return result;
     }
 
-    // do not use sort data from windows for now.
-//    int nThis = 0, nOther = 0;
-//    if (!pOther->location().isEmpty()) {
-//        QSettings* setting = ExtensionSystem::PluginManager::settings();
-//        nOther = setting->value("FolderPosition/" + pOther->location()).toInt();
-//        nThis = setting->value("FolderPosition/" + location()).toInt();
-//    }
-//    //
-//    if (nThis != nOther)
-//    {
-//        if (nThis > 0 && nOther > 0)
-//        {
-//            return nThis < nOther;
-//        }
-//        else
-//        {
-//            return nThis > 0;
-//        }
-//    }
+    // sort by folder pos
+    if (m_app.userSettings().isManualSortingEnabled())
+    {
+        int nThis = 0, nOther = 0;
+        if (!pOther->location().isEmpty()) {
+            QSettings* setting = ExtensionSystem::PluginManager::settings();
+//            qDebug() << "pother location : " << pOther->location() << "  this location : " << location();
+            nOther = setting->value("FolderPosition/" + pOther->location()).toInt();
+            nThis = setting->value("FolderPosition/" + location()).toInt();
+        }
+
+//        qDebug() << "manual sort enable, this folder pos : " << nThis << "  other sort pos : " << nOther;
+
+        if (nThis != nOther)
+        {
+            if (nThis > 0 && nOther > 0)
+            {
+                bool result  =  nThis < nOther;
+//                qDebug() << "folder position different : " << result;
+                return result;
+            }
+        }
+    }
 
     //
     QString strThis = text(0).toLower();
@@ -804,11 +829,15 @@ bool CWizCategoryViewFolderItem::operator < (const QTreeWidgetItem &other) const
             std::string strThisA(arrThis.data(), arrThis.size());
             std::string strOtherA(arrOther.data(), arrOther.size());
             //
-            return strThisA.compare(strOtherA.c_str()) < 0;
+            bool result = strThisA.compare(strOtherA.c_str()) < 0;
+//            qDebug() << "compare by chinese text : " << result;
+            return result;
         }
     }
     //
-    return strThis.compare(strOther) < 0;
+    bool result =  strThis.compare(strOther) < 0;
+//    qDebug() << "compare by english text : " << result;
+    return result;
 }
 
 
@@ -852,6 +881,12 @@ bool CWizCategoryViewAllTagsItem::accept(CWizDatabase& db, const WIZDOCUMENTDATA
     }
 
     return false;
+}
+
+bool CWizCategoryViewAllTagsItem::acceptDrop(const CWizCategoryViewItemBase* pItem) const
+{
+    const CWizCategoryViewTagItem* item = dynamic_cast<const CWizCategoryViewTagItem*>(pItem);
+    return NULL != item;
 }
 
 QString CWizCategoryViewAllTagsItem::getSectionName()
@@ -936,6 +971,12 @@ void CWizCategoryViewTagItem::reload(CWizDatabase& db)
 {
     db.TagFromGUID(m_tag.strGUID, m_tag);
     setText(0, m_tag.strName);
+    m_strName = m_tag.strName;
+}
+
+void CWizCategoryViewTagItem::setTagPosition(int nPos)
+{
+    m_tag.nPostion = nPos;
 }
 
 
@@ -1016,6 +1057,12 @@ bool CWizCategoryViewGroupsRootItem::accept(CWizDatabase& db, const WIZDOCUMENTD
     }
 
     return false;
+}
+
+bool CWizCategoryViewGroupsRootItem::acceptDrop(const CWizCategoryViewItemBase* pItem) const
+{
+    const CWizCategoryViewGroupItem* item = dynamic_cast<const CWizCategoryViewGroupItem*>(pItem);
+    return NULL != item;
 }
 QString CWizCategoryViewGroupsRootItem::getSectionName()
 {
@@ -1335,6 +1382,12 @@ bool CWizCategoryViewGroupRootItem::acceptDrop(const WIZDOCUMENTDATA &data) cons
     return false;
 }
 
+bool CWizCategoryViewGroupRootItem::acceptDrop(const CWizCategoryViewItemBase* pItem) const
+{
+    const CWizCategoryViewGroupItem* item = dynamic_cast<const CWizCategoryViewGroupItem*>(pItem);
+    return NULL != item;
+}
+
 void CWizCategoryViewGroupRootItem::drop(const WIZDOCUMENTDATA &data, bool forceCopy)
 {
     if (!acceptDrop(data))
@@ -1647,10 +1700,30 @@ QString CWizCategoryViewGroupItem::id() const
     return ::WizMd5StringNoSpaceJava(QString(text(0) + m_tag.strGUID).toUtf8());
 }
 
+bool CWizCategoryViewGroupItem::operator<(const QTreeWidgetItem& other) const
+{
+    if (m_app.userSettings().isManualSortingEnabled())
+    {
+        const CWizCategoryViewGroupItem* pOther = dynamic_cast<const CWizCategoryViewGroupItem*>(&other);
+        if (pOther)
+        {
+            return m_tag.nPostion < pOther->m_tag.nPostion;
+        }
+    }
+
+    return CWizCategoryViewItemBase::operator <(other);
+}
+
 void CWizCategoryViewGroupItem::reload(CWizDatabase& db)
 {
     db.TagFromGUID(m_tag.strGUID, m_tag);
     setText(0, m_tag.strName);
+    m_strName = m_tag.strName;
+}
+
+void CWizCategoryViewGroupItem::setTagPosition(int nPos)
+{
+    m_tag.nPostion = nPos;
 }
 
 /* ------------------------------ CWizCategoryViewTrashItem ------------------------------ */
@@ -1694,6 +1767,11 @@ bool CWizCategoryViewTrashItem::acceptDrop(const WIZDOCUMENTDATA &data) const
         return false;
 
     return true;
+}
+
+bool CWizCategoryViewTrashItem::acceptDrop(const CWizCategoryViewItemBase* pItem) const
+{
+    return false;
 }
 
 

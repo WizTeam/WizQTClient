@@ -36,6 +36,10 @@ public:
     QString GetDatabasePath() const { return m_strFileName; }
     virtual QString GetDefaultNoteLocation() const { return LOCATION_DEFAULT; }
 
+    virtual bool setTableStructureVersion(const QString& strVersion) = 0;
+    virtual QString getTableStructureVersion() = 0;
+    bool updateTableStructure(int oldVersion);
+
     /* Raw query*/
 
     /* Tags */
@@ -237,6 +241,7 @@ Q_SIGNALS:
     void documentDataModified(const WIZDOCUMENTDATA& document);
     void documentAbstractModified(const WIZDOCUMENTDATA& document);
     void documentTagModified(const WIZDOCUMENTDATA& document);
+    void documentReadCountChanged(const WIZDOCUMENTDATA& document);
 
     void groupDocumentUnreadCountModified(const QString& strKbGUID);
 
@@ -264,13 +269,13 @@ Q_SIGNALS:
 #define TABLE_NAME_WIZ_TAG  "WIZ_TAG"
 
 #define FIELD_LIST_WIZ_TAG  "\
-TAG_GUID, TAG_GROUP_GUID, TAG_NAME, TAG_DESCRIPTION, DT_MODIFIED, WIZ_VERSION"
+TAG_GUID, TAG_GROUP_GUID, TAG_NAME, TAG_DESCRIPTION, DT_MODIFIED, WIZ_VERSION, TAG_POS"
 
-#define PARAM_LIST_WIZ_TAG  "%s, %s, %s, %s, %s, %s"
+#define PARAM_LIST_WIZ_TAG  "%s, %s, %s, %s, %s, %s, %s"
 
 #define FIELD_LIST_WIZ_TAG_MODIFY "\
 TAG_GROUP_GUID=%s, TAG_NAME=%s, TAG_DESCRIPTION=%s, DT_MODIFIED=%s, \
-WIZ_VERSION=%s"
+WIZ_VERSION=%s, TAG_POS=%s"
 
 #define TABLE_KEY_WIZ_TAG   "TAG_GUID"
 
@@ -283,7 +288,8 @@ enum FieldIndex_WizTag
     tagTAG_NAME,
     tagTAG_DESCRIPTION,
     tagDT_MODIFIED,
-    tagVersion
+    tagVersion,
+    tagTAG_POS
 };
 
 /* ------------------------------ WIZ_STYLE ------------------------------ */

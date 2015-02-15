@@ -462,6 +462,18 @@ EditorToolBar::EditorToolBar(QWidget *parent)
     m_btnScreenShot = 0;
 #endif
 
+    m_btnViewSource = new CWizToolButton(this);
+    m_btnViewSource->setCheckable(true);
+    m_btnViewSource->setIcon(::WizLoadSkinIcon(skin, "actionFormatViewSource"));
+    m_btnViewSource->setToolTip(tr("View source"));
+    connect(m_btnViewSource, SIGNAL(clicked()), SLOT(on_btnViewSource_clicked()));
+
+//    m_btnInsertCode = new CWizToolButton(this);
+//    m_btnInsertCode->setCheckable(false);
+//    m_btnInsertCode->setIcon(::WizLoadSkinIcon(skin, "actionFormatInsertCode"));
+//    m_btnInsertCode->setToolTip(tr("Insert code"));
+//    connect(m_btnInsertCode, SIGNAL(clicked()), SLOT(on_btnInsertCode_clicked()));
+
     QHBoxLayout* layout = new QHBoxLayout();
     layout->setContentsMargins(3, 0, 3, 0);
     layout->setAlignment(Qt::AlignVCenter);
@@ -469,8 +481,10 @@ EditorToolBar::EditorToolBar(QWidget *parent)
     setLayout(layout);
 
     layout->addSpacing(6);
+    layout->addWidget(m_btnViewSource);
     layout->addWidget(m_btnMobileImage);
     layout->addWidget(m_btnCheckList);
+//    layout->addWidget(m_btnInsertCode);
     layout->addSpacing(6);
     layout->addWidget(m_comboFontFamily);
     layout->addSpacing(6);
@@ -863,9 +877,9 @@ void EditorToolBar::on_delegate_requestShowContextMenu(const QPoint& pos)
         actionFromName(WIZEDITOR_ACTION_PASTE)->setEnabled(false);
     }
 
-#ifdef QT_DEBUG
-    m_menuContext->addAction(m_editor->pageAction(QWebPage::InspectElement));
-#endif
+    if (m_editor->page()->settings()->globalSettings()->testAttribute(QWebSettings::DeveloperExtrasEnabled)) {
+        m_menuContext->addAction(m_editor->pageAction(QWebPage::InspectElement));
+    }
 
     m_menuContext->popup(pos);
     m_menuContext->update();
@@ -1287,6 +1301,20 @@ void EditorToolBar::on_btnScreenShot_clicked()
 {
     if (m_editor) {
         m_editor->editorCommandExecuteScreenShot();
+    }
+}
+
+void EditorToolBar::on_btnViewSource_clicked()
+{
+    if (m_editor) {
+        m_editor->editorCommandExecuteViewSource();
+    }
+}
+
+void EditorToolBar::on_btnInsertCode_clicked()
+{
+    if (m_editor) {
+        m_editor->editorCommandExecuteInsertCode();
     }
 }
 

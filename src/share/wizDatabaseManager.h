@@ -83,6 +83,8 @@ Q_SIGNALS:
     void documentDataModified(const WIZDOCUMENTDATA& document);
     void documentAbstractModified(const WIZDOCUMENTDATA& document);
     void documentTagModified(const WIZDOCUMENTDATA& document);
+    void documentReadCountChanged(const WIZDOCUMENTDATA& document);
+    void documentUploaded(const QString& strKbGUID, const QString& strGUID);
     void groupDocumentUnreadCountModified(const QString& strKbGUID);
     void attachmentCreated(const WIZDOCUMENTATTACHMENTDATA& attachment);
     void attachmentModified(const WIZDOCUMENTATTACHMENTDATA& attachmentOld, const WIZDOCUMENTATTACHMENTDATA& attachmentNew);
@@ -90,6 +92,7 @@ Q_SIGNALS:
     void folderCreated(const QString& strLocation);
     void folderDeleted(const QString& strLocation);
     void folderPositionChanged();
+    void tagsPositionChanged(const QString& strKbGUID);
 
 };
 

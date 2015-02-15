@@ -9,6 +9,7 @@
 
 #include "wizdef.h"
 #include "wizmisc.h"
+#include "wizsettings.h"
 #include "html/wizhtmlcollector.h"
 #include "wizDatabase.h"
 #include "utils/logger.h"
@@ -51,6 +52,7 @@ void CWizSearchIndexer::run()
             idleCounter = 0;
             //
             buildFTSIndex();
+            m_buldNow = false;
 
         }
         else
@@ -97,6 +99,12 @@ bool CWizSearchIndexer::buildFTSIndex()
     return true;
 }
 
+void clearDatabaseCipher(CWizDatabase& db)
+{
+    db.setSaveUserCipher(false);
+    db.setUserCipher("");
+}
+
 bool CWizSearchIndexer::buildFTSIndexByDatabase(CWizDatabase& db)
 {
     // if FTS version is lower than release, rebuild all
@@ -113,10 +121,25 @@ bool CWizSearchIndexer::buildFTSIndexByDatabase(CWizDatabase& db)
         return false;
 
     // filter document data have not downloadeded or encrypted
-    filterDocuments(db, arrayDocuments);
+    bool searchEncryptedDoc = false;
+    if (!db.IsGroup()) {
+        CWizUserSettings settings(db);
+        QString strPassword = settings.encryptedNotePassword();
+        if (settings.searchEncryptedNote() && !strPassword.isEmpty()) {
+            db.loadUserCert();
+            db.setUserCipher(strPassword);
+            db.setSaveUserCipher(true);
+            searchEncryptedDoc = true;
+        }
+    }
+    filterDocuments(db, arrayDocuments, searchEncryptedDoc);
 
-    if (arrayDocuments.empty())
+    if (arrayDocuments.empty()) {
+        if (searchEncryptedDoc) {
+            clearDatabaseCipher(db);
+        }
         return true;
+    }
 
     int nErrors = 0;
     int nTotal = arrayDocuments.size();
@@ -137,6 +160,11 @@ bool CWizSearchIndexer::buildFTSIndexByDatabase(CWizDatabase& db)
         msleep(100);
     }
 
+    // clear usercipher after build fts
+    if (searchEncryptedDoc) {
+        clearDatabaseCipher(db);
+    }
+
     if (nErrors >= 3) {
         TOLOG(tr("[WARNING] total %1 notes failed to build").arg(nErrors));
         return false;
@@ -145,14 +173,14 @@ bool CWizSearchIndexer::buildFTSIndexByDatabase(CWizDatabase& db)
     return true;
 }
 
-void CWizSearchIndexer::filterDocuments(CWizDatabase& db, CWizDocumentDataArray& arrayDocument)
+void CWizSearchIndexer::filterDocuments(CWizDatabase& db, CWizDocumentDataArray& arrayDocument, bool searchEncryptedDoc)
 {
     int nCount = arrayDocument.size();
     for (intptr_t i = nCount - 1; i >= 0; i--) {
         bool bFilter = false;
         WIZDOCUMENTDATAEX& doc = arrayDocument.at(i);
 
-        if (doc.nProtected)
+        if (!searchEncryptedDoc && doc.nProtected)
             bFilter = true;
 
         QString strFileName = db.GetDocumentFileName(doc.strGUID);

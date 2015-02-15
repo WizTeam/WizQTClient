@@ -1,4 +1,5 @@
 #include "wizIndexBase.h"
+#include "wizdef.h"
 
 #include <QDebug>
 
@@ -30,6 +31,13 @@ bool CWizIndexBase::Open(const CString& strFileName)
 
     try {
         m_db.open(strFileName);
+        // upgrade table structure if table structure have been changed
+        if (m_db.tableExists(TABLE_NAME_WIZ_META)) {
+            int nVersion = getTableStructureVersion().toInt();
+            if (nVersion < QString(WIZ_TABLE_STRUCTURE_VERSION).toInt()) {
+                updateTableStructure(nVersion);
+            }
+        }
     } catch (const CppSQLite3Exception& e) {
         return LogSQLException(e, _T("open database"));
     }
@@ -38,6 +46,7 @@ bool CWizIndexBase::Open(const CString& strFileName)
         if (!CheckTable(g_arrayTableName[i]))
             return false;
     }
+    setTableStructureVersion(WIZ_TABLE_STRUCTURE_VERSION);
 
     return true;
 }
@@ -63,7 +72,8 @@ bool CWizIndexBase::CheckTable(const QString& strTableName)
     if (!WizLoadUnicodeTextFromFile(strFileName, strSQL))
         return false;
 
-    return ExecSQL(strSQL);
+    bool result = ExecSQL(strSQL);
+    return result;
 }
 
 bool CWizIndexBase::ExecSQL(const CString& strSQL)
@@ -127,6 +137,17 @@ bool CWizIndexBase::LogSQLException(const CppSQLite3Exception& e, const CString&
 bool CWizIndexBase::Repair(const QString& strDestFileName)
 {
     return CppSQLite3DB::repair(m_strFileName, strDestFileName) ? true : false;
+}
+
+bool CWizIndexBase::updateTableStructure(int oldVersion)
+{
+    if (oldVersion < 1)
+    {
+        qDebug() << "table structure version : " << oldVersion << "  update to version 1";
+        Exec("ALTER TABLE 'WIZ_TAG' ADD 'TAG_POS' int64; ");
+    }
+    setTableStructureVersion(WIZ_TABLE_STRUCTURE_VERSION);
+    return true;
 }
 
 CString CWizIndexBase::FormatCanonicSQL(const CString& strTableName,
@@ -282,6 +303,7 @@ bool CWizIndexBase::SQLToTagDataArray(const CString& strSQL, CWizTagDataArray& a
             data.strDescription = query.getStringField(tagTAG_DESCRIPTION);
             data.tModified = query.getTimeField(tagDT_MODIFIED);
             data.nVersion = query.getInt64Field(tagVersion);
+            data.nPostion = query.getInt64Field(tagTAG_POS);
 
             arrayTag.push_back(data);
             query.nextRow();
@@ -769,7 +791,8 @@ bool CWizIndexBase::CreateTagEx(const WIZTAGDATA& d)
         STR2SQL(data.strName).utf16(),
         STR2SQL(data.strDescription).utf16(),
         TIME2SQL(data.tModified).utf16(),
-        WizInt64ToStr(data.nVersion).utf16()
+        WizInt64ToStr(data.nVersion).utf16(),
+        WizInt64ToStr(data.nPostion).utf16()
         );
 
 
@@ -806,6 +829,7 @@ bool CWizIndexBase::ModifyTagEx(const WIZTAGDATA& d)
         STR2SQL(data.strDescription).utf16(),
         TIME2SQL(data.tModified).utf16(),
         WizInt64ToStr(data.nVersion).utf16(),
+        WizInt64ToStr(data.nPostion).utf16(),
         STR2SQL(data.strGUID).utf16()
         );
 
@@ -1392,7 +1416,7 @@ bool CWizIndexBase::DocumentFromGUID(const CString& strDocumentGUID, WIZDOCUMENT
     }
 
     if (arrayDocument.empty()) {
-        TOLOG(_T("Failed to get document by guid, result is empty"));
+        //TOLOG(_T("Failed to get document by guid, result is empty"));
         return false;
     }
 

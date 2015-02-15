@@ -32,6 +32,12 @@
    <string>WizPreferenceDialog</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_2">
+   <property name="topMargin">
+    <number>12</number>
+   </property>
+   <property name="bottomMargin">
+    <number>5</number>
+   </property>
    <item>
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
@@ -103,6 +109,13 @@
         <widget class="QCheckBox" name="checkBoxSystemStyle">
          <property name="text">
           <string>Use system based style</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="checkBoxManuallySort">
+         <property name="text">
+          <string>Manually sorting folders</string>
          </property>
         </widget>
        </item>
@@ -314,7 +327,7 @@
        <item>
         <widget class="QGroupBox" name="groupBoxNoteView">
          <property name="title">
-          <string>Default note view</string>
+          <string>Default note view(Only works for psersonal note)</string>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_8">
           <item>
@@ -327,16 +340,99 @@
           <item>
            <widget class="QRadioButton" name="radioAlwaysEditing">
             <property name="text">
-             <string>Always open note in Editing-View</string>
+             <string>Always open in Editing-View</string>
             </property>
            </widget>
           </item>
           <item>
            <widget class="QRadioButton" name="radioAlwaysReading">
             <property name="text">
-             <string>Always open note in Reading-View</string>
+             <string>Always open in Reading-View</string>
             </property>
            </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="groupBox_4">
+         <property name="title">
+          <string>Background color</string>
+         </property>
+         <layout class="QHBoxLayout" name="horizontalLayout_4">
+          <item>
+           <widget class="QPushButton" name="pushButtonBackgroundColor">
+            <property name="minimumSize">
+             <size>
+              <width>126</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="text">
+             <string/>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="pushButtonClearBackground">
+            <property name="text">
+             <string>Clear</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="horizontalSpacer_2">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="tabSearch">
+      <attribute name="title">
+       <string>Search</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_11">
+       <item>
+        <widget class="QGroupBox" name="groupBox_3">
+         <property name="title">
+          <string>Search settings</string>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_10">
+          <item>
+           <widget class="QCheckBox" name="checkBoxSearchEncryNote">
+            <property name="text">
+             <string>Search encrypted note</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_3">
+            <item>
+             <widget class="QLabel" name="label_6">
+              <property name="text">
+               <string>Password of encrypted note : </string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="lineEditNotePassword">
+              <property name="echoMode">
+               <enum>QLineEdit::Password</enum>
+              </property>
+             </widget>
+            </item>
+           </layout>
           </item>
          </layout>
         </widget>
@@ -349,7 +445,7 @@
          <property name="sizeHint" stdset="0">
           <size>
            <width>20</width>
-           <height>40</height>
+           <height>59</height>
           </size>
          </property>
         </spacer>

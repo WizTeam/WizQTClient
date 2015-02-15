@@ -79,7 +79,7 @@ void CWizKMSyncEvents::OnEndKb(const QString& strKbGUID)
 
 /* ---------------------------- CWizKMSyncThead ---------------------------- */
 
-#define FULL_SYNC_INTERVAL 15 * 60
+#define DEFAULT_FULL_SYNC_INTERVAL 15 * 60
 
 static CWizKMSyncThread* g_pSyncThread = NULL;
 CWizKMSyncThread::CWizKMSyncThread(CWizDatabase& db, QObject* parent)
@@ -89,9 +89,10 @@ CWizKMSyncThread::CWizKMSyncThread(CWizDatabase& db, QObject* parent)
     , m_pEvents(NULL)
     , m_bBackground(true)
     , m_mutex(QMutex::Recursive)
+    , m_nfullSyncInterval(DEFAULT_FULL_SYNC_INTERVAL)
 {
-    int delaySeconds = - 15 * 60 + 10;   //delay for 10 seconds
-    m_tLastSyncAll = QDateTime::currentDateTime().addSecs(delaySeconds);
+    QTimer::singleShot(10 * 1000, this, SLOT(syncAfterStart()));
+    m_tLastSyncAll = QDateTime::currentDateTime();
     //
     m_pEvents = new CWizKMSyncEvents();
     //
@@ -123,6 +124,14 @@ void CWizKMSyncThread::run()
     }
 }
 
+void CWizKMSyncThread::syncAfterStart()
+{
+    if (m_tLastSyncAll.secsTo(QDateTime::currentDateTime()) < 5)
+        return;
+
+    startSyncAll(false);
+}
+
 void CWizKMSyncThread::startSyncAll(bool bBackground)
 {
     m_bNeedSyncAll = true;
@@ -151,6 +160,7 @@ bool CWizKMSyncThread::doSync()
         qDebug() << "[Sync] syncing all started, thread:" << QThread::currentThreadId();
 
         syncAll();
+        m_bNeedSyncAll = false;
         m_tLastSyncAll = QDateTime::currentDateTime();
         return true;
     }
@@ -185,7 +195,7 @@ bool CWizKMSyncThread::needSyncAll()
 
     QDateTime tNow = QDateTime::currentDateTime();
     int seconds = m_tLastSyncAll.secsTo(tNow);
-    if (seconds > FULL_SYNC_INTERVAL)
+    if (m_nfullSyncInterval > 0 && seconds > m_nfullSyncInterval)
     {
         m_bNeedSyncAll = true;
     }
@@ -317,6 +327,11 @@ void CWizKMSyncThread::stopSync()
     if (isRunning() && m_pEvents) {
         m_pEvents->SetStop(true);
     }
+}
+
+void CWizKMSyncThread::setFullSyncInterval(int nMinutes)
+{
+    m_nfullSyncInterval = nMinutes * 60;
 }
 void CWizKMSyncThread::addQuickSyncKb(const QString& kbGuid)
 {

@@ -18,6 +18,7 @@ public:
     QString syncUrl();
     QString asServerUrl();
     QString messageVersionUrl();
+    QString mailShareUrl();
     QString avatarDownloadUrl(const QString& strUserGUID);
     QString avatarUploadUrl();
     QString commentUrl(const QString& strToken, const QString& strKbGUID,const QString& strGUID);

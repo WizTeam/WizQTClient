@@ -24,6 +24,7 @@ struct IWizSyncableDatabase
     virtual bool SetObjectLocalServerVersion(const QString& strObjectGUID,
                                              const QString& strObjectType,
                                              qint64 nVersion) = 0;
+    virtual void OnObjectUploaded(const QString& strObjectGUID, const QString& strObjectType) = 0;
 
     virtual bool DocumentFromGUID(const QString& strGUID,
                                   WIZDOCUMENTDATA& dataExists) = 0;
@@ -58,6 +59,8 @@ struct IWizSyncableDatabase
     virtual bool InitAttachmentData(const QString& strGUID, WIZDOCUMENTATTACHMENTDATAEX& data, UINT part) = 0;
 
     virtual bool OnUploadObject(const QString& strGUID, const QString& strObjectType) = 0;
+
+    virtual bool ModifyDocumentsVersion(CWizDocumentDataArray& arrayData) = 0;
 
     virtual bool OnDownloadGroups(const CWizGroupDataArray& arrayGroup) = 0;
     virtual bool OnDownloadBizs(const CWizBizDataArray& arrayBiz) = 0;

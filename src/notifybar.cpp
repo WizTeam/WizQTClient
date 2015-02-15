@@ -2,6 +2,8 @@
 
 #include <QHBoxLayout>
 #include <QLabel>
+#include <QPropertyAnimation>
+#include <QDebug>
 
 #include "widgets/wizImageButton.h"
 #include "utils/stylehelper.h"
@@ -12,7 +14,7 @@ NotifyBar::NotifyBar(QWidget *parent)
     : QWidget(parent)
 {
     //setStyleSheet("* {font-size:12px; color: #FFFFFF;} *:active {background: url(:/notify_bg.png);} *:!active {background: url(:/notify_bg_inactive.png);}");
-    setFixedHeight(Utils::StyleHelper::notifyBarHeight());
+//    setFixedHeight(Utils::StyleHelper::notifyBarHeight());
     setAutoFillBackground(true);
     QPalette paletteBG(palette());
     paletteBG.setBrush(QPalette::Window, QBrush("#F6F3D3"));
@@ -34,8 +36,12 @@ NotifyBar::NotifyBar(QWidget *parent)
     layout->addWidget(m_labelNotify);
     layout->addStretch();
     layout->addWidget(m_buttonClose);
+    connect(m_labelNotify, SIGNAL(linkActivated(QString)), SIGNAL(labelLink_clicked(QString)));
 
     connect(m_buttonClose, SIGNAL(clicked()), SLOT(on_closeButton_Clicked()));
+
+    setMaximumHeight(0);
+    m_animation = new QPropertyAnimation(this, "maximumHeight", this);
 }
 
 void NotifyBar::showPermissionNotify(int type)
@@ -43,40 +49,52 @@ void NotifyBar::showPermissionNotify(int type)
     setStyleForPermission();
 
     switch (type) {
-    case NotifyBar::Locked:
+    case Locked:
         m_labelNotify->setText(QObject::tr("The note is locked and read only, press unlock button if you need edit."));
-        show();
+        showNotify();
         break;
-    case NotifyBar::Deleted:
+    case Deleted:
         m_labelNotify->setText(QObject::tr("This note is deleted, You can edit after move to other folders."));
-        show();
+        showNotify();
         break;
-    case NotifyBar::PermissionLack:
+    case PermissionLack:
         m_labelNotify->setText(QObject::tr("Your permission is not enough to edit this note."));
-        show();
+        showNotify();
         break;
+    case LockForGruop:
+//        setStyleForEditing();
+//        m_labelNotify->setText(QObject::tr("Checking for the version of note, please wait for a second..."));
+//        showNotify();
+//        break;
     default:
-        hide();
+        hideNotify(false);
+        break;
     }
 }
 
-void NotifyBar::showEditingNotify(const QString &editor)
+void NotifyBar::showMessageTips(Qt::TextFormat format, const QString& info)
 {
-    if (!editor.isEmpty())
+    if (!info.isEmpty())
     {
         setStyleForEditing();
-        m_labelNotify->setText(QString(tr("This note is editing by %1 .")).arg(editor));
-        show();
+        m_labelNotify->setTextFormat(format);
+        m_labelNotify->setText(info);
+        showNotify();
     }
     else
     {
-        hide();
+        hideNotify(false);
     }
+}
+
+void NotifyBar::hideMessageTips(bool useAnimation)
+{
+    hideNotify(useAnimation);
 }
 
 void NotifyBar::on_closeButton_Clicked()
 {
-    hide();
+    hideNotify(true);
 }
 
 void NotifyBar::setStyleForPermission()
@@ -91,4 +109,42 @@ void NotifyBar::setStyleForEditing()
     QPalette paletteBG(palette());
     paletteBG.setBrush(QPalette::Window, QBrush("#F6F3D3"));
     setPalette(paletteBG);
+}
+
+void NotifyBar::showNotify()
+{
+//    if (maximumHeight() > 0)
+//        return;
+
+    m_animation->stop();
+    m_animation->setDuration(800);
+    m_animation->setStartValue(maximumHeight());
+    m_animation->setEndValue(Utils::StyleHelper::notifyBarHeight());
+    m_animation->setEasingCurve(QEasingCurve::InExpo);
+
+    m_animation->start();
+}
+
+void NotifyBar::hideNotify(bool bUseAnimation)
+{
+    m_animation->stop();
+    if (maximumHeight() > 0)
+    {
+        if (bUseAnimation)
+        {
+            m_animation->setDuration(400);
+            m_animation->setStartValue(Utils::StyleHelper::notifyBarHeight());
+            m_animation->setEndValue(0);
+//            m_animation->setEasingCurve(QEasingCurve::InOutQuad);
+
+            m_animation->start();
+            return;
+        }
+        else
+        {
+            m_animation->stop();
+            setMaximumHeight(0);
+            return;
+        }
+    }
 }

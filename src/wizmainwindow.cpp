@@ -48,6 +48,7 @@
 #include "utils/stylehelper.h"
 #include "widgets/wizFramelessWebDialog.h"
 #include "widgets/wizScreenShotWidget.h"
+#include "widgets/wizImageButton.h"
 
 #include "wiznotestyle.h"
 #include "wizdocumenthistory.h"
@@ -114,7 +115,7 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     , m_actions(new CWizActions(*this, this))
     , m_category(new CWizCategoryView(*this, this))
     , m_documents(new CWizDocumentListView(*this, this))
-    , m_noteList(NULL)
+    , m_noteListWidget(NULL)
     , m_msgList(new MessageListView(this))
     , m_documentSelection(new CWizDocumentSelectionView(*this, this))
     , m_doc(new CWizDocumentView(*this, this))
@@ -149,6 +150,7 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     m_searcher->start(QThread::HighPriority);
 
     // syncing thread
+    m_sync->setFullSyncInterval(userSettings().syncInterval());
     connect(m_sync, SIGNAL(processLog(const QString&)), SLOT(on_syncProcessLog(const QString&)));
     connect(m_sync, SIGNAL(syncStarted(bool)), SLOT(on_syncStarted(bool)));
     connect(m_sync, SIGNAL(syncFinished(int, QString)), SLOT(on_syncDone(int, QString)));
@@ -299,6 +301,11 @@ void MainWindow::cleanOnQuit()
     }
 }
 
+void MainWindow::rebuildFTS()
+{
+    m_searchIndexer->rebuild();
+}
+
 MainWindow*MainWindow::instance()
 {
     return windowInstance;
@@ -319,8 +326,11 @@ void MainWindow::closeEvent(QCloseEvent* event)
         return;
     }
 #else
-    setVisible(false);
-    event->ignore();
+    if (m_settings->showSystemTrayIcon())
+    {
+        setVisible(false);
+        event->ignore();
+    }
 #endif
 }
 
@@ -366,7 +376,10 @@ void MainWindow::on_actionClose_triggered()
 #ifdef Q_OS_MAC
     wizMacHideCurrentApplication();
 #else
-    setVisible(false);
+    if (m_settings->showSystemTrayIcon())
+    {
+        setVisible(false);
+    }
 #endif
 }
 
@@ -583,7 +596,7 @@ void MainWindow::initActions()
     m_actions->init();
 #endif
     m_animateSync->setAction(m_actions->actionFromName(WIZACTION_GLOBAL_SYNC));
-    m_animateSync->setIcons("sync");
+    m_animateSync->setSingleIcons("sync");
 
     connect(m_doc->web(), SIGNAL(statusChanged()), SLOT(on_editor_statusChanged()));
     //connect(m_doc->web()->page(), SIGNAL(contentsChanged()), SLOT(on_document_contentChanged()));
@@ -1043,6 +1056,24 @@ void MainWindow::SetDialogResult(int nResult)
     }
 }
 
+bool MainWindow::checkListClickable()
+{
+    if (!m_dbMgr.db(m_doc->note().strKbGUID).IsGroup())
+    {
+        emit clickingTodoCallBack(false, false);
+        return true;
+    }
+
+    if (m_doc->checkListClickable())
+    {
+        emit clickingTodoCallBack(false, false);
+        m_doc->setStatusToEditingByCheckList();
+        return true;
+    }
+    emit clickingTodoCallBack(true, true);
+    return false;
+}
+
 #ifndef Q_OS_MAC
 void MainWindow::layoutTitleBar()
 {
@@ -1238,32 +1269,32 @@ void MainWindow::initClient()
 
     m_splitter->addWidget(m_category);
 
-    m_docListWidget = new QWidget(this);
+    m_docListContainer = new QWidget(this);
     QHBoxLayout* layoutList = new QHBoxLayout();
     layoutList->setContentsMargins(0, 0, 0, 0);
     layoutList->setSpacing(0);
-    layoutList->addWidget(createListView());
-    layoutList->addWidget(m_msgList);
-    m_docListWidget->setLayout(layoutList);
-    m_splitter->addWidget(m_docListWidget);
+    layoutList->addWidget(createNoteListView());
+    layoutList->addWidget(createMessageListView());
+    m_docListContainer->setLayout(layoutList);
+    m_splitter->addWidget(m_docListContainer);
     m_splitter->addWidget(documentPanel);
     m_splitter->setStretchFactor(0, 0);
     m_splitter->setStretchFactor(1, 0);
     m_splitter->setStretchFactor(2, 1);
 
-    m_msgList->hide();
+    m_msgListWidget->hide();
     //
     connect(m_splitter, SIGNAL(splitterMoved(int, int)), SLOT(on_client_splitterMoved(int, int)));
 }
 
-QWidget* MainWindow::createListView()
+QWidget* MainWindow::createNoteListView()
 {
-    m_noteList = new QWidget(this);
-    m_noteList->setMinimumWidth(100);
+    m_noteListWidget = new QWidget(this);
+    m_noteListWidget->setMinimumWidth(100);
     QVBoxLayout* layoutList = new QVBoxLayout();
     layoutList->setContentsMargins(0, 0, 0, 0);
     layoutList->setSpacing(0);
-    m_noteList->setLayout(layoutList);
+    m_noteListWidget->setLayout(layoutList);
 
     QHBoxLayout* layoutActions = new QHBoxLayout();
     layoutActions->setContentsMargins(0, 0, 0, 0);
@@ -1306,7 +1337,53 @@ QWidget* MainWindow::createListView()
     layoutList->addWidget(line2);
     layoutList->addWidget(m_documents);
 
-    return m_noteList;
+    return m_noteListWidget;
+}
+
+QWidget*MainWindow::createMessageListView()
+{
+    m_msgListWidget = new QWidget(this);
+    m_msgListWidget->setMinimumWidth(100);
+    QVBoxLayout* layoutList = new QVBoxLayout();
+    layoutList->setContentsMargins(0, 0, 0, 0);
+    layoutList->setSpacing(0);
+    m_msgListWidget->setLayout(layoutList);
+
+    m_msgListUnreadBar = new QWidget(this);
+    QHBoxLayout* layoutActions = new QHBoxLayout();
+    layoutActions->setContentsMargins(0, 0, 0, 0);
+    layoutActions->setSpacing(0);
+    m_msgListUnreadBar->setLayout(layoutActions);
+
+
+    int nMargin = 15;
+    QSize szMarkMessageBtn(16, 16);
+    layoutActions->setContentsMargins(szMarkMessageBtn.width() + nMargin, 0, nMargin, 0);
+
+    QLabel* labelHint = new QLabel(this);
+    labelHint->setText(tr("Unread Messages"));
+    labelHint->setAlignment(Qt::AlignCenter);
+    labelHint->setStyleSheet("color: #787878;padding-bottom:1px;");
+    layoutActions->addWidget(labelHint);
+
+    wizImageButton* readBtn = new wizImageButton(this);
+    QIcon btnIcon = ::WizLoadSkinIcon(userSettings().skin(), "actionMarkMessagesRead");
+    readBtn->setIcon(btnIcon);
+    readBtn->setFixedSize(szMarkMessageBtn);
+    readBtn->setToolTip(tr("Mark all messages read"));
+    connect(readBtn, SIGNAL(clicked()), SLOT(on_actionMarkAllMessageRead_triggered()));
+    layoutActions->addWidget(readBtn);
+
+    QWidget* line2 = new QWidget(this);
+    line2->setFixedHeight(1);
+    line2->setStyleSheet("border-top-width:1;border-top-style:solid;border-top-color:#DADAD9");
+
+    layoutList->addWidget(m_msgListUnreadBar);
+    layoutList->addWidget(line2);
+    layoutList->addWidget(m_msgList);
+    m_msgList->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
+
+    return m_msgListWidget;
 }
 
 void MainWindow::on_documents_documentCountChanged()
@@ -1352,36 +1429,6 @@ void MainWindow::on_documents_sortingTypeChanged(int type)
 {
     m_documents->resetItemsSortingType(type);
 }
-
-
-//void MainWindow::on_document_contentChanged()
-//{
-//    m_doc->setModified(m_doc->web()->page()->isModified());
-//}
-
-
-//void MainWindow::resetNotice()
-//{
-//#ifdef Q_OS_MAC
-//#else
-//    if (!m_labelNotice)
-//        return;
-//    //
-//    m_labelNotice->setText("");
-//    //
-//    QString notice;
-//    if (!::WizGetNotice(notice)
-//        || notice.isEmpty())
-//        return;
-//    //
-//    CString strTitle = ::WizGetCommandLineValue(notice, "Title");
-//    CString strLink = ::WizGetCommandLineValue(notice, "Link");
-//    //
-//    CString strText = CString("<a href=\"%1\">%2</a>").arg(strLink, strTitle);
-//    //
-//    m_labelNotice->setText(strText);
-//#endif
-//}
 
 void MainWindow::init()
 {
@@ -1528,12 +1575,14 @@ void MainWindow::on_actionEditingCopy_triggered()
 
 void MainWindow::on_actionEditingPaste_triggered()
 {
+    m_doc->web()->setPastePlainTextEnable(false);
     m_doc->web()->triggerPageAction(QWebPage::Paste);
 }
 
 void MainWindow::on_actionEditingPastePlain_triggered()
 {
-    m_doc->web()->on_editorCommandPastePlainText_triggered();
+    m_doc->web()->setPastePlainTextEnable(true);
+    m_doc->web()->triggerPageAction(QWebPage::Paste);
 }
 
 void MainWindow::on_actionEditingDelete_triggered()
@@ -1555,10 +1604,10 @@ void MainWindow::on_actionViewToggleCategory_triggered()
         category->show();
     }
 
-    if (m_docListWidget->isVisible()) {
-        m_docListWidget->hide();
+    if (m_docListContainer->isVisible()) {
+        m_docListContainer->hide();
     } else {
-        m_docListWidget->show();
+        m_docListContainer->show();
     }
 
     m_actions->toggleActionText(WIZACTION_GLOBAL_TOGGLE_CATEGORY);
@@ -1576,6 +1625,11 @@ void MainWindow::on_actionViewToggleFullscreen_triggered()
 //        m_splitter->widget(1)->hide();
 //    }
 #endif // Q_OS_MAC
+}
+
+void MainWindow::on_actionMarkAllMessageRead_triggered()
+{
+    m_msgList->markAllMessagesReaded();
 }
 
 void MainWindow::on_actionFormatJustifyLeft_triggered()
@@ -1726,6 +1780,11 @@ void MainWindow::on_actionAbout_triggered()
     dialog.exec();
 }
 
+void MainWindow::on_actionDeveloper_triggered()
+{
+    m_doc->web()->settings()->globalSettings()->setAttribute(QWebSettings::DeveloperExtrasEnabled, true);
+}
+
 
 void MainWindow::on_actionPreference_triggered()
 {
@@ -1782,8 +1841,9 @@ void MainWindow::on_actionRebuildFTS_triggered()
     msg.addButton(QMessageBox::Cancel);
     msg.setText(tr("Rebuild full text search is quit slow if you have quite a few notes or attachments, you do not have to use this function while search should work as expected."));
 
-    if (QMessageBox::Ok == msg.exec()) {
-        m_searchIndexer->rebuild();
+    if (QMessageBox::Ok == msg.exec())
+    {
+        rebuildFTS();
     }
 }
 
@@ -1871,8 +1931,8 @@ void MainWindow::on_search_doSearch(const QString& keywords)
     m_category->saveSelection();
     m_documents->clear();
     //
-    m_noteList->show();
-    m_msgList->hide();
+    m_noteListWidget->show();
+    m_msgListWidget->hide();
     //
     m_searcher->search(keywords, 500);
     startSearchStatus();
@@ -2061,9 +2121,11 @@ void MainWindow::on_options_settingsChanged(WizOptionsType type)
     if (wizoptionsNoteView == type) {
         m_doc->settingsChanged();
     } else if (wizoptionsSync == type) {
-
+        m_sync->setFullSyncInterval(userSettings().syncInterval());
     } else if (wizoptionsFont == type) {
         m_doc->web()->editorResetFont();
+    } else if (wizoptionsFolders == type) {
+        m_category->sortItems(0, Qt::AscendingOrder);
     }
 }
 
@@ -2465,7 +2527,7 @@ void MainWindow::createNoteWithImage(const QString& strImageFile)
 void MainWindow::showNewFeatureGuide()
 {
     QString strUrl = WizService::ApiEntry::standardCommandUrl("link");
-    strUrl += "&name=newfeaturetips.html";
+    strUrl += "&name=newfeature-mac";
 
     CWizFramelessWebDialog *dlg = new CWizFramelessWebDialog();
     dlg->loadAndShow(strUrl);
@@ -2517,6 +2579,13 @@ void MainWindow::initTrayIcon(QSystemTrayIcon* trayIcon)
     QIcon icon;
     icon.addFile(normal, QSize(), QIcon::Normal, QIcon::Off);
     icon.addFile(selected, QSize(), QIcon::Selected, QIcon::Off);
+    if (!icon.isNull())
+    {
+        trayIcon->setIcon(icon);
+    }
+#else
+    QString normal = WizGetSkinResourceFileName(userSettings().skin(), "trayIcon_grey");
+    QIcon icon(normal);
     if (!icon.isNull())
     {
         trayIcon->setIcon(icon);
@@ -2605,11 +2674,11 @@ void MainWindow::resortDocListAfterViewDocument(const WIZDOCUMENTDATA& doc)
 
 void MainWindow::showDocmentList(CWizCategoryBaseView* category)
 {
-    if (!m_noteList->isVisible())
+    if (!m_noteListWidget->isVisible())
     {
-        m_docListWidget->show();
-        m_noteList->show();
-        m_msgList->hide();
+        m_docListContainer->show();
+        m_noteListWidget->show();
+        m_msgListWidget->hide();
     }
     QString kbGUID = category->selectedItemKbGUID();
     if (!kbGUID.isEmpty())
@@ -2629,16 +2698,19 @@ void MainWindow::showDocmentList(CWizCategoryBaseView* category)
 
 void MainWindow::showMessageList(CWizCategoryViewMessageItem* pItem)
 {
-    if (!m_msgList->isVisible())
+    if (!m_msgListWidget->isVisible())
     {
-        m_docListWidget->show();
-        m_msgList->show();
-        m_noteList->hide();
+        m_docListContainer->show();
+        m_msgListWidget->show();
+        m_noteListWidget->hide();
     }
 
     CWizMessageDataArray arrayMsg;
     pItem->getMessages(m_dbMgr.db(), arrayMsg);
     m_msgList->setMessages(arrayMsg);
+
+    bool showUnreadBar = pItem->hitTestUnread();
+    m_msgListUnreadBar->setVisible(showUnreadBar);
 }
 
 void MainWindow::viewDocumentByShortcut(CWizCategoryViewShortcutItem* pShortcut)
@@ -2648,7 +2720,7 @@ void MainWindow::viewDocumentByShortcut(CWizCategoryViewShortcutItem* pShortcut)
     if (db.DocumentFromGUID(pShortcut->guid(), doc))
     {
         viewDocument(doc, true);
-        m_docListWidget->hide();
+        m_docListContainer->hide();
     }
 }
 

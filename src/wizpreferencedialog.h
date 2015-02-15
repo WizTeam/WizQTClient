@@ -25,16 +25,6 @@ public:
     CWizUserSettings& userSettings() const { return m_app.userSettings(); }
 
     void showPrintMarginPage();
-private:
-    Ui::CWizPreferenceWindow *ui;
-    CWizExplorerApp& m_app;
-    CWizDatabaseManager& m_dbMgr;
-
-    QStringList m_locales;
-    QStringList m_skins;
-    QPointer<QFontDialog> m_fontDialog;
-
-    void setSyncGroupTimeLine(int nDays);
 
 Q_SIGNALS:
     void settingsChanged(WizOptionsType type);
@@ -65,6 +55,24 @@ private slots:
     void on_spinBox_left_valueChanged(double arg1);
     void on_spinBox_right_valueChanged(double arg1);
     void on_checkBoxSystemStyle_toggled(bool checked);
+    void on_checkBoxSearchEncryNote_toggled(bool checked);
+    void on_lineEditNotePassword_editingFinished();
+    void on_pushButtonBackgroundColor_clicked();
+    void on_pushButtonClearBackground_clicked();
+
+    void on_checkBoxManuallySort_toggled(bool checked);
+
+private:
+    Ui::CWizPreferenceWindow *ui;
+    CWizExplorerApp& m_app;
+    CWizDatabaseManager& m_dbMgr;
+
+    QStringList m_locales;
+    QStringList m_skins;
+    QPointer<QFontDialog> m_fontDialog;
+
+    void setSyncGroupTimeLine(int nDays);
+    void updateEditorBackgroundColor(const QString& strColorName);
 };
 
 

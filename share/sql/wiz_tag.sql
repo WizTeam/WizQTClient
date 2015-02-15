@@ -6,5 +6,6 @@ create table WIZ_TAG
    TAG_DESCRIPTION                varchar(600),
    DT_MODIFIED                    char(19),
    WIZ_VERSION                    int64,
+   TAG_POS	                      int64,
    primary key (TAG_GUID)
 )

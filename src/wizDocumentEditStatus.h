@@ -3,6 +3,7 @@
 
 #include <QThread>
 #include <QMutex>
+#include <QTimer>
 #include <QWeakPointer>
 #include <QMap>
 #include <QPointer>
@@ -18,44 +19,87 @@ class CWizDocumentEditStatusSyncThread : public QThread
 public:
     CWizDocumentEditStatusSyncThread(QObject* parent = 0);
     //
-    void stopEditingDocument();
-    void setCurrentEditingDocument(const QString& strUserAlias,const QString& strKbGUID ,const QString& strGUID);
+    void startEditingDocument(const QString& strUserAlias, const QString& strKbGUID, const QString& strGUID);
+    void stopEditingDocument(const QString& strKbGUID ,const QString& strGUID, bool bModified);
+    void documentSaved(const QString& strUserAlias, const QString& strKbGUID ,const QString& strGUID);
+
     void stop();
     //
     void waitForDone();
+
+public slots:
+    void documentUploaded(const QString& strKbGUID ,const QString& strGUID);
+
 protected:
     void run();
 private:
+    QString combineObjID(const QString& strKbGUID, const QString& strGUID);
     void sendEditingMessage();
     void sendDoneMessage();
-    void sendEditingMessage(const QString& strUserAlias, const QString& strObjID);
-    void sendDoneMessage(const QString& strUserAlias, const QString& strObjID);
+    bool sendEditingMessage(const QString& strUserAlias, const QString& strObjID);
+    bool sendDoneMessage(const QString& strUserAlias, const QString& strObjID);
 private:
-    struct EditStatusObj{
-        QString strObjID;
-        QString strUserName;
-        //
-        void clear(){
-            strObjID.clear();
-            strUserName.clear();
-        }
-    };
     //
     bool m_stop;
     bool m_sendNow;
 
-    EditStatusObj m_editingObj;
-    EditStatusObj m_oldObj;
+    QMap<QString, QString> m_editingMap;
+    QMap<QString, QString> m_modifiedMap;
+    QMap<QString, QString> m_doneMap;
 
     QMutex m_mutext;
     QPointer<QNetworkAccessManager> m_netManager;
 };
 
-class CWizDocumentEditStatusCheckThread : public QThread
+class CWizDocumentStatusChecker : public QObject
 {
     Q_OBJECT
 public:
-    CWizDocumentEditStatusCheckThread(QObject* parent = 0);
+    CWizDocumentStatusChecker(QObject* parent = 0);
+    ~CWizDocumentStatusChecker();
+
+public slots:
+    void onTimeOut();
+    void recheck();
+    void initialise();
+    void clearTimers();
+    void checkEditStatus(const QString& strKbGUID, const QString& strGUID);
+    void stopCheckStatus(const QString& strKbGUID, const QString& strGUID);
+
+signals:
+    void checkTimeOut(QString strGUID);
+    void documentEditingByOthers(QString strGUID,QStringList editors);
+    void checkDocumentChangedFinished(const QString& strGUID, bool bChanged);
+    void checkEditStatusFinished(const QString& strGUID, bool eidtable);
+
+private:
+    void setDocmentGUID(const QString& strKbGUID,const QString& strGUID);
+    void peekDocumentGUID(QString& strKbGUID, QString& strGUID);
+    void startRecheck();
+    void startCheck();
+    bool checkDocumentChangedOnServer(const QString& strKbGUID, const QString& strGUID);
+    bool checkDocumentEditStatus(const QString& strKbGUID, const QString& strGUID);
+    bool checkDocumentEditStatus(const QString& strUrl);
+
+private:
+    QTimer* m_timeOutTimer;
+//    QTimer* m_loopCheckTimer;
+    bool m_stop;
+
+    QString m_strKbGUID;
+    QString m_strGUID;
+    QMutex m_mutexWait;
+
+    QString m_strCurGUID;
+    QString m_strCurKbGUID;
+};
+
+class CWizDocumentStatusCheckThread : public QThread
+{
+    Q_OBJECT
+public:
+    CWizDocumentStatusCheckThread(QObject* parent = 0);
+    ~CWizDocumentStatusCheckThread();
     void checkEditStatus(const QString& strKbGUID,const QString& strGUID);
     void downloadData(const QString& strUrl);
     //
@@ -65,15 +109,21 @@ public:
 
 public slots:
     void needRecheck();
+    void onTimeOut();
 
 signals:
+    void checkTimeOut(QString strGUID);
     void checkFinished(QString strGUID,QStringList editors);
+    void checkDocumentChangedFinished(const QString& strGUID, bool bChanged);
 
 protected:
     virtual void run();
 
 private:
     void setDocmentGUID(const QString& strKbGUID,const QString& strGUID);
+
+    bool checkDocumentChangedOnServer(const QString& strKbGUID, const QString& strGUID);
+    bool checkDocumentEditStatus(const QString& strKbGUID, const QString& strGUID);
 
 private:
     QString m_strKbGUID;
@@ -82,6 +132,11 @@ private:
     QMutex m_mutexWait;
     QWaitCondition m_wait;
     bool m_needRecheck;
+    bool m_checkNow;
+
+    QTimer* m_timer;
+    QString m_strCurGUID;
+    QString m_strCurKbGUID;
 };
 
 #endif // WIZDOCUMENTEDITSTATUS_H

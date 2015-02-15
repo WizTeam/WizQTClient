@@ -17,7 +17,7 @@ cd ../WizQTClient
 APPLCERT="Developer ID Application: Wei Shijun"
 INSTCERT="3rd Party Mac Developer Installer: Wei Shijun"
 
-codesign --verbose=2 --sign "$APPLCERT"  ../WizQTClient-Release-QT5/WizNote.app
+codesign --verbose=2 --deep --sign "$APPLCERT"  ../WizQTClient-Release-QT5/WizNote.app
 
 setFile -a V ${package_home}/wiznote-disk-cover.jpg
 

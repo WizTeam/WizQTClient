@@ -4,6 +4,8 @@
 #include <QDebug>
 //#include <QByteArrayData>
 
+#include "rtf2html/rtf2html.h"
+
 CWizRtfReader::CWizRtfReader()
 {
 }
@@ -210,3 +212,18 @@ bool CWizRtfReader::load(const QString& strFile, QString& strText)
 
     return true;
 }
+
+bool CWizRtfReader::rtf2hmlt(const QString& strRtf, QString& strHtml)
+{
+    std::string strResult = strRtf.toStdString();
+    const char* ch = strResult.c_str();
+    rtf2html(ch, strResult);
+    strHtml = QString::fromStdString(strResult);
+
+    qDebug() << "rtf 2 html utf8 " << strHtml.toUtf8();
+    qDebug() << "rtf 2 html Latin1 " << strHtml.toLatin1();
+
+    return true;
+}
+
+

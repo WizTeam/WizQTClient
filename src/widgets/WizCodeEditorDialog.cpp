@@ -1,6 +1,7 @@
 #include "WizCodeEditorDialog.h"
 #include "wizdef.h"
 #include "utils/pathresolve.h"
+#include "share/wizsettings.h"
 
 #include <QVBoxLayout>
 #include <QHBoxLayout>
@@ -24,8 +25,11 @@
 #include <extensionsystem/pluginspec.h>
 #include <coreplugin/icore.h>
 
-WizCodeEditorDialog::WizCodeEditorDialog(QWidget *parent) :
+#define LASTUSEDCODETYPE "LASTUSEDCODETYPE"
+
+WizCodeEditorDialog::WizCodeEditorDialog(CWizExplorerApp& app, QWidget *parent) :
     QDialog(parent)
+  , m_app(app)
   , m_codeType(new QComboBox(this))
   , m_codeEditor(new QPlainTextEdit(this))
   , m_codeBrowser(new QWebView(this))
@@ -134,6 +138,7 @@ void WizCodeEditorDialog::onButtonOKClicked()
     strHtml.replace("\\n", "\\\\n");
     strHtml.replace("\'", "\\\'");
     insertHtmlRequest(strHtml);
+    saveLastCodeType();
     close();
 }
 
@@ -162,12 +167,31 @@ void WizCodeEditorDialog::initCodeTypeCombox()
     foreach (QString str, strList) {
         m_codeType->addItem(str);
     }
+
+    QString strLastType = m_app.userSettings().get((LASTUSEDCODETYPE));
+    if (!strLastType.isEmpty())
+    {
+#if QT_VERSION < 0x050000
+        int index = m_codeType->findText(strLastType);
+        m_codeType->setCurrentIndex(index);
+#else
+        m_codeType->setCurrentText(strLastType);
+#endif
+        return;
+    }
+
 #if QT_VERSION < 0x050000
     int index = m_codeType->findText("c");
     m_codeType->setCurrentIndex(index);
 #else
     m_codeType->setCurrentText("c");
 #endif
+}
+
+void WizCodeEditorDialog::saveLastCodeType()
+{
+    QString strLastCodeType = m_codeType->currentText();
+    m_app.userSettings().set(LASTUSEDCODETYPE, strLastCodeType);
 }
 
 

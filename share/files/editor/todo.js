@@ -3,7 +3,7 @@ function initDefaultCss(document, destNode) {
 	var WIZ_TODO_STYLE_ID = 'wiz_todo_style_id';
 	var WIZ_STYLE = 'wiz_style';
 	var WIZ_LINK_VERSION = 'wiz_link_version';
-	var WIZ_TODO_STYLE_VERSION = "01.00.07";
+	var WIZ_TODO_STYLE_VERSION = "01.00.08";
 
 	var style = document.getElementById(WIZ_TODO_STYLE_ID);
 	if (style && !!style.getAttribute && style.getAttribute(WIZ_LINK_VERSION) >= WIZ_TODO_STYLE_VERSION)
@@ -13,8 +13,7 @@ function initDefaultCss(document, destNode) {
 		style.parentElement.removeChild(style);
 	}
 	//
-	var strStyle = '.wiz-todo, .wiz-todo-img {width: 16px; height: 16px; cursor: default; padding: 0 10px 0 2px; vertical-align: -10%;-webkit-user-select: none;} .wiz-todo-label {margin-top: 8px; margin-bottom: 8px; line-height: 1;} .wiz-todo-label-checked { /*text-decoration: line-through;*/ color: #666;} .wiz-todo-label-unchecked {text-decoration: initial;} .wiz-todo-completed-info {padding-left: 44px; display: inline-block; } .wiz-todo-avatar { width:20px; height: 20px; vertical-align: -20%; margin-right:10px; border-radius: 2px;} .wiz-todo-account, .wiz-todo-dt { color: #666; }';
-	//
+	var strStyle = '.wiz-todo, .wiz-todo-img {width: 16px; height: 16px; cursor: default; padding: 0 10px 0 2px; vertical-align: -10%;-webkit-user-select: none;} .wiz-todo-label { display: inline-block; padding-top: 8px; padding-bottom: 8px; line-height: 1;} .wiz-todo-label-checked { /*text-decoration: line-through;*/ color: #666;} .wiz-todo-label-unchecked {text-decoration: initial;} .wiz-todo-completed-info {padding-left: 44px; display: inline-block; } .wiz-todo-avatar { width:20px; height: 20px; vertical-align: -20%; margin-right:10px; border-radius: 2px;} .wiz-todo-account, .wiz-todo-dt { color: #666; }';	//
 	var objStyle = document.createElement('style');
 	objStyle.type = 'text/css';
 	objStyle.textContent = strStyle;
@@ -150,7 +149,7 @@ function WizTodoQtHelper() {
     	var WIZ_TODO_STYLE_ID = 'wiz_todo_style_id';
 		var WIZ_STYLE = 'wiz_style';
 		var WIZ_LINK_VERSION = 'wiz_link_version';
-		var WIZ_TODO_STYLE_VERSION = "01.00.07";
+		var WIZ_TODO_STYLE_VERSION = "01.00.08";
         
 		var style = document.getElementById(WIZ_TODO_STYLE_ID);
 		if (style && !!style.getAttribute && style.getAttribute(WIZ_LINK_VERSION) >= WIZ_TODO_STYLE_VERSION)
@@ -160,7 +159,7 @@ function WizTodoQtHelper() {
 			style.parentElement.removeChild(style);
 		}
 		//
-		var strStyle = '.wiz-todo, .wiz-todo-img {width: 16px; height: 16px; cursor: default; padding: 0 10px 0 2px; vertical-align: -10%;-webkit-user-select: none;} .wiz-todo-label {margin-top: 4px; margin-top-bottom: 4px; line-height: 1;} .wiz-todo-label-checked { /*text-decoration: line-through;*/ color: #666;} .wiz-todo-label-unchecked {text-decoration: initial;} .wiz-todo-completed-info {padding-left: 44px; display: inline-block; } .wiz-todo-avatar { width:20px; height: 20px; vertical-align: -20%; margin-right:10px; border-radius: 2px;} .wiz-todo-account, .wiz-todo-dt { color: #666; }';
+		var strStyle = '.wiz-todo, .wiz-todo-img {width: 16px; height: 16px; cursor: default; padding: 0 10px 0 2px; vertical-align: -10%;-webkit-user-select: none;} .wiz-todo-label { display: inline-block; padding-top: 8px; padding-bottom: 8px; line-height: 1;} .wiz-todo-label-checked { /*text-decoration: line-through;*/ color: #666;} .wiz-todo-label-unchecked {text-decoration: initial;} .wiz-todo-completed-info {padding-left: 44px; display: inline-block; } .wiz-todo-avatar { width:20px; height: 20px; vertical-align: -20%; margin-right:10px; border-radius: 2px;} .wiz-todo-account, .wiz-todo-dt { color: #666; }';
 		//
 		var objStyle = document.createElement('style');
 		objStyle.type = 'text/css';
@@ -743,6 +742,21 @@ var WizTodo = (function () {
 		}
 	}
 
+	function formatIntToDateString(n){
+		
+		return n < 10 ? '0' + n : n;
+	}
+	function ToDateString(dt){
+       	//
+        var ret = dt.getFullYear() + "-" + 
+	    			formatIntToDateString(dt.getMonth() + 1) + "-" + 
+	    			formatIntToDateString(dt.getDate()) + " " + 
+	    			formatIntToDateString(dt.getHours())+ ":" + 
+	    			formatIntToDateString(dt.getMinutes()) + ":" + 
+	    			formatIntToDateString(dt.getSeconds());
+        return ret;
+    }
+
 	function onTodoClick(todoEle) {
 		//
 		var label = getParentTodoLabelElement(todoEle);
@@ -794,7 +808,7 @@ var WizTodo = (function () {
 		if (!todoHelper.isPersonalDocument()) {
 
 			if (isIpad() || isIphone()) {
-				todoHelper.onAddTodoCompletedInfo(!isChecked, todoEle.id, new Date(), 'addTodoCompletedInfo');
+				todoHelper.onAddTodoCompletedInfo(!isChecked, todoEle.id, ToDateString(new Date()), 'addTodoCompletedInfo');
 			}
 			else {
 				var dt = todoHelper.getLocalDateTime(new Date());
@@ -802,17 +816,7 @@ var WizTodo = (function () {
 			}
 		}
 		//
-		var nextSib = label.nextSibling;
-		while (nextSib) {
-			//
-			var tmpNext = nextSib;
-			nextSib = nextSib.nextSibling;
-			//
-			if (isLabel(tmpNext) || isCompletedInfo(tmpNext) || isBlockNode(tmpNext))
-				break;
-			//
-			label.appendChild(tmpNext);
-		}
+		wrapSiblingIntoLabel(label);
 		//
 		var parent = getBlockParentElement(label);
 		if (!parent) {
@@ -1144,6 +1148,23 @@ var WizTodo = (function () {
 		setCaret(label);
 	}
 
+	function wrapSiblingIntoLabel(label) {
+		if (!label)
+			return;
+		//
+		var nextSib = label.nextSibling;
+		while (nextSib) {
+			//
+			var tmpNext = nextSib;
+			nextSib = nextSib.nextSibling;
+			//
+			if (isLabel(tmpNext) || isCompletedInfo(tmpNext) || isBlockNode(tmpNext))
+				break;
+			//
+			label.appendChild(tmpNext);
+		}
+	}
+
 	function insertOneTodo() {
 
 		// deleteEmptyLabel();
@@ -1170,6 +1191,8 @@ var WizTodo = (function () {
 		divideFromParentLabel(label);
 		//
 		setCaret(label);
+		//
+		wrapSiblingIntoLabel(label);
 		//
 		todoHelper.setDocumentType(WIZ_DOC_TODO_TYPE);
 		todoHelper.setDocumentModified();

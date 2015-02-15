@@ -68,7 +68,8 @@ enum WizOptionsType
     wizoptionsNoteView,
     wizoptionsSync,
     wizoptionsSkin,
-    wizoptionsFont
+    wizoptionsFont,
+    wizoptionsFolders
 };
 
 enum WizPositionType
@@ -104,8 +105,10 @@ public:
     QString get(const QString& section, const QString& strKey) const;
     void set(const QString& section, const QString& strKey, const QString& strValue);
 
-    QString user() const { return m_strUserId; }
+    QString user() const;
     void setUser(const QString& strUser);
+
+    QString myWizMail() const;
 
     QString password() const;
     void setPassword(const QString& strPassword = "");
@@ -136,6 +139,18 @@ public:
 
     bool needShowMobileFileReceiverUserGuide();
     void setNeedShowMobileFileReceiverUserGuide(bool bNeedShow);
+
+    bool searchEncryptedNote();
+    void setSearchEncryptedNote(bool bSearchEncryNote);
+
+    QString encryptedNotePassword();
+    void setEncryptedNotePassword(const QString& strPassword);
+
+    QString editorBackgroundColor();
+    void setEditorBackgroundColor(const QString& strColor);
+
+    bool isManualSortingEnabled();
+    void setManualSortingEnable(bool bEnable);
 
     QString locale();
     void setLocale(const QString& strLocale);

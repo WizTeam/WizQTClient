@@ -179,8 +179,8 @@ void TitleEdit::setReadOnly(bool b)
     setAttribute(Qt::WA_MacShowFocusRect, false);
 
     // Focre to update document title right now
-    if (b)
-        onTitleEditingFinished();
+//    if (b)
+//        onTitleEditingFinished();
 }
 
 void TitleEdit::setCompleter(QCompleter* completer)
@@ -217,6 +217,9 @@ void TitleEdit::onTitleEditingFinished()
     WIZDOCUMENTDATA data;
     CWizDatabase& db = CWizDatabaseManager::instance()->db(noteView()->note().strKbGUID);
     if (db.DocumentFromGUID(noteView()->note().strGUID, data)) {
+        if (!db.CanEditDocument(data))
+            return;
+
         QString strNewTitle = text().left(255);
         if (strNewTitle != data.strTitle) {
             data.strTitle = strNewTitle;

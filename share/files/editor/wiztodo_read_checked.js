@@ -1,3 +1,221 @@
+// Copyright (c) 2014, Dan Kogai
+// All rights reserved.
+
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+
+// * Redistributions of source code must retain the above copyright notice, this
+//   list of conditions and the following disclaimer.
+
+// * Redistributions in binary form must reproduce the above copyright notice,
+//   this list of conditions and the following disclaimer in the documentation
+//   and/or other materials provided with the distribution.
+
+// * Neither the name of {{{project}}} nor the names of its
+//   contributors may be used to endorse or promote products derived from
+//   this software without specific prior written permission.
+
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+// DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+// FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+// DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+// SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+// CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+// OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+/*
+ * $Id: base64.js,v 2.15 2014/04/05 12:58:57 dankogai Exp dankogai $
+ *
+ *  Licensed under the MIT license.
+ *    http://opensource.org/licenses/mit-license
+ *
+ *  References:
+ *    http://en.wikipedia.org/wiki/Base64
+ */
+
+(function(global) {
+    'use strict';
+    // existing version for noConflict()
+    var _Base64 = global.Base64;
+    var version = "2.1.5";
+    // if node.js, we use Buffer
+    var buffer;
+    if (typeof module !== 'undefined' && module.exports) {
+        buffer = require('buffer').Buffer;
+    }
+    // constants
+    var b64chars
+        = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+    var b64tab = function(bin) {
+        var t = {};
+        for (var i = 0, l = bin.length; i < l; i++) t[bin.charAt(i)] = i;
+        return t;
+    }(b64chars);
+    var fromCharCode = String.fromCharCode;
+    // encoder stuff
+    var cb_utob = function(c) {
+        if (c.length < 2) {
+            var cc = c.charCodeAt(0);
+            return cc < 0x80 ? c
+                : cc < 0x800 ? (fromCharCode(0xc0 | (cc >>> 6))
+                                + fromCharCode(0x80 | (cc & 0x3f)))
+                : (fromCharCode(0xe0 | ((cc >>> 12) & 0x0f))
+                   + fromCharCode(0x80 | ((cc >>>  6) & 0x3f))
+                   + fromCharCode(0x80 | ( cc         & 0x3f)));
+        } else {
+            var cc = 0x10000
+                + (c.charCodeAt(0) - 0xD800) * 0x400
+                + (c.charCodeAt(1) - 0xDC00);
+            return (fromCharCode(0xf0 | ((cc >>> 18) & 0x07))
+                    + fromCharCode(0x80 | ((cc >>> 12) & 0x3f))
+                    + fromCharCode(0x80 | ((cc >>>  6) & 0x3f))
+                    + fromCharCode(0x80 | ( cc         & 0x3f)));
+        }
+    };
+    var re_utob = /[\uD800-\uDBFF][\uDC00-\uDFFFF]|[^\x00-\x7F]/g;
+    var utob = function(u) {
+        return u.replace(re_utob, cb_utob);
+    };
+    var cb_encode = function(ccc) {
+        var padlen = [0, 2, 1][ccc.length % 3],
+        ord = ccc.charCodeAt(0) << 16
+            | ((ccc.length > 1 ? ccc.charCodeAt(1) : 0) << 8)
+            | ((ccc.length > 2 ? ccc.charCodeAt(2) : 0)),
+        chars = [
+            b64chars.charAt( ord >>> 18),
+            b64chars.charAt((ord >>> 12) & 63),
+            padlen >= 2 ? '=' : b64chars.charAt((ord >>> 6) & 63),
+            padlen >= 1 ? '=' : b64chars.charAt(ord & 63)
+        ];
+        return chars.join('');
+    };
+    var btoa = global.btoa ? function(b) {
+        return global.btoa(b);
+    } : function(b) {
+        return b.replace(/[\s\S]{1,3}/g, cb_encode);
+    };
+    var _encode = buffer
+        ? function (u) { return (new buffer(u)).toString('base64') } 
+    : function (u) { return btoa(utob(u)) }
+    ;
+    var encode = function(u, urisafe) {
+        return !urisafe 
+            ? _encode(u)
+            : _encode(u).replace(/[+\/]/g, function(m0) {
+                return m0 == '+' ? '-' : '_';
+            }).replace(/=/g, '');
+    };
+    var encodeURI = function(u) { return encode(u, true) };
+    // decoder stuff
+    var re_btou = new RegExp([
+        '[\xC0-\xDF][\x80-\xBF]',
+        '[\xE0-\xEF][\x80-\xBF]{2}',
+        '[\xF0-\xF7][\x80-\xBF]{3}'
+    ].join('|'), 'g');
+    var cb_btou = function(cccc) {
+        switch(cccc.length) {
+        case 4:
+            var cp = ((0x07 & cccc.charCodeAt(0)) << 18)
+                |    ((0x3f & cccc.charCodeAt(1)) << 12)
+                |    ((0x3f & cccc.charCodeAt(2)) <<  6)
+                |     (0x3f & cccc.charCodeAt(3)),
+            offset = cp - 0x10000;
+            return (fromCharCode((offset  >>> 10) + 0xD800)
+                    + fromCharCode((offset & 0x3FF) + 0xDC00));
+        case 3:
+            return fromCharCode(
+                ((0x0f & cccc.charCodeAt(0)) << 12)
+                    | ((0x3f & cccc.charCodeAt(1)) << 6)
+                    |  (0x3f & cccc.charCodeAt(2))
+            );
+        default:
+            return  fromCharCode(
+                ((0x1f & cccc.charCodeAt(0)) << 6)
+                    |  (0x3f & cccc.charCodeAt(1))
+            );
+        }
+    };
+    var btou = function(b) {
+        return b.replace(re_btou, cb_btou);
+    };
+    var cb_decode = function(cccc) {
+        var len = cccc.length,
+        padlen = len % 4,
+        n = (len > 0 ? b64tab[cccc.charAt(0)] << 18 : 0)
+            | (len > 1 ? b64tab[cccc.charAt(1)] << 12 : 0)
+            | (len > 2 ? b64tab[cccc.charAt(2)] <<  6 : 0)
+            | (len > 3 ? b64tab[cccc.charAt(3)]       : 0),
+        chars = [
+            fromCharCode( n >>> 16),
+            fromCharCode((n >>>  8) & 0xff),
+            fromCharCode( n         & 0xff)
+        ];
+        chars.length -= [0, 0, 2, 1][padlen];
+        return chars.join('');
+    };
+    var atob = global.atob ? function(a) {
+        return global.atob(a);
+    } : function(a){
+        return a.replace(/[\s\S]{1,4}/g, cb_decode);
+    };
+    var _decode = buffer
+        ? function(a) { return (new buffer(a, 'base64')).toString() }
+    : function(a) { return btou(atob(a)) };
+    var decode = function(a){
+        return _decode(
+            a.replace(/[-_]/g, function(m0) { return m0 == '-' ? '+' : '/' })
+                .replace(/[^A-Za-z0-9\+\/]/g, '')
+        );
+    };
+    var noConflict = function() {
+        var Base64 = global.Base64;
+        global.Base64 = _Base64;
+        return Base64;
+    };
+    // export Base64
+    global.Base64 = {
+        VERSION: version,
+        atob: atob,
+        btoa: btoa,
+        fromBase64: decode,
+        toBase64: encode,
+        utob: utob,
+        encode: encode,
+        encodeURI: encodeURI,
+        btou: btou,
+        decode: decode,
+        noConflict: noConflict
+    };
+    // if ES5 is available, make Base64.extendString() available
+    if (typeof Object.defineProperty === 'function') {
+        var noEnum = function(v){
+            return {value:v,enumerable:false,writable:true,configurable:true};
+        };
+        global.Base64.extendString = function () {
+            Object.defineProperty(
+                String.prototype, 'fromBase64', noEnum(function () {
+                    return decode(this)
+                }));
+            Object.defineProperty(
+                String.prototype, 'toBase64', noEnum(function (urisafe) {
+                    return encode(this, urisafe)
+                }));
+            Object.defineProperty(
+                String.prototype, 'toBase64URI', noEnum(function () {
+                    return encode(this, true)
+                }));
+        };
+    }
+    // that's it!
+})(this);
+
+if (this['Meteor']) {
+    Base64 = global.Base64; // for normal export in Meteor.js
+}
+////////////////////////////////////////////////////////////////////////////////
 
 function WizDoc(wizDoc) {
 
@@ -33,6 +251,32 @@ function WizDoc(wizDoc) {
 	}
 }
 
+function WizInitReadCss(document, destNode) {
+	var WIZ_TODO_STYLE_ID = 'wiz_todo_style_id';
+	var WIZ_STYLE = 'wiz_style';
+	var WIZ_LINK_VERSION = 'wiz_link_version';
+	var WIZ_TODO_STYLE_VERSION = "01.01.00";// must above todo edit css version
+
+	var style = document.getElementById(WIZ_TODO_STYLE_ID);
+	if (style && !!style.getAttribute && style.getAttribute(WIZ_LINK_VERSION) >= WIZ_TODO_STYLE_VERSION)
+		return;
+	//
+	if (style && style.parentElement) { 
+		style.parentElement.removeChild(style);
+	}
+	//
+	var strStyle = '.wiz-todo, .wiz-todo-img {width: 16px; height: 16px; cursor: default; padding: 0 10px 0 2px; vertical-align: -7%;-webkit-user-select: none;} .wiz-todo-label { line-height: 2.5;} .wiz-todo-label-checked { /*text-decoration: line-through;*/ color: #666;} .wiz-todo-label-unchecked {text-decoration: initial;} .wiz-todo-completed-info {padding-left: 44px; display: inline-block; } .wiz-todo-avatar { width:20px; height: 20px; vertical-align: -20%; margin-right:10px; border-radius: 2px;} .wiz-todo-account, .wiz-todo-dt { color: #666; }';
+	//
+	var objStyle = document.createElement('style');
+	objStyle.type = 'text/css';
+	objStyle.textContent = strStyle;
+	objStyle.id = WIZ_TODO_STYLE_ID;
+	// objStyle.setAttribute(WIZ_STYLE, 'unsave');
+	objStyle.setAttribute(WIZ_LINK_VERSION, WIZ_TODO_STYLE_VERSION);
+	//
+	destNode.appendChild(objStyle);
+}
+
 function WizTodoReadCheckedWindows (wizApp) {
 
 	if (wizApp) {
@@ -43,6 +287,7 @@ function WizTodoReadCheckedWindows (wizApp) {
 		this.commonUI = wizApp.CreateWizObject('WizKMControls.WizCommonUI');
 	}
 
+	this.initCss = initCss;
 	this.getDocHtml = getDocHtml;
 	this.setDocHtml = setDocHtml;
 	this.canEdit = canEdit;
@@ -54,7 +299,11 @@ function WizTodoReadCheckedWindows (wizApp) {
 	this.getLocalDateTime = getLocalDateTime;
 	this.getWizDocument = getWizDocument;
 	this.getAvatarName = getAvatarName;
+	this.onClickingTodo = onClickingTodo;
 	
+	function initCss() {
+		WizInitReadCss(document, document.head);
+	}
 
 	function getDocHtml() {
 		return this.doc.getHtml();
@@ -155,10 +404,15 @@ function WizTodoReadCheckedWindows (wizApp) {
 		}
 		else return "";
 	}
+
+	function onClickingTodo(callback) {
+		WizTodoReadChecked[callback](false, false);
+	}
 }
 
 function WizTodoReadCheckedQt () {
 
+	this.initCss = initCss;
     this.getDocHtml = getDocHtml;
     this.setDocHtml = setDocHtml;
     this.canEdit = canEdit;
@@ -169,6 +423,10 @@ function WizTodoReadCheckedQt () {
     this.getUserAvatarFileName = getUserAvatarFileName;
     this.getLocalDateTime = getLocalDateTime;
     this.getAvatarName = getAvatarName;
+    this.onClickingTodo = onClickingTodo;
+
+    function initCss() {
+    }
 
     function getDocHtml() {
         return objApp.getCurrentNoteHtml();
@@ -222,9 +480,16 @@ function WizTodoReadCheckedQt () {
         }
         else return "";
     }
+
+    function onClickingTodo(callback) {
+        objApp.clickingTodoCallBack.connect(WizTodoReadChecked[callback]);
+        return objApp.checkListClickable();
+    }
 }
 
 function WizTodoReadCheckedAndroid () {
+
+	this.initCss = initCss;
 	this.getDocHtml = getDocHtml;
 	this.setDocHtml = setDocHtml;
 	this.canEdit = canEdit;
@@ -236,7 +501,11 @@ function WizTodoReadCheckedAndroid () {
 	this.getLocalDateTime = getLocalDateTime;
 	this.onDocumentClose = onDocumentClose;
 	this.onTodoImageClicked = onTodoImageClicked;
-	this.getAvatarName = getAvatarName;	
+	this.getAvatarName = getAvatarName;
+	this.onClickingTodo = onClickingTodo;
+
+	function initCss() {
+	}
 
 	function getDocHtml() {
 		return window.WizNote.getDocHtml();
@@ -296,10 +565,15 @@ function WizTodoReadCheckedAndroid () {
 		}
 		else return "";
 	}
+
+    function onClickingTodo(callback) {
+        window.WizNote.onClickingTodo(callback);
+    }
 }
 
 function WizTodoReadCheckedIphone() {
 	
+	this.initCss = initCss;
 	this.getUserAlias = getUserAlias;
 	this.getUserAvatarFileName = getUserAvatarFileName;
 	this.isPersonalDocument = isPersonalDocument;
@@ -318,6 +592,7 @@ function WizTodoReadCheckedIphone() {
 	this.setDocOriginalHtml = setDocOriginalHtml;
 	this.getAvatarName = getAvatarName;
 	this.onAddTodoCompletedInfo = onAddTodoCompletedInfo;
+	this.onClickingTodo = onClickingTodo;
 
 	this.userAlias = null;
 	this.avatarFileName = null;
@@ -327,6 +602,9 @@ function WizTodoReadCheckedIphone() {
 	this.canedit = null;
 	this.originalHtml = "";
     
+	function initCss() {
+	}
+
 	function setUserAlias(alias) {
 		this.userAlias = alias;
 	}
@@ -388,7 +666,7 @@ function WizTodoReadCheckedIphone() {
 	}
 
 	function setDocHtml(html, resources) {
-		window.location.href="wiztodolist://setDocHtml"+"&*/" + html +"&*/"+ resources;
+		window.location.href="wiztodolist://setDocHtml/"+"?html=" + html +"&resource="+ resources;
 	}
 
 	function getAvatarName(avatarFileName) {
@@ -407,7 +685,12 @@ function WizTodoReadCheckedIphone() {
 	}
 
 	function onAddTodoCompletedInfo(isChecked, id, dt, callBack) {
-		window.location.href = "wiztodolist://onAddTodoCompletedInfo" + "&*/"+ isChecked +"&*/"+ id +"&*/"+ dt +"&*/"+ callBack;
+        var href = "wiztodolist://onAddTodoCompletedInfo/" + "?checked="+ isChecked +"&id="+ id +"&dt="+ dt +"&callback="+ callBack;
+        window.location.href = href;
+	}
+
+	function onClickingTodo(callback) {
+		window.location.href="wiztodolist://tryLockDocument/"+"?callback=" + callback;
 	}
 }
 var WizTodoReadChecked = (function () {
@@ -421,6 +704,8 @@ var WizTodoReadChecked = (function () {
 	var wizClient = null;
 	var modifiedTodos = {};
 	var editorDocument = null;
+	var needCallHelperClicking = true;
+	var beingClickedTodoEle = null;
 
 	function getHelper(wizClient) {
 		switch(wizClient) {
@@ -676,7 +961,23 @@ var WizTodoReadChecked = (function () {
 		}
 	}
 
-	function onTodoClick(todoEle) {
+	function formatIntToDateString(n){
+		
+		return n < 10 ? '0' + n : n;
+	}
+
+	function ToDateString(dt){
+       	//
+        var ret = dt.getFullYear() + "-" + 
+	    			formatIntToDateString(dt.getMonth() + 1) + "-" + 
+	    			formatIntToDateString(dt.getDate()) + "T" + 
+	    			formatIntToDateString(dt.getHours())+ ":" + 
+	    			formatIntToDateString(dt.getMinutes()) + ":" + 
+	    			formatIntToDateString(dt.getSeconds());
+        return ret;
+    }
+
+	function clickTodo(todoEle) {
 
 		if (helper.onTodoImageClicked) {
 			helper.onTodoImageClicked();
@@ -734,7 +1035,7 @@ var WizTodoReadChecked = (function () {
 		//
 		if (!helper.isPersonalDocument()) {
 			if (isIpad() || isIphone()) {
-				helper.onAddTodoCompletedInfo(isChecked, todoEle.id, new Date(), 'addTodoCompletedInfo');
+				helper.onAddTodoCompletedInfo(isChecked, todoEle.id, Date.now(), 'addTodoCompletedInfo');
 			}
 			else {
 				var dt = helper.getLocalDateTime(new Date());
@@ -772,6 +1073,19 @@ var WizTodoReadChecked = (function () {
 		// modifiedTodos[todoEle.id]['completedInfo'] = isChecked ? completedInfo : "";
 	}
 
+	function onTodoClick(todoEle) {
+
+		if (!needCallHelperClicking) {
+			clickTodo(todoEle);
+		}
+		else {
+			if (helper.onClickingTodo) {
+				beingClickedTodoEle = todoEle;
+				helper.onClickingTodo("onClickingTodoCallback");
+			}
+		}
+	}
+
 	function onDocumentClick(e) {
 		var node = e.target;
 		if (!node)
@@ -788,6 +1102,10 @@ var WizTodoReadChecked = (function () {
 		editorDocument.addEventListener('click', onDocumentClick);
 	}
 
+    function unregisterEvent() {
+        editorDocument.removeEventListener('click', onDocumentClick);
+    }
+
 	function init(client) {
 
 		wizClient = client;
@@ -799,9 +1117,15 @@ var WizTodoReadChecked = (function () {
 		//
 		editorDocument = ueditor ? ueditor.contentDocument : document;
 		helper = getHelper(wizClient);
+		helper.initCss();
 		//
 		registerEvent();
 	}
+
+    function clear() {
+        needCallHelperClicking = true;
+        unregisterEvent();
+    }
 
 	function extractTodoText(id, html) {
 		var todoImg = editorDocument.getElementById(id);
@@ -971,12 +1295,15 @@ var WizTodoReadChecked = (function () {
 			var userAvatar = helper.getUserAvatarFileName(WIZ_HTML_TODO_AVATAR_SIZE);
 			var avatarName = helper.getAvatarName(userAvatar);
 			//
-			var userAvatar2 = userAvatar.replace(/\\/g, '\\\\');
-			var reg = new RegExp(userAvatar2, 'ig');
-			//
-			html = html.replace(reg, "index_files/" + avatarName);
-			//
-			resources += "*" + userAvatar;
+			if (userAvatar && avatarName) {
+				
+				var userAvatar2 = userAvatar.replace(/\\/g, '\\\\');
+				var reg = new RegExp(userAvatar2, 'ig');
+				//
+				html = html.replace(reg, "index_files/" + avatarName);
+				//
+				resources += "*" + userAvatar;
+			}
 		}
         //
         modifiedTodos = {};
@@ -1043,6 +1370,9 @@ var WizTodoReadChecked = (function () {
 
 	function setDocOriginalHtml(html) {
 		if (helper.setDocOriginalHtml) {
+		
+			html = Base64.decode(html);
+			//
 			helper.setDocOriginalHtml(html);
 		}
 	}
@@ -1053,9 +1383,17 @@ var WizTodoReadChecked = (function () {
 		//
 		addCompletedInfo(label, isChecked === 'true', id, localDateTime);
 	}
+  
+	function onClickingTodoCallback(cancel, needCallAgain) {
+		needCallHelperClicking = needCallAgain;
+		if (!cancel) {
+			clickTodo(beingClickedTodoEle);
+		}
+	}
 
 	return {
 		init: init,
+        clear: clear,
 		onDocumentClose: onDocumentClose,
 		getWizDocument: getWizDocument,
 		setCanEdit: setCanEdit,
@@ -1065,7 +1403,8 @@ var WizTodoReadChecked = (function () {
 		setUnCheckedImageFileName: setUnCheckedImageFileName,
 		setIsPersonalDocument: setIsPersonalDocument,
 		setDocOriginalHtml: setDocOriginalHtml,
-		addTodoCompletedInfo: addTodoCompletedInfo
+		addTodoCompletedInfo: addTodoCompletedInfo,
+		onClickingTodoCallback: onClickingTodoCallback
 	}
 
 })();
