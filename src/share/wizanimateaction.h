@@ -27,9 +27,9 @@ class CWizAnimateActionContainer : public CWizAnimateContainerBase
 public:
     explicit CWizAnimateActionContainer(QAction* action, QObject* parent);
 
-    virtual QIcon icon() Q_DECL_OVERRIDE;
-    virtual void setIcon(const QIcon &icon) Q_DECL_OVERRIDE;
-    virtual bool setProperty(const char *name, const QVariant &value) Q_DECL_OVERRIDE;
+    virtual QIcon icon();
+    virtual void setIcon(const QIcon &icon);
+    virtual bool setProperty(const char *name, const QVariant &value);
 
 private:
     QAction* m_action;
@@ -40,9 +40,9 @@ class CWizAnimateButtonContainer : public CWizAnimateContainerBase
 public:
     explicit CWizAnimateButtonContainer(QToolButton* button, QObject* parent);
 
-    virtual QIcon icon() Q_DECL_OVERRIDE;
-    virtual void setIcon(const QIcon &icon) Q_DECL_OVERRIDE;
-    virtual bool setProperty(const char *name, const QVariant &value) Q_DECL_OVERRIDE;
+    virtual QIcon icon();
+    virtual void setIcon(const QIcon &icon);
+    virtual bool setProperty(const char *name, const QVariant &value);
 
 private:
     QToolButton* m_button;
