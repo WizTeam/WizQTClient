@@ -25,7 +25,8 @@ class CWizObjectDataDownloaderHost;
 class QStackedWidget;
 class QWebFrame;
 class CWizDocumentEditStatusSyncThread;
-class CWizDocumentEditStatusCheckThread;
+class CWizDocumentStatusCheckThread;
+class CWizDocumentStatusChecker;
 
 namespace Core {
 namespace Internal {
@@ -66,7 +67,8 @@ protected:
 
     CWizUserCipherForm* m_passwordView;
     CWizDocumentEditStatusSyncThread* m_editStatusSyncThread;
-    CWizDocumentEditStatusCheckThread* m_editStatusCheckThread;
+//    CWizDocumentStatusCheckThread* m_editStatusCheckThread;
+    CWizDocumentStatusChecker* m_editStatusChecker;
 
     virtual void showEvent(QShowEvent *event);
 
@@ -76,6 +78,8 @@ private:
     bool m_bEditingMode; // true: editing mode, false: reading mode
     int m_viewMode; // user defined editing mode
     bool m_noteLoaded;
+    //
+    int m_status;  // document edit or version status
 
 public:
     const WIZDOCUMENTDATA& note() const { return m_note; }
@@ -95,14 +99,18 @@ public:
     void setViewMode(int mode);
     void setModified(bool modified);
     void settingsChanged();
-    void sendDocumentSavedSignal(const QString& strGUID);
+    void sendDocumentSavedSignal(const QString& strGUID, const QString& strKbGUID);
     void resetTitle(const QString& strTitle);
     void promptMessage(const QString& strMsg);
+    bool checkListClickable();
+    void setStatusToEditingByCheckList();
 
     QWebFrame* noteFrame();
 
 signals:
     void documentSaved(const QString& strGUID, CWizDocumentView* viewer);
+    void checkDocumentEditStatusRequest(const QString& strKbGUID, const QString& strGUID);
+    void stopCheckDocumentEditStatusRequest(const QString& strKbGUID, const QString& strGUID);
 
 public Q_SLOTS:
     void onViewNoteRequested(Core::INoteView* view, const WIZDOCUMENTDATA& doc);
@@ -122,11 +130,25 @@ public Q_SLOTS:
     void on_attachment_deleted(const WIZDOCUMENTATTACHMENTDATA& attachment);
 
     //
-    void on_checkEditStatus_finished(QString strGUID, QStringList editors);
+    void on_checkEditStatus_finished(const QString& strGUID, bool editable);
+    void on_checkEditStatus_timeout(const QString& strGUID);
+    void on_documentEditingByOthers(QString strGUID, QStringList editors);
+    void on_checkDocumentChanged_finished(const QString& strGUID, bool changed);
+    void on_syncDatabase_request(const QString& strKbGUID);
     void on_webView_focus_changed();
+
+    void on_notifyBar_link_clicked(const QString& link);
 
 private:
     void loadNote(const WIZDOCUMENTDATA &doc);
+    void downloadDocumentFromServer();
+    void sendDocumentEditingStatus();
+    void stopDocumentEditingStatus();
+    void startCheckDocumentEditStatus();
+    void stopCheckDocumentEditStatus();
+    bool checkDocumentEditable();
+    //
+    void stopCheckDocumentAnimations();
 };
 
 class WizFloatDocumentViewer : public QWidget

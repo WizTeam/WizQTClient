@@ -251,6 +251,7 @@ struct WIZTAGDATA : public WIZOBJECTBASE
     CString strDescription;
     COleDateTime tModified;
     qint64 nVersion;
+    qint64 nPostion;
 
     friend bool operator< (const WIZTAGDATA& data1, const WIZTAGDATA& data2) throw();
 

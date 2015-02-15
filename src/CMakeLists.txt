@@ -151,6 +151,11 @@ set(wiznote_SOURCES
     share/wizRtfReader.cpp
     widgets/wizScreenShotWidget.cpp
     widgets/wizVerificationCodeDialog.cpp
+    share/rtf2html/fmt_opts.cpp
+    share/rtf2html/rtf_keyword.cpp
+    share/rtf2html/rtf_table.cpp
+    share/rtf2html/rtf2html.cpp
+    widgets/wizEmailShareDialog.cpp
 )
 
 set(wiznote_HEADERS
@@ -289,6 +294,14 @@ set(wiznote_HEADERS
     share/wizRtfReader.h
     widgets/wizScreenShotWidget.h
     widgets/wizVerificationCodeDialog.h
+    share/rtf2html/common.h
+    share/rtf2html/config.h
+    share/rtf2html/dbg_iter.h
+    share/rtf2html/fmt_opts.h
+    share/rtf2html/rtf_keyword.h
+    share/rtf2html/rtf_table.h
+    share/rtf2html/rtf_tools.h
+    widgets/wizEmailShareDialog.h
 )
 
 set(wiznote_FORMS
@@ -307,6 +320,7 @@ set(wiznote_FORMS
     ui/wizSearchReplaceWidget.ui
     ui/wizDocTemplateDialog.ui
     ui/wizVerificationCodeDialog.ui
+    ui/wizEmailShareDialog.ui
 )
 
 set(wiznote_TRANSLATIONS
@@ -351,10 +365,11 @@ if(UNIX)
         cmake_policy(SET CMP0016 OLD)
         find_library(_CARBON_LIBRARY Carbon)
         find_library(_COCOA_LIBRARY Cocoa)
+        find_library(_WEBKIT_LIBRARY WebKit)
 
         # please set env: MACOSX_DEPLOYMENT_TARGET = 10.8 to ~/.bash_profile if you need NSUserNotification support.
         message("use cocoa library: ${_COCOA_LIBRARY}")
-        target_link_libraries(${PROJECT_NAME} ${_CARBON_LIBRARY} ${_COCOA_LIBRARY})
+        target_link_libraries(${PROJECT_NAME} ${_CARBON_LIBRARY} ${_COCOA_LIBRARY} ${_WEBKIT_LIBRARY})
 
         # setup plist info and logo
         set_target_properties(${PROJECT_NAME} PROPERTIES MACOSX_BUNDLE_INFO_PLIST "${CMAKE_SOURCE_DIR}/build/osx/Info.plist")

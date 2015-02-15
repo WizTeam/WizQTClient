@@ -99,6 +99,7 @@ public:
     bool isLogout() const { return m_bLogoutRestart; }
 
     QString searchKeywords() const { return m_strSearchKeywords; }
+    void rebuildFTS();
 
     static MainWindow* instance();
 
@@ -145,12 +146,14 @@ private:
     QPointer<CWizCategoryView> m_category;
     CWizDocumentListView* m_documents;
     WizService::Internal::MessageListView* m_msgList;
-    QWidget* m_noteList;
+    QWidget* m_noteListWidget;
+    QWidget* m_msgListWidget;
+    QWidget* m_msgListUnreadBar;
     CWizDocumentSelectionView* m_documentSelection;
     CWizDocumentView* m_doc;
     CWizDocumentTransitionView* m_transitionView;
     QPointer<CWizSplitter> m_splitter;
-    QPointer<QWidget> m_docListWidget;
+    QPointer<QWidget> m_docListContainer;
     QPointer<CWizOptionsWidget> m_options;
 
     QLabel* m_labelDocumentsHint;
@@ -186,8 +189,8 @@ private:
 #endif
     void initMenuBar();
 
-    QWidget* createListView();
-
+    QWidget* createNoteListView();
+    QWidget* createMessageListView();
 
 public:
     // CWizDocument passthrough methods
@@ -224,6 +227,9 @@ public:
 signals:
     void documentSaved(const QString& strGUID, CWizDocumentView* viewer);
 
+    // signal connect to checklist in javascript
+    void clickingTodoCallBack(bool cancel, bool needCallAgain);
+
 public Q_SLOTS:
     void on_actionExit_triggered();
     void on_actionClose_triggered();
@@ -234,6 +240,7 @@ public Q_SLOTS:
     void on_actionNewNoteByTemplate_triggered();
     void on_actionLogout_triggered();
     void on_actionAbout_triggered();
+    void on_actionDeveloper_triggered();
     void on_actionPreference_triggered();
     void on_actionRebuildFTS_triggered();
     void on_actionFeedback_triggered();
@@ -261,6 +268,8 @@ public Q_SLOTS:
     // menu view
     void on_actionViewToggleCategory_triggered();
     void on_actionViewToggleFullscreen_triggered();
+
+    void on_actionMarkAllMessageRead_triggered();
 
     // menu format
     void on_actionFormatJustifyLeft_triggered();
@@ -337,6 +346,8 @@ public Q_SLOTS:
     void setCurrentDocumentType(const QString& strType);
     void OpenURLInDefaultBrowser(const QString& strURL);
     void SetDialogResult(int nResult);
+    bool checkListClickable();
+
 
 #ifndef Q_OS_MAC
     void on_actionPopupMainMenu_triggered();

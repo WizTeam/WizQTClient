@@ -277,10 +277,16 @@ void CWizDatabaseManager::initSignals(CWizDatabase* db)
     connect(db, SIGNAL(documentTagModified(const WIZDOCUMENTDATA&)),
             SIGNAL(documentTagModified(const WIZDOCUMENTDATA&)));
 
+    connect(db, SIGNAL(documentReadCountChanged(const WIZDOCUMENTDATA&)),
+            SIGNAL(documentReadCountChanged(const WIZDOCUMENTDATA&)));
+
     connect(db, SIGNAL(documentDataModified(const WIZDOCUMENTDATA&)),
             SIGNAL(documentDataModified(const WIZDOCUMENTDATA&)));
     connect(db, SIGNAL(documentAbstractModified(const WIZDOCUMENTDATA&)),
             SIGNAL(documentAbstractModified(const WIZDOCUMENTDATA&)));
+
+    connect(db, SIGNAL(documentUploaded(QString,QString)),
+            SIGNAL(documentUploaded(QString,QString)));
 
     connect(db,SIGNAL(groupDocumentUnreadCountModified(QString)),
             SIGNAL(groupDocumentUnreadCountModified(QString)));
@@ -296,6 +302,8 @@ void CWizDatabaseManager::initSignals(CWizDatabase* db)
             SIGNAL(folderCreated(const QString&)));
     connect(db, SIGNAL(folderDeleted(const QString&)),
             SIGNAL(folderDeleted(const QString&)));
+    connect(db, SIGNAL(tagsPositionChanged(const QString&)),
+            SIGNAL(tagsPositionChanged(const QString&)));
     connect(db, SIGNAL(folderPositionChanged()),
             SIGNAL(folderPositionChanged()));
 }

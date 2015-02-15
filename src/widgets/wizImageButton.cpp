@@ -71,6 +71,7 @@ void wizImageButton::paintEvent(QPaintEvent* event)
 void wizImageButton::mousePressEvent(QMouseEvent* event)
 {
     if (!m_lockNormalStatus) {
+        m_oldIcon = m_currentIcon;
         setStatusDown();
     }
 
@@ -80,7 +81,7 @@ void wizImageButton::mousePressEvent(QMouseEvent* event)
 void wizImageButton::mouseReleaseEvent(QMouseEvent* event)
 {
     if (!m_lockNormalStatus) {
-        setStatusHot();
+        m_currentIcon = m_oldIcon;
     }
 
     QPushButton::mouseReleaseEvent(event);

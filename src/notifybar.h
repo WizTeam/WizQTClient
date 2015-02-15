@@ -5,6 +5,9 @@
 
 class QLabel;
 class wizImageButton;
+class QPropertyAnimation;
+
+#define NOTIFYBAR_LABELLINK_DOWNLOAD  "clicktodownload"
 
 namespace Core {
 namespace Internal {
@@ -17,22 +20,31 @@ public:
     {
         Locked,
         Deleted,
-        PermissionLack
+        PermissionLack,
+        LockForGruop
     };
 
     explicit NotifyBar(QWidget *parent);
     void showPermissionNotify(int type);
-    void showEditingNotify(const QString& editor);
+    void showMessageTips(Qt::TextFormat format, const QString& info);
+    void hideMessageTips(bool useAnimation);
 
 public slots:
     void on_closeButton_Clicked();
 
+signals:
+    void labelLink_clicked(const QString& link);
+
 private:
     QLabel* m_labelNotify;
     wizImageButton* m_buttonClose;
+    QPropertyAnimation* m_animation;
 
     void setStyleForPermission();
     void setStyleForEditing();
+
+    void showNotify();
+    void hideNotify(bool bUseAnimation);
 };
 
 } // namespace Internal

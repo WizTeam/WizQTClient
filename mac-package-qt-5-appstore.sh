@@ -11,7 +11,7 @@ package_output_path="$HOME"
 mkdir ../WizQTClient-Release-QT5
 rm -rf ../WizQTClient-Release-QT5/* && \
 cd ../WizQTClient-Release-QT5 && \
-cmake -DWIZNOTE_USE_QT5=YES -DCMAKE_BUILD_TYPE=Release -UPDATE_TRANSLATIONS=YES -DAPPSTORE_BUILD=YES -DCMAKE_PREFIX_PATH=~/usr/local/qt/5.3.2/lib/cmake ../WizQTClient && \
+cmake -DWIZNOTE_USE_QT5=YES -DCMAKE_BUILD_TYPE=Release -UPDATE_TRANSLATIONS=YES -DAPPSTORE_BUILD=YES -DCMAKE_PREFIX_PATH=~/usr/local/qt/5.4.0/lib/cmake ../WizQTClient && \
 make -j5 
 
 MYAPP="WizNote"
@@ -19,10 +19,10 @@ DEST="$MYAPP.app" # Our final App directory
 BUILDDIR=$(pwd);
 ICUDIR="/usr/local/icu54.1"
 ICULIBS="libicui18n.54 libicudata.54 libicuuc.54"
-QTDIR="/usr/local/qt/5.3.2"
+QTDIR="/usr/local/qt/5.4.0"
 QTLIBS="QtCore QtNetwork QtSql QtGui QtOpenGL QtWidgets QtWebKit QtWebKitWidgets \
   QtPrintSupport QtXml QtPositioning QtSensors QtConcurrent QtMacExtras QtMultimediaWidgets QtMultimedia" # QtQml QtQuick QtSvg QtScript
-PLUGINS="sqldrivers imageformats  platforms printsupport accessible \
+PLUGINS="sqldrivers imageformats  platforms printsupport \
   position" # playlistformats sensors sensorgestures bearer audio iconengines
  
 # make clean & create pathes 
@@ -31,16 +31,16 @@ mkdir -p $DEST/Contents/Frameworks $DEST/Contents/PlugIns/icu $DEST/Contents/Sha
 # copy Qt libs, plug-ins and ICU
 for L in $QTLIBS ; do
   cp -R -p $QTDIR/lib/$L.framework $MYAPP.app/Contents/Frameworks
-  mkdir $MYAPP.app/Contents/Frameworks/$L.framework/Versions/5/Resources
-  cp -R -p $MYAPP.app/Contents/Frameworks/$L.framework/Contents/Info.plist \
-    $MYAPP.app/Contents/Frameworks/$L.framework/Versions/5/Resources
-  rm -R -f $MYAPP.app/Contents/Frameworks/$L.framework/Contents
+  # mkdir $MYAPP.app/Contents/Frameworks/$L.framework/Versions/5/Resources
+  # cp -R -p $MYAPP.app/Contents/Frameworks/$L.framework/Contents/Info.plist \
+  #   $MYAPP.app/Contents/Frameworks/$L.framework/Versions/5/Resources
+  # rm -R -f $MYAPP.app/Contents/Frameworks/$L.framework/Contents
   # remove all unnecessary header files:
   rm -f $MYAPP.app/Contents/Frameworks/$L.framework/Headers
   rm -R -f $MYAPP.app/Contents/Frameworks/$L.framework/Versions/5/Headers
   #rm -R -f $MYAPP.app/Contents/Frameworks/$L.framework/Versions/Current
   # rm $MYAPP.app/Contents/Frameworks/$L.framework/Versions/5/${L}_debug
-  rm $MYAPP.app/Contents/Frameworks/$L.framework/${L}
+  # rm $MYAPP.app/Contents/Frameworks/$L.framework/${L}
   rm $MYAPP.app/Contents/Frameworks/$L.framework/${L}.prl
   # rm $MYAPP.app/Contents/Frameworks/$L.framework/${L}_debug
   # rm $MYAPP.app/Contents/Frameworks/$L.framework/${L}_debug.prl
@@ -48,8 +48,9 @@ for L in $QTLIBS ; do
   #ln -s 5/ Current
   # cd ..
   # cd $MYAPP.app/Contents/Frameworks/$L.framework
-  # ln -s Versions/5/$L $L
-  # ln -s Versions/5/Resources/ Resources
+  # rm -f Resources
+  # ln -s Versions/Current/$L $L
+  # ln -s Versions/Current/Resources/ Resources
   # cd $BUILDDIR
   #rm $MYAPP.app/Contents/Frameworks/$L.framework/Versions/Current/.
 done
@@ -130,7 +131,6 @@ for P in $DISTPLUGINS2 ; do # change ID for all *.dylib libs
 done
 
 
-DISTPLUGINS3=`cd $MYAPP.app/Contents/PlugIns; ls *.pluginspec`;
 
 install_name_tool -change libicui18n.54.dylib @executable_path/../PlugIns/icu/libicui18n.54.dylib WizNote.app/Contents/Frameworks/QtWebKit.framework/Versions/5/QtWebKit
 install_name_tool -change libicuuc.54.dylib @executable_path/../PlugIns/icu/libicuuc.54.dylib WizNote.app/Contents/Frameworks/QtWebKit.framework/Versions/5/QtWebKit
@@ -171,11 +171,6 @@ for I in $DISTPLUGINS2 ; do # signing all *.dylib libs
     $MYAPP.app/Contents/PlugIns/$I
 done
 
-for I in $DISTPLUGINS3 ; do # signing all *.dylib libs
-  echo "code sign : "   $I;
-  codesign --force --verify --deep --verbose --sign "$APPLCERT" \
-    $MYAPP.app/Contents/PlugIns/$I
-done
 
 codesign --verbose=2 --sign "$APPLCERT" --entitlements \
   WizNote-Entitlements.plist  "$MYAPP.app"

@@ -121,9 +121,13 @@ public:
 
     virtual qint64 GetObjectLocalVersion(const QString& strObjectGUID,
                                          const QString& strObjectType);
+    virtual qint64 GetObjectLocalVersionEx(const QString& strObjectGUID,
+                                         const QString& strObjectType,
+                                           bool& bObjectVersion);
     virtual bool SetObjectLocalServerVersion(const QString& strObjectGUID,
                                              const QString& strObjectType,
                                              qint64 nVersion);
+    virtual void OnObjectUploaded(const QString &strObjectGUID, const QString &strObjectType);
 
     // query
     virtual bool GetModifiedDeletedList(CWizDeletedGUIDDataArray& arrayData);
@@ -171,6 +175,9 @@ public:
 
     virtual bool OnUploadObject(const QString& strGUID,
                                 const QString& strObjectType);
+
+    // modify
+    virtual bool ModifyDocumentsVersion(CWizDocumentDataArray& arrayData);
 
     //copy Document
     //create new doc and copy data, set the new doc time as the source doc.
@@ -260,13 +267,18 @@ public:
     int GetObjectSyncTimeline();
     QString GetFolders();
     QString GetFoldersPos();
+    QString GetGroupTagsPos();
     void SetFoldersPos(const QString& foldersPos, qint64 nVersion);
     void SetFolders(const QString& strFolders, qint64 nVersion, bool bSaveVersion);
+    void SetGroupTagsPos(const QString& tagsPos, qint64 nVersion);
 
     void SetBizUsers(const QString &strBizGUID, const QString& strUsers);
     bool loadBizUsersFromJson(const QString &strBizGUID,
                               const QString& strJsonRaw,
                               CWizBizUserDataArray& arrayUser);
+
+    void SetFoldersPosModified();
+    void SetGroupTagsPosModified();
 
     //
     virtual bool getAllNotesOwners(CWizStdStringArray &arrayOwners);
@@ -347,6 +359,8 @@ public:
 
     virtual bool UpdateDocumentDataMD5(WIZDOCUMENTDATA& data, const CString& strZipFileName, bool notifyDataModify = true);
 
+    // delete
+    bool DeleteObject(const QString &strGUID, const QString &strType, bool bLog);
     bool DeleteTagWithChildren(const WIZTAGDATA& data, bool bLog);
     bool DeleteAttachment(const WIZDOCUMENTATTACHMENTDATA& data, bool bLog, bool bReset);
 
@@ -466,6 +480,8 @@ Q_SIGNALS:
     void processLog(const QString& msg);
     void attachmentsUpdated();
     void folderPositionChanged();
+    void tagsPositionChanged(const QString& strKbGUID);
+    void documentUploaded(const QString& strKbGUID, const QString& strGUID);
 
 private:
     //should make sure sourceDoc already exist before use this.

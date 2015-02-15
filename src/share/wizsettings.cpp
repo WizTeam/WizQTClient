@@ -178,6 +178,11 @@ void CWizUserSettings::setUser(const QString& strUser)
     }
 }
 
+QString CWizUserSettings::myWizMail() const
+{
+    return get("ACCOUNT", "MYWIZMAIL");
+}
+
 QString CWizUserSettings::get(const QString& section, const QString& strKey) const
 {
     if (!m_strUserId.isEmpty()) {
@@ -208,6 +213,14 @@ void CWizUserSettings::set(const QString& section, const QString& strKey, const 
         m_db->SetMeta(section, strKey, strValue);
         return;
     }
+}
+
+QString CWizUserSettings::user() const
+{
+    if (m_strUserId.isEmpty())
+        return m_db->GetUserId();
+
+    return m_strUserId;
 }
 
 QString CWizUserSettings::get(const QString& strKey) const
@@ -404,6 +417,66 @@ bool CWizUserSettings::needShowMobileFileReceiverUserGuide()
 void CWizUserSettings::setNeedShowMobileFileReceiverUserGuide(bool bNeedShow)
 {
     set("ShowMobileFileReceiverUserGuide", bNeedShow ? "1" : "0");
+}
+
+bool CWizUserSettings::searchEncryptedNote()
+{
+    QString strShowGuide = get("SearchEncryptedNote");
+    if (!strShowGuide.isEmpty()) {
+        return strShowGuide.toInt() ? true : false;
+    }
+
+    return false;
+}
+
+void CWizUserSettings::setSearchEncryptedNote(bool bSearchEncryNote)
+{
+    set("SearchEncryptedNote", bSearchEncryNote ? "1" : "0");
+}
+
+QString CWizUserSettings::encryptedNotePassword()
+{
+    QString strPassword = get("EncryptedNotePassword");
+    return ::WizDecryptPassword(strPassword);
+}
+
+void CWizUserSettings::setEncryptedNotePassword(const QString& strPassword)
+{
+    QString strEncryptPass = ::WizEncryptPassword(strPassword);
+    set("EncryptedNotePassword", strEncryptPass);
+}
+
+QString CWizUserSettings::editorBackgroundColor()
+{
+    QString strColor = get("EditorBackgroundColor");
+    if (strColor.isEmpty())
+        return "#FFFFFF";
+
+    return strColor;
+}
+
+void CWizUserSettings::setEditorBackgroundColor(const QString& strColor)
+{
+    set("EditorBackgroundColor", strColor);
+}
+
+bool CWizUserSettings::isManualSortingEnabled()
+{
+    QString strManualSortingEnable = get("ManualSortingEnable");
+    if (!strManualSortingEnable.isEmpty()) {
+        return strManualSortingEnable.toInt() ? true : false;
+    }
+
+#ifdef Q_OS_LINUX
+    return false;
+#else
+    return true;
+#endif
+}
+
+void CWizUserSettings::setManualSortingEnable(bool bEnable)
+{
+    set("ManualSortingEnable", bEnable ? "1" : "0");
 }
 
 QString CWizUserSettings::skin()

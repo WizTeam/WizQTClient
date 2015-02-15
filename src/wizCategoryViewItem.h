@@ -17,9 +17,9 @@ public:
     virtual void showContextMenu(CWizCategoryBaseView* pCtrl, QPoint pos) = 0;
     virtual void getDocuments(CWizDatabase& db, CWizDocumentDataArray& arrayDocument) = 0;
     virtual bool accept(CWizDatabase& db, const WIZDOCUMENTDATA& data) { Q_UNUSED(db); Q_UNUSED(data); return false; }
-
-    //NOTE: data used nowhere, could delete
+    virtual bool acceptDrop(const CWizCategoryViewItemBase* pItem) const { Q_UNUSED(pItem); return false;}
     virtual bool acceptDrop(const WIZDOCUMENTDATA& data) const { Q_UNUSED(data); return false; }
+    virtual bool dragAble() const { return false; }
     virtual void drop(const WIZDOCUMENTDATA& data, bool forceCopy = false) { Q_UNUSED(data); Q_UNUSED(forceCopy);}
 
     virtual void draw(QPainter* p, const QStyleOptionViewItemV4* vopt) const;
@@ -182,6 +182,7 @@ public:
     virtual void showContextMenu(CWizCategoryBaseView* pCtrl, QPoint pos);
     virtual void getDocuments(CWizDatabase& db, CWizDocumentDataArray& arrayDocument);
     virtual bool accept(CWizDatabase& db, const WIZDOCUMENTDATA& data);
+    virtual bool acceptDrop(const CWizCategoryViewItemBase* pItem) const;
     virtual QString getSectionName();
     virtual int getSortOrder() const { return 20; }
 };
@@ -194,6 +195,8 @@ public:
     virtual void getDocuments(CWizDatabase& db, CWizDocumentDataArray& arrayDocument);
     virtual bool accept(CWizDatabase& db, const WIZDOCUMENTDATA& data);
     virtual bool acceptDrop(const WIZDOCUMENTDATA& data) const;
+    virtual bool acceptDrop(const CWizCategoryViewItemBase* pItem) const;
+    virtual bool dragAble() const { return true; }
     virtual void drop(const WIZDOCUMENTDATA& data, bool forceCopy = false);
 
     virtual bool operator < (const QTreeWidgetItem &other) const;
@@ -203,6 +206,7 @@ public:
     virtual QString id() const;
 
     QString location() const { return m_strName; }
+    void setLocation(const QString& strLocation);
     QString name() const;
 
 private:
@@ -216,6 +220,7 @@ public:
     virtual void showContextMenu(CWizCategoryBaseView* pCtrl, QPoint pos);
     virtual void getDocuments(CWizDatabase& db, CWizDocumentDataArray& arrayDocument);
     virtual bool accept(CWizDatabase& db, const WIZDOCUMENTDATA& data);
+    virtual bool acceptDrop(const CWizCategoryViewItemBase* pItem) const;
     virtual QString getSectionName();
     virtual int getSortOrder() const { return 21; }
 };
@@ -233,6 +238,7 @@ public:
     virtual QTreeWidgetItem *clone() const;
 
     void reload(CWizDatabase& db);
+    void setTagPosition(int nPos);
     const WIZTAGDATA& tag() const { return m_tag; }
 
 private:
@@ -263,6 +269,7 @@ public:
 
     virtual void getDocuments(CWizDatabase& db, CWizDocumentDataArray& arrayDocument);
     virtual bool accept(CWizDatabase& db, const WIZDOCUMENTDATA& data);
+    virtual bool acceptDrop(const CWizCategoryViewItemBase* pItem) const;
     virtual QString getSectionName();
 
 };
@@ -358,6 +365,7 @@ public:
     virtual void getDocuments(CWizDatabase& db, CWizDocumentDataArray& arrayDocument);
     virtual bool accept(CWizDatabase& db, const WIZDOCUMENTDATA& data);
     virtual bool acceptDrop(const WIZDOCUMENTDATA& data) const;
+    virtual bool acceptDrop(const CWizCategoryViewItemBase* pItem) const;
     virtual void drop(const WIZDOCUMENTDATA& data, bool forceCopy = false);
     virtual void draw(QPainter* p, const QStyleOptionViewItemV4* vopt) const;
     void reload(CWizDatabase& db);
@@ -397,12 +405,15 @@ public:
     virtual void getDocuments(CWizDatabase& db, CWizDocumentDataArray& arrayDocument);
     virtual bool accept(CWizDatabase& db, const WIZDOCUMENTDATA& data);
     virtual bool acceptDrop(const WIZDOCUMENTDATA& data) const;
+    virtual bool dragAble() const { return true; }
     virtual void drop(const WIZDOCUMENTDATA& data, bool forceCopy = false);
 
     virtual QString id() const;
 
-    void reload(CWizDatabase& db);
+    virtual bool operator<(const QTreeWidgetItem &other) const;
 
+    void reload(CWizDatabase& db);
+    void setTagPosition(int nPos);
     const WIZTAGDATA& tag() const { return m_tag; }
 
     virtual int getSortOrder() const { return 11; }
@@ -419,6 +430,8 @@ public:
     virtual void getDocuments(CWizDatabase& db, CWizDocumentDataArray& arrayDocument);
     virtual bool accept(CWizDatabase& db, const WIZDOCUMENTDATA& data);
     virtual bool acceptDrop(const WIZDOCUMENTDATA& data) const;
+    virtual bool acceptDrop(const CWizCategoryViewItemBase* pItem) const;
+    virtual bool dragAble() const { return false; }
     virtual int getSortOrder() const { return 12; }
 };
 

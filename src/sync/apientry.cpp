@@ -54,6 +54,7 @@
 #define WIZNOTE_API_COMMAND_COMMENT_COUNT   "comment_count"
 #define WIZNOTE_API_COMMAND_CHANGELOG        "changelog"
 #define WIZNOTE_API_COMMAND_UPGRADE        "updatev2"
+#define WIZNOTE_API_COMMAND_MAIL_SHARE        "mail_share"
 
 //#ifdef _M_X64
 //    QString strPlatform = "x64";
@@ -185,11 +186,13 @@ QString ApiEntryPrivate::commentCountUrl(const QString& strServer, const QString
     strUrl.replace("{kbGuid}", strKbGUID);
     strUrl.replace("{documentGuid}", strGUID);
 
-    // use https
-    QUrl url(strUrl);
-    url.setScheme("https");
+    //WARNING: 不知道问什么强制使用Https请求，暂时注掉
+//    // use https
+//    QUrl url(strUrl);
+//    url.setScheme("https");
+//    return url.toString();
 
-    return url.toString();
+    return strUrl;
 }
 
 QString ApiEntryPrivate::feedbackUrl()
@@ -211,6 +214,16 @@ QString ApiEntryPrivate::changeLogUrl()
 QString ApiEntryPrivate::upgradeUrl()
 {
     return urlFromCommand(WIZNOTE_API_COMMAND_UPGRADE);
+}
+
+QString ApiEntryPrivate::mailShareUrl()
+{
+//    QString strKsHost = syncUrl();
+
+    QString strMailShare;
+    requestUrl(WIZNOTE_API_COMMAND_MAIL_SHARE, strMailShare);
+//    strMailShare.replace("{ks_host}", strKsHost);
+    return strMailShare;
 }
 
 QString ApiEntryPrivate::accountInfoUrl(const QString& strToken)
@@ -326,6 +339,13 @@ QString ApiEntry::avatarUploadUrl()
     if (!d)
         d = new ApiEntryPrivate();
     return d->avatarUploadUrl();
+}
+
+QString ApiEntry::mailShare()
+{
+    if (!d)
+        d = new ApiEntryPrivate();
+    return d->mailShareUrl();
 }
 
 QString ApiEntry::commentUrl(const QString& strToken, const QString& strKbGUID,const QString& strGUID)

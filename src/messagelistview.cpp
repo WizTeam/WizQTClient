@@ -310,6 +310,18 @@ void MessageListView::drawItem(QPainter* p, const QStyleOptionViewItemV4* vopt) 
     pItem->paint(p, vopt);
 }
 
+void MessageListView::markAllMessagesReaded()
+{
+    for (int i = 0; i < count(); i++) {
+        MessageListViewItem* pItem = messageItem(i);
+        if (!pItem->data().nReadStatus) {
+            CWizDatabaseManager::instance()->db().setMessageReadStatus(pItem->data(), 1);
+            m_lsIds.push_back(pItem->data().nId);
+        }
+    }
+    m_timerTriggerSync.start();
+}
+
 void MessageListView::onAvatarLoaded(const QString& strUserId)
 {
     for (int i = 0; i < count(); i++) {

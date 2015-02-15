@@ -39,16 +39,21 @@ public:
     void startSyncAll(bool bBackground = true);
     void stopSync();
     //
+    void setFullSyncInterval(int nMinutes);
+    //
     void addQuickSyncKb(const QString& kbGuid);
     bool clearCurrentToken();
     //
-    void waitForDone();
+    void waitForDone();    
 
 public:
     static void quickSyncKb(const QString& kbGuid); //thread safe
 
 protected:
     virtual void run();
+
+private slots:
+    void syncAfterStart();
 
 private:
     bool m_bBackground;
@@ -58,6 +63,8 @@ private:
     CWizKMSyncEvents* m_pEvents;
     bool m_bNeedSyncAll;
     QDateTime m_tLastSyncAll;
+    int m_nfullSyncInterval;
+
     //
     QMutex m_mutex;
     std::set<QString> m_setQuickSyncKb;

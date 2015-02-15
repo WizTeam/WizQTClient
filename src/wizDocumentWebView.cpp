@@ -42,6 +42,7 @@
 #include "wizSearchReplaceWidget.h"
 #include "widgets/WizCodeEditorDialog.h"
 #include "widgets/wizScreenShotWidget.h"
+#include "widgets/wizEmailShareDialog.h"
 
 #include "utils/pathresolve.h"
 #include "utils/logger.h"
@@ -114,49 +115,30 @@ void CWizDocumentWebViewPage::triggerAction(QWebPage::WebAction typeAction, bool
     Q_EMIT actionTriggered(typeAction);
 }
 
-bool getBodyContentFromHtml(QString& strHtml, bool bNeedTextParse)
-{
-    QRegExp regHead("</?head[^>]*>", Qt::CaseInsensitive);
-    if (strHtml.contains(regHead))
-    {
-        if (bNeedTextParse)
-        {
-            QRegExp regHeadContant("<head[^>]*>[\\s\\S]*</head>");
-            int headIndex = regHeadContant.indexIn(strHtml);
-            if (headIndex > -1)
-            {
-                QString strHead = regHeadContant.cap(0);
-                if (strHead.contains("Cocoa HTML Writer"))
-                {
-                    // convert mass html to rtf, then convert rft to html
-                    QTextDocument textParase;
-                    textParase.setHtml(strHtml);
-                    strHtml = textParase.toHtml();
-                }
-            }
-        }
-
-        strHtml = WizGetHtmlBodyContent(strHtml);
-    }
-
-    return true;
-}
-
 void CWizDocumentWebViewPage::on_editorCommandPaste_triggered()
 {
     QClipboard* clip = QApplication::clipboard();
     Q_ASSERT(clip);
 
     const QMimeData* mime = clip->mimeData();
-    QStringList formats = mime->formats();
-    for(int i = 0; i < formats.size(); ++ i) {
-        qDebug() << "Mime Format: " << formats.at(i) << " Mime data: " << mime->data(formats.at(i));
-    }
+//    QStringList formats = mime->formats();
+//    for(int i = 0; i < formats.size(); ++ i) {
+//        qDebug() << "Mime Format: " << formats.at(i) << " Mime data: " << mime->data(formats.at(i));
+//    }
 
-    if (mime->hasHtml())
+#ifdef Q_OS_MAC
+    QString strText = wizSystemClipboardData();
+    if (!strText.isEmpty())
+    {
+        QMimeData* data = new QMimeData();
+        data->removeFormat("text/html");
+        data->setHtml(strText);
+        clip->setMimeData(data);
+    }
+    else if (mime->hasHtml())   // special process for xcode
     {
         QString strHtml = mime->html();
-        if (getBodyContentFromHtml(strHtml, true))
+        if (WizGetBodyContentFromHtml(strHtml, true))
         {
             QMimeData* data = new QMimeData();
             data->setHtml(strHtml);
@@ -164,6 +146,7 @@ void CWizDocumentWebViewPage::on_editorCommandPaste_triggered()
             return;
         }
     }
+#endif
 
     if (!clip->image().isNull()) {
         // save clipboard image to $TMPDIR
@@ -245,7 +228,8 @@ CWizDocumentWebView::CWizDocumentWebView(CWizExplorerApp& app, QWidget* parent)
 
 CWizDocumentWebView::~CWizDocumentWebView()
 {
-
+    if (m_searchReplaceWidget)
+        delete m_searchReplaceWidget;
 }
 void CWizDocumentWebView::waitForDone()
 {
@@ -627,6 +611,7 @@ void CWizDocumentWebView::onDocumentReady(const QString kbGUID, const QString st
     m_mapFile.insert(strGUID, strFileName);
 
     if (m_bEditorInited) {
+        resetCheckListEnvironment();
         viewDocumentInEditor(m_bEditingMode);
     } else {
         initEditor();
@@ -640,7 +625,7 @@ void CWizDocumentWebView::onDocumentSaved(const QString kbGUID, const QString st
         TOLOG("Save document failed");
     }
     //
-    view()->sendDocumentSavedSignal(strGUID);
+    view()->sendDocumentSavedSignal(strGUID, kbGUID);
     //
     MainWindow* mainWindow = qobject_cast<MainWindow*>(m_app.mainWindow());
     mainWindow->quickSyncKb(kbGUID);
@@ -699,6 +684,8 @@ bool CWizDocumentWebView::resetDefaultCss()
 
     strCss.replace("/*default-font-family*/", QString("font-family:%1;").arg(strFont));
     strCss.replace("/*default-font-size*/", QString("font-size:%1px;").arg(nSize));
+    strCss.replace("/*default-background-color*/", QString("background-color:%1;").arg(
+                   m_app.userSettings().editorBackgroundColor()));
 
     QString strPath = Utils::PathResolve::cachePath() + "editor/"+m_dbMgr.db().GetUserId()+"/";
     Utils::PathResolve::ensurePathExists(strPath);
@@ -744,6 +731,12 @@ void CWizDocumentWebView::setEditorEnable(bool enalbe)
     }
 }
 
+bool CWizDocumentWebView::evaluateJavaScript(const QString& js)
+{
+    page()->mainFrame()->evaluateJavaScript(js);
+    return true;
+}
+
 void CWizDocumentWebView::initEditor()
 {
     if (m_bEditorInited)
@@ -778,6 +771,15 @@ void CWizDocumentWebView::initEditor()
 
 }
 
+void CWizDocumentWebView::resetCheckListEnvironment()
+{
+    if (!m_bEditingMode)
+    {
+        QString strScript = QString("WizTodoReadChecked.clear();");
+        page()->mainFrame()->evaluateJavaScript(strScript);
+    }
+}
+
 void CWizDocumentWebView::initCheckListEnvironment()
 {
     if (m_bEditingMode)
@@ -808,6 +810,16 @@ bool CWizDocumentWebView::insertImage(const QString& strFileName, bool bCopyFile
         return editorCommandExecuteInsertHtml(strHtml, true);
     }
     return false;
+}
+
+bool CWizDocumentWebView::shareNoteByEmail()
+{
+    CWizEmailShareDialog dlg(m_app);
+    dlg.setNote(view()->note());
+
+    dlg.exec();
+
+    return true;
 }
 
 void CWizDocumentWebView::onEditorLoadFinished(bool ok)
@@ -857,11 +869,6 @@ void CWizDocumentWebView::onEditorSelectionChanged()
 #endif // Q_OS_MAC
 
     Q_EMIT statusChanged();
-}
-
-void CWizDocumentWebView::clearEditorHeight()
-{
-    page()->mainFrame()->evaluateJavaScript("editor.document.body.style.height='';");
 }
 
 void CWizDocumentWebView::onEditorLinkClicked(const QUrl& url)
@@ -1076,7 +1083,7 @@ void CWizDocumentWebView::clearSearchKeywordHighlight()
 void CWizDocumentWebView::on_insertCodeHtml_requset(QString strOldHtml)
 {
     QString strHtml = strOldHtml;
-    if (getBodyContentFromHtml(strHtml, false))
+    if (WizGetBodyContentFromHtml(strHtml, false))
     {
         editorCommandExecuteInsertHtml(strHtml, true);
         //FiXME:插入代码时li的属性会丢失，此处需要特殊处理，在head中增加li的属性
@@ -1151,13 +1158,6 @@ void CWizDocumentWebView::viewDocumentInEditor(bool editing)
 void CWizDocumentWebView::onNoteLoadFinished()
 {
     ICore::instance()->emitViewNoteLoaded(view(), view()->note(), true);
-
-    static bool init = true;
-    if (init)
-    {
-        QTimer::singleShot(100, this, SLOT(clearEditorHeight()));
-        init = false;
-    }
 }
 
 void CWizDocumentWebView::setEditingDocument(bool editing)
@@ -1182,6 +1182,7 @@ void CWizDocumentWebView::setEditingDocument(bool editing)
 
     saveDocument(docData, false);
 
+    resetCheckListEnvironment();
     m_bEditingMode = editing;
     //
     QString strScript = QString("setEditing(%1);").arg(editing ? "true" : "false");
@@ -1284,28 +1285,13 @@ bool CWizDocumentWebView::editorCommandExecuteInsertHtml(const QString& strHtml,
     return editorCommandExecuteCommand("insertHtml", "'" + strHtml + "'", s);
 }
 
-void CWizDocumentWebView::on_editorCommandPastePlainText_triggered()
+void CWizDocumentWebView::setPastePlainTextEnable(bool bEnable)
 {
-    QClipboard* clip = QApplication::clipboard();
-    Q_ASSERT(clip);
-
-    const QMimeData* mime = clip->mimeData();
-    QStringList formats = mime->formats();
-//    for(int i = 0; i < formats.size(); ++ i) {
-//        qDebug() << "Mime Format: " << formats.at(i) << " Mime data: " << mime->data(formats.at(i));
-//    }
-    if (mime->hasHtml())
+    int nState = editorCommandQueryCommandState("pasteplain");
+    if ((!bEnable && nState == 1) || (bEnable && nState != 1))
     {
-        QString strText = mime->text();
-        if (strText.isEmpty())
-            WizHtml2Text(mime->html(), strText);
-        QMimeData* data = new QMimeData();
-        data->removeFormat("text/html");
-        data->setText(strText);
-        clip->setMimeData(data);
+        editorCommandExecuteCommand("pasteplain");
     }
-
-    triggerPageAction(QWebPage::Paste);
 }
 
 bool CWizDocumentWebView::editorCommandExecuteIndent()
@@ -1661,7 +1647,7 @@ bool CWizDocumentWebView::editorCommandExecuteViewSource()
 bool CWizDocumentWebView::editorCommandExecuteInsertCode()
 {
     QString strSelectHtml = page()->selectedText();
-    WizCodeEditorDialog *dialog = new WizCodeEditorDialog();
+    WizCodeEditorDialog *dialog = new WizCodeEditorDialog(m_app);
     connect(dialog, SIGNAL(insertHtmlRequest(QString)), SLOT(on_insertCodeHtml_requset(QString)));
     dialog->show();
     dialog->setWindowState(dialog->windowState() & ~Qt::WindowFullScreen | Qt::WindowActive);
@@ -2051,7 +2037,6 @@ void CWizDocumentWebViewSaverThread::PeekData(SAVEDATA& data)
         //
         break;
     }
-
 }
 
 void CWizDocumentWebViewSaverThread::run()

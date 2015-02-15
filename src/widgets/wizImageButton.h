@@ -38,6 +38,7 @@ private:
     QPixmap m_hotIcon;
     QPixmap m_downIcon;
     QPixmap m_currentIcon;
+    QPixmap m_oldIcon;
 
     bool m_lockNormalStatus;
 };

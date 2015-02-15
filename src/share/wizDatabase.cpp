@@ -393,8 +393,6 @@ qint64 CWizDatabase::GetObjectVersion(const QString& strObjectName)
 bool CWizDatabase::SetObjectVersion(const QString& strObjectName,
                                     qint64 nVersion)
 {
-    qDebug() << "set object: " << strObjectName << " version: " << nVersion;
-
     return SetMetaInt64("SYNC_INFO", strObjectName, nVersion);
 }
 
@@ -415,7 +413,21 @@ bool CWizDatabase::GetModifiedStyleList(CWizStyleDataArray& arrayData)
 
 bool CWizDatabase::GetModifiedDocumentList(CWizDocumentDataArray& arrayData)
 {
-    return GetModifiedDocuments(arrayData);
+    CWizDocumentDataArray docList;
+    if (!GetModifiedDocuments(docList))
+        return false;
+
+    // remove invalid document
+    CWizDocumentDataArray::iterator it;
+    for (it = docList.begin(); it != docList.end(); it++)
+    {
+        WIZDOCUMENTDATA doc = *it;
+        if (CanEditDocument(doc))
+        {
+            arrayData.push_back(doc);
+        }
+    }
+    return true;
 }
 
 bool CWizDatabase::GetModifiedAttachmentList(CWizDocumentAttachmentDataArray& arrayData)
@@ -448,6 +460,13 @@ bool CWizDatabase::OnDownloadTagList(const CWizTagDataArray& arrayData)
     for (it = arrayData.begin(); it != arrayData.end(); it++) {
         WIZTAGDATA data(*it);
         data.strKbGUID = kbGUID();
+        //WARNING:当前同步数据时不会从服务器中下载tag的position数据。
+        //将position数据保留为原本的数据。如果后期规则修改，此处需要修改
+        WIZTAGDATA dataTemp;
+        if (TagFromGUID(data.strGUID, dataTemp))
+        {
+            data.nPostion = dataTemp.nPostion;
+        }
         arrayTag.push_back(data);
     }
 
@@ -507,6 +526,11 @@ qint64 CWizDatabase::GetObjectLocalVersion(const QString& strObjectGUID,
     return CWizIndex::GetObjectLocalVersion(strObjectGUID, strObjectType);
 }
 
+qint64 CWizDatabase::GetObjectLocalVersionEx(const QString& strObjectGUID, const QString& strObjectType, bool& bObjectVersion)
+{
+     return CWizIndex::GetObjectLocalVersionEx(strObjectGUID, strObjectType, bObjectVersion);
+}
+
 qint64 CWizDatabase::GetObjectLocalServerVersion(const QString& strObjectGUID,
                                                  const QString& strObjectType)
 {
@@ -518,6 +542,14 @@ bool CWizDatabase::SetObjectLocalServerVersion(const QString& strObjectGUID,
                                                qint64 nVersion)
 {
     return ModifyObjectVersion(strObjectGUID, strObjectType, nVersion);
+}
+
+void CWizDatabase::OnObjectUploaded(const QString& strObjectGUID, const QString& strObjectType)
+{
+    if (strObjectType == "document")
+    {
+        emit documentUploaded(kbGUID(), strObjectGUID);
+    }
 }
 
 bool CWizDatabase::DocumentFromGUID(const QString& strGUID,
@@ -655,6 +687,17 @@ bool CWizDatabase::OnUploadObject(const QString& strGUID,
     } else {
         return ModifyObjectVersion(strGUID, strObjectType, 0);
     }
+}
+
+bool CWizDatabase::ModifyDocumentsVersion(CWizDocumentDataArray& arrayData)
+{
+    CWizDocumentDataArray::const_iterator it;
+    for (it = arrayData.begin(); it != arrayData.end(); it++) {
+        WIZDOCUMENTDATA data(*it);
+        SetDocumentVersion(data.strGUID, data.nVersion);
+    }
+
+    return true;
 }
 
 bool CWizDatabase::CopyDocumentTo(const QString &strGUID, CWizDatabase &targetDB, const QString &strTargetLocation,
@@ -1076,6 +1119,7 @@ void CWizDatabase::GetKBKeys(CWizStdStringArray& arrayKey)
     {
         arrayKey.push_back("group_tag_oem");
         arrayKey.push_back("group_tag_config_oem");
+        arrayKey.push_back("group_tag_pos");
     }
     else
     {
@@ -1133,6 +1177,10 @@ QString CWizDatabase::GetLocalValue(const QString& key)
     {
         return GetFoldersPos();
     }
+    else if (strKey == "group_tag_pos")
+    {
+        return GetGroupTagsPos();
+    }
     else if (strKey == "group_tag_oem")
     {
         Q_ASSERT(false);
@@ -1170,6 +1218,10 @@ void CWizDatabase::SetLocalValue(const QString& key, const QString& value,
     else if (strKey == "folders_pos")
     {
         SetFoldersPos(value, nServerVersion);
+    }
+    else if (strKey == "group_tag_pos")
+    {
+        SetGroupTagsPos(value, nServerVersion);
     }
     else if (strKey == "group_tag_oem")
     {
@@ -1340,6 +1392,7 @@ void CWizDatabase::setBizGroupUsers(const QString& strkbGUID, const QString& str
 void CWizDatabase::SetFoldersPos(const QString& foldersPos, qint64 nVersion)
 {
     SetLocalValueVersion("folders_pos", nVersion);
+    SetMeta("SYNC_INFO", "FOLDERS_POS", foldersPos);
 
     bool bPositionChanged = false;
 
@@ -1367,7 +1420,6 @@ void CWizDatabase::SetFoldersPos(const QString& foldersPos, qint64 nVersion)
         CString strPos;
         if (!::WizStringSimpleSplit(strLine, ':', strLocation, strPos))
             continue;
-
         strLocation.Trim();
         strLocation.Trim('\"');
 
@@ -1381,6 +1433,8 @@ void CWizDatabase::SetFoldersPos(const QString& foldersPos, qint64 nVersion)
             bPositionChanged = true;
         }
     }
+
+    setting->sync();
 
     if (bPositionChanged) {
         Q_EMIT folderPositionChanged();
@@ -1410,7 +1464,26 @@ QString CWizDatabase::GetFolders()
 
 QString CWizDatabase::GetFoldersPos()
 {
-    return QString();
+    return meta("SYNC_INFO", "FOLDERS_POS");
+}
+
+QString CWizDatabase::GetGroupTagsPos()
+{
+    CWizTagDataArray arrayTag;
+    GetAllTags(arrayTag);
+    if (arrayTag.size() == 0)
+        return QString();
+
+    QString strTagPos;
+    for (CWizTagDataArray::const_iterator it = arrayTag.begin();
+         it != arrayTag.end();
+         it++)
+    {
+        WIZTAGDATA tag = *it;
+        strTagPos.append(tag.strGUID + ":" + QString::number(tag.nPostion) + "*");
+    }
+    strTagPos.remove(strTagPos.length() - 1, 1);
+    return strTagPos;
 }
 
 void CWizDatabase::SetFolders(const QString& strFolders, qint64 nVersion, bool bSaveVersion)
@@ -1480,6 +1553,46 @@ void CWizDatabase::SetFolders(const QString& strFolders, qint64 nVersion, bool b
     if (bSaveVersion)
     {
         SetLocalValueVersion("folders", nVersion);
+    }
+}
+
+void CWizDatabase::SetGroupTagsPos(const QString& tagsPos, qint64 nVersion)
+{
+    SetLocalValueVersion("group_tag_pos", nVersion);
+
+    bool bPositionChanged = false;
+
+    CString str(tagsPos);
+    str.Trim();
+    if (str.IsEmpty())
+        return;
+
+    CWizStdStringArray arrPos;
+    ::WizSplitTextToArray(str, '*', arrPos);
+
+    CWizStdStringArray::const_iterator it;
+    for (it= arrPos.begin(); it != arrPos.end(); it++) {
+        CString strLine = *it;
+        QStringList posList =  strLine.split(':');
+        if (posList.count() != 2) {
+            qDebug() << "Process tags pos error : " << strLine;
+            continue;
+        }
+
+        QString strGUID = posList.first();
+        int nPos = posList.last().toInt();
+        WIZTAGDATA tagData;
+        if (TagFromGUID(strGUID, tagData)) {
+            if (tagData.nPostion != nPos) {
+                tagData.nPostion = nPos;
+                ModifyTag(tagData);
+                bPositionChanged = true;
+            }
+        }
+    }
+
+    if (bPositionChanged) {
+        Q_EMIT tagsPositionChanged(kbGUID());
     }
 }
 
@@ -1563,6 +1676,17 @@ bool CWizDatabase::loadBizUsersFromJson(const QString& strBizGUID,
     delete encoder;
 
     return true;
+}
+
+void CWizDatabase::SetFoldersPosModified()
+{
+    SetLocalValueVersion("folders_pos", -1);
+    SetLocalValueVersion("folders", -1);
+}
+
+void CWizDatabase::SetGroupTagsPosModified()
+{
+    SetLocalValueVersion("group_tag_pos", -1);
 }
 
 bool CWizDatabase::getAllNotesOwners(CWizStdStringArray& arrayOwners)
@@ -2657,6 +2781,70 @@ bool CWizDatabase::UpdateDocumentDataMD5(WIZDOCUMENTDATA& data, const CString& s
     return bRet;
 }
 
+bool CWizDatabase::DeleteObject(const QString& strGUID, const QString& strType, bool bLog)
+{
+    if (strGUID.isEmpty() || strType.isEmpty())
+        return false;
+
+    if (!IsGroup())
+    {
+        BOOL objectExists = FALSE;
+        if (-1 == GetObjectLocalVersionEx(strGUID, strType, objectExists))
+        {
+            if (objectExists)
+            {
+                TOLOG2(_T("[%1] object [%2] is modified on local, skip to delete it"), strType, strGUID);
+                return S_FALSE;
+            }
+            else
+            {
+                return S_OK;
+            }
+        }
+    }
+
+
+    if (0 == strType.compare("tag", Qt::CaseInsensitive))
+    {
+        WIZTAGDATA data;
+        if (TagFromGUID(strGUID, data)) {
+            DeleteTag(data, bLog, false);
+        }
+        return true;
+    }
+    else if (0 == strType.compare("style", Qt::CaseInsensitive))
+    {
+        WIZSTYLEDATA data;
+        if (StyleFromGUID(strGUID, data)) {
+            return DeleteStyle(data, bLog, false);
+        }
+        return true;
+    }
+    else if (0 == strType.compare("document", Qt::CaseInsensitive))
+    {
+        WIZDOCUMENTDATA data;
+        if (DocumentFromGUID(strGUID, data)) {
+            return DeleteDocument(data, bLog);
+        }
+        return true;
+    }
+    else if (0 == strType.compare("attachment", Qt::CaseInsensitive))
+    {
+        WIZDOCUMENTATTACHMENTDATA data;
+        if (AttachmentFromGUID(strGUID, data)) {
+            return DeleteAttachment(data, bLog, false);
+        }
+        return true;
+    }
+    else
+    {
+        Q_ASSERT(0);
+        TOLOG1("Unknown object type: %1", strType);
+        return false;
+    }
+}
+
+
 bool CWizDatabase::DeleteAttachment(const WIZDOCUMENTATTACHMENTDATA& data,
                                     bool bLog,
                                     bool bReset /* = true */)
@@ -3655,7 +3843,7 @@ bool CWizDatabase::makeSureDocumentExist(const WIZDOCUMENTDATA& doc, CWizObjectD
         connect(downloaderHost, SIGNAL(downloadProgress(QString,int,int)), &dlg, SLOT(setProgress(QString,int,int)));
         connect(downloaderHost, SIGNAL(downloadDone(WIZOBJECTDATA,bool)), &dlg, SLOT(accept()));
 
-        downloaderHost->download(doc);
+        downloaderHost->downloadData(doc);
 
         dlg.exec();
     }
@@ -3682,7 +3870,7 @@ bool CWizDatabase::makeSureAttachmentExist(const WIZDOCUMENTATTACHMENTDATAEX &at
         connect(downloaderHost, SIGNAL(downloadProgress(QString,int, int)), &dlg, SLOT(setProgress(QString,int, int)));
         connect(downloaderHost, SIGNAL(downloadDone(WIZOBJECTDATA, bool)), &dlg, SLOT(accept()));
 
-        downloaderHost->download(attachData);
+        downloaderHost->downloadData(attachData);
 
         dlg.exec();
     }

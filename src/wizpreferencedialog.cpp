@@ -3,6 +3,7 @@
 
 #include <QMessageBox>
 #include <QFontDialog>
+#include <QColorDialog>
 
 #include "share/wizDatabaseManager.h"
 #include "wizmainwindow.h"
@@ -166,6 +167,19 @@ CWizPreferenceWindow::CWizPreferenceWindow(CWizExplorerApp& app, QWidget* parent
     ui->spinBox_left->setValue(m_app.userSettings().printMarginValue(wizPositionLeft));
     ui->spinBox_right->setValue(m_app.userSettings().printMarginValue(wizPositionRight));
     ui->spinBox_top->setValue(m_app.userSettings().printMarginValue(wizPositionTop));
+
+    bool searchEncryptedNote = m_app.userSettings().searchEncryptedNote();
+    ui->checkBoxSearchEncryNote->setChecked(searchEncryptedNote);
+    ui->lineEditNotePassword->setEnabled(searchEncryptedNote);
+    ui->lineEditNotePassword->setText(m_app.userSettings().encryptedNotePassword());
+
+    QString strColor = m_app.userSettings().editorBackgroundColor();
+    ui->pushButtonBackgroundColor->setStyleSheet(QString("QPushButton "
+                                                         "{ border: 1px; background: %1; height:20px;  border-radius:5px } ").arg(strColor));
+    ui->pushButtonClearBackground->setStyleSheet(QString("QPushButton:pressed{background-color: #000000;"));
+
+    bool manuallySortFolders = m_app.userSettings().isManualSortingEnabled();
+    ui->checkBoxManuallySort->setChecked(manuallySortFolders);
 }
 
 void CWizPreferenceWindow::showPrintMarginPage()
@@ -389,4 +403,67 @@ void CWizPreferenceWindow::on_checkBoxSystemStyle_toggled(bool checked)
     m_app.userSettings().setUseSystemBasedStyle(checked);
 
     QMessageBox::information(m_app.mainWindow(), tr("Info"), tr("Application style will be changed after restart WizNote."), QMessageBox::Ok);
+}
+
+void CWizPreferenceWindow::on_checkBoxSearchEncryNote_toggled(bool checked)
+{
+    m_app.userSettings().setSearchEncryptedNote(checked);
+    if (!checked)
+    {
+        ui->lineEditNotePassword->blockSignals(true);
+        ui->lineEditNotePassword->clear();
+        ui->lineEditNotePassword->blockSignals(false);
+        m_app.userSettings().setEncryptedNotePassword("");
+
+        QMessageBox msg;
+        msg.setIcon(QMessageBox::Information);
+        msg.setWindowTitle(tr("Cancel search encrypted note"));
+        msg.addButton(QMessageBox::Ok);
+        msg.addButton(QMessageBox::Cancel);
+        msg.setText(tr("Cancel search encrypted note need to rebuild full text search, this would be quite slow if you have quite a few notes or attachments. "
+                       "Do you want to rebuild full text search?"));
+
+        if (QMessageBox::Ok == msg.exec())
+        {
+            Core::Internal::MainWindow* mainWindow = qobject_cast<Core::Internal::MainWindow*>(m_app.mainWindow());
+            Q_ASSERT(mainWindow);
+            mainWindow->rebuildFTS();
+        }
+    }
+    ui->lineEditNotePassword->setEnabled(checked);
+}
+
+void CWizPreferenceWindow::on_lineEditNotePassword_editingFinished()
+{
+    m_app.userSettings().setEncryptedNotePassword(ui->lineEditNotePassword->text());
+}
+
+void CWizPreferenceWindow::on_pushButtonBackgroundColor_clicked()
+{
+    QColorDialog dlg;
+    dlg.setCurrentColor(m_app.userSettings().editorBackgroundColor());
+    if (dlg.exec() == QDialog::Accepted)
+    {
+        QString strColor = dlg.currentColor().name();
+        updateEditorBackgroundColor(strColor);
+    }
+}
+
+void CWizPreferenceWindow::on_pushButtonClearBackground_clicked()
+{
+    updateEditorBackgroundColor("#FFFFFF");
+}
+
+void CWizPreferenceWindow::updateEditorBackgroundColor(const QString& strColorName)
+{
+    ui->pushButtonBackgroundColor->setStyleSheet(QString("QPushButton "
+                                                         "{ border: 1px; background: %1; height:20px;  border-radius:5px } ").arg(strColorName));
+    m_app.userSettings().setEditorBackgroundColor(strColorName);
+    Q_EMIT settingsChanged(wizoptionsFont);
+}
+
+void CWizPreferenceWindow::on_checkBoxManuallySort_toggled(bool checked)
+{
+    m_app.userSettings().setManualSortingEnable(checked);
+    emit settingsChanged(wizoptionsFolders);
 }

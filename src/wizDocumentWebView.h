@@ -148,6 +148,8 @@ public:
     void editorFocus();
     void setEditorEnable(bool enalbe);
 
+    bool evaluateJavaScript(const QString& js);
+
     // -1: command invalid
     // 0: available
     // 1: executed before
@@ -167,11 +169,12 @@ public:
     bool editorCommandExecuteFontSize(const QString& strSize);
     bool editorCommandExecuteInsertHtml(const QString& strHtml, bool bNotSerialize);
 
-    void on_editorCommandPastePlainText_triggered();
+    void setPastePlainTextEnable(bool bEnable);
     //
     void saveAsPDF(const QString& strFileName);
     void saveAsHtml(const QString& strDirPath);
     void printDocument();
+    bool shareNoteByEmail();
     bool findIMGElementAt(QPoint point, QString& strSrc);
     //
     Q_INVOKABLE bool isContentsChanged() { return m_bContentsChanged; }
@@ -251,7 +254,6 @@ public Q_SLOTS:
     void onEditorLinkClicked(const QUrl& url);
     void onEditorContentChanged();
     void onEditorSelectionChanged();
-    void clearEditorHeight();
 
     void onTimerAutoSaveTimout();
 
@@ -346,6 +348,7 @@ public Q_SLOTS:
 #endif
 
     // js func
+    void resetCheckListEnvironment();
     void initCheckListEnvironment();
 
 Q_SIGNALS:
@@ -365,6 +368,7 @@ Q_SIGNALS:
 private:
     void setWindowVisibleOnScreenShot(bool bVisible);
     bool insertImage(const QString& strFileName, bool bCopyFile);
+
 };
 
 #endif // WIZDOCUMENTWEBVIEW_H

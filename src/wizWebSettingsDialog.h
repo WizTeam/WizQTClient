@@ -34,7 +34,6 @@ private Q_SLOTS:
     void onEditorPopulateJavaScriptWindowObject();
 };
 
-
 #define WIZ_TOKEN_IN_URL_REPLACE_PART   "wiz_web_settings_with_token_replace_part"
 
 class CWizWebSettingsWithTokenDialog : public CWizWebSettingsDialog

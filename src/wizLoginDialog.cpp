@@ -62,6 +62,13 @@ CWizLoginDialog::CWizLoginDialog(const QString &strDefaultUserId, const QString 
     //
 
 #endif
+    QPainterPath path;
+    QRectF rect = geometry();
+    path.addRoundRect(rect, 5, 2);
+    QPolygon polygon= path.toFillPolygon().toPolygon();
+    QRegion region(polygon);
+    setMask(region);
+
     m_lineEditUserName = ui->wgt_usercontainer->edit();
     m_lineEditPassword = ui->wgt_passwordcontainer->edit();
     m_buttonLogin = ui->btn_login;
@@ -345,7 +352,7 @@ void CWizLoginDialog::applyElementStyles(const QString &strLocal)
 
     ui->wgt_newUser->setBackgroundImage(strLoginTopLineEditor, QPoint(8, 8));
     ui->wgt_newUser->setLeftIcon(strIconPerson);
-    m_lineEditNewUserName->setPlaceholderText(tr("Please input eamil as your account"));
+    m_lineEditNewUserName->setPlaceholderText(tr("Please input email as your account"));
 
     ui->wgt_newPassword->setBackgroundImage(strLoginMidLineEditor, QPoint(8, 8));
     ui->wgt_newPassword->setLeftIcon(strIconKey);
