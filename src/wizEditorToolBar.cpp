@@ -940,7 +940,7 @@ void EditorToolBar::saveImage(QString strFileName)
     }
 
     QString strFilePath = QFileDialog::getSaveFileName(this, tr("Save as..."),
-                                                       QDir::homePath(), tr("Image Files (*.%1)").arg(info.suffix()));
+                                                       QDir::homePath() + "/untitled." + info.suffix(), tr("Image Files (*.%1)").arg(info.suffix()));
     if (strFilePath.isEmpty())
         return;
 
@@ -1033,7 +1033,7 @@ bool EditorToolBar::processBase64Image(bool bUseForCopy)
     if (!bUseForCopy)
     {
         QString strFilePath = QFileDialog::getSaveFileName(this, tr("Save as..."),
-                                                           QDir::homePath(), tr("Image Files (*.%1)").arg(strType));
+                                                           QDir::homePath() + "/untitled." + strType, tr("Image Files (*.%1)").arg(strType));
         if (strFilePath.isEmpty())
             return false;
 
