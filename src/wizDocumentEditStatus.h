@@ -83,7 +83,7 @@ private:
 
 private:
     QTimer* m_timeOutTimer;
-    QTimer* m_loopCheckTimer;
+//    QTimer* m_loopCheckTimer;
     bool m_stop;
 
     QString m_strKbGUID;

@@ -4,23 +4,23 @@
 <context>
     <name>CWizAttachmentListView</name>
     <message>
-        <location filename="../src/wizattachmentlistwidget.cpp" line="196"/>
+        <location filename="../src/wizattachmentlistwidget.cpp" line="197"/>
         <source>Add attachments</source>
         <translation>添加附件</translation>
     </message>
     <message>
-        <location filename="../src/wizattachmentlistwidget.cpp" line="198"/>
+        <location filename="../src/wizattachmentlistwidget.cpp" line="199"/>
         <source>All files(*.*)</source>
         <translation>所有文件(*.*)</translation>
     </message>
     <message>
-        <location filename="../src/wizattachmentlistwidget.cpp" line="359"/>
-        <location filename="../src/wizattachmentlistwidget.cpp" line="387"/>
+        <location filename="../src/wizattachmentlistwidget.cpp" line="362"/>
+        <location filename="../src/wizattachmentlistwidget.cpp" line="390"/>
         <source>Can not save attachment to %1</source>
         <translation>不能保存附件到 %1</translation>
     </message>
     <message>
-        <location filename="../src/wizattachmentlistwidget.cpp" line="366"/>
+        <location filename="../src/wizattachmentlistwidget.cpp" line="369"/>
         <source>Save attachments to</source>
         <translation>保存附件到</translation>
     </message>
@@ -28,12 +28,12 @@
 <context>
     <name>CWizAttachmentListViewItem</name>
     <message>
-        <location filename="../src/wizattachmentlistwidget.cpp" line="529"/>
+        <location filename="../src/wizattachmentlistwidget.cpp" line="540"/>
         <source>Uploading (%1 %) ...</source>
         <translation>正在上传 (%1 %) ...</translation>
     </message>
     <message>
-        <location filename="../src/wizattachmentlistwidget.cpp" line="531"/>
+        <location filename="../src/wizattachmentlistwidget.cpp" line="542"/>
         <source>Unknow State</source>
         <translation>未知状态</translation>
     </message>
@@ -41,12 +41,12 @@
 <context>
     <name>CWizAttachmentListWidget</name>
     <message>
-        <location filename="../src/wizattachmentlistwidget.cpp" line="454"/>
+        <location filename="../src/wizattachmentlistwidget.cpp" line="457"/>
         <source>Add attachments</source>
         <translation>添加附件</translation>
     </message>
     <message>
-        <location filename="../src/wizattachmentlistwidget.cpp" line="461"/>
+        <location filename="../src/wizattachmentlistwidget.cpp" line="464"/>
         <source>Attachments</source>
         <translation>附件</translation>
     </message>
@@ -269,84 +269,84 @@
 <context>
     <name>CWizDatabase</name>
     <message>
-        <location filename="../src/share/wizDatabase.cpp" line="833"/>
+        <location filename="../src/share/wizDatabase.cpp" line="838"/>
         <source>Please input document password to encrypt</source>
         <translation>请输入笔记密码</translation>
     </message>
     <message>
-        <location filename="../src/share/wizDatabase.cpp" line="3365"/>
+        <location filename="../src/share/wizDatabase.cpp" line="3434"/>
         <source>My Notes</source>
         <translation>我的笔记</translation>
     </message>
     <message>
-        <location filename="../src/share/wizDatabase.cpp" line="3367"/>
-        <location filename="../src/share/wizDatabase.cpp" line="3369"/>
+        <location filename="../src/share/wizDatabase.cpp" line="3436"/>
+        <location filename="../src/share/wizDatabase.cpp" line="3438"/>
         <source>My Journals</source>
         <translation>我的日记</translation>
     </message>
     <message>
-        <location filename="../src/share/wizDatabase.cpp" line="3371"/>
+        <location filename="../src/share/wizDatabase.cpp" line="3440"/>
         <source>My Events</source>
         <translation>我的事件</translation>
     </message>
     <message>
-        <location filename="../src/share/wizDatabase.cpp" line="3373"/>
+        <location filename="../src/share/wizDatabase.cpp" line="3442"/>
         <source>My Sticky Notes</source>
         <translation>我的桌面便笺</translation>
     </message>
     <message>
-        <location filename="../src/share/wizDatabase.cpp" line="3375"/>
+        <location filename="../src/share/wizDatabase.cpp" line="3444"/>
         <source>My Emails</source>
         <translation>我的邮件</translation>
     </message>
     <message>
-        <location filename="../src/share/wizDatabase.cpp" line="3377"/>
+        <location filename="../src/share/wizDatabase.cpp" line="3446"/>
         <source>My Drafts</source>
         <translation>我的草稿</translation>
     </message>
     <message>
-        <location filename="../src/share/wizDatabase.cpp" line="3379"/>
+        <location filename="../src/share/wizDatabase.cpp" line="3448"/>
         <source>My Tasks</source>
         <translation>我的任务</translation>
     </message>
     <message>
-        <location filename="../src/share/wizDatabase.cpp" line="3383"/>
+        <location filename="../src/share/wizDatabase.cpp" line="3452"/>
         <source>Inbox</source>
         <translation>收集箱</translation>
     </message>
     <message>
-        <location filename="../src/share/wizDatabase.cpp" line="3385"/>
+        <location filename="../src/share/wizDatabase.cpp" line="3454"/>
         <source>Completed</source>
         <translation>已完成</translation>
     </message>
     <message>
-        <location filename="../src/share/wizDatabase.cpp" line="3740"/>
+        <location filename="../src/share/wizDatabase.cpp" line="3809"/>
         <source>Doucment  %1  Password</source>
         <translation>笔记 %1 密码</translation>
     </message>
     <message>
-        <location filename="../src/share/wizDatabase.cpp" line="3741"/>
+        <location filename="../src/share/wizDatabase.cpp" line="3810"/>
         <source>Password :</source>
         <translation>密码：</translation>
     </message>
     <message>
-        <location filename="../src/share/wizDatabase.cpp" line="820"/>
-        <location filename="../src/share/wizDatabase.cpp" line="3751"/>
+        <location filename="../src/share/wizDatabase.cpp" line="825"/>
+        <location filename="../src/share/wizDatabase.cpp" line="3820"/>
         <source>Info</source>
         <translation>提示</translation>
     </message>
     <message>
-        <location filename="../src/share/wizDatabase.cpp" line="820"/>
+        <location filename="../src/share/wizDatabase.cpp" line="825"/>
         <source>No password cert founded. Please create password cert from windows client first.</source>
         <translation>未发现加密证书，请从Windows客户端创建加密证书。</translation>
     </message>
     <message>
-        <location filename="../src/share/wizDatabase.cpp" line="833"/>
+        <location filename="../src/share/wizDatabase.cpp" line="838"/>
         <source>Password</source>
         <translation>密码</translation>
     </message>
     <message>
-        <location filename="../src/share/wizDatabase.cpp" line="3751"/>
+        <location filename="../src/share/wizDatabase.cpp" line="3820"/>
         <source>password error!</source>
         <translation>密码错误！</translation>
     </message>
@@ -453,22 +453,22 @@
 <context>
     <name>CWizDocumentWebView</name>
     <message>
-        <location filename="../src/wizDocumentWebView.cpp" line="1589"/>
+        <location filename="../src/wizDocumentWebView.cpp" line="1591"/>
         <source>Image File</source>
         <translation>图片文件</translation>
     </message>
     <message>
-        <location filename="../src/wizDocumentWebView.cpp" line="1589"/>
+        <location filename="../src/wizDocumentWebView.cpp" line="1591"/>
         <source>Images (*.png *.bmp *.gif *.jpg)</source>
         <translation>图片 (*.png *.bmp *.gif *.jpg)</translation>
     </message>
     <message>
-        <location filename="../src/wizDocumentWebView.cpp" line="1836"/>
+        <location filename="../src/wizDocumentWebView.cpp" line="1838"/>
         <source>Inof</source>
         <translation>提示</translation>
     </message>
     <message>
-        <location filename="../src/wizDocumentWebView.cpp" line="1836"/>
+        <location filename="../src/wizDocumentWebView.cpp" line="1838"/>
         <source>No available printer founded! Please add printer to system printer list.</source>
         <translation>未发现可用打印机！请在系统打印机列表中添加打印机。</translation>
     </message>
@@ -1565,37 +1565,37 @@ w: %3  h: %4</translation>
 <context>
     <name>Core::CWizDocumentView</name>
     <message>
-        <location filename="../src/wizDocumentView.cpp" line="390"/>
+        <location filename="../src/wizDocumentView.cpp" line="387"/>
         <source>Checking whether note is eiditable...</source>
         <translation type="unfinished">正在检查笔记是否可编辑...</translation>
     </message>
     <message>
-        <location filename="../src/wizDocumentView.cpp" line="471"/>
+        <location filename="../src/wizDocumentView.cpp" line="468"/>
         <source>Checking whether checklist is clickable...</source>
         <translation type="unfinished">正在检查清单项是否可点击...</translation>
     </message>
     <message>
-        <location filename="../src/wizDocumentView.cpp" line="479"/>
+        <location filename="../src/wizDocumentView.cpp" line="476"/>
         <source>You have occupied this note by clicking checklist !  Switch to other notes to free this note.</source>
         <translation type="unfinished">您点击了阅读状态的清单项，当前笔记正被您占用！如需解除，请切换到其他笔记。</translation>
     </message>
     <message>
-        <location filename="../src/wizDocumentView.cpp" line="692"/>
+        <location filename="../src/wizDocumentView.cpp" line="689"/>
         <source>%1 is currently editing this note. Note has been locked.</source>
         <translation>当前笔记正在被 %1 编辑，笔记已处于锁定状态。</translation>
     </message>
     <message>
-        <location filename="../src/wizDocumentView.cpp" line="696"/>
+        <location filename="../src/wizDocumentView.cpp" line="693"/>
         <source>%1 is currently editing this note.</source>
         <translation>当前笔记正在被 %1 编辑。</translation>
     </message>
     <message>
-        <location filename="../src/wizDocumentView.cpp" line="721"/>
+        <location filename="../src/wizDocumentView.cpp" line="718"/>
         <source>The current network in poor condition, you are &lt;b&gt; offline editing mode &lt;/b&gt;.</source>
         <translation type="unfinished">当前网络状况不佳，您正处于 &lt;b&gt; 离线编辑模式 &lt;/b&gt;。</translation>
     </message>
     <message>
-        <location filename="../src/wizDocumentView.cpp" line="739"/>
+        <location filename="../src/wizDocumentView.cpp" line="736"/>
         <source>New version on server avalible. &lt;a href=&apos;%1&apos;&gt;Click to down load new version.&lt;a&gt;</source>
         <translation>检测到当前笔记有更新，&lt;a href=&apos;%1&apos;&gt;下载更新&lt;a&gt;</translation>
     </message>
@@ -2411,27 +2411,27 @@ w: %3  h: %4</translation>
         <translation>大小: </translation>
     </message>
     <message>
-        <location filename="../src/wizattachmentlistwidget.cpp" line="519"/>
+        <location filename="../src/wizattachmentlistwidget.cpp" line="530"/>
         <source>Un-downloaded</source>
         <translation>未下载</translation>
     </message>
     <message>
-        <location filename="../src/wizattachmentlistwidget.cpp" line="29"/>
+        <location filename="../src/wizattachmentlistwidget.cpp" line="30"/>
         <source>Add...</source>
         <translation>添加...</translation>
     </message>
     <message>
-        <location filename="../src/wizattachmentlistwidget.cpp" line="30"/>
+        <location filename="../src/wizattachmentlistwidget.cpp" line="31"/>
         <source>Save as...</source>
         <translation>另存为...</translation>
     </message>
     <message>
-        <location filename="../src/wizattachmentlistwidget.cpp" line="31"/>
+        <location filename="../src/wizattachmentlistwidget.cpp" line="32"/>
         <source>Open...</source>
         <translation>打开...</translation>
     </message>
     <message>
-        <location filename="../src/wizattachmentlistwidget.cpp" line="525"/>
+        <location filename="../src/wizattachmentlistwidget.cpp" line="536"/>
         <source>Downloading (%1 %) ...</source>
         <translation>正在下载 (%1 %) ...</translation>
     </message>
@@ -2440,7 +2440,7 @@ w: %3  h: %4</translation>
         <location filename="../src/wizCategoryView.cpp" line="57"/>
         <location filename="../src/wizDocumentListView.cpp" line="32"/>
         <location filename="../src/wizactions.cpp" line="90"/>
-        <location filename="../src/wizattachmentlistwidget.cpp" line="32"/>
+        <location filename="../src/wizattachmentlistwidget.cpp" line="33"/>
         <source>Delete</source>
         <translation>删除</translation>
     </message>
@@ -2857,24 +2857,19 @@ w: %3  h: %4</translation>
         <translation>拖拽笔记到此栏目</translation>
     </message>
     <message>
-        <location filename="../src/notifybar.cpp" line="48"/>
+        <location filename="../src/notifybar.cpp" line="53"/>
         <source>The note is locked and read only, press unlock button if you need edit.</source>
         <translation>笔记已锁定为只读, 如需修改请点击解锁按钮。</translation>
     </message>
     <message>
-        <location filename="../src/notifybar.cpp" line="52"/>
+        <location filename="../src/notifybar.cpp" line="57"/>
         <source>This note is deleted, You can edit after move to other folders.</source>
         <translation>这个笔记已被删除, 请移动到其他文件夹之后再进行修改。</translation>
     </message>
     <message>
-        <location filename="../src/notifybar.cpp" line="56"/>
+        <location filename="../src/notifybar.cpp" line="61"/>
         <source>Your permission is not enough to edit this note.</source>
         <translation>您的权限不够, 无法修改这个笔记。</translation>
-    </message>
-    <message>
-        <location filename="../src/notifybar.cpp" line="61"/>
-        <source>Checking for the version of note, please wait for a second...</source>
-        <translation>正在检查笔记版本，请稍等...</translation>
     </message>
     <message>
         <location filename="../src/utils/misc.cpp" line="15"/>
@@ -3050,27 +3045,27 @@ w: %3  h: %4</translation>
         <translation>$分享给朋友的笔记</translation>
     </message>
     <message>
-        <location filename="../src/share/wizDatabase.cpp" line="3771"/>
+        <location filename="../src/share/wizDatabase.cpp" line="3840"/>
         <source>Download Note %1 </source>
         <translation>下载笔记 %1</translation>
     </message>
     <message>
-        <location filename="../src/share/wizDatabase.cpp" line="3772"/>
+        <location filename="../src/share/wizDatabase.cpp" line="3841"/>
         <source>Downloading,please wait...</source>
         <translation>正在下载，请稍等...</translation>
     </message>
     <message>
-        <location filename="../src/share/wizDatabase.cpp" line="3798"/>
+        <location filename="../src/share/wizDatabase.cpp" line="3867"/>
         <source>Download Attachment %1 </source>
         <translation>下载附件 %1</translation>
     </message>
     <message>
-        <location filename="../src/share/wizDatabase.cpp" line="3799"/>
+        <location filename="../src/share/wizDatabase.cpp" line="3868"/>
         <source>Downloading, please wait...</source>
         <translation>正在下载，请稍等...</translation>
     </message>
     <message>
-        <location filename="../src/wizDocumentWebView.cpp" line="1843"/>
+        <location filename="../src/wizDocumentWebView.cpp" line="1845"/>
         <source>Print Document</source>
         <translation>打印文档</translation>
     </message>

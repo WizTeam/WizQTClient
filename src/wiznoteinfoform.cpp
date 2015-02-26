@@ -108,8 +108,11 @@ void CWizNoteInfoForm::on_editTitle_editingFinished()
     CWizDatabase& db = CWizDatabaseManager::instance()->db(m_docKbGuid);
     if (db.DocumentFromGUID(m_docGuid, doc))
     {
-        doc.strTitle = ui->editTitle->text();
-        db.ModifyDocumentInfo(doc);
+        if (doc.strTitle != ui->editTitle->text())
+        {
+            doc.strTitle = ui->editTitle->text();
+            db.ModifyDocumentInfo(doc);
+        }
     }
 }
 
@@ -119,8 +122,11 @@ void CWizNoteInfoForm::on_editURL_editingFinished()
     CWizDatabase& db = CWizDatabaseManager::instance()->db(m_docKbGuid);
     if (db.DocumentFromGUID(m_docGuid, doc))
     {
-        doc.strURL= ui->editURL->text();
-        db.ModifyDocumentInfo(doc);
+        if (doc.strURL != ui->editURL->text())
+        {
+            doc.strURL= ui->editURL->text();
+            db.ModifyDocumentInfo(doc);
+        }
     }
 }
 
@@ -130,8 +136,11 @@ void CWizNoteInfoForm::on_editAuthor_editingFinished()
     CWizDatabase& db = CWizDatabaseManager::instance()->db(m_docKbGuid);
     if (db.DocumentFromGUID(m_docGuid, doc))
     {
-        doc.strAuthor = ui->editAuthor->text();
-        db.ModifyDocumentInfo(doc);
+        if (doc.strAuthor != ui->editAuthor->text())
+        {
+            doc.strAuthor = ui->editAuthor->text();
+            db.ModifyDocumentInfo(doc);
+        }
     }
 }
 

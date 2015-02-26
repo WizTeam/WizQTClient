@@ -1137,84 +1137,75 @@ bool UploadList(const WIZKBINFO& kbInfo, IWizKMSyncEvents* pEvents, IWizSyncable
     int total = int(arrayData.size());
     int index = 0;
     //
-    TArray arraySubData;
-    CWizStdStringArray arraySubGUID;
-    while (!arrayData.empty())
+    CWizStdStringArray arrayGUID;
+    for (typename std::deque<TData>::const_iterator it = arrayData.begin();
+         it != arrayData.end();
+         it++)
     {
-        if (pEvents->IsStop())
-        {
-            pEvents->OnStatus(_TR("Stopped"));
-            return FALSE;
-        }
+        arrayGUID.push_back(it->strGUID);
+    }
+
+    /*
         //
-        TData dataTemp = arrayData.back();
-        arrayData.pop_back();
+        ////从服务器获取本地对象信息，然后判断是否需要上传数据或者信息////
         //
-        arraySubData.push_back(dataTemp);
-        arraySubGUID.push_back(dataTemp.strGUID);
-        //
-        if (arraySubData.size() == 50
-            || arrayData.empty()
-            )
-        {
-            TArray arrayDataOnServer;
-            if (!server.downloadList<TData>(arraySubGUID, arrayDataOnServer))
-            {
-                pEvents->OnError(_TR("Cannot download object list!"));
-                return FALSE;
-            }
-            //
-            std::map<QString, TData> mapDataOnServer;
-            for (typename TArray::const_iterator it = arrayDataOnServer.begin();
-                it != arrayDataOnServer.end();
-                it++)
-            {
-                mapDataOnServer[it->strGUID] = *it;
-            }
-            //
-            for (typename TArray::const_iterator it = arraySubData.begin();
-                it != arraySubData.end();
-                it++)
-            {
-                index++;
-                //
-                if (pEvents->IsStop())
-                    return FALSE;
-                //
-                TData local = *it;
-                //
-                if (_document)	//
-                {
-                    pEvents->OnUploadDocument(local.strGUID, FALSE);
-                }
-                //
-                BOOL bUploaded = TRUE;
-                if (!UploadObject<TData>(kbInfo, size, start, total, index, mapDataOnServer, local, pEvents, pDatabase, server, strObjectType, progress))
-                {
-                    bUploaded = FALSE;
-                    //
-                    pEvents->OnStatus("Can't upload object, ErrorCode: " + WizIntToStr(server.GetLastErrorCode()));
-                    pEvents->OnStatus(server.GetLastErrorMessage());
-                    //
-                    switch (server.GetLastErrorCode())
-                    {
-                    case WIZKM_XMLRPC_ERROR_TRAFFIC_LIMIT:
-                    case WIZKM_XMLRPC_ERROR_STORAGE_LIMIT:
-                    case WIZKM_XMLRPC_ERROR_BIZ_SERVICE_EXPR:
-                        return FALSE;
-                    }
-                }
-                //
-                if (_document && bUploaded)	//
-                {
-                    pEvents->OnUploadDocument(local.strGUID, TRUE);
-                    pDatabase->OnObjectUploaded(local.strGUID, _T("document"));
-                }
-            }
-        }
-        arraySubGUID.clear();
+        */
+    TArray arrayDataOnServer;
+    if (!server.downloadSimpleList<TData>(arrayGUID, arrayDataOnServer))
+    {
+        pEvents->OnError(_TR("Cannot download object list!"));
+        return FALSE;
+    }
+
+    //
+    std::map<QString, TData> mapDataOnServer;
+    for (typename TArray::const_iterator it = arrayDataOnServer.begin();
+        it != arrayDataOnServer.end();
+        it++)
+    {
+        mapDataOnServer[it->strGUID] = *it;
     }
     //
+    for (typename TArray::const_iterator it = arrayData.begin();
+        it != arrayData.end();
+        it++)
+    {
+        index++;
+        //
+        if (pEvents->IsStop())
+            return FALSE;
+        //
+        TData local = *it;
+        //
+        if (_document)	//
+        {
+            pEvents->OnUploadDocument(local.strGUID, FALSE);
+        }
+        //
+        BOOL bUploaded = TRUE;
+        if (!UploadObject<TData>(kbInfo, size, start, total, index, mapDataOnServer, local, pEvents, pDatabase, server, strObjectType, progress))
+        {
+            bUploaded = FALSE;
+            //
+            pEvents->OnStatus("Can't upload object, ErrorCode: " + WizIntToStr(server.GetLastErrorCode()));
+            pEvents->OnStatus(server.GetLastErrorMessage());
+            //
+            switch (server.GetLastErrorCode())
+            {
+            case WIZKM_XMLRPC_ERROR_TRAFFIC_LIMIT:
+            case WIZKM_XMLRPC_ERROR_STORAGE_LIMIT:
+            case WIZKM_XMLRPC_ERROR_BIZ_SERVICE_EXPR:
+                return FALSE;
+            }
+        }
+        //
+        if (_document && bUploaded)	//
+        {
+            pEvents->OnUploadDocument(local.strGUID, TRUE);
+            pDatabase->OnObjectUploaded(local.strGUID, _T("document"));
+        }
+    }
+
     return TRUE;
 }
 bool CWizKMSync::UploadDocumentList()
@@ -1302,46 +1293,36 @@ bool CWizKMSync::DownloadFullDocumentList()
             mapDocumentPart[itNeedToBeDownloaded->strGUID] = part;
             arrayDocumentGUID.push_back(itNeedToBeDownloaded->strGUID);
         }
+    }
+    //
+    if (!arrayDocumentGUID.empty())
+    {
+        m_pEvents->OnStatus(_TR(_T("Query notes information")));
         //
-        //
-        if (arrayDocumentGUID.size() >= 30
-            || itNeedToBeDownloaded == (m_arrayDocumentNeedToBeDownloaded.end() - 1))
+        std::deque<WIZDOCUMENTDATAEX> arrayDocument;
+        if (!m_server.document_downloadFullList(arrayDocumentGUID, arrayDocument))
         {
-            if (!arrayDocumentGUID.empty())
+            TOLOG(_T("Can't download note info list!"));
+            return FALSE;
+        }
+        //
+        for (std::deque<WIZDOCUMENTDATAEX>::const_iterator itDocument = arrayDocument.begin();
+             itDocument != arrayDocument.end();
+             itDocument++)
+        {
+            m_pEvents->OnStatus(WizFormatString1(_TR(_T("Update note information: %1")), itDocument->strTitle));
+            //
+            int nDocumentPart = mapDocumentPart[itDocument->strGUID];
+            if (!m_pDatabase->OnDownloadDocument(nDocumentPart, *itDocument))
             {
-                m_pEvents->OnStatus(_TR(_T("Query notes information")));
-                //
-                std::deque<WIZDOCUMENTDATAEX> arrayDocument;
-                if (!m_server.document_downloadFullList(arrayDocumentGUID, arrayDocument))
-                {
-                    TOLOG(_T("Can't download note info list!"));
-                    return FALSE;
-                }
-                //
-                for (std::deque<WIZDOCUMENTDATAEX>::const_iterator itDocument = arrayDocument.begin();
-                    itDocument != arrayDocument.end();
-                    itDocument++)
-                {
-                    m_pEvents->OnStatus(WizFormatString1(_T("Update note information: %1"), itDocument->strTitle));
-                    //
-                    int nDocumentPart = mapDocumentPart[itDocument->strGUID];
-                    if (!m_pDatabase->OnDownloadDocument(nDocumentPart, *itDocument))
-                    {
-                        m_pEvents->OnError(WizFormatString1(_T("Cannot update note information: %1"), itDocument->strTitle));
-                        return FALSE;
-                    }
-                }
+                m_pEvents->OnError(WizFormatString1(_T("Cannot update note information: %1"), itDocument->strTitle));
+                return FALSE;
             }
-            //
-            int index = int(itNeedToBeDownloaded - m_arrayDocumentNeedToBeDownloaded.begin());
-            //
-            double fPos = index / double(total) * size;
-            m_pEvents->OnSyncProgress(start + int(fPos));
-            //
-            arrayDocumentGUID.clear();
-            mapDocumentPart.clear();
         }
     }
+    //
+    double fPos = size;
+    m_pEvents->OnSyncProgress(start + int(fPos));
     //
     return TRUE;
 }
@@ -1586,7 +1567,7 @@ bool WizDownloadMessages(IWizKMSyncEvents* pEvents, CWizKMAccountsServer& server
         pEvents->OnStatus(_TR(_T("Query notes information")));
         //
         std::deque<WIZDOCUMENTDATAEX> arrayDocumentServer;
-        if (!serverDB.document_downloadFullListEx(arrayDocumentGUID, arrayDocumentServer))
+        if (!serverDB.document_downloadFullList(arrayDocumentGUID, arrayDocumentServer))
         {
             pEvents->OnError(_T("Can download notes of messages"));
             return FALSE;

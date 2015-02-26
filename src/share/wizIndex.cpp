@@ -2322,48 +2322,6 @@ bool CWizIndex::ObjectExists(const QString& strGUID, const QString& strType, boo
 	}
 }
 
-bool CWizIndex::DeleteObject(const QString& strGUID, const QString& strType, bool bLog)
-{
-    if (0 == strType.compare("tag", Qt::CaseInsensitive))
-    {
-        WIZTAGDATA data;
-        if (TagFromGUID(strGUID, data)) {
-            DeleteTag(data, bLog, false);
-        }
-        return true;
-    }
-    else if (0 == strType.compare("style", Qt::CaseInsensitive))
-    {
-        WIZSTYLEDATA data;
-        if (StyleFromGUID(strGUID, data)) {
-            return DeleteStyle(data, bLog, false);
-        }
-        return true;
-    }
-    else if (0 == strType.compare("document", Qt::CaseInsensitive))
-    {
-        WIZDOCUMENTDATA data;
-        if (DocumentFromGUID(strGUID, data)) {
-            return DeleteDocument(data, bLog);
-        }
-        return true;
-    }
-    else if (0 == strType.compare("attachment", Qt::CaseInsensitive))
-    {
-        WIZDOCUMENTATTACHMENTDATA data;
-        if (AttachmentFromGUID(strGUID, data)) {
-            return DeleteAttachment(data, bLog, false);
-        }
-        return true;
-    }
-    else
-    {
-        Q_ASSERT(0);
-        TOLOG1("Unknown object type: %1", strType);
-        return false;
-    }
-}
-
 bool CWizIndex::GetObjectTableInfo(const CString& strType, CString& strTableName, CString& strKeyFieldName)
 {
     if (0 == strType.CompareNoCase("tag")) {
@@ -2397,6 +2355,12 @@ bool CWizIndex::GetObjectTableInfo(const CString& strType, CString& strTableName
 
 qint64 CWizIndex::GetObjectLocalVersion(const QString& strGUID, const QString& strType)
 {
+    bool objectExists = false;
+    return GetObjectLocalVersionEx(strGUID, strType, objectExists);
+}
+
+qint64 CWizIndex::GetObjectLocalVersionEx(const QString& strGUID, const QString& strType, bool& bObjectExists)
+{
     CString strTableName;
     CString strKeyFieldName;
 
@@ -2415,6 +2379,7 @@ qint64 CWizIndex::GetObjectLocalVersion(const QString& strGUID, const QString& s
 
         if (!query.eof())
         {
+            bObjectExists = true;
             return query.getInt64Field(0);
         }
         else
@@ -2427,6 +2392,7 @@ qint64 CWizIndex::GetObjectLocalVersion(const QString& strGUID, const QString& s
         return -1;
         //return LogSQLException(e, strSQL);
     }
+    return -1;
 }
 
 bool CWizIndex::ModifyObjectVersion(const CString& strGUID, const CString& strType, qint64 nVersion)

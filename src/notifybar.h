@@ -27,6 +27,7 @@ public:
     explicit NotifyBar(QWidget *parent);
     void showPermissionNotify(int type);
     void showMessageTips(Qt::TextFormat format, const QString& info);
+    void hideMessageTips(bool useAnimation);
 
 public slots:
     void on_closeButton_Clicked();

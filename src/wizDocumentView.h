@@ -155,6 +155,8 @@ private:
     void startCheckDocumentEditStatus();
     void stopCheckDocumentEditStatus();
     bool checkDocumentEditable();
+    //
+    void stopCheckDocumentAnimations();
 };
 
 class WizFloatDocumentViewer : public QWidget

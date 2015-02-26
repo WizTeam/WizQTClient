@@ -131,6 +131,7 @@ WIZACTION* CWizActions::actionsData()
         {WIZACTION_FORMAT_PLAINTEXT,                    QObject::tr("Convert to plain text"), "",           QKeySequence()},
         {WIZACTION_FORMAT_VIEW_SOURCE,             QObject::tr("View html source..."),  "",           QKeySequence()},
         {WIZACTION_FORMAT_SCREEN_SHOT,             QObject::tr("Screen shot..."),           "",           QKeySequence()},
+        {"actionDeveloper",                       QObject::tr("Developer mode"), "", QKeySequence()},
 
 
         {"", "", "", QKeySequence()}

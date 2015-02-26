@@ -608,7 +608,7 @@ void MainWindow::initActions()
     m_actions->init();
 #endif
     m_animateSync->setAction(m_actions->actionFromName(WIZACTION_GLOBAL_SYNC));
-    m_animateSync->setIcons("sync");
+    m_animateSync->setSingleIcons("sync");
 
     connect(m_doc->web(), SIGNAL(statusChanged()), SLOT(on_editor_statusChanged()));
     //connect(m_doc->web()->page(), SIGNAL(contentsChanged()), SLOT(on_document_contentChanged()));
@@ -997,6 +997,24 @@ void MainWindow::SetDialogResult(int nResult)
         m_doc->viewNote(doc, false);
     }
 }
+
+//bool MainWindow::checkListClickable()
+//{
+//    if (!m_dbMgr.db(m_doc->note().strKbGUID).IsGroup())
+//    {
+//        emit clickingTodoCallBack(false, false);
+//        return true;
+//    }
+
+//    if (m_doc->checkListClickable())
+//    {
+//        emit clickingTodoCallBack(false, false);
+//        m_doc->setStatusToEditingByCheckList();
+//        return true;
+//    }
+//    emit clickingTodoCallBack(true, true);
+//    return false;
+//}
 
 #ifndef Q_OS_MAC
 void MainWindow::layoutTitleBar()
@@ -1743,6 +1761,11 @@ void MainWindow::on_actionAbout_triggered()
 {
     AboutDialog dialog(this);
     dialog.exec();
+}
+
+void MainWindow::on_actionDeveloper_triggered()
+{
+//    m_doc->web()->settings()->globalSettings()->setAttribute(QWebSettings::DeveloperExtrasEnabled, true);
 }
 
 

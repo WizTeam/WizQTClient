@@ -68,6 +68,7 @@ void NotifyBar::showPermissionNotify(int type)
         break;
     default:
         hideNotify(false);
+        break;
     }
 }
 
@@ -82,8 +83,13 @@ void NotifyBar::showMessageTips(Qt::TextFormat format, const QString& info)
     }
     else
     {
-        hideNotify(true);
+        hideNotify(false);
     }
+}
+
+void NotifyBar::hideMessageTips(bool useAnimation)
+{
+    hideNotify(useAnimation);
 }
 
 void NotifyBar::on_closeButton_Clicked()
@@ -107,11 +113,12 @@ void NotifyBar::setStyleForEditing()
 
 void NotifyBar::showNotify()
 {
-    if (maximumHeight() > 0)
-        return;
+//    if (maximumHeight() > 0)
+//        return;
 
+    m_animation->stop();
     m_animation->setDuration(800);
-    m_animation->setStartValue(0);
+    m_animation->setStartValue(maximumHeight());
     m_animation->setEndValue(Utils::StyleHelper::notifyBarHeight());
     m_animation->setEasingCurve(QEasingCurve::InExpo);
 
@@ -133,7 +140,10 @@ void NotifyBar::hideNotify(bool bUseAnimation)
             m_animation->start();
             return;
         }
+        else
+        {
+            setMaximumHeight(0);
+            return;
+        }
     }
-
-    setMaximumHeight(0);
 }

@@ -12,6 +12,8 @@ class CWizTagListWidget;
 class CWizNoteInfoForm;
 class CWizDocumentWebEngine;
 class CWizAttachmentListWidget;
+class CWizAnimateAction;
+class CWizExplorerApp;
 
 namespace Core {
 class CWizDocumentView;
@@ -29,10 +31,11 @@ class TitleBar : public QWidget
     Q_OBJECT
 
 public:
-    explicit TitleBar(QWidget *parent);
+    explicit TitleBar(CWizExplorerApp& app, QWidget *parent);
     CWizDocumentView* noteView();
     void setLocked(bool bReadOnly, int nReason, bool bIsGroup);
-    void showMessageTip(Qt::TextFormat format, const QString& strInfo);
+    void showMessageTips(Qt::TextFormat format, const QString& strInfo);
+    void hideMessageTips(bool useAnimation);
     void setEditor(CWizDocumentWebEngine* editor);
 
     void setNote(const WIZDOCUMENTDATA& data, bool editing, bool locked);
@@ -41,6 +44,9 @@ public:
     void setEditButtonState(bool enable, bool editing);
     void updateEditButton(bool bEditing);
     void resetTitle(const QString& strTitle);
+
+    void startEditButtonAnimation();
+    void stopEditButtonAnimation();
 
 
 public Q_SLOTS:
@@ -74,6 +80,8 @@ private:
 
 private:
     CWizDocumentWebEngine* m_editor;
+//    CWizDocumentWebView* m_editor;
+    CWizExplorerApp& m_app;
 
     TitleEdit* m_editTitle;
     InfoBar* m_infoBar;
@@ -95,6 +103,7 @@ private:
     CWizNoteInfoForm* m_info;
 
     QString m_strWebchannelUrl;
+    CWizAnimateAction* m_editButtonAnimation;
 };
 
 } //namesapce Internal
