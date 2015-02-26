@@ -22,7 +22,8 @@
             font-family: "Microsoft YaHei", Georgia, Helvetica, Arial, sans-serif, ËÎÌו, serif, PMingLiU;
         }
     </style>
-    <script type="text/javascript" charset="utf-8" src="../../plugins/Notes.Markdown/google-code-prettify/prettify.js" ></script>
+    <script type="text/javascript" charset="utf-8" src="markdown/google-code-prettify/prettify.js" ></script>
+    <script type="text/javascript" charset="utf-8" src="editor/qwebchannel.js" ></script>
     <link  rel="stylesheet" type="text/css" href="wiz_code_highlight.css" />
 </head>
 <body>
@@ -77,11 +78,11 @@
         <div id="divResult"></div>
     <script language="javascript">
         
-        var objApp = window.external;
-        var pluginPath = objApp.GetHtmlDocumentPath(document);
-        var languageFileName = pluginPath + "insert_code.ini";
-        //
-        objApp.LocalizeHtmlDocument(languageFileName, document);
+        var objApp = null;
+        // var pluginPath = objApp.GetHtmlDocumentPath(document);
+        // var languageFileName = pluginPath + "insert_code.ini";
+        // //
+        // objApp.LocalizeHtmlDocument(languageFileName, document);
         /*
         //
         var objTools = objApp.CreateCommonTools();
@@ -170,7 +171,8 @@
         //
         function buttonCancel_onclick() {
             try {
-                external.ClosePluginDlg(document, 0);
+                //external.ClosePluginDlg(document, 0);
+                objApp.reject();
             }
             catch(e) {
 
@@ -184,6 +186,7 @@
         }
         //
         function insertCss(doc) {
+            
             if (!doc)
                 return;
             if (!external)
@@ -218,15 +221,16 @@
             prettyPrint();
 
             try {
-                var doc = external.EditorDocument;
-                insertCss(doc);
+                //var doc = external.editorDocument;
+                //insertCss(doc);
                 //    
                 var code = divResult.innerHTML;
-                doc.execCommand("insertHTML", false, code);
+                // doc.execCommand("insertHTML", false, code);
+                objApp.insertHtml(code);
                 //
                 setLaunguage(selectLanguage.value);
                 //
-                external.ClosePluginDlg(document, 1);
+                objApp.accept();
             }
             catch(e) {
 
@@ -235,7 +239,7 @@
         //
         function getSelectText() {
             try {
-                var doc = external.EditorDocument;
+                var doc = external.editorDocument;
                 var sel = doc.getSelection();
                 if (!sel || sel.rangeCount < 1)
                     return "";
@@ -267,37 +271,13 @@
         function getLanguage() {
             if (!objApp)
                 return "";
-            try {
-                var doc = objApp.WizDocument;
-                if (!doc)
-                    return "";
-                var db = doc.Database;
-                if (!db)
-                    return "";
-                //
-                return db.GetMeta("WizCodeHighlight", "language");;
-            }
-            catch(e) {
-                return "";
-            }
-
-            return "";
+            return objApp.getLastCodeType();
+            
         } 
         function setLaunguage(lang) {
             if (!objApp)
                 return;
-            try {
-                var doc = objApp.WizDocument;
-                if (!doc)
-                    return;
-                var db = doc.Database;
-                if (!db)
-                    return;
-                //
-                db.SetMeta("WizCodeHighlight", "language", lang);
-            }
-            catch(e) {
-            }
+            objApp.saveLastCodeType(lang);
         }
         function initLanguage() {
             var lang = getLanguage();
@@ -311,18 +291,48 @@
                 }
             }
         }
-        (function init() {
-            textSource.focus();
-            //
-            var text = getSelectText();
-            if (text) {
-                textSource.value = text;
-                highlightCode();
-            }
-            //
-            initLanguage();
-        })();
 
+        function output(message)
+        {
+            console.log(message);
+        }
+
+        function initializeJSObject(strUrl)
+        {
+            output("Connecting to WebSocket server at " + strUrl + ".");
+            var socket = new WebSocket(strUrl);
+            socket.onclose = function()
+            {
+                console.error("web channel closed");
+            };
+            socket.onerror = function(error)
+            {
+                console.error("web channel error: " + error);
+            };
+            socket.onopen = function()
+            {
+                output("WebSocket connected, setting up QWebChannel.");
+                new QWebChannel(socket, function(channel) {
+                    // make dialog object accessible globally
+                    // window.jsObject = channel.objects.jsObject;
+                    // jsObject.speakHello();
+                    objApp = channel.objects.codeEditor;
+                    output("Connected to WebChannel, ready to send/receive messages!");
+                });
+
+                (function init() {
+                    textSource.focus();
+                    //
+                    var text = getSelectText();
+                    if (text) {
+                        textSource.value = text;
+                        highlightCode();
+                    }
+                    //
+                    initLanguage();
+                })();
+            }
+        }
     </script>
 
 </body>

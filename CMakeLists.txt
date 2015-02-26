@@ -51,6 +51,7 @@ if(APPLE)
         add_definitions(-DBUILD4APPSTORE=TRUE)
     endif(APPSTORE_BUILD)
     add_definitions(-DUSECOCOATOOLBAR=TRUE)
+    #add_definitions(-DUSEWEBENGINE=FALSE)
 endif(APPLE)
 
 if(APPLE)

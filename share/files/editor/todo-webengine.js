@@ -111,21 +111,53 @@ function WizTodoQtHelper() {
     this.initCss = initCss;
     this.canEdit = canEdit;
     this.setDocumentType = setDocumentType;
+    this.setUserAlias = setUserAlias;
+	this.setUserAvatarFileName = setUserAvatarFileName;
+	this.setCheckedImageFileName = setCheckedImageFileName;
+	this.setUnCheckedImageFileName = setUnCheckedImageFileName;
+	this.setIsPersonalDocument = setIsPersonalDocument;
+
+
+    this.userAlias = null;
+	this.avatarFileName = null;
+	this.checkedFileName = null;
+	this.unCheckedFileName = null;
+	this.personalDocument = false;
+    
+	function setUserAlias(alias) {
+		this.userAlias = alias;
+	}
+
+	function setUserAvatarFileName(avatarFileName) {
+		this.avatarFileName = avatarFileName;
+	}
+
+	function setCheckedImageFileName(fileName) {
+		this.checkedFileName = fileName;
+	}
+
+	function setUnCheckedImageFileName(fileName) {
+		this.unCheckedFileName = fileName;
+	}
+
+	function setIsPersonalDocument(isPersonalDocument) {
+		this.personalDocument = isPersonalDocument;
+	}
 
     function getUserAlias() {
-        return objApp.getUserAlias();
+        return this.userAlias;
     }
 
     function getUserAvatarFileName(size) {
-        return objApp.getUserAvatarFilePath(size);
+    	return this.avatarFileName;
     }
 
     function isPersonalDocument() {
-        return objApp.isPersonalDocument();
+        return this.personalDocument;
     }
 
     function getLocalDateTime(dt) {
-        return objApp.getFormatedDateTime();
+        return "";
     }
 
     function setDocumentModified() {
@@ -133,11 +165,11 @@ function WizTodoQtHelper() {
     }
 
     function getCheckedImageFileName() {
-        return objApp.getSkinResourcePath() + "checked.png";
+    	return this.checkedFileName;
     }
 
     function getUnCheckedImageFileName() {
-        return objApp.getSkinResourcePath() + "unchecked.png";
+    	return this.unCheckedFileName;
     }
 
     function canEdit() {
@@ -152,6 +184,7 @@ function WizTodoQtHelper() {
 		var WIZ_TODO_STYLE_VERSION = "01.00.09";
         
 		var style = document.getElementById(WIZ_TODO_STYLE_ID);
+		console.log("todo init css called from editor document : " + document + " find style : " + style);
 		if (style && !!style.getAttribute && style.getAttribute(WIZ_LINK_VERSION) >= WIZ_TODO_STYLE_VERSION)
 			return;
 		//
@@ -168,11 +201,14 @@ function WizTodoQtHelper() {
 		// objStyle.setAttribute(WIZ_STYLE, 'unsave');
 		objStyle.setAttribute(WIZ_LINK_VERSION, WIZ_TODO_STYLE_VERSION);
 		//
+		console.log("add css style to document head, objStyle  : " + objStyle);
+		console.log("before appendChild ,innerHTML : " + document.head.innerHTML);
 		document.head.appendChild(objStyle);
+		console.log("after appendChild ,innerHTML : " + document.head.innerHTML);
     }  
 
     function setDocumentType(type) {
-        objApp.setCurrentDocumentType(type);
+        WizEditor.setCurrentDocumentType(type);
     } 
 }
 
@@ -356,6 +392,7 @@ var WizTodo = (function () {
 			case 'windows':
 				return new WizTodoWindowsHelper(external);
 			case 'qt':
+				console.log("get qt todo helper called");
 				return new WizTodoQtHelper();
 			case 'iphone':
 				return new WizTodoIphoneHelper();
@@ -1730,11 +1767,15 @@ var WizTodo = (function () {
 	}
 
 	function init(wizClient) { 
+		console.log("init todo called , todoHelper : " + todoHelper);
+		// if (todoHelper != null)
+		// 	return;
 
 		var ueditor = null;
 		if (wizClient == 'qt') {
 			ueditor = document.getElementById('ueditor_0');
 		}
+
 		//
 		editorDocument = ueditor ? ueditor.contentDocument : document;
 		//
@@ -1743,8 +1784,10 @@ var WizTodo = (function () {
 		todoHelper = getTodoHelper(wizClient);
 		//
 		registerEvent();
+
 		//
 		todoHelper.initCss(editorDocument);
+		console.log("init todo js finished , helper :  " + todoHelper);
 	}
 
 	function setUserAlias(alias) {

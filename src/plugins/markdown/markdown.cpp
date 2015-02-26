@@ -70,6 +70,27 @@ void MarkdownPlugin::onFrameRenderRequested(QWebFrame* frame, bool bUseInlineCss
     }
 }
 
+QString MarkdownPlugin::getExecString() const
+{
+    QString strFile = cachePath() + "plugins/markdown/WizNote-Markdown.js";
+    QFile f(strFile);
+    if (!f.open(QIODevice::ReadOnly)) {
+        qDebug() << "[Markdown]Failed to get render execute code";
+        return;
+    }
+
+    QTextStream ts(&f);
+    QString strExec = ts.readAll();
+    f.close();
+
+    Q_ASSERT(strExec.indexOf("${CACHE_PATH}") != -1);
+    QString strPath = cachePath() + "plugins/markdown/";
+    QDir dir;
+    dir.mkpath(strPath);
+    strExec.replace("${CACHE_PATH}", strPath);
+    return strExec;
+}
+
 bool MarkdownPlugin::canRender(INoteView* view, const WIZDOCUMENTDATA& doc)
 {
     if (view->isEditing())
@@ -93,25 +114,16 @@ void MarkdownPlugin::render(QWebEnginePage* page)
 {
     Q_ASSERT(page);
 
-
-    QString strFile = cachePath() + "plugins/markdown/WizNote-Markdown.js";
-    QFile f(strFile);
-    if (!f.open(QIODevice::ReadOnly)) {
-        qDebug() << "[Markdown]Failed to get render execute code";
-        return;
-    }
-
-    QTextStream ts(&f);
-    QString strExec = ts.readAll();
-    f.close();
-
-    Q_ASSERT(strExec.indexOf("${CACHE_PATH}") != -1);
-    QString strPath = cachePath() + "plugins/markdown/";
-    QDir dir;
-    dir.mkpath(strPath);
-    strExec.replace("${CACHE_PATH}", strPath);
-
+    QString strExec = getExecString();
     page->runJavaScript(strExec);
+}
+
+void MarkdownPlugin::render(QWebFrame* frame)
+{
+    Q_ASSERT(frame);
+
+    QString strExec = getExecString();
+    frame->evaluateJavaScript(strExec);
 }
 
 void MarkdownPlugin::changeCssToInline(QWebFrame* frame)

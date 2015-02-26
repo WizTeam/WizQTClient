@@ -24,6 +24,7 @@
 #include "wiztaglistwidget.h"
 #include "wizattachmentlistwidget.h"
 #include "wizDocumentWebEngine.h"
+#include "wizDocumentWebView.h"
 #include "wiznoteinfoform.h"
 #include "share/wizmisc.h"
 #include "share/wizDatabase.h"
@@ -193,6 +194,7 @@ void TitleBar::setLocked(bool bReadOnly, int nReason, bool bIsGroup)
     m_tagBtn->setEnabled(!bIsGroup ? true : false);
 }
 
+#ifdef USEWEBENGINE
 void TitleBar::setEditor(CWizDocumentWebEngine* editor)
 {
     Q_ASSERT(!m_editor);
@@ -202,13 +204,30 @@ void TitleBar::setEditor(CWizDocumentWebEngine* editor)
     connect(editor, SIGNAL(focusIn()), SLOT(onEditorFocusIn()));
     connect(editor, SIGNAL(focusOut()), SLOT(onEditorFocusOut()));
 
-    //connect(editor->page(), SIGNAL(selectionChanged()), SLOT(onEditorChanged()));
     connect(editor->page(), SIGNAL(contentsChanged()), SLOT(onEditorChanged()));
 
     connect(m_editTitle, SIGNAL(titleEdited(QString)), editor, SLOT(onTitleEdited(QString)));
 
     m_editor = editor;
 }
+#else
+void TitleBar::setEditor(CWizDocumentWebView* editor)
+{
+    Q_ASSERT(!m_editor);
+
+    m_editorBar->setDelegate(editor);
+
+    connect(editor, SIGNAL(focusIn()), SLOT(onEditorFocusIn()));
+    connect(editor, SIGNAL(focusOut()), SLOT(onEditorFocusOut()));
+
+    connect(editor->page(), SIGNAL(selectionChanged()), SLOT(onEditorChanged()));
+    connect(editor->page(), SIGNAL(contentsChanged()), SLOT(onEditorChanged()));
+
+    connect(m_editTitle, SIGNAL(titleEdited(QString)), editor, SLOT(onTitleEdited(QString)));
+
+    m_editor = editor;
+}
+#endif
 
 void TitleBar::onEditorFocusIn()
 {

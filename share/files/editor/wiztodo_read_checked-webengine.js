@@ -430,47 +430,94 @@ function WizTodoReadCheckedQt () {
     this.getLocalDateTime = getLocalDateTime;
     this.getAvatarName = getAvatarName;
     this.onClickingTodo = onClickingTodo;
-    this.onBeforeSave = onBeforeSave;
+    this.setUserAlias = setUserAlias;
+    this.setUserAvatarFileName = setUserAvatarFileName;
+    this.setCheckedImageFileName = setCheckedImageFileName;
+    this.setUnCheckedImageFileName = setUnCheckedImageFileName;
+    this.setIsPersonalDocument = setIsPersonalDocument;
+    this.setCanEdit = setCanEdit;
+    this.setDocOriginalHtml = setDocOriginalHtml;
 
+
+    this.userAlias = null;
+    this.avatarFileName = null;
+    this.checkedFileName = null;
+    this.unCheckedFileName = null;
+    this.personalDocument = false;
+    this.canedit = false;
+    this.originalHtml = "";
+
+    // WizEditor.setDocOriginalHtml.connect(function (strHtml) {
+    //     this.originalHtml = strHtml;
+    //     console.log("after set original html , html : " + getDocHtml());
+    // });
+    
     function initCss() {
     }
 
+    function setUserAlias(alias) {
+        this.userAlias = alias;
+    }
+
+    function setUserAvatarFileName(avatarFileName) {
+        this.avatarFileName = avatarFileName;
+    }
+
+    function setCheckedImageFileName(fileName) {
+        this.checkedFileName = fileName;
+    }
+
+    function setUnCheckedImageFileName(fileName) {
+        this.unCheckedFileName = fileName;
+    }
+
+    function setIsPersonalDocument(isPersonalDocument) {
+        this.personalDocument = isPersonalDocument;
+    }
+
+    function setCanEdit(canEdit) {
+        this.canedit = canEdit;
+    }
+
+    function setDocOriginalHtml (strHtml) {
+        console.log("set doc originalHtml called , html : " + strHtml);
+        this.originalHtml = strHtml;
+    }
+
     function getDocHtml() {
-        return objApp.getCurrentNoteHtml();
+        return this.originalHtml;
     }
 
     function setDocHtml(html, resources) {
-        objApp.saveHtmlToCurrentNote(html, resources);
+        WizEditor.saveHtmlToCurrentNote(html, resources);
     }
 
     function canEdit() {
-        var htmlEditable = editor.body.contentEditable == "false";
-        var userPermission = objApp.hasEditPermissionOnCurrentNote();
-        return htmlEditable && userPermission;
+        return this.canedit;
     }
 
     function getCheckedImageFileName() {
-        return objApp.getSkinResourcePath() + "checked.png";
+        return this.checkedFileName;
     }
 
     function getUnCheckedImageFileName() {
-        return objApp.getSkinResourcePath() + "unchecked.png";
+        return this.unCheckedFileName;
     }
 
     function isPersonalDocument() {
-        return objApp.isPersonalDocument();
+        return this.personalDocument;
     }
 
     function getLocalDateTime(dt) {
-        return objApp.getFormatedDateTime();
+        return "";
     }
 
     function getUserAlias() {
-        return objApp.getUserAlias();
+        return this.userAlias;
     }
 
     function getUserAvatarFileName(size) {
-        return objApp.getUserAvatarFilePath(size);
+        return this.avatarFileName;
     }
 
     function getAvatarName(avatarFileName) {
@@ -489,12 +536,8 @@ function WizTodoReadCheckedQt () {
     }
 
     function onClickingTodo(callback) {
-        objApp.clickingTodoCallBack.connect(WizTodoReadChecked[callback]);
-        return objApp.checkListClickable();
-    }
-
-    function onBeforeSave(isModified) {
-
+        WizEditor.clickingTodoCallBack.connect(WizTodoReadChecked[callback]);
+        return WizEditor.checkListClickable();
     }
 }
 
@@ -752,6 +795,10 @@ var WizTodoReadChecked = (function () {
 	function isIpad() {
 		return 'ipad' === wizClient;
 	}
+
+    function isQt () {
+        return 'qt' == wizClient;
+    }
 
 	function getClassValue(ele) {
 		if (!ele)
@@ -1322,6 +1369,7 @@ var WizTodoReadChecked = (function () {
         modified = true;
 		//
 		var html = helper.getDocHtml();
+        console.log("get save html , original html : " + html);
 		//
 		for (var id in modifiedTodos) {
 			newHtml = changeWizDocument(id, modifiedTodos[id].state, modifiedTodos[id].completedInfo, html);
@@ -1357,7 +1405,7 @@ var WizTodoReadChecked = (function () {
         //
         modifiedTodos = {};
         //
-        if (!isIpad() && !isIphone()) {
+        if (!isIpad() && !isIphone() && !isQt()) {
 			helper.setDocHtml(html, resources);
 		}
 		else {
@@ -1376,10 +1424,10 @@ var WizTodoReadChecked = (function () {
         if (helper.onDocumentClose) {
             helper.onDocumentClose();
         }
-        //
-        if (isIpad() || isIphone()) {
-            return html;
-        }
+		//
+		if (isIpad() || isIphone() || isQt()) {
+			return html;
+		}
 	}
 	
 	function getWizDocument() {

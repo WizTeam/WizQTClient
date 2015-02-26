@@ -11,6 +11,7 @@ class CWizDatabase;
 class CWizTagListWidget;
 class CWizNoteInfoForm;
 class CWizDocumentWebEngine;
+class CWizDocumentWebView;
 class CWizAttachmentListWidget;
 class CWizAnimateAction;
 class CWizExplorerApp;
@@ -36,7 +37,12 @@ public:
     void setLocked(bool bReadOnly, int nReason, bool bIsGroup);
     void showMessageTips(Qt::TextFormat format, const QString& strInfo);
     void hideMessageTips(bool useAnimation);
+#ifdef USEWEBENGINE
     void setEditor(CWizDocumentWebEngine* editor);
+#else
+    void setEditor(CWizDocumentWebView* editor);
+#endif
+
 
     void setNote(const WIZDOCUMENTDATA& data, bool editing, bool locked);
     void updateInfo(const WIZDOCUMENTDATA& doc);
@@ -79,8 +85,11 @@ private:
     void registerWebChannel();
 
 private:
+#ifdef USEWEBENGINE
     CWizDocumentWebEngine* m_editor;
-//    CWizDocumentWebView* m_editor;
+#else
+    CWizDocumentWebView* m_editor;
+#endif
     CWizExplorerApp& m_app;
 
     TitleEdit* m_editTitle;

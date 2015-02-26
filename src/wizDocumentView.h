@@ -47,8 +47,12 @@ public:
     virtual QSize sizeHint() const { return QSize(200, 1); }
 
     QWidget* client() const;
-    CWizDocumentWebEngine* web() const { return m_engine; }
-    QWebEngineView* commentView() const { return m_comments; }
+#ifdef USEWEBENGINE
+    CWizDocumentWebEngine* web() const { return m_web; }
+#else
+    CWizDocumentWebView* web() const { return m_web; }
+#endif
+    QWebView* commentView() const { return m_comments; }
     //
     void waitForDone();
 
@@ -63,10 +67,12 @@ protected:
     QLabel* m_msgLabel;
 
     QWidget* m_docView;
-//    CWizDocumentWebView* m_web;
-    CWizDocumentWebEngine* m_engine;
-//    QWebView* m_comments;
-    QWebEngineView* m_comments;
+#ifdef USEWEBENGINE
+    CWizDocumentWebEngine* m_web;
+#else
+    CWizDocumentWebView* m_web;
+#endif
+    QWebView* m_comments;
     CWizSplitter* m_splitter;
     Core::Internal::TitleBar* m_title;
 
@@ -176,9 +182,12 @@ public slots:
     void on_textInputFinished();
 
 private:
+#ifdef USEWEBENGINE
     CWizDocumentWebEngine* m_webEngine;
-    QLineEdit* m_edit;
+#else
 //    CWizDocumentView* m_docView;
+#endif
+    QLineEdit* m_edit;
 };
 
 } // namespace Core

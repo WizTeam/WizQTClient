@@ -3,8 +3,8 @@
 #include "utils/pathresolve.h"
 #include "share/wizsettings.h"
 #include "wizDocumentWebView.h"
-#include "share/websocketclientwrapper.h"
-#include "share/websockettransport.h"
+//#include "share/websocketclientwrapper.h"
+//#include "share/websockettransport.h"
 #include "wizWebEngineInjectObject.h"
 
 #include <QVBoxLayout>
@@ -15,8 +15,10 @@
 #include <QDir>
 #include <QPlainTextEdit>
 #include <QEvent>
-#include <QWebSocketServer>
-#include <QWebChannel>
+//#include <QWebSocketServer>
+//#include <QWebChannel>
+#include <QWebPage>
+#include <QWebFrame>
 #include <QDebug>
 
 #include <extensionsystem/pluginmanager.h>
@@ -30,7 +32,7 @@ WizCodeEditorDialog::WizCodeEditorDialog(CWizExplorerApp& app, QObject* external
     QDialog(parent)
   , m_app(app)
   , m_external(new CWizCodeExternal(this, this))
-  , m_codeBrowser(new QWebEngineView(this))
+  , m_codeBrowser(new QWebView(this))
 {
 
     setAttribute(Qt::WA_DeleteOnClose);
@@ -42,8 +44,8 @@ WizCodeEditorDialog::WizCodeEditorDialog(CWizExplorerApp& app, QObject* external
     verticalLayout->setSpacing(6);
     verticalLayout->setContentsMargins(5, 5, 5, 5);
 
-    WebEnginePage* page = new WebEnginePage(m_codeBrowser);
-    m_codeBrowser->setPage(page);
+//    WebEnginePage* page = new WebEnginePage(m_codeBrowser);
+//    m_codeBrowser->setPage(page);
     verticalLayout->addWidget(m_codeBrowser);
 
     m_edit = new QLineEdit(this);
@@ -55,8 +57,8 @@ WizCodeEditorDialog::WizCodeEditorDialog(CWizExplorerApp& app, QObject* external
     ::WizLoadUnicodeTextFromFile(strFileName, strHtml);
     QUrl url = QUrl::fromLocalFile(strFileName);
 
-    connect(m_codeBrowser->page(), SIGNAL(loadFinished(bool)), SLOT(onHtmlLoaded(bool)));
-    m_codeBrowser->page()->setHtml(strHtml, url);
+//    connect(m_codeBrowser->page(), SIGNAL(loadFinished(bool)), SLOT(onHtmlLoaded(bool)));
+    m_codeBrowser->page()->mainFrame()->setHtml(strHtml, url);
 
 }
 
@@ -105,6 +107,7 @@ void WizCodeEditorDialog::saveLastCodeType(const QString& codeType)
     m_app.userSettings().set(LASTUSEDCODETYPE, codeType);
 }
 
+/* if use webengine
 void WizCodeEditorDialog::onHtmlLoaded(bool ok)
 {
     if (!ok)
@@ -136,4 +139,5 @@ void WizCodeEditorDialog::runJs()
     QString strHtml = m_edit->text();
     m_codeBrowser->page()->runJavaScript(strHtml);
 }
+*/
 
