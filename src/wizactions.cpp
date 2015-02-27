@@ -90,6 +90,7 @@ WIZACTION* CWizActions::actionsData()
         {WIZACTION_EDITOR_DELETE,                QObject::tr("Delete"),    "",          QKeySequence()},
         {WIZACTION_EDITOR_SELECT_ALL,        QObject::tr("Select all"), "",         QKeySequence("Ctrl+A")},
 
+#ifdef USEWEBENGINE
         {"actionMoveToPageStart",          QObject::tr("Move to page start"),     "",     QKeySequence(QKeySequence::MoveToStartOfDocument)},
         {"actionMoveToPageEnd",           QObject::tr("Move to page end"),      "",     QKeySequence(QKeySequence::MoveToEndOfDocument)},
     #ifdef Q_OS_MAC
@@ -101,6 +102,7 @@ WIZACTION* CWizActions::actionsData()
 //        {"actionMoveToLineEnd",             QObject::tr("Move to line end"),        "",     QKeySequence(QKeySequence::MoveToPreviousPage)},
 
     #endif
+#endif
 
         // view
         {WIZACTION_GLOBAL_TOGGLE_CATEGORY,      QObject::tr("Hide category view"),   QObject::tr("Show category view"),    QKeySequence("Alt+Ctrl+S")},

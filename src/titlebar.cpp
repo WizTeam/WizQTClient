@@ -5,9 +5,6 @@
 #include <QNetworkConfigurationManager>
 #include <QSplitter>
 #include <QList>
-#include <QWebEngineView>
-#include <QWebChannel>
-#include <QWebSocketServer>
 
 #include "share/websocketclientwrapper.h"
 #include "share/websockettransport.h"
@@ -255,17 +252,22 @@ void TitleBar::showEditorBar()
 
 void TitleBar::loadErrorPage()
 {
+#ifdef USEWEBENGINE
     QWebEngineView* comments = noteView()->commentView();
+#else
+    QWebView* comments = noteView()->commentView();
+#endif
     QString strFileName = Utils::PathResolve::resourcesPath() + "files/errorpage/load_fail_comments.html";
     QString strHtml;
     ::WizLoadUnicodeTextFromFile(strFileName, strHtml);
-    strHtml.replace("error_text1", tr("Load Error"));
-    strHtml.replace("error_text2", tr("Network anomalies, check the network, then retry!"));
-    strHtml.replace("error_text3", tr("Load Error"));
+    strHtml.replace("{error_text1}", tr("Load Error"));
+    strHtml.replace("{error_text2}", tr("Network anomalies, check the network, then retry!"));
+    strHtml.replace("{error_text3}", tr("Load Error"));
     QUrl url = QUrl::fromLocalFile(strFileName);
     comments->setHtml(strHtml, url);
 }
 
+#ifdef USEWEBENGINE
 void TitleBar::initWebChannel()
 {
     QWebSocketServer *server = new QWebSocketServer(QStringLiteral("Wiz Socket Server"), QWebSocketServer::NonSecureMode, this);
@@ -311,6 +313,7 @@ void TitleBar::registerWebChannel()
     strExec.replace("//${INIT_COMMAND}", strCommand);
     noteView()->commentView()->page()->runJavaScript(strExec);
 }
+#endif
 
 void TitleBar::onEditorChanged()
 {
@@ -451,7 +454,11 @@ bool isNetworkAccessible()
 
 void TitleBar::onCommentsButtonClicked()
 {
+#ifdef USEWEBENGINE
     QWebEngineView* comments = noteView()->commentView();
+#else
+    QWebView* comments = noteView()->commentView();
+#endif
     if (comments->isVisible()) {
         comments->hide();
         return;
@@ -459,6 +466,7 @@ void TitleBar::onCommentsButtonClicked()
 
     if (isNetworkAccessible()) {
         if (!m_commentsUrl.isEmpty()) {
+            qDebug() << "load comment from url : " << m_commentsUrl;
             comments->load(m_commentsUrl);
             QSplitter* splitter = qobject_cast<QSplitter*>(comments->parentWidget());
             Q_ASSERT(splitter);
@@ -481,13 +489,17 @@ void TitleBar::onCommentsButtonClicked()
 
 void TitleBar::onCommentPageLoaded(bool ok)
 {
+#ifdef USEWEBENGINE
     QWebEngineView* comments = noteView()->commentView();
-    qDebug() << "comments paged loaded : " << ok;
+#else
+    QWebView* comments = noteView()->commentView();
+#endif
     if (!ok)
     {
         loadErrorPage();
         comments->show();
     }
+#ifdef USEWEBENGINE
     else
     {
         comments->page()->runJavaScript("location.protocol",[this](const QVariant& returnValue) {
@@ -498,6 +510,7 @@ void TitleBar::onCommentPageLoaded(bool ok)
             }
         });
     }
+#endif
 }
 
 void TitleBar::onViewNoteLoaded(INoteView* view, const WIZDOCUMENTDATA& note, bool bOk)
@@ -528,7 +541,11 @@ void TitleBar::onTokenAcquired(const QString& strToken)
 {
     WizService::Token::instance()->disconnect(this);
 
+#ifdef USEWEBENGINE
     QWebEngineView* comments = noteView()->commentView();
+#else
+    QWebView* comments = noteView()->commentView();
+#endif
 
     if (strToken.isEmpty()) {
         comments->hide();
@@ -539,6 +556,7 @@ void TitleBar::onTokenAcquired(const QString& strToken)
     QString strGUID = noteView()->note().strGUID;
     m_commentsUrl =  WizService::ApiEntry::commentUrl(strToken, strKbGUID, strGUID);
 
+    qDebug() << "load comment from url : " << m_commentsUrl;
     if (comments->isVisible()) {
 //        comments->load(QUrl());
         comments->load(m_commentsUrl);

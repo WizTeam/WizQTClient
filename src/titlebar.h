@@ -80,12 +80,12 @@ private:
     void showInfoBar();
     void showEditorBar();
     void loadErrorPage();
+#ifdef USEWEBENGINE
     //
     void initWebChannel();
     void registerWebChannel();
 
 private:
-#ifdef USEWEBENGINE
     CWizDocumentWebEngine* m_editor;
 #else
     CWizDocumentWebView* m_editor;

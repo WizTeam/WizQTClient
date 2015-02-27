@@ -1,6 +1,7 @@
 #ifndef CWIZDOCUMENTWEBENGINE_H
 #define CWIZDOCUMENTWEBENGINE_H
 
+#ifdef USEWEBENGINE
 #include <QWebEngineView>
 #include <QTimer>
 #include <QPointer>
@@ -360,5 +361,7 @@ private:
     QString getCurrentNoteHtml() const;
     bool hasEditPermissionOnCurrentNote() const;
 };
+
+#endif
 
 #endif // CWIZDOCUMENTWEBENGINE_H

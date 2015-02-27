@@ -31,6 +31,7 @@
 **
 ****************************************************************************/
 
+#ifdef USEWEBENGINE
 #include "websocketclientwrapper.h"
 
 #include <QtWebSockets/QWebSocketServer>
@@ -70,3 +71,4 @@ void WebSocketClientWrapper::handleNewConnection()
 }
 
 QT_END_NAMESPACE
+#endif

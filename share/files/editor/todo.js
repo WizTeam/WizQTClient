@@ -113,19 +113,19 @@ function WizTodoQtHelper() {
     this.setDocumentType = setDocumentType;
 
     function getUserAlias() {
-        return objApp.getUserAlias();
+        return WizEditor.getUserAlias();
     }
 
     function getUserAvatarFileName(size) {
-        return objApp.getUserAvatarFilePath(size);
+        return WizEditor.getUserAvatarFilePath(size);
     }
 
     function isPersonalDocument() {
-        return objApp.isPersonalDocument();
+        return WizEditor.isPersonalDocument();
     }
 
     function getLocalDateTime(dt) {
-        return objApp.getFormatedDateTime();
+        return WizEditor.getFormatedDateTime();
     }
 
     function setDocumentModified() {
@@ -133,11 +133,11 @@ function WizTodoQtHelper() {
     }
 
     function getCheckedImageFileName() {
-        return objApp.getSkinResourcePath() + "checked.png";
+        return WizEditor.getSkinResourcePath() + "checked.png";
     }
 
     function getUnCheckedImageFileName() {
-        return objApp.getSkinResourcePath() + "unchecked.png";
+        return WizEditor.getSkinResourcePath() + "unchecked.png";
     }
 
     function canEdit() {
@@ -172,7 +172,7 @@ function WizTodoQtHelper() {
     }  
 
     function setDocumentType(type) {
-        objApp.setCurrentDocumentType(type);
+        WizEditor.setCurrentDocumentType(type);
     } 
 }
 

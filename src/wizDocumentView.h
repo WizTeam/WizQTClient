@@ -152,6 +152,9 @@ public Q_SLOTS:
     void on_notifyBar_link_clicked(const QString& link);
 
     void on_command_request();
+    //
+    void on_comment_populateJavaScriptWindowObject();
+
 
 private:
     void loadNote(const WIZDOCUMENTDATA &doc);
@@ -185,7 +188,7 @@ private:
 #ifdef USEWEBENGINE
     CWizDocumentWebEngine* m_webEngine;
 #else
-//    CWizDocumentView* m_docView;
+    CWizDocumentView* m_docView;
 #endif
     QLineEdit* m_edit;
 };

@@ -2,7 +2,6 @@
 
 #include <QWebElement>
 #include <QWebFrame>
-#include <QWebEngineSettings>
 #include <QLineEdit>
 #include <QLabel>
 #include <QHBoxLayout>
@@ -51,7 +50,7 @@ CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
     , m_comments(new QWebEngineView(this))
     #else
     , m_web(new CWizDocumentWebView(app, this))
-    , m_comments(new QWebView(this))
+    , m_comments(new QWebView(app.mainWindow()))
     #endif
     , m_title(new TitleBar(app, this))
     , m_passwordView(new CWizUserCipherForm(app, this))
@@ -93,6 +92,9 @@ CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
     m_splitter = new CWizSplitter(this);
     m_splitter->addWidget(m_web);
     m_splitter->addWidget(m_comments);
+    QWebPage *commentPage = new QWebPage(m_comments);
+    commentPage->setLinkDelegationPolicy(QWebPage::DelegateAllLinks);
+    m_comments->setPage(commentPage);
     m_comments->page()->setLinkDelegationPolicy(QWebPage::DelegateAllLinks);
     m_comments->settings()->globalSettings()->setAttribute(QWebSettings::LocalStorageEnabled, true);
     m_comments->settings()->globalSettings()->setAttribute(QWebSettings::LocalStorageDatabaseEnabled, true);
@@ -100,17 +102,19 @@ CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
     m_comments->setAcceptDrops(false);
     m_comments->hide();
     connect(m_comments, SIGNAL(loadFinished(bool)), m_title, SLOT(onCommentPageLoaded(bool)));
+    connect(m_comments, SIGNAL(linkClicked(QUrl)), m_web, SLOT(onEditorLinkClicked(QUrl)));
+    connect(m_comments->page()->mainFrame(), SIGNAL(javaScriptWindowObjectCleared()),
+            SLOT(on_comment_populateJavaScriptWindowObject()));
 
     layoutDoc->addWidget(m_title);
     layoutDoc->addWidget(m_splitter);
     layoutDoc->setStretchFactor(m_title, 0);
     layoutDoc->setStretchFactor(m_splitter, 1);
 
-#ifdef QT_DEBUG
+#ifdef USEWEBENGINE
     QLineEdit *commandLine = new QLineEdit(this);
     layoutDoc->addWidget(commandLine);
     connect(commandLine, SIGNAL(returnPressed()), SLOT(on_command_request()));
-//    m_comments->page()->settings()->globalSettings()->setAttribute(QWebSettings::DeveloperExtrasEnabled, true);
 #endif
 
     QVBoxLayout* layoutMain = new QVBoxLayout(this);
@@ -147,9 +151,9 @@ CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
     connect(Core::ICore::instance(), SIGNAL(closeNoteRequested(Core::INoteView*)),
             SLOT(onCloseNoteRequested(Core::INoteView*)));
 
-//    connect(m_web, SIGNAL(focusIn()), SLOT(on_webView_focus_changed()));
+    connect(m_web, SIGNAL(focusIn()), SLOT(on_webView_focus_changed()));
 
-//    connect(m_title, SIGNAL(notifyBar_link_clicked(QString)), SLOT(on_notifyBar_link_clicked(QString)));
+    connect(m_title, SIGNAL(notifyBar_link_clicked(QString)), SLOT(on_notifyBar_link_clicked(QString)));
 
 //    connect(m_editStatusCheckThread, SIGNAL(checkFinished(QString,QStringList)),
 //            SLOT(on_checkEditStatus_finished(QString,QStringList)));
@@ -158,9 +162,6 @@ CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
 //    connect(m_editStatusCheckThread, SIGNAL(checkTimeOut(QString)),
 //            SLOT(on_checkEditStatus_timeout(QString)));
 
-    // open comments link by document webview
-//    connect(m_comments->page(), SIGNAL(linkClicked(const QUrl&)), m_web,
-//            SLOT(onEditorLinkClicked(const QUrl&)));
     //
     m_editStatusSyncThread->start(QThread::IdlePriority);
 //    m_editStatusCheckThread->start(QThread::IdlePriority);
@@ -305,15 +306,8 @@ void CWizDocumentView::initStat(const WIZDOCUMENTDATA& data, bool bEditing)
 void CWizDocumentView::viewNote(const WIZDOCUMENTDATA& data, bool forceEdit)
 {
     MainWindow* window = qobject_cast<MainWindow *>(m_app.mainWindow());
-#ifdef USEWEBENGINE
-    qDebug() << "before close document";
     m_web->closeDocument(m_note);
-    qDebug() << "before save document";
     m_web->saveDocument(m_note, false);
-    qDebug() << "after save document";
-#else
-    m_web->saveDocument(m_note, false);
-#endif
     if (m_dbMgr.db(m_note.strKbGUID).IsGroup())
     {
         stopDocumentEditingStatus();
@@ -857,6 +851,11 @@ void CWizDocumentView::on_command_request()
     }
 }
 
+void CWizDocumentView::on_comment_populateJavaScriptWindowObject()
+{
+    m_comments->page()->mainFrame()->addToJavaScriptWindowObject("WizExplorerApp", m_app.object());
+}
+
 
 WizFloatDocumentViewer::WizFloatDocumentViewer(CWizExplorerApp& app, QWidget* parent) : QWidget(parent)
 {
@@ -865,26 +864,26 @@ WizFloatDocumentViewer::WizFloatDocumentViewer(CWizExplorerApp& app, QWidget* pa
         setPalette(QPalette(Qt::white));
         QVBoxLayout* layout = new QVBoxLayout(this);
         layout->setContentsMargins(0, 0, 0, 0);
-        m_webEngine = new CWizDocumentWebEngine(app, this);
-        layout->addWidget(m_webEngine);
-        m_edit = new QLineEdit(this);
-        layout->addWidget(m_edit);
-        connect(m_edit, SIGNAL(returnPressed()), SLOT(on_textInputFinished()));
-        WIZDOCUMENTDATA doc;
-        m_webEngine->viewDocument(doc, true);
-//        m_docView = new CWizDocumentView(app, this);
-//        layout->addWidget(m_docView);
+//        m_webEngine = new CWizDocumentWebEngine(app, this);
+//        layout->addWidget(m_webEngine);
+//        m_edit = new QLineEdit(this);
+//        layout->addWidget(m_edit);
+//        connect(m_edit, SIGNAL(returnPressed()), SLOT(on_textInputFinished()));
+//        WIZDOCUMENTDATA doc;
+//        m_webEngine->viewDocument(doc, true);
+        m_docView = new CWizDocumentView(app, this);
+        layout->addWidget(m_docView);
         setLayout(layout);
 }
 
 WizFloatDocumentViewer::~WizFloatDocumentViewer()
 {
-    //    m_docView->waitForDone();
+        m_docView->waitForDone();
 }
 
 void WizFloatDocumentViewer::on_textInputFinished()
 {
-    qDebug() << "run js : " << m_edit->text();
-    m_webEngine->page()->runJavaScript(m_edit->text());
+//    qDebug() << "run js : " << m_edit->text();
+//    m_webEngine->page()->runJavaScript(m_edit->text());
 }
 

@@ -208,7 +208,6 @@ public:
     // CWizDocument passthrough methods
     QSize clientSize() const { return m_splitter->widget(2)->size(); }
     QWidget* client() const { return m_doc->client(); }
-    CWizDocumentWebEngine* web() const { return m_doc->web(); }
     void showClient(bool visible) const { return m_doc->showClient(visible); }
 
     CWizActions* actions() const { return m_actions; }
@@ -238,6 +237,8 @@ public:
 
 signals:
     void documentSaved(const QString& strGUID, CWizDocumentView* viewer);
+    // signal connect to checklist in javascript
+    void clickingTodoCallBack(bool cancel, bool needCallAgain);
 
 public Q_SLOTS:
     void on_actionExit_triggered();
@@ -274,11 +275,13 @@ public Q_SLOTS:
     void on_actionEditingDelete_triggered();
     void on_actionEditingSelectAll_triggered();
 
+#ifdef USEWEBENGINE
     //move input position
     void on_actionMoveToPageStart_triggered();
     void on_actionMoveToPageEnd_triggered();
     void on_actionMoveToLineStart_triggered();
     void on_actionMoveToLineEnd_triggered();
+#endif
 
     // menu view
     void on_actionViewToggleCategory_triggered();
@@ -349,11 +352,6 @@ public Q_SLOTS:
 
     void on_mobileFileRecived(const QString& strFile);
 
-    //js environment func
-    void OpenURLInDefaultBrowser(const QString& strURL);
-    void SetDialogResult(int nResult);
-
-
 #ifndef Q_OS_MAC
     void on_actionPopupMainMenu_triggered();
     void on_menuButtonClicked();
@@ -408,6 +406,12 @@ public:
     Q_INVOKABLE QObject* CreateWizObject(const QString& strObjectID);
     Q_INVOKABLE void SetSavingDocument(bool saving);
     Q_INVOKABLE void ProcessClipboardBeforePaste(const QVariantMap& data);
+
+    Q_INVOKABLE bool checkListClickable();
+    //NOTE: these functions would called by comment page, do not delete
+    Q_INVOKABLE void OpenURLInDefaultBrowser(const QString& strUrl);
+    Q_INVOKABLE void GetToken(const QString& strFunctionName);
+    Q_INVOKABLE void SetDialogResult(int nResult);
 
 private:
     void syncAllData();

@@ -10,7 +10,7 @@
 #include "share/wizDatabase.h"
 #include "wizDocumentView.h"
 #include "wizmainwindow.h"
-//#include "wizDocumentWebView.h"
+#include "wizDocumentWebView.h"
 #include "wizDocumentWebEngine.h"
 
 using namespace Core;

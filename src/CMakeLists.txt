@@ -399,10 +399,10 @@ if(UNIX)
             add_dependencies(WizNote coreplugin_plugin helloworld_plugin)
         endif()
 
-#        if(NOT APPSTORE_BUILD)
-#            add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-#                COMMAND ${qt_binary_dir}/macdeployqt ${WIZNOTE_ROOT_DIR})
-#        endif()
+        if(NOT APPSTORE_BUILD)
+            add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+                COMMAND ${qt_binary_dir}/macdeployqt ${WIZNOTE_ROOT_DIR})
+        endif()
 
     elseif(NOT APPLE)
         add_executable(WizNote ${wiznote_SOURCES} ${wiznote_HEADERS} ${wiznote_FORM_HEADERS} ${wiznote_QM} ${wiznote_RC})

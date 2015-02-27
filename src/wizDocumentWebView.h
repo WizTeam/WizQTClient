@@ -127,6 +127,7 @@ public:
     void setEditingDocument(bool editing);
     void saveDocument(const WIZDOCUMENTDATA& data, bool force);
     void reloadNoteData(const WIZDOCUMENTDATA& data);
+    void closeDocument(const WIZDOCUMENTDATA& doc);
 
     bool isInited() const { return m_bEditorInited; }
     bool isEditing() const { return m_bEditingMode; }
@@ -174,7 +175,7 @@ public:
 
     void setPastePlainTextEnable(bool bEnable);
     //
-    void saveAsPDF(const QString& strFileName);
+    void saveAsPDF();
     void saveAsHtml(const QString& strDirPath);
     void printDocument();
     bool shareNoteByEmail();
@@ -186,6 +187,17 @@ public:
     //use undo func provied by editor
     void undo();
     void redo();
+
+    //js environment func
+    Q_INVOKABLE QString getSkinResourcePath();
+    Q_INVOKABLE QString getUserAvatarFilePath(int size);
+    Q_INVOKABLE QString getUserAlias();
+    Q_INVOKABLE QString getFormatedDateTime();
+    Q_INVOKABLE bool isPersonalDocument();
+    Q_INVOKABLE QString getCurrentNoteHtml();
+    Q_INVOKABLE void saveHtmlToCurrentNote(const QString& strHtml, const QString& strResource);
+    Q_INVOKABLE bool hasEditPermissionOnCurrentNote();
+    Q_INVOKABLE void setCurrentDocumentType(const QString& strType);
 
     //
     QNetworkDiskCache* networkCache();

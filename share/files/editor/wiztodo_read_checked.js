@@ -436,41 +436,41 @@ function WizTodoReadCheckedQt () {
     }
 
     function getDocHtml() {
-        return objApp.getCurrentNoteHtml();
+        return WizEditor.getCurrentNoteHtml();
     }
 
     function setDocHtml(html, resources) {
-        objApp.saveHtmlToCurrentNote(html, resources);
+        WizEditor.saveHtmlToCurrentNote(html, resources);
     }
 
     function canEdit() {
         var htmlEditable = editor.body.contentEditable == "false";
-        var userPermission = objApp.hasEditPermissionOnCurrentNote();
+        var userPermission = WizEditor.hasEditPermissionOnCurrentNote();
         return htmlEditable && userPermission;
     }
 
     function getCheckedImageFileName() {
-        return objApp.getSkinResourcePath() + "checked.png";
+        return WizEditor.getSkinResourcePath() + "checked.png";
     }
 
     function getUnCheckedImageFileName() {
-        return objApp.getSkinResourcePath() + "unchecked.png";
+        return WizEditor.getSkinResourcePath() + "unchecked.png";
     }
 
     function isPersonalDocument() {
-        return objApp.isPersonalDocument();
+        return WizEditor.isPersonalDocument();
     }
 
     function getLocalDateTime(dt) {
-        return objApp.getFormatedDateTime();
+        return WizEditor.getFormatedDateTime();
     }
 
     function getUserAlias() {
-        return objApp.getUserAlias();
+        return WizEditor.getUserAlias();
     }
 
     function getUserAvatarFileName(size) {
-        return objApp.getUserAvatarFilePath(size);
+        return WizEditor.getUserAvatarFilePath(size);
     }
 
     function getAvatarName(avatarFileName) {

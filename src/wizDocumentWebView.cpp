@@ -46,6 +46,7 @@
 
 #include "utils/pathresolve.h"
 #include "utils/logger.h"
+#include "sync/avatar.h"
 
 #include "mac/wizmachelper.h"
 
@@ -648,6 +649,15 @@ void CWizDocumentWebView::reloadNoteData(const WIZDOCUMENTDATA& data)
     m_docLoadThread->load(data);
 }
 
+void CWizDocumentWebView::closeDocument(const WIZDOCUMENTDATA& doc)
+{
+    bool isSourceMode = editorCommandQueryCommandState("source");
+    if (isSourceMode)
+    {
+        page()->mainFrame()->evaluateJavaScript("editor.execCommand('source')");
+    }
+}
+
 QString CWizDocumentWebView::getDefaultCssFilePath() const
 {
     return m_strDefaultCssFilePath;
@@ -864,6 +874,7 @@ void CWizDocumentWebView::onEditorSelectionChanged()
 
 void CWizDocumentWebView::onEditorLinkClicked(const QUrl& url)
 {
+    qDebug() << "editor link clicked : " << url;
     if (isInternalUrl(url))
     {
         viewDocumentByUrl(url);
@@ -1076,36 +1087,9 @@ void CWizDocumentWebView::on_insertCodeHtml_requset(QString strOldHtml)
     QString strHtml = strOldHtml;
     if (WizGetBodyContentFromHtml(strHtml, false))
     {
-        QString strCss = Utils::PathResolve::resourcesPath() + "files/wiz_code_highlight.css";
-        QString strFolder = Utils::PathResolve::tempDocumentFolder(view()->note().strGUID)
-                + "index_files/wiz_code_highlight.css";
-        ::WizEnsurePathExists(strFolder);
-        qDebug() << "copy css file from : " << strCss << "  file exist  : " << QFile::exists(strCss) << "  to : " << strFolder;
-        if (QFile::exists(strCss))
-        {
-            QFile fileCss(strFolder);
-            if (fileCss.exists() && !fileCss.remove())
-            {
-                qDebug() << "remove file failed";
-                return;
-            }
-            qDebug() << "try to copy file";
-            if (!QFile::copy(strCss, strFolder))
-            {
-                qDebug() << "copy file failed";
-                return;
-
-            }
-
-//        QFile fileCss(strCss);
-//        if (!fileCss.copy(strFolder))
-//        {
-//        }
-
+        QString strCss = "file://" + Utils::PathResolve::resourcesPath() + "files/code/wiz_code_highlight.css";
+        page()->mainFrame()->evaluateJavaScript(QString("WizAddCssForCode('%1');").arg(strCss));
         editorCommandExecuteInsertHtml(strHtml, true);
-        //FiXME:插入代码时li的属性会丢失，此处需要特殊处理，在head中增加li的属性
-        page()->mainFrame()->evaluateJavaScript("WizAddCssForCode();");
-        }
     }
 }
 
@@ -1805,10 +1789,12 @@ bool CWizDocumentWebView::editorCommandExecuteTableAverageCols()
     return editorCommandExecuteCommand("averagedistributecol");
 }
 
-void CWizDocumentWebView::saveAsPDF(const QString& strFileName)
+void CWizDocumentWebView::saveAsPDF()
 {
     if (QWebFrame* frame = noteFrame())
     {
+        QString strFileName = QFileDialog::getSaveFileName(this, QString(),
+                                                           QDir::homePath() + "/untited.pdf", tr("PDF Files (*.pdf)"));
         if (::PathFileExists(strFileName))
         {
             ::DeleteFile(strFileName);
@@ -1891,6 +1877,119 @@ void CWizDocumentWebView::redo()
 {
     page()->mainFrame()->evaluateJavaScript("editor.execCommand('redo')");
     emit statusChanged();
+}
+
+QString CWizDocumentWebView::getSkinResourcePath()
+{
+    return ::WizGetSkinResourcePath(m_app.userSettings().skin());
+}
+
+QString CWizDocumentWebView::getUserAvatarFilePath(int size)
+{
+    QString strFileName;
+    QString strUserID = m_dbMgr.db().GetUserId();
+    if (WizService::AvatarHost::customSizeAvatar(strUserID, size, size, strFileName))
+        return strFileName;
+
+
+    return QString();
+}
+
+QString CWizDocumentWebView::getUserAlias()
+{
+    QString strKbGUID = view()->note().strKbGUID;
+    return m_dbMgr.db(strKbGUID).GetUserAlias();
+}
+
+QString CWizDocumentWebView::getFormatedDateTime()
+{
+    COleDateTime time = QDateTime::currentDateTime();
+    return ::WizDateToLocalString(time);
+}
+
+bool CWizDocumentWebView::isPersonalDocument()
+{
+    QString strKbGUID = view()->note().strKbGUID;
+    QString dbKbGUID = m_dbMgr.db().kbGUID();
+    return strKbGUID.isEmpty() || (strKbGUID == dbKbGUID);
+}
+
+QString CWizDocumentWebView::getCurrentNoteHtml()
+{
+    CWizDatabase& db = m_dbMgr.db(view()->note().strKbGUID);
+    QString strFolder = Utils::PathResolve::tempDocumentFolder(view()->note().strGUID);
+    if (db.ExtractZiwFileToFolder(view()->note(), strFolder))
+    {
+        QString strHtmlFile = strFolder + "index.html";
+        QString strHtml;
+        ::WizLoadUnicodeTextFromFile(strHtmlFile, strHtml);
+        return strHtml;
+    }
+
+    return QString();
+}
+
+
+void copyFileToFolder(const QString& strFileFoler, const QString& strIndexFile, \
+                         const QStringList& strResourceList)
+{
+    //copy index file
+    QString strFolderIndex = strFileFoler + "index.html";
+    if (strIndexFile != strFolderIndex)
+    {
+        QFile::remove(strFolderIndex);
+        QFile::copy(strIndexFile, strFolderIndex);
+    }
+
+    //copy resources to temp folder
+    QString strResourcePath = strFileFoler + "index_files/";
+    for (int i = 0; i < strResourceList.count(); i++)
+    {
+        if (QFile::exists(strResourceList.at(i)))
+        {
+            QFile::copy(strResourceList.at(i), strResourcePath + WizExtractFileName(strResourceList.at(i)));
+        }
+    }
+}
+
+void CWizDocumentWebView::saveHtmlToCurrentNote(const QString &strHtml, const QString& strResource)
+{
+    if (strHtml.isEmpty())
+        return;
+
+    WIZDOCUMENTDATA docData = view()->note();
+    CWizDatabase& db = m_dbMgr.db(docData.strKbGUID);
+    QString strFolder = Utils::PathResolve::tempDocumentFolder(docData.strGUID);
+    //
+    QString strHtmlFile = strFolder + "index.html";
+    ::WizSaveUnicodeTextToUtf8File(strHtmlFile, strHtml);
+    QStringList strResourceList = strResource.split('*');
+    copyFileToFolder(strFolder, strHtmlFile, strResourceList);
+
+    db.CompressFolderToZiwFile(docData, strFolder);
+    bool bNotify = false;
+    QString strZiwFile = db.GetDocumentFileName(docData.strGUID);
+    db.UpdateDocumentDataMD5(docData, strZiwFile, bNotify);
+
+    MainWindow* mainWindow = qobject_cast<MainWindow *>(m_app.mainWindow());
+    mainWindow->quickSyncKb(docData.strKbGUID);
+
+    updateNoteHtml();
+}
+
+bool CWizDocumentWebView::hasEditPermissionOnCurrentNote()
+{
+    WIZDOCUMENTDATA docData = view()->note();
+    CWizDatabase& db = m_dbMgr.db(docData.strKbGUID);
+    return db.CanEditDocument(docData) && !CWizDatabase::IsInDeletedItems(docData.strLocation);
+}
+
+void CWizDocumentWebView::setCurrentDocumentType(const QString &strType)
+{
+    WIZDOCUMENTDATA docData = view()->note();
+    CWizDatabase& db = m_dbMgr.db(docData.strKbGUID);
+    docData.strType = strType;
+    db.ModifyDocumentInfoEx(docData);
 }
 
 QNetworkDiskCache*CWizDocumentWebView::networkCache()

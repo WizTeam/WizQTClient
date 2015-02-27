@@ -34,6 +34,7 @@
 #ifndef WEBSOCKETTRANSPORT_H
 #define WEBSOCKETTRANSPORT_H
 
+#ifdef USEWEBENGINE
 #include <QtWebChannel/QWebChannelAbstractTransport>
 
 QT_BEGIN_NAMESPACE
@@ -56,5 +57,6 @@ private:
 };
 
 QT_END_NAMESPACE
+#endif
 
 #endif // WEBSOCKETTRANSPORT_H

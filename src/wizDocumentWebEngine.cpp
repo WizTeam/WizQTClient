@@ -1,3 +1,4 @@
+#ifdef USEWEBENGINE
 #include "wizDocumentWebEngine.h"
 #include "wizDocumentWebView.h"
 #include <QRunnable>
@@ -114,6 +115,7 @@ enum WizLinkType {
 //    m_timerAutoSave.setInterval(5*60*1000); // 5 minutes
 //    connect(&m_timerAutoSave, SIGNAL(timeout()), SLOT(onTimerAutoSaveTimout()));
 //}
+
 
 CWizDocumentWebEngine::CWizDocumentWebEngine(CWizExplorerApp& app, QWidget* parent)
     : QWebEngineView(parent)
@@ -1197,8 +1199,6 @@ void CWizDocumentWebEngine::on_insertCodeHtml_requset(QString strCodeHtml)
 //    {
     insertCssForCode();
     editorCommandExecuteInsertHtml(strCodeHtml, true);
-//        //FiXME:插入代码时li的属性会丢失，此处需要特殊处理，在head中增加li的属性
-//        page()->runJavaScript("WizAddCssForCodeLi();");
 //    }
 }
 
@@ -1915,7 +1915,7 @@ void CWizDocumentWebEngine::saveAsPDF()
         if (strHtml.isEmpty())
             return;
 
-        QString	fileName = QFileDialog::getSaveFileName (this, QString(), QDir::homePath(), tr("PDF Files (*.pdf)"));
+        QString	fileName = QFileDialog::getSaveFileName (this, QString(), QDir::homePath() + "/untited.pdf", tr("PDF Files (*.pdf)"));
         if (!fileName.isEmpty())
         {
             if (::PathFileExists(fileName))
@@ -2084,3 +2084,6 @@ void WebEnginePage::load(const QUrl& url)
 {
     qDebug() << "web page load called : " << url;
 }
+
+
+#endif

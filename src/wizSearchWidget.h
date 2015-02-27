@@ -12,9 +12,8 @@
 
 #ifdef USECOCOATOOLBAR
 class CWizSearchWidget;
-#endif
 
-#ifndef Q_OS_MAC
+#else
 
 class CWizExplorerApp;
 

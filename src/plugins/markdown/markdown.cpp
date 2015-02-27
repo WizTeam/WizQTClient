@@ -7,7 +7,7 @@
 #include <QFile>
 #include <QTextStream>
 #include <QWebFrame>
-#include <QWebEnginePage>
+//#include <QWebEnginePage>
 #include <QCoreApplication>
 #include <QApplication>
 #include <QTimer>
@@ -52,7 +52,13 @@ void MarkdownPlugin::onViewNoteLoaded(INoteView* view, const WIZDOCUMENTDATA& do
         return;
 
     if (canRender(view, doc))
+    {
+#ifdef USEWEBENGINE
         render(view->notePage());
+#else
+        render(view->noteFrame());
+#endif
+    }
 }
 
 void MarkdownPlugin::onFrameRenderRequested(QWebFrame* frame, bool bUseInlineCss)
@@ -68,27 +74,6 @@ void MarkdownPlugin::onFrameRenderRequested(QWebFrame* frame, bool bUseInlineCss
             changeCssToInline(frame);
         }
     }
-}
-
-QString MarkdownPlugin::getExecString() const
-{
-    QString strFile = cachePath() + "plugins/markdown/WizNote-Markdown.js";
-    QFile f(strFile);
-    if (!f.open(QIODevice::ReadOnly)) {
-        qDebug() << "[Markdown]Failed to get render execute code";
-        return;
-    }
-
-    QTextStream ts(&f);
-    QString strExec = ts.readAll();
-    f.close();
-
-    Q_ASSERT(strExec.indexOf("${CACHE_PATH}") != -1);
-    QString strPath = cachePath() + "plugins/markdown/";
-    QDir dir;
-    dir.mkpath(strPath);
-    strExec.replace("${CACHE_PATH}", strPath);
-    return strExec;
 }
 
 bool MarkdownPlugin::canRender(INoteView* view, const WIZDOCUMENTDATA& doc)
@@ -110,6 +95,7 @@ bool MarkdownPlugin::canRender(INoteView* view, const WIZDOCUMENTDATA& doc)
     return false;
 }
 
+#ifdef USEWEBENGINE
 void MarkdownPlugin::render(QWebEnginePage* page)
 {
     Q_ASSERT(page);
@@ -117,7 +103,7 @@ void MarkdownPlugin::render(QWebEnginePage* page)
     QString strExec = getExecString();
     page->runJavaScript(strExec);
 }
-
+#else
 void MarkdownPlugin::render(QWebFrame* frame)
 {
     Q_ASSERT(frame);
@@ -125,6 +111,7 @@ void MarkdownPlugin::render(QWebFrame* frame)
     QString strExec = getExecString();
     frame->evaluateJavaScript(strExec);
 }
+#endif
 
 void MarkdownPlugin::changeCssToInline(QWebFrame* frame)
 {
@@ -233,6 +220,27 @@ bool MarkdownPlugin::copyRes2Cache()
     copyFolder(sourcePath, destPath);
 
     return true;
+}
+
+QString MarkdownPlugin::getExecString()
+{
+    QString strFile = cachePath() + "plugins/markdown/WizNote-Markdown.js";
+    QFile f(strFile);
+    if (!f.open(QIODevice::ReadOnly)) {
+        qDebug() << "[Markdown]Failed to get render execute code";
+        return "";
+    }
+
+    QTextStream ts(&f);
+    QString strExec = ts.readAll();
+    f.close();
+
+    Q_ASSERT(strExec.indexOf("${CACHE_PATH}") != -1);
+    QString strPath = cachePath() + "plugins/markdown/";
+    QDir dir;
+    dir.mkpath(strPath);
+    strExec.replace("${CACHE_PATH}", strPath);
+    return strExec;
 }
 
 

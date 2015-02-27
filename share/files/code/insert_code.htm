@@ -22,7 +22,7 @@
             font-family: "Microsoft YaHei", Georgia, Helvetica, Arial, sans-serif, ËÎÌו, serif, PMingLiU;
         }
     </style>
-    <script type="text/javascript" charset="utf-8" src="../../plugins/Notes.Markdown/google-code-prettify/prettify.js" ></script>
+    <script type="text/javascript" charset="utf-8" src="../markdown/google-code-prettify/prettify.js" ></script>
     <link  rel="stylesheet" type="text/css" href="wiz_code_highlight.css" />
 </head>
 <body>
@@ -77,11 +77,11 @@
         <div id="divResult"></div>
     <script language="javascript">
         
-        var objApp = window.external;
-        var pluginPath = objApp.GetHtmlDocumentPath(document);
-        var languageFileName = pluginPath + "insert_code.ini";
-        //
-        objApp.LocalizeHtmlDocument(languageFileName, document);
+        var objApp = codeEditor;
+        // var pluginPath = objApp.GetHtmlDocumentPath(document);
+        // var languageFileName = pluginPath + "insert_code.ini";
+        // //
+        // objApp.LocalizeHtmlDocument(languageFileName, document);
         /*
         //
         var objTools = objApp.CreateCommonTools();
@@ -170,7 +170,8 @@
         //
         function buttonCancel_onclick() {
             try {
-                external.ClosePluginDlg(document, 0);
+                //external.ClosePluginDlg(document, 0);
+                objApp.close();
             }
             catch(e) {
 
@@ -184,6 +185,7 @@
         }
         //
         function insertCss(doc) {
+            
             if (!doc)
                 return;
             if (!external)
@@ -218,15 +220,16 @@
             prettyPrint();
 
             try {
-                var doc = external.EditorDocument;
-                insertCss(doc);
+                //var doc = external.editorDocument;
+                //insertCss(doc);
                 //    
                 var code = divResult.innerHTML;
-                doc.execCommand("insertHTML", false, code);
+                // doc.execCommand("insertHTML", false, code);
+                objApp.insertHtml(code);
                 //
                 setLaunguage(selectLanguage.value);
                 //
-                external.ClosePluginDlg(document, 1);
+                objApp.close();
             }
             catch(e) {
 
@@ -235,7 +238,7 @@
         //
         function getSelectText() {
             try {
-                var doc = external.EditorDocument;
+                var doc = external.editorDocument;
                 var sel = doc.getSelection();
                 if (!sel || sel.rangeCount < 1)
                     return "";
@@ -267,37 +270,13 @@
         function getLanguage() {
             if (!objApp)
                 return "";
-            try {
-                var doc = objApp.WizDocument;
-                if (!doc)
-                    return "";
-                var db = doc.Database;
-                if (!db)
-                    return "";
-                //
-                return db.GetMeta("WizCodeHighlight", "language");;
-            }
-            catch(e) {
-                return "";
-            }
-
-            return "";
+            return objApp.getLastCodeType();
+            
         } 
         function setLaunguage(lang) {
             if (!objApp)
                 return;
-            try {
-                var doc = objApp.WizDocument;
-                if (!doc)
-                    return;
-                var db = doc.Database;
-                if (!db)
-                    return;
-                //
-                db.SetMeta("WizCodeHighlight", "language", lang);
-            }
-            catch(e) {
-            }
+            objApp.saveLastCodeType(lang);
         }
         function initLanguage() {
             var lang = getLanguage();
