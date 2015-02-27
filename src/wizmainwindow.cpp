@@ -612,10 +612,10 @@ void MainWindow::initActions()
     m_animateSync->setSingleIcons("sync");
 
     connect(m_doc->web(), SIGNAL(statusChanged()), SLOT(on_editor_statusChanged()));
-#ifndef USEWEBENGINE
-    connect(m_doc->web()->page(), SIGNAL(contentsChanged()), SLOT(on_document_contentChanged()));
-    connect(m_doc->web()->page(), SIGNAL(selectionChanged()), SLOT(on_document_contentChanged()));
-#endif
+//#ifndef USEWEBENGINE
+//    connect(m_doc->web()->page(), SIGNAL(contentsChanged()), SLOT(on_document_contentChanged()));
+//    connect(m_doc->web()->page(), SIGNAL(selectionChanged()), SLOT(on_document_contentChanged()));
+//#endif
 
     on_editor_statusChanged();
 }

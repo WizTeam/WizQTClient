@@ -283,6 +283,9 @@ void CWizDocumentWebView::inputMethodEvent(QInputMethodEvent* event)
 
 void CWizDocumentWebView::keyPressEvent(QKeyEvent* event)
 {
+    QTime time;
+    qDebug() << "key press event start .";
+    time.start();
     // special cases process
     if (event->key() == Qt::Key_Escape)
     {
@@ -373,6 +376,7 @@ void CWizDocumentWebView::keyPressEvent(QKeyEvent* event)
     if (event->key() == Qt::Key_Enter || event->key() == Qt::Key_Return) {
         tryResetTitle();
     }
+    qDebug() << "key press end : " << time.elapsed();
 }
 
 void CWizDocumentWebView::focusInEvent(QFocusEvent *event)
@@ -861,13 +865,13 @@ void CWizDocumentWebView::onEditorContentChanged()
 
 void CWizDocumentWebView::onEditorSelectionChanged()
 {
-
+    qDebug() << "web view selection changed : " << selectedText();
 #ifdef Q_OS_MAC
     // FIXME: every time change content should tell webview to clean the canvas
     if (hasFocus()) {
         update();
     }
-#endif // Q_OS_MAC
+#endif // Q_OS_MAAC
 
     Q_EMIT statusChanged();
 }

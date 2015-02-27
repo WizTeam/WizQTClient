@@ -66,7 +66,6 @@ public Q_SLOTS:
 
     void onCommentsButtonClicked();
     void onCommentPageLoaded(bool ok);
-    void onNetworkRequestFinished(QNetworkReply* reply);
     void onViewNoteLoaded(Core::INoteView* view, const WIZDOCUMENTDATA& note, bool bOk);
     void onTokenAcquired(const QString& strToken);
     void onGetCommentsCountFinished(int nCount);

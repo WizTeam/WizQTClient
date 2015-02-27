@@ -1117,7 +1117,11 @@ void EditorToolBar::on_delegate_requestShowContextMenu(const QPoint& pos)
 
 void EditorToolBar::on_delegate_selectionChanged()
 {
+    QTime time;
+    qDebug() << " start to reset tool bar";
+    time.start();
     resetToolbar();
+    qDebug() << "after reset tool bar , time : " << time.elapsed();
 }
 
 void EditorToolBar::saveImage(QString strFileName)
