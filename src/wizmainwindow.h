@@ -408,7 +408,7 @@ public:
     Q_INVOKABLE void ProcessClipboardBeforePaste(const QVariantMap& data);
 
     Q_INVOKABLE bool checkListClickable();
-    //NOTE: these functions would called by comment page, do not delete
+    //NOTE: these functions would called by web page, do not delete
     Q_INVOKABLE void OpenURLInDefaultBrowser(const QString& strUrl);
     Q_INVOKABLE void GetToken(const QString& strFunctionName);
     Q_INVOKABLE void SetDialogResult(int nResult);

@@ -863,7 +863,7 @@ void CWizDocumentWebView::onEditorSelectionChanged()
 {
 
 #ifdef Q_OS_MAC
-    // FIXME: every time change content shuld tell webview to clean the canvas
+    // FIXME: every time change content should tell webview to clean the canvas
     if (hasFocus()) {
         update();
     }
@@ -874,7 +874,6 @@ void CWizDocumentWebView::onEditorSelectionChanged()
 
 void CWizDocumentWebView::onEditorLinkClicked(const QUrl& url)
 {
-    qDebug() << "editor link clicked : " << url;
     if (isInternalUrl(url))
     {
         viewDocumentByUrl(url);

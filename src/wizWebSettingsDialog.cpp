@@ -26,6 +26,10 @@ CWizWebSettingsDialog::CWizWebSettingsDialog(QString url, QSize sz, QWidget *par
     setPalette(pal);
 
     m_web = new QWebView(this);
+    m_web->settings()->globalSettings()->setAttribute(QWebSettings::LocalStorageEnabled, true);
+    m_web->settings()->globalSettings()->setAttribute(QWebSettings::LocalStorageDatabaseEnabled, true);
+    connect(m_web->page()->networkAccessManager(), SIGNAL(finished(QNetworkReply*)),
+            SLOT(on_networkRequest_finished(QNetworkReply*)));
     connect(m_web, SIGNAL(loadFinished(bool)), SLOT(on_web_loaded(bool)));
     connect(m_web->page()->mainFrame(), SIGNAL(javaScriptWindowObjectCleared()),
             SLOT(onEditorPopulateJavaScriptWindowObject()));
@@ -39,20 +43,20 @@ CWizWebSettingsDialog::CWizWebSettingsDialog(QString url, QSize sz, QWidget *par
     m_labelProgress->setMovie(m_movie);
 
     QVBoxLayout* layout = new QVBoxLayout(this);
-//    layout->setAlignment(Qt::AlignCenter);
     layout->setContentsMargins(0, 0, 0, 0);
     layout->setSpacing(0);
     setLayout(layout);
 
     layout->addWidget(m_labelProgress);
     layout->addWidget(m_web);
+    m_web->setVisible(true);
+    m_labelProgress->setVisible(false);
 }
 
 void CWizWebSettingsDialog::load()
 {
     m_web->setVisible(false);
     m_labelProgress->setVisible(true);
-
     m_movie->start();
     m_web->page()->mainFrame()->load(m_url);
 }
@@ -67,14 +71,12 @@ void CWizWebSettingsDialog::showEvent(QShowEvent* event)
 
 void CWizWebSettingsDialog::on_web_loaded(bool ok)
 {
+    if (ok)
+    {
         m_movie->stop();
         m_labelProgress->setVisible(false);
         m_web->setVisible(true);
-
-        if (!ok)
-        {
-            loadErrorPage();
-        }
+    }
 }
 
 void CWizWebSettingsDialog::loadErrorPage()
@@ -82,9 +84,9 @@ void CWizWebSettingsDialog::loadErrorPage()
     QString strFileName = Utils::PathResolve::resourcesPath() + "files/errorpage/load_fail.html";
     QString strHtml;
     ::WizLoadUnicodeTextFromFile(strFileName, strHtml);
-    strHtml.replace("error_text1", tr("Load Error"));
-    strHtml.replace("error_text2", tr("Network anomalies, check the network, then retry!"));
-    strHtml.replace("error_text3", tr("Load Error"));
+    strHtml.replace("{error_text1}", tr("Load Error"));
+    strHtml.replace("{error_text2}", tr("Network anomalies, check the network, then retry!"));
+    strHtml.replace("{error_text3}", tr("Load Error"));
     QUrl url = QUrl::fromLocalFile(strFileName);
     m_web->setHtml(strHtml, url);
 }
@@ -95,6 +97,15 @@ void CWizWebSettingsDialog::onEditorPopulateJavaScriptWindowObject()
     m_web->page()->mainFrame()->addToJavaScriptWindowObject("WizExplorerApp", mainWindow->object());
 }
 
+void CWizWebSettingsDialog::on_networkRequest_finished(QNetworkReply* reply)
+{
+    // 即使在连接正常情况下也会出现OperationCanceledError，此处将其忽略
+    if (reply && reply->error() != QNetworkReply::NoError && reply->error() != QNetworkReply::OperationCanceledError)
+    {
+        showError();
+    }
+}
+
 void CWizWebSettingsDialog::showError()
 {
     m_movie->stop();
@@ -102,7 +113,6 @@ void CWizWebSettingsDialog::showError()
     m_web->setVisible(true);
     loadErrorPage();
 }
-
 
 void CWizWebSettingsWithTokenDialog::load()
 {

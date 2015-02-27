@@ -1166,7 +1166,7 @@ bool MainWindow::checkListClickable()
     return false;
 }
 
-/** 评论页面调用该方法，打开URL
+/** web页面调用该方法，打开URL
   * @brief MainWindow::OpenURLInDefaultBrowser
  * @param strUrl
  */
@@ -1175,7 +1175,7 @@ void MainWindow::OpenURLInDefaultBrowser(const QString& strUrl)
     m_doc->web()->onEditorLinkClicked(strUrl);
 }
 
-/** 评论页面调用该方法，token失效时重新获取token
+/** web页面调用该方法，token失效时重新获取token
  * @brief MainWindow::GetToken
  * @param strFunctionName
  */
@@ -1186,9 +1186,9 @@ void MainWindow::GetToken(const QString& strFunctionName)
     m_doc->commentView()->page()->mainFrame()->evaluateJavaScript(strExec);
 }
 
-/**   评论页面调用该方法，将评论页面的结果返回
+/**   web页面调用该方法，将页面的结果返回
  * @brief MainWindow::SetDialogResult
- * @param result  评论页面返回结果，如需更新数据，会返回1
+ * @param result  web页面返回结果，如需更新笔记数据，会返回1
  */
 void MainWindow::SetDialogResult(int nResult)
 {

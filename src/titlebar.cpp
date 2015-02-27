@@ -466,7 +466,6 @@ void TitleBar::onCommentsButtonClicked()
 
     if (isNetworkAccessible()) {
         if (!m_commentsUrl.isEmpty()) {
-            qDebug() << "load comment from url : " << m_commentsUrl;
             comments->load(m_commentsUrl);
             QSplitter* splitter = qobject_cast<QSplitter*>(comments->parentWidget());
             Q_ASSERT(splitter);
@@ -556,7 +555,6 @@ void TitleBar::onTokenAcquired(const QString& strToken)
     QString strGUID = noteView()->note().strGUID;
     m_commentsUrl =  WizService::ApiEntry::commentUrl(strToken, strKbGUID, strGUID);
 
-    qDebug() << "load comment from url : " << m_commentsUrl;
     if (comments->isVisible()) {
 //        comments->load(QUrl());
         comments->load(m_commentsUrl);

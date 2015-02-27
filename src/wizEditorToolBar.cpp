@@ -881,6 +881,20 @@ void EditorToolBar::resetToolbar()
         } else {
             Q_ASSERT(0);
         }
+
+        state = m_editor->editorCommandQueryCommandState("source");
+        qDebug() << "qurey source command state : " << state;
+        if (state == -1) {
+            m_btnViewSource->setEnabled(false);
+        } else if (state == 0) {
+            m_btnViewSource->setEnabled(true);
+            m_btnViewSource->setChecked(false);
+        } else if (state == 1) {
+            m_btnViewSource->setEnabled(true);
+            m_btnViewSource->setChecked(true);
+        } else {
+            Q_ASSERT(0);
+        }
 #endif
 
     bool bReceiveImage = m_editor->editorCommandQueryMobileFileReceiverState();

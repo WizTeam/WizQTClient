@@ -849,7 +849,7 @@
     <message>
         <location filename="../src/wiznoteinfoform.cpp" line="160"/>
         <source>Please input document password to cancel encrypt.</source>
-        <translation type="unfinished">请输入笔记密码</translation>
+        <translation>请输入笔记密码。</translation>
     </message>
 </context>
 <context>
@@ -1593,12 +1593,12 @@ w: %3  h: %4</translation>
         <location filename="../src/wizWebSettingsDialog.cpp" line="85"/>
         <location filename="../src/wizWebSettingsDialog.cpp" line="87"/>
         <source>Load Error</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">无法加载该页面</translation>
     </message>
     <message>
         <location filename="../src/wizWebSettingsDialog.cpp" line="86"/>
         <source>Network anomalies, check the network, then retry!</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">网络异常，请检查后重试！</translation>
     </message>
 </context>
 <context>
