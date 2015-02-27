@@ -217,7 +217,7 @@ void TitleBar::setEditor(CWizDocumentWebView* editor)
     connect(editor, SIGNAL(focusIn()), SLOT(onEditorFocusIn()));
     connect(editor, SIGNAL(focusOut()), SLOT(onEditorFocusOut()));
 
-    connect(editor->page(), SIGNAL(selectionChanged()), SLOT(onEditorChanged()));
+//    connect(editor->page(), SIGNAL(selectionChanged()), SLOT(onEditorChanged()));
     connect(editor->page(), SIGNAL(contentsChanged()), SLOT(onEditorChanged()));
 
     connect(m_editTitle, SIGNAL(titleEdited(QString)), editor, SLOT(onTitleEdited(QString)));

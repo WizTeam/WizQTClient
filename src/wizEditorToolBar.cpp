@@ -1059,8 +1059,8 @@ void EditorToolBar::setDelegate(CWizDocumentWebView* editor)
     connect(m_editor, SIGNAL(requestShowContextMenu(QPoint)),
             SLOT(on_delegate_requestShowContextMenu(QPoint)));
 
-    connect(m_editor, SIGNAL(selectionChanged()),
-            SLOT(on_delegate_selectionChanged()));
+//    connect(m_editor, SIGNAL(selectionChanged()),
+//            SLOT(on_delegate_selectionChanged()));
 }
 #endif
 
@@ -1069,9 +1069,7 @@ void EditorToolBar::on_delegate_requestShowContextMenu(const QPoint& pos)
     if (!m_editor)
         return;
 
-    qDebug() << "on delegate show context menu";
     buildMenu();
-    qDebug() << "after build menu";
 
     m_strImageSrc.clear();
     if (m_editor->findIMGElementAt(pos, m_strImageSrc))

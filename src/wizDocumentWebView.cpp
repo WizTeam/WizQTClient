@@ -766,8 +766,8 @@ void CWizDocumentWebView::initEditor()
     connect(page(), SIGNAL(linkClicked(const QUrl&)),
             SLOT(onEditorLinkClicked(const QUrl&)));
 
-    connect(page(), SIGNAL(selectionChanged()),
-            SLOT(onEditorSelectionChanged()));
+//    connect(page(), SIGNAL(selectionChanged()),
+//            SLOT(onEditorSelectionChanged()));
 
     connect(page(), SIGNAL(contentsChanged()),
             SLOT(onEditorContentChanged()));
