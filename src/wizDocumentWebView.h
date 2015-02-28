@@ -218,6 +218,7 @@ private:
 
 protected:
     virtual void keyPressEvent(QKeyEvent* event);
+    virtual void mousePressEvent(QMouseEvent* event);
     virtual void inputMethodEvent(QInputMethodEvent* event);
     virtual void focusInEvent(QFocusEvent* event);
     virtual void focusOutEvent(QFocusEvent* event);
@@ -375,8 +376,8 @@ Q_SIGNALS:
     void focusOut();
     //
 
-    void requestShowContextMenu(const QPoint& pos);
-
+    void showContextMenuRequest(const QPoint& pos);
+    void updateEditorToolBarRequest();
     //
     void viewDocumentFinished();
 

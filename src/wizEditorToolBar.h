@@ -4,6 +4,7 @@
 #include <QWidget>
 #include <QPointer>
 #include <QMap>
+#include <QTimer>
 
 class QString;
 class QMenu;
@@ -71,6 +72,10 @@ private:
 
     QString m_strImageSrc;
 
+    //text input would call resetToolbar and cause input delay, lock to ignore reset request
+    bool m_resetLocked;
+    QTimer m_resetLockTimer;
+
     WizEditorContextMenuItem* contextMenuData();
     void buildMenu();
     int buildMenu(QMenu* pMenu, int indx);
@@ -117,8 +122,11 @@ protected Q_SLOTS:
     void on_editor_copyImage_triggered();
     void on_editor_copyImageLink_triggered();
 
-    void on_delegate_requestShowContextMenu(const QPoint& pos);
+    void on_delegate_showContextMenuRequest(const QPoint& pos);
     void on_delegate_selectionChanged();
+
+    void on_updateToolBarStatus_request();
+    void on_resetLockTimer_timeOut();
 
     void saveImage(QString strFileName);
     void copyImage(QString strFileName);

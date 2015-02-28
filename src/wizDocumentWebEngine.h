@@ -338,7 +338,7 @@ Q_SIGNALS:
     void focusOut();
     //
 
-    void requestShowContextMenu(const QPoint& pos);
+    void showContextMenuRequest(const QPoint& pos);
 
     //
     void viewDocumentFinished();

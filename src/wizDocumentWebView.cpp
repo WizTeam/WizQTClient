@@ -376,7 +376,15 @@ void CWizDocumentWebView::keyPressEvent(QKeyEvent* event)
     if (event->key() == Qt::Key_Enter || event->key() == Qt::Key_Return) {
         tryResetTitle();
     }
+
+    emit updateEditorToolBarRequest();
     qDebug() << "key press end : " << time.elapsed();
+}
+
+void CWizDocumentWebView::mousePressEvent(QMouseEvent* event)
+{
+    QWebView::mousePressEvent(event);
+    emit updateEditorToolBarRequest();
 }
 
 void CWizDocumentWebView::focusInEvent(QFocusEvent *event)
@@ -408,7 +416,7 @@ void CWizDocumentWebView::contextMenuEvent(QContextMenuEvent *event)
     if (!m_bEditorInited)
         return;
 
-    Q_EMIT requestShowContextMenu(mapToGlobal(event->pos()));
+    Q_EMIT showContextMenuRequest(mapToGlobal(event->pos()));
 }
 
 void CWizDocumentWebView::dragEnterEvent(QDragEnterEvent *event)

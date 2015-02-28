@@ -351,7 +351,7 @@ void CWizDocumentWebEngine::contextMenuEvent(QContextMenuEvent *event)
         return;
 
     qDebug() << "contextMenu event called : " << event  << "\n event pos : " << event->pos();
-    Q_EMIT requestShowContextMenu(mapToGlobal(event->pos()));
+    Q_EMIT showContextMenuRequest(mapToGlobal(event->pos()));
 }
 
 void CWizDocumentWebEngine::dragEnterEvent(QDragEnterEvent *event)
