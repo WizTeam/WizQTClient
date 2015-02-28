@@ -283,9 +283,6 @@ void CWizDocumentWebView::inputMethodEvent(QInputMethodEvent* event)
 
 void CWizDocumentWebView::keyPressEvent(QKeyEvent* event)
 {
-    QTime time;
-    qDebug() << "key press event start .";
-    time.start();
     // special cases process
     if (event->key() == Qt::Key_Escape)
     {
@@ -332,9 +329,6 @@ void CWizDocumentWebView::keyPressEvent(QKeyEvent* event)
 
 #endif
 
-//    int keyValue = event->key();
-//    QString keyText = event->text();
-//    qDebug() << keyValue << " text : " << keyText;
 
 #ifdef Q_OS_LINUX
     setUpdatesEnabled(false);
@@ -357,19 +351,6 @@ void CWizDocumentWebView::keyPressEvent(QKeyEvent* event)
     }
 
     //special handled for qt4,case capslock doesn't work
-#if QT_VERSION < 0x050000
-//    if (65 <= keyValue && 90 >= keyValue)
-//    {
-//        if (event->key() & Qt::Key_CapsLock)
-//        {
-//            qDebug() << "capslock pressed";
-//            QKeyEvent newKeyEvent(event->type(), keyValue, event->modifiers(),
-//                                  keyText.toUpper(), event->isAutoRepeat(), event->count());
-//            QWebView::keyPressEvent(&newKeyEvent);
-//            return;
-//        }
-//    }
-#endif
     QWebView::keyPressEvent(event);
 #endif
 
@@ -378,7 +359,6 @@ void CWizDocumentWebView::keyPressEvent(QKeyEvent* event)
     }
 
     emit updateEditorToolBarRequest();
-    qDebug() << "key press end : " << time.elapsed();
 }
 
 void CWizDocumentWebView::mousePressEvent(QMouseEvent* event)

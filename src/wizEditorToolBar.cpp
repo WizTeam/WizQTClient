@@ -886,7 +886,6 @@ void EditorToolBar::resetToolbar()
     }
 
     state = m_editor->editorCommandQueryCommandState("source");
-    qDebug() << "qurey source command state : " << state;
     if (state == -1) {
         m_btnViewSource->setEnabled(false);
     } else if (state == 0) {
@@ -899,8 +898,8 @@ void EditorToolBar::resetToolbar()
         Q_ASSERT(0);
     }
 #endif
-//    bool bReceiveImage = m_editor->editorCommandQueryMobileFileReceiverState();
-//    m_btnMobileImage->setChecked(bReceiveImage);
+    bool bReceiveImage = m_editor->editorCommandQueryMobileFileReceiverState();
+    m_btnMobileImage->setChecked(bReceiveImage);
 }
 
 struct WizEditorContextMenuItem
@@ -1116,15 +1115,16 @@ void EditorToolBar::on_delegate_showContextMenuRequest(const QPoint& pos)
     m_menuContext->update();
 }
 
+/**     此处对slectionChanged引起的刷新做延迟和屏蔽处理。在输入中文的时候频繁的刷新会引起输入卡顿的问题
+ * @brief EditorToolBar::on_delegate_selectionChanged
+ */
 void EditorToolBar::on_delegate_selectionChanged()
 {
-    qDebug() << "on_delegate_selectionChanged called";
     static int counter = 0;
     if (m_resetLocked)
     {
         if (counter == 0)
         {
-            qDebug() << "counter is 0, create single shot";
             counter ++;
             QTimer::singleShot(1600, [this](){
                 on_delegate_selectionChanged();
@@ -1133,11 +1133,7 @@ void EditorToolBar::on_delegate_selectionChanged()
         return;
     }
 
-    QTime time;
-    qDebug() << " start to reset tool bar";
-    time.start();
     resetToolbar();
-    qDebug() << "after reset tool bar , time : " << time.elapsed();
 
     // 锁定更新
     m_resetLocked = true;
@@ -1152,7 +1148,6 @@ void EditorToolBar::on_updateToolBarStatus_request()
 
 void EditorToolBar::on_resetLockTimer_timeOut()
 {
-    qDebug() << "stop reset lock timer";
     m_resetLockTimer.stop();
     m_resetLocked = false;
 }
