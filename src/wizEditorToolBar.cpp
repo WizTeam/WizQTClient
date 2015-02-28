@@ -1126,9 +1126,7 @@ void EditorToolBar::on_delegate_selectionChanged()
         if (counter == 0)
         {
             counter ++;
-            QTimer::singleShot(1600, [this](){
-                on_delegate_selectionChanged();
-            });
+            QTimer::singleShot(1600, this,SLOT(on_delegate_selectionChanged()));
         }
         return;
     }

@@ -629,7 +629,9 @@ void CWizDocumentListView::startDrag(Qt::DropActions supportedActions)
 
     drag->setPixmap(WizGetDocumentDragBadget(items.size()));
     drag->exec();
-    delete drag;
+
+    //delete drag would cause crash
+//    drag->deleteLater();
 }
 
 void CWizDocumentListView::dragEnterEvent(QDragEnterEvent *event)

@@ -144,7 +144,7 @@ public:
     void init();
 
     void loadShortcutState();
-    void saveShortcutState();
+    Q_INVOKABLE void saveShortcutState();
     void loadExpandState();
     void saveExpandState();
 
