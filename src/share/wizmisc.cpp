@@ -2112,14 +2112,12 @@ CWaitCursor::~CWaitCursor()
 void showWebDialogWithToken(const QString& windowTitle, const QString& url, QWidget* parent, bool dialogResizable)
 {
     CWizWebSettingsWithTokenDialog pDlg(url, QSize(800, 480), parent);
-//    if (dialogResizable)
-//    {
-//        pDlg->setMaximumSize(QSize(QWIDGETSIZE_MAX, QWIDGETSIZE_MAX));
-//    }
+    if (dialogResizable)
+    {
+        pDlg.setMaximumSize(QSize(QWIDGETSIZE_MAX, QWIDGETSIZE_MAX));
+    }
     pDlg.setWindowTitle(windowTitle);
     pDlg.exec();
-
-//    delete pDlg;
 }
 
 

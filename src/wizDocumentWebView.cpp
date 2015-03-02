@@ -643,6 +643,9 @@ void CWizDocumentWebView::reloadNoteData(const WIZDOCUMENTDATA& data)
 
 void CWizDocumentWebView::closeDocument(const WIZDOCUMENTDATA& doc)
 {
+    if (!isInited())
+        return;
+
     bool isSourceMode = editorCommandQueryCommandState("source");
     if (isSourceMode)
     {
@@ -725,11 +728,6 @@ bool CWizDocumentWebView::evaluateJavaScript(const QString& js)
     return true;
 }
 
-QVariant CWizDocumentWebView::editorDocument()
-{
-    return page()->mainFrame()->evaluateJavaScript("editor.document");
-}
-
 void CWizDocumentWebView::initEditor()
 {
     if (m_bEditorInited)
@@ -754,8 +752,8 @@ void CWizDocumentWebView::initEditor()
     connect(page(), SIGNAL(linkClicked(const QUrl&)),
             SLOT(onEditorLinkClicked(const QUrl&)));
 
-//    connect(page(), SIGNAL(selectionChanged()),
-//            SLOT(onEditorSelectionChanged()));
+    connect(page(), SIGNAL(selectionChanged()),
+            SLOT(onEditorSelectionChanged()));
 
     connect(page(), SIGNAL(contentsChanged()),
             SLOT(onEditorContentChanged()));
@@ -853,7 +851,6 @@ void CWizDocumentWebView::onEditorContentChanged()
 
 void CWizDocumentWebView::onEditorSelectionChanged()
 {
-    qDebug() << "web view selection changed : " << selectedText();
 #ifdef Q_OS_MAC
     // FIXME: every time change content should tell webview to clean the canvas
     if (hasFocus()) {

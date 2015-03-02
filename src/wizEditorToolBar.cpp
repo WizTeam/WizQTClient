@@ -726,15 +726,40 @@ void EditorToolBar::resetToolbar()
         }
     });
 
+    bool bReceiveImage = m_editor->editorCommandQueryMobileFileReceiverState();
+    m_btnMobileImage->setChecked(bReceiveImage);
+    m_btnMobileImage->setEnabled(true);
+
 #else
     int state;
     QString value;
 
+    state = m_editor->editorCommandQueryCommandState("source");
+    if (state == -1) {
+        m_btnViewSource->setEnabled(false);
+    } else if (state == 0) {
+        m_btnViewSource->setEnabled(true);
+        m_btnViewSource->setChecked(false);
+    } else if (state == 1) {
+        m_btnViewSource->setEnabled(true);
+        m_btnViewSource->setChecked(true);
+    } else {
+        Q_ASSERT(0);
+    }
+    bool isSourceMode = (1 == state);
+
+    m_btnCheckList->setEnabled(!isSourceMode);
+    m_btnSearchReplace->setEnabled(!isSourceMode);
+    m_btnInsertImage->setEnabled(!isSourceMode);
+//    m_btnInsertCode->setEnabled(!isSourceMode);
+
     value = m_editor->editorCommandQueryCommandValue("fontFamily");
     m_comboFontFamily->setText(value);
+    m_comboFontFamily->setEnabled(!isSourceMode);
 
     value = m_editor->editorCommandQueryCommandValue("fontSize");
     m_comboFontSize->setText(value);
+    m_comboFontSize->setEnabled(!isSourceMode);
 
     state = m_editor->editorCommandQueryCommandState("formatMatch");
     if (state == -1) {
@@ -751,9 +776,11 @@ void EditorToolBar::resetToolbar()
 
     value = m_editor->editorCommandQueryCommandValue("foreColor");
     m_btnForeColor->setColor(QColor(value));
+    m_btnForeColor->setEnabled(!isSourceMode);
 
     value = m_editor->editorCommandQueryCommandValue("backColor");
     m_btnBackColor->setColor(QColor(value));
+    m_btnBackColor->setEnabled(!isSourceMode);
 
     state = m_editor->editorCommandQueryCommandState("bold");
     if (state == -1) {
@@ -885,21 +912,10 @@ void EditorToolBar::resetToolbar()
         Q_ASSERT(0);
     }
 
-    state = m_editor->editorCommandQueryCommandState("source");
-    if (state == -1) {
-        m_btnViewSource->setEnabled(false);
-    } else if (state == 0) {
-        m_btnViewSource->setEnabled(true);
-        m_btnViewSource->setChecked(false);
-    } else if (state == 1) {
-        m_btnViewSource->setEnabled(true);
-        m_btnViewSource->setChecked(true);
-    } else {
-        Q_ASSERT(0);
-    }
-#endif
     bool bReceiveImage = m_editor->editorCommandQueryMobileFileReceiverState();
     m_btnMobileImage->setChecked(bReceiveImage);
+    m_btnMobileImage->setEnabled(!isSourceMode);
+#endif
 }
 
 struct WizEditorContextMenuItem

@@ -531,7 +531,6 @@ NSString* getDoucmentType(documentType type)
         return @"NSPlainTextDocumentType";
         break;
     }
-
     return @"NULL";
 }
 
@@ -560,7 +559,7 @@ QString wizUrlToHtml(NSString* url)
 {
     NSAttributedString *string = [[NSAttributedString alloc] initWithPath:url
                                                                                documentAttributes:nil];
-
+    NSLog(@"document data loaded : %@", string);
     return wizAttributedStringToHtml(string);
 }
 

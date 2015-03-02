@@ -2405,12 +2405,6 @@ void MainWindow::viewDocument(const WIZDOCUMENTDATA& data, bool addToHistory)
         return;
     }
 
-    //bool forceEdit = false;
-    //if (doc->GUID() == m_documentForEditing.strGUID) {
-    //    m_documentForEditing = WIZDOCUMENTDATA();
-    //    forceEdit = true;
-    //}
-
     resetPermission(data.strKbGUID, data.strOwner);
 
     ICore::emitViewNoteRequested(m_doc, data);
