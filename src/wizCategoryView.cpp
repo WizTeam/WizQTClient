@@ -1196,8 +1196,8 @@ void CWizCategoryView::on_action_importFile()
     QStringList files = QFileDialog::getOpenFileNames(
     this,
     tr("Select one or more files to open"),
-    "/home",
-    "Text files(*.txt *.md *.cpp *.h *.rtf *.doc *.docx);;Images (*.png *.xpm *.jpg);;Webarchive (*.webarchive);;All files(*.*)");
+    QDir::homePath(),
+    "Text files(*.txt *.md *.html *.htm *.mht *.cpp *.h *.rtf *.doc *.docx *.pages);;Images (*.png *.xpm *.jpg);;Webarchive (*.webarchive);;All files(*.*)");
     loadDocument(files);
 }
 
