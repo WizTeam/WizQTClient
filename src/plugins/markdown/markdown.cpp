@@ -200,6 +200,10 @@ void copyFolder(QString sourceFolder, QString destFolder)
     {
         QString srcName = sourceFolder + "/" + files[i];
         QString destName = destFolder + "/" + files[i];
+        if (QFile::exists(destName))
+        {
+            QFile::remove(destName);
+        }
         QFile::copy(srcName, destName);
     }
     files.clear();
