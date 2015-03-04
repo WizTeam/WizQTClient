@@ -38,23 +38,6 @@ QSize TitleEdit::sizeHint() const
     return QSize(fontMetrics().width(text()), fontMetrics().height() + 10);
 }
 
-void TitleEdit::inputMethodEvent(QInputMethodEvent* event)
-{
-    // FIXME: This should be a QT bug
-    // when use input method, input as normal is fine, but input as selection text
-    // will lose blink cursor, we should reset cursor position first!!!
-//    if (hasSelectedText()) {
-//        del();
-//    }
-
-    QLineEdit::inputMethodEvent(event);
-
-    //QString strCompPrefix = textUnderCursor();
-    //if (strCompPrefix != c->completionPrefix()) {
-    //    updateCompleterPopupItems(strCompPrefix);
-    //}
-}
-
 void TitleEdit::keyPressEvent(QKeyEvent* e)
 {
     if (c && c->popup()->isVisible()) {

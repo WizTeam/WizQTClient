@@ -21,6 +21,8 @@ signals:
     void fileLoaded(QString strHtml, QString strTitle);
     void loadFinished();
     void loadProgress(int total,int loaded);
+    void htmlFileloaded(const QString &strFileName, const QString& strHtml,
+                     const QString& strTitle);
 
 public slots:
 

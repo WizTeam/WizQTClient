@@ -8,6 +8,8 @@
 #include "share/wizmisc.h"
 #include "share/wizRtfReader.h"
 #include "mac/wizmachelper.h"
+#include "html/wizhtmlcollector.h"
+#include "utils/pathresolve.h"
 
 CWizFileReader::CWizFileReader(QObject *parent) :
     QThread(parent)
@@ -32,22 +34,6 @@ QString CWizFileReader::loadHtmlFileToHtml(const QString& strFileName)
     QTextStream in(&file);
     QString ret = in.readAll();
     file.close();
-
-    // 检查是否存在与Html文件对于的_files文件夹
-    QString strResFolder = strFileName;
-    QFileInfo info(strFileName);
-    strResFolder.remove("." + info.suffix());
-    strResFolder.append("_files");
-
-//    qDebug() << "check if resource folder exists : " << strResFolder;
-    QDir dir(strResFolder);
-    if (dir.exists())
-    {
-        QString strOldPath = "./" + info.completeBaseName() + "_files";
-        QString strNewPath = "file://" + info.path() + "/" +info.completeBaseName() + "_files";
-//        qDebug() << "replace old res path : " << strOldPath << "   to new path : " << strNewPath;
-        ret.replace(strOldPath, strNewPath);
-    }
 
     return ret;
 }
@@ -120,6 +106,10 @@ void CWizFileReader::run()
         else if (htmlExtList.contains(docType, Qt::CaseInsensitive))
         {
             strHtml = loadHtmlFileToHtml(strFile);
+            QString strTitle = WizExtractFileName(strFile);
+            emit htmlFileloaded(strFile, strHtml, strTitle);
+
+            continue;
         }
 #ifdef Q_OS_MAC
         else if (rtfExtList.contains(docType, Qt::CaseInsensitive))

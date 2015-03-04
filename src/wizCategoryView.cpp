@@ -432,6 +432,8 @@ void CWizCategoryBaseView::loadDocument(QStringList &strFileList)
 {
     CWizFileReader *fileReader = new CWizFileReader();
     connect(fileReader, SIGNAL(fileLoaded(QString, QString)), SLOT(createDocumentByHtml(QString, QString)));
+    connect(fileReader, SIGNAL(htmlFileloaded(QString, QString, QString)),
+            SLOT(createDocumentByHtml(QString, QString, QString)));
     MainWindow *mainWindow = dynamic_cast<MainWindow*>(m_app.mainWindow());
     CWizProgressDialog *progressDialog  = mainWindow->progressDialog();
     progressDialog->setProgress(100,0);
@@ -735,6 +737,11 @@ void CWizCategoryBaseView::createDocumentByHtml(const QString& /*strHtml*/, cons
     // do nothing
     // create document in CWizCategoryView
 
+}
+
+void CWizCategoryBaseView::createDocumentByHtml(const QString &/*strFileName*/,
+                                                const QString& /*strHtml*/, const QString& /*strTitle*/)
+{
 }
 
 
@@ -4042,6 +4049,15 @@ void CWizCategoryView::createDocumentByHtml(const QString& strHtml, const QStrin
 {
     WIZDOCUMENTDATA data;
     createDocument(data, strHtml, strTitle);
+}
+
+void CWizCategoryView::createDocumentByHtml(const QString& strFileName,
+                                            const QString& strHtml, const QString& strTitle)
+{
+    WIZDOCUMENTDATA data;
+    createDocument(data, "<p><br/></p>", strTitle);
+    CWizDatabase& db = m_dbMgr.db(data.strKbGUID);
+    db.UpdateDocumentData(data, strHtml, strFileName, 0);
 }
 
 

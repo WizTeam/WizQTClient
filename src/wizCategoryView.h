@@ -114,8 +114,8 @@ protected Q_SLOTS:
 
     virtual void on_itemPosition_changed(CWizCategoryViewItemBase* pItem) { Q_UNUSED(pItem); }
 
-    virtual void createDocumentByHtml(const QString& strHtml, const QString& strTitle);
-
+    virtual void createDocumentByHtml(const QString& strHtml, const QString& strTitle) = 0;
+    virtual void createDocumentByHtml(const QString& strFileName, const QString& strHtml, const QString& strTitle);
     void on_dragHovered_timeOut();
 
 private:
@@ -313,6 +313,8 @@ protected Q_SLOTS:
     virtual void on_itemPosition_changed(CWizCategoryViewItemBase* pItem);
 
     virtual void createDocumentByHtml(const QString& strHtml, const QString& strTitle);
+    virtual void createDocumentByHtml(const QString &strFileName, const QString& strHtml,
+                                      const QString& strTitle);
 
 
 public Q_SLOTS:
