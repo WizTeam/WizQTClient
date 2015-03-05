@@ -643,14 +643,10 @@ void CWizDocumentWebView::reloadNoteData(const WIZDOCUMENTDATA& data)
 
 void CWizDocumentWebView::closeDocument(const WIZDOCUMENTDATA& doc)
 {
-    if (!isInited())
+    if (!isInited() || !isEditing())
         return;
 
-    bool isSourceMode = editorCommandQueryCommandState("source");
-    if (isSourceMode)
-    {
-        page()->mainFrame()->evaluateJavaScript("editor.execCommand('source')");
-    }
+    closeSourceMode();
 }
 
 QString CWizDocumentWebView::getDefaultCssFilePath() const
@@ -801,6 +797,16 @@ bool CWizDocumentWebView::insertImage(const QString& strFileName, bool bCopyFile
         return editorCommandExecuteInsertHtml(strHtml, true);
     }
     return false;
+}
+
+void CWizDocumentWebView::closeSourceMode()
+{
+    bool isSourceMode = editorCommandQueryCommandState("source");
+    qDebug() << "on close SourceMode : " << "  is in source mode : " << isSourceMode;
+    if (isSourceMode)
+    {
+        page()->mainFrame()->evaluateJavaScript("editor.execCommand('source')");
+    }
 }
 
 bool CWizDocumentWebView::shareNoteByEmail()
@@ -1155,6 +1161,10 @@ void CWizDocumentWebView::setEditingDocument(bool editing)
     //Q_ASSERT(m_bEditorInited);      //
     if(!m_bEditorInited)
         return;             //If editor wasn't initialized,just return.
+
+    if (!editing) {
+        closeSourceMode();
+    }
 
     // show editor toolbar properly
     if (!editing && hasFocus()) {

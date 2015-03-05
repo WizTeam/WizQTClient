@@ -381,7 +381,7 @@ Q_SIGNALS:
 private:
     void setWindowVisibleOnScreenShot(bool bVisible);
     bool insertImage(const QString& strFileName, bool bCopyFile);
-
+    void closeSourceMode();
 };
 
 #endif // WIZDOCUMENTWEBVIEW_H
