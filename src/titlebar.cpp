@@ -188,7 +188,19 @@ void TitleBar::setLocked(bool bReadOnly, int nReason, bool bIsGroup)
     m_notifyBar->showPermissionNotify(nReason);
     m_editTitle->setReadOnly(bReadOnly);
     m_editBtn->setEnabled(!bReadOnly);
-    m_tagBtn->setEnabled(!bIsGroup ? true : false);
+
+    if (nReason == NotifyBar::Deleted)
+    {
+        m_tagBtn->setEnabled(false);
+        m_historyBtn->setEnabled(false);
+        m_commentsBtn->setEnabled(false);
+    }
+    else
+    {
+        m_tagBtn->setEnabled(!bIsGroup ? true : false);
+        m_historyBtn->setEnabled(true);
+        m_commentsBtn->setEnabled(true);
+    }
 }
 
 #ifdef USEWEBENGINE
@@ -523,17 +535,10 @@ void TitleBar::onViewNoteLoaded(INoteView* view, const WIZDOCUMENTDATA& note, bo
         return;
     }
 
-    if (!isNetworkAccessible()) {
-        noteView()->commentView()->hide();
-        m_commentsBtn->setEnabled(false);
-    } else {
-        m_commentsUrl.clear();
-        m_commentsBtn->setEnabled(true);
-
-        connect(WizService::Token::instance(), SIGNAL(tokenAcquired(QString)),
-                SLOT(onTokenAcquired(QString)), Qt::QueuedConnection);
-        WizService::Token::requestToken();
-    }
+    m_commentsUrl.clear();
+    connect(WizService::Token::instance(), SIGNAL(tokenAcquired(QString)),
+            SLOT(onTokenAcquired(QString)), Qt::QueuedConnection);
+    WizService::Token::requestToken();
 }
 
 void TitleBar::onTokenAcquired(const QString& strToken)

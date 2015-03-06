@@ -1720,9 +1720,15 @@ void CWizCategoryView::on_action_group_deleteFolder_confirmed(int result)
 
 void CWizCategoryView::on_action_deleted_recovery()
 {
-    QString strToken = WizService::Token::token();
-    QString strUrl = WizService::ApiEntry::standardCommandUrl("deleted_recovery", strToken);
-    showWebDialogWithToken(tr("Recovery notes"), strUrl, 0, true);
+    CWizCategoryViewTrashItem* trashItem = currentCategoryItem<CWizCategoryViewTrashItem>();
+    if (trashItem)
+    {
+        QString strToken = WizService::Token::token();
+        QString strUrl = WizService::ApiEntry::standardCommandUrl("deleted_recovery", strToken, "&kb_guid=" + trashItem->kbGUID());
+//        strUrl = strUrl + "%26kb_guid%3D" +  trashItem->kbGUID();
+        qDebug() << "delete recovery url : " << strUrl;
+        showWebDialogWithToken(tr("Recovery notes"), strUrl, 0, true);
+    }
 }
 
 void CWizCategoryView::on_action_itemAttribute()

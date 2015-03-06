@@ -471,7 +471,7 @@ bool CWizDatabase::GetModifiedDocumentList(CWizDocumentDataArray& arrayData)
     for (it = docList.begin(); it != docList.end(); it++)
     {
         WIZDOCUMENTDATA doc = *it;
-        if (CanEditDocument(doc))
+        if (CanEditDocument(doc) && !IsInDeletedItems(doc.strLocation))  // do not upload doc in trash
         {
             arrayData.push_back(doc);
         }

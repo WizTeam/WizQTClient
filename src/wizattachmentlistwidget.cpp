@@ -270,6 +270,9 @@ void CWizAttachmentListView::resetPermission()
 {
     QString strUserId = m_dbMgr.db().GetUserId();
     int nPerm = m_dbMgr.db(m_document.strKbGUID).permission();
+    if (CWizDatabase::IsInDeletedItems(m_document.strLocation)) {
+        nPerm = WIZ_USERGROUP_READER;
+    }
 
     if (nPerm <= WIZ_USERGROUP_EDITOR
             || (nPerm == WIZ_USERGROUP_AUTHOR && m_document.strOwner == strUserId)) {
@@ -493,7 +496,7 @@ bool CWizAttachmentListWidget::setDocument(const WIZDOCUMENTDATA& doc)
     m_list->setDocument(document);
 
     // reset permission
-    if (db.CanEditDocument(document)) {
+    if (db.CanEditDocument(document) && !CWizDatabase::IsInDeletedItems(document.strLocation)) {
         m_btnAddAttachment->setEnabled(true);
     } else {
         m_btnAddAttachment->setEnabled(false);

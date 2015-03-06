@@ -88,6 +88,12 @@ void CWizNoteInfoForm::setDocument(const WIZDOCUMENTDATA& data)
     ui->labelOpenURL->setText(WizFormatString2("<a href=\"%1\">%2</a>", data.strURL, tr("Open")));
     ui->labelSize->setText(sz);
     ui->checkEncrypted->setChecked(data.nProtected ? true : false);
+
+    bool canEdit = (db.CanEditDocument(data) && !CWizDatabase::IsInDeletedItems(data.strLocation));
+    ui->editAuthor->setReadOnly(!canEdit);
+    ui->editTitle->setReadOnly(!canEdit);
+    ui->editURL->setReadOnly(!canEdit);
+    ui->checkEncrypted->setEnabled(canEdit);
 }
 
 void CWizNoteInfoForm::on_labelOpenDocument_linkActivated(const QString &link)
