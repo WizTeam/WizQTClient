@@ -1183,6 +1183,7 @@ void MainWindow::GetToken(const QString& strFunctionName)
 {
     QString strToken = WizService::Token::token();
     QString strExec = strFunctionName + QString("('%1')").arg(strToken);
+    qDebug() << "cpp get token callled : " << strExec;
     m_doc->commentView()->page()->mainFrame()->evaluateJavaScript(strExec);
 }
 
@@ -1828,6 +1829,11 @@ void MainWindow::on_actionViewToggleFullscreen_triggered()
 //        m_splitter->widget(1)->hide();
 //    }
 #endif // Q_OS_MAC
+}
+
+void MainWindow::on_actionViewMinimize_triggered()
+{
+    setWindowState(Qt::WindowMinimized);
 }
 
 void MainWindow::on_actionMarkAllMessageRead_triggered()

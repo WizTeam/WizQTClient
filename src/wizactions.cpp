@@ -107,6 +107,7 @@ WIZACTION* CWizActions::actionsData()
         // view
         {WIZACTION_GLOBAL_TOGGLE_CATEGORY,      QObject::tr("Hide category view"),   QObject::tr("Show category view"),    QKeySequence("Alt+Ctrl+S")},
         {WIZACTION_GLOBAL_TOGGLE_FULLSCREEN,    QObject::tr("Enter fullscreen"),       QObject::tr("Leave fullscreen"),         QKeySequence("Ctrl+Meta+f")},
+        {"actionViewMinimize",                                               QObject::tr("Minimize"),       QObject::tr(""),         QKeySequence("Ctrl+W")},
 
         // format
         {WIZACTION_FORMAT_JUSTIFYLEFT,               QObject::tr("Justify left"),                "",           QKeySequence("Ctrl+[")},
