@@ -43,6 +43,8 @@ public:
     Q_INVOKABLE void PermanentlyDelete(void);
     Q_INVOKABLE void MoveTo(QObject* pFolder);
     Q_INVOKABLE bool UpdateDocument4(const QString& strHtml, const QString& strURL, int nFlags);
+    Q_INVOKABLE void deleteToTrash();   // would delete from server
+    Q_INVOKABLE void deleteFromTrash();   // delete local file
 };
 
 

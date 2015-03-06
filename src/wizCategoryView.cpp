@@ -63,7 +63,7 @@ using namespace Core::Internal;
 #define CATEGORY_ACTION_MANAGE_BIZ     QObject::tr("Manage team...")
 #define CATEGORY_ACTION_QUIT_GROUP     QObject::tr("Quit group")
 #define CATEGORY_ACTION_REMOVE_SHORTCUT     QObject::tr("Remove from shortcuts")
-
+#define CATEGORY_ACTION_RECOVERY_DELETED_NOTES    QObject::tr("Recovery deleted notes...")
 
 #define LINK_COMMAND_ID_CREATE_GROUP        100
 
@@ -830,6 +830,11 @@ void CWizCategoryView::initMenus()
     addAction(actionTrash);
     connect(actionTrash, SIGNAL(triggered()), SLOT(on_action_emptyTrash()));
 
+    QAction* actionRecovery = new QAction("ActionRecovery", this);
+    actionRecovery->setData(ActionRecovery);
+    actionRecovery->setText(CATEGORY_ACTION_RECOVERY_DELETED_NOTES);
+    addAction(actionRecovery);
+    connect(actionRecovery, SIGNAL(triggered()), SLOT(on_action_deleted_recovery()));
     //
 
 
@@ -865,6 +870,7 @@ void CWizCategoryView::initMenus()
     // trash menu
     m_menuTrash = new QMenu(this);
     m_menuTrash->addAction(actionTrash);
+    m_menuTrash->addAction(actionRecovery);
 
     // folder root menu
     m_menuFolderRoot = new QMenu(this);
@@ -1710,6 +1716,13 @@ void CWizCategoryView::on_action_group_deleteFolder_confirmed(int result)
         WIZTAGDATA tag = p->tag();
         m_dbMgr.db(p->kbGUID()).DeleteTagWithChildren(tag, true);
     }
+}
+
+void CWizCategoryView::on_action_deleted_recovery()
+{
+    QString strToken = WizService::Token::token();
+    QString strUrl = WizService::ApiEntry::standardCommandUrl("deleted_recovery", strToken);
+    showWebDialogWithToken(tr("Recovery notes"), strUrl, 0, true);
 }
 
 void CWizCategoryView::on_action_itemAttribute()
@@ -3973,6 +3986,7 @@ void CWizCategoryView::on_group_permissionChanged(const QString& strKbGUID)
         findAction(ActionNewItem)->setEnabled(false);
         findAction(ActionRenameItem)->setEnabled(false);
         findAction(ActionDeleteItem)->setEnabled(false);
+        findAction(ActionRecovery)->setEnabled(false);
     } else {
         CWizCategoryViewTrashItem* pItem = findTrash(strKbGUID);
         if (pItem) pItem->setHidden(false);
@@ -3980,6 +3994,7 @@ void CWizCategoryView::on_group_permissionChanged(const QString& strKbGUID)
         findAction(ActionNewItem)->setEnabled(true);
         findAction(ActionRenameItem)->setEnabled(true);
         findAction(ActionDeleteItem)->setEnabled(true);
+        findAction(ActionRecovery)->setEnabled(true);
     }
 
     // permission greater than author can create new document

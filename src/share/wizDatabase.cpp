@@ -69,6 +69,53 @@ bool CWizDocument::UpdateDocument4(const QString& strHtml, const QString& strURL
     return m_db.UpdateDocumentData(m_data, strHtml, strURL, nFlags);
 }
 
+void CWizDocument::deleteToTrash()
+{
+    // move document to trash
+
+//    int nVersion = m_data.nVersion;
+    MoveTo(m_db.GetDeletedItemsFolder());
+    m_db.SetDocumentVersion(m_data.strGUID, 0);
+
+    // delete document from server
+    CWizDocumentAttachmentDataArray arrayAttachment;
+    m_db.GetDocumentAttachments(m_data.strGUID, arrayAttachment);
+    CWizDocumentAttachmentDataArray::const_iterator it;
+    for (it = arrayAttachment.begin(); it != arrayAttachment.end(); it++) {
+        m_db.LogDeletedGUID(it->strGUID, wizobjectDocumentAttachment);
+    }
+
+    m_db.LogDeletedGUID(m_data.strGUID, wizobjectDocument);
+}
+
+void CWizDocument::deleteFromTrash()
+{
+    CWizDocumentAttachmentDataArray arrayAttachment;
+    m_db.GetDocumentAttachments(m_data.strGUID, arrayAttachment);
+
+    CWizDocumentAttachmentDataArray::const_iterator it;
+    for (it = arrayAttachment.begin(); it != arrayAttachment.end(); it++) {
+        CString strFileName = m_db.GetAttachmentFileName(it->strGUID);
+        ::WizDeleteFile(strFileName);
+
+        m_db.DeleteAttachment(*it, true, true);
+        m_db.DeleteDeletedGUID(it->strGUID);
+    }
+
+    if (!m_db.DeleteDocument(m_data, true)) {
+        TOLOG1("Failed to delete document: %1", m_data.strTitle);
+        return;
+    }
+    //NOTE: 笔记移动到已删除时已通知服务器删除，在已删除中删除数据时候不再记录到已删除目录
+    m_db.DeleteDeletedGUID(m_data.strGUID);
+
+    CString strZipFileName = m_db.GetDocumentFileName(m_data.strGUID);
+    if (PathFileExists(strZipFileName))
+    {
+        WizDeleteFile(strZipFileName);
+    }
+}
+
 bool CWizDocument::IsInDeletedItemsFolder()
 {
     QString strDeletedItemsFolderLocation = m_db.GetDeletedItemsLocation();
@@ -167,9 +214,11 @@ bool CWizDocument::RemoveTag(const WIZTAGDATA& dataTag)
 void CWizDocument::Delete()
 {
     if (IsInDeletedItemsFolder()) {
-        return PermanentlyDelete();
+//        return PermanentlyDelete();
+        return deleteFromTrash();
     } else {
-        return MoveTo(m_db.GetDeletedItemsFolder());
+//        return MoveTo(m_db.GetDeletedItemsFolder());
+        return deleteToTrash();
     }
 
 }
@@ -2584,6 +2633,7 @@ bool CWizDatabase::UpdateAttachment(const WIZDOCUMENTATTACHMENTDATAEX& data)
         }
     } else {
         bRet = CreateAttachmentEx(data);
+        UpdateDocumentAttachmentCount(data.strDocumentGUID, false);
     }
 
     if (!bRet) {

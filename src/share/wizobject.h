@@ -333,7 +333,7 @@ struct WIZDOCUMENTDATABASE : public WIZOBJECTBASE
     QString strParamMD5;
 
     // field: version
-    qint64 nVersion;
+    qint64 nVersion;  // -1: modified , 0: uploaded
 
     // helper filed
     // used to indicate which part of full info need download or downloaded

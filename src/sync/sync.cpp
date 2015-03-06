@@ -1417,7 +1417,7 @@ int WizCalDocumentPartForDownloadToLocal(IWizSyncableDatabase* pDatabase, const 
     {
         if (dataLocal.strInfoMD5 != dataServer.strInfoMD5)
         {
-            if (dataLocal.tInfoModified < dataServer.tInfoModified)
+            if ((dataLocal.tInfoModified < dataServer.tInfoModified) || (dataLocal.nVersion < dataServer.nVersion))
             {
                 nPart |= WIZKM_XMLRPC_OBJECT_PART_INFO;
             }
