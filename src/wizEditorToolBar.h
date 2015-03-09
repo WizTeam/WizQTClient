@@ -88,6 +88,8 @@ private:
     bool processImageSrc(bool bUseForCopy, bool& bNeedSubsequent);
     bool processBase64Image(bool bUseForCopy);
 
+    QMenu* createColorMenu(const char *slot, const char *slotColorBoard);
+
 protected Q_SLOTS:
     void on_editor_google_triggered();
     void on_editor_baidu_triggered();
@@ -98,8 +100,6 @@ protected Q_SLOTS:
     void on_comboFontFamily_indexChanged(const QString& strFamily);
     void on_comboFontSize_indexChanged(const QString& strSize);
     void on_btnFormatMatch_clicked();
-    void on_BtnForeColor_clicked();
-    void on_BtnBackColor_clicked();
     void on_btnBold_clicked();
     void on_btnItalic_clicked();
     void on_btnUnderLine_clicked();
@@ -127,6 +127,11 @@ protected Q_SLOTS:
 
     void on_updateToolBarStatus_request();
     void on_resetLockTimer_timeOut();
+
+    void on_foreColor_changed();
+    void on_showForeColorBoard();
+    void on_backColor_changed();
+    void on_showBackColorBoard();
 
     void saveImage(QString strFileName);
     void copyImage(QString strFileName);

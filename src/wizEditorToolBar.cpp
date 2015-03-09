@@ -23,6 +23,39 @@
 #include "utils/logger.h"
 #include "share/wizObjectDataDownloader.h"
 
+
+const QColor colors[6][8] =
+{
+    {QColor(0, 0, 0, 255), QColor(170, 0, 0, 255), QColor(0, 85, 0, 255), QColor(170, 85, 0, 255),
+    QColor(0, 170, 0, 255), QColor(170, 170, 0, 255), QColor(0, 255, 0, 255), QColor(170, 250, 0, 255)},
+
+    {QColor(0, 0, 127, 255), QColor(170, 0, 127, 255), QColor(0, 85, 127, 255), QColor(170, 85, 127, 255),
+    QColor(0, 170, 127, 255), QColor(170, 170, 127, 255), QColor(0, 255, 127, 255), QColor(170, 255, 127, 255)},
+
+    {QColor(0, 0, 255, 255), QColor(170, 0, 255, 255), QColor(0, 85, 255, 255), QColor(170, 85, 255, 255),
+    QColor(0, 170, 255, 255), QColor(170, 170, 255, 255), QColor(0, 255, 255, 255), QColor(170, 255, 255, 255)},
+
+    {QColor(85, 0, 0, 255), QColor(255, 0, 0, 255), QColor(85, 85, 0, 255), QColor(255, 85, 0, 255),
+    QColor(85, 170, 0, 255), QColor(255, 170, 0, 255), QColor(85, 255, 0, 255), QColor(255, 255, 0, 255)},
+
+    {QColor(85, 0, 127, 255), QColor(255, 0, 127, 255), QColor(85, 85, 127, 255), QColor(255, 85, 127, 255),
+    QColor(85, 170, 127, 255), QColor(255, 170, 127, 255), QColor(85, 255, 127, 255), QColor(255, 255, 127, 255)},
+
+    {QColor(85, 0, 255, 255), QColor(255, 0, 255, 255), QColor(85, 85, 255, 255), QColor(255, 85, 255, 255),
+    QColor(85, 170, 255, 255), QColor(255, 170, 255, 255), QColor(85, 255, 255, 255), QColor(255, 255, 255, 255)}
+};
+
+QIcon createColorIcon(QColor color)
+{
+    QPixmap pixmap(16, 16);
+    QPainter painter(&pixmap);
+    painter.setPen(Qt::NoPen);
+    painter.fillRect(QRect(0, 0, 16, 16), color);
+
+    return QIcon(pixmap);
+}
+
+
 using namespace Core::Internal;
 
 void drawComboPrimitive(QStylePainter* p, QStyle::PrimitiveElement pe, const QStyleOption &opt);
@@ -179,12 +212,18 @@ public:
     {
         setCheckable(false);
         setIconSize(QSize(16, 16));
+        setPopupMode(QToolButton::MenuButtonPopup);
     }
 
     void setColor(const QColor& color)
     {
         m_color = color;
         repaint();
+    }
+
+    QColor color() const
+    {
+        return m_color;
     }
 
 protected:
@@ -367,12 +406,16 @@ EditorToolBar::EditorToolBar(QWidget *parent)
     m_btnForeColor = new CWizToolButtonColor(this);
     m_btnForeColor->setIcon(::WizLoadSkinIcon(skin, "actionFormatForeColor"));
     m_btnForeColor->setToolTip(tr("ForeColor"));
-    connect(m_btnForeColor, SIGNAL(clicked()), SLOT(on_BtnForeColor_clicked()));
+    QMenu* foreColorMenu = createColorMenu(SLOT(on_foreColor_changed()),
+                                           SLOT(on_showForeColorBoard()));
+    m_btnForeColor->setMenu(foreColorMenu);
 
     m_btnBackColor = new CWizToolButtonColor(this);
     m_btnBackColor->setIcon(::WizLoadSkinIcon(skin, "actionFormatBackColor"));
     m_btnBackColor->setToolTip(tr("BackColor"));
-    connect(m_btnBackColor, SIGNAL(clicked()), SLOT(on_BtnBackColor_clicked()));
+    QMenu* backColorMenu = createColorMenu(SLOT(on_backColor_changed()),
+                                           SLOT(on_showBackColorBoard()));
+    m_btnBackColor->setMenu(backColorMenu);
 
     m_btnBold = new CWizToolButton(this);
     m_btnBold->setIcon(::WizLoadSkinIcon(skin, "actionFormatBold"));
@@ -1166,6 +1209,122 @@ void EditorToolBar::on_resetLockTimer_timeOut()
     m_resetLocked = false;
 }
 
+
+QMenu* EditorToolBar::createColorMenu(const char *slot, const char *slotColorBoard)
+{
+    // 设置透明色
+    QAction *pActionTransparent = new QAction(this);
+    pActionTransparent->setData(QColor(0, 0, 0, 0));
+    pActionTransparent->setText(tr("transparent"));
+    connect(pActionTransparent, SIGNAL(triggered()), this, slot);
+    QToolButton *pBtnTransparent = new QToolButton(this);
+    pBtnTransparent->setFixedSize(QSize(142, 20));
+    pBtnTransparent->setText(tr("transparent"));
+    pBtnTransparent->setDefaultAction(pActionTransparent);
+
+    // 选择其他颜色
+    QToolButton *pBtnOtherColor = new QToolButton(this);
+    pBtnOtherColor->setText(tr("show more colors..."));
+    pBtnOtherColor->setFixedSize(QSize(142, 20));
+    pBtnOtherColor->setAutoRaise(true);
+    pBtnOtherColor->setToolTip("show more colors...");
+    connect(pBtnOtherColor, SIGNAL(clicked()), this, slotColorBoard);
+
+    // 基本色
+    QGridLayout *pGridLayout = new QGridLayout;
+    pGridLayout->setAlignment(Qt::AlignCenter);
+    pGridLayout->setContentsMargins(0, 0, 0, 0);
+    pGridLayout->setSpacing(2);
+
+    for (int iRow = 0; iRow < 6; iRow++)
+    {
+        for (int iCol = 0; iCol < 8; iCol++)
+        {
+            QAction *action = new QAction(this);
+            action->setData(colors[iRow][iCol]);
+            action->setIcon(createColorIcon(colors[iRow][iCol]));
+            connect(action, SIGNAL(triggered()), this, slot);
+
+            QToolButton *pBtnColor = new QToolButton(this);
+            pBtnColor->setFixedSize(QSize(16, 16));
+            pBtnColor->setAutoRaise(true);
+            pBtnColor->setDefaultAction(action);
+            pBtnColor->setToolTip("white");
+
+            pGridLayout->addWidget(pBtnColor, iRow, iCol);
+        }
+    }
+
+    QWidget *widget = new QWidget;
+    widget->setLayout(pGridLayout);
+
+    QVBoxLayout *pVLayout = new QVBoxLayout;
+    pVLayout->addWidget(pBtnTransparent);
+    pVLayout->addWidget(widget);
+    pVLayout->addWidget(pBtnOtherColor);
+
+    QMenu *colorMenu = new QMenu(this);
+    colorMenu->setLayout(pVLayout);
+
+    return colorMenu;
+}
+
+void EditorToolBar::on_foreColor_changed()
+{
+    QAction *pColorAction = qobject_cast<QAction *>(sender());
+    if (!pColorAction)
+        return;
+
+    m_btnForeColor->menu()->close();
+    QColor color = qvariant_cast<QColor>(pColorAction->data());
+    if (!color.isValid())
+        return;
+
+    if (m_editor) {
+        m_editor->on_editorCommandExecuteForeColor(color);
+    }
+}
+
+void EditorToolBar::on_showForeColorBoard()
+{
+    m_btnForeColor->menu()->close();
+    QColor color = QColorDialog::getColor(m_btnForeColor->color(), this);
+    if (!color.isValid())
+        return;
+
+    if (m_editor) {
+        m_editor->on_editorCommandExecuteForeColor(color);
+    }
+}
+
+void EditorToolBar::on_backColor_changed()
+{
+    QAction *pColorAction = qobject_cast<QAction *>(sender());
+    if (!pColorAction)
+        return;
+
+    m_btnBackColor->menu()->close();
+    QColor color = qvariant_cast<QColor>(pColorAction->data());
+    if (!color.isValid())
+        return;
+
+    if (m_editor) {
+        m_editor->on_editorCommandExecuteBackColor(color);
+    }
+}
+
+void EditorToolBar::on_showBackColorBoard()
+{
+    m_btnBackColor->menu()->close();
+    QColor color = QColorDialog::getColor(m_btnBackColor->color(), this);
+    if (!color.isValid())
+        return;
+
+    if (m_editor) {
+        m_editor->on_editorCommandExecuteBackColor(color);
+    }
+}
+
 void EditorToolBar::saveImage(QString strFileName)
 {
     QFileInfo info(strFileName);
@@ -1463,20 +1622,6 @@ void EditorToolBar::on_btnFormatMatch_clicked()
 {
     if (m_editor) {
         m_editor->editorCommandExecuteFormatMatch();
-    }
-}
-
-void EditorToolBar::on_BtnForeColor_clicked()
-{
-    if (m_editor) {
-        m_editor->editorCommandExecuteForeColor();
-    }
-}
-
-void EditorToolBar::on_BtnBackColor_clicked()
-{
-    if (m_editor) {
-        m_editor->editorCommandExecuteBackColor();
     }
 }
 

@@ -252,7 +252,6 @@ private:
 
     QPointer<CWizEditorInsertLinkForm> m_editorInsertLinkForm;
     QPointer<CWizEditorInsertTableForm> m_editorInsertTableForm;
-    QPointer<QColorDialog> m_colorDialog;
 
     CWizSearchReplaceWidget* m_searchReplaceWidget;
 
@@ -286,10 +285,8 @@ public Q_SLOTS:
     /* editor API */
 
     // font
-    void editorCommandExecuteBackColor();
-    void on_editorCommandExecuteBackColor_accepted(const QColor& color);
-    void editorCommandExecuteForeColor();
-    void on_editorCommandExecuteForeColor_accepted(const QColor& color);
+    void on_editorCommandExecuteBackColor(const QColor& color);
+    void on_editorCommandExecuteForeColor(const QColor& color);
     bool editorCommandExecuteBold();
     bool editorCommandExecuteItalic();
     bool editorCommandExecuteUnderLine();

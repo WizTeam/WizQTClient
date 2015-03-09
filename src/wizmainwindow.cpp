@@ -1881,11 +1881,6 @@ void MainWindow::on_actionFormatInsertLink_triggered()
     m_doc->web()->editorCommandExecuteLinkInsert();
 }
 
-void MainWindow::on_actionFormatForeColor_triggered()
-{
-    m_doc->web()->editorCommandExecuteForeColor();
-}
-
 void MainWindow::on_actionFormatBold_triggered()
 {
     m_doc->web()->editorCommandExecuteBold();

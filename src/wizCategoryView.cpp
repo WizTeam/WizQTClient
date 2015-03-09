@@ -1524,7 +1524,7 @@ void CWizCategoryView::on_action_user_renameFolder_confirmed_progress(int nMax, 
     progress->setActionString(tr("Move Note: %1 to %2").arg(strOldLocation).arg(strNewLocation));
     progress->setNotifyString(data.strTitle);
     progress->setProgress(nMax, nValue);
-    if (nMax == nValue + 1) {
+    if (nMax <= nValue + 1) {
         progress->setVisible(false);
     }
 }
@@ -1532,7 +1532,6 @@ void CWizCategoryView::on_action_user_renameFolder_confirmed_progress(int nMax, 
 void CWizCategoryView::on_action_user_renameTag()
 {
     CWizCategoryViewItemBase* p = currentCategoryItem<CWizCategoryViewItemBase>();
-
     CWizLineInputDialog* dialog = new CWizLineInputDialog(tr("Rename tag"),
                                                           tr("Please input tag name: "),
                                                           p->name(), window());

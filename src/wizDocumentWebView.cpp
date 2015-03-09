@@ -1420,45 +1420,25 @@ bool CWizDocumentWebView::editorCommandExecuteFontSize(const QString& strSize)
     return editorCommandExecuteCommand("fontSize", "'" + strSize + "'");
 }
 
-void CWizDocumentWebView::editorCommandExecuteBackColor()
+void CWizDocumentWebView::on_editorCommandExecuteBackColor(const QColor& color)
 {
-    if (!m_colorDialog) {
-        m_colorDialog = new QColorDialog(this);
+//    editorCommandExecuteCommand("backColor", "'" + color.name() + "'");
+    if (color == QColor(Qt::transparent)) {
+        editorCommandExecuteCommand("backColor", "'default'");
     }
-
-    m_colorDialog->disconnect();
-
-    connect(m_colorDialog, SIGNAL(currentColorChanged(const QColor &)),
-            SLOT(on_editorCommandExecuteBackColor_accepted(const QColor&)));
-    connect(m_colorDialog, SIGNAL(colorSelected(const QColor &)),
-            SLOT(on_editorCommandExecuteBackColor_accepted(const QColor&)));
-
-    m_colorDialog->exec();
-}
-
-void CWizDocumentWebView::on_editorCommandExecuteBackColor_accepted(const QColor& color)
-{
-    editorCommandExecuteCommand("backColor", "'" + color.name() + "'");
-}
-
-void CWizDocumentWebView::editorCommandExecuteForeColor()
-{
-    if (!m_colorDialog) {
-        m_colorDialog = new QColorDialog(this);
+    else {
+        editorCommandExecuteCommand("backColor", "'" + color.name() + "'");
     }
-
-    m_colorDialog->disconnect();
-    connect(m_colorDialog, SIGNAL(currentColorChanged(const QColor &)),
-            SLOT(on_editorCommandExecuteForeColor_accepted(const QColor&)));
-    connect(m_colorDialog, SIGNAL(colorSelected(const QColor &)),
-            SLOT(on_editorCommandExecuteForeColor_accepted(const QColor&)));
-
-    m_colorDialog->exec();
 }
 
-void CWizDocumentWebView::on_editorCommandExecuteForeColor_accepted(const QColor& color)
+void CWizDocumentWebView::on_editorCommandExecuteForeColor(const QColor& color)
 {
-    editorCommandExecuteCommand("foreColor", "'" + color.name() + "'");
+    if (color == QColor(Qt::transparent)) {
+        editorCommandExecuteCommand("foreColor", "'default'");
+    }
+    else {
+        editorCommandExecuteCommand("foreColor", "'" + color.name() + "'");
+    }
 }
 
 bool CWizDocumentWebView::editorCommandExecuteBold()
