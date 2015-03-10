@@ -336,6 +336,15 @@ public Q_SLOTS:
     bool editorCommandExecuteTableSplitCols();
     bool editorCommandExecuteTableAverageRows();
     bool editorCommandExecuteTableAverageCols();
+    bool editorCommandExecuteTableCellAlignLeftTop();
+    bool editorCommandExecuteTableCellAlignTop();
+    bool editorCommandExecuteTableCellAlignRightTop();
+    bool editorCommandExecuteTableCellAlignLeft();
+    bool editorCommandExecuteTableCellAlignCenter();
+    bool editorCommandExecuteTableCellAlignRight();
+    bool editorCommandExecuteTableCellAlignLeftBottom();
+    bool editorCommandExecuteTableCellAlignBottom();
+    bool editorCommandExecuteTableCellAlignRightBottom();
 
     // fast operation
     bool editorCommandExecuteInsertDate();

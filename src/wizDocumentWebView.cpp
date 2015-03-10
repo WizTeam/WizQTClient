@@ -1767,6 +1767,51 @@ bool CWizDocumentWebView::editorCommandExecuteTableAverageCols()
     return editorCommandExecuteCommand("averagedistributecol");
 }
 
+bool CWizDocumentWebView::editorCommandExecuteTableCellAlignLeftTop()
+{
+    return editorCommandExecuteCommand("cellalignment", "{align: 'left', vAlign: 'top'}");
+}
+
+bool CWizDocumentWebView::editorCommandExecuteTableCellAlignTop()
+{
+    return editorCommandExecuteCommand("cellalignment", "{align: 'center', vAlign: 'top'}");
+}
+
+bool CWizDocumentWebView::editorCommandExecuteTableCellAlignRightTop()
+{
+    return editorCommandExecuteCommand("cellalignment", "{align: 'right', vAlign: 'top'}");
+}
+
+bool CWizDocumentWebView::editorCommandExecuteTableCellAlignLeft()
+{
+    return editorCommandExecuteCommand("cellalignment", "{align: 'left', vAlign: 'middle'}");
+}
+
+bool CWizDocumentWebView::editorCommandExecuteTableCellAlignCenter()
+{
+    return editorCommandExecuteCommand("cellalignment", "{align: 'center', vAlign: 'middle'}");
+}
+
+bool CWizDocumentWebView::editorCommandExecuteTableCellAlignRight()
+{
+    return editorCommandExecuteCommand("cellalignment", "{align: 'right', vAlign: 'middle'}");
+}
+
+bool CWizDocumentWebView::editorCommandExecuteTableCellAlignLeftBottom()
+{
+    return editorCommandExecuteCommand("cellalignment", "{align: 'left', vAlign: 'bottom'}");
+}
+
+bool CWizDocumentWebView::editorCommandExecuteTableCellAlignBottom()
+{
+    return editorCommandExecuteCommand("cellalignment", "{align: 'center', vAlign: 'bottom'}");
+}
+
+bool CWizDocumentWebView::editorCommandExecuteTableCellAlignRightBottom()
+{
+    return editorCommandExecuteCommand("cellalignment", "{align: 'right', vAlign: 'bottom'}");
+}
+
 void CWizDocumentWebView::saveAsPDF()
 {
     if (QWebFrame* frame = noteFrame())
