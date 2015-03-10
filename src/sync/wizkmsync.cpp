@@ -61,6 +61,12 @@ void CWizKMSyncEvents::OnBizServiceExpr(IWizSyncableDatabase *pDatabase)
     Q_UNUSED(pDatabase);
 }
 
+void CWizKMSyncEvents::OnBizNoteCountLimit(IWizSyncableDatabase* pDatabase)
+{
+    // FIXME
+    Q_UNUSED(pDatabase);
+}
+
 void CWizKMSyncEvents::OnUploadDocument(const QString& strDocumentGUID, bool bDone)
 {
     qDebug() << "[Sync]SetCurrentDatabase guid: " << strDocumentGUID;

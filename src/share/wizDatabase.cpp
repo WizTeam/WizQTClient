@@ -32,8 +32,8 @@
 #define WIZKMSYNC_EXIT_OK		0
 #define WIZKMSYNC_EXIT_TRAFFIC_LIMIT		304
 #define WIZKMSYNC_EXIT_STORAGE_LIMIT		305
+#define WIZKMSYNC_EXIT_NOTE_COUNT_LIMIT		3032
 #define WIZKMSYNC_EXIT_BIZ_SERVICE_EXPR		380
-#define WIZKMSYNC_EXIT_BIZ_NOTE_COUNT_LIMIT		3032
 
 #define WIZKMSYNC_EXIT_INFO     "WIZKMSYNC_EXIT_INFO"
 
@@ -1303,12 +1303,12 @@ void CWizDatabase::GetAllBizUserIds(CWizStdStringArray& arrayText)
 
 void CWizDatabase::ClearLastSyncError()
 {
-    // last sync error only contains in personal database
-    if (getPersonalDatabase() != this)
-        return;
-
     setMeta(WIZKMSYNC_EXIT_INFO, _T("LastSyncErrorCode"), QString::number(WIZKMSYNC_EXIT_OK));
     setMeta(WIZKMSYNC_EXIT_INFO, _T("LastSyncErrorMessage"), "");
+
+    //
+    if (getPersonalDatabase() != this)
+        return;
 
     //
     int bizCount = GetMetaDef("Bizs", "Count").toInt();
@@ -1332,6 +1332,12 @@ void CWizDatabase::OnStorageLimit(const QString& strErrorMessage)
     setMeta(WIZKMSYNC_EXIT_INFO, _T("LastSyncErrorMessage"), strErrorMessage);
 }
 
+void CWizDatabase::OnNoteCountLimit(const QString& strErrorMessage)
+{
+    setMeta(WIZKMSYNC_EXIT_INFO, _T("LastSyncErrorCode"), QString::number(WIZKMSYNC_EXIT_NOTE_COUNT_LIMIT));
+    setMeta(WIZKMSYNC_EXIT_INFO, _T("LastSyncErrorMessage"), strErrorMessage);
+}
+
 void CWizDatabase::OnBizServiceExpr(const QString& strBizGUID, const QString& strErrorMessage)
 {
     if (strBizGUID.isEmpty())
@@ -1349,23 +1355,6 @@ void CWizDatabase::OnBizServiceExpr(const QString& strBizGUID, const QString& st
     db->setMeta(strMetaSection, _T("LastSyncErrorMessage"), strErrorMessage);
 }
 
-void CWizDatabase::OnBizNoteCountLimit(const QString& strBizGUID, const QString& strErrorMessage)
-{
-    if (strBizGUID.isEmpty())
-        return;
-
-    CWizDatabase* db = getPersonalDatabase();
-    if (!db)
-        return;
-
-    QString strMetaSection;
-    if (!db->GetBizMetaName(strBizGUID, strMetaSection))
-        return;
-    //
-    db->setMeta(strMetaSection, _T("LastSyncErrorCode"), QString::number(WIZKMSYNC_EXIT_BIZ_NOTE_COUNT_LIMIT));
-    db->setMeta(strMetaSection, _T("LastSyncErrorMessage"), strErrorMessage);
-}
-
 bool CWizDatabase::IsTrafficLimit()
 {
     QString strLastError = meta(WIZKMSYNC_EXIT_INFO, _T("LastSyncErrorCode"));
@@ -1378,6 +1367,13 @@ bool CWizDatabase::IsStorageLimit()
     QString strLastError = meta(WIZKMSYNC_EXIT_INFO, _T("LastSyncErrorCode"));
 
     return strLastError.toInt() == WIZKMSYNC_EXIT_STORAGE_LIMIT;
+}
+
+bool CWizDatabase::IsNoteCountLimit()
+{
+    QString strLastError = meta(WIZKMSYNC_EXIT_INFO, _T("LastSyncErrorCode"));
+
+    return strLastError.toInt() == WIZKMSYNC_EXIT_NOTE_COUNT_LIMIT;
 }
 
 bool CWizDatabase::IsBizServiceExpr(const QString& strBizGUID)
@@ -1395,26 +1391,37 @@ bool CWizDatabase::IsBizServiceExpr(const QString& strBizGUID)
     return strLastError.toInt() == WIZKMSYNC_EXIT_BIZ_SERVICE_EXPR;
 }
 
-bool CWizDatabase::IsBizNoteCountLimit(const QString& strBizGUID)
-{
-    CWizDatabase* db = getPersonalDatabase();
-    if (!db)
-        return false;
-
-    QString strMetaSection;
-    if (!db->GetBizMetaName(strBizGUID, strMetaSection))
-        return false;
-
-    QString strLastError = db->meta(strMetaSection, _T("LastSyncErrorCode"));
-
-    return strLastError.toInt() == WIZKMSYNC_EXIT_BIZ_NOTE_COUNT_LIMIT;
-}
-
 bool CWizDatabase::GetStorageLimitMessage(QString &strErrorMessage)
 {
     QString strLastError = meta(WIZKMSYNC_EXIT_INFO, _T("LastSyncErrorCode"));
 
     if (strLastError.toInt() == WIZKMSYNC_EXIT_STORAGE_LIMIT)
+    {
+        strErrorMessage = meta(WIZKMSYNC_EXIT_INFO, _T("LastSyncErrorMessage"));
+        return true;
+    }
+
+    return false;
+}
+
+bool CWizDatabase::GetTrafficLimitMessage(QString& strErrorMessage)
+{
+    QString strLastError = meta(WIZKMSYNC_EXIT_INFO, _T("LastSyncErrorCode"));
+
+    if (strLastError.toInt() == WIZKMSYNC_EXIT_TRAFFIC_LIMIT)
+    {
+        strErrorMessage = meta(WIZKMSYNC_EXIT_INFO, _T("LastSyncErrorMessage"));
+        return true;
+    }
+
+    return false;
+}
+
+bool CWizDatabase::GetNoteCountLimit(QString& strErrorMessage)
+{
+    QString strLastError = meta(WIZKMSYNC_EXIT_INFO, _T("LastSyncErrorCode"));
+
+    if (strLastError.toInt() == WIZKMSYNC_EXIT_NOTE_COUNT_LIMIT)
     {
         strErrorMessage = meta(WIZKMSYNC_EXIT_INFO, _T("LastSyncErrorMessage"));
         return true;

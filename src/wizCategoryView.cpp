@@ -1724,8 +1724,6 @@ void CWizCategoryView::on_action_deleted_recovery()
     {
         QString strToken = WizService::Token::token();
         QString strUrl = WizService::ApiEntry::standardCommandUrl("deleted_recovery", strToken, "&kb_guid=" + trashItem->kbGUID());
-//        strUrl = strUrl + "%26kb_guid%3D" +  trashItem->kbGUID();
-        qDebug() << "delete recovery url : " << strUrl;
         showWebDialogWithToken(tr("Recovery notes"), strUrl, 0, true);
     }
 }
@@ -1894,7 +1892,7 @@ void CWizCategoryView::on_itemClicked(QTreeWidgetItem *item, int column)
     {
         if (pItem->extraButtonClickTest())
         {
-            promptGroupStorageLimitMessage(pItem->kbGUID(), pItem->bizGUID());
+            promptGroupLimitMessage(pItem->kbGUID(), pItem->bizGUID());
         }
 
     }
@@ -1919,30 +1917,38 @@ void CWizCategoryView::updateGroupsData()
         }
         setBizRootItemExtraButton(pBizGroupItem, biz);
     }
-    //
-    CWizGroupDataArray arrayOwnGroup;
-    CWizDatabase::GetOwnGroups(arrayGroup, arrayOwnGroup);
-    if (!arrayOwnGroup.empty())
+
+    for (CWizGroupDataArray::const_iterator it = arrayGroup.begin(); it != arrayGroup.end(); it++)
     {
-        for (CWizGroupDataArray::const_iterator it = arrayOwnGroup.begin(); it != arrayOwnGroup.end(); it++)
-        {
-            const WIZGROUPDATA& group = *it;
-            CWizCategoryViewGroupRootItem* pOwnGroupItem = findGroup(group.strGroupGUID);
-            setGroupRootItemExtraButton(pOwnGroupItem, group);
-        }
+        const WIZGROUPDATA& group = *it;
+        CWizCategoryViewGroupRootItem* pGroupItem = findGroup(group.strGroupGUID);
+        setGroupRootItemExtraButton(pGroupItem, group);
     }
+
     //
-    CWizGroupDataArray arrayJionedGroup;
-    CWizDatabase::GetJionedGroups(arrayGroup, arrayJionedGroup);
-    if (!arrayJionedGroup.empty())
-    {
-        for (CWizGroupDataArray::const_iterator it = arrayJionedGroup.begin(); it != arrayJionedGroup.end(); it++)
-        {
-            const WIZGROUPDATA& group = *it;
-            CWizCategoryViewGroupRootItem* pOwnGroupItem = findGroup(group.strGroupGUID);
-            setGroupRootItemExtraButton(pOwnGroupItem, group);
-        }
-    }
+//    CWizGroupDataArray arrayOwnGroup;
+//    CWizDatabase::GetOwnGroups(arrayGroup, arrayOwnGroup);
+//    if (!arrayOwnGroup.empty())
+//    {
+//        for (CWizGroupDataArray::const_iterator it = arrayOwnGroup.begin(); it != arrayOwnGroup.end(); it++)
+//        {
+//            const WIZGROUPDATA& group = *it;
+//            CWizCategoryViewGroupRootItem* pOwnGroupItem = findGroup(group.strGroupGUID);
+//            setGroupRootItemExtraButton(pOwnGroupItem, group);
+//        }
+//    }
+//    //
+//    CWizGroupDataArray arrayJionedGroup;
+//    CWizDatabase::GetJionedGroups(arrayGroup, arrayJionedGroup);
+//    if (!arrayJionedGroup.empty())
+//    {
+//        for (CWizGroupDataArray::const_iterator it = arrayJionedGroup.begin(); it != arrayJionedGroup.end(); it++)
+//        {
+//            const WIZGROUPDATA& group = *it;
+//            CWizCategoryViewGroupRootItem* pOwnGroupItem = findGroup(group.strGroupGUID);
+//            setGroupRootItemExtraButton(pOwnGroupItem, group);
+//        }
+//    }
 }
 
 QString appstoreParam(bool bHasAndSym = true)
@@ -1994,17 +2000,21 @@ void CWizCategoryView::manageBizGroup(const QString& groupGUID, const QString& b
     showWebDialogWithToken(tr("Manage group"), strUrl, window());
 }
 
-void CWizCategoryView::promptGroupStorageLimitMessage(const QString &groupGUID, const QString &/*bizGUID*/)
+void CWizCategoryView::promptGroupLimitMessage(const QString &groupGUID, const QString &/*bizGUID*/)
 {
-    //QString extInfo = "kb=" + groupGUID + "&biz=" + bizGUID;
-    //QString strUrl = WizService::ApiEntry::standardCommandUrl("manage_biz_group", WIZ_TOKEN_IN_URL_REPLACE_PART, extInfo);
-    //showWebDialogWithToken(tr("Group Space Excess"), strUrl, window());
-
     CWizDatabase& db = m_dbMgr.db(groupGUID);
     QString strErrorMsg;
     if (db.GetStorageLimitMessage(strErrorMsg))
     {
-        QMessageBox::information(this, tr("Storage Limit Info"), strErrorMsg);
+        QMessageBox::warning(this, tr("Storage Limit Info"), strErrorMsg);
+    }
+    else if (db.GetTrafficLimitMessage(strErrorMsg))
+    {
+        QMessageBox::warning(this, tr("Traffic Limit Info"), strErrorMsg);
+    }
+    else if (db.GetNoteCountLimit(strErrorMsg))
+    {
+        QMessageBox::warning(this, tr("Note Count Limit Info"), strErrorMsg);
     }
 }
 
@@ -2437,7 +2447,7 @@ void CWizCategoryView::setBizRootItemExtraButton(CWizCategoryViewItemBase* pItem
     if (pItem)
     {
         CWizDatabase& db = m_dbMgr.db();
-        if (bizData.bizIsDue || db.IsBizServiceExpr(bizData.bizGUID) || db.IsBizNoteCountLimit(bizData.bizGUID))
+        if (bizData.bizIsDue || db.IsBizServiceExpr(bizData.bizGUID))
         {
             QString strIconPath = ::WizGetSkinResourcePath(m_app.userSettings().skin()) + "bizDue.png";
             pItem->setExtraButtonIcon(strIconPath);
@@ -2453,8 +2463,10 @@ void CWizCategoryView::setGroupRootItemExtraButton(CWizCategoryViewItemBase* pIt
 {
     if (pItem)
     {
-        if (m_dbMgr.db(gData.strGroupGUID).IsStorageLimit())
+        CWizDatabase& db = m_dbMgr.db(gData.strGroupGUID);
+        if (db.IsStorageLimit() || db.IsTrafficLimit() || db.IsNoteCountLimit())
         {
+            qDebug() << "group limit : " << gData.strGroupName;
             QString strIconPath = ::WizGetSkinResourcePath(m_app.userSettings().skin()) + "bizDue.png";
             pItem->setExtraButtonIcon(strIconPath);
         }

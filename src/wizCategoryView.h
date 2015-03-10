@@ -276,7 +276,6 @@ public:
     void viewBizGroupInfo(const QString& groupGUID, const QString& bizGUID);
     void managePersonalGroup(const QString& groupGUID);
     void manageBizGroup(const QString& groupGUID, const QString& bizGUID);
-    void promptGroupStorageLimitMessage(const QString& groupGUID, const QString& bizGUID);
     void viewBizInfo(const QString& bizGUID);
     void manageBiz(const QString& bizGUID, bool bUpgrade);
 
@@ -411,6 +410,9 @@ private:
                                       const QString& strNewLocation);
     void updatePrivateTagPosition(CWizDatabase& db);
     void updateGroupFolderPosition(CWizDatabase& db);
+
+    //
+    void promptGroupLimitMessage(const QString& groupGUID, const QString& bizGUID);
 
 private:
     void initGeneral();
