@@ -513,11 +513,11 @@ EditorToolBar::EditorToolBar(QWidget *parent)
     m_btnViewSource->setToolTip(tr("View source"));
     connect(m_btnViewSource, SIGNAL(clicked()), SLOT(on_btnViewSource_clicked()));
 
-//    m_btnInsertCode = new CWizToolButton(this);
-//    m_btnInsertCode->setCheckable(false);
-//    m_btnInsertCode->setIcon(::WizLoadSkinIcon(skin, "actionFormatInsertCode"));
-//    m_btnInsertCode->setToolTip(tr("Insert code"));
-//    connect(m_btnInsertCode, SIGNAL(clicked()), SLOT(on_btnInsertCode_clicked()));
+    m_btnInsertCode = new CWizToolButton(this);
+    m_btnInsertCode->setCheckable(false);
+    m_btnInsertCode->setIcon(::WizLoadSkinIcon(skin, "actionFormatInsertCode"));
+    m_btnInsertCode->setToolTip(tr("Insert code"));
+    connect(m_btnInsertCode, SIGNAL(clicked()), SLOT(on_btnInsertCode_clicked()));
 
     QHBoxLayout* layout = new QHBoxLayout();
     layout->setContentsMargins(3, 0, 3, 0);
@@ -529,7 +529,7 @@ EditorToolBar::EditorToolBar(QWidget *parent)
     layout->addWidget(m_btnViewSource);
     layout->addWidget(m_btnMobileImage);
     layout->addWidget(m_btnCheckList);
-//    layout->addWidget(m_btnInsertCode);
+    layout->addWidget(m_btnInsertCode);
     layout->addSpacing(6);
     layout->addWidget(m_comboFontFamily);
     layout->addSpacing(6);
@@ -1051,9 +1051,9 @@ WizEditorContextMenuItem* EditorToolBar::contextMenuData()
         {WIZEDITOR_ACTION_FONT_ITALIC,              "italic",           "editorCommandExecuteItalic"},
         {WIZEDITOR_ACTION_FONT_UNDERLINE,           "underline",        "editorCommandExecuteUnderLine"},
         {WIZEDITOR_ACTION_FONT_STRIKETHROUGH,       "strikethrough",    "editorCommandExecuteStrikeThrough"},
-        {"-", "-", "-"},
-        {WIZEDITOR_ACTION_FONT_FORECOLOR,           "foreColor",        "editorCommandExecuteForeColor"},
-        {WIZEDITOR_ACTION_FONT_BACKCOLOR,           "backColor",        "editorCommandExecuteBackColor"},
+//        {"-", "-", "-"},
+//        {WIZEDITOR_ACTION_FONT_FORECOLOR,           "foreColor",        "editorCommandExecuteForeColor"},
+//        {WIZEDITOR_ACTION_FONT_BACKCOLOR,           "backColor",        "editorCommandExecuteBackColor"},
         {"+", "+", "+"},
 
         {QObject::tr("Justify"),                    "+",          "+"},
