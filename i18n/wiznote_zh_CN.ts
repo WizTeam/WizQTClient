@@ -178,6 +178,11 @@
         <translation>笔记数目限制信息</translation>
     </message>
     <message>
+        <location filename="../src/wizCategoryView.cpp" line="2017"/>
+        <source>Group notes count limit exceeded!</source>
+        <translation>群组笔记数目超出限制！</translation>
+    </message>
+    <message>
         <location filename="../src/wizCategoryView.cpp" line="2025"/>
         <source>View team info</source>
         <translation>团队信息</translation>
@@ -193,7 +198,7 @@
         <translation>新建笔记</translation>
     </message>
     <message>
-        <location filename="../src/wizCategoryView.cpp" line="3172"/>
+        <location filename="../src/wizCategoryView.cpp" line="3171"/>
         <source>Create new group...</source>
         <translation>创建群组...</translation>
     </message>
@@ -486,27 +491,27 @@
 <context>
     <name>CWizDocumentWebView</name>
     <message>
-        <location filename="../src/wizDocumentWebView.cpp" line="1571"/>
+        <location filename="../src/wizDocumentWebView.cpp" line="1572"/>
         <source>Image File</source>
         <translation>图片文件</translation>
     </message>
     <message>
-        <location filename="../src/wizDocumentWebView.cpp" line="1571"/>
+        <location filename="../src/wizDocumentWebView.cpp" line="1572"/>
         <source>Images (*.png *.bmp *.gif *.jpg)</source>
         <translation>图片 (*.png *.bmp *.gif *.jpg)</translation>
     </message>
     <message>
-        <location filename="../src/wizDocumentWebView.cpp" line="1820"/>
+        <location filename="../src/wizDocumentWebView.cpp" line="1821"/>
         <source>PDF Files (*.pdf)</source>
         <translation>PDF 文件 (*.pdf)</translation>
     </message>
     <message>
-        <location filename="../src/wizDocumentWebView.cpp" line="1865"/>
+        <location filename="../src/wizDocumentWebView.cpp" line="1866"/>
         <source>Inof</source>
         <translation>提示</translation>
     </message>
     <message>
-        <location filename="../src/wizDocumentWebView.cpp" line="1865"/>
+        <location filename="../src/wizDocumentWebView.cpp" line="1866"/>
         <source>No available printer founded! Please add printer to system printer list.</source>
         <translation>未发现可用打印机！请在系统打印机列表中添加打印机。</translation>
     </message>
@@ -1752,26 +1757,26 @@ w: %3  h: %4</translation>
         <translation>插入代码</translation>
     </message>
     <message>
-        <location filename="../src/wizEditorToolBar.cpp" line="1218"/>
-        <location filename="../src/wizEditorToolBar.cpp" line="1222"/>
+        <location filename="../src/wizEditorToolBar.cpp" line="1230"/>
+        <location filename="../src/wizEditorToolBar.cpp" line="1234"/>
         <source>transparent</source>
         <translation>清除颜色</translation>
     </message>
     <message>
-        <location filename="../src/wizEditorToolBar.cpp" line="1227"/>
-        <location filename="../src/wizEditorToolBar.cpp" line="1230"/>
+        <location filename="../src/wizEditorToolBar.cpp" line="1239"/>
+        <location filename="../src/wizEditorToolBar.cpp" line="1242"/>
         <source>show more colors...</source>
         <translation>显示更多颜色...</translation>
     </message>
     <message>
-        <location filename="../src/wizEditorToolBar.cpp" line="1337"/>
-        <location filename="../src/wizEditorToolBar.cpp" line="1430"/>
+        <location filename="../src/wizEditorToolBar.cpp" line="1349"/>
+        <location filename="../src/wizEditorToolBar.cpp" line="1442"/>
         <source>Save as...</source>
         <translation>另存为...</translation>
     </message>
     <message>
-        <location filename="../src/wizEditorToolBar.cpp" line="1338"/>
-        <location filename="../src/wizEditorToolBar.cpp" line="1431"/>
+        <location filename="../src/wizEditorToolBar.cpp" line="1350"/>
+        <location filename="../src/wizEditorToolBar.cpp" line="1443"/>
         <source>Image Files (*.%1)</source>
         <translation>图片文件 (*.%1)</translation>
     </message>
@@ -2923,6 +2928,56 @@ w: %3  h: %4</translation>
         <translation>段落方向</translation>
     </message>
     <message>
+        <location filename="../src/wizEditorToolBar.cpp" line="1069"/>
+        <source>Cell Alignment</source>
+        <translation>单元格对齐</translation>
+    </message>
+    <message>
+        <location filename="../src/wizEditorToolBar.cpp" line="1070"/>
+        <source>Align leftTop</source>
+        <translation>靠上两端对齐</translation>
+    </message>
+    <message>
+        <location filename="../src/wizEditorToolBar.cpp" line="1071"/>
+        <source>Align top</source>
+        <translation>靠上居中</translation>
+    </message>
+    <message>
+        <location filename="../src/wizEditorToolBar.cpp" line="1072"/>
+        <source>Align rightTop</source>
+        <translation>靠上右对齐</translation>
+    </message>
+    <message>
+        <location filename="../src/wizEditorToolBar.cpp" line="1073"/>
+        <source>Align left</source>
+        <translation>中部两端对齐</translation>
+    </message>
+    <message>
+        <location filename="../src/wizEditorToolBar.cpp" line="1074"/>
+        <source>Align center</source>
+        <translation>居中</translation>
+    </message>
+    <message>
+        <location filename="../src/wizEditorToolBar.cpp" line="1075"/>
+        <source>Align right</source>
+        <translation>中部右对齐</translation>
+    </message>
+    <message>
+        <location filename="../src/wizEditorToolBar.cpp" line="1076"/>
+        <source>Align leftBottom</source>
+        <translation>靠下两端对齐</translation>
+    </message>
+    <message>
+        <location filename="../src/wizEditorToolBar.cpp" line="1077"/>
+        <source>Align bottom</source>
+        <translation>靠下居中</translation>
+    </message>
+    <message>
+        <location filename="../src/wizEditorToolBar.cpp" line="1078"/>
+        <source>Align rightBottom</source>
+        <translation>靠下右对齐</translation>
+    </message>
+    <message>
         <location filename="../src/wizDocumentListViewItem.cpp" line="189"/>
         <location filename="../src/wizDocumentListViewItem.cpp" line="232"/>
         <source>Unknown</source>
@@ -3167,7 +3222,7 @@ w: %3  h: %4</translation>
         <translation>正在下载，请稍等...</translation>
     </message>
     <message>
-        <location filename="../src/wizDocumentWebView.cpp" line="1872"/>
+        <location filename="../src/wizDocumentWebView.cpp" line="1873"/>
         <source>Print Document</source>
         <translation>打印文档</translation>
     </message>

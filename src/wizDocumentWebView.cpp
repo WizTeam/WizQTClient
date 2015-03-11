@@ -1110,8 +1110,9 @@ void CWizDocumentWebView::viewDocumentInEditor(bool editing)
     m_strCurrentNoteHtml.clear();
     splitHtmlToHeadAndBody(strHtml, m_strCurrentNoteHead, m_strCurrentNoteHtml);
 
-    m_strCurrentNoteHead = m_strCurrentNoteHead + "<link rel=\"stylesheet\" type=\"text/css\" href=\"" +
-            m_strDefaultCssFilePath + "\">";
+    // 将默认的css样式放到最前面，防止覆盖文件本身的css样式
+    m_strCurrentNoteHead = "<link rel=\"stylesheet\" type=\"text/css\" href=\"" +
+            m_strDefaultCssFilePath + "\">" + m_strCurrentNoteHead;
 
     m_strCurrentNoteGUID = strGUID;
     m_bCurrentEditing = editing;

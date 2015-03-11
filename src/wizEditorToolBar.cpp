@@ -1066,6 +1066,18 @@ WizEditorContextMenuItem* EditorToolBar::contextMenuData()
         {WIZEDITOR_ACTION_TABLE_INSERT,             "inserttable",      "editorCommandExecuteTableInsert"},
         {WIZEDITOR_ACTION_TABLE_DELETE,             "deletetable",      "editorCommandExecuteTableDelete"},
         {"-", "-", "-"},
+        {QObject::tr("Cell Alignment"),                      "+",                "+"},
+        {QObject::tr("Align leftTop"),         "cellalignment",        "editorCommandExecuteTableCellAlignLeftTop"},
+        {QObject::tr("Align top"),         "cellalignment",        "editorCommandExecuteTableCellAlignTop"},
+        {QObject::tr("Align rightTop"),         "cellalignment",        "editorCommandExecuteTableCellAlignRightTop"},
+        {QObject::tr("Align left"),         "cellalignment",        "editorCommandExecuteTableCellAlignLeft"},
+        {QObject::tr("Align center"),         "cellalignment",        "editorCommandExecuteTableCellAlignCenter"},
+        {QObject::tr("Align right"),         "cellalignment",        "editorCommandExecuteTableCellAlignRight"},
+        {QObject::tr("Align leftBottom"),         "cellalignment",        "editorCommandExecuteTableCellAlignLeftBottom"},
+        {QObject::tr("Align bottom"),         "cellalignment",        "editorCommandExecuteTableCellAlignBottom"},
+        {QObject::tr("Align rightBottom"),         "cellalignment",        "editorCommandExecuteTableCellAlignRightBottom"},
+        {"+", "+", "+"},
+        {"-", "-", "-"},
         {WIZEDITOR_ACTION_TABLE_DELETE_ROW,         "deleterow",        "editorCommandExecuteTableDeleteRow"},
         {WIZEDITOR_ACTION_TABLE_DELETE_COLUM,       "deletecol",        "editorCommandExecuteTableDeleteCol"},
         {WIZEDITOR_ACTION_TABLE_INSERT_ROW,         "insertrow",        "editorCommandExecuteTableInsertRow"},
@@ -1509,7 +1521,8 @@ int EditorToolBar::buildMenu(QMenu* pMenu, int indx)
         WizEditorContextMenuItem& item = arrayData[index];
         if (item.label == "+") {
             break;
-
+        } else if (item.execute == "+") {
+            index = buildMenu(pSubMenu, index);
         } else if (item.label == "-") {
             pSubMenu->addSeparator();
 

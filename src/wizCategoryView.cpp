@@ -2466,7 +2466,7 @@ void CWizCategoryView::setGroupRootItemExtraButton(CWizCategoryViewItemBase* pIt
         CWizDatabase& db = m_dbMgr.db(gData.strGroupGUID);
         if (db.IsStorageLimit() || db.IsTrafficLimit() || db.IsNoteCountLimit())
         {
-            QString strIconPath = ::WizGetSkinResourcePath(m_app.userSettings().skin()) + "bizDue.png";
+            QString strIconPath = ::WizGetSkinResourcePath(m_app.userSettings().skin()) + "groupLimit.png";
             pItem->setExtraButtonIcon(strIconPath);
         }
         else
