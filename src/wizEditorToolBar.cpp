@@ -794,7 +794,7 @@ void EditorToolBar::resetToolbar()
     m_btnCheckList->setEnabled(!isSourceMode);
     m_btnSearchReplace->setEnabled(!isSourceMode);
     m_btnInsertImage->setEnabled(!isSourceMode);
-//    m_btnInsertCode->setEnabled(!isSourceMode);
+    m_btnInsertCode->setEnabled(!isSourceMode);
 
     value = m_editor->editorCommandQueryCommandValue("fontFamily");
     m_comboFontFamily->setText(value);
@@ -1227,7 +1227,7 @@ QMenu* EditorToolBar::createColorMenu(const char *slot, const char *slotColorBoa
     pBtnOtherColor->setText(tr("show more colors..."));
     pBtnOtherColor->setFixedSize(QSize(142, 20));
     pBtnOtherColor->setAutoRaise(true);
-    pBtnOtherColor->setToolTip("show more colors...");
+    pBtnOtherColor->setToolTip(tr("show more colors..."));
     connect(pBtnOtherColor, SIGNAL(clicked()), this, slotColorBoard);
 
     // 基本色
@@ -1259,6 +1259,7 @@ QMenu* EditorToolBar::createColorMenu(const char *slot, const char *slotColorBoa
     widget->setLayout(pGridLayout);
 
     QVBoxLayout *pVLayout = new QVBoxLayout;
+    pVLayout->setContentsMargins(5, 5, 5, 5);
     pVLayout->addWidget(pBtnTransparent);
     pVLayout->addWidget(widget);
     pVLayout->addWidget(pBtnOtherColor);
@@ -1281,20 +1282,19 @@ void EditorToolBar::on_foreColor_changed()
         return;
 
     if (m_editor) {
-        m_editor->on_editorCommandExecuteForeColor(color);
+        m_editor->editorCommandExecuteForeColor(color);
     }
 }
 
 void EditorToolBar::on_showForeColorBoard()
 {
     m_btnForeColor->menu()->close();
-    QColor color = QColorDialog::getColor(m_btnForeColor->color(), this);
-    if (!color.isValid())
-        return;
-
-    if (m_editor) {
-        m_editor->on_editorCommandExecuteForeColor(color);
-    }
+    QColorDialog dlg(m_btnForeColor->color(), this);
+    connect(&dlg, SIGNAL(currentColorChanged(QColor)), m_editor,
+            SLOT(editorCommandExecuteForeColor(QColor)));
+    connect(&dlg, SIGNAL(colorSelected(QColor)), m_editor,
+            SLOT(editorCommandExecuteForeColor(QColor)));
+    dlg.exec();
 }
 
 void EditorToolBar::on_backColor_changed()
@@ -1309,20 +1309,19 @@ void EditorToolBar::on_backColor_changed()
         return;
 
     if (m_editor) {
-        m_editor->on_editorCommandExecuteBackColor(color);
+        m_editor->editorCommandExecuteBackColor(color);
     }
 }
 
 void EditorToolBar::on_showBackColorBoard()
 {
     m_btnBackColor->menu()->close();
-    QColor color = QColorDialog::getColor(m_btnBackColor->color(), this);
-    if (!color.isValid())
-        return;
-
-    if (m_editor) {
-        m_editor->on_editorCommandExecuteBackColor(color);
-    }
+    QColorDialog dlg(m_btnBackColor->color(), this);
+    connect(&dlg, SIGNAL(currentColorChanged(QColor)), m_editor,
+            SLOT(editorCommandExecuteBackColor(QColor)));
+    connect(&dlg, SIGNAL(colorSelected(QColor)), m_editor,
+            SLOT(editorCommandExecuteBackColor(QColor)));
+    dlg.exec();
 }
 
 void EditorToolBar::saveImage(QString strFileName)

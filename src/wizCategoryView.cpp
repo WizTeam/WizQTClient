@@ -1210,7 +1210,7 @@ void CWizCategoryView::on_action_importFile()
     this,
     tr("Select one or more files to open"),
     QDir::homePath(),
-    "Text files(*.txt *.md *.html *.htm *.mht *.cpp *.h *.rtf *.doc *.docx *.pages);;Images (*.png *.xpm *.jpg);;Webarchive (*.webarchive);;All files(*.*)");
+    "Text files(*.txt *.md *.html *.htm *.cpp *.h *.rtf *.doc *.docx *.pages);;Images (*.png *.xpm *.jpg *.jpeg *.svg);;Webarchive (*.webarchive);;All files(*.*)");
     loadDocument(files);
 }
 
@@ -2014,7 +2014,7 @@ void CWizCategoryView::promptGroupLimitMessage(const QString &groupGUID, const Q
     }
     else if (db.GetNoteCountLimit(strErrorMsg))
     {
-        QMessageBox::warning(this, tr("Note Count Limit Info"), strErrorMsg);
+        QMessageBox::warning(this, tr("Note Count Limit Info"), tr("Group notes count limit exceeded!"));
     }
 }
 
@@ -2466,7 +2466,6 @@ void CWizCategoryView::setGroupRootItemExtraButton(CWizCategoryViewItemBase* pIt
         CWizDatabase& db = m_dbMgr.db(gData.strGroupGUID);
         if (db.IsStorageLimit() || db.IsTrafficLimit() || db.IsNoteCountLimit())
         {
-            qDebug() << "group limit : " << gData.strGroupName;
             QString strIconPath = ::WizGetSkinResourcePath(m_app.userSettings().skin()) + "bizDue.png";
             pItem->setExtraButtonIcon(strIconPath);
         }

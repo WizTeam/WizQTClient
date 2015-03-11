@@ -802,7 +802,7 @@ bool CWizDocumentWebView::insertImage(const QString& strFileName, bool bCopyFile
 void CWizDocumentWebView::closeSourceMode()
 {
     bool isSourceMode = editorCommandQueryCommandState("source");
-    qDebug() << "on close SourceMode : " << "  is in source mode : " << isSourceMode;
+//    qDebug() << "on close SourceMode : " << "  is in source mode : " << isSourceMode;
     if (isSourceMode)
     {
         page()->mainFrame()->evaluateJavaScript("editor.execCommand('source')");
@@ -1420,7 +1420,7 @@ bool CWizDocumentWebView::editorCommandExecuteFontSize(const QString& strSize)
     return editorCommandExecuteCommand("fontSize", "'" + strSize + "'");
 }
 
-void CWizDocumentWebView::on_editorCommandExecuteBackColor(const QColor& color)
+void CWizDocumentWebView::editorCommandExecuteBackColor(const QColor& color)
 {
 //    editorCommandExecuteCommand("backColor", "'" + color.name() + "'");
     if (color == QColor(Qt::transparent)) {
@@ -1431,7 +1431,7 @@ void CWizDocumentWebView::on_editorCommandExecuteBackColor(const QColor& color)
     }
 }
 
-void CWizDocumentWebView::on_editorCommandExecuteForeColor(const QColor& color)
+void CWizDocumentWebView::editorCommandExecuteForeColor(const QColor& color)
 {
     if (color == QColor(Qt::transparent)) {
         editorCommandExecuteCommand("foreColor", "'default'");

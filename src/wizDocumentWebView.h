@@ -285,8 +285,8 @@ public Q_SLOTS:
     /* editor API */
 
     // font
-    void on_editorCommandExecuteBackColor(const QColor& color);
-    void on_editorCommandExecuteForeColor(const QColor& color);
+    void editorCommandExecuteBackColor(const QColor& color);
+    void editorCommandExecuteForeColor(const QColor& color);
     bool editorCommandExecuteBold();
     bool editorCommandExecuteItalic();
     bool editorCommandExecuteUnderLine();

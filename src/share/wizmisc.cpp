@@ -2260,8 +2260,6 @@ void showDocumentHistory(const WIZDOCUMENTDATA& doc, QWidget* parent)
     CString strExt = WizFormatString2(_T("obj_guid=%1&kb_guid=%2&obj_type=document"),
                                       doc.strGUID, doc.strKbGUID);
     QString strUrl = WizService::ApiEntry::standardCommandUrl("document_history", WIZ_TOKEN_IN_URL_REPLACE_PART, strExt);
-    qDebug() << "load document history page : " << strUrl;
-//    strUrl = "http://www.wiz.cn/";
     showWebDialogWithToken(QObject::tr("Note History"), strUrl, parent, true);
 }
 

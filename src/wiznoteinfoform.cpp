@@ -93,7 +93,7 @@ void CWizNoteInfoForm::setDocument(const WIZDOCUMENTDATA& data)
     ui->editAuthor->setReadOnly(!canEdit);
     ui->editTitle->setReadOnly(!canEdit);
     ui->editURL->setReadOnly(!canEdit);
-    ui->checkEncrypted->setEnabled(canEdit);
+    ui->checkEncrypted->setEnabled(canEdit && !db.IsGroup());
 }
 
 void CWizNoteInfoForm::on_labelOpenDocument_linkActivated(const QString &link)

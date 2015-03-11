@@ -55,8 +55,6 @@ QString CWizFileReader::loadTextFileToHtml(const QString& strFileName)
     ret.replace("\n","<br>");
     ret.replace(" ","&nbsp");
 
-    qDebug() << "load text file to html : " << ret;
-
     return ret;
 }
 
