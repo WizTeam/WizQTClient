@@ -47,7 +47,7 @@ using namespace Core::Internal;
 // for context menu text
 #define CATEGORY_ACTION_DOCUMENT_NEW    QObject::tr("New note")
 #define CATEGORY_ACTION_DOCUMENT_LOAD   QObject::tr("Load note")
-#define CATEGORY_ACTION_IMPORT_FILE   QObject::tr("Import file")
+#define CATEGORY_ACTION_IMPORT_FILE   QObject::tr("Import file...")
 #define CATEGORY_ACTION_FOLDER_NEW      QObject::tr("New folder...")
 #define CATEGORY_ACTION_FOLDER_MOVE     QObject::tr("Move to...")
 #define CATEGORY_ACTION_FOLDER_RENAME   QObject::tr("Rename...")
@@ -879,7 +879,7 @@ void CWizCategoryView::initMenus()
     // folder menu
     m_menuFolder = new QMenu(this);
     m_menuFolder->addAction(actionNewDoc);
-//    m_menuFolder->addAction(actionImportFile);
+    m_menuFolder->addAction(actionImportFile);
     m_menuFolder->addAction(actionNewItem);
     m_menuFolder->addSeparator();
     m_menuFolder->addAction(actionMoveItem);

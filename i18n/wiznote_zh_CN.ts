@@ -294,6 +294,11 @@
         <translation>请输入笔记密码</translation>
     </message>
     <message>
+        <location filename="../src/share/wizDatabase.cpp" line="907"/>
+        <source>User password check failed!</source>
+        <translation>密码错误！</translation>
+    </message>
+    <message>
         <location filename="../src/share/wizDatabase.cpp" line="3491"/>
         <source>My Notes</source>
         <translation>我的笔记</translation>
@@ -351,6 +356,7 @@
     </message>
     <message>
         <location filename="../src/share/wizDatabase.cpp" line="874"/>
+        <location filename="../src/share/wizDatabase.cpp" line="907"/>
         <location filename="../src/share/wizDatabase.cpp" line="3877"/>
         <source>Info</source>
         <translation>提示</translation>
@@ -2624,8 +2630,8 @@ w: %3  h: %4</translation>
     </message>
     <message>
         <location filename="../src/wizCategoryView.cpp" line="50"/>
-        <source>Import file</source>
-        <translation>导入文件</translation>
+        <source>Import file...</source>
+        <translation>导入文件...</translation>
     </message>
     <message>
         <location filename="../src/wizCategoryView.cpp" line="51"/>

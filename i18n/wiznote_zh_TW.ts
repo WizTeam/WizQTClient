@@ -180,7 +180,7 @@
     <message>
         <location filename="../src/wizCategoryView.cpp" line="2017"/>
         <source>Group notes count limit exceeded!</source>
-        <translation type="unfinished">羣組筆記數目超出限制！</translation>
+        <translation>羣組筆記數目超出限制！</translation>
     </message>
     <message>
         <location filename="../src/wizCategoryView.cpp" line="2025"/>
@@ -253,7 +253,7 @@
     <message>
         <location filename="../src/ui/wizconsoledialog.ui" line="20"/>
         <source>Console</source>
-        <translation type="unfinished">訊息控制台</translation>
+        <translation>訊息控制台</translation>
     </message>
     <message>
         <location filename="../src/ui/wizconsoledialog.ui" line="78"/>
@@ -283,7 +283,7 @@
     <message>
         <location filename="../src/wizconsoledialog.cpp" line="121"/>
         <source>you should select a file name which does not exists</source>
-        <translation type="unfinished">您應當使用一個不重復的名稱進行保存</translation>
+        <translation>您應當使用一個不重復的名稱進行保存</translation>
     </message>
 </context>
 <context>
@@ -292,6 +292,11 @@
         <location filename="../src/share/wizDatabase.cpp" line="887"/>
         <source>Please input document password to encrypt</source>
         <translation>請輸入筆記密碼</translation>
+    </message>
+    <message>
+        <location filename="../src/share/wizDatabase.cpp" line="907"/>
+        <source>User password check failed!</source>
+        <translation>密碼錯誤！</translation>
     </message>
     <message>
         <location filename="../src/share/wizDatabase.cpp" line="3491"/>
@@ -351,6 +356,7 @@
     </message>
     <message>
         <location filename="../src/share/wizDatabase.cpp" line="874"/>
+        <location filename="../src/share/wizDatabase.cpp" line="907"/>
         <location filename="../src/share/wizDatabase.cpp" line="3877"/>
         <source>Info</source>
         <translation>提示</translation>
@@ -2630,8 +2636,8 @@ w: %3  h: %4</translation>
     </message>
     <message>
         <location filename="../src/wizCategoryView.cpp" line="50"/>
-        <source>Import file</source>
-        <translation>導入文件</translation>
+        <source>Import file...</source>
+        <translation>導入文件...</translation>
     </message>
     <message>
         <location filename="../src/wizCategoryView.cpp" line="51"/>

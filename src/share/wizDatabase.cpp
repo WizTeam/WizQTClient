@@ -904,7 +904,7 @@ bool CWizDatabase::initZiwReaderForEncryption(const QString& strUserCipher)
         //
         if (!initResult)
         {
-            QMessageBox::warning(0, "Info", "User password check failed!");
+            QMessageBox::warning(0, tr("Info"), tr("User password check failed!"));
             return false;
         }
     }
