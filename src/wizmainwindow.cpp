@@ -387,7 +387,15 @@ void MainWindow::on_actionExit_triggered()
 void MainWindow::on_actionClose_triggered()
 {
 #ifdef Q_OS_MAC
-    wizMacHideCurrentApplication();
+    if (qApp->activeWindow() != this)
+    {
+        qApp->activeWindow()->close();
+    }
+    else
+    {
+        wizMacHideCurrentApplication();
+//        setVisible(false);
+    }
 #else
     if (m_settings->showSystemTrayIcon())
     {
@@ -1833,7 +1841,13 @@ void MainWindow::on_actionViewToggleFullscreen_triggered()
 
 void MainWindow::on_actionViewMinimize_triggered()
 {
-    setWindowState(Qt::WindowMinimized);
+    while (true) {
+        QWidget* wgt = qApp->activeWindow();
+        if (wgt == 0)
+            return;
+
+        wgt->setWindowState(Qt::WindowMinimized);
+    }
 }
 
 void MainWindow::on_actionMarkAllMessageRead_triggered()
