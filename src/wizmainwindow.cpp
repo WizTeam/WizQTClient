@@ -387,9 +387,10 @@ void MainWindow::on_actionExit_triggered()
 void MainWindow::on_actionClose_triggered()
 {
 #ifdef Q_OS_MAC
-    if (qApp->activeWindow() != this)
+    QWidget* wgt = qApp->activeWindow();
+    if (wgt && wgt != this)
     {
-        qApp->activeWindow()->close();
+       wgt->close();
     }
     else
     {
