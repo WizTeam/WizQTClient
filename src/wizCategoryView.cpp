@@ -1210,7 +1210,11 @@ void CWizCategoryView::on_action_importFile()
     this,
     tr("Select one or more files to open"),
     QDir::homePath(),
+#ifdef Q_OS_LINUX
+    "Text files(*.txt *.md *.html *.htm *.cpp *.h *.c *.hpp *.cpp);;Images (*.png *.xpm *.jpg *.jpeg *.svg);;All files(*.*)");
+#else
     "Text files(*.txt *.md *.html *.htm *.cpp *.h *.rtf *.doc *.docx *.pages);;Images (*.png *.xpm *.jpg *.jpeg *.svg);;Webarchive (*.webarchive);;All files(*.*)");
+#endif
     loadDocument(files);
 }
 

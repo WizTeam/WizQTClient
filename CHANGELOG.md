@@ -1,3 +1,62 @@
+##2.1.16(2015-3-12)
+
+Bugfixes:
+
+- [Mac]Fix the delay problem of text input.
+- [Linux]Fix the crash problem when drag document to folder.
+- Fixed the initialization delay problem of insert code panel.
+
+Features:
+
+- Add the funtion of importing files(not supported documents with images for now).
+- Added support table cell alignment.
+- Modify the usage of editor color selection buttons.
+- Add function to retrieve the deleted notes.
+- Modify the limitation prompt of group.
+- Optimized loading speed of notes list.
+- Modify the Markdown references css file storage location, you can manually modify the style.
+- You can edit note information now.
+
+
+##2.1.15(2015-1-16)
+
+Bugfixes:
+
+- Fix the problem that modify the sync interval had no effect.
+- Fix the width problem when pasting as plain text.
+
+Features:
+
+- Modify the way of checking the status of the group notes, no longer allowed to edit notes that editing by other users!
+- Add the function of manually sorting folders. You can choose to manually sort the folder or sorted in a systematic manner in the preferences.
+- Quit program if system tray icon is unvisible when users close the mainwindow.
+- Change the icon for system tray icon.
+- Add the function of sending notes by email.
+- Added support for searching encrypted notes, need to enter the password in the preferences.
+- Add the function of setting the editor background color in preferences.
+- Add the function of editing the html source code of notes.
+- All unread messages can be marked as read.
+- Update note version when upload data to server.
+
+##2.1.14(2014-11-9)
+
+Bugfixes:
+
+- Fixed shortcuts scope problem of editor, no longer affect the operation of other widgets.
+- Normal token failure no longer ask for password.
+
+Features:
+
+- Add option to use system window style.
+- Add function of screenshot.
+- Notes browsing history.
+- Increase the common notes list, you can set notes shortcuts now.
+- Notes List sorted by access time.
+- Set notes always on the top.
+- Added support for multi-keyword search, use blank space to split keywords.
+- Add creator information of notes to the document list.
+- Too much registration will called for a verification code.
+
 ##2.1.13(2014-9-30)
 
 Bugfixes:
