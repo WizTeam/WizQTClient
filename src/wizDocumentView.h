@@ -174,10 +174,10 @@ class WizFloatDocumentViewer : public QWidget
 public:
     WizFloatDocumentViewer(CWizExplorerApp& app, QWidget* parent = 0);
 
-//    CWizDocumentView* docView()
-//    {
-//        return m_docView;
-//    }
+    CWizDocumentView* docView()
+    {
+        return m_docView;
+    }
 
     ~WizFloatDocumentViewer();
 
