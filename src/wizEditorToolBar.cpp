@@ -406,6 +406,7 @@ EditorToolBar::EditorToolBar(QWidget *parent)
     m_btnForeColor = new CWizToolButtonColor(this);
     m_btnForeColor->setIcon(::WizLoadSkinIcon(skin, "actionFormatForeColor"));
     m_btnForeColor->setToolTip(tr("ForeColor"));
+    m_btnForeColor->setCheckable(false);
     QMenu* foreColorMenu = createColorMenu(SLOT(on_foreColor_changed()),
                                            SLOT(on_showForeColorBoard()));
     m_btnForeColor->setMenu(foreColorMenu);
@@ -413,6 +414,7 @@ EditorToolBar::EditorToolBar(QWidget *parent)
     m_btnBackColor = new CWizToolButtonColor(this);
     m_btnBackColor->setIcon(::WizLoadSkinIcon(skin, "actionFormatBackColor"));
     m_btnBackColor->setToolTip(tr("BackColor"));
+    m_btnBackColor->setCheckable(false);
     QMenu* backColorMenu = createColorMenu(SLOT(on_backColor_changed()),
                                            SLOT(on_showBackColorBoard()));
     m_btnBackColor->setMenu(backColorMenu);
