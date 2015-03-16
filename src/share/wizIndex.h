@@ -298,14 +298,15 @@ public:
 
     /* Attachment related operations */
     void UpdateDocumentAttachmentCount(const CString& strDocumentGUID,
-                                       bool bReset = true);
+                                       bool bResetDocInfo = true);
 
     bool CreateAttachment(const CString& strDocumentGUID, const CString& strName,
                           const CString& strURL, const CString& strDescription,
                           const CString& strDataMD5, WIZDOCUMENTATTACHMENTDATA& data);
 
     bool ModifyAttachmentInfo(WIZDOCUMENTATTACHMENTDATA& data);
-    virtual bool DeleteAttachment(const WIZDOCUMENTATTACHMENTDATA& data, bool bLog, bool bReset);
+    virtual bool DeleteAttachment(const WIZDOCUMENTATTACHMENTDATA& data, bool bLog,
+                                  bool bResetDocInfo, bool updateAttachList = true);
 
     // Raw Query
     int GetDocumentAttachmentCount(const CString& strDocumentGUID);

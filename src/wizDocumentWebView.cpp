@@ -965,7 +965,7 @@ void CWizDocumentWebView::saveEditingViewDocument(const WIZDOCUMENTDATA &data, b
 
     //
     //QString strPlainTxt = page()->mainFrame()->evaluateJavaScript("editor.getPlainTxt();").toString();
-    strHtml = "<html><head>" + strHead + "</head><body>" + strHtml + "</body></html>";
+    strHtml = "<!DOCTYPE html><html><head>" + strHead + "</head><body>" + strHtml + "</body></html>";
 
     m_docSaverThread->save(data, strHtml, strFileName, 0);
 }
@@ -1163,7 +1163,7 @@ void CWizDocumentWebView::setEditingDocument(bool editing)
     if(!m_bEditorInited)
         return;             //If editor wasn't initialized,just return.
 
-    if (!editing) {
+    if (m_bEditingMode && !editing) {
         closeSourceMode();
     }
 

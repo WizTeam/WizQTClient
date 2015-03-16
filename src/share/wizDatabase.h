@@ -366,7 +366,8 @@ public:
     // delete
     bool DeleteObject(const QString &strGUID, const QString &strType, bool bLog);
     bool DeleteTagWithChildren(const WIZTAGDATA& data, bool bLog);
-    bool DeleteAttachment(const WIZDOCUMENTATTACHMENTDATA& data, bool bLog, bool bReset);
+    bool DeleteAttachment(const WIZDOCUMENTATTACHMENTDATA& data, bool bLog,
+                          bool bResetDocInfo, bool updateAttachList = true);
 
     bool IsDocumentModified(const CString& strGUID);
     bool IsAttachmentModified(const CString& strGUID);
