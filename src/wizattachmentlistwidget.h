@@ -25,7 +25,7 @@ public:
         Uploading
     };
 
-    CWizAttachmentListViewItem(const WIZDOCUMENTATTACHMENTDATA& att);
+    CWizAttachmentListViewItem(const WIZDOCUMENTATTACHMENTDATA& att, QListWidget* view);
     const WIZDOCUMENTATTACHMENTDATA& attachment() const { return m_attachment; }
 
     QString detailText(const CWizAttachmentListView* view) const;

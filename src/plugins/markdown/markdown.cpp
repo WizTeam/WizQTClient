@@ -221,6 +221,8 @@ bool MarkdownPlugin::copyRes2Cache()
     QString destPath = cachePath() + "plugins/markdown/";
     QString sourcePath = resourcesPath() + "files/markdown/";
 
+    QDir cacheDir(destPath);
+    cacheDir.mkpath(destPath);
     copyFolder(sourcePath, destPath);
 
     return true;

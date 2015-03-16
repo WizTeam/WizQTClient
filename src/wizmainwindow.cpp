@@ -403,10 +403,14 @@ void MainWindow::on_actionClose_triggered()
     {
        wgt->close();
     }
-    else if (m_settings->showSystemTrayIcon())
+    else
     {
-        setVisible(false);
+        if (m_settings->showSystemTrayIcon())
+        {
+            setVisible(false);
+        }
     }
+
 #endif
 }
 

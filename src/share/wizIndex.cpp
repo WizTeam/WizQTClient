@@ -902,8 +902,7 @@ bool CWizIndex::ModifyAttachmentInfo(WIZDOCUMENTATTACHMENTDATA& data)
 }
 
 bool CWizIndex::DeleteAttachment(const WIZDOCUMENTATTACHMENTDATA& data,
-                                 bool bLog,
-                                 bool bReset)
+                                 bool bLog, bool bResetDocInfo, bool /*update*/)
 {
     if (!DeleteAttachmentEx(data)) {
         TOLOG1("Failed to delete attachment: %1", data.strName);
@@ -916,7 +915,7 @@ bool CWizIndex::DeleteAttachment(const WIZDOCUMENTATTACHMENTDATA& data,
         }
     }
 
-    UpdateDocumentAttachmentCount(data.strDocumentGUID, bReset);
+    UpdateDocumentAttachmentCount(data.strDocumentGUID, bResetDocInfo);
 
     return true;
 }
@@ -3259,7 +3258,7 @@ int CWizIndex::GetDocumentAttachmentCount(const CString& strDocumentGUID)
 }
 
 void CWizIndex::UpdateDocumentAttachmentCount(const CString& strDocumentGUID,
-                                              bool bReset /* = true */)
+                                              bool bResetDocInfo /* = true */)
 {
     WIZDOCUMENTDATA data;
     if (!DocumentFromGUID(strDocumentGUID, data))
@@ -3267,7 +3266,7 @@ void CWizIndex::UpdateDocumentAttachmentCount(const CString& strDocumentGUID,
 
     data.nAttachmentCount = GetDocumentAttachmentCount(strDocumentGUID);
 
-    ModifyDocumentInfo(data, bReset);
+    ModifyDocumentInfo(data, bResetDocInfo);
 }
 
 bool CWizIndex::GetSync(const CString& strLocation)

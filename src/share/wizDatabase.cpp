@@ -2903,16 +2903,17 @@ bool CWizDatabase::DeleteObject(const QString& strGUID, const QString& strType, 
 
 
 bool CWizDatabase::DeleteAttachment(const WIZDOCUMENTATTACHMENTDATA& data,
-                                    bool bLog,
-                                    bool bReset /* = true */)
+                                    bool bLog, bool bReset, bool updateAttachList)
 {
     CString strFileName = GetAttachmentFileName(data.strGUID);
-    bool bRet = CWizIndex::DeleteAttachment(data, bLog, bReset);
+    bool bRet = CWizIndex::DeleteAttachment(data, bLog, bReset, updateAttachList);
     if (PathFileExists(strFileName)) {
         ::WizDeleteFile(strFileName);
     }
 
-    emit attachmentsUpdated();
+    if (updateAttachList) {
+        emit attachmentsUpdated();
+    }
 
     return bRet;
 }
