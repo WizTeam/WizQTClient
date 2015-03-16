@@ -398,7 +398,12 @@ void MainWindow::on_actionClose_triggered()
 //        setVisible(false);
     }
 #else
-    if (m_settings->showSystemTrayIcon())
+    QWidget* wgt = qApp->activeWindow();
+    if (wgt && wgt != this)
+    {
+       wgt->close();
+    }
+    else if (m_settings->showSystemTrayIcon())
     {
         setVisible(false);
     }
