@@ -30,7 +30,7 @@ if [ -e "$package_home" ]; then
 	rm -rf ./${package_home}/WizNote.app && \
 	cp -R ../WizQTClient-Release-QT5/WizNote.app ${package_home} && \
 	hdiutil makehybrid -hfs -hfs-volume-name $volumn_name -hfs-openfolder $package_home $package_home -o "${package_output_path}/tmp.dmg" && \
-	hdiutil convert -format UDZO "${package_output_path}/tmp.dmg" -o  "${package_output_path}/wiznote-${current_date}.dmg" && \
+	hdiutil convert -format UDZO "${package_output_path}/tmp.dmg" -o  "${package_output_path}/wiznote-macos-${current_date}.dmg" && \
 	rm -f "${package_output_path}/tmp.dmg"
 	rm -rf ./${package_home}/WizNote.app
 else
