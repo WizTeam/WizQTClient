@@ -52,10 +52,10 @@ WizCodeEditorDialog::WizCodeEditorDialog(CWizExplorerApp& app, CWizDocumentWebVi
 
     QString strFileName = Utils::PathResolve::resourcesPath() + "files/code/insert_code.htm";
     QString strHtml;
-    strHtml.replace("Wiz_Language_Replace", tr("Language"));
-    strHtml.replace("Wiz_OK_Replace", tr("OK1"));
-    strHtml.replace("Wiz_Cancel_Replace", tr("Cancel1"));
     ::WizLoadUnicodeTextFromFile(strFileName, strHtml);
+    strHtml.replace("Wiz_Language_Replace", tr("Language"));
+    strHtml.replace("Wiz_OK_Replace", tr("OK"));
+    strHtml.replace("Wiz_Cancel_Replace", tr("Cancel"));
     QUrl url = QUrl::fromLocalFile(strFileName);
 
     m_codeBrowser->page()->mainFrame()->setHtml(strHtml, url);
