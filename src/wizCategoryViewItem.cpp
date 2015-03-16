@@ -566,7 +566,7 @@ void CWizCategoryViewShortcutRootItem::drop(const WIZDOCUMENTDATA& data, bool /*
     addChild(pItem);
     sortChildren(0, Qt::AscendingOrder);
 
-#if QT_VERSION < 0x050000
+#if QT_VERSION < 0x054000
     CWizCategoryView* categoryView = dynamic_cast<CWizCategoryView*>(treeWidget());
     QTimer::singleShot(200, categoryView, SLOT(saveShortcutState()));
 #else
