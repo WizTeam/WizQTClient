@@ -34,6 +34,7 @@ class CWizDocumentTransitionView;
 class CWizActions;
 class CWizDocumentViewHistory;
 class CWizFixedSpacer;
+class CWizMacFixedSpacer;
 class CWizSplitter;
 class CWizAnimateAction;
 class CWizOptionsWidget;
@@ -113,6 +114,11 @@ protected:
     virtual void mouseMoveEvent(QMouseEvent* event);
     virtual void mouseReleaseEvent(QMouseEvent* event);
     virtual void changeEvent(QEvent *event);
+
+#ifdef USECOCOATOOLBAR
+    virtual void showEvent(QShowEvent *event);
+#endif
+
 private:
     ICore* m_core;
     CWizDatabaseManager& m_dbMgr;
@@ -128,7 +134,14 @@ private:
     //
     QSystemTrayIcon* m_tray;
 
+#ifdef USECOCOATOOLBAR
+    CWizMacToolBar* m_toolBar;
+    CWizMacFixedSpacer* m_spacerForToolButtonAdjust;
+#else
     QToolBar* m_toolBar;
+    CWizFixedSpacer* m_spacerForToolButtonAdjust;
+#endif
+
     QMenuBar* m_menuBar;
 #ifdef Q_OS_LINUX
     QMenu* m_menu;
@@ -167,7 +180,6 @@ private:
 
     CWizSearchIndexer* m_searchIndexer;
     QPointer<CWizSearchWidget> m_search;
-    CWizFixedSpacer* m_spacerForToolButtonAdjust;
 
     CWizMobileFileReceiver *m_mobileFileReceiver;
 
@@ -196,7 +208,6 @@ public:
     // CWizDocument passthrough methods
     QSize clientSize() const { return m_splitter->widget(2)->size(); }
     QWidget* client() const { return m_doc->client(); }
-    CWizDocumentWebView* web() const { return m_doc->web(); }
     void showClient(bool visible) const { return m_doc->showClient(visible); }
 
     CWizActions* actions() const { return m_actions; }
@@ -226,7 +237,6 @@ public:
 
 signals:
     void documentSaved(const QString& strGUID, CWizDocumentView* viewer);
-
     // signal connect to checklist in javascript
     void clickingTodoCallBack(bool cancel, bool needCallAgain);
 
@@ -265,9 +275,18 @@ public Q_SLOTS:
     void on_actionEditingDelete_triggered();
     void on_actionEditingSelectAll_triggered();
 
+#ifdef USEWEBENGINE
+    //move input position
+    void on_actionMoveToPageStart_triggered();
+    void on_actionMoveToPageEnd_triggered();
+    void on_actionMoveToLineStart_triggered();
+    void on_actionMoveToLineEnd_triggered();
+#endif
+
     // menu view
     void on_actionViewToggleCategory_triggered();
     void on_actionViewToggleFullscreen_triggered();
+    void on_actionViewMinimize_triggered();
 
     void on_actionMarkAllMessageRead_triggered();
 
@@ -282,7 +301,6 @@ public Q_SLOTS:
     void on_actionFormatInsertUnorderedList_triggered();
     void on_actionFormatInsertTable_triggered();
     void on_actionFormatInsertLink_triggered();
-    void on_actionFormatForeColor_triggered();
     void on_actionFormatBold_triggered();
     void on_actionFormatItalic_triggered();
     void on_actionFormatUnderLine_triggered();
@@ -333,21 +351,6 @@ public Q_SLOTS:
     void createDocumentByTemplate(const QString& strFile);
 
     void on_mobileFileRecived(const QString& strFile);
-
-    //js environment func
-    QString getSkinResourcePath() const;
-    QString getUserAvatarFilePath(int size) const;
-    QString getUserAlias() const;
-    QString getFormatedDateTime() const;
-    bool isPersonalDocument() const;
-    QString getCurrentNoteHtml() const;
-    void saveHtmlToCurrentNote(const QString& strHtml, const QString& strResource);
-    bool hasEditPermissionOnCurrentNote() const;
-    void setCurrentDocumentType(const QString& strType);
-    void OpenURLInDefaultBrowser(const QString& strURL);
-    void SetDialogResult(int nResult);
-    bool checkListClickable();
-
 
 #ifndef Q_OS_MAC
     void on_actionPopupMainMenu_triggered();
@@ -403,6 +406,12 @@ public:
     Q_INVOKABLE QObject* CreateWizObject(const QString& strObjectID);
     Q_INVOKABLE void SetSavingDocument(bool saving);
     Q_INVOKABLE void ProcessClipboardBeforePaste(const QVariantMap& data);
+
+    Q_INVOKABLE bool checkListClickable();
+    //NOTE: these functions would called by web page, do not delete
+    Q_INVOKABLE void OpenURLInDefaultBrowser(const QString& strUrl);
+    Q_INVOKABLE void GetToken(const QString& strFunctionName);
+    Q_INVOKABLE void SetDialogResult(int nResult);
 
 private:
     void syncAllData();

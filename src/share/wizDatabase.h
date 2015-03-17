@@ -43,6 +43,8 @@ public:
     Q_INVOKABLE void PermanentlyDelete(void);
     Q_INVOKABLE void MoveTo(QObject* pFolder);
     Q_INVOKABLE bool UpdateDocument4(const QString& strHtml, const QString& strURL, int nFlags);
+    Q_INVOKABLE void deleteToTrash();   // would delete from server
+    Q_INVOKABLE void deleteFromTrash();   // delete local file
 };
 
 
@@ -248,13 +250,15 @@ public:
     virtual void ClearLastSyncError();
     virtual void OnTrafficLimit(const QString& strErrorMessage);
     virtual void OnStorageLimit(const QString& strErrorMessage);
+    virtual void OnNoteCountLimit(const QString& strErrorMessage);
     virtual void OnBizServiceExpr(const QString& strBizGUID, const QString& strErrorMessage);
-    virtual void OnBizNoteCountLimit(const QString& strBizGUID, const QString& strErrorMessage);
     virtual bool IsTrafficLimit();
     virtual bool IsStorageLimit();
+    virtual bool IsNoteCountLimit();
     virtual bool IsBizServiceExpr(const QString& strBizGUID);
-    virtual bool IsBizNoteCountLimit(const QString& strBizGUID);
     virtual bool GetStorageLimitMessage(QString& strErrorMessage);
+    virtual bool GetTrafficLimitMessage(QString& strErrorMessage);
+    virtual bool GetNoteCountLimit(QString& strErrorMessage);
 
     virtual bool setMeta(const QString& strSection, const QString& strKey, const QString& strValue);
     virtual QString meta(const QString& strSection, const QString& strKey);
@@ -362,7 +366,8 @@ public:
     // delete
     bool DeleteObject(const QString &strGUID, const QString &strType, bool bLog);
     bool DeleteTagWithChildren(const WIZTAGDATA& data, bool bLog);
-    bool DeleteAttachment(const WIZDOCUMENTATTACHMENTDATA& data, bool bLog, bool bReset);
+    bool DeleteAttachment(const WIZDOCUMENTATTACHMENTDATA& data, bool bLog,
+                          bool bResetDocInfo, bool updateAttachList = true);
 
     bool IsDocumentModified(const CString& strGUID);
     bool IsAttachmentModified(const CString& strGUID);

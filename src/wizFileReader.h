@@ -10,16 +10,19 @@ class CWizFileReader : public QThread
 public:
     explicit CWizFileReader(QObject *parent = 0);
 
-    void loadFiles(QStringList strFiles);
+    void loadFiles(const QStringList& strFiles);
 
-    QString loadTextFileToHtml(QString strFileName);
-    QString loadImageFileToHtml(QString strFileName);
-    QString loadRtfFileToHtml(QString strFileName);
+    QString loadHtmlFileToHtml(const QString& strFileName);
+    QString loadTextFileToHtml(const QString& strFileName);
+    QString loadImageFileToHtml(const QString& strFileName);
+    QString loadRtfFileToHtml(const QString& strFileName);
 
 signals:
     void fileLoaded(QString strHtml, QString strTitle);
     void loadFinished();
     void loadProgress(int total,int loaded);
+    void htmlFileloaded(const QString &strFileName, const QString& strHtml,
+                     const QString& strTitle);
 
 public slots:
 

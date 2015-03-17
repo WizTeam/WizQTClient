@@ -53,8 +53,8 @@ protected:
 public:
     QString GetURL() const;
     //
-    int GetLastErrorCode();
-    QString GetLastErrorMessage();
+    int GetLastErrorCode() const;
+    QString GetLastErrorMessage() const;
     //
     virtual void OnXmlRpcError() {}
 protected:

@@ -17,10 +17,44 @@
 #include "share/wizmisc.h"
 #include "wizdef.h"
 #include "share/wizsettings.h"
+#include "wizDocumentWebEngine.h"
 #include "wizDocumentWebView.h"
 #include "wizactions.h"
 #include "utils/logger.h"
 #include "share/wizObjectDataDownloader.h"
+
+
+const QColor colors[6][8] =
+{
+    {QColor(0, 0, 0, 255), QColor(170, 0, 0, 255), QColor(0, 85, 0, 255), QColor(170, 85, 0, 255),
+    QColor(0, 170, 0, 255), QColor(170, 170, 0, 255), QColor(0, 255, 0, 255), QColor(170, 250, 0, 255)},
+
+    {QColor(0, 0, 127, 255), QColor(170, 0, 127, 255), QColor(0, 85, 127, 255), QColor(170, 85, 127, 255),
+    QColor(0, 170, 127, 255), QColor(170, 170, 127, 255), QColor(0, 255, 127, 255), QColor(170, 255, 127, 255)},
+
+    {QColor(0, 0, 255, 255), QColor(170, 0, 255, 255), QColor(0, 85, 255, 255), QColor(170, 85, 255, 255),
+    QColor(0, 170, 255, 255), QColor(170, 170, 255, 255), QColor(0, 255, 255, 255), QColor(170, 255, 255, 255)},
+
+    {QColor(85, 0, 0, 255), QColor(255, 0, 0, 255), QColor(85, 85, 0, 255), QColor(255, 85, 0, 255),
+    QColor(85, 170, 0, 255), QColor(255, 170, 0, 255), QColor(85, 255, 0, 255), QColor(255, 255, 0, 255)},
+
+    {QColor(85, 0, 127, 255), QColor(255, 0, 127, 255), QColor(85, 85, 127, 255), QColor(255, 85, 127, 255),
+    QColor(85, 170, 127, 255), QColor(255, 170, 127, 255), QColor(85, 255, 127, 255), QColor(255, 255, 127, 255)},
+
+    {QColor(85, 0, 255, 255), QColor(255, 0, 255, 255), QColor(85, 85, 255, 255), QColor(255, 85, 255, 255),
+    QColor(85, 170, 255, 255), QColor(255, 170, 255, 255), QColor(85, 255, 255, 255), QColor(255, 255, 255, 255)}
+};
+
+QIcon createColorIcon(QColor color)
+{
+    QPixmap pixmap(16, 16);
+    QPainter painter(&pixmap);
+    painter.setPen(Qt::NoPen);
+    painter.fillRect(QRect(0, 0, 16, 16), color);
+
+    return QIcon(pixmap);
+}
+
 
 using namespace Core::Internal;
 
@@ -178,12 +212,18 @@ public:
     {
         setCheckable(false);
         setIconSize(QSize(16, 16));
+        setPopupMode(QToolButton::MenuButtonPopup);
     }
 
     void setColor(const QColor& color)
     {
         m_color = color;
         repaint();
+    }
+
+    QColor color() const
+    {
+        return m_color;
     }
 
 protected:
@@ -342,6 +382,7 @@ private:
 
 EditorToolBar::EditorToolBar(QWidget *parent)
     : QWidget(parent)
+    , m_resetLocked(false)
 {
     QString skin = "default";
 
@@ -365,12 +406,18 @@ EditorToolBar::EditorToolBar(QWidget *parent)
     m_btnForeColor = new CWizToolButtonColor(this);
     m_btnForeColor->setIcon(::WizLoadSkinIcon(skin, "actionFormatForeColor"));
     m_btnForeColor->setToolTip(tr("ForeColor"));
-    connect(m_btnForeColor, SIGNAL(clicked()), SLOT(on_BtnForeColor_clicked()));
+    m_btnForeColor->setCheckable(false);
+    QMenu* foreColorMenu = createColorMenu(SLOT(on_foreColor_changed()),
+                                           SLOT(on_showForeColorBoard()));
+    m_btnForeColor->setMenu(foreColorMenu);
 
     m_btnBackColor = new CWizToolButtonColor(this);
     m_btnBackColor->setIcon(::WizLoadSkinIcon(skin, "actionFormatBackColor"));
     m_btnBackColor->setToolTip(tr("BackColor"));
-    connect(m_btnBackColor, SIGNAL(clicked()), SLOT(on_BtnBackColor_clicked()));
+    m_btnBackColor->setCheckable(false);
+    QMenu* backColorMenu = createColorMenu(SLOT(on_backColor_changed()),
+                                           SLOT(on_showBackColorBoard()));
+    m_btnBackColor->setMenu(backColorMenu);
 
     m_btnBold = new CWizToolButton(this);
     m_btnBold->setIcon(::WizLoadSkinIcon(skin, "actionFormatBold"));
@@ -468,11 +515,11 @@ EditorToolBar::EditorToolBar(QWidget *parent)
     m_btnViewSource->setToolTip(tr("View source"));
     connect(m_btnViewSource, SIGNAL(clicked()), SLOT(on_btnViewSource_clicked()));
 
-//    m_btnInsertCode = new CWizToolButton(this);
-//    m_btnInsertCode->setCheckable(false);
-//    m_btnInsertCode->setIcon(::WizLoadSkinIcon(skin, "actionFormatInsertCode"));
-//    m_btnInsertCode->setToolTip(tr("Insert code"));
-//    connect(m_btnInsertCode, SIGNAL(clicked()), SLOT(on_btnInsertCode_clicked()));
+    m_btnInsertCode = new CWizToolButton(this);
+    m_btnInsertCode->setCheckable(false);
+    m_btnInsertCode->setIcon(::WizLoadSkinIcon(skin, "actionFormatInsertCode"));
+    m_btnInsertCode->setToolTip(tr("Insert code"));
+    connect(m_btnInsertCode, SIGNAL(clicked()), SLOT(on_btnInsertCode_clicked()));
 
     QHBoxLayout* layout = new QHBoxLayout();
     layout->setContentsMargins(3, 0, 3, 0);
@@ -484,7 +531,7 @@ EditorToolBar::EditorToolBar(QWidget *parent)
     layout->addWidget(m_btnViewSource);
     layout->addWidget(m_btnMobileImage);
     layout->addWidget(m_btnCheckList);
-//    layout->addWidget(m_btnInsertCode);
+    layout->addWidget(m_btnInsertCode);
     layout->addSpacing(6);
     layout->addWidget(m_comboFontFamily);
     layout->addSpacing(6);
@@ -514,6 +561,8 @@ EditorToolBar::EditorToolBar(QWidget *parent)
     layout->addSpacing(12);
     layout->addWidget(m_btnSearchReplace);
     layout->addStretch();
+
+    connect(&m_resetLockTimer, SIGNAL(timeout()), SLOT(on_resetLockTimer_timeOut()));
 }
 
 QSize EditorToolBar::sizeHint() const
@@ -523,17 +572,239 @@ QSize EditorToolBar::sizeHint() const
 
 void EditorToolBar::resetToolbar()
 {
-    if (!m_editor)
-        return;
+    Q_ASSERT(m_editor);
 
+#ifdef USEWEBENGINE
+    m_editor->editorCommandQueryCommandValue("fontFamily", [this](const QVariant& returnValue) {
+        m_comboFontFamily->setText(returnValue.toString());
+    });
+
+    m_editor->editorCommandQueryCommandValue("fontSize", [this](const QVariant& returnValue) {
+        m_comboFontSize->setText(returnValue.toString());
+    });
+
+    m_editor->editorCommandQueryCommandState("formatMatch", [this](const QVariant& returnValue) {
+        int state = returnValue.toInt();
+        if (state == -1) {
+            m_btnFormatMatch->setEnabled(false);
+        } else if (state == 0) {
+            m_btnFormatMatch->setEnabled(true);
+            m_btnFormatMatch->setChecked(false);
+        } else if (state == 1) {
+            m_btnFormatMatch->setEnabled(true);
+            m_btnFormatMatch->setChecked(true);
+        } else {
+            Q_ASSERT(0);
+        }
+    });
+
+    m_editor->editorCommandQueryCommandValue("foreColor", [this](const QVariant& returnValue) {
+        m_btnForeColor->setColor(QColor(returnValue.toString()));
+    });
+
+    m_editor->editorCommandQueryCommandValue("backColor", [this](const QVariant& returnValue) {
+        m_btnBackColor->setColor(QColor(returnValue.toString()));
+    });
+
+    m_editor->editorCommandQueryCommandState("bold", [this](const QVariant& returnValue) {
+        int state = returnValue.toInt();
+        if (state == -1) {
+            m_btnBold->setEnabled(false);
+        } else if (state == 0) {
+            m_btnBold->setEnabled(true);
+            m_btnBold->setChecked(false);
+        } else if (state == 1) {
+            m_btnBold->setEnabled(true);
+            m_btnBold->setChecked(true);
+        } else {
+            Q_ASSERT(0);
+        }
+    });
+
+    m_editor->editorCommandQueryCommandState("italic", [this](const QVariant& returnValue) {
+        int state = returnValue.toInt();
+        if (state == -1) {
+            m_btnItalic->setEnabled(false);
+        } else if (state == 0) {
+            m_btnItalic->setEnabled(true);
+            m_btnItalic->setChecked(false);
+        } else if (state == 1) {
+            m_btnItalic->setEnabled(true);
+            m_btnItalic->setChecked(true);
+        } else {
+            Q_ASSERT(0);
+        }
+    });
+
+    m_editor->editorCommandQueryCommandState("underline", [this](const QVariant& returnValue) {
+        int state = returnValue.toInt();
+        if (state == -1) {
+            m_btnUnderLine->setEnabled(false);
+        } else if (state == 0) {
+            m_btnUnderLine->setEnabled(true);
+            m_btnUnderLine->setChecked(false);
+        } else if (state == 1) {
+            m_btnUnderLine->setEnabled(true);
+            m_btnUnderLine->setChecked(true);
+        } else {
+            Q_ASSERT(0);
+        }
+    });
+
+    m_editor->editorCommandQueryCommandState("strikethrough", [this](const QVariant& returnValue) {
+        int state = returnValue.toInt();
+        if (state == -1) {
+            m_btnStrikeThrough->setEnabled(false);
+        } else if (state == 0) {
+            m_btnStrikeThrough->setEnabled(true);
+            m_btnStrikeThrough->setChecked(false);
+        } else if (state == 1) {
+            m_btnStrikeThrough->setEnabled(true);
+            m_btnStrikeThrough->setChecked(true);
+        } else {
+            Q_ASSERT(0);
+        }
+    });
+
+    m_editor->editorCommandQueryCommandState("justify", [this](const QVariant& returnValue) {
+        int state = returnValue.toInt();
+        if (state == -1) {
+            m_btnJustifyLeft->setEnabled(false);
+            m_btnJustifyCenter->setEnabled(false);
+            m_btnJustifyRight->setEnabled(false);
+        } else {
+            m_btnJustifyLeft->setEnabled(true);
+            m_btnJustifyCenter->setEnabled(true);
+            m_btnJustifyRight->setEnabled(true);
+        }
+    });
+
+    m_editor->editorCommandQueryCommandValue("justify", [this](const QVariant& returnValue) {
+        QString value = returnValue.toString();
+        if (value == "left") {
+            m_btnJustifyLeft->setChecked(true);
+            m_btnJustifyCenter->setChecked(false);
+            m_btnJustifyRight->setChecked(false);
+        } else if (value == "center") {
+            m_btnJustifyLeft->setChecked(false);
+            m_btnJustifyCenter->setChecked(true);
+            m_btnJustifyRight->setChecked(false);
+        } else if (value == "right") {
+            m_btnJustifyLeft->setChecked(false);
+            m_btnJustifyCenter->setChecked(false);
+            m_btnJustifyRight->setChecked(true);
+        }
+    });
+
+    m_editor->editorCommandQueryCommandState("insertOrderedList", [this](const QVariant& returnValue) {
+        int state = returnValue.toInt();
+        if (state == -1) {
+            m_btnOrderedList->setEnabled(false);
+        } else if (state == 0) {
+            m_btnOrderedList->setEnabled(true);
+            m_btnOrderedList->setChecked(false);
+        } else if (state == 1) {
+            m_btnOrderedList->setEnabled(true);
+            m_btnOrderedList->setChecked(true);
+        } else {
+            Q_ASSERT(0);
+        }
+    });
+
+    m_editor->editorCommandQueryCommandState("insertUnorderedList", [this](const QVariant& returnValue) {
+        int state = returnValue.toInt();
+        if (state == -1) {
+            m_btnUnorderedList->setEnabled(false);
+        } else if (state == 0) {
+            m_btnUnorderedList->setEnabled(true);
+            m_btnUnorderedList->setChecked(false);
+        } else if (state == 1) {
+            m_btnUnorderedList->setEnabled(true);
+            m_btnUnorderedList->setChecked(true);
+        } else {
+            Q_ASSERT(0);
+        }
+    });
+
+    m_editor->editorCommandQueryCommandState("insertTable", [this](const QVariant& returnValue) {
+        int state = returnValue.toInt();
+        if (state == -1) {
+            m_btnTable->setEnabled(false);
+        } else if (state == 0) {
+            m_btnTable->setEnabled(true);
+            m_btnTable->setChecked(false);
+        } else if (state == 1) {
+            m_btnTable->setEnabled(true);
+            m_btnTable->setChecked(true);
+        } else {
+            Q_ASSERT(0);
+        }
+    });
+
+    m_editor->editorCommandQueryCommandState("horizontal", [this](const QVariant& returnValue) {
+        int state = returnValue.toInt();
+        if (state == -1) {
+            m_btnHorizontal->setEnabled(false);
+        } else if (state == 0) {
+            m_btnHorizontal->setEnabled(true);
+            m_btnHorizontal->setChecked(false);
+        } else if (state == 1) {
+            m_btnHorizontal->setEnabled(true);
+            m_btnHorizontal->setChecked(true);
+        } else {
+            Q_ASSERT(0);
+        }
+    });
+
+    m_editor->editorCommandQueryCommandState("source", [this](const QVariant& returnValue) {
+        int state = returnValue.toInt();
+        if (state == -1) {
+            m_btnViewSource->setEnabled(false);
+        } else if (state == 0) {
+            m_btnViewSource->setEnabled(true);
+            m_btnViewSource->setChecked(false);
+        } else if (state == 1) {
+            m_btnViewSource->setEnabled(true);
+            m_btnViewSource->setChecked(true);
+        } else {
+            Q_ASSERT(0);
+        }
+    });
+
+    bool bReceiveImage = m_editor->editorCommandQueryMobileFileReceiverState();
+    m_btnMobileImage->setChecked(bReceiveImage);
+    m_btnMobileImage->setEnabled(true);
+
+#else
     int state;
     QString value;
 
+    state = m_editor->editorCommandQueryCommandState("source");
+    if (state == -1) {
+        m_btnViewSource->setEnabled(false);
+    } else if (state == 0) {
+        m_btnViewSource->setEnabled(true);
+        m_btnViewSource->setChecked(false);
+    } else if (state == 1) {
+        m_btnViewSource->setEnabled(true);
+        m_btnViewSource->setChecked(true);
+    } else {
+        Q_ASSERT(0);
+    }
+    bool isSourceMode = (1 == state);
+
+    m_btnCheckList->setEnabled(!isSourceMode);
+    m_btnSearchReplace->setEnabled(!isSourceMode);
+    m_btnInsertImage->setEnabled(!isSourceMode);
+    m_btnInsertCode->setEnabled(!isSourceMode);
+
     value = m_editor->editorCommandQueryCommandValue("fontFamily");
     m_comboFontFamily->setText(value);
+    m_comboFontFamily->setEnabled(!isSourceMode);
 
     value = m_editor->editorCommandQueryCommandValue("fontSize");
     m_comboFontSize->setText(value);
+    m_comboFontSize->setEnabled(!isSourceMode);
 
     state = m_editor->editorCommandQueryCommandState("formatMatch");
     if (state == -1) {
@@ -550,9 +821,11 @@ void EditorToolBar::resetToolbar()
 
     value = m_editor->editorCommandQueryCommandValue("foreColor");
     m_btnForeColor->setColor(QColor(value));
+    m_btnForeColor->setEnabled(!isSourceMode);
 
     value = m_editor->editorCommandQueryCommandValue("backColor");
     m_btnBackColor->setColor(QColor(value));
+    m_btnBackColor->setEnabled(!isSourceMode);
 
     state = m_editor->editorCommandQueryCommandState("bold");
     if (state == -1) {
@@ -686,6 +959,8 @@ void EditorToolBar::resetToolbar()
 
     bool bReceiveImage = m_editor->editorCommandQueryMobileFileReceiverState();
     m_btnMobileImage->setChecked(bReceiveImage);
+    m_btnMobileImage->setEnabled(!isSourceMode);
+#endif
 }
 
 struct WizEditorContextMenuItem
@@ -778,9 +1053,9 @@ WizEditorContextMenuItem* EditorToolBar::contextMenuData()
         {WIZEDITOR_ACTION_FONT_ITALIC,              "italic",           "editorCommandExecuteItalic"},
         {WIZEDITOR_ACTION_FONT_UNDERLINE,           "underline",        "editorCommandExecuteUnderLine"},
         {WIZEDITOR_ACTION_FONT_STRIKETHROUGH,       "strikethrough",    "editorCommandExecuteStrikeThrough"},
-        {"-", "-", "-"},
-        {WIZEDITOR_ACTION_FONT_FORECOLOR,           "foreColor",        "editorCommandExecuteForeColor"},
-        {WIZEDITOR_ACTION_FONT_BACKCOLOR,           "backColor",        "editorCommandExecuteBackColor"},
+//        {"-", "-", "-"},
+//        {WIZEDITOR_ACTION_FONT_FORECOLOR,           "foreColor",        "editorCommandExecuteForeColor"},
+//        {WIZEDITOR_ACTION_FONT_BACKCOLOR,           "backColor",        "editorCommandExecuteBackColor"},
         {"+", "+", "+"},
 
         {QObject::tr("Justify"),                    "+",          "+"},
@@ -792,6 +1067,18 @@ WizEditorContextMenuItem* EditorToolBar::contextMenuData()
         {QObject::tr("Table"),                      "+",                "+"},
         {WIZEDITOR_ACTION_TABLE_INSERT,             "inserttable",      "editorCommandExecuteTableInsert"},
         {WIZEDITOR_ACTION_TABLE_DELETE,             "deletetable",      "editorCommandExecuteTableDelete"},
+        {"-", "-", "-"},
+        {QObject::tr("Cell Alignment"),                      "+",                "+"},
+        {QObject::tr("Align leftTop"),         "cellalignment",        "editorCommandExecuteTableCellAlignLeftTop"},
+        {QObject::tr("Align top"),         "cellalignment",        "editorCommandExecuteTableCellAlignTop"},
+        {QObject::tr("Align rightTop"),         "cellalignment",        "editorCommandExecuteTableCellAlignRightTop"},
+        {QObject::tr("Align left"),         "cellalignment",        "editorCommandExecuteTableCellAlignLeft"},
+        {QObject::tr("Align center"),         "cellalignment",        "editorCommandExecuteTableCellAlignCenter"},
+        {QObject::tr("Align right"),         "cellalignment",        "editorCommandExecuteTableCellAlignRight"},
+        {QObject::tr("Align leftBottom"),         "cellalignment",        "editorCommandExecuteTableCellAlignLeftBottom"},
+        {QObject::tr("Align bottom"),         "cellalignment",        "editorCommandExecuteTableCellAlignBottom"},
+        {QObject::tr("Align rightBottom"),         "cellalignment",        "editorCommandExecuteTableCellAlignRightBottom"},
+        {"+", "+", "+"},
         {"-", "-", "-"},
         {WIZEDITOR_ACTION_TABLE_DELETE_ROW,         "deleterow",        "editorCommandExecuteTableDeleteRow"},
         {WIZEDITOR_ACTION_TABLE_DELETE_COLUM,       "deletecol",        "editorCommandExecuteTableDeleteCol"},
@@ -823,20 +1110,36 @@ WizEditorContextMenuItem* EditorToolBar::contextMenuData()
     return arrayData;
 }
 
+#ifdef USEWEBENGINE
+void EditorToolBar::setDelegate(CWizDocumentWebEngine* editor)
+{
+    Q_ASSERT(editor);
+
+    m_editor = editor;
+
+    connect(m_editor, SIGNAL(showContextMenuRequest(QPoint)),
+            SLOT(on_delegate_showContextMenuRequest(QPoint)), Qt::QueuedConnection);
+
+    connect(m_editor, SIGNAL(selectionChanged()),
+            SLOT(on_delegate_selectionChanged()));
+}
+#else
 void EditorToolBar::setDelegate(CWizDocumentWebView* editor)
 {
     Q_ASSERT(editor);
 
     m_editor = editor;
 
-    connect(m_editor, SIGNAL(requestShowContextMenu(QPoint)),
-            SLOT(on_delegate_requestShowContextMenu(QPoint)));
-
+    connect(m_editor, SIGNAL(showContextMenuRequest(QPoint)),
+            SLOT(on_delegate_showContextMenuRequest(QPoint)));
     connect(m_editor, SIGNAL(selectionChanged()),
             SLOT(on_delegate_selectionChanged()));
+    connect(m_editor, SIGNAL(updateEditorToolBarRequest()),
+            SLOT(on_updateToolBarStatus_request()));
 }
+#endif
 
-void EditorToolBar::on_delegate_requestShowContextMenu(const QPoint& pos)
+void EditorToolBar::on_delegate_showContextMenuRequest(const QPoint& pos)
 {
     if (!m_editor)
         return;
@@ -885,9 +1188,154 @@ void EditorToolBar::on_delegate_requestShowContextMenu(const QPoint& pos)
     m_menuContext->update();
 }
 
+/**     此处对slectionChanged引起的刷新做延迟和屏蔽处理。在输入中文的时候频繁的刷新会引起输入卡顿的问题
+ * @brief EditorToolBar::on_delegate_selectionChanged
+ */
 void EditorToolBar::on_delegate_selectionChanged()
 {
+    static int counter = 0;
+    if (m_resetLocked)
+    {
+        if (counter == 0)
+        {
+            counter ++;
+            QTimer::singleShot(1600, this,SLOT(on_delegate_selectionChanged()));
+        }
+        return;
+    }
+
     resetToolbar();
+
+    // 锁定更新
+    m_resetLocked = true;
+    m_resetLockTimer.start(1500);
+    counter = 0;
+}
+
+void EditorToolBar::on_updateToolBarStatus_request()
+{
+    resetToolbar();
+}
+
+void EditorToolBar::on_resetLockTimer_timeOut()
+{
+    m_resetLockTimer.stop();
+    m_resetLocked = false;
+}
+
+
+QMenu* EditorToolBar::createColorMenu(const char *slot, const char *slotColorBoard)
+{
+    // 设置透明色
+    QAction *pActionTransparent = new QAction(this);
+    pActionTransparent->setData(QColor(0, 0, 0, 0));
+    pActionTransparent->setText(tr("transparent"));
+    connect(pActionTransparent, SIGNAL(triggered()), this, slot);
+    QToolButton *pBtnTransparent = new QToolButton(this);
+    pBtnTransparent->setFixedSize(QSize(142, 20));
+    pBtnTransparent->setText(tr("transparent"));
+    pBtnTransparent->setDefaultAction(pActionTransparent);
+
+    // 选择其他颜色
+    QToolButton *pBtnOtherColor = new QToolButton(this);
+    pBtnOtherColor->setText(tr("show more colors..."));
+    pBtnOtherColor->setFixedSize(QSize(142, 20));
+    pBtnOtherColor->setAutoRaise(true);
+    pBtnOtherColor->setToolTip(tr("show more colors..."));
+    connect(pBtnOtherColor, SIGNAL(clicked()), this, slotColorBoard);
+
+    // 基本色
+    QGridLayout *pGridLayout = new QGridLayout;
+    pGridLayout->setAlignment(Qt::AlignCenter);
+    pGridLayout->setContentsMargins(0, 0, 0, 0);
+    pGridLayout->setSpacing(2);
+
+    for (int iRow = 0; iRow < 6; iRow++)
+    {
+        for (int iCol = 0; iCol < 8; iCol++)
+        {
+            QAction *action = new QAction(this);
+            action->setData(colors[iRow][iCol]);
+            action->setIcon(createColorIcon(colors[iRow][iCol]));
+            connect(action, SIGNAL(triggered()), this, slot);
+
+            QToolButton *pBtnColor = new QToolButton(this);
+            pBtnColor->setFixedSize(QSize(16, 16));
+            pBtnColor->setAutoRaise(true);
+            pBtnColor->setDefaultAction(action);
+            pBtnColor->setToolTip("white");
+
+            pGridLayout->addWidget(pBtnColor, iRow, iCol);
+        }
+    }
+
+    QWidget *widget = new QWidget;
+    widget->setLayout(pGridLayout);
+
+    QVBoxLayout *pVLayout = new QVBoxLayout;
+    pVLayout->setContentsMargins(5, 5, 5, 5);
+    pVLayout->addWidget(pBtnTransparent);
+    pVLayout->addWidget(widget);
+    pVLayout->addWidget(pBtnOtherColor);
+
+    QMenu *colorMenu = new QMenu(this);
+    colorMenu->setLayout(pVLayout);
+
+    return colorMenu;
+}
+
+void EditorToolBar::on_foreColor_changed()
+{
+    QAction *pColorAction = qobject_cast<QAction *>(sender());
+    if (!pColorAction)
+        return;
+
+    m_btnForeColor->menu()->close();
+    QColor color = qvariant_cast<QColor>(pColorAction->data());
+    if (!color.isValid())
+        return;
+
+    if (m_editor) {
+        m_editor->editorCommandExecuteForeColor(color);
+    }
+}
+
+void EditorToolBar::on_showForeColorBoard()
+{
+    m_btnForeColor->menu()->close();
+    QColorDialog dlg(m_btnForeColor->color(), this);
+    connect(&dlg, SIGNAL(currentColorChanged(QColor)), m_editor,
+            SLOT(editorCommandExecuteForeColor(QColor)));
+    connect(&dlg, SIGNAL(colorSelected(QColor)), m_editor,
+            SLOT(editorCommandExecuteForeColor(QColor)));
+    dlg.exec();
+}
+
+void EditorToolBar::on_backColor_changed()
+{
+    QAction *pColorAction = qobject_cast<QAction *>(sender());
+    if (!pColorAction)
+        return;
+
+    m_btnBackColor->menu()->close();
+    QColor color = qvariant_cast<QColor>(pColorAction->data());
+    if (!color.isValid())
+        return;
+
+    if (m_editor) {
+        m_editor->editorCommandExecuteBackColor(color);
+    }
+}
+
+void EditorToolBar::on_showBackColorBoard()
+{
+    m_btnBackColor->menu()->close();
+    QColorDialog dlg(m_btnBackColor->color(), this);
+    connect(&dlg, SIGNAL(currentColorChanged(QColor)), m_editor,
+            SLOT(editorCommandExecuteBackColor(QColor)));
+    connect(&dlg, SIGNAL(colorSelected(QColor)), m_editor,
+            SLOT(editorCommandExecuteBackColor(QColor)));
+    dlg.exec();
 }
 
 void EditorToolBar::saveImage(QString strFileName)
@@ -901,7 +1349,7 @@ void EditorToolBar::saveImage(QString strFileName)
     }
 
     QString strFilePath = QFileDialog::getSaveFileName(this, tr("Save as..."),
-                                                       QDir::homePath(), tr("Image Files (*.%1)").arg(info.suffix()));
+                                                       QDir::homePath() + "/untitled." + info.suffix(), tr("Image Files (*.%1)").arg(info.suffix()));
     if (strFilePath.isEmpty())
         return;
 
@@ -994,7 +1442,7 @@ bool EditorToolBar::processBase64Image(bool bUseForCopy)
     if (!bUseForCopy)
     {
         QString strFilePath = QFileDialog::getSaveFileName(this, tr("Save as..."),
-                                                           QDir::homePath(), tr("Image Files (*.%1)").arg(strType));
+                                                           QDir::homePath() + "/untitled." + strType, tr("Image Files (*.%1)").arg(strType));
         if (strFilePath.isEmpty())
             return false;
 
@@ -1075,20 +1523,21 @@ int EditorToolBar::buildMenu(QMenu* pMenu, int indx)
         WizEditorContextMenuItem& item = arrayData[index];
         if (item.label == "+") {
             break;
-
+        } else if (item.execute == "+") {
+            index = buildMenu(pSubMenu, index);
         } else if (item.label == "-") {
             pSubMenu->addSeparator();
 
         } else if (item.command != "+" && !item.execute.isEmpty()) {
 
-            // special case
-            if (m_editor->editorCommandQueryLink()
-                    && item.label == WIZEDITOR_ACTION_LINK_INSERT) {
-                continue;
-            } else if (!m_editor->editorCommandQueryLink()
-                       && item.label == WIZEDITOR_ACTION_LINK_EDIT) {
-                continue;
-            }
+//            // special case
+//            if (m_editor->editorCommandQueryLink()
+//                    && item.label == WIZEDITOR_ACTION_LINK_INSERT) {
+//                continue;
+//            } else if (!m_editor->editorCommandQueryLink()
+//                       && item.label == WIZEDITOR_ACTION_LINK_EDIT) {
+//                continue;
+//            }
 
             if (!item.command.isEmpty()) {
                 int value = m_editor->editorCommandQueryCommandState(item.command);
@@ -1129,6 +1578,22 @@ void EditorToolBar::on_editor_baidu_triggered()
     QDesktopServices::openUrl(url);
 }
 
+#ifdef USEWEBENGINE
+void EditorToolBar::on_editor_cut_triggered()
+{
+    m_editor->triggerPageAction(QWebEnginePage::Cut);
+}
+
+void EditorToolBar::on_editor_copy_triggered()
+{
+    m_editor->triggerPageAction(QWebEnginePage::Copy);
+}
+
+void EditorToolBar::on_editor_paste_triggered()
+{
+    m_editor->triggerPageAction(QWebEnginePage::Paste);
+}
+#else
 void EditorToolBar::on_editor_cut_triggered()
 {
     m_editor->triggerPageAction(QWebPage::Cut);
@@ -1143,6 +1608,7 @@ void EditorToolBar::on_editor_paste_triggered()
 {
     m_editor->triggerPageAction(QWebPage::Paste);
 }
+#endif
 
 void EditorToolBar::on_comboFontFamily_indexChanged(const QString& strFamily)
 {
@@ -1170,20 +1636,6 @@ void EditorToolBar::on_btnFormatMatch_clicked()
 {
     if (m_editor) {
         m_editor->editorCommandExecuteFormatMatch();
-    }
-}
-
-void EditorToolBar::on_BtnForeColor_clicked()
-{
-    if (m_editor) {
-        m_editor->editorCommandExecuteForeColor();
-    }
-}
-
-void EditorToolBar::on_BtnBackColor_clicked()
-{
-    if (m_editor) {
-        m_editor->editorCommandExecuteBackColor();
     }
 }
 

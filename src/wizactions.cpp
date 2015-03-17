@@ -11,7 +11,7 @@ struct WIZACTION
     QString strName;
     QString strText;
     QString strText2;
-    QString strShortcut;
+    QKeySequence strShortcut;
 };
 
 
@@ -56,73 +56,88 @@ WIZACTION* CWizActions::actionsData()
 
     static WIZACTION arrayActions[] =
     {
-        {"actionPreference",                QObject::tr("Preference..."), "", ""},
-        {"actionAbout",                     QObject::tr("About WizNote..."), "", ""},
-        {"actionExit",                      QObject::tr("Exit"), "", "Ctrl+Q"},
-        {"actionClose",                      QObject::tr("Close"), "", "Ctrl+W"},
-        {"actionLogout",                    QObject::tr("Logout..."), "", ""},
-        {WIZACTION_GLOBAL_SYNC,             QObject::tr("Sync"), "", ""},
-        {WIZACTION_GLOBAL_NEW_DOCUMENT,     QObject::tr("New Note"), "", "Ctrl+N"},
-        {WIZACTION_GLOBAL_NEW_DOCUMENT_BY_TEMPLATE,     QObject::tr("New Note by template..."), "", ""},
-        {WIZACTION_GLOBAL_SAVE_AS_PDF,      QObject::tr("Save as PDF..."), "", ""},
-        {WIZACTION_GLOBAL_SAVE_AS_HTML,      QObject::tr("Save as Html..."), "", ""},
-        {WIZACTION_GLOBAL_PRINT,      QObject::tr("Print..."), "", "Ctrl+P"},
-        {WIZACTION_GLOBAL_PRINT_MARGIN,      QObject::tr("Print page margins..."), "", ""},
-        //{WIZACTION_GLOBAL_VIEW_MESSAGES,    QObject::tr("View messages"), "", ""},
-        {WIZACTION_GLOBAL_GOBACK,                    QObject::tr("Back"), "", ""},
-        {WIZACTION_GLOBAL_GOFORWARD,                 QObject::tr("Forward"), "", ""},
-        {"actionConsole",                   QObject::tr("Console..."), "", ""},
-        {"actionRebuildFTS",                QObject::tr("Rebuild full text search index"), "", ""},
-        {"actionSearch",                    QObject::tr("Search note"), "", "Alt+Ctrl+F"},
-        {"actionResetSearch",               QObject::tr("Reset search"), "", "Ctrl+R"},
-        {"actionFeedback",                  QObject::tr("User feedback..."), "", ""},
-        {"actionSupport",                  QObject::tr("User support..."), "", ""},
-        {"actionManual",                  QObject::tr("User manual..."), "", ""},
-        {WIZACTION_EDITOR_FIND_REPLACE,                  QObject::tr("Find and replace..."), "", "Ctrl+F"},
+        {"actionPreference",                                 QObject::tr("Preference..."),               "",              QKeySequence()},
+        {"actionAbout",                                         QObject::tr("About WizNote..."),         "",              QKeySequence()},
+        {"actionExit",                                            QObject::tr("Exit"),                              "",               QKeySequence("Ctrl+Q")},
+        {"actionClose",                                         QObject::tr("Close"),                             "",            QKeySequence("Ctrl+W")},
+        {"actionLogout",                                        QObject::tr("Logout..."),                       "",            QKeySequence()},
+        {WIZACTION_GLOBAL_SYNC,              QObject::tr("Sync"),                             "",             QKeySequence()},
+        {WIZACTION_GLOBAL_NEW_DOCUMENT,     QObject::tr("New Note"),          "",             QKeySequence("Ctrl+N")},
+        {"actionNewNoteByTemplate",             QObject::tr("New Note by template..."),      "",          QKeySequence()},
+        {WIZACTION_GLOBAL_SAVE_AS_PDF,      QObject::tr("Save as PDF..."),             "",      QKeySequence()},
+        {WIZACTION_GLOBAL_SAVE_AS_HTML,      QObject::tr("Save as Html..."),          "",      QKeySequence()},
+        {WIZACTION_GLOBAL_PRINT,                    QObject::tr("Print..."),                           "",      QKeySequence("Ctrl+P")},
+        {WIZACTION_GLOBAL_PRINT_MARGIN,      QObject::tr("Print page margins..."),   "",     QKeySequence()},
+        //{WIZACTION_GLOBAL_VIEW_MESSAGES,    QObject::tr("View messages"),     "",       QKeySequence()},
+        {WIZACTION_GLOBAL_GOBACK,                    QObject::tr("Back"),                        "",       QKeySequence()},
+        {WIZACTION_GLOBAL_GOFORWARD,                 QObject::tr("Forward"), "",                   QKeySequence()},
+        {"actionConsole",                              QObject::tr("Console..."),                                   "",      QKeySequence()},
+        {"actionRebuildFTS",                        QObject::tr("Rebuild full text search index"),    "",        QKeySequence()},
+        {"actionSearch",                                QObject::tr("Search note"),                             "",         QKeySequence("Alt+Ctrl+F")},
+        {"actionResetSearch",                       QObject::tr("Reset search"),                           "",         QKeySequence("Ctrl+R")},
+        {"actionFeedback",                            QObject::tr("User feedback..."),                      "",         QKeySequence()},
+        {"actionSupport",                               QObject::tr("User support..."),                         "",         QKeySequence()},
+        {"actionManual",                                QObject::tr("User manual..."),                        "",          QKeySequence()},
+        {WIZACTION_EDITOR_FIND_REPLACE,        QObject::tr("Find and replace..."), "",          QKeySequence("Ctrl+F")},
 
         // editing
-        {WIZACTION_EDITOR_UNDO,             QObject::tr("Undo"), "", "Ctrl+Z"},
-        {WIZACTION_EDITOR_REDO,             QObject::tr("Redo"), "", "Shift+Ctrl+Z"},
-        {WIZACTION_EDITOR_CUT,              QObject::tr("Cut"), "", "Ctrl+X"},
-        {WIZACTION_EDITOR_COPY,             QObject::tr("Copy"), "", "Ctrl+C"},
-        {WIZACTION_EDITOR_PASTE,            QObject::tr("Paste"), "", "Ctrl+V"},
-        {WIZACTION_EDITOR_PASTE_PLAIN,      QObject::tr("Paste as plain text"), "", "Shift+Ctrl+V"},
-        {WIZACTION_EDITOR_DELETE,           QObject::tr("Delete"), "", ""},
-        {WIZACTION_EDITOR_SELECT_ALL,       QObject::tr("Select all"), "", "Ctrl+A"},
+        {WIZACTION_EDITOR_UNDO,                  QObject::tr("Undo"),        "",       QKeySequence("Ctrl+Z")},
+        {WIZACTION_EDITOR_REDO,                   QObject::tr("Redo"),       "",        QKeySequence("Shift+Ctrl+Z")},
+        {WIZACTION_EDITOR_CUT,                       QObject::tr("Cut"),         "",        QKeySequence("Ctrl+X")},
+        {WIZACTION_EDITOR_COPY,                    QObject::tr("Copy"),      "",        QKeySequence("Ctrl+C")},
+        {WIZACTION_EDITOR_PASTE,                  QObject::tr("Paste"),      "",        QKeySequence("Ctrl+V")},
+        {WIZACTION_EDITOR_PASTE_PLAIN,      QObject::tr("Paste as plain text"), "", QKeySequence("Shift+Ctrl+V")},
+        {WIZACTION_EDITOR_DELETE,                QObject::tr("Delete"),    "",          QKeySequence()},
+        {WIZACTION_EDITOR_SELECT_ALL,        QObject::tr("Select all"), "",         QKeySequence("Ctrl+A")},
+
+#ifdef USEWEBENGINE
+        {"actionMoveToPageStart",          QObject::tr("Move to page start"),     "",     QKeySequence(QKeySequence::MoveToStartOfDocument)},
+        {"actionMoveToPageEnd",           QObject::tr("Move to page end"),      "",     QKeySequence(QKeySequence::MoveToEndOfDocument)},
+    #ifdef Q_OS_MAC
+        {"actionMoveToLineStart",            QObject::tr("Move to line start"),       "",     QKeySequence(QKeySequence::MoveToStartOfLine)},
+        {"actionMoveToLineEnd",             QObject::tr("Move to line end"),        "",     QKeySequence(QKeySequence::MoveToEndOfLine)},
+//        {"actionMoveToLineEnd",             QObject::tr("Move to line end"),        "",     QKeySequence(QKeySequence::MoveToNextLine)},
+//        {"actionMoveToLineEnd",             QObject::tr("Move to line end"),        "",     QKeySequence(QKeySequence::MoveToNextPage)},
+//        {"actionMoveToLineEnd",             QObject::tr("Move to line end"),        "",     QKeySequence(QKeySequence::MoveToPreviousLine)},
+//        {"actionMoveToLineEnd",             QObject::tr("Move to line end"),        "",     QKeySequence(QKeySequence::MoveToPreviousPage)},
+
+    #endif
+#endif
 
         // view
-        {WIZACTION_GLOBAL_TOGGLE_CATEGORY,      QObject::tr("Hide category view"), QObject::tr("Show category view"), "Alt+Ctrl+S"},
-        {WIZACTION_GLOBAL_TOGGLE_FULLSCREEN,    QObject::tr("Enter fullscreen"), QObject::tr("Leave fullscreen"), "Ctrl+Meta+f"},
+        {WIZACTION_GLOBAL_TOGGLE_CATEGORY,      QObject::tr("Hide category view"),   QObject::tr("Show category view"),    QKeySequence("Alt+Ctrl+S")},
+        {WIZACTION_GLOBAL_TOGGLE_FULLSCREEN,    QObject::tr("Enter fullscreen"),       QObject::tr("Leave fullscreen"),         QKeySequence("Ctrl+Meta+f")},
+        {"actionViewMinimize",                                               QObject::tr("Minimize"),       QObject::tr(""),         QKeySequence("Ctrl+M")},
 
         // format
-        {WIZACTION_FORMAT_JUSTIFYLEFT,          QObject::tr("Justify left"), "", "Ctrl+["},
-        {WIZACTION_FORMAT_JUSTIFYRIGHT,         QObject::tr("Justify right"), "", "Ctrl+]"},
-        {WIZACTION_FORMAT_JUSTIFYCENTER,        QObject::tr("Justify center"), "", "Ctrl+="},
-        {WIZACTION_FORMAT_JUSTIFYJUSTIFY,       QObject::tr("Justify both side"), "", ""},
-        {WIZACTION_FORMAT_INDENT,               QObject::tr("Indent"), "", ""},
-        {WIZACTION_FORMAT_OUTDENT,              QObject::tr("Outdent"), "", ""},
-        {WIZACTION_FORMAT_UNORDEREDLIST,        QObject::tr("Convert to unoredered list"), "", "Ctrl+Alt+U"},
-        {WIZACTION_FORMAT_ORDEREDLIST,          QObject::tr("Convert to ordered list"), "", "Ctrl+Alt+O"},
-        {WIZACTION_FORMAT_INSERT_TABLE,         QObject::tr("Insert table"), "", ""},
-        {WIZACTION_FORMAT_INSERT_LINK,          QObject::tr("Insert link"), "", "Ctrl+K"},
-        {WIZACTION_FORMAT_BOLD,                 QObject::tr("Bold"), "", "Ctrl+B"},
-        {WIZACTION_FORMAT_ITALIC,               QObject::tr("Italic"), "", "Ctrl+I"},
-        {WIZACTION_FORMAT_UNDERLINE,            QObject::tr("Underline"), "", "Ctrl+U"},
-        {WIZACTION_FORMAT_STRIKETHROUGH,        QObject::tr("Strike through"), "", "Ctrl+Alt+K"},
-        {WIZACTION_FORMAT_INSERT_HORIZONTAL,    QObject::tr("Insert horizontal"), "", "Shift+Ctrl+H"},
-        {WIZACTION_FORMAT_INSERT_DATE,          QObject::tr("Insert date"), "", "Shift+Ctrl+D"},
-        {WIZACTION_FORMAT_INSERT_TIME,          QObject::tr("Insert time"), "", "Shift+Ctrl+Alt+D"},
-        {WIZACTION_FORMAT_INSERT_CHECKLIST,      QObject::tr("Insert check list"), "", "Ctrl+O"},
-        {WIZACTION_FORMAT_INSERT_CODE,                QObject::tr("Insert code"), "", "Shift+Ctrl+C"},
-        {WIZACTION_FORMAT_INSERT_IMAGE,                QObject::tr("Insert image"), "", "Shift+Ctrl+I"},
-        {WIZACTION_FORMAT_REMOVE_FORMAT,        QObject::tr("Remove format"), "", ""},
-        {WIZACTION_FORMAT_PLAINTEXT,        QObject::tr("Convert to plain text"), "", ""},
-        {WIZACTION_FORMAT_VIEW_SOURCE,          QObject::tr("View html source..."), "", ""},
-        {WIZACTION_FORMAT_SCREEN_SHOT,          QObject::tr("Screen shot..."), "", ""},
-        {"actionDeveloper",                       QObject::tr("Developer mode"), "", ""},
+        {WIZACTION_FORMAT_JUSTIFYLEFT,               QObject::tr("Justify left"),                "",           QKeySequence("Ctrl+[")},
+        {WIZACTION_FORMAT_JUSTIFYRIGHT,             QObject::tr("Justify right"),              "",          QKeySequence("Ctrl+]")},
+        {WIZACTION_FORMAT_JUSTIFYCENTER,          QObject::tr("Justify center"),           "",          QKeySequence("Ctrl+=")},
+        {WIZACTION_FORMAT_JUSTIFYJUSTIFY,          QObject::tr("Justify both side"),      "",           QKeySequence()},
+        {WIZACTION_FORMAT_INDENT,                          QObject::tr("Indent"),                    "",            QKeySequence()},
+        {WIZACTION_FORMAT_OUTDENT,                      QObject::tr("Outdent"),                   "",           QKeySequence()},
+        {WIZACTION_FORMAT_UNORDEREDLIST,         QObject::tr("Convert to unoredered list"), "", QKeySequence("Ctrl+Alt+U")},
+        {WIZACTION_FORMAT_ORDEREDLIST,              QObject::tr("Convert to ordered list"), "",       QKeySequence("Ctrl+Alt+O")},
+        {WIZACTION_FORMAT_INSERT_TABLE,             QObject::tr("Insert table"),                "",           QKeySequence()},
+        {WIZACTION_FORMAT_INSERT_LINK,                 QObject::tr("Insert link"),                  "",          QKeySequence("Ctrl+K")},
+        {WIZACTION_FORMAT_BOLD,                              QObject::tr("Bold"),                       "",             QKeySequence("Ctrl+B")},
+        {WIZACTION_FORMAT_ITALIC,                             QObject::tr("Italic"),                        "",           QKeySequence("Ctrl+I")},
+        {WIZACTION_FORMAT_UNDERLINE,                   QObject::tr("Underline"),                "",           QKeySequence("Ctrl+U")},
+        {WIZACTION_FORMAT_STRIKETHROUGH,         QObject::tr("Strike through"),         "",           QKeySequence("Ctrl+Alt+K")},
+        {WIZACTION_FORMAT_INSERT_HORIZONTAL,  QObject::tr("Insert horizontal"),       "",           QKeySequence("Shift+Ctrl+H")},
+        {WIZACTION_FORMAT_INSERT_DATE,               QObject::tr("Insert date"),                "",           QKeySequence("Shift+Ctrl+D")},
+        {WIZACTION_FORMAT_INSERT_TIME,                QObject::tr("Insert time"),               "",           QKeySequence("Shift+Ctrl+Alt+D")},
+        {WIZACTION_FORMAT_INSERT_CHECKLIST,    QObject::tr("Insert check list"),        "",           QKeySequence("Ctrl+O")},
+        {WIZACTION_FORMAT_INSERT_CODE,              QObject::tr("Insert code"),               "",           QKeySequence("Shift+Ctrl+C")},
+        {WIZACTION_FORMAT_INSERT_IMAGE,             QObject::tr("Insert image"),            "",           QKeySequence("Shift+Ctrl+I")},
+        {WIZACTION_FORMAT_REMOVE_FORMAT,        QObject::tr("Remove format"),       "",           QKeySequence()},
+        {WIZACTION_FORMAT_PLAINTEXT,                    QObject::tr("Convert to plain text"), "",           QKeySequence()},
+        {WIZACTION_FORMAT_VIEW_SOURCE,             QObject::tr("View html source..."),  "",           QKeySequence()},
+        {WIZACTION_FORMAT_SCREEN_SHOT,             QObject::tr("Screen shot..."),           "",           QKeySequence()},
+        {"actionDeveloper",                       QObject::tr("Developer mode"), "", QKeySequence()},
 
 
-        {"", "", "", ""}
+        {"", "", "", QKeySequence()}
     };
 
     return arrayActions;
@@ -132,7 +147,7 @@ CWizShortcutAction *CWizActions::addAction(WIZACTION& action, bool bUseExtraShor
 {   
     QString strText = action.strText;
     QString strIconName = action.strName;
-    QString strShortcut = action.strShortcut;
+    QKeySequence strShortcut = action.strShortcut;
     QString strSlot = "1on_" + action.strName + "_triggered()";
 
     CWizShortcutAction* pAction = new CWizShortcutAction(strText, m_parent);
@@ -141,7 +156,7 @@ CWizShortcutAction *CWizActions::addAction(WIZACTION& action, bool bUseExtraShor
         pAction->setIcon(::WizLoadSkinIcon(m_app.userSettings().skin(), strIconName));
     }
 
-    pAction->setShortcut(QKeySequence::fromString(strShortcut));
+    pAction->setShortcut(strShortcut);
 
     if (action.strName == "actionAbout")
         pAction->setMenuRole(QAction::AboutRole);
@@ -158,7 +173,7 @@ CWizShortcutAction *CWizActions::addAction(WIZACTION& action, bool bUseExtraShor
     m_actions[action.strName] = pAction;
 
     if (bUseExtraShortcut && !strShortcut.isEmpty()) {
-        QShortcut *shortcut  = new QShortcut(QKeySequence::fromString(strShortcut), m_app.mainWindow());
+        QShortcut *shortcut  = new QShortcut(strShortcut, m_app.mainWindow());
         QObject::connect(shortcut, SIGNAL(activated()), m_parent, strSlot.toUtf8());
         pAction->setShortcut(shortcut);
     }

@@ -122,13 +122,15 @@ struct IWizSyncableDatabase
     virtual void ClearLastSyncError() = 0;
     virtual void OnTrafficLimit(const QString& strErrorMessage) = 0;
     virtual void OnStorageLimit(const QString& strErrorMessage) = 0;
+    virtual void OnNoteCountLimit(const QString& strErrorMessage) = 0;
     virtual void OnBizServiceExpr(const QString& strBizGUID, const QString& strErrorMessage) = 0;
-    virtual void OnBizNoteCountLimit(const QString& strBizGUID, const QString& strErrorMessage) = 0;
     virtual bool IsTrafficLimit() = 0;
     virtual bool IsStorageLimit() = 0;
+    virtual bool IsNoteCountLimit() = 0;
     virtual bool IsBizServiceExpr(const QString& strBizGUID) = 0;
-    virtual bool IsBizNoteCountLimit(const QString& strBizGUID) = 0;
     virtual bool GetStorageLimitMessage(QString& strErrorMessage) = 0;
+    virtual bool GetTrafficLimitMessage(QString& strErrorMessage) = 0;
+    virtual bool GetNoteCountLimit(QString& strErrorMessage) = 0;
 
     virtual bool setMeta(const QString& strSection, const QString& strKey, const QString& strValue) = 0;
     virtual QString meta(const QString& strSection, const QString& strKey) = 0;
@@ -169,6 +171,7 @@ public:
     virtual void OnTrafficLimit(IWizSyncableDatabase* pDatabase) {}
     virtual void OnStorageLimit(IWizSyncableDatabase* pDatabase) {}
     virtual void OnBizServiceExpr(IWizSyncableDatabase* pDatabase) {}
+    virtual void OnBizNoteCountLimit(IWizSyncableDatabase* pDatabase) {}
     virtual void OnUploadDocument(const QString& strDocumentGUID, bool bDone) {}
     virtual void OnBeginKb(const QString& strKbGUID) {}
     virtual void OnEndKb(const QString& strKbGUID) {}

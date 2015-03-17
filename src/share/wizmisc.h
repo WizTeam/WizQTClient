@@ -153,6 +153,7 @@ void WizDeleteFile(const CString& strFileName);
 BOOL WizDeleteAllFilesInFolder(const CString& strPath);
 
 bool WizImage2Html(const QString& strImageFile, QString& strHtml, bool bUseCopyFile = false);
+QString WizStr2Title(const QString& str);
 
 BOOL WizIsValidFileNameNoPath(const CString& strFileName);
 void WizMakeValidFileNameNoPath(CString& strFileName);

@@ -10,7 +10,7 @@
 #include  "../share/wizSyncableDatabase.h"
 
 #define IDS_BIZ_SERVICE_EXPR    "Your {p} business service has expired."
-#define IDS_BIZ_NOTE_COUNT_LIMIT     "Your Biz Group notes count limit exceeded!"
+#define IDS_BIZ_NOTE_COUNT_LIMIT     QObject::tr("Group notes count limit exceeded!")
 
 void GetSyncProgressRange(WizKMSyncProgress progress, int& start, int& count)
 {
@@ -687,6 +687,58 @@ int CalObjectDataForUploadToServer(IWizSyncableDatabase* pDatabase, const QStrin
 }
 
 
+void SaveServerError(const WIZKBINFO& kbInfo, const CWizKMDatabaseServer& server, const QString& localKbGUID, IWizKMSyncEvents* pEvents, IWizSyncableDatabase* pDatabase)
+{
+    int nServerErrorCode = server.GetLastErrorCode();
+    switch (nServerErrorCode) {
+    case WIZKM_XMLRPC_ERROR_TRAFFIC_LIMIT:
+    {
+        QString strMessage = WizFormatString2("Monthly traffic limit reached! \n\nTraffic Limit %1\nTraffic Using:%2",
+                                              ::WizInt64ToStr(kbInfo.nTrafficLimit),
+                                              ::WizInt64ToStr(kbInfo.nTrafficUsage)
+                                              );
+        //
+        pDatabase->OnTrafficLimit(strMessage + _T("\n\n") + server.GetLastErrorMessage());
+        //
+        pEvents->OnTrafficLimit(pDatabase);
+    }
+    case WIZKM_XMLRPC_ERROR_STORAGE_LIMIT:
+    {
+        QString strMessage = WizFormatString3("Storage limit reached.\n\n%1\nStorage Limit: %2, Storage Using: %3", _T(""),
+                                              ::WizInt64ToStr(kbInfo.nStorageLimit),
+                                              ::WizInt64ToStr(kbInfo.nStorageUsage)
+                                              );
+        //
+        pDatabase->OnStorageLimit(strMessage + _T("\n\n") + server.GetLastErrorMessage());
+        //
+        pEvents->OnStorageLimit(pDatabase);
+    }
+        break;
+    case WIZKM_XMLRPC_ERROR_BIZ_SERVICE_EXPR:
+    {
+        CString strMessage = WizFormatString0(IDS_BIZ_SERVICE_EXPR);
+        //
+        QString strBizGUID;
+        pDatabase->GetBizGUID(localKbGUID, strBizGUID);
+        pDatabase->OnBizServiceExpr(strBizGUID, strMessage);
+        //
+        pEvents->OnBizServiceExpr(pDatabase);
+    }
+    case WIZKM_XMLRPC_ERROR_NOTE_COUNT_LIMIT:
+    {
+        CString strMessage = WizFormatString0(IDS_BIZ_NOTE_COUNT_LIMIT);
+        //
+        QString strBizGUID;
+        pDatabase->GetBizGUID(localKbGUID, strBizGUID);
+        pDatabase->OnNoteCountLimit(strMessage);
+        //
+        pEvents->OnBizNoteCountLimit(pDatabase);
+    }
+    default:
+        break;
+    }
+}
+
 
 
 
@@ -798,53 +850,17 @@ bool UploadDocument(const WIZKBINFO& kbInfo, int size, int start, int total, int
                 succeeded = true;
                 break;
             }
-            else if (server.GetLastErrorCode() == WIZKM_XMLRPC_ERROR_TRAFFIC_LIMIT)
+            else
             {
-                QString strMessage = WizFormatString2("Monthly traffic limit reached! \n\nTraffic Limit %1\nTraffic Using:%2",
-                                                      ::WizInt64ToStr(kbInfo.nTrafficLimit),
-                                                      ::WizInt64ToStr(kbInfo.nTrafficUsage)
-                    );
-                //
-                pDatabase->OnTrafficLimit(strMessage + _T("\n\n") + server.GetLastErrorMessage());
-                //
-                //pEvents->SetStop(TRUE);
-                pEvents->OnTrafficLimit(pDatabase);
-                return FALSE;
-            }
-            else if (server.GetLastErrorCode() == WIZKM_XMLRPC_ERROR_STORAGE_LIMIT)
-            {
-                QString strMessage = WizFormatString3("Storage limit reached.\n\n%1\nStorage Limit: %2, Storage Using: %3", _T(""),
-                    ::WizInt64ToStr(kbInfo.nStorageLimit),
-                    ::WizInt64ToStr(kbInfo.nStorageUsage)
-                    );
-                //
-                pDatabase->OnStorageLimit(strMessage + _T("\n\n") + server.GetLastErrorMessage());
-                //
-                //pEvents->SetStop(TRUE);
-                pEvents->OnStorageLimit(pDatabase);
-                return FALSE;
-            }
-            else if (server.GetLastErrorCode() == WIZKM_XMLRPC_ERROR_BIZ_SERVICE_EXPR)
-            {
-                CString strMessage = WizFormatString0(IDS_BIZ_SERVICE_EXPR);
-                //
-                QString strBizGUID;
-                pDatabase->GetBizGUID(local.strKbGUID, strBizGUID);
-                pDatabase->OnBizServiceExpr(strBizGUID, strMessage);
-                //
-                //pEvents->SetStop(TRUE);
-                pEvents->OnBizServiceExpr(pDatabase);
-                return FALSE;
-            }
-            else if (server.GetLastErrorCode() == WIZKM_XMLRPC_ERROR_BIZ_NOTE_COUNT_LIMIT)
-            {
-                CString strMessage = WizFormatString0(IDS_BIZ_NOTE_COUNT_LIMIT);
-                //
-                QString strBizGUID;
-                pDatabase->GetBizGUID(local.strKbGUID, strBizGUID);
-                pDatabase->OnBizNoteCountLimit(strBizGUID, strMessage);
-                //
-                return FALSE;
+                switch (server.GetLastErrorCode())
+                {
+                case WIZKM_XMLRPC_ERROR_TRAFFIC_LIMIT:
+                case WIZKM_XMLRPC_ERROR_STORAGE_LIMIT:
+                case WIZKM_XMLRPC_ERROR_BIZ_SERVICE_EXPR:
+                case WIZKM_XMLRPC_ERROR_NOTE_COUNT_LIMIT:
+                    SaveServerError(kbInfo, server, local.strKbGUID, pEvents, pDatabase);
+                    return FALSE;
+                }
             }
         }
     }
@@ -1078,9 +1094,7 @@ bool UploadAttachment(const WIZKBINFO& kbInfo, int size, int start, int total, i
     //
     if (updateVersion)
     {
-        pEvents->OnError(WizFormatString1(_T("Cannot update local version of attachment: %1!"), local.strName));
-        //
-        return FALSE;
+        pEvents->OnError(WizFormatString1(_T("Local version of attachment: %1 updated!"), local.strName));
     }
     //
     return TRUE;
@@ -1109,16 +1123,6 @@ bool UploadObject(const WIZKBINFO& kbInfo, int size, int start, int total, int i
 template <class TData, bool _document>
 bool UploadList(const WIZKBINFO& kbInfo, IWizKMSyncEvents* pEvents, IWizSyncableDatabase* pDatabase, CWizKMDatabaseServer& server, const QString& strObjectType, WizKMSyncProgress progress)
 {
-    if (pDatabase->IsTrafficLimit())
-    {
-        pEvents->OnStatus(_TR("Traffic limit"));
-        return FALSE;
-    }
-    if (pDatabase->IsStorageLimit())
-    {
-        pEvents->OnStatus(_TR("Storage limit"));
-        return FALSE;
-    }
     //
     typedef std::deque<TData> TArray;
     TArray arrayData;
@@ -1195,6 +1199,8 @@ bool UploadList(const WIZKBINFO& kbInfo, IWizKMSyncEvents* pEvents, IWizSyncable
             case WIZKM_XMLRPC_ERROR_TRAFFIC_LIMIT:
             case WIZKM_XMLRPC_ERROR_STORAGE_LIMIT:
             case WIZKM_XMLRPC_ERROR_BIZ_SERVICE_EXPR:
+            case WIZKM_XMLRPC_ERROR_NOTE_COUNT_LIMIT:
+                SaveServerError(kbInfo, server, local.strKbGUID, pEvents, pDatabase);
                 return FALSE;
             }
         }
@@ -1417,7 +1423,7 @@ int WizCalDocumentPartForDownloadToLocal(IWizSyncableDatabase* pDatabase, const 
     {
         if (dataLocal.strInfoMD5 != dataServer.strInfoMD5)
         {
-            if (dataLocal.tInfoModified < dataServer.tInfoModified)
+            if ((dataLocal.tInfoModified < dataServer.tInfoModified) || (dataLocal.nVersion < dataServer.nVersion))
             {
                 nPart |= WIZKM_XMLRPC_OBJECT_PART_INFO;
             }
@@ -1865,6 +1871,7 @@ bool WizSyncDatabase(const WIZUSERINFO& info, IWizKMSyncEvents* pEvents,
         //
         if (syncGroup.Sync())
         {
+            pGroupDatabase->ClearLastSyncError();
             pGroupDatabase->SaveLastSyncTime();
             pEvents->OnStatus(WizFormatString1(_TR("Sync group %1 done"), group.strGroupName));
 

@@ -51,6 +51,6 @@
             WizMDAppendScriptSrc(doc, 'HEAD', "text/javascript", "wiznote-markdown-inject.js");
         };
     }
-    WizInitMarkdown(document);
+    WizInitMarkdown(editor.document);
 })();
 

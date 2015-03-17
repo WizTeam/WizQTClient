@@ -9,6 +9,7 @@ class INoteView;
 }
 
 class QWebFrame;
+class QWebEnginePage;
 
 namespace Markdown {
 namespace Internal {
@@ -27,11 +28,16 @@ public:
 
 private:
     QString cachePath();
+    QString resourcesPath();
     bool copyRes2Cache();
     bool canRender(Core::INoteView* view, const WIZDOCUMENTDATA& data);
+#ifdef USEWEBENGINE
+    void render(QWebEnginePage* page);
+#else
     void render(QWebFrame* frame);
+#endif
     void changeCssToInline(QWebFrame* frame);
-
+    QString getExecString();
 
 private Q_SLOTS:
     void onViewNoteLoaded(Core::INoteView* view, const WIZDOCUMENTDATA& doc, bool bOk);

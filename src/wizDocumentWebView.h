@@ -35,7 +35,7 @@ class CWizDocumentWebViewLoaderThread : public QThread
 {
     Q_OBJECT
 public:
-    CWizDocumentWebViewLoaderThread(CWizDatabaseManager& dbMgr);
+    CWizDocumentWebViewLoaderThread(CWizDatabaseManager& dbMgr, QObject* parent);
 
     void load(const WIZDOCUMENTDATA& doc);
     //
@@ -63,7 +63,7 @@ class CWizDocumentWebViewSaverThread : public QThread
 {
     Q_OBJECT
 public:
-    CWizDocumentWebViewSaverThread(CWizDatabaseManager& dbMgr);
+    CWizDocumentWebViewSaverThread(CWizDatabaseManager& dbMgr, QObject* parent);
 
     void save(const WIZDOCUMENTDATA& doc, const QString& strHtml,
               const QString& strHtmlFile, int nFlags);
@@ -127,6 +127,7 @@ public:
     void setEditingDocument(bool editing);
     void saveDocument(const WIZDOCUMENTDATA& data, bool force);
     void reloadNoteData(const WIZDOCUMENTDATA& data);
+    void closeDocument(const WIZDOCUMENTDATA& doc);
 
     bool isInited() const { return m_bEditorInited; }
     bool isEditing() const { return m_bEditingMode; }
@@ -171,7 +172,7 @@ public:
 
     void setPastePlainTextEnable(bool bEnable);
     //
-    void saveAsPDF(const QString& strFileName);
+    void saveAsPDF();
     void saveAsHtml(const QString& strDirPath);
     void printDocument();
     bool shareNoteByEmail();
@@ -183,6 +184,17 @@ public:
     //use undo func provied by editor
     void undo();
     void redo();
+
+    //js environment func
+    Q_INVOKABLE QString getSkinResourcePath();
+    Q_INVOKABLE QString getUserAvatarFilePath(int size);
+    Q_INVOKABLE QString getUserAlias();
+    Q_INVOKABLE QString getFormatedDateTime();
+    Q_INVOKABLE bool isPersonalDocument();
+    Q_INVOKABLE QString getCurrentNoteHtml();
+    Q_INVOKABLE void saveHtmlToCurrentNote(const QString& strHtml, const QString& strResource);
+    Q_INVOKABLE bool hasEditPermissionOnCurrentNote();
+    Q_INVOKABLE void setCurrentDocumentType(const QString& strType);
 
     //
     QNetworkDiskCache* networkCache();
@@ -203,6 +215,7 @@ private:
 
 protected:
     virtual void keyPressEvent(QKeyEvent* event);
+    virtual void mousePressEvent(QMouseEvent* event);
     virtual void inputMethodEvent(QInputMethodEvent* event);
     virtual void focusInEvent(QFocusEvent* event);
     virtual void focusOutEvent(QFocusEvent* event);
@@ -239,7 +252,6 @@ private:
 
     QPointer<CWizEditorInsertLinkForm> m_editorInsertLinkForm;
     QPointer<CWizEditorInsertTableForm> m_editorInsertTableForm;
-    QPointer<QColorDialog> m_colorDialog;
 
     CWizSearchReplaceWidget* m_searchReplaceWidget;
 
@@ -273,10 +285,8 @@ public Q_SLOTS:
     /* editor API */
 
     // font
-    void editorCommandExecuteBackColor();
-    void on_editorCommandExecuteBackColor_accepted(const QColor& color);
-    void editorCommandExecuteForeColor();
-    void on_editorCommandExecuteForeColor_accepted(const QColor& color);
+    void editorCommandExecuteBackColor(const QColor& color);
+    void editorCommandExecuteForeColor(const QColor& color);
     bool editorCommandExecuteBold();
     bool editorCommandExecuteItalic();
     bool editorCommandExecuteUnderLine();
@@ -326,6 +336,15 @@ public Q_SLOTS:
     bool editorCommandExecuteTableSplitCols();
     bool editorCommandExecuteTableAverageRows();
     bool editorCommandExecuteTableAverageCols();
+    bool editorCommandExecuteTableCellAlignLeftTop();
+    bool editorCommandExecuteTableCellAlignTop();
+    bool editorCommandExecuteTableCellAlignRightTop();
+    bool editorCommandExecuteTableCellAlignLeft();
+    bool editorCommandExecuteTableCellAlignCenter();
+    bool editorCommandExecuteTableCellAlignRight();
+    bool editorCommandExecuteTableCellAlignLeftBottom();
+    bool editorCommandExecuteTableCellAlignBottom();
+    bool editorCommandExecuteTableCellAlignRightBottom();
 
     // fast operation
     bool editorCommandExecuteInsertDate();
@@ -360,15 +379,15 @@ Q_SIGNALS:
     void focusOut();
     //
 
-    void requestShowContextMenu(const QPoint& pos);
-
+    void showContextMenuRequest(const QPoint& pos);
+    void updateEditorToolBarRequest();
     //
     void viewDocumentFinished();
 
 private:
     void setWindowVisibleOnScreenShot(bool bVisible);
     bool insertImage(const QString& strFileName, bool bCopyFile);
-
+    void closeSourceMode();
 };
 
 #endif // WIZDOCUMENTWEBVIEW_H

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<title>{error_text3}</title>
+	<script type="text/javascript">
+		// function onLoad () {
+		// 	try {
+		// 		if (undefined === external.AppPath) {
+		// 			alert("Failed to get AppPath.");
+		// 			return;
+		// 		}
+		// 	}
+		// 	catch(e) {
+		// 		alert("external is invalid.");
+		// 		return;
+		// 	}
+		// 	//
+		// 	var objApp = external;
+		// 	var img = document.getElementById("error-img");
+		// 	if (img) {
+		// 		img.src = objApp.AppPath + "files\\load_error.png";
+		// 	}
+		// 	//
+		// 	error_text1.innerText = objApp.TranslateString(error_text1.innerText);
+		// 	error_text2.innerText = objApp.TranslateString(error_text2.innerText);
+		// }
+		//
+	</script>
+	<!-- {error_image} -> load_error.png -->
+	<!-- {error_text1} -> Load Error -->
+	<!-- {error_text2} -> Network anomalies, check the network, then retry! -->
+	<!-- {error_text3} -> Load Error -->
+</head>
+<body onload="onLoad();">
+	<div style="width: 200px; height:200px; position:absolute; left:50%; top:19em; margin:-100px 0 0 -100px">
+		<div>
+			<div style="text-align: center;">
+				<div style="display: inline-block; ">
+					<img id='error-img' src="load_error.png">
+				</div>
+				<div style="font-family: 'Microsoft Yahei', '微软雅黑', 'Helvetica', 'SimHei', 'SimSun'; margin-top: 14px;">
+					<div><span id="error_text1" style="font-size: 24px; color: #3a3a3a;">{error_text1}</span></div>
+					<div style="margin-top: 3px;"><span id="error_text2" style="font-size: 14px; color: #bdbdbd;">{error_text2}</span></div>
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+</html>

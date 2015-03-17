@@ -1894,9 +1894,9 @@ QIcon WizLoadSkinIcon3(const QString& strIconName, QIcon::Mode mode)
 // FIXME: obosolete, use CWizHtmlToPlainText class instead!
 void WizHtml2Text(const QString& strHtml, QString& strText)
 {
-    QTextDocument* doc = new QTextDocument();
-    doc->setHtml(strHtml);
-    strText = doc->toPlainText();
+    QTextDocument doc;
+    doc.setHtml(strHtml);
+    strText = doc.toPlainText();
     QChar ch(0xfffc);
     strText.replace(ch, QChar(' '));
     return;
@@ -2111,15 +2111,13 @@ CWaitCursor::~CWaitCursor()
 
 void showWebDialogWithToken(const QString& windowTitle, const QString& url, QWidget* parent, bool dialogResizable)
 {
-    CWizWebSettingsDialog* pDlg = new CWizWebSettingsWithTokenDialog(url, QSize(800, 480), parent);
+    CWizWebSettingsWithTokenDialog pDlg(url, QSize(800, 480), parent);
     if (dialogResizable)
     {
-        pDlg->setMaximumSize(QSize(QWIDGETSIZE_MAX, QWIDGETSIZE_MAX));
+        pDlg.setMaximumSize(QSize(QWIDGETSIZE_MAX, QWIDGETSIZE_MAX));
     }
-    pDlg->setWindowTitle(windowTitle);
-    pDlg->exec();
-    //
-    delete pDlg;
+    pDlg.setWindowTitle(windowTitle);
+    pDlg.exec();
 }
 
 
@@ -2261,8 +2259,8 @@ void showDocumentHistory(const WIZDOCUMENTDATA& doc, QWidget* parent)
 {
     CString strExt = WizFormatString2(_T("obj_guid=%1&kb_guid=%2&obj_type=document"),
                                       doc.strGUID, doc.strKbGUID);
-     QString strUrl = WizService::ApiEntry::standardCommandUrl("document_history", WIZ_TOKEN_IN_URL_REPLACE_PART, strExt);
-     showWebDialogWithToken(QObject::tr("Note History"), strUrl, parent, true);
+    QString strUrl = WizService::ApiEntry::standardCommandUrl("document_history", WIZ_TOKEN_IN_URL_REPLACE_PART, strExt);
+    showWebDialogWithToken(QObject::tr("Note History"), strUrl, parent, true);
 }
 
 
@@ -2324,4 +2322,19 @@ QString GetParamFromWizKMURL(const QString& strURL, const QString& strParamName)
     }
 
     return QString();
+}
+
+
+QString WizStr2Title(const QString& str)
+{
+    int idx = str.size() - 1;
+    static QString eol("，。？~!#$%^&*()_+{}|:\"<>?,./;'[]\\-=\n\r"); // end of line
+    foreach(QChar c, eol) {
+        int i = str.indexOf(c, 0, Qt::CaseInsensitive);
+        if (i != -1 && i < idx) {
+            idx = i;
+        }
+    }
+
+    return str.left(idx);
 }

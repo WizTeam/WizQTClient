@@ -6,6 +6,10 @@
 #include <QSplitter>
 #include <QList>
 
+#include "share/websocketclientwrapper.h"
+#include "share/websockettransport.h"
+#include "wizWebEngineInjectObject.h"
+
 #include <coreplugin/icore.h>
 
 #include "titleedit.h"
@@ -16,6 +20,7 @@
 #include "wizDocumentView.h"
 #include "wiztaglistwidget.h"
 #include "wizattachmentlistwidget.h"
+#include "wizDocumentWebEngine.h"
 #include "wizDocumentWebView.h"
 #include "wiznoteinfoform.h"
 #include "share/wizmisc.h"
@@ -23,6 +28,7 @@
 #include "share/wizsettings.h"
 #include "share/wizanimateaction.h"
 #include "utils/stylehelper.h"
+#include "utils/pathresolve.h"
 
 #include "sync/token.h"
 #include "sync/apientry.h"
@@ -159,6 +165,7 @@ TitleBar::TitleBar(CWizExplorerApp& app, QWidget *parent)
 
     layout->addStretch();
     connect(m_notifyBar, SIGNAL(labelLink_clicked(QString)), SIGNAL(notifyBar_link_clicked(QString)));
+
 }
 
 CWizDocumentView* TitleBar::noteView()
@@ -181,9 +188,38 @@ void TitleBar::setLocked(bool bReadOnly, int nReason, bool bIsGroup)
     m_notifyBar->showPermissionNotify(nReason);
     m_editTitle->setReadOnly(bReadOnly);
     m_editBtn->setEnabled(!bReadOnly);
-    m_tagBtn->setEnabled(!bIsGroup ? true : false);
+
+    if (nReason == NotifyBar::Deleted)
+    {
+        m_tagBtn->setEnabled(false);
+        m_historyBtn->setEnabled(false);
+        m_commentsBtn->setEnabled(false);
+    }
+    else
+    {
+        m_tagBtn->setEnabled(!bIsGroup ? true : false);
+        m_historyBtn->setEnabled(true);
+        m_commentsBtn->setEnabled(true);
+    }
 }
 
+#ifdef USEWEBENGINE
+void TitleBar::setEditor(CWizDocumentWebEngine* editor)
+{
+    Q_ASSERT(!m_editor);
+
+    m_editorBar->setDelegate(editor);
+
+    connect(editor, SIGNAL(focusIn()), SLOT(onEditorFocusIn()));
+    connect(editor, SIGNAL(focusOut()), SLOT(onEditorFocusOut()));
+
+    connect(editor->page(), SIGNAL(contentsChanged()), SLOT(onEditorChanged()));
+
+    connect(m_editTitle, SIGNAL(titleEdited(QString)), editor, SLOT(onTitleEdited(QString)));
+
+    m_editor = editor;
+}
+#else
 void TitleBar::setEditor(CWizDocumentWebView* editor)
 {
     Q_ASSERT(!m_editor);
@@ -193,13 +229,14 @@ void TitleBar::setEditor(CWizDocumentWebView* editor)
     connect(editor, SIGNAL(focusIn()), SLOT(onEditorFocusIn()));
     connect(editor, SIGNAL(focusOut()), SLOT(onEditorFocusOut()));
 
-    //connect(editor->page(), SIGNAL(selectionChanged()), SLOT(onEditorChanged()));
+//    connect(editor->page(), SIGNAL(selectionChanged()), SLOT(onEditorChanged()));
     connect(editor->page(), SIGNAL(contentsChanged()), SLOT(onEditorChanged()));
 
     connect(m_editTitle, SIGNAL(titleEdited(QString)), editor, SLOT(onTitleEdited(QString)));
 
     m_editor = editor;
 }
+#endif
 
 void TitleBar::onEditorFocusIn()
 {
@@ -208,6 +245,7 @@ void TitleBar::onEditorFocusIn()
 
 void TitleBar::onEditorFocusOut()
 {
+    showEditorBar();
     if (!m_editorBar->hasFocus())
         showInfoBar();
 }
@@ -223,6 +261,71 @@ void TitleBar::showEditorBar()
     m_infoBar->hide();
     m_editorBar->show();
 }
+
+void TitleBar::loadErrorPage()
+{
+#ifdef USEWEBENGINE
+    QWebEngineView* comments = noteView()->commentView();
+#else
+    QWebView* comments = noteView()->commentView();
+#endif
+    QString strFileName = Utils::PathResolve::resourcesPath() + "files/errorpage/load_fail_comments.html";
+    QString strHtml;
+    ::WizLoadUnicodeTextFromFile(strFileName, strHtml);
+    strHtml.replace("{error_text1}", tr("Load Error"));
+    strHtml.replace("{error_text2}", tr("Network anomalies, check the network, then retry!"));
+    strHtml.replace("{error_text3}", tr("Load Error"));
+    QUrl url = QUrl::fromLocalFile(strFileName);
+    comments->setHtml(strHtml, url);
+}
+
+#ifdef USEWEBENGINE
+void TitleBar::initWebChannel()
+{
+    QWebSocketServer *server = new QWebSocketServer(QStringLiteral("Wiz Socket Server"), QWebSocketServer::NonSecureMode, this);
+    if (!server->listen(QHostAddress::LocalHost, 0)) {
+        qFatal("Failed to open web socket server.");
+        return;
+    }
+
+    // wrap WebSocket clients in QWebChannelAbstractTransport objects
+    WebSocketClientWrapper *clientWrapper  = new WebSocketClientWrapper(server, this);
+
+    // setup the dialog and publish it to the QWebChannel
+    QWebChannel *webChannel = new QWebChannel(this);
+    // setup the channel
+    QObject::connect(clientWrapper, &WebSocketClientWrapper::clientConnected,
+                     webChannel, &QWebChannel::connectTo);
+    CWizCommentsExternal* exteranl = new CWizCommentsExternal(this);
+    webChannel->registerObject(QStringLiteral("externalObject"), exteranl);
+
+    m_strWebchannelUrl = server->serverUrl().toString();
+}
+
+void TitleBar::registerWebChannel()
+{
+    QString strFile = Utils::PathResolve::resourcesPath() + "files/editor/qwebchannel.js";
+    QFile f(strFile);
+    if (!f.open(QIODevice::ReadOnly))
+    {
+        qDebug() << "[Comments]Failed to get execute code";
+        return;
+    }
+
+    QTextStream ts(&f);
+    QString strExec = ts.readAll();
+    f.close();
+
+    Q_ASSERT(strExec.indexOf("//${INIT_COMMAND}") != -1);
+    if (m_strWebchannelUrl.isEmpty())
+    {
+        initWebChannel();
+    }
+    QString strCommand = QString("initWebChannel('%1')").arg(m_strWebchannelUrl);
+    strExec.replace("//${INIT_COMMAND}", strCommand);
+    noteView()->commentView()->page()->runJavaScript(strExec);
+}
+#endif
 
 void TitleBar::onEditorChanged()
 {
@@ -363,7 +466,11 @@ bool isNetworkAccessible()
 
 void TitleBar::onCommentsButtonClicked()
 {
+#ifdef USEWEBENGINE
+    QWebEngineView* comments = noteView()->commentView();
+#else
     QWebView* comments = noteView()->commentView();
+#endif
     if (comments->isVisible()) {
         comments->hide();
         return;
@@ -382,13 +489,39 @@ void TitleBar::onCommentsButtonClicked()
             splitter->setSizes(lin);
             comments->show();
         } else {
-            comments->setHtml(tr("Network service not available!"));
+            loadErrorPage();
             comments->show();
         }
 
     } else {
         m_commentsBtn->setEnabled(false);
     }
+}
+
+void TitleBar::onCommentPageLoaded(bool ok)
+{
+#ifdef USEWEBENGINE
+    QWebEngineView* comments = noteView()->commentView();
+#else
+    QWebView* comments = noteView()->commentView();
+#endif
+    if (!ok)
+    {
+        loadErrorPage();
+        comments->show();
+    }
+#ifdef USEWEBENGINE
+    else
+    {
+        comments->page()->runJavaScript("location.protocol",[this](const QVariant& returnValue) {
+            qDebug() << "lcation protocol :  " << returnValue.toString();
+            if ("file:" != returnValue.toString())
+            {
+                registerWebChannel();
+            }
+        });
+    }
+#endif
 }
 
 void TitleBar::onViewNoteLoaded(INoteView* view, const WIZDOCUMENTDATA& note, bool bOk)
@@ -402,24 +535,21 @@ void TitleBar::onViewNoteLoaded(INoteView* view, const WIZDOCUMENTDATA& note, bo
         return;
     }
 
-    if (!isNetworkAccessible()) {
-        noteView()->commentView()->hide();
-        m_commentsBtn->setEnabled(false);
-    } else {
-        m_commentsUrl.clear();
-        m_commentsBtn->setEnabled(true);
-
-        connect(WizService::Token::instance(), SIGNAL(tokenAcquired(QString)),
-                SLOT(onTokenAcquired(QString)), Qt::QueuedConnection);
-        WizService::Token::requestToken();
-    }
+    m_commentsUrl.clear();
+    connect(WizService::Token::instance(), SIGNAL(tokenAcquired(QString)),
+            SLOT(onTokenAcquired(QString)), Qt::QueuedConnection);
+    WizService::Token::requestToken();
 }
 
 void TitleBar::onTokenAcquired(const QString& strToken)
 {
     WizService::Token::instance()->disconnect(this);
 
+#ifdef USEWEBENGINE
+    QWebEngineView* comments = noteView()->commentView();
+#else
     QWebView* comments = noteView()->commentView();
+#endif
 
     if (strToken.isEmpty()) {
         comments->hide();
@@ -431,7 +561,7 @@ void TitleBar::onTokenAcquired(const QString& strToken)
     m_commentsUrl =  WizService::ApiEntry::commentUrl(strToken, strKbGUID, strGUID);
 
     if (comments->isVisible()) {
-        comments->load(QUrl());
+//        comments->load(QUrl());
         comments->load(m_commentsUrl);
     }
 

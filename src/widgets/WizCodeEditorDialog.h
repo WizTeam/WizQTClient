@@ -11,47 +11,34 @@ class QComboBox;
 class QWebView;
 class QMenu;
 class QPlainTextEdit;
-
-class CWizCodeEditorView : public QWebView
-{
-    Q_OBJECT
-public:
-    CWizCodeEditorView(QWidget *parent = 0) : QWebView(parent){}
-
-protected:
-    virtual void contextMenuEvent(QContextMenuEvent* event)
-    {
-        //do nothing
-        Q_UNUSED(event);
-    }
-
-};
+class CWizDocumentWebView;
 
 class WizCodeEditorDialog : public QDialog
 {
     Q_OBJECT
 public:
-    explicit WizCodeEditorDialog(CWizExplorerApp& app, QWidget *parent = 0);
+    explicit WizCodeEditorDialog(CWizExplorerApp& app, CWizDocumentWebView *external, QWidget *parent = 0);
     void setCode(const QString& strCode);
 signals:
     void insertHtmlRequest(QString strHtml);
 
 public slots:
-    void renderCodeToHtml();
-    void onButtonOKClicked();
-    void onButtonCancelClicked();
+    void registerJSObject();
+    void insertHtml(const QString& strResultDiv);
 
+    QString getLastCodeType();
+    void saveLastCodeType(const QString& codeType);
+
+        // if use webengine
+//    void onHtmlLoaded(bool ok);
+//    void runJs();
 protected:
     void changeEvent(QEvent * event);
 
 private:
-    void initCodeTypeCombox();
-    void saveLastCodeType();
-private:
-    QComboBox *m_codeType;
-    QPlainTextEdit *m_codeEditor;
     QWebView *m_codeBrowser;
     CWizExplorerApp& m_app;
+    CWizDocumentWebView *m_external;
 };
 
 #endif // WIZCODEEDITORDIALOG_H

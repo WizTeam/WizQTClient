@@ -114,8 +114,8 @@ protected Q_SLOTS:
 
     virtual void on_itemPosition_changed(CWizCategoryViewItemBase* pItem) { Q_UNUSED(pItem); }
 
-    virtual void createDocumentByHtml(const QString& strHtml, const QString& strTitle);
-
+    virtual void createDocumentByHtml(const QString& strHtml, const QString& strTitle) = 0;
+    virtual void createDocumentByHtml(const QString& strFileName, const QString& strHtml, const QString& strTitle);
     void on_dragHovered_timeOut();
 
 private:
@@ -144,7 +144,7 @@ public:
     void init();
 
     void loadShortcutState();
-    void saveShortcutState();
+    Q_INVOKABLE void saveShortcutState();
     void loadExpandState();
     void saveExpandState();
 
@@ -159,6 +159,7 @@ public:
         ActionMoveItem,
         ActionRenameItem,
         ActionDeleteItem,
+        ActionRecovery,
         ActionItemAttribute,
         ActionEmptyTrash,
         ActionQuitGroup,
@@ -275,7 +276,6 @@ public:
     void viewBizGroupInfo(const QString& groupGUID, const QString& bizGUID);
     void managePersonalGroup(const QString& groupGUID);
     void manageBizGroup(const QString& groupGUID, const QString& bizGUID);
-    void promptGroupStorageLimitMessage(const QString& groupGUID, const QString& bizGUID);
     void viewBizInfo(const QString& bizGUID);
     void manageBiz(const QString& bizGUID, bool bUpgrade);
 
@@ -313,6 +313,8 @@ protected Q_SLOTS:
     virtual void on_itemPosition_changed(CWizCategoryViewItemBase* pItem);
 
     virtual void createDocumentByHtml(const QString& strHtml, const QString& strTitle);
+    virtual void createDocumentByHtml(const QString &strFileName, const QString& strHtml,
+                                      const QString& strTitle);
 
 
 public Q_SLOTS:
@@ -355,6 +357,8 @@ public Q_SLOTS:
     void on_action_user_deleteTag_confirmed(int result);
     void on_action_group_deleteFolder();
     void on_action_group_deleteFolder_confirmed(int result);
+
+    void on_action_deleted_recovery();
 
     void on_action_itemAttribute();
     void on_action_groupAttribute();
@@ -406,6 +410,9 @@ private:
                                       const QString& strNewLocation);
     void updatePrivateTagPosition(CWizDatabase& db);
     void updateGroupFolderPosition(CWizDatabase& db);
+
+    //
+    void promptGroupLimitMessage(const QString& groupGUID, const QString& bizGUID);
 
 private:
     void initGeneral();

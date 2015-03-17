@@ -29,7 +29,6 @@ signals:
 
 protected:
     QSize sizeHint() const;
-    virtual void inputMethodEvent(QInputMethodEvent* event);
     virtual void keyPressEvent(QKeyEvent* e);
     virtual void contextMenuEvent(QContextMenuEvent* e);
 

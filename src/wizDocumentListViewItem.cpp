@@ -148,15 +148,13 @@ void CWizDocumentListViewItem::reload(CWizDatabase& db)
 void CWizDocumentListViewItem::setSortingType(int type)
 {
     m_nSortingType = type;
-
     CWizDatabase& db = m_app.databaseManager().db(m_data.doc.strKbGUID);
-    db.DocumentFromGUID(m_data.doc.strGUID, m_data.doc);
-    QString strFileName = db.GetDocumentFileName(m_data.doc.strGUID);
-    QString strAuthor = db.GetDocumentOwnerAlias(m_data.doc);
-    strAuthor += strAuthor.isEmpty() ? "" : " ";
-    QFileInfo fi(strFileName);
+
 
     if (m_data.nType == TypeGroupDocument) {
+        QString strAuthor = db.GetDocumentOwnerAlias(m_data.doc);
+        strAuthor += strAuthor.isEmpty() ? "" : " ";
+
         switch (m_nSortingType) {
         case CWizSortingPopupButton::SortingCreateTime:
         case -CWizSortingPopupButton::SortingCreateTime:
@@ -184,6 +182,9 @@ void CWizDocumentListViewItem::setSortingType(int type)
             break;
         case CWizSortingPopupButton::SortingSize:
         case -CWizSortingPopupButton::SortingSize:
+        {
+            QString strFileName = db.GetDocumentFileName(m_data.doc.strGUID);
+            QFileInfo fi(strFileName);
             if (!fi.exists()) {
                 m_data.strInfo = strAuthor + QObject::tr("Unknown");
             } else {
@@ -191,6 +192,7 @@ void CWizDocumentListViewItem::setSortingType(int type)
                 m_data.strInfo = strAuthor + ::WizGetFileSizeHumanReadalbe(strFileName);
             }
             break;
+        }
         default:
             Q_ASSERT(0);
             break;
@@ -223,6 +225,9 @@ void CWizDocumentListViewItem::setSortingType(int type)
             break;
         case CWizSortingPopupButton::SortingSize:
         case -CWizSortingPopupButton::SortingSize:
+        {
+            QString strFileName = db.GetDocumentFileName(m_data.doc.strGUID);
+            QFileInfo fi(strFileName);
             if (!fi.exists()) {
                 m_data.strInfo = QObject::tr("Unknown") + " " + tags();
             } else {
@@ -230,6 +235,7 @@ void CWizDocumentListViewItem::setSortingType(int type)
                 m_data.strInfo = ::WizGetFileSizeHumanReadalbe(strFileName) + " "  + tags();
             }
             break;
+        }
         default:
             Q_ASSERT(0);
             break;

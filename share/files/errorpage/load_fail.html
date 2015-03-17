@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<title>{error_text3}</title>
+	<!-- {error_image} -> load_error.png -->
+	<!-- {error_text1} -> Load Error -->
+	<!-- {error_text2} -> Network anomalies, check the network, then retry! -->	
+	<!-- {error_text3} -> Load Error -->
+</head>
+<body>
+	<div style="width: 450px; height:200px; position:absolute; left:50%; top:50%; margin:-100px 0 0 -150px">
+		<div>
+			<div style="display: inline-block; ">
+				<img id='error-img' src="load_error.png">
+			</div>
+			<div style="display: inline-block; position: absolute; margin: 5px 0 0 28px; font-family: 'Microsoft Yahei', '微软雅黑', 'Helvetica', 'SimHei', 'SimSun'; ">
+				<div><span id="error_text1" style="font-size: 24px; color: #3a3a3a;">{error_text1}</span></div>
+				<div style="margin-top: 3px;"><span id="error_text2" style="font-size: 14px; color: #bdbdbd;">{error_text2}</span></div>
+			</div>
+		</div>
+	</div>
+</body>
+</html>

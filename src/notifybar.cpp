@@ -64,8 +64,8 @@ void NotifyBar::showPermissionNotify(int type)
     case LockForGruop:
 //        setStyleForEditing();
 //        m_labelNotify->setText(QObject::tr("Checking for the version of note, please wait for a second..."));
-//        showNotify();
-//        break;
+//        show();
+        break;
     default:
         hideNotify(false);
         break;
@@ -142,7 +142,6 @@ void NotifyBar::hideNotify(bool bUseAnimation)
         }
         else
         {
-            m_animation->stop();
             setMaximumHeight(0);
             return;
         }

@@ -72,11 +72,11 @@ QString CWizXmlRpcServerBase::GetURL() const
     return m_strUrl;
 }
 
-int CWizXmlRpcServerBase::GetLastErrorCode()
+int CWizXmlRpcServerBase::GetLastErrorCode() const
 {
     return m_nLastErrorCode;
 }
-QString CWizXmlRpcServerBase::GetLastErrorMessage()
+QString CWizXmlRpcServerBase::GetLastErrorMessage() const
 {
     return m_strLastErrorMessage;
 }

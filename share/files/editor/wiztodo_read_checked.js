@@ -300,6 +300,7 @@ function WizTodoReadCheckedWindows (wizApp) {
 	this.getWizDocument = getWizDocument;
 	this.getAvatarName = getAvatarName;
 	this.onClickingTodo = onClickingTodo;
+    this.onBeforeSave = onBeforeSave;
 	
 	function initCss() {
 		WizInitReadCss(document, document.head);
@@ -406,8 +407,13 @@ function WizTodoReadCheckedWindows (wizApp) {
 	}
 
 	function onClickingTodo(callback) {
-		WizTodoReadChecked[callback](false, false);
+        this.app.ExecuteCommand("OnClickingChecklist",
+         "WizTodoReadChecked." + callback + "({cancel}, {needCallAgain});", "readingnote");
 	}
+
+    function onBeforeSave(isModified) {
+        // this.app.ExecuteCommand("onBeforeSaveChecklist", isModified, "readingnote");
+    }
 }
 
 function WizTodoReadCheckedQt () {
@@ -424,46 +430,47 @@ function WizTodoReadCheckedQt () {
     this.getLocalDateTime = getLocalDateTime;
     this.getAvatarName = getAvatarName;
     this.onClickingTodo = onClickingTodo;
+    this.onBeforeSave = onBeforeSave;
 
     function initCss() {
     }
 
     function getDocHtml() {
-        return objApp.getCurrentNoteHtml();
+        return WizEditor.getCurrentNoteHtml();
     }
 
     function setDocHtml(html, resources) {
-        objApp.saveHtmlToCurrentNote(html, resources);
+        WizEditor.saveHtmlToCurrentNote(html, resources);
     }
 
     function canEdit() {
         var htmlEditable = editor.body.contentEditable == "false";
-        var userPermission = objApp.hasEditPermissionOnCurrentNote();
+        var userPermission = WizEditor.hasEditPermissionOnCurrentNote();
         return htmlEditable && userPermission;
     }
 
     function getCheckedImageFileName() {
-        return objApp.getSkinResourcePath() + "checked.png";
+        return WizEditor.getSkinResourcePath() + "checked.png";
     }
 
     function getUnCheckedImageFileName() {
-        return objApp.getSkinResourcePath() + "unchecked.png";
+        return WizEditor.getSkinResourcePath() + "unchecked.png";
     }
 
     function isPersonalDocument() {
-        return objApp.isPersonalDocument();
+        return WizEditor.isPersonalDocument();
     }
 
     function getLocalDateTime(dt) {
-        return objApp.getFormatedDateTime();
+        return WizEditor.getFormatedDateTime();
     }
 
     function getUserAlias() {
-        return objApp.getUserAlias();
+        return WizEditor.getUserAlias();
     }
 
     function getUserAvatarFileName(size) {
-        return objApp.getUserAvatarFilePath(size);
+        return WizEditor.getUserAvatarFilePath(size);
     }
 
     function getAvatarName(avatarFileName) {
@@ -485,6 +492,10 @@ function WizTodoReadCheckedQt () {
         objApp.clickingTodoCallBack.connect(WizTodoReadChecked[callback]);
         return objApp.checkListClickable();
     }
+
+    function onBeforeSave(isModified) {
+
+    }
 }
 
 function WizTodoReadCheckedAndroid () {
@@ -503,6 +514,7 @@ function WizTodoReadCheckedAndroid () {
 	this.onTodoImageClicked = onTodoImageClicked;
 	this.getAvatarName = getAvatarName;
 	this.onClickingTodo = onClickingTodo;
+    this.onBeforeSave = onBeforeSave;
 
 	function initCss() {
 	}
@@ -543,7 +555,7 @@ function WizTodoReadCheckedAndroid () {
 		return window.WizNote.getUserAvatarFileName(size);
 	}
 
-	function onDocumentClose() {
+	function onDocumentClose(isModified) {
 		window.WizNote.onWizTodoReadCheckedClose();
 	}
 
@@ -569,6 +581,10 @@ function WizTodoReadCheckedAndroid () {
     function onClickingTodo(callback) {
         window.WizNote.onClickingTodo(callback);
     }
+
+    function onBeforeSave(modified) {
+
+    }
 }
 
 function WizTodoReadCheckedIphone() {
@@ -593,6 +609,7 @@ function WizTodoReadCheckedIphone() {
 	this.getAvatarName = getAvatarName;
 	this.onAddTodoCompletedInfo = onAddTodoCompletedInfo;
 	this.onClickingTodo = onClickingTodo;
+    this.onBeforeSave = onBeforeSave;
 
 	this.userAlias = null;
 	this.avatarFileName = null;
@@ -692,6 +709,10 @@ function WizTodoReadCheckedIphone() {
 	function onClickingTodo(callback) {
 		window.location.href="wiztodolist://tryLockDocument/"+"?callback=" + callback;
 	}
+
+    function onBeforeSave(isModified) {
+        
+    }
 }
 var WizTodoReadChecked = (function () {
 
@@ -706,6 +727,8 @@ var WizTodoReadChecked = (function () {
 	var editorDocument = null;
 	var needCallHelperClicking = true;
 	var beingClickedTodoEle = null;
+    var modified = false;
+    var bodyOriginalCursor = undefined;
 
 	function getHelper(wizClient) {
 		switch(wizClient) {
@@ -1064,17 +1087,24 @@ var WizTodoReadChecked = (function () {
 		//
 		var id = todoEle.id;
 		//
-		// changeWizDocument(id);
 		if (modifiedTodos[todoEle.id] === undefined) {
 			modifiedTodos[todoEle.id] = {};
 		}
+        //
+        if (modifiedTodos[todoEle.id]['state'] === undefined) {
+            modifiedTodos[todoEle.id]['state'] = isChecked ? "checked" : "unchecked";    
+        }
+        else {
+            delete modifiedTodos[todoEle.id];
+        }
 		//
-		modifiedTodos[todoEle.id]['state'] = isChecked ? "checked" : "unchecked";
-		// modifiedTodos[todoEle.id]['completedInfo'] = isChecked ? completedInfo : "";
 	}
 
 	function onTodoClick(todoEle) {
 
+        if (beingClickedTodoEle != null)
+            return;
+        //
 		if (!needCallHelperClicking) {
 			clickTodo(todoEle);
 		}
@@ -1103,7 +1133,9 @@ var WizTodoReadChecked = (function () {
 	}
 
     function unregisterEvent() {
-        editorDocument.removeEventListener('click', onDocumentClick);
+        if (editorDocument) {
+            editorDocument.removeEventListener('click', onDocumentClick);
+        }
     }
 
 	function init(client) {
@@ -1123,8 +1155,17 @@ var WizTodoReadChecked = (function () {
 	}
 
     function clear() {
-        needCallHelperClicking = true;
+
         unregisterEvent();
+        //
+        helper = null;
+        wizClient = null;
+        modifiedTodos = {};
+        editorDocument = null;
+        needCallHelperClicking = true;
+        beingClickedTodoEle = null;
+        modified = false;
+        bodyOriginalCursor = undefined;
     }
 
 	function extractTodoText(id, html) {
@@ -1262,15 +1303,23 @@ var WizTodoReadChecked = (function () {
 	function getObjectLength(obj) {
 	     var count = 0;
 	     for(var i in obj){
-	         count ++;
+	        if(obj[i] !== undefined) {
+                count ++;
+            }
 	     }
 	     return count;		
 	}
 
+    function _isModified() {
+        return getObjectLength(modifiedTodos) >= 1;
+    }
+
 	function saveHtml() {
 		
-		if (getObjectLength(modifiedTodos) < 1)
+		if (!_isModified())
 			return;
+        //
+        modified = true;
 		//
 		var html = helper.getDocHtml();
 		//
@@ -1317,15 +1366,20 @@ var WizTodoReadChecked = (function () {
 	}
 
 	function onDocumentClose() {
-		var html = saveHtml();
-		//
-		if (helper.onDocumentClose) {
-			helper.onDocumentClose();
-		}
-		//
-		if (isIpad() || isIphone()) {
-			return html;
-		}
+        var modified = _isModified();
+        //
+        if (helper.onBeforeSave) {
+            helper.onBeforeSave(modified);
+        }
+        var html = saveHtml();
+        //
+        if (helper.onDocumentClose) {
+            helper.onDocumentClose();
+        }
+        //
+        if (isIpad() || isIphone()) {
+            return html;
+        }
 	}
 	
 	function getWizDocument() {
@@ -1386,10 +1440,49 @@ var WizTodoReadChecked = (function () {
   
 	function onClickingTodoCallback(cancel, needCallAgain) {
 		needCallHelperClicking = needCallAgain;
-		if (!cancel) {
+		if (cancel) {
+            beingClickedTodoEle = null;
+        }
+        else {
 			clickTodo(beingClickedTodoEle);
+            beingClickedTodoEle = null;
 		}
 	}
+
+    function isModified() {
+        return modified || _isModified();
+    }
+
+    function _setChecklistCursor(cursor) {
+        var labels = editorDocument.getElementsByClassName('wiz-todo-label');
+        for (var i = 0; i < labels.length; i++) {
+            var label  = labels[i];
+            label.style.cursor = cursor;
+            //
+            var imgs = label.getElementsByClassName('wiz-todo-img');
+            for (var j = 0; j < imgs.length; j++) {
+                imgs[j].style.cursor = cursor;
+            }
+        }
+    }
+
+    function setChecklistCursorWait() {
+        _setChecklistCursor("wait");
+        //
+        bodyOriginalCursor = editorDocument.body.style.cursor;
+        editorDocument.body.style.cursor = "wait";
+    }
+
+    function restoreChecklistCursor() {
+        if (undefined === bodyOriginalCursor) {
+            console.log("restoreChecklistCursor, undefined == bodyOriginalCursor.");
+            return;
+        }
+        //
+        _setChecklistCursor("");
+        //
+        editorDocument.body.style.cursor = bodyOriginalCursor;
+    }
 
 	return {
 		init: init,
@@ -1404,7 +1497,10 @@ var WizTodoReadChecked = (function () {
 		setIsPersonalDocument: setIsPersonalDocument,
 		setDocOriginalHtml: setDocOriginalHtml,
 		addTodoCompletedInfo: addTodoCompletedInfo,
-		onClickingTodoCallback: onClickingTodoCallback
+		onClickingTodoCallback: onClickingTodoCallback,
+        isModified: isModified,
+        setChecklistCursorWait: setChecklistCursorWait,
+        restoreChecklistCursor: restoreChecklistCursor
 	}
 
 })();

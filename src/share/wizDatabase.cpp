@@ -32,8 +32,8 @@
 #define WIZKMSYNC_EXIT_OK		0
 #define WIZKMSYNC_EXIT_TRAFFIC_LIMIT		304
 #define WIZKMSYNC_EXIT_STORAGE_LIMIT		305
+#define WIZKMSYNC_EXIT_NOTE_COUNT_LIMIT		3032
 #define WIZKMSYNC_EXIT_BIZ_SERVICE_EXPR		380
-#define WIZKMSYNC_EXIT_BIZ_NOTE_COUNT_LIMIT		3032
 
 #define WIZKMSYNC_EXIT_INFO     "WIZKMSYNC_EXIT_INFO"
 
@@ -67,6 +67,53 @@ CWizDocument::CWizDocument(CWizDatabase& db, const WIZDOCUMENTDATA& data)
 bool CWizDocument::UpdateDocument4(const QString& strHtml, const QString& strURL, int nFlags)
 {
     return m_db.UpdateDocumentData(m_data, strHtml, strURL, nFlags);
+}
+
+void CWizDocument::deleteToTrash()
+{
+    // move document to trash
+
+//    int nVersion = m_data.nVersion;
+    MoveTo(m_db.GetDeletedItemsFolder());
+    m_db.SetDocumentVersion(m_data.strGUID, 0);
+
+    // delete document from server
+    CWizDocumentAttachmentDataArray arrayAttachment;
+    m_db.GetDocumentAttachments(m_data.strGUID, arrayAttachment);
+    CWizDocumentAttachmentDataArray::const_iterator it;
+    for (it = arrayAttachment.begin(); it != arrayAttachment.end(); it++) {
+        m_db.LogDeletedGUID(it->strGUID, wizobjectDocumentAttachment);
+    }
+
+    m_db.LogDeletedGUID(m_data.strGUID, wizobjectDocument);
+}
+
+void CWizDocument::deleteFromTrash()
+{
+    CWizDocumentAttachmentDataArray arrayAttachment;
+    m_db.GetDocumentAttachments(m_data.strGUID, arrayAttachment);
+
+    CWizDocumentAttachmentDataArray::const_iterator it;
+    for (it = arrayAttachment.begin(); it != arrayAttachment.end(); it++) {
+        CString strFileName = m_db.GetAttachmentFileName(it->strGUID);
+        ::WizDeleteFile(strFileName);
+
+        m_db.DeleteAttachment(*it, true, true);
+        m_db.DeleteDeletedGUID(it->strGUID);
+    }
+
+    if (!m_db.DeleteDocument(m_data, true)) {
+        TOLOG1("Failed to delete document: %1", m_data.strTitle);
+        return;
+    }
+    //NOTE: 笔记移动到已删除时已通知服务器删除，在已删除中删除数据时候不再记录到已删除目录
+    m_db.DeleteDeletedGUID(m_data.strGUID);
+
+    CString strZipFileName = m_db.GetDocumentFileName(m_data.strGUID);
+    if (PathFileExists(strZipFileName))
+    {
+        WizDeleteFile(strZipFileName);
+    }
 }
 
 bool CWizDocument::IsInDeletedItemsFolder()
@@ -167,9 +214,11 @@ bool CWizDocument::RemoveTag(const WIZTAGDATA& dataTag)
 void CWizDocument::Delete()
 {
     if (IsInDeletedItemsFolder()) {
-        return PermanentlyDelete();
+//        return PermanentlyDelete();
+        return deleteFromTrash();
     } else {
-        return MoveTo(m_db.GetDeletedItemsFolder());
+//        return MoveTo(m_db.GetDeletedItemsFolder());
+        return deleteToTrash();
     }
 
 }
@@ -422,7 +471,7 @@ bool CWizDatabase::GetModifiedDocumentList(CWizDocumentDataArray& arrayData)
     for (it = docList.begin(); it != docList.end(); it++)
     {
         WIZDOCUMENTDATA doc = *it;
-        if (CanEditDocument(doc))
+        if (CanEditDocument(doc) && !IsInDeletedItems(doc.strLocation))  // do not upload doc in trash
         {
             arrayData.push_back(doc);
         }
@@ -855,7 +904,7 @@ bool CWizDatabase::initZiwReaderForEncryption(const QString& strUserCipher)
         //
         if (!initResult)
         {
-            QMessageBox::warning(0, "Info", "User password check failed!");
+            QMessageBox::warning(0, tr("Info"), tr("User password check failed!"));
             return false;
         }
     }
@@ -1254,12 +1303,12 @@ void CWizDatabase::GetAllBizUserIds(CWizStdStringArray& arrayText)
 
 void CWizDatabase::ClearLastSyncError()
 {
-    // last sync error only contains in personal database
-    if (getPersonalDatabase() != this)
-        return;
-
     setMeta(WIZKMSYNC_EXIT_INFO, _T("LastSyncErrorCode"), QString::number(WIZKMSYNC_EXIT_OK));
     setMeta(WIZKMSYNC_EXIT_INFO, _T("LastSyncErrorMessage"), "");
+
+    //
+    if (getPersonalDatabase() != this)
+        return;
 
     //
     int bizCount = GetMetaDef("Bizs", "Count").toInt();
@@ -1283,6 +1332,12 @@ void CWizDatabase::OnStorageLimit(const QString& strErrorMessage)
     setMeta(WIZKMSYNC_EXIT_INFO, _T("LastSyncErrorMessage"), strErrorMessage);
 }
 
+void CWizDatabase::OnNoteCountLimit(const QString& strErrorMessage)
+{
+    setMeta(WIZKMSYNC_EXIT_INFO, _T("LastSyncErrorCode"), QString::number(WIZKMSYNC_EXIT_NOTE_COUNT_LIMIT));
+    setMeta(WIZKMSYNC_EXIT_INFO, _T("LastSyncErrorMessage"), strErrorMessage);
+}
+
 void CWizDatabase::OnBizServiceExpr(const QString& strBizGUID, const QString& strErrorMessage)
 {
     if (strBizGUID.isEmpty())
@@ -1300,23 +1355,6 @@ void CWizDatabase::OnBizServiceExpr(const QString& strBizGUID, const QString& st
     db->setMeta(strMetaSection, _T("LastSyncErrorMessage"), strErrorMessage);
 }
 
-void CWizDatabase::OnBizNoteCountLimit(const QString& strBizGUID, const QString& strErrorMessage)
-{
-    if (strBizGUID.isEmpty())
-        return;
-
-    CWizDatabase* db = getPersonalDatabase();
-    if (!db)
-        return;
-
-    QString strMetaSection;
-    if (!db->GetBizMetaName(strBizGUID, strMetaSection))
-        return;
-    //
-    db->setMeta(strMetaSection, _T("LastSyncErrorCode"), QString::number(WIZKMSYNC_EXIT_BIZ_NOTE_COUNT_LIMIT));
-    db->setMeta(strMetaSection, _T("LastSyncErrorMessage"), strErrorMessage);
-}
-
 bool CWizDatabase::IsTrafficLimit()
 {
     QString strLastError = meta(WIZKMSYNC_EXIT_INFO, _T("LastSyncErrorCode"));
@@ -1329,6 +1367,13 @@ bool CWizDatabase::IsStorageLimit()
     QString strLastError = meta(WIZKMSYNC_EXIT_INFO, _T("LastSyncErrorCode"));
 
     return strLastError.toInt() == WIZKMSYNC_EXIT_STORAGE_LIMIT;
+}
+
+bool CWizDatabase::IsNoteCountLimit()
+{
+    QString strLastError = meta(WIZKMSYNC_EXIT_INFO, _T("LastSyncErrorCode"));
+
+    return strLastError.toInt() == WIZKMSYNC_EXIT_NOTE_COUNT_LIMIT;
 }
 
 bool CWizDatabase::IsBizServiceExpr(const QString& strBizGUID)
@@ -1346,26 +1391,37 @@ bool CWizDatabase::IsBizServiceExpr(const QString& strBizGUID)
     return strLastError.toInt() == WIZKMSYNC_EXIT_BIZ_SERVICE_EXPR;
 }
 
-bool CWizDatabase::IsBizNoteCountLimit(const QString& strBizGUID)
-{
-    CWizDatabase* db = getPersonalDatabase();
-    if (!db)
-        return false;
-
-    QString strMetaSection;
-    if (!db->GetBizMetaName(strBizGUID, strMetaSection))
-        return false;
-
-    QString strLastError = db->meta(strMetaSection, _T("LastSyncErrorCode"));
-
-    return strLastError.toInt() == WIZKMSYNC_EXIT_BIZ_NOTE_COUNT_LIMIT;
-}
-
 bool CWizDatabase::GetStorageLimitMessage(QString &strErrorMessage)
 {
     QString strLastError = meta(WIZKMSYNC_EXIT_INFO, _T("LastSyncErrorCode"));
 
     if (strLastError.toInt() == WIZKMSYNC_EXIT_STORAGE_LIMIT)
+    {
+        strErrorMessage = meta(WIZKMSYNC_EXIT_INFO, _T("LastSyncErrorMessage"));
+        return true;
+    }
+
+    return false;
+}
+
+bool CWizDatabase::GetTrafficLimitMessage(QString& strErrorMessage)
+{
+    QString strLastError = meta(WIZKMSYNC_EXIT_INFO, _T("LastSyncErrorCode"));
+
+    if (strLastError.toInt() == WIZKMSYNC_EXIT_TRAFFIC_LIMIT)
+    {
+        strErrorMessage = meta(WIZKMSYNC_EXIT_INFO, _T("LastSyncErrorMessage"));
+        return true;
+    }
+
+    return false;
+}
+
+bool CWizDatabase::GetNoteCountLimit(QString& strErrorMessage)
+{
+    QString strLastError = meta(WIZKMSYNC_EXIT_INFO, _T("LastSyncErrorCode"));
+
+    if (strLastError.toInt() == WIZKMSYNC_EXIT_NOTE_COUNT_LIMIT)
     {
         strErrorMessage = meta(WIZKMSYNC_EXIT_INFO, _T("LastSyncErrorMessage"));
         return true;
@@ -2584,6 +2640,7 @@ bool CWizDatabase::UpdateAttachment(const WIZDOCUMENTATTACHMENTDATAEX& data)
         }
     } else {
         bRet = CreateAttachmentEx(data);
+        UpdateDocumentAttachmentCount(data.strDocumentGUID, false);
     }
 
     if (!bRet) {
@@ -2846,16 +2903,17 @@ bool CWizDatabase::DeleteObject(const QString& strGUID, const QString& strType, 
 
 
 bool CWizDatabase::DeleteAttachment(const WIZDOCUMENTATTACHMENTDATA& data,
-                                    bool bLog,
-                                    bool bReset /* = true */)
+                                    bool bLog, bool bReset, bool updateAttachList)
 {
     CString strFileName = GetAttachmentFileName(data.strGUID);
-    bool bRet = CWizIndex::DeleteAttachment(data, bLog, bReset);
+    bool bRet = CWizIndex::DeleteAttachment(data, bLog, bReset, updateAttachList);
     if (PathFileExists(strFileName)) {
         ::WizDeleteFile(strFileName);
     }
 
-    emit attachmentsUpdated();
+    if (updateAttachList) {
+        emit attachmentsUpdated();
+    }
 
     return bRet;
 }

@@ -565,6 +565,17 @@ void CWizCategoryViewShortcutRootItem::drop(const WIZDOCUMENTDATA& data, bool /*
                                                                            data.strTitle, data.strKbGUID, data.strGUID, isEncrypted);
     addChild(pItem);
     sortChildren(0, Qt::AscendingOrder);
+
+#if QT_VERSION < 0x054000
+    CWizCategoryView* categoryView = dynamic_cast<CWizCategoryView*>(treeWidget());
+    QTimer::singleShot(200, categoryView, SLOT(saveShortcutState()));
+#else
+    QTimer::singleShot(200, [this]() {
+        CWizCategoryView* categoryView = dynamic_cast<CWizCategoryView*>(treeWidget());
+        Q_ASSERT(categoryView);
+        categoryView->saveShortcutState();
+    });
+#endif
 }
 
 QString CWizCategoryViewShortcutRootItem::getSectionName()
@@ -1427,44 +1438,46 @@ void CWizCategoryViewGroupRootItem::drop(const WIZDOCUMENTDATA &data, bool force
 
 void CWizCategoryViewGroupRootItem::draw(QPainter* p, const QStyleOptionViewItemV4* vopt) const
 {
-    if (!m_nUnread)
-        return;
     //
-    QString text = unreadString();
-    if (text.isEmpty())
-        return;
-
-    p->save();
-
-    QFont f;
-    Utils::StyleHelper::fontExtend(f);
-    p->setFont(f);
-    //
-    p->setRenderHint(QPainter::Antialiasing);
-
-    QRect rcRect = getExtraButtonRect(vopt->rect, true);
-    QRect rcb = QRect(rcRect.right() - m_szUnreadSize.width() + 1, rcRect.y() + (rcRect.height() - m_szUnreadSize.height())/2,
-                      m_szUnreadSize.width(), m_szUnreadSize.height());
-
-
-    if (vopt->state.testFlag(QStyle::State_Selected) && vopt->state.testFlag(QStyle::State_HasFocus))
+    if (m_nUnread > 0)
     {
-        p->setPen(Utils::StyleHelper::treeViewItemMessageText());
-        p->setBrush(Utils::StyleHelper::treeViewItemMessageText());
-        p->drawRoundedRect(rcb, rcb.height() / 2, rcb.height() / 2);
-        p->setPen(Utils::StyleHelper::treeViewItemMessageBackground());
-        p->drawText(rcb, Qt::AlignCenter, text);
+        QString text = unreadString();
+        p->save();
+
+        QFont f;
+        Utils::StyleHelper::fontExtend(f);
+        p->setFont(f);
+        //
+        p->setRenderHint(QPainter::Antialiasing);
+
+        QRect rcRect = getExtraButtonRect(vopt->rect, true);
+        QRect rcb = QRect(rcRect.right() - m_szUnreadSize.width() + 1, rcRect.y() + (rcRect.height() - m_szUnreadSize.height())/2,
+                          m_szUnreadSize.width(), m_szUnreadSize.height());
+
+
+        if (vopt->state.testFlag(QStyle::State_Selected) && vopt->state.testFlag(QStyle::State_HasFocus))
+        {
+            p->setPen(Utils::StyleHelper::treeViewItemMessageText());
+            p->setBrush(Utils::StyleHelper::treeViewItemMessageText());
+            p->drawRoundedRect(rcb, rcb.height() / 2, rcb.height() / 2);
+            p->setPen(Utils::StyleHelper::treeViewItemMessageBackground());
+            p->drawText(rcb, Qt::AlignCenter, text);
+        }
+        else
+        {
+            p->setPen(Utils::StyleHelper::treeViewItemMessageBackground());
+            p->setBrush(Utils::StyleHelper::treeViewItemMessageBackground());
+            p->drawRoundedRect(rcb, rcb.height() / 2, rcb.height() / 2);
+            p->setPen(Utils::StyleHelper::treeViewItemMessageText());
+            p->drawText(rcb, Qt::AlignCenter, text);
+        }
+        //
+        p->restore();
     }
     else
     {
-        p->setPen(Utils::StyleHelper::treeViewItemMessageBackground());
-        p->setBrush(Utils::StyleHelper::treeViewItemMessageBackground());
-        p->drawRoundedRect(rcb, rcb.height() / 2, rcb.height() / 2);
-        p->setPen(Utils::StyleHelper::treeViewItemMessageText());
-        p->drawText(rcb, Qt::AlignCenter, text);
+        CWizCategoryViewItemBase::draw(p, vopt);
     }
-    //
-    p->restore();
 }
 
 void CWizCategoryViewGroupRootItem::reload(CWizDatabase& db)

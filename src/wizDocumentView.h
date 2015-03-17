@@ -24,9 +24,12 @@ class CWizUserCipherForm;
 class CWizObjectDataDownloaderHost;
 class QStackedWidget;
 class QWebFrame;
+class QWebEnginePage;
+class QWebEngineView;
 class CWizDocumentEditStatusSyncThread;
 class CWizDocumentStatusCheckThread;
 class CWizDocumentStatusChecker;
+class CWizDocumentWebEngine;
 
 namespace Core {
 namespace Internal {
@@ -44,7 +47,11 @@ public:
     virtual QSize sizeHint() const { return QSize(200, 1); }
 
     QWidget* client() const;
+#ifdef USEWEBENGINE
+    CWizDocumentWebEngine* web() const { return m_web; }
+#else
     CWizDocumentWebView* web() const { return m_web; }
+#endif
     QWebView* commentView() const { return m_comments; }
     //
     void waitForDone();
@@ -60,7 +67,11 @@ protected:
     QLabel* m_msgLabel;
 
     QWidget* m_docView;
+#ifdef USEWEBENGINE
+    CWizDocumentWebEngine* m_web;
+#else
     CWizDocumentWebView* m_web;
+#endif
     QWebView* m_comments;
     CWizSplitter* m_splitter;
     Core::Internal::TitleBar* m_title;
@@ -106,6 +117,7 @@ public:
     void setStatusToEditingByCheckList();
 
     QWebFrame* noteFrame();
+    QWebEnginePage* notePage();
 
 signals:
     void documentSaved(const QString& strGUID, CWizDocumentView* viewer);
@@ -139,6 +151,11 @@ public Q_SLOTS:
 
     void on_notifyBar_link_clicked(const QString& link);
 
+    void on_command_request();
+    //
+    void on_comment_populateJavaScriptWindowObject();
+
+
 private:
     void loadNote(const WIZDOCUMENTDATA &doc);
     void downloadDocumentFromServer();
@@ -164,8 +181,16 @@ public:
 
     ~WizFloatDocumentViewer();
 
+public slots:
+    void on_textInputFinished();
+
 private:
+#ifdef USEWEBENGINE
+    CWizDocumentWebEngine* m_webEngine;
+#else
     CWizDocumentView* m_docView;
+#endif
+    QLineEdit* m_edit;
 };
 
 } // namespace Core

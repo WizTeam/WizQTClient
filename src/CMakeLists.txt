@@ -88,6 +88,7 @@ set(wiznote_SOURCES
     wizDocumentListViewItem.cpp
     wizDocumentView.cpp
     wizDocumentWebView.cpp
+    wizDocumentWebEngine.cpp
     wizactions.cpp
     wiznotestyle.cpp
     wizLineInputDialog.cpp
@@ -156,6 +157,9 @@ set(wiznote_SOURCES
     share/rtf2html/rtf_table.cpp
     share/rtf2html/rtf2html.cpp
     widgets/wizEmailShareDialog.cpp
+    share/websocketclientwrapper.cpp
+    share/websockettransport.cpp
+    wizWebEngineInjectObject.cpp
 )
 
 set(wiznote_HEADERS
@@ -230,6 +234,7 @@ set(wiznote_HEADERS
     wizDocumentListViewItem.h
     wizDocumentView.h
     wizDocumentWebView.h
+    wizDocumentWebEngine.h
     wizdocumenthistory.h
     wizattachmentlistwidget.h
     wiztaglistwidget.h
@@ -302,6 +307,9 @@ set(wiznote_HEADERS
     share/rtf2html/rtf_table.h
     share/rtf2html/rtf_tools.h
     widgets/wizEmailShareDialog.h
+    share/websocketclientwrapper.h
+    share/websockettransport.h
+    wizWebEngineInjectObject.h
 )
 
 set(wiznote_FORMS

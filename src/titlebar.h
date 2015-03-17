@@ -10,10 +10,12 @@ struct WIZDOCUMENTDATA;
 class CWizDatabase;
 class CWizTagListWidget;
 class CWizNoteInfoForm;
+class CWizDocumentWebEngine;
 class CWizDocumentWebView;
 class CWizAttachmentListWidget;
 class CWizAnimateAction;
 class CWizExplorerApp;
+class QNetworkReply;
 
 namespace Core {
 class CWizDocumentView;
@@ -36,7 +38,12 @@ public:
     void setLocked(bool bReadOnly, int nReason, bool bIsGroup);
     void showMessageTips(Qt::TextFormat format, const QString& strInfo);
     void hideMessageTips(bool useAnimation);
+#ifdef USEWEBENGINE
+    void setEditor(CWizDocumentWebEngine* editor);
+#else
     void setEditor(CWizDocumentWebView* editor);
+#endif
+
 
     void setNote(const WIZDOCUMENTDATA& data, bool editing, bool locked);
     void updateInfo(const WIZDOCUMENTDATA& doc);
@@ -58,6 +65,7 @@ public Q_SLOTS:
     void onInfoButtonClicked();
 
     void onCommentsButtonClicked();
+    void onCommentPageLoaded(bool ok);
     void onViewNoteLoaded(Core::INoteView* view, const WIZDOCUMENTDATA& note, bool bOk);
     void onTokenAcquired(const QString& strToken);
     void onGetCommentsCountFinished(int nCount);
@@ -72,9 +80,17 @@ signals:
 private:
     void showInfoBar();
     void showEditorBar();
+    void loadErrorPage();
+#ifdef USEWEBENGINE
+    //
+    void initWebChannel();
+    void registerWebChannel();
 
 private:
+    CWizDocumentWebEngine* m_editor;
+#else
     CWizDocumentWebView* m_editor;
+#endif
     CWizExplorerApp& m_app;
 
     TitleEdit* m_editTitle;
@@ -96,6 +112,7 @@ private:
     CWizAttachmentListWidget* m_attachments;
     CWizNoteInfoForm* m_info;
 
+    QString m_strWebchannelUrl;
     CWizAnimateAction* m_editButtonAnimation;
 };
 

@@ -13,6 +13,7 @@
 
 #include <extensionsystem/pluginmanager.h>
 #include "wizmainwindow.h"
+#include "wizDocumentWebEngine.h"
 #include "wizLoginDialog.h"
 #include "share/wizsettings.h"
 #include "share/wizwin32helper.h"

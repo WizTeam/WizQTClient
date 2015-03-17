@@ -68,6 +68,7 @@ void CWizHtmlCollector::StartTag(CWizHtmlTag *pTag, DWORD dwAppData, bool &bAbor
     {
         if (pTag->getValueFromName("type") == "text/css")
         {
+            ProcessTagValue(pTag, "href", WIZHTMLFILEDATA::typeResource);
             ProcessTagValue(pTag, "src", WIZHTMLFILEDATA::typeResource);
         }
     }

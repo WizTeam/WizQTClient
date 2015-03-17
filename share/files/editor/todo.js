@@ -3,7 +3,7 @@ function initDefaultCss(document, destNode) {
 	var WIZ_TODO_STYLE_ID = 'wiz_todo_style_id';
 	var WIZ_STYLE = 'wiz_style';
 	var WIZ_LINK_VERSION = 'wiz_link_version';
-	var WIZ_TODO_STYLE_VERSION = "01.00.08";
+	var WIZ_TODO_STYLE_VERSION = "01.00.09";
 
 	var style = document.getElementById(WIZ_TODO_STYLE_ID);
 	if (style && !!style.getAttribute && style.getAttribute(WIZ_LINK_VERSION) >= WIZ_TODO_STYLE_VERSION)
@@ -13,7 +13,7 @@ function initDefaultCss(document, destNode) {
 		style.parentElement.removeChild(style);
 	}
 	//
-	var strStyle = '.wiz-todo, .wiz-todo-img {width: 16px; height: 16px; cursor: default; padding: 0 10px 0 2px; vertical-align: -10%;-webkit-user-select: none;} .wiz-todo-label { display: inline-block; padding-top: 8px; padding-bottom: 8px; line-height: 1;} .wiz-todo-label-checked { /*text-decoration: line-through;*/ color: #666;} .wiz-todo-label-unchecked {text-decoration: initial;} .wiz-todo-completed-info {padding-left: 44px; display: inline-block; } .wiz-todo-avatar { width:20px; height: 20px; vertical-align: -20%; margin-right:10px; border-radius: 2px;} .wiz-todo-account, .wiz-todo-dt { color: #666; }';	//
+	var strStyle = '.wiz-todo, .wiz-todo-img {width: 16px; height: 16px; cursor: default; padding: 0 10px 0 2px; vertical-align: -10%;-webkit-user-select: none;} .wiz-todo-label { display: inline-block; padding-top: 7px; padding-bottom: 6px; line-height: 1.5;} .wiz-todo-label-checked { /*text-decoration: line-through;*/ color: #666;} .wiz-todo-label-unchecked {text-decoration: initial;} .wiz-todo-completed-info {padding-left: 44px; display: inline-block; } .wiz-todo-avatar { width:20px; height: 20px; vertical-align: -20%; margin-right:10px; border-radius: 2px;} .wiz-todo-account, .wiz-todo-dt { color: #666; }';	//
 	var objStyle = document.createElement('style');
 	objStyle.type = 'text/css';
 	objStyle.textContent = strStyle;
@@ -113,19 +113,19 @@ function WizTodoQtHelper() {
     this.setDocumentType = setDocumentType;
 
     function getUserAlias() {
-        return objApp.getUserAlias();
+        return WizEditor.getUserAlias();
     }
 
     function getUserAvatarFileName(size) {
-        return objApp.getUserAvatarFilePath(size);
+        return WizEditor.getUserAvatarFilePath(size);
     }
 
     function isPersonalDocument() {
-        return objApp.isPersonalDocument();
+        return WizEditor.isPersonalDocument();
     }
 
     function getLocalDateTime(dt) {
-        return objApp.getFormatedDateTime();
+        return WizEditor.getFormatedDateTime();
     }
 
     function setDocumentModified() {
@@ -133,11 +133,11 @@ function WizTodoQtHelper() {
     }
 
     function getCheckedImageFileName() {
-        return objApp.getSkinResourcePath() + "checked.png";
+        return WizEditor.getSkinResourcePath() + "checked.png";
     }
 
     function getUnCheckedImageFileName() {
-        return objApp.getSkinResourcePath() + "unchecked.png";
+        return WizEditor.getSkinResourcePath() + "unchecked.png";
     }
 
     function canEdit() {
@@ -149,7 +149,7 @@ function WizTodoQtHelper() {
     	var WIZ_TODO_STYLE_ID = 'wiz_todo_style_id';
 		var WIZ_STYLE = 'wiz_style';
 		var WIZ_LINK_VERSION = 'wiz_link_version';
-		var WIZ_TODO_STYLE_VERSION = "01.00.08";
+		var WIZ_TODO_STYLE_VERSION = "01.00.09";
         
 		var style = document.getElementById(WIZ_TODO_STYLE_ID);
 		if (style && !!style.getAttribute && style.getAttribute(WIZ_LINK_VERSION) >= WIZ_TODO_STYLE_VERSION)
@@ -159,7 +159,7 @@ function WizTodoQtHelper() {
 			style.parentElement.removeChild(style);
 		}
 		//
-		var strStyle = '.wiz-todo, .wiz-todo-img {width: 16px; height: 16px; cursor: default; padding: 0 10px 0 2px; vertical-align: -10%;-webkit-user-select: none;} .wiz-todo-label { display: inline-block; padding-top: 8px; padding-bottom: 8px; line-height: 1;} .wiz-todo-label-checked { /*text-decoration: line-through;*/ color: #666;} .wiz-todo-label-unchecked {text-decoration: initial;} .wiz-todo-completed-info {padding-left: 44px; display: inline-block; } .wiz-todo-avatar { width:20px; height: 20px; vertical-align: -20%; margin-right:10px; border-radius: 2px;} .wiz-todo-account, .wiz-todo-dt { color: #666; }';
+		var strStyle = '.wiz-todo, .wiz-todo-img {width: 16px; height: 16px; cursor: default; padding: 0 10px 0 2px; vertical-align: -10%;-webkit-user-select: none;} .wiz-todo-label { display: inline-block; padding-top: 7px; padding-bottom: 6px; line-height: 1.5;} .wiz-todo-label-checked { /*text-decoration: line-through;*/ color: #666;} .wiz-todo-label-unchecked {text-decoration: initial;} .wiz-todo-completed-info {padding-left: 44px; display: inline-block; } .wiz-todo-avatar { width:20px; height: 20px; vertical-align: -20%; margin-right:10px; border-radius: 2px;} .wiz-todo-account, .wiz-todo-dt { color: #666; }';
 		//
 		var objStyle = document.createElement('style');
 		objStyle.type = 'text/css';
@@ -172,7 +172,7 @@ function WizTodoQtHelper() {
     }  
 
     function setDocumentType(type) {
-        objApp.setCurrentDocumentType(type);
+        WizEditor.setCurrentDocumentType(type);
     } 
 }
 
@@ -299,7 +299,7 @@ function WizTodoIphoneHelper() {
 	}
     
 	function setDocumentModified() {
-        window.location.href = "wiztodolist://setDocumentModified";
+        window.location.href = "wiztodolist://setDocumentModified/";
 	}
     
 	function getCheckedImageFileName() {
@@ -319,17 +319,18 @@ function WizTodoIphoneHelper() {
 	}
 
 	function setDocumentType(type) {
-        window.location.href = "wiztodolist://setDocumentType" + "&*/"+ type;
+        window.location.href = "wiztodolist://setDocumentType/" + "?type="+ type;
 	}
 
 	function onAddTodoCompletedInfo(isChecked, id, dt, callBack) {
-		window.location.href = "wiztodolist://onAddTodoCompletedInfo" + "&*/"+ isChecked +"&*/"+ id +"&*/"+ dt +"&*/"+ callBack;		
+        var href = "wiztodolist://onAddTodoCompletedInfo/" + "?checked="+ isChecked +"&id="+ id +"&dt="+ dt +"&callback="+ callBack;
+		window.location.href = href;
 	}
     
 	function canInsert(caninsert) {
 		if (caninsert)
 			return;
-		window.location.href = "wiztodolist://canInsert" + "&*/"+ caninsert;
+		window.location.href = "wiztodolist://canInsert/" + "?canInsert"+ caninsert;
 	}
 }
 
@@ -746,11 +747,12 @@ var WizTodo = (function () {
 		
 		return n < 10 ? '0' + n : n;
 	}
+
 	function ToDateString(dt){
        	//
         var ret = dt.getFullYear() + "-" + 
 	    			formatIntToDateString(dt.getMonth() + 1) + "-" + 
-	    			formatIntToDateString(dt.getDate()) + " " + 
+	    			formatIntToDateString(dt.getDate()) + "T" + 
 	    			formatIntToDateString(dt.getHours())+ ":" + 
 	    			formatIntToDateString(dt.getMinutes()) + ":" + 
 	    			formatIntToDateString(dt.getSeconds());
@@ -808,7 +810,7 @@ var WizTodo = (function () {
 		if (!todoHelper.isPersonalDocument()) {
 
 			if (isIpad() || isIphone()) {
-				todoHelper.onAddTodoCompletedInfo(!isChecked, todoEle.id, ToDateString(new Date()), 'addTodoCompletedInfo');
+				todoHelper.onAddTodoCompletedInfo(!isChecked, todoEle.id, Date.now(), 'addTodoCompletedInfo');
 			}
 			else {
 				var dt = todoHelper.getLocalDateTime(new Date());

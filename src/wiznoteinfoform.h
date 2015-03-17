@@ -24,6 +24,14 @@ protected:
 private slots:
     void on_labelOpenDocument_linkActivated(const QString &link);
 
+    void on_editTitle_editingFinished();
+
+    void on_editURL_editingFinished();
+
+    void on_editAuthor_editingFinished();
+
+    void on_checkEncrypted_clicked(bool checked);
+
 private:
     Ui::CWizNoteInfoForm *ui;
     QString m_docKbGuid;

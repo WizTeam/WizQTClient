@@ -61,6 +61,12 @@ void CWizKMSyncEvents::OnBizServiceExpr(IWizSyncableDatabase *pDatabase)
     Q_UNUSED(pDatabase);
 }
 
+void CWizKMSyncEvents::OnBizNoteCountLimit(IWizSyncableDatabase* pDatabase)
+{
+    // FIXME
+    Q_UNUSED(pDatabase);
+}
+
 void CWizKMSyncEvents::OnUploadDocument(const QString& strDocumentGUID, bool bDone)
 {
     qDebug() << "[Sync]SetCurrentDatabase guid: " << strDocumentGUID;
@@ -126,10 +132,12 @@ void CWizKMSyncThread::run()
 
 void CWizKMSyncThread::syncAfterStart()
 {
+#ifndef QT_DEBUG
     if (m_tLastSyncAll.secsTo(QDateTime::currentDateTime()) < 5)
         return;
 
     startSyncAll(false);
+#endif
 }
 
 void CWizKMSyncThread::startSyncAll(bool bBackground)
@@ -192,6 +200,10 @@ bool CWizKMSyncThread::needSyncAll()
 {
     if (m_bNeedSyncAll)
         return true;
+
+#ifdef QT_DEBUG
+    return false;
+#endif
 
     QDateTime tNow = QDateTime::currentDateTime();
     int seconds = m_tLastSyncAll.secsTo(tNow);
