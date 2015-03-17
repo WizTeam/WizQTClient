@@ -37,9 +37,14 @@ bool WizHtml2Zip(const QString& strHtml, const CWizStdStringArray& arrayResource
     if (!zip.open(strZipFileName))
         return false;
 
+    QString strHtmlText = strHtml;
+    if (strHtmlText.left(2) != " <!")
+    {
+        strHtmlText = "<!DOCTYPE html>" + strHtmlText;
+    }
     CString strIndexFileName = Utils::PathResolve::tempPath() + WizIntToStr(GetTickCount()) + ".html";
     //if (!::WizSaveUnicodeTextToUnicodeFile(strIndexFileName, strHtml))
-    if (!::WizSaveUnicodeTextToUtf8File(strIndexFileName, strHtml))
+    if (!::WizSaveUnicodeTextToUtf8File(strIndexFileName, strHtmlText))
         return false;
 
     CString strMetaFileName = Utils::PathResolve::tempPath() + WizIntToStr(GetTickCount()) + ".xml";

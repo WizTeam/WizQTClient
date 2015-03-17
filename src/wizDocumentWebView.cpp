@@ -965,7 +965,7 @@ void CWizDocumentWebView::saveEditingViewDocument(const WIZDOCUMENTDATA &data, b
 
     //
     //QString strPlainTxt = page()->mainFrame()->evaluateJavaScript("editor.getPlainTxt();").toString();
-    strHtml = "<!DOCTYPE html><html><head>" + strHead + "</head><body>" + strHtml + "</body></html>";
+    strHtml = "<html><head>" + strHead + "</head><body>" + strHtml + "</body></html>";
 
     m_docSaverThread->save(data, strHtml, strFileName, 0);
 }
