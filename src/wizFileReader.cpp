@@ -118,9 +118,10 @@ void CWizFileReader::run()
         }
         else if (docExtList.contains(docType))
         {
-            if (!documentToHtml(strFile, DocFormatTextDocumentType, strHtml))
-                continue;
-            WizGetBodyContentFromHtml(strHtml, true);
+//            if (!documentToHtml(strFile, DocFormatTextDocumentType, strHtml))
+//                continue;
+//            WizGetBodyContentFromHtml(strHtml, true);
+            emit fileLoadFailed(strFile);
         }
         else if (webExtList.contains(docType))
         {
