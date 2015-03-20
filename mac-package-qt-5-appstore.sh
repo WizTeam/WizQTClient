@@ -61,6 +61,7 @@ done
 
 rm -R -f $MYAPP.app/Contents/PlugIns/platforms/libqminimal.dylib
 rm -R -f $MYAPP.app/Contents/PlugIns/platforms/libqoffscreen.dylib
+rm -R -f $MYAPP.app/Contents/PlugIns/sqldrivers/libqsqlpsql.dylib
 
 for I in $ICULIBS ; do
     cp -p $ICUDIR/lib/$I.dylib $MYAPP.app/Contents/PlugIns/icu/
