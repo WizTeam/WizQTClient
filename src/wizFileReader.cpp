@@ -130,7 +130,8 @@ void CWizFileReader::run()
         }
         else
         {
-            strHtml = loadTextFileToHtml(strFile);
+//            strHtml = loadTextFileToHtml(strFile);
+            emit fileLoadFailed(strFile);
         }
 #endif
 

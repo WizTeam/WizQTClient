@@ -19,6 +19,7 @@ public:
 
 signals:
     void fileLoaded(QString strHtml, QString strTitle);
+    void fileLoadFailed(const QString& strFileName);
     void loadFinished();
     void loadProgress(int total,int loaded);
     void htmlFileloaded(const QString &strFileName, const QString& strHtml,

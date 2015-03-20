@@ -2342,14 +2342,24 @@ void MainWindow::on_message_itemSelectionChanged()
 
 void MainWindow::on_options_settingsChanged(WizOptionsType type)
 {
-    if (wizoptionsNoteView == type) {
+    switch (type) {
+    case wizoptionsNoteView:
         m_doc->settingsChanged();
-    } else if (wizoptionsSync == type) {
+        break;
+    case wizoptionsSync:
         m_sync->setFullSyncInterval(userSettings().syncInterval());
-    } else if (wizoptionsFont == type) {
+        break;
+    case wizoptionsFont:
         m_doc->web()->editorResetFont();
-    } else if (wizoptionsFolders == type) {
+        break;
+    case wizoptionsFolders:
         m_category->sortItems(0, Qt::AscendingOrder);
+        break;
+    case wizoptionsMarkdown:
+        Core::ICore::instance()->emitMarkdownSettingChanged();
+        break;
+    default:
+        break;
     }
 }
 

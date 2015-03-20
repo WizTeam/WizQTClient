@@ -431,9 +431,12 @@ void CWizCategoryBaseView::dropEvent(QDropEvent * event)
 void CWizCategoryBaseView::loadDocument(QStringList &strFileList)
 {
     CWizFileReader *fileReader = new CWizFileReader();
-    connect(fileReader, SIGNAL(fileLoaded(QString, QString)), SLOT(createDocumentByHtml(QString, QString)));
+    connect(fileReader, SIGNAL(fileLoaded(QString, QString)),
+            SLOT(createDocumentByHtml(QString, QString)));
     connect(fileReader, SIGNAL(htmlFileloaded(QString, QString, QString)),
             SLOT(createDocumentByHtml(QString, QString, QString)));
+    connect(fileReader, SIGNAL(fileLoadFailed(QString)),
+            SLOT(createDocumentByFile(QString)));
     MainWindow *mainWindow = dynamic_cast<MainWindow*>(m_app.mainWindow());
     CWizProgressDialog *progressDialog  = mainWindow->progressDialog();
     progressDialog->setProgress(100,0);
@@ -744,6 +747,10 @@ void CWizCategoryBaseView::createDocumentByHtml(const QString &/*strFileName*/,
 {
 }
 
+bool CWizCategoryBaseView::createDocumentByFile(const QString& /*strFileName*/)
+{
+
+}
 
 
 /* ------------------------------ CWizCategoryView ------------------------------ */
@@ -1129,6 +1136,16 @@ bool CWizCategoryView::createDocument(WIZDOCUMENTDATA& data, const QString& strH
     quickSyncNewDocument(data.strKbGUID);
     //
     return true;
+}
+
+bool CWizCategoryView::createDocumentByFile(const QString& strFileName)
+{
+    if (!QFile::exists(strFileName))
+        return false;
+
+    QStringList fileList(strFileName);
+    WIZDOCUMENTDATA data;
+    return createDocumentByAttachments(data, fileList);
 }
 
 bool CWizCategoryView::createDocumentByAttachments(WIZDOCUMENTDATA& data, const QStringList& attachList)
