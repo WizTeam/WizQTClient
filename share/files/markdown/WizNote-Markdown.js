@@ -1,5 +1,6 @@
 ﻿;(function() {     
-    var WizMD_pluginPath = "${CACHE_PATH}";     
+    var WizMD_pluginPath = "${CACHE_PATH}";   
+    var WizMD_cssFilePath = "${CSS_FILE_PATH}"  
     
     //-----------------------------------------------------------------
     //-----------------------------------------------------------------
@@ -27,7 +28,7 @@
     function WizMDAppendCssSrc(doc, str) {
         WizMDInsertElem(doc, 'HEAD', "link", function(oCss) {
             oCss.rel = "stylesheet";
-            oCss.href = ("file:///" + WizMD_pluginPath + str).replace(/\\/g, '/');
+            oCss.href = ("file://" + str).replace(/\\/g, '/');
         });
     }
 
@@ -46,7 +47,7 @@
         WizMDAppendScriptSrc(doc, 'HEAD', "text/javascript", "markdown\\marked.min.js");
         WizMDAppendScriptSrc(doc, 'HEAD', "text/javascript", "google-code-prettify\\prettify.js");
         var jqueryScript = WizMDAppendScriptSrc(doc, 'HEAD', "text/javascript", "markdown\\jquery.min.js");
-        WizMDAppendCssSrc(doc, "markdown\\github2.css");
+        WizMDAppendCssSrc(doc, WizMD_cssFilePath);
         jqueryScript.onload = function() {
             WizMDAppendScriptSrc(doc, 'HEAD', "text/javascript", "wiznote-markdown-inject.js");
         };

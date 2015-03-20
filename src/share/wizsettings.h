@@ -69,7 +69,8 @@ enum WizOptionsType
     wizoptionsSync,
     wizoptionsSkin,
     wizoptionsFont,
-    wizoptionsFolders
+    wizoptionsFolders,
+    wizoptionsMarkdown
 };
 
 enum WizPositionType

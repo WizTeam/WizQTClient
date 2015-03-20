@@ -8,6 +8,8 @@
 #include "share/wizDatabaseManager.h"
 #include "wizmainwindow.h"
 #include "wizproxydialog.h"
+#include "widgets/wizMarkdownTemplateDialog.h"
+#include "plugins/coreplugin/icore.h"
 
 
 CWizPreferenceWindow::CWizPreferenceWindow(CWizExplorerApp& app, QWidget* parent)
@@ -21,9 +23,6 @@ CWizPreferenceWindow::CWizPreferenceWindow(CWizExplorerApp& app, QWidget* parent
     setWindowTitle(tr("Preference"));
 
     connect(ui->btnClose, SIGNAL(clicked()), SLOT(accept()));
-
-    // FIXME: proxy settings will back soon!!!
-//    ui->labelProxySettings->hide();
 
     // general tab
     ::WizGetTranslatedLocales(m_locales);
@@ -308,6 +307,12 @@ void CWizPreferenceWindow::labelProxy_linkActivated(const QString& link)
 
 void CWizPreferenceWindow::onButtonFontSelect_clicked()
 {
+    CWizMarkdownTemplateDialog dlg;
+    if (dlg.exec() == QDialog::Accepted)
+//        Core::ICore::instance()->emitMarkdownSettingChanged();
+        Q_EMIT settingsChanged(wizoptionsMarkdown);
+    return;
+
     if (!m_fontDialog) {
         m_fontDialog = new QFontDialog(this);
 

@@ -31,15 +31,13 @@ public:
     static void emitViewNoteRequested(INoteView* view, const WIZDOCUMENTDATA& doc);
     static void emitViewNoteLoaded(INoteView* view, const WIZDOCUMENTDATA& doc, bool bOk);
     static void emitCloseNoteRequested(INoteView* view);
-
-    static void emitFrameRenderRequested(QWebFrame *frame, bool bUseInlineCss);
+    static void emitMarkdownSettingChanged();
 
 Q_SIGNALS:
     void viewNoteRequested(Core::INoteView* view, const WIZDOCUMENTDATA& doc);
     void viewNoteLoaded(Core::INoteView* view, const WIZDOCUMENTDATA& doc, bool bOk);
     void closeNoteRequested(Core::INoteView* view);
-
-    void frameRenderRequested(QWebFrame *frame, bool bUseInlineCss);
+    void markdownSettingChanged();
 };
 
 } // namespace Core
