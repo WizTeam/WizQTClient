@@ -249,17 +249,21 @@ void MarkdownPlugin::getCustomCssFile()
     QSettings* settings = ExtensionSystem::PluginManager::settings();
     QByteArray ba = QByteArray::fromBase64(settings->value(strCategory + "SelectedItem").toByteArray());
     QString strFile = QString::fromUtf8(ba);
-    if (!strFile.isEmpty() && QFile::exists(strFile))
+    if (strFile.isEmpty())
+    {
+        strFile = cachePath() + "plugins/markdown/markdown/github2.css";
+    }
+    else if (QFile::exists(strFile))
     {
         m_strCssFile = strFile;
     }
     else
     {
-        QString strCssFile = cachePath() + "plugins/markdown/markdown/github2.css";
         qDebug() << QString("[Markdown] You have choose %1 as you Markdown style template, but"
-                 "we can not find this file. Please check wether file exists.").arg(strFile);
-        m_strCssFile = strCssFile;
+                            "we can not find this file. Please check wether file exists.").arg(strFile);
+        strFile  = cachePath() + "plugins/markdown/markdown/github2.css";
     }
+    m_strCssFile = strFile;
 }
 
 

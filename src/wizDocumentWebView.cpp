@@ -134,6 +134,7 @@ void CWizDocumentWebViewPage::on_editorCommandPaste_triggered()
         QMimeData* data = new QMimeData();
         data->removeFormat("text/html");
         data->setHtml(strText);
+        data->setText(mime->text());
         clip->setMimeData(data);
     }
     else if (mime->hasHtml())   // special process for xcode
@@ -143,6 +144,7 @@ void CWizDocumentWebViewPage::on_editorCommandPaste_triggered()
         {
             QMimeData* data = new QMimeData();
             data->setHtml(strHtml);
+            data->setText(mime->text());
             clip->setMimeData(data);
             return;
         }
