@@ -21,6 +21,7 @@ CWizMarkdownTemplateDialog::CWizMarkdownTemplateDialog(QWidget *parent) :
     ui->listWidget->setTextElideMode(Qt::ElideMiddle);
     CWizListStyle* listStyle = new CWizListStyle();
     ui->listWidget->setStyle(listStyle);
+    ui->webView->page()->setLinkDelegationPolicy(QWebPage::DelegateAllLinks);
     QTimer::singleShot(100, this, SLOT(initListWidget()));
 }
 
