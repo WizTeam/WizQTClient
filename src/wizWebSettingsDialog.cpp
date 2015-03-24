@@ -28,8 +28,8 @@ CWizWebSettingsDialog::CWizWebSettingsDialog(QString url, QSize sz, QWidget *par
     m_web = new QWebView(this);
     m_web->settings()->globalSettings()->setAttribute(QWebSettings::LocalStorageEnabled, true);
     m_web->settings()->globalSettings()->setAttribute(QWebSettings::LocalStorageDatabaseEnabled, true);
-    connect(m_web->page()->networkAccessManager(), SIGNAL(finished(QNetworkReply*)),
-            SLOT(on_networkRequest_finished(QNetworkReply*)));
+//    connect(m_web->page()->networkAccessManager(), SIGNAL(finished(QNetworkReply*)),
+//            SLOT(on_networkRequest_finished(QNetworkReply*)));
     connect(m_web, SIGNAL(loadFinished(bool)), SLOT(on_web_loaded(bool)));
     connect(m_web->page()->mainFrame(), SIGNAL(javaScriptWindowObjectCleared()),
             SLOT(onEditorPopulateJavaScriptWindowObject()));
@@ -76,6 +76,10 @@ void CWizWebSettingsDialog::on_web_loaded(bool ok)
         m_movie->stop();
         m_labelProgress->setVisible(false);
         m_web->setVisible(true);
+    }
+    else
+    {
+        loadErrorPage();
     }
 }
 
