@@ -456,3 +456,17 @@ QString ApiEntry::kUrlFromGuid(const QString& strToken, const QString& strKbGUID
     return d->kUrlFromGuid(strToken, strKbGUID);
 }
 
+QString ApiEntry::appstoreParam(bool useAndSymbol)
+{
+    QString strParam = "";
+#ifdef BUILD4APPSTORE
+    if (useAndSymbol) {
+        strParam = "&appstore=1";
+    } else {
+        strParam = "appstore=1";
+    }
+#endif
+
+    return strParam;
+}
+
