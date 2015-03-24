@@ -74,6 +74,7 @@
 #include "notecomments.h"
 #include "wizMobileFileReceiver.h"
 #include "wizDocTemplateDialog.h"
+#include "share/wizFileMonitor.h"
 
 using namespace Core;
 using namespace Core::Internal;
@@ -2655,30 +2656,40 @@ void MainWindow::viewDocumentByWizKMURL(const QString &strKMURL)
     }
 }
 
-void MainWindow::viewAttachmentByWizKMURL(const QString& strKMURL)
+void MainWindow::viewAttachmentByWizKMURL(const QString& strKbGUID, const QString& strKMURL)
 {
 
     if (GetWizUrlType(strKMURL) != WizUrl_Attachment)
         return;
-    //TODO:
-/*
-    CWizDatabase& db = m_dbMgr.db();
-    QString strGUID = db.GetParamFromWizKMURL(strKMURL, "guid");
 
-    const WIZDOCUMENTDATA& document = m_doc->note();
-
-    WIZDOCUMENTDATA document;
+    CWizDatabase& db = m_dbMgr.db(strKbGUID);
+    QString strGUID = GetParamFromWizKMURL(strKMURL, "guid");
 
     WIZDOCUMENTATTACHMENTDATA attachment;
-    if (m_dbMgr.db(document.strKbGUID).AttachmentFromGUID(strGUID, attachment))
+    if (db.AttachmentFromGUID(strGUID, attachment))
     {
-        if (attachment.strDocumentGUID == document.strGUID)
+        bool bIsLocal = db.IsObjectDataDownloaded(attachment.strGUID, "attachment");
+        QString strFileName = db.GetAttachmentFileName(attachment.strGUID);
+        bool bExists = PathFileExists(strFileName);
+        if (!bIsLocal || !bExists)
         {
+            downloadAttachment(attachment);
 
+#if QT_VERSION > 0x050000
+            // try to set the attachement read-only.
+            QFile file(strFileName);
+            if (file.exists() && !db.CanEditAttachment(attachment) && (file.permissions() & QFileDevice::WriteUser))
+            {
+                QFile::Permissions permissions = file.permissions();
+                permissions = permissions & ~QFileDevice::WriteOwner & ~QFileDevice::WriteUser
+                        & ~QFileDevice::WriteGroup & ~QFileDevice::WriteOther;
+                file.setPermissions(permissions);
+            }
+#endif
         }
-    }
 
-*/
+        openAttachment(attachment, strFileName);
+    }
 }
 
 void MainWindow::createNoteWithAttachments(const QStringList& strAttachList)
@@ -2948,6 +2959,38 @@ void MainWindow::updateHistoryButtonStatus()
     m_actions->actionFromName(WIZACTION_GLOBAL_GOBACK)->setEnabled(canGoBack);
     bool canGoForward = m_history->canForward();
     m_actions->actionFromName(WIZACTION_GLOBAL_GOFORWARD)->setEnabled(canGoForward);
+}
+
+void MainWindow::openAttachment(const WIZDOCUMENTATTACHMENTDATA& attachment,
+                                const QString& strFileName)
+{
+    if (!QDesktopServices::openUrl(QUrl::fromLocalFile(strFileName)))
+    {
+        qDebug() << "Can not open attachment file : " << strFileName;
+    }
+
+    CWizFileMonitor& monitor = CWizFileMonitor::instance();
+    connect(&monitor, SIGNAL(fileModified(QString,QString,QString,QString,QDateTime)),
+            &m_dbMgr.db(), SLOT(onAttachmentModified(QString,QString,QString,QString,QDateTime)), Qt::UniqueConnection);
+
+    /*需要使用文件的修改日期来判断文件是否被改动,从服务器上下载下的文件修改日期必定大于数据库中日期.*/
+    QFileInfo info(strFileName);
+    monitor.addFile(attachment.strKbGUID, attachment.strGUID, strFileName,
+                    attachment.strDataMD5, info.lastModified());
+}
+
+void MainWindow::downloadAttachment(const WIZDOCUMENTATTACHMENTDATA& attachment)
+{
+    CWizProgressDialog *dlg = progressDialog();
+    dlg->setProgress(100,0);
+    dlg->setActionString(tr("Downloading attachment file  %1 ").arg(attachment.strName));
+    dlg->setNotifyString(tr("loading..."));
+    connect(m_objectDownloaderHost, SIGNAL(downloadProgress(QString,int,int)),
+            dlg, SLOT(setProgress(QString,int,int)));
+    connect(m_objectDownloaderHost, SIGNAL(downloadDone(WIZOBJECTDATA,bool)),
+            dlg, SLOT(accept()));
+    m_objectDownloaderHost->downloadData(attachment);
+    dlg->exec();
 }
 
 void MainWindow::viewDocumentInFloatWidget(const WIZDOCUMENTDATA& data)

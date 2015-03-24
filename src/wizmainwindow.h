@@ -229,7 +229,7 @@ public:
     void setMobileFileReceiverEnable(bool bEnable);
     //
     void viewDocumentByWizKMURL(const QString& strKMURL);
-    void viewAttachmentByWizKMURL(const QString& strKMURL);
+    void viewAttachmentByWizKMURL(const QString& strKbGUID, const QString& strKMURL);
     //
     void createNoteWithAttachments(const QStringList& strAttachList);
     void createNoteWithText(const QString& strText);
@@ -433,7 +433,6 @@ private:
 
     //
     bool needShowNewFeatureGuide();
-
     //
     void resortDocListAfterViewDocument(const WIZDOCUMENTDATA& doc);
 
@@ -444,6 +443,9 @@ private:
 
     //
     void updateHistoryButtonStatus();
+    //
+    void openAttachment(const WIZDOCUMENTATTACHMENTDATA& attachment, const QString& strFileName);
+    void downloadAttachment(const WIZDOCUMENTATTACHMENTDATA& attachment);
 };
 
 } // namespace Internal

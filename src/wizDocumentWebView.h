@@ -205,7 +205,8 @@ private:
     void tryResetTitle();
 
     bool isInternalUrl(const QUrl& url);
-    void viewDocumentByUrl(const QUrl& url);
+    void viewDocumentByUrl(const QString& strUrl);
+    void viewAttachmentByUrl(const QString& strKbGUID, const QString& strUrl);
 
     void splitHtmlToHeadAndBody(const QString& strHtml, QString& strHead, QString& strBody);
 
@@ -388,6 +389,7 @@ private:
     void setWindowVisibleOnScreenShot(bool bVisible);
     bool insertImage(const QString& strFileName, bool bCopyFile);
     void closeSourceMode();
+    void addAttachmentThumbnail(const QString strFile, const QString& strGuid);
 };
 
 #endif // WIZDOCUMENTWEBVIEW_H
