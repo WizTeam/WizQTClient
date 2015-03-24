@@ -518,6 +518,7 @@ void CWizDocumentWebView::dropEvent(QDropEvent* event)
                     TOLOG1("[drop] add attachment failed %1", strFileName);
                     continue;
                 }
+                addAttachmentThumbnail(strFileName, data.strGUID);
                 nAccepted ++;
             }
         }
@@ -811,6 +812,18 @@ void CWizDocumentWebView::closeSourceMode()
     }
 }
 
+void CWizDocumentWebView::addAttachmentThumbnail(const QString strFile, const QString& strGuid)
+{
+    QImage img;
+    QString strBG = getSkinResourcePath() + "html_attachment_bg.png";
+    ::WizCreateThumbnailForAttachment(img, strFile, strBG, QSize(32, 32));
+    QString strDestFile =Utils::PathResolve::tempPath() + WizGenGUIDLowerCaseLetterOnly() + ".png";
+    img.save(strDestFile, "PNG");
+    QString strLink = QString("wiz://open_attachment?guid=%1").arg(strGuid);
+    QString strHtml = WizGetImageHtmlLabelWithLink(strDestFile, strLink);
+    editorCommandExecuteInsertHtml(strHtml, true);
+}
+
 bool CWizDocumentWebView::shareNoteByEmail()
 {
     CWizEmailShareDialog dlg(m_app);
@@ -873,8 +886,20 @@ void CWizDocumentWebView::onEditorLinkClicked(const QUrl& url)
 {
     if (isInternalUrl(url))
     {
-        viewDocumentByUrl(url);
-        return;
+        QString strUrl = url.toString();
+        switch (GetWizUrlType(strUrl)) {
+        case WizUrl_Document:
+            viewDocumentByUrl(strUrl);
+            break;
+        case WizUrl_Attachment:
+            if (!m_bEditingMode)
+            {
+                viewAttachmentByUrl(view()->note().strKbGUID, strUrl);
+            }
+            break;
+        default:
+            break;
+        }
     }
     else
     {
@@ -912,14 +937,22 @@ bool WizStringList2Map(const QStringList& list, QMap<QString, QString>& map)
     return true;
 }
 
-void CWizDocumentWebView::viewDocumentByUrl(const QUrl& url)
+void CWizDocumentWebView::viewDocumentByUrl(const QString& strUrl)
 {
-    if (!url.isValid())
+    if (strUrl.isEmpty())
         return;
 
-    QString strUrl = url.toString();
     MainWindow* mainWindow = qobject_cast<MainWindow *>(m_app.mainWindow());
     mainWindow->viewDocumentByWizKMURL(strUrl);
+}
+
+void CWizDocumentWebView::viewAttachmentByUrl(const QString& strKbGUID, const QString& strUrl)
+{
+    if (strUrl.isEmpty())
+        return;
+
+    MainWindow* mainWindow = qobject_cast<MainWindow *>(m_app.mainWindow());
+    mainWindow->viewAttachmentByWizKMURL(strKbGUID, strUrl);
 }
 
 void CWizDocumentWebView::splitHtmlToHeadAndBody(const QString& strHtml, QString& strHead, QString& strBody)

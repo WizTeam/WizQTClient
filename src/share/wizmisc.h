@@ -143,7 +143,10 @@ void WizLoadSkinIcon3(QIcon& icon, const QString& strSkinName, const QString& st
                       QIcon::Mode mode, QIcon::State state, const QColor& blendColor);
 QIcon WizLoadSkinIcon3(const QString& strIconName, QIcon::Mode mode);
 
-void scaleIconSizeForRetina(QSize& size);
+void WizScaleIconSizeForRetina(QSize& size);
+
+bool WizCreateThumbnailForAttachment(QImage& img, const QString& fileName,
+                                  const QString& bgImage, const QSize& iconSize);
 
 QString WizGetHtmlBodyContent(const QString& strHtml);
 bool WizGetBodyContentFromHtml(QString& strHtml, bool bNeedTextParse);
@@ -153,6 +156,7 @@ void WizDeleteFile(const CString& strFileName);
 BOOL WizDeleteAllFilesInFolder(const CString& strPath);
 
 bool WizImage2Html(const QString& strImageFile, QString& strHtml, bool bUseCopyFile = false);
+QString WizGetImageHtmlLabelWithLink(const QString& imageFile, const QString& linkHref);
 QString WizStr2Title(const QString& str);
 
 BOOL WizIsValidFileNameNoPath(const CString& strFileName);

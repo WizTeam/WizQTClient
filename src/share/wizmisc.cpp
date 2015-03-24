@@ -11,6 +11,7 @@
 #include <QPixmap>
 #include <QPainter>
 #include <QThread>
+#include <QFileIconProvider>
 
 #include <QtCore>
 //#include <QtNetwork>
@@ -1907,6 +1908,12 @@ QString getImageHtmlLabelByFile(const QString& strImageFile)
     return QString("<div><img border=\"0\" src=\"file://%1\" /></div>").arg(strImageFile);
 }
 
+QString WizGetImageHtmlLabelWithLink(const QString& imageFile, const QString& linkHref)
+{
+    return QString("<div><a href=\"%1\"><img border=\"0\" src=\"file://%2\" /></a></div>")
+            .arg(linkHref).arg(imageFile);
+}
+
 bool WizImage2Html(const QString& strImageFile, QString& strHtml, bool bUseCopyFile)
 {
     QString strDestFile = strImageFile;
@@ -2284,7 +2291,7 @@ QChar getWizSearchSplitChar()
 }
 
 
-void scaleIconSizeForRetina(QSize& size)
+void WizScaleIconSizeForRetina(QSize& size)
 {
 #ifdef Q_OS_MAC
     if (qApp->devicePixelRatio() >= 2)
@@ -2337,4 +2344,52 @@ QString WizStr2Title(const QString& str)
     }
 
     return str.left(idx);
+}
+
+bool WizCreateThumbnailForAttachment(QImage& img, const QString& fileName,
+                                  const QString& bgImage, const QSize& iconSize)
+{
+    QFileInfo info(fileName);
+    if (!info.exists())
+        return false;
+
+    // get info text and calculate width of image
+    const int nMb = 1024 * 1024;
+    int nIconMargin = 4;
+    QString sz = info.size() > 1024 ? (info.size() > nMb ? QString(QString::number(qCeil(info.size() / (double)nMb)) + " MB")
+                                                         : QString(QString::number(qCeil(info.size() / (double)1024)) + " KB")) :
+                                      QString(QString::number(info.size()) + " B");
+    QString infoText = QDate::currentDate().toString(Qt::ISODate) + " " + QTime::currentTime().toString() + ", " + sz;
+
+    QFont font;
+    QFontMetrics fm(font);
+    int nTextWidth = fm.width(infoText);
+    int nWidth = nTextWidth + nIconMargin * 4 + iconSize.width();
+    QImage imageBg(bgImage);
+    int nHeight = imageBg.height();
+
+    // draw icon and text on image
+    img = QImage(nWidth, nHeight, QImage::Format_RGB888);
+    imageBg.scaledToWidth(nWidth);
+    QPainter p(&img);
+    p.drawImage(QRect(0, 0, nWidth, nHeight), imageBg);
+
+    QFileIconProvider ip;
+    QIcon icon = ip.icon(info);
+    QPixmap pixIcon = icon.pixmap(iconSize);
+    p.drawPixmap(nIconMargin, (nHeight - iconSize.height()) / 2, pixIcon);
+
+    //
+    QColor cText = QColor("#3c4d81");
+    p.setPen(QPen(cText));
+    QRect titleRect(QPoint(nIconMargin * 2 + pixIcon.width(), nIconMargin), QPoint(nWidth, nHeight / 2));
+    QString strTitle = fm.elidedText(info.fileName(), Qt::ElideMiddle, titleRect.width() - nIconMargin * 2);
+    p.drawText(titleRect, strTitle);
+
+    //
+    QRect infoRect(QPoint(nIconMargin * 2 + pixIcon.width(), nHeight / 2),
+                      QPoint(nWidth, nHeight));
+    p.drawText(infoRect, infoText);
+
+    return true;
 }

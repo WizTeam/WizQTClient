@@ -173,7 +173,7 @@ QRect CWizCategoryViewItemBase::getExtraButtonRect(const QRect &rcItemBorder, bo
     if (!m_extraButtonIcon.isNull())
     {
         szBtn = m_extraButtonIcon.size();
-        scaleIconSizeForRetina(szBtn);
+        WizScaleIconSizeForRetina(szBtn);
     }
     else if (!ignoreIconExist)
     {
@@ -328,7 +328,7 @@ QRect CWizCategoryViewSectionItem::getExtraButtonRect(const QRect &itemBorder, b
     QSize szBtn(16, 16);
     if (!m_extraButtonIcon.isNull()) {
         szBtn = m_extraButtonIcon.size();
-        scaleIconSizeForRetina(szBtn);
+        WizScaleIconSizeForRetina(szBtn);
     } else if (!ignoreIconExist){
         return QRect(0, 0, 0, 0);
     }

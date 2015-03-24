@@ -151,7 +151,7 @@ bool CWizAttachmentListView::itemExtraImage(const QModelIndex& index, const QRec
 
         extraPix = QPixmap(strIconPath);
         QSize szImage = extraPix.size();
-        scaleIconSizeForRetina(szImage);
+        WizScaleIconSizeForRetina(szImage);
         int nMargin = -1;
         rcImage.setLeft(itemBound.right() - szImage.width() - nMargin);
         rcImage.setTop(itemBound.bottom() - szImage.height() - nMargin);
@@ -231,7 +231,6 @@ void CWizAttachmentListView::openAttachment(CWizAttachmentListViewItem* item)
     QString strFileName = db.GetAttachmentFileName(item->attachment().strGUID);
     bool bExists = PathFileExists(strFileName);
     if (!bIsLocal || !bExists) {
-        //m_downloadDialog->downloadData(attachment);
         startDownload(item);
         waitForDownload();
     }
