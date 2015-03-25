@@ -1,0 +1,1495 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+	<meta content="text/html;charset=utf-8">
+	<title>Share Link</title>
+	<link rel="stylesheet" type="text/css" href="./share.css">
+	<script type="text/javascript" src="./qrcode.js"></script>
+	<script type="text/javascript" src="./localize.js"></script>
+	<script type="text/javascript">
+
+	var DEBUG = false;
+
+	function DEBUG_ALERT (msg) {
+		if (DEBUG) {
+			alert(msg);
+		}
+	}
+
+	var kbGuid = 'ceb13ef7-7ca0-47f2-9216-db681f8cbf37';
+	var documentGuid = '3914b1d3-39e9-46fb-90a3-689e75fddcae';
+	var url = 'http://fromwiz.com/share/api/shares';
+	var token = '6f00fa7a34c71d2c953d55c37717f237np8ak8sedvtd6p';
+	var documentTitle = "TestDocumentTitle";
+
+	function toLog(log) {
+		try {
+			external.WriteToLog(log);
+		}
+		catch (e) {
+		}
+	}
+
+	// var kbGuid = getUrlParam("kb_guid");
+	// var documentGuid = getUrlParam("doc_guid");
+	// var documentTitle = getUrlParam("doc_title");
+	// var url = 'http://fromwiz.com/share/api/shares';
+	// var token;
+
+	var tokenRefreshed = false;
+
+	function getTokenSlot(t, callback) {
+		token = t;
+		callback();
+	}
+
+	function getToken(callback) {
+		try {
+			// external.tokenObtained.disconnect(getTokenSlot)
+			// external.tokenObtained.connect(getTokenSlot);
+			// external.getToken(callback);
+			// external.Window.GetToken(function(t) {
+			// 	token = t;
+				callback();
+			// });
+		}
+		catch (e) {
+		}
+	}
+
+	var requestSucceeded = 0;
+	var requestError = -1;
+	var requestTimeout = -2;
+	var requestTokenInvalid = -3;
+	var requestServerError = -4;
+	var requestUnknownError = -5;
+	/**/
+	function request(type, url, params, callback) {
+		WizShare.busy = true;
+　　　　var xhr = new XMLHttpRequest();
+　　　　xhr.open(type, url, true);
+		//
+　　　　xhr.onload = function () {
+			WizShare.busy = false;
+　　　　　　callback(xhr.status, JSON.parse(xhr.response));
+　　　　};
+		xhr.onerror = function () {
+			WizShare.busy = false;
+			callback(xhr.status, requestError);
+		}
+		if (undefined !== xhr.timeout) {
+			xhr.timeout = 2000;
+			//
+			xhr.ontimeout = function () {
+				WizShare.busy = false;
+				callback(undefined, requestTimeout);
+			}
+		}
+		//
+		xhr.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+		//
+		var data = "";
+　　　　if ((type === 'POST' || type === 'PUT' || type === 'DELETE') && params) {
+　　　　　　for (var key in params) {
+				var v;
+				if (typeof(params[key]) === 'string') {
+					v = params[key];
+				}
+				else {
+					v = JSON.stringify(params[key]);
+				}
+				//
+				data += key + '=' + v + '&';
+　　　　　　}
+			if (data.length > 0 && data[data.length - 1] == '&') {
+				data = data.substring(0, data.length - 1);
+			}
+　　　　}
+		//
+　　　　xhr.send(params ? data : null);
+　　}
+
+	function getUrlParam(name) {
+	    var reg = new RegExp("[?&]" + name + "=([^?&]*)[&]?", "i");
+	    var match = location.search.match(reg);
+	    return match == null ? "" : match[1];
+	}
+
+	var WizShare = (function () {
+
+		var info = {
+			"password": null,
+			"readCountLimit": null,
+			"shareId": null,
+			"readCount": null,
+			"expiredAt": null
+		};
+
+		var tempInfo = {
+			"password": null,
+			"readCountLimit": null,
+			"shareId": null,
+			"readCount": null,
+			"expiredAt": null
+		};
+
+		var callback = {
+			"shareCallback": "",
+			"updateCallback": "",
+			"cancelCallback": ""
+		}
+
+		var busy = false;
+
+		function _initTempInfo() {
+			tempInfo.password = info.password;
+			tempInfo.readCountLimit = info.readCountLimit;
+			tempInfo.shareId = info.shareId;
+			tempInfo.readCount = info.readCount;
+			tempInfo.expiredAt = info.expiredAt;
+		}
+
+		function _updateInfo() {
+			info.password = tempInfo.password;
+			info.readCountLimit = tempInfo.readCountLimit;
+			info.shareId = tempInfo.shareId;
+			info.readCount = tempInfo.readCount;
+			info.expiredAt = tempInfo.expiredAt;
+		}
+
+		function _share(callback) {
+			var params = {};
+			params['token'] = token;
+			params['kbGuid'] = kbGuid;
+			params['documentGuid'] = documentGuid;
+			params['api_version'] = 4;
+			//
+			request('POST', url, params, function(status, resp) {
+				//
+				callback(status, resp);
+			});
+		}
+
+		function _update(callback) {
+			var params = {};
+			params['token'] = token;
+			params['api_version'] = 4;
+			//
+			if (null !== tempInfo.readCountLimit) {
+				params['readCountLimit'] = tempInfo.readCountLimit;
+			}
+			if (null !== tempInfo.password) {
+				params['password'] = tempInfo.password;
+			}
+			if (null !== tempInfo.expiredAt) {
+				var d = new Date(tempInfo.expiredAt);
+				params['expiredAt'] = d.toISOString();
+			}
+			//
+			request('PUT', url + '/' + tempInfo.shareId, params, function(status, resp) {
+				callback(status, resp);
+			});
+		}
+
+		function _cancel(callback) {
+			var params = {};
+			params['api_version'] = 4;
+			//
+			var _url = url + '/' + tempInfo.shareId + "?token=" + token;
+			request('DELETE', _url, params, function(status, resp) {
+				callback(status, resp);
+			});
+		}
+
+		function _updateShare(callback) {
+
+			callback.updateCallback = callback;
+
+			_update(function(status, resp) {
+				if (resp === requestError
+					|| resp === requestTimeout) {
+					callback.updateCallback(resp);
+				}
+				else if (200 == status) {
+
+					var retCode = resp.return_code;
+					switch (retCode) {
+						case 200:
+							_updateInfo();
+							callback.updateCallback(requestSucceeded);
+							break;						
+						case 301:
+							// invalid token;
+							callback.updateCallback(requestTokenInvalid);
+							//
+							break;
+						case 303:
+							// no authority to access kb
+							callback.updateCallback(requestServerError, sharelocale_access_other_kb, 303);
+							break;
+						case 322:
+							// argument error
+							break;
+						case 500:
+							callback.updateCallback(requestServerError, sharelocale_server_error, 500);
+							break;
+						case 3330:
+							// note not exist. shouldn't arrive here
+							break;
+						case 3374:
+							// link not exist. shouldn't arrive here
+							break;
+						default:
+							DEBUG_ALERT("_updateShare unknown return_code.");
+							callback.updateCallback(requestUnknownError, resp.return_message, retCode);
+					}
+				}
+				else {
+
+				}
+			});
+		}
+
+		function _randomPassword () {
+			var str = "abcdefghijklmnopqrstuvwxyz01234567890123456789";
+			//
+			var p0 = Math.round((Math.random() * 45));
+			var p1 = Math.round((Math.random() * 45));
+			var p2 = Math.round((Math.random() * 45));
+			var p3 = Math.round((Math.random() * 45));
+			//
+			var psd = str[p0];
+			psd += str[p1];
+			psd += str[p2];
+			psd += str[p3];
+			//
+			return psd;
+		}
+
+		function addPassword(callback) {
+
+			_initTempInfo();
+
+			if (null !== tempInfo.password) {
+				DEBUG_ALERT("Psd isn't null.");
+			}
+			//
+			tempInfo.password = _randomPassword();
+			//
+			_updateShare(callback);
+		}
+
+		function removePassword (callback) {
+
+			_initTempInfo();
+
+			if (null === tempInfo.password) {
+				DEBUG_ALERT("Psd is null.");
+			}
+			//
+			tempInfo.password = null;
+			//
+			_updateShare(callback);
+		}
+
+		function updateOptions (day, time, callback) {
+
+			_initTempInfo();
+
+			if (null !== day && null !== time) {
+				DEBUG_ALERT("Day and time are both invalid value.");
+				return;
+			}
+			//
+			if (null != day) {
+				var now = new Date();
+				now.setDate(now.getDate() + day);
+				tempInfo.expiredAt = now.getTime();
+				tempInfo.readCountLimit = null;
+			}
+			else if (null != time) {
+				tempInfo.expiredAt = null;
+				tempInfo.readCountLimit = time;
+			}
+			else {
+				tempInfo.expiredAt = null;
+				tempInfo.readCountLimit = null;
+			}
+			//
+			_updateShare(callback);
+		}
+		//
+		function cancel(callback) {
+
+			_initTempInfo();
+
+			callback.cancelCallback = callback;
+
+			_cancel(function(status, resp) {
+				if (resp === requestError
+					|| resp === requestTimeout) {
+					callback.cancelCallback(resp);
+				}
+				else if (200 == status) {
+
+					var retCode = resp.return_code;
+					switch (retCode) {
+						case 200:
+							info.password = null;
+							info.readCountLimit = null;
+							info.shareId = null;
+							info.readCount = null;
+							info.expiredAt = null;
+							callback.cancelCallback(requestSucceeded);
+							break;
+						case 301:
+							// invalid token;
+							callback.cancelCallback(requestTokenInvalid);
+							//
+							break;
+						case 303:
+							// no authority to access kb
+							callback.cancelCallback(requestServerError, sharelocale_access_other_kb, 303);
+							break;
+						case 322:
+							// argument error. don't process
+							break;
+						case 500:
+							callback.cancelCallback(requestServerError, sharelocale_server_error, 500);
+							break;
+						case 3374:
+							// link not exist, shouldn't arrive here
+							break;
+						default:
+							DEBUG_ALERT("_cancel unknown return_code.");
+							callback.cancelCallback(requestUnknownError, resp.return_message, retCode);
+					}
+				}
+				else {
+
+				}
+			});
+		}
+		//
+		function share(callback) {
+
+			callback.shareCallback = callback;
+
+			_share(function(status, resp) {
+				if (resp === requestError
+					|| resp === requestTimeout) {
+					callback.shareCallback(resp);
+				}
+				else if (200 == status) {
+					var retCode = resp.return_code;
+					switch (retCode) {
+						case 200:
+							if (resp.password)
+								info.password = resp.password;
+							if (resp.shareId)
+								info.shareId = resp.shareId;
+							if (resp.readCountLimit)
+								info.readCountLimit = resp.readCountLimit;
+							if (resp.readCount)
+								info.readCount = resp.readCount;
+							if (resp.expiredAt)
+								info.expiredAt = resp.expiredAt;
+							//
+							callback.shareCallback(requestSucceeded);
+							break;
+						case 301:
+							// invalid token;
+							callback.shareCallback(requestTokenInvalid);
+							//
+							break;
+						case 303:
+							// no authority to access kb
+							callback.shareCallback(requestServerError, sharelocale_access_other_kb, 303);
+							break;
+						case 500:
+							callback.shareCallback(requestServerError, sharelocale_server_error, 500);
+							break;
+						case 3330:
+							// note not exist
+							callback.shareCallback(requestServerError, sharelocale_note_not_in_server, 3330);
+							break;
+						case 3372:
+							// mail account haven't verified
+							callback.shareCallback(requestServerError, sharelocale_mail_unverified, 3372);
+							break;
+						case 3373:
+							// has exist
+							if (resp.password)
+								info.password = resp.password;
+							info.shareId = resp.shareId;
+							if (resp.readCountLimit)
+								info.readCountLimit = resp.readCountLimit;
+							if (resp.readCount)
+								info.readCount = resp.readCount;
+							if (resp.expiredAt)
+								info.expiredAt = resp.expiredAt;
+							//
+							callback.shareCallback(requestSucceeded);
+							break;
+						case 3379:
+							// non vip can't set read limit
+							callback.shareCallback(requestServerError, sharelocale_free_account_create_link, 3379);
+							break;
+						case 33701:
+							// blacklist
+							callback.shareCallback(requestServerError, sharelocale_blacklist, 33701);
+							break;
+						default:
+							DEBUG_ALERT("share unknown return_code.");
+							callback.shareCallback(requestUnknownError
+								, resp.return_message, retCode);
+					}
+				}
+				else {
+
+				}
+			});
+		}		
+		//
+		function getLink() {
+			if (!info.shareId)
+				return null;
+			//
+			return "http://fromwiz.com/share/s/" + info.shareId;
+		}
+		//
+		function getPassword() {
+			return info.password;
+		}
+		//
+		function getExpiredAt() {
+			return info.expiredAt;
+		}
+		//
+		function getReadCountLimit() {
+			return info.readCountLimit;
+		}
+		//
+		function getReadCount() {
+			return info.readCount;
+		}
+		//
+		return {
+			busy: busy,
+			share: share,
+			addPassword: addPassword,
+			removePassword: removePassword,
+			updateOptions: updateOptions,
+			cancel: cancel,
+			getLink: getLink,
+			getPassword: getPassword,
+			getExpiredAt: getExpiredAt,
+			getReadCountLimit: getReadCountLimit,
+			getReadCount: getReadCount
+		};
+	})();
+
+	/**/
+	function prompt(text) {
+		var tips = document.querySelector("#tips");
+		if (tips) {
+			if ("none" === tips.style.display) {
+				tips.style.display = "";
+			}
+			tips.firstElementChild.innerText = text;
+			//
+			setTimeout(function () {
+				var tips = document.querySelector("#tips");
+				if (tips) {
+					tips.style.display = "none";
+				}
+			}, 2000);
+		}
+	}
+
+	function resizeex() {
+		if (customObject) {
+			var width = document.body.clientWidth;
+			var height = document.body.clientHeight;
+			customObject.Execute("resizeex", width, height, "", "");
+		}
+	}
+
+	function closeDialog() {
+		if (customObject) {
+			customObject.Execute("close", "", "", "", "");
+		}
+	}
+
+	function logAction(text) {
+		if (external && external.LogAction) {
+			external.LogAction(text);
+		}
+	}
+
+	function onCreateLinkError(errorText) {
+		var tipsOk = document.querySelector(".tips-ok");
+		if (tipsOk) {
+			tipsOk.style.display = "none";
+		}
+		var tipsFailed = document.querySelector(".tips-failed");
+		if (tipsFailed) {
+			tipsFailed.style.display = "";
+		}
+		//
+		var tipsReason = document.querySelector("#tips-failed-reason");
+		if (tipsReason) {
+			tipsReason.innerText = errorText;
+		}
+		//
+		updateUI();
+	}
+
+	function addPasswordCore() {
+		if (WizShare.busy)
+			return;
+		//
+		WizShare.addPassword(function (errorCode, errorText, serverCode) {
+			if (requestSucceeded === errorCode) {
+				updateUI();
+			}
+			else if (requestTimeout === errorCode
+				|| requestError === errorCode) {
+				prompt(sharelocale_network_error);
+			}
+			else if (requestTokenInvalid === errorCode) {
+				if (tokenRefreshed) {
+					prompt(sharelocale_token_invalid);
+					toLog("Token has been refreshed, also invalid.");
+				}
+				else {
+					getToken(function () {
+						tokenRefreshed = true;
+						addPasswordCore();
+					});
+				}
+			}
+			else if (requestServerError === errorCode){
+				prompt(errorText);
+			}
+			else {
+				prompt(sharelocale_unknown_error);
+				toLog("serverCode: " + serverCode + " msg: " + errorText);
+			}
+		});
+	}
+
+	function onAddPassword(e) {
+		if (WizShare.busy)
+			return;
+		if (!WizShare.getLink())
+			return;
+		//
+		tokenRefreshed = true;
+		addPasswordCore();
+		//
+		logAction("addPasswordShareLink");
+	}
+	//
+	function removePasswordCore(Core) {
+		if (WizShare.busy)
+			return;
+		//
+		WizShare.removePassword(function (errorCode, errorText, serverCode) {
+			if (requestSucceeded === errorCode) {
+				updateUI();
+			}
+			else if (requestTimeout === errorCode
+				|| requestError === errorCode) {
+				prompt(sharelocale_network_error);
+			}
+			else if (requestTokenInvalid === errorCode) {
+				if (tokenRefreshed) {
+					prompt(sharelocale_token_invalid);
+					toLog("Token has been refreshed, also invalid.");
+				}
+				else {
+					getToken(function () {
+						tokenRefreshed = true;
+						removePasswordCore();
+					});
+				}
+			}
+			else if (requestServerError === errorCode) {
+				prompt(errorText);
+			}
+			else {
+				prompt(sharelocale_unknown_error);
+				toLog("serverCode: " + serverCode + " msg: " + errorText);
+			}
+		});	
+	}
+	//
+	function onRemovePassword () {
+		if (WizShare.busy)
+			return;
+		if (!WizShare.getLink())
+			return;
+		//
+		tokenRefreshed = true;
+		removePasswordCore();
+		//
+		logAction("removePasswordShareLink");
+	}
+	//
+	function onExpandOptions() {
+		var classList = btnExpandOptions.classList;
+		for (var i = 0; i < classList.length; i++) {
+			if ("disable" == classList[i])
+				return;
+		}
+		//
+		var option = document.querySelector('#link-limit-setting');
+		if (option) {
+			if (option.style.display === 'none') {
+				option.style.display = '';
+				expandIconDown.style.display = "none";
+				expandIconUp.style.display = "";
+			}
+			else {
+				option.style.display = 'none';
+				expandIconDown.style.display = "";
+				expandIconUp.style.display = "none";
+			}
+			//
+			resizeex();
+		}
+	}
+	//
+	function modifyOptionsCore() {
+		if (WizShare.busy)
+			return;
+		//
+		var day = null, time = null;
+		var selects = document.querySelectorAll('.option-select');
+		if (!selects || selects.length < 2) {
+			DEBUG_ALERT("select options less than 2.");
+			return;
+		}
+		if (-1 != selects[0].className.indexOf("lmt-time-unlmt")
+			&& -1 != selects[1].className.indexOf("lmt-day-unlmt")) {
+			day = null, time = null;
+		}
+		if (-1 != selects[0].className.indexOf("lmt-time-unlmt")) {
+			var v = selects[1].className.match(/\d+/g);
+			if (v && v.length > 0) {
+				day = Number(v[0]);
+			}
+		}
+		else if (-1 != selects[0].className.indexOf("lmt-day-unlmt")) {
+			var v = selects[1].className.match(/\d+/g);
+			if (v && v.length > 0) {
+				time = Number(v[0]);
+			}
+		}
+		else if (-1 != selects[1].className.indexOf("lmt-time-unlmt")) {
+			var v = selects[0].className.match(/\d+/g);
+			if (v && v.length > 0) {
+				day = Number(v[0]);
+			}
+		}
+		else if (-1 != selects[1].className.indexOf("lmt-day-unlmt")) {
+			var v = selects[0].className.match(/\d+/g);
+			if (v && v.length > 0) {
+				time = Number(v[0]);
+			}
+		}
+		//
+		WizShare.updateOptions(day, time, function (errorCode, errorText, serverCode) {
+			if (requestSucceeded === errorCode) {
+				updateUI();
+				//
+				prompt(sharelocale_modify_succeeded);
+				onExpandOptions();
+			}
+			else if (requestTimeout === errorCode
+				|| requestError === errorCode) {
+				prompt(sharelocale_network_error);
+			}
+			else if (requestTokenInvalid === errorCode) {
+				if (tokenRefreshed) {
+					prompt(sharelocale_token_invalid);
+					toLog("Token has been refreshed, also invalid.");
+				}
+				else {
+					getToken(function () {
+						tokenRefreshed = true;
+						modifyOptionsCore();
+					});
+				}
+			}
+			else if (requestServerError === errorCode) {
+				prompt(errorText);
+			}
+			else {
+				prompt(sharelocale_unknown_error);
+				toLog("serverCode: " + serverCode + " msg: " + errorText);
+			}
+		});
+		//
+		logAction("modifyOptionsDay" + day + "Time" + time +"ShareLink");
+	}
+	//
+	function onModifyOptions() {
+		if (WizShare.busy)
+			return;
+		if (!WizShare.getLink())
+			return;
+		//
+		tokenRefreshed = true;
+		modifyOptionsCore();
+	}
+	//
+	function onClickOption (e) {
+		var node = this;
+		var options = document.querySelectorAll(".btnLimitDay");
+		for (var i = 0; i < options.length; i++) {
+			options[i].classList.remove("option-select");
+			options[i].classList.add("option-unselect");
+		}
+		//
+		var options = document.querySelectorAll(".btnLimitTime");
+		for (var i = 0; i < options.length; i++) {
+			options[i].classList.remove("option-select");
+			options[i].classList.add("option-unselect");
+		}		
+		//
+		node.classList.remove("option-unselect");
+		node.classList.add("option-select");
+		//
+		if (node.classList.length > 1) {
+			if ("btnLimitTime" === node.classList[0]) {
+				var lmt_day_unlmt = document.querySelector('.lmt-day-unlmt');
+				lmt_day_unlmt.classList.add("option-select");
+				lmt_day_unlmt.classList.remove("option-unselect");
+			}
+			else if ("btnLimitDay" === node.classList[0]) {
+				var lmt_time_unlmt = document.querySelector('.lmt-time-unlmt');
+				lmt_time_unlmt.classList.add("option-select");
+				lmt_time_unlmt.classList.remove("option-unselect");
+			}
+		}
+		//
+		var selects = document.querySelectorAll('.option-select');
+		var modify = document.querySelector('#btnModifyOptions');
+		if (modify) {
+			modify.classList.remove("btn-normal");
+			modify.classList.remove("btn-normal-disable");
+			//
+			var canModify = (selects && selects.length > 0);
+			modify.classList.add(canModify ? "btn-normal" : "btn-normal-disable");
+		}
+	}
+	//
+	function cancelShareCore() {
+		if (WizShare.busy)
+			return;
+		//
+		if (!WizShare.getLink())
+			return;
+		//
+		WizShare.cancel(function (errorCode, errorText, serverCode) {
+			if (requestSucceeded === errorCode) {
+				updateUI();
+				//
+				prompt(sharelocale_cancel_succeeded);
+				//
+				setTimeout(function () {
+					closeDialog();
+				}, 1000);
+			}
+			else if (requestTimeout === errorCode
+				|| requestError === errorCode) {
+				prompt(sharelocale_network_error);
+			}
+			else if (requestTokenInvalid === errorCode) {
+				if (tokenRefreshed) {
+					prompt(sharelocale_token_invalid);
+					toLog("Token has been refreshed, also invalid.");
+				}
+				else {
+					getToken(function () {
+						tokenRefreshed = true;
+						cancelShareCore();
+					});
+				}
+			}
+			else if (requestServerError === errorCode) {
+				prompt(errorText);
+			}
+			else {
+				prompt(sharelocale_unknown_error);
+				toLog("serverCode: " + serverCode + " msg: " + errorText);
+			}
+		});
+	}
+	//
+	function onCancelShare () {
+		if (WizShare.busy)
+			return;
+		//
+		tokenRefreshed = true;
+		cancelShareCore();
+	}
+	//
+	function createLinkCore() {
+		if (WizShare.busy)
+			return;
+		//
+		WizShare.share(function (errorCode, errorText, serverCode) {
+			if (requestSucceeded === errorCode) {
+				updateUI();
+				generateQRCode();
+			}
+			else if (requestTimeout === errorCode
+				|| requestError === errorCode){
+				onCreateLinkError(sharelocale_network_error);
+			}
+			else if (requestTokenInvalid === errorCode) {
+				if (tokenRefreshed) {
+					onCreateLinkError(requestTokenInvalid);
+					toLog("Token has been refreshed, also invalid.");
+				}
+				else {
+					getToken(function () {
+						tokenRefreshed = true;
+						createLinkCore();
+					});
+				}
+			}
+			else if (requestServerError === errorCode) {
+				onCreateLinkError(errorText);
+			}
+			else {
+				onCreateLinkError(sharelocale_unknown_error);
+				toLog("serverCode: " + serverCode + " msg: " + errorText);
+			}
+			//
+			hideBackground();
+		});
+	}
+	//
+	function createLink() {
+		if (WizShare.busy) {
+			DEBUG_ALERT("WizShare shouldn't busy.");
+			return;
+		}
+		//
+		tokenRefreshed = true;
+		createLinkCore();
+	}
+	//
+	function onShareWeibo(e) {
+		var url = "http://service.weibo.com/share/share.php?appkey=3957573307&title=Hi，我分享了一篇文章 “{documentTitle}”，来看看吧！ （分享自 @为知笔记）&url={url}&ralateUid=1920682763";
+		//
+		var link = WizShare.getLink();
+		if (!link)
+			return;
+		//
+		url = url.replace("{documentTitle}", documentTitle)
+				.replace("{url}", link);
+		//
+		if (customObject) {
+			customObject.Execute("openindefaultbrowser", url, "", "", "");
+		}
+		else {
+			window.open(url);
+		}
+		//
+		logAction("shareWeiboShareLink");
+	}
+	//
+	function onShareWechat(e) {
+		if (!WizShare.getLink())
+			return;
+		//
+		var qrcode = document.querySelector("#shareweixin-qrcode");
+		if (qrcode) {
+			var displaying = ("none" !== qrcode.style.display);
+			qrcode.style.display = displaying ? "none" : "";
+			//
+			resizeex();
+		}
+		//
+		logAction("shareWeChatShareLink");
+	}
+	//
+	function onHideQRCode(e) {
+		var qrcode = document.querySelector("#shareweixin-qrcode");
+		if (qrcode) {
+			qrcode.style.display = "none";
+			resizeex();
+		}
+	}
+	//
+	function onCopyLink(e) {
+		if (!WizShare.getLink())
+			return;
+		//
+		var linkInfo = document.querySelector("#link-info-text");
+		if (linkInfo) {
+			var text;
+			var copyLinkPsd = false;
+			if (WizShare.getPassword()) {
+				text = linkPart0.innerText + linkPart1.innerText + '\n' + 
+						linkPart3.innerText + linkPart4.innerText;
+				//
+				copyLinkPsd = true;
+			}
+			else {
+				text = linkPart1.innerText;
+			}
+			//
+		    var input = document.createElement('textarea');
+		    document.body.appendChild(input);
+		    input.value = text;
+		    input.focus();
+		    input.select();
+		    var succeeded = document.execCommand('Copy', false, null);
+		    input.remove();
+		    if (succeeded) {
+		    	if (copyLinkPsd) {
+		    		prompt(sharelocale_copy_link_password_succeeded);
+		    	}
+		    	else {
+					prompt(sharelocale_copy_link_succeeded);
+		    	}
+		    }
+		    else {
+		    	DEBUG_ALERT("The browser isn't support copy command.");
+		    }
+		}
+		//
+		logAction("copyLinkShareLink");
+	}
+	//
+	function onClose(e) {
+		closeDialog();
+	}
+	//
+	function onClickLink(e) {
+		var url = linkPart1.innerText;
+		if (customObject) {
+			customObject.Execute("openindefaultbrowser", url, "", "", "");
+		}
+		else {
+			window.open(url);
+		}
+		//
+		logAction("clickLinkShareLink");
+	}
+	//
+	function showBackground() {
+		var bkgnd = document.getElementById('waiting');
+		//
+		if (bkgnd) {
+			bkgnd.style.width = document.body.clientWidth + 'px';
+			bkgnd.style.height = document.body.clientHeight + 'px';
+			bkgnd.style.display = "";
+		}
+	}
+
+	function hideBackground() {
+		var bkgnd = document.getElementById('waiting');
+		//
+		if (bkgnd) {
+			bkgnd.style.display = "none";
+		}
+	}
+
+	function updateUI() {
+		// link
+		var nodeLink = WizShare.getLink();
+		var link = document.querySelector(".link");
+		if (link) {
+			if (nodeLink) {
+				linkPart1.innerText = nodeLink;
+			}
+			else {
+				var linkInfo = document.querySelector("#link-info-text");
+				if (linkInfo) {
+					linkInfo.style.display = "none";
+				}
+			}
+		}
+		// psd
+		var showPsd = (null !== WizShare.getPassword());
+		var psdText = document.querySelectorAll('.psd');
+		if (psdText && psdText.length > 0) {
+			for (var i = 0; i < psdText.length; i++) {
+				psdText[i].style.display = showPsd ? '' : 'none';
+			}
+		}
+		var linkLabel = document.querySelector(".link-label");
+		if (linkLabel) {
+			linkLabel.style.display = showPsd ? "" : "none";
+		}		
+		//
+		var psdValue = document.querySelectorAll('.psd-value');
+		if (psdValue && psdValue.length > 0) {
+			for (var i = 0; i < psdValue.length; i++) {
+				psdValue[i].style.display = showPsd ? '' : 'none';
+				psdValue[i].innerText = showPsd ? WizShare.getPassword() : "";
+			}
+		}
+		var addPsd = document.querySelector('#btnAddPassword');
+		var rmvPsd = document.querySelector('#btnRemovePassword');
+		if (addPsd) {
+			addPsd.style.display = showPsd ? "none" : "";
+		}
+		if (rmvPsd) {
+			rmvPsd.style.display = showPsd ? "" : "none";
+		}
+		//
+		var copyLink = document.querySelector("#btnCopyLink");
+		if (copyLink) {
+			copyLink.style.display = showPsd ? "none" : "";
+		}
+		var copyLinkPsd = document.querySelector("#btnCopyLinkPassword");
+		if (copyLinkPsd) {
+			copyLinkPsd.style.display = showPsd ? "" : "none";
+		}
+		// options
+		var limitTips = document.querySelectorAll('.lmt-tips');
+		for (var i = 0; i < limitTips.length; i++) {
+			limitTips[i].style.display = "none";
+		}
+		var timeLimit = WizShare.getReadCountLimit();
+		var expiredAt = WizShare.getExpiredAt();
+		if (null === timeLimit
+			&& null === expiredAt) {
+			var unlimit = document.querySelector('.lmt-tips-unlmt');
+			if (unlimit) {
+				unlimit.style.display = "";
+			}
+		}
+		else if (null !== timeLimit) {
+			var timeTips = document.querySelector('.lmt-tips-time');
+			if (timeTips) {
+				timeTips.style.display = "";
+				timeTips.innerText = sharelocale_remain_times.replace("%1", timeLimit - WizShare.getReadCount());
+			}
+		}
+		else if (null !== expiredAt) {
+			var dayTips = document.querySelector('.lmt-tips-day');
+			if (dayTips) {
+				dayTips.style.display = "";
+				var days = Math.round((expiredAt - Date.now()) / (1000*60*60*24.0));
+				dayTips.innerText = sharelocale_remain_days.replace("%1", days);
+			}
+		}
+		// disable all buttons
+		if (!nodeLink) {
+			btnAddPassword.classList.add("disable");
+			btnCancelShare.classList.add("disable");
+			btnExpandOptions.classList.add("disable");
+
+			btnCopyLink.classList.remove("btn-normal")
+			btnCopyLink.classList.add("btn-normal-disable");
+			btnShareWeibo.classList.remove("btn-white");
+			btnShareWeibo.classList.add("btn-white-disable");
+			btnShareWechat.classList.remove("btn-white");
+			btnShareWechat.classList.add("btn-white-disable");
+		}
+	}
+	var QR;
+	function generateQRCode() {
+	    var params = {
+	        width: 128,
+	        height: 128,
+	        text: "",
+	        colorDark: '#333333',
+	        typeNumber: 6,
+	        correctLevel: 1
+	    };
+	    //
+	    params.text = WizShare.getLink();
+	    //
+	    if (QR) {
+	    	QR.makeCode(params.text);
+	    }
+	    else {
+	    	var node = document.querySelector("#qrcode");
+	    	if (node) {
+	        	QR = new QRCode(node, params);
+	        }	    	
+	    }
+	}
+
+	var g_mousedown = false;
+	var g_lastX = undefined;
+	var g_lastY = undefined;
+	function onHeadMouseDown(e) {
+		//
+		if (e.target.id === "btnClose")
+			return;
+		//
+		if (e.preventDefault) {
+			e.preventDefault();
+		}
+		if (e.stopPropagation) {
+			e.stopPropagation();
+		}
+		//
+		document.addEventListener("mousemove", onDocumentMouseMove);
+		//
+		g_mousedown = true;
+		g_lastX = e.clientX;
+		g_lastY = e.clientY;
+	}
+
+	function onDocumentMouseUp(e) {
+		if (g_mousedown) {
+			document.removeEventListener("mousemove", onDocumentMouseMove);
+			//
+			g_mousedown = false;
+			g_lastX = undefined;
+			g_lastY = undefined;
+		}
+	}
+
+	function onDocumentMouseMove(e) {
+		if (g_mousedown) {
+			if (customObject) {
+				customObject.Execute("dragcaption", g_lastX, g_lastY, "", "");
+			}
+		}
+	}
+
+	var settings = undefined;
+	//
+	function onCreateNow() {
+		if (btnDonotPrompt.checked) {
+			settings.SetStringValue("SNSShare", "ShareLinkFirstTips", "1");
+			settings.Close();
+		}
+		//
+		var content = document.querySelector("#content");
+		if (content) {
+			content.style.display = "";
+		}
+		//
+		var tips = document.querySelector("#first-tips");
+		if (tips) {
+			tips.style.display = "none";
+		}
+		//
+		showBackground();
+		getToken(createLink);
+	}
+
+	function onCancelCreate() {
+		closeDialog();
+	}
+
+	function promptFirstTips() {
+		try {
+			// settings = external.CreateWizObject("WizKMCore.WizSettings");
+			// if (settings) {
+			// 	settings.Open(external.SettingsFileName);
+				//
+				var firstTips = 1; //settings.StringValue("SNSShare", "ShareLinkFirstTips");
+				var content = document.querySelector("#content");
+				if (content) {
+					content.style.display = ("1" === firstTips) ? "" : "none";
+				}
+				//
+				var tips = document.querySelector("#first-tips");
+				if (tips) {
+					tips.style.display = ("1" === firstTips) ? "none" : "";
+				}				
+				if ("1" == firstTips) {
+					showBackground();
+					getToken(createLink);
+				}
+			// }
+		}
+		catch (e) {
+		}
+	}
+
+	function onDocumentKeyUp (e) {
+		if (27 == e.keyCode) {
+			closeDialog();
+		}
+	}
+
+	function initButtons() {
+		console.log("initButtons called");
+
+		document.addEventListener("mouseup", onDocumentMouseUp);
+		//
+		var head = document.querySelector("#head");
+		if (head) {
+			head.addEventListener("mousedown", onHeadMouseDown);
+		}
+		document.addEventListener("keyup", onDocumentKeyUp);
+		//
+		btnClose.addEventListener("click", onClose);
+		btnAddPassword.addEventListener("click", onAddPassword);
+		btnRemovePassword.addEventListener("click", onRemovePassword);
+		btnLink.addEventListener("click", onClickLink);
+		btnCancelShare.addEventListener("click", onCancelShare);
+		btnShareWechat.addEventListener("click", onShareWechat);
+		btnHideQRcode.addEventListener("click", onHideQRCode);
+		btnShareWeibo.addEventListener("click", onShareWeibo);
+		btnCopyLink.addEventListener("click", onCopyLink);
+		btnCopyLinkPassword.addEventListener("click", onCopyLink);
+		btnExpandOptions.addEventListener("click", onExpandOptions);
+		btnModifyOptions.addEventListener("click", onModifyOptions);
+		//
+		var lmtTimes = document.querySelectorAll(".btnLimitTime");
+		if (lmtTimes) {
+			for (var i = 0; i < lmtTimes.length; i++) {
+				lmtTimes[i].addEventListener("click", onClickOption);
+			}
+		}
+		var lmtDays = document.querySelectorAll(".btnLimitDay");
+		if (lmtDays) {
+			for (var i = 0; i < lmtDays.length; i++) {
+				lmtDays[i].addEventListener("click", onClickOption);
+			}
+		}
+		//
+		btnCreateNow.addEventListener("click", onCreateNow);
+		btnCancelCreate.addEventListener("click", onCancelCreate);
+	}
+
+	function translatePage() {
+		var nodes = document.querySelectorAll(".need-translate");
+		if (nodes) {
+			for (var i = 0; i < nodes.length; i++) {
+				var node = nodes[i];
+				node.innerText = wizTranslate(node.innerText);
+			}
+		}
+	}
+
+	function onLoad () {
+		translatePage();
+		//
+		initButtons();
+		//
+		try {
+			if (customObject) {}
+		}
+		catch (e) {
+			customObject = undefined;
+		}
+		try {
+			promptFirstTips();
+		}
+		catch(e) {
+
+		}
+	}
+
+	</script>
+</head>
+<body onload='onLoad();'>
+	<div id='main'>
+		<div id='head'>
+			<div>
+				<span class='need-translate'>Share Link</span>
+				<div id='btnClose'></div>
+			</div>
+		</div>
+		<div id='head-line'></div>
+		<div id='tips' style="display: none;">
+			<div>Copy Succeeded!</div>
+		</div>
+		<div id='content' style="">
+			<div id='share-tips'>
+				<div class='tips-ok'>
+					<img src="./files/succeeded.png">
+					<div class='tips'>
+						<div class='tips-text1'><span class='need-translate'>Link has been created!</span></div>
+						<div><span class='tips-text2 need-translate'>Copy the link and share it to your friends.</span></div>
+					</div>
+				</div>
+					<div class='tips-failed' style='display: none;'>
+						<img src="./files/failed.png">
+						<div class='tips'>
+							<div class='tips-text1'><span class='need-translate'>Create link failed!</span></div>
+							<div><span id='tips-failed-reason' class='tips-text2'></span></div>
+						</div>
+					</div>
+				<div id='add-psd'>
+					<span class='psd need-translate' style='display: none;'>Password : </span><span style='display: none;' class='psd psd-value'></span>
+					<span>&nbsp; &nbsp;</span>
+					<a href='javascript:void(0);' class='action-a need-translate' id='btnAddPassword'>Add Password</a>
+					<a href='javascript:void(0);' class='action-a need-translate' id='btnRemovePassword' style='display: none;'>Remove</a>
+				</div>
+			</div>
+
+			<div id='link-info'>
+				<div id='link-info-text'>
+<span id='linkPart0' class='label link-label need-translate' style='display: none;'>Link : </span><a id='btnLink' class='link action-a'><span id='linkPart1'></span></a>
+					<div class='psd' style='display: none;'>
+						<span id='linkPart3' class='label need-translate'>Password : </span><span id='linkPart4' class='psd-value'></span>
+					</div>
+				</div>
+			</div>
+
+			<div id='link-action'>
+				<span id='btnCancelShare' class='cancel action-a need-translate'>Stop Sharing</span>
+				<div id='btnCopyLink' class='btn btn-normal'>
+					<span class='btn-content'>
+						<a href="javascript:void(0);" class='need-translate'>Copy Link</a>
+					</span>
+				</div>
+				<div id='btnCopyLinkPassword' class='btn btn-normal' style="display: none;">
+					<span class='btn-content'>
+						<a href="javascript:void(0);" class='need-translate'>Copy Link &amp; Password</a>
+					</span>
+				</div>				
+				<div id='btnShareWeibo' class='btn btn-white'>
+					<span class='btn-content'>
+						<img src="./files/weibo.png">
+						<a href="javascript:void(0);" class='need-translate'>Share to Weibo</a>
+					</span>
+				</div>				
+				<div id='btnShareWechat' class='btn btn-white'>
+					<span class='btn-content'>
+						<img src="./files/weixin.png">
+						<a href="javascript:void(0);" class='need-translate'>Share to WeChat</a>
+					</span>
+				</div>
+			</div>
+			<div id='shareweixin-qrcode' style="display: none;">
+				<div id='qrcode'></div>
+				<div class='qrcode-label'>
+					<span class='need-translate'>Open WeChat to scan the QR code and share the note with your friends.</span>
+					<a id='btnHideQRcode' class='action-a hide-qrcode need-translate'>Hide</a>
+				</div>
+			</div>
+			<div id='link-limit'>
+				<div class='action'>
+					<span class='lmt-tips lmt-tips-unlmt need-translate' style="display: none;">(Unlimited)</span>
+					<span class='lmt-tips lmt-tips-day need-translate' style="display: none;">(%1 Day(s) Left)</span>
+					<span class='lmt-tips lmt-tips-time need-translate' style="display: none;">(%1 Time(s) Left)</span>
+					<a href="javascript:void(0);" id='btnExpandOptions' class='action-a'>
+						<span class='need-translate'>Access Limitations</span>
+						<img id='expandIconDown' src="./files/triangle_down.png">
+						<img id='expandIconUp' style='display: none;' src="./files/triangle_up.png">
+					</a>
+				</div>
+			</div>
+
+			<div id='link-limit-setting' style='display: none;'>
+				<p id='limit-tips'>
+					<span class='need-translate'>Automatically stop sharing after the limit is exceeded.</span>
+				</p>
+				<table id='limit-options'>
+					<tbody>
+						<th>
+							<div>
+								<span class='need-translate'>Reading Time</span>
+							</div>
+						</th>
+						<td>
+							<div class="btnLimitTime lmt-time-50 option-unselect">
+								<span class='need-translate'>50 times</span>
+								<img src="./files/check_option.png">
+							</div>
+						</td>
+						<td>
+							<div class="btnLimitTime lmt-time-100 option-unselect">
+								<span class='need-translate'>100 times</span>
+								<img src="./files/check_option.png">
+							</div>
+						</td>
+						<td>
+							<div class="btnLimitTime lmt-time-300 option-unselect">
+								<span class='need-translate'>300 times</span>
+								<img src="./files/check_option.png">
+							</div>
+						</td>
+						<td>
+							<div class="btnLimitTime lmt-time-unlmt option-unselect">
+								<span class='need-translate'>Unlimited</span>
+								<img src="./files/check_option.png">
+							</div>
+						</td>
+					</tbody>
+					<tbody>
+						<th>
+							<div>
+								<span class='need-translate'>Sharing Days</span>
+							</div>
+						</th>
+						<td>
+							<div class="btnLimitDay lmt-day-1 option-unselect">
+								<span class='need-translate'>1 day</span>
+								<img src="./files/check_option.png">
+							</div>
+						</td>
+						<td>
+							<div class="btnLimitDay lmt-day-3 option-unselect">
+								<span class='need-translate'>3 days</span>
+								<img src="./files/check_option.png">
+							</div>
+						</td>
+						<td>
+							<div class="btnLimitDay lmt-day-7 option-unselect">
+								<span class='need-translate'>7 days</span>
+								<img src="./files/check_option.png">
+							</div>
+						</td>
+						<td>
+							<div class="btnLimitDay lmt-day-unlmt option-unselect">
+								<span class='need-translate'>Unlimited</span>
+								<img src="./files/check_option.png">
+							</div>
+						</td>
+					</tbody>
+				</table>
+				<div id='set-limit-ok' class='floatfix'>
+					<div id='btnModifyOptions' class='btn btn-normal-disable'>
+						<span class='btn-content'>
+							<a href="javascript:void(0);" class='need-translate'>Save Modified</a>
+						</span>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div id='first-tips' style="display: none;">
+			<div class='title'>
+				<span class='need-translate'>Do you want to create a public link?</span>
+			</div>
+			<div class='text'>
+				<span class='need-translate'>The public link can be visited by anyone, you can add a password or set access limitations for it.</span>
+			</div>
+			<div class='actions floatfix'>
+				<div class='not-prompt'>
+					<input type='checkbox' id='btnDonotPrompt'>
+					<label for='btnDonotPrompt'><span></span><span class='need-translate'>Don't prompt</span></label>
+				</div>
+				<div id='btnCancelCreate' class='btn btn-white'>
+					<span class='btn-content'>
+						<a href="javascript:void(0);" class='need-translate'>Cancel</a>
+					</span>
+				</div>
+				<div id='btnCreateNow' class='btn btn-normal'>
+					<span class='btn-content'>
+						<a href="javascript:void(0);" class='need-translate'>Create Now</a>
+					</span>
+				</div>
+			</div>
+		</div>
+		<div id='waiting' style='display: none;'>
+			<div class='content'>
+				<img src="./files/waiting.gif">
+				<div class='text'>
+					<span class='need-translate'>Getting information, please waiting...</span>
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+</html>

@@ -43,6 +43,7 @@
 #include "widgets/WizCodeEditorDialog.h"
 #include "widgets/wizScreenShotWidget.h"
 #include "widgets/wizEmailShareDialog.h"
+#include "widgets/wizShareLinkDialog.h"
 
 #include "utils/pathresolve.h"
 #include "utils/logger.h"
@@ -1479,7 +1480,9 @@ void CWizDocumentWebView::editorCommandExecuteForeColor(const QColor& color)
 
 bool CWizDocumentWebView::editorCommandExecuteBold()
 {
-    return editorCommandExecuteCommand("bold");
+    CWizShareLinkDialog dlg;
+    dlg.exec();
+//    return editorCommandExecuteCommand("bold");
 }
 
 bool CWizDocumentWebView::editorCommandExecuteItalic()

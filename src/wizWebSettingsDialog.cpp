@@ -68,7 +68,6 @@ void CWizWebSettingsDialog::showEvent(QShowEvent* event)
     load();
 }
 
-
 void CWizWebSettingsDialog::on_web_loaded(bool ok)
 {
     if (ok)
