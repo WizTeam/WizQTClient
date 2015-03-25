@@ -141,7 +141,7 @@ void CWizWebSettingsWithTokenDialog::on_token_acquired(const QString& token)
     url.replace(QString(WIZ_TOKEN_IN_URL_REPLACE_PART), token);
     //
     QUrl u = QUrl::fromEncoded(url.toUtf8());
-    qDebug() << " show web dialog with token : " << u;
+//    qDebug() << " show web dialog with token : " << u;
 
     //
     m_web->page()->mainFrame()->load(u);

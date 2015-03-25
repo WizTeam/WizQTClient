@@ -16,27 +16,31 @@
 		}
 	}
 
-	var kbGuid = 'ceb13ef7-7ca0-47f2-9216-db681f8cbf37';
-	var documentGuid = '3914b1d3-39e9-46fb-90a3-689e75fddcae';
-	var url = 'http://fromwiz.com/share/api/shares';
-	var token = '6f00fa7a34c71d2c953d55c37717f237np8ak8sedvtd6p';
-	var documentTitle = "TestDocumentTitle";
+	// var kbGuid = '077e05ca-1191-4283-9f63-e0bce4474349';
+	// var documentGuid = '00a5ac3a-ffc0-4ec6-99db-7088d32640db';
+	// var url = 'http://fromwiz.com/share/api/shares';
+	// var token = '29c1a714ae3143d43ea266d99b322947f9j3fbt41ym784';
+	// var documentTitle = "TestDocumentTitle";
 
 	function toLog(log) {
 		try {
-			external.WriteToLog(log);
+			external.writeToLog(log);
 		}
 		catch (e) {
 		}
 	}
 
-	// var kbGuid = getUrlParam("kb_guid");
-	// var documentGuid = getUrlParam("doc_guid");
-	// var documentTitle = getUrlParam("doc_title");
-	// var url = 'http://fromwiz.com/share/api/shares';
-	// var token;
+	var kbGuid;
+	var documentGuid;
+	var documentTitle;
+	var url = 'http://fromwiz.com/share/api/shares';
+	var token;
 
 	var tokenRefreshed = false;
+
+	function setToken(t) {
+		token = t;
+	}
 
 	function getTokenSlot(t, callback) {
 		token = t;
@@ -44,17 +48,21 @@
 	}
 
 	function getToken(callback) {
-		try {
-			// external.tokenObtained.disconnect(getTokenSlot)
-			// external.tokenObtained.connect(getTokenSlot);
-			// external.getToken(callback);
+		// try {
+			kbGuid = external.getKbGuid();
+			documentGuid = external.getGuid();
+			documentTitle = external.getTitle();
+			// external.tokenObtained.disconnect(callback);
+			external.tokenObtained.connect(callback);
+			external.getToken();
+			
 			// external.Window.GetToken(function(t) {
 			// 	token = t;
-				callback();
+				// callback();
 			// });
-		}
-		catch (e) {
-		}
+		// }
+		// catch (e) {
+		// }
 	}
 
 	var requestSucceeded = 0;
@@ -511,19 +519,19 @@
 		if (customObject) {
 			var width = document.body.clientWidth;
 			var height = document.body.clientHeight;
-			customObject.Execute("resizeex", width, height, "", "");
+			customObject.resizeEx(width, height);
 		}
 	}
 
 	function closeDialog() {
 		if (customObject) {
-			customObject.Execute("close", "", "", "", "");
+			customObject.close();
 		}
 	}
 
 	function logAction(text) {
-		if (external && external.LogAction) {
-			external.LogAction(text);
+		if (external && external.logAction) {
+			external.logAction(text);
 		}
 	}
 
@@ -895,7 +903,7 @@
 				.replace("{url}", link);
 		//
 		if (customObject) {
-			customObject.Execute("openindefaultbrowser", url, "", "", "");
+			customObject.openindefaultbrowser(url);
 		}
 		else {
 			window.open(url);
@@ -944,25 +952,27 @@
 			else {
 				text = linkPart1.innerText;
 			}
+			external.copyLink(text);
 			//
-		    var input = document.createElement('textarea');
-		    document.body.appendChild(input);
-		    input.value = text;
-		    input.focus();
-		    input.select();
-		    var succeeded = document.execCommand('Copy', false, null);
-		    input.remove();
-		    if (succeeded) {
-		    	if (copyLinkPsd) {
-		    		prompt(sharelocale_copy_link_password_succeeded);
-		    	}
-		    	else {
-					prompt(sharelocale_copy_link_succeeded);
-		    	}
-		    }
-		    else {
-		    	DEBUG_ALERT("The browser isn't support copy command.");
-		    }
+		   //  var input = document.createElement('textarea');
+		   //  document.body.appendChild(input);
+		   //  input.value = text;
+		   //  input.focus();
+		   //  input.select();
+		   //  var succeeded = document.execCommand('Copy', false, null);
+		   //  toLog("document exec commomd copy : " + succeeded);
+		   //  input.remove();
+		   //  if (succeeded) {
+		   //  	if (copyLinkPsd) {
+		   //  		prompt(sharelocale_copy_link_password_succeeded);
+		   //  	}
+		   //  	else {
+					// prompt(sharelocale_copy_link_succeeded);
+		   //  	}
+		   //  }
+		   //  else {
+		   //  	DEBUG_ALERT("The browser isn't support copy command.");
+		   //  }
 		}
 		//
 		logAction("copyLinkShareLink");
@@ -975,7 +985,7 @@
 	function onClickLink(e) {
 		var url = linkPart1.innerText;
 		if (customObject) {
-			customObject.Execute("openindefaultbrowser", url, "", "", "");
+			customObject.openindefaultbrowser(url);
 		}
 		else {
 			window.open(url);
@@ -1156,7 +1166,8 @@
 	function onDocumentMouseMove(e) {
 		if (g_mousedown) {
 			if (customObject) {
-				customObject.Execute("dragcaption", g_lastX, g_lastY, "", "");
+				// customObject.Execute("dragcaption", g_lastX, g_lastY, "", "");
+				customObject.dragcaption(g_lastX, g_lastY);
 			}
 		}
 	}
@@ -1223,7 +1234,7 @@
 		console.log("initButtons called");
 
 		document.addEventListener("mouseup", onDocumentMouseUp);
-		//
+		
 		var head = document.querySelector("#head");
 		if (head) {
 			head.addEventListener("mousedown", onHeadMouseDown);
@@ -1273,14 +1284,9 @@
 	function onLoad () {
 		translatePage();
 		//
+
 		initButtons();
 		//
-		try {
-			if (customObject) {}
-		}
-		catch (e) {
-			customObject = undefined;
-		}
 		try {
 			promptFirstTips();
 		}

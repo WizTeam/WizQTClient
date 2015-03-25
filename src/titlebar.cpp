@@ -116,13 +116,20 @@ TitleBar::TitleBar(CWizExplorerApp& app, QWidget *parent)
     m_emailBtn->setNormalIcon(::WizLoadSkinIcon(strTheme, "document_email"), tr("Share document by email (Alt + 6)"));
     connect(m_emailBtn, SIGNAL(clicked()), SLOT(onEmailButtonClicked()));
 
+    m_shareBtn = new CellButton(CellButton::Center, this);
+    m_shareBtn->setFixedHeight(nTitleHeight);
+    QString shareShortcut = ::WizGetShortcut("EditShare", "Alt+7");
+    m_shareBtn->setShortcut(QKeySequence::fromString(shareShortcut));
+    m_shareBtn->setNormalIcon(::WizLoadSkinIcon(strTheme, "document_share"), tr("Share document (Alt + 7)"));
+    connect(m_shareBtn, SIGNAL(clicked()), SLOT(onShareButtonClicked()));
+
     // comments
     m_commentsBtn = new CellButton(CellButton::Right, this);
     m_commentsBtn->setFixedHeight(nTitleHeight);
-    QString commentShortcut = ::WizGetShortcut("ShowComment", "Alt+7");
+    QString commentShortcut = ::WizGetShortcut("ShowComment", "Alt+c");
     m_commentsBtn->setShortcut(QKeySequence::fromString(commentShortcut));
-    m_commentsBtn->setNormalIcon(::WizLoadSkinIcon(strTheme, "comments"), tr("Add comments (Alt + 7)"));
-    m_commentsBtn->setBadgeIcon(::WizLoadSkinIcon(strTheme, "comments_exist"), tr("View and add comments (Alt + 7)"));
+    m_commentsBtn->setNormalIcon(::WizLoadSkinIcon(strTheme, "comments"), tr("Add comments (Alt + c)"));
+    m_commentsBtn->setBadgeIcon(::WizLoadSkinIcon(strTheme, "comments_exist"), tr("View and add comments (Alt + c)"));
     connect(m_commentsBtn, SIGNAL(clicked()), SLOT(onCommentsButtonClicked()));
     connect(ICore::instance(), SIGNAL(viewNoteLoaded(Core::INoteView*,const WIZDOCUMENTDATA&,bool)),
             SLOT(onViewNoteLoaded(Core::INoteView*,const WIZDOCUMENTDATA&,bool)));
@@ -146,6 +153,7 @@ TitleBar::TitleBar(CWizExplorerApp& app, QWidget *parent)
     layoutInfo2->addWidget(m_historyBtn);
     layoutInfo2->addWidget(m_infoBtn);
     layoutInfo2->addWidget(m_emailBtn);
+    layoutInfo2->addWidget(m_shareBtn);
     layoutInfo2->addWidget(m_commentsBtn);
 
 
@@ -417,6 +425,11 @@ void TitleBar::onTagButtonClicked()
 void TitleBar::onEmailButtonClicked()
 {
     m_editor->shareNoteByEmail();
+}
+
+void TitleBar::onShareButtonClicked()
+{
+    m_editor->shareNoteByLink();
 }
 
 void TitleBar::onAttachButtonClicked()

@@ -835,6 +835,13 @@ bool CWizDocumentWebView::shareNoteByEmail()
     return true;
 }
 
+bool CWizDocumentWebView::shareNoteByLink()
+{
+    CWizShareLinkDialog dlg;
+    dlg.shareDocument(view()->note());
+    dlg.exec();
+}
+
 void CWizDocumentWebView::onEditorLoadFinished(bool ok)
 {
     if (!ok) {
@@ -1480,9 +1487,7 @@ void CWizDocumentWebView::editorCommandExecuteForeColor(const QColor& color)
 
 bool CWizDocumentWebView::editorCommandExecuteBold()
 {
-    CWizShareLinkDialog dlg;
-    dlg.exec();
-//    return editorCommandExecuteCommand("bold");
+    return editorCommandExecuteCommand("bold");
 }
 
 bool CWizDocumentWebView::editorCommandExecuteItalic()

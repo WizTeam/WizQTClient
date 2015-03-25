@@ -3,6 +3,8 @@
 
 #include <QDialog>
 #include <QWebView>
+#include <QPropertyAnimation>
+#include "share/wizobject.h"
 
 class CWizShareLinkDialog : public QDialog
 {
@@ -11,20 +13,35 @@ public:
     CWizShareLinkDialog(QWidget *parent = 0, Qt::WindowFlags f = 0);
     ~CWizShareLinkDialog();
 
+    virtual QSize sizeHint() const;
+
+    void shareDocument(const WIZDOCUMENTDATA& doc);
+
     Q_INVOKABLE void logAction(const QString& strAction);
     Q_INVOKABLE void writeToLog(const QString& strLog);
-    Q_INVOKABLE void getToken(const QString& callback);
+    Q_INVOKABLE void getToken();
+
+    Q_INVOKABLE QString getKbGuid();
+    Q_INVOKABLE QString getGuid();
+    Q_INVOKABLE QString getTitle();
+    Q_INVOKABLE void resizeEx(int nWidth, int nHeight);
+    Q_INVOKABLE void openindefaultbrowser(const QString& url);
+    Q_INVOKABLE void dragcaption(int x, int y);
+    Q_INVOKABLE void copyLink(const QString& link);
 
 public slots:
     void loadHtml();
 
     void onJavaScriptWindowObject();
 
+
 signals:
-    void tokenObtained(const QString& strToken, const QString& callback);
+    void tokenObtained();
 
 private:
     QWebView* m_view;
+    WIZDOCUMENTDATA m_doc;
+    QPropertyAnimation* m_animation;
 };
 
 #endif // CWIZSHARELINKDIALOG_H
