@@ -33,6 +33,8 @@ public:
 
     static QString kUrlFromGuid(const QString& strToken, const QString& strKbGUID);
 
+    static QString appstoreParam(bool useAndSymbol = true);
+
 };
 
 } // namespace WizService

@@ -28,8 +28,8 @@ CWizWebSettingsDialog::CWizWebSettingsDialog(QString url, QSize sz, QWidget *par
     m_web = new QWebView(this);
     m_web->settings()->globalSettings()->setAttribute(QWebSettings::LocalStorageEnabled, true);
     m_web->settings()->globalSettings()->setAttribute(QWebSettings::LocalStorageDatabaseEnabled, true);
-    connect(m_web->page()->networkAccessManager(), SIGNAL(finished(QNetworkReply*)),
-            SLOT(on_networkRequest_finished(QNetworkReply*)));
+//    connect(m_web->page()->networkAccessManager(), SIGNAL(finished(QNetworkReply*)),
+//            SLOT(on_networkRequest_finished(QNetworkReply*)));
     connect(m_web, SIGNAL(loadFinished(bool)), SLOT(on_web_loaded(bool)));
     connect(m_web->page()->mainFrame(), SIGNAL(javaScriptWindowObjectCleared()),
             SLOT(onEditorPopulateJavaScriptWindowObject()));
@@ -75,6 +75,10 @@ void CWizWebSettingsDialog::on_web_loaded(bool ok)
         m_movie->stop();
         m_labelProgress->setVisible(false);
         m_web->setVisible(true);
+    }
+    else
+    {
+        loadErrorPage();
     }
 }
 
@@ -137,7 +141,7 @@ void CWizWebSettingsWithTokenDialog::on_token_acquired(const QString& token)
     url.replace(QString(WIZ_TOKEN_IN_URL_REPLACE_PART), token);
     //
     QUrl u = QUrl::fromEncoded(url.toUtf8());
-//    qDebug() << " show web dialog with token : " << u;
+    qDebug() << " show web dialog with token : " << u;
 
     //
     m_web->page()->mainFrame()->load(u);
