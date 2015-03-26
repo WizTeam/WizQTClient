@@ -116,7 +116,9 @@ protected Q_SLOTS:
 
     virtual void createDocumentByHtml(const QString& strHtml, const QString& strTitle) = 0;
     virtual void createDocumentByHtml(const QString& strFileName, const QString& strHtml, const QString& strTitle);
-    virtual bool createDocumentByFile(const QString& strFileName);
+    virtual bool createDocumentWithAttachment(const QString& strFileName);
+    virtual bool createDocumentByHtmlWithAttachment(const QString& strHtml, const QString& strTitle,
+                                                    const QString& strAttachFile);
     void on_dragHovered_timeOut();
 
 private:
@@ -268,7 +270,9 @@ public:
     bool createDocument(WIZDOCUMENTDATA& data);
     bool createDocument(WIZDOCUMENTDATA& data, const QString& strHtml, const QString& strTitle);
 
-    bool createDocumentByFile(const QString& strFileName);
+    bool createDocumentWithAttachment(const QString& strFileName);
+    bool createDocumentByHtmlWithAttachment(const QString& strHtml, const QString& strTitle,
+                                                    const QString& strAttachFile);
     bool createDocumentByAttachments(WIZDOCUMENTDATA& data, const QStringList& attachList);
     bool createDocumentByTemplate(WIZDOCUMENTDATA& data, const QString& strZiw);
 

@@ -436,7 +436,9 @@ void CWizCategoryBaseView::loadDocument(QStringList &strFileList)
     connect(fileReader, SIGNAL(htmlFileloaded(QString, QString, QString)),
             SLOT(createDocumentByHtml(QString, QString, QString)));
     connect(fileReader, SIGNAL(fileLoadFailed(QString)),
-            SLOT(createDocumentByFile(QString)));
+            SLOT(createDocumentWithAttachment(QString)));
+    connect(fileReader, SIGNAL(richTextFileLoaded(QString,QString,QString)),
+            SLOT(createDocumentByHtmlWithAttachment(QString,QString,QString)));
     MainWindow *mainWindow = dynamic_cast<MainWindow*>(m_app.mainWindow());
     CWizProgressDialog *progressDialog  = mainWindow->progressDialog();
     progressDialog->setProgress(100,0);
@@ -691,6 +693,7 @@ QString CWizCategoryBaseView::getUseableItemName(QTreeWidgetItem* parent, \
 
 void CWizCategoryBaseView::resetFolderLocation(CWizCategoryViewFolderItem* item, const QString& strNewLocation)
 {
+    qDebug() << "reset folder location : " << strNewLocation;
     item->setLocation(strNewLocation);
     for (int i = 0; i < item->childCount(); i++)
     {
@@ -747,9 +750,15 @@ void CWizCategoryBaseView::createDocumentByHtml(const QString &/*strFileName*/,
 {
 }
 
-bool CWizCategoryBaseView::createDocumentByFile(const QString& /*strFileName*/)
+bool CWizCategoryBaseView::createDocumentWithAttachment(const QString& /*strFileName*/)
 {
+    return true;
+}
 
+bool CWizCategoryBaseView::createDocumentByHtmlWithAttachment(const QString& /*strHtml*/,
+                                                              const QString& /*strTitle*/, const QString& /*strAttachFile*/)
+{
+    return true;
 }
 
 
@@ -1138,7 +1147,7 @@ bool CWizCategoryView::createDocument(WIZDOCUMENTDATA& data, const QString& strH
     return true;
 }
 
-bool CWizCategoryView::createDocumentByFile(const QString& strFileName)
+bool CWizCategoryView::createDocumentWithAttachment(const QString& strFileName)
 {
     if (!QFile::exists(strFileName))
         return false;
@@ -1146,6 +1155,23 @@ bool CWizCategoryView::createDocumentByFile(const QString& strFileName)
     QStringList fileList(strFileName);
     WIZDOCUMENTDATA data;
     return createDocumentByAttachments(data, fileList);
+}
+
+bool CWizCategoryView::createDocumentByHtmlWithAttachment(const QString& strHtml, const QString& strTitle, const QString& strAttachFile)
+{
+    if (!QFile::exists(strAttachFile))
+        return false;
+
+     WIZDOCUMENTDATA data;
+    if (!createDocument(data, strHtml, strTitle))
+        return false;
+
+    CWizDatabase& db = m_dbMgr.db(data.strKbGUID);
+    WIZDOCUMENTATTACHMENTDATA attach;
+    if (!db.AddAttachment(data, strAttachFile, attach))
+    {
+        TOLOG1("[Service] add attch failed :  1%", strAttachFile);
+    }
 }
 
 bool CWizCategoryView::createDocumentByAttachments(WIZDOCUMENTDATA& data, const QStringList& attachList)
@@ -1158,11 +1184,11 @@ bool CWizCategoryView::createDocumentByAttachments(WIZDOCUMENTDATA& data, const 
         return false;
 
     CWizDatabase& db = m_dbMgr.db(data.strKbGUID);
-    foreach (QString StrFileName, attachList) {
+    foreach (QString strFileName, attachList) {
         WIZDOCUMENTATTACHMENTDATA attach;
-        if (!db.AddAttachment(data, StrFileName, attach))
+        if (!db.AddAttachment(data, strFileName, attach))
         {
-            TOLOG1("[Service] add attch failed :  1%", StrFileName);
+            TOLOG1("[Service] add attch failed :  1%", strFileName);
         }
     }
 
@@ -1665,6 +1691,8 @@ void CWizCategoryView::on_action_user_deleteFolder_confirmed(int result)
     CWizCategoryViewFolderItem* p = currentCategoryItem<CWizCategoryViewFolderItem>();
     if (!p)
         return;
+
+    qDebug() << "try to delete folder : " << p->location();
 
     if (result == QMessageBox::Ok) {
         CWizFolder folder(m_dbMgr.db(), p->location());
@@ -4061,21 +4089,25 @@ void CWizCategoryView::on_itemPosition_changed(CWizCategoryViewItemBase* pItem)
                 return;
 
             QString strName = getUseableItemName(parentItem, item);
+            qDebug() << "get useable item name : " << strName;
             QString strNewLocation = "/" + strName + "/";
             item->setText(0, strName);
 
-            while (parentItem != folderRoot)
+
+            if (parentItem != folderRoot)
             {
                 CWizCategoryViewItemBase* parentBase = dynamic_cast<CWizCategoryViewItemBase*>(parentItem);
                 if (!parentBase)
                     return;
 
-
+                qDebug() << "parent is not root , parent name : " << parentBase->name();
                 strNewLocation = parentBase->name() + strNewLocation.remove(0, 1);
                 parentItem = parentBase->parent();
             }
 
             QString strOldLocation = item->location();
+
+            qDebug() << "item position changed , " << strOldLocation << " ,  new location : " << strNewLocation;
             resetFolderLocation(item, strNewLocation);
             updatePrivateFolderLocation(db, strOldLocation, strNewLocation);
         }

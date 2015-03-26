@@ -24,6 +24,8 @@ signals:
     void loadProgress(int total,int loaded);
     void htmlFileloaded(const QString &strFileName, const QString& strHtml,
                      const QString& strTitle);
+    void richTextFileLoaded(const QString& strHtml, const QString& strTitle,
+                         const QString& strFileName);
 
 public slots:
 
