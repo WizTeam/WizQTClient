@@ -6,11 +6,12 @@
 #include <QPropertyAnimation>
 #include "share/wizobject.h"
 
+class CWizUserSettings;
 class CWizShareLinkDialog : public QDialog
 {
     Q_OBJECT
 public:
-    CWizShareLinkDialog(QWidget *parent = 0, Qt::WindowFlags f = 0);
+    CWizShareLinkDialog(CWizUserSettings& settings, QWidget *parent = 0, Qt::WindowFlags f = 0);
     ~CWizShareLinkDialog();
 
     virtual QSize sizeHint() const;
@@ -29,6 +30,9 @@ public:
     Q_INVOKABLE void dragcaption(int x, int y);
     Q_INVOKABLE void copyLink(const QString& link);
 
+    Q_INVOKABLE QString getShareLinkFirstTips();
+    Q_INVOKABLE void setShareLinkFirstTips(const QString& value);
+
 public slots:
     void loadHtml();
 
@@ -39,6 +43,7 @@ signals:
     void tokenObtained();
 
 private:
+    CWizUserSettings& m_settings;
     QWebView* m_view;
     WIZDOCUMENTDATA m_doc;
     QPropertyAnimation* m_animation;

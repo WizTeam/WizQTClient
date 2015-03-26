@@ -1172,12 +1172,10 @@
 		}
 	}
 
-	var settings = undefined;
 	//
 	function onCreateNow() {
 		if (btnDonotPrompt.checked) {
-			settings.SetStringValue("SNSShare", "ShareLinkFirstTips", "1");
-			settings.Close();
+			external.setShareLinkFirstTips("1");
 		}
 		//
 		var content = document.querySelector("#content");
@@ -1200,11 +1198,8 @@
 
 	function promptFirstTips() {
 		try {
-			// settings = external.CreateWizObject("WizKMCore.WizSettings");
-			// if (settings) {
-			// 	settings.Open(external.SettingsFileName);
 				//
-				var firstTips = 1; //settings.StringValue("SNSShare", "ShareLinkFirstTips");
+				var firstTips = external.getShareLinkFirstTips();
 				var content = document.querySelector("#content");
 				if (content) {
 					content.style.display = ("1" === firstTips) ? "" : "none";
@@ -1218,7 +1213,6 @@
 					showBackground();
 					getToken(createLink);
 				}
-			// }
 		}
 		catch (e) {
 		}

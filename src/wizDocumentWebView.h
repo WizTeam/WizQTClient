@@ -175,8 +175,8 @@ public:
     void saveAsPDF();
     void saveAsHtml(const QString& strDirPath);
     void printDocument();
-    bool shareNoteByEmail();
-    bool shareNoteByLink();
+    void shareNoteByEmail();
+    void shareNoteByLink();
     bool findIMGElementAt(QPoint point, QString& strSrc);
     //
     Q_INVOKABLE bool isContentsChanged() { return m_bContentsChanged; }

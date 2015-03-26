@@ -76,7 +76,7 @@ var ShareLocale = (function() {
 			objLng = en_us_loc;
 	};
 	//
-	return en_us_loc;
+	return objLng;
 })();
 
 function wizTranslate (str) {

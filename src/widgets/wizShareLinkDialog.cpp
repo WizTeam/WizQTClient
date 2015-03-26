@@ -1,6 +1,7 @@
 #include "wizShareLinkDialog.h"
 #include "sync/token.h"
 #include "utils/pathresolve.h"
+#include "share/wizsettings.h"
 #include <QVBoxLayout>
 #include <QWebFrame>
 #include <QTimer>
@@ -12,8 +13,11 @@
 #include <QMessageBox>
 #include <QDebug>
 
-CWizShareLinkDialog::CWizShareLinkDialog(QWidget* parent, Qt::WindowFlags f)
+#define ShareLinkFirstTips "ShareLinkFirstTips"
+
+CWizShareLinkDialog::CWizShareLinkDialog(CWizUserSettings& settings, QWidget* parent, Qt::WindowFlags f)
     : QDialog(parent, f)
+    , m_settings(settings)
     , m_view(new QWebView(this))
 {
     setWindowFlags(Qt::CustomizeWindowHint);
@@ -115,6 +119,16 @@ void CWizShareLinkDialog::copyLink(const QString& link)
     data->setText(link);
     clip->setMimeData(data);
     QMessageBox::information(this, tr("Info"), tr("Link copied successfully!"));
+}
+
+QString CWizShareLinkDialog::getShareLinkFirstTips()
+{
+    return m_settings.get(ShareLinkFirstTips);
+}
+
+void CWizShareLinkDialog::setShareLinkFirstTips(const QString& value)
+{
+    m_settings.set(ShareLinkFirstTips, value);
 }
 
 void CWizShareLinkDialog::loadHtml()

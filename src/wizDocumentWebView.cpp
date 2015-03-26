@@ -825,19 +825,17 @@ void CWizDocumentWebView::addAttachmentThumbnail(const QString strFile, const QS
     editorCommandExecuteInsertHtml(strHtml, true);
 }
 
-bool CWizDocumentWebView::shareNoteByEmail()
+void CWizDocumentWebView::shareNoteByEmail()
 {
     CWizEmailShareDialog dlg(m_app);
     dlg.setNote(view()->note());
 
     dlg.exec();
-
-    return true;
 }
 
-bool CWizDocumentWebView::shareNoteByLink()
+void CWizDocumentWebView::shareNoteByLink()
 {
-    CWizShareLinkDialog dlg;
+    CWizShareLinkDialog dlg(m_app.userSettings());
     dlg.shareDocument(view()->note());
     dlg.exec();
 }
