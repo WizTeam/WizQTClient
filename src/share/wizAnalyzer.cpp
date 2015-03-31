@@ -1,0 +1,467 @@
+#include "wizAnalyzer.h"
+#include "wizmisc.h"
+#include "wizdef.h"
+#include "utils/pathresolve.h"
+#include "sync/apientry.h"
+#include "wizmainwindow.h"
+#include <QMutexLocker>
+#include <QRunnable>
+#include <QThreadPool>
+#include <QNetworkAccessManager>
+#include <QNetworkReply>
+#include <QNetworkRequest>
+#include <QEventLoop>
+#include <QSettings>
+#include <QApplication>
+#include <QDesktopWidget>
+#include <QFile>
+#include <QDataStream>
+#include <QDebug>
+
+CWizAnalyzer::CWizAnalyzer(const CString& strRecordFileName)
+    : m_strRecordFileName(strRecordFileName)
+{
+
+    m_strRecordFileNameNoDelete = ::WizExtractFilePath(strRecordFileName) + WizExtractFileTitle(strRecordFileName) + _T("Ex") + WizExtractFileExt(strRecordFileName);
+	//
+	m_tLastLog = ::WizIniReadDateTimeDef(m_strRecordFileNameNoDelete, _T("Common"), _T("Last"), COleDateTime(2015, 1, 1, 0, 0, 0));
+}
+
+CString CWizAnalyzer::guid()
+{
+	CString str = ::WizIniReadStringDef(m_strRecordFileNameNoDelete, _T("Common"), _T("guid"));
+	if (str.IsEmpty())
+	{
+		str = ::WizGenGUIDLowerCaseLetterOnly();
+		::WizIniWriteString(m_strRecordFileNameNoDelete, _T("Common"), _T("guid"), str);
+	}
+	return str;
+}
+CString CWizAnalyzer::GetUseDays()
+{
+	int days = ::WizIniReadIntDef(m_strRecordFileNameNoDelete, _T("Common"), _T("useDays"), 0);
+	//
+    return WizIntToStr(days);
+}
+
+CString CWizAnalyzer::GetInstallDays()
+{
+    int days = ::WizIniReadIntDef(m_strRecordFileNameNoDelete, _T("Common"), _T("useDays"), 0);
+    //
+    if (days == 0)
+    {
+        QFileInfo info(QApplication::applicationFilePath());
+        days = info.created().daysTo(QDateTime::currentDateTime());
+        ::WizIniWriteInt(m_strRecordFileNameNoDelete, _T("Common"), _T("useDays"), days);
+    }
+    //
+    return WizIntToStr(days);
+}
+void CWizAnalyzer::IncreaseCounter(const CString& strSection, const CString& strKey)
+{
+    int count = ::WizIniReadIntDef(m_strRecordFileName, strSection, strKey, 0);
+	count++;
+    ::WizIniWriteInt(m_strRecordFileName, strSection, strKey, count);
+}
+
+void CWizAnalyzer::AddDuration(const CString& strFunctionName, int seconds)
+{
+    int count = ::WizIniReadIntDef(m_strRecordFileName, _T("Durations"), strFunctionName, 0);
+	count += seconds;
+    ::WizIniWriteInt(m_strRecordFileName, _T("Durations"), strFunctionName, count);
+}
+
+void CWizAnalyzer::LogTimes()
+{
+	COleDateTime t = ::WizGetCurrentTime();
+	//
+	int hour = t.GetHour();
+	int week = t.GetDayOfWeek();
+	if (week == 1)
+		week = 7;
+	else
+		week = week - 1;
+	//
+	CString hourString = _T("Hour") + WizIntToStr(hour);
+	IncreaseCounter(_T("Actions"), hourString);
+	//
+	CString weekString = _T("Week") + WizIntToStr(week);
+	IncreaseCounter(_T("Actions"), weekString);
+}
+//
+void CWizAnalyzer::LogUseDays()
+{
+	COleDateTime t = ::WizGetCurrentTime();
+	//
+	if (m_tLastLog.GetYear() == t.GetYear()
+		&& m_tLastLog.GetDayOfYear() == t.GetDayOfYear())
+		return;
+	//
+	int days = ::WizIniReadIntDef(m_strRecordFileNameNoDelete, _T("Common"), _T("useDays"), 0);
+	days++;
+	::WizIniWriteInt(m_strRecordFileNameNoDelete, _T("Common"), _T("useDays"), days);
+	//
+	::WizIniWriteDateTime(m_strRecordFileNameNoDelete, _T("Common"), _T("Last"), t);
+}
+//
+CString CWizAnalyzer::KeyOfFirstAction(int index)
+{
+	index++;
+	//
+	CString key = _T("firstAction");
+	if (index >= 2)
+	{
+		key += WizIntToStr(index);
+	}
+	return key;
+}
+//
+CString CWizAnalyzer::GetFirstAction(int index)
+{
+	CString strKey = KeyOfFirstAction(index);
+	CString strAction = ::WizIniReadStringDef(m_strRecordFileNameNoDelete, _T("firstAction"), strKey);
+	return strAction;
+}
+void CWizAnalyzer::LogFirstAction(const CString& strActionName)
+{
+    if (!strActionName || !*strActionName)
+		return;
+	//
+    if (0 == WizStrStrI_Pos(strActionName, _T("Init")))
+		return;
+	//
+	static BOOL logged = FALSE;
+	if (logged)
+		return;
+	//
+	for (int i = 0; i < 10; i++)
+	{
+		CString old = GetFirstAction(i);
+		if (old.IsEmpty())
+		{
+			CString strKey = KeyOfFirstAction(i);
+            ::WizIniWriteString(m_strRecordFileNameNoDelete, _T("firstAction"), strKey, strActionName);
+			return;
+		}
+	}
+	//
+	logged = TRUE;
+}
+
+void CWizAnalyzer::LogAction(const CString& strAction)
+{
+    QMutexLocker locker(&m_csLog);
+	//
+	LogUseDays();
+	LogTimes();
+    LogFirstAction(strAction);
+	//
+    IncreaseCounter(_T("Actions"), strAction);
+}
+
+void CWizAnalyzer::LogDurations(const CString& strAction, int seconds)
+{
+    QMutexLocker locker(&m_csLog);
+    //
+	LogUseDays();
+    IncreaseCounter(_T("Functions"), strAction);
+    AddDuration(strAction, seconds);
+}
+//
+static int WizGetVersionCode()
+{
+    QString str(WIZ_CLIENT_VERSION);
+    QStringList strList = str.split('.');
+    Q_ASSERT(strList.count() >= 3);
+
+    QString strNum = strList.first();
+    QString strSec = strList.at(1);
+    while (strSec.length() < 2) {
+        strSec.insert(0, "0");
+    }
+    QString strThr = strList.at(2);
+    while (strThr.length() < 3) {
+        strThr.insert(0, "0");
+    }
+
+    strNum.append(strSec);
+    strNum.append(strThr);
+
+    return strNum.toInt();
+}
+//
+void CWizAnalyzer::Post(IWizSyncableDatabase* db)
+{
+#ifndef QT_DEBUG
+    if (!WizDayOnce("Analyzer"))
+		return;
+#endif
+    //
+    class CPostRunable : public QRunnable
+    {
+    public:
+        CPostRunable(IWizSyncableDatabase* db)
+            : m_db(db)
+        {}
+
+        //
+        void run()
+        {
+            WizGetAnalyzer().PostBlocked(m_db);
+        }
+
+    private:
+        IWizSyncableDatabase* m_db;
+    };
+
+    QThreadPool::globalInstance()->start(new CPostRunable(db));
+}
+
+
+//
+void CWizAnalyzer::PostBlocked(IWizSyncableDatabase* db)
+{
+    QMutexLocker locker(&m_csPost);
+
+    rapidjson::Document dd;
+    dd.SetObject();
+    rapidjson::Document::AllocatorType& allocator = dd.GetAllocator();
+
+    QByteArray baGuid = guid().toUtf8();
+    rapidjson::Value vGuid(baGuid.constData(), baGuid.size());
+    dd.AddMember("guid", vGuid, allocator);
+
+    QByteArray baPlat = QSysInfo::prettyProductName().toUtf8();
+    rapidjson::Value vPlat(baPlat.constData(), baPlat.size());
+    dd.AddMember("platform", vPlat, allocator);
+
+    rapidjson::Value versionName(rapidjson::kStringType);
+    versionName.SetString(WIZ_CLIENT_VERSION);
+    dd.AddMember("versionName", versionName, allocator);
+
+    rapidjson::Value versionCode(WizGetVersionCode());
+    dd.AddMember("versionCode", versionCode, allocator);
+
+    //
+    Core::Internal::MainWindow *window = Core::Internal::MainWindow::instance();
+    QByteArray baLocal = QLocale::system().name().toUtf8();
+    if (window)
+    {
+        baLocal = window->userSettings().locale().toUtf8();
+    }
+    rapidjson::Value locale(baLocal.constData(), baLocal.size());
+    dd.AddMember("locale", locale, allocator);
+
+    //
+    QRect rec = QApplication::desktop()->screenGeometry();
+    QString strScreenSize = QString::number(rec.width()) + "x" + QString::number(rec.height());
+    QByteArray baScreenSize = strScreenSize.toUtf8();
+    rapidjson::Value screenSize(baScreenSize.constData(), baScreenSize.size());
+    dd.AddMember("screenSize", screenSize, allocator);
+
+#ifdef Q_OS_MAC    
+    dd.AddMember("deviceName", "MacOSX", allocator);
+#ifdef BUILD4APPSTORE
+    dd.AddMember("packageType", "AppStore", allocator);
+#else
+    dd.AddMember("packageType", "DMG", allocator);
+#endif
+
+#else
+    dd.AddMember("deviceName", "Linux", allocator);
+#endif
+
+    rapidjson::Value isAnoymous(false);
+    dd.AddMember("isAnoymous", isAnoymous, allocator);
+
+    //
+    rapidjson::Value isBiz(db->HasBiz());
+    dd.AddMember("isBiz", isBiz, allocator);
+
+    QByteArray baUseDays = GetUseDays().toUtf8();
+    rapidjson::Value useDays(baUseDays.constData(), baUseDays.size());
+    dd.AddMember("useDays", useDays, allocator);
+
+    QByteArray baInstall = GetInstallDays().toUtf8();
+    rapidjson::Value installDays(baInstall.constData(), baInstall.size());
+    qDebug() << "install days : " << baInstall;
+    dd.AddMember("installDays", installDays, allocator);
+
+    QDateTime dtSignUp = QDateTime::fromString(db->meta("Account", "DateSignUp"));
+    int signUpDays = dtSignUp.daysTo(QDateTime::currentDateTime());
+    qDebug() << "sign up days : " << signUpDays;
+    dd.AddMember("signUpDays", signUpDays, allocator);
+
+//    root["installDays"] = CString("em"); //WizKMGetInstallDateTime();        //TODO:
+//    root["signUpDays"] = CString("dt"); //db.GetUserSignupDateTime();      //TOOD:
+	//
+
+    QMap<QByteArray, QByteArray> firstActionMap;
+	for (int i = 0; i < 10; i++)
+	{
+        CString strFirstAction = GetFirstAction(i);
+        if (!strFirstAction.IsEmpty())
+        {
+            CString strKey = KeyOfFirstAction(i);
+            firstActionMap.insert(strKey.toUtf8(), strFirstAction.toUtf8());
+        }
+        else
+        {
+            break;
+        }
+    }
+
+    for (int i = 0; i < firstActionMap.count(); i++)
+    {
+        const QByteArray& baKey = firstActionMap.keys().at(i);
+        const QByteArray& baValue = firstActionMap[baKey];
+        rapidjson::Value fistAction(baValue.constData(), baValue.size());
+        rapidjson::Value vKey(baKey.constData(), baKey.size());
+        dd.AddMember(vKey, fistAction, allocator);
+    }
+
+	//
+	CWizIniFileEx iniFile;
+	iniFile.LoadFromFile(m_strRecordFileName);
+	//
+    rapidjson::Value actions(rapidjson::kObjectType);
+    actions.SetObject();
+	//
+    QMap<QByteArray, QByteArray> actionMap;
+    iniFile.GetSection(_T("Actions"), actionMap);
+    for (QMap<QByteArray, QByteArray>::iterator it = actionMap.begin();
+        it != actionMap.end();
+		it++)
+	{        
+        const QByteArray& baKey = it.key();
+        const QByteArray& baValue = it.value();
+        rapidjson::Value vValue(baValue.constData(), baValue.size());
+        rapidjson::Value vKey(baKey.constData(), baKey.size());
+        actions.AddMember(vKey, vValue, allocator);
+	}
+	//
+    dd.AddMember("actions", actions, allocator);
+	//
+    rapidjson::Value durations(rapidjson::kObjectType);
+    durations.SetObject();
+	//
+    QMap<QString, QString> seconds;
+    iniFile.GetSection(_T("Durations"), seconds);
+	//
+    QMap<QByteArray, QByteArray> functionMap;
+
+    iniFile.GetSection(_T("Functions"), functionMap);
+    for (QMap<QByteArray, QByteArray>::const_iterator it = functionMap.begin();
+        it != functionMap.end();
+		it++)
+	{
+        QString strKey = it.key();
+        int sec = seconds.value(strKey).toInt();
+        qDebug() << "item : " << strKey << " duration : " << sec;
+        if (sec == 0)
+            continue;
+
+        rapidjson::Value elem(rapidjson::kObjectType);
+        elem.SetObject();
+
+        elem.AddMember("totalTime", sec, allocator);
+        elem.AddMember("count", it.value().toInt(), allocator);
+        //
+        rapidjson::Value vKey(it.key().constData(), it.key().size());
+        durations.AddMember(vKey, elem, allocator);
+	}
+	//
+    dd.AddMember("durations", durations, allocator);
+    //
+
+    rapidjson::GenericStringBuffer< rapidjson::UTF8<> > buffer;
+    rapidjson::Writer<rapidjson::GenericStringBuffer< rapidjson::UTF8<> > > writer(buffer);
+
+    dd.Accept(writer);
+    qDebug() << buffer.GetString();
+
+
+    CString strURL = WizService::ApiEntry::analyzerUploadUrl();
+    qDebug() << "get url : " <<strURL;
+
+    if (0 != ::WizStrStrI_Pos(strURL, _T("http://"))
+        && 0 != ::WizStrStrI_Pos(strURL, _T("https://")))
+        return;
+
+    QNetworkAccessManager net;
+    QNetworkRequest request;
+    request.setUrl(strURL);
+    request.setHeader(QNetworkRequest::ContentTypeHeader, QVariant("text/plain"));
+    QNetworkReply* reply = net.post(request, buffer.GetString());
+
+    QEventLoop loop;
+    QObject::connect(reply, SIGNAL(finished()), &loop, SLOT(quit()));
+    loop.exec();
+
+    if (reply->error() != QNetworkReply::NoError) {
+        qDebug() << "setdata error;" ;
+        reply->deleteLater();
+        return;
+    }
+
+    QString strReply = QString::fromUtf8(reply->readAll());
+    reply->deleteLater();
+    qDebug() << "reply data : " <<strReply;
+
+    rapidjson::Document d;
+    d.Parse<0>(strReply.toUtf8().constData());
+
+    if (!d.HasMember("return_code"))
+    {
+        qDebug() << "can not get return code ";
+        return;
+    }
+
+    int returnCode = d.FindMember("return_code")->value.GetInt();
+    if (returnCode != 200)
+    {
+        qDebug() << "error code was not 200 " << returnCode;
+        return;
+    }
+
+//	//
+//    ::DeleteFile(m_strRecordFileName);	//remove old file
+}
+
+CWizAnalyzer& CWizAnalyzer::GetAnalyzer()
+{
+    QSettings globalSettings(Utils::PathResolve::globalSettingsFile(), QSettings::IniFormat);
+    QString strUserId = globalSettings.value("Users/DefaultUser").toString();
+    QString strFile = Utils::PathResolve::dataStorePath() + strUserId + "/analyzer.ini";
+
+    static CWizAnalyzer analyzer(strFile);
+	//
+    return analyzer;
+}
+
+
+
+CWizAnalyzer& WizGetAnalyzer()
+{
+	return CWizAnalyzer::GetAnalyzer();
+}
+////////////////////////////////////////////////////////
+CWizFunctionDurationLogger::CWizFunctionDurationLogger(const CString& strFunctionName)
+    : m_strFunctionName(strFunctionName)
+{
+    m_tStart = QTime::currentTime();
+    qDebug() << "start tick : " << m_tStart;
+}
+
+CWizFunctionDurationLogger::~CWizFunctionDurationLogger()
+{
+    QTime end = QTime::currentTime();
+    qDebug() << "end tick : " << end;
+    if (end < m_tStart)
+		return;
+	//
+    int seconds = m_tStart.secsTo(end); //(end - m_tStart) / 1000;
+	//
+	WizGetAnalyzer().LogDurations(m_strFunctionName, seconds);
+}
+

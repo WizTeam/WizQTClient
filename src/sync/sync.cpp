@@ -7,7 +7,8 @@
 #include "avatar.h"
 #include "rapidjson/document.h"
 
-#include  "../share/wizSyncableDatabase.h"
+#include  "share/wizSyncableDatabase.h"
+#include "share/wizAnalyzer.h"
 
 #define IDS_BIZ_SERVICE_EXPR    "Your {p} business service has expired."
 #define IDS_BIZ_NOTE_COUNT_LIMIT     QObject::tr("Group notes count limit exceeded!")
@@ -1799,7 +1800,14 @@ bool WizSyncDatabase(const WIZUSERINFO& info, IWizKMSyncEvents* pEvents,
             return false;
         }
 
+
         syncGroupUsers(server, arrayGroup, pEvents, pDatabase, bBackground);
+    }
+    // sync analyzer info one time a day
+    if (WizIsDayFirstSync(pDatabase))
+    {
+        CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
+        analyzer.Post(pDatabase);
     }
 
     //

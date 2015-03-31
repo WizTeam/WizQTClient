@@ -6,6 +6,7 @@
 #include <QIcon>
 #include <QBuffer>
 #include <QByteArray>
+#include <QSettings>
 
 #include "wizobject.h"
 #include "wizmd5.h"
@@ -34,6 +35,13 @@ CString WizFormatString6(const CString& strFormat, const CString& strParam1, con
 CString WizFormatString7(const CString& strFormat, const CString& strParam1, const CString& strParam2, const CString& strParam3, const CString& strParam4, const CString& strParam5, const CString& strParam6, const CString& strParam7);
 CString WizFormatString8(const CString& strFormat, const CString& strParam1, const CString& strParam2, const CString& strParam3, const CString& strParam4, const CString& strParam5, const CString& strParam6, const CString& strParam7, const CString& strParam8);
 CString WizFormatInt(__int64 n);
+
+COleDateTime WizIniReadDateTimeDef(const CString& strFile, const CString& strSection, const CString& strKey, COleDateTime defaultData = COleDateTime());
+void WizIniWriteDateTime(const CString& strFile, const CString& strSection, const CString& strKey, COleDateTime dateTime);
+CString WizIniReadStringDef(const CString& strFile, const CString& strSection, const CString& strKey);
+void WizIniWriteString(const CString& strFile, const CString& strSection, const CString& strKey, const CString& strValue);
+int WizIniReadIntDef(const CString& strFile, const CString& strSection, const CString& strKey, int defaultValue = 0);
+void WizIniWriteInt(const CString& strFile, const CString& strSection, const CString& strKey, int nValue);
 
 time_t WizTimeGetTimeT(const COleDateTime& t);
 
@@ -206,6 +214,20 @@ class CWaitCursor
 public:
     CWaitCursor();
     ~CWaitCursor();
+};
+
+class CWizIniFileEx
+{
+public:
+    CWizIniFileEx();
+    ~CWizIniFileEx();
+    void LoadFromFile(const QString& strFile);
+    void GetSection(const QString& section, CWizStdStringArray& arrayData);
+    void GetSection(const QString& section, QMap<QString, QString>& dataMap);
+    void GetSection(const QString& section, QMap<QByteArray, QByteArray>& dataMap);
+
+private:
+    QSettings* m_settings;
 };
 
 class QThread;

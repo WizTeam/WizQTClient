@@ -10,6 +10,7 @@
 #include <QMimeData>
 #include <QApplication>
 #include <QClipboard>
+#include <QDateTime>
 
 #include <extensionsystem/pluginmanager.h>
 
@@ -383,6 +384,9 @@ void CWizFolder::MoveToLocation(const QString& strDestLocation)
          it != arrayFolder.end();
          it++) {
         QString strFolder = *it;
+        if (strFolder.right(1) != "/") {
+            strFolder.append("/");
+        }
         if (strFolder.startsWith(strOldLocation)) {
             strFolder.remove(0, strOldLocation.length());
             strFolder.insert(0, strDestLocation);
@@ -996,6 +1000,7 @@ void CWizDatabase::SetUserInfo(const WIZUSERINFO& userInfo)
     SetMeta(g_strAccountSection, "UserLevel", QString::number(userInfo.nUserLevel));
     SetMeta(g_strAccountSection, "UserPoints", QString::number(userInfo.nUserPoints));
     SetMeta(g_strAccountSection, "MywizMail", userInfo.strMywizEmail);
+    SetMeta(g_strAccountSection, "DateSignUp", userInfo.tCreated.toString());
 
     Q_EMIT userInfoChanged();
 }
@@ -1006,6 +1011,13 @@ bool CWizDatabase::IsGroup()
         return false;
 
     return true;
+}
+
+bool CWizDatabase::HasBiz()
+{
+    CWizDatabase* personDb = getPersonalDatabase();
+
+    return !personDb->GetMetaDef("Bizs", "Count").IsEmpty();
 }
 
 bool CWizDatabase::IsGroupAdmin()
@@ -1094,6 +1106,20 @@ COleDateTime CWizDatabase::GetLastSyncTime()
 {
     uint secs = GetMetaDef("SYNC_INFO", "TIME").toUInt();
     return COleDateTime(secs);
+}
+
+bool CWizDatabase::WizDayOnce(const QString& strName)
+{
+    CWizDatabase* db = getPersonalDatabase();
+    QString strDate = db->meta("WizDayOnce", strName);
+    QDateTime curDt = QDateTime::currentDateTime();
+    db->setMeta("WizDayOnce", strName, curDt.toString(Qt::ISODate));
+
+    if (strDate.isEmpty())
+        return true;
+
+    QDateTime dt = QDateTime::fromString(strDate, Qt::ISODate);
+    return dt.daysTo(curDt) >= 1;
 }
 
 long CWizDatabase::GetLocalFlags(const QString& strObjectGUID,
@@ -2466,6 +2492,7 @@ bool CWizDatabase::GetUserInfo(WIZUSERINFO& userInfo)
     userInfo.nUserLevel = GetMetaDef(g_strAccountSection, "UserLevel").toInt();
     userInfo.nUserPoints = GetMetaDef(g_strAccountSection, "UserPoints").toInt();
     userInfo.strMywizEmail = GetMetaDef(g_strAccountSection, "MywizMail");
+    userInfo.tCreated = QDateTime::fromString(GetMetaDef(g_strAccountSection, "DateSignUp"));
 
     return true;
 }
@@ -3169,7 +3196,8 @@ bool CWizDatabase::CreateDocumentByTemplate(const QString& templateZiwFile, cons
     return CreateDocumentAndInit(newDoc, ba, strLocation, tag, newDoc);
 }
 
-bool CWizDatabase::AddAttachment(const WIZDOCUMENTDATA& document, const CString& strFileName, WIZDOCUMENTATTACHMENTDATA& dataRet)
+bool CWizDatabase::AddAttachment(const WIZDOCUMENTDATA& document, const CString& strFileName,
+                                 WIZDOCUMENTATTACHMENTDATA& dataRet)
 {
     dataRet.strKbGUID = document.strKbGUID;
     dataRet.strDocumentGUID = document.strGUID;

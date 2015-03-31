@@ -20,6 +20,7 @@ public:
     static QString supportUrl();
     static QString changeLogUrl();
     static QString upgradeUrl();
+    static QString analyzerUploadUrl();
     static QString accountInfoUrl(const QString& strToken);
     static QString groupAttributeUrl(const QString& strToken, const QString& strKbGUID);
     static QString groupUsersUrl(const QString& strToken, const QString& strBizGUID, const QString& strkbGUID);

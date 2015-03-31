@@ -12,6 +12,7 @@
 #include <QPainter>
 #include <QThread>
 #include <QFileIconProvider>
+#include <QSettings>
 
 #include <QtCore>
 //#include <QtNetwork>
@@ -20,6 +21,7 @@
 #include "utils/pathresolve.h"
 #include "mac/wizmachelper.h"
 #include "sync/apientry.h"
+#include "share/wizAnalyzer.h"
 
 
 #ifndef MAX_PATH
@@ -2118,6 +2120,10 @@ CWaitCursor::~CWaitCursor()
 
 void showWebDialogWithToken(const QString& windowTitle, const QString& url, QWidget* parent, bool dialogResizable)
 {
+    QString strFuncName = windowTitle;
+    strFuncName = "Dialog"+strFuncName.replace(" ", "");
+    CWizFunctionDurationLogger logger(strFuncName);
+
     CWizWebSettingsWithTokenDialog pDlg(url, QSize(800, 480), parent);
     if (dialogResizable)
     {
@@ -2392,4 +2398,103 @@ bool WizCreateThumbnailForAttachment(QImage& img, const QString& fileName,
     p.drawText(infoRect, infoText);
 
     return true;
+}
+
+
+COleDateTime WizIniReadDateTimeDef(const CString& strFile, const CString& strSection, const CString& strKey, COleDateTime defaultData)
+{
+    QSettings settings(strFile, QSettings::IniFormat);
+    QString strStr = strSection.IsEmpty() ? strKey : strSection + "/" + strKey;
+    QDateTime dt = settings.value(strStr, defaultData).toDateTime();
+
+    return dt;
+}
+
+
+CString WizIniReadStringDef(const CString& strFile, const CString& strSection, const CString& strKey)
+{
+    QSettings settings(strFile, QSettings::IniFormat);
+    QString strStr = strSection.IsEmpty() ? strKey : strSection + "/" + strKey;
+    return settings.value(strStr).toString();
+}
+
+
+void WizIniWriteString(const CString& strFile, const CString& strSection, const CString& strKey, const CString& strValue)
+{
+    QSettings settings(strFile, QSettings::IniFormat);
+    QString strStr = strSection.IsEmpty() ? strKey : strSection + "/" + strKey;
+    settings.setValue(strStr, strValue);
+}
+
+
+int WizIniReadIntDef(const CString& strFile, const CString& strSection, const CString& strKey, int defaultValue)
+{
+    QSettings settings(strFile, QSettings::IniFormat);
+    QString strStr = strSection.IsEmpty() ? strKey : strSection + "/" + strKey;
+    return settings.value(strStr, defaultValue).toInt();
+}
+
+
+void WizIniWriteInt(const CString& strFile, const CString& strSection, const CString& strKey, int nValue)
+{
+    QSettings settings(strFile, QSettings::IniFormat);
+    QString strStr = strSection.IsEmpty() ? strKey : strSection + "/" + strKey;
+    settings.setValue(strStr, nValue);
+}
+
+
+void WizIniWriteDateTime(const CString& strFile, const CString& strSection, const CString& strKey, COleDateTime dateTime)
+{
+    QSettings settings(strFile, QSettings::IniFormat);
+    QString strStr = strSection.IsEmpty() ? strKey : strSection + "/" + strKey;
+    settings.setValue(strStr, dateTime);
+}
+
+
+CWizIniFileEx::CWizIniFileEx()
+    : m_settings(0)
+{
+}
+
+CWizIniFileEx::~CWizIniFileEx()
+{
+    if (m_settings)
+        delete m_settings;
+}
+
+void CWizIniFileEx::LoadFromFile(const QString& strFile)
+{
+    m_settings = new QSettings(strFile, QSettings::IniFormat);
+}
+
+void CWizIniFileEx::GetSection(const QString& section, CWizStdStringArray& arrayData)
+{
+    m_settings->beginGroup(section);
+    QStringList childList = m_settings->childKeys();
+
+    foreach (QString child, childList) {
+        QString strLine = child + "=" + m_settings->value(child).toString();
+        arrayData.push_back(strLine);
+    }
+    m_settings->endGroup();
+}
+
+void CWizIniFileEx::GetSection(const QString& section, QMap<QString, QString>& dataMap)
+{
+    m_settings->beginGroup(section);
+    QStringList childList = m_settings->childKeys();
+    foreach (QString child, childList) {
+        dataMap.insert(child, m_settings->value(child).toString());
+    }
+    m_settings->endGroup();
+}
+
+void CWizIniFileEx::GetSection(const QString& section, QMap<QByteArray, QByteArray>& dataMap)
+{
+    m_settings->beginGroup(section);
+    QStringList childList = m_settings->childKeys();
+    foreach (QString child, childList) {
+        dataMap.insert(child.toUtf8(), m_settings->value(child).toString().toUtf8());
+    }
+    m_settings->endGroup();
 }

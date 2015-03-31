@@ -151,6 +151,9 @@ struct WIZUSERINFO : public WIZUSERINFOBASE
     // field: vip_date
     COleDateTime tVipExpried;
 
+    // field: sign up date
+    COleDateTime tCreated;
+
 
 
     QString strBackupDatabaseServer;

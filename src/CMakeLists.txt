@@ -162,6 +162,7 @@ set(wiznote_SOURCES
     wizWebEngineInjectObject.cpp
     widgets/wizMarkdownTemplateDialog.cpp
     widgets/wizShareLinkDialog.cpp
+    share/wizAnalyzer.cpp
 )
 
 set(wiznote_HEADERS
@@ -314,6 +315,7 @@ set(wiznote_HEADERS
     wizWebEngineInjectObject.h
     widgets/wizMarkdownTemplateDialog.h
     widgets/wizShareLinkDialog.h
+    share/wizAnalyzer.h
 )
 
 set(wiznote_FORMS

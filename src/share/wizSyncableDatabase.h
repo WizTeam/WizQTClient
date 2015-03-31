@@ -72,6 +72,8 @@ struct IWizSyncableDatabase
     virtual void SetUserInfo(const WIZUSERINFO& info) = 0;
 
     virtual bool IsGroup() = 0;
+    virtual bool HasBiz() = 0;
+
     virtual bool IsGroupAdmin() = 0;
     virtual bool IsGroupSuper() = 0;
     virtual bool IsGroupEditor() = 0;

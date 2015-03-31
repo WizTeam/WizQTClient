@@ -37,6 +37,7 @@ WIZUSERINFO::WIZUSERINFO(const WIZUSERINFO& info)
     nUserPoints = info.nUserPoints;
     strUserType = info.strUserType;
     tVipExpried = info.tVipExpried;
+    tCreated = info.tCreated;
 }
 
 
@@ -68,6 +69,7 @@ bool WIZUSERINFO::LoadFromXmlRpc(CWizXmlRpcStructValue& val)
         pUser->GetString("language", strLanguage);
         pUser->GetString("nickname", strNickName);
         pUser->GetString("user_guid", strUserGUID);
+        pUser->GetTime("dt_created", tCreated);
     }
 
     data.GetInt("user_level", nUserLevel);
