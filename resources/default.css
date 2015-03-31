@@ -30,6 +30,7 @@ body {
 html, body {
     /*default-color*/
     /*default-background-color*/
+    height: auto !important;
 }
 h1 {
     font-size:1.5em;

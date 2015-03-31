@@ -27,6 +27,7 @@
 #include "share/wizDatabase.h"
 #include "share/wizsettings.h"
 #include "share/wizanimateaction.h"
+#include "share/wizAnalyzer.h"
 #include "utils/stylehelper.h"
 #include "utils/pathresolve.h"
 
@@ -406,7 +407,17 @@ void TitleBar::stopEditButtonAnimation()
 
 void TitleBar::onEditButtonClicked()
 {
-    noteView()->setEditNote(!m_editBtn->state());
+    bool bEdit = !m_editBtn->state();
+    noteView()->setEditNote(bEdit);
+    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
+    if (bEdit)
+    {
+        analyzer.LogAction("editNote");
+    }
+    else
+    {
+        analyzer.LogAction("viewNote");
+    }
 }
 
 void TitleBar::onTagButtonClicked()
@@ -420,16 +431,25 @@ void TitleBar::onTagButtonClicked()
     QRect rc = m_tagBtn->rect();
     QPoint pt = m_tagBtn->mapToGlobal(QPoint(rc.width()/2, rc.height()));
     m_tags->showAtPoint(pt);
+
+    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
+    analyzer.LogAction("showTags");
 }
 
 void TitleBar::onEmailButtonClicked()
 {
     m_editor->shareNoteByEmail();
+
+    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
+    analyzer.LogAction("shareByEmail");
 }
 
 void TitleBar::onShareButtonClicked()
 {
     m_editor->shareNoteByLink();
+
+    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
+    analyzer.LogAction("shareByLink");
 }
 
 void TitleBar::onAttachButtonClicked()
@@ -445,6 +465,9 @@ void TitleBar::onAttachButtonClicked()
         QPoint pt = m_attachBtn->mapToGlobal(QPoint(rc.width()/2, rc.height()));
         m_attachments->showAtPoint(pt);
     }
+
+    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
+    analyzer.LogAction("showAttachments");
 }
 
 void TitleBar::onHistoryButtonClicked()
@@ -452,6 +475,9 @@ void TitleBar::onHistoryButtonClicked()
     const WIZDOCUMENTDATA& doc = noteView()->note();
 
     showDocumentHistory(doc, noteView());
+
+    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
+    analyzer.LogAction("showHistory");
 }
 
 
@@ -466,6 +492,9 @@ void TitleBar::onInfoButtonClicked()
     QRect rc = m_infoBtn->rect();
     QPoint pt = m_infoBtn->mapToGlobal(QPoint(rc.width()/2, rc.height()));
     m_info->showAtPoint(pt);
+
+    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
+    analyzer.LogAction("showNoteInfo");
 }
 
 bool isNetworkAccessible()
@@ -486,8 +515,15 @@ void TitleBar::onCommentsButtonClicked()
 #endif
     if (comments->isVisible()) {
         comments->hide();
+
+        CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
+        analyzer.LogAction("hideComments");
+
         return;
     }
+
+    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
+    analyzer.LogAction("showComments");
 
     if (isNetworkAccessible()) {
         if (!m_commentsUrl.isEmpty()) {
