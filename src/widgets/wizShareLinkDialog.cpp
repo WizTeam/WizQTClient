@@ -84,14 +84,16 @@ QString CWizShareLinkDialog::getTitle()
 void CWizShareLinkDialog::resizeEx(int nWidth, int nHeight)
 {
 //    resize(nWidth, nHeight);
+    QRect rec = geometry();
+    rec.setHeight(nHeight);
+    setGeometry(rec);
+//    m_animation->stop();
+//    m_animation->setDuration(100);
+//    m_animation->setStartValue(geometry().size());
+//    m_animation->setEndValue(QSize(nWidth, nHeight));
+////    m_animation->setEasingCurve(QEasingCurve::InOutQuad);
 
-    m_animation->stop();
-    m_animation->setDuration(100);
-    m_animation->setStartValue(geometry().size());
-    m_animation->setEndValue(QSize(nWidth, nHeight));
-//    m_animation->setEasingCurve(QEasingCurve::InOutQuad);
-
-    m_animation->start();
+//    m_animation->start();
 }
 
 void CWizShareLinkDialog::openindefaultbrowser(const QString& url)
@@ -105,7 +107,7 @@ void CWizShareLinkDialog::dragcaption(int x, int y)
     move(pos.x() - x, pos.y() - y);
 }
 
-void CWizShareLinkDialog::copyLink(const QString& link)
+void CWizShareLinkDialog::copyLink(const QString& link, const QString& callBack)
 {
     if (link.isEmpty())
     {
@@ -118,7 +120,8 @@ void CWizShareLinkDialog::copyLink(const QString& link)
     data->setHtml(link);
     data->setText(link);
     clip->setMimeData(data);
-    QMessageBox::information(this, tr("Info"), tr("Link copied successfully!"));
+
+    m_view->page()->mainFrame()->evaluateJavaScript(callBack);
 }
 
 QString CWizShareLinkDialog::getShareLinkFirstTips()

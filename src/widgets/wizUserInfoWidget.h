@@ -50,6 +50,9 @@ protected Q_SLOTS:
     void on_action_changeAvatar_triggered();
     void on_action_changeAvatar_uploaded(bool ok);
 
+    void on_action_viewNotesOnWeb_triggered();
+    void on_action_mySharedNotes_triggered();
+
     void on_action_logout_triggered();
 };
 

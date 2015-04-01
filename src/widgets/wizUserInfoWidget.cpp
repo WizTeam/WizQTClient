@@ -52,12 +52,21 @@ CWizUserInfoWidget::CWizUserInfoWidget(CWizExplorerApp& app, QWidget *parent)
     QAction* actionChangeAvatar = new QAction(tr("Change avatar..."), m_menuMain);
     connect(actionChangeAvatar, SIGNAL(triggered()), SLOT(on_action_changeAvatar_triggered()));
 
+    QAction* actionWebService = new QAction(tr("My documents on web..."), m_menuMain);
+    connect(actionWebService, SIGNAL(triggered()), SLOT(on_action_viewNotesOnWeb_triggered()));
+
+    QAction* actionMyShare = new QAction(tr("My shared document..."), m_menuMain);
+    connect(actionMyShare, SIGNAL(triggered()), SLOT(on_action_mySharedNotes_triggered()));
+
     QAction* actionLogout = new QAction(tr("Logout..."), m_menuMain);
     connect(actionLogout, SIGNAL(triggered()), SLOT(on_action_logout_triggered()));
 
     m_menuMain->addAction(actionAccountInfo);
     m_menuMain->addAction(actionAccountSetup);
     m_menuMain->addAction(actionChangeAvatar);
+    m_menuMain->addSeparator();
+    m_menuMain->addAction(actionWebService);
+    m_menuMain->addAction(actionMyShare);
     m_menuMain->addSeparator();
     m_menuMain->addAction(actionLogout);
     //
@@ -149,6 +158,22 @@ void CWizUserInfoWidget::on_action_changeAvatar_uploaded(bool ok)
     }
 
     uploader->deleteLater();
+}
+
+void CWizUserInfoWidget::on_action_viewNotesOnWeb_triggered()
+{
+    QString strToken = WizService::Token::token();
+    QString strUrl = WizService::ApiEntry::standardCommandUrl("service", strToken);
+
+    QDesktopServices::openUrl(strUrl);
+}
+
+void CWizUserInfoWidget::on_action_mySharedNotes_triggered()
+{
+    QString strToken = WizService::Token::token();
+    QString strUrl = WizService::ApiEntry::standardCommandUrl("my_share", strToken);
+
+    QDesktopServices::openUrl(strUrl);
 }
 
 void CWizUserInfoWidget::on_action_logout_triggered()

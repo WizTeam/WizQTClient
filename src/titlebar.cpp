@@ -3,6 +3,7 @@
 #include <QVBoxLayout>
 #include <QUrl>
 #include <QNetworkConfigurationManager>
+#include <QMessageBox>
 #include <QSplitter>
 #include <QList>
 
@@ -203,12 +204,16 @@ void TitleBar::setLocked(bool bReadOnly, int nReason, bool bIsGroup)
         m_tagBtn->setEnabled(false);
         m_historyBtn->setEnabled(false);
         m_commentsBtn->setEnabled(false);
+        m_shareBtn->setEnabled(false);
+        m_emailBtn->setEnabled(false);
     }
     else
     {
-        m_tagBtn->setEnabled(!bIsGroup ? true : false);
+        m_tagBtn->setEnabled(bIsGroup ? false : true);
+        m_shareBtn->setEnabled(bIsGroup ? false : true);
         m_historyBtn->setEnabled(true);
         m_commentsBtn->setEnabled(true);
+        m_emailBtn->setEnabled(true);
     }
 }
 

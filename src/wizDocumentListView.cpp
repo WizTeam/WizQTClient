@@ -35,6 +35,7 @@ using namespace Core::Internal;
 #define WIZACTION_LIST_COPY_DOCUMENT QObject::tr("Copy Note")
 #define WIZACTION_LIST_DOCUMENT_HISTORY QObject::tr("Version history...")
 #define WIZACTION_LIST_COPY_DOCUMENT_LINK QObject::tr("Copy document link")
+#define WIZACTION_LIST_SHARE_DOCUMENT_BY_LINK QObject::tr("Share document by link...")
 #define WIZACTION_LIST_ENCRYPT_DOCUMENT QObject::tr("Encrypt document")
 #define WIZACTION_LIST_CANCEL_ENCRYPTION  QObject::tr("Cancel document encryption")
 #define WIZACTION_LIST_ALWAYS_ON_TOP  QObject::tr("Always on top")
@@ -151,6 +152,9 @@ CWizDocumentListView::CWizDocumentListView(CWizExplorerApp& app, QWidget *parent
                               SLOT(on_action_copyDocumentLink()));
     m_menuDocument->addAction(WIZACTION_LIST_DOCUMENT_HISTORY, this,
                               SLOT(on_action_documentHistory()));
+
+    m_menuDocument->addAction(WIZACTION_LIST_SHARE_DOCUMENT_BY_LINK, this,
+                              SLOT(on_action_shareDocumentByLink()));
 
     m_menuDocument->addSeparator();
     QAction* actionOnTop = m_menuDocument->addAction(WIZACTION_LIST_ALWAYS_ON_TOP,
@@ -349,11 +353,13 @@ void CWizDocumentListView::resetPermission()
     bool bCanEdit = isDocumentsAllCanDelete(arrayDocument);
     bool bAlwaysOnTop = isDocumentsAlwaysOnTop(arrayDocument);
 
+    bool bShareEnable = true;
     // if group documents or deleted documents selected
     if (bGroup || bDeleted) {
         findAction(WIZACTION_LIST_TAGS)->setEnabled(false);
         findAction(WIZACTION_LIST_ENCRYPT_DOCUMENT)->setEnabled(false);
         findAction(WIZACTION_LIST_CANCEL_ENCRYPTION)->setEnabled(false);
+        bShareEnable = false;
     } else {
         findAction(WIZACTION_LIST_TAGS)->setEnabled(true);
         findAction(WIZACTION_LIST_ENCRYPT_DOCUMENT)->setEnabled(true);
@@ -386,6 +392,7 @@ void CWizDocumentListView::resetPermission()
         {
             setEncryptDocumentActionEnable(true);
         }
+        bShareEnable = false;
     }
     else
     {
@@ -395,7 +402,7 @@ void CWizDocumentListView::resetPermission()
         setEncryptDocumentActionEnable(encryptEnable);
     }
 
-
+    findAction(WIZACTION_LIST_SHARE_DOCUMENT_BY_LINK)->setEnabled(bShareEnable);
 }
 
 QAction* CWizDocumentListView::findAction(const QString& strName)
@@ -873,6 +880,20 @@ void CWizDocumentListView::on_action_documentHistory()
 
    const WIZDOCUMENTDATA& doc = item->document();
    showDocumentHistory(doc, window());
+}
+
+void CWizDocumentListView::on_action_shareDocumentByLink()
+{
+    if (m_rightButtonFocusedItems.count() != 1)
+        return;
+
+   CWizDocumentListViewItem* item = m_rightButtonFocusedItems.first();
+   if (!item)
+       return;
+
+   const WIZDOCUMENTDATA& doc = item->document();
+
+   emit shareDocumentByLinkRequest(doc.strKbGUID, doc.strGUID);
 }
 
 //void CWizDocumentListView::on_message_created(const WIZMESSAGEDATA& data)

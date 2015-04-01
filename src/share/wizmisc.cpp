@@ -571,7 +571,6 @@ BOOL WizIso8601StringToDateTime(CString str, COleDateTime& t, CString& strError)
     return WizStringToDateTime(str, t, strError);
 }
 
-
 CString WizDateTimeToIso8601String(const COleDateTime& t)
 {
     CString str;

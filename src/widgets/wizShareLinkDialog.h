@@ -28,7 +28,7 @@ public:
     Q_INVOKABLE void resizeEx(int nWidth, int nHeight);
     Q_INVOKABLE void openindefaultbrowser(const QString& url);
     Q_INVOKABLE void dragcaption(int x, int y);
-    Q_INVOKABLE void copyLink(const QString& link);
+    Q_INVOKABLE void copyLink(const QString& link, const QString& callBack);
 
     Q_INVOKABLE QString getShareLinkFirstTips();
     Q_INVOKABLE void setShareLinkFirstTips(const QString& value);

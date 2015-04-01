@@ -49,6 +49,8 @@
 #include "utils/pathresolve.h"
 #include "utils/logger.h"
 #include "sync/avatar.h"
+#include "sync/token.h"
+#include "sync/apientry.h"
 
 #include "mac/wizmachelper.h"
 
@@ -836,9 +838,8 @@ void CWizDocumentWebView::shareNoteByEmail()
 
 void CWizDocumentWebView::shareNoteByLink()
 {
-    CWizShareLinkDialog dlg(m_app.userSettings());
-    dlg.shareDocument(view()->note());
-    dlg.exec();
+    const WIZDOCUMENTDATA& doc = view()->note();
+    emit shareDocumentByLinkRequest(doc.strKbGUID, doc.strGUID);
 }
 
 void CWizDocumentWebView::onEditorLoadFinished(bool ok)

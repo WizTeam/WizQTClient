@@ -952,7 +952,7 @@
 			else {
 				text = linkPart1.innerText;
 			}
-			external.copyLink(text);
+			
 			//
 		   //  var input = document.createElement('textarea');
 		   //  document.body.appendChild(input);
@@ -963,12 +963,12 @@
 		   //  toLog("document exec commomd copy : " + succeeded);
 		   //  input.remove();
 		   //  if (succeeded) {
-		   //  	if (copyLinkPsd) {
-		   //  		prompt(sharelocale_copy_link_password_succeeded);
-		   //  	}
-		   //  	else {
-					// prompt(sharelocale_copy_link_succeeded);
-		   //  	}
+		    	if (copyLinkPsd) {
+		    		external.copyLink(text, 'prompt(sharelocale_copy_link_password_succeeded)');
+		    	}
+		    	else {
+					external.copyLink(text, 'prompt(sharelocale_copy_link_succeeded)');
+		    	}
 		   //  }
 		   //  else {
 		   //  	DEBUG_ALERT("The browser isn't support copy command.");
@@ -1393,6 +1393,12 @@
 							</div>
 						</th>
 						<td>
+							<div class="btnLimitTime lmt-time-30 option-unselect">
+								<span class='need-translate'>30 times</span>
+								<img src="./files/check_option.png">
+							</div>
+						</td>
+						<td>
 							<div class="btnLimitTime lmt-time-50 option-unselect">
 								<span class='need-translate'>50 times</span>
 								<img src="./files/check_option.png">
@@ -1401,12 +1407,6 @@
 						<td>
 							<div class="btnLimitTime lmt-time-100 option-unselect">
 								<span class='need-translate'>100 times</span>
-								<img src="./files/check_option.png">
-							</div>
-						</td>
-						<td>
-							<div class="btnLimitTime lmt-time-300 option-unselect">
-								<span class='need-translate'>300 times</span>
 								<img src="./files/check_option.png">
 							</div>
 						</td>

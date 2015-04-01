@@ -166,6 +166,7 @@ public Q_SLOTS:
     void on_action_showDocumentInFloatWindow();
     void on_action_copyDocumentLink();
     void on_action_documentHistory();
+    void on_action_shareDocumentByLink();
 
     void on_menu_aboutToHide();
 
@@ -187,7 +188,7 @@ Q_SIGNALS:
     void documentCountChanged();
     void lastDocumentDeleted();
     void documentsSelectionChanged();
-
+    void shareDocumentByLinkRequest(const QString& strKbGUID, const QString& strGUID);
 
 private:
     int numOfEncryptedDocuments(const CWizDocumentDataArray& docArray);

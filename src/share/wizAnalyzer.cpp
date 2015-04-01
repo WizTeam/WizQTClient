@@ -192,10 +192,6 @@ static int WizGetVersionCode()
 //
 void CWizAnalyzer::Post(IWizSyncableDatabase* db)
 {
-#ifndef QT_DEBUG
-    if (!WizDayOnce("Analyzer"))
-		return;
-#endif
     //
     class CPostRunable : public QRunnable
     {
@@ -382,7 +378,6 @@ void CWizAnalyzer::PostBlocked(IWizSyncableDatabase* db)
 
 
     CString strURL = WizService::ApiEntry::analyzerUploadUrl();
-    qDebug() << "get url : " <<strURL;
 
     if (0 != ::WizStrStrI_Pos(strURL, _T("http://"))
         && 0 != ::WizStrStrI_Pos(strURL, _T("https://")))
@@ -406,7 +401,6 @@ void CWizAnalyzer::PostBlocked(IWizSyncableDatabase* db)
 
     QString strReply = QString::fromUtf8(reply->readAll());
     reply->deleteLater();
-    qDebug() << "reply data : " <<strReply;
 
     rapidjson::Document d;
     d.Parse<0>(strReply.toUtf8().constData());
@@ -450,13 +444,11 @@ CWizFunctionDurationLogger::CWizFunctionDurationLogger(const CString& strFunctio
     : m_strFunctionName(strFunctionName)
 {
     m_tStart = QTime::currentTime();
-    qDebug() << "start tick : " << m_tStart;
 }
 
 CWizFunctionDurationLogger::~CWizFunctionDurationLogger()
 {
     QTime end = QTime::currentTime();
-    qDebug() << "end tick : " << end;
     if (end < m_tStart)
 		return;
 	//

@@ -76,6 +76,7 @@
 #include "wizDocTemplateDialog.h"
 #include "share/wizFileMonitor.h"
 #include "share/wizAnalyzer.h"
+#include "widgets/wizShareLinkDialog.h"
 
 using namespace Core;
 using namespace Core::Internal;
@@ -167,10 +168,10 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
 
     connect(m_doc, SIGNAL(documentSaved(QString,CWizDocumentView*)), SIGNAL(documentSaved(QString,CWizDocumentView*)));
 //    connect(m_doc->web(), SIGNAL(selectAllKeyPressed()), SLOT(on_actionEditingSelectAll_triggered()));
-    connect(this, SIGNAL(documentSaved(QString,CWizDocumentView*)), m_doc, SLOT(on_document_data_saved(QString,CWizDocumentView*)));
-
-    // misc settings
-    //m_avatarDownloaderHost->setDefault(::WizGetSkinResourcePath(userSettings().skin()) + "avatar_default.png");
+    connect(m_doc->web(), SIGNAL(shareDocumentByLinkRequest(QString,QString)),
+            SLOT(on_shareDocumentByLink_request(QString,QString)));
+    connect(this, SIGNAL(documentSaved(QString,CWizDocumentView*)),
+            m_doc, SLOT(on_document_data_saved(QString,CWizDocumentView*)));
 
     // GUI
     initActions();
@@ -1174,6 +1175,50 @@ void MainWindow::on_mobileFileRecived(const QString& strFile)
     }
 }
 
+void MainWindow::on_shareDocumentByLink_request(const QString& strKbGUID, const QString& strGUID)
+{
+    if (!m_dbMgr.db().IsVip())
+    {
+        openVipPageInWebBrowser();
+        return;
+    }
+
+    WIZDOCUMENTDATA doc;
+    if (!m_dbMgr.db(strKbGUID).DocumentFromGUID(strGUID, doc))
+    {
+        qDebug() << "[ShareLink] can not find doc " << strGUID;
+        return;
+    }
+
+    if (doc.nProtected == 1)
+    {
+        QMessageBox::information(this, tr("Info"), tr("Can not share encrpyted notes."));
+        return;
+    }
+
+    CWizShareLinkDialog dlg(userSettings());
+    dlg.shareDocument(doc);
+    dlg.exec();
+}
+
+void MainWindow::openVipPageInWebBrowser()
+{
+    QMessageBox msg(this);
+    msg.setWindowTitle(tr("Info"));
+    msg.setText(tr("Only vip can share link, buy vip?"));
+    msg.addButton(tr("Cancel"), QMessageBox::ActionRole);
+    QPushButton *actionBuy = msg.addButton(tr("Buy VIP"), QMessageBox::ActionRole);
+    msg.setDefaultButton(actionBuy);
+    msg.exec();
+
+    if (msg.clickedButton() == actionBuy)
+    {
+        QString strToken = WizService::Token::token();
+        QString strUrl = WizService::ApiEntry::standardCommandUrl("vip", strToken);
+        QDesktopServices::openUrl(QUrl(strUrl));
+    }
+}
+
 bool MainWindow::checkListClickable()
 {
     if (!m_dbMgr.db(m_doc->note().strKbGUID).IsGroup())
@@ -1615,6 +1660,8 @@ void MainWindow::init()
     connect(m_documents, SIGNAL(documentsSelectionChanged()), SLOT(on_documents_itemSelectionChanged()));
     connect(m_documents, SIGNAL(itemDoubleClicked(QListWidgetItem*)), SLOT(on_documents_itemDoubleClicked(QListWidgetItem*)));
     connect(m_documents, SIGNAL(lastDocumentDeleted()), SLOT(on_documents_lastDocumentDeleted()));
+    connect(m_documents, SIGNAL(shareDocumentByLinkRequest(QString,QString)),
+            SLOT(on_shareDocumentByLink_request(QString,QString)));
 
     QTimer::singleShot(100, this, SLOT(adjustToolBarLayout()));
 }
@@ -3089,6 +3136,8 @@ void MainWindow::viewDocumentInFloatWidget(const WIZDOCUMENTDATA& data)
     CWizDocumentView* docView = wgt->docView();
     connect(docView, SIGNAL(documentSaved(QString,CWizDocumentView*)), SIGNAL(documentSaved(QString,CWizDocumentView*)));
     connect(this, SIGNAL(documentSaved(QString,CWizDocumentView*)), docView, SLOT(on_document_data_saved(QString,CWizDocumentView*)));
+    connect(docView->web(), SIGNAL(shareDocumentByLinkRequest(QString,QString)),
+            SLOT(on_shareDocumentByLink_request(QString,QString)));
 
     wgt->setGeometry((width() - m_doc->width())  / 2, (height() - wgt->height()) / 2,
                      m_doc->width(), wgt->height());

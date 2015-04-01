@@ -1171,7 +1171,9 @@ bool CWizCategoryView::createDocumentByHtmlWithAttachment(const QString& strHtml
     if (!db.AddAttachment(data, strAttachFile, attach))
     {
         TOLOG1("[Service] add attch failed :  1%", strAttachFile);
+        return false;
     }
+    return true;
 }
 
 bool CWizCategoryView::createDocumentByAttachments(WIZDOCUMENTDATA& data, const QStringList& attachList)

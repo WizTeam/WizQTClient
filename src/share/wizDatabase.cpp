@@ -1020,6 +1020,17 @@ bool CWizDatabase::HasBiz()
     return !personDb->GetMetaDef("Bizs", "Count").IsEmpty();
 }
 
+bool CWizDatabase::IsVip()
+{
+    CWizDatabase* personDb = getPersonalDatabase();
+
+    CString strUserType = personDb->GetMetaDef(g_strAccountSection, "USERTYPE");
+    if (strUserType.IsEmpty() || strUserType == "free")
+        return false;
+
+    return true;
+}
+
 bool CWizDatabase::IsGroupAdmin()
 {
     if (permission() <= WIZ_USERGROUP_ADMIN)

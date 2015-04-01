@@ -352,6 +352,9 @@ public Q_SLOTS:
 
     void on_mobileFileRecived(const QString& strFile);
 
+    //
+    void on_shareDocumentByLink_request(const QString& strKbGUID, const QString& strGUID);
+
 #ifndef Q_OS_MAC
     void on_actionPopupMainMenu_triggered();
     void on_menuButtonClicked();
@@ -446,6 +449,8 @@ private:
     //
     void openAttachment(const WIZDOCUMENTATTACHMENTDATA& attachment, const QString& strFileName);
     void downloadAttachment(const WIZDOCUMENTATTACHMENTDATA& attachment);
+
+    void openVipPageInWebBrowser();
 };
 
 } // namespace Internal
