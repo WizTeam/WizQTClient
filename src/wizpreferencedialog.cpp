@@ -307,12 +307,6 @@ void CWizPreferenceWindow::labelProxy_linkActivated(const QString& link)
 
 void CWizPreferenceWindow::onButtonFontSelect_clicked()
 {
-    CWizMarkdownTemplateDialog dlg;
-    if (dlg.exec() == QDialog::Accepted)
-//        Core::ICore::instance()->emitMarkdownSettingChanged();
-        Q_EMIT settingsChanged(wizoptionsMarkdown);
-    return;
-
     if (!m_fontDialog) {
         m_fontDialog = new QFontDialog(this);
 
@@ -471,4 +465,13 @@ void CWizPreferenceWindow::on_checkBoxManuallySort_toggled(bool checked)
 {
     m_app.userSettings().setManualSortingEnable(checked);
     emit settingsChanged(wizoptionsFolders);
+}
+
+void CWizPreferenceWindow::on_pushButtonChoseMarkdwonTemplate_clicked()
+{
+    CWizMarkdownTemplateDialog dlg;
+    if (dlg.exec() == QDialog::Accepted)
+//        Core::ICore::instance()->emitMarkdownSettingChanged();
+        Q_EMIT settingsChanged(wizoptionsMarkdown);
+    return;
 }
