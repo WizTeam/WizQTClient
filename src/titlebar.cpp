@@ -286,9 +286,6 @@ void TitleBar::loadErrorPage()
     QString strFileName = Utils::PathResolve::resourcesPath() + "files/errorpage/load_fail_comments.html";
     QString strHtml;
     ::WizLoadUnicodeTextFromFile(strFileName, strHtml);
-    strHtml.replace("{error_text1}", tr("Load Error"));
-    strHtml.replace("{error_text2}", tr("Network anomalies, check the network, then retry!"));
-    strHtml.replace("{error_text3}", tr("Load Error"));
     QUrl url = QUrl::fromLocalFile(strFileName);
     comments->setHtml(strHtml, url);
 }
@@ -479,7 +476,7 @@ void TitleBar::onHistoryButtonClicked()
 {
     const WIZDOCUMENTDATA& doc = noteView()->note();
 
-    showDocumentHistory(doc, noteView());
+    WizShowDocumentHistory(doc, noteView());
 
     CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
     analyzer.LogAction("showHistory");

@@ -879,7 +879,7 @@ void CWizDocumentListView::on_action_documentHistory()
        return;
 
    const WIZDOCUMENTDATA& doc = item->document();
-   showDocumentHistory(doc, window());
+   WizShowDocumentHistory(doc, window());
 }
 
 void CWizDocumentListView::on_action_shareDocumentByLink()

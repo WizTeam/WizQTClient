@@ -2117,7 +2117,7 @@ CWaitCursor::~CWaitCursor()
 
 
 
-void showWebDialogWithToken(const QString& windowTitle, const QString& url, QWidget* parent, bool dialogResizable)
+void WizShowWebDialogWithToken(const QString& windowTitle, const QString& url, QWidget* parent, bool dialogResizable)
 {
     QString strFuncName = windowTitle;
     strFuncName = "Dialog"+strFuncName.replace(" ", "");
@@ -2267,12 +2267,12 @@ bool WizCopyFolder(const QString& strSrcDir, const QString& strDestDir, bool bCo
 }
 
 
-void showDocumentHistory(const WIZDOCUMENTDATA& doc, QWidget* parent)
+void WizShowDocumentHistory(const WIZDOCUMENTDATA& doc, QWidget* parent)
 {
     CString strExt = WizFormatString2(_T("obj_guid=%1&kb_guid=%2&obj_type=document"),
                                       doc.strGUID, doc.strKbGUID);
     QString strUrl = WizService::ApiEntry::standardCommandUrl("document_history", WIZ_TOKEN_IN_URL_REPLACE_PART, strExt);
-    showWebDialogWithToken(QObject::tr("Note History"), strUrl, parent, true);
+    WizShowWebDialogWithToken(QObject::tr("Note History"), strUrl, parent, true);
 }
 
 
@@ -2496,4 +2496,13 @@ void CWizIniFileEx::GetSection(const QString& section, QMap<QByteArray, QByteArr
         dataMap.insert(child.toUtf8(), m_settings->value(child).toString().toUtf8());
     }
     m_settings->endGroup();
+}
+
+
+void WizShowAttachmentHistory(const WIZDOCUMENTATTACHMENTDATA& attach, QWidget* parent)
+{
+    CString strExt = WizFormatString2(_T("obj_guid=%1&kb_guid=%2&obj_type=attachment"),
+                                      attach.strGUID, attach.strKbGUID);
+    QString strUrl = WizService::ApiEntry::standardCommandUrl("document_history", WIZ_TOKEN_IN_URL_REPLACE_PART, strExt);
+    WizShowWebDialogWithToken(QObject::tr("Attachment History"), strUrl, parent, true);
 }

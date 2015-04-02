@@ -76,6 +76,7 @@
 #include "wizDocTemplateDialog.h"
 #include "share/wizFileMonitor.h"
 #include "share/wizAnalyzer.h"
+#include "share/wizTranslater.h"
 #include "widgets/wizShareLinkDialog.h"
 
 using namespace Core;
@@ -160,6 +161,8 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     // syncing thread
     m_sync->setFullSyncInterval(userSettings().syncInterval());
     connect(m_sync, SIGNAL(processLog(const QString&)), SLOT(on_syncProcessLog(const QString&)));
+    connect(m_sync, SIGNAL(promptMessageRequest(const QString&)),
+            SLOT(on_promptMessage_request(QString)));
     connect(m_sync, SIGNAL(syncStarted(bool)), SLOT(on_syncStarted(bool)));
     connect(m_sync, SIGNAL(syncFinished(int, QString)), SLOT(on_syncDone(int, QString)));
 
@@ -1204,10 +1207,11 @@ void MainWindow::on_shareDocumentByLink_request(const QString& strKbGUID, const 
 void MainWindow::openVipPageInWebBrowser()
 {
     QMessageBox msg(this);
-    msg.setWindowTitle(tr("Info"));
-    msg.setText(tr("Only vip can share link, buy vip?"));
-    msg.addButton(tr("Cancel"), QMessageBox::ActionRole);
-    QPushButton *actionBuy = msg.addButton(tr("Buy VIP"), QMessageBox::ActionRole);
+    msg.setWindowTitle(tr("Upgrading to VIP"));
+    msg.setIcon(QMessageBox::Information);
+    msg.setText(tr("Only VIP user can create link, please retry after upgrading to VIP and syncing to server."));
+    msg.addButton(tr("Cancel"), QMessageBox::NoRole);
+    QPushButton *actionBuy = msg.addButton(tr("Upgrade now"), QMessageBox::YesRole);
     msg.setDefaultButton(actionBuy);
     msg.exec();
 
@@ -1754,6 +1758,11 @@ void MainWindow::on_syncDone_userVerified()
 void MainWindow::on_syncProcessLog(const QString& strMsg)
 {
     Q_UNUSED(strMsg);
+}
+
+void MainWindow::on_promptMessage_request(const QString& strMsg)
+{
+    QMessageBox::warning(0, tr("Inof"), strMsg);
 }
 
 void MainWindow::on_actionNewNote_triggered()
@@ -2741,6 +2750,11 @@ void MainWindow::ProcessClipboardBeforePaste(const QVariantMap& data)
 //        QString strHtml = QString("<img border=\"0\" src=\"file://%1\" />").arg(strFileName);
 //        web()->editorCommandExecuteInsertHtml(strHtml, true);
     //    }
+}
+
+QString MainWindow::TranslateString(const QString& string)
+{
+    return ::WizTranlateString(string);
 }
 
 void MainWindow::syncAllData()

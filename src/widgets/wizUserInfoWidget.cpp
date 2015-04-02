@@ -123,7 +123,7 @@ void CWizUserInfoWidget::on_action_accountSetup_triggered()
     QString extInfo = WizService::ApiEntry::appstoreParam(false);
     QString strUrl = WizService::ApiEntry::standardCommandUrl("user_info", WIZ_TOKEN_IN_URL_REPLACE_PART, extInfo);
 //    QString strUrl = WizService::ApiEntry::accountInfoUrl(WIZ_TOKEN_IN_URL_REPLACE_PART);
-    showWebDialogWithToken(tr("Account settings"), strUrl, window());
+    WizShowWebDialogWithToken(tr("Account settings"), strUrl, window());
 }
 
 void CWizUserInfoWidget::on_action_changeAvatar_triggered()

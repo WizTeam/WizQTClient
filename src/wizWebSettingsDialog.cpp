@@ -86,10 +86,7 @@ void CWizWebSettingsDialog::loadErrorPage()
 {
     QString strFileName = Utils::PathResolve::resourcesPath() + "files/errorpage/load_fail.html";
     QString strHtml;
-    ::WizLoadUnicodeTextFromFile(strFileName, strHtml);
-    strHtml.replace("{error_text1}", tr("Load Error"));
-    strHtml.replace("{error_text2}", tr("Network anomalies, check the network, then retry!"));
-    strHtml.replace("{error_text3}", tr("Load Error"));
+    ::WizLoadUnicodeTextFromFile(strFileName, strHtml);    
     QUrl url = QUrl::fromLocalFile(strFileName);
     m_web->setHtml(strHtml, url);
 }

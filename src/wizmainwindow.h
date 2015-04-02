@@ -341,6 +341,7 @@ public Q_SLOTS:
     void on_syncDone_userVerified();
 
     void on_syncProcessLog(const QString& strMsg);
+    void on_promptMessage_request(const QString& strMsg);
 
     void on_TokenAcquired(const QString& strToken);
 
@@ -409,6 +410,8 @@ public:
     Q_INVOKABLE QObject* CreateWizObject(const QString& strObjectID);
     Q_INVOKABLE void SetSavingDocument(bool saving);
     Q_INVOKABLE void ProcessClipboardBeforePaste(const QVariantMap& data);
+
+    Q_INVOKABLE QString TranslateString(const QString& string);
 
     Q_INVOKABLE bool checkListClickable();
     //NOTE: these functions would called by web page, do not delete
