@@ -6532,8 +6532,7 @@ var fillCharReg = new RegExp(domUtils.fillChar, 'g');
             readonly: false,
             zIndex: 999,
             imagePopup: true,
-//            enterTag: 'p', //wiz
-            enterTag: 'br', //wiz  避免 ueditor 编辑规则 与 pc 客户端不匹配的 bug
+            enterTag: 'p', //wiz
             customDomain: false,
             lang: 'zh-cn',
             langPath: me.options.UEDITOR_HOME_URL + 'lang/',

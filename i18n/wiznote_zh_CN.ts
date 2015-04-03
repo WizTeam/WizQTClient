@@ -484,27 +484,27 @@
 <context>
     <name>CWizDocumentWebView</name>
     <message>
-        <location filename="../src/wizDocumentWebView.cpp" line="1657"/>
+        <location filename="../src/wizDocumentWebView.cpp" line="1664"/>
         <source>Image File</source>
         <translation>图片文件</translation>
     </message>
     <message>
-        <location filename="../src/wizDocumentWebView.cpp" line="1657"/>
+        <location filename="../src/wizDocumentWebView.cpp" line="1664"/>
         <source>Images (*.png *.bmp *.gif *.jpg)</source>
         <translation>图片 (*.png *.bmp *.gif *.jpg)</translation>
     </message>
     <message>
-        <location filename="../src/wizDocumentWebView.cpp" line="1985"/>
+        <location filename="../src/wizDocumentWebView.cpp" line="1992"/>
         <source>PDF Files (*.pdf)</source>
         <translation>PDF 文件 (*.pdf)</translation>
     </message>
     <message>
-        <location filename="../src/wizDocumentWebView.cpp" line="2036"/>
+        <location filename="../src/wizDocumentWebView.cpp" line="2043"/>
         <source>Inof</source>
         <translation>提示</translation>
     </message>
     <message>
-        <location filename="../src/wizDocumentWebView.cpp" line="2036"/>
+        <location filename="../src/wizDocumentWebView.cpp" line="2043"/>
         <source>No available printer founded! Please add printer to system printer list.</source>
         <translation>未发现可用打印机！请在系统打印机列表中添加打印机。</translation>
     </message>
@@ -1585,12 +1585,12 @@ w: %3  h: %4</translation>
     </message>
     <message>
         <location filename="../src/widgets/wizUserInfoWidget.cpp" line="55"/>
-        <source>My documents on web...</source>
+        <source>Open web client...</source>
         <translation>打开网页版...</translation>
     </message>
     <message>
         <location filename="../src/widgets/wizUserInfoWidget.cpp" line="58"/>
-        <source>My shared document...</source>
+        <source>My shared links...</source>
         <translation>我的分享...</translation>
     </message>
     <message>
@@ -1914,7 +1914,7 @@ w: %3  h: %4</translation>
         <translation>全部标记为已读</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="3143"/>
+        <location filename="../src/wizmainwindow.cpp" line="3147"/>
         <source>downloading...</source>
         <translation>正在下载...</translation>
     </message>
@@ -1954,7 +1954,7 @@ w: %3  h: %4</translation>
         <translation>退出</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="3142"/>
+        <location filename="../src/wizmainwindow.cpp" line="3146"/>
         <source>Downloading attachment file  %1 </source>
         <translation>正在下载附件  %1</translation>
     </message>
@@ -2829,8 +2829,8 @@ w: %3  h: %4</translation>
     </message>
     <message>
         <location filename="../src/wizDocumentListView.cpp" line="38"/>
-        <source>Share document by link...</source>
-        <translation>创建公开链接...</translation>
+        <source>Share Link...</source>
+        <translation>分享链接...</translation>
     </message>
     <message>
         <location filename="../src/wizDocumentListView.cpp" line="40"/>
@@ -3127,12 +3127,12 @@ w: %3  h: %4</translation>
         <translation>拖拽笔记到此栏目</translation>
     </message>
     <message>
-        <location filename="../src/wizCategoryViewItem.cpp" line="1202"/>
+        <location filename="../src/wizCategoryViewItem.cpp" line="1200"/>
         <source>Your enterprise services has expired</source>
         <translation>您的企业服务已到期</translation>
     </message>
     <message>
-        <location filename="../src/wizCategoryViewItem.cpp" line="1602"/>
+        <location filename="../src/wizCategoryViewItem.cpp" line="1600"/>
         <source>Your group is in the abnormal state</source>
         <translation>您的群组处于异常状态</translation>
     </message>
@@ -3350,7 +3350,7 @@ w: %3  h: %4</translation>
         <translation>正在下载，请稍等...</translation>
     </message>
     <message>
-        <location filename="../src/wizDocumentWebView.cpp" line="2043"/>
+        <location filename="../src/wizDocumentWebView.cpp" line="2050"/>
         <source>Print Document</source>
         <translation>打印文档</translation>
     </message>

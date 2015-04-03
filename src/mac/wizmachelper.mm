@@ -559,7 +559,6 @@ QString wizUrlToHtml(NSString* url)
 {
     NSAttributedString *string = [[NSAttributedString alloc] initWithPath:url
                                                                                documentAttributes:nil];
-    NSLog(@"document data loaded : %@", string);
     return wizAttributedStringToHtml(string);
 }
 
@@ -619,8 +618,6 @@ QString wizWebarchiveToHtml(NSString *filePath)
 
 bool documentToHtml(const QString& strFile, documentType type, QString& strHtml)
 {
-    qDebug() << "start to load file to html, fileName : " << strFile;
-
     NSString* filePath = WizToNSString(strFile);
 
     if([[NSFileManager defaultManager] fileExistsAtPath:filePath])
@@ -640,7 +637,6 @@ bool documentToHtml(const QString& strFile, documentType type, QString& strHtml)
            strHtml = wizDataToHtml(data, docType);
            break;
        }
-       qDebug() << "after convert to html  : " << strHtml;
        return true;
     }
     else

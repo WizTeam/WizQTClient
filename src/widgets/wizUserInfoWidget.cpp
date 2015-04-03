@@ -52,10 +52,10 @@ CWizUserInfoWidget::CWizUserInfoWidget(CWizExplorerApp& app, QWidget *parent)
     QAction* actionChangeAvatar = new QAction(tr("Change avatar..."), m_menuMain);
     connect(actionChangeAvatar, SIGNAL(triggered()), SLOT(on_action_changeAvatar_triggered()));
 
-    QAction* actionWebService = new QAction(tr("My documents on web..."), m_menuMain);
+    QAction* actionWebService = new QAction(tr("Open web client..."), m_menuMain);
     connect(actionWebService, SIGNAL(triggered()), SLOT(on_action_viewNotesOnWeb_triggered()));
 
-    QAction* actionMyShare = new QAction(tr("My shared document..."), m_menuMain);
+    QAction* actionMyShare = new QAction(tr("My shared links..."), m_menuMain);
     connect(actionMyShare, SIGNAL(triggered()), SLOT(on_action_mySharedNotes_triggered()));
 
     QAction* actionLogout = new QAction(tr("Logout..."), m_menuMain);

@@ -647,10 +647,8 @@ CWizCategoryViewAllFoldersItem::CWizCategoryViewAllFoldersItem(CWizExplorerApp& 
 
 void CWizCategoryViewAllFoldersItem::getDocuments(CWizDatabase& db, CWizDocumentDataArray& arrayDocument)
 {
-    COleDateTime t = ::WizGetCurrentTime();
-    t = t.addDays(-60);
-
-    db.GetRecentDocumentsByCreatedTime(t, arrayDocument);
+//    db.GetAllDocuments(arrayDocument);
+    db.GetDocumentsBySQLWhere("DOCUMENT_LOCATION not like '/Deleted Items/%'", arrayDocument);
 }
 
 bool CWizCategoryViewAllFoldersItem::accept(CWizDatabase& db, const WIZDOCUMENTDATA& data)

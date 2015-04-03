@@ -406,7 +406,7 @@ void CWizCategoryBaseView::dropEvent(QDropEvent * event)
             strFileList.append(url.path());
         }
         //
-        loadDocument(strFileList);
+        importFiles(strFileList);
     }
     else
     {
@@ -427,7 +427,7 @@ void CWizCategoryBaseView::dropEvent(QDropEvent * event)
     event->accept();
 }
 
-void CWizCategoryBaseView::loadDocument(QStringList &strFileList)
+void CWizCategoryBaseView::importFiles(QStringList &strFileList)
 {
     CWizFileReader *fileReader = new CWizFileReader();
     connect(fileReader, SIGNAL(fileLoaded(QString, QString)),
@@ -1255,11 +1255,11 @@ void CWizCategoryView::on_action_importFile()
     tr("Select one or more files to open"),
     QDir::homePath(),
 #ifdef Q_OS_LINUX
-    "Text files(*.txt *.md *.html *.htm *.cpp *.h *.c *.hpp *.cpp);;Images (*.png *.xpm *.jpg *.jpeg *.svg);;All files(*.*)");
+    "All files(*.*);;Text files(*.txt *.md *.html *.htm *.cpp *.h *.c *.hpp *.cpp);;Images (*.png *.xpm *.jpg *.jpeg *.svg)");
 #else
-    "Text files(*.txt *.md *.html *.htm *.cpp *.h *.rtf *.doc *.docx *.pages);;Images (*.png *.xpm *.jpg *.jpeg *.svg);;Webarchive (*.webarchive);;All files(*.*)");
+    "All files(*.*);;Text files(*.txt *.md *.html *.htm *.cpp *.h *.rtf *.doc *.docx *.pages);;Images (*.png *.xpm *.jpg *.jpeg *.svg);;Webarchive (*.webarchive)");
 #endif
-    loadDocument(files);
+    importFiles(files);
 }
 
 void CWizCategoryView::on_action_newItem()
@@ -4119,6 +4119,7 @@ void CWizCategoryView::createDocumentByHtml(const QString& strHtml, const QStrin
 void CWizCategoryView::createDocumentByHtml(const QString& strFileName,
                                             const QString& strHtml, const QString& strTitle)
 {
+    //为了提取和file路径相关联的图片，不直接使用strHtml创建笔记，而是在创建之后更新笔记内容
     WIZDOCUMENTDATA data;
     createDocument(data, "<p><br/></p>", strTitle);
     CWizDatabase& db = m_dbMgr.db(data.strKbGUID);

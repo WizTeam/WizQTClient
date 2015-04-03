@@ -38,7 +38,7 @@ public:
     void getDocuments(CWizDocumentDataArray& arrayDocument);
     bool acceptDocument(const WIZDOCUMENTDATA& document);
 
-    void loadDocument(QStringList& strFileList);
+    void importFiles(QStringList& strFileList);
 
     void saveSelection();
     void restoreSelection();
