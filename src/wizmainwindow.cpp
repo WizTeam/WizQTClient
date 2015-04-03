@@ -218,7 +218,7 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
 
     if (needShowNewFeatureGuide())
     {
-        m_settings->setNewFeatureGuideVersion(WIZ_CLIENT_VERSION);
+        m_settings->setNewFeatureGuideVersion(WIZ_NEW_FEATURE_GUIDE_VERSION);
         QTimer::singleShot(3000, this, SLOT(showNewFeatureGuide()));
     }
 }
@@ -3044,6 +3044,10 @@ bool MainWindow::needShowNewFeatureGuide()
     QString strGuideVserion = m_settings->newFeatureGuideVersion();
     if (strGuideVserion.isEmpty())
         return true;
+
+    //FIXME:  之前的版本误将版本号写入了新特性的数据中，此处将其忽略 。2015年07月之后可以将其移除
+    if (strGuideVserion.contains("2.1"))
+        strGuideVserion = "0";
 
     return strGuideVserion.compare(WIZ_NEW_FEATURE_GUIDE_VERSION) < 0;
 }

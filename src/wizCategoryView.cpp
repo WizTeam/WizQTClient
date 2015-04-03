@@ -200,10 +200,7 @@ void CWizCategoryBaseView::mousePressEvent(QMouseEvent* event)
 }
 
 void CWizCategoryBaseView::mouseMoveEvent(QMouseEvent* event)
-{
-//    if (DraggingState == state())
-//        return;
-
+{    
     QPoint msPos = event->pos();
     CWizCategoryViewItemBase* pItem =  itemAt(msPos);
     if (!pItem)
@@ -215,6 +212,7 @@ void CWizCategoryBaseView::mouseMoveEvent(QMouseEvent* event)
         if (cursor().shape() != Qt::PointingHandCursor)
         {
             setCursor(Qt::PointingHandCursor);
+            setToolTip(pItem->getExtraButtonToolTip());
         }
     }
     else
@@ -222,6 +220,7 @@ void CWizCategoryBaseView::mouseMoveEvent(QMouseEvent* event)
         if (cursor().shape() != Qt::ArrowCursor)
         {
             setCursor(Qt::ArrowCursor);
+            setToolTip("");
         }
     }
 
@@ -1468,9 +1467,6 @@ void CWizCategoryView::on_action_user_moveFolder_confirmed(int result)
                 SLOT(on_action_user_moveFolder_confirmed_progress(int, int, const QString&, const QString&, const WIZDOCUMENTDATA&)));
 
         folder.MoveToLocation(strLocation);
-
-        //addAndSelectFolder(strLocation);
-        //on_folder_deleted(strOldLocation);
     }
 }
 
@@ -1555,9 +1551,6 @@ void CWizCategoryView::on_action_user_renameFolder_confirmed(int result)
                 SLOT(on_action_user_renameFolder_confirmed_progress(int, int, const QString&, const QString&, const WIZDOCUMENTDATA&)));
 
         folder.MoveToLocation(strLocation);
-
-        //addAndSelectFolder(strLocation);
-        //on_folder_deleted(strOldLocation);
     }
 }
 

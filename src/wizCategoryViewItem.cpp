@@ -205,6 +205,11 @@ bool CWizCategoryViewItemBase::extraButtonClickTest()
     return btnRect.contains(view->hitPoint());
 }
 
+QString CWizCategoryViewItemBase::getExtraButtonToolTip() const
+{
+    return "";
+}
+
 void CWizCategoryViewItemBase::draw(QPainter* p, const QStyleOptionViewItemV4* vopt) const
 {
     QPixmap pixmap;
@@ -1189,6 +1194,14 @@ void CWizCategoryViewBizGroupRootItem::draw(QPainter* p, const QStyleOptionViewI
     }
 }
 
+QString CWizCategoryViewBizGroupRootItem::getExtraButtonToolTip() const
+{
+    if (m_extraButtonIcon.isNull())
+        return "";
+
+    return QObject::tr("Your enterprise services has expired");
+}
+
 bool CWizCategoryViewBizGroupRootItem::isExtraButtonUseable()
 {
     return m_extraButtonUseable;
@@ -1579,6 +1592,14 @@ bool CWizCategoryViewGroupRootItem::hitTestUnread()
     rcb.adjust(-nMargin, -nMargin, nMargin, nMargin);
 
     return rcb.contains(pt);
+}
+
+QString CWizCategoryViewGroupRootItem::getExtraButtonToolTip() const
+{
+    if (m_extraButtonIcon.isNull())
+        return "";
+
+    return QObject::tr("Your group is in the abnormal state");
 }
 
 /* --------------------- CWizCategoryViewGroupNoTagItem --------------------- */

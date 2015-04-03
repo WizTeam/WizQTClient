@@ -46,6 +46,7 @@ public:
     virtual bool getExtraButtonIcon(QPixmap &ret) const;
     virtual QRect getExtraButtonRect(const QRect &itemBorder, bool ignoreIconExist = false) const;
     virtual bool extraButtonClickTest();
+    virtual QString getExtraButtonToolTip() const;
 
     //
     virtual QString countString() const { return m_countString; }
@@ -287,12 +288,14 @@ public:
     //
     virtual void getDocuments(CWizDatabase& db, CWizDocumentDataArray& arrayDocument);
     virtual void draw(QPainter* p, const QStyleOptionViewItemV4* vopt) const;
+
     //
     bool isExtraButtonUseable();
     bool isUnreadButtonUseable() const;
     void updateUnreadCount();
     QString unreadString() const;
     bool hitTestUnread();
+    virtual QString getExtraButtonToolTip() const;
     //
     bool isOwner();
     bool isAdmin();
@@ -380,6 +383,7 @@ public:
     int getUnreadCount();
     QString unreadString() const;
     bool hitTestUnread();
+    virtual QString getExtraButtonToolTip() const;
 
 private:
     WIZGROUPDATA m_group;
