@@ -1374,8 +1374,15 @@ void CWizDocumentWebView::on_editorCommandExecuteLinkInsert_accepted()
 {
     // append http if not exist
     QString strUrl = m_editorInsertLinkForm->getUrl();
-    if (strUrl.lastIndexOf("http://", 0, Qt::CaseInsensitive) == -1)
+    QUrl url(strUrl);
+    if (url.scheme().isEmpty())
+    {
         strUrl = "http://" + strUrl;
+    }
+    else
+    {
+        strUrl = url.toString();
+    }
 
     editorCommandExecuteCommand("link", QString("{href: '%1'}").arg(strUrl));
 }
