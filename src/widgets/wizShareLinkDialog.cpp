@@ -40,7 +40,12 @@ CWizShareLinkDialog::~CWizShareLinkDialog()
 
 QSize CWizShareLinkDialog::sizeHint() const
 {
-    return QSize(800, 331);
+    if (m_settings.locale() == ::WizGetDefaultTranslatedLocal())
+    {
+        return QSize(630, 337);
+    }
+
+    return QSize(541, 335);
 }
 
 void CWizShareLinkDialog::shareDocument(const WIZDOCUMENTDATA& doc)
