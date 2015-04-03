@@ -1357,6 +1357,11 @@ void CWizDatabase::ClearLastSyncError()
     }
 }
 
+QString CWizDatabase::GetLastSyncErrorMessage()
+{
+    return meta(WIZKMSYNC_EXIT_INFO, _T("LastSyncErrorMessage"));
+}
+
 void CWizDatabase::OnTrafficLimit(const QString& strErrorMessage)
 {
     setMeta(WIZKMSYNC_EXIT_INFO, _T("LastSyncErrorCode"), QString::number(WIZKMSYNC_EXIT_TRAFFIC_LIMIT));

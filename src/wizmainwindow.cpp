@@ -1210,6 +1210,7 @@ void MainWindow::openVipPageInWebBrowser()
     msg.setWindowTitle(tr("Upgrading to VIP"));
     msg.setIcon(QMessageBox::Information);
     msg.setText(tr("Only VIP user can create link, please retry after upgrading to VIP and syncing to server."));
+#ifndef BUILD4APPSTORE
     msg.addButton(tr("Cancel"), QMessageBox::NoRole);
     QPushButton *actionBuy = msg.addButton(tr("Upgrade now"), QMessageBox::YesRole);
     msg.setDefaultButton(actionBuy);
@@ -1221,6 +1222,10 @@ void MainWindow::openVipPageInWebBrowser()
         QString strUrl = WizService::ApiEntry::standardCommandUrl("vip", strToken);
         QDesktopServices::openUrl(QUrl(strUrl));
     }
+#else
+    msg.addButton(tr("OK"), QMessageBox::YesRole);
+    msg.exec();
+#endif
 }
 
 bool MainWindow::checkListClickable()
@@ -1762,7 +1767,7 @@ void MainWindow::on_syncProcessLog(const QString& strMsg)
 
 void MainWindow::on_promptMessage_request(const QString& strMsg)
 {
-    QMessageBox::warning(0, tr("Inof"), strMsg);
+    QMessageBox::warning(0, tr("Info"), strMsg);
 }
 
 void MainWindow::on_actionNewNote_triggered()
@@ -3135,7 +3140,7 @@ void MainWindow::downloadAttachment(const WIZDOCUMENTATTACHMENTDATA& attachment)
     CWizProgressDialog *dlg = progressDialog();
     dlg->setProgress(100,0);
     dlg->setActionString(tr("Downloading attachment file  %1 ").arg(attachment.strName));
-    dlg->setNotifyString(tr("loading..."));
+    dlg->setNotifyString(tr("downloading..."));
     connect(m_objectDownloaderHost, SIGNAL(downloadProgress(QString,int,int)),
             dlg, SLOT(setProgress(QString,int,int)));
     connect(m_objectDownloaderHost, SIGNAL(downloadDone(WIZOBJECTDATA,bool)),

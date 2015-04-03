@@ -27,6 +27,11 @@ HRESULT CWizKMSyncEvents::OnText(WizKMSyncProgressStatusType type, const QString
     return 0;
 }
 
+HRESULT CWizKMSyncEvents::OnPromptMessage(const QString& strMessage)
+{
+    emit promptMessageRequest(strMessage);
+}
+
 void CWizKMSyncEvents::SetDatabaseCount(int count)
 {
     qDebug() << "[Sync]SetDatabaseCount count = " << count;
@@ -103,6 +108,7 @@ CWizKMSyncThread::CWizKMSyncThread(CWizDatabase& db, QObject* parent)
     m_pEvents = new CWizKMSyncEvents();
     //
     connect(m_pEvents, SIGNAL(messageReady(const QString&)), SIGNAL(processLog(const QString&)));
+    connect(m_pEvents, SIGNAL(promptMessageRequest(QString)), SIGNAL(promptMessageRequest(QString)));
     //
     g_pSyncThread = this;
 }

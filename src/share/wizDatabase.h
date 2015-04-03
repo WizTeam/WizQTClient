@@ -253,6 +253,7 @@ public:
     virtual void GetAllBizUserIds(CWizStdStringArray& arrayText);
 
     virtual void ClearLastSyncError();
+    virtual QString GetLastSyncErrorMessage();
     virtual void OnTrafficLimit(const QString& strErrorMessage);
     virtual void OnStorageLimit(const QString& strErrorMessage);
     virtual void OnNoteCountLimit(const QString& strErrorMessage);

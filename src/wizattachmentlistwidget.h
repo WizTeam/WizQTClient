@@ -61,9 +61,11 @@ public:
 
 public Q_SLOTS:
     void on_action_addAttachment();
+    void on_action_downloadAttachment();
     void on_action_saveAttachmentAs();
     void on_action_openAttachment();
     void on_action_deleteAttachment();
+    void on_action_attachmentHistory();
     void on_list_itemDoubleClicked(QListWidgetItem* item);
     //
     void forceRepaint();
@@ -77,6 +79,7 @@ public:
     const CWizAttachmentListViewItem* attachmentItemFromIndex(const QModelIndex& index) const;
     void addAttachments();
     void openAttachment(CWizAttachmentListViewItem* item);
+    void downloadAttachment(CWizAttachmentListViewItem* item);
 
 signals:
     void closeRequest();
@@ -104,6 +107,9 @@ private:
     void startDownload(CWizAttachmentListViewItem* item);
     CWizAttachmentListViewItem* newAttachmentItem(const WIZDOCUMENTATTACHMENTDATA& att);
     void waitForDownload();
+
+    // if has item that is downloading waiting for open , would not open another attach that is not exists in local.
+    static bool m_bHasItemWaitingForDownload;
 };
 
 

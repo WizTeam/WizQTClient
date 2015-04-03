@@ -1800,7 +1800,6 @@ bool WizSyncDatabase(const WIZUSERINFO& info, IWizKMSyncEvents* pEvents,
             return false;
         }
 
-
         syncGroupUsers(server, arrayGroup, pEvents, pDatabase, bBackground);
     }
     // sync analyzer info one time a day
@@ -1836,6 +1835,12 @@ bool WizSyncDatabase(const WIZUSERINFO& info, IWizKMSyncEvents* pEvents,
         if (!syncPrivate.Sync())
         {
             pEvents->OnText(wizhttpstatustypeError, _T("Cannot sync!"));
+            QString strLastError = pDatabase->GetLastSyncErrorMessage();
+            if (!strLastError.isEmpty() && !bBackground)
+            {
+                pEvents->OnText(wizhttpstatustypeError, QString("Sync database error, for reason : %1").arg(strLastError));
+                pEvents->OnPromptMessage(strLastError);
+            }
         }
         else
         {
