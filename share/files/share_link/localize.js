@@ -58,10 +58,7 @@ var zh_tw_loc = {
 } ;
 //
 function GetBrowserLanguage() {
-	var type = navigator.appName
-	//
-	return type == "Netscape" ? navigator.language
-							  : navigator.userLanguage;
+	return external.getLocalLanguage();
 }
 //
 var ShareLocale = (function() {
@@ -69,7 +66,7 @@ var ShareLocale = (function() {
 	//
 	var objLng;
 	switch (lng) {
-		case "zh-cn":
+		case "zh_cn":
 			objLng = zh_cn_loc;
 			break;
 		default:

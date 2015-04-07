@@ -139,6 +139,11 @@ void CWizShareLinkDialog::setShareLinkFirstTips(const QString& value)
     m_settings.set(ShareLinkFirstTips, value);
 }
 
+QString CWizShareLinkDialog::getLocalLanguage()
+{
+    return m_settings.locale();
+}
+
 void CWizShareLinkDialog::loadHtml()
 {
     QString strFile = Utils::PathResolve::resourcesPath() + "files/share_link/index.html";

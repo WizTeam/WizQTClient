@@ -32,6 +32,7 @@ public:
 
     Q_INVOKABLE QString getShareLinkFirstTips();
     Q_INVOKABLE void setShareLinkFirstTips(const QString& value);
+    Q_INVOKABLE QString getLocalLanguage();
 
 public slots:
     void loadHtml();
