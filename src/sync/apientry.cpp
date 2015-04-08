@@ -326,6 +326,13 @@ QString ApiEntry::syncUrl()
     return d->syncUrl();
 }
 
+QString ApiEntry::asServerUrl()
+{
+    if (!d)
+        d = new ApiEntryPrivate();
+    return d->asServerUrl();
+}
+
 QString ApiEntry::messageVersionUrl()
 {
     if (!d)

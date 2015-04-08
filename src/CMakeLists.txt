@@ -11,6 +11,7 @@ set(wiznote_SOURCES_MAC
     mac/wizUserInfoWidgetBaseMac.mm
     mac/wizUserInfoWidgetBaseMac_mm.cpp
     utils/notify.mm
+    mac/wizIAPHelper.mm
 )
 
 set(wiznote_HEADERS_MAC
@@ -21,6 +22,7 @@ set(wiznote_HEADERS_MAC
     mac/wizmactoolbardelegate.h
     mac/wizmacactionhelper.h
     mac/wizUserInfoWidgetBaseMac_mm.h
+    mac/wizIAPHelper.h
 )
 
 set(wiznote_SOURCES
@@ -164,6 +166,7 @@ set(wiznote_SOURCES
     widgets/wizShareLinkDialog.cpp
     share/wizAnalyzer.cpp
     share/wizTranslater.cpp
+    widgets/wizIAPDialog.cpp
 )
 
 set(wiznote_HEADERS
@@ -318,6 +321,7 @@ set(wiznote_HEADERS
     widgets/wizShareLinkDialog.h
     share/wizAnalyzer.h
     share/wizTranslater.h
+    widgets/wizIAPDialog.h
 )
 
 set(wiznote_FORMS
@@ -338,6 +342,7 @@ set(wiznote_FORMS
     ui/wizVerificationCodeDialog.ui
     ui/wizEmailShareDialog.ui
     ui/wizMarkdownTemplateDialog.ui
+    ui/wizIAPDialog.ui
 )
 
 set(wiznote_TRANSLATIONS
@@ -383,10 +388,11 @@ if(UNIX)
         find_library(_CARBON_LIBRARY Carbon)
         find_library(_COCOA_LIBRARY Cocoa)
         find_library(_WEBKIT_LIBRARY WebKit)
+        find_library(_STORE_LIBRARY StoreKit)
 
         # please set env: MACOSX_DEPLOYMENT_TARGET = 10.8 to ~/.bash_profile if you need NSUserNotification support.
         message("use cocoa library: ${_COCOA_LIBRARY}")
-        target_link_libraries(${PROJECT_NAME} ${_CARBON_LIBRARY} ${_COCOA_LIBRARY} ${_WEBKIT_LIBRARY})
+        target_link_libraries(${PROJECT_NAME} ${_CARBON_LIBRARY} ${_COCOA_LIBRARY} ${_WEBKIT_LIBRARY} ${_STORE_LIBRARY})
 
         # setup plist info and logo
         set_target_properties(${PROJECT_NAME} PROPERTIES MACOSX_BUNDLE_INFO_PLIST "${CMAKE_SOURCE_DIR}/build/osx/Info.plist")

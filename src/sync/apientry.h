@@ -9,6 +9,7 @@ class ApiEntry
 {
 public:
     static QString syncUrl();
+    static QString asServerUrl();
     static QString messageVersionUrl();
     static QString avatarDownloadUrl(const QString& strUserGUID);
     static QString avatarUploadUrl();

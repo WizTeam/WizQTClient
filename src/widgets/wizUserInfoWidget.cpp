@@ -15,6 +15,7 @@
 #include "sync/avataruploader.h"
 #include "sync/avatar.h"
 #include "sync/token.h"
+#include "widgets/wizIAPDialog.h"
 
 using namespace WizService;
 using namespace WizService::Internal;
@@ -47,7 +48,7 @@ CWizUserInfoWidget::CWizUserInfoWidget(CWizExplorerApp& app, QWidget *parent)
     actionAccountInfo->setVisible(false);
 
     QAction* actionAccountSetup = new QAction(tr("Account settings..."), m_menuMain);
-    connect(actionAccountSetup, SIGNAL(triggered()), SLOT(on_action_accountSetup_triggered()));
+    connect(actionAccountSetup, SIGNAL(triggered()), SLOT(on_action_accountSettings_triggered()));
 
     QAction* actionChangeAvatar = new QAction(tr("Change avatar..."), m_menuMain);
     connect(actionChangeAvatar, SIGNAL(triggered()), SLOT(on_action_changeAvatar_triggered()));
@@ -118,12 +119,15 @@ void CWizUserInfoWidget::on_action_accountInfo_triggered()
 
 }
 
-void CWizUserInfoWidget::on_action_accountSetup_triggered()
+void CWizUserInfoWidget::on_action_accountSettings_triggered()
 {
     QString extInfo = WizService::ApiEntry::appstoreParam(false);
     QString strUrl = WizService::ApiEntry::standardCommandUrl("user_info", WIZ_TOKEN_IN_URL_REPLACE_PART, extInfo);
 //    QString strUrl = WizService::ApiEntry::accountInfoUrl(WIZ_TOKEN_IN_URL_REPLACE_PART);
-    WizShowWebDialogWithToken(tr("Account settings"), strUrl, window());
+//    WizShowWebDialogWithToken(tr("Account settings"), strUrl, window());
+
+    CWizIAPDialog dlg;
+    dlg.exec();
 }
 
 void CWizUserInfoWidget::on_action_changeAvatar_triggered()
