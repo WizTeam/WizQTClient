@@ -2,6 +2,7 @@
 #define WIZIAPDIALOG_H
 
 #include <QDialog>
+#include <QTimer>
 #include "mac/wizIAPHelper.h"
 
 namespace Ui {
@@ -30,6 +31,9 @@ private slots:
 
     void loadProducts();
 
+    //
+    void onWaitingTimeOut();
+
 
 private:
     void initStyles();
@@ -42,6 +46,7 @@ private:
     Ui::CWizIAPDialog *ui;
     CWizIAPHelper* m_iAPhelper;
     QMessageBox* m_waitingMsgBox;
+    QTimer m_timer;
 };
 
 #endif // WIZIAPDIALOG_H

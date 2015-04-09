@@ -9,8 +9,11 @@
 #include "share/wizDatabase.h"
 #include <QMessageBox>
 #include <QWebView>
-#include <QTimer>
 #include <QTextBrowser>
+#include <QNetworkAccessManager>
+#include <QNetworkReply>
+#include <QNetworkRequest>
+#include <QEventLoop>
 #include <QDebug>
 
 #define WIZ_PRODUCT_MONTH "cn.wiz.wiznote.mac.pro.monthly"
@@ -29,6 +32,7 @@ CWizIAPDialog::CWizIAPDialog(QWidget *parent) :
 
     initStyles();
 
+    connect(&m_timer, SIGNAL(timeout()), SLOT(onWaitingTimeOut()));
     QTimer::singleShot(100, this, SLOT(loadProducts()));
 }
 
@@ -39,6 +43,7 @@ CWizIAPDialog::~CWizIAPDialog()
 
 void CWizIAPDialog::onProductsLoaded(const QList<CWizIAPProduct>& productList)
 {
+    m_timer.stop();
     setPurchaseAvailable(true);
     foreach (CWizIAPProduct product, productList)
     {
@@ -132,14 +137,38 @@ void CWizIAPDialog::checkReceiptInfo(const QString& receipt)
     strPlat = "linux";
 #endif
     QString asServerUrl = WizService::ApiEntry::asServerUrl();
+    QString checkUrl = asServerUrl + "/a/pay2/ios";
     CWizDatabase& db = CWizDatabaseManager::instance()->db();
     QString userID = db.GetUserId();
     QString userGUID = db.GetUserGUID();
     QString receiptBase64(receipt.toUtf8().toBase64());
-    QString checkUrl = QString("%1a/pay2/mac?client_type=%2&user_id=%3&user_guid=%4&receipt=%5")
-            .arg(asServerUrl).arg(strPlat).arg(userID).arg(userGUID).arg(receiptBase64);
+    QString strExtInfo = QString("client_type=%2&user_id=%3&user_guid=%4&receipt=%5")
+            .arg(strPlat).arg(userID).arg(userGUID).arg(receiptBase64);
 
-    qDebug() << "check receipt : " << checkUrl;
+
+//    checkUrl = checkUrl + "?" + strExtInfo;
+    qDebug() << "check receipt : " << checkUrl << strExtInfo;
+
+    QNetworkAccessManager net;
+    QNetworkRequest request;
+    request.setUrl(checkUrl);
+//    QNetworkReply* reply = net.get(request);
+    request.setHeader(QNetworkRequest::ContentTypeHeader, QVariant("application/x-www-form-urlencoded"));
+    QNetworkReply* reply = net.post(request, strExtInfo.toUtf8());
+
+    QEventLoop loop;
+    QObject::connect(reply, SIGNAL(finished()), &loop, SLOT(quit()));
+    loop.exec();
+
+    if (reply->error() != QNetworkReply::NoError) {
+        qDebug() << "setdata error;" ;
+        reply->deleteLater();
+        return;
+    }
+
+    qDebug() << "reply from server : " << reply->readAll();
+    reply->deleteLater();
+
 }
 
 void CWizIAPDialog::on_btn_goBack_clicked()
@@ -156,7 +185,7 @@ void CWizIAPDialog::on_btn_month_clicked()
     hideInfoLabel();
     m_waitingMsgBox->setModal(true);
     m_waitingMsgBox->setStandardButtons(0);
-    m_waitingMsgBox->setText("Waiting for appstore...");
+    m_waitingMsgBox->setText("Waiting for AppStore...");
     m_waitingMsgBox->open();
 
     m_iAPhelper->purchaseProduct(WIZ_PRODUCT_MONTH);
@@ -167,7 +196,7 @@ void CWizIAPDialog::on_btn_year_clicked()
     hideInfoLabel();
     m_waitingMsgBox->setModal(true);
     m_waitingMsgBox->setStandardButtons(0);
-    m_waitingMsgBox->setText("Waiting for appstore...");
+    m_waitingMsgBox->setText("Waiting for AppStore...");
     m_waitingMsgBox->open();
 
     m_iAPhelper->purchaseProduct(WIZ_PRODUCT_YEAR);
@@ -179,4 +208,16 @@ void CWizIAPDialog::loadProducts()
         m_iAPhelper = new CWizIAPHelper(this);
 
     m_iAPhelper->requestProducts();
+    m_timer.start(2 * 60 * 1000);
+}
+
+void CWizIAPDialog::onWaitingTimeOut()
+{
+    m_timer.stop();
+    m_waitingMsgBox->close();
+//    m_waitingMsgBox->setModal(false);
+    m_waitingMsgBox->setStandardButtons(QMessageBox::Ok);
+    m_waitingMsgBox->setText("Can not connect to AppStore, please try again later.");
+    m_waitingMsgBox->exec();
+    accept();
 }
