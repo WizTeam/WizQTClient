@@ -2117,7 +2117,7 @@ CWaitCursor::~CWaitCursor()
 
 
 
-void WizShowWebDialogWithToken(const QString& windowTitle, const QString& url, QWidget* parent, bool dialogResizable)
+void WizShowWebDialogWithToken(const QString& windowTitle, const QString& url, QWidget* parent, const QSize& sz, bool dialogResizable)
 {
     QString strFuncName = windowTitle;
     strFuncName = "Dialog"+strFuncName.replace(" ", "");
@@ -2272,7 +2272,7 @@ void WizShowDocumentHistory(const WIZDOCUMENTDATA& doc, QWidget* parent)
     CString strExt = WizFormatString2(_T("obj_guid=%1&kb_guid=%2&obj_type=document"),
                                       doc.strGUID, doc.strKbGUID);
     QString strUrl = WizService::ApiEntry::standardCommandUrl("document_history", WIZ_TOKEN_IN_URL_REPLACE_PART, strExt);
-    WizShowWebDialogWithToken(QObject::tr("Note History"), strUrl, parent, true);
+    WizShowWebDialogWithToken(QObject::tr("Note History"), strUrl, parent, QSize(1000, 500), true);
 }
 
 
@@ -2504,5 +2504,5 @@ void WizShowAttachmentHistory(const WIZDOCUMENTATTACHMENTDATA& attach, QWidget* 
     CString strExt = WizFormatString2(_T("obj_guid=%1&kb_guid=%2&obj_type=attachment"),
                                       attach.strGUID, attach.strKbGUID);
     QString strUrl = WizService::ApiEntry::standardCommandUrl("document_history", WIZ_TOKEN_IN_URL_REPLACE_PART, strExt);
-    WizShowWebDialogWithToken(QObject::tr("Attachment History"), strUrl, parent, true);
+    WizShowWebDialogWithToken(QObject::tr("Attachment History"), strUrl, parent, QSize(1000, 500), true);
 }

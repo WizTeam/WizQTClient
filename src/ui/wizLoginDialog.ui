@@ -109,6 +109,22 @@
             </property>
            </spacer>
           </item>
+          <item>
+           <widget class="QPushButton" name="btn_proxysetting">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="cursor">
+             <cursorShape>PointingHandCursor</cursorShape>
+            </property>
+            <property name="text">
+             <string>Proxy settings</string>
+            </property>
+           </widget>
+          </item>
          </layout>
         </item>
        </layout>
@@ -633,18 +649,9 @@
       </spacer>
      </item>
      <item>
-      <widget class="QPushButton" name="btn_proxysetting">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="cursor">
-        <cursorShape>PointingHandCursor</cursorShape>
-       </property>
+      <widget class="QPushButton" name="btn_snsLogin">
        <property name="text">
-        <string>Proxy settings</string>
+        <string>Thirdparty</string>
        </property>
       </widget>
      </item>
@@ -709,7 +716,6 @@
   <tabstop>btn_singUp</tabstop>
   <tabstop>btn_changeToSignin</tabstop>
   <tabstop>btn_changeToLogin</tabstop>
-  <tabstop>btn_proxysetting</tabstop>
   <tabstop>btn_fogetpass</tabstop>
   <tabstop>btn_max</tabstop>
   <tabstop>btn_min</tabstop>

@@ -11,6 +11,7 @@
 #include "wizproxydialog.h"
 #include <extensionsystem/pluginmanager.h>
 #include "widgets/wizVerificationCodeDialog.h"
+#include "wizWebSettingsDialog.h"
 #include <QPainter>
 #include <QMouseEvent>
 #include <QMenu>
@@ -18,6 +19,7 @@
 #include <QToolButton>
 #include <QDesktopServices>
 #include <QUrl>
+#include <QWebView>
 #include <QDebug>
 #include <QDateTime>
 
@@ -397,9 +399,11 @@ void CWizLoginDialog::applyElementStyles(const QString &strLocal)
                                                  "color: #43a6e8; padding-left: 10px; padding-bottom: 0px}"));
 #endif
     ui->btn_proxysetting->setStyleSheet(QString("QPushButton { border: none; background: none; "
-                                                 "color: #b1b1b1; padding-right: 15px; padding-bottom: 5px}"));
+                                                 "color: rgba(255, 255, 255, 153); padding-right: 30px; padding-top: 5px}"));
     ui->btn_fogetpass->setStyleSheet(QString("QPushButton { border: none; background: none; "
                                                  "color: #b1b1b1; padding-left: 15px; padding-bottom: 5px}"));
+    ui->btn_snsLogin->setStyleSheet(QString("QPushButton { border: none; background: none; "
+                                            "color: #b1b1b1; padding-right: 15px; padding-bottom: 5px}"));
 
     QString strLineSeparator = ::WizGetSkinResourceFileName(strThemeName, "loginLineSeparator");
     ui->label_separator3->setStyleSheet(QString("QLabel {border: none;background-image: url(%1);"
@@ -653,4 +657,50 @@ void CWizLoginDialog::onUserNameEdited(const QString& arg1)
     m_lineEditPassword->setText("");
 }
 
+void CWizLoginDialog::onSNSPageUrlChanged(const QUrl& url)
+{
+    QString strUrl = url.toString();
 
+    if (strUrl.contains("user_id") && strUrl.contains("user_guid") && strUrl.contains("access_token"))
+    {
+        emit snsLoginSuccess(strUrl);
+        onSNSLoginSuccess(strUrl);
+    }
+}
+
+void CWizLoginDialog::onSNSLoginSuccess(const QString& strUrl)
+{
+    QStringList strList = strUrl.split("&");
+    QString userIdString = "";
+    QString userGuidString = "";
+    QString encryptedPassword = "";
+
+    QString keyOfUserId = "user_id=";
+    QString keyOfUserGuid = "user_guid=";
+    QString keyOfAccessToken = "access_token=";
+    foreach (QString str, strList) {
+        if (str.startsWith(keyOfUserId)) {
+            userIdString = str.remove(0, keyOfUserId.length());
+        } else if (str.startsWith(keyOfUserGuid)) {
+            userGuidString = str.remove(0, keyOfUserGuid.length());
+        } else if (str.startsWith(keyOfAccessToken)) {
+            encryptedPassword = str.remove(0, keyOfAccessToken.length());
+        }
+    }
+    m_lineEditUserName->setText(userIdString);
+    QString strPassword(QByteArray::fromBase64(encryptedPassword.toUtf8()));
+    m_lineEditPassword->setText(strPassword);
+
+    accept();
+}
+
+
+
+void CWizLoginDialog::on_btn_snsLogin_clicked()
+{
+    QString strUrl = WizService::ApiEntry::standardCommandUrl("snspage");
+    CWizWebSettingsDialog dlg(strUrl, QSize(800, 480), 0);
+    connect(dlg.webVew(), SIGNAL(urlChanged(QUrl)), SLOT(onSNSPageUrlChanged(QUrl)));
+    connect(this, SIGNAL(snsLoginSuccess(QString)), &dlg, SLOT(accept()));
+    dlg.exec();
+}

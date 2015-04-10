@@ -45,6 +45,9 @@ public:
     void enableLoginControls(bool bEnable);
     void enableSignInControls(bool bEnable);
 
+signals:
+    void snsLoginSuccess(const QString& strUrl);
+
 #ifdef Q_OS_MAC
 private:
     QPoint m_mousePoint;
@@ -60,6 +63,7 @@ private slots:
     void on_btn_proxysetting_clicked();
     void on_btn_fogetpass_clicked();
     void on_btn_login_clicked();
+    void on_btn_snsLogin_clicked();
     void on_btn_singUp_clicked();
 
 
@@ -75,6 +79,10 @@ private slots:
     void on_cbx_autologin_toggled(bool checked);
 
     void onUserNameEdited(const QString& arg1);
+
+    void onSNSPageUrlChanged(const QUrl& url);
+    void onSNSLoginSuccess(const QString& strUrl);
+
 
 private:
     void applyElementStyles(const QString& strLocal);

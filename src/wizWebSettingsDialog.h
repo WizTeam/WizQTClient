@@ -16,8 +16,8 @@ class CWizWebSettingsDialog : public QDialog
 
 public:
     explicit CWizWebSettingsDialog(QString url, QSize sz, QWidget *parent = 0);
+    QWebView* webVew();
 
-public:
     void showError();
 protected:
     virtual void load();
