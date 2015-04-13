@@ -1711,6 +1711,17 @@ int CWizDatabase::GetObjectSyncTimeline()
     return nDays;
 }
 
+void CWizDatabase::setDownloadAttachmentsAtSync(bool download)
+{
+    CString strD = download ? "1" : "0";
+    SetMeta("QT_WIZNOTE", "SyncDownloadAttachment", strD);
+}
+
+bool CWizDatabase::getDownloadAttachmentsAtSync()
+{
+    return GetMetaDef("QT_WIZNOTE", "SyncDownloadAttachment", "0").toInt() != 0;
+}
+
 void CWizDatabase::SetBizUsers(const QString& strBizGUID, const QString& strJsonUsers)
 {
     CWizBizUserDataArray arrayUser;
@@ -3010,9 +3021,13 @@ bool CWizDatabase::GetAllObjectsNeedToBeDownloaded(CWizObjectDataArray& arrayDat
                 continue;
             }
 
-            if (arrayData[i].eObjectType == wizobjectDocumentAttachment) {
-                arrayData.erase(arrayData.begin() + i);
-                continue;
+            CWizDatabase* privateDB = getPersonalDatabase();
+            if (!privateDB->getDownloadAttachmentsAtSync())
+            {
+                if (arrayData[i].eObjectType == wizobjectDocumentAttachment) {
+                    arrayData.erase(arrayData.begin() + i);
+                    continue;
+                }
             }
         }
     }

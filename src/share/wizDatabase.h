@@ -275,6 +275,8 @@ public:
     // helper methods for interface
     void SetObjectSyncTimeLine(int nDays);
     int GetObjectSyncTimeline();
+    void setDownloadAttachmentsAtSync(bool download);
+    bool getDownloadAttachmentsAtSync();
     QString GetFolders();
     QString GetFoldersPos();
     QString GetGroupTagsPos();

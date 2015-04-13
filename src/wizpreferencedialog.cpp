@@ -143,9 +143,13 @@ CWizPreferenceWindow::CWizPreferenceWindow(CWizExplorerApp& app, QWidget* parent
             ui->comboSyncGroupMethod->setCurrentIndex(1);
     }
 
+    bool downloadAttachments = m_dbMgr.db().getDownloadAttachmentsAtSync();
+    ui->comboDownloadAttachments->setCurrentIndex(downloadAttachments ? 1 : 0);
+
     connect(ui->comboSyncInterval, SIGNAL(activated(int)), SLOT(on_comboSyncInterval_activated(int)));
     connect(ui->comboSyncMethod, SIGNAL(activated(int)), SLOT(on_comboSyncMethod_activated(int)));
     connect(ui->comboSyncGroupMethod, SIGNAL(activated(int)), SLOT(on_comboSyncGroupMethod_activated(int)));
+    connect(ui->comboDownloadAttachments, SIGNAL(activated(int)), SLOT(on_comboDownloadAttachments_activated(int)));
 
     QString proxySettings = WizFormatString1("<a href=\"proxy_settings\" style=\"color:#3CA2E0;\">%1</a>", tr("Proxy settings"));
     ui->labelProxySettings->setText(proxySettings);
@@ -474,4 +478,21 @@ void CWizPreferenceWindow::on_pushButtonChoseMarkdwonTemplate_clicked()
 //        Core::ICore::instance()->emitMarkdownSettingChanged();
         Q_EMIT settingsChanged(wizoptionsMarkdown);
     return;
+}
+
+
+void CWizPreferenceWindow::on_comboDownloadAttachments_activated(int index)
+{
+    switch (index) {
+    case 0:
+        m_dbMgr.db().setDownloadAttachmentsAtSync(false);
+        break;
+    case 1:
+        m_dbMgr.db().setDownloadAttachmentsAtSync(true);
+        break;
+    default:
+        Q_ASSERT(0);
+    }
+
+    Q_EMIT settingsChanged(wizoptionsSync);
 }
