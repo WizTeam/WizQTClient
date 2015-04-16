@@ -50,6 +50,9 @@ CWizUserInfoWidget::CWizUserInfoWidget(CWizExplorerApp& app, QWidget *parent)
     QAction* actionAccountSetup = new QAction(tr("Account settings..."), m_menuMain);
     connect(actionAccountSetup, SIGNAL(triggered()), SLOT(on_action_accountSettings_triggered()));
 
+    QAction* actionUpgradeVIP = new QAction(tr("Upgrade VIP..."), m_menuMain);
+    connect(actionUpgradeVIP, SIGNAL(triggered()), SLOT(on_action_upgradeVip_triggered()));
+
     QAction* actionChangeAvatar = new QAction(tr("Change avatar..."), m_menuMain);
     connect(actionChangeAvatar, SIGNAL(triggered()), SLOT(on_action_changeAvatar_triggered()));
 
@@ -65,6 +68,7 @@ CWizUserInfoWidget::CWizUserInfoWidget(CWizExplorerApp& app, QWidget *parent)
     m_menuMain->addAction(actionAccountInfo);
     m_menuMain->addAction(actionAccountSetup);
     m_menuMain->addAction(actionChangeAvatar);
+    m_menuMain->addAction(actionUpgradeVIP);
     m_menuMain->addSeparator();
     m_menuMain->addAction(actionWebService);
     m_menuMain->addAction(actionMyShare);
@@ -120,12 +124,14 @@ void CWizUserInfoWidget::on_action_accountInfo_triggered()
 }
 
 void CWizUserInfoWidget::on_action_accountSettings_triggered()
-{
-    QString extInfo = WizService::ApiEntry::appstoreParam(false);
-    QString strUrl = WizService::ApiEntry::standardCommandUrl("user_info", WIZ_TOKEN_IN_URL_REPLACE_PART, extInfo);
-//    QString strUrl = WizService::ApiEntry::accountInfoUrl(WIZ_TOKEN_IN_URL_REPLACE_PART);
-//    WizShowWebDialogWithToken(tr("Account settings"), strUrl, window());
+{    
+    CWizIAPDialog dlg;
+    dlg.loadUserInfo();
+    dlg.exec();
+}
 
+void CWizUserInfoWidget::on_action_upgradeVip_triggered()
+{
     CWizIAPDialog dlg;
     dlg.exec();
 }

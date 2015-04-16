@@ -280,12 +280,10 @@ void CWizAnalyzer::PostBlocked(IWizSyncableDatabase* db)
 
     QByteArray baInstall = GetInstallDays().toUtf8();
     rapidjson::Value installDays(baInstall.constData(), baInstall.size());
-    qDebug() << "install days : " << baInstall;
     dd.AddMember("installDays", installDays, allocator);
 
     QDateTime dtSignUp = QDateTime::fromString(db->meta("Account", "DateSignUp"));
     int signUpDays = dtSignUp.daysTo(QDateTime::currentDateTime());
-    qDebug() << "sign up days : " << signUpDays;
     dd.AddMember("signUpDays", signUpDays, allocator);
 
 //    root["installDays"] = CString("em"); //WizKMGetInstallDateTime();        //TODO:
@@ -353,7 +351,6 @@ void CWizAnalyzer::PostBlocked(IWizSyncableDatabase* db)
 	{
         QString strKey = it.key();
         int sec = seconds.value(strKey).toInt();
-        qDebug() << "item : " << strKey << " duration : " << sec;
         if (sec == 0)
             continue;
 
@@ -374,7 +371,6 @@ void CWizAnalyzer::PostBlocked(IWizSyncableDatabase* db)
     rapidjson::Writer<rapidjson::GenericStringBuffer< rapidjson::UTF8<> > > writer(buffer);
 
     dd.Accept(writer);
-    qDebug() << buffer.GetString();
 
 
     CString strURL = WizService::ApiEntry::analyzerUploadUrl();

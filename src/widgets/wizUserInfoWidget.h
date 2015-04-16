@@ -47,6 +47,7 @@ protected Q_SLOTS:
     void on_userAvatar_loaded(const QString& strGUID);
     void on_action_accountInfo_triggered();
     void on_action_accountSettings_triggered();
+    void on_action_upgradeVip_triggered();
 
     void on_action_changeAvatar_triggered();
     void on_action_changeAvatar_uploaded(bool ok);

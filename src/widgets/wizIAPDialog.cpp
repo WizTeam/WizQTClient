@@ -7,13 +7,17 @@
 #include "share/wizmisc.h"
 #include "share/wizDatabaseManager.h"
 #include "share/wizDatabase.h"
+#include "wizmainwindow.h"
+#include "coreplugin/icore.h"
 #include <QMessageBox>
 #include <QWebView>
 #include <QTextBrowser>
+#include <QWebFrame>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QNetworkRequest>
 #include <QEventLoop>
+#include <QUrl>
 #include <QDebug>
 
 #define WIZ_PRODUCT_MONTH "cn.wiz.wiznote.mac.pro.monthly"
@@ -47,7 +51,6 @@ void CWizIAPDialog::onProductsLoaded(const QList<CWizIAPProduct>& productList)
     setPurchaseAvailable(true);
     foreach (CWizIAPProduct product, productList)
     {
-        qDebug() << product.id << product.localizedTitle << product.localizedPrice << product.localizedDescription;
         if (product.id == WIZ_PRODUCT_MONTH)
         {
             ui->btn_month->setText(QString(tr("%1 / month")).arg(product.localizedPrice));
@@ -59,9 +62,8 @@ void CWizIAPDialog::onProductsLoaded(const QList<CWizIAPProduct>& productList)
     }
 }
 
-void CWizIAPDialog::onPurchaseFinished(bool ok, const QString& receipt)
+void CWizIAPDialog::onPurchaseFinished(bool ok, const QByteArray& receipt, const QString& strTransationID)
 {
-    qDebug() << "pruchage finished : " << ok << receipt;
     m_waitingMsgBox->done(ok);
 
     ui->label_success->setVisible(ok);
@@ -69,8 +71,23 @@ void CWizIAPDialog::onPurchaseFinished(bool ok, const QString& receipt)
 
     if (ok)
     {
-        checkReceiptInfo(receipt);
+        m_waitingMsgBox->setModal(true);
+        m_waitingMsgBox->setStandardButtons(0);
+        m_waitingMsgBox->setText("Waiting for Wiz Server...");
+        m_waitingMsgBox->open();
+        m_timer.start(2 * 1000);
+        checkReceiptInfo(receipt, strTransationID);
     }
+}
+
+void CWizIAPDialog::loadUserInfo()
+{
+   ui->stackedWidget->setCurrentIndex(0);
+   QString extInfo = WizService::ApiEntry::appstoreParam(false);
+   QString strToken = WizService::Token::token();
+   QString strUrl = WizService::ApiEntry::standardCommandUrl("user_info", strToken, extInfo);
+   qDebug() << "load page : " << strUrl;
+   ui->webView->load(QUrl(strUrl));
 }
 
 void CWizIAPDialog::initStyles()
@@ -128,7 +145,7 @@ void CWizIAPDialog::hideInfoLabel()
     ui->label_failed->setVisible(false);
 }
 
-void CWizIAPDialog::checkReceiptInfo(const QString& receipt)
+void CWizIAPDialog::checkReceiptInfo(const QByteArray& receipt, const QString& strTransationID)
 {
     QString strPlat;
 #ifdef Q_OS_MAC
@@ -137,14 +154,23 @@ void CWizIAPDialog::checkReceiptInfo(const QString& receipt)
     strPlat = "linux";
 #endif
     QString asServerUrl = WizService::ApiEntry::asServerUrl();
-    QString checkUrl = asServerUrl + "/a/pay2/ios";
+//    QString checkUrl = asServerUrl + "/a/pay2/ios";
+    QString checkUrl = "http://192.168.1.89/wizas/a/pay2/ios/";
+//    QString checkUrl = "https://sandbox.itunes.apple.com/verifyReceipt";
+//    QString checkUrl = "https://buy.itunes.apple.com/verifyReceipt";
     CWizDatabase& db = CWizDatabaseManager::instance()->db();
     QString userID = db.GetUserId();
     QString userGUID = db.GetUserGUID();
-    QString receiptBase64(receipt.toUtf8().toBase64());
-    QString strExtInfo = QString("client_type=%2&user_id=%3&user_guid=%4&receipt=%5")
-            .arg(strPlat).arg(userID).arg(userGUID).arg(receiptBase64);
+//    QString  receiptBase64(QByteArray::fromBase64(receipt.toLocal8Bit()));
+    QString receiptBase64 = receipt.toBase64();
+    receiptBase64 = QString(QUrl::toPercentEncoding(receiptBase64));
+//    qDebug() << "recipt base 64 : " << receiptBase64;
+    QString strExtInfo = QString("client_type=%1&user_id=%2&user_guid=%3&transaction_id=%4&receipt=%5")
+            .arg(strPlat).arg(userID).arg(userGUID).arg(strTransationID).arg(receiptBase64);
 
+    qDebug() << "transation id = " << strTransationID;
+
+//    QString strExtInfo = QString("{\"receipt-data\":\"%1\"}").arg(receiptBase64);
 
 //    checkUrl = checkUrl + "?" + strExtInfo;
     qDebug() << "check receipt : " << checkUrl << strExtInfo;
@@ -152,7 +178,6 @@ void CWizIAPDialog::checkReceiptInfo(const QString& receipt)
     QNetworkAccessManager net;
     QNetworkRequest request;
     request.setUrl(checkUrl);
-//    QNetworkReply* reply = net.get(request);
     request.setHeader(QNetworkRequest::ContentTypeHeader, QVariant("application/x-www-form-urlencoded"));
     QNetworkReply* reply = net.post(request, strExtInfo.toUtf8());
 
@@ -173,11 +198,7 @@ void CWizIAPDialog::checkReceiptInfo(const QString& receipt)
 
 void CWizIAPDialog::on_btn_goBack_clicked()
 {
-    ui->stackedWidget->setCurrentIndex(0);
-    QString extInfo = WizService::ApiEntry::appstoreParam(false);
-    QString strToken = WizService::Token::token();
-    QString strUrl = WizService::ApiEntry::standardCommandUrl("user_info", strToken, extInfo);
-    ui->webView->load(QUrl(strUrl));
+    loadUserInfo();
 }
 
 void CWizIAPDialog::on_btn_month_clicked()
@@ -217,7 +238,15 @@ void CWizIAPDialog::onWaitingTimeOut()
     m_waitingMsgBox->close();
 //    m_waitingMsgBox->setModal(false);
     m_waitingMsgBox->setStandardButtons(QMessageBox::Ok);
-    m_waitingMsgBox->setText("Can not connect to AppStore, please try again later.");
+    m_waitingMsgBox->setText("Can not connect to Server, please try again later.");
     m_waitingMsgBox->exec();
     accept();
+}
+
+void CWizIAPDialog::onEditorPopulateJavaScriptWindowObject()
+{
+    Core::Internal::MainWindow* mainWindow = qobject_cast<Core::Internal::MainWindow *>(Core::ICore::mainWindow());
+    if (mainWindow) {
+        ui->webView->page()->mainFrame()->addToJavaScriptWindowObject("WizExplorerApp", mainWindow->object());
+    }
 }

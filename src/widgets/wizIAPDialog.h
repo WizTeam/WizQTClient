@@ -20,7 +20,9 @@ public:
     ~CWizIAPDialog();
 
     virtual void onProductsLoaded(const QList<CWizIAPProduct>& productList);
-    virtual void onPurchaseFinished(bool ok, const QString& receipt);
+    virtual void onPurchaseFinished(bool ok, const QByteArray& receipt, const QString& strTransationID);
+
+    void loadUserInfo();
 
 private slots:
     void on_btn_goBack_clicked();
@@ -33,14 +35,14 @@ private slots:
 
     //
     void onWaitingTimeOut();
-
+    void onEditorPopulateJavaScriptWindowObject();
 
 private:
     void initStyles();
     void createIAPHelper();
     void setPurchaseAvailable(bool b);
     void hideInfoLabel();
-    void checkReceiptInfo(const QString& receipt);
+    void checkReceiptInfo(const QByteArray& receipt, const QString& strTransationID);
 
 private:
     Ui::CWizIAPDialog *ui;

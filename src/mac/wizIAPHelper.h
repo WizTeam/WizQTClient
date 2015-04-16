@@ -18,7 +18,7 @@ class CWizIAPCaller
 {
 public:
     virtual void onProductsLoaded(const QList<CWizIAPProduct>& productList) = 0;
-    virtual void onPurchaseFinished(bool ok, const QString& receipt) = 0;
+    virtual void onPurchaseFinished(bool ok, const QByteArray& receipt, const QString& strTransationID) = 0;
 };
 
 class CWizIAPHelper
@@ -30,7 +30,7 @@ public:
     void purchaseProduct(const QString& strID);
     void requestProducts();
     void onProductsLoaded(const QList<CWizIAPProduct>& productList);
-    void onPurchaseFinished(bool ok, const QString& receipt);
+    void onPurchaseFinished(bool ok, const QByteArray& receipt, const QString& strTransationID);
 
 private:
     CWizIAPHelperPrivate* m_helper;
