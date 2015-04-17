@@ -167,6 +167,7 @@ set(wiznote_SOURCES
     share/wizAnalyzer.cpp
     share/wizTranslater.cpp
     widgets/wizIAPDialog.cpp
+    widgets/wizAdvancedSearchDialog.cpp
 )
 
 set(wiznote_HEADERS
@@ -322,6 +323,7 @@ set(wiznote_HEADERS
     share/wizAnalyzer.h
     share/wizTranslater.h
     widgets/wizIAPDialog.h
+    widgets/wizAdvancedSearchDialog.h
 )
 
 set(wiznote_FORMS
@@ -343,6 +345,7 @@ set(wiznote_FORMS
     ui/wizEmailShareDialog.ui
     ui/wizMarkdownTemplateDialog.ui
     ui/wizIAPDialog.ui
+    ui/wizAdvancedSearchDialog.ui
 )
 
 set(wiznote_TRANSLATIONS

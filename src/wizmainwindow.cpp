@@ -50,6 +50,7 @@
 #include "widgets/wizFramelessWebDialog.h"
 #include "widgets/wizScreenShotWidget.h"
 #include "widgets/wizImageButton.h"
+#include "widgets/wizIAPDialog.h"
 
 #include "wiznotestyle.h"
 #include "wizdocumenthistory.h"
@@ -309,6 +310,12 @@ void MainWindow::cleanOnQuit()
     {
         m_mobileFileReceiver->waitForDone();
     }
+}
+
+CWizSearcher*MainWindow::searcher()
+{
+    CWizSearcher* searcher = m_searcher.data();
+    return searcher;
 }
 
 void MainWindow::rebuildFTS()
@@ -1210,7 +1217,6 @@ void MainWindow::openVipPageInWebBrowser()
     msg.setWindowTitle(tr("Upgrading to VIP"));
     msg.setIcon(QMessageBox::Information);
     msg.setText(tr("Only VIP user can create link, please retry after upgrading to VIP and syncing to server."));
-#ifndef BUILD4APPSTORE
     msg.addButton(tr("Cancel"), QMessageBox::NoRole);
     QPushButton *actionBuy = msg.addButton(tr("Upgrade now"), QMessageBox::YesRole);
     msg.setDefaultButton(actionBuy);
@@ -1218,14 +1224,15 @@ void MainWindow::openVipPageInWebBrowser()
 
     if (msg.clickedButton() == actionBuy)
     {
-        QString strToken = WizService::Token::token();
-        QString strUrl = WizService::ApiEntry::standardCommandUrl("vip", strToken);
-        QDesktopServices::openUrl(QUrl(strUrl));
+//#ifndef BUILD4APPSTORE
+//        QString strToken = WizService::Token::token();
+//        QString strUrl = WizService::ApiEntry::standardCommandUrl("vip", strToken);
+//        QDesktopServices::openUrl(QUrl(strUrl));
+//#else
+        CWizIAPDialog dlg;
+        dlg.exec();
+//    #endif
     }
-#else
-    msg.addButton(tr("OK"), QMessageBox::YesRole);
-    msg.exec();
-#endif
 }
 
 bool MainWindow::checkListClickable()
@@ -1283,6 +1290,12 @@ void MainWindow::SetDialogResult(int nResult)
         m_dbMgr.db(doc.strKbGUID).SetObjectDataDownloaded(doc.strGUID, _T("document"), false);
         m_doc->viewNote(doc, false);
     }
+}
+
+void MainWindow::AppStoreIAP()
+{
+    CWizIAPDialog dlg;
+    dlg.exec();
 }
 
 #ifndef Q_OS_MAC
@@ -2316,9 +2329,9 @@ void MainWindow::on_searchProcess(const QString& strKeywords, const CWizDocument
         m_doc->web()->applySearchKeywordHighlight();
     }
 
-    if (strKeywords != m_strSearchKeywords) {
-        return;
-    }
+//    if (strKeywords != m_strSearchKeywords) {
+//        return;
+//    }
 
     m_documents->setDocuments(arrayDocument);
     on_documents_itemSelectionChanged();
@@ -2426,22 +2439,47 @@ void MainWindow::on_category_itemSelectionChanged()
         oldItem = currentItem;
     }
 
-    CWizCategoryViewMessageItem* pItem = category->currentCategoryItem<CWizCategoryViewMessageItem>();
-    if (pItem)
+    QTreeWidgetItem* categoryItem = category->currentItem();
+    switch (categoryItem->type()) {
+    case ItemType_MessageItem:
     {
-        showMessageList(pItem);
+        CWizCategoryViewMessageItem* pItem = dynamic_cast<CWizCategoryViewMessageItem*>(categoryItem);
+        if (pItem)
+        {
+            showMessageList(pItem);
+        }
     }
-    else
+        break;
+    case ItemType_ShortcutItem:
     {
-        CWizCategoryViewShortcutItem *pShortcut = category->currentCategoryItem<CWizCategoryViewShortcutItem>();
+        CWizCategoryViewShortcutItem* pShortcut = dynamic_cast<CWizCategoryViewShortcutItem*>(categoryItem);
         if (pShortcut)
         {
             viewDocumentByShortcut(pShortcut);
         }
-        else
+    }
+        break;
+    case ItemType_QuickSearchItem:
+    {
+        CWizCategoryViewSearchItem* pSearchItem = dynamic_cast<CWizCategoryViewSearchItem*>(categoryItem);
+        if (pSearchItem)
         {
-            showDocmentList(category);
+            searchNotesBySQL(pSearchItem->getSQLWhere());
         }
+    }
+        break;
+    case ItemType_QuickSearchCustomItem:
+    {
+        CWizCategoryViewCustomSearchItem* pSearchItem = dynamic_cast<CWizCategoryViewCustomSearchItem*>(categoryItem);
+        if (pSearchItem)
+        {
+            searchNotesBySQLAndKeyword(pSearchItem->getSQLWhere(), pSearchItem->getKeyword());
+        }
+    }
+        break;
+    default:
+        showDocmentList(category);
+        break;
     }
 }
 
@@ -2523,8 +2561,6 @@ void MainWindow::on_options_restartForSettings()
 
 void MainWindow::resetPermission(const QString& strKbGUID, const QString& strOwner)
 {
-    Q_ASSERT(!strKbGUID.isEmpty());
-
     int nPerm = m_dbMgr.db(strKbGUID).permission();
     bool isGroup = m_dbMgr.db().kbGUID() != strKbGUID;
 
@@ -2584,7 +2620,7 @@ void MainWindow::resetPermission(const QString& strKbGUID, const QString& strOwn
 
 void MainWindow::viewDocument(const WIZDOCUMENTDATA& data, bool addToHistory)
 {
-    Q_ASSERT(!data.strKbGUID.isEmpty());
+    Q_ASSERT(!data.strGUID.isEmpty());
 
     if (data.strGUID == m_doc->note().strGUID)
     {
@@ -3113,6 +3149,30 @@ void MainWindow::viewDocumentByShortcut(CWizCategoryViewShortcutItem* pShortcut)
     }
 }
 
+void MainWindow::searchNotesBySQL(const QString& strSQLWhere)
+{
+    if (strSQLWhere.isEmpty())
+        return;
+    m_searcher->searchBySQLWhere(strSQLWhere, 500);
+}
+
+void MainWindow::searchNotesBySQLAndKeyword(const QString& strSQLWhere, const QString& strKeyword)
+{
+    qDebug() << "search by sql and keyword : " << strSQLWhere << strKeyword;
+    if (strSQLWhere.isEmpty())
+    {
+        m_searcher->search(strKeyword, 500);
+    }
+    else if (strKeyword.isEmpty())
+    {
+        m_searcher->searchBySQLWhere(strSQLWhere, 500);
+    }
+    else
+    {
+        m_searcher->searchByKeywordAndWhere(strKeyword, strSQLWhere, 500);
+    }
+}
+
 void MainWindow::updateHistoryButtonStatus()
 {
     bool canGoBack = m_history->canBack();
@@ -3174,3 +3234,5 @@ void MainWindow::quickSyncKb(const QString& kbGuid)
 {
     CWizKMSyncThread::quickSyncKb(kbGuid);
 }
+
+

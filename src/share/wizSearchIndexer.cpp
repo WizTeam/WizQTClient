@@ -345,6 +345,129 @@ void CWizSearcher::search(const QString &strKeywords, int nMaxSize /* = -1 */)
 
 }
 
+void CWizSearcher::searchByDateCreate(SearchDateInterval dateInterval, int nMaxSize)
+{
+    m_mapDocumentSearched.clear();
+    m_nMaxResult = nMaxSize;
+    COleDateTime dt = getDateByInterval(dateInterval);
+    //
+    CWizDocumentDataArray arrayDocument;
+    m_dbMgr.db().GetRecentDocumentsByCreatedTime(dt, arrayDocument);
+
+    CWizDocumentDataArray::const_iterator it;
+    for (it = arrayDocument.begin(); it != arrayDocument.end(); it++) {
+
+        const WIZDOCUMENTDATAEX& doc = *it;
+        m_mapDocumentSearched[doc.strGUID] = doc;
+        m_nResults++;
+        if (m_nResults > nMaxSize)
+            break;
+    }
+
+    arrayDocument.clear();
+
+    int nCount = m_dbMgr.count();
+    for (int i = 0; i < nCount; i++) {
+        m_dbMgr.at(i).GetRecentDocumentsByCreatedTime(dt, arrayDocument);
+
+        for (it = arrayDocument.begin(); it != arrayDocument.end(); it++) {
+            const WIZDOCUMENTDATAEX& doc = *it;
+            m_mapDocumentSearched[doc.strGUID] = doc;
+            m_nResults++;
+            if (m_nResults > nMaxSize)
+                break;
+        }
+
+        arrayDocument.clear();
+    }
+
+    qDebug() << QString("[Search]Find %1 results in database").arg(m_mapDocumentSearched.size());
+
+    emitSearchProcess("");
+}
+
+void CWizSearcher::searchByDateModified(SearchDateInterval dateInterval, int nMaxSize)
+{
+    m_mapDocumentSearched.clear();
+    m_nMaxResult = nMaxSize;
+    COleDateTime dt = getDateByInterval(dateInterval);
+    //
+    CWizDocumentDataArray arrayDocument;
+    m_dbMgr.db().GetRecentDocumentsByModifiedTime(dt, arrayDocument);
+
+    CWizDocumentDataArray::const_iterator it;
+    for (it = arrayDocument.begin(); it != arrayDocument.end(); it++) {
+
+        const WIZDOCUMENTDATAEX& doc = *it;
+        m_mapDocumentSearched[doc.strGUID] = doc;
+        m_nResults++;
+        if (m_nResults > nMaxSize)
+            break;
+    }
+
+    arrayDocument.clear();
+
+    int nCount = m_dbMgr.count();
+    for (int i = 0; i < nCount; i++) {
+        m_dbMgr.at(i).GetRecentDocumentsByModifiedTime(dt, arrayDocument);
+
+        for (it = arrayDocument.begin(); it != arrayDocument.end(); it++) {
+            const WIZDOCUMENTDATAEX& doc = *it;
+            m_mapDocumentSearched[doc.strGUID] = doc;
+            m_nResults++;
+            if (m_nResults > nMaxSize)
+                break;
+        }
+
+        arrayDocument.clear();
+    }
+
+    qDebug() << QString("[Search]Find %1 results in database").arg(m_mapDocumentSearched.size());
+
+    emitSearchProcess("");
+}
+
+void CWizSearcher::searchByDateAccessed(SearchDateInterval dateInterval, int nMaxSize)
+{
+    m_mapDocumentSearched.clear();
+    m_nMaxResult = nMaxSize;
+    COleDateTime dt = getDateByInterval(dateInterval);
+    //
+    CWizDocumentDataArray arrayDocument;
+    m_dbMgr.db().GetRecentDocumentsByAccessedTime(dt, arrayDocument);
+
+    CWizDocumentDataArray::const_iterator it;
+    for (it = arrayDocument.begin(); it != arrayDocument.end(); it++) {
+
+        const WIZDOCUMENTDATAEX& doc = *it;
+        m_mapDocumentSearched[doc.strGUID] = doc;
+        m_nResults++;
+        if (m_nResults > nMaxSize)
+            break;
+    }
+
+    arrayDocument.clear();
+
+    int nCount = m_dbMgr.count();
+    for (int i = 0; i < nCount; i++) {
+        m_dbMgr.at(i).GetRecentDocumentsByAccessedTime(dt, arrayDocument);
+
+        for (it = arrayDocument.begin(); it != arrayDocument.end(); it++) {
+            const WIZDOCUMENTDATAEX& doc = *it;
+            m_mapDocumentSearched[doc.strGUID] = doc;
+            m_nResults++;
+            if (m_nResults > nMaxSize)
+                break;
+        }
+
+        arrayDocument.clear();
+    }
+
+    qDebug() << QString("[Search]Find %1 results in database").arg(m_mapDocumentSearched.size());
+
+    emitSearchProcess("");
+}
+
 void CWizSearcher::stop()
 {
     m_stop = true;
@@ -378,7 +501,7 @@ void CWizSearcher::searchKeyword(const QString& strKeywords)
 
     qDebug() << "\n[Search]search: " << strKeywords;
 
-    searchDatabase(strKeywords);
+    searchDatabaseByKeyword(strKeywords);
 
     if (m_nResults < m_nMaxResult)
     {
@@ -390,36 +513,10 @@ void CWizSearcher::searchKeyword(const QString& strKeywords)
     int nMilliseconds = counter.elapsed();
     qDebug() << "[Search]search times: " << nMilliseconds;
 
-    int nTimes = m_mapDocumentSearched.size() % SEARCH_PAGE_MAX ?
-                (m_mapDocumentSearched.size() / SEARCH_PAGE_MAX) + 1: (m_mapDocumentSearched.size() / SEARCH_PAGE_MAX);
-    int nPos = 0;
-    for (int i = 0; i < nTimes; i++) {
-
-        CWizDocumentDataArray arrayDocument;
-        QMap<QString, WIZDOCUMENTDATAEX>::const_iterator it;
-        for (it = m_mapDocumentSearched.begin() + nPos; it != m_mapDocumentSearched.end(); it++) {
-            arrayDocument.push_back(it.value());
-            nPos++;
-        }
-
-        if (i == nTimes - 1) {
-            Q_EMIT searchProcess(strKeywords, arrayDocument, true);
-            return;
-        } else {
-            Q_EMIT searchProcess(strKeywords, arrayDocument, false);
-        }
-
-        QTime dieTime = QTime::currentTime().addMSecs(30);
-        while (QTime::currentTime() < dieTime) {
-            QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
-        }
-    }
-
-    CWizDocumentDataArray arrayDocument;
-    Q_EMIT searchProcess(strKeywords, arrayDocument, true);
+    emitSearchProcess(strKeywords);
 }
 
-void CWizSearcher::searchDatabase(const QString& strKeywords)
+void CWizSearcher::searchDatabaseByKeyword(const QString& strKeywords)
 {
     CWizDocumentDataArray arrayDocument;
     m_dbMgr.db().SearchDocumentByTitle(strKeywords, NULL, true, 5000, arrayDocument);
@@ -448,6 +545,162 @@ void CWizSearcher::searchDatabase(const QString& strKeywords)
     }
 
     qDebug() << QString("[Search]Find %1 results in database").arg(m_mapDocumentSearched.size());
+}
+
+void CWizSearcher::searchBySQLWhere(const QString& strWhere, int nMaxSize)
+{
+    m_mapDocumentSearched.clear();
+    m_nMaxResult = nMaxSize;
+    CWizDocumentDataArray arrayDocument;
+    //
+    m_dbMgr.db().SearchDocumentByWhere(strWhere, 5000, arrayDocument);
+
+    CWizDocumentDataArray::const_iterator it;
+    for (it = arrayDocument.begin(); it != arrayDocument.end(); it++) {
+
+        const WIZDOCUMENTDATAEX& doc = *it;
+        m_mapDocumentSearched[doc.strGUID] = doc;
+        m_nResults++;
+    }
+
+    arrayDocument.clear();
+
+    int nCount = m_dbMgr.count();
+    for (int i = 0; i < nCount; i++) {
+        m_dbMgr.at(i).SearchDocumentByWhere(strWhere, 5000, arrayDocument);
+
+        for (it = arrayDocument.begin(); it != arrayDocument.end(); it++) {
+            const WIZDOCUMENTDATAEX& doc = *it;
+            m_mapDocumentSearched[doc.strGUID] = doc;
+            m_nResults++;
+        }
+
+        arrayDocument.clear();
+    }
+
+    qDebug() << QString("[Search]Find %1 results in database").arg(m_mapDocumentSearched.size());
+
+    emitSearchProcess("");
+}
+
+void CWizSearcher::searchByKeywordAndWhere(const QString& strKeywords,
+                                           const QString& strWhere, int nMaxSize)
+{
+    // search keyword
+    Q_ASSERT(!strKeywords.isEmpty());
+    qDebug() << "\n[Search]search: " << strKeywords;
+
+    m_nMaxResult = nMaxSize;
+    m_nResults = 0;
+    m_mapDocumentSearched.clear();
+    searchDatabaseByKeyword(strKeywords);
+
+    if (m_nResults < m_nMaxResult)
+    {
+        // NOTE: make sure convert keyword to lower case
+        searchDocument(m_strIndexPath.toStdWString().c_str(),
+                       strKeywords.toLower().toStdWString().c_str());
+    }
+
+    // search by where
+    QSet<QString> whereSet; // = mapDocByWhere.keys().toSet();
+    CWizDocumentDataArray arrayDocument;
+    m_dbMgr.db().SearchDocumentByWhere(strWhere, 5000, arrayDocument);
+
+    CWizDocumentDataArray::const_iterator it;
+    for (it = arrayDocument.begin(); it != arrayDocument.end(); it++) {
+
+        const WIZDOCUMENTDATAEX& doc = *it;
+        whereSet.insert(doc.strGUID);
+    }
+
+    arrayDocument.clear();
+
+    int nCount = m_dbMgr.count();
+    for (int i = 0; i < nCount; i++) {
+        m_dbMgr.at(i).SearchDocumentByWhere(strWhere, 5000, arrayDocument);
+
+        for (it = arrayDocument.begin(); it != arrayDocument.end(); it++) {
+            const WIZDOCUMENTDATAEX& doc = *it;
+            whereSet.insert(doc.strGUID);
+        }
+
+        arrayDocument.clear();
+    }
+
+    QSet<QString> keywordSet = m_mapDocumentSearched.keys().toSet();
+
+    keywordSet.intersect(whereSet);
+
+    QMap<QString, WIZDOCUMENTDATAEX> keywordSearchMap = m_mapDocumentSearched;
+    m_mapDocumentSearched.clear();
+    QMap<QString, WIZDOCUMENTDATAEX>::iterator itM;
+    for (itM = keywordSearchMap.begin(); itM != keywordSearchMap.end(); itM++)
+    {
+        if (keywordSet.contains(itM.key()))
+            m_mapDocumentSearched.insert(itM.key(), itM.value());
+    }
+
+    qDebug() << QString("[Search]Find %1 results in database").arg(m_mapDocumentSearched.size());
+
+
+    emitSearchProcess(strKeywords);
+}
+
+COleDateTime CWizSearcher::getDateByInterval(SearchDateInterval dateInterval)
+{
+    COleDateTime dt;
+    switch (dateInterval) {
+    case today:
+        dt = dt.addDays(-1);
+        break;
+    case yesterday:
+        dt = dt.addDays(-2);
+        break;
+    case dayBeforeYesterday:
+        dt = dt.addDays(-3);
+        break;
+    case oneWeek:
+        dt = dt.addDays(-8);
+        break;
+    case oneMonth:
+        dt = dt.addMonths(-1);
+    default:
+        break;
+    }
+
+    return dt;
+}
+
+void CWizSearcher::emitSearchProcess(const QString& strKeywords)
+{
+    int nTimes = m_mapDocumentSearched.size() % SEARCH_PAGE_MAX ?
+                (m_mapDocumentSearched.size() / SEARCH_PAGE_MAX) + 1: (m_mapDocumentSearched.size() / SEARCH_PAGE_MAX);
+    int nPos = 0;
+    for (int i = 0; i < nTimes; i++) {
+
+        CWizDocumentDataArray arrayDocument;
+        QMap<QString, WIZDOCUMENTDATAEX>::const_iterator it;
+        for (it = m_mapDocumentSearched.begin() + nPos; it != m_mapDocumentSearched.end(); it++) {
+            arrayDocument.push_back(it.value());
+            nPos++;
+        }
+
+        if (i == nTimes - 1) {
+            Q_EMIT searchProcess(strKeywords, arrayDocument, true);
+            return;
+        } else {
+            Q_EMIT searchProcess(strKeywords, arrayDocument, false);
+        }
+
+        QTime dieTime = QTime::currentTime().addMSecs(30);
+        while (QTime::currentTime() < dieTime) {
+            QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
+        }
+    }
+
+    CWizDocumentDataArray arrayDocument;
+    Q_EMIT searchProcess(strKeywords, arrayDocument, true);
 }
 
 bool CWizSearcher::onSearchProcess(const std::string& lpszKbGUID,

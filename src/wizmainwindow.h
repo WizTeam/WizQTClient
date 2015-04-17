@@ -4,6 +4,7 @@
 #include <QtGlobal>
 #include <QMainWindow>
 #include <QPushButton>
+#include <functional>
 
 #include "wizdef.h"
 #include "share/wizuihelper.h"
@@ -99,6 +100,7 @@ public:
 
     bool isLogout() const { return m_bLogoutRestart; }
 
+    CWizSearcher* searcher();
     QString searchKeywords() const { return m_strSearchKeywords; }
     void rebuildFTS();
 
@@ -418,6 +420,7 @@ public:
     Q_INVOKABLE void OpenURLInDefaultBrowser(const QString& strUrl);
     Q_INVOKABLE void GetToken(const QString& strFunctionName);
     Q_INVOKABLE void SetDialogResult(int nResult);
+    Q_INVOKABLE void AppStoreIAP();
 
 private:
     void syncAllData();
@@ -446,7 +449,8 @@ private:
     void showDocmentList(CWizCategoryBaseView* category);
     void showMessageList(CWizCategoryViewMessageItem* pItem);
     void viewDocumentByShortcut(CWizCategoryViewShortcutItem *pShortcut);
-
+    void searchNotesBySQL(const QString& strSQLWhere);
+    void searchNotesBySQLAndKeyword(const QString& strSQLWhere, const QString& strKeyword);
     //
     void updateHistoryButtonStatus();
     //

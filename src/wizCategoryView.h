@@ -166,7 +166,11 @@ public:
         ActionItemAttribute,
         ActionEmptyTrash,
         ActionQuitGroup,
-        ActionItemManage
+        ActionItemManage,
+        ActionAdvancedSearch,
+        ActionAddCustomSearch,
+        ActionEditCustomSearch,
+        ActionRemoveCustomSearch
     };
 
     enum CategoryMenuType
@@ -180,7 +184,9 @@ public:
         TrashItem,
         BizGroupRootItem,
         OwnGroupRootItem,
-        ShortcutItem
+        ShortcutItem,
+        AddCustomSearchItem,
+        EditCustomSearchItem,
     };
 
     void initMenus();
@@ -203,6 +209,7 @@ public:
     void showGroupContextMenu(QPoint pos);
     void showTrashContextMenu(QPoint pos);
     void showShortcutContextMenu(QPoint pos);
+    void showCustomSearchContextMenu(QPoint pos, bool removable = false);
 
 
 public:
@@ -376,6 +383,11 @@ public Q_SLOTS:
 
     void on_action_removeShortcut();
 
+    void on_action_advancedSearch();
+    void on_action_addCustomSearch();
+    void on_action_editCustomSearch();
+    void on_action_removeCustomSearch();
+
     void on_action_emptyTrash();
 
     void on_itemSelectionChanged();
@@ -434,6 +446,7 @@ private:
     void initGroup(CWizDatabase& db, bool& itemCreeated);
     void initGroup(CWizDatabase& db, QTreeWidgetItem* pParent,
                    const QString& strParentTagGUID);
+    void initQuickSearches();
     //
     void resetCreateGroupLink();
 
@@ -453,6 +466,10 @@ private:
     void saveChildState(QTreeWidgetItem* pi, QSettings* settings);
     void saveItemState(QTreeWidgetItem* pi, QSettings* settings);
 
+    void advancedSearchByCustomParam(const QString& strParam);
+    void saveCustomAdvancedSearchParamToDB(const QString& strGuid, const QString& strParam);
+    void loadCustomAdvancedSearchParamFromDB(QMap<QString, QString>& paramMap);
+    void deleteCustomAdvancedSearchParamFromDB(const QString& strGuid);
 
 private:
     QPointer<QMenu> m_menuShortcut;
@@ -467,6 +484,7 @@ private:
     QPointer<QMenu> m_menuAdminBizGroupRoot;
     QPointer<QMenu> m_menuGroup;
     QPointer<QMenu> m_menuTrash;
+    QPointer<QMenu> m_menuCustomSearch;
     QPointer<QTimer> m_timerUpdateFolderCount;
     QPointer<QTimer> m_timerUpdateTagCount;
     QMap<QString, QTimer*> m_mapTimerUpdateGroupCount;

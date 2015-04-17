@@ -285,6 +285,8 @@ public:
     bool GetRecentDocumentsCreated(const CString& strDocumentType, int nCount, CWizDocumentDataArray& arrayDocument);
     bool GetRecentDocumentsModified(const CString& strDocumentType, int nCount, CWizDocumentDataArray& arrayDocument);
     bool GetRecentDocumentsByCreatedTime(const COleDateTime& t, CWizDocumentDataArray& arrayDocument);
+    bool GetRecentDocumentsByModifiedTime(const COleDateTime& t, CWizDocumentDataArray& arrayDocument);
+    bool GetRecentDocumentsByAccessedTime(const COleDateTime& t, CWizDocumentDataArray& arrayDocument);
 
     // Extend
     bool GetModifiedDocuments(CWizDocumentDataArray& arrayData);
@@ -348,6 +350,7 @@ public:
     qint64 GetMetaInt64(const CString& strMetaName, const CString& strKey, qint64 nDef);
     bool SetMetaInt64(const CString& strMetaName, const CString& strKey, qint64 n);
     bool deleteMetasByName(const QString& strMetaName);
+    bool deleteMetaByKey(const QString& strMetaName, const QString& strMetaKey);
 
     /* Deleted related operations */
     bool GetDeletedGUIDs(CWizDeletedGUIDDataArray& arrayGUID);
@@ -405,6 +408,10 @@ public:
     bool setAllDocumentsSearchIndexed(bool b);
     bool getAllDocumentsNeedToBeSearchIndexed(CWizDocumentDataArray& arrayDocument);
     bool setDocumentSearchIndexed(const QString& strDocumentGUID, bool b);
+
+    bool SearchDocumentByWhere(const QString& strWhere,
+                               int nMaxCount,
+                               CWizDocumentDataArray& arrayDocument);
 
     bool SearchDocumentByTitle(const QString& strTitle,
                                const QString& strLocation,

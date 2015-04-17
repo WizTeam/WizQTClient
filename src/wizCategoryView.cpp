@@ -18,6 +18,7 @@
 #include "share/wizdrawtexthelper.h"
 #include "share/wizsettings.h"
 #include "share/wizDatabaseManager.h"
+#include "share/wizSearchIndexer.h"
 #include "wizFolderSelector.h"
 #include "wizLineInputDialog.h"
 #include "wizWebSettingsDialog.h"
@@ -26,6 +27,7 @@
 #include "sync/token.h"
 #include "utils/stylehelper.h"
 #include "wizFileReader.h"
+#include "widgets/wizAdvancedSearchDialog.h"
 
 using namespace WizService;
 
@@ -43,6 +45,7 @@ using namespace Core::Internal;
 #define CATEGORY_TAGS       QObject::tr("Tags")
 #define CATEGORY_STYLES     QObject::tr("Styles")
 
+#define CATEGORY_SEARCH_BYCUSTOM  QObject::tr("Search by custom param")
 
 // for context menu text
 #define CATEGORY_ACTION_DOCUMENT_NEW    QObject::tr("New note")
@@ -73,6 +76,8 @@ using namespace Core::Internal;
 
 #define CATEGORY_SHORTCUT   "CategoryShortcut"
 #define CATEGORY_META   "CategoryMeta"
+
+#define QUICK_SEARCH_META   "CUSTOM_QUICK_SEARCH"
 
 
 /* ------------------------------ CWizCategoryBaseView ------------------------------ */
@@ -379,6 +384,7 @@ void CWizCategoryBaseView::dropEvent(QDropEvent * event)
 
     m_dragDocArray.clear();
 
+    qDebug() << "category view dropEvent" << event;
 
     if (event->mimeData()->hasFormat(WIZNOTE_MIMEFORMAT_DOCUMENTS)) {
         CWizDocumentDataArray arrayDocument;
@@ -410,16 +416,18 @@ void CWizCategoryBaseView::dropEvent(QDropEvent * event)
     }
     else
     {
-        QModelIndex droppedIndex = indexAt(event->pos());
-        if( !droppedIndex.isValid() )
-          return;
+//        QModelIndex droppedIndex = indexAt(event->pos());
+//        qDebug() << "drop index called " << droppedIndex;
+//        if( !droppedIndex.isValid() )
+//          return;
 
+//        qDebug() << "get dropped item : " << m_dragItem;
         QTreeWidget::dropEvent(event);
-        if (m_dragItem)
-        {
-            on_itemPosition_changed(m_dragItem);
-        }
-        viewport()->repaint();
+//        if (m_dragItem)
+//        {
+//            on_itemPosition_changed(m_dragItem);
+//        }
+//        viewport()->repaint();
         return;
     }
 
@@ -765,7 +773,7 @@ bool CWizCategoryBaseView::createDocumentByHtmlWithAttachment(const QString& /*s
 CWizCategoryView::CWizCategoryView(CWizExplorerApp& app, QWidget* parent)
     : CWizCategoryBaseView(app, parent)
 {
-    setDragDropMode(QAbstractItemView::DragDrop);
+    setDragDropMode(QAbstractItemView::InternalMove);
     setDragEnabled(true);
 
     initMenus();
@@ -877,10 +885,38 @@ void CWizCategoryView::initMenus()
     addAction(actionRemoveShortcut);
     connect(actionRemoveShortcut, SIGNAL(triggered()), SLOT(on_action_removeShortcut()));
 
+    QAction* actionAdvancedSearch = new QAction(tr("Advanced search"), this);
+    actionAdvancedSearch->setData(ActionAdvancedSearch);
+    addAction(actionAdvancedSearch);
+    connect(actionAdvancedSearch, SIGNAL(triggered()), SLOT(on_action_advancedSearch()));
+
+    QAction* actionAddCustomSearch = new QAction(tr("Add custom search"), this);
+    actionAddCustomSearch->setData(ActionAddCustomSearch);
+    addAction(actionAddCustomSearch);
+    connect(actionAddCustomSearch, SIGNAL(triggered()), SLOT(on_action_addCustomSearch()));
+
+    QAction* actionEditCustomSearch = new QAction(tr("Edit custom search"), this);
+    actionEditCustomSearch->setData(ActionEditCustomSearch);
+    addAction(actionEditCustomSearch);
+    connect(actionEditCustomSearch, SIGNAL(triggered()), SLOT(on_action_editCustomSearch()));
+
+    QAction* actionRemoveCustomSearch = new QAction(tr("Remove custom search"), this);
+    actionRemoveCustomSearch->setData(ActionRemoveCustomSearch);
+    addAction(actionRemoveCustomSearch);
+    connect(actionRemoveCustomSearch, SIGNAL(triggered()), SLOT(on_action_removeCustomSearch()));
+
+
     // shortcut menu
     m_menuShortcut = new QMenu(this);
     m_menuShortcut->addAction(actionRemoveShortcut);
 
+    // custom search menu
+    m_menuCustomSearch = new QMenu(this);
+    m_menuCustomSearch->addAction(actionAdvancedSearch);
+    m_menuCustomSearch->addSeparator();
+    m_menuCustomSearch->addAction(actionAddCustomSearch);
+    m_menuCustomSearch->addAction(actionEditCustomSearch);
+    m_menuCustomSearch->addAction(actionRemoveCustomSearch);
 
     // trash menu
     m_menuTrash = new QMenu(this);
@@ -1036,6 +1072,14 @@ void CWizCategoryView::resetMenu(CategoryMenuType type)
                 act->setText(CATEGORY_ACTION_MANAGE_BIZ);
             }
             break;
+        case ActionRemoveCustomSearch:
+        case ActionEditCustomSearch:
+            if (type == AddCustomSearchItem) {
+                act->setVisible(false);
+            } else if (type == EditCustomSearchItem) {
+                act->setVisible(true);
+            }
+            break;
         default:
             continue;
         }
@@ -1052,6 +1096,19 @@ void CWizCategoryView::showShortcutContextMenu(QPoint pos)
 {
     resetMenu(ShortcutItem);
     m_menuShortcut->popup(pos);
+}
+
+void CWizCategoryView::showCustomSearchContextMenu(QPoint pos, bool removable)
+{
+    if (removable)
+    {
+        resetMenu(EditCustomSearchItem);
+    }
+    else
+    {
+        resetMenu(AddCustomSearchItem);
+    }
+    m_menuCustomSearch->popup(pos);
 }
 
 void CWizCategoryView::showFolderRootContextMenu(QPoint pos)
@@ -1768,7 +1825,7 @@ void CWizCategoryView::on_action_deleted_recovery()
     {
         QString strToken = WizService::Token::token();
         QString strUrl = WizService::ApiEntry::standardCommandUrl("deleted_recovery", strToken, "&kb_guid=" + trashItem->kbGUID());
-        WizShowWebDialogWithToken(tr("Recovery notes"), strUrl, 0, true);
+        WizShowWebDialogWithToken(tr("Recovery notes"), strUrl, 0, QSize(800, 480), true);
     }
 }
 
@@ -1851,6 +1908,132 @@ void CWizCategoryView::on_action_removeShortcut()
         }
     }
     saveShortcutState();
+}
+
+void CWizCategoryView::on_action_advancedSearch()
+{
+    bool bSearchOnly = true;
+    CWizAdvancedSearchDialog dlg(bSearchOnly);
+    if (dlg.exec() == QDialog::Accepted)
+    {
+        QString strParam = dlg.getParams();
+        advancedSearchByCustomParam(strParam);
+    }
+}
+
+void CWizCategoryView::on_action_addCustomSearch()
+{
+    bool bSearchOnly = false;
+    CWizAdvancedSearchDialog dlg(bSearchOnly);
+    if (dlg.exec() == QDialog::Accepted)
+    {
+        QString strParam = dlg.getParams();
+        advancedSearchByCustomParam(strParam);
+
+        // create item by param
+        QString strSQLWhere, name , keyword;
+        CWizAdvancedSearchDialog::paramToSQL(strParam, strSQLWhere, keyword, name);
+        qDebug() << "get sql from dlg : " << strSQLWhere << " keyword : " << keyword << "  name : " << name;
+
+        QTreeWidgetItem* curItem = currentItem();
+        qDebug() << "current item type : " << curItem->type();
+        QTreeWidgetItem* parentItem = 0;
+        if (curItem->type() == ItemType_QuickSearchRootItem)
+        {
+            for (int i = 0; i < curItem->childCount(); i++)
+            {
+                if (curItem->child(i)->text(0) == CATEGORY_SEARCH_BYCUSTOM)
+                {
+                    parentItem = dynamic_cast<CWizCategoryViewSearchItem*>(curItem->child(i));
+                    break;
+                }
+            }
+            if (parentItem == 0)
+            {
+                parentItem = new CWizCategoryViewSearchItem(m_app, CATEGORY_SEARCH_BYCUSTOM);
+            }
+            curItem->addChild(parentItem);
+        }
+        else if (curItem->type() == ItemType_QuickSearchItem)
+        {
+            if (curItem->text(0) == CATEGORY_SEARCH_BYCUSTOM)
+            {
+                parentItem = curItem;
+            }
+            else
+            {
+                QTreeWidgetItem* rootItem = curItem->parent();
+                while (rootItem && rootItem->type() != ItemType_QuickSearchRootItem) {
+                    rootItem = rootItem->parent();
+                }
+                for (int i = 0; i < rootItem->childCount(); i++)
+                {
+                    if (rootItem->child(i)->text(0) == CATEGORY_SEARCH_BYCUSTOM)
+                    {
+                        parentItem = dynamic_cast<CWizCategoryViewSearchItem*>(rootItem->child(i));
+                        break;
+                    }
+                }
+                if (parentItem == 0)
+                {
+                    parentItem = new CWizCategoryViewSearchItem(m_app, CATEGORY_SEARCH_BYCUSTOM);
+                }
+                rootItem->addChild(parentItem);
+            }
+        }
+        else if (curItem->type() == ItemType_QuickSearchCustomItem)
+        {
+            parentItem = curItem->parent();
+        }
+
+
+        qDebug() << "get parent item : " << parentItem << " text : " << parentItem->text(0);
+        QString strGuid = ::WizGenGUIDLowerCaseLetterOnly();
+        CWizCategoryViewCustomSearchItem* item = new CWizCategoryViewCustomSearchItem(
+                    m_app, name, strParam, strSQLWhere, strGuid, keyword);
+        parentItem->addChild(item);
+        sortItems(0, Qt::AscendingOrder);
+        saveCustomAdvancedSearchParamToDB(strGuid, strParam);
+    }
+}
+
+void CWizCategoryView::on_action_editCustomSearch()
+{
+    if (currentItem()->type() == ItemType_QuickSearchCustomItem)
+    {
+        CWizCategoryViewCustomSearchItem* item = dynamic_cast<CWizCategoryViewCustomSearchItem*>(currentItem());
+        if (item)
+        {
+            CWizAdvancedSearchDialog dlg(false);
+            qDebug() << "eidt search param : " << item->getSelectParam();
+            dlg.setParams(item->getSelectParam());
+            if (dlg.exec() == QDialog::Accepted)
+            {
+                QString strParam = dlg.getParams();
+                QString strSQLWhere, name, keyword;
+                CWizAdvancedSearchDialog::paramToSQL(strParam, strSQLWhere, keyword, name);
+                item->setText(0, name);
+                item->setSelectParam(strParam);
+                item->setSQLWhere(strSQLWhere);
+                saveCustomAdvancedSearchParamToDB(item->kbGUID(), strParam);
+                update();
+            }
+        }
+    }
+}
+
+void CWizCategoryView::on_action_removeCustomSearch()
+{
+    if (currentItem()->type() == ItemType_QuickSearchCustomItem)
+    {
+        CWizCategoryViewCustomSearchItem* item = dynamic_cast<CWizCategoryViewCustomSearchItem*>(currentItem());
+        if (item)
+        {
+            QString strGuid = item->kbGUID();
+            deleteCustomAdvancedSearchParamFromDB(strGuid);
+            item->parent()->removeChild(item);
+        }
+    }
 }
 
 void CWizCategoryView::on_action_emptyTrash()
@@ -2667,9 +2850,7 @@ void CWizCategoryView::initGeneral()
 
     loadShortcutState();
 
-    //CWizCategoryViewSearchRootItem* pSearchRoot = new CWizCategoryViewSearchRootItem(m_app, CATEGORY_SEARCH);
-    //addTopLevelItem(pSearchRoot);
-    //pSearchRoot->setHidden(true);
+    initQuickSearches();
 }
 
 void CWizCategoryView::sortFolders()
@@ -3264,6 +3445,72 @@ void CWizCategoryView::initGroup(CWizDatabase& db, QTreeWidgetItem* pParent, con
     }
     //
     pParent->sortChildren(0, Qt::AscendingOrder);
+}
+
+void CWizCategoryView::initQuickSearches()
+{
+    CWizCategoryViewSearchRootItem* pSearchRoot = new CWizCategoryViewSearchRootItem(m_app, CATEGORY_SEARCH);
+    addTopLevelItem(pSearchRoot);
+
+//    CWizCategoryViewSearchItem* pSearchByAttributes = new CWizCategoryViewSearchItem(m_app, tr("Search by Attributes(Personal Notes)"));
+    CWizCategoryViewSearchItem* pSearchByDTCreated = new CWizCategoryViewSearchItem(m_app, tr("Search by Date Created"));
+    CWizCategoryViewSearchItem* pSearchByDTModified = new CWizCategoryViewSearchItem(m_app, tr("Search by Date Modified"));
+    CWizCategoryViewSearchItem* pSearchByDTAccessed = new CWizCategoryViewSearchItem(m_app, tr("Search by Date Accessed"));
+
+//    pSearchRoot->addChild(pSearchByAttributes);
+    pSearchRoot->addChild(pSearchByDTCreated);
+    pSearchRoot->addChild(pSearchByDTModified);
+    pSearchRoot->addChild(pSearchByDTAccessed);
+
+    CWizCategoryViewTimeSearchItem* pCreatedToday = new CWizCategoryViewTimeSearchItem(m_app, tr("Created since Today"), "DT_CREATED > %1", DateInterval_Today);
+    CWizCategoryViewTimeSearchItem* pCreatedYestoday = new CWizCategoryViewTimeSearchItem(m_app, tr("Created since Yestoday"), "DT_CREATED > %1", DateInterval_Yestoday);
+    CWizCategoryViewTimeSearchItem* pCreatedDayBeforeYestoday = new CWizCategoryViewTimeSearchItem(m_app, tr("Created since the day before yestoday"), "DT_CREATED > %1", DateInterval_TheDayBeforeYestoday);
+    CWizCategoryViewTimeSearchItem* pCreatedOneWeek = new CWizCategoryViewTimeSearchItem(m_app, tr("Created since one week"), "DT_CREATED > %1", DateInterval_LastWeek);
+    CWizCategoryViewTimeSearchItem* pCreatedOneMonth = new CWizCategoryViewTimeSearchItem(m_app, tr("Created since one month"), "DT_CREATED > %1", DateInterval_LastMonth);
+    pSearchByDTCreated->addChild(pCreatedToday);
+    pSearchByDTCreated->addChild(pCreatedYestoday);
+    pSearchByDTCreated->addChild(pCreatedDayBeforeYestoday);
+    pSearchByDTCreated->addChild(pCreatedOneWeek);
+    pSearchByDTCreated->addChild(pCreatedOneMonth);
+
+    CWizCategoryViewTimeSearchItem* pModifiedToday = new CWizCategoryViewTimeSearchItem(m_app, tr("Modified since Today"), "DT_MODIFIED > %1", DateInterval_Today);
+    CWizCategoryViewTimeSearchItem* pModifiedYestoday = new CWizCategoryViewTimeSearchItem(m_app, tr("Modified since Yestoday"), "DT_MODIFIED > %1", DateInterval_Yestoday);
+    CWizCategoryViewTimeSearchItem* pModifiedDayBeforeYestoday = new CWizCategoryViewTimeSearchItem(m_app, tr("Modified since the day before yestoday"), "DT_MODIFIED > %1", DateInterval_TheDayBeforeYestoday);
+    CWizCategoryViewTimeSearchItem* pModifiedOneWeek = new CWizCategoryViewTimeSearchItem(m_app, tr("Modified since one week"), "DT_MODIFIED > %1", DateInterval_LastWeek);
+    CWizCategoryViewTimeSearchItem* pModifiedOneMonth = new CWizCategoryViewTimeSearchItem(m_app, tr("Modified since one month"), "DT_MODIFIED > %1", DateInterval_LastMonth);
+    pSearchByDTModified->addChild(pModifiedToday);
+    pSearchByDTModified->addChild(pModifiedYestoday);
+    pSearchByDTModified->addChild(pModifiedDayBeforeYestoday);
+    pSearchByDTModified->addChild(pModifiedOneWeek);
+    pSearchByDTModified->addChild(pModifiedOneMonth);
+
+    CWizCategoryViewTimeSearchItem* pAccessedToday = new CWizCategoryViewTimeSearchItem(m_app, tr("Accessed since Today"), "DT_ACCESSED > %1", DateInterval_Today);
+    CWizCategoryViewTimeSearchItem* pAccessedYestoday = new CWizCategoryViewTimeSearchItem(m_app, tr("Accessed since Yestoday"), "DT_ACCESSED > %1", DateInterval_Yestoday);
+    CWizCategoryViewTimeSearchItem* pAccessedDayBeforeYestoday = new CWizCategoryViewTimeSearchItem(m_app, tr("Accessed since the day before yestoday"), "DT_ACCESSED > %1", DateInterval_TheDayBeforeYestoday);
+    CWizCategoryViewTimeSearchItem* pAccessedOneWeek = new CWizCategoryViewTimeSearchItem(m_app, tr("Accessed since one week"), "DT_ACCESSED > %1", DateInterval_LastWeek);
+    CWizCategoryViewTimeSearchItem* pAccessedOneMonth = new CWizCategoryViewTimeSearchItem(m_app, tr("Accessed since one month"), "DT_ACCESSED > %1", DateInterval_LastMonth);
+    pSearchByDTAccessed->addChild(pAccessedToday);
+    pSearchByDTAccessed->addChild(pAccessedYestoday);
+    pSearchByDTAccessed->addChild(pAccessedDayBeforeYestoday);
+    pSearchByDTAccessed->addChild(pAccessedOneWeek);
+    pSearchByDTAccessed->addChild(pAccessedOneMonth);
+
+    QMap<QString, QString> customMap;
+    loadCustomAdvancedSearchParamFromDB(customMap);
+    if (customMap.count() > 0)
+    {
+        CWizCategoryViewSearchItem* pSearchByCustomSQL = new CWizCategoryViewSearchItem(m_app, CATEGORY_SEARCH_BYCUSTOM);
+        pSearchRoot->addChild(pSearchByCustomSQL);
+        QMap<QString, QString>::Iterator it;
+        for (it = customMap.begin(); it != customMap.end(); it++)
+        {
+            QString where, name, keyword;
+            CWizAdvancedSearchDialog::paramToSQL(it.value(), where, keyword, name);
+            CWizCategoryViewCustomSearchItem* pCustomSearch = new CWizCategoryViewCustomSearchItem(m_app,
+                                                                                                   name, it.value(), where, it.key(), keyword);
+            pSearchByCustomSQL->addChild(pCustomSearch);
+        }
+    }
 }
 
 CWizCategoryViewItemBase* CWizCategoryView::findGroupsRootItem(const WIZGROUPDATA& group, bool bCreate /* = true*/)
@@ -4076,12 +4323,21 @@ void CWizCategoryView::on_itemPosition_changed(CWizCategoryViewItemBase* pItem)
     }
     else
     {
+        qDebug() << "private solumtion add " << pItem;
         if (CWizCategoryViewFolderItem* item = dynamic_cast<CWizCategoryViewFolderItem*>(pItem))
         {
             CWizCategoryViewItemBase* folderRoot = findAllFolderItem();
             QTreeWidgetItem* parentItem = item->parent();
-            if (!parentItem)
-                return;
+            qDebug() << "get item parent item : " << parentItem;
+            if (parentItem == 0)
+            {
+//                parentItem = folderRoot;
+                //拖拽存在bug，会导致普通元素变成顶级元素，此处进行特殊处理。
+//                int index = indexOfTopLevelItem(item);
+//                takeTopLevelItem(index);
+//                folderRoot->insertChild(0, item);
+                parentItem = folderRoot;
+            }
 
             QString strName = getUseableItemName(parentItem, item);
             qDebug() << "get useable item name : " << strName;
@@ -4106,6 +4362,8 @@ void CWizCategoryView::on_itemPosition_changed(CWizCategoryViewItemBase* pItem)
             resetFolderLocation(item, strNewLocation);
             updatePrivateFolderLocation(db, strOldLocation, strNewLocation);
         }
+
+        sortFolders();
     }
 }
 
@@ -4221,6 +4479,56 @@ void CWizCategoryView::saveItemState(QTreeWidgetItem* pi, QSettings *settings)
    bool bExpand = pItem->isExpanded() ? true : false;
 
    settings->setValue(strId, bExpand);
+}
+
+void CWizCategoryView::advancedSearchByCustomParam(const QString& strParam)
+{
+    qDebug() << "get params : " << strParam;
+    QString strSql, strName, strKeyword;
+    CWizAdvancedSearchDialog::paramToSQL(strParam, strSql, strKeyword, strName);
+    qDebug() << "sql : " << strSql << " name : " << strName << " keyword : " << strKeyword;
+
+    MainWindow* mainWindow = qobject_cast<MainWindow*>(m_app.mainWindow());
+    CWizSearcher* searcher = mainWindow->searcher();
+    if (searcher)
+    {
+        if (strSql.isEmpty())
+        {
+            searcher->search(strKeyword, 500);
+        }
+        else if (strKeyword.isEmpty())
+        {
+            searcher->searchBySQLWhere(strSql, 500);
+        }
+        else
+        {
+            searcher->searchByKeywordAndWhere(strKeyword, strSql, 500);
+        }
+    }
+}
+
+void CWizCategoryView::saveCustomAdvancedSearchParamToDB(const QString& strGuid, const QString& strParam)
+{
+    qDebug() << "save param to db , key ; " << strGuid << " value : " << strParam;
+    m_dbMgr.db().SetMeta(QUICK_SEARCH_META, strGuid, strParam);
+}
+
+void CWizCategoryView::loadCustomAdvancedSearchParamFromDB(QMap<QString, QString>& paramMap)
+{
+    CWizMetaDataArray arrayMeta;
+     m_dbMgr.db().GetMetasByName(QUICK_SEARCH_META, arrayMeta);
+     CWizMetaDataArray::iterator it;
+     for (it = arrayMeta.begin(); it != arrayMeta.end(); it++)
+     {
+         qDebug() << "load param from db , key ; " << it->strKey << " value : " << it->strValue;
+         paramMap.insert(it->strKey, it->strValue);
+     }
+}
+
+void CWizCategoryView::deleteCustomAdvancedSearchParamFromDB(const QString& strGuid)
+{
+    qDebug() << "delete param, key : " << strGuid;
+    m_dbMgr.db().deleteMetaByKey(QUICK_SEARCH_META, strGuid);
 }
 
 void CWizCategoryView::saveSelected(QSettings* settings)

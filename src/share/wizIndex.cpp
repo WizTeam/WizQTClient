@@ -3078,6 +3078,34 @@ bool CWizIndex::GetRecentDocumentsByCreatedTime(const COleDateTime& t, CWizDocum
     return SQLToDocumentDataArray(strSQL, arrayDocument);
 }
 
+bool CWizIndex::GetRecentDocumentsByModifiedTime(const COleDateTime& t, CWizDocumentDataArray& arrayDocument)
+{
+    CString strTime = TIME2SQL(t);
+
+    CString strSQL;
+    strSQL.Format(_T("select %s from %s where DOCUMENT_LOCATION not like '/Deleted Items/%%' and DT_MODIFIED>=%s order by DT_MODIFIED desc"),
+        QString(FIELD_LIST_WIZ_DOCUMENT).utf16(),
+        QString(TABLE_NAME_WIZ_DOCUMENT).utf16(),
+        strTime.utf16()
+        );
+
+    return SQLToDocumentDataArray(strSQL, arrayDocument);
+}
+
+bool CWizIndex::GetRecentDocumentsByAccessedTime(const COleDateTime& t, CWizDocumentDataArray& arrayDocument)
+{
+    CString strTime = TIME2SQL(t);
+
+    CString strSQL;
+    strSQL.Format(_T("select %s from %s where DOCUMENT_LOCATION not like '/Deleted Items/%%' and DT_ACCESSED>=%s order by DT_ACCESSED desc"),
+        QString(FIELD_LIST_WIZ_DOCUMENT).utf16(),
+        QString(TABLE_NAME_WIZ_DOCUMENT).utf16(),
+        strTime.utf16()
+        );
+
+    return SQLToDocumentDataArray(strSQL, arrayDocument);
+}
+
 #ifndef WIZ_NO_OBSOLETE
 bool CWizIndex::GetCalendarEvents(const COleDateTime& tStart, const COleDateTime& tEnd, CWizDocumentDataArray& arrayDocument)
 {
@@ -3234,6 +3262,18 @@ bool CWizIndex::deleteMetasByName(const QString& strMetaName)
     strSQL.Format(strFormat,
         STR2SQL(strMetaName).utf16()
         );
+
+    if (!ExecSQL(strSQL))
+        return false;
+
+    return true;
+}
+
+bool CWizIndex::deleteMetaByKey(const QString& strMetaName, const QString& strMetaKey)
+{
+    CString strWhere = "META_NAME=%1 AND META_KEY=%2";
+    strWhere.arg(STR2SQL(strMetaName), STR2SQL(strMetaKey));
+    CString strSQL = FormatDeleteSQLByWhere(TABLE_NAME_WIZ_META, strWhere);
 
     if (!ExecSQL(strSQL))
         return false;
@@ -3489,6 +3529,20 @@ bool CWizIndex::setDocumentSearchIndexed(const QString& strDocumentGUID, bool b)
 
 	if (!ExecSQL(strSQL))
         return false;
+
+    return true;
+}
+
+bool CWizIndex::SearchDocumentByWhere(const QString& strWhere, int nMaxCount, CWizDocumentDataArray& arrayDocument)
+{
+    CString strSQL = FormatQuerySQL(TABLE_NAME_WIZ_DOCUMENT, FIELD_LIST_WIZ_DOCUMENT, strWhere);
+
+    if (!SQLToDocumentDataArray(strSQL, arrayDocument))
+        return false;
+
+    if (arrayDocument.size() > nMaxCount) {
+        arrayDocument.resize(nMaxCount);
+    }
 
     return true;
 }

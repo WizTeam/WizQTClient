@@ -216,6 +216,13 @@ CString CWizIndexBase::FormatDeleteSQLFormat(const CString& strTableName,
                             strKey);
 }
 
+CString CWizIndexBase::FormatDeleteSQLByWhere(const CString& strTableName, const CString& strWhere)
+{
+    return WizFormatString2(_T("delete from %1 where %2"),
+                            strTableName,
+                            strWhere);
+}
+
 CString CWizIndexBase::FormatQuerySQLByTime(const CString& strTableName,
                                             const CString& strFieldList,
                                             const CString& strFieldName,

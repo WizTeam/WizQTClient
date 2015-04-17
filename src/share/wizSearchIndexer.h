@@ -9,9 +9,19 @@
 
 #include "wizClucene.h"
 #include "wizDatabaseManager.h"
+#include "share/wizqthelper.h"
 
 struct WIZDOCUMENTDATAEX;
 typedef std::deque<WIZDOCUMENTDATAEX> CWizDocumentDataArray;
+
+
+enum SearchDateInterval {
+    today = 0,
+    yesterday,
+    dayBeforeYesterday,
+    oneWeek,
+    oneMonth
+};
 
 
 /* --------------------------- CWizSearchIndexer --------------------------- */
@@ -66,8 +76,14 @@ class CWizSearcher
 
 public:
     explicit CWizSearcher(CWizDatabaseManager& dbMgr, QObject *parent = 0);
-    void search(const QString& strKeywords, int nMaxSize = -1);
     void waitForDone();
+
+    void search(const QString& strKeywords, int nMaxSize = -1);
+    void searchByDateCreate(SearchDateInterval dateInterval, int nMaxSize = -1);
+    void searchByDateModified(SearchDateInterval dateInterval, int nMaxSize = -1);
+    void searchByDateAccessed(SearchDateInterval dateInterval, int nMaxSize = -1);
+    void searchBySQLWhere(const QString& strWhere, int nMaxSize = -1);
+    void searchByKeywordAndWhere(const QString& strKeywords, const QString& strWhere, int nMaxSize = -1);
 
 protected:
     virtual bool onSearchProcess(const std::string& lpszKbGUID, const std::string& lpszDocumentID, const std::string& lpszURL);
@@ -93,7 +109,10 @@ private:
     void doSearch();
 
     Q_INVOKABLE void searchKeyword(const QString& strKeywords);
-    void searchDatabase(const QString& strKeywords);
+    void searchDatabaseByKeyword(const QString& strKeywords);
+    COleDateTime getDateByInterval(SearchDateInterval dateInterval);
+
+    void emitSearchProcess(const QString& strKeywords);
 
     void stop();
 
