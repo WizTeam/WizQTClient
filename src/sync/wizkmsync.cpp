@@ -252,6 +252,12 @@ bool CWizKMSyncThread::syncAll()
 
     ::WizSyncDatabase(m_info, m_pEvents, &m_db, true, m_bBackground);
 
+    //FIXME: 用户首次登录同步数据是数据库id为空，会导致访问评论等出现错误，此处刷新数据库id
+    if (m_db.kbGUID().isEmpty())
+    {
+        m_db.setKbGUID(m_db.meta("DATABASE", "KBGUID"));
+    }
+
     return true;
 }
 

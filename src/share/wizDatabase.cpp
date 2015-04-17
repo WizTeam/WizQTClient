@@ -2149,6 +2149,7 @@ bool CWizDatabase::Open(const QString& strUserId, const QString& strKbGUID /* = 
     }
 
     if (!CWizIndex::Open(GetIndexFileName())) {
+        QFile::remove(GetIndexFileName());
         return false;
     }
 
@@ -2162,6 +2163,7 @@ bool CWizDatabase::Open(const QString& strUserId, const QString& strKbGUID /* = 
 
     // FIXME
     if (!CThumbIndex::OpenThumb(GetThumbFileName(), getThumIndexVersion())) {
+        QFile::remove(GetThumbFileName());
         return false;
     }
 

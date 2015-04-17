@@ -29,7 +29,6 @@ CWizDocumentListViewItem::CWizDocumentListViewItem(CWizExplorerApp& app,
     , m_documentUnread(false)
     , m_specialFocused(false)
 {
-    Q_ASSERT(!data.doc.strKbGUID.isEmpty());
     Q_ASSERT(!data.doc.strGUID.isEmpty());
 
     m_data.nType = data.nType;

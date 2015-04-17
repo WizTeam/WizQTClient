@@ -2246,7 +2246,7 @@ void CWizDocumentWebViewLoaderThread::run()
         if (m_stop)
             return;
         //
-        if (kbGuid.isEmpty())
+        if (docGuid.isEmpty())
             continue;
         //
         CWizDatabase& db = m_dbMgr.db(kbGuid);
@@ -2280,7 +2280,7 @@ void CWizDocumentWebViewLoaderThread::PeekCurrentDocGUID(QString& kbGUID, QStrin
     QMutexLocker locker(&m_mutex);
     Q_UNUSED(locker);
     //
-    if (m_strCurrentKbGUID.isEmpty())
+    if (m_strCurrentDocGUID.isEmpty())
         m_waitForData.wait(&m_mutex);
     //
     kbGUID = m_strCurrentKbGUID;

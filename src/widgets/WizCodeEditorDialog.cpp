@@ -80,12 +80,8 @@ void WizCodeEditorDialog::registerJSObject()
 
 void WizCodeEditorDialog::insertHtml(const QString& strResultDiv)
 {
-    QString strHtml = strResultDiv;
-//    QString strCss = Utils::PathResolve::resourcesPath() + "files/wiz_code_highlight.css";
-//    QString strHtml = QString("<html></html><head><link rel='stylesheet' type='text/css' "
-//                              "href='%1'> </head><body>%2</body>").arg(strCss).arg(strResultDiv);
-    qDebug() << "insert html before : " << strHtml;
-//    page.mainFrame()->setHtml(strHtml);
+    QString strHtml = strResultDiv;    
+    strHtml.replace("'", "\\'");
     insertHtmlRequest(strHtml);
 }
 
