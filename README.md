@@ -37,8 +37,6 @@ install from [PPA](https://launchpad.net/~wiznote-team/+archive/ppa) is much mor
     $ sudo apt-get update
     $ sudo apt-get install wiznote
 
-Also, App Store is not so far!
-
 
 ### Fedora 19/20/21/rawhide
 
