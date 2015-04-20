@@ -31,6 +31,7 @@ TitleEdit::TitleEdit(QWidget *parent)
 
     connect(this, SIGNAL(returnPressed()), SLOT(onTitleReturnPressed()));
     connect(this, SIGNAL(editingFinished()), SLOT(onTitleEditingFinished()));
+    connect(this, SIGNAL(textEdited(QString)), SLOT(onTextEdit(QString)));
 }
 
 QSize TitleEdit::sizeHint() const
@@ -57,38 +58,40 @@ void TitleEdit::keyPressEvent(QKeyEvent* e)
 
     QLineEdit::keyPressEvent(e);
 
-    if (!c)
-        return;
+    // NOTE:目前不在keypress的时候处理提示的问题，原因是中文输入法不会触发keypress事件，
+    //改为在textedit事件中处理
+//    if (!c)
+//        return;
 
-    QString completionPrefix = textUnderCursor();
-    bool isSeparator = (!completionPrefix.isEmpty() || charBeforeCursor() == m_separator) ? true : false;
+//    QString completionPrefix = textUnderCursor();
+//    bool isSeparator = (!completionPrefix.isEmpty() || charBeforeCursor() == m_separator) ? true : false;
 
-    if (!isSeparator) {
-        c->popup()->hide();
-        return;
-    }
+//    if (!isSeparator) {
+//        c->popup()->hide();
+//        return;
+//    }
 
-    const bool ctrlOrShift = e->modifiers() & (Qt::ControlModifier | Qt::ShiftModifier);
-    if (!c || (ctrlOrShift && e->text().isEmpty()))
-        return;
+//    const bool ctrlOrShift = e->modifiers() & (Qt::ControlModifier | Qt::ShiftModifier);
+//    if (!c || (ctrlOrShift && e->text().isEmpty()))
+//        return;
 
-    static QString eow("~!#$%^&*()_+{}|:\"<>?,./;'[]\\-="); // end of word
-    bool hasModifier = isSeparator && !ctrlOrShift;
+//    static QString eow("~!#$%^&*()_+{}|:\"<>?,./;'[]\\-="); // end of word
+//    bool hasModifier = isSeparator && !ctrlOrShift;
 
-    if (!isSeparator && (hasModifier || e->text().isEmpty()
-                      || eow.contains(e->text().right(1)))) {
-        c->popup()->hide();
-        return;
-    }
+//    if (!isSeparator && (hasModifier || e->text().isEmpty()
+//                      || eow.contains(e->text().right(1)))) {
+//        c->popup()->hide();
+//        return;
+//    }
 
-    if (completionPrefix != c->completionPrefix()) {
-        updateCompleterPopupItems(completionPrefix);
-    }
+//    if (completionPrefix != c->completionPrefix()) {
+//        updateCompleterPopupItems(completionPrefix);
+//    }
 
-    QRect cr = cursorRect();
-    cr.setWidth(c->popup()->sizeHintForColumn(0)
-                + c->popup()->verticalScrollBar()->sizeHint().width() + 20); // bigger
-    c->complete(cr); // popup it up!
+//    QRect cr = cursorRect();
+//    cr.setWidth(c->popup()->sizeHintForColumn(0)
+//                + c->popup()->verticalScrollBar()->sizeHint().width() + 20); // bigger
+//    c->complete(cr); // popup it up!
 }
 
 
@@ -219,4 +222,36 @@ void TitleEdit::onTitleReturnPressed()
     noteView()->setEditorFocus();
     noteView()->web()->setFocus(Qt::MouseFocusReason);
     noteView()->web()->editorFocus();
+}
+
+void TitleEdit::onTextEdit(const QString& text)
+{
+    if (!c)
+        return;
+
+    QString completionPrefix = textUnderCursor();
+    bool isSeparator = (!completionPrefix.isEmpty() || charBeforeCursor() == m_separator) ? true : false;
+
+    if (!isSeparator) {
+        c->popup()->hide();
+        return;
+    }
+
+
+    static QString eow("~!#$%^&*()_+{}|:\"<>?,./;'[]\\-="); // end of word
+
+    if (!isSeparator && (text.isEmpty()
+                      || eow.contains(text.right(1)))) {
+        c->popup()->hide();
+        return;
+    }
+
+    if (completionPrefix != c->completionPrefix()) {
+        updateCompleterPopupItems(completionPrefix);
+    }
+
+    QRect cr = cursorRect();
+    cr.setWidth(c->popup()->sizeHintForColumn(0)
+                + c->popup()->verticalScrollBar()->sizeHint().width() + 20); // bigger
+    c->complete(cr); // popup it up!
 }
