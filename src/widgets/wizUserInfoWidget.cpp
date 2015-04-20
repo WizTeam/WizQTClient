@@ -125,15 +125,27 @@ void CWizUserInfoWidget::on_action_accountInfo_triggered()
 
 void CWizUserInfoWidget::on_action_accountSettings_triggered()
 {    
+#ifndef BUILD4APPSTORE
+    QString extInfo = WizService::ApiEntry::appstoreParam(false);
+    QString strUrl = WizService::ApiEntry::standardCommandUrl("user_info", WIZ_TOKEN_IN_URL_REPLACE_PART, extInfo);
+    WizShowWebDialogWithToken(tr("Account settings"), strUrl, window());
+#else
     CWizIAPDialog dlg;
     dlg.loadUserInfo();
     dlg.exec();
+#endif
 }
 
 void CWizUserInfoWidget::on_action_upgradeVip_triggered()
 {
+#ifndef BUILD4APPSTORE
+    QString extInfo = WizService::ApiEntry::appstoreParam(false);
+    QString strUrl = WizService::ApiEntry::standardCommandUrl("vip", WIZ_TOKEN_IN_URL_REPLACE_PART, extInfo);
+    WizShowWebDialogWithToken(tr("Account settings"), strUrl, window());
+#else
     CWizIAPDialog dlg;
     dlg.exec();
+#endif
 }
 
 void CWizUserInfoWidget::on_action_changeAvatar_triggered()

@@ -1,6 +1,8 @@
 #ifndef WIZIAPDIALOG_H
 #define WIZIAPDIALOG_H
 
+#ifdef Q_OS_MAC
+
 #include <QDialog>
 #include <QTimer>
 #include "mac/wizIAPHelper.h"
@@ -50,5 +52,6 @@ private:
     QMessageBox* m_waitingMsgBox;
     QTimer m_timer;
 };
+#endif
 
 #endif // WIZIAPDIALOG_H

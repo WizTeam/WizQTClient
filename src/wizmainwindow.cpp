@@ -1224,14 +1224,14 @@ void MainWindow::openVipPageInWebBrowser()
 
     if (msg.clickedButton() == actionBuy)
     {
-//#ifndef BUILD4APPSTORE
-//        QString strToken = WizService::Token::token();
-//        QString strUrl = WizService::ApiEntry::standardCommandUrl("vip", strToken);
-//        QDesktopServices::openUrl(QUrl(strUrl));
-//#else
+#ifndef BUILD4APPSTORE
+        QString strToken = WizService::Token::token();
+        QString strUrl = WizService::ApiEntry::standardCommandUrl("vip", strToken);
+        QDesktopServices::openUrl(QUrl(strUrl));
+#else
         CWizIAPDialog dlg;
         dlg.exec();
-//    #endif
+    #endif
     }
 }
 
@@ -1294,8 +1294,10 @@ void MainWindow::SetDialogResult(int nResult)
 
 void MainWindow::AppStoreIAP()
 {
+#ifdef BUILD4APPSTORE
     CWizIAPDialog dlg;
     dlg.exec();
+#endif
 }
 
 #ifndef Q_OS_MAC

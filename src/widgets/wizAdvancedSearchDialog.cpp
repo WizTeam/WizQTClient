@@ -309,7 +309,7 @@ void CWizAdvancedSearchDialog::on_comboBox_first_activated(const QString &arg1)
         getDateList(dateList);
         ui->comboBox_third->setVisible(true);
         ui->comboBox_third->addItems(dateList);
-        ui->comboBox_third->setCurrentText(0);
+        ui->comboBox_third->setCurrentIndex(0);
     }
 }
 

@@ -1,3 +1,4 @@
+#ifdef Q_OS_MAC
 #include "wizIAPDialog.h"
 #include "ui_wizIAPDialog.h"
 #include "mac/wizIAPHelper.h"
@@ -250,3 +251,5 @@ void CWizIAPDialog::onEditorPopulateJavaScriptWindowObject()
         ui->webView->page()->mainFrame()->addToJavaScriptWindowObject("WizExplorerApp", mainWindow->object());
     }
 }
+
+#endif
