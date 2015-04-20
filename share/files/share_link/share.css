@@ -1,0 +1,392 @@
+﻿body {
+	font-size: 12px;
+	font-family: "Microsoft Yahei", "微软雅黑", "Helvetica", "SimSun", "SimHei";
+	-webkit-user-select: none;
+	min-width: 541px;
+	margin: 0;
+	overflow: hidden;
+}
+/*common*/
+.action-a {
+	text-decoration: none;
+	color: #359bdc;
+	cursor: pointer;
+}
+
+.action-a.disable {
+	cursor: default;
+	color: #86c3ea;
+}
+
+/*button*/
+.btn {
+	display: inline-block;
+	border: 1px solid #359bdc;
+	margin-left: 14px;
+	text-align: center;
+	-webkit-user-select: none;
+	cursor: pointer;
+}
+
+.btn-normal {
+	background-color: #3da5e0;
+	border: 1px solid #2180bd;
+}
+.btn-normal a {
+	color: white;
+	text-decoration: initial;
+}
+.btn-normal:hover {
+	background-color: #1e7cc0;
+	color: white;
+}
+.btn-normal:active {
+	-webkit-box-shadow: inset 0 2px 5px -1px rgba(0, 0, 0, 0.25);
+  	-moz-box-shadow: inset 0 2px 5px -1px rgba(0, 0, 0, 0.25);
+  	box-shadow: inset 0 2px 5px -1px rgba(0, 0, 0, 0.25);
+}
+.btn-normal-disable {
+	background-color: #86c3ea;
+	border: none;
+	cursor: default;
+}
+.btn-normal-disable a {
+	color: white;
+	text-decoration: initial;
+	cursor: default;
+}
+	
+.btn-white {
+	border: 1px solid #d2d2d2;
+}
+.btn-white a {
+	color: #282828;
+	text-decoration: initial;
+}
+.btn-white:hover {
+	background-color: #f0f0f0;
+	color: white;
+}
+.btn-white:active {
+	-webkit-box-shadow: inset 0 2px 5px -1px rgba(0, 0, 0, 0.25);
+  	-moz-box-shadow: inset 0 2px 5px -1px rgba(0, 0, 0, 0.25);
+  	box-shadow: inset 0 2px 5px -1px rgba(0, 0, 0, 0.25);
+}
+
+.btn-white-disable {
+	background-color: #d8d8d8;
+	border: none;
+	cursor: default;
+}
+.btn-white-disable a {
+	color: #666;
+	text-decoration: initial;
+	cursor: default;
+}
+/**/
+
+.btn-content {
+	display: inline-block;
+	padding: 5px 10px 6px;
+}
+.floatfix:after {
+	content: ".";
+	display: block;
+	height: 0;
+	clear: both;
+	visibility: hidden;
+}
+/**/		
+#main {
+	/*border: 1px solid red;*/
+	padding-bottom: 26px;
+}
+#head {
+	font-size: 16px;
+	color: #282828;
+}
+#head div {
+	padding: 11px 0;
+}
+#head span {
+	cursor: default;
+}
+#head-line {
+	border-bottom: 1px solid #d5d5d5;
+}
+#head div {
+	text-align: center;
+}
+div#btnClose {
+	padding: 0 0;
+}
+#btnClose {
+	position: absolute;
+	z-index: 1000;
+	top: 12px;
+	right: 14px;
+	width: 16px;
+	height: 16px;
+	border: none;
+	background-image: url("./files/icons.png");
+	background-position: 0px, 0px;
+	cursor: pointer;
+}
+#btnClose:hover {
+	background-image: url("./files/icons.png");
+	background-position: -16px, 0px;
+}
+#btnClose:active{
+	background-image: url("./files/icons.png");
+	background-position: -32px, 0px;
+}
+#tips {
+	position: absolute;
+	left: 50%;
+}
+#tips div {
+	position: relative;
+	left: -50%;
+	font-size: 12px;
+	border: 1px solid #e1b7a1;
+	background-color: #f9dccd;
+	padding: 1px 30px;
+	border-radius: 1px;
+	margin: 1px 0;
+	white-space: nowrap;
+}
+#content {
+	margin: 0 28px 0;
+}
+#share-tips {
+	margin-top: 20px;
+	/*border-bottom: 1px solid red;*/
+}
+.tips-ok, .tips-failed, #add-psd {
+	display: inline-block;
+	vertical-align: top;
+}
+.tips-ok .tips, .tips-failed .tips {
+	display: inline-block;
+	margin-left: 10px;
+}
+#add-psd {
+	float: right;
+	margin-top: 1px;
+}
+.tips-text1 {
+	font-size: 16px;
+	margin-bottom: 1px;
+}
+
+.tips-text2 {
+	color: #939393;
+}
+
+.tips-ok .tips-text1 {
+	color: #2f940a;
+}
+.tips-failed .tips-text1 {
+	color: #d9504f;
+}
+#link-info {
+	font-size: 12px;
+	min-height: 71px;
+	border: 1px solid #d5d5d5;
+	margin-top: 25px;
+}
+#link-info-text {
+	padding: 9px;
+	-webkit-user-select: text;
+	overflow: hidden;
+}
+#link-info-text .label {
+
+}
+#link-info-text .link {
+	color: #3da5e0;
+	word-break: break-all;
+}
+/*link action*/
+#link-action {
+	margin-top: 20px;
+	margin-bottom: 38px;
+}
+#link-action:after {
+	content: ".";
+	display: block;
+	height: 0;
+	clear: both;
+	visibility: hidden;
+}
+#link-action .btn {
+	float: right;
+	min-width: 120px;
+}
+#link-action .btn img {
+	vertical-align: middle;
+	margin-right: 4px;
+}
+#link-action .cancel {
+	display: inline-block;
+	margin-top: 6px;
+}
+/*weixin qrcode*/
+#shareweixin-qrcode {
+	margin: 0 0 18px 56px;
+}
+#qrcode {
+	display: inline-block;
+	margin-right: 54px;
+}
+.qrcode-label {
+	display: inline-block;
+	color: #515151;
+	position: fixed;
+	margin-top: 35px;
+	margin-right: 28px;
+}
+/*link limit*/
+#link-limit {
+	margin-top: 6px;
+}
+#link-limit .action {
+	display: inline-block;
+	float: right;
+}
+#link-limit .action img {
+	vertical-align: bottom;
+}
+#link-limit:after {
+	content: ".";
+	display: block;
+	height: 0;
+	clear: both;
+	visibility: hidden;			
+}
+
+/*limit-setting*/
+#link-limit-setting {
+	margin-top: 8px;
+}
+#limit-tips {
+	margin: 0;
+	color: #939393;
+}
+#limit-options {
+	width: 100%;
+	margin-top: 10px;
+	border-collapse: collapse;
+}
+#limit-options th {
+	text-align: left;
+	/*padding-right: 30px;*/
+	font-weight: normal;
+	width: 16%;
+}
+#limit-options th div {
+	max-width: 120px;
+}
+#limit-options td {
+	padding: 0;
+	text-align: center;
+	border: 1px solid #dadada;
+	width: 20%;
+}
+#limit-options td, #limit-options td span {
+	cursor: default;
+}
+#limit-options td div {
+	padding: 6px 0 7px;
+}
+#set-limit-ok {
+	margin-top: 33px;
+}
+#set-limit-ok .btn{
+	float: right;
+	min-width: 106px;
+}
+.modify-tips {
+	display: inline-block;
+	margin-top: 8px;
+	float: right;
+}
+.option-select {
+	background-color: #359bdb;
+	color: white;
+}
+.option-select img {
+	display: inline-block;
+	position: absolute;
+	margin-left: 11px;
+}
+.option-unselect img {
+	display: none;
+}
+/* first tips */
+#first-tips {
+	margin: 0 28px;
+}
+#first-tips .title {
+	text-align: center;
+	margin-top: 85px;
+	font-size: 16px;
+}
+#first-tips .text {
+	text-align: center;
+	margin-top: 18px;
+	color: #939393;
+}
+#first-tips .actions {
+	margin-top: 75px;
+}
+#first-tips .actions div {
+	display: inline-block;
+}
+#first-tips #btnCreateNow, #first-tips #btnCancelCreate {
+	float: right;
+	min-width: 101px;
+}
+
+.not-prompt {
+	margin-top: 7px;
+}
+.not-prompt input[type='checkbox'] {
+	display: none;
+}
+
+.not-prompt input[type='checkbox'] + label {
+	cursor: pointer;
+}
+
+.not-prompt input[type='checkbox'] + label :first-child {
+    display:inline-block;
+    width:16px;
+    height:16px;
+    margin:0px 10px 0 0;
+    vertical-align:text-top;
+    background:url("./files/icons.png") -48px top no-repeat;
+    cursor:pointer;
+}
+.not-prompt input[type="checkbox"]:checked + label :first-child {
+    background:url("./files/icons.png") -64px top no-repeat;
+}
+
+/* waiting */
+#waiting {
+	position: absolute;
+	background: white;
+	top: 0;
+	left: 0;
+	opacity: 1;
+	filter: alpha(opacity=50);
+	z-index: 170;
+}
+#waiting .content {
+	margin: 0 auto;
+	text-align: center;
+	margin-top: 130px;
+}
+#waiting .text {
+	margin-top: 9px;
+}

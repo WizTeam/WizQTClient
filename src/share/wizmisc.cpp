@@ -11,6 +11,8 @@
 #include <QPixmap>
 #include <QPainter>
 #include <QThread>
+#include <QFileIconProvider>
+#include <QSettings>
 
 #include <QtCore>
 //#include <QtNetwork>
@@ -19,6 +21,7 @@
 #include "utils/pathresolve.h"
 #include "mac/wizmachelper.h"
 #include "sync/apientry.h"
+#include "share/wizAnalyzer.h"
 
 
 #ifndef MAX_PATH
@@ -567,7 +570,6 @@ BOOL WizIso8601StringToDateTime(CString str, COleDateTime& t, CString& strError)
     str.Insert(4, '-');
     return WizStringToDateTime(str, t, strError);
 }
-
 
 CString WizDateTimeToIso8601String(const COleDateTime& t)
 {
@@ -1907,6 +1909,12 @@ QString getImageHtmlLabelByFile(const QString& strImageFile)
     return QString("<div><img border=\"0\" src=\"file://%1\" /></div>").arg(strImageFile);
 }
 
+QString WizGetImageHtmlLabelWithLink(const QString& imageFile, const QString& linkHref)
+{
+    return QString("<div><a href=\"%1\"><img border=\"0\" src=\"file://%2\" /></a></div>")
+            .arg(linkHref).arg(imageFile);
+}
+
 bool WizImage2Html(const QString& strImageFile, QString& strHtml, bool bUseCopyFile)
 {
     QString strDestFile = strImageFile;
@@ -2109,8 +2117,12 @@ CWaitCursor::~CWaitCursor()
 
 
 
-void showWebDialogWithToken(const QString& windowTitle, const QString& url, QWidget* parent, bool dialogResizable)
+void WizShowWebDialogWithToken(const QString& windowTitle, const QString& url, QWidget* parent, bool dialogResizable)
 {
+    QString strFuncName = windowTitle;
+    strFuncName = "Dialog"+strFuncName.replace(" ", "");
+    CWizFunctionDurationLogger logger(strFuncName);
+
     CWizWebSettingsWithTokenDialog pDlg(url, QSize(800, 480), parent);
     if (dialogResizable)
     {
@@ -2255,12 +2267,12 @@ bool WizCopyFolder(const QString& strSrcDir, const QString& strDestDir, bool bCo
 }
 
 
-void showDocumentHistory(const WIZDOCUMENTDATA& doc, QWidget* parent)
+void WizShowDocumentHistory(const WIZDOCUMENTDATA& doc, QWidget* parent)
 {
     CString strExt = WizFormatString2(_T("obj_guid=%1&kb_guid=%2&obj_type=document"),
                                       doc.strGUID, doc.strKbGUID);
     QString strUrl = WizService::ApiEntry::standardCommandUrl("document_history", WIZ_TOKEN_IN_URL_REPLACE_PART, strExt);
-    showWebDialogWithToken(QObject::tr("Note History"), strUrl, parent, true);
+    WizShowWebDialogWithToken(QObject::tr("Note History"), strUrl, parent, true);
 }
 
 
@@ -2284,7 +2296,7 @@ QChar getWizSearchSplitChar()
 }
 
 
-void scaleIconSizeForRetina(QSize& size)
+void WizScaleIconSizeForRetina(QSize& size)
 {
 #ifdef Q_OS_MAC
     if (qApp->devicePixelRatio() >= 2)
@@ -2337,4 +2349,160 @@ QString WizStr2Title(const QString& str)
     }
 
     return str.left(idx);
+}
+
+bool WizCreateThumbnailForAttachment(QImage& img, const QString& fileName,
+                                  const QString& bgImage, const QSize& iconSize)
+{
+    QFileInfo info(fileName);
+    if (!info.exists())
+        return false;
+
+    // get info text and calculate width of image
+    const int nMb = 1024 * 1024;
+    int nIconMargin = 4;
+    QString sz = info.size() > 1024 ? (info.size() > nMb ? QString(QString::number(qCeil(info.size() / (double)nMb)) + " MB")
+                                                         : QString(QString::number(qCeil(info.size() / (double)1024)) + " KB")) :
+                                      QString(QString::number(info.size()) + " B");
+    QString infoText = QDate::currentDate().toString(Qt::ISODate) + " " + QTime::currentTime().toString() + ", " + sz;
+
+    QFont font;
+    QFontMetrics fm(font);
+    int nTextWidth = fm.width(infoText);
+    int nWidth = nTextWidth + nIconMargin * 4 + iconSize.width();
+    QImage imageBg(bgImage);
+    int nHeight = imageBg.height();
+
+    // draw icon and text on image
+    img = QImage(nWidth, nHeight, QImage::Format_RGB888);
+    imageBg.scaledToWidth(nWidth);
+    QPainter p(&img);
+    p.drawImage(QRect(0, 0, nWidth, nHeight), imageBg);
+
+    QFileIconProvider ip;
+    QIcon icon = ip.icon(info);
+    QPixmap pixIcon = icon.pixmap(iconSize);
+    p.drawPixmap(nIconMargin, (nHeight - iconSize.height()) / 2, pixIcon);
+
+    //
+    QColor cText = QColor("#3c4d81");
+    p.setPen(QPen(cText));
+    QRect titleRect(QPoint(nIconMargin * 2 + pixIcon.width(), nIconMargin), QPoint(nWidth, nHeight / 2));
+    QString strTitle = fm.elidedText(info.fileName(), Qt::ElideMiddle, titleRect.width() - nIconMargin * 2);
+    p.drawText(titleRect, strTitle);
+
+    //
+    QRect infoRect(QPoint(nIconMargin * 2 + pixIcon.width(), nHeight / 2),
+                      QPoint(nWidth, nHeight));
+    p.drawText(infoRect, infoText);
+
+    return true;
+}
+
+
+COleDateTime WizIniReadDateTimeDef(const CString& strFile, const CString& strSection, const CString& strKey, COleDateTime defaultData)
+{
+    QSettings settings(strFile, QSettings::IniFormat);
+    QString strStr = strSection.IsEmpty() ? strKey : strSection + "/" + strKey;
+    QDateTime dt = settings.value(strStr, defaultData).toDateTime();
+
+    return dt;
+}
+
+
+CString WizIniReadStringDef(const CString& strFile, const CString& strSection, const CString& strKey)
+{
+    QSettings settings(strFile, QSettings::IniFormat);
+    QString strStr = strSection.IsEmpty() ? strKey : strSection + "/" + strKey;
+    return settings.value(strStr).toString();
+}
+
+
+void WizIniWriteString(const CString& strFile, const CString& strSection, const CString& strKey, const CString& strValue)
+{
+    QSettings settings(strFile, QSettings::IniFormat);
+    QString strStr = strSection.IsEmpty() ? strKey : strSection + "/" + strKey;
+    settings.setValue(strStr, strValue);
+}
+
+
+int WizIniReadIntDef(const CString& strFile, const CString& strSection, const CString& strKey, int defaultValue)
+{
+    QSettings settings(strFile, QSettings::IniFormat);
+    QString strStr = strSection.IsEmpty() ? strKey : strSection + "/" + strKey;
+    return settings.value(strStr, defaultValue).toInt();
+}
+
+
+void WizIniWriteInt(const CString& strFile, const CString& strSection, const CString& strKey, int nValue)
+{
+    QSettings settings(strFile, QSettings::IniFormat);
+    QString strStr = strSection.IsEmpty() ? strKey : strSection + "/" + strKey;
+    settings.setValue(strStr, nValue);
+}
+
+
+void WizIniWriteDateTime(const CString& strFile, const CString& strSection, const CString& strKey, COleDateTime dateTime)
+{
+    QSettings settings(strFile, QSettings::IniFormat);
+    QString strStr = strSection.IsEmpty() ? strKey : strSection + "/" + strKey;
+    settings.setValue(strStr, dateTime);
+}
+
+
+CWizIniFileEx::CWizIniFileEx()
+    : m_settings(0)
+{
+}
+
+CWizIniFileEx::~CWizIniFileEx()
+{
+    if (m_settings)
+        delete m_settings;
+}
+
+void CWizIniFileEx::LoadFromFile(const QString& strFile)
+{
+    m_settings = new QSettings(strFile, QSettings::IniFormat);
+}
+
+void CWizIniFileEx::GetSection(const QString& section, CWizStdStringArray& arrayData)
+{
+    m_settings->beginGroup(section);
+    QStringList childList = m_settings->childKeys();
+
+    foreach (QString child, childList) {
+        QString strLine = child + "=" + m_settings->value(child).toString();
+        arrayData.push_back(strLine);
+    }
+    m_settings->endGroup();
+}
+
+void CWizIniFileEx::GetSection(const QString& section, QMap<QString, QString>& dataMap)
+{
+    m_settings->beginGroup(section);
+    QStringList childList = m_settings->childKeys();
+    foreach (QString child, childList) {
+        dataMap.insert(child, m_settings->value(child).toString());
+    }
+    m_settings->endGroup();
+}
+
+void CWizIniFileEx::GetSection(const QString& section, QMap<QByteArray, QByteArray>& dataMap)
+{
+    m_settings->beginGroup(section);
+    QStringList childList = m_settings->childKeys();
+    foreach (QString child, childList) {
+        dataMap.insert(child.toUtf8(), m_settings->value(child).toString().toUtf8());
+    }
+    m_settings->endGroup();
+}
+
+
+void WizShowAttachmentHistory(const WIZDOCUMENTATTACHMENTDATA& attach, QWidget* parent)
+{
+    CString strExt = WizFormatString2(_T("obj_guid=%1&kb_guid=%2&obj_type=attachment"),
+                                      attach.strGUID, attach.strKbGUID);
+    QString strUrl = WizService::ApiEntry::standardCommandUrl("document_history", WIZ_TOKEN_IN_URL_REPLACE_PART, strExt);
+    WizShowWebDialogWithToken(QObject::tr("Attachment History"), strUrl, parent, true);
 }

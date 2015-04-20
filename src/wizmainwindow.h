@@ -229,7 +229,7 @@ public:
     void setMobileFileReceiverEnable(bool bEnable);
     //
     void viewDocumentByWizKMURL(const QString& strKMURL);
-    void viewAttachmentByWizKMURL(const QString& strKMURL);
+    void viewAttachmentByWizKMURL(const QString& strKbGUID, const QString& strKMURL);
     //
     void createNoteWithAttachments(const QStringList& strAttachList);
     void createNoteWithText(const QString& strText);
@@ -341,6 +341,7 @@ public Q_SLOTS:
     void on_syncDone_userVerified();
 
     void on_syncProcessLog(const QString& strMsg);
+    void on_promptMessage_request(const QString& strMsg);
 
     void on_TokenAcquired(const QString& strToken);
 
@@ -351,6 +352,9 @@ public Q_SLOTS:
     void createDocumentByTemplate(const QString& strFile);
 
     void on_mobileFileRecived(const QString& strFile);
+
+    //
+    void on_shareDocumentByLink_request(const QString& strKbGUID, const QString& strGUID);
 
 #ifndef Q_OS_MAC
     void on_actionPopupMainMenu_triggered();
@@ -407,6 +411,8 @@ public:
     Q_INVOKABLE void SetSavingDocument(bool saving);
     Q_INVOKABLE void ProcessClipboardBeforePaste(const QVariantMap& data);
 
+    Q_INVOKABLE QString TranslateString(const QString& string);
+
     Q_INVOKABLE bool checkListClickable();
     //NOTE: these functions would called by web page, do not delete
     Q_INVOKABLE void OpenURLInDefaultBrowser(const QString& strUrl);
@@ -433,7 +439,6 @@ private:
 
     //
     bool needShowNewFeatureGuide();
-
     //
     void resortDocListAfterViewDocument(const WIZDOCUMENTDATA& doc);
 
@@ -444,6 +449,11 @@ private:
 
     //
     void updateHistoryButtonStatus();
+    //
+    void openAttachment(const WIZDOCUMENTATTACHMENTDATA& attachment, const QString& strFileName);
+    void downloadAttachment(const WIZDOCUMENTATTACHMENTDATA& attachment);
+
+    void openVipPageInWebBrowser();
 };
 
 } // namespace Internal

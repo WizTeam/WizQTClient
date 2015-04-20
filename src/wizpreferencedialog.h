@@ -62,6 +62,8 @@ private slots:
 
     void on_checkBoxManuallySort_toggled(bool checked);
 
+    void on_pushButtonChoseMarkdwonTemplate_clicked();
+
 private:
     Ui::CWizPreferenceWindow *ui;
     CWizExplorerApp& m_app;

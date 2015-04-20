@@ -38,10 +38,14 @@ private:
 #endif
     void changeCssToInline(QWebFrame* frame);
     QString getExecString();
+    void getCustomCssFile();
 
 private Q_SLOTS:
     void onViewNoteLoaded(Core::INoteView* view, const WIZDOCUMENTDATA& doc, bool bOk);
-    void onFrameRenderRequested(QWebFrame* frame, bool bUseInlineCss);
+    void onMarkdownSettingChanged();
+
+private:
+    QString m_strCssFile;
 };
 
 } // namespace Internal

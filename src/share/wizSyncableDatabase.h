@@ -72,6 +72,8 @@ struct IWizSyncableDatabase
     virtual void SetUserInfo(const WIZUSERINFO& info) = 0;
 
     virtual bool IsGroup() = 0;
+    virtual bool HasBiz() = 0;
+
     virtual bool IsGroupAdmin() = 0;
     virtual bool IsGroupSuper() = 0;
     virtual bool IsGroupEditor() = 0;
@@ -120,6 +122,7 @@ struct IWizSyncableDatabase
     virtual bool OnDownloadMessages(const CWizUserMessageDataArray& arrayMessage) = 0;
 
     virtual void ClearLastSyncError() = 0;
+    virtual QString GetLastSyncErrorMessage() = 0;
     virtual void OnTrafficLimit(const QString& strErrorMessage) = 0;
     virtual void OnStorageLimit(const QString& strErrorMessage) = 0;
     virtual void OnNoteCountLimit(const QString& strErrorMessage) = 0;
@@ -161,6 +164,7 @@ public:
 
     virtual void OnSyncProgress(int pos) {}
     virtual HRESULT OnText(WizKMSyncProgressStatusType type, const QString& strStatus) = 0;
+    virtual HRESULT OnPromptMessage(const QString& strMessage) = 0;
     virtual void SetStop(bool b) { m_bStop = b; }
     virtual bool IsStop() const { return m_bStop; }
     virtual void SetLastErrorCode(int nErrorCode) { m_nLastError = nErrorCode; }

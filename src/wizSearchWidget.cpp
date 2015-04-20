@@ -95,7 +95,7 @@ void CWizSearchEdit::paintEvent(QPaintEvent* event)
 
     QPainter pt(this);
     QSize szIcon = m_searchIcon.size();
-    scaleIconSizeForRetina(szIcon);
+    WizScaleIconSizeForRetina(szIcon);
     QRect rcIcon(QPoint(4, (height() - szIcon.height()) / 2 + 1),
                  szIcon);
     pt.drawPixmap(rcIcon, m_searchIcon);
@@ -103,7 +103,7 @@ void CWizSearchEdit::paintEvent(QPaintEvent* event)
     if (!text().isEmpty())
     {
         szIcon = m_deleteIcon.size();
-        scaleIconSizeForRetina(szIcon);
+        WizScaleIconSizeForRetina(szIcon);
         rcIcon = QRect(QPoint(width() - szIcon.width() - 4, (height() - szIcon.height()) / 2),
                        szIcon);
         pt.drawPixmap(rcIcon, m_deleteIcon);

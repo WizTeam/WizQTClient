@@ -509,7 +509,7 @@ void CWizDocumentListViewItem::drawSyncStatus(QPainter* p, const QStyleOptionVie
     int nMargin = -1;
     QPixmap pix(strIconPath);
     QSize szPix = pix.size();
-    scaleIconSizeForRetina(szPix);
+    WizScaleIconSizeForRetina(szPix);
     QRect rcSync(vopt->rect.right() - szPix.width() - nMargin, vopt->rect.bottom() - szPix.height() - nMargin,
                  szPix.width(), szPix.height());
     p->drawPixmap(rcSync, pix);

@@ -11,10 +11,12 @@
 #include <QCoreApplication>
 #include <QApplication>
 #include <QTimer>
+#include <QSettings>
 
-#include <coreplugin/icore.h>
+#include "coreplugin/icore.h"
+#include "coreplugin/inoteview.h"
+#include "extensionsystem/pluginmanager.h"
 
-#include "../../wizDocumentView.h"
 #include "../../share/wizobject.h"
 
 using namespace Core;
@@ -35,6 +37,7 @@ bool MarkdownPlugin::initialize(const QStringList &arguments, QString *errorMess
     Q_UNUSED(arguments);
     Q_UNUSED(errorMessage);
 
+    getCustomCssFile();
     return copyRes2Cache();
 }
 
@@ -42,8 +45,8 @@ void MarkdownPlugin::extensionsInitialized()
 {
     connect(Core::ICore::instance(), SIGNAL(viewNoteLoaded(Core::INoteView*,WIZDOCUMENTDATA,bool)),
             SLOT(onViewNoteLoaded(Core::INoteView*,WIZDOCUMENTDATA,bool)));
-    connect(Core::ICore::instance(), SIGNAL(frameRenderRequested(QWebFrame*, bool)),
-            SLOT(onFrameRenderRequested(QWebFrame*, bool)));
+    connect(Core::ICore::instance(), SIGNAL(markdownSettingChanged()),
+            SLOT(onMarkdownSettingChanged()), Qt::QueuedConnection);
 }
 
 void MarkdownPlugin::onViewNoteLoaded(INoteView* view, const WIZDOCUMENTDATA& doc, bool bOk)
@@ -61,19 +64,9 @@ void MarkdownPlugin::onViewNoteLoaded(INoteView* view, const WIZDOCUMENTDATA& do
     }
 }
 
-void MarkdownPlugin::onFrameRenderRequested(QWebFrame* frame, bool bUseInlineCss)
+void MarkdownPlugin::onMarkdownSettingChanged()
 {
-    if (frame)
-    {
-        //render(frame);
-        if (bUseInlineCss)
-        {
-            // wait for code render finished
-            QCoreApplication::processEvents(QEventLoop::AllEvents, 500);
-
-            changeCssToInline(frame);
-        }
-    }
+    getCustomCssFile();
 }
 
 bool MarkdownPlugin::canRender(INoteView* view, const WIZDOCUMENTDATA& doc)
@@ -246,7 +239,31 @@ QString MarkdownPlugin::getExecString()
     QDir dir;
     dir.mkpath(strPath);
     strExec.replace("${CACHE_PATH}", strPath);
+    strExec.replace("${CSS_FILE_PATH}", m_strCssFile);
     return strExec;
+}
+
+void MarkdownPlugin::getCustomCssFile()
+{
+    const QString strCategory = "MarkdownTemplate/";
+    QSettings* settings = ExtensionSystem::PluginManager::settings();
+    QByteArray ba = QByteArray::fromBase64(settings->value(strCategory + "SelectedItem").toByteArray());
+    QString strFile = QString::fromUtf8(ba);
+    if (strFile.isEmpty())
+    {
+        strFile = cachePath() + "plugins/markdown/markdown/github2.css";
+    }
+    else if (QFile::exists(strFile))
+    {
+        m_strCssFile = strFile;
+    }
+    else
+    {
+        qDebug() << QString("[Markdown] You have choose %1 as you Markdown style template, but"
+                            "we can not find this file. Please check wether file exists.").arg(strFile);
+        strFile  = cachePath() + "plugins/markdown/markdown/github2.css";
+    }
+    m_strCssFile = strFile;
 }
 
 

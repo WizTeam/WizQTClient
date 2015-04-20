@@ -22,6 +22,7 @@
 #include "wizactions.h"
 #include "utils/logger.h"
 #include "share/wizObjectDataDownloader.h"
+#include "share/wizAnalyzer.h"
 
 
 const QColor colors[6][8] =
@@ -1186,6 +1187,9 @@ void EditorToolBar::on_delegate_showContextMenuRequest(const QPoint& pos)
 
     m_menuContext->popup(pos);
     m_menuContext->update();
+
+    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
+    analyzer.LogAction("editorContextMenu");
 }
 
 /**     此处对slectionChanged引起的刷新做延迟和屏蔽处理。在输入中文的时候频繁的刷新会引起输入卡顿的问题

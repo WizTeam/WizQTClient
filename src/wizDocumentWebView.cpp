@@ -43,10 +43,14 @@
 #include "widgets/WizCodeEditorDialog.h"
 #include "widgets/wizScreenShotWidget.h"
 #include "widgets/wizEmailShareDialog.h"
+#include "widgets/wizShareLinkDialog.h"
+#include "share/wizAnalyzer.h"
 
 #include "utils/pathresolve.h"
 #include "utils/logger.h"
 #include "sync/avatar.h"
+#include "sync/token.h"
+#include "sync/apientry.h"
 
 #include "mac/wizmachelper.h"
 
@@ -134,6 +138,7 @@ void CWizDocumentWebViewPage::on_editorCommandPaste_triggered()
         QMimeData* data = new QMimeData();
         data->removeFormat("text/html");
         data->setHtml(strText);
+        data->setText(mime->text());
         clip->setMimeData(data);
     }
     else if (mime->hasHtml())   // special process for xcode
@@ -143,6 +148,7 @@ void CWizDocumentWebViewPage::on_editorCommandPaste_triggered()
         {
             QMimeData* data = new QMimeData();
             data->setHtml(strHtml);
+            data->setText(mime->text());
             clip->setMimeData(data);
             return;
         }
@@ -516,6 +522,7 @@ void CWizDocumentWebView::dropEvent(QDropEvent* event)
                     TOLOG1("[drop] add attachment failed %1", strFileName);
                     continue;
                 }
+                addAttachmentThumbnail(strFileName, data.strGUID);
                 nAccepted ++;
             }
         }
@@ -809,14 +816,30 @@ void CWizDocumentWebView::closeSourceMode()
     }
 }
 
-bool CWizDocumentWebView::shareNoteByEmail()
+void CWizDocumentWebView::addAttachmentThumbnail(const QString strFile, const QString& strGuid)
+{
+    QImage img;
+    QString strBG = getSkinResourcePath() + "html_attachment_bg.png";
+    ::WizCreateThumbnailForAttachment(img, strFile, strBG, QSize(32, 32));
+    QString strDestFile =Utils::PathResolve::tempPath() + WizGenGUIDLowerCaseLetterOnly() + ".png";
+    img.save(strDestFile, "PNG");
+    QString strLink = QString("wiz://open_attachment?guid=%1").arg(strGuid);
+    QString strHtml = WizGetImageHtmlLabelWithLink(strDestFile, strLink);
+    editorCommandExecuteInsertHtml(strHtml, true);
+}
+
+void CWizDocumentWebView::shareNoteByEmail()
 {
     CWizEmailShareDialog dlg(m_app);
     dlg.setNote(view()->note());
 
     dlg.exec();
+}
 
-    return true;
+void CWizDocumentWebView::shareNoteByLink()
+{
+    const WIZDOCUMENTDATA& doc = view()->note();
+    emit shareDocumentByLinkRequest(doc.strKbGUID, doc.strGUID);
 }
 
 void CWizDocumentWebView::onEditorLoadFinished(bool ok)
@@ -871,8 +894,20 @@ void CWizDocumentWebView::onEditorLinkClicked(const QUrl& url)
 {
     if (isInternalUrl(url))
     {
-        viewDocumentByUrl(url);
-        return;
+        QString strUrl = url.toString();
+        switch (GetWizUrlType(strUrl)) {
+        case WizUrl_Document:
+            viewDocumentByUrl(strUrl);
+            break;
+        case WizUrl_Attachment:
+            if (!m_bEditingMode)
+            {
+                viewAttachmentByUrl(view()->note().strKbGUID, strUrl);
+            }
+            break;
+        default:
+            break;
+        }
     }
     else
     {
@@ -910,14 +945,22 @@ bool WizStringList2Map(const QStringList& list, QMap<QString, QString>& map)
     return true;
 }
 
-void CWizDocumentWebView::viewDocumentByUrl(const QUrl& url)
+void CWizDocumentWebView::viewDocumentByUrl(const QString& strUrl)
 {
-    if (!url.isValid())
+    if (strUrl.isEmpty())
         return;
 
-    QString strUrl = url.toString();
     MainWindow* mainWindow = qobject_cast<MainWindow *>(m_app.mainWindow());
     mainWindow->viewDocumentByWizKMURL(strUrl);
+}
+
+void CWizDocumentWebView::viewAttachmentByUrl(const QString& strKbGUID, const QString& strUrl)
+{
+    if (strUrl.isEmpty())
+        return;
+
+    MainWindow* mainWindow = qobject_cast<MainWindow *>(m_app.mainWindow());
+    mainWindow->viewAttachmentByWizKMURL(strKbGUID, strUrl);
 }
 
 void CWizDocumentWebView::splitHtmlToHeadAndBody(const QString& strHtml, QString& strHead, QString& strBody)
@@ -965,7 +1008,7 @@ void CWizDocumentWebView::saveEditingViewDocument(const WIZDOCUMENTDATA &data, b
 
     //
     //QString strPlainTxt = page()->mainFrame()->evaluateJavaScript("editor.getPlainTxt();").toString();
-    strHtml = "<!DOCTYPE html><html><head>" + strHead + "</head><body>" + strHtml + "</body></html>";
+    strHtml = "<html><head>" + strHead + "</head><body>" + strHtml + "</body></html>";
 
     m_docSaverThread->save(data, strHtml, strFileName, 0);
 }
@@ -1297,11 +1340,15 @@ void CWizDocumentWebView::setPastePlainTextEnable(bool bEnable)
 
 bool CWizDocumentWebView::editorCommandExecuteIndent()
 {
+    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
+    analyzer.LogAction("indent");
     return editorCommandExecuteCommand("indent");
 }
 
 bool CWizDocumentWebView::editorCommandExecuteOutdent()
 {
+    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
+    analyzer.LogAction("outdent");
     return editorCommandExecuteCommand("outdent");
 }
 
@@ -1317,6 +1364,9 @@ bool CWizDocumentWebView::editorCommandExecuteLinkInsert()
 
     m_editorInsertLinkForm->exec();
 
+    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
+    analyzer.LogAction("linkInsert");
+
     return true;
 }
 
@@ -1324,14 +1374,23 @@ void CWizDocumentWebView::on_editorCommandExecuteLinkInsert_accepted()
 {
     // append http if not exist
     QString strUrl = m_editorInsertLinkForm->getUrl();
-    if (strUrl.lastIndexOf("http://", 0, Qt::CaseInsensitive) == -1)
+    QUrl url(strUrl);
+    if (url.scheme().isEmpty())
+    {
         strUrl = "http://" + strUrl;
+    }
+    else
+    {
+        strUrl = url.toString();
+    }
 
     editorCommandExecuteCommand("link", QString("{href: '%1'}").arg(strUrl));
 }
 
 bool CWizDocumentWebView::editorCommandExecuteLinkRemove()
 {
+    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
+    analyzer.LogAction("unlink");
     return editorCommandExecuteCommand("unlink");
 }
 
@@ -1350,6 +1409,9 @@ bool CWizDocumentWebView::editorCommandExecuteFindReplace()
     QRect rect = geometry();
     rect.moveTo(mapToGlobal(pos()));
     m_searchReplaceWidget->showInEditor(rect);
+
+    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
+    analyzer.LogAction("findReplace");
 
     return true;
 }
@@ -1423,13 +1485,14 @@ bool CWizDocumentWebView::editorCommandExecuteFontSize(const QString& strSize)
 
 void CWizDocumentWebView::editorCommandExecuteBackColor(const QColor& color)
 {
-//    editorCommandExecuteCommand("backColor", "'" + color.name() + "'");
     if (color == QColor(Qt::transparent)) {
         editorCommandExecuteCommand("backColor", "'default'");
     }
     else {
         editorCommandExecuteCommand("backColor", "'" + color.name() + "'");
     }
+    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
+    analyzer.LogAction("backColor");
 }
 
 void CWizDocumentWebView::editorCommandExecuteForeColor(const QColor& color)
@@ -1440,55 +1503,77 @@ void CWizDocumentWebView::editorCommandExecuteForeColor(const QColor& color)
     else {
         editorCommandExecuteCommand("foreColor", "'" + color.name() + "'");
     }
+    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
+    analyzer.LogAction("foreColor");
 }
 
 bool CWizDocumentWebView::editorCommandExecuteBold()
 {
+    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
+    analyzer.LogAction("bold");
     return editorCommandExecuteCommand("bold");
 }
 
 bool CWizDocumentWebView::editorCommandExecuteItalic()
 {
+    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
+    analyzer.LogAction("italic");
     return editorCommandExecuteCommand("italic");
 }
 
 bool CWizDocumentWebView::editorCommandExecuteUnderLine()
 {
+    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
+    analyzer.LogAction("underline");
     return editorCommandExecuteCommand("underline");
 }
 
 bool CWizDocumentWebView::editorCommandExecuteStrikeThrough()
 {
+    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
+    analyzer.LogAction("strikethrough");
     return editorCommandExecuteCommand("strikethrough");
 }
 
 bool CWizDocumentWebView::editorCommandExecuteJustifyLeft()
 {
+    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
+    analyzer.LogAction("justifyLeft");
     return editorCommandExecuteCommand("justify", "'left'");
 }
 
 bool CWizDocumentWebView::editorCommandExecuteJustifyRight()
 {
+    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
+    analyzer.LogAction("justifyRight");
     return editorCommandExecuteCommand("justify", "'right'");
 }
 
 bool CWizDocumentWebView::editorCommandExecuteJustifyCenter()
 {
+    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
+    analyzer.LogAction("justifyCenter");
     return editorCommandExecuteCommand("justify", "'center'");
 }
 
 bool CWizDocumentWebView::editorCommandExecuteJustifyJustify()
 {
+    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
+    analyzer.LogAction("justifyJustify");
     return editorCommandExecuteCommand("justify", "'justify'");
 }
 
 bool CWizDocumentWebView::editorCommandExecuteInsertOrderedList()
 {
+    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
+    analyzer.LogAction("insertOrderedList");
     return editorCommandExecuteCommand("insertOrderedList");
 }
 
 bool CWizDocumentWebView::editorCommandExecuteInsertUnorderedList()
 {
+    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
+    analyzer.LogAction("insertUnorderedList");
     return editorCommandExecuteCommand("insertUnorderedList");
 }
 
@@ -1501,6 +1586,9 @@ bool CWizDocumentWebView::editorCommandExecuteTableInsert()
 
     m_editorInsertTableForm->clear();
     m_editorInsertTableForm->exec();
+
+    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
+    analyzer.LogAction("tableInsert");
 
     return true;
 }
@@ -1548,6 +1636,8 @@ void CWizDocumentWebView::on_editorCommandExecuteScreenShot_finished()
 
 bool CWizDocumentWebView::editorCommandExecuteInsertHorizontal()
 {
+    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
+    analyzer.LogAction("insertHorizontal");
     return editorCommandExecuteCommand("horizontal");
 }
 
@@ -1564,6 +1654,8 @@ bool CWizDocumentWebView::editorCommandExecuteInsertCheckList()
 
     emit statusChanged();
 
+    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
+    analyzer.LogAction("insertCheckList");
     return ret;
 }
 
@@ -1578,26 +1670,38 @@ bool CWizDocumentWebView::editorCommandExecuteInsertImage()
         bool bUseCopyFile = true;
         insertImage(strImgFile, bUseCopyFile);
     }
+
+    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
+    analyzer.LogAction("insertImage");
     return true;
 }
 
 bool CWizDocumentWebView::editorCommandExecuteInsertDate()
 {
+    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
+    analyzer.LogAction("insertDate");
     return editorCommandExecuteCommand("date");
 }
 
 bool CWizDocumentWebView::editorCommandExecuteInsertTime()
 {
+    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
+    analyzer.LogAction("insertTime");
     return editorCommandExecuteCommand("time");
 }
 
 bool CWizDocumentWebView::editorCommandExecuteRemoveFormat()
 {
+    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
+    analyzer.LogAction("removeFormat");
     return editorCommandExecuteCommand("removeFormat");
 }
 
 bool CWizDocumentWebView::editorCommandExecutePlainText()
 {
+    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
+    analyzer.LogAction("plainText");
+
     QString strText = page()->mainFrame()->evaluateJavaScript("editor.getPlainTxt()").toString();
     QRegExp exp("<[^>]*>");
     strText.replace(exp, "");
@@ -1617,11 +1721,15 @@ bool CWizDocumentWebView::editorCommandExecutePlainText()
 
 bool CWizDocumentWebView::editorCommandExecuteFormatMatch()
 {
+    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
+    analyzer.LogAction("formatMatch");
     return editorCommandExecuteCommand("formatMatch");
 }
 
 bool CWizDocumentWebView::editorCommandExecuteViewSource()
 {
+    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
+    analyzer.LogAction("viewSource");
     return editorCommandExecuteCommand("source");
 }
 
@@ -1634,6 +1742,8 @@ bool CWizDocumentWebView::editorCommandExecuteInsertCode()
     dialog->setWindowState(dialog->windowState() & ~Qt::WindowFullScreen | Qt::WindowActive);
     dialog->setCode(strSelectHtml);
 
+    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
+    analyzer.LogAction("insertCode");
     return true;
 }
 
@@ -1648,6 +1758,8 @@ bool CWizDocumentWebView::editorCommandExecuteMobileImage(bool bReceiveImage)
     m_app.userSettings().setReceiveMobileFile(bReceiveImage);
     mainWindow->setMobileFileReceiverEnable(bReceiveImage);
 
+    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
+    analyzer.LogAction("mobileImage");
     return true;
 }
 
@@ -1661,6 +1773,9 @@ bool CWizDocumentWebView::editorCommandExecuteScreenShot()
 
     setWindowVisibleOnScreenShot(false);
     QTimer::singleShot(200, helper, SLOT(startScreenShot()));
+
+    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
+    analyzer.LogAction("screenShot");
     return true;
 }
 
@@ -1675,141 +1790,197 @@ bool CWizDocumentWebView::editorCommandExecuteRemoveStartOfLine()
 
 bool CWizDocumentWebView::editorCommandExecuteTableDelete()
 {
+    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
+    analyzer.LogAction("deletetable");
     return editorCommandExecuteCommand("deletetable");
 }
 
 bool CWizDocumentWebView::editorCommandExecuteTableDeleteRow()
 {
+    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
+    analyzer.LogAction("deleterow");
     return editorCommandExecuteCommand("deleterow");
 }
 
 bool CWizDocumentWebView::editorCommandExecuteTableDeleteCol()
 {
+    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
+    analyzer.LogAction("deletecol");
     return editorCommandExecuteCommand("deletecol");
 }
 
 bool CWizDocumentWebView::editorCommandExecuteTableInsertRow()
 {
+    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
+    analyzer.LogAction("insertrow");
     return editorCommandExecuteCommand("insertrow");
 }
 
 bool CWizDocumentWebView::editorCommandExecuteTableInsertRowNext()
 {
+    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
+    analyzer.LogAction("insertrownext");
     return editorCommandExecuteCommand("insertrownext");
 }
 
 bool CWizDocumentWebView::editorCommandExecuteTableInsertCol()
 {
+    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
+    analyzer.LogAction("insertcol");
     return editorCommandExecuteCommand("insertcol");
 }
 
 bool CWizDocumentWebView::editorCommandExecuteTableInsertColNext()
 {
+    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
+    analyzer.LogAction("insertcolnext");
     return editorCommandExecuteCommand("insertcolnext");
 }
 
 bool CWizDocumentWebView::editorCommandExecuteTableInsertCaption()
 {
+    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
+    analyzer.LogAction("insertcaption");
     return editorCommandExecuteCommand("insertcaption");
 }
 
 bool CWizDocumentWebView::editorCommandExecuteTableDeleteCaption()
 {
+    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
+    analyzer.LogAction("deletecaption");
     return editorCommandExecuteCommand("deletecaption");
 }
 
 bool CWizDocumentWebView::editorCommandExecuteTableInsertTitle()
 {
+    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
+    analyzer.LogAction("inserttitle");
     return editorCommandExecuteCommand("inserttitle");
 }
 
 bool CWizDocumentWebView::editorCommandExecuteTableDeleteTitle()
 {
+    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
+    analyzer.LogAction("deletetitle");
     return editorCommandExecuteCommand("deletetitle");
 }
 
 bool CWizDocumentWebView::editorCommandExecuteTableMergeCells()
 {
+    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
+    analyzer.LogAction("mergecells");
     return editorCommandExecuteCommand("mergecells");
 }
 
 bool CWizDocumentWebView::editorCommandExecuteTalbeMergeRight()
 {
+    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
+    analyzer.LogAction("mergeright");
     return editorCommandExecuteCommand("mergeright");
 }
 
 bool CWizDocumentWebView::editorCommandExecuteTableMergeDown()
 {
+    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
+    analyzer.LogAction("mergedown");
     return editorCommandExecuteCommand("mergedown");
 }
 
 bool CWizDocumentWebView::editorCommandExecuteTableSplitCells()
 {
+    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
+    analyzer.LogAction("splittocells");
     return editorCommandExecuteCommand("splittocells");
 }
 
 bool CWizDocumentWebView::editorCommandExecuteTableSplitRows()
 {
+    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
+    analyzer.LogAction("splittorows");
     return editorCommandExecuteCommand("splittorows");
 }
 
 bool CWizDocumentWebView::editorCommandExecuteTableSplitCols()
 {
+    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
+    analyzer.LogAction("splittocols");
     return editorCommandExecuteCommand("splittocols");
 }
 
 bool CWizDocumentWebView::editorCommandExecuteTableAverageRows()
 {
+    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
+    analyzer.LogAction("averagedistributerow");
     return editorCommandExecuteCommand("averagedistributerow");
 }
 
 bool CWizDocumentWebView::editorCommandExecuteTableAverageCols()
 {
+    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
+    analyzer.LogAction("averagedistributecol");
     return editorCommandExecuteCommand("averagedistributecol");
 }
 
 bool CWizDocumentWebView::editorCommandExecuteTableCellAlignLeftTop()
 {
+    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
+    analyzer.LogAction("cellalignmentLeftTop");
     return editorCommandExecuteCommand("cellalignment", "{align: 'left', vAlign: 'top'}");
 }
 
 bool CWizDocumentWebView::editorCommandExecuteTableCellAlignTop()
 {
+    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
+    analyzer.LogAction("cellalignmentTop");
     return editorCommandExecuteCommand("cellalignment", "{align: 'center', vAlign: 'top'}");
 }
 
 bool CWizDocumentWebView::editorCommandExecuteTableCellAlignRightTop()
 {
+    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
+    analyzer.LogAction("cellalignmentRightTop");
     return editorCommandExecuteCommand("cellalignment", "{align: 'right', vAlign: 'top'}");
 }
 
 bool CWizDocumentWebView::editorCommandExecuteTableCellAlignLeft()
 {
+    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
+    analyzer.LogAction("cellalignmentLeft");
     return editorCommandExecuteCommand("cellalignment", "{align: 'left', vAlign: 'middle'}");
 }
 
 bool CWizDocumentWebView::editorCommandExecuteTableCellAlignCenter()
 {
+    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
+    analyzer.LogAction("cellalignmentCenter");
     return editorCommandExecuteCommand("cellalignment", "{align: 'center', vAlign: 'middle'}");
 }
 
 bool CWizDocumentWebView::editorCommandExecuteTableCellAlignRight()
 {
+    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
+    analyzer.LogAction("cellalignmentRight");
     return editorCommandExecuteCommand("cellalignment", "{align: 'right', vAlign: 'middle'}");
 }
 
 bool CWizDocumentWebView::editorCommandExecuteTableCellAlignLeftBottom()
 {
+    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
+    analyzer.LogAction("cellalignmentLeftBottom");
     return editorCommandExecuteCommand("cellalignment", "{align: 'left', vAlign: 'bottom'}");
 }
 
 bool CWizDocumentWebView::editorCommandExecuteTableCellAlignBottom()
 {
+    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
+    analyzer.LogAction("cellalignmentBottom");
     return editorCommandExecuteCommand("cellalignment", "{align: 'center', vAlign: 'bottom'}");
 }
 
 bool CWizDocumentWebView::editorCommandExecuteTableCellAlignRightBottom()
 {
+    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
+    analyzer.LogAction("cellalignmentRightBottom");
     return editorCommandExecuteCommand("cellalignment", "{align: 'right', vAlign: 'bottom'}");
 }
 
@@ -1836,6 +2007,9 @@ void CWizDocumentWebView::saveAsPDF()
         printer.setOutputFileName(strFileName);
         //
         frame->print(&printer);
+
+        CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
+        analyzer.LogAction("saveAsPDF");
     }
 }
 
@@ -1844,6 +2018,9 @@ void CWizDocumentWebView::saveAsHtml(const QString& strDirPath)
     const WIZDOCUMENTDATA& doc = view()->note();
     CWizDatabase& db = m_dbMgr.db(doc.strKbGUID);
     db.ExportToHtmlFile(doc, strDirPath);
+
+    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
+    analyzer.LogAction("saveAsHtml");
 }
 
 void CWizDocumentWebView::printDocument()
@@ -1874,6 +2051,9 @@ void CWizDocumentWebView::printDocument()
         if(dlg.exec() == QDialog::Accepted)
         {
             frame->print(&printer);
+
+            CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
+            analyzer.LogAction("print");
         }
     }
 }

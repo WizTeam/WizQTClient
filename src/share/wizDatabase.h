@@ -117,6 +117,8 @@ public:
     virtual bool SaveLastSyncTime();
     virtual COleDateTime GetLastSyncTime();
 
+    bool WizDayOnce(const QString& strName);
+
     // versions
     virtual qint64 GetObjectVersion(const QString& strObjectType);
     virtual bool SetObjectVersion(const QString& strObjectType, qint64 nVersion);
@@ -202,6 +204,9 @@ public:
     virtual IWizSyncableDatabase* GetPersonalDatabase();
 
     virtual bool IsGroup();
+    virtual bool HasBiz();
+    bool IsVip();
+
     virtual bool IsGroupAdmin();
     virtual bool IsGroupSuper();
     virtual bool IsGroupEditor();
@@ -248,6 +253,7 @@ public:
     virtual void GetAllBizUserIds(CWizStdStringArray& arrayText);
 
     virtual void ClearLastSyncError();
+    virtual QString GetLastSyncErrorMessage();
     virtual void OnTrafficLimit(const QString& strErrorMessage);
     virtual void OnStorageLimit(const QString& strErrorMessage);
     virtual void OnNoteCountLimit(const QString& strErrorMessage);

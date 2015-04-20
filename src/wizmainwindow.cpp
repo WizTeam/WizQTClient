@@ -74,6 +74,10 @@
 #include "notecomments.h"
 #include "wizMobileFileReceiver.h"
 #include "wizDocTemplateDialog.h"
+#include "share/wizFileMonitor.h"
+#include "share/wizAnalyzer.h"
+#include "share/wizTranslater.h"
+#include "widgets/wizShareLinkDialog.h"
 
 using namespace Core;
 using namespace Core::Internal;
@@ -157,6 +161,8 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     // syncing thread
     m_sync->setFullSyncInterval(userSettings().syncInterval());
     connect(m_sync, SIGNAL(processLog(const QString&)), SLOT(on_syncProcessLog(const QString&)));
+    connect(m_sync, SIGNAL(promptMessageRequest(const QString&)),
+            SLOT(on_promptMessage_request(QString)));
     connect(m_sync, SIGNAL(syncStarted(bool)), SLOT(on_syncStarted(bool)));
     connect(m_sync, SIGNAL(syncFinished(int, QString)), SLOT(on_syncDone(int, QString)));
 
@@ -165,10 +171,10 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
 
     connect(m_doc, SIGNAL(documentSaved(QString,CWizDocumentView*)), SIGNAL(documentSaved(QString,CWizDocumentView*)));
 //    connect(m_doc->web(), SIGNAL(selectAllKeyPressed()), SLOT(on_actionEditingSelectAll_triggered()));
-    connect(this, SIGNAL(documentSaved(QString,CWizDocumentView*)), m_doc, SLOT(on_document_data_saved(QString,CWizDocumentView*)));
-
-    // misc settings
-    //m_avatarDownloaderHost->setDefault(::WizGetSkinResourcePath(userSettings().skin()) + "avatar_default.png");
+    connect(m_doc->web(), SIGNAL(shareDocumentByLinkRequest(QString,QString)),
+            SLOT(on_shareDocumentByLink_request(QString,QString)));
+    connect(this, SIGNAL(documentSaved(QString,CWizDocumentView*)),
+            m_doc, SLOT(on_document_data_saved(QString,CWizDocumentView*)));
 
     // GUI
     initActions();
@@ -212,7 +218,7 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
 
     if (needShowNewFeatureGuide())
     {
-        m_settings->setNewFeatureGuideVersion(WIZ_CLIENT_VERSION);
+        m_settings->setNewFeatureGuideVersion(WIZ_NEW_FEATURE_GUIDE_VERSION);
         QTimer::singleShot(3000, this, SLOT(showNewFeatureGuide()));
     }
 }
@@ -381,11 +387,17 @@ void MainWindow::showEvent(QShowEvent* event)
 
 void MainWindow::on_actionExit_triggered()
 {
+    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
+    analyzer.LogAction("exit");
+
     qApp->exit();
 }
 
 void MainWindow::on_actionClose_triggered()
 {
+    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
+    analyzer.LogAction("close");
+
 #ifdef Q_OS_MAC
     QWidget* wgt = qApp->activeWindow();
     if (wgt && wgt != this)
@@ -1166,6 +1178,56 @@ void MainWindow::on_mobileFileRecived(const QString& strFile)
     }
 }
 
+void MainWindow::on_shareDocumentByLink_request(const QString& strKbGUID, const QString& strGUID)
+{
+    if (!m_dbMgr.db().IsVip())
+    {
+        openVipPageInWebBrowser();
+        return;
+    }
+
+    WIZDOCUMENTDATA doc;
+    if (!m_dbMgr.db(strKbGUID).DocumentFromGUID(strGUID, doc))
+    {
+        qDebug() << "[ShareLink] can not find doc " << strGUID;
+        return;
+    }
+
+    if (doc.nProtected == 1)
+    {
+        QMessageBox::information(this, tr("Info"), tr("Can not share encrpyted notes."));
+        return;
+    }
+
+    CWizShareLinkDialog dlg(userSettings());
+    dlg.shareDocument(doc);
+    dlg.exec();
+}
+
+void MainWindow::openVipPageInWebBrowser()
+{
+    QMessageBox msg(this);
+    msg.setWindowTitle(tr("Upgrading to VIP"));
+    msg.setIcon(QMessageBox::Information);
+    msg.setText(tr("Only VIP user can create link, please retry after upgrading to VIP and syncing to server."));
+#ifndef BUILD4APPSTORE
+    msg.addButton(tr("Cancel"), QMessageBox::NoRole);
+    QPushButton *actionBuy = msg.addButton(tr("Upgrade now"), QMessageBox::YesRole);
+    msg.setDefaultButton(actionBuy);
+    msg.exec();
+
+    if (msg.clickedButton() == actionBuy)
+    {
+        QString strToken = WizService::Token::token();
+        QString strUrl = WizService::ApiEntry::standardCommandUrl("vip", strToken);
+        QDesktopServices::openUrl(QUrl(strUrl));
+    }
+#else
+    msg.addButton(tr("OK"), QMessageBox::YesRole);
+    msg.exec();
+#endif
+}
+
 bool MainWindow::checkListClickable()
 {
     if (!m_dbMgr.db(m_doc->note().strKbGUID).IsGroup())
@@ -1607,6 +1669,8 @@ void MainWindow::init()
     connect(m_documents, SIGNAL(documentsSelectionChanged()), SLOT(on_documents_itemSelectionChanged()));
     connect(m_documents, SIGNAL(itemDoubleClicked(QListWidgetItem*)), SLOT(on_documents_itemDoubleClicked(QListWidgetItem*)));
     connect(m_documents, SIGNAL(lastDocumentDeleted()), SLOT(on_documents_lastDocumentDeleted()));
+    connect(m_documents, SIGNAL(shareDocumentByLinkRequest(QString,QString)),
+            SLOT(on_shareDocumentByLink_request(QString,QString)));
 
     QTimer::singleShot(100, this, SLOT(adjustToolBarLayout()));
 }
@@ -1618,6 +1682,9 @@ void MainWindow::on_actionAutoSync_triggered()
 
 void MainWindow::on_actionSync_triggered()
 {
+    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
+    analyzer.LogAction("syncAll");
+
 //    if (::WizIsOffline())
 //    {
 //        QMessageBox::information(this, tr("Info"), tr("Connection is not available, please check your network connection."));
@@ -1698,8 +1765,16 @@ void MainWindow::on_syncProcessLog(const QString& strMsg)
     Q_UNUSED(strMsg);
 }
 
+void MainWindow::on_promptMessage_request(const QString& strMsg)
+{
+    QMessageBox::warning(0, tr("Info"), strMsg);
+}
+
 void MainWindow::on_actionNewNote_triggered()
 {
+    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
+    analyzer.LogAction("newNote");
+
     initVariableBeforCreateNote();
     WIZDOCUMENTDATA data;
     if (!m_category->createDocument(data))
@@ -1713,6 +1788,9 @@ void MainWindow::on_actionNewNote_triggered()
 
 void MainWindow::on_actionNewNoteByTemplate_triggered()
 {
+    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
+    analyzer.LogAction("newNoteByTemplate");
+
     //通过模板创建笔记
     CWizDocTemplateDialog dlg;
     connect(&dlg, SIGNAL(documentTemplateSelected(QString)), SLOT(createDocumentByTemplate(QString)));
@@ -1721,11 +1799,17 @@ void MainWindow::on_actionNewNoteByTemplate_triggered()
 
 void MainWindow::on_actionEditingUndo_triggered()
 {
+    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
+    analyzer.LogAction("undo");
+
     m_doc->web()->undo();
 }
 
 void MainWindow::on_actionEditingRedo_triggered()
 {
+    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
+    analyzer.LogAction("redo");
+
     m_doc->web()->redo();
 }
 
@@ -1785,28 +1869,43 @@ void MainWindow::on_actionMoveToLineEnd_triggered()
 
 void MainWindow::on_actionEditingCut_triggered()
 {
+    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
+    analyzer.LogAction("cut");
+
     m_doc->web()->triggerPageAction(QWebPage::Cut);
 }
 
 void MainWindow::on_actionEditingCopy_triggered()
 {
+    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
+    analyzer.LogAction("copy");
+
     m_doc->web()->triggerPageAction(QWebPage::Copy);
 }
 
 void MainWindow::on_actionEditingPaste_triggered()
 {
+    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
+    analyzer.LogAction("paste");
+
     m_doc->web()->setPastePlainTextEnable(false);
     m_doc->web()->triggerPageAction(QWebPage::Paste);
 }
 
 void MainWindow::on_actionEditingPastePlain_triggered()
 {
+    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
+    analyzer.LogAction("pastePlain");
+
     m_doc->web()->setPastePlainTextEnable(true);
     m_doc->web()->triggerPageAction(QWebPage::Paste);
 }
 
 void MainWindow::on_actionEditingSelectAll_triggered()
 {
+    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
+    analyzer.LogAction("selectAll");
+
     m_doc->web()->triggerPageAction(QWebPage::SelectAll);
 }
 #endif
@@ -1819,6 +1918,9 @@ void MainWindow::on_actionEditingDelete_triggered()
 
 void MainWindow::on_actionViewToggleCategory_triggered()
 {
+    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
+    analyzer.LogAction("toggleCategory");
+
     QWidget* category = m_splitter->widget(0);
     if (category->isVisible()) {
         category->hide();
@@ -1837,6 +1939,9 @@ void MainWindow::on_actionViewToggleCategory_triggered()
 
 void MainWindow::on_actionViewToggleFullscreen_triggered()
 {
+    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
+    analyzer.LogAction("fullscreen");
+
 #ifdef Q_OS_MAC
     //toggleFullScreenMode(this);
     setWindowState(windowState() ^ Qt::WindowFullScreen);
@@ -1851,6 +1956,9 @@ void MainWindow::on_actionViewToggleFullscreen_triggered()
 
 void MainWindow::on_actionViewMinimize_triggered()
 {
+    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
+    analyzer.LogAction("minimize");
+
     while (true) {
         QWidget* wgt = qApp->activeWindow();
         if (wgt == 0)
@@ -1862,6 +1970,9 @@ void MainWindow::on_actionViewMinimize_triggered()
 
 void MainWindow::on_actionMarkAllMessageRead_triggered()
 {
+    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
+    analyzer.LogAction("markAllMessagesRead");
+
     m_msgList->markAllMessagesReaded();
 }
 
@@ -1992,10 +2103,16 @@ void MainWindow::on_actionConsole_triggered()
     }
 
     m_console->show();
+
+    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
+    analyzer.LogAction("console");
 }
 
 void MainWindow::on_actionLogout_triggered()
 {
+    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
+    analyzer.LogAction("logout");
+
     // save state
     m_settings->setAutoLogin(false);
     m_bLogoutRestart = true;
@@ -2004,6 +2121,9 @@ void MainWindow::on_actionLogout_triggered()
 
 void MainWindow::on_actionAbout_triggered()
 {
+    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
+    analyzer.LogAction("aboutWiz");
+
     AboutDialog dialog(this);
     dialog.exec();
 }
@@ -2011,11 +2131,17 @@ void MainWindow::on_actionAbout_triggered()
 void MainWindow::on_actionDeveloper_triggered()
 {
     m_doc->web()->settings()->globalSettings()->setAttribute(QWebSettings::DeveloperExtrasEnabled, true);
+
+    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
+    analyzer.LogAction("developerMode");
 }
 
 
 void MainWindow::on_actionPreference_triggered()
 {
+    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
+    analyzer.LogAction("preference");
+
     CWizPreferenceWindow preference(*this, this);
 
     connect(&preference, SIGNAL(settingsChanged(WizOptionsType)), SLOT(on_options_settingsChanged(WizOptionsType)));
@@ -2037,6 +2163,9 @@ void MainWindow::on_actionFeedback_triggered()
     strUrl.replace(QHostInfo::localHostName(), strUserName);
 
     QDesktopServices::openUrl(strUrl);
+
+    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
+    analyzer.LogAction("feedback");
 }
 
 void MainWindow::on_actionSupport_triggered()
@@ -2047,6 +2176,9 @@ void MainWindow::on_actionSupport_triggered()
         return;
 
     QDesktopServices::openUrl(strUrl);
+
+    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
+    analyzer.LogAction("support");
 }
 
 void MainWindow::on_actionManual_triggered()
@@ -2058,10 +2190,16 @@ void MainWindow::on_actionManual_triggered()
 
     strUrl += "&site=www&name=manual/mac/index.html";
     QDesktopServices::openUrl(strUrl);
+
+    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
+    analyzer.LogAction("manual");
 }
 
 void MainWindow::on_actionRebuildFTS_triggered()
 {
+    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
+    analyzer.LogAction("rebuildFTS");
+
     QMessageBox msg;
     msg.setIcon(QMessageBox::Warning);
     msg.setWindowTitle(tr("Rebuild full text search index"));
@@ -2071,6 +2209,8 @@ void MainWindow::on_actionRebuildFTS_triggered()
 
     if (QMessageBox::Ok == msg.exec())
     {
+        analyzer.LogAction("rebuildFTSConfirm");
+
         rebuildFTS();
     }
 }
@@ -2078,6 +2218,9 @@ void MainWindow::on_actionRebuildFTS_triggered()
 void MainWindow::on_actionSearch_triggered()
 {
     m_search->focus();
+
+    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
+    analyzer.LogAction("search");
 }
 
 void MainWindow::on_actionResetSearch_triggered()
@@ -2087,10 +2230,13 @@ void MainWindow::on_actionResetSearch_triggered()
     m_search->focus();
     m_category->restoreSelection();
     m_doc->web()->applySearchKeywordHighlight();
+
+    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
+    analyzer.LogAction("resetSearch");
 }
 
 void MainWindow::on_actionFindReplace_triggered()
-{
+{    
     m_doc->web()->editorCommandExecuteFindReplace();
 }
 
@@ -2214,6 +2360,9 @@ void MainWindow::on_client_splitterMoved(int pos, int index)
 
 void MainWindow::on_actionGoBack_triggered()
 {
+    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
+    analyzer.LogAction("goBack");
+
     if (!m_history->canBack())
         return;
 
@@ -2234,6 +2383,9 @@ void MainWindow::on_actionGoBack_triggered()
 
 void MainWindow::on_actionGoForward_triggered()
 {
+    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
+    analyzer.LogAction("goForward");
+
     if (!m_history->canForward())
         return;
 
@@ -2342,14 +2494,24 @@ void MainWindow::on_message_itemSelectionChanged()
 
 void MainWindow::on_options_settingsChanged(WizOptionsType type)
 {
-    if (wizoptionsNoteView == type) {
+    switch (type) {
+    case wizoptionsNoteView:
         m_doc->settingsChanged();
-    } else if (wizoptionsSync == type) {
+        break;
+    case wizoptionsSync:
         m_sync->setFullSyncInterval(userSettings().syncInterval());
-    } else if (wizoptionsFont == type) {
+        break;
+    case wizoptionsFont:
         m_doc->web()->editorResetFont();
-    } else if (wizoptionsFolders == type) {
+        break;
+    case wizoptionsFolders:
         m_category->sortItems(0, Qt::AscendingOrder);
+        break;
+    case wizoptionsMarkdown:
+        Core::ICore::instance()->emitMarkdownSettingChanged();
+        break;
+    default:
+        break;
     }
 }
 
@@ -2595,6 +2757,11 @@ void MainWindow::ProcessClipboardBeforePaste(const QVariantMap& data)
     //    }
 }
 
+QString MainWindow::TranslateString(const QString& string)
+{
+    return ::WizTranlateString(string);
+}
+
 void MainWindow::syncAllData()
 {
     m_sync->startSyncAll(false);
@@ -2645,30 +2812,40 @@ void MainWindow::viewDocumentByWizKMURL(const QString &strKMURL)
     }
 }
 
-void MainWindow::viewAttachmentByWizKMURL(const QString& strKMURL)
+void MainWindow::viewAttachmentByWizKMURL(const QString& strKbGUID, const QString& strKMURL)
 {
 
     if (GetWizUrlType(strKMURL) != WizUrl_Attachment)
         return;
-    //TODO:
-/*
-    CWizDatabase& db = m_dbMgr.db();
-    QString strGUID = db.GetParamFromWizKMURL(strKMURL, "guid");
 
-    const WIZDOCUMENTDATA& document = m_doc->note();
-
-    WIZDOCUMENTDATA document;
+    CWizDatabase& db = m_dbMgr.db(strKbGUID);
+    QString strGUID = GetParamFromWizKMURL(strKMURL, "guid");
 
     WIZDOCUMENTATTACHMENTDATA attachment;
-    if (m_dbMgr.db(document.strKbGUID).AttachmentFromGUID(strGUID, attachment))
+    if (db.AttachmentFromGUID(strGUID, attachment))
     {
-        if (attachment.strDocumentGUID == document.strGUID)
+        bool bIsLocal = db.IsObjectDataDownloaded(attachment.strGUID, "attachment");
+        QString strFileName = db.GetAttachmentFileName(attachment.strGUID);
+        bool bExists = PathFileExists(strFileName);
+        if (!bIsLocal || !bExists)
         {
+            downloadAttachment(attachment);
 
+#if QT_VERSION > 0x050000
+            // try to set the attachement read-only.
+            QFile file(strFileName);
+            if (file.exists() && !db.CanEditAttachment(attachment) && (file.permissions() & QFileDevice::WriteUser))
+            {
+                QFile::Permissions permissions = file.permissions();
+                permissions = permissions & ~QFileDevice::WriteOwner & ~QFileDevice::WriteUser
+                        & ~QFileDevice::WriteGroup & ~QFileDevice::WriteOther;
+                file.setPermissions(permissions);
+            }
+#endif
         }
-    }
 
-*/
+        openAttachment(attachment, strFileName);
+    }
 }
 
 void MainWindow::createNoteWithAttachments(const QStringList& strAttachList)
@@ -2868,6 +3045,10 @@ bool MainWindow::needShowNewFeatureGuide()
     if (strGuideVserion.isEmpty())
         return true;
 
+    //FIXME:  之前的版本误将版本号写入了新特性的数据中，此处将其忽略 。2015年07月之后可以将其移除
+    if (strGuideVserion.contains("2.1"))
+        strGuideVserion = "0";
+
     return strGuideVserion.compare(WIZ_NEW_FEATURE_GUIDE_VERSION) < 0;
 }
 
@@ -2940,12 +3121,46 @@ void MainWindow::updateHistoryButtonStatus()
     m_actions->actionFromName(WIZACTION_GLOBAL_GOFORWARD)->setEnabled(canGoForward);
 }
 
+void MainWindow::openAttachment(const WIZDOCUMENTATTACHMENTDATA& attachment,
+                                const QString& strFileName)
+{
+    if (!QDesktopServices::openUrl(QUrl::fromLocalFile(strFileName)))
+    {
+        qDebug() << "Can not open attachment file : " << strFileName;
+    }
+
+    CWizFileMonitor& monitor = CWizFileMonitor::instance();
+    connect(&monitor, SIGNAL(fileModified(QString,QString,QString,QString,QDateTime)),
+            &m_dbMgr.db(), SLOT(onAttachmentModified(QString,QString,QString,QString,QDateTime)), Qt::UniqueConnection);
+
+    /*需要使用文件的修改日期来判断文件是否被改动,从服务器上下载下的文件修改日期必定大于数据库中日期.*/
+    QFileInfo info(strFileName);
+    monitor.addFile(attachment.strKbGUID, attachment.strGUID, strFileName,
+                    attachment.strDataMD5, info.lastModified());
+}
+
+void MainWindow::downloadAttachment(const WIZDOCUMENTATTACHMENTDATA& attachment)
+{
+    CWizProgressDialog *dlg = progressDialog();
+    dlg->setProgress(100,0);
+    dlg->setActionString(tr("Downloading attachment file  %1 ").arg(attachment.strName));
+    dlg->setNotifyString(tr("downloading..."));
+    connect(m_objectDownloaderHost, SIGNAL(downloadProgress(QString,int,int)),
+            dlg, SLOT(setProgress(QString,int,int)));
+    connect(m_objectDownloaderHost, SIGNAL(downloadDone(WIZOBJECTDATA,bool)),
+            dlg, SLOT(accept()));
+    m_objectDownloaderHost->downloadData(attachment);
+    dlg->exec();
+}
+
 void MainWindow::viewDocumentInFloatWidget(const WIZDOCUMENTDATA& data)
 {
     WizFloatDocumentViewer* wgt = new WizFloatDocumentViewer(*this);
     CWizDocumentView* docView = wgt->docView();
     connect(docView, SIGNAL(documentSaved(QString,CWizDocumentView*)), SIGNAL(documentSaved(QString,CWizDocumentView*)));
     connect(this, SIGNAL(documentSaved(QString,CWizDocumentView*)), docView, SLOT(on_document_data_saved(QString,CWizDocumentView*)));
+    connect(docView->web(), SIGNAL(shareDocumentByLinkRequest(QString,QString)),
+            SLOT(on_shareDocumentByLink_request(QString,QString)));
 
     wgt->setGeometry((width() - m_doc->width())  / 2, (height() - wgt->height()) / 2,
                      m_doc->width(), wgt->height());

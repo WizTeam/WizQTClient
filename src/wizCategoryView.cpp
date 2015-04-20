@@ -200,10 +200,7 @@ void CWizCategoryBaseView::mousePressEvent(QMouseEvent* event)
 }
 
 void CWizCategoryBaseView::mouseMoveEvent(QMouseEvent* event)
-{
-//    if (DraggingState == state())
-//        return;
-
+{    
     QPoint msPos = event->pos();
     CWizCategoryViewItemBase* pItem =  itemAt(msPos);
     if (!pItem)
@@ -215,6 +212,7 @@ void CWizCategoryBaseView::mouseMoveEvent(QMouseEvent* event)
         if (cursor().shape() != Qt::PointingHandCursor)
         {
             setCursor(Qt::PointingHandCursor);
+            setToolTip(pItem->getExtraButtonToolTip());
         }
     }
     else
@@ -222,6 +220,7 @@ void CWizCategoryBaseView::mouseMoveEvent(QMouseEvent* event)
         if (cursor().shape() != Qt::ArrowCursor)
         {
             setCursor(Qt::ArrowCursor);
+            setToolTip("");
         }
     }
 
@@ -407,7 +406,7 @@ void CWizCategoryBaseView::dropEvent(QDropEvent * event)
             strFileList.append(url.path());
         }
         //
-        loadDocument(strFileList);
+        importFiles(strFileList);
     }
     else
     {
@@ -428,12 +427,17 @@ void CWizCategoryBaseView::dropEvent(QDropEvent * event)
     event->accept();
 }
 
-void CWizCategoryBaseView::loadDocument(QStringList &strFileList)
+void CWizCategoryBaseView::importFiles(QStringList &strFileList)
 {
     CWizFileReader *fileReader = new CWizFileReader();
-    connect(fileReader, SIGNAL(fileLoaded(QString, QString)), SLOT(createDocumentByHtml(QString, QString)));
+    connect(fileReader, SIGNAL(fileLoaded(QString, QString)),
+            SLOT(createDocumentByHtml(QString, QString)));
     connect(fileReader, SIGNAL(htmlFileloaded(QString, QString, QString)),
             SLOT(createDocumentByHtml(QString, QString, QString)));
+    connect(fileReader, SIGNAL(fileLoadFailed(QString)),
+            SLOT(createDocumentWithAttachment(QString)));
+    connect(fileReader, SIGNAL(richTextFileLoaded(QString,QString,QString)),
+            SLOT(createDocumentByHtmlWithAttachment(QString,QString,QString)));
     MainWindow *mainWindow = dynamic_cast<MainWindow*>(m_app.mainWindow());
     CWizProgressDialog *progressDialog  = mainWindow->progressDialog();
     progressDialog->setProgress(100,0);
@@ -688,6 +692,7 @@ QString CWizCategoryBaseView::getUseableItemName(QTreeWidgetItem* parent, \
 
 void CWizCategoryBaseView::resetFolderLocation(CWizCategoryViewFolderItem* item, const QString& strNewLocation)
 {
+    qDebug() << "reset folder location : " << strNewLocation;
     item->setLocation(strNewLocation);
     for (int i = 0; i < item->childCount(); i++)
     {
@@ -744,6 +749,16 @@ void CWizCategoryBaseView::createDocumentByHtml(const QString &/*strFileName*/,
 {
 }
 
+bool CWizCategoryBaseView::createDocumentWithAttachment(const QString& /*strFileName*/)
+{
+    return true;
+}
+
+bool CWizCategoryBaseView::createDocumentByHtmlWithAttachment(const QString& /*strHtml*/,
+                                                              const QString& /*strTitle*/, const QString& /*strAttachFile*/)
+{
+    return true;
+}
 
 
 /* ------------------------------ CWizCategoryView ------------------------------ */
@@ -1131,6 +1146,35 @@ bool CWizCategoryView::createDocument(WIZDOCUMENTDATA& data, const QString& strH
     return true;
 }
 
+bool CWizCategoryView::createDocumentWithAttachment(const QString& strFileName)
+{
+    if (!QFile::exists(strFileName))
+        return false;
+
+    QStringList fileList(strFileName);
+    WIZDOCUMENTDATA data;
+    return createDocumentByAttachments(data, fileList);
+}
+
+bool CWizCategoryView::createDocumentByHtmlWithAttachment(const QString& strHtml, const QString& strTitle, const QString& strAttachFile)
+{
+    if (!QFile::exists(strAttachFile))
+        return false;
+
+     WIZDOCUMENTDATA data;
+    if (!createDocument(data, strHtml, strTitle))
+        return false;
+
+    CWizDatabase& db = m_dbMgr.db(data.strKbGUID);
+    WIZDOCUMENTATTACHMENTDATA attach;
+    if (!db.AddAttachment(data, strAttachFile, attach))
+    {
+        TOLOG1("[Service] add attch failed :  1%", strAttachFile);
+        return false;
+    }
+    return true;
+}
+
 bool CWizCategoryView::createDocumentByAttachments(WIZDOCUMENTDATA& data, const QStringList& attachList)
 {
     if (attachList.isEmpty())
@@ -1141,11 +1185,11 @@ bool CWizCategoryView::createDocumentByAttachments(WIZDOCUMENTDATA& data, const 
         return false;
 
     CWizDatabase& db = m_dbMgr.db(data.strKbGUID);
-    foreach (QString StrFileName, attachList) {
+    foreach (QString strFileName, attachList) {
         WIZDOCUMENTATTACHMENTDATA attach;
-        if (!db.AddAttachment(data, StrFileName, attach))
+        if (!db.AddAttachment(data, strFileName, attach))
         {
-            TOLOG1("[Service] add attch failed :  1%", StrFileName);
+            TOLOG1("[Service] add attch failed :  1%", strFileName);
         }
     }
 
@@ -1211,11 +1255,11 @@ void CWizCategoryView::on_action_importFile()
     tr("Select one or more files to open"),
     QDir::homePath(),
 #ifdef Q_OS_LINUX
-    "Text files(*.txt *.md *.html *.htm *.cpp *.h *.c *.hpp *.cpp);;Images (*.png *.xpm *.jpg *.jpeg *.svg);;All files(*.*)");
+    "All files(*.*);;Text files(*.txt *.md *.html *.htm *.cpp *.h *.c *.hpp *.cpp);;Images (*.png *.xpm *.jpg *.jpeg *.svg)");
 #else
-    "Text files(*.txt *.md *.html *.htm *.cpp *.h *.rtf *.doc *.docx *.pages);;Images (*.png *.xpm *.jpg *.jpeg *.svg);;Webarchive (*.webarchive);;All files(*.*)");
+    "All files(*.*);;Text files(*.txt *.md *.html *.htm *.cpp *.h *.rtf *.doc *.docx *.pages);;Images (*.png *.xpm *.jpg *.jpeg *.svg);;Webarchive (*.webarchive)");
 #endif
-    loadDocument(files);
+    importFiles(files);
 }
 
 void CWizCategoryView::on_action_newItem()
@@ -1423,9 +1467,6 @@ void CWizCategoryView::on_action_user_moveFolder_confirmed(int result)
                 SLOT(on_action_user_moveFolder_confirmed_progress(int, int, const QString&, const QString&, const WIZDOCUMENTDATA&)));
 
         folder.MoveToLocation(strLocation);
-
-        //addAndSelectFolder(strLocation);
-        //on_folder_deleted(strOldLocation);
     }
 }
 
@@ -1510,9 +1551,6 @@ void CWizCategoryView::on_action_user_renameFolder_confirmed(int result)
                 SLOT(on_action_user_renameFolder_confirmed_progress(int, int, const QString&, const QString&, const WIZDOCUMENTDATA&)));
 
         folder.MoveToLocation(strLocation);
-
-        //addAndSelectFolder(strLocation);
-        //on_folder_deleted(strOldLocation);
     }
 }
 
@@ -1649,6 +1687,8 @@ void CWizCategoryView::on_action_user_deleteFolder_confirmed(int result)
     if (!p)
         return;
 
+    qDebug() << "try to delete folder : " << p->location();
+
     if (result == QMessageBox::Ok) {
         CWizFolder folder(m_dbMgr.db(), p->location());
         folder.Delete();
@@ -1728,7 +1768,7 @@ void CWizCategoryView::on_action_deleted_recovery()
     {
         QString strToken = WizService::Token::token();
         QString strUrl = WizService::ApiEntry::standardCommandUrl("deleted_recovery", strToken, "&kb_guid=" + trashItem->kbGUID());
-        showWebDialogWithToken(tr("Recovery notes"), strUrl, 0, true);
+        WizShowWebDialogWithToken(tr("Recovery notes"), strUrl, 0, true);
     }
 }
 
@@ -1955,53 +1995,39 @@ void CWizCategoryView::updateGroupsData()
 //    }
 }
 
-QString appstoreParam(bool bHasAndSym = true)
-{
-    QString strParam = "";
-#ifdef BUILD4APPSTORE
-    if (bHasAndSym) {
-        strParam = "&appstore=1";
-    } else {
-        strParam = "appstore=1";
-    }
-#endif
-
-    return strParam;
-}
-
 void CWizCategoryView::createGroup()
 {
-    QString strExtInfo = appstoreParam(false);
+    QString strExtInfo = WizService::ApiEntry::appstoreParam(false);
     QString strUrl = WizService::ApiEntry::standardCommandUrl("create_group", WIZ_TOKEN_IN_URL_REPLACE_PART, strExtInfo);
-    showWebDialogWithToken(tr("Create new group"), strUrl, window());
+    WizShowWebDialogWithToken(tr("Create new group"), strUrl, window());
 }
 
 void CWizCategoryView::viewPersonalGroupInfo(const QString& groupGUID)
 {
-    QString extInfo = "kb=" + groupGUID + appstoreParam();
+    QString extInfo = "kb=" + groupGUID + WizService::ApiEntry::appstoreParam();
     QString strUrl = WizService::ApiEntry::standardCommandUrl("view_personal_group", WIZ_TOKEN_IN_URL_REPLACE_PART, extInfo);
-    showWebDialogWithToken(tr("View group info"), strUrl, window());
+    WizShowWebDialogWithToken(tr("View group info"), strUrl, window());
 }
 
 void CWizCategoryView::viewBizGroupInfo(const QString& groupGUID, const QString& bizGUID)
 {
-    QString extInfo = "kb=" + groupGUID + "&biz=" + bizGUID + appstoreParam();
+    QString extInfo = "kb=" + groupGUID + "&biz=" + bizGUID + WizService::ApiEntry::appstoreParam();
     QString strUrl = WizService::ApiEntry::standardCommandUrl("view_biz_group", WIZ_TOKEN_IN_URL_REPLACE_PART, extInfo);
-    showWebDialogWithToken(tr("View group info"), strUrl, window());
+    WizShowWebDialogWithToken(tr("View group info"), strUrl, window());
 }
 
 void CWizCategoryView::managePersonalGroup(const QString& groupGUID)
 {
-    QString extInfo = "kb=" + groupGUID + appstoreParam();
+    QString extInfo = "kb=" + groupGUID + WizService::ApiEntry::appstoreParam();
     QString strUrl = WizService::ApiEntry::standardCommandUrl("manage_personal_group", WIZ_TOKEN_IN_URL_REPLACE_PART, extInfo);
-    showWebDialogWithToken(tr("Manage group"), strUrl, window());
+    WizShowWebDialogWithToken(tr("Manage group"), strUrl, window());
 }
 
 void CWizCategoryView::manageBizGroup(const QString& groupGUID, const QString& bizGUID)
 {
-    QString extInfo = "kb=" + groupGUID + "&biz=" + bizGUID + appstoreParam();
+    QString extInfo = "kb=" + groupGUID + "&biz=" + bizGUID + WizService::ApiEntry::appstoreParam();
     QString strUrl = WizService::ApiEntry::standardCommandUrl("manage_biz_group", WIZ_TOKEN_IN_URL_REPLACE_PART, extInfo);
-    showWebDialogWithToken(tr("Manage group"), strUrl, window());
+    WizShowWebDialogWithToken(tr("Manage group"), strUrl, window());
 }
 
 void CWizCategoryView::promptGroupLimitMessage(const QString &groupGUID, const QString &/*bizGUID*/)
@@ -2024,9 +2050,9 @@ void CWizCategoryView::promptGroupLimitMessage(const QString &groupGUID, const Q
 
 void CWizCategoryView::viewBizInfo(const QString& bizGUID)
 {
-    QString extInfo = "biz=" + bizGUID + appstoreParam();
+    QString extInfo = "biz=" + bizGUID + WizService::ApiEntry::appstoreParam();
     QString strUrl = WizService::ApiEntry::standardCommandUrl("view_biz", WIZ_TOKEN_IN_URL_REPLACE_PART, extInfo);
-    showWebDialogWithToken(tr("View team info"), strUrl, window());
+    WizShowWebDialogWithToken(tr("View team info"), strUrl, window());
 }
 
 void CWizCategoryView::manageBiz(const QString& bizGUID, bool bUpgrade)
@@ -2036,9 +2062,9 @@ void CWizCategoryView::manageBiz(const QString& bizGUID, bool bUpgrade)
     {
         extInfo += _T("&p=payment");
     }
-    extInfo += appstoreParam();
+    extInfo += WizService::ApiEntry::appstoreParam();
     QString strUrl = WizService::ApiEntry::standardCommandUrl("manage_biz", WIZ_TOKEN_IN_URL_REPLACE_PART, extInfo);
-    showWebDialogWithToken(tr("Manage team"), strUrl, window());
+    WizShowWebDialogWithToken(tr("Manage team"), strUrl, window());
 
 }
 
@@ -4058,21 +4084,25 @@ void CWizCategoryView::on_itemPosition_changed(CWizCategoryViewItemBase* pItem)
                 return;
 
             QString strName = getUseableItemName(parentItem, item);
+            qDebug() << "get useable item name : " << strName;
             QString strNewLocation = "/" + strName + "/";
             item->setText(0, strName);
 
-            while (parentItem != folderRoot)
+
+            if (parentItem != folderRoot)
             {
                 CWizCategoryViewItemBase* parentBase = dynamic_cast<CWizCategoryViewItemBase*>(parentItem);
                 if (!parentBase)
                     return;
 
-
+                qDebug() << "parent is not root , parent name : " << parentBase->name();
                 strNewLocation = parentBase->name() + strNewLocation.remove(0, 1);
                 parentItem = parentBase->parent();
             }
 
             QString strOldLocation = item->location();
+
+            qDebug() << "item position changed , " << strOldLocation << " ,  new location : " << strNewLocation;
             resetFolderLocation(item, strNewLocation);
             updatePrivateFolderLocation(db, strOldLocation, strNewLocation);
         }
@@ -4089,6 +4119,7 @@ void CWizCategoryView::createDocumentByHtml(const QString& strHtml, const QStrin
 void CWizCategoryView::createDocumentByHtml(const QString& strFileName,
                                             const QString& strHtml, const QString& strTitle)
 {
+    //为了提取和file路径相关联的图片，不直接使用strHtml创建笔记，而是在创建之后更新笔记内容
     WIZDOCUMENTDATA data;
     createDocument(data, "<p><br/></p>", strTitle);
     CWizDatabase& db = m_dbMgr.db(data.strKbGUID);

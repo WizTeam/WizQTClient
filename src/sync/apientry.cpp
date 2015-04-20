@@ -197,8 +197,7 @@ QString ApiEntryPrivate::commentCountUrl(const QString& strServer, const QString
 
 QString ApiEntryPrivate::feedbackUrl()
 {
-    m_strFeedbackUrl = urlFromCommand(WIZNOTE_API_COMMAND_FEEDBACK);
-    return m_strFeedbackUrl;
+    return urlFromCommand(WIZNOTE_API_COMMAND_FEEDBACK);
 }
 
 QString ApiEntryPrivate::supportUrl()
@@ -214,6 +213,13 @@ QString ApiEntryPrivate::changeLogUrl()
 QString ApiEntryPrivate::upgradeUrl()
 {
     return urlFromCommand(WIZNOTE_API_COMMAND_UPGRADE);
+}
+
+QString ApiEntryPrivate::analyzerUploadUrl()
+{
+    QString analyzerUrl;
+    requestUrl("analyzer", analyzerUrl);
+    return analyzerUrl;
 }
 
 QString ApiEntryPrivate::mailShareUrl()
@@ -391,6 +397,13 @@ QString ApiEntry::upgradeUrl()
     return d->upgradeUrl();
 }
 
+QString ApiEntry::analyzerUploadUrl()
+{
+    if (!d)
+        d = new ApiEntryPrivate();
+    return d->analyzerUploadUrl();
+}
+
 QString ApiEntry::accountInfoUrl(const QString& strToken)
 {
     if (!d)
@@ -454,5 +467,19 @@ QString ApiEntry::kUrlFromGuid(const QString& strToken, const QString& strKbGUID
     if (!d)
         d = new ApiEntryPrivate();
     return d->kUrlFromGuid(strToken, strKbGUID);
+}
+
+QString ApiEntry::appstoreParam(bool useAndSymbol)
+{
+    QString strParam = "";
+#ifdef BUILD4APPSTORE
+    if (useAndSymbol) {
+        strParam = "&appstore=1";
+    } else {
+        strParam = "appstore=1";
+    }
+#endif
+
+    return strParam;
 }
 

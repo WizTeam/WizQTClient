@@ -60,6 +60,7 @@ public Q_SLOTS:
     void onEditButtonClicked();
     void onTagButtonClicked();
     void onEmailButtonClicked();
+    void onShareButtonClicked();
     void onAttachButtonClicked();
     void onHistoryButtonClicked();
     void onInfoButtonClicked();
@@ -101,6 +102,7 @@ private:
     CellButton* m_editBtn;
     CellButton* m_tagBtn;
     CellButton* m_emailBtn;
+    CellButton* m_shareBtn;
     CellButton* m_attachBtn;
     CellButton* m_historyBtn;
     CellButton* m_infoBtn;

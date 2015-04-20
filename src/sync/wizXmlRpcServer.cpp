@@ -150,7 +150,8 @@ BOOL CWizXmlRpcServerBase::Call(const QString& strMethodName, CWizXmlRpcValue* p
     CWizXmlRpcResult ret;
     if (!xmlRpcCall(strMethodName, ret, pParam1, pParam2, pParam3, pParam4))
     {
-        TOLOG1(_T("Failed to call xml-rpc method: %1"), strMethodName);
+        TOLOG3(_T("Failed to call xml-rpc method: %1 , error code : %2 , error message : %3")
+               , strMethodName, QString::number(m_nLastErrorCode), m_strLastErrorMessage);
         return FALSE;
     }
     //
@@ -162,7 +163,8 @@ BOOL CWizXmlRpcServerBase::Call(const QString& strMethodName, CWizXmlRpcResult& 
 {
     if (!xmlRpcCall(strMethodName, ret, pParam1, pParam2, pParam3, pParam4))
     {
-        TOLOG1(_T("Failed to call xml-rpc method: %1"), strMethodName);
+        TOLOG3(_T("Failed to call xml-rpc method: %1 , error code : %2 , error message : %3")
+               , strMethodName, QString::number(m_nLastErrorCode), m_strLastErrorMessage);
         return FALSE;
     }
     //

@@ -8,6 +8,8 @@
 #include "share/wizDatabaseManager.h"
 #include "wizmainwindow.h"
 #include "wizproxydialog.h"
+#include "widgets/wizMarkdownTemplateDialog.h"
+#include "plugins/coreplugin/icore.h"
 
 
 CWizPreferenceWindow::CWizPreferenceWindow(CWizExplorerApp& app, QWidget* parent)
@@ -21,9 +23,6 @@ CWizPreferenceWindow::CWizPreferenceWindow(CWizExplorerApp& app, QWidget* parent
     setWindowTitle(tr("Preference"));
 
     connect(ui->btnClose, SIGNAL(clicked()), SLOT(accept()));
-
-    // FIXME: proxy settings will back soon!!!
-//    ui->labelProxySettings->hide();
 
     // general tab
     ::WizGetTranslatedLocales(m_locales);
@@ -466,4 +465,13 @@ void CWizPreferenceWindow::on_checkBoxManuallySort_toggled(bool checked)
 {
     m_app.userSettings().setManualSortingEnable(checked);
     emit settingsChanged(wizoptionsFolders);
+}
+
+void CWizPreferenceWindow::on_pushButtonChoseMarkdwonTemplate_clicked()
+{
+    CWizMarkdownTemplateDialog dlg;
+    if (dlg.exec() == QDialog::Accepted)
+//        Core::ICore::instance()->emitMarkdownSettingChanged();
+        Q_EMIT settingsChanged(wizoptionsMarkdown);
+    return;
 }

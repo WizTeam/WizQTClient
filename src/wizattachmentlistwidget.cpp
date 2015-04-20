@@ -28,9 +28,13 @@ using namespace Core::Internal;
 
 
 #define WIZACTION_ATTACHMENT_ADD    QObject::tr("Add...")
+#define WIZACTION_ATTACHMENT_DOWNLOAD    QObject::tr("Download")
 #define WIZACTION_ATTACHMENT_SAVEAS QObject::tr("Save as...")
 #define WIZACTION_ATTACHMENT_OPEN   QObject::tr("Open...")
 #define WIZACTION_ATTACHMENT_DELETE QObject::tr("Delete")
+#define WIZACTION_ATTACHMENT_HISTORY QObject::tr("History...")
+
+bool CWizAttachmentListView::m_bHasItemWaitingForDownload = false;
 
 CWizAttachmentListView::CWizAttachmentListView(QWidget* parent)
     : CWizMultiLineListWidget(2, parent)
@@ -64,10 +68,13 @@ CWizAttachmentListView::CWizAttachmentListView(QWidget* parent)
     m_menu = new QMenu(this);
     m_menu->addAction(WIZACTION_ATTACHMENT_ADD, this, SLOT(on_action_addAttachment()));
     m_menu->addSeparator();
-    m_menu->addAction(WIZACTION_ATTACHMENT_SAVEAS, this, SLOT(on_action_saveAttachmentAs()));
     m_menu->addAction(WIZACTION_ATTACHMENT_OPEN, this, SLOT(on_action_openAttachment()));
+    m_menu->addAction(WIZACTION_ATTACHMENT_SAVEAS, this, SLOT(on_action_saveAttachmentAs()));
+    m_menu->addAction(WIZACTION_ATTACHMENT_DOWNLOAD, this, SLOT(on_action_downloadAttachment()));
     m_menu->addSeparator();
     m_menu->addAction(WIZACTION_ATTACHMENT_DELETE, this, SLOT(on_action_deleteAttachment()));
+    m_menu->addSeparator();
+    m_menu->addAction(WIZACTION_ATTACHMENT_HISTORY, this, SLOT(on_action_attachmentHistory()));
 }
 
 QAction* CWizAttachmentListView::findAction(const QString& strName)
@@ -151,7 +158,7 @@ bool CWizAttachmentListView::itemExtraImage(const QModelIndex& index, const QRec
 
         extraPix = QPixmap(strIconPath);
         QSize szImage = extraPix.size();
-        scaleIconSizeForRetina(szImage);
+        WizScaleIconSizeForRetina(szImage);
         int nMargin = -1;
         rcImage.setLeft(itemBound.right() - szImage.width() - nMargin);
         rcImage.setTop(itemBound.bottom() - szImage.height() - nMargin);
@@ -224,16 +231,19 @@ void CWizAttachmentListView::openAttachment(CWizAttachmentListViewItem* item)
     if (!item)
         return;
 
-    const WIZDOCUMENTATTACHMENTDATA& attachment = item->attachment();
+    WIZDOCUMENTATTACHMENTDATA attachment = item->attachment();
 
     CWizDatabase& db = m_dbMgr.db(attachment.strKbGUID);
     bool bIsLocal = db.IsObjectDataDownloaded(attachment.strGUID, "attachment");
     QString strFileName = db.GetAttachmentFileName(item->attachment().strGUID);
     bool bExists = PathFileExists(strFileName);
     if (!bIsLocal || !bExists) {
-        //m_downloadDialog->downloadData(attachment);
         startDownload(item);
+        qDebug() << "start download attach : " << item->attachment().strName;
+        m_bHasItemWaitingForDownload = true;
         waitForDownload();
+        m_bHasItemWaitingForDownload = false;
+        qDebug() << "attachment download finished : " << item->attachment().strName;
     }
 
 #if QT_VERSION > 0x050000
@@ -248,6 +258,7 @@ void CWizAttachmentListView::openAttachment(CWizAttachmentListViewItem* item)
     }
 #endif
 
+    qDebug() << "try to open file : " << strFileName;
     QDesktopServices::openUrl(QUrl::fromLocalFile(strFileName));
 
     CWizFileMonitor& monitor = CWizFileMonitor::instance();
@@ -258,6 +269,22 @@ void CWizAttachmentListView::openAttachment(CWizAttachmentListViewItem* item)
     QFileInfo info(strFileName);
     monitor.addFile(attachment.strKbGUID, attachment.strGUID, strFileName,
                     attachment.strDataMD5, info.lastModified());
+}
+
+void CWizAttachmentListView::downloadAttachment(CWizAttachmentListViewItem* item)
+{
+    if (!item)
+        return;
+
+    const WIZDOCUMENTATTACHMENTDATA& attachment = item->attachment();
+
+    CWizDatabase& db = m_dbMgr.db(attachment.strKbGUID);
+    bool bIsLocal = db.IsObjectDataDownloaded(attachment.strGUID, "attachment");
+    QString strFileName = db.GetAttachmentFileName(item->attachment().strGUID);
+    bool bExists = PathFileExists(strFileName);
+    if (!bIsLocal || !bExists) {
+        startDownload(item);
+    }
 }
 
 void CWizAttachmentListView::contextMenuEvent(QContextMenuEvent * e)
@@ -283,25 +310,46 @@ void CWizAttachmentListView::resetPermission()
         findAction(WIZACTION_ATTACHMENT_DELETE)->setEnabled(false);
     }
 
+    bool bDownloadEnable = true;
+    bool bOpenOrSaveEnable = true;
+    bool bDeleteEnable = true;
     // if user select noting
     if (!selectedItems().size()) {
-        findAction(WIZACTION_ATTACHMENT_OPEN)->setEnabled(false);
-        findAction(WIZACTION_ATTACHMENT_SAVEAS)->setEnabled(false);
-        findAction(WIZACTION_ATTACHMENT_DELETE)->setEnabled(false);
+        bDownloadEnable = false;
+        bOpenOrSaveEnable = false;
+        bDeleteEnable = false;
     } else {
         foreach (QListWidgetItem* item, selectedItems()) {
             CWizAttachmentListViewItem* attachItem = dynamic_cast<CWizAttachmentListViewItem*>(item);
             if (attachItem && (attachItem->isDownloading() || attachItem->isUploading())) {
-                findAction(WIZACTION_ATTACHMENT_OPEN)->setEnabled(false);
-                findAction(WIZACTION_ATTACHMENT_SAVEAS)->setEnabled(false);
-                findAction(WIZACTION_ATTACHMENT_DELETE)->setEnabled(false);
-
-                return;
+                bDownloadEnable = false;
+                bOpenOrSaveEnable = false;
+                bDeleteEnable = false;
+            }
+            else{
+                const WIZDOCUMENTATTACHMENTDATA& attachment = attachItem->attachment();
+                CWizDatabase& db = m_dbMgr.db(attachment.strKbGUID);
+                bool bIsLocal = db.IsObjectDataDownloaded(attachment.strGUID, "attachment");
+                QString strFileName = db.GetAttachmentFileName(attachment.strGUID);
+                bool bExists = PathFileExists(strFileName);
+                if (!bIsLocal || !bExists)
+                {
+                    bDownloadEnable = bDownloadEnable | true;
+                }
+                else if (!bExists && m_bHasItemWaitingForDownload)
+                {
+                    bOpenOrSaveEnable = false;
+                }
             }
         }
-        findAction(WIZACTION_ATTACHMENT_OPEN)->setEnabled(true);
-        findAction(WIZACTION_ATTACHMENT_SAVEAS)->setEnabled(true);
+
+        findAction(WIZACTION_ATTACHMENT_OPEN)->setEnabled(bOpenOrSaveEnable);
+        findAction(WIZACTION_ATTACHMENT_SAVEAS)->setEnabled(bOpenOrSaveEnable);
+        findAction(WIZACTION_ATTACHMENT_DOWNLOAD)->setEnabled(bDownloadEnable);
+        findAction(WIZACTION_ATTACHMENT_DELETE)->setEnabled(bDeleteEnable);
     }
+
+    findAction(WIZACTION_ATTACHMENT_HISTORY)->setEnabled(selectedItems().size() == 1);
 }
 
 void CWizAttachmentListView::startDownload(CWizAttachmentListViewItem* item)
@@ -337,6 +385,17 @@ void CWizAttachmentListView::on_action_addAttachment()
     addAttachments();
 }
 
+void CWizAttachmentListView::on_action_downloadAttachment()
+{
+    foreach (QListWidgetItem* it, selectedItems())
+    {
+        if (CWizAttachmentListViewItem* item = dynamic_cast<CWizAttachmentListViewItem*>(it))
+        {
+            downloadAttachment(item);
+        }
+    }
+}
+
 void CWizAttachmentListView::on_action_saveAttachmentAs()
 {
     QList<QListWidgetItem*> items = selectedItems();
@@ -353,7 +412,9 @@ void CWizAttachmentListView::on_action_saveAttachmentAs()
             if (!bIsLocal || !bExists) {
                 //m_downloadDialog->downloadData(item->attachment());
                 startDownload(item);
+                m_bHasItemWaitingForDownload = true;
                 waitForDownload();
+                m_bHasItemWaitingForDownload = false;
             }
 
             QString strFileName = QFileDialog::getSaveFileName(this, QString(), item->attachment().strName);
@@ -437,6 +498,23 @@ void CWizAttachmentListView::on_action_deleteAttachment()
         CWizDatabase& db = m_dbMgr.db(strKbGUID);
         MainWindow::quickSyncKb(db.IsGroup() ? db.kbGUID() : "");
     }
+}
+
+void CWizAttachmentListView::on_action_attachmentHistory()
+{
+    QList<QListWidgetItem*> itemList = selectedItems();
+    if (itemList.size() != 1)
+        return;
+
+    QListWidgetItem* it = itemList.first();
+    if (CWizAttachmentListViewItem* item = dynamic_cast<CWizAttachmentListViewItem*>(it))
+    {
+        ::WizShowAttachmentHistory(item->attachment());
+//        strKbGUID = item->attachment().strKbGUID;
+//        CWizDatabase& db = m_dbMgr.db(strKbGUID);
+//        db.DeleteAttachment(item->attachment(), true, true, false);
+    }
+
 }
 
 void CWizAttachmentListView::on_list_itemDoubleClicked(QListWidgetItem* it)

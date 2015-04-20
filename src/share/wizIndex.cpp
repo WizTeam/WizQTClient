@@ -3903,6 +3903,9 @@ void CWizIndex::DeleteExtraFolder(const QString& strLocation)
     int n = arrayLocation.size();
     for (intptr_t i = n - 1; i >= 0; i--) {
         QString str = arrayLocation.at(i);
+        if (str.right(1) != "/") {
+            str.append("/");
+        }
         //int idx = str.lastIndexOf("/", -2);
         if (str.startsWith(strLocation)) {
             arrayLocation.erase(arrayLocation.begin() + i);

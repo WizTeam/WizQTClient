@@ -7,7 +7,8 @@
 #include "avatar.h"
 #include "rapidjson/document.h"
 
-#include  "../share/wizSyncableDatabase.h"
+#include  "share/wizSyncableDatabase.h"
+#include "share/wizAnalyzer.h"
 
 #define IDS_BIZ_SERVICE_EXPR    "Your {p} business service has expired."
 #define IDS_BIZ_NOTE_COUNT_LIMIT     QObject::tr("Group notes count limit exceeded!")
@@ -1801,6 +1802,12 @@ bool WizSyncDatabase(const WIZUSERINFO& info, IWizKMSyncEvents* pEvents,
 
         syncGroupUsers(server, arrayGroup, pEvents, pDatabase, bBackground);
     }
+    // sync analyzer info one time a day
+    if (WizIsDayFirstSync(pDatabase))
+    {
+        CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
+        analyzer.Post(pDatabase);
+    }
 
     //
     int groupCount = int(arrayGroup.size());
@@ -1828,6 +1835,12 @@ bool WizSyncDatabase(const WIZUSERINFO& info, IWizKMSyncEvents* pEvents,
         if (!syncPrivate.Sync())
         {
             pEvents->OnText(wizhttpstatustypeError, _T("Cannot sync!"));
+            QString strLastError = pDatabase->GetLastSyncErrorMessage();
+            if (!strLastError.isEmpty() && !bBackground)
+            {
+                pEvents->OnText(wizhttpstatustypeError, QString("Sync database error, for reason : %1").arg(strLastError));
+                pEvents->OnPromptMessage(strLastError);
+            }
         }
         else
         {

@@ -5,7 +5,7 @@ rm -rf ../WizQTClient-Release-Linux/*
 cd ../WizQTClient-Release-Linux
 
 cmake -DWIZNOTE_USE_QT5=NO -DCMAKE_BUILD_TYPE=Release ../WizQTClient && \
-make -j5
+make
 
 cd ..
 rm -rf WizNote

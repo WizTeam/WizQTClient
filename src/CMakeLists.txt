@@ -160,6 +160,10 @@ set(wiznote_SOURCES
     share/websocketclientwrapper.cpp
     share/websockettransport.cpp
     wizWebEngineInjectObject.cpp
+    widgets/wizMarkdownTemplateDialog.cpp
+    widgets/wizShareLinkDialog.cpp
+    share/wizAnalyzer.cpp
+    share/wizTranslater.cpp
 )
 
 set(wiznote_HEADERS
@@ -310,6 +314,10 @@ set(wiznote_HEADERS
     share/websocketclientwrapper.h
     share/websockettransport.h
     wizWebEngineInjectObject.h
+    widgets/wizMarkdownTemplateDialog.h
+    widgets/wizShareLinkDialog.h
+    share/wizAnalyzer.h
+    share/wizTranslater.h
 )
 
 set(wiznote_FORMS
@@ -329,6 +337,7 @@ set(wiznote_FORMS
     ui/wizDocTemplateDialog.ui
     ui/wizVerificationCodeDialog.ui
     ui/wizEmailShareDialog.ui
+    ui/wizMarkdownTemplateDialog.ui
 )
 
 set(wiznote_TRANSLATIONS

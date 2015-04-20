@@ -28,6 +28,7 @@ public:
     QString supportUrl();
     QString changeLogUrl();
     QString upgradeUrl();
+    QString analyzerUploadUrl();
     QString accountInfoUrl(const QString& strToken);
     QString groupAttributeUrl(const QString& strToken, const QString& strKbGUID);
     QString groupUsersUrl(const QString& strToken, const QString& strBizGUID, const QString& strkbGUID);
@@ -46,7 +47,6 @@ private:
     QString m_strAvatarUploadUrl;
     QString m_strCommentUrl;
     QString m_strCommentCountUrl;
-    QString m_strFeedbackUrl;
     QMap<QString, QString> m_mapkUrl;
 
     QString urlFromCommand(const QString& strCommand);

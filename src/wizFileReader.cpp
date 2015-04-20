@@ -91,7 +91,7 @@ void CWizFileReader::run()
         QStringList webExtList;
         webExtList << "webarchive";
 #endif
-
+        bool addAttach = false;
         QString docType = fi.suffix();
         if (textExtList.contains(docType,Qt::CaseInsensitive))
         {
@@ -115,12 +115,14 @@ void CWizFileReader::run()
             if (!documentToHtml(strFile, RTFTextDocumentType, strHtml))
                 continue;
             WizGetBodyContentFromHtml(strHtml, true);
+            addAttach = true;
         }
         else if (docExtList.contains(docType))
         {
             if (!documentToHtml(strFile, DocFormatTextDocumentType, strHtml))
                 continue;
             WizGetBodyContentFromHtml(strHtml, true);
+            addAttach = true;
         }
         else if (webExtList.contains(docType))
         {
@@ -130,13 +132,17 @@ void CWizFileReader::run()
         }
         else
         {
-            strHtml = loadTextFileToHtml(strFile);
+            emit fileLoadFailed(strFile);
         }
 #endif
+        QString strTitle = WizExtractFileName(strFile);
 
-        if (!strHtml.isEmpty())
+        if (addAttach)
         {
-            QString strTitle = WizExtractFileName(strFile);
+            emit richTextFileLoaded(strHtml, strTitle, strFile);
+        }
+        else if (!strHtml.isEmpty())
+        {
             emit fileLoaded(strHtml, strTitle);
         }
 

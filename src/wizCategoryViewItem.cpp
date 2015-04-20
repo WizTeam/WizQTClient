@@ -173,7 +173,7 @@ QRect CWizCategoryViewItemBase::getExtraButtonRect(const QRect &rcItemBorder, bo
     if (!m_extraButtonIcon.isNull())
     {
         szBtn = m_extraButtonIcon.size();
-        scaleIconSizeForRetina(szBtn);
+        WizScaleIconSizeForRetina(szBtn);
     }
     else if (!ignoreIconExist)
     {
@@ -203,6 +203,11 @@ bool CWizCategoryViewItemBase::extraButtonClickTest()
     btnRect.adjust(-nClickDist, -nClickDist, nClickDist, nClickDist);
 
     return btnRect.contains(view->hitPoint());
+}
+
+QString CWizCategoryViewItemBase::getExtraButtonToolTip() const
+{
+    return "";
 }
 
 void CWizCategoryViewItemBase::draw(QPainter* p, const QStyleOptionViewItemV4* vopt) const
@@ -328,7 +333,7 @@ QRect CWizCategoryViewSectionItem::getExtraButtonRect(const QRect &itemBorder, b
     QSize szBtn(16, 16);
     if (!m_extraButtonIcon.isNull()) {
         szBtn = m_extraButtonIcon.size();
-        scaleIconSizeForRetina(szBtn);
+        WizScaleIconSizeForRetina(szBtn);
     } else if (!ignoreIconExist){
         return QRect(0, 0, 0, 0);
     }
@@ -566,7 +571,7 @@ void CWizCategoryViewShortcutRootItem::drop(const WIZDOCUMENTDATA& data, bool /*
     addChild(pItem);
     sortChildren(0, Qt::AscendingOrder);
 
-#if QT_VERSION < 0x054000
+#if QT_VERSION < 0x050400
     CWizCategoryView* categoryView = dynamic_cast<CWizCategoryView*>(treeWidget());
     QTimer::singleShot(200, categoryView, SLOT(saveShortcutState()));
 #else
@@ -642,10 +647,8 @@ CWizCategoryViewAllFoldersItem::CWizCategoryViewAllFoldersItem(CWizExplorerApp& 
 
 void CWizCategoryViewAllFoldersItem::getDocuments(CWizDatabase& db, CWizDocumentDataArray& arrayDocument)
 {
-    COleDateTime t = ::WizGetCurrentTime();
-    t = t.addDays(-60);
-
-    db.GetRecentDocumentsByCreatedTime(t, arrayDocument);
+//    db.GetAllDocuments(arrayDocument);
+    db.GetDocumentsBySQLWhere("DOCUMENT_LOCATION not like '/Deleted Items/%'", arrayDocument);
 }
 
 bool CWizCategoryViewAllFoldersItem::accept(CWizDatabase& db, const WIZDOCUMENTDATA& data)
@@ -1189,6 +1192,14 @@ void CWizCategoryViewBizGroupRootItem::draw(QPainter* p, const QStyleOptionViewI
     }
 }
 
+QString CWizCategoryViewBizGroupRootItem::getExtraButtonToolTip() const
+{
+    if (m_extraButtonIcon.isNull())
+        return "";
+
+    return QObject::tr("Your enterprise services has expired");
+}
+
 bool CWizCategoryViewBizGroupRootItem::isExtraButtonUseable()
 {
     return m_extraButtonUseable;
@@ -1579,6 +1590,14 @@ bool CWizCategoryViewGroupRootItem::hitTestUnread()
     rcb.adjust(-nMargin, -nMargin, nMargin, nMargin);
 
     return rcb.contains(pt);
+}
+
+QString CWizCategoryViewGroupRootItem::getExtraButtonToolTip() const
+{
+    if (m_extraButtonIcon.isNull())
+        return "";
+
+    return QObject::tr("Your group is in the abnormal state");
 }
 
 /* --------------------- CWizCategoryViewGroupNoTagItem --------------------- */

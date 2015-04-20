@@ -19,10 +19,13 @@ public:
 
 signals:
     void fileLoaded(QString strHtml, QString strTitle);
+    void fileLoadFailed(const QString& strFileName);
     void loadFinished();
     void loadProgress(int total,int loaded);
     void htmlFileloaded(const QString &strFileName, const QString& strHtml,
                      const QString& strTitle);
+    void richTextFileLoaded(const QString& strHtml, const QString& strTitle,
+                         const QString& strFileName);
 
 public slots:
 

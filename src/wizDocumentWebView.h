@@ -175,7 +175,8 @@ public:
     void saveAsPDF();
     void saveAsHtml(const QString& strDirPath);
     void printDocument();
-    bool shareNoteByEmail();
+    void shareNoteByEmail();
+    void shareNoteByLink();
     bool findIMGElementAt(QPoint point, QString& strSrc);
     //
     Q_INVOKABLE bool isContentsChanged() { return m_bContentsChanged; }
@@ -205,7 +206,8 @@ private:
     void tryResetTitle();
 
     bool isInternalUrl(const QUrl& url);
-    void viewDocumentByUrl(const QUrl& url);
+    void viewDocumentByUrl(const QString& strUrl);
+    void viewAttachmentByUrl(const QString& strKbGUID, const QString& strUrl);
 
     void splitHtmlToHeadAndBody(const QString& strHtml, QString& strHead, QString& strBody);
 
@@ -383,11 +385,15 @@ Q_SIGNALS:
     void updateEditorToolBarRequest();
     //
     void viewDocumentFinished();
+    //
+    void shareDocumentByLinkRequest(const QString& strKbGUID, const QString& strGUID);
 
 private:
     void setWindowVisibleOnScreenShot(bool bVisible);
     bool insertImage(const QString& strFileName, bool bCopyFile);
     void closeSourceMode();
+    void addAttachmentThumbnail(const QString strFile, const QString& strGuid);
+    void openVipPageInWebBrowser();
 };
 
 #endif // WIZDOCUMENTWEBVIEW_H

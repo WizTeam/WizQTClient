@@ -6,6 +6,7 @@
 #include <QIcon>
 #include <QBuffer>
 #include <QByteArray>
+#include <QSettings>
 
 #include "wizobject.h"
 #include "wizmd5.h"
@@ -34,6 +35,13 @@ CString WizFormatString6(const CString& strFormat, const CString& strParam1, con
 CString WizFormatString7(const CString& strFormat, const CString& strParam1, const CString& strParam2, const CString& strParam3, const CString& strParam4, const CString& strParam5, const CString& strParam6, const CString& strParam7);
 CString WizFormatString8(const CString& strFormat, const CString& strParam1, const CString& strParam2, const CString& strParam3, const CString& strParam4, const CString& strParam5, const CString& strParam6, const CString& strParam7, const CString& strParam8);
 CString WizFormatInt(__int64 n);
+
+COleDateTime WizIniReadDateTimeDef(const CString& strFile, const CString& strSection, const CString& strKey, COleDateTime defaultData = COleDateTime());
+void WizIniWriteDateTime(const CString& strFile, const CString& strSection, const CString& strKey, COleDateTime dateTime);
+CString WizIniReadStringDef(const CString& strFile, const CString& strSection, const CString& strKey);
+void WizIniWriteString(const CString& strFile, const CString& strSection, const CString& strKey, const CString& strValue);
+int WizIniReadIntDef(const CString& strFile, const CString& strSection, const CString& strKey, int defaultValue = 0);
+void WizIniWriteInt(const CString& strFile, const CString& strSection, const CString& strKey, int nValue);
 
 time_t WizTimeGetTimeT(const COleDateTime& t);
 
@@ -143,7 +151,10 @@ void WizLoadSkinIcon3(QIcon& icon, const QString& strSkinName, const QString& st
                       QIcon::Mode mode, QIcon::State state, const QColor& blendColor);
 QIcon WizLoadSkinIcon3(const QString& strIconName, QIcon::Mode mode);
 
-void scaleIconSizeForRetina(QSize& size);
+void WizScaleIconSizeForRetina(QSize& size);
+
+bool WizCreateThumbnailForAttachment(QImage& img, const QString& fileName,
+                                  const QString& bgImage, const QSize& iconSize);
 
 QString WizGetHtmlBodyContent(const QString& strHtml);
 bool WizGetBodyContentFromHtml(QString& strHtml, bool bNeedTextParse);
@@ -153,6 +164,7 @@ void WizDeleteFile(const CString& strFileName);
 BOOL WizDeleteAllFilesInFolder(const CString& strPath);
 
 bool WizImage2Html(const QString& strImageFile, QString& strHtml, bool bUseCopyFile = false);
+QString WizGetImageHtmlLabelWithLink(const QString& imageFile, const QString& linkHref);
 QString WizStr2Title(const QString& str);
 
 BOOL WizIsValidFileNameNoPath(const CString& strFileName);
@@ -165,8 +177,9 @@ bool WizSaveDataToFile(const QString& strFileName, const QByteArray& arrayData);
 bool WizLoadDataFromFile(const QString& strFileName, QByteArray& arrayData);
 
 //web dialog
-void showWebDialogWithToken(const QString& windowTitle, const QString& url, QWidget* parent = 0, bool dialogResizable = false);
-void showDocumentHistory(const WIZDOCUMENTDATA& doc, QWidget* parent = 0);
+void WizShowWebDialogWithToken(const QString& windowTitle, const QString& url, QWidget* parent = 0, bool dialogResizable = false);
+void WizShowDocumentHistory(const WIZDOCUMENTDATA& doc, QWidget* parent = 0);
+void WizShowAttachmentHistory(const WIZDOCUMENTATTACHMENTDATA& attach, QWidget* parent = 0);
 
 bool WizIsOffline();
 bool WizIsHighPixel();
@@ -202,6 +215,20 @@ class CWaitCursor
 public:
     CWaitCursor();
     ~CWaitCursor();
+};
+
+class CWizIniFileEx
+{
+public:
+    CWizIniFileEx();
+    ~CWizIniFileEx();
+    void LoadFromFile(const QString& strFile);
+    void GetSection(const QString& section, CWizStdStringArray& arrayData);
+    void GetSection(const QString& section, QMap<QString, QString>& dataMap);
+    void GetSection(const QString& section, QMap<QByteArray, QByteArray>& dataMap);
+
+private:
+    QSettings* m_settings;
 };
 
 class QThread;

@@ -128,6 +128,8 @@ public:
     int GetHour() const { return time().hour(); }
     int GetMinute() const { return time().minute(); }
     int GetSecond() const { return time().second(); }
+    int GetDayOfYear() const { return date().dayOfYear(); }
+    int GetDayOfWeek() const { return date().dayOfWeek(); }
 
     QString toHumanFriendlyString() const;
     //

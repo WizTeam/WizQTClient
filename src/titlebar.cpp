@@ -3,6 +3,7 @@
 #include <QVBoxLayout>
 #include <QUrl>
 #include <QNetworkConfigurationManager>
+#include <QMessageBox>
 #include <QSplitter>
 #include <QList>
 
@@ -27,6 +28,7 @@
 #include "share/wizDatabase.h"
 #include "share/wizsettings.h"
 #include "share/wizanimateaction.h"
+#include "share/wizAnalyzer.h"
 #include "utils/stylehelper.h"
 #include "utils/pathresolve.h"
 
@@ -116,13 +118,20 @@ TitleBar::TitleBar(CWizExplorerApp& app, QWidget *parent)
     m_emailBtn->setNormalIcon(::WizLoadSkinIcon(strTheme, "document_email"), tr("Share document by email (Alt + 6)"));
     connect(m_emailBtn, SIGNAL(clicked()), SLOT(onEmailButtonClicked()));
 
+    m_shareBtn = new CellButton(CellButton::Center, this);
+    m_shareBtn->setFixedHeight(nTitleHeight);
+    QString shareShortcut = ::WizGetShortcut("EditShare", "Alt+7");
+    m_shareBtn->setShortcut(QKeySequence::fromString(shareShortcut));
+    m_shareBtn->setNormalIcon(::WizLoadSkinIcon(strTheme, "document_share"), tr("Share document (Alt + 7)"));
+    connect(m_shareBtn, SIGNAL(clicked()), SLOT(onShareButtonClicked()));
+
     // comments
     m_commentsBtn = new CellButton(CellButton::Right, this);
     m_commentsBtn->setFixedHeight(nTitleHeight);
-    QString commentShortcut = ::WizGetShortcut("ShowComment", "Alt+7");
+    QString commentShortcut = ::WizGetShortcut("ShowComment", "Alt+c");
     m_commentsBtn->setShortcut(QKeySequence::fromString(commentShortcut));
-    m_commentsBtn->setNormalIcon(::WizLoadSkinIcon(strTheme, "comments"), tr("Add comments (Alt + 7)"));
-    m_commentsBtn->setBadgeIcon(::WizLoadSkinIcon(strTheme, "comments_exist"), tr("View and add comments (Alt + 7)"));
+    m_commentsBtn->setNormalIcon(::WizLoadSkinIcon(strTheme, "comments"), tr("Add comments (Alt + c)"));
+    m_commentsBtn->setBadgeIcon(::WizLoadSkinIcon(strTheme, "comments_exist"), tr("View and add comments (Alt + c)"));
     connect(m_commentsBtn, SIGNAL(clicked()), SLOT(onCommentsButtonClicked()));
     connect(ICore::instance(), SIGNAL(viewNoteLoaded(Core::INoteView*,const WIZDOCUMENTDATA&,bool)),
             SLOT(onViewNoteLoaded(Core::INoteView*,const WIZDOCUMENTDATA&,bool)));
@@ -146,6 +155,7 @@ TitleBar::TitleBar(CWizExplorerApp& app, QWidget *parent)
     layoutInfo2->addWidget(m_historyBtn);
     layoutInfo2->addWidget(m_infoBtn);
     layoutInfo2->addWidget(m_emailBtn);
+    layoutInfo2->addWidget(m_shareBtn);
     layoutInfo2->addWidget(m_commentsBtn);
 
 
@@ -194,12 +204,16 @@ void TitleBar::setLocked(bool bReadOnly, int nReason, bool bIsGroup)
         m_tagBtn->setEnabled(false);
         m_historyBtn->setEnabled(false);
         m_commentsBtn->setEnabled(false);
+        m_shareBtn->setEnabled(false);
+        m_emailBtn->setEnabled(false);
     }
     else
     {
-        m_tagBtn->setEnabled(!bIsGroup ? true : false);
+        m_tagBtn->setEnabled(bIsGroup ? false : true);
+        m_shareBtn->setEnabled(bIsGroup ? false : true);
         m_historyBtn->setEnabled(true);
         m_commentsBtn->setEnabled(true);
+        m_emailBtn->setEnabled(true);
     }
 }
 
@@ -272,9 +286,6 @@ void TitleBar::loadErrorPage()
     QString strFileName = Utils::PathResolve::resourcesPath() + "files/errorpage/load_fail_comments.html";
     QString strHtml;
     ::WizLoadUnicodeTextFromFile(strFileName, strHtml);
-    strHtml.replace("{error_text1}", tr("Load Error"));
-    strHtml.replace("{error_text2}", tr("Network anomalies, check the network, then retry!"));
-    strHtml.replace("{error_text3}", tr("Load Error"));
     QUrl url = QUrl::fromLocalFile(strFileName);
     comments->setHtml(strHtml, url);
 }
@@ -398,7 +409,17 @@ void TitleBar::stopEditButtonAnimation()
 
 void TitleBar::onEditButtonClicked()
 {
-    noteView()->setEditNote(!m_editBtn->state());
+    bool bEdit = !m_editBtn->state();
+    noteView()->setEditNote(bEdit);
+    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
+    if (bEdit)
+    {
+        analyzer.LogAction("editNote");
+    }
+    else
+    {
+        analyzer.LogAction("viewNote");
+    }
 }
 
 void TitleBar::onTagButtonClicked()
@@ -412,11 +433,25 @@ void TitleBar::onTagButtonClicked()
     QRect rc = m_tagBtn->rect();
     QPoint pt = m_tagBtn->mapToGlobal(QPoint(rc.width()/2, rc.height()));
     m_tags->showAtPoint(pt);
+
+    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
+    analyzer.LogAction("showTags");
 }
 
 void TitleBar::onEmailButtonClicked()
 {
     m_editor->shareNoteByEmail();
+
+    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
+    analyzer.LogAction("shareByEmail");
+}
+
+void TitleBar::onShareButtonClicked()
+{
+    m_editor->shareNoteByLink();
+
+    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
+    analyzer.LogAction("shareByLink");
 }
 
 void TitleBar::onAttachButtonClicked()
@@ -432,13 +467,19 @@ void TitleBar::onAttachButtonClicked()
         QPoint pt = m_attachBtn->mapToGlobal(QPoint(rc.width()/2, rc.height()));
         m_attachments->showAtPoint(pt);
     }
+
+    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
+    analyzer.LogAction("showAttachments");
 }
 
 void TitleBar::onHistoryButtonClicked()
 {
     const WIZDOCUMENTDATA& doc = noteView()->note();
 
-    showDocumentHistory(doc, noteView());
+    WizShowDocumentHistory(doc, noteView());
+
+    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
+    analyzer.LogAction("showHistory");
 }
 
 
@@ -453,6 +494,9 @@ void TitleBar::onInfoButtonClicked()
     QRect rc = m_infoBtn->rect();
     QPoint pt = m_infoBtn->mapToGlobal(QPoint(rc.width()/2, rc.height()));
     m_info->showAtPoint(pt);
+
+    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
+    analyzer.LogAction("showNoteInfo");
 }
 
 bool isNetworkAccessible()
@@ -473,8 +517,15 @@ void TitleBar::onCommentsButtonClicked()
 #endif
     if (comments->isVisible()) {
         comments->hide();
+
+        CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
+        analyzer.LogAction("hideComments");
+
         return;
     }
+
+    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
+    analyzer.LogAction("showComments");
 
     if (isNetworkAccessible()) {
         if (!m_commentsUrl.isEmpty()) {
