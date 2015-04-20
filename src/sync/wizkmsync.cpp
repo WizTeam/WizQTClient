@@ -30,6 +30,7 @@ HRESULT CWizKMSyncEvents::OnText(WizKMSyncProgressStatusType type, const QString
 HRESULT CWizKMSyncEvents::OnPromptMessage(const QString& strMessage)
 {
     emit promptMessageRequest(strMessage);
+    return S_OK;
 }
 
 void CWizKMSyncEvents::SetDatabaseCount(int count)

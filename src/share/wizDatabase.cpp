@@ -2149,8 +2149,11 @@ bool CWizDatabase::Open(const QString& strUserId, const QString& strKbGUID /* = 
     }
 
     if (!CWizIndex::Open(GetIndexFileName())) {
-        QFile::remove(GetIndexFileName());
-        return false;
+        // If can not open db, try again. If db still can not be opened, delete the db file and download data from server.
+        if (!CWizIndex::Open(GetIndexFileName())) {
+            QFile::remove(GetIndexFileName());
+            return false;
+        }
     }
 
     // user private database opened, try to load kb guid
@@ -2163,8 +2166,11 @@ bool CWizDatabase::Open(const QString& strUserId, const QString& strKbGUID /* = 
 
     // FIXME
     if (!CThumbIndex::OpenThumb(GetThumbFileName(), getThumIndexVersion())) {
-        QFile::remove(GetThumbFileName());
-        return false;
+        // If can not open db, try again. If db still can not be opened, delete the db file and download data from server.
+        if (!CThumbIndex::OpenThumb(GetThumbFileName(), getThumIndexVersion())) {
+            QFile::remove(GetThumbFileName());
+            return false;
+        }
     }
 
     setThumbIndexVersion(WIZNOTE_THUMB_VERSION);
