@@ -227,9 +227,14 @@ void CWizAnalyzer::PostBlocked(IWizSyncableDatabase* db)
     rapidjson::Value vGuid(baGuid.constData(), baGuid.size());
     dd.AddMember("guid", vGuid, allocator);
 
+#if QT_VERSION >= 0x050400
     QByteArray baPlat = QSysInfo::prettyProductName().toUtf8();
     rapidjson::Value vPlat(baPlat.constData(), baPlat.size());
     dd.AddMember("platform", vPlat, allocator);
+#else
+    dd.AddMember("platform", "Linux", allocator);
+#endif
+
 
     rapidjson::Value versionName(rapidjson::kStringType);
     versionName.SetString(WIZ_CLIENT_VERSION);
