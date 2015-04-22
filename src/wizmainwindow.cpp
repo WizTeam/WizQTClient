@@ -104,6 +104,7 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     , m_objectDownloaderHost(new CWizObjectDataDownloaderHost(dbMgr, this))
     //, m_avatarDownloaderHost(new CWizUserAvatarDownloaderHost(dbMgr.db().GetAvatarPath(), this))
     , m_transitionView(new CWizDocumentTransitionView(this))
+    , m_iapDialog(0)
 #ifndef Q_OS_MAC
     , m_labelNotice(NULL)
     , m_optionsAction(NULL)
@@ -1229,9 +1230,10 @@ void MainWindow::openVipPageInWebBrowser()
         QString strUrl = WizService::ApiEntry::standardCommandUrl("vip", strToken);
         QDesktopServices::openUrl(QUrl(strUrl));
 #else
-        CWizIAPDialog dlg;
-        dlg.exec();
-    #endif
+    CWizIAPDialog* dlg = iapDialog();
+    dlg->loadIAPPage();
+    dlg->exec();
+#endif
     }
 }
 
@@ -1295,8 +1297,9 @@ void MainWindow::SetDialogResult(int nResult)
 void MainWindow::AppStoreIAP()
 {
 #ifdef BUILD4APPSTORE
-    CWizIAPDialog dlg;
-    dlg.exec();
+    CWizIAPDialog* dlg = iapDialog();
+    dlg->loadIAPPage();
+    dlg->exec();
 #endif
 }
 
@@ -1627,6 +1630,18 @@ QWidget*MainWindow::createMessageListView()
     m_msgList->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
 
     return m_msgListWidget;
+}
+
+CWizIAPDialog*MainWindow::iapDialog()
+{
+#ifdef Q_OS_MAC
+    if (m_iapDialog == 0) {
+        m_iapDialog = new CWizIAPDialog(this);
+    }
+    return m_iapDialog;
+#else
+    return 0;
+#endif
 }
 
 void MainWindow::on_documents_documentCountChanged()
@@ -2475,7 +2490,7 @@ void MainWindow::on_category_itemSelectionChanged()
         CWizCategoryViewCustomSearchItem* pSearchItem = dynamic_cast<CWizCategoryViewCustomSearchItem*>(categoryItem);
         if (pSearchItem)
         {
-            searchNotesBySQLAndKeyword(pSearchItem->getSQLWhere(), pSearchItem->getKeyword());
+            searchNotesBySQLAndKeyword(pSearchItem->getSQLWhere(), pSearchItem->getKeyword(), pSearchItem->searchScope());
         }
     }
         break;
@@ -3158,20 +3173,20 @@ void MainWindow::searchNotesBySQL(const QString& strSQLWhere)
     m_searcher->searchBySQLWhere(strSQLWhere, 500);
 }
 
-void MainWindow::searchNotesBySQLAndKeyword(const QString& strSQLWhere, const QString& strKeyword)
+void MainWindow::searchNotesBySQLAndKeyword(const QString& strSQLWhere, const QString& strKeyword, int searchScope)
 {
     qDebug() << "search by sql and keyword : " << strSQLWhere << strKeyword;
     if (strSQLWhere.isEmpty())
     {
-        m_searcher->search(strKeyword, 500);
+        m_searcher->search(strKeyword, 500, (SearchScope)searchScope);
     }
     else if (strKeyword.isEmpty())
     {
-        m_searcher->searchBySQLWhere(strSQLWhere, 500);
+        m_searcher->searchBySQLWhere(strSQLWhere, 500, (SearchScope)searchScope);
     }
     else
     {
-        m_searcher->searchByKeywordAndWhere(strKeyword, strSQLWhere, 500);
+        m_searcher->searchByKeywordAndWhere(strKeyword, strSQLWhere, 500, (SearchScope)searchScope);
     }
 }
 

@@ -26,7 +26,7 @@ void CWizXmlRpcEventLoop::doFinished(QNetworkReply* reply)
 
     //TODO: modify content type checker
     QString strContentType = reply->header(QNetworkRequest::ContentTypeHeader).toString();
-    if (strContentType != "text/xml;charset=UTF-8") {
+    if (strContentType.remove(' ').toLower() != "text/xml;charset=utf-8") {
         m_error = QNetworkReply::ProtocolFailure;
         m_errorString = "Invalid content type of response";
         return;

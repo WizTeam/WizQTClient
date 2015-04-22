@@ -27,6 +27,7 @@
  * %7: platform, ios|android|web|wp7|x86|x64|linux|macosx
  * %8: debug, true|false, optional
  */
+
 #define WIZNOTE_API_ENTRY "http://api.wiz.cn/?p=%1&l=%2&v=%3&c=%4&random=%5&cn=%6&plat=%7&debug=%8"
 
 #define WIZNOTE_API_ARG_PRODUCT "wiz"
@@ -114,11 +115,13 @@ QString ApiEntryPrivate::requestUrl(const QString& strUrl)
     loop.exec();
 
     if (reply->error()) {
+        reply->deleteLater();
         return 0;
     }
 
     QString strRequestedUrl = QString::fromUtf8(reply->readAll().constData());
 
+    reply->deleteLater();
     net->deleteLater();
 
     return strRequestedUrl;

@@ -29,10 +29,11 @@ public:
 
     void purchaseProduct(const QString& strID);
     void requestProducts();
+    void loadLocalReceipt(QByteArray& receipt);
     void onProductsLoaded(const QList<CWizIAPProduct>& productList);
     void onPurchaseFinished(bool ok, const QByteArray& receipt, const QString& strTransationID);
 
-private:
+protected:
     CWizIAPHelperPrivate* m_helper;
     CWizIAPCaller* m_caller;
 };

@@ -1,10 +1,10 @@
 #ifndef WIZIAPDIALOG_H
 #define WIZIAPDIALOG_H
 
-#ifdef Q_OS_MAC
 
 #include <QDialog>
 #include <QTimer>
+#if defined Q_OS_MAC
 #include "mac/wizIAPHelper.h"
 
 namespace Ui {
@@ -25,6 +25,13 @@ public:
     virtual void onPurchaseFinished(bool ok, const QByteArray& receipt, const QString& strTransationID);
 
     void loadUserInfo();
+    void loadIAPPage();
+
+public slots:
+    virtual int exec();
+
+signals:
+    void checkReceiptRequest(const QByteArray receipt, const QString strTransationID);
 
 private slots:
     void on_btn_goBack_clicked();
@@ -35,9 +42,15 @@ private slots:
 
     void loadProducts();
 
+    void stopWaitTimer();
+
     //
     void onWaitingTimeOut();
     void onEditorPopulateJavaScriptWindowObject();
+
+    void onCheckReceiptRequest(const QByteArray& receipt, const QString& strTransationID);
+
+    void checkUnfinishedTransation();
 
 private:
     void initStyles();
@@ -45,6 +58,12 @@ private:
     void setPurchaseAvailable(bool b);
     void hideInfoLabel();
     void checkReceiptInfo(const QByteArray& receipt, const QString& strTransationID);
+    void parseCheckResult(const QString& strResult);
+
+    //
+    QStringList getUnfinishedTransations();
+    void saveUnfinishedTransation(const QString& strTransationID);
+    void removeTransationFromUnfinishedList(const QString& strTransationID);
 
 private:
     Ui::CWizIAPDialog *ui;

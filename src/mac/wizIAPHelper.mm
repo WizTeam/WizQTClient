@@ -31,6 +31,7 @@
 - (id)initWithProductIdentifiers:(NSSet *)productIdentifiers;
 - (void)buyProduct:(SKProduct *)product;
 - (void)buyProductIdentifier:(NSString *)productIdentifier;
+- (NSData *)loadLocalReceipt;
 @end
 
 
@@ -41,6 +42,7 @@
         ~CWizIAPHelperPrivate();
 
         void requestProducts();
+        void loadLocalReceipt(QByteArray& receipt);
         void onProductsLoaded(const QList<CWizIAPProduct>& productList);
         void onPurchaseFinished(bool ok, const QByteArray& receipt, const QString& strTransationID);
         void purchaseProduct(const QString& strID);
@@ -139,6 +141,16 @@
 }
 
 
+- (NSData *)loadLocalReceipt {
+        NSURL *receiptURL = [[NSBundle mainBundle] appStoreReceiptURL];
+        NSData *receipt = [NSData dataWithContentsOfURL:receiptURL];
+        if (!receipt) {
+            NSLog(@"can not load receipt!");
+            return NULL;
+        }
+
+        return receipt;
+}
 
 
 - (void)completeTransaction:(SKPaymentTransaction *)transaction {
@@ -293,6 +305,12 @@ void CWizIAPHelperPrivate::requestProducts()
     [m_helper requestProducts];
 }
 
+void CWizIAPHelperPrivate::loadLocalReceipt(QByteArray& receipt)
+{
+    NSData* nsReceipt = [m_helper loadLocalReceipt];
+    receipt = QByteArray::fromNSData(nsReceipt);
+}
+
 void CWizIAPHelperPrivate::onProductsLoaded(const QList<CWizIAPProduct>& productList)
 {
     m_container->onProductsLoaded(productList);
@@ -328,6 +346,11 @@ void CWizIAPHelper::purchaseProduct(const QString& strID)
 void CWizIAPHelper::requestProducts()
 {
     m_helper->requestProducts();
+}
+
+void CWizIAPHelper::loadLocalReceipt(QByteArray& receipt)
+{
+    m_helper->loadLocalReceipt(receipt);
 }
 
 void CWizIAPHelper::onProductsLoaded(const QList<CWizIAPProduct>& productList)

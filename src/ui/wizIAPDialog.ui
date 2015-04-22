@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>AppStore IAP</string>
+   <string>Upgrade VIP</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <property name="leftMargin">
@@ -92,7 +92,7 @@
          <item>
           <widget class="QLabel" name="label_headTitle">
            <property name="text">
-            <string>体验为知笔记VIP用户的专享功能</string>
+            <string>Experience exclusive features for VIP users</string>
            </property>
           </widget>
          </item>
@@ -219,7 +219,7 @@
              </size>
             </property>
             <property name="text">
-             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:16pt; color:#48a4e0;&quot;&gt;Purchase success, please synchronize data later.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:16pt; color:#48a4e0;&quot;&gt;Purchase success, please synchronize data.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
             </property>
            </widget>
           </item>
@@ -232,7 +232,7 @@
              </size>
             </property>
             <property name="text">
-             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:16pt; color:#48a4e0;&quot;&gt;Purchase failed, please try again.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:16pt; color:#ff6666;&quot;&gt;Purchase failed, please try again.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
             </property>
            </widget>
           </item>
@@ -244,6 +244,9 @@
          <property name="topMargin">
           <number>50</number>
          </property>
+         <property name="rightMargin">
+          <number>0</number>
+         </property>
          <property name="verticalSpacing">
           <number>20</number>
          </property>
@@ -252,7 +255,7 @@
            <item>
             <widget class="QLabel" name="label_text4">
              <property name="text">
-              <string>Customer support provided by the customer service manager. (Email support for free users) </string>
+              <string>Customer support provided by the customer service manager (Email support for free users) </string>
              </property>
              <property name="wordWrap">
               <bool>true</bool>
@@ -266,7 +269,7 @@
            <item>
             <widget class="QLabel" name="label_text2">
              <property name="text">
-              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Your single note / attachment size limit is 100M. (30M for free users)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+              <string>Your single note / attachment size limit is 100M  (30M for free users)</string>
              </property>
              <property name="wordWrap">
               <bool>true</bool>
@@ -280,7 +283,7 @@
            <item>
             <widget class="QLabel" name="label_text3">
              <property name="text">
-              <string>Your monthly usage limit is 10G. (500M for free users)</string>
+              <string>Your monthly usage limit is 10G (500M for free users)</string>
              </property>
              <property name="wordWrap">
               <bool>true</bool>
@@ -294,7 +297,7 @@
            <item>
             <widget class="QLabel" name="label_text1">
              <property name="text">
-              <string>You can recover recent 20 historical versions. (1 historical version for free users)</string>
+              <string>You can recover recent 20 historical versions (1 historical version for free users)</string>
              </property>
              <property name="wordWrap">
               <bool>true</bool>
