@@ -321,7 +321,8 @@ public Q_SLOTS:
     void on_actionFormatInsertImage_triggered();
     void on_actionFormatScreenShot_triggered();
 
-    void on_searchProcess(const QString &strKeywords, const CWizDocumentDataArray& arrayDocument, bool bEnd);
+    void on_searchProcess(const QString &strKeywords, const CWizDocumentDataArray& arrayDocument,
+                          bool bStart, bool bEnd);
 
     void on_actionGoBack_triggered();
     void on_actionGoForward_triggered();

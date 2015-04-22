@@ -230,7 +230,7 @@ class CWizCategoryViewCustomSearchItem : public CWizCategoryViewSearchItem
 public:
     CWizCategoryViewCustomSearchItem(CWizExplorerApp& app, const QString& strName,
                                const QString strSelectParam, const QString strSqlWhere,
-                                     const QString& strGuid, const QString& keyword);
+                                     const QString& strGuid, const QString& keyword, int searchScope);
 
     virtual void showContextMenu(CWizCategoryBaseView* pCtrl, QPoint pos);
 
@@ -240,11 +240,14 @@ public:
     virtual void setSelectParam(const QString& strParam);
     void setKeyword(const QString& strKeyword);
     QString getKeyword();
+    int searchScope() const;
+    void setSearchScope(int searchScope);
 
 protected:
     QString m_strSelectParam;
     QString m_strSQLWhere;
     QString m_strKeywrod;
+    int m_nSearchScope;
 };
 
 class CWizCategoryViewAllFoldersItem : public CWizCategoryViewItemBase

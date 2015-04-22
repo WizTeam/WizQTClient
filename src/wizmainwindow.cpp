@@ -168,8 +168,8 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     connect(m_sync, SIGNAL(syncStarted(bool)), SLOT(on_syncStarted(bool)));
     connect(m_sync, SIGNAL(syncFinished(int, QString)), SLOT(on_syncDone(int, QString)));
 
-    connect(m_searcher, SIGNAL(searchProcess(const QString&, const CWizDocumentDataArray&, bool)),
-        SLOT(on_searchProcess(const QString&, const CWizDocumentDataArray&, bool)));
+    connect(m_searcher, SIGNAL(searchProcess(const QString&, const CWizDocumentDataArray&, bool, bool)),
+        SLOT(on_searchProcess(const QString&, const CWizDocumentDataArray&, bool, bool)));
 
     connect(m_doc, SIGNAL(documentSaved(QString,CWizDocumentView*)), SIGNAL(documentSaved(QString,CWizDocumentView*)));
 //    connect(m_doc->web(), SIGNAL(selectAllKeyPressed()), SLOT(on_actionEditingSelectAll_triggered()));
@@ -2339,7 +2339,7 @@ void MainWindow::on_search_doSearch(const QString& keywords)
 }
 
 
-void MainWindow::on_searchProcess(const QString& strKeywords, const CWizDocumentDataArray& arrayDocument, bool bEnd)
+void MainWindow::on_searchProcess(const QString& strKeywords, const CWizDocumentDataArray& arrayDocument, bool bStart, bool bEnd)
 {
     if (bEnd) {
         m_doc->web()->clearSearchKeywordHighlight(); //need clear hightlight first
@@ -2350,7 +2350,12 @@ void MainWindow::on_searchProcess(const QString& strKeywords, const CWizDocument
 //        return;
 //    }
 
-    m_documents->setDocuments(arrayDocument);
+    if (bStart) {
+        m_documents->setDocuments(arrayDocument);
+    } else {
+//        m_documents->setDocuments(arrayDocument);
+        m_documents->appendDocuments(arrayDocument);
+    }
     on_documents_itemSelectionChanged();
 }
 

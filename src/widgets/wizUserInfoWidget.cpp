@@ -139,16 +139,16 @@ void CWizUserInfoWidget::on_action_accountSettings_triggered()
 
 void CWizUserInfoWidget::on_action_upgradeVip_triggered()
 {
-//#ifndef BUILD4APPSTORE
-//    QString extInfo = WizService::ApiEntry::appstoreParam(false);
-//    QString strUrl = WizService::ApiEntry::standardCommandUrl("vip", WIZ_TOKEN_IN_URL_REPLACE_PART, extInfo);
-//    WizShowWebDialogWithToken(tr("Account settings"), strUrl, window());
-//#else
+#ifndef BUILD4APPSTORE
+    QString extInfo = WizService::ApiEntry::appstoreParam(false);
+    QString strUrl = WizService::ApiEntry::standardCommandUrl("vip", WIZ_TOKEN_IN_URL_REPLACE_PART, extInfo);
+    WizShowWebDialogWithToken(tr("Account settings"), strUrl, window());
+#else
     MainWindow* window = dynamic_cast<MainWindow*>(m_app.mainWindow());
     CWizIAPDialog* dlg = window->iapDialog();
     dlg->loadIAPPage();
     dlg->exec();
-//#endif
+#endif
 }
 
 void CWizUserInfoWidget::on_action_changeAvatar_triggered()

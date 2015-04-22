@@ -7,8 +7,10 @@
 #include "utils/stylehelper.h"
 #include <QCursor>
 #include <QLineEdit>
+#include <QGroupBox>
 #include <QMessageBox>
 #include <QPainter>
+#include <QButtonGroup>
 #include <QDebug>
 
 #define PARAM_SELECT_PARAM    QObject::tr("Select search param")
@@ -34,6 +36,7 @@
 #define PARAM_FOLDER_CHILDFOLDER QObject::tr("--Select child folder--")
 
 #define PARAM_NAME      "name:"
+#define PARAM_SCOPE     "scope:"
 #define PARAM_KEYWORD       "keyword:"
 #define PARAM_PARAM     "param:"
 
@@ -42,6 +45,7 @@
 CWizAdvancedSearchDialog::CWizAdvancedSearchDialog(bool searchOnly, QWidget *parent) :
     QDialog(parent),
     ui(new Ui::CWizAdvancedSearchDialog)
+  , m_radioGroup(new QButtonGroup(this))
 {
     ui->setupUi(this);
 
@@ -56,6 +60,10 @@ CWizAdvancedSearchDialog::CWizAdvancedSearchDialog(bool searchOnly, QWidget *par
     ui->label->setVisible(!searchOnly);
     if (!searchOnly) {
         ui->lineEdit_name->setText(tr("Untitled Search"));
+        setWindowTitle(tr("Custom advanced search"));
+    }
+    else {
+        setWindowTitle(tr("Advanced search"));
     }
     ui->lineEdit_keyword->setPlaceholderText(tr("Multiple keywords should be separated by blank"));
 
@@ -64,6 +72,15 @@ CWizAdvancedSearchDialog::CWizAdvancedSearchDialog(bool searchOnly, QWidget *par
 
     ui->radioButton_personalNotes->setChecked(true);
     initFirstCombox(false);
+
+    m_radioGroup->addButton(ui->radioButton_allNotes, 0);
+    m_radioGroup->addButton(ui->radioButton_personalNotes, 1);
+    m_radioGroup->addButton(ui->radioButton_groupNotes, 2);
+    connect(m_radioGroup, SIGNAL(buttonClicked(QAbstractButton*)),
+            SLOT(onRadioButtonClicked(QAbstractButton*)));
+    //
+//    ui->label_5->setVisible(false);
+//    ui->groupBox->setVisible(false);
 }
 
 CWizAdvancedSearchDialog::~CWizAdvancedSearchDialog()
@@ -73,7 +90,9 @@ CWizAdvancedSearchDialog::~CWizAdvancedSearchDialog()
 
 QString CWizAdvancedSearchDialog::getParams()
 {
-    QString strParam = PARAM_NAME + ui->lineEdit_name->text() + "/" + PARAM_KEYWORD + ui->lineEdit_keyword->text();
+    int scope = m_radioGroup->checkedId();
+    QString strParam = PARAM_NAME + ui->lineEdit_name->text() + "/" + PARAM_KEYWORD + ui->lineEdit_keyword->text()
+            + "/" + PARAM_SCOPE + QString::number(scope);
     for (int i = 0; i < ui->listWidget->count(); i++)
     {
         strParam += QString("/") + PARAM_PARAM + ui->listWidget->item(i)->text();
@@ -96,6 +115,12 @@ void CWizAdvancedSearchDialog::setParams(const QString& strParam)
             QString strKeyword = strParam.remove(PARAM_KEYWORD);
             ui->lineEdit_keyword->setText(strKeyword);
         }
+        else if (strParam.startsWith(PARAM_SCOPE))
+        {
+            int scopeId = strParam.remove(PARAM_SCOPE).toInt();
+            QAbstractButton* button = m_radioGroup->button(scopeId);
+            button->setChecked(true);
+        }
         else if (strParam.startsWith(PARAM_PARAM))
         {
             QString param = strParam.remove(PARAM_PARAM);
@@ -103,12 +128,10 @@ void CWizAdvancedSearchDialog::setParams(const QString& strParam)
             ui->listWidget->addItem(item);
         }
     }
-
-    qDebug() << "after set param : " << ui->lineEdit_name->text() << ui->lineEdit_keyword->text();
 }
 
 bool CWizAdvancedSearchDialog::paramToSQL(const QString& param, QString& sqlWhere,
-                                          QString& keyword, QString& name)
+                                          QString& keyword, QString& name, int& scope)
 {
     QStringList paramList = param.split('/');
     foreach (QString strParam, paramList) {
@@ -120,6 +143,10 @@ bool CWizAdvancedSearchDialog::paramToSQL(const QString& param, QString& sqlWher
         {
             keyword = strParam.remove(PARAM_KEYWORD);
         }
+        else if (strParam.startsWith(PARAM_SCOPE))
+        {
+            scope = strParam.remove(PARAM_SCOPE).toInt();
+        }
         else if (strParam.startsWith(PARAM_PARAM))
         {
             QStringList paramList = strParam.remove(PARAM_PARAM).split(',');
@@ -127,7 +154,7 @@ bool CWizAdvancedSearchDialog::paramToSQL(const QString& param, QString& sqlWher
             if (paramList.first() == PARAM_SELECT_FOLDER)
             {
                 QString strWhere = "DOCUMENT_LOCATION like '/" + paramList.at(1) + QString("/") +
-                        (paramList.count() == 3 ? paramList.last() + "/%'" : "%'");
+                        (paramList.last().isEmpty() ? "%'" : paramList.last() + "/%'");
                 sqlWhere += sqlWhere.isEmpty() ? strWhere : " and " + strWhere;
             }
 //            else if (paramList.first() == PARAM_SELECT_TAG)
@@ -170,6 +197,31 @@ bool CWizAdvancedSearchDialog::paramToSQL(const QString& param, QString& sqlWher
     return true;
 }
 
+void CWizAdvancedSearchDialog::onRadioButtonClicked(QAbstractButton* button)
+{
+    ui->comboBox_first->setCurrentIndex(0);
+    ui->comboBox_second->clear();
+    ui->comboBox_second->setVisible(false);
+    ui->comboBox_third->setVisible(false);
+    if (button == ui->radioButton_allNotes || button == ui->radioButton_groupNotes)
+    {
+        int index = ui->comboBox_first->findText(PARAM_SELECT_FOLDER);
+        if (index != -1)
+        {
+            ui->listWidget->clear();
+            ui->comboBox_first->removeItem(index);
+        }
+    }
+    else if (button == ui->radioButton_personalNotes)
+    {
+        int index = ui->comboBox_first->findText(PARAM_SELECT_FOLDER);
+        if (index == -1)
+        {
+            ui->comboBox_first->insertItem(1, PARAM_SELECT_FOLDER);
+        }
+    }
+}
+
 void CWizAdvancedSearchDialog::getDateList(QStringList& dateList)
 {
     dateList.clear();
@@ -195,9 +247,7 @@ void CWizAdvancedSearchDialog::getFirstLevelFolders(QStringList& folders)
             strFolder.remove('/');
             folders.append(strFolder);
         }
-    }
-
-    qDebug() << "get first level folders : " << folders.count();
+    }    
 }
 
 void CWizAdvancedSearchDialog::getSecondLevelFolders(const QString& firstLevelFolder, QStringList& folders)
@@ -209,7 +259,6 @@ void CWizAdvancedSearchDialog::getSecondLevelFolders(const QString& firstLevelFo
 
     QStringList folderList = m_strFolders.split('*', QString::SkipEmptyParts);
     foreach (QString strFolder, folderList) {
-        qDebug() << "get second item : " << strFolder << strFolder.startsWith("/" + firstLevelFolder);
         if (strFolder.startsWith("/" + firstLevelFolder) && strFolder.count('/') == 3)
         {
             strFolder.remove("/");
@@ -280,6 +329,24 @@ void CWizAdvancedSearchDialog::on_comboBox_first_activated(const QString &arg1)
         QStringList folders;
         getFirstLevelFolders(folders);
         ui->comboBox_second->addItems(folders);
+
+        //
+        ui->comboBox_third->clear();
+
+        if (folders.count() > 0)
+        {
+            QString strFirstFolder = folders.first();
+            folders.clear();
+            getSecondLevelFolders(strFirstFolder, folders);
+            if (folders.count() > 0)
+            {
+                ui->comboBox_third->clear();
+                ui->comboBox_third->addItem(PARAM_FOLDER_CHILDFOLDER);
+                ui->comboBox_third->addItems(folders);
+                ui->comboBox_third->setVisible(true);
+                ui->comboBox_third->setCurrentIndex(0);
+            }
+        }
     }
 //    else if (arg1 == PARAM_SELECT_TAG)
 //    {
@@ -334,7 +401,6 @@ void CWizAdvancedSearchDialog::on_comboBox_second_activated(const QString &arg1)
 {
     ui->comboBox_third->setVisible(false);
     QString firstParam = ui->comboBox_first->currentText();
-    qDebug() << "first param : " << firstParam;
     if (firstParam == PARAM_SELECT_FOLDER)
     {
         ui->comboBox_third->clear();
@@ -388,17 +454,6 @@ void CWizAdvancedSearchDialog::on_toolButton_add_clicked()
     }
 }
 
-void CWizAdvancedSearchDialog::on_toolButton_remove_clicked()
-{
-//    qDebug() << "remove button called";
-//    QList<QListWidgetItem*> itemList = ui->listWidget->selectedItems();
-//    qDebug() << "selected item " << itemList.count();
-//    foreach (QListWidgetItem* item, itemList) {
-//        qDebug() << "list widget remove item : " << item << item->text();
-//        ui->listWidget->takeItem(ui->listWidget->row(item));
-//    }
-}
-
 
 CWizSearchParamItem::CWizSearchParamItem(const QString& text, QListWidget* view, int type)
     : QListWidgetItem(text, view, type)
@@ -419,7 +474,6 @@ void CWizSearchParamItem::draw(QPainter* p, const QStyleOptionViewItemV4* vopt) 
     QPen pen;
     bSelected ? pen.setColor(Qt::white) : pen.setColor(Qt::black);
     p->setPen(pen);
-    qDebug() << "draw item item text " << text() << "  in rect : " << vopt->rect;
     p->drawText(vopt->rect, Qt::AlignLeft | Qt::AlignVCenter, text());
 
      p->restore();
@@ -433,7 +487,6 @@ QRect CWizSearchParamItem::drawItemBackground(QPainter* p, const QRect& rect, bo
     p->setPen(Qt::NoPen);
     p->setBrush(brush);
     p->drawRect(rect);
-    qDebug() << "item selected : " << selected << " focused : " << focused << "  brush : " << p->brush();
 
 
     if (selected)
@@ -449,18 +502,15 @@ bool CWizSearchParamItem::removeIconClicked()
 {
     QPoint pos = QCursor::pos();
     pos = listWidget()->mapFromGlobal(pos);
-    qDebug() << "cursor pos : " << pos;
     QRect border = listWidget()->visualItemRect(this);
     QRect pixRect(border.right() - m_pix.width(), border.top() + (border.height() - m_pix.height()) / 2,
                   m_pix.width(), m_pix.height());
-    qDebug() << "broder : " << pixRect;
     return pixRect.contains(pos);
 }
 
 void CWizAdvancedSearchDialog::on_listWidget_itemClicked(QListWidgetItem *item)
 {
     CWizSearchParamItem* paramItem = dynamic_cast<CWizSearchParamItem*>(item);
-    qDebug() << "item clicked : " << paramItem;
     Q_ASSERT(paramItem);
     if (paramItem)
     {
@@ -470,3 +520,5 @@ void CWizAdvancedSearchDialog::on_listWidget_itemClicked(QListWidgetItem *item)
           }
     }
 }
+
+

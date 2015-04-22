@@ -3271,8 +3271,7 @@ bool CWizIndex::deleteMetasByName(const QString& strMetaName)
 
 bool CWizIndex::deleteMetaByKey(const QString& strMetaName, const QString& strMetaKey)
 {
-    CString strWhere = "META_NAME=%1 AND META_KEY=%2";
-    strWhere.arg(STR2SQL(strMetaName), STR2SQL(strMetaKey));
+    CString strWhere = QString("META_NAME='%1' AND META_KEY='%2'").arg(strMetaName).arg(strMetaKey);
     CString strSQL = FormatDeleteSQLByWhere(TABLE_NAME_WIZ_META, strWhere);
 
     if (!ExecSQL(strSQL))

@@ -384,8 +384,6 @@ void CWizCategoryBaseView::dropEvent(QDropEvent * event)
 
     m_dragDocArray.clear();
 
-    qDebug() << "category view dropEvent" << event;
-
     if (event->mimeData()->hasFormat(WIZNOTE_MIMEFORMAT_DOCUMENTS)) {
         CWizDocumentDataArray arrayDocument;
         mime2Note(event->mimeData()->data(WIZNOTE_MIMEFORMAT_DOCUMENTS), arrayDocument);
@@ -700,7 +698,6 @@ QString CWizCategoryBaseView::getUseableItemName(QTreeWidgetItem* parent, \
 
 void CWizCategoryBaseView::resetFolderLocation(CWizCategoryViewFolderItem* item, const QString& strNewLocation)
 {
-    qDebug() << "reset folder location : " << strNewLocation;
     item->setLocation(strNewLocation);
     for (int i = 0; i < item->childCount(); i++)
     {
@@ -1744,8 +1741,6 @@ void CWizCategoryView::on_action_user_deleteFolder_confirmed(int result)
     if (!p)
         return;
 
-    qDebug() << "try to delete folder : " << p->location();
-
     if (result == QMessageBox::Ok) {
         CWizFolder folder(m_dbMgr.db(), p->location());
         folder.Delete();
@@ -1932,11 +1927,10 @@ void CWizCategoryView::on_action_addCustomSearch()
 
         // create item by param
         QString strSQLWhere, name , keyword;
-        CWizAdvancedSearchDialog::paramToSQL(strParam, strSQLWhere, keyword, name);
-        qDebug() << "get sql from dlg : " << strSQLWhere << " keyword : " << keyword << "  name : " << name;
+        int scope;
+        CWizAdvancedSearchDialog::paramToSQL(strParam, strSQLWhere, keyword, name, scope);
 
         QTreeWidgetItem* curItem = currentItem();
-        qDebug() << "current item type : " << curItem->type();
         QTreeWidgetItem* parentItem = 0;
         if (curItem->type() == ItemType_QuickSearchRootItem)
         {
@@ -1987,10 +1981,9 @@ void CWizCategoryView::on_action_addCustomSearch()
         }
 
 
-        qDebug() << "get parent item : " << parentItem << " text : " << parentItem->text(0);
         QString strGuid = ::WizGenGUIDLowerCaseLetterOnly();
         CWizCategoryViewCustomSearchItem* item = new CWizCategoryViewCustomSearchItem(
-                    m_app, name, strParam, strSQLWhere, strGuid, keyword);
+                    m_app, name, strParam, strSQLWhere, strGuid, keyword, scope);
         parentItem->addChild(item);
         sortItems(0, Qt::AscendingOrder);
         saveCustomAdvancedSearchParamToDB(strGuid, strParam);
@@ -2005,16 +1998,18 @@ void CWizCategoryView::on_action_editCustomSearch()
         if (item)
         {
             CWizAdvancedSearchDialog dlg(false);
-            qDebug() << "eidt search param : " << item->getSelectParam();
             dlg.setParams(item->getSelectParam());
             if (dlg.exec() == QDialog::Accepted)
             {
                 QString strParam = dlg.getParams();
                 QString strSQLWhere, name, keyword;
-                CWizAdvancedSearchDialog::paramToSQL(strParam, strSQLWhere, keyword, name);
+                int scope;
+                CWizAdvancedSearchDialog::paramToSQL(strParam, strSQLWhere, keyword, name, scope);
                 item->setText(0, name);
+                item->setKeyword(keyword);
                 item->setSelectParam(strParam);
                 item->setSQLWhere(strSQLWhere);
+                item->setSearchScope(scope);
                 saveCustomAdvancedSearchParamToDB(item->kbGUID(), strParam);
                 update();
             }
@@ -3505,9 +3500,10 @@ void CWizCategoryView::initQuickSearches()
         for (it = customMap.begin(); it != customMap.end(); it++)
         {
             QString where, name, keyword;
-            CWizAdvancedSearchDialog::paramToSQL(it.value(), where, keyword, name);
+            int scope;
+            CWizAdvancedSearchDialog::paramToSQL(it.value(), where, keyword, name, scope);
             CWizCategoryViewCustomSearchItem* pCustomSearch = new CWizCategoryViewCustomSearchItem(m_app,
-                                                                                                   name, it.value(), where, it.key(), keyword);
+                                                                                                   name, it.value(), where, it.key(), keyword, scope);
             pSearchByCustomSQL->addChild(pCustomSearch);
         }
     }
@@ -4323,12 +4319,10 @@ void CWizCategoryView::on_itemPosition_changed(CWizCategoryViewItemBase* pItem)
     }
     else
     {
-        qDebug() << "private solumtion add " << pItem;
         if (CWizCategoryViewFolderItem* item = dynamic_cast<CWizCategoryViewFolderItem*>(pItem))
         {
             CWizCategoryViewItemBase* folderRoot = findAllFolderItem();
             QTreeWidgetItem* parentItem = item->parent();
-            qDebug() << "get item parent item : " << parentItem;
             if (parentItem == 0)
             {
 //                parentItem = folderRoot;
@@ -4340,7 +4334,7 @@ void CWizCategoryView::on_itemPosition_changed(CWizCategoryViewItemBase* pItem)
             }
 
             QString strName = getUseableItemName(parentItem, item);
-            qDebug() << "get useable item name : " << strName;
+//            qDebug() << "get useable item name : " << strName;
             QString strNewLocation = "/" + strName + "/";
             item->setText(0, strName);
 
@@ -4351,14 +4345,14 @@ void CWizCategoryView::on_itemPosition_changed(CWizCategoryViewItemBase* pItem)
                 if (!parentBase)
                     return;
 
-                qDebug() << "parent is not root , parent name : " << parentBase->name();
+//                qDebug() << "parent is not root , parent name : " << parentBase->name();
                 strNewLocation = parentBase->name() + strNewLocation.remove(0, 1);
                 parentItem = parentBase->parent();
             }
 
             QString strOldLocation = item->location();
 
-            qDebug() << "item position changed , " << strOldLocation << " ,  new location : " << strNewLocation;
+//            qDebug() << "item position changed , " << strOldLocation << " ,  new location : " << strNewLocation;
             resetFolderLocation(item, strNewLocation);
             updatePrivateFolderLocation(db, strOldLocation, strNewLocation);
         }
@@ -4483,10 +4477,9 @@ void CWizCategoryView::saveItemState(QTreeWidgetItem* pi, QSettings *settings)
 
 void CWizCategoryView::advancedSearchByCustomParam(const QString& strParam)
 {
-    qDebug() << "get params : " << strParam;
     QString strSql, strName, strKeyword;
-    CWizAdvancedSearchDialog::paramToSQL(strParam, strSql, strKeyword, strName);
-    qDebug() << "sql : " << strSql << " name : " << strName << " keyword : " << strKeyword;
+    int scope;
+    CWizAdvancedSearchDialog::paramToSQL(strParam, strSql, strKeyword, strName, scope);
 
     MainWindow* mainWindow = qobject_cast<MainWindow*>(m_app.mainWindow());
     CWizSearcher* searcher = mainWindow->searcher();
@@ -4494,22 +4487,21 @@ void CWizCategoryView::advancedSearchByCustomParam(const QString& strParam)
     {
         if (strSql.isEmpty())
         {
-            searcher->search(strKeyword, 500);
+            searcher->search(strKeyword, 500, (SearchScope)scope);
         }
         else if (strKeyword.isEmpty())
         {
-            searcher->searchBySQLWhere(strSql, 500);
+            searcher->searchBySQLWhere(strSql, 500, (SearchScope)scope);
         }
         else
         {
-            searcher->searchByKeywordAndWhere(strKeyword, strSql, 500);
+            searcher->searchByKeywordAndWhere(strKeyword, strSql, 500, (SearchScope)scope);
         }
     }
 }
 
 void CWizCategoryView::saveCustomAdvancedSearchParamToDB(const QString& strGuid, const QString& strParam)
 {
-    qDebug() << "save param to db , key ; " << strGuid << " value : " << strParam;
     m_dbMgr.db().SetMeta(QUICK_SEARCH_META, strGuid, strParam);
 }
 
@@ -4520,14 +4512,12 @@ void CWizCategoryView::loadCustomAdvancedSearchParamFromDB(QMap<QString, QString
      CWizMetaDataArray::iterator it;
      for (it = arrayMeta.begin(); it != arrayMeta.end(); it++)
      {
-         qDebug() << "load param from db , key ; " << it->strKey << " value : " << it->strValue;
          paramMap.insert(it->strKey, it->strValue);
      }
 }
 
 void CWizCategoryView::deleteCustomAdvancedSearchParamFromDB(const QString& strGuid)
 {
-    qDebug() << "delete param, key : " << strGuid;
     m_dbMgr.db().deleteMetaByKey(QUICK_SEARCH_META, strGuid);
 }
 

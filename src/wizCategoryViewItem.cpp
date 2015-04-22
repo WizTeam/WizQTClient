@@ -1961,11 +1961,13 @@ QString CWizCategoryViewTimeSearchItem::getSQLWhere()
 
 CWizCategoryViewCustomSearchItem::CWizCategoryViewCustomSearchItem(CWizExplorerApp& app,
                                                                    const QString& strName, const QString strSelectParam,
-                                                                   const QString strSqlWhere, const QString& strGuid, const QString& keyword)
+                                                                   const QString strSqlWhere, const QString& strGuid,
+                                                                   const QString& keyword, int searchScope)
     : CWizCategoryViewSearchItem(app, strName, ItemType_QuickSearchCustomItem)
     , m_strSelectParam(strSelectParam)
     , m_strSQLWhere(strSqlWhere)
     , m_strKeywrod(keyword)
+    , m_nSearchScope(searchScope)
 {
     m_strKbGUID = strGuid;
 }
@@ -2006,3 +2008,13 @@ QString CWizCategoryViewCustomSearchItem::getKeyword()
 {
     return m_strKeywrod;
 }
+int CWizCategoryViewCustomSearchItem::searchScope() const
+{
+    return m_nSearchScope;
+}
+
+void CWizCategoryViewCustomSearchItem::setSearchScope(int nSearchScope)
+{
+    m_nSearchScope = nSearchScope;
+}
+

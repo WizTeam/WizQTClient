@@ -218,14 +218,12 @@ void CWizDocumentListView::setDocuments(const CWizDocumentDataArray& arrayDocume
     //reset
     clear();
 
-    Q_EMIT documentCountChanged();
-
     verticalScrollBar()->setValue(0);
 
-    addDocuments(arrayDocument);
+    appendDocuments(arrayDocument);
 }
 
-void CWizDocumentListView::addDocuments(const CWizDocumentDataArray& arrayDocument)
+void CWizDocumentListView::appendDocuments(const CWizDocumentDataArray& arrayDocument)
 {
     CWizDocumentDataArray::const_iterator it;
     for (it = arrayDocument.begin(); it != arrayDocument.end(); it++) {
