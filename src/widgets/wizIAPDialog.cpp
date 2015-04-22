@@ -182,8 +182,7 @@ void CWizIAPDialog::checkReceiptInfo(const QByteArray& receipt, const QString& s
     strPlat = "linux";
 #endif
     QString asServerUrl = WizService::ApiEntry::asServerUrl();
-//    QString checkUrl = asServerUrl + "/a/pay2/ios";
-    QString checkUrl = "http://192.168.1.89/wizas/a/pay2/ios/";
+    QString checkUrl = asServerUrl + "/a/pay2/ios";
 //    QString checkUrl = "https://sandbox.itunes.apple.com/verifyReceipt";
 //    QString checkUrl = "https://buy.itunes.apple.com/verifyReceipt";
     CWizDatabase& db = CWizDatabaseManager::instance()->db();
