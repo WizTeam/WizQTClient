@@ -79,7 +79,6 @@ void CWizIAPDialog::onPurchaseFinished(bool ok, const QByteArray& receipt, const
     if (ok)
     {
         saveUnfinishedTransation(strTransationID);
-        qDebug() << "purchase success, emit signal";
         emit checkReceiptRequest(receipt, strTransationID);
     }
     else
@@ -91,16 +90,17 @@ void CWizIAPDialog::onPurchaseFinished(bool ok, const QByteArray& receipt, const
 
 void CWizIAPDialog::loadUserInfo()
 {
+    setWindowTitle(tr("Account settings"));
    ui->stackedWidget->setCurrentIndex(0);
    QString extInfo = WizService::ApiEntry::appstoreParam(false);
    QString strToken = WizService::Token::token();
    QString strUrl = WizService::ApiEntry::standardCommandUrl("user_info", strToken, extInfo);
-   qDebug() << "load page : " << strUrl;
    ui->webView->load(QUrl(strUrl));
 }
 
 void CWizIAPDialog::loadIAPPage()
 {
+    setWindowTitle(tr("Upgrade VIP"));
     ui->stackedWidget->setCurrentIndex(1);
     hideInfoLabel();
 }
@@ -175,7 +175,6 @@ void CWizIAPDialog::hideInfoLabel()
 
 void CWizIAPDialog::checkReceiptInfo(const QByteArray& receipt, const QString& strTransationID)
 {
-    qDebug() << "checkReceiptInfo called";
     QString strPlat;
 #ifdef Q_OS_MAC
     strPlat = "macosx";
@@ -196,7 +195,7 @@ void CWizIAPDialog::checkReceiptInfo(const QByteArray& receipt, const QString& s
             .arg(strPlat).arg(userID).arg(userGUID).arg(strTransationID).arg(receiptBase64);
 
     qDebug() << "transation id = " << strTransationID;    
-    qDebug() << "check receipt : " << checkUrl << strExtInfo;
+//    qDebug() << "check receipt : " << checkUrl << strExtInfo;
 
     QNetworkAccessManager net;
     QNetworkRequest request;
@@ -215,7 +214,6 @@ void CWizIAPDialog::checkReceiptInfo(const QByteArray& receipt, const QString& s
     }
 
     QString strResult = reply->readAll();
-    qDebug() << "reply from server : " << strResult;
     reply->deleteLater();
 
     m_waitingMsgBox->done(0);
@@ -319,6 +317,7 @@ void CWizIAPDialog::loadProducts()
 
     m_iAPhelper->requestProducts();
     m_timer.start(2 * 60 * 1000);
+    ui->label_downloading->setVisible(true);
 }
 
 void CWizIAPDialog::stopWaitTimer()
@@ -346,7 +345,6 @@ void CWizIAPDialog::onEditorPopulateJavaScriptWindowObject()
 
 void CWizIAPDialog::onCheckReceiptRequest(const QByteArray& receipt, const QString& strTransationID)
 {
-    qDebug() << "onCheckReceiptRequest called";
     m_waitingMsgBox->close();
     m_waitingMsgBox->setModal(true);
     m_waitingMsgBox->setStandardButtons(0);

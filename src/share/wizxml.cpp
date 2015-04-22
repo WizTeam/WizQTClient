@@ -750,12 +750,7 @@ bool CWizXMLDocument::IsFail()
 }
 
 bool CWizXMLDocument::AppendChild(const QString& strNodeName, CWizXMLNode& nodeChild)
-{
-    if (m_doc.isNull())
-    {
-        m_doc = QDomDocument(strNodeName);
-    }
-
+{    
     QDomNode node = m_doc.createElement(strNodeName);
     nodeChild = m_doc.appendChild(node);
 
@@ -763,11 +758,7 @@ bool CWizXMLDocument::AppendChild(const QString& strNodeName, CWizXMLNode& nodeC
 }
 
 bool CWizXMLDocument::GetChildNode(const QString& strName, CWizXMLNode& nodeChild)
-{
-    if (m_doc.isNull())
-    {
-        m_doc = QDomDocument(strName);
-    }
+{    
 
     if (FindChildNode(strName, nodeChild))
         return true;
