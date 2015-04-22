@@ -46,7 +46,8 @@ CWizIAPDialog::CWizIAPDialog(QWidget *parent) :
                this, SLOT(onCheckReceiptRequest(QByteArray,QString)));
     connect(this, SIGNAL(checkReceiptRequest(QByteArray,QString)),
             SLOT(onCheckReceiptRequest(QByteArray,QString)), Qt::QueuedConnection);
-    QTimer::singleShot(100, this, SLOT(loadProducts()));
+    connect(ui->webView->page()->mainFrame(), SIGNAL(javaScriptWindowObjectCleared()),
+            SLOT(onEditorPopulateJavaScriptWindowObject()));
 }
 
 CWizIAPDialog::~CWizIAPDialog()
@@ -95,6 +96,7 @@ void CWizIAPDialog::loadUserInfo()
    QString extInfo = WizService::ApiEntry::appstoreParam(false);
    QString strToken = WizService::Token::token();
    QString strUrl = WizService::ApiEntry::standardCommandUrl("user_info", strToken, extInfo);
+   qDebug() << "load user info : " << strUrl;
    ui->webView->load(QUrl(strUrl));
 }
 
@@ -103,6 +105,10 @@ void CWizIAPDialog::loadIAPPage()
     setWindowTitle(tr("Upgrade VIP"));
     ui->stackedWidget->setCurrentIndex(1);
     hideInfoLabel();
+    if (!ui->btn_month->isEnabled())
+    {
+        QTimer::singleShot(10, this, SLOT(loadProducts()));
+    }
 }
 
 int CWizIAPDialog::exec()

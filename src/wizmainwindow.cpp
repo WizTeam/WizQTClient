@@ -1299,7 +1299,10 @@ void MainWindow::AppStoreIAP()
 #ifdef BUILD4APPSTORE
     CWizIAPDialog* dlg = iapDialog();
     dlg->loadIAPPage();
-    dlg->exec();
+    if (!dlg->isActiveWindow())
+    {
+        dlg->exec();
+    }
 #endif
 }
 
