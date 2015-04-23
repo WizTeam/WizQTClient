@@ -6,87 +6,87 @@
     <message>
         <location filename="../src/ui/wizAdvancedSearchDialog.ui" line="14"/>
         <source>Advanced Search</source>
-        <translation type="unfinished"></translation>
+        <translation>高級搜索</translation>
     </message>
     <message>
         <location filename="../src/ui/wizAdvancedSearchDialog.ui" line="43"/>
         <source>All notes</source>
-        <translation type="unfinished"></translation>
+        <translation>全部筆記</translation>
     </message>
     <message>
         <location filename="../src/ui/wizAdvancedSearchDialog.ui" line="50"/>
         <source>Personal notes</source>
-        <translation type="unfinished">個人筆記</translation>
+        <translation>個人筆記</translation>
     </message>
     <message>
         <location filename="../src/ui/wizAdvancedSearchDialog.ui" line="57"/>
         <source>Group notes</source>
-        <translation type="unfinished"></translation>
+        <translation>羣組筆記</translation>
     </message>
     <message>
         <location filename="../src/ui/wizAdvancedSearchDialog.ui" line="87"/>
         <source>Name:</source>
-        <translation type="unfinished"></translation>
+        <translation>名稱：</translation>
     </message>
     <message>
         <location filename="../src/ui/wizAdvancedSearchDialog.ui" line="94"/>
         <source>Scope:</source>
-        <translation type="unfinished"></translation>
+        <translation>搜索範圍:</translation>
     </message>
     <message>
         <location filename="../src/ui/wizAdvancedSearchDialog.ui" line="101"/>
         <source>Keyword:</source>
-        <translation type="unfinished"></translation>
+        <translation>關鍵字:</translation>
     </message>
     <message>
         <location filename="../src/ui/wizAdvancedSearchDialog.ui" line="113"/>
         <source>Param:</source>
-        <translation type="unfinished"></translation>
+        <translation>搜索參數:</translation>
     </message>
     <message>
         <location filename="../src/ui/wizAdvancedSearchDialog.ui" line="177"/>
         <source>Add</source>
-        <translation type="unfinished"></translation>
+        <translation>添加</translation>
     </message>
     <message>
         <location filename="../src/ui/wizAdvancedSearchDialog.ui" line="213"/>
         <source>Cancel</source>
-        <translation type="unfinished">取消</translation>
+        <translation>取消</translation>
     </message>
     <message>
         <location filename="../src/ui/wizAdvancedSearchDialog.ui" line="220"/>
         <source>OK</source>
-        <translation type="unfinished">確定</translation>
+        <translation>確定</translation>
     </message>
     <message>
         <location filename="../src/widgets/wizAdvancedSearchDialog.cpp" line="58"/>
         <source>Untitled Search</source>
-        <translation type="unfinished"></translation>
+        <translation>未命名搜索</translation>
     </message>
     <message>
         <location filename="../src/widgets/wizAdvancedSearchDialog.cpp" line="59"/>
         <source>Custom advanced search</source>
-        <translation type="unfinished"></translation>
+        <translation>自定義搜索</translation>
     </message>
     <message>
         <location filename="../src/widgets/wizAdvancedSearchDialog.cpp" line="62"/>
         <source>Advanced search</source>
-        <translation type="unfinished"></translation>
+        <translation>高級搜索</translation>
     </message>
     <message>
         <location filename="../src/widgets/wizAdvancedSearchDialog.cpp" line="64"/>
         <source>Multiple keywords should be separated by blank</source>
-        <translation type="unfinished"></translation>
+        <translation>多個關鍵字以空格進行間隔</translation>
     </message>
     <message>
         <location filename="../src/widgets/wizAdvancedSearchDialog.cpp" line="373"/>
         <source>Info</source>
-        <translation type="unfinished">提示</translation>
+        <translation>提示</translation>
     </message>
     <message>
         <location filename="../src/widgets/wizAdvancedSearchDialog.cpp" line="373"/>
         <source>Both of keywords and search param were empty!</source>
-        <translation type="unfinished"></translation>
+        <translation>關鍵字和搜索選項不能全部為空!</translation>
     </message>
 </context>
 <context>
@@ -280,92 +280,92 @@
     <message>
         <location filename="../src/wizCategoryView.cpp" line="3456"/>
         <source>Search by Date Created</source>
-        <translation type="unfinished"></translation>
+        <translation>通過創建日期</translation>
     </message>
     <message>
         <location filename="../src/wizCategoryView.cpp" line="3457"/>
         <source>Search by Date Modified</source>
-        <translation type="unfinished"></translation>
+        <translation>通過修改日期</translation>
     </message>
     <message>
         <location filename="../src/wizCategoryView.cpp" line="3458"/>
         <source>Search by Date Accessed</source>
-        <translation type="unfinished"></translation>
+        <translation>通過訪問日期</translation>
     </message>
     <message>
         <location filename="../src/wizCategoryView.cpp" line="3465"/>
         <source>Created since Today</source>
-        <translation type="unfinished"></translation>
+        <translation>今日</translation>
     </message>
     <message>
         <location filename="../src/wizCategoryView.cpp" line="3466"/>
         <source>Created since Yestoday</source>
-        <translation type="unfinished"></translation>
+        <translation>昨天至今</translation>
     </message>
     <message>
         <location filename="../src/wizCategoryView.cpp" line="3467"/>
         <source>Created since the day before yestoday</source>
-        <translation type="unfinished"></translation>
+        <translation>前天至今</translation>
     </message>
     <message>
         <location filename="../src/wizCategoryView.cpp" line="3468"/>
         <source>Created since one week</source>
-        <translation type="unfinished"></translation>
+        <translation>一週內</translation>
     </message>
     <message>
         <location filename="../src/wizCategoryView.cpp" line="3469"/>
         <source>Created since one month</source>
-        <translation type="unfinished"></translation>
+        <translation>一月內</translation>
     </message>
     <message>
         <location filename="../src/wizCategoryView.cpp" line="3476"/>
         <source>Modified since Today</source>
-        <translation type="unfinished"></translation>
+        <translation>今日</translation>
     </message>
     <message>
         <location filename="../src/wizCategoryView.cpp" line="3477"/>
         <source>Modified since Yestoday</source>
-        <translation type="unfinished"></translation>
+        <translation>昨天至今</translation>
     </message>
     <message>
         <location filename="../src/wizCategoryView.cpp" line="3478"/>
         <source>Modified since the day before yestoday</source>
-        <translation type="unfinished"></translation>
+        <translation>前天至今</translation>
     </message>
     <message>
         <location filename="../src/wizCategoryView.cpp" line="3479"/>
         <source>Modified since one week</source>
-        <translation type="unfinished"></translation>
+        <translation>一週內</translation>
     </message>
     <message>
         <location filename="../src/wizCategoryView.cpp" line="3480"/>
         <source>Modified since one month</source>
-        <translation type="unfinished"></translation>
+        <translation>一月內</translation>
     </message>
     <message>
         <location filename="../src/wizCategoryView.cpp" line="3487"/>
         <source>Accessed since Today</source>
-        <translation type="unfinished"></translation>
+        <translation>今日</translation>
     </message>
     <message>
         <location filename="../src/wizCategoryView.cpp" line="3488"/>
         <source>Accessed since Yestoday</source>
-        <translation type="unfinished"></translation>
+        <translation>昨天至今</translation>
     </message>
     <message>
         <location filename="../src/wizCategoryView.cpp" line="3489"/>
         <source>Accessed since the day before yestoday</source>
-        <translation type="unfinished"></translation>
+        <translation>前天至今</translation>
     </message>
     <message>
         <location filename="../src/wizCategoryView.cpp" line="3490"/>
         <source>Accessed since one week</source>
-        <translation type="unfinished"></translation>
+        <translation>一週內</translation>
     </message>
     <message>
         <location filename="../src/wizCategoryView.cpp" line="3491"/>
         <source>Accessed since one month</source>
-        <translation type="unfinished"></translation>
+        <translation>一月內</translation>
     </message>
     <message>
         <location filename="../src/wizCategoryView.cpp" line="2071"/>
@@ -375,22 +375,22 @@
     <message>
         <location filename="../src/wizCategoryView.cpp" line="888"/>
         <source>Advanced search</source>
-        <translation type="unfinished"></translation>
+        <translation>高級搜索</translation>
     </message>
     <message>
         <location filename="../src/wizCategoryView.cpp" line="893"/>
         <source>Add custom search</source>
-        <translation type="unfinished"></translation>
+        <translation>添加自定義搜索</translation>
     </message>
     <message>
         <location filename="../src/wizCategoryView.cpp" line="898"/>
         <source>Edit custom search</source>
-        <translation type="unfinished"></translation>
+        <translation>編輯</translation>
     </message>
     <message>
         <location filename="../src/wizCategoryView.cpp" line="903"/>
         <source>Remove custom search</source>
-        <translation type="unfinished"></translation>
+        <translation>刪除</translation>
     </message>
     <message>
         <location filename="../src/wizCategoryView.cpp" line="1312"/>
@@ -893,93 +893,93 @@
     <message>
         <location filename="../src/ui/wizIAPDialog.ui" line="14"/>
         <source>Upgrade VIP</source>
-        <translation type="unfinished"></translation>
+        <translation>升級VIP</translation>
     </message>
     <message>
         <location filename="../src/ui/wizIAPDialog.ui" line="95"/>
         <source>Experience exclusive features for VIP users</source>
-        <translation type="unfinished"></translation>
+        <translation>體驗VIP用戶的專享功能</translation>
     </message>
     <message>
         <location filename="../src/ui/wizIAPDialog.ui" line="147"/>
         <source>? ? / month</source>
-        <translation type="unfinished"></translation>
+        <translation>? ? / 月</translation>
     </message>
     <message>
         <location filename="../src/ui/wizIAPDialog.ui" line="160"/>
         <source>? ? / year</source>
-        <translation type="unfinished"></translation>
+        <translation>? ? / 年</translation>
     </message>
     <message>
         <location filename="../src/ui/wizIAPDialog.ui" line="209"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:16pt; color:#48a4e0;&quot;&gt;Downloading data from AppStore, please wait for a while...&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:16pt; color:#48a4e0;&quot;&gt;正在從AppStore下載數據，請稍等...&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <location filename="../src/ui/wizIAPDialog.ui" line="222"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:16pt; color:#48a4e0;&quot;&gt;Purchase success, please synchronize data.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:16pt; color:#48a4e0;&quot;&gt;購買成功，同步數據後生效.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <location filename="../src/ui/wizIAPDialog.ui" line="235"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:16pt; color:#ff6666;&quot;&gt;Purchase failed, please try again.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:16pt; color:#ff6666;&quot;&gt;購買失敗，請重試.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <location filename="../src/ui/wizIAPDialog.ui" line="258"/>
         <source>Customer support provided by the customer service manager (Email support for free users) </source>
-        <translation type="unfinished"></translation>
+        <translation>客戶支持由客戶經理提供 (免費用戶通過電郵支持)</translation>
     </message>
     <message>
         <location filename="../src/ui/wizIAPDialog.ui" line="272"/>
         <source>Your single note / attachment size limit is 100M  (30M for free users)</source>
-        <translation type="unfinished"></translation>
+        <translation>單篇筆記/附件大小限制為100M (免費用戶為30M)</translation>
     </message>
     <message>
         <location filename="../src/ui/wizIAPDialog.ui" line="286"/>
         <source>Your monthly usage limit is 10G (500M for free users)</source>
-        <translation type="unfinished"></translation>
+        <translation>每月流量限制為10G (免費用戶為500M)</translation>
     </message>
     <message>
         <location filename="../src/ui/wizIAPDialog.ui" line="300"/>
         <source>You can recover recent 20 historical versions (1 historical version for free users)</source>
-        <translation type="unfinished"></translation>
+        <translation>可恢復最近的20個版本 (免費用戶可恢復1個版本)</translation>
     </message>
     <message>
         <location filename="../src/widgets/wizIAPDialog.cpp" line="63"/>
         <source>%1 / month</source>
-        <translation type="unfinished"></translation>
+        <translation>%1 / 月</translation>
     </message>
     <message>
         <location filename="../src/widgets/wizIAPDialog.cpp" line="67"/>
         <source>%1 / year</source>
-        <translation type="unfinished"></translation>
+        <translation>%1 / 年</translation>
     </message>
     <message>
         <location filename="../src/widgets/wizIAPDialog.cpp" line="272"/>
         <location filename="../src/widgets/wizIAPDialog.cpp" line="284"/>
         <source>Waiting for AppStore...</source>
-        <translation type="unfinished"></translation>
+        <translation>正在請求AppStore處理，請稍等...</translation>
     </message>
     <message>
         <location filename="../src/widgets/wizIAPDialog.cpp" line="309"/>
         <source>Can not connect to Server, please try again later.</source>
-        <translation type="unfinished"></translation>
+        <translation>無法連接到服務器，請稍後重試.</translation>
     </message>
     <message>
         <location filename="../src/widgets/wizIAPDialog.cpp" line="326"/>
         <source>Waiting for Wiz Server...</source>
-        <translation type="unfinished"></translation>
+        <translation>數據正在處理中，請稍等...</translation>
     </message>
     <message>
         <location filename="../src/widgets/wizIAPDialog.cpp" line="347"/>
         <source>Info</source>
-        <translation type="unfinished">提示</translation>
+        <translation>提示</translation>
     </message>
     <message>
         <location filename="../src/widgets/wizIAPDialog.cpp" line="347"/>
         <source>You have unfinished transation, continue to process it?</source>
-        <translation type="unfinished"></translation>
+        <translation>您有未完成的購買記錄，繼續處理？</translation>
     </message>
 </context>
 <context>
@@ -1409,17 +1409,17 @@
     <message>
         <location filename="../src/ui/wizpreferencedialog.ui" line="316"/>
         <source>Download attachment:</source>
-        <translation type="unfinished"></translation>
+        <translation>下載附件:</translation>
     </message>
     <message>
         <location filename="../src/ui/wizpreferencedialog.ui" line="330"/>
         <source>Not download attachments</source>
-        <translation type="unfinished"></translation>
+        <translation>同步時不下載附件</translation>
     </message>
     <message>
         <location filename="../src/ui/wizpreferencedialog.ui" line="335"/>
         <source>Download all attachments</source>
-        <translation type="unfinished"></translation>
+        <translation>下載所有附件</translation>
     </message>
     <message>
         <location filename="../src/ui/wizpreferencedialog.ui" line="395"/>
@@ -1898,7 +1898,7 @@ w: %3  h: %4</translation>
     <message>
         <location filename="../src/widgets/wizUserInfoWidget.cpp" line="53"/>
         <source>Upgrade VIP...</source>
-        <translation type="unfinished"></translation>
+        <translation>升級VIP...</translation>
     </message>
     <message>
         <location filename="../src/widgets/wizUserInfoWidget.cpp" line="56"/>
@@ -3046,7 +3046,7 @@ w: %3  h: %4</translation>
     <message>
         <location filename="../src/wizCategoryView.cpp" line="48"/>
         <source>Search by custom param</source>
-        <translation type="unfinished"></translation>
+        <translation>通過自定義參數搜索</translation>
     </message>
     <message>
         <location filename="../src/wizCategoryView.cpp" line="51"/>
@@ -3699,87 +3699,87 @@ w: %3  h: %4</translation>
     <message>
         <location filename="../src/widgets/wizAdvancedSearchDialog.cpp" line="14"/>
         <source>Select search param</source>
-        <translation type="unfinished"></translation>
+        <translation>選擇搜索條件</translation>
     </message>
     <message>
         <location filename="../src/widgets/wizAdvancedSearchDialog.cpp" line="15"/>
         <source>Folder</source>
-        <translation type="unfinished"></translation>
+        <translation>資料夾</translation>
     </message>
     <message>
         <location filename="../src/widgets/wizAdvancedSearchDialog.cpp" line="16"/>
         <source>Tag</source>
-        <translation type="unfinished"></translation>
+        <translation>標籤</translation>
     </message>
     <message>
         <location filename="../src/widgets/wizAdvancedSearchDialog.cpp" line="17"/>
         <source>Contains</source>
-        <translation type="unfinished"></translation>
+        <translation>包含</translation>
     </message>
     <message>
         <location filename="../src/widgets/wizAdvancedSearchDialog.cpp" line="18"/>
         <source>Created time</source>
-        <translation type="unfinished"></translation>
+        <translation>建立時間</translation>
     </message>
     <message>
         <location filename="../src/widgets/wizAdvancedSearchDialog.cpp" line="19"/>
         <source>Modified time</source>
-        <translation type="unfinished"></translation>
+        <translation>修改時間</translation>
     </message>
     <message>
         <location filename="../src/widgets/wizAdvancedSearchDialog.cpp" line="20"/>
         <source>Accessed time</source>
-        <translation type="unfinished"></translation>
+        <translation>訪問時間</translation>
     </message>
     <message>
         <location filename="../src/widgets/wizAdvancedSearchDialog.cpp" line="22"/>
         <source>Attachment</source>
-        <translation type="unfinished"></translation>
+        <translation>附件</translation>
     </message>
     <message>
         <location filename="../src/widgets/wizAdvancedSearchDialog.cpp" line="24"/>
         <source>Before</source>
-        <translation type="unfinished"></translation>
+        <translation>早於</translation>
     </message>
     <message>
         <location filename="../src/widgets/wizAdvancedSearchDialog.cpp" line="25"/>
         <source>After</source>
-        <translation type="unfinished"></translation>
+        <translation>開始於</translation>
     </message>
     <message>
         <location filename="../src/widgets/wizAdvancedSearchDialog.cpp" line="27"/>
         <source>Today</source>
-        <translation type="unfinished"></translation>
+        <translation>今天</translation>
     </message>
     <message>
         <location filename="../src/widgets/wizAdvancedSearchDialog.cpp" line="28"/>
         <source>Yestoday</source>
-        <translation type="unfinished"></translation>
+        <translation>昨天</translation>
     </message>
     <message>
         <location filename="../src/widgets/wizAdvancedSearchDialog.cpp" line="29"/>
         <source>Day before yestoday</source>
-        <translation type="unfinished"></translation>
+        <translation>前天</translation>
     </message>
     <message>
         <location filename="../src/widgets/wizAdvancedSearchDialog.cpp" line="30"/>
         <source>Last week</source>
-        <translation type="unfinished"></translation>
+        <translation>上週</translation>
     </message>
     <message>
         <location filename="../src/widgets/wizAdvancedSearchDialog.cpp" line="31"/>
         <source>Last month</source>
-        <translation type="unfinished"></translation>
+        <translation>上月</translation>
     </message>
     <message>
         <location filename="../src/widgets/wizAdvancedSearchDialog.cpp" line="32"/>
         <source>Last year</source>
-        <translation type="unfinished"></translation>
+        <translation>去年</translation>
     </message>
     <message>
         <location filename="../src/widgets/wizAdvancedSearchDialog.cpp" line="34"/>
         <source>--Select child folder--</source>
-        <translation type="unfinished"></translation>
+        <translation>--選擇子資料夾--</translation>
     </message>
 </context>
 <context>
@@ -3863,7 +3863,7 @@ w: %3  h: %4</translation>
     <message>
         <location filename="../src/ui/wizLoginDialog.ui" line="654"/>
         <source>Thirdparty</source>
-        <translation type="unfinished"></translation>
+        <translation>第三方登錄</translation>
     </message>
     <message>
         <location filename="../src/ui/wizLoginDialog.ui" line="677"/>

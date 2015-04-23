@@ -76,7 +76,7 @@
     <message>
         <location filename="../src/widgets/wizAdvancedSearchDialog.cpp" line="64"/>
         <source>Multiple keywords should be separated by blank</source>
-        <translation>以空格间隔多个关键字</translation>
+        <translation>多个关键字以空格进行间隔</translation>
     </message>
     <message>
         <location filename="../src/widgets/wizAdvancedSearchDialog.cpp" line="373"/>
@@ -928,22 +928,22 @@
     <message>
         <location filename="../src/ui/wizIAPDialog.ui" line="258"/>
         <source>Customer support provided by the customer service manager (Email support for free users) </source>
-        <translation type="unfinished">客户支持由客户经理提供 (免费用户通过邮件支持）</translation>
+        <translation>客户支持由客户经理提供 (免费用户通过邮件支持）</translation>
     </message>
     <message>
         <location filename="../src/ui/wizIAPDialog.ui" line="272"/>
         <source>Your single note / attachment size limit is 100M  (30M for free users)</source>
-        <translation type="unfinished">单篇笔记/附件大小限制为100M (免费用户为30M)</translation>
+        <translation>单篇笔记/附件大小限制为100M (免费用户为30M)</translation>
     </message>
     <message>
         <location filename="../src/ui/wizIAPDialog.ui" line="286"/>
         <source>Your monthly usage limit is 10G (500M for free users)</source>
-        <translation type="unfinished">每月的流量限制为10G (免费用户为500M)</translation>
+        <translation>每月流量限制为10G (免费用户为500M)</translation>
     </message>
     <message>
         <location filename="../src/ui/wizIAPDialog.ui" line="300"/>
         <source>You can recover recent 20 historical versions (1 historical version for free users)</source>
-        <translation type="unfinished">可恢复最近的20个版本 (免费用户可恢复1个版本)</translation>
+        <translation>可恢复最近的20个版本 (免费用户可恢复1个版本)</translation>
     </message>
     <message>
         <location filename="../src/widgets/wizIAPDialog.cpp" line="63"/>
@@ -959,7 +959,7 @@
         <location filename="../src/widgets/wizIAPDialog.cpp" line="272"/>
         <location filename="../src/widgets/wizIAPDialog.cpp" line="284"/>
         <source>Waiting for AppStore...</source>
-        <translation type="unfinished">正在请求AppStore处理，请稍等...</translation>
+        <translation>正在请求AppStore处理，请稍等...</translation>
     </message>
     <message>
         <location filename="../src/widgets/wizIAPDialog.cpp" line="309"/>
@@ -969,7 +969,7 @@
     <message>
         <location filename="../src/widgets/wizIAPDialog.cpp" line="326"/>
         <source>Waiting for Wiz Server...</source>
-        <translation type="unfinished">数据正在处理中，请稍等...</translation>
+        <translation>数据正在处理中，请稍等...</translation>
     </message>
     <message>
         <location filename="../src/widgets/wizIAPDialog.cpp" line="347"/>
@@ -1409,12 +1409,12 @@
     <message>
         <location filename="../src/ui/wizpreferencedialog.ui" line="316"/>
         <source>Download attachment:</source>
-        <translation>下载附件</translation>
+        <translation>下载附件:</translation>
     </message>
     <message>
         <location filename="../src/ui/wizpreferencedialog.ui" line="330"/>
         <source>Not download attachments</source>
-        <translation>不下载附件</translation>
+        <translation>同步时不下载附件</translation>
     </message>
     <message>
         <location filename="../src/ui/wizpreferencedialog.ui" line="335"/>
