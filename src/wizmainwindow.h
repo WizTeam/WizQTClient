@@ -263,6 +263,7 @@ public Q_SLOTS:
     void on_actionManual_triggered();
     void on_actionSearch_triggered();
     void on_actionResetSearch_triggered();
+    void on_actionAdvancedSearch_triggered();
     void on_actionFindReplace_triggered();
     void on_actionSaveAsPDF_triggered();
     void on_actionSaveAsHtml_triggered();

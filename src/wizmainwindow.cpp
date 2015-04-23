@@ -2268,6 +2268,11 @@ void MainWindow::on_actionResetSearch_triggered()
     analyzer.LogAction("resetSearch");
 }
 
+void MainWindow::on_actionAdvancedSearch_triggered()
+{
+    m_category->on_action_advancedSearch();
+}
+
 void MainWindow::on_actionFindReplace_triggered()
 {    
     m_doc->web()->editorCommandExecuteFindReplace();

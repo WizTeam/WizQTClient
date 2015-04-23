@@ -74,6 +74,7 @@ WIZACTION* CWizActions::actionsData()
         {"actionConsole",                              QObject::tr("Console..."),                                   "",      QKeySequence()},
         {"actionRebuildFTS",                        QObject::tr("Rebuild full text search index"),    "",        QKeySequence()},
         {"actionSearch",                                QObject::tr("Search note"),                             "",         QKeySequence("Alt+Ctrl+F")},
+        {"actionAdvancedSearch",                QObject::tr("Advanced search"),                     "",         QKeySequence("Alt+Ctrl+A")},
         {"actionResetSearch",                       QObject::tr("Reset search"),                           "",         QKeySequence("Ctrl+R")},
         {"actionFeedback",                            QObject::tr("User feedback..."),                      "",         QKeySequence()},
         {"actionSupport",                               QObject::tr("User support..."),                         "",         QKeySequence()},

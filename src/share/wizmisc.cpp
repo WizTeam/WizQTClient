@@ -2123,7 +2123,7 @@ void WizShowWebDialogWithToken(const QString& windowTitle, const QString& url, Q
     strFuncName = "Dialog"+strFuncName.replace(" ", "");
     CWizFunctionDurationLogger logger(strFuncName);
 
-    CWizWebSettingsWithTokenDialog pDlg(url, QSize(800, 480), parent);
+    CWizWebSettingsWithTokenDialog pDlg(url, sz, parent);
     if (dialogResizable)
     {
         pDlg.setMaximumSize(QSize(QWIDGETSIZE_MAX, QWIDGETSIZE_MAX));
