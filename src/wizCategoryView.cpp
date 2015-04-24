@@ -1930,55 +1930,24 @@ void CWizCategoryView::on_action_addCustomSearch()
         int scope;
         CWizAdvancedSearchDialog::paramToSQL(strParam, strSQLWhere, keyword, name, scope);
 
-        QTreeWidgetItem* curItem = currentItem();
+        CWizCategoryViewItemBase* rootItem = findAllSearchItem();
+        if (!rootItem)
+            return;
+
         QTreeWidgetItem* parentItem = 0;
-        if (curItem->type() == ItemType_QuickSearchRootItem)
+        for (int i = 0; i < rootItem->childCount(); i++)
         {
-            for (int i = 0; i < curItem->childCount(); i++)
+            if (rootItem->child(i)->text(0) == CATEGORY_SEARCH_BYCUSTOM)
             {
-                if (curItem->child(i)->text(0) == CATEGORY_SEARCH_BYCUSTOM)
-                {
-                    parentItem = dynamic_cast<CWizCategoryViewSearchItem*>(curItem->child(i));
-                    break;
-                }
-            }
-            if (parentItem == 0)
-            {
-                parentItem = new CWizCategoryViewSearchItem(m_app, CATEGORY_SEARCH_BYCUSTOM);
-            }
-            curItem->addChild(parentItem);
-        }
-        else if (curItem->type() == ItemType_QuickSearchItem)
-        {
-            if (curItem->text(0) == CATEGORY_SEARCH_BYCUSTOM)
-            {
-                parentItem = curItem;
-            }
-            else
-            {
-                QTreeWidgetItem* rootItem = curItem->parent();
-                while (rootItem && rootItem->type() != ItemType_QuickSearchRootItem) {
-                    rootItem = rootItem->parent();
-                }
-                for (int i = 0; i < rootItem->childCount(); i++)
-                {
-                    if (rootItem->child(i)->text(0) == CATEGORY_SEARCH_BYCUSTOM)
-                    {
-                        parentItem = dynamic_cast<CWizCategoryViewSearchItem*>(rootItem->child(i));
-                        break;
-                    }
-                }
-                if (parentItem == 0)
-                {
-                    parentItem = new CWizCategoryViewSearchItem(m_app, CATEGORY_SEARCH_BYCUSTOM);
-                }
-                rootItem->addChild(parentItem);
+                parentItem = dynamic_cast<CWizCategoryViewSearchItem*>(rootItem->child(i));
+                break;
             }
         }
-        else if (curItem->type() == ItemType_QuickSearchCustomItem)
+        if (parentItem == 0)
         {
-            parentItem = curItem->parent();
+            parentItem = new CWizCategoryViewSearchItem(m_app, CATEGORY_SEARCH_BYCUSTOM);
         }
+        rootItem->addChild(parentItem);
 
 
         QString strGuid = ::WizGenGUIDLowerCaseLetterOnly();
@@ -3611,6 +3580,22 @@ CWizCategoryViewItemBase* CWizCategoryView::findAllTagsItem()
     //
     return NULL;
 }
+
+CWizCategoryViewItemBase*CWizCategoryView::findAllSearchItem()
+{
+    for (int i = 0; i < topLevelItemCount(); i++) {
+        if (topLevelItem(i)->type() != ItemType_QuickSearchRootItem)
+            continue;
+
+        CWizCategoryViewSearchRootItem* pItem = dynamic_cast<CWizCategoryViewSearchRootItem*>(topLevelItem(i));
+        if (pItem) {
+            return pItem;
+        }
+    }
+    //
+    return NULL;
+}
+
 CWizCategoryViewItemBase* CWizCategoryView::findAllMessagesItem()
 {
     for (int i = 0; i < topLevelItemCount(); i++) {

@@ -259,6 +259,7 @@ public:
     CWizCategoryViewItemBase* findGroupsRootItem(const WIZGROUPDATA& group, bool bCreate = true);
     CWizCategoryViewItemBase* findAllFolderItem();
     CWizCategoryViewItemBase* findAllTagsItem();
+    CWizCategoryViewItemBase* findAllSearchItem();
     CWizCategoryViewItemBase* findAllMessagesItem();
     CWizCategoryViewTrashItem* findTrash(const QString& strKbGUID = NULL);
 

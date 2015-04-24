@@ -1474,6 +1474,8 @@ void MainWindow::initToolBar()
 #endif
     //
     connect(m_search, SIGNAL(doSearch(const QString&)), SLOT(on_search_doSearch(const QString&)));
+    connect(m_search, SIGNAL(advancedSearchRequest()), SLOT(on_actionAdvancedSearch_triggered()));
+    connect(m_search, SIGNAL(addCustomSearchRequest()), SLOT(on_actionAddCustomSearch_triggered()));
 }
 
 void MainWindow::initClient()
@@ -2271,6 +2273,11 @@ void MainWindow::on_actionResetSearch_triggered()
 void MainWindow::on_actionAdvancedSearch_triggered()
 {
     m_category->on_action_advancedSearch();
+}
+
+void MainWindow::on_actionAddCustomSearch_triggered()
+{
+    m_category->on_action_addCustomSearch();
 }
 
 void MainWindow::on_actionFindReplace_triggered()
