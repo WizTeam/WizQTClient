@@ -325,6 +325,7 @@ void AvatarHostPrivate::load(const QString& strUserID, bool bForce)
         {
             m_listUser.append(strUserID);
             m_thread->start(QThread::IdlePriority);
+            download_impl();
         }
 
         return;
